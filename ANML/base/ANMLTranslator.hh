@@ -58,6 +58,7 @@ class ANMLContext
     virtual void setParentContext(const ANMLContext* parent) { m_parentContext = parent; }
     	
     virtual void addElement(ANMLElement* element);
+    virtual const std::vector<ANMLElement*>& getElements() const { return m_elements; }
     
 	virtual void     addType(Type* type);
 	virtual ObjType* addObjType(const std::string& name,const std::string& parentName);
@@ -151,6 +152,10 @@ class Type : public ANMLElement
 	    
 	virtual bool isPrimitive() const { return true; }
 	
+	virtual bool canBeResourceType() const { return false; }
+    virtual bool isResourceType() const { return false; }	
+	virtual void becomeResourceType();
+	
 	virtual bool isAssignableFrom(const Type& rhs) const { return getName() == rhs.getName(); }
 	    
     virtual void toNDDL(std::ostream& os) const { os << m_name; }
@@ -183,11 +188,16 @@ class Range : public Type
 	Range(const std::string& name,const Type& dataType,const std::string& lb,const std::string& ub);
 	virtual ~Range();
 	    
-	virtual bool isPrimitive() const { return true; }
+	virtual bool canBeResourceType() const;
+    virtual bool isResourceType() const { return m_isResourceType; }	
+	virtual void becomeResourceType();
+	
+	virtual bool isPrimitive() const { return !m_isResourceType; }
 	    
     virtual void toNDDL(std::ostream& os) const;
     
   protected:
+    bool m_isResourceType;
     const Type& m_dataType;
     std::string m_lb;
     std::string m_ub;
@@ -199,7 +209,7 @@ class Enumeration : public Type
 	Enumeration(const std::string& name,const Type& dataType,const std::vector<Expr*>& values);
 	virtual ~Enumeration();
 	    
-	virtual bool isPrimitive() const { return m_dataType.isPrimitive(); }
+	virtual bool isPrimitive() const { return false; }
 	    
     virtual void toNDDL(std::ostream& os) const;
     
@@ -222,13 +232,15 @@ class Arg
     const Type& m_dataType;
 };	
 	
-class Variable : public ANMLElement
+class Variable 
 {
   public:
     Variable(const Type& type, const std::string& name);
     Variable(const Type& type, const std::string& name, const std::vector<Arg*>& args);
     
     virtual ~Variable();
+    
+    const std::string& getName() const { return m_name; }
 
     const Type& getDataType() const { return m_dataType; }
     const std::vector<Arg*>& getArgs() const { return m_args; }
@@ -236,6 +248,7 @@ class Variable : public ANMLElement
     virtual void toNDDL(std::ostream& os) const;
     
   protected:
+    std::string m_name;
 	const Type& m_dataType;
 	std::vector<Arg*> m_args;
 };
@@ -303,6 +316,14 @@ class ObjType : public Type, public ANMLContext
     
   protected:
     ObjType* m_parentObjType;   	
+};
+
+class VectorType : public ObjType
+{
+  public:
+    VectorType(const std::string& name);
+    
+    virtual void toNDDL(std::ostream& os) const;  
 };
 
 class Action : public ANMLElement, public ANMLContext
@@ -545,7 +566,14 @@ class Expr
     virtual bool needsVar() { return true; }
     virtual std::string toString() const = 0; 
     virtual const Type& getDataType() const = 0;
-    virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const = 0;    
+    
+    virtual void toNDDLasLHS(std::ostream& os,
+                             Proposition::Context context,
+                             const std::string& varName) const {}    
+                             
+    virtual void toNDDLasRHS(std::ostream& os,
+                             Proposition::Context context,
+                             const std::string& varName) const {}    
 };
 
 class LHSExpr : public Expr
@@ -572,7 +600,9 @@ class LHSPlannerConfig : public LHSExpr
     virtual std::string toString() const  { return "PlannerConfig"; }
     virtual const Type& getDataType() const { return *Type::BOOL; }
     virtual void toNDDL(std::ostream& os) const;
-    virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const {}
+    virtual void toNDDLasRHS(std::ostream& os,
+                             Proposition::Context context,
+                             const std::string& varName) const {}    
     
   protected:
     Expr* m_startHorizon;
@@ -589,8 +619,11 @@ class LHSAction : public LHSExpr
 	
     virtual const Type& getDataType() const { return *Type::VOID; }
     virtual std::string toString() const  { return m_path; }
-    virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const;
     
+    virtual void toNDDLasLHS(std::ostream& os,
+                             Proposition::Context context,
+                             const std::string& varName) const;    
+        
   protected:
     Action* m_action;  	  
     std::string m_path;
@@ -605,7 +638,9 @@ class LHSVariable : public LHSExpr
     virtual bool needsVar() { return false; }
     virtual const Type& getDataType() const { return m_var->getDataType(); }
     virtual std::string toString() const  { return m_path; }
-    virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const;
+    virtual void toNDDLasRHS(std::ostream& os,
+                             Proposition::Context context,
+                             const std::string& varName) const;    
     
   protected:
     Variable* m_var;  	  
@@ -621,7 +656,10 @@ class ExprConstant : public Expr
     virtual bool needsVar() { return false; }
     virtual const Type& getDataType() const { return m_dataType; }
     virtual std::string toString() const { return m_value; } 
-    virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const {}    
+    
+    virtual void toNDDLasRHS(std::ostream& os,
+                             Proposition::Context context,
+                             const std::string& varName) const;    
   
   protected:
     const Type& m_dataType;
@@ -637,7 +675,9 @@ class ExprArithOp : public Expr
     virtual bool needsVar() { return true; }
     virtual const Type& getDataType() const { return m_op1->getDataType(); }
     virtual std::string toString() const { return m_op1->toString() + m_operator + m_op2->toString(); } 
-    virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const;    
+    virtual void toNDDLasRHS(std::ostream& os,
+                             Proposition::Context context,
+                             const std::string& varName) const;    
   
   protected:
     std::string m_operator;
@@ -654,14 +694,14 @@ class ExprVector : public Expr
     virtual bool needsVar() { return false; }
     virtual std::string toString() const; 
     virtual const Type& getDataType() const { return *m_dataType; }
-    virtual void toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const;
+    virtual void toNDDLasRHS(std::ostream& os,
+                             Proposition::Context context,
+                             const std::string& varName) const;    
     
   protected:
-    ObjType* m_dataType;
+    VectorType* m_dataType;
     std::vector<Expr*> m_values;        
 };
-
-
 
 }
 

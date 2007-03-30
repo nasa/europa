@@ -99,6 +99,8 @@ namespace ANML
     void ANMLTranslator::toNDDL(std::ostream& os) const
     {
     	m_plannerConfig->toNDDL(os);
+    	
+    	// TODO: verify that all resource vars are use correctly
     	m_context->toNDDL(os);        
     }
 
@@ -302,6 +304,11 @@ namespace ANML
 	Type::~Type()
 	{
 	}
+	
+	void Type::becomeResourceType()
+	{
+		check_runtime_error(ALWAYS_FAIL,m_name + " can't become a resource type");
+	}
 	        
     std::string autoIdentifier(const char* base)
     {
@@ -340,10 +347,32 @@ namespace ANML
 	Range::~Range()
 	{
 	}
+
+	bool Range::canBeResourceType() const
+	{
+		return &m_dataType == Type::FLOAT;
+	}
+
+	void Range::becomeResourceType()
+	{
+		check_runtime_error(canBeResourceType(),m_name + " can't become a resource type. only a float range can.");
+		m_isResourceType = true;
+	}	        
 	        
     void Range::toNDDL(std::ostream& os) const
     {
-        os << "typedef " << m_dataType.getName() << " [" << m_lb << " " << m_ub <<  "] " << getName() << ";"<< std::endl << std::endl;
+    	if (m_isResourceType) {
+    		os << "class " << m_name << " extends Reusable" << std::endl
+    		   << "{" << std::endl
+    		   << "    " << m_name << "()" << std::endl
+    		   << "    {" << std::endl
+    		   << "        super(" << m_ub << "," << m_lb << ");" << std::endl
+    		   << "    }" << std::endl
+    		   << "}" << std::endl << std::endl;    		
+    	}
+    	else {
+            os << "typedef " << m_dataType.getName() << " [" << m_lb << " " << m_ub <<  "] " << getName() << ";"<< std::endl << std::endl;
+    	}
     }
     
 	Enumeration::Enumeration(const std::string& name,const Type& dataType,const std::vector<Expr*>& values)
@@ -360,7 +389,7 @@ namespace ANML
 	        
     void Enumeration::toNDDL(std::ostream& os) const
     {
-        os << "enum " << getName() << " {";
+        os << "enum " << getName() << "Enum {";
         
         for (unsigned int i=0;i<m_values.size(); i++) {
             if (i>0)
@@ -368,17 +397,24 @@ namespace ANML
             // TODO: translate different types differently?    
             os << m_values[i]->toString();
         }   
-        os << "};" << std::endl << std::endl;                                
+        os << "};" << std::endl << std::endl;
+        
+        os << "class " << getName() << " extends Timeline" << std::endl;
+        os << "{" << std::endl;
+        os << "    predicate setValue { " << getName() << "Enum value; }" << std::endl;     
+        os << "}" << std::endl << std::endl;
+        
+        os << getName() << "::setValue {}" << std::endl << std::endl;                                
     }
     
     Variable::Variable(const Type& dataType, const std::string& name)
-        : ANMLElement("VARIABLE",name)
+        : m_name(name)
         , m_dataType(dataType)
     {
     }
 
     Variable::Variable(const Type& dataType, const std::string& name, const std::vector<Arg*>& args)
-        : ANMLElement("VARIABLE",name)
+        : m_name(name)
         , m_dataType(dataType)
         , m_args(args)
     {
@@ -409,7 +445,7 @@ namespace ANML
     	os << m_dataType.getName() << " ";
     	for (unsigned int i=0; i < m_init.size(); i++) {
     		if (i>0)
-    		    os << " , ";
+    		    os << "," << std::endl << "    ";
     		os << m_init[i]->getName();
     		if (m_init[i]->getValue().length() > 0) {
     			os << "=" << m_init[i]->getValue();
@@ -418,7 +454,7 @@ namespace ANML
     			os << " = new " << m_dataType.getName() << "()";
     		}
     	}
-    	os << ";" << std::endl;
+    	os << ";" << std::endl << std::endl;
     }
     
     FreeVarDeclaration::FreeVarDeclaration(const std::vector<Variable*>& vars)
@@ -434,7 +470,9 @@ namespace ANML
     void FreeVarDeclaration::toNDDL(std::ostream& os) const
     {
     	for (unsigned int i=0; i < m_vars.size(); i++) 
-    		os << m_vars[i]->getDataType().getName() << m_vars[i]->getName() << ";";
+    		os << "    " << m_vars[i]->getDataType().getName() << " " << m_vars[i]->getName() << ";" << std::endl;
+    	
+    	os << std::endl;	
     }
     
     ObjType::ObjType(const std::string& name,ObjType* parentObjType)
@@ -501,6 +539,58 @@ namespace ANML
     	        m_elements[i]->toNDDL(os);
         }    	     
     }
+ 
+    VectorType::VectorType(const std::string& name)
+        : ObjType(name,Type::OBJECT)
+    {
+    }
+    
+    void VectorType::toNDDL(std::ostream& os) const
+    {
+    	os << "class " << m_name << " extends Timeline" << std::endl
+           << "{" << std::endl
+           << "    predicate setValue { ";    	
+
+        for (unsigned int i=0; i<m_elements.size(); i++) {
+    	    if (m_elements[i]->getType() == "VAR_DECLARATION") {
+    	    	VarDeclaration* vd = (VarDeclaration*)m_elements[i];
+        	    for (unsigned j=0;j<vd->getInit().size();j++) {
+        	    	os << vd->getDataType().getName() << " " 
+        	    	   << vd->getInit()[j]->getName()
+        	    	   << ";";
+        	    }    	    	
+    	    }
+        }
+        
+        os << " }" << std::endl 
+           << "}" << std::endl << std::endl;
+        
+        os << m_name << "::setValue {}" << std::endl << std::endl;           
+        
+        os << "class " << m_name << "Copier" << std::endl
+           << "{" << std::endl
+           << "    predicate copy { " << m_name << " lhs; " << m_name << " rhs; }" << std::endl
+           << "}" << std::endl << std::endl;
+           
+        os << m_name << "Copier::copy" << std::endl
+           << "{" << std:: endl
+           << "    contained_by(lhs.setValue lhsValue);" << std::endl
+           << "    contained_by(rhs.setValue rhsValue);" << std::endl << std::endl;
+           
+        for (unsigned int i=0; i<m_elements.size(); i++) {
+    	    if (m_elements[i]->getType() == "VAR_DECLARATION") {
+    	    	VarDeclaration* vd = (VarDeclaration*)m_elements[i];
+        	    for (unsigned j=0;j<vd->getInit().size();j++) {
+        	    	os << "    eq("
+        	    	   << "lhs." << vd->getInit()[j]->getName() << ","
+        	    	   << "rhs." << vd->getInit()[j]->getName()
+        	    	   << ");" << std::endl;
+        	    }    	    	
+    	    }
+        }
+        
+        os << "}" << std::endl << std::endl;                         
+    }
     
     Action::Action(ObjType& objType,const std::string& name, const std::vector<Variable*>& params)
         : ANMLElement("ACTION",name)
@@ -520,13 +610,7 @@ namespace ANML
     
     void Action::toNDDL(std::ostream& os) const
     {
-    	os << m_objType.getName() << "::" << m_name << "(";
-        for (unsigned int i=0; i<m_params.size(); i++) {
-        	if (i>0)
-        	    os << ",";
-        	m_params[i]->toNDDL(os);
-        }    	
-    	os << ")" << std::endl;
+    	os << m_objType.getName() << "::" << m_name << std::endl;
 
     	os << "{" << std::endl;
         for (unsigned int i=0; i<m_body.size(); i++) {
@@ -555,7 +639,7 @@ namespace ANML
     	else 
     	    os << m_values[0]->toString();
     	    
-    	os << ");" << std::endl;
+    	os << ");" << std::endl  << std::endl;
     }    
     
     
@@ -577,7 +661,8 @@ namespace ANML
             if (m_args[i]->needsVar()) {
             	std::string varName = autoIdentifier("_v");
             	m_argValues[i] = varName;
-            	m_args[i]->toNDDL(os,context,varName);
+            	// TODO: using as RHS is probably not the right thing here
+            	m_args[i]->toNDDLasRHS(os,context,varName);
             }
             else {
             	m_argValues[i] = m_args[i]->toString();
@@ -634,12 +719,12 @@ namespace ANML
     	                     
    	    std::string varName = (m_lhs->needsVar() ? autoIdentifier("_v") : "");
    	    
-    	m_lhs->toNDDL(os,m_parentProp->getContext(),varName);
+    	m_lhs->toNDDLasLHS(os,m_parentProp->getContext(),varName);
     	if (m_lhs->needsVar()) 
    		    tq->toNDDL(os,ident,varName);
    		
     	if (m_rhs != NULL)
-    	    m_rhs->toNDDL(os,m_parentProp->getContext(),varName);     
+    	    m_rhs->toNDDLasRHS(os,m_parentProp->getContext(),varName);     
     }    
     
     Constraint::Constraint(const std::string& name,const std::vector<ANML::Expr*>& args) 
@@ -655,7 +740,7 @@ namespace ANML
     void Constraint::toNDDL(std::ostream& os, TemporalQualifier* tq) const
     {
     	// TODO: deal with the temporal qualifier??
-    	os << m_name << "(";
+    	os << "    " << m_name << "(";
     	
     	for (unsigned int i=0;i<m_args.size();i++) {
     		if (i>0)
@@ -680,9 +765,11 @@ namespace ANML
     
     void Condition::toNDDL(std::ostream& os) const 
     { 
+    	os << "    // Condition start" << std::endl;
     	for (unsigned int i=0; i<m_propositions.size(); i++) {
     		m_propositions[i]->toNDDL(os);
     	}
+    	os << "    // Condition end" << std::endl << std::endl;
     }
     
     Effect::Effect(const std::vector<Proposition*>& propositions) 
@@ -699,9 +786,11 @@ namespace ANML
     
     void Effect::toNDDL(std::ostream& os) const 
     { 
+    	os << "    // Effect start" << std::endl;
     	for (unsigned int i=0; i<m_propositions.size(); i++) {
     		m_propositions[i]->toNDDL(os);
     	}
+    	os << "    // Effect end" << std::endl << std::endl;
     }
     
     Goal::Goal(const std::vector<Proposition*>& propositions) 
@@ -832,8 +921,7 @@ namespace ANML
 
     void TransitionChangeFluent::toNDDL(std::ostream& os, TemporalQualifier* tq) const
     {
-    	unsigned int stateCnt = m_states.size();
-    	os << "    // TODO:  generate NDDL for TransitionChangeFluent " << m_states.size() << std::endl;
+    	os << "    // TODO:  generate NDDL for TransitionChangeFluent " << std::endl;
     	os << "    // " << m_var->toString();
     	
     	for (unsigned int i=0;i<m_states.size();i++) {
@@ -844,7 +932,7 @@ namespace ANML
     	os << std::endl;        	
     }
 
-    void LHSAction::toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const 
+    void LHSAction::toNDDLasLHS(std::ostream& os,Proposition::Context context,const std::string& varName) const 
     { 
     	switch (context) {
     		case Proposition::GOAL : 
@@ -854,29 +942,66 @@ namespace ANML
     		    os << "    any(" << m_action->getName() << " " << varName << ");" << std::endl;
     		    break; 
     		case Proposition::FACT : 
-    		    check_runtime_error(false,"ERROR! LHSAction not supported for FACTS");
+    		    check_runtime_error(ALWAYS_FAIL,"ERROR! LHSAction not supported for FACTS");
     		    break; 
     		case Proposition::EFFECT : 
-    		    check_runtime_error(false,"ERROR! LHSAction not supported for EFFECTS");
+    		    check_runtime_error(ALWAYS_FAIL,"ERROR! LHSAction not supported for EFFECTS");
     		    break;
     		default:
-    		    check_error(false,"Unexpected error");
+    		    check_error(ALWAYS_FAIL,"Unexpected error");
     		    break;
     	}
     }          
     
-    void LHSVariable::toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const 
+    void LHSVariable::toNDDLasRHS(std::ostream& os,Proposition::Context context,const std::string& varName) const 
     { 
+    	std::string ident;
+    	
     	// TODO: implement this
+    	if (context == Proposition::GOAL || context == Proposition::FACT) {
+    	    ident = "";
+    	    os << "goal(";
+        }    
+        else {
+        	ident = "    ";
+        	os << ident << "any(";
+        }
+        
+        // TODO: make sure this is the right type
+        std::string v = autoIdentifier("_copier");
+        os << m_var->getDataType().getName() << "Copier.copy " << v << ");" << std::endl
+           << ident << "eq(" << v << ".lhs," << varName << ");" << std::endl
+           << ident << "eq(" << v << ".rhs," << m_path << ");" << std::endl << std::endl;
     }
     
-   void ExprArithOp::toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const 
+    void ExprConstant::toNDDLasRHS(std::ostream& os,Proposition::Context context,const std::string& varName) const 
+    { 
+    	std::string ident;
+    	
+    	// TODO: implement this
+    	if (context == Proposition::GOAL || context == Proposition::FACT) {
+    	    ident = "";
+    	    os << "goal(";
+        }    
+        else {
+        	ident = "    ";
+        	os << ident << "any(";
+        }
+        
+        // TODO: make sure this is the right type
+        std::string v = autoIdentifier("_copier");
+        os << m_dataType.getName() << ".setValue " << v << ");" << std::endl
+           << ident << "eq(" << v << ".value," << m_value << ");" << std::endl << std::endl;
+    }
+    
+    
+   void ExprArithOp::toNDDLasRHS(std::ostream& os,Proposition::Context context,const std::string& varName) const 
    {
        std::string op1,op2;
        
        if (m_op1->needsVar()) {
          op1 = autoIdentifier("_v");
-         m_op1->toNDDL(os,context,op1);
+         m_op1->toNDDLasRHS(os,context,op1);
        }
        else {
        	 op1 = m_op1->toString();
@@ -884,7 +1009,7 @@ namespace ANML
        	
        if (m_op2->needsVar()) {
          op2 = autoIdentifier("_v");
-         m_op2->toNDDL(os,context,op2);
+         m_op2->toNDDLasRHS(os,context,op2);
        }
        else {
        	 op2 = m_op2->toString();
@@ -896,15 +1021,27 @@ namespace ANML
            // addEq(x,y,z) means x+y=z which implies x=z-y
            os << ident << "addEq(" << varName << "," << op2 << "," << op1 << ");" << std::endl << std::endl;
        }
+       else {
+           check_runtime_error(ALWAYS_FAIL,"Don't know how to deal with operator : " + m_operator);
+       }
    }    
    
    ExprVector::ExprVector(const std::vector<Expr*>& values)
        : m_values(values) 
    {
-   	   m_dataType = new ObjType(autoIdentifier("VectorType_"),Type::OBJECT);
+   	   // TODO dataType needs to make sure there are no leaks
+   	   m_dataType = new VectorType(autoIdentifier("VectorType_"));
        for (unsigned int i=0;i<m_values.size();i++)  {
        	   std::ostringstream name; name << "member_" << i;
-           m_dataType->addVariable(new Variable(m_values[i]->getDataType(),name.str()));
+       	   std::vector<VarInit*> init;
+       	   init.push_back(new VarInit(new Variable(m_values[i]->getDataType(),name.str()),""));
+       	   
+           m_dataType->addElement(
+             new VarDeclaration(
+               m_values[i]->getDataType(),
+               init             
+             )  
+           );
        }
    }
    
@@ -928,12 +1065,34 @@ namespace ANML
        return os.str();
    }
     
-   void ExprVector::toNDDL(std::ostream& os,Proposition::Context context,const std::string& varName) const
+   void ExprVector::toNDDLasRHS(std::ostream& os,Proposition::Context context,const std::string& varName) const
    {
-       // TODO: implement this correctly
-       os << toString();
-   }
-   
+   	   std::string ident = (context == Proposition::GOAL || 
+    	                    context == Proposition::FACT ? "" : "    ");
+    	                        	
+       if (context == Proposition::GOAL || context == Proposition::FACT)	
+           os << "goal(";
+       else
+           os << "any(";
+           
+       std::string v = autoIdentifier("_setter");    
+       os << varName << ".setValue " << v << ");" << std::endl;
+
+       // TODO: use lhs type instead
+       const std::vector<ANMLElement*>& elements = m_dataType->getElements();
+       int varIdx=0;
+       for (unsigned int i=0; i<elements.size(); i++) {
+    	    if (elements[i]->getType() == "VAR_DECLARATION") {
+    	    	const VarDeclaration* vd = (const VarDeclaration*)elements[i];
+        	    for (unsigned j=0;j<vd->getInit().size();j++) {
+        	    	os << "eq(" << v << "." << vd->getInit()[j]->getName()
+        	    	   << "," << m_values[varIdx++]->toString() << ");" << std::endl;
+        	    }    	    	
+    	    }
+        }    
+        
+        os << std::endl;                
+   }   
     
     // Special expression to handle PlannerConfig
     LHSPlannerConfig::LHSPlannerConfig()

@@ -171,7 +171,8 @@ var_type[const std::string& name=""] returns [ANML::Type* t]
       )
     | #(VECTOR vb=vector_body)   
        { 
-           ANML::ObjType* vectorType = new ANML::ObjType(name,ANML::Type::OBJECT); newType=true; 
+       	   newType=true;
+           ANML::VectorType* vectorType = new ANML::VectorType(name);  
            for (unsigned int i=0; i<vb.size(); i++) {
                vectorType->addVariable(vb[i]);
                std::vector<ANML::VarInit*> init;
@@ -426,6 +427,7 @@ var_list returns [std::vector<ANML::Variable*> vars]
                {
                    ANML::Variable* v = new ANML::Variable(*vt,vn);
                    m_translator.getContext().addVariable(v);
+                   vars.push_back(v);
                }
            )+
        )    
@@ -443,12 +445,16 @@ relational_fluent returns [ANML::RelationalFluent* f]
     	| lhs=lhs_expr 
     )
 {
+	if (rhs!=NULL) { 
 	// TODO: do type checking for lhs and rhs	
-	//if (rhs!=NULL && !lhs->getDataType().isAssignableFrom(rhs->getDataType()))
-	//    check_runtime_error(ALWAYS_FAIL,type->getName() + " and " + value->getDataType().getName() + " are incompatible types");	
-	//else if (!lhs->getDataType() != ANML::Type::BOOL) // TODO: if rhs is absent, lhs must be a predicate 
-	//    check_runtime_error(ALWAYS_FAIL,"Only predicates can be stated without a right hand side expr. the following is not a predicate:" + lhs->toString());
-	
+	//    check_runtime_error(lhs->getDataType().isAssignableFrom(rhs->getDataType()),
+	//        type->getName() + " and " + value->getDataType().getName() + " are incompatible types");	
+	}
+	else { // if rhs is absent, lhs must be a predicate or an action
+	    //check_runtime_error((&(lhs->getDataType()) == ANML::Type::BOOL),
+	    //    "Only predicates can be stated without a right hand side expr. the following is not a predicate:" + lhs->toString());	        
+	}
+		
 	f = new ANML::RelationalFluent(lhs,rhs);
 }	
 ;
@@ -720,12 +726,9 @@ resource_change returns [ANML::ResourceChangeFluent* fluent]
 	// TODO: need to make sure this cast is safe
 	ANML::LHSVariable* v = static_cast<ANML::LHSVariable*>(var);
 	
-	// TODO: perform type checking
-	//if (&(v->getDataType()) != ANML::Type::FLOAT)
-    //    check_runtime_error(ALWAYS_FAIL,"Resource change variable must be of type float. " + var->toString() + " is of type " + var->getDataType().getName());
-    
-    // TODO : mark var as resource var    
-	
+    ANML::Type* type = m_translator.getContext().getType(v->getDataType().getName());
+    type->becomeResourceType();
+        	
 	if (qty != NULL) {
     	if (&(qty->getDataType()) != ANML::Type::INT &&
 	        &(qty->getDataType()) != ANML::Type::FLOAT)
@@ -835,9 +838,9 @@ signed_literal returns [ANML::Expr* e]
 	| #(MINUS e=numeric_literal)  { /* TODO!!: append - to numeric literal */  }
 ;
 
-// TODO: What about floats??
+// TODO: What about ints??
 numeric_literal returns [ANML::Expr* e]
-    : t1:NUMERIC_LIT  { e = new ANML::ExprConstant(*ANML::Type::INT,t1->getText()); }
+    : t1:NUMERIC_LIT  { e = new ANML::ExprConstant(*ANML::Type::FLOAT,t1->getText()); }
     | t2:INF          { e = new ANML::ExprConstant(*ANML::Type::BOOL,t2->getText()); }
 ;
 
