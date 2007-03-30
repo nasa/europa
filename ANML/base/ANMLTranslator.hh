@@ -563,17 +563,21 @@ class Expr
     Expr() {}
     virtual ~Expr() {}
         
-    virtual bool needsVar() { return true; }
+    virtual bool needsVar() { return false; }
     virtual std::string toString() const = 0; 
     virtual const Type& getDataType() const = 0;
     
+    virtual void toNDDLasExpr(std::ostream& os,
+                             const std::string& varName) const {}    
+                             
     virtual void toNDDLasLHS(std::ostream& os,
                              Proposition::Context context,
                              const std::string& varName) const {}    
                              
     virtual void toNDDLasRHS(std::ostream& os,
                              Proposition::Context context,
-                             const std::string& varName) const {}    
+                             Expr* lhs,
+                             const std::string& tokenName) const {}                                                           
 };
 
 class LHSExpr : public Expr
@@ -595,14 +599,10 @@ class LHSPlannerConfig : public LHSExpr
 	LHSPlannerConfig();
 	virtual ~LHSPlannerConfig();
 	
-    virtual bool needsVar() { return false; }
     virtual void setArgs(const std::string& predicate,const std::vector<Expr*>& args);
     virtual std::string toString() const  { return "PlannerConfig"; }
     virtual const Type& getDataType() const { return *Type::BOOL; }
     virtual void toNDDL(std::ostream& os) const;
-    virtual void toNDDLasRHS(std::ostream& os,
-                             Proposition::Context context,
-                             const std::string& varName) const {}    
     
   protected:
     Expr* m_startHorizon;
@@ -635,12 +635,12 @@ class LHSVariable : public LHSExpr
 	LHSVariable(Variable* v,const std::string& path) : m_var(v), m_path(path) {}
 	virtual ~LHSVariable() {}
 	
-    virtual bool needsVar() { return false; }
     virtual const Type& getDataType() const { return m_var->getDataType(); }
     virtual std::string toString() const  { return m_path; }
     virtual void toNDDLasRHS(std::ostream& os,
                              Proposition::Context context,
-                             const std::string& varName) const;    
+                             Expr* lhs,
+                             const std::string& tokenName) const;    
     
   protected:
     Variable* m_var;  	  
@@ -653,12 +653,12 @@ class ExprConstant : public Expr
     ExprConstant(const Type& dataType,const std::string& value) : m_dataType(dataType),m_value(value) {}
     virtual ~ExprConstant() {}
         
-    virtual bool needsVar() { return false; }
     virtual const Type& getDataType() const { return m_dataType; }
     virtual std::string toString() const { return m_value; } 
     
     virtual void toNDDLasRHS(std::ostream& os,
                              Proposition::Context context,
+                             Expr* lhs,
                              const std::string& varName) const;    
   
   protected:
@@ -675,8 +675,7 @@ class ExprArithOp : public Expr
     virtual bool needsVar() { return true; }
     virtual const Type& getDataType() const { return m_op1->getDataType(); }
     virtual std::string toString() const { return m_op1->toString() + m_operator + m_op2->toString(); } 
-    virtual void toNDDLasRHS(std::ostream& os,
-                             Proposition::Context context,
+    virtual void toNDDLasExpr(std::ostream& os,
                              const std::string& varName) const;    
   
   protected:
@@ -691,11 +690,11 @@ class ExprVector : public Expr
     ExprVector(const std::vector<Expr*>& values);
     virtual ~ExprVector();
         
-    virtual bool needsVar() { return false; }
     virtual std::string toString() const; 
     virtual const Type& getDataType() const { return *m_dataType; }
     virtual void toNDDLasRHS(std::ostream& os,
                              Proposition::Context context,
+                             Expr* lhs,
                              const std::string& varName) const;    
     
   protected:

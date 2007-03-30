@@ -661,8 +661,7 @@ namespace ANML
             if (m_args[i]->needsVar()) {
             	std::string varName = autoIdentifier("_v");
             	m_argValues[i] = varName;
-            	// TODO: using as RHS is probably not the right thing here
-            	m_args[i]->toNDDLasRHS(os,context,varName);
+            	m_args[i]->toNDDLasExpr(os,varName);
             }
             else {
             	m_argValues[i] = m_args[i]->toString();
@@ -716,15 +715,20 @@ namespace ANML
     {
     	std::string ident = (m_parentProp->getContext() == Proposition::GOAL || 
     	                     m_parentProp->getContext() == Proposition::FACT ? "" : "    ");
-    	                     
-   	    std::string varName = (m_lhs->needsVar() ? autoIdentifier("_v") : "");
-   	    
-    	m_lhs->toNDDLasLHS(os,m_parentProp->getContext(),varName);
-    	if (m_lhs->needsVar()) 
-   		    tq->toNDDL(os,ident,varName);
-   		
-    	if (m_rhs != NULL)
-    	    m_rhs->toNDDLasRHS(os,m_parentProp->getContext(),varName);     
+    	 
+    	// A token is always created for lhs                     
+   	    std::string tokenName = autoIdentifier("_v");   	    
+    	m_lhs->toNDDLasLHS(os,m_parentProp->getContext(),tokenName);
+   		   		
+    	if (m_rhs != NULL) {
+    	    m_rhs->toNDDLasRHS(os,m_parentProp->getContext(),m_lhs,tokenName);
+    	}
+    	else {
+    		// TODO: if lhs is an action, then it's ok to do nothing
+    		// if it's a predicate, we need to generate the assignment to TRUE
+    	}
+    	
+   		tq->toNDDL(os,ident,tokenName);    	     
     }    
     
     Constraint::Constraint(const std::string& name,const std::vector<ANML::Expr*>& args) 
@@ -953,11 +957,14 @@ namespace ANML
     	}
     }          
     
-    void LHSVariable::toNDDLasRHS(std::ostream& os,Proposition::Context context,const std::string& varName) const 
+    void LHSVariable::toNDDLasRHS(std::ostream& os,
+                                  Proposition::Context context,
+                                  Expr* lhs,
+                                  const std::string& tokenName) const 
     { 
     	std::string ident;
     	
-    	// TODO: implement this
+    	// TODO: implement this correctly
     	if (context == Proposition::GOAL || context == Proposition::FACT) {
     	    ident = "";
     	    os << "goal(";
@@ -968,17 +975,19 @@ namespace ANML
         }
         
         // TODO: make sure this is the right type
-        std::string v = autoIdentifier("_copier");
-        os << m_var->getDataType().getName() << "Copier.copy " << v << ");" << std::endl
-           << ident << "eq(" << v << ".lhs," << varName << ");" << std::endl
-           << ident << "eq(" << v << ".rhs," << m_path << ");" << std::endl << std::endl;
+        os << m_var->getDataType().getName() << "Copier.copy " << tokenName << ");" << std::endl
+           << ident << "eq(" << tokenName << ".lhs," << lhs->toString() << ");" << std::endl
+           << ident << "eq(" << tokenName << ".rhs," << m_path << ");" << std::endl << std::endl;
     }
     
-    void ExprConstant::toNDDLasRHS(std::ostream& os,Proposition::Context context,const std::string& varName) const 
+    void ExprConstant::toNDDLasRHS(std::ostream& os,
+                                   Proposition::Context context,
+                                   Expr* lhs,
+                                   const std::string& tokenName) const 
     { 
     	std::string ident;
     	
-    	// TODO: implement this
+    	// TODO: implement this properly
     	if (context == Proposition::GOAL || context == Proposition::FACT) {
     	    ident = "";
     	    os << "goal(";
@@ -989,19 +998,18 @@ namespace ANML
         }
         
         // TODO: make sure this is the right type
-        std::string v = autoIdentifier("_copier");
-        os << m_dataType.getName() << ".setValue " << v << ");" << std::endl
-           << ident << "eq(" << v << ".value," << m_value << ");" << std::endl << std::endl;
+        os << m_dataType.getName() << ".setValue " << tokenName << ");" << std::endl
+           << ident << "eq(" << tokenName << ".value," << m_value << ");" << std::endl << std::endl;
     }
     
     
-   void ExprArithOp::toNDDLasRHS(std::ostream& os,Proposition::Context context,const std::string& varName) const 
+   void ExprArithOp::toNDDLasExpr(std::ostream& os,const std::string& varName) const 
    {
        std::string op1,op2;
        
        if (m_op1->needsVar()) {
          op1 = autoIdentifier("_v");
-         m_op1->toNDDLasRHS(os,context,op1);
+         m_op1->toNDDLasExpr(os,op1);
        }
        else {
        	 op1 = m_op1->toString();
@@ -1009,7 +1017,7 @@ namespace ANML
        	
        if (m_op2->needsVar()) {
          op2 = autoIdentifier("_v");
-         m_op2->toNDDLasRHS(os,context,op2);
+         m_op2->toNDDLasExpr(os,op2);
        }
        else {
        	 op2 = m_op2->toString();
@@ -1065,7 +1073,10 @@ namespace ANML
        return os.str();
    }
     
-   void ExprVector::toNDDLasRHS(std::ostream& os,Proposition::Context context,const std::string& varName) const
+   void ExprVector::toNDDLasRHS(std::ostream& os,
+                                Proposition::Context context,
+                                Expr* lhs,
+                                const std::string& tokenName) const
    {
    	   std::string ident = (context == Proposition::GOAL || 
     	                    context == Proposition::FACT ? "" : "    ");
@@ -1075,8 +1086,7 @@ namespace ANML
        else
            os << "any(";
            
-       std::string v = autoIdentifier("_setter");    
-       os << varName << ".setValue " << v << ");" << std::endl;
+       os << lhs->toString() << ".setValue " << tokenName << ");" << std::endl;
 
        // TODO: use lhs type instead
        const std::vector<ANMLElement*>& elements = m_dataType->getElements();
@@ -1085,7 +1095,7 @@ namespace ANML
     	    if (elements[i]->getType() == "VAR_DECLARATION") {
     	    	const VarDeclaration* vd = (const VarDeclaration*)elements[i];
         	    for (unsigned j=0;j<vd->getInit().size();j++) {
-        	    	os << "eq(" << v << "." << vd->getInit()[j]->getName()
+        	    	os << "eq(" << tokenName << "." << vd->getInit()[j]->getName()
         	    	   << "," << m_values[varIdx++]->toString() << ");" << std::endl;
         	    }    	    	
     	    }
