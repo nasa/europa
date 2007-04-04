@@ -2,7 +2,6 @@
 
 #include "Rover-model.anml"
 
-// TODO: we need collections
 Location lander, rock1, rock2, rock3, rock4;
 Path p1,p2,p3;
 Rover spirit;
@@ -27,6 +26,7 @@ fact at start {
     spirit.location_ = lander;
     spirit.instrument_.state_ = "stowed";
 };
+
 
 goal in [0 100] {
     spirit.TakeSample(rock4);

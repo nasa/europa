@@ -193,8 +193,11 @@ declaration
 ;
 
 problem_stmt
-    : fact
+    : (
+      fact
     | goal
+    )
+    SEMI_COLON!
 ;
    
 vartype_decl
@@ -382,9 +385,7 @@ relational_fluent!
 
 // NOTE: removed start(fluent), end(fluent) from the grammar, it has to be taken care of by either functions or dot notation
 lhs_expr
-    : (IDENTIFIER LPAREN)=> function_symbol arguments
-      {#lhs_expr = #(#[FUNCTION, "function"], #lhs_expr);}
-    | qualified_var_name
+    : qualified_var_name ((LPAREN)=>arguments {#lhs_expr = #(#[FUNCTION, "function"], #lhs_expr);})?
 ;
 
 // TODO: we should allow for full-blown expressions (logical and numerical) at some point

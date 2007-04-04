@@ -698,6 +698,8 @@ namespace ANML
     	else if (m_operator == "contains") {
     		// TODO: implement this
     	}
+    	
+    	os << std::endl;
     }
     
     RelationalFluent::RelationalFluent(LHSExpr* lhs,Expr* rhs) 
@@ -713,6 +715,9 @@ namespace ANML
         
     void RelationalFluent::toNDDL(std::ostream& os, TemporalQualifier* tq) const 
     {
+    	if (m_lhs->toString() == "PlannerConfig")
+    	    return;
+    	    
     	std::string ident = (m_parentProp->getContext() == Proposition::GOAL || 
     	                     m_parentProp->getContext() == Proposition::FACT ? "" : "    ");
     	 
@@ -997,9 +1002,8 @@ namespace ANML
         	os << ident << "any(";
         }
         
-        // TODO: make sure this is the right type
-        os << m_dataType.getName() << ".setValue " << tokenName << ");" << std::endl
-           << ident << "eq(" << tokenName << ".value," << m_value << ");" << std::endl << std::endl;
+        os << lhs->toString() << ".setValue " << tokenName << ");" << std::endl
+           << ident << "eq(" << tokenName << ".value," << toString() << ");" << std::endl << std::endl;
     }
     
     
@@ -1087,9 +1091,9 @@ namespace ANML
            os << "any(";
            
        os << lhs->toString() << ".setValue " << tokenName << ");" << std::endl;
-
-       // TODO: use lhs type instead
-       const std::vector<ANMLElement*>& elements = m_dataType->getElements();
+       
+       VectorType* lhsType = (VectorType*)&(lhs->getDataType());       
+       const std::vector<ANMLElement*>& elements = lhsType->getElements();
        int varIdx=0;
        for (unsigned int i=0; i<elements.size(); i++) {
     	    if (elements[i]->getType() == "VAR_DECLARATION") {

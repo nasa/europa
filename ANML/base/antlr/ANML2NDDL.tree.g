@@ -465,21 +465,11 @@ lhs_expr returns [ANML::LHSExpr* p;]
 	std::string name;
 	std::vector<ANML::Expr*> args;
 }
-    : #(FUNCTION 
-          name=function_symbol // This can be an action, a function or a predicate
-          {
-          	ANML::Variable* v;
-          	ANML::Action* a;
-          	
-            if ((v=m_translator.getContext().getVariable(name)) != NULL)
-                p = new ANML::LHSVariable(v,name);
-          	else if ((a=m_translator.getContext().getAction(name)) != NULL)
-              	p = new ANML::LHSAction(a,name);
-            else
-                check_runtime_error(ALWAYS_FAIL,std::string("No function, action or predicate called ") + name + " in scope");
-          }
+    : #(FUNCTION p=qualified_var_name[m_translator.getContext(),""]       
+        (
           args=arguments
           {
+          	// TODO: do type checking on args!!
           	if (name == "PlannerConfig" || name == "PlanningHorizon") {
           		ANML::LHSPlannerConfig* p1 = m_translator.getPlannerConfig();
           		p1->setArgs(name,args);
@@ -489,8 +479,9 @@ lhs_expr returns [ANML::LHSExpr* p;]
              	p->setArgs(args);
           	}
           }
-      ) 
-    | p=qualified_var_name[m_translator.getContext(),""] 
+        )?
+      )
+    | p=qualified_var_name[m_translator.getContext(),""]       
 ;
 
 // TODO: we should allow for full-blown expressions (logical and numerical) at some point

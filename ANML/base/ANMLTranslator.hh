@@ -654,7 +654,12 @@ class ExprConstant : public Expr
     virtual ~ExprConstant() {}
         
     virtual const Type& getDataType() const { return m_dataType; }
-    virtual std::string toString() const { return m_value; } 
+    virtual std::string toString() const 
+    { 
+    	return (&m_dataType != Type::STRING 
+          ? m_value 
+          : "\""+m_value+"\""); 
+    } 
     
     virtual void toNDDLasRHS(std::ostream& os,
                              Proposition::Context context,
