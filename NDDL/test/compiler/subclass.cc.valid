@@ -530,6 +530,7 @@ namespace NDDL {
   Bar::p0::p0(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : Foo::p0(planDatabase, name, rejectable, false) {
     handleDefaults(close);
+    getVariable("arg0")->restrictBaseDomain(IntervalDomain(1.0, 1.0, "float"));
   }
   
   Bar::p0::p0(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)

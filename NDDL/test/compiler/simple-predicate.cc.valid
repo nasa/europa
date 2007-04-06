@@ -573,6 +573,8 @@ namespace NDDL {
   Bar::pred1::pred1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
    : Foo::pred1(planDatabase, name, rejectable, false) {
     handleDefaults(close);
+    getVariable("duration")->restrictBaseDomain(IntervalIntDomain(2, 100, "int"));
+    getVariable("m_3")->restrictBaseDomain(BoolDomain(true, "bool"));
   }
   
   Bar::pred1::pred1(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
