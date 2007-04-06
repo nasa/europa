@@ -96,18 +96,34 @@ namespace ANML
     	check_runtime_error(m_context != NULL,"ANMLTranslator context can't be NULL");
     }      
             
-    void ANMLTranslator::toNDDL(std::ostream& os) const
+    void ANMLTranslator::toNDDL(std::vector<ANML::ANMLElement*>& program, std::ostream& os) const
     {
-    	m_plannerConfig->toNDDL(os);
-    	
-    	// TODO: verify that all resource vars are use correctly
-    	m_context->toNDDL(os);        
+    	for (unsigned int i=0; i<program.size(); i++) 
+    	    program[i]->preProcess();
+
+        std::vector<std::string> problems;
+    	for (unsigned int i=0; i<program.size(); i++) 
+    	    program[i]->validate(problems);
+        
+        if (problems.size() == 0) {    	        	
+        	m_plannerConfig->toNDDL(*m_context,os);    	
+        	for (unsigned int i=0; i<program.size(); i++) 
+        	    program[i]->toNDDL(*m_context,os);
+        }   
+        else {
+        	// TODO: Return problems instead
+        	std::cerr << "Validation ERRORS translating into NDDL:" << std::endl;
+        	for (unsigned int i=0; i<problems.size(); i++) 
+        	    std::cerr << problems[i] << std::endl;        	
+        } 	            
     }
 
     std::string ANMLTranslator::toString() const
     {
     	std::ostringstream os;    
-    	toNDDL(os);            	
+    	os << "ANMLTranslator {" << std::endl;
+    	os << m_context->toString();
+    	os << "}" << std::endl;            	
     	return os.str();
     }
 
@@ -118,14 +134,6 @@ namespace ANML
 	
     ANMLContext::~ANMLContext()
     {
-    }
-
-    void ANMLContext::addElement(ANMLElement* element)
-    {
-    	check_error(element != NULL, "Can't add a NULL element to an ANML context");
-    	
-   	    m_elements.push_back(element);
-   	    debugMsg("ANMLContext", getContextDesc() << " Added element:" << element->getType() << " " << element->getName());    	    
     }
 
     ObjType* ANMLContext::addObjType(const std::string& name,const std::string& parentObjType)
@@ -176,8 +184,8 @@ namespace ANML
 	{
 		// TODO: check name against functions as well?
 		// TODO: warn if it hides an element in a parent context?
-    	check_runtime_error(getAction(a->getName()) == NULL,"Action "+a->getName()+" already defined");
-		m_actions[a->getName()] = a;
+    	check_runtime_error(getAction(a->getElementName()) == NULL,"Action "+a->getElementName()+" already defined");
+		m_actions[a->getElementName()] = a;
 	}
 	
 	Action* ANMLContext::getAction(const std::string& name,bool mustExist) const
@@ -259,33 +267,27 @@ namespace ANML
     	return NULL;
     }
 	
-    void ANMLContext::toNDDL(std::ostream& os) const
-    {
-    	for (unsigned int i=0; i<m_elements.size(); i++) 
-    	    m_elements[i]->toNDDL(os);
-    }
-	
     std::string ANMLContext::toString() const
     {
     	std::ostringstream os;
     	
-    	for (unsigned int i=0; i<m_elements.size(); i++) {
-    		debugMsg("ANMLContext", "toString:" << i << " " << m_elements[i]->getType()); 
-    	    os << m_elements[i]->toString() << std::endl; 
-    	}   	     
+        os << getContextDesc() << "{" << std::endl;
+        // TODO
+        os << "}" << std::endl;
     	
     	return os.str();
     }
 
-    void ANMLElement::toNDDL(std::ostream& os) const 
+    void ANMLElement::toNDDL(ANMLContext& context, std::ostream& os) const 
     { 
-    	os << "//" << m_type << " " << m_name << std::endl; 
+    	os << "    //" << m_elementType << " " << m_elementName << std::endl; 
     }
     
     std::string ANMLElement::toString() const 
     { 
-    	std::ostringstream os; 
-    	toNDDL(os); 
+    	std::ostringstream os;
+    	ANMLContext context; 
+    	toNDDL(context,os); 
     	return os.str(); 
     }
     
@@ -297,7 +299,7 @@ namespace ANML
     ObjType* Type::OBJECT = new ObjType("object",NULL);
     
 	Type::Type(const std::string& name)
-	    : ANMLElement("TYPE",name)
+	    : m_typeName(name)
 	{
 	}
 	
@@ -307,7 +309,7 @@ namespace ANML
 	
 	void Type::becomeResourceType()
 	{
-		check_runtime_error(ALWAYS_FAIL,m_name + " can't become a resource type");
+		check_runtime_error(ALWAYS_FAIL,m_typeName + " can't become a resource type");
 	}
 	        
     std::string autoIdentifier(const char* base)
@@ -330,9 +332,9 @@ namespace ANML
 	{
 	}
 	    	    
-    void TypeAlias::toNDDL(std::ostream& os) const 
+    void TypeAlias::toNDDL(ANMLContext& context, std::ostream& os) const 
     { 
-    	os << "typedef " << m_wrappedType.getName() << " " << m_name << ";" << std::endl; 
+    	os << "typedef " << m_wrappedType.getName() << " " << m_typeName << ";" << std::endl; 
     }    
     
 	Range::Range(const std::string& name,const Type& dataType,const std::string& lb,const std::string& ub)	
@@ -355,16 +357,16 @@ namespace ANML
 
 	void Range::becomeResourceType()
 	{
-		check_runtime_error(canBeResourceType(),m_name + " can't become a resource type. only a float range can.");
+		check_runtime_error(canBeResourceType(),m_typeName + " can't become a resource type. only a float range can.");
 		m_isResourceType = true;
 	}	        
 	        
-    void Range::toNDDL(std::ostream& os) const
+    void Range::toNDDL(ANMLContext& context, std::ostream& os) const
     {
     	if (m_isResourceType) {
-    		os << "class " << m_name << " extends Reusable" << std::endl
+    		os << "class " << getName() << " extends Reusable" << std::endl
     		   << "{" << std::endl
-    		   << "    " << m_name << "()" << std::endl
+    		   << "    " << getName() << "()" << std::endl
     		   << "    {" << std::endl
     		   << "        super(" << m_ub << "," << m_lb << ");" << std::endl
     		   << "    }" << std::endl
@@ -387,7 +389,7 @@ namespace ANML
 	{
 	}
 	        
-    void Enumeration::toNDDL(std::ostream& os) const
+    void Enumeration::toNDDL(ANMLContext& context, std::ostream& os) const
     {
         os << "enum " << getName() << "Enum {";
         
@@ -407,6 +409,123 @@ namespace ANML
         os << getName() << "::setValue {}" << std::endl << std::endl;                                
     }
     
+    ObjType::ObjType(const std::string& name,ObjType* parentObjType)
+        : Type(name)
+        , m_parentObjType(parentObjType)
+    {
+    }
+    
+    ObjType::~ObjType()
+    {
+    }
+    
+    void ObjType::toNDDL(ANMLContext& context, std::ostream& os) const
+    {
+        std::string parent = (
+            (m_parentObjType != NULL && m_parentObjType->getName() != "object") 
+                ? (std::string(" extends ") + m_parentObjType->getName()) 
+                : ""
+        );
+        
+        os << "class " << getName() << parent << std::endl 
+           << "{" << std::endl;
+                      
+        for (unsigned int i=0; i<m_elements.size(); i++) {
+    	    if (m_elements[i]->getElementType() == "ACTION") {
+    	    	Action* a = (Action*) m_elements[i];
+    	    	os << "    predicate " << a->getElementName() << " {";
+    	    	
+    	    	const std::vector<Variable*> params = a->getParams();
+                for (unsigned int j=0; j<params.size(); j++) {
+        	        params[j]->toNDDL(context,os);
+       	            os << ";";
+                }    	
+    	    	
+    	        os << "}" << std::endl;
+    	    }
+    	    else if (m_elements[i]->getElementType() == "VAR_DECLARATION") {
+    	    	VarDeclaration* vd = (VarDeclaration*)m_elements[i];
+    	    	for (unsigned j=0;j<vd->getInit().size();j++)
+    	    	    os << "    " << vd->getDataType().getName() << " " << vd->getInit()[j]->getName() << ";" << std::endl;
+    	    }
+    	}
+
+        // Generate constructor and initialize members that require contructors themselves
+        os << std::endl << "    " << getName() << "()" << std::endl 
+           << "    {" << std::endl;
+        for (unsigned int i=0; i<m_elements.size(); i++) {
+    	    if (m_elements[i]->getElementType() == "VAR_DECLARATION") {
+    	    	VarDeclaration* vd = (VarDeclaration*)m_elements[i];
+    	    	if (!vd->getDataType().isPrimitive()) {
+        	        for (unsigned j=0;j<vd->getInit().size();j++) {
+    	    	        os << "        " << vd->getInit()[j]->getName() 
+    	    	           << " = new " << vd->getDataType().getName() << "();" << std::endl;
+        	        }
+    	    	}
+    	    }
+        }
+        os << "    }" << std::endl;
+           
+        os << "}" << std::endl << std::endl;
+        
+        for (unsigned int i=0; i<m_elements.size(); i++) {
+    	    if (m_elements[i]->getElementType() != "VAR_DECLARATION") 
+    	        m_elements[i]->toNDDL(context,os);
+        }    	     
+    }
+ 
+    VectorType::VectorType(const std::string& name)
+        : ObjType(name,Type::OBJECT)
+    {
+    }
+    
+    void VectorType::toNDDL(ANMLContext& context, std::ostream& os) const
+    {
+    	os << "class " << getName() << " extends Timeline" << std::endl
+           << "{" << std::endl
+           << "    predicate setValue { ";    	
+
+        for (unsigned int i=0; i<m_elements.size(); i++) {
+    	    if (m_elements[i]->getElementType() == "VAR_DECLARATION") {
+    	    	VarDeclaration* vd = (VarDeclaration*)m_elements[i];
+        	    for (unsigned j=0;j<vd->getInit().size();j++) {
+        	    	os << vd->getDataType().getName() << " " 
+        	    	   << vd->getInit()[j]->getName()
+        	    	   << ";";
+        	    }    	    	
+    	    }
+        }
+        
+        os << " }" << std::endl 
+           << "}" << std::endl << std::endl;
+        
+        os << getName() << "::setValue {}" << std::endl << std::endl;           
+        
+        os << "class " << getName() << "Copier" << std::endl
+           << "{" << std::endl
+           << "    predicate copy { " << getName() << " lhs; " << getName() << " rhs; }" << std::endl
+           << "}" << std::endl << std::endl;
+           
+        os << getName() << "Copier::copy" << std::endl
+           << "{" << std:: endl
+           << "    contained_by(lhs.setValue lhsValue);" << std::endl
+           << "    contained_by(rhs.setValue rhsValue);" << std::endl << std::endl;
+           
+        for (unsigned int i=0; i<m_elements.size(); i++) {
+    	    if (m_elements[i]->getElementType() == "VAR_DECLARATION") {
+    	    	VarDeclaration* vd = (VarDeclaration*)m_elements[i];
+        	    for (unsigned j=0;j<vd->getInit().size();j++) {
+        	    	os << "    eq("
+        	    	   << "lhs." << vd->getInit()[j]->getName() << ","
+        	    	   << "rhs." << vd->getInit()[j]->getName()
+        	    	   << ");" << std::endl;
+        	    }    	    	
+    	    }
+        }
+        
+        os << "}" << std::endl << std::endl;                         
+    }
+    
     Variable::Variable(const Type& dataType, const std::string& name)
         : m_name(name)
         , m_dataType(dataType)
@@ -424,7 +543,7 @@ namespace ANML
     {
     }
 
-    void Variable::toNDDL(std::ostream& os) const
+    void Variable::toNDDL(ANMLContext& context, std::ostream& os) const
     {
     	os << m_dataType.getName() << " " << m_name;
     }
@@ -440,7 +559,7 @@ namespace ANML
     {
     }
 
-    void VarDeclaration::toNDDL(std::ostream& os) const
+    void VarDeclaration::toNDDL(ANMLContext& context, std::ostream& os) const
     {
     	os << m_dataType.getName() << " ";
     	for (unsigned int i=0; i < m_init.size(); i++) {
@@ -467,129 +586,12 @@ namespace ANML
     {
     }
 
-    void FreeVarDeclaration::toNDDL(std::ostream& os) const
+    void FreeVarDeclaration::toNDDL(ANMLContext& context, std::ostream& os) const
     {
     	for (unsigned int i=0; i < m_vars.size(); i++) 
     		os << "    " << m_vars[i]->getDataType().getName() << " " << m_vars[i]->getName() << ";" << std::endl;
     	
     	os << std::endl;	
-    }
-    
-    ObjType::ObjType(const std::string& name,ObjType* parentObjType)
-        : Type(name)
-        , m_parentObjType(parentObjType)
-    {
-    }
-    
-    ObjType::~ObjType()
-    {
-    }
-    
-    void ObjType::toNDDL(std::ostream& os) const
-    {
-        std::string parent = (
-            (m_parentObjType != NULL && m_parentObjType->getName() != "object") 
-                ? (std::string(" extends ") + m_parentObjType->getName()) 
-                : ""
-        );
-        
-        os << "class " << m_name << parent << std::endl 
-           << "{" << std::endl;
-                      
-        for (unsigned int i=0; i<m_elements.size(); i++) {
-    	    if (m_elements[i]->getType() == "ACTION") {
-    	    	Action* a = (Action*) m_elements[i];
-    	    	os << "    predicate " << a->getName() << " {";
-    	    	
-    	    	const std::vector<Variable*> params = a->getParams();
-                for (unsigned int j=0; j<params.size(); j++) {
-        	        params[j]->toNDDL(os);
-       	            os << ";";
-                }    	
-    	    	
-    	        os << "}" << std::endl;
-    	    }
-    	    else if (m_elements[i]->getType() == "VAR_DECLARATION") {
-    	    	VarDeclaration* vd = (VarDeclaration*)m_elements[i];
-    	    	for (unsigned j=0;j<vd->getInit().size();j++)
-    	    	    os << "    " << vd->getDataType().getName() << " " << vd->getInit()[j]->getName() << ";" << std::endl;
-    	    }
-    	}
-
-        // Generate constructor and initialize members that require contructors themselves
-        os << std::endl << "    " << getName() << "()" << std::endl 
-           << "    {" << std::endl;
-        for (unsigned int i=0; i<m_elements.size(); i++) {
-    	    if (m_elements[i]->getType() == "VAR_DECLARATION") {
-    	    	VarDeclaration* vd = (VarDeclaration*)m_elements[i];
-    	    	if (!vd->getDataType().isPrimitive()) {
-        	        for (unsigned j=0;j<vd->getInit().size();j++) {
-    	    	        os << "        " << vd->getInit()[j]->getName() 
-    	    	           << " = new " << vd->getDataType().getName() << "();" << std::endl;
-        	        }
-    	    	}
-    	    }
-        }
-        os << "    }" << std::endl;
-           
-        os << "}" << std::endl << std::endl;
-        
-        for (unsigned int i=0; i<m_elements.size(); i++) {
-    	    if (m_elements[i]->getType() != "VAR_DECLARATION") 
-    	        m_elements[i]->toNDDL(os);
-        }    	     
-    }
- 
-    VectorType::VectorType(const std::string& name)
-        : ObjType(name,Type::OBJECT)
-    {
-    }
-    
-    void VectorType::toNDDL(std::ostream& os) const
-    {
-    	os << "class " << m_name << " extends Timeline" << std::endl
-           << "{" << std::endl
-           << "    predicate setValue { ";    	
-
-        for (unsigned int i=0; i<m_elements.size(); i++) {
-    	    if (m_elements[i]->getType() == "VAR_DECLARATION") {
-    	    	VarDeclaration* vd = (VarDeclaration*)m_elements[i];
-        	    for (unsigned j=0;j<vd->getInit().size();j++) {
-        	    	os << vd->getDataType().getName() << " " 
-        	    	   << vd->getInit()[j]->getName()
-        	    	   << ";";
-        	    }    	    	
-    	    }
-        }
-        
-        os << " }" << std::endl 
-           << "}" << std::endl << std::endl;
-        
-        os << m_name << "::setValue {}" << std::endl << std::endl;           
-        
-        os << "class " << m_name << "Copier" << std::endl
-           << "{" << std::endl
-           << "    predicate copy { " << m_name << " lhs; " << m_name << " rhs; }" << std::endl
-           << "}" << std::endl << std::endl;
-           
-        os << m_name << "Copier::copy" << std::endl
-           << "{" << std:: endl
-           << "    contained_by(lhs.setValue lhsValue);" << std::endl
-           << "    contained_by(rhs.setValue rhsValue);" << std::endl << std::endl;
-           
-        for (unsigned int i=0; i<m_elements.size(); i++) {
-    	    if (m_elements[i]->getType() == "VAR_DECLARATION") {
-    	    	VarDeclaration* vd = (VarDeclaration*)m_elements[i];
-        	    for (unsigned j=0;j<vd->getInit().size();j++) {
-        	    	os << "    eq("
-        	    	   << "lhs." << vd->getInit()[j]->getName() << ","
-        	    	   << "rhs." << vd->getInit()[j]->getName()
-        	    	   << ");" << std::endl;
-        	    }    	    	
-    	    }
-        }
-        
-        os << "}" << std::endl << std::endl;                         
     }
     
     Action::Action(ObjType& objType,const std::string& name, const std::vector<Variable*>& params)
@@ -608,14 +610,14 @@ namespace ANML
     	m_body = body;
     }
     
-    void Action::toNDDL(std::ostream& os) const
+    void Action::toNDDL(ANMLContext& context, std::ostream& os) const
     {
-    	os << m_objType.getName() << "::" << m_name << std::endl;
+    	os << m_objType.getName() << "::" << getElementName() << std::endl;
 
     	os << "{" << std::endl;
         for (unsigned int i=0; i<m_body.size(); i++) {
-    		debugMsg("ANMLContext", "Action::toNDDL " << i << " " << m_body[i]->getType()); 
-        	m_body[i]->toNDDL(os);
+    		debugMsg("ANMLContext", "Action::toNDDL " << i << " " << m_body[i]->getElementType()); 
+        	m_body[i]->toNDDL(context,os);
         }    	
     	os << "}" << std::endl << std::endl;
     }
@@ -630,7 +632,7 @@ namespace ANML
     {    	
     }
     
-    void ActionDuration::toNDDL(std::ostream& os) const
+    void ActionDuration::toNDDL(ANMLContext& context, std::ostream& os) const
     {
     	os << "    eq(duration,";
     	
@@ -772,11 +774,11 @@ namespace ANML
     {
     }
     
-    void Condition::toNDDL(std::ostream& os) const 
+    void Condition::toNDDL(ANMLContext& context, std::ostream& os) const 
     { 
     	os << "    // Condition start" << std::endl;
     	for (unsigned int i=0; i<m_propositions.size(); i++) {
-    		m_propositions[i]->toNDDL(os);
+    		m_propositions[i]->toNDDL(context,os);
     	}
     	os << "    // Condition end" << std::endl << std::endl;
     }
@@ -793,11 +795,11 @@ namespace ANML
     {
     }
     
-    void Effect::toNDDL(std::ostream& os) const 
+    void Effect::toNDDL(ANMLContext& context, std::ostream& os) const 
     { 
     	os << "    // Effect start" << std::endl;
     	for (unsigned int i=0; i<m_propositions.size(); i++) {
-    		m_propositions[i]->toNDDL(os);
+    		m_propositions[i]->toNDDL(context,os);
     	}
     	os << "    // Effect end" << std::endl << std::endl;
     }
@@ -814,10 +816,10 @@ namespace ANML
     {
     }
     
-    void Goal::toNDDL(std::ostream& os) const 
+    void Goal::toNDDL(ANMLContext& context, std::ostream& os) const 
     { 
     	for (unsigned int i=0; i<m_propositions.size(); i++) 
-    		m_propositions[i]->toNDDL(os);
+    		m_propositions[i]->toNDDL(context,os);
     }
     
     Fact::Fact(const std::vector<Proposition*>& propositions) 
@@ -832,10 +834,10 @@ namespace ANML
     {
     }
     
-    void Fact::toNDDL(std::ostream& os) const 
+    void Fact::toNDDL(ANMLContext& context, std::ostream& os) const 
     { 
     	for (unsigned int i=0; i<m_propositions.size(); i++) 
-    		m_propositions[i]->toNDDL(os);
+    		m_propositions[i]->toNDDL(context,os);
     }
     
     Proposition::Proposition(TemporalQualifier* tq,Fluent* f) 
@@ -866,7 +868,7 @@ namespace ANML
     {
     }
     
-    void Proposition::toNDDL(std::ostream& os) const 
+    void Proposition::toNDDL(ANMLContext& context, std::ostream& os) const 
     {
     	// output any expressions needed for the parameters of the temporal qualifier
     	m_temporalQualifier->toNDDL(os,m_context);
@@ -879,7 +881,7 @@ namespace ANML
         : Proposition(tq,f)
         , m_whenCondition(when_condition)
     {
-   	    m_type = "CHANGE";
+   	    m_elementType = "CHANGE";
    	    setContext(EFFECT);
     }
    
@@ -888,13 +890,13 @@ namespace ANML
        	
     }
    
-    void Change::toNDDL(std::ostream& os) const
+    void Change::toNDDL(ANMLContext& context, std::ostream& os) const
     {
         if (m_whenCondition != NULL) {
             // TODO: deal with this
         }
        
-        Proposition::toNDDL(os);
+        Proposition::toNDDL(context,os);
     }    
         
     ResourceChangeFluent::ResourceChangeFluent(const std::string& op,Expr* var,Expr* qty)
@@ -945,10 +947,10 @@ namespace ANML
     { 
     	switch (context) {
     		case Proposition::GOAL : 
-    		    os << "goal(" << m_action->getName() << " " << varName << ");" << std::endl;
+    		    os << "goal(" << m_action->getElementName() << " " << varName << ");" << std::endl;
     		    break; 
     		case Proposition::CONDITION : 
-    		    os << "    any(" << m_action->getName() << " " << varName << ");" << std::endl;
+    		    os << "    any(" << m_action->getElementName() << " " << varName << ");" << std::endl;
     		    break; 
     		case Proposition::FACT : 
     		    check_runtime_error(ALWAYS_FAIL,"ERROR! LHSAction not supported for FACTS");
@@ -1029,7 +1031,7 @@ namespace ANML
        
        std::string ident="    ";
        if (m_operator == "-") {
-       	   os << ident; getDataType().toNDDL(os); os << " " << varName << ";" << std::endl;
+       	   os << ident; getDataType().getName(); os << " " << varName << ";" << std::endl;
            // addEq(x,y,z) means x+y=z which implies x=z-y
            os << ident << "addEq(" << varName << "," << op2 << "," << op1 << ");" << std::endl << std::endl;
        }
@@ -1096,7 +1098,7 @@ namespace ANML
        const std::vector<ANMLElement*>& elements = lhsType->getElements();
        int varIdx=0;
        for (unsigned int i=0; i<elements.size(); i++) {
-    	    if (elements[i]->getType() == "VAR_DECLARATION") {
+    	    if (elements[i]->getElementType() == "VAR_DECLARATION") {
     	    	const VarDeclaration* vd = (const VarDeclaration*)elements[i];
         	    for (unsigned j=0;j<vd->getInit().size();j++) {
         	    	os << "eq(" << tokenName << "." << vd->getInit()[j]->getName()
@@ -1110,7 +1112,8 @@ namespace ANML
     
     // Special expression to handle PlannerConfig
     LHSPlannerConfig::LHSPlannerConfig()
-        : m_startHorizon(NULL)
+        : m_translated(false)
+        , m_startHorizon(NULL)
         , m_endHorizon(NULL)
         , m_maxSteps(NULL)
         , m_maxDepth(NULL)
@@ -1133,8 +1136,11 @@ namespace ANML
     	}    	  
     }
     
-    void LHSPlannerConfig::toNDDL(std::ostream& os) const
+    void LHSPlannerConfig::toNDDL(ANMLContext& context, std::ostream& os) const
     {
+    	if (m_translated)
+    	    return;
+    	    
     	std::string sh = (m_startHorizon != NULL ? m_startHorizon->toString() : "0");
     	std::string eh = (m_endHorizon != NULL ? m_endHorizon->toString() : "1");
     	std::string ms = (m_maxSteps != NULL ? m_maxSteps->toString() : "+inf");
@@ -1146,6 +1152,8 @@ namespace ANML
    	    os << "int solver_maxDepth=" << md << ";" << std::endl;
     	
     	os << "PlannerConfig plannerConfiguration = new PlannerConfig(start,end,solver_MaxSteps,solver_maxDepth);" 
-    	   << std::endl << std::endl;    	
+    	   << std::endl << std::endl;
+    	   
+    	m_translated = true;    	
     }            
 }

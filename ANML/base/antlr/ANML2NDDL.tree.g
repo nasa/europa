@@ -81,15 +81,15 @@ options {
         ANML::ANMLTranslator m_translator;
 }
 
-anml
-{
+anml returns [std::vector<ANML::ANMLElement*> program]
+{	
 	ANML::ANMLElement* stmt;
 }
   : #(ANML
 	    {
            debugMsg("ANML2NDDL:anml", "Parsing...");
         }
-      (stmt=anml_stmt { m_translator.getContext().addElement(stmt); debugMsg("ANML2NDDL:anml", "Added Element " << stmt->getType() << " " << stmt->getName());})*
+      (stmt=anml_stmt { program.push_back(stmt); debugMsg("ANML2NDDL:anml", "Added Element " << stmt->getElementType() << " " << stmt->getElementName());})*
 	    {
 	       debugMsg("ANML2NDDL:anml", "Done parsing");
 	    }
@@ -123,7 +123,7 @@ vartype_decl returns [ANML::ANMLElement* element]
 }
     : #(VARTYPE name=user_defined_type_name t=var_type[name])
 {
-	element = t;
+	element = new ANML::TypeDefinition(t);
 }    
 ;
 
@@ -462,17 +462,18 @@ relational_fluent returns [ANML::RelationalFluent* f]
 // NOTE: removed start(fluent), end(fluent) from the grammar, it has to be taken care of by either functions or dot notation
 lhs_expr returns [ANML::LHSExpr* p;]
 {
-	std::string name;
 	std::vector<ANML::Expr*> args;
 }
     : #(FUNCTION p=qualified_var_name[m_translator.getContext(),""]       
         (
           args=arguments
           {
+        	std::string name = p->toString();
           	// TODO: do type checking on args!!
           	if (name == "PlannerConfig" || name == "PlanningHorizon") {
           		ANML::LHSPlannerConfig* p1 = m_translator.getPlannerConfig();
           		p1->setArgs(name,args);
+          		delete p;
           		p = p1;
           	}
           	else {          	
@@ -667,7 +668,7 @@ change_proposition_list returns [ANML::ANMLElement* element]
 	ANML::ANMLElementList* l = new ANML::ANMLElementList();
 	ANML::Change* change;
 }
-    : #(LCURLY (change=change_proposition {l->add(change);})+)
+    : #(LCURLY (change=change_proposition {l->addElement(change);})+)
 {
 	element = l;
 }

@@ -35,7 +35,7 @@ class ANMLTranslator
       
       virtual LHSPlannerConfig* getPlannerConfig() { return m_plannerConfig; }
             
-      virtual void toNDDL(std::ostream& os) const;
+      virtual void toNDDL(std::vector<ANML::ANMLElement*>& program,std::ostream& os) const;
       
 	  virtual std::string toString() const;      
       
@@ -57,9 +57,6 @@ class ANMLContext
     virtual const ANMLContext* getParentContext() { return m_parentContext; }
     virtual void setParentContext(const ANMLContext* parent) { m_parentContext = parent; }
     	
-    virtual void addElement(ANMLElement* element);
-    virtual const std::vector<ANMLElement*>& getElements() const { return m_elements; }
-    
 	virtual void     addType(Type* type);
 	virtual ObjType* addObjType(const std::string& name,const std::string& parentName);
 
@@ -77,13 +74,10 @@ class ANMLContext
     virtual void addConstraint(ConstraintDef* c);
     virtual ConstraintDef* getConstraint(const std::string& name,const std::vector<const Type*>& argTypes,bool mustExist=false) const;
     	
-    virtual void toNDDL(std::ostream& os) const;
-    
 	virtual std::string toString() const;
 		
   protected:
     const ANMLContext*        m_parentContext;
-    std::vector<ANMLElement*> m_elements;              
 
     // maps to quickly get to elements by name
     std::map<std::string,Type*>      m_types;    
@@ -94,35 +88,26 @@ class ANMLContext
     std::map<std::string,ConstraintDef*>  m_constraints;        
 };
 
-class ConstraintDef 
-{
-  public:
-    ConstraintDef(const std::string& name, const std::vector<const Type*>& argTypes) : m_name(name), m_argTypes(argTypes) {}   
-
-    const std::string& getName() const { return m_name; }
-    const std::vector<const Type*>& getArgTypes() const { return m_argTypes; }
-    
-  protected:
-	std::string m_name;
-	std::vector<const Type*> m_argTypes;
-};
-
 class ANMLElement
 {
   public:
-    ANMLElement(const std::string& type) : m_type(type) {}
-    ANMLElement(const std::string& type,const std::string& name) : m_type(type), m_name(name) {}
+    ANMLElement(const std::string& type) : m_elementType(type) {}
+    ANMLElement(const std::string& type,const std::string& name) : m_elementType(type), m_elementName(name) {}
     virtual ~ANMLElement() {}    
 
-    virtual const std::string& getType() { return m_type; }
-    virtual const std::string& getName() const { return m_name; }
-    virtual void setName(const std::string& n) { m_name = n; }
-    virtual void toNDDL(std::ostream& os) const;
+    virtual const std::string& getElementType() { return m_elementType; }
+    virtual const std::string& getElementName() const { return m_elementName; }
+    virtual void setName(const std::string& n) { m_elementName = n; }
+    
+    virtual void preProcess() {}
+    virtual bool validate(std::vector<std::string>& problems) { return true; }
+    virtual void toNDDL(ANMLContext& context,std::ostream& os) const;
+
     virtual std::string toString() const;
     
   protected:    
-    std::string m_type;
-    std::string m_name;	  
+    std::string m_elementType;
+    std::string m_elementName;	  
 };
 
 class ANMLElementList : public ANMLElement
@@ -130,26 +115,26 @@ class ANMLElementList : public ANMLElement
   public:
     ANMLElementList() : ANMLElement("Element list") {}
     
-    void add(ANMLElement* e) { m_elements.push_back(e); }
+    void addElement(ANMLElement* e) { m_elements.push_back(e); }
+    const std::vector<ANMLElement*>& getElements() const { return m_elements; }
     
-    virtual void toNDDL(std::ostream& os) const
+    virtual void toNDDL(ANMLContext& context,std::ostream& os) const
     {
     	for (unsigned int i=0;i<m_elements.size();i++)
-    	    m_elements[i]->toNDDL(os);
+    	    m_elements[i]->toNDDL(context,os);
     }
     
   protected:
     std::vector<ANMLElement*> m_elements;  	
 };
 
-class ObjType;
-
-class Type : public ANMLElement
+class Type 
 {
   public:
 	Type(const std::string& name);
 	virtual ~Type();
 	    
+	virtual std::string getName() const { return m_typeName; }    
 	virtual bool isPrimitive() const { return true; }
 	
 	virtual bool canBeResourceType() const { return false; }
@@ -158,7 +143,7 @@ class Type : public ANMLElement
 	
 	virtual bool isAssignableFrom(const Type& rhs) const { return getName() == rhs.getName(); }
 	    
-    virtual void toNDDL(std::ostream& os) const { os << m_name; }
+    virtual void toNDDL(ANMLContext& context,std::ostream& os) const { os << getName(); }
     
     static Type* VOID;    
     static Type* BOOL;    
@@ -166,6 +151,9 @@ class Type : public ANMLElement
     static Type* FLOAT;    
     static Type* STRING;    
     static ObjType* OBJECT;    
+    
+  protected:
+    std::string m_typeName;     
 };
 
 class TypeAlias : public Type
@@ -176,7 +164,7 @@ class TypeAlias : public Type
 	    
 	virtual bool isPrimitive() const { return m_wrappedType.isPrimitive(); }
 	    
-    virtual void toNDDL(std::ostream& os) const;    
+    virtual void toNDDL(ANMLContext& context,std::ostream& os) const;    
 
   protected:    
     const Type& m_wrappedType;
@@ -194,7 +182,7 @@ class Range : public Type
 	
 	virtual bool isPrimitive() const { return !m_isResourceType; }
 	    
-    virtual void toNDDL(std::ostream& os) const;
+    virtual void toNDDL(ANMLContext& context,std::ostream& os) const;
     
   protected:
     bool m_isResourceType;
@@ -211,13 +199,52 @@ class Enumeration : public Type
 	    
 	virtual bool isPrimitive() const { return false; }
 	    
-    virtual void toNDDL(std::ostream& os) const;
+    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
     
   protected:
     const Type& m_dataType;
     std::vector<Expr*> m_values;
 };
 	
+class ObjType : public Type, public ANMLContext, public ANMLElementList
+{
+  public:
+    ObjType(const std::string& name,ObjType* parentObjType);
+    virtual ~ObjType();
+    
+    virtual std::string getContextDesc() const { return m_typeName; }
+
+    virtual ObjType* getParentObjType() const { return m_parentObjType; }
+        
+	virtual bool isPrimitive() const { return false; }
+
+    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
+    
+  protected:
+    ObjType* m_parentObjType;   	
+};
+
+class VectorType : public ObjType
+{
+  public:
+    VectorType(const std::string& name);
+    
+    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;  
+};
+
+class ConstraintDef 
+{
+  public:
+    ConstraintDef(const std::string& name, const std::vector<const Type*>& argTypes) : m_name(name), m_argTypes(argTypes) {}   
+
+    const std::string& getName() const { return m_name; }
+    const std::vector<const Type*>& getArgTypes() const { return m_argTypes; }
+    
+  protected:
+	std::string m_name;
+	std::vector<const Type*> m_argTypes;
+};
+
 class Arg
 {
   public:
@@ -245,7 +272,7 @@ class Variable
     const Type& getDataType() const { return m_dataType; }
     const std::vector<Arg*>& getArgs() const { return m_args; }
     
-    virtual void toNDDL(std::ostream& os) const;
+    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
     
   protected:
     std::string m_name;
@@ -270,6 +297,18 @@ class VarInit
       std::string m_value;	
 };
     
+class TypeDefinition : public ANMLElement
+{
+  public:
+    TypeDefinition(Type* anmlType) : ANMLElement("TYPE",anmlType->getName()), m_anmlType(anmlType) {}
+    virtual ~TypeDefinition() {}
+
+    virtual void toNDDL(ANMLContext& context,std::ostream& os) const { m_anmlType->toNDDL(context,os); }
+    
+  protected:
+    Type* m_anmlType;        
+};
+
 class VarDeclaration : public ANMLElement
 {
   public:
@@ -279,7 +318,7 @@ class VarDeclaration : public ANMLElement
     const Type& getDataType() const { return m_dataType; }
     const std::vector<VarInit*>& getInit() const { return m_init; }
     
-    virtual void toNDDL(std::ostream& os) const;
+    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
       
   protected:
 	const Type& m_dataType;
@@ -293,37 +332,10 @@ class FreeVarDeclaration : public ANMLElement
     FreeVarDeclaration(const std::vector<Variable*>& vars);
     virtual ~FreeVarDeclaration();
     
-    virtual void toNDDL(std::ostream& os) const;
+    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
       
   protected:
 	std::vector<Variable*> m_vars;    
-};
-
-
-class ObjType : public Type, public ANMLContext
-{
-  public:
-    ObjType(const std::string& name,ObjType* parentObjType);
-    virtual ~ObjType();
-    
-    virtual std::string getContextDesc() const { return m_name; }
-
-    virtual ObjType* getParentObjType() const { return m_parentObjType; }
-        
-	virtual bool isPrimitive() const { return false; }
-
-    virtual void toNDDL(std::ostream& os) const;
-    
-  protected:
-    ObjType* m_parentObjType;   	
-};
-
-class VectorType : public ObjType
-{
-  public:
-    VectorType(const std::string& name);
-    
-    virtual void toNDDL(std::ostream& os) const;  
 };
 
 class Action : public ANMLElement, public ANMLContext
@@ -332,13 +344,13 @@ class Action : public ANMLElement, public ANMLContext
     Action(ObjType& objType,const std::string& name,const std::vector<Variable*>& params);
     virtual ~Action();
 
-    virtual std::string getContextDesc() const { return m_objType.getName() + "::" + m_name; }
+    virtual std::string getContextDesc() const { return m_objType.getName() + "::" + m_elementName; }
     
     const std::vector<Variable*> getParams() const { return m_params; }
     
     void setBody(const std::vector<ANMLElement*>& body);
   
-    virtual void toNDDL(std::ostream& os) const;
+    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
         
   protected:
     ObjType& m_objType;
@@ -352,7 +364,7 @@ class ActionDuration : public ANMLElement
     ActionDuration(const std::vector<Expr*>& values);
     virtual ~ActionDuration();
     
-    virtual void toNDDL(std::ostream& os) const;
+    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
     
   protected:  
     std::vector<Expr*> m_values;    	
@@ -365,7 +377,7 @@ class Condition : public ANMLElement
     Condition(const std::vector<Proposition*>& propositions);
     virtual ~Condition();
     
-    virtual void toNDDL(std::ostream& os) const;
+    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
     
   protected:  
     std::vector<Proposition*> m_propositions;    	
@@ -377,7 +389,7 @@ class Effect : public ANMLElement
     Effect(const std::vector<Proposition*>& propositions);
     virtual ~Effect();
     
-    virtual void toNDDL(std::ostream& os) const;
+    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
     
   protected:  
     std::vector<Proposition*> m_propositions;    	
@@ -389,7 +401,7 @@ class Decomposition : public ANMLElement
     Decomposition() : ANMLElement("DECOMPOSITION") {}
     virtual ~Decomposition() {}
     
-    //virtual void toNDDL(std::ostream& os) const;
+    //virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
     
   protected:  
     //std::vector<Proposition*> m_propositions;    	
@@ -401,7 +413,7 @@ class Goal : public ANMLElement
     Goal(const std::vector<Proposition*>& props);
     virtual ~Goal();
     
-    virtual void toNDDL(std::ostream& os) const;
+    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
     
   protected:  
     std::vector<Proposition*> m_propositions;    	
@@ -413,7 +425,7 @@ class Fact : public ANMLElement
     Fact(const std::vector<Proposition*>& props);
     virtual ~Fact();
     
-    virtual void toNDDL(std::ostream& os) const;
+    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
     
   protected:  
     std::vector<Proposition*> m_propositions;    	
@@ -431,7 +443,7 @@ class Proposition : public ANMLElement
     void setContext(Context c) { m_context = c; }
     Context getContext() const { return m_context; }
     
-    virtual void toNDDL(std::ostream& os) const;
+    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
     
   protected:  
     Context m_context;    	
@@ -449,7 +461,7 @@ class Change : public Proposition
     
     void setWhenCondition(Proposition* p) { m_whenCondition = p; }
     
-    virtual void toNDDL(std::ostream& os) const;
+    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
     
   protected:  
     Proposition* m_whenCondition;
@@ -602,13 +614,14 @@ class LHSPlannerConfig : public LHSExpr
     virtual void setArgs(const std::string& predicate,const std::vector<Expr*>& args);
     virtual std::string toString() const  { return "PlannerConfig"; }
     virtual const Type& getDataType() const { return *Type::BOOL; }
-    virtual void toNDDL(std::ostream& os) const;
-    
+    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
+
   protected:
+    mutable bool m_translated;
     Expr* m_startHorizon;
     Expr* m_endHorizon;
     Expr* m_maxSteps;
-    Expr* m_maxDepth;  	  
+    Expr* m_maxDepth;     	
 };
 
 class LHSAction : public LHSExpr

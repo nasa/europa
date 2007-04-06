@@ -81,12 +81,12 @@ void translate(const std::string& filename, antlr::RefAST& ast)
   DumpAST(ast,"");
    
   ANML2NDDL* treeParser = new ANML2NDDL();
-  treeParser->anml(ast);  
+  std::vector<ANML::ANMLElement*> program = treeParser->anml(ast);  
 
   debugMsg("ANMLTest:translator", "Phase 2 complete");
   debugMsg("ANMLTest:translator", "\n" << treeParser->getTranslator().toString());
   
-  treeParser->getTranslator().toNDDL(nddl);  
+  treeParser->getTranslator().toNDDL(program,nddl);  
   delete treeParser;
 }
 
