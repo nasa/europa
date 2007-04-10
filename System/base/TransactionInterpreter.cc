@@ -1686,6 +1686,14 @@ namespace EUROPA {
   		else if (strcmp(relationName,"ends") == 0) {
   			ends("this",name);
   		}   	  		   
+        else if (strcmp(relationName, "paralleled_by") == 0) {
+            relation(precedes, "this", Start, name, Start);
+            relation(precedes, "this", End, name, End);
+        }
+        else if (strcmp(relationName, "parallels") == 0) {
+            relation(precedes, "this", Start, name, Start);
+            relation(precedes, "this", End, name, End);
+        }
   		else if (strcmp(relationName,"ends_after") == 0) {
   			ends_after("this",name);
   		}   	  		   
@@ -1720,7 +1728,7 @@ namespace EUROPA {
   			equals("this",name);
   		}  
   		else {
-  			check_runtime_error(ALWAYS_FAILS,std::string("Unrecognized relation:")+relationName);
+  			check_runtime_error(strcmp(relationName,"any") == 0,std::string("Unrecognized relation:")+relationName);
   		} 	  		   
   		
   		debugMsg("XMLInterpreter:InterpretedRule","Created relation " << relationName << " " << predicateInstance.c_str());
