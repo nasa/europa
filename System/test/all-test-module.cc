@@ -2,7 +2,6 @@
 #include "../../NDDL/test/nddl-test-module.hh"
 #include "../../Utils/test/util-test-module.hh"
 #include "../../Solvers/test/solvers-test-module.hh"
-#include "../../Aver/test/aver-test-module.hh"
 #include "../../ConstraintEngine/test/ce-test-module.hh"
 #include "../../PlanDatabase/test/db-test-module.hh"
 #include "../../Resource/test/rs-test-module.hh"
@@ -18,7 +17,6 @@ void AllModuleTests::runTests() {
   ConstraintEngineModuleTests::runTests("../../ConstraintEngine/test");
  
   // The following cluster of tests can be placed in any order
-  AverModuleTests::runTests("../../Aver/test");
   NDDLModuleTests::runTests("../../NDDL/test"); 
   ResourceModuleTests::runTests("../../Resource/test");
   RulesEngineModuleTests::runTests("../../RulesEngine/test");

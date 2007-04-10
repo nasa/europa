@@ -19,7 +19,6 @@
 
 SchemaId schema;
 const char* initialTransactions = NULL;
-const char* averTestFile = NULL;
 const char* plannerConfig = NULL;
 bool replayRequired = false;
 
@@ -52,7 +51,7 @@ bool runPlanner(){
   doc.LoadFile();
   
 
-  assert(assembly.plan(initialTransactions,*(doc.RootElement()), averTestFile));
+  assert(assembly.plan(initialTransactions,*(doc.RootElement())));
 
   debugMsg("Main:runPlanner", "Found a plan at depth " 
 	   << assembly.getDepthReached() << " after " << assembly.getTotalNodesSearched());
@@ -101,8 +100,7 @@ int internalMain(int argc, const char** argv){
 #define MODEL_INDEX 1
 #define TRANS_INDEX 2
 #define PCONF_INDEX 3
-#define AVER_INDEX 4
-#define ARGC 5
+#define ARGC 4
 
   const char* error_msg;
   void* libHandle;
@@ -111,16 +109,13 @@ int internalMain(int argc, const char** argv){
 
   if(argc != ARGC && argc != ARGC - 1) {
     std::cout << "usage: runProblem <model shared library path>" <<
-      " <initial transaction file> <planner config file> [Aver test file]" << std::endl;
+      " <initial transaction file> <planner config file>" << std::endl;
     return 1;
   }
   
   libPath = argv[MODEL_INDEX];
   initialTransactions = argv[TRANS_INDEX];
   plannerConfig = argv[PCONF_INDEX];
-
-  if(argc == ARGC)
-    averTestFile = argv[AVER_INDEX];
 
   std::cout << "runProblem: p_dlopen() file: " << libPath << std::endl;
   std::cout.flush();
@@ -151,19 +146,15 @@ int internalMain(int argc, const char** argv){
 #else //STANDALONE
 #define TRANS_INDEX 1
 #define PCONF_INDEX 2
-#define AVER_INDEX 3
-#define ARGC 4
+#define ARGC 3
   if(argc != ARGC && argc != ARGC-1) {
     std::cout << "usage: runProblem <initial transaction file> "
-	      << "<planner config> [Aver test file]" << std::endl;
+	      << "<planner config>" << std::endl;
     std::cout << ARGC << " " << argc << std::endl;
     return 1;
   }
   initialTransactions = argv[TRANS_INDEX];
   plannerConfig = argv[PCONF_INDEX];
-
-  if(argc == ARGC)
-    averTestFile = argv[AVER_INDEX];
 
   ASSEMBLY::initialize();
   schema = NDDL::loadSchema();

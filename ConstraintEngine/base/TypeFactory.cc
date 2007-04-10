@@ -110,6 +110,8 @@ namespace EUROPA {
     std::map<double, ConcreteTypeFactoryId >::iterator factories_iter = factories.begin();
     while (factories_iter != factories.end()) {
       ConcreteTypeFactoryId factory = (factories_iter++)->second;
+      debugMsg("TypeFactory:purgeAll",
+	       "Removing factory for " << factory->getTypeName().toString());
       delete (ConcreteTypeFactory *) factory;
     }
     factories.clear();

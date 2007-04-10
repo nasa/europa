@@ -14,7 +14,6 @@ find . \( -name '*.[ao]' -o -name '*.so' -o -name '*_[gop]' -o -name '*_rt' -o -
   include [ FDirName $(SUBDIR) AntlrRules ] ;
   include [ FDirName $(SUBDIR) ModuleRules ] ;
   include [ FDirName $(SUBDIR) NddlRules ] ;
-  include [ FDirName $(SUBDIR) AverRules ] ;
   include [ FDirName $(SUBDIR) SWIGRules ] ;
   include [ FDirName $(SUBDIR) Jamfile ] ;
   PLASMA_READY = TRUE ;

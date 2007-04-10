@@ -50,10 +50,9 @@ SubInclude PLASMA Resource ;
 SubInclude PLASMA NDDL ;
 SubInclude PLASMA ANML ;
 SubInclude PLASMA Solvers ;
-SubInclude PLASMA Aver ;
 SubInclude PLASMA System ;
 SubInclude PLASMA Examples ;
-SubInclude PLASMA DSA ;
+#SubInclude PLASMA DSA ;
 
 RemoveBinaries clean-all ;
 Depends clean-all : clean clean-nddl-xml clean-system-xml ;

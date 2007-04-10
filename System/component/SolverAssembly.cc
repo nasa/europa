@@ -43,8 +43,6 @@
 
 #include <string>
 
-#include "AverInterp.hh"
-
 #define PPW_WITH_PLANNER
 
 namespace EUROPA {
@@ -98,10 +96,10 @@ namespace EUROPA {
     check_error(config != NULL, "Must have a planner config argument.");
     TiXmlDocument doc(config);
     doc.LoadFile();
-    return plan(txSource, *(doc.RootElement()), NULL );
+    return plan(txSource, *(doc.RootElement()));
   }
 
-  bool SolverAssembly::plan(const char* txSource, const TiXmlElement& config, const char* averFile){
+  bool SolverAssembly::plan(const char* txSource, const TiXmlElement& config){
     SOLVERS::SolverId solver = (new SOLVERS::Solver(m_planDatabase, config))->getId();
 
 #ifdef PPW_WITH_PLANNER
@@ -109,11 +107,6 @@ namespace EUROPA {
 #else
     SOLVERS::PlanWriter::PartialPlanWriter ppw(m_planDatabase, m_constraintEngine, m_rulesEngine);
 #endif
-
-    if(averFile != NULL) {
-      AverInterp::init(std::string(averFile), solver, 
-                       m_planDatabase->getConstraintEngine(), m_planDatabase, m_rulesEngine);
-    }
 
     // Now process the transactions
     if(!playTransactions(txSource))
@@ -152,9 +145,6 @@ namespace EUROPA {
     
     m_totalNodes = solver->getStepCount();
     m_finalDepth = solver->getDepth();
-
-    if(averFile != NULL)
-      AverInterp::terminate();
     
     delete (SOLVERS::Solver*) solver;
 

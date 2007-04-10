@@ -44,10 +44,9 @@ namespace EUROPA {
      * @brief Invoke the planner. Calls playTransactions(txSource).
      * @param txSource The source from which we get the initial state
      * @param A solver configuration file
-     * @param An optional aver test file
      * @return True if successfully found a plan. Otherwise false.
      */
-    bool plan(const char* txSource, const TiXmlElement& config, const char* averFile = NULL);
+    bool plan(const char* txSource, const TiXmlElement& config);
 
     const PlanDatabaseId& getPlanDatabase() const;
 

@@ -16,7 +16,6 @@ NddlMain all-module-tests : module-tests.cc
                                            ../../NDDL/test/nddl-test-module.cc
                                            ../../PlanDatabase/test/db-test-module.cc
                                            ../../Solvers/test/solvers-test-module.cc
-                                           ../../Aver/test/aver-test-module.cc
                                            ../../Resource/test/rs-test-module.cc 
                                            ../../RulesEngine/test/re-test-module.cc 
                                            ../../RulesEngine/test/TestRule.cc                                  
@@ -92,10 +91,9 @@ rule RunPlannerProblem {
   Includes $(cc) : $(hh) ;
   Nddl $(hh) $(cc) : $(model) ;
   ModuleObjects $(cc) : NDDL ;
-  #ModuleObjects $(cc) : NDDL Aver ;
 
   # create planner with linked model
-  ModuleMain $(exe) : $(o) runProblem_link_$(PLANNER).o : System Aver ;
+  ModuleMain $(exe) : $(o) runProblem_link_$(PLANNER).o : System ;
   RunModuleMain run-$(exe) : $(exe) : $(xml) $(configurationFile) ;
   #Echo Creating exec target $(exe) run target run-$(exe) ;
 
