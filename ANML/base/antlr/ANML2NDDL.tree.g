@@ -103,10 +103,10 @@ anml_stmt returns [ANML::ANMLElement* element]
     | element=action_def            // <- implicit global object
 ;
 
-declaration returns [ANML::ANMLElement* element]
+declaration[ANML::ObjType* objType=NULL] returns [ANML::ANMLElement* element]
     : element=objtype_decl
     | element=vartype_decl
-    | element=var_obj_declaration
+    | element=var_obj_declaration[objType]
     | (#(FUNCTION IDENT LPAREN)) => element=predicate_declaration
     | element=function_declaration
 ;
@@ -127,7 +127,7 @@ vartype_decl returns [ANML::ANMLElement* element]
 }    
 ;
 
-var_obj_declaration! returns [ANML::ANMLElement* element]
+var_obj_declaration[ANML::ObjType* objType=NULL] returns [ANML::VarDeclaration* element]
 {
 	ANML::Type* type;
 	std::vector<ANML::VarInit*> varInit;
@@ -135,6 +135,8 @@ var_obj_declaration! returns [ANML::ANMLElement* element]
     : #(VARIABLE type=var_type varInit=var_init_list[type])
 {
     element = new ANML::VarDeclaration(*type,varInit);	
+    for (unsigned int i=0; i<varInit.size();i++)
+        varInit[i]->getVar()->setObjType(objType);
 }    
 ;
 
@@ -176,7 +178,7 @@ var_type[const std::string& name=""] returns [ANML::Type* t]
            for (unsigned int i=0; i<vb.size(); i++) {
                vectorType->addVariable(vb[i]);
                std::vector<ANML::VarInit*> init;
-               init.push_back(new ANML::VarInit(vb[i],""));
+               init.push_back(new ANML::VarInit(vb[i],NULL));
                vectorType->addElement(new ANML::VarDeclaration(vb[i]->getDataType(),init));
            }
               
@@ -247,16 +249,17 @@ var_init[ANML::Type* type] returns [ANML::VarInit* vi]
 	std::string name;
 	ANML::Expr* value=NULL;
 }
-    : #(EQUAL name=var_name (value=constant)?)
-	| name=var_name
+    : (
+        #(EQUAL name=var_name (value=constant)?)
+    	| name=var_name
+      )
 {
 	if (value!=NULL && !type->isAssignableFrom(value->getDataType()))
 	       check_runtime_error(ALWAYS_FAIL,"Can't initialize " + type->getName() + " with " + value->getDataType().getName());
 	    
 	ANML::Variable* v = new ANML::Variable(*type,name);
     m_translator.getContext().addVariable(v);
-    // TODO : pass along expr?
-	vi = new ANML::VarInit(v,(value !=NULL ? value->toString() : ""));
+	vi = new ANML::VarInit(v,value);
 }	
 ;
 
@@ -290,15 +293,15 @@ objtype_decl! returns [ANML::ANMLElement* element]
        	newType = m_translator.getContext().addObjType(objtypeName->getText(),parentType);
        	m_translator.pushContext(newType);
       }
-        #(LCURLY (childElement=objtype_body_stmt { newType->addElement(childElement); } )*))
+        #(LCURLY (childElement=objtype_body_stmt[newType] { newType->addElement(childElement); } )*))
       {
       	element = newType;
         m_translator.popContext();      	
       }
 ;
 
-objtype_body_stmt returns [ANML::ANMLElement* element=NULL]
-    : element=declaration
+objtype_body_stmt[ANML::ObjType* objType] returns [ANML::ANMLElement* element]
+    : element=declaration[objType]
     | element=action_def
     | element=transition_constraint
 ;
@@ -364,7 +367,7 @@ condition_proposition_list returns [std::vector<ANML::Proposition*> l]
 ;
 
 // TODO : FROM and FOR branches to be implemented later
-proposition! returns [ANML::Proposition* p;]
+proposition returns [ANML::Proposition* p]
     : p=qualif_fluent
     | #(WHEN { check_runtime_error(ALWAYS_FAIL, "WHEN not supported yet"); } 
         #(LCURLY condition_proposition) #(LCURLY effect_proposition))
@@ -655,7 +658,8 @@ effect_stmt returns [ANML::ANMLElement* element]
          p=effect_proposition { propositions.push_back(p); }
          | propositions=effect_proposition_list))
 {
-    element = new ANML::Effect(propositions);	
+    ANML::Action* parent = static_cast<ANML::Action*>(&(m_translator.getContext()));   
+    element = new ANML::Effect(propositions,parent);	
 }    
 ;
 
@@ -679,10 +683,15 @@ change_proposition returns [ANML::Change* change]
 	ANML::TemporalQualifier* tq;
 	ANML::Fluent* fluent;
     ANML::Proposition* when_condition=NULL;	
+    ANML::Proposition* change_stmt=NULL;	
+    ANML::Action* parent = static_cast<ANML::Action*>(&(m_translator.getContext()));   
 }
     : #(FLUENT tq=temporal_qualif fluent=change_fluent
           {
-              change = new ANML::Change(when_condition,tq,fluent);
+          	  change_stmt = new ANML::Proposition(tq,fluent);
+          	  change_stmt->setParentAction(parent);
+          	  change_stmt->setContext(ANML::Proposition::EFFECT); // TODO??
+              change = new ANML::Change(when_condition,change_stmt);
           }
       )
     | #(WHEN when_condition=condition_proposition change=change_proposition
@@ -882,8 +891,9 @@ qualified_var_name [ANML::ANMLContext& context,const std::string& path, bool onl
           	ANML::Action* a;
           	
           	newPath = (path=="" ? s : path+"."+s); 
-            if ((v=context.getVariable(s)) != NULL) 
+            if ((v=context.getVariable(s)) != NULL) {
                 expr = new ANML::LHSVariable(v,newPath);                
+            }
             else if (onlyVarAllowed) {
                 check_runtime_error(ALWAYS_FAIL,"Variable " + s + " has not been defined in " + context.getContextDesc());  	
             }

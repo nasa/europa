@@ -99,9 +99,10 @@ class ANMLElement
     virtual const std::string& getElementName() const { return m_elementName; }
     virtual void setName(const std::string& n) { m_elementName = n; }
     
-    virtual void preProcess() {}
-    virtual bool validate(std::vector<std::string>& problems) { return true; }
-    virtual void toNDDL(ANMLContext& context,std::ostream& os) const;
+    // Steps to support translation
+    virtual void preProcess (ANMLContext& context) {}
+    virtual bool validate   (ANMLContext& context,std::vector<std::string>& problems) { return true; }
+    virtual void toNDDL     (ANMLContext& context,std::ostream& os) const;
 
     virtual std::string toString() const;
     
@@ -118,14 +119,43 @@ class ANMLElementList : public ANMLElement
     void addElement(ANMLElement* e) { m_elements.push_back(e); }
     const std::vector<ANMLElement*>& getElements() const { return m_elements; }
     
-    virtual void toNDDL(ANMLContext& context,std::ostream& os) const
-    {
-    	for (unsigned int i=0;i<m_elements.size();i++)
-    	    m_elements[i]->toNDDL(context,os);
-    }
+    virtual void preProcess (ANMLContext& context);
+    virtual bool validate(ANMLContext& context,std::vector<std::string>& problems);
+    virtual void toNDDL(ANMLContext& context,std::ostream& os) const;
     
   protected:
     std::vector<ANMLElement*> m_elements;  	
+};
+
+// Class used to keep track of all elements needed to translate relational fluents that may appear in 
+// conditions or effects
+class ExplanatoryAction
+{
+  public:
+    ExplanatoryAction(Action* a,TemporalQualifier* tq) : m_action(a), m_tq(tq) {}
+
+    const Action* getAction() const { return m_action; }
+    const TemporalQualifier* getTemporalQualifer() const { return m_tq; }
+     
+  protected:
+    Action* m_action;
+    TemporalQualifier* m_tq;
+};
+
+class ValueSetter
+{
+  public: 
+    ValueSetter(int idx);
+    virtual ~ValueSetter();
+    
+    const std::string& getName() const { return m_name; }
+    void addExplanatoryAction(Action* a,TemporalQualifier* tq);
+    
+    void toNDDL(ANMLContext& context,std::ostream& os,const std::string& typeName) const;
+  
+  protected:
+    std::string m_name;
+    std::vector<ExplanatoryAction> m_explanatoryActions;  
 };
 
 class Type 
@@ -143,7 +173,10 @@ class Type
 	
 	virtual bool isAssignableFrom(const Type& rhs) const { return getName() == rhs.getName(); }
 	    
-    virtual void toNDDL(ANMLContext& context,std::ostream& os) const { os << getName(); }
+    virtual void toNDDL(ANMLContext& context,std::ostream& os) const;
+    
+    virtual ValueSetter* getValueSetter(const std::string& objtypeName,const std::string& varName);
+    virtual const std::string& getValueSetterName(const std::string& objtypeName,const std::string& varName); 
     
     static Type* VOID;    
     static Type* BOOL;    
@@ -154,6 +187,8 @@ class Type
     
   protected:
     std::string m_typeName;     
+    std::vector<ValueSetter*> m_valueSetters;
+    std::map<std::string,ValueSetter*> m_valueSettersByKey;
 };
 
 class TypeAlias : public Type
@@ -269,6 +304,9 @@ class Variable
     
     const std::string& getName() const { return m_name; }
 
+    const ObjType* getObjType() const { return m_objType; }
+    void setObjType(const ObjType* ot) { m_objType = ot; }
+    
     const Type& getDataType() const { return m_dataType; }
     const std::vector<Arg*>& getArgs() const { return m_args; }
     
@@ -276,6 +314,7 @@ class Variable
     
   protected:
     std::string m_name;
+    const ObjType* m_objType; // this is != NULL iif the variable is an ObjType member
 	const Type& m_dataType;
 	std::vector<Arg*> m_args;
 };
@@ -283,18 +322,19 @@ class Variable
 class VarInit
 {
   public:
-      VarInit(const Variable* v, const std::string& value)
+      VarInit(Variable* v, const Expr* value)
           : m_var(v)
           , m_value(value)
       {
       }
       
+      Variable* getVar() { return m_var; }
       const std::string& getName() const { return m_var->getName(); }
-      const std::string& getValue() const { return m_value; }
+      const std::string getValue() const;
       
   protected:
-      const Variable* m_var;
-      std::string m_value;	
+      Variable* m_var;
+      const Expr* m_value;	
 };
     
 class TypeDefinition : public ANMLElement
@@ -338,12 +378,14 @@ class FreeVarDeclaration : public ANMLElement
 	std::vector<Variable*> m_vars;    
 };
 
-class Action : public ANMLElement, public ANMLContext
+class Action : public ANMLContext, public ANMLElementList
 {
   public:
     Action(ObjType& objType,const std::string& name,const std::vector<Variable*>& params);
     virtual ~Action();
 
+    const std::string& getName() const { return m_name; }
+    
     virtual std::string getContextDesc() const { return m_objType.getName() + "::" + m_elementName; }
     
     const std::vector<Variable*> getParams() const { return m_params; }
@@ -353,9 +395,9 @@ class Action : public ANMLElement, public ANMLContext
     virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
         
   protected:
+    std::string m_name;
     ObjType& m_objType;
     std::vector<Variable*> m_params;
-    std::vector<ANMLElement*> m_body;
 };
 
 class ActionDuration : public ANMLElement
@@ -370,68 +412,8 @@ class ActionDuration : public ANMLElement
     std::vector<Expr*> m_values;    	
 };
 
-// TODO: Condition and effect must be same class, or have a common parent that incorporates functionality
-class Condition : public ANMLElement
-{
-  public:
-    Condition(const std::vector<Proposition*>& propositions);
-    virtual ~Condition();
-    
-    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
-    
-  protected:  
-    std::vector<Proposition*> m_propositions;    	
-};
 
-class Effect : public ANMLElement
-{
-  public:
-    Effect(const std::vector<Proposition*>& propositions);
-    virtual ~Effect();
-    
-    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
-    
-  protected:  
-    std::vector<Proposition*> m_propositions;    	
-};
-
-class Decomposition : public ANMLElement
-{
-  public:
-    Decomposition() : ANMLElement("DECOMPOSITION") {}
-    virtual ~Decomposition() {}
-    
-    //virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
-    
-  protected:  
-    //std::vector<Proposition*> m_propositions;    	
-};
-
-class Goal : public ANMLElement
-{
-  public:
-    Goal(const std::vector<Proposition*>& props);
-    virtual ~Goal();
-    
-    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
-    
-  protected:  
-    std::vector<Proposition*> m_propositions;    	
-};
-
-class Fact : public ANMLElement
-{
-  public:
-    Fact(const std::vector<Proposition*>& props);
-    virtual ~Fact();
-    
-    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
-    
-  protected:  
-    std::vector<Proposition*> m_propositions;    	
-};
-
-class Proposition : public ANMLElement
+class Proposition 
 {
   public:
     enum Context {GOAL,CONDITION,FACT,EFFECT};
@@ -440,23 +422,85 @@ class Proposition : public ANMLElement
     Proposition(TemporalQualifier* tq,const std::vector<Fluent*>& fluents);
     virtual ~Proposition();
     
+    Action* getParentAction() { return m_parentAction; }
+    void setParentAction(Action* parent) { m_parentAction = parent; }
+    
+    TemporalQualifier* getTemporalQualifier() { return m_temporalQualifier; }
+    
     void setContext(Context c) { m_context = c; }
     Context getContext() const { return m_context; }
     
+    virtual void preProcess(ANMLContext& context);
+    virtual bool validate(ANMLContext& context,std::vector<std::string>& problems);
     virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
     
   protected:  
     Context m_context;    	
     TemporalQualifier* m_temporalQualifier;
     std::vector<Fluent*> m_fluents;
+    Action* m_parentAction;
     
     void commonInit();    
 };
 
-class Change : public Proposition
+class PropositionSet : public ANMLElement
 {
   public:
-    Change(Proposition* when_condition,TemporalQualifier* tq,Fluent* f);
+    PropositionSet(const std::vector<Proposition*>& propositions, Action* parent,Proposition::Context context,const std::string& type);
+    virtual ~PropositionSet();
+    
+    virtual void preProcess (ANMLContext& context);
+    virtual bool validate(ANMLContext& context,std::vector<std::string>& problems);
+    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
+    
+  protected:  
+    std::vector<Proposition*> m_propositions;    	
+};
+
+class Condition : public PropositionSet
+{
+  public:
+    Condition(const std::vector<Proposition*>& propositions);
+    virtual ~Condition();
+};
+
+class Effect : public PropositionSet
+{
+  public:
+    Effect(const std::vector<Proposition*>& propositions,Action* parentAction);
+    virtual ~Effect();
+};
+
+class Decomposition : public ANMLElement
+{
+  public:
+    Decomposition();
+    virtual ~Decomposition();
+    
+    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
+    
+  protected:  
+    //std::vector<Proposition*> m_propositions;    	
+};
+
+class Goal : public PropositionSet
+{
+  public:
+    Goal(const std::vector<Proposition*>& props);
+    virtual ~Goal();
+};
+
+class Fact : public PropositionSet
+{
+  public:
+    Fact(const std::vector<Proposition*>& props);
+    virtual ~Fact();
+};
+
+class Change : public ANMLElement
+{
+  public:
+    Change(Proposition* when_condition,Proposition* change_stmt);
     virtual ~Change();
     
     void setWhenCondition(Proposition* p) { m_whenCondition = p; }
@@ -465,6 +509,7 @@ class Change : public Proposition
     
   protected:  
     Proposition* m_whenCondition;
+    Proposition* m_changeStmt;
 };
 
 class PropositionComponent
@@ -499,7 +544,10 @@ class Fluent : public PropositionComponent
     Fluent() {}
     virtual ~Fluent() {}
     
+    virtual void preProcess(ANMLContext& context) {}
+    virtual bool validate(ANMLContext& context,std::vector<std::string>& problems) { return true; }
     virtual void toNDDL(std::ostream& os, TemporalQualifier* tq) const = 0;
+    virtual std::string toString() const = 0;
 };
 
 class Constraint : public Fluent
@@ -509,6 +557,8 @@ class Constraint : public Fluent
     virtual ~Constraint();
     
     virtual void toNDDL(std::ostream& os, TemporalQualifier* tq) const;
+
+    virtual std::string toString() const { return m_name; }
     
   protected:
     std::string m_name;    
@@ -522,6 +572,8 @@ class CompositeFluent : public Fluent
     virtual ~CompositeFluent() {}
     
     virtual void toNDDL(std::ostream& os, TemporalQualifier* tq) const { os << m_op; }
+
+    virtual std::string toString() const;
     
   protected:
     std::string m_op;
@@ -535,7 +587,10 @@ class RelationalFluent : public Fluent
     RelationalFluent(LHSExpr* lhs,Expr* rhs);
     virtual ~RelationalFluent();
     
+    virtual void preProcess(ANMLContext& context);    
     virtual void toNDDL(std::ostream& os, TemporalQualifier* tq) const;
+    
+    virtual std::string toString() const;
     
   protected:  
     LHSExpr* m_lhs;
@@ -550,11 +605,14 @@ class ResourceChangeFluent : public Fluent
 
     virtual void toNDDL(std::ostream& os, TemporalQualifier* tq) const;
 
+    virtual std::string toString() const;
+
   protected:
 	std::string m_op;
 	Expr* m_var;
 	Expr* m_qty;      
 };
+
 
 class TransitionChangeFluent : public Fluent
 {
@@ -564,6 +622,8 @@ class TransitionChangeFluent : public Fluent
 
     virtual void toNDDL(std::ostream& os, TemporalQualifier* tq) const;
     
+    virtual std::string toString() const;
+
   protected:    
     Expr* m_var;
 	std::vector<Expr*> m_states;
@@ -598,6 +658,9 @@ class LHSExpr : public Expr
     LHSExpr() {}
     virtual ~LHSExpr() {}
         
+    virtual bool isVariableExpr() const=0;
+    virtual const Variable* getVariable() const=0;
+        
     virtual void setArgs(const std::vector<Expr*>& args) { m_args = args; }
     virtual const std::vector<Expr*>& getArgs() const { return m_args; } 
     
@@ -611,6 +674,9 @@ class LHSPlannerConfig : public LHSExpr
 	LHSPlannerConfig();
 	virtual ~LHSPlannerConfig();
 	
+    virtual bool isVariableExpr() const { return true; }
+    virtual const Variable* getVariable() const { return NULL; } // TODO: throw exception
+
     virtual void setArgs(const std::string& predicate,const std::vector<Expr*>& args);
     virtual std::string toString() const  { return "PlannerConfig"; }
     virtual const Type& getDataType() const { return *Type::BOOL; }
@@ -630,6 +696,9 @@ class LHSAction : public LHSExpr
 	LHSAction(Action* a,const std::string& path) : m_action(a), m_path(path) {}
 	virtual ~LHSAction() {}
 	
+    virtual bool isVariableExpr() const { return false; }
+    virtual const Variable* getVariable() const { return NULL; } // TODO: throw exception
+    
     virtual const Type& getDataType() const { return *Type::VOID; }
     virtual std::string toString() const  { return m_path; }
     
@@ -648,6 +717,9 @@ class LHSVariable : public LHSExpr
 	LHSVariable(Variable* v,const std::string& path) : m_var(v), m_path(path) {}
 	virtual ~LHSVariable() {}
 	
+    virtual bool isVariableExpr() const { return true; }
+    virtual const Variable* getVariable() const { return m_var; } 
+
     virtual const Type& getDataType() const { return m_var->getDataType(); }
     virtual std::string toString() const  { return m_path; }
     virtual void toNDDLasRHS(std::ostream& os,

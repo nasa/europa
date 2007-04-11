@@ -1,6 +1,7 @@
 #include "ANMLTranslator.hh"
 
 #include "Debug.hh"
+#include "LabelStr.hh"
 
 #include <sstream>
 
@@ -99,11 +100,11 @@ namespace ANML
     void ANMLTranslator::toNDDL(std::vector<ANML::ANMLElement*>& program, std::ostream& os) const
     {
     	for (unsigned int i=0; i<program.size(); i++) 
-    	    program[i]->preProcess();
+    	    program[i]->preProcess(*m_context);
 
         std::vector<std::string> problems;
     	for (unsigned int i=0; i<program.size(); i++) 
-    	    program[i]->validate(problems);
+    	    program[i]->validate(*m_context,problems);
         
         if (problems.size() == 0) {    	        	
         	m_plannerConfig->toNDDL(*m_context,os);    	
@@ -152,7 +153,7 @@ namespace ANML
     void ANMLContext::addType(Type* type)
     {
     	m_types[type->getName()] = type;
-    	debugMsg("ANMLContext",getContextDesc() << " Added type:" << type->getName());
+    	debugMsg("ANML:ANMLContext",getContextDesc() << " Added type:" << type->getName());
     }
 	
 	Type* ANMLContext::getType(const std::string& name,bool mustExist) const
@@ -182,10 +183,10 @@ namespace ANML
 		
 	void ANMLContext::addAction(Action* a)
 	{
-		// TODO: check name against functions as well?
-		// TODO: warn if it hides an element in a parent context?
-    	check_runtime_error(getAction(a->getElementName()) == NULL,"Action "+a->getElementName()+" already defined");
-		m_actions[a->getElementName()] = a;
+    	check_runtime_error(getAction(a->getName()) == NULL,"Action "+a->getName()+" already defined");
+    	check_runtime_error(getVariable(a->getName()) == NULL,"Variable "+a->getName()+" already defined, can't define an Action with the same name");
+		m_actions[a->getName()] = a;
+    	debugMsg("ANML:ANMLContext",getContextDesc() << " Added action:" << a->getName());		
 	}
 	
 	Action* ANMLContext::getAction(const std::string& name,bool mustExist) const
@@ -206,11 +207,10 @@ namespace ANML
 	
 	void ANMLContext::addVariable(Variable* v)
 	{
-		// TODO: check name against actions as well?
-		// TODO: warn if it hides an element in a parent context?
     	check_runtime_error(getVariable(v->getName()) == NULL,"Variable "+v->getName()+" already defined");
+    	check_runtime_error(getAction(v->getName()) == NULL,"Action "+v->getName()+" already defined, can't define a Variable with the same name");
 		m_variables[v->getName()] = v;
-    	debugMsg("ANMLContext",getContextDesc() << " Added variable:" << v->getName());		
+    	debugMsg("ANML:ANMLContext",getContextDesc() << " Added variable:" << v->getName());		
 	}
 	
 	Variable* ANMLContext::getVariable(const std::string& name,bool mustExist) const
@@ -246,7 +246,7 @@ namespace ANML
     	std::string key = makeKey(c->getName(),c->getArgTypes());
     	check_runtime_error(getConstraint(c->getName(),c->getArgTypes()) == NULL,"Constraint "+key+" already defined");
     	m_constraints[key] = c;
-    	debugMsg("ANMLContext",getContextDesc() << " Added Constraint " << key);
+    	debugMsg("ANML:ANMLContext",getContextDesc() << " Added Constraint " << key);
     }
     
     ConstraintDef* ANMLContext::getConstraint(const std::string& name,const std::vector<const Type*>& argTypes,bool mustExist) const
@@ -291,6 +291,83 @@ namespace ANML
     	return os.str(); 
     }
     
+    void ANMLElementList::preProcess(ANMLContext& context)
+    {
+    	for (unsigned int i=0;i<m_elements.size();i++) {
+    	    m_elements[i]->preProcess(context);
+    	    debugMsg("ANML:ANMLElementList", getElementType() << "::" << getElementName() << " preProcessed " 
+    	        << m_elements[i]->getElementType() << m_elements[i]->getElementName());    
+        }
+    }
+    
+    bool ANMLElementList::validate(ANMLContext& context,std::vector<std::string>& problems)
+    {   
+    	for (unsigned int i=0;i<m_elements.size();i++) {
+    	    if (!m_elements[i]->validate(context,problems))
+    	        return false;
+    	    
+    	    debugMsg("ANML:ANMLElementList", getElementType() << "::" << getElementName() << " validated " 
+    	        << m_elements[i]->getElementType() << m_elements[i]->getElementName());    
+    	}
+    	    
+    	return true;
+    }
+
+    void ANMLElementList::toNDDL(ANMLContext& context,std::ostream& os) const
+    {
+    	for (unsigned int i=0;i<m_elements.size();i++)
+    	    m_elements[i]->toNDDL(context,os);
+    }
+
+    std::string defaultValueSetterName="setValue";
+        
+    std::string makeValueSetterName(int idx)
+    {
+    	std::ostringstream os;
+    	os << defaultValueSetterName << "_" << idx;
+    	
+    	return os.str();
+    }
+        
+    ValueSetter::ValueSetter(int idx)
+        : m_name(makeValueSetterName(idx))
+    {
+    }
+    
+    ValueSetter::~ValueSetter()
+    {
+    }
+    
+    void ValueSetter::addExplanatoryAction(Action* a,TemporalQualifier* tq)
+    {
+    	check_error(a != NULL, "Explanatory Action can't be NULL");
+    	m_explanatoryActions.push_back(ExplanatoryAction(a,tq));
+    	ExplanatoryAction& ea = m_explanatoryActions[m_explanatoryActions.size()-1];
+    	debugMsg("ANML:ValueSetter","added ExplanatoryAction:" << ea.getAction()->getName());
+    }
+    
+    void ValueSetter::toNDDL(ANMLContext& context,std::ostream& os,const std::string& typeName) const
+    {
+    	check_runtime_error(m_explanatoryActions.size() >= 1,"Must not generate setter if there are no actions that can cause it");
+    	
+    	// TODO: generate comment with objType::varName
+    	os << "// ValueSetter for TODO:objType::varName" << std::endl
+           << typeName << "::" << getName() << std::endl
+           << "{" << std::endl
+           // TODO: if there is only one action don't generate disjunction
+           << "    int option = [1 " << m_explanatoryActions.size() << "];" << std::endl;
+        
+        for (unsigned int i=0;i<m_explanatoryActions.size();i++) {
+        	// TODO: generate obj parameter in predicate declaration
+        	// TODO: generate appropriate operator depending on temporal qualifier
+        	os << "    if (option == " << (i+1) << ") {" << std::endl
+        	   << "        met_by(obj." << m_explanatoryActions[i].getAction()->getName() << ");" << std::endl
+        	   << "    }" << std::endl;
+        }
+        
+        os << "}" << std::endl << std::endl;
+    }
+    
     Type* Type::VOID   = new Type("void");
     Type* Type::BOOL   = new Type("bool");
     Type* Type::INT    = new Type("int");
@@ -311,7 +388,48 @@ namespace ANML
 	{
 		check_runtime_error(ALWAYS_FAIL,m_typeName + " can't become a resource type");
 	}
+	
+	std::string makeValueSetterKey(const std::string& objTypeName,const std::string& varName)
+	{
+		return objTypeName+"::"+varName;
+	}
+	    
+    ValueSetter* Type::getValueSetter(const std::string& objTypeName,const std::string& varName)
+    {    	
+    	std::string key = makeValueSetterKey(objTypeName,varName);
+    	std::map<std::string,ValueSetter*>::iterator it = m_valueSettersByKey.find(key);
+    	
+    	if (it != m_valueSettersByKey.end()) {
+    		return it->second;
+    	}
+    	else {
+        	ValueSetter* retval = new ValueSetter(m_valueSetters.size()+1);
+        	m_valueSetters.push_back(retval);
+        	m_valueSettersByKey[key] = retval;
+        	debugMsg("ANML:Type","Added value setter " << key << " to " << getName());    	
+            return retval;
+    	}
+    }
+    
+    const std::string& Type::getValueSetterName(const std::string& objTypeName,const std::string& varName)
+    {
+    	std::string key = makeValueSetterKey(objTypeName,varName);
+    	std::map<std::string,ValueSetter*>::iterator it = m_valueSettersByKey.find(key);
+    	
+    	if (it != m_valueSettersByKey.end()) {
+    		return it->second->getName();
+    	}
+    	else {
+    		return defaultValueSetterName;
+    	}
+    }	
 	        
+    void Type::toNDDL(ANMLContext& context,std::ostream& os) const 
+    { 
+    	for (unsigned int i=0;i<m_valueSetters.size();i++)    	
+    	    m_valueSetters[i]->toNDDL(context,os,getName()); 
+    }
+   
     std::string autoIdentifier(const char* base)
     {
     	static int cnt=0;
@@ -373,8 +491,10 @@ namespace ANML
     		   << "}" << std::endl << std::endl;    		
     	}
     	else {
+    		// TODO: this isn't right, still need to generate Timeline
             os << "typedef " << m_dataType.getName() << " [" << m_lb << " " << m_ub <<  "] " << getName() << ";"<< std::endl << std::endl;
-    	}
+            // TODO: Type::toNDDL(context,os);                                
+    	}      
     }
     
 	Enumeration::Enumeration(const std::string& name,const Type& dataType,const std::vector<Expr*>& values)
@@ -382,7 +502,6 @@ namespace ANML
 	    , m_dataType(dataType)
 	    , m_values(values)
 	{
-		// TODO: convert lb,ub to typed values
 	}
 	
 	Enumeration::~Enumeration()
@@ -406,7 +525,9 @@ namespace ANML
         os << "    predicate setValue { " << getName() << "Enum value; }" << std::endl;     
         os << "}" << std::endl << std::endl;
         
-        os << getName() << "::setValue {}" << std::endl << std::endl;                                
+        os << getName() << "::setValue {}" << std::endl << std::endl;
+        
+        Type::toNDDL(context,os);                                
     }
     
     ObjType::ObjType(const std::string& name,ObjType* parentObjType)
@@ -433,7 +554,7 @@ namespace ANML
         for (unsigned int i=0; i<m_elements.size(); i++) {
     	    if (m_elements[i]->getElementType() == "ACTION") {
     	    	Action* a = (Action*) m_elements[i];
-    	    	os << "    predicate " << a->getElementName() << " {";
+    	    	os << "    predicate " << a->getName() << " {";
     	    	
     	    	const std::vector<Variable*> params = a->getParams();
                 for (unsigned int j=0; j<params.size(); j++) {
@@ -471,7 +592,9 @@ namespace ANML
         for (unsigned int i=0; i<m_elements.size(); i++) {
     	    if (m_elements[i]->getElementType() != "VAR_DECLARATION") 
     	        m_elements[i]->toNDDL(context,os);
-        }    	     
+        }   
+        
+        Type::toNDDL(context,os); 	     
     }
  
     VectorType::VectorType(const std::string& name)
@@ -523,7 +646,9 @@ namespace ANML
     	    }
         }
         
-        os << "}" << std::endl << std::endl;                         
+        os << "}" << std::endl << std::endl;        
+        
+        Type::toNDDL(context,os);                                                         
     }
     
     Variable::Variable(const Type& dataType, const std::string& name)
@@ -546,6 +671,11 @@ namespace ANML
     void Variable::toNDDL(ANMLContext& context, std::ostream& os) const
     {
     	os << m_dataType.getName() << " " << m_name;
+    }
+    
+    const std::string VarInit::getValue() const 
+    { 
+    	return (m_value != NULL ? m_value->toString() : ""); 
     }
     
     VarDeclaration::VarDeclaration(const Type& type, const std::vector<VarInit*>& init)
@@ -595,10 +725,11 @@ namespace ANML
     }
     
     Action::Action(ObjType& objType,const std::string& name, const std::vector<Variable*>& params)
-        : ANMLElement("ACTION",name)
+        : m_name(name) 
         , m_objType(objType)        
         , m_params(params)
     {
+    	m_elementType="ACTION";
     }
     
     Action::~Action()
@@ -607,17 +738,18 @@ namespace ANML
     
     void Action::setBody(const std::vector<ANMLElement*>& body)
     {
-    	m_body = body;
+    	for (unsigned int i=0;i<body.size();i++)
+    	    addElement(body[i]);
     }
     
     void Action::toNDDL(ANMLContext& context, std::ostream& os) const
     {
-    	os << m_objType.getName() << "::" << getElementName() << std::endl;
+    	os << m_objType.getName() << "::" << getName() << std::endl;
 
     	os << "{" << std::endl;
-        for (unsigned int i=0; i<m_body.size(); i++) {
-    		debugMsg("ANMLContext", "Action::toNDDL " << i << " " << m_body[i]->getElementType()); 
-        	m_body[i]->toNDDL(context,os);
+        for (unsigned int i=0; i<m_elements.size(); i++) {
+    		debugMsg("ANML:Action", getName() << " Action::toNDDL " << i << " " << m_elements[i]->getElementType()); 
+        	m_elements[i]->toNDDL(context,os);
         }    	
     	os << "}" << std::endl << std::endl;
     }
@@ -673,32 +805,37 @@ namespace ANML
      
     void TemporalQualifier::toNDDL(std::ostream& os, const std::string& ident,const std::string& fluentName) const 
     { 
+  		// TODO: determine context for all time points, eval expr if necessary
+
     	if (m_operator == "at") {
     		const std::string& timePoint = m_argValues[0];
-    		// TODO: determine context for timePoint, eval expr if necessary
     		os << ident << "leq(" << fluentName << ".start," << timePoint << ");" << std::endl;
     		os << ident << "leq(" << timePoint << "," << fluentName << ".end);"<< std::endl;    		
     	}
     	else if (m_operator == "over") {
     		const std::string& lb = m_argValues[0];
     		const std::string& ub = m_argValues[1];
-    		// TODO: determine context for time points, eval expr if necessary
     		os << ident << "leq(" << fluentName << ".start," << lb << ");" << std::endl;
     		os << ident << "leq(" << ub << "," << fluentName << ".end);" << std::endl;    		                		
     	}
     	else if (m_operator == "in") {
-    		// TODO: implement this
+    		const std::string& lb = m_argValues[0];
+    		const std::string& ub = m_argValues[1];
+    		os << ident << "leq(" << lb << "," << fluentName << ".start);" << std::endl;
+    		os << ident << "leq(" << fluentName << ".end," << ub << ");" << std::endl;    		                		
     	}
     	else if (m_operator == "after") {
-    		// TODO: implement this
+    		const std::string& timePoint = m_argValues[0];
+    		os << ident << "leq(" << timePoint << "," << fluentName << ".start);" << std::endl;
     	}
     	else if (m_operator == "before") {
     		const std::string& timePoint = m_argValues[0];
-    		// TODO: determine context for timePoint, eval expr if necessary
     		os << ident << "leq(" << fluentName << ".end," << timePoint << ");" << std::endl;
     	}
     	else if (m_operator == "contains") {
-    		// TODO: implement this
+    		const std::string& timePoint = m_argValues[0];
+    		os << ident << "leq(" << fluentName << ".start," << timePoint << ");" << std::endl;
+    		os << ident << "leq(" << timePoint << "," << fluentName << ".end);" << std::endl;
     	}
     	
     	os << std::endl;
@@ -708,13 +845,40 @@ namespace ANML
         : m_lhs(lhs)
         , m_rhs(rhs) 
     {
-    	debugMsg("ANMLContext","Created RelationalExpr : " << lhs->toString() << " = " << (rhs != NULL ? rhs->toString() : "NULL"));
+    	debugMsg("ANML:RelationalFluent","Created " << toString());
     }
     
     RelationalFluent::~RelationalFluent() 
     {
     }
-        
+     
+    void RelationalFluent::preProcess(ANMLContext& context) 
+    {
+    	// TODO: make sure nddl for Functions and Predicates is generated so that this doesn't break    	
+    	
+    	if (m_parentProp->getContext() == Proposition::EFFECT &&
+    	    m_lhs->isVariableExpr()) {
+    	    	
+        	Type* t = context.getType(m_lhs->getDataType().getName(),true);
+        	// TODO: capture varName when lhs is parsed
+        	EUROPA::LabelStr ls(m_lhs->toString());
+    	    unsigned int cnt = ls.countElements(".");
+    	    EUROPA::LabelStr varName = ls.getElement(cnt-1,".");
+    	    
+    	    ValueSetter* vs = t->getValueSetter(m_lhs->getVariable()->getObjType()->getName(),varName.toString());
+    	    vs->addExplanatoryAction(m_parentProp->getParentAction(),m_parentProp->getTemporalQualifier());
+    	}
+    	
+    	// TODO: do we need to do anything else for GOAL, FACT or CONDITION?
+    	// TODO: how do we generate termination axioms??
+    	// TODO: ValueSetter::toNDDL must take the value as a parameter and generate the set of explanatory axioms
+    	// with the appropriate temporal qualifiers
+    	
+    	// TODO: need to eliminate copiers, only setValue can be used
+    	debugMsg("ANML:RelationalFluent","preProcessed " << toString());
+    }
+    
+    // TODO: temporal qualifier should not be passed in a parameter, fluent can go to the parent proposition for it    
     void RelationalFluent::toNDDL(std::ostream& os, TemporalQualifier* tq) const 
     {
     	if (m_lhs->toString() == "PlannerConfig")
@@ -738,6 +902,19 @@ namespace ANML
    		tq->toNDDL(os,ident,tokenName);    	     
     }    
     
+    std::string RelationalFluent::toString() const
+    {
+    	std::ostringstream os;
+    	
+    	os << "RelationalFluent : " << m_lhs->toString() << (m_rhs != NULL ? "=" + m_rhs->toString() : "");
+    	
+    	return os.str();
+    }
+    
+    std::string CompositeFluent::toString() const { return m_op + " " + m_lhs->toString() + " " + m_rhs->toString(); }
+    std::string TransitionChangeFluent::toString() const { return "transition change : " + m_var->toString(); }
+    std::string ResourceChangeFluent::toString() const { return m_op + " " + m_var->toString() + " " + m_qty->toString(); }
+            
     Constraint::Constraint(const std::string& name,const std::vector<ANML::Expr*>& args) 
         : m_name(name)
         , m_args(args)
@@ -763,94 +940,65 @@ namespace ANML
     }
 
     Condition::Condition(const std::vector<Proposition*>& propositions) 
-        : ANMLElement("CONDITION")
-        , m_propositions(propositions) 
+        : PropositionSet(propositions,NULL,Proposition::CONDITION,"CONDITION")
     {
-    	for (unsigned int i=0;i<m_propositions.size();i++) 
-    		m_propositions[i]->setContext(Proposition::CONDITION);
     }
     
     Condition::~Condition() 
     {
     }
     
-    void Condition::toNDDL(ANMLContext& context, std::ostream& os) const 
-    { 
-    	os << "    // Condition start" << std::endl;
-    	for (unsigned int i=0; i<m_propositions.size(); i++) {
-    		m_propositions[i]->toNDDL(context,os);
-    	}
-    	os << "    // Condition end" << std::endl << std::endl;
-    }
-    
-    Effect::Effect(const std::vector<Proposition*>& propositions) 
-        : ANMLElement("EFFECT")
-        , m_propositions(propositions) 
+    Effect::Effect(const std::vector<Proposition*>& propositions,Action* parentAction) 
+        : PropositionSet(propositions,parentAction,Proposition::EFFECT,"EFFECT")
     {
-    	for (unsigned int i=0;i<m_propositions.size();i++) 
-    		m_propositions[i]->setContext(Proposition::EFFECT);
     }
     
     Effect::~Effect() 
     {
     }
     
-    void Effect::toNDDL(ANMLContext& context, std::ostream& os) const 
-    { 
-    	os << "    // Effect start" << std::endl;
-    	for (unsigned int i=0; i<m_propositions.size(); i++) {
-    		m_propositions[i]->toNDDL(context,os);
-    	}
-    	os << "    // Effect end" << std::endl << std::endl;
+    Decomposition::Decomposition() 
+        : ANMLElement("DECOMPOSITION") 
+    {
+    }
+    
+    Decomposition::~Decomposition() 
+    {
+    }    
+    
+    void Decomposition::toNDDL(ANMLContext& context, std::ostream& os) const
+    {
+    	// TODO: implement this
+    	os << "    // TODO!: Decompositions not handled yet" << std::endl;
     }
     
     Goal::Goal(const std::vector<Proposition*>& propositions) 
-        : ANMLElement("GOAL")
-        , m_propositions(propositions) 
+        : PropositionSet(propositions,NULL,Proposition::GOAL,"GOAL")
     {
-    	for (unsigned int i=0;i<m_propositions.size();i++) 
-    		m_propositions[i]->setContext(Proposition::GOAL);
     }
     
     Goal::~Goal() 
     {
     }
     
-    void Goal::toNDDL(ANMLContext& context, std::ostream& os) const 
-    { 
-    	for (unsigned int i=0; i<m_propositions.size(); i++) 
-    		m_propositions[i]->toNDDL(context,os);
-    }
-    
     Fact::Fact(const std::vector<Proposition*>& propositions) 
-        : ANMLElement("FACT")
-        , m_propositions(propositions) 
+        : PropositionSet(propositions,NULL,Proposition::FACT,"FACT")
     {
-    	for (unsigned int i=0;i<m_propositions.size();i++) 
-    		m_propositions[i]->setContext(Proposition::FACT);
     }
     
     Fact::~Fact() 
     {
     }
     
-    void Fact::toNDDL(ANMLContext& context, std::ostream& os) const 
-    { 
-    	for (unsigned int i=0; i<m_propositions.size(); i++) 
-    		m_propositions[i]->toNDDL(context,os);
-    }
-    
     Proposition::Proposition(TemporalQualifier* tq,Fluent* f) 
-       : ANMLElement("PROPOSITION")
-       , m_temporalQualifier(tq)
+       : m_temporalQualifier(tq)
     {
     	m_fluents.push_back(f);
     	commonInit();
     }
     
     Proposition::Proposition(TemporalQualifier* tq,const std::vector<Fluent*>& fluents) 
-       : ANMLElement("PROPOSITION")
-       , m_temporalQualifier(tq)
+       : m_temporalQualifier(tq)
        , m_fluents(fluents) 
     {
     	commonInit();
@@ -858,7 +1006,7 @@ namespace ANML
     
     void Proposition::commonInit()
     {
-  	    debugMsg("ANMLContext","Creating  Proposition with " << m_fluents.size() << " fluents");
+  	    debugMsg("ANML:Proposition","Creating  Proposition with " << m_fluents.size() << " fluents");
     	m_temporalQualifier->setProposition(this);
     	for (unsigned int i=0;i<m_fluents.size();i++) 
     	    m_fluents[i]->setProposition(this); 
@@ -866,6 +1014,26 @@ namespace ANML
     
     Proposition::~Proposition() 
     {
+    }
+    
+    void Proposition::preProcess(ANMLContext& context) 
+    {
+    	for (unsigned int i=0;i<m_fluents.size();i++) {
+    		Fluent* f = m_fluents[i];
+    	    f->preProcess(context);    	
+        	debugMsg("ANML:Proposition","preProcessed:" << m_fluents[i]->toString());
+    	}
+    }
+    
+    bool Proposition::validate(ANMLContext& context,std::vector<std::string>& problems)
+    {   
+    	for (unsigned int i=0;i<m_fluents.size();i++) {
+    	    if (!m_fluents[i]->validate(context,problems))
+    	        return false;
+        	debugMsg("ANML:Proposition","Validated:" << m_fluents[i]->toString());
+    	}
+    	    
+    	return true;
     }
     
     void Proposition::toNDDL(ANMLContext& context, std::ostream& os) const 
@@ -877,26 +1045,76 @@ namespace ANML
     	    m_fluents[i]->toNDDL(os,m_temporalQualifier);
     }
     
-    Change:: Change(Proposition* when_condition,TemporalQualifier* tq,Fluent* f) 
-        : Proposition(tq,f)
-        , m_whenCondition(when_condition)
+    PropositionSet::PropositionSet(const std::vector<Proposition*>& propositions,
+                                   Action* parent,
+                                   Proposition::Context context,
+                                   const std::string& type) 
+        : ANMLElement(type)
+        , m_propositions(propositions) 
     {
-   	    m_elementType = "CHANGE";
-   	    setContext(EFFECT);
+    	for (unsigned int i=0;i<m_propositions.size();i++) { 
+    		m_propositions[i]->setParentAction(parent);
+    		m_propositions[i]->setContext(context);
+    	}
+    }
+    
+    PropositionSet::~PropositionSet()
+    {
+    	for (unsigned int i=0;i<m_propositions.size();i++) 
+    		delete m_propositions[i];
+    }
+    
+    void PropositionSet::preProcess(ANMLContext& context) 
+    {
+    	for (unsigned int i=0;i<m_propositions.size();i++) {
+    	    m_propositions[i]->preProcess(context);    	
+        	debugMsg("ANML:PropositionSet","preProcessed Proposition:" << i);
+    	}
+    }
+    
+    bool PropositionSet::validate(ANMLContext& context,std::vector<std::string>& problems)
+    {   
+    	for (unsigned int i=0;i<m_propositions.size();i++) {
+    	    if (!m_propositions[i]->validate(context,problems))
+    	        return false;
+        	debugMsg("ANML:PropositionSet","validated Proposition:" << i);
+    	}
+    	    
+    	return true;
+    }
+    
+    void PropositionSet::toNDDL(ANMLContext& context, std::ostream& os) const 
+    { 
+    	os << "    // " << m_elementType << " start" << std::endl;
+    	for (unsigned int i=0; i<m_propositions.size(); i++) {
+    		m_propositions[i]->toNDDL(context,os);
+    	}
+    	os << "    // " << m_elementType << " end" << std::endl << std::endl;
+    }
+    
+    Change::Change(Proposition* when_condition,Proposition* change_stmt) 
+        : ANMLElement("CHANGE")
+        , m_whenCondition(when_condition)
+        , m_changeStmt(change_stmt)
+    {
     }
    
     Change::~Change()
     {
+       	if (m_whenCondition != NULL)
+       	    delete m_whenCondition;
        	
+       	delete m_changeStmt;    
     }
    
     void Change::toNDDL(ANMLContext& context, std::ostream& os) const
     {
         if (m_whenCondition != NULL) {
             // TODO: deal with this
+            check_runtime_error(ALWAYS_FAIL,"When clause not supported for changes yet");
         }
        
-        Proposition::toNDDL(context,os);
+        m_changeStmt->toNDDL(context,os);
     }    
         
     ResourceChangeFluent::ResourceChangeFluent(const std::string& op,Expr* var,Expr* qty)
@@ -947,10 +1165,10 @@ namespace ANML
     { 
     	switch (context) {
     		case Proposition::GOAL : 
-    		    os << "goal(" << m_action->getElementName() << " " << varName << ");" << std::endl;
+    		    os << "goal(" << m_action->getName() << " " << varName << ");" << std::endl;
     		    break; 
     		case Proposition::CONDITION : 
-    		    os << "    any(" << m_action->getElementName() << " " << varName << ");" << std::endl;
+    		    os << "    any(" << m_action->getName() << " " << varName << ");" << std::endl;
     		    break; 
     		case Proposition::FACT : 
     		    check_runtime_error(ALWAYS_FAIL,"ERROR! LHSAction not supported for FACTS");
@@ -1048,7 +1266,7 @@ namespace ANML
        for (unsigned int i=0;i<m_values.size();i++)  {
        	   std::ostringstream name; name << "member_" << i;
        	   std::vector<VarInit*> init;
-       	   init.push_back(new VarInit(new Variable(m_values[i]->getDataType(),name.str()),""));
+       	   init.push_back(new VarInit(new Variable(m_values[i]->getDataType(),name.str()),NULL));
        	   
            m_dataType->addElement(
              new VarDeclaration(
