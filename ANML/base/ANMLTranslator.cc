@@ -391,7 +391,10 @@ namespace ANML
 	
 	std::string makeValueSetterKey(const std::string& objTypeName,const std::string& varName)
 	{
-		return objTypeName+"::"+varName;
+		if (objTypeName != "")
+		    return objTypeName+"::"+varName;
+		else
+		    return "default";
 	}
 	    
     ValueSetter* Type::getValueSetter(const ObjType* objType,const std::string& varName)
