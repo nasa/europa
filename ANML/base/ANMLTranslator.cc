@@ -348,7 +348,7 @@ namespace ANML
     
     void ValueSetter::toNDDL(ANMLContext& context,std::ostream& os,const std::string& typeName) const
     {
-    	check_runtime_error(m_explanatoryActions.size() >= 1,"Must not generate setter if there are no actions that can cause it");
+    	//check_runtime_error(m_explanatoryActions.size() >= 1,"Must not generate setter if there are no actions that can cause it");
     	
     	// TODO: generate comment with objType::varName
     	os << "// ValueSetter for TODO:objType::varName" << std::endl
@@ -394,8 +394,9 @@ namespace ANML
 		return objTypeName+"::"+varName;
 	}
 	    
-    ValueSetter* Type::getValueSetter(const std::string& objTypeName,const std::string& varName)
+    ValueSetter* Type::getValueSetter(const ObjType* objType,const std::string& varName)
     {    	
+    	const std::string& objTypeName = (objType != NULL ? objType->getName() : "");
     	std::string key = makeValueSetterKey(objTypeName,varName);
     	std::map<std::string,ValueSetter*>::iterator it = m_valueSettersByKey.find(key);
     	
@@ -411,18 +412,30 @@ namespace ANML
     	}
     }
     
-    const std::string& Type::getValueSetterName(const std::string& objTypeName,const std::string& varName)
+    const std::string& Type::getValueSetterName(const ObjType* objType,const std::string& varName) const
     {
+    	const std::string& objTypeName = (objType != NULL ? objType->getName() : "");
     	std::string key = makeValueSetterKey(objTypeName,varName);
-    	std::map<std::string,ValueSetter*>::iterator it = m_valueSettersByKey.find(key);
+    	std::map<std::string,ValueSetter*>::const_iterator it = m_valueSettersByKey.find(key);
     	
     	if (it != m_valueSettersByKey.end()) {
+    		debugMsg("ANML:Type","Found ValueSetterName for " << key << " returning " << it->second->getName()); 
     		return it->second->getName();
     	}
     	else {
+    		debugMsg("ANML:Type","Didn't find ValueSetterName for " << key << " returning defaultValueSetterName:" << defaultValueSetterName); 
     		return defaultValueSetterName;
     	}
     }	
+    
+    void Type::generateCopier(std::ostream& os,
+                              const std::string& lhs,
+                              const std::string& predName,
+                              const std::string& tokenName,
+                              const std::string& rhs) const   
+    {
+    	check_error(ALWAYS_FAIL,"generateCopier not supported for type:" + getName());
+    }
 	        
     void Type::toNDDL(ANMLContext& context,std::ostream& os) const 
     { 
@@ -540,6 +553,21 @@ namespace ANML
     {
     }
     
+    void ObjType::declareValueSetters(std::ostream& os) const
+    {
+        for (unsigned int i=0; i < m_valueSetters.size(); i++) {
+            os  << "    predicate " << m_valueSetters[i]->getName() << " { ";    	
+
+            std::map<std::string,Variable*>::const_iterator varIt = m_variables.begin();              
+            for (; varIt != m_variables.end() ; ++varIt) {
+    	        Variable* v = varIt->second;
+    	        os << " " << v->getDataType().getName() << " " << v->getName() << ";";
+            }
+        
+            os << " }" << std::endl;
+        }     	
+    }
+    
     void ObjType::toNDDL(ANMLContext& context, std::ostream& os) const
     {
         std::string parent = (
@@ -550,40 +578,41 @@ namespace ANML
         
         os << "class " << getName() << parent << std::endl 
            << "{" << std::endl;
-                      
-        for (unsigned int i=0; i<m_elements.size(); i++) {
-    	    if (m_elements[i]->getElementType() == "ACTION") {
-    	    	Action* a = (Action*) m_elements[i];
+        
+        // Declare Variables
+        std::map<std::string,Variable*>::const_iterator varIt = m_variables.begin();              
+        for (; varIt != m_variables.end() ; ++varIt) {
+    	    Variable* v = varIt->second;
+    	    os << "    " << v->getDataType().getName() << " " << v->getName() << ";" << std::endl;
+        }
+
+        // Declare Actions
+        std::map<std::string,Action*>::const_iterator actIt = m_actions.begin();              
+        for (; actIt != m_actions.end() ; ++actIt) {
+    	    	Action* a = actIt->second;
     	    	os << "    predicate " << a->getName() << " {";
     	    	
-    	    	const std::vector<Variable*> params = a->getParams();
+    	    	const std::vector<Variable*>& params = a->getParams();
                 for (unsigned int j=0; j<params.size(); j++) {
         	        params[j]->toNDDL(context,os);
        	            os << ";";
                 }    	
     	    	
     	        os << "}" << std::endl;
-    	    }
-    	    else if (m_elements[i]->getElementType() == "VAR_DECLARATION") {
-    	    	VarDeclaration* vd = (VarDeclaration*)m_elements[i];
-    	    	for (unsigned j=0;j<vd->getInit().size();j++)
-    	    	    os << "    " << vd->getDataType().getName() << " " << vd->getInit()[j]->getName() << ";" << std::endl;
-    	    }
     	}
-
+    	
+    	declareValueSetters(os);
+        
         // Generate constructor and initialize members that require contructors themselves
         os << std::endl << "    " << getName() << "()" << std::endl 
            << "    {" << std::endl;
-        for (unsigned int i=0; i<m_elements.size(); i++) {
-    	    if (m_elements[i]->getElementType() == "VAR_DECLARATION") {
-    	    	VarDeclaration* vd = (VarDeclaration*)m_elements[i];
-    	    	if (!vd->getDataType().isPrimitive()) {
-        	        for (unsigned j=0;j<vd->getInit().size();j++) {
-    	    	        os << "        " << vd->getInit()[j]->getName() 
-    	    	           << " = new " << vd->getDataType().getName() << "();" << std::endl;
-        	        }
-    	    	}
-    	    }
+        varIt = m_variables.begin();              
+        for (; varIt != m_variables.end() ; ++varIt) {
+   	    	Variable* v = varIt->second;
+   	    	if (!v->getDataType().isPrimitive()) {
+   	    	    os << "        " << v->getName() 
+   	    	       << " = new " << v->getDataType().getName() << "();" << std::endl;
+   	    	}
         }
         os << "    }" << std::endl;
            
@@ -602,52 +631,31 @@ namespace ANML
     {
     }
     
+    void VectorType::generateCopier(std::ostream& os,
+                              const std::string& lhs,
+                              const std::string& predName,
+                              const std::string& tokenName,
+                              const std::string& rhs) const   
+    {
+    	// TODO: do it differently depending on whether it's a condition/effect or a goal
+    	std::string ident = "    ";
+        std::map<std::string,Variable*>::const_iterator varIt = m_variables.begin();              
+        for (; varIt != m_variables.end() ; ++varIt) {
+    	    Variable* v = varIt->second;
+    	    os << ident << "eq(" << tokenName << "." << v->getName() << "," << rhs << "." << v->getName() << ");" << std::endl;
+        }
+    }
+	        
+
     void VectorType::toNDDL(ANMLContext& context, std::ostream& os) const
     {
     	os << "class " << getName() << " extends Timeline" << std::endl
-           << "{" << std::endl
-           << "    predicate setValue { ";    	
-
-        for (unsigned int i=0; i<m_elements.size(); i++) {
-    	    if (m_elements[i]->getElementType() == "VAR_DECLARATION") {
-    	    	VarDeclaration* vd = (VarDeclaration*)m_elements[i];
-        	    for (unsigned j=0;j<vd->getInit().size();j++) {
-        	    	os << vd->getDataType().getName() << " " 
-        	    	   << vd->getInit()[j]->getName()
-        	    	   << ";";
-        	    }    	    	
-    	    }
-        }
+           << "{" << std::endl;
         
-        os << " }" << std::endl 
-           << "}" << std::endl << std::endl;
+        declareValueSetters(os);   
         
-        os << getName() << "::setValue {}" << std::endl << std::endl;           
-        
-        os << "class " << getName() << "Copier" << std::endl
-           << "{" << std::endl
-           << "    predicate copy { " << getName() << " lhs; " << getName() << " rhs; }" << std::endl
-           << "}" << std::endl << std::endl;
-           
-        os << getName() << "Copier::copy" << std::endl
-           << "{" << std:: endl
-           << "    contained_by(lhs.setValue lhsValue);" << std::endl
-           << "    contained_by(rhs.setValue rhsValue);" << std::endl << std::endl;
-           
-        for (unsigned int i=0; i<m_elements.size(); i++) {
-    	    if (m_elements[i]->getElementType() == "VAR_DECLARATION") {
-    	    	VarDeclaration* vd = (VarDeclaration*)m_elements[i];
-        	    for (unsigned j=0;j<vd->getInit().size();j++) {
-        	    	os << "    eq("
-        	    	   << "lhs." << vd->getInit()[j]->getName() << ","
-        	    	   << "rhs." << vd->getInit()[j]->getName()
-        	    	   << ");" << std::endl;
-        	    }    	    	
-    	    }
-        }
-        
-        os << "}" << std::endl << std::endl;        
-        
+        os << "}" << std::endl << std::endl;
+                
         Type::toNDDL(context,os);                                                         
     }
     
@@ -865,7 +873,7 @@ namespace ANML
     	    unsigned int cnt = ls.countElements(".");
     	    EUROPA::LabelStr varName = ls.getElement(cnt-1,".");
     	    
-    	    ValueSetter* vs = t->getValueSetter(m_lhs->getVariable()->getObjType()->getName(),varName.toString());
+    	    ValueSetter* vs = t->getValueSetter(m_lhs->getVariable()->getObjType(),varName.toString());
     	    vs->addExplanatoryAction(m_parentProp->getParentAction(),m_parentProp->getTemporalQualifier());
     	}
     	
@@ -1184,7 +1192,7 @@ namespace ANML
     
     void LHSVariable::toNDDLasRHS(std::ostream& os,
                                   Proposition::Context context,
-                                  Expr* lhs,
+                                  LHSExpr* lhs,
                                   const std::string& tokenName) const 
     { 
     	std::string ident;
@@ -1199,15 +1207,20 @@ namespace ANML
         	os << ident << "any(";
         }
         
-        // TODO: make sure this is the right type
-        os << m_var->getDataType().getName() << "Copier.copy " << tokenName << ");" << std::endl
-           << ident << "eq(" << tokenName << ".lhs," << lhs->toString() << ");" << std::endl
-           << ident << "eq(" << tokenName << ".rhs," << m_path << ");" << std::endl << std::endl;
+        // TODO: store varName when this Expr is created        
+       	EUROPA::LabelStr ls(lhs->toString());
+  	    unsigned int cnt = ls.countElements(".");
+  	    EUROPA::LabelStr varName = ls.getElement(cnt-1,".");
+    	    
+    	const std::string& predName = lhs->getVariable()->getDataType().getValueSetterName(lhs->getVariable()->getObjType(),varName.toString());    	
+    	os << lhs->toString() << "." << predName << " " << tokenName << ");" << std::endl;
+    	
+        m_var->getDataType().generateCopier(os,lhs->toString(),predName,tokenName,m_path);
     }
     
     void ExprConstant::toNDDLasRHS(std::ostream& os,
                                    Proposition::Context context,
-                                   Expr* lhs,
+                                   LHSExpr* lhs,
                                    const std::string& tokenName) const 
     { 
     	std::string ident;
@@ -1299,7 +1312,7 @@ namespace ANML
     
    void ExprVector::toNDDLasRHS(std::ostream& os,
                                 Proposition::Context context,
-                                Expr* lhs,
+                                LHSExpr* lhs,
                                 const std::string& tokenName) const
    {
    	   std::string ident = (context == Proposition::GOAL || 

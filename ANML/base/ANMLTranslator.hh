@@ -62,14 +62,17 @@ class ANMLContext
 
 	virtual Type*    getType(const std::string& name,bool mustExist=false) const;
 	virtual ObjType* getObjType(const std::string& name) const;
+	virtual const std::map<std::string,Type*>& getTypes() const { return m_types; }
 	
 	virtual void addAction(Action* a);
 	virtual Action* getAction(const std::string& name,bool mustExist=false) const;
+	virtual const std::map<std::string,Action*>& getActions() const { return m_actions; }
 	
 	// Variables, Functions and Predicates are included here, 
 	// a function is just a var with args, a predicate is just a function on the boolean domain
 	virtual void addVariable(Variable* v);
 	virtual Variable* getVariable(const std::string& name,bool mustExist=false) const;
+	virtual const std::map<std::string,Variable*>& getVariables() const { return m_variables; }
 
     virtual void addConstraint(ConstraintDef* c);
     virtual ConstraintDef* getConstraint(const std::string& name,const std::vector<const Type*>& argTypes,bool mustExist=false) const;
@@ -155,6 +158,8 @@ class ValueSetter
   
   protected:
     std::string m_name;
+    ObjType* m_objType;
+    
     std::vector<ExplanatoryAction> m_explanatoryActions;  
 };
 
@@ -173,10 +178,16 @@ class Type
 	
 	virtual bool isAssignableFrom(const Type& rhs) const { return getName() == rhs.getName(); }
 	    
+    virtual void generateCopier(std::ostream& os,
+                              const std::string& lhs,
+                              const std::string& predName,
+                              const std::string& tokenName,
+                              const std::string& rhs) const;
+                                 
     virtual void toNDDL(ANMLContext& context,std::ostream& os) const;
     
-    virtual ValueSetter* getValueSetter(const std::string& objtypeName,const std::string& varName);
-    virtual const std::string& getValueSetterName(const std::string& objtypeName,const std::string& varName); 
+    virtual ValueSetter* getValueSetter(const ObjType* objType,const std::string& varName);
+    virtual const std::string& getValueSetterName(const ObjType* objType,const std::string& varName) const; 
     
     static Type* VOID;    
     static Type* BOOL;    
@@ -248,7 +259,7 @@ class ObjType : public Type, public ANMLContext, public ANMLElementList
     virtual ~ObjType();
     
     virtual std::string getContextDesc() const { return m_typeName; }
-
+    
     virtual ObjType* getParentObjType() const { return m_parentObjType; }
         
 	virtual bool isPrimitive() const { return false; }
@@ -256,13 +267,21 @@ class ObjType : public Type, public ANMLContext, public ANMLElementList
     virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
     
   protected:
-    ObjType* m_parentObjType;   	
+    ObjType* m_parentObjType; 
+    
+    void declareValueSetters(std::ostream& os) const;    
 };
 
 class VectorType : public ObjType
 {
   public:
     VectorType(const std::string& name);
+    
+    virtual void generateCopier(std::ostream& os,
+                              const std::string& lhs,
+                              const std::string& predName,
+                              const std::string& tokenName,
+                              const std::string& rhs) const;   
     
     virtual void toNDDL(ANMLContext& context, std::ostream& os) const;  
 };
@@ -388,7 +407,7 @@ class Action : public ANMLContext, public ANMLElementList
     
     virtual std::string getContextDesc() const { return m_objType.getName() + "::" + m_elementName; }
     
-    const std::vector<Variable*> getParams() const { return m_params; }
+    const std::vector<Variable*>& getParams() const { return m_params; }
     
     void setBody(const std::vector<ANMLElement*>& body);
   
@@ -648,7 +667,7 @@ class Expr
                              
     virtual void toNDDLasRHS(std::ostream& os,
                              Proposition::Context context,
-                             Expr* lhs,
+                             LHSExpr* lhs,
                              const std::string& tokenName) const {}                                                           
 };
 
@@ -724,7 +743,7 @@ class LHSVariable : public LHSExpr
     virtual std::string toString() const  { return m_path; }
     virtual void toNDDLasRHS(std::ostream& os,
                              Proposition::Context context,
-                             Expr* lhs,
+                             LHSExpr* lhs,
                              const std::string& tokenName) const;    
     
   protected:
@@ -748,7 +767,7 @@ class ExprConstant : public Expr
     
     virtual void toNDDLasRHS(std::ostream& os,
                              Proposition::Context context,
-                             Expr* lhs,
+                             LHSExpr* lhs,
                              const std::string& varName) const;    
   
   protected:
@@ -784,7 +803,7 @@ class ExprVector : public Expr
     virtual const Type& getDataType() const { return *m_dataType; }
     virtual void toNDDLasRHS(std::ostream& os,
                              Proposition::Context context,
-                             Expr* lhs,
+                             LHSExpr* lhs,
                              const std::string& varName) const;    
     
   protected:
