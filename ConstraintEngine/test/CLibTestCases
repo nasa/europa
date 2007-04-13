@@ -3385,3 +3385,4 @@ subsetOf inputs {A B C} {A B C D E} outputs {A B C} {A B C D E}
 subsetOf inputs {A B C D E} {A B C} outputs {A B C} {A B C}
 subsetOf inputs {A B C} {A B C} outputs {A B C} {A B C}
 subsetOf inputs {A B C} {D E F} outputs {} {}
+calcDistance inputs [0 10] {0} {0} {0} {0} outputs {10} {0} {0} {0} {0}

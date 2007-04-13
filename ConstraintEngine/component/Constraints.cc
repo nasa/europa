@@ -8,6 +8,7 @@
 #include "Utils.hh"
 #include "Debug.hh"
 #include "TypeFactory.hh"
+#include "NumericDomain.hh"
 
 namespace EUROPA {
 
@@ -1903,6 +1904,78 @@ namespace EUROPA {
     else if(m_y.isMember(-lb) || m_y.isMember(-ub))
       m_y.intersect(IntervalDomain(-ub, -lb));
   }
+
+  CalcDistanceConstraint::CalcDistanceConstraint(const LabelStr& name,
+						 const LabelStr& propagatorName,
+						 const ConstraintEngineId& constraintEngine,
+						 const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_distance(getCurrentDomain(variables[DISTANCE])),
+      m_x1(getCurrentDomain(variables[X1])),
+      m_y1(getCurrentDomain(variables[Y1])),
+      m_x2(getCurrentDomain(variables[X2])),
+      m_y2(getCurrentDomain(variables[Y2])){
+    checkError(variables.size() == ARG_COUNT, variables.size() << " is the wrong number of arguments for " << name.toString());
+  }
+
+  void CalcDistanceConstraint::handleExecute(){
+    if(!m_x1.areBoundsFinite() ||
+       !m_y1.areBoundsFinite()  || 
+       !m_x2.areBoundsFinite() ||
+       !m_y2.areBoundsFinite())
+      return;
+
+    NumericDomain dom;
+    dom.insert(compute(m_x1.getLowerBound(), m_y1.getLowerBound(), m_x2.getLowerBound(), m_y2.getLowerBound()));
+    dom.insert(compute(m_x1.getLowerBound(), m_y1.getLowerBound(), m_x2.getLowerBound(), m_y2.getUpperBound()));
+    dom.insert(compute(m_x1.getLowerBound(), m_y1.getLowerBound(), m_x2.getUpperBound(), m_y2.getLowerBound()));
+    dom.insert(compute(m_x1.getLowerBound(), m_y1.getLowerBound(), m_x2.getUpperBound(), m_y2.getUpperBound()));
+    dom.insert(compute(m_x1.getLowerBound(), m_y1.getUpperBound(), m_x2.getLowerBound(), m_y2.getLowerBound()));
+    dom.insert(compute(m_x1.getLowerBound(), m_y1.getUpperBound(), m_x2.getLowerBound(), m_y2.getUpperBound()));
+    dom.insert(compute(m_x1.getLowerBound(), m_y1.getUpperBound(), m_x2.getUpperBound(), m_y2.getLowerBound()));
+    dom.insert(compute(m_x1.getLowerBound(), m_y1.getUpperBound(), m_x2.getUpperBound(), m_y2.getUpperBound()));
+    dom.insert(compute(m_x1.getUpperBound(), m_y1.getLowerBound(), m_x2.getLowerBound(), m_y2.getLowerBound()));
+    dom.insert(compute(m_x1.getUpperBound(), m_y1.getLowerBound(), m_x2.getLowerBound(), m_y2.getUpperBound()));
+    dom.insert(compute(m_x1.getUpperBound(), m_y1.getLowerBound(), m_x2.getUpperBound(), m_y2.getLowerBound()));
+    dom.insert(compute(m_x1.getUpperBound(), m_y1.getLowerBound(), m_x2.getUpperBound(), m_y2.getUpperBound()));
+    dom.insert(compute(m_x1.getUpperBound(), m_y1.getUpperBound(), m_x2.getLowerBound(), m_y2.getLowerBound()));
+    dom.insert(compute(m_x1.getUpperBound(), m_y1.getUpperBound(), m_x2.getLowerBound(), m_y2.getUpperBound()));
+    dom.insert(compute(m_x1.getUpperBound(), m_y1.getUpperBound(), m_x2.getUpperBound(), m_y2.getLowerBound()));
+    dom.insert(compute(m_x1.getUpperBound(), m_y1.getUpperBound(), m_x2.getUpperBound(), m_y2.getUpperBound()));
+    dom.close();
+    m_distance.intersect(dom.getLowerBound(), dom.getUpperBound());
+  }
+
+  double CalcDistanceConstraint::compute(double x1, double y1, double x2, double y2){
+    return pow(pow(x2-x1, 2)+ pow(y2-y1, 2), 0.5);
+  }
+
+  /**************************************************************************************/
+
+  SineFunction::SineFunction(const LabelStr& name,
+			     const LabelStr& propagatorName,
+			     const ConstraintEngineId& constraintEngine,
+			     const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_target(getCurrentDomain(variables[0])),
+      m_source(getCurrentDomain(variables[1])){
+    checkError(variables.size() == ARG_COUNT, variables.size() << " is the wrong number of arguments for " << name.toString());
+  }
+
+  void SineFunction::handleExecute(){
+    // Requires the angle to be defined on a right angled triangle
+    m_source.intersect(-90, 90);
+
+    static const double PIE = 3.141592;
+
+    if(!m_source.isEmpty()){
+      NumericDomain dom;
+      dom.insert(sin(m_source.getLowerBound() * PIE / 180));
+      dom.insert(sin(m_source.getUpperBound() * PIE / 180));
+      m_target.intersect(dom.getLowerBound(), dom.getUpperBound());
+    }
+  }
+
   /**************************************************************************************/
 
   static bool & constraintLibraryInitialized() {
@@ -1920,7 +1993,7 @@ namespace EUROPA {
     if( !constraintLibraryInitialized()) {
       constraintLibraryInitialized() = true;
      
-      debugMsg("Constriants:initConstriantLibrary", "Initializing the constraint library");
+      debugMsg("Constriants:initConstraintLibrary", "Initializing the constraint library");
       // Register constraint Factories
       REGISTER_CONSTRAINT(UnaryConstraint, "UNARY", "Default");
       REGISTER_CONSTRAINT(AddEqualConstraint, "AddEqual", "Default");
@@ -1951,6 +2024,7 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(NotEqualConstraint, "NotEqual", "Default");
       REGISTER_CONSTRAINT(OrConstraint, "Or", "Default");
       REGISTER_CONSTRAINT(SubsetOfConstraint, "SubsetOf", "Default");
+      REGISTER_CONSTRAINT(SubsetOfConstraint, "subsetOf", "Default");
       REGISTER_CONSTRAINT(TestEQ, "TestEqual", "Default");
       REGISTER_CONSTRAINT(TestLessThan, "TestLessThan", "Default");
       REGISTER_CONSTRAINT(TestEQ, "testEQ", "Default");
@@ -2006,8 +2080,9 @@ namespace EUROPA {
       REGISTER_SWAP_TWO_VARS_CONSTRAINT("eqcondsum", "Default", "CondEqualSum", 0, 1);
       REGISTER_ROTATED_CONSTRAINT("addeqcond", "Default", "eqcondsum", 2);
 
+      REGISTER_CONSTRAINT(CalcDistanceConstraint, "calcDistance", "Default");
 
-    
+      REGISTER_CONSTRAINT(SineFunction, "sin", "Default");
     } else {
        debugMsg("Constriants:initConstriantLibrary", "Constraint library already initalized - no action taken");
     }

@@ -43723,4 +43723,98 @@
 			<SymbolDomain type="Letter"/>
 		</Outputs>
 	</Constraint>
+	<Constraint name="calcDistance" test="3388">
+		<Inputs>
+			<IntervalIntDomain lb="0" ub="10"/>
+			<IntervalIntDomain lb="0" ub="0"/>
+			<IntervalIntDomain lb="0" ub="0"/>
+			<IntervalIntDomain lb="0" ub=""/>
+			<IntervalIntDomain lb="10" ub="10"/>
+		</Inputs>
+		<Outputs>
+			<IntervalIntDomain lb="10" ub="10"/>
+			<IntervalIntDomain lb="0" ub="0"/>
+			<IntervalIntDomain lb="0" ub="0"/>
+			<IntervalIntDomain lb="0" ub=""/>
+			<IntervalIntDomain lb="10" ub="10"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="calcDistance" test="3389">
+		<Inputs>
+			<IntervalIntDomain lb="0" ub="10"/>
+			<IntervalIntDomain lb="1" ub="2"/>
+			<IntervalIntDomain lb="0" ub="0"/>
+			<IntervalIntDomain lb="1" ub="2"/>
+			<IntervalIntDomain lb="0" ub="0"/>
+		</Inputs>
+		<Outputs>
+			<IntervalIntDomain lb="0" ub="1"/>
+			<IntervalIntDomain lb="1" ub="2"/>
+			<IntervalIntDomain lb="0" ub="0"/>
+			<IntervalIntDomain lb="1" ub="2"/>
+			<IntervalIntDomain lb="0" ub="0"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="calcDistance" test="3390">
+		<Inputs>
+			<IntervalIntDomain lb="2" ub="10"/>
+			<IntervalIntDomain lb="1" ub="2"/>
+			<IntervalIntDomain lb="0" ub="0"/>
+			<IntervalIntDomain lb="1" ub="2"/>
+			<IntervalIntDomain lb="0" ub="0"/>
+		</Inputs>
+		<Outputs>
+			<IntervalIntDomain/>
+			<IntervalIntDomain/>
+			<IntervalIntDomain/>
+			<IntervalIntDomain/>
+			<IntervalIntDomain/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="calcDistance" test="3391">
+		<Inputs>
+			<IntervalIntDomain lb="2" ub="10"/>
+			<IntervalIntDomain lb="1" ub="2"/>
+			<IntervalIntDomain lb="0" ub="0"/>
+			<IntervalIntDomain lb="-inf" ub="+inf"/>
+			<IntervalIntDomain lb="0" ub="0"/>
+		</Inputs>
+		<Outputs>
+			<IntervalIntDomain lb="2" ub="10"/>
+			<IntervalIntDomain lb="1" ub="2"/>
+			<IntervalIntDomain lb="0" ub="0"/>
+			<IntervalIntDomain lb="-inf" ub="+inf"/>
+			<IntervalIntDomain lb="0" ub="0"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="sin" test="3392">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="-1" ub="1"/>
+			<IntervalDomain lb="-90" ub="90"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="sin" test="3393">
+		<Inputs>
+			<IntervalDomain lb="0" ub="0.5"/>
+			<IntervalDomain lb="30" ub="30"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="0.5" ub="0.5"/>
+			<IntervalDomain lb="30" ub="30"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="sin" test="3394">
+		<Inputs>
+			<IntervalDomain lb="0" ub="0.3"/>
+			<IntervalDomain lb="30" ub="30"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain/>
+			<IntervalDomain/>
+		</Outputs>
+	</Constraint>
 </ConstraintTests>

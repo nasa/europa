@@ -872,6 +872,59 @@ namespace EUROPA {
     static const unsigned int ARG_COUNT = 2;
   };
 
+
+  /**
+   * @brief Calculate the euclidean distance in 2-d space between between 2 points 
+   */
+  class CalcDistanceConstraint : public Constraint {
+  public:
+    CalcDistanceConstraint(const LabelStr& name,
+			   const LabelStr& propagatorName,
+			   const ConstraintEngineId& constraintEngine,
+			   const std::vector<ConstrainedVariableId>& variables);
+
+    void handleExecute();
+
+  private:
+
+    /**
+     * Calculates the actual distance
+     */
+    double compute(double x1, double y1, double x2, double y2);
+
+    static const unsigned int ARG_COUNT = 5;
+    static const unsigned int DISTANCE = 0;
+    static const unsigned int X1 = 1;
+    static const unsigned int Y1 = 2;
+    static const unsigned int X2 = 3;
+    static const unsigned int Y2 = 4;
+
+    AbstractDomain& m_distance;
+    AbstractDomain& m_x1;
+    AbstractDomain& m_y1;
+    AbstractDomain& m_x2;
+    AbstractDomain& m_y2;
+  };
+
+  /**
+   * @brief Computes the sign of a given variable. Varable is in degrees. The constraint is a function
+   * rather than a relation. The range of the source variable must be in [0 90].
+   */
+  class SineFunction : public Constraint {
+  public:
+    SineFunction(const LabelStr& name,
+		 const LabelStr& propagatorName,
+		 const ConstraintEngineId& constraintEngine,
+		 const std::vector<ConstrainedVariableId>& variables);
+
+    void handleExecute();
+
+  private:
+    static const unsigned int ARG_COUNT = 2;
+    AbstractDomain& m_target;
+    AbstractDomain& m_source;
+  };
+
   /**
    * @brief initialize constraint library by registering default constraint set
    */
