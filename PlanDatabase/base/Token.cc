@@ -616,22 +616,51 @@ namespace EUROPA{
     if(isTerminated())
       return false;
 
-    // Merged and rejected tokens can be immediately terminated without any consideration of their variables or their
+    // Rejected tokens can be immediately terminated without any consideration of their variables or their
     // constraints
-    if(isMerged() || isRejected() || isInactive())
+    if(isRejected())
       return true;
 
-    // Construct the set of constraints on variables of this token
+    // Use this count for iteration later
     const unsigned int varCount = m_allVariables.size();
+
+    // If merged, it is redundant if the variables in its scope are supersets of the corresponding active token variable base domain
+    if(isMerged()){
+      TokenId activeToken = getActiveToken();
+      const std::vector<ConstrainedVariableId>& activeVariables = activeToken->getVariables();
+      // All variables except state variable
+      for(unsigned int i = 1; i < varCount; i++){
+	const AbstractDomain& activeBaseDomain = activeVariables[i]->baseDomain();
+	const AbstractDomain& inactiveDerivedDomain = m_allVariables[i]->lastDomain();
+	if(!activeBaseDomain.isSubsetOf(inactiveDerivedDomain)){
+	  debugMsg("Token:canBeTerminated", 
+		   "Cannot terminate " << this->toString() << activeBaseDomain.toString() << " can be further restricted by " << inactiveDerivedDomain.toString() << std::endl <<
+		   "Active Variable: " << activeVariables[i]->toString() << " Inactive Variable: " << m_allVariables[i]->toString());
+
+	  return false;
+	}
+      }
+
+      return true;
+    }
+
+    // 
+    // Declare a set to pull together all variables in the scope of a token into a single easy to check collection. Could manage this incrementally on
+    // the token also for greater efficiency
+    std::set<int> allVars;
+
+    // Construct the set of constraints on variables of this token
     std::set<ConstraintId> constraints;
     for(unsigned int i = 0; i < varCount; i++){
       ConstrainedVariableId var = m_allVariables[i];
       var->constraints(constraints);
+      allVars.insert(var->getKey());
     }
 
     for(ConstrainedVariableSet::const_iterator it = m_localVariables.begin(); it != m_localVariables.end(); ++it){
       ConstrainedVariableId var = *it;
       var->constraints(constraints);
+      allVars.insert(var->getKey());
     }
 
     for(std::set<ConstraintId>::const_iterator it = constraints.begin(); it != constraints.end(); ++it){
@@ -645,8 +674,8 @@ namespace EUROPA{
       const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
       for(unsigned int i=0;i<scope.size();i++){
 	ConstrainedVariableId var = scope[i];
-	// If an external variable, then it is an external constraint ans so we cannot terminate
-	if(var->getParent() != getId()){ 
+	// If an external variable, then it is an external constraint and so we cannot terminate
+	if(allVars.find(var->getKey()) == allVars.end()){
 	  debugMsg("Token:canBeTerminated", 
 		   "Cannot terminate " << toString() << ". " 
 		   << var->toString() << " has an active external constraint "
