@@ -18,7 +18,7 @@ namespace EUROPA {
       : Component(configData), 
         m_objectType(WILD_CARD()), m_predicate(WILD_CARD()), m_variable(WILD_CARD()), 
         m_masterObjectType(WILD_CARD()), m_masterPredicate(WILD_CARD()), m_masterRelation(WILD_CARD()),
-        m_staticFilterCount(0), m_lastCycle(0) {
+        m_staticFilterCount(0), m_lastCycle(0), m_hitCount(0) {
 
       std::string expr;
       if(configData.Attribute("label") != NULL){

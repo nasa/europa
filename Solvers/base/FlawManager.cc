@@ -352,13 +352,20 @@ namespace EUROPA {
       return result;
     }
 
+    /**
+     * We always try static matching first since the results are cached and it is generally very fast. Such matching
+     * is based on properties of the entity that cannot change. Dynamic matching is based on specific guard values or other
+     * dynamic properties that must be re-evaluated on each cycle.
+     */
     bool FlawManager::matches(const EntityId& entity){
       return staticMatch(entity) || dynamicMatch(entity);
     }
 
     bool FlawManager::staticMatch(const EntityId& entity) {
+
+      // If there is a parent flaw manager ten it may already have excluded the given entity. Filters are inherited in this way.
       if(m_parent.isId() && m_parent->staticMatch(entity)) {
-        debugMsg("FlawManager:staticMatch", "Excluding " << entity->getKey() << " because parent is excluded.");
+        debugMsg("FlawManager:staticMatch", "Excluding " << entity->getKey() << " based on parent flaw manager.");
         return true;
       }
 
