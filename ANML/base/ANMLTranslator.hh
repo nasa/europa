@@ -490,18 +490,6 @@ class Effect : public PropositionSet
     virtual ~Effect();
 };
 
-class Decomposition : public ANMLElement
-{
-  public:
-    Decomposition();
-    virtual ~Decomposition();
-    
-    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
-    
-  protected:  
-    //std::vector<Proposition*> m_propositions;    	
-};
-
 class Goal : public PropositionSet
 {
   public:
@@ -646,6 +634,76 @@ class TransitionChangeFluent : public Fluent
   protected:    
     Expr* m_var;
 	std::vector<Expr*> m_states;
+};
+
+
+class ActionSet;
+class SubAction;
+
+class Decomposition : public ANMLElement
+{
+  public:
+    Decomposition();
+    virtual ~Decomposition();
+    
+    void addActionSet(ActionSet* as, TemporalQualifier* tq);
+    void addConstraint(Constraint* c) { m_constraints.push_back(c); }
+    virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
+    
+  protected:  
+    std::vector<ActionSet*> m_actionSets;  
+    std::vector<Constraint*> m_constraints;  
+    	
+};
+
+class ActionSetElement
+{
+  public:
+      ActionSetElement() {}
+      virtual ~ActionSetElement() {}
+      
+      virtual const std::string getType() const = 0;
+      virtual const std::string& getLabel() const { return m_label; }
+      virtual void toNDDL(ANMLContext& context, std::ostream& os) const = 0;
+
+  protected:
+      std::string m_label;        
+};
+
+class ActionSet : public ActionSetElement
+{
+  public:
+      ActionSet(const std::string& op,const std::vector<ANML::ActionSetElement*>& elements);
+      virtual ~ActionSet();
+
+      virtual const std::string getType() const { return m_type; }
+
+      virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
+  
+  protected:
+      std::string m_label;
+      std::string m_operator;
+      TemporalQualifier* m_tq;
+      std::vector<ActionSetElement*> m_elements;
+      std::string m_type;
+};
+
+class LHSAction;
+
+class SubAction : public ActionSetElement
+{
+  public:
+      SubAction(ANML::LHSAction* action, const std::vector<ANML::Expr*>& args, const std::string& label);		
+      virtual ~SubAction();
+
+      virtual const std::string getType() const;
+      
+      virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
+  
+  protected:
+      std::string m_label;
+      LHSAction* m_action;
+      std::vector<ANML::Expr*> m_args;      
 };
 
 class Expr 

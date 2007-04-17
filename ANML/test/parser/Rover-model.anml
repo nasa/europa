@@ -9,16 +9,6 @@ objtype Instrument
 {
 	StowState state_;
 
-	action TakeSample(Location rock) 
-	{
-		decomposition over all ordered (
-			Unstow(),
-			Place(rock),
-			Sample(rock),
-			Stow()
-		);
-	}
-
 	action Sample(Location rock) 
 	{
 		duration 10;
@@ -39,6 +29,16 @@ objtype Instrument
 	{
 		duration 2;
         change over all { state_ = "stowed" -> "unstowing" -> "unstowed" };
+	}
+
+	action TakeSample(Location rock) 
+	{
+		decomposition over all ordered (
+			Unstow(),
+			Place(rock),
+			Sample(rock),
+			Stow()
+		);
 	}
 }
 
@@ -73,22 +73,6 @@ objtype Rover
 		change over all { uses(battery_, p.cost); };
 	}
 
-    action TakeSample(Location rock) 
-    {
-	    duration 20;
-	    
-		condition over all { location_ = rock; };
-
-    	decomposition { 
-          contains all 
-	        ordered(
-		        instrument_.TakeSample(rock),
-	            or(PhoneLander(),
-		           PhoneHome())
-	        );
-	    };
-	}
-	
 	// TODO: PhoneHome is longer and more costly than PhoneLander
 	// the model is probably missing a condition under which we'd
 	// prefer to PhoneHome over PhoneLander
@@ -105,5 +89,21 @@ objtype Rover
         duration 5;
     	change over all { uses(battery_, 20); };
     }
+    
+    action TakeSample(Location rock) 
+    {
+	    duration 20;
+	    
+		condition over all { location_ = rock; };
+
+    	decomposition { 
+          contains all 
+	        ordered(
+		        instrument_.TakeSample(rock),
+	            or(PhoneLander(),
+		           PhoneHome())
+	        );
+	    };
+	}	    
 }
 

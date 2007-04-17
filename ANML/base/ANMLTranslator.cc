@@ -977,10 +977,88 @@ namespace ANML
     {
     }    
     
+    void Decomposition::addActionSet(ActionSet* as, TemporalQualifier* tq) 
+    {
+    	// TODO: deal with temporal qualifier 
+    	m_actionSets.push_back(as); 
+    }
+
     void Decomposition::toNDDL(ANMLContext& context, std::ostream& os) const
     {
-    	// TODO: implement this
-    	os << "    // TODO!: Decompositions not handled yet" << std::endl;
+    	os << "    // Decomposition start" << std::endl;
+    	for (unsigned int i=0;i<m_actionSets.size();i++) {
+    		m_actionSets[i]->toNDDL(context,os);
+    	}
+    	
+    	for (unsigned int i=0;i<m_constraints.size();i++) {
+    		m_constraints[i]->toNDDL(os,NULL);
+    	}
+    	os << "    // Decomposition end" << std::endl;
+    }
+    
+
+    ActionSet::ActionSet(const std::string& op,const std::vector<ANML::ActionSetElement*>& elements)
+        : m_label(autoIdentifier("_v"))
+        , m_operator(op)
+        , m_elements(elements)
+        , m_type(autoIdentifier("ActionSet"))
+    {    	
+    }
+    
+    ActionSet::~ActionSet()
+    {
+    }
+
+    void ActionSet::toNDDL(ANMLContext& context, std::ostream& os) const
+    {
+    	std::string ident="    ";
+
+        // TODO: a new predicate must be generated for each ActionSet
+    	if (m_operator == "or") {
+    		check_error(m_elements.size() == 2, "OR decomposition must have exactly 2 branches");
+    		std::string varName = autoIdentifier("_v");
+    		os << ident << "int " << varName << "= [0 1];" << std::endl;
+    		for (unsigned int i=0;i<m_elements.size();i++) {
+    		    os << ident << "if (" << varName << " == 0) { " << std::endl;
+    		    // TODO: call toNDDL on children instead
+    		    os << ident << "    any(" << m_elements[i]->getType() << " " << m_elements[i]->getLabel() << ");" << std::endl;
+    		    os << ident << "}" << std::endl;
+    		} 
+    	}
+    	else {
+    		for (unsigned int i=0;i<m_elements.size();i++) {
+    		    // TODO: call toNDDL on children instead
+    		    os << ident << "contains(" << m_elements[i]->getType() << " " << m_elements[i]->getLabel() << ");" << std::endl;
+    		    if (m_operator == "ordered") {
+    		    	// TODO: generate precedence constraints
+    		    }    			
+    		}    		
+    	}
+    }
+  
+    SubAction::SubAction(ANML::LHSAction* action, const std::vector<ANML::Expr*>& args, const std::string& label)
+        : m_label(label!="" ? label : autoIdentifier("_v"))
+        , m_action(action)
+        , m_args(args)        
+    {
+    }
+    
+    SubAction::~SubAction()
+    {
+    }
+
+    const std::string SubAction::getType() const 
+    { 
+    	return m_action->toString(); 
+    }
+
+    void SubAction::toNDDL(ANMLContext& context, std::ostream& os) const
+    {
+    	// TODO: should use "any" instead?
+    	os << "    contains(" << m_action->toString() << " " << m_label << ");" << std::endl;
+   		for (unsigned int i=0;i<m_args.size();i++) {  	
+    	    // TODO: specify args
+   		}
     }
     
     Goal::Goal(const std::vector<Proposition*>& propositions) 

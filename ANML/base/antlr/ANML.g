@@ -566,9 +566,7 @@ action_set_element
 ;
 
 qualified_action_symbol
-    :! o:object_name d:DOT a:action_symbol
-       { #qualified_action_symbol = #(#o, #(#d, #a)); }
-    | action_symbol
+    : qualified_var_name
 ;
     
 constraint 

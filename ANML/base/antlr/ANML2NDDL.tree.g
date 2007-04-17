@@ -761,36 +761,73 @@ directed_expr_list[std::vector<ANML::Expr*>& states]
       )
 ;
 
-decomp_stmt returns [ANML::ANMLElement* element]
-    : #(DECOMPOSITION (decomp_step | #(LCURLY (decomp_step)+)))
+decomp_stmt returns [ANML::Decomposition* element]
 {
 	element = new ANML::Decomposition();
 }    
+    : #(DECOMPOSITION 
+           (decomp_step[element] | 
+            #(LCURLY (decomp_step[element])+)
+           ) 
+        )
 ;
 
-decomp_step
-    : #(ACTIONS temporal_qualif action_set)
-		| constraint
+decomp_step[ANML::Decomposition* parent]
+{
+	ANML::TemporalQualifier* tq;
+	ANML::ActionSet* as;
+	ANML::Constraint* c;
+}
+    : #(ACTIONS tq=temporal_qualif as=action_set) { parent->addActionSet(as,tq); }
+	| c=constraint { parent->addConstraint(c); }
 ;
 
-action_set
-    : #(ORDERED action_set_element_list)
-    | #(UNORDERED action_set_element_list)
-    | #(DISJUNCTION action_set_element_list)
+action_set returns [ANML::ActionSet* set]
+{
+	std::string op;
+	std::vector<ANML::ActionSetElement*> elements;
+}
+    : (#(ORDERED {op = "ordered";}    elements=action_set_element_list)
+    | #(UNORDERED {op = "unordered";} elements=action_set_element_list)
+    | #(DISJUNCTION {op = "or";}      elements=action_set_element_list)
+    )
+{
+	set = new ANML::ActionSet(op,elements);
+}    
 ;
 
-action_set_element_list
-    : #(LPAREN (action_set_element)+)
+action_set_element_list returns [std::vector<ANML::ActionSetElement*> elements]
+{
+	ANML::ActionSetElement* e;
+}
+    : #(LPAREN (e=action_set_element {elements.push_back(e);} )+)
 ;
 
-action_set_element
-    : #(ACTION qualified_action_symbol arguments (action_instance_label)?)
-    | action_set
+action_set_element returns [ANML::ActionSetElement* element]
+{
+	ANML::LHSAction* action;
+	std::string label="";
+	std::vector<ANML::Expr*> args;	
+}
+    : #(ACTION action=qualified_action_symbol args=arguments (label=action_instance_label)?)
+      { 
+          element = new ANML::SubAction(action,args,label);
+          if (label != "") {
+              // TODO add action to the current context
+          }
+      }
+    | element=action_set
 ;
 
-qualified_action_symbol
-    : (#(IDENTIFIER DOT))=> #(IDENTIFIER (#(DOT action_symbol))?)
-		| action_symbol
+qualified_action_symbol returns [ANML::LHSAction* action]
+{
+	ANML::LHSExpr* expr;
+}
+    : expr=qualified_var_name[m_translator.getContext(),""]
+{
+	check_error(!expr->isVariableExpr(),expr->toString()+" is not an action");
+	action = static_cast<ANML::LHSAction*>(expr);
+}    
 ;
 
 constraint returns [ANML::Constraint* element]
