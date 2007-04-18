@@ -93,8 +93,8 @@ namespace EUROPA {
   ObjectFactory::ObjectFactory(){}
 
   ObjectFactory& ObjectFactory::getInstance(){
-    static ObjectFactory sl_instance;
-    return sl_instance;
+    static ObjectFactory* sl_instance = new ObjectFactory();
+    return *sl_instance;
   }
 
   ObjectFactory::~ObjectFactory(){

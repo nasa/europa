@@ -23,10 +23,6 @@ namespace EUROPA {
    */
   class ObjectFactory {
   public:
-    /**
-     * @brief Should be private, but breaks with Andrews compiler if it is.
-     */
-    virtual ~ObjectFactory();
 
     /**
      * @brief Helper method to compose full factory signature from type and arguments
@@ -61,6 +57,10 @@ namespace EUROPA {
      * factories should remain for all instances of the plan database in the same process.
      */
     static void purgeAll();
+
+  protected:
+
+    virtual ~ObjectFactory();
 
   private:
     friend class ConcreteObjectFactory; /*!< Requires access to registerFactory */
