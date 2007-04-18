@@ -681,7 +681,6 @@ class ActionSet : public ActionSetElement
       virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
   
   protected:
-      std::string m_label;
       std::string m_operator;
       TemporalQualifier* m_tq;
       std::vector<ActionSetElement*> m_elements;
@@ -701,7 +700,6 @@ class SubAction : public ActionSetElement
       virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
   
   protected:
-      std::string m_label;
       LHSAction* m_action;
       std::vector<ANML::Expr*> m_args;      
 };

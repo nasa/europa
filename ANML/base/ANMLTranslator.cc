@@ -998,11 +998,11 @@ namespace ANML
     
 
     ActionSet::ActionSet(const std::string& op,const std::vector<ANML::ActionSetElement*>& elements)
-        : m_label(autoIdentifier("_v"))
-        , m_operator(op)
+        : m_operator(op)
         , m_elements(elements)
         , m_type(autoIdentifier("ActionSet"))
     {    	
+        m_label = autoIdentifier("_v");
     }
     
     ActionSet::~ActionSet()
@@ -1037,10 +1037,13 @@ namespace ANML
     }
   
     SubAction::SubAction(ANML::LHSAction* action, const std::vector<ANML::Expr*>& args, const std::string& label)
-        : m_label(label!="" ? label : autoIdentifier("_v"))
-        , m_action(action)
+        : m_action(action)
         , m_args(args)        
     {
+    	if (label.length() == 0)
+    	    m_label = autoIdentifier("_v");
+    	else 
+    	    m_label = label;
     }
     
     SubAction::~SubAction()
