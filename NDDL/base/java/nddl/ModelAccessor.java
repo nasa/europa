@@ -1089,8 +1089,8 @@ public class ModelAccessor {
       }
       // process include path
       Vector includes = root.getChildrenNamed("include");
-      if (includes.size() > 0 ) {
-        IXMLElement path = (IXMLElement) includes.elementAt(0); // only one include statement. 
+			for(Iterator i = includes.iterator(); i.hasNext()) {
+        IXMLElement path = (IXMLElement) i.next();
         String pathAsString = XMLUtil.getAttribute(path, "path");
         // record custom search path for nddl files.
 
