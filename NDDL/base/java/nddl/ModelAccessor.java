@@ -13,7 +13,7 @@ import java.io.FileNotFoundException;
  */
 public class ModelAccessor {
   static String s_directory = System.getProperty("user.dir");
-	static String s_cfgFilename = "NDDL.cfg";
+  static String s_cfgFilename = "NDDL.cfg";
   static boolean s_cfgExact = true;
 
   // Holds all classes as they are visited
@@ -226,10 +226,10 @@ public class ModelAccessor {
   }
 
   public static String getPredicateSuperClass(IXMLElement predicate){
-		String toRet = getPredicateSuperClass(predicate,true);
+    String toRet = getPredicateSuperClass(predicate,true);
     assert(DebugMsg.debugMsg("ModelAccessor:getPredicateSuperClass:Search","-> returning "+toRet));
-		return toRet;
-	}
+    return toRet;
+  }
 
   public static String getPredicateSuperClass(IXMLElement predicate, boolean dummy){
     String name = XMLUtil.getAttribute(predicate, "name");
@@ -252,13 +252,13 @@ public class ModelAccessor {
     // Try ancestors
     List ancestors = getAncestors(klass);
     if(ancestors != null){
-    	assert(DebugMsg.debugMsg("ModelAccessor:getPredicateSuperClass:Search","Ancestors: "+ancestors));
-			// ancestors are listed fifo (this should have been causing problems earlier)
+      assert(DebugMsg.debugMsg("ModelAccessor:getPredicateSuperClass:Search","Ancestors: "+ancestors));
+      // ancestors are listed fifo (this should have been causing problems earlier)
       for(int i=ancestors.size()-1; i>=0; --i){
         String ancestor = (String) ancestors.get(i);
         // third, check for specific parent predicates: ancestor.name
         String superPredicate = ancestor + "." + name;
-    		assert(DebugMsg.debugMsg("ModelAccessor:getPredicateSuperClass:Search",superPredicate));
+        assert(DebugMsg.debugMsg("ModelAccessor:getPredicateSuperClass:Search",superPredicate));
 
         if(isPredefinedClass(superPredicate))
           return getCppClass(superPredicate);
@@ -267,7 +267,7 @@ public class ModelAccessor {
 
         // fourth, check for general parent predicates: ancestor.*
         superPredicate = ancestor + ".*";
-    		assert(DebugMsg.debugMsg("ModelAccessor:getPredicateSuperClass:Search",superPredicate));
+        assert(DebugMsg.debugMsg("ModelAccessor:getPredicateSuperClass:Search",superPredicate));
         if(isPredefinedClass(superPredicate))
           return getCppClass(superPredicate);
       }
@@ -1089,8 +1089,8 @@ public class ModelAccessor {
       }
       // process include path
       Vector includes = root.getChildrenNamed("include");
-			for(Iterator i = includes.iterator(); i.hasNext()) {
-        IXMLElement path = (IXMLElement) i.next();
+      for(Iterator it = includes.iterator(); it.hasNext();) {
+        IXMLElement path = (IXMLElement) it.next();
         String pathAsString = XMLUtil.getAttribute(path, "path");
         // record custom search path for nddl files.
 
@@ -1149,12 +1149,14 @@ public class ModelAccessor {
     else
       returnFile = new File(filename);
 
+    assert(DebugMsg.debugMsg("ModelAccessor:includeSearch", "Testing for: "+returnFile));
     // If the file can be read, it's been found.
     if (returnFile.canRead()) return returnFile;
 
     for(int i=0;i<s_customSearchPath.size();i++)
     {
       returnFile = new File((String)s_customSearchPath.get(i),filename);
+      assert(DebugMsg.debugMsg("ModelAccessor:includeSearch", "Testing for: "+returnFile));
       if(returnFile.canRead()) return returnFile;
     }
     return null;
