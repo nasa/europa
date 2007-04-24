@@ -33,12 +33,14 @@ objtype Instrument
 
 	action TakeSample(Location rock) 
 	{
-		decomposition over all ordered (
-			Unstow(),
-			Place(rock),
-			Sample(rock),
-			Stow()
-		);
+		decomposition 
+		  over all 
+		    ordered(
+			  Unstow(),
+	  		  Place(rock),
+			  Sample(rock),
+			  Stow()
+		    );
 	}
 }
 
@@ -97,7 +99,7 @@ objtype Rover
 		condition over all { location_ = rock; };
 
     	decomposition { 
-          contains all 
+          over all 
 	        ordered(
 		        instrument_.TakeSample(rock),
 	            or(PhoneLander(),
