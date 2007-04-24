@@ -843,10 +843,12 @@ namespace ANML
     		const std::string& timePoint = m_argValues[0];
     		os << ident << "leq(" << fluentName << ".end," << timePoint << ");" << std::endl;
     	}
+    	// TODO: should contains operate with a single point? it is currently the same as over
     	else if (m_operator == "contains") {
-    		const std::string& timePoint = m_argValues[0];
-    		os << ident << "leq(" << fluentName << ".start," << timePoint << ");" << std::endl;
-    		os << ident << "leq(" << timePoint << "," << fluentName << ".end);" << std::endl;
+    		const std::string& lb = m_argValues[0];
+    		const std::string& ub = m_argValues[1];
+    		os << ident << "leq(" << fluentName << ".start," << lb << ");" << std::endl;
+    		os << ident << "leq(" << ub << "," << fluentName << ".end);" << std::endl;
     	}
     	
     	os << std::endl;
@@ -979,15 +981,17 @@ namespace ANML
     
     void Decomposition::addActionSet(ActionSet* as, TemporalQualifier* tq) 
     {
-    	// TODO: deal with temporal qualifier 
+    	as->setTemporalQualifier(tq);
     	m_actionSets.push_back(as); 
     }
 
     void Decomposition::toNDDL(ANMLContext& context, std::ostream& os) const
     {
+    	std::string ident="    ";
+        
     	os << "    // Decomposition start" << std::endl;
     	for (unsigned int i=0;i<m_actionSets.size();i++) {
-    		m_actionSets[i]->toNDDL(context,os);
+    		m_actionSets[i]->toNDDL(context,os,ident);
     	}
     	
     	for (unsigned int i=0;i<m_constraints.size();i++) {
@@ -999,40 +1003,53 @@ namespace ANML
 
     ActionSet::ActionSet(const std::string& op,const std::vector<ANML::ActionSetElement*>& elements)
         : m_operator(op)
+        , m_tq(NULL)
         , m_elements(elements)
         , m_type(autoIdentifier("ActionSet"))
     {    	
-        m_label = autoIdentifier("_v");
+        m_label = autoIdentifier("_ActionSet");
     }
     
     ActionSet::~ActionSet()
     {
     }
 
-    void ActionSet::toNDDL(ANMLContext& context, std::ostream& os) const
+    void ActionSet::toNDDL(ANMLContext& context, std::ostream& os, const std::string& ident) const
     {
-    	std::string ident="    ";
-
-        // TODO: a new predicate must be generated for each ActionSet
+    	os << ident << "any(Decomposition " << getLabel() << ");" << std::endl;
+    	
     	if (m_operator == "or") {
     		check_error(m_elements.size() == 2, "OR decomposition must have exactly 2 branches");
     		std::string varName = autoIdentifier("_v");
     		os << ident << "int " << varName << "= [0 1];" << std::endl;
     		for (unsigned int i=0;i<m_elements.size();i++) {
-    		    os << ident << "if (" << varName << " == 0) { " << std::endl;
-    		    // TODO: call toNDDL on children instead
-    		    os << ident << "    any(" << m_elements[i]->getType() << " " << m_elements[i]->getLabel() << ");" << std::endl;
+    		    os << ident << "if (" << varName << " == " << i << ") { " << std::endl;
+    		    m_elements[i]->toNDDL(context,os,ident+"    ");
+    		    os << ident << "   " << getLabel() << " contains " << m_elements[i]->getLabel() << ";" << std::endl;
     		    os << ident << "}" << std::endl;
     		} 
     	}
     	else {
     		for (unsigned int i=0;i<m_elements.size();i++) {
-    		    // TODO: call toNDDL on children instead
-    		    os << ident << "contains(" << m_elements[i]->getType() << " " << m_elements[i]->getLabel() << ");" << std::endl;
+    		    m_elements[i]->toNDDL(context,os,ident);
+    		    os << ident << getLabel() << " contains " << m_elements[i]->getLabel() << ";" << std::endl;
+    		}
+    		
+    		std::string lastLabel = "";
+    		for (unsigned int i=0;i<m_elements.size();i++) {
     		    if (m_operator == "ordered") {
-    		    	// TODO: generate precedence constraints
+    		    	if (lastLabel != "") 
+    		    		os << ident << lastLabel << " before " << m_elements[i]->getLabel() << ";" << std::endl;
+   		    		lastLabel = m_elements[i]->getLabel();
     		    }    			
     		}    		
+    	}
+    	
+    	// Deal with temporal qualifier
+    	if (m_tq != NULL) {
+    		// TODO: this seems awkward, look into improving API for TemporalQualifier
+    		m_tq->toNDDL(os,Proposition::EFFECT);
+    	    m_tq->toNDDL(os,ident,getLabel());
     	}
     }
   
@@ -1055,10 +1072,9 @@ namespace ANML
     	return m_action->toString(); 
     }
 
-    void SubAction::toNDDL(ANMLContext& context, std::ostream& os) const
+    void SubAction::toNDDL(ANMLContext& context, std::ostream& os, const std::string& ident) const
     {
-    	// TODO: should use "any" instead?
-    	os << "    contains(" << m_action->toString() << " " << m_label << ");" << std::endl;
+    	os << ident << "any(" << m_action->toString() << " " << m_label << ");" << std::endl;
    		for (unsigned int i=0;i<m_args.size();i++) {  	
     	    // TODO: specify args
    		}

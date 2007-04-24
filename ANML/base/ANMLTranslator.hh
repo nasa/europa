@@ -664,7 +664,7 @@ class ActionSetElement
       
       virtual const std::string getType() const = 0;
       virtual const std::string& getLabel() const { return m_label; }
-      virtual void toNDDL(ANMLContext& context, std::ostream& os) const = 0;
+      virtual void toNDDL(ANMLContext& context, std::ostream& os, const std::string& ident) const = 0;
 
   protected:
       std::string m_label;        
@@ -677,8 +677,10 @@ class ActionSet : public ActionSetElement
       virtual ~ActionSet();
 
       virtual const std::string getType() const { return m_type; }
+      
+      virtual void setTemporalQualifier(TemporalQualifier* tq) { m_tq = tq; }
 
-      virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
+      virtual void toNDDL(ANMLContext& context, std::ostream& os, const std::string& ident) const;
   
   protected:
       std::string m_operator;
@@ -697,7 +699,7 @@ class SubAction : public ActionSetElement
 
       virtual const std::string getType() const;
       
-      virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
+      virtual void toNDDL(ANMLContext& context, std::ostream& os, const std::string& ident) const;
   
   protected:
       LHSAction* m_action;
