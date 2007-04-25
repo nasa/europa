@@ -273,7 +273,7 @@ namespace EUROPA {
     
     /**
      * @brief Restricts the domain to a singleton value.
-     * @param singleTonValue to specify it to.
+     * @param singletonValue to specify it to.
      */
     virtual void specify(double singletonValue);
 
