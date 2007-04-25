@@ -674,8 +674,15 @@ namespace EUROPA{
       const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
       for(unsigned int i=0;i<scope.size();i++){
 	ConstrainedVariableId var = scope[i];
-	// If an external variable, then it is an external constraint and so we cannot terminate
-	if(allVars.find(var->getKey()) == allVars.end()){
+
+	// If the variable has no parent, its scope is not defined temporally. This is typically only arising
+	// in initialization.
+	if (var->getParent().isNoId())
+	  continue;
+
+	// If it is a culprit with an unbound domain, and an external variable, 
+	// then it is an external constraint that must be retained and so we cannot terminate
+	if(allVars.find(var->getKey()) == allVars.end() && !var->baseDomain().isSingleton()){
 	  debugMsg("Token:canBeTerminated", 
 		   "Cannot terminate " << toString() << ". " 
 		   << var->toString() << " has an active external constraint "
