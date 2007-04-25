@@ -1942,6 +1942,11 @@ namespace EUROPA {
     dom.insert(compute(m_x1.getUpperBound(), m_y1.getUpperBound(), m_x2.getLowerBound(), m_y2.getUpperBound()));
     dom.insert(compute(m_x1.getUpperBound(), m_y1.getUpperBound(), m_x2.getUpperBound(), m_y2.getLowerBound()));
     dom.insert(compute(m_x1.getUpperBound(), m_y1.getUpperBound(), m_x2.getUpperBound(), m_y2.getUpperBound()));
+
+    // If there could be an intersection, then it is possible there will be a zero distance
+    if(m_x1.intersects(m_x2) && m_y1.intersects(m_y2))
+      dom.insert(0);
+
     dom.close();
     m_distance.intersect(dom.getLowerBound(), dom.getUpperBound());
   }
