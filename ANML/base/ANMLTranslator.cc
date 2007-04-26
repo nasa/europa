@@ -1297,10 +1297,13 @@ namespace ANML
     { 
     	std::string ident;
     	
-    	// TODO: implement this correctly
-    	if (context == Proposition::GOAL || context == Proposition::FACT) {
+    	if (context == Proposition::GOAL) {
     	    ident = "";
     	    os << "goal(";
+        }    
+    	if (context == Proposition::FACT) {
+    	    ident = "";
+    	    os << "fact(";
         }    
         else {
         	ident = "    ";
@@ -1325,10 +1328,13 @@ namespace ANML
     { 
     	std::string ident;
     	
-    	// TODO: implement this properly
-    	if (context == Proposition::GOAL || context == Proposition::FACT) {
+    	if (context == Proposition::GOAL) {
     	    ident = "";
     	    os << "goal(";
+        }    
+    	else if (context == Proposition::FACT) {
+    	    ident = "";
+    	    os << "fact(";
         }    
         else {
         	ident = "    ";
@@ -1418,8 +1424,10 @@ namespace ANML
    	   std::string ident = (context == Proposition::GOAL || 
     	                    context == Proposition::FACT ? "" : "    ");
     	                        	
-       if (context == Proposition::GOAL || context == Proposition::FACT)	
+       if (context == Proposition::GOAL)	
            os << "goal(";
+       else if (context == Proposition::FACT)	
+           os << "fact(";
        else
            os << "any(";
            
