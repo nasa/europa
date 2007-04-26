@@ -180,6 +180,11 @@ namespace EUROPA {
     }
 
     token = m_client->createToken(type, true /*isMandatory*/, true /*isFact*/);    
+    if (!token->isActive()) {
+        m_client->activate(token);
+        token->getState()->restrictBaseDomain(token->getState()->lastDomain());
+    }
+    
     if (!object.isNoId()) {
         // We restrict the base domain permanently since the name is specifically mentioned on creation
         token->getObject()->restrictBaseDomain(object->getThis()->baseDomain());
