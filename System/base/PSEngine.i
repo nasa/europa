@@ -186,6 +186,8 @@ namespace EUROPA {
   class PSToken : public PSEntity
   {
   public:
+    bool isFact();
+    
     PSObject* getOwner();
 
     PSToken* getMaster();

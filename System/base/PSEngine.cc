@@ -204,11 +204,17 @@ namespace EUROPA {
     return retval;
   }
 
+  bool PSToken::isFact()
+  {
+  	return m_tok->isFact();
+  }
+  
   std::string PSToken::toString()
   {
   	std::ostringstream os;
   	
   	os << "Token(" << PSEntity::toString() << ") {" << std::endl;
+  	os << "    isFact:" << isFact() << std::endl;
   	
   	for (int i=0;i<m_vars.size();i++) {
   	    os << "    " << m_vars.get(i)->toString() << std::endl;

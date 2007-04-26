@@ -215,6 +215,8 @@ namespace EUROPA {
   public:
     virtual ~PSToken() {}
 
+    bool isFact(); 
+    
     PSObject* getOwner(); 
 	    
 	PSToken* getMaster();
