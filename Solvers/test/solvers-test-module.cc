@@ -191,6 +191,7 @@ private:
       IntervalToken token(db, 
                           "A.predicateA", 
                           true, 
+                          false,
                           IntervalIntDomain(0, 1000),
                           IntervalIntDomain(0, 1000),
                           IntervalIntDomain(2, 10),
@@ -745,13 +746,13 @@ private:
     Object o1(db, "A", "o1");
 
     //create the token to which everything is going to get compared.  Midpoint at 10.
-    IntervalToken foo(db, "A.Foo", false, IntervalIntDomain(5, 10), IntervalIntDomain(6, 20), IntervalIntDomain(1, 10), "o1", true);
+    IntervalToken foo(db, "A.Foo", false, false, IntervalIntDomain(5, 10), IntervalIntDomain(6, 20), IntervalIntDomain(1, 10), "o1", true);
     //create a token after foo
-    IntervalToken t1(db, "A.Foo", false, IntervalIntDomain(7, 10), IntervalIntDomain(8, 20), IntervalIntDomain(1, 10), "o1", true);
+    IntervalToken t1(db, "A.Foo", false, false, IntervalIntDomain(7, 10), IntervalIntDomain(8, 20), IntervalIntDomain(1, 10), "o1", true);
     //create a token before foo
-    IntervalToken t2(db, "A.Foo", false, IntervalIntDomain(4, 10), IntervalIntDomain(5, 20), IntervalIntDomain(1, 10), "o1", true);
+    IntervalToken t2(db, "A.Foo", false, false, IntervalIntDomain(4, 10), IntervalIntDomain(5, 20), IntervalIntDomain(1, 10), "o1", true);
     //create a token that starts at the same time as foo
-    IntervalToken t3(db, "A.Foo", false, IntervalIntDomain(5, 10), IntervalIntDomain(9, 20), IntervalIntDomain(4, 10), "o1", true);
+    IntervalToken t3(db, "A.Foo", false, false, IntervalIntDomain(5, 10), IntervalIntDomain(9, 20), IntervalIntDomain(4, 10), "o1", true);
 
     EarlyTokenComparator early(foo.getId());
     assertTrue(early.compare(foo.getId(), t1.getId()));
@@ -770,32 +771,32 @@ private:
     assertTrue(!late.compare(t3.getId(), foo.getId()));
 
     //create a token w/ midpoint 1 after foo's midpoint, starting before foo
-    IntervalToken t4(db, "A.Foo", false, IntervalIntDomain(4, 9), IntervalIntDomain(5, 19), IntervalIntDomain(1, 14), "o1", true);
+    IntervalToken t4(db, "A.Foo", false, false, IntervalIntDomain(4, 9), IntervalIntDomain(5, 19), IntervalIntDomain(1, 14), "o1", true);
     //create a token w/ midpoint 1 after foo's midpoint, starting at the same time as foo
-    IntervalToken t5(db, "A.Foo", false, IntervalIntDomain(5, 10), IntervalIntDomain(6, 22), IntervalIntDomain(1, 12), "o1", true);
+    IntervalToken t5(db, "A.Foo", false, false, IntervalIntDomain(5, 10), IntervalIntDomain(6, 22), IntervalIntDomain(1, 12), "o1", true);
     //create a token w/ midpoint 1 after foo's midpoint, starting after foo
-    IntervalToken t6(db, "A.Foo", false, IntervalIntDomain(6, 11), IntervalIntDomain(7, 21), IntervalIntDomain(1, 10), "o1", true);
+    IntervalToken t6(db, "A.Foo", false, false, IntervalIntDomain(6, 11), IntervalIntDomain(7, 21), IntervalIntDomain(1, 10), "o1", true);
 
     //create a token w/ midpoint 1 before foo's midpoint, starting before foo
-    IntervalToken t7(db, "A.Foo", false, IntervalIntDomain(4, 9), IntervalIntDomain(5, 19), IntervalIntDomain(1, 10), "o1", true);
+    IntervalToken t7(db, "A.Foo", false, false, IntervalIntDomain(4, 9), IntervalIntDomain(5, 19), IntervalIntDomain(1, 10), "o1", true);
     //create a token w/ midpoint 1 before foo's midpoint, starting at the same time as foo
-    IntervalToken t8(db, "A.Foo", false, IntervalIntDomain(5, 10), IntervalIntDomain(6, 18), IntervalIntDomain(1, 8), "o1", true);
+    IntervalToken t8(db, "A.Foo", false, false, IntervalIntDomain(5, 10), IntervalIntDomain(6, 18), IntervalIntDomain(1, 8), "o1", true);
     //create a token w/ midpoint 1 before foo's midpoint, starting after foo
-    IntervalToken t9(db, "A.Foo", false, IntervalIntDomain(6, 11), IntervalIntDomain(7, 17), IntervalIntDomain(1, 6), "o1", true);
+    IntervalToken t9(db, "A.Foo", false, false, IntervalIntDomain(6, 11), IntervalIntDomain(7, 17), IntervalIntDomain(1, 6), "o1", true);
 
     //create a token w/ midpoint 2 after foo's midpoint, starting before foo
-    IntervalToken t10(db, "A.Foo", false, IntervalIntDomain(4, 9), IntervalIntDomain(5, 25), IntervalIntDomain(1, 16), "o1", true);
+    IntervalToken t10(db, "A.Foo", false, false, IntervalIntDomain(4, 9), IntervalIntDomain(5, 25), IntervalIntDomain(1, 16), "o1", true);
     //create a token w/ midpoint 2 after foo's midpoint, starting at the same time as foo
-    IntervalToken t11(db, "A.Foo", false, IntervalIntDomain(5, 10), IntervalIntDomain(6, 24), IntervalIntDomain(1, 14), "o1", true);
+    IntervalToken t11(db, "A.Foo", false, false, IntervalIntDomain(5, 10), IntervalIntDomain(6, 24), IntervalIntDomain(1, 14), "o1", true);
     //create a token w/ midpoint 2 after foo's midpoint, starting after foo
-    IntervalToken t12(db, "A.Foo", false, IntervalIntDomain(6, 11), IntervalIntDomain(7, 23), IntervalIntDomain(1, 12), "o1", true);
+    IntervalToken t12(db, "A.Foo", false, false, IntervalIntDomain(6, 11), IntervalIntDomain(7, 23), IntervalIntDomain(1, 12), "o1", true);
 
     //create a token w/ midpoint 2 before foo's midpoint, starting before foo
-    IntervalToken t13(db, "A.Foo", false, IntervalIntDomain(4, 9), IntervalIntDomain(5, 17), IntervalIntDomain(1, 8), "o1", true);
+    IntervalToken t13(db, "A.Foo", false, false, IntervalIntDomain(4, 9), IntervalIntDomain(5, 17), IntervalIntDomain(1, 8), "o1", true);
     //create a token w/ midpoint 2 before foo's midpoint, starting at the same time as foo
-    IntervalToken t14(db, "A.Foo", false, IntervalIntDomain(5, 10), IntervalIntDomain(6, 16), IntervalIntDomain(1, 6), "o1", true);
+    IntervalToken t14(db, "A.Foo", false, false, IntervalIntDomain(5, 10), IntervalIntDomain(6, 16), IntervalIntDomain(1, 6), "o1", true);
     //create a token w/ midpoint 2 before foo's mispoint, starting after foo
-    IntervalToken t15(db, "A.Foo", false, IntervalIntDomain(6, 11), IntervalIntDomain(7, 15), IntervalIntDomain(1, 4), "o1", true);
+    IntervalToken t15(db, "A.Foo", false, false, IntervalIntDomain(6, 11), IntervalIntDomain(7, 15), IntervalIntDomain(1, 4), "o1", true);
 
     NearTokenComparator near(foo.getId());
     assertTrue(!near.compare(foo.getId(), foo.getId()));
@@ -1261,7 +1262,7 @@ private:
     Object o1(db, "A", "o1");    
 
     //flawed token that should be compatible with everything
-    IntervalToken flawedToken(db, "A.Foo", false);
+    IntervalToken flawedToken(db, "A.Foo", false, false);
 
     assertTrue(client->propagate());
     //test activate only
@@ -1274,7 +1275,7 @@ private:
     assertTrue(aOnly.getCompatibleTokens().empty());
 
     //test merge only
-    IntervalToken tok1(db, "A.Foo", false, IntervalIntDomain(1, 10), IntervalIntDomain(6, 20), IntervalIntDomain(5, 10), "o1");
+    IntervalToken tok1(db, "A.Foo", false, false, IntervalIntDomain(1, 10), IntervalIntDomain(6, 20), IntervalIntDomain(5, 10), "o1");
     client->activate(tok1.getId());
     std::string mOnlyHeur("<FlawHandler component=\"HSTSOpenConditionDecisionPoint\" choice=\"mergeOnly\"/>");
     TiXmlElement* mOnlyHeurXml = initXml(mOnlyHeur);
@@ -1310,7 +1311,7 @@ private:
     assertTrue(mFirst.getCompatibleTokens()[0] == tok1.getId());
 
     //test early
-    IntervalToken tok2(db, "A.Foo", false, IntervalIntDomain(3, 10), IntervalIntDomain(8, 20), IntervalIntDomain(5, 10), "o1");
+    IntervalToken tok2(db, "A.Foo", false, false, IntervalIntDomain(3, 10), IntervalIntDomain(8, 20), IntervalIntDomain(5, 10), "o1");
     client->activate(tok2.getId());
     std::string mEarlyHeur("<FlawHandler component=\"HSTSOpenConditionDecisionPoint\" choice=\"mergeOnly\" order=\"early\"/>");
     TiXmlElement* mEarlyHeurXml = initXml(mEarlyHeur);
@@ -1375,18 +1376,18 @@ private:
     DbClientId client = db->getClient();
     Timeline o1(db, "A", "o1");
 
-    IntervalToken tok1(db, "A.Foo", false, IntervalIntDomain(3, 10), IntervalIntDomain(7, 14),
+    IntervalToken tok1(db, "A.Foo", false, false, IntervalIntDomain(3, 10), IntervalIntDomain(7, 14),
                        IntervalIntDomain(4, 4), "o1");
     client->activate(tok1.getId());
 
-    IntervalToken tok2(db, "A.Foo", false, IntervalIntDomain(7, 16), IntervalIntDomain(8, 20),
+    IntervalToken tok2(db, "A.Foo", false, false, IntervalIntDomain(7, 16), IntervalIntDomain(8, 20),
                        IntervalIntDomain(1, 4), "o1");
     client->activate(tok2.getId());
 
     client->constrain(o1.getId(), tok1.getId(), tok1.getId());
     client->constrain(o1.getId(), tok1.getId(), tok2.getId());
 
-    IntervalToken flawedToken(db, "A.Foo", false, IntervalIntDomain(1, 10), IntervalIntDomain(4, 20), 
+    IntervalToken flawedToken(db, "A.Foo", false, false, IntervalIntDomain(1, 10), IntervalIntDomain(4, 20), 
                               IntervalIntDomain(3, 10), "o1");
     client->activate(flawedToken.getId());
 

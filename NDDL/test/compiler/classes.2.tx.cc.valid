@@ -57,8 +57,8 @@ namespace NDDL {
   
   
   // Plasma.nddl:143 uses
-  Reusable::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Reusable::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -281,8 +281,8 @@ namespace NDDL {
   
   
   // Plasma.nddl:179 use
-  Unary::use::use(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Unary::use::use(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -327,8 +327,8 @@ namespace NDDL {
   
   
   // Plasma.nddl:188 uses
-  UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -613,8 +613,8 @@ namespace NDDL {
   
   
   // classes.2.nddl:7 At
-  Navigator::At::At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Navigator::At::At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -637,8 +637,8 @@ namespace NDDL {
   
   
   // classes.2.nddl:12 Going
-  Navigator::Going::Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Navigator::Going::Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   

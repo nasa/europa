@@ -57,8 +57,8 @@ namespace NDDL {
   
   
   // Plasma.nddl:143 uses
-  Reusable::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Reusable::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -281,8 +281,8 @@ namespace NDDL {
   
   
   // Plasma.nddl:179 use
-  Unary::use::use(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Unary::use::use(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -327,8 +327,8 @@ namespace NDDL {
   
   
   // Plasma.nddl:188 uses
-  UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -454,8 +454,8 @@ namespace NDDL {
   
   
   // string-domain.nddl:7 Bar
-  Foo::Bar::Bar(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Foo::Bar::Bar(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   

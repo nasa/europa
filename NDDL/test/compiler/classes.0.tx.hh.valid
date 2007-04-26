@@ -61,7 +61,7 @@ namespace NDDL {
     // Plasma.nddl:143 uses
     class uses : public NddlToken {
     public:
-      uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       uses(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Reusable::uses, Reusable.uses);
@@ -101,7 +101,7 @@ namespace NDDL {
     // Plasma.nddl:179 use
     class use : public NddlToken {
     public:
-      use(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      use(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       use(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Unary::use, Unary.use);
@@ -125,7 +125,7 @@ namespace NDDL {
     // Plasma.nddl:188 uses
     class uses : public NddlToken {
     public:
-      uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       uses(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(UnaryResource::uses, UnaryResource.uses);

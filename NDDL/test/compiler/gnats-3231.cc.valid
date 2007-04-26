@@ -33,8 +33,8 @@ namespace NDDL {
   
   
   // gnats-3231.nddl:1 p
-  GnatsClass::p::p(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  GnatsClass::p::p(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   

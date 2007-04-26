@@ -215,6 +215,7 @@ private:
     IntervalToken t1(db.getId(),
     		     "Objects.Predicate", 
     		     true,
+    		     false,
     		     IntervalIntDomain(0, 10),
     		     IntervalIntDomain(0, 20),
     		     IntervalIntDomain(1, 1000));
@@ -226,6 +227,7 @@ private:
     IntervalToken t2(db.getId(), 
     		     "Objects.Predicate", 
     		     true,
+    		     false,
     		     IntervalIntDomain(0, 10),
     		     IntervalIntDomain(0, 20),
     		     IntervalIntDomain(1, 1000));
@@ -267,6 +269,7 @@ private:
     IntervalToken first(db.getId(),
 			"Objects.Predicate", 
 			true,
+			false,
 			IntervalIntDomain(0, 100),
 			IntervalIntDomain(0, 100),
 			IntervalIntDomain(1, 1000));
@@ -274,6 +277,7 @@ private:
     IntervalToken second(db.getId(),
 			 "Objects.Predicate", 
 			 true,
+			 false,
 			 IntervalIntDomain(0, 100),
 			 IntervalIntDomain(0, 100),
 			 IntervalIntDomain(1, 1000));
@@ -354,18 +358,21 @@ private:
     IntervalToken token(db.getId(),
 			"Objects.Predicate", 
 			true,
+			false,
 			IntervalIntDomain(0, 10),
 			IntervalIntDomain(0, 20),
 			IntervalIntDomain(1, 1000));
     IntervalToken predecessor(db.getId(),
 			      "Objects.Predicate", 
 			      true,
+			      false,
 			      IntervalIntDomain(0, 10),
 			      IntervalIntDomain(0, 20),
 			      IntervalIntDomain(1, 1000));
     IntervalToken successor(db.getId(),
 			    "Objects.Predicate", 
 			    true,
+			    false,
 			    IntervalIntDomain(0, 10),
 			    IntervalIntDomain(0, 20),
 			    IntervalIntDomain(1, 1000));
@@ -392,6 +399,7 @@ private:
     IntervalToken t0(db.getId(),
 		     "Objects.Predicate", 
 		     true,
+		     false,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
@@ -399,6 +407,7 @@ private:
     IntervalToken t1(db.getId(),
 		     "Objects.Predicate", 
 		     true,
+		     false,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
@@ -406,6 +415,7 @@ private:
     IntervalToken t2(db.getId(),
 		     "Objects.Predicate", 
 		     true,
+		     false,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
@@ -597,6 +607,7 @@ private:
     IntervalToken t1(db.getId(),
     		     "Objects.Predicate", 
     		     true,
+    		     false,
     		     IntervalIntDomain(0, 10),
     		     IntervalIntDomain(0, 20),
     		     IntervalIntDomain(1, 1000));
@@ -608,6 +619,7 @@ private:
     IntervalToken t2(db.getId(), 
     		     "Objects.Predicate", 
     		     true,
+    		     false,
     		     IntervalIntDomain(0, 10),
     		     IntervalIntDomain(0, 20),
     		     IntervalIntDomain(1, 1000));
@@ -657,6 +669,7 @@ private:
     IntervalToken t1(db.getId(),
     		     "Objects.PredicateA", 
     		     true,
+    		     false,
     		     IntervalIntDomain(0, 10),
     		     IntervalIntDomain(0, 20),
     		     IntervalIntDomain(1, 5),

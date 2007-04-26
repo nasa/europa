@@ -57,8 +57,8 @@ namespace NDDL {
   
   
   // Plasma.nddl:143 uses
-  Reusable::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Reusable::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -281,8 +281,8 @@ namespace NDDL {
   
   
   // Plasma.nddl:179 use
-  Unary::use::use(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Unary::use::use(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -327,8 +327,8 @@ namespace NDDL {
   
   
   // Plasma.nddl:188 uses
-  UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -438,8 +438,8 @@ namespace NDDL {
   
   
   // less-basic-model.nddl:9 At
-  Rover::At::At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Rover::At::At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -469,8 +469,8 @@ namespace NDDL {
   
   
   // less-basic-model.nddl:14 Going
-  Rover::Going::Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Rover::Going::Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -627,8 +627,8 @@ namespace NDDL {
   
   
   // less-basic-model.nddl:42 On
-  Camera::On::On(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Camera::On::On(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -655,8 +655,8 @@ namespace NDDL {
   
   
   // less-basic-model.nddl:45 Off
-  Camera::Off::Off(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Camera::Off::Off(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -683,8 +683,8 @@ namespace NDDL {
   
   
   // less-basic-model.nddl:48 TakingPicture
-  Camera::TakingPicture::TakingPicture(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Camera::TakingPicture::TakingPicture(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -806,8 +806,8 @@ namespace NDDL {
   
   
   // less-basic-model.nddl:78 initialState
-  World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   

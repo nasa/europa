@@ -124,8 +124,8 @@
       : ConcreteTokenFactory(DEFAULT_PREDICATE()) {
     }
   private:
-    TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false) const {
-      TokenId token = (new IntervalToken(planDb, name, rejectable))->getId();
+    TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false, bool isFact = false) const {
+      TokenId token = (new IntervalToken(planDb, name, rejectable, isFact))->getId();
       return(token);
     }
     TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const{
@@ -546,7 +546,7 @@ private:
     assertTrue(object1 != object2);
     assertTrue(db.getObjects().size() == 2);
     // 2. Create 1 token.
-    EventToken eventToken(db.getId(), DEFAULT_PREDICATE(), false, IntervalIntDomain(0, 10));
+    EventToken eventToken(db.getId(), DEFAULT_PREDICATE(), false, false, IntervalIntDomain(0, 10));
 
     // Confirm not added to the object
     assertFalse(eventToken.getObject()->getDerivedDomain().isSingleton());
@@ -837,7 +837,7 @@ private:
     assertTrue(ENGINE->propagate());
     // Now add an object and we should expect the constraint network to be consistent next time we add the token.
     ObjectId o1 = (new Object(db.getId(), DEFAULT_OBJECT_TYPE(), "o1"))->getId();
-    EventToken eventToken(db.getId(), DEFAULT_PREDICATE(), false, IntervalIntDomain(0, 10));
+    EventToken eventToken(db.getId(), DEFAULT_PREDICATE(), false, false, IntervalIntDomain(0, 10));
 
     eventToken.activate(); // Must be activate to eventually propagate the objectTokenRelation
     assertTrue(ENGINE->propagate());
@@ -865,21 +865,24 @@ private:
   
     IntervalToken t1(db.getId(),  
                      DEFAULT_PREDICATE(),                                                     
-                     true,                                                               
+                     true,      
+                     false,                                                         
                      IntervalIntDomain(0, 10),                                           
                      IntervalIntDomain(0, 20),                                           
                      IntervalIntDomain(1, 1000));                                        
   
     IntervalToken t2(db.getId(),                                                         
                      DEFAULT_PREDICATE(),                                                     
-                     true,                                                               
+                     true,             
+                     false,                                                  
                      IntervalIntDomain(0, 10),                                           
                      IntervalIntDomain(0, 20),                                           
                      IntervalIntDomain(1, 1000));                                        
   
     IntervalToken t3(db.getId(),                                                         
                      DEFAULT_PREDICATE(),                                                     
-                     true,                                                               
+                     true,       
+                     false,                                                        
                      IntervalIntDomain(0, 10),                                           
                      IntervalIntDomain(0, 20),                                           
                      IntervalIntDomain(1, 1000));
@@ -905,7 +908,8 @@ private:
     {
       IntervalToken t4(db.getId(),                                                         
 		       DEFAULT_PREDICATE(),                                                     
-		       true,                                                               
+		       true,         
+		       false,                                                      
 		       IntervalIntDomain(0, 10),                                           
 		       IntervalIntDomain(0, 20),                                           
 		       IntervalIntDomain(1, 1000));
@@ -952,7 +956,7 @@ private:
   static bool testBasicTokenAllocation() {
     DEFAULT_SETUP(ce, db, true);
     // Event Token
-    EventToken eventToken(db, DEFAULT_PREDICATE(), true, IntervalIntDomain(0, 1000), Token::noObject(), false);
+    EventToken eventToken(db, DEFAULT_PREDICATE(), true, false, IntervalIntDomain(0, 1000), Token::noObject(), false);
     assertTrue(eventToken.getStart()->getDerivedDomain() == eventToken.getEnd()->getDerivedDomain());
     assertTrue(eventToken.getDuration()->getDerivedDomain() == IntervalIntDomain(0, 0));
     eventToken.getStart()->restrictBaseDomain(IntervalIntDomain(5, 10));
@@ -964,6 +968,7 @@ private:
     IntervalToken intervalToken(db, 
                                 DEFAULT_PREDICATE(), 
                                 true, 
+                                false,
                                 IntervalIntDomain(0, 1000),
                                 IntervalIntDomain(0, 1000),
                                 IntervalIntDomain(2, 10),
@@ -987,7 +992,8 @@ private:
     // Create and delete a Token
     TokenId token = (new IntervalToken(db, 
                                        DEFAULT_PREDICATE(), 
-                                       true, 
+                                       true,
+                                       false, 
                                        IntervalIntDomain(0, 1000),
                                        IntervalIntDomain(0, 1000),
                                        IntervalIntDomain(2, 10),
@@ -1006,7 +1012,8 @@ private:
   
     IntervalToken t1(db,                                                         
                      DEFAULT_PREDICATE(),                                                     
-                     true,                                                               
+                     true,    
+                     false,                                                           
                      IntervalIntDomain(0, 10),                                           
                      IntervalIntDomain(0, 20),                                           
                      IntervalIntDomain(1, 1000));                                        
@@ -1019,6 +1026,7 @@ private:
     IntervalToken t0(db, 
                      DEFAULT_PREDICATE(), 
                      true, 
+                     false,
                      IntervalIntDomain(0, 1000),
                      IntervalIntDomain(0, 1000),
                      IntervalIntDomain(2, 10),
@@ -1039,6 +1047,7 @@ private:
     IntervalToken t1(db, 
                      DEFAULT_PREDICATE(), 
                      true, 
+                     false,
                      IntervalIntDomain(0, 1000),
                      IntervalIntDomain(0, 1000),
                      IntervalIntDomain(2, 10),
@@ -1071,6 +1080,7 @@ private:
     IntervalToken t0(db, 
                      DEFAULT_PREDICATE(), 
                      false, 
+                     false,
                      IntervalIntDomain(0, 1),
                      IntervalIntDomain(0, 1),
                      IntervalIntDomain(1, 1));
@@ -1078,6 +1088,7 @@ private:
   
     TokenId t1 = (new IntervalToken(db, 
                                     DEFAULT_PREDICATE(), 
+                                    false,
                                     false,
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(0, 1),
@@ -1142,6 +1153,7 @@ private:
       IntervalToken t0(db, 
 		       DEFAULT_PREDICATE(), 
 		       true,
+		       false,
 		       IntervalIntDomain(0, 10),
 		       IntervalIntDomain(0, 20),
 		       IntervalIntDomain(1, 1000));
@@ -1149,6 +1161,7 @@ private:
       IntervalToken t1(db,
 		       DEFAULT_PREDICATE(), 
 		       true,
+		       false,
 		       IntervalIntDomain(0, 10),
 		       IntervalIntDomain(0, 20),
 		       IntervalIntDomain(1, 1000));
@@ -1163,6 +1176,7 @@ private:
       IntervalToken t0(db, 
 		       DEFAULT_PREDICATE(), 
 		       true,
+		       false,
 		       IntervalIntDomain(0, 0),
 		       IntervalIntDomain(),
 		       IntervalIntDomain(1, 1));
@@ -1170,6 +1184,7 @@ private:
       IntervalToken t1(db,
 		       DEFAULT_PREDICATE(), 
 		       true,
+		       false,
 		       IntervalIntDomain(0, 0),
 		       IntervalIntDomain(),
 		       IntervalIntDomain(1, 1));
@@ -1186,6 +1201,7 @@ private:
       IntervalToken t0(db, 
 		       DEFAULT_PREDICATE(), 
 		       true,
+		       false,
 		       IntervalIntDomain(0, 0),
 		       IntervalIntDomain(1, 1),
 		       IntervalIntDomain(1, 1));
@@ -1227,6 +1243,7 @@ private:
     IntervalToken t0(db, 
                      DEFAULT_PREDICATE(), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000),
@@ -1235,6 +1252,7 @@ private:
     IntervalToken t1(db,
                      DEFAULT_PREDICATE(), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
@@ -1271,6 +1289,7 @@ private:
     IntervalToken t0(db, 
                      DEFAULT_PREDICATE(), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
@@ -1280,6 +1299,7 @@ private:
     IntervalToken t1(db,
                      DEFAULT_PREDICATE(), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
@@ -1311,6 +1331,7 @@ private:
     IntervalToken t2(db, 
                      DEFAULT_PREDICATE(), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
@@ -1375,6 +1396,7 @@ private:
     IntervalToken t0(db, 
                      DEFAULT_PREDICATE(), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
@@ -1382,6 +1404,7 @@ private:
     IntervalToken t1(db,
                      DEFAULT_PREDICATE(), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
@@ -1391,6 +1414,7 @@ private:
     IntervalToken t2(db, 
                      DEFAULT_PREDICATE(), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
@@ -1398,6 +1422,7 @@ private:
     IntervalToken t3(db,
                      DEFAULT_PREDICATE(), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
@@ -1437,6 +1462,7 @@ private:
     IntervalToken token0(db, 
 			 DEFAULT_PREDICATE(), 
 			 false,
+			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(1, 1000),
@@ -1447,6 +1473,7 @@ private:
     IntervalToken token1(db, 
 			 DEFAULT_PREDICATE(), 
 			 false,
+			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(1, 1000),
@@ -1456,6 +1483,7 @@ private:
 
     IntervalToken token2(db, 
 			 DEFAULT_PREDICATE(), 
+			 false,
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -1468,6 +1496,7 @@ private:
 
     IntervalToken token3(db, 
 			 DEFAULT_PREDICATE(), 
+			 false,
 			 false,
 			 IntervalIntDomain(0, 10),
 			 IntervalIntDomain(0, 200),
@@ -1586,6 +1615,7 @@ private:
         IntervalTokenId t = (new IntervalToken(db, 
                                                DEFAULT_PREDICATE(), 
                                                true,
+                                               false,
                                                IntervalIntDomain(0, 210),
                                                IntervalIntDomain(0, 220),
                                                IntervalIntDomain(1, 110),
@@ -1680,6 +1710,7 @@ private:
     IntervalToken t0(db, 
                      LabelStr(DEFAULT_PREDICATE()), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
@@ -1691,6 +1722,7 @@ private:
     IntervalToken t1(db,
                      LabelStr(DEFAULT_PREDICATE()), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
@@ -1718,6 +1750,7 @@ private:
     IntervalToken t2(db,
                      LabelStr(DEFAULT_PREDICATE()), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
@@ -1736,6 +1769,7 @@ private:
     IntervalToken t3(db,
                      LabelStr(DEFAULT_PREDICATE()), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
@@ -1791,6 +1825,7 @@ private:
     IntervalToken t0(db,
                      LabelStr("A.a"), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
@@ -1801,6 +1836,7 @@ private:
     IntervalToken t1(db,
                      LabelStr("A.b"), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
@@ -1811,6 +1847,7 @@ private:
     IntervalToken t2(db,
                      LabelStr("B.a"), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
@@ -1821,6 +1858,7 @@ private:
     IntervalToken t3(db,
                      LabelStr("C.a"), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
@@ -1831,6 +1869,7 @@ private:
     IntervalToken t4(db,
                      LabelStr("C.b"), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
@@ -1841,6 +1880,7 @@ private:
     IntervalToken t5(db,
                      LabelStr("C.c"), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
@@ -1851,6 +1891,7 @@ private:
     IntervalToken t6(db,
                      LabelStr("D.a"), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
@@ -1861,6 +1902,7 @@ private:
     IntervalToken t7(db,
                      LabelStr("D.b"), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
@@ -1874,6 +1916,7 @@ private:
       IntervalToken t(db,
 		      LabelStr("A.a"), 
 		      true,
+		      false,
 		      IntervalIntDomain(0, 10),
 		      IntervalIntDomain(0, 20),
 		      IntervalIntDomain(1, 1000),
@@ -1894,6 +1937,7 @@ private:
       IntervalToken t(db,
 		      LabelStr("D.b"), 
 		      true,
+		      false,
 		      IntervalIntDomain(0, 10),
 		      IntervalIntDomain(0, 20),
 		      IntervalIntDomain(1, 1000),
@@ -1935,6 +1979,7 @@ private:
     IntervalToken tokenA(db, 
                          LabelStr(DEFAULT_PREDICATE()), 
                          true,
+                         false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
@@ -1949,6 +1994,7 @@ private:
     IntervalToken tokenB(db, 
                          LabelStr(DEFAULT_PREDICATE()), 
                          true,
+                         false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
@@ -1956,6 +2002,7 @@ private:
     IntervalToken tokenC(db, 
                          LabelStr(DEFAULT_PREDICATE()), 
                          true,
+                         false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
@@ -2000,6 +2047,7 @@ private:
     IntervalToken t0(db,
                      DEFAULT_PREDICATE(),
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
@@ -2011,6 +2059,7 @@ private:
     IntervalToken t1(db,
                      DEFAULT_PREDICATE(),
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
@@ -2023,6 +2072,7 @@ private:
     IntervalToken t2(db,
                      DEFAULT_PREDICATE(),
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
@@ -2035,11 +2085,12 @@ private:
     IntervalToken t3(db,
                      DEFAULT_PREDICATE(),
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
-										 Token::noObject(),
-										 false);
+					 Token::noObject(),
+					false);
     t3.addParameter(one, LabelStr("FOO"));
     t3.getVariable(LabelStr("FOO"))->open();
     t3.close();
@@ -2047,11 +2098,12 @@ private:
     IntervalToken t4(db,
                      DEFAULT_PREDICATE(),
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
-										 Token::noObject(),
-										 false);
+					 Token::noObject(),
+					 false);
     t4.addParameter(one, LabelStr("FOO"));
     t4.getVariable(LabelStr("FOO"))->open();
     t4.close();
@@ -2098,6 +2150,7 @@ private:
     IntervalToken t0(db,
                      DEFAULT_PREDICATE(),
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
@@ -2109,6 +2162,7 @@ private:
     IntervalToken t1(db,
                      DEFAULT_PREDICATE(),
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000),
@@ -2145,6 +2199,7 @@ private:
     IntervalToken t0(db, 
                      DEFAULT_PREDICATE(), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
@@ -2153,6 +2208,7 @@ private:
     IntervalToken t1(db, 
                      DEFAULT_PREDICATE(), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(10, 20),
                      IntervalIntDomain(1, 1000));
@@ -2173,6 +2229,7 @@ private:
     IntervalToken t2(db, 
                      DEFAULT_PREDICATE(), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 9),
                      IntervalIntDomain(1, 1000));
@@ -2204,6 +2261,7 @@ private:
     IntervalToken t0(db.getId(), 
                      DEFAULT_PREDICATE(), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 9),
                      IntervalIntDomain(1, 1000));
@@ -2254,7 +2312,8 @@ private:
   
     TokenId master = (new IntervalToken(db.getId(),  
 				       DEFAULT_PREDICATE(),                                                     
-				       true,                                                               
+				       true, 
+				       false,                                                              
 				       IntervalIntDomain(0, 10),                                           
 				       IntervalIntDomain(0, 20),                                           
 				       IntervalIntDomain(1, 1000)))->getId();                                  
@@ -2300,7 +2359,8 @@ private:
   
     TokenId master = (new IntervalToken(db.getId(),  
 				       DEFAULT_PREDICATE(),                                                     
-				       true,                                                               
+				       true,  
+				       false,                                                             
 				       IntervalIntDomain(0, 10),                                           
 				       IntervalIntDomain(0, 20),                                           
 				       IntervalIntDomain(1, 1000)))->getId();                                  
@@ -2310,7 +2370,8 @@ private:
   
     TokenId orphan = (new IntervalToken(db.getId(),  
 					DEFAULT_PREDICATE(),                                                     
-					true,                                                               
+					true,  
+					false,                                                             
 					IntervalIntDomain(0, 10),                                           
 					IntervalIntDomain(0, 20),                                           
 					IntervalIntDomain(1, 1000)))->getId();       
@@ -2375,7 +2436,8 @@ private:
 
     TokenId master = (new IntervalToken(db.getId(),  
 				       DEFAULT_PREDICATE(),                                                     
-				       true,                                                               
+				       true, 
+				       false,                                                              
 				       IntervalIntDomain(0, 10),                                           
 				       IntervalIntDomain(0, 20),                                           
 				       IntervalIntDomain(1, 1000)))->getId();                                  
@@ -2399,7 +2461,8 @@ private:
 
     TokenId t0 = (new IntervalToken(db.getId(),  
 				       DEFAULT_PREDICATE(),                                                     
-				       true,                                                               
+				       true,    
+				       false,                                                           
 				       IntervalIntDomain(0, 10),                                           
 				       IntervalIntDomain(0, 20),                                           
 				       IntervalIntDomain(1, 1000)))->getId();  
@@ -2407,7 +2470,8 @@ private:
 
     TokenId t1 = (new IntervalToken(db.getId(),  
 				       DEFAULT_PREDICATE(),                                                     
-				       true,                                                               
+				       true, 
+				       false,                                                              
 				       IntervalIntDomain(0, 10),                                           
 				       IntervalIntDomain(0, 20),                                           
 				       IntervalIntDomain(1, 1000)))->getId();
@@ -2458,6 +2522,7 @@ private:
     IntervalToken tokenA(db, 
                          LabelStr(DEFAULT_PREDICATE()), 
                          true,
+                         false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
@@ -2465,6 +2530,7 @@ private:
     IntervalToken tokenB(db, 
                          LabelStr(DEFAULT_PREDICATE()), 
                          true,
+                         false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
@@ -2472,6 +2538,7 @@ private:
     IntervalToken tokenC(db, 
                          LabelStr(DEFAULT_PREDICATE()), 
                          true,
+                         false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
@@ -2479,6 +2546,7 @@ private:
     IntervalToken tokenD(db, 
                          LabelStr(DEFAULT_PREDICATE()), 
                          true,
+                         false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
@@ -2615,6 +2683,7 @@ private:
     IntervalToken tokenA(db, 
                          LabelStr(DEFAULT_PREDICATE()), 
                          true,
+                         false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
@@ -2622,6 +2691,7 @@ private:
     IntervalToken tokenB(db, 
                          LabelStr(DEFAULT_PREDICATE()), 
                          true,
+                         false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
@@ -2629,6 +2699,7 @@ private:
     IntervalToken tokenC(db, 
                          LabelStr(DEFAULT_PREDICATE()), 
                          true,
+                         false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
@@ -2673,6 +2744,7 @@ private:
     Token* tokenD = new IntervalToken(db, 
                                       LabelStr(DEFAULT_PREDICATE()), 
                                       true,
+                                      false,
                                       IntervalIntDomain(0, 10),
                                       IntervalIntDomain(0, 20),
                                       IntervalIntDomain(1, 1000));
@@ -2702,6 +2774,7 @@ private:
       TokenId token = (new IntervalToken(db, 
                                          LabelStr(DEFAULT_PREDICATE()),
                                          true,
+                                         false,
                                          IntervalIntDomain(start, start),
                                          IntervalIntDomain(start+DURATION, start+DURATION),
                                          IntervalIntDomain(DURATION, DURATION)))->getId();
@@ -2749,6 +2822,7 @@ private:
     TokenId token = (new IntervalToken(db, 
                                        LabelStr(DEFAULT_PREDICATE()),
                                        true,
+                                       false,
                                        IntervalIntDomain(),
                                        IntervalIntDomain(),
                                        IntervalIntDomain(DURATION, DURATION)))->getId();
@@ -2769,6 +2843,7 @@ private:
     TokenId token2 = (new IntervalToken(db, 
 					LabelStr(DEFAULT_PREDICATE()),
 					true,
+					false,
 					IntervalIntDomain(),
 					IntervalIntDomain(),
 					IntervalIntDomain(DURATION, DURATION)))->getId();
@@ -2816,6 +2891,7 @@ private:
     IntervalToken it1(db, 
                       LabelStr(DEFAULT_PREDICATE()), 
                       true,
+                      false,
                       IntervalIntDomain(0, 10),
                       IntervalIntDomain(0, 1000),
                       IntervalIntDomain(1, 1000));
@@ -2828,6 +2904,7 @@ private:
     EventToken et1(db, 
                    DEFAULT_PREDICATE(), 
                    true, 
+                   false,
                    IntervalIntDomain(0, 100), 
                    Token::noObject());
 
@@ -2840,6 +2917,7 @@ private:
     EventToken et2(db, 
                    DEFAULT_PREDICATE(), 
                    true, 
+                   false,
                    IntervalIntDomain(0, 100), 
                    Token::noObject());
 
@@ -2852,6 +2930,7 @@ private:
     EventToken et3(db, 
                    DEFAULT_PREDICATE(), 
                    true, 
+                   false,
                    IntervalIntDomain(10, 100), 
                    Token::noObject());
 
@@ -2864,6 +2943,7 @@ private:
     EventToken et4(db, 
                    DEFAULT_PREDICATE(), 
                    true, 
+                   false,
                    IntervalIntDomain(0, 100), 
                    Token::noObject());
 
@@ -2884,6 +2964,7 @@ private:
     IntervalToken tokenA(db, 
                          LabelStr(DEFAULT_PREDICATE()), 
                          true,
+                         false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
@@ -2891,6 +2972,7 @@ private:
     IntervalToken tokenB(db, 
                          LabelStr(DEFAULT_PREDICATE()), 
                          true,
+                         false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
@@ -2898,6 +2980,7 @@ private:
     IntervalToken tokenC(db, 
                          LabelStr(DEFAULT_PREDICATE()), 
                          true,
+                         false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
@@ -2926,6 +3009,7 @@ private:
     IntervalToken tokenA(db, 
                          LabelStr(DEFAULT_PREDICATE()), 
                          true,
+                         false,
                          IntervalIntDomain(10, 10),
                          IntervalIntDomain(20, 20),
                          IntervalIntDomain(1, 1000));
@@ -2933,6 +3017,7 @@ private:
     IntervalToken tokenB(db, 
                          LabelStr(DEFAULT_PREDICATE()), 
                          true,
+                         false,
                          IntervalIntDomain(100, 100),
                          IntervalIntDomain(120, 120),
                          IntervalIntDomain(1, 1000));
@@ -2940,6 +3025,7 @@ private:
     IntervalToken tokenC(db, 
                          LabelStr(DEFAULT_PREDICATE()), 
                          true,
+                         false,
                          IntervalIntDomain(9, 9),
                          IntervalIntDomain(11, 11),
                          IntervalIntDomain(1, 1000));
@@ -2974,6 +3060,7 @@ private:
     IntervalToken t0(db.getId(), 
                      DEFAULT_PREDICATE(), 
                      true,
+                     false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 9),
                      IntervalIntDomain(1, 1000));
@@ -3025,21 +3112,24 @@ private:
   
     IntervalToken t1(db.getId(),  
                      DEFAULT_PREDICATE(),                                                     
-                     true,                                                               
+                     true,   
+                     false,                                                            
                      IntervalIntDomain(0, 10),                                           
                      IntervalIntDomain(0, 20),                                           
                      IntervalIntDomain(1, 1000));                                        
   
     IntervalToken t2(db.getId(),                                                         
                      DEFAULT_PREDICATE(),                                                     
-                     true,                                                               
+                     true, 
+                     false,                                                              
                      IntervalIntDomain(0, 10),                                           
                      IntervalIntDomain(0, 20),                                           
                      IntervalIntDomain(1, 1000));                                        
   
     IntervalToken t3(db.getId(),                                                         
                      DEFAULT_PREDICATE(),                                                     
-                     true,                                                               
+                     true,  
+                     false,                                                             
                      IntervalIntDomain(0, 10),                                           
                      IntervalIntDomain(0, 20),                                           
                      IntervalIntDomain(1, 1000));
@@ -3061,7 +3151,8 @@ private:
     // Also use a locally scoped token to force a different deletion path
     TokenId t4 = (new IntervalToken(db.getId(),                                                         
 				    DEFAULT_PREDICATE(),                                                     
-				    true,                                                               
+				    true,  
+				    false,                                                             
 				    IntervalIntDomain(0, 10),                                           
 				    IntervalIntDomain(0, 20),                                           
 				    IntervalIntDomain(1, 1000)))->getId();
@@ -3090,6 +3181,7 @@ private:
       TokenId master = (new IntervalToken(db, 
 					  LabelStr(DEFAULT_PREDICATE()), 
 					  true,
+					  false,
 					  IntervalIntDomain(0, 0),
 					  IntervalIntDomain(),
 					  IntervalIntDomain(1, 1)))->getId();
@@ -3120,6 +3212,7 @@ private:
       TokenId master = (new IntervalToken(db, 
 					  LabelStr(DEFAULT_PREDICATE()), 
 					  true,
+					  false,
 					  IntervalIntDomain(1, 1),
 					  IntervalIntDomain(),
 					  IntervalIntDomain(1, 1)))->getId();
@@ -3172,6 +3265,7 @@ private:
       TokenId tokenA = (new IntervalToken(db, 
 					  LabelStr(DEFAULT_PREDICATE()), 
 					  true,
+					  false,
 					  IntervalIntDomain(i, i),
 					  IntervalIntDomain(),
 					  IntervalIntDomain(1, 1)))->getId();
@@ -3181,6 +3275,7 @@ private:
       new IntervalToken(db, 
 			LabelStr(DEFAULT_PREDICATE()), 
 			true,
+			false,
 			IntervalIntDomain(i, i),
 			IntervalIntDomain(),
 			IntervalIntDomain(1, 1));
@@ -3256,6 +3351,7 @@ private:
     TokenId tokenA = (new IntervalToken(db, 
 					LabelStr(DEFAULT_PREDICATE()), 
 					true,
+					false,
 					IntervalIntDomain(startTick, startTick),
 					IntervalIntDomain(),
 					IntervalIntDomain(1, 1)))->getId();
@@ -3305,6 +3401,7 @@ private:
     TokenId tokenA = (new IntervalToken(db, 
 					LabelStr(DEFAULT_PREDICATE()), 
 					true,
+					false,
 					IntervalIntDomain(startTick, startTick),
 					IntervalIntDomain(),
 					IntervalIntDomain(1, 1)))->getId();
@@ -3361,6 +3458,7 @@ private:
     TokenId tokenA = (new IntervalToken(db, 
 					LabelStr(DEFAULT_PREDICATE()), 
 					true,
+					false,
 					IntervalIntDomain(startTick, startTick),
 					IntervalIntDomain(),
 					IntervalIntDomain(1, 1)))->getId();
@@ -3371,6 +3469,7 @@ private:
     TokenId tokenB = (new IntervalToken(db, 
 					LabelStr(DEFAULT_PREDICATE()), 
 					true,
+					false,
 					IntervalIntDomain(startTick, startTick),
 					IntervalIntDomain(),
 					IntervalIntDomain(1, 1)))->getId();
@@ -3733,8 +3832,8 @@ public:
     // Borrowed from System/test/backtr.{nddl,cc,hh,xml}
     class Sample : public IntervalToken {
     public:
-      Sample(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false)
-        : IntervalToken(planDb, name, rejectable, IntervalIntDomain(), IntervalIntDomain(),
+      Sample(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false, bool isFact = false)
+        : IntervalToken(planDb, name, rejectable, isFact, IntervalIntDomain(), IntervalIntDomain(),
                         IntervalIntDomain(1, PLUS_INFINITY), Token::noObject(), false) {
         handleDefaults();
       }
@@ -3761,8 +3860,8 @@ public:
           : ConcreteTokenFactory(LabelStr("TestClass2.Sample")) {
         }
       private:
-        TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false) const {
-          TokenId token = (new Sample(planDb, name, rejectable))->getId();
+        TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false, bool isFact = false) const {
+          TokenId token = (new Sample(planDb, name, rejectable, isFact))->getId();
           return(token);
         }
         TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const {

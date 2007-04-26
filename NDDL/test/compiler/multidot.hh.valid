@@ -69,7 +69,7 @@ namespace NDDL {
     // Plasma.nddl:143 uses
     class uses : public NddlToken {
     public:
-      uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       uses(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Reusable::uses, Reusable.uses);
@@ -109,7 +109,7 @@ namespace NDDL {
     // Plasma.nddl:179 use
     class use : public NddlToken {
     public:
-      use(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      use(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       use(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Unary::use, Unary.use);
@@ -133,7 +133,7 @@ namespace NDDL {
     // Plasma.nddl:188 uses
     class uses : public NddlToken {
     public:
-      uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       uses(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(UnaryResource::uses, UnaryResource.uses);
@@ -205,7 +205,7 @@ namespace NDDL {
     // multidot.nddl:24 apred
     class apred : public NddlToken {
     public:
-      apred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      apred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       apred(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Baz::apred, Baz.apred);
@@ -216,7 +216,7 @@ namespace NDDL {
     // multidot.nddl:28 bpred
     class bpred : public NddlToken {
     public:
-      bpred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      bpred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       bpred(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Baz::bpred, Baz.bpred);
@@ -244,7 +244,7 @@ namespace NDDL {
     // multidot.nddl:47 mumbPred
     class mumbPred : public NddlToken {
     public:
-      mumbPred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      mumbPred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       mumbPred(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Mumble::mumbPred, Mumble.mumbPred);

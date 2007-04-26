@@ -62,8 +62,8 @@ namespace NDDL {
   
   
   // Resources.nddl:96 uses
-  UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -109,8 +109,8 @@ namespace NDDL {
   
   
   // simple-resources.nddl:4 change
-  Battery::change::change(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlResource::change(planDatabase, name, rejectable, false) {
+  Battery::change::change(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlResource::change(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -217,8 +217,8 @@ namespace NDDL {
   
   
   // simple-resources.nddl:19 At
-  Rover::At::At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Rover::At::At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -240,8 +240,8 @@ namespace NDDL {
   
   
   // simple-resources.nddl:23 Going
-  Rover::Going::Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Rover::Going::Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -334,8 +334,8 @@ namespace NDDL {
   
   
   // simple-resources.nddl:45 initialState
-  World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   

@@ -54,7 +54,7 @@ namespace NDDL {
     // Plasma.nddl:188 uses
     class uses : public NddlToken {
     public:
-      uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       uses(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(UnaryResource::uses, UnaryResource.uses);
@@ -93,7 +93,7 @@ namespace NDDL {
     // subtype-extension.nddl:10 P
     class P : public NddlToken {
     public:
-      P(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      P(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       P(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Base::P, Base.P);
@@ -116,7 +116,7 @@ namespace NDDL {
     // subtype-extension.nddl:20 P
     class P : public Base::P {
     public:
-      P(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      P(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       P(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Derived::P, Derived.P);

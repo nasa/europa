@@ -61,7 +61,7 @@ namespace NDDL {
     // Plasma.nddl:143 uses
     class uses : public NddlToken {
     public:
-      uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       uses(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Reusable::uses, Reusable.uses);
@@ -101,7 +101,7 @@ namespace NDDL {
     // Plasma.nddl:179 use
     class use : public NddlToken {
     public:
-      use(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      use(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       use(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Unary::use, Unary.use);
@@ -125,7 +125,7 @@ namespace NDDL {
     // Plasma.nddl:188 uses
     class uses : public NddlToken {
     public:
-      uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       uses(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(UnaryResource::uses, UnaryResource.uses);
@@ -175,7 +175,7 @@ namespace NDDL {
     // guards.nddl:8 pred
     class pred : public NddlToken {
     public:
-      pred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      pred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       pred(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Bar::pred, Bar.pred);
@@ -217,7 +217,7 @@ namespace NDDL {
     // guards.nddl:19 basicToken
     class basicToken : public NddlToken {
     public:
-      basicToken(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      basicToken(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       basicToken(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Foo::basicToken, Foo.basicToken);
@@ -227,7 +227,7 @@ namespace NDDL {
     // guards.nddl:20 tokenWithParameters
     class tokenWithParameters : public NddlToken {
     public:
-      tokenWithParameters(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      tokenWithParameters(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       tokenWithParameters(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Foo::tokenWithParameters, Foo.tokenWithParameters);
@@ -242,7 +242,7 @@ namespace NDDL {
     // guards.nddl:28 impliedObjectGuard
     class impliedObjectGuard : public NddlToken {
     public:
-      impliedObjectGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      impliedObjectGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       impliedObjectGuard(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Foo::impliedObjectGuard, Foo.impliedObjectGuard);
@@ -253,7 +253,7 @@ namespace NDDL {
     // guards.nddl:32 impliedLocalVariableGuard
     class impliedLocalVariableGuard : public NddlToken {
     public:
-      impliedLocalVariableGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      impliedLocalVariableGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       impliedLocalVariableGuard(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Foo::impliedLocalVariableGuard, Foo.impliedLocalVariableGuard);
@@ -263,7 +263,7 @@ namespace NDDL {
     // guards.nddl:34 singletonGuard
     class singletonGuard : public NddlToken {
     public:
-      singletonGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      singletonGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       singletonGuard(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Foo::singletonGuard, Foo.singletonGuard);
@@ -273,7 +273,7 @@ namespace NDDL {
     // guards.nddl:35 mixGuardedWithUnguarded
     class mixGuardedWithUnguarded : public NddlToken {
     public:
-      mixGuardedWithUnguarded(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      mixGuardedWithUnguarded(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       mixGuardedWithUnguarded(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Foo::mixGuardedWithUnguarded, Foo.mixGuardedWithUnguarded);
@@ -283,7 +283,7 @@ namespace NDDL {
     // guards.nddl:36 localVariableGuard
     class localVariableGuard : public NddlToken {
     public:
-      localVariableGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      localVariableGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       localVariableGuard(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Foo::localVariableGuard, Foo.localVariableGuard);
@@ -293,7 +293,7 @@ namespace NDDL {
     // guards.nddl:37 multipleNestedGuards
     class multipleNestedGuards : public NddlToken {
     public:
-      multipleNestedGuards(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      multipleNestedGuards(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       multipleNestedGuards(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Foo::multipleNestedGuards, Foo.multipleNestedGuards);

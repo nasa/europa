@@ -228,6 +228,7 @@ private:
     IntervalToken t0(db.getId(), 
 		     LabelStr("AllObjects.Predicate"), 
 		     true,
+		     false,
 		     IntervalIntDomain(0, 1000),
 		     IntervalIntDomain(0, 1000),
 		     IntervalIntDomain(1, 1000));
@@ -255,6 +256,7 @@ private:
     IntervalToken t0(db.getId(), 
 		     LabelStr("AllObjects.Predicate"), 
 		     true,
+		     false,
 		     IntervalIntDomain(0, 10),
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
@@ -301,6 +303,7 @@ private:
     IntervalToken t0(db.getId(), 
 		     LabelStr("AllObjects.Predicate"), 
 		     true,
+		     false,
 		     IntervalIntDomain(0, 1000),
 		     IntervalIntDomain(0, 1000),
 		     IntervalIntDomain(1, 1000));
@@ -336,6 +339,7 @@ private:
     IntervalToken t0(db.getId(), 
 		     LabelStr("AllObjects.Predicate"), 
 		     true,
+		     false,
 		     IntervalIntDomain(0, 1000),
 		     IntervalIntDomain(0, 1000),
 		     IntervalIntDomain(1, 1000));
@@ -377,6 +381,7 @@ private:
       IntervalToken t0(db.getId(), 
 		       LabelStr("AllObjects.Predicate"), 
 		       true,
+		       false,
 		       IntervalIntDomain(0, 1000),
 		       IntervalIntDomain(0, 1000),
 		       IntervalIntDomain(1, 1000));
@@ -402,6 +407,7 @@ private:
 	IntervalToken t0(db.getId(), 
 			 LabelStr("AllObjects.Predicate"), 
 			 true,
+			 false,
 			 IntervalIntDomain(0, 1000),
 			 IntervalIntDomain(0, 1000),
 			 IntervalIntDomain(1, 1000));

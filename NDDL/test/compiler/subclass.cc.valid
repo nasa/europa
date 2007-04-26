@@ -57,8 +57,8 @@ namespace NDDL {
   
   
   // Plasma.nddl:143 uses
-  Reusable::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Reusable::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -281,8 +281,8 @@ namespace NDDL {
   
   
   // Plasma.nddl:179 use
-  Unary::use::use(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Unary::use::use(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -327,8 +327,8 @@ namespace NDDL {
   
   
   // Plasma.nddl:188 uses
-  UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -436,8 +436,8 @@ namespace NDDL {
   
   
   // subclass.nddl:10 p0
-  Foo::p0::p0(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Foo::p0::p0(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -459,8 +459,8 @@ namespace NDDL {
   
   
   // subclass.nddl:14 p1
-  Foo::p1::p1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Foo::p1::p1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -527,8 +527,8 @@ namespace NDDL {
   
   
   // subclass.nddl:25 p0
-  Bar::p0::p0(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : Foo::p0(planDatabase, name, rejectable, false) {
+  Bar::p0::p0(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : Foo::p0(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
     getVariable("arg0")->restrictBaseDomain(IntervalDomain(1.0, 1.0, "float"));
   }
@@ -549,8 +549,8 @@ namespace NDDL {
   
   
   // subclass.nddl:30 p1
-  Bar::p1::p1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : Foo::p1(planDatabase, name, rejectable, false) {
+  Bar::p1::p1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : Foo::p1(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -572,8 +572,8 @@ namespace NDDL {
   
   
   // subclass.nddl:34 p2
-  Bar::p2::p2(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Bar::p2::p2(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -615,8 +615,8 @@ namespace NDDL {
   
   
   // subclass.nddl:39 p0
-  Baz::p0::p0(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : Bar::p0(planDatabase, name, rejectable, false) {
+  Baz::p0::p0(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : Bar::p0(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -638,8 +638,8 @@ namespace NDDL {
   
   
   // subclass.nddl:44 p1
-  Baz::p1::p1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : Bar::p1(planDatabase, name, rejectable, false) {
+  Baz::p1::p1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : Bar::p1(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -688,8 +688,8 @@ namespace NDDL {
   
   
   // subclass.nddl:54 initialState
-  World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   

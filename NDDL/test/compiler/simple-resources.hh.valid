@@ -53,7 +53,7 @@ namespace NDDL {
     // Resources.nddl:96 uses
     class uses : public NddlToken {
     public:
-      uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       uses(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(UnaryResource::uses, UnaryResource.uses);
@@ -76,7 +76,7 @@ namespace NDDL {
     // simple-resources.nddl:4 change
     class change : public NddlResource::change {
     public:
-      change(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      change(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       change(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Battery::change, Battery.change);
@@ -111,7 +111,7 @@ namespace NDDL {
     // simple-resources.nddl:19 At
     class At : public NddlToken {
     public:
-      At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       At(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Rover::At, Rover.At);
@@ -122,7 +122,7 @@ namespace NDDL {
     // simple-resources.nddl:23 Going
     class Going : public NddlToken {
     public:
-      Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       Going(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(Rover::Going, Rover.Going);
@@ -153,7 +153,7 @@ namespace NDDL {
     // simple-resources.nddl:45 initialState
     class initialState : public NddlToken {
     public:
-      initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
       initialState(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
       void handleDefaults(bool autoClose = true); // default variable initialization
       DECLARE_TOKEN_FACTORY(World::initialState, World.initialState);

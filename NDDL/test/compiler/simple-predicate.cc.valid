@@ -57,8 +57,8 @@ namespace NDDL {
   
   
   // Plasma.nddl:143 uses
-  Reusable::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Reusable::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -281,8 +281,8 @@ namespace NDDL {
   
   
   // Plasma.nddl:179 use
-  Unary::use::use(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Unary::use::use(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -327,8 +327,8 @@ namespace NDDL {
   
   
   // Plasma.nddl:188 uses
-  UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -442,8 +442,8 @@ namespace NDDL {
   
   
   // simple-predicate.nddl:12 pred1
-  Foo::pred1::pred1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Foo::pred1::pred1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -570,8 +570,8 @@ namespace NDDL {
   
   
   // simple-predicate.nddl:36 pred1
-  Bar::pred1::pred1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : Foo::pred1(planDatabase, name, rejectable, false) {
+  Bar::pred1::pred1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : Foo::pred1(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
     getVariable("duration")->restrictBaseDomain(IntervalIntDomain(2, 100, "int"));
     getVariable("m_3")->restrictBaseDomain(BoolDomain(true, "bool"));
@@ -617,8 +617,8 @@ namespace NDDL {
   
   
   // simple-predicate.nddl:48 initialState
-  World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   

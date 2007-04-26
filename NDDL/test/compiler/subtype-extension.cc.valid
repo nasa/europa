@@ -56,8 +56,8 @@ namespace NDDL {
   
   
   // Plasma.nddl:188 uses
-  UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -160,8 +160,8 @@ namespace NDDL {
   
   
   // subtype-extension.nddl:10 P
-  Base::P::P(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : NddlToken(planDatabase, name, rejectable, false) {
+  Base::P::P(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
@@ -228,8 +228,8 @@ namespace NDDL {
   
   
   // subtype-extension.nddl:20 P
-  Derived::P::P(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
-   : Base::P(planDatabase, name, rejectable, false) {
+  Derived::P::P(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : Base::P(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
   }
   
