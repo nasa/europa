@@ -123,6 +123,7 @@ nddl[IXMLElement environment]
       | classDeclaration[environment]
       | rule[environment]
       | goal[environment]
+      | fact[environment]
       | {IXMLElement goal;} goal=relation[environment]
       {goal.setName("goal");}
       | constraintInstantiation[environment]
@@ -405,6 +406,13 @@ goal![IXMLElement parent]
         #(REJECTABLE_KEYWORD
       predicateArgumentList[goal]
      )
+  ;
+
+fact![IXMLElement parent]
+{IXMLElement fact = new XMLElement("fact");}
+  : { if(parent != null) parent.addChild(fact);
+        copyPosition(fact,_t);}
+    #(FACT_KEYWORD predicateArgumentList[fact])
   ;
 
 relation![IXMLElement parent]

@@ -17,7 +17,7 @@ namespace NDDL {
      * @brief Constructor for goal tokens.
      * @see PLASMA::IntervalToken
      */
-    NddlToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, const bool& rejectable = false, const bool& close = false);
+    NddlToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, const bool& rejectable = false, const bool& isFact = false, const bool& close = false);
 
     /**
      * @brief Constructor for subgoal tokens.

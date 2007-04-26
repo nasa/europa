@@ -38,8 +38,8 @@ class PredicateWriter {
 
     writer.write("\n");
     SharedWriter.generateFileLocation(writer, predicate);
-    writer.write(longname+"::"+name+"(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)\n");
-    writer.write(" : "+ superCppClass +"(planDatabase, name, rejectable, false) {\n");
+    writer.write(longname+"::"+name+"(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)\n");
+    writer.write(" : "+ superCppClass +"(planDatabase, name, rejectable, isFact, false) {\n");
     writer.indent();
     writer.write("handleDefaults(close);\n");
     writeAssignments(writer,predicate);

@@ -29,6 +29,7 @@ options {
 tokens {
 
   GOAL_KEYWORD="goal";
+  FACT_KEYWORD="fact";
   REJECTABLE_KEYWORD="rejectable";
   // access modifiers
   PRIVATE_KEYWORD="private";
@@ -392,6 +393,7 @@ nddlStatement:
   | classDeclaration
   | rule
   | goal SEMICOLON!
+  | fact SEMICOLON!
   | ((IDENT)? temporalRelation)=> relation SEMICOLON!
   | (qualified[null,true,true,true,false] DOT)=> function SEMICOLON!
   | (qualified[null,true,false,false,false])=> assignment SEMICOLON!
@@ -594,6 +596,9 @@ goal:
     (REJECTABLE_KEYWORD^ | GOAL_KEYWORD^) predicateArgumentList
   ;
 
+fact:
+    FACT_KEYWORD^ predicateArgumentList
+  ;
 //not arguments to a predicate, arguments which are predicates (possibly named)
 predicateArgumentList:
     {LT(1).getType()!=DOT && isPredVar(LT(1).getText())}? IDENT

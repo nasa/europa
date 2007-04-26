@@ -103,8 +103,8 @@ public: \
   Factory() : ConcreteTokenFactory(LabelStr(#predicateName)) { \
   } \
 private: \
-  TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false) const { \
-    TokenId token = (new klass(planDb, name, rejectable, true))->getId(); \
+  TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false, bool isFact = false) const { \
+    TokenId token = (new klass(planDb, name, rejectable, isFact, true))->getId(); \
     return(token); \
   } \
   TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const { \

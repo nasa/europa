@@ -3,10 +3,11 @@
 #include "Object.hh"
 namespace NDDL {
 
-  NddlToken::NddlToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, const bool& rejectable, const bool& close)
+  NddlToken::NddlToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, const bool& rejectable, const bool& isFact, const bool& close)
     : EUROPA::IntervalToken(planDatabase, 
                             predicateName,
                             rejectable,
+                            isFact,
                             IntervalIntDomain(),
                             IntervalIntDomain(),
                             IntervalIntDomain(1, PLUS_INFINITY),

@@ -79,7 +79,7 @@ class SharedWriter {
     writer.indent();
 
     if (ModelAccessor.isPredicate(element)) { // Declare constructors for Tokens
-      writer.write(name+"(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);\n");
+      writer.write(name+"(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);\n");
       writer.write(name+"(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);\n");
       String parentName = ModelAccessor.getPredicateClassName(element);
       SchemaWriter.addCommand("addPredicate(\""+parentName + "." + name+"\")");

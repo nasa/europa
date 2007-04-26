@@ -16,7 +16,7 @@ namespace NDDL {
 
   class NddlUnaryToken : public EUROPA::SAVH::UnaryToken {
   public:
-    NddlUnaryToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, const bool& rejectable = false, const bool& close = false);
+    NddlUnaryToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, const bool& rejectable = false, const bool& isFact=false, const bool& close = false);
     NddlUnaryToken(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, const bool& close = false);
 
     StateVarId state;
@@ -54,7 +54,7 @@ namespace NDDL {
 
     class use : public EUROPA::SAVH::ReusableToken {
     public:
-      use(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool close);
+      use(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool isFact, bool close);
       use(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, bool close);
       
       StateVarId state;
@@ -99,7 +99,7 @@ namespace NDDL {
 
     class uses : public EUROPA::SAVH::ReusableToken {
     public:
-      uses(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool close);
+      uses(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool isFact, bool close);
       uses(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, bool close);
       
       StateVarId state;
@@ -152,7 +152,7 @@ namespace NDDL {
 
     class produce : public EUROPA::SAVH::ProducerToken {
     public:
-      produce(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool close);
+      produce(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool isFact, bool close);
       produce(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, bool close);
 
       /* Access to primitives of a token as public members. */
@@ -176,7 +176,7 @@ namespace NDDL {
 
     class consume : public EUROPA::SAVH::ConsumerToken {
     public:
-      consume(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool close);
+      consume(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool isFact, bool close);
       consume(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, bool close);
 
       /* Access to primitives of a token as public members. */
@@ -239,7 +239,7 @@ namespace NDDL {
 
     class change: public EUROPA::Transaction {
     public:
-      change(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool close);
+      change(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool isFact, bool close);
       change(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, bool close);
 
       /* Access to primitives of a token as public members. */

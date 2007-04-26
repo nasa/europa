@@ -11,8 +11,8 @@
 
 namespace NDDL {
 
-  NddlUnaryToken::NddlUnaryToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, const bool& rejectable, const bool& close)
-    : EUROPA::SAVH::UnaryToken(planDatabase, predicateName, rejectable, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY), 
+  NddlUnaryToken::NddlUnaryToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, const bool& rejectable, const bool& isFact, const bool& close)
+    : EUROPA::SAVH::UnaryToken(planDatabase, predicateName, rejectable, isFact, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY), 
 			       EUROPA::Token::noObject(), false, false) {
     commonInit(close);
   }
@@ -86,6 +86,7 @@ namespace NDDL {
   NddlUnary::use::use(const PlanDatabaseId& planDatabase,
                       const LabelStr& predicateName,
                       bool rejectable,
+                      bool isFact,
                       bool close)
     : EUROPA::SAVH::ReusableToken(planDatabase, predicateName, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
                                   IntervalDomain(1.0), Token::noObject(), false) {
@@ -208,6 +209,7 @@ namespace NDDL {
   NddlReusable::uses::uses(const PlanDatabaseId& planDatabase,
 				const LabelStr& predicateName,
 				bool rejectable,
+				bool isFact,
 				bool close)
     : EUROPA::SAVH::ReusableToken(planDatabase, predicateName, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
 				  Token::noObject(), false) {
@@ -368,8 +370,9 @@ namespace NDDL {
   NddlReservoir::produce::produce(const PlanDatabaseId& planDatabase,
 				    const LabelStr& predicateName,
 				    bool rejectable,
+				    bool isFact,
 				    bool close)
-    : EUROPA::SAVH::ProducerToken(planDatabase, predicateName, rejectable, IntervalIntDomain(), Token::noObject(), false) {
+    : EUROPA::SAVH::ProducerToken(planDatabase, predicateName, rejectable, isFact, IntervalIntDomain(), Token::noObject(), false) {
     handleDefaults(close);
   }
 
@@ -401,8 +404,9 @@ namespace NDDL {
   NddlReservoir::consume::consume(const PlanDatabaseId& planDatabase,
 				    const LabelStr& predicateName,
 				    bool rejectable,
+				    bool isFact,
 				    bool close)
-    : EUROPA::SAVH::ConsumerToken(planDatabase, predicateName, rejectable, IntervalIntDomain(), Token::noObject(), false) {
+    : EUROPA::SAVH::ConsumerToken(planDatabase, predicateName, rejectable, isFact, IntervalIntDomain(), Token::noObject(), false) {
     handleDefaults(close);
   }
 
@@ -574,8 +578,9 @@ namespace NDDL {
   NddlResource::change::change(const PlanDatabaseId& planDatabase,
 			       const LabelStr& predicateName,
 			       bool rejectable,
+			       bool isFact,
 			       bool close)
-    : Transaction(planDatabase, predicateName, rejectable, IntervalIntDomain(), Token::noObject(), false) {
+    : Transaction(planDatabase, predicateName, rejectable, isFact, IntervalIntDomain(), Token::noObject(), false) {
     handleDefaults(close);
   }
 
