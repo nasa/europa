@@ -89,7 +89,7 @@ namespace EUROPA {
      * schema.
      * @return The Id of the token created. Will error out rather than return a noId.
      */
-    TokenId createToken(const char* predicateName, bool rejectable = false);
+    TokenId createToken(const char* predicateName, bool rejectable = false, bool isFact = false);
 
     /**
      * @brief imposes a constraint such that token comes before successor, on the given object.
@@ -296,7 +296,7 @@ namespace EUROPA {
     DbClient(const DbClient&); /* NO IMPL */
 
     /*!< Helper methods */
-    TokenId allocateToken(const LabelStr& predicateName, bool rejectable);
+    TokenId allocateToken(const LabelStr& predicateName, bool rejectable, bool isFact=false);
 
     DbClientId m_id;
     PlanDatabaseId m_planDb;

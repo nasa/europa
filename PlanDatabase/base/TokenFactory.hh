@@ -34,7 +34,8 @@ namespace EUROPA {
      */
     static TokenId createInstance(const PlanDatabaseId& planDb,
                                   const LabelStr& predicateName,
-                                  bool rejectable = false);
+                                  bool rejectable = false,
+                                  bool isFact = false);
 
     /**
      * @brief Create a slave token.
@@ -90,7 +91,8 @@ namespace EUROPA {
      */
     virtual TokenId createInstance(const PlanDatabaseId& planDb,
                                    const LabelStr& name,
-                                   bool rejectable = false) const = 0;
+                                   bool rejectable = false,
+                                   bool isFact = false) const = 0;
 
 
     /**

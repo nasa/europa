@@ -48,6 +48,7 @@ namespace EUROPA {
     void playVariableCreated(const TiXmlElement & element);
     void playObjectCreated(const TiXmlElement & element);
     void playTokenCreated(const TiXmlElement & element);
+    void playFactCreated(const TiXmlElement & element);
     void playConstrained(const TiXmlElement & element);
     void playFreed(const TiXmlElement & element);
     void playActivated(const TiXmlElement & element);

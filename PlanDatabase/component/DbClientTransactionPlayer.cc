@@ -98,6 +98,8 @@ namespace EUROPA {
       playObjectCreated(element);
     else if (strcmp(tagname, "goal") == 0)
       playTokenCreated(element);
+    else if (strcmp(tagname, "fact") == 0)
+      playFactCreated(element);
     else if (strcmp(tagname, "constrain") == 0)
       playConstrained(element);
     else if (strcmp(tagname, "free") == 0)
@@ -152,6 +154,47 @@ namespace EUROPA {
   void DbClientTransactionPlayer::playObjectCreated(const TiXmlElement & element) {
     const char * name = element.Attribute("name");
     xmlAsValue(element, name);
+  }
+
+  void DbClientTransactionPlayer::playFactCreated(const TiXmlElement & element) {
+    // simple token creation
+    TiXmlElement * child = element.FirstChildElement();
+    check_error(child != NULL);
+    const char * type = child->Attribute("type");
+    check_error(type != NULL);
+    ObjectId object;
+
+    // The type may be qualified with an object name, in which case we should get the
+    // object and specify it. We will also have to generate the appropriate type designation
+    // by extracting the class from the object
+    TokenId token;
+
+    if (!Schema::instance()->isPredicate(type)) {
+      LabelStr typeStr(type);
+      LabelStr prefix = typeStr.getElement(0, Schema::getDelimiter());
+      LabelStr suffix = typeStr.getElement(1, Schema::getDelimiter());
+      ObjectId object = m_client->getObject(prefix.c_str());
+      check_error(object.isValid(), "Failed to find an object named " + prefix.toString());
+      std::string newType(object->getType().toString() + Schema::getDelimiter() + suffix.toString());
+      type =  newType.c_str();
+    }
+
+    token = m_client->createToken(type, true /*isMandatory*/, true /*isFact*/);    
+    if (!object.isNoId()) {
+        // We restrict the base domain permanently since the name is specifically mentioned on creation
+        token->getObject()->restrictBaseDomain(object->getThis()->baseDomain());
+    }
+
+    const char * name = child->Attribute("name");
+    if (name != NULL) {
+      std::string std_name = name;
+      m_tokens[std_name] = token;
+    }
+    else {
+    	name = "NO_NAME";
+    }
+    
+    debugMsg("DbClientTransactionPlayer:createFact", "created Fact:" << name << " of type " << type);      
   }
 
   void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element) {

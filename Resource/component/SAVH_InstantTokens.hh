@@ -19,6 +19,7 @@ namespace EUROPA {
       ReservoirToken(const PlanDatabaseId& planDatabase,
 		     const LabelStr& predicateName,
 		     bool rejectable,
+		     bool isFact,
 		     const IntervalIntDomain& timeBaseDomain,
 		     const LabelStr& objectName,
 		     bool isConsumer,
@@ -59,11 +60,12 @@ namespace EUROPA {
       ConsumerToken(const PlanDatabaseId& planDatabase,
 		    const LabelStr& predicateName,
 		    bool rejectable,
+		    bool isFact,
 		    const IntervalIntDomain& timeBaseDomain,
 		    const LabelStr& objectName,
 		    bool closed,
 		    bool activate = true)
-	: ReservoirToken(planDatabase, predicateName, rejectable, timeBaseDomain, objectName, true, closed, activate) {
+	: ReservoirToken(planDatabase, predicateName, rejectable, isFact, timeBaseDomain, objectName, true, closed, activate) {
       }
       
       ConsumerToken(const TokenId& parent,
@@ -90,11 +92,12 @@ namespace EUROPA {
       ProducerToken(const PlanDatabaseId& planDatabase,
 		    const LabelStr& predicateName,
 		    bool rejectable,
+		    bool isFact,
 		    const IntervalIntDomain& timeBaseDomain,
 		    const LabelStr& objectName,
 		    bool closed,
 		    bool activate = true)
-	: ReservoirToken(planDatabase, predicateName, rejectable, timeBaseDomain, objectName, false, closed, activate) {
+	: ReservoirToken(planDatabase, predicateName, rejectable, isFact, timeBaseDomain, objectName, false, closed, activate) {
       }
       
       ProducerToken(const TokenId& parent,

@@ -205,6 +205,12 @@ namespace EUROPA {
      */
     bool canBeCommitted() const;
 
+
+    /**
+     * @brief True if the token was established as a fact
+     */
+    bool isFact() const { return m_isFact; }
+
     /**
      * Substates of Pending
      */
@@ -364,6 +370,7 @@ namespace EUROPA {
     Token(const PlanDatabaseId& planDatabase, 
           const LabelStr& predicateName, 
           bool rejectable,
+          bool isFact,
           const IntervalIntDomain& durationBaseDomain,
           const LabelStr& objectName,
           bool closed);
@@ -414,6 +421,7 @@ namespace EUROPA {
     StateVarId m_state; // state variable for token.
     ObjectVarId m_object;
     TempVarId m_duration;
+    bool m_isFact;
     std::vector<ConstrainedVariableId> m_parameters;
     std::vector<ConstrainedVariableId> m_allVariables;
     TokenSet m_slaves;
@@ -440,6 +448,7 @@ namespace EUROPA {
      */
     void commonInit(const LabelStr& predicateName, 
                     bool rejectable,
+                    bool isFact,
                     const IntervalIntDomain& durationBaseDomain,
                     const LabelStr& objectName,
                     bool closed);

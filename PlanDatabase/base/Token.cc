@@ -70,6 +70,7 @@ namespace EUROPA{
   Token::Token(const PlanDatabaseId& planDatabase, 
 	       const LabelStr& predicateName,
 	       bool rejectable,
+	       bool isFact,
 	       const IntervalIntDomain& durationBaseDomain,
 	       const LabelStr& objectName,
 	       bool closed)
@@ -78,7 +79,7 @@ namespace EUROPA{
        m_relation("none"), 
        m_predicateName(predicateName), 
        m_planDatabase(planDatabase) {
-    commonInit(predicateName, rejectable, durationBaseDomain, objectName, closed);
+    commonInit(predicateName, rejectable, isFact, durationBaseDomain, objectName, closed);
   }
 
   // Slave tokens cannot be rejectable.
@@ -98,7 +99,7 @@ namespace EUROPA{
        // Master must be active to add children
        check_error(m_master->isActive());
        m_master->add(m_id);
-       commonInit(predicateName, false, durationBaseDomain, objectName, closed);
+       commonInit(predicateName, false, false, durationBaseDomain, objectName, closed);
   }
 
   Token::~Token(){
@@ -434,6 +435,7 @@ namespace EUROPA{
    */
   void Token::commonInit(const LabelStr& predicateName, 
 			 bool rejectable,
+			 bool isFact,
 			 const IntervalIntDomain& durationBaseDomain,
 			 const LabelStr& objectName,
 			 bool closed){
@@ -448,6 +450,7 @@ namespace EUROPA{
     m_committed = false;
     m_deleted = false;
     m_terminated = false;
+    m_isFact = isFact;
 
     debugMsg("Token:commonInit", 
 	     "Initializing token (" << getKey() << ") for predicate " << predicateName.toString()

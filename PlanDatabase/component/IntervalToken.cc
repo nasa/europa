@@ -9,6 +9,7 @@ namespace EUROPA{
   IntervalToken::IntervalToken(const PlanDatabaseId& planDatabase, 
 			       const LabelStr& predicateName,
 			       bool rejectable,
+			       bool isFact,
 			       const IntervalIntDomain& startBaseDomain,
 			       const IntervalIntDomain& endBaseDomain,
 			       const IntervalIntDomain& durationBaseDomain,
@@ -17,6 +18,7 @@ namespace EUROPA{
     :Token(planDatabase, 
 	   predicateName, 
 	   rejectable,
+	   isFact,
 	   durationBaseDomain,
 	   objectName,
 	   false){

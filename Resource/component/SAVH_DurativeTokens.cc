@@ -13,7 +13,7 @@ namespace EUROPA {
 				 const LabelStr& objectName,
 				 bool closed,
 				 bool activate)
-      : IntervalToken(planDatabase, predicateName, false, startBaseDomain, endBaseDomain, durationBaseDomain,
+      : IntervalToken(planDatabase, predicateName, false, false, startBaseDomain, endBaseDomain, durationBaseDomain,
 		      objectName, false) {
       check_error(quantityBaseDomain.getLowerBound() >= 0 && quantityBaseDomain.getUpperBound() <= PLUS_INFINITY);
       commonInit(closed, activate, quantityBaseDomain);
@@ -27,13 +27,14 @@ namespace EUROPA {
 				 const LabelStr& objectName,
 				 bool closed,
 				 bool activate) 
-      : IntervalToken(planDatabase, predicateName, false, startBaseDomain, endBaseDomain, durationBaseDomain, objectName, false) {
+      : IntervalToken(planDatabase, predicateName, false, false, startBaseDomain, endBaseDomain, durationBaseDomain, objectName, false) {
       commonInit(closed, activate, IntervalDomain(0, PLUS_INFINITY));
     }
 
     ReusableToken::ReusableToken(const PlanDatabaseId& planDatabase,
 				 const LabelStr& predicateName,
 				 bool rejectable,
+				 bool isFact,
 				 const IntervalIntDomain& startBaseDomain,
 				 const IntervalIntDomain& endBaseDomain,
 				 const IntervalIntDomain& durationBaseDomain,
@@ -41,7 +42,7 @@ namespace EUROPA {
 				 const LabelStr& objectName,
 				 bool closed,
 				 bool activate)
-      : IntervalToken(planDatabase, predicateName, rejectable, startBaseDomain, endBaseDomain, durationBaseDomain,
+      : IntervalToken(planDatabase, predicateName, rejectable, isFact, startBaseDomain, endBaseDomain, durationBaseDomain,
 		      objectName, false) {
       check_error(quantityBaseDomain.getLowerBound() >= 0 && quantityBaseDomain.getUpperBound() <= PLUS_INFINITY);
       commonInit(closed, activate, quantityBaseDomain);
@@ -50,13 +51,14 @@ namespace EUROPA {
     ReusableToken::ReusableToken(const PlanDatabaseId& planDatabase,
 				 const LabelStr& predicateName,
 				 bool rejectable,
+				 bool isFact,
 				 const IntervalIntDomain& startBaseDomain,
 				 const IntervalIntDomain& endBaseDomain,
 				 const IntervalIntDomain& durationBaseDomain,
 				 const LabelStr& objectName,
 				 bool closed,
 				 bool activate) 
-      : IntervalToken(planDatabase, predicateName, rejectable, startBaseDomain, endBaseDomain, durationBaseDomain, objectName, false) {
+      : IntervalToken(planDatabase, predicateName, rejectable, isFact, startBaseDomain, endBaseDomain, durationBaseDomain, objectName, false) {
       commonInit(closed, activate, IntervalDomain(0, PLUS_INFINITY));
     }
 
@@ -130,13 +132,14 @@ namespace EUROPA {
     UnaryToken::UnaryToken(const PlanDatabaseId& planDatabase,
 			   const LabelStr& predicateName,
 			   bool rejectable,
+			   bool isFact,
 			   const IntervalIntDomain& startBaseDomain,
 			   const IntervalIntDomain& endBaseDomain,
 			   const IntervalIntDomain& durationBaseDomain,
 			   const LabelStr& objectName,
 			   bool closed,
 			   bool activate)
-      : ReusableToken(planDatabase, predicateName, rejectable, startBaseDomain, endBaseDomain, durationBaseDomain, IntervalDomain(1), objectName, closed, activate) {}
+      : ReusableToken(planDatabase, predicateName, rejectable, isFact, startBaseDomain, endBaseDomain, durationBaseDomain, IntervalDomain(1), objectName, closed, activate) {}
 
     UnaryToken::UnaryToken(const TokenId& master, 
 			   const LabelStr& relation,

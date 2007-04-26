@@ -104,7 +104,7 @@ namespace EUROPA {
     publish(notifyClosed(objectType));
   }
  
-  TokenId DbClient::createToken(const char* predicateName, bool rejectable) {
+  TokenId DbClient::createToken(const char* predicateName, bool rejectable, bool isFact) {
     TokenId token = allocateToken(predicateName, rejectable);
     debugMsg("DbClient:createToken", token->toString());
     publish(notifyTokenCreated(token));
@@ -337,9 +337,9 @@ namespace EUROPA {
     return TokenFactory::hasFactory();
   }
 
-  TokenId DbClient::allocateToken(const LabelStr& predicateName, bool rejectable) {
+  TokenId DbClient::allocateToken(const LabelStr& predicateName, bool rejectable, bool isFact) {
     checkError(supportsAutomaticAllocation(), "Cannot allocate tokens from the schema.");
-    TokenId token = TokenFactory::createInstance(m_planDb, predicateName, rejectable);
+    TokenId token = TokenFactory::createInstance(m_planDb, predicateName, rejectable, isFact);
 
     if (isTransactionLoggingEnabled())
       m_keysOfTokensCreated.push_back(token->getKey());

@@ -15,6 +15,7 @@ namespace EUROPA {
     IntervalToken(const PlanDatabaseId& planDatabase, 
 		  const LabelStr& predicateName, 
 		  bool rejectable,
+		  bool isFact,
 		  const IntervalIntDomain& startBaseDomain = IntervalIntDomain(),
 		  const IntervalIntDomain& endBaseDomain = IntervalIntDomain(),
 		  const IntervalIntDomain& durationBaseDomain = IntervalIntDomain(1, PLUS_INFINITY),

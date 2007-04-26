@@ -63,7 +63,8 @@ namespace EUROPA {
 
   TokenId TokenFactory::createInstance(const PlanDatabaseId& planDb,
                                        const LabelStr& predicateName,
-                                       bool rejectable) {
+                                       bool rejectable,
+                                       bool isFact) {
     check_error(planDb.isValid());
 
     // Obtain the factory 
@@ -71,7 +72,7 @@ namespace EUROPA {
 
     check_error(factory.isValid());
 
-    TokenId token = factory->createInstance(planDb, predicateName, rejectable);
+    TokenId token = factory->createInstance(planDb, predicateName, rejectable, isFact);
 
     check_error(token.isValid());
     return(token);

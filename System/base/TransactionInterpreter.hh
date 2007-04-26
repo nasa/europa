@@ -230,7 +230,8 @@ namespace EUROPA {
 	                     const std::vector<LabelStr>& assignVars,
                          const std::vector<Expr*>& assignValues,
                          const std::vector<ExprConstraint*>& constraints,
-                         const bool& rejectable = false, 
+                         const bool& rejectable = false,
+                         const bool& isFact = false, 
   	                     const bool& close = false); 
   	                     
         InterpretedToken(const TokenId& master, 
@@ -238,7 +239,7 @@ namespace EUROPA {
                          const LabelStr& relation, 
                          const std::vector<LabelStr>& parameterNames,
                          const std::vector<LabelStr>& parameterTypes,
-			 const std::vector<LabelStr>& assignVars,
+                         const std::vector<LabelStr>& assignVars,
                          const std::vector<Expr*>& assignValues,
                          const std::vector<ExprConstraint*>& constraints,
                          const bool& close = false); 
@@ -285,7 +286,7 @@ namespace EUROPA {
 	  std::vector<ExprConstraint*> m_constraints;
 
 	private: 
-	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false) const;
+	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const;
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
   };
 
@@ -527,7 +528,7 @@ namespace EUROPA {
 	  NativeTokenFactory(const LabelStr& predicateName) : ConcreteTokenFactory(predicateName) {}
 	  
 	private: 
-	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false) const = 0;
+	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const = 0;
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const = 0;
   };  
   
@@ -565,7 +566,7 @@ namespace EUROPA {
 	  ResourceChangeTokenFactory(const LabelStr& predicateName) : NativeTokenFactory(predicateName) {}
 	  
 	private: 
-	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false) const;
+	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const;
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
   };   
 
@@ -589,7 +590,7 @@ namespace EUROPA {
 	  ReusableUsesTokenFactory(const LabelStr& predicateName) : NativeTokenFactory(predicateName) {}
 	  
 	private: 
-	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false) const;
+	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable , bool isFact) const;
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
   };   
 }

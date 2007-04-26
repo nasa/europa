@@ -15,6 +15,7 @@ namespace EUROPA {
     EventToken(const PlanDatabaseId& planDatabase,
 	       const LabelStr& predicateName,
 	       bool rejectable,
+	       bool isFact,
 	       const IntervalIntDomain& timeBaseDomain = IntervalIntDomain(),
 	       const LabelStr& objectName = Token::noObject(),
 	       bool closed = true);

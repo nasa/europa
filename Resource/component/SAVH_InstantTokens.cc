@@ -12,7 +12,7 @@ namespace EUROPA {
 				   bool closed,
 				   bool activate) 
       : EventToken(planDatabase, predicateName,
-		   false, timeBaseDomain,
+		   false, false, timeBaseDomain,
 		   Token::noObject(), false), m_isConsumer(isConsumer) {
       check_error(quantityBaseDomain.getLowerBound() >= 0 &&
 		  quantityBaseDomain.getUpperBound() <= PLUS_INFINITY);
@@ -23,13 +23,14 @@ namespace EUROPA {
     ReservoirToken::ReservoirToken(const PlanDatabaseId& planDatabase,
 				   const LabelStr& predicateName,
 				   bool rejectable,
+				   bool isFact,
 				   const IntervalIntDomain& timeBaseDomain,
 				   const LabelStr& objectName,
 				   bool isConsumer,
 				   bool closed,
 				   bool activate)
       : EventToken(planDatabase, predicateName,
-		   rejectable, timeBaseDomain, objectName, false), m_isConsumer(isConsumer) {
+		   rejectable, isFact, timeBaseDomain, objectName, false), m_isConsumer(isConsumer) {
       commonInit(closed, activate, IntervalDomain( 0, PLUS_INFINITY ) );
     }
 

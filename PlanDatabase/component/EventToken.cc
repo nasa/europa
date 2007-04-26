@@ -9,11 +9,13 @@ namespace EUROPA{
   EventToken::EventToken(const PlanDatabaseId& planDatabase,
 			 const LabelStr& predicateName,
 			 bool rejectable,
+			 bool isFact,
 			 const IntervalIntDomain& timeBaseDomain,
 			 const LabelStr& objectName,
 			 bool closed)
     :Token(planDatabase, predicateName, 
 	   rejectable,
+	   isFact,
 	   IntervalIntDomain(0, 0), 
 	   objectName,
 	   closed){

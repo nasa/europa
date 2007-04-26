@@ -50,6 +50,7 @@ namespace EUROPA {
     Transaction(const PlanDatabaseId& planDatabase,
 		const LabelStr& predicateName,
 		bool rejectable,
+		bool isFact,
 		const IntervalIntDomain& timeBaseDomain,
 		const LabelStr& objectName,
 		bool closed);

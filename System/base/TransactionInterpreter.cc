@@ -1337,10 +1337,12 @@ namespace EUROPA {
                      const std::vector<Expr*>& assignValues,
                      const std::vector<ExprConstraint*>& constraints,
                      const bool& rejectable, 
+                     const bool& isFact,
                      const bool& close) 
                      
         : IntervalToken(planDatabase, 
                         predicateName,
+                        isFact,
                         rejectable,
                         IntervalIntDomain(),                  // start
                         IntervalIntDomain(),                  // end
@@ -1464,7 +1466,7 @@ namespace EUROPA {
 	{ 
 	} 
 	
-	TokenId InterpretedTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable) const 
+	TokenId InterpretedTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const 
 	{ 
 	    TokenId token = (new InterpretedToken(
 	        planDb, 
@@ -1474,7 +1476,8 @@ namespace EUROPA {
 	        m_assignVars,
 	        m_assignValues,
 	        m_constraints, 
-	        rejectable, 
+	        rejectable,
+	        isFact, 
 	        true))->getId(); 
 	    return token; 
 	} 
@@ -1904,10 +1907,10 @@ namespace EUROPA {
     	return instance;	
     }   
     
-	TokenId ResourceChangeTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable) const
+	TokenId ResourceChangeTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
 	{
 	   	debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Resource.change"); 
-		return new NDDL::NddlResource::change(planDb,name,rejectable,true);
+		return new NDDL::NddlResource::change(planDb,name,rejectable,isFact,true);
 	}
 	
 	TokenId ResourceChangeTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
@@ -1957,10 +1960,10 @@ namespace EUROPA {
     	return instance;	
     }   
     
-	TokenId ReusableUsesTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable) const
+	TokenId ReusableUsesTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
 	{
 	   	debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reusable.uses"); 
-		return new NDDL::NddlReusable::uses(planDb,name,rejectable,true);
+		return new NDDL::NddlReusable::uses(planDb,name,rejectable,isFact,true);
 	}
 	
 	TokenId ReusableUsesTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
