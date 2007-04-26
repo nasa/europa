@@ -1342,8 +1342,8 @@ namespace EUROPA {
                      
         : IntervalToken(planDatabase, 
                         predicateName,
-                        isFact,
                         rejectable,
+                        isFact,
                         IntervalIntDomain(),                  // start
                         IntervalIntDomain(),                  // end
                         IntervalIntDomain(1, PLUS_INFINITY),  // duration
