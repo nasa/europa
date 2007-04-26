@@ -1490,7 +1490,7 @@ namespace ANML
    	    os << "int solver_maxSteps=" << ms << ";" << std::endl;
    	    os << "int solver_maxDepth=" << md << ";" << std::endl;
     	
-    	os << "PlannerConfig plannerConfiguration = new PlannerConfig(start,end,solver_MaxSteps,solver_maxDepth);" 
+    	os << "PlannerConfig plannerConfiguration = new PlannerConfig(start,end,solver_maxSteps,solver_maxDepth);" 
     	   << std::endl << std::endl;
     	   
     	m_translated = true;    	
