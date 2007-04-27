@@ -201,7 +201,6 @@ namespace EUROPA {
 	                        const std::vector<const AbstractDomain*>& arguments) const;
 	                        
 	    virtual void evalConstructorBody(
-	                       DbClientId dbClient,
 	                       ObjectId& instance, 
 	                       const std::vector<const AbstractDomain*>& arguments) const;
   

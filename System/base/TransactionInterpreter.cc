@@ -1238,7 +1238,7 @@ namespace EUROPA {
 		
 	    ObjectId instance = makeNewObject(planDb, objectType, objectName,arguments);
 		evalContext.addVar("this",instance->getThis());
-	    evalConstructorBody(planDb->getClient(),instance,arguments);
+	    evalConstructorBody(instance,arguments);
 	    instance->close();
 		
 		m_evalContext = NULL;
@@ -1300,7 +1300,6 @@ namespace EUROPA {
 	}
 	
 	void InterpretedObjectFactory::evalConstructorBody(
-	                                           DbClientId dbClient,
 	                                           ObjectId& instance, 
 	                                           const std::vector<const AbstractDomain*>& arguments) const
 	{	    
