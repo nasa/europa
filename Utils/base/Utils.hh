@@ -45,7 +45,7 @@ namespace EUROPA {
   /**
    * @brief Utility to produce a string from a double
    */
-  std::string toString(float value);
+  std::string toString(double value);
 
   /**
    * @brief Utility function to tokenzie a std string 

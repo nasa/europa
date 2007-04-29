@@ -1905,6 +1905,73 @@ namespace EUROPA {
       m_y.intersect(IntervalDomain(-ub, -lb));
   }
 
+  SquareOfDifferenceConstraint::SquareOfDifferenceConstraint(const LabelStr& name,
+							     const LabelStr& propagatorName,
+							     const ConstraintEngineId& constraintEngine,
+							     const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables) {
+    check_error(variables.size() == (unsigned int) ARG_COUNT);
+  }
+  
+  /**
+     Propagate only forward.
+     Moreover, the way it is used, either the points are completely
+     specified (singletons), or they are INF
+  */
+  void SquareOfDifferenceConstraint::handleExecute() {
+    AbstractDomain& domx = getCurrentDomain(m_variables[V1]);
+    AbstractDomain& domy = getCurrentDomain(m_variables[V2]);
+    AbstractDomain& doma = getCurrentDomain(m_variables[RES]);
+    
+    // domains should be closed
+    if ( domx.isOpen() || domy.isOpen() || 
+	 !domx.isSingleton() || !domy.isSingleton() ) 
+      return;
+
+    // get the boundaries
+    double x, y;
+    x = domx.getSingletonValue();
+    y = domy.getSingletonValue();
+    double square = (x-y)*(x-y);
+
+    doma.intersect( IntervalDomain(square) );
+
+  }
+
+  DistanceFromSquaresConstraint::DistanceFromSquaresConstraint(const LabelStr& name,
+					 const LabelStr& propagatorName,
+					 const ConstraintEngineId& constraintEngine,
+					 const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables) {
+    check_error(variables.size() == (unsigned int) ARG_COUNT);
+  }
+
+  /**
+     Propagate only forward.
+     Moreover, the way it is used, either the squares are completely
+     specified (singletons), or they are INF
+   */
+  void DistanceFromSquaresConstraint::handleExecute() {
+    AbstractDomain& domx = getCurrentDomain(m_variables[V1]);
+    AbstractDomain& domy = getCurrentDomain(m_variables[V2]);
+    AbstractDomain& doma = getCurrentDomain(m_variables[RES]);
+
+    // domains should be closed
+    if ( domx.isOpen() || domy.isOpen() || 
+	 !domx.isSingleton() || !domy.isSingleton() ) 
+      return;
+
+    // get the boundaries
+    double x, y;
+    x = domx.getSingletonValue();
+    y = domy.getSingletonValue();
+    double distance = sqrt(x+y);
+
+    doma.intersect( IntervalDomain(distance) );
+
+    // cout << "DistanceFromSquares "<<x<<" "<<y<<" "<<distance<<endl;
+  }
+
   CalcDistanceConstraint::CalcDistanceConstraint(const LabelStr& name,
 						 const LabelStr& propagatorName,
 						 const ConstraintEngineId& constraintEngine,
@@ -2030,6 +2097,8 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(OrConstraint, "Or", "Default");
       REGISTER_CONSTRAINT(SubsetOfConstraint, "SubsetOf", "Default");
       REGISTER_CONSTRAINT(SubsetOfConstraint, "subsetOf", "Default");
+      REGISTER_CONSTRAINT(SubsetOfConstraint, "Singleton", "Default");
+      REGISTER_CONSTRAINT(SubsetOfConstraint, "subsetOf", "Default");
       REGISTER_CONSTRAINT(TestEQ, "TestEqual", "Default");
       REGISTER_CONSTRAINT(TestLessThan, "TestLessThan", "Default");
       REGISTER_CONSTRAINT(TestEQ, "testEQ", "Default");
@@ -2037,7 +2106,9 @@ namespace EUROPA {
 
       // Europa (NewPlan/ConstraintNetwork) names for the same constraints:
       REGISTER_CONSTRAINT(AddEqualConstraint, "addeq", "Default");
+      REGISTER_CONSTRAINT(AddEqualConstraint, "addEq", "Default");
       REGISTER_CONSTRAINT(AddMultEqualConstraint, "addmuleq", "Default");
+      REGISTER_CONSTRAINT(AddMultEqualConstraint, "addMulEq", "Default");
       REGISTER_CONSTRAINT(AllDiffConstraint, "adiff", "Default"); // all different
       REGISTER_CONSTRAINT(AllDiffConstraint, "fadiff", "Default"); // flexible all different
       REGISTER_CONSTRAINT(AllDiffConstraint, "fneq", "Default"); // flexible not equal
@@ -2057,6 +2128,7 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(EqualSumConstraint, "sum", "Default");
       REGISTER_CONSTRAINT(LessOrEqThanSumConstraint, "leqsum", "Default");
       REGISTER_CONSTRAINT(LessThanConstraint, "lt", "Default");
+      REGISTER_CONSTRAINT(LessThanConstraint, "lessThan", "Default");
       REGISTER_CONSTRAINT(LessThanEqualConstraint, "leq", "Default");
       REGISTER_CONSTRAINT(WithinBounds, "withinBounds", "Default");
       REGISTER_CONSTRAINT(MemberImplyConstraint, "memberImply", "Default");
@@ -2085,6 +2157,10 @@ namespace EUROPA {
       REGISTER_SWAP_TWO_VARS_CONSTRAINT("eqcondsum", "Default", "CondEqualSum", 0, 1);
       REGISTER_ROTATED_CONSTRAINT("addeqcond", "Default", "eqcondsum", 2);
 
+      //constraints formerly from LORAX
+      REGISTER_CONSTRAINT(SquareOfDifferenceConstraint, "diffSquare", "Default");
+      REGISTER_CONSTRAINT(DistanceFromSquaresConstraint, "distanceSquares", "Default");      
+   
       REGISTER_CONSTRAINT(CalcDistanceConstraint, "calcDistance", "Default");
 
       REGISTER_CONSTRAINT(SineFunction, "sin", "Default");

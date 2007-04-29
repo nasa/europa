@@ -7,7 +7,7 @@
  */
 
 #include "Nddl.hh" /*!< Includes protypes required to load a model */
-#include "SolverAssembly.hh" /*!< For using a test EUROPA Assembly */
+#include "SolverAssemblyWithResources.hh" /*!< For using a test EUROPA Assembly */
 
 using namespace EUROPA;
 
@@ -25,7 +25,7 @@ int main(int argc, const char ** argv){
   const char* plannerConfig = argv[2];
 
   // Initialize Library  
-  SolverAssembly::initialize();
+  SolverAssemblyWithResources::initialize();
 
   // Allocate the schema with a call to the linked in model function - eventually
   // make this called via dlopen
@@ -34,7 +34,7 @@ int main(int argc, const char ** argv){
   // Enacpsualte allocation so that they go out of scope before calling terminate
   {  
     // Allocate the test assembly.
-    SolverAssembly assembly(schema);
+    SolverAssemblyWithResources assembly(schema);
 
     // Run the planner
     assembly.plan(txSource, plannerConfig);

@@ -11,8 +11,6 @@
 
 #include "PlanDatabaseDefs.hh"
 
-using namespace EUROPA;
-
 namespace EUROPA {
   namespace NDDL {
     /**
@@ -21,4 +19,6 @@ namespace EUROPA {
     extern "C" SchemaId loadSchema();
   }
 }
+
+using namespace EUROPA;
 #endif

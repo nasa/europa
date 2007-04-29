@@ -4,6 +4,15 @@ if ! $(PLASMA_READY) {
 
 SubDirC++Flags -Wno-unknown-pragmas -DTIXML_USE_STL ;
 
+if ! ( "Resources" in $(NO) ) {
+  SubInclude PLASMA Solvers component Resource ;
+}
+else {
+  ModuleComponent Solvers : SolverConfig.cc ;
+  SubDirC++Flags -DNO_RESOURCES ;
+}
+
+
 ModuleComponent Solvers
 	:
 	ValueSource.cc
@@ -15,11 +24,10 @@ ModuleComponent Solvers
 	ThreatDecisionPoint.cc
 	ThreatManager.cc
         SolverPartialPlanWriter.cc
-	SolverConfig.cc
+	#SolverConfig.cc
 	HSTSDecisionPoints.cc
-	ResourceThreatDecisionPoint.cc
-  	SAVH_ThreatManager.cc
-  	SAVH_ThreatDecisionPoint.cc
+	#ResourceThreatDecisionPoint.cc
+  	#SAVH_ThreatManager.cc
+  	#SAVH_ThreatDecisionPoint.cc
 	;
-
 } # PLASMA_READY

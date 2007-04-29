@@ -1,10 +1,10 @@
-// composition.0.nddl
-
 #include "Db.hh"
 #include "NddlUtils.hh"
 /** Custom Include Files **/
 
 namespace NDDL {
+
+// composition.0.nddl
 
   class Foo;
   typedef Id<Foo> FooId;

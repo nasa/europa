@@ -2,6 +2,7 @@
 #include "SymbolDomain.hh"
 #include "TokenFactory.hh"
 #include "Debug.hh"
+#include "Utils.hh"
 
 namespace EUROPA {
 
@@ -454,10 +455,12 @@ namespace EUROPA {
 
   void Schema::addPrimitive(const LabelStr& primitiveName){
     check_error(!isPrimitive(primitiveName), primitiveName.toString() + " is already defined.");
+    debugMsg("Schema:addPrimitive", "[" << m_name.toString() << "] " << "Adding primitive type " << primitiveName.toString());
     primitives.insert(primitiveName);
   }
 
   void Schema::declareObjectType(const LabelStr& objectType) {
+    debugMsg("Schema:declareObjectType", "[" << m_name.toString() << "] " << "Declaring object type " << objectType.toString());
     objectTypes.insert(objectType);			                 	
   }
   
@@ -482,7 +485,9 @@ namespace EUROPA {
     objectTypes.insert(objectType);
     membershipRelation.insert(std::pair<LabelStr, NameValueVector>(objectType, NameValueVector()));
     childOfRelation.insert(std::pair<LabelStr, LabelStr>(objectType, parent));
-    debugMsg("Schema","Added object type " << objectType.toString() << " that extends " << parent.toString());
+    debugMsg("Schema:addObjectType",
+	     "[" << m_name.toString() << "] " << "Added object type " << objectType.toString() << " that extends " <<
+	     parent.toString());
   }
 
   void Schema::addPredicate(const LabelStr& predicate) {
@@ -495,6 +500,8 @@ namespace EUROPA {
 
     check_error(predicates.find(predicate) == predicates.end(), predicate.toString() + " already defined.");
 
+    debugMsg("Schema:addPredicate",
+	     "[" << m_name.toString() << "] " << "Added predicate " << predicate.toString());
     predicates.insert(predicate);
     membershipRelation.insert(std::pair<LabelStr, NameValueVector>(predicate, NameValueVector()));
   }
@@ -509,6 +516,9 @@ namespace EUROPA {
     check_error(!canContain(parentType, memberType, memberName),
 		parentType.toString() + " already contains " + memberName.toString());
 
+    debugMsg("Schema:addMember",
+	     "[" << m_name.toString() << "] " << "Added to " << parentType.toString() << ": " << memberType.toString() << " " <<
+	     memberName.toString());
     // We can now assume the entry is present, so just add where appropriate
     NameValueVector& members = membershipRelation.find(parentType)->second;
     members.push_back(NameValuePair(memberType, memberName));
@@ -518,12 +528,15 @@ namespace EUROPA {
   void Schema::addEnum(const LabelStr& enumName) {
     check_error(!isEnum(enumName), enumName.toString() + " is already defined as an enumeration.");
     check_error(!isObjectType(enumName), enumName.toString() + " is already defined as an object type.");
+    debugMsg("Schema:addEnum", "[" << m_name.toString() << "] " << "Added enumeration " << enumName.toString());
     enumValues.insert(std::pair<LabelStr, ValueSet>(enumName, ValueSet()));
   }
 
   void Schema::addValue(const LabelStr& enumName, double enumValue) {
     check_error(isEnum(enumName), enumName.toString() + " is undefined.");
-
+    debugMsg("Schema:addValue", "[" << m_name.toString() << "] " << "Added " <<
+	     (LabelStr::isString(enumValue) ? LabelStr(enumValue).toString() : toString(enumValue)) << " to " <<
+	     enumName.toString());
     ValueSet& members = enumValues.find(enumName)->second;
     members.insert(enumValue);
   }

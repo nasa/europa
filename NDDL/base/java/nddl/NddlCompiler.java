@@ -9,6 +9,9 @@ import java.io.OutputStreamWriter;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Iterator;
+import java.util.Set;
 import net.n3.nanoxml.StdXMLReader;
 import net.n3.nanoxml.XMLParserFactory;
 import net.n3.nanoxml.IXMLReader;
@@ -26,13 +29,13 @@ class NddlCompiler {
 
   // returns the path to the cc file generated.
   public static String compile(IXMLElement el, File modelFile, File sourceFile, File headerFile) throws IOException {
-    if(!headerFile.canWrite()&&headerFile.exists())
-      throw new IOException("Cannot generate headerfile to compile \""+headerFile.getAbsolutePath()+"\"");
-
     ModelAccessor.setModelName(modelFile.getName().replaceAll("\\.[^.]+$",""));
 
+
     assert(DebugMsg.debugMsg(Nddl.versionString() + ": Generating \""+headerFile+"\""));	
-    IndentWriter header = new IndentWriter(new BufferedWriter(new FileWriter(headerFile)));
+    //IndentWriter header = new IndentWriter(new BufferedWriter(new FileWriter(headerFile)));
+    StringWriter headerString = new StringWriter();
+    IndentWriter header = new IndentWriter(new BufferedWriter(headerString));
     header.write("// "+modelFile.getName()+"\n\n");
     // write class and function prototypes
     new HeaderGenerator(header).generate(el);
@@ -48,11 +51,32 @@ class NddlCompiler {
     implementation.write("#include \""+headerFile.getName()+"\"\n");
     new ImplementationGenerator(implementation).generate(el);
 
+    if(!headerFile.canWrite()&&headerFile.exists())
+      throw new IOException("Cannot generate headerfile to compile \""+headerFile.getAbsolutePath()+"\"");
+
     assert(DebugMsg.debugMsg(Nddl.versionString() + ": Writing Schema"));
     implementation.write("\n\n");
     SchemaWriter.generate(implementation);
     implementation.flush();
     implementation.close();
+
+    assert(DebugMsg.debugMsg(Nddl.versionString() + ": Writing \""+headerFile+"\""));	
+    BufferedWriter headerWriter = new BufferedWriter(new FileWriter(headerFile));
+    headerWriter.write("#include \"Db.hh\"\n");
+    headerWriter.write("#include \"NddlUtils.hh\"\n");
+
+    headerWriter.write("/** Custom Include Files **/\n");
+    Set customIncludes = ModelAccessor.getCustomIncludes();
+    for(Iterator i=customIncludes.iterator(); i.hasNext();) {
+      String includeFile = (String) i.next();
+      headerWriter.write("#include \"" + includeFile + "\"\n");
+    }
+    headerWriter.write("\n");
+    headerWriter.write("namespace NDDL {\n");
+    headerWriter.write("\n");
+    headerWriter.write(headerString.toString());
+    headerWriter.flush();
+    headerWriter.close();
 
     return sourceFile.getAbsolutePath();
   }

@@ -16,6 +16,7 @@
 #include "IntervalIntDomain.hh"
 #include "PlanDatabase.hh"
 
+
 #include <vector>
 #include <set>
 
@@ -33,6 +34,8 @@ namespace EUROPA {
    */
   class Token: public Entity {
   public:
+    DECLARE_ENTITY_TYPE(Token);
+
     /**
      * Begin Declaration of allowable states for a Token.
      */

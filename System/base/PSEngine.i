@@ -49,11 +49,9 @@ namespace EUROPA {
   typedef int PSEntityKey;
 
   class PSObject;
-  class PSResource;
   class PSToken;
   class PSSolver;
   class PSVariable;
-  class PSResourceProfile;
   class PSVarValue;
 
   template<class T>
@@ -66,7 +64,6 @@ namespace EUROPA {
   };
 
   %template(PSObjectList) PSList<PSObject*>;
-  %template(PSResourceList) PSList<PSResource*>;
   %template(PSTokenList) PSList<PSToken*>;
   %template(PSVariableList) PSList<PSVariable*>;
   %template(PSValueList) PSList<PSVarValue>;
@@ -102,8 +99,8 @@ namespace EUROPA {
     std::string executeScript(const std::string& language, const std::string& script) throw(Error);
     PSList<PSObject*> getObjectsByType(const std::string& objectType);
     PSObject* getObjectByKey(PSEntityKey id);
-    PSList<PSResource*> getResourcesByType(const std::string& resourceType);
-    PSResource* getResourceByKey(PSEntityKey id);
+//     PSList<PSResource*> getResourcesByType(const std::string& resourceType);
+//     PSResource* getResourceByKey(PSEntityKey id);
     PSList<PSToken*> getTokens();
     PSToken* getTokenByKey(PSEntityKey id);
     PSSolver* createSolver(const std::string& configurationFile);
@@ -114,7 +111,7 @@ namespace EUROPA {
   public:
     PSEntityKey getKey() const;
     const std::string& getName() const;
-    const std::string& getType() const;
+    const std::string& getEntityType() const;
     
     std::string toString();
         
@@ -132,25 +129,6 @@ namespace EUROPA {
     ~PSObject();
   protected:
     PSObject();
-  };
-
-  class PSResource : public PSEntity
-  {
-  public:
-    PSResourceProfile* getLimits();
-    PSResourceProfile* getLevels();
-  protected:
-    PSResource();
-  };
-
-  class PSResourceProfile
-  {
-  public:
-    const PSList<TimePoint>& getTimes();
-    double getLowerBound(TimePoint time);
-    double getUpperBound(TimePoint time);
-  protected:
-    PSResourceProfile();
   };
 
   class PSSolver
@@ -207,10 +185,9 @@ namespace EUROPA {
 
   enum PSVarType {OBJECT,STRING,INTEGER,DOUBLE,BOOLEAN};
 
-  class PSVariable
+  class PSVariable : public PSEntity
   {
   public:
-    const std::string& getName();
 
     bool isEnumerated();
     bool isInterval();

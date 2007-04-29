@@ -7,23 +7,10 @@
 #include "RulesEngine.hh"
 #include "DefaultPropagator.hh"
 
-#include "Resource.hh"
-#include "ResourceConstraint.hh"
-#include "ResourceDefs.hh"
-#include "ResourcePropagator.hh"
-#include "Transaction.hh"
-
-#include "SAVH_Profile.hh"
-#include "SAVH_FVDetector.hh"
-#include "SAVH_TimetableProfile.hh"
-#include "SAVH_TimetableFVDetector.hh"
-#include "SAVH_ProfilePropagator.hh"
-#include "SAVH_FlowProfile.hh"
-#include "SAVH_IncrementalFlowProfile.hh"
-
 // Transactions
 #include "DbClientTransactionPlayer.hh"
 #include "DbClientTransactionLog.hh"
+#include "TransactionInterpreter.hh"
 #include "BoolTypeFactory.hh"
 #include "StringTypeFactory.hh"
 #include "floatType.hh"
@@ -63,31 +50,6 @@ namespace EUROPA {
 		"Cannot initialize if already initialized. Call 'terminate' first.");
     initNDDL();
     initConstraintLibrary();
-    
-    /*
-     *  TODO: constraint registration below needs to be removed, initConstraintLibrary takes care of this
-     *  leaving it for now for backwards compatibility since some constraints are named differently
-     * and some other constraints like Lock and Ancestor are not registered by initConstraintLibrary for some reason
-     */
-     
-    // Procedural Constraints used with Default Propagation
-    REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");
-    REGISTER_CONSTRAINT(NotEqualConstraint, "neq", "Default");
-    REGISTER_CONSTRAINT(LessThanEqualConstraint, "leq", "Default");
-    REGISTER_CONSTRAINT(LessThanConstraint, "lessThan", "Default");
-    REGISTER_CONSTRAINT(AddEqualConstraint, "addEq", "Default");
-    REGISTER_CONSTRAINT(NegateConstraint, "neg", "Default");
-    REGISTER_CONSTRAINT(MultEqualConstraint, "mulEq", "Default");
-    REGISTER_CONSTRAINT(AddMultEqualConstraint, "addMulEq", "Default");
-    REGISTER_CONSTRAINT(AddMultEqualConstraint, "addmuleq", "Default");
-    REGISTER_CONSTRAINT(SubsetOfConstraint, "subsetOf", "Default");
-    REGISTER_CONSTRAINT(SubsetOfConstraint, "Singleton", "Default");
-    REGISTER_CONSTRAINT(LockConstraint, "Lock", "Default");
-    REGISTER_CONSTRAINT(CommonAncestorConstraint, "commonAncestor", "Default");
-    REGISTER_CONSTRAINT(HasAncestorConstraint, "hasAncestor", "Default");
-    REGISTER_CONSTRAINT(TestEQ, "testEQ", "Default");
-    REGISTER_CONSTRAINT(TestLessThan, "testLEQ", "Default");
-    REGISTER_CONSTRAINT(EqualSumConstraint, "sum", "Default");
 
     isInitialized() = true;
   }
@@ -100,6 +62,7 @@ namespace EUROPA {
     ObjectFactory::purgeAll();
     TokenFactory::purgeAll();
     ConstraintLibrary::purgeAll();
+    uninitConstraintLibrary();
     Rule::purgeAll();
     uninitNDDL();
     isInitialized() = false;
@@ -110,7 +73,11 @@ namespace EUROPA {
     return sl_isInitialized;
   }
 
-  StandardAssembly::StandardAssembly(const SchemaId& schema){
+  StandardAssembly::StandardAssembly() {
+    check_error(ALWAYS_FAIL, "Should never get here.");
+  }
+
+  StandardAssembly::StandardAssembly(const SchemaId& schema) : m_transactionPlayer(NULL) {
     check_error(isInitialized(), "Must initialize StandardAssembly before use.");
 
     // Allocate the Constraint Engine
@@ -123,8 +90,6 @@ namespace EUROPA {
     // Note that propagators will subsequently be managed by the constraint engine
     new DefaultPropagator(LabelStr("Default"), m_constraintEngine);
     new TemporalPropagator(LabelStr("Temporal"), m_constraintEngine);
-    new ResourcePropagator(LabelStr("Resource"), m_constraintEngine, m_planDatabase);
-    new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), m_constraintEngine);
 
     // Link up the Temporal Advisor in the PlanDatabase so that it can use the temporal
     // network for determining temporal distances between time points.
@@ -143,6 +108,7 @@ namespace EUROPA {
     Entity::purgeStarted();
 
     delete (RulesEngine*) m_rulesEngine;
+    delete m_transactionPlayer;
     delete (PlanDatabase*) m_planDatabase;
     delete (ConstraintEngine*) m_constraintEngine;
 
@@ -150,20 +116,25 @@ namespace EUROPA {
     Entity::purgeEnded();
   }
 
-  bool StandardAssembly::playTransactions(const char* txSource){
+  bool StandardAssembly::playTransactions(const char* txSource, bool interp){
     check_error(txSource != NULL, "NULL transaction source provided.");
 
     // Obtain the client to play transactions on.
     DbClientId client = m_planDatabase->getClient();
 
     // Construct player
-    DbClientTransactionPlayer player(client);
+    if(m_transactionPlayer == NULL) {
+      if(interp)
+	m_transactionPlayer = new InterpretedDbClientTransactionPlayer(client);
+      else
+	m_transactionPlayer = new DbClientTransactionPlayer(client);
+    }
 
     // Open transaction source and play transactions
     std::ifstream in(txSource);
 
     check_error(in, "Invalid transaction source '" + std::string(txSource) + "'.");
-    player.play(in);
+    m_transactionPlayer->play(in);
 
     return m_constraintEngine->constraintConsistent();
   }

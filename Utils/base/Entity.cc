@@ -112,6 +112,9 @@ namespace EUROPA {
 
   bool Entity::decRefCount() {
     m_refCount--;
+    debugMsg("Entity:decRefCount",
+	     "Decremented ref count of " << toString() << "(" << getKey() << ") to " <<
+	     m_refCount);
     if(m_refCount == 0){
       discard();
       return true;

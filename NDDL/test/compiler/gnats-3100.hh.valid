@@ -1,10 +1,10 @@
-// gnats-3100.nddl
-
 #include "Db.hh"
 #include "NddlUtils.hh"
 /** Custom Include Files **/
 
 namespace NDDL {
+
+// gnats-3100.nddl
 
   class Base;
   typedef Id<Base> BaseId;

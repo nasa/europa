@@ -1,10 +1,10 @@
-// class-constructor.nddl
-
 #include "Db.hh"
 #include "NddlUtils.hh"
 /** Custom Include Files **/
 
 namespace NDDL {
+
+// class-constructor.nddl
 
   class Foo;
   typedef Id<Foo> FooId;

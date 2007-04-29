@@ -5,7 +5,9 @@
 #include "PlanDatabaseDefs.hh"
 #include "ConstraintEngineDefs.hh"
 #include "RulesEngineDefs.hh"
+#ifndef NO_RESOURCES
 #include "ResourceDefs.hh"
+#endif
 #include "DomainListener.hh"
 #include "PlanDatabaseListener.hh"
 #include "ConstraintEngineListener.hh"
@@ -90,7 +92,9 @@ namespace EUROPA {
 	void outputConstrVar(const ConstrainedVariableId &, const int, const int, 
 			     std::ofstream &);
 	void outputConstraint(const ConstraintId &, std::ofstream &, std::ofstream &);
+#ifndef NO_RESOURCES
 	void outputInstant(const InstantId &, const int, std::ofstream &);
+#endif
 	void outputRuleInstance(const RuleInstanceId &, std::ofstream &, std::ofstream & , std::ofstream &);
 	void buildSlaveAndVarSets(std::set<TokenId> &, std::set<ConstrainedVariableId> &, 
 				  const RuleInstanceId &);

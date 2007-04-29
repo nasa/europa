@@ -10,7 +10,6 @@
 
 #include "NddlDefs.hh"
 #include "NddlToken.hh"
-#include "NddlResource.hh"
 #include "NddlRules.hh"
 
 #include "NumericDomain.hh"

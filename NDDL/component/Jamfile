@@ -8,4 +8,8 @@ ModuleComponent NDDL
 	intType.cc
 	;
 
+if ! ( "Resources" in $(NO) ) {
+   SubInclude PLASMA NDDL component Resource ;
+}
+
 } # PLASMA_READY

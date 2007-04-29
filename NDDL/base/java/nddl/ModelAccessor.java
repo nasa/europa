@@ -89,6 +89,10 @@ public class ModelAccessor {
    */
   private static Set s_customIncludes = new HashSet();
 
+  private static Set s_usedCustomIncludes = new HashSet();
+
+  private static Map s_customIncludesByCppName = new HashMap();
+
   public static void changeDirectory(String toDir) {
     if(toDir.equals(""))
       s_directory = System.getProperty("user.dir");
@@ -140,8 +144,18 @@ public class ModelAccessor {
 
   public static String getCppClass(String nddlClass){
     String cppClass = nddlClass;
-    if(isPredefinedClass(nddlClass))
+    if(isPredefinedClass(nddlClass)) {
       cppClass = (String) s_customClassesByNddlName.get(nddlClass);
+      assert(DebugMsg.debugMsg("ModelAccessor:getCppClass",
+			       "Nddl class '" + nddlClass + "' is a pre-defined class.  The " +
+			       " C++ class is '" + cppClass + "'."));
+      if(s_customIncludesByCppName.containsKey(cppClass)) {
+	s_usedCustomIncludes.add(s_customIncludesByCppName.get(cppClass));
+	assert(DebugMsg.debugMsg("ModelAccessor:getCppClass",
+				 "C++ class '" + cppClass + "' requires header '" +
+				 s_customIncludesByCppName.get(cppClass).toString() + "'"));
+      }
+    }
     assert(DebugMsg.debugMsg("ModelAccessor:getCppClass",nddlClass + " becomes " + cppClass));
     return cppClass;
   }
@@ -1044,7 +1058,7 @@ public class ModelAccessor {
   }
 
   public static Set getCustomIncludes(){
-    return s_customIncludes;
+    return s_usedCustomIncludes;//s_customIncludes;
   }
 
   /**
@@ -1058,6 +1072,8 @@ public class ModelAccessor {
     s_customSearchPath.clear();
     s_customClassesByNddlName.clear();
     s_customIncludes.clear();
+    s_usedCustomIncludes.clear();
+    s_customIncludesByCppName.clear();
 
     // If s_cfgFilename is available in the directory from which this
     // program is run, then use that file to load properties
@@ -1085,6 +1101,7 @@ public class ModelAccessor {
         if(binding.hasAttribute("include")){
           String source = XMLUtil.getAttribute(binding, "include");
           s_customIncludes.add(source);
+	  s_customIncludesByCppName.put(cpp, source);
         }
       }
       // process include path
@@ -1107,7 +1124,7 @@ public class ModelAccessor {
       // process constraint registration
       Vector constraints = root.getChildrenNamed("constraint");
       for(int i=0;i<constraints.size();i++)
-      {
+	{
         IXMLElement constraint = (IXMLElement)constraints.get(i);
         String name = constraint.getAttribute("name", null);
         String cpp =  constraint.getAttribute("cpp", null);
@@ -1124,8 +1141,8 @@ public class ModelAccessor {
       assert(DebugMsg.debugMsg("ModelAccessor:init", "File not found: "+e.getMessage()));
       s_customClassesByNddlName.put("Object", "Object");
       s_customClassesByNddlName.put("Timeline", "Timeline");
-      s_customClassesByNddlName.put("Resource", "NddlResource");
-      s_customClassesByNddlName.put("Resource.change", "NddlResource::change");
+//       s_customClassesByNddlName.put("Resource", "NddlResource");
+//       s_customClassesByNddlName.put("Resource.change", "NddlResource::change");
     }
     catch(Exception e){
       e.printStackTrace();

@@ -2,7 +2,8 @@ SubDir PLASMA Resource ;
 
 if ! $(PLASMA_READY) {
 
-Module Resource : ConstraintEngine TemporalNetwork PlanDatabase Utils ;
+#Module Resource : ConstraintEngine TemporalNetwork PlanDatabase Utils ;
+Module Resource : TemporalNetwork ;
 
 SubInclude PLASMA Resource base ;
 SubInclude PLASMA Resource component ;

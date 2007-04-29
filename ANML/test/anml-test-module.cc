@@ -19,6 +19,7 @@ using namespace EUROPA;
 void ANMLModuleTests::runTests(std::string path) {
   LockManager::instance().connect();
   LockManager::instance().lock();
+  initConstraintLibrary();
   setTestLoadLibraryPath(path);
 
   REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");

@@ -883,5 +883,5 @@ void TemporalNetworkModuleTests::runTests(std::string path) {
     runTestSuite(TemporalPropagatorTest::test);
   }
   std::cout << "Finished" << std::endl;
-  ConstraintLibrary::purgeAll();
+  uninitConstraintLibrary();
 }

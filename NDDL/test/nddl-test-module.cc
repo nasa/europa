@@ -50,11 +50,11 @@ void NDDLModuleTests::runTests(std::string path) {
   LockManager::instance().connect();
   LockManager::instance().lock();
 
-  REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");
+  initConstraintLibrary();
+  //REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");
 
   // Pre-allocate a schema
   SCHEMA;
-
   initNDDL();
 
   runTestSuite(UtilitiesTest::test);

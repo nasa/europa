@@ -11,6 +11,15 @@
 
 namespace EUROPA{
 
+#define DECLARE_ENTITY_TYPE(type) \
+  static const LabelStr& entityTypeName() { \
+    static LabelStr sl_type(#type); \
+    return sl_type; \
+  } \
+  virtual const LabelStr& entityType() { \
+    return entityTypeName(); \
+  } \
+
 /**
  * @class Entity
  * @brief Basic entity in system
@@ -22,6 +31,8 @@ namespace EUROPA{
 
   class Entity{
   public:
+    DECLARE_ENTITY_TYPE(Entity);
+
     inline int getKey() const {return m_key;}
     virtual ~Entity();
     virtual const LabelStr& getName() const;

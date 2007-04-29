@@ -11,12 +11,11 @@ SubDirHdrs $(PLASMA) PlanDatabase test ;
 #ModuleMain all-module-tests : test-main.cc
 #made switch to nddlMain as we Solvers test needs some nddl compiled.
 
-NddlMain all-module-tests : module-tests.cc
+local global-module-tests = module-tests.cc
                                            all-test-module.cc
                                            ../../NDDL/test/nddl-test-module.cc
                                            ../../PlanDatabase/test/db-test-module.cc
                                            ../../Solvers/test/solvers-test-module.cc
-                                           ../../Resource/test/rs-test-module.cc 
                                            ../../RulesEngine/test/re-test-module.cc 
                                            ../../RulesEngine/test/TestRule.cc                                  
                                            ../../ConstraintEngine/test/ce-test-module.cc
@@ -26,11 +25,23 @@ NddlMain all-module-tests : module-tests.cc
                                            ../../ConstraintEngine/test/ce-test-module.cc
                                            ../../Utils/test/util-test-module.cc
                                            $(PlanDatabase_Test_Files:S=$(SUFOBJ))
-                                           $(CET_Files:S=$(SUFOBJ)) 
+                                           $(CET_Files:S=$(SUFOBJ)) ;
+
+local global-test-deps = System NDDL ;
+
+if ! ( "Resources" in $(NO) ) {
+  global-module-tests += ../../Resource/test/rs-test-module.cc ;
+  global-test-deps += Resource ;
+}
+else {
+  SubDirC++Flags -DNO_RESOURCES ;
+}
+
+NddlMain all-module-tests : $(global-module-tests)
                                            : 
                                            ../../Solvers/test/Model.nddl
                                            :
-                                            System NDDL ;
+                                            $(global-test-deps) ;
 
 RunModuleMain run-all-module-tests : all-module-tests ;
 
@@ -47,6 +58,11 @@ if $(LIBRARIES) = SHARED {
 EXTRA_DEFS = -D$(PLANNER) ;
 ModuleNamedObjects runProblem_link_$(PLANNER) : runProblem.cc : System ;
 
+
+EXTRA_DEFS = -D$(PLANNER) -DINTERPRETED ;
+ModuleNamedObjects runProblem_interp_$(PLANNER) : runProblem.cc : System ;
+ModuleMain runProblem_interp_$(PLANNER) : runProblem_interp_$(PLANNER).o : System ;
+
 local DEFAULT_PCONFIG = "DefaultPlannerConfig.xml" ;
 
 # To run one of these individulally: jam run-<target> i.e. jam run-basic-types
@@ -57,22 +73,44 @@ checkin-tests =
 	HTX.1
 	HTX.2
 	HTX.3
-        Rover-transaction
-	Rover-transaction-reservoir
-        k9.backtrack.moderate-transaction
-	k9.backtrack.moderate-transaction-reservoir
         rejection
-        resource-backtrack-test
-        resource-backtrack-test-reservoir
-        better-res
-	better-res-reservoir #need to re-write the constraints so that they produce positive consumption values
         constrain-transaction
         foreach-transaction
         force-object-distribution
 	gnats_3161
-	reusable-test-transaction
-  	unary-resource-test-transaction
         ;
+
+if ! ( "Resources" in $(NO) ) {
+checkin-tests += Rover-transaction
+	      	 Rover-transaction-reservoir
+                 k9.backtrack.moderate-transaction
+	         k9.backtrack.moderate-transaction-reservoir
+                 resource-backtrack-test
+                 resource-backtrack-test-reservoir
+                 better-res
+	         better-res-reservoir #need to re-write the constraints so that they produce positive consumption values
+		 reusable-test-transaction
+		 unary-resource-test-transaction ;
+}
+
+
+#tests to skip because they currently fail in known, but hard to fix ways
+local interp-skip =
+      subtype-extension.tx.nddl #predicate bug
+      unary-resource-test-transaction.nddl
+      HTX.1.solver.nddl
+      HTX.3.solver.nddl
+      foreach-transaction.nddl
+      gnats_2837-tx.nddl
+      gnats_2572_interval-tx.nddl
+      gnats_3161.nddl
+      parent-predicate.nddl #predecessor->isActive() is false
+      parent-predicate-reservoir.nddl
+      resource-backtrack-test-reservoir.nddl
+      better-res-reservoir.nddl
+      EOS-backtrack-test-reservoir.nddl
+      ;
+      
 
 #RunPlannerProblem <model> : <configurationFile> : <heuristicsFile> : <target that depends> ;
 rule RunPlannerProblem {
@@ -95,14 +133,21 @@ rule RunPlannerProblem {
   # create planner with linked model
   ModuleMain $(exe) : $(o) runProblem_link_$(PLANNER).o : System ;
   RunModuleMain run-$(exe) : $(exe) : $(xml) $(configurationFile) ;
-  #Echo Creating exec target $(exe) run target run-$(exe) ;
-
   Depends $(deptarget) : run-$(exe) ;
+
+
+  #run with interpreted model
+  if ! ( $(model) in $(interp-skip) ) {
+    RunModuleMain run-interp-$(exe) : runProblem_interp_$(PLANNER) :
+                  $(xml) $(configurationFile) ;
+    Depends $(deptarget) : run-interp-$(exe) ;
+  }
 
   Clean clean-system-xml : $(xml) ;
 
   if $(executable) in $(checkin-tests) {
     LocalDepends run-$(deptarget)-checkin-tests : run-$(exe) ;
+    LocalDepends run-$(deptarget)-checkin-tests : run-interp-$(exe) ;
   }
 
   if $(LIBRARIES) = SHARED {
@@ -134,22 +179,33 @@ rule RunPlannerProblem {
 #
 
 local testmodels = subtype-extension.tx.nddl k9-transaction.nddl path-filter-transaction.nddl foreach-transaction.nddl
-      force-object-distribution.nddl resource-backtrack-test.nddl resource-backtrack-test-reservoir.nddl rejection.nddl constrain-transaction.nddl
-      parent-predicate.nddl parent-predicate-reservoir.nddl k9-initial.nddl backtr.nddl better-res.nddl 
-      better-res-reservoir.nddl
-      CAPER.nddl monkey1monkey-transaction.nddl
-      basic-model-transaction.nddl EOS-backtrack-test.nddl 
-      EOS-backtrack-test-reservoir.nddl
+      force-object-distribution.nddl  rejection.nddl constrain-transaction.nddl
+      k9-initial.nddl monkey1monkey-transaction.nddl
+      basic-model-transaction.nddl 
       gnats_2837-tx.nddl DynamicObjTest.nddl
       rules.0.tx.nddl gnats_2572_interval-tx.nddl gnats_3161.nddl basic-types.nddl 
        ;
+
+if ! ( "Resources" in $(NO) ) {
+  testmodels += 
+      parent-predicate.nddl parent-predicate-reservoir.nddl
+      resource-backtrack-test.nddl resource-backtrack-test-reservoir.nddl
+      backtr.nddl
+      better-res.nddl 
+      better-res-reservoir.nddl
+      CAPER.nddl 
+      EOS-backtrack-test-reservoir.nddl
+      EOS-backtrack-test.nddl  ;
+}
 
 for model in $(testmodels) {
   RunPlannerProblem $(model) : $(DEFAULT_PCONFIG) : common-tests ;
 }
 
+if ! ( "Resources" in $(NO) ) {
 RunPlannerProblem reusable-test-transaction.nddl : ReusableTestConfig.xml :  solver-tests ;
 RunPlannerProblem unary-resource-test-transaction.nddl : ReusableTestConfig.xml : solver-tests ;
+}
 
 
 if $(PLANNER) = SOLVER {

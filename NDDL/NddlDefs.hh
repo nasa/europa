@@ -2,7 +2,6 @@
 #define NDDL_DEFS_HH
 
 #include "RulesEngineDefs.hh"
-#include "ResourceDefs.hh"
 
 using namespace EUROPA;
 
@@ -11,11 +10,11 @@ namespace NDDL {
   class NddlToken;
   typedef Id<NddlToken> NddlTokenId;
 
-  class NddlResource;
-  typedef Id<NddlResource> NddlResourceId;
+//   class NddlResource;
+//   typedef Id<NddlResource> NddlResourceId;
 
-  class NddlResourceTransaction;
-  typedef Id<NddlResourceTransaction> NddlResourceTransactionId;
+//   class NddlResourceTransaction;
+//   typedef Id<NddlResourceTransaction> NddlResourceTransactionId;
 
   class ObjectFilterConstraint;
   typedef Id<ObjectFilterConstraint> ObjectFilterConstraintId;

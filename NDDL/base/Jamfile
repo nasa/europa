@@ -4,9 +4,7 @@ if ! $(PLASMA_READY) {
 
 ModuleBase NDDL
 	:
-	NddlResource.cc
 	NddlToken.cc
-	StandardAssembly.cc
 	NddlUtils.cc
 	NddlRules.cc
 	;

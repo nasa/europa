@@ -5,7 +5,6 @@
 #include "FlawHandler.hh"
 #include "Token.hh"
 #include "Debug.hh"
-#include "SAVH_Instant.hh"
 
 /**
  * @file FlawManager.cc
@@ -382,9 +381,9 @@ namespace EUROPA {
       // Load filters
       std::vector<MatchingRuleId> filters;
       if(TokenId::convertable(entity))
-        m_flawFilters.getTokenMatches(entity, filters);
+        m_flawFilters.getMatches(TokenId(entity), filters);
       else
-        m_flawFilters.getVariableMatches(entity, filters);
+        m_flawFilters.getMatches(ConstrainedVariableId(entity), filters);
 
       std::vector<FlawFilterId> dynamicFilters;
       for(std::vector<MatchingRuleId>::const_iterator it = filters.begin(); it!= filters.end(); ++it){
@@ -490,15 +489,7 @@ namespace EUROPA {
       else { // Have to load heuristics
         debugMsg("FlawManager:getFlawHandler", "Loading heuristics.");
         std::vector<MatchingRuleId> candidates;
-        if(TokenId::convertable(entity))
-          m_flawHandlers.getTokenMatches(entity, candidates);
-        else if(ConstrainedVariableId::convertable(entity))
-          m_flawHandlers.getVariableMatches(entity, candidates);
-        else if(SAVH::InstantId::convertable(entity))
-          m_flawHandlers.getInstantMatches(entity, candidates);
-        else {
-          checkError(ALWAYS_FAIL, "No way to match entities of type " << entity->toString());
-        }
+	m_flawHandlers.getMatches(entity, candidates);
 
         FlawHandlerEntry entry;
         bool requiresPropagation = false;
@@ -603,6 +594,7 @@ namespace EUROPA {
     void FlawManager::synchronize(){
       m_timestamp =  m_db->getConstraintEngine()->cycleCount();
     }
+
 
     /** FLAW ITERATOR IMPLEMENTION **/
 

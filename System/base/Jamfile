@@ -6,14 +6,22 @@ SubDirC++Flags -Wno-unknown-pragmas -DTIXML_USE_STL ;
 
 ModuleBase System 
 	: 
-	PLASMAPerformanceConstraint.cc 
-	LoraxConstraints.cc	
 	PSEngine.cc
 	TransactionInterpreter.cc
+	StandardAssembly.cc
 	;
 
-if $(LIBRARIES) = SHARED {
-  SwigJava PSEngine.i : psengine : swig/psengine : cpp : PSEngine : TinyXml Utils ConstraintEngine PlanDatabase RulesEngine Resource NDDL TemporalNetwork Solvers System ANML : PSEngine ;
+if ! ( "Resources" in $(NO) ) {
+  ModuleBase System : TransactionInterpreterResources.cc PSResources.cc
+  	     	      StandardAssemblyWithResources.cc ;
+  if $(LIBRARIES) = SHARED {
+    SwigJava PSEngineResources.i : psengine : swig/psengine : cpp : PSEngine : TinyXml Utils ConstraintEngine PlanDatabase RulesEngine NDDL TemporalNetwork Solvers System ANML : PSEngine ;
+  }
+}
+else {
+  if $(LIBRARIES) = SHARED {
+    SwigJava PSEngine.i : psengine : swig/psengine : cpp : PSEngine : TinyXml Utils ConstraintEngine PlanDatabase RulesEngine NDDL TemporalNetwork Solvers System : PSEngine ;
+  }
 }
 
 } # PLASMA_READY

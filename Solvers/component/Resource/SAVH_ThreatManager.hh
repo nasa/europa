@@ -2,6 +2,7 @@
 #define _H_SAVH_ThreatManager
 
 #include "FlawManager.hh"
+#include "SAVH_Instant.hh"
 
 namespace EUROPA {
   namespace SAVH {

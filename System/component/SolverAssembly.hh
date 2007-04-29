@@ -21,7 +21,7 @@ namespace EUROPA {
 
 #define PPW_WITH_PLANNER
 
-  class SolverAssembly : public StandardAssembly {
+  class SolverAssembly : public virtual StandardAssembly {
   public:
     SolverAssembly(const SchemaId& schema);
 
@@ -38,7 +38,7 @@ namespace EUROPA {
     /**
      * Convenient form of plan to retrieve the XML configuration from a filename.
      */
-    bool plan(const char* txSource, const char* config);
+    bool plan(const char* txSource, const char* config, bool interp = false);
 
     /**
      * @brief Invoke the planner. Calls playTransactions(txSource).
@@ -46,7 +46,7 @@ namespace EUROPA {
      * @param A solver configuration file
      * @return True if successfully found a plan. Otherwise false.
      */
-    bool plan(const char* txSource, const TiXmlElement& config);
+    bool plan(const char* txSource, const TiXmlElement& config, bool interp = false);
 
     const PlanDatabaseId& getPlanDatabase() const;
 
@@ -59,6 +59,7 @@ namespace EUROPA {
   private:
     unsigned int m_totalNodes;
     unsigned int m_finalDepth;
+    static bool s_initialized;
   };
 }
 #endif

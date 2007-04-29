@@ -1,10 +1,10 @@
-// csp.2.nddl
-
 #include "Db.hh"
 #include "NddlUtils.hh"
 /** Custom Include Files **/
 
 namespace NDDL {
+
+// csp.2.nddl
 
   class Foo;
   typedef Id<Foo> FooId;

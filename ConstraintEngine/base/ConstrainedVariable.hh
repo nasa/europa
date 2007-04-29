@@ -52,6 +52,7 @@ namespace EUROPA {
    */
   class ConstrainedVariable : public Entity {
   public:
+    DECLARE_ENTITY_TYPE(ConstrainedVariable);
 
     static const LabelStr& NO_NAME() {
       static const LabelStr sl_noName(NO_VAR_NAME);

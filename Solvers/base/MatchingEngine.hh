@@ -8,12 +8,15 @@
 
 #include "SolverDefs.hh"
 #include "XMLUtils.hh"
-#include "SAVH_ResourceDefs.hh"
 #include <map>
 #include <set>
+#include <typeinfo>
 
 namespace EUROPA {
   namespace SOLVERS {
+
+    class MatchFinder;
+    typedef Id<MatchFinder> MatchFinderId;
 
     class MatchingEngine {
     public:
@@ -24,19 +27,15 @@ namespace EUROPA {
       const MatchingEngineId& getId() const;
 
       /**
-       * @brief Retrives all relevant matching rules for the given variable
+       * @brief Retrieves all relevent matching rules for the given entity.
+       * @note This method has no implementation.  It is expected that specializations will be
+       *       written for each type.
        */
-      void getVariableMatches(const ConstrainedVariableId& var, std::vector<MatchingRuleId>& results);
-
-      /**
-       * @brief Retrievs all relevant matching rules for te given token
-       */
-      void getTokenMatches(const TokenId& token, std::vector<MatchingRuleId>& results);
-
-      /**
-       * @brief Retrieves all relevant matching rules for the given instant.
-       */
-      void getInstantMatches(const SAVH::InstantId& inst, std::vector<MatchingRuleId>& results);
+      template<typename T>
+      void getMatches(const T& entity, std::vector<MatchingRuleId>& results) {
+	checkError(ALWAYS_FAIL,
+		   "Don't know how to match objects of type " << typeid(T).name());
+      }
 
       /**
        * @brief Adds a rule. Details of how it is indexed are internal
@@ -62,6 +61,8 @@ namespace EUROPA {
 
       const std::set<MatchingRuleId>& getRules() const {return m_rules;}
 
+      static void addMatchFinder(const LabelStr& type, const MatchFinderId& finder);
+
     private:
 
       /**
@@ -70,9 +71,8 @@ namespace EUROPA {
       void addFilter(const LabelStr& label, const MatchingRuleId& rule, 
 		     std::multimap<double,MatchingRuleId>& index);
 
-      void getMatchesInternal(const TokenId& token, std::vector<MatchingRuleId>& results);
-
-      void getMatchesInternal(const SAVH::InstantId& inst, std::vector<MatchingRuleId>& results);
+      template<typename T>
+      void getMatchesInternal(const T& entity, std::vector<MatchingRuleId>& results);
 
       /**
        * @brief Utility method to trigger rules along a given index.
@@ -109,7 +109,59 @@ namespace EUROPA {
       std::set<MatchingRuleId> m_rules; /*!< The set of all rules. */
       std::multimap<double, MatchingRuleId> m_rulesByExpression; /*!< All rules by expression */
       std::vector<MatchingRuleId> m_unfilteredRules; /*!< All rules without filters */
+
+      static std::map<double, MatchFinderId> s_entityMatchers;
     };
+    
+    template<>
+    void MatchingEngine::getMatches(const EntityId& entity,
+				    std::vector<MatchingRuleId>& results);
+
+    /**
+     * @brief Retrives all relevant matching rules for the given variable
+     */
+    template<>
+    void MatchingEngine::getMatches(const ConstrainedVariableId& var,
+				    std::vector<MatchingRuleId>& results);
+    
+    /**
+     * @brief Retrievs all relevant matching rules for te given token
+     */
+    template<>
+    void MatchingEngine::getMatches(const TokenId& token,
+				    std::vector<MatchingRuleId>& results);
+    
+    template<>
+    void MatchingEngine::getMatchesInternal(const TokenId& token,
+					    std::vector<MatchingRuleId>& results);
+
+    /**
+     * Class for 
+     */
+
+    class MatchFinder {
+    public:
+      MatchFinder() : m_id(this) {}
+      const MatchFinderId& getId() const {return m_id;}
+      virtual ~MatchFinder() { m_id.remove();}
+      virtual void getMatches(const MatchingEngineId& engine, const EntityId& entity,
+			      std::vector<MatchingRuleId>& results) = 0;
+    private:
+      MatchFinderId m_id;
+    };
+
+    class VariableMatchFinder : public MatchFinder {
+    public:
+      void getMatches(const MatchingEngineId& engine, const EntityId& entity,
+		      std::vector<MatchingRuleId>& results);
+    };
+
+    class TokenMatchFinder : public MatchFinder {
+    public:
+      void getMatches(const MatchingEngineId& engine, const EntityId& entity,
+		      std::vector<MatchingRuleId>& results);
+    };
+
   }
 }
 #endif

@@ -926,6 +926,49 @@ namespace EUROPA {
   };
 
   /**
+   * @brief SquareOfDifference(x, y, a) maintains the relation:
+   * @li a = (x - y)^2
+   * if x and y are singleton.
+   */
+  class SquareOfDifferenceConstraint : public Constraint {
+  public:
+    SquareOfDifferenceConstraint(const LabelStr& name,
+		       const LabelStr& propagatorName,
+		       const ConstraintEngineId& constraintEngine,
+		       const std::vector<ConstrainedVariableId>& variables);
+
+    void handleExecute();
+
+  private:
+    static const int V1 = 0;
+    static const int V2 = 1;
+    static const int RES = 2;
+    static const int ARG_COUNT = 3;
+  };
+
+  /**
+   * @brief DistanceFromSquaresConstraint(x, y, a) maintains the relation
+   * @li a = sqrt(x + y)
+   * if x and y are singleton
+   */
+  class DistanceFromSquaresConstraint : public Constraint {
+  public:
+    DistanceFromSquaresConstraint(const LabelStr& name,
+		       const LabelStr& propagatorName,
+		       const ConstraintEngineId& constraintEngine,
+		       const std::vector<ConstrainedVariableId>& variables);
+
+    void handleExecute();
+
+  private:
+    static const int V1 = 0;
+    static const int V2 = 1;
+    static const int RES = 2;
+    static const int ARG_COUNT = 3;
+  };
+
+
+  /**
    * @brief initialize constraint library by registering default constraint set
    */
    extern void initConstraintLibrary();

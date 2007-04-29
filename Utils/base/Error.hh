@@ -35,7 +35,7 @@
 #ifndef _H_Error
 #define _H_Error
 
-/* $Id: Error.hh,v 1.5 2007-03-01 20:53:34 meboyce Exp $ */
+/* $Id: Error.hh,v 1.6 2007-04-29 04:36:18 miatauro Exp $ */
 
 #include <iostream>
 #include <string>
@@ -102,7 +102,9 @@
  * @param msg The information to print.
  * @note When EUROPA_FAST is defined, these are ignored
  */
+#ifndef warn
 #define warn(msg)
+#endif
 
 /**
  * @def condWarning
@@ -153,7 +155,9 @@
   } \
 }
 
+#ifndef warn
 #define warn(msg) (Error::printWarning((msg), __FILE__, __LINE__))
+#endif
 
 #define condWarning(cond, msg) { \
   if (!(cond)) { \

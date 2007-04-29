@@ -1,6 +1,6 @@
 #include "PlannerConfig.nddl"
 #include "Plasma.nddl"
-#include "LoraxConstraints.nddl"
+#include "Resources.nddl"
 
 /*
 	Rover:   Standby, Drive, Sample. Drive and Sample consume at max rate.
@@ -117,8 +117,13 @@ Rover::Drive{
 
   // Battery consumption and driving duration are functions of distance
   // These two constraints enforce consumption rate of [2,4]
-  driveBattery( bc.quantity, dist );
-  driveDuration( duration, dist );
+  //driveBattery( bc.quantity, dist );
+  float intermediateQuantity;
+  multEq(dist, 4, intermediateQuantity);
+  neg(intermediateQuantity, bc.quantity);
+
+  //driveDuration( duration, dist );
+  multEq(dist, [1 2], duration);
 
   // What do we do after
   bool sw_after;

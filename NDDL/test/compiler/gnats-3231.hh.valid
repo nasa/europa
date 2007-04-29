@@ -1,10 +1,10 @@
-// gnats-3231.nddl
-
 #include "Db.hh"
 #include "NddlUtils.hh"
 /** Custom Include Files **/
 
 namespace NDDL {
+
+// gnats-3231.nddl
 
   class GnatsClass;
   typedef Id<GnatsClass> GnatsClassId;

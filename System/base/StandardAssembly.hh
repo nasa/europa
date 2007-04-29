@@ -50,7 +50,7 @@ namespace EUROPA {
     /**
      * @brief Play Transactions stored in the given file
      */
-    bool playTransactions(const char* txSource);
+    bool playTransactions(const char* txSource, bool interp = false);
 
     /**
      * @brief Writes the current state of the plan database to the
@@ -74,6 +74,7 @@ namespace EUROPA {
     const RulesEngineId& getRulesEngine() const {return m_rulesEngine;}
 
   protected:
+    StandardAssembly();
     /**
      * @brief Provides accessor for static variable indicating if the static members,
      * primarily related to various factories have been initialized e.g.: Rules, Constraints, 
@@ -84,6 +85,7 @@ namespace EUROPA {
     ConstraintEngineId m_constraintEngine; /*!< A Constraint Engine for propagation of relations */
     PlanDatabaseId m_planDatabase; /*!< A PlanDatabase as central state representation */
     RulesEngineId m_rulesEngine; /*!< A Rules Engine to enforce model rules. */
+    DbClientTransactionPlayer* m_transactionPlayer;
   };
 }
 #endif

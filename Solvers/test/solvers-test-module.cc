@@ -1,6 +1,5 @@
 #include "solvers-test-module.hh"
 #include "Nddl.hh"
-#include "StandardAssembly.hh"
 #include "Solver.hh"
 #include "ComponentFactory.hh"
 #include "Constraint.hh"
@@ -22,8 +21,14 @@
 #include "MatchingEngine.hh"
 #include "HSTSDecisionPoints.hh"
 #include "PlanDatabaseWriter.hh"
-#include "ResourceThreatDecisionPoint.hh"
+#include "RulesEngine.hh"
+#include "NddlDefs.hh"
 #include "Context.hh"
+#include "STNTemporalAdvisor.hh"
+#include "DbClientTransactionPlayer.hh"
+#include "TemporalPropagator.hh"
+#ifndef NO_RESOURCES
+#include "ResourceThreatDecisionPoint.hh"
 #include "SAVH_Profile.hh"
 #include "SAVH_FlowProfile.hh"
 #include "SAVH_IncrementalFlowProfile.hh"
@@ -33,6 +38,12 @@
 #include "SAVH_DurativeTokens.hh"
 #include "SAVH_ThreatDecisionPoint.hh"
 #include "SAVH_ThreatManager.hh"
+#include "SAVH_ProfilePropagator.hh"
+#include "ResourceMatching.hh"
+#include "ResourcePropagator.hh"
+#endif
+
+#include <fstream>
 /**
  * @file Provides module tests for Solver Module.
  * @author Conor McGann
@@ -44,6 +55,68 @@
 using namespace EUROPA;
 using namespace EUROPA::SOLVERS;
 using namespace EUROPA::SOLVERS::HSTS;
+
+class TestAssembly {
+public:
+  static void initialize() {
+    initNDDL();
+    initConstraintLibrary();
+  }
+
+  TestAssembly(const SchemaId& schema) {
+    m_constraintEngine = (new ConstraintEngine())->getId();
+
+    m_planDatabase = (new PlanDatabase(m_constraintEngine, schema))->getId();
+
+    new DefaultPropagator(LabelStr("Default"), m_constraintEngine);
+    new TemporalPropagator(LabelStr("Temporal"), m_constraintEngine);
+#ifndef NO_RESOURCES
+    new ResourcePropagator(LabelStr("Resource"), m_constraintEngine, m_planDatabase);
+    new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), m_constraintEngine);
+#endif
+
+    PropagatorId temporalPropagator = m_constraintEngine->getPropagatorByName(LabelStr("Temporal"));
+    m_planDatabase->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
+
+    m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();
+  }
+
+
+  ~TestAssembly() {
+    Entity::purgeStarted();
+    delete (RulesEngine*) m_rulesEngine;
+    delete (PlanDatabase*) m_planDatabase;
+    delete (ConstraintEngine*) m_constraintEngine;
+    Entity::purgeEnded();
+  }
+
+  bool playTransactions(const char* txSource){
+    check_error(txSource != NULL, "NULL transaction source provided.");
+    
+    // Obtain the client to play transactions on.
+    DbClientId client = m_planDatabase->getClient();
+    
+    // Construct player
+    DbClientTransactionPlayer player(client);
+    
+    // Open transaction source and play transactions
+    std::ifstream in(txSource);
+
+    check_error(in, "Invalid transaction source '" + std::string(txSource) + "'.");
+    player.play(in);
+    
+    return m_constraintEngine->constraintConsistent();
+  }
+  const PlanDatabaseId& getPlanDatabase() const { return m_planDatabase; }
+
+  const ConstraintEngineId& getConstraintEngine() const {return m_constraintEngine;}
+  
+  const RulesEngineId& getRulesEngine() const {return m_rulesEngine;}
+private:
+  ConstraintEngineId m_constraintEngine;
+  PlanDatabaseId m_planDatabase;
+  RulesEngineId m_rulesEngine;
+};
 
 /**
  * @brief Test Constraint to only fire when all values are singletons and to then
@@ -169,7 +242,7 @@ private:
     assertTrue(me.hasRule("[R10]*.*.*.before.*.*"));
     assertTrue(me.hasRule("[R11]*.*.neverMatched.*.*.*"));
 
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     PlanDatabaseId db = assembly.getPlanDatabase();
     Object o1(db, "A", "o1");
     Object o2(db, "D", "o2");
@@ -181,7 +254,7 @@ private:
     {
       Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), true, "v0");
       std::vector<MatchingRuleId> rules;
-      me.getVariableMatches(v0.getId(), rules);
+      me.getMatches(v0.getId(), rules);
       assertTrue(rules.size() == 1, toString(rules.size()));
       assertTrue(rules[0]->toString() == "[R0]*.*.*.*.*.*", rules[0]->toString());
     }
@@ -198,7 +271,7 @@ private:
                           Token::noObject(), true);
 
       std::vector<MatchingRuleId> rules;
-      me.getVariableMatches(token.getStart(), rules);
+      me.getMatches(ConstrainedVariableId(token.getStart()), rules);
       assertTrue(rules.size() == 2, toString(rules.size()));
       assertTrue(rules[1]->toString() == "[R1]*.*.start.*.*.*", rules[1]->toString());
     }
@@ -207,7 +280,7 @@ private:
     {
       Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), true, "arg3");
       std::vector<MatchingRuleId> rules;
-      me.getVariableMatches(v0.getId(), rules);
+      me.getMatches(v0.getId(), rules);
       assertTrue(rules.size() == 2, toString(rules.size()));
       assertTrue(rules[1]->toString() == "[R2]*.*.arg3.*.*.*", rules[1]->toString());
     }
@@ -216,7 +289,7 @@ private:
     {
       TokenId token = db->getClient()->createToken("D.predicateF", false);
       std::vector<MatchingRuleId> rules;
-      me.getTokenMatches(token, rules);
+      me.getMatches(token, rules);
       assertTrue(rules.size() == 2, toString(rules.size()));
       assertTrue(rules[1]->toString() == "[R3]*.predicateF.*.*.*.*", rules[1]->toString());
       token->discard();
@@ -226,7 +299,7 @@ private:
     {
       TokenId token = db->getClient()->createToken("D.predicateC", false);
       std::vector<MatchingRuleId> rules;
-      me.getVariableMatches(token->getVariable("arg6"), rules);
+      me.getMatches(token->getVariable("arg6"), rules);
       assertTrue(rules.size() == 2, toString(rules.size()));
       assertTrue(rules[1]->toString() == "[R4]*.predicateC.arg6.*.*.*", rules[1]->toString());
       token->discard();
@@ -236,7 +309,7 @@ private:
     {
       TokenId token = db->getClient()->createToken("C.predicateC", false);
       std::vector<MatchingRuleId> rules;
-      me.getTokenMatches(token, rules);
+      me.getMatches(token, rules);
       assertTrue(rules.size() == 3, toString(rules.size()) + " for " + token->getUnqualifiedPredicateName().toString());
       assertTrue(rules[1]->toString() == "[R5]C.predicateC.*.*.*.*", rules[1]->toString());
       assertTrue(rules[2]->toString() == "[R6]C.*.*.*.*.*", rules[2]->toString());
@@ -247,7 +320,7 @@ private:
     {
       TokenId token = db->getClient()->createToken("C.predicateA", false);
       std::vector<MatchingRuleId> rules;
-      me.getTokenMatches(token, rules);
+      me.getMatches(token, rules);
       assertTrue(rules.size() == 2, toString(rules.size()) + " for " + token->getUnqualifiedPredicateName().toString());
       assertTrue(rules[1]->toString() == "[R6]C.*.*.*.*.*", rules[1]->toString());
       token->discard();
@@ -259,7 +332,7 @@ private:
       token->activate();
       TokenId E_predicateC = *(token->getSlaves().begin());
       std::vector<MatchingRuleId> rules;
-      me.getVariableMatches(E_predicateC->getDuration(), rules);
+      me.getMatches(ConstrainedVariableId(E_predicateC->getDuration()), rules);
       assertTrue(rules.size() == 2, toString(rules.size()) + " for " + token->getUnqualifiedPredicateName().toString());
       assertTrue(rules[1]->toString() == "[R7]*.*.duration.*.Object.*", rules[1]->toString());
       token->discard();
@@ -269,7 +342,7 @@ private:
     {
       TokenId token = db->getClient()->createToken("E.predicateC", false);
       std::vector<MatchingRuleId> rules;
-      me.getVariableMatches(token->getDuration(), rules);
+      me.getMatches(ConstrainedVariableId(token->getDuration()), rules);
       assertTrue(rules.size() == 2, toString(rules.size()) + " for " + token->getPredicateName().toString());
       assertTrue(rules[1]->toString() == "[R7a]*.*.duration.none.*.*", rules[1]->toString());
       token->discard();
@@ -281,7 +354,7 @@ private:
       token->activate();
       TokenId E_predicateC = *(token->getSlaves().begin());
       std::vector<MatchingRuleId> rules;
-      me.getVariableMatches(E_predicateC->getDuration(), rules);
+      me.getMatches(ConstrainedVariableId(E_predicateC->getDuration()), rules);
       assertTrue(rules.size() == 3, toString(rules.size()) + " for " + token->getPredicateName().toString());
       assertTrue(rules[1]->toString() == "[R8]*.*.*.*.B.*", rules[1]->toString());
       assertTrue(rules[2]->toString() == "[R7]*.*.duration.*.Object.*", rules[2]->toString());
@@ -300,7 +373,7 @@ private:
       expectedRules.insert(LabelStr("[R9]*.*.*.meets.D.predicateG"));
       expectedRules.insert(LabelStr("[R10]*.*.*.before.*.*"));
       std::vector<MatchingRuleId> rules;
-      me.getVariableMatches(E_predicateC->getDuration(), rules);
+      me.getMatches(ConstrainedVariableId(E_predicateC->getDuration()), rules);
       assertTrue(rules.size() == 4, toString(rules.size()) + " for " + token->getPredicateName().toString());
       for(int i=0;i>4; i++)
         assertTrue(expectedRules.find(LabelStr(rules[i]->toString())) != expectedRules.end(), rules[i]->toString());
@@ -314,7 +387,7 @@ private:
   static bool testVariableFiltering(){
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawFilterTests.xml").c_str(), "UnboundVariableManager");
 
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     UnboundVariableManager fm(*root);
     assert(assembly.playTransactions( (getTestLoadLibraryPath() + "/UnboundVariableFiltering.xml").c_str() ));
 
@@ -365,7 +438,7 @@ private:
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawFilterTests.xml").c_str(), "OpenConditionManager");
                 check_error(root != NULL, "Error loading xml: " + getTestLoadLibraryPath() + "/FlawFilterTests.xml");
 
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     OpenConditionManager fm(*root);
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
@@ -392,7 +465,7 @@ private:
   static bool testThreatFiltering(){
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawFilterTests.xml" ).c_str(), "ThreatManager");
 
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     ThreatManager fm(*root);
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
@@ -438,8 +511,10 @@ public:
     runTest(testValueEnum);
     runTest(testHSTSOpenConditionDecisionPoint);
     runTest(testHSTSThreatDecisionPoint);
+#ifndef NO_RESOURCES
     runTest(testResourceDecisionPoint);
     runTest(testSAVHThreatDecisionPoint);
+#endif
     return true;
   }
 
@@ -447,7 +522,7 @@ private:
   static bool testPriorities(){
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestPriorities");
     MatchingEngine me(*root, "FlawHandler");
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     PlanDatabaseId db = assembly.getPlanDatabase();
     Object o1(db, "A", "o1");
     Object o2(db, "D", "o2");
@@ -459,7 +534,7 @@ private:
     {
       Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), true, "v0");
       std::vector<MatchingRuleId> rules;
-      me.getVariableMatches(v0.getId(), rules);
+      me.getMatches(v0.getId(), rules);
       assertTrue(rules.size() == 1, toString(rules.size()));
       FlawHandlerId flawHandler = rules[0];
       assertTrue(flawHandler->getPriority() == 1000, toString(flawHandler->getPriority()));
@@ -470,7 +545,7 @@ private:
     {
       Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), true, "start");
       std::vector<MatchingRuleId> rules;
-      me.getVariableMatches(v0.getId(), rules);
+      me.getMatches(v0.getId(), rules);
       assertTrue(rules.size() == 2, toString(rules.size()));
       FlawHandlerId flawHandler = rules[1];
       assertTrue(flawHandler->getPriority() == 1000, toString(flawHandler->getPriority()));
@@ -481,7 +556,7 @@ private:
     {
       Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), true, "end");
       std::vector<MatchingRuleId> rules;
-      me.getVariableMatches(v0.getId(), rules);
+      me.getMatches(v0.getId(), rules);
       assertTrue(rules.size() == 2, toString(rules.size()));
       FlawHandlerId flawHandler = rules[1];
       assertTrue(flawHandler->getPriority() == 200, toString(flawHandler->getPriority()));
@@ -494,7 +569,7 @@ private:
       token->activate();
       TokenId E_predicateC = *(token->getSlaves().begin());
       std::vector<MatchingRuleId> rules;
-      me.getVariableMatches(E_predicateC->getEnd(), rules);
+      me.getMatches(ConstrainedVariableId(E_predicateC->getEnd()), rules);
       assertTrue(rules.size() == 3, toString(rules.size()));
       FlawHandlerId flawHandler = rules[2];
       assertTrue(flawHandler->getPriority() == 1, toString(flawHandler->getPriority()));
@@ -508,7 +583,7 @@ private:
   static bool testGuards(){
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestGuards");
     MatchingEngine me(*root, "FlawHandler");
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     PlanDatabaseId db = assembly.getPlanDatabase();
     Object o1(db, "A", "o1");
     Object o2(db, "D", "o2");
@@ -521,7 +596,7 @@ private:
     {
       TokenId token = db->getClient()->createToken("D.predicateG", false);
       std::vector<MatchingRuleId> rules;
-      me.getTokenMatches(token, rules);
+      me.getMatches(token, rules);
       assertTrue(rules.size() == 1, toString(rules.size()));
       FlawHandlerId flawHandler = rules[0];
       std::vector<ConstrainedVariableId> guards;
@@ -541,7 +616,7 @@ private:
     {
       TokenId token = db->getClient()->createToken("C.predicateA", false);
       std::vector<MatchingRuleId> rules;
-      me.getTokenMatches(token, rules);
+      me.getMatches(token, rules);
       assertTrue(rules.size() == 1, toString(rules.size()));
       FlawHandlerId flawHandler = rules[0];
       std::vector<ConstrainedVariableId> guards;
@@ -554,7 +629,7 @@ private:
       TokenId token = db->getClient()->createToken("B.predicateC", false);
       {
         std::vector<MatchingRuleId> rules;
-        me.getTokenMatches(token, rules);
+        me.getMatches(token, rules);
         assertTrue(rules.size() == 1, toString(rules.size()));
         FlawHandlerId flawHandler = rules[0];
         std::vector<ConstrainedVariableId> guards;
@@ -564,7 +639,7 @@ private:
       token->activate();
       TokenId B_predicateC = *(token->getSlaves().begin());
       std::vector<MatchingRuleId> rules;
-      me.getTokenMatches(B_predicateC, rules);
+      me.getMatches(B_predicateC, rules);
       assertTrue(rules.size() == 1, toString(rules.size()));
       FlawHandlerId flawHandler = rules[0];
       std::vector<ConstrainedVariableId> guards;
@@ -580,7 +655,7 @@ private:
     {
       Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), true, "FreeVariable");
       std::vector<MatchingRuleId> rules;
-      me.getVariableMatches(v0.getId(), rules);
+      me.getMatches(v0.getId(), rules);
       assertTrue(rules.size() == 1, toString(rules.size()));
       FlawHandlerId flawHandler = rules[0];
       std::vector<ConstrainedVariableId> guards;
@@ -593,7 +668,7 @@ private:
   static bool testDynamicFlawManagement(){
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestDynamicFlaws");
     TiXmlElement* child = root->FirstChildElement();
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     PlanDatabaseId db = assembly.getPlanDatabase();
     Object o1(db, "A", "o1");
     Object o2(db, "D", "o2");
@@ -701,7 +776,7 @@ private:
   }
 
   static bool testDefaultVariableOrdering(){
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "DefaultVariableOrdering");
     TiXmlElement* child = root->FirstChildElement();
     {
@@ -720,7 +795,7 @@ private:
   }
 
   static bool testHeuristicVariableOrdering(){
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "HeuristicVariableOrdering");
     TiXmlElement* child = root->FirstChildElement();
     {
@@ -739,7 +814,7 @@ private:
   }
 
   static bool testTokenComparators() {
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     Schema::instance()->addPredicate("A.Foo");
     PlanDatabaseId db = assembly.getPlanDatabase();
 
@@ -1105,7 +1180,7 @@ private:
   }
 
   static bool testValueEnum() {
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     PlanDatabaseId db = assembly.getPlanDatabase();
     ConstraintEngineId ce = assembly.getConstraintEngine();
 
@@ -1256,7 +1331,7 @@ private:
     return true;
   }
   static bool testHSTSOpenConditionDecisionPoint() {
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     PlanDatabaseId db = assembly.getPlanDatabase();
     DbClientId client = db->getClient();
     Object o1(db, "A", "o1");    
@@ -1371,7 +1446,7 @@ private:
     return true;
   }
   static bool testHSTSThreatDecisionPoint() {
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     PlanDatabaseId db = assembly.getPlanDatabase();
     DbClientId client = db->getClient();
     Timeline o1(db, "A", "o1");
@@ -1443,8 +1518,9 @@ private:
     return true;
   }
 
+#ifndef NO_RESOURCES 
   static bool testResourceDecisionPoint() {
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     PlanDatabaseId db = assembly.getPlanDatabase();
     ConstraintEngineId ce = assembly.getConstraintEngine();
     DbClientId client = db->getClient();
@@ -1504,7 +1580,7 @@ private:
   }
 
   static bool testSAVHThreatDecisionPoint() {
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     PlanDatabaseId db = assembly.getPlanDatabase();
     ConstraintEngineId ce = assembly.getConstraintEngine();
     DbClientId client = db->getClient();
@@ -1828,6 +1904,8 @@ private:
  
     return true;
   }
+#endif
+
 };
 
 class SolverTests {
@@ -1854,7 +1932,7 @@ private:
    * @brief Will load an intial state and solve a csp with only variables.
    */
   static bool testMinValuesSimpleCSP(){
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
@@ -1898,7 +1976,7 @@ private:
 
 
   static bool testSuccessfulSearch(){
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
@@ -1910,7 +1988,7 @@ private:
   }
 
   static bool testExhaustiveSearch(){
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
@@ -1935,7 +2013,7 @@ private:
   }
 
   static bool testSimpleActivation() {
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleActivationSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
@@ -1950,7 +2028,7 @@ private:
   }
 
   static bool testSimpleRejection() {
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleRejectionSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
@@ -1969,7 +2047,7 @@ private:
 
 
   static bool testMultipleSearch(){
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
 
@@ -1987,7 +2065,7 @@ private:
 
   //to test GNATS 3068
   static bool testOversearch() {
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
 
@@ -2000,7 +2078,7 @@ private:
   }
 
   static bool testBacktrackFirstDecisionPoint(){
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "BacktrackSolver");
     TiXmlElement* child = root->FirstChildElement();
     assert(assembly.playTransactions((getTestLoadLibraryPath() +"/BacktrackFirstDecision.xml").c_str()));
@@ -2022,7 +2100,7 @@ private:
    * we are better off trying anoher branch with the time we have rather than working the current one.
    */
   static bool testMultipleSolutionsSearch(){
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
     assert(assembly.playTransactions( (getTestLoadLibraryPath() + "/StaticCSP.xml").c_str()));
@@ -2071,7 +2149,7 @@ private:
   }
 
   static bool testGNATS_3196(){
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "GNATS_3196");
     TiXmlElement* child = root->FirstChildElement();
     assert(assembly.playTransactions( (getTestLoadLibraryPath() + "/GNATS_3196.xml").c_str()));
@@ -2085,7 +2163,7 @@ private:
   }
 
   static bool testContext() {
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     std::stringstream data;
     data << "<Solver name=\"TestSolver\">" << std::endl;
     data << "</Solver>" << std::endl;
@@ -2103,7 +2181,7 @@ private:
 
   static bool testDeletedFlaw() {
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestDynamicFlaws");
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     PlanDatabaseId db = assembly.getPlanDatabase();
     Object o1(db, "GuardTest", "o1");
     db->close();
@@ -2136,7 +2214,7 @@ private:
   static bool testDeleteAfterCommit() {
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestCommit");
     TiXmlElement* child = root->FirstChildElement();
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     PlanDatabaseId db = assembly.getPlanDatabase();
     Object o1(db, "CommitTest", "o1");
     db->close();
@@ -2211,7 +2289,7 @@ private:
   static bool testUnboundVariableFlawIteration() {
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawFilterTests.xml" ).c_str(), "UnboundVariableManager");
     
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     UnboundVariableManager fm(*root);
     fm.initialize(assembly.getPlanDatabase());
     assert(assembly.playTransactions((getTestLoadLibraryPath() + "/UnboundVariableFiltering.xml").c_str()));
@@ -2243,7 +2321,7 @@ private:
   static bool testOpenConditionFlawIteration() {
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawFilterTests.xml" ).c_str(), "OpenConditionManager");
     
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     OpenConditionManager fm(*root);
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
@@ -2276,7 +2354,7 @@ private:
   static bool testThreatFlawIteration() {
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawFilterTests.xml" ).c_str(), "ThreatManager");
 
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     ThreatManager fm(*root);
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
@@ -2307,7 +2385,7 @@ private:
 
   static bool testSolverIteration() {
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/IterationTests.xml" ).c_str(), "Solver");
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     ThreatManager tm(*(root->FirstChildElement("ThreatManager")));
     OpenConditionManager ocm(*(root->FirstChildElement("OpenConditionManager")));
     UnboundVariableManager uvm(*(root->FirstChildElement("UnboundVariableManager")));
@@ -2367,12 +2445,15 @@ private:
 class FlawManagerTests {
 public:
   static bool test() {
+#ifndef NO_RESOURCES
     runTest(testSAVHThreatManager);
+#endif
     return true;
   }
 private:
+#ifndef NO_RESOURCES
   static bool testSAVHThreatManager() {
-    StandardAssembly assembly(Schema::instance());
+    TestAssembly assembly(Schema::instance());
     PlanDatabaseId db = assembly.getPlanDatabase();
     ConstraintEngineId ce = assembly.getConstraintEngine();
     DbClientId client = db->getClient();
@@ -2436,19 +2517,31 @@ private:
     delete earliestXml;
     return true;
   }
+#endif
 };
 
 void initSolverModuleTests() {
  
-  StandardAssembly::initialize();
+  TestAssembly::initialize();
 
   // Allocate the schema with a call to the linked in model function - eventually
   // make this called via dlopen
   EUROPA::NDDL::loadSchema();
  
+#ifndef NO_RESOURCES
+  Schema::instance()->addObjectType("Reusable");
+  Schema::instance()->addMember("Reusable", "float", "capacity");
+  Schema::instance()->addMember("Reusable", "float", "levelLimitMin");
+  Schema::instance()->addMember("Reusable", "float", "consumptionMax");
+  Schema::instance()->addMember("Reusable", "float", "consumptionRateMax");
+
+  Schema::instance()->addPredicate("Reusable.uses");
+  Schema::instance()->addMember("Reusable.uses", "float", "quantity");
+#endif
 }
 
 void SolversModuleTests::runTests(std::string path) {
+  initConstraintLibrary();
    setTestLoadLibraryPath(path);
 
    // For tests on th ematching engine
@@ -2480,9 +2573,11 @@ void SolversModuleTests::runTests(std::string path) {
    REGISTER_CONSTRAINT(LazyAllDiff, "lazyAllDiff",  "Default");
    REGISTER_CONSTRAINT(LazyAlwaysFails, "lazyAlwaysFails",  "Default");
 
+#ifndef NO_RESOURCES
    REGISTER_PROFILE(EUROPA::SAVH::FlowProfile, FlowProfile);
    REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile);
    REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
+#endif
 
    runTestSuite(ComponentFactoryTests::test);
    runTestSuite(FilterTests::test);

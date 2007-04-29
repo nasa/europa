@@ -4,6 +4,7 @@
 #include "PlanDatabaseDefs.hh"
 #include "Timeline.hh"
 #include "IntervalToken.hh"
+#include "TokenVariable.hh"
 #include "PlanDatabase.hh"
 #include "RulesEngine.hh"
 #include "Rule.hh"

@@ -5,10 +5,8 @@
 #include "Entity.hh"
 #include "ConstraintEngineDefs.hh"
 #include "PlanDatabaseDefs.hh"
-#include "SAVH_ResourceDefs.hh"
 #include "SolverDefs.hh"
 #include "RulesEngineDefs.hh"
-#include "ANMLTranslator.hh"
 #include "DbClientTransactionPlayer.hh"
 #include "TransactionInterpreter.hh"
 
@@ -43,13 +41,24 @@ namespace EUROPA {
   };
 
   class PSObject;
-  class PSResource;
   class PSToken;
   class PSSolver;
   class PSVariable;
-  class PSResourceProfile;
   class PSVarValue;
     
+
+  class ObjectWrapperGenerator {
+  public:
+    virtual ~ObjectWrapperGenerator() {}
+    virtual PSObject* wrap(const ObjectId& obj) = 0;
+  };
+
+  class PSLanguageInterpreter {
+  public:
+    virtual ~PSLanguageInterpreter() {}
+    virtual std::string interpret(const std::string& script) = 0;
+  };
+
   /* Wihtout a query interface PSObjects and PSResources may need to :
    * - have lazy instanciation (otherwise calls that return collections of objects may end up being very expensive)
    * - deal gracefully with deletions/changes
@@ -63,10 +72,10 @@ namespace EUROPA {
   {
   public:
     PSEngine();
-    ~PSEngine();
+    virtual ~PSEngine();
 	    
-    void start();
-    void shutdown();
+    virtual void start();
+    virtual void shutdown();
 	     
     // Loads a planning model in binary format
     void loadModel(const std::string& modelFileName);
@@ -78,24 +87,31 @@ namespace EUROPA {
     PSList<PSObject*> getObjectsByType(const std::string& objectType);
     PSObject* getObjectByKey(PSEntityKey id);
 		
-    PSList<PSResource*> getResourcesByType(const std::string& resourceType);
-    PSResource* getResourceByKey(PSEntityKey id);
+//     PSList<PSResource*> getResourcesByType(const std::string& resourceType);
+//     PSResource* getResourceByKey(PSEntityKey id);
 		
     PSList<PSToken*> getTokens();    	 
     PSToken* getTokenByKey(PSEntityKey id);	
 		
     PSSolver* createSolver(const std::string& configurationFile);		
     
+    static void addObjectWrapperGenerator(const LabelStr& type,
+					  ObjectWrapperGenerator* wrapper);
+    
+    static void addLanguageInterpreter(const LabelStr& langauge,
+				       PSLanguageInterpreter* interpreter);
   protected:
-      void initDatabase();
-           
-  private:
+    virtual void initDatabase();
+    static ObjectWrapperGenerator* getObjectWrapperGenerator(const LabelStr& type);
+
     DbClientTransactionPlayerId m_interpTransactionPlayer;
     DbClientTransactionPlayerId m_transactionPlayer;
     ConstraintEngineId m_constraintEngine;
     PlanDatabaseId m_planDatabase;
     RulesEngineId m_rulesEngine;
-    ANML::ANMLTranslator m_anmlTranslator;
+
+    static std::map<double, ObjectWrapperGenerator*> s_objectWrapperGenerators;
+    static std::map<double, PSLanguageInterpreter*> s_languageInterpreters;
   };
 
   class PSEntity
@@ -105,7 +121,7 @@ namespace EUROPA {
     
     PSEntityKey getKey() const;
     const std::string& getName() const;
-    const std::string& getType() const;
+    const std::string& getEntityType() const;
 
     virtual std::string toString();
 
@@ -130,40 +146,12 @@ namespace EUROPA {
     friend class PSEngine;
     friend class PSToken;
     friend class PSVarValue;
+    friend class BaseObjectWrapperGenerator;
     PSObject(const ObjectId& obj);
     
   private:
     ObjectId m_obj;
     PSList<PSVariable*> m_vars;
-  };
-
-  class PSResource : public PSEntity
-  {
-  public:
-    PSResourceProfile* getLimits();
-    PSResourceProfile* getLevels();        	  
-  protected:
-    friend class PSEngine;
-    PSResource(const SAVH::ResourceId& res);
-  private:
-    SAVH::ResourceId m_res;
-  };   
-    
-  class PSResourceProfile
-  {
-  public:
-    const PSList<TimePoint>& getTimes();
-    double getLowerBound(TimePoint time);
-    double getUpperBound(TimePoint time);
-  protected:
-    friend class PSResource;
-    PSResourceProfile(const double lb, const double ub);
-    PSResourceProfile(const SAVH::ProfileId& profile);
-  private:
-    bool m_isConst;
-    double m_lb, m_ub;
-    PSList<TimePoint> m_times;
-    SAVH::ProfileId m_profile;
   };
     
   class PSSolver
@@ -260,12 +248,10 @@ namespace EUROPA {
     
   enum PSVarType {OBJECT,STRING,INTEGER,DOUBLE,BOOLEAN};
   
-  class PSVariable
+  class PSVariable : public PSEntity
   {
   public:
     virtual ~PSVariable(){}
-
-    const std::string& getName();
 	    
     bool isEnumerated();
     bool isInterval();

@@ -2,7 +2,8 @@ SubDir PLASMA ConstraintEngine ;
 
 if ! $(PLASMA_READY) {
 
-Module ConstraintEngine : Utils TinyXml ;
+#Module ConstraintEngine : Utils TinyXml ;
+Module ConstraintEngine : Utils ;
 
 ModuleFiles ConstraintEngine : ConstraintEngineDefs.cc ;
 

@@ -10,8 +10,6 @@
 #include "Object.hh"
 #include "Token.hh"
 #include "TokenVariable.hh"
-#include "SAVH_Resource.hh"
-#include "SAVH_Profile.hh"
 #include "IntervalDomain.hh"
 #include "EntityIterator.hh"
 #include "Solver.hh"
@@ -30,20 +28,14 @@
 #include "Filters.hh"
 #include "DefaultPropagator.hh"
 #include "TemporalPropagator.hh"
-#include "SAVH_ProfilePropagator.hh"
 #include "STNTemporalAdvisor.hh"
-#include "ResourcePropagator.hh"
-#include "ANMLParser.hpp"
-#include "ANML2NDDL.hpp"
-
-// TODO: registration for these needs to happen somewhere else
-#include "SAVH_ReusableFVDetector.hh"
-#include "SAVH_IncrementalFlowProfile.hh" 
-#include "ResourceThreatDecisionPoint.hh"
 
 #include <fstream>
 
 namespace EUROPA {
+  std::map<double, ObjectWrapperGenerator*> PSEngine::s_objectWrapperGenerators;
+  std::map<double, PSLanguageInterpreter*> PSEngine::s_languageInterpreters;
+
   const std::string UNKNOWN("UNKNOWN");
 
   PSEntity::PSEntity(const EntityId& entity) : m_entity(entity) {}
@@ -53,7 +45,7 @@ namespace EUROPA {
   const std::string& PSEntity::getName() const {return m_entity->getName().toString();}
 
   //FIXME
-  const std::string& PSEntity::getType() const {return UNKNOWN;}
+  const std::string& PSEntity::getEntityType() const {return UNKNOWN;}
   
   std::string PSEntity::toString()
   {
@@ -103,51 +95,6 @@ namespace EUROPA {
     }
     return retval;
   }
-
-  PSResource::PSResource(const SAVH::ResourceId& res) : PSEntity(res), m_res(res) {}
-
-  PSResourceProfile* PSResource::getLimits() {
-    return new PSResourceProfile(m_res->getLowerLimit(), m_res->getUpperLimit());
-  }
-
-  PSResourceProfile* PSResource::getLevels() {
-    return new PSResourceProfile(m_res->getProfile());
-  }
-
-  PSResourceProfile::PSResourceProfile(const double lb, const double ub)
-    : m_isConst(true), m_lb(lb), m_ub(ub) {
-    TimePoint inst = (TimePoint) MINUS_INFINITY;
-    m_times.push_back(inst);
-  }
-
-  PSResourceProfile::PSResourceProfile(const SAVH::ProfileId& profile)
-    : m_isConst(false), m_profile(profile) {
-    SAVH::ProfileIterator it(m_profile);
-    while(!it.done()) {
-      TimePoint inst = (TimePoint) it.getTime();
-      m_times.push_back(inst);
-      it.next();
-    }
-  }
-
-  double PSResourceProfile::getLowerBound(TimePoint time) {
-    if(m_isConst)
-      return m_lb;
-
-    IntervalDomain dom;
-    m_profile->getLevel((int) time, dom);
-    return dom.getLowerBound();
-  }
-
-  double PSResourceProfile::getUpperBound(TimePoint time) {
-    if(m_isConst)
-      return m_ub;
-    IntervalDomain dom;
-    m_profile->getLevel((int) time, dom);
-    return dom.getUpperBound();
-  }
-
-  const PSList<TimePoint>& PSResourceProfile::getTimes() {return m_times;}
 
   PSToken::PSToken(const TokenId& tok) : PSEntity(tok), m_tok(tok) {
     const std::vector<ConstrainedVariableId>& vars = m_tok->getVariables();
@@ -226,7 +173,7 @@ namespace EUROPA {
   }
 
 
-  PSVariable::PSVariable(const ConstrainedVariableId& var) : m_var(var) {
+  PSVariable::PSVariable(const ConstrainedVariableId& var) : PSEntity(var), m_var(var) {
     check_runtime_error(m_var.isValid());
     if(m_var->baseDomain().isString())
       m_type =  STRING;
@@ -249,11 +196,6 @@ namespace EUROPA {
     }
   }
   
-  const std::string& PSVariable::getName() {
-    check_runtime_error(m_var.isValid());
-    return m_var->getName().toString();
-  }
-
   bool PSVariable::isEnumerated() {
     check_runtime_error(m_var.isValid());
     return m_var->baseDomain().isEnumerated();
@@ -442,10 +384,6 @@ namespace EUROPA {
 
   PSEngine::PSEngine()
   {
-  	// TODO: this needs to happen somewhere else
-	 REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
-	 REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile);
-	 REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreatDecisionPoint);
   }
 
   PSEngine::~PSEngine() 
@@ -454,8 +392,8 @@ namespace EUROPA {
 
   //FIXME
   void PSEngine::start() {		
-	Error::doThrowExceptions(); // throw exceptions!
-	Error::doDisplayErrors();
+    Error::doThrowExceptions(); // throw exceptions!
+    Error::doDisplayErrors();
     check_runtime_error(m_constraintEngine.isNoId());
     check_runtime_error(m_planDatabase.isNoId());
     check_runtime_error(m_rulesEngine.isNoId());
@@ -463,7 +401,6 @@ namespace EUROPA {
     m_constraintEngine = (new ConstraintEngine())->getId();
     new DefaultPropagator(LabelStr("Default"), m_constraintEngine);
     new TemporalPropagator(LabelStr("Temporal"), m_constraintEngine);
-    new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), m_constraintEngine);
 
     initConstraintLibrary();
     initNDDL();
@@ -496,7 +433,6 @@ namespace EUROPA {
   void PSEngine::initDatabase() 
   {
     m_planDatabase = (new PlanDatabase(m_constraintEngine, Schema::instance()))->getId();
-    new ResourcePropagator(LabelStr("Resource"), m_constraintEngine, m_planDatabase);
     PropagatorId temporalPropagator =
       m_constraintEngine->getPropagatorByName(LabelStr("Temporal"));
     m_planDatabase->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
@@ -552,38 +488,25 @@ namespace EUROPA {
 
   //FIXME
   std::string PSEngine::executeScript(const std::string& language, const std::string& script) {
-		if(language == "anml") {
-			antlr::RefAST ast;
-			// create and invoke parser
-			ast = ANMLParser::eval(script);
-			// create translator
-			ANML2NDDL treeParser(m_anmlTranslator);
-			// pass AST to translator
-			treeParser.anml(ast);
-			// return result.
-			return m_anmlTranslator.toString();
-		}
-		else if(language == "nddl") {
-			return "";
-		}
-    checkRuntimeError(ALWAYS_FAIL, "Cannot execute script of unknown language \"" << language << "\"");
-		return "";
+    std::map<double, PSLanguageInterpreter*>::iterator it =
+      s_languageInterpreters.find(LabelStr(language));
+    checkRuntimeError(it != s_languageInterpreters.end(),
+		      "Cannot execute script of unknown language \"" << language << "\"");
+    return it->second->interpret(script);
   }
 
   PSList<PSObject*> PSEngine::getObjectsByType(const std::string& objectType) {
     check_runtime_error(m_planDatabase.isValid());
-
+    
     PSList<PSObject*> retval;
-
+    
     const ObjectSet& objects = m_planDatabase->getObjects();
     for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
-        ObjectId object = *it;
-	    if(Schema::instance()->isA(object->getType(), objectType.c_str())) {
-            PSObject* obj = new PSObject(*it);
-            retval.push_back(obj);
-	    }
+      ObjectId object = *it;
+      if(Schema::instance()->isA(object->getType(), objectType.c_str()))
+	retval.push_back(getObjectWrapperGenerator(object->getType())->wrap(object));
     }
-
+    
     return retval;
   }
 
@@ -593,30 +516,6 @@ namespace EUROPA {
     EntityId entity = Entity::getEntity(id);
     check_runtime_error(entity.isValid());
     return new PSObject(entity);
-  }
-
-  PSList<PSResource*> PSEngine::getResourcesByType(const std::string& objectType) {
-    check_runtime_error(m_planDatabase.isValid());
-    
-    std::list<SAVH::ResourceId> objs;
-    m_planDatabase->getObjectsByType(objectType, objs);
-
-    PSList<PSResource*> retval;
-    
-    for(std::list<SAVH::ResourceId>::const_iterator it = objs.begin(); it != objs.end();
-	++it) {
-      PSResource* res = new PSResource(*it);
-      retval.push_back(res);
-    }
-    return retval;
-  }
-  
-  PSResource* PSEngine::getResourceByKey(PSEntityKey id) {
-    check_runtime_error(m_planDatabase.isValid());
-
-    EntityId entity = Entity::getEntity(id);
-    check_runtime_error(entity.isValid());
-    return new PSResource(entity);
   }
 
   PSList<PSToken*> PSEngine::getTokens() {
@@ -648,6 +547,69 @@ namespace EUROPA {
       (new SOLVERS::Solver(m_planDatabase, *(doc->RootElement())))->getId();
 
     return new PSSolver(solver,configurationFile);
+  }
+
+  void PSEngine::addLanguageInterpreter(const LabelStr& language,
+					PSLanguageInterpreter* interpreter) {
+    std::map<double, PSLanguageInterpreter*>::iterator it =
+      s_languageInterpreters.find(language);
+    if(it == s_languageInterpreters.end())
+      s_languageInterpreters.insert(std::make_pair(language, interpreter));
+    else {
+      delete it->second;
+      it->second = interpreter;
+    }
+  }
+
+  void PSEngine::addObjectWrapperGenerator(const LabelStr& type,
+					   ObjectWrapperGenerator* wrapper) {
+    std::map<double, ObjectWrapperGenerator*>::iterator it =
+      s_objectWrapperGenerators.find(type);
+    if(it == s_objectWrapperGenerators.end())
+      s_objectWrapperGenerators.insert(std::make_pair(type, wrapper));
+    else {
+      delete it->second;
+      it->second = wrapper;
+    }
+  }
+
+  ObjectWrapperGenerator* PSEngine::getObjectWrapperGenerator(const LabelStr& type) {
+    const std::vector<LabelStr>& types = Schema::instance()->getAllObjectTypes(type);
+    for(std::vector<LabelStr>::const_iterator it = types.begin(); it != types.end(); ++it) {
+      std::map<double, ObjectWrapperGenerator*>::iterator wrapper =
+	s_objectWrapperGenerators.find(*it);
+      if(wrapper != s_objectWrapperGenerators.end())
+	return wrapper->second;
+    }
+    checkRuntimeError(ALWAYS_FAIL,
+		      "Don't know how to wrap objects of type " << type.toString());
+    return NULL;
+  }
+
+  class BaseObjectWrapperGenerator : public ObjectWrapperGenerator {
+  public:
+    PSObject* wrap(const ObjectId& obj) {
+      return new PSObject(obj);
+    }
+  };
+
+  class NDDLInterpreter : public PSLanguageInterpreter {
+  public:
+    std::string interpret(const std::string& script) {
+      return "";
+    }
+  };
+
+  class PSEngineLocalStatic {
+  public:
+    PSEngineLocalStatic() {
+      PSEngine::addObjectWrapperGenerator("Object", new BaseObjectWrapperGenerator());
+      PSEngine::addLanguageInterpreter("nddl", new NDDLInterpreter());
+    }
+  };
+
+  namespace PSEngine {
+    PSEngineLocalStatic s_localStatic;
   }
 
 }

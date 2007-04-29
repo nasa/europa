@@ -45,6 +45,7 @@ namespace EUROPA {
    */
   class Constraint : public Entity {
   public:
+    DECLARE_ENTITY_TYPE(Constraint);
 
     /**
      * @brief Constructor for NARY constraint

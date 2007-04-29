@@ -7,12 +7,11 @@
 #include "Schema.hh"
 #include "Utils.hh"
 #include "SolverUtils.hh"
-#include "SAVH_Instant.hh"
-#include "SAVH_Profile.hh"
-#include "SAVH_Resource.hh"
 
 namespace EUROPA {
   namespace SOLVERS {
+
+    std::map<double, MatchFinderId> MatchingEngine::s_entityMatchers;
 
     MatchingEngine::MatchingEngine(const TiXmlElement& configData, const char* ruleTag) 
       : m_id(this), m_cycleCount(1) {
@@ -103,10 +102,28 @@ namespace EUROPA {
       return m_cycleCount;
     }
 
-    void MatchingEngine::getVariableMatches(const ConstrainedVariableId& var, std::vector<MatchingRuleId>& results) {
+    void MatchingEngine::addMatchFinder(const LabelStr& type, const MatchFinderId& finder) {
+      checkError(s_entityMatchers.find(type) == s_entityMatchers.end(),
+		 "Already know how to match entities of type " << type.toString());
+      s_entityMatchers.insert(std::make_pair((double) type, finder));
+    }
+
+    template<>
+    void MatchingEngine::getMatches(const EntityId& entity,
+				    std::vector<MatchingRuleId>& results) {
+      std::map<double, MatchFinderId>::iterator it =
+	s_entityMatchers.find(entity->entityType());
+      checkError(it != s_entityMatchers.end(),
+		 "No way to match entities of type " << entity->entityType().toString());
+      it->second->getMatches(getId(), entity, results);
+    }
+
+    template<>
+    void MatchingEngine::getMatches(const ConstrainedVariableId& var,
+				    std::vector<MatchingRuleId>& results) {
       m_cycleCount++;
       results = m_unfilteredRules;
-
+      
       // If it has a parent, then process that too
       if(var->getParent().isId()){
         if(TokenId::convertable(var->getParent()))
@@ -122,16 +139,11 @@ namespace EUROPA {
       trigger(var->getName(), m_rulesByVariable, results);
     }
 
-    void MatchingEngine::getTokenMatches(const TokenId& token, std::vector<MatchingRuleId>& results) {
+    template<>
+    void MatchingEngine::getMatches(const TokenId& token, std::vector<MatchingRuleId>& results) {
       m_cycleCount++;
       results = m_unfilteredRules;
       getMatchesInternal(token, results);
-    }
-
-    void MatchingEngine::getInstantMatches(const SAVH::InstantId& inst, std::vector<MatchingRuleId>& results) {
-      m_cycleCount++;
-      results = m_unfilteredRules;
-      getMatchesInternal(inst, results);
     }
 
     unsigned int MatchingEngine::ruleCount() const {
@@ -141,6 +153,7 @@ namespace EUROPA {
     /**
      * @brief todo. Fire for all cases
      */
+    template<>
     void MatchingEngine::getMatchesInternal(const TokenId& token, std::vector<MatchingRuleId>& results){
       // Fire for predicate
       LabelStr unqualifiedName = token->getUnqualifiedPredicateName();
@@ -167,11 +180,6 @@ namespace EUROPA {
         debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for 'none' master relation.");
         trigger(none, m_rulesByMasterRelation, results);
       }
-    }
-
-    void MatchingEngine::getMatchesInternal(const SAVH::InstantId& inst, std::vector<MatchingRuleId>& results) {
-      debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for object types (" << inst->getProfile()->getResource()->getType().toString() << ")");
-      trigger(Schema::instance()->getAllObjectTypes(inst->getProfile()->getResource()->getType()), m_rulesByObjectType, results);
     }
 
     void MatchingEngine::trigger(const LabelStr& lbl, 
@@ -216,5 +224,32 @@ namespace EUROPA {
       }
       return str.str();
     }
+
+    class MatchingEngineLocalStatic {
+    public:
+      MatchingEngineLocalStatic() {
+	static bool sl_registerMatchers = false;
+	check_error(!sl_registerMatchers, "Should only be called once.");
+	MatchingEngine::addMatchFinder(ConstrainedVariable::entityTypeName(),
+				       (new VariableMatchFinder())->getId());
+	MatchingEngine::addMatchFinder(Token::entityTypeName(),
+				       (new TokenMatchFinder())->getId());
+				     
+	sl_registerMatchers = true;
+      }
+    };
+
+    void VariableMatchFinder::getMatches(const MatchingEngineId& engine, const EntityId& entity,
+					 std::vector<MatchingRuleId>& results) {
+      engine->getMatches(ConstrainedVariableId(entity), results);
+    }
+
+    void TokenMatchFinder::getMatches(const MatchingEngineId& engine, const EntityId& entity,
+				      std::vector<MatchingRuleId>& results) {
+      engine->getMatches(TokenId(entity), results);
+    }
+
+
+    MatchingEngineLocalStatic sl_matchingEngineLocalStatic;
   }
 }

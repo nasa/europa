@@ -15,6 +15,8 @@
 #include "Utils.hh"
 #include "EntityIterator.hh"
 #include "ObjectTokenRelation.hh"
+#include "CommonAncestorConstraint.hh"
+#include "HasAncestorConstraint.hh"
 #include <iostream>
 
 
@@ -34,6 +36,8 @@ namespace EUROPA{
       static bool sl_registerConstraints = false;
       check_error(sl_registerConstraints == false, "Should only be called once.");
       if(sl_registerConstraints == false){
+	REGISTER_SYSTEM_CONSTRAINT(CommonAncestorConstraint, "commonAncestor", "Default");
+	REGISTER_SYSTEM_CONSTRAINT(HasAncestorConstraint, "hasAncestor", "Default");
 	REGISTER_SYSTEM_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
         // Temporal Constraints
         REGISTER_SYSTEM_CONSTRAINT(EqualConstraint, "concurrent", "Temporal");
@@ -371,7 +375,10 @@ namespace EUROPA{
       const std::vector<ConstrainedVariableId>& candidateTokenVariables = candidate->getVariables();
 
       // Check assumption that the set of variables is the same
-      check_error(candidateTokenVariables.size() == (unsigned int) variableCount);
+      checkError(candidateTokenVariables.size() == (unsigned int) variableCount,
+		 "Candidate token (" << candidate->getKey() << ") has " <<
+		 candidateTokenVariables.size() << " variables, while inactive token (" <<
+		 inactiveToken->getKey() << ") has " << variableCount);
 
       // Iterate and ensure there is an intersection. This could possibly be optmized based on
       // the cost of comparing domains, or the likelihood of a variable excluding choice. Smaller domains

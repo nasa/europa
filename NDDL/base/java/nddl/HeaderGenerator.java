@@ -25,19 +25,19 @@ public class HeaderGenerator {
       XMLUtil.checkExpectedNode("nddl", nddl);
 
       // Output include and namespace information
-      writer.write("#include \"Db.hh\"\n");
-      writer.write("#include \"NddlUtils.hh\"\n");
+//       writer.write("#include \"Db.hh\"\n");
+//       writer.write("#include \"NddlUtils.hh\"\n");
 
-      writer.write("/** Custom Include Files **/\n");
-      Set customIncludes = ModelAccessor.getCustomIncludes();
-      for(Iterator i=customIncludes.iterator(); i.hasNext();) {
-	  String includeFile = (String) i.next();
-	  writer.write("#include \"" + includeFile + "\"\n");
-      }
+//       writer.write("/** Custom Include Files **/\n");
+//       Set customIncludes = ModelAccessor.getCustomIncludes();
+//       for(Iterator i=customIncludes.iterator(); i.hasNext();) {
+// 	  String includeFile = (String) i.next();
+// 	  writer.write("#include \"" + includeFile + "\"\n");
+//       }
 
-      writer.write("\n");
-      writer.write("namespace NDDL {\n");
-      writer.write("\n");
+//       writer.write("\n");
+//       writer.write("namespace NDDL {\n");
+//       writer.write("\n");
       writer.indent();
 
       // Iterate over classes and write necessary type declarations. Note that we are

@@ -1,11 +1,16 @@
-// multi-resources.nddl
-
 #include "Db.hh"
 #include "NddlUtils.hh"
 /** Custom Include Files **/
+#include "NddlResource.hh"
 
 namespace NDDL {
 
+// multi-resources.nddl
+
+  class StringData;
+  typedef Id<StringData> StringDataId;
+  typedef ObjectDomain StringDataDomain;
+  
   class Reusable;
   typedef Id<Reusable> ReusableId;
   typedef ObjectDomain ReusableDomain;
@@ -17,10 +22,6 @@ namespace NDDL {
   class UnaryResource;
   typedef Id<UnaryResource> UnaryResourceId;
   typedef ObjectDomain UnaryResourceDomain;
-  
-  class StringData;
-  typedef Id<StringData> StringDataId;
-  typedef ObjectDomain StringDataDomain;
   
   class Battery;
   typedef Id<Battery> BatteryId;
@@ -40,17 +41,32 @@ namespace NDDL {
   
   
   
-  // Plasma.nddl:10 TokenStates
+  // Core.nddl:8 TokenStates
   typedef SymbolDomain TokenStates;
   TokenStates TokenStatesBaseDomain();
   // SKIPPING DECLARATION FOR BUILT-IN CLASS Timeline
   
+  
+  // Plasma.nddl:15 StringData
+  class StringData : public Object {
+  public:
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId data; // SchemaWriter::declareVariable
+    
+    // Plasma.nddl:15 StringData
+    virtual void constructor(const LabelStr& _data);
+  };
   // SKIPPING DECLARATION FOR BUILT-IN CLASS Resource
   
   // SKIPPING DECLARATION FOR BUILT-IN CLASS Reservoir
   
   
-  // Plasma.nddl:137 Reusable
+  // Resources.nddl:126 Reusable
   class Reusable : public Object {
   public:
     Reusable(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -66,7 +82,7 @@ namespace NDDL {
     ConstrainedVariableId consumptionMax; // SchemaWriter::declareVariable
     ConstrainedVariableId consumptionRateMax; // SchemaWriter::declareVariable
     
-    // Plasma.nddl:143 uses
+    // Resources.nddl:132 uses
     class uses : public NddlToken {
     public:
       uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
@@ -77,17 +93,17 @@ namespace NDDL {
       ConstrainedVariableId quantity; // SchemaWriter::declareVariable
     };
     
-    // Plasma.nddl:137 Reusable
+    // Resources.nddl:126 Reusable
     virtual void constructor(float c, float ll_min);
     
-    // Plasma.nddl:137 Reusable
+    // Resources.nddl:126 Reusable
     virtual void constructor(float c, float ll_min, float cr_max);
     
-    // Plasma.nddl:137 Reusable
+    // Resources.nddl:126 Reusable
     virtual void constructor(float c, float ll_min, float c_max, float cr_max);
   };
   
-  // Plasma.nddl:169 Unary
+  // Resources.nddl:158 Unary
   class Unary : public Object {
   public:
     Unary(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -100,13 +116,13 @@ namespace NDDL {
     typedef Id<use> useId;
     ConstrainedVariableId consumptionMax; // SchemaWriter::declareVariable
     
-    // Plasma.nddl:169 Unary
+    // Resources.nddl:158 Unary
     virtual void constructor();
     
-    // Plasma.nddl:169 Unary
+    // Resources.nddl:158 Unary
     virtual void constructor(float c_max);
     
-    // Plasma.nddl:179 use
+    // Resources.nddl:168 use
     class use : public NddlToken {
     public:
       use(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
@@ -117,7 +133,7 @@ namespace NDDL {
     };
   };
   
-  // Plasma.nddl:187 UnaryResource
+  // Resources.nddl:176 UnaryResource
   class UnaryResource : public Timeline {
   public:
     UnaryResource(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -130,7 +146,7 @@ namespace NDDL {
     class uses;
     typedef Id<uses> usesId;
     
-    // Plasma.nddl:188 uses
+    // Resources.nddl:177 uses
     class uses : public NddlToken {
     public:
       uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
@@ -141,22 +157,7 @@ namespace NDDL {
     };
   };
   
-  // Plasma.nddl:197 StringData
-  class StringData : public Object {
-  public:
-    StringData(const PlanDatabaseId& planDatabase, const LabelStr& name);
-    StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
-    StringData(const ObjectId& parent, const LabelStr& name);
-    StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
-    void handleDefaults(bool autoClose = true); // default variable initialization
-    
-    ConstrainedVariableId data; // SchemaWriter::declareVariable
-    
-    // Plasma.nddl:197 StringData
-    virtual void constructor(const LabelStr& _data);
-  };
-  
-  // multi-resources.nddl:3 Battery
+  // multi-resources.nddl:4 Battery
   class Battery : public NddlResource {
   public:
     Battery(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -166,11 +167,11 @@ namespace NDDL {
     void handleDefaults(bool autoClose = true); // default variable initialization
     
     
-    // multi-resources.nddl:3 Battery
+    // multi-resources.nddl:4 Battery
     virtual void constructor(float ic, float ll_min, float ll_max);
   };
   
-  // multi-resources.nddl:9 SolarPanel
+  // multi-resources.nddl:10 SolarPanel
   class SolarPanel : public NddlResource {
   public:
     SolarPanel(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -180,16 +181,16 @@ namespace NDDL {
     void handleDefaults(bool autoClose = true); // default variable initialization
     
     
-    // multi-resources.nddl:9 SolarPanel
+    // multi-resources.nddl:10 SolarPanel
     virtual void constructor(float ic, float ll_min, float ll_max);
   };
   
   
-  // multi-resources.nddl:15 Locations
+  // multi-resources.nddl:16 Locations
   typedef SymbolDomain Locations;
   Locations LocationsBaseDomain();
   
-  // multi-resources.nddl:17 Rover
+  // multi-resources.nddl:18 Rover
   class Rover : public Timeline {
   public:
     Rover(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -202,7 +203,7 @@ namespace NDDL {
     class Drive;
     typedef Id<Drive> DriveId;
     
-    // multi-resources.nddl:18 Drive
+    // multi-resources.nddl:19 Drive
     class Drive : public NddlToken {
     public:
       Drive(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
@@ -216,7 +217,7 @@ namespace NDDL {
     };
   };
   
-  // multi-resources.nddl:32 World
+  // multi-resources.nddl:33 World
   class World : public Timeline {
   public:
     World(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -232,7 +233,7 @@ namespace NDDL {
     ConstrainedVariableId reserveBattery; // SchemaWriter::declareVariable
     ConstrainedVariableId rover; // SchemaWriter::declareVariable
     
-    // multi-resources.nddl:38 initialState
+    // multi-resources.nddl:39 initialState
     class initialState : public NddlToken {
     public:
       initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
@@ -242,7 +243,7 @@ namespace NDDL {
       
     };
     
-    // multi-resources.nddl:32 World
+    // multi-resources.nddl:33 World
     virtual void constructor();
   };
 } // End NDDL namespace

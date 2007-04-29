@@ -1,6 +1,6 @@
-#include "../../NDDL/base/Plasma.nddl"
-#include "../../NDDL/base/PlannerConfig.nddl"
-
+#include "Plasma.nddl"
+#include "Resources.nddl"
+#include "PlannerConfig.nddl"
 class Rover;
 
 /**

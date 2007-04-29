@@ -4,11 +4,17 @@
 #include "Debug.hh"
 #include "Pdlfcn.hh"
 #include "PlanDatabaseWriter.hh"
+#include "ObjectFactory.hh"
+#include "TypeFactory.hh"
+#include "TokenFactory.hh"
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
 
 #include "SolverAssembly.hh"
+#include "Rule.hh"
+#ifndef NO_RESOURCES
+#include "SolverAssemblyWithResources.hh"
 #include "SAVH_FVDetector.hh"
 #include "SAVH_Profile.hh"
 #include "SAVH_TimetableFVDetector.hh"
@@ -16,20 +22,30 @@
 #include "SAVH_FlowProfile.hh"
 #include "SAVH_IncrementalFlowProfile.hh"
 #include "SAVH_ReusableFVDetector.hh"
+#endif
 
 SchemaId schema;
 const char* initialTransactions = NULL;
 const char* plannerConfig = NULL;
 bool replayRequired = false;
 
-
+/**
+   REPLAY IS BROKEN WITH THE INTERPRETER AND NEEDS TO BE FIXED!!!!
+ */
 template<class ASSEMBLY>
 void replay(const PlanDatabaseId& db, const DbClientTransactionLogId& txLog) {
   std::string s1 = PlanDatabaseWriter::toString(db, false);
   std::ofstream out(ASSEMBLY::TX_LOG());
   txLog->flush(out);
   out.close();
+#ifdef INTERPRETED
+  Schema::instance()->reset();
+  Rule::purgeAll();
+#endif
   ASSEMBLY replayed(Schema::instance());
+#ifdef INTERPRETED
+  replayed.playTransactions(initialTransactions, true);
+#endif
   replayed.playTransactions(ASSEMBLY::TX_LOG());
   std::string s2 = PlanDatabaseWriter::toString(replayed.getPlanDatabase(), false);
   condDebugMsg(s1 != s2, "Main", "S1" << std::endl << s1 << std::endl << "S2" << std::endl << s2);
@@ -49,9 +65,13 @@ bool runPlanner(){
   check_error(plannerConfig != NULL, "Must have a planner config argument.");
   TiXmlDocument doc(plannerConfig);
   doc.LoadFile();
-  
 
-  assert(assembly.plan(initialTransactions,*(doc.RootElement())));
+  bool interpreted = false;
+#ifdef INTERPRETED
+  interpreted = true;
+#endif
+
+  assert(assembly.plan(initialTransactions,*(doc.RootElement()), interpreted));
 
   debugMsg("Main:runPlanner", "Found a plan at depth " 
 	   << assembly.getDepthReached() << " after " << assembly.getTotalNodesSearched());
@@ -63,6 +83,15 @@ bool runPlanner(){
 
   if(replayRequired)
     replay<ASSEMBLY>(assembly.getPlanDatabase(), txLog);
+
+  //HACK!  The runTest() macro expects an identical Id count at the beginning and end
+  //of the test.  This fails with the interpreter because it creates these factories
+  //at run-time
+#ifdef INTERPRETED
+  ObjectFactory::purgeAll();
+  TokenFactory::purgeAll();
+  TypeFactory::purgeAll();
+#endif
 
   debugStmt("IdTypeCounts", IdTable::printTypeCnts(std::cerr));
 
@@ -143,6 +172,23 @@ int internalMain(int argc, const char** argv){
   assert(Schema::instance().isValid());
   ASSEMBLY::initialize();
   schema = (*fcn_schema)();
+#elif INTERPRETED
+#define TRANS_INDEX 1
+#define PCONF_INDEX 2
+#define ARGC 3
+  if(argc != ARGC && argc != ARGC-1) {
+    std::cout << "usage: runProblem <initial transaction file> "
+	      << "<planner config>" << std::endl;
+    std::cout << ARGC << " " << argc << std::endl;
+    return 1;
+  }
+  initialTransactions = argv[TRANS_INDEX];
+  plannerConfig = argv[PCONF_INDEX];
+
+  ASSEMBLY::initialize();
+  std::string modelName(initialTransactions);
+  modelName = modelName.substr(0, modelName.find(".xml"));
+  schema = Schema::instance(modelName);
 #else //STANDALONE
 #define TRANS_INDEX 1
 #define PCONF_INDEX 2
@@ -170,9 +216,9 @@ int internalMain(int argc, const char** argv){
   }
   else {
     for(int i = 0; i < 1; i++) {
-      replayRequired = true;
+      replayRequired = false; //= true;
       runTest(runPlanner<ASSEMBLY>);
-      runTest(copyFromFile<ASSEMBLY>);
+      //runTest(copyFromFile<ASSEMBLY>);
     }
   }
 
@@ -208,24 +254,34 @@ void __assert_fail(const char *__assertion,
 #endif
 
 
+#ifndef NO_RESOURCES
+#define ASSEMBLY_TYPE SolverAssemblyWithResources
+#else
+#define ASSEMBLY_TYPE SolverAssembly
+#endif
+
 int main(int argc, const char** argv) {
+
+#ifndef NO_RESOURCES
   REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
   REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
   REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile);
   REGISTER_PROFILE(EUROPA::SAVH::FlowProfile, FlowProfile);
   REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile);
+#endif
+
 #define ONE_ASSEMBLY_ONLY
 #ifdef ONE_ASSEMBLY_ONLY
 #ifdef CBPLANNER
 #error "CBPlanner is now deprecated."
 #else
-  return internalMain<SolverAssembly>(argc, argv);
+  return internalMain<ASSEMBLY_TYPE>(argc, argv);
 #endif
 #else
 #ifdef CBPLANNER
 #error "CBPlanner is now deprecated."
 #else
-  bool result = internalMain<SolverAssembly>(argc, argv);
+  bool result = internalMain<ASSEMBLY_TYPE>(argc, argv);
 #endif
 
   if(result != 0)
@@ -234,7 +290,7 @@ int main(int argc, const char** argv) {
 #ifdef CBPLANNER
 #error "CBPlanner is now deprecated."
 #else
-    return internalMain<SolverAssembly>(argc, argv);
+    return internalMain<ASSEMBLY_TYPE>(argc, argv);
 #endif
   }
 #endif

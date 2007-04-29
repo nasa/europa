@@ -2,6 +2,10 @@ SubDir PLASMA NDDL test compiler ;
 
 if ! $(PLASMA_READY) {
 
+if "Resources" in $(NO) {
+  SubDirC++Flags -DNO_RESOURCES ;
+}
+
 local compiler_test = no-world.nddl ;
 local hh = $(compiler_test:S=.hh) ;
 local cc = $(compiler_test:S=.cc) ;
@@ -9,13 +13,10 @@ LocalDepends nddl-tests : $(hh) $(cc) ;
 Nddl $(hh) $(cc) : $(compiler_test) ;
 ModuleObjects NddlMain.cc : NDDL ;
 
-local model ;
-
-for model in 
-  class-constructor.nddl  composition.0.nddl  constraint-test.nddl
+local nddl_tests =   class-constructor.nddl  composition.0.nddl  constraint-test.nddl
   existential.nddl        foreach-exec.nddl   foreach.nddl
   globals.nddl            guards.nddl         interval-constants.nddl
-  less-basic-model.nddl   multidot.nddl       multi-resources.nddl
+  less-basic-model.nddl   multidot.nddl       
   plasma-base.nddl        string-domain.nddl  subclass.nddl
   classes.0.tx.nddl       classes.1.tx.nddl   classes.2.tx.nddl
 
@@ -23,8 +24,16 @@ for model in
   gnats-2537.nddl gnats_2830.nddl gnats-3100.nddl gnats_3140.nddl gnats-3231.nddl gnats-3248.nddl
   inheritance.0.nddl inheritance.1.nddl inheritance.2.nddl
   nddl.tx.nddl nddl.tx.0.nddl nddl.tx.1.nddl nddl.tx.2.nddl
-  simple-class.nddl simple-predicate.nddl simple-resources.nddl simple-rules.nddl
-  subtype-extension.nddl
+  simple-class.nddl simple-predicate.nddl simple-rules.nddl
+  subtype-extension.nddl ;
+
+if ! ( "Resources" in $(NO) ) {
+  nddl_tests += multi-resources.nddl simple-resources.nddl ;
+}
+
+local model ;
+
+for model in $(nddl_tests)
 {
   local exe = $(model:S=) ;
   NddlMain $(exe) : NddlMain.o : $(model) : NDDL ;

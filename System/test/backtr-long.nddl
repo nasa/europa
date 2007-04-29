@@ -63,7 +63,8 @@ Rover::Drive{
   neq( dist, 0 );
 
   // Battery consumption and driving duration are functions of distance
-  driveDuration( duration, dist );
+  //driveDuration( duration, dist );
+  multEq(dist, [1 2], duration);
 
   // What do we do after
   bool sw_after;

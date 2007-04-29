@@ -27,6 +27,8 @@ namespace EUROPA {
  
   class Object: public Entity {
   public:
+    DECLARE_ENTITY_TYPE(Object);
+
     enum State { INCOMPLETE = 0, /**< The object has been constructed but not all variables have been added yet. */
                  COMPLETE /**< All variables have been added. */
     };

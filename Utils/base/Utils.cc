@@ -5,7 +5,7 @@ DEFINE_GLOBAL_CONST(bool, g_alwaysFails, false);
 
 namespace EUROPA {
 
-  std::string toString(float value) {
+  std::string toString(double value) {
     std::stringstream s;
     s << value;
     return(s.str());

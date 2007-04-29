@@ -46,9 +46,11 @@ SubInclude PLASMA documentation ;
 SubInclude PLASMA PlanDatabase ;
 SubInclude PLASMA RulesEngine ;
 SubInclude PLASMA TemporalNetwork ;
-SubInclude PLASMA Resource ;
+if ! ( "Resources" in $(NO) ) {
+  SubInclude PLASMA Resource ;
+  SubInclude PLASMA ANML ;
+}
 SubInclude PLASMA NDDL ;
-SubInclude PLASMA ANML ;
 SubInclude PLASMA Solvers ;
 SubInclude PLASMA System ;
 SubInclude PLASMA Examples ;
@@ -59,6 +61,8 @@ Depends clean-all : clean clean-nddl-xml clean-system-xml ;
 
 ExecuteSO check-cvs-changes : checkcvs : $(PLASMA) ;
 
-ExecuteSO check-makefile : checkmakeproject : $(PLASMA) ;
+if ! ( "Resources" in $(NO) ) {
+  ExecuteSO check-makefile : checkmakeproject : $(PLASMA) ;
+}
 
 } # PLASMA_READY

@@ -1,10 +1,10 @@
-// inheritance.1.nddl
-
 #include "Db.hh"
 #include "NddlUtils.hh"
 /** Custom Include Files **/
 
 namespace NDDL {
+
+// inheritance.1.nddl
 
   class Foo;
   typedef Id<Foo> FooId;

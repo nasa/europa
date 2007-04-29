@@ -28,6 +28,8 @@ namespace EUROPA {
     class Instant : public Entity {
     public:
 
+      DECLARE_ENTITY_TYPE(SAVH_Instant);
+
       ~Instant();
 
       InstantId getId() const {return m_id;}

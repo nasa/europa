@@ -82,6 +82,8 @@ namespace EUROPA {
     const char * tagname = element.Value();
 
     sl_txCount++;
+    debugMsg("DbClientTransactionPlayer:processTransaction",
+	     "Processing transaction '" << tagname << "'");
     if (strcmp(tagname, "class_decl") == 0)
       playDeclareClass(element);
     else if (strcmp(tagname, "class") == 0)

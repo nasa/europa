@@ -1,9 +1,9 @@
 #include "Filters.hh"
-#include "Resource.hh"
 #include "SolverUtils.hh"
 #include "Debug.hh"
 #include "PlanDatabase.hh"
 #include "RuleVariableListener.hh"
+#include "TokenVariable.hh"
 
 #include <set>
 

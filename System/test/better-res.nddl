@@ -1,6 +1,6 @@
 #include "PlannerConfig.nddl"
 #include "Plasma.nddl"
-#include "LoraxConstraints.nddl"
+#include "Resources.nddl"
 
 //*****************************************************************
 class Battery extends Resource {
@@ -50,7 +50,8 @@ class Wind extends Timeline {
 Wind::Velocity{
   any(Battery.change ch);
   eq(ch.time, end);
-  windPower(ch.quantity, m_velocity);
+  //windPower(ch.quantity, m_velocity);
+  eq(ch.quantity, m_velocity);
 }
 
 // Sun::XXX
@@ -79,8 +80,11 @@ Rover::Sample{
   
   // battery consumption and duration depend on work
   // should we pass coordinates here?
-  sampleBattery( bc.quantity, m_x, m_y );
-  sampleDuration( duration, m_x, m_y );
+  //sampleBattery( bc.quantity, m_x, m_y );
+  eq(bc.quantity, -10.0);
+  
+  //sampleDuration( duration, m_x, m_y );
+  eq(duration, [3 10]);
 
   // What do we do after
   bool sw_after;
@@ -114,8 +118,13 @@ Rover::Drive{
   neq( dist, 0 );
 
   // Battery consumption and driving duration are functions of distance
-  driveBattery( bc.quantity, dist );
-  driveDuration( duration, dist );
+  //driveBattery( bc.quantity, dist );
+  float intermediateQuantity;
+  multEq(dist, 4, intermediateQuantity);
+  neg(intermediateQuantity, bc.quantity);
+
+ //driveDuration( duration, dist );
+  multEq(dist, [1 2], duration);
 
   // What do we do after
   bool sw_after;
