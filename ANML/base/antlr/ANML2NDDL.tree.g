@@ -690,7 +690,7 @@ change_proposition returns [ANML::Change* change]
           {
           	  change_stmt = new ANML::Proposition(tq,fluent);
           	  change_stmt->setParentAction(parent);
-          	  change_stmt->setContext(ANML::Proposition::EFFECT); // TODO??
+          	  change_stmt->setContext(ANML::EFFECT); // TODO??
               change = new ANML::Change(when_condition,change_stmt);
           }
       )

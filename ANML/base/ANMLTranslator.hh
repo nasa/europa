@@ -135,33 +135,52 @@ class ANMLElementList : public ANMLElement
 class ExplanatoryAction
 {
   public:
-    ExplanatoryAction(Action* a,TemporalQualifier* tq) : m_action(a), m_tq(tq) {}
+    ExplanatoryAction(
+             const ObjType* objType,
+             const std::string& varName,
+             Action* a,
+             TemporalQualifier* tq) 
+        : m_objType(objType)
+        , m_varName(varName)
+        , m_action(a)
+        , m_tq(tq) 
+    {
+    }
 
+    const ObjType* getObjType() const { return m_objType; }    
+    const std::string& getVarName() const { return m_varName; }
     const Action* getAction() const { return m_action; }
     const TemporalQualifier* getTemporalQualifer() const { return m_tq; }
      
   protected:
-    Action* m_action;
+    const ObjType* m_objType;
+    std::string m_varName;    
+    Action*  m_action;
     TemporalQualifier* m_tq;
 };
 
 class ValueSetter
 {
   public: 
-    ValueSetter(int idx);
+    ValueSetter();
     virtual ~ValueSetter();
     
-    const std::string& getName() const { return m_name; }
-    void addExplanatoryAction(Action* a,TemporalQualifier* tq);
+    // TODO : Pass action parameters as needed    
+    void addExplanatoryAction(
+             const ObjType* objType,
+             const std::string& varName,
+             Action* a,
+             TemporalQualifier* tq
+    );
     
     void toNDDL(ANMLContext& context,std::ostream& os,const std::string& typeName) const;
   
   protected:
-    std::string m_name;
-    ObjType* m_objType;
-    
-    std::vector<ExplanatoryAction> m_explanatoryActions;  
+    // Map keyed by ObjType+VarName. Unqualified actions (for parameters and local vars) have "default" key 
+    std::map<std::string , std::vector<ExplanatoryAction> > m_explanatoryActions;  
 };
+
+enum PropositionContext {GOAL,CONDITION,FACT,EFFECT};
 
 class Type 
 {
@@ -176,18 +195,19 @@ class Type
     virtual bool isResourceType() const { return false; }	
 	virtual void becomeResourceType();
 	
+	// TODO: make this more sophisticated, specially for ObjTypes
 	virtual bool isAssignableFrom(const Type& rhs) const { return getName() == rhs.getName(); }
 	    
-    virtual void generateCopier(std::ostream& os,
-                              const std::string& lhs,
-                              const std::string& predName,
-                              const std::string& tokenName,
-                              const std::string& rhs) const;
+    virtual void generateCopier(
+                         std::ostream& os,
+                         PropositionContext context, 
+                         const std::string& lhsVar,
+                         const std::string& rhs) const;   
                                  
     virtual void toNDDL(ANMLContext& context,std::ostream& os) const;
     
-    virtual ValueSetter* getValueSetter(const ObjType* objType,const std::string& varName);
-    virtual const std::string& getValueSetterName(const ObjType* objType,const std::string& varName) const; 
+    virtual ValueSetter& getValueSetter() { return m_valueSetter; }
+    virtual const std::string& getValueSetterName() const;
     
     static Type* VOID;    
     static Type* BOOL;    
@@ -198,8 +218,7 @@ class Type
     
   protected:
     std::string m_typeName;     
-    std::vector<ValueSetter*> m_valueSetters;
-    std::map<std::string,ValueSetter*> m_valueSettersByKey;
+    ValueSetter m_valueSetter;
 };
 
 class TypeAlias : public Type
@@ -269,7 +288,7 @@ class ObjType : public Type, public ANMLContext, public ANMLElementList
   protected:
     ObjType* m_parentObjType; 
     
-    void declareValueSetters(std::ostream& os) const;    
+    void declareValueSetters(std::ostream& os) const;         
 };
 
 class VectorType : public ObjType
@@ -277,11 +296,11 @@ class VectorType : public ObjType
   public:
     VectorType(const std::string& name);
     
-    virtual void generateCopier(std::ostream& os,
-                              const std::string& lhs,
-                              const std::string& predName,
-                              const std::string& tokenName,
-                              const std::string& rhs) const;   
+    virtual void generateCopier(
+                         std::ostream& os,
+                         PropositionContext context, 
+                         const std::string& lhsVar,
+                         const std::string& rhs) const;   
     
     virtual void toNDDL(ANMLContext& context, std::ostream& os) const;  
 };
@@ -434,9 +453,7 @@ class ActionDuration : public ANMLElement
 
 class Proposition 
 {
-  public:
-    enum Context {GOAL,CONDITION,FACT,EFFECT};
-    
+  public:    
     Proposition(TemporalQualifier* tq,Fluent* f); 
     Proposition(TemporalQualifier* tq,const std::vector<Fluent*>& fluents);
     virtual ~Proposition();
@@ -446,15 +463,15 @@ class Proposition
     
     TemporalQualifier* getTemporalQualifier() { return m_temporalQualifier; }
     
-    void setContext(Context c) { m_context = c; }
-    Context getContext() const { return m_context; }
+    void setContext(PropositionContext c) { m_context = c; }
+    PropositionContext getContext() const { return m_context; }
     
     virtual void preProcess(ANMLContext& context);
     virtual bool validate(ANMLContext& context,std::vector<std::string>& problems);
     virtual void toNDDL(ANMLContext& context, std::ostream& os) const;
     
   protected:  
-    Context m_context;    	
+    PropositionContext m_context;    	
     TemporalQualifier* m_temporalQualifier;
     std::vector<Fluent*> m_fluents;
     Action* m_parentAction;
@@ -465,7 +482,7 @@ class Proposition
 class PropositionSet : public ANMLElement
 {
   public:
-    PropositionSet(const std::vector<Proposition*>& propositions, Action* parent,Proposition::Context context,const std::string& type);
+    PropositionSet(const std::vector<Proposition*>& propositions, Action* parent,PropositionContext context,const std::string& type);
     virtual ~PropositionSet();
     
     virtual void preProcess (ANMLContext& context);
@@ -536,7 +553,7 @@ class TemporalQualifier : public PropositionComponent
     TemporalQualifier(const std::string& op,const std::vector<Expr*>& args);
     virtual ~TemporalQualifier();
      
-    virtual void toNDDL(std::ostream& os,Proposition::Context context) const;
+    virtual void toNDDL(std::ostream& os,PropositionContext context) const;
     virtual void toNDDL(std::ostream& os,const std::string& ident,const std::string& fluentName) const;
     
   protected:
@@ -720,11 +737,11 @@ class Expr
                              const std::string& varName) const {}    
                              
     virtual void toNDDLasLHS(std::ostream& os,
-                             Proposition::Context context,
+                             PropositionContext context,
                              const std::string& varName) const {}    
                              
     virtual void toNDDLasRHS(std::ostream& os,
-                             Proposition::Context context,
+                             PropositionContext context,
                              LHSExpr* lhs,
                              const std::string& tokenName) const {}                                                           
 };
@@ -780,7 +797,7 @@ class LHSAction : public LHSExpr
     virtual std::string toString() const  { return m_path; }
     
     virtual void toNDDLasLHS(std::ostream& os,
-                             Proposition::Context context,
+                             PropositionContext context,
                              const std::string& varName) const;    
         
   protected:
@@ -800,7 +817,7 @@ class LHSVariable : public LHSExpr
     virtual const Type& getDataType() const { return m_var->getDataType(); }
     virtual std::string toString() const  { return m_path; }
     virtual void toNDDLasRHS(std::ostream& os,
-                             Proposition::Context context,
+                             PropositionContext context,
                              LHSExpr* lhs,
                              const std::string& tokenName) const;    
     
@@ -824,7 +841,7 @@ class ExprConstant : public Expr
     } 
     
     virtual void toNDDLasRHS(std::ostream& os,
-                             Proposition::Context context,
+                             PropositionContext context,
                              LHSExpr* lhs,
                              const std::string& varName) const;    
   
@@ -860,7 +877,7 @@ class ExprVector : public Expr
     virtual std::string toString() const; 
     virtual const Type& getDataType() const { return *m_dataType; }
     virtual void toNDDLasRHS(std::ostream& os,
-                             Proposition::Context context,
+                             PropositionContext context,
                              LHSExpr* lhs,
                              const std::string& varName) const;    
     

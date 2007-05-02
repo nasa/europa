@@ -107,7 +107,15 @@ namespace ANML
     	    program[i]->validate(*m_context,problems);
         
         if (problems.size() == 0) {    	        	
-        	m_plannerConfig->toNDDL(*m_context,os);    	
+            // TODO: make this optional
+            os << "#include \"Plasma.nddl\"" << std::endl;
+            os << "#include \"PlannerConfig.nddl\"" << std::endl;
+            os << std::endl; 
+        	os << "class Decomposition { predicate execute {} }" << std::endl;
+            os << "Decomposition decomposition = new Decomposition();" << std::endl << std::endl;
+
+        	m_plannerConfig->toNDDL(*m_context,os);
+                	
         	for (unsigned int i=0; i<program.size(); i++) 
         	    program[i]->toNDDL(*m_context,os);
         }   
@@ -329,8 +337,7 @@ namespace ANML
     	return os.str();
     }
         
-    ValueSetter::ValueSetter(int idx)
-        : m_name(makeValueSetterName(idx))
+    ValueSetter::ValueSetter()
     {
     }
     
@@ -338,31 +345,68 @@ namespace ANML
     {
     }
     
-    void ValueSetter::addExplanatoryAction(Action* a,TemporalQualifier* tq)
+	std::string makeEAKey(const std::string& objTypeName,const std::string& varName)
+	{
+		if (objTypeName != "")
+		    return objTypeName+"_"+varName;
+		else
+		    return "default";
+	}
+
+    void ValueSetter::addExplanatoryAction(
+                          const ObjType* objType,
+                          const std::string& varName,
+                          Action* a,
+                          TemporalQualifier* tq)
     {
+    	const std::string& objTypeName = (objType != NULL ? objType->getName() : "");
+    	std::string key = makeEAKey(objTypeName,varName);
     	check_error(a != NULL, "Explanatory Action can't be NULL");
-    	m_explanatoryActions.push_back(ExplanatoryAction(a,tq));
-    	ExplanatoryAction& ea = m_explanatoryActions[m_explanatoryActions.size()-1];
+    	std::vector<ExplanatoryAction>& actions = m_explanatoryActions[key];
+    	ExplanatoryAction ea(objType,varName,a,tq);
+    	actions.push_back(ea);
     	debugMsg("ANML:ValueSetter","added ExplanatoryAction:" << ea.getAction()->getName());
     }
     
     void ValueSetter::toNDDL(ANMLContext& context,std::ostream& os,const std::string& typeName) const
     {
-    	//check_runtime_error(m_explanatoryActions.size() >= 1,"Must not generate setter if there are no actions that can cause it");
-    	
     	// TODO: generate comment with objType::varName
-    	os << "// ValueSetter for TODO:objType::varName" << std::endl
-           << typeName << "::" << getName() << std::endl
-           << "{" << std::endl
-           // TODO: if there is only one action don't generate disjunction
-           << "    int option = [1 " << m_explanatoryActions.size() << "];" << std::endl;
+    	os << typeName << "::setValue" << std::endl
+           << "{" << std::endl;
+           
+        std::map<std::string , std::vector<ExplanatoryAction> >::const_iterator it;
+
+        // TODO: generate disjunction between default and the rest
+                  
+        std::string ident = "    ";
+        for (it = m_explanatoryActions.begin();it != m_explanatoryActions.end(); ++it) {
+        	if (it->first == "default") // put default on a different branch
+        	    continue;
+        	
+        	std::string objVar = "obj_" + it->first;
+          	os << ident << "if (" << objVar << ") {" << std::endl;        
+
+            const std::vector<ExplanatoryAction>& actions = it->second;        	
+          	
+            std::string optVar = "opt_" + it->first;
+
+            // if there is only one action don't generate disjunction
+            if (m_explanatoryActions.size() > 1)
+                os << ident << ident << "int " << optVar << " = [1 " << m_explanatoryActions.size() << "];" << std::endl;
         
-        for (unsigned int i=0;i<m_explanatoryActions.size();i++) {
-        	// TODO: generate obj parameter in predicate declaration
-        	// TODO: generate appropriate operator depending on temporal qualifier
-        	os << "    if (option == " << (i+1) << ") {" << std::endl
-        	   << "        met_by(obj." << m_explanatoryActions[i].getAction()->getName() << ");" << std::endl
-        	   << "    }" << std::endl;
+            for (unsigned int i=0;i<actions.size();i++) {
+            	const ExplanatoryAction& ea = actions[i];
+        	    // TODO: generate obj parameter in predicate declaration
+        	    // TODO: generate appropriate operator depending on temporal qualifier
+                if (m_explanatoryActions.size() > 1)
+        	        os << ident << ident << "if (" << optVar << " == " << (i+1) << ") {" << std::endl;
+        	    
+        	    os << ident << ident << "    met_by(" << objVar << "." << ea.getAction()->getName() << ");" << std::endl;
+
+                if (m_explanatoryActions.size() > 1)
+        	        os << ident << ident << "}" << std::endl;
+            }        
+          	os << ident << "}" << std::endl;        
         }
         
         os << "}" << std::endl << std::endl;
@@ -389,63 +433,12 @@ namespace ANML
 		check_runtime_error(ALWAYS_FAIL,m_typeName + " can't become a resource type");
 	}
 	
-	std::string makeValueSetterKey(const std::string& objTypeName,const std::string& varName)
-	{
-		if (objTypeName != "")
-		    return objTypeName+"::"+varName;
-		else
-		    return "default";
-	}
-	    
-    ValueSetter* Type::getValueSetter(const ObjType* objType,const std::string& varName)
-    {    	
-    	const std::string& objTypeName = (objType != NULL ? objType->getName() : "");
-    	std::string key = makeValueSetterKey(objTypeName,varName);
-    	std::map<std::string,ValueSetter*>::iterator it = m_valueSettersByKey.find(key);
-    	
-    	if (it != m_valueSettersByKey.end()) {
-    		return it->second;
-    	}
-    	else {
-        	ValueSetter* retval = new ValueSetter(m_valueSetters.size()+1);
-        	m_valueSetters.push_back(retval);
-        	m_valueSettersByKey[key] = retval;
-        	debugMsg("ANML:Type","Added value setter " << key << " to " << getName());    	
-            return retval;
-    	}
-    }
-    
-    const std::string& Type::getValueSetterName(const ObjType* objType,const std::string& varName) const
+    const std::string& Type::getValueSetterName() const
     {
-    	const std::string& objTypeName = (objType != NULL ? objType->getName() : "");
-    	std::string key = makeValueSetterKey(objTypeName,varName);
-    	std::map<std::string,ValueSetter*>::const_iterator it = m_valueSettersByKey.find(key);
-    	
-    	if (it != m_valueSettersByKey.end()) {
-    		debugMsg("ANML:Type","Found ValueSetterName for " << key << " returning " << it->second->getName()); 
-    		return it->second->getName();
-    	}
-    	else {
-    		debugMsg("ANML:Type","Didn't find ValueSetterName for " << key << " returning defaultValueSetterName:" << defaultValueSetterName); 
-    		return defaultValueSetterName;
-    	}
+    	static std::string name = "setValue";
+    	return name;
     }	
     
-    void Type::generateCopier(std::ostream& os,
-                              const std::string& lhs,
-                              const std::string& predName,
-                              const std::string& tokenName,
-                              const std::string& rhs) const   
-    {
-    	check_error(ALWAYS_FAIL,"generateCopier not supported for type:" + getName());
-    }
-	        
-    void Type::toNDDL(ANMLContext& context,std::ostream& os) const 
-    { 
-    	for (unsigned int i=0;i<m_valueSetters.size();i++)    	
-    	    m_valueSetters[i]->toNDDL(context,os,getName()); 
-    }
-   
     std::string autoIdentifier(const char* base)
     {
     	static int cnt=0;
@@ -456,6 +449,20 @@ namespace ANML
         return os.str();    	
     }
     
+    void Type::generateCopier(
+                         std::ostream& os,
+                         PropositionContext context, 
+                         const std::string& lhsVar,
+                         const std::string& rhs) const   
+    {
+    	check_error(ALWAYS_FAIL,"generateCopier not supported for type:" + getName());
+    }
+	        
+    void Type::toNDDL(ANMLContext& context,std::ostream& os) const 
+    { 
+   	    m_valueSetter.toNDDL(context,os,getName()); 
+    }
+   
 	TypeAlias::TypeAlias(const std::string& name,const Type& t) 
 	    : Type(name)
 	    , m_wrappedType(t) 
@@ -558,17 +565,16 @@ namespace ANML
     
     void ObjType::declareValueSetters(std::ostream& os) const
     {
-        for (unsigned int i=0; i < m_valueSetters.size(); i++) {
-            os  << "    predicate " << m_valueSetters[i]->getName() << " { ";    	
+        os  << "    predicate setValue { ";    	
 
-            std::map<std::string,Variable*>::const_iterator varIt = m_variables.begin();              
-            for (; varIt != m_variables.end() ; ++varIt) {
-    	        Variable* v = varIt->second;
-    	        os << " " << v->getDataType().getName() << " " << v->getName() << ";";
-            }
+        // TODO: add all object parameters
+        std::map<std::string,Variable*>::const_iterator varIt = m_variables.begin();              
+        for (; varIt != m_variables.end() ; ++varIt) {
+   	        Variable* v = varIt->second;
+	        os << " " << v->getDataType().getName() << " " << v->getName() << ";";
+        }
         
-            os << " }" << std::endl;
-        }     	
+        os << " }" << std::endl;
     }
     
     void ObjType::toNDDL(ANMLContext& context, std::ostream& os) const
@@ -634,18 +640,32 @@ namespace ANML
     {
     }
     
-    void VectorType::generateCopier(std::ostream& os,
-                              const std::string& lhs,
-                              const std::string& predName,
-                              const std::string& tokenName,
-                              const std::string& rhs) const   
+    void VectorType::generateCopier(
+                         std::ostream& os,
+                         PropositionContext context, 
+                         const std::string& lhsVar,
+                         const std::string& rhs) const   
     {
-    	// TODO: do it differently depending on whether it's a condition/effect or a goal
-    	std::string ident = "    ";
+    	std::string ident;
+    	std::string relation;
+    	
+    	if (context == GOAL || context == FACT) {
+            ident = "";
+            relation = "goal";
+    	}
+    	else {
+            ident = "    ";
+            relation = "any";
+    	}
+    	
+    	std::string rhsVar = autoIdentifier("_v");
+    	
+    	os << ident << relation << "(" << rhs << ".setValue " << rhsVar << ");" << std::endl;
+    	os << ident << rhsVar << " contains " << lhsVar << ";" << std::endl; 
         std::map<std::string,Variable*>::const_iterator varIt = m_variables.begin();              
         for (; varIt != m_variables.end() ; ++varIt) {
     	    Variable* v = varIt->second;
-    	    os << ident << "eq(" << tokenName << "." << v->getName() << "," << rhs << "." << v->getName() << ");" << std::endl;
+    	    os << ident << "eq(" << lhsVar << "." << v->getName() << "," << rhsVar << "." << v->getName() << ");" << std::endl;
         }
     }
 	        
@@ -799,7 +819,7 @@ namespace ANML
     {
     }
      
-    void TemporalQualifier::toNDDL(std::ostream& os,Proposition::Context context) const 
+    void TemporalQualifier::toNDDL(std::ostream& os,PropositionContext context) const 
     {
         // Evaluate all args, cache var names if necessary.
         for (unsigned int i=0;i<m_args.size();i++) {
@@ -869,7 +889,7 @@ namespace ANML
     {
     	// TODO: make sure nddl for Functions and Predicates is generated so that this doesn't break    	
     	
-    	if (m_parentProp->getContext() == Proposition::EFFECT &&
+    	if (m_parentProp->getContext() == EFFECT &&
     	    m_lhs->isVariableExpr()) {
     	    	
         	Type* t = context.getType(m_lhs->getDataType().getName(),true);
@@ -878,15 +898,18 @@ namespace ANML
     	    unsigned int cnt = ls.countElements(".");
     	    EUROPA::LabelStr varName = ls.getElement(cnt-1,".");
     	    
-    	    ValueSetter* vs = t->getValueSetter(m_lhs->getVariable()->getObjType(),varName.toString());
-    	    vs->addExplanatoryAction(m_parentProp->getParentAction(),m_parentProp->getTemporalQualifier());
+    	    ValueSetter& vs = t->getValueSetter();
+    	    vs.addExplanatoryAction(
+    	        m_lhs->getVariable()->getObjType(),
+    	        varName.toString(),
+    	        m_parentProp->getParentAction(),
+    	        m_parentProp->getTemporalQualifier()
+    	    );
+    	    // TODO: detect if any of the local variables is used in the assignment and pass them over to  the explanatory action
     	}
     	
     	// TODO: do we need to do anything else for GOAL, FACT or CONDITION?
     	// TODO: how do we generate termination axioms??
-    	// TODO: ValueSetter::toNDDL must take the value as a parameter and generate the set of explanatory axioms
-    	// with the appropriate temporal qualifiers
-    	
     	// TODO: need to eliminate copiers, only setValue can be used
     	debugMsg("ANML:RelationalFluent","preProcessed " << toString());
     }
@@ -897,8 +920,8 @@ namespace ANML
     	if (m_lhs->toString() == "PlannerConfig")
     	    return;
     	    
-    	std::string ident = (m_parentProp->getContext() == Proposition::GOAL || 
-    	                     m_parentProp->getContext() == Proposition::FACT ? "" : "    ");
+    	std::string ident = (m_parentProp->getContext() == GOAL || 
+    	                     m_parentProp->getContext() == FACT ? "" : "    ");
     	 
     	// A token is always created for lhs                     
    	    std::string tokenName = autoIdentifier("_v");   	    
@@ -953,7 +976,7 @@ namespace ANML
     }
 
     Condition::Condition(const std::vector<Proposition*>& propositions) 
-        : PropositionSet(propositions,NULL,Proposition::CONDITION,"CONDITION")
+        : PropositionSet(propositions,NULL,CONDITION,"CONDITION")
     {
     }
     
@@ -962,7 +985,7 @@ namespace ANML
     }
     
     Effect::Effect(const std::vector<Proposition*>& propositions,Action* parentAction) 
-        : PropositionSet(propositions,parentAction,Proposition::EFFECT,"EFFECT")
+        : PropositionSet(propositions,parentAction,EFFECT,"EFFECT")
     {
     }
     
@@ -1016,7 +1039,7 @@ namespace ANML
 
     void ActionSet::toNDDL(ANMLContext& context, std::ostream& os, const std::string& ident) const
     {
-    	os << ident << "any(Decomposition " << getLabel() << ");" << std::endl;
+    	os << ident << "any(decomposition.execute " << getLabel() << ");" << std::endl;
     	
     	if (m_operator == "or") {
     		check_error(m_elements.size() == 2, "OR decomposition must have exactly 2 branches");
@@ -1048,7 +1071,7 @@ namespace ANML
     	// Deal with temporal qualifier
     	if (m_tq != NULL) {
     		// TODO: this seems awkward, look into improving API for TemporalQualifier
-    		m_tq->toNDDL(os,Proposition::EFFECT);
+    		m_tq->toNDDL(os,EFFECT);
     	    m_tq->toNDDL(os,ident,getLabel());
     	}
     }
@@ -1081,7 +1104,7 @@ namespace ANML
     }
     
     Goal::Goal(const std::vector<Proposition*>& propositions) 
-        : PropositionSet(propositions,NULL,Proposition::GOAL,"GOAL")
+        : PropositionSet(propositions,NULL,GOAL,"GOAL")
     {
     }
     
@@ -1090,7 +1113,7 @@ namespace ANML
     }
     
     Fact::Fact(const std::vector<Proposition*>& propositions) 
-        : PropositionSet(propositions,NULL,Proposition::FACT,"FACT")
+        : PropositionSet(propositions,NULL,FACT,"FACT")
     {
     }
     
@@ -1155,7 +1178,7 @@ namespace ANML
     
     PropositionSet::PropositionSet(const std::vector<Proposition*>& propositions,
                                    Action* parent,
-                                   Proposition::Context context,
+                                   PropositionContext context,
                                    const std::string& type) 
         : ANMLElement(type)
         , m_propositions(propositions) 
@@ -1269,19 +1292,19 @@ namespace ANML
     	os << std::endl;        	
     }
 
-    void LHSAction::toNDDLasLHS(std::ostream& os,Proposition::Context context,const std::string& varName) const 
+    void LHSAction::toNDDLasLHS(std::ostream& os,PropositionContext context,const std::string& varName) const 
     { 
     	switch (context) {
-    		case Proposition::GOAL : 
+    		case GOAL : 
     		    os << "goal(" << m_action->getName() << " " << varName << ");" << std::endl;
     		    break; 
-    		case Proposition::CONDITION : 
+    		case CONDITION : 
     		    os << "    any(" << m_action->getName() << " " << varName << ");" << std::endl;
     		    break; 
-    		case Proposition::FACT : 
+    		case FACT : 
     		    check_runtime_error(ALWAYS_FAIL,"ERROR! LHSAction not supported for FACTS");
     		    break; 
-    		case Proposition::EFFECT : 
+    		case EFFECT : 
     		    check_runtime_error(ALWAYS_FAIL,"ERROR! LHSAction not supported for EFFECTS");
     		    break;
     		default:
@@ -1291,17 +1314,17 @@ namespace ANML
     }          
     
     void LHSVariable::toNDDLasRHS(std::ostream& os,
-                                  Proposition::Context context,
+                                  PropositionContext context,
                                   LHSExpr* lhs,
                                   const std::string& tokenName) const 
     { 
     	std::string ident;
     	
-    	if (context == Proposition::GOAL) {
+    	if (context == GOAL) {
     	    ident = "";
     	    os << "goal(";
         }    
-    	if (context == Proposition::FACT) {
+    	else if (context == FACT) {
     	    ident = "";
     	    os << "fact(";
         }    
@@ -1315,24 +1338,28 @@ namespace ANML
   	    unsigned int cnt = ls.countElements(".");
   	    EUROPA::LabelStr varName = ls.getElement(cnt-1,".");
     	    
-    	const std::string& predName = lhs->getVariable()->getDataType().getValueSetterName(lhs->getVariable()->getObjType(),varName.toString());    	
-    	os << lhs->toString() << "." << predName << " " << tokenName << ");" << std::endl;
+    	os << lhs->toString() << ".setValue " << tokenName << ");" << std::endl;
     	
-        m_var->getDataType().generateCopier(os,lhs->toString(),predName,tokenName,m_path);
+        m_var->getDataType().generateCopier(
+            os,
+            context,
+            tokenName, // lhs
+            m_path     // rhs
+        );
     }
     
     void ExprConstant::toNDDLasRHS(std::ostream& os,
-                                   Proposition::Context context,
+                                   PropositionContext context,
                                    LHSExpr* lhs,
                                    const std::string& tokenName) const 
     { 
     	std::string ident;
     	
-    	if (context == Proposition::GOAL) {
+    	if (context == GOAL) {
     	    ident = "";
     	    os << "goal(";
         }    
-    	else if (context == Proposition::FACT) {
+    	else if (context == FACT) {
     	    ident = "";
     	    os << "fact(";
         }    
@@ -1417,16 +1444,16 @@ namespace ANML
    }
     
    void ExprVector::toNDDLasRHS(std::ostream& os,
-                                Proposition::Context context,
+                                PropositionContext context,
                                 LHSExpr* lhs,
                                 const std::string& tokenName) const
    {
-   	   std::string ident = (context == Proposition::GOAL || 
-    	                    context == Proposition::FACT ? "" : "    ");
+   	   std::string ident = (context == GOAL || 
+    	                    context == FACT ? "" : "    ");
     	                        	
-       if (context == Proposition::GOAL)	
+       if (context == GOAL)	
            os << "goal(";
-       else if (context == Proposition::FACT)	
+       else if (context == FACT)	
            os << "fact(";
        else
            os << "any(";
