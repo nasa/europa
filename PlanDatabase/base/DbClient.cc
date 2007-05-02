@@ -105,7 +105,7 @@ namespace EUROPA {
   }
  
   TokenId DbClient::createToken(const char* predicateName, bool rejectable, bool isFact) {
-    TokenId token = allocateToken(predicateName, rejectable);
+    TokenId token = allocateToken(predicateName, rejectable, isFact);
     debugMsg("DbClient:createToken", token->toString());
     publish(notifyTokenCreated(token));
     return(token);
