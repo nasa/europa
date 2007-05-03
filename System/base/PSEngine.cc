@@ -163,6 +163,9 @@ namespace EUROPA {
   	os << "Token(" << PSEntity::toString() << ") {" << std::endl;
   	os << "    isFact:" << isFact() << std::endl;
   	
+  	if (m_tok->isMerged())
+  	    os << "    mergedInto:" << m_tok->getActiveToken()->getKey() << std::endl;
+  	
   	for (int i=0;i<m_vars.size();i++) {
   	    os << "    " << m_vars.get(i)->toString() << std::endl;
   	}
