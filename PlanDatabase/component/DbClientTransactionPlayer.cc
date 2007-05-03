@@ -158,38 +158,54 @@ namespace EUROPA {
     xmlAsValue(element, name);
   }
 
+  const char* getObjectAndType(DbClientId& client, const char* predicate,ObjectId& object)
+  {
+    if (!Schema::instance()->isPredicate(predicate)) {
+      LabelStr typeStr(predicate);
+      int cnt = typeStr.countElements(Schema::getDelimiter());
+      LabelStr prefix = typeStr.getElement(0, Schema::getDelimiter());
+      object = client->getObject(prefix.c_str());
+      check_error(object.isValid(), "Failed to find an object named " + prefix.toString());
+      LabelStr objType = object->getType();      
+      LabelStr suffix = typeStr.getElement(1, Schema::getDelimiter());
+      
+      for (int i=2; i<cnt;i++) {
+          objType = Schema::instance()->getMemberType(objType,suffix);
+          suffix = typeStr.getElement(i, Schema::getDelimiter());           	
+      }
+      
+      std::string objName(predicate);
+      objName = objName.substr(0,objName.length()-suffix.toString().length()-1);
+      object = client->getObject(objName.c_str());
+      check_error(object.isValid(), "Failed to find an object named " + objName);
+      std::cout << "Found object " << objName << std::endl;
+      LabelStr newType(objType.toString() + Schema::getDelimiter() + suffix.toString());
+      return  newType.c_str();
+    }
+    else {
+    	return predicate;
+    }  	
+  }
+   
   void DbClientTransactionPlayer::playFactCreated(const TiXmlElement & element) {
     // simple token creation
     TiXmlElement * child = element.FirstChildElement();
     check_error(child != NULL);
     const char * type = child->Attribute("type");
     check_error(type != NULL);
-    ObjectId object;
 
     // The type may be qualified with an object name, in which case we should get the
     // object and specify it. We will also have to generate the appropriate type designation
     // by extracting the class from the object
-    TokenId token;
+    ObjectId object;
+    const char* predicateType = getObjectAndType(m_client,type,object);
 
-    if (!Schema::instance()->isPredicate(type)) {
-      LabelStr typeStr(type);
-      LabelStr prefix = typeStr.getElement(0, Schema::getDelimiter());
-      LabelStr suffix = typeStr.getElement(1, Schema::getDelimiter());
-      ObjectId object = m_client->getObject(prefix.c_str());
-      check_error(object.isValid(), "Failed to find an object named " + prefix.toString());
-      std::string newType(object->getType().toString() + Schema::getDelimiter() + suffix.toString());
-      type =  newType.c_str();
-    }
-
-    token = m_client->createToken(type, true /*isMandatory*/, true /*isFact*/);    
-    if (!token->isActive()) {
-        m_client->activate(token);
-        token->getState()->restrictBaseDomain(token->getState()->lastDomain());
-    }
+    TokenId token = m_client->createToken(predicateType, true /*isMandatory*/, true /*isFact*/); 
     
     if (!object.isNoId()) {
         // We restrict the base domain permanently since the name is specifically mentioned on creation
         token->getObject()->restrictBaseDomain(object->getThis()->baseDomain());
+        std::cout << "Restricted base domain to " << token->getObject()->baseDomain().toString() << std::endl;
     }
 
     const char * name = child->Attribute("name");
@@ -201,7 +217,7 @@ namespace EUROPA {
     	name = "NO_NAME";
     }
     
-    debugMsg("DbClientTransactionPlayer:createFact", "created Fact:" << name << " of type " << type);      
+    debugMsg("DbClientTransactionPlayer:createFact", "created Fact:" << name << " of type " << predicateType);      
   }
 
   void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element) {
@@ -322,42 +338,28 @@ namespace EUROPA {
     const char * type = child->Attribute("type");
     check_error(type != NULL);
 
-    // The type may be qualified with an object name, in which case we should get the
-    // object and specify it. We will also have to generate the appropriate type designation
-    // by extracting the class from the object
-    TokenId token;
-
     const char * mandatory = element.Attribute("mandatory");
     bool b_mandatory = false;
     if(mandatory != NULL && (strcmp(mandatory, "true") == 0))
       b_mandatory = true;
 
-    if (Schema::instance()->isPredicate(type))
-       token = m_client->createToken(type, !b_mandatory);
-    else {
-      LabelStr typeStr(type);
-      LabelStr prefix = typeStr.getElement(0, Schema::getDelimiter());
-      LabelStr suffix = typeStr.getElement(1, Schema::getDelimiter());
-      ObjectId object = m_client->getObject(prefix.c_str());
-      check_error(object.isValid(), "Failed to find an object named " + prefix.toString());
-      std::string newType(object->getType().toString() + Schema::getDelimiter() + suffix.toString());
-      token = m_client->createToken(newType.c_str(), !b_mandatory);
+    // The type may be qualified with an object name, in which case we should get the
+    // object and specify it. We will also have to generate the appropriate type designation
+    // by extracting the class from the object
+    ObjectId object;
+    const char* predicateType = getObjectAndType(m_client,type,object);
 
-      // We restrict the base domain permanently since the name is specifically mentioned on creation
-      token->getObject()->restrictBaseDomain(object->getThis()->baseDomain());
+    TokenId token = m_client->createToken(predicateType, true /*isMandatory*/, false /*isFact*/); 
+    
+    if (!object.isNoId()) {
+        // We restrict the base domain permanently since the name is specifically mentioned on creation
+        token->getObject()->restrictBaseDomain(object->getThis()->baseDomain());
+        std::cout << "Restricted base domain to " << token->getObject()->baseDomain().toString() << std::endl;
     }
 
-    // If it is mandatory, then activate immediately so there is less for a
-    // client to figure out, or specify in the transactions
     if (b_mandatory){
-      if (!token->isActive()) {
-        m_client->activate(token);
-        token->getState()->restrictBaseDomain(token->getState()->lastDomain());
-      }
-    }
-    else {
       StateDomain state = token->getState()->lastDomain();
-      state.remove(Token::MERGED);
+      state.remove(Token::REJECTED);
       token->getState()->restrictBaseDomain(state);
     }
 
@@ -366,7 +368,7 @@ namespace EUROPA {
     if (name != NULL) {
       std::string std_name = name;
       m_tokens[std_name] = token;
-      debugMsg("DbClientTransactionPlayer:createToken", "created Token:" << name);      
+      debugMsg("DbClientTransactionPlayer:createToken", "created Token:" << name << "of type " << predicateType);      
     }
   }
 
