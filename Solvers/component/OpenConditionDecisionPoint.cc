@@ -98,8 +98,9 @@ namespace EUROPA {
     std::string OpenConditionDecisionPoint::toString() const{
       std::stringstream strStream;
       strStream << "TOKEN STATE: TOKEN=" << 
-        m_flawedToken->getName().toString()  << "(" << m_flawedToken->getKey() << "), " <<
-        "CHOICES=";
+        m_flawedToken->getName().toString()  << "(" << m_flawedToken->getKey() << ")," <<
+        " OBJECT=" << m_flawedToken->getObject()->toString() <<
+        " CHOICES(current=" << m_choiceIndex << ")=";
 
       if(!m_compatibleTokens.empty()){
         strStream << "MERGED {";

@@ -1,5 +1,6 @@
 #include "ThreatDecisionPoint.hh"
 #include "Token.hh"
+#include "TokenVariable.hh"
 #include "Object.hh"
 #include "DbClient.hh"
 #include "Debug.hh"
@@ -82,10 +83,10 @@ namespace EUROPA {
 
     std::string ThreatDecisionPoint::toString() const {
       std::stringstream strStream;
-      strStream << "TOKEN=" << m_tokenToOrder->toString() << " CHOICES:";
+      strStream << "TOKEN=" << m_tokenToOrder->toString() << " OBJECT:" << m_tokenToOrder->getObject()->toString() << "  CHOICES(current=" << m_index << "):";
 
       for (unsigned int i = 0; i < m_choiceCount; i++)
-	strStream << toString(i, m_choices[i]) << " ";
+          strStream << i << ") " << toString(i, m_choices[i]) << ":";
 
       return strStream.str();
     }
@@ -96,7 +97,7 @@ namespace EUROPA {
       TokenId predecessor;
       TokenId successor;
       extractParts(index, object, predecessor, successor);
-      strStream << "<" << object->getName().toString() << ":" << predecessor->toString() << ":" << successor->toString() << ">";
+      strStream << "<" << object->getName().toString() << " " << predecessor->toString() << " " << successor->toString() << ">";
       return strStream.str();
     }
 
