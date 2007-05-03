@@ -478,33 +478,44 @@ namespace EUROPA {
 	for(const TiXmlElement* arg = child->FirstChildElement(); arg; arg = arg->NextSiblingElement() ) 
 	  constraintArgs.push_back(valueToExpr(arg));
             	
-	ruleBody.push_back(new ExprConstraint(child->Attribute("name"),constraintArgs));
-      }
-      else if (strcmp(child->Value(),"subgoal") == 0) {
-	const char* predicateInstance = NULL;
-	const char* name = NULL;
-	for(const TiXmlElement* arg = child->FirstChildElement(); arg; arg = arg->NextSiblingElement() ) {
-	  if (strcmp(arg->Value(),"predicateinstance") == 0) { 
-	    predicateInstance = arg->Attribute("type");
-	    name = arg->Attribute("name");
-	  }            		
-	  else 
-	    check_runtime_error(ALWAYS_FAILS,std::string("Unknown subgoal element:") + arg->Value());
-	}
-	check_runtime_error(predicateInstance != NULL,"predicate instance in a subgoal cannot be null");
-
-	const char* predicateType = predicateInstanceToType(className, predName.c_str(), predicateInstance,localVars).c_str();    
-	if (name == NULL) {
-	  std::ostringstream tmpname;
-	  tmpname << "slave" << (slave_cnt++);            
-	  name = LabelStr(tmpname.str()).c_str();
-	}                 
-	ruleBody.push_back(new ExprSubgoal(name,predicateType,predicateInstance,child->Attribute("relation")));
-      }
-      else if (strcmp(child->Value(),"var") == 0) {
-	LabelStr name(child->Attribute("name"));
-	LabelStr type(child->Attribute("type"));
-	localVars[name.toString()]=type.toString();
+      		ruleBody.push_back(new ExprConstraint(child->Attribute("name"),constraintArgs));
+      	}
+      	else if (strcmp(child->Value(),"subgoal") == 0) {
+      		const char* predicateInstance = NULL;
+      		const char* name = NULL;
+      		const char* relation = child->Attribute("relation");
+      		const char* origin = child->Attribute("origin");
+      		
+      		if (origin == NULL) {
+	            for(const TiXmlElement* arg = child->FirstChildElement(); arg; arg = arg->NextSiblingElement() ) {
+	            	if (strcmp(arg->Value(),"predicateinstance") == 0) { 
+	            		predicateInstance = arg->Attribute("type");
+	            		name = arg->Attribute("name");
+	            	}            		
+	             	else 
+	      	            check_runtime_error(ALWAYS_FAILS,std::string("Unknown subgoal element:") + arg->Value());
+	            }
+	            check_runtime_error(predicateInstance != NULL,"predicate instance in a subgoal cannot be null");
+	
+	            const char* predicateType = predicateInstanceToType(className, predName.c_str(), predicateInstance,localVars).c_str();    
+	            if (name == NULL) {
+	            	std::ostringstream tmpname;
+	            	tmpname << "slave" << (slave_cnt++);            
+	                name = LabelStr(tmpname.str()).c_str();
+	            }                 
+	      		ruleBody.push_back(new ExprSubgoal(name,predicateType,predicateInstance,relation));
+      		}
+      		else {
+      		  const char* target = child->Attribute("target");
+      		  // TODO:	
+         	  //ruleBody.push_back(new ExprRelation(relation,origin,target));
+         	  check_runtime_error(ALWAYS_FAIL,"don't know how to deal with relation-only subgoals yet. relation="+std::string(relation)+" origin="+origin+" target="+target); 
+      		}
+      	}
+      	else if (strcmp(child->Value(),"var") == 0) {
+      		LabelStr name(child->Attribute("name"));
+      		LabelStr type(child->Attribute("type"));
+      		localVars[name.toString()]=type.toString();
 
 	Expr* domainRestriction=NULL;        		
 	if (child->FirstChildElement() != NULL)
