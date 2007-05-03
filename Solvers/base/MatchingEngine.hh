@@ -110,7 +110,7 @@ namespace EUROPA {
       std::multimap<double, MatchingRuleId> m_rulesByExpression; /*!< All rules by expression */
       std::vector<MatchingRuleId> m_unfilteredRules; /*!< All rules without filters */
 
-      static std::map<double, MatchFinderId> s_entityMatchers;
+      static std::map<double, MatchFinderId>& getEntityMatchers();
     };
     
     template<>

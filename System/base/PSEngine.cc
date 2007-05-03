@@ -33,8 +33,18 @@
 #include <fstream>
 
 namespace EUROPA {
-  std::map<double, ObjectWrapperGenerator*> PSEngine::s_objectWrapperGenerators;
-  std::map<double, PSLanguageInterpreter*> PSEngine::s_languageInterpreters;
+  
+  std::map<double, ObjectWrapperGenerator*>& PSEngine::getObjectWrapperGenerators()
+  {
+      static std::map<double, ObjectWrapperGenerator*> objectWrapperGenerators;
+      return objectWrapperGenerators;
+  }
+  
+  std::map<double, PSLanguageInterpreter*>& PSEngine::getLanguageInterpreters()
+  {
+      static std::map<double, PSLanguageInterpreter*> languageInterpreters;
+      return languageInterpreters;
+  }
 
   const std::string UNKNOWN("UNKNOWN");
 
@@ -492,8 +502,8 @@ namespace EUROPA {
   //FIXME
   std::string PSEngine::executeScript(const std::string& language, const std::string& script) {
     std::map<double, PSLanguageInterpreter*>::iterator it =
-      s_languageInterpreters.find(LabelStr(language));
-    checkRuntimeError(it != s_languageInterpreters.end(),
+      getLanguageInterpreters().find(LabelStr(language));
+    checkRuntimeError(it != getLanguageInterpreters().end(),
 		      "Cannot execute script of unknown language \"" << language << "\"");
     return it->second->interpret(script);
   }
@@ -555,9 +565,9 @@ namespace EUROPA {
   void PSEngine::addLanguageInterpreter(const LabelStr& language,
 					PSLanguageInterpreter* interpreter) {
     std::map<double, PSLanguageInterpreter*>::iterator it =
-      s_languageInterpreters.find(language);
-    if(it == s_languageInterpreters.end())
-      s_languageInterpreters.insert(std::make_pair(language, interpreter));
+      getLanguageInterpreters().find(language);
+    if(it == getLanguageInterpreters().end())
+      getLanguageInterpreters().insert(std::make_pair(language, interpreter));
     else {
       delete it->second;
       it->second = interpreter;
@@ -567,9 +577,9 @@ namespace EUROPA {
   void PSEngine::addObjectWrapperGenerator(const LabelStr& type,
 					   ObjectWrapperGenerator* wrapper) {
     std::map<double, ObjectWrapperGenerator*>::iterator it =
-      s_objectWrapperGenerators.find(type);
-    if(it == s_objectWrapperGenerators.end())
-      s_objectWrapperGenerators.insert(std::make_pair(type, wrapper));
+      getObjectWrapperGenerators().find(type);
+    if(it == getObjectWrapperGenerators().end())
+      getObjectWrapperGenerators().insert(std::make_pair(type, wrapper));
     else {
       delete it->second;
       it->second = wrapper;
@@ -580,8 +590,8 @@ namespace EUROPA {
     const std::vector<LabelStr>& types = Schema::instance()->getAllObjectTypes(type);
     for(std::vector<LabelStr>::const_iterator it = types.begin(); it != types.end(); ++it) {
       std::map<double, ObjectWrapperGenerator*>::iterator wrapper =
-	s_objectWrapperGenerators.find(*it);
-      if(wrapper != s_objectWrapperGenerators.end())
+	getObjectWrapperGenerators().find(*it);
+      if(wrapper != getObjectWrapperGenerators().end())
 	return wrapper->second;
     }
     checkRuntimeError(ALWAYS_FAIL,

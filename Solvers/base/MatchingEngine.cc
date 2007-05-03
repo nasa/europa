@@ -11,7 +11,13 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    std::map<double, MatchFinderId> MatchingEngine::s_entityMatchers;
+    
+    std::map<double, MatchFinderId>& MatchingEngine::getEntityMatchers() 
+    { 
+        static std::map<double, MatchFinderId> entityMatchers;
+    	
+    	return entityMatchers; 
+    }
 
     MatchingEngine::MatchingEngine(const TiXmlElement& configData, const char* ruleTag) 
       : m_id(this), m_cycleCount(1) {
@@ -103,17 +109,17 @@ namespace EUROPA {
     }
 
     void MatchingEngine::addMatchFinder(const LabelStr& type, const MatchFinderId& finder) {
-      checkError(s_entityMatchers.find(type) == s_entityMatchers.end(),
+      checkError(getEntityMatchers().find(type) == getEntityMatchers().end(),
 		 "Already know how to match entities of type " << type.toString());
-      s_entityMatchers.insert(std::make_pair((double) type, finder));
+      getEntityMatchers().insert(std::make_pair((double) type, finder));
     }
 
     template<>
     void MatchingEngine::getMatches(const EntityId& entity,
 				    std::vector<MatchingRuleId>& results) {
       std::map<double, MatchFinderId>::iterator it =
-	s_entityMatchers.find(entity->entityType());
-      checkError(it != s_entityMatchers.end(),
+	getEntityMatchers().find(entity->entityType());
+      checkError(it != getEntityMatchers().end(),
 		 "No way to match entities of type " << entity->entityType().toString());
       it->second->getMatches(getId(), entity, results);
     }
