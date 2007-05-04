@@ -178,7 +178,6 @@ namespace EUROPA {
       objName = objName.substr(0,objName.length()-suffix.toString().length()-1);
       object = client->getObject(objName.c_str());
       check_error(object.isValid(), "Failed to find an object named " + objName);
-      std::cout << "Found object " << objName << std::endl;
       LabelStr newType(objType.toString() + Schema::getDelimiter() + suffix.toString());
       return  newType.c_str();
     }
@@ -205,7 +204,6 @@ namespace EUROPA {
     if (!object.isNoId()) {
         // We restrict the base domain permanently since the name is specifically mentioned on creation
         token->getObject()->restrictBaseDomain(object->getThis()->baseDomain());
-        std::cout << "Restricted base domain to " << token->getObject()->baseDomain().toString() << std::endl;
     }
 
     const char * name = child->Attribute("name");
@@ -354,7 +352,6 @@ namespace EUROPA {
     if (!object.isNoId()) {
         // We restrict the base domain permanently since the name is specifically mentioned on creation
         token->getObject()->restrictBaseDomain(object->getThis()->baseDomain());
-        std::cout << "Restricted base domain to " << token->getObject()->baseDomain().toString() << std::endl;
     }
 
     if (b_mandatory){
