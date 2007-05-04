@@ -1079,13 +1079,15 @@ public class ModelAccessor {
     // program is run, then use that file to load properties
     try{
       File cfgFile = new File(s_directory, s_cfgFilename);
-      if(s_cfgExact)
+      if(s_cfgExact) {
         if(!cfgFile.exists()) throw new FileNotFoundException("Couldn't find "+s_cfgFilename+" in "+s_directory);
-        else
-          while(!cfgFile.exists()) {
-            if(cfgFile.getParentFile() == null) throw new FileNotFoundException("Couldn't find "+s_cfgFilename);
-            cfgFile = new File(cfgFile.getParentFile().getParentFile(), s_cfgFilename);
-          }
+      }
+      else {
+	while(!cfgFile.exists()) {
+	  if(cfgFile.getParentFile() == null) throw new FileNotFoundException("Couldn't find "+s_cfgFilename);
+	  cfgFile = new File(cfgFile.getParentFile().getParentFile(), s_cfgFilename);
+	}
+      }
       assert(DebugMsg.debugMsg("ModelAccessor:init", "Loading Compiler configuration data from file "+cfgFile));
       IXMLParser parser = XMLParserFactory.createDefaultXMLParser();
       IXMLReader reader = new StdXMLReader(new BufferedReader(new FileReader(cfgFile)));
