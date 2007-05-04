@@ -23,5 +23,6 @@ BaseTimeline timeline = new BaseTimeline();
 close();
 
 goal(BaseTimeline.p0 g0);
+g0.activate();
 timeline.constrain(g0);
 timeline.free(g0);

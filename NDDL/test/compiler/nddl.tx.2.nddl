@@ -16,11 +16,11 @@ close();
 
 // Allocate active tokens. Initially the object variable of each will contain
 // 2 values - foo1 and foo2
-goal(Foo.pred0 t0); // Initially active
-goal(Foo.pred1 t1); // Initially active
-goal(Foo.pred2 t2); // Initially active
-goal(Foo.pred3 t3); // Initially active
-goal(Foo.pred4 t4); // Initially active
+goal(Foo.pred0 t0); t0.activate(); // Initially active
+goal(Foo.pred1 t1); t1.activate(); // Initially active
+goal(Foo.pred2 t2); t2.activate(); // Initially active
+goal(Foo.pred3 t3); t3.activate(); // Initially active
+goal(Foo.pred4 t4); t4.activate(); // Initially active
 
 // Set a time time bound overall extent
 t0.start.specify(0);

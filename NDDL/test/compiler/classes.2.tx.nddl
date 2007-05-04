@@ -16,6 +16,7 @@ close();
 
 // First token
 goal(nav1.At t0);
+t0.activate();
 
 // Specify that it is located at the Rock
 t0.location.specify(Rock);
@@ -25,6 +26,7 @@ t0.start.specify(0);
 
 // Second token
 goal(nav1.At t1);
+t1.activate();
 
 // Specify that it is at the Lander
 t1.location.specify(Lander);
