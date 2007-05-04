@@ -44,7 +44,7 @@ Foo y = new Foo(false);
 Bar b = new Bar();
 
 // Set it up to be only compatible with one value, forcing a backtrack.
-goal(b.somePred first);
+goal(b.somePred first); first.activate();
 first.arg.specify(true); // Force it to be specified right off the bat
 
 rejectable(b.otherPred second);
