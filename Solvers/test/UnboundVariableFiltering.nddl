@@ -19,22 +19,22 @@ HorizonFiltered f = new HorizonFiltered();
 
 close();
 
-goal(A.predicateA t0);
-goal(A.predicateB t1);
-goal(B.predicateA t2);
-goal(C.predicateA t3);
-goal(D.predicateC t4);
-goal(D.predicateF t5);
+goal(A.predicateA t0); t0.activate();
+goal(A.predicateB t1); t1.activate();
+goal(B.predicateA t2); t2.activate();
+goal(C.predicateA t3); t3.activate();
+goal(D.predicateC t4); t4.activate();
+goal(D.predicateF t5); t5.activate();
 
-goal(PredicateRoot.predicateD t6);
-goal(PredicateRoot.predicateE t7);
-goal(PredicateRoot.predicateD t8);
+goal(PredicateRoot.predicateD t6); t6.activate();
+goal(PredicateRoot.predicateE t7); t7.activate();
+goal(PredicateRoot.predicateD t8); t8.activate();
 
-goal(C.predicateC t9);
+goal(C.predicateC t9);  t9.activate();
 
-goal(HorizonFiltered.predicate6 t10);
+goal(HorizonFiltered.predicate6 t10);  t10.activate();
 t10.start.specify(1001);
 
-goal(HorizonFiltered.predicate7 t11);
+goal(HorizonFiltered.predicate7 t11);  t11.activate();
 t11.start.specify(100);
 t11.end.specify(1000);
