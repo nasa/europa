@@ -3692,9 +3692,10 @@ public:
 
     /* Initialize state-domain-at-creation of mandatory and rejectable tokens.  Const after this. */
     s_mandatoryStateDom.insert(Token::ACTIVE);
+    s_mandatoryStateDom.insert(Token::MERGED); // Goals can now be merged
     s_mandatoryStateDom.close();
     s_rejectableStateDom.insert(Token::ACTIVE);
-    // NOT PERMITTED: s_rejectableStateDom.insert(Token::MERGED);
+    s_rejectableStateDom.insert(Token::MERGED);
     s_rejectableStateDom.insert(Token::REJECTED);
     s_rejectableStateDom.close();
 
@@ -4381,6 +4382,7 @@ public:
     const unsigned int initialObjectTokenCount_B = obj2b->getTokens().size();
 
     TokenId constrainedToken = createToken("constrainedSample", true);
+    TEST_PLAYING_XML(buildXMLObjTokTokStr("activate", "", "constrainedSample", ""));
     std::cout << __FILE__ << ':' << __LINE__ << ": constrainedToken is " << constrainedToken << '\n';
     std::cout << __FILE__ << ':' << __LINE__ << ": constrainedSample's derived object domain is " << constrainedToken->getObject()->derivedDomain() << '\n';
     assertTrue(!constrainedToken->getObject()->derivedDomain().isSingleton(), "token already constrained to one object");
@@ -4395,6 +4397,7 @@ public:
 
     /* Again, but also constrain it with the prior token. */
     TokenId constrained2 = createToken("constrainedSample2", true);
+    TEST_PLAYING_XML(buildXMLObjTokTokStr("activate", "", "constrainedSample2", ""));
     std::cout << __FILE__ << ':' << __LINE__ << ": constrained2 is " << constrained2 << '\n';
     std::cout << __FILE__ << ':' << __LINE__ << ": constrained2's derived object domain is " << constrained2->getObject()->derivedDomain() << '\n';
     std::cout << __FILE__ << ':' << __LINE__ << ": constrained2's derived object domain is " << constrained2->getObject()->derivedDomain() << '\n';
@@ -4456,11 +4459,13 @@ public:
     /*!!For debugging:
     TokenSet tokens2 = tokens;
     for (int i = 1; !tokens2.empty(); i++) {
+      TokenId tok = *(tokens2.begin());	
+      assertTrue(tok.isValid());
       std::cout << __FILE__ << ':' << __LINE__ << ": testFree(): on obj2b, token " << i << " is " << *(tokens2.begin()) << '\n';
       tokens2.erase(tokens2.begin());
     }
     !!*/
-    TokenId one = *(--tokens.rbegin());
+    TokenId one = *(tokens.begin());
     assertTrue(one.isValid());
     assertTrue(one->getObject()->derivedDomain().isSingleton());
     assertTrue(one->getObject()->derivedDomain() == objDom2b);
