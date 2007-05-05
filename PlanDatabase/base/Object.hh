@@ -239,6 +239,8 @@ namespace EUROPA {
    */
     void setParent(const ObjectId& parent);
 
+   static std::string toString(ObjectVarId objVar);
+    
   protected:
 
     /**

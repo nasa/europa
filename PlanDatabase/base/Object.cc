@@ -722,4 +722,19 @@ namespace EUROPA {
   void Object::notifyDeleted(const TokenId& token){
     remove(token);
   }
+  
+  std::string Object::toString(ObjectVarId objVar)
+  {
+  	std::ostringstream os;
+  	if (objVar->lastDomain().isSingleton()) {
+  		ObjectId obj = objVar->lastDomain().getSingletonValue(); 
+  	    os << obj->getName().toString();
+  	}
+  	else {
+  		os << objVar->toString();
+  	}
+  	
+  	return os.str();
+  }
+  
 }
