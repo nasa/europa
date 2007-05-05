@@ -134,7 +134,7 @@ namespace EUROPA {
     	for (unsigned int i=0; i<m_decisionStack.size(); i++) {
     		if (i>0)
     		    os << ",";
-    	    os << m_decisionStack[i];
+    	    os << m_decisionStack[i]->toShortString();
     	}
     	    
     	return os.str();
@@ -253,7 +253,7 @@ namespace EUROPA {
                "OpenDecisions at [stepCnt=" << getStepCount() << ",depth=" << getDepth() << "]" << std::endl << printOpenDecisions());
 
       debugMsg("Solver:decisionStack", 
-               "DecisionStack at [stepCnt=" << getStepCount() << ",stepCnt=" << getDepth() << "]" << std::endl << getDecisionStackAsString());
+               "DecisionStack at [stepCnt=" << getStepCount() << ",stepCnt=" << getDepth() << "] " << getDecisionStackAsString());
 
       // Reset flag for flaws found
       m_noFlawsFound = false;
