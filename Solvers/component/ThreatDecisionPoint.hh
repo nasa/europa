@@ -29,6 +29,9 @@ namespace EUROPA {
 
       const TokenId& getToken() const {return m_tokenToOrder;}
 
+      virtual std::string toString() const;
+      virtual std::string toShortString() const;
+
     protected:
       virtual void handleInitialize();
 
@@ -47,7 +50,6 @@ namespace EUROPA {
       virtual void handleUndo();
 
       /** HELPER METHODS **/
-      std::string toString() const;
       std::string toString(unsigned int index, const std::pair<ObjectId, std::pair<TokenId, TokenId> >& choice) const;
     };
 

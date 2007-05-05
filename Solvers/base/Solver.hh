@@ -126,6 +126,8 @@ namespace EUROPA {
        * @brief Retrieve all decisions on the stack.
        */
       const DecisionStack& getDecisionStack() const;
+      
+      std::string getDecisionStackAsString() const;
 
       /**
        * @brief Register a listener for search actions and status.

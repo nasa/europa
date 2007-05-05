@@ -47,7 +47,8 @@ namespace EUROPA {
       /**
        * @brief Dump contents to a String.
        */
-      std::string toString() const;
+      virtual std::string toString() const;
+      virtual std::string toShortString() const;
 
       const ConstrainedVariableId& getFlawedVariable() const;
 

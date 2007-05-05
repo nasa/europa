@@ -127,6 +127,19 @@ namespace EUROPA {
 
     const DecisionStack& Solver::getDecisionStack() const {return m_decisionStack;}
 
+    std::string Solver::getDecisionStackAsString() const 
+    {
+    	std::ostringstream os;
+    	
+    	for (unsigned int i=0; i<m_decisionStack.size(); i++) {
+    		if (i>0)
+    		    os << ",";
+    	    os << m_decisionStack[i];
+    	}
+    	    
+    	return os.str();
+    }
+
     void Solver::setMaxSteps(const unsigned int steps) {m_maxSteps = steps;}
     
     void Solver::setMaxDepth(const unsigned int depth) {m_maxDepth = depth;}
@@ -237,7 +250,10 @@ namespace EUROPA {
       }
 
       debugMsg("Solver:step", 
-               "[" << getDepth() << ',' << getStepCount() << "]" << std::endl << printOpenDecisions());
+               "OpenDecisions at [stepCnt=" << getStepCount() << ",depth=" << getDepth() << "]" << std::endl << printOpenDecisions());
+
+      debugMsg("Solver:decisionStack", 
+               "DecisionStack at [stepCnt=" << getStepCount() << ",stepCnt=" << getDepth() << "]" << std::endl << getDecisionStackAsString());
 
       // Reset flag for flaws found
       m_noFlawsFound = false;

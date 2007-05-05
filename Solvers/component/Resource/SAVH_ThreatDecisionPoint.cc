@@ -411,6 +411,17 @@ namespace EUROPA {
       filters.addFilter(new DefaultChoiceFilter((FlowProfile*) profile, getExplanation(), m_flawedInstant));
     }
 
+    std::string ThreatDecisionPoint::toShortString() const {
+      std::stringstream os;
+      
+      os << "INS(" << m_instTime << ") on " << m_resName.toString();
+      TransactionId predecessor = m_choices[m_index].first;
+      TransactionId successor = m_choices[m_index].second;
+      os << " {" << predecessor->toString() << " < " << successor->toString() << "}";      
+      
+      return os.str();
+    }
+
     std::string ThreatDecisionPoint::toString() const {
       std::stringstream os;
       os << "INSTANT=" << m_instTime << " on " << m_resName.toString() << " : ";

@@ -19,6 +19,7 @@ namespace EUROPA {
       ThreatDecisionPoint(const DbClientId& client, const InstantId& inst, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
       virtual ~ThreatDecisionPoint();
       virtual std::string toString() const;
+      virtual std::string toShortString() const;
       void execute() {DecisionPoint::execute();}
       void undo() {DecisionPoint::undo();}
       const std::vector<std::pair<TransactionId, TransactionId> >& getChoices() {return m_choices;}

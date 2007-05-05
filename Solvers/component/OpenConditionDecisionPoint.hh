@@ -50,7 +50,8 @@ namespace EUROPA {
        */
       static bool test(const EntityId& entity);
 
-      std::string toString() const;
+      virtual std::string toString() const;
+      virtual std::string toShortString() const;
 
       /**
        * @brief Accessor to flawed token

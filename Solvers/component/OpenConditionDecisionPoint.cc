@@ -95,12 +95,34 @@ namespace EUROPA {
       return m_choiceIndex < m_choiceCount;
     }
 
+    std::string OpenConditionDecisionPoint::toShortString() const{
+      // This returns the last executed choice	
+      int idx = m_choiceIndex;
+      std::stringstream os;
+      
+      if(m_choices[idx] == Token::MERGED) {
+          os << "MRG(" << m_flawedToken->getKey() << "," << m_compatibleTokens[m_mergeIndex]->getKey() << ")";
+      }
+      else if(m_choices[idx] == Token::ACTIVE) {
+      	  os << "ACT(" << m_flawedToken->getKey() << ")";
+      }
+      else if(m_choices[idx] == Token::REJECTED) {
+      	  os << "REJ(" << m_flawedToken->getKey() << ")";
+      }
+      else {
+      	check_error(ALWAYS_FAIL,"Unknown choice:"+m_choices[idx].toString());
+      }
+      
+      return os.str(); 	
+    }
+    
     std::string OpenConditionDecisionPoint::toString() const{
       std::stringstream strStream;
-      strStream << "TOKEN STATE: TOKEN=" << 
-        m_flawedToken->getName().toString()  << "(" << m_flawedToken->getKey() << ")," <<
-        " OBJECT=" << m_flawedToken->getObject()->toString() <<
-        " CHOICES(current=" << m_choiceIndex << ")=";
+      strStream 
+        << "TOKEN STATE:"
+        << "    TOKEN=" << m_flawedToken->getName().toString()  << "(" << m_flawedToken->getKey() << "):" 
+        << "    OBJECT=" << Object::toString(m_flawedToken->getObject()) << ":"
+        << "    CHOICES(current=" << m_choiceIndex << ")=";
 
       if(!m_compatibleTokens.empty()){
         strStream << "MERGED {";

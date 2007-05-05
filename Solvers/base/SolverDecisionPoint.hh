@@ -43,6 +43,12 @@ namespace EUROPA {
        */
       virtual std::string toString() const = 0;
 
+
+      /**
+       * @brief short version of toString() to be used in aggregate summaries
+       */
+      virtual std::string toShortString() const = 0;
+
       /**
        * @brief Hook for default behavior. Subclasses can make new static methods to specialize the static matching.
        * @see FlawHandler

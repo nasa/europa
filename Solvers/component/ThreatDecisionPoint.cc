@@ -81,9 +81,24 @@ namespace EUROPA {
       m_choiceCount = m_choices.size();
     }
 
+    std::string ThreatDecisionPoint::toShortString() const {
+      std::stringstream os;
+      
+      ObjectId object;
+      TokenId predecessor, successor;
+      extractParts(m_index, object, predecessor, successor);
+      os << "THR{" << object->getName().toString() << " (" << predecessor->getKey() << ") < (" << successor->toString() << ")}";
+      return os.str();
+    }
+    
     std::string ThreatDecisionPoint::toString() const {
       std::stringstream strStream;
-      strStream << "TOKEN=" << m_tokenToOrder->toString() << " OBJECT:" << m_tokenToOrder->getObject()->toString() << "  CHOICES(current=" << m_index << "):";
+      strStream 
+          << "THREAT:" 
+          << "    " << toString(m_index, m_choices[m_index]) << " :" 
+          << "    TOKEN=" << m_tokenToOrder->toString() << ":"
+          << "    OBJECT=" << Object::toString(m_tokenToOrder->getObject()) << ":" 
+          << "    CHOICES(current=" << m_index << "):";
 
       for (unsigned int i = 0; i < m_choiceCount; i++)
           strStream << i << ") " << toString(i, m_choices[i]) << ":";
@@ -97,7 +112,7 @@ namespace EUROPA {
       TokenId predecessor;
       TokenId successor;
       extractParts(index, object, predecessor, successor);
-      strStream << "<" << object->getName().toString() << " " << predecessor->toString() << " " << successor->toString() << ">";
+      strStream << "{" << object->getName().toString() << " " << predecessor->toString() << " < " << successor->toString() << "}";
       return strStream.str();
     }
 
