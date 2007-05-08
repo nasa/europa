@@ -110,8 +110,8 @@ namespace EUROPA {
     PlanDatabaseId m_planDatabase;
     RulesEngineId m_rulesEngine;
 
-    static std::map<double, PSLanguageInterpreter*>& PSEngine::getLanguageInterpreters();
-    static std::map<double, ObjectWrapperGenerator*>& PSEngine::getObjectWrapperGenerators();    
+    static std::map<double, PSLanguageInterpreter*>& getLanguageInterpreters();
+    static std::map<double, ObjectWrapperGenerator*>& getObjectWrapperGenerators();    
   };
 
   class PSEntity
