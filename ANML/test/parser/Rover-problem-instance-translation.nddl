@@ -1,94 +1,129 @@
-// Rover-problem-instance-translation.nddl
+#include "Rover-model.nddl"
 
-Location lander = new Location(), 
-         rock1 = new Location(), 
-         rock2 = new Location(), 
-         rock3 = new Location(), 
-         rock4 = new Location(); 
-         
+Decomposition decomposition = new Decomposition();
+ 
+int globalStart=1;
+int globalEnd=100;
+int solver_maxSteps=1000;
+int solver_maxDepth=1000;
+PlannerConfig plannerConfiguration = new PlannerConfig(0,101,solver_maxSteps,solver_maxDepth);
+
+Location lander = new Location(),
+    rock1 = new Location(),
+    rock2 = new Location(),
+    rock3 = new Location(),
+    rock4 = new Location();
+
 Path p1 = new Path(),
-     p2 = new Path(),
-     p3 = new Path();
-     
+    p2 = new Path(),
+    p3 = new Path();
+
 Rover spirit = new Rover();
 
-int startHorizon = 1;
-int endHorizon = 100;
+// TODO: generate this
+close();
 
-// compute real planning horizon as startHorizon-1,endHorizon-1
-int _start_ = 0;
-int _end_ = 101;
-PlannerConfig pc = new PlannerConfig(_start_,_end_,500,500);
+    // FACT start
+fact(lander.setValue _v_31);
+eq(_v_31.name,"LANDER");
+eq(_v_31.x,0);
+eq(_v_31.y,0);
 
-// TODO: extend NDDL to include facts
-fact(lander.setValue fact1);
-eq(fact1.name,"LANDER");eq(fact1.x,0);eq(fact1.y,0);
+leq(_v_31.start,globalStart);
+leq(globalEnd,_v_31.end);
 
-fact(rock1.setValue fact2);
-eq(fact2.name,"ROCK1");eq(fact2.x,9);eq(fact2.y,9);
+fact(rock1.setValue _v_32);
+eq(_v_32.name,"ROCK1");
+eq(_v_32.x,1);
+eq(_v_32.y,1);
 
-fact(rock2.setValue fact3);
-eq(fact3.name,"ROCK2");eq(fact3.x,1);eq(fact3.y,6);
+leq(_v_32.start,globalStart);
+leq(globalEnd,_v_32.end);
 
-fact(rock3.setValue fact4);
-eq(fact4.name,"ROCK3");eq(fact4.x,4);eq(fact4.y,8);
+fact(rock2.setValue _v_33);
+eq(_v_33.name,"ROCK2");
+eq(_v_33.x,2);
+eq(_v_33.y,2);
 
-fact(rock4.setValue fact5);
-eq(fact5.name,"ROCK4");eq(fact5.x,3);eq(fact5.y,9);
+leq(_v_33.start,globalStart);
+leq(globalEnd,_v_33.end);
 
-fact(p1.setValue fact6);
-eq(fact6.name,"Very Long Way");eq(fact6.origin,lander);eq(fact6.dest,rock4);eq(fact6.cost,-2000.0);
+fact(rock3.setValue _v_34);
+eq(_v_34.name,"ROCK3");
+eq(_v_34.x,3);
+eq(_v_34.y,3);
 
-fact(p2.setValue fact7);
-eq(fact7.name,"Moderately Long Way");eq(fact7.origin,lander);eq(fact7.dest,rock4);eq(fact7.cost,-1500.0);
+leq(_v_34.start,globalStart);
+leq(globalEnd,_v_34.end);
 
-fact(p3.setValue fact8);
-eq(fact8.name,"Short Cut");eq(fact8.origin,lander);eq(fact8.dest,rock4);eq(fact8.cost,-400.0);
+fact(rock4.setValue _v_35);
+eq(_v_35.name,"ROCK4");
+eq(_v_35.x,4);
+eq(_v_35.y,4);
 
-// facts 1-8 "over all"
-precedes(startHorizon,fact1.start); precedes(fact1.end,endHorizon);
-precedes(startHorizon,fact2.start); precedes(fact2.end,endHorizon);
-precedes(startHorizon,fact3.start); precedes(fact3.end,endHorizon);
-precedes(startHorizon,fact4.start); precedes(fact4.end,endHorizon);
-precedes(startHorizon,fact5.start); precedes(fact5.end,endHorizon);
-precedes(startHorizon,fact6.start); precedes(fact6.end,endHorizon);
-precedes(startHorizon,fact7.start); precedes(fact7.end,endHorizon);
-precedes(startHorizon,fact8.start); precedes(fact8.end,endHorizon);
+leq(_v_35.start,globalStart);
+leq(globalEnd,_v_35.end);
 
-// TODO: this is a hack, EUROPA resources cannot really handle level specification
-fact(spirit.battery_.uses fact9);
-eq(fact9.quantity,30.0); // 30.0 must be derived from the max specified for Battery - the specified level = (100.0 - 70.0)
+fact(p1.setValue _v_36);
+eq(_v_36.name,"Very Long Way");
+eq(_v_36.origin,lander);
+eq(_v_36.dest,rock4);
+eq(_v_36.cost,2000.0);
 
-fact(LocationCopier.copy fact10);
-eq(fact10.lhs,spirit.location_);eq(fact10.rhs,lander);
+leq(_v_36.start,globalStart);
+leq(globalEnd,_v_36.end);
 
-fact(StowStateCopier.copy fact11);
-eq(fact11.lhs,spirit.instrument_.state_);eq(fact11.rhs,stowed);
+fact(p2.setValue _v_37);
+eq(_v_37.name,"Moderately Long Way");
+eq(_v_37.origin,lander);
+eq(_v_37.dest,rock4);
+eq(_v_37.cost,1500.0);
 
-// facts 9-11 "at start"
-precedes(fact9.start,startHorizon); precedes(startHorizon,fact9.end);
-precedes(fact10.start,startHorizon); precedes(startHorizon,fact10.end);
-precedes(fact11.start,startHorizon); precedes(startHorizon,fact11.end);
+leq(_v_37.start,globalStart);
+leq(globalEnd,_v_37.end);
 
-goal(spirit.TakeSample goal1);
-eq(goal1.rock,rock4);
-// goal1 in [0 100]
-precedes(0,goal1.start); precedes(goal1.end,100);
+fact(p3.setValue _v_38);
+eq(_v_38.name,"Short Cut");
+eq(_v_38.origin,lander);
+eq(_v_38.dest,rock4);
+eq(_v_38.cost,400.0);
 
-// make sure all goals and facts fit within the horizon
-precedes(_start_,fact1.start);precedes(fact1.end,_end_);
-precedes(_start_,fact2.start);precedes(fact2.end,_end_);
-precedes(_start_,fact3.start);precedes(fact3.end,_end_);
-precedes(_start_,fact4.start);precedes(fact4.end,_end_);
-precedes(_start_,fact5.start);precedes(fact5.end,_end_);
-precedes(_start_,fact6.start);precedes(fact6.end,_end_);
-precedes(_start_,fact7.start);precedes(fact7.end,_end_);
-precedes(_start_,fact8.start);precedes(fact8.end,_end_);
-precedes(_start_,fact9.start);precedes(fact9.end,_end_);
-precedes(_start_,fact10.start);precedes(fact10.end,_end_);
-precedes(_start_,fact11.start);precedes(fact11.end,_end_);
+leq(_v_38.start,globalStart);
+leq(globalEnd,_v_38.end);
 
-precedes(_start_,goal1.start);precedes(goal1.end,_end_);
+    // FACT end
+
+    // FACT start
+//fact(spirit.battery_.setValue _v_39);
+//eq(_v_39.value,70.0);
+//leq(_v_39.start,globalStart);
+//leq(globalStart,_v_39.end);
+
+fact(spirit.location_.setValue _v_40);
+fact(rock1.setValue _v_41);
+_v_41 contains _v_40;
+eq(_v_40.name,_v_41.name);
+eq(_v_40.x,_v_41.x);
+eq(_v_40.y,_v_41.y);
+leq(_v_40.start,globalStart);
+lt(globalStart,_v_40.end);
+
+fact(spirit.instrument_.state_.setValue _v_42);
+eq(_v_42.value,stowed);
+
+leq(_v_42.start,globalStart);
+leq(globalStart,_v_42.end);
+
+    // FACT end
+
+    // GOAL start
+goal(spirit.TakeSample _v_43);
+// TODO: this is missing from the translation
+eq(_v_43.rock,rock4);
+leq(20,_v_43.start);
+leq(_v_43.end,80);
 
 
+
+    // GOAL end
 
