@@ -22,6 +22,7 @@
 #include "SAVH_FlowProfile.hh"
 #include "SAVH_IncrementalFlowProfile.hh"
 #include "SAVH_ReusableFVDetector.hh"
+#include "TransactionInterpreterResources.hh"
 #endif
 
 SchemaId schema;
@@ -268,6 +269,9 @@ int main(int argc, const char** argv) {
   REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile);
   REGISTER_PROFILE(EUROPA::SAVH::FlowProfile, FlowProfile);
   REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile);
+  
+  // Explicit reference is needed so that static initializer isn't dropped when static libs are used.
+  TransactionInterpreterResourcesInitializer::getInstance();
 #endif
 
 #define ONE_ASSEMBLY_ONLY

@@ -111,9 +111,8 @@ namespace EUROPA {
   }        
 
 
-  class TransactionInterpreterResourcesLocalStatic {
-  public:
-    TransactionInterpreterResourcesLocalStatic() {
+  TransactionInterpreterResourcesInitializer::TransactionInterpreterResourcesInitializer()
+  {
       REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource);	    	    	  
       REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float);	    	    	  
       REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float:float:float);	    	    	  
@@ -125,11 +124,7 @@ namespace EUROPA {
       REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:float:float:float);	    	    	  
       REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:float:float:float:float);	    	    	  
       new ReusableUsesTokenFactory("Reusable.uses");
-
-    }
-  };
-
-  namespace TransactionInterpreter {
-    TransactionInterpreterResourcesLocalStatic s_localStatic;
   }
+  
+  TransactionInterpreterResourcesInitializer TransactionInterpreterResourcesInitializer::s_instance;
 }

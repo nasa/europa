@@ -12,8 +12,13 @@ ModuleBase System
 	;
 
 if ! ( "Resources" in $(NO) ) {
-  ModuleBase System : TransactionInterpreterResources.cc PSResources.cc
-  	     	      StandardAssemblyWithResources.cc ;
+  ModuleBase System 
+      : 
+      TransactionInterpreterResources.cc 
+      PSResources.cc 
+      StandardAssemblyWithResources.cc 
+      ;
+      
   if $(LIBRARIES) = SHARED {
     SwigJava PSEngineResources.i : psengine : swig/psengine : cpp : PSEngine : TinyXml Utils ConstraintEngine PlanDatabase RulesEngine NDDL TemporalNetwork Solvers System ANML : PSEngine ;
   }

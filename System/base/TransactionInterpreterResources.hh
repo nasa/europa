@@ -51,6 +51,15 @@ namespace EUROPA {
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable , bool isFact) const;
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
   };   
+  
+  class TransactionInterpreterResourcesInitializer 
+  {
+      public:
+          TransactionInterpreterResourcesInitializer();
+          
+          static TransactionInterpreterResourcesInitializer& getInstance() { return s_instance; }
+          static TransactionInterpreterResourcesInitializer s_instance;
+  };  
 }
 
 #endif
