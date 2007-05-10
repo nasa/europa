@@ -57,7 +57,9 @@ namespace EUROPA {
       public:
           TransactionInterpreterResourcesInitializer();
           
-          static TransactionInterpreterResourcesInitializer& getInstance() { return s_instance; }
+          static TransactionInterpreterResourcesInitializer& getInstance();
+          
+      protected:    
           static TransactionInterpreterResourcesInitializer s_instance;
   };  
 }

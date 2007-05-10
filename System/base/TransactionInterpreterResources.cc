@@ -127,4 +127,9 @@ namespace EUROPA {
   }
   
   TransactionInterpreterResourcesInitializer TransactionInterpreterResourcesInitializer::s_instance;
+  
+  TransactionInterpreterResourcesInitializer& TransactionInterpreterResourcesInitializer::getInstance() 
+  { 
+      return s_instance; 
+  } 
 }
