@@ -119,6 +119,11 @@ namespace EUROPA {
      */
     ConstrainedVariableId xmlAsCreateVariable(const char * type, const char * name, const TiXmlElement * value);
 
+    /**
+     * @brief create a new token
+     */
+    TokenId createToken(const char* name,const char* type,bool rejectable,bool isFact);
+
 #define construct_constraint(relation, ftoken, fvar, stoken, svar){\
         std::vector<ConstrainedVariableId> variables;\
         variables.push_back( ftoken##_token->get##fvar());\

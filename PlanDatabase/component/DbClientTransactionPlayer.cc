@@ -185,28 +185,26 @@ namespace EUROPA {
     	return predicate;
     }  	
   }
-   
-  void DbClientTransactionPlayer::playFactCreated(const TiXmlElement & element) {
-    // simple token creation
-    TiXmlElement * child = element.FirstChildElement();
-    check_error(child != NULL);
-    const char * type = child->Attribute("type");
-    check_error(type != NULL);
-
+  
+  TokenId DbClientTransactionPlayer::createToken(
+                                         const char* name,
+                                         const char* type, 
+                                         bool rejectable, 
+                                         bool isFact)
+  {
     // The type may be qualified with an object name, in which case we should get the
     // object and specify it. We will also have to generate the appropriate type designation
     // by extracting the class from the object
     ObjectId object;
     const char* predicateType = getObjectAndType(m_client,type,object);
 
-    TokenId token = m_client->createToken(predicateType, true /*isMandatory*/, true /*isFact*/); 
+    TokenId token = m_client->createToken(predicateType,rejectable,isFact); 
     
     if (!object.isNoId()) {
         // We restrict the base domain permanently since the name is specifically mentioned on creation
         token->getObject()->restrictBaseDomain(object->getThis()->baseDomain());
     }
 
-    const char * name = child->Attribute("name");
     if (name != NULL) {
       std::string std_name = name;
       m_tokens[std_name] = token;
@@ -215,7 +213,23 @@ namespace EUROPA {
     	name = "NO_NAME";
     }
     
-    debugMsg("DbClientTransactionPlayer:createFact", "created Fact:" << name << " of type " << predicateType);      
+    debugMsg("DbClientTransactionPlayer:createToken", "created Token:" << name << " of type " << predicateType << " isFact:" << isFact);      
+    
+    return token;  	
+  }
+   
+  void DbClientTransactionPlayer::playFactCreated(const TiXmlElement & element) {
+    TiXmlElement * child = element.FirstChildElement();
+    check_error(child != NULL);
+    const char * type = child->Attribute("type");
+    check_error(type != NULL);
+
+    createToken(
+        child->Attribute("name"),
+        type,
+        false, // rejectable  
+        true   // isFact 
+    );
   }
 
   void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element) {
@@ -337,36 +351,16 @@ namespace EUROPA {
     check_error(type != NULL);
 
     const char * mandatory = element.Attribute("mandatory");
-    bool b_mandatory = false;
+    bool rejectable = true;
     if(mandatory != NULL && (strcmp(mandatory, "true") == 0))
-      b_mandatory = true;
+      rejectable = false;
 
-    // The type may be qualified with an object name, in which case we should get the
-    // object and specify it. We will also have to generate the appropriate type designation
-    // by extracting the class from the object
-    ObjectId object;
-    const char* predicateType = getObjectAndType(m_client,type,object);
-
-    TokenId token = m_client->createToken(predicateType, true /*isMandatory*/, false /*isFact*/); 
-    
-    if (!object.isNoId()) {
-        // We restrict the base domain permanently since the name is specifically mentioned on creation
-        token->getObject()->restrictBaseDomain(object->getThis()->baseDomain());
-    }
-
-    if (b_mandatory){
-      StateDomain state = token->getState()->lastDomain();
-      state.remove(Token::REJECTED);
-      token->getState()->restrictBaseDomain(state);
-    }
-
-    const char * name = child->Attribute("name");
-
-    if (name != NULL) {
-      std::string std_name = name;
-      m_tokens[std_name] = token;
-      debugMsg("DbClientTransactionPlayer:createToken", "created Token:" << name << "of type " << predicateType);      
-    }
+    TokenId token = createToken(
+        child->Attribute("name"),
+        type,
+        rejectable, // rejectable 
+        false       // isFact
+    );
   }
 
   void DbClientTransactionPlayer::playConstrained(const TiXmlElement & element) {
