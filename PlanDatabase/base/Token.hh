@@ -215,6 +215,11 @@ namespace EUROPA {
     bool isFact() const { return m_isFact; }
 
     /**
+     * @brief Token becomes a fact, it's ok to call if token is already a fact
+     */
+    void makeFact();
+    
+    /**
      * Substates of Pending
      */
     bool isActive() const;

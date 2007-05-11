@@ -450,7 +450,10 @@ namespace EUROPA{
     m_committed = false;
     m_deleted = false;
     m_terminated = false;
-    m_isFact = isFact;
+    m_isFact = false;
+    
+    if (isFact)
+        makeFact();
 
     debugMsg("Token:commonInit", 
 	     "Initializing token (" << getKey() << ") for predicate " << predicateName.toString()
@@ -554,6 +557,11 @@ namespace EUROPA{
 
   bool Token::isDeleted() const {return m_deleted;}
 
+  void Token::makeFact() {
+  	m_isFact = true;
+  	// TODO commit();?
+  }
+  
   void Token::commit() {
     static StateDomain sl_activeOnly;
     static bool sl_initialized(false);
