@@ -885,12 +885,12 @@ namespace EUROPA {
 
     void handleExecute();
 
-  private:
-
     /**
      * Calculates the actual distance
      */
-    double compute(double x1, double y1, double x2, double y2);
+    static double compute(double x1, double y1, double x2, double y2);
+
+  private:
 
     static const unsigned int ARG_COUNT = 5;
     static const unsigned int DISTANCE = 0;
