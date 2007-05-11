@@ -108,10 +108,6 @@ namespace EUROPA{
     check_error(token->isActive());
     check_error(m_ruleInstancesByToken.find(token->getKey()) == m_ruleInstancesByToken.end());
 
-    // if the token is a fact, we don't do anything
-    if (token->isFact())
-        return;
-         
     // Allocate a rule instance for all rules that apply
     std::vector<RuleId> allRules;
     Rule::getRules(token->getPredicateName(), allRules);
