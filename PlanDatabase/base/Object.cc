@@ -260,9 +260,9 @@ namespace EUROPA {
 
   void Object::constrain(const TokenId& predecessor, const TokenId& successor, bool isExplicit) { 
     check_error(predecessor.isValid());
-    checkError(predecessor->isActive(), predecessor->toString());
+    checkError(predecessor->isActive(), predecessor->toString() << ": " << predecessor->getState()->toString());
     check_error(successor.isValid());
-    checkError(successor->isActive(), successor->toString());
+    checkError(successor->isActive(), successor->toString() << ": " << successor->getState()->toString());
 
     check_error(!isConstrainedToPrecede(predecessor, successor),
 		"Attempted to constrain previously constrained tokens.");
