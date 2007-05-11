@@ -142,7 +142,15 @@ namespace EUROPA {
       std::vector<ConstrainedVariableId> vars = t->getParameters();
       for (std::vector<ConstrainedVariableId>::const_iterator varit = vars.begin(); varit != vars.end(); ++varit) {
 	ConstrainedVariableId v = (*varit);
-	os << v->getName().toString() << "=" << v->derivedDomain();
+	const AbstractDomain& dom = v->derivedDomain();
+
+	if(dom.isNumeric() && dom.minDelta() < 1)
+	  os.setf(std::ios::fixed);
+	else
+	  os.unsetf(std::ios::fixed);
+
+	os << v->getName().toString() << "=" << dom;
+	os.unsetf(std::ios::fixed);
       }
       os << ")" <<std::endl;
       os << indentation() << "\tKey=" << getKey(t);
