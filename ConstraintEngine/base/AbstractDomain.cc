@@ -199,6 +199,11 @@ namespace EUROPA {
 
   std::string AbstractDomain::toString() const {
     std::stringstream s_stream;
+
+    // Use fixed position notation on output for reals
+    if(isNumeric() && minDelta() < 1)
+      s_stream.setf(std::ios::fixed);
+
     s_stream << *this;
     return s_stream.str();
   }
