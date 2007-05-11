@@ -396,8 +396,6 @@ namespace EUROPA{
 	checkError(AbstractDomain::canBeCompared(domA, domB),
 		   domA.toString() << " cannot be compared to " << domB.toString() << ".");
 
-	// If there is no intersection, it is not compatible for merging. The order may be important for
-	// efficiency.
 	if(domA.getSize() == 0 && domB.getSize() == 0)
 	  isCompatible = true;
 	else if(domA.isOpen() && domB.isOpen())

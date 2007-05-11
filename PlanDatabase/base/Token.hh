@@ -421,12 +421,13 @@ namespace EUROPA {
     LabelStr m_relation;
     LabelStr m_baseObjectType;
     LabelStr m_predicateName;
-    StateVarId m_state; // state variable for token.
-    ObjectVarId m_object;
-    TempVarId m_duration;
+    StateVarId m_state; /*!< state variable for token.*/
+    ObjectVarId m_object; /*!< object variable for token. The set of objects it may be assigned to. */
+    TempVarId m_duration; /*!< The duration of the token. [0 +inf]. */
     bool m_isFact;
-    std::vector<ConstrainedVariableId> m_parameters;
-    std::vector<ConstrainedVariableId> m_allVariables;
+    std::vector<ConstrainedVariableId> m_parameters; /*!< The parameters of the token specification. May be empty */
+    std::vector<ConstrainedVariableId> m_allVariables; /*!< The set of all variables of a token specification. Includes built in variables
+							 such as object, state, start, end, duration. Also includes all parameters (m_parameters). */
     TokenSet m_slaves;
     std::set<ConstraintId> m_standardConstraints; /**< Indicates internally generated constraints that are standard 
                                                      across Token instances of the same type. */
@@ -469,7 +470,9 @@ namespace EUROPA {
     unsigned int m_refCount; /*!< The number of sources requiring existence of the token */
     bool m_deleted;
     bool m_terminated;
-    ConstrainedVariableSet m_localVariables;
+    ConstrainedVariableSet m_localVariables; /*!< Variables created external to the token but related to it. They are
+					       not part of the predicate definition but may be derived from the model elsewhere 
+					       such as via local rule variables.*/
     LabelStr m_unqualifiedPredicateName;
   };
 
