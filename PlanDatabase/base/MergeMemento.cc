@@ -106,7 +106,11 @@ namespace EUROPA{
     // Start by removing all the new constraints that were created. To avoid a call back 
     // into this method for synching data structures, we set a flag for undoing
     m_undoing = true;
-    discardAll(m_newConstraints);
+
+    // If the active token is committed, and the merged token is being terminated, then we leave the new constraints.
+    // othwreiwse we can nuke them
+    if(!m_inactiveToken->isTerminated() || !m_activeToken->isCommitted())
+      discardAll(m_newConstraints);
 
     // Clear the deactivated ocnstraints
     m_deactivatedConstraints.clear();
