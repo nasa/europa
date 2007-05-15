@@ -81,17 +81,15 @@ namespace EUROPA {
     void loadModel(const std::string& modelFileName);
         		
     void executeTxns(const std::string& xmlTxnSource,bool isFile,bool useInterpreter); // TODO: fold XML into executeScript?
-    //What's this supposed to do, exactly? ~MJI
     std::string executeScript(const std::string& language, const std::string& script);
 	
     PSList<PSObject*> getObjectsByType(const std::string& objectType);
     PSObject* getObjectByKey(PSEntityKey id);
 		
-//     PSList<PSResource*> getResourcesByType(const std::string& resourceType);
-//     PSResource* getResourceByKey(PSEntityKey id);
-		
     PSList<PSToken*> getTokens();    	 
     PSToken* getTokenByKey(PSEntityKey id);	
+		
+	PSList<PSVariable*> getGlobalVariables();
 		
     PSSolver* createSolver(const std::string& configurationFile);		
     
@@ -271,6 +269,7 @@ namespace EUROPA {
 	    
     virtual std::string toString();
   protected:
+    friend class PSEngine;
     friend class PSObject;
     friend class PSToken;
 

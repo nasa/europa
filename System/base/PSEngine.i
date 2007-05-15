@@ -67,10 +67,6 @@ namespace EUROPA {
   %template(PSTokenList) PSList<PSToken*>;
   %template(PSVariableList) PSList<PSVariable*>;
   %template(PSValueList) PSList<PSVarValue>;
-  //%template(PSTimePointList) PSList<TimePoint>;
-  //%template(PSStringList) PSList<std::string>;
-
-  //%rename(PSException) Error;
 
   //trying template instantiation to get the right results.
 
@@ -94,15 +90,19 @@ namespace EUROPA {
 
     void start();
     void shutdown();
+
     void loadModel(const std::string& modelFileName);
     void executeTxns(const std::string& xmlTxnSource, bool isFile, bool useInterpreter) throw(Error);
     std::string executeScript(const std::string& language, const std::string& script) throw(Error);
+
     PSList<PSObject*> getObjectsByType(const std::string& objectType);
     PSObject* getObjectByKey(PSEntityKey id);
-//     PSList<PSResource*> getResourcesByType(const std::string& resourceType);
-//     PSResource* getResourceByKey(PSEntityKey id);
+
+	PSList<PSVariable*> getGlobalVariables();
+
     PSList<PSToken*> getTokens();
     PSToken* getTokenByKey(PSEntityKey id);
+
     PSSolver* createSolver(const std::string& configurationFile);
   };
 

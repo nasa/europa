@@ -552,6 +552,19 @@ namespace EUROPA {
     return new PSToken(entity);
   }
 
+  PSList<PSVariable*>  PSEngine::getGlobalVariables() {
+    check_runtime_error(m_planDatabase.isValid());
+
+    const ConstrainedVariableSet& vars = m_planDatabase->getGlobalVariables();
+    PSList<PSVariable*> retval;
+
+    for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
+      PSVariable* v = new PSVariable(*it);
+      retval.push_back(v);
+    }
+    return retval;
+  }  
+
   PSSolver* PSEngine::createSolver(const std::string& configurationFile) {
     TiXmlDocument* doc = new TiXmlDocument(configurationFile.c_str());
     doc->LoadFile();
