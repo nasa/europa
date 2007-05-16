@@ -42,38 +42,14 @@ actions Swig {
   swig $(ARGUMENTS) $(2)
 }
 
-#SwigSharedLibrary <swig file> : <target language> : <output destination for language-specific files> : <true if wrapping C++> : <library name> : 
-#                  <module dependencies> : <build target> 
-rule SwigSharedLibrary {
-     local swigfile = $(1) ;
-     local language = $(2) ;
-     local outdir = $(3) ;
-     local cpp = $(4) ;
-     local libname = $(5) ;
-     local deps = $(6) ;
-     local target = $(7) ;
-
-     #generate the name for the wrapping c/c++ file that gets generated
-     local wrapsuffix = c ;
-     if $(cpp) {
-       wrapsuffix = cc ;
-     }
-     local wrapfile = $(swigfile:S=)_wrap.$(wrapsuffix) ;
-
-     #generate wrapping code and language-specific files
-     Swig [ FGristFiles $(wrapfile) ] : $(swigfile) : $(language) : $(outdir) : $(cpp) ;
-
-     ModuleSharedLibrary $(libname) : $(wrapfile) : $(deps) : $(target) ;
-}
-
 rule SwigJava {
      local swigfile = $(1) ;
      local package = $(2) ;
      local outdir = $(3) ;
      local cpp = $(4) ;
-     local libname = $(5) ;
-     local deps = $(6) ;
-     local target = $(7) ;
+     local deps = $(5) ;
+     local target = $(6) ;
+     local language = java "package $(package)" ;
 
      if $(JAVA_HOME) {
 	if $(OS) = SOLARIS {
@@ -86,7 +62,10 @@ rule SwigJava {
 		SubDirC++Flags -I$(JAVA_HOME)/include ;
 	}
      }
-     SwigSharedLibrary $(swigfile) : java "package $(package)" : $(outdir) : $(cpp) : $(libname) : $(deps) : $(target) ;
+
+     local wrapfile = [ FSwigWrapperName $(swigfile) : $(cpp) ] ;
+
+     Swig [ FGristFiles $(wrapfile) ] : $(swigfile) : java "package $(package)" : $(outdir) : $(cpp) ;
 
      local javadir ;
      if $(outdir) {
@@ -98,6 +77,17 @@ rule SwigJava {
      }
      ApacheAnt $(target:S=.jar) : [ FGristFiles build.xml ] : $(target) -Dsrc.dir=$(javadir) ;
      Depends $(target) : $(target:S=.jar) ;
+}
+
+rule FSwigWrapperName {
+	local swigfile = $(1) ;
+	local cpp = $(2) ;
+
+	local wrapsuffix = c ;
+	if $(cpp) {
+		wrapsuffix = cc ;
+	}
+	return $(swigfile:S=)_wrap.$(wrapsuffix) ;
 }
 
 }

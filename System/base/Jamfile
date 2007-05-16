@@ -19,14 +19,13 @@ if ! ( "Resources" in $(NO) ) {
       StandardAssemblyWithResources.cc 
       ;
       
-  if $(LIBRARIES) = SHARED {
-    SwigJava PSEngineResources.i : psengine : swig/psengine : cpp : PSEngine : TinyXml Utils ConstraintEngine PlanDatabase RulesEngine NDDL TemporalNetwork Solvers System ANML : PSEngine ;
-  }
+  SwigJava PSEngineResources.i : psengine : swig/psengine : cpp : TinyXml Utils ConstraintEngine PlanDatabase RulesEngine NDDL TemporalNetwork Solvers System ANML : PSEngine ;
+	ModuleBase System : [ FSwigWrapperName PSEngineResources.i : cpp ] ;
 }
 else {
-  if $(LIBRARIES) = SHARED {
-    SwigJava PSEngine.i : psengine : swig/psengine : cpp : PSEngine : TinyXml Utils ConstraintEngine PlanDatabase RulesEngine NDDL TemporalNetwork Solvers System : PSEngine ;
-  }
+  SwigJava PSEngine.i : psengine : swig/psengine : cpp : TinyXml Utils ConstraintEngine PlanDatabase RulesEngine NDDL TemporalNetwork Solvers System : PSEngine ;
+	ModuleBase System : [ FSwigWrapperName PSEngine.i : cpp ] ;
 }
+
 
 } # PLASMA_READY
