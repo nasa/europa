@@ -76,6 +76,7 @@ rule SwigJava {
        javadir = $(SUBDIR) ;
      }
      ApacheAnt $(target:S=.jar) : [ FGristFiles build.xml ] : $(target) -Dsrc.dir=$(javadir) ;
+		 Depends $(target) : [ FGristFiles $(wrapfile) ] ;
      Depends $(target) : $(target:S=.jar) ;
 }
 
