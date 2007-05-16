@@ -13,6 +13,20 @@
   }
 %}
 
+%typemap(javabody) SWIGTYPE %{
+  private long swigCPtr;
+  protected boolean swigCMemOwn;
+
+  protected $javaclassname(long cPtr, boolean cMemoryOwn) {
+    swigCMemOwn = cMemoryOwn;
+    swigCPtr = cPtr;
+  }
+
+  public static long getCPtr($javaclassname obj) {
+    return (obj == null) ? 0 : obj.swigCPtr;
+  }
+%}
+
 // TODO: There's probably a better way to refer to both package and class name here.
 %typemap(throws, throws="psengine.PSException") Error {
   jclass excepClass = jenv->FindClass("psengine/PSException");
