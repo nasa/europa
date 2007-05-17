@@ -163,6 +163,8 @@ namespace EUROPA {
     PSToken* getTokenByKey(PSEntityKey id);
 
     PSSolver* createSolver(const std::string& configurationFile);
+
+    std::string planDatabaseToString();
   };
 
   class PSEntity
@@ -272,10 +274,14 @@ namespace EUROPA {
   class PSVarValue
   {
   public:
+    PSVarValue          getInstance(std::string val);
+    PSVarValue          getInstance(int val);
+    PSVarValue          getInstance(double val);
+    PSVarValue          getInstance(bool val);
 
     PSVarType getType() const;
 
-    PSObject*          asObject();
+    PSObject*           asObject();
     int                 asInt();
     double              asDouble();
     bool                asBoolean();
