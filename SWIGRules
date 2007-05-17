@@ -38,8 +38,8 @@ rule Swig {
 }
 
 actions Swig {
-  echo swig $(ARGUMENTS) $(2) ;
-  swig $(ARGUMENTS) $(2)
+  echo $(SWIG) $(ARGUMENTS) $(2) ;
+  $(SWIG) $(ARGUMENTS) $(2)
 }
 
 rule SwigJava {

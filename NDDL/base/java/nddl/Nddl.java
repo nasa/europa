@@ -9,6 +9,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.StringWriter;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.Set;
 import java.util.Set;
 import java.util.HashSet;
@@ -49,9 +50,9 @@ public class Nddl {
     return "Nddl "+ MAJOR_VERSION + "." + MINOR_VERSION;
   }
 
-	public static double version() {
-		return Double.parseDouble(MAJOR_VERSION + "." + MINOR_VERSION);
-	}
+  public static double version() {
+    return Double.parseDouble(MAJOR_VERSION + "." + MINOR_VERSION);
+  }
 
   /**
    * Print a message and exit with a non-zero status.
@@ -167,26 +168,44 @@ public class Nddl {
       nddlModel(models[i]);
     assert(DebugMsg.debugMsg("Exiting "+execName));
   }
-  
+
   /*
    * Method to be called to bypass main and parse only.
    * I'm sure code can be refactored so this is not a completely separate thing
    */
-  public static String nddlToXML(String model)
+  public static String nddlToXML(Reader model, boolean exitOnError)
       throws IOException
   {
-	  noxml = true;
-	  ModelAccessor.init();
-	  
-	  File modelFile =  ModelAccessor.generateIncludeFileName("",model);
-	  IXMLElement xml = nddlParse(modelFile);
-	  StringWriter result = new StringWriter();
-      BufferedWriter writer = new BufferedWriter(result);
-      XMLWriter xmlWriter = new XMLWriter(writer);
-      xmlWriter.write(xml,true,2,true);
-      writer.close();
-      
-      return result.toString();
+    ModelAccessor.init();
+
+    IXMLElement xml = new XMLElement("nddl");
+    try {
+      NddlParser parser = NddlParser.eval(null, model);
+      parser.getState().printWarnCount();
+      if(parser.getState().printErrorCount()) {
+        if(exitOnError) 
+          System.exit(1);
+        else
+          throw new RuntimeException("Errors while parsing Nddl Model.");
+      }
+      NddlTreeParser treeParser = new NddlTreeParser(parser.getState());
+      treeParser.nddl(parser.getAST(), xml);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      if(exitOnError)
+        System.exit(1);
+      else
+        throw new RuntimeException(e);
+    }
+
+    StringWriter result = new StringWriter();
+    BufferedWriter writer = new BufferedWriter(result);
+    XMLWriter xmlWriter = new XMLWriter(writer);
+    xmlWriter.write(xml,true,2,true);
+    writer.close();
+
+    return result.toString();
   }
 
   /**

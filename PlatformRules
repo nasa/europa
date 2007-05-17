@@ -154,6 +154,9 @@ if $(JAVA_HOME) {
 ANT_HOME ?= [ FDirName $(PLASMA) ext ant ] ;
 ANT ?= [ FDirName $(ANT_HOME) bin ant ] ;
 
+#SWIG_HOME ?= [ FDirName $(PLASMA) ext swig ] ;
+SWIG ?= [ FDirName $(SWIG_HOME) swig ] ;
+
 # CLASSPATH_SEPARATOR = separator for java class path
 
 if $(OS) = CYGWIN {

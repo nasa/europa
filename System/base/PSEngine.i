@@ -98,6 +98,51 @@ namespace EUROPA {
     int get(int idx);
   };
 
+// If the output language is java, add a method to the PSEngine
+// that can get at the NDDL implementation.
+%typemap(javacode) PSEngine %{
+  public void executeScript(String language, java.io.Reader reader) throws PSException {
+    String txns = null;
+    if(language.equalsIgnoreCase("nddl")) {
+      try {
+        Class nddlClass = ClassLoader.getSystemClassLoader().loadClass("nddl.Nddl");
+        Class[] parameters = new Class[]{java.io.Reader.class, boolean.class};
+        Object[] arguments = new Object[]{reader, new Boolean(false)};
+        txns = (String) nddlClass.getMethod("nddlToXML", parameters).invoke(null, arguments);
+      }
+      catch(ClassNotFoundException ex) {
+        System.err.println("Cannot execute NDDL source: failed to find NDDL implementation.");
+        throw new RuntimeException(ex);
+      }
+      catch(NoSuchMethodException ex) {
+        System.err.println("Cannot execute NDDL source: Unexpected NDDL implementation (nddlToXML not found).");
+        throw new RuntimeException(ex);
+      }
+      catch(IllegalAccessException ex) {
+        System.err.println("Cannot execute NDDL source: Unexpected NDDL implementation (access modifiers too restrictive on parse method).");
+        throw new RuntimeException(ex);
+      }
+      catch(java.lang.reflect.InvocationTargetException ex) {
+        System.err.println("Cannot execute NDDL source: exception during parsing: ");
+        System.err.println(ex.getCause().getClass().getName() + ": "+ ex.getCause().getMessage());
+        throw new RuntimeException(ex.getCause());
+      }
+      catch(RuntimeException ex) {
+        System.err.println("Cannot execute NDDL source: exception during parsing: ");
+        System.err.println(ex.getClass().getName() + ": "+ ex.getMessage());
+        throw ex;
+      }
+    }
+
+    if(txns != null) {
+      executeTxns(txns, false , true);
+    }
+    else {
+      throw new RuntimeException("Failed to create transactions from "+language+" source.");
+    }
+  }
+%}
+
   class PSEngine {
   public:
     PSEngine();
@@ -112,7 +157,7 @@ namespace EUROPA {
     PSList<PSObject*> getObjectsByType(const std::string& objectType);
     PSObject* getObjectByKey(PSEntityKey id);
 
-	PSList<PSVariable*> getGlobalVariables();
+    PSList<PSVariable*> getGlobalVariables();
 
     PSList<PSToken*> getTokens();
     PSToken* getTokenByKey(PSEntityKey id);

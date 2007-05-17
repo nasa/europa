@@ -32,7 +32,7 @@ class NddlCompiler {
     ModelAccessor.setModelName(modelFile.getName().replaceAll("\\.[^.]+$",""));
 
 
-    assert(DebugMsg.debugMsg(Nddl.versionString() + ": Generating \""+headerFile+"\""));	
+    assert(DebugMsg.debugMsg(Nddl.versionString() + ": Generating \""+headerFile+"\""));
     //IndentWriter header = new IndentWriter(new BufferedWriter(new FileWriter(headerFile)));
     StringWriter headerString = new StringWriter();
     IndentWriter header = new IndentWriter(new BufferedWriter(headerString));
@@ -44,7 +44,7 @@ class NddlCompiler {
 
     if(!sourceFile.canWrite()&&sourceFile.exists())
       throw new IOException("Cannot generate sourcefile to compile \""+sourceFile.getAbsolutePath()+"\"");
-    assert(DebugMsg.debugMsg(Nddl.versionString() + ": Generating \""+sourceFile+"\""));	
+    assert(DebugMsg.debugMsg(Nddl.versionString() + ": Generating \""+sourceFile+"\""));
 
     IndentWriter implementation = new IndentWriter(new BufferedWriter(new FileWriter(sourceFile)));
     implementation.write("// "+modelFile.getName()+"\n\n");
@@ -60,7 +60,7 @@ class NddlCompiler {
     implementation.flush();
     implementation.close();
 
-    assert(DebugMsg.debugMsg(Nddl.versionString() + ": Writing \""+headerFile+"\""));	
+    assert(DebugMsg.debugMsg(Nddl.versionString() + ": Writing \""+headerFile+"\""));
     BufferedWriter headerWriter = new BufferedWriter(new FileWriter(headerFile));
     headerWriter.write("#include \"Db.hh\"\n");
     headerWriter.write("#include \"NddlUtils.hh\"\n");
@@ -124,12 +124,12 @@ class NddlCompiler {
     longopt[6] = new LongOpt("warnings",     LongOpt.REQUIRED_ARGUMENT, null, 'W');
     Getopt parser = new Getopt(execName, args, "ho:qvW:", longopt, true);
     int c;
-    while((c = parser.getopt()) != -1) 
+    while((c = parser.getopt()) != -1)
       switch(c)
       {
         case 'C': ModelAccessor.changeDirectory(parser.getOptarg()); break;
         case 'h': printUsage(); System.exit(0);
-				case 'N': ModelAccessor.setConfigFile(parser.getOptarg()); break;
+        case 'N': ModelAccessor.setConfigFile(parser.getOptarg()); break;
         case 'o': output = parser.getOptarg(); break;
         case 'q': DebugMsg.debugMsgEnabled = false; break;
         case 'v': System.out.println(Nddl.versionString()); System.exit(0);
@@ -137,7 +137,7 @@ class NddlCompiler {
         case 'W': System.err.println("Compiler doesn't yet support warnings!"); break;
         case '?': die("Error processing arguments",true);
         default:  die("Option '"+(char)c+"' not implemented.",true);
-      }     
+      }
     int remainder = args.length - parser.getOptind();
     if(remainder < 1) die("no input files",true);
     if(remainder > 1 && output != null) die("specified output file with more than 1 input file",true);
