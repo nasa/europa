@@ -118,13 +118,11 @@ namespace EUROPA {
   }
 
   PSObject* PSToken::getOwner() {
-    ObjectVarId objVar = m_tok->getObject();
-    if(!objVar->lastDomain().isSingleton())
+    if(!m_tok->isAssigned())
       return NULL;
-    else
-      return new PSObject(ObjectId(objVar->lastDomain().getSingletonValue()));
-    check_runtime_error(ALWAYS_FAIL);
-    return NULL;
+      
+    ObjectVarId objVar = m_tok->getObject();
+    return new PSObject(ObjectId(objVar->lastDomain().getSingletonValue()));
   }
   
   PSToken* PSToken::getMaster() {
