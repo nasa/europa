@@ -266,6 +266,10 @@ namespace EUROPA {
   void PSVariable::specifyValue(PSVarValue& v) {
     check_runtime_error(m_var.isValid());
     check_runtime_error(getType() == v.getType());
+
+    if (m_var->isSpecified() && m_var->getSpecifiedValue() != v.asDouble())
+        m_var->reset();
+        
     m_var->specify(v.asDouble());
   }
 
