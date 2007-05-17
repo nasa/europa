@@ -5,4 +5,5 @@ SimpleRover*.cc
 SimpleRover*.hh
 SimpleRover*.xml
 *rt
-
+*_o
+*_g
