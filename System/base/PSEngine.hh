@@ -10,6 +10,7 @@
 #include "DbClientTransactionPlayer.hh"
 #include "TransactionInterpreter.hh"
 
+
 /*
   Changes by Mike (01/03/2007):
   1) got rid of Id types.  They create a necessity for a double-wrapping.
@@ -91,7 +92,8 @@ namespace EUROPA {
 		
 	PSList<PSVariable*> getGlobalVariables();
 		
-    PSSolver* createSolver(const std::string& configurationFile);		
+    PSSolver* createSolver(const std::string& configurationFile);
+    std::string planDatabaseToString();
     
     static void addObjectWrapperGenerator(const LabelStr& type,
 					  ObjectWrapperGenerator* wrapper);
@@ -289,7 +291,13 @@ namespace EUROPA {
     int                 asInt();
     double              asDouble();
     bool                asBoolean();
-    const std::string&  asString();
+    const std::string&  asString(); 
+      
+    static PSVarValue getInstance(std::string val) {return PSVarValue((double)LabelStr(val), STRING);}
+    static PSVarValue getInstance(int val) {return PSVarValue((double)val, INTEGER);}
+    static PSVarValue getInstance(double val) {return PSVarValue((double)val, DOUBLE);}
+    static PSVarValue getInstance(bool val) {return PSVarValue((double)val, BOOLEAN);}
+            
   protected:
     friend class PSVariable;
     PSVarValue(const double val, const PSVarType type);

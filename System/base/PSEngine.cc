@@ -29,6 +29,7 @@
 #include "DefaultPropagator.hh"
 #include "TemporalPropagator.hh"
 #include "STNTemporalAdvisor.hh"
+#include "PlanDatabaseWriter.hh"
 
 #include <fstream>
 
@@ -578,6 +579,13 @@ namespace EUROPA {
 
     return new PSSolver(solver,configurationFile);
   }
+
+   std::string PSEngine::planDatabaseToString() {
+      PlanDatabaseWriter* pdw = new PlanDatabaseWriter();
+      std::string planOutput = pdw->toString(m_planDatabase);
+      delete pdw;
+      return planOutput;
+   }
 
   void PSEngine::addLanguageInterpreter(const LabelStr& language,
 					PSLanguageInterpreter* interpreter) {
