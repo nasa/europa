@@ -347,9 +347,11 @@ namespace EUROPA {
             os << asString();
   		    break;
   		case OBJECT:
-  		    PSObject* obj = asObject();
-            os << "OBJECT:" << obj->getName() << "(" << obj->getKey() << ")";
-            delete obj;
+  		    {
+  		        PSObject* obj = asObject();
+                os << "OBJECT:" << obj->getName() << "(" << obj->getKey() << ")";
+                delete obj;
+  		    }
   		    break;
   		
   		default:
