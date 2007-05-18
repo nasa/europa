@@ -58,8 +58,13 @@ namespace EUROPA {
                            std::vector<ConstrainedVariableId>& fromvars,
                            std::vector<ConstrainedVariableId>& tovars,
                            //std::vector<long>& lengths
-			   std::vector<int>& lengths
+			   //std::vector<int>& lengths
+                           std::vector<Time>& lengths
                            );
+
+    void getMinPerturbTimes(const std::vector<ConstrainedVariableId>& timevars,
+                            const std::vector<Time>& oldreftimes,
+                            std::vector<Time>& newreftimes);
 
     void addListener(const TemporalNetworkListenerId& listener);
 
