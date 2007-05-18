@@ -635,7 +635,7 @@ namespace EUROPA{
     // If the constraint is an inactive subgoal of the master, and its master is committed, and it is strictly in the past
     // then it can be terminated. This is the case of deferred (ignored) subgoals.
     if(isInactive() && getMaster().isId() && getMaster()->isCommitted()){
-      int latestStart = getStart()->lastDomain().getUpperBound();
+      int latestStart = (int) getStart()->lastDomain().getUpperBound();
       if(latestStart < getMaster()->getEnd()->lastDomain().getUpperBound())
 	return true;
     }
