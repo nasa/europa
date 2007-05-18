@@ -95,6 +95,8 @@ namespace EUROPA {
     PSSolver* createSolver(const std::string& configurationFile);
     std::string planDatabaseToString();
     
+    double getViolation() const;
+    
     static void addObjectWrapperGenerator(const LabelStr& type,
 					  ObjectWrapperGenerator* wrapper);
     
@@ -253,13 +255,14 @@ namespace EUROPA {
   public:
     virtual ~PSVariable(){}
 	    
+    PSVarType getType(); // Data Type 
+
     bool isEnumerated();
     bool isInterval();
-	
-    PSVarType getType(); 
-	    
+
+    bool isNull();      // iif CurrentDomain is empty and the variable hasn't been specified    
     bool isSingleton();
-	
+		   
     PSVarValue getSingletonValue();    // Call to get value if isSingleton()==true 
 	
     PSList<PSVarValue> getValues();  // if isSingleton()==false && isEnumerated() == true
@@ -268,6 +271,8 @@ namespace EUROPA {
     double getUpperBound();  // if isSingleton()==false && isInterval() == true
 	    
     void specifyValue(PSVarValue& v);
+	
+	double getViolation() const;
 	    
     virtual std::string toString();
   protected:
@@ -287,12 +292,14 @@ namespace EUROPA {
        
     PSVarType getType() const;
         
-    PSObject*          asObject();
-    int                 asInt();
-    double              asDouble();
-    bool                asBoolean();
-    const std::string&  asString(); 
+    PSObject*           asObject() const;
+    int                 asInt() const;
+    double              asDouble() const;
+    bool                asBoolean() const;
+    const std::string&  asString() const; 
       
+    std::string toString() const;
+          
     static PSVarValue getInstance(std::string val) {return PSVarValue((double)LabelStr(val), STRING);}
     static PSVarValue getInstance(int val) {return PSVarValue((double)val, INTEGER);}
     static PSVarValue getInstance(double val) {return PSVarValue((double)val, DOUBLE);}

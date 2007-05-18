@@ -21,6 +21,47 @@
 
 namespace EUROPA {
 
+  class ViolationMgr
+  {
+  	public:
+  	  virtual unsigned int getMaxViolationsAllowed() = 0;
+  	  virtual void setMaxViolationsAllowed(unsigned int i) = 0;
+  	  
+  	  virtual double getViolation() const = 0;
+  	  
+  	  virtual bool handleEmpty(ConstrainedVariableId v) = 0;
+  	  virtual bool handleRelax(ConstrainedVariableId v) = 0;
+  	  
+  	  virtual bool isViolated(ConstraintId c) const = 0;
+  	  
+  	protected:
+  	   ViolationMgr() {}
+  	   virtual ~ViolationMgr() {}  
+  	   
+  	   friend class ConstraintEngine;
+  };
+  
+  class ViolationMgrImpl : public ViolationMgr
+  {
+  	public:
+  	  ViolationMgrImpl(unsigned int maxViolationsAllowed);
+  	  virtual ~ViolationMgrImpl();
+
+  	  virtual unsigned int getMaxViolationsAllowed();
+  	  virtual void setMaxViolationsAllowed(unsigned int i);
+  	  
+  	  virtual double getViolation() const;
+  	  
+  	  virtual bool handleEmpty(ConstrainedVariableId v);
+  	  virtual bool handleRelax(ConstrainedVariableId v);
+
+  	  virtual bool isViolated(ConstraintId c) const;
+  	  
+  	protected:
+  	  unsigned int m_maxViolationsAllowed;
+  	  ConstraintSet m_violatedConstraints;
+  };  
+  
   /**
    * @class ConstraintEngine
    * @brief Base Class from which specific Constraint Engine Framework Instances can be derived.
@@ -197,7 +238,14 @@ namespace EUROPA {
      * @brief Accessor for all propagators
      */
     const PropagatorId& getPropagatorByName(const LabelStr& name)  const;
+    
+    /**
+     * @brief returns total violation in the system
+     */
+    double getViolation() const;
 
+  	bool isViolated(ConstraintId c) const;
+  	
   protected:
 
     /**
@@ -379,6 +427,7 @@ namespace EUROPA {
     bool m_dirty; /*!< Flag to record if any messages handled without propagating consequences */
     std::set<ConstraintEngineListenerId> m_listeners; /*!< Stores the set of registered listeners. */
     ConstraintSet m_redundantConstraints; /*!< Pending redundant constraints awaiting deactivation */
+    ViolationMgr* m_violationMgr;
   };
 }
 #endif

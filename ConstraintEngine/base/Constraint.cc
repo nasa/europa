@@ -72,6 +72,16 @@ namespace EUROPA {
     Entity::handleDiscard();
   }
 
+  double Constraint::getViolation() const {
+    // TODO: each constraint must eventually know whether it is being violated and it must know how to compute its 
+    // penalty value
+    if (m_constraintEngine->isViolated(getId()))
+        return 1.0;
+    else
+        return 0.0;
+  }
+
+
   const ConstraintId& Constraint::getId() const {
     return m_id;
   }

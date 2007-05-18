@@ -404,4 +404,16 @@ namespace EUROPA {
   }
 
   bool ConstrainedVariable::specifiedFlag() const {return m_specifiedFlag;}
+  
+  double ConstrainedVariable::getViolation() const
+  {
+  	  double total = 0.0;
+  	  
+  	  for (ConstraintList::const_iterator it = m_constraints.begin() ; it != m_constraints.end(); ++it){
+          ConstraintId constraint = it->first;
+          total += constraint->getViolation();
+  	  }  	
+  	  
+  	  return total;
+  }  
 }

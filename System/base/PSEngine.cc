@@ -223,6 +223,11 @@ namespace EUROPA {
     return m_type;
   }
 
+  bool PSVariable::isNull() {
+    check_runtime_error(m_var.isValid());
+    return m_var->lastDomain().isEmpty() && !m_var->isSpecified();
+  }
+
   bool PSVariable::isSingleton() {
     check_runtime_error(m_var.isValid());
     return m_var->lastDomain().isSingleton();
@@ -272,31 +277,88 @@ namespace EUROPA {
     m_var->specify(v.asDouble());
   }
 
+  double PSVariable::getViolation() const
+  {
+    check_runtime_error(m_var.isValid());
+    return m_var->getViolation();
+  }
+  
+
   std::string PSVariable::toString() {
     check_runtime_error(m_var.isValid());
-    return m_var->toString();
+    std::ostringstream os;
+    
+    if (isNull())
+        os << "NULL";
+    else if (isSingleton()) 
+    	os << getSingletonValue().toString();    	    
+    else if (isInterval()) 
+        os << "[" << getLowerBound() << "," << getUpperBound() << "]";
+    else if (isEnumerated()) {
+    	os << "{";
+    	PSList<PSVarValue> values = getValues();
+    	for (int i=0;i<values.size();i++) {
+    		if (i > 0)
+    		    os << ",";
+    		os << values.get(i).toString();    
+    	}
+    	os << "}";
+    }
+    else 
+        os << "ERROR!";    
+    
+    return os.str();
   }
 
   PSVarValue::PSVarValue(const double val, const PSVarType type) : m_val(val), m_type(type) {}
 
   PSVarType PSVarValue::getType() const {return m_type;}
   
-  PSObject* PSVarValue::asObject() {
+  PSObject* PSVarValue::asObject() const {
     check_runtime_error(m_type == OBJECT);
     return new PSObject(ObjectId(m_val));
   }
 
-  int PSVarValue::asInt() {check_runtime_error(m_type == INTEGER); return (int) m_val;}
+  int PSVarValue::asInt() const {check_runtime_error(m_type == INTEGER); return (int) m_val;}
   
-  double PSVarValue::asDouble() {return m_val;}
+  double PSVarValue::asDouble() const {return m_val;}
 
-  bool PSVarValue::asBoolean() {check_runtime_error(m_type == BOOLEAN); return (bool) m_val;}
+  bool PSVarValue::asBoolean() const {check_runtime_error(m_type == BOOLEAN); return (bool) m_val;}
 
-  const std::string& PSVarValue::asString() {
+  const std::string& PSVarValue::asString() const {
     check_runtime_error(m_type == STRING);
     return LabelStr(m_val).toString();
   }
 
+  std::string PSVarValue::toString() const {
+  	std::ostringstream os;
+  	
+  	switch (m_type) {
+  		case INTEGER:
+            os << asInt();
+  		    break;
+  		case DOUBLE:
+            os << asDouble();
+  		    break;
+  		case BOOLEAN:
+            os << asBoolean();
+  		    break;
+  		case STRING:
+            os << asString();
+  		    break;
+  		case OBJECT:
+  		    PSObject* obj = asObject();
+            os << "OBJECT:" << obj->getName() << "(" << obj->getKey() << ")";
+            delete obj;
+  		    break;
+  		
+  		default:
+  		    check_error(ALWAYS_FAILS, "Unknown type");    
+  	}
+  	  	
+  	return os.str();
+  }
+   
   PSSolver::PSSolver(const SOLVERS::SolverId& solver, const std::string& configFilename) 
       : m_solver(solver) 
       , m_configFile(configFilename)
@@ -578,6 +640,11 @@ namespace EUROPA {
     return new PSSolver(solver,configurationFile);
   }
 
+  double PSEngine::getViolation() const
+  {
+  	return m_constraintEngine->getViolation();
+  }
+   
    std::string PSEngine::planDatabaseToString() {
       PlanDatabaseWriter* pdw = new PlanDatabaseWriter();
       std::string planOutput = pdw->toString(m_planDatabase);

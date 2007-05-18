@@ -330,6 +330,11 @@ namespace EUROPA {
      * @brief Accessor
      */
     bool specifiedFlag() const;
+    
+    /**
+     * @brief Sum of the violation values for all the constraints attached to this variable
+     */
+    double getViolation() const;
 
   protected:
     /**

@@ -150,6 +150,11 @@ namespace EUROPA {
      */
     inline bool isRedundant() const {return m_isRedundant;}
 
+    /**
+     * @brief If the constraint is violated this must return a value >=0. It'll return 0 otherwise.
+     */
+    virtual double getViolation() const;
+
   protected:
     /**
      * @brief Base implementation will require all variables in scope have the base domains as singletons. Over-ride
