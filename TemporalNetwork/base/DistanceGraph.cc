@@ -344,7 +344,15 @@ Bool DistanceGraph::incBellmanFord()
 Void DistanceGraph::dijkstra (DnodeId source, DnodeId destination)
 {
  check_error(isValid(source), "node is not defined in this graph");
- check_error(isValid(destination), "node is not defined in this graph");
+
+ // PHM 05/16/2007 The previous isValid(destination) check was
+ // mistaken; a null destination was intended to be allowed; in that
+ // case dijkstra computes the distance to ALL nodes in the graph.
+ // (See DistanceGraph.hh, which has destination = noId() as default!)
+
+ check_error(destination.isNoId() || isValid(destination),
+             "node is not null or defined in this graph");
+
  //debugMsg("DistanceGraph:dijkstra", "from " << source << " to " << destination);
   source->distance = 0;
   source->depth=0;
