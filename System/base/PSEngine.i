@@ -285,13 +285,13 @@ namespace EUROPA {
 
     PSVarType getType() const;
 
-    PSObject*           asObject();
-    int                 asInt();
-    double              asDouble();
-    bool                asBoolean();
-    const std::string&  asString();
+    PSObject*           asObject() const;
+    int                 asInt() const;
+    double              asDouble() const;
+    bool                asBoolean() const;
+    const std::string&  asString() const;
     
-    std::string toString();
+    std::string toString() const;
     
   protected:
     PSVarValue();
