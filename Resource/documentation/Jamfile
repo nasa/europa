@@ -1,7 +1,0 @@
-SubDir PLASMA Resource documentation ;
-
-if ! $(PLASMA_READY) {
-
-ModuleDocumentation Resource ;
-
-} # PLASMA_READY

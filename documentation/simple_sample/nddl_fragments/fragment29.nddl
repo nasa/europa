@@ -1,2 +1,0 @@
-rejectable(Instrument.Stowed stowed); 
-eq(stowed.start, world.m_horizonStart);
