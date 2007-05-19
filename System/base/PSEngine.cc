@@ -230,13 +230,17 @@ namespace EUROPA {
 
   bool PSVariable::isSingleton() {
     check_runtime_error(m_var.isValid());
-    return m_var->lastDomain().isSingleton();
+    return m_var->isSpecified() || m_var->lastDomain().isSingleton();
   }
 
   PSVarValue PSVariable::getSingletonValue() {
     check_runtime_error(m_var.isValid());
     check_runtime_error(isSingleton());
-    return PSVarValue(m_var->lastDomain().getSingletonValue(), getType());
+    
+    if (m_var->isSpecified())
+      return PSVarValue(m_var->getSpecifiedValue(), getType());
+    else
+      return PSVarValue(m_var->lastDomain().getSingletonValue(), getType());
   }
 
   PSList<PSVarValue> PSVariable::getValues() {
