@@ -787,7 +787,7 @@ namespace EUROPA {
     ConstrainedVariableId rhsValue = m_rhs->eval(context).getValue(); 
     const AbstractDomain& domain = rhsValue->derivedDomain();
     object->addVariable(domain,m_lhs.c_str());
-    debugMsg("XMLInterpreter:InterpretedObject","Initialized variable:" << object->getName().toString() << "." << m_lhs << " to " << rhsValue->derivedDomain().toString() << " in constructor");
+    debugMsg("XMLInterpreter:InterpretedObject","Initialized variable:" << object->getName().toString() << "." << m_lhs.toString() << " to " << rhsValue->derivedDomain().toString() << " in constructor");
   		
     return DataRef::null;
   } 
