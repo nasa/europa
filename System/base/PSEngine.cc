@@ -47,7 +47,6 @@ namespace EUROPA {
       return languageInterpreters;
   }
 
-  const std::string UNKNOWN("UNKNOWN");
 
   PSEntity::PSEntity(const EntityId& entity) : m_entity(entity) {}
 
@@ -55,7 +54,8 @@ namespace EUROPA {
   
   const std::string& PSEntity::getName() const {return m_entity->getName().toString();}
 
-  //FIXME
+  const std::string UNKNOWN("UNKNOWN");
+  
   const std::string& PSEntity::getEntityType() const {return UNKNOWN;}
   
   std::string PSEntity::toString()
@@ -83,6 +83,17 @@ namespace EUROPA {
 
   const PSList<PSVariable*>& PSObject::getMemberVariables() {
     return m_vars;
+  }
+
+  const std::string OBJECT_STR("OBJECT");
+  const std::string& PSObject::getEntityType() const 
+  {
+  	return OBJECT_STR;
+  }
+
+  std::string PSObject::getObjectType() const 
+  {
+  	return m_obj->getType().toString();
   }
 
   PSVariable* PSObject::getMemberVariable(const std::string& name) {
@@ -115,6 +126,17 @@ namespace EUROPA {
       check_runtime_error(var != NULL);
       m_vars.push_back(var);
     }
+  }
+
+  const std::string TOKEN_STR("TOKEN");
+  const std::string& PSToken::getEntityType() const 
+  {
+  	return TOKEN_STR;
+  }
+
+  std::string PSToken::getTokenType() const 
+  {
+  	return m_tok->getUnqualifiedPredicateName().toString();
   }
 
   PSObject* PSToken::getOwner() {
@@ -206,6 +228,12 @@ namespace EUROPA {
     else {
       checkError(ALWAYS_FAIL, "Failed to correctly determine the type of " << var->toString());
     }
+  }
+
+  const std::string VARIABLE_STR("VARIABLE");
+  const std::string& PSVariable::getEntityType() const 
+  {
+  	return VARIABLE_STR;
   }
   
   bool PSVariable::isEnumerated() {

@@ -123,7 +123,7 @@ namespace EUROPA {
     
     PSEntityKey getKey() const;
     const std::string& getName() const;
-    const std::string& getEntityType() const;
+    virtual const std::string& getEntityType() const;
 
     virtual std::string toString();
 
@@ -139,6 +139,10 @@ namespace EUROPA {
   public:
     virtual ~PSObject();
     
+    virtual const std::string& getEntityType() const;
+    
+    std::string getObjectType() const; 
+
     const PSList<PSVariable*>& getMemberVariables();
     PSVariable* getMemberVariable(const std::string& name);
 
@@ -205,6 +209,10 @@ namespace EUROPA {
   public:
     virtual ~PSToken() {}
 
+    virtual const std::string& getEntityType() const;
+
+    std::string getTokenType() const; 
+
     bool isFact(); 
     
     PSObject* getOwner(); 
@@ -255,6 +263,8 @@ namespace EUROPA {
   public:
     virtual ~PSVariable(){}
 	    
+    virtual const std::string& getEntityType() const;
+
     PSVarType getType(); // Data Type 
 
     bool isEnumerated();

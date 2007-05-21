@@ -186,6 +186,7 @@ namespace EUROPA {
   class PSObject : public PSEntity
   {
   public:
+    std::string getObjectType() const;
     const PSList<PSVariable*>& getMemberVariables();
     PSVariable* getMemberVariable(const std::string& name);
     PSList<PSToken*> getTokens();
@@ -227,6 +228,8 @@ namespace EUROPA {
   class PSToken : public PSEntity
   {
   public:
+    std::string getTokenType() const;
+    
     bool isFact();
     
     PSObject* getOwner();
@@ -278,10 +281,10 @@ namespace EUROPA {
   class PSVarValue
   {
   public:
-    PSVarValue          getInstance(std::string val);
-    PSVarValue          getInstance(int val);
-    PSVarValue          getInstance(double val);
-    PSVarValue          getInstance(bool val);
+    static PSVarValue getInstance(std::string val);
+    static PSVarValue getInstance(int val);
+    static PSVarValue getInstance(double val);
+    static PSVarValue getInstance(bool val);
 
     PSVarType getType() const;
 
