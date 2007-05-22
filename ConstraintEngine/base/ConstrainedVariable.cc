@@ -58,6 +58,11 @@ namespace EUROPA {
     if(dom.isSingleton() && !m_specifiedFlag && canBeSpecified())
       specify(dom.getSingletonValue());
 
+    // Trigger events for propagation of this variable restriction, even if no domain restriction has occured, since it does
+    // refelct a status change of a variable and further inference may be possible if we know the base domain
+    // has been restricted.
+    m_constraintEngine->notify(m_id, DomainListener::BOUNDS_RESTRICTED);
+
     // Iterate over all constraints and notify of this restriction
     for(ConstraintList::const_iterator it = m_constraints.begin(); it != m_constraints.end(); ++it){
       ConstraintId constraint = it->first;
