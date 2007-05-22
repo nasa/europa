@@ -134,17 +134,17 @@ namespace EUROPA {
    */
   bool Schema::isA(const LabelStr& descendant,
 		   const LabelStr& ancestor) const {
+    debugMsg("Schema:isA", "Checking if " << descendant.toString() << " is a " << ancestor.toString());
+
     // Special case if the 2 are the same, in which case we suspend any requirement that
-    // they be predefined types - class, predicate, enum, primitive. To test this, we first
-    // convert to strings so that we do not go around in circles for comparator.
-    if(descendant.toString() == ancestor.toString())
-      return true;
-
-    check_error(isType(descendant), descendant.toString() + " is not defined.");
-    check_error(isType(ancestor), ancestor.toString() + " is not defined.");
-
+    // they be predefined types - class, predicate, enum, primitive. 
     if(descendant == ancestor)
       return true;
+
+    checkError(isType(descendant), 
+	       descendant.toString() << " is not defined.");
+    checkError(isType(ancestor), 
+	       "Ancestor of '" << descendant.toString() << "' is '" << ancestor.toString() << "' which is not defined.");
 
     if(hasParent(descendant))
       return isA(getParent(descendant), ancestor);
