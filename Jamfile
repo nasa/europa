@@ -39,10 +39,14 @@ Depends run-install-tests : run-tests ;
 NOCARE run-all-tests run-tests run-checkin-tests run-nddl-tests run-nddl-planner-tests tests run-hsts-planner-tests ;
 
 SubInclude PLASMA TinyXml ;
-SubInclude PLASMA Antlr ;
+if ! ( "Antlr" in $(NO) ) {
+  SubInclude PLASMA Antlr ;
+}
 SubInclude PLASMA Utils ;
 SubInclude PLASMA ConstraintEngine ;
-SubInclude PLASMA documentation ;
+if ! ( "docs" in $(NO) ) {
+  SubInclude PLASMA documentation ;
+}
 SubInclude PLASMA PlanDatabase ;
 SubInclude PLASMA RulesEngine ;
 SubInclude PLASMA TemporalNetwork ;
@@ -53,7 +57,9 @@ if ! ( "Resources" in $(NO) ) {
 SubInclude PLASMA NDDL ;
 SubInclude PLASMA Solvers ;
 SubInclude PLASMA System ;
-SubInclude PLASMA Examples ;
+if ! ( "Examples" in $(NO) ) {
+  SubInclude PLASMA Examples ;
+}
 #SubInclude PLASMA DSA ;
 
 RemoveBinaries clean-all ;
