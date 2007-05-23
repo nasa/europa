@@ -95,7 +95,11 @@ namespace EUROPA {
     PSSolver* createSolver(const std::string& configurationFile);
     std::string planDatabaseToString();
     
+    bool getAllowViolations() const;
+    void setAllowViolations(bool v);
+    
     double getViolation() const;
+    std::string getViolationExpl() const;
     
     static void addObjectWrapperGenerator(const LabelStr& type,
 					  ObjectWrapperGenerator* wrapper);
@@ -225,8 +229,8 @@ namespace EUROPA {
     // TODO: getStatus()? -> MERGED, ACTIVE, REJECTED, etc
 	    
     //What does this do? ~MJI
-    double getViolation();
-    const std::string& getViolationExpl();
+    double getViolation() const;
+    std::string getViolationExpl() const;
 	    
     //Traditionally, the temporal variables and the object and state variables aren't 
     //considered "parameters".  I'm putting them in for the moment, but clearly the token
@@ -283,6 +287,7 @@ namespace EUROPA {
     void specifyValue(PSVarValue& v);
 	
 	double getViolation() const;
+	std::string getViolationExpl() const;
 	    
     virtual std::string toString();
   protected:

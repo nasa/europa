@@ -28,9 +28,11 @@ namespace EUROPA {
   	  virtual void setMaxViolationsAllowed(unsigned int i) = 0;
   	  
   	  virtual double getViolation() const = 0;
+  	  virtual std::string getViolationExpl() const = 0;
   	  
   	  virtual bool handleEmpty(ConstrainedVariableId v) = 0;
   	  virtual bool handleRelax(ConstrainedVariableId v) = 0;
+      virtual bool canContinue() = 0;
   	  
   	  virtual bool isViolated(ConstraintId c) const = 0;
   	  
@@ -51,9 +53,11 @@ namespace EUROPA {
   	  virtual void setMaxViolationsAllowed(unsigned int i);
   	  
   	  virtual double getViolation() const;
+  	  virtual std::string getViolationExpl() const;
   	  
   	  virtual bool handleEmpty(ConstrainedVariableId v);
   	  virtual bool handleRelax(ConstrainedVariableId v);
+      virtual bool canContinue();
 
   	  virtual bool isViolated(ConstraintId c) const;
   	  
@@ -239,10 +243,15 @@ namespace EUROPA {
      */
     const PropagatorId& getPropagatorByName(const LabelStr& name)  const;
     
+    
+    bool getAllowViolations() const;
+    void setAllowViolations(bool v);
+      
     /**
      * @brief returns total violation in the system
      */
     double getViolation() const;
+    std::string getViolationExpl() const;
 
   	bool isViolated(ConstraintId c) const;
   	
@@ -402,6 +411,7 @@ namespace EUROPA {
      */
     inline bool hasEmptyVariable() const {return !m_emptied.isNoId();}
     inline void clearEmptiedVariable(){m_emptied = ConstrainedVariableId::noId();}
+    bool doPropagate();
 
 
     /**
@@ -425,6 +435,7 @@ namespace EUROPA {
     bool m_deleted; /*!< Used to control cleanup, preventing cycles. */
     bool m_purged; /*!< Indicates if the engine has been purged of its data */
     bool m_dirty; /*!< Flag to record if any messages handled without propagating consequences */
+    bool m_relaxingViolation; /*!< Flag to record if relax events should be ignored by the ViolationMgr */
     std::set<ConstraintEngineListenerId> m_listeners; /*!< Stores the set of registered listeners. */
     ConstraintSet m_redundantConstraints; /*!< Pending redundant constraints awaiting deactivation */
     ViolationMgr* m_violationMgr;

@@ -162,7 +162,11 @@ namespace EUROPA {
     PSList<PSToken*> getTokens();
     PSToken* getTokenByKey(PSEntityKey id);
 
-    double getViolation();    
+    bool getAllowViolations() const;
+    void setAllowViolations(bool v);
+
+    double getViolation() const;    
+    std::string getViolationExpl() const;
 
     PSSolver* createSolver(const std::string& configurationFile);   
 
@@ -237,8 +241,8 @@ namespace EUROPA {
     PSToken* getMaster();
     PSList<PSToken*> getSlaves();
     
-    double getViolation();
-    const std::string& getViolationExpl();
+    double getViolation() const;
+    std::string getViolationExpl() const;
 
     const PSList<PSVariable*>& getParameters();
     PSVariable* getParameter(const std::string& name);
@@ -271,8 +275,9 @@ namespace EUROPA {
 
     void specifyValue(PSVarValue& v);
 
-    double getViolation();
-    
+    double getViolation() const;
+    std::string getViolationExpl() const;
+        
     std::string toString();
   protected:
     PSVariable();

@@ -46,6 +46,9 @@ namespace EUROPA {
     m_id.remove();
   }
 
+  void ConstrainedVariable::setCurrentPropagatingConstraint(ConstraintId c) { m_propagatingConstraint = c; } 
+  ConstraintId ConstrainedVariable::getCurrentPropagatingConstraint() const { return m_propagatingConstraint; }    
+
   void ConstrainedVariable::restrictBaseDomain(const AbstractDomain& dom){
     checkError(isActive(), toString());
     checkError(dom.isSubsetOf(baseDomain()), dom.toString() << " not in " << baseDomain().toString());
@@ -421,4 +424,17 @@ namespace EUROPA {
   	  
   	  return total;
   }  
+  
+  std::string ConstrainedVariable::getViolationExpl() const
+  {
+  	  std::ostringstream os;
+  	  
+  	  for (ConstraintList::const_iterator it = m_constraints.begin() ; it != m_constraints.end(); ++it){
+          ConstraintId constraint = it->first;
+          if (constraint->getViolation() > 0.0)
+              os << constraint->getViolationExpl() << std::endl;
+  	  }  	
+  	  
+  	  return os.str();
+  }    
 }

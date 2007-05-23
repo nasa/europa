@@ -166,9 +166,9 @@ namespace EUROPA {
     return retval;    	
   }  
 
-  double PSToken::getViolation() {return 0.0;}
-
-  const std::string& PSToken::getViolationExpl() {return UNKNOWN;}
+  // TODO: Implement these
+  double PSToken::getViolation() const {return 0.0;}
+  std::string PSToken::getViolationExpl() const { return UNKNOWN; }
 
   const PSList<PSVariable*>& PSToken::getParameters() {return m_vars;}
 
@@ -307,12 +307,19 @@ namespace EUROPA {
         m_var->reset();
         
     m_var->specify(v.asDouble());
+    m_var->getConstraintEngine()->propagate();
   }
 
   double PSVariable::getViolation() const
   {
     check_runtime_error(m_var.isValid());
     return m_var->getViolation();
+  }
+  
+  std::string PSVariable::getViolationExpl() const 
+  { 
+    check_runtime_error(m_var.isValid());
+    return m_var->getViolationExpl();
   }
   
 
@@ -674,9 +681,24 @@ namespace EUROPA {
     return new PSSolver(solver,configurationFile);
   }
 
+  bool PSEngine::getAllowViolations() const
+  {
+  	return m_constraintEngine->getAllowViolations();
+  }
+
+  void PSEngine::setAllowViolations(bool v)
+  {
+    m_constraintEngine->setAllowViolations(v);
+  }
+
   double PSEngine::getViolation() const
   {
   	return m_constraintEngine->getViolation();
+  }
+   
+  std::string PSEngine::getViolationExpl() const
+  {
+  	return m_constraintEngine->getViolationExpl();
   }
    
    std::string PSEngine::planDatabaseToString() {
