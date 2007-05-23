@@ -717,11 +717,13 @@ namespace EUROPA
   	    
     ConstraintId c = v->getCurrentPropagatingConstraint();
     
-    check_error(c != ConstraintId::noId());
-    debugMsg("ConstraintEngine:ViolationMgr", "Marking constraint as violated : " << c->toString());
-    c->deactivate();
-  	// TODO: remove from agenda?
-    m_violatedConstraints.insert(c);
+    // if c is noId, this was caused directly by an specify, just relax the var and the next time around we'll catch the constraint
+    if (c != ConstraintId::noId()) {
+        debugMsg("ConstraintEngine:ViolationMgr", "Marking constraint as violated : " << c->toString());
+        c->deactivate();
+  	    // TODO: remove from agenda?
+        m_violatedConstraints.insert(c);
+    }
   	
   	return true;
   }
