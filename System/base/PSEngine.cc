@@ -303,7 +303,10 @@ namespace EUROPA {
     check_runtime_error(m_var.isValid());
     check_runtime_error(getType() == v.getType());
 
-    if (m_var->isSpecified() && m_var->getSpecifiedValue() != v.asDouble())
+    // If specifying to the same value it already has, do nothing
+    if (m_var->isSpecified() && (m_var->getSpecifiedValue() == v.asDouble()))
+        return;
+    else
         m_var->reset();
         
     m_var->specify(v.asDouble());
@@ -670,6 +673,29 @@ namespace EUROPA {
     }
     return retval;
   }  
+
+  PSVariable* PSEngine::getVariableByKey(PSEntityKey id)
+  {
+    check_runtime_error(m_planDatabase.isValid());
+    EntityId entity = Entity::getEntity(id);
+    check_runtime_error(entity.isValid());
+    return new PSVariable(entity);
+  }
+
+  // TODO: this needs to be optimized
+  PSVariable* PSEngine::getVariableByName(const std::string& name)
+  {
+    check_runtime_error(m_planDatabase.isValid());
+    const ConstrainedVariableSet& vars = m_constraintEngine->getVariables();
+
+    for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
+    	ConstrainedVariableId v = *it;
+    	if (v->getName().toString() == name)
+            return new PSVariable(*it);
+    }
+    
+    return NULL;
+  }
 
   PSSolver* PSEngine::createSolver(const std::string& configurationFile) {
     TiXmlDocument* doc = new TiXmlDocument(configurationFile.c_str());

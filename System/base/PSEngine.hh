@@ -91,6 +91,8 @@ namespace EUROPA {
     PSToken* getTokenByKey(PSEntityKey id);	
 		
 	PSList<PSVariable*> getGlobalVariables();
+	PSVariable* getVariableByKey(PSEntityKey id);
+	PSVariable* getVariableByName(const std::string& name);
 		
     PSSolver* createSolver(const std::string& configurationFile);
     std::string planDatabaseToString();

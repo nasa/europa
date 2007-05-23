@@ -158,6 +158,8 @@ namespace EUROPA {
     PSObject* getObjectByKey(PSEntityKey id);
 
     PSList<PSVariable*> getGlobalVariables();
+	PSVariable* getVariableByKey(PSEntityKey id);
+	PSVariable* getVariableByName(const std::string& name);
 
     PSList<PSToken*> getTokens();
     PSToken* getTokenByKey(PSEntityKey id);
