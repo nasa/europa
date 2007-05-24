@@ -56,6 +56,7 @@ namespace EUROPA{
      */
     static const int EVENT_COUNT = (int)LAST_CHANGE_TYPE;
 
+    static std::string toString(const ChangeType& changeType);
 
     /**
      * @brief Utility to test if an event is a restriction
