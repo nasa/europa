@@ -249,6 +249,7 @@ namespace EUROPA {
     check_error(!Entity::isPurging());
     check_error(m_lastRelaxed < cycleCount);
     m_lastRelaxed = cycleCount;
+    debugMsg("ConstrainedVariable:updateLastRelaxed",getName().toString() << " lastRelaxed updated to " << m_lastRelaxed);
   }
 
   int ConstrainedVariable::lastRelaxed() const {
@@ -367,7 +368,7 @@ namespace EUROPA {
     // If it has been specified, relax to the specified domain
     if(m_specifiedFlag)
       getCurrentDomain().relax(m_specifiedValue);
-    else // Rleax to the base domain
+    else // Relax to the base domain
       getCurrentDomain().relax(internal_baseDomain());
   }
 

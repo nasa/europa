@@ -303,14 +303,22 @@ namespace EUROPA {
     check_runtime_error(m_var.isValid());
     check_runtime_error(getType() == v.getType());
 
+    debugMsg("PSVariable:specify","Specifying var:" << m_var->toString() << " to value:" << v.toString());
+    
     // If specifying to the same value it already has, do nothing
-    if (m_var->isSpecified() && (m_var->getSpecifiedValue() == v.asDouble()))
+    if (m_var->isSpecified() && (m_var->getSpecifiedValue() == v.asDouble())) {
+        debugMsg("PSVariable:specify","Tried to specify to same value, so bailing out without doing any work");
         return;
-    else
+    }
+    else {
         m_var->reset();
+        debugMsg("PSVariable:specify","After reset for var:" << m_var->toString());
+    }
         
     m_var->specify(v.asDouble());
+    debugMsg("PSVariable:specify","After specify for var:" << m_var->toString() << " to value:" << v.toString());
     m_var->getConstraintEngine()->propagate();
+    debugMsg("PSVariable:specify","After propagate for var:" << m_var->toString());
   }
 
   double PSVariable::getViolation() const
