@@ -32,7 +32,7 @@ namespace EUROPA {
   	  
   	  virtual bool handleEmpty(ConstrainedVariableId v) = 0;
   	  virtual bool handleRelax(ConstrainedVariableId v) = 0;
-      virtual bool canContinue() = 0;
+      virtual bool canContinuePropagation() = 0;
   	  
   	  virtual bool isViolated(ConstraintId c) const = 0;
   	  
@@ -57,7 +57,7 @@ namespace EUROPA {
   	  
   	  virtual bool handleEmpty(ConstrainedVariableId v);
   	  virtual bool handleRelax(ConstrainedVariableId v);
-      virtual bool canContinue();
+      virtual bool canContinuePropagation();
 
   	  virtual bool isViolated(ConstraintId c) const;
   	  
@@ -215,6 +215,13 @@ namespace EUROPA {
      * PROVEN_INCONSISTENT.
      */
     bool propagate();
+
+    /**
+     * @brief Indicates whether the ConstraintEngine is able to continue propagation.
+     * should be invoked after the constraint has been proven inconsistent so that Propagators
+     * and other classes can decide whether to keep relevant state for when propagation resumes
+     */
+    bool canContinuePropagation() const; 
 
     /**
      * @brief Accessor for all constrained variables.
@@ -418,6 +425,9 @@ namespace EUROPA {
      * @brief Deactivate redundant constraints buffered for pprocessing after successful propagation
      */
     void processRedundantConstraints();
+
+    // debug methods
+    std::string dumpPropagatorState(const std::list<PropagatorId>& propagators) const;
 
     ConstraintEngineId m_id;
     ConstrainedVariableSet m_variables; /*!< The set of all variables under the control of the ConstraintEngine. */
