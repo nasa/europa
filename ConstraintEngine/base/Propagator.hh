@@ -42,7 +42,7 @@ namespace EUROPA {
     /**
      * @brief Obtain the list of all constraints managed by this Propagator
      */
-    const std::list<ConstraintId>& getConstraints() const;
+    const std::set<ConstraintId>& getConstraints() const;
 
     /**
      * @brief tests if the propagatpr is enabled
@@ -171,7 +171,7 @@ namespace EUROPA {
   private:
     Propagator(); /**< NO IMPL - MUST HAVE A ConstraintEngine. */
 
-    std::list<ConstraintId> m_constraints; /**< The list of all constraints (should be a set) managed by this Propagator. */
+    std::set<ConstraintId> m_constraints; /**< The list of all constraints (should be a set) managed by this Propagator. */
     PropagatorId m_id; /**< Self reference. */
     const LabelStr m_name;
     const ConstraintEngineId& m_constraintEngine; /**< The ConstraintEngine to which this Propagator belongs. Must be valid. */
