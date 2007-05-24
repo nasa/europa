@@ -1,9 +1,0 @@
-SubDir PLASMA ANML component ;
-
-if ! $(PLASMA_READY) {
-
-# ModuleComponent ANML
-	# : files.cc
-	# ;
-
-} # PLASMA_READY
