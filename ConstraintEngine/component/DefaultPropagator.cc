@@ -40,9 +40,12 @@ namespace EUROPA {
 					     const DomainListener::ChangeType& changeType){
     checkError(!constraint->isDiscarded(), constraint);
     if(constraint->getKey() != m_activeConstraint) {
-      debugMsg("DefaultPropagator:handleNotification", "Adding to the agenda: " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
+      debugMsg("DefaultPropagator:handleNotification", 
+          "Adding to the agenda: " << constraint->getName().toString() << "(" << constraint->getKey() << ")"
+          << " because of " << DomainListener::toString(changeType) << " change to " << variable->toString()
+      );
       m_agenda.insert(constraint);
-    }
+    }        
   }
 
   void DefaultPropagator::execute(){
@@ -50,20 +53,30 @@ namespace EUROPA {
     check_error(!getConstraintEngine()->provenInconsistent());
     check_error(m_activeConstraint == 0);
 
-    while(!m_agenda.empty()){
+    while(!m_agenda.empty() && 
+          !getConstraintEngine()->provenInconsistent()){
       ConstraintSet::iterator it = m_agenda.begin();
       ConstraintId constraint = *it;
       m_agenda.erase(constraint);
 
       if(constraint->isActive()){
-	m_activeConstraint = constraint->getKey();
-	Propagator::execute(constraint);
+          m_activeConstraint = constraint->getKey();
+          Propagator::execute(constraint);
       }
-
-      if(getConstraintEngine()->provenInconsistent())
-	m_agenda.clear();
     }
 
+    // If we can continue propagation despite the discovered inconsistency, 
+    // keep agenda for when the ConstraintEngine recovers and decides to resume propagation
+    if(getConstraintEngine()->provenInconsistent()) {
+        if (getConstraintEngine()->canContinuePropagation()) {
+	        debugMsg("DefaultPropagator:agenda","CE was proven inconsistent, keeping agenda because propagation can continue later");
+	        // TODO: should remove from the agenda any constraints associated with the empty variable, since it'll be relaxed and they'll ba added again
+        }
+        else {
+            m_agenda.clear();
+	        debugMsg("DefaultPropagator:agenda","Cleared agenda because CE was proven inconsistent");
+        }
+    }
     m_activeConstraint = 0;
   }
 
