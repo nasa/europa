@@ -14,7 +14,8 @@ import java.io.FileNotFoundException;
 public class ModelAccessor {
   static String s_plasmaHome = NddlUtil.getenv("PLASMA_HOME");
   static String s_directory = System.getProperty("user.dir");
-  static String s_cfgFilename = "NDDL.cfg";
+  static final String DEFAULT_CFG = "NDDL.cfg";
+  static String s_cfgFilename = DEFAULT_CFG;
   static boolean s_cfgExact = true;
 
   // Holds all classes as they are visited
@@ -105,7 +106,7 @@ public class ModelAccessor {
 
   public static void setConfigFile(String filename) {
     if(filename == null || filename.equals(""))
-      s_cfgFilename = "NDDL.cfg";
+      s_cfgFilename = DEFAULT_CFG;
     else
       s_cfgFilename = filename;
   }
@@ -1092,8 +1093,8 @@ public class ModelAccessor {
         }
       }
       if(!cfgFile.exists() && s_plasmaHome != null) {
-        // if all else fails, attempt to look in $PLASMA_HOME
-        cfgFile = new File(s_plasmaHome, s_cfgFilename);
+        // if all else fails, attempt to look in $PLASMA_HOME (ignore any custom s_cfgFilename)
+        cfgFile = new File(s_plasmaHome, DEFAULT_CFG);
       }
       if(!cfgFile.exists())
         // we're done trying, throw an error.
