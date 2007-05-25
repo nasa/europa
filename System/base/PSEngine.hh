@@ -239,6 +239,9 @@ namespace EUROPA {
     //interface has the least thought put into it. ~MJI
     const PSList<PSVariable*>& getParameters();
     PSVariable* getParameter(const std::string& name);
+
+
+    void activate() {if (m_tok->isInactive()) m_tok->activate();}      
 	    
     virtual std::string toString();
 
