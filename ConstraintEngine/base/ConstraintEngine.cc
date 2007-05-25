@@ -334,9 +334,9 @@ namespace EUROPA
       PropagatorId propagator = *it;
       os << propagator->getName().toString() << "(";
       
-      const std::list<ConstraintId>& constraints = propagator->getConstraints();
+      const std::set<ConstraintId>& constraints = propagator->getConstraints();
       int i=0;
-      for(std::list<ConstraintId>::const_iterator cit = constraints.begin(); cit != constraints.end(); ++cit){
+      for(std::set<ConstraintId>::const_iterator cit = constraints.begin(); cit != constraints.end(); ++cit){
           if (i>0)
             os << ",";
           i++;
