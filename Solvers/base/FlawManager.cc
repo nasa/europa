@@ -507,7 +507,7 @@ namespace EUROPA {
                                                                             candidate,
                                                                             guards))->getId();
             requiresPropagation = true;
-            debugMsg("FlawManager:getFlawManager", getId() << " Sticking " << entity->getKey() <<
+            debugMsg("FlawManager:getFlawHandler", getId() << " Sticking " << entity->getKey() <<
                      " into flaw handler guards (Guard listener: " << guardListener->getKey() <<").");
             m_flawHandlerGuards.insert(std::pair<unsigned int, ConstraintId>(entity->getKey(), guardListener));
             // If we are not yet ready to move on.
@@ -515,11 +515,12 @@ namespace EUROPA {
               continue;
           }    
           entry.insert(std::pair<double, FlawHandlerId>(candidate->getWeight(), candidate));
+          debugMsg("FlawManager:getFlawHandler", "Added active FlawHandler " << candidate->toString() << std::endl << " for entity " << entity->getKey());
         }
-        debugMsg("FlawManager:getFlawManager", "Found " << entry.size() << " possible heuristics.");
+        debugMsg("FlawManager:getFlawHandler", "Found " << entry.size() << " possible heuristics" << " for entity " << entity->getKey());
         checkError(!entry.empty(), "No Heuristics for " << entity->toString());
 
-        debugMsg("FlawManager:getFlawManager", getId() << " Sticking " << entity->getKey() << " into active flaw handlers.");
+        debugMsg("FlawManager:getFlawHandler", getId() << " Sticking " << entity->getKey() << " into active flaw handlers.");
         m_activeFlawHandlersByKey.insert(std::pair<unsigned int, FlawHandlerEntry>(entity->getKey(), entry));
 
         // Propagate if necessary to process any constraints that have been added. This is required
@@ -545,6 +546,7 @@ namespace EUROPA {
                  "We should have at least one entry for a standard handler for entity " << target->getKey() << " handler " << flawHandler->toString());
       FlawHandlerEntry& entry = it->second;
       entry.insert(std::pair<double, FlawHandlerId>(flawHandler->getWeight(),flawHandler ));
+      debugMsg("FlawManager:notifyActivated", "Added active FlawHandler " << flawHandler->toString() << std::endl << " for entity " << target->getKey());
       condDebugMsg(!isValid(), "FlawManager:isValid", "Invalid datastructures in flaw manger.");
     }
 
