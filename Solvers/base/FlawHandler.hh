@@ -86,6 +86,8 @@ namespace EUROPA {
 
 
       friend class FlawManager;
+      
+      // This constraint notifies the FlawManager when a Guard on a FlawHandler is satisfied
       class VariableListener: public Constraint {
       public:
         /**
@@ -126,14 +128,14 @@ namespace EUROPA {
         const EntityId getTarget() const {return m_target;}
       private:
         void handleExecute();
-        bool isExecuted() const;
-        void execute();
+        bool isApplied() const;
+        void apply();
         void undo();
 
         const EntityId m_target;
         const FlawManagerId m_flawManager;
         const FlawHandlerId m_flawHandler;
-        bool m_isExecuted;
+        bool m_isApplied;
       };
 
 

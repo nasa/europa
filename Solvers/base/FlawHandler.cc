@@ -318,7 +318,7 @@ namespace EUROPA {
                                                     const LabelStr& propagatorName,
                                                     const ConstraintEngineId& constraintEngine, 
                                                     const std::vector<ConstrainedVariableId>& variables)
-      : Constraint(name, propagatorName, constraintEngine, variables), m_isExecuted(false) {}
+      : Constraint(name, propagatorName, constraintEngine, variables), m_isApplied(false) {}
 
     FlawHandler::VariableListener::VariableListener(const ConstraintEngineId& ce,
                                                     const EntityId& target,
@@ -326,7 +326,7 @@ namespace EUROPA {
                                                     const FlawHandlerId& flawHandler,
                                                     const std::vector<ConstrainedVariableId>& scope)
       : Constraint(CONSTRAINT_NAME(), PROPAGATOR_NAME(), ce, scope),
-        m_target(target), m_flawManager(flawManager), m_flawHandler(flawHandler), m_isExecuted(false) {}
+        m_target(target), m_flawManager(flawManager), m_flawHandler(flawHandler), m_isApplied(false) {}
 
     void FlawHandler::VariableListener::handleExecute() {
       // If the handler is not set, we can ignore this.
@@ -336,24 +336,24 @@ namespace EUROPA {
       checkError(m_flawHandler.isValid(), m_flawHandler);
 
       // If a Reset has occurred, and the rule has been fired, we may have to do something right now
-      bool shouldBeExecuted = m_flawHandler->test(getScope());
-      if(isExecuted() && !shouldBeExecuted)
+      bool shouldBeApplied = m_flawHandler->test(getScope());
+      if(isApplied() && !shouldBeApplied)
         undo();
-      else if(!isExecuted() && shouldBeExecuted)
-        execute();
+      else if(!isApplied() && shouldBeApplied)
+        apply();
     }
 
-    bool FlawHandler::VariableListener::isExecuted() const {return m_isExecuted;}
+    bool FlawHandler::VariableListener::isApplied() const {return m_isApplied;}
 
-    void FlawHandler::VariableListener::execute(){
+    void FlawHandler::VariableListener::apply(){
       checkError(m_target.isValid(),"Target is invalid: " << m_target);
-      m_isExecuted = true;
+      m_isApplied = true;
       m_flawManager->notifyActivated(m_target, m_flawHandler);
     }
 
     void FlawHandler::VariableListener::undo(){
       checkError(m_target.isValid(),"Target is invalid: " << m_target);
-      m_isExecuted = false;
+      m_isApplied = false;
       m_flawManager->notifyDeactivated(m_target, m_flawHandler);
     }
   }
