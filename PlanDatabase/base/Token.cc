@@ -817,4 +817,18 @@ namespace EUROPA{
     m_localVariables.erase(var);
   }
 
+  std::string Token::toString() const
+  {
+  	static std::string ident="    ";
+  	
+  	std::ostringstream os;
+  	
+  	os << "Token(" << getKey() << "," << getName().toString() << ") {" << std::endl;
+  	os << ident << "object:" << getObject()->toString() << std::endl;
+  	os << ident << "start:" << getStart()->toString() << std::endl;
+  	os << ident << "end:" << getStart()->toString() << std::endl;
+  	os << ident << "duration:" << getDuration()->toString() << std::endl;
+  	os << "}" << std::endl; 
+  	return os.str();
+  }
 }
