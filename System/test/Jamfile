@@ -97,8 +97,6 @@ checkin-tests += Rover-transaction
 #tests to skip because they currently fail in known, but hard to fix ways
 local interp-skip =
       subtype-extension.tx.nddl #predicate bug
-      parent-predicate.nddl #predecessor->isActive() is false
-      parent-predicate-reservoir.nddl
       ;
       
 
