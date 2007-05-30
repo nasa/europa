@@ -349,7 +349,7 @@ namespace EUROPA {
     	PSList<PSVarValue> values = getValues();
     	for (int i=0;i<values.size();i++) {
     		if (i > 0)
-    		    os << ",";
+    		    os << ", ";
     		os << values.get(i).toString();    
     	}
     	os << "}";
