@@ -96,19 +96,8 @@ checkin-tests += Rover-transaction
 
 #tests to skip because they currently fail in known, but hard to fix ways
 local interp-skip =
-      subtype-extension.tx.nddl #predicate bug
-      unary-resource-test-transaction.nddl
-      HTX.1.solver.nddl
-      HTX.3.solver.nddl
-      foreach-transaction.nddl
-      gnats_2837-tx.nddl
-      gnats_2572_interval-tx.nddl
-      gnats_3161.nddl
-      parent-predicate.nddl #predecessor->isActive() is false
-      parent-predicate-reservoir.nddl
       resource-backtrack-test-reservoir.nddl
       better-res-reservoir.nddl
-      EOS-backtrack-test-reservoir.nddl
       ;
       
 
