@@ -99,9 +99,6 @@ local interp-skip =
       subtype-extension.tx.nddl #predicate bug
       parent-predicate.nddl #predecessor->isActive() is false
       parent-predicate-reservoir.nddl
-      resource-backtrack-test-reservoir.nddl
-      better-res-reservoir.nddl
-      EOS-backtrack-test-reservoir.nddl
       ;
       
 
