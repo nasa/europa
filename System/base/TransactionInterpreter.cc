@@ -81,10 +81,16 @@ namespace EUROPA {
     //I'm not sure exactly what to do about these, as far as dealing with resources goes...
     //~MJI
     m_systemClasses.insert("Resource"); 
-    m_systemClasses.insert("Resource.change");
+    m_systemTokens.insert("Resource.change");
+
     m_systemClasses.insert("Reusable");
     m_systemTokens.insert("Reusable.uses");
-    // TODO: expose Reservoir and Unary
+
+    m_systemClasses.insert("Reservoir");
+    m_systemTokens.insert("Reservoir.produce");
+    m_systemTokens.insert("Reservoir.consume");
+
+    // TODO: expose Unary
   	  
     // TODO: this should be done only once after the schema is initialized, not for every TransactionPlayer
     createDefaultObjectFactory("Object", true);
