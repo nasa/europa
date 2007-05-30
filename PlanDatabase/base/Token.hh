@@ -370,7 +370,7 @@ namespace EUROPA {
      */
     bool removeMaster(const TokenId& token);
 
-    virtual std::string toString() const;
+    virtual std::string toLongString() const;
      
   protected:
 

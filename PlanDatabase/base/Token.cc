@@ -817,7 +817,7 @@ namespace EUROPA{
     m_localVariables.erase(var);
   }
 
-  std::string Token::toString() const
+  std::string Token::toLongString() const
   {
   	static std::string ident="    ";
   	
@@ -831,4 +831,5 @@ namespace EUROPA{
   	os << "}" << std::endl; 
   	return os.str();
   }
+  
 }
