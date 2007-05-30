@@ -36,6 +36,6 @@ Battery mainBattery = new Battery(30.0, 0.0, 50.0);
 Rover rover = new Rover(mainBattery);
 close();
 
-rejectable(Rover.Move indirectChange);
-rejectable(Battery.consume directChange);
+rejectable(Rover.Move indirectChange);    
+rejectable(Battery.consume directChange); directChange.activate();
 mainBattery.constrain(directChange);
