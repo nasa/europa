@@ -206,13 +206,12 @@ namespace EUROPA {
   
 	    bool checkArgs(const std::vector<const AbstractDomain*>& arguments) const;
 
-        LabelStr m_className;
+        LabelStr                  m_className;
         std::vector<std::string>  m_constructorArgNames;	                          
         std::vector<std::string>  m_constructorArgTypes;	
         ExprConstructorSuperCall* m_superCallExpr;                          
         std::vector<Expr*>        m_constructorBody;
         bool                      m_canMakeNewObject;
-        mutable EvalContext*	  m_evalContext;
   };  
   
   class ExprConstraint;
