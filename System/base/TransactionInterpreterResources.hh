@@ -52,6 +52,40 @@ namespace EUROPA {
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
   };   
   
+  class ReservoirObjectFactory : public NativeObjectFactory 
+  { 
+  	public: 
+  	    ReservoirObjectFactory(const LabelStr& signature);
+  	    virtual ~ReservoirObjectFactory(); 
+  	
+  	protected: 
+    	virtual ObjectId makeNewObject( 
+	                        const PlanDatabaseId& planDb, 
+	                        const LabelStr& objectType, 
+	                        const LabelStr& objectName, 
+	                        const std::vector<const AbstractDomain*>& arguments) const;
+  };   
+  
+  class ReservoirProduceTokenFactory: public NativeTokenFactory 
+  { 
+    public: 
+	  ReservoirProduceTokenFactory(const LabelStr& predicateName) : NativeTokenFactory(predicateName) {}
+	  
+	private: 
+	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable , bool isFact) const;
+	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
+  };   
+  
+  class ReservoirConsumeTokenFactory: public NativeTokenFactory 
+  { 
+    public: 
+	  ReservoirConsumeTokenFactory(const LabelStr& predicateName) : NativeTokenFactory(predicateName) {}
+	  
+	private: 
+	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable , bool isFact) const;
+	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
+  };   
+  
   class TransactionInterpreterResourcesInitializer 
   {
       public:
