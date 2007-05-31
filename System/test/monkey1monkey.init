@@ -1,8 +1,0 @@
-Debug 1
-; First, the planning horizon (required)
-[ 0 200 ]
-
-Object_Timelines Monkey_Class Monkey1 (
-        Location_SV (At (Rock) ... At (Rock))
-        Altitude_SV (LOW() ... LOW())
-        Banana_SV (NOT_HAVE_BANANA() ... HAVE_BANANA()))

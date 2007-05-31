@@ -1,9 +1,0 @@
-bool a = 1;
-bool b = 0, c = 1;
-int [0 +inf] d;
-float [0.0 +inf] e = +inf, f = 54;
-string g = "foo";
-enum {3, 6, 4, 2} h = 3;
-vector (int i, float j, string k) l;
-vartype Foo : float [0 +inf];
-Foo m = 1.5;

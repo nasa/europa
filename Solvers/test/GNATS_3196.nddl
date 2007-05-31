@@ -1,6 +1,0 @@
-#include "Model.nddl"
-
-Foo f = new Foo();
-close();
-rejectable(f.p g0);
-
