@@ -1642,7 +1642,24 @@ namespace EUROPA {
 						 bool isConstrained,
 						 ConstrainedVariableId& owner)
   {
-    TokenId slave = TokenFactory::createInstance(m_token,predicateType,relation);
+    TokenId slave;
+
+    unsigned int tokenCnt = predicateInstance.countElements(".");
+    bool isOnSameObject = (
+        tokenCnt == 1 || 
+        (tokenCnt==2 && (predicateInstance.getElement(0,".").toString() == "object"))
+    );
+    
+    if (isOnSameObject) {
+        // TODO: this is to support predicate inheritance
+      	// currently doing the same as the compiler, it'll probably be surprising to the user that
+      	// predicate inheritance will work only if the predicates are on the same object that the rule belongs to
+      	LabelStr suffix = predicateInstance.getElement(tokenCnt-1,".");
+        slave = NDDL::allocateOnSameObject(m_token,suffix,relation);
+    }
+    else {
+          slave = TokenFactory::createInstance(m_token,predicateType,relation);
+    }
     addSlave(slave,name);  		
 
     // For qualified names like "object.helloWorld" must add constraint to the object variable on the slave token
@@ -1650,7 +1667,6 @@ namespace EUROPA {
     if (isConstrained) {
       std::vector<ConstrainedVariableId> vars;
   			    
-      unsigned int tokenCnt = predicateInstance.countElements(".");
       if (tokenCnt <= 2) {
 	vars.push_back(owner);
       }
@@ -1672,8 +1688,9 @@ namespace EUROPA {
       vars.push_back(slave->getObject());
       addConstraint(LabelStr("eq"),vars);             
     }
-    else 
+    else { 
       debugMsg("XMLInterpreter:InterpretedRule",predicateInstance.toString() << " NotConstrained");
+    } 		
   		
     const char* relationName = relation.c_str();
   		
