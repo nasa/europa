@@ -796,6 +796,28 @@ namespace EUROPA {
     return(IntervalIntDomain(lb,ub));
   }
 
+  void TemporalPropagator::getTemporalDistanceDomains(const ConstrainedVariableId& first, 
+                                                      const std::vector<ConstrainedVariableId>& seconds, 
+                                                      std::vector<IntervalIntDomain>& domains)
+  {
+    // More efficient to get several at once. Exact calculation.
+    TimepointId tstart = getTimepoint(first);
+    std::vector<TimepointId> tends;
+    std::vector<Time> lbs;
+    std::vector<Time> ubs;
+    for (unsigned i=0; i<seconds.size(); i++) {
+      TimepointId tend = getTimepoint(seconds[i]);
+      tends.push_back(tend);
+    }
+    m_tnet->calcDistanceBounds(tstart, tends, lbs, ubs);
+    checkError(lbs.size() == seconds.size() && lbs.size() = ubs.size(),
+               "size mismatch in TemporalPropagator getTemporalDistanceDomains");
+    for (unsigned i=0; i<seconds.size(); i++) {
+      domains.push_back(IntervalIntDomain(lbs[i],ubs[i]));
+    }
+    return;
+  }
+
   void TemporalPropagator::getMinPerturbTimes(const std::vector<ConstrainedVariableId>& timevars,
                                               const std::vector<Time>& oldreftimes,
                                               std::vector<Time>& newreftimes)

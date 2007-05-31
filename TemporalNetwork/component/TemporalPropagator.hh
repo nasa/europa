@@ -47,7 +47,10 @@ namespace EUROPA {
      */
     const IntervalIntDomain getTemporalDistanceDomain(const ConstrainedVariableId& first, 
 						      const ConstrainedVariableId& second, const bool exact);
-
+    void getTemporalDistanceDomains(const ConstrainedVariableId& first, 
+                                    const std::vector<ConstrainedVariableId>&
+                                    seconds, 
+                                    std::vector<IntervalIntDomain>& domains);
 
     /**
      * @see TemporalAdvisor::mostRecentReprogation
