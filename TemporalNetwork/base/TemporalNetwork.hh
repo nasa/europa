@@ -152,6 +152,17 @@ namespace EUROPA {
     Void calcDistanceBounds(const TimepointId& src, const TimepointId& targ, Time& lb, Time& ub, Bool exact=true);
 
     /**
+     * @brief Calculate the (exact) temporal distance from one timepoint to others.  Much more efficient when many targs.
+     * @param src the start node in the network.
+     * @param targs the end nodes in the network.
+     * @param lbs returns the lower bounds of the distances
+     * @param ubs returns the upper bounds of the distances
+     */
+    Void calcDistanceBounds(const TimepointId& src,
+                            const std::vector<TimepointId>& targs,
+                            std::vector<Time>& lbs, std::vector<Time>& ubs);
+
+    /**
      * @brief Identify the timepoints that mark the head and foot of a temporal constraint.
      * @param id temporal constraint of interest. 
      * @result two time points - the head and foot of the constraint (in that order).
@@ -381,6 +392,11 @@ namespace EUROPA {
      */
     Void incDijkstraBackward();
     
+    /**
+     * @brief Propagates lower/upper distance bounds from src
+     * using backward and forward Dijkstra propagations.
+     */
+    Void TemporalNetwork::propagateBoundsFrom (const TimepointId& src);
    
     /**
      * @brief
