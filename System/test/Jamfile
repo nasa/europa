@@ -94,11 +94,6 @@ checkin-tests += Rover-transaction
 }
 
 
-#tests to skip because they currently fail in known, but hard to fix ways
-local interp-skip =
-      subtype-extension.tx.nddl #predicate bug
-      ;
-      
 
 #RunPlannerProblem <model> : <configurationFile> : <heuristicsFile> : <target that depends> ;
 rule RunPlannerProblem {
@@ -125,11 +120,9 @@ rule RunPlannerProblem {
 
 
   #run with interpreted model
-  if ! ( $(model) in $(interp-skip) ) {
-    RunModuleMain run-interp-$(exe) : runProblem_interp_$(PLANNER) :
-                  $(xml) $(configurationFile) ;
-    Depends $(deptarget) : run-interp-$(exe) ;
-  }
+  RunModuleMain run-interp-$(exe) : runProblem_interp_$(PLANNER) :
+                $(xml) $(configurationFile) ;
+  Depends $(deptarget) : run-interp-$(exe) ;
 
   Clean clean-system-xml : $(xml) ;
 
