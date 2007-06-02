@@ -396,7 +396,7 @@ namespace EUROPA {
      * @brief Propagates lower/upper distance bounds from src
      * using backward and forward Dijkstra propagations.
      */
-    Void TemporalNetwork::propagateBoundsFrom (const TimepointId& src);
+    Void propagateBoundsFrom (const TimepointId& src);
    
     /**
      * @brief
