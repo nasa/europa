@@ -109,7 +109,7 @@ class BucketQueue;    // For use in Dijkstra algorithm.
     */
 
 class DistanceGraph {
-  std::vector<DedgeId> edges;
+  std::set<DedgeId> edges;
   Int dijkstraGeneration;
 protected:
   std::vector<DnodeId> nodes;
