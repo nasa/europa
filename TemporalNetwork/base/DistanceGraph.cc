@@ -161,7 +161,7 @@ DedgeId DistanceGraph::createEdge(DnodeId from, DnodeId to, Time length)
   edge->from = from;
   edge->to = to;
   edge->length = length;
-  this->edges.push_back(edge);
+  this->edges.insert(edge);
   attachEdge (from->outArray, from->outArraySize, from->outCount, edge);
   attachEdge (to->inArray, to->inArraySize, to->inCount, edge);
   return edge;
@@ -176,7 +176,8 @@ Void DistanceGraph::deleteEdge(DedgeId edge)
 
 Void DistanceGraph::eraseEdge(DedgeId edge)
 {
-  deleteIfEqual(edges, edge);
+  //deleteIfEqual(edges, edge);
+  edges.erase(edge);
   edge->from = DnodeId::noId();
   edge->to = DnodeId::noId();
   edge->length = 99;  // A clue for debugging purposes
@@ -344,7 +345,15 @@ Bool DistanceGraph::incBellmanFord()
 Void DistanceGraph::dijkstra (DnodeId source, DnodeId destination)
 {
  check_error(isValid(source), "node is not defined in this graph");
- check_error(isValid(destination), "node is not defined in this graph");
+
+ // PHM 05/16/2007 The previous isValid(destination) check was
+ // mistaken; a null destination was intended to be allowed; in that
+ // case dijkstra computes the distance to ALL nodes in the graph.
+ // (See DistanceGraph.hh, which has destination = noId() as default!)
+
+ check_error(destination.isNoId() || isValid(destination),
+             "node is not null or defined in this graph");
+
  //debugMsg("DistanceGraph:dijkstra", "from " << source << " to " << destination);
   source->distance = 0;
   source->depth=0;
@@ -606,7 +615,7 @@ bool DistanceGraph::hasNode(const DnodeId node) const {
 std::string DistanceGraph::toString() const {
  std::stringstream sstr;
 
- for (std::vector<DedgeId>::const_iterator it = edges.begin(); it != edges.end(); ++it){
+ for (std::set<DedgeId>::const_iterator it = edges.begin(); it != edges.end(); ++it){
    DedgeId edge = *it;
    sstr << edge->from << " " << edge->to << " " << edge->length << std::endl;
  }
