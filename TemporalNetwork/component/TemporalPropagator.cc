@@ -810,7 +810,7 @@ namespace EUROPA {
       tends.push_back(tend);
     }
     m_tnet->calcDistanceBounds(tstart, tends, lbs, ubs);
-    checkError(lbs.size() == seconds.size() && lbs.size() = ubs.size(),
+    checkError((lbs.size() == seconds.size()) && (lbs.size() == ubs.size()),
                "size mismatch in TemporalPropagator getTemporalDistanceDomains");
     for (unsigned i=0; i<seconds.size(); i++) {
       domains.push_back(IntervalIntDomain(lbs[i],ubs[i]));
