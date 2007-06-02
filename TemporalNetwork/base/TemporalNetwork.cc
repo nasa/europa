@@ -221,6 +221,50 @@ namespace EUROPA {
     lb = - getDistance(src);
   }
 
+  Void TemporalNetwork::propagateBoundsFrom (const TimepointId& src)
+  {
+    for(std::vector<DnodeId>::const_iterator it = nodes.begin(); it != nodes.end(); ++it){
+      TimepointId node = (TimepointId) *it;
+      node->upperBound = POS_INFINITY;
+      node->lowerBound = NEG_INFINITY;
+    }
+    src->upperBound = 0;
+    src->lowerBound = 0;
+    src->depth = 0;
+    BucketQueue* queue = initializeBqueue();
+    queue->insertInQueue(src);
+    incDijkstraForward();
+    queue->insertInQueue(src);
+    incDijkstraBackward();
+  }
+
+  Void TemporalNetwork::calcDistanceBounds(const TimepointId& src,
+                                           const std::vector<TimepointId>&
+                                           targs,
+					   std::vector<Time>& lbs,
+                                           std::vector<Time>& ubs)
+  {
+    // Method: Calculate lower/upper bounds as if src was the origin.
+    // Afterwards restore the proper bounds.  Requires only four
+    // dijkstras instead of 2*n dijkstras.
+   
+    checkError(isConsistent(), "TemporalNetwork: calcDistanceBounds from inconsistent network");
+    
+    propagateBoundsFrom(src);
+
+    lbs.clear();
+    ubs.clear();
+
+    for (unsigned i=0; i<targs.size(); i++) {
+      lbs.push_back(targs[i]->lowerBound);
+      ubs.push_back(targs[i]->upperBound);
+    }
+
+    propagateBoundsFrom(getOriginNode());
+
+    return;
+  }
+
   std::list<TimepointId>
   TemporalNetwork::getConstraintScope(const TemporalConstraintId& id) {
     std::list<TimepointId> result;
