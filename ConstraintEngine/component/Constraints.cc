@@ -457,31 +457,9 @@ namespace EUROPA {
       check_error(!getCurrentDomain(m_variables[i]).isEnumerated());
   }
 
-  /**
-   * @brief Return larger argument.
-   * @note Shouldn't be here, but in a generic "arithmetic" class or system library.
-   * @note max() is a macro in some compiler implementations. --wedgingt 2004 Feb 26
-   */
-  double max(double a, double b) {
-    return (a > b ? a : b);
-  }
-
-  /**
-   * @brief Return smaller argument.
-   * @note Shouldn't be here, but in a generic "arithmetic" class or system library.
-   * @note min() is a macro in some compiler implementations. --wedgingt 2004 Feb 26
-   */
-  double min(double a, double b) {
-    return(a < b ? a : b);
-  }
-
-  /**
-   * @brief Helper method to compute new bounds for both X and Y in X*Y == Z.
-   * @return True if the target domain was modified.
-   */
-  bool updateMinAndMax(IntervalDomain& targetDomain,
-		       double denomMin, double denomMax,
-		       double numMin, double numMax) {
+  bool MultEqualConstraint::updateMinAndMax(IntervalDomain& targetDomain,
+					    double denomMin, double denomMax,
+					    double numMin, double numMax) {
     double xMax = targetDomain.getUpperBound();
     double xMin = targetDomain.getLowerBound();
     double newMin = xMin;
@@ -506,10 +484,10 @@ namespace EUROPA {
     check_error(denomMin != 0.0 && denomMax != 0.0);
 
     // Otherwise we must examine min and max of all pairings to deal with signs correctly.
-    newMax = max(max(numMax / denomMin, numMin / denomMin),
-                 max(numMax / denomMax, numMin/ denomMax));
-    newMin = min(min(numMax / denomMin, numMin / denomMin),
-                 min(numMax / denomMax, numMin/ denomMax));
+    newMax = std::max(std::max(numMax / denomMin, numMin / denomMin),
+                 std::max(numMax / denomMax, numMin/ denomMax));
+    newMin = std::min(std::min(numMax / denomMin, numMin / denomMin),
+                 std::min(numMax / denomMax, numMin/ denomMax));
 
     if (xMax > newMax)
       xMax = targetDomain.translateNumber(newMax, false);
@@ -545,11 +523,11 @@ namespace EUROPA {
       domz.getBounds(zMin, zMax);
 
       // Process Z
-      double max_z = max(max(xMax * yMax, xMin * yMin), max(xMin * yMax, xMax * yMin));
+      double max_z = std::max(std::max(xMax * yMax, xMin * yMin), std::max(xMin * yMax, xMax * yMin));
       if (zMax > max_z)
         zMax = domz.translateNumber(max_z, false);
 
-      double min_z = min(min(xMax * yMax, xMin * yMin), min(xMin * yMax, xMax * yMin));
+      double min_z = std::min(std::min(xMax * yMax, xMin * yMin), std::min(xMin * yMax, xMax * yMin));
       if (zMin < min_z)
         zMin = domz.translateNumber(min_z, true);
 

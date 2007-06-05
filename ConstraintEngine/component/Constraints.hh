@@ -204,6 +204,13 @@ namespace EUROPA {
 
     void handleExecute();
 
+    /**
+     * @brief Helper method to compute new bounds for both X and Y in X*Y == Z.
+     * @return True if the target domain was modified.
+     */
+    static bool updateMinAndMax(IntervalDomain& targetDomain,
+				double denomMin, double denomMax,
+				double numMin, double numMax);
   private:
     static const int X = 0;
     static const int Y = 1;
