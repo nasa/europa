@@ -374,7 +374,7 @@ namespace EUROPA {
   bool IntervalDomain::isFinite() const {
     check_error(!isOpen());
     // Real domains are only finite if they are singleton or empty.
-    return(isSingleton() || isEmpty());
+    return((isSingleton() && areBoundsFinite()) || isEmpty());
   }
 
   const LabelStr& IntervalDomain::getDefaultTypeName() {
