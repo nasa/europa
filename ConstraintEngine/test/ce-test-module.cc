@@ -1391,6 +1391,12 @@ private:
       assertTrue(v1.getDerivedDomain() == IntervalDomain(-2.3, -1.8), v1.getDerivedDomain().toString());
       assertTrue(v2.getDerivedDomain() == IntervalDomain(-11.6, -1.8), v2.getDerivedDomain().toString());
     }
+
+    // Special test for roundig errors
+    IntervalDomain dom;
+    MultEqualConstraint::updateMinAndMax(dom, 3.225, 3.225, -1, -1);
+    IntervalDomain expectedResult(-1.0 / 3.225, -1.0 / 3.225);
+    assertTrue(dom == expectedResult, dom.toString() + " != " + expectedResult.toString());
     return true;
   }
 

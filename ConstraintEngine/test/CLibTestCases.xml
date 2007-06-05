@@ -43817,4 +43817,16 @@
 			<IntervalDomain/>
 		</Outputs>
 	</Constraint>
+	<Constraint name="MultEqual" test="3395">
+		<Inputs>
+			<IntervalDomain lb="3.225" ub="3.225"/>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<IntervalDomain lb="-1" ub="-1"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="3.225" ub="3.225"/>
+			<IntervalDomain lb="-0.310078" ub="-0.310078"/>
+			<IntervalDomain lb="-1" ub="-1"/>
+		</Outputs>
+	</Constraint>
 </ConstraintTests>
