@@ -45,6 +45,8 @@ namespace EUROPA {
 	void setDest(std::string destPath);
 	void addSourcePath(const char* path);
 	static int noFullWrite, writeStep;
+	void setSolver(SOLVERS::SolverId& solver);
+	void clearSolver();
       protected:
 	inline long long int getPPId(void){return ppId;}
 	long long int ppId;

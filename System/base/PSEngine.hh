@@ -117,6 +117,7 @@ namespace EUROPA {
     ConstraintEngineId m_constraintEngine;
     PlanDatabaseId m_planDatabase;
     RulesEngineId m_rulesEngine;
+    SOLVERS::PlanWriter::PartialPlanWriter* m_ppw;
 
     static std::map<double, PSLanguageInterpreter*>& getLanguageInterpreters();
     static std::map<double, ObjectWrapperGenerator*>& getObjectWrapperGenerators();    
@@ -169,6 +170,7 @@ namespace EUROPA {
   class PSSolver
   {
   public:
+    virtual ~PSSolver();
     void step();
     //Solver::solve returns a bool to determine if a solution was found.  Should this perhaps
     //do the same?  ~MJI
@@ -204,10 +206,12 @@ namespace EUROPA {
     void configure(int horizonStart, int horizonEnd);
   protected:
     friend class PSEngine;
-    PSSolver(const SOLVERS::SolverId& solver, const std::string& configFilename);
+    PSSolver(const SOLVERS::SolverId& solver, const std::string& configFilename,
+	     SOLVERS::PlanWriter::PartialPlanWriter* ppw);
   private:
     SOLVERS::SolverId m_solver;
     std::string m_configFile;
+    SOLVERS::PlanWriter::PartialPlanWriter* m_ppw;
   };
 
   class PSToken : public PSEntity

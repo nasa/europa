@@ -30,6 +30,7 @@
 #include "TemporalPropagator.hh"
 #include "STNTemporalAdvisor.hh"
 #include "PlanDatabaseWriter.hh"
+#include "SolverPartialPlanWriter.hh"
 
 #include <fstream>
 
@@ -411,10 +412,18 @@ namespace EUROPA {
   	return os.str();
   }
    
-  PSSolver::PSSolver(const SOLVERS::SolverId& solver, const std::string& configFilename) 
+  PSSolver::PSSolver(const SOLVERS::SolverId& solver, const std::string& configFilename,
+		     SOLVERS::PlanWriter::PartialPlanWriter* ppw) 
       : m_solver(solver) 
-      , m_configFile(configFilename)
+      , m_configFile(configFilename),
+	m_ppw(ppw)
   {
+    m_ppw->setSolver(m_solver);
+  }
+
+  PSSolver::~PSSolver() {
+    if(m_solver.isValid())
+      destroy();
   }
 
   void PSSolver::step() {
@@ -430,6 +439,7 @@ namespace EUROPA {
   }
 
   void PSSolver::destroy() {
+    m_ppw->clearSolver();
     delete (SOLVERS::Solver*) m_solver;
     m_solver = SOLVERS::SolverId::noId();
   }
@@ -512,7 +522,7 @@ namespace EUROPA {
     SOLVERS::HorizonFilter::getHorizon().intersect(horizonStart, horizonEnd);
   }
 
-  PSEngine::PSEngine()
+  PSEngine::PSEngine() : m_ppw(NULL)
   {
   }
 
@@ -540,22 +550,33 @@ namespace EUROPA {
 
   //FIXME
   void PSEngine::shutdown() {
+    if(m_ppw != NULL) {
+      delete m_ppw;
+      m_ppw = NULL;
+    }
     Entity::purgeStarted();
 
     uninitConstraintLibrary();
     uninitNDDL();
+    Schema::instance()->reset();
     ObjectFactory::purgeAll();
     TokenFactory::purgeAll();
     ConstraintLibrary::purgeAll();
     Rule::purgeAll();
 
     // TODO: deletes are causing a crash, fix it
-    delete (RulesEngine*) m_rulesEngine;
-    m_rulesEngine = RulesEngineId::noId();    
-    //delete (PlanDatabase*) m_planDatabase;
-    m_planDatabase = PlanDatabaseId::noId();
-    //delete (ConstraintEngine*) m_constraintEngine;
-    m_constraintEngine = ConstraintEngineId::noId();
+    if(m_rulesEngine.isValid()) {
+      delete (RulesEngine*) m_rulesEngine;
+      m_rulesEngine = RulesEngineId::noId();    
+    }
+    if(m_planDatabase.isValid()) {
+      delete (PlanDatabase*) m_planDatabase;
+      m_planDatabase = PlanDatabaseId::noId();
+    }
+    if(m_constraintEngine.isValid()) {
+      delete (ConstraintEngine*) m_constraintEngine;
+      m_constraintEngine = ConstraintEngineId::noId();
+    }
 
     Entity::purgeEnded();
   }
@@ -568,8 +589,11 @@ namespace EUROPA {
     m_planDatabase->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
     m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();
     DbClientId client = m_planDatabase->getClient();
-		m_interpTransactionPlayer = new InterpretedDbClientTransactionPlayer(client);
-		m_transactionPlayer = new DbClientTransactionPlayer(client);
+    m_interpTransactionPlayer = new InterpretedDbClientTransactionPlayer(client);
+    m_transactionPlayer = new DbClientTransactionPlayer(client);
+    m_ppw =
+      new SOLVERS::PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine,
+						 m_rulesEngine);
   }
    
   void PSEngine::loadModel(const std::string& modelFileName) {
@@ -711,8 +735,7 @@ namespace EUROPA {
 
     SOLVERS::SolverId solver =
       (new SOLVERS::Solver(m_planDatabase, *(doc->RootElement())))->getId();
-
-    return new PSSolver(solver,configurationFile);
+    return new PSSolver(solver,configurationFile, m_ppw);
   }
 
   bool PSEngine::getAllowViolations() const
