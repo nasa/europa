@@ -90,9 +90,11 @@ namespace EUROPA {
     SOLVERS::SolverId solver = (new SOLVERS::Solver(m_planDatabase, config))->getId();
 
 #ifdef PPW_WITH_PLANNER
-    SOLVERS::PlanWriter::PartialPlanWriter ppw(m_planDatabase, m_constraintEngine, m_rulesEngine, solver);
+    SOLVERS::PlanWriter::PartialPlanWriter* ppw = 
+      new SOLVERS::PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine, m_rulesEngine, solver);
 #else
-    SOLVERS::PlanWriter::PartialPlanWriter ppw(m_planDatabase, m_constraintEngine, m_rulesEngine);
+    SOLVERS::PlanWriter::PartialPlanWriter* ppw =
+      new SOLVERS::PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine, m_rulesEngine);
 #endif
 
     // Now process the transactions
@@ -134,6 +136,7 @@ namespace EUROPA {
     m_totalNodes = solver->getStepCount();
     m_finalDepth = solver->getDepth();
     
+    delete ppw;
     delete (SOLVERS::Solver*) solver;
 
     return retval;
