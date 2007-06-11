@@ -159,6 +159,7 @@ namespace EUROPA {
     friend class PSEngine;
     friend class PSToken;
     friend class PSVarValue;
+    friend class PSVariable;
     friend class BaseObjectWrapperGenerator;
     PSObject(const ObjectId& obj);
     
@@ -263,6 +264,7 @@ namespace EUROPA {
   protected:
     friend class PSEngine;
     friend class PSObject;
+    friend class PSVariable;
     PSToken(const TokenId& tok);
 
     TokenId m_tok;
@@ -295,8 +297,10 @@ namespace EUROPA {
 	    
     void specifyValue(PSVarValue& v);
 	
-	double getViolation() const;
-	std::string getViolationExpl() const;
+    double getViolation() const;
+    std::string getViolationExpl() const;
+
+    PSEntity* getParent();
 	    
     virtual std::string toString();
   protected:

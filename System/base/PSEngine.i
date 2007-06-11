@@ -280,6 +280,8 @@ namespace EUROPA {
     double getViolation() const;
     std::string getViolationExpl() const;
         
+    PSEntity* getParent();
+
     std::string toString();
   protected:
     PSVariable();

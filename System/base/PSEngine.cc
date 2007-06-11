@@ -334,6 +334,23 @@ namespace EUROPA {
     return m_var->getViolationExpl();
   }
   
+  PSEntity* PSVariable::getParent() {
+    EntityId parent(m_var->getParent());
+    if(parent.isNoId())
+      return NULL;
+    else if(TokenId::convertable(parent))
+      return new PSToken((TokenId) parent);
+    else if(ObjectId::convertable(parent))
+      return new PSObject((ObjectId) parent);
+    else if(RuleInstanceId::convertable(parent))
+      return new PSToken(((RuleInstanceId)parent)->getToken());
+    else {
+      checkRuntimeError(ALWAYS_FAIL,
+			"Variable " << toString() << " has a parent that isn't a token, " <<
+			"object, or rule: " << m_var->getParent()->toString());
+    }
+    return NULL;
+  }
 
   std::string PSVariable::toString() {
     check_runtime_error(m_var.isValid());
