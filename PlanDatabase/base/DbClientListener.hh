@@ -28,9 +28,11 @@ namespace EUROPA {
 
     virtual void notifyObjectCreated(const ObjectId& object) {}
     virtual void notifyObjectCreated(const ObjectId& object, const std::vector<const AbstractDomain*>& arguments){}
+    virtual void notifyObjectDeleted(const ObjectId& object) {}
     virtual void notifyClosed(){}
     virtual void notifyClosed(const LabelStr& objectType){}
     virtual void notifyTokenCreated(const TokenId& token){}
+    virtual void notifyTokenDeleted(const TokenId& token, const std::string& name){}
     virtual void notifyConstrained(const ObjectId& object, const TokenId& predecessor, const TokenId& successor){}
     virtual void notifyFreed(const ObjectId& object, const TokenId& predecessor, const TokenId& successor){}
     virtual void notifyActivated(const TokenId& token){}
@@ -39,7 +41,9 @@ namespace EUROPA {
     virtual void notifyRejected(const TokenId& token){}
     virtual void notifyCancelled(const TokenId& token){}
     virtual void notifyConstraintCreated(const ConstraintId& constraint){}
+    virtual void notifyConstraintDeleted(const ConstraintId& constraint){}
     virtual void notifyVariableCreated(const ConstrainedVariableId& variable){}
+    virtual void notifyVariableDeleted(const ConstrainedVariableId& variable){}
     virtual void notifyVariableSpecified(const ConstrainedVariableId& variable){}
     virtual void notifyVariableRestricted(const ConstrainedVariableId& variable){}
     virtual void notifyVariableClosed(const ConstrainedVariableId& variable){}

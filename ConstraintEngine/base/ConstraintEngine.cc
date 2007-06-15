@@ -10,6 +10,7 @@
 #include "DomainListener.hh"
 
 #include <string>
+#include <iterator>
 
 namespace EUROPA
 {
@@ -651,6 +652,22 @@ namespace EUROPA
   }
 
   const ConstraintSet& ConstraintEngine::getConstraints() const {return m_constraints;}
+
+  ConstraintId ConstraintEngine::getConstraint(unsigned int index) {
+    check_error(index < m_constraints.size());
+    ConstraintSet::iterator it = m_constraints.begin();
+    std::advance(it, index);
+    check_error(it->isValid());
+    return *it;
+  }
+
+  unsigned int ConstraintEngine::getIndex(const ConstraintId& constr) {
+    check_error(constr.isValid());
+    ConstraintSet::iterator it = m_constraints.find(constr);
+    check_error(it != m_constraints.end());
+    check_error(it->isValid());
+    return (unsigned int) std::distance(m_constraints.begin(), it);
+  }
 
   const PropagatorId& ConstraintEngine::getPropagatorByName(const LabelStr& name)  const {
     if (m_propagatorsByName.find(name.getKey()) == m_propagatorsByName.end())

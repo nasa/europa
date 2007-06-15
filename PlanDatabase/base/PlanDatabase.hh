@@ -99,6 +99,11 @@ namespace EUROPA {
     void registerGlobalVariable(const ConstrainedVariableId& var);
 
     /**
+     * @brief Un-register an allocated global variable.
+     */
+    void unregisterGlobalVariable(const ConstrainedVariableId& var);
+
+    /**
      * @brief Return all global variables registered with the plan database as such
      * @return The set of all registered global variables.
      * @see registerGlobalVariable, DbClient::createVariable

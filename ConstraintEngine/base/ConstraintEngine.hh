@@ -246,6 +246,16 @@ namespace EUROPA {
     const ConstraintSet& getConstraints() const;
 
     /**
+     * @brief Get constraint based on its position in the set of constraints.
+     */
+    ConstraintId getConstraint(unsigned int index);
+
+    /**
+     * @brief Get index based on its position in the set of constraints.
+     */
+    unsigned int getIndex(const ConstraintId& constr);
+
+    /**
      * @brief Accessor for all propagators
      */
     const PropagatorId& getPropagatorByName(const LabelStr& name)  const;

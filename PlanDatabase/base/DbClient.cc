@@ -77,6 +77,13 @@ namespace EUROPA {
     return variable;
   }
 
+  void DbClient::deleteVariable(const ConstrainedVariableId& var) {
+    if(isGlobalVariable(var->getName()))
+      m_planDb->unregisterGlobalVariable(var);
+    publish(notifyVariableDeleted(var));
+    delete (ConstrainedVariable*) var;
+  }
+
   ObjectId DbClient::createObject(const char* type, const char* name){
     static const std::vector<const AbstractDomain*> noArguments;
     ObjectId object = ObjectFactory::createInstance(m_planDb, type, name, noArguments);
@@ -90,6 +97,11 @@ namespace EUROPA {
     debugMsg("DbClient:createObject", object->toString());
     publish(notifyObjectCreated(object, arguments));
     return object;
+  }
+
+  void DbClient::deleteObject(const ObjectId& obj) {
+    publish(notifyObjectDeleted(obj));
+    delete (Object*) obj;
   }
 
   void DbClient::close(){
@@ -109,6 +121,27 @@ namespace EUROPA {
     debugMsg("DbClient:createToken", token->toString());
     publish(notifyTokenCreated(token));
     return(token);
+  }
+
+  void DbClient::deleteToken(const TokenId& token, const std::string& name) {
+    check_error(token.isValid());
+    checkError(token->isInactive() || token->isFact(),
+	       "Attempted to delete active, non-fact token " << token->toString());
+    publish(notifyTokenDeleted(token, name));
+
+    //the keys are only recorded if logging is enabled
+    //this may not be the right thing...
+    if(!m_keysOfTokensCreated.empty()) {
+      if(m_keysOfTokensCreated.back() == token->getKey()) {
+	debugMsg("DbClient:deleteToken",
+		 "Removing token key " << m_keysOfTokensCreated.back());
+	m_keysOfTokensCreated.pop_back();
+      }
+      checkError(std::find(m_keysOfTokensCreated.begin(), m_keysOfTokensCreated.end(),
+			   token->getKey()) == m_keysOfTokensCreated.end(),
+		 "Attempted to delete " << token->toString() << " out of order.");
+    }
+    delete (Token*) token;
   }
 
   void DbClient::constrain(const ObjectId& object, const TokenId& predecessor, const TokenId& successor){
@@ -162,8 +195,11 @@ namespace EUROPA {
       checkError(!isTransactionLoggingEnabled() || 
 		 m_keysOfTokensCreated.back() == activeToken->getKey(),
 		 "If transaction logging enabled then we require chronological retraction. " << activeToken->toString());
-      if(isTransactionLoggingEnabled())
+      if(isTransactionLoggingEnabled()) {
+	debugMsg("DbClient:cancel",
+		 "Removing token key " << m_keysOfTokensCreated.back());
 	m_keysOfTokensCreated.pop_back();
+      }
     }
 
 
@@ -182,6 +218,11 @@ namespace EUROPA {
     debugMsg("DbClient:createConstraint", constraint->toString());
     publish(notifyConstraintCreated(constraint));
     return constraint;
+  }
+
+  void DbClient::deleteConstraint(const ConstraintId& constr) {
+    publish(notifyConstraintDeleted(constr));
+    delete (Constraint*) constr;
   }
 
   void DbClient::restrict(const ConstrainedVariableId& variable, const AbstractDomain& domain){
@@ -253,6 +294,10 @@ namespace EUROPA {
     return m_planDb->getGlobalVariable(varName);
   }
 
+  bool DbClient::isGlobalVariable(const LabelStr& varName) const {
+    return m_planDb->isGlobalVariable(varName);
+  }
+
   /**
    * @brief Build the path from the bottom up, and return it from the top down.
    */
@@ -317,6 +362,14 @@ namespace EUROPA {
     return m_planDb->getConstraintEngine()->getIndex(var);
   }
 
+  ConstraintId DbClient::getConstraintByIndex(unsigned int index) {
+    return m_planDb->getConstraintEngine()->getConstraint(index);
+  }
+
+  unsigned int DbClient::getIndexByConstraint(const ConstraintId& constr) {
+    return m_planDb->getConstraintEngine()->getIndex(constr);
+  }
+
   void DbClient::notifyAdded(const DbClientListenerId& listener){
     check_error(m_listeners.find(listener) == m_listeners.end());
     m_listeners.insert(listener);
@@ -341,8 +394,11 @@ namespace EUROPA {
     checkError(supportsAutomaticAllocation(), "Cannot allocate tokens from the schema.");
     TokenId token = TokenFactory::createInstance(m_planDb, predicateName, rejectable, isFact);
 
-    if (isTransactionLoggingEnabled())
+    if (isTransactionLoggingEnabled()) {
+      debugMsg("DbClient:allocateToken",
+	       "Saving token key " << token->getKey());
       m_keysOfTokensCreated.push_back(token->getKey());
+    }
 
     checkError(token.isValid(), "Failed to allocate token for " << predicateName.toString());
     return token;

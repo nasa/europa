@@ -3735,18 +3735,28 @@ public:
 
     testDefineEnumeration();
     testCreateVariable();
+    testDeleteVariable();
+    testUndeleteVariable();
     testDefineClass();
     testCreateObject();
+    testDeleteObject();
+    testUndeleteObject();
     testSpecifyVariable();
     testResetVariable();
+    testUnresetVariable();
     testCreateTokens();
+    testDeleteTokens();
+    testUndeleteTokens(); //I
     testInvokeConstraint();
+    testReinvokeConstraint(); //I
     testConstrain();
     testFree();
+    testUnfree();
     testActivate();
     testMerge();
     testReject();
     testCancel();
+    testUncancel();
 
     TokenFactory::purgeAll();
     TypeFactory::purgeAll();
@@ -3920,11 +3930,16 @@ public:
    */
   static void testPlayingXML(const std::string& xml, const char *file, const int& line);
 
+  static void testRewindingXML(const std::string& xml, const char* file, const int& line,
+			       bool breakpoint = false);
+
   /**
    * @def TEST_PLAYING_XML
    * Call testPlayingXML with __FILE__ and __LINE__.
    */
 #define TEST_PLAYING_XML(xml) (testPlayingXML(xml, __FILE__, __LINE__))
+
+#define TEST_REWINDING_XML(xml) (testRewindingXML(xml, __FILE__, __LINE__))
 
   /** Test defining an enumeration. */
   static void testDefineEnumeration() {
@@ -3985,6 +4000,72 @@ public:
     assertTrue(g_int2.isNoId());
     assertTrue(g_float2.isNoId());
     assertTrue(g_location2.isNoId());
+  }
+
+  static void testDeleteVariable() {
+    assertTrue(s_db->getClient()->isGlobalVariable("g_int"));
+    TEST_REWINDING_XML(buildXMLNameTypeStr("var", "g_int",
+					  IntervalIntDomain::getDefaultTypeName().toString(),
+					  __FILE__, __LINE__));
+    assertTrue(!s_db->getClient()->isGlobalVariable("g_int"));
+    ConstrainedVariableSet allVars = s_ce->getVariables();
+    for(ConstrainedVariableSet::iterator it = allVars.begin(); it != allVars.end(); ++it) {
+      assertTrue((*it)->getName() != LabelStr("g_int"));
+    }
+    //have to re-create the variable because future tests depend on it
+    TEST_PLAYING_XML(buildXMLNameTypeStr("var", "g_int",
+					  IntervalIntDomain::getDefaultTypeName().toString(),
+					  __FILE__, __LINE__));
+    assertTrue(s_db->getClient()->isGlobalVariable("g_int"));
+    bool found = false;
+    allVars = s_ce->getVariables();
+    for(ConstrainedVariableSet::iterator it = allVars.begin(); it != allVars.end() && !found;
+	++it) {
+      if((found = ((*it)->getName() == LabelStr("g_int")))) {
+	sg_int = (*it);
+      }
+    }
+    assertTrue(found);
+  }
+
+  static void testUndeleteVariable() {
+    assertTrue(s_db->getClient()->isGlobalVariable("g_int"));
+    bool found = false;
+    ConstrainedVariableSet allVars = s_ce->getVariables();
+    for(ConstrainedVariableSet::iterator it = allVars.begin(); it != allVars.end() && !found;
+	++it)
+      found = ((*it)->getName() == LabelStr("g_int"));
+    assertTrue(found);
+
+    std::stringstream transactions;
+    transactions << "<deletevar index=\"" << s_db->getClient()->getIndexByVariable(sg_int) <<
+      "\" name=\"g_int\"/>";
+    TEST_PLAYING_XML(transactions.str());
+
+    assertTrue(!s_db->getClient()->isGlobalVariable("g_int"));
+    allVars = s_ce->getVariables();
+    for(ConstrainedVariableSet::iterator it = allVars.begin(); it != allVars.end(); ++it) {
+      assertTrue((*it)->getName() != LabelStr("g_int"));
+    }
+    
+    std::stringstream otherTransactions;
+    otherTransactions << buildXMLNameTypeStr("var", "g_int",
+					     IntervalIntDomain::getDefaultTypeName().toString(),
+					     __FILE__, __LINE__);
+    otherTransactions << "<breakpoint/>";
+    otherTransactions << transactions.str();
+
+    testRewindingXML(otherTransactions.str(), __FILE__, __LINE__, true);
+    assertTrue(s_db->getClient()->isGlobalVariable("g_int"));
+    found = false;
+    allVars = s_ce->getVariables();
+    for(ConstrainedVariableSet::iterator it = allVars.begin(); it != allVars.end() && !found;
+	++it) {
+      if((found = ((*it)->getName() == LabelStr("g_int")))) {
+	sg_int = (*it);
+      }
+    }
+    assertTrue(found);
   }
 
   /** Test defining classes. */
@@ -4110,6 +4191,69 @@ public:
     //!!Find each in PlanDB just after each is built
   }
 
+  static void testDeleteObject() {
+    ObjectId obj2a = s_db->getObject("testObj2a");
+    assertTrue(!obj2a.isNoId() && obj2a.isValid());
+    assertTrue(obj2a->getType() == LabelStr("TestClass2"));
+    assertTrue(obj2a->getName() == LabelStr("testObj2a"));
+
+    std::vector<const AbstractDomain*> domains;
+    domains.push_back(new IntervalIntDomain(1));
+    domains.push_back(new IntervalDomain(1.414));
+    domains.push_back(new Locations(LabelStr("Hill"), "Locations"));
+    std::string transaction = buildXMLCreateObjectStr("TestClass2", "testObj2a", domains);
+    cleanDomains(domains);
+
+    TEST_REWINDING_XML(transaction);
+
+    obj2a = s_db->getObject("testObj2a");
+    assertTrue(obj2a.isNoId());
+
+    //have to re-play in case something needs this object
+    TEST_PLAYING_XML(transaction);
+    obj2a = s_db->getObject("testObj2a");
+    assertTrue(!obj2a.isNoId() && obj2a.isValid());
+    assertTrue(obj2a->getType() == LabelStr("TestClass2"));
+    assertTrue(obj2a->getName() == LabelStr("testObj2a"));
+
+  }
+
+  static void testUndeleteObject() {
+    ObjectId obj2a = s_db->getObject("testObj2a");
+    assertTrue(!obj2a.isNoId() && obj2a.isValid());
+    assertTrue(obj2a->getType() == LabelStr("TestClass2"));
+    assertTrue(obj2a->getName() == LabelStr("testObj2a"));
+
+    std::vector<const AbstractDomain*> domains;
+    domains.push_back(new IntervalIntDomain(1));
+    domains.push_back(new IntervalDomain(1.414));
+    domains.push_back(new Locations(LabelStr("Hill"), "Locations"));
+    std::string createTransaction =
+      buildXMLCreateObjectStr("TestClass2", "testObj2a", domains);
+    cleanDomains(domains);
+    
+
+    std::string deleteTransaction = "<deleteobject name=\"testObj2a\"/>";
+
+    TEST_PLAYING_XML(deleteTransaction);
+
+    obj2a = s_db->getObject("testObj2a");
+    assertTrue(obj2a.isNoId());
+
+    std::stringstream transactions;
+    transactions << createTransaction;
+    transactions << "<breakpoint/>";
+    transactions << deleteTransaction;
+
+    testRewindingXML(transactions.str(), __FILE__, __LINE__, true);
+
+    obj2a = s_db->getObject("testObj2a");
+    assertTrue(!obj2a.isNoId() && obj2a.isValid());
+    assertTrue(obj2a->getType() == LabelStr("TestClass2"));
+    assertTrue(obj2a->getName() == LabelStr("testObj2a"));    
+    
+  }
+
   /** Test specifying variables. */
   static void testSpecifyVariable() {
     TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_int, IntervalIntDomain(-5)));
@@ -4143,6 +4287,27 @@ public:
     assertTrue(obj2vars[1]->lastDomain() == IntervalDomain(), obj2vars[1]->toString());
     TEST_PLAYING_XML(buildXMLResetVariableStr(obj2vars[2]));
     assertTrue(obj2vars[2]->lastDomain() == LocationsBaseDomain(), obj2vars[2]->toString());
+
+
+    std::string transaction = buildXMLSpecifyVariableStr(sg_int, IntervalIntDomain(-5));
+    TEST_PLAYING_XML(transaction);
+    assertTrue(sg_int->lastDomain() == IntervalIntDomain(-5));
+
+    TEST_REWINDING_XML(transaction);
+    assertTrue(sg_int->lastDomain() == IntervalIntDomain(), sg_int->toString());
+  }
+
+  static void testUnresetVariable() {
+    std::cout << "testUnresetVariable" << std::endl;
+    std::string specify = buildXMLSpecifyVariableStr(sg_int, IntervalIntDomain(-5));
+    std::stringstream transactions;
+    transactions << specify;
+    transactions << "<breakpoint/>";
+    transactions << buildXMLResetVariableStr(sg_int);
+    testRewindingXML(transactions.str(), __FILE__, __LINE__, true);
+
+    assertTrue(sg_int->lastDomain() == IntervalIntDomain(-5));
+    TEST_PLAYING_XML(buildXMLResetVariableStr(sg_int));
   }
 
   /** Test invoking constraints, including "special cases" (as the player calls them). */
@@ -4159,7 +4324,8 @@ public:
     std::list<ConstrainedVariableId> vars;
     vars.push_back(sg_int);
     vars.push_back(obj2vars[0]);
-    TEST_PLAYING_XML(buildXMLInvokeConstrainVarsStr("Equal", vars));
+    std::string transaction = buildXMLInvokeConstrainVarsStr("Equal", vars);
+    TEST_PLAYING_XML(transaction);
     std::set<ConstraintId> constraints;
     sg_int->constraints(constraints);
     assertTrue(constraints.size() == 1);
@@ -4172,6 +4338,7 @@ public:
     obj2vars[0]->constraints(constraints);
     assertTrue(constraints.size() == 1);
     assertTrue(constr == *(constraints.begin()));
+
 
     // Second constraint
     vars.clear();
@@ -4273,6 +4440,10 @@ public:
       std::cout << __FILE__ << ':' << __LINE__ << ": TestClass2 base domain is still open, despite plan database saying otherwise\n";
   }
 
+  static void testReinvokeConstraint() {
+    
+  }
+
   /** Test creating tokens. */
   static void testCreateTokens() {
     testCreateGoalTokens();
@@ -4370,6 +4541,28 @@ public:
     }
   }
 
+  static void testDeleteTokens() {
+    TokenSet::size_type oldTokenCount = s_db->getTokens().size();
+    std::stringstream transactions;
+    transactions << buildXMLCreateGoalStr("TestClass2.Sample", true, "sample1");
+    for(std::set<LabelStr>::const_iterator it = s_tempRels.begin(); it != s_tempRels.end();
+	++it) {
+      std::string subgoalName = "subgoal1" + it->toString();
+      transactions << buildXMLCreateSubgoalStr("sample1", "TestClass2.Sample", subgoalName,
+					       *it);
+    }
+    TEST_REWINDING_XML(transactions.str());
+    TokenSet::size_type newTokenCount = s_db->getTokens().size();
+    assertTrue(newTokenCount < oldTokenCount);      
+    assertTrue((oldTokenCount - newTokenCount) == (TokenSet::size_type)(s_tempRels.size() + 1));
+    
+    TEST_PLAYING_XML(transactions.str());
+    assertTrue(oldTokenCount == s_db->getTokens().size());
+  }
+
+  static void testUndeleteTokens() {
+  }
+
   /**
    * Test constraining tokens to an object and ordering tokens on an object.
    */
@@ -4427,17 +4620,37 @@ public:
     TEST_PLAYING_XML(buildXMLObjTokTokStr("constrain", "testObj2a", "rejectableConstrainedSample", ""));
     std::cout << __FILE__ << ':' << __LINE__ << ": rejectable's derived object domain is " << rejectable->getObject()->derivedDomain() << '\n';
     assertTrue(rejectable->getObject()->derivedDomain().isSingleton(), "player did not constrain token to one object");
-
     assertTrue(rejectable->getObject()->derivedDomain() == objDom2a, "player did not constrain token to expected object");
+
     TokenId rejectable2 = createToken("rejectable2", false);
     TEST_PLAYING_XML(buildXMLObjTokTokStr("activate", "", "rejectable2", ""));
     assertTrue(!rejectable2->getObject()->derivedDomain().isSingleton(), "token already constrained to one object");
-    TEST_PLAYING_XML(buildXMLObjTokTokStr("constrain", "testObj2a", "rejectable2", "rejectableConstrainedSample"));
+    std::string transaction =
+      buildXMLObjTokTokStr("constrain", "testObj2a", "rejectable2",
+			   "rejectableConstrainedSample");
+    TEST_PLAYING_XML(transaction);
     assertTrue(rejectable2->getObject()->derivedDomain().isSingleton(), "player did not constrain token to one object");
     assertTrue(rejectable2->getObject()->derivedDomain() == objDom2a, "player did not constrain token to expected object");
     assertTrue(verifyTokenRelation(rejectable, rejectable2, "before")); //!! "precedes" ?
     assertTrue(obj2a->getTokens().size() == initialObjectTokenCount_A + 2);
     /* Leave them in plan db for testFree(). */
+
+    TEST_REWINDING_XML(transaction);
+    assertTrue(rejectable->getObject()->derivedDomain().isSingleton(), "player did not constrain token to one object");
+    assertTrue(rejectable->getObject()->derivedDomain() == objDom2a, "player did not constrain token to expected object");
+    assertTrue(!rejectable2->getObject()->derivedDomain().isSingleton(),
+	       "player did not constrain token to one object");
+    assertTrue(rejectable2->getObject()->derivedDomain() != objDom2a,
+	       "player did not constrain token to expected object");
+    assertTrue(obj2a->getTokens().size() == initialObjectTokenCount_A + 2);
+    
+    TEST_PLAYING_XML(transaction);
+    assertTrue(rejectable2->getObject()->derivedDomain().isSingleton(),
+	       "player did not constrain token to one object");
+    assertTrue(rejectable2->getObject()->derivedDomain() == objDom2a,
+	       "player did not constrain token to expected object");
+    assertTrue(verifyTokenRelation(rejectable, rejectable2, "before")); //!! "precedes" ?
+    assertTrue(obj2a->getTokens().size() == initialObjectTokenCount_A + 2);
   }
 
   /** Test freeing tokens. */
@@ -4518,23 +4731,45 @@ public:
     //!!assertTrue(three->getObject()->derivedDomain() == ObjectDomain("TestClass2"));
   }
 
+  static void testUnfree() {
+    std::cout << "testUnfree" << std::endl;
+
+    std::stringstream transactions;
+    transactions << buildXMLObjTokTokStr("constrain", "testObj2b", "constrainedSample", "");
+    transactions << buildXMLObjTokTokStr("constrain", "testObj2b", "constrainedSample2",
+					 "constrainedSample");
+    transactions << buildXMLObjTokTokStr("free", "testObj2b", "constrainedSample2",
+					 "constrainedSample");
+    transactions << buildXMLObjTokTokStr("free", "testObj2b", "constrainedSample", "");
+    TEST_REWINDING_XML(transactions.str());
+  }
+
   /** Test activating a token. */
   static void testActivate() {
     s_activatedToken = createToken("activateSample", false);
     std::cout << __FILE__ << ':' << __LINE__ << ": s_activatedToken is " << s_activatedToken << '\n';
-    TEST_PLAYING_XML(buildXMLObjTokTokStr("activate", "", "activateSample", ""));
+    std::string transaction = buildXMLObjTokTokStr("activate", "", "activateSample", "");
+    TEST_PLAYING_XML(transaction);
+    assertTrue(s_activatedToken->isActive(), "token not activated by player");
+    TEST_REWINDING_XML(transaction);
+    assertTrue(s_activatedToken->isInactive());
+    TEST_PLAYING_XML(transaction);
     assertTrue(s_activatedToken->isActive(), "token not activated by player");
     /* Leave activated for testMerge(). */
   }
 
   /** Test merging tokens. */
   static void testMerge() {
-    /* DEPRECATED SINCE IT IS INCORRECT TO MERGE A REJECTABLE TOKEN
-    s_mergedToken = createToken("mergeSample", false);
+    s_mergedToken = createToken("mergeSample", true);
     std::cout << __FILE__ << ':' << __LINE__ << ": s_mergedToken is " << s_mergedToken << '\n';
-    TEST_PLAYING_XML(buildXMLObjTokTokStr("merge", "", "mergeSample", "activateSample"));
+    std::string transaction = buildXMLObjTokTokStr("merge", "", "mergeSample",
+						   "activateSample");
+    TEST_PLAYING_XML(transaction);
     assertTrue(s_mergedToken->isMerged(), "token not merged by player");
-    */
+    TEST_REWINDING_XML(transaction);
+    assertTrue(s_mergedToken->isInactive());
+    TEST_PLAYING_XML(transaction);
+    assertTrue(s_mergedToken->isMerged(), "token not merged by player");    
     /* Leave merged for testCancel(). */
   }
 
@@ -4542,7 +4777,12 @@ public:
   static void testReject() {
     s_rejectedToken = createToken("rejectSample", false);
     std::cout << __FILE__ << ':' << __LINE__ << ": s_rejectedToken is " << s_rejectedToken << '\n';
-    TEST_PLAYING_XML(buildXMLObjTokTokStr("reject", "", "rejectSample", ""));
+    std::string transaction = buildXMLObjTokTokStr("reject", "", "rejectSample", "");
+    TEST_PLAYING_XML(transaction);
+    assertTrue(s_rejectedToken->isRejected(), "token not rejected by player");
+    TEST_REWINDING_XML(transaction);
+    assertTrue(s_rejectedToken->isInactive());
+    TEST_PLAYING_XML(transaction);
     assertTrue(s_rejectedToken->isRejected(), "token not rejected by player");
     /* Leave rejected for testCancel(). */
   }
@@ -4551,10 +4791,28 @@ public:
   static void testCancel() {
     TEST_PLAYING_XML(buildXMLObjTokTokStr("cancel", "", "rejectSample", ""));
     assertTrue(!s_rejectedToken->isRejected(), "token not unrejected by player");
-    //TEST_PLAYING_XML(buildXMLObjTokTokStr("cancel", "", "mergeSample", ""));
-    //assertTrue(!s_mergedToken->isMerged(), "token not unmerged by player");
+    TEST_PLAYING_XML(buildXMLObjTokTokStr("cancel", "", "mergeSample", ""));
+    assertTrue(!s_mergedToken->isMerged(), "token not unmerged by player");
     TEST_PLAYING_XML(buildXMLObjTokTokStr("cancel", "", "activateSample", ""));
     assertTrue(!s_activatedToken->isActive(), "token not unactivated by player");
+  }
+
+  static void testUncancel() {
+    std::cout << "testUncancel" << std::endl;
+    std::stringstream transactions;
+    transactions << buildXMLObjTokTokStr("activate", "", "activateSample", "");
+    transactions << buildXMLObjTokTokStr("merge", "", "mergeSample",
+						   "activateSample");
+    transactions << buildXMLObjTokTokStr("reject", "", "rejectSample", "");
+    transactions << "<breakpoint/>";
+    transactions << buildXMLObjTokTokStr("cancel", "", "rejectSample", "");
+    transactions << buildXMLObjTokTokStr("cancel", "", "mergeSample", "");
+    transactions << buildXMLObjTokTokStr("cancel", "", "activateSample", "");
+    testRewindingXML(transactions.str(), __FILE__, __LINE__, true);
+    assertTrue(s_rejectedToken->isRejected());
+    assertTrue(s_mergedToken->isMerged());
+    assertTrue(s_activatedToken->isActive());
+    testCancel(); //just to clean up
   }
 
   static TokenId createToken(const LabelStr& name, bool mandatory) {
@@ -4878,6 +5136,13 @@ void DbTransPlayerTest::testPlayingXML(const std::string& xml, const char *file,
   assertTrue(s_dbPlayer != 0);
   std::istringstream iss(xml);
   s_dbPlayer->play(iss);
+}
+
+void DbTransPlayerTest::testRewindingXML(const std::string& xml, const char* file, const int & line,
+					 bool breakpoint) {
+  assertTrue(s_dbPlayer != 0);
+  std::istringstream iss(xml);
+  s_dbPlayer->rewind(iss, breakpoint);
 }
 
 std::string DbTransPlayerTest::buildXMLNameStr(const std::string& tag, const std::string& name,

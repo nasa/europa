@@ -15,12 +15,61 @@
 #include "DbClient.hh"
 #include "DbClientTransactionPlayer.hh"
 #include "DbClientTransactionLog.hh"
+#include "Utils.hh"
 
 #include <algorithm>
 #include <iostream>
 #include <sstream>
 
 namespace EUROPA {
+
+  const std::set<std::string>& DbClientTransactionPlayer::MODEL_TRANSACTIONS() {
+    static bool called = false;
+    static std::set<std::string> sl_retval;
+    if(!called) {
+      sl_retval.insert("class_decl");
+      sl_retval.insert("class");
+      sl_retval.insert("enum");
+      sl_retval.insert("typedef");
+      sl_retval.insert("compat");
+      called = true;
+    }
+    return sl_retval;
+  }
+
+  const std::set<std::string>& DbClientTransactionPlayer::STATE_TRANSACTIONS() {
+    static bool called = false;
+    static std::set<std::string> sl_retval;
+    if(!called) {
+      sl_retval.insert("var");
+      sl_retval.insert("new");
+      sl_retval.insert("goal");
+      sl_retval.insert("fact");
+      sl_retval.insert("constrain");
+      sl_retval.insert("free");
+      sl_retval.insert("activate");
+      sl_retval.insert("merge");
+      sl_retval.insert("reject");
+      sl_retval.insert("cancel");
+      sl_retval.insert("specify");
+      sl_retval.insert("assign");
+      sl_retval.insert("restrict");
+      sl_retval.insert("reset");
+      sl_retval.insert("invoke");
+      called = true;
+    }
+    return sl_retval;    
+  }
+
+  const std::set<std::string>& DbClientTransactionPlayer::NO_TRANSACTIONS() {
+    static bool called = false;
+    static std::set<std::string> sl_retval;
+    if(!called) {
+      sl_retval.insert("breakpoint");
+      called = true;
+    }
+    return sl_retval;
+  }
 
   static const std::vector<int> 
   pathAsVector(const std::string & path) {
@@ -47,6 +96,10 @@ namespace EUROPA {
   }
 
   DbClientTransactionPlayer::~DbClientTransactionPlayer() {
+  }
+
+  void DbClientTransactionPlayer::setFilter(const std::set<std::string>& filters) {
+    
   }
 
   void DbClientTransactionPlayer::play(std::istream& is) {
@@ -77,6 +130,56 @@ namespace EUROPA {
     }
   }
 
+  void DbClientTransactionPlayer::rewind(std::istream& is, bool breakpoint) {
+    check_error(is, "Invalid input sream for playing transactions.");
+    std::list<TiXmlElement*> transactions;
+    while(!is.eof()) {
+      if (is.peek() != '<') {
+	is.get(); // discard characters up to '<'
+	continue;
+      }
+      
+      TiXmlElement* elem = new TiXmlElement("");
+      is >> (*elem);
+      transactions.push_front(elem);
+    }
+    for(std::list<TiXmlElement*>::iterator it = transactions.begin(); it != transactions.end();
+	++it) {
+      const TiXmlElement& tx = **it;
+      processTransactionInverse(tx, it, transactions.end());
+      if(breakpoint && tx.Value() == std::string("breakpoint"))
+	break;
+    }
+    cleanup(transactions);
+  }
+
+  void DbClientTransactionPlayer::rewind(const DbClientTransactionLogId& txLog,
+					 bool breakpoint) {
+    const std::list<TiXmlElement*>& transactions = txLog->getBufferedTransactions();
+    while(!transactions.empty()) {
+      const TiXmlElement& tx = *(transactions.back());
+      processTransactionInverse(tx, transactions.rbegin(), transactions.rend());
+      if(breakpoint && tx.Value() == std::string("breakpoint"))
+	break;
+      txLog->popTransaction();
+    }
+  }
+
+  bool DbClientTransactionPlayer::transactionFiltered(const TiXmlElement& trans) const {
+    for(std::set<std::string>::const_iterator it = m_filters.begin(); it != m_filters.end();
+	++it)
+      if(transactionMatch(trans, *it))
+	return true;
+    return false;
+  }
+
+  bool DbClientTransactionPlayer::transactionMatch(const TiXmlElement& trans,
+						   const std::string& name) const {
+    return name == trans.Value() ||
+      (std::string("invoke") == trans.Value() && trans.Attribute("name") != NULL &&
+       trans.Attribute("name") == name);
+  }
+
   void DbClientTransactionPlayer::processTransaction(const TiXmlElement & element) {
     static unsigned int sl_txCount(0);
     const char * tagname = element.Value();
@@ -84,56 +187,139 @@ namespace EUROPA {
     sl_txCount++;
     debugMsg("DbClientTransactionPlayer:processTransaction",
 	     "Processing transaction '" << tagname << "'");
-    if (strcmp(tagname, "class_decl") == 0)
-      playDeclareClass(element);
-    else if (strcmp(tagname, "class") == 0)
-      playDefineClass(element);
-    else if (strcmp(tagname, "enum") == 0)
-      playDefineEnumeration(element);
-    else if (strcmp(tagname, "typedef") == 0)
-      playDefineType(element);
-    else if (strcmp(tagname, "compat") == 0)
-      playDefineCompat(element);
-    else if (strcmp(tagname, "var") == 0)
-      playVariableCreated(element);
-    else if (strcmp(tagname, "new") == 0)
-      playObjectCreated(element);
-    else if (strcmp(tagname, "goal") == 0)
-      playTokenCreated(element);
-    else if (strcmp(tagname, "fact") == 0)
-      playFactCreated(element);
-    else if (strcmp(tagname, "constrain") == 0)
-      playConstrained(element);
-    else if (strcmp(tagname, "free") == 0)
-      playFreed(element);
-    else if (strcmp(tagname, "activate") == 0)
-      playActivated(element);
-    else if (strcmp(tagname, "merge") == 0)
-      playMerged(element);
-    else if (strcmp(tagname, "reject") == 0)
-      playRejected(element);
-    else if (strcmp(tagname, "cancel") == 0)
-      playCancelled(element);
-    else if (strcmp(tagname, "specify") == 0)
-      playVariableSpecified(element);
-    else if (strcmp(tagname, "assign") == 0)
-      playVariableAssigned(element);
-    else if (strcmp(tagname, "restrict") == 0)
-      playVariableRestricted(element);
-    else if (strcmp(tagname, "reset") == 0)
-      playVariableReset(element);
-    else if (strcmp(tagname, "invoke") == 0)
-      playInvokeConstraint(element);
-    else {
-      check_error(strcmp(tagname, "nddl") == 0, "Unknown tag name " + std::string(tagname));
-      for (TiXmlElement * child_el = element.FirstChildElement() ;
-           child_el != NULL ; child_el = child_el->NextSiblingElement()) {
-        processTransaction(*child_el);
-	if (!m_client->propagate())
-	  return;
+    if(!transactionFiltered(element)) {
+      if(transactionMatch(element, "breakpoint")) {}
+      else if (transactionMatch(element, "class_decl"))
+	playDeclareClass(element);
+      else if (transactionMatch(element, "class"))
+	playDefineClass(element);
+      else if (transactionMatch(element, "enum"))
+	playDefineEnumeration(element);
+      else if (transactionMatch(element, "typedef"))
+	playDefineType(element);
+      else if (transactionMatch(element, "compat"))
+	playDefineCompat(element);
+      else if (transactionMatch(element, "var"))
+	playVariableCreated(element);
+      else if(transactionMatch(element, "deletevar"))
+	playVariableDeleted(element);
+      else if (transactionMatch(element, "new"))
+	playObjectCreated(element);
+      else if(transactionMatch(element, "deleteobject"))
+	playObjectDeleted(element);
+      else if (transactionMatch(element, "goal"))
+	playTokenCreated(element);
+      else if (transactionMatch(element, "fact"))
+	playFactCreated(element);
+      else if(transactionMatch(element, "deletetoken"))
+	playTokenDeleted(element);
+      else if (transactionMatch(element, "constrain"))
+	playConstrained(element);
+      else if (transactionMatch(element, "free"))
+	playFreed(element);
+      else if (transactionMatch(element, "activate"))
+	playActivated(element);
+      else if (transactionMatch(element, "merge"))
+	playMerged(element);
+      else if (transactionMatch(element, "reject"))
+	playRejected(element);
+      else if (transactionMatch(element, "cancel"))
+	playCancelled(element);
+      else if (transactionMatch(element, "specify"))
+	playVariableSpecified(element);
+      else if (transactionMatch(element, "assign"))
+	playVariableAssigned(element);
+      else if (transactionMatch(element, "restrict"))
+	playVariableRestricted(element);
+      else if (transactionMatch(element, "reset"))
+	playVariableReset(element);
+      else if (transactionMatch(element, "invoke"))
+	playInvokeConstraint(element);
+      else if(transactionMatch(element, "deleteconstraint"))
+	playUninvokeConstraint(element);
+      else {
+	checkError(strcmp(tagname, "nddl") == 0, "Unknown tag name " << tagname);
+	for (TiXmlElement * child_el = element.FirstChildElement() ;
+	     child_el != NULL ; child_el = child_el->NextSiblingElement()) {
+	  processTransaction(*child_el);
+	  if (!m_client->propagate())
+	    return;
+	}
       }
     }
     m_client->propagate();
+  }
+
+  template<typename Iterator>
+  void DbClientTransactionPlayer::processTransactionInverse(const TiXmlElement& element,
+							    Iterator start, Iterator end) {
+    const char* tagname = element.Value();
+    debugMsg("DbClientTransactionPlayer:processTransactionInverse",
+	     "Processing inverse of transaction '" << tagname << "'");
+    if(!transactionFiltered(element)) {
+      if(transactionMatch(element, "breakpoint")) {} // does nothing
+      else if (transactionMatch(element, "class_decl")) {}
+	//playDeclareClass(element);
+      else if (transactionMatch(element, "class")) {}
+	//playDefineClass(element);
+      else if (transactionMatch(element, "enum")) {}
+      //playDefineEnumeration(element);
+      else if (transactionMatch(element, "typedef")) {}
+      //playDefineType(element);
+      else if (transactionMatch(element, "compat")) {}
+      //playDefineCompat(element);
+      else if (transactionMatch(element, "var")) 
+	playVariableDeleted(element);
+      else if(transactionMatch(element, "deletevar"))
+	playVariableUndeleted(element, start, end);
+      else if (transactionMatch(element, "new")) 
+	playObjectDeleted(element);
+      else if(transactionMatch(element, "deleteobject")) //has to scan backwards for "new" or "var"
+	playObjectUndeleted(element, start, end);
+      else if (transactionMatch(element, "goal"))
+	playTokenDeleted(element);
+      else if (transactionMatch(element, "fact"))
+	playTokenDeleted(element);
+      else if(transactionMatch(element, "deletetoken"))
+	playTokenUndeleted(element, start, end);
+      else if (transactionMatch(element, "constrain"))
+	playFreed(element);
+      else if (transactionMatch(element, "free"))
+	playUnfreed(element, start, end);
+      else if (transactionMatch(element, "activate"))
+	playCancelled(element);
+      else if (transactionMatch(element, "merge"))
+	playCancelled(element);
+      else if (transactionMatch(element, "reject"))
+	playCancelled(element);
+      else if (transactionMatch(element, "cancel"))
+	playUncancelled(element, start, end);
+      else if (transactionMatch(element, "specify"))
+	playVariableReset(element);
+
+      //these two can have no inverse--we lose base domain information and the CE only allows
+      //restrictions of base domains, so we can't use type factories
+      else if (transactionMatch(element, "assign")) {}
+      else if (transactionMatch(element, "restrict")) {}
+
+      else if (transactionMatch(element, "reset"))
+	playVariableUnreset(element, start, end);
+      else if (transactionMatch(element, "invoke"))
+	playUninvokeConstraint(element, start, end);
+      else if(transactionMatch(element, "deleteconstraint"))
+	playReinvokeConstraint(element, start, end);
+      else {
+	check_error(strcmp(tagname, "nddl") == 0, "Unknown tag name " + std::string(tagname));
+	for (TiXmlElement * child_el = element.FirstChildElement() ;
+	     child_el != NULL ; child_el = child_el->NextSiblingElement()) {
+	  processTransactionInverse(*child_el, start, end);
+	  if (!m_client->propagate())
+	    return;
+	}
+      }
+    }
+    m_client->propagate();
+
   }
 
   void DbClientTransactionPlayer::playVariableCreated(const TiXmlElement & element) {
@@ -153,9 +339,103 @@ namespace EUROPA {
     m_variables[std_name] = variable;
   }
 
+  void DbClientTransactionPlayer::playVariableDeleted(const TiXmlElement& element) {
+    debugMsg("DbClientTransactionPlayer:playVariableDeleted",
+	     "Playing (possibly the inverse of) " << element);
+    const char* name = element.Attribute("name");
+    check_error(name != NULL);
+
+    ConstrainedVariableId var = ConstrainedVariableId::noId();
+
+    const char* index = element.Attribute("index");
+    if(index != NULL) {
+      std::stringstream str;
+      str << index;
+      unsigned int key;
+      str >> key;
+      var = m_client->getVariableByIndex(key);
+    }
+    else {
+      check_error(m_client->isGlobalVariable(name));
+      var = m_client->getGlobalVariable(name);
+    }
+    check_error(var.isValid());
+
+    TiXmlElement* child = element.FirstChildElement("new");
+    if(child != NULL) {
+      playObjectDeleted(*child);
+    }
+
+    m_client->deleteVariable(var);
+    
+    std::string std_name(name);
+    m_variables.erase(name);
+  }
+
+  template <typename Iterator>
+  void DbClientTransactionPlayer::playVariableUndeleted(const TiXmlElement& element,
+							Iterator start, Iterator end) {
+    debugMsg("DbClientTransactionPlayer:playVariableUndeleted",
+	     "Playing inverse of " << element);
+    const char* name = element.Attribute("name");
+    check_error(name != NULL);
+    const char* index = element.Attribute("index");
+    check_error(index != NULL);
+    const char* type = element.Attribute("type");
+
+    debugMsg("DbClientTransactionPlayer:playVariableUndeleted",
+	     "Searching backwards for a creation transaction.");
+    for(Iterator it = start; it != end; ++it) {
+      debugMsg("DbClientTransactionPlayer:playVariableUndeleted",
+	       "Checking " << **it);
+      if(strcmp((*it)->Value(), "var") == 0 &&
+	 ((*it)->Attribute("name") != NULL && strcmp((*it)->Attribute("name"), name) == 0) &&
+	 ((*it)->Attribute("index") == NULL || strcmp((*it)->Attribute("index"), index) == 0) &&
+	 (type == NULL || ((*it)->Attribute("type") != NULL &&
+			   strcmp((*it)->Attribute("type"), type) == 0))) {
+	playVariableCreated(**it);
+	return;
+      }
+    }
+    checkError(ALWAYS_FAIL, "No creation transaction to complement " << element);
+  }
+
   void DbClientTransactionPlayer::playObjectCreated(const TiXmlElement & element) {
     const char * name = element.Attribute("name");
     xmlAsValue(element, name);
+  }
+
+  void DbClientTransactionPlayer::playObjectDeleted(const TiXmlElement& element) {
+    const char* name = element.Attribute("name");
+    check_error(name != NULL);
+    ObjectId obj = m_client->getObject(name);
+    check_error(obj.isValid());
+    m_client->deleteObject(obj);
+  }
+
+  template <typename Iterator>
+  void DbClientTransactionPlayer::playObjectUndeleted(const TiXmlElement& element,
+						      Iterator start, Iterator end) {
+    debugMsg("DbClientTransactionPlayer:playObjectUndeleted",
+	     "Playing inverse of " << element);
+    const char* name = element.Attribute("name");
+    check_error(name != NULL);
+    
+    debugMsg("DbClientTransactionPlayer:playObjectUndeleted",
+	     "Searching backwards for a creation transaction.");
+    for(Iterator it = start; it != end; ++it) {
+      TiXmlElement* elem = *it;
+      debugMsg("DbClientTransactionPlayer:playObjectUndeleted",
+	       "Checking " << *elem);
+      if(strcmp(elem->Value(), "var") == 0 && elem->FirstChildElement("new") != NULL)
+	elem = elem->FirstChildElement("new");
+      if(strcmp(elem->Value(), "new") == 0 && elem->Attribute("name") != NULL &&
+	 strcmp(elem->Attribute("name"), name) == 0) {
+	playObjectCreated(*elem);
+	return;
+      }
+    }
+    checkError(ALWAYS_FAIL, "No creation transaction to complement " << element);
   }
 
   const char* getObjectAndType(DbClientId& client, const char* predicate,ObjectId& object)
@@ -235,113 +515,7 @@ namespace EUROPA {
   void DbClientTransactionPlayer::playTokenCreated(const TiXmlElement & element) {
     const char * relation = element.Attribute("relation");
     if (relation != NULL) {
-      // inter-token temporal relation
-      const char * origin = element.Attribute("origin");
-      const char * target = element.Attribute("target");
-      TokenId origin_token = parseToken(origin);
-      TokenId target_token = parseToken(target);
-      debugMsg("DbClientTransactionPlayer:playTokenCreated",
-	       "got token " << origin_token->getKey() << " and " << 
-	       target_token->getKey() << " for relation " << relation);
-      checkError(origin_token.isValid(), "Invalid token for label '" << origin << "'");
-      checkError(target_token.isValid(), "Invalid token for label '" << target << "'");
-      if (strcmp(relation, "before") == 0) {
-        construct_constraint(precedes, origin, End, target, Start);
-        return;
-      }
-      else if (strcmp(relation, "after") == 0) {
-        construct_constraint(precedes, target, End, origin, Start);
-        return;
-      }
-      else if (strcmp(relation, "meets") == 0) {
-        construct_constraint(concurrent, origin, End, target, Start);
-        return;
-      }
-      else if (strcmp(relation, "met_by") == 0) {
-        construct_constraint(concurrent, origin, Start, target, End);
-        return;
-      }
-      else if ((strcmp(relation, "equal") == 0) || 
-               (strcmp(relation, "equals") == 0)) {
-        construct_constraint(concurrent, origin, Start, target, Start);
-        construct_constraint(concurrent, origin, End, target, End);
-        return;
-      }
-      else if (strcmp(relation, "contains") == 0) {
-        construct_constraint(precedes, origin, Start, target, Start);
-        construct_constraint(precedes, target, End, origin, End);
-        return;
-      }
-      else if (strcmp(relation, "contained_by") == 0) {
-        construct_constraint(precedes, target, Start, origin, Start);
-        construct_constraint(precedes, origin, End, target, End);
-        return;
-      }
-      else if (strcmp(relation, "paralleled_by") == 0) {
-        construct_constraint(precedes, target, Start, origin, Start);
-        construct_constraint(precedes, target, End, origin, End);
-        return;
-      }
-      else if (strcmp(relation, "parallels") == 0) {
-        construct_constraint(precedes, origin, Start, target, Start);
-        construct_constraint(precedes, origin, End, target, End);
-        return;
-      }
-      else if (strcmp(relation, "starts") == 0) {
-        construct_constraint(concurrent, origin, Start, target, Start);
-        return;
-      }
-      else if (strcmp(relation, "ends") == 0) {
-        construct_constraint(concurrent, origin, End, target, End);
-        return;
-      }
-      else if (strcmp(relation, "ends_after") == 0) {
-        construct_constraint(precedes, target, Start, origin, End);
-        return;
-      }
-      else if (strcmp(relation, "ends_before") == 0) {
-        construct_constraint(precedes, origin, End, target, Start);
-        return;
-      }
-      else if (strcmp(relation, "ends_after_start") == 0) {
-        construct_constraint(precedes, target, Start, origin, End);
-        return;
-      }
-      else if (strcmp(relation, "starts_before_end") == 0) {
-        construct_constraint(precedes, origin, Start, target, End);
-        return;
-      }
-      else if (strcmp(relation, "starts_during") == 0) {
-        construct_constraint(precedes, target, Start, origin, Start);
-        construct_constraint(precedes, origin, Start, target, End);
-        return;
-      }
-      else if (strcmp(relation, "contains_start") == 0) {
-        construct_constraint(precedes, origin, Start, target, Start);
-        construct_constraint(precedes, target, Start, origin, End);
-        return;
-      }
-      else if (strcmp(relation, "ends_during") == 0) {
-        construct_constraint(precedes, target, Start, origin, End);
-        construct_constraint(precedes, origin, End, target, End);
-        return;
-      }
-      else if (strcmp(relation, "contains_end") == 0) {
-        construct_constraint(precedes, origin, Start, target, End);
-        construct_constraint(precedes, target, End, origin, End);
-        return;
-      }
-      else if (strcmp(relation, "starts_after") == 0) {
-        construct_constraint(precedes, target, Start, origin, Start);
-        return;
-      }
-      else if (strcmp(relation, "starts_before") == 0) {
-        construct_constraint(precedes, origin, Start, target, Start);
-        return;
-      }
-      check_error(strcmp(relation, "any") == 0,
-                  std::string("unknown temporal relation name ") + std::string(relation));
-      // The "any" relation is not an actual constraint, so don't create one.
+      playTemporalRelationCreated(element);
       return;
     }
     // simple token creation
@@ -363,95 +537,505 @@ namespace EUROPA {
     );
   }
 
-  void DbClientTransactionPlayer::playConstrained(const TiXmlElement & element) {
-    TiXmlElement * object_el = element.FirstChildElement();
-    check_error(object_el != NULL);
-    check_error(strcmp(object_el->Value(), "object") == 0);
-    const char * name = object_el->Attribute("name");
-    check_error(name != NULL);
-    ObjectId object = m_client->getObject(name);
-    check_error(object.isValid());
+  //bizarre... playTokenCreated will, separately, create a token and create a temporal relation
+  //these should be separated!
+  void DbClientTransactionPlayer::playTokenDeleted(const TiXmlElement& element) {
+    debugMsg("DbClientTransactionPlayer:playTokenDeleted",
+	     "Rewinding " << element);
 
-    TiXmlElement * token_el = object_el->NextSiblingElement();
-    check_error(token_el != NULL);
-    TokenId predecessor = xmlAsToken(*token_el);
-    check_error(predecessor.isValid());
-
-    TiXmlElement * successor_el = token_el->NextSiblingElement();
-    TokenId successor = predecessor;
-    if(successor_el != NULL){
-      successor = xmlAsToken(*successor_el);
-      checkError(successor.isValid(), "Invalid id for successor: " << *successor_el);
+    if(element.Attribute("relation") != NULL) {
+      playTemporalRelationDeleted(element);
+      return;
     }
 
+    TokenId tok = TokenId::noId();
+
+    TiXmlElement* child = element.FirstChildElement("predicateinstance");
+    check_error(child != NULL);
+
+    const char* name = child->Attribute("name");
+    check_error(name != NULL);
+    std::map<std::string, TokenId>::iterator tokIt = m_tokens.find(name);
+    if(tokIt != m_tokens.end()) {
+      tok = tokIt->second;
+      m_tokens.erase(tokIt);
+    }
+    else {
+      const char* pathStr = child->Attribute("path");
+      check_error(pathStr != NULL);
+      
+      
+      std::vector<std::string> tokens;
+      tokenize(pathStr, tokens, ".");
+      
+      std::vector<int> path;
+      for(std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); ++it) {
+	std::stringstream str;
+	str << *it;
+	int element;
+	str >> element;
+	path.push_back(element);
+      }
+      tok = m_client->getTokenByPath(path);
+    }
+
+    check_error(tok.isValid());
+    m_client->deleteToken(tok);
+  }
+
+  template <typename Iterator>
+  void DbClientTransactionPlayer::playTokenUndeleted(const TiXmlElement& element,
+						     Iterator start, Iterator end) {
+    const char* type = element.Attribute("type");
+    check_error(type != NULL);
+    const char* path = element.Attribute("path");
+    check_error(path != NULL);
+    const char* name = element.Attribute("name");
+    check_error(name != NULL);
+
+    for(Iterator it = start; it != end; ++it) {
+      if((strcmp((*it)->Value(), "fact") == 0 || strcmp((*it)->Value(), "goal")) &&
+	 (*it)->Attribute("relation") == NULL) {
+	TiXmlElement* child = (*it)->FirstChildElement();
+	check_error(child != NULL);
+	if((child->Attribute("type") != NULL && strcmp(child->Attribute("type"), type) == 0) &&
+	   (child->Attribute("path") == NULL || strcmp(child->Attribute("path"), path) == 0) &&
+	   (child->Attribute("name") != NULL && strcmp(child->Attribute("name"), name) == 0)) {
+	  playTokenCreated(**it);
+	  return;
+	}
+      }
+    }
+    checkError(ALWAYS_FAIL, "No creation transaction to complement " << element);
+  }
+
+  void DbClientTransactionPlayer::playTemporalRelationCreated(const TiXmlElement& element) {
+    const char* relation = element.Attribute("relation");
+    check_error(relation != NULL);
+    const char * origin = element.Attribute("origin");
+    check_error(origin != NULL);
+    const char * target = element.Attribute("target");
+    check_error(target != NULL);
+    TokenId origin_token = parseToken(origin);
+    TokenId target_token = parseToken(target);
+    debugMsg("DbClientTransactionPlayer:playTemporalRelationCreated",
+	     "got token " << origin_token->getKey() << " and " << 
+	     target_token->getKey() << " for relation '" << relation << "'");
+    checkError(origin_token.isValid(), "Invalid token for label '" << origin << "'");
+    checkError(target_token.isValid(), "Invalid token for label '" << target << "'");
+    if (strcmp(relation, "before") == 0) {
+      construct_constraint(precedes, origin, End, target, Start);
+    }
+    else if (strcmp(relation, "after") == 0) {
+      construct_constraint(precedes, target, End, origin, Start);
+    }
+    else if (strcmp(relation, "meets") == 0) {
+      construct_constraint(concurrent, origin, End, target, Start);
+    }
+    else if (strcmp(relation, "met_by") == 0) {
+      construct_constraint(concurrent, origin, Start, target, End);
+    }
+    else if ((strcmp(relation, "equal") == 0) || 
+	     (strcmp(relation, "equals") == 0)) {
+      construct_constraint(concurrent, origin, Start, target, Start);
+      construct_constraint(concurrent, origin, End, target, End);
+    }
+    else if (strcmp(relation, "contains") == 0) {
+      construct_constraint(precedes, origin, Start, target, Start);
+      construct_constraint(precedes, target, End, origin, End);
+    }
+    else if (strcmp(relation, "contained_by") == 0) {
+      construct_constraint(precedes, target, Start, origin, Start);
+      construct_constraint(precedes, origin, End, target, End);
+    }
+    else if (strcmp(relation, "paralleled_by") == 0) {
+      construct_constraint(precedes, target, Start, origin, Start);
+      construct_constraint(precedes, target, End, origin, End);
+    }
+    else if (strcmp(relation, "parallels") == 0) {
+      construct_constraint(precedes, origin, Start, target, Start);
+      construct_constraint(precedes, origin, End, target, End);
+    }
+    else if (strcmp(relation, "starts") == 0) {
+      construct_constraint(concurrent, origin, Start, target, Start);
+    }
+    else if (strcmp(relation, "ends") == 0) {
+      construct_constraint(concurrent, origin, End, target, End);
+    }
+    else if (strcmp(relation, "ends_after") == 0) {
+      construct_constraint(precedes, target, Start, origin, End);
+    }
+    else if (strcmp(relation, "ends_before") == 0) {
+      construct_constraint(precedes, origin, End, target, Start);
+    }
+    else if (strcmp(relation, "ends_after_start") == 0) {
+      construct_constraint(precedes, target, Start, origin, End);
+    }
+    else if (strcmp(relation, "starts_before_end") == 0) {
+      construct_constraint(precedes, origin, Start, target, End);
+    }
+    else if (strcmp(relation, "starts_during") == 0) {
+      construct_constraint(precedes, target, Start, origin, Start);
+      construct_constraint(precedes, origin, Start, target, End);
+    }
+    else if (strcmp(relation, "contains_start") == 0) {
+      construct_constraint(precedes, origin, Start, target, Start);
+      construct_constraint(precedes, target, Start, origin, End);
+    }
+    else if (strcmp(relation, "ends_during") == 0) {
+      construct_constraint(precedes, target, Start, origin, End);
+      construct_constraint(precedes, origin, End, target, End);
+    }
+    else if (strcmp(relation, "contains_end") == 0) {
+      construct_constraint(precedes, origin, Start, target, End);
+      construct_constraint(precedes, target, End, origin, End);
+    }
+    else if (strcmp(relation, "starts_after") == 0) {
+      construct_constraint(precedes, target, Start, origin, Start);
+    }
+    else if (strcmp(relation, "starts_before") == 0) {
+      construct_constraint(precedes, origin, Start, target, Start);
+    }
+    else {
+      checkError(strcmp(relation, "any") == 0,
+		 "unknown temporal relation name '" << relation << "'");
+    }
+  }
+
+  DbClientTransactionPlayer::TemporalRelations::iterator
+  DbClientTransactionPlayer::getTemporalConstraint(const ConstrainedVariableId& fvar,
+						   const ConstrainedVariableId& svar,
+						   const std::string& name) {
+    std::pair<TemporalRelations::iterator, TemporalRelations::iterator> range =
+      m_relations.equal_range(std::make_pair(fvar, svar));
+    checkError(range.first != m_relations.end(),
+	       "No saved temporal constraints between " << fvar->toString() << " and " <<
+	       svar->toString());
+    LabelStr relName(name);
+    for(TemporalRelations::iterator it = range.first; it != range.second; ++it) {
+      if(it->second->getName() == relName)
+	return it;
+    }
+    return m_relations.end();
+  }
+
+  void DbClientTransactionPlayer::deleteTemporalConstraint(TemporalRelations::iterator it) {
+    check_error(it != m_relations.end());
+    ConstraintId constr = it->second;
+    check_error(constr.isValid());
+    m_relations.erase(it);
+    m_client->deleteConstraint(constr);
+  }
+  
+  void DbClientTransactionPlayer::removeTemporalConstraint(const ConstrainedVariableId& fvar,
+							   const ConstrainedVariableId& svar,
+							   const std::string& name) {
+    deleteTemporalConstraint(getTemporalConstraint(fvar, svar, name));
+  }
+
+  void DbClientTransactionPlayer::playTemporalRelationDeleted(const TiXmlElement& element) {
+    const char* relation = element.Attribute("relation");
+    check_error(relation != NULL);
+    const char * origin = element.Attribute("origin");
+    check_error(origin != NULL);
+    const char * target = element.Attribute("target");
+    check_error(target != NULL);
+    TokenId origin_token = parseToken(origin);
+    TokenId target_token = parseToken(target);
+    debugMsg("DbClientTransactionPlayer:playTemporalRelationDeleted",
+	     "got token " << origin_token->getKey() << " and " << 
+	     target_token->getKey() << " for relation " << relation);
+    checkError(origin_token.isValid(), "Invalid token for label '" << origin << "'");
+    checkError(target_token.isValid(), "Invalid token for label '" << target << "'");
+    if (strcmp(relation, "before") == 0)
+      removeTemporalConstraint(origin_token->getEnd(), target_token->getStart(), "precedes");
+    else if (strcmp(relation, "after") == 0)
+      removeTemporalConstraint(target_token->getEnd(), origin_token->getStart(), "precedes");
+    else if (strcmp(relation, "meets") == 0)
+      removeTemporalConstraint(origin_token->getEnd(), target_token->getStart(), "concurrent");
+    else if (strcmp(relation, "met_by") == 0)
+      removeTemporalConstraint(origin_token->getStart(), target_token->getEnd(), "concurrent");
+    else if ((strcmp(relation, "equal") == 0) || 
+	     (strcmp(relation, "equals") == 0)) {
+      removeTemporalConstraint(origin_token->getStart(), target_token->getStart(), "concurrent");
+      removeTemporalConstraint(origin_token->getEnd(), target_token->getEnd(), "concurrent");
+    }
+    else if (strcmp(relation, "contains") == 0) {
+      removeTemporalConstraint(origin_token->getStart(), target_token->getStart(), "precedes");
+      removeTemporalConstraint(target_token->getEnd(), origin_token->getEnd(), "precedes");
+    }
+    else if (strcmp(relation, "contained_by") == 0) {
+      removeTemporalConstraint(target_token->getStart(), origin_token->getStart(), "precedes");
+      removeTemporalConstraint(origin_token->getEnd(), target_token->getEnd(), "precedes");
+    }
+    else if (strcmp(relation, "paralleled_by") == 0) {
+      removeTemporalConstraint(target_token->getStart(), origin_token->getStart(), "precedes");
+      removeTemporalConstraint(target_token->getEnd(), origin_token->getEnd(), "precedes");
+    }
+    else if (strcmp(relation, "parallels") == 0) {
+      removeTemporalConstraint(origin_token->getStart(), target_token->getStart(), "precedes");
+      removeTemporalConstraint(origin_token->getEnd(), target_token->getEnd(), "precedes");
+    }
+    else if (strcmp(relation, "starts") == 0) {
+      removeTemporalConstraint(origin_token->getStart(), target_token->getStart(), "concurrent");
+    }
+    else if (strcmp(relation, "ends") == 0) {
+      removeTemporalConstraint(origin_token->getEnd(), target_token->getEnd(), "concurrent");
+    }
+    else if (strcmp(relation, "ends_after") == 0) {
+      removeTemporalConstraint(target_token->getStart(), origin_token->getEnd(), "precedes");
+    }
+    else if (strcmp(relation, "ends_before") == 0) {
+      removeTemporalConstraint(origin_token->getEnd(), target_token->getStart(), "precedes");
+    }
+    else if (strcmp(relation, "ends_after_start") == 0) {
+      removeTemporalConstraint(target_token->getStart(), origin_token->getEnd(), "precedes");
+    }
+    else if (strcmp(relation, "starts_before_end") == 0) {
+      removeTemporalConstraint(origin_token->getStart(), target_token->getEnd(), "precedes");
+    }
+    else if (strcmp(relation, "starts_during") == 0) {
+      removeTemporalConstraint(target_token->getStart(), origin_token->getStart(), "precedes");
+      removeTemporalConstraint(origin_token->getStart(), target_token->getEnd(), "precedes");
+    }
+    else if (strcmp(relation, "contains_start") == 0) {
+      removeTemporalConstraint(origin_token->getStart(), target_token->getStart(), "precedes");
+      removeTemporalConstraint(target_token->getStart(), origin_token->getEnd(), "precedes");
+    }
+    else if (strcmp(relation, "ends_during") == 0) {
+      removeTemporalConstraint(target_token->getStart(), origin_token->getEnd(), "precedes");
+      removeTemporalConstraint(origin_token->getEnd(), target_token->getEnd(), "precedes");
+    }
+    else if (strcmp(relation, "contains_end") == 0) {
+      removeTemporalConstraint(origin_token->getStart(), target_token->getEnd(), "precedes");
+      removeTemporalConstraint(target_token->getEnd(), origin_token->getEnd(), "precedes");
+    }
+    else if (strcmp(relation, "starts_after") == 0) {
+      removeTemporalConstraint(target_token->getStart(), origin_token->getStart(), "precedes");
+    }
+    else if (strcmp(relation, "starts_before") == 0) {
+      removeTemporalConstraint(origin_token->getStart(), target_token->getStart(), "precedes");
+    }
+    else {
+      check_error(strcmp(relation, "any") == 0,
+		  std::string("unknown temporal relation name ") + std::string(relation));
+    }
+  }
+
+  void DbClientTransactionPlayer::playConstrained(const TiXmlElement & element) {
+    ObjectId object;
+    TokenId predecessor, successor;
+    getElementsFromConstrain(element, object, predecessor, successor);
     m_client->constrain(object, predecessor, successor);
   }
 
   void DbClientTransactionPlayer::playFreed(const TiXmlElement & element) {
-    TiXmlElement * object_el = element.FirstChildElement();
-    check_error(object_el != NULL);
-    check_error(strcmp(object_el->Value(), "object") == 0);
-    const char * name = object_el->Attribute("name");
-    check_error(name != NULL);
-    ObjectId object = m_client->getObject(name);
-    check_error(object.isValid());
-
-    TiXmlElement * token_el = object_el->NextSiblingElement();
-    check_error(token_el != NULL);
-    TokenId predecessor = xmlAsToken(*token_el);
-    check_error(predecessor.isValid());
-    TiXmlElement * successor_el = token_el->NextSiblingElement();
-    TokenId successor = predecessor;
-    if (successor_el != NULL) {
-      successor = xmlAsToken(*successor_el);
-      check_error(successor.isValid());
-    }
+    ObjectId object;
+    TokenId predecessor, successor;
+    getElementsFromConstrain(element, object, predecessor, successor);
     m_client->free(object, predecessor, successor);
   }
 
+  void DbClientTransactionPlayer::getElementsFromConstrain(const TiXmlElement& element,
+							   ObjectId& object,
+							   TokenId& predecessor,
+							   TokenId& successor) {
+    if(strcmp(element.Value(), "invoke") == 0) {
+      check_error(element.Attribute("identifier") != NULL);
+      object = m_client->getObject(element.Attribute("identifier"));
+    }
+    else {
+      TiXmlElement* object_el = element.FirstChildElement("object");
+      check_error(object_el != NULL && object_el->Attribute("name") != NULL);
+      object = m_client->getObject(object_el->Attribute("name"));
+    }
+    check_error(object.isValid());
+
+    TiXmlElement* token = element.FirstChildElement("token");
+    if(token == NULL)
+      token = element.FirstChildElement("id");
+    check_error(token != NULL);
+
+    if(token->Attribute("path") != NULL)
+      predecessor = xmlAsToken(*token);
+    else {
+      check_error(token->Attribute("name") != NULL);
+      predecessor = parseToken(token->Attribute("name"));
+    }
+    check_error(predecessor.isValid());
+    successor = predecessor;
+
+    token = token->NextSiblingElement(token->Value());
+    if(token != NULL) {
+      if(token->Attribute("path") != NULL)
+	successor = xmlAsToken(*token);
+      else {
+	check_error(token->Attribute("name") != NULL);
+	successor = parseToken(token->Attribute("name"));
+      }
+    }
+    check_error(successor.isValid());
+  }
+
+  template <typename Iterator>
+  void DbClientTransactionPlayer::playUnfreed(const TiXmlElement& element, Iterator start,
+					      Iterator end) {
+    debugMsg("DbClientTransactionPlayer:playUnfreed",
+	     "Rewinding transaction " << element);
+    ObjectId object;
+    TokenId predecessor, successor;
+    getElementsFromConstrain(element, object, predecessor, successor);
+
+    //have to search backwards for the last 'constrain' transaction to un-play the free
+    for(Iterator it = start; it != end; ++it) {
+      debugMsg("DbClientTransactionPlayer:playUnfreed",
+	       "Iterating backwards over " << **it);
+      if((*it)->Value() == std::string("constrain") ||
+	 ((*it)->Value() == std::string("invoke") && (*it)->Attribute("name") != NULL &&
+	  (*it)->Attribute("name") == std::string("constrain"))) {
+	ObjectId object2;
+	TokenId predecessor2, successor2;
+	getElementsFromConstrain(**it, object2, predecessor2, successor2);
+
+	if(object2 == object && predecessor2 == predecessor && successor2 == successor) {
+	  processTransaction(**it);
+	  return;
+	}
+      }
+    }
+    checkError(ALWAYS_FAIL, "No constrain transaction prior to " << element);
+  }
+
   void DbClientTransactionPlayer::playActivated(const TiXmlElement & element) {
-    TiXmlElement * token_el = element.FirstChildElement();
-    check_error(token_el != NULL);
-    TokenId token = xmlAsToken(*token_el);
+    TokenId token = TokenId::noId();
+    if(strcmp(element.Value(), "invoke") == 0) {
+      check_error(element.Attribute("identifier") != NULL);
+      std::string name(element.Attribute("identifier"));
+      token = m_tokens[name];
+    }
+    else {
+      TiXmlElement * token_el = element.FirstChildElement();
+      check_error(token_el != NULL);
+      token = xmlAsToken(*token_el);
+    }
     check_error(token.isValid());
-    m_client->activate(token);
+    if(!token->isActive()) //Temporary.  Pull out when we scrub test input files
+      m_client->activate(token);
   }
 
   void DbClientTransactionPlayer::playMerged(const TiXmlElement & element) {
-    TiXmlElement * token_el = element.FirstChildElement();
-    check_error(token_el != NULL);
-    TokenId token = xmlAsToken(*token_el);
-    check_error(token.isValid());
+    TokenId token = TokenId::noId();
+    TiXmlElement* active_el = NULL;
+    if(strcmp(element.Value(), "invoke") == 0) {
+      check_error(element.Attribute("identifier") != NULL);
+      std::string name(element.Attribute("identifier"));
+      token = m_tokens[name];
+      active_el = element.FirstChildElement("token");
+    }
+    else {
+      TiXmlElement * token_el = element.FirstChildElement("token");
+      check_error(token_el != NULL);
+      token = xmlAsToken(*token_el);
+      active_el = token_el->NextSiblingElement("token");
+    }
 
-    // It may or may not have another sibling element
-    TiXmlElement * active_el = token_el->NextSiblingElement();
+    check_error(token.isValid());
     checkError(active_el != NULL, "Active element required for merge.");
+
     TokenId active_token = xmlAsToken(*active_el);
     check_error(active_token.isValid());
     m_client->merge(token, active_token);
   }
 
   void DbClientTransactionPlayer::playRejected(const TiXmlElement & element) {
-    TiXmlElement * token_el = element.FirstChildElement();
-    check_error(token_el != NULL);
-    TokenId token = xmlAsToken(*token_el);
+    TokenId token = TokenId::noId();
+    if(strcmp(element.Value(), "invoke") == 0) {
+      check_error(element.Attribute("identifier") != NULL);
+      std::string name(element.Attribute("identifier"));
+      token = m_tokens[name];
+    }
+    else {
+      TiXmlElement * token_el = element.FirstChildElement();
+      check_error(token_el != NULL);
+      token = xmlAsToken(*token_el);
+    }
     check_error(token.isValid());
     m_client->reject(token);    
   }
 
   void DbClientTransactionPlayer::playCancelled(const TiXmlElement & element)
   {
-    TiXmlElement * token_el = element.FirstChildElement();
-    check_error(token_el != NULL);
-    TokenId token = xmlAsToken(*token_el);
+    TokenId token = TokenId::noId();
+    if(strcmp(element.Value(), "invoke") == 0) {
+      check_error(element.Attribute("identifier") != NULL);
+      std::string name(element.Attribute("identifier"));
+      token = m_tokens[name];
+    }
+    else {
+      TiXmlElement * token_el = element.FirstChildElement();
+      check_error(token_el != NULL);
+      token = xmlAsToken(*token_el);
+    }
     check_error(token.isValid());
     m_client->cancel(token);    
+  }
+
+  template<typename Iterator>
+  void DbClientTransactionPlayer::playUncancelled(const TiXmlElement& element, Iterator start,
+						  Iterator end) {
+    debugMsg("DbClientTransactionPlayer:playUncancelled",
+	     "Processing inverse of " << element);
+    TokenId token = TokenId::noId();
+    if(strcmp(element.Value(), "invoke") == 0) {
+      check_error(element.Attribute("identifier") != NULL);
+      std::string name(element.Attribute("identifier"));
+      token = m_tokens[name];
+    }
+    else {
+      TiXmlElement * token_el = element.FirstChildElement();
+      check_error(token_el != NULL);
+      token = xmlAsToken(*token_el);
+    }
+    check_error(token.isValid());
+
+    debugMsg("DbClientTransactionPlayer:playUncancelled",
+	     "Looking for a prior restriction transaction.");
+    for(Iterator it = start; it != end; ++it) {
+      debugMsg("DbClientTransactionPlayer:playUncancelled",
+	       "Checking " << **it);
+      if(strcmp((*it)->Value(), "activate") == 0 || strcmp((*it)->Value(), "merge") == 0 ||
+	 strcmp((*it)->Value(), "reject") == 0 ||
+	 (strcmp((*it)->Value(), "invoke") == 0 && (*it)->Attribute("name") != NULL &&
+	  (strcmp((*it)->Attribute("name"), "activate") == 0 ||
+	   strcmp((*it)->Attribute("name"), "merge") == 0 ||
+	   strcmp((*it)->Attribute("name"), "reject") == 0))) {
+	TokenId transToken = TokenId::noId();
+	if(strcmp((*it)->Value(), "invoke") == 0) {
+	  check_error((*it)->Attribute("identifier") != NULL);
+	  std::string name((*it)->Attribute("identifier"));
+	  transToken = m_tokens[name];
+	}
+	else {
+	  TiXmlElement * token_el = (*it)->FirstChildElement();
+	  check_error(token_el != NULL);
+	  transToken = xmlAsToken(*token_el);
+	}
+	check_error(transToken.isValid());
+	if(transToken == token) {
+	  debugMsg("DbClientTransactionPlayer:playUncancelled",
+		   "Transaction is the proper inverse.  Playing.");
+	  processTransaction(**it);
+	  return;
+	}
+      }
+    }
+    checkError(ALWAYS_FAIL, "No activate, merge, or reject transaction prior to " << element);
   }
 
   void DbClientTransactionPlayer::playVariableAssigned(const TiXmlElement & element) {
 
     const char * name = element.Attribute("name");
-		check_error(name != NULL);
+    check_error(name != NULL);
     debugMsg("DbClientTransactionPlayer:playVariableAssigned", "assigning for " << name);
     ConstrainedVariableId variable = parseVariable(name);
     debugMsg("DbClientTransactionPlayer:playVariableAssigned", "found variable " << variable->getKey());
@@ -459,24 +1043,38 @@ namespace EUROPA {
     check_error(value_el != NULL);
     const AbstractDomain * value = xmlAsAbstractDomain(*value_el);
     debugMsg("DbClientTransactionPlayer:playVariableAssigned", "specifying to " << (*value));
-		variable->restrictBaseDomain(*value);
-	}
+    variable->restrictBaseDomain(*value);
+  }
 
   void DbClientTransactionPlayer::playVariableSpecified(const TiXmlElement & element) {
-    TiXmlElement * var_el = element.FirstChildElement();
-    check_error(var_el != NULL);
-    ConstrainedVariableId variable = xmlAsVariable(*var_el);
-    check_error(variable.isValid());
+    debugMsg("DbClientTransactionPlayer:playVariableSpecified",
+	     "Playing " << element);
+    ConstrainedVariableId var = ConstrainedVariableId::noId();
+    TiXmlElement* value_el = NULL;
+    if(strcmp(element.Value(), "invoke") == 0) {
+      check_error(element.Attribute("identifier") != NULL);
+      var = parseVariable(element.Attribute("identifier"));
+      value_el = element.FirstChildElement();
+    }
+    else {
+      TiXmlElement * var_el = element.FirstChildElement("variable");
+      if(var_el == NULL)
+	var_el = element.FirstChildElement("id");
+      check_error(var_el != NULL);
+      var = xmlAsVariable(*var_el);
+      value_el = var_el->NextSiblingElement();
+    }
 
-    TiXmlElement * value_el = var_el->NextSiblingElement();
+    check_error(var.isValid());
     check_error(value_el != NULL);
+
     const AbstractDomain * value = xmlAsAbstractDomain(*value_el);
     if (value->isSingleton()) {
       double v = value->getSingletonValue();
-      m_client->specify(variable, v);
+      m_client->specify(var, v);
     } 
     else
-      playVariableRestricted(element);
+      m_client->restrict(var, *value);
   }
 
   void DbClientTransactionPlayer::playVariableRestricted(const TiXmlElement & element) {
@@ -492,9 +1090,51 @@ namespace EUROPA {
   }
 
   void DbClientTransactionPlayer::playVariableReset(const TiXmlElement & element) {
+    ConstrainedVariableId var = ConstrainedVariableId::noId();
+    if(strcmp(element.Value(), "invoke") == 0) {
+      check_error(element.Attribute("identifier") != NULL);
+      var = parseVariable(element.Attribute("identifier"));
+    }
+    else {
+      TiXmlElement * var_el = element.FirstChildElement();
+      check_error(var_el != NULL);
+      var = xmlAsVariable(*var_el);
+    }
+    check_error(var.isValid());
+    m_client->reset(var);
+  }
+
+  template<typename Iterator>
+  void DbClientTransactionPlayer::playVariableUnreset(const TiXmlElement& element,
+						      Iterator start, Iterator end) {
     TiXmlElement * var_el = element.FirstChildElement();
     check_error(var_el != NULL);
-    m_client->reset(xmlAsVariable(*var_el));
+    ConstrainedVariableId var = xmlAsVariable(*var_el);
+    
+    for(Iterator it = start; it != end; ++it) {
+      if(strcmp((*it)->Value(), "specify") == 0 ||
+	 (strcmp((*it)->Value(), "invoke") == 0 && (*it)->Attribute("name") != NULL &&
+	  strcmp((*it)->Attribute("name"), "specify") == 0)) {
+	ConstrainedVariableId transVar = ConstrainedVariableId::noId();
+	if(strcmp((*it)->Value(), "invoke") == 0) {
+	  check_error((*it)->Attribute("identifier") != NULL);
+	  transVar = parseVariable((*it)->Attribute("identifier"));
+	}
+	else {
+	  TiXmlElement * var_el = (*it)->FirstChildElement("variable");
+	  if(var_el == NULL)
+	    var_el = (*it)->FirstChildElement("id");
+	  check_error(var_el != NULL);
+	  transVar = xmlAsVariable(*var_el);
+	}
+	check_error(transVar.isValid());
+	if(transVar == var) {
+	  playVariableSpecified(**it);
+	  return;
+	}
+      }
+    }
+    checkError(ALWAYS_FAIL, "No specify transaction prior to " << element);
   }
 
   void DbClientTransactionPlayer::playInvokeConstraint(const TiXmlElement & element) {
@@ -520,131 +1160,123 @@ namespace EUROPA {
     debugMsg("DbClientTransactionPlayer:playInvokeConstraint","Added constraint " << name << " args: " << os.str());
   }
 
+  void DbClientTransactionPlayer::playUninvokeConstraint(const TiXmlElement& element) {
+    const char* index = element.Attribute("index");
+    check_error(index != NULL);
+    
+    std::stringstream str;
+    str << index;
+    int key;
+    str >> key;
+    ConstraintId constr = m_client->getConstraintByIndex(key);
+    m_client->deleteConstraint(constr);
+  }
+
+  template<typename Iterator>
+  void DbClientTransactionPlayer::playUninvokeConstraint(const TiXmlElement& element,
+							 Iterator start, Iterator end) {
+    const char* identifier = element.Attribute("identifier");
+    if(identifier != NULL || element.FirstChildElement() == NULL) {
+      playUninvokeTransaction(element, start, end);
+      return;
+    }
+    playUninvokeConstraint(element);
+  }
+
+  template<typename Iterator>
+  void DbClientTransactionPlayer::playReinvokeConstraint(const TiXmlElement& element,
+							 Iterator start, Iterator end) {
+    const char* name = element.Attribute("name");
+    check_error(name != NULL);
+    const char* index = element.Attribute("index");
+    std::vector<ConstrainedVariableId> vars;
+    for(TiXmlElement* varElem = element.FirstChildElement("variable"); varElem != NULL;
+	varElem = varElem->NextSiblingElement("variable")) {
+      ConstrainedVariableId var = xmlAsVariable(*varElem);
+      check_error(var.isValid());
+      vars.push_back(var);
+    }
+    check_error(!vars.empty());
+
+    for(Iterator it = start; it != end; ++it) {
+      if(strcmp((*it)->Value(), "invoke") == 0 && (*it)->Attribute("identifier") == NULL &&
+	 (*it)->Attribute("name") != NULL && strcmp((*it)->Attribute("name"), name) == 0 &&
+	 ((index == NULL || (*it)->Attribute("index") == NULL) ||
+	  strcmp((*it)->Attribute("index"), index) == 0)) {
+	std::vector<ConstrainedVariableId> otherVars;
+	for(TiXmlElement* varElem = (*it)->FirstChildElement("variable"); varElem != NULL;
+	    varElem = varElem->NextSiblingElement("variable")) {
+	  ConstrainedVariableId var = xmlAsVariable(*varElem);
+	  check_error(var.isValid());
+	  otherVars.push_back(var);
+	}
+	check_error(!otherVars.empty());
+	if(vars == otherVars) {
+	  playInvokeConstraint(**it);
+	  return;
+	}
+      }
+    }
+    checkError(ALWAYS_FAIL, "No creation transaction to complement " << element);
+  }
+
   void DbClientTransactionPlayer::playInvokeTransaction(const TiXmlElement & element) {
     const char * name = element.Attribute("name");
     check_error(name != NULL);
     const char * identifier = element.Attribute("identifier");
     if (strcmp(name, "close") == 0) {
-      if (identifier == NULL) {
-        // close database special case
-        m_client->close();
-        return;
-      }
-      m_client->close(identifier);
-      return;
-    }
-
-    if (strcmp(name, "constrain") == 0) {
-      // constrain token(s) special case
-      const char * object_name = identifier;
-      ObjectId object = m_client->getObject(object_name);
-      check_error(object.isValid(),
-                  "constrain transaction refers to an undefined object: '"
-                   + std::string(object_name) + "'");
-      TiXmlElement * predecessor_el = element.FirstChildElement();
-      check_error(predecessor_el != NULL, "missing mandatory predecessor identifier for constrain transaction");
-      TokenId predecessor = xmlAsToken(*predecessor_el);
-      check_error(predecessor.isValid(),
-                  "invalid predecessor identifier for constrain transaction");
-      
-      TiXmlElement * successor_el = predecessor_el->NextSiblingElement();
-      TokenId successor = predecessor;
-      if (successor_el != NULL) {
-        successor = xmlAsToken(*successor_el);
-        check_error(successor.isValid(),
-                    "invalid successor token identifier for constrain transaction");
-      }
-
-      m_client->constrain(object, predecessor, successor);
-      return;
-    }
-
-    if (strcmp(name, "free") == 0) {
-      // free token(s) special case
-      const char * object_name = identifier;
-      ObjectId object = m_client->getObject(object_name);
-      check_error(object.isValid(),
-                  "free transaction refers to an undefined object: '"
-                   + std::string(object_name) + "'");
-      TiXmlElement * predecessor_el = element.FirstChildElement();
-      check_error(predecessor_el != NULL, "missing mandatory predecessor identifier for free transaction");
-      TokenId predecessor = xmlAsToken(*predecessor_el);
-      check_error(predecessor.isValid(),
-                  "invalid predecessor identifier for free transaction");
-      
-      TiXmlElement * successor_el = predecessor_el->NextSiblingElement();
-      TokenId successor = predecessor;
-      if (successor_el != NULL) {
-        successor = xmlAsToken(*successor_el);
-        check_error(successor.isValid(),
-                    "invalid successor token identifier for free transaction");
-      }
-
-      m_client->free(object, predecessor, successor);
-      return;
-    }
-
-    if (strcmp(name, "activate") == 0) {
-      // activate token special case
-      std::string token_name = identifier;
-      TokenId token = m_tokens[token_name];
-      check_error(token.isValid(), "Invalid token name '" + token_name + "' for activation.");
-      if(!token->isActive()) // Temporary. Pull out when we scrub test input files
-	m_client->activate(token);
-      return;
-    }
-
-    if (strcmp(name, "merge") == 0) {
-      // merge token special case
-      std::string token_name = identifier;
-      TokenId token = m_tokens[token_name];
-      check_error(token.isValid());
-      TiXmlElement * active_el = element.FirstChildElement();
-      check_error(active_el != NULL);
-      TokenId activeToken = xmlAsToken(*active_el);
-      check_error(activeToken.isValid());
-      m_client->merge(token, activeToken);
-      return;
-    }
-
-    if (strcmp(name, "reject") == 0) {
-      // reject token special case
-      std::string token_name = identifier;
-      TokenId token = m_tokens[token_name];
-      check_error(token.isValid());
-      m_client->reject(token);
-      return;
-    }
-
-    if (strcmp(name, "cancel") == 0) {
-      // cancel token special case
-      std::string token_name = identifier;
-      TokenId token = m_tokens[token_name];
-      check_error(token.isValid());
-      m_client->cancel(token);
-      return;
-    }
-
-    if (strcmp(name, "specify") == 0) {
-      // specify variable special case
-      debugMsg("DbClientTransactionPlayer:playInvokeTransaction", "specifying for " << identifier);
-      ConstrainedVariableId variable = parseVariable(identifier);
-      debugMsg("DbClientTransactionPlayer:playInvokeTransaction", "found variable " << variable->getKey());
-      TiXmlElement * value_el = element.FirstChildElement();
-      check_error(value_el != NULL);
-      const AbstractDomain * value = xmlAsAbstractDomain(*value_el);
-      debugMsg("DbClientTransactionPlayer:playInvokeTransaction", "specifying to " << (*value));
-      if (value->isSingleton()) {
-	double v = value->getSingletonValue();
-	m_client->specify(variable, v);
-      } 
+      if(identifier != NULL)
+	m_client->close(identifier);
       else
-	m_client->restrict(variable, *value);
+        m_client->close();
+    }
+    else if (strcmp(name, "constrain") == 0)
+      playConstrained(element);
+    else if (strcmp(name, "free") == 0)
+      playFreed(element);
+    else if (strcmp(name, "activate") == 0)
+      playActivated(element);
+    else if (strcmp(name, "merge") == 0)
+      playMerged(element);
+    else if (strcmp(name, "reject") == 0)
+      playRejected(element);
+    else if (strcmp(name, "cancel") == 0)
+      playCancelled(element);
+    else if (strcmp(name, "specify") == 0)
+      playVariableSpecified(element);
+    else {
+      check_error(ALWAYS_FAILS, "unexpected transaction invoked: '" + std::string(name) + "'");
+    }
+  }
 
+  template<typename Iterator>
+  void DbClientTransactionPlayer::playUninvokeTransaction(const TiXmlElement& element,
+							  Iterator start, Iterator end) {
+    const char * name = element.Attribute("name");
+    check_error(name != NULL);
+    if (strcmp(name, "close") == 0) {
+      debugMsg("DbClientTransactionPlayer:playUninvokeTransaction", 
+	       "Warning:  can't un-close the database or a type.");
       return;
     }
-
-    check_error(ALWAYS_FAILS, "unexpected transaction invoked: '" + std::string(name) + "'");
+    else if (strcmp(name, "constrain") == 0)
+      playFreed(element);
+    else if (strcmp(name, "free") == 0)
+      playUnfreed(element, start, end);
+    else if (strcmp(name, "activate") == 0)
+      playCancelled(element);
+    else if (strcmp(name, "merge") == 0)
+      playCancelled(element);
+    else if (strcmp(name, "reject") == 0)
+      playCancelled(element);
+    else if (strcmp(name, "cancel") == 0)
+      playUncancelled(element, start, end);
+    else if (strcmp(name, "specify") == 0)
+      playVariableReset(element);
+    else {
+      check_error(ALWAYS_FAILS, "unexpected transaction invoked: '" + std::string(name) + "'");
+    }
+    
   }
 
   //! string input functions

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <map>
 #include <list>
+#include <set>
 
 
 /**
@@ -34,8 +35,34 @@ namespace EUROPA {
      */
     void play(const DbClientTransactionLogId& txLog);
 
+    /**
+     * @brief Play the inverses of transactions from an input stream.
+     * @param is a stream of xml-based transactions
+     * @param breakpoint If true, stop at the first "breakpoint" transaction
+     */
+    void rewind(std::istream& is, bool breakpoint = false);
+
+    /**
+     * @brief Play the inverses of transactions from a TransactionLog, in reverse order,
+     *        popping reverted transactions.
+     * @param txLog The source log which has all transactions in memory.
+     * @param breakpoint If true, stop at the first "breakpoint" transaction
+     */
+    void rewind(const DbClientTransactionLogId& txLog, bool breakpoint = false);
+
+    void setFilter(const std::set<std::string>& filters);
+    static const std::set<std::string>& MODEL_TRANSACTIONS();
+    static const std::set<std::string>& STATE_TRANSACTIONS();
+    static const std::set<std::string>& NO_TRANSACTIONS();
   protected:
+    typedef std::multimap<std::pair<ConstrainedVariableId, ConstrainedVariableId>, ConstraintId> TemporalRelations;
+
+    bool transactionMatch(const TiXmlElement& trans, const std::string& name) const;
+    bool transactionFiltered(const TiXmlElement& trans) const;
     void processTransaction(const TiXmlElement & element);
+    template<typename Iterator>
+    void processTransactionInverse(const TiXmlElement& element,
+				   Iterator start, Iterator end);
 
     // These are handled by code-generation
     virtual void playDeclareClass(const TiXmlElement &)       {} 
@@ -46,29 +73,65 @@ namespace EUROPA {
     // end code-generation
 
     void playVariableCreated(const TiXmlElement & element);
+    void playVariableDeleted(const TiXmlElement& element); //P
+    template <typename Iterator>
+    void playVariableUndeleted(const TiXmlElement& element, Iterator start, Iterator end);
     void playObjectCreated(const TiXmlElement & element);
+    void playObjectDeleted(const TiXmlElement& element);
+    template <typename Iterator>
+    void playObjectUndeleted(const TiXmlElement& element, Iterator start, Iterator end);
     void playTokenCreated(const TiXmlElement & element);
+    void playTokenDeleted(const TiXmlElement& element);
+    template <typename Iterator>
+    void playTokenUndeleted(const TiXmlElement& element, Iterator start, Iterator end); 
     void playFactCreated(const TiXmlElement & element);
     void playConstrained(const TiXmlElement & element);
     void playFreed(const TiXmlElement & element);
+    template <typename Iterator>
+    void playUnfreed(const TiXmlElement& element, Iterator start, Iterator end);
     void playActivated(const TiXmlElement & element);
     void playMerged(const TiXmlElement & element);
     void playRejected(const TiXmlElement & element);
     void playCancelled(const TiXmlElement & element);
+    template <typename Iterator>
+    void playUncancelled(const TiXmlElement& element, Iterator start, Iterator end);
     void playVariableSpecified(const TiXmlElement & element);
     void playVariableAssigned(const TiXmlElement & element);
     void playVariableRestricted(const TiXmlElement & element);
     void playVariableReset(const TiXmlElement & element);
+    template <typename Iterator>
+    void playVariableUnreset(const TiXmlElement& element, Iterator start, Iterator end);
     void playInvokeConstraint(const TiXmlElement & element);
+    void playUninvokeConstraint(const TiXmlElement& element);
+    template <typename Iterator>
+    void playUninvokeConstraint(const TiXmlElement& element, Iterator start, Iterator end);
+    template <typename Iterator>
+    void playReinvokeConstraint(const TiXmlElement& element, Iterator start, Iterator end);
     void playInvokeTransaction(const TiXmlElement & element);
+    template <typename Iterator>
+    void playUninvokeTransaction(const TiXmlElement& element, Iterator start, Iterator end);
+    void playTemporalRelationCreated(const TiXmlElement& element);
+    void playTemporalRelationDeleted(const TiXmlElement& element);
+    TemporalRelations::iterator getTemporalConstraint(const ConstrainedVariableId& fvar,
+						      const ConstrainedVariableId& svar,
+						      const std::string& name);
+    void deleteTemporalConstraint(TemporalRelations::iterator it);
+    void removeTemporalConstraint(const ConstrainedVariableId& fvar,
+				  const ConstrainedVariableId& svar,
+				  const std::string& name);
+    void getElementsFromConstrain(const TiXmlElement& elem, ObjectId& obj, TokenId& pred,
+				  TokenId& succ);
 
     DbClientId m_client;
     int m_objectCount;
     int m_varCount;
+    std::set<std::string> m_filters;
     std::map<std::string, TokenId> m_tokens;
     std::map<std::string, ConstrainedVariableId> m_variables;
-    std::list<std::string> m_enumerations;
-    std::list<std::string> m_classes;
+    TemporalRelations m_relations;
+    //These two seem not to be used ~MJI
+//     std::list<std::string> m_enumerations;
+//     std::list<std::string> m_classes;
 
   //! string input functions
 
@@ -128,7 +191,7 @@ namespace EUROPA {
         std::vector<ConstrainedVariableId> variables;\
         variables.push_back( ftoken##_token->get##fvar());\
         variables.push_back( stoken##_token->get##svar());\
-        m_client->createConstraint(#relation, variables);\
+        m_relations.insert(std::make_pair(std::make_pair(variables[0], variables[1]), m_client->createConstraint(#relation, variables))); \
         }
 
   };

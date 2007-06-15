@@ -49,6 +49,11 @@ namespace EUROPA {
     ConstrainedVariableId createVariable(const char* typeName, const char* name, bool isTmpVar = false);
 
     /**
+     * @brief Delete a variable.  By way of symmetry with createVariable().
+     */
+    void deleteVariable(const ConstrainedVariableId& var);
+
+    /**
      * @brief Create an object instance in the dabatase.
      * @param key The expected key value for the object. This is used as a check to ensure we are creating values
      * in the order we expect.
@@ -72,6 +77,11 @@ namespace EUROPA {
     ObjectId createObject(const char* type, const char* name, const std::vector<const AbstractDomain*>& arguments);
 
     /**
+     * @brief Delete an object.  By way of symmetry with createObject().
+     */
+    void deleteObject(const ObjectId& obj);
+
+    /**
      * @brief Close the database. This will prohibit any further insertion of objects.
      * @see close(const char* objectType)
      */
@@ -90,6 +100,11 @@ namespace EUROPA {
      * @return The Id of the token created. Will error out rather than return a noId.
      */
     TokenId createToken(const char* predicateName, bool rejectable = false, bool isFact = false);
+
+    /**
+     * @brief Deletes a token instance.  By way of symmetry with createToken().
+     */
+    void deleteToken(const TokenId& token, const std::string& name = "");
 
     /**
      * @brief imposes a constraint such that token comes before successor, on the given object.
@@ -155,6 +170,11 @@ namespace EUROPA {
 				  const AbstractDomain& domain);
 
     /**
+     * @brief Delete a constraint.  By way of symmetry with createConstraint().
+     */
+    void deleteConstraint(const ConstraintId& constr);
+
+    /**
      * @brief Restricts the base domain of a variable
      * @param variable The variable to be restricted
      * @param value The new base domain of the variable.
@@ -206,6 +226,12 @@ namespace EUROPA {
     const ConstrainedVariableId getGlobalVariable(const LabelStr& varName) const;
 
     /**
+     * @brief Test if a global exists for a given name
+     * @return true if present, otherwise false
+     */
+    bool isGlobalVariable(const LabelStr& varName) const;
+
+    /**
      * @brief Retrieve token defined by a particular path from a root token. Transaction Logging must be enabled.
      * For example: [1265,2,3,1,0,9] will return (Token 1265).slave(2).slave(3).slave(1).slave(0).slave(9)
      * @param relativePath The relative path to find the target token where each vector position reflects the position in the ordered
@@ -246,6 +272,10 @@ namespace EUROPA {
      * this fast!
      */
     unsigned int getIndexByVariable(const ConstrainedVariableId& var);
+
+    ConstraintId getConstraintByIndex(unsigned int index);
+    
+    unsigned int getIndexByConstraint(const ConstraintId& constr);
 
     /**
      * @brief Adds a listener to operations invoked on the client
