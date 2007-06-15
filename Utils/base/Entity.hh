@@ -106,6 +106,11 @@ namespace EUROPA{
     static EntityId getEntity(int key);
 
     /**
+     * @brief Get all entities
+     */
+    static void getEntities(std::set<EntityId>& resultSet);
+
+    /**
      * @brief Retrieve a key
      */
     static int allocateKey();

@@ -334,6 +334,20 @@ namespace EUROPA {
     return scope;
   }
 
+  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1,
+					       const ConstrainedVariableId& arg2,
+					       const ConstrainedVariableId& arg3,
+					       const ConstrainedVariableId& arg4,
+					       const ConstrainedVariableId& arg5,
+					       const ConstrainedVariableId& arg6,
+					       const ConstrainedVariableId& arg7,
+					       const ConstrainedVariableId& arg8){
+    check_error(arg8.isValid());
+    std::vector<ConstrainedVariableId>& scope =  makeScope(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+    scope.push_back(arg8);
+    return scope;
+  }
+
   std::string Constraint::toString() const{
     std::stringstream sstr;
     sstr << Entity::toString() << std::endl;

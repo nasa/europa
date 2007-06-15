@@ -30,7 +30,6 @@ namespace EUROPA {
       }
   }
 
-
   //DEFINE_GLOBAL_CONST(int, g_maxInt, (LONG_MAX/8)); /*!< Same as max finite time */
   DEFINE_GLOBAL_CONST(int, g_maxInt, (std::numeric_limits<int>::max() / 8));
   DEFINE_GLOBAL_CONST(int, g_infiniteTime, (g_maxInt() + 1));

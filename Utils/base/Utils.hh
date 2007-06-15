@@ -21,7 +21,6 @@
 
 namespace EUROPA {
 
-
   /**
    * Utility class that might get promoted later.
    */

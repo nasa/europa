@@ -61,6 +61,14 @@ namespace EUROPA {
     return entity;
   }
 
+  void Entity::getEntities(std::set<EntityId>& resultSet){
+    for(std::map<int, unsigned long int>::const_iterator it = entitiesByKey().begin();
+	it != entitiesByKey().end();
+	++it){
+      resultSet.insert((EntityId) it->second);
+    }
+  }
+
   void Entity::setExternalEntity(const EntityId& externalEntity){
     check_error(m_externalEntity.isNoId());
     check_error(externalEntity.isValid());

@@ -129,8 +129,11 @@ namespace EUROPA {
         return;
       os << name << " Tokens: *************************" << std::endl;
       TokenSet::const_iterator it = tokens.begin();
-      for ( ; it != tokens.end(); it++)
-        writeToken(*it, os);
+      for ( ; it != tokens.end(); ++it){
+	TokenId tok = *it;
+	checkError(tok.isValid(), tok);
+        writeToken(tok, os);
+      }
     }
 
     void PlanDatabaseWriter::writeToken(const TokenId& t, std::ostream& os) {
@@ -142,6 +145,7 @@ namespace EUROPA {
       std::vector<ConstrainedVariableId> vars = t->getParameters();
       for (std::vector<ConstrainedVariableId>::const_iterator varit = vars.begin(); varit != vars.end(); ++varit) {
 	ConstrainedVariableId v = (*varit);
+	checkError(v.isValid(), v);
 	const AbstractDomain& dom = v->derivedDomain();
 
 	if(dom.isNumeric() && dom.minDelta() < 1)
