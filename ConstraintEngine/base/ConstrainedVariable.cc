@@ -263,6 +263,13 @@ namespace EUROPA {
       results.insert(it->first);
   }
 
+  void ConstrainedVariable::constraints(ConstraintSet& results) const {
+    check_error(!Entity::isPurging());
+    ConstraintList::const_iterator it = m_constraints.begin();
+    for ( ; it != m_constraints.end(); ++it)
+      results.insert(it->first);
+  }
+
   unsigned int ConstrainedVariable::constraintCount() const{
     return m_constraints.size();
   }

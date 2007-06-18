@@ -330,6 +330,12 @@ namespace EUROPA {
     static const LabelStr& noObject();
 
     /**
+     * @brief Utility for allocating pseudo variable names such that there are no duplicates. Duplicates can be dangerous
+     * since associative maps look up variables by name and can lead to mix-ups.
+     */
+    static LabelStr makePseudoVarName();
+
+    /**
      * @brief Add a parameter as a member to the object. This is used when building the instance
      * and cannot be called once the specific token instance has been closed.
      * @param baseDomain The base domain to use to populate the variable

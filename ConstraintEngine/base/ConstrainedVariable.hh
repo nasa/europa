@@ -86,6 +86,11 @@ namespace EUROPA {
     void constraints(std::set<ConstraintId>& results) const;
 
     /**
+     * @brief Retrieve all constraints on this variable.
+     */
+    void constraints(ConstraintSet& results) const;
+
+    /**
      * @brief Retrive the count of constraints direclt on this variable
      */
     unsigned int constraintCount() const;

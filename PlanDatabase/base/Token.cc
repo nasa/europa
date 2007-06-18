@@ -610,6 +610,7 @@ namespace EUROPA{
 
     for(ConstrainedVariableSet::const_iterator it = m_localVariables.begin(); it != m_localVariables.end(); ++it){
       ConstrainedVariableId var = *it;
+      checkError(var.isValid(), var);
       var->restrictBaseDomain(var->lastDomain());
     }
   }
@@ -669,8 +670,8 @@ namespace EUROPA{
     // the token also for greater efficiency
     std::set<int> allVars;
 
-    // Construct the set of constraints on variables of this token
-    std::set<ConstraintId> constraints;
+    // Construct the set of constraints on variables of this token. Use a constraint set to avoid memory dependent order.
+    ConstraintSet constraints;
     for(unsigned int i = 0; i < varCount; i++){
       ConstrainedVariableId var = m_allVariables[i];
       var->constraints(constraints);
@@ -683,8 +684,9 @@ namespace EUROPA{
       allVars.insert(var->getKey());
     }
 
-    for(std::set<ConstraintId>::const_iterator it = constraints.begin(); it != constraints.end(); ++it){
+    for(ConstraintSet::const_iterator it = constraints.begin(); it != constraints.end(); ++it){
       ConstraintId constraint = *it;
+      checkError(constraint.isValid(), constraint);
 
       // No problem if the constraint has been deactivated already
       if(!constraint->isActive() || constraint->isRedundant())
@@ -731,6 +733,14 @@ namespace EUROPA{
 	it != m_allVariables.end(); 
 	++it){
       ConstrainedVariableId var = *it;
+      var->deactivate();
+    }
+
+    for(std::vector<ConstrainedVariableId>::const_iterator it = m_pseudoVariables.begin(); 
+	it != m_pseudoVariables.end(); 
+	++it){
+      ConstrainedVariableId var = *it;
+      checkError(var.isValid(), var << " is not active for token " << getKey());
       var->deactivate();
     }
 
@@ -832,5 +842,13 @@ namespace EUROPA{
   	os << "}" << std::endl; 
   	return os.str();
   }
-  
+
+  LabelStr Token::makePseudoVarName(){
+    static int sl_varKey(0);
+    static std::string sl_prefix("PSEUDO_VARIABLE_");
+    std::stringstream ss;
+    ss << sl_prefix;
+    ss << sl_varKey++;
+    return ss.str();
+  }
 }
