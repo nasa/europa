@@ -50,12 +50,11 @@ namespace NDDL {
 						  std::vector<ConstrainedVariableId>& vars,
 						  const ELEMENT_TYPE& domain,
 						  const EntityId& parent){
-    static const LabelStr PSEUDO_VARIABLE("PSEUDO_VARIABLE");
 
     ConstrainedVariableId var = (new Variable< ELEMENT_TYPE >(ce, 
 							      domain,
 							      false,
-							      PSEUDO_VARIABLE,
+							      Token::makePseudoVarName(),
 							      parent))->getId();
     vars.push_back(var);
     return var;
