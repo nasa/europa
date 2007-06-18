@@ -15,14 +15,14 @@
   Changes by Mike (01/03/2007):
   1) got rid of Id types.  They create a necessity for a double-wrapping.
   2) changed "getCapacity" and "getUsage" to "getLimits" and "getLevels".  This is more in
-     line with internal usage and is also much clearer
+  line with internal usage and is also much clearer
   3) changed "getTokens" in PSObject to return a pointer to a list, since the list changes.
-     as a result, we may want to have the PSList destructor destroy the things it wraps.
+  as a result, we may want to have the PSList destructor destroy the things it wraps.
   4) changed Instant and PSEntityKey into typedefs rather than #defines because it plays havoc
-     with other code
+  with other code
   5) re-named "Instant" to "TimePoint" so as not to clash with existing Instant definition in 
-     Resource.
- */
+  Resource.
+*/
 
 namespace EUROPA {
 
@@ -90,9 +90,9 @@ namespace EUROPA {
     PSList<PSToken*> getTokens();    	 
     PSToken* getTokenByKey(PSEntityKey id);	
 		
-	PSList<PSVariable*> getGlobalVariables();
-	PSVariable* getVariableByKey(PSEntityKey id);
-	PSVariable* getVariableByName(const std::string& name);
+    PSList<PSVariable*> getGlobalVariables();
+    PSVariable* getVariableByKey(PSEntityKey id);
+    PSVariable* getVariableByName(const std::string& name);
 		
     PSSolver* createSolver(const std::string& configurationFile);
     std::string planDatabaseToString();
@@ -150,7 +150,7 @@ namespace EUROPA {
     
     std::string getObjectType() const; 
 
-    const PSList<PSVariable*>& getMemberVariables();
+    PSList<PSVariable*> getMemberVariables();
     PSVariable* getMemberVariable(const std::string& name);
 
     PSList<PSToken*> getTokens();
@@ -165,7 +165,6 @@ namespace EUROPA {
     
   private:
     ObjectId m_obj;
-    PSList<PSVariable*> m_vars;
   };
     
   class PSSolver
@@ -228,9 +227,9 @@ namespace EUROPA {
     
     PSObject* getOwner(); 
 	    
-	PSToken* getMaster();
+    PSToken* getMaster();
 	
-	PSList<PSToken*> getSlaves();
+    PSList<PSToken*> getSlaves();
 	    
     // TODO: Add setStatus(int newStatus)?; ask Mike Iatauro
     // TODO: getStatus()? -> MERGED, ACTIVE, REJECTED, etc
@@ -242,7 +241,7 @@ namespace EUROPA {
     //Traditionally, the temporal variables and the object and state variables aren't 
     //considered "parameters".  I'm putting them in for the moment, but clearly the token
     //interface has the least thought put into it. ~MJI
-    const PSList<PSVariable*>& getParameters();
+    PSList<PSVariable*> getParameters();
     PSVariable* getParameter(const std::string& name);
 
 
@@ -268,7 +267,6 @@ namespace EUROPA {
     PSToken(const TokenId& tok);
 
     TokenId m_tok;
-    PSList<PSVariable*> m_vars;
   };
     
   enum PSVarType {OBJECT,STRING,INTEGER,DOUBLE,BOOLEAN};

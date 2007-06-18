@@ -193,7 +193,7 @@ namespace EUROPA {
   {
   public:
     std::string getObjectType() const;
-    const PSList<PSVariable*>& getMemberVariables();
+    PSList<PSVariable*> getMemberVariables();
     PSVariable* getMemberVariable(const std::string& name);
     PSList<PSToken*> getTokens();
     ~PSObject();
@@ -246,7 +246,7 @@ namespace EUROPA {
     double getViolation() const;
     std::string getViolationExpl() const;
 
-    const PSList<PSVariable*>& getParameters();
+    PSList<PSVariable*> getParameters();
     PSVariable* getParameter(const std::string& name);
     
     std::string toString();

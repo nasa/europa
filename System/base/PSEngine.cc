@@ -68,22 +68,22 @@ namespace EUROPA {
   }
 
   PSObject::PSObject(const ObjectId& obj) : PSEntity(obj), m_obj(obj) {
+  }
+
+  PSObject::~PSObject() {
+  }
+
+  PSList<PSVariable*> PSObject::getMemberVariables() {
+    PSList<PSVariable*> retval;
     const std::vector<ConstrainedVariableId>& vars = m_obj->getVariables();
     for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
 	++it) {
       PSVariable* var = new PSVariable(*it); 
       check_runtime_error(var != NULL);
-      m_vars.push_back(var);
+      retval.push_back(var);
     }
-  }
 
-  PSObject::~PSObject() {
-    for(int i = 0; i < m_vars.size(); ++i)
-      delete m_vars.get(i);
-  }
-
-  const PSList<PSVariable*>& PSObject::getMemberVariables() {
-    return m_vars;
+    return retval;
   }
 
   const std::string OBJECT_STR("OBJECT");
@@ -98,13 +98,16 @@ namespace EUROPA {
   }
 
   PSVariable* PSObject::getMemberVariable(const std::string& name) {
+    LabelStr realName(name);
     PSVariable* retval = NULL;
-
-    for(int i = 0; i < m_vars.size(); ++i)
-      if(m_vars.get(i)->getName() == name) {
-	retval = m_vars.get(i);
+    const std::vector<ConstrainedVariableId>& vars = m_obj->getVariables();
+    for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
+	++it) {
+      if((*it)->getName() == realName) {
+	retval = new PSVariable(*it);
 	break;
       }
+    }
     return retval;
   }
 
@@ -120,13 +123,6 @@ namespace EUROPA {
   }
 
   PSToken::PSToken(const TokenId& tok) : PSEntity(tok), m_tok(tok) {
-    const std::vector<ConstrainedVariableId>& vars = m_tok->getVariables();
-    for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
-	++it) {
-      PSVariable* var = new PSVariable(*it);
-      check_runtime_error(var != NULL);
-      m_vars.push_back(var);
-    }
   }
 
   const std::string TOKEN_STR("TOKEN");
@@ -171,15 +167,29 @@ namespace EUROPA {
   double PSToken::getViolation() const {return 0.0;}
   std::string PSToken::getViolationExpl() const { return UNKNOWN; }
 
-  const PSList<PSVariable*>& PSToken::getParameters() {return m_vars;}
+  PSList<PSVariable*> PSToken::getParameters() {
+    PSList<PSVariable*> retval;
+    const std::vector<ConstrainedVariableId>& vars = m_tok->getVariables();
+    for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
+	++it) {
+      PSVariable* var = new PSVariable(*it);
+      check_runtime_error(var != NULL);
+      retval.push_back(var);
+    }
+    return retval;
+  }
 
   PSVariable* PSToken::getParameter(const std::string& name) {
+    LabelStr realName(name);
     PSVariable* retval = NULL;
-    for(int i = 0; i < m_vars.size(); ++i)
-      if(m_vars.get(i)->getName() == name) {
-	retval = m_vars.get(i);
+    const std::vector<ConstrainedVariableId>& vars = m_tok->getVariables();
+    for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
+	++it) {
+      if((*it)->getName() == realName) {
+	retval = new PSVariable(*it);
 	break;
       }
+    }
     return retval;
   }
 
@@ -197,9 +207,11 @@ namespace EUROPA {
   	
   	if (m_tok->isMerged())
   	    os << "    mergedInto:" << m_tok->getActiveToken()->getKey() << std::endl;
-  	
-  	for (int i=0;i<m_vars.size();i++) {
-  	    os << "    " << m_vars.get(i)->toString() << std::endl;
+
+	PSList<PSVariable*> vars = getParameters();
+  	for (int i=0;i<vars.size();i++) {
+  	    os << "    " << vars.get(i)->toString() << std::endl;
+	    delete vars.get(i);
   	}
   	
   	os << "}" << std::endl;
