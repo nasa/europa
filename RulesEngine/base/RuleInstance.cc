@@ -85,6 +85,8 @@ namespace EUROPA {
   }
 
   void RuleInstance::handleDiscard(){
+    checkError(m_token.isValid(), m_token);
+
     if(isExecuted())
       undo();
 
@@ -93,8 +95,9 @@ namespace EUROPA {
       delete m_guardDomain;
 
     // Delete the guard listener if we are not in purge mode. Purge mode will handle the deletion
-    // of the constraint in the Constraint Engine
-    if(!m_guardListener.isNoId() && !Entity::isPurging())
+    // of the constraint in the Constraint Engine. Also, ignore if we are terminating the token since
+    // variable deallocation will nuke the constraint.
+    if(!m_guardListener.isNoId() && !Entity::isPurging() && !m_token->isTerminated())
       m_guardListener->discard();
 
     Entity::handleDiscard();

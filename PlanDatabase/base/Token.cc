@@ -733,6 +733,7 @@ namespace EUROPA{
 	it != m_allVariables.end(); 
 	++it){
       ConstrainedVariableId var = *it;
+      checkError(var.isValid(), var << " is not valid for token " << getKey());
       var->deactivate();
     }
 
@@ -740,7 +741,7 @@ namespace EUROPA{
 	it != m_pseudoVariables.end(); 
 	++it){
       ConstrainedVariableId var = *it;
-      checkError(var.isValid(), var << " is not active for token " << getKey());
+      checkError(var.isValid(), var << " is not valid for token " << getKey());
       var->deactivate();
     }
 
