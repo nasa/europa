@@ -186,7 +186,7 @@ namespace EUROPA {
 
     sl_txCount++;
     debugMsg("DbClientTransactionPlayer:processTransaction",
-	     "Processing transaction '" << tagname << "'");
+	     "Processing transaction " << element);
     if(!transactionFiltered(element)) {
       if(transactionMatch(element, "breakpoint")) {}
       else if (transactionMatch(element, "class_decl"))
@@ -338,6 +338,7 @@ namespace EUROPA {
     std::string std_name = name;
     m_variables[std_name] = variable;
   }
+
 
   void DbClientTransactionPlayer::playVariableDeleted(const TiXmlElement& element) {
     debugMsg("DbClientTransactionPlayer:playVariableDeleted",
@@ -1334,7 +1335,9 @@ namespace EUROPA {
   //! XML input functions
 
   const AbstractDomain * 
-  DbClientTransactionPlayer::xmlAsAbstractDomain(const TiXmlElement & element, const char * name) {
+  DbClientTransactionPlayer::xmlAsAbstractDomain(const TiXmlElement & element,
+						 const char * name,
+						 const char* typeName) {
     static unsigned int sl_counter(0);
     sl_counter++;
     const char * tag = element.Value();
@@ -1352,9 +1355,9 @@ namespace EUROPA {
       return(var->baseDomain().copy());
     }
     if (strcmp(tag, "set") == 0)
-      return(xmlAsEnumeratedDomain(element));
+      return(xmlAsEnumeratedDomain(element, typeName));
     if (strcmp(tag, "interval") == 0)
-      return(xmlAsIntervalDomain(element));
+      return(xmlAsIntervalDomain(element, typeName));
     if (strcmp(tag, "value") == 0) {
       // New XML style for simple types.
       const char * type = element.Attribute("type");
@@ -1387,23 +1390,40 @@ namespace EUROPA {
   }
 
   IntervalDomain *
-  DbClientTransactionPlayer::xmlAsIntervalDomain(const TiXmlElement & element) {
+  DbClientTransactionPlayer::xmlAsIntervalDomain(const TiXmlElement & element,
+						 const char* typeName) {
     const char * type_st = element.Attribute("type");
     check_error(type_st != NULL);
     const char * min_st = element.Attribute("min");
     check_error(min_st != NULL);
     const char * max_st = element.Attribute("max");
     check_error(max_st != NULL);
-    IntervalDomain * domain = dynamic_cast<IntervalDomain*>(TypeFactory::baseDomain(type_st).copy());
-    check_error(domain != NULL, "type '" + std::string(type_st) + "' should indicate an interval domain type");
+    IntervalDomain * domain = NULL;
+    if(typeName != NULL) {
+      if(TypeFactory::baseDomain(type_st).minDelta() == 1)
+	domain = new IntervalIntDomain(typeName);
+      else if(TypeFactory::baseDomain(type_st).minDelta() < 1 &&
+	      TypeFactory::baseDomain(type_st).minDelta() > 0)
+	domain = new IntervalDomain(typeName);
+      else {
+	checkError(ALWAYS_FAIL, "Having trouble trying to duplicate type " << type_st);
+      }
+    }
+    else
+      domain = dynamic_cast<IntervalDomain*>(TypeFactory::baseDomain(type_st).copy());
+    check_error(domain != NULL,
+		"type '" + std::string(type_st) + "' should indicate an interval domain type");
     double min = TypeFactory::createValue(type_st, min_st);
     double max = TypeFactory::createValue(type_st, max_st);
     domain->intersect(min, max);
+    debugMsg("DbClientTransactionPlayer:xmlAsIntervalDomain",
+	     "For " << element << ", created domain " << (*domain).toString());
     return domain;
   }
   
   EnumeratedDomain *
-  DbClientTransactionPlayer::xmlAsEnumeratedDomain(const TiXmlElement & element) {
+  DbClientTransactionPlayer::xmlAsEnumeratedDomain(const TiXmlElement & element,
+						   const char* otherTypeName) {
     enum { ANY, BOOL, INT, FLOAT, STRING, SYMBOL, OBJECT } type = ANY;
     std::string typeName;
     // determine most specific type

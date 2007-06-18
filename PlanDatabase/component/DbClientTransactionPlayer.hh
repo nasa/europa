@@ -150,17 +150,21 @@ namespace EUROPA {
     /** 
      * @brief create an abstract domain as represented by an xml element
      */
-    const AbstractDomain * xmlAsAbstractDomain(const TiXmlElement & element, const char * name = NULL);
+    const AbstractDomain * xmlAsAbstractDomain(const TiXmlElement & element,
+					       const char * name = NULL,
+					       const char* typeName = NULL);
 
     /** 
      * @brief create an interval domain as represented by an xml element
      */
-    IntervalDomain * xmlAsIntervalDomain(const TiXmlElement & element);
+    IntervalDomain * xmlAsIntervalDomain(const TiXmlElement & element,
+					 const char* typeName = NULL);
 
     /** 
      * @brief create an enumerated domain as represented by an xml element
      */
-    EnumeratedDomain * xmlAsEnumeratedDomain(const TiXmlElement & element);
+    EnumeratedDomain * xmlAsEnumeratedDomain(const TiXmlElement & element,
+					     const char* typeName = NULL);
 
     /** 
      * @brief return a value as represented by an xml element
