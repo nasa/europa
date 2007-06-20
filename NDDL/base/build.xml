@@ -65,6 +65,7 @@
 			<fileset dir="${class}"/>
 			<manifest>
 				<attribute name="Main-Class" value="nddl.Nddl"/>
+				<attribute name="Class-Path" value="antlr.jar java-getopt.jar nanoxml.jar"/>
 			</manifest>
 		</jar>
 		<touch file="${dist}/nddl.jar"/>
