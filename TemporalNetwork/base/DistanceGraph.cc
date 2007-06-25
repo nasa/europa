@@ -99,12 +99,16 @@ DedgeId DistanceGraph::findEdge(DnodeId from, DnodeId to)
   // Cache node vars -- Chucko 22 Apr 2002 
   Int fromOutCount = from->outCount; 
   if (fromOutCount > 0) {
+    /*
     DedgeId* fromOutArray = from->outArray;
     for (Int i=0; i < fromOutCount; i++) {
       DedgeId edge = fromOutArray[i];
       if (to == edge->to)
 	return edge;
     }
+    */
+    // PHM 06/20/2007 Speedup by using map instead.
+    return from->edgemap[to];
   }
   return DedgeId::noId();
 }
@@ -164,6 +168,7 @@ DedgeId DistanceGraph::createEdge(DnodeId from, DnodeId to, Time length)
   this->edges.insert(edge);
   attachEdge (from->outArray, from->outArraySize, from->outCount, edge);
   attachEdge (to->inArray, to->inArraySize, to->inCount, edge);
+  from->edgemap[to] = edge;
   return edge;
 }
 
@@ -171,6 +176,7 @@ Void DistanceGraph::deleteEdge(DedgeId edge)
 {
   detachEdge (edge->from->outArray, edge->from->outCount, edge);
   detachEdge (edge->to->inArray, edge->to->inCount, edge);
+  edge->from->edgemap.erase(edge->to);
   eraseEdge(edge);
 }
 

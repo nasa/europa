@@ -375,9 +375,15 @@ namespace EUROPA {
      * direction precludes one in the other direction.
      * @return node at which incremental propogation should be tried.
      */
-    DnodeId startNode (TimepointId head, Time headDistance,
-		      TimepointId foot, Time footDistance,
-		      DedgeId edge);
+    /**
+     * @brief For incremental propagation, determines whether a propagation
+     *        is started from head to foot or vice versa, and does first 
+     *        propagation.  (PHM: 06/21/2007 Recoded for efficiency.)
+     * @return node from which to continue
+     *        the propagation (or noId if first prop is ineffective).
+     */
+    DnodeId startNode (TimepointId head, Time& headDistance,
+                       TimepointId foot, Time& footDistance);
 
     /**
      * @brief Similar to the DistanceGraph Dijkstra, but propagates the

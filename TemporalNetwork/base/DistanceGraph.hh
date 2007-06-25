@@ -317,6 +317,7 @@ protected:
   DedgeId* outArray;
   Int outArraySize;
   Int outCount;
+  std::map<DnodeId,DedgeId> edgemap;
   Time distance;      // Distance from any source of propagation.
   Time potential;     // Distance from Johnson-type external source.
   Int depth;  // Depth of propagation for testing against the BF limit.

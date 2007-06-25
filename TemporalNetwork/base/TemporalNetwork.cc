@@ -545,18 +545,14 @@ namespace EUROPA {
     check_error(isValidId(src));
     check_error(isValidId(targ));
 
-    DedgeId edge = findEdge(src,targ);
-
-    //Dqueue* queue = initializeDqueue();
-    //queue->addToQueue(startNode(src, src->potential,
-    //targ, targ->potential,
-    //edge));
     BucketQueue* queue = initializeBqueue();
-    queue->insertInQueue(startNode(src, src->potential,
-				   targ, targ->potential,
-				   edge));
 
-    this->consistent = incBellmanFord();
+    TimepointId bfstart = startNode(src, src->potential,
+                                    targ, targ->potential);
+    if (!bfstart.isNoId()) { 
+      queue->insertInQueue(bfstart);
+      this->consistent = incBellmanFord();
+    }
 
     // Can't do Dijkstra if network is now inconsistent.
     if (this->consistent == false)
@@ -567,32 +563,65 @@ namespace EUROPA {
 
     BucketQueue* queue1 = initializeBqueue();
 
-    queue1->insertInQueue( startNode(src, src->upperBound,
-				     targ, targ->upperBound,
-				     edge));
-    incDijkstraForward();
-    queue1->insertInQueue( startNode(targ, -(targ->lowerBound),
-				     src,  -(src->lowerBound),
-				     edge));
-    incDijkstraBackward();
+    TimepointId dfstart = startNode(src, src->upperBound,
+                                    targ, targ->upperBound);
+    if (!dfstart.isNoId()) { 
+      queue1->insertInQueue(dfstart);
+      incDijkstraForward();
+    }
+
+    // For lower-bound propagation we need to do some finagling (Irish
+    // word) to get the right effect from startNode().
+
+    // Can't pass a negative as a reference value, so use locals
+    Time headDistance = -(src->lowerBound);
+    Time footDistance = -(targ->lowerBound);
+
+    // Reverse targ/src to get the edge backwards.
+    TimepointId start = startNode(targ, headDistance,
+                                  src, footDistance);
+    if (!start.isNoId()) {
+      // Store propagated locals to proper locations
+      src->lowerBound = -(headDistance);
+      targ->lowerBound = -(footDistance);
+
+     // Compensate for targ/src reversal
+      TimepointId dbstart = (start == src) ? targ : src;
+      dbstart->depth = 0;
+
+      queue1->insertInQueue(dbstart);
+      incDijkstraBackward();
+    }
   }
 
-  DnodeId TemporalNetwork::startNode (TimepointId head, Time headDistance,
-				     TimepointId foot, Time footDistance,
-				     DedgeId edge)
+  DnodeId TemporalNetwork::startNode (TimepointId head, Time& headDistance,
+                                      TimepointId foot, Time& footDistance)
   {
-
+    // PHM 06/21/2007 Modified for efficiency to do first propagation
+    // as side-effect.  (Avoids waste of unnecessary fan-out at first
+    // node, which can be huge, for example, at the origin.)
 
     TimepointId start;
+    DedgeId edge = findEdge(head,foot);
 
-    if (!edge.isNoId() && headDistance < g_infiniteTime() && headDistance + edge->length < footDistance) {
-      start = head;
-    }
-    else if(footDistance < g_infiniteTime())  { // Propagation, if any, is in the other direction.
+    if (!edge.isNoId() && headDistance < g_infiniteTime()
+        && headDistance + edge->length < footDistance) {
+      // Propagate across edge
+      footDistance = headDistance + edge->length;
       start = foot;
     }
     else {
-      return DnodeId::noId();
+      // Propagation, if any, is in the other direction.
+      DedgeId revEdge = findEdge(foot,head);
+      if (!revEdge.isNoId() && footDistance < g_infiniteTime()
+          && footDistance + revEdge->length < headDistance) {
+        // Propagate across reverse edge
+        headDistance = footDistance + revEdge->length;
+        start = head;
+      }
+      else { // No effective propagation in either direction
+        return DnodeId::noId();
+      }
     }
 
     // depth is used by multiple prop methods so must reset.
