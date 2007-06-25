@@ -212,6 +212,7 @@ namespace EUROPA {
         ExprConstructorSuperCall* m_superCallExpr;                          
         std::vector<Expr*>        m_constructorBody;
         bool                      m_canMakeNewObject;
+    mutable EvalContext*      m_evalContext;
   };  
   
   class ExprConstraint;
