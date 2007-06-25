@@ -81,10 +81,16 @@ namespace EUROPA {
     //I'm not sure exactly what to do about these, as far as dealing with resources goes...
     //~MJI
     m_systemClasses.insert("Resource"); 
-    m_systemClasses.insert("Resource.change");
+    m_systemTokens.insert("Resource.change");
+
     m_systemClasses.insert("Reusable");
     m_systemTokens.insert("Reusable.uses");
-    // TODO: expose Reservoir and Unary
+
+    m_systemClasses.insert("Reservoir");
+    m_systemTokens.insert("Reservoir.produce");
+    m_systemTokens.insert("Reservoir.consume");
+
+    // TODO: expose Unary
   	  
     // TODO: this should be done only once after the schema is initialized, not for every TransactionPlayer
     createDefaultObjectFactory("Object", true);
@@ -787,7 +793,7 @@ namespace EUROPA {
     ConstrainedVariableId rhsValue = m_rhs->eval(context).getValue(); 
     const AbstractDomain& domain = rhsValue->derivedDomain();
     object->addVariable(domain,m_lhs.c_str());
-    debugMsg("XMLInterpreter:InterpretedObject","Initialized variable:" << object->getName().toString() << "." << m_lhs << " to " << rhsValue->derivedDomain().toString() << " in constructor");
+    debugMsg("XMLInterpreter:InterpretedObject","Initialized variable:" << object->getName().toString() << "." << m_lhs.toString() << " to " << rhsValue->derivedDomain().toString() << " in constructor");
   		
     return DataRef::null;
   } 
@@ -1201,22 +1207,22 @@ namespace EUROPA {
     {
       // Add arguments to eval context		
       for (unsigned int i=0;i<argNames.size();i++) {
-	ConstrainedVariableId arg = planDb->getClient()->createVariable(
+	      ConstrainedVariableId arg = planDb->getClient()->createVariable(
 									argTypes[i].c_str(),
 									*(args[i]),
 									argNames[i].c_str(), 
 									true
 									);
-	m_tmpVars.push_back(arg);
-	addVar(argNames[i].c_str(),arg);
+	       m_tmpVars.push_back(arg);
+	       addVar(argNames[i].c_str(),arg);
       }
     }
           
     virtual ~ObjectFactoryEvalContext()
     {
       for (unsigned int i=0;i<m_tmpVars.size();i++) {
-	// TODO: must release temprary vars, causing crash?
-	//m_tmpVars[i].release();
+	      // TODO: must release temporary vars, causing crash?
+	      //m_tmpVars[i].release();
       }
     }
       
@@ -1232,23 +1238,14 @@ namespace EUROPA {
   {
     check_runtime_error(checkArgs(arguments));
         
-    ObjectFactoryEvalContext evalContext(
-					 planDb,
-					 m_constructorArgNames,
-					 m_constructorArgTypes,
-					 arguments
-					 );	  			    
-    m_evalContext = &evalContext;
+    debugMsg("InterpretedObjectFactory:createInstance", "Creating instance for type " << objectType.toString() << " with name " << objectName.toString());
 
-	    ObjectId instance = makeNewObject(planDb, objectType, objectName,arguments);
-		evalContext.addVar("this",instance->getThis());
-	    evalConstructorBody(instance,arguments);
-	    instance->close();
+	ObjectId instance = makeNewObject(planDb, objectType, objectName,arguments);
+	evalConstructorBody(instance,arguments);
+	instance->close();
 		
-    m_evalContext = NULL;
-    debugMsg("InterpretedObjectFactory:createInstance",
-	     "Created instance " << instance->toString() << " for type " <<
-	     objectType.toString() << " with name " << objectName.toString());
+    debugMsg("InterpretedObjectFactory:createInstance", "Created instance " << instance->toString() << " for type " << objectType.toString() << " with name " << objectName.toString());
+	     
     return instance;
   } 
 
@@ -1270,8 +1267,7 @@ namespace EUROPA {
 						   const LabelStr& objectType, 
 						   const LabelStr& objectName,
 						   const std::vector<const AbstractDomain*>& arguments) const
-  {
-	  
+  {		 
     // go up the hierarchy and give the parents a chance to create the object, this allows native classes to be exported
     // TODO: some effort can be saved by keeping track of whether a class has a native ancestor different from Object.
     // If it doesn't, the object can be created right away and this traversal up the hierarchy can be skipped
@@ -1281,57 +1277,67 @@ namespace EUROPA {
     }
     else {
       check_error(m_superCallExpr != NULL, std::string("Failed to find factory for object ") + objectName.toString() + " of type "+objectType.toString());
-      // TODO: argumentsForSuper are eval'd twice, once here and once when the constructor body is eval'd
+	    	
+	  ObjectFactoryEvalContext evalContext(
+	      planDb,
+		  m_constructorArgNames,
+		  m_constructorArgTypes,
+		  arguments
+      );
+      	  			    	    	    
+      // TODO: argumentsForSuper are eval'd twice, once here and once when m_superCallExpr->eval(evalContext) is called
       //  figure out how to do it only once
       std::vector<const AbstractDomain*> argumentsForSuper;
-	    	
-      bool needsContext = (m_evalContext == NULL);
-      if (needsContext) {
-	m_evalContext = new ObjectFactoryEvalContext(
-						     planDb,
-						     m_constructorArgNames,
-						     m_constructorArgTypes,
-						     arguments
-						     );
-      }	  			    	    	    
-      m_superCallExpr->evalArgs(*m_evalContext,argumentsForSuper);
-      if (needsContext) {
-	delete m_evalContext;
-	m_evalContext = NULL;
-      }
-     	    
-      ObjectId retval = ObjectFactory::makeNewObject(planDb, m_superCallExpr->getSuperClassName(), objectType, objectName,argumentsForSuper);
-      return retval;
-    }
+      m_superCallExpr->evalArgs(evalContext,argumentsForSuper);
+            
+      ObjectId retval = ObjectFactory::makeNewObject(
+          planDb, 
+          m_superCallExpr->getSuperClassName(), 
+          objectType, 
+          objectName,
+          argumentsForSuper
+      );             
+    
+      return retval;            
+    }    
   }
 	
 	void InterpretedObjectFactory::evalConstructorBody(
 	                                           ObjectId& instance, 
 	                                           const std::vector<const AbstractDomain*>& arguments) const
 	{	    
-		EvalContext& evalContext = *m_evalContext;
-		if (m_superCallExpr != NULL)
-		    m_superCallExpr->eval(evalContext);
-		
-    for (unsigned int i=0; i < m_constructorBody.size(); i++) 
-      m_constructorBody[i]->eval(evalContext);
+		// TODO: should pass in eval context from outside to have access to globals
+	    ObjectFactoryEvalContext evalContext(
+	        instance->getPlanDatabase(),
+		    m_constructorArgNames,
+		    m_constructorArgTypes,
+		    arguments
+        );
+        evalContext.addVar("this",instance->getThis());
+        
+        if (m_superCallExpr != NULL)
+    	    m_superCallExpr->eval(evalContext);
+        
+        for (unsigned int i=0; i < m_constructorBody.size(); i++) 
+            m_constructorBody[i]->eval(evalContext);
 
-    // Initialize any variables that were not explicitly initialized
-    const Schema::NameValueVector& members = Schema::instance()->getMembers(m_className);
-    for (unsigned int i=0; i < members.size(); i++) {
-      std::string varName = instance->getName().toString() + "." + members[i].second.toString();
-      if (instance->getVariable(varName) == ConstrainedVariableId::noId()) {
-	const AbstractDomain& baseDomain = TypeFactory::baseDomain(members[i].first.c_str()); 
-	instance->addVariable(
+        // Initialize any variables that were not explicitly initialized
+        const Schema::NameValueVector& members = Schema::instance()->getMembers(m_className);
+        for (unsigned int i=0; i < members.size(); i++) {
+            std::string varName = instance->getName().toString() + "." + members[i].second.toString();
+            if (instance->getVariable(varName) == ConstrainedVariableId::noId()) {
+	            const AbstractDomain& baseDomain = TypeFactory::baseDomain(members[i].first.c_str()); 
+	            instance->addVariable(
 			      baseDomain,
 			      members[i].second.c_str()
-			      );
-	debugMsg("XMLInterpreter:InterpretedObject","Used default initializer for " << m_className.toString() << "." << members[i].second.toString()); 
-      } 
-    }
-    debugMsg("XMLInterpreter:evalConstructorBody",
-	     "Evaluated constructor for " << instance->toString());
-  }	
+			    );
+	            debugMsg("XMLInterpreter:InterpretedObject","Used default initializer for " << m_className.toString() << "." << members[i].second.toString()); 
+            } 
+        }
+        
+        debugMsg("XMLInterpreter:evalConstructorBody",
+	             "Evaluated constructor for " << instance->toString());
+    }	
 	
     /*
      * InterpretedToken
@@ -1636,7 +1642,24 @@ namespace EUROPA {
 						 bool isConstrained,
 						 ConstrainedVariableId& owner)
   {
-    TokenId slave = TokenFactory::createInstance(m_token,predicateType,relation);
+    TokenId slave;
+
+    unsigned int tokenCnt = predicateInstance.countElements(".");
+    bool isOnSameObject = (
+        tokenCnt == 1 || 
+        (tokenCnt==2 && (predicateInstance.getElement(0,".").toString() == "object"))
+    );
+    
+    if (isOnSameObject) {
+        // TODO: this is to support predicate inheritance
+      	// currently doing the same as the compiler, it'll probably be surprising to the user that
+      	// predicate inheritance will work only if the predicates are on the same object that the rule belongs to
+      	LabelStr suffix = predicateInstance.getElement(tokenCnt-1,".");
+        slave = NDDL::allocateOnSameObject(m_token,suffix,relation);
+    }
+    else {
+          slave = TokenFactory::createInstance(m_token,predicateType,relation);
+    }
     addSlave(slave,name);  		
 
     // For qualified names like "object.helloWorld" must add constraint to the object variable on the slave token
@@ -1644,7 +1667,6 @@ namespace EUROPA {
     if (isConstrained) {
       std::vector<ConstrainedVariableId> vars;
   			    
-      unsigned int tokenCnt = predicateInstance.countElements(".");
       if (tokenCnt <= 2) {
 	vars.push_back(owner);
       }
@@ -1666,8 +1688,9 @@ namespace EUROPA {
       vars.push_back(slave->getObject());
       addConstraint(LabelStr("eq"),vars);             
     }
-    else 
+    else { 
       debugMsg("XMLInterpreter:InterpretedRule",predicateInstance.toString() << " NotConstrained");
+    } 		
   		
     const char* relationName = relation.c_str();
   		
