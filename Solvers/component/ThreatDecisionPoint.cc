@@ -92,6 +92,9 @@ namespace EUROPA {
     }
     
     std::string ThreatDecisionPoint::toString() const {
+      if(m_choices.empty())
+	return "NO CHOICES";
+
       std::stringstream strStream;
       strStream 
           << "THREAT:" 
