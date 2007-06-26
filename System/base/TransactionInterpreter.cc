@@ -268,9 +268,14 @@ namespace EUROPA {
     dbgout << ident << "constructor (" << signature.str() << ")" << std::endl; 
 
     // If constructor for super class isn't called explicitly, call default one with no args
-    if (superCallExpr == NULL) 
-      superCallExpr = new ExprConstructorSuperCall(Schema::instance()->getParent(className),std::vector<Expr*>());                 	
-            
+    if (superCallExpr == NULL){
+      bool hasParent = Schema::instance()->hasParent(className);
+      if(hasParent)
+	superCallExpr = new ExprConstructorSuperCall(Schema::instance()->getParent(className),std::vector<Expr*>());
+      else
+	superCallExpr = new ExprConstructorSuperCall("Object",std::vector<Expr*>());
+    }
+
     // The ObjectFactory constructor automatically registers the factory
     new InterpretedObjectFactory(
 				 className,
