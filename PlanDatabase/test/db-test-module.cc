@@ -216,8 +216,8 @@ private:
     std::list<LabelStr> allenums;
     SCHEMA->getEnumerations(allenums);
     assert(allenums.size() == 2);
-    assert(allenums.back() == LabelStr("FooEnum"));
-    assert(allenums.front() == LabelStr("BarEnum"));
+    assert(allenums.back() == LabelStr("BarEnum"));
+    assert(allenums.front() == LabelStr("FooEnum"));
 
     // test getEnumValues.
     LabelStr enumDomainName = "TestEnum";

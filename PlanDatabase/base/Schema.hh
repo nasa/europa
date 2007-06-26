@@ -16,6 +16,8 @@
 
 namespace EUROPA {
 
+  typedef std::set<double> LabelStrSet;
+
   /**
    * @class Schema
    * @brief Defines an interface for type checking information for the PlanDatabase.
@@ -32,6 +34,11 @@ namespace EUROPA {
 
     typedef std::pair<LabelStr, LabelStr> NameValuePair;
     typedef std::vector<NameValuePair> NameValueVector;
+    typedef std::set<double> ValueSet;
+    typedef std::map<double, LabelStr> LabelStr_LabelStr_Map;
+    typedef std::map<double, LabelStrSet > LabelStr_LabelStrSet_Map;
+    typedef std::map<double, ValueSet > LabelStr_ValueSet_Map;
+    typedef std::map<double,LabelStr_LabelStr_Map> LabelStr_LabelStrLabelStrMap_Map;
 
     /**
      * @brief Accessor for singleton instance, if present
@@ -174,7 +181,7 @@ namespace EUROPA {
      * @brief Obtains all the Object Types in the Schema.  
      * @return a const ref to a set of LabelStr (each of which is the name of an  ObjectType)  
      */
-    const std::set<LabelStr>& getAllObjectTypes() const;
+    const LabelStrSet& getAllObjectTypes() const;
 
     /**
      * @brief Obtains the set of all ObjectTypes that can be matched with the given object type.
@@ -339,13 +346,6 @@ namespace EUROPA {
      */
     Schema(const LabelStr& name);
 
-    typedef std::set<double> ValueSet;
-    typedef std::set<LabelStr> LabelStrSet;
-    typedef std::map<LabelStr, LabelStr> LabelStr_LabelStr_Map;
-    typedef std::map<LabelStr, LabelStrSet > LabelStr_LabelStrSet_Map;
-    typedef std::map<LabelStr, ValueSet > LabelStr_ValueSet_Map;
-    typedef std::map<LabelStr,LabelStr_LabelStr_Map> LabelStr_LabelStrLabelStrMap_Map;
-
     SchemaId m_id;
     const LabelStr m_name;
     LabelStr_ValueSet_Map enumValues;
@@ -353,11 +353,11 @@ namespace EUROPA {
     LabelStrSet predicates;
     LabelStrSet primitives;
 
-    std::map<LabelStr, NameValueVector> membershipRelation; /*! All type compositions */
-    std::map<LabelStr, LabelStr> childOfRelation; /*! Required to answer the getParent query */
+    std::map<double, NameValueVector> membershipRelation; /*! All type compositions */
+    std::map<double, LabelStr> childOfRelation; /*! Required to answer the getParent query */
     LabelStr_LabelStrSet_Map objectPredicates; /*! All predicates by object type */
-    std::set<LabelStr> typesWithNoPredicates; /*! Cache for lookup efficiently */
-    std::map<LabelStr, std::vector<LabelStr> > allObjectTypes; /*! Cache to retrieve allObjectTypes by sub-class */
+    LabelStrSet typesWithNoPredicates; /*! Cache for lookup efficiently */
+    std::map<double, std::vector<LabelStr> > allObjectTypes; /*! Cache to retrieve allObjectTypes by sub-class */
     Schema(const Schema&); /**< NO IMPL */
   };
 

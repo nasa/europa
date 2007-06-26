@@ -90,20 +90,33 @@ namespace EUROPA {
   }
 
   bool Schema::isPredicate(const LabelStr& predicateName) const {
-    // If a direct hit, then true
-    if(predicates.find(predicateName) != predicates.end())
+    std::set<double> sl_trueCache, sl_falseCache;
+
+    if(sl_trueCache.find(predicateName) != sl_trueCache.end())
       return true;
 
-    // If not the correct format, return false
-    if(predicateName.countElements(getDelimiter()) != 2)
+    if(sl_falseCache.find(predicateName) != sl_falseCache.end())
       return false;
 
-    // Call recursively if we have a parent
-    std::string predStr;
-    if(makeParentPredicateString(predicateName, predStr))
-      return isPredicate(predStr);
+    bool result = false;
 
-    return false;
+    if(predicates.find(predicateName) != predicates.end()) // If a direct hit, then true
+      result = true;
+    else if(predicateName.countElements(getDelimiter()) != 2) // If not the correct format, return false
+      result = false;
+    else {
+      // Call recursively if we have a parent
+      std::string predStr;
+      if(makeParentPredicateString(predicateName, predStr))
+	result = isPredicate(predStr);
+    }
+
+    if(result)
+      sl_trueCache.insert(predicateName);
+    else
+      sl_falseCache.insert(predicateName);
+
+    return result;
   }
 
   bool Schema::isObjectType(const LabelStr& str) const {
@@ -162,7 +175,7 @@ namespace EUROPA {
     check_error(isType(parentType), parentType.toString() + " is not defined.");
 
     // First see if we get a hit for the parentType
-    std::map<LabelStr, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(parentType);
 
     // If no hit, then try for the parent. There must be one since it is a valid 
@@ -194,7 +207,7 @@ namespace EUROPA {
 
   const Schema::NameValueVector& Schema::getMembers(const LabelStr& objectType) const
   {
-    std::map<LabelStr, NameValueVector>::const_iterator it = membershipRelation.find(objectType);
+    std::map<double, NameValueVector>::const_iterator it = membershipRelation.find(objectType);
       
     check_error(it != membershipRelation.end(), "Unable to find members for object type:" + objectType.toString() );
     return it->second;
@@ -204,7 +217,7 @@ namespace EUROPA {
     check_error(isType(parentType), parentType.toString() + " is undefined.");
 
     // First see if we get a hit for the parentType
-    std::map<LabelStr, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(parentType);
 
     // If no hit, then try for the parent. There must be one since it is a valid 
@@ -235,7 +248,7 @@ namespace EUROPA {
   }
 
   const std::vector<LabelStr>& Schema::getAllObjectTypes(const LabelStr& objectType) {
-    std::map<LabelStr, std::vector<LabelStr> >::iterator it = allObjectTypes.find(objectType);
+    std::map<double, std::vector<LabelStr> >::iterator it = allObjectTypes.find(objectType);
     if(it != allObjectTypes.end())
       return it->second;
 
@@ -254,25 +267,33 @@ namespace EUROPA {
   }
 
   bool Schema::hasParent(const LabelStr& type) const {
-    // If it is a primitive, it has no parent
-    if(isPrimitive(type) || isEnum(type))
+    static std::set<double> sl_trueCache, sl_falseCache;
+
+    if(sl_trueCache.find(type) != sl_trueCache.end())
+      return true;
+
+    if(sl_falseCache.find(type) != sl_falseCache.end())
       return false;
 
-    // If it is a predicate then it has a parent if and only if it is NOT directly
-    // accessible in the direct set of predicates defined
+    bool result = false;
 
-    // If an object type, then look it up in child relations
-    if(isObjectType(type))
-      return childOfRelation.find(type) != childOfRelation.end();
+    if(isPrimitive(type) || isEnum(type)) // If it is a primitive, it has no parent
+      result = false;
+    else if(isObjectType(type)) // If an object type, then look it up in child relations
+      result = childOfRelation.find(type) != childOfRelation.end();
+    else {
+      std::string predStr;
+      if(makeParentPredicateString(type, predStr))
+	result = predicates.find(LabelStr(predStr)) != predicates.end() || hasParent(predStr);
+    }
 
-    // Othwerwise it is a predicate. So we need to test if the parent is
-    // a predicate
-    // Call recursively if we have a parent
-    std::string predStr;
-    if(makeParentPredicateString(type, predStr))
-      return predicates.find(predStr) != predicates.end() || hasParent(predStr);
+    // If we get a true result, store it in the cache
+    if(result)
+      sl_trueCache.insert(type);
+    else
+      sl_falseCache.insert(type);
 
-    return false;
+    return result;
   }
 
   const LabelStr Schema::getParent(const LabelStr& type) const {
@@ -289,7 +310,7 @@ namespace EUROPA {
     return predStr;
   }
 
-  const std::set<LabelStr>& Schema::getAllObjectTypes() const {
+  const LabelStrSet& Schema::getAllObjectTypes() const {
     return objectTypes;
   }
   
@@ -303,16 +324,17 @@ namespace EUROPA {
 
   void Schema::getPredicates(const LabelStr& objectType, std::set<LabelStr>& results) const {
     check_error(isType(objectType), objectType.toString() + " is undefined");
-    for(std::set<LabelStr>::const_iterator pred = predicates.begin(); pred != predicates.end(); ++pred) {
-      LabelStr object((*pred).getElement(0, getDelimiter()));
-      LabelStr predicate((*pred).getElement(1, getDelimiter()));
+    for(LabelStrSet::const_iterator pred = predicates.begin(); pred != predicates.end(); ++pred) {
+      const LabelStr& predLbl = static_cast<const LabelStr&>(*pred);
+      LabelStr object((predLbl).getElement(0, getDelimiter()));
+      LabelStr predicate((predLbl).getElement(1, getDelimiter()));
       if ((object == objectType) || isA(objectType, object))
 	results.insert(predicate);
     }
   }
 
   void Schema::getPredicates(std::set<LabelStr>& results) const {
-    for(std::set<LabelStr>::const_iterator it = predicates.begin(); it != predicates.end(); ++it)
+    for(LabelStrSet::const_iterator it = predicates.begin(); it != predicates.end(); ++it)
       results.insert(*it);
   }
 
@@ -324,8 +346,9 @@ namespace EUROPA {
       return false;
 
     // Otherwise, it is not conclusive, so we try in detail
-    for(std::set<LabelStr>::const_iterator pred = predicates.begin(); pred != predicates.end(); ++pred) {
-      LabelStr object((*pred).getElement(0, getDelimiter()));
+    for(LabelStrSet::const_iterator pred = predicates.begin(); pred != predicates.end(); ++pred) {
+      const LabelStr& predLbl = static_cast<const LabelStr&>(*pred);
+      LabelStr object((predLbl).getElement(0, getDelimiter()));
       if ((object == objectType) || isA(objectType, object))
 	return true;
     }
@@ -340,7 +363,7 @@ namespace EUROPA {
 		memberName.toString() + " is not a member of " + parentType.toString());
 
     // First see if we get a hit for the parentType
-    std::map<LabelStr, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
@@ -364,7 +387,7 @@ namespace EUROPA {
 		memberName.toString() + " is not a member of " + parentType.toString());
 
     // First see if we get a hit for the parentType
-    std::map<LabelStr, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
@@ -388,7 +411,7 @@ namespace EUROPA {
 
   const LabelStr Schema::getNameFromIndex(const LabelStr& parentType, unsigned int index) const {
     // First see if we get a hit for the parentType
-    std::map<LabelStr, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
@@ -430,7 +453,7 @@ namespace EUROPA {
   unsigned int Schema::getParameterCount(const LabelStr& predicate) const {
     check_error(isPredicate(predicate), predicate.toString() + " is not defined as a Predicate");
     // First see if we get a hit for the parentType
-    std::map<LabelStr, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(predicate);
 
     check_error(membershipRelation_it != membershipRelation.end(), predicate.toString() + " not found in the membership relation");
@@ -444,7 +467,7 @@ namespace EUROPA {
     check_error(paramIndex < getParameterCount(predicate), paramIndex + " is not a valid index"); 
 
     // First see if we get a hit for the parentType
-    std::map<LabelStr, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(predicate);
 
     check_error(membershipRelation_it != membershipRelation.end());
