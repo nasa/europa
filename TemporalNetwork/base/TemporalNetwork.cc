@@ -550,6 +550,7 @@ namespace EUROPA {
     TimepointId bfstart = startNode(src, src->potential,
                                     targ, targ->potential);
     if (!bfstart.isNoId()) { 
+      handleNodeUpdate(bfstart);
       queue->insertInQueue(bfstart);
       this->consistent = incBellmanFord();
     }
@@ -567,6 +568,7 @@ namespace EUROPA {
                                     targ, targ->upperBound);
     if (!dfstart.isNoId()) { 
       queue1->insertInQueue(dfstart);
+      handleNodeUpdate(dfstart);
       incDijkstraForward();
     }
 
@@ -590,6 +592,7 @@ namespace EUROPA {
       dbstart->depth = 0;
 
       queue1->insertInQueue(dbstart);
+      handleNodeUpdate(dbstart);
       incDijkstraBackward();
     }
   }
