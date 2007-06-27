@@ -221,6 +221,50 @@ namespace EUROPA {
     lb = - getDistance(src);
   }
 
+  Void TemporalNetwork::propagateBoundsFrom (const TimepointId& src)
+  {
+    for(std::vector<DnodeId>::const_iterator it = nodes.begin(); it != nodes.end(); ++it){
+      TimepointId node = (TimepointId) *it;
+      node->upperBound = POS_INFINITY;
+      node->lowerBound = NEG_INFINITY;
+    }
+    src->upperBound = 0;
+    src->lowerBound = 0;
+    src->depth = 0;
+    BucketQueue* queue = initializeBqueue();
+    queue->insertInQueue(src);
+    incDijkstraForward();
+    queue->insertInQueue(src);
+    incDijkstraBackward();
+  }
+
+  Void TemporalNetwork::calcDistanceBounds(const TimepointId& src,
+                                           const std::vector<TimepointId>&
+                                           targs,
+					   std::vector<Time>& lbs,
+                                           std::vector<Time>& ubs)
+  {
+    // Method: Calculate lower/upper bounds as if src was the origin.
+    // Afterwards restore the proper bounds.  Requires only four
+    // dijkstras instead of 2*n dijkstras.
+   
+    checkError(isConsistent(), "TemporalNetwork: calcDistanceBounds from inconsistent network");
+    
+    propagateBoundsFrom(src);
+
+    lbs.clear();
+    ubs.clear();
+
+    for (unsigned i=0; i<targs.size(); i++) {
+      lbs.push_back(targs[i]->lowerBound);
+      ubs.push_back(targs[i]->upperBound);
+    }
+
+    propagateBoundsFrom(getOriginNode());
+
+    return;
+  }
+
   std::list<TimepointId>
   TemporalNetwork::getConstraintScope(const TemporalConstraintId& id) {
     std::list<TimepointId> result;
@@ -501,18 +545,18 @@ namespace EUROPA {
     check_error(isValidId(src));
     check_error(isValidId(targ));
 
-    DedgeId edge = findEdge(src,targ);
-
-    //Dqueue* queue = initializeDqueue();
-    //queue->addToQueue(startNode(src, src->potential,
-    //targ, targ->potential,
-    //edge));
     BucketQueue* queue = initializeBqueue();
-    queue->insertInQueue(startNode(src, src->potential,
-				   targ, targ->potential,
-				   edge));
+    TimepointId next;
 
-    this->consistent = incBellmanFord();
+    next = startNode(src, src->potential, targ, targ->potential);
+    if (!next.isNoId()) {
+      TimepointId start = (next == src) ? targ : src;
+      incrementalSource = start;  // Used in specialized cycle detection
+      next->predecessor = findEdge(start,next);  // Used to trace nogood
+      handleNodeUpdate(next);
+      queue->insertInQueue(next);
+      this->consistent = incBellmanFord();
+    }
 
     // Can't do Dijkstra if network is now inconsistent.
     if (this->consistent == false)
@@ -523,39 +567,68 @@ namespace EUROPA {
 
     BucketQueue* queue1 = initializeBqueue();
 
-    queue1->insertInQueue( startNode(src, src->upperBound,
-				     targ, targ->upperBound,
-				     edge));
-    incDijkstraForward();
-    queue1->insertInQueue( startNode(targ, -(targ->lowerBound),
-				     src,  -(src->lowerBound),
-				     edge));
-    incDijkstraBackward();
+    next = startNode(src, src->upperBound, targ, targ->upperBound);
+    if (!next.isNoId()) {
+      queue1->insertInQueue(next);
+      handleNodeUpdate(next);
+      incDijkstraForward();
+    }
+
+    // For lower-bound propagation we need to do some finagling (Irish
+    // word) to get the right effect from startNode().
+
+    // Can't pass a negative as a reference value, so use locals
+    Time headDistance = -(src->lowerBound);
+    Time footDistance = -(targ->lowerBound);
+
+    // Backwards propagation, so call with "forward" flag false.
+    next = startNode(src, headDistance, targ, footDistance, false);
+    if (!next.isNoId()) {
+
+      // Store propagated locals back to proper locations
+      src->lowerBound = -(headDistance);
+      targ->lowerBound = -(footDistance);
+
+      queue1->insertInQueue(next);
+      handleNodeUpdate(next);
+      incDijkstraBackward();
+    }
   }
 
-  DnodeId TemporalNetwork::startNode (TimepointId head, Time headDistance,
-				     TimepointId foot, Time footDistance,
-				     DedgeId edge)
+  DnodeId TemporalNetwork::startNode (TimepointId head, Time& headDistance,
+                                      TimepointId foot, Time& footDistance,
+                                      bool forwards)
   {
+    // PHM 06/21/2007 Modified for efficiency to do first propagation
+    // as side-effect.  (Avoids waste of unnecessary fan-out at first
+    // node, which can be huge, for example O(n) at the origin.)
 
+    DedgeId edge = findEdge(forwards ? head : foot,
+                            forwards ? foot : head);
 
-    TimepointId start;
-
-    if (!edge.isNoId() && headDistance < g_infiniteTime() && headDistance + edge->length < footDistance) {
-      start = head;
+    if (!edge.isNoId() && headDistance < g_infiniteTime()
+        && headDistance + edge->length < footDistance) {
+      // Propagate across edge
+      footDistance = headDistance + edge->length;
+      head->depth = 0;
+      foot->depth = 1;
+      return foot;  // Continue propagation from foot
     }
-    else if(footDistance < g_infiniteTime())  { // Propagation, if any, is in the other direction.
-      start = foot;
-    }
-    else {
-      return DnodeId::noId();
+    
+    // Else Propagation, if any, is in the other direction.
+    DedgeId revEdge = findEdge(forwards ? foot : head,
+                               forwards ? head : foot);
+
+    if (!revEdge.isNoId() && footDistance < g_infiniteTime()
+        && footDistance + revEdge->length < headDistance) {
+      // Propagate across reverse edge
+      headDistance = footDistance + revEdge->length;
+      foot->depth = 0;
+      head->depth = 1;
+      return head;  // Continue propagation from head
     }
 
-    // depth is used by multiple prop methods so must reset.
-    start->depth = 0;
-
-    this->incrementalSource = start;  // Used in specialized cycle detection.
-    return start;
+    return DnodeId::noId();
   }
 
   Void TemporalNetwork::incDijkstraForward()
