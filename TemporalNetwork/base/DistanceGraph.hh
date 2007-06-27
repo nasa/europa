@@ -109,7 +109,7 @@ class BucketQueue;    // For use in Dijkstra algorithm.
     */
 
 class DistanceGraph {
-  std::vector<DedgeId> edges;
+  std::set<DedgeId> edges;
   Int dijkstraGeneration;
 protected:
   std::vector<DnodeId> nodes;
@@ -317,6 +317,7 @@ protected:
   DedgeId* outArray;
   Int outArraySize;
   Int outCount;
+  std::map<DnodeId,DedgeId> edgemap;
   Time distance;      // Distance from any source of propagation.
   Time potential;     // Distance from Johnson-type external source.
   Int depth;  // Depth of propagation for testing against the BF limit.
@@ -329,8 +330,9 @@ public:
    */
   inline const DnodeId& getId() const {return m_id;}
   DnodeId link;        // For creating linked-list of nodes (for Dqueue)
-private:
+protected:
   DedgeId predecessor;      // For reconstructing negative cycles.
+private:
   Int markLocal;               // Used for obsoletable marking of nodes.
   static Int markGlobal;       // Global obsolescence number for marks.
   Int generation;     // Used for obsoleting Dijkstra-calculated distances.

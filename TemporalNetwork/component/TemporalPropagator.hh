@@ -47,7 +47,10 @@ namespace EUROPA {
      */
     const IntervalIntDomain getTemporalDistanceDomain(const ConstrainedVariableId& first, 
 						      const ConstrainedVariableId& second, const bool exact);
-
+    void getTemporalDistanceDomains(const ConstrainedVariableId& first, 
+                                    const std::vector<ConstrainedVariableId>&
+                                    seconds, 
+                                    std::vector<IntervalIntDomain>& domains);
 
     /**
      * @see TemporalAdvisor::mostRecentReprogation
@@ -58,8 +61,13 @@ namespace EUROPA {
                            std::vector<ConstrainedVariableId>& fromvars,
                            std::vector<ConstrainedVariableId>& tovars,
                            //std::vector<long>& lengths
-			   std::vector<int>& lengths
+			   //std::vector<int>& lengths
+                           std::vector<Time>& lengths
                            );
+
+    void getMinPerturbTimes(const std::vector<ConstrainedVariableId>& timevars,
+                            const std::vector<Time>& oldreftimes,
+                            std::vector<Time>& newreftimes);
 
     void addListener(const TemporalNetworkListenerId& listener);
 
