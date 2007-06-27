@@ -383,7 +383,8 @@ namespace EUROPA {
      *        the propagation (or noId if first prop is ineffective).
      */
     DnodeId startNode (TimepointId head, Time& headDistance,
-                       TimepointId foot, Time& footDistance);
+                       TimepointId foot, Time& footDistance,
+                       bool forwards = true);
 
     /**
      * @brief Similar to the DistanceGraph Dijkstra, but propagates the

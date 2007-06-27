@@ -330,8 +330,9 @@ public:
    */
   inline const DnodeId& getId() const {return m_id;}
   DnodeId link;        // For creating linked-list of nodes (for Dqueue)
-private:
+protected:
   DedgeId predecessor;      // For reconstructing negative cycles.
+private:
   Int markLocal;               // Used for obsoletable marking of nodes.
   static Int markGlobal;       // Global obsolescence number for marks.
   Int generation;     // Used for obsoleting Dijkstra-calculated distances.
