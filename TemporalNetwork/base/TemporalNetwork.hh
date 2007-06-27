@@ -152,6 +152,17 @@ namespace EUROPA {
     Void calcDistanceBounds(const TimepointId& src, const TimepointId& targ, Time& lb, Time& ub, Bool exact=true);
 
     /**
+     * @brief Calculate the (exact) temporal distance from one timepoint to others.  Much more efficient when many targs.
+     * @param src the start node in the network.
+     * @param targs the end nodes in the network.
+     * @param lbs returns the lower bounds of the distances
+     * @param ubs returns the upper bounds of the distances
+     */
+    Void calcDistanceBounds(const TimepointId& src,
+                            const std::vector<TimepointId>& targs,
+                            std::vector<Time>& lbs, std::vector<Time>& ubs);
+
+    /**
      * @brief Identify the timepoints that mark the head and foot of a temporal constraint.
      * @param id temporal constraint of interest. 
      * @result two time points - the head and foot of the constraint (in that order).
@@ -364,9 +375,16 @@ namespace EUROPA {
      * direction precludes one in the other direction.
      * @return node at which incremental propogation should be tried.
      */
-    DnodeId startNode (TimepointId head, Time headDistance,
-		      TimepointId foot, Time footDistance,
-		      DedgeId edge);
+    /**
+     * @brief For incremental propagation, determines whether a propagation
+     *        is started from head to foot or vice versa, and does first 
+     *        propagation.  (PHM: 06/21/2007 Recoded for efficiency.)
+     * @return node from which to continue
+     *        the propagation (or noId if first prop is ineffective).
+     */
+    DnodeId startNode (TimepointId head, Time& headDistance,
+                       TimepointId foot, Time& footDistance,
+                       bool forwards = true);
 
     /**
      * @brief Similar to the DistanceGraph Dijkstra, but propagates the
@@ -381,6 +399,11 @@ namespace EUROPA {
      */
     Void incDijkstraBackward();
     
+    /**
+     * @brief Propagates lower/upper distance bounds from src
+     * using backward and forward Dijkstra propagations.
+     */
+    Void propagateBoundsFrom (const TimepointId& src);
    
     /**
      * @brief

@@ -796,6 +796,89 @@ namespace EUROPA {
     return(IntervalIntDomain(lb,ub));
   }
 
+  void TemporalPropagator::getTemporalDistanceDomains(const ConstrainedVariableId& first, 
+                                                      const std::vector<ConstrainedVariableId>& seconds, 
+                                                      std::vector<IntervalIntDomain>& domains)
+  {
+    // More efficient to get several at once. Exact calculation.
+    TimepointId tstart = getTimepoint(first);
+    std::vector<TimepointId> tends;
+    std::vector<Time> lbs;
+    std::vector<Time> ubs;
+    for (unsigned i=0; i<seconds.size(); i++) {
+      TimepointId tend = getTimepoint(seconds[i]);
+      tends.push_back(tend);
+    }
+    m_tnet->calcDistanceBounds(tstart, tends, lbs, ubs);
+    checkError((lbs.size() == seconds.size()) && (lbs.size() == ubs.size()),
+               "size mismatch in TemporalPropagator getTemporalDistanceDomains");
+    for (unsigned i=0; i<seconds.size(); i++) {
+      domains.push_back(IntervalIntDomain(lbs[i],ubs[i]));
+    }
+    return;
+  }
+
+  void TemporalPropagator::getMinPerturbTimes(const std::vector<ConstrainedVariableId>& timevars,
+                                              const std::vector<Time>& oldreftimes,
+                                              std::vector<Time>& newreftimes)
+  {
+    checkError(oldreftimes.size() == timevars.size(),
+               "Size mismatch in TemporalPropagator::getMinPerturbTimes");
+
+    // METHOD: Simulate the propagations that would occur with naive
+    // minperturb.  Minimize the need for distance calculations by (1)
+    // pulling the lower-bound propagations from prior nodes, (2)
+    // calculating the new reftime, and (3) pushing the upper-bound
+    // propagations to subsequent nodes (using uppers as a cache).
+
+    newreftimes.clear();
+    newreftimes.reserve(timevars.size());
+    std::vector<Time> uppers;
+    uppers.reserve(timevars.size());
+    for (unsigned i=0; i<timevars.size(); i++) {
+      TimepointId tp = getTimepoint(timevars[i]);
+      uppers.push_back(tp->getUpperBound());  // will be refined by props
+      newreftimes.push_back(0);   // Temporary value, will be overwritten
+    }
+
+    for (unsigned i=0; i<timevars.size(); i++) {
+      TimepointId tp = getTimepoint(timevars[i]);
+      m_tnet->dijkstra(tp);  // One distance calc for each node
+
+      // Pull the lb propagations to refine the lb.
+      Time lb = tp->getLowerBound();
+      for (unsigned j=0; j<i; j++) {
+        TimepointId tp1 = getTimepoint(timevars[j]);
+        Time distance = m_tnet->getDistance(tp1);
+        Time lb1 = newreftimes[j] - distance;
+        if (lb1 > lb) lb = lb1;
+      }
+      // The ub props for j<i have already been pushed to uppers[i].
+      Time ub = uppers[i];
+      checkError(lb <= ub, "lb>ub in TemporalPropagator::getMinPerturbTimes");
+
+      // Calculate the new reftime
+      if (oldreftimes[i] < lb)
+        newreftimes[i] = lb;
+      else if (oldreftimes[i] > ub)
+        newreftimes[i] = ub;
+      else
+        newreftimes[i] = oldreftimes[i];
+      //std::cerr << timevars[i]->getParent()->toString() << " "
+                //<< timevars[i]->lastDomain().getLowerBound() << " "
+                //<< timevars[i]->lastDomain().getUpperBound() << " "
+                //<< newreftimes[i] << " " << oldreftimes[i] << "\n";
+
+      // Push the ub props for j>i to uppers.
+      for (unsigned j=i+1; j<timevars.size(); j++) {
+        TimepointId tp1 = getTimepoint(timevars[j]);
+        Time distance = m_tnet->getDistance(tp1);
+        Time ub1 = newreftimes[i] + distance;
+        if (ub1 < uppers[j]) uppers[j] = ub1;
+      }
+    }
+  }
+
   unsigned int TemporalPropagator::mostRecentRepropagation() const{
     checkError(getConstraintEngine()->mostRecentRepropagation() >= m_mostRecentRepropagation,
                "Cannot imagine how it could be more recent since we should always have a " <<
@@ -809,7 +892,7 @@ namespace EUROPA {
   (const ConstrainedVariableId& useAsOrigin,
    std::vector<ConstrainedVariableId>& fromvars,
    std::vector<ConstrainedVariableId>& tovars,
-   std::vector<int>& lengths)//std::vector<long>& lengths)
+   std::vector<Time>& lengths)//std::vector<int>& lengths)//std::vector<long>& lengths)
   {
     std::list<DedgeId> edgeNogoodList = m_tnet->getEdgeNogoodList();
     TimepointId origin = m_tnet->getOrigin();
