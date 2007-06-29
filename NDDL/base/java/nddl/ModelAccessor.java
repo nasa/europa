@@ -101,7 +101,7 @@ public class ModelAccessor {
     else if(new File(toDir).isAbsolute())
       s_directory = toDir;
     else
-      s_directory = new File(s_directory,toDir).toString();
+      s_directory = new File(s_directory, toDir).toString();
   }
 
   public static void setConfigFile(String filename) {
@@ -1177,7 +1177,7 @@ public class ModelAccessor {
     if(parent!=null && !parent.equals(""))
       returnFile = new File(parent, filename);
     else
-      returnFile = new File(filename);
+      returnFile = new File(s_directory, filename);
 
     assert(DebugMsg.debugMsg("ModelAccessor:includeSearch", "Testing for: "+returnFile));
     // If the file can be read, it's been found.
