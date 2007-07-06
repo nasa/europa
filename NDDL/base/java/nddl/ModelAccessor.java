@@ -1086,6 +1086,8 @@ public class ModelAccessor {
     try{
       // search for NDDL.cfg locally
       File cfgFile = new File(s_directory, s_cfgFilename);
+      if(!cfgFile.exists())
+        cfgFile = new File(System.getProperty("user.dir"), s_cfgFilename);
       if(!s_cfgExact) {
         // if we're allowed to, search in parent directories.
         while(!cfgFile.exists() && cfgFile.getParentFile() != null) {
@@ -1190,6 +1192,10 @@ public class ModelAccessor {
       if(returnFile.canRead())
         return returnFile;
     }
+    // As a last resort search in the current directory ignoring -C option
+    returnFile = new File(System.getProperty("user.dir"), filename);
+    if(returnFile.canRead())
+      return returnFile;
     return null;
   }
 
