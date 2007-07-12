@@ -104,8 +104,8 @@ namespace NDDL {
     REGISTER_TYPE_FACTORY(GnatsClass, ObjectDomain("GnatsClass"));
     REGISTER_OBJECT_FACTORY(GnatsClassFactory0, GnatsClass);
     // Allocate rules
-    new Rule$GnatsClass$p$1();
     new Rule$GnatsClass$p$0();
+    new Rule$GnatsClass$p$1();
     return id;
   }
   

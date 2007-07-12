@@ -879,14 +879,14 @@ namespace NDDL {
     REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
     REGISTER_OBJECT_FACTORY(FooFactory2, Foo);
     // Allocate rules
-    new Rule$Foo$impliedLocalVariableGuard$1();
-    new Rule$Foo$singletonGuard$2();
-    new Rule$Foo$impliedObjectGuard$0();
-    new Rule$Foo$mixGuardedWithUnguarded$5();
-    new Rule$Foo$tokenWithParameters$4();
-    new Rule$Foo$localVariableGuard$6();
     new Rule$Foo$multipleNestedGuards$7();
     new Rule$Foo$tokenWithParameters$3();
+    new Rule$Foo$tokenWithParameters$4();
+    new Rule$Foo$impliedObjectGuard$0();
+    new Rule$Foo$mixGuardedWithUnguarded$5();
+    new Rule$Foo$localVariableGuard$6();
+    new Rule$Foo$impliedLocalVariableGuard$1();
+    new Rule$Foo$singletonGuard$2();
     return id;
   }
   

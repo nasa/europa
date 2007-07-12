@@ -673,9 +673,9 @@ namespace NDDL {
     REGISTER_TYPE_FACTORY(World, ObjectDomain("World"));
     REGISTER_OBJECT_FACTORY(WorldFactory4, World);
     // Allocate rules
-    new Rule$World$initialState$2();
     new Rule$Rover$Going$1();
     new Rule$Rover$At$0();
+    new Rule$World$initialState$2();
     return id;
   }
   

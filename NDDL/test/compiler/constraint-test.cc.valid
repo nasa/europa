@@ -404,8 +404,8 @@ namespace NDDL {
     REGISTER_TYPE_FACTORY(World, ObjectDomain("World"));
     REGISTER_OBJECT_FACTORY(WorldFactory2, World);
     // Allocate rules
-    new Rule$World$initialState$1();
     new Rule$Sample$sample$0();
+    new Rule$World$initialState$1();
     return id;
   }
   
