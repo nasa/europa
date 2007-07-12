@@ -347,7 +347,7 @@ namespace EUROPA {
 
     // Otherwise, it is not conclusive, so we try in detail
     for(LabelStrSet::const_iterator pred = predicates.begin(); pred != predicates.end(); ++pred) {
-      const LabelStr& predLbl = static_cast<const LabelStr&>(*pred);
+      LabelStr predLbl(*pred);
       LabelStr object((predLbl).getElement(0, getDelimiter()));
       if ((object == objectType) || isA(objectType, object))
 	return true;
