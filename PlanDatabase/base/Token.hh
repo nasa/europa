@@ -326,6 +326,7 @@ namespace EUROPA {
 
     void addLocalVariable(const ConstrainedVariableId& var);
     void removeLocalVariable(const ConstrainedVariableId& var);
+    const ConstrainedVariableSet& getLocalVariables();
 
     static const LabelStr& noObject();
 

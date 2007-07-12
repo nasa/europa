@@ -118,8 +118,8 @@ namespace EUROPA{
       decRefCount();
 
     if(!Entity::isPurging()){ // Exploit relationships for cascaded delete
-      check_error(isValid());
       check_error(!isIncomplete());
+      check_error(isValid());
 
       // If it is not committed and is is not inactive, undo a cancellation
       if (!isInactive()) 
@@ -323,11 +323,20 @@ namespace EUROPA{
     check_error(isValid());
     check_error(isMerged());
     check_error(m_unifyMemento.isValid());
+
+    // Make changes to the state before removing from active token as there can be a circularity
+    // when making non-chronological deletes.
     m_state->resetSpecified();
-    bool activeTokenDeleted = m_activeToken->removeMergedToken(m_id);
-    m_unifyMemento->undo(activeTokenDeleted);
-    m_unifyMemento.release();
+    TokenId activeToken = m_activeToken;
+    UnifyMementoId memento = m_unifyMemento;
+    m_unifyMemento = UnifyMementoId::noId();
     m_activeToken = TokenId::noId();
+
+    // Now clean up 
+    bool activeTokenDeleted = activeToken->removeMergedToken(m_id);
+    memento->undo(activeTokenDeleted);
+    memento.release();
+
     m_planDatabase->notifySplit(m_id);
   }
 
@@ -407,27 +416,31 @@ namespace EUROPA{
   }
 
   bool Token::isValid() const {
+    bool result = true;
+
     // State Variable should never include INACTIVE
-    if(m_state->baseDomain().isMember(INACTIVE))
-      return false;
+    if(m_state->baseDomain().isMember(INACTIVE)){
+      result = false;
+      debugMsg("Token:isValid", "Cannot be incomplete.");
+    }
+    else if(m_id.isInvalid() || (!m_master.isNoId() && m_master.isInvalid())){
+      result = false;
+      debugMsg("Token:isValid", "Bad id or master id.");
+    }
+    else if(isActive()){
+      result = m_unifyMemento.isNoId() && m_activeToken.isNoId();
+      condDebugMsg(!result, "Token:isValid", "Cannot have merged ids if active.");
+    }
+    else if(isMerged()){
+      result = (m_mergedTokens.empty() && m_unifyMemento.isValid() && m_activeToken.isValid() && m_slaves.empty());
+      condDebugMsg(!result, "Token:isValid", "Not correctly merged");
+    }
+    else {// Otherwise - REJECTED or INACTIVE
+      result = (m_mergedTokens.empty() && m_unifyMemento.isNoId() && m_activeToken.isNoId() && m_slaves.empty());
+      condDebugMsg(!result, "Token:isValid", "Invalid rejected or inactive token.");
+    }
 
-    if(m_id.isInvalid() || (!m_master.isNoId() && m_master.isInvalid()))
-      return false;
-
-    if(isActive())
-       return m_unifyMemento.isNoId() && m_activeToken.isNoId();
-
-    if(isMerged())
-      return (m_mergedTokens.empty() &&
-	      m_unifyMemento.isValid() &&
-	      m_activeToken.isValid() &&
-	      m_slaves.empty());
-
-    // Otherwise - REJECTED or INACTIVE
-    return (m_mergedTokens.empty() &&
-	    m_unifyMemento.isNoId() &&
-	    m_activeToken.isNoId() &&
-	    m_slaves.empty());
+    return result;
   }
 
   /**
@@ -827,6 +840,10 @@ namespace EUROPA{
 
   void Token::removeLocalVariable(const ConstrainedVariableId& var){
     m_localVariables.erase(var);
+  }
+
+  const ConstrainedVariableSet& Token::getLocalVariables(){
+    return m_localVariables;
   }
 
   std::string Token::toLongString() const
