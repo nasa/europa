@@ -6,7 +6,7 @@ import java.util.*;
 
 class RuleWriter {
   public static String delimiter = "$";
-  private static Set s_rules = new HashSet(); /* The set of all rules built up. Used to generate rules for system initialization. */
+  private static Set s_rules = new TreeSet(); /* The set of all rules built up. Used to generate rules for system initialization. */
   private static int s_counter = 0; /* Used to ensure rule names are unique when you have more than one rule for the same predicate */
   private static String s_activeRuleClass = "";
   private static int s_slaveCount = 0;
