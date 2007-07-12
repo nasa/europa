@@ -110,7 +110,7 @@ namespace EUROPA {
 
     // Incrementing result will round up.
     // Why the condition that number is positive? It breaks symmetry if nothing else. --wedgingt 2004 Mar 4
-    if (result != number && asMin && number > 0)
+    if ((fabs(result - number) >= EPSILON) && asMin && number > 0)
       result = result + 1;
     return(result);
   }
