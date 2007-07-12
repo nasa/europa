@@ -1178,9 +1178,12 @@ public class ModelAccessor {
     // handle the case of the parent dir being empty.
     if(parent!=null && !parent.equals(""))
       returnFile = new File(parent, filename);
-    else
-      returnFile = new File(s_directory, filename);
-
+    else {
+      returnFile = new File(filename);
+      if(!returnFile.canRead())
+          returnFile = new File(s_directory, filename);
+    }
+    
     assert(DebugMsg.debugMsg("ModelAccessor:includeSearch", "Testing for: "+returnFile));
     // If the file can be read, it's been found.
     if(returnFile.canRead())
