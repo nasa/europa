@@ -214,8 +214,12 @@ public class Nddl {
    */
   public static void nddlModel(String model) {
     File modelFile =  ModelAccessor.generateIncludeFileName("",model);
-    if(modelFile == null || !modelFile.canRead())
-      die("Cannot read input model file \""+model+"\"",false);
+
+    if(modelFile == null)
+      die("Cannot locate input model file \""+model+"\"",false);
+
+    if( !modelFile.canRead())
+	die("Cannot read input model file \""+modelFile.getAbsolutePath()+"\"",false);
 
     try {
       // Mode 1: As NddlParser (actually Parse)
