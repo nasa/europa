@@ -325,7 +325,7 @@ namespace EUROPA {
   void Schema::getPredicates(const LabelStr& objectType, std::set<LabelStr>& results) const {
     check_error(isType(objectType), objectType.toString() + " is undefined");
     for(LabelStrSet::const_iterator pred = predicates.begin(); pred != predicates.end(); ++pred) {
-      const LabelStr& predLbl = static_cast<const LabelStr&>(*pred);
+      LabelStr predLbl(*pred);
       LabelStr object((predLbl).getElement(0, getDelimiter()));
       LabelStr predicate((predLbl).getElement(1, getDelimiter()));
       if ((object == objectType) || isA(objectType, object))
