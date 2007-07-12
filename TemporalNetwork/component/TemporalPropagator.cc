@@ -222,6 +222,10 @@ namespace EUROPA {
     debugMsg("TemporalPropagator:execute", "Calling updateTnet()");
     updateTnet();
 
+    // If already inconsistent by applying constraints directly, skip the rest
+    if(getConstraintEngine()->provenInconsistent())
+      return;
+
     //propagate the tnet
     if (!m_tnet->isConsistent()) {
       debugMsg("TemporalPropagator:execute", "Tnet is inconsistent.");
@@ -401,7 +405,13 @@ namespace EUROPA {
 
       debugMsg("TemporalPropagator:updateTnet", "Calling updateTemporalConstraint");
       updateTemporalConstraint(constraint);
+
+      // If the cnet has become inconsistent, which can happen since distance bounds may be restricted as we apply
+      // a constraint, then we can skip out.
+      if(getConstraintEngine()->provenInconsistent())
+	break;
     }
+
     m_changedConstraints.clear();
   }
 
@@ -612,6 +622,20 @@ namespace EUROPA {
     // Update for the distance variable
     if(constraint->getScope().size() == 3) {
       const ConstrainedVariableId& distance = constraint->getScope()[1];
+
+      // In order to avoid the unhappy situation where temporalDistance does not maintain the semantics of addEq
+      // we now apply the distance bounds to the distance variable.
+      const IntervalIntDomain& sourceDom = constraint->getScope()[0]->lastDomain();
+      const IntervalIntDomain& targetDom = constraint->getScope()[2]->lastDomain();
+
+      // Checks for finiteness are to av oid overflow or underflow.
+      if(sourceDom.isFinite() && targetDom.isFinite()){
+	IntervalIntDomain& distanceDom = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(distance));
+	Time minDistance = (Time) (targetDom.getLowerBound() - sourceDom.getUpperBound());
+	Time maxDistance = (Time) (targetDom.getUpperBound() - sourceDom.getLowerBound());
+	if(distanceDom.intersect(minDistance, maxDistance) && distanceDom.isEmpty())
+	  return;
+      }
 
       checkError(distance->getExternalEntity().isNoId(), 
 		 "No support for timepoints being distances. " << distance->toString());
