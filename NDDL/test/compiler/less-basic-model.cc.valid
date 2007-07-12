@@ -661,12 +661,12 @@ namespace NDDL {
     REGISTER_TYPE_FACTORY(World, ObjectDomain("World"));
     REGISTER_OBJECT_FACTORY(WorldFactory3, World);
     // Allocate rules
-    new Rule$Camera$TakingPicture$4();
-    new Rule$World$initialState$5();
-    new Rule$Rover$Going$1();
-    new Rule$Rover$At$0();
     new Rule$Camera$Off$3();
     new Rule$Camera$On$2();
+    new Rule$Camera$TakingPicture$4();
+    new Rule$Rover$At$0();
+    new Rule$Rover$Going$1();
+    new Rule$World$initialState$5();
     return id;
   }
   

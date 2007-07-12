@@ -428,8 +428,8 @@ namespace NDDL {
     REGISTER_OBJECT_FACTORY(MumbleFactory4, Mumble:Baz);
     REGISTER_OBJECT_FACTORY(MumbleFactory4, Mumble:Timeline);
     // Allocate rules
-    new Rule$Mumble$mumbPred$1();
     new Rule$Baz$apred$0();
+    new Rule$Mumble$mumbPred$1();
     return id;
   }
   
