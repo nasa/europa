@@ -615,8 +615,8 @@ namespace EUROPA{
    * @todo Could speed up considerably if warranted
    */
   void Token::restrictBaseDomains(){
-    for(std::vector<ConstrainedVariableId>::const_iterator it = m_allVariables.begin(); it != m_allVariables.end(); ++it){
-      ConstrainedVariableId var = *it;
+    for(unsigned int i=1; i<m_allVariables.size(); i++){
+      ConstrainedVariableId var = m_allVariables[i];
       checkError(var.isValid(), var);
       var->restrictBaseDomain(var->lastDomain());
     }
