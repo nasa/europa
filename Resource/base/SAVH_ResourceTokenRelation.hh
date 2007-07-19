@@ -31,6 +31,8 @@ namespace EUROPA {
       static const int STATE_VAR = 0;
       static const int OBJECT_VAR = 1;
             
+      virtual std::string getViolationExpl() const;
+      
     protected:
     private:
       bool canIgnore(const ConstrainedVariableId& variable,

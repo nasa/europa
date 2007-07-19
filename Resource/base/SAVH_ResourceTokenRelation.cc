@@ -62,5 +62,10 @@ namespace EUROPA {
       }
       return true;
     }    
+    
+    std::string ResourceTokenRelation::getViolationExpl() const
+    {
+    	return "Violated limits for resource "+m_resource->getName().toString();
+    }
   }
 }
