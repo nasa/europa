@@ -15,6 +15,146 @@
 namespace EUROPA
 {
 
+	class ViolationMgrImpl : public ViolationMgr
+	{
+	public:
+		ViolationMgrImpl(unsigned int maxViolationsAllowed);
+		virtual ~ViolationMgrImpl();
+	
+		virtual unsigned int getMaxViolationsAllowed();
+		virtual void setMaxViolationsAllowed(unsigned int i);
+	
+		virtual double getViolation() const;
+		virtual std::string getViolationExpl() const;
+	
+		virtual bool handleEmpty(ConstrainedVariableId v);
+		virtual bool handleRelax(ConstrainedVariableId v);
+		virtual bool canContinuePropagation();
+	
+		virtual bool isViolated(ConstraintId c) const;
+		
+		virtual void addViolatedConstraint(ConstraintId c);
+		virtual void removeViolatedConstraint(ConstraintId c);
+	
+	protected:
+		unsigned int m_maxViolationsAllowed;
+		ConstraintSet m_violatedConstraints;
+	};  
+	
+	ViolationMgrImpl::ViolationMgrImpl(unsigned int maxViolationsAllowed)
+	: m_maxViolationsAllowed(maxViolationsAllowed) 
+	{
+	}
+	
+	ViolationMgrImpl::~ViolationMgrImpl() 
+	{
+	}  
+	
+	unsigned int ViolationMgrImpl::getMaxViolationsAllowed() 
+	{ 
+		return m_maxViolationsAllowed; 
+	}
+	
+	void ViolationMgrImpl::setMaxViolationsAllowed(unsigned int i)
+	{
+		check_runtime_error(m_violatedConstraints.size() == 0, "Can only call ViolationMgrImpl::setMaxViolationsAllowed if there are no violations");
+		m_maxViolationsAllowed = i;
+	}
+	
+	double ViolationMgrImpl::getViolation() const 
+	{ 
+		double total = 0.0;
+		for (ConstraintSet::const_iterator it = m_violatedConstraints.begin(); it != m_violatedConstraints.end(); ++it) {
+			ConstraintId c = *it;
+			total += c->getViolation();
+		}  
+	
+		return total;
+	}
+	
+	std::string ViolationMgrImpl::getViolationExpl() const 
+	{ 
+		std::ostringstream os;
+	
+		for (ConstraintSet::const_iterator it = m_violatedConstraints.begin(); it != m_violatedConstraints.end(); ++it) {
+			ConstraintId c = *it;
+			os << c->getViolationExpl() << std::endl;
+		}  
+	
+		return os.str();
+	}
+	
+	bool ViolationMgrImpl::isViolated(ConstraintId c) const
+	{
+		return m_violatedConstraints.find(c) != m_violatedConstraints.end();
+	}
+	
+	bool ViolationMgrImpl::canContinuePropagation()
+	{
+		return m_violatedConstraints.size() < m_maxViolationsAllowed;
+	} 
+	
+	void ViolationMgrImpl::addViolatedConstraint(ConstraintId c)
+	{
+		debugMsg("ConstraintEngine:ViolationMgr", "Marking constraint as violated : " << c->toString());
+		c->deactivate(); // Deactivate will cause propagators to ignore constraint, including removing from current agendas  	
+		m_violatedConstraints.insert(c);		
+	}
+	
+	bool canPropagate(ConstraintId constraint)
+	{
+		/*
+		const std::vector<ConstrainedVariableId>& vars = constraint->getScope();
+		for (unsigned int i=0; i<vars.size(); i++) {
+			if (vars[i]->derivedDomain().isEmpty())
+			    return false;
+		}
+		 */
+	
+		return true;  	
+	}
+	
+	void ViolationMgrImpl::removeViolatedConstraint(ConstraintId c)
+	{
+		if (canPropagate(c)) {
+			debugMsg("ConstraintEngine:ViolationMgr", "Removing constraint from violated set : " << c->toString());
+			c->undoDeactivation(); // This will put the constraint back on the Propagators' agendas
+			m_violatedConstraints.erase(c);
+		}		
+	}
+
+	bool ViolationMgrImpl::handleEmpty(ConstrainedVariableId v) 
+	{
+		if (m_violatedConstraints.size() >= m_maxViolationsAllowed)
+			return false;
+	
+		ConstraintId c = v->getCurrentPropagatingConstraint();
+	
+		// if c is noId, this was caused directly by an specify, just relax the var and the next time around we'll catch the constraint
+		if (c != ConstraintId::noId()) 
+			addViolatedConstraint(c);		
+	
+		return true;
+	}
+	
+	bool ViolationMgrImpl::handleRelax(ConstrainedVariableId v) 
+	{
+		if (m_violatedConstraints.size() == 0)
+			return true;
+	
+		// restore all constraints attached to v to propagation
+		// as long as all the vars in the constraint are now non-empty
+		std::set<ConstraintId> constraints;
+		v->constraints(constraints);
+		for (std::set<ConstraintId>::iterator it = constraints.begin(); it != constraints.end(); ++it) {
+			ConstraintId c = *it;
+			if (!c->isActive()) 
+				removeViolatedConstraint(c);
+		}
+	
+		return true;
+	}  	    
+	
   static bool allActiveVariables(const std::vector<ConstrainedVariableId>& vars){
     for (std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end(); ++it){
       ConstrainedVariableId var = *it;
@@ -721,110 +861,4 @@ namespace EUROPA
   {
   	return m_violationMgr->isViolated(c);
   }  
-  
-  ViolationMgrImpl::ViolationMgrImpl(unsigned int maxViolationsAllowed)
-      : m_maxViolationsAllowed(maxViolationsAllowed) 
-  {
-  }
-    
-  ViolationMgrImpl::~ViolationMgrImpl() 
-  {
-  }  
-
-  unsigned int ViolationMgrImpl::getMaxViolationsAllowed() 
-  { 
-  	return m_maxViolationsAllowed; 
-  }
-  
-  void ViolationMgrImpl::setMaxViolationsAllowed(unsigned int i)
-  {
-  	check_runtime_error(m_violatedConstraints.size() == 0, "Can only call ViolationMgrImpl::setMaxViolationsAllowed if there are no violations");
-  	m_maxViolationsAllowed = i;
-  }
-  
-  double ViolationMgrImpl::getViolation() const 
-  { 
-  	  double total = 0.0;
-      for (ConstraintSet::const_iterator it = m_violatedConstraints.begin(); it != m_violatedConstraints.end(); ++it) {
-  	      ConstraintId c = *it;
-  	      total += c->getViolation();
-      }  
-      
-      return total;
-  }
-
-  std::string ViolationMgrImpl::getViolationExpl() const 
-  { 
-  	  std::ostringstream os;
-  	  
-      for (ConstraintSet::const_iterator it = m_violatedConstraints.begin(); it != m_violatedConstraints.end(); ++it) {
-  	      ConstraintId c = *it;
-  	      os << c->getViolationExpl() << std::endl;
-      }  
-      
-      return os.str();
-  }
-
-  bool ViolationMgrImpl::isViolated(ConstraintId c) const
-  {
-  	return m_violatedConstraints.find(c) != m_violatedConstraints.end();
-  }
-  
-  bool ViolationMgrImpl::canContinuePropagation()
-  {
-  	return m_violatedConstraints.size() < m_maxViolationsAllowed;
-  } 
-
-  bool ViolationMgrImpl::handleEmpty(ConstrainedVariableId v) 
-  {
-  	if (m_violatedConstraints.size() >= m_maxViolationsAllowed)
-  	    return false;
-  	    
-    ConstraintId c = v->getCurrentPropagatingConstraint();
-    
-    // if c is noId, this was caused directly by an specify, just relax the var and the next time around we'll catch the constraint
-    if (c != ConstraintId::noId()) {
-        debugMsg("ConstraintEngine:ViolationMgr", "Marking constraint as violated : " << c->toString());
-        c->deactivate(); // Deactivate will cause propagators to ignore constraint, including removing from current agendas  	
-        m_violatedConstraints.insert(c);
-    }
-  	
-  	return true;
-  }
-  
-  bool canPropagate(ConstraintId constraint)
-  {
-  	/*
-  	const std::vector<ConstrainedVariableId>& vars = constraint->getScope();
-  	for (unsigned int i=0; i<vars.size(); i++) {
-  		if (vars[i]->derivedDomain().isEmpty())
-  		    return false;
-  	}
-  	*/
-  	
-  	return true;  	
-  }
-  
-  bool ViolationMgrImpl::handleRelax(ConstrainedVariableId v) 
-  {
-  	if (m_violatedConstraints.size() == 0)
-  	    return true;
-  	    
-  	// restore all constraints attached to v to propagation
-  	// as long as all the vars in the constraint are now non-empty
-  	std::set<ConstraintId> constraints;
-  	v->constraints(constraints);
-  	for (std::set<ConstraintId>::iterator it = constraints.begin(); it != constraints.end(); ++it) {
-  		ConstraintId c = *it;
-		if (!c->isActive()) {
-  		    if (canPropagate(c)) {
-                debugMsg("ConstraintEngine:ViolationMgr", "Removing constraint from violated set : " << c->toString());
-  			    c->undoDeactivation(); // This will put the constraint back on the Propagators' agendas
-  	            m_violatedConstraints.erase(*it);
-  		    }
-  		}
-  	}
-  	
-  	return true;
-  }  	    
 }

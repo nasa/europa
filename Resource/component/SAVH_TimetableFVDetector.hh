@@ -11,6 +11,8 @@ namespace EUROPA {
       void initialize(){}
       bool detect(const InstantId inst);
     protected:
+      virtual ResourceProblem::Type getResourceProblem(const InstantId inst) const;    	
+    	
     private:
       double m_lowerLimit, m_upperLimit, m_maxInstConsumption, m_maxInstProduction;
       double m_maxCumulativeConsumption, m_maxCumulativeProduction;

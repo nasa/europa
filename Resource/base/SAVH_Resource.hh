@@ -13,6 +13,7 @@
 #include "Object.hh"
 #include "Constraint.hh"
 #include "PlanDatabaseDefs.hh"
+#include "ResourceProblem.hh"
 
 namespace EUROPA {
   namespace SAVH {
@@ -144,7 +145,9 @@ namespace EUROPA {
        *        action to push this information to the planner (i.e. empty a variable's domain).
        * @param inst The violated instant.
        */
-      virtual void notifyViolated(const InstantId inst);
+      virtual void notifyViolated(const InstantId inst, ResourceProblem::Type problem);
+
+      virtual void notifyNoLongerViolated(const InstantId inst);
 
       /**
        * @brief Receive notification of a flaw at an instant.  The subclass should take appropriate action
@@ -180,6 +183,9 @@ namespace EUROPA {
       std::map<TransactionId, TokenId> m_transactionsToTokens;
       std::map<TokenId, std::set<InstantId> > m_flawedTokens;
       std::map<int, InstantId> m_flawedInstants;
+      
+      TokenId getTokenForTransaction(TransactionId t);
+      ResourceTokenRelationId getRTRConstraint(TokenId tok);      
     };
   }
 }

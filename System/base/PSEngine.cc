@@ -164,8 +164,15 @@ namespace EUROPA {
   }  
 
   // TODO: Implement these
-  double PSToken::getViolation() const {return 0.0;}
-  std::string PSToken::getViolationExpl() const { return UNKNOWN; }
+  double PSToken::getViolation() const 
+  {
+	  return m_tok->getViolation();
+  }
+  
+  std::string PSToken::getViolationExpl() const 
+  { 
+	  return m_tok->getViolationExpl();
+  }
 
   PSList<PSVariable*> PSToken::getParameters() {
     PSList<PSVariable*> retval;

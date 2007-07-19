@@ -3,6 +3,7 @@
 #include "SAVH_FVDetector.hh"
 #include "SAVH_Transaction.hh"
 #include "SAVH_Instant.hh"
+#include "SAVH_ResourceTokenRelation.hh"
 #include "PlanDatabase.hh"
 #include "Variable.hh"
 #include "IntervalDomain.hh"
@@ -188,15 +189,96 @@ namespace EUROPA {
         results.push_back(it->first);
     }
 
-    void Resource::notifyViolated(const InstantId inst) {
+    TokenId Resource::getTokenForTransaction(TransactionId t)
+    {
+        std::map<TransactionId, TokenId>::iterator transIt = m_transactionsToTokens.find(t);
+        check_error(transIt != m_transactionsToTokens.end());
+        TokenId tok = transIt->second;
+        check_error(tok.isValid());
+        
+        return tok;
+    }
+    
+    ResourceTokenRelationId Resource::getRTRConstraint(TokenId tok)
+    {
+    	ResourceTokenRelationId retval = ResourceTokenRelationId::noId();
+                
+        const std::set<ConstraintId>& constraints = tok->getStandardConstraints();
+        std::set<ConstraintId>::const_iterator constIt = constraints.begin();
+        for(;constIt != constraints.end();++constIt) {
+        	ConstraintId c = *constIt;
+        	if (c->getName() == ResourceTokenRelation::CONSTRAINT_NAME())
+        		return ResourceTokenRelationId(c);
+        }
+        
+        check_error(ALWAYS_FAIL,"Could not find ResourceTokenRelation for Transaction");
+        return retval;
+    }
+    
+    bool isConsumptionProblem(ResourceProblem::Type problem)
+    {
+        return	
+            problem == ResourceProblem::ConsumptionSumExceeded ||
+            problem == ResourceProblem::ConsumptionRateExceeded ||
+            problem == ResourceProblem::LevelTooLow; 
+    }
+    
+    bool isProductionProblem(ResourceProblem::Type problem)
+    {
+        return	
+            problem == ResourceProblem::ProductionSumExceeded ||
+            problem == ResourceProblem::ProductionRateExceeded ||
+            problem == ResourceProblem::LevelTooHigh; 
+    }
+    
+    void Resource::notifyViolated(const InstantId inst, ResourceProblem::Type problem) 
+    {
       check_error(inst.isValid());
       check_error(inst->isViolated());
       check_error(!inst->getTransactions().empty());
 
-      TransactionId trans = *(inst->getTransactions().begin());
-      const_cast<AbstractDomain&>(trans->quantity()->lastDomain()).empty();
+	  const std::set<TransactionId>& txns = inst->getTransactions();	  
+      TransactionId txn = *(txns.begin());
+      ConstraintEngineId ce = txn->quantity()->getConstraintEngine();
+ 
+      debugMsg("Resource:notifyViolated", "Received notification of violation at time " << inst->getTime());
+      
+      if (ce->getAllowViolations()) { // TODO: move this test to the constraint?
+    	  std::set<TransactionId>::const_iterator it = txns.begin();
+    	  for(;it != txns.end(); ++it) {
+              txn = *it;     
+              TokenId tok = getTokenForTransaction(txn);
+    		  ResourceTokenRelationId c = getRTRConstraint(tok);
+
+    		  if (isConsumptionProblem(problem) && txn->isConsumer()) {
+    		      c->notifyViolated();
+    		      debugMsg("Resource:notifyViolated", "Marked constraint as violated : Token(" << tok->getKey() << ") Constraint " << c->toString());
+    		  }
+    		  else if (isProductionProblem(problem) && !(txn->isConsumer())) {
+    		      c->notifyViolated();
+    		      debugMsg("Resource:notifyViolated", "Marked constraint as Violated : Token(" << tok->getKey() << ") Constraint " << c->toString());
+    		  }
+    	  }
+      }
+      else {
+          const_cast<AbstractDomain&>(txn->quantity()->lastDomain()).empty();
+      }      
     }
 
+    void Resource::notifyNoLongerViolated(const InstantId inst) 
+    {
+        // remove all constraints associated with the instant from violated list
+  	  const std::set<TransactionId>& txns = inst->getTransactions();	  
+	  std::set<TransactionId>::const_iterator it = txns.begin();
+	  for(;it != txns.end(); ++it) {
+          TransactionId txn = *it;      		  		  
+          TokenId tok = getTokenForTransaction(txn);
+		  ResourceTokenRelationId c = getRTRConstraint(tok);
+		  c->notifyNoLongerViolated();
+	      debugMsg("Resource:notifyNoLongerViolated", "Marked constraint as NoLongerViolated : Token(" << tok->getKey() << ") Constraint " << c->toString());
+	  }
+    }
+    
     //all ordering choices apply to all tokens in all flaws
     void Resource::notifyFlawed(const InstantId inst) {
       check_error(inst.isValid());

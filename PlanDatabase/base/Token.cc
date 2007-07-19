@@ -414,6 +414,37 @@ namespace EUROPA{
   bool Token::isStandardConstraint(const ConstraintId& constraint) const{
     return(m_standardConstraints.find(constraint) != m_standardConstraints.end());
   }
+  
+  const std::set<ConstraintId>& Token::getStandardConstraints() const
+  {
+	  return m_standardConstraints;
+  }
+  
+  
+  // TODO: include constraints currently held by the RuleInstance that was triggered by this token
+  double Token::getViolation() const 
+  {
+  	  double total = 0.0;
+      for (std::set<ConstraintId>::const_iterator it = m_standardConstraints.begin(); it != m_standardConstraints.end(); ++it) {
+  	      ConstraintId c = *it;
+  	      total += c->getViolation();
+      }  
+      
+      return total;
+  }
+  
+  std::string Token::getViolationExpl() const
+  {
+  	  std::ostringstream os;
+  	  
+      for (std::set<ConstraintId>::const_iterator it = m_standardConstraints.begin(); it != m_standardConstraints.end(); ++it) {
+  	      ConstraintId c = *it;
+  	      if (c->getViolation() > 0.0)
+  	          os << c->getViolationExpl() << std::endl;
+      }  
+      
+      return os.str();  
+  }
 
   bool Token::isValid() const {
     bool result = true;

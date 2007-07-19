@@ -257,6 +257,9 @@ namespace EUROPA {
     const LabelStr m_name; /**< Name used on stratup to bind to the correct factory and then present as a debugging aid. */
     const ConstraintEngineId m_constraintEngine; /**< The owner ConstraintEngine */
     std::vector<ConstrainedVariableId> m_variables; /**< The variable scope of the Constraint. */
+    
+    void notifyViolated();
+    void notifyNoLongerViolated();    
 
   private:
     /**

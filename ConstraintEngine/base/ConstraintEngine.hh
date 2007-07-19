@@ -35,6 +35,8 @@ namespace EUROPA {
       virtual bool canContinuePropagation() = 0;
   	  
   	  virtual bool isViolated(ConstraintId c) const = 0;
+  	  virtual void addViolatedConstraint(ConstraintId c) = 0;
+	  virtual void removeViolatedConstraint(ConstraintId c) = 0;	
   	  
   	protected:
   	   ViolationMgr() {}
@@ -42,29 +44,6 @@ namespace EUROPA {
   	   
   	   friend class ConstraintEngine;
   };
-  
-  class ViolationMgrImpl : public ViolationMgr
-  {
-  	public:
-  	  ViolationMgrImpl(unsigned int maxViolationsAllowed);
-  	  virtual ~ViolationMgrImpl();
-
-  	  virtual unsigned int getMaxViolationsAllowed();
-  	  virtual void setMaxViolationsAllowed(unsigned int i);
-  	  
-  	  virtual double getViolation() const;
-  	  virtual std::string getViolationExpl() const;
-  	  
-  	  virtual bool handleEmpty(ConstrainedVariableId v);
-  	  virtual bool handleRelax(ConstrainedVariableId v);
-      virtual bool canContinuePropagation();
-
-  	  virtual bool isViolated(ConstraintId c) const;
-  	  
-  	protected:
-  	  unsigned int m_maxViolationsAllowed;
-  	  ConstraintSet m_violatedConstraints;
-  };  
   
   /**
    * @class ConstraintEngine
@@ -286,6 +265,8 @@ namespace EUROPA {
      */
     DomainListenerId allocateVariableListener(const ConstrainedVariableId& variable,
                                               const ConstraintList& constraints) const;
+    
+    ViolationMgr& getViolationMgr() { return *m_violationMgr; }
 
   private:
     friend class Constraint;

@@ -12,6 +12,29 @@ namespace EUROPA {
       m_maxCumulativeConsumption = res->getMaxConsumption();
     }
 
+    ResourceProblem::Type ReusableFVDetector::getResourceProblem(const InstantId inst) const
+    {
+    	if (inst->getMaxCumulativeConsumption() > m_maxCumulativeConsumption)
+    		return ResourceProblem::ConsumptionSumExceeded;
+    	
+    	if (inst->getMaxCumulativeProduction() > m_maxCumulativeConsumption)
+    		return ResourceProblem::ProductionSumExceeded;
+    	         
+    	if (inst->getMaxInstantConsumption() > m_maxInstConsumption)
+    		return ResourceProblem::ConsumptionRateExceeded;
+    	
+    	if (inst->getMaxInstantProduction() > m_maxInstConsumption)
+    		return ResourceProblem::ProductionRateExceeded;
+    	
+    	if (inst->getUpperLevel() < m_lowerLimit)
+    		return ResourceProblem::LevelTooLow;
+    	
+    	if (inst->getLowerLevel() > m_upperLimit)
+    	    return ResourceProblem::LevelTooHigh;
+    		
+    	return ResourceProblem::NoProblem;
+    }
+    
     bool ReusableFVDetector::detect(const InstantId inst) {
       debugMsg("ReusableFVDetector:detect", "Detecting flaws and violations at time " << inst->getTime());
       debugMsg("ReusableFVDetector:detect", "Max cumulative consumption: " << m_maxCumulativeConsumption << 
@@ -25,25 +48,22 @@ namespace EUROPA {
       debugMsg("ReusableFVDetector:detect", "Lower limit: " << m_lowerLimit << ".  Level: [" << inst->getLowerLevel() << " " << inst->getUpperLevel() << "]");
       debugMsg("ReusableFVDetector:detect", "Upper limit: " << m_upperLimit << ".  Level: [" << inst->getLowerLevel() << " " << inst->getUpperLevel() << "]");
       bool isFlawed = inst->isFlawed();
+      bool wasViolated = inst->isViolated();
       inst->setViolated(false);
 
-      if(inst->getMaxCumulativeConsumption() > m_maxCumulativeConsumption ||
-         inst->getMaxCumulativeProduction() > m_maxCumulativeConsumption ||
-         inst->getMaxInstantConsumption() > m_maxInstConsumption ||
-         inst->getMaxInstantProduction() > m_maxInstConsumption ||
-         inst->getUpperLevel() < m_lowerLimit ||
-         inst->getLowerLevel() > m_upperLimit) {
-
+      ResourceProblem::Type problem = getResourceProblem(inst);
+      
+      if(problem != ResourceProblem::NoProblem) {
         debugMsg("ReusableFVDetector:detect", "Flagging violation:");
-        condDebugMsg(inst->getMaxCumulativeConsumption() > m_maxCumulativeConsumption, "ReusableFVDetector:detect", "Cumulative consumption violation.");
-        condDebugMsg(inst->getMaxCumulativeProduction() > m_maxCumulativeConsumption, "ReusableFVDetector:detect", "Cumulative production violation.");
-        condDebugMsg(inst->getMaxInstantConsumption() > m_maxInstConsumption, "ReusableFVDetector:detect", "Instantaneous consumption violation.");
-        condDebugMsg(inst->getMaxInstantProduction() > m_maxInstConsumption, "ReusableFVDetector:detect", "Instantaneous production violation.");
-        condDebugMsg(inst->getUpperLevel() < m_lowerLimit, "ReusableFVDetector:detect", "Upper level below limit violation.");
-        condDebugMsg(inst->getLowerLevel() > m_upperLimit, "ReusableFVDetector:detect", "Lower level above limit violation.");
+        condDebugMsg(problem == ResourceProblem::ConsumptionSumExceeded, "ReusableFVDetector:detect", "Cumulative consumption violation.");
+        condDebugMsg(problem == ResourceProblem::ProductionSumExceeded,  "ReusableFVDetector:detect", "Cumulative production violation.");
+        condDebugMsg(problem == ResourceProblem::ConsumptionRateExceeded, "ReusableFVDetector:detect", "Instantaneous consumption violation.");
+        condDebugMsg(problem == ResourceProblem::ProductionRateExceeded, "ReusableFVDetector:detect", "Instantaneous production violation.");
+        condDebugMsg(problem == ResourceProblem::LevelTooLow, "ReusableFVDetector:detect", "Upper level below limit violation.");
+        condDebugMsg(problem == ResourceProblem::LevelTooHigh, "ReusableFVDetector:detect", "Lower level above limit violation.");
 
         inst->setViolated(true);
-        notifyOfViolation(inst);
+        notifyOfViolation(inst,problem);
         return true;
       }
       else if(inst->getLowerLevel() < m_lowerLimit || inst->getUpperLevel() > m_upperLimit) {
@@ -66,6 +86,10 @@ namespace EUROPA {
           notifyNoLongerFlawed(inst);
         }
       }
+      
+      if (wasViolated)
+    	  notifyNoLongerViolated(inst);
+    	  
       return false;
     }
   }

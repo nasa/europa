@@ -260,6 +260,16 @@ namespace EUROPA {
 
   unsigned int Constraint::deactivationCount() const {return m_deactivationRefCount;}
 
+  void Constraint::notifyViolated()
+  {
+	  m_propagator->getConstraintEngine()->getViolationMgr().addViolatedConstraint(m_id);
+  }
+  
+  void Constraint::notifyNoLongerViolated()
+  {
+	  m_propagator->getConstraintEngine()->getViolationMgr().removeViolatedConstraint(m_id);
+  }  
+  
   std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1){
     static std::vector<ConstrainedVariableId> sl_scope;
     check_error(arg1.isValid());

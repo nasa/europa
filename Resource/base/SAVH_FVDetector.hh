@@ -65,8 +65,10 @@ namespace EUROPA {
       /**
        * @brief Inform the Resource that there is a violation at an Instant.
        */
-      void notifyOfViolation(const InstantId inst) {if(m_res.isValid()) m_res->notifyViolated(inst);}
+      void notifyOfViolation(const InstantId inst, ResourceProblem::Type problem) {if(m_res.isValid()) m_res->notifyViolated(inst,problem);}
 
+      void notifyNoLongerViolated(const InstantId inst) {if(m_res.isValid()) m_res->notifyNoLongerViolated(inst);}      
+      
       /**
        * @brief Inform the Resource that there is a flaw at an Instant.
        */

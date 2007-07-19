@@ -185,6 +185,21 @@ namespace EUROPA {
      */
     bool isStandardConstraint(const ConstraintId& constraint) const;
 
+    /**
+     * @brief Internally generated constraints that are standard across Token instances of the same type. 
+     */
+    const std::set<ConstraintId>& getStandardConstraints() const;
+
+    /**
+     * @brief Sum of violation value for all the constraints attached to this token
+     */
+    double getViolation() const; 
+
+    /**
+     * @brief Concatenation of violation expl for all the constraints attached to this token
+     */
+    std::string getViolationExpl() const;
+    
     /**< State checks */
     bool isIncomplete() const;
 

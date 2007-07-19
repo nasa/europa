@@ -35,6 +35,9 @@ namespace EUROPA {
 
     class ReusableToken;
     typedef Id<ReusableToken> ReusableTokenId;
+    
+    class ResourceTokenRelation;
+    typedef Id<ResourceTokenRelation> ResourceTokenRelationId;
 
     typedef std::map<TokenId, std::set<InstantId> > ResourceFlaws;
   }

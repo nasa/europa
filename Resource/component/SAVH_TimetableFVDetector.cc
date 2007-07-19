@@ -32,6 +32,29 @@ namespace EUROPA {
 	       m_maxCumulativeProduction << ")");
     }
 
+    ResourceProblem::Type TimetableFVDetector::getResourceProblem(const InstantId inst) const
+    {
+    	if (inst->getMinCumulativeConsumption() > m_maxCumulativeConsumption)
+    		return ResourceProblem::ConsumptionSumExceeded;
+    	
+    	if (inst->getMinCumulativeProduction() > m_maxCumulativeProduction)
+    		return ResourceProblem::ProductionSumExceeded;
+    	         
+    	if (inst->getMinInstantConsumption() > m_maxInstConsumption)
+    		return ResourceProblem::ConsumptionRateExceeded;
+    	
+    	if (inst->getMinInstantProduction() > m_maxInstProduction)
+    		return ResourceProblem::ProductionRateExceeded;
+    	
+    	if (inst->getUpperLevel() + (m_maxCumulativeProduction - inst->getMinCumulativeProduction()) < m_lowerLimit)
+    		return ResourceProblem::LevelTooLow;
+    	
+    	if (inst->getLowerLevel() - (m_maxCumulativeConsumption - inst->getMinCumulativeConsumption()) > m_upperLimit)
+    	    return ResourceProblem::LevelTooHigh;
+    		
+    	return ResourceProblem::NoProblem;
+    }
+    
     bool TimetableFVDetector::detect(const InstantId inst) {
       debugMsg("TimetableFVDetector:detect", "Detecting flaws and violations at time " << inst->getTime());
       condDebugMsg(inst->getMinCumulativeConsumption() > m_maxCumulativeConsumption, "TimetableFVDetector:detect", 
@@ -48,24 +71,24 @@ namespace EUROPA {
       condDebugMsg(inst->getLowerLevel() - (m_maxCumulativeConsumption - inst->getMinCumulativeConsumption()) > m_upperLimit,
 		   "TimetableFVDetector:detect", "Upper limit violation.  Limit: " << m_upperLimit << " Lower level: " << inst->getLowerLevel() <<
 		   " Maxumum remaining consumption: " << (m_maxCumulativeConsumption - inst->getMinCumulativeConsumption()));
+      
+      bool wasViolated = inst->isViolated();
       inst->setViolated(false);
       inst->setFlawed(false);
+      
       //detect violations
-      //if the min consumption up to now is more than the max allowable
-      if(inst->getMinCumulativeConsumption() > m_maxCumulativeConsumption ||
-	 //if the min production up to now is more than the max allowable
-	 inst->getMinCumulativeProduction() > m_maxCumulativeProduction ||
-	 //if the min consumption at this instant is more than the max allowable
-	 inst->getMinInstantConsumption() > m_maxInstConsumption ||
-	 //if the min production at this instant is more than the max allowable
-	 inst->getMinInstantProduction() > m_maxInstProduction ||
-	 //if the upper level plus the max amount of possible production is still below the lower limit
-	 inst->getUpperLevel() + (m_maxCumulativeProduction - inst->getMinCumulativeProduction()) < m_lowerLimit ||
-	 //if the lower level minus the max amount of possible consumption is still above the upper limit
-	 inst->getLowerLevel() - (m_maxCumulativeConsumption - inst->getMinCumulativeConsumption()) > m_upperLimit) {
-	inst->setViolated(true);
-	notifyOfViolation(inst);
+      ResourceProblem::Type problem = getResourceProblem(inst);
+      
+      if(problem != ResourceProblem::NoProblem) {
+          inst->setViolated(true);
+          notifyOfViolation(inst,problem);
+          return true;
       }
+      else {
+    	  if (wasViolated)
+    		  notifyNoLongerViolated(inst);
+      }
+      
       //detect flaws NOTE: don't really need to do this, since flaws in the timetable situation aren't integrated into planning
       //if(instant->getLowerMax() < m_lowerLimit) {}
       //if(instant->getUpperMax() > m_upperLimit){}
