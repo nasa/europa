@@ -75,6 +75,9 @@ namespace EUROPA {
       void notifyOfFlaw(const InstantId inst) {if(m_res.isValid()) m_res->notifyFlawed(inst);}
 
       void notifyNoLongerFlawed(const InstantId inst) {if(m_res.isValid()) m_res->notifyNoLongerFlawed(inst);}
+      
+      bool allowViolations() const;
+      
     private:
       FVDetectorId m_id;
       ResourceId m_res;
