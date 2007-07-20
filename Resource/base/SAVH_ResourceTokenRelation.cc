@@ -67,7 +67,7 @@ namespace EUROPA {
     void ResourceTokenRelation::notifyViolated(ResourceProblem::Type problem, const InstantId inst)
     {
     	m_violationProblem = problem;
-    	m_violationInstant = inst;    	
+    	m_violationTime = inst->getTime();    	
     	Constraint::notifyViolated();
     }
 
@@ -77,7 +77,7 @@ namespace EUROPA {
     	
     	os << ResourceProblem::getString(m_violationProblem) 
     	      << " for resource " << m_resource->getName().toString()
-    	      << " at instant " << m_violationInstant->getTime();
+    	      << " at instant " << m_violationTime;
     	
     	return os.str();
     }

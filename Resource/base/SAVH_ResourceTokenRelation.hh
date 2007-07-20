@@ -45,7 +45,7 @@ namespace EUROPA {
       TokenId m_token;
       ResourceId m_resource;
 
-      InstantId m_violationInstant;
+      int m_violationTime;
       ResourceProblem::Type m_violationProblem;
       
       friend class Resource;
