@@ -333,6 +333,8 @@ namespace EUROPA {
     else {
         m_var->reset();
         debugMsg("PSVariable:specify","After reset for var:" << m_var->toString());
+        m_var->getConstraintEngine()->propagate();
+        debugMsg("PSVariable:specify","After propagate for var:" << m_var->toString());
     }
         
     m_var->specify(v.asDouble());
