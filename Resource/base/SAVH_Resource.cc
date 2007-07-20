@@ -274,8 +274,10 @@ namespace EUROPA {
           TransactionId txn = *it;      		  		  
           TokenId tok = getTokenForTransaction(txn);
 		  ResourceTokenRelationId c = getRTRConstraint(tok);
-		  c->notifyNoLongerViolated();
-	      debugMsg("Resource:notifyNoLongerViolated", "Marked constraint as NoLongerViolated : Token(" << tok->getKey() << ") Constraint " << c->toString());
+		  if (c->getViolation() > 0) {
+		      c->notifyNoLongerViolated();
+	          debugMsg("Resource:notifyNoLongerViolated", "Marked constraint as NoLongerViolated : Token(" << tok->getKey() << ") Constraint " << c->toString());
+		  }
 	  }
     }
     
