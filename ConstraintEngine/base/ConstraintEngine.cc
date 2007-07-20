@@ -117,6 +117,7 @@ namespace EUROPA
 	void ViolationMgrImpl::removeViolatedConstraint(ConstraintId c)
 	{
 		if (canPropagate(c)) {
+			check_error(isViolated(c),"Tried to remove constraint that is not violated "+c->toString());
 			debugMsg("ConstraintEngine:ViolationMgr", "Removing constraint from violated set : " << c->toString());
 			c->undoDeactivation(); // This will put the constraint back on the Propagators' agendas
 			m_violatedConstraints.erase(c);
@@ -148,7 +149,7 @@ namespace EUROPA
 		v->constraints(constraints);
 		for (std::set<ConstraintId>::iterator it = constraints.begin(); it != constraints.end(); ++it) {
 			ConstraintId c = *it;
-			if (!c->isActive()) 
+			if (isViolated(c)) 
 				removeViolatedConstraint(c);
 		}
 	
