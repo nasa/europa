@@ -54,7 +54,7 @@ namespace EUROPA {
       ResourceProblem::Type problem = getResourceProblem(inst);
       
       if(problem != ResourceProblem::NoProblem) {
-        debugMsg("ReusableFVDetector:detect", "Flagging violation:");
+        debugMsg("ReusableFVDetector:detect", "Flagging violation at instant " << inst->getTime() << " : ");
         condDebugMsg(problem == ResourceProblem::ConsumptionSumExceeded, "ReusableFVDetector:detect", "Cumulative consumption violation.");
         condDebugMsg(problem == ResourceProblem::ProductionSumExceeded,  "ReusableFVDetector:detect", "Cumulative production violation.");
         condDebugMsg(problem == ResourceProblem::ConsumptionRateExceeded, "ReusableFVDetector:detect", "Instantaneous consumption violation.");
@@ -65,10 +65,14 @@ namespace EUROPA {
         inst->setViolated(true);
         notifyOfViolation(inst,problem);
         
-        if (allowViolations())
+        if (allowViolations()) {
+            debugMsg("ReusableFVDetector:detect", "Violations allowed, continuing detection");        	
         	return false;
-        else
+        }
+        else {
+            debugMsg("ReusableFVDetector:detect", "Violations not allowed, stopping detection");        	
             return true;
+        }
       }
       else if(inst->getLowerLevel() < m_lowerLimit || inst->getUpperLevel() > m_upperLimit) {
         inst->setFlawed(true);
@@ -91,8 +95,10 @@ namespace EUROPA {
         }
       }
       
-      if (wasViolated)
+      if (wasViolated) {
     	  notifyNoLongerViolated(inst);
+          debugMsg("ReusableFVDetector:detect", "Clearing Violation");
+      }
     	  
       return false;
     }
