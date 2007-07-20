@@ -28,6 +28,29 @@ namespace EUROPA {
     new ResourcePropagator(LabelStr("Resource"), m_constraintEngine, m_planDatabase);
   }
 
+  PSList<PSResource*> PSEngineWithResources::getResourcesByType(const std::string& objectType) {
+    check_runtime_error(m_planDatabase.isValid());
+    
+    PSList<PSResource*> retval;
+    
+    const ObjectSet& objects = m_planDatabase->getObjects();
+    for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
+      ObjectId object = *it;
+      if(Schema::instance()->isA(object->getType(), objectType.c_str()))
+	    retval.push_back(dynamic_cast<PSResource*>(getObjectWrapperGenerator(object->getType())->wrap(object)));
+    }
+    
+    return retval;
+  }
+  
+  PSResource* PSEngineWithResources::getResourceByKey(PSEntityKey id) {
+    check_runtime_error(m_planDatabase.isValid());
+
+    EntityId entity = Entity::getEntity(id);
+    check_runtime_error(entity.isValid());
+    return new PSResource(entity);
+  }
+  
   PSResource::PSResource(const SAVH::ResourceId& res) : PSObject(res), m_res(res) {}
 
   PSResourceProfile* PSResource::getLimits() {

@@ -6,11 +6,16 @@
 
 namespace EUROPA {
 
+  class PSResource;
+  
   class PSEngineWithResources : public PSEngine {
   public:
     PSEngineWithResources();
     void start();
     void initDatabase();
+    
+    PSList<PSResource*> getResourcesByType(const std::string& objectType);
+    PSResource* getResourceByKey(PSEntityKey id);    
   };
 
   class PSResourceProfile

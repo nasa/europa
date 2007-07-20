@@ -1,7 +1,6 @@
 %module PSEngineInterface
 %{
 #include "PSResources.hh"
-#define PSEngine PSEngineWithResources
 %}
 
 %include "PSEngine.i"
@@ -13,6 +12,13 @@ namespace EUROPA {
 
   %template(PSResourceList) PSList<PSResource*>;
 
+  class PSEngineWithResources : public PSEngine
+  {
+  public:
+    PSList<PSResource*> getResourcesByType(const std::string& objectType);
+    PSResource* getResourceByKey(PSEntityKey id);
+  };
+   
   class PSResource : public PSObject
   {
   public:
