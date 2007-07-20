@@ -42,6 +42,8 @@ namespace EUROPA {
 		NoWayOutProduction
 	};
 
+    static const char* getString(Type t) { return labels[t]; }
+
     const char* getString() const { return labels[m_type]; }
 
     /**

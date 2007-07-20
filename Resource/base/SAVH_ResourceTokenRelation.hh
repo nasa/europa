@@ -6,6 +6,7 @@
 #include "DomainListener.hh"
 #include "PlanDatabaseDefs.hh"
 #include "SAVH_ResourceDefs.hh"
+#include "ResourceProblem.hh"
 #include "LabelStr.hh"
 
 #include <vector>
@@ -34,6 +35,8 @@ namespace EUROPA {
       virtual std::string getViolationExpl() const;
       
     protected:
+      void notifyViolated(ResourceProblem::Type problem, const InstantId inst);
+      
     private:
       bool canIgnore(const ConstrainedVariableId& variable,
 		     int argIndex,
@@ -41,6 +44,9 @@ namespace EUROPA {
       void handleExecute(){}
       TokenId m_token;
       ResourceId m_resource;
+
+      InstantId m_violationInstant;
+      ResourceProblem::Type m_violationProblem;
       
       friend class Resource;
     };

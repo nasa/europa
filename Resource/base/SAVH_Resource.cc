@@ -251,11 +251,11 @@ namespace EUROPA {
     		  ResourceTokenRelationId c = getRTRConstraint(tok);
 
     		  if (isConsumptionProblem(problem) && txn->isConsumer()) {
-    		      c->notifyViolated();
+    		      c->notifyViolated(problem,inst);
     		      debugMsg("Resource:notifyViolated", "Marked constraint as violated : Token(" << tok->getKey() << ") Constraint " << c->toString());
     		  }
     		  else if (isProductionProblem(problem) && !(txn->isConsumer())) {
-    		      c->notifyViolated();
+    		      c->notifyViolated(problem,inst);
     		      debugMsg("Resource:notifyViolated", "Marked constraint as Violated : Token(" << tok->getKey() << ") Constraint " << c->toString());
     		  }
     	  }

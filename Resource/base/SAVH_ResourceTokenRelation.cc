@@ -4,6 +4,7 @@
 #include "Token.hh"
 #include "ConstrainedVariable.hh"
 #include "TokenVariable.hh"
+#include "SAVH_Instant.hh"
 
 namespace EUROPA {
   namespace SAVH {
@@ -63,9 +64,22 @@ namespace EUROPA {
       return true;
     }    
     
+    void ResourceTokenRelation::notifyViolated(ResourceProblem::Type problem, const InstantId inst)
+    {
+    	m_violationProblem = problem;
+    	m_violationInstant = inst;    	
+    	Constraint::notifyViolated();
+    }
+
     std::string ResourceTokenRelation::getViolationExpl() const
     {
-    	return "Violated limits for resource "+m_resource->getName().toString();
+    	std::ostringstream os;
+    	
+    	os << ResourceProblem::getString(m_violationProblem) 
+    	      << " for resource " << m_resource->getName().toString()
+    	      << " at instant " << m_violationInstant->getTime();
+    	
+    	return os.str();
     }
   }
 }
