@@ -82,7 +82,10 @@ namespace EUROPA {
       if(problem != ResourceProblem::NoProblem) {
           inst->setViolated(true);
           notifyOfViolation(inst,problem);
-          return true;
+          if (allowViolations())
+        	  return false;
+          else
+              return true;
       }
       else {
     	  if (wasViolated)

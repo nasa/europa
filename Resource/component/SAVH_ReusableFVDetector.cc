@@ -64,7 +64,11 @@ namespace EUROPA {
 
         inst->setViolated(true);
         notifyOfViolation(inst,problem);
-        return true;
+        
+        if (allowViolations())
+        	return false;
+        else
+            return true;
       }
       else if(inst->getLowerLevel() < m_lowerLimit || inst->getUpperLevel() > m_upperLimit) {
         inst->setFlawed(true);
