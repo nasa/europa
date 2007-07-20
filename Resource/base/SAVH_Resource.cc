@@ -374,6 +374,7 @@ namespace EUROPA {
 
     void Resource::notifyDeleted(const InstantId inst) {
       notifyNoLongerFlawed(inst);
+      notifyNoLongerViolated(inst);
       debugMsg("Resource:notifyDeleted", "Removing (possibly) flawed instant at time " << inst->getTime());
       m_flawedInstants.erase(inst->getTime());
       for(ResourceFlaws::iterator it = m_flawedTokens.begin(); it != m_flawedTokens.end(); ++it)
