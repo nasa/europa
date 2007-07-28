@@ -37,7 +37,13 @@ namespace EUROPA {
   	  virtual bool isViolated(ConstraintId c) const = 0;
   	  virtual void addViolatedConstraint(ConstraintId c) = 0;
 	  virtual void removeViolatedConstraint(ConstraintId c) = 0;	
-  	  
+
+	  virtual bool isEmpty(ConstrainedVariableId v) const = 0;
+  	  virtual void addEmptyVariable(ConstrainedVariableId c) = 0;
+  	  virtual const ConstrainedVariableSet& getEmptyVariables() const = 0;
+  	  virtual void clearEmptyVariables() = 0;
+      virtual void relaxEmptyVariables() = 0;
+      
   	protected:
   	   ViolationMgr() {}
   	   virtual ~ViolationMgr() {}  
@@ -267,6 +273,7 @@ namespace EUROPA {
                                               const ConstraintList& constraints) const;
     
     ViolationMgr& getViolationMgr() { return *m_violationMgr; }
+    const ViolationMgr& getViolationMgr() const { return *m_violationMgr; }
 
   private:
     friend class Constraint;
@@ -407,8 +414,8 @@ namespace EUROPA {
     /**
      * @brief Internal helper methods
      */
-    inline bool hasEmptyVariable() const {return !m_emptied.isNoId();}
-    inline void clearEmptiedVariable(){m_emptied = ConstrainedVariableId::noId();}
+    bool hasEmptyVariables() const;
+    void clearEmptyVariables();
     bool doPropagate();
 
 
@@ -427,7 +434,6 @@ namespace EUROPA {
 					     Position in the list indicates execution priority. This
 					     is determined by the order of construction. */
     std::map<double, PropagatorId> m_propagatorsByName; /*!< Support configuration and lookup by name. */
-    ConstrainedVariableId m_emptied; /*!< Set when a domain is EMPTIED. Implies PROVEN_INCONSISTENT. */
     bool m_relaxed; /*!< Set when a domain is RELAXED. Implies PENDING. */
     bool m_propInProgress; /*!< Set true when doing propagation, otherwise false. */
     int m_cycleCount; /*!< A monotonically increasing count of propagation cycles. Identifies

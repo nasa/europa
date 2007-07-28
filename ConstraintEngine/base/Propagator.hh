@@ -167,6 +167,10 @@ namespace EUROPA {
     virtual void execute(const ConstraintId& constraint);
 
     static AbstractDomain& getCurrentDomain(const ConstrainedVariableId& var);
+    
+    // Constraint Violation Mgmt
+    virtual void notifyConstraintViolated(ConstraintId c);
+    virtual void notifyVariableEmptied(ConstrainedVariableId v);
 
   private:
     Propagator(); /**< NO IMPL - MUST HAVE A ConstraintEngine. */

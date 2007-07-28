@@ -31,18 +31,26 @@ namespace EUROPA
 		virtual bool handleRelax(ConstrainedVariableId v);
 		virtual bool canContinuePropagation();
 	
-		virtual bool isViolated(ConstraintId c) const;
-		
+		virtual bool isViolated(ConstraintId c) const;		
 		virtual void addViolatedConstraint(ConstraintId c);
 		virtual void removeViolatedConstraint(ConstraintId c);
+		
+		virtual bool isEmpty(ConstrainedVariableId v) const;
+	  	virtual void addEmptyVariable(ConstrainedVariableId c);
+	  	virtual const ConstrainedVariableSet& getEmptyVariables() const;
+	  	virtual void clearEmptyVariables();
+	    virtual void relaxEmptyVariables();		
 	
 	protected:
 		unsigned int m_maxViolationsAllowed;
 		ConstraintSet m_violatedConstraints;
+		ConstrainedVariableSet m_emptyVariables;
+		bool m_relaxing;
 	};  
 	
 	ViolationMgrImpl::ViolationMgrImpl(unsigned int maxViolationsAllowed)
-	: m_maxViolationsAllowed(maxViolationsAllowed) 
+	: m_maxViolationsAllowed(maxViolationsAllowed)
+	, m_relaxing(false)
 	{
 	}
 	
@@ -97,8 +105,8 @@ namespace EUROPA
 	void ViolationMgrImpl::addViolatedConstraint(ConstraintId c)
 	{
 		debugMsg("ConstraintEngine:ViolationMgr", "Marking constraint as violated : " << c->toString());
-		c->deactivate(); // Deactivate will cause propagators to ignore constraint, including removing from current agendas  	
 		m_violatedConstraints.insert(c);		
+		c->deactivate(); // Deactivate will cause propagators to ignore constraint, including removing from current agendas  	
 	}
 	
 	bool canPropagate(ConstraintId constraint)
@@ -156,7 +164,45 @@ namespace EUROPA
 		return true;
 	}  	    
 	
-  static bool allActiveVariables(const std::vector<ConstrainedVariableId>& vars){
+	bool ViolationMgrImpl::isEmpty(ConstrainedVariableId v) const
+	{
+		return m_emptyVariables.find(v) != m_emptyVariables.end();
+	}
+	
+  	void ViolationMgrImpl::addEmptyVariable(ConstrainedVariableId c)
+  	{
+		debugMsg("ConstraintEngine:ViolationMgr", "Marking ConstrainedVariable as empty : " << c->toString());
+  		m_emptyVariables.insert(c); // TODO: make sure set is avoiding duplicates correctly
+  	}
+  	
+  	const ConstrainedVariableSet& ViolationMgrImpl::getEmptyVariables() const
+  	{
+  		return m_emptyVariables;
+  	}
+  	
+    void ViolationMgrImpl::clearEmptyVariables()
+    {
+    	m_emptyVariables.clear();
+    }
+
+    void ViolationMgrImpl::relaxEmptyVariables()
+    {
+    	if (m_relaxing)
+    		return;
+    	
+    	m_relaxing = true;
+    	ConstrainedVariableSet::const_iterator it = m_emptyVariables.begin();
+    	for(;it != m_emptyVariables.end();++it) {
+    		ConstrainedVariableId v = *it;
+    		check_error(!v.isNoId(),"Tried to relax ConstrainedVariableId::noId()");
+    		v->relax();
+    	}
+    	
+    	m_emptyVariables.clear();
+    	m_relaxing = false;
+    }
+
+    static bool allActiveVariables(const std::vector<ConstrainedVariableId>& vars){
     for (std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end(); ++it){
       ConstrainedVariableId var = *it;
       check_error(var.isValid());
@@ -281,7 +327,7 @@ namespace EUROPA
   }
 
   bool ConstraintEngine::provenInconsistent() const {
-    return(hasEmptyVariable());
+    return(hasEmptyVariables());
   }
 
   bool ConstraintEngine::constraintConsistent() const {
@@ -319,8 +365,8 @@ namespace EUROPA
     if(Entity::isPurging())
       return;
 
-    if(m_emptied == variable)
-      clearEmptiedVariable();
+    if(getViolationMgr().isEmpty(variable))
+      clearEmptyVariables();
 
     publish(notifyRemoved(variable));
 
@@ -494,6 +540,16 @@ namespace EUROPA
   	
   	return os.str();
   }
+
+  bool ConstraintEngine::hasEmptyVariables() const 
+  {
+	  return (getViolationMgr().getEmptyVariables().size() > 0);
+  }
+  
+  void ConstraintEngine::clearEmptyVariables() 
+  { 
+	  getViolationMgr().clearEmptyVariables();
+  }  
   
   bool ConstraintEngine::doPropagate()
   {
@@ -508,12 +564,12 @@ namespace EUROPA
     }
 
     // If we have an empty domain, then we sould relax it.
-    if(hasEmptyVariable())
-      m_emptied->relax();
+    if(hasEmptyVariables())
+      getViolationMgr().relaxEmptyVariables();
 
     // If we still have an empty variable, which we might in special cases dealing with empty
     // base or derived domains. then simply return false.
-    if(hasEmptyVariable())
+    if(hasEmptyVariables())
       return false;
 
     m_relaxed = false; // Reset by default
@@ -573,8 +629,7 @@ namespace EUROPA
   	return m_violationMgr->canContinuePropagation();
   }
   
-  bool ConstraintEngine::propagate(){
-  	
+  bool ConstraintEngine::propagate(){  	
   	bool result = true;
   	
   	bool done = false;  	
@@ -582,8 +637,8 @@ namespace EUROPA
   	  result = doPropagate();	
       if (!result && canContinuePropagation()) {
       	  m_relaxingViolation = true;
-          m_emptied->relax();
-      	  m_relaxingViolation = false;
+      	  getViolationMgr().relaxEmptyVariables();
+      	  m_relaxingViolation = false;	  
       }
       else {
       	done = true;
@@ -636,11 +691,11 @@ namespace EUROPA
     check_error(variable.isValid());
     check_error(variable->getCurrentDomain().isEmpty());
 
-    m_emptied = variable;
-    debugMsg("ConstraintEngine:emptied","Emptied var:" << m_emptied->toString()
-        << " parent:" << (m_emptied->getParent().isNoId() ? "NULL" : m_emptied->getParent()->toString()));
+    getViolationMgr().addEmptyVariable(variable);
+    debugMsg("ConstraintEngine:emptied","Emptied var:" << variable->toString()
+        << " parent:" << (variable->getParent().isNoId() ? "NULL" : variable->getParent()->toString()));
     check_error(m_relaxed == false);    
-    m_violationMgr->handleEmpty(variable);            
+    getViolationMgr().handleEmpty(variable);            
   }
 
   void ConstraintEngine::handleRelax(const ConstrainedVariableId& variable){
@@ -666,14 +721,10 @@ namespace EUROPA
     // Now this should be true for all
     check_error(variable->lastRelaxed() == m_cycleCount);
 
-    // If there is an empty variable, clear it.
-    if(m_emptied.isId()) {
-    	
-      // If it is not this variable, relax it
-      if(m_emptied != variable)
-          m_emptied->relax();
-
-      clearEmptiedVariable();
+    if(hasEmptyVariables()) {    
+      // If this isn't one of the empty variables, relax the empty variables.
+      if (!getViolationMgr().isEmpty(variable))     	
+          getViolationMgr().relaxEmptyVariables(); 
     }
 
     // Now relax all the variables of all the constraints and ping the propagator of the constraint

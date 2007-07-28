@@ -131,7 +131,8 @@ namespace EUROPA {
     if (tnetConstraint.isId()){
       tnetConstraint->clearExternalEntity();
       constraint->clearExternalEntity();
-      m_tnet->removeTemporalConstraint(tnetConstraint, false);
+      bool markDeleted = (constraint->getViolation() > 0);
+      m_tnet->removeTemporalConstraint(tnetConstraint, markDeleted);
     }
   }
 
@@ -212,6 +213,27 @@ namespace EUROPA {
     return consistent;
   }
 
+  ConstraintId getConstraint(ConstrainedVariableId& fromvar,
+		                     ConstrainedVariableId& tovar,
+                             Time& length)
+  {
+	ConstraintSet constraints;
+	fromvar->constraints(constraints);
+	
+	ConstraintSet::const_iterator it = constraints.begin();
+	for (;it != constraints.end();++it) {
+	    ConstraintId c = (*it);
+	    if (c->isVariableOf(tovar)) {
+	    	// TODO: fromvar and tovar could be together in more than one constraint
+	    	// need to make sure it is a temporal constraint and use length to make
+	    	// sure it is the right instance
+	    	return c;
+	    }
+	}
+	
+	return ConstraintId::noId();
+  }
+  
   void TemporalPropagator::execute(){
     static unsigned int sl_counter(0);
     sl_counter++;
@@ -223,19 +245,58 @@ namespace EUROPA {
     updateTnet();
 
     // If already inconsistent by applying constraints directly, skip the rest
-    if(getConstraintEngine()->provenInconsistent())
+    if(getConstraintEngine()->provenInconsistent() && !getConstraintEngine()->getAllowViolations())
       return;
 
     //propagate the tnet
     if (!m_tnet->isConsistent()) {
       debugMsg("TemporalPropagator:execute", "Tnet is inconsistent.");
+      
       const std::set<TimepointId>& updatedTimepoints = m_tnet->getUpdatedTimepoints();
       checkError(!updatedTimepoints.empty(), sl_counter);
       TimepointId tp = *(updatedTimepoints.begin());
-
       ConstrainedVariableId var = tp->getExternalEntity();
-      check_error (!var.isNoId());
-      Propagator::getCurrentDomain(var).empty();
+
+      if (getConstraintEngine()->getAllowViolations()) {
+          // Map tnet violation to violated constraints
+          std::vector<ConstrainedVariableId> fromvars,tovars;
+          std::vector<Time> lengths;
+          ConstrainedVariableId origin = var;//m_tnet->getOrigin()->getExternalEntity();
+          
+          getTemporalNogood(origin,fromvars,tovars,lengths);
+      
+          for (unsigned int i=0;i<fromvars.size();i++) {
+        	  std::ostringstream os,os1;
+    		  os << (i+1) << " of " << fromvars.size();
+    	      debugMsg("TemporalPropagator:violations", "Violated edge:"+os.str());
+    	      
+    	      if (fromvars[i].isNoId() || tovars[i].isNoId()){
+    	    	  debugMsg("TemporalPropagator:violations", "from or to var is noId, skipping");
+    	    	  continue;
+    	      }
+    	       
+    		  os1 << fromvars[i]->toString() << " "
+    		     << tovars[i]->toString() << " "
+    		     << lengths[i];              	  
+    	      debugMsg("TemporalPropagator:violations", "Violated edge:"+os1.str());
+    	
+    	      ConstraintId c = getConstraint(fromvars[i],tovars[i],lengths[i]);
+    	      if (!c.isNoId()) {
+    	          notifyConstraintViolated(c);
+    	          notifyVariableEmptied(fromvars[i]);
+    	          notifyVariableEmptied(tovars[i]);
+    	          debugMsg("TemporalPropagator:violations", "Violated constraint:"+c->toString());
+              }
+    	      else {
+    	    	  // TODO: why is this possible?
+    	          debugMsg("TemporalPropagator:violations", "No constraint found for edge, skipping");    	    	  
+    	      }
+          }      
+      }          
+      else {
+          check_error (!var.isNoId());
+          Propagator::getCurrentDomain(var).empty();
+      }
     }
     else {// update the Temp Vars of the CNET.
       debugMsg("TemporalPropagator:execute", "Calling updateTempVar");
@@ -432,7 +493,7 @@ namespace EUROPA {
 
       check_error(lb <= ub);
 
-      check_error(tp->getExternalEntity().isValid(), "Ensure the connection between TempVar and Timepointis correct");
+      check_error(tp->getExternalEntity().isValid(), "Ensure the connection between TempVar and Timepoint is correct");
       ConstrainedVariableId var = tp->getExternalEntity();
       if(!var->isActive()){
 	handleVariableDeactivated(var);
@@ -479,7 +540,11 @@ namespace EUROPA {
 
     IntervalIntDomain& duration = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(token->getDuration()));
 
-    check_error(!start.isEmpty() && !end.isEmpty() && !duration.isEmpty());
+    check_error(!start.isEmpty() && !end.isEmpty() && !duration.isEmpty(), "Can't update token duration with empty variable. Token:" 
+    		+ token->toString() 
+    		+ " start:"	+ start.toString()
+    		+ " end:" + end.toString()
+    		+ " duration:" + duration.toString());
 
     double maxDuration = end.getUpperBound() - start.getLowerBound();
     double minDuration = end.getLowerBound() - start.getUpperBound();
