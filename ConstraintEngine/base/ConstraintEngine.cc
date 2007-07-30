@@ -741,6 +741,14 @@ namespace EUROPA
                                                                    << " relaxing connected variable(lastRelaxed=" << id->lastRelaxed() << "):" << id->toString());
 	              id->updateLastRelaxed(m_cycleCount);
 	              id->relax();
+	              // We may be relaxing variables that were already relaxed by the violationMgr, so we won't get notification
+	              // TODO: only make this call if there was no change in the variable
+	              if (!m_relaxingViolation)    
+	                  m_violationMgr->handleRelax(id);
+	          }
+	          else {
+                  debugMsg("ConstraintEngine:relaxed",m_cycleCount << "-relaxing var:" << variable->toString() 
+                		                                           << " skipping connected variable(lastRelaxed=" << id->lastRelaxed() << "):" << id->toString());	        	  
 	          }
 	      }
       }
