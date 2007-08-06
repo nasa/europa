@@ -897,6 +897,11 @@ namespace EUROPA {
      */
     static double compute(double x1, double y1, double x2, double y2);
 
+    /**
+     * Calculates the hypotenuse w. pythagaras
+     */
+    static double compute(double a, double b);
+
   private:
 
     static const unsigned int ARG_COUNT = 5;

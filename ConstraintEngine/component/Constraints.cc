@@ -141,8 +141,9 @@ namespace EUROPA {
      * is not satisfied. The motivating case for this: A:Int[-10,10] +
      * B:Int[-10,10] == C:Real[0.01, 0.99].
      */
-    if (m_z.isInterval() && (!m_z.isMember(Infinity::plus(yMax, xMin, zMin)) ||
-			     !m_z.isMember(Infinity::plus(yMin, xMax, zMin))))
+    if (m_z.isInterval() && 
+	(!m_z.isMember(Infinity::plus(yMax, xMin, zMin)) ||
+	 !m_z.isMember(Infinity::plus(yMin, xMax, zMin))))
       m_z.empty();
   }
 
@@ -1970,34 +1971,37 @@ namespace EUROPA {
        !m_y2.areBoundsFinite())
       return;
 
-    NumericDomain dom;
-    dom.insert(compute(m_x1.getLowerBound(), m_y1.getLowerBound(), m_x2.getLowerBound(), m_y2.getLowerBound()));
-    dom.insert(compute(m_x1.getLowerBound(), m_y1.getLowerBound(), m_x2.getLowerBound(), m_y2.getUpperBound()));
-    dom.insert(compute(m_x1.getLowerBound(), m_y1.getLowerBound(), m_x2.getUpperBound(), m_y2.getLowerBound()));
-    dom.insert(compute(m_x1.getLowerBound(), m_y1.getLowerBound(), m_x2.getUpperBound(), m_y2.getUpperBound()));
-    dom.insert(compute(m_x1.getLowerBound(), m_y1.getUpperBound(), m_x2.getLowerBound(), m_y2.getLowerBound()));
-    dom.insert(compute(m_x1.getLowerBound(), m_y1.getUpperBound(), m_x2.getLowerBound(), m_y2.getUpperBound()));
-    dom.insert(compute(m_x1.getLowerBound(), m_y1.getUpperBound(), m_x2.getUpperBound(), m_y2.getLowerBound()));
-    dom.insert(compute(m_x1.getLowerBound(), m_y1.getUpperBound(), m_x2.getUpperBound(), m_y2.getUpperBound()));
-    dom.insert(compute(m_x1.getUpperBound(), m_y1.getLowerBound(), m_x2.getLowerBound(), m_y2.getLowerBound()));
-    dom.insert(compute(m_x1.getUpperBound(), m_y1.getLowerBound(), m_x2.getLowerBound(), m_y2.getUpperBound()));
-    dom.insert(compute(m_x1.getUpperBound(), m_y1.getLowerBound(), m_x2.getUpperBound(), m_y2.getLowerBound()));
-    dom.insert(compute(m_x1.getUpperBound(), m_y1.getLowerBound(), m_x2.getUpperBound(), m_y2.getUpperBound()));
-    dom.insert(compute(m_x1.getUpperBound(), m_y1.getUpperBound(), m_x2.getLowerBound(), m_y2.getLowerBound()));
-    dom.insert(compute(m_x1.getUpperBound(), m_y1.getUpperBound(), m_x2.getLowerBound(), m_y2.getUpperBound()));
-    dom.insert(compute(m_x1.getUpperBound(), m_y1.getUpperBound(), m_x2.getUpperBound(), m_y2.getLowerBound()));
-    dom.insert(compute(m_x1.getUpperBound(), m_y1.getUpperBound(), m_x2.getUpperBound(), m_y2.getUpperBound()));
+    // Compute bounds for dx
+    NumericDomain dx;
+    dx.insert(fabs(m_x1.getLowerBound() - m_x2.getLowerBound()));
+    dx.insert(fabs(m_x1.getLowerBound() - m_x2.getUpperBound()));
+    dx.insert(fabs(m_x1.getUpperBound() - m_x2.getLowerBound()));
+    dx.insert(fabs(m_x1.getUpperBound() - m_x2.getUpperBound()));
+    if(m_x1.intersects(m_x2))
+      dx.insert(0.0);
+    dx.close();
 
-    // If there could be an intersection, then it is possible there will be a zero distance
-    if(m_x1.intersects(m_x2) && m_y1.intersects(m_y2))
-      dom.insert(0);
+    // Compute bounds for dy
+    NumericDomain dy;
+    dy.insert(fabs(m_y1.getLowerBound() - m_y2.getLowerBound()));
+    dy.insert(fabs(m_y1.getLowerBound() - m_y2.getUpperBound()));
+    dy.insert(fabs(m_y1.getUpperBound() - m_y2.getLowerBound()));
+    dy.insert(fabs(m_y1.getUpperBound() - m_y2.getUpperBound()));
+    if(m_y1.intersects(m_y2))
+      dy.insert(0.0);
+    dy.close();
 
-    dom.close();
-    m_distance.intersect(dom.getLowerBound(), dom.getUpperBound());
+    m_distance.intersect(compute(dx.getLowerBound(), dy.getLowerBound()), compute(dx.getUpperBound(), dy.getUpperBound()));
   }
 
   double CalcDistanceConstraint::compute(double x1, double y1, double x2, double y2){
-    return pow(pow(x2-x1, 2)+ pow(y2-y1, 2), 0.5);
+    double result = pow(pow(x2-x1, 2)+ pow(y2-y1, 2), 0.5);
+    return result;
+  }
+
+  double CalcDistanceConstraint::compute(double a, double b){
+    double result = pow(pow(a, 2)+ pow(b, 2), 0.5);
+    return result;
   }
 
   /**************************************************************************************/
