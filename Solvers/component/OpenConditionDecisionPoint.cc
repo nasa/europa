@@ -100,7 +100,10 @@ namespace EUROPA {
       int idx = m_choiceIndex;
       std::stringstream os;
       
-      if(m_choices[idx] == Token::MERGED) {
+      if(m_choices.empty()) {
+	os << "EMPTY";
+      }
+      else if(m_choices[idx] == Token::MERGED) {
           os << "MRG(" << m_flawedToken->getKey() << "," << m_compatibleTokens[m_mergeIndex]->getKey() << ")";
       }
       else if(m_choices[idx] == Token::ACTIVE) {

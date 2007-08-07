@@ -96,15 +96,15 @@ namespace EUROPA {
 	return "NO CHOICES";
 
       std::stringstream strStream;
-      strStream 
-          << "THREAT:" 
-          << "    " << toString(m_index, m_choices[m_index]) << " :" 
-          << "    TOKEN=" << m_tokenToOrder->toString() << ":"
-          << "    OBJECT=" << Object::toString(m_tokenToOrder->getObject()) << ":" 
-          << "    CHOICES(current=" << m_index << "):";
+      strStream << "THREAT:";
+      if(!m_choices.empty())
+	strStream << "    " << toString(m_index, m_choices[m_index]) << " :" ;
+      strStream << "    TOKEN=" << m_tokenToOrder->toString() << ":"
+		<< "    OBJECT=" << Object::toString(m_tokenToOrder->getObject()) << ":" 
+		<< "    CHOICES(current=" << m_index << "):";
 
       for (unsigned int i = 0; i < m_choiceCount; i++)
-          strStream << i << ") " << toString(i, m_choices[i]) << ":";
+	strStream << i << ") " << toString(i, m_choices[i]) << ":";
 
       return strStream.str();
     }
