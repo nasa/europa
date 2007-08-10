@@ -135,7 +135,11 @@ class ClassWriter {
       Enumeration arguments = superCall.enumerateChildren();
       while(arguments.hasMoreElements()){
 	IXMLElement argument = (IXMLElement) arguments.nextElement();
-	writer.write(comma + ModelAccessor.getValue(argument));
+	String value = ModelAccessor.getValue(argument);
+	if(argument.getName().equals("value") && XMLUtil.getAttribute(argument, "type").equals("string"))
+	    writer.write(comma + "\"" + value + "\"");
+	else
+	    writer.write(comma + value);
 	comma = ", ";
       }
       writer.write(");\n");

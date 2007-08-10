@@ -87,6 +87,19 @@ class Baluga{
  }
 }
 
+/**
+ * Test for passing a string constructor value to a superclass constructor. The code genrator was
+ * not creating the string quotes
+ */
+class StringBase{
+	string arg0;
+	StringBase(string _arg0){arg0 = _arg0;}
+}
+
+class StringDerived extends StringBase {
+	StringDerived(){super("derived");}
+}
+
 class World {
  string m_str1;
  Foo m_foo1;
@@ -96,6 +109,7 @@ class World {
  Baz m_baz1;
  Bat m_bat1;
  int m_int1;
+ StringDerived m_string;
 
  World(){
   m_str1 = "This is also a long string";
@@ -106,6 +120,7 @@ class World {
   m_foo4 = new Foo(this, m_int1, false);
   m_baz1 = new Baz(m_foo1);
   m_bat1 = new Bat(m_foo1);
+  m_string = new StringDerived();
  } 
 }
 

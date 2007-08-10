@@ -452,7 +452,99 @@ namespace NDDL {
   };
   
   
-  // class-constructor.nddl:90 World
+  // class-constructor.nddl:94 StringBase
+  StringBase::StringBase(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "StringBase", name, true) {
+  }
+  StringBase::StringBase(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  StringBase::StringBase(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "StringBase", name, true) {}
+  StringBase::StringBase(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void StringBase::handleDefaults(bool autoClose) {
+    if(arg0.isNoId()){
+      arg0 = addVariable(StringDomain("string"), "arg0");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  // class-constructor.nddl:94 StringBase
+  void StringBase::constructor(const LabelStr& _arg0) {
+    arg0 = addVariable(StringDomain(_arg0, "string"), "arg0");
+  }
+  
+  // class-constructor.nddl:94 StringBase
+  class StringBaseFactory9: public ConcreteObjectFactory {
+  public:
+    StringBaseFactory9(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 1);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("string")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
+      check_error(arguments[0]->isSingleton());
+      LabelStr _arg0((LabelStr)arguments[0]->getSingletonValue());
+      
+      StringBaseId instance = (new StringBase(planDb, objectType, objectName))->getId();
+      instance->constructor(_arg0);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  
+  // class-constructor.nddl:99 StringDerived
+  StringDerived::StringDerived(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : StringBase(planDatabase, "StringDerived", name) {
+  }
+  StringDerived::StringDerived(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : StringBase(planDatabase, type, name) {
+  }
+  StringDerived::StringDerived(const ObjectId& parent, const LabelStr& name)
+   : StringBase(parent, "StringDerived", name) {}
+  StringDerived::StringDerived(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : StringBase(parent, type, name) {}
+  // default initialization of member variables
+  void StringDerived::handleDefaults(bool autoClose) {
+    StringBase::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  // class-constructor.nddl:99 StringDerived
+  void StringDerived::constructor() {
+    StringBase::constructor("derived");
+  }
+  
+  // class-constructor.nddl:99 StringDerived
+  class StringDerivedFactory10: public ConcreteObjectFactory {
+  public:
+    StringDerivedFactory10(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 0);
+      StringDerivedId instance = (new StringDerived(planDb, objectType, objectName))->getId();
+      instance->constructor();
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  
+  // class-constructor.nddl:103 World
   World::World(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "World", name, true) {
   }
@@ -483,12 +575,14 @@ namespace NDDL {
     if(m_int1.isNoId()){
       m_int1 = addVariable(IntervalIntDomain("int"), "m_int1");
     }
+    check_error(m_string.isValid(), "object variables must be initialized explicitly");
+    
     if (autoClose)
       close();
   }
   
   
-  // class-constructor.nddl:90 World
+  // class-constructor.nddl:103 World
   void World::constructor() {
     m_str1 = addVariable(StringDomain(LabelStr("This is also a long string"), "string"), "m_str1");
     m_foo1 = addVariable(FooDomain((new Foo(m_id, "m_foo1"))->getId(), "Foo"), "m_foo1");
@@ -508,12 +602,15 @@ namespace NDDL {
     m_bat1 = addVariable(BatDomain((new Bat(m_id, "m_bat1"))->getId(), "Bat"), "m_bat1");
     Id<Bat>(singleton(m_bat1))->constructor(singleton(m_foo1));
     Id<Bat>(singleton(m_bat1))->handleDefaults();
+    m_string = addVariable(StringDerivedDomain((new StringDerived(m_id, "m_string"))->getId(), "StringDerived"), "m_string");
+    Id<StringDerived>(singleton(m_string))->constructor();
+    Id<StringDerived>(singleton(m_string))->handleDefaults();
   }
   
-  // class-constructor.nddl:90 World
-  class WorldFactory9: public ConcreteObjectFactory {
+  // class-constructor.nddl:103 World
+  class WorldFactory11: public ConcreteObjectFactory {
   public:
-    WorldFactory9(const LabelStr& name): ConcreteObjectFactory(name){}
+    WorldFactory11(const LabelStr& name): ConcreteObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -546,6 +643,8 @@ namespace NDDL {
     id->addObjectType("Bing", "Object");
     id->addObjectType("Bang", "Bing");
     id->addObjectType("Baluga", "Object");
+    id->addObjectType("StringBase", "Object");
+    id->addObjectType("StringDerived", "StringBase");
     id->addObjectType("World", "Object");
     id->addEnum("Locations");
     id->addMember("Foo", "int", "m_0");
@@ -560,6 +659,7 @@ namespace NDDL {
     id->addMember("Baz", "Foo", "m_foo");
     id->addMember("Bat", "Baz", "m_baz");
     id->addMember("Baluga", "Locations", "location");
+    id->addMember("StringBase", "string", "arg0");
     id->addMember("World", "string", "m_str1");
     id->addMember("World", "Foo", "m_foo1");
     id->addMember("World", "Foo", "m_foo2");
@@ -568,6 +668,7 @@ namespace NDDL {
     id->addMember("World", "Baz", "m_baz1");
     id->addMember("World", "Bat", "m_bat1");
     id->addMember("World", "int", "m_int1");
+    id->addMember("World", "StringDerived", "m_string");
     id->addValue("Locations", LabelStr("Hill"));
     id->addValue("Locations", LabelStr("Rock"));
     id->addValue("Locations", LabelStr("Lander"));
@@ -597,8 +698,12 @@ namespace NDDL {
     REGISTER_OBJECT_FACTORY(BangFactory7, Bang);
     REGISTER_TYPE_FACTORY(Baluga, ObjectDomain("Baluga"));
     REGISTER_OBJECT_FACTORY(BalugaFactory8, Baluga:Locations);
+    REGISTER_TYPE_FACTORY(StringBase, ObjectDomain("StringBase"));
+    REGISTER_OBJECT_FACTORY(StringBaseFactory9, StringBase:string);
+    REGISTER_TYPE_FACTORY(StringDerived, ObjectDomain("StringDerived"));
+    REGISTER_OBJECT_FACTORY(StringDerivedFactory10, StringDerived);
     REGISTER_TYPE_FACTORY(World, ObjectDomain("World"));
-    REGISTER_OBJECT_FACTORY(WorldFactory9, World);
+    REGISTER_OBJECT_FACTORY(WorldFactory11, World);
     // Allocate rules
     return id;
   }

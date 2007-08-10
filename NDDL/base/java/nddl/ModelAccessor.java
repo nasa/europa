@@ -701,7 +701,8 @@ public class ModelAccessor {
     else if(element.getName().equals("interval"))
       result = XMLUtil.getAttribute(element, "min") + ", " + XMLUtil.getAttribute(element,"max");
     else
-      result = XMLUtil.getAttribute(element, "name");
+	result = XMLUtil.getAttribute(element, "name");
+
     return result;
   }
 

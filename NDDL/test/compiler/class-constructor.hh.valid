@@ -34,6 +34,14 @@ namespace NDDL {
   typedef Id<Baluga> BalugaId;
   typedef ObjectDomain BalugaDomain;
   
+  class StringBase;
+  typedef Id<StringBase> StringBaseId;
+  typedef ObjectDomain StringBaseDomain;
+  
+  class StringDerived;
+  typedef Id<StringDerived> StringDerivedId;
+  typedef ObjectDomain StringDerivedDomain;
+  
   class World;
   typedef Id<World> WorldId;
   typedef ObjectDomain WorldDomain;
@@ -155,7 +163,36 @@ namespace NDDL {
     virtual void constructor(const LabelStr& loc);
   };
   
-  // class-constructor.nddl:90 World
+  // class-constructor.nddl:94 StringBase
+  class StringBase : public Object {
+  public:
+    StringBase(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    StringBase(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    StringBase(const ObjectId& parent, const LabelStr& name);
+    StringBase(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId arg0; // SchemaWriter::declareVariable
+    
+    // class-constructor.nddl:94 StringBase
+    virtual void constructor(const LabelStr& _arg0);
+  };
+  
+  // class-constructor.nddl:99 StringDerived
+  class StringDerived : public StringBase {
+  public:
+    StringDerived(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    StringDerived(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    StringDerived(const ObjectId& parent, const LabelStr& name);
+    StringDerived(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    
+    // class-constructor.nddl:99 StringDerived
+    virtual void constructor();
+  };
+  
+  // class-constructor.nddl:103 World
   class World : public Object {
   public:
     World(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -172,8 +209,9 @@ namespace NDDL {
     ConstrainedVariableId m_baz1; // SchemaWriter::declareVariable
     ConstrainedVariableId m_bat1; // SchemaWriter::declareVariable
     ConstrainedVariableId m_int1; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_string; // SchemaWriter::declareVariable
     
-    // class-constructor.nddl:90 World
+    // class-constructor.nddl:103 World
     virtual void constructor();
   };
 } // End NDDL namespace
