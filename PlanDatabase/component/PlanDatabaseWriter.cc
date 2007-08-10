@@ -140,13 +140,13 @@ namespace EUROPA {
       indent()++;
       check_error(t.isValid());
       TempVarId st = t->getStart();
-      os << indentation() << "[ " << st->derivedDomain() << " ]"<< std::endl;
+      os << indentation() << "[ " << st->lastDomain() << " ]"<< std::endl;
       os << indentation() << "\t" << t->getPredicateName().toString() << "(" ;
       std::vector<ConstrainedVariableId> vars = t->getParameters();
       for (std::vector<ConstrainedVariableId>::const_iterator varit = vars.begin(); varit != vars.end(); ++varit) {
 	ConstrainedVariableId v = (*varit);
 	checkError(v.isValid(), v);
-	const AbstractDomain& dom = v->derivedDomain();
+	const AbstractDomain& dom = v->lastDomain();
 
 	if(dom.isNumeric() && dom.minDelta() < 1)
 	  os.setf(std::ios::fixed);
@@ -169,14 +169,14 @@ namespace EUROPA {
       for (TokenSet::const_iterator mit = mergedtoks.begin(); mit != mergedtoks.end(); ++mit) 
 	os << indentation() << "\t\tMerged Key=" << getKey(*mit) << std::endl;
 
-      os << indentation() << "[ " << t->getEnd()->derivedDomain() << " ]"<< std::endl;
+      os << indentation() << "[ " << t->getEnd()->lastDomain() << " ]"<< std::endl;
       indent()--;
     }
 
     void PlanDatabaseWriter::writeVariable(const ConstrainedVariableId& var, std::ostream& os) {
       check_error(var.isValid());
       indent()++;
-      os << indentation() << var->getName().toString() << "=" << var->derivedDomain() << std::endl;
+      os << indentation() << var->getName().toString() << "=" << var->lastDomain() << std::endl;
       indent()--;
     }
 
