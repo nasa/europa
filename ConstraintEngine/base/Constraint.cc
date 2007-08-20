@@ -90,7 +90,11 @@ namespace EUROPA {
     for(unsigned int i=0;i<m_variables.size();i++) {
     	if (i > 0)
     	  os << ",";
-	    os << m_variables[i]->getName().toString();
+    	std::string name = m_variables[i]->getName().toString();
+    	if (name.substr(0,4) != "$VAR")
+	        os << name;
+    	else
+    		os << m_variables[i]->lastDomain().toString();
     }
     os << ")";
     
