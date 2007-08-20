@@ -518,9 +518,13 @@ namespace EUROPA {
       }
     }
 
+    // TODO JRB: looks like this call should be skipped since updateTemporalConstraint will always be called before 
+    // this and already seems to be doing it 
+    /*
     for(std::vector<TokenId>::const_iterator it = updatedTokens.begin(); it != updatedTokens.end(); ++it)
       updateDuration(*it);
-
+    */
+    
     m_tnet->resetUpdatedTimepoints();
   }
       
@@ -540,6 +544,7 @@ namespace EUROPA {
 
     IntervalIntDomain& duration = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(token->getDuration()));
 
+    // TODO JRB : this check may may fail if we support violations
     check_error(!start.isEmpty() && !end.isEmpty() && !duration.isEmpty(), "Can't update token duration with empty variable. Token:" 
     		+ token->toString() 
     		+ " start:"	+ start.toString()
@@ -548,6 +553,8 @@ namespace EUROPA {
 
     double maxDuration = end.getUpperBound() - start.getLowerBound();
     double minDuration = end.getLowerBound() - start.getUpperBound();
+    
+    // TODO JRB: if this causes a violation we need to assign a constraint as the culprit
     duration.intersect(minDuration, maxDuration);
   }
 
@@ -685,11 +692,12 @@ namespace EUROPA {
     }
 
     // Update for the distance variable
-    if(constraint->getScope().size() == 3) {
+    if(constraint->getScope().size() == 3) { // TODO JRB: this seems brittle, what if we get other temporal constraints with 3 parameters?
       const ConstrainedVariableId& distance = constraint->getScope()[1];
 
       // In order to avoid the unhappy situation where temporalDistance does not maintain the semantics of addEq
       // we now apply the distance bounds to the distance variable.
+      // TODO JRB: this seems to be done already by the updateDuration() method, what's the difference?
       const IntervalIntDomain& sourceDom = constraint->getScope()[0]->lastDomain();
       const IntervalIntDomain& targetDom = constraint->getScope()[2]->lastDomain();
 
@@ -698,6 +706,8 @@ namespace EUROPA {
 	IntervalIntDomain& distanceDom = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(distance));
 	Time minDistance = (Time) (targetDom.getLowerBound() - sourceDom.getUpperBound());
 	Time maxDistance = (Time) (targetDom.getUpperBound() - sourceDom.getLowerBound());
+	// JRB: if this intersect() call causes a violation we need to have the constraint network know the culprit (constraint)
+	distance->setCurrentPropagatingConstraint(constraint);
 	if(distanceDom.intersect(minDistance, maxDistance) && distanceDom.isEmpty())
 	  return;
       }
