@@ -162,6 +162,12 @@ namespace EUROPA {
        * @param inst The formerly flawed instant.
        */
       virtual void notifyNoLongerFlawed(const InstantId inst);
+      
+      /*
+       * called by FVDetector when profile is recomputed 
+       */
+      void resetViolations(InstantId inst);
+      void resetViolations();
 
     private:
       friend class ResourceTokenRelation;

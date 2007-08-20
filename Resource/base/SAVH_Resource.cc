@@ -231,6 +231,27 @@ namespace EUROPA {
             problem == ResourceProblem::LevelTooHigh; 
     }
     
+    /*
+     * reset violations from instant inst
+     */
+    void Resource::resetViolations(InstantId inst)
+    {
+    	// TODO: for now reset all violations, see if this can be made more efficient
+    	resetViolations();
+    }
+    
+    /*
+     * reset all violations
+     */
+    void Resource::resetViolations()
+    {
+    	ProfileIterator it(m_profile);
+        while(!it.done()) {
+        	notifyNoLongerViolated(it.getInstant());
+        	it.next();
+        }
+    }
+    
     void Resource::notifyViolated(const InstantId inst, ResourceProblem::Type problem) 
     {
       check_error(inst.isValid());

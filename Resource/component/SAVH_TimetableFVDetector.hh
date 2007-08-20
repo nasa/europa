@@ -7,8 +7,6 @@ namespace EUROPA {
     class TimetableFVDetector : public FVDetector {
     public:
       TimetableFVDetector(const ResourceId res);
-      void initialize(const InstantId inst) {}
-      void initialize(){}
       bool detect(const InstantId inst);
     protected:
       virtual ResourceProblem::Type getResourceProblem(const InstantId inst) const;    	

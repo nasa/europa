@@ -37,12 +37,12 @@ namespace EUROPA {
        * @brief Initialize a detection run with the given instant data
        * @param inst The source of the level data.
        */
-      virtual void initialize(const InstantId inst) = 0;
+      virtual void initialize(const InstantId inst) {if(m_res.isValid()) m_res->resetViolations(inst);}
 
       /**
        * @brief Initialize a detection run with no data.  Used when the first Instant in the recalculation interval is the first Instant.
        */
-      virtual void initialize() = 0;
+      virtual void initialize() {if(m_res.isValid()) m_res->resetViolations();}
 
       /**
        * @brief Detect flaws and violations at an instant.
