@@ -245,10 +245,12 @@ namespace EUROPA {
      */
     void Resource::resetViolations()
     {
-    	ProfileIterator it(m_profile);
-        while(!it.done()) {
-        	notifyNoLongerViolated(it.getInstant());
-        	it.next();
+        if (getPlanDatabase()->getConstraintEngine()->getAllowViolations()) { // TODO: move this test to FVDetector?
+        	ProfileIterator it(m_profile);
+            while(!it.done()) {
+            	notifyNoLongerViolated(it.getInstant());
+        	    it.next();
+            }
         }
     }
     
