@@ -51,10 +51,10 @@ namespace EUROPA {
 
   void ConstrainedVariable::restrictBaseDomain(const AbstractDomain& dom){
     checkError(isActive(), toString());
-    checkError(dom.isSubsetOf(baseDomain()), dom.toString() << " not in " << baseDomain().toString());
+    checkError(dom.intersects(baseDomain()), dom.toString() << " not intersecting " << baseDomain().toString());
 
     debugMsg("ConstrainedVariable:restrictBaseDomain", 
-	     toString() << " restricted from " << baseDomain().toString() << " to " << dom.toString());
+	     toString() << " restricted from " << baseDomain().toString() << " intersecting " << dom.toString());
 
     handleRestrictBaseDomain(dom);
 
