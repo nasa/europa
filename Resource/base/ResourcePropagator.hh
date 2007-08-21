@@ -52,8 +52,8 @@ namespace EUROPA {
     const std::list<ResourceId> getDirtyResources() const;
 
     const PlanDatabaseId m_planDb;
-
-    const bool m_isEnabled;
+    
+    bool isEnabled() const;
   };
 }
 #endif
