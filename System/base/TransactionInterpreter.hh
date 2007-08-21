@@ -133,7 +133,7 @@ namespace EUROPA {
   	    virtual DataRef eval(EvalContext& context) const;  
   	    
   	protected:
-  	    DbClientId& m_dbClient;
+  	    DbClientId m_dbClient;
   	    LabelStr m_type;
   	    const AbstractDomain* m_domain;
   };
