@@ -20,8 +20,9 @@ namespace EUROPA {
   ResourcePropagator::ResourcePropagator(const LabelStr& name, 
 					 const ConstraintEngineId& constraintEngine, 
 					 const PlanDatabaseId& planDatabase)
-    : DefaultPropagator(name, constraintEngine), m_planDb(planDatabase), 
-      m_isEnabled(Schema::instance()->isObjectType(resourceString())) {}
+    : DefaultPropagator(name, constraintEngine), m_planDb(planDatabase)
+  {	  
+  }
 
   /**
    * This method over-rides that of the base class. The agenda is managed automatically by the
@@ -54,8 +55,14 @@ namespace EUROPA {
     return sl_resourceString;
   }
 
+  // This check can't be made when the propagator is created, since the Schema may not have been populated by then
+  bool ResourcePropagator::isEnabled() const
+  {
+	  return Schema::instance()->isObjectType(resourceString());
+  }
+  
   bool ResourcePropagator::updateRequired() const {
-    if(!m_isEnabled)
+    if(!isEnabled())
       return false;
     else
       return (DefaultPropagator::updateRequired() || !getDirtyResources().empty());
