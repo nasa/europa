@@ -427,6 +427,12 @@ namespace EUROPA {
     // debug methods
     std::string dumpPropagatorState(const std::list<PropagatorId>& propagators) const;
 
+    int addLinkedVarsForRelaxation(const ConstrainedVariableId& var,
+				   std::list<ConstrainedVariableId>& dest,
+				   std::list<ConstrainedVariableId>::iterator pos,
+				   std::set<ConstrainedVariableId>& visitedVars);
+
+
     ConstraintEngineId m_id;
     ConstrainedVariableSet m_variables; /*!< The set of all variables under the control of the ConstraintEngine. */
     ConstraintSet m_constraints; /*!< The set of all constraints. */
@@ -446,6 +452,7 @@ namespace EUROPA {
     std::set<ConstraintEngineListenerId> m_listeners; /*!< Stores the set of registered listeners. */
     ConstraintSet m_redundantConstraints; /*!< Pending redundant constraints awaiting deactivation */
     ViolationMgr* m_violationMgr;
+    bool m_relaxing;
   };
 }
 #endif
