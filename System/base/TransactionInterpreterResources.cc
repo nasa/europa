@@ -48,7 +48,7 @@ namespace EUROPA {
   TokenId ResourceChangeTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Resource.change"); 
-    return new NDDL::NddlResource::change(planDb,name,rejectable,isFact,true);
+    return (new NDDL::NddlResource::change(planDb,name,rejectable,isFact,true))->getId();
   }
 	
   TokenId ResourceChangeTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
@@ -101,7 +101,7 @@ namespace EUROPA {
   TokenId ReusableUsesTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reusable.uses"); 
-    return new NDDL::NddlReusable::uses(planDb,name,rejectable,isFact,true);
+    return (new NDDL::NddlReusable::uses(planDb,name,rejectable,isFact,true))->getId();
   }
 	
   TokenId ReusableUsesTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
@@ -155,7 +155,7 @@ namespace EUROPA {
   TokenId ReservoirProduceTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reservoir.produce"); 
-    return new NDDL::NddlReservoir::produce(planDb,name,rejectable,isFact,true);
+    return (new NDDL::NddlReservoir::produce(planDb,name,rejectable,isFact,true))->getId();
   }
 	
   TokenId ReservoirProduceTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
@@ -167,7 +167,7 @@ namespace EUROPA {
   TokenId ReservoirConsumeTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reservoir.consume"); 
-    return new NDDL::NddlReservoir::consume(planDb,name,rejectable,isFact,true);
+    return (new NDDL::NddlReservoir::consume(planDb,name,rejectable,isFact,true))->getId();
   }
 	
   TokenId ReservoirConsumeTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
