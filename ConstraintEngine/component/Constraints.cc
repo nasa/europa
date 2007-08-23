@@ -2080,7 +2080,6 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(SubsetOfConstraint, "SubsetOf", "Default");
       REGISTER_CONSTRAINT(SubsetOfConstraint, "subsetOf", "Default");
       REGISTER_CONSTRAINT(SubsetOfConstraint, "Singleton", "Default");
-      REGISTER_CONSTRAINT(SubsetOfConstraint, "subsetOf", "Default");
       REGISTER_CONSTRAINT(TestEQ, "TestEqual", "Default");
       REGISTER_CONSTRAINT(TestLessThan, "TestLessThan", "Default");
       REGISTER_CONSTRAINT(TestEQ, "testEQ", "Default");
@@ -2090,7 +2089,6 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(AddEqualConstraint, "addeq", "Default");
       REGISTER_CONSTRAINT(AddEqualConstraint, "addEq", "Default");
       REGISTER_CONSTRAINT(AddMultEqualConstraint, "addmuleq", "Default");
-      REGISTER_CONSTRAINT(AddMultEqualConstraint, "addMulEq", "Default");
       REGISTER_CONSTRAINT(AllDiffConstraint, "adiff", "Default"); // all different
       REGISTER_CONSTRAINT(AllDiffConstraint, "fadiff", "Default"); // flexible all different
       REGISTER_CONSTRAINT(AllDiffConstraint, "fneq", "Default"); // flexible not equal
