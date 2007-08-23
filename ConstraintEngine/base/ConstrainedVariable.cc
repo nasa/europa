@@ -53,6 +53,10 @@ namespace EUROPA {
     checkError(isActive(), toString());
     checkError(dom.intersects(baseDomain()), dom.toString() << " not intersecting " << baseDomain().toString());
 
+    // If already restricted, nothing to be done
+    if(baseDomain().isSubsetOf(dom) && (isClosed() || dom.isOpen()))
+      return;
+
     debugMsg("ConstrainedVariable:restrictBaseDomain", 
 	     toString() << " restricted from " << baseDomain().toString() << " intersecting " << dom.toString());
 
