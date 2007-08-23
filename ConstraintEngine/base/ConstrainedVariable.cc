@@ -325,14 +325,19 @@ namespace EUROPA {
     if (!m_specifiedFlag){
       m_specifiedFlag = true;
       m_specifiedValue = singletonValue;
-      if(getCurrentDomain().isMember(singletonValue))
-	getCurrentDomain().set(singletonValue);
-      else
-	getCurrentDomain().empty();
-    }
 
-    if(getCurrentDomain().isOpen())
-      getCurrentDomain().close();
+      if(!internal_baseDomain().isMember(singletonValue))
+	getCurrentDomain().empty();
+      else {
+	//reset the current domain so that we can do search in the infeasible space
+	if(!getCurrentDomain().isMember(singletonValue))
+	  reset();
+	getCurrentDomain().set(singletonValue);
+      }
+
+      if(getCurrentDomain().isOpen())
+	getCurrentDomain().close();
+    }
 
     check_error(isValid());
   }

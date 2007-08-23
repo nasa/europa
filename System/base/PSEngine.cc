@@ -326,15 +326,19 @@ namespace EUROPA {
     debugMsg("PSVariable:specify","Specifying var:" << m_var->toString() << " to value:" << v.toString());
     
     // If specifying to the same value it already has, do nothing
-    if (m_var->isSpecified() && (m_var->getSpecifiedValue() == v.asDouble())) {
+    if (m_var->isSpecified()) {
+      if(m_var->getSpecifiedValue() == v.asDouble()) {
         debugMsg("PSVariable:specify","Tried to specify to same value, so bailing out without doing any work");
         return;
-    }
-    else {
-        m_var->reset();
-        debugMsg("PSVariable:specify","After reset for var:" << m_var->toString());
-        m_var->getConstraintEngine()->propagate();
-        debugMsg("PSVariable:specify","After propagate for var:" << m_var->toString());
+      }
+      m_var->reset();
+      debugMsg("PSVariable:specify","After reset for var:" << m_var->toString());
+      //only propagate if we aren't allowing violations
+      //this can save us an extra call to reset() and propagate()
+      if(!m_var->getConstraintEngine()->getAllowViolations()) {
+	m_var->getConstraintEngine()->propagate();
+	debugMsg("PSVariable:specify","After propagate for var:" << m_var->toString());
+      }
     }
         
     m_var->specify(v.asDouble());
