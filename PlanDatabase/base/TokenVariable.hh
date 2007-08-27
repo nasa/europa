@@ -195,7 +195,8 @@ namespace EUROPA{
 
     // If it is already specified, reset it, otherwsie just relax it.
     if(this->isSpecified())
-      this->m_derivedDomain->reset(*(this->m_integratedBaseDomain));
+      Variable<DomainType>::reset(*(this->m_integratedBaseDomain));
+    //this->m_derivedDomain->reset(*(this->m_integratedBaseDomain));
     else{
       // Relax first to the original and the narrow for intersection of base domains
       this->m_derivedDomain->relax(*(this->m_baseDomain));
