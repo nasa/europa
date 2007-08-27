@@ -281,10 +281,11 @@ namespace EUROPA {
 
       if(m_activeDecision->hasNext()){
         m_activeDecision->execute();
-        m_lastExecutedDecision = m_activeDecision->toString();
+	bool isConsistent = m_db->getConstraintEngine()->propagate();
+        m_lastExecutedDecision = (isConsistent ? m_activeDecision->toString() : "Failed.");
         m_stepCount++;
 
-        if(m_db->getConstraintEngine()->propagate()){
+        if(isConsistent){
           m_decisionStack.push_back(m_activeDecision);
           publish(notifyStepSucceeded,m_activeDecision);
           m_activeDecision = DecisionPointId::noId();
@@ -328,7 +329,10 @@ namespace EUROPA {
           debugMsg("Solver:backtrack", "Retrieving closed decision. Depth is:" << m_decisionStack.size());
         }
 
-        debugMsg("Solver:backtrack", "Backtracking decision " << m_activeDecision->toString());
+	// This debug message uses a toString call which requires the database to be propagated. Normally we do not propagate on relaxations as there may be many if
+	// we pop the stack. To allow the debug, we will propgate inline. It should effect performance but not correctness, unless things are not working
+	// as expected !
+        debugMsg("Solver:backtrack", "Backtracking decision " << (m_db->getClient()->propagate() ? m_activeDecision->toString() : "No data"));
 
         // If the active decision is executed, undo it
         if(m_activeDecision->isExecuted()) {
