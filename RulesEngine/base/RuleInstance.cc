@@ -44,6 +44,7 @@ namespace EUROPA {
   RuleInstance::RuleInstance(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& guards)
     : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()), 
     m_planDb(parent->getPlanDatabase()),m_rulesEngine() , m_parent(parent), m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
+    check_error(isValid());
     setGuard(guards);
   }
 
@@ -53,6 +54,7 @@ namespace EUROPA {
   RuleInstance::RuleInstance(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& guards, const bool positive)
     : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()), 
     m_planDb(parent->getPlanDatabase()),m_rulesEngine() , m_parent(parent), m_guardDomain(0), m_isExecuted(false), m_isPositive(positive){
+    check_error(isValid());
     setGuard(guards);
   }
 
@@ -62,6 +64,7 @@ namespace EUROPA {
   RuleInstance::RuleInstance(const RuleInstanceId& parent, const ConstrainedVariableId& guard, const AbstractDomain& domain)
     : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()), 
     m_planDb(parent->getPlanDatabase()), m_rulesEngine(), m_parent(parent), m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
+    check_error(isValid());
     setGuard(guard, domain);
   }
 
@@ -71,6 +74,7 @@ namespace EUROPA {
   RuleInstance::RuleInstance(const RuleInstanceId& parent, const ConstrainedVariableId& guard, const AbstractDomain& domain, const bool positive)
     : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()), 
     m_planDb(parent->getPlanDatabase()), m_rulesEngine(), m_parent(parent), m_guardDomain(0), m_isExecuted(false), m_isPositive(positive){
+    check_error(isValid());
     setGuard(guard, domain);
   }
 
@@ -134,6 +138,7 @@ namespace EUROPA {
    * 3. Guard and guard value specifed
    */
   bool RuleInstance::test() const {
+    checkError(m_rule.isValid(), m_rule);
     debugMsg("RuleInstance:test", "Testing rule " << m_id << " for " << m_rule->getName().toString() << " from " << m_rule->getSource().toString());
     if(m_guardDomain != 0) { // Case of explicit guard on a single variable
       debugMsg("RuleInstance:test", "Case of explicit guard on a single variable");
