@@ -300,6 +300,12 @@ namespace EUROPA {
     }
   }
 
+  std::string RuleInstance::makeImplicitVariableName(){
+    std::stringstream sstr;
+    sstr << "PSEUDO_VARIABLE_" << m_variablesByName.size();
+    return sstr.str();
+  }
+
   /**
    * @see addVariable
    */

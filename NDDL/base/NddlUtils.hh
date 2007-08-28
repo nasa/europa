@@ -51,10 +51,12 @@ namespace NDDL {
 						  const ELEMENT_TYPE& domain,
 						  const EntityId& parent){
 
+    std::stringstream sstr;
+    sstr << "PSEDUO_VARIABLE_" << vars.size();
     ConstrainedVariableId var = (new Variable< ELEMENT_TYPE >(ce, 
 							      domain,
 							      false,
-							      Token::makePseudoVarName(),
+							      LabelStr(sstr.str()),
 							      parent))->getId();
     vars.push_back(var);
     return var;

@@ -155,6 +155,7 @@ namespace EUROPA{
     const std::vector<RuleInstanceId> &getChildRules(void) const {return m_childRules;}
 
   protected:
+
     /**
      * @brief Handle rule related deallocations
      */
@@ -232,7 +233,7 @@ namespace EUROPA{
     void addConstraint(const ConstraintId& constraint);
     void addChildRule(RuleInstance* instance);
     void clearLoopVar(const LabelStr& loopVarName);
-
+    std::string makeImplicitVariableName();
     ConstraintId constraint(const std::string& name) const;
 
 

@@ -11,7 +11,7 @@ namespace NDDL {
 
 #define localVar(domain, name, guarded) addVariable(domain, guarded, LabelStr(#name))
 
-#define ruleVariable(domain) addVariable(domain, false, Token::makePseudoVarName())
+#define ruleVariable(domain) addVariable(domain, false, makeImplicitVariableName())
 
   /**
    * @brief Allocates a local loop variable in code for 'foreach' loop
