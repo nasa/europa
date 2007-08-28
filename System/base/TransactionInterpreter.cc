@@ -1550,6 +1550,20 @@ namespace EUROPA {
       debugMsg("XMLInterpreter:EvalContext:RuleInstance","Didn't find var in rule instance:" << name);
       return EvalContext::getVar(name);
     }
+  } 
+  
+  TokenId RuleInstanceEvalContext::getToken(const char* name)
+  {
+	  LabelStr ls_name(name);
+      TokenId tok = m_ruleInstance->getSlave(ls_name);
+      if (!tok.isNoId()) {
+          debugMsg("XMLInterpreter:EvalContext:RuleInstance","Found token in rule instance:" << name);
+          return tok;    	  
+      }
+      else {
+        debugMsg("XMLInterpreter:EvalContext:RuleInstance","Didn't find token in rule instance:" << name);
+        return EvalContext::getToken(name);
+      }
   }  
   	 
   std::string RuleInstanceEvalContext::toString() const 
