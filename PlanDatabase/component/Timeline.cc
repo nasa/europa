@@ -338,9 +338,15 @@ namespace EUROPA {
 
     // Remove mark as explicit in all cases. We do this prior to calling free in the base class
     // as the latter also deletes the constraint.
-    m_explicitConstraints.erase(toString(predecessor, successor));
+    ConstraintId constraint = getPrecedenceConstraint(predecessor, successor);
 
-    // Tokens are supported if they participate in any explict constraints for the sequence
+    // Clear markers for explicit constraints for this token pair
+    if(constraint.isId())
+      m_explicitConstraints.erase(constraint->getKey());
+    if(predecessor == successor)
+      m_explicitConstraints.erase(predecessor->getKey());
+
+    // Tokens are supported if they participate in any further explict constraints for the sequence
     bool predecessorRequired = hasExplicitConstraint(predecessor);
 
     bool successorRequired = hasExplicitConstraint(successor);
@@ -350,8 +356,9 @@ namespace EUROPA {
     if (predecessorRequired && successorRequired)
       return;
 
-    // We free the constraint now, and adjust as necessary
-    Object::free(predecessor, successor, false); // Since no longer explict
+    // We free the constraint now, and adjust as necessary. Already taken care of markers
+    // for the explicit constraint
+    Object::free(predecessor, successor, false);
 
     // In the event we are freeing based on a single token, unlink it and get out
     if (predecessor == successor) {

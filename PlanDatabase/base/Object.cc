@@ -198,12 +198,8 @@ namespace EUROPA {
 
       // If the constraint is a precedence constraint, the additional cleanup required
       std::map<int, double>::iterator pos = m_keyPairsByConstraintKey.find(constraint->getKey());
-      if(pos != m_keyPairsByConstraintKey.end()) { 
-	LabelStr encodedKey = pos->second;
-	debugMsg("Object:remove:token", "Removing entries for " + encodedKey.toString());
-	m_keyPairsByConstraintKey.erase(pos);
-	m_constraintsByKeyPair.erase(encodedKey);
-      }
+      if(pos != m_keyPairsByConstraintKey.end()) 
+	removePrecedenceConstraint(constraint);
     }
 
     
@@ -280,11 +276,9 @@ namespace EUROPA {
     // Post constraints on object variable, predecessor only in event they are equal
     constrainToThisObjectAsNeeded(predecessor);
 
-    LabelStr encodedKey(toString(predecessor, successor));
+    double encodedKey = makeKey(predecessor, successor);
 
-      // Log as an explicit constraint if necessary
-    if(isExplicit)
-      m_explicitConstraints.insert(encodedKey);
+    ConstraintId constraint;
 
     // If successor is not noId then add the precede constraint.
     if (predecessor != successor) {
@@ -294,7 +288,7 @@ namespace EUROPA {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(predecessor->getEnd());
       vars.push_back(successor->getStart());
-      ConstraintId constraint =  ConstraintLibrary::createConstraint(LabelStr("precedes"),
+      constraint =  ConstraintLibrary::createConstraint(LabelStr("precedes"),
 								     getPlanDatabase()->getConstraintEngine(),
 								     vars);
 
@@ -306,6 +300,9 @@ namespace EUROPA {
       m_constraintsByTokenKey.insert(std::pair<int, ConstraintId>(predecessor->getKey(), constraint));
       m_constraintsByTokenKey.insert(std::pair<int, ConstraintId>(successor->getKey(), constraint));
     }
+
+    if(isExplicit)
+      m_explicitConstraints.insert(constraint.isId() ? constraint->getKey() : predecessor->getKey());
 
     m_planDatabase->notifyConstrained(m_id, predecessor, successor);
     check_error(isValid());
@@ -330,31 +327,22 @@ namespace EUROPA {
     check_error(predecessor == successor ||  getPrecedenceConstraint(predecessor, successor).isValid(),
 		"A precedence constraint is required to free.");
 
-    if(isExplicit){
-      check_error(m_explicitConstraints.find(toString(predecessor, successor)) != m_explicitConstraints.end(),
-		  "May only explicit free and explicit constraint.");
-      // Remove as an explicit constraint.
-      m_explicitConstraints.erase(toString(predecessor, successor));
-    }
+    if(predecessor == successor){
+      if(isExplicit){
+	check_error( m_explicitConstraints.find(predecessor->getKey()) != m_explicitConstraints.end(),
+		     "May only explicit free and explicit constraint.");
 
-    if(predecessor == successor)
+	// Remove as an explicit constraint. No harm if it does not exist
+	m_explicitConstraints.erase(predecessor->getKey());
+      }
+      // Clean up for token
       clean(predecessor);
+    }
     else {
       // Now retrieve the constraint to be deleted
-      LabelStr encodedKey(toString(predecessor, successor));
+      ConstraintId constraint = getPrecedenceConstraint(predecessor, successor);
 
-      std::map<double, ConstraintId>::iterator it = m_constraintsByKeyPair.find(encodedKey);
-      check_error(it != m_constraintsByKeyPair.end(), "Expected constraint not found.");
-      ConstraintId constraint = it->second;
-      m_constraintsByKeyPair.erase(it);
-      m_keyPairsByConstraintKey.erase(constraint->getKey());
-
-      // Remove the entries in the m_constraintsByTokenKey list for predecessor and successor
-      clean(constraint, predecessor->getKey());
-      clean(constraint, successor->getKey());
-
-      // Delete the actual constraint
-      constraint->discard();
+      removePrecedenceConstraint(constraint);
 
       // Now clean up tokens if there are no more precedence constraints left - will remove restriction
       // posted in this object
@@ -445,27 +433,31 @@ namespace EUROPA {
   }
 
   ConstraintId Object::getPrecedenceConstraint(const TokenId& predecessor, const TokenId& successor) const{
-    LabelStr encodedKey(toString(predecessor, successor));
-    std::map<double, ConstraintId>::const_iterator it = m_constraintsByKeyPair.find(encodedKey);
-    if(it != m_constraintsByKeyPair.end())
-      return it->second;
-    else
-      return ConstraintId::noId();
+    double encodedKey = makeKey(predecessor, successor);
+    std::multimap<double, ConstraintId>::const_iterator it = m_constraintsByKeyPair.find(encodedKey);
+    while(it != m_constraintsByKeyPair.end() && it->first == encodedKey){
+      ConstraintId constraint = it->second;
+      if(constraint->getScope()[0] == predecessor->getEnd() &&
+	 constraint->getScope()[1] == successor->getStart())
+	return constraint;
+      ++it;
+    }
+
+    return ConstraintId::noId();
   }
 
   /**
    * Use encoded lookup
    */
   bool Object::isConstrainedToPrecede(const TokenId& predecessor, const TokenId& successor) const{
-    LabelStr encodedKey(toString(predecessor, successor));
-    return(m_constraintsByKeyPair.find(encodedKey) != m_constraintsByKeyPair.end());
+    return getPrecedenceConstraint(predecessor, successor).isId();
   }
 
   /**
    * Get all constraints for this token. And the accompanying encoded key pair
    */
   void Object::getPrecedenceConstraints(const TokenId& token, 
-					std::vector<std::pair<ConstraintId, LabelStr > >& results) const{
+					std::vector<ConstraintId>& results) const{
     check_error(isValid());
     check_error(results.empty());
 
@@ -483,11 +475,8 @@ namespace EUROPA {
 		    "Can only find one singleton constraint per token.");
 	singletonFound = true;
       }
-      else {
-	// Extract keys from encoded key pair
-	const LabelStr& encodedKeyPair = pos->second;
-	results.push_back(std::make_pair(constraint, encodedKeyPair));
-      }
+      else
+	results.push_back(constraint);
       ++it;
     }
   }
@@ -495,22 +484,24 @@ namespace EUROPA {
 
   bool Object::hasExplicitConstraint(const TokenId& token) const {
     // Get all the constraints for this token
-    std::vector<std::pair<ConstraintId, LabelStr> > constraints;
+    std::vector<ConstraintId> constraints;
     getPrecedenceConstraints(token, constraints);
-    for(std::vector<std::pair<ConstraintId, LabelStr > >::const_iterator it = constraints.begin();
+    for(std::vector<ConstraintId>::const_iterator it = constraints.begin();
 	it != constraints.end();
 	++it){
-      ConstraintId constraint = it->first;
-      LabelStr encodedKeyPair = it->second;
+      ConstraintId constraint = *it;
+
+      checkError(constraint->getScope()[1]->getParent() == token || constraint->getScope()[0]->getParent() == token,
+		 "Problem with constraint caching.");
+
       // If an explict constraint, and the given token is the successor
-      if(m_explicitConstraints.find(encodedKeyPair) != m_explicitConstraints.end() &&
-	 (constraint->getScope()[1]->getParent() == token || constraint->getScope()[0]->getParent() == token))
+      if(m_explicitConstraints.find(constraint->getKey()) != m_explicitConstraints.end())
 	return true;
     }
     
 
-    // Finally we try for an explicit singleton constraint. SHould be a rare thing!
-    return m_explicitConstraints.find(toString(token, token)) != m_explicitConstraints.end();
+    // Finally we try for an explicit singleton constraint. Should be a rare thing!
+    return m_explicitConstraints.find(token->getKey()) != m_explicitConstraints.end();
   }
 
   bool Object::canBeCompared(const EntityId& entity) const {
@@ -522,12 +513,6 @@ namespace EUROPA {
       results.push_back(m_parent);
       m_parent->getAncestors(results);
     }
-  }
-
-  LabelStr Object::toString(const TokenId& predecessor, const TokenId& successor){
-    std::ostringstream os;
-    os << predecessor->getKey() << ":" << successor->getKey();
-    return os.str();
   }
 
   void Object::clean(const ConstraintId& constraint, int tokenKey) {
@@ -559,15 +544,15 @@ namespace EUROPA {
 
   void Object::freeImplicitConstraints(const TokenId& token){
     // Get all the constraints for this token
-    std::vector<std::pair<ConstraintId, LabelStr> > constraints;
+    std::vector<ConstraintId> constraints;
     getPrecedenceConstraints(token, constraints);
-    for(std::vector<std::pair<ConstraintId, LabelStr > >::const_iterator it = constraints.begin();
+    for(std::vector<ConstraintId>::const_iterator it = constraints.begin();
 	it != constraints.end();
 	++it){
 
-      ConstraintId constraint = it->first;
+      ConstraintId constraint = *it;
 
-      check_error(m_explicitConstraints.find(it->second) == m_explicitConstraints.end(),
+      check_error(m_explicitConstraints.find(constraint->getKey()) == m_explicitConstraints.end(),
 		  "Should never be freeing explicit constraints in this manner.");
 
       TokenId predecessor = constraint->getScope()[0]->getParent();
@@ -592,7 +577,7 @@ namespace EUROPA {
 	it != m_constraintsByKeyPair.end();
 	++it){
       checkError(it->second.isValid(), "Invalid constraint for key pair " << LabelStr(it->first).toString());
-      check_error(m_keyPairsByConstraintKey.find(it->second->getKey())->second == it->first,
+      checkError(m_keyPairsByConstraintKey.find(it->second->getKey())->second == it->first,
 		  "Lookup should be symmetric.");
     }
 
@@ -740,5 +725,35 @@ namespace EUROPA {
   	
   	return os.str();
   }
-  
+
+  double Object::makeKey(const TokenId& a, const TokenId& b){
+    return a->getKey() + (b->getKey()/1000.0);
+  }
+
+  void Object::removePrecedenceConstraint(const ConstraintId& constraint){
+    TokenId predecessor = constraint->getScope()[0]->getParent();
+    TokenId successor = constraint->getScope()[1]->getParent();
+
+    double encodedKey = makeKey(predecessor, successor);
+    std::multimap<double, ConstraintId>::iterator it = m_constraintsByKeyPair.find(encodedKey);
+    while(it != m_constraintsByKeyPair.end() && it->first == encodedKey){
+      ConstraintId c = it->second;
+      if(c == constraint){
+	m_constraintsByKeyPair.erase(it);
+	break;
+      }
+
+      ++it;
+    }
+
+    m_keyPairsByConstraintKey.erase(constraint->getKey());
+    m_explicitConstraints.erase(constraint->getKey());
+
+      // Remove the entries in the m_constraintsByTokenKey list for predecessor and successor
+    clean(constraint, predecessor->getKey());
+    clean(constraint, successor->getKey());
+
+      // Delete the actual constraint
+    constraint->discard();
+  }
 }
