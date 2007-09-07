@@ -6,6 +6,7 @@ jam.run-all-tests.*
 jam.run-checkin-tests.*
 jam.withPPW.*
 lib
+dist
 .cdtproject
 .project
 .settings

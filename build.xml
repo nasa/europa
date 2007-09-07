@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="PLASMA" default="dist" basedir=".">
+    <description>PLASMA</description>
+
+    <property environment="env"/>
+
+    <!-- load overrides -->
+    <property file="${env.HOME}/.ant.plasma.properties"/>
+	
+    <property name="dir.plasma" value="."/>
+    <property name="dir.planworks" value="../PlanWorks"/>
+    <property name="dir.dist" value="dist"/>
+    <property name="dir.dist.base" location="${dir.dist}/plasma"/>
+    <property name="file.plasma_dist" value="plasma.zip"/>
+	
+	<target name="clean">
+        <delete dir="${dir.dist}"/>		
+	</target>
+		
+	<!-- This target assumes that PLASMA and PlanWorks have already been built so that all the products are in place -->
+    <target name="dist" 
+            description="Creates the binary distribution and packages it up into ${dir.dist}/${file.plasma_dist}">
+
+    	<!-- Create the distribution directory  -->
+        <mkdir dir="${dir.dist}"/>
+
+        <copy todir="${dir.dist.base}/bin">
+        	<!-- TODO: copy scripts to run PlanWorks and PSDesktop -->        	
+        	<!-- TODO: need to modify makeproject so that it can work with makefile, PSEngine and binary release -->
+        	<fileset file="${dir.plasma}/makeproject"/>
+        </copy>     
+    	
+        <copy todir="${dir.dist.base}/lib">
+            <fileset dir="${dir.plasma}/lib"/>
+        	<!-- TODO: copy PSUI and PlanWorks libraries -->
+        </copy>     
+
+        <copy todir="${dir.dist.base}/include">
+        	<!-- TODO: need to make PSEngine a pure virtual class so that PSEngine.hh has no outside dependencies -->
+            <fileset file="${dir.plasma}/System/base/PSEngine.hh"/>
+        	<fileset dir="${dir.plasma}/NDDL/base">
+        	    <include name="*.nddl"/>
+        	</fileset>
+            <fileset file="${dir.plasma}/NDDL/component/Resource/Resources.nddl"/>
+        </copy>     
+
+        <copy todir="${dir.dist.base}/config">
+        	<!-- TODO: also include PlanWorks.cfg, Debug.cfg and PlannerConfig files? -->
+        	<!-- TODO: include path in NDDL.cfg needs to support layout of binary release -->
+            <fileset file="${dir.plasma}/NDDL.cfg"/>
+        </copy>             
+
+        <!-- Finally, zip everything up -->
+        <zip destfile="${dir.dist}/${file.plasma_dist}" basedir="${dir.dist.base}"/>              
+    </target>
+</project>
