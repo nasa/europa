@@ -137,7 +137,7 @@ namespace EUROPA {
       }
 
       if (m_flawedToken->getState()->lastDomain().isMember(Token::ACTIVE)  && 
-          (/*!m_flawedToken->getPlanDatabase()->getConstraintEngine()->constraintConsistent() ||*/
+          (!m_flawedToken->getPlanDatabase()->getConstraintEngine()->constraintConsistent() ||
            m_flawedToken->getPlanDatabase()->hasOrderingChoice(m_flawedToken)))
         strStream << " ACTIVE ";
 
