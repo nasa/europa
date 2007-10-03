@@ -347,6 +347,14 @@ namespace EUROPA {
     debugMsg("PSVariable:specify","After propagate for var:" << m_var->toString());
   }
 
+  void PSVariable::reset() {
+    check_runtime_error(m_var.isValid());
+    debugMsg("PSVariable:reset",
+	     "Re-setting " << m_var->toString());
+    m_var->reset();
+    m_var->getConstraintEngine()->propagate();
+  }
+
   double PSVariable::getViolation() const
   {
     check_runtime_error(m_var.isValid());

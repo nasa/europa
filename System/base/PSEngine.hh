@@ -294,6 +294,7 @@ namespace EUROPA {
     double getUpperBound();  // if isSingleton()==false && isInterval() == true
 	    
     void specifyValue(PSVarValue& v);
+    void reset();
 	
     double getViolation() const;
     std::string getViolationExpl() const;
