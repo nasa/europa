@@ -36,6 +36,13 @@ namespace EUROPA {
   public:
     int size() const { return m_elements.size(); }
     T& get(int idx) { return m_elements[idx]; }
+    void remove(int idx) {m_elements.erase(std::advance(m_elements.begin(), idx));}
+    void remove(const T& value) {
+      typename std::vector<T>::iterator it =
+	std::find(m_elements.begin(), m_elements.end(), value);
+      if(it != m_elements.end())
+	m_elements.erase(it);
+    }
     void push_back(const T& value) {m_elements.push_back(value);}
   protected:
     std::vector<T> m_elements;    	
@@ -108,6 +115,9 @@ namespace EUROPA {
     
     static void addLanguageInterpreter(const LabelStr& langauge,
 				       PSLanguageInterpreter* interpreter);
+
+    //quick hack to do what I need to for SACE ~MJI
+    const PlanDatabaseId& getPlanDatabase() const {return m_planDatabase;}
   protected:
     virtual void initDatabase();
     static ObjectWrapperGenerator* getObjectWrapperGenerator(const LabelStr& type);
@@ -331,7 +341,7 @@ namespace EUROPA {
     static PSVarValue getInstance(int val) {return PSVarValue((double)val, INTEGER);}
     static PSVarValue getInstance(double val) {return PSVarValue((double)val, DOUBLE);}
     static PSVarValue getInstance(bool val) {return PSVarValue((double)val, BOOLEAN);}
-            
+    static PSVarValue getInstance(const ObjectId& obj) {return PSVarValue((double) obj, OBJECT);}
   protected:
     friend class PSVariable;
     PSVarValue(const double val, const PSVarType type);
