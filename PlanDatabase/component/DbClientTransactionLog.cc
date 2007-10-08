@@ -37,11 +37,23 @@ namespace EUROPA {
               strcmp(typeName.c_str(),BoolDomain::getDefaultTypeName().c_str()) == 0);
   }
 
+  void DbClientTransactionLog::insertBreakpoint() {
+    pushTransaction(allocateXmlElement("breakpoint"));
+  }
+
+  void DbClientTransactionLog::removeBreakpoint() {
+    check_error(!m_bufferedTransactions.empty());
+    checkError(m_bufferedTransactions.back()->Value() == std::string("breakpoint"),
+	       "Last transaction is a " << m_bufferedTransactions.back()->Value() <<
+	       ", not a breakpoint.");
+    popTransaction();
+  }
+
   void DbClientTransactionLog::notifyVariableCreated(const ConstrainedVariableId& variable){
     TiXmlElement * element = allocateXmlElement("var");
     const AbstractDomain& baseDomain = variable->baseDomain();
     std::string type = baseDomain.getTypeName().toString();
-    if (type == "object") {
+    if (Schema::instance()->isObjectType(type)) {
       ObjectId object = baseDomain.getLowerBound();
       check_error(object.isValid());
       type = object->getType().toString();
@@ -52,10 +64,20 @@ namespace EUROPA {
     }
     debugMsg("notifyVariableCreated"," variable name = " << variable->getName().c_str() << " typeName = " << type << " type = " << baseDomain.getTypeName().c_str());
 
+    element->SetAttribute("index", m_client->getIndexByVariable(variable));
+
     if (!baseDomain.isEmpty()) {
       TiXmlElement * value = abstractDomainAsXml(&baseDomain);
       element->LinkEndChild(value);
     }
+    pushTransaction(element);
+  }
+
+  void DbClientTransactionLog::notifyVariableDeleted(const ConstrainedVariableId& variable) {
+    TiXmlElement* element = allocateXmlElement("deletevar");
+    element->SetAttribute("index", m_client->getIndexByVariable(variable));
+    element->SetAttribute("name", variable->getName().toString());
+    element->SetAttribute("type", variable->baseDomain().getTypeName().toString());
     pushTransaction(element);
   }
 
@@ -77,6 +99,12 @@ namespace EUROPA {
     pushTransaction(element);
   }
 
+  void DbClientTransactionLog::notifyObjectDeleted(const ObjectId& object) {
+    TiXmlElement* element = allocateXmlElement("deleteobject");
+    element->SetAttribute("name", object->getName().toString());
+    pushTransaction(element);
+  }
+
   void DbClientTransactionLog::notifyClosed(){
     TiXmlElement * element = allocateXmlElement("invoke");
     element->SetAttribute("name", "close");
@@ -91,12 +119,24 @@ namespace EUROPA {
   }
 
   void DbClientTransactionLog::notifyTokenCreated(const TokenId& token){
-    TiXmlElement * element = allocateXmlElement("goal");
+    TiXmlElement * element = (token->isFact() ? allocateXmlElement("fact") : 
+			      allocateXmlElement("goal"));
     TiXmlElement * instance = allocateXmlElement("predicateinstance");
     instance->SetAttribute("name", m_tokensCreated++);
     check_error(LabelStr::isString(token->getName()));
     instance->SetAttribute("type", token->getName().toString());
+    instance->SetAttribute("path", m_client->getPathAsString(token));
     element->LinkEndChild(instance);
+    pushTransaction(element);
+  }
+
+  void DbClientTransactionLog::notifyTokenDeleted(const TokenId& token,
+						  const std::string& name) {
+    TiXmlElement* element = allocateXmlElement("deletetoken");
+    element->SetAttribute("type", token->getName().toString());
+    element->SetAttribute("path", m_client->getPathAsString(token));
+    if(!name.empty())
+      element->SetAttribute("name", name);
     pushTransaction(element);
   }
 
@@ -169,6 +209,20 @@ namespace EUROPA {
   void DbClientTransactionLog::notifyConstraintCreated(const ConstraintId& constraint){
     TiXmlElement * element = allocateXmlElement("invoke");
     element->SetAttribute("name", constraint->getName().toString());    
+    element->SetAttribute("index", m_client->getIndexByConstraint(constraint));
+    const std::vector<ConstrainedVariableId>& variables = constraint->getScope();
+    std::vector<ConstrainedVariableId>::const_iterator iter;
+    for (iter = variables.begin() ; iter != variables.end() ; iter++) {
+      const ConstrainedVariableId variable = *iter;
+      element->LinkEndChild(variableAsXml(variable));
+    }
+    pushTransaction(element);
+  }
+
+  void DbClientTransactionLog::notifyConstraintDeleted(const ConstraintId& constraint) {
+    TiXmlElement* element = allocateXmlElement("deleteconstraint");
+    element->SetAttribute("name", constraint->getName().toString());
+    element->SetAttribute("index", m_client->getIndexByConstraint(constraint));
     const std::vector<ConstrainedVariableId>& variables = constraint->getScope();
     std::vector<ConstrainedVariableId>::const_iterator iter;
     for (iter = variables.begin() ; iter != variables.end() ; iter++) {

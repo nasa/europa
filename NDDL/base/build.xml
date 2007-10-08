@@ -58,6 +58,19 @@
 		<touch file="${dist}/nddl.jar"/>
 	</target>
 
+	<target name="libnddl" depends="compile"
+	        description="Creates nddl.jar containing nddl without support libraries">
+		<mkdir dir="${dist}"/>
+		<jar jarfile="${dist}/nddl.jar">
+			<fileset dir="${class}"/>
+			<manifest>
+				<attribute name="Main-Class" value="nddl.Nddl"/>
+				<attribute name="Class-Path" value="antlr.jar java-getopt.jar nanoxml.jar"/>
+			</manifest>
+		</jar>
+		<touch file="${dist}/nddl.jar"/>
+	</target>
+
 	<target name="clean"
 	        description="Remove all generated files and directories">
 		<delete dir="${cache}"/>

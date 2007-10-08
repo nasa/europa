@@ -117,26 +117,54 @@ namespace EUROPA {
           debugMsg("OpenConditionDecisionPoint:handleInitialize", "Adding choice '" << Token::ACTIVE.toString() << "' for token " << m_flawedToken->getKey());
           m_choices.push_back(Token::ACTIVE);
         }
+	else {
+	  condDebugMsg(!stateDomain.isMember(Token::ACTIVE),
+		       "OpenConditionDecisionPoint:handleInitialize",
+		       "Skipping choice '" << Token::ACTIVE.toString() << "' for token " << 
+		       m_flawedToken->getKey() << " because it isn't in the state domain.");
+	  condDebugMsg(!m_flawedToken->getPlanDatabase()->hasOrderingChoice(m_flawedToken),
+		       "OpenConditionDecisionPoint:handleInitialize",
+		       "Skipping choice '" << Token::ACTIVE.toString() << "' for token " << 
+		       m_flawedToken->getKey() << " because it has no ordering choices.");
+	}
 
-        if(stateDomain.isMember(Token::MERGED) && (m_action == mergeFirst || m_action == mergeOnly || m_action == activateFirst)) {
+        if((m_action == mergeFirst || m_action == mergeOnly || m_action == activateFirst)) {
 
-          m_flawedToken->getPlanDatabase()->getCompatibleTokens(m_flawedToken, m_compatibleTokens, PLUS_INFINITY, true);
-          m_mergeCount = m_compatibleTokens.size();
+	  if(stateDomain.isMember(Token::MERGED)) {
+	    m_flawedToken->getPlanDatabase()->getCompatibleTokens(m_flawedToken, m_compatibleTokens, PLUS_INFINITY, true);
+	    m_mergeCount = m_compatibleTokens.size();
+	    
+	    if(m_mergeCount > 0) {
+	      debugMsg("OpenConditionDecisionPoint:handleInitialize", "Adding choice '" << Token::MERGED.toString() << "' for token " << m_flawedToken->getKey());
+	      m_choices.push_back(Token::MERGED);
+	      std::sort<std::vector<TokenId>::iterator, TokenComparatorWrapper& >(m_compatibleTokens.begin(), m_compatibleTokens.end(), *m_comparator);
+	    }
+	    else {
+	      debugMsg("OpenConditionDecisionPoint:handleInitialize", "Skipping choice '" << Token::MERGED.toString() << "' for token " << m_flawedToken->getKey() 
+		       << " because there were no compatible tokens.");
+	    }
+	  }
+	  else {
+	    debugMsg("OpenConditionDecisionPoint:handleInitialize",
+		     "Skipping choice '" << Token::MERGED.toString() << "' for token " <<
+		     m_flawedToken->getKey() << " because it isn't in the domain.");
+	  }
 
-          if(m_mergeCount > 0) {
-            debugMsg("OpenConditionDecisionPoint:handleInitialize", "Adding choice '" << Token::MERGED.toString() << "' for token " << m_flawedToken->getKey());
-            m_choices.push_back(Token::MERGED);
-            std::sort<std::vector<TokenId>::iterator, TokenComparatorWrapper& >(m_compatibleTokens.begin(), m_compatibleTokens.end(), *m_comparator);
-          }
-          else {
-            debugMsg("OpenConditionDecisionPoint:handleInitialize", "Skipping choice '" << Token::MERGED.toString() << "' for token " << m_flawedToken->getKey() 
-                     << " because there were no compatible tokens.");
-          }
-
-          if(m_action == mergeFirst && m_flawedToken->getPlanDatabase()->hasOrderingChoice(m_flawedToken)) {
-            debugMsg("OpenConditionDecisionPoint:handleInitialize", "Adding choice '" << Token::ACTIVE.toString() << "' for token " << m_flawedToken->getKey());
+          if(m_action == mergeFirst && stateDomain.isMember(Token::ACTIVE) &&
+	     m_flawedToken->getPlanDatabase()->hasOrderingChoice(m_flawedToken)) {
+            debugMsg("OpenConditionDecisionPoint:handleInitialize",
+		     "Adding choice '" << Token::ACTIVE.toString() <<
+		     "' for token " << m_flawedToken->getKey());
             m_choices.push_back(Token::ACTIVE);
           }
+	  else {
+	    condDebugMsg(m_action == mergeFirst && !m_flawedToken->getPlanDatabase()->hasOrderingChoice(m_flawedToken),
+			 "OpenConditionDecisionPoint:handleInitialize",
+			 "Skipping choice '" << Token::ACTIVE.toString() << "' for token " << 
+			 m_flawedToken->getKey() << " because it has no ordering chioces.");
+	    
+	  }
+
         }
 
         if(stateDomain.isMember(Token::REJECTED)) {
@@ -145,6 +173,8 @@ namespace EUROPA {
         }
       
         m_choiceCount = m_choices.size();
+	debugMsg("OpenConditionDecisionPoint:handleInitialize",
+		 "Have " << m_choices.size() << " choices for " << m_flawedToken->getKey());
       }
       
       OpenConditionDecisionPoint::~OpenConditionDecisionPoint() {

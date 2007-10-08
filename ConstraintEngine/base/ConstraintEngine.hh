@@ -28,39 +28,28 @@ namespace EUROPA {
   	  virtual void setMaxViolationsAllowed(unsigned int i) = 0;
   	  
   	  virtual double getViolation() const = 0;
+  	  virtual std::string getViolationExpl() const = 0;
   	  
   	  virtual bool handleEmpty(ConstrainedVariableId v) = 0;
   	  virtual bool handleRelax(ConstrainedVariableId v) = 0;
+      virtual bool canContinuePropagation() = 0;
   	  
   	  virtual bool isViolated(ConstraintId c) const = 0;
-  	  
+  	  virtual void addViolatedConstraint(ConstraintId c) = 0;
+	  virtual void removeViolatedConstraint(ConstraintId c) = 0;	
+
+	  virtual bool isEmpty(ConstrainedVariableId v) const = 0;
+  	  virtual void addEmptyVariable(ConstrainedVariableId c) = 0;
+  	  virtual const ConstrainedVariableSet& getEmptyVariables() const = 0;
+  	  virtual void clearEmptyVariables() = 0;
+      virtual void relaxEmptyVariables() = 0;
+      
   	protected:
   	   ViolationMgr() {}
   	   virtual ~ViolationMgr() {}  
   	   
   	   friend class ConstraintEngine;
   };
-  
-  class ViolationMgrImpl : public ViolationMgr
-  {
-  	public:
-  	  ViolationMgrImpl(unsigned int maxViolationsAllowed);
-  	  virtual ~ViolationMgrImpl();
-
-  	  virtual unsigned int getMaxViolationsAllowed();
-  	  virtual void setMaxViolationsAllowed(unsigned int i);
-  	  
-  	  virtual double getViolation() const;
-  	  
-  	  virtual bool handleEmpty(ConstrainedVariableId v);
-  	  virtual bool handleRelax(ConstrainedVariableId v);
-
-  	  virtual bool isViolated(ConstraintId c) const;
-  	  
-  	protected:
-  	  unsigned int m_maxViolationsAllowed;
-  	  ConstraintSet m_violatedConstraints;
-  };  
   
   /**
    * @class ConstraintEngine
@@ -213,6 +202,13 @@ namespace EUROPA {
     bool propagate();
 
     /**
+     * @brief Indicates whether the ConstraintEngine is able to continue propagation.
+     * should be invoked after the constraint has been proven inconsistent so that Propagators
+     * and other classes can decide whether to keep relevant state for when propagation resumes
+     */
+    bool canContinuePropagation() const; 
+
+    /**
      * @brief Accessor for all constrained variables.
      */
     const ConstrainedVariableSet& getVariables() const;
@@ -235,14 +231,29 @@ namespace EUROPA {
     const ConstraintSet& getConstraints() const;
 
     /**
+     * @brief Get constraint based on its position in the set of constraints.
+     */
+    ConstraintId getConstraint(unsigned int index);
+
+    /**
+     * @brief Get index based on its position in the set of constraints.
+     */
+    unsigned int getIndex(const ConstraintId& constr);
+
+    /**
      * @brief Accessor for all propagators
      */
     const PropagatorId& getPropagatorByName(const LabelStr& name)  const;
     
+    
+    bool getAllowViolations() const;
+    void setAllowViolations(bool v);
+      
     /**
      * @brief returns total violation in the system
      */
     double getViolation() const;
+    std::string getViolationExpl() const;
 
   	bool isViolated(ConstraintId c) const;
   	
@@ -260,6 +271,9 @@ namespace EUROPA {
      */
     DomainListenerId allocateVariableListener(const ConstrainedVariableId& variable,
                                               const ConstraintList& constraints) const;
+    
+    ViolationMgr& getViolationMgr() { return *m_violationMgr; }
+    const ViolationMgr& getViolationMgr() const { return *m_violationMgr; }
 
   private:
     friend class Constraint;
@@ -400,14 +414,24 @@ namespace EUROPA {
     /**
      * @brief Internal helper methods
      */
-    inline bool hasEmptyVariable() const {return !m_emptied.isNoId();}
-    inline void clearEmptiedVariable(){m_emptied = ConstrainedVariableId::noId();}
+    bool hasEmptyVariables() const;
+    void clearEmptyVariables();
+    bool doPropagate();
 
 
     /**
      * @brief Deactivate redundant constraints buffered for pprocessing after successful propagation
      */
     void processRedundantConstraints();
+
+    // debug methods
+    std::string dumpPropagatorState(const std::list<PropagatorId>& propagators) const;
+
+    int addLinkedVarsForRelaxation(const ConstrainedVariableId& var,
+				   std::list<ConstrainedVariableId>& dest,
+				   std::list<ConstrainedVariableId>::iterator pos,
+				   std::set<ConstrainedVariableId>& visitedVars);
+
 
     ConstraintEngineId m_id;
     ConstrainedVariableSet m_variables; /*!< The set of all variables under the control of the ConstraintEngine. */
@@ -416,7 +440,6 @@ namespace EUROPA {
 					     Position in the list indicates execution priority. This
 					     is determined by the order of construction. */
     std::map<double, PropagatorId> m_propagatorsByName; /*!< Support configuration and lookup by name. */
-    ConstrainedVariableId m_emptied; /*!< Set when a domain is EMPTIED. Implies PROVEN_INCONSISTENT. */
     bool m_relaxed; /*!< Set when a domain is RELAXED. Implies PENDING. */
     bool m_propInProgress; /*!< Set true when doing propagation, otherwise false. */
     int m_cycleCount; /*!< A monotonically increasing count of propagation cycles. Identifies
@@ -425,9 +448,11 @@ namespace EUROPA {
     bool m_deleted; /*!< Used to control cleanup, preventing cycles. */
     bool m_purged; /*!< Indicates if the engine has been purged of its data */
     bool m_dirty; /*!< Flag to record if any messages handled without propagating consequences */
+    bool m_relaxingViolation; /*!< Flag to record if relax events should be ignored by the ViolationMgr */
     std::set<ConstraintEngineListenerId> m_listeners; /*!< Stores the set of registered listeners. */
     ConstraintSet m_redundantConstraints; /*!< Pending redundant constraints awaiting deactivation */
     ViolationMgr* m_violationMgr;
+    bool m_relaxing;
   };
 }
 #endif

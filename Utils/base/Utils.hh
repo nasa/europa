@@ -21,24 +21,27 @@
 
 namespace EUROPA {
 
-
   /**
    * Utility class that might get promoted later.
    */
   class Infinity {
   public:
     static double plus(double n1, double n2, double defaultValue) {
-      // Why cast to int and use abs()?  Why not just use fabs()? --wedgingt 2004 Feb 24
-      if (abs((int)n1) == PLUS_INFINITY || abs((int)n2) == PLUS_INFINITY)
+      if (fabs(n1) >= PLUS_INFINITY || fabs(n2) >= PLUS_INFINITY)
 	return(defaultValue);
-      return(n1 + n2);
+      double retval = n1 + n2;
+      if(fabs(retval) >= PLUS_INFINITY)
+	return defaultValue;
+      return retval;
     }
 
     static double minus(double n1, double n2, double defaultValue) {
-      // Why cast to int and use abs()?  Why not just use fabs()? --wedgingt 2004 Feb 24
-      if (abs((int)n1) == PLUS_INFINITY || abs((int)n2) == PLUS_INFINITY)
+      if (fabs(n1) >= PLUS_INFINITY || fabs(n2) >= PLUS_INFINITY)
 	return(defaultValue);
-      return(n1 - n2);
+      double retval = n1 - n2;
+      if(fabs(retval) >= PLUS_INFINITY)
+	return defaultValue;
+      return retval;
     }
   };
 

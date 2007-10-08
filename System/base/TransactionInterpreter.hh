@@ -133,7 +133,7 @@ namespace EUROPA {
   	    virtual DataRef eval(EvalContext& context) const;  
   	    
   	protected:
-  	    DbClientId& m_dbClient;
+  	    DbClientId m_dbClient;
   	    LabelStr m_type;
   	    const AbstractDomain* m_domain;
   };
@@ -206,13 +206,13 @@ namespace EUROPA {
   
 	    bool checkArgs(const std::vector<const AbstractDomain*>& arguments) const;
 
-        LabelStr m_className;
+        LabelStr                  m_className;
         std::vector<std::string>  m_constructorArgNames;	                          
         std::vector<std::string>  m_constructorArgTypes;	
         ExprConstructorSuperCall* m_superCallExpr;                          
         std::vector<Expr*>        m_constructorBody;
         bool                      m_canMakeNewObject;
-        mutable EvalContext*	  m_evalContext;
+    mutable EvalContext*      m_evalContext;
   };  
   
   class ExprConstraint;
@@ -359,6 +359,8 @@ namespace EUROPA {
   	    virtual ConstrainedVariableId getVar(const char* name);  
   	    virtual InterpretedRuleInstanceId& getRuleInstance() { return m_ruleInstance; }
   	     
+  	    virtual TokenId getToken(const char* name);
+  	    
         virtual std::string toString() const;
   	    
   	protected:

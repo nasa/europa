@@ -1,9 +1,0 @@
-Commands::PhoneHome{ 
-   starts(Battery.change tx); 
-   eq(tx.quantity, -600); // consume battery power
-}
-
-Commands::PhoneLander{ 
-  starts(Battery.change tx); 
-  eq(tx.quantity, -20); // consume battery power
-}

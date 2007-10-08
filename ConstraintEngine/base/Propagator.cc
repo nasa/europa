@@ -28,7 +28,7 @@ namespace EUROPA
 
   void Propagator::disable(){m_enabled = false;}
 
-  const std::list<ConstraintId>& Propagator::getConstraints() const {return m_constraints;}
+  const std::set<ConstraintId>& Propagator::getConstraints() const {return m_constraints;}
 
   void Propagator::execute(const ConstraintId& constraint){
     check_error(constraint.isValid());
@@ -38,13 +38,13 @@ namespace EUROPA
   void Propagator::addConstraint(const ConstraintId& constraint){
     check_error(constraint->getPropagator().isNoId());
     checkError(!constraint->isDiscarded(), constraint);
-    m_constraints.push_back(constraint);
+    m_constraints.insert(constraint);
     handleConstraintAdded(constraint);
   }
 
   void Propagator::removeConstraint(const ConstraintId& constraint){
     check_error(constraint->getPropagator() == m_id);
-    m_constraints.remove(constraint);
+    m_constraints.erase(constraint);
     handleConstraintRemoved(constraint);
   }
 

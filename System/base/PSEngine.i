@@ -158,11 +158,17 @@ namespace EUROPA {
     PSObject* getObjectByKey(PSEntityKey id);
 
     PSList<PSVariable*> getGlobalVariables();
+	PSVariable* getVariableByKey(PSEntityKey id);
+	PSVariable* getVariableByName(const std::string& name);
 
     PSList<PSToken*> getTokens();
     PSToken* getTokenByKey(PSEntityKey id);
 
-    double getViolation();    
+    bool getAllowViolations() const;
+    void setAllowViolations(bool v);
+
+    double getViolation() const;    
+    std::string getViolationExpl() const;
 
     PSSolver* createSolver(const std::string& configurationFile);   
 
@@ -186,7 +192,8 @@ namespace EUROPA {
   class PSObject : public PSEntity
   {
   public:
-    const PSList<PSVariable*>& getMemberVariables();
+    std::string getObjectType() const;
+    PSList<PSVariable*> getMemberVariables();
     PSVariable* getMemberVariable(const std::string& name);
     PSList<PSToken*> getTokens();
     ~PSObject();
@@ -227,6 +234,8 @@ namespace EUROPA {
   class PSToken : public PSEntity
   {
   public:
+    std::string getTokenType() const;
+    
     bool isFact();
     
     PSObject* getOwner();
@@ -234,10 +243,10 @@ namespace EUROPA {
     PSToken* getMaster();
     PSList<PSToken*> getSlaves();
     
-    double getViolation();
-    const std::string& getViolationExpl();
+    double getViolation() const;
+    std::string getViolationExpl() const;
 
-    const PSList<PSVariable*>& getParameters();
+    PSList<PSVariable*> getParameters();
     PSVariable* getParameter(const std::string& name);
     
     std::string toString();
@@ -268,8 +277,11 @@ namespace EUROPA {
 
     void specifyValue(PSVarValue& v);
 
-    double getViolation();
-    
+    double getViolation() const;
+    std::string getViolationExpl() const;
+        
+    PSEntity* getParent();
+
     std::string toString();
   protected:
     PSVariable();
@@ -278,20 +290,20 @@ namespace EUROPA {
   class PSVarValue
   {
   public:
-    PSVarValue          getInstance(std::string val);
-    PSVarValue          getInstance(int val);
-    PSVarValue          getInstance(double val);
-    PSVarValue          getInstance(bool val);
+    static PSVarValue getInstance(std::string val);
+    static PSVarValue getInstance(int val);
+    static PSVarValue getInstance(double val);
+    static PSVarValue getInstance(bool val);
 
     PSVarType getType() const;
 
-    PSObject*           asObject();
-    int                 asInt();
-    double              asDouble();
-    bool                asBoolean();
-    const std::string&  asString();
+    PSObject*           asObject() const;
+    int                 asInt() const;
+    double              asDouble() const;
+    bool                asBoolean() const;
+    const std::string&  asString() const;
     
-    std::string toString();
+    std::string toString() const;
     
   protected:
     PSVarValue();

@@ -15,14 +15,14 @@
   Changes by Mike (01/03/2007):
   1) got rid of Id types.  They create a necessity for a double-wrapping.
   2) changed "getCapacity" and "getUsage" to "getLimits" and "getLevels".  This is more in
-     line with internal usage and is also much clearer
+  line with internal usage and is also much clearer
   3) changed "getTokens" in PSObject to return a pointer to a list, since the list changes.
-     as a result, we may want to have the PSList destructor destroy the things it wraps.
+  as a result, we may want to have the PSList destructor destroy the things it wraps.
   4) changed Instant and PSEntityKey into typedefs rather than #defines because it plays havoc
-     with other code
+  with other code
   5) re-named "Instant" to "TimePoint" so as not to clash with existing Instant definition in 
-     Resource.
- */
+  Resource.
+*/
 
 namespace EUROPA {
 
@@ -36,6 +36,13 @@ namespace EUROPA {
   public:
     int size() const { return m_elements.size(); }
     T& get(int idx) { return m_elements[idx]; }
+    void remove(int idx) {m_elements.erase(std::advance(m_elements.begin(), idx));}
+    void remove(const T& value) {
+      typename std::vector<T>::iterator it =
+	std::find(m_elements.begin(), m_elements.end(), value);
+      if(it != m_elements.end())
+	m_elements.erase(it);
+    }
     void push_back(const T& value) {m_elements.push_back(value);}
   protected:
     std::vector<T> m_elements;    	
@@ -86,22 +93,32 @@ namespace EUROPA {
 	
     PSList<PSObject*> getObjectsByType(const std::string& objectType);
     PSObject* getObjectByKey(PSEntityKey id);
+    PSObject* getObjectByName(const std::string& name);
 		
     PSList<PSToken*> getTokens();    	 
     PSToken* getTokenByKey(PSEntityKey id);	
 		
-	PSList<PSVariable*> getGlobalVariables();
+    PSList<PSVariable*> getGlobalVariables();
+    PSVariable* getVariableByKey(PSEntityKey id);
+    PSVariable* getVariableByName(const std::string& name);
 		
     PSSolver* createSolver(const std::string& configurationFile);
     std::string planDatabaseToString();
     
+    bool getAllowViolations() const;
+    void setAllowViolations(bool v);
+    
     double getViolation() const;
+    std::string getViolationExpl() const;
     
     static void addObjectWrapperGenerator(const LabelStr& type,
 					  ObjectWrapperGenerator* wrapper);
     
     static void addLanguageInterpreter(const LabelStr& langauge,
 				       PSLanguageInterpreter* interpreter);
+
+    //quick hack to do what I need to for SACE ~MJI
+    const PlanDatabaseId& getPlanDatabase() const {return m_planDatabase;}
   protected:
     virtual void initDatabase();
     static ObjectWrapperGenerator* getObjectWrapperGenerator(const LabelStr& type);
@@ -111,6 +128,7 @@ namespace EUROPA {
     ConstraintEngineId m_constraintEngine;
     PlanDatabaseId m_planDatabase;
     RulesEngineId m_rulesEngine;
+    SOLVERS::PlanWriter::PartialPlanWriter* m_ppw;
 
     static std::map<double, PSLanguageInterpreter*>& getLanguageInterpreters();
     static std::map<double, ObjectWrapperGenerator*>& getObjectWrapperGenerators();    
@@ -123,7 +141,7 @@ namespace EUROPA {
     
     PSEntityKey getKey() const;
     const std::string& getName() const;
-    const std::string& getEntityType() const;
+    virtual const std::string& getEntityType() const;
 
     virtual std::string toString();
 
@@ -139,7 +157,11 @@ namespace EUROPA {
   public:
     virtual ~PSObject();
     
-    const PSList<PSVariable*>& getMemberVariables();
+    virtual const std::string& getEntityType() const;
+    
+    std::string getObjectType() const; 
+
+    PSList<PSVariable*> getMemberVariables();
     PSVariable* getMemberVariable(const std::string& name);
 
     PSList<PSToken*> getTokens();
@@ -148,17 +170,18 @@ namespace EUROPA {
     friend class PSEngine;
     friend class PSToken;
     friend class PSVarValue;
+    friend class PSVariable;
     friend class BaseObjectWrapperGenerator;
     PSObject(const ObjectId& obj);
     
   private:
     ObjectId m_obj;
-    PSList<PSVariable*> m_vars;
   };
     
   class PSSolver
   {
   public:
+    virtual ~PSSolver();
     void step();
     //Solver::solve returns a bool to determine if a solution was found.  Should this perhaps
     //do the same?  ~MJI
@@ -194,10 +217,12 @@ namespace EUROPA {
     void configure(int horizonStart, int horizonEnd);
   protected:
     friend class PSEngine;
-    PSSolver(const SOLVERS::SolverId& solver, const std::string& configFilename);
+    PSSolver(const SOLVERS::SolverId& solver, const std::string& configFilename,
+	     SOLVERS::PlanWriter::PartialPlanWriter* ppw);
   private:
     SOLVERS::SolverId m_solver;
     std::string m_configFile;
+    SOLVERS::PlanWriter::PartialPlanWriter* m_ppw;
   };
 
   class PSToken : public PSEntity
@@ -205,26 +230,33 @@ namespace EUROPA {
   public:
     virtual ~PSToken() {}
 
+    virtual const std::string& getEntityType() const;
+
+    std::string getTokenType() const; 
+
     bool isFact(); 
     
     PSObject* getOwner(); 
 	    
-	PSToken* getMaster();
+    PSToken* getMaster();
 	
-	PSList<PSToken*> getSlaves();
+    PSList<PSToken*> getSlaves();
 	    
     // TODO: Add setStatus(int newStatus)?; ask Mike Iatauro
     // TODO: getStatus()? -> MERGED, ACTIVE, REJECTED, etc
 	    
     //What does this do? ~MJI
-    double getViolation();
-    const std::string& getViolationExpl();
+    double getViolation() const;
+    std::string getViolationExpl() const;
 	    
     //Traditionally, the temporal variables and the object and state variables aren't 
     //considered "parameters".  I'm putting them in for the moment, but clearly the token
     //interface has the least thought put into it. ~MJI
-    const PSList<PSVariable*>& getParameters();
+    PSList<PSVariable*> getParameters();
     PSVariable* getParameter(const std::string& name);
+
+
+    void activate() {if (m_tok->isInactive()) m_tok->activate();}      
 	    
     virtual std::string toString();
 
@@ -242,10 +274,10 @@ namespace EUROPA {
   protected:
     friend class PSEngine;
     friend class PSObject;
+    friend class PSVariable;
     PSToken(const TokenId& tok);
 
     TokenId m_tok;
-    PSList<PSVariable*> m_vars;
   };
     
   enum PSVarType {OBJECT,STRING,INTEGER,DOUBLE,BOOLEAN};
@@ -255,6 +287,8 @@ namespace EUROPA {
   public:
     virtual ~PSVariable(){}
 	    
+    virtual const std::string& getEntityType() const;
+
     PSVarType getType(); // Data Type 
 
     bool isEnumerated();
@@ -271,8 +305,12 @@ namespace EUROPA {
     double getUpperBound();  // if isSingleton()==false && isInterval() == true
 	    
     void specifyValue(PSVarValue& v);
+    void reset();
 	
-	double getViolation() const;
+    double getViolation() const;
+    std::string getViolationExpl() const;
+
+    PSEntity* getParent();
 	    
     virtual std::string toString();
   protected:
@@ -304,7 +342,7 @@ namespace EUROPA {
     static PSVarValue getInstance(int val) {return PSVarValue((double)val, INTEGER);}
     static PSVarValue getInstance(double val) {return PSVarValue((double)val, DOUBLE);}
     static PSVarValue getInstance(bool val) {return PSVarValue((double)val, BOOLEAN);}
-            
+    static PSVarValue getInstance(const ObjectId& obj) {return PSVarValue((double) obj, OBJECT);}
   protected:
     friend class PSVariable;
     PSVarValue(const double val, const PSVarType type);

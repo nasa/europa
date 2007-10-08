@@ -25,9 +25,11 @@ namespace EUROPA {
     /* Declare DbClient event handlers we will over-ride */
     void notifyObjectCreated(const ObjectId& object);
     void notifyObjectCreated(const ObjectId& object, const std::vector<const AbstractDomain*>& arguments);
+    void notifyObjectDeleted(const ObjectId& object);
     void notifyClosed();
     void notifyClosed(const LabelStr& objectType);
     void notifyTokenCreated(const TokenId& token);
+    void notifyTokenDeleted(const TokenId& token, const std::string& name);
     void notifyConstrained(const ObjectId& object, const TokenId& predecessor, const TokenId& successor);
     void notifyFreed(const ObjectId& object, const TokenId& predecessor, const TokenId& successor);
     void notifyActivated(const TokenId& token);
@@ -36,11 +38,15 @@ namespace EUROPA {
     void notifyRejected(const TokenId& token);
     void notifyCancelled(const TokenId& token);
     void notifyConstraintCreated(const ConstraintId& constraint);
+    void notifyConstraintDeleted(const ConstraintId& constraint);
     void notifyVariableCreated(const ConstrainedVariableId& variable);
+    void notifyVariableDeleted(const ConstrainedVariableId& variable);
     void notifyVariableSpecified(const ConstrainedVariableId& variable);
     void notifyVariableRestricted(const ConstrainedVariableId& variable);
     void notifyVariableReset(const ConstrainedVariableId& variable);
 
+    void insertBreakpoint();
+    void removeBreakpoint();
     /**
      * @brief Flush all buffered transactions to an output stream and clear the buffer. Handy for checkpointing.
      */

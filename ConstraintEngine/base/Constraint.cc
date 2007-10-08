@@ -81,6 +81,21 @@ namespace EUROPA {
         return 0.0;
   }
 
+  std::string Constraint::getViolationExpl() const
+  {
+  	// TODO: this must eventually come from the model
+  	std::ostringstream os;
+
+    os << getName().toString() << "(";  	
+    for(unsigned int i=0;i<m_variables.size();i++) {
+    	if (i > 0)
+    	  os << ",";
+	    os << m_variables[i]->getName().toString();
+    }
+    os << ")";
+    
+  	return os.str();
+  }
 
   const ConstraintId& Constraint::getId() const {
     return m_id;
@@ -111,9 +126,33 @@ namespace EUROPA {
     return false;
   }
 
+  void Constraint::execute()
+  {
+   for(unsigned int i=0;i<m_variables.size();i++)
+    	m_variables[i]->setCurrentPropagatingConstraint(m_id);
+				 	
+    handleExecute();
+    
+    for(unsigned int i=0;i<m_variables.size();i++)
+    	m_variables[i]->setCurrentPropagatingConstraint(ConstraintId::noId());   
+  }
+  
+  void Constraint::execute(const ConstrainedVariableId& variable, 
+				 int argIndex, 
+				 const DomainListener::ChangeType& changeType) {   
+
+   for(unsigned int i=0;i<m_variables.size();i++)
+    	m_variables[i]->setCurrentPropagatingConstraint(m_id);
+				 	
+    handleExecute(variable,argIndex,changeType);
+
+    for(unsigned int i=0;i<m_variables.size();i++)
+    	m_variables[i]->setCurrentPropagatingConstraint(ConstraintId::noId());   
+  }
+  
   void Constraint::handleExecute(const ConstrainedVariableId& variable, 
 				 int argIndex, 
-				 const DomainListener::ChangeType& changeType) {
+				 const DomainListener::ChangeType& changeType) {   
     handleExecute();
   }
 

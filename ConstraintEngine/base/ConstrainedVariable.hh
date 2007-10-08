@@ -86,6 +86,11 @@ namespace EUROPA {
     void constraints(std::set<ConstraintId>& results) const;
 
     /**
+     * @brief Retrieve all constraints on this variable.
+     */
+    void constraints(ConstraintSet& results) const;
+
+    /**
      * @brief Retrive the count of constraints direclt on this variable
      */
     unsigned int constraintCount() const;
@@ -334,8 +339,19 @@ namespace EUROPA {
     /**
      * @brief Sum of the violation values for all the constraints attached to this variable
      */
-    double getViolation() const;
+    virtual double getViolation() const;
 
+    /**
+     * @brief string to present to the user describing what the getViolation value means when it's > 0
+     */
+    virtual std::string getViolationExpl() const;
+
+    /**
+     * @brief Keeps track of who's the current propagating constraint, so if there is a violation the ConstraintEngine can get to it
+     */
+    void setCurrentPropagatingConstraint(ConstraintId c); 
+    ConstraintId getCurrentPropagatingConstraint() const;    
+     
   protected:
     /**
      * @brief Ensure the constrained variable is part of a ConstraintEngine.
@@ -427,6 +443,9 @@ namespace EUROPA {
      * @brief Helper method to reset to a specific domain
      */
     void reset(const AbstractDomain& domain);
+    
+    // keeps track of who's the current propagating constraint, in case there is a violation
+    ConstraintId m_propagatingConstraint;
 
   private:
     /**

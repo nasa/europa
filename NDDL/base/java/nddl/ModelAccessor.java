@@ -12,8 +12,10 @@ import java.io.FileNotFoundException;
  * and returns the information for substitution into code by the caller.
  */
 public class ModelAccessor {
+  static String s_plasmaHome = NddlUtil.getenv("PLASMA_HOME");
   static String s_directory = System.getProperty("user.dir");
-  static String s_cfgFilename = "NDDL.cfg";
+  static final String DEFAULT_CFG = "NDDL.cfg";
+  static String s_cfgFilename = DEFAULT_CFG;
   static boolean s_cfgExact = true;
 
   // Holds all classes as they are visited
@@ -25,7 +27,7 @@ public class ModelAccessor {
   // The model name, derived from input file name
   private static String s_modelName = new String("NO_MODEL");
 
-  // Contains the set of all 
+  // Contains the set of all
   private static Map s_predicatesByName = new Hashtable();
 
   // Maps variable names to their types
@@ -52,14 +54,14 @@ public class ModelAccessor {
   // Stack for nested rule contexts
   static private Stack s_currentRule = new Stack();
 
-  // Search path for nddl include files. 
+  // Search path for nddl include files.
   static private List s_customSearchPath = new ArrayList();
 
   /**
    * @brief Lists the currently supported temporal relations
    * @see NddlUtils macros
    */
-  public static final String s_slave_relations = 
+  public static final String s_slave_relations =
     ":any:meets:met_by:contains:contained_by:before:after:starts:ends:" +
     "ends_after:ends_before:ends_after_start:starts_before_end:starts_during:" +
     "contains_start:ends_during:contains_end:starts_after:starts_before:equal:equals:";
@@ -99,28 +101,28 @@ public class ModelAccessor {
     else if(new File(toDir).isAbsolute())
       s_directory = toDir;
     else
-      s_directory = new File(s_directory,toDir).toString();
+      s_directory = new File(s_directory, toDir).toString();
   }
 
   public static void setConfigFile(String filename) {
     if(filename == null || filename.equals(""))
-      s_cfgFilename = "NDDL.cfg";
-    else    
+      s_cfgFilename = DEFAULT_CFG;
+    else
       s_cfgFilename = filename;
   }
 
   /** MODEL ACCESS **/
-  public static void setModelName(String modelName){
+  public static void setModelName(String modelName) {
     s_modelName = modelName;
   }
 
-  public static String getModelName(){
+  public static String getModelName() {
     return s_modelName;
   }
 
   /** CLASS ACCESSORS **/
 
-  public static String getClassName(IXMLElement element){
+  public static String getClassName(IXMLElement element) {
     String className = "";
 
     if(isPredicate(element))
@@ -135,39 +137,39 @@ public class ModelAccessor {
     return className;
   }
 
-  public static String getSuperClass(IXMLElement element){
+  public static String getSuperClass(IXMLElement element) {
     if(isPredicate(element))
       return getPredicateSuperClass(element);
     else
       return getParentClassName(element);
   }
 
-  public static String getCppClass(String nddlClass){
+  public static String getCppClass(String nddlClass) {
     String cppClass = nddlClass;
     if(isPredefinedClass(nddlClass)) {
       cppClass = (String) s_customClassesByNddlName.get(nddlClass);
       assert(DebugMsg.debugMsg("ModelAccessor:getCppClass",
-			       "Nddl class '" + nddlClass + "' is a pre-defined class.  The " +
-			       " C++ class is '" + cppClass + "'."));
+                               "Nddl class '" + nddlClass + "' is a pre-defined class.  The " +
+                               " C++ class is '" + cppClass + "'."));
       if(s_customIncludesByCppName.containsKey(cppClass)) {
-	s_usedCustomIncludes.add(s_customIncludesByCppName.get(cppClass));
-	assert(DebugMsg.debugMsg("ModelAccessor:getCppClass",
-				 "C++ class '" + cppClass + "' requires header '" +
-				 s_customIncludesByCppName.get(cppClass).toString() + "'"));
+        s_usedCustomIncludes.add(s_customIncludesByCppName.get(cppClass));
+        assert(DebugMsg.debugMsg("ModelAccessor:getCppClass",
+                                 "C++ class '" + cppClass + "' requires header '" +
+                                 s_customIncludesByCppName.get(cppClass).toString() + "'"));
       }
     }
     assert(DebugMsg.debugMsg("ModelAccessor:getCppClass",nddlClass + " becomes " + cppClass));
     return cppClass;
   }
 
-  public static String getQualifiedClassName(IXMLElement element){
+  public static String getQualifiedClassName(IXMLElement element) {
     return XMLUtil.qualifiedName(element);
   }
 
   /**
    * @brief Handles the mapping to include the built in or implicit classes
-   */ 
-  public static String getParentClassName(IXMLElement element){
+   */
+  public static String getParentClassName(IXMLElement element) {
     XMLUtil.checkExpectedNode("class", element);
 
     String className = getClassName(element);
@@ -180,7 +182,7 @@ public class ModelAccessor {
       klass = "Object";
 
     // This is in error as of parser version 1.1.  Fear the worst now that this is fixed!
-    //else  if (element.getFirstChildNamed("predicate") != null) // Backward compatibility - Predicates imply a Timeline
+    //else if(element.getFirstChildNamed("predicate") != null) // Backward compatibility - Predicates imply a Timeline
     //klass = "Timeline";
 
     else
@@ -190,11 +192,11 @@ public class ModelAccessor {
     return klass;
   }
 
-  public static boolean isClass(String elementName){
+  public static boolean isClass(String elementName) {
     return s_classesByName.get(elementName) != null;
   }
 
-  public static boolean isObjectType(IXMLElement element){
+  public static boolean isObjectType(IXMLElement element) {
     return element.getName().equals("class");
   }
 
@@ -202,7 +204,7 @@ public class ModelAccessor {
    * Tests if the given string is matched with special built in classes, as opposed to simply being
    * a new class defined in the model.
    */
-  public static boolean isPredefinedClass(String className){
+  public static boolean isPredefinedClass(String className) {
     return s_customClassesByNddlName.containsKey(className);
   }
 
@@ -211,7 +213,7 @@ public class ModelAccessor {
   /**
    * Register a predicate
    */
-  public static void registerPredicate(IXMLElement predicate){
+  public static void registerPredicate(IXMLElement predicate) {
     String name = XMLUtil.getAttribute(predicate,"name");
     String scope = XMLUtil.getAttribute(predicate.getParent(), "name");
     s_predicatesByName.put(scope + "." + name, predicate);
@@ -220,32 +222,32 @@ public class ModelAccessor {
   /**
    * @brief Obtain the class for which this predicate is defined
    */
-  public static String getPredicateClassName(IXMLElement element){
+  public static String getPredicateClassName(IXMLElement element) {
     return getClassName(element.getParent());
   }
 
   /**
    * @brief Obtain the name of the predicate
    */
-  public static String getPredicateName(IXMLElement element){
+  public static String getPredicateName(IXMLElement element) {
     return XMLUtil.getAttribute(element,"predicate", "name");
   }
 
-  public static boolean isPredicate(String name){
+  public static boolean isPredicate(String name) {
     return s_predicatesByName.containsKey(name);
   }
 
-  public static boolean isPredicate(IXMLElement element){
+  public static boolean isPredicate(IXMLElement element) {
     return element.getName().equals("predicate");
   }
 
-  public static String getPredicateSuperClass(IXMLElement predicate){
+  public static String getPredicateSuperClass(IXMLElement predicate) {
     String toRet = getPredicateSuperClass(predicate,true);
     assert(DebugMsg.debugMsg("ModelAccessor:getPredicateSuperClass:Search","-> returning "+toRet));
     return toRet;
   }
 
-  public static String getPredicateSuperClass(IXMLElement predicate, boolean dummy){
+  public static String getPredicateSuperClass(IXMLElement predicate, boolean dummy) {
     String name = XMLUtil.getAttribute(predicate, "name");
     String klass = XMLUtil.getAttribute(predicate.getParent(), "name");
 
@@ -265,10 +267,10 @@ public class ModelAccessor {
 
     // Try ancestors
     List ancestors = getAncestors(klass);
-    if(ancestors != null){
+    if(ancestors != null) {
       assert(DebugMsg.debugMsg("ModelAccessor:getPredicateSuperClass:Search","Ancestors: "+ancestors));
       // ancestors are listed fifo (this should have been causing problems earlier)
-      for(int i=ancestors.size()-1; i>=0; --i){
+      for(int i=ancestors.size()-1; i>=0; --i) {
         String ancestor = (String) ancestors.get(i);
         // third, check for specific parent predicates: ancestor.name
         String superPredicate = ancestor + "." + name;
@@ -292,7 +294,7 @@ public class ModelAccessor {
     return "NddlToken";
   }
 
-  public static IXMLElement getPredicate(String name){
+  public static IXMLElement getPredicate(String name) {
     IXMLElement predicate = null;
     if(isPredicate(name))
       predicate = (IXMLElement) s_predicatesByName.get(name);
@@ -301,7 +303,7 @@ public class ModelAccessor {
 
   /** VARIABLE ACCESSORS **/
 
-  public static boolean isMemberVariable(String klassName, String varName){
+  public static boolean isMemberVariable(String klassName, String varName) {
     assert(DebugMsg.debugMsg("ModelAccessor","isMemberVariable:" + klassName + "." + varName));
 
     if(s_varTypesByName.get(klassName + "." + varName) != null)
@@ -309,7 +311,7 @@ public class ModelAccessor {
 
     List ancestors = getAncestors(klassName);
 
-    for(int i=0;i<ancestors.size(); i++){
+    for(int i=0; i < ancestors.size(); ++i) {
       String currentClass = (String) ancestors.get(i);
       if(s_varTypesByName.get(currentClass + "." + varName) != null)
         return true;
@@ -321,11 +323,11 @@ public class ModelAccessor {
   /**
    * Obtain the C++ type for a <var> element
    */
-  public static String getVariableType(IXMLElement element){
+  public static String getVariableType(IXMLElement element) {
     return XMLUtil.getAttribute(element, "type");
   }
 
-  public static String getVariableName(IXMLElement element){
+  public static String getVariableName(IXMLElement element) {
     return XMLUtil.getAttribute(element, "name");
   }
 
@@ -335,49 +337,49 @@ public class ModelAccessor {
   }
 
   /** MEMBERS FOR INTERNAL DATA MANAGEMENT **/
-  private static void addClassByName(String className, IXMLElement element){
+  private static void addClassByName(String className, IXMLElement element) {
     s_classesByName.put(className, element);
   }
 
   /** MEMBERS FOR MANAGING OVERALL SCOPE **/
-  public static void setCurrentObjectType(String name){
+  public static void setCurrentObjectType(String name) {
     s_currentObjectType = name;
   }
-  public static void resetCurrentObjectType(){
+  public static void resetCurrentObjectType() {
     s_currentObjectType = "";
   }
-  public static void setCurrentPredicate(String name){
+  public static void setCurrentPredicate(String name) {
     s_currentPredicate = name;
   }
-  public static void resetCurrentPredicate(){
+  public static void resetCurrentPredicate() {
     s_currentPredicate = "";
   }
-  public static void setCurrentRule(String name){
+  public static void setCurrentRule(String name) {
     String priorRules = "";
 
-    for(int i=0;i<s_currentRule.size();i++)
+    for(int i=0; i < s_currentRule.size(); ++i)
       priorRules = priorRules + "=>" + s_currentRule.elementAt(i);
     assert(DebugMsg.debugMsg("ModelAccessor:setCurrentRule","Prior rules" + priorRules));
 
     s_currentRule.push(name);
   }
-  public static void resetCurrentRule(){
+  public static void resetCurrentRule() {
     String name = (String) s_currentRule.pop();
     assert(DebugMsg.debugMsg("ModelAccessor:resetCurrentRule","Removing " + name));
   }
-  public static String getCurrentObjectType(){
+  public static String getCurrentObjectType() {
     return s_currentObjectType;
   }
-  public static String getCurrentPredicate(){
+  public static String getCurrentPredicate() {
     return s_currentPredicate;
   }
-  public static String getPredicateScope(){
+  public static String getPredicateScope() {
     if(s_currentObjectType.equals("") || s_currentPredicate.equals(""))
       return "!ERROR";
 
     return s_currentObjectType + "." + s_currentPredicate;
   }
-  public static String getCurrentScope(){
+  public static String getCurrentScope() {
     if(!s_currentRule.empty())
       return (String) s_currentRule.peek();
 
@@ -390,7 +392,7 @@ public class ModelAccessor {
   /**
    * Log this so we can use it to test for inheritance relationships.
    */
-  public static void addParentChildRelation(String parent, String child){
+  public static void addParentChildRelation(String parent, String child) {
     List parentAncestors = null;
     if(s_childOf.containsKey(parent))
       parentAncestors = (List) s_childOf.get(parent);
@@ -411,7 +413,7 @@ public class ModelAccessor {
   /**
    * Retrieve the ancestors for a klass
    */
-  public static List getAncestors(String klass){
+  public static List getAncestors(String klass) {
     return (List) s_childOf.get(klass);
   }
 
@@ -424,7 +426,7 @@ public class ModelAccessor {
    * This function will allocate the domain type to be later retrieved by name
    * @param variable The <var> xml element
    */
-  static public void registerVariable(IXMLElement variable) {
+  public static void registerVariable(IXMLElement variable) {
     String varType = getVariableType(variable);
     String varName = getVariableName(variable);
     String parentType = getCurrentScope();
@@ -456,17 +458,17 @@ public class ModelAccessor {
    * @param variable The <var> xml element
    * @see getDefaultDomain
    */
-  static private void registerDefaultDomain(IXMLElement variable){
+  static private void registerDefaultDomain(IXMLElement variable) {
     XMLUtil.checkExpectedNode("var", variable);
   }
 
-  static public String getTypeForScopedVariable(String qualifiedName){
+  public static String getTypeForScopedVariable(String qualifiedName) {
     String result = (String) s_varTypesByName.get(qualifiedName);
     assert(DebugMsg.debugMsg("ModelAccessor","ModelAccessor.getTypeForScopedVariable TYPE for " + qualifiedName + " is " + result));;
     return result;
   }
 
-  static public String getQualifiedName(IXMLElement variable){
+  public static String getQualifiedName(IXMLElement variable) {
     String var_name = XMLUtil.nameOf(variable);
     return getCurrentScope() + "." + var_name;
   }
@@ -474,19 +476,19 @@ public class ModelAccessor {
   /**
    * Class, Predicate or Compat
    */
-  static public String getVariableParentType(IXMLElement variable){
+  public static String getVariableParentType(IXMLElement variable) {
     IXMLElement parent = variable.getParent();
 
 
-    while (parent != null){
+    while (parent != null) {
       if(parent.getName().equals("compat"))
         return XMLUtil.getAttribute(parent, "class") + "." + XMLUtil.getAttribute(parent, "name");
-      else if (parent.getName().equals("predicate")){
+      else if(parent.getName().equals("predicate")) {
         String suffix = XMLUtil.getAttribute(parent, "name");
         String prefix = XMLUtil.getAttribute(parent.getParent(), "name");
         return prefix + "." + suffix;
       }
-      else if (parent.getName().equals("class"))
+      else if(parent.getName().equals("class"))
         return XMLUtil.getAttribute(parent, "name");
       else
         parent = parent.getParent();
@@ -501,7 +503,7 @@ public class ModelAccessor {
    * @param variable The <var> XMLElement
    * @see makeDomainFromConstant, registerDefaultDomain
    */
-  static public String getDefaultDomain(IXMLElement variable){
+  public static String getDefaultDomain(IXMLElement variable) {
     XMLUtil.checkExpectedNode("var", variable);
     String memberName = getQualifiedName(variable);
     String defaultDomain = (String) s_defaultDomainsByName.get(memberName);
@@ -512,8 +514,8 @@ public class ModelAccessor {
   /**
    * Constructs the domain from a <var> xmlElement
    * @see getDomain(String vartType)
-   */ 
-  static public String getDomain(IXMLElement variable) {
+   */
+  public static String getDomain(IXMLElement variable) {
     XMLUtil.checkExpectedNode("var", variable);
     String var_type = XMLUtil.typeOf(variable);
     IXMLElement scope = variable.getParent();
@@ -521,17 +523,17 @@ public class ModelAccessor {
     while (scope != null) {
       for (Enumeration e = scope.getChildren().elements() ; e.hasMoreElements() ; ) {
         IXMLElement type_element = (IXMLElement)e.nextElement();
-        if (!type_element.hasAttribute("name")) {
+        if(!type_element.hasAttribute("name")) {
           continue;
         }
-        if (var_type.equals(XMLUtil.nameOf(type_element))) {
+        if(var_type.equals(XMLUtil.nameOf(type_element))) {
           type = type_element;
           break;
         }
       }
       scope = scope.getParent();
     }
-    if (type != null) {
+    if(type != null) {
       var_type = XMLUtil.qualifiedName(type);
     }
 
@@ -542,19 +544,24 @@ public class ModelAccessor {
    * Retrieves the domain class name given the domain type
    * @param type The type of the domain
    */
-  public static String getDomain(String type){
+  public static String getDomain(String type) {
     String domainName = "";
-    if (type.equals(NddlXmlStrings.x_boolean)) {
+    if(type.equals(NddlXmlStrings.x_boolean)) {
       domainName = "BoolDomain";
-    } else if (type.equals(NddlXmlStrings.x_int)) {
+    }
+    else if(type.equals(NddlXmlStrings.x_int)) {
       domainName = "IntervalIntDomain";
-    } else if (type.equals(NddlXmlStrings.x_float)) {
+    }
+    else if(type.equals(NddlXmlStrings.x_float)) {
       domainName = "IntervalDomain";
-    } else if (type.equals(NddlXmlStrings.x_string)) {
+    }
+    else if(type.equals(NddlXmlStrings.x_string)) {
       domainName = "StringDomain";
-    } else if (type.equals(NddlXmlStrings.x_symbol)) {
+    }
+    else if(type.equals(NddlXmlStrings.x_symbol)) {
       domainName = "SymbolDomain";
-    } else if (isEnumeration(type)){
+    }
+    else if(isEnumeration(type)) {
       domainName = type;
     }
     else domainName = type + "Domain";
@@ -563,20 +570,20 @@ public class ModelAccessor {
     return domainName;
   }
 
-  static public String makeDomain(IXMLElement variable){
+  public static String makeDomain(IXMLElement variable) {
     String longname = getQualifiedClassName(variable.getParent());
     String var_type = getVariableType(variable);
     String baseDomain = "StringDomain(\"string\")";
-    if(isClass(var_type)){ // It must be an object variable for a predicate
+    if(isClass(var_type)) { // It must be an object variable for a predicate
       baseDomain =  "ObjectDomain(\""+var_type+"\")";
     }
-    else if(isEnumeration(longname + "::" + var_type)){
+    else if(isEnumeration(longname + "::" + var_type)) {
       baseDomain =  longname + "::" + var_type + "BaseDomain()";
     }
-    else if(isEnumeration(var_type)){
+    else if(isEnumeration(var_type)) {
       baseDomain =  var_type + "BaseDomain()";
     }
-    else if (!var_type.equals("string")){
+    else if(!var_type.equals("string")) {
       baseDomain = ModelAccessor.getDomain(var_type) + "(\""+var_type+"\")";
     }
     return baseDomain;
@@ -584,13 +591,13 @@ public class ModelAccessor {
   /**
    * Will generate code to construct a domain for a constant
    */
-  static public String makeDomainFromConstant(IXMLElement argument){
+  public static String makeDomainFromConstant(IXMLElement argument) {
     String arg_type = argument.getName();
     if(argument.getName().equals("value"))
       arg_type = argument.getAttribute("type", "ERROR - No type found");
 
     // CASE 0: It is an enumeration of more than one variable
-    if(arg_type.equals("set")){
+    if(arg_type.equals("set")) {
       String elementsAsString = "";
       String domainClass = "SymbolDomain"; // The default
       String isNumeric = "false";
@@ -608,22 +615,22 @@ public class ModelAccessor {
         // ensure they are the same, so we assume it here.
         elementType = element.getAttribute("type", "float");
 
-        if (!elementType.equals("bool")) { // if it is a set, it can only have the two values, so we ignore the elements, since we know they must be true and false.
+        if(!elementType.equals("bool")) { // if it is a set, it can only have the two values, so we ignore the elements, since we know they must be true and false.
           elementsAsString += v + "$"; // Delimit with $
         }
         //the following *MAY* pleasently rely on the new type checking system
-        if(elementType.equals("string")){
+        if(elementType.equals("string")) {
           domainClass = "StringDomain";
         }
-        if(elementType.equals("bool")){
+        if(elementType.equals("bool")) {
           domainClass = "BoolDomain";
         }
-        else if(isNumericPrimitive(elementType)){
+        else if(isNumericPrimitive(elementType)) {
           domainClass = "NumericDomain";
           isNumeric = "true";
         }
       }
-      if (elementType.equals("bool")) {
+      if(elementType.equals("bool")) {
         return domainClass + "(\"" + elementType + "\")";
       }
       return domainClass + "(listFromString(\"" + XMLUtil.escapeQuotes(elementsAsString) + "\","+isNumeric+"), \"" + elementType + "\")";
@@ -631,7 +638,7 @@ public class ModelAccessor {
 
     // CASE 1: It is a singleton, numeric, primitive identifier. Have to support legacy syntax
     // in XML of the form <value name="-16" type="int"/>
-    if (isNumericPrimitive(arg_type)) {
+    if(isNumericPrimitive(arg_type)) {
       String value = "";
 
       if(argument.getName().equals("value"))
@@ -643,25 +650,25 @@ public class ModelAccessor {
       value = value + "," + value;
 
       return  ModelAccessor.getDomain(arg_type) + "(" + value + ", \"" + arg_type + "\")";
-    }   
+    }
 
     String type = argument.getAttribute("type", "ERROR - NO 'type'");
 
     // CASE 2: An interval
-    if (arg_type.equals("interval")) {
+    if(arg_type.equals("interval")) {
       String max = XMLUtil.getAttribute(argument,"max");
       String min = XMLUtil.getAttribute(argument,"min");
       return ModelAccessor.getDomain(type) + "("+ min+ ", "+max + ", \"" + type +"\")";
     }
 
     // CASE 3: A symbol
-    if(arg_type.equals("symbol")){
+    if(arg_type.equals("symbol")) {
       String value = argument.getAttribute("value", "ERROR - NO 'value'");
       return "SymbolDomain(LabelStr(\"" + XMLUtil.escapeQuotes(value) + "\"), \"" + type + "\")";
     }
 
     // CASE 4: A string, boolean or error.
-    if(type.equals("string")){
+    if(type.equals("string")) {
       String value = argument.getAttribute("name", "ERROR - NO 'value'");
       return "StringDomain(LabelStr(\"" + XMLUtil.escapeQuotes(value) + "\"), \"" + type + "\")";
     }
@@ -674,21 +681,21 @@ public class ModelAccessor {
     return "!ERROR. '" + arg_type + "' not a valid constant";
   }
 
-  public static boolean isVariable(String name){
+  public static boolean isVariable(String name) {
     boolean result = (isPredefinedVariable(name) || (s_varTypesByName.get(getCurrentScope() + "." + name) != null));
     return result;
   }
 
-  public static boolean isPredefinedVariable(String name){
+  public static boolean isPredefinedVariable(String name) {
     return s_reserved_variables.indexOf(":" + name + ":") >= 0;
   }
 
   /**
    * @brief method to get the value from an atribute.
    */
-  static public String getValue(IXMLElement element){
+  public static String getValue(IXMLElement element) {
     String result = "!ERROR";
-    if (element.getName().equals(NddlXmlStrings.x_symbol) ||
+    if(element.getName().equals(NddlXmlStrings.x_symbol) ||
         element.getName().equals("ident"))
       result = XMLUtil.getAttribute(element, "value");
     else if(element.getName().equals("interval"))
@@ -702,19 +709,19 @@ public class ModelAccessor {
    * @brief method to get the value from an atribute.
    */
   public static String getValueType(IXMLElement element) {
-    if (element.getName().equals(NddlXmlStrings.x_value)) {
+    if(element.getName().equals(NddlXmlStrings.x_value)) {
       return XMLUtil.getAttribute(element, NddlXmlStrings.x_type);
     }
-    if (element.getName().equals(NddlXmlStrings.x_symbol)) {
+    if(element.getName().equals(NddlXmlStrings.x_symbol)) {
       return NddlXmlStrings.x_symbol;
     }
     return "!ERROR";
   }
 
   /**
-   * Determine if the given variable name is an object variable in the current scope. 
+   * Determine if the given variable name is an object variable in the current scope.
    */
-  public static boolean isObjectVariable(String varName){
+  public static boolean isObjectVariable(String varName) {
     return (getClass(varName) != null);
   }
 
@@ -722,7 +729,7 @@ public class ModelAccessor {
    * Obtain the class for a given varName, in current scope of rule instance or predicate.
    * @return null if not of type class, otherwise the class name
    */
-  public static String getClass(String varName){
+  public static String getClass(String varName) {
     // If it is the object variable of the current rule instance, then just strip
     // The Object Class qualifier from the active scope
     if(varName.equals("object"))
@@ -746,9 +753,9 @@ public class ModelAccessor {
    * local variables.
    * @return String the type, if found, otherwise null
    */
-  private static String getTypeForLocalVariable(String name){
+  private static String getTypeForLocalVariable(String name) {
     List scope = (List) s_currentRule;
-    for(int i=0; i<scope.size(); i++){
+    for(int i=0; i < scope.size(); ++i) {
       String currentRule = (String) scope.get(i);
       String type = getTypeForScopedVariable(currentRule + "." + name);
       if(type != null)
@@ -757,38 +764,37 @@ public class ModelAccessor {
     return null;
   }
 
-  public static boolean isSymbolicPrimitive(String type){
+  public static boolean isSymbolicPrimitive(String type) {
     return (type.equals(NddlXmlStrings.x_string) ||
             type.equals(NddlXmlStrings.x_symbol) ||
             type.equals(NddlXmlStrings.x_boolean));
   }
 
-  public static boolean isNumericPrimitive(String type){
+  public static boolean isNumericPrimitive(String type) {
     return (type.equals(NddlXmlStrings.x_int) ||
             type.equals(NddlXmlStrings.x_float));
   }
 
-  public static boolean isInterval(String name){
+  public static boolean isInterval(String name) {
     return s_intervals.contains(name) && isEnumeration(name);
   }
-  public static boolean isEnumeration(String name){
+
+  public static boolean isEnumeration(String name) {
     return s_allEnumerations.containsKey(name) && !isClass(name);
   }
 
-  public static String getEnumerationType(IXMLElement enumeration){
+  public static String getEnumerationType(IXMLElement enumeration) {
     XMLUtil.checkExpectedNode("enum:typedef", enumeration);
     IXMLElement child = XMLUtil.getSingleChild("set:interval",enumeration);
-    if(child.getName().equals("set"))
-    {
-      if (!enumeration.hasAttribute("basetype"))
+    if(child.getName().equals("set")) {
+      if(!enumeration.hasAttribute("basetype"))
         return "SymbolDomain";
-      if (enumeration.getAttribute("basetype", "").equals(NddlXmlStrings.x_string))
+      if(enumeration.getAttribute("basetype", "").equals(NddlXmlStrings.x_string))
         return "StringDomain";
       else
         return "NumericDomain";
     }
-    else if(child.getName().equals("interval"))
-    {
+    else if(child.getName().equals("interval")) {
       if(enumeration.getAttribute("basetype","").equals(NddlXmlStrings.x_int))
         return "IntervalIntDomain";
       if(enumeration.getAttribute("basetype","").equals(NddlXmlStrings.x_float))
@@ -797,20 +803,20 @@ public class ModelAccessor {
     return null;
   }
 
-  public static void registerEnumeration(String enumeration, String type, boolean isInterval){
+  public static void registerEnumeration(String enumeration, String type, boolean isInterval) {
     s_allEnumerations.put(enumeration,type);
     s_intervals.add(enumeration);
   }
 
-  public static boolean isEnumeration(IXMLElement element){
+  public static boolean isEnumeration(IXMLElement element) {
     return element.getName().equals("enum") || element.getName().equals("typedef");
   }
 
-  public static boolean isInterval(IXMLElement element){
+  public static boolean isInterval(IXMLElement element) {
     return isEnumeration(element) && element.hasChildren() && element.getChildAtIndex(0).getName().equals("interval");
   }
 
-  public static String convertDelimiters(String inputString, String newString){
+  public static String convertDelimiters(String inputString, String newString) {
     StringBuffer strBuf = new StringBuffer(inputString);
     int index = inputString.indexOf(".");
     if(index >= 0)
@@ -821,7 +827,7 @@ public class ModelAccessor {
   /**
    * Obtain the suffic for a suring of the form <prefix><delimiter><suffix>
    */
-  public static String getSuffix(String delimiter, String inputString){
+  public static String getSuffix(String delimiter, String inputString) {
     int index = inputString.indexOf(".");
     String suffix = inputString.substring(index +1);
     return suffix;
@@ -830,18 +836,18 @@ public class ModelAccessor {
   /**
    * Need to test if a variable is guarded in order to control if it should be specified or not
    */
-  public static boolean isGuarded(String varName, IXMLElement node){
-    if(node.getName().equals("id")){
+  public static boolean isGuarded(String varName, IXMLElement node) {
+    if(node.getName().equals("id")) {
       String name = XMLUtil.getAttribute(node, "name");
 
       if(name.equals(varName) &&
-          (node.getParent().getName().equals("if") || 
+          (node.getParent().getName().equals("if") ||
            node.getParent().getName().equals("equals")))
         return true; /* We are done */
     }
 
     Vector childNodes = node.getChildren();
-    for(int i=0;i<childNodes.size();i++){
+    for(int i=0; i < childNodes.size(); ++i) {
       IXMLElement childNode = (IXMLElement) childNodes.elementAt(i);
       if(isGuarded(varName, childNode))
         return true;
@@ -853,7 +859,7 @@ public class ModelAccessor {
   /**
    * @see isGuarded
    */
-  private static boolean isFilterVariable(String varName, IXMLElement constraintArgNode){
+  private static boolean isFilterVariable(String varName, IXMLElement constraintArgNode) {
     IXMLElement parent = (IXMLElement) constraintArgNode.getParent();
     XMLUtil.checkExpectedNode("invoke", parent);
     parent = (IXMLElement) parent.getParent();
@@ -869,13 +875,13 @@ public class ModelAccessor {
    * Will register a named subgoal if present.
    * @param slave The <subgoal/> xml element
    */
-  public static void registerSlave(IXMLElement slave){
+  public static void registerSlave(IXMLElement slave) {
     XMLUtil.checkExpectedNode("subgoal", slave);
 
-    if(slave.hasChildren()){
+    if(slave.hasChildren()) {
       IXMLElement pred = XMLUtil.getSingleChild("predicateinstance",slave);
       XMLUtil.checkExpectedNode("predicateinstance", pred);
-      if(pred.hasAttribute("name")){ // It introduces a named slave to register
+      if(pred.hasAttribute("name")) { // It introduces a named slave to register
         String name = XMLUtil.getAttribute(pred, "name");
         s_slaves.add(getCurrentScope() + "." + name);
         assert(DebugMsg.debugMsg("ModelAccessor:registerSlave","Registering slave " + name));
@@ -883,11 +889,11 @@ public class ModelAccessor {
     }
   }
 
-  public static boolean isSlave(String name){
+  public static boolean isSlave(String name) {
     List scope = (List) s_currentRule;
-    for(int i=0;i<scope.size();i++){
+    for(int i=0; i < scope.size(); ++i) {
       String currentScope = (String) scope.get(i);
-      if(s_slaves.contains(currentScope + "." + name)){
+      if(s_slaves.contains(currentScope + "." + name)) {
         assert(DebugMsg.debugMsg("ModelAccessor:isSlave",name + " is a slave in scope " + currentScope));
         return true;
       }
@@ -899,7 +905,7 @@ public class ModelAccessor {
   /**
    * Test if a slave is constrained to an object variable
    */
-  public static boolean isConstrained(IXMLElement slave){
+  public static boolean isConstrained(IXMLElement slave) {
     XMLUtil.checkExpectedNode("predicateinstance", slave);
     String type = XMLUtil.getAttribute(slave, "type");
     String prefix = XMLUtil.stripSuffix(type, ".");
@@ -910,7 +916,7 @@ public class ModelAccessor {
    * Obtain the object type for introduction of a new slave
    * @todo Update to handle multi-dot prefix
    */
-  public static String getSlaveObjectType(IXMLElement slave){
+  public static String getSlaveObjectType(IXMLElement slave) {
     XMLUtil.checkExpectedNode("predicateinstance", slave);
     String type = XMLUtil.getAttribute(slave, "type");
 
@@ -922,12 +928,12 @@ public class ModelAccessor {
     String prefix = type.substring(0, type.indexOf("."));
     String suffix = type.substring(type.indexOf(".") + 1, type.length());
 
-    // If prefix is a class, return the class 
+    // If prefix is a class, return the class
     if(isClass(prefix))
       return prefix;
 
     String klass = getClass(prefix);
-    while (suffix.indexOf(".") > 0){
+    while (suffix.indexOf(".") > 0) {
       prefix = suffix.substring(0, suffix.indexOf("."));
       suffix = suffix.substring(suffix.indexOf(".") + 1, suffix.length());
       klass = getTypeForScopedVariable(klass + "." + prefix);
@@ -945,17 +951,17 @@ public class ModelAccessor {
    * @return true If the current node implicitly or explicitly introduces a guard
    * @see getOutStandingGuards
    */
-  public static boolean hasImplicitGuard(IXMLElement node, String guards){
+  public static boolean hasImplicitGuard(IXMLElement node, String guards) {
     boolean b = !getOutstandingGuards(node, guards).equals("");
     assert(DebugMsg.debugMsg("ModelAccessor","RuleWriter:requiresGuard returns " + b));
     return (b);
   }
 
-  public static boolean hasExplicitGuard(IXMLElement node){
+  public static boolean hasExplicitGuard(IXMLElement node) {
     return node.getName().equals("if");
   }
 
-  public static String getExplicitGuard(IXMLElement node){
+  public static String getExplicitGuard(IXMLElement node) {
     XMLUtil.checkExpectedNode( "if", node);
     // If child is equals
     IXMLElement id = (IXMLElement) node.getChildAtIndex(0);
@@ -969,25 +975,25 @@ public class ModelAccessor {
    * Helper method
    * @see getOutStandingGuards
    */
-  private static String addObjectGuardIfNeeded(String idName, String currentGuards){
+  private static String addObjectGuardIfNeeded(String idName, String currentGuards) {
     String newGuards = currentGuards;
     // Ignore if the id is not of the pattern <prefix>.<suffix>
     int delimiterPosition = idName.indexOf(".");
-    if(delimiterPosition >= 0){
+    if(delimiterPosition >= 0) {
       String guard = idName.substring(0, delimiterPosition);
 
-      // Quit if guard is neither a slave or an oblect variable 
-      if(!isSlave(guard) && !isObjectVariable(guard)){
+      // Quit if guard is neither a slave or an oblect variable
+      if(!isSlave(guard) && !isObjectVariable(guard)) {
         assert(DebugMsg.debugMsg("ModelAccessor:addObjectGuardIfNeeded","Neither a slave or object variable."));
         return newGuards;
       }
 
       // If a slave, then it must have an extra delimited field to be acceptable
-      if(isSlave(guard)){
+      if(isSlave(guard)) {
         assert(DebugMsg.debugMsg("ModelAccessor:addObjectGuardIfNeeded","Testing a slave."));
         String suffix = idName.substring(delimiterPosition+1, idName.length());
         delimiterPosition = suffix.indexOf(".");
-        if(delimiterPosition < 0){ // Not an implied guard
+        if(delimiterPosition < 0) { // Not an implied guard
           assert(DebugMsg.debugMsg("ModelAccessor:addObjectGuardIfNeeded","Slave has no outstanding guards."));
           return newGuards;
         }
@@ -1011,10 +1017,10 @@ public class ModelAccessor {
    * <token>.<var>.<var> => GUARD
    * <var>.<var>
    */
-  public static String getOutstandingGuards(IXMLElement node, String guards){
+  public static String getOutstandingGuards(IXMLElement node, String guards) {
 
     // Filter out nodes that cannot require a guard
-    if(s_guardableNodes.indexOf(":" + node.getName() + ":") < 0){
+    if(s_guardableNodes.indexOf(":" + node.getName() + ":") < 0) {
       return "";
     }
 
@@ -1024,26 +1030,26 @@ public class ModelAccessor {
       // Iterate over all the arguments
       Vector ids = node.getChildrenNamed("id");
       assert(DebugMsg.debugMsg("ModelAccessor:getOutStandingGuards","num ids " + ids.size()));
-      for(int j=0;j<ids.size();j++){
+      for(int j = 0; j < ids.size(); ++j) {
         IXMLElement id = (IXMLElement) ids.elementAt(j);
         String idName = XMLUtil.getAttribute(id, "name");
         newGuards = addObjectGuardIfNeeded(idName, newGuards);
       }
     }
-    else if(node.getName().equals("subgoal") && node.getChildrenNamed("predicateinstance").size()==1){ // CASE 1: A slave on multi-level variable
+    else if(node.getName().equals("subgoal") && node.getChildrenNamed("predicateinstance").size()==1) { // CASE 1: A slave on multi-level variable
       IXMLElement predicate = (IXMLElement) node.getChildAtIndex(0);
       String type = XMLUtil.getAttribute(predicate, "type");
       // If more than one level of indirection on the type then it implies
       // a guarded object variable. There will only be one.
       int index = type.indexOf(".");
-      if(index > 0){
+      if(index > 0) {
         String suffix = type.substring(index+1, type.length());
         if(suffix.indexOf(".") > 0)
           newGuards = addObjectGuardIfNeeded(type.substring(0, index), newGuards);
         assert(DebugMsg.debugMsg("ModelAccessor:getOutStandingGuards","SLAVE GUARD TEST: Current guards = "+guards+"; New guards for "+ type +" = " + newGuards));
       }
     }
-    else if(node.getName().equals("if")){
+    else if(node.getName().equals("if")) {
       String explicitGuard = getExplicitGuard(node);
       int index = explicitGuard.indexOf(".");
       if(index >0)
@@ -1053,11 +1059,11 @@ public class ModelAccessor {
     return newGuards;
   }
 
-  public static boolean isSlaveRelation(String relation){
+  public static boolean isSlaveRelation(String relation) {
     return s_slave_relations.indexOf(":" + relation + ":") >= 0;
   }
 
-  public static Set getCustomIncludes(){
+  public static Set getCustomIncludes() {
     return s_usedCustomIncludes;//s_customIncludes;
   }
 
@@ -1078,16 +1084,22 @@ public class ModelAccessor {
     // If s_cfgFilename is available in the directory from which this
     // program is run, then use that file to load properties
     try{
+      // search for NDDL.cfg locally
       File cfgFile = new File(s_directory, s_cfgFilename);
-      if(s_cfgExact) {
-        if(!cfgFile.exists()) throw new FileNotFoundException("Couldn't find "+s_cfgFilename+" in "+s_directory);
+      if(!s_cfgExact) {
+        // if we're allowed to, search in parent directories.
+        while(!cfgFile.exists() && cfgFile.getParentFile() != null) {
+          cfgFile = new File(cfgFile.getParentFile().getParentFile(), s_cfgFilename);
+        }
       }
-      else {
-	while(!cfgFile.exists()) {
-	  if(cfgFile.getParentFile() == null) throw new FileNotFoundException("Couldn't find "+s_cfgFilename);
-	  cfgFile = new File(cfgFile.getParentFile().getParentFile(), s_cfgFilename);
-	}
+      if(!cfgFile.exists() && s_plasmaHome != null) {
+        // if all else fails, attempt to look in $PLASMA_HOME (ignore any custom s_cfgFilename)
+        cfgFile = new File(s_plasmaHome, DEFAULT_CFG);
       }
+      if(!cfgFile.exists())
+        // we're done trying, throw an error.
+        throw new FileNotFoundException("Couldn't find "+s_cfgFilename);
+
       assert(DebugMsg.debugMsg("ModelAccessor:init", "Loading Compiler configuration data from file "+cfgFile));
       IXMLParser parser = XMLParserFactory.createDefaultXMLParser();
       IXMLReader reader = new StdXMLReader(new BufferedReader(new FileReader(cfgFile)));
@@ -1095,15 +1107,15 @@ public class ModelAccessor {
       IXMLElement root =  (IXMLElement) parser.parse();
       XMLUtil.checkExpectedNode("configuration", root);
       Vector bindings = root.getChildrenNamed("binding");
-      for(int i=0;i<bindings.size();i++){
+      for(int i=0; i < bindings.size(); ++i) {
         IXMLElement binding = (IXMLElement) bindings.elementAt(i);
         String nddl = XMLUtil.getAttribute(binding, "nddl");
         String cpp = XMLUtil.getAttribute(binding, "cpp");
         s_customClassesByNddlName.put(nddl, cpp);
-        if(binding.hasAttribute("include")){
+        if(binding.hasAttribute("include")) {
           String source = XMLUtil.getAttribute(binding, "include");
           s_customIncludes.add(source);
-	  s_customIncludesByCppName.put(cpp, source);
+          s_customIncludesByCppName.put(cpp, source);
         }
       }
       // process include path
@@ -1114,24 +1126,23 @@ public class ModelAccessor {
         // record custom search path for nddl files.
 
         String[]paths = pathAsString.split(";");
-        for(int i=0;i<paths.length;i++)
-        {
+        for(int i=0; i < paths.length; ++i) {
           if(new File(paths[i]).isAbsolute())
             s_customSearchPath.add(paths[i]);
           else
             s_customSearchPath.add(cfgFile.getParent() + File.separator + paths[i]);
         }
-      } 
+      }
+
+
 
       // process constraint registration
       Vector constraints = root.getChildrenNamed("constraint");
-      for(int i=0;i<constraints.size();i++)
-	{
+      for(int i=0; i < constraints.size(); ++i) {
         IXMLElement constraint = (IXMLElement)constraints.get(i);
         String name = constraint.getAttribute("name", null);
         String cpp =  constraint.getAttribute("cpp", null);
-        if(name == null || cpp == null)
-        {
+        if(name == null || cpp == null) {
           System.err.println("NddlCompiler Warning: constraint registrations must contain both a \"name\" and \"cpp\" attribute.");
           continue;
         }
@@ -1139,14 +1150,14 @@ public class ModelAccessor {
         SchemaWriter.addConstraintRegistration("REGISTER_CONSTRAINT(" +cpp +", \"" + name + "\", \"" + propagator +"\")");
       }
     }
-    catch(FileNotFoundException e){
+    catch(FileNotFoundException e) {
       assert(DebugMsg.debugMsg("ModelAccessor:init", "File not found: "+e.getMessage()));
       s_customClassesByNddlName.put("Object", "Object");
       s_customClassesByNddlName.put("Timeline", "Timeline");
 //       s_customClassesByNddlName.put("Resource", "NddlResource");
 //       s_customClassesByNddlName.put("Resource.change", "NddlResource::change");
     }
-    catch(Exception e){
+    catch(Exception e) {
       e.printStackTrace();
       System.exit(-1);
     }
@@ -1154,29 +1165,30 @@ public class ModelAccessor {
 
   /**
    * If file "parent + filename" exists, then return it,
-   * otherwise search the search path for filename and return it. 
+   * otherwise search the search path for filename and return it.
    *
    * If the "parent + filename" or just "filename" does not exist and is not found in the
-   * search path, "path + filename" is returned. The caller must be prepared to 
-   * handle a file that does not exist. 
+   * search path, "path + filename" is returned. The caller must be prepared to
+   * handle a file that does not exist.
    */
   public static final File generateIncludeFileName(final String parent, final String filename) {
     File returnFile = null;
-    // handle the case of the parent dir being empty. 
-    if (parent!=null && !parent.equals(""))
+    // handle the case of the parent dir being empty.
+    if(parent!=null && !parent.equals(""))
       returnFile = new File(parent, filename);
     else
-      returnFile = new File(filename);
+      returnFile = new File(s_directory, filename);
 
     assert(DebugMsg.debugMsg("ModelAccessor:includeSearch", "Testing for: "+returnFile));
     // If the file can be read, it's been found.
-    if (returnFile.canRead()) return returnFile;
+    if(returnFile.canRead())
+      return returnFile;
 
-    for(int i=0;i<s_customSearchPath.size();i++)
-    {
+    for(int i=0; i < s_customSearchPath.size(); ++i) {
       returnFile = new File((String)s_customSearchPath.get(i),filename);
       assert(DebugMsg.debugMsg("ModelAccessor:includeSearch", "Testing for: "+returnFile));
-      if(returnFile.canRead()) return returnFile;
+      if(returnFile.canRead())
+        return returnFile;
     }
     return null;
   }

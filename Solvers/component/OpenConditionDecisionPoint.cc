@@ -39,15 +39,47 @@ namespace EUROPA {
         // Use exact test in this case
         m_flawedToken->getPlanDatabase()->getCompatibleTokens(m_flawedToken, m_compatibleTokens, PLUS_INFINITY, true);
         m_mergeCount = m_compatibleTokens.size();
-        if(m_mergeCount > 0)
+        if(m_mergeCount > 0) {
           m_choices.push_back(Token::MERGED);
+	debugMsg("OpenConditionDecisionPoint:handleInitialize",
+		 "Adding choice '" << Token::MERGED.toString() << "' for token " <<
+		 m_flawedToken->getKey());
+	}
+	else {
+	debugMsg("OpenConditionDecisionPoint:handleInitialize",
+		 "Skipping choice '" << Token::MERGED.toString() << "' for token " <<
+		 m_flawedToken->getKey() << " because there are no compatible tokens.");
+	}
+      }
+      else {
+	debugMsg("OpenConditionDecisionPoint:handleInitialize",
+		 "Skipping choice '" << Token::MERGED.toString() << "' for token " <<
+		 m_flawedToken->getKey() << " because it isn't in the state domain.");
       }
 
-      if(stateDomain.isMember(Token::ACTIVE) )//&& m_flawedToken->getPlanDatabase()->hasOrderingChoice(m_flawedToken))
+      if(stateDomain.isMember(Token::ACTIVE) ) {//&& m_flawedToken->getPlanDatabase()->hasOrderingChoice(m_flawedToken))
+	debugMsg("OpenConditionDecisionPoint:handleInitialize",
+		 "Adding choice '" << Token::ACTIVE.toString() << "' for token " <<
+		 m_flawedToken->getKey());
         m_choices.push_back(Token::ACTIVE);
+      }
+      else {
+	debugMsg("OpenConditionDecisionPoint:handleInitialize",
+		 "Skipping choice '" << Token::ACTIVE.toString() << "' for token " <<
+		 m_flawedToken->getKey() << " because it isn't in the state domain.");
+      }
 
-      if(stateDomain.isMember(Token::REJECTED))
+      if(stateDomain.isMember(Token::REJECTED)) {
+	debugMsg("OpenConditionDecisionPoint:handleInitialize",
+		 "Adding choice '" << Token::REJECTED.toString() << "' for token " <<
+		 m_flawedToken->getKey());
         m_choices.push_back(Token::REJECTED);
+      }
+      else {
+	debugMsg("OpenConditionDecisionPoint:handleInitialize",
+		 "Skipping choice '" << Token::REJECTED.toString() << "' for token " <<
+		 m_flawedToken->getKey() << " because it isn't in the state domain.");
+      }
 
       m_choiceCount = m_choices.size();
     }
@@ -100,7 +132,10 @@ namespace EUROPA {
       int idx = m_choiceIndex;
       std::stringstream os;
       
-      if(m_choices[idx] == Token::MERGED) {
+      if(m_choices.empty()) {
+	os << "EMPTY";
+      }
+      else if(m_choices[idx] == Token::MERGED) {
           os << "MRG(" << m_flawedToken->getKey() << "," << m_compatibleTokens[m_mergeIndex]->getKey() << ")";
       }
       else if(m_choices[idx] == Token::ACTIVE) {

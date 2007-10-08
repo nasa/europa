@@ -118,8 +118,8 @@ namespace EUROPA{
       decRefCount();
 
     if(!Entity::isPurging()){ // Exploit relationships for cascaded delete
-      check_error(isValid());
       check_error(!isIncomplete());
+      check_error(isValid());
 
       // If it is not committed and is is not inactive, undo a cancellation
       if (!isInactive()) 
@@ -323,11 +323,20 @@ namespace EUROPA{
     check_error(isValid());
     check_error(isMerged());
     check_error(m_unifyMemento.isValid());
+
+    // Make changes to the state before removing from active token as there can be a circularity
+    // when making non-chronological deletes.
     m_state->resetSpecified();
-    bool activeTokenDeleted = m_activeToken->removeMergedToken(m_id);
-    m_unifyMemento->undo(activeTokenDeleted);
-    m_unifyMemento.release();
+    TokenId activeToken = m_activeToken;
+    UnifyMementoId memento = m_unifyMemento;
+    m_unifyMemento = UnifyMementoId::noId();
     m_activeToken = TokenId::noId();
+
+    // Now clean up 
+    bool activeTokenDeleted = activeToken->removeMergedToken(m_id);
+    memento->undo(activeTokenDeleted);
+    memento.release();
+
     m_planDatabase->notifySplit(m_id);
   }
 
@@ -405,29 +414,64 @@ namespace EUROPA{
   bool Token::isStandardConstraint(const ConstraintId& constraint) const{
     return(m_standardConstraints.find(constraint) != m_standardConstraints.end());
   }
+  
+  const std::set<ConstraintId>& Token::getStandardConstraints() const
+  {
+	  return m_standardConstraints;
+  }
+  
+  
+  // TODO: include constraints currently held by the RuleInstance that was triggered by this token
+  double Token::getViolation() const 
+  {
+  	  double total = 0.0;
+      for (std::set<ConstraintId>::const_iterator it = m_standardConstraints.begin(); it != m_standardConstraints.end(); ++it) {
+  	      ConstraintId c = *it;
+  	      total += c->getViolation();
+      }  
+      
+      return total;
+  }
+  
+  std::string Token::getViolationExpl() const
+  {
+  	  std::ostringstream os;
+  	  
+      for (std::set<ConstraintId>::const_iterator it = m_standardConstraints.begin(); it != m_standardConstraints.end(); ++it) {
+  	      ConstraintId c = *it;
+  	      if (c->getViolation() > 0.0)
+  	          os << c->getViolationExpl() << std::endl;
+      }  
+      
+      return os.str();  
+  }
 
   bool Token::isValid() const {
+    bool result = true;
+
     // State Variable should never include INACTIVE
-    if(m_state->baseDomain().isMember(INACTIVE))
-      return false;
+    if(m_state->baseDomain().isMember(INACTIVE)){
+      result = false;
+      debugMsg("Token:isValid", "Cannot be incomplete.");
+    }
+    else if(m_id.isInvalid() || (!m_master.isNoId() && m_master.isInvalid())){
+      result = false;
+      debugMsg("Token:isValid", "Bad id or master id.");
+    }
+    else if(isActive()){
+      result = m_unifyMemento.isNoId() && m_activeToken.isNoId();
+      condDebugMsg(!result, "Token:isValid", "Cannot have merged ids if active.");
+    }
+    else if(isMerged()){
+      result = (m_mergedTokens.empty() && m_unifyMemento.isValid() && m_activeToken.isValid() && m_slaves.empty());
+      condDebugMsg(!result, "Token:isValid", "Not correctly merged");
+    }
+    else {// Otherwise - REJECTED or INACTIVE
+      result = (m_mergedTokens.empty() && m_unifyMemento.isNoId() && m_activeToken.isNoId() && m_slaves.empty());
+      condDebugMsg(!result, "Token:isValid", "Invalid rejected or inactive token.");
+    }
 
-    if(m_id.isInvalid() || (!m_master.isNoId() && m_master.isInvalid()))
-      return false;
-
-    if(isActive())
-       return m_unifyMemento.isNoId() && m_activeToken.isNoId();
-
-    if(isMerged())
-      return (m_mergedTokens.empty() &&
-	      m_unifyMemento.isValid() &&
-	      m_activeToken.isValid() &&
-	      m_slaves.empty());
-
-    // Otherwise - REJECTED or INACTIVE
-    return (m_mergedTokens.empty() &&
-	    m_unifyMemento.isNoId() &&
-	    m_activeToken.isNoId() &&
-	    m_slaves.empty());
+    return result;
   }
 
   /**
@@ -602,13 +646,15 @@ namespace EUROPA{
    * @todo Could speed up considerably if warranted
    */
   void Token::restrictBaseDomains(){
-    for(std::vector<ConstrainedVariableId>::const_iterator it = m_allVariables.begin(); it != m_allVariables.end(); ++it){
-      ConstrainedVariableId var = *it;
+    for(unsigned int i=1; i<m_allVariables.size(); i++){
+      ConstrainedVariableId var = m_allVariables[i];
+      checkError(var.isValid(), var);
       var->restrictBaseDomain(var->lastDomain());
     }
 
     for(ConstrainedVariableSet::const_iterator it = m_localVariables.begin(); it != m_localVariables.end(); ++it){
       ConstrainedVariableId var = *it;
+      checkError(var.isValid(), var);
       var->restrictBaseDomain(var->lastDomain());
     }
   }
@@ -635,7 +681,7 @@ namespace EUROPA{
     // If the constraint is an inactive subgoal of the master, and its master is committed, and it is strictly in the past
     // then it can be terminated. This is the case of deferred (ignored) subgoals.
     if(isInactive() && getMaster().isId() && getMaster()->isCommitted()){
-      int latestStart = getStart()->lastDomain().getUpperBound();
+      int latestStart = (int) getStart()->lastDomain().getUpperBound();
       if(latestStart < getMaster()->getEnd()->lastDomain().getUpperBound())
 	return true;
     }
@@ -668,8 +714,8 @@ namespace EUROPA{
     // the token also for greater efficiency
     std::set<int> allVars;
 
-    // Construct the set of constraints on variables of this token
-    std::set<ConstraintId> constraints;
+    // Construct the set of constraints on variables of this token. Use a constraint set to avoid memory dependent order.
+    ConstraintSet constraints;
     for(unsigned int i = 0; i < varCount; i++){
       ConstrainedVariableId var = m_allVariables[i];
       var->constraints(constraints);
@@ -682,8 +728,9 @@ namespace EUROPA{
       allVars.insert(var->getKey());
     }
 
-    for(std::set<ConstraintId>::const_iterator it = constraints.begin(); it != constraints.end(); ++it){
+    for(ConstraintSet::const_iterator it = constraints.begin(); it != constraints.end(); ++it){
       ConstraintId constraint = *it;
+      checkError(constraint.isValid(), constraint);
 
       // No problem if the constraint has been deactivated already
       if(!constraint->isActive() || constraint->isRedundant())
@@ -730,6 +777,15 @@ namespace EUROPA{
 	it != m_allVariables.end(); 
 	++it){
       ConstrainedVariableId var = *it;
+      checkError(var.isValid(), var << " is not valid for token " << getKey());
+      var->deactivate();
+    }
+
+    for(std::vector<ConstrainedVariableId>::const_iterator it = m_pseudoVariables.begin(); 
+	it != m_pseudoVariables.end(); 
+	++it){
+      ConstrainedVariableId var = *it;
+      checkError(var.isValid(), var << " is not valid for token " << getKey());
       var->deactivate();
     }
 
@@ -817,4 +873,31 @@ namespace EUROPA{
     m_localVariables.erase(var);
   }
 
+  const ConstrainedVariableSet& Token::getLocalVariables(){
+    return m_localVariables;
+  }
+
+  std::string Token::toLongString() const
+  {
+  	static std::string ident="    ";
+  	
+  	std::ostringstream os;
+  	
+  	os << "Token(" << getKey() << "," << getName().toString() << ") {" << std::endl;
+  	os << ident << "object:" << getObject()->toString() << std::endl;
+  	os << ident << "start:" << getStart()->toString() << std::endl;
+  	os << ident << "end:" << getStart()->toString() << std::endl;
+  	os << ident << "duration:" << getDuration()->toString() << std::endl;
+  	os << "}" << std::endl; 
+  	return os.str();
+  }
+
+  LabelStr Token::makePseudoVarName(){
+    static int sl_varKey(0);
+    static std::string sl_prefix("PSEUDO_VARIABLE_");
+    std::stringstream ss;
+    ss << sl_prefix;
+    ss << sl_varKey++;
+    return ss.str();
+  }
 }

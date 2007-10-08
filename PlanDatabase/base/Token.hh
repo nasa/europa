@@ -185,6 +185,21 @@ namespace EUROPA {
      */
     bool isStandardConstraint(const ConstraintId& constraint) const;
 
+    /**
+     * @brief Internally generated constraints that are standard across Token instances of the same type. 
+     */
+    const std::set<ConstraintId>& getStandardConstraints() const;
+
+    /**
+     * @brief Sum of violation value for all the constraints attached to this token
+     */
+    double getViolation() const; 
+
+    /**
+     * @brief Concatenation of violation expl for all the constraints attached to this token
+     */
+    std::string getViolationExpl() const;
+    
     /**< State checks */
     bool isIncomplete() const;
 
@@ -326,8 +341,15 @@ namespace EUROPA {
 
     void addLocalVariable(const ConstrainedVariableId& var);
     void removeLocalVariable(const ConstrainedVariableId& var);
+    const ConstrainedVariableSet& getLocalVariables();
 
     static const LabelStr& noObject();
+
+    /**
+     * @brief Utility for allocating pseudo variable names such that there are no duplicates. Duplicates can be dangerous
+     * since associative maps look up variables by name and can lead to mix-ups.
+     */
+    static LabelStr makePseudoVarName();
 
     /**
      * @brief Add a parameter as a member to the object. This is used when building the instance
@@ -370,6 +392,8 @@ namespace EUROPA {
      */
     bool removeMaster(const TokenId& token);
 
+    virtual std::string toLongString() const;
+     
   protected:
 
     /**

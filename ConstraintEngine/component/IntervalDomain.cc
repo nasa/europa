@@ -247,18 +247,18 @@ namespace EUROPA {
     // Select the strongest message applicable.
     if ((lb_increased || ub_decreased) && isSingleton())
       notifyChange(DomainListener::RESTRICT_TO_SINGLETON);
+    else if (lb_increased && ub_decreased) {
+      if (isEmpty())
+	notifyChange(DomainListener::EMPTIED);
+      else
+	notifyChange(DomainListener::BOUNDS_RESTRICTED);
+      }
     else
-      if (lb_increased && ub_decreased) {
-        if (isEmpty())
-          notifyChange(DomainListener::EMPTIED);
-        else
-          notifyChange(DomainListener::BOUNDS_RESTRICTED);
-      } else
-        if (lb_increased)
-          notifyChange(DomainListener::LOWER_BOUND_INCREASED);
-        else
-          if (ub_decreased)
-            notifyChange(DomainListener::UPPER_BOUND_DECREASED);
+      if (lb_increased)
+	notifyChange(DomainListener::LOWER_BOUND_INCREASED);
+      else
+	if (ub_decreased)
+	  notifyChange(DomainListener::UPPER_BOUND_DECREASED);
 
     return(lb_increased || ub_decreased);
    
@@ -344,7 +344,9 @@ namespace EUROPA {
   void IntervalDomain::operator>>(ostream& os) const {
     AbstractDomain::operator>>(os);
     os << "[";
-
+    
+    std::streamsize prec = os.precision();
+    os.precision(15);
     if (m_lb == MINUS_INFINITY)
       os << "-inf";
     else
@@ -361,7 +363,7 @@ namespace EUROPA {
         os << "+inf";
       else
         os << m_ub;
-
+    os.precision(prec);
     os << "]";
   }
 
@@ -374,7 +376,7 @@ namespace EUROPA {
   bool IntervalDomain::isFinite() const {
     check_error(!isOpen());
     // Real domains are only finite if they are singleton or empty.
-    return(isSingleton() || isEmpty());
+    return((isSingleton() && areBoundsFinite()) || isEmpty());
   }
 
   const LabelStr& IntervalDomain::getDefaultTypeName() {

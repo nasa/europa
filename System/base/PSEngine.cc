@@ -30,6 +30,7 @@
 #include "TemporalPropagator.hh"
 #include "STNTemporalAdvisor.hh"
 #include "PlanDatabaseWriter.hh"
+#include "SolverPartialPlanWriter.hh"
 
 #include <fstream>
 
@@ -47,7 +48,6 @@ namespace EUROPA {
       return languageInterpreters;
   }
 
-  const std::string UNKNOWN("UNKNOWN");
 
   PSEntity::PSEntity(const EntityId& entity) : m_entity(entity) {}
 
@@ -55,7 +55,8 @@ namespace EUROPA {
   
   const std::string& PSEntity::getName() const {return m_entity->getName().toString();}
 
-  //FIXME
+  const std::string UNKNOWN("UNKNOWN");
+  
   const std::string& PSEntity::getEntityType() const {return UNKNOWN;}
   
   std::string PSEntity::toString()
@@ -67,32 +68,46 @@ namespace EUROPA {
   }
 
   PSObject::PSObject(const ObjectId& obj) : PSEntity(obj), m_obj(obj) {
+  }
+
+  PSObject::~PSObject() {
+  }
+
+  PSList<PSVariable*> PSObject::getMemberVariables() {
+    PSList<PSVariable*> retval;
     const std::vector<ConstrainedVariableId>& vars = m_obj->getVariables();
     for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
 	++it) {
       PSVariable* var = new PSVariable(*it); 
       check_runtime_error(var != NULL);
-      m_vars.push_back(var);
+      retval.push_back(var);
     }
+
+    return retval;
   }
 
-  PSObject::~PSObject() {
-    for(int i = 0; i < m_vars.size(); ++i)
-      delete m_vars.get(i);
+  const std::string OBJECT_STR("OBJECT");
+  const std::string& PSObject::getEntityType() const 
+  {
+  	return OBJECT_STR;
   }
 
-  const PSList<PSVariable*>& PSObject::getMemberVariables() {
-    return m_vars;
+  std::string PSObject::getObjectType() const 
+  {
+  	return m_obj->getType().toString();
   }
 
   PSVariable* PSObject::getMemberVariable(const std::string& name) {
+    LabelStr realName(name);
     PSVariable* retval = NULL;
-
-    for(int i = 0; i < m_vars.size(); ++i)
-      if(m_vars.get(i)->getName() == name) {
-	retval = m_vars.get(i);
+    const std::vector<ConstrainedVariableId>& vars = m_obj->getVariables();
+    for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
+	++it) {
+      if((*it)->getName() == realName) {
+	retval = new PSVariable(*it);
 	break;
       }
+    }
     return retval;
   }
 
@@ -108,13 +123,17 @@ namespace EUROPA {
   }
 
   PSToken::PSToken(const TokenId& tok) : PSEntity(tok), m_tok(tok) {
-    const std::vector<ConstrainedVariableId>& vars = m_tok->getVariables();
-    for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
-	++it) {
-      PSVariable* var = new PSVariable(*it);
-      check_runtime_error(var != NULL);
-      m_vars.push_back(var);
-    }
+  }
+
+  const std::string TOKEN_STR("TOKEN");
+  const std::string& PSToken::getEntityType() const 
+  {
+  	return TOKEN_STR;
+  }
+
+  std::string PSToken::getTokenType() const 
+  {
+  	return m_tok->getUnqualifiedPredicateName().toString();
   }
 
   PSObject* PSToken::getOwner() {
@@ -144,19 +163,40 @@ namespace EUROPA {
     return retval;    	
   }  
 
-  double PSToken::getViolation() {return 0.0;}
+  // TODO: Implement these
+  double PSToken::getViolation() const 
+  {
+	  return m_tok->getViolation();
+  }
+  
+  std::string PSToken::getViolationExpl() const 
+  { 
+	  return m_tok->getViolationExpl();
+  }
 
-  const std::string& PSToken::getViolationExpl() {return UNKNOWN;}
-
-  const PSList<PSVariable*>& PSToken::getParameters() {return m_vars;}
+  PSList<PSVariable*> PSToken::getParameters() {
+    PSList<PSVariable*> retval;
+    const std::vector<ConstrainedVariableId>& vars = m_tok->getVariables();
+    for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
+	++it) {
+      PSVariable* var = new PSVariable(*it);
+      check_runtime_error(var != NULL);
+      retval.push_back(var);
+    }
+    return retval;
+  }
 
   PSVariable* PSToken::getParameter(const std::string& name) {
+    LabelStr realName(name);
     PSVariable* retval = NULL;
-    for(int i = 0; i < m_vars.size(); ++i)
-      if(m_vars.get(i)->getName() == name) {
-	retval = m_vars.get(i);
+    const std::vector<ConstrainedVariableId>& vars = m_tok->getVariables();
+    for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
+	++it) {
+      if((*it)->getName() == realName) {
+	retval = new PSVariable(*it);
 	break;
       }
+    }
     return retval;
   }
 
@@ -174,9 +214,11 @@ namespace EUROPA {
   	
   	if (m_tok->isMerged())
   	    os << "    mergedInto:" << m_tok->getActiveToken()->getKey() << std::endl;
-  	
-  	for (int i=0;i<m_vars.size();i++) {
-  	    os << "    " << m_vars.get(i)->toString() << std::endl;
+
+	PSList<PSVariable*> vars = getParameters();
+  	for (int i=0;i<vars.size();i++) {
+  	    os << "    " << vars.get(i)->toString() << std::endl;
+	    delete vars.get(i);
   	}
   	
   	os << "}" << std::endl;
@@ -207,6 +249,12 @@ namespace EUROPA {
       checkError(ALWAYS_FAIL, "Failed to correctly determine the type of " << var->toString());
     }
   }
+
+  const std::string VARIABLE_STR("VARIABLE");
+  const std::string& PSVariable::getEntityType() const 
+  {
+  	return VARIABLE_STR;
+  }
   
   bool PSVariable::isEnumerated() {
     check_runtime_error(m_var.isValid());
@@ -230,13 +278,17 @@ namespace EUROPA {
 
   bool PSVariable::isSingleton() {
     check_runtime_error(m_var.isValid());
-    return m_var->lastDomain().isSingleton();
+    return m_var->isSpecified() || m_var->lastDomain().isSingleton();
   }
 
   PSVarValue PSVariable::getSingletonValue() {
     check_runtime_error(m_var.isValid());
     check_runtime_error(isSingleton());
-    return PSVarValue(m_var->lastDomain().getSingletonValue(), getType());
+    
+    if (m_var->isSpecified())
+      return PSVarValue(m_var->getSpecifiedValue(), getType());
+    else
+      return PSVarValue(m_var->lastDomain().getSingletonValue(), getType());
   }
 
   PSList<PSVarValue> PSVariable::getValues() {
@@ -271,10 +323,36 @@ namespace EUROPA {
     check_runtime_error(m_var.isValid());
     check_runtime_error(getType() == v.getType());
 
-    if (m_var->isSpecified() && m_var->getSpecifiedValue() != v.asDouble())
-        m_var->reset();
+    debugMsg("PSVariable:specify","Specifying var:" << m_var->toString() << " to value:" << v.toString());
+    
+    // If specifying to the same value it already has, do nothing
+    if (m_var->isSpecified()) {
+      if(m_var->getSpecifiedValue() == v.asDouble()) {
+        debugMsg("PSVariable:specify","Tried to specify to same value, so bailing out without doing any work");
+        return;
+      }
+      m_var->reset();
+      debugMsg("PSVariable:specify","After reset for var:" << m_var->toString());
+      //only propagate if we aren't allowing violations
+      //this can save us an extra call to reset() and propagate()
+      if(!m_var->getConstraintEngine()->getAllowViolations()) {
+	m_var->getConstraintEngine()->propagate();
+	debugMsg("PSVariable:specify","After propagate for var:" << m_var->toString());
+      }
+    }
         
     m_var->specify(v.asDouble());
+    debugMsg("PSVariable:specify","After specify for var:" << m_var->toString() << " to value:" << v.toString());
+    m_var->getConstraintEngine()->propagate();
+    debugMsg("PSVariable:specify","After propagate for var:" << m_var->toString());
+  }
+
+  void PSVariable::reset() {
+    check_runtime_error(m_var.isValid());
+    debugMsg("PSVariable:reset",
+	     "Re-setting " << m_var->toString());
+    m_var->reset();
+    m_var->getConstraintEngine()->propagate();
   }
 
   double PSVariable::getViolation() const
@@ -283,6 +361,29 @@ namespace EUROPA {
     return m_var->getViolation();
   }
   
+  std::string PSVariable::getViolationExpl() const 
+  { 
+    check_runtime_error(m_var.isValid());
+    return m_var->getViolationExpl();
+  }
+  
+  PSEntity* PSVariable::getParent() {
+    EntityId parent(m_var->getParent());
+    if(parent.isNoId())
+      return NULL;
+    else if(TokenId::convertable(parent))
+      return new PSToken((TokenId) parent);
+    else if(ObjectId::convertable(parent))
+      return new PSObject((ObjectId) parent);
+    else if(RuleInstanceId::convertable(parent))
+      return new PSToken(((RuleInstanceId)parent)->getToken());
+    else {
+      checkRuntimeError(ALWAYS_FAIL,
+			"Variable " << toString() << " has a parent that isn't a token, " <<
+			"object, or rule: " << m_var->getParent()->toString());
+    }
+    return NULL;
+  }
 
   std::string PSVariable::toString() {
     check_runtime_error(m_var.isValid());
@@ -299,7 +400,7 @@ namespace EUROPA {
     	PSList<PSVarValue> values = getValues();
     	for (int i=0;i<values.size();i++) {
     		if (i > 0)
-    		    os << ",";
+    		    os << ", ";
     		os << values.get(i).toString();    
     	}
     	os << "}";
@@ -347,9 +448,11 @@ namespace EUROPA {
             os << asString();
   		    break;
   		case OBJECT:
-  		    PSObject* obj = asObject();
-            os << "OBJECT:" << obj->getName() << "(" << obj->getKey() << ")";
-            delete obj;
+  		    {
+  		        PSObject* obj = asObject();
+                os << "OBJECT:" << obj->getName() << "(" << obj->getKey() << ")";
+                delete obj;
+  		    }
   		    break;
   		
   		default:
@@ -359,10 +462,18 @@ namespace EUROPA {
   	return os.str();
   }
    
-  PSSolver::PSSolver(const SOLVERS::SolverId& solver, const std::string& configFilename) 
+  PSSolver::PSSolver(const SOLVERS::SolverId& solver, const std::string& configFilename,
+		     SOLVERS::PlanWriter::PartialPlanWriter* ppw) 
       : m_solver(solver) 
-      , m_configFile(configFilename)
+      , m_configFile(configFilename),
+	m_ppw(ppw)
   {
+    m_ppw->setSolver(m_solver);
+  }
+
+  PSSolver::~PSSolver() {
+    if(m_solver.isValid())
+      destroy();
   }
 
   void PSSolver::step() {
@@ -378,6 +489,7 @@ namespace EUROPA {
   }
 
   void PSSolver::destroy() {
+    m_ppw->clearSolver();
     delete (SOLVERS::Solver*) m_solver;
     m_solver = SOLVERS::SolverId::noId();
   }
@@ -460,7 +572,7 @@ namespace EUROPA {
     SOLVERS::HorizonFilter::getHorizon().intersect(horizonStart, horizonEnd);
   }
 
-  PSEngine::PSEngine()
+  PSEngine::PSEngine() : m_ppw(NULL)
   {
   }
 
@@ -488,22 +600,33 @@ namespace EUROPA {
 
   //FIXME
   void PSEngine::shutdown() {
+    if(m_ppw != NULL) {
+      delete m_ppw;
+      m_ppw = NULL;
+    }
     Entity::purgeStarted();
 
     uninitConstraintLibrary();
     uninitNDDL();
+    Schema::instance()->reset();
     ObjectFactory::purgeAll();
     TokenFactory::purgeAll();
     ConstraintLibrary::purgeAll();
     Rule::purgeAll();
 
     // TODO: deletes are causing a crash, fix it
-    delete (RulesEngine*) m_rulesEngine;
-    m_rulesEngine = RulesEngineId::noId();    
-    //delete (PlanDatabase*) m_planDatabase;
-    m_planDatabase = PlanDatabaseId::noId();
-    //delete (ConstraintEngine*) m_constraintEngine;
-    m_constraintEngine = ConstraintEngineId::noId();
+    if(m_rulesEngine.isValid()) {
+      delete (RulesEngine*) m_rulesEngine;
+      m_rulesEngine = RulesEngineId::noId();    
+    }
+    if(m_planDatabase.isValid()) {
+      delete (PlanDatabase*) m_planDatabase;
+      m_planDatabase = PlanDatabaseId::noId();
+    }
+    if(m_constraintEngine.isValid()) {
+      delete (ConstraintEngine*) m_constraintEngine;
+      m_constraintEngine = ConstraintEngineId::noId();
+    }
 
     Entity::purgeEnded();
   }
@@ -516,8 +639,11 @@ namespace EUROPA {
     m_planDatabase->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
     m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();
     DbClientId client = m_planDatabase->getClient();
-		m_interpTransactionPlayer = new InterpretedDbClientTransactionPlayer(client);
-		m_transactionPlayer = new DbClientTransactionPlayer(client);
+    m_interpTransactionPlayer = new InterpretedDbClientTransactionPlayer(client);
+    m_transactionPlayer = new DbClientTransactionPlayer(client);
+    m_ppw =
+      new SOLVERS::PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine,
+						 m_rulesEngine);
   }
    
   void PSEngine::loadModel(const std::string& modelFileName) {
@@ -596,6 +722,13 @@ namespace EUROPA {
     return new PSObject(entity);
   }
 
+  PSObject* PSEngine::getObjectByName(const std::string& name) {
+    check_runtime_error(m_planDatabase.isValid());
+    ObjectId obj = m_planDatabase->getObject(LabelStr(name));
+    check_runtime_error(obj.isValid());
+    return new PSObject(obj);
+  }
+
   PSList<PSToken*> PSEngine::getTokens() {
     check_runtime_error(m_planDatabase.isValid());
 
@@ -630,19 +763,56 @@ namespace EUROPA {
     return retval;
   }  
 
+  PSVariable* PSEngine::getVariableByKey(PSEntityKey id)
+  {
+    check_runtime_error(m_planDatabase.isValid());
+    EntityId entity = Entity::getEntity(id);
+    check_runtime_error(entity.isValid());
+    return new PSVariable(entity);
+  }
+
+  // TODO: this needs to be optimized
+  PSVariable* PSEngine::getVariableByName(const std::string& name)
+  {
+    check_runtime_error(m_planDatabase.isValid());
+    const ConstrainedVariableSet& vars = m_constraintEngine->getVariables();
+
+    for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
+    	ConstrainedVariableId v = *it;
+    	if (v->getName().toString() == name)
+            return new PSVariable(*it);
+    }
+    
+    return NULL;
+  }
+
   PSSolver* PSEngine::createSolver(const std::string& configurationFile) {
     TiXmlDocument* doc = new TiXmlDocument(configurationFile.c_str());
     doc->LoadFile();
 
     SOLVERS::SolverId solver =
       (new SOLVERS::Solver(m_planDatabase, *(doc->RootElement())))->getId();
+    return new PSSolver(solver,configurationFile, m_ppw);
+  }
 
-    return new PSSolver(solver,configurationFile);
+  bool PSEngine::getAllowViolations() const
+  {
+  	return m_constraintEngine->getAllowViolations();
+  }
+
+  void PSEngine::setAllowViolations(bool v)
+  {
+    m_constraintEngine->setAllowViolations(v);
   }
 
   double PSEngine::getViolation() const
   {
   	return m_constraintEngine->getViolation();
+  }
+   
+  std::string PSEngine::getViolationExpl() const
+  {
+  	return m_constraintEngine->getViolationExpl();
   }
    
    std::string PSEngine::planDatabaseToString() {

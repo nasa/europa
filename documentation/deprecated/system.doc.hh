@@ -1,3 +1,0 @@
-/**
- * @page system System Architecture
- */

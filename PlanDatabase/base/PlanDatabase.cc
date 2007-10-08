@@ -267,8 +267,15 @@ namespace EUROPA{
   }
 
   void PlanDatabase::notifyRemoved(const PlanDatabaseListenerId& listener){
-    if(!m_deleted)
+    if(!m_deleted) {
+      debugMsg("PlanDatabase:notifyRemoved:Listener",
+	       "Not in PlanDatabase destructor, so erasing " << listener);
       m_listeners.erase(listener);
+    }
+    else {
+      debugMsg("PlanDatabase:notifyRemoved:Listener",
+	       "In PlanDatabase destructor, so not erasing " << listener);
+    }
   }
 
   const PlanDatabaseId& PlanDatabase::getId() const {return m_id;}
@@ -321,6 +328,16 @@ namespace EUROPA{
 
     checkError(isGlobalVariable(varName), var->toString() << " is not registered after all. This cannot be!.");
     debugMsg("PlanDatabase:registerGlobalVariable", "Registered " << var->toString());
+  }
+
+  void PlanDatabase::unregisterGlobalVariable(const ConstrainedVariableId& var) {
+    const LabelStr& varName = var->getName();
+    checkError(isGlobalVariable(varName), var->toString() << " is not a global variable.");
+    m_globalVariables.erase(var);
+    m_globalVarsByName.erase(varName);
+    checkError(!isGlobalVariable(varName), var->toString() << " failed to un-register.");
+    debugMsg("PlanDatabase:unregisterGlobalVariable",
+	     "Un-registered " << var->toString());
   }
 
   const ConstrainedVariableSet& PlanDatabase::getGlobalVariables() const {

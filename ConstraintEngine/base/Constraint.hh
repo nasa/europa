@@ -155,6 +155,12 @@ namespace EUROPA {
      */
     virtual double getViolation() const;
 
+    /**
+     * @brief string to present to the user describing what the violation of this constraint means
+     * TODO: this must be allowed to be set from the model
+     */
+    virtual std::string getViolationExpl() const;
+
   protected:
     /**
      * @brief Base implementation will require all variables in scope have the base domains as singletons. Over-ride
@@ -174,6 +180,13 @@ namespace EUROPA {
      */
     static AbstractDomain& getCurrentDomain(const ConstrainedVariableId& var);
 
+    /**
+     * @brief Wrapper for handleExecute calls, will set propagation context for all the variables in this constraint
+     *
+     */
+    virtual void execute(); 
+    virtual void execute(const ConstrainedVariableId& variable,int argIndex,const DomainListener::ChangeType& changeType);
+     
     /**
      * @brief Called when no specific change event on a variable is reported.
      *

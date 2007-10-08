@@ -46,17 +46,29 @@ namespace EUROPA {
     m_id.remove();
   }
 
+  void ConstrainedVariable::setCurrentPropagatingConstraint(ConstraintId c) { m_propagatingConstraint = c; } 
+  ConstraintId ConstrainedVariable::getCurrentPropagatingConstraint() const { return m_propagatingConstraint; }    
+
   void ConstrainedVariable::restrictBaseDomain(const AbstractDomain& dom){
     checkError(isActive(), toString());
-    checkError(dom.isSubsetOf(baseDomain()), dom.toString() << " not in " << baseDomain().toString());
+    checkError(dom.intersects(baseDomain()), dom.toString() << " not intersecting " << baseDomain().toString());
+
+    // If already restricted, nothing to be done
+    if(baseDomain().isSubsetOf(dom) && (isClosed() || dom.isOpen()))
+      return;
 
     debugMsg("ConstrainedVariable:restrictBaseDomain", 
-	     toString() << " restricted from " << baseDomain().toString() << " to " << dom.toString());
+	     toString() << " restricted from " << baseDomain().toString() << " intersecting " << dom.toString());
 
     handleRestrictBaseDomain(dom);
 
     if(dom.isSingleton() && !m_specifiedFlag && canBeSpecified())
       specify(dom.getSingletonValue());
+
+    // Trigger events for propagation of this variable restriction, even if no domain restriction has occured, since it does
+    // refelct a status change of a variable and further inference may be possible if we know the base domain
+    // has been restricted.
+    m_constraintEngine->notify(m_id, DomainListener::BOUNDS_RESTRICTED);
 
     // Iterate over all constraints and notify of this restriction
     for(ConstraintList::const_iterator it = m_constraints.begin(); it != m_constraints.end(); ++it){
@@ -241,6 +253,7 @@ namespace EUROPA {
     check_error(!Entity::isPurging());
     check_error(m_lastRelaxed < cycleCount);
     m_lastRelaxed = cycleCount;
+    debugMsg("ConstrainedVariable:updateLastRelaxed",getName().toString() << " lastRelaxed updated to " << m_lastRelaxed);
   }
 
   int ConstrainedVariable::lastRelaxed() const {
@@ -248,6 +261,13 @@ namespace EUROPA {
   }
 
   void ConstrainedVariable::constraints(std::set<ConstraintId>& results) const {
+    check_error(!Entity::isPurging());
+    ConstraintList::const_iterator it = m_constraints.begin();
+    for ( ; it != m_constraints.end(); ++it)
+      results.insert(it->first);
+  }
+
+  void ConstrainedVariable::constraints(ConstraintSet& results) const {
     check_error(!Entity::isPurging());
     ConstraintList::const_iterator it = m_constraints.begin();
     for ( ; it != m_constraints.end(); ++it)
@@ -305,14 +325,19 @@ namespace EUROPA {
     if (!m_specifiedFlag){
       m_specifiedFlag = true;
       m_specifiedValue = singletonValue;
-      if(getCurrentDomain().isMember(singletonValue))
-	getCurrentDomain().set(singletonValue);
-      else
-	getCurrentDomain().empty();
-    }
 
-    if(getCurrentDomain().isOpen())
-      getCurrentDomain().close();
+      if(!internal_baseDomain().isMember(singletonValue))
+	getCurrentDomain().empty();
+      else {
+	//reset the current domain so that we can do search in the infeasible space
+	if(!getCurrentDomain().isMember(singletonValue))
+	  reset();
+	getCurrentDomain().set(singletonValue);
+      }
+
+      if(getCurrentDomain().isOpen())
+	getCurrentDomain().close();
+    }
 
     check_error(isValid());
   }
@@ -359,7 +384,7 @@ namespace EUROPA {
     // If it has been specified, relax to the specified domain
     if(m_specifiedFlag)
       getCurrentDomain().relax(m_specifiedValue);
-    else // Rleax to the base domain
+    else // Relax to the base domain
       getCurrentDomain().relax(internal_baseDomain());
   }
 
@@ -416,4 +441,17 @@ namespace EUROPA {
   	  
   	  return total;
   }  
+  
+  std::string ConstrainedVariable::getViolationExpl() const
+  {
+  	  std::ostringstream os;
+  	  
+  	  for (ConstraintList::const_iterator it = m_constraints.begin() ; it != m_constraints.end(); ++it){
+          ConstraintId constraint = it->first;
+          if (constraint->getViolation() > 0.0)
+              os << constraint->getViolationExpl() << std::endl;
+  	  }  	
+  	  
+  	  return os.str();
+  }    
 }

@@ -181,15 +181,7 @@ namespace EUROPA {
 					   const RulesEngineId& reId2,
 					   SOLVERS::SolverId& solver) {
 	commonInit(planDb, ceId2, reId2);
-	sl = (new PPWSearchListener(solver, this))->getId();
-	unmarksStep(PROPAGATION_PREEMPTED);
-	unmarksStep(PROPAGATION_COMPLETED);
-	marksStep(STEP_SUCCEEDED);
-	marksStep(STEP_FAILED);
-	marksStep(PLAN_FOUND);
-	marksStep(SEARCH_EXHAUSTED);
-	marksStep(TIMEOUT_REACHED);
-	marksStep(RETRACT_SUCCEEDED);
+	setSolver(solver);
       }
 
       PartialPlanWriter::PartialPlanWriter(const PlanDatabaseId &planDb,
@@ -265,6 +257,33 @@ namespace EUROPA {
 	}
 	marksStep(PROPAGATION_COMPLETED);
 	marksStep(PROPAGATION_PREEMPTED);
+      }
+
+      void PartialPlanWriter::setSolver(SOLVERS::SolverId& solver) {
+	check_error(sl.isNoId(), "Already have a solver");
+	sl = (new PPWSearchListener(solver, this))->getId();
+	unmarksStep(PROPAGATION_PREEMPTED);
+	unmarksStep(PROPAGATION_COMPLETED);
+	marksStep(STEP_SUCCEEDED);
+	marksStep(STEP_FAILED);
+	marksStep(PLAN_FOUND);
+	marksStep(SEARCH_EXHAUSTED);
+	marksStep(TIMEOUT_REACHED);
+	marksStep(RETRACT_SUCCEEDED);
+      }
+
+      void PartialPlanWriter::clearSolver() {
+	check_error(sl.isValid(), "No solver.");
+	delete (SOLVERS::SearchListener*) sl;
+	sl = SOLVERS::SearchListenerId::noId();
+	marksStep(PROPAGATION_PREEMPTED);
+	marksStep(PROPAGATION_COMPLETED);
+	unmarksStep(STEP_SUCCEEDED);
+	unmarksStep(STEP_FAILED);
+	unmarksStep(PLAN_FOUND);
+	unmarksStep(SEARCH_EXHAUSTED);
+	unmarksStep(TIMEOUT_REACHED);
+	unmarksStep(RETRACT_SUCCEEDED);
       }
 
       void PartialPlanWriter::initOutputDestination() {
@@ -388,11 +407,8 @@ namespace EUROPA {
       PartialPlanWriter::~PartialPlanWriter(void) {
 	if (!cel.isNoId())
 	  delete (ConstraintEngineListener*) cel;
-	//incredibly bizarre... something's deleting the search listener
-	//before this, and I can't breakpoint where it's happening.
-	//~MJI
-	//if(!sl.isNoId())
-	//  delete (SOLVERS::SearchListener*) sl;
+	if(!sl.isNoId())
+	 delete (SOLVERS::SearchListener*) sl;
 
 	if(stepsPerWrite) {
 	  if(destAlreadyInitialized) {
