@@ -722,6 +722,13 @@ namespace EUROPA {
     return new PSObject(entity);
   }
 
+  PSObject* PSEngine::getObjectByName(const std::string& name) {
+    check_runtime_error(m_planDatabase.isValid());
+    ObjectId obj = m_planDatabase->getObject(LabelStr(name));
+    check_runtime_error(obj.isValid());
+    return new PSObject(obj);
+  }
+
   PSList<PSToken*> PSEngine::getTokens() {
     check_runtime_error(m_planDatabase.isValid());
 

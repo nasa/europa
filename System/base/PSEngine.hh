@@ -93,6 +93,7 @@ namespace EUROPA {
 	
     PSList<PSObject*> getObjectsByType(const std::string& objectType);
     PSObject* getObjectByKey(PSEntityKey id);
+    PSObject* getObjectByName(const std::string& name);
 		
     PSList<PSToken*> getTokens();    	 
     PSToken* getTokenByKey(PSEntityKey id);	
