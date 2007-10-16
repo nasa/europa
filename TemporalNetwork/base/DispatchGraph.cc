@@ -36,7 +36,7 @@ Notes:
 
 namespace EUROPA {
 
-Dnode* DispatchGraph::makeNode()
+DnodeId DispatchGraph::makeNode()
 {
   // Overrides the definition in DistanceGraph class.
   DispatchNode* node = new DispatchNode();
@@ -72,7 +72,7 @@ void DispatchGraph::filter( void (*keepEdge)(DispatchNode*, DispatchNode*,
                  TempNetErr::TempNetMemoryError());
   this->sccLeaders = std::vector<DispatchNode*>();
   // Set initial distances to same as potential
-  for (std::vector<Dnode*>::const_iterator it=nodes.begin(); it != nodes.end(); ++it) {
+  for (std::vector<DnodeId>::const_iterator it=nodes.begin(); it != nodes.end(); ++it) {
     DispatchNode* node = (DispatchNode*) *it;
     node->distance = node->potential;
   }
@@ -126,12 +126,12 @@ void DispatchGraph::findSccs( void (*keepEdge)(DispatchNode*, DispatchNode*,
   delete[] scc;
 }
 
-void DispatchGraph::buildReversePostorder (std::vector<Dnode*>& argNodes)
+void DispatchGraph::buildReversePostorder (std::vector<DnodeId>& argNodes)
 {
   // Do depth-first searches, collecting nodes into reverse-postorder.
   Dnode::unmarkAll();
   Int position = argNodes.size();
-  for (std::vector<Dnode*>::const_iterator it=argNodes.begin(); it != argNodes.end(); ++it) {
+  for (std::vector<DnodeId>::const_iterator it=argNodes.begin(); it != argNodes.end(); ++it) {
     Dnode* node = *it;
     if (!node->isMarked())
       predGraphDfs ((DispatchNode*)node, position);
@@ -221,6 +221,7 @@ void DispatchGraph::sccMoveFluids (DispatchNode* node, DispatchNode* leader)
   Time relativeDistance = node->distance - leader->distance;
 
   // First move edges from the node to outside
+  // TODO: gcc 4.1.1 is comlaining about not finding a match for the 2 calls to sccMoveDirectional below
   sccMoveDirectional (node, leader, relativeDistance,
                       &DispatchNode::inArray, &DispatchNode::inCount,
                       &DispatchNode::outArray, &DispatchNode::outCount,
@@ -233,6 +234,7 @@ void DispatchGraph::sccMoveFluids (DispatchNode* node, DispatchNode* leader)
                       &DispatchNode::inArray, &DispatchNode::inCount,
                       &DispatchNode::inArraySize,
                       &Dedge::from, &Dedge::to);
+  
 }
 
 // Following are defined in DistanceGraph.cc

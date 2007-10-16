@@ -56,7 +56,7 @@ public:
   // Destructor inherited from DistanceGraph is ok.
 private:
   void findSccs( void (*keepEdge)(DispatchNode*, DispatchNode*, Time) );
-  void buildReversePostorder (std::vector<Dnode*>& nodes);
+  void buildReversePostorder (std::vector<DnodeId>& nodes);
   void predGraphDfs (DispatchNode* node, int& position);
   void predGraphTraceScc (DispatchNode* node, DispatchNode* scc[],
                           size_t& sccSize, int nodeCount);
@@ -76,7 +76,7 @@ private:
                       void (*keepEdge)(DispatchNode*, DispatchNode*, Time)
                       );
 protected:                          // Overridden virtual functions
-  Dnode* makeNode();
+  DnodeId makeNode();
 };
 
  /**
