@@ -1139,7 +1139,7 @@ namespace EUROPA {
 					      new InterpretedRuleInstance(
 									  context.getRuleInstance()->getId(), 
 									  lhs.getValue(), 
-									  rhs.getValue()->derivedDomain(), 
+									  rhs.getValue()->lastDomain(), 
 									  isOpEquals,
 									  m_ifBody
 									  )
