@@ -122,17 +122,21 @@ namespace EUROPA  {
   void Resource::add(const TokenId& token){
     Object::add(token);
     markDirty();
+    debugMsg("Resource:add",getName().toString() << " added " << token->toString());
   }
 
   void Resource::remove(const TokenId& token){
     Object::remove(token);
     markDirty();
+    debugMsg("Resource:remove",getName().toString() << " removed " << token->toString());
   }
 
   bool Resource::isDirty() const {return m_dirty;}
 
-  void Resource::markDirty(){
+  void Resource::markDirty()
+  {
     m_dirty = true;
+    debugMsg("Resource:markDirty",getName().toString() << " marked Dirty");
   }
 
   bool Resource::insert(const TransactionId& tx) {
