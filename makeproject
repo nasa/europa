@@ -41,8 +41,8 @@ echo "Adding Jamrules"
 touch $DIRECTORY/Jamrules
 echo "{"                                                     >> $DIRECTORY/Jamrules
 echo "  local SUBDIR = \$("$NAME") ;"                        >> $DIRECTORY/Jamrules
-echo "  local PLASMA = [ FDirName \$("$NAME") .. PLASMA ] ;" >> $DIRECTORY/Jamrules
-echo "  include [ FDirName \$(PLASMA) Jamrules ] ;"          >> $DIRECTORY/Jamrules
+echo "  local PLASMA = \$(PLASMA_HOME) ;"                    >> $DIRECTORY/Jamrules
+echo "  include [ FDirName \$(PLASMA_HOME) Jamrules ] ;"     >> $DIRECTORY/Jamrules
 echo "  include [ FDirName \$(SUBDIR) Jamfile ] ;"           >> $DIRECTORY/Jamrules
 echo "  "$NAME"_READY = TRUE ;"                              >> $DIRECTORY/Jamrules
 echo "}"                                                     >> $DIRECTORY/Jamrules
@@ -60,7 +60,7 @@ echo "if ! \$("$NAME"_READY) {" >> $DIRECTORY/Jamfile
 echo " # Declare a library for PlanWorks Control" >> $DIRECTORY/Jamfile
 echo "" >> $DIRECTORY/Jamfile
 echo " ModuleSharedLibrary "$NAME"Controller " >> $DIRECTORY/Jamfile
-echo "     : ../PLASMA/ControllerStub.cc ../PLASMA/MasterController.cc ../PLASMA/SingleSolverController.cc " >> $DIRECTORY/Jamfile
+echo "     : $PLASMA_HOME/ControllerStub.cc $PLASMA_HOME/MasterController.cc $PLASMA_HOME/SingleSolverController.cc " >> $DIRECTORY/Jamfile
 echo "     : System : "$NAME"Controller ;" >> $DIRECTORY/Jamfile
 echo "" >> $DIRECTORY/Jamfile
 echo " # Create a build target to run a problem" >> $DIRECTORY/Jamfile
@@ -165,4 +165,13 @@ then
   exit -1
 fi
 echo "Adding NDDL.cfg"
-cp ./DefaultNDDL.cfg $DIRECTORY/NDDL.cfg
+
+touch $DIRECTORY/NDDL.cfg
+echo "<configuration>"                                                                                 >> $DIRECTORY/NDDL.cfg
+echo " <binding nddl=\"Object\" cpp=\"Object\"/>"                                                      >> $DIRECTORY/NDDL.cfg
+echo " <binding nddl=\"Timeline\" cpp=\"Timeline\"/>"                                                  >> $DIRECTORY/NDDL.cfg
+echo " <binding nddl=\"Resource\" cpp=\"NddlResource\" include=\"NddlResource.hh\"/>"                  >> $DIRECTORY/NDDL.cfg
+echo " <binding nddl=\"Resource.change\" cpp=\"NddlResource::change\" include=\"NddlResource.hh\"/>"   >> $DIRECTORY/NDDL.cfg
+echo " <include path=\"$PLASMA_HOME/NDDL/base;$PLASMA_HOME/NDDL/component/Resource\"/>"                >> $DIRECTORY/NDDL.cfg
+echo "</configuration>"                                                                                >> $DIRECTORY/NDDL.cfg
+echo ""                                                                                                >> $DIRECTORY/NDDL.cfg
