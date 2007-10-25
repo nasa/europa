@@ -1,11 +1,12 @@
 #!/bin/bash
 #
-# the makeproject script creates a directory adjacent to PLASMA
-# with the name NAME.  it populates this directory with basic
+# the makeproject script creates a directory (either in the specified location, or adjacent
+# to PLASMA by default)  with the name NAME.  it populates this directory with basic
 # project files that use PLASMA.
 #
 # See ./NDDL/test/project/* for source material
 #
+
 PLASMA=`dirname "$0"`
 
 # Special case of a test project - invoked from checkmakeproject.
@@ -15,14 +16,20 @@ TEST_PROJECT_NAME="CheckMakeProjectTestProject"
 if [ "$1" == "" ]
 then
   echo "makeproject version 1.0"
-  echo "Usage: makeproject NAME"
+  echo "Usage: makeproject NAME (LOCATION)"
   echo ""
-  echo "Example: makeproject IDEA"
+  echo "Example: makeproject IDEA ~/PLASMA/example" 
   exit -1
 fi
 
 NAME="$1"
+
 DIRECTORY="$PLASMA/../$NAME"
+if [ "$2" != "" ]
+then
+  DIRECTORY="$2/$NAME"
+fi
+
 if [ -e $DIRECTORY ]
 then
   echo "error: "$DIRECTORY" already exists"
