@@ -359,6 +359,8 @@ namespace EUROPA {
   	    virtual ConstrainedVariableId getVar(const char* name);  
   	    virtual InterpretedRuleInstanceId& getRuleInstance() { return m_ruleInstance; }
   	     
+  	    virtual TokenId getToken(const char* name);
+  	    
         virtual std::string toString() const;
   	    
   	protected:
