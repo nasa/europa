@@ -25,15 +25,14 @@ Depends run-all-tests : run-examples-tests ;
 Depends run-all-tests : run-nddl-tests ;
 Depends run-all-tests : run-hsts-planner-tests ;
 
-
-Depends run-checkin-tests : check-cvs-changes ;
+Depends run-checkin-tests : check-svn-changes ;
 Depends run-checkin-tests : run-tests ;
 Depends run-checkin-tests : run-nddl-planner-tests ;
 Depends run-checkin-tests : run-makefile-tests ;
 
 Depends run-makefile-tests : check-makefile ;
 
-# install tests designed for off site customers to check system is installed without cvs update
+# install tests designed for off site customers to check system is installed without svn update
 Depends run-install-tests : run-tests ;
 
 NOCARE run-all-tests run-tests run-checkin-tests run-nddl-tests run-nddl-planner-tests tests run-hsts-planner-tests ;
@@ -65,7 +64,7 @@ if ! ( "Examples" in $(NO) ) {
 RemoveBinaries clean-all ;
 Depends clean-all : clean clean-nddl-xml clean-system-xml ;
 
-ExecuteSO check-cvs-changes : checkcvs : $(PLASMA) ;
+ExecuteSO check-svn-changes : checksvn : $(PLASMA) ;
 
 if ! ( "Resources" in $(NO) ) {
   ExecuteSO check-makefile : checkmakeproject : $(PLASMA) ;
