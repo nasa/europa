@@ -1,0 +1,56 @@
+<Solver name="DefaultTestSolver">
+  <FlawFilter component="HorizonFilter" policy="PartiallyContained"/>
+
+  <SAVHThreatManager order="most,earliest,lower" defaultPriority="1">
+    <FlawHandler component="SAVHThreatHandler" filter="both" />
+    <!--FlawHandler component="SAVHThreatHandler" class="Timeline" filter="both" constraint="precedesOnly"/-->
+    <!--FlawFilter class-match="Timeline"/-->
+    <!--FlawHandler component="SAVHThreatHandler" master-class="Crew" order="late" priority="1"/-->
+  </SAVHThreatManager>
+
+  <ThreatManager defaultPriority="1">
+    <FlawHandler component="StandardThreatHandler"/>
+    <FlawHandler component="StandardThreatHandler" predicate="change_filter" order="late" priority="2"/>
+    <FlawHandler component="StandardThreatHandler" predicate="medical_conference" order="late" priority="2"/>
+    <FlawHandler component="StandardThreatHandler" predicate="payload_activity" order="late" priority="3"/>
+    <FlawHandler component="StandardThreatHandler" predicate="comm_payload_activity" order="late" priority="3"/>
+    <FlawHandler component="StandardThreatHandler" predicate="restraint_payload_activity" order="late" priority="3"/>
+
+    <!--FlawHandler component="ResourceThreatDecisionPoint" predicate="uses" order="late" priority="1"/-->
+    
+    <!--FlawHandler component="ResourceThreat"/>
+    <FlawHandler component="ResourceThreat" predicate="change_filter" order="late" priority="2"/>
+    <FlawHandler component="ResourceThreat" predicate="medical_conference" order="late" priority="2"/>
+    <FlawHandler component="ResourceThreat" predicate="payload_activity" order="late" priority="3"/>
+    <FlawHandler component="ResourceThreat" predicate="comm_payload_activity" order="late" priority="3"/>
+    <FlawHandler component="ResourceThreat" predicate="restraint_payload_activity" order="late" priority="3"/-->    
+  </ThreatManager>
+
+  <OpenConditionManager defaultPriority="1">
+    <FlawHandler component="StandardOpenConditionHandler"/>
+    <FlawHandler component="StandardOpenConditionHandler" predicate="notfasting" order="early" choice="activateOnly" priority="0"/>
+    <FlawHandler component="StandardOpenConditionHandler" predicate="fasting" order="early" priority="0"/>
+    <FlawHandler component="StandardOpenConditionHandler" predicate="daily_routine" order="early" priority="0"/>
+    <FlawHandler component="StandardOpenConditionHandler" predicate="change_filter" order="late" priority="2"/>
+    <FlawHandler component="StandardOpenConditionHandler" predicate="medical_conference" order="late" priority="2"/>
+    <FlawHandler component="StandardOpenConditionHandler" predicate="payload_activity" order="late" priority="4"/>
+    <FlawHandler component="StandardOpenConditionHandler" predicate="comm_payload_activity" order="late" priority="4"/>
+    <FlawHandler component="StandardOpenConditionHandler" predicate="restraint_payload_activity" order="late" priority="4"/>
+    <FlawHandler component="StandardOpenConditionHandler" predicate="power_activity" order="late" priority="5"/>
+
+    <FlawHandler component="StandardOpenConditionHandler" predicate="remove_sleep_station" order="early" priority="5"/>
+    <FlawHandler component="StandardOpenConditionHandler" predicate="reconfigure_thermal_loops" order="early" priority="5"/>
+    <FlawHandler component="StandardOpenConditionHandler" predicate="remove_power_source" order="early" priority="5"/>
+    <FlawHandler component="StandardOpenConditionHandler" predicate="replace_rpcm" order="early" priority="6"/>
+    <FlawHandler component="StandardOpenConditionHandler" predicate="place_power_source" order="early" priority="7"/>
+    <FlawHandler component="StandardOpenConditionHandler" predicate="assemble_sleep_station" order="early" priority="7"/>
+  </OpenConditionManager>
+
+  <UnboundVariableManager defaultPriority="0">
+    <FlawFilter var-match="start"/>
+    <FlawFilter var-match="end"/>
+    <FlawFilter var-match="duration"/>
+    <FlawFilter component="InfiniteDynamicFilter"/>
+    <FlawHandler component="StandardVariableHandler"/>
+  </UnboundVariableManager>
+</Solver>
