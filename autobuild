@@ -34,18 +34,18 @@ use strict;
 #                          Script Constants                          #
 ######################################################################
 
-my $cvsname = "PLASMA";
-my $cvscanon = "${cvsname}_cvscanon";
-my $cvshost = "copernicus.arc.nasa.gov";
-my $cvsrepository = "/home/cvs/ISG-Repository";
+my $svnhost = "https://babelfish.arc.nasa.gov/";
+my $svnrepository = "svn/europa/";
+my $svnname = "PLASMA";
+my $svncanon = "${svnname}_svncanon";
 my $smtphost = "gate.arc.nasa.gov";
 my $resultaddress = "europa-night-build-results\@nx.arc.nasa.gov";
 my $version = "2.2b pl";
 my $help = 0;
 my $man = 0;
 
-GetOptions("cvshost=s" => \$cvshost,
-           "cvsrepository=s" => \$cvsrepository,
+GetOptions("svnhost=s" => \$svnhost,
+           "svnrepository=s" => \$svnrepository,
 					 "define|environment=s" => \%ENV,
 					 "help|?" => \$help,
 					 "mailserver=s" => \$smtphost,
@@ -136,18 +136,10 @@ sub init {
 	chomp($ENV{OSTYPE} = lc `uname -s`) if(!defined $ENV{OSTYPE});
 	chomp($ENV{HOST} = `uname -n`) if(!defined $ENV{HOST});
 
-	if(-r "$cvsrepository/PLASMA") {
-		$ENV{CVSROOT} = $cvsrepository;
-	}
-	else {
-		$ENV{CVSROOT} = "$cvshost:$cvsrepository";
-		$ENV{CVS_RSH} = "ssh" if(!defined $ENV{CVS_RSH});
-	}
-
-	$ENV{AUTOBUILD_HOME} = "$ENV{HOME}/${cvsname}_autobuilds" if(!defined($ENV{AUTOBUILD_HOME}));
+	$ENV{AUTOBUILD_HOME} = "$ENV{HOME}/${svnname}_autobuilds" if(!defined($ENV{AUTOBUILD_HOME}));
 	mkdir($ENV{AUTOBUILD_HOME});
 
-	$ENV{PLASMA_HOME} = "$ENV{AUTOBUILD_HOME}/$cvsname";
+	$ENV{PLASMA_HOME} = "$ENV{AUTOBUILD_HOME}/$svnname";
 
 	# build path from common directories, if they exist.
 	# the directories containing version checked execs (to follow) will take precidence.
@@ -206,15 +198,11 @@ sub sanityCheck {
 	my $errors = "";
 	
 	# all the simple existance checks.
-	my @reqs = ("AUTOBUILD_HOME", "JAVA_HOME", "JAM_HOME", "PATH", "CVSROOT");
+	my @reqs = ("AUTOBUILD_HOME", "JAVA_HOME", "JAM_HOME", "PATH");
 	foreach my $req (@reqs) {
 		defined($ENV{$req}) or $errors .= "\$$req must be defined.\n";
 	}
 	
-	if($ENV{CVSROOT} =~ /:/) {
-		defined($ENV{CVS_RSH}) or $errors .= "\$CVS_RSH must be defined.\n";
-	}
-
 	!defined($ENV{INVALID}) or $errors .= "\$INVALID must be undefined.\n";
 
 	if($ENV{OSTYPE} eq "darwin") {
@@ -289,18 +277,18 @@ sub mailresults {
 	$mailserver->mail($ENV{USER});
 	$mailserver->to($resultaddress);
 	$mailserver->data();
-	$mailserver->datasend("From: $cvsname Autobuild <europa-dev\@nx.arc.nasa.gov>\n");
+	$mailserver->datasend("From: $svnname Autobuild <europa-dev\@nx.arc.nasa.gov>\n");
 	$mailserver->datasend("To: $resultaddress\n");
 	$mailserver->datasend("Reply-To: europa-dev\@nx.arc.nasa.gov\n");
 	$mailserver->datasend("Subject: PLASMA Autobuild on $ENV{HOST} ", ($allsucceeded? "passed" : "failed"), "\n");
-	$mailserver->datasend("X-Mailer: $cvsname Autobuild script $version\n");
+	$mailserver->datasend("X-Mailer: $svnname Autobuild script $version\n");
 	$mailserver->datasend("MIME-Version: 1.0\n");
 	$mailserver->datasend("Content-type: multipart/mixed; boundary=\"$mime_boundary\"\n");
 	$mailserver->datasend("\n");
 	$mailserver->datasend("This is a multi-part message in MIME format.\n\n");
 	$mailserver->datasend("--$mime_boundary\n");
-	$mailserver->datasend("Content-type: text/plain; name=\"$cvsname Autobuild Summary\"\n");
-	$mailserver->datasend("Content-disposition: inline; filename=\"$cvsname Autobuild Summary\"\n");
+	$mailserver->datasend("Content-type: text/plain; name=\"$svnname Autobuild Summary\"\n");
+	$mailserver->datasend("Content-disposition: inline; filename=\"$svnname Autobuild Summary\"\n");
 	$mailserver->datasend("\n");
 	$mailserver->datasend("Environment for all tests:\n");
 	$mailserver->datasend(envString("  ","OSTYPE","\n"));
@@ -310,7 +298,6 @@ sub mailresults {
 	$mailserver->datasend(envString("  ","GCC_ROOTDIR","\n"));
 	$mailserver->datasend(envString("  ","JAM_HOME","\n"));
 	$mailserver->datasend(envString("  ","PATH","\n"));
-	$mailserver->datasend(envString("  ","CVSROOT","\n"));
 	$mailserver->datasend(envString("  ","PLASMA_HOME","\n"));
 	$mailserver->datasend(envString("  ","LD_LIBRARY_PATH","\n"));
 	$mailserver->datasend(envString("  ","DYLD_LIBRARY_PATH","\n"));
@@ -377,17 +364,17 @@ sub mailresults {
 
 # this will send off an error message and die.
 sub softdie {
-	print stderr "$cvsname autobuild sending message for die..";
+	print stderr "$svnname autobuild sending message for die..";
 	my $mailserver = Net::SMTP->new($smtphost);
 	die "Kaboom!: $_\nOriginal Error: ", join("", @_) if(!$mailserver);
 	$mailserver->mail($ENV{USER});
 	$mailserver->to($resultaddress);
 	$mailserver->data();
-	$mailserver->datasend("From: $cvsname Autobuild <europa-dev\@nx.arc.nasa.gov>\n");
+	$mailserver->datasend("From: $svnname Autobuild <europa-dev\@nx.arc.nasa.gov>\n");
 	$mailserver->datasend("To: $resultaddress\n");
 	$mailserver->datasend("Reply-To: europa-dev\@nx.arc.nasa.gov\n");
 	$mailserver->datasend("Subject: PLASMA Autobuild on $ENV{HOST} Died\n");
-	$mailserver->datasend("X-Mailer: $cvsname Autobuild script $version\n");
+	$mailserver->datasend("X-Mailer: $svnname Autobuild script $version\n");
 	$mailserver->datasend("MIME-Version: 1.0\n");
 	$mailserver->datasend("Content-type: text/plain\n");
 	$mailserver->datasend("\n");
@@ -399,7 +386,6 @@ sub softdie {
 	$mailserver->datasend(envString("  ","GCC_ROOTDIR","\n"));
 	$mailserver->datasend(envString("  ","JAM_HOME","\n"));
 	$mailserver->datasend(envString("  ","PATH","\n"));
-	$mailserver->datasend(envString("  ","CVSROOT","\n"));
 	$mailserver->datasend(envString("  ","PLASMA_HOME","\n"));
 	$mailserver->datasend(envString("  ","LD_LIBRARY_PATH","\n"));
 	$mailserver->datasend(envString("  ","DYLD_LIBRARY_PATH","\n"));
@@ -430,9 +416,9 @@ sub main {
 	print "  file locked!\n";
 
 	chdir($ENV{AUTOBUILD_HOME}) or softdie "Error moving to AUTOBUILD_HOME: $!";
-	print "checking out $cvsname...\n";
-	print "  cvs checkout $cvsname\n";
-	system("bash -c 'cvs checkout -d $cvscanon $cvsname > /dev/null 2>&1'") and softdie("Error during checkout");
+	print "checking out $svnname...\n";
+	print "  svn checkout $svnname\n";
+	system("bash -c 'svn co ${svnhost}${svnrepository}${svnname}/trunk $ENV{AUTOBUILD_HOME}/${svncanon} > $ENV{AUTOBUILD_HOME}/svn.log 2>&1'") and softdie("Error during checkout");
 	print "Checkout complete.\n";
 	for(my $i = 0; $i <= $#buildtypes; $i++) {
 		my $build = $buildtypes[$i];
@@ -442,15 +428,15 @@ sub main {
 		print " |   LIBRARIES => $build->{LIBRARIES}\n" if(defined($build->{LIBRARIES}));
 		print " |   VARIANTS => $build->{VARIANTS}\n" if(defined($build->{VARIANTS}));
 		print " +------------------------------------------------------------\n";
-		if(-d $cvsname) {
-			system("bash -c 'chmod -fR u+w $cvsname'") and softdie("Error moving canon checkout: $!");
-			system("rm -rf $cvsname") and softdie("Error deleting directory in preparation for build $build->{NAME}: $!\n");
+		if(-d $svnname) {
+			system("bash -c 'chmod -fR u+w $svnname'") and softdie("Error moving canon checkout: $!");
+			system("rm -rf $svnname") and softdie("Error deleting directory in preparation for build $build->{NAME}: $!\n");
 		}
-		system("bash -c 'cp -pR $cvscanon $cvsname'") and softdie("Error moving canon checkout: $!");
+		system("bash -c 'cp -pR $svncanon $svnname'") and softdie("Error moving canon checkout: $!");
 		sanityCheck();
 		jam($build);
-		system("bash -c 'chmod -fR u+w $cvsname'") and softdie("Error moving canon checkout: $!");
-		system("rm -rf $cvsname") and softdie("Error deleting directory for build $build->{NAME}: $!\n");
+		system("bash -c 'chmod -fR u+w $svnname'") and softdie("Error moving canon checkout: $!");
+		system("rm -rf $svnname") and softdie("Error deleting directory for build $build->{NAME}: $!\n");
 	}
 	mailresults(@buildtypes);
 	return 0;
@@ -471,13 +457,13 @@ autobuild [options]
 
 =over 4
 
-=item B<--cvshost=[hostname]>
+=item B<--svnhost=[hostname]>
 
-Set host to connect to for cvs repository.
+Set host to connect to for svn repository.
 
-=item B<--cvsrepository=[directory]>
+=item B<--svnrepository=[directory]>
 
-Set directory containing projects on cvshost.
+Set directory containing projects on svnhost.
 
 =item B<--define [variable=value]>
 
