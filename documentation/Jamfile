@@ -14,24 +14,5 @@ actions Doxygen {
 
 Doxygen documentation : doxygen.cfg ;
 
-#Depends documentation : run-csp.0 run-csp.1 run-csp.2 run-classes.0.tx run-classes.1.tx 
-#			run-classes.2.tx run-inheritance.0 run-inheritance.1 run-inheritance.2
-#			run-composition.0 
-#			run-rules.0.tx run-nddl.tx run-nddl.tx.0 run-nddl.tx.1 run-nddl.tx.2 ;
-rule Latex 
-{
-  local file = $(1) ;
-  local target = $(file:S=.tex) ;
-}
-
-actions Latex {
-  latex $(1) ;
-  bibtex $(1) ;
-  latex $(1) ;
-  latex $(1) ;
-  dvipdf $(1) ;
-}
-
-Latex user-guide : user-guide.tex ;
 
 } # Documentation_INCLUDED
