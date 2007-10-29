@@ -1,4 +1,0 @@
-Instrument::Stowed{
-  met_by(Stow a);
-  meets(Unstow b);
-} 

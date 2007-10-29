@@ -1,13 +1,10 @@
-EUROPA2 Documentation directory
+EUROPA documentation is now kept on the project wiki pages at:
 
-* To Install Guide is located in the install_guide directory. 
-  It is a PDF document that requires Adobe's reader. Please read this 
-  document for instruction on installing, testing, and operating EUROPA2.
+https://babelfish.arc.nasa.gov/trac/europa/wiki
 
-* To make the remainder of EUROPA2's documentation you must have installed
-  doxygen as detailed in the Install Guide.
-   - type "jam documentation" 
-   - this will create a html directory
-   - open the "index.html" file in the html directory.
+This directory remains simply for Doxygen related files.  Doxygen is used to
+document the code itself; those docs can be viewed by using a web browser to
+open:
 
-* Contact europa-help@nx.arc.nasa.gov with questions.
+PLASMA/documentation/html/index.html
+
