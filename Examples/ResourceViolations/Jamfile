@@ -1,0 +1,20 @@
+SubDir ResourceViolations ;
+
+if ! $(ResourceViolations_READY) {
+ # Declare a library for PlanWorks Control
+
+ ModuleSharedLibrary ResourceViolationsController 
+     : /home/tsmith/svn/PLASMA/ControllerStub.cc /home/tsmith/svn/PLASMA/MasterController.cc /home/tsmith/svn/PLASMA/SingleSolverController.cc 
+     : System : ResourceViolationsController ;
+
+ # Create a build target to run a problem
+ RunNDDLProblem ResourceViolations : ResourceViolations-initial-state.nddl : ResourceViolations-planner : PlannerConfig.xml ;
+
+ # Create a build target for the planner executable with the given model.
+ NddlMain ResourceViolations-planner : ResourceViolations-Main.cc : ResourceViolations-model.nddl : System : ResourceViolations-planner ;
+
+ # Create a build target for the planner shared library with model.
+ ModuleSharedLibrary ResourceViolations : ResourceViolations-model.o : System : ResourceViolations ;
+
+ Depends all : ResourceViolations ResourceViolationsController ;
+} # ResourceViolations_READY

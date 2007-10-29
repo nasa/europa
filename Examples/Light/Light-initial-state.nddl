@@ -1,0 +1,17 @@
+#include "Light-model.nddl"
+
+PlannerConfig c = new PlannerConfig(0, 100, +inf, +inf);
+
+// Problem instance : turning the light off
+LightSwitch switch1 = new LightSwitch();
+LightBulb bulb1 = new LightBulb(switch1);
+
+// At time 0, the bulb is on
+fact(bulb1.On initialCondition);
+eq(initialCondition.start,0);
+
+// We want the bulb to be off by time 10
+goal(bulb1.Off goal1);
+lt(0,goal1.start);
+lt(goal1.start,10);
+

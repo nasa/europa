@@ -1,0 +1,505 @@
+// CrewPlanning.bsh
+
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.List;
+import java.util.Vector;
+import java.util.Comparator;
+import java.util.Collections;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JInternalFrame;
+import javax.swing.JPanel;
+import javax.swing.JButton;
+import javax.swing.JTextField;
+import javax.swing.JTable;
+import javax.swing.table.TableModel;
+import javax.swing.table.AbstractTableModel;
+
+import org.ops.ui.util.Util;
+import org.ops.ui.PSDesktop;
+import org.ops.ui.mouse.*;
+import org.ops.ui.gantt.*;
+import org.ops.ui.chart.*;
+import org.ops.ui.solver.*;
+import psengine.*;
+
+int month = GregorianCalendar.SEPTEMBER, day = 11; 
+GregorianCalendar start = new GregorianCalendar(2006,month,day,0,0);
+GregorianCalendar end = new GregorianCalendar(2006,month,day,0,10);
+
+void usingCodeGeneration()
+{
+	cwd = bsh.cwd;
+    psengine.loadModel(cwd+"/libTower_o.so");
+    boolean isFile = true;
+    boolean useInterpreter = false;
+    psengine.executeTxns(cwd+"/Tower-initial-state.xml",isFile,useInterpreter);	
+    System.out.println("Used code generation");
+}
+
+void usingInterpreter()
+{
+	cwd = bsh.cwd;
+    String nddlModel = cwd+"/Tower-initial-state.nddl";
+    psengine.executeScript("nddl",nddlModel);
+}
+
+void initPSEngine()
+{
+    //usingCodeGeneration();
+    usingInterpreter();
+}
+
+void setupDesktop()
+    throws Exception
+{
+    ActionDetailsPanel dp = (ActionDetailsPanel)desktop.makeDetailsFrame().getContentPane().getComponent(0);
+
+    JInternalFrame ganttFrame = desktop.makeResourceGanttFrame("Object",start,end);
+    ganttFrame.setLocation(0,0);
+    ganttFrame.setSize(700,300);
+    PSGantt gantt = (PSGantt)ganttFrame.getContentPane().getComponent(0);
+    gantt.addMouseListener(dp);    
+}
+
+Object safeBound(int bound)
+{
+	int INF=1e6;
+    if (bound < -INF)
+    	return "-INF";
+    if (bound > INF)
+    	return "INF";
+    
+    return bound;
+}
+
+String valueToString(PSVarValue v)
+{
+	String type = v.getType().toString();
+	
+	if ("STRING".equals(type))
+		return v.asString();
+	if ("INTEGER".equals(type))
+		return v.asInt().toString();	
+	if ("DOUBLE".equals(type))
+		return v.asDouble().toString();
+	if ("BOOLEAN".equals(type))
+		return v.asBoolean().toString();
+	if ("OBJECT".equals(type))
+		return v.asObject().getName();
+	
+	return "ERROR!!! UNKNOWN TYPE :" + type;
+}
+
+String varValueToString(PSVariable var)
+{	
+	if (var.isSingleton()) 
+		return valueToString(var.getSingletonValue());	
+	else if (var.isInterval()) {
+	    StringBuffer buf = new StringBuffer();
+		buf.append("[").append(var.getLowerBound()).append(",")
+		               .append(var.getUpperBound()).append("]");
+		return buf.toString();
+	}
+	else if (var.isEnumerated()) {
+		PSValueList l = var.getValues();
+	    StringBuffer buf = new StringBuffer();
+	    buf.append("[");
+	    for (int i=0;i<l.size();i++) {
+	    	if (i>0)
+	    		buf.append(",");
+	    	buf.append(valueToString(l.get(i)));
+	    }
+	    buf.append("]");
+	    return buf.toString();
+	}
+	
+	throw RuntimeException("Unexpected ERROR: variable "+var.getName()+" is not one of {Singleton, Interval, Enumeration}");
+}
+
+String getBounds(PSToken t)
+{
+    StringBuffer buf = new StringBuffer();
+    
+    buf.append("[")
+       .append(varValueToString(t.getParameter("start")))
+       .append(",")
+       .append(varValueToString(t.getParameter("end")))
+       .append("]");
+    
+    return buf.toString();
+}
+
+class BlockWorld
+{
+	protected List towers_;
+	protected Map blockToTower_;
+	
+	public BlockWorld()
+	{
+	    towers_ = new Vector();
+	    blockToTower_ = new HashMap();
+	}
+	
+	public List getTowers() { return towers_; }
+	
+	public void addBlock(String name,String state,String bottomBlock, PSToken a)
+	{
+		//System.out.println("BlockWorld.add("+name+","+state+","+bottomBlock+")");
+
+		List tower = (List)blockToTower_.get(name);
+		if (tower == null) {
+        	tower = new Vector();	
+        	towers_.add(tower);
+        	blockToTower_.put(name, tower);
+		}
+
+		int idx = tower.indexOf(name);
+		StringBuffer buf = new StringBuffer();
+		buf.append(name).append("=").append(state).append(bottomBlock != null ? "-"+bottomBlock : "")
+		   .append("(").append(getBounds(a)).append(")");
+		String towerValue = buf.toString();
+		
+		if (state.equals("OnTable")) {
+			if (idx == -1) 
+    			tower.add(0,towerValue);
+			else
+				tower.set(idx,towerValue);
+		}
+		
+		if (state.equals("On")) {
+			
+			// Add Bottom if we need to
+            int bottomIdx = -1;
+            for (int i=0;i<tower.size();i++) {
+            	if (tower.get(i).toString().startsWith(bottomBlock)) {
+            		bottomIdx = i;
+            		break;
+            	}
+            }
+
+            if (bottomIdx == -1) {
+            	bottomIdx = (idx == -1 ? 0 : idx++);
+            	tower.add(bottomIdx,bottomBlock);
+            	blockToTower_.put(bottomBlock, tower);
+            }
+
+			if (idx == -1) 
+                tower.add(bottomIdx+1,towerValue);
+			else 
+    			tower.set(idx,towerValue);
+		}
+    }
+	
+	public String toString()
+	{
+		StringBuffer buf = new StringBuffer();
+		
+		for (List tower : towers_) {
+			buf.append("{");
+			for (int i=0;i<tower.size();i++) {
+				if (i > 0)
+					buf.append(",");
+		        buf.append(tower.get(i));				
+			}
+			buf.append("}  ");
+		}
+		
+		return buf.toString();
+	}
+}
+
+
+class BlockWorldTableModel
+    extends AbstractTableModel
+{
+	protected BlockWorld data_;
+    protected int maxTowerSize_;
+	public BlockWorldTableModel(BlockWorld bw)
+	{
+		data_ = bw;
+		maxTowerSize_=0;
+		for (int i=0;i<data_.getTowers().size();i++) {
+			List tower = (List)data_.getTowers().get(i);
+			if (tower.size() > maxTowerSize_)
+				maxTowerSize_ = tower.size();
+		}
+	}
+
+	public int getColumnCount() {  return data_.getTowers().size(); }
+	public String getColumnName(int columnIndex) { return "Tower-"+columnIndex; }
+
+	public int getRowCount() { return maxTowerSize_; }
+
+	public Object getValueAt(int rowIndex, int columnIndex) 
+	{
+    	List tower = data_.getTowers().get(columnIndex);
+	    if (tower.size() > rowIndex)
+	    	return tower.get(rowIndex);
+	    else
+	    	return "";
+	}
+}
+
+interface BlockWorldHistory
+{
+	public void add(int stepCount,BlockWorld bw,String operatorHistory);
+}
+
+class TowerSolverListener
+    implements PSSolverDialogListener
+{
+	protected BlockWorldHistory history_;
+
+    public TowerSolverListener(BlockWorldHistory h)
+    {
+    	history_ = h;
+    }
+    
+    protected String getBlockName(String s)
+    {
+        StringTokenizer tok = new StringTokenizer(s,".");
+        
+        // name is second token 
+        tok.nextToken();
+        return tok.nextToken();
+    }
+    
+    protected PSToken getLastAction(List actions)
+    {
+    	PSToken last = (PSToken)actions.get(actions.size()-1);
+    	return last;
+    }
+    
+    static class ActionComparator implements Comparator
+    {
+        public int compare(Object lhs, Object rhs) 
+        { 
+        	return (int) (((PSToken)lhs).getParameter("start").getLowerBound() - ((PSToken)rhs).getParameter("start").getLowerBound()); }
+    }
+    
+    ActionComparator actionComparator_ = new ActionComparator();
+    
+    protected String getHistory(PSObject c)
+    {
+    	StringBuffer buf = new StringBuffer();
+    	
+        List actions = Util.SWIGList(c.getTokens()); 
+        Collections.sort(actions,actionComparator_); 
+    	for (Object o : actions) {
+    		PSToken a = (PSToken)o;
+    		buf.append("{").append(a.getName()) //append(a.getName().substring(9,a.getName().length()))
+    		   .append(getBounds(a))
+    		   .append("(");
+    		PSVariableList parameters = a.getParameters();
+    		for (int i=5; i<parameters.size(); i++) {
+    		    PSVariable p = parameters.get(i);
+    		    if (i>5) buf.append(",");
+    		    String value = varValueToString(p);
+                buf//.append(p.getName().substring(10,p.getName().length())).append("=")
+                   //.append(p.getSingletonValue().asString().substring(23,p.getSingletonValue().asString().length()-6));
+                   .append(value.substring(10,value.length()));
+    		}
+    		buf.append("} ");
+    	}    	
+    	
+    	return buf.toString();
+    }
+    
+    public void stepCompleted(PSSolver s)
+    {
+    	BlockWorld bw = new BlockWorld();
+    	PSObjectList components = psengine.getObjectsByType("Timeline");
+    	String operatorHistory = null;
+    	
+    	for (int i=0;i<components.size(); i++) {
+    		PSObject c = components.get(i);
+    		if (c.getName().endsWith("Bottom")) {
+    			String blockName = getBlockName(c.getName());
+    			blockName = blockName.substring(0,blockName.length()-5);
+                List actions = Util.SWIGList(c.getTokens()); 
+                Collections.sort(actions,actionComparator_); 
+    			if (actions.size()==0)
+    				continue;
+
+    			PSToken a = getLastAction(actions);
+
+    			String blockState=null;
+    			String bottomBlock=null;
+
+    			if (a.getName().endsWith("OnTable")) {
+    				blockState = "OnTable";
+    			}
+    			else if (a.getName().endsWith("On")) {
+    				blockState = "On";
+    				bottomBlock = varValueToString(a.getParameters().get(5));
+    				int start = bottomBlock.lastIndexOf('.');
+    				bottomBlock = bottomBlock.substring(start+1, bottomBlock.length()-5);
+    			}
+    			
+    			if (blockState != null)	
+    			    bw.addBlock(blockName,blockState,bottomBlock,a);
+    		}	
+    		
+    		if (c.getName().endsWith("operatorTL"))
+    			operatorHistory = getHistory(c);
+    	}
+    	
+    	history_.add(s.getStepCount(), bw, operatorHistory);    
+    }    
+}
+
+class BlockHistoryEntry
+{
+    protected Integer idx_;
+    protected Integer step_;
+    protected String towers_;
+    protected String opHistory_;
+    
+    public BlockHistoryEntry(Integer idx,Integer step,String towers,String opHistory)
+    {
+    	idx_ = idx;
+    	step_ = step;
+    	towers_ = towers;
+    	opHistory_ = opHistory;
+    }
+    
+    public Integer getIndex() { return idx_; }
+    public Integer getStepNumber() { return step_; }
+    public String getTowers() { return towers_; }
+    public String getOperatorHistory() { return opHistory_; }
+}
+
+class BlockWorldHistoryPanel
+    extends JPanel
+    implements BlockWorldHistory, ActionListener
+{
+	protected List history_;
+	protected List blockWorldHistory_;
+	protected JTable historyTable_;
+	protected int currentIdx_;
+    protected JTextField gotoIdx_;
+    protected JLabel status_;
+    
+	public BlockWorldHistoryPanel()
+	{
+		history_ = new Vector();
+		blockWorldHistory_ = new Vector();
+		
+	    historyTable_ = new JTable();
+	    currentIdx_ = -1;
+	    
+    	JPanel buttonPanel = new JPanel(new FlowLayout());
+    	JButton b;
+		b = new JButton("<<"); b.addActionListener(this);b.setActionCommand("prev"); buttonPanel.add(b);
+		b = new JButton(">>"); b.addActionListener(this);b.setActionCommand("next"); buttonPanel.add(b);
+		b = new JButton("Go To Step"); b.addActionListener(this);b.setActionCommand("goto"); buttonPanel.add(b);
+		gotoIdx_ = new JTextField(6);
+		buttonPanel.add(gotoIdx_);
+		
+        status_ = new JLabel("");
+		JPanel statusPanel = new JPanel(new FlowLayout());
+        statusPanel.add(status_);
+        
+		setLayout(new BorderLayout());
+    	add(BorderLayout.NORTH,buttonPanel);
+    	add(BorderLayout.CENTER,new JScrollPane(historyTable_));		
+    	add(BorderLayout.SOUTH,statusPanel);
+    	
+    	updateStatus();
+	}
+
+    public List getHistory() { return history_; }
+    public List getBlockWorldHistory() { return blockWorldHistory_; }
+    
+    protected void updateStatus() 
+    {	
+	    status_.setText("Currently showing step "+(currentIdx_+1)+" out of "+blockWorldHistory_.size()+" available");    	
+    }
+    
+    public void showStep(int step) 
+    { 
+    	if (step>=0 && step<blockWorldHistory_.size()) {
+        	currentIdx_ = step;
+    	    historyTable_.setModel(new BlockWorldTableModel(blockWorldHistory_.get(currentIdx_)));
+    	    updateStatus();
+    	}
+    }
+
+	public void add(int stepCount,BlockWorld bw,String operatorHistory)
+	{
+		BlockHistoryEntry step = new BlockHistoryEntry(history_.size()+1,stepCount,bw.toString(),operatorHistory);
+		blockWorldHistory_.add(bw);
+		history_.add(step);
+	    updateStatus();
+		//System.out.println(step);
+	}
+	
+    public void actionPerformed(ActionEvent e) 
+    {
+        if ("next".equals(e.getActionCommand())) {
+        	showStep(currentIdx_+1);
+        	return;
+        } 
+
+        if ("prev".equals(e.getActionCommand())) {
+        	showStep(currentIdx_-1);
+        	return;
+        }         
+
+        if ("goto".equals(e.getActionCommand())) {
+    		int step;    		
+    		try {
+    			step = new Integer(gotoIdx_.getText());
+    		}
+    		catch (Exception e) {
+    			// TODO: display error message
+    			return;
+    		}
+    		
+		    showStep(step-1);
+    		
+        	return;
+        }         
+    }    	        
+}
+
+void showHistory()
+{
+    String[] fields1 = {"Index","StepNumber","Towers","OperatorHistory"};
+    desktop.makeTableFrame("Execution History",bwhp.getHistory(),fields1);
+}
+
+
+horizonStart = 0;
+horizonEnd = 1000;
+maxSteps = 200;
+config = "PlannerConfig.xml";
+
+BlockWorldHistoryPanel bwhp;
+
+try {
+    initPSEngine();
+    PSSolver solver = psengine.createSolver(config);
+    solver.configure(horizonStart,horizonEnd);
+    solverDialog = desktop.makeSolverDialog(solver);
+
+    bwhp = new BlockWorldHistoryPanel();
+    JInternalFrame hf = desktop.makeNewFrame("Block World History");
+    hf.getContentPane().setLayout(new BorderLayout());
+    hf.getContentPane().add(bwhp);
+  
+    TowerSolverListener listener = new TowerSolverListener(bwhp);
+    solverDialog.addListener(listener);
+}    
+catch (Exception e) {
+  	System.err.println("Failed Initializing : "+e.getMessage());
+}
+   
+//setupDesktop();
+

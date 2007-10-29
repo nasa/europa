@@ -1,0 +1,7 @@
+{
+  local SUBDIR = $(Light) ;
+  local PLASMA = $(PLASMA_HOME) ;
+  include [ FDirName $(PLASMA) Jamrules ] ;
+  include [ FDirName $(SUBDIR) Jamfile ] ;
+  Light_READY = TRUE ;
+}

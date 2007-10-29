@@ -1,0 +1,28 @@
+#include "NDDLHelloWorld-model.nddl"
+
+// Create a planner configuration instance in PLASMA.
+// Horizon Start, Horizon End, MaxPlannerSteps, MaxPlannerDepth
+PlannerConfig plannerConfiguration = new PlannerConfig(0, 100, 500, +inf);
+//TestPC tpc = new TestPC();
+
+// Sample object
+YourObject object = new YourObject();
+
+TestIf test1 = new TestIf();
+
+// Close the the PLASMA Database - no more objects can be created.
+close();
+
+// Now place your facts and goals here.
+fact(YourObject.helloWorld fact1);
+fact1.start.specify(15); // Starts at beginning of the horizon
+fact(YourObject.helloWorld fact2);
+fact2.start.specify(35); // Starts at beginning of the horizon
+
+goal(YourObject.helloWorld initialToken);
+initialToken.start.specify(25); // Starts at beginning of the horizon
+
+goal(test1.ScopedIf goal1);
+goal1.start.specify(0);
+
+// The planner should take it form here!

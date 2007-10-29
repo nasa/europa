@@ -1,0 +1,20 @@
+SubDir Light ;
+
+if ! $(Light_READY) {
+ # Declare a library for PlanWorks Control
+
+ ModuleSharedLibrary LightController 
+     : $(PLASMA_HOME)/ControllerStub.cc $(PLASMA_HOME)/MasterController.cc $(PLASMA_HOME)/SingleSolverController.cc 
+     : System : LightController ;
+
+ # Create a build target to run a problem
+ RunNDDLProblem Light : Light-initial-state.nddl : Light-planner : PlannerConfig.xml ;
+
+ # Create a build target for the planner executable with the given model.
+ NddlMain Light-planner : Light-Main.cc : Light-model.nddl : System : Light-planner ;
+
+ # Create a build target for the planner shared library with model.
+ ModuleSharedLibrary Light : Light-model.o : System : Light ;
+
+ Depends all : Light LightController ;
+} # Light_READY

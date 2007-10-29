@@ -1,0 +1,259 @@
+#include "Plasma.nddl"
+#include "PlannerConfig.nddl"
+
+enum Case1 {case11, case12, case13};
+
+class Block;
+class Goal;
+
+class Bottom extends Timeline
+{
+    Block wholeBlock;
+
+    Bottom(Block b) 
+    { 
+        wholeBlock=b; 
+    }
+
+    predicate Holding      { Block theBlock;}
+    predicate OnTable      { Block theBlock;}
+    predicate On           { Block blockUnder; Block theBlock;}
+    predicate None_bottom  { Block theBlock;}
+}
+
+class Top extends Timeline
+{
+    Block wholeBlock;
+
+    Top(Block b)
+    {
+        wholeBlock=b;
+    }
+
+    predicate Clear     { Block theBlock; }
+    predicate NotClear  { Block theBlock;}
+}
+
+class Arm extends Timeline
+{
+    predicate ArmEmpty {}
+    predicate ArmBusy  {}
+}
+
+class Operator extends Timeline
+{
+    predicate PickUp  { Block blockPickedUp; eq(duration, [1 1]); }
+    predicate PutDown { Block blockPutDown; eq(duration, [1 1]); }
+    predicate Stack   { Block blockStackAbove; Block blockStackBelow; eq(duration, [1 1]); }
+    predicate Unstack { Block blockUnstackAbove; Block blockUnstackBelow; eq(duration, [1 1]); }
+    predicate Nop     {}
+}
+
+class Block
+{
+    Goal theGoal;
+    Top blockTop;
+    Bottom blockBottom;
+
+    Block(Goal g) 
+    {
+        theGoal=g;
+        blockBottom=new Bottom(this);
+        blockTop=new Top(this);
+    }
+}
+
+class Goal extends Timeline
+{
+    Block firstBlock;
+    Block secondBlock;
+    Block thirdBlock;
+    Operator operatorTL;
+    Arm armTL;
+
+    Goal()
+    {
+        firstBlock=new Block(this);
+        secondBlock=new Block(this);
+        thirdBlock=new Block(this);
+        operatorTL=new Operator();
+        armTL=new Arm();
+    }
+
+    predicate GoalAchieved { eq(duration, [1 1]); }
+}
+
+Operator::PickUp
+{
+    contained_by(Bottom.OnTable onTable);
+    eq(blockPickedUp, onTable.theBlock);
+
+    meets(Bottom.Holding holding);
+    eq(blockPickedUp, holding.theBlock);
+
+    contained_by(Top.Clear clear);
+    eq(blockPickedUp, clear.theBlock);
+
+    meets(Top.NotClear noneTop);
+    eq(blockPickedUp, noneTop.theBlock);
+
+    contained_by(Arm.ArmEmpty armEmpty);
+
+    meets(Arm.ArmBusy arm);
+}
+
+Operator::PutDown
+{
+    contained_by(Bottom.Holding holding);
+    eq(blockPutDown, holding.theBlock);
+
+    meets(Bottom.OnTable onTable);
+    eq(blockPutDown, onTable.theBlock);
+
+    meets(Top.Clear clear);
+    eq(blockPutDown, clear.theBlock);
+    meets(Arm.ArmEmpty armEmpty);
+}
+
+Operator::Stack
+{
+    contained_by(Bottom.Holding holding);
+    eq(blockStackAbove, holding.theBlock);
+
+    meets(Bottom.On on);
+    eq(blockStackAbove, on.theBlock);
+    eq(blockStackBelow, on.blockUnder);
+
+    contained_by(Top.Clear clear);
+    eq(blockStackBelow, clear.theBlock);
+
+    meets(Top.NotClear noneTop);
+    eq(blockStackBelow, noneTop.theBlock);
+
+    meets(Top.Clear clear1);
+    eq(blockStackAbove, clear1.theBlock);
+
+    meets(Arm.ArmEmpty armEmpty);
+}
+
+Operator::Unstack
+{
+    contained_by(Top.Clear clear);
+    eq(blockUnstackAbove, clear.theBlock);
+
+    meets(Top.NotClear none);
+    eq(blockUnstackAbove, none.theBlock);
+
+    contained_by(Arm.ArmEmpty armEmpty);
+
+    meets(Arm.ArmBusy noneV3);
+
+    contained_by(Bottom.On on);
+    eq(blockUnstackAbove, on.theBlock);
+    eq(blockUnstackBelow, on.blockUnder);
+
+    meets(Bottom.Holding holding);
+    eq(blockUnstackAbove, holding.theBlock);
+
+    meets(Top.Clear clear1);
+    eq(blockUnstackBelow, clear1.theBlock);
+}
+
+
+Bottom::Holding
+{
+    eq(theBlock, object.wholeBlock);
+
+    ends(Operator.Stack stackExe);
+    eq(theBlock, stackExe.blockStackAbove);
+
+    met_by(Operator.PickUp pickUp);
+    eq(theBlock, pickUp.blockPickedUp);
+}
+
+Bottom::OnTable
+{
+    eq(theBlock, object.wholeBlock);
+
+    ends(Operator.PickUp pickUp);
+    eq(theBlock, pickUp.blockPickedUp);
+ 
+    met_by(Operator.PutDown putDown);
+    eq(theBlock, putDown.blockPutDown);
+}
+
+Bottom::On
+{
+    eq(theBlock, object.wholeBlock);
+
+    ends(Operator.Unstack unstackExe);
+    eq(theBlock, unstackExe.blockUnstackAbove);
+    eq(blockUnder, unstackExe.blockUnstackBelow);
+
+    met_by(Operator.Stack stackExe);
+    eq(theBlock, stackExe.blockStackAbove);
+    eq(blockUnder, stackExe.blockStackBelow);
+}
+
+Top::Clear
+{
+    eq(theBlock, object.wholeBlock);
+
+    bool OR15;
+
+    if (OR15==true) {
+        ends(Operator.PickUp pickexe);
+        eq(theBlock, pickexe.blockPickedUp);
+    }
+    if (OR15==false) {
+        ends(Operator.Stack stackexe);
+        eq(theBlock, stackexe.blockStackBelow);
+    }
+
+    met_by(Operator.Stack stackexe);
+    eq(theBlock, stackexe.blockStackAbove);
+}
+
+Top::NotClear 
+{
+    eq(theBlock, object.wholeBlock);
+
+    bool OR18;
+
+    ends(Operator.Stack stackexe);
+    eq(theBlock, stackexe.blockStackAbove);
+
+    if (OR18==true) {
+        met_by(Operator.PickUp pickexe);
+        eq(theBlock, pickexe.blockPickedUp);
+    }
+
+    if (OR18==false) {
+        met_by(Operator.Stack stackexe);
+        eq(theBlock, stackexe.blockStackBelow);
+    }
+}
+
+Arm::ArmEmpty
+{
+    ends(Operator.PickUp pickexe);
+    met_by(Operator.Stack stackexe);
+}
+
+Arm::ArmBusy
+{
+    met_by(Operator.PickUp pickexe);
+    ends(Operator.Stack stackexe);
+}
+
+Goal::GoalAchieved
+{
+    contained_by(Bottom.On onB1B2true);
+    eq(onB1B2true.theBlock, object.firstBlock);
+    eq(onB1B2true.blockUnder, object.secondBlock);
+
+    contained_by(Bottom.On onB2B3true);
+    eq(onB2B3true.theBlock, object.secondBlock);
+    eq(onB2B3true.blockUnder, object.thirdBlock);
+}
+
