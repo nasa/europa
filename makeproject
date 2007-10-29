@@ -182,3 +182,21 @@ echo " <binding nddl=\"Resource.change\" cpp=\"NddlResource::change\" include=\"
 echo " <include path=\"$PLASMA_HOME/NDDL/base;$PLASMA_HOME/NDDL/component/Resource\"/>"                >> $DIRECTORY/NDDL.cfg
 echo "</configuration>"                                                                                >> $DIRECTORY/NDDL.cfg
 echo ""                                                                                                >> $DIRECTORY/NDDL.cfg
+
+echo "Adding build.xml"
+cp makeproject.java.build.xml $DIRECTORY/build.xml
+
+echo "Adding build.properties"
+echo "project=$NAME" >> $DIRECTORY/build.properties
+cat makeproject.java.build.properties >> $DIRECTORY/build.properties
+
+echo "Adding "$NAME".bsh"
+echo "String project=\"$NAME\";" >> $DIRECTORY/$NAME.bsh
+cat makeproject.java.project.bsh >> $DIRECTORY/$NAME.bsh
+
+echo "Adding "$NAME".java"
+mkdir $DIRECTORY/java
+mkdir $DIRECTORY/java/$NAME
+echo "package $NAME;" >> $DIRECTORY/java/$NAME/$NAME.java
+cat makeproject.java.project.java >> $DIRECTORY/java/$NAME/$NAME.java
+
