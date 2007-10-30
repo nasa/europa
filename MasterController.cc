@@ -434,24 +434,9 @@ namespace EUROPA {
 
   void MasterController::handleRegistration(){
     initNDDL();
-
-    // Procedural Constraints used with Default Propagation
-    REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");
-    REGISTER_CONSTRAINT(NotEqualConstraint, "neq", "Default");
-    REGISTER_CONSTRAINT(LessThanEqualConstraint, "leq", "Default");
-    REGISTER_CONSTRAINT(LessThanConstraint, "lessThan", "Default");
-    REGISTER_CONSTRAINT(LessThanConstraint, "LessThan", "Default");
-    REGISTER_CONSTRAINT(AddEqualConstraint, "addEq", "Default");
-    REGISTER_CONSTRAINT(NegateConstraint, "neg", "Default");
-    REGISTER_CONSTRAINT(MultEqualConstraint, "mulEq", "Default");
-    REGISTER_CONSTRAINT(AddMultEqualConstraint, "addMulEq", "Default");
-    REGISTER_CONSTRAINT(SubsetOfConstraint, "subsetOf", "Default");
-    REGISTER_CONSTRAINT(SubsetOfConstraint, "Singleton", "Default");
-    REGISTER_CONSTRAINT(LockConstraint, "Lock", "Default");
-    REGISTER_CONSTRAINT(CommonAncestorConstraint, "commonAncestor", "Default");
-    REGISTER_CONSTRAINT(HasAncestorConstraint, "hasAncestor", "Default");
-    REGISTER_CONSTRAINT(TestEQ, "testEQ", "Default");
-    REGISTER_CONSTRAINT(TestLessThan, "testLEQ", "Default");
+    
+    // Use usual function to register constraints:
+    initConstraintLibrary();
   }
 
   void MasterController::logMsg(std::string msg){
