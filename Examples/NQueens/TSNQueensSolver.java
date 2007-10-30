@@ -13,7 +13,7 @@ class TSNQueensSolver
 {
 	protected PSEngine psengine_;
 	protected Map tabuList_;
-	protected int tabuTenure_=5;
+	protected int tabuTenure_=10;
 	protected int curIteration_=0;
 	protected int queenCnt_;
 	protected List observers_;
