@@ -395,6 +395,7 @@ namespace EUROPA {
   void MasterController::terminate(){
     delete s_instance;
     s_instance = NULL;
+    uninitConstraintLibrary();
   }
 
 
