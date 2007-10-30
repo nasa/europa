@@ -8,7 +8,7 @@
   <property file="build.properties"/>
 	
   <property name="src.dir"       value="java"/>
-  <property name="build.dir"     value="classes"/>
+  <property name="build.dir"     value="build"/>
   <property name="dist.dir"      value="dist"/>
 
   <property name="plasma.dir"   value="${env.PLASMA_HOME}"/>
