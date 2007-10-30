@@ -197,6 +197,6 @@ cat makeproject.java.project.bsh >> $DIRECTORY/$NAME.bsh
 echo "Adding "$NAME".java"
 mkdir $DIRECTORY/java
 mkdir $DIRECTORY/java/$NAME
-echo "package $NAME;" >> $DIRECTORY/java/$NAME/$NAME.java
+echo "package $NAME;" >> $DIRECTORY/java/$NAME/Main.java
 cat makeproject.java.project.java >> $DIRECTORY/java/$NAME/$NAME.java
 
