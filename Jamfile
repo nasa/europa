@@ -14,6 +14,7 @@ if SHARED in $(LIBRARIES) {
 PLANWORKS_COMPONENTS = $(PLASMA)/MasterController.cc $(PLASMA)/SingleSolverController.cc ;
 
 Depends plasma-all : all ;
+Depends lib : PSEngine.jar ;
 
 Module plasma : all System ;
 
