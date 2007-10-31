@@ -7,7 +7,6 @@ Module Resource : TemporalNetwork ;
 
 SubInclude PLASMA Resource base ;
 SubInclude PLASMA Resource component ;
-SubInclude PLASMA Resource documentation ;
 SubInclude PLASMA Resource test ;
 
 } # PLASMA_READY

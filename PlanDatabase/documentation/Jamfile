@@ -1,7 +1,0 @@
-SubDir PLASMA PlanDatabase documentation ;
-
-if ! $(PLASMA_READY) {
-
-ModuleDocumentation PlanDatabase ;
-
-} # PLASMA_READY
