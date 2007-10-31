@@ -39,8 +39,8 @@ my $svnrepository = "svn/europa/";
 my $svnname = "PLASMA";
 my $svncanon = "${svnname}_svncanon";
 my $smtphost = "gate.arc.nasa.gov";
-my $resultaddress = "europa-night-build-results\@nx.arc.nasa.gov";
-my $version = "2.2b pl";
+my $resultaddress = "europa-nightly-build\@nx.arc.nasa.gov";
+my $version = "2.3b pl";
 my $help = 0;
 my $man = 0;
 
