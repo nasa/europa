@@ -13,7 +13,6 @@ ModuleLibraries System : $(DLOPEN_LIBRARY) ;
 
 SubInclude PLASMA System base ;
 SubInclude PLASMA System component ;
-SubInclude PLASMA System documentation ;
 SubInclude PLASMA System test ;
 
 } # PLASMA_READY
