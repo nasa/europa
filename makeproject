@@ -198,5 +198,5 @@ echo "Adding Main.java"
 mkdir $DIRECTORY/java
 mkdir $DIRECTORY/java/$NAME
 echo "package $NAME;" >> $DIRECTORY/java/$NAME/Main.java
-cat makeproject.java.project.java >> $DIRECTORY/java/$NAME/$NAME.java
+cat makeproject.java.project.java >> $DIRECTORY/java/$NAME/Main.java
 
