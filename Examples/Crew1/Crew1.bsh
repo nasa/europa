@@ -82,7 +82,15 @@ catch (Exception e) {
 
 //setupDesktop();
 
-//source("RMLWriter.bsh");
+/*
+ 
+String toRML()
+{
+    RMLWriter writer = new RMLWriter();
+    return writer.toRML(psengine);
+}
+ 
+*/
 
 
  

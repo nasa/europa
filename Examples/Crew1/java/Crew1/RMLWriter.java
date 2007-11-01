@@ -1,3 +1,5 @@
+package Crew1;
+
 import psengine.*;
 
 
@@ -131,11 +133,5 @@ public class RMLWriter
 		
 	    return out_.toString();
 	}	
-}
-
-String toRML()
-{
-    RMLWriter writer = new RMLWriter();
-    return writer.toRML(psengine);
 }
 
