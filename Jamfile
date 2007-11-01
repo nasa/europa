@@ -62,6 +62,16 @@ if ! ( "Examples" in $(NO) ) {
 }
 #SubInclude PLASMA DSA ;
 
+PSUI_HOME ?= [ FDirName .. PlanWorks PSUI ] ;
+
+Depends lib : PSUI.jar ;
+Depends PSUI.jar : $(PSUI_HOME) ;
+Depends PSUI.jar : PSEngine.jar ;
+ApacheAnt PSUI.jar :
+  $(PSUI_HOME)/build.xml : dist ;
+
+LOCATE on PSUI.jar = [ FDirName lib ] ;
+
 RemoveBinaries clean-all ;
 Depends clean-all : clean clean-nddl-xml clean-system-xml ;
 
