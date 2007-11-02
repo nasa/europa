@@ -1805,17 +1805,10 @@ namespace EUROPA {
   }
 
   void TestLEQ::handleExecute(){
-    bool intersects = m_arg1.intersects(m_arg2);
-
-    // if there is no intersection, we can remove true or false
-    if(!intersects){
-      if(m_arg1.getUpperBound() <= m_arg2.getLowerBound())
+    if(m_arg1.getUpperBound() <= m_arg2.getLowerBound())
 	m_test.remove(0);
-      else
+    else if(m_arg1.getLowerBound() > m_arg2.getUpperBound())
 	m_test.remove(1);
-    }
-    else if(m_arg1.isSingleton() && m_arg2.isSingleton())
-	m_test.remove(false);
   }
 
 
