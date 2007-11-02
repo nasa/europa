@@ -164,8 +164,8 @@ namespace EUROPA {
     int counter = 0;
     for(std::vector<ConstrainedVariableId>::const_iterator it = m_guards.begin(); it != m_guards.end(); ++it){
       ConstrainedVariableId guard = *it;
-      check_error(guard.isValid());
-			check_error(m_isPositive); // negative testing isn't allowed on singleton guards.
+      checkError(guard.isValid(), guard);
+      check_error(m_isPositive); // negative testing isn't allowed on singleton guards.
 
       debugMsg("RuleInstance:test", "checking  " << counter << " argument:" << guard->toString());
 
@@ -523,6 +523,7 @@ namespace EUROPA {
 
   ConstrainedVariableId RuleInstance::varfromtok(const TokenId& token, const std::string varstring) {
     std::string local_name = varstring.substr(0, varstring.find(Schema::getDelimiter()));
+    checkError(token.isValid(), "Cannot get variable : " << varstring << " from token with id " << token); 
     ConstrainedVariableId retVar;
     if (varstring.find(Schema::getDelimiter()) == std::string::npos) {
       retVar = token->getVariable(local_name);
