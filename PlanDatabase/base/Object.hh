@@ -239,8 +239,13 @@ namespace EUROPA {
    */
     void setParent(const ObjectId& parent);
 
-   static std::string toString(ObjectVarId objVar);
+    static std::string toString(ObjectVarId objVar);
     
+    // Looking for pairwise precedence constraints
+    ConstraintId getPrecedenceConstraint(const TokenId& predecessor, const TokenId& successor) const;
+
+    void getPrecedenceConstraints(const TokenId& token,  std::vector<ConstraintId>& results) const;
+
   protected:
 
     /**
@@ -259,12 +264,6 @@ namespace EUROPA {
     virtual void add(const ObjectId& component);
     virtual void remove(const ObjectId& component);
     void cascadeDelete();
-
-    // Looking for pairwise precedence constraints
-    ConstraintId getPrecedenceConstraint(const TokenId& predecessor, const TokenId& successor) const;
-
-    void getPrecedenceConstraints(const TokenId& token, 
-				  std::vector<ConstraintId>& results) const;
 
     /**
      * @brief Determine if this token participates in any explicit constraints on the timeline
