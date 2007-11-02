@@ -4,12 +4,15 @@
 
 namespace NDDL {
 
+  /**
+   * @todo Swtich these interface to use const LabelStr&
+   */
+
+  /**
+   * Look up the slave in the rule instance context.
+   */
   TokenId tok(const RuleInstanceId& rule, const std::string name) {
-    TokenId token =rule->getSlave(LabelStr(name));
-    if ((!token.isNoId()) && token->isMerged())
-      return token->getActiveToken();
-    else
-      return token;
+    return rule->getSlave(LabelStr(name));
   }
 
   ConstrainedVariableId var(const RuleInstanceId& entity, const std::string name) {
