@@ -255,7 +255,13 @@ namespace EUROPA {
     double getViolation() const;
     std::string getViolationExpl() const;
 
-  	bool isViolated(ConstraintId c) const;
+
+    bool isViolated(ConstraintId c) const;
+
+    /**
+     * @brief Test of the network is in a relaxed state
+     */
+    bool isRelaxed() const;
   	
   protected:
 
