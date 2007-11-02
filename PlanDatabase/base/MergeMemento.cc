@@ -2,6 +2,7 @@
 #include "Token.hh"
 #include "PlanDatabase.hh"
 #include "ConstraintLibrary.hh"
+#include "TokenVariable.hh"
 #include "Utils.hh"
 #include <map>
 
@@ -34,6 +35,9 @@ namespace EUROPA{
 
   MergeMemento::MergeMemento(const TokenId& inactiveToken, const TokenId& activeToken)
     :m_inactiveToken(inactiveToken), m_activeToken(activeToken), m_undoing(false){
+
+    checkError(inactiveToken.isValid(), inactiveToken);
+    checkError(activeToken.isValid(), activeToken);
 
     // Iterate over all variables and impose unaries on spec domain and the corresponding variable in
     // Active Token.
@@ -70,30 +74,7 @@ namespace EUROPA{
     // Iterate over all constraints and deactivate them, as well as create and store new ones where necessary
     for(std::set<ConstraintId>::const_iterator it = deactivatedConstraints.begin(); it != deactivatedConstraints.end(); ++it){
       ConstraintId constraint = *it;
-      m_deactivatedConstraints.push_back(constraint);
-      const std::vector<ConstrainedVariableId>& variables = constraint->getScope();
-      std::vector<ConstrainedVariableId> newScope;
-
-      for(unsigned int i=0;i<variables.size();i++){
-	ConstrainedVariableId var = checkForReplacement(varMap, variables[i]);
-	newScope.push_back(var);
-      }
-
-      // Create the new constraint if it is not a standard constraint - different for unary vs. nary
-      ConstraintId newConstraint;
-
-      // If it is not a standard constraint, then we need to create a surrogate as the target active token
-      // may not have it already.
-      if(!m_inactiveToken->isStandardConstraint(constraint)){
-	newConstraint = ConstraintLibrary::createConstraint(constraint->getName(),
-							    m_activeToken->getPlanDatabase()->getConstraintEngine(),
-							    newScope);
-
-	// Now set the source on the new constraint to give opportunity to pass data
-	newConstraint->setSource(constraint);
-      }
-
-      m_newConstraints.push_back(newConstraint); // Note that it might be a noId()
+      migrateConstraint(constraint);
     }
   }
 
@@ -102,6 +83,9 @@ namespace EUROPA{
   void MergeMemento::undo(bool activeTokenDeleted){
     checkError(activeTokenDeleted || m_activeToken.isValid(), m_activeToken);
     check_error(!m_newConstraints.empty());
+
+    if(m_inactiveToken->isTerminated())
+      return;
  
     // Start by removing all the new constraints that were created. To avoid a call back 
     // into this method for synching data structures, we set a flag for undoing
@@ -109,8 +93,7 @@ namespace EUROPA{
 
     // If the active token is committed, and the merged token is being terminated, then we leave the new constraints.
     // othwreiwse we can nuke them
-    if(!m_inactiveToken->isTerminated() || !m_activeToken->isCommitted())
-      discardAll(m_newConstraints);
+    discardAll(m_newConstraints);
 
     // Clear the deactivated ocnstraints
     m_deactivatedConstraints.clear();
@@ -133,6 +116,10 @@ namespace EUROPA{
     m_undoing = false;
   }
 
+  void MergeMemento::handleAdditionOfInactiveConstraint(const ConstraintId& constraint){
+    migrateConstraint(constraint);
+  }
+
   void MergeMemento::handleRemovalOfInactiveConstraint(const ConstraintId& constraint){
     check_error(m_deactivatedConstraints.size() + m_inactiveToken->getVariables().size() >= m_newConstraints.size());
     checkError(!constraint->isActive(), constraint->toString());
@@ -149,7 +136,8 @@ namespace EUROPA{
 	ConstraintId newConstraint = *it_2;
 
 	// Ensure that if a constraint was migrated, it has the same scope length at least.
-	check_error(newConstraint.isNoId() || (newConstraint->getScope().size() == constraint->getScope().size()));
+	checkError(newConstraint.isNoId() || (newConstraint->getScope().size() == constraint->getScope().size()),
+		   newConstraint->toString() << " does not match " << constraint->toString());
 
 	// Remove from both lists at this location.
 	m_deactivatedConstraints.erase(it_1);
@@ -165,5 +153,39 @@ namespace EUROPA{
       it_1++;
       it_2++;
     }
+  }
+
+  void MergeMemento::migrateConstraint(const ConstraintId& constraint){
+    const std::vector<ConstrainedVariableId>& variables = constraint->getScope();
+    std::vector<ConstrainedVariableId> newScope;
+
+    for(unsigned int i=0;i<variables.size();i++){
+      ConstrainedVariableId var = variables[i];
+
+      // If not a variable of the source token, add directly
+      if(var->getParent() != m_inactiveToken)
+	newScope.push_back(var);
+      else if(var == m_inactiveToken->getState())
+	return;
+      else
+	newScope.push_back(m_activeToken->getVariables()[var->getIndex()]);
+    }
+
+    // Create the new constraint if it is not a standard constraint - different for unary vs. nary
+    ConstraintId newConstraint;
+
+    // If it is not a standard constraint, then we need to create a surrogate as the target active token
+    // may not have it already.
+    if(!m_inactiveToken->isStandardConstraint(constraint)){
+      newConstraint = ConstraintLibrary::createConstraint(constraint->getName(),
+							  m_activeToken->getPlanDatabase()->getConstraintEngine(),
+							  newScope);
+
+      // Now set the source on the new constraint to give opportunity to pass data
+      newConstraint->setSource(constraint);
+    }
+
+    m_deactivatedConstraints.push_back(constraint);
+    m_newConstraints.push_back(newConstraint); // Note that it might be a noId()
   }
 }

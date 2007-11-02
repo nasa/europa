@@ -27,6 +27,7 @@ namespace EUROPA {
 
     void undo(bool activeTokenDeleted);
 
+    void handleAdditionOfInactiveConstraint(const ConstraintId& constraint);
     void handleRemovalOfInactiveConstraint(const ConstraintId& constraint);
 
   private:
