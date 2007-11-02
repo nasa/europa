@@ -42,6 +42,15 @@ namespace EUROPA {
       m_mm->undo(activeTokenDeleted);
   }
 
+  void UnifyMemento::handleAdditionOfInactiveConstraint(const ConstraintId& constraint) {
+    check_error(m_mm.isNoId() || m_sm.isNoId());
+    check_error(!m_mm.isNoId() || !m_sm.isNoId());
+    if (m_mm.isNoId())
+      m_sm->handleAdditionOfInactiveConstraint(constraint);
+    else
+      m_mm->handleAdditionOfInactiveConstraint(constraint);
+  }
+
   void UnifyMemento::handleRemovalOfInactiveConstraint(const ConstraintId& constraint) {
     check_error(m_mm.isNoId() || m_sm.isNoId());
     check_error(!m_mm.isNoId() || !m_sm.isNoId());
