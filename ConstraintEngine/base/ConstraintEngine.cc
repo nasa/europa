@@ -926,6 +926,8 @@ namespace EUROPA
     return m_violationMgr->isViolated(c);
   }  
 
+  bool ConstraintEngine::isRelaxed() const {return m_relaxed;}
+
   int ConstraintEngine::addLinkedVarsForRelaxation(const ConstrainedVariableId& var,
 						   std::list<ConstrainedVariableId>& dest,
 						   std::list<ConstrainedVariableId>::iterator pos,
