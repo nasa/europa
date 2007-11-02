@@ -32,9 +32,6 @@ namespace EUROPA {
 
     int variableCount = 0;
     for (unsigned int i = 0; i < m_variables.size(); i++) {
-      checkError(m_variables[i].isValid(), 
-		 "The argIndex " << i << " is not a valid variable for constraint " << name.toString());
-      m_variables[i]->addConstraint(m_id, i);
 
       // To support determining if it is in fact a Unary, we test for the possible
       // volatility of a variable. Extend this when locking comes on stream!
@@ -43,6 +40,14 @@ namespace EUROPA {
 
       if(!m_variables[i]->isActive())
 	m_deactivationRefCount++;
+
+      checkError(m_variables[i].isValid(), 
+		 "The argIndex " << i << " is not a valid variable for constraint " << name.toString());
+
+      // It is important that the call to add the constraint is only made after the deactivation reference
+      // count has been adjusted since the former effects the active status of the constraint and that may be used by
+      // a handler in figuring how to treat the constraint
+      m_variables[i]->addConstraint(m_id, i);
     }
 
     if(variableCount > 1)
@@ -50,6 +55,11 @@ namespace EUROPA {
 
     // Update if redundant immediately
     notifyBaseDomainRestricted(m_variables[0]);
+
+    if(!isActive()){
+      m_constraintEngine->notifyDeactivated(m_id);
+      handleDeactivate();
+    }
   }
 
   Constraint::~Constraint(){

@@ -184,10 +184,6 @@ namespace EUROPA {
     debugMsg("ConstrainedVariable:addConstraint", "Adding " << constraint->toString() << " to " << toString());
     m_constraints.push_back(ConstraintEntry(constraint, argIndex));
 
-    // If this variable is inactive, then the constraint should be immediately deactivated
-    if(!isActive())
-      constraint->deactivate();
-
     handleConstraintAdded(constraint);
     for(std::set<ConstrainedVariableListenerId>::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
       (*it)->notifyConstraintAdded(constraint, argIndex);
@@ -385,7 +381,7 @@ namespace EUROPA {
     if(m_specifiedFlag)
       getCurrentDomain().relax(m_specifiedValue);
     else // Relax to the base domain
-      getCurrentDomain().relax(internal_baseDomain());
+      getCurrentDomain().relax(baseDomain());
   }
 
   void ConstrainedVariable::insert(double value) {
