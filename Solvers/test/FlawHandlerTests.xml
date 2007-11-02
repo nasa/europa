@@ -1,6 +1,6 @@
 <TestPriorities defaultPriority="1000">
   <!-- Test Default Priority with no guards -->
-  <FlawHandler label="H0" component="StandardVariableHandler"/>
+  <FlawHandler label="H0" component="StandardVariableHandler" maxChoices="10"/>
   <FlawHandler label="H1" variable="start" component="StandardVariableHandler"/>
   <FlawHandler label="H2" variable="end" priority="200" component="StandardVariableHandler"/>
   <FlawHandler label="H3" variable="end" masterPredicate="predicateG" priority="1" component="StandardVariableHandler"/>

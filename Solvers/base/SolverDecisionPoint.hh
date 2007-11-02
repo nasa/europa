@@ -63,7 +63,10 @@ namespace EUROPA {
       static unsigned int customStaticFilterCount() {return 0;}
 
       ContextId getContext() const {return m_context;}
+
       void setContext(const ContextId& ctx) {m_context = ctx;}
+
+      void setCutoff(unsigned int maxChoices) {m_maxChoices = maxChoices;}
 
     protected:
       DecisionPoint(const DbClientId& client, unsigned int entityKey, const LabelStr& explanation);
@@ -90,7 +93,6 @@ namespace EUROPA {
 
       const unsigned int getFlawedEntityKey() {return m_entityKey;}
 
-      //private:
       /**
        * @brief Main accessor for the Solver to execute current choice.
        * @see handleExecute
@@ -103,7 +105,11 @@ namespace EUROPA {
        */
       void undo();
 
-    protected:
+      /**
+       * @brief Test to see if choices should be cut. This will supercede 'hasNext' which can
+       * be specialized in a sub-class. Employs a test of number of choices made vs. maxChoices allowed
+       */
+      bool cut() const;
 
       /**
        * @brief Implement this method to construct the set of choices in the
@@ -144,6 +150,8 @@ namespace EUROPA {
       bool m_isExecuted; /*!< True if executed has been called, and undo has not */
       bool m_initialized; /*!< True if choices have been set up. Otherwise false.*/
       ContextId m_context;
+      unsigned int m_maxChoices; /*!< Set to bound number of choices */
+      unsigned int m_counter; /*!< Increment on execution */
     };
   }
 }

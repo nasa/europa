@@ -7,7 +7,8 @@
 namespace EUROPA {
   namespace SOLVERS {
     DecisionPoint::DecisionPoint(const DbClientId& client, unsigned int entityKey, const LabelStr& explanation) 
-      : Entity(), m_client(client),  m_entityKey(entityKey), m_id(this), m_explanation(explanation), m_isExecuted(false), m_initialized(false) {}
+      : Entity(), m_client(client),  m_entityKey(entityKey), m_id(this), 
+	m_explanation(explanation), m_isExecuted(false), m_initialized(false), m_maxChoices(0), m_counter(0) {}
 
     DecisionPoint::~DecisionPoint() {m_id.remove();}
 
@@ -29,6 +30,7 @@ namespace EUROPA {
       handleExecute();
       debugMsg("DecisionPoint:execute", sl_counter << ": Executed current decision. " << toString());
       m_isExecuted = true;
+      m_counter++;
     }
 
     void DecisionPoint::undo(){
@@ -37,6 +39,8 @@ namespace EUROPA {
       handleUndo();
       m_isExecuted = false;
     }
+
+    bool DecisionPoint::cut() const {return m_maxChoices > 0 && m_counter >= m_maxChoices;}
 
     bool DecisionPoint::isExecuted() const {return m_isExecuted;}
 
