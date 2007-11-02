@@ -227,6 +227,7 @@ namespace EUROPA{
     for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin();
 	it != vars.end(); ++it){
       ConstrainedVariableId var = *it;
+      checkError(var.isValid(), "Invalid variable id: " << var << " found in token: " << m_id);
       if(var->getName() == name)
 	return var;
     }
@@ -583,12 +584,21 @@ namespace EUROPA{
     check_error(isValid());
   }
 
-  void Token::handleRemovalOfInactiveConstraint(const ConstraintId& constraint){
+  void Token::handleAdditionOfInactiveConstraint(const ConstraintId& constraint){
     check_error(constraint.isValid());
     check_error(isMerged());
 
     // Delegate to the unify memento
-    m_unifyMemento->handleRemovalOfInactiveConstraint(constraint);
+    m_unifyMemento->handleAdditionOfInactiveConstraint(constraint);
+  }
+
+  void Token::handleRemovalOfInactiveConstraint(const ConstraintId& constraint){
+    check_error(constraint.isValid());
+    check_error(isMerged());
+
+    // Delegate to the unify memento when not terminated
+    if(!isTerminated())
+      m_unifyMemento->handleRemovalOfInactiveConstraint(constraint);
   }
 
   bool Token::isAssigned() const {
@@ -662,28 +672,37 @@ namespace EUROPA{
   bool Token::isTerminated() const { return m_terminated;}
 
   /**
-   * We can tighten this up further. The variables ommitted from this:
-   * start
-   * end
-   * duration
-   * state
-   * object
+   * @brief Tests if a token can be terminated.
+   * @see terminate
    */
-  bool Token::canBeTerminated() const{
+  bool Token::canBeTerminated(unsigned int tick) const{
     if(isTerminated())
       return false;
 
-    // Rejected tokens can be immediately terminated without any consideration of their variables or their
-    // constraints
+    // Rejected tokens can be immediately terminated without any consideration of their variables or their constraints
     if(isRejected())
       return true;
 
-    // If the constraint is an inactive subgoal of the master, and its master is committed, and it is strictly in the past
-    // then it can be terminated. This is the case of deferred (ignored) subgoals.
-    if(isInactive() && getMaster().isId() && getMaster()->isCommitted()){
-      int latestStart = (int) getStart()->lastDomain().getUpperBound();
-      if(latestStart < getMaster()->getEnd()->lastDomain().getUpperBound())
-	return true;
+    // The relationship to the master has an impact. If the master must be retained then the slave must be retained if it is
+    // in the temporal scope of the master. When a token's end time is less than the tick, it is out of scope for
+    // synchronization at the execution frontier
+    if(m_master.isId()){
+      bool keepingMaster = !m_master->isTerminated() && (tick <= m_master->getEnd()->baseDomain().getUpperBound());
+      if(keepingMaster){
+	// Compute bounds using the active token if this slave is merged
+	TokenId tokenToUse = (m_activeToken.isId() ? m_activeToken : m_id);
+	if(tokenToUse->getEnd()->lastDomain().getUpperBound() > m_master->getStart()->lastDomain().getLowerBound() &&
+	   tokenToUse->getStart()->lastDomain().getLowerBound() < m_master->getEnd()->lastDomain().getUpperBound()){
+	  debugMsg("Token:canBeTerminated", "Cannot terminate " << toString() << " which is a slave of " << m_master->toString());
+	  return false;
+	}
+      }
+    }
+
+    // Now if it has any merged tokens, it cannot be terminated. The merged tokens must be removed first
+    if(!m_mergedTokens.empty()){
+      debugMsg("Token:canBeTerminated", "Cannot terminate " << toString() << " because of remaining supported token " << ((TokenId) * (m_mergedTokens.begin()))->toString() );
+      return false;
     }
 
     // Use this count for iteration later
@@ -692,6 +711,20 @@ namespace EUROPA{
     // If merged, it is redundant if the variables in its scope are supersets of the corresponding active token variable base domain
     if(isMerged()){
       TokenId activeToken = getActiveToken();
+
+      // No basis for termination if active token is not committed.
+      if(!activeToken->isCommitted()){
+	debugMsg("Token:canBeTerminated", "Cannot terminate " << toString() << " which is a slave of " << m_master->toString());
+	return false;
+      }
+
+      // Definitiely can terminate if the active token is terminated
+      if(activeToken->isTerminated())
+	return true;
+
+      // Finally, we have to analyze the variables to see if the merged token is imposing restrictions on the active token
+      // that would be lost if it were removed. The anaylsis will check that the base domain of the active token is a subset of the
+      // derived domain of the merged token.
       const std::vector<ConstrainedVariableId>& activeVariables = activeToken->getVariables();
       // All variables except state variable
       for(unsigned int i = 1; i < varCount; i++){
@@ -710,8 +743,8 @@ namespace EUROPA{
     }
 
     // 
-    // Declare a set to pull together all variables in the scope of a token into a single easy to check collection. Could manage this incrementally on
-    // the token also for greater efficiency
+    // Declare a set to pull together all variables in the scope of a token into a single easy to check collection. 
+    // Could manage this incrementally on the token also for greater efficiency
     std::set<int> allVars;
 
     // Construct the set of constraints on variables of this token. Use a constraint set to avoid memory dependent order.
@@ -763,16 +796,11 @@ namespace EUROPA{
   }
 
   void Token::terminate(){
-    checkError(canBeTerminated(), "Cannot terminate " << toString());
+    // Set this flag immediately so that other tokens can evaluate its state when we are dealing with cascaded effects
+    m_terminated = true;
 
-    // First, if it has any supported tokens, we terminate them first
-    TokenSet mergedTokens = m_mergedTokens;
-    for(TokenSet::const_iterator it = mergedTokens.begin(); it != mergedTokens.end(); ++it){
-      TokenId token = *it;
-      token->terminate();
-      token->discard();
-    }
-
+    // Deactivate all variables to ensure the termination will not cause a relaxation. It is important to do this prior to treating
+    // merged tokens
     for(std::vector<ConstrainedVariableId>::const_iterator it = m_allVariables.begin(); 
 	it != m_allVariables.end(); 
 	++it){
@@ -789,7 +817,15 @@ namespace EUROPA{
       var->deactivate();
     }
 
-    m_terminated = true;
+    // Finally, we can terminate all inactive slaves
+    const TokenSet slaves = getSlaves();
+    for(TokenSet::const_iterator it = slaves.begin(); it != slaves.end(); ++it){
+      TokenId slave = *it;
+      if(slave->isInactive()){
+	slave->terminate();
+	slave->discard();
+      }
+    }
   }
 
   bool Token::noExternalConstraints() const{
