@@ -65,13 +65,13 @@ private:
   void sccMoveFluids (DispatchNode* node, DispatchNode* leader);
   void sccMoveDirectional (DispatchNode* node, DispatchNode* leader,
                            Time offset,
-                           Dedge** Dnode::*ins,
+                           DedgeId* Dnode::*ins,
                            int Dnode::*inCount,
-                           Dedge** Dnode::*outs,
+                           DedgeId* Dnode::*outs,
                            int Dnode::*outCount,
                            int Dnode::*outSize,
-                           Dnode* Dedge::*to,
-                           Dnode* Dedge::*from);
+                           DnodeId Dedge::*to,
+                           DnodeId Dedge::*from);
   void findKeptEdges (DispatchNode* source,
                       void (*keepEdge)(DispatchNode*, DispatchNode*, Time)
                       );
