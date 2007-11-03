@@ -221,7 +221,6 @@ void DispatchGraph::sccMoveFluids (DispatchNode* node, DispatchNode* leader)
   Time relativeDistance = node->distance - leader->distance;
 
   // First move edges from the node to outside
-  // TODO: gcc 4.1.1 is comlaining about not finding a match for the 2 calls to sccMoveDirectional below
   sccMoveDirectional (node, 
 		              leader, 
 		              relativeDistance,
@@ -242,10 +241,6 @@ void DispatchGraph::sccMoveFluids (DispatchNode* node, DispatchNode* leader)
 }
 
 // Following are defined in DistanceGraph.cc
-/*
-void attachEdge (Dedge**& edgeArray, int& size, int& count, Dedge* edge);
-void detachEdge (Dedge**& edgeArray, int& count, Dedge* edge);
-*/
 Void attachEdge (DedgeId*& edgeArray, Int& size, Int& count, DedgeId edge);
 Void detachEdge (DedgeId*& edgeArray, Int& count, DedgeId edge);
 
