@@ -143,9 +143,11 @@ namespace EUROPA {
   }
 %}
 
+%nodefaultctor PSEngine;   
+
   class PSEngine {
   public:
-    PSEngine();
+    static PSEngine* makeInstance();
 
     void start();
     void shutdown();
@@ -172,7 +174,7 @@ namespace EUROPA {
 
     PSSolver* createSolver(const std::string& configurationFile);   
 
-    std::string planDatabaseToString();     
+    std::string planDatabaseToString();         
   };
 
   class PSEntity
@@ -207,7 +209,6 @@ namespace EUROPA {
     void step();
     void solve(int maxSteps,int maxDepth);
     void reset();
-    void destroy();
 
     int getStepCount();
     int getDepth();

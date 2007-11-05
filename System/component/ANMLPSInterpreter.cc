@@ -16,10 +16,11 @@ namespace EUROPA {
 
   }
 
+  // TODO: Do this through configuration with dynamic loading instead
   class ANMLPSInterpreterLocalStatic {
   public:
     ANMLPSInterpreterLocalStatic() {
-      PSEngine::addLanguageInterpreter("anml", new ANMLPSInterpreter());
+      PSEngineImpl::addLanguageInterpreter("anml", new ANMLPSInterpreter());
     }
   };
   

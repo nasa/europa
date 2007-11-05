@@ -1,14 +1,15 @@
 #ifndef _H_PSResources
 #define _H_PSResources
 
-#include "PSEngine.hh"
+#include "PSEngineImpl.hh"
 #include "SAVH_ResourceDefs.hh"
 
 namespace EUROPA {
 
   class PSResource;
   
-  class PSEngineWithResources : public PSEngine {
+  class PSEngineWithResources : public PSEngineImpl 
+  {
   public:
     PSEngineWithResources();
     void start();
@@ -36,13 +37,12 @@ namespace EUROPA {
   };
 
 
-  class PSResource : public PSObject
+  class PSResource : public PSObjectImpl
   {
   public:
     PSResourceProfile* getLimits();
     PSResourceProfile* getLevels();        	  
   protected:
-    friend class PSEngine;
     friend class PSEngineWithResources;
     friend class ResourceWrapperGenerator;
     PSResource(const SAVH::ResourceId& res);

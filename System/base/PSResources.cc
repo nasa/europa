@@ -11,20 +11,24 @@
 
 namespace EUROPA {
 
-  PSEngineWithResources::PSEngineWithResources() : PSEngine() {
+  PSEngineWithResources::PSEngineWithResources()
+      : PSEngineImpl()
+  {
     REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
     REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile);
     REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreatDecisionPoint);
   }
 
-  void PSEngineWithResources::start() {
-    PSEngine::start();
+  void PSEngineWithResources::start() 
+  {
+    PSEngineImpl::start();
 
     new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), m_constraintEngine);
   }
 
-  void PSEngineWithResources::initDatabase() {
-    PSEngine::initDatabase();
+  void PSEngineWithResources::initDatabase() 
+  {
+    PSEngineImpl::initDatabase();
     new ResourcePropagator(LabelStr("Resource"), m_constraintEngine, m_planDatabase);
   }
 
@@ -51,7 +55,7 @@ namespace EUROPA {
     return new PSResource(entity);
   }
   
-  PSResource::PSResource(const SAVH::ResourceId& res) : PSObject(res), m_res(res) {}
+  PSResource::PSResource(const SAVH::ResourceId& res) : PSObjectImpl(res), m_res(res) {}
 
   PSResourceProfile* PSResource::getLimits() {
     return new PSResourceProfile(m_res->getLowerLimit(), m_res->getUpperLimit());
@@ -108,9 +112,9 @@ namespace EUROPA {
   class PSResourceLocalStatic {
   public:
     PSResourceLocalStatic() {
-      PSEngine::addObjectWrapperGenerator("Reservoir", new ResourceWrapperGenerator());
-      PSEngine::addObjectWrapperGenerator("Reusable", new ResourceWrapperGenerator());
-      PSEngine::addObjectWrapperGenerator("Unary", new ResourceWrapperGenerator());
+      PSEngineImpl::addObjectWrapperGenerator("Reservoir", new ResourceWrapperGenerator());
+      PSEngineImpl::addObjectWrapperGenerator("Reusable", new ResourceWrapperGenerator());
+      PSEngineImpl::addObjectWrapperGenerator("Unary", new ResourceWrapperGenerator());
     }
   };
 
