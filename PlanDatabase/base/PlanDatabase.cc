@@ -853,7 +853,7 @@ namespace EUROPA{
 
 	unsigned int latestEndTime = (unsigned int) token->getEnd()->lastDomain().getUpperBound();
 
-	if(latestEndTime <= tick && token->canBeTerminated()){
+	if(latestEndTime <= tick && token->canBeTerminated(tick)){
 	  debugMsg("PlanDatabase:archive:remove", 
 		   token->toString() << " ending by " << latestEndTime << " for tick " << tick);
 	  int earliestStartTime = (int) token->getStart()->lastDomain().getLowerBound();

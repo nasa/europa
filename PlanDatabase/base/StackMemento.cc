@@ -48,5 +48,7 @@ namespace EUROPA{
     m_stackConstraints.clear();
   }
 
+  void StackMemento::handleAdditionOfInactiveConstraint(const ConstraintId& constraint){ }
+
   void StackMemento::handleRemovalOfInactiveConstraint(const ConstraintId& constraint){ }
 }

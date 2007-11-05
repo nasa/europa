@@ -35,6 +35,12 @@ namespace EUROPA {
       checkError(m_priority >= 0 && m_priority < WEIGHT_BASE(), 
                  m_priority << " outside valid range of [0 " << WEIGHT_BASE()-1 << "]");
  
+      // Establish the max choices to cut a decision
+      const char* maxChoicesStr =  m_configData->Attribute("maxChoices");
+      m_maxChoices = atof(maxChoicesStr);
+
+      checkError(m_maxChoices >= 0, maxChoicesStr << " must be positive");
+
       // The base uses a number that exceeds the max absolute value priority allowed.
       // It also multiplies by a minimum of 1 to ensure that 0 guards are handled as low weights.
       // Note also that we make it 2 so that defaul t compatibility heuristics 
@@ -59,6 +65,11 @@ namespace EUROPA {
           s_element->SetAttribute("priority", "99999");
       }
 
+      if(s_element->Attribute("maxChoices") == NULL){
+	// Set a default of 0 which implies no cut to be applied
+        s_element->SetAttribute("maxChoices", "0");
+      }
+
       return s_element;
     }
   
@@ -70,6 +81,8 @@ namespace EUROPA {
  
     double FlawHandler::getWeight() const {return m_weight;}
     
+    unsigned int FlawHandler::getMaxChoices() const {return m_maxChoices;}
+
     std::string FlawHandler::toString() const{
       std::stringstream sstr;
 

@@ -279,7 +279,7 @@ namespace EUROPA {
 
       condDebugMsg(m_stepCount % 50 == 0, "Solver:heartbeat", std::endl << printOpenDecisions());
 
-      if(m_activeDecision->hasNext()){
+      if(!m_activeDecision->cut() && m_activeDecision->hasNext()){
         m_activeDecision->execute();
 	bool isConsistent = m_db->getConstraintEngine()->propagate();
         m_lastExecutedDecision = (isConsistent ? m_activeDecision->toString() : "Failed.");
@@ -298,7 +298,7 @@ namespace EUROPA {
         }
       }
       else {
-        debugMsg("Solver:backtrack", "Backtracking because " << m_activeDecision->toString() << " has no further decisions.");
+        debugMsg("Solver:backtrack", "Backtracking because " << m_activeDecision->toString() << " has no further choices.");
       }
 
       // If we get here then we must have to backtrack. so do it!
@@ -342,7 +342,7 @@ namespace EUROPA {
         }
 
         // If there are available choices to take, we can quit and resume normal search
-        backtracking = !m_activeDecision->hasNext();
+        backtracking = m_activeDecision->cut() || !m_activeDecision->hasNext();
 
         // If still retracting, we must discard the active decision
         if(backtracking){

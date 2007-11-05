@@ -464,7 +464,9 @@ namespace EUROPA {
 
       FlawHandlerId flawHandler = getFlawHandler(entity);
       checkError(flawHandler.isValid(), "On " << sl_counter << ": No flawHandler for " << entity->toString());
-      return flawHandler->create(m_db->getClient(), entity, explanation);
+      DecisionPointId dp =  flawHandler->create(m_db->getClient(), entity, explanation);
+      dp->setCutoff(flawHandler->getMaxChoices());
+      return dp;
     }
 
     FlawHandlerId FlawManager::getFlawHandler(const EntityId& entity){

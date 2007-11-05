@@ -8,7 +8,7 @@
 
 #include "Nddl.hh" /*!< Includes protypes required to load a model */
 #include "SolverAssemblyWithResources.hh" /*!< For using a test EUROPA Assembly */
-#include "PSEngine.hh" 
+#include "PSResources.hh" 
 #include "Debug.hh"
 
 using namespace EUROPA;
@@ -72,7 +72,7 @@ void executeWithAssembly(const char* plannerConfig, const char* txSource)
 bool executeWithPSEngine(const char* plannerConfig, const char* txSource, int startHorizon, int endHorizon, int maxSteps)
 {
     try {
-	  PSEngine engine;
+	  PSEngineWithResources engine;
 	
 	  engine.start();
 	  engine.executeTxns(txSource,true,true);

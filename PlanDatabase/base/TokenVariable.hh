@@ -42,6 +42,8 @@ namespace EUROPA{
 
     void specify(double singletonValue);
 
+    void relax();
+
     void reset();
 
     void handleRestrictBaseDomain(const AbstractDomain& baseDomain);
@@ -242,6 +244,12 @@ namespace EUROPA{
   void TokenVariable<DomainType>::handleConstraintAdded(const ConstraintId& constraint){
     // Not valid to add a constraint if token is rejected
     check_error(!this->m_parentToken->isRejected());
+
+    // If the token has been merged, the new constraint should be migrated
+    if(this->m_parentToken->isMerged()){
+      checkError(!constraint->isActive(), "Constraint should be inactive if it is on a merged token.");
+      this->m_parentToken->handleAdditionOfInactiveConstraint(constraint);
+    }
   }
 
   template <class DomainType>
@@ -261,5 +269,12 @@ namespace EUROPA{
     else
       return true;
   }
+
+  template<class DomainType>
+  void TokenVariable<DomainType>::relax() {
+    Variable<DomainType>::relax();
+    this->m_derivedDomain->intersect(*m_integratedBaseDomain);
+  }
+
 }
 #endif

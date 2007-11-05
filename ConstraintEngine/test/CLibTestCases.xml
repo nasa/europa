@@ -43841,4 +43841,16 @@
 			<IntervalIntDomain lb="13" ub="13"/>
 		</Outputs>
 	</Constraint>
+	<Constraint name="testLEQ" test="3397">
+		<Inputs>
+			<BoolDomain><element value="false"/><element value="true"/></BoolDomain>
+			<IntervalDomain lb="0.0" ub="10.0"/>
+			<IntervalDomain lb="10.0" ub="10.0"/>
+		</Inputs>
+		<Outputs>
+			<BoolDomain><element value="true"/></BoolDomain>
+			<IntervalDomain lb="0.0" ub="10.0"/>
+			<IntervalDomain lb="10.0" ub="10.0"/>
+		</Outputs>
+	</Constraint>
 </ConstraintTests>

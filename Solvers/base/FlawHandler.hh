@@ -42,6 +42,10 @@ namespace EUROPA {
        */
       double getWeight() const;
 
+      /**
+       * @brief Accessor for th emax number of choices to permit.
+       */
+      unsigned int getMaxChoices() const;
 
       /**
        * @brief Tests for a match between this factory and the entity
@@ -190,7 +194,8 @@ namespace EUROPA {
       const PlanDatabaseId& getPlanDatabase(const ConstrainedVariableId& tokenVar);
 
       PlanDatabaseId m_db;
-
+      
+      unsigned int m_maxChoices; /*!< Allows a cut operator on choices. xml attribute is 'maxChoices' */
     }; 
 
     /**

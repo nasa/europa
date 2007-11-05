@@ -1,7 +1,7 @@
 #ifndef _H_ANMLPSInterpreter
 #define _H_ANMLPSInterpreter
 
-#include "PSEngine.hh"
+#include "PSEngineImpl.hh"
 #include "ANMLTranslator.hh"
 
 namespace EUROPA {

@@ -19,6 +19,7 @@ namespace EUROPA {
     StackMemento(const TokenId& activeTokenToStack, const TokenId& activeToken);
     void undo(bool activeTokenDeleted);
 
+    void handleAdditionOfInactiveConstraint(const ConstraintId& constraint);
     void handleRemovalOfInactiveConstraint(const ConstraintId& constraint);
     const TokenId m_activeTokenToStack;
     const TokenId m_activeToken;

@@ -267,13 +267,10 @@ namespace EUROPA {
   }
 
   bool Schema::hasParent(const LabelStr& type) const {
-    static std::set<double> sl_trueCache, sl_falseCache;
+    static std::set<double> sl_trueCache;
 
     if(sl_trueCache.find(type) != sl_trueCache.end())
       return true;
-
-    if(sl_falseCache.find(type) != sl_falseCache.end())
-      return false;
 
     bool result = false;
 
@@ -290,8 +287,6 @@ namespace EUROPA {
     // If we get a true result, store it in the cache
     if(result)
       sl_trueCache.insert(type);
-    else
-      sl_falseCache.insert(type);
 
     return result;
   }

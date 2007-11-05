@@ -631,6 +631,10 @@ namespace EUROPA {
     debugMsg("TemporalPropagator:canBeConcurrent", 
 	     "determining if  " << first->lastDomain() << " can be concurrent with " << second->lastDomain());
 
+    // If either node does not have a timepoint, then it means that there is no temporal constraint for it. That being the case,
+    // the only question is whether the domains have an intersection
+    if(_first.isNoId() || _second.isNoId())
+      return first->lastDomain().intersects(second->lastDomain());
 
     checkError( !first->lastDomain().areBoundsFinite() || m_tnet->hasEdgeToOrigin(_first), 
 	       "It should have an edge to the origin, but it doesn't!" << 

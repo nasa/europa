@@ -272,8 +272,9 @@ namespace EUROPA {
 
     /**
      * @brief Test if the token can be terminated. Must not have active constraints.
+     * @param tick The current clock value
      */
-    bool canBeTerminated() const;
+    bool canBeTerminated(unsigned int tick) const;
 
     /**
      * @brief Terminate a token, disconnects it from propagation.
@@ -317,6 +318,14 @@ namespace EUROPA {
      */
     void cancel();
 
+    /**
+     * @brief Invoked when a constraint is added to a merged token
+     */
+    void handleAdditionOfInactiveConstraint(const ConstraintId& constraint);
+
+    /**
+     * @brief Invoked when a constaint is removed from a merged token
+     */
     void handleRemovalOfInactiveConstraint(const ConstraintId& constraint);
 
     /**

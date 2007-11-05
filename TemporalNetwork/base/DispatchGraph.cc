@@ -221,15 +221,18 @@ void DispatchGraph::sccMoveFluids (DispatchNode* node, DispatchNode* leader)
   Time relativeDistance = node->distance - leader->distance;
 
   // First move edges from the node to outside
-  // TODO: gcc 4.1.1 is comlaining about not finding a match for the 2 calls to sccMoveDirectional below
-  sccMoveDirectional (node, leader, relativeDistance,
+  sccMoveDirectional (node, 
+		              leader, 
+		              relativeDistance,
                       &DispatchNode::inArray, &DispatchNode::inCount,
                       &DispatchNode::outArray, &DispatchNode::outCount,
                       &DispatchNode::outArraySize,
                       &Dedge::to, &Dedge::from);
 
   // Now move edges TO the node FROM outside, by reversing directions.
-  sccMoveDirectional (node, leader, -relativeDistance,
+  sccMoveDirectional (node, 
+		              leader, 
+		              -relativeDistance,
                       &DispatchNode::outArray, &DispatchNode::outCount,
                       &DispatchNode::inArray, &DispatchNode::inCount,
                       &DispatchNode::inArraySize,
@@ -238,8 +241,9 @@ void DispatchGraph::sccMoveFluids (DispatchNode* node, DispatchNode* leader)
 }
 
 // Following are defined in DistanceGraph.cc
-void attachEdge (Dedge**& edgeArray, int& size, int& count, Dedge* edge);
-void detachEdge (Dedge**& edgeArray, int& count, Dedge* edge);
+Void attachEdge (DedgeId*& edgeArray, Int& size, Int& count, DedgeId edge);
+Void detachEdge (DedgeId*& edgeArray, Int& count, DedgeId edge);
+
 
 /* TBW: Replaced by newer version that does more error checking
 void DispatchGraph::sccMoveDirectional (DispatchNode* node,
@@ -294,13 +298,13 @@ void DispatchGraph::sccMoveDirectional (DispatchNode* node,
 void DispatchGraph::sccMoveDirectional (DispatchNode* node,
                                         DispatchNode* leader,
                                         Time offset,
-                                        Dedge** Dnode::*ins,
+                                        DedgeId* Dnode::*ins,
                                         int Dnode::*inCount,
-                                        Dedge** Dnode::*outs,
+                                        DedgeId* Dnode::*outs,
                                         int Dnode::*outCount,
                                         int Dnode::*outSize,
-                                        Dnode* Dedge::*to,
-                                        Dnode* Dedge::*from)
+                                        DnodeId Dedge::*to,
+                                        DnodeId Dedge::*from)
 {
   // We use args that are pointers to the graph traversal member functions
   // so we can easily reverse the direction of graph operations.
@@ -321,7 +325,8 @@ void DispatchGraph::sccMoveDirectional (DispatchNode* node,
       Dedge* leaderEdge = 0;
       for (Int j=0; j < leader->*outCount; j++) {
         Dedge* e = (leader->*outs)[j];
-        if (e->*to == next)
+        Dnode* eTo = (Dnode*)(e->*to);
+        if (eTo == next)
           leaderEdge = e;
       }
       if (leaderEdge) {

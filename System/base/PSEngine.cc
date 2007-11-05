@@ -3,7 +3,7 @@
  *
  */
  
-#include "PSEngine.hh"
+#include "PSEngineImpl.hh"
 #include "ConstrainedVariable.hh"
 #include "Entity.hh"
 #include "LabelStr.hh"
@@ -36,13 +36,19 @@
 
 namespace EUROPA {
   
-  std::map<double, ObjectWrapperGenerator*>& PSEngine::getObjectWrapperGenerators()
+  // TODO : allow user to register factories through configuration. dynamically load them.
+  PSEngine* PSEngine::makeInstance()
+  {
+	  return new PSEngineImpl();
+  }
+
+  std::map<double, ObjectWrapperGenerator*>& PSEngineImpl::getObjectWrapperGenerators()
   {
       static std::map<double, ObjectWrapperGenerator*> objectWrapperGenerators;
       return objectWrapperGenerators;
   }
   
-  std::map<double, PSLanguageInterpreter*>& PSEngine::getLanguageInterpreters()
+  std::map<double, PSLanguageInterpreter*>& PSEngineImpl::getLanguageInterpreters()
   {
       static std::map<double, PSLanguageInterpreter*> languageInterpreters;
       return languageInterpreters;
@@ -67,18 +73,18 @@ namespace EUROPA {
   	return os.str();
   }
 
-  PSObject::PSObject(const ObjectId& obj) : PSEntity(obj), m_obj(obj) {
+  PSObjectImpl::PSObjectImpl(const ObjectId& obj) : PSObject(obj), m_obj(obj) {
   }
 
-  PSObject::~PSObject() {
+  PSObjectImpl::~PSObjectImpl() {
   }
 
-  PSList<PSVariable*> PSObject::getMemberVariables() {
+  PSList<PSVariable*> PSObjectImpl::getMemberVariables() {
     PSList<PSVariable*> retval;
     const std::vector<ConstrainedVariableId>& vars = m_obj->getVariables();
     for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
 	++it) {
-      PSVariable* var = new PSVariable(*it); 
+      PSVariable* var = new PSVariableImpl(*it); 
       check_runtime_error(var != NULL);
       retval.push_back(var);
     }
@@ -87,125 +93,125 @@ namespace EUROPA {
   }
 
   const std::string OBJECT_STR("OBJECT");
-  const std::string& PSObject::getEntityType() const 
+  const std::string& PSObjectImpl::getEntityType() const 
   {
   	return OBJECT_STR;
   }
 
-  std::string PSObject::getObjectType() const 
+  std::string PSObjectImpl::getObjectType() const 
   {
   	return m_obj->getType().toString();
   }
 
-  PSVariable* PSObject::getMemberVariable(const std::string& name) {
+  PSVariable* PSObjectImpl::getMemberVariable(const std::string& name) {
     LabelStr realName(name);
     PSVariable* retval = NULL;
     const std::vector<ConstrainedVariableId>& vars = m_obj->getVariables();
     for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
 	++it) {
       if((*it)->getName() == realName) {
-	retval = new PSVariable(*it);
+	retval = new PSVariableImpl(*it);
 	break;
       }
     }
     return retval;
   }
 
-  PSList<PSToken*> PSObject::getTokens() {
+  PSList<PSToken*> PSObjectImpl::getTokens() {
     PSList<PSToken*> retval;
     const TokenSet& tokens = m_obj->getTokens();
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
-      PSToken* tok = new PSToken(*it);
+      PSToken* tok = new PSTokenImpl(*it);
       check_runtime_error(tok != NULL);
       retval.push_back(tok);
     }
     return retval;
   }
 
-  PSToken::PSToken(const TokenId& tok) : PSEntity(tok), m_tok(tok) {
+  PSTokenImpl::PSTokenImpl(const TokenId& tok) : PSToken(tok), m_tok(tok) {
   }
 
   const std::string TOKEN_STR("TOKEN");
-  const std::string& PSToken::getEntityType() const 
+  const std::string& PSTokenImpl::getEntityType() const 
   {
   	return TOKEN_STR;
   }
 
-  std::string PSToken::getTokenType() const 
+  std::string PSTokenImpl::getTokenType() const 
   {
   	return m_tok->getUnqualifiedPredicateName().toString();
   }
 
-  PSObject* PSToken::getOwner() {
+  PSObject* PSTokenImpl::getOwner() {
     if(!m_tok->isAssigned())
       return NULL;
       
     ObjectVarId objVar = m_tok->getObject();
-    return new PSObject(ObjectId(objVar->lastDomain().getSingletonValue()));
+    return new PSObjectImpl(ObjectId(objVar->lastDomain().getSingletonValue()));
   }
   
-  PSToken* PSToken::getMaster() {
+  PSToken* PSTokenImpl::getMaster() {
   	TokenId master = m_tok->getMaster();
   	if (master.isNoId())
   	    return NULL;
   	
-  	return new PSToken(master);    
+  	return new PSTokenImpl(master);    
   }
   
-  PSList<PSToken*> PSToken::getSlaves() {
+  PSList<PSToken*> PSTokenImpl::getSlaves() {
     const TokenSet& tokens = m_tok->getSlaves();
     PSList<PSToken*> retval;
 
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
-      PSToken* tok = new PSToken(*it);
+      PSToken* tok = new PSTokenImpl(*it);
       retval.push_back(tok);
     }
     return retval;    	
   }  
 
   // TODO: Implement these
-  double PSToken::getViolation() const 
+  double PSTokenImpl::getViolation() const 
   {
 	  return m_tok->getViolation();
   }
   
-  std::string PSToken::getViolationExpl() const 
+  std::string PSTokenImpl::getViolationExpl() const 
   { 
 	  return m_tok->getViolationExpl();
   }
 
-  PSList<PSVariable*> PSToken::getParameters() {
+  PSList<PSVariable*> PSTokenImpl::getParameters() {
     PSList<PSVariable*> retval;
     const std::vector<ConstrainedVariableId>& vars = m_tok->getVariables();
     for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
 	++it) {
-      PSVariable* var = new PSVariable(*it);
+      PSVariable* var = new PSVariableImpl(*it);
       check_runtime_error(var != NULL);
       retval.push_back(var);
     }
     return retval;
   }
 
-  PSVariable* PSToken::getParameter(const std::string& name) {
+  PSVariable* PSTokenImpl::getParameter(const std::string& name) {
     LabelStr realName(name);
     PSVariable* retval = NULL;
     const std::vector<ConstrainedVariableId>& vars = m_tok->getVariables();
     for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
 	++it) {
       if((*it)->getName() == realName) {
-	retval = new PSVariable(*it);
+	retval = new PSVariableImpl(*it);
 	break;
       }
     }
     return retval;
   }
 
-  bool PSToken::isFact()
+  bool PSTokenImpl::isFact()
   {
   	return m_tok->isFact();
   }
   
-  std::string PSToken::toString()
+  std::string PSTokenImpl::toString()
   {
   	std::ostringstream os;
   	
@@ -227,7 +233,7 @@ namespace EUROPA {
   }
 
 
-  PSVariable::PSVariable(const ConstrainedVariableId& var) : PSEntity(var), m_var(var) {
+  PSVariableImpl::PSVariableImpl(const ConstrainedVariableId& var) : PSVariable(var), m_var(var) {
     check_runtime_error(m_var.isValid());
     if(m_var->baseDomain().isString())
       m_type =  STRING;
@@ -251,37 +257,37 @@ namespace EUROPA {
   }
 
   const std::string VARIABLE_STR("VARIABLE");
-  const std::string& PSVariable::getEntityType() const 
+  const std::string& PSVariableImpl::getEntityType() const 
   {
   	return VARIABLE_STR;
   }
   
-  bool PSVariable::isEnumerated() {
+  bool PSVariableImpl::isEnumerated() {
     check_runtime_error(m_var.isValid());
     return m_var->baseDomain().isEnumerated();
   }
 
-  bool PSVariable::isInterval() {
+  bool PSVariableImpl::isInterval() {
     check_runtime_error(m_var.isValid());
     return m_var->baseDomain().isInterval();
   }
   
-  PSVarType PSVariable::getType() {
+  PSVarType PSVariableImpl::getType() {
     check_runtime_error(m_var.isValid());
     return m_type;
   }
 
-  bool PSVariable::isNull() {
+  bool PSVariableImpl::isNull() {
     check_runtime_error(m_var.isValid());
     return m_var->lastDomain().isEmpty() && !m_var->isSpecified();
   }
 
-  bool PSVariable::isSingleton() {
+  bool PSVariableImpl::isSingleton() {
     check_runtime_error(m_var.isValid());
     return m_var->isSpecified() || m_var->lastDomain().isSingleton();
   }
 
-  PSVarValue PSVariable::getSingletonValue() {
+  PSVarValue PSVariableImpl::getSingletonValue() {
     check_runtime_error(m_var.isValid());
     check_runtime_error(isSingleton());
     
@@ -291,7 +297,7 @@ namespace EUROPA {
       return PSVarValue(m_var->lastDomain().getSingletonValue(), getType());
   }
 
-  PSList<PSVarValue> PSVariable::getValues() {
+  PSList<PSVarValue> PSVariableImpl::getValues() {
     check_runtime_error(m_var.isValid());
     check_runtime_error(!isSingleton() && isEnumerated());
     PSList<PSVarValue> retval;
@@ -307,19 +313,19 @@ namespace EUROPA {
   }
 
 
-  double PSVariable::getLowerBound() {
+  double PSVariableImpl::getLowerBound() {
     check_runtime_error(m_var.isValid());
     check_runtime_error(isInterval());
     return m_var->lastDomain().getLowerBound();
   }
 
-  double PSVariable::getUpperBound() {
+  double PSVariableImpl::getUpperBound() {
     check_runtime_error(m_var.isValid());
     check_runtime_error(isInterval());
     return m_var->lastDomain().getUpperBound();
   }
 
-  void PSVariable::specifyValue(PSVarValue& v) {
+  void PSVariableImpl::specifyValue(PSVarValue& v) {
     check_runtime_error(m_var.isValid());
     check_runtime_error(getType() == v.getType());
 
@@ -348,7 +354,7 @@ namespace EUROPA {
     debugMsg("PSVariable:specify","After propagate for var:" << m_var->toString());
   }
 
-  void PSVariable::reset() {
+  void PSVariableImpl::reset() {
     check_runtime_error(m_var.isValid());
     debugMsg("PSVariable:reset",
 	     "Re-setting " << m_var->toString());
@@ -356,28 +362,28 @@ namespace EUROPA {
     m_var->getConstraintEngine()->propagate();
   }
 
-  double PSVariable::getViolation() const
+  double PSVariableImpl::getViolation() const
   {
     check_runtime_error(m_var.isValid());
     return m_var->getViolation();
   }
   
-  std::string PSVariable::getViolationExpl() const 
+  std::string PSVariableImpl::getViolationExpl() const 
   { 
     check_runtime_error(m_var.isValid());
     return m_var->getViolationExpl();
   }
   
-  PSEntity* PSVariable::getParent() {
+  PSEntity* PSVariableImpl::getParent() {
     EntityId parent(m_var->getParent());
     if(parent.isNoId())
       return NULL;
     else if(TokenId::convertable(parent))
-      return new PSToken((TokenId) parent);
+      return new PSTokenImpl((TokenId) parent);
     else if(ObjectId::convertable(parent))
-      return new PSObject((ObjectId) parent);
+      return new PSObjectImpl((ObjectId) parent);
     else if(RuleInstanceId::convertable(parent))
-      return new PSToken(((RuleInstanceId)parent)->getToken());
+      return new PSTokenImpl(((RuleInstanceId)parent)->getToken());
     else {
       checkRuntimeError(ALWAYS_FAIL,
 			"Variable " << toString() << " has a parent that isn't a token, " <<
@@ -386,7 +392,7 @@ namespace EUROPA {
     return NULL;
   }
 
-  std::string PSVariable::toString() {
+  std::string PSVariableImpl::toString() {
     check_runtime_error(m_var.isValid());
     std::ostringstream os;
     
@@ -418,7 +424,7 @@ namespace EUROPA {
   
   PSObject* PSVarValue::asObject() const {
     check_runtime_error(m_type == OBJECT);
-    return new PSObject(ObjectId(m_val));
+    return new PSObjectImpl(ObjectId(m_val));
   }
 
   int PSVarValue::asInt() const {check_runtime_error(m_type == INTEGER); return (int) m_val;}
@@ -463,7 +469,7 @@ namespace EUROPA {
   	return os.str();
   }
    
-  PSSolver::PSSolver(const SOLVERS::SolverId& solver, const std::string& configFilename,
+  PSSolverImpl::PSSolverImpl(const SOLVERS::SolverId& solver, const std::string& configFilename,
 		     SOLVERS::PlanWriter::PartialPlanWriter* ppw) 
       : m_solver(solver) 
       , m_configFile(configFilename),
@@ -472,54 +478,54 @@ namespace EUROPA {
     m_ppw->setSolver(m_solver);
   }
 
-  PSSolver::~PSSolver() {
+  PSSolverImpl::~PSSolverImpl() {
     if(m_solver.isValid())
       destroy();
   }
 
-  void PSSolver::step() {
+  void PSSolverImpl::step() {
     m_solver->step();
   }
 
-  void PSSolver::solve(int maxSteps, int maxDepth) {
+  void PSSolverImpl::solve(int maxSteps, int maxDepth) {
     m_solver->solve(maxSteps, maxDepth);
   }
 
-  void PSSolver::reset() {
+  void PSSolverImpl::reset() {
     m_solver->reset();
   }
 
-  void PSSolver::destroy() {
+  void PSSolverImpl::destroy() {
     m_ppw->clearSolver();
     delete (SOLVERS::Solver*) m_solver;
     m_solver = SOLVERS::SolverId::noId();
   }
 
-  int PSSolver::getStepCount() {
+  int PSSolverImpl::getStepCount() {
     return (int) m_solver->getStepCount();
   }
 
-  int PSSolver::getDepth() {
+  int PSSolverImpl::getDepth() {
     return (int) m_solver->getDepth();
   }
 
-  bool PSSolver::isExhausted() {
+  bool PSSolverImpl::isExhausted() {
     return m_solver->isExhausted();
   }
 
-  bool PSSolver::isTimedOut() {
+  bool PSSolverImpl::isTimedOut() {
     return m_solver->isTimedOut();
   }
 
-  bool PSSolver::isConstraintConsistent() {
+  bool PSSolverImpl::isConstraintConsistent() {
     return m_solver->isConstraintConsistent();
   }
 
-  bool PSSolver::hasFlaws() {
+  bool PSSolverImpl::hasFlaws() {
     return !m_solver->noMoreFlaws();
   }
 
-  int PSSolver::getOpenDecisionCnt() {
+  int PSSolverImpl::getOpenDecisionCnt() {
     int count = 0;
     IteratorId flawIt = m_solver->createIterator();
     while(!flawIt->done()) {
@@ -530,7 +536,7 @@ namespace EUROPA {
     return count;
   }
 
-  PSList<std::string> PSSolver::getFlaws() {
+  PSList<std::string> PSSolverImpl::getFlaws() {
     PSList<std::string> retval;
 
     /*    
@@ -553,36 +559,36 @@ namespace EUROPA {
     return retval;
   }
 
-  std::string PSSolver::getLastExecutedDecision() {
+  std::string PSSolverImpl::getLastExecutedDecision() {
     return m_solver->getLastExecutedDecision();
   }
 
-  const std::string& PSSolver::getConfigFilename() {return m_configFile;}
+  const std::string& PSSolverImpl::getConfigFilename() {return m_configFile;}
 
-  int PSSolver::getHorizonStart() {
+  int PSSolverImpl::getHorizonStart() {
     return (int) SOLVERS::HorizonFilter::getHorizon().getLowerBound();
   }
 
-  int PSSolver::getHorizonEnd() {
+  int PSSolverImpl::getHorizonEnd() {
     return (int) SOLVERS::HorizonFilter::getHorizon().getUpperBound();
   }
 
-  void PSSolver::configure(int horizonStart, int horizonEnd) {
+  void PSSolverImpl::configure(int horizonStart, int horizonEnd) {
     check_runtime_error(horizonStart <= horizonEnd);
     SOLVERS::HorizonFilter::getHorizon().reset(IntervalIntDomain());
     SOLVERS::HorizonFilter::getHorizon().intersect(horizonStart, horizonEnd);
   }
 
-  PSEngine::PSEngine() : m_ppw(NULL)
+  PSEngineImpl::PSEngineImpl() : m_ppw(NULL)
   {
   }
 
-  PSEngine::~PSEngine() 
+  PSEngineImpl::~PSEngineImpl() 
   {
   }
 
   //FIXME
-  void PSEngine::start() {		
+  void PSEngineImpl::start() {		
     Error::doThrowExceptions(); // throw exceptions!
     Error::doDisplayErrors();
     check_runtime_error(m_constraintEngine.isNoId());
@@ -600,7 +606,7 @@ namespace EUROPA {
   }
 
   //FIXME
-  void PSEngine::shutdown() {
+  void PSEngineImpl::shutdown() {
     if(m_ppw != NULL) {
       delete m_ppw;
       m_ppw = NULL;
@@ -632,7 +638,7 @@ namespace EUROPA {
     Entity::purgeEnded();
   }
     
-  void PSEngine::initDatabase() 
+  void PSEngineImpl::initDatabase() 
   {
     m_planDatabase = (new PlanDatabase(m_constraintEngine, Schema::instance()))->getId();
     PropagatorId temporalPropagator =
@@ -647,7 +653,7 @@ namespace EUROPA {
 						 m_rulesEngine);
   }
    
-  void PSEngine::loadModel(const std::string& modelFileName) {
+  void PSEngineImpl::loadModel(const std::string& modelFileName) {
     check_runtime_error(m_planDatabase.isNoId());
     check_runtime_error(m_rulesEngine.isNoId());
 
@@ -665,7 +671,7 @@ namespace EUROPA {
     initDatabase();    
   }
 
-  void PSEngine::executeTxns(const std::string& xmlTxnSource,bool isFile,bool useInterpreter) {
+  void PSEngineImpl::executeTxns(const std::string& xmlTxnSource,bool isFile,bool useInterpreter) {
   	// if we're using the TransactionInterpreter, we'll be starting from scratch
     if(m_planDatabase.isNoId())
           initDatabase();
@@ -692,7 +698,7 @@ namespace EUROPA {
   }
 
   //FIXME
-  std::string PSEngine::executeScript(const std::string& language, const std::string& script) {
+  std::string PSEngineImpl::executeScript(const std::string& language, const std::string& script) {
     std::map<double, PSLanguageInterpreter*>::iterator it =
       getLanguageInterpreters().find(LabelStr(language));
     checkRuntimeError(it != getLanguageInterpreters().end(),
@@ -700,7 +706,7 @@ namespace EUROPA {
     return it->second->interpret(script);
   }
 
-  PSList<PSObject*> PSEngine::getObjectsByType(const std::string& objectType) {
+  PSList<PSObject*> PSEngineImpl::getObjectsByType(const std::string& objectType) {
     check_runtime_error(m_planDatabase.isValid());
     
     PSList<PSObject*> retval;
@@ -715,65 +721,65 @@ namespace EUROPA {
     return retval;
   }
 
-  PSObject* PSEngine::getObjectByKey(PSEntityKey id) {
+  PSObject* PSEngineImpl::getObjectByKey(PSEntityKey id) {
     check_runtime_error(m_planDatabase.isValid());
 
     EntityId entity = Entity::getEntity(id);
     check_runtime_error(entity.isValid());
-    return new PSObject(entity);
+    return new PSObjectImpl(entity);
   }
 
-  PSObject* PSEngine::getObjectByName(const std::string& name) {
+  PSObject* PSEngineImpl::getObjectByName(const std::string& name) {
     check_runtime_error(m_planDatabase.isValid());
     ObjectId obj = m_planDatabase->getObject(LabelStr(name));
     check_runtime_error(obj.isValid());
-    return new PSObject(obj);
+    return new PSObjectImpl(obj);
   }
 
-  PSList<PSToken*> PSEngine::getTokens() {
+  PSList<PSToken*> PSEngineImpl::getTokens() {
     check_runtime_error(m_planDatabase.isValid());
 
     const TokenSet& tokens = m_planDatabase->getTokens();
     PSList<PSToken*> retval;
 
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
-      PSToken* tok = new PSToken(*it);
+      PSToken* tok = new PSTokenImpl(*it);
       retval.push_back(tok);
     }
     return retval;
   }
 
-  PSToken* PSEngine::getTokenByKey(PSEntityKey id) {
+  PSToken* PSEngineImpl::getTokenByKey(PSEntityKey id) {
     check_runtime_error(m_planDatabase.isValid());
 
     EntityId entity = Entity::getEntity(id);
     check_runtime_error(entity.isValid());
-    return new PSToken(entity);
+    return new PSTokenImpl(entity);
   }
 
-  PSList<PSVariable*>  PSEngine::getGlobalVariables() {
+  PSList<PSVariable*>  PSEngineImpl::getGlobalVariables() {
     check_runtime_error(m_planDatabase.isValid());
 
     const ConstrainedVariableSet& vars = m_planDatabase->getGlobalVariables();
     PSList<PSVariable*> retval;
 
     for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
-      PSVariable* v = new PSVariable(*it);
+      PSVariable* v = new PSVariableImpl(*it);
       retval.push_back(v);
     }
     return retval;
   }  
 
-  PSVariable* PSEngine::getVariableByKey(PSEntityKey id)
+  PSVariable* PSEngineImpl::getVariableByKey(PSEntityKey id)
   {
     check_runtime_error(m_planDatabase.isValid());
     EntityId entity = Entity::getEntity(id);
     check_runtime_error(entity.isValid());
-    return new PSVariable(entity);
+    return new PSVariableImpl(entity);
   }
 
   // TODO: this needs to be optimized
-  PSVariable* PSEngine::getVariableByName(const std::string& name)
+  PSVariable* PSEngineImpl::getVariableByName(const std::string& name)
   {
     check_runtime_error(m_planDatabase.isValid());
     const ConstrainedVariableSet& vars = m_constraintEngine->getVariables();
@@ -781,49 +787,49 @@ namespace EUROPA {
     for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
     	ConstrainedVariableId v = *it;
     	if (v->getName().toString() == name)
-            return new PSVariable(*it);
+            return new PSVariableImpl(*it);
     }
     
     return NULL;
   }
 
-  PSSolver* PSEngine::createSolver(const std::string& configurationFile) {
+  PSSolver* PSEngineImpl::createSolver(const std::string& configurationFile) {
     TiXmlDocument* doc = new TiXmlDocument(configurationFile.c_str());
     doc->LoadFile();
 
     SOLVERS::SolverId solver =
       (new SOLVERS::Solver(m_planDatabase, *(doc->RootElement())))->getId();
-    return new PSSolver(solver,configurationFile, m_ppw);
+    return new PSSolverImpl(solver,configurationFile, m_ppw);
   }
 
-  bool PSEngine::getAllowViolations() const
+  bool PSEngineImpl::getAllowViolations() const
   {
   	return m_constraintEngine->getAllowViolations();
   }
 
-  void PSEngine::setAllowViolations(bool v)
+  void PSEngineImpl::setAllowViolations(bool v)
   {
     m_constraintEngine->setAllowViolations(v);
   }
 
-  double PSEngine::getViolation() const
+  double PSEngineImpl::getViolation() const
   {
   	return m_constraintEngine->getViolation();
   }
    
-  std::string PSEngine::getViolationExpl() const
+  std::string PSEngineImpl::getViolationExpl() const
   {
   	return m_constraintEngine->getViolationExpl();
   }
    
-   std::string PSEngine::planDatabaseToString() {
+   std::string PSEngineImpl::planDatabaseToString() {
       PlanDatabaseWriter* pdw = new PlanDatabaseWriter();
       std::string planOutput = pdw->toString(m_planDatabase);
       delete pdw;
       return planOutput;
    }
 
-  void PSEngine::addLanguageInterpreter(const LabelStr& language,
+  void PSEngineImpl::addLanguageInterpreter(const LabelStr& language,
 					PSLanguageInterpreter* interpreter) {
     std::map<double, PSLanguageInterpreter*>::iterator it =
       getLanguageInterpreters().find(language);
@@ -835,7 +841,7 @@ namespace EUROPA {
     }
   }
 
-  void PSEngine::addObjectWrapperGenerator(const LabelStr& type,
+  void PSEngineImpl::addObjectWrapperGenerator(const LabelStr& type,
 					   ObjectWrapperGenerator* wrapper) {
     std::map<double, ObjectWrapperGenerator*>::iterator it =
       getObjectWrapperGenerators().find(type);
@@ -847,7 +853,7 @@ namespace EUROPA {
     }
   }
 
-  ObjectWrapperGenerator* PSEngine::getObjectWrapperGenerator(const LabelStr& type) {
+  ObjectWrapperGenerator* PSEngineImpl::getObjectWrapperGenerator(const LabelStr& type) {
     const std::vector<LabelStr>& types = Schema::instance()->getAllObjectTypes(type);
     for(std::vector<LabelStr>::const_iterator it = types.begin(); it != types.end(); ++it) {
       std::map<double, ObjectWrapperGenerator*>::iterator wrapper =
@@ -863,7 +869,7 @@ namespace EUROPA {
   class BaseObjectWrapperGenerator : public ObjectWrapperGenerator {
   public:
     PSObject* wrap(const ObjectId& obj) {
-      return new PSObject(obj);
+      return new PSObjectImpl(obj);
     }
   };
 
@@ -877,8 +883,8 @@ namespace EUROPA {
   class PSEngineLocalStatic {
   public:
     PSEngineLocalStatic() {
-      PSEngine::addObjectWrapperGenerator("Object", new BaseObjectWrapperGenerator());
-      PSEngine::addLanguageInterpreter("nddl", new NDDLInterpreter());
+      PSEngineImpl::addObjectWrapperGenerator("Object", new BaseObjectWrapperGenerator());
+      PSEngineImpl::addLanguageInterpreter("nddl", new NDDLInterpreter());
     }
   };
 
