@@ -14,7 +14,6 @@ if SHARED in $(LIBRARIES) {
 PLANWORKS_COMPONENTS = $(PLASMA)/MasterController.cc $(PLASMA)/SingleSolverController.cc ;
 
 Depends plasma-all : all ;
-Depends lib : PSEngine.jar ;
 
 Module plasma : all System ;
 
@@ -64,6 +63,7 @@ if ! ( "Examples" in $(NO) ) {
 
 PSUI_HOME ?= [ FDirName .. PlanWorks PSUI ] ;
 
+Depends lib : PSEngine.jar ;
 Depends lib : PSUI.jar ;
 Depends PSUI.jar : $(PSUI_HOME) ;
 Depends PSUI.jar : PSEngine.jar ;
