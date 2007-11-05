@@ -67,7 +67,7 @@ echo "if ! \$("$NAME"_READY) {" >> $DIRECTORY/Jamfile
 echo " # Declare a library for PlanWorks Control" >> $DIRECTORY/Jamfile
 echo "" >> $DIRECTORY/Jamfile
 echo " ModuleSharedLibrary "$NAME"Controller " >> $DIRECTORY/Jamfile
-echo "     : $PLASMA_HOME/ControllerStub.cc $PLASMA_HOME/MasterController.cc $PLASMA_HOME/SingleSolverController.cc " >> $DIRECTORY/Jamfile
+echo "     : \$(PLASMA_HOME)/ControllerStub.cc \$(PLASMA_HOME)/MasterController.cc \$(PLASMA_HOME)/SingleSolverController.cc " >> $DIRECTORY/Jamfile
 echo "     : System : "$NAME"Controller ;" >> $DIRECTORY/Jamfile
 echo "" >> $DIRECTORY/Jamfile
 echo " # Create a build target to run a problem" >> $DIRECTORY/Jamfile
