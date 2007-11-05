@@ -253,7 +253,7 @@ namespace EUROPA {
                "OpenDecisions at [stepCnt=" << getStepCount() << ",depth=" << getDepth() << "]" << std::endl << printOpenDecisions());
 
       debugMsg("Solver:decisionStack", 
-               "DecisionStack at [stepCnt=" << getStepCount() << ",stepCnt=" << getDepth() << "] " << getDecisionStackAsString());
+               "DecisionStack at [stepCnt=" << getStepCount() << ",depth=" << getDepth() << "] " << getDecisionStackAsString());
 
       // Reset flag for flaws found
       m_noFlawsFound = false;
