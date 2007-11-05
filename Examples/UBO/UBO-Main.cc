@@ -12,13 +12,11 @@
 #include "PSResources.hh" 
 #include "Debug.hh"
 
-#include "SAVH_ReusableFVDetector.hh"
-#include "SAVH_IncrementalFlowProfile.hh"
-#include "FlawHandler.hh"
-#include "ResourceThreatDecisionPoint.hh"
+/*
 #include "ConstrainedVariable.hh"
 #include "TokenVariable.hh"
 #include "Token.hh"
+*/
 #include "Timer.hh"
 
 using namespace EUROPA;
@@ -111,10 +109,6 @@ void printFlaws(int it, PSList<std::string>& flaws)
 
 void executeWithAssembly(const char* plannerConfig, const char* txSource)
 {
-  REGISTER_FVDETECTOR( EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector );
-  REGISTER_PROFILE( EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile );
-  REGISTER_FLAW_HANDLER( EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreat);
-
   // Initialize Library  
   SolverAssemblyWithResources::initialize();
 

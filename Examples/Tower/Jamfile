@@ -4,7 +4,7 @@ if ! $(Tower_READY) {
  # Declare a library for PlanWorks Control
 
  ModuleSharedLibrary TowerController 
-     : /home/tsmith/svn/PLASMA/ControllerStub.cc /home/tsmith/svn/PLASMA/MasterController.cc /home/tsmith/svn/PLASMA/SingleSolverController.cc 
+     : $(PLASMA_HOME)/ControllerStub.cc $(PLASMA_HOME)/MasterController.cc $(PLASMA_HOME)/SingleSolverController.cc 
      : System : TowerController ;
 
  # Create a build target to run a problem

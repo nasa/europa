@@ -1,7 +1,0 @@
-{
-  local SUBDIR = $(NQueens) ;
-  local PLASMA = $(PLASMA_HOME) ;
-  include [ FDirName $(PLASMA_HOME) Jamrules ] ;
-  include [ FDirName $(SUBDIR) Jamfile ] ;
-  NQueens_READY = TRUE ;
-}

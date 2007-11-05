@@ -2,13 +2,13 @@
  * @file Main.cc
  *
  * @brief Provides an executable for your project which will use a
- * standard Chronological backtracking planner and a Test Assembly of
- * EUROPA
+ * standard Chronological backtracking planner and a StandardAssembly or a PSEngine
+ * to encapsulate EUROPA
  */
 
 #include "Nddl.hh" /*!< Includes protypes required to load a model */
-#include "SolverAssembly.hh" /*!< For using a test EUROPA Assembly */
-#include "PSEngine.hh" 
+#include "SolverAssemblyWithResources.hh" /*!< For using a test EUROPA Assembly */
+#include "PSResources.hh" 
 #include "Debug.hh"
 
 using namespace EUROPA;
@@ -26,22 +26,53 @@ int main(int argc, const char ** argv)
 
   const char* txSource = argv[1];
   const char* plannerConfig = argv[2];
-  int startHorizon = 0;
-  int endHorizon   = 100;
-  int maxSteps     = 1000;
-
-  if (!executeWithPSEngine(plannerConfig,txSource,startHorizon,endHorizon,maxSteps)) 
-      return -1;
-
-  // executeWithAssembly(plannerConfig,txSource);
-   
+  
+  executeWithAssembly(plannerConfig,txSource);
+  
+  /*
+  executeWithPSEngine(
+      plannerConfig,
+      txSource,
+      0,   // startHorizon
+      100, // endHorizon
+      1000 // maxSteps
+  ); 
+  */
+     
   return 0;
+}
+
+void executeWithAssembly(const char* plannerConfig, const char* txSource)
+{
+  // Initialize Library  
+  SolverAssemblyWithResources::initialize();
+
+  // Allocate the schema with a call to the linked in model function - eventually
+  // make this called via dlopen
+  SchemaId schema = NDDL::loadSchema();
+
+  // Enacpsualte allocation so that they go out of scope before calling terminate
+  {  
+    // Allocate the test assembly.
+    SolverAssemblyWithResources assembly(schema);
+
+    // Run the planner
+    assembly.plan(txSource, plannerConfig);
+
+    // Dump the results
+    assembly.write(std::cout);
+  }
+
+  // Terminate the library
+  SolverAssemblyWithResources::terminate();
+
+  std::cout << "Finished\n";
 }
 
 bool executeWithPSEngine(const char* plannerConfig, const char* txSource, int startHorizon, int endHorizon, int maxSteps)
 {
     try {
-	  PSEngine engine;
+	  PSEngineWithResources engine;
 	
 	  engine.start();
 	  engine.executeTxns(txSource,true,true);
@@ -95,30 +126,4 @@ void printFlaws(int it, PSList<std::string>& flaws)
 	}
 }
 
-void executeWithAssembly(const char* plannerConfig, const char* txSource)
-{
-  // Initialize Library  
-  SolverAssembly::initialize();
-
-  // Allocate the schema with a call to the linked in model function - eventually
-  // make this called via dlopen
-  SchemaId schema = NDDL::loadSchema();
-
-  // Enacpsualte allocation so that they go out of scope before calling terminate
-  {  
-    // Allocate the test assembly.
-    SolverAssembly assembly(schema);
-
-    // Run the planner
-    assembly.plan(txSource, plannerConfig);
-
-    // Dump the results
-    assembly.write(std::cout);
-  }
-
-  // Terminate the library
-  SolverAssembly::terminate();
-
-  std::cout << "Finished\n";
-}
 
