@@ -1824,53 +1824,54 @@ namespace EUROPA {
     // Create a local domain based on the objects included in the valueSet
     ConstrainedVariableId setVar = evalContext.getVar(valueSet.c_str());
     check_error(!setVar.isNoId(),"Loop var can't be NULL");
-    const AbstractDomain& loopVarDomain = setVar->lastDomain();
-    debugMsg("XMLInterpreter:InterpretedRule","loop var domain:" << loopVarDomain.toString());
-    const ObjectDomain& loopObjectSet =
-      dynamic_cast<const ObjectDomain&>(loopVarDomain); 
+    const AbstractDomain& loopVarDomain = setVar->derivedDomain();
+    debugMsg("XMLInterpreter:InterpretedRule","set var for loop :" << setVar->toString());
+    debugMsg("XMLInterpreter:InterpretedRule","set var domain for loop:" << loopVarDomain.toString());
+    const ObjectDomain& loopObjectSet = dynamic_cast<const ObjectDomain&>(loopVarDomain); 
         
-    if (!loopObjectSet.isEmpty()){
-      // Post a locking constraint on the set
-      {
-	std::vector<ConstrainedVariableId> loop_vars;
-	loop_vars.push_back(setVar);
-	loop_vars.push_back(ruleVariable(loopObjectSet));
-	rule_constraint(Lock, loop_vars);
-      }
-           
-      std::list<double> loopObjectSet_values;
-      loopObjectSet.getValues(loopObjectSet_values);
-        
-      // Translate into a set ordered by key to ensure reliable ordering across runs
-      ObjectSet loopObjectSet_valuesByKey;          
-      for(std::list<double>::iterator it=loopObjectSet_values.begin();
-	  it!=loopObjectSet_values.end(); ++it) {
-	ObjectId t = *it;
-	loopObjectSet_valuesByKey.insert(t);
-      }
-        
-      // execute loop body
-          
-      for(ObjectSet::const_iterator it=loopObjectSet_valuesByKey.begin()
-	    ;it!=loopObjectSet_valuesByKey.end(); ++it) {
-	ObjectId loop_var = *it;
-	check_error(loop_var.isValid());
-          
-	// Allocate a local variable for this singleton object
-	// see loopVar(Allocation, a);
-	{
-	  ObjectDomain loopVarDomain(loopVarType.c_str());
-	  loopVarDomain.insert(loop_var);
-	  loopVarDomain.close();
-	  // This will automatically put it in the evalContext, since all RuleInstance vars are reachable there
-	  addVariable(loopVarDomain, false, loopVarName);
-	}
+    if (loopObjectSet.isEmpty())
+    	return; // we're done
+    
+    // Post a locking constraint on the set
+    {
+    	std::vector<ConstrainedVariableId> loop_vars;
+    	loop_vars.push_back(setVar);
+    	loop_vars.push_back(ruleVariable(loopObjectSet));
+    	rule_constraint(Lock, loop_vars);
+    }
 
-	for (unsigned int i=0; i < loopBody.size(); i++) 
-	  loopBody[i]->eval(evalContext);
-                    
-	clearLoopVar(loopVarName);
-      }
+    std::list<double> loopObjectSet_values;
+    loopObjectSet.getValues(loopObjectSet_values);
+
+    // Translate into a set ordered by key to ensure reliable ordering across runs
+    ObjectSet loopObjectSet_valuesByKey;          
+    for(std::list<double>::iterator it=loopObjectSet_values.begin();
+    it!=loopObjectSet_values.end(); ++it) {
+    	ObjectId t = *it;
+    	loopObjectSet_valuesByKey.insert(t);
+    }
+
+    // iterate over loop collection
+    for(ObjectSet::const_iterator it=loopObjectSet_valuesByKey.begin()
+    		;it!=loopObjectSet_valuesByKey.end(); ++it) {
+    	ObjectId loop_var = *it;
+    	check_error(loop_var.isValid());
+
+    	// Allocate a local variable for this singleton object
+    	// see loopVar(Allocation, a);
+    	{
+    		ObjectDomain loopVarDomain(loopVarType.c_str());
+    		loopVarDomain.insert(loop_var);
+    		loopVarDomain.close();
+    		// This will automatically put it in the evalContext, since all RuleInstance vars are reachable there
+    		addVariable(loopVarDomain, false, loopVarName);
+    	}
+
+        // execute loop body
+    	for (unsigned int i=0; i < loopBody.size(); i++) 
+    		loopBody[i]->eval(evalContext);
+
+    	clearLoopVar(loopVarName);
     }
   }
 	

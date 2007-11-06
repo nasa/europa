@@ -293,6 +293,17 @@ namespace EUROPA {
      * @brief Copy the concrete C++ object into new memory and return a pointer to it.
      */
     virtual EnumeratedDomain *copy() const;
+    
+    /**
+     * @brief Creates a verbose string for displaying the contents of the domain
+     */
+    virtual std::string toString() const;
+
+    /**
+     * @brief Creates a concise string for displaying the value
+     * @param value must be a member of the domain.
+     */
+    virtual std::string toString(double value) const;    
 
   protected:
 

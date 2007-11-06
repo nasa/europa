@@ -1705,8 +1705,14 @@ namespace EUROPA {
     // If the current domain is a superset, then restrict it. 
     if(m_lockDomain.isSubsetOf(m_currentDomain))
        m_currentDomain.intersect(m_lockDomain);
-    else
-      m_currentDomain.empty(); // Otherwise, the lock is enforced by forcing a relaxation
+    else {
+       debugMsg("LockConstraint","current domain:" << m_currentDomain.toString() 
+    		                     << " is not a superset of lock domain :" << m_lockDomain.toString()
+    		                     << " emptying current domain" 
+       );
+    		                     
+       m_currentDomain.empty(); // Otherwise, the lock is enforced by forcing a relaxation
+    }
   }
 
   // Enforces X >=0, Y<=0, X+Y==0

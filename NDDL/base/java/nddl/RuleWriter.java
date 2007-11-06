@@ -534,7 +534,7 @@ class RuleWriter {
       writer.write("const ObjectDomain& foreach_" + loopVariableName + " =\n");
       writer.indent();
       writer.write("static_cast<const ObjectDomain&>(var(getId(), std::string(\""+
-                   loopVariableName+"\"))->lastDomain()); \n\n");
+                   loopVariableName+"\"))->derivedDomain()); \n\n");
       writer.unindent();
 
       writer.write("if(!foreach_"+loopVariableName +".isEmpty()){\n");

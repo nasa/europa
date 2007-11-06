@@ -636,7 +636,9 @@ namespace EUROPA {
   std::string ObjectDomain::toString(double value) const {
     check_error(isMember(value), "Caught an invalid attempt to display a value not in this domain");
     ObjectId object = value;
-    return  object->getName().toString();
+    std::ostringstream os;
+    os << object->getName().toString()<<"("<< object->getKey() <<")";
+    return  os.str();
   }
 
   std::list<ObjectId> ObjectDomain::makeObjectList(const std::list<double>& inputs){

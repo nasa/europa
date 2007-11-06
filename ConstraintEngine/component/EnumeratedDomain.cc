@@ -244,7 +244,8 @@ namespace EUROPA {
         return(true);
       // Before giving up, see if prior position is within epsilon
       --it;
-      return(it != m_values.end() && compareEqual(value, *it));
+      elem = *it;
+      return(it != m_values.end() && compareEqual(value, elem));
     }
     if (m_values.empty())
       return(false);
@@ -482,9 +483,6 @@ namespace EUROPA {
   }
 
   void EnumeratedDomain::operator>>(ostream&os) const {
-    static const std::string sl_false("0");
-    static const std::string sl_true("1");
-
     // Now commence output
     AbstractDomain::operator>>(os);
     os << "{";
@@ -495,21 +493,14 @@ namespace EUROPA {
     std::string comma = "";
     for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
       double valueAsDouble = *it;
-
-      if (isNumeric()) {
-        os << comma << valueAsDouble;
-        comma = ", ";
+      std::string valueAsStr = toString(valueAsDouble);
+      
+      if (isNumeric()) {    	  
+          os << comma << valueAsStr;
+          comma = ", ";
       } 
-      else if (valueAsDouble == true)
-	orderedSet.insert(sl_true);
-      else if (valueAsDouble == false)
-	orderedSet.insert(sl_false);
-      else if (LabelStr::isString(valueAsDouble))
-	orderedSet.insert(LabelStr(valueAsDouble).toString());
-      else {
-	EntityId entity(valueAsDouble);
-	orderedSet.insert(entity->getName().toString());
-      }
+      else  
+          orderedSet.insert(valueAsStr);
     }
 
     for (std::set<std::string>::const_iterator it = orderedSet.begin(); it != orderedSet.end(); ++it) {
@@ -521,7 +512,34 @@ namespace EUROPA {
 
     os << "}";
   }
+  
+  std::string EnumeratedDomain::toString() const
+  {
+	  return AbstractDomain::toString();
+  }
 
+  std::string EnumeratedDomain::toString(double valueAsDouble) const
+  {
+      static const std::string sl_false("0");
+	  static const std::string sl_true("1");
+
+      if (isNumeric()) {
+    	  std::ostringstream os; 
+    	  os << valueAsDouble;
+    	  return os.str(); 
+      }
+      else if (valueAsDouble == true)
+          return sl_true;
+      else if (valueAsDouble == false)
+          return sl_false;
+      else if (LabelStr::isString(valueAsDouble))
+          return LabelStr(valueAsDouble).toString();
+      else {
+          EntityId entity(valueAsDouble);
+          return entity->getName().toString();
+      }	  
+  }
+  
   EnumeratedDomain *EnumeratedDomain::copy() const {
     EnumeratedDomain *ptr = new EnumeratedDomain(*this);
     check_error(ptr != 0);
