@@ -18,7 +18,7 @@ namespace EUROPA {
     : StandardAssembly(schema), StandardAssemblyWithResources(schema), SolverAssembly(schema) {
     if(!s_initialized) {
    	  REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector );
-   	  REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile );
+   	  //REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile );
    	  REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreat);    	  
    	  s_initialized = true;
     }
