@@ -7,22 +7,26 @@
 #include "Resources.nddl"
 #include "PlannerConfig.nddl"
 
-class CapacityResource extends Reusable {
-	CapacityResource( float mincapacity, float maxcapacity ) {
-	  super( maxcapacity, mincapacity );
-      } 
+class CapacityResource extends Reusable 
+{
+    CapacityResource( float mincapacity, float maxcapacity ) 
+    {
+        super( maxcapacity, mincapacity );
+    } 
 }
 
-class Allocation {
-	int m_identifier;
-	float m_quantity;
-	CapacityResource m_resource;
+class Allocation 
+{
+    int m_identifier;
+    float m_quantity;
+    CapacityResource m_resource;
 
-	Allocation( CapacityResource resource, int activityId, float quantity ) {
-	m_identifier = activityId;
-	m_resource = resource;
-	m_quantity = quantity;
-	}
+    Allocation( CapacityResource resource, int activityId, float quantity ) 
+    {
+        m_identifier = activityId;
+        m_resource = resource;
+        m_quantity = quantity;
+    }
 }
 
 class ActivityTimeline extends Timeline
@@ -41,27 +45,26 @@ ActivityTimeline::act
 {
 }
 
-class ProblemInstance extends Object {
-	predicate Activity {
+class ProblemInstance extends Object 
+{
+    predicate Activity {
 	int m_identifier;
-	bool b;
 	ActivityTimeline timeline;
-	}
+    }
 }
 
-ProblemInstance::Activity{
-	//eq(start, [ 0 +inf ]);
+ProblemInstance::Activity
+{
+    //eq(start, [ 0 +inf ]);
     equals(timeline.act);
 
-	Allocation allocations;
-	eq( allocations.m_identifier, m_identifier );
+    Allocation allocations;
+    eq( allocations.m_identifier, m_identifier );
 
-	if( b == true ) {
-	  foreach( a in allocations ) {
-	  equals( a.m_resource.uses u );
-	  eq( u.quantity, a.m_quantity );
-	  }
-	}
-	
+    foreach( a in allocations ) {
+        equals( a.m_resource.uses u );
+        eq( duration, u.duration); // Duration is known, so force propagation
+        eq( u.quantity, a.m_quantity );
+    }
 }
 

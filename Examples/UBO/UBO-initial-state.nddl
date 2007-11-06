@@ -8,8 +8,10 @@ PlannerConfig c = new PlannerConfig(0, 1000, +inf, +inf );
 
 ProblemInstance problem = new ProblemInstance();
 
-int maxDuration = 100;
-int maxDurationPlusOne = 101;
+// Proven minimum duration for this problem is 45
+
+int maxDuration = 60;
+int maxDurationPlusOne = 61;
 
 CapacityResource resource0 = new CapacityResource( 0.00000 , 10.0000 );
 CapacityResource resource1 = new CapacityResource( 0.00000 , 10.0000 );
@@ -70,91 +72,78 @@ ActivityTimeline at8 = new ActivityTimeline(8);
 ActivityTimeline at9 = new ActivityTimeline(9);
 ActivityTimeline at10 = new ActivityTimeline(10);
 ActivityTimeline at11 = new ActivityTimeline(11);
+
+close();
  
 goal( problem.Activity activity0 );
 eq( activity0.duration, 1 );
 eq( activity0.m_identifier, 0);
 eq( activity0.timeline, at0);
-leq(0,activity0.start);
-leq( activity0.end, maxDuration);
 
 goal( problem.Activity activity1 );
 eq( activity1.duration, 4 );
 eq( activity1.m_identifier, 1);
 eq( activity1.timeline, at1);
-leq( activity1.end, maxDuration);
 
 
 goal( problem.Activity activity2 );
 eq( activity2.duration, 4 );
 eq( activity2.m_identifier, 2);
 eq( activity2.timeline, at2);
-leq( activity2.end, maxDuration);
 
 
 goal( problem.Activity activity3 );
 eq( activity3.duration, 10 );
 eq( activity3.m_identifier, 3);
 eq( activity3.timeline, at3);
-leq( activity3.end, maxDuration);
 
 
 goal( problem.Activity activity4 );
 eq( activity4.duration, 10 );
 eq( activity4.m_identifier, 4);
 eq( activity4.timeline, at4);
-leq( activity4.end, maxDuration);
 
 
 goal( problem.Activity activity5 );
 eq( activity5.duration, 3 );
 eq( activity5.m_identifier, 5);
 eq( activity5.timeline, at5);
-leq( activity5.end, maxDuration);
 
 
 goal( problem.Activity activity6 );
 eq( activity6.duration, 1 );
 eq( activity6.m_identifier, 6);
 eq( activity6.timeline, at6);
-leq( activity6.end, maxDuration);
 
 
 goal( problem.Activity activity7 );
 eq( activity7.duration, 8 );
 eq( activity7.m_identifier, 7);
 eq( activity7.timeline, at7);
-leq( activity7.end, maxDuration);
 
 
 goal( problem.Activity activity8 );
 eq( activity8.duration, 10 );
 eq( activity8.m_identifier, 8);
 eq( activity8.timeline, at8);
-leq( activity8.end, maxDuration);
 
 
 goal( problem.Activity activity9 );
 eq( activity9.duration, 9 );
 eq( activity9.m_identifier, 9);
 eq( activity9.timeline, at9);
-leq( activity9.end, maxDuration);
 
 
 goal( problem.Activity activity10 );
 eq( activity10.duration, 5 );
 eq( activity10.m_identifier, 10);
 eq( activity10.timeline, at10);
-leq( activity10.end, maxDuration);
 
 
 goal( problem.Activity activity11 );
 eq( activity11.duration, 1 );
 eq( activity11.m_identifier, 11);
 eq( activity11.timeline, at11);
-leq( activity11.end, maxDurationPlusOne);
-
-
 
 temporalDistance( activity0.start, [ 0 +inf ], activity1.start );
 temporalDistance( activity0.start, [ 0 +inf ], activity2.start );
@@ -175,29 +164,16 @@ temporalDistance( activity4.start, [ -inf 25 ], activity9.start );
 temporalDistance( activity9.start, [ 9 +inf ], activity11.start );
 temporalDistance( activity10.start, [ 5 +inf ], activity11.start );
 
-activity0.b.specify( true );
-activity1.b.specify( true );
-activity2.b.specify( true );
-activity3.b.specify( true );
-activity4.b.specify( true );
-activity5.b.specify( true );
-activity6.b.specify( true );
-activity7.b.specify( true );
-activity8.b.specify( true );
-activity9.b.specify( true );
-activity10.b.specify( true );
-activity11.b.specify( true );
+leq(0,activity0.start);  leq( activity0.end, maxDuration);
+leq(0,activity1.start);  leq( activity1.end, maxDuration);
+leq(0,activity2.start);  leq( activity2.end, maxDuration);
+leq(0,activity3.start);  leq( activity3.end, maxDuration);
+leq(0,activity4.start);  leq( activity4.end, maxDuration);
+leq(0,activity5.start);  leq( activity5.end, maxDuration);
+leq(0,activity6.start);  leq( activity6.end, maxDuration);
+leq(0,activity7.start);  leq( activity7.end, maxDuration);
+leq(0,activity8.start);  leq( activity8.end, maxDuration);
+leq(0,activity9.start);  leq( activity9.end, maxDuration);
+leq(0,activity10.start); leq( activity10.end, maxDuration);
+leq(0,activity11.start); leq( activity11.end, maxDurationPlusOne);
 
-leq(0,activity1.start);
-leq(0,activity2.start);
-leq(0,activity3.start);
-leq(0,activity4.start);
-leq(0,activity5.start);
-leq(0,activity6.start);
-leq(0,activity7.start);
-leq(0,activity8.start);
-leq(0,activity9.start);
-leq(0,activity10.start);
-leq(0,activity11.start);
-
-close();

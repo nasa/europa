@@ -11,12 +11,6 @@
 #include "PSEngine.hh" 
 #include "PSResources.hh" 
 #include "Debug.hh"
-
-/*
-#include "ConstrainedVariable.hh"
-#include "TokenVariable.hh"
-#include "Token.hh"
-*/
 #include "Timer.hh"
 
 using namespace EUROPA;
@@ -40,11 +34,7 @@ int main(int argc, const char ** argv)
   int endHorizon   = 1000;
   int maxSteps     = 5000;
 
-  /*
-  if (!executeWithPSEngine(plannerConfig,txSource,startHorizon,endHorizon,maxSteps)) 
-      return -1;
-  /**/
-  
+  //executeWithPSEngine(plannerConfig,txSource,startHorizon,endHorizon,maxSteps); 
   executeWithAssembly(plannerConfig,txSource);
    
   return 0;
@@ -100,7 +90,7 @@ bool executeWithPSEngine(const char* plannerConfig, const char* txSource, int st
 
 void printFlaws(int it, PSList<std::string>& flaws)
 {
-	std::cout << "Iteration:" << it << " " << flaws.size() << " flaws" << std::endl;
+	debugMsg("Main","Iteration:" << it << " " << flaws.size() << " flaws");
 	
 	for (int i=0; i<flaws.size(); i++) {
 		std::cout << "    " << (i+1) << " - " << flaws.get(i) << std::endl;

@@ -3,7 +3,6 @@
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Vector;
-import java.util.regex.*;
 import javax.swing.JInternalFrame;
 import org.ops.ui.util.Util;
 import org.ops.ui.PSDesktop;
@@ -12,6 +11,7 @@ import org.ops.ui.mouse.*;
 import org.ops.ui.gantt.*;
 import org.ops.ui.chart.*;
 import org.ops.ui.solver.*;
+import UBO.*;
 
 int month = GregorianCalendar.SEPTEMBER, day = 11; 
 GregorianCalendar start = new GregorianCalendar(2006,month,day,0,0);
@@ -40,50 +40,6 @@ void initPSEngine()
 	usingInterpreter();
 }
 
-String valueToString(PSVarValue v)
-{
-	String type = v.getType().toString();
-	
-	if ("STRING".equals(type))
-		return v.asString();
-	if ("INTEGER".equals(type))
-		return v.asInt().toString();	
-	if ("DOUBLE".equals(type))
-		return v.asDouble().toString();
-	if ("BOOLEAN".equals(type))
-		return v.asBoolean().toString();
-	if ("OBJECT".equals(type))
-		return v.asObject().getName();
-	
-	return "ERROR!!! UNKNOWN TYPE :" + type;
-}
-
-String varValueToString(PSVariable var)
-{	
-	if (var.isSingleton()) 
-		return valueToString(var.getSingletonValue());	
-	else if (var.isInterval()) {
-	    StringBuffer buf = new StringBuffer();
-		buf.append("[").append(var.getLowerBound()).append(",")
-		               .append(var.getUpperBound()).append("]");
-		return buf.toString();
-	}
-	else if (var.isEnumerated()) {
-		PSValueList l = var.getValues();
-	    StringBuffer buf = new StringBuffer();
-	    buf.append("[");
-	    for (int i=0;i<l.size();i++) {
-	    	if (i>0)
-	    		buf.append(",");
-	    	buf.append(valueToString(l.get(i)));
-	    }
-	    buf.append("]");
-	    return buf.toString();
-	}
-	
-	throw RuntimeException("Unexpected ERROR: variable "+var.getName()+" is not one of {Singleton, Interval, Enumeration}");
-}
-
 void setupDesktop()
     throws Exception
 {
@@ -104,141 +60,8 @@ void setupDesktop()
     resourceFrame.setSize(500,300);
 }
 
-class PlanHistoryEntry
-{
-    Integer step_;
-    Long remainingTreeSize_;
-    String currentTree_;
-    String currentPlan_;
-               
-    public PlanHistoryEntry(
-               Integer step,
-               Long remainingTreeSize,
-               String currentTree,
-               String currentPlan)
-    {
-        step_ = step;
-        remainingTreeSize_ = remainingTreeSize;
-        currentTree_ = currentTree;
-        currentPlan_ = currentPlan;
-    }
-    
-    public Integer getStepNumber() { return step_; }
-    public Long getRemainingTreeSize() { return remainingTreeSize_; }
-    public String getCurrentTree() { return currentTree_; }
-    public String getCurrentPlan() { return currentPlan_; }               
-    
-    public String toString()
-    {
-        StringBuffer buf = new StringBuffer();
-        buf.append(step_).append(": ")
-           .append("(").append(remianingTreeSize_).append(")")
-           .append(currentTree_)
-           .append(currentPlan_); 
-        return buf.toString();
-    }
-}
 
-class UBOSolverListener
-    implements PSSolverDialogListener
-{
-    int lastDepth_;
-    Vector plan_;
-    Vector decisionHistory_;
-    Vector planHistory_;
-    Vector treeSize_;
-    Vector currentTree_;
-    
-    public UBOSolverListener()
-    {
-        lastDepth_ = 0;
-        plan_ = new Vector/*<String>*/();
-        decisionHistory_ = new Vector();
-        planHistory_ = new Vector();
-        treeSize_ = new Vector();
-        currentTree_ = new Vector();
-    }
-    
-    public Vector getDecisionHistory() { return decisionHistory_; }
-    public Vector getPlanHistory() { return planHistory_; }
-    
-    protected PlanHistoryEntry makePlanHistoryEntry(PSSolver s)
-    {
-        // Compute remaining nodes to explore
-        long size = 1;
-        for (Integer i : treeSize_) {
-            if (i != null)
-                size *= i;
-        }        
-        
-        PlanHistoryEntry entry = new PlanHistoryEntry(s.getStepCount(),size,currentTree_.toString(),plan_.toString());
-
-        return entry;
-    }
-    
-    protected void setPlanSize(int size)
-    {
-        plan_.setSize(size);
-        treeSize_.setSize(size);
-        currentTree_.setSize(size);
-    }
-    
-    public void stepCompleted(PSSolver s)
-    {
-        String lastDecision = s.getLastExecutedDecision();        
-        if (lastDecision.startsWith("INSTANT") && (lastDepth_ <= s.getDepth())) {
-            Pattern p = Pattern.compile("token=[0-9]+");
-            Matcher m = p.matcher(lastDecision);
-            m.find();
-            Integer predId = new Integer(lastDecision.substring(m.start()+6,m.end()));
-            m.find();
-            Integer succId = new Integer(lastDecision.substring(m.start()+6,m.end()));
-            String tokenDecision = " tokens:{" + predId + "} < {" + succId +"}";
-            
-            PSObject resource = psengine.getTokenByKey(predId).getOwner();
-            PSToken pred = psengine.getTokenByKey(predId).getMaster();
-            PSToken succ = psengine.getTokenByKey(succId).getMaster();
-            String predAct = varValueToString(pred.getParameter("m_identifier"));
-            String succAct = varValueToString(succ.getParameter("m_identifier"));
-
-            // Get info to compute max remaining size of search tree
-            Pattern p1 = Pattern.compile("CHOICE=[0-9]+");
-            Matcher m1 = p1.matcher(lastDecision);
-            m1.find();
-            Integer choiceIdx = new Integer(lastDecision.substring(m1.start()+7,m1.end()));
-            m1.find();
-            Integer choiceCnt = new Integer(lastDecision.substring(m1.start()+7,m1.end()));
-            Integer remaining = choiceCnt - choiceIdx;
-
-            StringBuffer decisionBuf = new StringBuffer();
-            decisionBuf.append("{").append(predAct).append("} < {").append(succAct).append("}");
-            String decision = decisionBuf.toString();
-            String decisionMsg = s.getStepCount() + ": "+ decision + " because of " + resource.getName() + tokenDecision;
-            decisionHistory_.add(decisionMsg);
-            //System.out.println(decisionMsg);            
-
-            plan_.add(decision);
-            treeSize_.add((remaining > 0) ? remaining : new Integer(1));
-            currentTree_.add("("+choiceIdx+","+choiceCnt+")");
-            PlanHistoryEntry entry = makePlanHistoryEntry(s);
-            planHistory_.add(entry);        
-            //System.out.println(entry);           
-        }        
-        
-        if (lastDepth_ >= s.getDepth()) {
-            String btMsg = s.getStepCount() + ": Backtracked! from "+plan_.size()+" to "+s.getDepth();
-            decisionHistory_.add(btMsg);
-            //System.out.println(btMsg); 
-
-            setPlanSize(s.getDepth());
-            PlanHistoryEntry entry = makePlanHistoryEntry(s);
-            planHistory_.add(entry);        
-            //System.out.println(entry);           
-        }
-
-        lastDepth_ = s.getDepth();        
-    }
-} 
+UBOSolverListener listener;
 
 void showHistory()
 {
@@ -250,14 +73,14 @@ void showHistory()
 
 // main()
 horizonStart = 0;
-horizonEnd = 100;
+horizonEnd = 1000;
 maxSteps = 1000;
 config = "PlannerConfig.xml";
-UBOSolverListener listener;
+PSSolver solver;
 
 try {
     initPSEngine();
-    PSSolver solver = psengine.createSolver(config);
+    solver = psengine.createSolver(config);
     solver.configure(horizonStart,horizonEnd);
     solverDialog = desktop.makeSolverDialog(solver);
 
