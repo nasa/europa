@@ -452,7 +452,7 @@ namespace NDDL {
     {
       // Create a local domain based on the trackable objects
       const ObjectDomain& foreach_trackable =
-        static_cast<const ObjectDomain&>(var(getId(), std::string("trackable"))->lastDomain()); 
+        static_cast<const ObjectDomain&>(var(getId(), std::string("trackable"))->derivedDomain()); 
         
       if(!foreach_trackable.isEmpty()){
         // Post a locking constraint on trackable
@@ -605,7 +605,7 @@ namespace NDDL {
     {
       // Create a local domain based on the r objects
       const ObjectDomain& foreach_r =
-        static_cast<const ObjectDomain&>(var(getId(), std::string("r"))->lastDomain()); 
+        static_cast<const ObjectDomain&>(var(getId(), std::string("r"))->derivedDomain()); 
         
       if(!foreach_r.isEmpty()){
         // Post a locking constraint on r
@@ -656,7 +656,7 @@ namespace NDDL {
     {
       // Create a local domain based on the emptyPath objects
       const ObjectDomain& foreach_emptyPath =
-        static_cast<const ObjectDomain&>(var(getId(), std::string("emptyPath"))->lastDomain()); 
+        static_cast<const ObjectDomain&>(var(getId(), std::string("emptyPath"))->derivedDomain()); 
         
       if(!foreach_emptyPath.isEmpty()){
         // Post a locking constraint on emptyPath
