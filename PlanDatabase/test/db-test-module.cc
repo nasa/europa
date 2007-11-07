@@ -2706,7 +2706,7 @@ private:
       assertTrue(ce->getConstraints().size() == num_constraints);
       timeline.free(tokenA.getId(), tokenB.getId());
       num_constraints -= 3;
-      assertTrue(ce->getConstraints().size() == num_constraints);
+      assertTrue(ce->getConstraints().size() == num_constraints, toString(ce->getConstraints().size()) + " " + toString(num_constraints));
       assertTrue(timeline.getTokenSequence().size() == 0);
     }
 

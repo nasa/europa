@@ -304,7 +304,7 @@ namespace EUROPA {
     /**
      * @brief Utility to generate a hashkey for a token pair
      */
-    static double makeKey(const TokenId& a, const TokenId& b);
+    static int makeKey(const TokenId& a, const TokenId& b);
 
     ObjectId m_id;
     ObjectId m_parent;
@@ -319,8 +319,8 @@ namespace EUROPA {
 					   is stored, or in cases where it is a straight assignment of a token, the key of the token is stored. */
     unsigned int m_lastOrderingChoiceCount; /*!< The last computed count of ordering choices */
     std::multimap<int, ConstraintId> m_constraintsByTokenKey; /**< All Precedence Constraints by Token Key */
-    std::multimap<double, ConstraintId> m_constraintsByKeyPair; /**< Precedence Constraints by  encoded key pair */
-    std::map<int, double> m_keyPairsByConstraintKey; /**< Reverse lookup to obtain the key pair */
+    std::multimap<int, ConstraintId> m_constraintsByKeyPair; /**< Precedence Constraints by  encoded key pair */
+    std::map<int, int> m_keyPairsByConstraintKey; /**< Reverse lookup to obtain the key pair */
     ConstrainedVariableId m_thisVar; /**< Used to constrain against */
 
   private:

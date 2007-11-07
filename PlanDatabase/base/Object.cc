@@ -197,7 +197,7 @@ namespace EUROPA {
       debugMsg("Object:remove:token", "Also removing " << constraint->toString());
 
       // If the constraint is a precedence constraint, the additional cleanup required
-      std::map<int, double>::iterator pos = m_keyPairsByConstraintKey.find(constraint->getKey());
+      std::map<int, int>::iterator pos = m_keyPairsByConstraintKey.find(constraint->getKey());
       if(pos != m_keyPairsByConstraintKey.end()) 
 	removePrecedenceConstraint(constraint);
     }
@@ -276,7 +276,11 @@ namespace EUROPA {
     // Post constraints on object variable, predecessor only in event they are equal
     constrainToThisObjectAsNeeded(predecessor);
 
-    double encodedKey = makeKey(predecessor, successor);
+    int encodedKey = makeKey(predecessor, successor);
+
+    condDebugMsg(m_constraintsByKeyPair.find(encodedKey) != m_constraintsByKeyPair.end(), "Object:makeKey",
+		 "Collision detected for " << predecessor->toString() << " and " << successor->toString() << 
+		 " with " << encodedKey);
 
     ConstraintId constraint;
 
@@ -293,7 +297,7 @@ namespace EUROPA {
 								     vars);
 
       // Store for bi-directional access by encoded key pair and constraint
-      m_constraintsByKeyPair.insert(std::pair<double, ConstraintId>(encodedKey, constraint));
+      m_constraintsByKeyPair.insert(std::pair<int, ConstraintId>(encodedKey, constraint));
       m_keyPairsByConstraintKey.insert(std::make_pair(constraint->getKey(), encodedKey));
 
       // Store for access by token
@@ -433,8 +437,8 @@ namespace EUROPA {
   }
 
   ConstraintId Object::getPrecedenceConstraint(const TokenId& predecessor, const TokenId& successor) const{
-    double encodedKey = makeKey(predecessor, successor);
-    std::multimap<double, ConstraintId>::const_iterator it = m_constraintsByKeyPair.find(encodedKey);
+    int encodedKey = makeKey(predecessor, successor);
+    std::multimap<int, ConstraintId>::const_iterator it = m_constraintsByKeyPair.find(encodedKey);
     while(it != m_constraintsByKeyPair.end() && it->first == encodedKey){
       ConstraintId constraint = it->second;
       if(constraint->getScope()[0] == predecessor->getEnd() &&
@@ -469,7 +473,7 @@ namespace EUROPA {
     bool singletonFound = false; 
     while(it != m_constraintsByTokenKey.end() && it->first == token->getKey()){
       ConstraintId constraint = it->second;
-      std::map<int, double>::const_iterator pos = m_keyPairsByConstraintKey.find(constraint->getKey());
+      std::map<int, int>::const_iterator pos = m_keyPairsByConstraintKey.find(constraint->getKey());
       if(pos == m_keyPairsByConstraintKey.end()){
 	check_error(singletonFound == false,
 		    "Can only find one singleton constraint per token.");
@@ -573,7 +577,7 @@ namespace EUROPA {
       check_error(Entity::getEntity(it->first));
     }
 
-    for(std::map<double, ConstraintId>::const_iterator it = m_constraintsByKeyPair.begin();
+    for(std::map<int, ConstraintId>::const_iterator it = m_constraintsByKeyPair.begin();
 	it != m_constraintsByKeyPair.end();
 	++it){
       checkError(it->second.isValid(), "Invalid constraint for key pair " << LabelStr(it->first).toString());
@@ -728,16 +732,16 @@ namespace EUROPA {
   	return os.str();
   }
 
-  double Object::makeKey(const TokenId& a, const TokenId& b){
-    return a->getKey() + (b->getKey()/1000.0);
+  int Object::makeKey(const TokenId& a, const TokenId& b){
+    return (a->getKey() << 16) ^ b->getKey();
   }
 
   void Object::removePrecedenceConstraint(const ConstraintId& constraint){
     TokenId predecessor = constraint->getScope()[0]->getParent();
     TokenId successor = constraint->getScope()[1]->getParent();
 
-    double encodedKey = makeKey(predecessor, successor);
-    std::multimap<double, ConstraintId>::iterator it = m_constraintsByKeyPair.find(encodedKey);
+    int encodedKey = makeKey(predecessor, successor);
+    std::multimap<int, ConstraintId>::iterator it = m_constraintsByKeyPair.find(encodedKey);
     while(it != m_constraintsByKeyPair.end() && it->first == encodedKey){
       ConstraintId c = it->second;
       if(c == constraint){
