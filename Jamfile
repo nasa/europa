@@ -61,7 +61,7 @@ if ! ( "Examples" in $(NO) ) {
 }
 #SubInclude PLASMA DSA ;
 
-PSUI_HOME ?= [ FDirName .. PlanWorks PSUI ] ;
+PSUI_HOME ?= [ FDirName $(PLANWORKS_HOME) PSUI ] ;
 
 Depends lib : PSEngine.jar ;
 Depends lib : PSUI.jar ;
