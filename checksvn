@@ -5,7 +5,7 @@
 #
 #   Argument: relative location of PLASMA root
 #
-echo "Checking for recent CVS checkins..."
+echo "Checking for recent SVN checkins..."
 
 RELDIR=`dirname "$0"`
 cd "$RELDIR"

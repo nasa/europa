@@ -1,4 +1,6 @@
-SubDir Crew1 ;
+PROJECT_ROOT ?= $(TOP) ;
+
+SubDir $(PROJECT_ROOT) Crew1 ;
 
 if ! $(Crew1_READY) {
  # Declare a library for PlanWorks Control
@@ -16,5 +18,6 @@ if ! $(Crew1_READY) {
  # Create a build target for the planner shared library with model.
  ModuleSharedLibrary Crew1 : Crew1-model.o : System : Crew1 ;
 
- Depends all : Crew1 Crew1Controller ;
+ Depends all : run-Crew1-tests ;
+ Depends run-Crew1-tests : Crew1 Crew1Controller ;
 } # Crew1_READY

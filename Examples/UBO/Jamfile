@@ -1,4 +1,5 @@
-SubDir UBO ;
+PROJECT_ROOT ?= $(TOP) ;
+SubDir $(PROJECT_ROOT) UBO ;
 
 if ! $(UBO_READY) {
  # Declare a library for PlanWorks Control
@@ -16,5 +17,7 @@ if ! $(UBO_READY) {
  # Create a build target for the planner shared library with model.
  ModuleSharedLibrary UBO : UBO-model.o : System : UBO ;
 
- Depends all : UBO UBOController ;
+ Depends all : run-UBO-tests ;
+ Depends run-UBO-tests : UBO ;
+ Depends run-UBO-tests : UBOController ;
 } # UBO_READY

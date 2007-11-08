@@ -1,4 +1,5 @@
-SubDir Shopping ;
+PROJECT_ROOT ?= $(TOP) ;
+SubDir $(PROJECT_ROOT) Shopping ;
 
 if ! $(Shopping_READY) {
  # Declare a library for PlanWorks Control
@@ -16,5 +17,7 @@ if ! $(Shopping_READY) {
  # Create a build target for the planner shared library with model.
  ModuleSharedLibrary Shopping : Shopping-model.o : System : Shopping ;
 
- Depends all : Shopping ShoppingController ;
+ Depends all : run-Shopping-tests ;
+ Depends run-Shopping-tests : Shopping ;
+ Depends run-Shopping-tests : ShoppingController ;
 } # Shopping_READY

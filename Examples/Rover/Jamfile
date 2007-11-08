@@ -1,4 +1,6 @@
-SubDir Rover ;
+PROJECT_ROOT ?= $(TOP) ;
+
+SubDir $(PROJECT_ROOT) Rover ;
 
 if ! $(Rover_READY) {
  # Declare a library for PlanWorks Control
@@ -14,7 +16,8 @@ if ! $(Rover_READY) {
  NddlMain Rover-planner : Rover-Main.cc : Rover-model.nddl : System : Rover-planner ;
 
  # Create a build target for the planner shared library with model.
- ModuleSharedLibrary Rover : Rover-model.o : System : Rover ;
-
- Depends all : Rover RoverController ;
+ ModuleSharedLibrary Rover : Rover-model.o : System : Rover 
+;
+ Depends all : run-Rover-tests ;
+ Depends run-Rover-tests : Rover RoverController ;
 } # Rover_READY

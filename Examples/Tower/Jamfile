@@ -1,4 +1,5 @@
-SubDir Tower ;
+PROJECT_ROOT ?= $(TOP) ;
+SubDir $(PROJECT_ROOT) Tower ;
 
 if ! $(Tower_READY) {
  # Declare a library for PlanWorks Control
@@ -16,5 +17,7 @@ if ! $(Tower_READY) {
  # Create a build target for the planner shared library with model.
  ModuleSharedLibrary Tower : Tower-model.o : System : Tower ;
 
- Depends all : Tower TowerController ;
+ Depends all : run-Tower-tests ;
+ Depends run-Tower-tests : Tower ;
+ Depends run-Tower-tests : TowerController ;
 } # Tower_READY

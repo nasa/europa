@@ -1,4 +1,5 @@
-SubDir NDDLHelloWorld ;
+PROJECT_ROOT ?= $(TOP) ;
+SubDir $(PROJECT_ROOT) NDDLHelloWorld ;
 
 if ! $(NDDLHelloWorld_READY) {
  # Declare a library for PlanWorks Control
@@ -16,5 +17,7 @@ if ! $(NDDLHelloWorld_READY) {
  # Create a build target for the planner shared library with model.
  ModuleSharedLibrary NDDLHelloWorld : NDDLHelloWorld-model.o : System : NDDLHelloWorld ;
 
- Depends all : NDDLHelloWorld NDDLHelloWorldController ;
+ Depends all : run-NDDLHelloWorld-tests ;
+ Depends run-NDDLHelloWorld-tests : NDDLHelloWorld ;
+ Depends run-NDDLHelloWorld-tests : NDDLHelloWorldController ;
 } # NDDLHelloWorld_READY
