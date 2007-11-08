@@ -2,11 +2,6 @@ SubDir PLASMA Examples ;
 
 if ! $(PLASMA_READY) {
 
-# Set this variable so example Jamfiles, which are designed to work everywhere,
-# will play nicely with a bigger compilation.
-
-PROJECT_ROOT ?= [ FDirName $(TOP) Examples ] ;
-
 Module Examples : System ;
 
 # For now all examples are added by hand:

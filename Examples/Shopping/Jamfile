@@ -1,6 +1,5 @@
-PROJECT_ROOT ?= $(TOP) ;
-SubDir $(PROJECT_ROOT) Shopping ;
-
+SubDir PLASMA Examples Shopping ;
+ 
 if ! $(Shopping_READY) {
  # Declare a library for PlanWorks Control
 

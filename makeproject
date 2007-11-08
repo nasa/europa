@@ -61,8 +61,7 @@ then
 fi
 
 echo "Adding Jamfile"
-echo "PROJECT_ROOT ?= \$(TOP) ;" >> $DIRECTORY/Jamfile
-echo "SubDir \$(PROJECT_ROOT) "$NAME" ;" >> $DIRECTORY/Jamfile
+echo "SubDir "$NAME" ;" >> $DIRECTORY/Jamfile
 echo "" >> $DIRECTORY/Jamfile
 echo "if ! \$("$NAME"_READY) {" >> $DIRECTORY/Jamfile
 echo " # Declare a library for PlanWorks Control" >> $DIRECTORY/Jamfile

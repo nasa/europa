@@ -1,5 +1,4 @@
-PROJECT_ROOT ?= $(TOP) ;
-SubDir $(PROJECT_ROOT) ResourceViolations ;
+SubDir PLASMA Examples ResourceViolations ;
 
 if ! $(ResourceViolations_READY) {
  # Declare a library for PlanWorks Control

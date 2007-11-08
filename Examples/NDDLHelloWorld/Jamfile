@@ -1,5 +1,4 @@
-PROJECT_ROOT ?= $(TOP) ;
-SubDir $(PROJECT_ROOT) NDDLHelloWorld ;
+SubDir PLASMA Examples NDDLHelloWorld ;
 
 if ! $(NDDLHelloWorld_READY) {
  # Declare a library for PlanWorks Control

@@ -1,6 +1,4 @@
-PROJECT_ROOT ?= $(TOP) ;
-
-SubDir $(PROJECT_ROOT) Light ;
+SubDir PLASMA Examples Light ;
 
 if ! $(Light_READY) {
  # Declare a library for PlanWorks Control

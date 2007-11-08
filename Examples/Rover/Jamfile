@@ -1,6 +1,4 @@
-PROJECT_ROOT ?= $(TOP) ;
-
-SubDir $(PROJECT_ROOT) Rover ;
+SubDir PLASMA Examples Rover ;
 
 if ! $(Rover_READY) {
  # Declare a library for PlanWorks Control

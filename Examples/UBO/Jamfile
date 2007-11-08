@@ -1,5 +1,4 @@
-PROJECT_ROOT ?= $(TOP) ;
-SubDir $(PROJECT_ROOT) UBO ;
+SubDir PLASMA Examples UBO ;
 
 if ! $(UBO_READY) {
  # Declare a library for PlanWorks Control

@@ -1,6 +1,4 @@
-PROJECT_ROOT ?= $(TOP) ;
-
-SubDir $(PROJECT_ROOT) pddl2nddl ;
+SubDir PLASMA Examples pddl2nddl ;
 
 if ! $(pddl2nddl_READY) {
  # Declare a library for PlanWorks Control

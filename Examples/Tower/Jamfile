@@ -1,5 +1,4 @@
-PROJECT_ROOT ?= $(TOP) ;
-SubDir $(PROJECT_ROOT) Tower ;
+SubDir PLASMA Examples Tower ;
 
 if ! $(Tower_READY) {
  # Declare a library for PlanWorks Control
