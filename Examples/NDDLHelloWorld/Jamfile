@@ -1,6 +1,6 @@
 SubDir PLASMA Examples NDDLHelloWorld ;
 
-if ! $(NDDLHelloWorld_READY) {
+if ! $(NDDLHelloWorld_READY) && ! $(PLASMA_READY) {
  # Declare a library for PlanWorks Control
 
  ModuleSharedLibrary NDDLHelloWorldController 
@@ -16,7 +16,11 @@ if ! $(NDDLHelloWorld_READY) {
  # Create a build target for the planner shared library with model.
  ModuleSharedLibrary NDDLHelloWorld : NDDLHelloWorld-model.o : System : NDDLHelloWorld ;
 
- Depends all : run-NDDLHelloWorld-tests ;
- Depends run-NDDLHelloWorld-tests : NDDLHelloWorld ;
- Depends run-NDDLHelloWorld-tests : NDDLHelloWorldController ;
+ NOTFILE NDDLHelloWorld NDDLHelloWorldController ; 
+
+ # Only let all run project if we're in this directory:
+ if $(SUBDIR) = . { 
+    Depends all : NDDLHelloWorld NDDLHelloWorldController ;
+ } 
+ Depends run-NDDLHelloWorld-tests : NDDLHelloWorld NDDLHelloWorldController ;
 } # NDDLHelloWorld_READY

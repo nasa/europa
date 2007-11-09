@@ -33,5 +33,9 @@ if ! ( "Resources" in $(NO) ) {
    #Depends run-examples-tests : run-UBO-tests ;
 }
 
+# These currrently cause problems if:
+# a) LIBRARIES=STATIC or
+# b) Jam is invoked from 
+#NOCARE RoverController NDDLHelloWorldController ShoppingController pddl2nddlController LightController ;
 
 } # PLASMA_READY

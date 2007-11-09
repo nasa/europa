@@ -1,6 +1,6 @@
 SubDir PLASMA Examples UBO ;
 
-if ! $(UBO_READY) {
+if ! $(UBO_READY) && ! $(PLASMA_READY) {
  # Declare a library for PlanWorks Control
 
  ModuleSharedLibrary UBOController 
@@ -16,7 +16,11 @@ if ! $(UBO_READY) {
  # Create a build target for the planner shared library with model.
  ModuleSharedLibrary UBO : UBO-model.o : System : UBO ;
 
- Depends all : run-UBO-tests ;
- Depends run-UBO-tests : UBO ;
- Depends run-UBO-tests : UBOController ;
+ NOTFILE UBO UBOController ; 
+
+ # Only let all run project if we're in this directory:
+ if $(SUBDIR) = . { 
+    Depends all : UBO UBOController ;
+ } 
+ Depends run-UBO-tests : UBO UBOController ;
 } # UBO_READY

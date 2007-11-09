@@ -1,6 +1,6 @@
 SubDir PLASMA Examples Tower ;
 
-if ! $(Tower_READY) {
+if ! $(Tower_READY) && ! $(PLASMA_READY) {
  # Declare a library for PlanWorks Control
 
  ModuleSharedLibrary TowerController 
@@ -16,7 +16,11 @@ if ! $(Tower_READY) {
  # Create a build target for the planner shared library with model.
  ModuleSharedLibrary Tower : Tower-model.o : System : Tower ;
 
- Depends all : run-Tower-tests ;
- Depends run-Tower-tests : Tower ;
- Depends run-Tower-tests : TowerController ;
+ NOTFILE Tower TowerController ; 
+
+ # Only let all run project if we're in this directory:
+ if $(SUBDIR) = . { 
+    Depends all : Tower TowerController ;
+ } 
+ Depends run-Tower-tests : Tower TowerController ;
 } # Tower_READY

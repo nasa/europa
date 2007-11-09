@@ -79,9 +79,13 @@ echo "" >> $DIRECTORY/Jamfile
 echo " # Create a build target for the planner shared library with model." >> $DIRECTORY/Jamfile
 echo " ModuleSharedLibrary "$NAME" : "$NAME"-model.o : System : "$NAME" ;" >> $DIRECTORY/Jamfile
 echo "" >> $DIRECTORY/Jamfile
-echo " Depends all : run-"$NAME"-tests ;" >> $DIRECTORY/Jamfile
-echo " Depends run-"$NAME"-tests : "$NAME" ;" >> $DIRECTORY/Jamfile
-echo " Depends run-"$NAME"-tests : "$NAME"Controller ;" >> $DIRECTORY/Jamfile
+echo " NOTFILE "$NAME" "$NAME"Controller ; " >> $DIRECTORY/Jamfile
+echo "" >> $DIRECTORY/Jamfile
+echo " # Only let all run project if we're in this directory:" >> $DIRECTORY/Jamfile
+echo " if \$(SUBDIR) = "." { " >> $DIRECTORY/Jamfile
+echo "    Depends all : "$NAME" "$NAME"Controller ;" >> $DIRECTORY/Jamfile
+echo " } " >> $DIRECTORY/Jamfile
+echo " Depends run-"$NAME"-tests : "$NAME" "$NAME"Controller ;" >> $DIRECTORY/Jamfile
 echo "} # "$NAME"_READY" >> $DIRECTORY/Jamfile
 
 

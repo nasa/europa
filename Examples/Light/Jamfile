@@ -1,6 +1,6 @@
 SubDir PLASMA Examples Light ;
 
-if ! $(Light_READY) {
+if ! $(Light_READY)  && ! $(PLASMA_READY) {
  # Declare a library for PlanWorks Control
 
  ModuleSharedLibrary LightController 
@@ -16,6 +16,11 @@ if ! $(Light_READY) {
  # Create a build target for the planner shared library with model.
  ModuleSharedLibrary Light : Light-model.o : System : Light ;
 
- Depends all : run-Light-tests ;
+ NOTFILE Light LightController ; 
+
+ # Only let all run project if we're in this directory:
+ if $(SUBDIR) = . { 
+    Depends all : Light LightController ;
+ } 
  Depends run-Light-tests : Light LightController ;
 } # Light_READY

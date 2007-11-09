@@ -1,6 +1,6 @@
 SubDir PLASMA Examples ResourceViolations ;
 
-if ! $(ResourceViolations_READY) {
+if ! $(ResourceViolations_READY) && ! $(PLASMA_READY) {
  # Declare a library for PlanWorks Control
 
  ModuleSharedLibrary ResourceViolationsController 
@@ -16,7 +16,11 @@ if ! $(ResourceViolations_READY) {
  # Create a build target for the planner shared library with model.
  ModuleSharedLibrary ResourceViolations : ResourceViolations-model.o : System : ResourceViolations ;
 
- Depends all : run-ResourceViolations-tests ;
- Depends run-ResourceViolations-tests : ResourceViolations ;
- Depends run-ResourceViolations-tests : ResourceViolationsController ;
+ NOTFILE ResourceViolations ResourceViolationsController ; 
+
+ # Only let all run project if we're in this directory:
+ if $(SUBDIR) = . { 
+    Depends all : ResourceViolations ResourceViolationsController ;
+ } 
+ Depends run-ResourceViolations-tests : ResourceViolations ResourceViolationsController ;
 } # ResourceViolations_READY
