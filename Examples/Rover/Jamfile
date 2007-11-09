@@ -1,6 +1,6 @@
 SubDir PLASMA Examples Rover ;
 
-if ! $(Rover_READY) {
+if ! $(Rover_READY) && ! $(PLASMA_READY) {
  # Declare a library for PlanWorks Control
 
  ModuleSharedLibrary RoverController 
@@ -14,8 +14,14 @@ if ! $(Rover_READY) {
  NddlMain Rover-planner : Rover-Main.cc : Rover-model.nddl : System : Rover-planner ;
 
  # Create a build target for the planner shared library with model.
- ModuleSharedLibrary Rover : Rover-model.o : System : Rover 
-;
- Depends all : run-Rover-tests ;
+ ModuleSharedLibrary Rover : Rover-model.o : System : Rover ;
+
+ NOTFILE Rover RoverController ;
+
+ if $(SUBDIR) = "." {
+   Depends all : Rover RoverController ;
+ }
  Depends run-Rover-tests : Rover RoverController ;
+
 } # Rover_READY
+
