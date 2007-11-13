@@ -4,8 +4,8 @@
 * @author Automated ProGen/max RCPSP input format converter to NDDL (David Rijsman)
 */
 
-#include "Resources.nddl"
 #include "PlannerConfig.nddl"
+#include "Resources.nddl"
 
 class CapacityResource extends Reusable 
 {

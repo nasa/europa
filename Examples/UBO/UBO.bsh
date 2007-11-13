@@ -94,3 +94,5 @@ catch (Exception e) {
 //setupDesktop();
 //showHistory();
 
+//qry = "select key,toString from psengine.PSToken where name like 'Capacity%'";
+//desktop.makeTableFrame("Resource Tokens",Util.SWIGList(psengine.getTokens()), qry);

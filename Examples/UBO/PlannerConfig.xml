@@ -5,15 +5,12 @@
     <FlawHandler component="SAVHThreatHandler" filter="both" />
   </SAVHThreatManager>
 
-  <ThreatManager defaultPriority="1">
+  <ThreatManager defaultPriority="2">
     <FlawHandler component="StandardThreatHandler"/>
     <FlawHandler component="StandardThreatHandler" predicate="act" order="late" priority="2"/>
+    <FlawFilter class-match="Reusable"/>
+    <FlawFilter class-match="CapacityResource"/>
   </ThreatManager>
-
-<!--   <ThreatManager defaultPriority="0"> -->
-<!--     <FlawHandler component="ResourceThreat"/> -->
-<!--     <FlawFilter class-match="Reservoir"/> -->
-<!--   </ThreatManager> -->
 
   <OpenConditionManager defaultPriority="1">
     <FlawHandler component="StandardOpenConditionHandler"/>
@@ -23,11 +20,11 @@
     <FlawFilter var-match="start"/>
     <FlawFilter var-match="end"/>
     <FlawFilter var-match="duration"/>
-    <FlawFilter class-match="Resource" var-match="time"/>
+    <!--FlawFilter class-match="Resource" var-match="time"/>
     <FlawFilter class-match="Resource" var-match="quantity"/>
     <FlawFilter class-match="Reservoir" var-match="time"/>
     <FlawFilter class-match="Reservoir" var-match="quantity"/>
-    <FlawFilter class-match="Reusable" var-match="quantity"/>
+    <FlawFilter class-match="Reusable" var-match="quantity"/-->
     <FlawFilter component="InfiniteDynamicFilter"/>
     <FlawHandler component="StandardVariableHandler"/>
   </UnboundVariableManager>

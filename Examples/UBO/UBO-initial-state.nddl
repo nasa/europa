@@ -10,8 +10,8 @@ ProblemInstance problem = new ProblemInstance();
 
 // Proven minimum duration for this problem is 45
 
-int maxDuration = 60;
-int maxDurationPlusOne = 61;
+int maxDuration = 90;
+int maxDurationPlusOne = 91;
 
 CapacityResource resource0 = new CapacityResource( 0.00000 , 10.0000 );
 CapacityResource resource1 = new CapacityResource( 0.00000 , 10.0000 );

@@ -50,7 +50,8 @@ public class UBOSolverListener
     
     protected void decreasePlanSize(int delta)
     {
-    	int newSize = plan_.size()-delta;
+    	int newSize = Math.max(0,plan_.size()-delta);
+    	
         plan_.setSize(newSize);
         treeSize_.setSize(newSize);
         currentTree_.setSize(newSize);
