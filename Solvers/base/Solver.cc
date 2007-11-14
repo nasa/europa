@@ -185,7 +185,7 @@ namespace EUROPA {
           // If we get a decision back, it trumps our current best decisions so update the bestDecision
           if(!candidate.isNoId()){
             if(!m_activeDecision.isNoId())
-              delete (DecisionPoint*) m_activeDecision;
+              m_activeDecision->discard();
 
             m_activeDecision = candidate;
           }
@@ -244,7 +244,7 @@ namespace EUROPA {
       // If inconsistent, before doing anything, there is no solution.
       if(!m_db->getConstraintEngine()->constraintConsistent()){
         m_exhausted = true;
-        debugMsg("Solver:step", "No solution perior to stepping.");
+        debugMsg("Solver:step", "No solution prior to stepping.");
         publish(notifyExhausted,);
         return;
       }
@@ -348,7 +348,7 @@ namespace EUROPA {
         if(backtracking){
           publish(notifyRetractNotDone,m_activeDecision);
           publish(notifyDeleted,m_activeDecision);
-          delete (DecisionPoint*) m_activeDecision;
+          m_activeDecision->discard();
           m_activeDecision = DecisionPointId::noId();
         }
         else {
@@ -371,7 +371,7 @@ namespace EUROPA {
           m_activeDecision->undo();
         }
 
-        delete (DecisionPoint*) m_activeDecision;
+        m_activeDecision->discard();
         m_activeDecision = DecisionPointId::noId();
       }
 
@@ -398,7 +398,7 @@ namespace EUROPA {
         }
 
         publish(notifyDeleted,node);
-        delete (DecisionPoint*) node;
+        node->discard();
         depth--;
       }
 
@@ -418,7 +418,7 @@ namespace EUROPA {
           m_activeDecision->undo();
         }
 
-        delete (DecisionPoint*) m_activeDecision;
+        m_activeDecision->discard();
         m_activeDecision = DecisionPointId::noId();
         stepCount--;
       }
@@ -452,17 +452,17 @@ namespace EUROPA {
 
     void Solver::cleanupDecisions(){
       if(m_activeDecision.isId()){
-        delete (DecisionPoint*) m_activeDecision;
+        m_activeDecision->discard();
         m_activeDecision = DecisionPointId::noId();
       }
 
-      cleanup(m_decisionStack);
+      discardAll(m_decisionStack);
     }
 
     void Solver::cleanup(DecisionStack& decisionStack){
       for(DecisionStack::const_iterator it = decisionStack.begin(); it != decisionStack.end(); ++it){
         DecisionPointId node = *it;
-        delete (DecisionPoint*) node;
+        node->discard();
       }
       decisionStack.clear();
     }
