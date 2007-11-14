@@ -78,13 +78,18 @@ namespace EUROPA {
   }
 
   void ConstrainedVariable::handleDiscard(){
+    debugMsg("ConstrainedVariable:handleDiscard", "Discarding " << toString());
+
     check_error(m_constraintEngine.isValid());
     m_deleted = true;
     // Remove constraints if they apply and we are not purging
     if(!Entity::isPurging()){
       for (ConstraintList::const_iterator it = m_constraints.begin(); it != m_constraints.end(); ++it){
 	ConstraintId constraint = it->first;
+	debugMsg("ConstrainedVariable:handleDiscard", "Discarding constraint " << constraint->getKey());
+	checkError(constraint.isValid(), constraint);
 	constraint->discard();
+	checkError(constraint.isValid(), constraint << " should remain valid");
       }
     }
 
@@ -194,6 +199,8 @@ namespace EUROPA {
   void ConstrainedVariable::removeConstraint(const ConstraintId& constraint, int argIndex) {
     if(m_deleted) // Nothing to do
       return;
+
+    debugMsg("ConstrainedVariable:removeConstraint", "Unlinking " << constraint->toString());
 
     check_error(!Entity::isPurging());
     check_error(constraint.isValid());
