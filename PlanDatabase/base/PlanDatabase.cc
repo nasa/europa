@@ -121,7 +121,7 @@ namespace EUROPA{
           masterTokens.insert(token);
       }
 
-      cleanup(masterTokens);
+      Entity::discardAll(masterTokens);
 
       // Retrieve only the objects at the root
       std::set<ObjectId> rootObjects;
@@ -133,17 +133,20 @@ namespace EUROPA{
       }
 
       // Now clean up root objects - which will cascade delete to the children
-      cleanup(rootObjects);
+      Entity::discardAll(rootObjects);
     }
     else { // Just cleanup by blasting through the tokens and objects
-      cleanup(m_tokens);
-      cleanup(m_objects);
+      Entity::discardAll(m_tokens);
+      Entity::discardAll(m_objects);
     }
     // Purge global variables
-    cleanup(m_globalVariables);
+    Entity::discardAll(m_globalVariables);
 
     // Now purge the Constraint Engine
     m_constraintEngine->purge();
+
+    // Finally, run the garbage collector
+    Entity::garbageCollect();
   }
 
   void PlanDatabase::notifyAdded(const ObjectId& object){
@@ -364,6 +367,9 @@ namespace EUROPA{
                                          std::vector<TokenId>& results,
                                          unsigned int limit,
                                          bool useExactTest) {
+    if(!m_constraintEngine->propagate())
+      return;
+
     // Draw from list of active tokens of the same predicate
     const TokenSet& candidates = getActiveTokens(inactiveToken->getPredicateName());
 
@@ -478,6 +484,9 @@ namespace EUROPA{
   void PlanDatabase::getOrderingChoices(const TokenId& tokenToOrder,
                                         std::vector< OrderingChoice >& results,
                                         unsigned int limit){
+    if(!m_constraintEngine->propagate())
+      return;
+
     checkError(m_tokensToOrder.find(tokenToOrder->getKey()) != m_tokensToOrder.end(), 
                "Should not be calling this method if it is not a token in need of ordering. " << tokenToOrder->toString());
 
@@ -508,8 +517,9 @@ namespace EUROPA{
 
   unsigned int PlanDatabase::countOrderingChoices(const TokenId& token,
                                                   unsigned int limit){
-    checkError(m_constraintEngine->constraintConsistent(),
-               "Cannot query for ordering choices while database is not constraintConsistent.");
+    if(!m_constraintEngine->propagate())
+      return 0;
+
     std::list<double> objects;
     token->getObject()->lastDomain().getValues(objects);
     unsigned int choiceCount = 0;
@@ -701,12 +711,19 @@ namespace EUROPA{
              token->getPredicateName().toString()  << "(" << token->getKey() << "}");
   }
 
-
   void PlanDatabase::notifyCommitted(const TokenId& token){
     check_error(!Entity::isPurging());
     publish(notifyCommitted(token));
 
     debugMsg("PlanDatabase:notifyCommitted",
+             token->getPredicateName().toString()  << "(" << token->getKey() << "}");
+  }
+
+  void PlanDatabase::notifyTerminated(const TokenId& token){
+    check_error(!Entity::isPurging());
+    publish(notifyTerminated(token));
+
+    debugMsg("PlanDatabase:notifyTerminated",
              token->getPredicateName().toString()  << "(" << token->getKey() << "}");
   }
 
@@ -923,7 +940,7 @@ namespace EUROPA{
       checkError(it != m_activeTokensByPredicate.end(), token->toString() << " must be present but isn't.")
       TokenSet& activeTokens = it->second;
       activeTokens.erase(token);
-      debugMsg("PlanDatabase:insertActiveToken", token->toString() << " removed for " << predicate.toString());
+      debugMsg("PlanDatabase:removeActiveToken", token->toString() << " removed for " << predicate.toString());
 
       // Break if we hit a built in class
       if(objectType == sl_timelineRoot || objectType == sl_objectRoot)

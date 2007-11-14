@@ -314,6 +314,8 @@ namespace EUROPA {
 
     void notifyCommitted(const TokenId& token);
 
+    void notifyTerminated(const TokenId& token);
+
     void notifyConstrained(const ObjectId& object, const TokenId& predecessor, const TokenId& successor);
 
     void notifyFreed(const ObjectId& object, const TokenId& predecessor, const TokenId& successor);
