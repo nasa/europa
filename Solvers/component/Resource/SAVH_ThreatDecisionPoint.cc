@@ -426,6 +426,11 @@ namespace EUROPA {
       std::stringstream os;
       os << "INSTANT=" << m_instTime << " on " << m_resName.toString() << " : ";
 
+      if (m_choiceCount == 0) {
+    	os << "NO CHOICES";
+    	return os.str();
+      }
+      
       TransactionId predecessor = m_choices[m_index].first;
       TransactionId successor = m_choices[m_index].second;
       os << "  DECISION (CHOICE=" << (m_index+1) << " of MAX_CHOICE=" << m_choiceCount<< ") " 
