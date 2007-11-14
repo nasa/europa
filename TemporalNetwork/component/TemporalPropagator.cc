@@ -45,7 +45,7 @@ namespace EUROPA {
 
   void TemporalPropagator::handleDiscard(){
     check_error(Entity::isPurging() || m_wrappedTimepoints.empty());
-    cleanup(m_wrappedTimepoints);
+    Entity::discardAll(m_wrappedTimepoints);
     cleanup(m_listeners);
     check_error(m_tnet.isValid());
     delete (TemporalNetwork*) m_tnet;
@@ -148,7 +148,7 @@ namespace EUROPA {
       timepoint->clearDeletionMarker();
       m_variablesForDeletion.insert(timepoint);
       EntityId tw = var->getExternalEntity();
-      delete (Entity*) tw;
+      tw->discard();
     }
 
     m_changedVariables.erase(var->getKey());
