@@ -38,7 +38,7 @@ namespace EUROPA{
       : PlanDatabaseListener(planDatabase), m_rulesEngine(rulesEngine){}
     void notifyActivated(const TokenId& token){m_rulesEngine->notifyActivated(token);}
     void notifyDeactivated(const TokenId& token){m_rulesEngine->notifyDeactivated(token);}
-
+    void notifyTerminated(const TokenId& token){m_rulesEngine->notifyDeactivated(token);}
     const RulesEngineId m_rulesEngine;
   };
  
@@ -121,18 +121,24 @@ namespace EUROPA{
 
   void RulesEngine::notifyDeactivated(const TokenId& token){
     check_error(!Entity::isPurging());
-    check_error(token.isValid());
-    //@todo Change event so we get a notification of deactivating: check_error(token->isInactive());
+    cleanupRuleInstances(token);
+  }
 
-    std::multimap<int, RuleInstanceId>::const_iterator it = m_ruleInstancesByToken.find(token->getKey());
+  void RulesEngine::notifyTerminated(const TokenId& token){
+    cleanupRuleInstances(token);
+  }
+
+  void RulesEngine::cleanupRuleInstances(const TokenId& token){
+    check_error(token.isValid());
+
+    std::multimap<int, RuleInstanceId>::iterator it = m_ruleInstancesByToken.find(token->getKey());
     while(it!=m_ruleInstancesByToken.end() && it->first == token->getKey()){
       RuleInstanceId ruleInstance = it->second;
       check_error(ruleInstance.isValid());
       ruleInstance->discard();
-      ++it;
+      m_ruleInstancesByToken.erase(it++);
     }
 
-    m_ruleInstancesByToken.erase(token->getKey());
   }
 
   void RulesEngine::add(const RulesEngineListenerId &listener) {
