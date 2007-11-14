@@ -54,7 +54,6 @@ namespace EUROPA {
     static bool allocated(unsigned long int id);
     static unsigned int getKey(unsigned long int id);
     static void remove(unsigned long int id);
-
     ~IdTable(); // deallocating statics requires public access on beos
   private:
     IdTable();
