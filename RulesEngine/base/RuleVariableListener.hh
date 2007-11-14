@@ -47,6 +47,22 @@ namespace EUROPA
     }
 
   private:
+
+    /**
+     * @brief Handles messages from a rule instance when discarded to trigger a deactivation
+     */
+    virtual void notifyDiscarded(const Entity* entity);
+
+    /**
+     * @brief Handle rule related deallocations
+     */
+    virtual void handleDiscard();
+
+    /**
+     * @brief Over-ride base class test
+     */
+    virtual bool testIsRedundant(const ConstrainedVariableId& var = ConstrainedVariableId::noId()) const;
+
     friend class RuleInstance;
 
     /**
