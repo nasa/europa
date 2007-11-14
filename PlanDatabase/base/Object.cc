@@ -218,7 +218,8 @@ namespace EUROPA {
 	else
 	  ++it;
       }
-      cleanup(constraints);
+
+      Entity::discardAll(constraints);
     }
 
     m_planDatabase->notifyRemoved(m_id, token);
