@@ -121,8 +121,9 @@ namespace EUROPA{
       check_error(!isIncomplete());
       check_error(isValid());
 
-      // If it is not committed and is is not inactive, undo a cancellation
-      if (!isInactive()) 
+      // If it has been merged or activated then cancel it. This allows events to flow to unlink the implications
+      // to dependent entities.
+      if (!isInactive())
 	cancel();
 
       // Notify objects that the token is being deleted. Allows synchronization
@@ -135,7 +136,6 @@ namespace EUROPA{
       // Notify master of removal if appropriate - won't be done if this has arisen out of cascaded delete.
       if(!m_master.isNoId())
 	m_master->remove(m_id);
-
 
       // Now remove all the variables
       discardAll(m_allVariables);
@@ -817,15 +817,24 @@ namespace EUROPA{
       var->deactivate();
     }
 
+    for(ConstrainedVariableSet::const_iterator it = m_localVariables.begin(); 
+	it != m_localVariables.end(); 
+	++it){
+      ConstrainedVariableId var = *it;
+      checkError(var.isValid(), var << " is not valid for token " << getKey());
+      var->deactivate();
+    }
+
     // Finally, we can terminate all inactive slaves
     const TokenSet slaves = getSlaves();
     for(TokenSet::const_iterator it = slaves.begin(); it != slaves.end(); ++it){
       TokenId slave = *it;
       if(slave->isInactive()){
 	slave->terminate();
-	slave->discard();
       }
     }
+
+    m_planDatabase->notifyTerminated(m_id);
   }
 
   bool Token::noExternalConstraints() const{
