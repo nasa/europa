@@ -614,6 +614,7 @@ namespace EUROPA {
     void FlawIterator::advance(){
       EntityId candidate = nextCandidate();
       while(candidate.isId()){
+	checkError(candidate.isValid(), candidate);
         if(m_manager.dynamicMatch(candidate))
           candidate = nextCandidate();
         else {

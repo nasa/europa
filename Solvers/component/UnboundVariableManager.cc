@@ -200,6 +200,7 @@ namespace EUROPA {
 	  const std::vector<ConstrainedVariableId>& variables = token->getVariables();
 	  for(std::vector<ConstrainedVariableId>::const_iterator it = variables.begin(); it != variables.end(); ++it){
 	    ConstrainedVariableId var = *it;
+	    checkError(var.isValid(), var);
 	    updateFlaw(var);
 	  }
 	}
