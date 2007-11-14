@@ -177,3 +177,18 @@ leq(0,activity9.start);  leq( activity9.end, maxDuration);
 leq(0,activity10.start); leq( activity10.end, maxDuration);
 leq(0,activity11.start); leq( activity11.end, maxDurationPlusOne);
 
+// We know all activity goals must be satisfied separately, therefore activate right away to prune useless search space for the planner: 
+activity0.activate();
+activity1.activate();
+activity2.activate();
+activity3.activate();
+activity4.activate();
+activity5.activate();
+activity6.activate();
+activity7.activate();
+activity8.activate();
+activity9.activate();
+activity10.activate();
+activity11.activate();
+
+
