@@ -47,7 +47,7 @@ DistanceGraph::DistanceGraph ()
 DistanceGraph::~DistanceGraph()
 {
   cleanup(edges);
-  cleanup(nodes);
+  Entity::discardAll(nodes);
   delete dqueue;
   delete bqueue;
 }
@@ -88,7 +88,7 @@ Void DistanceGraph::deleteNode(DnodeId node)
   node->inCount = node->outCount = 0;
   node->potential = 99;  // A clue for debugging purposes
   deleteIfEqual(nodes, node);
-  delete (Dnode*) node;
+  node->discard();
 }
 
 DedgeId DistanceGraph::findEdge(DnodeId from, DnodeId to)
