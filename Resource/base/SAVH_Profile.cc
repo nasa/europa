@@ -152,7 +152,7 @@ namespace EUROPA {
         condDebugMsg(!inst->containsStartOrEnd(), "Profile:removeTransaction", "because it does not mark a change.");
         m_instants.erase(*it);
         m_detector->notifyDeleted(inst);
-        delete (Instant*) inst;
+	inst->discard();;
       }
       m_changeCount++;
       m_needsRecompute = true;
