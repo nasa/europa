@@ -46,5 +46,7 @@ namespace EUROPA {
 
   void PlanDatabaseListener::notifyCommitted(const TokenId& token){}
 
+  void PlanDatabaseListener::notifyTerminated(const TokenId& token){}
+
   const PlanDatabaseListenerId& PlanDatabaseListener::getId() const{return m_id;}
 }

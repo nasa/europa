@@ -90,6 +90,12 @@ namespace EUROPA {
      */
     virtual void notifyCommitted(const TokenId& token);
 
+    /**
+     * @brief Signals that a token has been terminated
+     * @param token The token that has been terminated
+     */
+    virtual void notifyTerminated(const TokenId& token);
+
     const PlanDatabaseListenerId& getId() const;
 
   protected:
