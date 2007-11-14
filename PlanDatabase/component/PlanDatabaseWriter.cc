@@ -98,6 +98,9 @@ namespace EUROPA {
       TokenSet::const_iterator tokit = alltokens.begin();
       for ( ; tokit != alltokens.end(); tokit++) {
         TokenId t = *tokit;
+	checkError(t.isValid(), t);
+	checkError(!t->isTerminated(), t->getKey());
+
         if (t->isMerged())
           mergedTokens.insert(t);
         else if (t->isActive())
