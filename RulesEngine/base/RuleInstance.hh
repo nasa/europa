@@ -127,9 +127,10 @@ namespace EUROPA{
     bool isExecuted() const;
 
     /**
-     * Tests if the condition, if there is one, is satisfied
+     * Tests if the condition, if there is one, is satisfied.
+     * @param The guard variables to evaluate against
      */
-    bool test() const;
+    bool test(const std::vector<ConstrainedVariableId>& guards) const;
 
     /**
      * Invoked by the RulesEngine or the RuleVariableListener in order to execute the subgoaling of the rule.
@@ -266,6 +267,12 @@ namespace EUROPA{
 
     bool isValid() const;
     void commonInit();
+
+    /**
+     * @brief Test of a constraint is connected to a given token. This is true if any variable in the scope
+     * of the constraint belongs to the token.
+     */
+    bool connectedToToken(const ConstraintId& constraint, const TokenId& token) const;
 
     std::vector<ConstrainedVariableId> m_guards; /*!< Guard variables for implicit and explcit guards */
     AbstractDomain* m_guardDomain; /*!< If an explicit equality test, will ahve this be non-null */

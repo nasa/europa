@@ -99,10 +99,15 @@ namespace EUROPA {
       delete m_guardDomain;
 
     // Delete the guard listener if we are not in purge mode. Purge mode will handle the deletion
-    // of the constraint in the Constraint Engine. Also, ignore if we are terminating the token since
-    // variable deallocation will nuke the constraint.
-    if(!m_guardListener.isNoId() && !Entity::isPurging() && !m_token->isTerminated())
+    // of the constraint in the Constraint Engine. We can deactivate this constraint since it does not impose a restriction
+    // on any variable and thus its removal is not a relaxtion. Since we are already discarding the rule, its implications
+    // will have been undone appropriately.
+    if(!m_guardListener.isNoId() && !Entity::isPurging()){
+      checkError(m_guardListener.isValid(), m_guardListener);
+      m_guardListener->removeDependent(this);
+      m_guardListener->deactivate();
       m_guardListener->discard();
+    }
 
     Entity::handleDiscard();
   }
@@ -127,7 +132,7 @@ namespace EUROPA {
   void RuleInstance::setRulesEngine(const RulesEngineId &rulesEngine) {
     check_error(m_rulesEngine.isNoId());
     m_rulesEngine = rulesEngine;
-    if(test())
+    if(test(m_guards))
       execute();
   }
 
@@ -137,24 +142,24 @@ namespace EUROPA {
    * 2. No guard value specified
    * 3. Guard and guard value specifed
    */
-  bool RuleInstance::test() const {
+  bool RuleInstance::test(const std::vector<ConstrainedVariableId>& guards) const {
     checkError(m_rule.isValid(), m_rule);
     debugMsg("RuleInstance:test", "Testing rule " << m_id << " for " << m_rule->getName().toString() << " from " << m_rule->getSource().toString());
     if(m_guardDomain != 0) { // Case of explicit guard on a single variable
       debugMsg("RuleInstance:test", "Case of explicit guard on a single variable");
-      checkError(m_guards.size() == 1, "Explcit guard on one variable only");
-      bool result = m_guards[0]->isSpecified() &&
-      (m_guardDomain->isMember(m_guards[0]->getSpecifiedValue()) ^ !m_isPositive);
+      checkError(guards.size() == 1, "Explcit guard on one variable only");
+      bool result = guards[0]->isSpecified() &&
+      (m_guardDomain->isMember(guards[0]->getSpecifiedValue()) ^ !m_isPositive);
       
-      debugMsg("RuleInstance:test", "variable " << m_guards[0]->getId()
-	       << " name " << m_guards[0]->toString()
-	       << " specified " << m_guards[0]->isSpecified()
+      debugMsg("RuleInstance:test", "variable " << guards[0]->getId()
+	       << " name " << guards[0]->toString()
+	       << " specified " << guards[0]->isSpecified()
 	       << " guard domain " << *m_guardDomain
 	       << (result ? " passed" : " failed"));
-      condDebugMsg(!m_guards[0]->isSpecified(), "RuleInstance:test", 
-		   "Guard " << m_guards[0]->toString() << " not specified.");
-      condDebugMsg(m_guards[0]->isSpecified() && !m_guardDomain->isMember(m_guards[0]->getSpecifiedValue()), "RuleInstance:test", 
-		   "Specified value '" << m_guards[0]->getSpecifiedValue() << "' of guard " << m_guards[0]->toString() << " not in guard domain " << *m_guardDomain);
+      condDebugMsg(!guards[0]->isSpecified(), "RuleInstance:test", 
+		   "Guard " << guards[0]->toString() << " not specified.");
+      condDebugMsg(guards[0]->isSpecified() && !m_guardDomain->isMember(guards[0]->getSpecifiedValue()), "RuleInstance:test", 
+		   "Specified value '" << guards[0]->getSpecifiedValue() << "' of guard " << guards[0]->toString() << " not in guard domain " << *m_guardDomain);
       
       return result;
     }
@@ -162,7 +167,7 @@ namespace EUROPA {
     // Otherwise, we must be dealing with implied singleton guards
     debugMsg("RuleInstance:test", "Implied singleton or no guards case.");
     int counter = 0;
-    for(std::vector<ConstrainedVariableId>::const_iterator it = m_guards.begin(); it != m_guards.end(); ++it){
+    for(std::vector<ConstrainedVariableId>::const_iterator it = guards.begin(); it != guards.end(); ++it){
       ConstrainedVariableId guard = *it;
       checkError(guard.isValid(), guard);
       check_error(m_isPositive); // negative testing isn't allowed on singleton guards.
@@ -194,6 +199,9 @@ namespace EUROPA {
   void RuleInstance::undo(){
     check_error(isExecuted(), "Cannot undo a rule if not already executed.");
 
+    // Clear child rules before destroying local entities. This is the reverse order of allocation
+    discardAll(m_childRules);
+
     if(!Entity::isPurging()){
       m_rulesEngine->notifyUndone(getId());
       // Clear slave lookups
@@ -212,15 +220,25 @@ namespace EUROPA {
       for(std::vector<ConstraintId>::const_iterator it = constraints.begin(); it != constraints.end(); ++it){
 	ConstraintId constraint = *it;
 	checkError(constraint.isValid(), constraint);
-	constraint->discard();
+
+	// Only discard constraints that are connected to the master since the master may persist after the rule has cleaned up
+	// but the constraints should not. If it is not connected to the master then it applies to local variables or slave variables.
+	// if a full roll-back of the rule occurs, slaves and local variables will be deleted, causing a delete of the attendant constraints.
+	// In the event that a slave persists, as cann occur when the master is removed through termination, then the constraints among 
+	// remaining slaves should also be retained
+	if(connectedToToken(constraint, m_token)){
+	  debugMsg("RuleInstance:undo", "Removing connected constraint " << constraint->toString());
+	  constraint->discard();
+	}
+	else // If we are not removing the constraint, we must remove the dependency on it
+	  constraint->removeDependent(this);
       }
 
       m_constraints.clear();
 
-      cleanup(m_childRules);
-
       // Clean up slaves if not already de-allocated. Copy collection to avoid call back changing the set of
       // slaves
+      debugMsg("RuleInstance:undo", "Processing slaves");
       std::vector<TokenId> slaves = m_slaves;
       for(std::vector<TokenId>::const_iterator it = slaves.begin(); it != slaves.end(); ++it){
 	TokenId slave = *it;
@@ -234,29 +252,35 @@ namespace EUROPA {
 	if(master.isId())
 	  slave->removeMaster(m_token);
       }
+
       m_slaves.clear();
 
       // Cleanup local variables
+      debugMsg("RuleInstance:undo", "Cleaning up local variables");
+
       for(std::vector<ConstrainedVariableId>::const_iterator it = m_variables.begin();
 	  it != m_variables.end();
 	  ++it){
 	ConstrainedVariableId var = *it;
+	checkError(var.isValid(), var);
+	debugMsg("RuleInstance:undo", "Removing " << var->toString());
 	getToken()->removeLocalVariable(var);
 
 	if(var->getParent() == m_id)
 	  var->discard();
+
+	checkError(var.isValid(), var << " should still be va;id after a discard.");
       }
       m_variables.clear();
       m_isExecuted = false;
     }
-    else // Just clean up child rules
-      cleanup(m_childRules);
   }
 
   void RuleInstance::setGuard(const std::vector<ConstrainedVariableId>& guards){
     check_error(m_guards.empty());
     m_guards = guards;
     m_guardListener = (new RuleVariableListener(m_planDb->getConstraintEngine(), m_id, m_guards))->getId();
+    m_guardListener->addDependent(this);
   }
 
   void RuleInstance::setGuard(const ConstrainedVariableId& guard, const AbstractDomain& domain){
@@ -268,12 +292,12 @@ namespace EUROPA {
 					      " with " + domain.getTypeName().toString());
     m_guardDomain = domain.copy();
     m_guardListener = (new RuleVariableListener(m_planDb->getConstraintEngine(), m_id, m_guards))->getId();
+    m_guardListener->addDependent(this);
   }
 
   TokenId RuleInstance::addSlave(Token* slave){
     m_slaves.push_back(slave->getId());
     slave->addDependent((Entity*) this);
-
     return slave->getId();
   }
 
@@ -311,7 +335,7 @@ namespace EUROPA {
    */
   TokenId RuleInstance::addSlave(Token* slave, const LabelStr& name){
 
-    // As with adding variables, we have to handle case of re-use of name when exeuting the inner
+    // As with adding variables, we have to handle case of re-use of name when executing the inner
     // loop of 'foreach'
     m_slavesByName.erase(name.getKey());
 
@@ -541,17 +565,12 @@ namespace EUROPA {
   }
 
   void RuleInstance::notifyDiscarded(const Entity* entity){
-    bool isToken = false;
-
-    // If not a constraint, then it must be a token
-    if(dynamic_cast<const Constraint*>(entity) == 0)
-      isToken = true;
 
     checkError(dynamic_cast<const Token*>(entity) != 0 || dynamic_cast<const Constraint*>(entity),
 	       "Must be a constraint or a token: " << entity->getKey());
  
     // Is it a slave? If so, reference to it
-    if(isToken){
+    if(dynamic_cast<const Constraint*>(entity) == 0){
       for(std::vector<TokenId>::iterator it = m_slaves.begin(); it != m_slaves.end(); ++it){
 	TokenId token = *it;
 	checkError(token.isValid(), token);
@@ -560,16 +579,41 @@ namespace EUROPA {
 	  return;
 	}
       }
+
+      return;
     }
-    else {
-      for(std::vector<ConstraintId>::iterator it = m_constraints.begin(); it != m_constraints.end(); ++it){
-	ConstraintId constraint = *it;
-	checkError(constraint.isValid(), constraint);
-	if(constraint->getKey() == entity->getKey()){
-	  m_constraints.erase(it);
-	  return;
-	}
+
+    // Is it the guard listener
+    if(m_guardListener.isId() && entity->getKey() == m_guardListener->getKey()){
+      m_guardListener = ConstraintId::noId();
+      return;
+    }
+    
+    // If neither of the above, it must be a regular constraint
+    for(std::vector<ConstraintId>::iterator it = m_constraints.begin(); it != m_constraints.end(); ++it){
+      ConstraintId constraint = *it;
+      checkError(constraint.isValid(), constraint);
+      if(constraint->getKey() == entity->getKey()){
+	m_constraints.erase(it);
+	return;
       }
     }
+  }
+
+  bool RuleInstance::connectedToToken(const ConstraintId& constraint, const TokenId& token) const{
+    // If the constrant is actually a rule variable listener then it is part of the context of the rule instance
+    // and thus part of the context of the token
+    if(RuleVariableListenerId::convertable(constraint))
+      return true;
+
+    for(std::vector<ConstrainedVariableId>::const_iterator it = constraint->getScope().begin();
+	it != constraint->getScope().end(); ++it){
+      ConstrainedVariableId var = *it;
+      EntityId parent = var->getParent();
+      if(parent == token || parent == m_id)
+	return true;
+    }
+
+    return false;
   }
 }
