@@ -1355,6 +1355,7 @@ private:
     std::string mOnlyHeur("<FlawHandler component=\"HSTSOpenConditionDecisionPoint\" choice=\"mergeOnly\"/>");
     TiXmlElement* mOnlyHeurXml = initXml(mOnlyHeur);
     HSTS::OpenConditionDecisionPoint mOnly(client, flawedToken.getId(), *mOnlyHeurXml);
+    assertTrue(client->propagate());
     mOnly.initialize();
     assertTrue(mOnly.getStateChoices().size() == 1);
     assertTrue(mOnly.getStateChoices()[0] == Token::MERGED);
@@ -1391,6 +1392,7 @@ private:
     std::string mEarlyHeur("<FlawHandler component=\"HSTSOpenConditionDecisionPoint\" choice=\"mergeOnly\" order=\"early\"/>");
     TiXmlElement* mEarlyHeurXml = initXml(mEarlyHeur);
     HSTS::OpenConditionDecisionPoint mEarly(client, flawedToken.getId(), *mEarlyHeurXml);
+    assertTrue(client->propagate());
     mEarly.initialize();
     assertTrue(mEarly.getStateChoices().size() == 1);
     assertTrue(mEarly.getStateChoices()[0] == Token::MERGED);
@@ -1402,6 +1404,7 @@ private:
     std::string mLateHeur("<FlawHandler component=\"HSTSOpenConditionDecisionPoint\" choice=\"mergeOnly\" order=\"late\"/>");
     TiXmlElement* mLateHeurXml = initXml(mLateHeur);
     HSTS::OpenConditionDecisionPoint mLate(client, flawedToken.getId(), *mLateHeurXml);
+    assertTrue(client->propagate());
     mLate.initialize();
     assertTrue(mLate.getStateChoices().size() == 1);
     assertTrue(mLate.getStateChoices()[0] == Token::MERGED);
@@ -1417,6 +1420,7 @@ private:
     std::string mNearHeur("<FlawHandler component=\"HSTSOpenConditionDecisionPoint\" choice=\"mergeOnly\" order=\"near\"/>");
     TiXmlElement* mNearHeurXml = initXml(mNearHeur);
     HSTS::OpenConditionDecisionPoint mNear(client, flawedToken.getId(), *mNearHeurXml);
+    assertTrue(client->propagate());
     mNear.initialize();
     assertTrue(mNear.getStateChoices().size() == 1);
     assertTrue(mNear.getStateChoices()[0] == Token::MERGED);
