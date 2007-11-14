@@ -11,6 +11,7 @@ namespace EUROPA {
   }
 
   Entity::~Entity(){
+    checkError(gcActive() || ! gcRequired(), m_key << " deleted outside of gabage collection when prohibited from doing so.");
     discardedEntities().erase(this);
     discard(false);
   }
@@ -30,7 +31,7 @@ namespace EUROPA {
       // If this entity has been integrated with an external entity, then delete the external
       // entity.
       if(!m_externalEntity.isNoId())
-	delete (Entity*) m_externalEntity;
+	m_externalEntity->discard();
 
       debugMsg("Entity:discard", "Deallocating " << m_key);
 
@@ -119,11 +120,14 @@ namespace EUROPA {
   void Entity::incRefCount() {m_refCount++;}
 
   bool Entity::decRefCount() {
-    m_refCount--;
+    if(m_refCount > 0)
+      m_refCount--;
+
     debugMsg("Entity:decRefCount",
 	     "Decremented ref count of " << toString() << "(" << getKey() << ") to " <<
 	     m_refCount);
-    if(m_refCount == 0){
+
+    if(m_refCount == 0 && !m_discarded){
       discard();
       return true;
     }
@@ -138,7 +142,10 @@ namespace EUROPA {
       return;
 
     m_discarded = true;
+    m_refCount = 0;
+
     handleDiscard();
+
     if(pool)
       discardedEntities().insert(this);
   }
@@ -163,6 +170,9 @@ namespace EUROPA {
   }
 
   unsigned int Entity::garbageCollect(){
+    // Flag activation of garbage collector
+    gcActive() = true;
+
     std::set<Entity*>& entities = discardedEntities();
     unsigned int count(0);
     while(!entities.empty()){
@@ -175,7 +185,21 @@ namespace EUROPA {
       delete (Entity*) entity;
       count++;
     }
+
+    // Flag completion of garbage collector
+    gcActive() = false;
+
     return count;
+  }
+
+  bool& Entity::gcActive(){
+    static bool sl_val(false);
+    return sl_val;
+  }
+
+  bool& Entity::gcRequired(){
+    static bool sl_val(false);
+    return sl_val;
   }
 
   std::set<Entity*>& Entity::discardedEntities(){

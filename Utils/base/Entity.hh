@@ -33,6 +33,17 @@ namespace EUROPA{
   public:
     DECLARE_ENTITY_TYPE(Entity);
 
+    template<class COLLECTION>
+    static void discardAll(COLLECTION& objects){
+      typedef typename COLLECTION::iterator object_iterator;
+      for(object_iterator it = objects.begin(); it != objects.end(); ++it){
+	check_error((*it).isValid());
+	Entity* elem = (Entity*) (*it);
+	elem->discard();
+      }
+      objects.clear();
+    }
+
     inline int getKey() const {return m_key;}
     virtual ~Entity();
     virtual const LabelStr& getName() const;
@@ -130,7 +141,6 @@ namespace EUROPA{
      */
     static bool isPurging();
 
-
     /**
      * @brief Test of the entity by the given key is pooled for deallocation
      */
@@ -141,6 +151,11 @@ namespace EUROPA{
      * @return The number of entities deleted
      */
     static unsigned int garbageCollect();
+
+    /**
+     * @brief Configure system to require garbage collection
+     */
+    static bool& gcRequired();
 
   protected:
     Entity();
@@ -153,6 +168,11 @@ namespace EUROPA{
     EntityId m_externalEntity; /*!< Helfpul to make synchronization with other data structures easy */
 
   private:
+
+    /**
+     * @brief Internal variable indicating if garbage collection is active
+     */
+    static bool& gcActive();
 
     /**
      * @brief Subclasses should over-ride this to handle special data structure management.
@@ -182,5 +202,6 @@ namespace EUROPA{
 
     bool operator==(const EntityComparator& c){return true;}
   };
+
 }
 #endif
