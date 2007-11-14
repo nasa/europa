@@ -29,6 +29,8 @@ namespace EUROPA {
 
     void notifyActivated(const TokenId& token);
     void notifyDeactivated(const TokenId& token);
+    void notifyTerminated(const TokenId& token);
+
     std::set<RuleInstanceId> getRuleInstances() const;
   private:
     friend class RulesEngineListener;
@@ -38,6 +40,8 @@ namespace EUROPA {
     void remove(const RulesEngineListenerId &listener);
     void notifyExecuted(const RuleInstanceId &rule);
     void notifyUndone(const RuleInstanceId &rule);
+    void cleanupRuleInstances(const TokenId& token);
+
     RulesEngineId m_id;
     const PlanDatabaseId m_planDb;
     PlanDatabaseListenerId m_planDbListener;
