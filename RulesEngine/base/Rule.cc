@@ -21,7 +21,9 @@ namespace EUROPA{
   Rule::~Rule(){
     check_error(m_id.isValid());
 
-    if (!isPurging()) {
+    bool purging = isPurging();
+
+    if (!purging) {
       rulesByName().erase(m_name.getKey());
     }
 
@@ -65,9 +67,9 @@ namespace EUROPA{
   void Rule::purgeAll(){
     isPurging() = true;
     std::multimap<double, RuleId>& rules = rulesByName();
-    std::multimap<double, RuleId>::const_iterator it = rules.begin();
-    while(it != rules.end()){
-      delete (Rule*) it++->second;
+    for(std::multimap<double, RuleId>::const_iterator it = rules.begin(); it != rules.end(); ++it){
+      RuleId rule = it->second;
+      rule->discard();
     }
 
     rules.clear();
