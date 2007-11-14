@@ -413,7 +413,6 @@ namespace EUROPA {
     /**
      * @brief
      */
-
     Void cleanupTEQ(TimepointId tpt);
     
     /**
@@ -426,6 +425,11 @@ namespace EUROPA {
      * @breif check if constraint is valid
      */
     Bool isValidId(const TemporalConstraintId& id);
+
+    /**
+     * @brief set the consistency flag.
+     */
+    void setConsistency(bool c);
 
     /**
      * @brief set of constraints in the temporal network

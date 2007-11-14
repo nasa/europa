@@ -14,6 +14,7 @@
 #include "TemporalNetworkDefs.hh"
 #include "IntervalIntDomain.hh"
 #include "TemporalNetwork.hh"
+#include "Debug.hh"
 
 namespace EUROPA {
 
@@ -46,7 +47,7 @@ namespace EUROPA {
     for(std::set<TemporalConstraintId>::const_iterator it = m_constraints.begin(); it != m_constraints.end(); ++it){
       TemporalConstraintId constraint = *it;
       check_error(constraint.isValid());
-      delete (Tspec*) constraint;
+      constraint->discard();
     }
 
     m_id.remove();
@@ -67,7 +68,7 @@ namespace EUROPA {
 
   Void TemporalNetwork::getTimepointBounds(const TimepointId& id, Time& lb, Time& ub)
   {
-    check_error(isConsistent(),
+    check_error(this->consistent,
                 "TemporalNetwork: Getting bounds from inconsistent network",
                 TempNetErr::TempNetInconsistentError());
     check_error(( this->isValidId(id) ),
@@ -109,7 +110,7 @@ namespace EUROPA {
   Bool TemporalNetwork::isDistanceLessThan (const TimepointId& from, const TimepointId& to,
 					    Time bound)
   {
-    check_error(isConsistent(),
+    check_error(this->consistent,
                 "TemporalNetwork: Checking distance in inconsistent network",
                 TempNetErr::TempNetInconsistentError());
     DistanceGraph* graph = (DistanceGraph*) this;
@@ -131,7 +132,7 @@ namespace EUROPA {
     // An efficient approximate version of isDistanceLessThan.
     // (Performs the unrolled recursion only to depth 1 with
     //  some extra checks involving upper/lower bounds of src/dest.)
-    check_error(isConsistent(),
+    check_error(this->consistent,
                 "TemporalNetwork: Checking distance in inconsistent network",
                 TempNetErr::TempNetInconsistentError());
     // We do not expect bound to be -infinity for normal
@@ -189,7 +190,7 @@ namespace EUROPA {
   Void TemporalNetwork::calcDistanceBounds(const TimepointId& src, const TimepointId& targ,
 					   Time& lb, Time& ub, Bool exact)
   {
-    check_error(isConsistent(),
+    check_error(this->consistent,
                 "TemporalNetwork: Getting bounds from inconsistent network",
                 TempNetErr::TempNetInconsistentError());
     check_error(( this->isValidId(src) ),
@@ -248,7 +249,7 @@ namespace EUROPA {
     // Afterwards restore the proper bounds.  Requires only four
     // dijkstras instead of 2*n dijkstras.
    
-    checkError(isConsistent(), "TemporalNetwork: calcDistanceBounds from inconsistent network");
+    checkError(this->consistent, "TemporalNetwork: calcDistanceBounds from inconsistent network");
     
     propagateBoundsFrom(src);
 
@@ -444,7 +445,7 @@ namespace EUROPA {
       removeEdgeSpec(targ, src, -lb);
     this->hasDeletions = this->hasDeletions || markDeleted;
     m_constraints.erase(spec->getId());
-    delete spec;
+    spec->discard();
   }
 
   TimepointId TemporalNetwork::getOrigin()
@@ -480,7 +481,7 @@ namespace EUROPA {
   }
 
   std::list<TimepointId> TemporalNetwork::getInconsistencyReason() {
-    check_error(!isConsistent(),
+    check_error(!this->consistent,
                 "Network is not inconsistent",
                 TempNetErr::TempNetNoInconsistencyError());
     std::list<TimepointId> ans;
@@ -508,7 +509,7 @@ namespace EUROPA {
   {
     m_updatedTimepoints.clear();
     this->incrementalSource = TimepointId::noId();   // Not applicable to a full prop.
-    this->consistent = bellmanFord();
+    setConsistency(bellmanFord());
     this->hasDeletions = false;
     if (this->consistent == false)
       return;
@@ -555,7 +556,7 @@ namespace EUROPA {
       next->predecessor = findEdge(start,next);  // Used to trace nogood
       handleNodeUpdate(next);
       queue->insertInQueue(next);
-      this->consistent = incBellmanFord();
+      setConsistency(incBellmanFord());
     }
 
     // Can't do Dijkstra if network is now inconsistent.
@@ -839,6 +840,11 @@ namespace EUROPA {
 
   void TemporalNetwork::resetUpdatedTimepoints() { 
     m_updatedTimepoints.clear();
+  }
+
+  void TemporalNetwork::setConsistency(Bool c){
+    condDebugMsg(!c && this->consistent, "TemporalNetwork:setConsistency", "Network is inconsistent");
+    this->consistent = c;
   }
 
   Tnode::Tnode(TemporalNetwork* t) :  Dnode(), m_deletionMarker(true) , owner(t){
