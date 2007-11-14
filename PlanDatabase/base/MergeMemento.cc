@@ -74,7 +74,9 @@ namespace EUROPA{
     // Iterate over all constraints and deactivate them, as well as create and store new ones where necessary
     for(std::set<ConstraintId>::const_iterator it = deactivatedConstraints.begin(); it != deactivatedConstraints.end(); ++it){
       ConstraintId constraint = *it;
-      migrateConstraint(constraint);
+      // Standard constraints will not be migrated as they will be built in to the target already
+      if(!m_inactiveToken->isStandardConstraint(constraint))
+	migrateConstraint(constraint);
     }
   }
 
@@ -82,7 +84,6 @@ namespace EUROPA{
 
   void MergeMemento::undo(bool activeTokenDeleted){
     checkError(activeTokenDeleted || m_activeToken.isValid(), m_activeToken);
-    check_error(!m_newConstraints.empty());
 
     if(m_inactiveToken->isTerminated())
       return;
@@ -145,7 +146,7 @@ namespace EUROPA{
 
 	// Now delete the new constraint which arose from migration, if it was migrated
 	if(!newConstraint.isNoId())
-	  delete (Constraint*) newConstraint;
+	  newConstraint->discard();
 
 	return;
       }
@@ -156,6 +157,10 @@ namespace EUROPA{
   }
 
   void MergeMemento::migrateConstraint(const ConstraintId& constraint){
+    checkError(constraint.isValid(), constraint);
+    checkError(m_activeToken.isValid(), m_activeToken);
+    checkError(m_activeToken->isActive(), m_activeToken->toString());
+
     const std::vector<ConstrainedVariableId>& variables = constraint->getScope();
     std::vector<ConstrainedVariableId> newScope;
 
@@ -167,8 +172,14 @@ namespace EUROPA{
 	newScope.push_back(var);
       else if(var == m_inactiveToken->getState())
 	return;
-      else
-	newScope.push_back(m_activeToken->getVariables()[var->getIndex()]);
+      else {
+	ConstrainedVariableId newVar = m_activeToken->getVariables()[var->getIndex()];
+
+	checkError(newVar.isValid(), newVar << " is invalid for index " << var->getIndex() << " in " << m_activeToken->toString() <<
+		   " from parent " << var->getParent()->toString() << " and constraint " << constraint->toString());
+
+	newScope.push_back(newVar);
+      }
     }
 
     // Create the new constraint if it is not a standard constraint - different for unary vs. nary
