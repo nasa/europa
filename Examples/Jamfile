@@ -8,14 +8,12 @@ Module Examples : System ;
 # (Using Jam glob is the alternative)
 
 SubInclude PLASMA Examples Light ;
-SubInclude PLASMA Examples NDDLHelloWorld ;
-#SubInclude PLASMA Examples NQueens ;
+#SubInclude PLASMA Examples NQueens ; # NQueens is java-only for now
 SubInclude PLASMA Examples pddl2nddl ;
 SubInclude PLASMA Examples Shopping ;
 #SubInclude PLASMA Examples Tower ;
 
 Depends run-examples-tests : run-Light-tests ;
-Depends run-examples-tests : run-NDDLHelloWorld-tests ;
 #Depends run-examples-tests : run-NQueens-tests ;
 Depends run-examples-tests : run-pddl2nddl-tests ;
 Depends run-examples-tests : run-Shopping-tests ;
@@ -36,6 +34,6 @@ if ! ( "Resources" in $(NO) ) {
 # These currrently cause problems if:
 # a) LIBRARIES=STATIC or
 # b) Jam is invoked from 
-#NOCARE RoverController NDDLHelloWorldController ShoppingController pddl2nddlController LightController ;
+#NOCARE RoverController ShoppingController pddl2nddlController LightController ;
 
 } # PLASMA_READY
