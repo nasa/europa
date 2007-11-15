@@ -12,7 +12,6 @@
 #include "PSResources.hh" 
 #include "Debug.hh"
 #include "Timer.hh"
-#include "SAVH_IncrementalFlowProfile.hh"
 
 
 using namespace EUROPA;
@@ -103,7 +102,6 @@ void executeWithAssembly(const char* plannerConfig, const char* txSource)
 {
   // Initialize Library  
   SolverAssemblyWithResources::initialize();
-  REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile );
   
   // Allocate the schema with a call to the linked in model function - eventually
   // make this called via dlopen
