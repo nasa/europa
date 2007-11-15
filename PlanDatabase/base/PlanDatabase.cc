@@ -379,8 +379,9 @@ namespace EUROPA{
     const std::vector<ConstrainedVariableId>& inactiveTokenVariables = inactiveToken->getVariables();
     int variableCount = inactiveTokenVariables.size();
 
-    TemporalAdvisorId temporalAdvisor = getTemporalAdvisor();
     unsigned int choiceCount = 0; // Used for comparison against given limit
+
+    TemporalAdvisorId temporalAdvisor = getTemporalAdvisor();
 
     for(TokenSet::const_iterator it = candidates.begin(); it != candidates.end(); ++it){
       TokenId candidate = *it;

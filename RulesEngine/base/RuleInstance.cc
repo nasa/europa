@@ -136,6 +136,16 @@ namespace EUROPA {
       execute();
   }
 
+  bool RuleInstance::willNotFire() const{
+    for(std::vector<ConstrainedVariableId>::const_iterator it = m_guards.begin(); it != m_guards.end(); ++it){
+      ConstrainedVariableId guard = *it;
+      if(!guard->isSpecified())
+	return false;
+    }
+
+    return !test(m_guards);
+  }
+
   /**
    * Cases for TEST:
    * 1. No guard specified
@@ -147,7 +157,7 @@ namespace EUROPA {
     debugMsg("RuleInstance:test", "Testing rule " << m_id << " for " << m_rule->getName().toString() << " from " << m_rule->getSource().toString());
     if(m_guardDomain != 0) { // Case of explicit guard on a single variable
       debugMsg("RuleInstance:test", "Case of explicit guard on a single variable");
-      checkError(guards.size() == 1, "Explcit guard on one variable only");
+      checkError(guards.size() == 1, "Explicit guard on one variable only");
       bool result = guards[0]->isSpecified() &&
       (m_guardDomain->isMember(guards[0]->getSpecifiedValue()) ^ !m_isPositive);
       

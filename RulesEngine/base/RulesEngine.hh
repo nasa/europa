@@ -32,6 +32,8 @@ namespace EUROPA {
     void notifyTerminated(const TokenId& token);
 
     std::set<RuleInstanceId> getRuleInstances() const;
+    bool hasPendingRuleInstances(const TokenId& token) const;
+
   private:
     friend class RulesEngineListener;
     friend class RuleInstance;
@@ -41,7 +43,7 @@ namespace EUROPA {
     void notifyExecuted(const RuleInstanceId &rule);
     void notifyUndone(const RuleInstanceId &rule);
     void cleanupRuleInstances(const TokenId& token);
-
+    bool isPending(const RuleInstanceId& r) const;
     RulesEngineId m_id;
     const PlanDatabaseId m_planDb;
     PlanDatabaseListenerId m_planDbListener;

@@ -683,22 +683,6 @@ namespace EUROPA{
     if(isRejected())
       return true;
 
-    // The relationship to the master has an impact. If the master must be retained then the slave must be retained if it is
-    // in the temporal scope of the master. When a token's end time is less than the tick, it is out of scope for
-    // synchronization at the execution frontier
-    if(m_master.isId()){
-      bool keepingMaster = !m_master->isTerminated() && (tick <= m_master->getEnd()->baseDomain().getUpperBound());
-      if(keepingMaster){
-	// Compute bounds using the active token if this slave is merged
-	TokenId tokenToUse = (m_activeToken.isId() ? m_activeToken : m_id);
-	if(tokenToUse->getEnd()->lastDomain().getUpperBound() > m_master->getStart()->lastDomain().getLowerBound() &&
-	   tokenToUse->getStart()->lastDomain().getLowerBound() < m_master->getEnd()->lastDomain().getUpperBound()){
-	  debugMsg("Token:canBeTerminated", "Cannot terminate " << toString() << " which is a slave of " << m_master->toString());
-	  return false;
-	}
-      }
-    }
-
     // Now if it has any merged tokens, it cannot be terminated. The merged tokens must be removed first
     if(!m_mergedTokens.empty()){
       debugMsg("Token:canBeTerminated", "Cannot terminate " << toString() << " because of remaining supported token " << ((TokenId) * (m_mergedTokens.begin()))->toString() );

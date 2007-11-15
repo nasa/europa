@@ -141,6 +141,37 @@ namespace EUROPA{
 
   }
 
+  bool RulesEngine::hasPendingRuleInstances(const TokenId& token) const {
+    check_error(token.isValid());
+    std::multimap<int, RuleInstanceId>::const_iterator it = m_ruleInstancesByToken.find(token->getKey());
+    while(it!=m_ruleInstancesByToken.end() && it->first == token->getKey()){
+      RuleInstanceId r = it->second;
+      if(isPending(r))
+	return true;
+      ++it;
+    }
+
+    return false;
+  }
+
+  bool RulesEngine::isPending(const RuleInstanceId& r) const {
+    // Try r directly
+    if(!r->isExecuted() && !r->willNotFire()){
+      debugMsg("RulesEngine:isPending", "Found pending rule:" << r->getKey() << " for " << r->getToken()->toString());
+      return true;
+    }
+
+    // No iterate over all child rule instances
+    const std::vector<RuleInstanceId>& childRules =  r->getChildRules();
+    for(std::vector<RuleInstanceId>::const_iterator it = childRules.begin(); it != childRules.end(); ++it){
+      RuleInstanceId child = *it;
+      if(isPending(child))
+	return true;
+    }
+
+    return false;
+  }
+
   void RulesEngine::add(const RulesEngineListenerId &listener) {
     check_error(listener.isValid());
     check_error(m_listeners.count(listener) == 0);

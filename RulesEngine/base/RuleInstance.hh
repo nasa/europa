@@ -133,6 +133,11 @@ namespace EUROPA{
     bool test(const std::vector<ConstrainedVariableId>& guards) const;
 
     /**
+     * Tests if the rule has been evaluated and is false
+     */
+    bool willNotFire() const;
+
+    /**
      * Invoked by the RulesEngine or the RuleVariableListener in order to execute the subgoaling of the rule.
      */
     void execute();
