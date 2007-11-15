@@ -68,6 +68,8 @@ namespace EUROPA {
 
   Void TemporalNetwork::getTimepointBounds(const TimepointId& id, Time& lb, Time& ub)
   {
+    isConsistent();
+
     check_error(this->consistent,
                 "TemporalNetwork: Getting bounds from inconsistent network",
                 TempNetErr::TempNetInconsistentError());
@@ -110,6 +112,8 @@ namespace EUROPA {
   Bool TemporalNetwork::isDistanceLessThan (const TimepointId& from, const TimepointId& to,
 					    Time bound)
   {
+    isConsistent();
+
     check_error(this->consistent,
                 "TemporalNetwork: Checking distance in inconsistent network",
                 TempNetErr::TempNetInconsistentError());
@@ -132,6 +136,7 @@ namespace EUROPA {
     // An efficient approximate version of isDistanceLessThan.
     // (Performs the unrolled recursion only to depth 1 with
     //  some extra checks involving upper/lower bounds of src/dest.)
+    isConsistent();
     check_error(this->consistent,
                 "TemporalNetwork: Checking distance in inconsistent network",
                 TempNetErr::TempNetInconsistentError());
@@ -190,6 +195,8 @@ namespace EUROPA {
   Void TemporalNetwork::calcDistanceBounds(const TimepointId& src, const TimepointId& targ,
 					   Time& lb, Time& ub, Bool exact)
   {
+    isConsistent();
+
     check_error(this->consistent,
                 "TemporalNetwork: Getting bounds from inconsistent network",
                 TempNetErr::TempNetInconsistentError());
