@@ -264,12 +264,6 @@ void __assert_fail(const char *__assertion,
 int main(int argc, const char** argv) {
 
 #ifndef NO_RESOURCES
-  REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
-  REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
-  REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile);
-  REGISTER_PROFILE(EUROPA::SAVH::FlowProfile, FlowProfile);
-  REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile);
-  
   // Explicit reference is needed so that static initializer isn't dropped when static libs are used.
   TransactionInterpreterResourcesInitializer::getInstance();
 #endif
