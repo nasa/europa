@@ -613,7 +613,6 @@ namespace EUROPA{
 
   void Token::makeFact() {
   	m_isFact = true;
-  	// TODO commit();?
   }
   
   void Token::commit() {
@@ -809,15 +808,6 @@ namespace EUROPA{
       var->deactivate();
     }
 
-    // Finally, we can terminate all inactive slaves
-    const TokenSet slaves = getSlaves();
-    for(TokenSet::const_iterator it = slaves.begin(); it != slaves.end(); ++it){
-      TokenId slave = *it;
-      if(slave->isInactive()){
-	slave->terminate();
-      }
-    }
-
     m_planDatabase->notifyTerminated(m_id);
   }
 
@@ -876,11 +866,18 @@ namespace EUROPA{
     // Call-back to unlink the slave if necessary.
     token->remove(m_id);
 
-    // If the token is already terminated we are done. Meaning we will not cascade delete
-    if(token->isTerminated())
-      return false;
+    // On removal of the master, the token will be discarded if its ref count is 1.
+    bool willBeDiscarded = (refCount() == 1);
+
+    // If the master is terminated and the slave is to be discarded, then terminate the slave. Otherwise just
+    // decrement the reference count. This is to prevent relaxations arising from removal of the slave when initiated
+    // by a termination
+    if(willBeDiscarded && token->isTerminated())
+      terminate();
     else
-      return decRefCount();
+      decRefCount();
+
+    return willBeDiscarded;
   }
 
   bool Token::isStateVariable(const ConstrainedVariableId& var){

@@ -69,12 +69,12 @@ namespace EUROPA{
     const EntityId& getExternalEntity() const;
 
     /**
-     * @brief Get the number of outsatnding references
+     * @brief Get the number of outstanding references
      */
     unsigned int refCount() const;
 
     /**
-     * @brief Increment the reference count. Use if you wish to delete the entity.
+     * @brief Increment the reference count. Use if you wish to prevent deletion of the entity
      */
     void incRefCount();
 
