@@ -9,13 +9,11 @@ Module Examples : System ;
 
 SubInclude PLASMA Examples Light ;
 #SubInclude PLASMA Examples NQueens ; # NQueens is java-only for now
-SubInclude PLASMA Examples pddl2nddl ;
 SubInclude PLASMA Examples Shopping ;
 SubInclude PLASMA Examples Tower ;
 
 Depends run-examples-tests : run-Light-tests ;
 #Depends run-examples-tests : run-NQueens-tests ; # NQueens is java-only for now
-Depends run-examples-tests : run-pddl2nddl-tests ;
 Depends run-examples-tests : run-Shopping-tests ;
 Depends run-examples-tests : run-Tower-tests ;
 
