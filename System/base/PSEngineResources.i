@@ -11,7 +11,8 @@ namespace EUROPA {
   class PSResourceProfile;
 
   %template(PSResourceList) PSList<PSResource*>;
-
+  //%template(PSEntityKeyList) PSList<PSEntityKey>;  
+  
   class PSEngineWithResources : public PSEngine
   {
   public:
@@ -24,6 +25,9 @@ namespace EUROPA {
   public:
     PSResourceProfile* getLimits();
     PSResourceProfile* getLevels();
+
+    PSList<PSEntityKey> getOrderingChoices(TimePoint t);
+        
   protected:
     PSResource();
   };

@@ -16,7 +16,7 @@ namespace EUROPA {
     void initDatabase();
     
     PSList<PSResource*> getResourcesByType(const std::string& objectType);
-    PSResource* getResourceByKey(PSEntityKey id);    
+    PSResource* getResourceByKey(PSEntityKey id);       
   };
 
   class PSResourceProfile
@@ -42,6 +42,9 @@ namespace EUROPA {
   public:
     PSResourceProfile* getLimits();
     PSResourceProfile* getLevels();        	  
+    
+    PSList<PSEntityKey> getOrderingChoices(TimePoint t);
+    
   protected:
     friend class PSEngineWithResources;
     friend class ResourceWrapperGenerator;

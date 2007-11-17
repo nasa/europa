@@ -198,6 +198,9 @@ namespace EUROPA {
     PSList<PSVariable*> getMemberVariables();
     PSVariable* getMemberVariable(const std::string& name);
     PSList<PSToken*> getTokens();
+    void addPrecedence(PSToken* pred,PSToken* succ);
+    void removePrecedence(PSToken* pred,PSToken* succ);
+    
     ~PSObject();
   protected:
     PSObject();

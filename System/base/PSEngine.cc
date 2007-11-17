@@ -128,6 +128,26 @@ namespace EUROPA {
     return retval;
   }
 
+
+  void PSObjectImpl::addPrecedence(PSToken* pred,PSToken* succ)
+  {
+	  TokenId p = m_obj->getPlanDatabase()->getEntityByKey(pred->getKey());
+	  TokenId s = m_obj->getPlanDatabase()->getEntityByKey(succ->getKey());
+	  m_obj->constrain(p,s);
+	  // TODO: this needs to be done on demand from outside
+	  m_obj->getPlanDatabase()->getConstraintEngine()->propagate();
+  }
+  
+  void PSObjectImpl::removePrecedence(PSToken* pred,PSToken* succ)
+  {
+	  TokenId p = m_obj->getPlanDatabase()->getEntityByKey(pred->getKey());
+	  TokenId s = m_obj->getPlanDatabase()->getEntityByKey(succ->getKey());
+	  m_obj->free(p,s);	  
+	  // TODO: this needs to be done on demand from outside
+	  m_obj->getPlanDatabase()->getConstraintEngine()->propagate();
+  }
+
+  
   PSTokenImpl::PSTokenImpl(const TokenId& tok) : PSToken(tok), m_tok(tok) {
   }
 

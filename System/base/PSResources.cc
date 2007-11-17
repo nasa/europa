@@ -64,6 +64,40 @@ namespace EUROPA {
   PSResourceProfile* PSResource::getLevels() {
     return new PSResourceProfile(m_res->getProfile());
   }
+  
+  PSList<PSEntityKey> PSResource::getOrderingChoices(TimePoint t)
+  {
+	  PSList<PSEntityKey> retval;
+	  
+	  SAVH::InstantId instant;
+	  
+	  SAVH::ProfileIterator it(m_res->getProfile());
+	  while(!it.done()) {
+	      TimePoint inst = (TimePoint) it.getTime();
+	      if (inst == t) {
+	          instant = it.getInstant();
+	          break;
+	      }
+	      it.next();
+	  }
+	  
+	  if (instant.isNoId()) {
+		  // TODO: log error
+		  return retval;
+	  }
+	  
+	  std::vector<std::pair<SAVH::TransactionId, SAVH::TransactionId> > results;
+	  m_res->getOrderingChoices(instant,results);
+	  for (unsigned int i = 0;i<results.size(); i++) {
+	      SAVH::TransactionId predecessor = results[i].first;
+	      SAVH::TransactionId successor = results[i].second;	
+	      retval.push_back(predecessor->time()->getParent()->getKey());
+	      retval.push_back(successor->time()->getParent()->getKey());
+	  }
+	  
+	  return retval;
+  }
+
 
   PSResourceProfile::PSResourceProfile(const double lb, const double ub)
     : m_isConst(true), m_lb(lb), m_ub(ub) {

@@ -100,6 +100,9 @@ namespace EUROPA {
 
     virtual PSList<PSToken*> getTokens();
     
+    virtual void addPrecedence(PSToken* pred,PSToken* succ);
+	virtual void removePrecedence(PSToken* pred,PSToken* succ);
+    
   protected:
     friend class PSEngineImpl;
     friend class PSTokenImpl;

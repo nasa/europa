@@ -103,6 +103,9 @@ namespace EUROPA {
 	  virtual PSVariable* getMemberVariable(const std::string& name) = 0;
 
 	  virtual PSList<PSToken*> getTokens() = 0;
+	  
+	  virtual void addPrecedence(PSToken* pred,PSToken* succ) = 0;
+	  virtual void removePrecedence(PSToken* pred,PSToken* succ) = 0;
   };
     
   class PSSolver
