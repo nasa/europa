@@ -76,7 +76,11 @@ namespace EUROPA
       ConstraintId c = *it;
       total += c->getViolation();
     }  
-	
+
+    // hack to report violation when operating in 0 violations allowed mode
+    if (total == 0 && m_emptyVariables.size()>0)
+    	total = 1.0;
+    
     return total;
   }
 	
@@ -109,27 +113,12 @@ namespace EUROPA
     c->deactivate(); // Deactivate will cause propagators to ignore constraint, including removing from current agendas  	
   }
 	
-  bool canPropagate(ConstraintId constraint)
-  {
-    /*
-      const std::vector<ConstrainedVariableId>& vars = constraint->getScope();
-      for (unsigned int i=0; i<vars.size(); i++) {
-      if (vars[i]->derivedDomain().isEmpty())
-      return false;
-      }
-    */
-	
-    return true;  	
-  }
-	
   void ViolationMgrImpl::removeViolatedConstraint(ConstraintId c)
   {
-    if (canPropagate(c)) {
-      check_error(isViolated(c),"Tried to remove constraint that is not violated "+c->toString());
-      debugMsg("ConstraintEngine:ViolationMgr", "Removing constraint from violated set : " << c->toString());
-      c->undoDeactivation(); // This will put the constraint back on the Propagators' agendas
-      m_violatedConstraints.erase(c);
-    }		
+    check_error(isViolated(c),"Tried to remove constraint that is not violated "+c->toString());
+    debugMsg("ConstraintEngine:ViolationMgr", "Removing constraint from violated set : " << c->toString());
+    c->undoDeactivation(); // This will put the constraint back on the Propagators' agendas
+    m_violatedConstraints.erase(c);
   }
 
   bool ViolationMgrImpl::handleEmpty(ConstrainedVariableId v) 
