@@ -10,8 +10,11 @@ ProblemInstance problem = new ProblemInstance();
 
 // Proven minimum duration for this problem is 45
 
-int maxDuration = 90;
-int maxDurationPlusOne = 91;
+int maxDuration;
+int maxDurationPlusOne;
+
+maxDuration.specify(60);
+addEq(maxDuration,1,maxDurationPlusOne);
 
 CapacityResource resource0 = new CapacityResource( 0.00000 , 10.0000 );
 CapacityResource resource1 = new CapacityResource( 0.00000 , 10.0000 );
@@ -164,18 +167,18 @@ temporalDistance( activity4.start, [ -inf 25 ], activity9.start );
 temporalDistance( activity9.start, [ 9 +inf ], activity11.start );
 temporalDistance( activity10.start, [ 5 +inf ], activity11.start );
 
-leq(0,activity0.start);  leq( activity0.end, maxDuration);
-leq(0,activity1.start);  leq( activity1.end, maxDuration);
-leq(0,activity2.start);  leq( activity2.end, maxDuration);
-leq(0,activity3.start);  leq( activity3.end, maxDuration);
-leq(0,activity4.start);  leq( activity4.end, maxDuration);
-leq(0,activity5.start);  leq( activity5.end, maxDuration);
-leq(0,activity6.start);  leq( activity6.end, maxDuration);
-leq(0,activity7.start);  leq( activity7.end, maxDuration);
-leq(0,activity8.start);  leq( activity8.end, maxDuration);
-leq(0,activity9.start);  leq( activity9.end, maxDuration);
-leq(0,activity10.start); leq( activity10.end, maxDuration);
-leq(0,activity11.start); leq( activity11.end, maxDurationPlusOne);
+precedes(0,activity0.start);  precedes( activity0.end, maxDuration);
+precedes(0,activity1.start);  precedes( activity1.end, maxDuration);
+precedes(0,activity2.start);  precedes( activity2.end, maxDuration);
+precedes(0,activity3.start);  precedes( activity3.end, maxDuration);
+precedes(0,activity4.start);  precedes( activity4.end, maxDuration);
+precedes(0,activity5.start);  precedes( activity5.end, maxDuration);
+precedes(0,activity6.start);  precedes( activity6.end, maxDuration);
+precedes(0,activity7.start);  precedes( activity7.end, maxDuration);
+precedes(0,activity8.start);  precedes( activity8.end, maxDuration);
+precedes(0,activity9.start);  precedes( activity9.end, maxDuration);
+precedes(0,activity10.start); precedes( activity10.end, maxDuration);
+precedes(0,activity11.start); precedes( activity11.end, maxDurationPlusOne);
 
 // We know all activity goals must be satisfied separately, therefore activate right away to prune useless search space for the planner: 
 activity0.activate();

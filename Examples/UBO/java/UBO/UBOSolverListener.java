@@ -72,8 +72,8 @@ public class UBOSolverListener
             PSObject resource = getPSEngine().getTokenByKey(predId).getOwner();
             PSToken pred = getPSEngine().getTokenByKey(predId).getMaster();
             PSToken succ = getPSEngine().getTokenByKey(succId).getMaster();
-            String predAct = varValueToString(pred.getParameter("m_identifier"));
-            String succAct = varValueToString(succ.getParameter("m_identifier"));
+            String predAct = RCPSPUtil.varValueToString(pred.getParameter("m_identifier"));
+            String succAct = RCPSPUtil.varValueToString(succ.getParameter("m_identifier"));
 
             // Get info to compute max remaining size of search tree
             Pattern p1 = Pattern.compile("CHOICE=[0-9]+");
@@ -113,49 +113,5 @@ public class UBOSolverListener
         lastDepth_ = s.getDepth(); 
         //System.out.println(s.getStepCount()+" set last depth to:"+lastDepth_);
     }
-    
-    public static String valueToString(PSVarValue v)
-    {
-    	String type = v.getType().toString();
-    	
-    	if ("STRING".equals(type))
-    		return v.asString();
-    	if ("INTEGER".equals(type))
-    		return new Integer(v.asInt()).toString();	
-    	if ("DOUBLE".equals(type))
-    		return new Double(v.asDouble()).toString();
-    	if ("BOOLEAN".equals(type))
-    		return new Boolean(v.asBoolean()).toString();
-    	if ("OBJECT".equals(type))
-    		return v.asObject().getName();
-    	
-    	return "ERROR!!! UNKNOWN TYPE :" + type;
-    }
-
-    public static String varValueToString(PSVariable var)
-    {	
-    	if (var.isSingleton()) 
-    		return valueToString(var.getSingletonValue());	
-    	else if (var.isInterval()) {
-    	    StringBuffer buf = new StringBuffer();
-    		buf.append("[").append(var.getLowerBound()).append(",")
-    		               .append(var.getUpperBound()).append("]");
-    		return buf.toString();
-    	}
-    	else if (var.isEnumerated()) {
-    		PSValueList l = var.getValues();
-    	    StringBuffer buf = new StringBuffer();
-    	    buf.append("[");
-    	    for (int i=0;i<l.size();i++) {
-    	    	if (i>0)
-    	    		buf.append(",");
-    	    	buf.append(valueToString(l.get(i)));
-    	    }
-    	    buf.append("]");
-    	    return buf.toString();
-    	}
-    	
-    	throw new RuntimeException("Unexpected ERROR: variable "+var.getName()+" is not one of {Singleton, Interval, Enumeration}");
-    }    
 } 
 

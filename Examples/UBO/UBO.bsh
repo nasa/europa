@@ -40,6 +40,13 @@ void initPSEngine()
 	usingInterpreter();
 }
 
+void showResourceProfiles()
+{
+    resourceFrame = desktop.makeResourcesFrame("CapacityResource",start);
+    resourceFrame.setLocation(0,180);
+    resourceFrame.setSize(500,300);	
+}
+
 void setupDesktop()
     throws Exception
 {
@@ -54,10 +61,7 @@ void setupDesktop()
     gantt.addMouseListener(vp);  
     
     //desktop.showTokens(psengine.getObjectsByType("ActivityTimeline").get(0));
-    
-    resourceFrame = desktop.makeResourcesFrame("CapacityResource",start);
-    resourceFrame.setLocation(0,180);
-    resourceFrame.setSize(500,300);
+    showResourceProfiles();    
 }
 
 
@@ -91,8 +95,28 @@ catch (Exception e) {
   	System.err.println("Failed Initializing : "+e.getMessage());
 }
 
+void runIFIR(int maxIterations,boolean usePSResources)
+{
+	s = new IFlatIRelaxSolver();
+	s.solve(psengine,maxIterations,usePSResources);
+}
+
+void showResourceTokens()
+{
+  qry = "select key,toString from psengine.PSToken where name like 'Capacity%'";
+  desktop.makeTableFrame("Resource Tokens",Util.SWIGList(psengine.getTokens()), qry);	
+}
+
+void printProfile(PSResource r)
+{
+	PSResourceProfile prof = r.getLevels();
+	PSTimePointList times = prof.getTimes();
+	for (int i=0; i<times.size(); i++) {
+		int time = times.get(i);
+		print(times.get(i)+" ["+prof.getLowerBound(time)+","+prof.getUpperBound(time)+"]");
+	}
+}
+
 //setupDesktop();
 //showHistory();
 
-//qry = "select key,toString from psengine.PSToken where name like 'Capacity%'";
-//desktop.makeTableFrame("Resource Tokens",Util.SWIGList(psengine.getTokens()), qry);
