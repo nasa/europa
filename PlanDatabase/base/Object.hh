@@ -39,7 +39,7 @@ namespace EUROPA {
 
     virtual ~Object();
 
-	virtual void constructor(const std::vector<const AbstractDomain*>& arguments) {};
+    virtual void constructor(const std::vector<const AbstractDomain*>& arguments) {}
 
     /**
      * @brief Add a variable as a member to the object. This is used when building the object

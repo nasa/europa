@@ -196,6 +196,10 @@ namespace EUROPA {
     return true; // All passed
   }
 
+  bool RuleInstance::test() const {
+    return test(m_guards);
+  }
+
   void RuleInstance::execute() {
     check_error(!isExecuted(), "Cannot execute a rule if already executed.");
     m_isExecuted = true;

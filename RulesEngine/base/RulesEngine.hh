@@ -32,6 +32,7 @@ namespace EUROPA {
     void notifyTerminated(const TokenId& token);
 
     std::set<RuleInstanceId> getRuleInstances() const;
+    void getRuleInstances(const TokenId& token,std::set<RuleInstanceId>& results) const;
     bool hasPendingRuleInstances(const TokenId& token) const;
 
   private:

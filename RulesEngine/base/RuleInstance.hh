@@ -127,10 +127,15 @@ namespace EUROPA{
     bool isExecuted() const;
 
     /**
-     * Tests if the condition, if there is one, is satisfied.
+     * @brief Tests if the condition, if there is one, is satisfied.
      * @param The guard variables to evaluate against
      */
     bool test(const std::vector<ConstrainedVariableId>& guards) const;
+
+    /**
+     * @brief Tests if condition is satisfied. Guards are internal
+     */
+    bool test() const;
 
     /**
      * Tests if the rule has been evaluated and is false
@@ -147,8 +152,9 @@ namespace EUROPA{
      */
     void undo();
 
-    const std::vector<ConstrainedVariableId> &getVariables(void) const { return m_variables;}
+    const std::vector<ConstrainedVariableId> &getGuards(void) const { return m_guards;}
 
+    const std::vector<ConstrainedVariableId> &getVariables(void) const { return m_variables;}
 
     /**
      * @brief Constructs a vector of constrained variables by replacing names in the given

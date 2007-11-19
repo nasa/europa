@@ -85,6 +85,15 @@ namespace EUROPA{
     return ruleInstances;
   }
 
+  void RulesEngine::getRuleInstances(const TokenId& token,std::set<RuleInstanceId>& results) const{
+    check_error(token.isValid());
+    std::multimap<int, RuleInstanceId>::const_iterator it = m_ruleInstancesByToken.find(token->getKey());
+    while(it!=m_ruleInstancesByToken.end() && it->first == token->getKey()){
+      results.insert(it->second);
+      ++it;
+    }
+  }
+
   void RulesEngine::notifyExecuted(const RuleInstanceId &rule) {
     check_error(rule.isValid());
     for(std::set<RulesEngineListenerId>::iterator it = m_listeners.begin(); 

@@ -108,7 +108,7 @@ namespace EUROPA {
   }
 
   void RuleVariableListener::handleDiscard(){
-    if(m_ruleInstance.isId())
+    if(!Entity::isPurging() && m_ruleInstance.isId())
       m_ruleInstance->removeDependent(this);
 
     Constraint::handleDiscard();
