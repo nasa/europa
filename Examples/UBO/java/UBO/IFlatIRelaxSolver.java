@@ -1,7 +1,8 @@
 package UBO;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Vector;
 import psengine.*;
@@ -14,35 +15,40 @@ public class IFlatIRelaxSolver
     SimpleTimer timer_;
 
     int bestMakespan_;
+    int makespanBound_;
     List<Precedence> bestSolution_;
     
     PSEngineWithResources psengine_;
     boolean usePSResources_;
     List<Resource> resources_;
     
-    Map<Integer,PSToken> activities_;
+    SortedMap<Integer,PSToken> activities_;
     List<Precedence> precedences_;
     List<Precedence> noGoods_;
     boolean hasViolations_;
     
     // TODO: pass in problem definition to be able to compute critical path
-    public void solve(PSEngineWithResources psengine,int maxIterations,boolean usePSResources)
+    public void solve(PSEngineWithResources psengine,
+    		          int maxIterations,
+    		          int bound, 
+    		          boolean usePSResources)
     {
-       init(psengine,usePSResources);
+       init(psengine,bound,usePSResources);
        
        for (int i=0; i<maxIterations; i++) {
           flatten();
           updateSolution(i);
           updateCriticalPrecedences();
           
-          if (nbStable_ > maxStable_)
+          if ((nbStable_ > maxStable_) || (bestMakespan_ <= makespanBound_))
              break;
+          
           relax();
        }       
 
        restoreBestSolution();
        RCPSPUtil.dbgout("IFlatIrelax.solve() done in "+timer_.getElapsedString());
-       RCPSPUtil.dbgout("best makespan is "+bestMakespan_+" for solution "+getBestSolutionAsString());
+       RCPSPUtil.dbgout("best makespan is "+bestMakespan_+" for solution "+getSolutionAsString());
     }
     
     
@@ -55,11 +61,12 @@ public class IFlatIRelaxSolver
     		return new RCPSPResource(psengine_,r,capacity);
     }
     
-    protected void init(PSEngineWithResources psengine,boolean usePSResources)
+    protected void init(PSEngineWithResources psengine,int bound, boolean usePSResources)
     {
         timer_ = new SimpleTimer();
 
         psengine_ = psengine;
+        makespanBound_ = bound;
         usePSResources_ = usePSResources;
         
         PSResourceList res = psengine.getResourcesByType("CapacityResource");
@@ -89,7 +96,7 @@ public class IFlatIRelaxSolver
     	
     	// Completely relax finish time
     	PSVariable v = psengine_.getVariableByName("maxDuration");
-    	v.specifyValue(PSVarValue.getInstance(60));
+    	v.specifyValue(PSVarValue.getInstance(100000));
     	
         timer_.start();
     }
@@ -257,6 +264,46 @@ public class IFlatIRelaxSolver
     	return false;
     }
     
+    protected void restoreBestSolution()
+    {
+        for (Precedence p : precedences_)
+        	p.res.removePrecedence(p.pred,p.succ);
+        
+        for (Precedence p : bestSolution_)
+        	p.res.addPrecedence(p.pred,p.succ);               
+    }
+    
+    public void undoSolve()
+    {
+        for (Precedence p : bestSolution_)
+        	p.res.removePrecedence(p.pred,p.succ);
+        
+        reset();
+    }
+    
+    protected void reset()
+    {
+    	bestSolution_.clear();
+    	precedences_.clear();
+    	noGoods_.clear();
+    }
+   
+    
+    public Collection<PSToken> getActivities()
+    {
+    	return activities_.values();
+    }
+    
+    protected void updateCriticalPrecedences()
+    {
+        // TODO: Implement this	
+    }
+    
+    public int getMakespan()
+    {
+        return RCPSPUtil.getLb(activities_.get(activities_.lastKey()).getParameter("end"));
+    }
+
     public String printResources()
     {
     	StringBuffer buf = new StringBuffer();
@@ -268,7 +315,7 @@ public class IFlatIRelaxSolver
         return buf.toString();        	        	
     }
     
-    protected String getBestSolutionAsString()
+    protected String getSolutionAsString()
     {
     	StringBuffer buf = new StringBuffer();
     	
@@ -278,25 +325,6 @@ public class IFlatIRelaxSolver
         return buf.toString();
     }
     
-    protected void restoreBestSolution()
-    {
-        for (Precedence p : precedences_)
-        	p.res.removePrecedence(p.pred,p.succ);
-        
-        for (Precedence p : bestSolution_)
-        	p.res.addPrecedence(p.pred,p.succ);               
-    }
-    
-    protected void updateCriticalPrecedences()
-    {
-        // TODO: Implement this	
-    }
-    
-    protected int getMakespan()
-    {
-        return RCPSPUtil.getLb(activities_.get(11).getParameter("end"));
-    }
-
     protected static class Precedence
     {
     	public PSResource res;

@@ -95,10 +95,23 @@ catch (Exception e) {
   	System.err.println("Failed Initializing : "+e.getMessage());
 }
 
-void runIFIR(int maxIterations,boolean usePSResources)
+IFlatIRelaxSolver runIFIR(int maxIterations,int bound, boolean usePSResources)
 {
 	s = new IFlatIRelaxSolver();
-	s.solve(psengine,maxIterations,usePSResources);
+	s.solve(psengine,maxIterations,bound,usePSResources);
+	RCPSPUtil.ground(s.getActivities());
+
+	// Run built-in solver to activate ActivityTimeline::act tokens used for gantt display
+	if (s.getMakespan() < 100)
+	    solver.solve(50,50);
+	
+	return s;
+}
+
+void undoIFIR(IFlatIRelaxSolver s)
+{
+	RCPSPUtil.undoGround(s.getActivities());
+    s.undoSolve();    
 }
 
 void showResourceTokens()
@@ -117,6 +130,8 @@ void printProfile(PSResource r)
 	}
 }
 
+//ifirSolver = runIFIR(50/*maxIter*/,47/*bound*/,false/*usePSResources*/);
 //setupDesktop();
 //showHistory();
+//undoIFIR(ifirSolver);
 

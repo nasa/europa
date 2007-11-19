@@ -56,8 +56,9 @@ class ProblemInstance extends Object
 ProblemInstance::Activity
 {
     //eq(start, [ 0 +inf ]);
-    equals(timeline.act);
-
+    equals(timeline.act act);
+    eq(act.state,ACTIVE);
+  
     Allocation allocations;
     eq( allocations.m_identifier, m_identifier );
 

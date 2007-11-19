@@ -1,5 +1,6 @@
 package UBO;
 
+import java.util.Collection;
 import psengine.PSToken;
 import psengine.PSValueList;
 import psengine.PSVarValue;
@@ -84,6 +85,34 @@ public class RCPSPUtil
     	throw new RuntimeException("Unexpected ERROR: variable "+var.getName()+" is not one of {Singleton, Interval, Enumeration}");
     }    
 
+    public static void ground(Collection<PSToken> tokens)
+    {
+    	for (PSToken t : tokens) {
+    		ground(t.getParameter("start"));
+    		ground(t.getParameter("end"));
+    	}
+    }
+    
+    public static void ground(PSVariable v)
+    {
+    	int value = RCPSPUtil.getLb(v);
+    	v.specifyValue(PSVarValue.getInstance(value));
+    }    
+
+    public static void undoGround(Collection<PSToken> tokens)
+    {
+    	for (PSToken t : tokens) {
+    		undoGround(t.getParameter("start"));
+    		undoGround(t.getParameter("end"));
+    	}
+    }
+    public static void undoGround(PSVariable v)
+    {
+    	int value = RCPSPUtil.getLb(v);
+    	v.reset();
+    }    
+
+    
     public static void dbgout(String msg)
     {
     	System.out.println(msg);
