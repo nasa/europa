@@ -1,7 +1,7 @@
 #include "BlocksWorld-model.nddl"
 
 // Allocate objects of the problem
-PlannerConfig world = new PlannerConfig(0, 100, 600);
+PlannerConfig world = new PlannerConfig(0, 150, 600);
  
 Goal goalTower = new Goal();
 
