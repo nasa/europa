@@ -1,22 +1,22 @@
 <Solver name="DefaultTestSolver">
   <FlawFilter component="HorizonFilter" policy="PartiallyContained"/>
 
-  <SAVHThreatManager order="most,earliest,lower" defaultPriority="1">
+  <SAVHThreatManager order="most,earliest,lower" defaultPriority="2">
     <FlawHandler component="SAVHThreatHandler" filter="both" />
   </SAVHThreatManager>
 
-  <ThreatManager defaultPriority="2">
+  <ThreatManager defaultPriority="1">
     <FlawHandler component="StandardThreatHandler"/>
-    <FlawHandler component="StandardThreatHandler" predicate="act" order="late" priority="2"/>
     <FlawFilter class-match="Reusable"/>
     <FlawFilter class-match="CapacityResource"/>
   </ThreatManager>
 
+  <!-- activate everything first -->
   <OpenConditionManager defaultPriority="1">
     <FlawHandler component="StandardOpenConditionHandler"/>
   </OpenConditionManager>
 
-  <UnboundVariableManager defaultPriority="1">
+  <UnboundVariableManager defaultPriority="2">
     <FlawFilter var-match="start"/>
     <FlawFilter var-match="end"/>
     <FlawFilter var-match="duration"/>
