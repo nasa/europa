@@ -122,7 +122,7 @@ void printFlaws(int it, PSList<std::string>& flaws)
 	debugMsg("Main","Iteration:" << it << " " << flaws.size() << " flaws");
 	
 	for (int i=0; i<flaws.size(); i++) {
-		std::cout << "    " << (i+1) << " - " << flaws.get(i) << std::endl;
+		debugMsg("Main","    " << (i+1) << " - " << flaws.get(i));
 	}
 }
 
