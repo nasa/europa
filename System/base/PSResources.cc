@@ -6,29 +6,38 @@
 #include "ResourcePropagator.hh"
 // TODO: registration for these needs to happen somewhere else
 #include "SAVH_ReusableFVDetector.hh"
-#include "SAVH_IncrementalFlowProfile.hh" 
+#include "SAVH_FlowProfile.hh"
+#include "SAVH_IncrementalFlowProfile.hh"
+#include "SAVH_TimetableProfile.hh"
 #include "ResourceThreatDecisionPoint.hh"
+#include "TransactionInterpreterResources.hh"
 
 namespace EUROPA {
 
   PSEngineWithResources::PSEngineWithResources()
       : PSEngineImpl()
   {
-    REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
-    REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile);
-    REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreatDecisionPoint);
+	  REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile );
+      REGISTER_PROFILE(EUROPA::SAVH::FlowProfile, FlowProfile);
+      REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile );
+      
+      REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
+      REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreatDecisionPoint);
+      
+   	  // Explicit reference is needed so that static initializer isn't dropped when static libs are used.
+   	  TransactionInterpreterResourcesInitializer::getInstance(); 	
   }
 
   void PSEngineWithResources::start() 
   {
     PSEngineImpl::start();
 
-    new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), m_constraintEngine);
   }
 
   void PSEngineWithResources::initDatabase() 
   {
     PSEngineImpl::initDatabase();
+    new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), m_constraintEngine);
     new ResourcePropagator(LabelStr("Resource"), m_constraintEngine, m_planDatabase);
   }
 

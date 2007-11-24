@@ -32,6 +32,14 @@
 #include "PlanDatabaseWriter.hh"
 #include "SolverPartialPlanWriter.hh"
 
+#include "ModuleConstraintEngine.hh"
+#include "ModulePlanDatabase.hh"
+#include "ModuleRulesEngine.hh"
+#include "ModuleTemporalNetwork.hh"
+//#include "ModuleResource.hh"
+#include "ModuleSolvers.hh"
+#include "ModuleNddl.hh"
+
 #include <fstream>
 
 namespace EUROPA {
@@ -54,6 +62,370 @@ namespace EUROPA {
       return languageInterpreters;
   }
 
+
+  PSEngineImpl::PSEngineImpl() 
+      : m_ppw(NULL)
+  {
+  }
+
+  PSEngineImpl::~PSEngineImpl() 
+  {
+  }
+
+  ModuleId PSEngineImpl::getModuleByName(const std::string& name) const
+  {
+	  for (unsigned int i=0;i<m_modules.size();i++) {
+		  if (m_modules[i]->getName() == name)
+			  return m_modules[i];
+	  }
+	  
+	  return ModuleId::noId();
+  }
+  
+  void PSEngineImpl::initializeModules()
+  {
+	  // TODO: make this data-driven
+	  m_modules.push_back(new ModuleConstraintEngine()); 
+	  m_modules.push_back(new ModuleConstraintLibrary());
+	  m_modules.push_back(new ModulePlanDatabase());
+	  m_modules.push_back(new ModuleRulesEngine());
+	  m_modules.push_back(new ModuleTemporalNetwork());
+      // TODO:	  m_modules.push_back(new ModuleResource());
+	  m_modules.push_back(new ModuleSolvers());
+	  m_modules.push_back(new ModuleNddl());
+	  
+	  for (unsigned int i=0;i<m_modules.size();i++) {
+		  m_modules[i]->initialize();
+		  debugMsg("PSEngine","Initialized Module " << m_modules[i]->getName());		  
+	  }	  
+  }
+
+  void PSEngineImpl::uninitializeModules()
+  {
+      Entity::purgeStarted();      
+	  for (unsigned int i=m_modules.size();i>0;i--) {
+		  unsigned int idx = i-1;
+		  m_modules[idx]->uninitialize();
+		  debugMsg("PSEngine","Uninitialized Module " << m_modules[idx]->getName());
+		  m_modules[idx].release();
+	  }	  
+	  Entity::purgeEnded();	  
+
+	  m_modules.clear();	  
+  }
+  
+  void PSEngineImpl::allocateComponents()
+  {
+	  m_constraintEngine = (new ConstraintEngine())->getId();	  
+      m_planDatabase = (new PlanDatabase(m_constraintEngine, Schema::instance()))->getId();	
+      m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();	  
+	  m_ppw = new SOLVERS::PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine, m_rulesEngine);
+
+	  for (unsigned int i=0;i<m_modules.size();i++) {
+		  m_modules[i]->initialize(getId());
+		  debugMsg("PSEngine","Engine initialized by Module " << m_modules[i]->getName());		  
+	  }	  
+	  
+	  // TODO: This needs to be done with a LanguageInterpreter for nddl-xml
+      DbClientId client = m_planDatabase->getClient();
+	  m_interpTransactionPlayer = new InterpretedDbClientTransactionPlayer(client);
+	  m_transactionPlayer = new DbClientTransactionPlayer(client);
+  }
+  
+  void PSEngineImpl::deallocateComponents()
+  {
+	  for (unsigned int i=m_modules.size();i>0;i--) {
+		  unsigned int idx = i-1;
+		  m_modules[idx]->uninitialize(getId());
+		  debugMsg("PSEngine","Engine uninitialized by Module " << m_modules[idx]->getName());		  
+	  }	  
+
+	  Entity::purgeStarted();
+      
+      if(m_ppw != NULL) {
+	     delete m_ppw;
+	     m_ppw = NULL;
+	  }
+
+      if(m_rulesEngine.isValid()) {
+	    delete (RulesEngine*) m_rulesEngine;
+	    m_rulesEngine = RulesEngineId::noId();    
+	  }
+      
+	  if(m_planDatabase.isValid()) {
+	    delete (PlanDatabase*) m_planDatabase;
+	    m_planDatabase = PlanDatabaseId::noId();
+	  }
+	  
+	  if(m_constraintEngine.isValid()) {
+	    delete (ConstraintEngine*) m_constraintEngine;
+	    m_constraintEngine = ConstraintEngineId::noId();
+	  }	  
+
+	  Entity::purgeEnded();	  
+  }
+  
+  EngineComponentId& PSEngineImpl::getComponent(const std::string& name)
+  {
+	  static EngineComponentId noId = EngineComponentId::noId();
+	  
+	  if (name == "ConstraintEngine")
+		  return (EngineComponentId&)m_constraintEngine;
+	  if (name == "PlanDatabase")
+		  return (EngineComponentId&)m_planDatabase;
+	  if (name == "RulesEngine")
+		  return (EngineComponentId&)m_constraintEngine;
+
+	  return noId;
+  }
+  
+  
+  void PSEngineImpl::start() 
+  {		
+    Error::doThrowExceptions(); // throw exceptions!
+    Error::doDisplayErrors();    
+    check_runtime_error(m_constraintEngine.isNoId());
+    check_runtime_error(m_planDatabase.isNoId());
+    check_runtime_error(m_rulesEngine.isNoId());
+    
+    initializeModules();
+    allocateComponents();    
+  }
+
+  //FIXME
+  void PSEngineImpl::shutdown() 
+  {
+    deallocateComponents();    
+    uninitializeModules();    
+  }
+    
+  void PSEngineImpl::initDatabase() 
+  {
+    m_planDatabase = (new PlanDatabase(m_constraintEngine, Schema::instance()))->getId();
+    PropagatorId temporalPropagator = m_constraintEngine->getPropagatorByName(LabelStr("Temporal"));
+    m_planDatabase->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
+    m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();
+    DbClientId client = m_planDatabase->getClient();
+    m_interpTransactionPlayer = new InterpretedDbClientTransactionPlayer(client);
+    m_transactionPlayer = new DbClientTransactionPlayer(client);
+    m_ppw =
+      new SOLVERS::PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine,
+						 m_rulesEngine);
+  }
+   
+  void PSEngineImpl::loadModel(const std::string& modelFileName) {
+    check_runtime_error(m_planDatabase.isNoId());
+    check_runtime_error(m_rulesEngine.isNoId());
+
+    void* libHandle = p_dlopen(modelFileName.c_str(), RTLD_NOW);
+    checkError(libHandle != NULL,
+	       "Error opening model " << modelFileName << ": " << p_dlerror());
+
+    SchemaId (*fcn_schema)();
+    fcn_schema = (SchemaId (*)()) p_dlsym(libHandle, "loadSchema");
+    checkError(fcn_schema != NULL,
+	       "Error locating symbol 'loadSchema' in " << modelFileName << ": " <<
+	       p_dlerror());
+
+    SchemaId schema = (*fcn_schema)();
+    initDatabase();    
+  }
+
+  void PSEngineImpl::executeTxns(const std::string& xmlTxnSource,bool isFile,bool useInterpreter) {
+  	// if we're using the TransactionInterpreter, we'll be starting from scratch
+	  // TODO: remove this
+    //if(m_planDatabase.isNoId())
+    //      initDatabase();
+
+    check_runtime_error(m_planDatabase.isValid());
+    
+
+    DbClientTransactionPlayerId player;      
+    if (useInterpreter)
+        player = m_interpTransactionPlayer;
+    else
+        player = m_transactionPlayer;
+
+    std::istream* in;    
+    if (isFile)
+      in = new std::ifstream(xmlTxnSource.c_str());
+    else
+      in = new std::istringstream(xmlTxnSource);
+
+    //check_runtime_error(*in);
+    player->play(*in);
+
+    delete in;    
+  }
+
+  //FIXME
+  std::string PSEngineImpl::executeScript(const std::string& language, const std::string& script) {
+    std::map<double, PSLanguageInterpreter*>::iterator it =
+      getLanguageInterpreters().find(LabelStr(language));
+    checkRuntimeError(it != getLanguageInterpreters().end(),
+		      "Cannot execute script of unknown language \"" << language << "\"");
+    return it->second->interpret(script);
+  }
+
+  PSList<PSObject*> PSEngineImpl::getObjectsByType(const std::string& objectType) {
+    check_runtime_error(m_planDatabase.isValid());
+    
+    PSList<PSObject*> retval;
+    
+    const ObjectSet& objects = m_planDatabase->getObjects();
+    for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
+      ObjectId object = *it;
+      if(Schema::instance()->isA(object->getType(), objectType.c_str()))
+	retval.push_back(getObjectWrapperGenerator(object->getType())->wrap(object));
+    }
+    
+    return retval;
+  }
+
+  PSObject* PSEngineImpl::getObjectByKey(PSEntityKey id) {
+    check_runtime_error(m_planDatabase.isValid());
+
+    EntityId entity = Entity::getEntity(id);
+    check_runtime_error(entity.isValid());
+    return new PSObjectImpl(entity);
+  }
+
+  PSObject* PSEngineImpl::getObjectByName(const std::string& name) {
+    check_runtime_error(m_planDatabase.isValid());
+    ObjectId obj = m_planDatabase->getObject(LabelStr(name));
+    check_runtime_error(obj.isValid());
+    return new PSObjectImpl(obj);
+  }
+
+  PSList<PSToken*> PSEngineImpl::getTokens() {
+    check_runtime_error(m_planDatabase.isValid());
+
+    const TokenSet& tokens = m_planDatabase->getTokens();
+    PSList<PSToken*> retval;
+
+    for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+      PSToken* tok = new PSTokenImpl(*it);
+      retval.push_back(tok);
+    }
+    return retval;
+  }
+
+  PSToken* PSEngineImpl::getTokenByKey(PSEntityKey id) {
+    check_runtime_error(m_planDatabase.isValid());
+
+    EntityId entity = Entity::getEntity(id);
+    check_runtime_error(entity.isValid());
+    return new PSTokenImpl(entity);
+  }
+
+  PSList<PSVariable*>  PSEngineImpl::getGlobalVariables() {
+    check_runtime_error(m_planDatabase.isValid());
+
+    const ConstrainedVariableSet& vars = m_planDatabase->getGlobalVariables();
+    PSList<PSVariable*> retval;
+
+    for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
+      PSVariable* v = new PSVariableImpl(*it);
+      retval.push_back(v);
+    }
+    return retval;
+  }  
+
+  PSVariable* PSEngineImpl::getVariableByKey(PSEntityKey id)
+  {
+    check_runtime_error(m_planDatabase.isValid());
+    EntityId entity = Entity::getEntity(id);
+    check_runtime_error(entity.isValid());
+    return new PSVariableImpl(entity);
+  }
+
+  // TODO: this needs to be optimized
+  PSVariable* PSEngineImpl::getVariableByName(const std::string& name)
+  {
+    check_runtime_error(m_planDatabase.isValid());
+    const ConstrainedVariableSet& vars = m_constraintEngine->getVariables();
+
+    for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
+    	ConstrainedVariableId v = *it;
+    	if (v->getName().toString() == name)
+            return new PSVariableImpl(*it);
+    }
+    
+    return NULL;
+  }
+
+  PSSolver* PSEngineImpl::createSolver(const std::string& configurationFile) {
+    TiXmlDocument* doc = new TiXmlDocument(configurationFile.c_str());
+    doc->LoadFile();
+
+    SOLVERS::SolverId solver =
+      (new SOLVERS::Solver(m_planDatabase, *(doc->RootElement())))->getId();
+    return new PSSolverImpl(solver,configurationFile, m_ppw);
+  }
+
+  bool PSEngineImpl::getAllowViolations() const
+  {
+  	return m_constraintEngine->getAllowViolations();
+  }
+
+  void PSEngineImpl::setAllowViolations(bool v)
+  {
+    m_constraintEngine->setAllowViolations(v);
+  }
+
+  double PSEngineImpl::getViolation() const
+  {
+  	return m_constraintEngine->getViolation();
+  }
+   
+  std::string PSEngineImpl::getViolationExpl() const
+  {
+  	return m_constraintEngine->getViolationExpl();
+  }
+   
+   std::string PSEngineImpl::planDatabaseToString() {
+      PlanDatabaseWriter* pdw = new PlanDatabaseWriter();
+      std::string planOutput = pdw->toString(m_planDatabase);
+      delete pdw;
+      return planOutput;
+   }
+
+  void PSEngineImpl::addLanguageInterpreter(const LabelStr& language,
+					PSLanguageInterpreter* interpreter) {
+    std::map<double, PSLanguageInterpreter*>::iterator it =
+      getLanguageInterpreters().find(language);
+    if(it == getLanguageInterpreters().end())
+      getLanguageInterpreters().insert(std::make_pair(language, interpreter));
+    else {
+      delete it->second;
+      it->second = interpreter;
+    }
+  }
+
+  void PSEngineImpl::addObjectWrapperGenerator(const LabelStr& type,
+					   ObjectWrapperGenerator* wrapper) {
+    std::map<double, ObjectWrapperGenerator*>::iterator it =
+      getObjectWrapperGenerators().find(type);
+    if(it == getObjectWrapperGenerators().end())
+      getObjectWrapperGenerators().insert(std::make_pair(type, wrapper));
+    else {
+      delete it->second;
+      it->second = wrapper;
+    }
+  }
+
+  ObjectWrapperGenerator* PSEngineImpl::getObjectWrapperGenerator(const LabelStr& type) {
+    const std::vector<LabelStr>& types = Schema::instance()->getAllObjectTypes(type);
+    for(std::vector<LabelStr>::const_iterator it = types.begin(); it != types.end(); ++it) {
+      std::map<double, ObjectWrapperGenerator*>::iterator wrapper =
+	getObjectWrapperGenerators().find(*it);
+      if(wrapper != getObjectWrapperGenerators().end())
+	return wrapper->second;
+    }
+    checkRuntimeError(ALWAYS_FAIL,
+		      "Don't know how to wrap objects of type " << type.toString());
+    return NULL;
+  }
 
   PSEntity::PSEntity(const EntityId& entity) : m_entity(entity) {}
 
@@ -597,293 +969,6 @@ namespace EUROPA {
     check_runtime_error(horizonStart <= horizonEnd);
     SOLVERS::HorizonFilter::getHorizon().reset(IntervalIntDomain());
     SOLVERS::HorizonFilter::getHorizon().intersect(horizonStart, horizonEnd);
-  }
-
-  PSEngineImpl::PSEngineImpl() : m_ppw(NULL)
-  {
-  }
-
-  PSEngineImpl::~PSEngineImpl() 
-  {
-  }
-
-  //FIXME
-  void PSEngineImpl::start() {		
-    Error::doThrowExceptions(); // throw exceptions!
-    Error::doDisplayErrors();
-    check_runtime_error(m_constraintEngine.isNoId());
-    check_runtime_error(m_planDatabase.isNoId());
-    check_runtime_error(m_rulesEngine.isNoId());
-    
-    m_constraintEngine = (new ConstraintEngine())->getId();
-    new DefaultPropagator(LabelStr("Default"), m_constraintEngine);
-    new TemporalPropagator(LabelStr("Temporal"), m_constraintEngine);
-
-    initConstraintLibrary();
-    initNDDL();
-    
-    //can't init plan database until we have the model loaded
-  }
-
-  //FIXME
-  void PSEngineImpl::shutdown() {
-    if(m_ppw != NULL) {
-      delete m_ppw;
-      m_ppw = NULL;
-    }
-    Entity::purgeStarted();
-
-    uninitConstraintLibrary();
-    uninitNDDL();
-    Schema::instance()->reset();
-    ObjectFactory::purgeAll();
-    TokenFactory::purgeAll();
-    ConstraintLibrary::purgeAll();
-    Rule::purgeAll();
-
-    // TODO: deletes are causing a crash, fix it
-    if(m_rulesEngine.isValid()) {
-      delete (RulesEngine*) m_rulesEngine;
-      m_rulesEngine = RulesEngineId::noId();    
-    }
-    if(m_planDatabase.isValid()) {
-      delete (PlanDatabase*) m_planDatabase;
-      m_planDatabase = PlanDatabaseId::noId();
-    }
-    if(m_constraintEngine.isValid()) {
-      delete (ConstraintEngine*) m_constraintEngine;
-      m_constraintEngine = ConstraintEngineId::noId();
-    }
-
-    Entity::purgeEnded();
-  }
-    
-  void PSEngineImpl::initDatabase() 
-  {
-    m_planDatabase = (new PlanDatabase(m_constraintEngine, Schema::instance()))->getId();
-    PropagatorId temporalPropagator =
-      m_constraintEngine->getPropagatorByName(LabelStr("Temporal"));
-    m_planDatabase->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
-    m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();
-    DbClientId client = m_planDatabase->getClient();
-    m_interpTransactionPlayer = new InterpretedDbClientTransactionPlayer(client);
-    m_transactionPlayer = new DbClientTransactionPlayer(client);
-    m_ppw =
-      new SOLVERS::PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine,
-						 m_rulesEngine);
-  }
-   
-  void PSEngineImpl::loadModel(const std::string& modelFileName) {
-    check_runtime_error(m_planDatabase.isNoId());
-    check_runtime_error(m_rulesEngine.isNoId());
-
-    void* libHandle = p_dlopen(modelFileName.c_str(), RTLD_NOW);
-    checkError(libHandle != NULL,
-	       "Error opening model " << modelFileName << ": " << p_dlerror());
-
-    SchemaId (*fcn_schema)();
-    fcn_schema = (SchemaId (*)()) p_dlsym(libHandle, "loadSchema");
-    checkError(fcn_schema != NULL,
-	       "Error locating symbol 'loadSchema' in " << modelFileName << ": " <<
-	       p_dlerror());
-
-    SchemaId schema = (*fcn_schema)();
-    initDatabase();    
-  }
-
-  void PSEngineImpl::executeTxns(const std::string& xmlTxnSource,bool isFile,bool useInterpreter) {
-  	// if we're using the TransactionInterpreter, we'll be starting from scratch
-    if(m_planDatabase.isNoId())
-          initDatabase();
-
-    check_runtime_error(m_planDatabase.isValid());
-    
-
-    DbClientTransactionPlayerId player;      
-    if (useInterpreter)
-        player = m_interpTransactionPlayer;
-    else
-        player = m_transactionPlayer;
-
-    std::istream* in;    
-    if (isFile)
-      in = new std::ifstream(xmlTxnSource.c_str());
-    else
-      in = new std::istringstream(xmlTxnSource);
-
-    //check_runtime_error(*in);
-    player->play(*in);
-
-    delete in;    
-  }
-
-  //FIXME
-  std::string PSEngineImpl::executeScript(const std::string& language, const std::string& script) {
-    std::map<double, PSLanguageInterpreter*>::iterator it =
-      getLanguageInterpreters().find(LabelStr(language));
-    checkRuntimeError(it != getLanguageInterpreters().end(),
-		      "Cannot execute script of unknown language \"" << language << "\"");
-    return it->second->interpret(script);
-  }
-
-  PSList<PSObject*> PSEngineImpl::getObjectsByType(const std::string& objectType) {
-    check_runtime_error(m_planDatabase.isValid());
-    
-    PSList<PSObject*> retval;
-    
-    const ObjectSet& objects = m_planDatabase->getObjects();
-    for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
-      ObjectId object = *it;
-      if(Schema::instance()->isA(object->getType(), objectType.c_str()))
-	retval.push_back(getObjectWrapperGenerator(object->getType())->wrap(object));
-    }
-    
-    return retval;
-  }
-
-  PSObject* PSEngineImpl::getObjectByKey(PSEntityKey id) {
-    check_runtime_error(m_planDatabase.isValid());
-
-    EntityId entity = Entity::getEntity(id);
-    check_runtime_error(entity.isValid());
-    return new PSObjectImpl(entity);
-  }
-
-  PSObject* PSEngineImpl::getObjectByName(const std::string& name) {
-    check_runtime_error(m_planDatabase.isValid());
-    ObjectId obj = m_planDatabase->getObject(LabelStr(name));
-    check_runtime_error(obj.isValid());
-    return new PSObjectImpl(obj);
-  }
-
-  PSList<PSToken*> PSEngineImpl::getTokens() {
-    check_runtime_error(m_planDatabase.isValid());
-
-    const TokenSet& tokens = m_planDatabase->getTokens();
-    PSList<PSToken*> retval;
-
-    for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
-      PSToken* tok = new PSTokenImpl(*it);
-      retval.push_back(tok);
-    }
-    return retval;
-  }
-
-  PSToken* PSEngineImpl::getTokenByKey(PSEntityKey id) {
-    check_runtime_error(m_planDatabase.isValid());
-
-    EntityId entity = Entity::getEntity(id);
-    check_runtime_error(entity.isValid());
-    return new PSTokenImpl(entity);
-  }
-
-  PSList<PSVariable*>  PSEngineImpl::getGlobalVariables() {
-    check_runtime_error(m_planDatabase.isValid());
-
-    const ConstrainedVariableSet& vars = m_planDatabase->getGlobalVariables();
-    PSList<PSVariable*> retval;
-
-    for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
-      PSVariable* v = new PSVariableImpl(*it);
-      retval.push_back(v);
-    }
-    return retval;
-  }  
-
-  PSVariable* PSEngineImpl::getVariableByKey(PSEntityKey id)
-  {
-    check_runtime_error(m_planDatabase.isValid());
-    EntityId entity = Entity::getEntity(id);
-    check_runtime_error(entity.isValid());
-    return new PSVariableImpl(entity);
-  }
-
-  // TODO: this needs to be optimized
-  PSVariable* PSEngineImpl::getVariableByName(const std::string& name)
-  {
-    check_runtime_error(m_planDatabase.isValid());
-    const ConstrainedVariableSet& vars = m_constraintEngine->getVariables();
-
-    for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
-    	ConstrainedVariableId v = *it;
-    	if (v->getName().toString() == name)
-            return new PSVariableImpl(*it);
-    }
-    
-    return NULL;
-  }
-
-  PSSolver* PSEngineImpl::createSolver(const std::string& configurationFile) {
-    TiXmlDocument* doc = new TiXmlDocument(configurationFile.c_str());
-    doc->LoadFile();
-
-    SOLVERS::SolverId solver =
-      (new SOLVERS::Solver(m_planDatabase, *(doc->RootElement())))->getId();
-    return new PSSolverImpl(solver,configurationFile, m_ppw);
-  }
-
-  bool PSEngineImpl::getAllowViolations() const
-  {
-  	return m_constraintEngine->getAllowViolations();
-  }
-
-  void PSEngineImpl::setAllowViolations(bool v)
-  {
-    m_constraintEngine->setAllowViolations(v);
-  }
-
-  double PSEngineImpl::getViolation() const
-  {
-  	return m_constraintEngine->getViolation();
-  }
-   
-  std::string PSEngineImpl::getViolationExpl() const
-  {
-  	return m_constraintEngine->getViolationExpl();
-  }
-   
-   std::string PSEngineImpl::planDatabaseToString() {
-      PlanDatabaseWriter* pdw = new PlanDatabaseWriter();
-      std::string planOutput = pdw->toString(m_planDatabase);
-      delete pdw;
-      return planOutput;
-   }
-
-  void PSEngineImpl::addLanguageInterpreter(const LabelStr& language,
-					PSLanguageInterpreter* interpreter) {
-    std::map<double, PSLanguageInterpreter*>::iterator it =
-      getLanguageInterpreters().find(language);
-    if(it == getLanguageInterpreters().end())
-      getLanguageInterpreters().insert(std::make_pair(language, interpreter));
-    else {
-      delete it->second;
-      it->second = interpreter;
-    }
-  }
-
-  void PSEngineImpl::addObjectWrapperGenerator(const LabelStr& type,
-					   ObjectWrapperGenerator* wrapper) {
-    std::map<double, ObjectWrapperGenerator*>::iterator it =
-      getObjectWrapperGenerators().find(type);
-    if(it == getObjectWrapperGenerators().end())
-      getObjectWrapperGenerators().insert(std::make_pair(type, wrapper));
-    else {
-      delete it->second;
-      it->second = wrapper;
-    }
-  }
-
-  ObjectWrapperGenerator* PSEngineImpl::getObjectWrapperGenerator(const LabelStr& type) {
-    const std::vector<LabelStr>& types = Schema::instance()->getAllObjectTypes(type);
-    for(std::vector<LabelStr>::const_iterator it = types.begin(); it != types.end(); ++it) {
-      std::map<double, ObjectWrapperGenerator*>::iterator wrapper =
-	getObjectWrapperGenerators().find(*it);
-      if(wrapper != getObjectWrapperGenerators().end())
-	return wrapper->second;
-    }
-    checkRuntimeError(ALWAYS_FAIL,
-		      "Don't know how to wrap objects of type " << type.toString());
-    return NULL;
   }
 
   class BaseObjectWrapperGenerator : public ObjectWrapperGenerator {

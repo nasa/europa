@@ -5,7 +5,7 @@ if ! $(PLASMA_READY) {
 #Module ConstraintEngine : Utils TinyXml ;
 Module ConstraintEngine : Utils ;
 
-ModuleFiles ConstraintEngine : ConstraintEngineDefs.cc ;
+ModuleFiles ConstraintEngine : ModuleConstraintEngine.cc ;
 
 SubInclude PLASMA ConstraintEngine base ;
 SubInclude PLASMA ConstraintEngine component ;

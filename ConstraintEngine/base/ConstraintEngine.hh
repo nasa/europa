@@ -14,6 +14,7 @@
 #include "LabelStr.hh"
 #include "ConstraintEngineListener.hh"
 #include "Entity.hh"
+#include "Engine.hh"
 
 #include <set>
 #include <map>
@@ -104,7 +105,7 @@ namespace EUROPA {
    * @see Constraint, ConstrainedVariable, AbstractDomain, VariableChangeListener, Propagator
    * @see "Propagator: A Family of Patterns, Peter H. Feiler, Walter F. Tichy"
    */
-  class ConstraintEngine {
+  class ConstraintEngine : public EngineComponent {
 
   public:
     enum State { PROVEN_INCONSISTENT = 0, /**< A domain has been emptied, and no subsequent retractions have occurred yet. */

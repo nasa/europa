@@ -12,6 +12,7 @@
 #include "RulesEngineDefs.hh"
 #include <map>
 #include <set>
+#include"Engine.hh"
 
 namespace EUROPA {
 
@@ -20,7 +21,7 @@ namespace EUROPA {
    * @brief Provides the control model to integrate plan database events with model rules
    * @see RuleVariableListener, PlanDatabaseListener, RuleInstance, Rule
    */
-  class RulesEngine{
+  class RulesEngine : public EngineComponent {
   public:
     RulesEngine(const PlanDatabaseId& planDatabase);
     ~RulesEngine();

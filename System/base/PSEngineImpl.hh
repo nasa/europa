@@ -4,6 +4,7 @@
 #include "PSEngine.hh"
 #include "Id.hh"
 #include "Entity.hh"
+#include "Module.hh"
 #include "ConstraintEngineDefs.hh"
 #include "PlanDatabaseDefs.hh"
 #include "SolverDefs.hh"
@@ -32,7 +33,7 @@ namespace EUROPA {
     virtual std::string interpret(const std::string& script) = 0;
   };
 
-  class PSEngineImpl : public PSEngine
+  class PSEngineImpl : public PSEngine, Engine
   {
   public:
     PSEngineImpl();
@@ -72,18 +73,33 @@ namespace EUROPA {
     static void addLanguageInterpreter(const LabelStr& langauge,
 				       PSLanguageInterpreter* interpreter);
 
+    virtual EngineComponentId& getComponent(const std::string& name);
+    
+    ConstraintEngineId& getConstraintEngine() { return m_constraintEngine; }
+    PlanDatabaseId&     getPlanDatabase()     { return m_planDatabase; }
+    RulesEngineId&      getRulesEngine()      { return m_rulesEngine; }
+    
   protected:
+	void initializeModules();
+	void uninitializeModules();
+	ModuleId getModuleByName(const std::string& name) const;
+	
+	void allocateComponents();
+	void deallocateComponents();
+	
     virtual void initDatabase();
     static ObjectWrapperGenerator* getObjectWrapperGenerator(const LabelStr& type);
     static std::map<double, PSLanguageInterpreter*>& getLanguageInterpreters();
     static std::map<double, ObjectWrapperGenerator*>& getObjectWrapperGenerators();    
 
-    DbClientTransactionPlayerId m_interpTransactionPlayer;
-    DbClientTransactionPlayerId m_transactionPlayer;
     ConstraintEngineId m_constraintEngine;
     PlanDatabaseId m_planDatabase;
     RulesEngineId m_rulesEngine;
+    DbClientTransactionPlayerId m_transactionPlayer;
+    DbClientTransactionPlayerId m_interpTransactionPlayer;
     SOLVERS::PlanWriter::PartialPlanWriter* m_ppw;
+    
+    std::vector<ModuleId> m_modules;
   };
 
   class PSObjectImpl : public PSObject

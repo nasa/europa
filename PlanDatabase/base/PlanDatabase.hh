@@ -15,6 +15,7 @@
 #include "DbClient.hh"
 #include "Object.hh"
 #include "Debug.hh"
+#include "Engine.hh"
 
 #include <set>
 #include <map>
@@ -27,7 +28,7 @@ namespace EUROPA {
   /**
    * @brief The main mediator for interaction with entities of the plan and managing their relationships.
    */
-  class PlanDatabase {
+  class PlanDatabase : public EngineComponent {
   public:
 
     enum Event { TOKEN_ADDED = 0,

@@ -142,10 +142,6 @@ namespace EUROPA {
     return retval;
   }
 
-  const PlanDatabaseId& SolverAssembly::getPlanDatabase() const {
-    return m_planDatabase;
-  }
-
   const unsigned int SolverAssembly::getTotalNodesSearched() const { return m_totalNodes; }
 
   const unsigned int SolverAssembly::getDepthReached() const { return m_finalDepth; }

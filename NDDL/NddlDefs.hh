@@ -10,12 +10,6 @@ namespace NDDL {
   class NddlToken;
   typedef Id<NddlToken> NddlTokenId;
 
-//   class NddlResource;
-//   typedef Id<NddlResource> NddlResourceId;
-
-//   class NddlResourceTransaction;
-//   typedef Id<NddlResourceTransaction> NddlResourceTransactionId;
-
   class ObjectFilterConstraint;
   typedef Id<ObjectFilterConstraint> ObjectFilterConstraintId;
 

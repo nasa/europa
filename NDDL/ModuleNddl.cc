@@ -1,4 +1,4 @@
-#include "NddlDefs.hh"
+#include "ModuleNddl.hh"
 #include "BoolTypeFactory.hh"
 #include "StringTypeFactory.hh"
 #include "SymbolTypeFactory.hh"
@@ -12,28 +12,57 @@ namespace EUROPA {
     return sl_alreadyDone;
   }
 
-  void initNDDL(){
+  ModuleNddl::ModuleNddl()
+      : Module("NDDL")
+  {
+	  
+  }
+
+  ModuleNddl::~ModuleNddl()
+  {	  
+  }  
+  
+  void initNDDL()
+  {
     if(!nddlInitialized()){
       nddlInitialized() = true;
 
-      /* Initialize dependendent module */
-      initConstraintEngine();
-
       /* Allocate NDDL Type Factories */
+      // Default names are uppercase, TODO: change default names so that this isn't necessary
       new BoolTypeFactory("bool");
       new StringTypeFactory("string");
       new SymbolTypeFactory("symbol");
+      
+      // These are Nddl specific, so they belong here
       new intTypeFactory();
       new floatTypeFactory();
     }
   }
 
-  void uninitNDDL(){
+  void uninitNDDL()
+  {
     if(nddlInitialized()){
-      uninitConstraintEngine();
       TypeFactory::purgeAll();
       nddlInitialized() = false;
     }
   }
+  
+  // TODO: remove initNDDL() and uninitNDDL()
+  void ModuleNddl::initialize()
+  {
+	  initNDDL();
+  }  
 
+  void ModuleNddl::uninitialize()
+  {
+	  uninitNDDL();
+  }
+  
+  void ModuleNddl::initialize(EngineId engine)
+  {
+  }
+  
+  void ModuleNddl::uninitialize(EngineId engine)
+  {	  
+  }  
 }

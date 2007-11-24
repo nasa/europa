@@ -2,11 +2,14 @@ SubDir PLASMA Solvers ;
 
 if ! $(PLASMA_READY) {
 
-	Module Solvers : RulesEngine ;
+Module Solvers : RulesEngine ;
 
-	SubInclude PLASMA Solvers base ;
-	SubInclude PLASMA Solvers component ;
-	SubInclude PLASMA Solvers documentation ;
-	SubInclude PLASMA Solvers test ;
+SubInclude PLASMA Solvers base ;
+SubInclude PLASMA Solvers component ;
+SubInclude PLASMA Solvers documentation ;
+
+ModuleFiles Solvers : ModuleSolvers.cc ;
+
+SubInclude PLASMA Solvers test ;
 
 } # PLASMA_READY

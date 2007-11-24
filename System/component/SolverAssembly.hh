@@ -48,8 +48,6 @@ namespace EUROPA {
      */
     bool plan(const char* txSource, const TiXmlElement& config, bool interp = false);
 
-    const PlanDatabaseId& getPlanDatabase() const;
-
     const unsigned int getTotalNodesSearched() const;
 
     const unsigned int getDepthReached() const;
