@@ -6,6 +6,7 @@ ModuleComponent NDDL
 	:
 	floatType.cc
 	intType.cc
+	TransactionInterpreter.cc
 	;
 
 if ! ( "Resources" in $(NO) ) {

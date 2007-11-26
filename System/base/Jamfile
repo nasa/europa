@@ -11,14 +11,12 @@ if "Resources" in $(NO) {
 ModuleBase System 
 	: 
 	PSEngine.cc
-	TransactionInterpreter.cc
 	StandardAssembly.cc
 	;
 
 if ! ( "Resources" in $(NO) ) {
   ModuleBase System 
       : 
-      TransactionInterpreterResources.cc 
       PSResources.cc 
       StandardAssemblyWithResources.cc 
       ;
