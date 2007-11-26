@@ -12,11 +12,41 @@
 #include "ResourceThreatDecisionPoint.hh"
 #include "TransactionInterpreterResources.hh"
 
+#include "ModuleConstraintEngine.hh"
+#include "ModulePlanDatabase.hh"
+#include "ModuleRulesEngine.hh"
+#include "ModuleTemporalNetwork.hh"
+#include "ModuleResource.hh"
+#include "ModuleSolvers.hh"
+#include "ModuleNddl.hh"
+//#include "ModuleAnml.hh"
+
+
 namespace EUROPA {
 
   PSEngineWithResources::PSEngineWithResources()
-      : PSEngineImpl()
   {
+  }
+
+  void PSEngineWithResources::createModules()
+  {
+	  // TODO: make this data-driven
+	  m_modules.push_back(new ModuleConstraintEngine()); 
+	  m_modules.push_back(new ModuleConstraintLibrary());
+	  m_modules.push_back(new ModulePlanDatabase());
+	  m_modules.push_back(new ModuleRulesEngine());
+	  m_modules.push_back(new ModuleTemporalNetwork());
+      m_modules.push_back(new ModuleResource());
+	  m_modules.push_back(new ModuleSolvers());
+	  m_modules.push_back(new ModuleNddl());	  
+      // TODO:	  m_modules.push_back(new ModuleAnml());
+  }
+  
+  void PSEngineWithResources::initializeModules()
+  {
+	  PSEngineImpl::initializeModules();
+
+	  // TODO: Move these to the corresponding modules
 	  REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile );
       REGISTER_PROFILE(EUROPA::SAVH::FlowProfile, FlowProfile);
       REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile );
@@ -25,22 +55,37 @@ namespace EUROPA {
       REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreatDecisionPoint);
       
    	  // Explicit reference is needed so that static initializer isn't dropped when static libs are used.
+      // TODO: probably a initSchema method is needed to make this work with loadModel()
    	  TransactionInterpreterResourcesInitializer::getInstance(); 	
   }
-
-  void PSEngineWithResources::start() 
+  
+  void PSEngineWithResources::allocateComponents()
   {
-    PSEngineImpl::start();
-
+	  PSEngineImpl::allocateComponents();
+	  
+	  // TODO: Move these to the corresponding modules
+	  new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), m_constraintEngine);
+	  new ResourcePropagator(LabelStr("Resource"), m_constraintEngine, m_planDatabase);	  	  
   }
-
-  void PSEngineWithResources::initDatabase() 
+  
+  class ResourceWrapperGenerator : public ObjectWrapperGenerator 
   {
-    PSEngineImpl::initDatabase();
-    new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), m_constraintEngine);
-    new ResourcePropagator(LabelStr("Resource"), m_constraintEngine, m_planDatabase);
+  public:
+    PSObject* wrap(const ObjectId& obj) {
+      checkRuntimeError(SAVH::ResourceId::convertable(obj),
+			"Object " << obj->toString() << " is not a resource.");
+      return new PSResource(SAVH::ResourceId(obj));
+    }
+  };
+    
+  void PSEngineWithResources::registerObjectWrappers()
+  {
+      addObjectWrapperGenerator("Reservoir", new ResourceWrapperGenerator());
+      addObjectWrapperGenerator("Reusable", new ResourceWrapperGenerator());
+      addObjectWrapperGenerator("Unary", new ResourceWrapperGenerator());
   }
-
+  
+  
   PSList<PSResource*> PSEngineWithResources::getResourcesByType(const std::string& objectType) {
     check_runtime_error(m_planDatabase.isValid());
     
@@ -107,7 +152,6 @@ namespace EUROPA {
 	  return retval;
   }
 
-
   PSResourceProfile::PSResourceProfile(const double lb, const double ub)
     : m_isConst(true), m_lb(lb), m_ub(ub) {
     TimePoint inst = (TimePoint) MINUS_INFINITY;
@@ -142,26 +186,4 @@ namespace EUROPA {
   }
 
   const PSList<TimePoint>& PSResourceProfile::getTimes() {return m_times;}
-
-  class ResourceWrapperGenerator : public ObjectWrapperGenerator {
-  public:
-    PSObject* wrap(const ObjectId& obj) {
-      checkRuntimeError(SAVH::ResourceId::convertable(obj),
-			"Object " << obj->toString() << " is not a resource.");
-      return new PSResource(SAVH::ResourceId(obj));
-    }
-  };
-    
-  class PSResourceLocalStatic {
-  public:
-    PSResourceLocalStatic() {
-      PSEngineImpl::addObjectWrapperGenerator("Reservoir", new ResourceWrapperGenerator());
-      PSEngineImpl::addObjectWrapperGenerator("Reusable", new ResourceWrapperGenerator());
-      PSEngineImpl::addObjectWrapperGenerator("Unary", new ResourceWrapperGenerator());
-    }
-  };
-
-  namespace PSResources {
-    PSResourceLocalStatic s_localStatic;
-  }
 }

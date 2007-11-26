@@ -39,11 +39,20 @@
 //#include "ModuleResource.hh"
 #include "ModuleSolvers.hh"
 #include "ModuleNddl.hh"
+//#include "ModuleAnml.hh"
 
 #include <fstream>
 
 namespace EUROPA {
   
+  class BaseObjectWrapperGenerator : public ObjectWrapperGenerator 
+  {
+    public:
+	  PSObject* wrap(const ObjectId& obj) {
+		  return new PSObjectImpl(obj);
+	  }
+  };
+
   // TODO : allow user to register factories through configuration. dynamically load them.
   PSEngine* PSEngine::makeInstance()
   {
@@ -82,7 +91,7 @@ namespace EUROPA {
 	  return ModuleId::noId();
   }
   
-  void PSEngineImpl::initializeModules()
+  void PSEngineImpl::createModules()
   {
 	  // TODO: make this data-driven
 	  m_modules.push_back(new ModuleConstraintEngine()); 
@@ -92,7 +101,12 @@ namespace EUROPA {
 	  m_modules.push_back(new ModuleTemporalNetwork());
       // TODO:	  m_modules.push_back(new ModuleResource());
 	  m_modules.push_back(new ModuleSolvers());
-	  m_modules.push_back(new ModuleNddl());
+	  m_modules.push_back(new ModuleNddl());	  
+  }
+  
+  void PSEngineImpl::initializeModules()
+  {
+	  createModules();
 	  
 	  for (unsigned int i=0;i<m_modules.size();i++) {
 		  m_modules[i]->initialize();
@@ -124,7 +138,7 @@ namespace EUROPA {
 	  for (unsigned int i=0;i<m_modules.size();i++) {
 		  m_modules[i]->initialize(getId());
 		  debugMsg("PSEngine","Engine initialized by Module " << m_modules[i]->getName());		  
-	  }	  
+	  }	  	  
 	  
 	  // TODO: This needs to be done with a LanguageInterpreter for nddl-xml
       DbClientId client = m_planDatabase->getClient();
@@ -189,9 +203,15 @@ namespace EUROPA {
     check_runtime_error(m_rulesEngine.isNoId());
     
     initializeModules();
-    allocateComponents();    
+    allocateComponents();   
+    registerObjectWrappers();
   }
 
+  void PSEngineImpl::registerObjectWrappers()
+  {
+      addObjectWrapperGenerator("Object", new BaseObjectWrapperGenerator());	  
+  }
+  
   //FIXME
   void PSEngineImpl::shutdown() 
   {
@@ -199,6 +219,7 @@ namespace EUROPA {
     uninitializeModules();    
   }
     
+  /* TODO: remove this
   void PSEngineImpl::initDatabase() 
   {
     m_planDatabase = (new PlanDatabase(m_constraintEngine, Schema::instance()))->getId();
@@ -212,6 +233,7 @@ namespace EUROPA {
       new SOLVERS::PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine,
 						 m_rulesEngine);
   }
+  */ 
    
   void PSEngineImpl::loadModel(const std::string& modelFileName) {
     check_runtime_error(m_planDatabase.isNoId());
@@ -228,18 +250,13 @@ namespace EUROPA {
 	       p_dlerror());
 
     SchemaId schema = (*fcn_schema)();
-    initDatabase();    
+    //initDatabase();    
   }
 
-  void PSEngineImpl::executeTxns(const std::string& xmlTxnSource,bool isFile,bool useInterpreter) {
-  	// if we're using the TransactionInterpreter, we'll be starting from scratch
-	  // TODO: remove this
-    //if(m_planDatabase.isNoId())
-    //      initDatabase();
-
+  void PSEngineImpl::executeTxns(const std::string& xmlTxnSource,bool isFile,bool useInterpreter) 
+  {
     check_runtime_error(m_planDatabase.isValid());
     
-
     DbClientTransactionPlayerId player;      
     if (useInterpreter)
         player = m_interpTransactionPlayer;
@@ -971,13 +988,6 @@ namespace EUROPA {
     SOLVERS::HorizonFilter::getHorizon().intersect(horizonStart, horizonEnd);
   }
 
-  class BaseObjectWrapperGenerator : public ObjectWrapperGenerator {
-  public:
-    PSObject* wrap(const ObjectId& obj) {
-      return new PSObjectImpl(obj);
-    }
-  };
-
   class NDDLInterpreter : public PSLanguageInterpreter {
   public:
     std::string interpret(const std::string& script) {
@@ -988,7 +998,6 @@ namespace EUROPA {
   class PSEngineLocalStatic {
   public:
     PSEngineLocalStatic() {
-      PSEngineImpl::addObjectWrapperGenerator("Object", new BaseObjectWrapperGenerator());
       PSEngineImpl::addLanguageInterpreter("nddl", new NDDLInterpreter());
     }
   };

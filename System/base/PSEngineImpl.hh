@@ -12,7 +12,6 @@
 #include "DbClientTransactionPlayer.hh"
 #include "TransactionInterpreter.hh"
 
-
 namespace EUROPA {
 
   class PSObjectImpl;
@@ -80,14 +79,17 @@ namespace EUROPA {
     RulesEngineId&      getRulesEngine()      { return m_rulesEngine; }
     
   protected:
-	void initializeModules();
-	void uninitializeModules();
-	ModuleId getModuleByName(const std::string& name) const;
+	virtual void createModules();
+	virtual void initializeModules();
+	virtual void uninitializeModules();
+	virtual ModuleId getModuleByName(const std::string& name) const;
 	
-	void allocateComponents();
-	void deallocateComponents();
+	virtual void allocateComponents();
+	virtual void deallocateComponents();
 	
-    virtual void initDatabase();
+	virtual void registerObjectWrappers();
+	
+    // TODO: remove this virtual void initDatabase();
     static ObjectWrapperGenerator* getObjectWrapperGenerator(const LabelStr& type);
     static std::map<double, PSLanguageInterpreter*>& getLanguageInterpreters();
     static std::map<double, ObjectWrapperGenerator*>& getObjectWrapperGenerators();    

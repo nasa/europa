@@ -10,13 +10,18 @@ namespace EUROPA {
   
   class PSEngineWithResources : public PSEngineImpl 
   {
-  public:
-    PSEngineWithResources();
-    void start();
-    void initDatabase();
+    public:
+        PSEngineWithResources();
     
-    PSList<PSResource*> getResourcesByType(const std::string& objectType);
-    PSResource* getResourceByKey(PSEntityKey id);       
+        // TODO: remove this void initDatabase();    
+        PSList<PSResource*> getResourcesByType(const std::string& objectType);
+        PSResource* getResourceByKey(PSEntityKey id);
+        
+    protected:
+		virtual void createModules();
+		virtual void initializeModules();
+		virtual void allocateComponents();
+		virtual void registerObjectWrappers();	  
   };
 
   class PSResourceProfile
