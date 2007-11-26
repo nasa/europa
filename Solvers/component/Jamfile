@@ -2,7 +2,7 @@ SubDir PLASMA Solvers component ;
 
 if ! $(PLASMA_READY) {
 
-SubDirC++Flags -Wno-unknown-pragmas -DTIXML_USE_STL ;
+SubDirC++Flags -Wno-unknown-pragmas ;
 
 if ! ( "Resources" in $(NO) ) {
   SubInclude PLASMA Solvers component Resource ;

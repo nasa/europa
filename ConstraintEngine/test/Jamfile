@@ -2,7 +2,7 @@ SubDir PLASMA ConstraintEngine test ;
 
 if ! $(PLASMA_READY) {
 
-SubDirC++Flags -Wno-unknown-pragmas -Wno-format -DTIXML_USE_STL ;
+SubDirC++Flags -Wno-unknown-pragmas -Wno-format ;
 
 CET_Files = [ FGristFiles ConstraintTesting ] ; #<ConstraintEngine!test>ConstraintTesting ;
 
