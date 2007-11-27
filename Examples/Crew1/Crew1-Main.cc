@@ -27,9 +27,9 @@ int main(int argc, const char ** argv)
   const char* txSource = argv[1];
   const char* plannerConfig = argv[2];
   
-  executeWithAssembly(plannerConfig,txSource);
+  //executeWithAssembly(plannerConfig,txSource);
   
-  /*
+  /**/
   executeWithPSEngine(
       plannerConfig,
       txSource,
@@ -37,7 +37,7 @@ int main(int argc, const char ** argv)
       100, // endHorizon
       1000 // maxSteps
   ); 
-  */
+  /**/
      
   return 0;
 }

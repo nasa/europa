@@ -35,8 +35,8 @@ int main(int argc, const char ** argv)
   int endHorizon   = 1000;
   int maxSteps     = 5000;
 
-  //executeWithPSEngine(plannerConfig,txSource,startHorizon,endHorizon,maxSteps); 
-  executeWithAssembly(plannerConfig,txSource);
+  executeWithPSEngine(plannerConfig,txSource,startHorizon,endHorizon,maxSteps); 
+  //executeWithAssembly(plannerConfig,txSource);
    
   return 0;
 }
