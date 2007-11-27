@@ -380,24 +380,6 @@ namespace EUROPA {
                                                               const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p2) {
         return m_comparator->compare(p1, p2);
       }
-
-      class HSTSDecisionPointLocalStatic {
-      public:
-        HSTSDecisionPointLocalStatic() {
-          static bool sl_bool = false;
-          checkError(sl_bool == false, "Should only be called once");
-          if(sl_bool == false) {
-            REGISTER_TOKEN_SORTER(EarlyTokenComparator, early);
-            REGISTER_TOKEN_SORTER(LateTokenComparator, late);
-            REGISTER_TOKEN_SORTER(NearTokenComparator, near);
-            REGISTER_TOKEN_SORTER(FarTokenComparator, far);
-            REGISTER_TOKEN_SORTER(AscendingKeyTokenComparator, ascendingKey);
-            sl_bool = true;
-          }
-        }
-      };
-
-      HSTSDecisionPointLocalStatic s_hstsDecisionPointLocalStatic;
     }
   }
 }

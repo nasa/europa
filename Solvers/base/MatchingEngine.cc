@@ -231,20 +231,6 @@ namespace EUROPA {
       return str.str();
     }
 
-    class MatchingEngineLocalStatic {
-    public:
-      MatchingEngineLocalStatic() {
-	static bool sl_registerMatchers = false;
-	check_error(!sl_registerMatchers, "Should only be called once.");
-	MatchingEngine::addMatchFinder(ConstrainedVariable::entityTypeName(),
-				       (new VariableMatchFinder())->getId());
-	MatchingEngine::addMatchFinder(Token::entityTypeName(),
-				       (new TokenMatchFinder())->getId());
-				     
-	sl_registerMatchers = true;
-      }
-    };
-
     void VariableMatchFinder::getMatches(const MatchingEngineId& engine, const EntityId& entity,
 					 std::vector<MatchingRuleId>& results) {
       engine->getMatches(ConstrainedVariableId(entity), results);
@@ -254,8 +240,5 @@ namespace EUROPA {
 				      std::vector<MatchingRuleId>& results) {
       engine->getMatches(TokenId(entity), results);
     }
-
-
-    MatchingEngineLocalStatic sl_matchingEngineLocalStatic;
   }
 }

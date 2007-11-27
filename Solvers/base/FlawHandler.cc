@@ -13,7 +13,6 @@
 #include "PlanDatabase.hh"
 #include "Utils.hh"
 #include "XMLUtils.hh"
-#include "ConstraintLibrary.hh"
 #include <math.h>
 
 namespace EUROPA {
@@ -309,23 +308,6 @@ namespace EUROPA {
     
 
     /** FlawHandler::VariableListener **/
-
-    class FlawHandlerLocalStatic {
-    public:
-      FlawHandlerLocalStatic(){
-        static bool sl_boolean = false;
-        checkError(sl_boolean == false, "Should only be called once");
-        if(sl_boolean == false){
-          // Register built in constraint with expected logical propagator name
-          REGISTER_SYSTEM_CONSTRAINT(FlawHandler::VariableListener, 
-                                     FlawHandler::VariableListener::CONSTRAINT_NAME(),
-                                     FlawHandler::VariableListener::PROPAGATOR_NAME());
-          sl_boolean = true;
-        }
-      }
-    };
-
-    FlawHandlerLocalStatic s_heuristicInstanceLocalStatic;
 
     FlawHandler::VariableListener::VariableListener(const LabelStr& name,
                                                     const LabelStr& propagatorName,

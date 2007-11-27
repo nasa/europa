@@ -28,17 +28,5 @@ namespace EUROPA {
 					std::vector<MatchingRuleId>& results) {
       engine->getMatches(SAVH::InstantId(entity), results);
     }
-
-    class ResourceMatchingLocalStatic {
-    public:
-      ResourceMatchingLocalStatic() {
-	static bool sl_registerMatcher = false;
-	checkError(!sl_registerMatcher, "Should only be called once.");
-	MatchingEngine::addMatchFinder(SAVH::Instant::entityTypeName(),
-				       (new InstantMatchFinder())->getId());
-      }
-    };
-
-    ResourceMatchingLocalStatic sl_resourceMatchingLocalStatic;
   }
 }
