@@ -59,7 +59,7 @@ namespace EUROPA {
 
     bool transactionMatch(const TiXmlElement& trans, const std::string& name) const;
     bool transactionFiltered(const TiXmlElement& trans) const;
-    void processTransaction(const TiXmlElement & element);
+    virtual void processTransaction(const TiXmlElement & element);
     template<typename Iterator>
     void processTransactionInverse(const TiXmlElement& element,
 				   Iterator start, Iterator end);

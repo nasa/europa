@@ -27,7 +27,10 @@ namespace EUROPA {
       InterpretedDbClientTransactionPlayer(const DbClientId & client);
       virtual ~InterpretedDbClientTransactionPlayer();
 
+      static void createDefaultObjectFactory(const char* className, bool canCreateObjects);
+      
     protected:
+      virtual void processTransaction(const TiXmlElement & element);    	
       virtual void playDeclareClass(const TiXmlElement &); 
       virtual void playDefineClass(const TiXmlElement &); 
       virtual void playDefineCompat(const TiXmlElement &);

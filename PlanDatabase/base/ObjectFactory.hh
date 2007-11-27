@@ -53,6 +53,11 @@ namespace EUROPA {
                                   const std::vector<const AbstractDomain*>& arguments);				   
 
     /**
+     * @brief Obtain the factory based on the type of object to create and the types of the arguments to the constructor
+     */ 
+    static ConcreteObjectFactoryId getFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments);
+
+    /**
      * @brief Delete all factory instances stored. Should only be used to support testing, since
      * factories should remain for all instances of the plan database in the same process.
      */
@@ -68,13 +73,7 @@ namespace EUROPA {
     /**
      * @brief Add a factory to provide instantiation of particular concrete types based on a label.
      */
-    static void registerFactory(const ConcreteObjectFactoryId& factory);
-
-    /**
-     * @brief Obtain the factory based on the type of object to create and the types of the arguments to the constructor
-     */ 
-    static ConcreteObjectFactoryId getFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments);
-    
+    static void registerFactory(const ConcreteObjectFactoryId& factory);    
 
     static ObjectFactory& getInstance();
 

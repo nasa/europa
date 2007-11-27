@@ -4,6 +4,7 @@
 #include "SymbolTypeFactory.hh"
 #include "intType.hh"
 #include "floatType.hh"
+#include "TransactionInterpreterInitializer.hh"
 
 namespace EUROPA {
 
@@ -24,27 +25,32 @@ namespace EUROPA {
   
   void initNDDL()
   {
-    if(!nddlInitialized()){
-      nddlInitialized() = true;
+    if(nddlInitialized())
+    	return;
 
-      /* Allocate NDDL Type Factories */
-      // Default names are uppercase, TODO: change default names so that this isn't necessary
-      new BoolTypeFactory("bool");
-      new StringTypeFactory("string");
-      new SymbolTypeFactory("symbol");
+    /* Allocate NDDL Type Factories */
+    // Default names are uppercase, TODO: change default names so that this isn't necessary
+    new BoolTypeFactory("bool");
+    new StringTypeFactory("string");
+    new SymbolTypeFactory("symbol");
       
-      // These are Nddl specific, so they belong here
-      new intTypeFactory();
-      new floatTypeFactory();
-    }
+    // These are Nddl specific, so they belong here
+    new intTypeFactory();
+    new floatTypeFactory();
+      
+    TransactionInterpreterInitializer::initialize();      
+      
+    nddlInitialized() = true;
   }
 
   void uninitNDDL()
   {
-    if(nddlInitialized()){
-      TypeFactory::purgeAll();
-      nddlInitialized() = false;
-    }
+    if(!nddlInitialized())
+    	return;
+    
+    TypeFactory::purgeAll();
+    TransactionInterpreterInitializer::uninitialize();      
+    nddlInitialized() = false;
   }
   
   // TODO: remove initNDDL() and uninitNDDL()

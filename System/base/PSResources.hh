@@ -16,8 +16,6 @@ namespace EUROPA {
         
     protected:
 		virtual void createModules();
-		virtual void initializeModules();
-		virtual void allocateComponents();
 		virtual void registerObjectWrappers();	  
   };
 

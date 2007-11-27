@@ -84,18 +84,7 @@ namespace EUROPA {
 	private: 
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable , bool isFact) const;
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
-  };   
-  
-  class TransactionInterpreterResourcesInitializer 
-  {
-      public:
-          TransactionInterpreterResourcesInitializer();
-          
-          static TransactionInterpreterResourcesInitializer& getInstance();
-          
-      protected:    
-          static TransactionInterpreterResourcesInitializer s_instance;
-  };  
+  };     
 }
 
 #endif

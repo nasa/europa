@@ -1,17 +1,8 @@
+
 #include "PSResources.hh"
-#include "FlawHandler.hh"
 #include "SAVH_Resource.hh"
 #include "SAVH_Profile.hh"
-#include "SAVH_ProfilePropagator.hh"
-#include "ResourcePropagator.hh"
-// TODO: registration for these needs to happen somewhere else
-#include "SAVH_ReusableFVDetector.hh"
-#include "SAVH_FlowProfile.hh"
-#include "SAVH_IncrementalFlowProfile.hh"
-#include "SAVH_TimetableProfile.hh"
-#include "ResourceThreatDecisionPoint.hh"
-#include "TransactionInterpreterResources.hh"
-
+#include "SAVH_Transaction.hh"
 #include "ModuleConstraintEngine.hh"
 #include "ModulePlanDatabase.hh"
 #include "ModuleRulesEngine.hh"
@@ -20,7 +11,6 @@
 #include "ModuleSolvers.hh"
 #include "ModuleNddl.hh"
 #include "ModuleAnml.hh"
-
 
 namespace EUROPA {
 
@@ -36,32 +26,6 @@ namespace EUROPA {
 	  m_modules.push_back(new ModuleSolvers());
 	  m_modules.push_back(new ModuleNddl());	  
       m_modules.push_back(new ModuleAnml());
-  }
-  
-  void PSEngineWithResources::initializeModules()
-  {
-	  PSEngineImpl::initializeModules();
-
-	  // TODO: Move these to the corresponding modules
-	  REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile );
-      REGISTER_PROFILE(EUROPA::SAVH::FlowProfile, FlowProfile);
-      REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile );
-      
-      REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
-      REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreatDecisionPoint);
-      
-   	  // Explicit reference is needed so that static initializer isn't dropped when static libs are used.
-      // TODO: probably a initSchema method is needed to make this work with loadModel()
-   	  TransactionInterpreterResourcesInitializer::getInstance(); 	
-  }
-  
-  void PSEngineWithResources::allocateComponents()
-  {
-	  PSEngineImpl::allocateComponents();
-	  
-	  // TODO: Move these to the corresponding modules
-	  new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), m_constraintEngine);
-	  new ResourcePropagator(LabelStr("Resource"), m_constraintEngine, m_planDatabase);	  	  
   }
   
   class ResourceWrapperGenerator : public ObjectWrapperGenerator 

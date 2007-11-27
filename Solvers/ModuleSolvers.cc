@@ -1,4 +1,5 @@
 #include "ModuleSolvers.hh"
+#include "SolverConfig.hh"
 
 namespace EUROPA {
 
@@ -21,12 +22,18 @@ namespace EUROPA {
   {
       if(SolversInitialized())
     	  return;
+
+      SOLVERS::SolverConfig::init();
       
       SolversInitialized() = true;
   }  
 
   void ModuleSolvers::uninitialize()
   {
+      if(!SolversInitialized())
+    	  return;
+      
+	  SOLVERS::SolverConfig::uninit();	  
 	  SolversInitialized() = false;
   }  
   

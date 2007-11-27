@@ -71,13 +71,15 @@ namespace EUROPA {
     class SolverConfig{
     public:
       static void init();
-      SolverConfig() {
-	static bool sl_registerComponents = false;
-	check_error(sl_registerComponents == false, "Should only be called once.");
-	if(sl_registerComponents == false){
-	  init();
-	  sl_registerComponents = true;
-	}
+      static void uninit();
+      
+      SolverConfig() 
+      {
+    	  static bool sl_registerComponents = false;
+          if(sl_registerComponents == false){
+	          init();
+	          sl_registerComponents = true;
+	      }
       }
     };
 

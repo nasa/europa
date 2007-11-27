@@ -22,7 +22,6 @@
 #include "SAVH_FlowProfile.hh"
 #include "SAVH_IncrementalFlowProfile.hh"
 #include "SAVH_ReusableFVDetector.hh"
-#include "TransactionInterpreterResources.hh"
 #endif
 
 SchemaId schema;
@@ -262,11 +261,6 @@ void __assert_fail(const char *__assertion,
 #endif
 
 int main(int argc, const char** argv) {
-
-#ifndef NO_RESOURCES
-  // Explicit reference is needed so that static initializer isn't dropped when static libs are used.
-  TransactionInterpreterResourcesInitializer::getInstance();
-#endif
 
 #define ONE_ASSEMBLY_ONLY
 #ifdef ONE_ASSEMBLY_ONLY

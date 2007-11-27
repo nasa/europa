@@ -6,6 +6,7 @@
  */
 
 #include "TransactionInterpreter.hh"
+#include "TransactionInterpreterInitializer.hh"
 
 #include "tinyxml.h"
 #include "Debug.hh"
@@ -50,7 +51,7 @@ namespace EUROPA {
    * 
    */ 
        
-  void createDefaultObjectFactory(const char* className, bool canCreateObjects)
+  void InterpretedDbClientTransactionPlayer::createDefaultObjectFactory(const char* className, bool canCreateObjects)
   {
     std::vector<std::string> constructorArgNames;
     std::vector<std::string> constructorArgTypes;
@@ -90,11 +91,7 @@ namespace EUROPA {
     m_systemTokens.insert("Reservoir.produce");
     m_systemTokens.insert("Reservoir.consume");
 
-    // TODO: expose Unary
-  	  
-    // TODO: this should be done only once after the schema is initialized, not for every TransactionPlayer
-    createDefaultObjectFactory("Object", true);
-    REGISTER_OBJECT_FACTORY(TimelineObjectFactory, Timeline);	    	    	  
+    // TODO: expose Unary  	  
   }
 
   InterpretedDbClientTransactionPlayer::~InterpretedDbClientTransactionPlayer() 
@@ -108,6 +105,22 @@ namespace EUROPA {
 
   std::ostringstream dbgout;
   const char* ident="    ";
+  
+  bool initialized()
+  {
+	  static LabelStr objectType("Object");
+	  static std::vector<const AbstractDomain*> arguments;
+	  
+	  return (!(ObjectFactory::getFactory(objectType,arguments)).isNoId());
+  }
+  void InterpretedDbClientTransactionPlayer::processTransaction(const TiXmlElement & element)
+  {
+	  if (strcmp(element.Value(), "nddl") && !initialized()) {
+		  // This call is needed because the code generator calls Schema::reset() and may wipe everything out
+		  TransactionInterpreterInitializer::initialize(); 
+	  }
+	  DbClientTransactionPlayer::processTransaction(element);
+  }
   
   void InterpretedDbClientTransactionPlayer::playDeclareClass(const TiXmlElement& element) 
   {

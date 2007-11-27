@@ -175,33 +175,4 @@ namespace EUROPA {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reservoir.consume"); 
     return (new NDDL::NddlReservoir::consume(master,name,relation,true))->getId();
   }        
-
-  TransactionInterpreterResourcesInitializer::TransactionInterpreterResourcesInitializer()
-  {
-      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource);	    	    	  
-      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float);	    	    	  
-      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float:float:float);	    	    	  
-      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float:float:float:float:float);	    	    	  
-      new ResourceChangeTokenFactory("Resource.change");
-
-      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable);	    	    	  
-      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:float:float);	    	    	  
-      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:float:float:float);	    	    	  
-      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:float:float:float:float);	    	    	  
-      new ReusableUsesTokenFactory("Reusable.uses");
-      
-      REGISTER_OBJECT_FACTORY(ReservoirObjectFactory, Reservoir);	    	    	  
-      REGISTER_OBJECT_FACTORY(ReservoirObjectFactory, Reservoir:float:float:float);	    	    	  
-      REGISTER_OBJECT_FACTORY(ReservoirObjectFactory, Reservoir:float:float:float:float:float);	    	    	  
-      REGISTER_OBJECT_FACTORY(ReservoirObjectFactory, Reservoir:float:float:float:float:float:float:float);	    	    	  
-      new ReservoirProduceTokenFactory("Reservoir.produce");      
-      new ReservoirConsumeTokenFactory("Reservoir.consume");      
-  }
-  
-  TransactionInterpreterResourcesInitializer TransactionInterpreterResourcesInitializer::s_instance;
-  
-  TransactionInterpreterResourcesInitializer& TransactionInterpreterResourcesInitializer::getInstance() 
-  { 
-      return s_instance; 
-  } 
 }
