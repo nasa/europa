@@ -26,12 +26,6 @@ namespace EUROPA {
     virtual PSObject* wrap(const ObjectId& obj) = 0;
   };
 
-  class PSLanguageInterpreter {
-  public:
-    virtual ~PSLanguageInterpreter() {}
-    virtual std::string interpret(const std::string& script) = 0;
-  };
-
   class PSEngineImpl : public PSEngine, Engine
   {
   public:
@@ -66,17 +60,14 @@ namespace EUROPA {
     virtual double getViolation() const;
     virtual std::string getViolationExpl() const;
     
-    static void addObjectWrapperGenerator(const LabelStr& type,
-					  ObjectWrapperGenerator* wrapper);
-    
-    static void addLanguageInterpreter(const LabelStr& langauge,
-				       PSLanguageInterpreter* interpreter);
-
     virtual EngineComponentId& getComponent(const std::string& name);
     
     ConstraintEngineId& getConstraintEngine() { return m_constraintEngine; }
     PlanDatabaseId&     getPlanDatabase()     { return m_planDatabase; }
     RulesEngineId&      getRulesEngine()      { return m_rulesEngine; }
+
+    virtual void addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter);
+    virtual void removeLanguageInterpreter(const std::string& language);    
     
   protected:
 	virtual void createModules();
@@ -88,11 +79,12 @@ namespace EUROPA {
 	virtual void deallocateComponents();
 	
 	virtual void registerObjectWrappers();
-	
-    static ObjectWrapperGenerator* getObjectWrapperGenerator(const LabelStr& type);
-    static std::map<double, PSLanguageInterpreter*>& getLanguageInterpreters();
-    static std::map<double, ObjectWrapperGenerator*>& getObjectWrapperGenerators();    
-
+    void addObjectWrapperGenerator(const LabelStr& type,ObjectWrapperGenerator* wrapper);    
+    ObjectWrapperGenerator* getObjectWrapperGenerator(const LabelStr& type);
+    std::map<double, ObjectWrapperGenerator*>& getObjectWrapperGenerators();
+    
+    std::map<double, LanguageInterpreter*>& getLanguageInterpreters();
+    
     ConstraintEngineId m_constraintEngine;
     PlanDatabaseId m_planDatabase;
     RulesEngineId m_rulesEngine;
@@ -101,6 +93,8 @@ namespace EUROPA {
     SOLVERS::PlanWriter::PartialPlanWriter* m_ppw;
     
     std::vector<ModuleId> m_modules;
+    std::map<double, ObjectWrapperGenerator*> m_objectWrapperGenerators;
+    std::map<double, LanguageInterpreter*> m_languageInterpreters;    
   };
 
   class PSObjectImpl : public PSObject

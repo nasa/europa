@@ -61,14 +61,12 @@ namespace EUROPA {
 
   std::map<double, ObjectWrapperGenerator*>& PSEngineImpl::getObjectWrapperGenerators()
   {
-      static std::map<double, ObjectWrapperGenerator*> objectWrapperGenerators;
-      return objectWrapperGenerators;
+      return m_objectWrapperGenerators;
   }
   
-  std::map<double, PSLanguageInterpreter*>& PSEngineImpl::getLanguageInterpreters()
+  std::map<double, LanguageInterpreter*>& PSEngineImpl::getLanguageInterpreters()
   {
-      static std::map<double, PSLanguageInterpreter*> languageInterpreters;
-      return languageInterpreters;
+      return m_languageInterpreters;
   }
 
 
@@ -259,7 +257,7 @@ namespace EUROPA {
 
   //FIXME
   std::string PSEngineImpl::executeScript(const std::string& language, const std::string& script) {
-    std::map<double, PSLanguageInterpreter*>::iterator it =
+    std::map<double, LanguageInterpreter*>::iterator it =
       getLanguageInterpreters().find(LabelStr(language));
     checkRuntimeError(it != getLanguageInterpreters().end(),
 		      "Cannot execute script of unknown language \"" << language << "\"");
@@ -389,18 +387,26 @@ namespace EUROPA {
       return planOutput;
    }
 
-  void PSEngineImpl::addLanguageInterpreter(const LabelStr& language,
-					PSLanguageInterpreter* interpreter) {
-    std::map<double, PSLanguageInterpreter*>::iterator it =
-      getLanguageInterpreters().find(language);
+  void PSEngineImpl::addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter) 
+  {
+    std::map<double, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
     if(it == getLanguageInterpreters().end())
-      getLanguageInterpreters().insert(std::make_pair(language, interpreter));
+      getLanguageInterpreters().insert(std::make_pair(LabelStr(language), interpreter));
     else {
       delete it->second;
       it->second = interpreter;
     }
   }
 
+  void PSEngineImpl::removeLanguageInterpreter(const std::string& language) 
+  {
+    std::map<double, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
+    if(it != getLanguageInterpreters().end()) {
+      delete it->second;
+      getLanguageInterpreters().erase(it);
+    }
+  }
+  
   void PSEngineImpl::addObjectWrapperGenerator(const LabelStr& type,
 					   ObjectWrapperGenerator* wrapper) {
     std::map<double, ObjectWrapperGenerator*>::iterator it =
@@ -969,23 +975,4 @@ namespace EUROPA {
     SOLVERS::HorizonFilter::getHorizon().reset(IntervalIntDomain());
     SOLVERS::HorizonFilter::getHorizon().intersect(horizonStart, horizonEnd);
   }
-
-  class NDDLInterpreter : public PSLanguageInterpreter {
-  public:
-    std::string interpret(const std::string& script) {
-      return "";
-    }
-  };
-
-  class PSEngineLocalStatic {
-  public:
-    PSEngineLocalStatic() {
-      PSEngineImpl::addLanguageInterpreter("nddl", new NDDLInterpreter());
-    }
-  };
-
-  namespace PSEngine {
-    PSEngineLocalStatic s_localStatic;
-  }
-
 }

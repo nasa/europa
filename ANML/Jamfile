@@ -7,7 +7,7 @@ Module ANML : Antlr RulesEngine Resource TemporalNetwork PlanDatabase ;
 SubInclude PLASMA ANML base ;
 SubInclude PLASMA ANML component ;
 
-ModuleFiles ANML :  ;
+ModuleFiles ANML : ModuleAnml.cc ;
 
 # SubInclude PLASMA ANML documentation ;
 SubInclude PLASMA ANML test ;

@@ -19,7 +19,7 @@
 #include "ModuleResource.hh"
 #include "ModuleSolvers.hh"
 #include "ModuleNddl.hh"
-//#include "ModuleAnml.hh"
+#include "ModuleAnml.hh"
 
 
 namespace EUROPA {
@@ -35,7 +35,7 @@ namespace EUROPA {
       m_modules.push_back(new ModuleResource());
 	  m_modules.push_back(new ModuleSolvers());
 	  m_modules.push_back(new ModuleNddl());	  
-      // TODO:	  m_modules.push_back(new ModuleAnml());
+      m_modules.push_back(new ModuleAnml());
   }
   
   void PSEngineWithResources::initializeModules()

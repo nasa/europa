@@ -58,11 +58,28 @@ namespace EUROPA {
 	  uninitNDDL();
   }
   
+  class NddlInterpreter : public LanguageInterpreter 
+  {
+    public:
+      virtual ~NddlInterpreter() {}	
+      virtual std::string interpret(const std::string& script); 
+  };
+
+  std::string NddlInterpreter::interpret(const std::string& script) 
+  {
+	  check_error(ALWAYS_FAIL,"nddl parser is only available in Java for now");
+      return "";
+  }
+  
+  
+
   void ModuleNddl::initialize(EngineId engine)
   {
+	  engine->addLanguageInterpreter("nddl", new NddlInterpreter());
   }
   
   void ModuleNddl::uninitialize(EngineId engine)
   {	  
+	  engine->removeLanguageInterpreter("nddl"); 
   }  
 }

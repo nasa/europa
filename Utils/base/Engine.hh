@@ -5,6 +5,14 @@
 
 namespace EUROPA {
 
+  class LanguageInterpreter 
+  {
+    public:
+      virtual ~LanguageInterpreter() {}
+      virtual std::string interpret(const std::string& script) = 0;
+  };
+
+
   class EngineComponent 
   {
     public :
@@ -28,6 +36,9 @@ namespace EUROPA {
 	  
 	  virtual EngineComponentId& getComponent(const std::string& name) = 0;
 	  
+      virtual void addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter) = 0;
+      virtual void removeLanguageInterpreter(const std::string& language) = 0;
+
     protected :
   	  Engine() : m_id(this) {}
   	  

@@ -7,7 +7,7 @@ if ( "Resources" in $(NO) ) {
 }
 else {
  Module System : NDDL Solvers Resource ;
- ModuleComponent System : SolverAssemblyWithResources.cc ANMLPSInterpreter.cc ;
+ ModuleComponent System : SolverAssemblyWithResources.cc ;
 }
 ModuleComponent System	: SolverAssembly.cc ;
 
