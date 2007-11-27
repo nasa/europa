@@ -50,7 +50,6 @@ class SchemaWriter {
       throw new RuntimeException("Failed to set model name. Bug in NddlCompiler");
 
     writer.write("Id<Schema> id = Schema::instance(\""+modelName+"\");\n");
-    writer.write("id->reset(); // Reset prior data if present. \n\n");
 
 		// Register Constraints
 		writer.write("// Register Constraints\n");
