@@ -219,26 +219,7 @@ namespace EUROPA {
     uninitializeModules();    
   }
     
-  /* TODO: remove this
-  void PSEngineImpl::initDatabase() 
-  {
-    m_planDatabase = (new PlanDatabase(m_constraintEngine, Schema::instance()))->getId();
-    PropagatorId temporalPropagator = m_constraintEngine->getPropagatorByName(LabelStr("Temporal"));
-    m_planDatabase->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
-    m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();
-    DbClientId client = m_planDatabase->getClient();
-    m_interpTransactionPlayer = new InterpretedDbClientTransactionPlayer(client);
-    m_transactionPlayer = new DbClientTransactionPlayer(client);
-    m_ppw =
-      new SOLVERS::PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine,
-						 m_rulesEngine);
-  }
-  */ 
-   
   void PSEngineImpl::loadModel(const std::string& modelFileName) {
-    check_runtime_error(m_planDatabase.isNoId());
-    check_runtime_error(m_rulesEngine.isNoId());
-
     void* libHandle = p_dlopen(modelFileName.c_str(), RTLD_NOW);
     checkError(libHandle != NULL,
 	       "Error opening model " << modelFileName << ": " << p_dlerror());
@@ -250,7 +231,8 @@ namespace EUROPA {
 	       p_dlerror());
 
     SchemaId schema = (*fcn_schema)();
-    //initDatabase();    
+    // TODO: need to make sure any previous initialization to Schema is replayed again, since the generated code calls Schema::reset()
+    //  possibly the best thing to do is to change the generated code
   }
 
   void PSEngineImpl::executeTxns(const std::string& xmlTxnSource,bool isFile,bool useInterpreter) 

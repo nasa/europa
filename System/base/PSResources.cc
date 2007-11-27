@@ -24,10 +24,6 @@
 
 namespace EUROPA {
 
-  PSEngineWithResources::PSEngineWithResources()
-  {
-  }
-
   void PSEngineWithResources::createModules()
   {
 	  // TODO: make this data-driven
@@ -80,6 +76,7 @@ namespace EUROPA {
     
   void PSEngineWithResources::registerObjectWrappers()
   {
+	  PSEngineImpl::registerObjectWrappers();
       addObjectWrapperGenerator("Reservoir", new ResourceWrapperGenerator());
       addObjectWrapperGenerator("Reusable", new ResourceWrapperGenerator());
       addObjectWrapperGenerator("Unary", new ResourceWrapperGenerator());

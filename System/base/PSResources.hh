@@ -11,9 +11,6 @@ namespace EUROPA {
   class PSEngineWithResources : public PSEngineImpl 
   {
     public:
-        PSEngineWithResources();
-    
-        // TODO: remove this void initDatabase();    
         PSList<PSResource*> getResourcesByType(const std::string& objectType);
         PSResource* getResourceByKey(PSEntityKey id);
         

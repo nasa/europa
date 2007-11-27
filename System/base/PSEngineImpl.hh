@@ -89,7 +89,6 @@ namespace EUROPA {
 	
 	virtual void registerObjectWrappers();
 	
-    // TODO: remove this virtual void initDatabase();
     static ObjectWrapperGenerator* getObjectWrapperGenerator(const LabelStr& type);
     static std::map<double, PSLanguageInterpreter*>& getLanguageInterpreters();
     static std::map<double, ObjectWrapperGenerator*>& getObjectWrapperGenerators();    
