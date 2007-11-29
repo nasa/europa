@@ -11,7 +11,7 @@ if "Resources" in $(NO) {
 ModuleBase System 
 	: 
 	EngineBase.cc
-	PSEngine.cc
+	PSEngineImpl.cc
 	StandardAssembly.cc
 	;
 

@@ -15,6 +15,7 @@ else {
 
 ModuleComponent Solvers
 	:
+	PSSolversImpl.cc
 	ValueSource.cc
 	UnboundVariableDecisionPoint.cc
 	UnboundVariableManager.cc

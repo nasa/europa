@@ -6,6 +6,7 @@ SubDirC++Flags -Wno-unknown-pragmas ;
 
 ModuleComponent PlanDatabase
 	:
+	PSPlanDatabaseImpl.cc
 	PlanDatabaseWriter.cc
 	DbClientTransactionLog.cc
 	DbClientTransactionPlayer.cc
