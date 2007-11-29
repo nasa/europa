@@ -3,31 +3,9 @@
 #include "SAVH_Resource.hh"
 #include "SAVH_Profile.hh"
 #include "SAVH_Transaction.hh"
-#include "ModuleConstraintEngine.hh"
-#include "ModulePlanDatabase.hh"
-#include "ModuleRulesEngine.hh"
-#include "ModuleTemporalNetwork.hh"
-#include "ModuleResource.hh"
-#include "ModuleSolvers.hh"
-#include "ModuleNddl.hh"
-#include "ModuleAnml.hh"
 
-namespace EUROPA {
-
-  void PSEngineWithResources::createModules()
-  {
-	  // TODO: make this data-driven
-	  m_modules.push_back(new ModuleConstraintEngine()); 
-	  m_modules.push_back(new ModuleConstraintLibrary());
-	  m_modules.push_back(new ModulePlanDatabase());
-	  m_modules.push_back(new ModuleRulesEngine());
-	  m_modules.push_back(new ModuleTemporalNetwork());
-      m_modules.push_back(new ModuleResource());
-	  m_modules.push_back(new ModuleSolvers());
-	  m_modules.push_back(new ModuleNddl());	  
-      m_modules.push_back(new ModuleAnml());
-  }
-  
+namespace EUROPA 
+{
   class ResourceWrapperGenerator : public ObjectWrapperGenerator 
   {
   public:

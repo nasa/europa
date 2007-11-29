@@ -15,7 +15,6 @@ namespace EUROPA {
         PSResource* getResourceByKey(PSEntityKey id);
         
     protected:
-		virtual void createModules();
 		virtual void registerObjectWrappers();	  
   };
 

@@ -14,7 +14,6 @@
 #include "SolverAssembly.hh"
 #include "Rule.hh"
 #ifndef NO_RESOURCES
-#include "SolverAssemblyWithResources.hh"
 #include "SAVH_FVDetector.hh"
 #include "SAVH_Profile.hh"
 #include "SAVH_TimetableFVDetector.hh"
@@ -52,12 +51,24 @@ void replay(const PlanDatabaseId& db, const DbClientTransactionLogId& txLog) {
   // TO FIX: assertTrue(s1 == s2);
 }
 
+std::string dumpIdTable(const char* title)
+{
+  std::ostringstream os;
+  os << "before:" << IdTable::size() << std::endl;
+  IdTable::printTypeCnts(os);
+  
+  return os.str();
+}
+
 template<class ASSEMBLY>
 bool runPlanner(){
   check_error(DebugMessage::isGood());
 
-  ASSEMBLY assembly(schema);
-
+  debugMsg("IdTypeCounts", dumpIdTable("before"));  
+  
+  ASSEMBLY* newAssembly = new ASSEMBLY(schema);
+  ASSEMBLY& assembly=*newAssembly;
+  
   DbClientTransactionLogId txLog;
   if(replayRequired)
     txLog = (new DbClientTransactionLog(assembly.getPlanDatabase()->getClient()))->getId();
@@ -84,6 +95,8 @@ bool runPlanner(){
   if(replayRequired)
     replay<ASSEMBLY>(assembly.getPlanDatabase(), txLog);
 
+  delete newAssembly;
+  
   //HACK!  The runTest() macro expects an identical Id count at the beginning and end
   //of the test.  This fails with the interpreter because it creates these factories
   //at run-time
@@ -93,7 +106,7 @@ bool runPlanner(){
   TypeFactory::purgeAll();
 #endif
 
-  debugStmt("IdTypeCounts", IdTable::printTypeCnts(std::cerr));
+  debugMsg("IdTypeCounts", dumpIdTable("after"));  
 
   return true;
 }
@@ -253,37 +266,11 @@ void __assert_fail(const char *__assertion,
 
 #endif
 
-
-#ifndef NO_RESOURCES
-#define ASSEMBLY_TYPE SolverAssemblyWithResources
-#else
-#define ASSEMBLY_TYPE SolverAssembly
-#endif
-
-int main(int argc, const char** argv) {
-
-#define ONE_ASSEMBLY_ONLY
-#ifdef ONE_ASSEMBLY_ONLY
+int main(int argc, const char** argv) 
+{
 #ifdef CBPLANNER
 #error "CBPlanner is now deprecated."
 #else
-  return internalMain<ASSEMBLY_TYPE>(argc, argv);
-#endif
-#else
-#ifdef CBPLANNER
-#error "CBPlanner is now deprecated."
-#else
-  bool result = internalMain<ASSEMBLY_TYPE>(argc, argv);
-#endif
-
-  if(result != 0)
-    return result;
-  else {
-#ifdef CBPLANNER
-#error "CBPlanner is now deprecated."
-#else
-    return internalMain<ASSEMBLY_TYPE>(argc, argv);
-#endif
-  }
+  return internalMain<SolverAssembly>(argc, argv);
 #endif
 }

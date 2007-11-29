@@ -6,6 +6,7 @@
  * @author Conor McGann
  */
 
+#include "EngineBase.hh"
 #include "PlanDatabaseDefs.hh"
 #include "RulesEngineDefs.hh"
 
@@ -21,7 +22,7 @@ namespace EUROPA {
    * @li Resources
    * @li TemporalNetwork
    */
-  class StandardAssembly {
+  class StandardAssembly : public EngineBase {
   public:
 
     /**
@@ -63,16 +64,6 @@ namespace EUROPA {
      */
     std::string toString() const;
 
-    /**
-     * The following set of methods are used by the PlannerControl
-     * interface for PlanWorks.
-     */
-    const PlanDatabaseId& getPlanDatabase() const { return m_planDatabase; }
-
-    const ConstraintEngineId& getConstraintEngine() const {return m_constraintEngine;}
-
-    const RulesEngineId& getRulesEngine() const {return m_rulesEngine;}
-
   protected:
     StandardAssembly();
     /**
@@ -81,10 +72,6 @@ namespace EUROPA {
      * Token Types, Object Types and domain types.
      */
     static bool& isInitialized();
-
-    ConstraintEngineId m_constraintEngine; /*!< A Constraint Engine for propagation of relations */
-    PlanDatabaseId m_planDatabase; /*!< A PlanDatabase as central state representation */
-    RulesEngineId m_rulesEngine; /*!< A Rules Engine to enforce model rules. */
     DbClientTransactionPlayer* m_transactionPlayer;
   };
 }

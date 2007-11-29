@@ -5,10 +5,7 @@ if ! $(PLASMA_READY) {
 if ( "Resources" in $(NO) ) {
   SubDirC++Flags -DNO_RESOURCES ;
 }
-else {
- Module System : NDDL Solvers Resource ;
- ModuleComponent System : SolverAssemblyWithResources.cc ;
-}
+
 ModuleComponent System	: SolverAssembly.cc ;
 
 } # PLASMA_READY

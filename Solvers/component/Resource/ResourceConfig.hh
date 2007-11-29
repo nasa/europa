@@ -11,7 +11,7 @@
 #define RESOURCE_REGISTRATIONS { \
 REGISTER_FLAW_MANAGER(SAVH::ThreatManager, SAVHThreatManager); \
 REGISTER_FLAW_HANDLER(SAVH::ThreatDecisionPoint, SAVHThreatHandler); \
-REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreatDecisionPoint); \
+REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreat); \
 MatchingEngine::addMatchFinder(SAVH::Instant::entityTypeName(),(new InstantMatchFinder())->getId()); \
 }
 

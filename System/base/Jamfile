@@ -10,6 +10,7 @@ if "Resources" in $(NO) {
 
 ModuleBase System 
 	: 
+	EngineBase.cc
 	PSEngine.cc
 	StandardAssembly.cc
 	;
@@ -18,7 +19,6 @@ if ! ( "Resources" in $(NO) ) {
   ModuleBase System 
       : 
       PSResources.cc 
-      StandardAssemblyWithResources.cc 
       ;
       
   SwigJava PSEngineResources.i : psengine : swig/psengine : cpp : TinyXml Utils ConstraintEngine PlanDatabase RulesEngine NDDL TemporalNetwork Solvers System ANML : PSEngine ;

@@ -2,6 +2,7 @@
 #define _H_ENGINE
 
 #include <string>
+#include "Id.hh"
 
 namespace EUROPA {
 
@@ -30,7 +31,7 @@ namespace EUROPA {
   class Engine 
   {
     public :
-	  virtual ~Engine() {}
+	  virtual ~Engine() { m_id.remove(); }
 
 	  EngineId& getId() { return m_id; }
 	  

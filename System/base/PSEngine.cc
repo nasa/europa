@@ -32,15 +32,6 @@
 #include "PlanDatabaseWriter.hh"
 #include "SolverPartialPlanWriter.hh"
 
-#include "ModuleConstraintEngine.hh"
-#include "ModulePlanDatabase.hh"
-#include "ModuleRulesEngine.hh"
-#include "ModuleTemporalNetwork.hh"
-//#include "ModuleResource.hh"
-#include "ModuleSolvers.hh"
-#include "ModuleNddl.hh"
-//#include "ModuleAnml.hh"
-
 #include <fstream>
 
 namespace EUROPA {
@@ -59,17 +50,6 @@ namespace EUROPA {
 	  return new PSEngineImpl();
   }
 
-  std::map<double, ObjectWrapperGenerator*>& PSEngineImpl::getObjectWrapperGenerators()
-  {
-      return m_objectWrapperGenerators;
-  }
-  
-  std::map<double, LanguageInterpreter*>& PSEngineImpl::getLanguageInterpreters()
-  {
-      return m_languageInterpreters;
-  }
-
-
   PSEngineImpl::PSEngineImpl() 
       : m_ppw(NULL)
   {
@@ -79,118 +59,36 @@ namespace EUROPA {
   {
   }
 
-  ModuleId PSEngineImpl::getModuleByName(const std::string& name) const
+  std::map<double, ObjectWrapperGenerator*>& PSEngineImpl::getObjectWrapperGenerators()
   {
-	  for (unsigned int i=0;i<m_modules.size();i++) {
-		  if (m_modules[i]->getName() == name)
-			  return m_modules[i];
-	  }
-	  
-	  return ModuleId::noId();
-  }
-  
-  void PSEngineImpl::createModules()
-  {
-	  // TODO: make this data-driven
-	  m_modules.push_back(new ModuleConstraintEngine()); 
-	  m_modules.push_back(new ModuleConstraintLibrary());
-	  m_modules.push_back(new ModulePlanDatabase());
-	  m_modules.push_back(new ModuleRulesEngine());
-	  m_modules.push_back(new ModuleTemporalNetwork());
-      // TODO:	  m_modules.push_back(new ModuleResource());
-	  m_modules.push_back(new ModuleSolvers());
-	  m_modules.push_back(new ModuleNddl());	  
-  }
-  
-  void PSEngineImpl::initializeModules()
-  {
-	  createModules();
-	  
-	  for (unsigned int i=0;i<m_modules.size();i++) {
-		  m_modules[i]->initialize();
-		  debugMsg("PSEngine","Initialized Module " << m_modules[i]->getName());		  
-	  }	  
-  }
-
-  void PSEngineImpl::uninitializeModules()
-  {
-      Entity::purgeStarted();      
-	  for (unsigned int i=m_modules.size();i>0;i--) {
-		  unsigned int idx = i-1;
-		  m_modules[idx]->uninitialize();
-		  debugMsg("PSEngine","Uninitialized Module " << m_modules[idx]->getName());
-		  m_modules[idx].release();
-	  }	  
-	  Entity::purgeEnded();	  
-
-	  m_modules.clear();	  
+      return m_objectWrapperGenerators;
   }
   
   void PSEngineImpl::allocateComponents()
   {
-	  m_constraintEngine = (new ConstraintEngine())->getId();	  
-      m_planDatabase = (new PlanDatabase(m_constraintEngine, Schema::instance()))->getId();	
-      m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();	  
+	  EngineBase::allocateComponents();
 	  m_ppw = new SOLVERS::PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine, m_rulesEngine);
-
-	  for (unsigned int i=0;i<m_modules.size();i++) {
-		  m_modules[i]->initialize(getId());
-		  debugMsg("PSEngine","Engine initialized by Module " << m_modules[i]->getName());		  
-	  }	  	  
-	  
-	  // TODO: This needs to be done with a LanguageInterpreter for nddl-xml
+	  // TODO: This needs to be done with LanguageInterpreters for nddl-xml and nddl-xml-txn
       DbClientId client = m_planDatabase->getClient();
 	  m_interpTransactionPlayer = new InterpretedDbClientTransactionPlayer(client);
-	  m_transactionPlayer = new DbClientTransactionPlayer(client);
+	  m_transactionPlayer = new DbClientTransactionPlayer(client);	  
   }
   
   void PSEngineImpl::deallocateComponents()
   {
-	  for (unsigned int i=m_modules.size();i>0;i--) {
-		  unsigned int idx = i-1;
-		  m_modules[idx]->uninitialize(getId());
-		  debugMsg("PSEngine","Engine uninitialized by Module " << m_modules[idx]->getName());		  
-	  }	  
-
-	  Entity::purgeStarted();
-      
-      if(m_ppw != NULL) {
+	  if(m_ppw != NULL) {
 	     delete m_ppw;
 	     m_ppw = NULL;
 	  }
-
-      if(m_rulesEngine.isValid()) {
-	    delete (RulesEngine*) m_rulesEngine;
-	    m_rulesEngine = RulesEngineId::noId();    
-	  }
-      
-	  if(m_planDatabase.isValid()) {
-	    delete (PlanDatabase*) m_planDatabase;
-	    m_planDatabase = PlanDatabaseId::noId();
-	  }
 	  
-	  if(m_constraintEngine.isValid()) {
-	    delete (ConstraintEngine*) m_constraintEngine;
-	    m_constraintEngine = ConstraintEngineId::noId();
-	  }	  
-
-	  Entity::purgeEnded();	  
-  }
-  
-  EngineComponentId& PSEngineImpl::getComponent(const std::string& name)
-  {
-	  static EngineComponentId noId = EngineComponentId::noId();
+	  if(m_interpTransactionPlayer.isValid()) 
+	     m_interpTransactionPlayer.release();
 	  
-	  if (name == "ConstraintEngine")
-		  return (EngineComponentId&)m_constraintEngine;
-	  if (name == "PlanDatabase")
-		  return (EngineComponentId&)m_planDatabase;
-	  if (name == "RulesEngine")
-		  return (EngineComponentId&)m_constraintEngine;
+	  if(m_transactionPlayer.isValid()) 
+	     m_transactionPlayer.release();
 
-	  return noId;
+	  EngineBase::deallocateComponents();
   }
-  
   
   void PSEngineImpl::start() 
   {		
@@ -387,26 +285,6 @@ namespace EUROPA {
       return planOutput;
    }
 
-  void PSEngineImpl::addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter) 
-  {
-    std::map<double, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
-    if(it == getLanguageInterpreters().end())
-      getLanguageInterpreters().insert(std::make_pair(LabelStr(language), interpreter));
-    else {
-      delete it->second;
-      it->second = interpreter;
-    }
-  }
-
-  void PSEngineImpl::removeLanguageInterpreter(const std::string& language) 
-  {
-    std::map<double, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
-    if(it != getLanguageInterpreters().end()) {
-      delete it->second;
-      getLanguageInterpreters().erase(it);
-    }
-  }
-  
   void PSEngineImpl::addObjectWrapperGenerator(const LabelStr& type,
 					   ObjectWrapperGenerator* wrapper) {
     std::map<double, ObjectWrapperGenerator*>::iterator it =

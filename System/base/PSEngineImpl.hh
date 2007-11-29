@@ -2,6 +2,7 @@
 #define _H_PSEngineImpl
 
 #include "PSEngine.hh"
+#include "EngineBase.hh"
 #include "Id.hh"
 #include "Entity.hh"
 #include "Module.hh"
@@ -26,7 +27,7 @@ namespace EUROPA {
     virtual PSObject* wrap(const ObjectId& obj) = 0;
   };
 
-  class PSEngineImpl : public PSEngine, Engine
+  class PSEngineImpl : public PSEngine, public EngineBase
   {
   public:
     PSEngineImpl();
@@ -35,10 +36,9 @@ namespace EUROPA {
     virtual void start();
     virtual void shutdown();
 	     
-    virtual void loadModel(const std::string& modelFileName);
-        		
-    virtual void executeTxns(const std::string& xmlTxnSource,bool isFile,bool useInterpreter); 
     virtual std::string executeScript(const std::string& language, const std::string& script);
+    virtual void executeTxns(const std::string& xmlTxnSource,bool isFile,bool useInterpreter); 
+    virtual void loadModel(const std::string& modelFileName);        		
 	
     virtual PSList<PSObject*> getObjectsByType(const std::string& objectType);
     virtual PSObject* getObjectByKey(PSEntityKey id);
@@ -47,12 +47,13 @@ namespace EUROPA {
     virtual PSList<PSToken*> getTokens();    	 
     virtual PSToken* getTokenByKey(PSEntityKey id);	
 		
+    virtual std::string planDatabaseToString();
+    
     virtual PSList<PSVariable*> getGlobalVariables();
     virtual PSVariable* getVariableByKey(PSEntityKey id);
     virtual PSVariable* getVariableByName(const std::string& name);
 		
     virtual PSSolver* createSolver(const std::string& configurationFile);
-    virtual std::string planDatabaseToString();
     
     virtual bool getAllowViolations() const;
     virtual void setAllowViolations(bool v);
@@ -60,41 +61,19 @@ namespace EUROPA {
     virtual double getViolation() const;
     virtual std::string getViolationExpl() const;
     
-    virtual EngineComponentId& getComponent(const std::string& name);
-    
-    ConstraintEngineId& getConstraintEngine() { return m_constraintEngine; }
-    PlanDatabaseId&     getPlanDatabase()     { return m_planDatabase; }
-    RulesEngineId&      getRulesEngine()      { return m_rulesEngine; }
-
-    virtual void addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter);
-    virtual void removeLanguageInterpreter(const std::string& language);    
-    
   protected:
-	virtual void createModules();
-	virtual void initializeModules();
-	virtual void uninitializeModules();
-	virtual ModuleId getModuleByName(const std::string& name) const;
-	
-	virtual void allocateComponents();
-	virtual void deallocateComponents();
-	
-	virtual void registerObjectWrappers();
+  	virtual void allocateComponents();
+  	virtual void deallocateComponents();
+
+  	virtual void registerObjectWrappers();
     void addObjectWrapperGenerator(const LabelStr& type,ObjectWrapperGenerator* wrapper);    
     ObjectWrapperGenerator* getObjectWrapperGenerator(const LabelStr& type);
     std::map<double, ObjectWrapperGenerator*>& getObjectWrapperGenerators();
+    std::map<double, ObjectWrapperGenerator*> m_objectWrapperGenerators;
     
-    std::map<double, LanguageInterpreter*>& getLanguageInterpreters();
-    
-    ConstraintEngineId m_constraintEngine;
-    PlanDatabaseId m_planDatabase;
-    RulesEngineId m_rulesEngine;
     DbClientTransactionPlayerId m_transactionPlayer;
     DbClientTransactionPlayerId m_interpTransactionPlayer;
-    SOLVERS::PlanWriter::PartialPlanWriter* m_ppw;
-    
-    std::vector<ModuleId> m_modules;
-    std::map<double, ObjectWrapperGenerator*> m_objectWrapperGenerators;
-    std::map<double, LanguageInterpreter*> m_languageInterpreters;    
+    SOLVERS::PlanWriter::PartialPlanWriter* m_ppw;    
   };
 
   class PSObjectImpl : public PSObject

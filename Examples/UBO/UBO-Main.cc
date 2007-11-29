@@ -7,7 +7,7 @@
  */
 
 #include "Nddl.hh" /*!< Includes protypes required to load a model */
-#include "SolverAssemblyWithResources.hh" /*!< For using a test EUROPA Assembly */
+#include "SolverAssembly.hh" /*!< For using a test EUROPA Assembly */
 #include "PSEngine.hh" 
 #include "PSResources.hh" 
 #include "Debug.hh"
@@ -101,7 +101,7 @@ void printFlaws(int it, PSList<std::string>& flaws)
 void executeWithAssembly(const char* plannerConfig, const char* txSource)
 {
   // Initialize Library  
-  SolverAssemblyWithResources::initialize();
+  SolverAssembly::initialize();
   
   // Allocate the schema with a call to the linked in model function - eventually
   // make this called via dlopen
@@ -110,7 +110,7 @@ void executeWithAssembly(const char* plannerConfig, const char* txSource)
   // Enacpsualte allocation so that they go out of scope before calling terminate
   {  
     // Allocate the test assembly.
-    SolverAssemblyWithResources assembly(schema);
+    SolverAssembly assembly(schema);
 
     Timer t;
     t.start();

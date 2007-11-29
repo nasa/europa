@@ -2,11 +2,9 @@
 
 // Support for required major plan database components
 #include "PlanDatabase.hh"
-#include "Token.hh"
 #include "PlanDatabaseWriter.hh"
 #include "ConstraintEngine.hh"
 #include "RulesEngine.hh"
-#include "DefaultPropagator.hh"
 
 // Transactions
 #include "DbClientTransactionPlayer.hh"
@@ -17,66 +15,29 @@
 #include "Utils.hh"
 
 // Solver Support
-#include "ComponentFactory.hh"
 #include "Solver.hh"
-#include "OpenConditionDecisionPoint.hh"
-#include "OpenConditionManager.hh"
-#include "ThreatDecisionPoint.hh"
-#include "ThreatManager.hh"
-#include "UnboundVariableDecisionPoint.hh"
-#include "UnboundVariableManager.hh"
-#include "SolverDecisionPoint.hh"
-#include "Filters.hh"
-#include "HSTSDecisionPoints.hh"
 #include "SolverPartialPlanWriter.hh"
+#include "Filters.hh"
 
 // Test Support
 #include "TestSupport.hh"
-
-#ifndef TIXML_USE_STL
-#define TIXML_USE_STL
-#endif
 #include "tinyxml.h"
 
 #include <string>
 
-#define PPW_WITH_PLANNER
-
 namespace EUROPA {
 
-  bool SolverAssembly::s_initialized = false;
   const char* SolverAssembly::TX_LOG() {
     static const char* sl_txLog = "TransactionLog.xml";
     return sl_txLog;
   }
 
-  SolverAssembly::SolverAssembly(const SchemaId& schema) : StandardAssembly(schema) {
-    if(!s_initialized) {
-    REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::InfiniteDynamicFilter, InfiniteDynamicFilter);
-    REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonFilter, HorizonFilter);
-    REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::HorizonVariableFilter, HorizonVariableFilter);
-    REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::TokenMustBeAssignedFilter, TokenMustBeAssignedFilter);
-    REGISTER_COMPONENT_FACTORY(EUROPA::SOLVERS::TokenMustBeAssignedFilter, ParentMustBeInsertedFilter);
-    REGISTER_FLAW_FILTER(EUROPA::SOLVERS::SingletonFilter, Singleton);
-    REGISTER_FLAW_FILTER(EUROPA::SOLVERS::MasterMustBeAssignedFilter, MasterMustBeInsertedFilter);
-    
-    REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::MinValue, Min);
-    REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::MinValue, Max);
-    REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::HSTS::ValueEnum, ValEnum);
-    REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::HSTS::OpenConditionDecisionPoint, HSTSOpenConditionDecisionPoint);
-    REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::HSTS::ThreatDecisionPoint, HSTSThreatDecisionPoint);
-
-    }
+  SolverAssembly::SolverAssembly(const SchemaId& schema) : StandardAssembly(schema) 
+  {
   }
 
-  SolverAssembly::~SolverAssembly() {}
-
-  /**
-   * @brief Sets up the necessary constraint factories
-   */
-  void SolverAssembly::initialize() {
-    StandardAssembly::initialize();
-    isInitialized() = true;
+  SolverAssembly::~SolverAssembly() 
+  {	  
   }
 
   bool SolverAssembly::plan(const char* txSource, const char* config, bool interp){
@@ -89,13 +50,8 @@ namespace EUROPA {
   bool SolverAssembly::plan(const char* txSource, const TiXmlElement& config, bool interp){
     SOLVERS::SolverId solver = (new SOLVERS::Solver(m_planDatabase, config))->getId();
 
-#ifdef PPW_WITH_PLANNER
     SOLVERS::PlanWriter::PartialPlanWriter* ppw = 
       new SOLVERS::PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine, m_rulesEngine, solver);
-#else
-    SOLVERS::PlanWriter::PartialPlanWriter* ppw =
-      new SOLVERS::PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine, m_rulesEngine);
-#endif
 
     // Now process the transactions
     if(!playTransactions(txSource, interp))

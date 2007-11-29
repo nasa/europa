@@ -81,7 +81,7 @@ namespace EUROPA {
   }
 
   void IdTable::printTypeCnts(std::ostream& os) {
-    os << "Id instances by type: ";
+    os << "Id instances by type:\n";
     for (std::map<std::string, unsigned int>::iterator it = getInstance().m_typeCnts.begin();
          it != getInstance().m_typeCnts.end();
          ++it)

@@ -21,19 +21,11 @@ namespace EUROPA {
 
 #define PPW_WITH_PLANNER
 
-  class SolverAssembly : public virtual StandardAssembly {
+  class SolverAssembly : public StandardAssembly {
   public:
     SolverAssembly(const SchemaId& schema);
 
     virtual ~SolverAssembly();
-
-    /**
-     * @brief Sets up the necessary constraint factories. The assembly must be explicitly
-     * initialized before use.  Mostly calls StandardAssembly, but needs
-     * some special constraint factories for contraints needed in test
-     * cases.
-     */
-    static void initialize();
 
     /**
      * Convenient form of plan to retrieve the XML configuration from a filename.

@@ -4,6 +4,7 @@
 #include "SAVH_TimetableProfile.hh"
 #include "SAVH_ProfilePropagator.hh"
 #include "SAVH_ReusableFVDetector.hh"
+#include "SAVH_TimetableFVDetector.hh"
 #include "ResourcePropagator.hh"
 
 namespace EUROPA {
@@ -32,6 +33,7 @@ namespace EUROPA {
       REGISTER_PROFILE(EUROPA::SAVH::FlowProfile, FlowProfile);
       REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile );
       
+   	  REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
       REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
       
 	  resourceInitialized() = true;
