@@ -11,7 +11,7 @@ if ! $(ResourceViolations_READY) && ! $(PLASMA_READY) {
  RunNDDLProblem ResourceViolations : ResourceViolations-initial-state.nddl : ResourceViolations-planner : PlannerConfig.xml ;
 
  # Create a build target for the planner executable with the given model.
- NddlMain ResourceViolations-planner : ResourceViolations-Main.cc : ResourceViolations-model.nddl : System : ResourceViolations-planner ;
+ NddlMain ResourceViolations-planner : ResourceViolations-Main.cc ViolationsTest.cc : ResourceViolations-model.nddl : System : ResourceViolations-planner ;
 
  # Create a build target for the planner shared library with model.
  ModuleSharedLibrary ResourceViolations : ResourceViolations-model.o : System : ResourceViolations ;

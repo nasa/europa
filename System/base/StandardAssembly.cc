@@ -28,7 +28,7 @@ namespace EUROPA {
     check_error(!isInitialized(), 
 		"Cannot initialize if already initialized. Call 'terminate' first.");
     
-    initializeModules(); 
+    EngineBase::initialize(); 
     isInitialized() = true;
   }
 
@@ -37,7 +37,7 @@ namespace EUROPA {
     check_error(isInitialized(), 
 		"Terminate should not be called unless the assembly has been initialized.");
 
-    uninitializeModules(); 
+    EngineBase::terminate(); 
     isInitialized() = false;
   }
 

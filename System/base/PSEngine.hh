@@ -11,6 +11,11 @@ namespace EUROPA {
   class PSEngine 
   {
     public:
+      static void initialize();
+      static void terminate();
+      
+  	  static PSEngine* makeInstance();
+  	  
 	  virtual ~PSEngine() {}
 
 	  virtual void start() = 0;
@@ -41,8 +46,9 @@ namespace EUROPA {
 
 	  virtual double getViolation() const = 0;
 	  virtual std::string getViolationExpl() const = 0;    
-	  
-	  static PSEngine* makeInstance();
+
+      virtual PSList<PSResource*> getResourcesByType(const std::string& objectType) = 0;
+      virtual PSResource* getResourceByKey(PSEntityKey id) = 0;	  
   };
   
 }	

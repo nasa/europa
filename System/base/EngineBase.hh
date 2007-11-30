@@ -11,7 +11,10 @@ namespace EUROPA {
 
   class EngineBase : public Engine 
   {
-    public:    	
+    public:  
+    	static void initialize();
+    	static void terminate();
+    	
         virtual EngineComponentId& getComponent(const std::string& name);
         
         virtual void addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter);
@@ -25,7 +28,7 @@ namespace EUROPA {
     	EngineBase() {}
     	virtual ~EngineBase() {}
     	
-    	// TODO: Modules should not be static, they are for now to maintain compatibility with the assemblies
+    	// TODO: Modules should not be static, they are for now because of all the singletons we still have laying around
     	static void createModules();
     	static void initializeModules();
     	static void uninitializeModules();

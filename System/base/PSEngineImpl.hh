@@ -3,24 +3,12 @@
 
 #include "PSEngine.hh"
 #include "EngineBase.hh"
-#include "Id.hh"
-#include "Entity.hh"
-#include "Module.hh"
-#include "ConstraintEngineDefs.hh"
-#include "PlanDatabaseDefs.hh"
 #include "SolverDefs.hh"
-#include "RulesEngineDefs.hh"
 #include "DbClientTransactionPlayer.hh"
 #include "TransactionInterpreter.hh"
 
 namespace EUROPA {
 
-  class PSObjectImpl;
-  class PSTokenImpl;
-  class PSSolverImpl;
-  class PSVariableImpl;
-  class PSVarValue;
-    
   class ObjectWrapperGenerator {
   public:
     virtual ~ObjectWrapperGenerator() {}
@@ -33,6 +21,9 @@ namespace EUROPA {
     PSEngineImpl();
     virtual ~PSEngineImpl();
 	    
+    static void initialize();
+    static void terminate();
+    
     virtual void start();
     virtual void shutdown();
 	     
@@ -61,6 +52,9 @@ namespace EUROPA {
     virtual double getViolation() const;
     virtual std::string getViolationExpl() const;
     
+    virtual PSList<PSResource*> getResourcesByType(const std::string& objectType);
+    virtual PSResource* getResourceByKey(PSEntityKey id);	  
+    
   protected:
   	virtual void allocateComponents();
   	virtual void deallocateComponents();
@@ -68,9 +62,9 @@ namespace EUROPA {
   	virtual void registerObjectWrappers();
     void addObjectWrapperGenerator(const LabelStr& type,ObjectWrapperGenerator* wrapper);    
     ObjectWrapperGenerator* getObjectWrapperGenerator(const LabelStr& type);
-    std::map<double, ObjectWrapperGenerator*>& getObjectWrapperGenerators();
     std::map<double, ObjectWrapperGenerator*> m_objectWrapperGenerators;
     
+    bool m_started;
     DbClientTransactionPlayerId m_transactionPlayer;
     DbClientTransactionPlayerId m_interpTransactionPlayer;
     SOLVERS::PlanWriter::PartialPlanWriter* m_ppw;    

@@ -15,19 +15,9 @@ ModuleBase System
 	StandardAssembly.cc
 	;
 
-if ! ( "Resources" in $(NO) ) {
-  ModuleBase System 
-      : 
-      PSResources.cc 
-      ;
-      
-  SwigJava PSEngineResources.i : psengine : swig/psengine : cpp : TinyXml Utils ConstraintEngine PlanDatabase RulesEngine NDDL TemporalNetwork Solvers System ANML : PSEngine ;
-	ModuleBase System : [ FSwigWrapperName PSEngineResources.i : cpp ] ;
-}
-else {
-  SwigJava PSEngine.i : psengine : swig/psengine : cpp : TinyXml Utils ConstraintEngine PlanDatabase RulesEngine NDDL TemporalNetwork Solvers System : PSEngine ;
+SwigJava PSEngine.i : psengine : swig/psengine : cpp : TinyXml Utils ConstraintEngine PlanDatabase RulesEngine NDDL TemporalNetwork Solvers System : PSEngine ;
 	ModuleBase System : [ FSwigWrapperName PSEngine.i : cpp ] ;
-}
+
 LOCATE on PSEngine.jar = [ FDirName $(SUBDIR) .. .. lib ] ;
 
 

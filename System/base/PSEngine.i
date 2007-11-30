@@ -1,5 +1,8 @@
 %module PSEngineInterface
 %include "std_string.i"
+
+%rename(executeScript_internal) executeScript;
+
 %{
 #include "PSEngine.hh"
 #include "Error.hh"
@@ -67,6 +70,8 @@ namespace EUROPA {
   class PSSolver;
   class PSVariable;
   class PSVarValue;
+  class PSResource;
+  class PSResourceProfile;
 
   template<class T>
   class PSList {
@@ -81,6 +86,7 @@ namespace EUROPA {
   %template(PSTokenList) PSList<PSToken*>;
   %template(PSVariableList) PSList<PSVariable*>;
   %template(PSValueList) PSList<PSVarValue>;
+  %template(PSResourceList) PSList<PSResource*>;
 
   //trying template instantiation to get the right results.
 
@@ -141,6 +147,29 @@ namespace EUROPA {
       throw new RuntimeException("Failed to create transactions from "+language+" source.");
     }
   }
+  
+  public Object nddlInterpreter=null; // For PSDesktop
+  public void executeScript(String language, String script) throws PSException 
+  {
+      try {
+        if (nddlInterpreter != null) {
+            Class nddlClass = ClassLoader.getSystemClassLoader().loadClass("org.ops.ui.nddl.NddlInterpreter");
+            Class[] parameters = new Class[]{String.class};
+            Object[] arguments = new Object[]{script};
+            nddlClass.getMethod("source", parameters).invoke(nddlInterpreter, arguments);
+        }
+        else if (language.equalsIgnoreCase("nddl")) {
+            executeScript(language,new java.io.BufferedReader(new java.io.FileReader(script)));
+        }
+        else {
+            executeScript_internal(language,script);
+        }
+      } 
+      catch(Exception e) {
+          throw new RuntimeException("Failed to execute "+language+" script "+script,e);
+      }
+  }
+  
 %}
 
 %nodefaultctor PSEngine;   
@@ -148,6 +177,9 @@ namespace EUROPA {
   class PSEngine {
   public:
     static PSEngine* makeInstance();
+
+    static void initialize();
+    static void terminate();
 
     void start();
     void shutdown();
@@ -160,8 +192,8 @@ namespace EUROPA {
     PSObject* getObjectByKey(PSEntityKey id);
 
     PSList<PSVariable*> getGlobalVariables();
-	PSVariable* getVariableByKey(PSEntityKey id);
-	PSVariable* getVariableByName(const std::string& name);
+    PSVariable* getVariableByKey(PSEntityKey id);
+    PSVariable* getVariableByName(const std::string& name);
 
     PSList<PSToken*> getTokens();
     PSToken* getTokenByKey(PSEntityKey id);
@@ -174,7 +206,10 @@ namespace EUROPA {
 
     PSSolver* createSolver(const std::string& configurationFile);   
 
-    std::string planDatabaseToString();         
+    std::string planDatabaseToString();
+    
+    PSList<PSResource*> getResourcesByType(const std::string& objectType);
+    PSResource* getResourceByKey(PSEntityKey id);                      
   };
 
   class PSEntity
@@ -312,6 +347,28 @@ namespace EUROPA {
     
   protected:
     PSVarValue();
+  };
+
+  class PSResource : public PSObject
+  {
+  public:
+    PSResourceProfile* getLimits();
+    PSResourceProfile* getLevels();
+
+    PSList<PSEntityKey> getOrderingChoices(TimePoint t);
+        
+  protected:
+    PSResource();
+  };
+
+  class PSResourceProfile
+  {
+  public:
+    const PSList<TimePoint>& getTimes();
+    double getLowerBound(TimePoint time);
+    double getUpperBound(TimePoint time);
+  protected:
+    PSResourceProfile();
   };
 
 }

@@ -19,6 +19,16 @@ namespace EUROPA
 {
     std::vector<ModuleId> EngineBase::m_modules;
 
+    void EngineBase::initialize()
+    {
+    	initializeModules();    	
+    }
+    
+    void EngineBase::terminate()
+    {
+    	uninitializeModules();
+    }
+    
     ModuleId EngineBase::getModuleByName(const std::string& name)
     {
 	    for (unsigned int i=0;i<m_modules.size();i++) {

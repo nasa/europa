@@ -2,7 +2,7 @@ package BlocksWorld;
 
 import org.ops.ui.PSDesktop;
 import org.ops.ui.util.LibraryLoader;
-import psengine.PSEngineWithResources;
+import psengine.PSEngine;
 
 class Main
 {
@@ -12,7 +12,7 @@ class Main
 	}
 	
 	/*
-	 * PSDesktop instanciates ints own EUROPA PSEngine internally, you can get a handle on it by calling
+	 * PSDesktop instanciates its own EUROPA PSEngine internally, you can get a handle on it by calling
 	 * PSDesktop.desktop.getPSEngine()
 	 * 
 	 * If you don't want to use PSDesktop, but instead create your own instance of EUROPA to manipulate programmatically
@@ -20,13 +20,18 @@ class Main
 	 * 
 	 * debugMode = "g" for debug, "o" for optimized
 	 */
-    public PSEngineWithResources makePSEngine(String debugMode)
-    {
-    	PSEngineWithResources psEngine;
+	public static void nonPSDesktopMain(String args[])
+	{
+		String debugMode = args[0];
         LibraryLoader.loadLibrary("System_"+debugMode);
-        psEngine = new PSEngineWithResources();
-        psEngine.start();
-
-    	return psEngine;
-    }	
+        
+	    PSEngine.initialize();
+	    
+	    PSEngine engine = PSEngine.makeInstance();
+        engine.start();
+    	// use engine....
+        engine.shutdown();
+        
+	    PSEngine.terminate();
+	}	
 }
