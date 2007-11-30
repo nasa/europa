@@ -4,11 +4,11 @@ import psengine.*;
 
 public abstract class ResourceBase implements Resource 
 {
-	protected PSEngineWithResources psengine_;
+	protected PSEngine psengine_;
 	protected PSResource res_;
 	protected int capacity_;
 	
-    public ResourceBase(PSEngineWithResources pse,PSResource r, int capacity)
+    public ResourceBase(PSEngine pse,PSResource r, int capacity)
     {
        psengine_ = pse;
        capacity_ = capacity;

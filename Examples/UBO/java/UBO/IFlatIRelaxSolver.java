@@ -18,7 +18,7 @@ public class IFlatIRelaxSolver
     int makespanBound_;
     List<Precedence> bestSolution_;
     
-    PSEngineWithResources psengine_;
+    PSEngine psengine_;
     boolean usePSResources_;
     List<Resource> resources_;
     
@@ -28,7 +28,7 @@ public class IFlatIRelaxSolver
     boolean hasViolations_;
     
     // TODO: pass in problem definition to be able to compute critical path
-    public void solve(PSEngineWithResources psengine,
+    public void solve(PSEngine psengine,
     		          int maxIterations,
     		          int bound, 
     		          boolean usePSResources)
@@ -61,7 +61,7 @@ public class IFlatIRelaxSolver
     		return new RCPSPResource(psengine_,r,capacity);
     }
     
-    protected void init(PSEngineWithResources psengine,int bound, boolean usePSResources)
+    protected void init(PSEngine psengine,int bound, boolean usePSResources)
     {
         timer_ = new SimpleTimer();
 

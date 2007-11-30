@@ -10,7 +10,7 @@ import psengine.*;
  */
 public class PSResourceWrapper extends ResourceBase 
 {
-    public PSResourceWrapper(PSEngineWithResources pse,PSResource r, int capacity)
+    public PSResourceWrapper(PSEngine pse,PSResource r, int capacity)
     {
     	super(pse,r,capacity);
     }

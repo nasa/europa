@@ -11,7 +11,7 @@ import psengine.*;
  */
 public class RCPSPResource extends ResourceBase 
 {	
-    public RCPSPResource(PSEngineWithResources pse,PSResource r, int capacity)
+    public RCPSPResource(PSEngine pse,PSResource r, int capacity)
     {
     	super(pse,r,capacity);
     }
