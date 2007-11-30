@@ -6,7 +6,6 @@ Module Solvers : RulesEngine ;
 
 SubInclude PLASMA Solvers base ;
 SubInclude PLASMA Solvers component ;
-SubInclude PLASMA Solvers documentation ;
 
 ModuleFiles Solvers : ModuleSolvers.cc ;
 

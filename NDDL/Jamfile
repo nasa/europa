@@ -9,7 +9,6 @@ SubInclude PLASMA NDDL component ;
 
 ModuleFiles NDDL : ModuleNddl.cc ;
 
-SubInclude PLASMA NDDL documentation ;
 SubInclude PLASMA NDDL test ;
 
 } # PLASMA_READY
