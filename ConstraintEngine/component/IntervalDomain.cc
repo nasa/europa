@@ -402,8 +402,10 @@ namespace EUROPA {
   }
 
   void IntervalDomain::commonInit(){
-    checkError(leq(m_lb, m_ub), "Tried to construct a domain with bounds [" << m_lb << " " << m_ub << "]");
     checkError(leq(m_ub,PLUS_INFINITY), "Upper bound " << m_ub << " is too large.");
     checkError(leq(MINUS_INFINITY, m_lb), "Lower bound " << m_lb << " is too small.");
+
+    if(isEmpty())
+      notifyChange(DomainListener::EMPTIED);
   }
 }

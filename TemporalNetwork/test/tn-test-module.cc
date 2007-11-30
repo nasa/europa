@@ -100,7 +100,7 @@ private:
     TemporalConstraintId a_before_b = tn.addTemporalConstraint(a_end, b_start, 0, g_infiniteTime());
     TemporalConstraintId start_before_end = tn.addTemporalConstraint(b_start, b_end, 1, g_infiniteTime());
     TemporalConstraintId a_meets_c = tn.addTemporalConstraint(a_end, c_start, 0, 0);
-    bool res = tn.isConsistent();
+    bool res = tn.propagate();
     assertTrue(res);
 
     Time dist_lb, dist_ub;
@@ -109,7 +109,7 @@ private:
 
     // Force failure where b meets c
     TemporalConstraintId b_meets_c = tn.addTemporalConstraint(b_end, c_start, 0, 0);
-    res = tn.isConsistent();
+    res = tn.propagate();
     assertTrue(!res);
 
     // Cleanup
@@ -135,13 +135,13 @@ private:
     TemporalConstraintId fromage = tn.addTemporalConstraint(x, y, (Time)0, g_infiniteTime());
     TemporalConstraintId tango = tn.addTemporalConstraint(y, x, 200, 200);
 
-    bool res = tn.isConsistent();
+    bool res = tn.propagate();
     assertTrue(!res);
 
     tn.removeTemporalConstraint(fromage);
     tn.removeTemporalConstraint(tango);
 
-    res = tn.isConsistent();
+    res = tn.propagate();
     assertTrue(res); // Consistency restored
 
     TemporalConstraintId c0 = tn.addTemporalConstraint(y, x, -200, g_infiniteTime());
@@ -149,7 +149,7 @@ private:
     TemporalConstraintId c2 = tn.addTemporalConstraint(z, y, (Time)0, g_infiniteTime());
     TemporalConstraintId c3 = tn.addTemporalConstraint(x, y, 200, g_infiniteTime());
 
-    res = tn.isConsistent();
+    res = tn.propagate();
     assertTrue(res);
 
     // Clean up

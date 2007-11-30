@@ -249,7 +249,7 @@ namespace EUROPA {
       return;
 
     //propagate the tnet
-    if (!m_tnet->isConsistent()) {
+    if (!m_tnet->propagate()) {
       debugMsg("TemporalPropagator:execute", "Tnet is inconsistent.");
       
       const std::set<TimepointId>& updatedTimepoints = m_tnet->getUpdatedTimepoints();

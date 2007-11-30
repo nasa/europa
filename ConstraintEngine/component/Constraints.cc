@@ -1811,10 +1811,14 @@ namespace EUROPA {
   }
 
   void TestLEQ::handleExecute(){
+    debugMsg("TestLEQ:handleExecute", "BEFORE:" << toString());
+
     if(m_arg1.getUpperBound() <= m_arg2.getLowerBound())
 	m_test.remove(0);
     else if(m_arg1.getLowerBound() > m_arg2.getUpperBound())
 	m_test.remove(1);
+
+    debugMsg("TestLEQ:handleExecute", "AFTER:" << toString());
   }
 
 
@@ -1970,6 +1974,8 @@ namespace EUROPA {
        !m_y2.areBoundsFinite())
       return;
 
+    debugMsg("CalcDistanceConstraint:handleExecute", "BEFORE:" << toString());
+
     // Compute bounds for dx
     NumericDomain dx;
     dx.insert(fabs(m_x1.getLowerBound() - m_x2.getLowerBound()));
@@ -1991,6 +1997,8 @@ namespace EUROPA {
     dy.close();
 
     m_distance.intersect(compute(dx.getLowerBound(), dy.getLowerBound()), compute(dx.getUpperBound(), dy.getUpperBound()));
+
+    debugMsg("CalcDistanceConstraint:handleExecute", "AFTER:" << toString());
   }
 
   double CalcDistanceConstraint::compute(double x1, double y1, double x2, double y2){

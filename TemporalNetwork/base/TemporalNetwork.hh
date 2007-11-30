@@ -139,7 +139,14 @@ namespace EUROPA {
      * @brief Test if the STN is consistent
      * @return true iff network is consistent. False otherwise.
      */
-    Bool isConsistent();
+    //Bool isConsistent() const;
+
+    /**
+     * @brief Propagate the network.
+     * @return true iff network is consistent. False otherwise.
+     */
+    Bool propagate();
+
 
     /**
      * @brief Calculate the temporal distance between two timepoints.

@@ -68,23 +68,23 @@ namespace EUROPA {
 
   Void TemporalNetwork::getTimepointBounds(const TimepointId& id, Time& lb, Time& ub)
   {
-    isConsistent();
+    // We need to be up-to-date to get the bounds.  Because of eager
+    // prop on consistent additions, we only need to prop if there are
+    // deletions.
+    propagate();
 
-    check_error(this->consistent,
-                "TemporalNetwork: Getting bounds from inconsistent network",
-                TempNetErr::TempNetInconsistentError());
     check_error(( this->isValidId(id) ),
                 "TemporalNetwork: Invalid timepoint identifier",
                 TempNetErr::TempNetInvalidTimepointError());
 
-    // We need to be up-to-date to get the bounds.  Because of eager
-    // prop on consistent additions, we only need to prop if there are
-    // deletions.
-
-    isConsistent(); // Forces appropariate propagation.
-
-    lb = id->lowerBound;
-    ub = id->upperBound;
+    if(this->consistent){
+      lb = id->lowerBound;
+      ub = id->upperBound;
+    }
+    else{
+      lb = 2;
+      ub = -2;
+    }
   }
 
   Void TemporalNetwork::getLastTimepointBounds(const TimepointId& node, Time& lb, Time& ub)
@@ -112,7 +112,7 @@ namespace EUROPA {
   Bool TemporalNetwork::isDistanceLessThan (const TimepointId& from, const TimepointId& to,
 					    Time bound)
   {
-    isConsistent();
+    propagate();
 
     check_error(this->consistent,
                 "TemporalNetwork: Checking distance in inconsistent network",
@@ -136,7 +136,7 @@ namespace EUROPA {
     // An efficient approximate version of isDistanceLessThan.
     // (Performs the unrolled recursion only to depth 1 with
     //  some extra checks involving upper/lower bounds of src/dest.)
-    isConsistent();
+    propagate();
     check_error(this->consistent,
                 "TemporalNetwork: Checking distance in inconsistent network",
                 TempNetErr::TempNetInconsistentError());
@@ -176,7 +176,11 @@ namespace EUROPA {
     return true;
   }
 
-  Bool TemporalNetwork::isConsistent()
+  //Bool TemporalNetwork::isConsistent() const {
+  //return this->consistent;
+  //}
+
+  Bool TemporalNetwork::propagate()
   {
     // We propagate additions eagerly so only deletions need a new
     // propagation here, and then only if network was inconsistent.
@@ -195,7 +199,14 @@ namespace EUROPA {
   Void TemporalNetwork::calcDistanceBounds(const TimepointId& src, const TimepointId& targ,
 					   Time& lb, Time& ub, Bool exact)
   {
-    isConsistent();
+    propagate();
+
+    // If inconsistent, return inconsistent bounds
+    if(!this->consistent){
+      lb = 2;
+      ub = -2;
+      return;
+    }
 
     check_error(this->consistent,
                 "TemporalNetwork: Getting bounds from inconsistent network",
@@ -256,6 +267,8 @@ namespace EUROPA {
     // Afterwards restore the proper bounds.  Requires only four
     // dijkstras instead of 2*n dijkstras.
    
+    propagate();
+
     checkError(this->consistent, "TemporalNetwork: calcDistanceBounds from inconsistent network");
     
     propagateBoundsFrom(src);
@@ -503,7 +516,7 @@ namespace EUROPA {
 
   std::list<DedgeId> TemporalNetwork::getEdgeNogoodList()
   {
-    if (isConsistent())
+    if (propagate())
       return std::list<DedgeId>();
     return edgeNogoodList;
   }
