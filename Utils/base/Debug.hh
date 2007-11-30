@@ -253,6 +253,11 @@ public:
   static void enableAll();
 
   /**
+   * @brief Disable all messages
+   */
+  static void disableAll();
+
+  /**
     @brief Assign a stream to which all debug messages will be sent.
     @param os
    */

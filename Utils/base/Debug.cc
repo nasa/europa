@@ -109,6 +109,14 @@ void DebugMessage::enableAll() {
                 std::mem_fun(&DebugMessage::enable));
 }
 
+void DebugMessage::disableAll() {
+  allEnabled() = false;
+  enabledPatterns().clear();
+  std::for_each(allMsgs().begin(),
+                allMsgs().end(),
+                std::mem_fun(&DebugMessage::disable));
+}
+
 void DebugMessage::enableMatchingMsgs(const std::string& file,
                                       const std::string& pattern) {
   if (file.length() < 1 && pattern.length() < 1) {
