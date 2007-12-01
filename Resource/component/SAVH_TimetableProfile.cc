@@ -141,15 +141,5 @@ namespace EUROPA {
 //     void TimetableProfile::handleTransactionQuantityChanged(const TransactionId t, const DomainListener::ChangeType& type) {
 
 //     }
-
-
-//     class TimetableProfileLocalStatic {
-//     public:
-//       TimetableProfileLocalStatic() {
-// 	REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile);
-//       }
-//     };
-
-//     TimetableProfileLocalStatic s_timetableProfileStatic;
   }
 }

@@ -4,19 +4,6 @@
 
 namespace EUROPA {
   namespace SAVH {
-    class TimetableFVDetectorLocalStatic {
-    public:
-      TimetableFVDetectorLocalStatic() {
-	static bool sl_registerFactory = false;
-	check_error(!sl_registerFactory, "Should only be called once.");
-	if(!sl_registerFactory) {
-	  REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
-	  sl_registerFactory = true;
-	}
-      }
-    };
-
-    TimetableFVDetectorLocalStatic s_localStatic;
 
     TimetableFVDetector::TimetableFVDetector(const ResourceId res) : FVDetector(res) {
       m_lowerLimit = res->getLowerLimit();

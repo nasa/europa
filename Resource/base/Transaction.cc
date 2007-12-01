@@ -11,6 +11,7 @@
 
 namespace EUROPA {
 
+/*
   class TransactionLocalStatic {
   public:
     TransactionLocalStatic(){
@@ -25,6 +26,7 @@ namespace EUROPA {
   };
 
   TransactionLocalStatic sl_transaction;
+*/
 
   Transaction::Transaction(const PlanDatabaseId& planDatabase,
 			   const LabelStr& predicateName,

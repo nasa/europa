@@ -1,4 +1,6 @@
 #include "ModuleResource.hh"
+#include "ResourceConstraint.hh"
+#include "ConstraintLibrary.hh"
 #include "SAVH_FlowProfile.hh"
 #include "SAVH_IncrementalFlowProfile.hh"
 #include "SAVH_TimetableProfile.hh"
@@ -29,7 +31,9 @@ namespace EUROPA {
       if(resourceInitialized())
     	  return;
 
-      REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile );
+  	  REGISTER_SYSTEM_CONSTRAINT(ResourceConstraint, "ResourceTransactionRelation", "Resource");
+
+  	  REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile );
       REGISTER_PROFILE(EUROPA::SAVH::FlowProfile, FlowProfile);
       REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile );
       
