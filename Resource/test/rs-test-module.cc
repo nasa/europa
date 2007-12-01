@@ -32,10 +32,75 @@
 #include "Debug.hh"
 
 #include "LockManager.hh"
+#include "ModuleConstraintEngine.hh"
+#include "ModulePlanDatabase.hh"
+#include "ModuleTemporalNetwork.hh"
+#include "ModuleResource.hh"
 
 #include <iostream>
 #include <string>
 #include <list>
+
+class ResourceTestEngine  
+{
+  public:  
+	ResourceTestEngine() {}
+	virtual ~ResourceTestEngine() {}
+	
+	static void initialize();
+	static void terminate();
+
+  protected: 
+	static void createModules();
+	static void initializeModules();
+	static void uninitializeModules();
+	static std::vector<ModuleId> m_modules;	    
+};
+
+std::vector<ModuleId> ResourceTestEngine::m_modules;
+
+void ResourceTestEngine::initialize()
+{
+	initializeModules();    	
+}
+
+void ResourceTestEngine::terminate()
+{
+	uninitializeModules();
+}
+
+void ResourceTestEngine::createModules()
+{
+    // TODO: make this data-driven
+    m_modules.push_back(new ModuleConstraintEngine()); 
+    m_modules.push_back(new ModuleConstraintLibrary());
+    m_modules.push_back(new ModulePlanDatabase());
+    m_modules.push_back(new ModuleTemporalNetwork());
+    m_modules.push_back(new ModuleResource());
+}
+
+void ResourceTestEngine::initializeModules()
+{
+    createModules();
+  
+    for (unsigned int i=0;i<m_modules.size();i++) {
+    	m_modules[i]->initialize();
+    }	  
+}
+
+void ResourceTestEngine::uninitializeModules()
+{
+    Entity::purgeStarted();      
+    for (unsigned int i=m_modules.size();i>0;i--) {
+    	unsigned int idx = i-1;
+    	m_modules[idx]->uninitialize();
+    	m_modules[idx].release();
+    }	  
+    Entity::purgeEnded();	  
+
+    m_modules.clear();	  
+}
+
 
 // Useful constants when doing constraint vio9lation tests
 const double initialCapacity = 5;
@@ -1898,17 +1963,15 @@ void ResourceModuleTests::runTests(std::string path) {
   setTestLoadLibraryPath(path);  
 
   Schema::instance();
-  initConstraintLibrary();
-  REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile);
-  REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
-  REGISTER_SYSTEM_CONSTRAINT(ResourceConstraint, "ResourceTransactionRelation", "Resource"); 
+  ResourceTestEngine::initialize();
+  
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(ResourceTest::test);
   runTestSuite(ProfileTest::test);
   runTestSuite(SAVHResourceTest::test);
   std::cout << "Finished" << std::endl;
-  ConstraintLibrary::purgeAll();
-  uninitConstraintLibrary();
+
+  ResourceTestEngine::terminate();
 }
 
   

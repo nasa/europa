@@ -46,6 +46,7 @@ namespace EUROPA {
   void ModuleResource::uninitialize()
   {
 	  // TODO: clean up
+	  SAVH::ProfileFactory::purgeAll();
 	  resourceInitialized() = false;
   }  
   

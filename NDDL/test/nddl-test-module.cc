@@ -58,9 +58,11 @@ void NDDLModuleTests::runTests(std::string path) {
   initNDDL();
 
   runTestSuite(UtilitiesTest::test);
-  std::cout << "Finished" << std::endl;
+
+  uninitNDDL();
   ConstraintLibrary::purgeAll();
   uninitConstraintLibrary();
+  std::cout << "Finished" << std::endl;
   }
 
 

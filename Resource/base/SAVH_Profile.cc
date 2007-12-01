@@ -21,6 +21,18 @@ namespace EUROPA {
       return factory->create(db, detector, initCapacityLb, initCapacityUb);
     }
     
+    void ProfileFactory::purgeAll()
+    {
+        std::map<double, ProfileFactory*>::iterator factories_iter = factoryMap().begin();
+        while (factories_iter != factoryMap().end()) {
+          ProfileFactory* factory = (factories_iter++)->second;
+          debugMsg("ProfileFactory:purgeAll",
+    	       "Removing factory for " << factory->getName().toString());
+          delete factory;
+        }
+     	factoryMap().clear();
+    }
+    
     void ProfileFactory::registerFactory(const LabelStr& name, ProfileFactory* factory) {
       checkError(factoryMap().find(name) == factoryMap().end(), "Tried to register factory '" << name.toString() << "' twice.");
       factoryMap().insert(std::pair<double, ProfileFactory*>(name, factory));

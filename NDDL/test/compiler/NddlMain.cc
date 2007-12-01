@@ -52,15 +52,86 @@
 // Misc
 #include "Utils.hh"
 
+#include "ModuleConstraintEngine.hh"
+#include "ModulePlanDatabase.hh"
+#include "ModuleTemporalNetwork.hh"
+#include "ModuleRulesEngine.hh"
+#include "ModuleNddl.hh"
+#ifndef NO_RESOURCES
+#include "ModuleResource.hh"
+#endif
+
 #include <fstream>
 #include <sstream>
 
 using namespace EUROPA;
 
+class NddlTestEngine  
+{
+  public:  
+	NddlTestEngine() {}
+	virtual ~NddlTestEngine() {}
+	
+	static void initialize();
+	static void terminate();
+
+  protected: 
+	static void createModules();
+	static void initializeModules();
+	static void uninitializeModules();
+	static std::vector<ModuleId> m_modules;	    
+};
+
+std::vector<ModuleId> NddlTestEngine::m_modules;
+
+void NddlTestEngine::initialize()
+{
+	initializeModules();    	
+}
+
+void NddlTestEngine::terminate()
+{
+	uninitializeModules();
+}
+
+void NddlTestEngine::createModules()
+{
+    // TODO: make this data-driven
+    m_modules.push_back(new ModuleConstraintEngine()); 
+    m_modules.push_back(new ModuleConstraintLibrary());
+    m_modules.push_back(new ModulePlanDatabase());
+    m_modules.push_back(new ModuleRulesEngine());
+    m_modules.push_back(new ModuleTemporalNetwork());
+    m_modules.push_back(new ModuleNddl());
+#ifndef NO_RESOURCES	    
+    m_modules.push_back(new ModuleResource());
+#endif
+}
+
+void NddlTestEngine::initializeModules()
+{
+    createModules();
+  
+    for (unsigned int i=0;i<m_modules.size();i++) {
+    	m_modules[i]->initialize();
+    }	  
+}
+
+void NddlTestEngine::uninitializeModules()
+{
+    Entity::purgeStarted();      
+    for (unsigned int i=m_modules.size();i>0;i--) {
+    	unsigned int idx = i-1;
+    	m_modules[idx]->uninitialize();
+    	m_modules[idx].release();
+    }	  
+    Entity::purgeEnded();	  
+
+    m_modules.clear();	  
+}
+
+
 void initialize() {
-  initNDDL();
-  initConstraintLibrary();
-    
   /*
    *  TODO: constraint registration below needs to be removed, initConstraintLibrary takes care of this
    *  leaving it for now for backwards compatibility since some constraints are named differently
@@ -102,13 +173,14 @@ int main(int argc, const char ** argv) {
 
   const char* txSource = argv[1];
 
-  // Initialize Library  
+  NddlTestEngine::initialize();  
   initialize();
 
   // Allocate the schema with a call to the linked in model function - eventually
   // make this called via dlopen
   SchemaId schema = EUROPA::NDDL::loadSchema();
 
+  
   // Allocate the Constraint Engine
   ConstraintEngineId m_constraintEngine = (new ConstraintEngine())->getId();
 
@@ -150,13 +222,7 @@ int main(int argc, const char ** argv) {
   assert(m_constraintEngine->constraintConsistent());
   PlanDatabaseWriter::write(m_planDatabase, std::cout);
 
-  // Terminate the library
-  ObjectFactory::purgeAll();
-  TokenFactory::purgeAll();
-  ConstraintLibrary::purgeAll();
-  Rule::purgeAll();
-  uninitNDDL();
-
+  NddlTestEngine::terminate();
   std::cout << "Finished\n";
   exit(0);
 }

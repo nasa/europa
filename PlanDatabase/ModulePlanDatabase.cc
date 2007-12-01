@@ -1,5 +1,9 @@
 #include "ModulePlanDatabase.hh"
 #include "Schema.hh"
+#include "ConstraintLibrary.hh"
+#include "CommonAncestorConstraint.hh"
+#include "HasAncestorConstraint.hh"
+#include "ObjectTokenRelation.hh"
 #include "ObjectFactory.hh"
 #include "TokenFactory.hh"
 
@@ -24,6 +28,10 @@ namespace EUROPA {
   {
       if(planDatabaseInitialized())
     	  return;
+
+      REGISTER_SYSTEM_CONSTRAINT(CommonAncestorConstraint, "commonAncestor", "Default");
+  	  REGISTER_SYSTEM_CONSTRAINT(HasAncestorConstraint, "hasAncestor", "Default");
+  	  REGISTER_SYSTEM_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
       
 	  planDatabaseInitialized() = true;
   }  

@@ -20,10 +20,74 @@
 #include "LockManager.hh"
 #include "ProxyVariableRelation.hh"
 
+#include "Constraints.hh"
+#include "ModuleConstraintEngine.hh"
+#include "ModulePlanDatabase.hh"
+#include "ModuleRulesEngine.hh"
+
 #include <iostream>
 #include <string>
 
 using namespace EUROPA;
+
+class RETestEngine  
+{
+  public:  
+	RETestEngine() {}
+	virtual ~RETestEngine() {}
+	
+	static void initialize();
+	static void terminate();
+
+  protected: 
+	static void createModules();
+	static void initializeModules();
+	static void uninitializeModules();
+	static std::vector<ModuleId> m_modules;	    
+};
+
+std::vector<ModuleId> RETestEngine::m_modules;
+
+void RETestEngine::initialize()
+{
+	initializeModules();    	
+}
+
+void RETestEngine::terminate()
+{
+	uninitializeModules();
+}
+
+void RETestEngine::createModules()
+{
+    // TODO: make this data-driven
+    m_modules.push_back(new ModuleConstraintEngine()); 
+    m_modules.push_back(new ModuleConstraintLibrary());
+    m_modules.push_back(new ModulePlanDatabase());
+    m_modules.push_back(new ModuleRulesEngine());
+}
+
+void RETestEngine::initializeModules()
+{
+    createModules();
+  
+    for (unsigned int i=0;i<m_modules.size();i++) {
+    	m_modules[i]->initialize();
+    }	  
+}
+
+void RETestEngine::uninitializeModules()
+{
+    Entity::purgeStarted();      
+    for (unsigned int i=m_modules.size();i>0;i--) {
+    	unsigned int idx = i-1;
+    	m_modules[idx]->uninitialize();
+    	m_modules[idx].release();
+    }	  
+    Entity::purgeEnded();	  
+
+    m_modules.clear();	  
+}
 
 class SimpleSubGoal: public Rule {
 public:
@@ -519,15 +583,19 @@ void RulesEngineModuleTests::runTests(std::string path) {
     LockManager::instance().connect();
     LockManager::instance().lock();
 
-    initConstraintEngine();
-    initConstraintLibrary();
+    RETestEngine::initialize();
+    // TODO: This introduces a dependency to the TemporalNetwork, why here?
+    REGISTER_SYSTEM_CONSTRAINT(EqualConstraint, "concurrent", "Temporal");
+    REGISTER_SYSTEM_CONSTRAINT(LessThanEqualConstraint, "precedes", "Temporal"); 
+    REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporaldistance", "Temporal");
+    REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporalDistance", "Temporal");  
+
     setTestLoadLibraryPath(path);
 
     // Allocate default schema initially so tests don't fail because of ID's
     Schema::instance();
     runTestSuite(RulesEngineTest::test);
     std::cout << "Finished" << std::endl;
-    ConstraintLibrary::purgeAll();
-   
-    uninitConstraintLibrary();
+
+    RETestEngine::terminate();
   }

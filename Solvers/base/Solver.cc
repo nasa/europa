@@ -30,8 +30,6 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    SolverConfig sl_solverConfig; /*!< Force single local allocation */
-
     Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
       : m_id(this), m_db(db), 
         m_stepCountFloor(0), m_depthFloor(0), m_stepCount(0), 

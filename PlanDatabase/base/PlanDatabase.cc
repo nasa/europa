@@ -30,6 +30,7 @@ namespace EUROPA{
 
   DEFINE_GLOBAL_CONST(std::string, g_ClassDelimiter, ":");
 
+/*  
   class PlanDatabaseLocalStatic{
   public:
     PlanDatabaseLocalStatic(){
@@ -50,7 +51,8 @@ namespace EUROPA{
   };
 
   PlanDatabaseLocalStatic sl_planDatabase;
-
+*/
+  
   /**
    * @brief Impements a Listener to handle deletions of variables of type ObjectDomain. 
    *

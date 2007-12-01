@@ -8,24 +8,6 @@
 
 namespace EUROPA {
 
-  class RuleVariableLocalStatic {
-  public:
-    RuleVariableLocalStatic(){
-      static bool sl_boolean = false;
-      check_error(sl_boolean == false, "Should only be called once");
-      if(sl_boolean == false){
-	// Register built in constraint with expected logical propagator name
-	REGISTER_SYSTEM_CONSTRAINT(RuleVariableListener, 
-				   RuleVariableListener::CONSTRAINT_NAME(),
-				   RuleVariableListener::PROPAGATOR_NAME());
-        sl_boolean = true;
-      }
-    }
-  };
-
-  RuleVariableLocalStatic s_ruleVariableLocalStatic;
-
-
   RuleVariableListener::RuleVariableListener(const LabelStr& name,
 					     const LabelStr& propagatorName,
 					     const ConstraintEngineId& constraintEngine, 

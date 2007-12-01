@@ -1,5 +1,7 @@
 #include "ModuleTemporalNetwork.hh"
 #include "ConstraintEngine.hh"
+#include "ConstraintLibrary.hh"
+#include "Constraints.hh"
 #include "PlanDatabase.hh"
 #include "TemporalPropagator.hh"
 #include "STNTemporalAdvisor.hh"
@@ -26,6 +28,11 @@ namespace EUROPA {
       if(TemporalNetworkInitialized())
     	  return;
       
+      REGISTER_SYSTEM_CONSTRAINT(EqualConstraint, "concurrent", "Temporal");
+      REGISTER_SYSTEM_CONSTRAINT(LessThanEqualConstraint, "precedes", "Temporal"); 
+      REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporaldistance", "Temporal");
+      REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporalDistance", "Temporal");
+
       TemporalNetworkInitialized() = true;
   }  
 

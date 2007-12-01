@@ -15,20 +15,6 @@
 
 namespace EUROPA{
 
-  class RulesEngineLocalStatic{
-  public:
-    RulesEngineLocalStatic(){
-      static bool sl_registerConstraints = false;
-      check_error(sl_registerConstraints == false, "Should only be called once.");
-      if(sl_registerConstraints == false){
-        REGISTER_SYSTEM_CONSTRAINT(ProxyVariableRelation, "proxyRelation", "Default");
-        sl_registerConstraints = true;
-      }
-    }
-  };
-
-  RulesEngineLocalStatic sl_rulesEngine;
-
   class DbRuleEngineConnector: public PlanDatabaseListener {
    
   private:

@@ -27,11 +27,73 @@
 
 #include "LockManager.hh"
 
+#include "Constraints.hh"
+#include "ModuleConstraintEngine.hh"
+#include "ModulePlanDatabase.hh"
+
 #include <iostream>
 #include <sstream>
 #include <iomanip>
 #include <pthread.h>
 #include <string>
+
+class PDBTestEngine  
+{
+  public:  
+	PDBTestEngine() {}
+	virtual ~PDBTestEngine() {}
+	
+	static void initialize();
+	static void terminate();
+
+  protected: 
+	static void createModules();
+	static void initializeModules();
+	static void uninitializeModules();
+	static std::vector<ModuleId> m_modules;	    
+};
+
+std::vector<ModuleId> PDBTestEngine::m_modules;
+
+void PDBTestEngine::initialize()
+{
+	initializeModules();    	
+}
+
+void PDBTestEngine::terminate()
+{
+	uninitializeModules();
+}
+
+void PDBTestEngine::createModules()
+{
+    m_modules.push_back(new ModuleConstraintEngine()); 
+    m_modules.push_back(new ModuleConstraintLibrary());
+    m_modules.push_back(new ModulePlanDatabase());
+}
+
+void PDBTestEngine::initializeModules()
+{
+    createModules();
+  
+    for (unsigned int i=0;i<m_modules.size();i++) {
+    	m_modules[i]->initialize();
+    }	  
+}
+
+void PDBTestEngine::uninitializeModules()
+{
+    Entity::purgeStarted();      
+    for (unsigned int i=m_modules.size();i>0;i--) {
+    	unsigned int idx = i-1;
+    	m_modules[idx]->uninitialize();
+    	m_modules[idx].release();
+    }	  
+    Entity::purgeEnded();	  
+
+    m_modules.clear();	  
+}
+
 
   class DBFoo;
   typedef Id<DBFoo> DBFooId;
@@ -153,9 +215,6 @@
 
 
   void initDbModuleTests() {
-    initConstraintEngine();
-    initConstraintLibrary();
-
     // Allocate default schema initially so tests don't fail because of ID's
     SCHEMA;
     initDbTestSchema(SCHEMA);
@@ -5725,7 +5784,15 @@ void PlanDatabaseModuleTests::runTests(std::string path) {
   LockManager::instance().connect();
   setTestLoadLibraryPath(path);
   LockManager::instance().lock();
+
+  PDBTestEngine::initialize();
+  // TODO: This introduces a dependency to the TemporalNetwork, why here?
+  REGISTER_SYSTEM_CONSTRAINT(EqualConstraint, "concurrent", "Temporal");
+  REGISTER_SYSTEM_CONSTRAINT(LessThanEqualConstraint, "precedes", "Temporal"); 
+  REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporaldistance", "Temporal");
+  REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporalDistance", "Temporal");  
   initDbModuleTests();
+  
   LockManager::instance().unlock();
 
   for (int i = 0; i < 1; i++) {
@@ -5742,8 +5809,7 @@ void PlanDatabaseModuleTests::runTests(std::string path) {
   }
 
   LockManager::instance().lock();
-  ConstraintLibrary::purgeAll();
-  uninitConstraintLibrary();
+  PDBTestEngine::terminate();
   LockManager::instance().unlock();
 
   LockManager::instance().lock();

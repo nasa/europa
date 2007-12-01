@@ -18,6 +18,9 @@
 #include "RulesEngine.hh"
 #include "TestSubgoalRule.hh"
 
+#include "ModuleConstraintEngine.hh"
+#include "ModuleTemporalNetwork.hh"
+
 #include <iostream>
 #include <string>
 #include <list>
@@ -875,7 +878,13 @@ void TemporalNetworkModuleTests::runTests(std::string path) {
   setTestLoadLibraryPath(path);
 
   Schema::instance();
-  initConstraintLibrary();
+  ModuleConstraintEngine moduleCE;
+  ModuleConstraintLibrary moduleCL;
+  ModuleTemporalNetwork moduleTN;
+  
+  moduleCE.initialize();
+  moduleCL.initialize();
+  moduleTN.initialize();
 
   for(int i=0;i<1;i++){
     runTestSuite(TemporalNetworkTest::test);
@@ -883,5 +892,8 @@ void TemporalNetworkModuleTests::runTests(std::string path) {
     runTestSuite(TemporalPropagatorTest::test);
   }
   std::cout << "Finished" << std::endl;
-  uninitConstraintLibrary();
+  
+  moduleTN.uninitialize();
+  moduleCL.uninitialize();
+  moduleCE.uninitialize();
 }

@@ -1,5 +1,8 @@
 #include "ModuleRulesEngine.hh"
+#include "ConstraintLibrary.hh"
+#include "ProxyVariableRelation.hh"
 #include "Rule.hh"
+#include "RuleVariableListener.hh"
 
 namespace EUROPA {
 
@@ -22,6 +25,9 @@ namespace EUROPA {
   {
       if(RulesEngineInitialized())
     	  return;
+      
+      REGISTER_SYSTEM_CONSTRAINT(ProxyVariableRelation, "proxyRelation", "Default");
+      REGISTER_SYSTEM_CONSTRAINT(RuleVariableListener, RuleVariableListener::CONSTRAINT_NAME(),RuleVariableListener::PROPAGATOR_NAME());
       
       RulesEngineInitialized() = true;
   }  

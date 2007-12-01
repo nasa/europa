@@ -351,6 +351,9 @@ namespace EUROPA {
                                       const double initCapacityLb = 0, const double initCapacityUb = 0);
 
       const LabelStr& getName() const {return m_name;}
+      
+      static void purgeAll();
+      
     protected:
       virtual ~ProfileFactory(){}
       static void registerFactory(const LabelStr& name, ProfileFactory* factory);

@@ -33,6 +33,8 @@
 
 #include "LockManager.hh"
 
+#include "ModuleConstraintEngine.hh"
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -40,6 +42,63 @@
 #include <fstream>
 
 using namespace EUROPA;
+
+class CETestEngine  
+{
+  public:  
+	CETestEngine() {}
+	virtual ~CETestEngine() {}
+	
+	static void initialize();
+	static void terminate();
+
+  protected: 
+	static void createModules();
+	static void initializeModules();
+	static void uninitializeModules();
+	static std::vector<ModuleId> m_modules;	    
+};
+
+std::vector<ModuleId> CETestEngine::m_modules;
+
+void CETestEngine::initialize()
+{
+	initializeModules();    	
+}
+
+void CETestEngine::terminate()
+{
+	uninitializeModules();
+}
+
+void CETestEngine::createModules()
+{
+    m_modules.push_back(new ModuleConstraintEngine()); 
+    m_modules.push_back(new ModuleConstraintLibrary());
+}
+
+void CETestEngine::initializeModules()
+{
+    createModules();
+  
+    for (unsigned int i=0;i<m_modules.size();i++) {
+    	m_modules[i]->initialize();
+    }	  
+}
+
+void CETestEngine::uninitializeModules()
+{
+    Entity::purgeStarted();      
+    for (unsigned int i=m_modules.size();i>0;i--) {
+    	unsigned int idx = i-1;
+    	m_modules[idx]->uninitialize();
+    	m_modules[idx].release();
+    }	  
+    Entity::purgeEnded();	  
+
+    m_modules.clear();	  
+}
+
 
 class DelegationTestConstraint : public Constraint {
 public:
@@ -2670,8 +2729,7 @@ void ConstraintEngineModuleTests::runTests(std::string path) {
     LockManager::instance().lock();
     setTestLoadLibraryPath(path);
 
-    initConstraintEngine();
-    initConstraintLibrary();
+    CETestEngine::initialize();
     REGISTER_CONSTRAINT(DelegationTestConstraint, "TestOnly", "Default");
     TypeFactory::createValue("INT_INTERVAL", std::string("5"));
     runTestSuite(DomainTests::test);
@@ -2683,8 +2741,7 @@ void ConstraintEngineModuleTests::runTests(std::string path) {
     runTestSuite(ConstraintFactoryTest::test);
     runTestSuite(EquivalenceClassTest::test);
     std::cout << "Finished" << std::endl;
-    ConstraintLibrary::purgeAll();
-    uninitConstraintLibrary();
+    CETestEngine::terminate();
   }
 
 
