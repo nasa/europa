@@ -11,23 +11,6 @@
 
 namespace EUROPA {
 
-/*
-  class TransactionLocalStatic {
-  public:
-    TransactionLocalStatic(){
-      static bool sl_registerConstraints = false;
-      check_error(sl_registerConstraints == false, "This constructor should only be called once");
-      if(sl_registerConstraints == false){
-	// The only resource specific constraints
-	REGISTER_SYSTEM_CONSTRAINT(ResourceConstraint, "ResourceTransactionRelation", "Resource");
-	sl_registerConstraints = true;
-      }
-    }
-  };
-
-  TransactionLocalStatic sl_transaction;
-*/
-
   Transaction::Transaction(const PlanDatabaseId& planDatabase,
 			   const LabelStr& predicateName,
 			   const IntervalIntDomain& timeBaseDomain,
