@@ -13,7 +13,7 @@ ProblemInstance problem = new ProblemInstance();
 int maxDuration;
 int maxDurationPlusOne;
 
-maxDuration.specify(70);
+maxDuration.specify(55);
 addEq(maxDuration,1,maxDurationPlusOne);
 
 CapacityResource resource0 = new CapacityResource( 0.00000 , 10.0000 );
