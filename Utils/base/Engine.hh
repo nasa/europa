@@ -2,6 +2,7 @@
 #define _H_ENGINE
 
 #include <string>
+#include <istream>
 #include "Id.hh"
 
 namespace EUROPA {
@@ -10,7 +11,7 @@ namespace EUROPA {
   {
     public:
       virtual ~LanguageInterpreter() {}
-      virtual std::string interpret(const std::string& script) = 0;
+      virtual std::string interpret(std::istream& input, const std::string& source) = 0;
   };
 
 

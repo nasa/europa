@@ -4,6 +4,7 @@
 #include "SymbolTypeFactory.hh"
 #include "intType.hh"
 #include "floatType.hh"
+#include "TransactionInterpreter.hh"
 #include "TransactionInterpreterInitializer.hh"
 
 namespace EUROPA {
@@ -68,24 +69,42 @@ namespace EUROPA {
   {
     public:
       virtual ~NddlInterpreter() {}	
-      virtual std::string interpret(const std::string& script); 
+      virtual std::string interpret(std::istream& input, const std::string& source);
   };
 
-  std::string NddlInterpreter::interpret(const std::string& script) 
+  std::string NddlInterpreter::interpret(std::istream& input, const std::string& script) 
   {
 	  check_error(ALWAYS_FAIL,"nddl parser is only available in Java for now");
       return "";
-  }
+  } 
   
-  
+  class NddlXmlInterpreter : public LanguageInterpreter 
+  {
+    public:
+      NddlXmlInterpreter(const DbClientId& client) : m_interpreter(client) {}	
+      virtual ~NddlXmlInterpreter() {}	
+      virtual std::string interpret(std::istream& input, const std::string& source);
+      
+    protected:
+      InterpretedDbClientTransactionPlayer m_interpreter;	
+  };
 
+  std::string NddlXmlInterpreter::interpret(std::istream& input, const std::string& script) 
+  {
+	  m_interpreter.play(input);
+      return "";
+  } 
+  
   void ModuleNddl::initialize(EngineId engine)
   {
+	  PlanDatabaseId& pdb = (PlanDatabaseId&)(engine->getComponent("PlanDatabase"));	  
 	  engine->addLanguageInterpreter("nddl", new NddlInterpreter());
+	  engine->addLanguageInterpreter("nddl-xml", new NddlXmlInterpreter(pdb->getClient()));
   }
   
   void ModuleNddl::uninitialize(EngineId engine)
   {	  
 	  engine->removeLanguageInterpreter("nddl"); 
+	  engine->removeLanguageInterpreter("nddl-xml"); 
   }  
 }

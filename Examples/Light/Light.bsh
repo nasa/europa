@@ -7,7 +7,7 @@ import psengine.*;
 
 // Load the model and the problem :
 String nddlModel = bsh.cwd+"/Light-initial-state.nddl";
-psengine.executeScript("nddl",nddlModel);
+psengine.executeScript("nddl",nddlModel,true/*isFile*/);
 
 // Create a solver
 solver = desktop.makeSolver(

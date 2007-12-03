@@ -21,22 +21,27 @@ void usingCodeGeneration()
 {
 	cwd = bsh.cwd;
     psengine.loadModel(cwd+"/libUBO_o.so");
-    boolean isFile = true;
-    boolean useInterpreter = false;
-    psengine.executeTxns(cwd+"/UBO-initial-state.xml",isFile,useInterpreter);		
-    //psengine.executeTxns(cwd+"/psp2.46.xml",isFile,useInterpreter);		
+    psengine.executeScript("nddl-xml-txn",cwd+"/UBO-initial-state.xml",true/*isFile*/);		
+}
+
+void usingXmlInterpreter()
+{
+	cwd = bsh.cwd;
+    String nddlModel = cwd+"/UBO-initial-state.xml";
+    psengine.executeScript("nddl-xml",nddlModel,true/*isFile*/);
 }
 
 void usingInterpreter()
 {
 	cwd = bsh.cwd;
     String nddlModel = cwd+"/UBO-initial-state.nddl";
-    psengine.executeScript("nddl",nddlModel);
+    psengine.executeScript("nddl",nddlModel,true/*isFile*/);
 }
 
 void initPSEngine()
 {
 	//usingCodeGeneration();
+	//usingXmlInterpreter();
 	usingInterpreter();
 }
 
@@ -126,7 +131,7 @@ try {
     	solver.step();
 
     listener = new UBOSolverListener();
-    solverDialog.addListener(listener);
+    //solverDialog.addListener(listener);
 }    
 catch (Exception e) {
   	System.err.println("Failed Initializing : "+e.getMessage());

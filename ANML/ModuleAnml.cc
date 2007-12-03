@@ -37,16 +37,16 @@ namespace EUROPA {
   {
     public:
       virtual ~AnmlInterpreter() {}	
-      virtual std::string interpret(const std::string& script);
+      virtual std::string interpret(std::istream& input, const std::string& source);
       
     protected:
       ANML::ANMLTranslator m_anmlTranslator;
   };
 
-  std::string AnmlInterpreter::interpret(const std::string& script) {
+  std::string AnmlInterpreter::interpret(std::istream& input, const std::string& source) {
     antlr::RefAST ast;
     // create and invoke parser
-    ast = ANMLParser::eval(script);
+    ast = ANMLParser::parse(input,source);
     // create translator
     ANML2NDDL treeParser(m_anmlTranslator);
     // pass AST to translator

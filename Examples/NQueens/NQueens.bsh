@@ -1,7 +1,6 @@
 // NQueens.bsh
 
 import psengine.*;
-import java.io.StringReader;
 
 source("NQueensBoard.java");
 source("TSNQueensSolver.java");
@@ -139,7 +138,7 @@ void loadModel()
 	String nddlModel = generateModel(N); //generateModelWithAllDiff(N);
 	//System.out.println(nddlModel);
 	psengine.setAllowViolations(true);
-	psengine.executeScript("nddl",new StringReader(nddlModel));
+	psengine.executeScript("nddl",nddlModel,false/*isFile*/);
 }
 
 

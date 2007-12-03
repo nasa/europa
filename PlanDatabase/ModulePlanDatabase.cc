@@ -1,11 +1,13 @@
 #include "ModulePlanDatabase.hh"
 #include "Schema.hh"
+#include "PlanDatabase.hh"
 #include "ConstraintLibrary.hh"
 #include "CommonAncestorConstraint.hh"
 #include "HasAncestorConstraint.hh"
 #include "ObjectTokenRelation.hh"
 #include "ObjectFactory.hh"
 #include "TokenFactory.hh"
+#include "DbClientTransactionPlayer.hh"
 
 namespace EUROPA {
 
@@ -45,11 +47,31 @@ namespace EUROPA {
 	  planDatabaseInitialized() = false;
   }  
   
+  class NddlXmlTxnInterpreter : public LanguageInterpreter 
+  {
+    public:
+      NddlXmlTxnInterpreter(const DbClientId& client) : m_interpreter(client) {}	
+      virtual ~NddlXmlTxnInterpreter() {}	
+      virtual std::string interpret(std::istream& input, const std::string& source);
+      
+    protected:
+      DbClientTransactionPlayer m_interpreter;	
+  };
+
+  std::string NddlXmlTxnInterpreter::interpret(std::istream& input, const std::string& script) 
+  {
+	  m_interpreter.play(input);
+      return "";
+  } 
+  
   void ModulePlanDatabase::initialize(EngineId engine)
   {
+	  PlanDatabaseId& pdb = (PlanDatabaseId&)(engine->getComponent("PlanDatabase"));	  
+	  engine->addLanguageInterpreter("nddl-xml-txn", new NddlXmlTxnInterpreter(pdb->getClient()));
   }
   
   void ModulePlanDatabase::uninitialize(EngineId engine)
   {	  
+	  engine->removeLanguageInterpreter("nddl-xml-txn"); 
   }  
 }

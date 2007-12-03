@@ -10,16 +10,9 @@
  */
 
 #include "StandardAssembly.hh"
-#include "DbClientTransactionLog.hh"
-
-#ifndef TIXML_USE_STL
-#define TIXML_USE_STL
-#endif
 #include "tinyxml.h"
 
 namespace EUROPA {
-
-#define PPW_WITH_PLANNER
 
   class SolverAssembly : public StandardAssembly {
   public:

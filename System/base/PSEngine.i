@@ -141,28 +141,37 @@ namespace EUROPA {
     }
 
     if(txns != null) {
-      executeTxns(txns, false , true);
+      executeScript_internal("nddl-xml",txns,false /*isFile*/);
     }
     else {
       throw new RuntimeException("Failed to create transactions from "+language+" source.");
     }
   }
-  
+
+  // NddlInterpreter class must be moved to psengine package  
   public Object nddlInterpreter=null; // For PSDesktop
-  public void executeScript(String language, String script) throws PSException 
+  public void executeScript(String language, String script, boolean isFile) throws PSException 
   {
       try {
-        if (nddlInterpreter != null) {
-            Class nddlClass = ClassLoader.getSystemClassLoader().loadClass("org.ops.ui.nddl.NddlInterpreter");
-            Class[] parameters = new Class[]{String.class};
-            Object[] arguments = new Object[]{script};
-            nddlClass.getMethod("source", parameters).invoke(nddlInterpreter, arguments);
-        }
-        else if (language.equalsIgnoreCase("nddl")) {
-            executeScript(language,new java.io.BufferedReader(new java.io.FileReader(script)));
+        if (language.equalsIgnoreCase("nddl")) {
+            if (nddlInterpreter != null) {
+                Class nddlClass = ClassLoader.getSystemClassLoader().loadClass("org.ops.ui.nddl.NddlInterpreter");
+                Class[] parameters = new Class[]{String.class};
+                Object[] arguments = new Object[]{script};
+                String methodName = (isFile ? "source" : "eval");
+                nddlClass.getMethod(methodName, parameters).invoke(nddlInterpreter, arguments);
+            }
+            else {
+                java.io.Reader input;
+                if (isFile)
+                    input = new java.io.BufferedReader(new java.io.FileReader(script));
+                else 
+                    input = new java.io.BufferedReader(new java.io.StringReader(script));
+                executeScript(language,input);
+            }
         }
         else {
-            executeScript_internal(language,script);
+            executeScript_internal(language,script,isFile);
         }
       } 
       catch(Exception e) {
@@ -185,8 +194,7 @@ namespace EUROPA {
     void shutdown();
 
     void loadModel(const std::string& modelFileName);
-    void executeTxns(const std::string& xmlTxnSource, bool isFile, bool useInterpreter) throw(Error);
-    std::string executeScript(const std::string& language, const std::string& script) throw(Error);
+    std::string executeScript(const std::string& language, const std::string& script, bool isFile) throw(Error);
 
     PSList<PSObject*> getObjectsByType(const std::string& objectType);
     PSObject* getObjectByKey(PSEntityKey id);

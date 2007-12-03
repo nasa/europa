@@ -18,9 +18,7 @@ void usingCodeGeneration()
 {
 	cwd = bsh.cwd;
     psengine.loadModel(cwd+"/libCrew1_o.so");
-    boolean isFile = true;
-    boolean useInterpreter = false;
-    psengine.executeTxns(cwd+"/Crew1-initial-state.xml",isFile,useInterpreter);	
+    psengine.executeScript("nddl-xml-txn",cwd+"/Crew1-initial-state.xml",true/*isFile*/);	
     System.out.println("Used code generation");
 }
 
@@ -28,7 +26,7 @@ void usingInterpreter()
 {
 	cwd = bsh.cwd;
     String nddlModel = cwd+"/Crew1-initial-state.nddl";
-    psengine.executeScript("nddl",nddlModel);
+    psengine.executeScript("nddl",nddlModel,true/*isFile*/);
 }
 
 void initPSEngine()

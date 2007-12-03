@@ -1,5 +1,6 @@
 #include "Nddl.hh"
 #include "PlanDatabase.hh"
+#include "DbClientTransactionLog.hh"
 #include "TestSupport.hh"
 #include "Debug.hh"
 #include "Pdlfcn.hh"

@@ -4,8 +4,6 @@
 #include "PSEngine.hh"
 #include "EngineBase.hh"
 #include "SolverDefs.hh"
-#include "DbClientTransactionPlayer.hh"
-#include "TransactionInterpreter.hh"
 
 namespace EUROPA {
 
@@ -27,9 +25,8 @@ namespace EUROPA {
     virtual void start();
     virtual void shutdown();
 	     
-    virtual std::string executeScript(const std::string& language, const std::string& script);
-    virtual void executeTxns(const std::string& xmlTxnSource,bool isFile,bool useInterpreter); 
     virtual void loadModel(const std::string& modelFileName);        		
+    virtual std::string executeScript(const std::string& language, const std::string& script, bool isFile);
 	
     virtual PSList<PSObject*> getObjectsByType(const std::string& objectType);
     virtual PSObject* getObjectByKey(PSEntityKey id);
@@ -65,8 +62,6 @@ namespace EUROPA {
     std::map<double, ObjectWrapperGenerator*> m_objectWrapperGenerators;
     
     bool m_started;
-    DbClientTransactionPlayerId m_transactionPlayer;
-    DbClientTransactionPlayerId m_interpTransactionPlayer;
     SOLVERS::PlanWriter::PartialPlanWriter* m_ppw;    
   };
     

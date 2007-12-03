@@ -107,11 +107,8 @@ namespace EUROPA {
   void PSEngineImpl::allocateComponents()
   {
 	  EngineBase::allocateComponents();
+	  // TODO: this needs to be moved to PSSolver
 	  m_ppw = new SOLVERS::PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine, m_rulesEngine);
-	  // TODO: This needs to be done with LanguageInterpreters for nddl-xml and nddl-xml-txn
-      DbClientId client = m_planDatabase->getClient();
-	  m_interpTransactionPlayer = new InterpretedDbClientTransactionPlayer(client);
-	  m_transactionPlayer = new DbClientTransactionPlayer(client);	  
   }
   
   void PSEngineImpl::deallocateComponents()
@@ -121,12 +118,6 @@ namespace EUROPA {
 	     m_ppw = NULL;
 	  }
 	  
-	  if(m_interpTransactionPlayer.isValid()) 
-	     m_interpTransactionPlayer.release();
-	  
-	  if(m_transactionPlayer.isValid()) 
-	     m_transactionPlayer.release();
-
 	  EngineBase::deallocateComponents();
   }
   
@@ -146,34 +137,9 @@ namespace EUROPA {
     SchemaId schema = (*fcn_schema)();
   }
 
-  void PSEngineImpl::executeTxns(const std::string& xmlTxnSource,bool isFile,bool useInterpreter) 
+  std::string PSEngineImpl::executeScript(const std::string& language, const std::string& script, bool isFile) 
   {
-    check_runtime_error(m_started,"PSEngine has not been started");
-    
-    DbClientTransactionPlayerId player;      
-    if (useInterpreter)
-        player = m_interpTransactionPlayer;
-    else
-        player = m_transactionPlayer;
-
-    std::istream* in;    
-    if (isFile)
-      in = new std::ifstream(xmlTxnSource.c_str());
-    else
-      in = new std::istringstream(xmlTxnSource);
-
-    player->play(*in);
-
-    delete in;    
-  }
-
-  std::string PSEngineImpl::executeScript(const std::string& language, const std::string& script) 
-  {
-    std::map<double, LanguageInterpreter*>::iterator it =
-      getLanguageInterpreters().find(LabelStr(language));
-    checkRuntimeError(it != getLanguageInterpreters().end(),
-		      "Cannot execute script of unknown language \"" << language << "\"");
-    return it->second->interpret(script);
+    return EngineBase::executeScript(language,script,isFile);
   }
 
   PSList<PSObject*> PSEngineImpl::getObjectsByType(const std::string& objectType) {

@@ -71,7 +71,7 @@ bool executeWithPSEngine(const char* plannerConfig, const char* txSource, int st
 	      PSEngine* engine = PSEngine::makeInstance();	
 	      engine->start();
 	      
-	      engine->executeTxns(txSource,true,true);
+	      engine->executeScript("nddl-xml",txSource,true/*isFile*/);
 
 	      PSSolver* solver = engine->createSolver(plannerConfig);
 	      runSolver(solver,startHorizon,endHorizon,maxSteps);

@@ -20,14 +20,14 @@ void usingCodeGeneration()
     psengine.loadModel(cwd+"/libResourceViolations_g.so");
     boolean isFile = true;
     boolean useInterpreter = false;
-    psengine.executeTxns(cwd+"/ResourceViolations-initial-state.xml",isFile,useInterpreter);		
+    psengine.executeScript("nddl-xml-txn",cwd+"/ResourceViolations-initial-state.xml",true/*isFile*/);		
 }
 
 void usingInterpreter()
 {
 	cwd = bsh.cwd;
     String nddlModel = cwd+"/ResourceViolations-initial-state.nddl";
-    psengine.executeScript("nddl",nddlModel);
+    psengine.executeScript("nddl",nddlModel,true/*isFile*/);
 }
 
 void initPSEngine()

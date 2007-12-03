@@ -66,13 +66,6 @@ namespace EUROPA {
 
   protected:
     StandardAssembly();
-    /**
-     * @brief Provides accessor for static variable indicating if the static members,
-     * primarily related to various factories have been initialized e.g.: Rules, Constraints, 
-     * Token Types, Object Types and domain types.
-     */
-    static bool& isInitialized();
-    DbClientTransactionPlayer* m_transactionPlayer;
   };
 }
 #endif

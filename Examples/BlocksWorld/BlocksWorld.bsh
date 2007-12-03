@@ -19,9 +19,7 @@ void usingCodeGeneration()
 {
 	cwd = bsh.cwd;
     psengine.loadModel(cwd+"/libBlocksWorld_o.so");
-    boolean isFile = true;
-    boolean useInterpreter = false;
-    psengine.executeTxns(cwd+"/BlocksWorld-initial-state.xml",isFile,useInterpreter);	
+    psengine.executeScript("nddl-xml-txn",cwd+"/BlocksWorld-initial-state.xml",true/*isFile*/);	
     System.out.println("Used code generation");
 }
 
@@ -29,7 +27,7 @@ void usingInterpreter()
 {
 	cwd = bsh.cwd;
     String nddlModel = cwd+"/BlocksWorld-initial-state.nddl";
-    psengine.executeScript("nddl",nddlModel);
+    psengine.executeScript("nddl",nddlModel,true/*isFile*/);
 }
 
 void initPSEngine()

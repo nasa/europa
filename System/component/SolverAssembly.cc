@@ -6,11 +6,6 @@
 #include "ConstraintEngine.hh"
 #include "RulesEngine.hh"
 
-// Transactions
-#include "DbClientTransactionPlayer.hh"
-
-#include "NddlDefs.hh"
-
 // Misc
 #include "Utils.hh"
 
@@ -21,7 +16,6 @@
 
 // Test Support
 #include "TestSupport.hh"
-#include "tinyxml.h"
 
 #include <string>
 

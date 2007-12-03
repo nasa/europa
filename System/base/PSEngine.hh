@@ -24,8 +24,7 @@ namespace EUROPA {
 	  // Loads a planning model in binary format
 	  virtual void loadModel(const std::string& modelFileName) = 0;
 
-	  virtual void executeTxns(const std::string& xmlTxnSource,bool isFile,bool useInterpreter) = 0; // TODO: fold XML into executeScript?
-	  virtual std::string executeScript(const std::string& language, const std::string& script) = 0;
+	  virtual std::string executeScript(const std::string& language, const std::string& script, bool isFile) = 0;
 
 	  virtual PSList<PSObject*> getObjectsByType(const std::string& objectType) = 0;
 	  virtual PSObject* getObjectByKey(PSEntityKey id) = 0;

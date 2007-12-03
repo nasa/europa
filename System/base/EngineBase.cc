@@ -15,18 +15,34 @@
 #include "PlanDatabase.hh"
 #include "RulesEngine.hh"
 
+#include <fstream>
+#include <sstream>
+
 namespace EUROPA 
 {
     std::vector<ModuleId> EngineBase::m_modules;
 
+    bool& isInitialized()
+    {
+      static bool sl_isInitialized(false);
+      return sl_isInitialized;
+    }
+
+    
     void EngineBase::initialize()
     {
-    	initializeModules();    	
+    	if (!isInitialized()) {
+    	    initializeModules();
+    	    isInitialized() = true;
+    	}
     }
     
     void EngineBase::terminate()
     {
-    	uninitializeModules();
+    	if (isInitialized()) {
+    	    uninitializeModules();
+    	    isInitialized() = false;
+    	}
     }
     
     ModuleId EngineBase::getModuleByName(const std::string& name)
@@ -107,6 +123,29 @@ namespace EUROPA
 
   	  Entity::purgeEnded();	  
     }    
+    
+    std::string EngineBase::executeScript(const std::string& language, const std::string& script, bool isFile) 
+    {
+      std::map<double, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
+      checkRuntimeError(it != getLanguageInterpreters().end(),
+  		      "Cannot execute script for unknown language \"" << language << "\"");
+      
+      std::istream *in;
+      std::string source;
+      if (isFile) {
+    	  in = new std::ifstream(script.c_str());
+    	  source = script;
+      }
+      else {
+    	  in = new std::istringstream(script);
+    	  source = "<eval>";
+      }
+     
+      std::string retval = it->second->interpret(*in, source);
+      delete in;
+      
+      return retval;
+    }
     
     std::map<double, LanguageInterpreter*>& EngineBase::getLanguageInterpreters()
     {

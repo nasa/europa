@@ -17,6 +17,7 @@ namespace EUROPA {
     	
         virtual EngineComponentId& getComponent(const std::string& name);
         
+        virtual std::string executeScript(const std::string& language, const std::string& script, bool isFile);        
         virtual void addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter);
         virtual void removeLanguageInterpreter(const std::string& language);    
         
