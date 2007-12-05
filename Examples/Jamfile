@@ -19,12 +19,10 @@ Depends run-examples-tests : run-BlocksWorld-tests ;
 
 if ! ( "Resources" in $(NO) ) {
    SubInclude PLASMA Examples Crew1 ;
-   SubInclude PLASMA Examples ResourceViolations ;
    SubInclude PLASMA Examples Rover ;
    SubInclude PLASMA Examples UBO ;
 
    Depends run-examples-tests : run-Crew1-tests ;
-   Depends run-examples-tests : run-ResourceViolations-tests ;
    Depends run-examples-tests : run-Rover-tests ;
    Depends run-examples-tests : run-UBO-tests ;
 }
