@@ -47,11 +47,6 @@ namespace EUROPA {
 
 	  // Solver methods
 	  virtual PSSolver* createSolver(const std::string& configurationFile) = 0;
-
-	  // Resource methods
-	  // TODO: this should go away once we figure out SWIG wrapping issues
-      virtual PSResource* getResourceByKey(PSEntityKey id) = 0;	  
-      virtual PSList<PSResource*> getResourcesByType(const std::string& objectType) = 0;
   };
   
 }	

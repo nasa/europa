@@ -70,8 +70,6 @@ namespace EUROPA {
   class PSSolver;
   class PSVariable;
   class PSVarValue;
-  class PSResource;
-  class PSResourceProfile;
 
   template<class T>
   class PSList {
@@ -86,7 +84,6 @@ namespace EUROPA {
   %template(PSTokenList) PSList<PSToken*>;
   %template(PSVariableList) PSList<PSVariable*>;
   %template(PSValueList) PSList<PSVarValue>;
-  %template(PSResourceList) PSList<PSResource*>;
 
   //trying template instantiation to get the right results.
 
@@ -214,10 +211,7 @@ namespace EUROPA {
 
     PSSolver* createSolver(const std::string& configurationFile);   
 
-    std::string planDatabaseToString();
-    
-    PSList<PSResource*> getResourcesByType(const std::string& objectType);
-    PSResource* getResourceByKey(PSEntityKey id);                      
+    std::string planDatabaseToString();    
   };
 
   class PSEntity
@@ -357,6 +351,10 @@ namespace EUROPA {
     PSVarValue();
   };
 
+  // TODO: move this to a separate file?
+  class PSResource;
+  class PSResourceProfile;
+  
   class PSResource : public PSObject
   {
   public:

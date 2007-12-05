@@ -1,7 +1,6 @@
 #ifndef _H_PSResource
 #define _H_PSResource
 
-#include "Engine.hh"
 #include "PSUtils.hh"
 #include "PSPlanDatabase.hh"
 
@@ -11,15 +10,6 @@ namespace EUROPA {
 
   class PSResource;
   class PSResourceProfile;
-  
-  class PSResourceManager : public EngineComponent
-  {
-    public:
-      virtual ~PSResourceManager() {}
-
-      virtual PSResource* getResourceByKey(PSEntityKey id) = 0;	              
-      virtual PSList<PSResource*> getResourcesByType(const std::string& objectType) = 0;
-  };
   
   class PSResource : public virtual PSObject
   {

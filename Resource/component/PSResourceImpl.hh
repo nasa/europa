@@ -7,19 +7,6 @@
 
 namespace EUROPA {
 
-  class PSResourceManagerImpl : public PSResourceManager
-  {
-    public:
-      PSResourceManagerImpl(PlanDatabaseId& pdb);
-      virtual ~PSResourceManagerImpl();
-
-      virtual PSResource* getResourceByKey(PSEntityKey id);	              
-      virtual PSList<PSResource*> getResourcesByType(const std::string& objectType);
-      
-    protected:
-      PlanDatabaseId m_planDatabase;	
-  };
-
   class PSResourceImpl : public PSResource, PSObjectImpl
   {
   public:

@@ -54,7 +54,7 @@ public class IFlatIRelaxSolver
     
     protected Resource makeResource(PSResource r)
     {
-    	int capacity=10;// TODO: don't hardcode this
+    	int capacity=10;// TODO: don't hardcode capacity
     	if (usePSResources_)
     		return new PSResourceWrapper(psengine_,r,capacity);
     	else
@@ -69,12 +69,11 @@ public class IFlatIRelaxSolver
         makespanBound_ = bound;
         usePSResources_ = usePSResources;
         
-        PSResourceList res = psengine.getResourcesByType("CapacityResource");
+        List<PSResource> res = PSUtil.toResourceList(psengine.getObjectsByType("CapacityResource"));
         resources_ = new Vector<Resource>();
         
-        // TODO: don't hardcode capacity
-        for (int i=0;i<res.size();i++) 
-        	resources_.add(makeResource(res.get(i)));
+        for (PSResource r : res) 
+        	resources_.add(makeResource(r));
         
         PSTokenList tokens = psengine.getTokens();
         activities_ = new TreeMap<Integer,PSToken>();

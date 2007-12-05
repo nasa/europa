@@ -1,42 +1,11 @@
 
 #include "PSResourceImpl.hh"
-#include "PlanDatabase.hh"
 #include "SAVH_Resource.hh"
 #include "SAVH_Profile.hh"
 #include "SAVH_Transaction.hh"
 
 namespace EUROPA 
 {
-  PSResourceManagerImpl::PSResourceManagerImpl(PlanDatabaseId& pdb) 
-    : m_planDatabase(pdb) 
-  {	  
-  }	
-
-  PSResourceManagerImpl::~PSResourceManagerImpl() 
-  {	  
-  }
-  
-  PSList<PSResource*> PSResourceManagerImpl::getResourcesByType(const std::string& objectType) 
-  {
-    PSList<PSResource*> retval;
-  
-    const ObjectSet& objects = m_planDatabase->getObjects();
-    for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
-    	ObjectId object = *it;
-    	if(Schema::instance()->isA(object->getType(), objectType.c_str()))
-    		retval.push_back(new PSResourceImpl(object));
-    }
-
-    return retval;
-  }
-
-  PSResource* PSResourceManagerImpl::getResourceByKey(PSEntityKey id) 
-  {
-	  EntityId entity = Entity::getEntity(id);
-	  check_runtime_error(entity.isValid());
-	  return new PSResourceImpl(entity);
-  }  
-  
   PSResource* PSResource::asPSResource(PSObject* obj)
   {
 	  return dynamic_cast<PSResource*>(obj);

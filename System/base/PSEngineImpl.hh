@@ -45,10 +45,6 @@ namespace EUROPA {
     // Solver methods
     virtual PSSolver* createSolver(const std::string& configurationFile);
     
-    // Resource methods
-    virtual PSList<PSResource*> getResourcesByType(const std::string& objectType);
-    virtual PSResource* getResourceByKey(PSEntityKey id);	  
-    
 	virtual EngineComponent* getComponentPtr(const std::string& name); 
 	
   protected:
@@ -56,7 +52,6 @@ namespace EUROPA {
     PSConstraintEngine* m_psConstraintEngine;
     PSPlanDatabase*     m_psPlanDatabase;
     PSSolverManager*    m_psSolverManager;
-    PSResourceManager*  m_psResourceManager;
     
   	virtual void allocateComponents();
   	virtual void deallocateComponents();

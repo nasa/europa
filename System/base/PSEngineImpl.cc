@@ -12,10 +12,6 @@
 #include "PSConstraintEngineImpl.hh"
 #include "PSPlanDatabaseImpl.hh"
 #include "PSSolversImpl.hh"
-// TODO: get rid of all the #ifdefs 
-#ifndef NO_RESOURCES
-#include "PSResourceImpl.hh"
-#endif
 
 namespace EUROPA {
   
@@ -81,9 +77,6 @@ namespace EUROPA {
 	  m_psConstraintEngine = new PSConstraintEngineImpl(m_constraintEngine);
 	  m_psPlanDatabase = new PSPlanDatabaseImpl(m_planDatabase);
 	  m_psSolverManager = new PSSolverManagerImpl(m_constraintEngine,m_planDatabase,m_rulesEngine);
-#ifndef NO_RESOURCES
-	  m_psResourceManager = new PSResourceManagerImpl(m_planDatabase);
-#endif	  
   }
   
   void PSEngineImpl::deallocateComponents()
@@ -91,9 +84,6 @@ namespace EUROPA {
 	  delete m_psConstraintEngine;
 	  delete m_psPlanDatabase;
 	  delete m_psSolverManager;
-#ifndef NO_RESOURCES
-	  delete m_psResourceManager;
-#endif	  
 	  EngineBase::deallocateComponents();
   }
   
@@ -213,28 +203,5 @@ namespace EUROPA {
     check_runtime_error(m_started,"PSEngine has not been started");
     return m_psSolverManager->createSolver(configurationFile);
   }
-
-#ifndef NO_RESOURCES
-   PSList<PSResource*> PSEngineImpl::getResourcesByType(const std::string& objectType) {
-     check_runtime_error(m_started,"PSEngine has not been started");
-     return m_psResourceManager->getResourcesByType(objectType);
-   }
-   
-   PSResource* PSEngineImpl::getResourceByKey(PSEntityKey id) {
-     check_runtime_error(m_started,"PSEngine has not been started");
-     return m_psResourceManager->getResourceByKey(id);
-   }    
-#else
-   PSList<PSResource*> PSEngineImpl::getResourcesByType(const std::string& objectType) {
-     check_runtime_error(ALWAYS_FAIL,"PSEngine was built without resource module");     
-     PSList<PSResource*> retval;
-     return retval;
-   }
-   
-   PSResource* PSEngineImpl::getResourceByKey(PSEntityKey id) {
-     check_runtime_error(ALWAYS_FAIL,"PSEngine was built without resource module");
-     return NULL;
-   }      
-#endif        
 }
 

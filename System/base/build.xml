@@ -23,8 +23,11 @@
 
   <target name="compile" depends="init">
     <depend srcdir="${src.dir}" destdir="${build.dir}" cache="${cache}" closure="yes"/>
-    <javac classpathref="psengine.classpath" source="1.4" target="1.4"
-           srcdir="${src.dir}" destdir="${build.dir}"/>
+    <javac classpathref="psengine.classpath" 
+           destdir="${build.dir}">
+  	<src path="${src.dir}"/>
+        <src path="java"/>    	
+    </javac>	
   </target>
 
   <target name="PSEngine" depends="compile">
