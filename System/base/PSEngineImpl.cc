@@ -62,7 +62,7 @@ namespace EUROPA {
 	if (m_started)
 		return;
 	
-    allocateComponents();   
+    doStart();   
     m_started = true;
   }
 
@@ -71,7 +71,7 @@ namespace EUROPA {
 	if (!m_started)
 		return;
 	
-    deallocateComponents();    
+    doShutdown();    
     m_started = false;
   }
     

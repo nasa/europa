@@ -94,27 +94,45 @@ namespace EUROPA
 
         m_modules.clear();	  
     }
+    
+    void EngineBase::doStart()
+    {
+    	allocateComponents();
+    	initializeByModules();
+    }
 
+    void EngineBase::doShutdown()
+    {
+    	uninitializeByModules();
+    	deallocateComponents();
+    }
+
+    void EngineBase::initializeByModules()
+    {
+	    for (unsigned int i=0;i<m_modules.size();i++) {
+	    	m_modules[i]->initialize(getId());
+	    	debugMsg("PSEngine","Engine initialized by Module " << m_modules[i]->getName());		  
+	    }	  	      	
+    }
+    
+    void EngineBase::uninitializeByModules()
+    {
+    	  for (unsigned int i=m_modules.size();i>0;i--) {
+    		  unsigned int idx = i-1;
+    		  m_modules[idx]->uninitialize(getId());
+    		  debugMsg("PSEngine","Engine uninitialized by Module " << m_modules[idx]->getName());		  
+    	  }	  
+    }
+    
     void EngineBase::allocateComponents()
     {
 	    m_constraintEngine = (new ConstraintEngine())->getId();	  
 	    m_planDatabase = (new PlanDatabase(m_constraintEngine, Schema::instance()))->getId();	
-	    m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();	  
-
-	    for (unsigned int i=0;i<m_modules.size();i++) {
-	    	m_modules[i]->initialize(getId());
-	    	debugMsg("PSEngine","Engine initialized by Module " << m_modules[i]->getName());		  
-	    }	  	  
+	    m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();	      
     }	  
     
     void EngineBase::deallocateComponents()
     {
-  	  for (unsigned int i=m_modules.size();i>0;i--) {
-  		  unsigned int idx = i-1;
-  		  m_modules[idx]->uninitialize(getId());
-  		  debugMsg("PSEngine","Engine uninitialized by Module " << m_modules[idx]->getName());		  
-  	  }	  
-
   	  Entity::purgeStarted();
         
       if(m_rulesEngine.isValid()) delete (RulesEngine*) m_rulesEngine;

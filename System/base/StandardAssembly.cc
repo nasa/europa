@@ -33,13 +33,13 @@ namespace EUROPA {
 
   StandardAssembly::StandardAssembly(const SchemaId& schema) 
   {
-    allocateComponents();
+    doStart();
     m_planDatabase->getClient()->enableTransactionLogging();
   }
 
   StandardAssembly::~StandardAssembly() 
   {
-    deallocateComponents();    
+    doShutdown();    
   }
 
   bool StandardAssembly::playTransactions(const char* txSource, bool interp)
