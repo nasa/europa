@@ -1,12 +1,22 @@
 #ifndef _H_PSSolvers
 #define _H_PSSolvers
 
+#include "Engine.hh"
 #include "PSUtils.hh"
 #include <string>
 
 namespace EUROPA 
 {
-
+  class PSSolver;
+  
+  class PSSolverManager : public EngineComponent
+  {
+    public:
+      virtual ~PSSolverManager() {}
+    	
+      virtual PSSolver* createSolver(const std::string& configurationFile) = 0;            	
+  };
+  
   class PSSolver
   {
     public:

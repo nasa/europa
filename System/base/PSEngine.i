@@ -302,7 +302,7 @@ namespace EUROPA {
     PSToken();
   };
 
-  enum PSVarType {OBJECT,STRING,INTEGER,DOUBLE,BOOLEAN};
+  enum PSVarType {INTEGER,DOUBLE,BOOLEAN,STRING,OBJECT};
 
   class PSVariable : public PSEntity
   {
@@ -345,7 +345,7 @@ namespace EUROPA {
 
     PSVarType getType() const;
 
-    PSObject*           asObject() const;
+    PSEntity*           asObject() const;
     int                 asInt() const;
     double              asDouble() const;
     bool                asBoolean() const;
@@ -364,7 +364,9 @@ namespace EUROPA {
     PSResourceProfile* getLevels();
 
     PSList<PSEntityKey> getOrderingChoices(TimePoint t);
-        
+
+    static PSResource* asPSResource(PSObject* obj);
+            
   protected:
     PSResource();
   };

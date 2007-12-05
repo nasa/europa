@@ -184,6 +184,6 @@ namespace EUROPA
   		  return (EngineComponentId&)m_constraintEngine;
 
   	  return noId;
-    }          
+    }            
 }
 

@@ -3,12 +3,33 @@
 
 #include "PSConstraintEngine.hh"
 #include "ConstraintEngineDefs.hh"
+#include <string>
 
 namespace EUROPA {
     
+  class PSConstraintEngineImpl : public PSConstraintEngine
+  {
+    public:
+    	PSConstraintEngineImpl(ConstraintEngineId ce);	    
+    	virtual ~PSConstraintEngineImpl();
+
+        virtual PSVariable* getVariableByKey(PSEntityKey id);
+  	    virtual PSVariable* getVariableByName(const std::string& name);
+  	    
+    	virtual bool getAllowViolations() const;
+    	virtual void setAllowViolations(bool v);
+
+    	virtual double getViolation() const;
+    	virtual std::string getViolationExpl() const;    
+
+    protected:
+    	ConstraintEngineId m_constraintEngine;
+  };
+
   class PSVariableImpl : public PSVariable
   {
   public:
+	PSVariableImpl(const ConstrainedVariableId& var);
     virtual ~PSVariableImpl(){}
 	    
     virtual const std::string& getEntityType() const;
@@ -38,12 +59,6 @@ namespace EUROPA {
 	    
     virtual std::string toString();
   protected:
-    friend class PSEngineImpl;
-    friend class PSObjectImpl;
-    friend class PSTokenImpl;
-
-    PSVariableImpl(const ConstrainedVariableId& var);
-  private:
     ConstrainedVariableId m_var;
     PSVarType m_type;
   };   

@@ -30,6 +30,7 @@ namespace EUROPA {
   class PSEntity
   {
     public: 
+      PSEntity(const EntityId& entity);
       virtual ~PSEntity() {}
     
       virtual PSEntityKey getKey() const;
@@ -37,9 +38,6 @@ namespace EUROPA {
       virtual const std::string& getEntityType() const;
 
       virtual std::string toString();
-
-    protected:
-      PSEntity(const EntityId& entity);
 
     private:
     	EntityId m_entity;

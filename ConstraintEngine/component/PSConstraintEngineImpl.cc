@@ -7,7 +7,58 @@
 
 namespace EUROPA {
   
-  PSVariableImpl::PSVariableImpl(const ConstrainedVariableId& var) : PSVariable(var), m_var(var) {
+  PSConstraintEngineImpl::PSConstraintEngineImpl(ConstraintEngineId ce) 
+    : m_constraintEngine(ce) 
+  {	  
+  }
+  
+  PSConstraintEngineImpl::~PSConstraintEngineImpl() 
+  {	  
+  }
+
+  PSVariable* PSConstraintEngineImpl::getVariableByKey(PSEntityKey id)
+  {
+    EntityId entity = Entity::getEntity(id);
+    check_runtime_error(entity.isValid());
+    return new PSVariableImpl(entity);
+  }
+
+  // TODO: this needs to be optimized
+  PSVariable* PSConstraintEngineImpl::getVariableByName(const std::string& name)
+  {
+    const ConstrainedVariableSet& vars = m_constraintEngine->getVariables();
+
+    for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
+    	ConstrainedVariableId v = *it;
+    	if (v->getName().toString() == name)
+            return new PSVariableImpl(*it);
+    }
+    
+    return NULL;
+  }
+
+  bool PSConstraintEngineImpl::getAllowViolations() const
+  {
+	return m_constraintEngine->getAllowViolations();
+  }
+
+  void PSConstraintEngineImpl::setAllowViolations(bool v)
+  {
+	  m_constraintEngine->setAllowViolations(v);
+  }
+
+  double PSConstraintEngineImpl::getViolation() const
+  {
+	  return m_constraintEngine->getViolation();
+  }
+
+  std::string PSConstraintEngineImpl::getViolationExpl() const
+  {
+	  return m_constraintEngine->getViolationExpl();
+  }
+
+  PSVariableImpl::PSVariableImpl(const ConstrainedVariableId& var) : PSVariable(var), m_var(var) 
+  {
     check_runtime_error(m_var.isValid());
     if(m_var->baseDomain().isString())
       m_type =  STRING;
@@ -166,8 +217,9 @@ namespace EUROPA {
 			"object, or rule: " << m_var->getParent()->toString());
     }
     */
-    return NULL;
+    return new PSEntity(parent);
   }
+  
   std::string PSVariableImpl::toString() {
     check_runtime_error(m_var.isValid());
     std::ostringstream os;
@@ -209,12 +261,11 @@ namespace EUROPA {
     return LabelStr(m_val).toString();
   }
   
-  PSObject* PSVarValue::asObject() const {
+  PSEntity* PSVarValue::asObject() const 
+  {
     check_runtime_error(m_type == OBJECT);
-    return NULL;
-    /* TODO: fixt his
-    return new PSObjectImpl(ObjectId(m_val));
-    */
+    /* TODO: provide hooks to return PSObject or other objects */
+    return new PSEntity(EntityId(m_val));
   }
 
   std::string PSVarValue::toString() const {
@@ -235,12 +286,9 @@ namespace EUROPA {
   		    break;
   		case OBJECT:
   		    {
-                os << "OBJECT: ERROR!! NOT SUPPORTED";
-                /* TODO: fix this
-  		        PSObject* obj = asObject();
+  		        PSEntity* obj = asObject();
                 os << "OBJECT:" << obj->getName() << "(" << obj->getKey() << ")";
                 delete obj;
-                */
   		    }
   		    break;
   		

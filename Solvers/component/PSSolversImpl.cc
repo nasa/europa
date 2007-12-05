@@ -6,6 +6,26 @@
 
 namespace EUROPA 
 {
+  PSSolverManagerImpl::PSSolverManagerImpl(ConstraintEngineId ce,PlanDatabaseId pdb,RulesEngineId re)
+    : m_planDatabase(pdb)
+  {
+    m_ppw = new SOLVERS::PlanWriter::PartialPlanWriter(pdb,ce,re);	  
+  }
+  
+  PSSolverManagerImpl::~PSSolverManagerImpl()
+  {
+	delete m_ppw;	  
+  }
+  
+  PSSolver* PSSolverManagerImpl::createSolver(const std::string& configurationFile) 
+  {
+    TiXmlDocument* doc = new TiXmlDocument(configurationFile.c_str());
+    doc->LoadFile();
+
+    SOLVERS::SolverId solver =
+    	(new SOLVERS::Solver(m_planDatabase, *(doc->RootElement())))->getId();
+    return new PSSolverImpl(solver,configurationFile, m_ppw);
+  }
 
   PSSolverImpl::PSSolverImpl(const SOLVERS::SolverId& solver, const std::string& configFilename,
 		     SOLVERS::PlanWriter::PartialPlanWriter* ppw) 

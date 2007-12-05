@@ -5,8 +5,36 @@
 
 namespace EUROPA {
 
+  class PSObject;
   class PSToken;
+
+  class ObjectWrapperGenerator 
+  {
+    public:
+      virtual ~ObjectWrapperGenerator() {}
+      virtual PSObject* wrap(const EntityId& obj) = 0;
+  };
+
   
+  class PSPlanDatabase : public EngineComponent
+  {
+    public:
+	  virtual ~PSPlanDatabase() {}
+
+	  virtual PSList<PSObject*> getObjectsByType(const std::string& objectType) = 0;
+	  virtual PSObject* getObjectByKey(PSEntityKey id) = 0;
+	  virtual PSObject* getObjectByName(const std::string& name) = 0;
+
+	  virtual PSList<PSToken*> getTokens() = 0;    	 
+	  virtual PSToken* getTokenByKey(PSEntityKey id) = 0;	
+
+	  virtual PSList<PSVariable*> getGlobalVariables() = 0;
+
+	  virtual void addObjectWrapperGenerator(const LabelStr& type,ObjectWrapperGenerator* wrapper) = 0;    
+	  
+	  virtual std::string toString() = 0;
+  };
+    
   class PSObject : public PSEntity
   {
     public:

@@ -2,13 +2,32 @@
 #define _H_PSSolversImpl
 
 #include "PSSolvers.hh"
+#include "ConstraintEngineDefs.hh"
+#include "PlanDatabaseDefs.hh"
+#include "RulesEngineDefs.hh"
 #include "SolverDefs.hh"
 
 namespace EUROPA
 {
+  class PSSolverManagerImpl : public PSSolverManager
+  {
+    public:
+      PSSolverManagerImpl(ConstraintEngineId ce,PlanDatabaseId pdb,RulesEngineId re);
+      virtual ~PSSolverManagerImpl();
+      
+      virtual PSSolver* createSolver(const std::string& configurationFile); 
+      
+    protected:
+      PlanDatabaseId m_planDatabase;	
+      SOLVERS::PlanWriter::PartialPlanWriter* m_ppw;          
+  };
+
   class PSSolverImpl : public PSSolver
   {
     public:
+      PSSolverImpl(const SOLVERS::SolverId& solver, 
+    		       const std::string& configFilename, 
+    		       SOLVERS::PlanWriter::PartialPlanWriter* ppw);
       virtual ~PSSolverImpl();
   
       virtual void step();
@@ -35,10 +54,6 @@ namespace EUROPA
       virtual void configure(int horizonStart, int horizonEnd);
 
     protected:
-    	friend class PSEngineImpl;
-    	PSSolverImpl(const SOLVERS::SolverId& solver, const std::string& configFilename,
-    			SOLVERS::PlanWriter::PartialPlanWriter* ppw);
-    private:
     	SOLVERS::SolverId m_solver;
     	std::string m_configFile;
     	SOLVERS::PlanWriter::PartialPlanWriter* m_ppw;

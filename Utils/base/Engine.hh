@@ -37,6 +37,7 @@ namespace EUROPA {
 	  EngineId& getId() { return m_id; }
 	  
 	  virtual EngineComponentId& getComponent(const std::string& name) = 0;
+	  virtual EngineComponent*   getComponentPtr(const std::string& name) {return (EngineComponent*)getComponent(name);} 
 	  
       virtual void addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter) = 0;
       virtual void removeLanguageInterpreter(const std::string& language) = 0;

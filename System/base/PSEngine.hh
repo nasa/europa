@@ -21,11 +21,19 @@ namespace EUROPA {
 	  virtual void start() = 0;
 	  virtual void shutdown() = 0;
 
-	  // Loads a planning model in binary format
-	  virtual void loadModel(const std::string& modelFileName) = 0;
-
+	  virtual void loadModel(const std::string& modelFileName) = 0; // Loads a planning model in binary format
 	  virtual std::string executeScript(const std::string& language, const std::string& script, bool isFile) = 0;
 
+	  // Constraint Engine methods
+	  virtual PSVariable* getVariableByKey(PSEntityKey id) = 0;
+	  virtual PSVariable* getVariableByName(const std::string& name) = 0;
+	  
+	  virtual bool getAllowViolations() const = 0;
+	  virtual void setAllowViolations(bool v) = 0;
+	  virtual double getViolation() const = 0;
+	  virtual std::string getViolationExpl() const = 0;    
+
+	  // Plan Database methods
 	  virtual PSList<PSObject*> getObjectsByType(const std::string& objectType) = 0;
 	  virtual PSObject* getObjectByKey(PSEntityKey id) = 0;
 	  virtual PSObject* getObjectByName(const std::string& name) = 0;
@@ -34,20 +42,16 @@ namespace EUROPA {
 	  virtual PSToken* getTokenByKey(PSEntityKey id) = 0;	
 
 	  virtual PSList<PSVariable*> getGlobalVariables() = 0;
-	  virtual PSVariable* getVariableByKey(PSEntityKey id) = 0;
-	  virtual PSVariable* getVariableByName(const std::string& name) = 0;
 
-	  virtual PSSolver* createSolver(const std::string& configurationFile) = 0;
 	  virtual std::string planDatabaseToString() = 0;
 
-	  virtual bool getAllowViolations() const = 0;
-	  virtual void setAllowViolations(bool v) = 0;
+	  // Solver methods
+	  virtual PSSolver* createSolver(const std::string& configurationFile) = 0;
 
-	  virtual double getViolation() const = 0;
-	  virtual std::string getViolationExpl() const = 0;    
-
-      virtual PSList<PSResource*> getResourcesByType(const std::string& objectType) = 0;
+	  // Resource methods
+	  // TODO: this should go away once we figure out SWIG wrapping issues
       virtual PSResource* getResourceByKey(PSEntityKey id) = 0;	  
+      virtual PSList<PSResource*> getResourcesByType(const std::string& objectType) = 0;
   };
   
 }	

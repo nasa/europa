@@ -5,40 +5,17 @@
  
 #include "PSEngineImpl.hh"
 
-// Utils
 #include "LabelStr.hh"
 #include "Pdlfcn.hh"
-
-// ConstraintEngine
-#include "PSConstraintEngineImpl.hh"
-#include "ConstraintEngine.hh"
-#include "ConstrainedVariable.hh"
-
-// PlanDatabase
-#include "PSPlanDatabaseImpl.hh"
 #include "Schema.hh"
-#include "PlanDatabase.hh"
-#include "Object.hh"
-#include "Token.hh"
-#include "TokenVariable.hh"
-#include "EntityIterator.hh"
 
-// RulesEngine
-#include "Rule.hh"
-
-// Solver
+#include "PSConstraintEngineImpl.hh"
+#include "PSPlanDatabaseImpl.hh"
 #include "PSSolversImpl.hh"
-#include "PlanDatabaseWriter.hh"
-#include "SolverPartialPlanWriter.hh"
-
-// TODO: get rid of all the #ifdefs by providing a query language on the PlanDatabase
-// so, for instance, ResourceProfiles can just be a query on a Resource object
+// TODO: get rid of all the #ifdefs 
 #ifndef NO_RESOURCES
 #include "PSResourceImpl.hh"
-#include "SAVH_Resource.hh"
 #endif
-
-#include <fstream>
 
 namespace EUROPA {
   
@@ -59,7 +36,6 @@ namespace EUROPA {
 
   PSEngineImpl::PSEngineImpl() 
       : m_started(false)
-      , m_ppw(NULL)
   {
   }
 
@@ -71,6 +47,8 @@ namespace EUROPA {
 
   void PSEngineImpl::initialize()
   {
+    Error::doThrowExceptions(); // throw exceptions!
+    Error::doDisplayErrors();    
 	EngineBase::initialize();  
   }
   
@@ -84,14 +62,7 @@ namespace EUROPA {
 	if (m_started)
 		return;
 	
-    Error::doThrowExceptions(); // throw exceptions!
-    Error::doDisplayErrors();    
-    check_runtime_error(m_constraintEngine.isNoId());
-    check_runtime_error(m_planDatabase.isNoId());
-    check_runtime_error(m_rulesEngine.isNoId());
-    
     allocateComponents();   
-    registerObjectWrappers();
     m_started = true;
   }
 
@@ -107,21 +78,39 @@ namespace EUROPA {
   void PSEngineImpl::allocateComponents()
   {
 	  EngineBase::allocateComponents();
-	  // TODO: this needs to be moved to PSSolver
-	  m_ppw = new SOLVERS::PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine, m_rulesEngine);
+	  m_psConstraintEngine = new PSConstraintEngineImpl(m_constraintEngine);
+	  m_psPlanDatabase = new PSPlanDatabaseImpl(m_planDatabase);
+	  m_psSolverManager = new PSSolverManagerImpl(m_constraintEngine,m_planDatabase,m_rulesEngine);
+#ifndef NO_RESOURCES
+	  m_psResourceManager = new PSResourceManagerImpl(m_planDatabase);
+#endif	  
   }
   
   void PSEngineImpl::deallocateComponents()
   {
-	  if(m_ppw != NULL) {
-	     delete m_ppw;
-	     m_ppw = NULL;
-	  }
-	  
+	  delete m_psConstraintEngine;
+	  delete m_psPlanDatabase;
+	  delete m_psSolverManager;
+#ifndef NO_RESOURCES
+	  delete m_psResourceManager;
+#endif	  
 	  EngineBase::deallocateComponents();
   }
   
-  void PSEngineImpl::loadModel(const std::string& modelFileName) {
+  EngineComponent* PSEngineImpl::getComponentPtr(const std::string& name)
+  {
+  	  if (name == "PSConstraintEngine")
+  		  return (EngineComponent*)m_psConstraintEngine;
+  	  if (name == "PSPlanDatabase")
+  		  return (EngineComponent*)m_psPlanDatabase;
+  	  if (name == "PSSolverManager")
+  		  return (EngineComponent*)m_psSolverManager;
+  	  
+      return EngineBase::getComponent(name);  	
+  }   
+  
+  void PSEngineImpl::loadModel(const std::string& modelFileName) 
+  {
     check_runtime_error(m_started,"PSEngine has not been started");
 	    
     void* libHandle = p_dlopen(modelFileName.c_str(), RTLD_NOW);
@@ -142,104 +131,60 @@ namespace EUROPA {
     return EngineBase::executeScript(language,script,isFile);
   }
 
-  PSList<PSObject*> PSEngineImpl::getObjectsByType(const std::string& objectType) {
+  // Plan Database methods
+  PSList<PSObject*> PSEngineImpl::getObjectsByType(const std::string& objectType) 
+  {
     check_runtime_error(m_started,"PSEngine has not been started");
-    
-    PSList<PSObject*> retval;
-    
-    const ObjectSet& objects = m_planDatabase->getObjects();
-    for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
-      ObjectId object = *it;
-      if(Schema::instance()->isA(object->getType(), objectType.c_str()))
-	retval.push_back(getObjectWrapperGenerator(object->getType())->wrap(object));
-    }
-    
-    return retval;
+    return m_psPlanDatabase->getObjectsByType(objectType);  
   }
 
   PSObject* PSEngineImpl::getObjectByKey(PSEntityKey id) 
   {
     check_runtime_error(m_started,"PSEngine has not been started");
-
-    EntityId entity = Entity::getEntity(id);
-    check_runtime_error(entity.isValid());
-    return new PSObjectImpl(entity);
+    return m_psPlanDatabase->getObjectByKey(id);  
   }
 
-  PSObject* PSEngineImpl::getObjectByName(const std::string& name) {
+  PSObject* PSEngineImpl::getObjectByName(const std::string& name) 
+  {
     check_runtime_error(m_started,"PSEngine has not been started");
-    ObjectId obj = m_planDatabase->getObject(LabelStr(name));
-    check_runtime_error(obj.isValid());
-    return new PSObjectImpl(obj);
+    return m_psPlanDatabase->getObjectByName(name);  
   }
 
-  PSList<PSToken*> PSEngineImpl::getTokens() {
+  PSList<PSToken*> PSEngineImpl::getTokens() 
+  {
     check_runtime_error(m_started,"PSEngine has not been started");
-
-    const TokenSet& tokens = m_planDatabase->getTokens();
-    PSList<PSToken*> retval;
-
-    for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
-      PSToken* tok = new PSTokenImpl(*it);
-      retval.push_back(tok);
-    }
-    return retval;
+    return m_psPlanDatabase->getTokens();  
   }
 
   PSToken* PSEngineImpl::getTokenByKey(PSEntityKey id) 
   {
     check_runtime_error(m_started,"PSEngine has not been started");
-
-    EntityId entity = Entity::getEntity(id);
-    check_runtime_error(entity.isValid());
-    return new PSTokenImpl(entity);
+    return m_psPlanDatabase->getTokenByKey(id);  
   }
 
-  PSList<PSVariable*>  PSEngineImpl::getGlobalVariables() {
+  PSList<PSVariable*>  PSEngineImpl::getGlobalVariables() 
+  {
     check_runtime_error(m_started,"PSEngine has not been started");
-
-    const ConstrainedVariableSet& vars = m_planDatabase->getGlobalVariables();
-    PSList<PSVariable*> retval;
-
-    for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
-      PSVariable* v = new PSVariableImpl(*it);
-      retval.push_back(v);
-    }
-    return retval;
+    return m_psPlanDatabase->getGlobalVariables();  
   }  
 
+  std::string PSEngineImpl::planDatabaseToString() 
+  {
+    check_runtime_error(m_started,"PSEngine has not been started");
+	return m_psPlanDatabase->toString();  
+  }
+
+  // Constraint Engine methods
   PSVariable* PSEngineImpl::getVariableByKey(PSEntityKey id)
   {
     check_runtime_error(m_started,"PSEngine has not been started");
-    EntityId entity = Entity::getEntity(id);
-    check_runtime_error(entity.isValid());
-    return new PSVariableImpl(entity);
+	return m_psConstraintEngine->getVariableByKey(id);  
   }
 
-  // TODO: this needs to be optimized
   PSVariable* PSEngineImpl::getVariableByName(const std::string& name)
   {
     check_runtime_error(m_started,"PSEngine has not been started");
-    const ConstrainedVariableSet& vars = m_constraintEngine->getVariables();
-
-    for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
-    	ConstrainedVariableId v = *it;
-    	if (v->getName().toString() == name)
-            return new PSVariableImpl(*it);
-    }
-    
-    return NULL;
-  }
-
-  PSSolver* PSEngineImpl::createSolver(const std::string& configurationFile) 
-  {
-    check_runtime_error(m_started,"PSEngine has not been started");
-    TiXmlDocument* doc = new TiXmlDocument(configurationFile.c_str());
-    doc->LoadFile();
-
-    SOLVERS::SolverId solver =
-      (new SOLVERS::Solver(m_planDatabase, *(doc->RootElement())))->getId();
-    return new PSSolverImpl(solver,configurationFile, m_ppw);
+	return m_psConstraintEngine->getVariableByName(name);  
   }
 
   bool PSEngineImpl::getAllowViolations() const
@@ -261,56 +206,24 @@ namespace EUROPA {
   {
   	return m_constraintEngine->getViolationExpl();
   }
-   
-   std::string PSEngineImpl::planDatabaseToString() {
-      PlanDatabaseWriter* pdw = new PlanDatabaseWriter();
-      std::string planOutput = pdw->toString(m_planDatabase);
-      delete pdw;
-      return planOutput;
-   }
 
-   class BaseObjectWrapperGenerator : public ObjectWrapperGenerator 
-   {
-     public:
- 	  PSObject* wrap(const ObjectId& obj) {
- 		  return new PSObjectImpl(obj);
- 	  }
-   };
+  // Solver methods
+  PSSolver* PSEngineImpl::createSolver(const std::string& configurationFile) 
+  {
+    check_runtime_error(m_started,"PSEngine has not been started");
+    return m_psSolverManager->createSolver(configurationFile);
+  }
 
 #ifndef NO_RESOURCES
-   class ResourceWrapperGenerator : public ObjectWrapperGenerator 
-   {
-   public:
-     PSObject* wrap(const ObjectId& obj) {
-       checkRuntimeError(SAVH::ResourceId::convertable(obj),
- 			"Object " << obj->toString() << " is not a resource.");
-       return new PSResourceImpl(SAVH::ResourceId(obj));
-     }
-   }; 
-
    PSList<PSResource*> PSEngineImpl::getResourcesByType(const std::string& objectType) {
      check_runtime_error(m_started,"PSEngine has not been started");
-     
-     PSList<PSResource*> retval;
-     
-     const ObjectSet& objects = m_planDatabase->getObjects();
-     for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
-       ObjectId object = *it;
-       if(Schema::instance()->isA(object->getType(), objectType.c_str()))
- 	    retval.push_back(dynamic_cast<PSResource*>(getObjectWrapperGenerator(object->getType())->wrap(object)));
-     }
-     
-     return retval;
+     return m_psResourceManager->getResourcesByType(objectType);
    }
    
    PSResource* PSEngineImpl::getResourceByKey(PSEntityKey id) {
      check_runtime_error(m_started,"PSEngine has not been started");
-
-     EntityId entity = Entity::getEntity(id);
-     check_runtime_error(entity.isValid());
-     return new PSResourceImpl(entity);
-   }  
-   
+     return m_psResourceManager->getResourceByKey(id);
+   }    
 #else
    PSList<PSResource*> PSEngineImpl::getResourcesByType(const std::string& objectType) {
      check_runtime_error(ALWAYS_FAIL,"PSEngine was built without resource module");     
@@ -322,40 +235,6 @@ namespace EUROPA {
      check_runtime_error(ALWAYS_FAIL,"PSEngine was built without resource module");
      return NULL;
    }      
-#endif     
-   
-   void PSEngineImpl::registerObjectWrappers()
-   {
-       addObjectWrapperGenerator("Object", new BaseObjectWrapperGenerator());	  
-#ifndef NO_RESOURCES
-       addObjectWrapperGenerator("Reservoir", new ResourceWrapperGenerator());
-       addObjectWrapperGenerator("Reusable", new ResourceWrapperGenerator());
-       addObjectWrapperGenerator("Unary", new ResourceWrapperGenerator());
-#endif     
-   }
-   
-  void PSEngineImpl::addObjectWrapperGenerator(const LabelStr& type,
-					   ObjectWrapperGenerator* wrapper) {
-    std::map<double, ObjectWrapperGenerator*>::iterator it =
-      m_objectWrapperGenerators.find(type);
-    if(it == m_objectWrapperGenerators.end())
-      m_objectWrapperGenerators.insert(std::make_pair(type, wrapper));
-    else {
-      delete it->second;
-      it->second = wrapper;
-    }
-  }
-
-  ObjectWrapperGenerator* PSEngineImpl::getObjectWrapperGenerator(const LabelStr& type) {
-    const std::vector<LabelStr>& types = Schema::instance()->getAllObjectTypes(type);
-    for(std::vector<LabelStr>::const_iterator it = types.begin(); it != types.end(); ++it) {
-      std::map<double, ObjectWrapperGenerator*>::iterator wrapper = m_objectWrapperGenerators.find(*it);
-      if(wrapper != m_objectWrapperGenerators.end())
-          return wrapper->second;
-    }
-    checkRuntimeError(ALWAYS_FAIL,"Don't know how to wrap objects of type " << type.toString());
-    return NULL;
-  }
-  
+#endif        
 }
 

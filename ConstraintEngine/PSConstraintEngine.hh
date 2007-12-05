@@ -1,14 +1,31 @@
 #ifndef _H_PSConstraintEngine
 #define _H_PSConstraintEngine
 
+#include "Engine.hh"
 #include "PSUtils.hh"
 
 namespace EUROPA {
 
-  enum PSVarType {OBJECT,STRING,INTEGER,DOUBLE,BOOLEAN};
+  enum PSVarType {INTEGER,DOUBLE,BOOLEAN,STRING,OBJECT};
 
+  class PSVariable;
   class PSVarValue;
   class PSObject;
+  
+  class PSConstraintEngine : public EngineComponent
+  {
+    public:
+      virtual ~PSConstraintEngine() {}
+    	
+	  virtual PSVariable* getVariableByKey(PSEntityKey id) = 0;
+	  virtual PSVariable* getVariableByName(const std::string& name) = 0;
+	  
+  	  virtual bool getAllowViolations() const = 0;
+  	  virtual void setAllowViolations(bool v) = 0;
+
+  	  virtual double getViolation() const = 0;
+  	  virtual std::string getViolationExpl() const = 0;    
+  };
   
   class PSVariable : public PSEntity
   {
@@ -50,7 +67,7 @@ namespace EUROPA {
 	  PSVarValue(const double val, const PSVarType type);
 	  PSVarType getType() const;
 
-	  PSObject*           asObject() const;
+	  PSEntity*           asObject() const;
 	  int                 asInt() const;
 	  double              asDouble() const;
 	  bool                asBoolean() const;
@@ -62,7 +79,7 @@ namespace EUROPA {
 	  static PSVarValue getInstance(int val) {return PSVarValue((double)val, INTEGER);}
 	  static PSVarValue getInstance(double val) {return PSVarValue((double)val, DOUBLE);}
 	  static PSVarValue getInstance(bool val) {return PSVarValue((double)val, BOOLEAN);}
-	  static PSVarValue getObjectInstance(double obj) {return PSVarValue(obj, OBJECT);} // cast an ObjectId to double to call this
+	  static PSVarValue getObjectInstance(double obj) {return PSVarValue(obj, OBJECT);} // cast an EntityId to double to call this
 
     private:
 	  double m_val;

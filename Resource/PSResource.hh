@@ -1,6 +1,7 @@
 #ifndef _H_PSResource
 #define _H_PSResource
 
+#include "Engine.hh"
 #include "PSUtils.hh"
 #include "PSPlanDatabase.hh"
 
@@ -8,7 +9,17 @@ namespace EUROPA {
 
   typedef int TimePoint;
 
+  class PSResource;
   class PSResourceProfile;
+  
+  class PSResourceManager : public EngineComponent
+  {
+    public:
+      virtual ~PSResourceManager() {}
+
+      virtual PSResource* getResourceByKey(PSEntityKey id) = 0;	              
+      virtual PSList<PSResource*> getResourcesByType(const std::string& objectType) = 0;
+  };
   
   class PSResource : public virtual PSObject
   {
@@ -20,6 +31,8 @@ namespace EUROPA {
       virtual PSResourceProfile* getLevels() = 0;        	  
     
       virtual PSList<PSEntityKey> getOrderingChoices(TimePoint t) = 0;    
+      
+      static PSResource* asPSResource(PSObject* obj);
   };   
     
   class PSResourceProfile

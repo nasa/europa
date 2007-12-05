@@ -2,13 +2,42 @@
 #define _H_PSPlanDatabaseImpl
 
 #include "PSPlanDatabase.hh"
+#include "ConstraintEngineDefs.hh"
 #include "PlanDatabaseDefs.hh"
+#include <map>
 
 namespace EUROPA {
+
+  class PSPlanDatabaseImpl : public PSPlanDatabase
+  {
+    public:
+      PSPlanDatabaseImpl(PlanDatabaseId& pdb);	
+	  virtual ~PSPlanDatabaseImpl();
+
+	  virtual PSList<PSObject*> getObjectsByType(const std::string& objectType);
+	  virtual PSObject* getObjectByKey(PSEntityKey id);
+	  virtual PSObject* getObjectByName(const std::string& name);
+
+	  virtual PSList<PSToken*> getTokens();    	 
+	  virtual PSToken* getTokenByKey(PSEntityKey id);	
+
+	  virtual PSList<PSVariable*> getGlobalVariables();
+
+	  virtual std::string toString();
+
+	  virtual void addObjectWrapperGenerator(const LabelStr& type,ObjectWrapperGenerator* wrapper);    
+	  
+    protected:
+      PlanDatabaseId m_planDatabase;	
+      std::map<double, ObjectWrapperGenerator*> m_objectWrapperGenerators;            
+
+      ObjectWrapperGenerator* getObjectWrapperGenerator(const LabelStr& type);
+  };
 
   class PSObjectImpl : public virtual PSObject
   {
     public:
+      PSObjectImpl(const ObjectId& obj);
       virtual ~PSObjectImpl();
   
       virtual const std::string& getEntityType() const;
@@ -24,20 +53,13 @@ namespace EUROPA {
       virtual void removePrecedence(PSToken* pred,PSToken* succ);
 
     protected:
-    	friend class PSEngineImpl;
-    	friend class PSTokenImpl;
-    	friend class PSVarValue;
-    	friend class PSVariableImpl;
-    	friend class BaseObjectWrapperGenerator;
-    	PSObjectImpl(const ObjectId& obj);
-
-    private:
     	ObjectId m_obj;
   };
 
   class PSTokenImpl : public PSToken
   {	    
     public:
+      PSTokenImpl(const TokenId& tok);
       virtual ~PSTokenImpl() {}
 
       virtual const std::string& getEntityType() const;
@@ -66,11 +88,6 @@ namespace EUROPA {
       virtual std::string toString();
 
     protected:
-    	friend class PSEngineImpl;
-    	friend class PSObjectImpl;
-    	friend class PSVariableImpl;
-    	PSTokenImpl(const TokenId& tok);
-
     	TokenId m_tok;
   };      
   

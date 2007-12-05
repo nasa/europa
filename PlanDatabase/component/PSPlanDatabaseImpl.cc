@@ -1,12 +1,119 @@
 
 #include "PSPlanDatabaseImpl.hh"
 #include "PSConstraintEngineImpl.hh"
+#include "PlanDatabaseWriter.hh"
 #include "Object.hh"
 #include "Token.hh"
 #include "TokenVariable.hh"
+#include <sstream>
 
 namespace EUROPA 
 {
+  class BaseObjectWrapperGenerator : public ObjectWrapperGenerator 
+  {
+    public:
+    	PSObject* wrap(const EntityId& obj) {
+    		return new PSObjectImpl(obj);
+    	}
+  };
+
+  PSPlanDatabaseImpl::PSPlanDatabaseImpl(PlanDatabaseId& pdb) 
+    : m_planDatabase(pdb) 
+  {
+      addObjectWrapperGenerator("Object", new BaseObjectWrapperGenerator());	  	  
+  }	
+  
+  PSPlanDatabaseImpl::~PSPlanDatabaseImpl() {}
+
+  PSList<PSObject*> PSPlanDatabaseImpl::getObjectsByType(const std::string& objectType) 
+  {
+    PSList<PSObject*> retval;
+
+    const ObjectSet& objects = m_planDatabase->getObjects();
+    for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
+    	ObjectId object = *it;
+    	if(Schema::instance()->isA(object->getType(), objectType.c_str()))
+    		retval.push_back(getObjectWrapperGenerator(object->getType())->wrap(object));
+    }
+
+    return retval;
+  }
+  PSObject* PSPlanDatabaseImpl::getObjectByKey(PSEntityKey id) 
+  {
+    EntityId entity = Entity::getEntity(id);
+    check_runtime_error(entity.isValid());
+    return new PSObjectImpl(entity);
+  }
+
+  PSObject* PSPlanDatabaseImpl::getObjectByName(const std::string& name) {
+    ObjectId obj = m_planDatabase->getObject(LabelStr(name));
+    check_runtime_error(obj.isValid());
+    return new PSObjectImpl(obj);
+  }
+
+  PSList<PSToken*> PSPlanDatabaseImpl::getTokens() {
+    const TokenSet& tokens = m_planDatabase->getTokens();
+    PSList<PSToken*> retval;
+
+    for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+      PSToken* tok = new PSTokenImpl(*it);
+      retval.push_back(tok);
+    }
+    
+    return retval;
+  }
+
+  PSToken* PSPlanDatabaseImpl::getTokenByKey(PSEntityKey id) 
+  {
+
+    EntityId entity = Entity::getEntity(id);
+    check_runtime_error(entity.isValid());
+    return new PSTokenImpl(entity);
+  }
+
+  PSList<PSVariable*>  PSPlanDatabaseImpl::getGlobalVariables() {
+
+    const ConstrainedVariableSet& vars = m_planDatabase->getGlobalVariables();
+    PSList<PSVariable*> retval;
+
+    for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
+      PSVariable* v = new PSVariableImpl(*it);
+      retval.push_back(v);
+    }
+    return retval;
+  }  
+
+  std::string PSPlanDatabaseImpl::toString() 
+  {
+      PlanDatabaseWriter* pdw = new PlanDatabaseWriter();
+      std::string planOutput = pdw->toString(m_planDatabase);
+      delete pdw;
+      return planOutput;
+  }
+
+  void PSPlanDatabaseImpl::addObjectWrapperGenerator(const LabelStr& type,
+					   ObjectWrapperGenerator* wrapper) {
+    std::map<double, ObjectWrapperGenerator*>::iterator it =
+      m_objectWrapperGenerators.find(type);
+    if(it == m_objectWrapperGenerators.end())
+      m_objectWrapperGenerators.insert(std::make_pair(type, wrapper));
+    else {
+      delete it->second;
+      it->second = wrapper;
+    }
+  }
+
+  ObjectWrapperGenerator* PSPlanDatabaseImpl::getObjectWrapperGenerator(const LabelStr& type) {
+    const std::vector<LabelStr>& types = Schema::instance()->getAllObjectTypes(type);
+    for(std::vector<LabelStr>::const_iterator it = types.begin(); it != types.end(); ++it) {
+      std::map<double, ObjectWrapperGenerator*>::iterator wrapper = m_objectWrapperGenerators.find(*it);
+      if(wrapper != m_objectWrapperGenerators.end())
+          return wrapper->second;
+    }
+    checkRuntimeError(ALWAYS_FAIL,"Don't know how to wrap objects of type " << type.toString());
+    return NULL;
+  }
+    
   PSObjectImpl::PSObjectImpl(const ObjectId& obj) : PSObject(obj), m_obj(obj) {
   }
 
