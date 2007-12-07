@@ -123,7 +123,7 @@
 <entry excluding="**/test/**" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Resource"/>
 <entry excluding="**/test/**" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="RulesEngine"/>
 <entry excluding="**/test/**|component/SolverConfig.cc" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Solvers"/>
-<entry excluding="**/test/**|component/ANMLPSInterpreter.cc|base/PSEngineResources_wrap.cc|component/Main.cc" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="System"/>
+<entry excluding="**/test/**|base/PSEngine_wrap.cc|component/Main.cc" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="System"/>
 <entry excluding="**/test/**" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="TemporalNetwork"/>
 <entry excluding="**/test/**" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="TinyXml"/>
 <entry excluding="**/test/**" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Utils"/>
