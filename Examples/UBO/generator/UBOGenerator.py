@@ -137,6 +137,9 @@ addEq(maxDuration,1,maxDurationPlusOne);
             print >>buf,'ActivityTimeline at%d = new ActivityTimeline(%d);' % (act.id,act.id)
         print >>buf,''
                 
+        print >>buf,'close();'
+        print >>buf,''
+                
         for act in self.activities:
             print >>buf,'goal( problem.Activity activity%d );' % (act.id,)
             print >>buf,'eq( activity%d.duration, %d );' % (act.id,act.duration)
