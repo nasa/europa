@@ -11,7 +11,7 @@ import org.ops.ui.util.SimpleTimer;
 public class IFlatIRelaxSolver 
 {
     int nbStable_ = 0;       
-	int maxStable_ = 100;
+	int maxStable_ = 10000;
     SimpleTimer timer_;
     boolean timedOut_;
 
@@ -60,10 +60,10 @@ public class IFlatIRelaxSolver
 
     public boolean timedOut() { return timedOut_; }
     public long getElapsedMsecs() { return timer_.getElapsed(); }
+    public int getBestMakespan() { return bestMakespan_; }
     
-    protected Resource makeResource(PSResource r)
+    protected Resource makeResource(PSResource r,int capacity)
     {
-    	int capacity=10;// TODO: don't hardcode capacity
     	if (usePSResources_)
     		return new PSResourceWrapper(psengine_,r,capacity);
     	else
@@ -82,8 +82,13 @@ public class IFlatIRelaxSolver
         List<PSResource> res = PSUtil.toResourceList(psengine.getObjectsByType("CapacityResource"));
         resources_ = new Vector<Resource>();
         
-        for (PSResource r : res) 
-        	resources_.add(makeResource(r));
+        for (PSResource r : res) {
+            PSResourceProfile prof = r.getLimits();
+            int t = prof.getTimes().get(0);
+            int capacity = (int) prof.getUpperBound(t);
+            //RCPSPUtil.dbgout("capacity for resource "+r.getName()+" is "+capacity);
+        	resources_.add(makeResource(r,capacity));
+        }
         
         PSTokenList tokens = psengine.getTokens();
         activities_ = new TreeMap<Integer,PSToken>();
@@ -154,7 +159,7 @@ public class IFlatIRelaxSolver
     	    }
     	}
     	
-    	RCPSPUtil.dbgout("Removed "+(before-precedences_.size())+" out of "+before+" precedences");
+    	//RCPSPUtil.dbgout("Removed "+(before-precedences_.size())+" out of "+before+" precedences");
     }
     
     /*
@@ -238,14 +243,14 @@ public class IFlatIRelaxSolver
 	    //RCPSPUtil.dbgout("removing {"+RCPSPUtil.getActivity(p.pred)+"<"+RCPSPUtil.getActivity(p.succ)+"} because of "+p.res.getName());
 		p.res.removePrecedence(p.pred,p.succ);
 		precedences_.remove(p);
-	    RCPSPUtil.dbgout("removed {"+RCPSPUtil.getActivity(p.pred)+"<"+RCPSPUtil.getActivity(p.succ)+"} because of "+p.res.getName());    	
+	    //RCPSPUtil.dbgout("removed {"+RCPSPUtil.getActivity(p.pred)+"<"+RCPSPUtil.getActivity(p.succ)+"} because of "+p.res.getName());    	
     }
     
     protected void updateSolution(int iteration)
     {    	
     	int newMakespan = getMakespan();
     	String violationMsg = (hasViolations_ ? " with violations" : "");
-		RCPSPUtil.dbgout("Iteration "+iteration+": found makespan "+newMakespan+violationMsg);
+		//RCPSPUtil.dbgout("Iteration "+iteration+": found makespan "+newMakespan+violationMsg);
     	
     	if (newMakespan < bestMakespan_ && !hasViolations_) {
     		bestMakespan_ = newMakespan;

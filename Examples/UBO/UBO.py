@@ -67,7 +67,7 @@ class Problem:
         words = line.split()
         actIdx = int(words[0])
         act = self.activities[actIdx]
-        act.duration = int(words[2])
+        act.duration = max(int(words[2]),1) # can't deal with 0 duration
         for j in xrange(resourceCnt):
             act.resUsages.append(int(words[j+3]))
 
@@ -115,12 +115,10 @@ PlannerConfig c = new PlannerConfig(0, 1000, +inf, +inf );
 
 ProblemInstance problem = new ProblemInstance();
 
-// Proven minimum duration for this problem is 45
-
 int maxDuration;
 int maxDurationPlusOne;
 
-maxDuration.specify(60);
+maxDuration.specify(1000);
 addEq(maxDuration,1,maxDurationPlusOne);
 '''        
         for r in self.resources:
@@ -133,6 +131,8 @@ addEq(maxDuration,1,maxDurationPlusOne);
                     # TODO: generate at least one allocation per activity?
                     print >>buf,'Allocation a%d = new Allocation( resource%d , %d , %d.0 );' % (i,j,act.id,act.resUsages[j])
                     i+=1
+        print >>buf,'Allocation a%d = new Allocation( resource%d , %d , %d.0 );' % (i,0,self.activities[0].id,0) ; i+=1
+        print >>buf,'Allocation a%d = new Allocation( resource%d , %d , %d.0 );' % (i,0,self.activities[len(self.activities)-1].id,0) ; i+=1
         print >>buf,''
             
         for act in self.activities:
@@ -207,8 +207,8 @@ class TestRunner:
                 cmd = 'ant'+\
                     ' -Dproject.mode=o'+\
                     ' -Dproject.test='+p[0]+\
-                    ' -Dproject.bound='+p[1]+\
-                    ' -Dproject.timeout='+timeoutSecs+\
+                    ' -Dproject.bound='+str(int(p[1])+2)+\
+                    ' -Dproject.timeout='+str(timeoutSecs)+\
                     ' -Dproject.solver='+s
                 print cmd 
                 os.system(cmd)

@@ -57,8 +57,8 @@ public class RCPSPResource extends ResourceBase
 			}
 		}
 		
-		if (lowestTime>=0)
-		   RCPSPUtil.dbgout("MaxViolation for "+res_.getName()+" "+lowestLevel+" at time "+lowestTime);
+		//if (lowestTime>=0)
+		//   RCPSPUtil.dbgout("MaxViolation for "+res_.getName()+" "+lowestLevel+" at time "+lowestTime);
 		
 		return lowestTime;    	
     }

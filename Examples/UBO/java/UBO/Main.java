@@ -96,7 +96,7 @@ class Main
         
         // Save results
         // test-name bound best-makespan time-in-msecs solution
-        int makespan = (s.getMakespan() != Integer.MAX_VALUE ? s.getMakespan() : 0);
+        int makespan = (s.getBestMakespan() != Integer.MAX_VALUE ? s.getMakespan() : 0);
         StringBuffer buf = new StringBuffer();
         String separator="    ";
         buf.append(test).append(separator)
