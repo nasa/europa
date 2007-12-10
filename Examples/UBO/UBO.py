@@ -1,3 +1,5 @@
+
+import os
 import sys
 import StringIO
 
@@ -64,7 +66,7 @@ class Problem:
     def readResourceUsage(self,line,resourceCnt):
         words = line.split()
         actIdx = int(words[0])
-        act = p.activities[actIdx]
+        act = self.activities[actIdx]
         act.duration = int(words[2])
         for j in xrange(resourceCnt):
             act.resUsages.append(int(words[j+3]))
@@ -89,7 +91,7 @@ class Problem:
         words = line.split()
         for i in xrange(resourceCnt):
             r = Resource()
-            p.resources.append(r)
+            self.resources.append(r)
             r.id = i
             r.capacity = int(words[i])
         
@@ -173,12 +175,42 @@ addEq(maxDuration,1,maxDurationPlusOne);
         return buf.getvalue()
         
 
-filename = sys.argv[1]
-#"/home/javier/research/RCPSP/problems/testset_ubo10/psp2.sch"
-print "filename is:"+filename        
-p = Problem()   
-p.readFromFile(filename)
-print p.toString()    
-print p.toNddl()    
-        
+class TestRunner:
+    def __init__(self,test_dir,benchmark_file):
+        self.test_dir = test_dir
+        self.benchmark_file = benchmark_file
+        self.problems = [] 
+         
+    def readProblems(self):
+        file = open(self.test_dir+'/'+self.benchmark_file)
+        for line in file:
+            if (line.startswith('UBO')):
+               words = line.split()
+               test_file = (words[0].split('-'))[1]
+               test_file = 'psp'+test_file.lstrip('0')+'.sch'
+               bound = words[1]
+               if (bound != 'inf'):
+                   self.problems.append((test_file,bound))
+         
+    def runTests(self,timeoutSecs):
+        self.readProblems()
+        solvers = ['BuiltIn','IFIR']
+        data_dir = self.test_dir+'/testset'+self.benchmark_file.lstrip('benchmarks').rstrip('.txt')
+        for p in self.problems:
+            problem = Problem()
+            problem.readFromFile(data_dir+'/'+p[0])
+            nddl = problem.toNddl()
+            out = open('UBO-gen-initial-state.nddl','w')
+            print >>out,nddl
+            out.close()
+            for s in solvers:
+                cmd = 'ant'+\
+                    ' -Dproject.mode=o'+\
+                    ' -Dproject.test='+p[0]+\
+                    ' -Dproject.bound='+p[1]+\
+                    ' -Dproject.timeout='+timeoutSecs+\
+                    ' -Dproject.solver='+s
+                print cmd 
+                os.system(cmd)
+                                    
          
