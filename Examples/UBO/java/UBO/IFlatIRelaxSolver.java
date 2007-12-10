@@ -13,6 +13,7 @@ public class IFlatIRelaxSolver
     int nbStable_ = 0;       
 	int maxStable_ = 100;
     SimpleTimer timer_;
+    boolean timedOut_;
 
     int bestMakespan_;
     int makespanBound_;
@@ -29,13 +30,13 @@ public class IFlatIRelaxSolver
     
     // TODO: pass in problem definition to be able to compute critical path
     public void solve(PSEngine psengine,
-    		          int maxIterations,
+    		          long timeout, // in msecs
     		          int bound, 
     		          boolean usePSResources)
     {
        init(psengine,bound,usePSResources);
        
-       for (int i=0; i<maxIterations; i++) {
+       for (int i=0; true ; i++) {
           flatten();
           updateSolution(i);
           updateCriticalPrecedences();
@@ -43,14 +44,22 @@ public class IFlatIRelaxSolver
           if ((nbStable_ > maxStable_) || (bestMakespan_ <= makespanBound_))
              break;
           
+          if (timer_.getElapsed() > timeout) {
+              timedOut_ = true;
+              break;
+          }
+          
           relax();
        }       
 
        restoreBestSolution();
+       timer_.stop();
        RCPSPUtil.dbgout("IFlatIrelax.solve() done in "+timer_.getElapsedString());
        RCPSPUtil.dbgout("best makespan is "+bestMakespan_+" for solution "+getSolutionAsString());
     }
-    
+
+    public boolean timedOut() { return timedOut_; }
+    public long getElapsedMsecs() { return timer_.getElapsed(); }
     
     protected Resource makeResource(PSResource r)
     {
@@ -64,7 +73,8 @@ public class IFlatIRelaxSolver
     protected void init(PSEngine psengine,int bound, boolean usePSResources)
     {
         timer_ = new SimpleTimer();
-
+        timedOut_ = false;
+        
         psengine_ = psengine;
         makespanBound_ = bound;
         usePSResources_ = usePSResources;
@@ -314,7 +324,7 @@ public class IFlatIRelaxSolver
         return buf.toString();        	        	
     }
     
-    protected String getSolutionAsString()
+    public String getSolutionAsString()
     {
     	StringBuffer buf = new StringBuffer();
     	

@@ -80,10 +80,10 @@ void showHistory()
     desktop.makeTableFrame("Plan History",listener.getPlanHistory(),fields2);
 }
 
-IFlatIRelaxSolver runIFIR(int maxIterations,int bound, boolean usePSResources)
+IFlatIRelaxSolver runIFIR(long timeout,int bound, boolean usePSResources)
 {
 	s = new IFlatIRelaxSolver();
-	s.solve(psengine,maxIterations,bound,usePSResources);
+	s.solve(psengine,timeout,bound,usePSResources);
 	RCPSPUtil.ground(s.getActivities());
 	
 	return s;
@@ -137,7 +137,7 @@ catch (Exception e) {
   	System.err.println("Failed Initializing : "+e.getMessage());
 }
 
-//ifirSolver = runIFIR(50/*maxIter*/,47/*bound*/,false/*usePSResources*/);
+//ifirSolver = runIFIR(60000/*timeout*/,47/*bound*/,false/*usePSResources*/);
 //setupDesktop();
 //showHistory();
 //undoIFIR(ifirSolver);
