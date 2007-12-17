@@ -30,6 +30,8 @@ namespace EUROPA
      */
     void setSource(const ConstraintId& sourceConstraint);
 
+    const RuleInstanceId& getRuleInstance() const;
+
     /**
      * @brief Standard constraint name
      */
@@ -79,7 +81,6 @@ namespace EUROPA
 
     void handleExecute();
 
-    const RuleInstanceId& getRuleInstance() const;
     RuleInstanceId m_ruleInstance;
   };
 }

@@ -342,6 +342,7 @@ namespace EUROPA {
     //if (domx.isOpen() || domy.isOpen())
     //  return;
     check_error(!domx.isEmpty() && !domy.isEmpty());
+
     if (!checkAndRemove(domx, domy))
       checkAndRemove(domy, domx);
   }
@@ -1738,10 +1739,10 @@ namespace EUROPA {
     domy.getBounds(yMin, yMax);
 
     // Prune immediately to enforce X >= 0 && Y <= 0.
-    xMin = (xMin >= 0 ? xMin : 0);
-    xMax = (xMax >= xMin ? xMax : xMin);
-    yMax = (yMax <= 0 ? yMax : 0);
-    yMin = (yMin <= yMax ? yMin : 0);
+    //xMin = (xMin >= 0 ? xMin : 0);
+    //xMax = (xMax >= xMin ? xMax : xMin);
+    //yMax = (yMax <= 0 ? yMax : 0);
+    //yMin = (yMin <= yMax ? yMin : 0);
 
     if (domx.intersect(-yMax, -yMin) && domx.isEmpty())
       return;

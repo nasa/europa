@@ -2177,7 +2177,7 @@ private:
 
   static bool testNegateConstraint() {
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain());
-    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain());
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(MINUS_INFINITY, 0));
     NegateConstraint c0(LabelStr("NegateConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
     ENGINE->propagate();
     assertTrue(ENGINE->constraintConsistent());

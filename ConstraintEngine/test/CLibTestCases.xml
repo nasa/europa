@@ -1,5 +1,15 @@
 <?xml version="1.0"?>
 <ConstraintTests>
+	<Constraint name="neg" test="3398">
+		<Inputs>
+			<IntervalDomain lb="0.0" ub="0.0"/>
+			<IntervalDomain lb="0.0" ub="0.0"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="0.0" ub="0.0"/>
+			<IntervalDomain lb="0.0" ub="0.0"/>
+		</Outputs>
+	</Constraint>
 	<Constraint name="addeq" test="1">
 		<Inputs>
 			<IntervalIntDomain lb="-29" ub="40"/>
