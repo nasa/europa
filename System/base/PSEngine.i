@@ -9,7 +9,7 @@
 %}
 
 %rename(PSException) Error;
-%typemap(javabase) Error "java.lang.Exception";
+%typemap(javabase) Error "java.lang.RuntimeException";
 %typemap(javacode) Error %{
   public String getMessage() {
     return getMsg();
