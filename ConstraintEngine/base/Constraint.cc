@@ -102,7 +102,7 @@ namespace EUROPA {
     	  os << ",";
     	std::string name = m_variables[i]->getName().toString();
     	if (name.substr(0,4) != "$VAR")
-	        os << name;
+	        os << name << "(" << m_variables[i]->getKey() << ")";
     	else
     		os << m_variables[i]->lastDomain().toString();
     }
