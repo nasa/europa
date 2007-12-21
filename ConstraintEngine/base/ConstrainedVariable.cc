@@ -320,27 +320,20 @@ namespace EUROPA {
   void ConstrainedVariable::internalSpecify(double singletonValue) {
     checkError(baseDomain().isMember(singletonValue), singletonValue << " not in " << baseDomain().toString());
     checkError(isActive(), toString());
-    checkError(!m_specifiedFlag || singletonValue == m_specifiedValue,
-	       "Cannot specify " << toString() << " to " << singletonValue);
 
-    // If not already specified, then execute it. Must set flag first so the variable has a record of being specified
+    bool violated = !getCurrentDomain().isMember(singletonValue); 
+    if(violated && getConstraintEngine()->getAllowViolations()) 
+        reset();    
+
+    // Must set flag first so the variable has a record of being specified 
     // as events are handled when we set the current domain
-    if (!m_specifiedFlag){
-      m_specifiedFlag = true;
-      m_specifiedValue = singletonValue;
-
-      if(!internal_baseDomain().isMember(singletonValue))
-	getCurrentDomain().empty();
-      else {
-	//reset the current domain so that we can do search in the infeasible space
-	if(!getCurrentDomain().isMember(singletonValue))
-	  reset();
-	getCurrentDomain().set(singletonValue);
-      }
-
-      if(getCurrentDomain().isOpen())
-	getCurrentDomain().close();
-    }
+    m_specifiedFlag = true;
+    m_specifiedValue = singletonValue;      
+      
+    if (violated)
+        getCurrentDomain().empty();
+    else
+        getCurrentDomain().set(singletonValue);
 
     check_error(isValid());
   }

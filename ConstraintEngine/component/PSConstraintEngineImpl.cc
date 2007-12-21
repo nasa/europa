@@ -161,18 +161,7 @@ namespace EUROPA {
         debugMsg("PSVariable:specify","Tried to specify to same value, so bailing out without doing any work");
         return;
     }
-    else {
-      // TODO: reset is only strictly necessary if the new value would conlict with the current domain	
-      m_var->reset();
-      debugMsg("PSVariable:specify","After reset for var:" << m_var->toString());
-      //only propagate if we aren't allowing violations
-      //this can save us an extra call to propagate()
-      if(!m_var->getConstraintEngine()->getAllowViolations()) {
-          m_var->getConstraintEngine()->propagate();
-          debugMsg("PSVariable:specify","After propagate for var:" << m_var->toString());
-      }
-    }
-        
+    
     m_var->specify(v.asDouble());
     debugMsg("PSVariable:specify","After specify for var:" << m_var->toString() << " to value:" << v.toString());
     m_var->getConstraintEngine()->propagate();
