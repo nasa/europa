@@ -42,6 +42,7 @@
 #include <sstream>
 #include <map>
 #include <cassert>
+
 /**
  * @def ALWAYS_FAIL
  * False.
@@ -84,7 +85,16 @@
   } \
 }
 
+#define check_error_function __attribute__ ((unused))
+
 #ifdef EUROPA_FAST
+
+/**
+ * @def check_error_variable
+ * Declare a variable as only being used for checkError (supresses warnings when compiling optimized).
+ */
+#define check_error_variable(decl) 
+
 
 /**
  * @def check_error
@@ -116,6 +126,8 @@
 #define condWarning(cond, msg)
 
 #else
+
+#define check_error_variable(decl) decl
 
 /**
  * @def check_error

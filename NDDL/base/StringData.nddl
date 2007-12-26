@@ -1,0 +1,8 @@
+/**
+ * The StringData class is a base class for sets of arbitrary string data.
+ */
+
+class StringData {
+  string data;
+  StringData(string _data) { data = _data;}
+}

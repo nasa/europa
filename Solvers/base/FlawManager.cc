@@ -127,7 +127,7 @@ namespace EUROPA {
         for(std::multimap<unsigned int, ConstraintId>::iterator it = m_flawHandlerGuards.begin(); it != m_flawHandlerGuards.end();) {
           if(it->second == listener) {
             debugMsg("FlawManager:notifyRemoved:Constraint", "Removing ("<< constraint->getKey() << ") from m_flawHandlerGuards, its constraint is deleted.");
-            unsigned int size = m_flawHandlerGuards.size();
+            check_error_variable(unsigned int size = m_flawHandlerGuards.size());
 						debugMsg("FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entry with key " << it->first << " from m_flawHandlerGuards");
             m_flawHandlerGuards.erase(it++);
             debugMsg("FlawManager:notifyRemoved:Constraint", "m_flawHandlerGuards.size() == " << m_flawHandlerGuards.size());

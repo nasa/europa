@@ -21,7 +21,7 @@ namespace NDDL {
   
   
   
-  // Plasma.nddl:15 StringData
+  // StringData.nddl:5 StringData
   StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Object(planDatabase, "StringData", name, true) {
   }
@@ -42,12 +42,12 @@ namespace NDDL {
   }
   
   
-  // Plasma.nddl:15 StringData
+  // StringData.nddl:5 StringData
   void StringData::constructor(const LabelStr& _data) {
     data = addVariable(StringDomain(_data, "string"), "data");
   }
   
-  // Plasma.nddl:15 StringData
+  // StringData.nddl:5 StringData
   class StringDataFactory0: public ConcreteObjectFactory {
   public:
     StringDataFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
@@ -258,7 +258,7 @@ namespace NDDL {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("f")));
       vars.push_back(ruleVariable(SymbolDomain(listFromString("X$Z$",false), "Fruits")));
-      rule_constraint(SubsetOf, vars);
+      rule_constraint(subsetOf, vars);
     }
   }
   

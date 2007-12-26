@@ -191,15 +191,16 @@ namespace EUROPA
     m_relaxing = false;
   }
 
-  static bool allActiveVariables(const std::vector<ConstrainedVariableId>& vars){
-    for (std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end(); ++it){
+  static bool allActiveVariables(const std::vector<ConstrainedVariableId>& vars) check_error_function;
+  static bool allActiveVariables(const std::vector<ConstrainedVariableId>& vars) {
+    for (std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end(); ++it) {
       ConstrainedVariableId var = *it;
       check_error(var.isValid());
       condDebugMsg(!var->isActive(), "allActiveVariables",
-		   var->toString() << " is not active but it participates in an active constraint.");
+                   var->toString() << " is not active but it participates in an active constraint.");
 
       if(!var->isActive())
-	return false;
+    return false;
     }
 
     return true;

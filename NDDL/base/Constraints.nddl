@@ -32,6 +32,7 @@ constraint product(a, b, c) { a <: numeric && b <: numeric && c <: numeric }
 constraint condEq(a, b, c) extends eq(b, c) {a <: bool}
 
 constraint allDiff(a, b) extends eq(a, b);
+constraint allDiff(a, b, c) extends eq(a, b, c);
 
 constraint condAllDiff(a, b, c) extends allDiff(b, c) {a <: bool}
 

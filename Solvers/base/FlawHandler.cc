@@ -36,7 +36,7 @@ namespace EUROPA {
  
       // Establish the max choices to cut a decision
       const char* maxChoicesStr =  m_configData->Attribute("maxChoices");
-      m_maxChoices = atof(maxChoicesStr);
+      m_maxChoices = static_cast<unsigned int>(atof(maxChoicesStr));
 
       checkError(m_maxChoices >= 0, maxChoicesStr << " must be positive");
 

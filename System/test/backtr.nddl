@@ -1,6 +1,8 @@
 #include "PlannerConfig.nddl"
-#include "Plasma.nddl"
 #include "Resources.nddl"
+constraint diffSquare(a, b, c) { a <: numeric && b <: numeric && c <: numeric }
+constraint distanceSquares(a, b, c) { a <: numeric && b <: numeric && c <: numeric }
+constraint neg(a, b) { a <: numeric && b <: numeric }
 
 /*
 	Rover:   Standby, Drive, Sample. Drive and Sample consume at max rate.
@@ -119,11 +121,11 @@ Rover::Drive{
   // These two constraints enforce consumption rate of [2,4]
   //driveBattery( bc.quantity, dist );
   float intermediateQuantity;
-  multEq(dist, 4, intermediateQuantity);
+  mulEq(dist, 4, intermediateQuantity);
   neg(intermediateQuantity, bc.quantity);
 
   //driveDuration( duration, dist );
-  multEq(dist, [1 2], duration);
+  mulEq(dist, [1 2], duration);
 
   // What do we do after
   bool sw_after;

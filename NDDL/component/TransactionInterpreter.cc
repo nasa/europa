@@ -310,7 +310,7 @@ namespace EUROPA {
     	// TODO: this is different from the behavior from code generation, fix it.
     	// In code generation the definition in a subclass extends the one if a superclass
     	std::cerr << "Predicate " << predName << " has already been defined in a superclass."
-    	          << "New definition will be ignored" << std::endl;
+    	          << "  New definition will be ignored" << std::endl;
     	return;
     }
          

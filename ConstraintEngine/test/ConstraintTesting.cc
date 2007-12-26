@@ -163,23 +163,23 @@ namespace EUROPA {
    */
   static void readDomains(const TiXmlElement & element, std::list<AbstractDomain*> & domains) {
     if(&element == NULL) return;
-    const char * name = element.Value();
+    check_error_variable(const char * name = element.Value());
     checkError(strcmp(name,"Inputs") == 0 || strcmp(name,"Outputs") == 0,
-	       "unexpected element type \"" << name << "\"");
+               "unexpected element type \"" << name << "\"");
 
     for (const TiXmlElement * child_el = element.FirstChildElement() ;
-	 child_el; child_el = child_el->NextSiblingElement()) {
+         child_el; child_el = child_el->NextSiblingElement()) {
       const char * cname = child_el->Value();
-      AbstractDomain * dom;
+      AbstractDomain * dom = NULL;
       if(strcmp(cname,"BoolDomain") == 0 || strcmp(cname,"NumericDomain") == 0 || strcmp(cname,"SymbolDomain") == 0)
-	dom = readSet(*child_el);
+        dom = readSet(*child_el);
       else if(strcmp(cname,"IntervalDomain") == 0 || strcmp(cname,"IntervalIntDomain") == 0)
-	dom = readInterval(*child_el);
+        dom = readInterval(*child_el);
       else
-	checkError(false,"Parent \"" << element.Value() << "\" shouldn't contain child \"" << cname << "\"");
+        checkError(false,"Parent \"" << element.Value() << "\" shouldn't contain child \"" << cname << "\"");
 
       if(dom != NULL)
-	domains.push_back(dom);
+        domains.push_back(dom);
     }
   }
 

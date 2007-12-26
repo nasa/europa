@@ -1,5 +1,4 @@
 #include "unary-resource-test.nddl"
-#include "Plasma.nddl"
 #include "PlannerConfig.nddl"
 
 PlannerConfig config = new PlannerConfig(0, 100, 100);

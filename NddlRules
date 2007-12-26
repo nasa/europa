@@ -21,6 +21,7 @@ rule RunNDDLProblem {
  local txSource = $(initialState:S=.xml) ;
  Nddl $(txSource) : $(initialState) ;
  Depends $(problem) : $(txSource) ;
+ #Depends $(executable) : $(txSource) ;
  RunModuleMain $(problem) : $(executable) : $(model) $(txSource) $(config) $(path) : $(prefix) ; 
 }
 
@@ -131,7 +132,7 @@ rule NddlParser1 {
 }
 
 actions NddlParser1 {
-$(JAVA) $(JREFLAGS) -jar "$(NDDL_JAR)" --NddlParser -C "$(2:D)" -q $(2) 
+$(JAVA) $(JREFLAGS) -jar "$(NDDL_JAR)" --NddlParser -C "$(2:D)" $(NDDL_FLAGS) -q $(2) 
 }
 
 } # NddlRules_INCLUDED

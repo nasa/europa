@@ -19,56 +19,6 @@ namespace NDDL {
   }
   // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Timeline
   
-  
-  
-  // Plasma.nddl:15 StringData
-  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& name)
-   : Object(planDatabase, "StringData", name, true) {
-  }
-  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
-   : Object(planDatabase, type, name, true) {
-  }
-  StringData::StringData(const ObjectId& parent, const LabelStr& name)
-   : Object(parent, "StringData", name, true) {}
-  StringData::StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
-   : Object(parent, type, name, true) {}
-  // default initialization of member variables
-  void StringData::handleDefaults(bool autoClose) {
-    if(data.isNoId()){
-      data = addVariable(StringDomain("string"), "data");
-    }
-    if (autoClose)
-      close();
-  }
-  
-  
-  // Plasma.nddl:15 StringData
-  void StringData::constructor(const LabelStr& _data) {
-    data = addVariable(StringDomain(_data, "string"), "data");
-  }
-  
-  // Plasma.nddl:15 StringData
-  class StringDataFactory0: public ConcreteObjectFactory {
-  public:
-    StringDataFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
-  private:
-    ObjectId createInstance(const PlanDatabaseId& planDb,
-                            const LabelStr& objectType, 
-                            const LabelStr& objectName,
-                            const std::vector<const AbstractDomain*>& arguments) const {
-      check_error(arguments.size() == 1);
-      check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("string")), 
-                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
-      check_error(arguments[0]->isSingleton());
-      LabelStr _data((LabelStr)arguments[0]->getSingletonValue());
-      
-      StringDataId instance = (new StringData(planDb, objectType, objectName))->getId();
-      instance->constructor(_data);
-      instance->handleDefaults();
-      return instance;
-    }
-  };
   // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Resource
   
   // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Reservoir
@@ -137,9 +87,9 @@ namespace NDDL {
   }
   
   // Resources.nddl:126 Reusable
-  class ReusableFactory1: public ConcreteObjectFactory {
+  class ReusableFactory0: public ConcreteObjectFactory {
   public:
-    ReusableFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
+    ReusableFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -174,9 +124,9 @@ namespace NDDL {
   }
   
   // Resources.nddl:126 Reusable
-  class ReusableFactory2: public ConcreteObjectFactory {
+  class ReusableFactory1: public ConcreteObjectFactory {
   public:
-    ReusableFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
+    ReusableFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -217,9 +167,9 @@ namespace NDDL {
   }
   
   // Resources.nddl:126 Reusable
-  class ReusableFactory3: public ConcreteObjectFactory {
+  class ReusableFactory2: public ConcreteObjectFactory {
   public:
-    ReusableFactory3(const LabelStr& name): ConcreteObjectFactory(name){}
+    ReusableFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -285,9 +235,9 @@ namespace NDDL {
   }
   
   // Resources.nddl:158 Unary
-  class UnaryFactory4: public ConcreteObjectFactory {
+  class UnaryFactory3: public ConcreteObjectFactory {
   public:
-    UnaryFactory4(const LabelStr& name): ConcreteObjectFactory(name){}
+    UnaryFactory3(const LabelStr& name): ConcreteObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -307,9 +257,9 @@ namespace NDDL {
   }
   
   // Resources.nddl:158 Unary
-  class UnaryFactory5: public ConcreteObjectFactory {
+  class UnaryFactory4: public ConcreteObjectFactory {
   public:
-    UnaryFactory5(const LabelStr& name): ConcreteObjectFactory(name){}
+    UnaryFactory4(const LabelStr& name): ConcreteObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -373,7 +323,7 @@ namespace NDDL {
   
   
   // Resources.nddl:176 UnaryResource
-  DECLARE_DEFAULT_OBJECT_FACTORY(UnaryResourceFactory6, UnaryResource);
+  DECLARE_DEFAULT_OBJECT_FACTORY(UnaryResourceFactory5, UnaryResource);
   
   
   // Resources.nddl:177 uses
@@ -404,7 +354,7 @@ namespace NDDL {
   
   
   
-  // multi-resources.nddl:4 Battery
+  // multi-resources.nddl:3 Battery
   Battery::Battery(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : NddlResource(planDatabase, "Battery", name, true) {
   }
@@ -422,15 +372,15 @@ namespace NDDL {
   }
   
   
-  // multi-resources.nddl:4 Battery
+  // multi-resources.nddl:3 Battery
   void Battery::constructor(float ic, float ll_min, float ll_max) {
     NddlResource::constructor(ic, ll_min, ll_max);
   }
   
-  // multi-resources.nddl:4 Battery
-  class BatteryFactory7: public ConcreteObjectFactory {
+  // multi-resources.nddl:3 Battery
+  class BatteryFactory6: public ConcreteObjectFactory {
   public:
-    BatteryFactory7(const LabelStr& name): ConcreteObjectFactory(name){}
+    BatteryFactory6(const LabelStr& name): ConcreteObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -463,7 +413,7 @@ namespace NDDL {
   };
   
   
-  // multi-resources.nddl:10 SolarPanel
+  // multi-resources.nddl:9 SolarPanel
   SolarPanel::SolarPanel(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : NddlResource(planDatabase, "SolarPanel", name, true) {
   }
@@ -481,15 +431,15 @@ namespace NDDL {
   }
   
   
-  // multi-resources.nddl:10 SolarPanel
+  // multi-resources.nddl:9 SolarPanel
   void SolarPanel::constructor(float ic, float ll_min, float ll_max) {
     NddlResource::constructor(ic, ll_min, ll_max);
   }
   
-  // multi-resources.nddl:10 SolarPanel
-  class SolarPanelFactory8: public ConcreteObjectFactory {
+  // multi-resources.nddl:9 SolarPanel
+  class SolarPanelFactory7: public ConcreteObjectFactory {
   public:
-    SolarPanelFactory8(const LabelStr& name): ConcreteObjectFactory(name){}
+    SolarPanelFactory7(const LabelStr& name): ConcreteObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -534,7 +484,7 @@ namespace NDDL {
   }
   
   
-  // multi-resources.nddl:18 Rover
+  // multi-resources.nddl:17 Rover
   Rover::Rover(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "Rover", name, true) {
   }
@@ -556,11 +506,11 @@ namespace NDDL {
   }
   
   
-  // multi-resources.nddl:18 Rover
-  DECLARE_DEFAULT_OBJECT_FACTORY(RoverFactory9, Rover);
+  // multi-resources.nddl:17 Rover
+  DECLARE_DEFAULT_OBJECT_FACTORY(RoverFactory8, Rover);
   
   
-  // multi-resources.nddl:19 Drive
+  // multi-resources.nddl:18 Drive
   Rover::Drive::Drive(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
    : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
@@ -588,7 +538,7 @@ namespace NDDL {
   }
   
   
-  // multi-resources.nddl:25 Drive
+  // multi-resources.nddl:24 Drive
   class Rover$Drive$0$0: public RuleInstance {
   public:
     Rover$Drive$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -596,7 +546,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$Rover$Drive$0, Rover$Drive$0$0, Rover.Drive, "multi-resources.nddl,25");
+  DECLARE_AND_DEFINE_RULE(Rule$Rover$Drive$0, Rover$Drive$0$0, Rover.Drive, "multi-resources.nddl,24");
   
   void Rover$Drive$0$0::handleExecute() {
     slave(Battery::change, Battery.change, battery, LabelStr("meets"));
@@ -616,7 +566,7 @@ namespace NDDL {
   }
   
   
-  // multi-resources.nddl:33 World
+  // multi-resources.nddl:32 World
   World::World(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "World", name, true) {
   }
@@ -643,7 +593,7 @@ namespace NDDL {
   
   
   
-  // multi-resources.nddl:39 initialState
+  // multi-resources.nddl:38 initialState
   World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
    : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
@@ -662,7 +612,7 @@ namespace NDDL {
   }
   
   
-  // multi-resources.nddl:33 World
+  // multi-resources.nddl:32 World
   void World::constructor() {
     solarPanel = addVariable(SolarPanelDomain((new SolarPanel(m_id, "solarPanel"))->getId(), "SolarPanel"), "solarPanel");
     Id<SolarPanel>(singleton(solarPanel))->constructor(10.0, 0.0, 30.0);
@@ -678,10 +628,10 @@ namespace NDDL {
     Id<Rover>(singleton(rover))->handleDefaults();
   }
   
-  // multi-resources.nddl:33 World
-  class WorldFactory10: public ConcreteObjectFactory {
+  // multi-resources.nddl:32 World
+  class WorldFactory9: public ConcreteObjectFactory {
   public:
-    WorldFactory10(const LabelStr& name): ConcreteObjectFactory(name){}
+    WorldFactory9(const LabelStr& name): ConcreteObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -695,7 +645,7 @@ namespace NDDL {
     }
   };
   
-  // multi-resources.nddl:49 initialState
+  // multi-resources.nddl:48 initialState
   class World$initialState$1$0: public RuleInstance {
   public:
     World$initialState$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
@@ -703,7 +653,7 @@ namespace NDDL {
     void handleExecute();
   };
   
-  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "multi-resources.nddl,49");
+  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "multi-resources.nddl,48");
   
   void World$initialState$1$0::handleExecute() {
     slave(Rover::Drive, Rover.Drive, a, LabelStr("any"));
@@ -757,7 +707,6 @@ namespace NDDL {
     // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
-    id->addObjectType("StringData", "Object");
     id->addObjectType("Resource", "Object");
     id->addObjectType("Reservoir", "Object");
     id->addObjectType("Reusable", "Object");
@@ -768,7 +717,6 @@ namespace NDDL {
     id->addObjectType("Rover", "Timeline");
     id->addObjectType("World", "Timeline");
     id->addEnum("TokenStates");
-    id->addMember("StringData", "string", "data");
     id->addMember("Resource", "float", "initialCapacity");
     id->addMember("Resource", "float", "levelLimitMin");
     id->addMember("Resource", "float", "levelLimitMax");
@@ -825,28 +773,26 @@ namespace NDDL {
     REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
     REGISTER_TYPE_FACTORY(Timeline, ObjectDomain("Timeline"));
-    REGISTER_TYPE_FACTORY(StringData, ObjectDomain("StringData"));
-    REGISTER_OBJECT_FACTORY(StringDataFactory0, StringData:string);
     REGISTER_TYPE_FACTORY(Resource, ObjectDomain("Resource"));
     REGISTER_TYPE_FACTORY(Reservoir, ObjectDomain("Reservoir"));
     REGISTER_TYPE_FACTORY(Reusable, ObjectDomain("Reusable"));
-    REGISTER_OBJECT_FACTORY(ReusableFactory1, Reusable:float:float);
-    REGISTER_OBJECT_FACTORY(ReusableFactory2, Reusable:float:float:float);
-    REGISTER_OBJECT_FACTORY(ReusableFactory3, Reusable:float:float:float:float);
+    REGISTER_OBJECT_FACTORY(ReusableFactory0, Reusable:float:float);
+    REGISTER_OBJECT_FACTORY(ReusableFactory1, Reusable:float:float:float);
+    REGISTER_OBJECT_FACTORY(ReusableFactory2, Reusable:float:float:float:float);
     REGISTER_TYPE_FACTORY(Unary, ObjectDomain("Unary"));
-    REGISTER_OBJECT_FACTORY(UnaryFactory4, Unary);
-    REGISTER_OBJECT_FACTORY(UnaryFactory5, Unary:float);
+    REGISTER_OBJECT_FACTORY(UnaryFactory3, Unary);
+    REGISTER_OBJECT_FACTORY(UnaryFactory4, Unary:float);
     REGISTER_TYPE_FACTORY(UnaryResource, ObjectDomain("UnaryResource"));
-    REGISTER_OBJECT_FACTORY(UnaryResourceFactory6, UnaryResource);
+    REGISTER_OBJECT_FACTORY(UnaryResourceFactory5, UnaryResource);
     REGISTER_TYPE_FACTORY(Battery, ObjectDomain("Battery"));
-    REGISTER_OBJECT_FACTORY(BatteryFactory7, Battery:float:float:float);
+    REGISTER_OBJECT_FACTORY(BatteryFactory6, Battery:float:float:float);
     REGISTER_TYPE_FACTORY(SolarPanel, ObjectDomain("SolarPanel"));
-    REGISTER_OBJECT_FACTORY(SolarPanelFactory8, SolarPanel:float:float:float);
+    REGISTER_OBJECT_FACTORY(SolarPanelFactory7, SolarPanel:float:float:float);
     REGISTER_TYPE_FACTORY(Locations, LocationsBaseDomain());
     REGISTER_TYPE_FACTORY(Rover, ObjectDomain("Rover"));
-    REGISTER_OBJECT_FACTORY(RoverFactory9, Rover);
+    REGISTER_OBJECT_FACTORY(RoverFactory8, Rover);
     REGISTER_TYPE_FACTORY(World, ObjectDomain("World"));
-    REGISTER_OBJECT_FACTORY(WorldFactory10, World);
+    REGISTER_OBJECT_FACTORY(WorldFactory9, World);
     // Allocate rules
     new Rule$Rover$Drive$0();
     new Rule$World$initialState$1();

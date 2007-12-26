@@ -1,6 +1,5 @@
-#include "Constraints.nddl"
-#include "Plasma.nddl"
 #include "PlannerConfig.nddl"
+#include "StringData.nddl"
 #include "Resources.nddl"
 
 // avoiding warnings:

@@ -98,7 +98,7 @@ namespace EUROPA {
       }
 
       // If there is an XML child for the distribution, then obtain it. Make sure there is at most 1.
-      bool foundOne = false;
+      check_error_variable(bool foundOne = false);
       for (TiXmlElement * child = configData.FirstChildElement(); 
 	   child != NULL; 
 	   child = child->NextSiblingElement()) {

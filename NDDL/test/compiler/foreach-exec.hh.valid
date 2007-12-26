@@ -46,7 +46,7 @@ namespace NDDL {
   // SKIPPING DECLARATION FOR BUILT-IN CLASS Timeline
   
   
-  // Plasma.nddl:15 StringData
+  // StringData.nddl:5 StringData
   class StringData : public Object {
   public:
     StringData(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -57,7 +57,7 @@ namespace NDDL {
     
     ConstrainedVariableId data; // SchemaWriter::declareVariable
     
-    // Plasma.nddl:15 StringData
+    // StringData.nddl:5 StringData
     virtual void constructor(const LabelStr& _data);
   };
   

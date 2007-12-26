@@ -706,8 +706,9 @@ private:
                    "Failed to get expected user.  Instead got \"" + LockManager::instance().getCurrentUser().toString() + "\"");
       }
       else {
-        assertTrue(LockManager::instance().getCurrentUser() == LabelStr("SECOND_USER"),
-                   "Failed to get expected user.  Instead got \"" + LockManager::instance().getCurrentUser().toString() + "\"");
+				LabelStr temp = LockManager::instance().getCurrentUser();
+        assertTrue(temp == LabelStr("SECOND_USER"),
+                   "Failed to get expected user.  Instead got \"" + temp.toString() + "\"");
       }
 
       LockManager::instance().unlock();

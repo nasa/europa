@@ -1,6 +1,8 @@
 #include "PlannerConfig.nddl"
-#include "Plasma.nddl"
 #include "Resources.nddl"
+constraint diffSquare(a, b, c) { a <: numeric && b <: numeric && c <: numeric }
+constraint distanceSquares(a, b, c) { a <: numeric && b <: numeric && c <: numeric }
+constraint neg(a, b) { a <: numeric && b <: numeric }
 
 //*****************************************************************
 class Battery extends Reservoir {
@@ -125,12 +127,12 @@ Rover::Drive{
   float qty;
   //driveBattery(qty, dist);
   float intermediateQuantity;
-  multEq(dist, 4, intermediateQuantity);
+  mulEq(dist, 4, intermediateQuantity);
   neg(intermediateQuantity, qty);
   addEq(bc.quantity, qty, 0);
 
   //driveDuration( duration, dist );
-  multEq(dist, [1 2], duration);
+  mulEq(dist, [1 2], duration);
 
   // What do we do after
   bool sw_after;

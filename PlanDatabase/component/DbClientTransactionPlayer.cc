@@ -182,7 +182,7 @@ namespace EUROPA {
 
   void DbClientTransactionPlayer::processTransaction(const TiXmlElement & element) {
     static unsigned int sl_txCount(0);
-    const char * tagname = element.Value();
+    check_error_variable(const char * tagname = element.Value());
 
     sl_txCount++;
     debugMsg("DbClientTransactionPlayer:processTransaction",

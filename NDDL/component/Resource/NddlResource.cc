@@ -50,7 +50,7 @@ namespace NDDL {
 
   void NddlUnary::close() {
     static const unsigned int CMAX = 0;
-    static const unsigned int ARG_COUNT = 1;
+    check_error_variable(static const unsigned int ARG_COUNT = 1);
     static const std::string PARAM_CONSUMPTION_MAX("consumptionMax");
 
     check_error(m_variables.size() >= ARG_COUNT);
@@ -137,7 +137,7 @@ namespace NDDL {
     static const unsigned int LLMIN = 1;
     static const unsigned int CRMAX = 2;
     static const unsigned int CMAX = 3;
-    static const unsigned int ARG_COUNT = 4;
+    check_error_variable(static const unsigned int ARG_COUNT = 4);
     static const std::string PARAM_CAPACITY("capacity");
     static const std::string PARAM_LEVEL_LIMIT_MIN("levelLimitMin");
     static const std::string PARAM_CONSUMPTION_RATE_MAX("consumptionRateMax");
@@ -261,7 +261,7 @@ namespace NDDL {
     static const int PMAX = 4;
     static const int CRMAX = 5;
     static const int CMAX = 6;
-    static const unsigned int ARG_COUNT = 7;
+    check_error_variable(static const unsigned int ARG_COUNT = 7);
     static const std::string PARAM_INITIAL_CAPACITY("initialCapacity");
     static const std::string PARAM_LEVEL_LIMIT_MIN("levelLimitMin");
     static const std::string PARAM_LEVEL_LIMIT_MAX("levelLimitMax");
@@ -459,7 +459,7 @@ namespace NDDL {
     static const int PMAX = 4;
     static const int CRMAX = 5;
     static const int CMAX = 6;
-    static const unsigned int ARG_COUNT = 7;
+    check_error_variable(static const unsigned int ARG_COUNT = 7);
     static const std::string PARAM_INITIAL_CAPACITY("initialCapacity");
     static const std::string PARAM_LEVEL_LIMIT_MIN("levelLimitMin");
     static const std::string PARAM_LEVEL_LIMIT_MAX("levelLimitMax");

@@ -37,7 +37,7 @@ Sample::sample{
  eq(object, sample.object);
 
  Fruits f;
- SubsetOf(f, {X, Z});
+ subsetOf(f, {X, Z});
 }
 
 class World extends Timeline {

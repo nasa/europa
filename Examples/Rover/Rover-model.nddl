@@ -1,5 +1,4 @@
 
-#include "Plasma.nddl"
 #include "PlannerConfig.nddl"
 #include "Resources.nddl"
 
