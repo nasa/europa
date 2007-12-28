@@ -235,23 +235,20 @@ namespace EUROPA {
   }
 
   bool EnumeratedDomain::isMember(double value) const {
+    if (m_values.empty())
+      return false;
     std::set<double>::const_iterator it = m_values.lower_bound(value);
     // If we get a hit - the entry >= value
     if (it != m_values.end()) {
       double elem = *it;
       // Try fast compare first, then epsilon safe version
       if (value == elem || compareEqual(value, elem))
-        return(true);
+        return true;
+			--it;
       // Before giving up, see if prior position is within epsilon
-      --it;
-      elem = *it;
-      return(it != m_values.end() && compareEqual(value, elem));
+      return it != m_values.end() && compareEqual(value, *it);
     }
-    if (m_values.empty())
-      return(false);
-    // Otherwise, double check by looking at prior value with epsilon safe check
-    --it;
-    return(compareEqual(value, *it));
+		return false;
   }
 
 
