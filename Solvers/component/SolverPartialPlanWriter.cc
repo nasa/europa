@@ -70,20 +70,6 @@ namespace EUROPA {
 
       const char *envPPWConfigFile = "PPW_CONFIG";
 
-      const LabelStr PartialPlanWriter::PROPAGATION_COMMENCED("PROPAGATION_COMMENCED"); 
-      const LabelStr PartialPlanWriter::PROPAGATION_COMPLETED("PROPAGATION_COMPLETED"); 
-      const LabelStr PartialPlanWriter::PROPAGATION_PREEMPTED("PROPAGATION_PREEMPTED"); 
-      const LabelStr PartialPlanWriter::ERROR("ERROR");
-
-      const LabelStr PartialPlanWriter::STEP_SUCCEEDED("STEP_SUCCEEDED");
-      const LabelStr PartialPlanWriter::STEP_FAILED("STEP_FAILED");
-      const LabelStr PartialPlanWriter::RETRACT_SUCCEEDED("RETRACT_SUCCEEDED");
-      const LabelStr PartialPlanWriter::RETRACT_FAILED("RETRACT_FAILED");
-      const LabelStr PartialPlanWriter::PLAN_FOUND("PLAN_FOUND");
-      const LabelStr PartialPlanWriter::SEARCH_EXHAUSTED("SEARCH_EXHAUSTED");
-      const LabelStr PartialPlanWriter::TIMEOUT_REACHED("TIMEOUT_REACHED");
-    
-
       const std::string DURATION_VAR("DURATION_VAR");
       const std::string END_VAR("END_VAR");
       const std::string START_VAR("START_VAR");
@@ -177,21 +163,45 @@ namespace EUROPA {
       int PartialPlanWriter::writeStep(0);
 
       PartialPlanWriter::PartialPlanWriter(const PlanDatabaseId& planDb,
-					   const ConstraintEngineId& ceId2,
-					   const RulesEngineId& reId2,
-					   SOLVERS::SolverId& solver) {
+	  const ConstraintEngineId& ceId2,
+	  const RulesEngineId& reId2,
+	  SOLVERS::SolverId& solver) :
+	PROPAGATION_COMMENCED("PROPAGATION_COMMENCED"),
+	PROPAGATION_COMPLETED("PROPAGATION_COMPLETED"),
+	PROPAGATION_PREEMPTED("PROPAGATION_PREEMPTED"),
+	ERROR("ERROR"), STEP_SUCCEEDED("STEP_SUCCEEDED"),
+	STEP_FAILED("STEP_FAILED"), RETRACT_SUCCEEDED("RETRACT_SUCCEEDED"),
+	RETRACT_FAILED("RETRACT_FAILED"), PLAN_FOUND("PLAN_FOUND"),
+	SEARCH_EXHAUSTED("SEARCH_EXHAUSTED"), TIMEOUT_REACHED("TIMEOUT_REACHED")
+      {
 	commonInit(planDb, ceId2, reId2);
 	setSolver(solver);
       }
 
       PartialPlanWriter::PartialPlanWriter(const PlanDatabaseId &planDb,
-					   const ConstraintEngineId &ceId2,
-					   const RulesEngineId &reId2) {
+	  const ConstraintEngineId &ceId2,
+	  const RulesEngineId &reId2) :
+	PROPAGATION_COMMENCED("PROPAGATION_COMMENCED"),
+	PROPAGATION_COMPLETED("PROPAGATION_COMPLETED"),
+	PROPAGATION_PREEMPTED("PROPAGATION_PREEMPTED"),
+	ERROR("ERROR"), STEP_SUCCEEDED("STEP_SUCCEEDED"),
+	STEP_FAILED("STEP_FAILED"), RETRACT_SUCCEEDED("RETRACT_SUCCEEDED"),
+	RETRACT_FAILED("RETRACT_FAILED"), PLAN_FOUND("PLAN_FOUND"),
+	SEARCH_EXHAUSTED("SEARCH_EXHAUSTED"), TIMEOUT_REACHED("TIMEOUT_REACHED")
+      {
 	commonInit(planDb, ceId2, reId2);
       }
 
       PartialPlanWriter::PartialPlanWriter(const PlanDatabaseId &planDb, 
-					   const ConstraintEngineId &ceId2) {
+	  const ConstraintEngineId &ceId2) :
+	PROPAGATION_COMMENCED("PROPAGATION_COMMENCED"),
+	PROPAGATION_COMPLETED("PROPAGATION_COMPLETED"),
+	PROPAGATION_PREEMPTED("PROPAGATION_PREEMPTED"),
+	ERROR("ERROR"), STEP_SUCCEEDED("STEP_SUCCEEDED"),
+	STEP_FAILED("STEP_FAILED"), RETRACT_SUCCEEDED("RETRACT_SUCCEEDED"),
+	RETRACT_FAILED("RETRACT_FAILED"), PLAN_FOUND("PLAN_FOUND"),
+	SEARCH_EXHAUSTED("SEARCH_EXHAUSTED"), TIMEOUT_REACHED("TIMEOUT_REACHED")
+      {
 	commonInit(planDb, ceId2, RulesEngineId::noId());
       }
 
@@ -202,7 +212,7 @@ namespace EUROPA {
       void PartialPlanWriter::commonInit(const PlanDatabaseId &planDb,
 					 const ConstraintEngineId &ceId2,
 					 const RulesEngineId& _reId) {
-	reId = _reId;
+        reId = _reId;
 	nstep = 0;
 	destAlreadyInitialized = false;
 	m_writing = false;

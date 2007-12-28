@@ -47,6 +47,19 @@ namespace EUROPA {
 	static int noFullWrite, writeStep;
 	void setSolver(SOLVERS::SolverId& solver);
 	void clearSolver();
+
+	const LabelStr PROPAGATION_COMMENCED;
+	const LabelStr PROPAGATION_COMPLETED;
+	const LabelStr PROPAGATION_PREEMPTED;
+	const LabelStr ERROR;
+
+	const LabelStr STEP_SUCCEEDED;
+	const LabelStr STEP_FAILED;
+	const LabelStr RETRACT_SUCCEEDED;
+	const LabelStr RETRACT_FAILED;
+	const LabelStr PLAN_FOUND;
+	const LabelStr SEARCH_EXHAUSTED;
+	const LabelStr TIMEOUT_REACHED;
       protected:
 	inline long long int getPPId(void){return ppId;}
 	long long int ppId;
@@ -159,21 +172,6 @@ namespace EUROPA {
 	  PartialPlanWriter *ppw;
 	};
 
-      public:
-	//TRANSACTIONS
-	static const LabelStr PROPAGATION_COMMENCED; 
-	static const LabelStr PROPAGATION_COMPLETED; 
-	static const LabelStr PROPAGATION_PREEMPTED; 
-
-	static const LabelStr STEP_SUCCEEDED;
-	static const LabelStr RETRACT_SUCCEEDED;
-	static const LabelStr RETRACT_FAILED;
-	static const LabelStr STEP_FAILED;
-	static const LabelStr PLAN_FOUND;
-	static const LabelStr SEARCH_EXHAUSTED;
-	static const LabelStr TIMEOUT_REACHED;
-
-	static const LabelStr ERROR;
       };
     }
   }
