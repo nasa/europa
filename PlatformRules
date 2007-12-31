@@ -193,7 +193,8 @@ if $(OS) = BEOS {
 }
 
 # Supress the message that ar usually prints (unifies build output further)
-AR = $(AR[0]) $(AR[1])c $(AR[2-]) ;
+AR = $(AR[1]) $(AR[2])c $(AR[3-]) ;
+Echo $(AR) ;
 
 # Using ar scan causes problems on MacOS X and Cygwin
 # Without ar scan building static libraries is more
