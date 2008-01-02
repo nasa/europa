@@ -1,6 +1,11 @@
 #include "ConstraintLibrary.hh"
 #include "Debug.hh"
 
+/**
+ * @file ConstraintLibrary.cc
+ */
+
+
 namespace EUROPA {
 
   ConstraintId ConstraintLibrary::createConstraint(const LabelStr& name, 

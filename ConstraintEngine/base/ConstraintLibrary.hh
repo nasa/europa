@@ -10,6 +10,10 @@
 #include <vector>
 #include <map>
 
+/**
+ * @file ConstraintLibrary.hh
+ */
+
 namespace EUROPA {
 
   class ConstraintFactory;
@@ -193,9 +197,9 @@ namespace EUROPA {
    * variables in the scope to the right (positive) or left (negative).
    * @param ConstraintName The constraint's name as used in NDDL models.
    * @param PropagatorName The constraint's propagator's name.
-   * @name RotateName The name of the constraint to be called after the
+   * @param RotateName The name of the constraint to be called after the
    * scope has been rotated based on RotateCount.
-   * @name RotateCount The number of variables to be moved from the end of the scope
+   * @param RotateCount The number of variables to be moved from the end of the scope
    * to the start of the scope.  E.g., if 1, move the last variable to the front;
    * if -1, move the first variable to the end.
    */
@@ -210,10 +214,10 @@ namespace EUROPA {
    * variables in the scope.
    * @param ConstraintName The constraint's name as used in NDDL models.
    * @param PropagatorName The constraint's propagator's name.
-   * @name RotateName The name of the constraint to be called after the
+   * @param RotateName The name of the constraint to be called after the
    * two variables have been swapped.
-   * @name FirstVar The index of the first variable to swap.
-   * @name SecondVar The index of the second variable to swap.
+   * @param FirstVar The index of the first variable to swap.
+   * @param SecondVar The index of the second variable to swap.
    * @note The indices start at 0 as for C++ STL's std::vector class.
    * @note An index of -1 indicates the last variable in the scope, -2 the one
    * before the last variable, etc.
