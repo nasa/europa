@@ -15,6 +15,8 @@
 
 #if defined(__APPLE__) && (__GNUC__ < 4)   
 #include <mach-o/dyld.h>
+#elif defined(__MINGW32__)
+#include <windows.h>
 #else
 #include <dlfcn.h>
 #endif
@@ -103,7 +105,63 @@ namespace EUROPA {
     }
     return 0;
   }
+#elif defined(__MINGW32__)
 
+  static DWORD dlerror_last = ERROR_SUCCESS;
+
+  void* p_dlopen(const char* path, int mode) {
+    if(!path) {
+      dlerror_last = ERROR_NOT_SUPPORTED;
+      return NULL;
+    }
+    HMODULE result = LoadLibrary(path);
+
+    if(!result)
+      dlerror_last = GetLastError();
+    return result;
+  }
+
+  void* p_dlsym(void* handle, const char* symbol) {
+    HMODULE hmodule = (HMODULE) handle;
+
+    if(!handle) {
+      dlerror_last = ERROR_INVALID_HANDLE;
+      return NULL;
+    }
+
+    void* result = (void*) GetProcAddress(hmodule, symbol);
+
+    if(!result)
+      dlerror_last = GetLastError();
+
+    return result;
+  }
+
+  const char* p_dlerror(void) {
+    if(dlerror_last != ERROR_SUCCESS) {
+      static char buffer[256];
+      if(!FormatMessage(FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM, NULL, dlerror_last, 0, buffer, sizeof(buffer), NULL))
+        snprintf(buffer, sizeof(buffer), "Failed to format error message");
+
+      dlerror_last = ERROR_SUCCESS;
+
+      return buffer;
+    }
+    return NULL;
+  }
+
+  int p_dlclose(void* handle) {
+    HMODULE hmodule = (HMODULE) handle;
+
+    if(!hmodule)
+      return 0;
+
+    int result = FreeLibrary(hmodule);
+    if(!result)
+      dlerror_last = GetLastError();
+
+    return !result;
+  }
 #else
   /*
    * use unix dl functions in all non Apple cases

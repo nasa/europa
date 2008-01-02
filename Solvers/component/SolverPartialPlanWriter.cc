@@ -64,6 +64,14 @@
 #define IN_NO_SECTION 0
 #define IN_GENERAL_SECTION 1
 
+#ifdef __MINGW32__ 
+	static int mkdir(const char* path, mode_t mode) { 
+		int toRet = mkdir(path); 
+		chmod(path, mode);
+		return toRet;
+	}
+#endif
+
 namespace EUROPA {
   namespace SOLVERS {
     namespace PlanWriter {
@@ -152,6 +160,20 @@ namespace EUROPA {
 	return resolved_path;
       }
 #endif
+
+#ifdef __MINGW32__
+ 
+#define NBBY 8
+			
+  static char *realpath(const char *path, char *resolved_path) {
+    char* temp;
+    if (GetFullPathNameA(path, MAXPATHLEN, resolved_path, &temp) == 0)
+      return NULL;
+    return resolved_path;
+  }
+#endif
+
+
 
       inline long long int timeval2Id(const struct timeval &currTime) {
 	return (((long long int) currTime.tv_sec) * 1000) + (currTime.tv_usec / 1000);

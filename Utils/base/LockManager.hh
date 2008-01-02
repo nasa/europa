@@ -17,6 +17,11 @@
 #include <pthread.h>
 #include <string>
 
+#ifdef __MINGW32__
+  bool operator < (const ptw32_handle_t& left, const ptw32_handle_t& right);
+  bool operator > (const ptw32_handle_t& left, const ptw32_handle_t& right);
+#endif
+
 namespace EUROPA {
 
   /**
@@ -167,9 +172,13 @@ namespace EUROPA {
     void m_unlock();
 
     static pthread_mutex_t s_lockMutex; /*!< The mutex that gets locked and unlocked. */
-    static const pthread_t s_noThread; /*!< A constant value representing an invalid thread. */
+    bool m_hasLockingThread; /*!< True if m_lockingThread is defined */
     pthread_t m_lockingThread; /*!< The thread that currently has the lock. */
+#ifdef __MINGW32__
+    std::map<ptw32_handle_t, LabelStr> m_validThreads; /*!< A map from connected threads to permission levels. */
+#else
     std::map<pthread_t, LabelStr> m_validThreads; /*!< A map from connected threads to permission levels. */
+#endif
   };
 
   /**

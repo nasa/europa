@@ -4,6 +4,11 @@
 
 #include "Module.hh"
 
+#ifdef __MINGW32__
+#undef VOID
+#undef IN
+#endif
+
 namespace EUROPA {
   class ModuleAnml : public Module
   {

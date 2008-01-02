@@ -1,10 +1,19 @@
 #include "LockManager.hh"
 #include "LabelStr.hh"
 
+#ifdef __MINGW32__
+  bool operator < (const ptw32_handle_t& left, const ptw32_handle_t& right) {
+    return left.p < right.p;
+  }
+
+  bool operator > (const ptw32_handle_t& left, const ptw32_handle_t& right) {
+    return left.p > right.p;
+  }
+#endif
+
 namespace EUROPA {
 
   LockManager* LockManager::s_instance = NULL;
-  const pthread_t ThreadedLockManager::s_noThread = (pthread_t) 0;
   pthread_mutex_t ThreadedLockManager::s_lockMutex = PTHREAD_MUTEX_INITIALIZER;
 
   LockManager::LockManager() {
@@ -25,7 +34,7 @@ namespace EUROPA {
   }
 
   ThreadedLockManager::ThreadedLockManager() : LockManager() {
-    m_lockingThread = s_noThread;
+    m_hasLockingThread = false;
   }
 
   ThreadedLockManager::~ThreadedLockManager() {
@@ -67,7 +76,7 @@ namespace EUROPA {
   }
 
   bool ThreadedLockManager::hasLock() const {
-    return ((bool)pthread_equal(m_lockingThread, pthread_self()));
+    return m_hasLockingThread && ((bool)pthread_equal(m_lockingThread, pthread_self()));
   }
   
   bool ThreadedLockManager::isConnected() const {
@@ -83,13 +92,14 @@ namespace EUROPA {
   void ThreadedLockManager::m_lock() {
     check_error(!hasLock(), "Attempted to acquire a lock multiply.");
     pthread_mutex_lock(&s_lockMutex);
+    m_hasLockingThread = true;
     m_lockingThread = pthread_self();
     check_error(hasLock(), "Failed to acquire lock.");
   }
 
   void ThreadedLockManager::m_unlock() {
     check_error(hasLock(), "Attempted to release a lock without having one.");
-    m_lockingThread = s_noThread;
+    m_hasLockingThread = false;
     pthread_mutex_unlock(&s_lockMutex);
     check_error(!hasLock(), "Failed to release lock.");
   }

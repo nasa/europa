@@ -3,6 +3,15 @@ header "post_include_hpp" {
 #include "antlr/ASTFactory.hpp"
 }
 
+header "pre_include_hpp" {
+#ifdef VOID
+#undef VOID
+#endif
+#ifdef IN
+#undef IN
+#endif
+}
+
 // run antlr.Tool on this file to generate a tree parser
 options {
 	language="Cpp";
@@ -406,7 +415,7 @@ numeric_literal
 ;
 
 bool_literal
-    : TRUE | FALSE
+    : TRUE_TOK | FALSE_TOK
 ;
 
 string_literal

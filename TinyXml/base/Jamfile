@@ -2,8 +2,6 @@ SubDir PLASMA TinyXml base ;
 
 if ! $(PLASMA_READY) {
 
-SubDirC++Flags -Wno-unknown-pragmas -Wno-format ;
-
 ModuleBase TinyXml
 	:
 	tinystr.cpp

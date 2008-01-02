@@ -5,6 +5,10 @@
 #include "PlanDatabase.hh"
 #include "Context.hh"
 
+#ifdef ABSOLUTE
+#undef ABSOLUTE
+#endif
+
 namespace EUROPA {
   using namespace SOLVERS;
   namespace SAVH {

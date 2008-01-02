@@ -1,3 +1,12 @@
+header "pre_include_hpp" {
+#ifdef VOID
+#undef VOID
+#endif
+#ifdef IN
+#undef IN
+#endif
+}
+
 header "post_include_hpp" {
 #include <string>
 #include <iostream>
@@ -17,6 +26,7 @@ extern const std::string* searchDir;
 extern ANMLParser* parser;
 extern ANMLLexer* mainLexer;
 #include "ANMLLexer.hpp"
+
 }
 
 /* for ANTLR 3
@@ -608,7 +618,7 @@ numeric_literal
 ;
 
 bool_literal
-    : TRUE | FALSE
+    : TRUE_TOK | FALSE_TOK
 ;
 
 string_literal
@@ -697,8 +707,8 @@ tokens {
     VECTOR        = "vector";
     WHEN          = "when";
     INF           = "inf";
-    TRUE          = "true";
-    FALSE         = "false";
+    TRUE_TOK      = "true";
+    FALSE_TOK     = "false";
 }
 
 {

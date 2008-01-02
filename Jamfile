@@ -79,10 +79,10 @@ if ( $(PLANWORKS_HOME) || $(PSUI_HOME) ) {
 RemoveBinaries clean-all ;
 Depends clean-all : clean clean-nddl-xml clean-system-xml ;
 
-ExecuteSO check-svn-changes : checksvn : $(PLASMA) ;
+ExecuteScript check-svn-changes : checksvn : $(PLASMA) ;
 
 if ! ( "Resources" in $(NO) ) {
-  ExecuteSO check-makefile : checkmakeproject : $(PLASMA) ;
+  ExecuteScript check-makefile : checkmakeproject : $(PLASMA) ;
 }
 
 } # PLASMA_READY

@@ -894,8 +894,8 @@ numeric_literal returns [ANML::Expr* e = NULL]
 ;
 
 bool_literal returns [ANML::Expr* e = NULL]
-    : t1:TRUE  { e = new ANML::ExprConstant(*ANML::Type::BOOL,t1->getText()); }
-    | t2:FALSE { e = new ANML::ExprConstant(*ANML::Type::BOOL,t2->getText()); }
+    : t1:TRUE_TOK { e = new ANML::ExprConstant(*ANML::Type::BOOL,t1->getText()); }
+    | t2:FALSE_TOK { e = new ANML::ExprConstant(*ANML::Type::BOOL,t2->getText()); }
 ;
 
 string_literal returns [ANML::Expr* e = NULL]

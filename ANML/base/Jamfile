@@ -2,6 +2,7 @@ SubDir PLASMA ANML base ;
 
 if ! $(PLASMA_READY) {
 
+ SubDirC++Flags -D_NO_W32_PSEUDO_MODIFIERS ;
  AntlrGrammar ANML : antlr/ANML.g antlr/ANML.tree.g ;
  # special rule for grammar with odd name.
  local sources.a2n = [ FGristFiles ANML2NDDL.cpp ] ; 

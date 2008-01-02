@@ -19,6 +19,10 @@
 #include <map>
 #include <vector>
 
+#ifdef ERROR
+#undef ERROR
+#endif
+
 namespace EUROPA {
   class TiXmlElement;
 
