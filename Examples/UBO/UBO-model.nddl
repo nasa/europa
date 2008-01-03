@@ -1,17 +1,15 @@
-/**
-/**
-* @file UBO-model.nddl
-* @author Automated ProGen/max RCPSP input format converter to NDDL (David Rijsman)
-*/
 
 #include "PlannerConfig.nddl"
 #include "Resources.nddl"
 
 class CapacityResource extends Reusable 
 {
-    CapacityResource( float mincapacity, float maxcapacity ) 
-    {
+    string profileType;
+     
+    CapacityResource( string pt, float mincapacity, float maxcapacity ) 
+    {    
         super( maxcapacity, mincapacity );
+        profileType = pt;
     } 
 }
 

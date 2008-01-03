@@ -16,11 +16,14 @@ int maxDurationPlusOne;
 maxDuration.specify(60);
 addEq(maxDuration,1,maxDurationPlusOne);
 
-CapacityResource resource0 = new CapacityResource( 0.00000 , 10.0000 );
-CapacityResource resource1 = new CapacityResource( 0.00000 , 10.0000 );
-CapacityResource resource2 = new CapacityResource( 0.00000 , 10.0000 );
-CapacityResource resource3 = new CapacityResource( 0.00000 , 10.0000 );
-CapacityResource resource4 = new CapacityResource( 0.00000 , 10.0000 );
+//string profileType = "TimetableProfile";
+string profileType = "IncrementalFlowProfile";
+
+CapacityResource resource0 = new CapacityResource( profileType, 0.00000 , 10.0000 );
+CapacityResource resource1 = new CapacityResource( profileType, 0.00000 , 10.0000 );
+CapacityResource resource2 = new CapacityResource( profileType, 0.00000 , 10.0000 );
+CapacityResource resource3 = new CapacityResource( profileType, 0.00000 , 10.0000 );
+CapacityResource resource4 = new CapacityResource( profileType, 0.00000 , 10.0000 );
 
 Allocation a0 = new Allocation( resource0 , 0 , 0.0 );
 Allocation a1 = new Allocation( resource0, 1, 4.00000 );

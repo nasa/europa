@@ -104,7 +104,7 @@ class Problem:
             print >>buf,'    ',a.toString()  
         return buf.getvalue()
     
-    def toNddl(self):
+    def toNddl(self,resProfile):
         buf = StringIO.StringIO()
         
         print >>buf,'// Original file:'+self.filename
@@ -122,7 +122,7 @@ maxDuration.specify(1000);
 addEq(maxDuration,1,maxDurationPlusOne);
 '''        
         for r in self.resources:
-            print >>buf,'CapacityResource resource%d = new CapacityResource( 0.0 , %d.0 );' % (r.id,r.capacity)  
+            print >>buf,'CapacityResource resource%d = new CapacityResource( "%s" , 0.0 , %d.0 );' % (r.id,resProfile,r.capacity)  
         
         i=0
         for act in self.activities:
@@ -194,22 +194,23 @@ class TestRunner:
          
     def runTests(self,timeoutSecs):
         self.readProblems()
-        solvers = ['BuiltIn','IFIR']
+        solvers     = ['BuiltIn','IFIR']
+        resProfiles = ['IncrementalFlowProfile','TimetableProfile']
         data_dir = self.test_dir+'/testset'+self.benchmark_file.lstrip('benchmarks').rstrip('.txt')
         for p in self.problems:
             problem = Problem()
             problem.readFromFile(data_dir+'/'+p[0])
-            nddl = problem.toNddl()
-            out = open('UBO-gen-initial-state.nddl','w')
-            print >>out,nddl
-            out.close()
-            for s in solvers:
+            for i in xrange(len(solvers)):                
+                nddl = problem.toNddl(resProfiles[i])
+                out = open('UBO-gen-initial-state.nddl','w')
+                print >>out,nddl
+                out.close()
                 cmd = 'ant'+\
                     ' -Dproject.mode=o'+\
                     ' -Dproject.test='+p[0]+\
                     ' -Dproject.bound='+str(int(p[1])+2)+\
                     ' -Dproject.timeout='+str(timeoutSecs)+\
-                    ' -Dproject.solver='+s
+                    ' -Dproject.solver='+solvers[i]
                 print cmd 
                 os.system(cmd)
                                     
