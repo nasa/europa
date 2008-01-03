@@ -289,7 +289,7 @@ namespace EUROPA
 
 	PSList<PSVariable*> vars = getParameters();
   	for (int i=0;i<vars.size();i++) {
-  	    os << "    " << vars.get(i)->toString() << std::endl;
+  	    os << "    " << vars.get(i)->getName() << " : " << vars.get(i)->toString() << std::endl;
 	    delete vars.get(i);
   	}
   	
