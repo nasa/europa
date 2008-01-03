@@ -139,7 +139,7 @@ rule ExecuteTargetSO {
 actions ExecuteTargetSO {
 cd `dirname $(2)`
 echo $(PREFIX) ./$(2) $(ARGUMENTS)
-$(PREFIX) `basename $(2)` $(ARGUMENTS)
+$(PREFIX) ./`basename $(2)` $(ARGUMENTS)
 }
 
 #
