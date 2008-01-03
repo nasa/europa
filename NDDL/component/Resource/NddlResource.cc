@@ -131,6 +131,21 @@ namespace NDDL {
 			     bool open)
     : EUROPA::SAVH::Reusable(parent, type, name, open) {}
 
+  
+  bool isValidProfile(ConstrainedVariableId profileNameVar)
+  {
+      if (!profileNameVar->derivedDomain().isSingleton())
+          return false;
+      
+      std::string profileName = LabelStr(profileNameVar->derivedDomain().getSingletonValue()).toString();
+      
+      if (profileName == "FlowProfile" ||
+          profileName == "IncrementalFlowProfile" ||
+          profileName == "TimetableProfile")
+            return true;
+      
+      return false;      
+  }
 
   void NddlReusable::close() {
     static const unsigned int C = 0;
@@ -154,12 +169,24 @@ namespace NDDL {
     check_error(m_variables[CRMAX]->derivedDomain().isSingleton());
     check_error(m_variables[CMAX]->derivedDomain().isSingleton());
     
+    static const std::string PARAM_PROFILE_TYPE("profileType"); 
+    std::string fullName = getName().toString()+"."+PARAM_PROFILE_TYPE;
+    ConstrainedVariableId profileNameVar = getVariable(fullName);
+    LabelStr profileName("IncrementalFlowProfile");
+    if (!profileNameVar.isNoId()) {
+        debugMsg("NddlReusable","Using Profile : " << profileNameVar->toString());
+        check_error(isValidProfile(profileNameVar),"Invalid resource profile type:"+profileNameVar->toString());
+        profileName = LabelStr(profileNameVar->derivedDomain().getSingletonValue());
+    }
+    debugMsg("NddlReusable","Using Profile : " << profileName.toString())
+            
     init(m_variables[C]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(), 
 	 m_variables[LLMIN]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(),
 	 m_variables[CRMAX]->derivedDomain().getSingletonValue(), m_variables[CRMAX]->derivedDomain().getSingletonValue(),
 	 m_variables[CMAX]->derivedDomain().getSingletonValue(), m_variables[CMAX]->derivedDomain().getSingletonValue(),
-	 //"ReusableFVDetector", "FlowProfile");
-	 "ReusableFVDetector", "IncrementalFlowProfile");
+	 "ReusableFVDetector", 
+	 profileName);
+    
     EUROPA::SAVH::Resource::close();
   }
 
