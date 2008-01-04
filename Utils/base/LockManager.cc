@@ -62,21 +62,17 @@ namespace EUROPA {
   }
 
   void ThreadedLockManager::lock() {
-    check_error(!hasLock(), "Attempted to acquire a lock multiply.");
     m_lock();
     LabelStr::lock();
-    check_error(hasLock(), "Failed to acquire lock.");
   }
  
   void ThreadedLockManager::unlock() {
-    check_error(hasLock(), "Attempted to release a lock without having one.");
     LabelStr::unlock();
     m_unlock();
-    check_error(!hasLock(), "Failed to release lock");
   }
 
   bool ThreadedLockManager::hasLock() const {
-    return m_hasLockingThread && ((bool)pthread_equal(m_lockingThread, pthread_self()));
+    return m_hasLockingThread && pthread_equal(m_lockingThread, pthread_self()) != 0;
   }
   
   bool ThreadedLockManager::isConnected() const {
@@ -92,8 +88,8 @@ namespace EUROPA {
   void ThreadedLockManager::m_lock() {
     check_error(!hasLock(), "Attempted to acquire a lock multiply.");
     pthread_mutex_lock(&s_lockMutex);
-    m_hasLockingThread = true;
     m_lockingThread = pthread_self();
+    m_hasLockingThread = true;
     check_error(hasLock(), "Failed to acquire lock.");
   }
 
@@ -110,12 +106,12 @@ namespace EUROPA {
     check_error(m_lockCount >= 0, "Released too many locks.");
     if(!hasLock())
       ThreadedLockManager::lock();
-    m_lockCount++;
+    ++m_lockCount;
   }
 
   void RecursiveLockManager::unlock() {
     check_error(m_lockCount > 0, "Released too many locks.");
-    m_lockCount--;
+    --m_lockCount;
     if(m_lockCount == 0)
       ThreadedLockManager::unlock();
   }
