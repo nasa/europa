@@ -8,7 +8,7 @@
 namespace EUROPA {
   
   PSConstraintEngineImpl::PSConstraintEngineImpl(ConstraintEngineId ce) 
-    : m_constraintEngine(ce) 
+    : m_constraintEngine(ce)    
   {	  
   }
   
@@ -35,6 +35,21 @@ namespace EUROPA {
     }
     
     return NULL;
+  }
+
+  bool PSConstraintEngineImpl::getAutoPropagation() const
+  {
+      return m_constraintEngine->getAutoPropagation();
+  }
+  
+  void PSConstraintEngineImpl::setAutoPropagation(bool v)
+  {
+      return m_constraintEngine->setAutoPropagation(v);
+  }
+  
+  bool PSConstraintEngineImpl::propagate()
+  {
+      return m_constraintEngine->propagate();
   }
 
   bool PSConstraintEngineImpl::getAllowViolations() const
@@ -164,7 +179,9 @@ namespace EUROPA {
     
     m_var->specify(v.asDouble());
     debugMsg("PSVariable:specify","After specify for var:" << m_var->toString() << " to value:" << v.toString());
-    m_var->getConstraintEngine()->propagate();
+    // TODO: move this to ConstrainedVariable::specify()
+    if (m_var->getConstraintEngine()->getAutoPropagation())
+       m_var->getConstraintEngine()->propagate();
     debugMsg("PSVariable:specify","After propagate for var:" << m_var->toString());
   }
 
@@ -173,7 +190,9 @@ namespace EUROPA {
     debugMsg("PSVariable:reset",
 	     "Re-setting " << m_var->toString());
     m_var->reset();
-    m_var->getConstraintEngine()->propagate();
+    // TODO: move this to ConstrainedVariable::reset()
+    if (m_var->getConstraintEngine()->getAutoPropagation())
+       m_var->getConstraintEngine()->propagate();
   }
 
   double PSVariableImpl::getViolation() const

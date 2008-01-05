@@ -259,15 +259,16 @@ namespace EUROPA
 
   ConstraintEngine::ConstraintEngine() 
     : m_id(this)
+    , m_relaxing(false)
+    , m_relaxingViolation(false)
     , m_relaxed(false)
     , m_propInProgress(false)
-    , m_cycleCount(1)
-    , m_mostRecentRepropagation(1)
     , m_deleted(false)
     , m_purged(false)
     , m_dirty(false)    
-    , m_relaxingViolation(false)
-    , m_relaxing(false)
+    , m_cycleCount(1)
+    , m_mostRecentRepropagation(1)
+    , m_autoPropagate(true)
   {
     m_violationMgr = new ViolationMgrImpl(0);
   }
@@ -285,6 +286,20 @@ namespace EUROPA
     delete m_violationMgr;
   }
 
+  bool ConstraintEngine::getAutoPropagation() const
+  {
+      return m_autoPropagate;
+  }
+  
+  void ConstraintEngine::setAutoPropagation(bool v)
+  {
+     if (v != m_autoPropagate) {
+         m_autoPropagate = v;
+         if (m_autoPropagate)
+             propagate();
+     }
+  }
+    
   const ConstraintEngineId& ConstraintEngine::getId() const {
     return(m_id);
   }

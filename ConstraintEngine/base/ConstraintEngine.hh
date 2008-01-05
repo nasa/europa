@@ -245,18 +245,42 @@ namespace EUROPA {
      * @brief Accessor for all propagators
      */
     const PropagatorId& getPropagatorByName(const LabelStr& name)  const;
-    
-    
-    bool getAllowViolations() const;
+       
+    /**
+     * @see If AutoPropagation is enabled, the constraint engine will automatically invoke propagate() 
+     * after variable or constraint modifications (create/delete/change) caused through calls in the public API
+     * (mainly PSConstraintEngine, PSVariable, PSConstraint, although calls in some other classes may indirectly trigger propagation in the future)
+     */
+    void setAutoPropagation(bool v);
+
+    /**
+     * @see setAutoPropagation
+     */
+    bool getAutoPropagation() const;
+            
+    /**
+     * @brief If violations are allowed propagation will continue and the constraint engine will keep track of violated constraints
+     */
     void setAllowViolations(bool v);
       
     /**
-     * @brief returns total violation in the system
+     * @see setAllowViolations
+     */
+    bool getAllowViolations() const;
+    
+    /**
+     * @brief returns total violation in the constraint engine
      */
     double getViolation() const;
+    
+    /**
+     * @brief returns string explanation for total violation in the constraint engine
+     */
     std::string getViolationExpl() const;
 
-
+    /**
+     * @brief is constraint c violated?
+     */
     bool isViolated(ConstraintId c) const;
 
     /**
@@ -447,19 +471,25 @@ namespace EUROPA {
 					     Position in the list indicates execution priority. This
 					     is determined by the order of construction. */
     std::map<double, PropagatorId> m_propagatorsByName; /*!< Support configuration and lookup by name. */
-    bool m_relaxed; /*!< Set when a domain is RELAXED. Implies PENDING. */
-    bool m_propInProgress; /*!< Set true when doing propagation, otherwise false. */
+
+    bool m_relaxing;
+    bool m_relaxingViolation; /*!< Flag to record if relax events should be ignored by the ViolationMgr */
+    bool m_relaxed;           /*!< Set when a domain is RELAXED. Implies PENDING. */
+    bool m_propInProgress;    /*!< Set true when doing propagation, otherwise false. */
+    bool m_deleted;           /*!< Used to control cleanup, preventing cycles. */
+    bool m_purged;            /*!< Indicates if the engine has been purged of its data */
+    bool m_dirty;              /*!< Flag to record if any messages handled without propagating consequences */
+
     int m_cycleCount; /*!< A monotonically increasing count of propagation cycles. Identifies
                          when propagation events have already been queued or handled. */
     unsigned int m_mostRecentRepropagation; /*!< A monotonically increasing record of cycles where a relaxation occurred. */
-    bool m_deleted; /*!< Used to control cleanup, preventing cycles. */
-    bool m_purged; /*!< Indicates if the engine has been purged of its data */
-    bool m_dirty; /*!< Flag to record if any messages handled without propagating consequences */
-    bool m_relaxingViolation; /*!< Flag to record if relax events should be ignored by the ViolationMgr */
+    
     std::set<ConstraintEngineListenerId> m_listeners; /*!< Stores the set of registered listeners. */
+
     ConstraintSet m_redundantConstraints; /*!< Pending redundant constraints awaiting deactivation */
+
     ViolationMgr* m_violationMgr;
-    bool m_relaxing;
+    bool m_autoPropagate;
   };
 }
 #endif

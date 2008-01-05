@@ -177,6 +177,21 @@ namespace EUROPA {
 	return m_psConstraintEngine->getVariableByName(name);  
   }
 
+  bool PSEngineImpl::getAutoPropagation() const
+  {
+    return m_psConstraintEngine->getAutoPropagation();
+  }
+
+  void PSEngineImpl::setAutoPropagation(bool v)      
+  {
+    m_psConstraintEngine->setAutoPropagation(v);
+  }
+
+  bool PSEngineImpl::propagate() 
+  {
+    return m_psConstraintEngine->propagate();
+  }
+    
   bool PSEngineImpl::getAllowViolations() const
   {
   	return m_constraintEngine->getAllowViolations();

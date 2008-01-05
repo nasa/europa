@@ -203,6 +203,10 @@ namespace EUROPA {
     PSList<PSToken*> getTokens();
     PSToken* getTokenByKey(PSEntityKey id);
 
+    bool getAutoPropagation() const;
+    void setAutoPropagation(bool v);        
+    bool propagate(); 
+
     bool getAllowViolations() const;
     void setAllowViolations(bool v);
 

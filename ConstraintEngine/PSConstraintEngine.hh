@@ -20,6 +20,10 @@ namespace EUROPA {
 	  virtual PSVariable* getVariableByKey(PSEntityKey id) = 0;
 	  virtual PSVariable* getVariableByName(const std::string& name) = 0;
 	  
+      virtual bool getAutoPropagation() const = 0;
+	  virtual void setAutoPropagation(bool v) = 0;	  
+	  virtual bool propagate() = 0; 
+	  
   	  virtual bool getAllowViolations() const = 0;
   	  virtual void setAllowViolations(bool v) = 0;
 
