@@ -30,7 +30,11 @@ public class RCPSPResource extends ResourceBase
     	List<PSToken> retval = new Vector<PSToken>();
     	for (PSToken pred : conflictSet) {
     		for (PSToken succ : conflictSet) {
-    			if ((pred != succ)) {
+    		    // Don't try to order tokens that can't be ordered
+    		    int predEndLb = RCPSPUtil.getLb(pred.getParameter("end"));
+                int succStartUb = RCPSPUtil.getUb(pred.getParameter("start"));
+    		    
+    			if ((pred != succ) && (predEndLb <= succStartUb)) {
     				retval.add(pred);
     				retval.add(succ);
     			}

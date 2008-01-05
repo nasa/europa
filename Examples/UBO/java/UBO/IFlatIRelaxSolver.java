@@ -4,18 +4,26 @@ import java.util.Collection;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.HashSet;
 import java.util.Vector;
 import psengine.*;
 import org.ops.ui.util.SimpleTimer;
 
 public class IFlatIRelaxSolver 
 {
+    int curIteration_ = 0;
     int nbStable_ = 0;       
 	int maxStable_ = 10000;
     SimpleTimer timer_;
     boolean timedOut_;
+    long timeout_;
 
     int bestMakespan_;
+    long timeToBest_;
     int makespanBound_;
     List<Precedence> bestSolution_;
     
@@ -24,8 +32,9 @@ public class IFlatIRelaxSolver
     List<Resource> resources_;
     
     SortedMap<Integer,PSToken> activities_;
+    Set<Integer> criticalPath_;
     List<Precedence> precedences_;
-    List<Precedence> noGoods_;
+    Map<String,Integer> noGoods_;
     boolean hasViolations_;
     
     // TODO: pass in problem definition to be able to compute critical path
@@ -34,7 +43,7 @@ public class IFlatIRelaxSolver
     		          int bound, 
     		          boolean usePSResources)
     {
-       init(psengine,bound,usePSResources);
+       init(psengine,timeout,bound,usePSResources);
        
        for (int i=0; true ; i++) {
           flatten();
@@ -50,6 +59,7 @@ public class IFlatIRelaxSolver
           }
           
           relax();
+          curIteration_++;
        }       
 
        restoreBestSolution();
@@ -61,6 +71,7 @@ public class IFlatIRelaxSolver
     public boolean timedOut() { return timedOut_; }
     public long getElapsedMsecs() { return timer_.getElapsed(); }
     public int getBestMakespan() { return bestMakespan_; }
+    public long getTimeToBest() { return timeToBest_; }
     
     protected Resource makeResource(PSResource r,int capacity)
     {
@@ -70,10 +81,12 @@ public class IFlatIRelaxSolver
     		return new RCPSPResource(psengine_,r,capacity);
     }
     
-    protected void init(PSEngine psengine,int bound, boolean usePSResources)
+    protected void init(PSEngine psengine,long timeout,int bound, boolean usePSResources)
     {
         timer_ = new SimpleTimer();
+        timeout_ = timeout;
         timedOut_ = false;
+        timeToBest_=timeout;
         
         psengine_ = psengine;
         makespanBound_ = bound;
@@ -86,8 +99,8 @@ public class IFlatIRelaxSolver
             PSResourceProfile prof = r.getLimits();
             int t = prof.getTimes().get(0);
             int capacity = (int) prof.getUpperBound(t);
-            //RCPSPUtil.dbgout("capacity for resource "+r.getName()+" is "+capacity);
         	resources_.add(makeResource(r,capacity));
+            //RCPSPUtil.dbgout("capacity for resource "+r.getName()+" is "+capacity);
         }
         
         PSTokenList tokens = psengine.getTokens();
@@ -100,12 +113,14 @@ public class IFlatIRelaxSolver
         	}
         }
 
+        criticalPath_ = new HashSet<Integer>();
         precedences_ = new Vector<Precedence>();
-        noGoods_ = new Vector<Precedence>();
+        noGoods_ = new HashMap<String,Integer>();
         
     	bestMakespan_ = Integer.MAX_VALUE;
         bestSolution_ = new Vector<Precedence>();
         
+        curIteration_ = 0;
     	nbStable_ = 0;
     	
     	// Completely relax finish time
@@ -138,28 +153,56 @@ public class IFlatIRelaxSolver
     		
     		if (!addedConstraint)
     			break;
+    		
+            if (timer_.getElapsed() > timeout_) {
+                timedOut_ = true;
+                break;
+            }    		
     	}
     	
     	//if (hasViolations_)
     	//	RCPSPUtil.dbgout("WARNING:unable to remove all violations");   
+        //RCPSPUtil.dbgout("flatten() finished "+timer_.getElapsedString());
     }
     
     public void relax()
     {
-    	double probOfDeletion = 0.02;
+    	double probOfDeletion = 0.2; 
     	int before = precedences_.size();
     	
-    	for (int i=0;i<4;i++) {
-      	    // remove some of those on the critical path with some probability
-    		List<Precedence> precs = new Vector<Precedence>();
-    		precs.addAll(precedences_);
-    	    for (Precedence p : precs) {
-    	    	if (p.isCritical && (Math.random() < probOfDeletion)) 
-   	    			removePrecedence(p);    	    		
-    	    }
+    	boolean removed = false;
+        psengine_.setAutoPropagation(false);
+
+        // remove some of those on the critical path with some probability
+  		List<Precedence> precs = new Vector<Precedence>();
+   		precs.addAll(precedences_);
+   	    for (Precedence p : precs) {
+   	    	if (p.isCritical && (Math.random() < probOfDeletion)) { 
+    			removePrecedence(p);    	    		
+    			removed = true;
+   	    	}
+    	    	
+   	        if (timer_.getElapsed() > timeout_) {
+   	            timedOut_ = true;
+   	            break;
+   	        }           
+   	    }
+    	    
+   	    // make sure we remove at least one precedence
+    	if (!removed) {
+            for (Precedence p : precs) {
+                if (p.isCritical) {
+                    removePrecedence(p);                    
+                    break;                    
+                }
+            }
     	}
+
+        psengine_.setAutoPropagation(true);        
     	
     	//RCPSPUtil.dbgout("Removed "+(before-precedences_.size())+" out of "+before+" precedences");
+        //RCPSPUtil.dbgout("after relax. makespan (current,best)=("+getMakespan()+","+bestMakespan_+")");
+        //RCPSPUtil.dbgout("relax() finished "+timer_.getElapsedString());
     }
     
     /*
@@ -174,8 +217,7 @@ public class IFlatIRelaxSolver
     		return false;
     	}
     	
-    	PSToken bestPred=null,bestSucc=null;
-    	int maxBuffer=Integer.MIN_VALUE;
+    	TreeSet<Precedence> candidates = new TreeSet<Precedence>();
     	
     	// look for the pair of tokens with max(succ.LatestStart-pred.EarliestFinish)
     	for (int i=0;i<conflictSet.size();) {
@@ -185,49 +227,51 @@ public class IFlatIRelaxSolver
    			    int succStart = RCPSPUtil.getUb(succ.getParameter("start"));
    			    int predFinish = RCPSPUtil.getLb(pred.getParameter("end"));
    			    int buffer = succStart-predFinish;
-   			    //RCPSPUtil.dbgout(RCPSPUtil.getActivity(succ)+"("+succ.getParameter("start")+") - "+RCPSPUtil.getActivity(pred)+"("+pred.getParameter("end")+")");
-   			    //RCPSPUtil.dbgout(r.getName()+" "+es+" "+lf+" "+buffer);
-   			    if (buffer > maxBuffer) {
-   			    	maxBuffer = buffer;
-   			    	bestPred = pred;
-   			    	bestSucc = succ;
-   			    }
+   			    candidates.add(new Precedence(r.getPSResource(),pred,succ,buffer));
+                //RCPSPUtil.dbgout(RCPSPUtil.getActivity(succ)+"("+succ.getParameter("start")+") - "+RCPSPUtil.getActivity(pred)+"("+pred.getParameter("end")+")");
+                //RCPSPUtil.dbgout(r.getName()+" "+es+" "+lf+" "+buffer);
    			}
     	}
     	
-    	if (maxBuffer >= 0) {
-    		Precedence p = new Precedence(r.getPSResource(),bestPred,bestSucc); 
-    		addPrecedence(p);
+    	for (Precedence p : candidates) {          
+    		addPrecedence(p);    		 
     		if (psengine_.getViolation() > 0) {
-    			removePrecedence(p);
-    			// this can happen because of the max distance constraints, add a no-good
-    			addNoGood(bestPred,bestSucc);
-    			RCPSPUtil.dbgout("added noGood:{"+RCPSPUtil.getActivity(bestPred)+"<"+RCPSPUtil.getActivity(bestSucc)+"}");
-    			return false;
-    		}
-    		return true;
+    			removePrecedence(p);    			
+    			addNoGood(p.pred,p.succ); // this can happen because of the max distance constraints, add a no-good    			
+    		} 
+    		else
+    		    return true;
     	}
     	
 		//RCPSPUtil.dbgout("WARNING!: for "+r.getName()+" could not find activity pair with positive slack, bailing out without adding precedence constraint");
     	return false;
     }
     
+    String getNoGoodKey(PSToken pred,PSToken succ)
+    {
+        int actPred = RCPSPUtil.getActivity(pred);
+        int actSucc = RCPSPUtil.getActivity(succ);
+        return actPred + "<" + actSucc;        
+    }
+    
+    int tabuTenure_ = 1;
+    
     void addNoGood(PSToken pred,PSToken succ)
     {
-    	noGoods_.add(new Precedence(null,pred,succ));
+        String key = getNoGoodKey(pred,succ);
+        noGoods_.put(key,curIteration_+tabuTenure_);        
+        //RCPSPUtil.dbgout(curIteration_+" added noGood:{"+key+"}");
     }
     
     boolean isNoGood(PSToken pred,PSToken succ)
     {
-    	int actPred = RCPSPUtil.getActivity(pred);
-    	int actSucc = RCPSPUtil.getActivity(succ);
-    	
-    	for (Precedence p : noGoods_) {
-    		if ((RCPSPUtil.getActivity(p.pred)==actPred) && (RCPSPUtil.getActivity(p.succ)==actSucc)) 
-    			return true;
-    	}
-    	
-    	return false;
+        String key = getNoGoodKey(pred,succ);
+        Integer iteration = noGoods_.get(key);
+        
+        if (iteration == null)
+            return false;
+        
+        return (iteration.intValue() > curIteration_);
     }
     
     protected void addPrecedence(Precedence p)
@@ -256,6 +300,7 @@ public class IFlatIRelaxSolver
     		bestMakespan_ = newMakespan;
     		bestSolution_.clear();
     		bestSolution_.addAll(precedences_);
+    		timeToBest_ = timer_.getElapsed();
     		RCPSPUtil.dbgout("Iteration "+iteration+": new best makespan "+bestMakespan_);
     		nbStable_=0;
     	}
@@ -280,17 +325,25 @@ public class IFlatIRelaxSolver
     
     protected void restoreBestSolution()
     {
+        psengine_.setAutoPropagation(false);
+        
         for (Precedence p : precedences_)
         	p.res.removePrecedence(p.pred,p.succ);
         
         for (Precedence p : bestSolution_)
         	p.res.addPrecedence(p.pred,p.succ);               
+
+        psengine_.setAutoPropagation(true);        
     }
     
     public void undoSolve()
     {
+        psengine_.setAutoPropagation(false);
+
         for (Precedence p : bestSolution_)
         	p.res.removePrecedence(p.pred,p.succ);
+        
+        psengine_.setAutoPropagation(true);        
         
         reset();
     }
@@ -310,12 +363,28 @@ public class IFlatIRelaxSolver
     
     protected void updateCriticalPrecedences()
     {
-        // TODO: Implement this	
+        // TODO: this only works if we're working with a solution that doesn't have any temporal violations
+        /*
+        int savedUb = RCPSPUtil.getUb(getProjectFinish());
+        
+        // TODO: mark activities on the critical path
+        for (Precedence p : precs)  { 
+            if (criticalPath_.contains(pred.getKey) || criticalPath_.contains(pred.getKey))
+                p.isCritical = true;
+            else
+                p.isCritical = false;
+        } 
+        */               
     }
     
     public int getMakespan()
     {
-        return RCPSPUtil.getLb(activities_.get(activities_.lastKey()).getParameter("end"));
+        return RCPSPUtil.getLb(getProjectFinish());
+    }
+    
+    public PSVariable getProjectFinish()
+    {
+        return activities_.get(activities_.lastKey()).getParameter("end");
     }
 
     public String printResources()
@@ -340,18 +409,35 @@ public class IFlatIRelaxSolver
     }
     
     protected static class Precedence
+        implements Comparable
     {
     	public PSResource res;
     	public PSToken pred;
     	public PSToken succ;
     	public boolean isCritical;
+    	public int buffer;
     	
     	public Precedence(PSResource r,PSToken p,PSToken s)
+    	{
+    	    this(r,p,s,0);
+            int succStart = RCPSPUtil.getUb(succ.getParameter("start"));
+            int predFinish = RCPSPUtil.getLb(pred.getParameter("end"));
+            buffer = succStart-predFinish;              	    
+    	}
+    	
+        public Precedence(PSResource r,PSToken p,PSToken s, int b)
     	{
     		res = r;
     		pred = p;
     		succ = s;    	
     		isCritical = true;
+            buffer = b;
+    	}   
+    	
+    	public int compareTo(Object o)
+    	{
+    	    Precedence rhs = (Precedence)o;
+    	    return rhs.buffer - buffer;
     	}
-    }
+    }       
 }

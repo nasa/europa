@@ -103,6 +103,7 @@ class Main
            .append(bound).append(separator)
            .append(makespan).append(separator)
            .append(s.getElapsedMsecs()).append(separator)
+           .append(s.getTimeToBest()).append(separator)
            .append(s.getSolutionAsString())
            .append("\n");
         
