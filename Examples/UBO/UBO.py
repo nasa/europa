@@ -188,7 +188,7 @@ class TestRunner:
                words = line.split()
                test_file = (words[0].split('-'))[1]
                test_file = 'psp'+test_file.lstrip('0')+'.sch'
-               bound = words[1]
+               bound = words[4]
                if (bound != 'inf'):
                    self.problems.append((test_file,bound))
          
