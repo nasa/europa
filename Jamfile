@@ -45,9 +45,6 @@ if ! ( "Antlr" in $(NO) ) {
 }
 SubInclude PLASMA Utils ;
 SubInclude PLASMA ConstraintEngine ;
-if ! ( "docs" in $(NO) ) {
-  SubInclude PLASMA documentation ;
-}
 SubInclude PLASMA PlanDatabase ;
 SubInclude PLASMA RulesEngine ;
 SubInclude PLASMA TemporalNetwork ;
