@@ -276,6 +276,8 @@ namespace EUROPA {
     PSSolver();
   };
 
+  enum PSTokenState { INACTIVE,ACTIVE,MERGED,REJECTED };
+  
   class PSToken : public PSEntity
   {
   public:
@@ -288,11 +290,23 @@ namespace EUROPA {
     PSToken* getMaster();
     PSList<PSToken*> getSlaves();
     
+    PSTokenState getTokenState() const;
+    PSVariable* getStart();
+    PSVariable* getEnd();
+    PSVariable* getDuration();
+
     double getViolation() const;
     std::string getViolationExpl() const;
 
     PSList<PSVariable*> getParameters();
     PSVariable* getParameter(const std::string& name);
+    
+    void activate();      
+    void reject();      
+    void merge(PSToken* activeToken);            
+    void cancel(); 
+    
+    PSList<PSToken*> getCompatibleTokens(unsigned int limit, bool useExactTest);
     
     std::string toString();
     
@@ -306,19 +320,18 @@ namespace EUROPA {
   {
   public:
 
-    bool isEnumerated();
-    bool isInterval();
-
     PSVarType getType();
+    PSEntity* getParent();
 
     bool isSingleton();
-
     PSVarValue getSingletonValue();    // Call to get value if isSingleton()==true
 
-    PSList<PSVarValue> getValues();  // if isSingleton()==false && isEnumerated() == true
-
+    bool isInterval();
     double getLowerBound();  // if isSingleton()==false && isInterval() == true
     double getUpperBound();  // if isSingleton()==false && isInterval() == true
+
+    bool isEnumerated();
+    PSList<PSVarValue> getValues();  // if isSingleton()==false && isEnumerated() == true
 
     void specifyValue(PSVarValue& v);
     void reset();
@@ -326,8 +339,6 @@ namespace EUROPA {
     double getViolation() const;
     std::string getViolationExpl() const;
         
-    PSEntity* getParent();
-
     std::string toString();
   protected:
     PSVariable();

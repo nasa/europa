@@ -5,6 +5,7 @@
 #include "Object.hh"
 #include "Token.hh"
 #include "TokenVariable.hh"
+#include "Error.hh"
 #include <sstream>
 
 namespace EUROPA 
@@ -232,7 +233,39 @@ namespace EUROPA
     return retval;    	
   }  
 
-  // TODO: Implement these
+  PSTokenState PSTokenImpl::getTokenState() const
+  {
+      if (m_tok->isActive())
+          return ACTIVE;
+      
+      if (m_tok->isInactive())
+          return INACTIVE;
+      
+      if (m_tok->isMerged())
+          return MERGED;
+      
+      if (m_tok->isRejected())
+          return REJECTED;
+      
+      check_error(ALWAYS_FAIL,"Unknown token state");
+      return INACTIVE;
+  }
+  
+  PSVariable* PSTokenImpl::getStart()
+  {
+      return new PSVariableImpl(m_tok->getStart());
+  }
+  
+  PSVariable* PSTokenImpl::getEnd()
+  {
+      return new PSVariableImpl(m_tok->getEnd());      
+  }
+  
+  PSVariable* PSTokenImpl::getDuration()
+  {
+      return new PSVariableImpl(m_tok->getDuration());            
+  }
+
   double PSTokenImpl::getViolation() const 
   {
 	  return m_tok->getViolation();
@@ -246,8 +279,7 @@ namespace EUROPA
   PSList<PSVariable*> PSTokenImpl::getParameters() {
     PSList<PSVariable*> retval;
     const std::vector<ConstrainedVariableId>& vars = m_tok->getVariables();
-    for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
-	++it) {
+    for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();++it) {
       PSVariable* var = new PSVariableImpl(*it);
       check_runtime_error(var != NULL);
       retval.push_back(var);
@@ -276,8 +308,39 @@ namespace EUROPA
   
   void PSTokenImpl::activate() 
   {
-	  if (m_tok->isInactive()) m_tok->activate();
+	  m_tok->activate();
   }        
+
+  void PSTokenImpl::reject() 
+  {
+      m_tok->reject();
+  }        
+
+  void PSTokenImpl::merge(PSToken* activeToken) 
+  {
+      check_error(activeToken != NULL, "Can't merge on NULL token");
+      TokenId tok = m_tok->getPlanDatabase()->getEntityByKey(activeToken->getKey());
+      m_tok->merge(tok);
+  }        
+
+  void PSTokenImpl::cancel() 
+  {
+      m_tok->cancel();
+  }        
+
+  PSList<PSToken*> PSTokenImpl::getCompatibleTokens(unsigned int limit, bool useExactTest)
+  {
+      std::vector<TokenId> tokens; 
+      m_tok->getPlanDatabase()->getCompatibleTokens(m_tok,tokens,limit,useExactTest);
+      PSList<PSToken*> retval;
+
+      for(unsigned int i=0;i<tokens.size();i++) {
+        PSToken* tok = new PSTokenImpl(tokens[i]);
+        retval.push_back(tok);
+      }
+      
+      return retval;      
+  }
   
   std::string PSTokenImpl::toString()
   {

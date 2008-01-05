@@ -12,21 +12,21 @@ namespace EUROPA {
   {
     public:
       PSPlanDatabaseImpl(PlanDatabaseId& pdb);	
-	  virtual ~PSPlanDatabaseImpl();
+      virtual ~PSPlanDatabaseImpl();
 
-	  virtual PSList<PSObject*> getObjectsByType(const std::string& objectType);
-	  virtual PSObject* getObjectByKey(PSEntityKey id);
-	  virtual PSObject* getObjectByName(const std::string& name);
+      virtual PSList<PSObject*> getObjectsByType(const std::string& objectType);
+      virtual PSObject* getObjectByKey(PSEntityKey id);
+      virtual PSObject* getObjectByName(const std::string& name);
 
-	  virtual PSList<PSToken*> getTokens();    	 
-	  virtual PSToken* getTokenByKey(PSEntityKey id);	
+      virtual PSList<PSToken*> getTokens();    	 
+      virtual PSToken* getTokenByKey(PSEntityKey id);	
 
-	  virtual PSList<PSVariable*> getGlobalVariables();
+      virtual PSList<PSVariable*> getGlobalVariables();
 
-	  virtual std::string toString();
+      virtual std::string toString();
 
-	  virtual void addObjectWrapperGenerator(const LabelStr& type,ObjectWrapperGenerator* wrapper);    
-	  
+      virtual void addObjectWrapperGenerator(const LabelStr& type,ObjectWrapperGenerator* wrapper);    
+      
     protected:
       PlanDatabaseId m_planDatabase;	
       std::map<double, ObjectWrapperGenerator*> m_objectWrapperGenerators;            
@@ -69,21 +69,26 @@ namespace EUROPA {
       virtual bool isFact(); 
 
       virtual PSObject* getOwner(); 
-
       virtual PSToken* getMaster();
-
       virtual PSList<PSToken*> getSlaves();
 
+      virtual PSTokenState getTokenState() const;
+      virtual PSVariable* getStart();
+      virtual PSVariable* getEnd();
+      virtual PSVariable* getDuration();
+            
       virtual double getViolation() const;
       virtual std::string getViolationExpl() const;
 
-      //Traditionally, the temporal variables and the object and state variables aren't 
-      //considered "parameters".  I'm putting them in for the moment, but clearly the token
-      //interface has the least thought put into it. ~MJI
       virtual PSList<PSVariable*> getParameters();
       virtual PSVariable* getParameter(const std::string& name);
 
       virtual void activate();      
+      virtual void reject();      
+      virtual void merge(PSToken* activeToken);            
+      virtual void cancel(); // Retracts merge, activate, reject      
+
+      virtual PSList<PSToken*> getCompatibleTokens(unsigned int limit, bool useExactTest);
 
       virtual std::string toString();
 
