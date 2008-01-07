@@ -3,7 +3,6 @@ releases, is now kept on the project wiki pages at:
 
 https://babelfish.arc.nasa.gov/trac/europa/wiki
 
-
 To generate a local copy of doxygen documentation, run:
 
 doxygen doxygen.cfg
