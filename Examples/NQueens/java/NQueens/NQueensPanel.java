@@ -115,7 +115,7 @@ public class NQueensPanel
 	    SwingUtilities.invokeLater(new Updater1(iteration));
 	}
 
-	public void newSolutionFound(int iteration, List queenPositions, List queenViolations) 
+	public void newSolutionFound(int iteration, List<Integer> queenPositions, List<String> queenViolations) 
 	{
 		solutions_.add(new Object[]{new Integer(iteration),queenPositions,queenViolations});
 	    SwingUtilities.invokeLater(new Updater2());

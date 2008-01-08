@@ -14,24 +14,26 @@ import psengine.*;
 public class TSNQueensSolver
 {
 	protected PSEngine psengine_;
-	protected Map tabuList_;
+	protected Map<String,Integer> tabuList_;
 	protected int tabuTenure_=10;
 	protected int curIteration_=0;
 	protected int queenCnt_;
-	protected List observers_;
+	protected List<SolverObserver> observers_;
+    protected int bestIter_;
+    protected double bestCost_;
 	
 	public interface SolverObserver
 	{
 		public void iterationCompleted(int iteration);
-		public void newSolutionFound(int iteration,List queenPositions,List queenViolations);
+		public void newSolutionFound(int iteration,List<Integer> queenPositions,List<String> queenViolations);
 	}
 	
     public TSNQueensSolver(int n,PSEngine engine)
     {
         psengine_ = engine;	
-        tabuList_ = new HashMap();
+        tabuList_ = new HashMap<String,Integer>();
         queenCnt_ = n;
-        observers_ = new Vector();
+        observers_ = new Vector<SolverObserver>();
     }
 
     public void addObserver(SolverObserver o) { observers_.add(o); }
@@ -39,15 +41,16 @@ public class TSNQueensSolver
  
     void notifyIterationCompleted(int iteration)
     {
+        dbgout(iteration+":"+queensToString());                    
         for (int i=0;i<observers_.size();i++) {
-        	((SolverObserver)observers_.get(i)).iterationCompleted(iteration);
+        	observers_.get(i).iterationCompleted(iteration);
         }
     }
     
     void notifyNewSolutionFound(int iteration)
     {
-    	List queenValues = new Vector();
-    	List queenViolations = new Vector();
+    	List<Integer> queenValues = new Vector<Integer>();
+    	List<String> queenViolations = new Vector<String>();
     	
     	PSVariableList l = psengine_.getGlobalVariables();	
     	
@@ -59,7 +62,7 @@ public class TSNQueensSolver
     	}
 
         for (int i=0;i<observers_.size();i++) {
-        	((SolverObserver)observers_.get(i)).newSolutionFound(iteration,queenValues,queenViolations);
+        	observers_.get(i).newSolutionFound(iteration,queenValues,queenViolations);
         }    	
     }
     
@@ -72,7 +75,10 @@ public class TSNQueensSolver
         	PSVarValue value = PSVarValue.getInstance((int)(Math.random()*(queenCnt_-1)));
     		PSVariable v = l.get(i);
     		v.specifyValue(value);
-    	}    		        
+    	} 
+    	
+        bestIter_ = curIteration_;
+        bestCost_ = psengine_.getViolation();            
     }
     
     void dbgout(String msg)
@@ -129,9 +135,9 @@ public class TSNQueensSolver
     	}        
     }
     
-    SortedSet getMoves(PSVariable queen,int curPos)
+    SortedSet<Move> getMoves(PSVariable queen,int curPos)
     {
-    	SortedSet moves = new TreeSet();
+    	SortedSet<Move> moves = new TreeSet<Move>();
     	
         for (int i=0;i<queenCnt_;i++) {
         	if (i != curPos) {
@@ -149,42 +155,37 @@ public class TSNQueensSolver
     {
     	init();
     	
-    	int bestIter = curIteration_;
-        double bestCost = psengine_.getViolation();
-        
     	for (int i=0;psengine_.getViolation() > 0 && i < maxIter;i++) {
     	    PSVariable queenToMove = getQueenWithMaxViolation();
     		int curPos = queenToMove.getSingletonValue().asInt();
-    	    SortedSet moves = getMoves(queenToMove,curPos);
     	    
     	    boolean moved = false;
-            Iterator it = moves.iterator();
-            while (it.hasNext() && !moved) {
-            	moved = makeMove(queenToMove,curPos,(Move)it.next(),false);
+            SortedSet<Move> moves = getMoves(queenToMove,curPos);             
+            for (Move m : moves) {
+            	moved = makeMove(queenToMove,curPos,m,false);
+            	if (moved)
+            	    break;
             }
             
-            if (!moved) {
-            	dbgout("Forced move!");
-            	makeMove(queenToMove,curPos,(Move)moves.first(),true);
-                // TODO: restart?
-            }
+            if (!moved) 
+            	makeMove(queenToMove,curPos,moves.first(),true);
             
-            double cost = psengine_.getViolation();
-            if (cost < bestCost) {
-            	bestCost = cost;
-            	bestIter = curIteration_;
-            	notifyNewSolutionFound(curIteration_);
-            }
+            checkSolution(); // See if we have a new best solution            
+            notifyIterationCompleted(curIteration_++);
             
-	        dbgout(i+":"+queensToString());            
-            curIteration_++;           
-            notifyIterationCompleted(curIteration_);
-            
-            if (curIteration_-bestIter > 50) {
+            if (curIteration_-bestIter_ > 50) 
             	restart();
-            	bestIter = curIteration_;
-            }
     	}
+    }
+    
+    protected void checkSolution()
+    {
+        double cost = psengine_.getViolation();
+        if (cost < bestCost_) {
+            bestCost_ = cost;
+            bestIter_ = curIteration_;
+            notifyNewSolutionFound(curIteration_);
+        }        
     }
     
     void addToTabuList(PSVariable queenToMove,int orig,int dest)
@@ -205,6 +206,9 @@ public class TSNQueensSolver
     
     boolean makeMove(PSVariable queenToMove,int curPos,Move m,boolean force)
     {
+        if (force)
+            dbgout("Forced move!");
+
     	if (force || !isTabu(queenToMove,curPos,m.slot_)) {
 		    PSVarValue value = PSVarValue.getInstance(m.slot_);
 		    queenToMove.specifyValue(value);
