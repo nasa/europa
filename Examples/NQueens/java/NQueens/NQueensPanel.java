@@ -1,3 +1,4 @@
+package NQueens;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -10,7 +11,7 @@ import javax.swing.*;
 
 import psengine.*;
 
-class NQueensPanel 
+public class NQueensPanel 
      extends MouseAdapter
      implements TSNQueensSolver.SolverObserver
 {

@@ -1,3 +1,5 @@
+package NQueens;
+
 // Tabu Search NQueens Solver
 
 import java.util.SortedSet;
@@ -9,7 +11,7 @@ import java.util.Map;
 import java.util.HashMap;
 import psengine.*;
 
-class TSNQueensSolver
+public class TSNQueensSolver
 {
 	protected PSEngine psengine_;
 	protected Map tabuList_;

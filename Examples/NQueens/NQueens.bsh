@@ -1,10 +1,7 @@
 // NQueens.bsh
 
 import psengine.*;
-
-source("NQueensBoard.java");
-source("TSNQueensSolver.java");
-source("NQueensPanel.java");
+import NQueens.*;
 
 String model = "NQueens";
 int N = 8;
