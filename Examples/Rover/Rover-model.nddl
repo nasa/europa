@@ -41,7 +41,7 @@ class Path {
    } 
 }
 
-class Battery extends Resource {
+class Battery extends Reservoir {
   Battery(float ic, float ll_min, float ll_max){ 
     super(ic, ll_min, ll_max);
   }
@@ -146,7 +146,7 @@ Navigator::Going{
   eq(p.to, to);
   
   // Pull power from the battery equal to the path cost.
-  starts(Battery.change tx);
+  starts(Battery.consume tx);
   eq(tx.quantity, p.cost);
 }
 
@@ -170,13 +170,13 @@ Commands::TakeSample{
 }
 
 Commands::PhoneHome{ 
-  starts(Battery.change tx); 
-  eq(tx.quantity, -600); // consume battery power
+  starts(Battery.consume tx); 
+  eq(tx.quantity, 300); // consume battery power
 }
 
 Commands::PhoneLander{ 
-  starts(Battery.change tx); 
-  eq(tx.quantity, -20); // consume battery power
+  starts(Battery.consume tx); 
+  eq(tx.quantity, 20); // consume battery power
 }
 
 
@@ -193,8 +193,8 @@ Instrument::TakeSample{
  // Succeded by stowing the instrument
   meets(Stow c);
 
-  starts(Battery.change tx);
-  eq(tx.quantity, -120); // consume battery power
+  starts(Battery.consume tx);
+  eq(tx.quantity, 120); // consume battery power
 } 
 
 Instrument::Place{
@@ -206,8 +206,8 @@ Instrument::Place{
   eq(a.rock, rock);
   met_by(Unstow b);
 
-  starts(Battery.change tx);
-  eq(tx.quantity, -20); // consume battery power
+  starts(Battery.consume tx);
+  eq(tx.quantity, 20); // consume battery power
 } 
 
 Instrument::Unstow{
@@ -217,8 +217,8 @@ Instrument::Unstow{
   meets(Place a);
   met_by(Stowed b);
 
-  starts(Battery.change tx); 
-  eq(tx.quantity, -20); // consume battery power
+  starts(Battery.consume tx); 
+  eq(tx.quantity, 20); // consume battery power
 }
 
 
@@ -229,8 +229,8 @@ Instrument::Stow{
   meets(Stowed a);
   met_by(TakeSample b);
 
-  starts(Battery.change tx);
-  eq(tx.quantity, -20);  // consume batter power
+  starts(Battery.consume tx);
+  eq(tx.quantity, 20);  // consume batter power
 }
 
 Instrument::Stowed{

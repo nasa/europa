@@ -10,9 +10,9 @@ Location rock3 = new Location("ROCK3", 4, 8);
 Location rock4 = new Location("ROCK4", 3, 9);
 
 // Allocate paths
-Path p1 = new Path("Very Long Way", lander, rock4, -2000.0);
-Path p2 = new Path("Moderately Long Way", lander, rock4, -1500.0);
-Path p3 = new Path("Short Cut", lander, rock4, -400.0);
+Path p1 = new Path("Very Long Way", lander, rock4, 2000.0);
+Path p2 = new Path("Moderately Long Way", lander, rock4, 1500.0);
+Path p3 = new Path("Short Cut", lander, rock4, 400.0);
 
 // Allocate Rover
 Battery battery = new Battery(1000.0, 0.0, 1000.0);
