@@ -61,6 +61,13 @@ namespace EUROPA {
       m_detector = FVDetectorFactory::createInstance(detectorName, getId());
       m_profile = ProfileFactory::createInstance(profileName, getPlanDatabase(), m_detector,
                                                  m_initCapacityLb, m_initCapacityUb);
+      debugMsg("Resource:init", "Initialized Resource " << getName().toString() << "{"
+              << "initCapacity=[" << m_initCapacityLb << "," << m_initCapacityUb << "],"
+              << "usageLimits=[" << m_lowerLimit << "," << m_upperLimit << "],"
+              << "productionLimits=[max=" << m_maxProduction << ",maxInst=" << m_maxInstProduction << "],"
+              << "consumptionLimits=[max=" << m_maxConsumption << ",maxInst=" << m_maxInstConsumption << "],"
+              << "}"
+      );      
     }
 
     void Resource::add(const TokenId& token) {
