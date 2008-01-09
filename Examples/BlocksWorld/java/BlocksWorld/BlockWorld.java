@@ -145,9 +145,9 @@ public class BlockWorld
         StringBuffer buf = new StringBuffer();
         
         buf.append("[")
-           .append(varValueToString(t.getParameter("start")))
+           .append(varValueToString(t.getStart()))
            .append(",")
-           .append(varValueToString(t.getParameter("end")))
+           .append(varValueToString(t.getEnd()))
            .append("]");
         
         return buf.toString();

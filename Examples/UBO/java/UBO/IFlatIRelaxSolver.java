@@ -224,11 +224,11 @@ public class IFlatIRelaxSolver
     		PSToken pred = conflictSet.get(i++); 
     		PSToken succ = conflictSet.get(i++); 
    			if ((pred != succ) && !isPrecedence(pred,succ) && !isNoGood(pred,succ)) {
-   			    int succStart = RCPSPUtil.getUb(succ.getParameter("start"));
-   			    int predFinish = RCPSPUtil.getLb(pred.getParameter("end"));
+   			    int succStart = RCPSPUtil.getUb(succ.getStart());
+   			    int predFinish = RCPSPUtil.getLb(pred.getEnd());
    			    int buffer = succStart-predFinish;
    			    candidates.add(new Precedence(r.getPSResource(),pred,succ,buffer));
-                //RCPSPUtil.dbgout(RCPSPUtil.getActivity(succ)+"("+succ.getParameter("start")+") - "+RCPSPUtil.getActivity(pred)+"("+pred.getParameter("end")+")");
+                //RCPSPUtil.dbgout(RCPSPUtil.getActivity(succ)+"("+succ.getStart()+") - "+RCPSPUtil.getActivity(pred)+"("+pred.getEnd()+")");
                 //RCPSPUtil.dbgout(r.getName()+" "+es+" "+lf+" "+buffer);
    			}
     	}
@@ -384,7 +384,7 @@ public class IFlatIRelaxSolver
     
     public PSVariable getProjectFinish()
     {
-        return activities_.get(activities_.lastKey()).getParameter("end");
+        return activities_.get(activities_.lastKey()).getEnd();
     }
 
     public String printResources()
@@ -420,8 +420,8 @@ public class IFlatIRelaxSolver
     	public Precedence(PSResource r,PSToken p,PSToken s)
     	{
     	    this(r,p,s,0);
-            int succStart = RCPSPUtil.getUb(succ.getParameter("start"));
-            int predFinish = RCPSPUtil.getLb(pred.getParameter("end"));
+            int succStart = RCPSPUtil.getUb(succ.getStart());
+            int predFinish = RCPSPUtil.getLb(pred.getEnd());
             buffer = succStart-predFinish;              	    
     	}
     	

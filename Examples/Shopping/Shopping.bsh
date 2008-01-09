@@ -38,7 +38,7 @@ void addRows(Vector data, PSTokenList tl, Vector columnNames)
 				row.add(t.getName());
 			}
 			else if(col == "ES") {
-				row.add(t.getParameter("start").getLowerBound());
+				row.add(t.getStart().getLowerBound());
 			}
 		
 			else {

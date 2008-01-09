@@ -31,8 +31,8 @@ public class RCPSPResource extends ResourceBase
     	for (PSToken pred : conflictSet) {
     		for (PSToken succ : conflictSet) {
     		    // Don't try to order tokens that can't be ordered
-    		    int predEndLb = RCPSPUtil.getLb(pred.getParameter("end"));
-                int succStartUb = RCPSPUtil.getUb(pred.getParameter("start"));
+    		    int predEndLb = RCPSPUtil.getLb(pred.getEnd());
+                int succStartUb = RCPSPUtil.getUb(pred.getStart());
     		    
     			if ((pred != succ) && (predEndLb <= succStartUb)) {
     				retval.add(pred);

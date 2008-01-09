@@ -27,8 +27,8 @@ public class ResourceProfile
 		PSTokenList acts = res_.getPSResource().getTokens();
 		for (int i=0;i<acts.size();i++) {
 			PSToken act = acts.get(i);
-		    int start = RCPSPUtil.getLb(act.getParameter("start"));	
-		    int end = RCPSPUtil.getLb(act.getParameter("end"));
+		    int start = RCPSPUtil.getLb(act.getStart());	
+		    int end = RCPSPUtil.getLb(act.getEnd());
 		    int qty = RCPSPUtil.getLb(act.getParameter("quantity"));
 		    
 		    update(start,end,qty);

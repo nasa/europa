@@ -39,7 +39,7 @@ public class BlockWorldSolverListener
     {
         public int compare(Object lhs, Object rhs) 
         { 
-        	return (int) (((PSToken)lhs).getParameter("start").getLowerBound() - ((PSToken)rhs).getParameter("start").getLowerBound()); }
+        	return (int) (((PSToken)lhs).getStart().getLowerBound() - ((PSToken)rhs).getStart().getLowerBound()); }
     }
     
     ActionComparator actionComparator_ = new ActionComparator();

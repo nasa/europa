@@ -35,8 +35,8 @@ public class RCPSPUtil
     
     public static boolean overlaps(PSToken tok, int t)
     {
-    	int lb = getLb(tok.getParameter("start"));
-    	int ub = getLb(tok.getParameter("end"));
+    	int lb = getLb(tok.getStart());
+    	int ub = getLb(tok.getEnd());
     	
     	return ((lb <= t) && (t <= ub));
     }    
@@ -88,8 +88,8 @@ public class RCPSPUtil
     public static void ground(Collection<PSToken> tokens)
     {
     	for (PSToken t : tokens) {
-    		ground(t.getParameter("start"));
-    		ground(t.getParameter("end"));
+    		ground(t.getStart());
+    		ground(t.getEnd());
     	}
     }
     
@@ -102,8 +102,8 @@ public class RCPSPUtil
     public static void undoGround(Collection<PSToken> tokens)
     {
     	for (PSToken t : tokens) {
-    		undoGround(t.getParameter("start"));
-    		undoGround(t.getParameter("end"));
+    		undoGround(t.getStart());
+    		undoGround(t.getEnd());
     	}
     }
     public static void undoGround(PSVariable v)
