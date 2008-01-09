@@ -1,20 +1,51 @@
 String project="Rover";
 
-import psengine.*;
+import java.awt.BorderLayout;
 import org.ops.ui.util.Util;
+import org.ops.ui.PSDesktop;
+import org.ops.ui.mouse.*;
+import org.ops.ui.gantt.*;
+import org.ops.ui.chart.*;
+import psengine.*;
+import Rover.*;
 
-psengine.executeScript("nddl",bsh.cwd+"/"+project+"-initial-state.nddl",true/*isFile*/);
-desktop.makeNddlConsole();
-solver = desktop.makeSolver(
-    "PlannerConfig.xml" // config
-	, 0                 // startHorizon
-	, 100               // endHorizon
-);
+int month = GregorianCalendar.SEPTEMBER, day = 11; 
+GregorianCalendar start = new GregorianCalendar(2006,month,day,0,0);
+GregorianCalendar end = new GregorianCalendar(2006,month,day,2,0);
 
-desktop.makeSolverDialog(solver);
 
-// Some useful calls
-// desktop.showTokens("All Tokens",psengine.getTokens());
-// desktop.makeTableFrame("All Objects",Util.SWIGList(psengine.getObjectsByType("Object")),new String[]{"Key","Name","ObjectType"});
-// key = ???; // see results of previous query
-// desktop.showTokens(psengine.getObjectByKey(key));
+// desktop.makeNddlConsole();
+
+void setupDesktop()
+    throws Exception
+{
+    ActionDetailsPanel dp = (ActionDetailsPanel)desktop.makeDetailsFrame().getContentPane().getComponent(0);
+
+    JInternalFrame ganttFrame = desktop.makeResourceGanttFrame("Object",start,end);
+    ganttFrame.setLocation(0,0);
+    ganttFrame.setSize(700,300);
+    PSGantt gantt = (PSGantt)ganttFrame.getContentPane().getComponent(0);
+    gantt.addMouseListener(dp);         
+}
+
+horizonStart = 0;
+horizonEnd = 1000;
+maxSteps = 200;
+config = "PlannerConfig.xml";
+
+try {
+    psengine.executeScript("nddl",bsh.cwd+"/"+project+"-initial-state.nddl",true/*isFile*/);
+
+    PSSolver solver = psengine.createSolver(config);
+    solver.configure(horizonStart,horizonEnd);
+    solverDialog = desktop.makeSolverDialog(solver);
+}    
+catch (Exception e) {
+  	System.err.println("Failed Initializing : "+e.getMessage());
+}
+
+
+   
+//setupDesktop();
+//showHistory();
+

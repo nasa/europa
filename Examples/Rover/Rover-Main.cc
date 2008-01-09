@@ -29,9 +29,8 @@ int main(int argc, const char ** argv)
   const char* txSource = argv[1];
   const char* plannerConfig = argv[2];
   
-  executeWithAssembly(plannerConfig,txSource);
+  //executeWithAssembly(plannerConfig,txSource);
   
-  /*
   executeWithPSEngine(
       plannerConfig,
       txSource,
@@ -39,7 +38,6 @@ int main(int argc, const char ** argv)
       100, // endHorizon
       1000 // maxSteps
   ); 
-  */
      
   return 0;
 }
@@ -75,8 +73,8 @@ bool executeWithPSEngine(const char* plannerConfig, const char* txSource, int st
 
 	      PSSolver* solver = engine->createSolver(plannerConfig);
 	      runSolver(solver,startHorizon,endHorizon,maxSteps);
-	      delete solver;	
-
+	      delete solver;
+	      
 	      delete engine;
       }
       

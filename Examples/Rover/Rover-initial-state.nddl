@@ -22,7 +22,7 @@ Rover spirit = new Rover(battery);
 close();
 
 // Establish the initial position for spirit
-goal(Navigator.At initialPosition);
+fact(Navigator.At initialPosition);
 eq(initialPosition.start, world.m_horizonStart);  // What time - the start of this planning horizon
 eq(initialPosition.location, lander); // What position - the lander
 
