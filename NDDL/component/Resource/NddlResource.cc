@@ -184,8 +184,7 @@ namespace NDDL {
 	 m_variables[LLMIN]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(),
 	 m_variables[CRMAX]->derivedDomain().getSingletonValue(), m_variables[CRMAX]->derivedDomain().getSingletonValue(),
 	 m_variables[CMAX]->derivedDomain().getSingletonValue(), m_variables[CMAX]->derivedDomain().getSingletonValue(),
-	 "ReusableFVDetector", 
-	 profileName);
+	 "ReusableFVDetector", profileName);
     
     EUROPA::SAVH::Resource::close();
   }
@@ -322,7 +321,7 @@ namespace NDDL {
 	 m_variables[LLMIN]->derivedDomain().getSingletonValue(), m_variables[LLMAX]->derivedDomain().getSingletonValue(),
 	 m_variables[PRMAX]->derivedDomain().getSingletonValue(), (m_variables[CRMAX]->derivedDomain().getSingletonValue()),
 	 m_variables[PMAX]->derivedDomain().getSingletonValue(), (m_variables[CMAX]->derivedDomain().getSingletonValue()),
-	 "TimetableFVDetector", "IncrementalFlowProfile");
+	 "ReusableFVDetector", "IncrementalFlowProfile");
     EUROPA::SAVH::Resource::close();
   }
 
