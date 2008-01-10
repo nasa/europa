@@ -59,7 +59,8 @@ class Navigator extends Timeline
  
   // Rover maybe going between two locations. 
   predicate Going{
-    Location from;
+	  Path p;
+	  Location from;
     Location to;
     neq(from, to); // prevents rover from going from a location straight back to that location.
   }
@@ -140,8 +141,7 @@ Navigator::Going{
   meets(object.At _to);
   eq(_to.location, to);
   
-  // Select a path from those available between the 2 points
-  Path p;
+  // The path used must be between the 2 points
   eq(p.from, from);
   eq(p.to, to);
   
