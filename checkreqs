@@ -36,6 +36,13 @@ BADLL=0
 
 echo "Checking for required software versions:"
 
+
+# $OSTYPE can have multiple vals in Linux so handle it in one place (here)
+os=$OSTYPE
+case $OSTYPE in *linux* )
+  os="linux" ;;
+esac
+
 #Check for minimum Jam version
 JAMVER=`jam -v | egrep "Jam [0-9]\.[0-9]+" | cut -d" " -f2`
 if [ -n "$JAMVER" ]
@@ -84,7 +91,7 @@ then
     then
       BADGCC=1 
     else
-      if [ $OSTYPE != darwin ]
+      if [ $os != darwin ]
       then
         if [ $i -le $MINGCC_I -a $j -le $MINGCC_J -a $k -lt $MINGCC_K ]
         then
@@ -187,11 +194,11 @@ fi
 if [ $BADJAM -eq 1 ]
 then
   echo "Your path to Jam may be set wrong."
-  if [ $OSTYPE = solaris ]
+  if [ $os = solaris ]
   then
     echo "Be sure to include $JAMPATH in your path."
   else  
-    if [ $OSTYPE = linux ]
+    if [ $os = linux ]
     then
       echo "Use: find /usr -name 'jam2.*'"
       echo "to help locate the required Jam executable."
@@ -203,11 +210,11 @@ fi
 if [ $BADGCC -eq 1 ]
 then
   echo "Your path to gcc may be set wrong."
-  if [ $OSTYPE = solaris ]
+  if [ $os = solaris ]
   then
     echo "Be sure to include $GCCPATH in your path."
   else  
-    if [ $OSTYPE = linux ]
+    if [ $os = linux ]
     then
       echo "Use: find /usr -name gcc-3.3.3"
       echo "to help locate the required gcc executable."
@@ -219,11 +226,11 @@ fi
 if [ $BADJAVA -eq 1 ]
 then
   echo "Your path to Java may be set wrong."
-  if [ $OSTYPE = solaris ]
+  if [ $os = solaris ]
   then
     echo "Be sure to include $JAVAPATH in your path."
   else  
-    if [ $OSTYPE = linux ]
+    if [ $os = linux ]
     then
       echo "Use: find /usr -name 'jdk1.*'"
       echo "to help locate the required gcc executable."
@@ -234,11 +241,11 @@ fi
 if [ $BADDOX -eq 1 ]
 then
   echo "Your path to Doxygen may be set wrong."
-  if [ $OSTYPE = solaris ]
+  if [ $os = solaris ]
   then
     echo "Be sure to include $DOXPATH in your path."
   else  
-    if [ $OSTYPE = linux ]
+    if [ $os = linux ]
     then
       echo "Use: find /usr -name doxygen"
       echo "to help locate the required doxygen executable."
@@ -256,27 +263,27 @@ fi
 echo "Checking for required environment variables:"
 
 #Check OS type set to a known OS
-if [ $OSTYPE = darwin ]
+if [ $os = darwin ]
 then
   BADOSTYPE=0
 fi
 
-if [ $OSTYPE = solaris ]
+if [ $os = solaris ]
 then
   BADOSTYPE=0
 fi
 
-if [ $OSTYPE = linux ]
+if [ $os = linux ]
 then
   BADOSTYPE=0
 fi
 
 if [ $BADOSTYPE -eq 1 ]
 then
- echo " [PROBLEM!] Unknown OSTYPE " $OSTYPE
- echo "            Known values are darwin, solaris, and linux." 
+ echo " [PROBLEM!] Unknown OSTYPE " $os
+ echo "            Known values are darwin, solaris, and *linux* (ie gnu-linux, linux, linux-gnu, etc)." 
 else 
- echo "  OSTYPE is set to " $OSTYPE
+ echo "  OSTYPE is set to " $os
 fi
 
 if [ -z "$ANT_HOME" ]
@@ -312,7 +319,7 @@ else
 fi
 
 #check load library
-if [ $OSTYPE = darwin ]
+if [ $os = darwin ]
 then 
   if [ -z "$DYLD_LIBRARY_PATH" ] 
   then
@@ -331,7 +338,7 @@ else
     fi
 fi
 
-if [ $OSTYPE = darwin ]
+if [ $os = darwin ]
 then
   if [ "$DYLD_BIND_AT_LAUNCH"  != YES ]
   then
