@@ -590,6 +590,11 @@ rule MkDir
 	}
 }
 
+actions existing RmDir
+{
+        rm -r $(>)
+}
+
 rule Object
 {
 	# locate object and search for source, if wanted

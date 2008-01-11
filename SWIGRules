@@ -34,7 +34,7 @@ rule Swig {
   Depends $(cfile) : $(swigfile) ;
   ARGUMENTS on $(cfile) = $(arguments) ;
   Clean clean : $(cfile) ;
-
+  RmDir clean : $(destdir) ;
 }
 
 actions Swig {
