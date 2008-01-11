@@ -1,7 +1,0 @@
-{
-  local SUBDIR = $(Crew1) ;
-  local PLASMA = $(PLASMA_HOME) ;
-  include [ FDirName $(PLASMA) Jamrules ] ;
-  include [ FDirName $(SUBDIR) Jamfile ] ;
-  Crew1_READY = TRUE ;
-}
