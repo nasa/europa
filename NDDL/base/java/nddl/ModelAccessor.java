@@ -137,6 +137,10 @@ public class ModelAccessor {
     return className;
   }
 
+  public static void addSearchPath(String path) {
+    s_customSearchPath.add(path);
+  }
+
   public static String getSuperClass(IXMLElement element) {
     if(isPredicate(element))
       return getPredicateSuperClass(element);
@@ -701,7 +705,7 @@ public class ModelAccessor {
     else if(element.getName().equals("interval"))
       result = XMLUtil.getAttribute(element, "min") + ", " + XMLUtil.getAttribute(element,"max");
     else
-	result = XMLUtil.getAttribute(element, "name");
+      result = XMLUtil.getAttribute(element, "name");
 
     return result;
   }
@@ -1131,9 +1135,9 @@ public class ModelAccessor {
         String[]paths = pathAsString.split(";");
         for(int i=0; i < paths.length; ++i) {
           if(new File(paths[i]).isAbsolute())
-            s_customSearchPath.add(paths[i]);
+            addSearchPath(paths[i]);
           else
-            s_customSearchPath.add(cfgFile.getParent() + File.separator + paths[i]);
+            addSearchPath(cfgFile.getParent() + File.separator + paths[i]);
         }
       }
 
@@ -1184,7 +1188,7 @@ public class ModelAccessor {
       if(!returnFile.canRead())
           returnFile = new File(s_directory, filename);
     }
-    
+
     assert(DebugMsg.debugMsg("ModelAccessor:includeSearch", "Testing for: "+returnFile));
     // If the file can be read, it's been found.
     if(returnFile.canRead())
