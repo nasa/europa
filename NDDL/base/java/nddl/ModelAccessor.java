@@ -1189,13 +1189,14 @@ public class ModelAccessor {
     searchPath.add(System.getProperty("user.dir"));
 
     for(int i=0; i < searchPath.size(); ++i) {
-      String parent = (String) searchPath.get(i);
-      if(parent == null)
+      String p = (String) searchPath.get(i);
+      if(p == null)
         continue;
-      returnFile = new File(parent, filename);
+      returnFile = new File(p, filename);
       assert(DebugMsg.debugMsg("ModelAccessor:includeSearch", "Testing for: " + returnFile));
       if(returnFile.canRead())
         return returnFile;
     }
+    return null;
   }
 }
