@@ -138,6 +138,7 @@ public class ModelAccessor {
   }
 
   public static void addSearchPath(String path) {
+    assert(DebugMsg.debugMsg("ModelAccessor:addSearchPath", "Adding search path " + path));
     s_customSearchPath.add(path);
   }
 
@@ -1180,31 +1181,21 @@ public class ModelAccessor {
    */
   public static final File generateIncludeFileName(final String parent, final String filename) {
     File returnFile = null;
-    // handle the case of the parent dir being empty.
-    if(parent!=null && !parent.equals(""))
+    List searchPath = new ArrayList(3 + s_customSearchPath.size());
+    searchPath.add(parent);
+    searchPath.add(s_directory);
+    searchPath.addAll(s_customSearchPath);
+    // As a last resort, ignore user set directory
+    searchPath.add(System.getProperty("user.dir"));
+
+    for(int i=0; i < searchPath.size(); ++i) {
+      String parent = (String) searchPath.get(i);
+      if(parent == null)
+        continue;
       returnFile = new File(parent, filename);
-    else {
-      returnFile = new File(filename);
-      if(!returnFile.canRead())
-          returnFile = new File(s_directory, filename);
-    }
-
-    assert(DebugMsg.debugMsg("ModelAccessor:includeSearch", "Testing for: "+returnFile));
-    // If the file can be read, it's been found.
-    if(returnFile.canRead())
-      return returnFile;
-
-    for(int i=0; i < s_customSearchPath.size(); ++i) {
-      returnFile = new File((String)s_customSearchPath.get(i),filename);
-      assert(DebugMsg.debugMsg("ModelAccessor:includeSearch", "Testing for: "+returnFile));
+      assert(DebugMsg.debugMsg("ModelAccessor:includeSearch", "Testing for: " + returnFile));
       if(returnFile.canRead())
         return returnFile;
     }
-    // As a last resort search in the current directory ignoring -C option
-    returnFile = new File(System.getProperty("user.dir"), filename);
-    if(returnFile.canRead())
-      return returnFile;
-    return null;
   }
-
 }
