@@ -14,30 +14,20 @@ import psengine.*;
 import org.ops.ui.util.SimpleTimer;
 
 public class IFlatIRelaxSolver 
+    extends RCPSPSolverBase 
 {
     int curIteration_ = 0;
     int nbStable_ = 0;       
 	int maxStable_ = 10000;
-    SimpleTimer timer_;
-    boolean timedOut_;
-    long timeout_;
 
-    int bestMakespan_;
-    long timeToBest_;
     int makespanBound_;
-    List<Precedence> bestSolution_;
     
-    PSEngine psengine_;
     boolean usePSResources_;
-    List<Resource> resources_;
-    
-    SortedMap<Integer,PSToken> activities_;
+
     Set<Integer> criticalPath_;
-    List<Precedence> precedences_;
     Map<String,Integer> noGoods_;
     boolean hasViolations_;
     
-    // TODO: pass in problem definition to be able to compute critical path
     public void solve(PSEngine psengine,
     		          long timeout, // in msecs
     		          int bound, 
@@ -69,9 +59,6 @@ public class IFlatIRelaxSolver
     }
 
     public boolean timedOut() { return timedOut_; }
-    public long getElapsedMsecs() { return timer_.getElapsed(); }
-    public int getBestMakespan() { return bestMakespan_; }
-    public long getTimeToBest() { return timeToBest_; }
     
     protected Resource makeResource(PSResource r,int capacity)
     {
@@ -141,7 +128,8 @@ public class IFlatIRelaxSolver
     		for (Resource r : resources_) {
     			//RCPSPUtil.dbgout("Before flatten() step : "+r.toString());
     			
-    			int t = r.getMostViolatedTime();
+    		    ResourceViolationInfo rvi = r.getMaxViolation();
+    			int t = rvi.time;
     			if (t >= 0) { 
 					hasViolations_ = true;
     				if (addPrecedenceConstraint(r,t)) 
@@ -309,57 +297,10 @@ public class IFlatIRelaxSolver
     	}
     }
     
-    // TODO: do this faster with a key
-    boolean isPrecedence(PSToken pred,PSToken succ)
-    {
-    	int actPred = RCPSPUtil.getActivity(pred);
-    	int actSucc = RCPSPUtil.getActivity(succ);
-    	
-    	for (Precedence p : precedences_) {
-    		if ((RCPSPUtil.getActivity(p.pred)==actPred) && (RCPSPUtil.getActivity(p.succ)==actSucc)) 
-    			return true;    		
-    	}
-    	
-    	return false;
-    }
-    
-    protected void restoreBestSolution()
-    {
-        psengine_.setAutoPropagation(false);
-        
-        for (Precedence p : precedences_)
-        	p.res.removePrecedence(p.pred,p.succ);
-        
-        for (Precedence p : bestSolution_)
-        	p.res.addPrecedence(p.pred,p.succ);               
-
-        psengine_.setAutoPropagation(true);        
-    }
-    
-    public void undoSolve()
-    {
-        psengine_.setAutoPropagation(false);
-
-        for (Precedence p : bestSolution_)
-        	p.res.removePrecedence(p.pred,p.succ);
-        
-        psengine_.setAutoPropagation(true);        
-        
-        reset();
-    }
-    
-    protected void reset()
-    {
-    	bestSolution_.clear();
-    	precedences_.clear();
-    	noGoods_.clear();
-    }
-   
-    
-    public Collection<PSToken> getActivities()
-    {
-    	return activities_.values();
-    }
+    public SortedMap<Integer,PSToken> getActivityMap() { return activities_; }    
+    /* (non-Javadoc)
+     * @see UBO.RCPSPSolver#getActivities()
+     */
     
     protected void updateCriticalPrecedences()
     {
@@ -377,6 +318,9 @@ public class IFlatIRelaxSolver
         */               
     }
     
+    /* (non-Javadoc)
+     * @see UBO.RCPSPSolver#getMakespan()
+     */
     public int getMakespan()
     {
         return RCPSPUtil.getLb(getProjectFinish());
@@ -396,48 +340,5 @@ public class IFlatIRelaxSolver
         }
         
         return buf.toString();        	        	
-    }
-    
-    public String getSolutionAsString()
-    {
-    	StringBuffer buf = new StringBuffer();
-    	
-        for (Precedence p : bestSolution_) 
-        	buf.append("{").append(RCPSPUtil.getActivity(p.pred)).append("<").append(RCPSPUtil.getActivity(p.succ)).append("}");
-        
-        return buf.toString();
-    }
-    
-    protected static class Precedence
-        implements Comparable
-    {
-    	public PSResource res;
-    	public PSToken pred;
-    	public PSToken succ;
-    	public boolean isCritical;
-    	public int buffer;
-    	
-    	public Precedence(PSResource r,PSToken p,PSToken s)
-    	{
-    	    this(r,p,s,0);
-            int succStart = RCPSPUtil.getUb(succ.getStart());
-            int predFinish = RCPSPUtil.getLb(pred.getEnd());
-            buffer = succStart-predFinish;              	    
-    	}
-    	
-        public Precedence(PSResource r,PSToken p,PSToken s, int b)
-    	{
-    		res = r;
-    		pred = p;
-    		succ = s;    	
-    		isCritical = true;
-            buffer = b;
-    	}   
-    	
-    	public int compareTo(Object o)
-    	{
-    	    Precedence rhs = (Precedence)o;
-    	    return rhs.buffer - buffer;
-    	}
-    }       
+    }    
 }

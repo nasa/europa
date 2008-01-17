@@ -28,7 +28,7 @@ public class PSResourceWrapper extends ResourceBase
     	return retval;
     }
     
-    public int getMostViolatedTime()
+    public ResourceViolationInfo getMaxViolation()
     {
     	int t = -1;
     	double lowestLevel = Double.MAX_VALUE;
@@ -47,6 +47,6 @@ public class PSResourceWrapper extends ResourceBase
 		if (t>=0)
 		    RCPSPUtil.dbgout("MaxViolation for "+res_.getName()+" "+lowestLevel+" at time "+t);
 		
-		return t;    	
+		return new ResourceViolationInfo(t,lowestLevel);    	
     }        
 }

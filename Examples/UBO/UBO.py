@@ -194,8 +194,10 @@ class TestRunner:
          
     def runTests(self,timeoutSecs):
         self.readProblems()
-        solvers     = ['BuiltIn','IFIR']
-        resProfiles = ['IncrementalFlowProfile','TimetableProfile']
+        solvers     = ['BuiltIn','IFIR','Hybrid']
+        resProfiles = ['IncrementalFlowProfile','TimetableProfile','TimetableProfile']
+        #solvers     = ['Hybrid']
+        #resProfiles = ['TimetableProfile']
         data_dir = self.test_dir+'/testset'+self.benchmark_file.lstrip('benchmarks').rstrip('.txt')
         for p in self.problems:
             problem = Problem()

@@ -38,7 +38,9 @@ class Main
 	        if ("BuiltIn".equals(solver))
 	            runBuiltInSolver(engine,test,bound,timeoutMsecs);
 	        else if ("IFIR".equals(solver))
-	            runIFIRSolver(engine,test,bound,timeoutMsecs);
+	            runRCPSPSolver(engine,new IFlatIRelaxSolver(),test,bound,timeoutMsecs);
+            else if ("Hybrid".equals(solver))
+                runRCPSPSolver(engine,new HybridSolver(),test,bound,timeoutMsecs);
 	        else
 	            throw new RuntimeException("Unknown solver:"+solver);
 
@@ -86,17 +88,16 @@ class Main
         writeToFile("Solver-BuiltIn.txt",buf.toString());  
 	}
 
-    public static void runIFIRSolver(PSEngine engine,String test,Integer bound, long timeoutMsecs)
+    public static void runRCPSPSolver(PSEngine engine,RCPSPSolver s, String test,Integer bound, long timeoutMsecs)
     {     
         // TODO: since this is randomized, run several times an get avg
-        IFlatIRelaxSolver s = new IFlatIRelaxSolver();
         boolean usePSResources = false; // TODO: eventually switch to true
         s.solve(engine,timeoutMsecs,bound,usePSResources);
-        RCPSPUtil.ground(s.getActivities());
+        //RCPSPUtil.ground(s.getActivities());
         
         // Save results
         // test-name bound best-makespan time-in-msecs solution
-        int makespan = (s.getBestMakespan() != Integer.MAX_VALUE ? s.getMakespan() : 0);
+        int makespan = (s.getBestMakespan() != Integer.MAX_VALUE ? s.getBestMakespan() : 0);
         StringBuffer buf = new StringBuffer();
         String separator="    ";
         buf.append(test).append(separator)

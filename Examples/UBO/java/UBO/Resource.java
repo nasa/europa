@@ -17,7 +17,5 @@ public interface Resource {
 
 	public abstract List<PSToken> getConflictSet(int t);
 
-	// TODO: this should be supported by PSResource
-	public abstract int getMostViolatedTime();
-
+	public abstract ResourceViolationInfo getMaxViolation();
 }

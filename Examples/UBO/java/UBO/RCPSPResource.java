@@ -44,10 +44,10 @@ public class RCPSPResource extends ResourceBase
     	return retval;
     }
     
-    public int getMostViolatedTime()
+    public ResourceViolationInfo getMaxViolation()
     {
     	int lowestTime = -1;
-    	int lowestLevel = Integer.MAX_VALUE;
+    	double lowestLevel = Double.MAX_VALUE;
     	
 		ResourceProfile prof = getLevels();
 		Iterator<Integer> times = prof.getTimes().iterator();
@@ -64,6 +64,6 @@ public class RCPSPResource extends ResourceBase
 		//if (lowestTime>=0)
 		//   RCPSPUtil.dbgout("MaxViolation for "+res_.getName()+" "+lowestLevel+" at time "+lowestTime);
 		
-		return lowestTime;    	
+		return new ResourceViolationInfo(lowestTime,lowestLevel);    	
     }
 }
