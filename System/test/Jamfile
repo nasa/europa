@@ -61,6 +61,7 @@ ModuleNamedObjects runProblem_link_$(PLANNER) : runProblem.cc : System ;
 
 EXTRA_DEFS = -D$(PLANNER) -DINTERPRETED ;
 ModuleNamedObjects runProblem_interp_$(PLANNER) : runProblem.cc : System ;
+ModuleMain runProblem_interp_$(PLANNER) : runProblem_interp_$(PLANNER).o : System ;
 
 local DEFAULT_PCONFIG = "DefaultPlannerConfig.xml" ;
 
@@ -119,7 +120,6 @@ rule RunPlannerProblem {
 
 
   #run with interpreted model
-  ModuleMain runProblem_interp_$(PLANNER) : runProblem_interp_$(PLANNER).o : System ;
   RunModuleMain run-interp-$(exe) : runProblem_interp_$(PLANNER) :
                 $(xml) $(configurationFile) ;
   Depends $(deptarget) : run-interp-$(exe) $(xml) ;
