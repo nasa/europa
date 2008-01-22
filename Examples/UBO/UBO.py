@@ -192,27 +192,23 @@ class TestRunner:
                if (bound != 'inf'):
                    self.problems.append((test_file,bound))
          
-    def runTests(self,timeoutSecs):
+    def runTests(self,timeoutSecs,solvers,resProfiles):
         self.readProblems()
-        solvers     = ['BuiltIn','IFIR','Hybrid']
-        resProfiles = ['IncrementalFlowProfile','TimetableProfile','TimetableProfile']
-        #solvers     = ['Hybrid']
-        #resProfiles = ['TimetableProfile']
         data_dir = self.test_dir+'/testset'+self.benchmark_file.lstrip('benchmarks').rstrip('.txt')
         for p in self.problems:
             problem = Problem()
             problem.readFromFile(data_dir+'/'+p[0])
-            for i in xrange(len(solvers)):                
-                nddl = problem.toNddl(resProfiles[i])
+            for solver in solvers:                
+                nddl = problem.toNddl(resProfiles[solver])
                 out = open('UBO-gen-initial-state.nddl','w')
                 print >>out,nddl
                 out.close()
                 cmd = 'ant'+\
                     ' -Dproject.mode=o'+\
                     ' -Dproject.test='+p[0]+\
-                    ' -Dproject.bound='+str(int(p[1])+2)+\
+                    ' -Dproject.bound='+str(int(p[1])+1)+\
                     ' -Dproject.timeout='+str(timeoutSecs)+\
-                    ' -Dproject.solver='+solvers[i]
+                    ' -Dproject.solver='+solver
                 print cmd 
                 os.system(cmd)
                                     

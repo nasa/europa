@@ -1,6 +1,5 @@
 package UBO;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -13,6 +12,10 @@ import java.util.Vector;
 import psengine.*;
 import org.ops.ui.util.SimpleTimer;
 
+/*
+ * This is a solver based on the Iterative flattening and relaxation algorithm. 
+ * It has been enhanced to be able to deal with general min/max precedence constraints
+ */
 public class IFlatIRelaxSolver 
     extends RCPSPSolverBase 
 {
@@ -71,6 +74,8 @@ public class IFlatIRelaxSolver
     protected void init(PSEngine psengine,long timeout,int bound, boolean usePSResources)
     {
         timer_ = new SimpleTimer();
+        timer_.start();
+        
         timeout_ = timeout;
         timedOut_ = false;
         timeToBest_=timeout;
@@ -101,20 +106,15 @@ public class IFlatIRelaxSolver
         }
 
         criticalPath_ = new HashSet<Integer>();
-        precedences_ = new Vector<Precedence>();
         noGoods_ = new HashMap<String,Integer>();
-        
-    	bestMakespan_ = Integer.MAX_VALUE;
-        bestSolution_ = new Vector<Precedence>();
-        
+                
         curIteration_ = 0;
     	nbStable_ = 0;
     	
+    	resetSolution();
     	// Completely relax finish time
     	PSVariable v = psengine_.getVariableByName("maxDuration");
-    	v.specifyValue(PSVarValue.getInstance(100000));
-    	
-        timer_.start();
+    	v.specifyValue(PSVarValue.getInstance(100000));    	
     }
 
     public void flatten()
@@ -155,7 +155,7 @@ public class IFlatIRelaxSolver
     
     public void relax()
     {
-    	double probOfDeletion = 0.2; 
+    	double probOfDeletion = 0.3; 
     	int before = precedences_.size();
     	
     	boolean removed = false;
@@ -289,7 +289,7 @@ public class IFlatIRelaxSolver
     		bestSolution_.clear();
     		bestSolution_.addAll(precedences_);
     		timeToBest_ = timer_.getElapsed();
-    		RCPSPUtil.dbgout("Iteration "+iteration+": new best makespan "+bestMakespan_);
+    		RCPSPUtil.dbgout("Iteration "+iteration+": new best makespan "+bestMakespan_+" "+timer_.getElapsedString());
     		nbStable_=0;
     	}
     	else {
@@ -318,19 +318,6 @@ public class IFlatIRelaxSolver
         */               
     }
     
-    /* (non-Javadoc)
-     * @see UBO.RCPSPSolver#getMakespan()
-     */
-    public int getMakespan()
-    {
-        return RCPSPUtil.getLb(getProjectFinish());
-    }
-    
-    public PSVariable getProjectFinish()
-    {
-        return activities_.get(activities_.lastKey()).getEnd();
-    }
-
     public String printResources()
     {
     	StringBuffer buf = new StringBuffer();

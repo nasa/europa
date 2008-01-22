@@ -1,13 +1,5 @@
 package UBO;
 
-
-/*
- * This is an exhaustive solver used by the Hybrid solver, it uses :
- * - The incoming precedenceOracle to guide precedence selection at each decision point
- * - the incoming upper bound to prune the search tree faster.
- * TODO: this was a very quick implementation to try the hybrid idea, it doesn't scale very well. 
- *        use ideas from best performing B&B solvers for this problem, combined with the oracle and strengthened bound, it should kick ass.
- */
 import java.util.List;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -19,7 +11,14 @@ import org.ops.ui.util.SimpleTimer;
 import psengine.PSEngine;
 import psengine.PSToken;
 
-public class ExhaustiveSolver
+/*
+ * this is a different version of the Exhaustive solver that didn't turn out to be an improvement
+ * instead of starting from scratch, it removes 1, then 2, then 3 ... precedences from the incoming oracle and then 
+ * performs and exhaustive search.
+ * Leaving the code around for now, in case this idea can be reused in some form later.
+ * For now it looks like it'll be much better to improve the Exhaustive solver by using ideas from existing B&B solvers
+ */
+public class SolDistExhaustiveSolver
     extends RCPSPSolverBase 
 {
     List<DecisionPoint> decisionStack_ = new Vector<DecisionPoint>();
@@ -28,7 +27,7 @@ public class ExhaustiveSolver
     SortedSet<String> precedenceOracle_;
     DecisionPoint curDP_;
     
-    public ExhaustiveSolver()
+    public SolDistExhaustiveSolver()
     {        
     }
     
@@ -43,6 +42,8 @@ public class ExhaustiveSolver
         solve(psengine,timeout,bound,Integer.MAX_VALUE,null,null,null);
     }    
 
+    Precedence noGood_ = null;
+    
     public void solve(
             PSEngine psengine,
             long timeout,
@@ -54,7 +55,38 @@ public class ExhaustiveSolver
     {
 
         init(psengine,timeout,lowerBound,upperBound,activities,resources,precedenceOracle);
-        doSolve();
+
+        if (precedenceOracle.size() > 0) {
+            for (int i=0;i<precedenceOracle.size();i++) {
+                OracleIterator it = new OracleIterator(precedenceOracle,i+1);
+                
+                while (it.hasNext()) {
+                    List<Precedence> exclusions = it.next();                    
+
+                    removePrecedences(exclusions);
+                    doSolve();
+
+                    if (upperBound_ <= lowerBound_ || timedOut_) {
+                        solveFinished(precedenceOracle);
+                        return;       
+                    }
+                    
+                    undoSolve();
+                    addPrecedences(exclusions);                    
+                }
+            }
+        }
+        else {
+            doSolve();
+        }
+
+        solveFinished(precedenceOracle);
+    }
+    
+    protected void solveFinished(List<Precedence> precedenceOracle)
+    {
+        bestSolution_.addAll(precedenceOracle);
+        timer_.stop();        
     }
     
     protected void doSolve()
@@ -118,11 +150,11 @@ public class ExhaustiveSolver
     
     protected void doSolveFinished(String msg)
     {
-        timer_.stop();
-        RCPSPUtil.dbgout("ExhaustiveSolver.solve finished("+msg+") in "+timer_.getElapsedString()+" best makespan:"+getBestMakespan());
-        if (bestMakespan_ < Integer.MAX_VALUE) {
-            RCPSPUtil.dbgout("ExhaustiveSolver found new Best Solution:"+getSolutionAsString());
-        }
+        // TODO: timer_.stop();
+        //RCPSPUtil.dbgout("ExhaustiveSolver.solve finished("+msg+") in "+timer_.getElapsedString()+" best makespan:"+getBestMakespan());
+        //if (bestMakespan_ < Integer.MAX_VALUE) {
+        //    RCPSPUtil.dbgout("ExhaustiveSolver found new Best Solution:"+getSolutionAsString());
+        //}
         restoreBestSolution();
         resetState();
     }
@@ -205,6 +237,17 @@ public class ExhaustiveSolver
         //RCPSPUtil.dbgout(reason+" new stack size:"+decisionStack_.size());
     }
     
+    boolean isNoGood(PSToken pred,PSToken succ)
+    {
+        return false;
+       /* 
+      if (noGood_ == null)
+          return false;
+      
+      return ((noGood_.pred.getKey()==pred.getKey()) && (noGood_.succ.getKey() == succ.getKey()));
+      */
+    }
+    
     protected class DecisionPoint
     {
         TreeSet<Precedence> choices_;
@@ -225,7 +268,7 @@ public class ExhaustiveSolver
                 int succStart = RCPSPUtil.getUb(succ.getStart());
                 int predFinish = RCPSPUtil.getLb(pred.getEnd());
                 int buffer = succStart-predFinish;
-                if (!isPrecedence(pred,succ))
+                if (!isPrecedence(pred,succ) && !isNoGood(pred,succ))
                     choices_.add(new Precedence(r.getPSResource(),pred,succ,buffer));
             }
             
@@ -241,6 +284,7 @@ public class ExhaustiveSolver
          {
              Precedence toExecute = choices_.first();
              
+             /*
              for (Precedence p : choices_) {
                  if (precedenceOracle_.contains(p.toString())) {
                      toExecute = p;
@@ -248,6 +292,7 @@ public class ExhaustiveSolver
                      break;
                  }                     
              }
+             */
              
              choices_.remove(toExecute);
              addPrecedence(toExecute);             
@@ -266,7 +311,91 @@ public class ExhaustiveSolver
              //RCPSPUtil.dbgout("DP("+decisionStack_.size()+","+choices_.size()+")-removedPrecedence:"+lastExecutedChoice_);
              lastExecutedChoice_ = null;
          }         
-    }    
+    }
+    
+    void addPrecedences(List<Precedence> l)
+    {
+        psengine_.setAutoPropagation(false);
+        
+        for (Precedence p : l)
+            p.res.addPrecedence(p.pred,p.succ);
+        
+        psengine_.setAutoPropagation(true);                
+    }
+    
+    void removePrecedences(List<Precedence> l)
+    {
+        psengine_.setAutoPropagation(false);
+        
+        for (Precedence p : l)
+            p.res.removePrecedence(p.pred,p.succ);
+        
+        psengine_.setAutoPropagation(true);                
+    }
+    
+    class OracleIterator
+    {
+        int setSize_;
+        List<Precedence> source_;
+        List<Integer> counter_;
+        int counterRow_;
+        int max_;
+        
+        public OracleIterator(List<Precedence> source,int setSize)
+        {
+            setSize_ = setSize;
+            source_ = source;
+            counter_ = new Vector<Integer>();
+            for (int i=0;i<setSize;i++)
+                counter_.add(i);
+            
+            max_ = source_.size()-1;
+            counterRow_=counter_.size()-1;
+        }
+        
+        boolean hasNext()
+        {
+            return counterRow_ >= 0;   
+        }
+        
+        void incCounter()
+        {
+            int newValue = counter_.get(counterRow_)+1;
+            while ((newValue + (counter_.size()-counterRow_) > max_) && counterRow_>=0) {
+                counterRow_--;
+                if (counterRow_ >= 0)
+                    newValue = counter_.get(counterRow_)+1;                
+            }
+            
+            if (counterRow_ >=0) {
+                for (int i=0;(counterRow_+i)<counter_.size();i++)
+                     counter_.set(counterRow_+i, newValue+i);
+            }
+        }
+        
+        List<Precedence> next()
+        {
+            List<Precedence> retval = new Vector<Precedence>();
+            
+            for (Integer i : counter_)
+                retval.add(source_.get(i));
+            
+            incCounter();
+            //printExcluded(retval);
+            
+            return retval;
+        }
+        
+        void printExcluded(List<Precedence> retval)
+        {
+            StringBuffer buf = new StringBuffer();
+            buf.append("Excluded:");
+            for (Precedence p: retval)
+                buf.append(p.toString()).append(",");
+            RCPSPUtil.dbgout(buf.toString());            
+        }
+    }
+        
 }
 
 

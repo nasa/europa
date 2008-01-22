@@ -85,7 +85,7 @@ class Main
            .append(solver.getStepCount()).append(separator)
            .append("\n");
         
-        writeToFile("Solver-BuiltIn.txt",buf.toString());  
+        writeToFile("Solver-BuiltIn-"+timeoutMsecs+".txt",buf.toString());  
 	}
 
     public static void runRCPSPSolver(PSEngine engine,RCPSPSolver s, String test,Integer bound, long timeoutMsecs)
@@ -108,7 +108,8 @@ class Main
            .append(s.getSolutionAsString())
            .append("\n");
         
-        writeToFile("Solver-IFIR.txt",buf.toString());
+        String filename = "Solver-"+s.getName()+"-"+(s.getActivities().size()-2)+".txt";
+        writeToFile(filename,buf.toString());
     }	
     
     protected static void writeToFile(String filename,String str)

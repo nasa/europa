@@ -1,8 +1,12 @@
 package UBO;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.Vector;
 
 import org.ops.ui.util.SimpleTimer;
 
@@ -22,18 +26,20 @@ public abstract class RCPSPSolverBase
     protected PSEngine psengine_;
     protected List<Resource> resources_;    
     protected SortedMap<Integer,PSToken> activities_;
-    protected List<Precedence> precedences_;
+    protected SortedSet<Precedence> precedences_;
     
-    protected List<Precedence> bestSolution_;    
+    protected SortedSet<Precedence> bestSolution_;    
+        
+    public String getName() { return getClass().getSimpleName(); }
         
     public Collection<PSToken> getActivities() { return activities_.values(); }    
     public List<Resource> getResources()       { return resources_; }
-    public List<Precedence> getPrecedences()   { return precedences_; }
+    public SortedSet<Precedence> getPrecedences()   { return precedences_; }
 
     public long getElapsedMsecs() { return timer_.getElapsed(); }
     public int getBestMakespan() { return bestMakespan_; }
     public long getTimeToBest() { return timeToBest_; }
-    public List<Precedence> getBestSolution() { return bestSolution_; }
+    public SortedSet<Precedence> getBestSolution() { return bestSolution_; }
     
     public void undoSolve()
     {
@@ -76,7 +82,7 @@ public abstract class RCPSPSolverBase
     
     public PSVariable getProjectFinish()
     {
-        return activities_.get(activities_.lastKey()).getEnd();
+        return activities_.get(activities_.lastKey()).getStart();
     }    
     
     protected void addPrecedence(Precedence p)
@@ -107,5 +113,27 @@ public abstract class RCPSPSolverBase
         }
         
         return false;
-    }       
+    }    
+
+    
+    protected void resetSolution()
+    {
+        bestMakespan_ = Integer.MAX_VALUE;
+        bestSolution_ = new TreeSet<Precedence>(new PrecedenceComparator());        
+        precedences_ = new TreeSet<Precedence>(new PrecedenceComparator());
+    }
+    
+    static class PrecedenceComparator
+        implements Comparator<Precedence>
+    {
+        public int compare(Precedence o1, Precedence o2) 
+        {
+            int diff = RCPSPUtil.getActivity(o1.pred) - RCPSPUtil.getActivity(o2.pred);
+
+            if (diff != 0) 
+                return diff;
+            else                
+                return RCPSPUtil.getActivity(o1.succ) - RCPSPUtil.getActivity(o2.succ);
+        }
+    }    
 }

@@ -23,7 +23,7 @@ public class RCPSPResource extends ResourceBase
     	PSTokenList toks = res_.getTokens();
         for (int i=0;i<toks.size();i++ ) {
         	PSToken tok = toks.get(i);
-            if (RCPSPUtil.overlaps(tok,t)) 
+            if (RCPSPUtil.overlaps(tok,t) /* && RCPSPUtil.getActivity(tok)!=0*/) 
             	conflictSet.add(tok);
         }
 

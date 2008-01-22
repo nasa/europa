@@ -8,6 +8,13 @@ import org.ops.ui.util.SimpleTimer;
 
 import psengine.*;
 
+/*
+ * Seeing the the IFIRSolver very quickly finds good quality solutions, and that optimal solutions are normally not far away
+ * This solvers combined local search with exhaustive search :
+ * - if first runs IFIR for a portion of the allowed time to try to find a good quality solution
+ * - it then runs an exhaustive solver that uses the IFIR solution as an oracle to guide decisions, and the makespan as a 
+ *   sharpened upper bound
+ */
 public class HybridSolver
     implements RCPSPSolver
 {
@@ -20,6 +27,8 @@ public class HybridSolver
     {       
     }    
     
+    public String getName() { return "HybridSolver"; }
+    
     public void solve(PSEngine psengine,
             long timeout, // in msecs
             int bound, 
@@ -28,10 +37,10 @@ public class HybridSolver
         timer_ = new SimpleTimer();
         timer_.start();
         
-        long ifirTimeout = (long)(timeout*0.1);
+        long ifirTimeout = (long)(timeout*0.5);
         long exhTimeout = timeout-ifirTimeout;
         
-        int ifirBound = bound; // TODO: use 10% higher?
+        int ifirBound = (int)(bound*1.0); // TODO: use 10% higher?
         ifirSolver_ = new IFlatIRelaxSolver();        
         ifirSolver_.solve(psengine, ifirTimeout, ifirBound, usePSResources);
         
@@ -44,7 +53,7 @@ public class HybridSolver
         
         List<Precedence> oracle = new Vector<Precedence>();
         oracle.addAll(ifirSolver_.getBestSolution());
-        ifirSolver_.undoSolve(); // TODO: best solution needs to be reapplid if we don't find better
+        ifirSolver_.undoSolve(); 
         
         exhSolver_ = new ExhaustiveSolver();
         exhSolver_.solve(
@@ -67,12 +76,10 @@ public class HybridSolver
     public int getMakespan()                   { return lastSolver_.getMakespan(); }
     public int getBestMakespan()               { return lastSolver_.getBestMakespan(); }
     public long getElapsedMsecs()              { return timer_.getElapsed(); }
-    public String getSolutionAsString()        { return lastSolver_.getSolutionAsString(); }
-    public long getTimeToBest()                { return lastSolver_.getTimeToBest(); }
+    public long getTimeToBest()                { return (lastSolver_ == ifirSolver_ ? lastSolver_.getTimeToBest() : ifirSolver_.getElapsedMsecs()+lastSolver_.getTimeToBest()); }
 
-    public void undoSolve() 
-    {
-        // TODO Auto-generated method stub        
-    }
+    public String getSolutionAsString()        { return lastSolver_.getName() + " " + lastSolver_.getSolutionAsString(); }
+
+    public void undoSolve() { lastSolver_.undoSolve(); }
 }
 
