@@ -676,7 +676,7 @@ private:
   
   static bool runConnectionTest() {
     const int numthreads = 100;
-    assertTrue(numthreads + 2 < PTHREAD_THREADS_MAX, "Running connection test will exceed the thread limit.");
+    //assertTrue(numthreads + 2 < PTHREAD_THREADS_MAX, "Running connection test will exceed the thread limit.");
     LockManager::instance().connect(LabelStr("Test"));
     LockManager::instance().lock();
     assertTrue(LockManager::instance().getCurrentUser() == LabelStr("Test"));
