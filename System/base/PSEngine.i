@@ -195,6 +195,7 @@ namespace EUROPA {
 
     PSList<PSObject*> getObjectsByType(const std::string& objectType);
     PSObject* getObjectByKey(PSEntityKey id);
+	PSObject* getObjectByName(const std::string& name);
 
     PSList<PSVariable*> getGlobalVariables();
     PSVariable* getVariableByKey(PSEntityKey id);
@@ -351,6 +352,7 @@ namespace EUROPA {
     static PSVarValue getInstance(int val);
     static PSVarValue getInstance(double val);
     static PSVarValue getInstance(bool val);
+	static PSVarValue getObjectInstance(double obj);
 
     PSVarType getType() const;
 
