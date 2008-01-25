@@ -1,4 +1,9 @@
 #include <iostream>
+
+#ifdef VOID
+#undef VOID
+#endif
+
 #include "TestSupport.hh"
 
 #include "anml-test-module.hh"

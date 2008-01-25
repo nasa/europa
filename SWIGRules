@@ -58,7 +58,7 @@ rule SwigJava {
 	else if $(OS) = LINUX {
 		SubDirC++Flags -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux ;
 	}
-	else if $(OS) = MINGW {
+	else if $(OS) = MINGW || $(OS) = CYGWIN {
 		SubDirC++Flags -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/win32 ;
 	}
 	else {

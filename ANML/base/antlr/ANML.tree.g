@@ -5,10 +5,10 @@ header "post_include_hpp" {
 
 header "pre_include_hpp" {
 #ifdef VOID
-#undef VOID
+\#undef VOID
 #endif
 #ifdef IN
-#undef IN
+\#undef IN
 #endif
 }
 

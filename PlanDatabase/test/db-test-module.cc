@@ -139,7 +139,7 @@ void PDBTestEngine::uninitializeModules()
 
   class StandardDBFooFactory: public ConcreteObjectFactory {
   public:
-    StandardDBFooFactory(): ConcreteObjectFactory(DEFAULT_OBJECT_TYPE()){}
+    StandardDBFooFactory(): ConcreteObjectFactory(LabelStr(DEFAULT_OBJECT_TYPE)){}
 
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb, 
@@ -156,7 +156,7 @@ void PDBTestEngine::uninitializeModules()
 
   class SpecialDBFooFactory: public ConcreteObjectFactory{
   public:
-    SpecialDBFooFactory(): ConcreteObjectFactory(DEFAULT_OBJECT_TYPE().toString() +
+    SpecialDBFooFactory(): ConcreteObjectFactory(LabelStr(DEFAULT_OBJECT_TYPE).toString() +
 					       ":" + IntervalIntDomain::getDefaultTypeName().toString() +
 					       ":" + LabelSet::getDefaultTypeName().toString())
     {}
@@ -183,7 +183,7 @@ void PDBTestEngine::uninitializeModules()
   class IntervalTokenFactory: public ConcreteTokenFactory {
   public:
     IntervalTokenFactory()
-      : ConcreteTokenFactory(DEFAULT_PREDICATE()) {
+      : ConcreteTokenFactory(LabelStr(DEFAULT_PREDICATE)) {
     }
   private:
     TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false, bool isFact = false) const {
@@ -483,11 +483,11 @@ private:
   static bool testBasicAllocation() {
     initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
-    Object o2(db.getId(), DEFAULT_OBJECT_TYPE(), "o2");
+    Object o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
+    Object o2(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
 
-    ObjectId id0((new Object(o1.getId(), DEFAULT_OBJECT_TYPE(), "id0"))->getId());
-    Object o3(o2.getId(), DEFAULT_OBJECT_TYPE(), "o3");
+    ObjectId id0((new Object(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "id0"))->getId());
+    Object o3(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o3");
     assertTrue(db.getObjects().size() == 4);
     assertTrue(o1.getComponents().size() == 1);
     assertTrue(o3.getParent() == o2.getId());
@@ -495,14 +495,14 @@ private:
     assertTrue(db.getObjects().size() == 3);
     assertTrue(o1.getComponents().empty());
 
-    ObjectId id1((new Object(db.getId(), DEFAULT_OBJECT_TYPE(), "id1"))->getId());
-    new Object(id1, DEFAULT_OBJECT_TYPE(), "id2");
-    ObjectId id3((new Object(id1, DEFAULT_OBJECT_TYPE(), "id3"))->getId());
+    ObjectId id1((new Object(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "id1"))->getId());
+    new Object(id1, LabelStr(DEFAULT_OBJECT_TYPE), "id2");
+    ObjectId id3((new Object(id1, LabelStr(DEFAULT_OBJECT_TYPE), "id3"))->getId());
     assertTrue(db.getObjects().size() == 6);
     assertTrue(id3->getName().toString() == "id1.id3");
 
     // Test ancestor call
-    ObjectId id4((new Object(id3, DEFAULT_OBJECT_TYPE(), "id4"))->getId());
+    ObjectId id4((new Object(id3, LabelStr(DEFAULT_OBJECT_TYPE), "id4"))->getId());
     std::list<ObjectId> ancestors;
     id4->getAncestors(ancestors);
     assertTrue(ancestors.front() == id3);
@@ -513,8 +513,8 @@ private:
     assertTrue(db.getObjects().size() == 3);
 
     // Now allocate dynamically and allow the plan database to clean it up when it deallocates
-    ObjectId id5 = ((new Object(db.getId(), DEFAULT_OBJECT_TYPE(), "id5"))->getId());
-    new Object(id5, DEFAULT_OBJECT_TYPE(), "id6");
+    ObjectId id5 = ((new Object(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "id5"))->getId());
+    new Object(id5, LabelStr(DEFAULT_OBJECT_TYPE), "id6");
     return(true);
   }
   
@@ -522,12 +522,12 @@ private:
     initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
     std::list<ObjectId> values;
-    Object o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
-    Object o2(db.getId(), DEFAULT_OBJECT_TYPE(), "o2");
+    Object o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
+    Object o2(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
     assertTrue(db.getObjects().size() == 2);
     values.push_back(o1.getId());
     values.push_back(o2.getId());
-    ObjectDomain os1(values, DEFAULT_OBJECT_TYPE().c_str());
+    ObjectDomain os1(values, LabelStr(DEFAULT_OBJECT_TYPE).c_str());
     assertTrue(os1.isMember(o1.getId()));
     os1.remove(o1.getId());
     assertTrue(!os1.isMember(o1.getId()));
@@ -555,7 +555,7 @@ private:
   static bool testObjectVariables(){
     initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1", true);
+    Object o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1", true);
     assertFalse(o1.isComplete());
     o1.addVariable(IntervalIntDomain(), "IntervalIntVar");
     o1.addVariable(BoolDomain(), "BoolVar");
@@ -563,7 +563,7 @@ private:
     assertTrue(o1.isComplete());
     assertTrue(o1.getVariable("o1.BoolVar") != o1.getVariable("o1IntervalIntVar"));
 
-    Object o2(db.getId(), DEFAULT_OBJECT_TYPE(), "o2", true);
+    Object o2(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2", true);
     assertFalse(o2.isComplete());
     o2.addVariable(IntervalIntDomain(15, 200), "IntervalIntVar");
     o2.close();
@@ -598,14 +598,14 @@ private:
     initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
     // 1. Create 2 objects
-    ObjectId object1 = (new Object(db.getId(), DEFAULT_OBJECT_TYPE(), "O1"))->getId();
-    ObjectId object2 = (new Object(db.getId(), DEFAULT_OBJECT_TYPE(), "O2"))->getId();    
+    ObjectId object1 = (new Object(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "O1"))->getId();
+    ObjectId object2 = (new Object(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "O2"))->getId();    
     db.close();
 
     assertTrue(object1 != object2);
     assertTrue(db.getObjects().size() == 2);
     // 2. Create 1 token.
-    EventToken eventToken(db.getId(), DEFAULT_PREDICATE(), false, false, IntervalIntDomain(0, 10));
+    EventToken eventToken(db.getId(), LabelStr(DEFAULT_PREDICATE), false, false, IntervalIntDomain(0, 10));
 
     // Confirm not added to the object
     assertFalse(eventToken.getObject()->getDerivedDomain().isSingleton());
@@ -639,15 +639,15 @@ private:
   static bool testCommonAncestorConstraint(){
     initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
-    Object o2(o1.getId(), DEFAULT_OBJECT_TYPE(), "o2");
-    Object o3(o1.getId(), DEFAULT_OBJECT_TYPE(), "o3");
-    Object o4(o2.getId(), DEFAULT_OBJECT_TYPE(), "o4");
-    Object o5(o2.getId(), DEFAULT_OBJECT_TYPE(), "o5");
-    Object o6(o3.getId(), DEFAULT_OBJECT_TYPE(), "o6");
-    Object o7(o3.getId(), DEFAULT_OBJECT_TYPE(), "o7");
+    Object o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
+    Object o2(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
+    Object o3(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o3");
+    Object o4(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o4");
+    Object o5(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o5");
+    Object o6(o3.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o6");
+    Object o7(o3.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o7");
 
-    ObjectDomain allObjects(DEFAULT_OBJECT_TYPE().c_str());
+    ObjectDomain allObjects(LabelStr(DEFAULT_OBJECT_TYPE).c_str());
     allObjects.insert(o1.getId());
     allObjects.insert(o2.getId());
     allObjects.insert(o3.getId());
@@ -659,9 +659,9 @@ private:
 
     // Ensure there they agree on a common root.
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId(), DEFAULT_OBJECT_TYPE().c_str()));
-      Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId(), DEFAULT_OBJECT_TYPE().c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       CommonAncestorConstraint constraint("commonAncestor", 
 					  "Default", 
 					  ENGINE, 
@@ -672,9 +672,9 @@ private:
 
     // Now impose a different set of restrictions which will eliminate all options
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId(), DEFAULT_OBJECT_TYPE().c_str()));
-      Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId(), DEFAULT_OBJECT_TYPE().c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       CommonAncestorConstraint constraint("commonAncestor", 
 					  "Default", 
 					  ENGINE, 
@@ -685,8 +685,8 @@ private:
 
     // Now try a set of restrictions, which will allow it to pass
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId(), DEFAULT_OBJECT_TYPE().c_str()));
-      Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       Variable<ObjectDomain> restrictions(ENGINE, allObjects);
       CommonAncestorConstraint constraint("commonAncestor", 
 					  "Default", 
@@ -724,20 +724,20 @@ private:
   static bool testHasAncestorConstraint(){
     initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
-    Object o2(o1.getId(), DEFAULT_OBJECT_TYPE(), "o2");
-    Object o3(o1.getId(), DEFAULT_OBJECT_TYPE(), "o3");
-    Object o4(o2.getId(), DEFAULT_OBJECT_TYPE(), "o4");
-    Object o5(o2.getId(), DEFAULT_OBJECT_TYPE(), "o5");
-    Object o6(o3.getId(), DEFAULT_OBJECT_TYPE(), "o6");
-    Object o7(o3.getId(), DEFAULT_OBJECT_TYPE(), "o7");
-    Object o8(db.getId(), DEFAULT_OBJECT_TYPE(), "o8");
+    Object o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
+    Object o2(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
+    Object o3(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o3");
+    Object o4(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o4");
+    Object o5(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o5");
+    Object o6(o3.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o6");
+    Object o7(o3.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o7");
+    Object o8(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o8");
     
     
     // Positive test immediate ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), DEFAULT_OBJECT_TYPE().c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o3.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o3.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       HasAncestorConstraint constraint("hasAncestor", 
                                        "Default", 
                                        ENGINE, 
@@ -748,8 +748,8 @@ private:
     
     // negative test immediate ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), DEFAULT_OBJECT_TYPE().c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       HasAncestorConstraint constraint("hasAncestor", 
                                        "Default", 
                                        ENGINE, 
@@ -759,8 +759,8 @@ private:
     }
     // Positive test higher up  ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), DEFAULT_OBJECT_TYPE().c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       HasAncestorConstraint constraint("hasAncestor", 
                                        "Default", 
                                        ENGINE, 
@@ -770,8 +770,8 @@ private:
     }
     // negative test higherup ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), DEFAULT_OBJECT_TYPE().c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o8.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o8.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       HasAncestorConstraint constraint("hasAncestor", 
                                        "Default", 
                                        ENGINE, 
@@ -782,13 +782,13 @@ private:
     
     //positive restriction of the set.
     {
-      ObjectDomain obs(DEFAULT_OBJECT_TYPE().c_str());
+      ObjectDomain obs(LabelStr(DEFAULT_OBJECT_TYPE).c_str());
       obs.insert(o7.getId());
       obs.insert(o4.getId());
       obs.close();
       
       Variable<ObjectDomain> first(ENGINE, obs);
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       HasAncestorConstraint constraint("hasAncestor", 
                                        "Default", 
                                        ENGINE, 
@@ -800,13 +800,13 @@ private:
     
     //no restriction of the set.
     {
-      ObjectDomain obs1(DEFAULT_OBJECT_TYPE().c_str());
+      ObjectDomain obs1(LabelStr(DEFAULT_OBJECT_TYPE).c_str());
       obs1.insert(o7.getId());
       obs1.insert(o4.getId());
       obs1.close();
       
       Variable<ObjectDomain> first(ENGINE, obs1);
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId(), DEFAULT_OBJECT_TYPE().c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       HasAncestorConstraint constraint("hasAncestor", 
                                        "Default", 
                                        ENGINE, 
@@ -825,16 +825,16 @@ private:
   static bool testMakeObjectVariable(){
     initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
-    ConstrainedVariableId v0 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain(DEFAULT_OBJECT_TYPE().c_str())))->getId();
+    ConstrainedVariableId v0 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain(LabelStr(DEFAULT_OBJECT_TYPE).c_str())))->getId();
     assertFalse(v0->isClosed());
-    db.makeObjectVariableFromType(DEFAULT_OBJECT_TYPE(), v0);
+    db.makeObjectVariableFromType(LabelStr(DEFAULT_OBJECT_TYPE), v0);
     assertFalse(v0->isClosed());
     assertTrue(ENGINE->propagate());
 
     // Now add an object and we should expect the constraint network to be consistent
-    Object o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    Object o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
     assertTrue(ENGINE->propagate());
-    assertFalse(db.isClosed(DEFAULT_OBJECT_TYPE().c_str()));
+    assertFalse(db.isClosed(LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
     assertTrue(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getId());
 
     // Now delete the variable. This should remove the listener
@@ -851,28 +851,28 @@ private:
     PlanDatabase db(ENGINE, SCHEMA);
 
     // Now add an object and we should expect the constraint network to be consistent
-    Object o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    Object o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
     assertTrue(ENGINE->propagate());
 
-    ConstrainedVariableId v0 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain(DEFAULT_OBJECT_TYPE().c_str())))->getId();
+    ConstrainedVariableId v0 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain(LabelStr(DEFAULT_OBJECT_TYPE).c_str())))->getId();
     assertFalse(v0->isClosed());
-    db.makeObjectVariableFromType(DEFAULT_OBJECT_TYPE(), v0);
+    db.makeObjectVariableFromType(LabelStr(DEFAULT_OBJECT_TYPE), v0);
     assertFalse(v0->isClosed());
     assertTrue(ENGINE->propagate());
-    assertFalse(db.isClosed(DEFAULT_OBJECT_TYPE().c_str()));
+    assertFalse(db.isClosed(LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
     assertTrue(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getId());
 
     // Now create another object and verify it is part of the initial domain of the next variable
-    Object o2(db.getId(), DEFAULT_OBJECT_TYPE(), "o2");
+    Object o2(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
     assertTrue(ENGINE->propagate());
 
     // Confirm the first variable has the value
     assertTrue(!v0->lastDomain().isSingleton());
 
     // Allocate another variable and confirm the domains are equal
-    ConstrainedVariableId v1 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain(DEFAULT_OBJECT_TYPE().c_str())))->getId();
+    ConstrainedVariableId v1 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain(LabelStr(DEFAULT_OBJECT_TYPE).c_str())))->getId();
     assertFalse(v1->isClosed());
-    db.makeObjectVariableFromType(DEFAULT_OBJECT_TYPE(), v1);
+    db.makeObjectVariableFromType(LabelStr(DEFAULT_OBJECT_TYPE), v1);
     assertFalse(v1->isClosed());
     assertTrue(v0->lastDomain() == v1->lastDomain() && 
 	       v1->lastDomain().isMember(o1.getId())  && 
@@ -895,8 +895,8 @@ private:
 
     assertTrue(ENGINE->propagate());
     // Now add an object and we should expect the constraint network to be consistent next time we add the token.
-    ObjectId o1 = (new Object(db.getId(), DEFAULT_OBJECT_TYPE(), "o1"))->getId();
-    EventToken eventToken(db.getId(), DEFAULT_PREDICATE(), false, false, IntervalIntDomain(0, 10));
+    ObjectId o1 = (new Object(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1"))->getId();
+    EventToken eventToken(db.getId(), LabelStr(DEFAULT_PREDICATE), false, false, IntervalIntDomain(0, 10));
 
     eventToken.activate(); // Must be activate to eventually propagate the objectTokenRelation
     assertTrue(ENGINE->propagate());
@@ -909,7 +909,7 @@ private:
     assertTrue(!o1->getTokens().empty());
 
     // Insertion of a new object should not affect the given event token
-    ObjectId o2 = (new Object(db.getId(), DEFAULT_OBJECT_TYPE(), "o2"))->getId();
+    ObjectId o2 = (new Object(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
     assertTrue(ENGINE->constraintConsistent());
     assertTrue(!eventToken.getObject()->baseDomain().isMember(o2));
 
@@ -919,11 +919,11 @@ private:
   static bool testFreeAndConstrain(){
     initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    Object o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
     db.close();                                                                          
   
     IntervalToken t1(db.getId(),  
-                     DEFAULT_PREDICATE(),                                                     
+                     LabelStr(DEFAULT_PREDICATE),                                                     
                      true,      
                      false,                                                         
                      IntervalIntDomain(0, 10),                                           
@@ -931,7 +931,7 @@ private:
                      IntervalIntDomain(1, 1000));                                        
   
     IntervalToken t2(db.getId(),                                                         
-                     DEFAULT_PREDICATE(),                                                     
+                     LabelStr(DEFAULT_PREDICATE),                                                     
                      true,             
                      false,                                                  
                      IntervalIntDomain(0, 10),                                           
@@ -939,7 +939,7 @@ private:
                      IntervalIntDomain(1, 1000));                                        
   
     IntervalToken t3(db.getId(),                                                         
-                     DEFAULT_PREDICATE(),                                                     
+                     LabelStr(DEFAULT_PREDICATE),                                                     
                      true,       
                      false,                                                        
                      IntervalIntDomain(0, 10),                                           
@@ -966,7 +966,7 @@ private:
     // Also use a locally scoped token to force a different deletion path
     {
       IntervalToken t4(db.getId(),                                                         
-		       DEFAULT_PREDICATE(),                                                     
+		       LabelStr(DEFAULT_PREDICATE),                                                     
 		       true,         
 		       false,                                                      
 		       IntervalIntDomain(0, 10),                                           
@@ -1016,7 +1016,7 @@ private:
   static bool testBasicTokenAllocation() {
     DEFAULT_SETUP(ce, db, true);
     // Event Token
-    EventToken eventToken(db, DEFAULT_PREDICATE(), true, false, IntervalIntDomain(0, 1000), Token::noObject(), false);
+    EventToken eventToken(db, LabelStr(DEFAULT_PREDICATE), true, false, IntervalIntDomain(0, 1000), Token::noObject(), false);
     assertTrue(eventToken.getStart()->getDerivedDomain() == eventToken.getEnd()->getDerivedDomain());
     assertTrue(eventToken.getDuration()->getDerivedDomain() == IntervalIntDomain(0, 0));
     eventToken.getStart()->restrictBaseDomain(IntervalIntDomain(5, 10));
@@ -1026,7 +1026,7 @@ private:
   
     // IntervalToken
     IntervalToken intervalToken(db, 
-                                DEFAULT_PREDICATE(), 
+                                LabelStr(DEFAULT_PREDICATE), 
                                 true, 
                                 false,
                                 IntervalIntDomain(0, 1000),
@@ -1051,7 +1051,7 @@ private:
 
     // Create and delete a Token
     TokenId token = (new IntervalToken(db, 
-                                       DEFAULT_PREDICATE(), 
+                                       LabelStr(DEFAULT_PREDICATE), 
                                        true,
                                        false, 
                                        IntervalIntDomain(0, 1000),
@@ -1066,12 +1066,12 @@ private:
 
   static bool testBasicTokenCreation() {           
     DEFAULT_SETUP(ce,db, false);
-    ObjectId timeline = (new Timeline(db, DEFAULT_OBJECT_TYPE(), "o2"))->getId();
+    ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
     assertFalse(timeline.isNoId());
     db->close();                                                                          
   
     IntervalToken t1(db,                                                         
-                     DEFAULT_PREDICATE(),                                                     
+                     LabelStr(DEFAULT_PREDICATE),                                                     
                      true,    
                      false,                                                           
                      IntervalIntDomain(0, 10),                                           
@@ -1084,7 +1084,7 @@ private:
   static bool testStateModel(){
     DEFAULT_SETUP(ce, db, true);
     IntervalToken t0(db, 
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      true, 
                      false,
                      IntervalIntDomain(0, 1000),
@@ -1105,7 +1105,7 @@ private:
     assertTrue(t0.isInactive());
   
     IntervalToken t1(db, 
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      true, 
                      false,
                      IntervalIntDomain(0, 1000),
@@ -1138,7 +1138,7 @@ private:
   static bool testMasterSlaveRelationship(){
     DEFAULT_SETUP(ce, db, true);
     IntervalToken t0(db, 
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      false, 
                      false,
                      IntervalIntDomain(0, 1),
@@ -1147,7 +1147,7 @@ private:
     t0.activate();
   
     TokenId t1 = (new IntervalToken(db, 
-                                    DEFAULT_PREDICATE(), 
+                                    LabelStr(DEFAULT_PREDICATE), 
                                     false,
                                     false,
                                     IntervalIntDomain(0, 1),
@@ -1156,31 +1156,31 @@ private:
     t1->activate();
   
     TokenId t2 = (new IntervalToken(t0.getId(), "any",
-                                    DEFAULT_PREDICATE(), 
+                                    LabelStr(DEFAULT_PREDICATE), 
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(1, 1)))->getId();
   
     TokenId t3 = (new IntervalToken(t0.getId(), "any",
-                                    DEFAULT_PREDICATE(), 
+                                    LabelStr(DEFAULT_PREDICATE), 
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(1, 1)))->getId();
   
     TokenId t4 = (new IntervalToken(t0.getId(), "any", 
-                                    DEFAULT_PREDICATE(), 
+                                    LabelStr(DEFAULT_PREDICATE), 
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(1, 1)))->getId();
   
     TokenId t5 = (new IntervalToken(t1, "any", 
-                                    DEFAULT_PREDICATE(), 
+                                    LabelStr(DEFAULT_PREDICATE), 
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(1, 1)))->getId();
   
     TokenId t6 = (new EventToken(t0.getId(), "any", 
-                                 DEFAULT_PREDICATE(), 
+                                 LabelStr(DEFAULT_PREDICATE), 
                                  IntervalIntDomain(0, 1)))->getId();
   
     // These are mostly to avoid compiler warnings about unused variables.
@@ -1211,7 +1211,7 @@ private:
 
     {    
       IntervalToken t0(db, 
-		       DEFAULT_PREDICATE(), 
+		       LabelStr(DEFAULT_PREDICATE), 
 		       true,
 		       false,
 		       IntervalIntDomain(0, 10),
@@ -1219,7 +1219,7 @@ private:
 		       IntervalIntDomain(1, 1000));
   
       IntervalToken t1(db,
-		       DEFAULT_PREDICATE(), 
+		       LabelStr(DEFAULT_PREDICATE), 
 		       true,
 		       false,
 		       IntervalIntDomain(0, 10),
@@ -1234,7 +1234,7 @@ private:
     // Now try again, but make sure that if we terminate them, the deletion causes no problems
     {    
       IntervalToken t0(db, 
-		       DEFAULT_PREDICATE(), 
+		       LabelStr(DEFAULT_PREDICATE), 
 		       true,
 		       false,
 		       IntervalIntDomain(0, 0),
@@ -1242,7 +1242,7 @@ private:
 		       IntervalIntDomain(1, 1));
   
       IntervalToken t1(db,
-		       DEFAULT_PREDICATE(), 
+		       LabelStr(DEFAULT_PREDICATE), 
 		       true,
 		       false,
 		       IntervalIntDomain(0, 0),
@@ -1259,7 +1259,7 @@ private:
     TokenId t1;
     {    
       IntervalToken t0(db, 
-		       DEFAULT_PREDICATE(), 
+		       LabelStr(DEFAULT_PREDICATE), 
 		       true,
 		       false,
 		       IntervalIntDomain(0, 0),
@@ -1269,7 +1269,7 @@ private:
       t0.activate();
 
       t1 = (new IntervalToken(t0.getId(), "any", 
-				      DEFAULT_PREDICATE(), 
+				      LabelStr(DEFAULT_PREDICATE), 
 				      IntervalIntDomain(0, 0),
 				      IntervalIntDomain(1, 1),
 				      IntervalIntDomain(1, 1)))->getId();
@@ -1301,7 +1301,7 @@ private:
     // Create 2 mergeable tokens.
     
     IntervalToken t0(db, 
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1310,7 +1310,7 @@ private:
 		     Token::noObject(), false);
   
     IntervalToken t1(db,
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1347,7 +1347,7 @@ private:
     DEFAULT_SETUP(ce, db, true);
     // Create 2 mergeable tokens - predicates, types and base domaiuns match
     IntervalToken t0(db, 
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1357,7 +1357,7 @@ private:
     assertTrue(t0.getDuration()->getDerivedDomain().getUpperBound() == 20);
   
     IntervalToken t1(db,
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1389,7 +1389,7 @@ private:
   
     // Now post equality constraint between t1 and extra token t2 and remerge
     IntervalToken t2(db, 
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1448,13 +1448,13 @@ private:
 
   static bool testConstraintMigrationDuringMerge() {
     DEFAULT_SETUP(ce, db, false);
-    ObjectId timeline1 = (new Timeline(db, DEFAULT_OBJECT_TYPE(), "timeline1"))->getId();
-    new Timeline(db, DEFAULT_OBJECT_TYPE(), "timeline2");
+    ObjectId timeline1 = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "timeline1"))->getId();
+    new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "timeline2");
     db->close();
 
     // Create two base tokens
     IntervalToken t0(db, 
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1462,7 +1462,7 @@ private:
                      IntervalIntDomain(1, 1000));
 
     IntervalToken t1(db,
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1472,7 +1472,7 @@ private:
 
     // Create 2 mergeable tokens - predicates, types and base domains match
     IntervalToken t2(db, 
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1480,7 +1480,7 @@ private:
                      IntervalIntDomain(1, 1000));
 
     IntervalToken t3(db,
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1513,14 +1513,14 @@ private:
    */
   static bool testConstraintAdditionAfterMerging(){
     DEFAULT_SETUP(ce, db, false);
-    ObjectId timeline1 = (new Timeline(db, DEFAULT_OBJECT_TYPE(), "timeline1"))->getId();
-    new Timeline(db, DEFAULT_OBJECT_TYPE(), "timeline2");
+    ObjectId timeline1 = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "timeline1"))->getId();
+    new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "timeline2");
     db->close();
 
 
     // Create two base tokens
     IntervalToken t0(db, 
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1528,7 +1528,7 @@ private:
                      IntervalIntDomain(1, 1000));
 
     IntervalToken t1(db,
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1537,7 +1537,7 @@ private:
 
 
     IntervalToken t2(db,
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1569,7 +1569,7 @@ private:
 
   static bool testNonChronGNATS2439() {
     DEFAULT_SETUP(ce, db, false);
-    new Timeline(db, DEFAULT_OBJECT_TYPE(), "timeline1");
+    new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "timeline1");
     db->close();
 
     std::list<double> values;
@@ -1580,7 +1580,7 @@ private:
     values.push_back(LabelStr("L3"));
 
     IntervalToken token0(db, 
-			 DEFAULT_PREDICATE(), 
+			 LabelStr(DEFAULT_PREDICATE), 
 			 false,
 			 false,
 			 IntervalIntDomain(0, 10),
@@ -1591,7 +1591,7 @@ private:
     token0.close();
 
     IntervalToken token1(db, 
-			 DEFAULT_PREDICATE(), 
+			 LabelStr(DEFAULT_PREDICATE), 
 			 false,
 			 false,
 			 IntervalIntDomain(0, 10),
@@ -1602,7 +1602,7 @@ private:
     token1.close();
 
     IntervalToken token2(db, 
-			 DEFAULT_PREDICATE(), 
+			 LabelStr(DEFAULT_PREDICATE), 
 			 false,
 			 false,
 			 IntervalIntDomain(0, 10),
@@ -1615,7 +1615,7 @@ private:
     token2.close();
 
     IntervalToken token3(db, 
-			 DEFAULT_PREDICATE(), 
+			 LabelStr(DEFAULT_PREDICATE), 
 			 false,
 			 false,
 			 IntervalIntDomain(0, 10),
@@ -1712,7 +1712,7 @@ private:
   // add backtracking and longer chain, also add a before constraint
   static bool testMergingPerformance(){
     DEFAULT_SETUP(ce, db, false);
-    ObjectId timeline = (new Timeline(db, DEFAULT_OBJECT_TYPE(), "o2"))->getId();
+    ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
     db->close();
 
     typedef Id<IntervalToken> IntervalTokenId;
@@ -1727,13 +1727,13 @@ private:
 
     // Add parameters to schema
     for(int i=0;i< UNIFIED; i++)
-      SCHEMA->addMember(DEFAULT_PREDICATE(), IntervalIntDomain::getDefaultTypeName(), LabelStr("P" + i).c_str());
+      SCHEMA->addMember(LabelStr(DEFAULT_PREDICATE), IntervalIntDomain::getDefaultTypeName(), LabelStr("P" + i).c_str());
 
     for (int i=0; i < NUMTOKS; i++) {
       std::vector<IntervalTokenId> tmp;
       for (int j=0; j < UNIFIED; j++) {
         IntervalTokenId t = (new IntervalToken(db, 
-                                               DEFAULT_PREDICATE(), 
+                                               LabelStr(DEFAULT_PREDICATE), 
                                                true,
                                                false,
                                                IntervalIntDomain(0, 210),
@@ -1828,7 +1828,7 @@ private:
 
     // Create 2 mergeable tokens - predicates, types and base domaiuns match
     IntervalToken t0(db, 
-                     LabelStr(DEFAULT_PREDICATE()), 
+                     LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1840,7 +1840,7 @@ private:
 
     // Same predicate and has an intersection
     IntervalToken t1(db,
-                     LabelStr(DEFAULT_PREDICATE()), 
+                     LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1868,7 +1868,7 @@ private:
     assertFalse(db->hasCompatibleTokens(t1.getId()));
 
     IntervalToken t2(db,
-                     LabelStr(DEFAULT_PREDICATE()), 
+                     LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1887,7 +1887,7 @@ private:
 
 
     IntervalToken t3(db,
-                     LabelStr(DEFAULT_PREDICATE()), 
+                     LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2078,11 +2078,11 @@ private:
 
   static bool testTokenFactory(){
     DEFAULT_SETUP(ce, db, true);
-    TokenId master = TokenFactory::createInstance(db, DEFAULT_PREDICATE(), true);
+    TokenId master = TokenFactory::createInstance(db, LabelStr(DEFAULT_PREDICATE), true);
     master->activate();
-    TokenId slave = TokenFactory::createInstance(master, DEFAULT_PREDICATE(), LabelStr("any"));
+    TokenId slave = TokenFactory::createInstance(master, LabelStr(DEFAULT_PREDICATE), LabelStr("any"));
     assertTrue(slave->getMaster() == master); 
-    TokenId rejectable = TokenFactory::createInstance(db, DEFAULT_PREDICATE(), false);
+    TokenId rejectable = TokenFactory::createInstance(db, LabelStr(DEFAULT_PREDICATE), false);
     rejectable->activate();
     //!!Should try rejecting master and verify inconsistency
     //!!Should try rejecting rejectable and verify consistency
@@ -2097,7 +2097,7 @@ private:
   static bool testCorrectSplit_Gnats2450(){
     DEFAULT_SETUP(ce, db, true);
     IntervalToken tokenA(db, 
-                         LabelStr(DEFAULT_PREDICATE()), 
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                          true,
                          false,
                          IntervalIntDomain(0, 10),
@@ -2112,7 +2112,7 @@ private:
     assertTrue(ce->propagate());
 
     IntervalToken tokenB(db, 
-                         LabelStr(DEFAULT_PREDICATE()), 
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                          true,
                          false,
                          IntervalIntDomain(0, 10),
@@ -2120,7 +2120,7 @@ private:
                          IntervalIntDomain(1, 1000));
 
     IntervalToken tokenC(db, 
-                         LabelStr(DEFAULT_PREDICATE()), 
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                          true,
                          false,
                          IntervalIntDomain(0, 10),
@@ -2156,7 +2156,7 @@ private:
     DEFAULT_SETUP(ce, db, true);
     
 		//SCHEMA->addPrimitive("int");
-		SCHEMA->addMember(DEFAULT_PREDICATE(),"int",LabelStr("FOO"));
+		SCHEMA->addMember(LabelStr(DEFAULT_PREDICATE),"int",LabelStr("FOO"));
 
     EnumeratedDomain zero(true, "int");
     zero.insert(0); zero.close();
@@ -2165,7 +2165,7 @@ private:
     one.insert(1); one.close();
 
     IntervalToken t0(db,
-                     DEFAULT_PREDICATE(),
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2177,7 +2177,7 @@ private:
     t0.close();
 
     IntervalToken t1(db,
-                     DEFAULT_PREDICATE(),
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2190,7 +2190,7 @@ private:
     t1.close();
 
     IntervalToken t2(db,
-                     DEFAULT_PREDICATE(),
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2203,7 +2203,7 @@ private:
     t2.close();
 
     IntervalToken t3(db,
-                     DEFAULT_PREDICATE(),
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2216,7 +2216,7 @@ private:
     t3.close();
 
     IntervalToken t4(db,
-                     DEFAULT_PREDICATE(),
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2268,7 +2268,7 @@ private:
     lbl.insert(LabelStr("L1"));
 
     IntervalToken t0(db,
-                     DEFAULT_PREDICATE(),
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2280,7 +2280,7 @@ private:
     t0.close();
 
     IntervalToken t1(db,
-                     DEFAULT_PREDICATE(),
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2317,7 +2317,7 @@ private:
     DEFAULT_SETUP(ce, db, true);
     //create a regular token
     IntervalToken t0(db, 
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2326,7 +2326,7 @@ private:
 
     //create a token that ends slightly later
     IntervalToken t1(db, 
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2347,7 +2347,7 @@ private:
 
     //create a token that has to end later
     IntervalToken t2(db, 
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2373,13 +2373,13 @@ private:
   static bool testAssignemnt(){
     initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
-    Object o2(db.getId(), DEFAULT_OBJECT_TYPE(), "o2");
+    Object o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
+    Object o2(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
     db.close();
 
     //create a token that has to end later
     IntervalToken t0(db.getId(), 
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2427,11 +2427,11 @@ private:
   static bool testDeleteMasterAndPreserveSlave(){
     initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
-    Timeline o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    Timeline o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
     db.close();                                                                
   
     TokenId master = (new IntervalToken(db.getId(),  
-				       DEFAULT_PREDICATE(),                                                     
+				       LabelStr(DEFAULT_PREDICATE),                                                     
 				       true, 
 				       false,                                                              
 				       IntervalIntDomain(0, 10),                                           
@@ -2441,14 +2441,14 @@ private:
 
     TokenId slaveA = (new IntervalToken(master,  
 					"any",
-					DEFAULT_PREDICATE(),                                                     
+					LabelStr(DEFAULT_PREDICATE),                                                     
 					IntervalIntDomain(0, 10),                                           
 					IntervalIntDomain(0, 20),                                           
 					IntervalIntDomain(1, 1000)))->getId();
 
     TokenId slaveB = (new IntervalToken(master,  
 					"any",
-					DEFAULT_PREDICATE(),                                                     
+					LabelStr(DEFAULT_PREDICATE),                                                     
 					IntervalIntDomain(0, 10),                                           
 					IntervalIntDomain(0, 20),                                           
 					IntervalIntDomain(1, 1000)))->getId();
@@ -2474,11 +2474,11 @@ private:
   static bool testPreserveMergeWithNonChronSplit(){
     initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
-    Timeline o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    Timeline o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
     db.close();                                                                
   
     TokenId master = (new IntervalToken(db.getId(),  
-				       DEFAULT_PREDICATE(),                                                     
+				       LabelStr(DEFAULT_PREDICATE),                                                     
 				       true,  
 				       false,                                                             
 				       IntervalIntDomain(0, 10),                                           
@@ -2489,7 +2489,7 @@ private:
                                                      
   
     TokenId orphan = (new IntervalToken(db.getId(),  
-					DEFAULT_PREDICATE(),                                                     
+					LabelStr(DEFAULT_PREDICATE),                                                     
 					true,  
 					false,                                                             
 					IntervalIntDomain(0, 10),                                           
@@ -2498,21 +2498,21 @@ private:
 
     TokenId slaveA = (new IntervalToken(master,  
 					"any",
-					DEFAULT_PREDICATE(),                                                     
+					LabelStr(DEFAULT_PREDICATE),                                                     
 					IntervalIntDomain(0, 10),                                           
 					IntervalIntDomain(0, 20),                                           
 					IntervalIntDomain(1, 1000)))->getId();
 
     TokenId slaveB = (new IntervalToken(master,  
 					"any",
-					DEFAULT_PREDICATE(),                                                     
+					LabelStr(DEFAULT_PREDICATE),                                                     
 					IntervalIntDomain(0, 10),                                           
 					IntervalIntDomain(0, 20),                                           
 					IntervalIntDomain(1, 1000)))->getId();
 
     TokenId slaveC = (new IntervalToken(master,  
 					"any",
-					DEFAULT_PREDICATE(),                                                     
+					LabelStr(DEFAULT_PREDICATE),                                                     
 					IntervalIntDomain(0, 10),                                           
 					IntervalIntDomain(0, 20),                                           
 					IntervalIntDomain(1, 1000)))->getId();
@@ -2551,11 +2551,11 @@ private:
   static bool testGNATS_3163(){
     initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
-    Timeline o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    Timeline o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
     db.close();
 
     TokenId master = (new IntervalToken(db.getId(),  
-				       DEFAULT_PREDICATE(),                                                     
+				       LabelStr(DEFAULT_PREDICATE),                                                     
 				       true, 
 				       false,                                                              
 				       IntervalIntDomain(0, 10),                                           
@@ -2576,11 +2576,11 @@ private:
   static bool testGNATS_3193(){
     initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
-    Timeline o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    Timeline o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
     db.close();
 
     TokenId t0 = (new IntervalToken(db.getId(),  
-				       DEFAULT_PREDICATE(),                                                     
+				       LabelStr(DEFAULT_PREDICATE),                                                     
 				       true,    
 				       false,                                                           
 				       IntervalIntDomain(0, 10),                                           
@@ -2589,7 +2589,7 @@ private:
     t0->activate();
 
     TokenId t1 = (new IntervalToken(db.getId(),  
-				       DEFAULT_PREDICATE(),                                                     
+				       LabelStr(DEFAULT_PREDICATE),                                                     
 				       true, 
 				       false,                                                              
 				       IntervalIntDomain(0, 10),                                           
@@ -2640,11 +2640,11 @@ private:
 
   static bool testBasicInsertion(){
     DEFAULT_SETUP(ce, db, false);
-    Timeline timeline(db, DEFAULT_OBJECT_TYPE(), "o2");
+    Timeline timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2");
     db->close();
 
     IntervalToken tokenA(db, 
-                         LabelStr(DEFAULT_PREDICATE()), 
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                          true,
                          false,
                          IntervalIntDomain(0, 10),
@@ -2652,7 +2652,7 @@ private:
                          IntervalIntDomain(1, 1000));
 
     IntervalToken tokenB(db, 
-                         LabelStr(DEFAULT_PREDICATE()), 
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                          true,
                          false,
                          IntervalIntDomain(0, 10),
@@ -2660,7 +2660,7 @@ private:
                          IntervalIntDomain(1, 1000));
 
     IntervalToken tokenC(db, 
-                         LabelStr(DEFAULT_PREDICATE()), 
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                          true,
                          false,
                          IntervalIntDomain(0, 10),
@@ -2668,7 +2668,7 @@ private:
                          IntervalIntDomain(1, 1000));
 
     IntervalToken tokenD(db, 
-                         LabelStr(DEFAULT_PREDICATE()), 
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                          true,
                          false,
                          IntervalIntDomain(0, 10),
@@ -2801,11 +2801,11 @@ private:
 
   static bool testObjectTokenRelation(){
     DEFAULT_SETUP(ce, db, false);
-    Timeline timeline(db, DEFAULT_OBJECT_TYPE(), "o2");
+    Timeline timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2");
     db->close();
     
     IntervalToken tokenA(db, 
-                         LabelStr(DEFAULT_PREDICATE()), 
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                          true,
                          false,
                          IntervalIntDomain(0, 10),
@@ -2813,7 +2813,7 @@ private:
                          IntervalIntDomain(1, 1000));
 
     IntervalToken tokenB(db, 
-                         LabelStr(DEFAULT_PREDICATE()), 
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                          true,
                          false,
                          IntervalIntDomain(0, 10),
@@ -2821,7 +2821,7 @@ private:
                          IntervalIntDomain(1, 1000));
 
     IntervalToken tokenC(db, 
-                         LabelStr(DEFAULT_PREDICATE()), 
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                          true,
                          false,
                          IntervalIntDomain(0, 10),
@@ -2866,7 +2866,7 @@ private:
 
     // Test destruction call path
     Token* tokenD = new IntervalToken(db, 
-                                      LabelStr(DEFAULT_PREDICATE()), 
+                                      LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                                       true,
                                       false,
                                       IntervalIntDomain(0, 10),
@@ -2887,7 +2887,7 @@ private:
   static bool testTokenOrderQuery(){
     DEFAULT_SETUP(ce, db, false);
 
-    Id<Timeline> timeline = (new Timeline(db, DEFAULT_OBJECT_TYPE(), "o2"))->getId();
+    Id<Timeline> timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
     db->close();
 
     const int COUNT = 5;
@@ -2896,7 +2896,7 @@ private:
     for (int i=0;i<COUNT;i++){
       int start = i*DURATION;
       TokenId token = (new IntervalToken(db, 
-                                         LabelStr(DEFAULT_PREDICATE()),
+                                         LabelStr(LabelStr(DEFAULT_PREDICATE)),
                                          true,
                                          false,
                                          IntervalIntDomain(start, start),
@@ -2944,7 +2944,7 @@ private:
 
     // Now ensure the query can correctly indicate no options available
     TokenId token = (new IntervalToken(db, 
-                                       LabelStr(DEFAULT_PREDICATE()),
+                                       LabelStr(LabelStr(DEFAULT_PREDICATE)),
                                        true,
                                        false,
                                        IntervalIntDomain(),
@@ -2965,7 +2965,7 @@ private:
 
 
     TokenId token2 = (new IntervalToken(db, 
-					LabelStr(DEFAULT_PREDICATE()),
+					LabelStr(LabelStr(DEFAULT_PREDICATE)),
 					true,
 					false,
 					IntervalIntDomain(),
@@ -3009,11 +3009,11 @@ private:
 
   static bool testEventTokenInsertion(){
     DEFAULT_SETUP(ce, db, false);
-    Timeline timeline(db, DEFAULT_OBJECT_TYPE(), "o2");
+    Timeline timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2");
     db->close();
 
     IntervalToken it1(db, 
-                      LabelStr(DEFAULT_PREDICATE()), 
+                      LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                       true,
                       false,
                       IntervalIntDomain(0, 10),
@@ -3026,7 +3026,7 @@ private:
 
     // Insert at the end after a token
     EventToken et1(db, 
-                   DEFAULT_PREDICATE(), 
+                   LabelStr(DEFAULT_PREDICATE), 
                    true, 
                    false,
                    IntervalIntDomain(0, 100), 
@@ -3039,7 +3039,7 @@ private:
 
     // Insert between a token and an event
     EventToken et2(db, 
-                   DEFAULT_PREDICATE(), 
+                   LabelStr(DEFAULT_PREDICATE), 
                    true, 
                    false,
                    IntervalIntDomain(0, 100), 
@@ -3052,7 +3052,7 @@ private:
 
     // Insert before a token
     EventToken et3(db, 
-                   DEFAULT_PREDICATE(), 
+                   LabelStr(DEFAULT_PREDICATE), 
                    true, 
                    false,
                    IntervalIntDomain(10, 100), 
@@ -3065,7 +3065,7 @@ private:
 
     // Insert between events
     EventToken et4(db, 
-                   DEFAULT_PREDICATE(), 
+                   LabelStr(DEFAULT_PREDICATE), 
                    true, 
                    false,
                    IntervalIntDomain(0, 100), 
@@ -3082,11 +3082,11 @@ private:
 
   static bool testFullInsertion(){
     DEFAULT_SETUP(ce, db, false);
-    Timeline timeline(db, DEFAULT_OBJECT_TYPE(), "o2");
+    Timeline timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2");
     db->close();
 
     IntervalToken tokenA(db, 
-                         LabelStr(DEFAULT_PREDICATE()), 
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                          true,
                          false,
                          IntervalIntDomain(0, 10),
@@ -3094,7 +3094,7 @@ private:
                          IntervalIntDomain(1, 1000));
 
     IntervalToken tokenB(db, 
-                         LabelStr(DEFAULT_PREDICATE()), 
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                          true,
                          false,
                          IntervalIntDomain(0, 10),
@@ -3102,7 +3102,7 @@ private:
                          IntervalIntDomain(1, 1000));
 
     IntervalToken tokenC(db, 
-                         LabelStr(DEFAULT_PREDICATE()), 
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                          true,
                          false,
                          IntervalIntDomain(0, 10),
@@ -3127,11 +3127,11 @@ private:
 
   static bool testNoChoicesThatFit(){
     DEFAULT_SETUP(ce, db, false);
-    Timeline timeline(db, DEFAULT_OBJECT_TYPE() , "o2");
+    Timeline timeline(db, LabelStr(DEFAULT_OBJECT_TYPE) , "o2");
     db->close();
 
     IntervalToken tokenA(db, 
-                         LabelStr(DEFAULT_PREDICATE()), 
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                          true,
                          false,
                          IntervalIntDomain(10, 10),
@@ -3139,7 +3139,7 @@ private:
                          IntervalIntDomain(1, 1000));
 
     IntervalToken tokenB(db, 
-                         LabelStr(DEFAULT_PREDICATE()), 
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                          true,
                          false,
                          IntervalIntDomain(100, 100),
@@ -3147,7 +3147,7 @@ private:
                          IntervalIntDomain(1, 1000));
 
     IntervalToken tokenC(db, 
-                         LabelStr(DEFAULT_PREDICATE()), 
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                          true,
                          false,
                          IntervalIntDomain(9, 9),
@@ -3176,13 +3176,13 @@ private:
   static bool testAssignment(){
     initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
-    Timeline o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
-    Timeline o2(db.getId(), DEFAULT_OBJECT_TYPE(), "o2");
+    Timeline o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
+    Timeline o2(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
     db.close();
 
     //create a token that has to end later
     IntervalToken t0(db.getId(), 
-                     DEFAULT_PREDICATE(), 
+                     LabelStr(DEFAULT_PREDICATE), 
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -3231,11 +3231,11 @@ private:
   static bool testFreeAndConstrain(){
     initDbTestSchema(SCHEMA);
     PlanDatabase db(ENGINE, SCHEMA);
-    Timeline o1(db.getId(), DEFAULT_OBJECT_TYPE(), "o1");
+    Timeline o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
     db.close();                                                                          
   
     IntervalToken t1(db.getId(),  
-                     DEFAULT_PREDICATE(),                                                     
+                     LabelStr(DEFAULT_PREDICATE),                                                     
                      true,   
                      false,                                                            
                      IntervalIntDomain(0, 10),                                           
@@ -3243,7 +3243,7 @@ private:
                      IntervalIntDomain(1, 1000));                                        
   
     IntervalToken t2(db.getId(),                                                         
-                     DEFAULT_PREDICATE(),                                                     
+                     LabelStr(DEFAULT_PREDICATE),                                                     
                      true, 
                      false,                                                              
                      IntervalIntDomain(0, 10),                                           
@@ -3251,7 +3251,7 @@ private:
                      IntervalIntDomain(1, 1000));                                        
   
     IntervalToken t3(db.getId(),                                                         
-                     DEFAULT_PREDICATE(),                                                     
+                     LabelStr(DEFAULT_PREDICATE),                                                     
                      true,  
                      false,                                                             
                      IntervalIntDomain(0, 10),                                           
@@ -3274,7 +3274,7 @@ private:
 
     // Also use a locally scoped token to force a different deletion path
     TokenId t4 = (new IntervalToken(db.getId(),                                                         
-				    DEFAULT_PREDICATE(),                                                     
+				    LabelStr(DEFAULT_PREDICATE),                                                     
 				    true,  
 				    false,                                                             
 				    IntervalIntDomain(0, 10),                                           
@@ -3298,12 +3298,12 @@ private:
    */
   static bool testRemovalOfMasterAndSlave(){
     DEFAULT_SETUP(ce, db, false);
-    Timeline timeline(db, DEFAULT_OBJECT_TYPE() , "o2");
+    Timeline timeline(db, LabelStr(DEFAULT_OBJECT_TYPE) , "o2");
     db->close();
 
     {
       TokenId master = (new IntervalToken(db, 
-					  LabelStr(DEFAULT_PREDICATE()), 
+					  LabelStr(LabelStr(DEFAULT_PREDICATE)), 
 					  true,
 					  false,
 					  IntervalIntDomain(0, 0),
@@ -3312,7 +3312,7 @@ private:
       master->activate();
 
       TokenId slave = (new IntervalToken(master, "any" ,
-					 LabelStr(DEFAULT_PREDICATE()),
+					 LabelStr(LabelStr(DEFAULT_PREDICATE)),
 					 IntervalIntDomain(1, 1),
 					 IntervalIntDomain(),
 					 IntervalIntDomain(1, 1)))->getId();
@@ -3334,7 +3334,7 @@ private:
 
     {
       TokenId master = (new IntervalToken(db, 
-					  LabelStr(DEFAULT_PREDICATE()), 
+					  LabelStr(LabelStr(DEFAULT_PREDICATE)), 
 					  true,
 					  false,
 					  IntervalIntDomain(1, 1),
@@ -3343,7 +3343,7 @@ private:
       master->activate();
 
       TokenId slave = (new IntervalToken(master, "any" ,
-					 LabelStr(DEFAULT_PREDICATE()),
+					 LabelStr(LabelStr(DEFAULT_PREDICATE)),
 					 IntervalIntDomain(0, 0),
 					 IntervalIntDomain(),
 					 IntervalIntDomain(1, 1)))->getId();
@@ -3377,7 +3377,7 @@ private:
    */
   static bool testArchiving1() {
     DEFAULT_SETUP(ce, db, false);
-    Timeline timeline(db, DEFAULT_OBJECT_TYPE() , "o2");
+    Timeline timeline(db, LabelStr(DEFAULT_OBJECT_TYPE) , "o2");
     db->close();
 
     const unsigned int startTick(0);
@@ -3387,7 +3387,7 @@ private:
     TokenId lastToken;
     for(unsigned int i=startTick;i<endTick;i++){
       TokenId tokenA = (new IntervalToken(db, 
-					  LabelStr(DEFAULT_PREDICATE()), 
+					  LabelStr(LabelStr(DEFAULT_PREDICATE)), 
 					  true,
 					  false,
 					  IntervalIntDomain(i, i),
@@ -3397,7 +3397,7 @@ private:
 
       // Allocate an inactive orphan
       new IntervalToken(db, 
-			LabelStr(DEFAULT_PREDICATE()), 
+			LabelStr(LabelStr(DEFAULT_PREDICATE)), 
 			true,
 			false,
 			IntervalIntDomain(i, i),
@@ -3406,14 +3406,14 @@ private:
 
       // Allocate an inactive slave
       new IntervalToken(tokenA, "any",
-			LabelStr(DEFAULT_PREDICATE()), 
+			LabelStr(LabelStr(DEFAULT_PREDICATE)), 
 			IntervalIntDomain(i, i),
 			IntervalIntDomain(),
 			IntervalIntDomain(1, 1));
 
       // Allocate an active slave
       Token* slaveB = new IntervalToken(tokenA, "any", 
-					LabelStr(DEFAULT_PREDICATE()), 
+					LabelStr(LabelStr(DEFAULT_PREDICATE)), 
 					IntervalIntDomain(i, i),
 					IntervalIntDomain(),
 					IntervalIntDomain(1, 1));
@@ -3422,7 +3422,7 @@ private:
 
       // Allocate a committed slave
       Token* slaveC = new IntervalToken(tokenA, "any", 
-					LabelStr(DEFAULT_PREDICATE()), 
+					LabelStr(LabelStr(DEFAULT_PREDICATE)), 
 					IntervalIntDomain(i, i),
 					IntervalIntDomain(),
 					IntervalIntDomain(1, 1));
@@ -3464,14 +3464,14 @@ private:
    */
   static bool testArchiving2() {
     DEFAULT_SETUP(ce, db, false);
-    Timeline timeline(db, DEFAULT_OBJECT_TYPE() , "o2");
+    Timeline timeline(db, LabelStr(DEFAULT_OBJECT_TYPE) , "o2");
     db->close();
 
     const unsigned int startTick(0);
     const unsigned int endTick(10);
 
     TokenId tokenA = (new IntervalToken(db, 
-					LabelStr(DEFAULT_PREDICATE()), 
+					LabelStr(LabelStr(DEFAULT_PREDICATE)), 
 					true,
 					false,
 					IntervalIntDomain(startTick, startTick),
@@ -3482,7 +3482,7 @@ private:
 
     for(unsigned int i=startTick+1;i<endTick;i++){
       TokenId tokenB = (new IntervalToken(tokenA, "any" ,
-					  LabelStr(DEFAULT_PREDICATE()),
+					  LabelStr(LabelStr(DEFAULT_PREDICATE)),
 					  IntervalIntDomain(i, i),
 					  IntervalIntDomain(),
 					  IntervalIntDomain(1, 1)))->getId();
@@ -3514,14 +3514,14 @@ private:
    */
   static bool testArchiving3() {
     DEFAULT_SETUP(ce, db, false);
-    Timeline timeline(db, DEFAULT_OBJECT_TYPE() , "o2");
+    Timeline timeline(db, LabelStr(DEFAULT_OBJECT_TYPE) , "o2");
     db->close();
 
     const unsigned int startTick(0);
     const unsigned int endTick(10);
 
     TokenId tokenA = (new IntervalToken(db, 
-					LabelStr(DEFAULT_PREDICATE()), 
+					LabelStr(LabelStr(DEFAULT_PREDICATE)), 
 					true,
 					false,
 					IntervalIntDomain(startTick, startTick),
@@ -3531,7 +3531,7 @@ private:
 
     for(unsigned int i=startTick+1;i<endTick;i++){
       TokenId tokenB = (new IntervalToken(tokenA, "any" ,
-					  LabelStr(DEFAULT_PREDICATE()),
+					  LabelStr(LabelStr(DEFAULT_PREDICATE)),
 					  IntervalIntDomain(i, i),
 					  IntervalIntDomain(),
 					  IntervalIntDomain(1, 1)))->getId();
@@ -3572,13 +3572,13 @@ private:
    */
   static bool testGNATS_3162(){
     DEFAULT_SETUP(ce, db, false);
-    Timeline timeline(db, DEFAULT_OBJECT_TYPE() , "o2");
+    Timeline timeline(db, LabelStr(DEFAULT_OBJECT_TYPE) , "o2");
     db->close();
 
     const unsigned int startTick(0);
 
     TokenId tokenA = (new IntervalToken(db, 
-					LabelStr(DEFAULT_PREDICATE()), 
+					LabelStr(LabelStr(DEFAULT_PREDICATE)), 
 					true,
 					false,
 					IntervalIntDomain(startTick, startTick),
@@ -3589,7 +3589,7 @@ private:
     ce->propagate();
 
     TokenId tokenB = (new IntervalToken(db, 
-					LabelStr(DEFAULT_PREDICATE()), 
+					LabelStr(LabelStr(DEFAULT_PREDICATE)), 
 					true,
 					false,
 					IntervalIntDomain(startTick, startTick),
@@ -3638,7 +3638,7 @@ private:
     client->enableTransactionLogging();
     DbClientTransactionLog* txLog = new DbClientTransactionLog(client);
 
-    DBFooId foo1 = client->createObject(DEFAULT_OBJECT_TYPE().c_str(), "foo1");
+    DBFooId foo1 = client->createObject(LabelStr(DEFAULT_OBJECT_TYPE).c_str(), "foo1");
     assertTrue(foo1.isValid());
 
     std::vector<const AbstractDomain*> arguments;
@@ -3646,10 +3646,10 @@ private:
     LabelSet arg1(LabelStr("Label"), LabelSet::getDefaultTypeName().c_str());
     arguments.push_back(&arg0); 
     arguments.push_back(&arg1);
-    DBFooId foo2 = client->createObject(DEFAULT_OBJECT_TYPE().c_str(), "foo2", arguments);
+    DBFooId foo2 = client->createObject(LabelStr(DEFAULT_OBJECT_TYPE).c_str(), "foo2", arguments);
     assertTrue(foo2.isValid());
 
-    TokenId token = client->createToken(DEFAULT_PREDICATE().c_str());
+    TokenId token = client->createToken(LabelStr(DEFAULT_PREDICATE).c_str());
     assertTrue(token.isValid());
 
     // Constrain the token duration
@@ -3666,47 +3666,47 @@ private:
   static bool testPathBasedRetrieval(){
     DEFAULT_SETUP(ce, db, true);
     db->getClient()->enableTransactionLogging();
-    TokenId t0 = db->getClient()->createToken(DEFAULT_PREDICATE().c_str());
+    TokenId t0 = db->getClient()->createToken(LabelStr(DEFAULT_PREDICATE).c_str());
     t0->activate();
 
-    TokenId t1 = db->getClient()->createToken(DEFAULT_PREDICATE().c_str());
+    TokenId t1 = db->getClient()->createToken(LabelStr(DEFAULT_PREDICATE).c_str());
     t1->activate();
 
     TokenId t0_0 = (new IntervalToken(t0, "any", 
-                                      DEFAULT_PREDICATE(), 
+                                      LabelStr(DEFAULT_PREDICATE), 
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(1, 1)))->getId();
     t0_0->activate();
 
     TokenId t0_1 = (new IntervalToken(t0, "any",  
-                                      DEFAULT_PREDICATE(), 
+                                      LabelStr(DEFAULT_PREDICATE), 
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(1, 1)))->getId();
     t0_1->activate();
 
     TokenId t0_2 = (new IntervalToken(t0, "any", 
-                                      DEFAULT_PREDICATE(), 
+                                      LabelStr(DEFAULT_PREDICATE), 
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(1, 1)))->getId();
     t0_2->activate();
 
     TokenId t1_0 = (new IntervalToken(t1, "any", 
-                                      DEFAULT_PREDICATE(), 
+                                      LabelStr(DEFAULT_PREDICATE), 
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(1, 1)))->getId();
     t1_0->activate();
 
     TokenId t0_1_0 = (new EventToken(t0_1, "any", 
-                                     DEFAULT_PREDICATE(), 
+                                     LabelStr(DEFAULT_PREDICATE), 
                                      IntervalIntDomain(0, 1)))->getId();
     t0_1_0->activate();
 
     TokenId t0_1_1 = (new EventToken(t0_1, "any", 
-                                     DEFAULT_PREDICATE(), 
+                                     LabelStr(DEFAULT_PREDICATE), 
                                      IntervalIntDomain(0, 1)))->getId();
     t0_1_1->activate();
 
@@ -5669,7 +5669,7 @@ private:
     LockManager::instance().unlock();
 
     LockManager::instance().lock();
-    TokenId token = db->getClient()->createToken(DEFAULT_PREDICATE().c_str());
+    TokenId token = db->getClient()->createToken(LabelStr(DEFAULT_PREDICATE).c_str());
     LockManager::instance().unlock();
     
     LockManager::instance().lock();
@@ -5700,7 +5700,7 @@ private:
     LockManager::instance().unlock();
 
     LockManager::instance().lock();
-    TokenId token = db->getClient()->createToken(DEFAULT_PREDICATE().c_str());
+    TokenId token = db->getClient()->createToken(LabelStr(DEFAULT_PREDICATE).c_str());
     LockManager::instance().unlock();
     
     LockManager::instance().lock();

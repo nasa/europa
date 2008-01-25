@@ -22,7 +22,7 @@
 
 namespace __gnu_cxx {
   template<> struct hash<double> {
-    size_t operator()(double __x) const {return (size_t) (__x * (1 / EPSILON));}
+    size_t operator()(double __x) const {return (size_t) (__x);}
   };
 
   template<> struct hash<std::string> {

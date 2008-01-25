@@ -54,6 +54,13 @@
 #endif
 
 #include <fstream>
+
+#ifdef near
+#undef near
+#endif
+#ifdef far
+#undef far
+#endif
 /**
  * @file Provides module tests for Solver Module.
  * @author Conor McGann

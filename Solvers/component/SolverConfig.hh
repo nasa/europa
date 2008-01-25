@@ -14,6 +14,13 @@
 #include "Token.hh"
 #include "UnboundVariableManager.hh"
 
+#ifdef near
+#undef near
+#endif
+#ifdef far
+#undef far
+#endif
+
 #define BASE_REGISTRATIONS { \
 \
 REGISTER_SYSTEM_CONSTRAINT(FlawHandler::VariableListener,FlawHandler::VariableListener::CONSTRAINT_NAME(),FlawHandler::VariableListener::PROPAGATOR_NAME());\

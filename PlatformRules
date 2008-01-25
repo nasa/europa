@@ -119,14 +119,11 @@ THREADED_LINK_FLAGS ?= -l$(PTHREADS_LIBRARY) ;
 
 # SUFSHARE = suffix for shared libraries
 
-if $(OS) = CYGWIN {
+if $(OS) = CYGWIN || $(OS) = MINGW {
   SUFSHARE ?= .dll ;
 } else {
 	if $(OS) = MACOSX {
 	   SUFSHARE ?= .dylib ;
-	}
-	else if $(OS) = MINGW {
-	   SUFSHARE ?= .dll ;
 	}
 	else {
      SUFSHARE ?= .so ;
@@ -193,8 +190,13 @@ if $(OS) = CYGWIN {
   LINKFLAGS += -Wl,--enable-auto-import ;
 }
 
+if $(OS) = CYGWIN && $(NOCYGWIN) {
+  LINKFLAGS += -L/usr/local/mingw/lib -mno-cygwin ;
+  PLATFORM_FLAGS += -D_NO_W32_PSEUDO_MODIFIERS -D__MINGW32__ -I/usr/local/mingw/include -mno-cygwin ;
+}
+
 if $(OS) = MINGW {
-  EXTRA_DEFS += -D_NO_W32_PSEUDO_MODIFIERS ;
+  PLATFORM_FLAGS += -D_NO_W32_PSEUDO_MODIFIERS ;
 }
 
 if $(OS) = BEOS {

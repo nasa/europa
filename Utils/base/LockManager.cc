@@ -63,11 +63,9 @@ namespace EUROPA {
 
   void ThreadedLockManager::lock() {
     m_lock();
-    LabelStr::lock();
   }
  
   void ThreadedLockManager::unlock() {
-    LabelStr::unlock();
     m_unlock();
   }
 

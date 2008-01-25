@@ -1,3 +1,4 @@
+#include "Debug.hh"
 #include "LabelStr.hh"
 #include "LockManager.hh"
 #include "Error.hh"
@@ -22,7 +23,7 @@ namespace EUROPA {
 
   __gnu_cxx::hash_map<std::string, double>& LabelStr::keysFromString() {
     static __gnu_cxx::hash_map<std::string, double> sl_keysFromString;
-    return(sl_keysFromString);
+    return sl_keysFromString;
   }
 
   __gnu_cxx::hash_map< double, std::string>& LabelStr::stringFromKeys() {
@@ -99,18 +100,25 @@ namespace EUROPA {
   }
 
   unsigned int LabelStr::getSize() {
+    lock();
     check_error(keysFromString().size() == stringFromKeys().size());
-    return(keysFromString().size());
+    int toRet = keysFromString().size();
+    unlock();
+    return toRet;
   }
 
   double LabelStr::getKey(const std::string& label) {
     static double sl_counter = EPSILON;
 
+    lock();
     __gnu_cxx::hash_map<std::string, double>::iterator it = 
       keysFromString().find(label);
 
-    if (it != keysFromString().end())
-      return(it->second); // Found it; return the key.
+    if (it != keysFromString().end()) {
+      double toRet = it->second;
+      unlock();
+      return toRet; // Found it; return the key.
+    }
 
     // Given label not found, so allocate it.
     double key = sl_counter;
@@ -119,26 +127,37 @@ namespace EUROPA {
     check_error(key < 1.0, "More strings allocated than permitted");
     
     handleInsertion(key, label);
+    unlock();
     return(key);
   }
 
   void LabelStr::handleInsertion(double key, const std::string& label) {
+    debugMsg("LabelStr:insert", " " << key << " -> " << label);
     keysFromString().insert(std::pair< std::string, double >(label, key));
     stringFromKeys().insert(std::pair< double, std::string >(key, label));
   }
 
   const std::string& LabelStr::getString(double key){
+    lock();
     __gnu_cxx::hash_map< double, std::string >::const_iterator it = stringFromKeys().find(key);
     check_error(it != stringFromKeys().end());
-    return(it->second);
+    const std::string& toRet = it->second;
+    unlock();
+    return toRet;
   }
 
   bool LabelStr::isString(double key) {
-    return(stringFromKeys().find(key) != stringFromKeys().end());
+    lock();
+    bool toRet = (stringFromKeys().find(key) != stringFromKeys().end());
+    unlock();
+    return toRet;
   }
 
   bool LabelStr::isString(const std::string& candidate){
-    return (keysFromString().find(candidate) != keysFromString().end());
+    lock();
+    bool toRet = (keysFromString().find(candidate) != keysFromString().end());
+    unlock();
+    return toRet;
   }
 
   bool LabelStr::contains(const LabelStr& lblStr) const{

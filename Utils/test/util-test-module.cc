@@ -667,7 +667,6 @@ private:
   }
 
   static bool testConnection() {
-   
     new ThreadedLockManager(); //ensure that we have a threaded model
     assert(runConnectionTest());
     new LockManager(); //return to your regularly scheduled threading
@@ -677,15 +676,21 @@ private:
   
   static bool runConnectionTest() {
     const int numthreads = 100;
+    assertTrue(numthreads + 2 < PTHREAD_THREADS_MAX, "Running connection test will exceed the thread limit.");
     LockManager::instance().connect(LabelStr("Test"));
     LockManager::instance().lock();
     assertTrue(LockManager::instance().getCurrentUser() == LabelStr("Test"));
     LockManager::instance().unlock();
     pthread_t threads[numthreads];
-    for(int i = 0; i < numthreads; i++)
-      pthread_create(&threads[i], NULL, connectionTestThread, NULL);
-    for(int i = numthreads - 1; i >= 0; i--)
+    int tids[numthreads];
+    for(int i = 0; i < numthreads; i++) {
+      tids[i] = i;
+      int temp = pthread_create(&threads[i], NULL, connectionTestThread, (int*) (tids + i));
+      assertTrue(temp == 0, "Error while creating thread: " + temp);
+    }
+    for(int i = numthreads - 1; i >= 0; i--) {
       pthread_join(threads[i], NULL);
+    }
     return true;
   }
 
@@ -693,8 +698,9 @@ private:
     const int numconnects = 100;
     bool toggle = false;
  
+    int tid = *((int*) arg);
     for(int i = 0; i < numconnects; i++) {
-      if(toggle)
+      if(toggle) 
         LockManager::instance().connect(LabelStr("FIRST_USER"));
       else
         LockManager::instance().connect(LabelStr("SECOND_USER"));

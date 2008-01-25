@@ -5,6 +5,10 @@
 #include <string>
 #include <vector>
 
+#ifdef VOID
+#undef VOID
+#endif
+
 namespace ANML
 {
 
