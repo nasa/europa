@@ -11,7 +11,7 @@ class Main
 	}
 	
 	/*
-	 * PSDesktop instanciates its own EUROPA PSEngine internally, you can get a handle on it by calling
+	 * PSDesktop instantiates its own EUROPA PSEngine internally, you can get a handle on it by calling
 	 * PSDesktop.desktop.getPSEngine()
 	 * 
 	 * If you don't want to use PSDesktop, but instead create your own instance of EUROPA to manipulate programmatically
