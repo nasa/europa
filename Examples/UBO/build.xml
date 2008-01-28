@@ -12,7 +12,7 @@
   <property name="dist.dir"      value="dist"/>
 
   <property name="plasma.dir"   value="${env.PLASMA_HOME}"/>
-  <property name="psui.dir"     value="${plasma.dir}/../PlanWorks/PSUI"/>
+  <property name="psui.dir"     value="${plasma.dir}/System/component/PSUI"/>
   <property name="psui.lib.dir" value="${psui.dir}/lib"/>
 	
   <property name="debug"  value="true"/>
