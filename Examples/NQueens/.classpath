@@ -5,14 +5,14 @@
 	<classpathentry kind="lib" path="/PLASMA/lib/nddl.jar"/>
 	<classpathentry kind="lib" path="/PLASMA/lib/PSEngine.jar"/>
 	<classpathentry kind="lib" path="/PLASMA/lib/PSUI.jar"/>
-        <classpathentry kind="lib" path="/PlanWorks/PSUI/lib/beanshell/bsh-2.0b4.jar"/>
-        <classpathentry kind="lib" path="/PlanWorks/PSUI/lib/egantt/egantt-core.jar"/>
-        <classpathentry kind="lib" path="/PlanWorks/PSUI/lib/egantt/egantt-ext.jar"/>
-        <classpathentry kind="lib" path="/PlanWorks/PSUI/lib/egantt/egantt-resources.jar"/>
-        <classpathentry kind="lib" path="/PlanWorks/PSUI/lib/jfreechart/jfreechart-1.0.2.jar"/>
-        <classpathentry kind="lib" path="/PlanWorks/PSUI/lib/jfreechart/jcommon-1.0.5.jar"/>
-        <classpathentry kind="lib" path="/PlanWorks/PSUI/lib/nanoxml/nanoxml.jar"/>
-        <classpathentry kind="lib" path="/PlanWorks/PSUI/lib/josql/JoSQL-1.9.jar"/>
-        <classpathentry kind="lib" path="/PlanWorks/PSUI/lib/josql/gentlyWEB-utils-1.1.jar"/>
+        <classpathentry kind="lib" path="/PLASMA/System/component/PSUI/lib/beanshell/bsh-2.0b4.jar"/>
+        <classpathentry kind="lib" path="/PLASMA/System/component/PSUI/lib/egantt/egantt-core.jar"/>
+        <classpathentry kind="lib" path="/PLASMA/System/component/PSUI/lib/egantt/egantt-ext.jar"/>
+        <classpathentry kind="lib" path="/PLASMA/System/component/PSUI/lib/egantt/egantt-resources.jar"/>
+        <classpathentry kind="lib" path="/PLASMA/System/component/PSUI/lib/jfreechart/jfreechart-1.0.2.jar"/>
+        <classpathentry kind="lib" path="/PLASMA/System/component/PSUI/lib/jfreechart/jcommon-1.0.5.jar"/>
+        <classpathentry kind="lib" path="/PLASMA/System/component/PSUI/lib/nanoxml/nanoxml.jar"/>
+        <classpathentry kind="lib" path="/PLASMA/System/component/PSUI/lib/josql/JoSQL-1.9.jar"/>
+        <classpathentry kind="lib" path="/PLASMA/System/component/PSUI/lib/josql/gentlyWEB-utils-1.1.jar"/>
 	<classpathentry kind="output" path="build_eclipse"/>
 </classpath>
