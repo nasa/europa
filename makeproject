@@ -180,14 +180,21 @@ fi
 echo "Adding NDDL.cfg"
 
 touch $DIRECTORY/NDDL.cfg
-echo "<configuration>"                                                                                 >> $DIRECTORY/NDDL.cfg
-echo " <binding nddl=\"Object\" cpp=\"Object\"/>"                                                      >> $DIRECTORY/NDDL.cfg
-echo " <binding nddl=\"Timeline\" cpp=\"Timeline\"/>"                                                  >> $DIRECTORY/NDDL.cfg
-echo " <binding nddl=\"Resource\" cpp=\"NddlResource\" include=\"NddlResource.hh\"/>"                  >> $DIRECTORY/NDDL.cfg
-echo " <binding nddl=\"Resource.change\" cpp=\"NddlResource::change\" include=\"NddlResource.hh\"/>"   >> $DIRECTORY/NDDL.cfg
-echo " <include path=\"$PLASMA_HOME/NDDL/base;$PLASMA_HOME/NDDL/component/Resource\"/>"                >> $DIRECTORY/NDDL.cfg
-echo "</configuration>"                                                                                >> $DIRECTORY/NDDL.cfg
-echo ""                                                                                                >> $DIRECTORY/NDDL.cfg
+echo "<configuration>"                                                                                   >> $DIRECTORY/NDDL.cfg
+echo " <binding nddl=\"Object\" cpp=\"Object\"/>"                                                        >> $DIRECTORY/NDDL.cfg
+echo " <binding nddl=\"Timeline\" cpp=\"Timeline\"/>"                                                    >> $DIRECTORY/NDDL.cfg
+echo " <binding nddl=\"Resource\" cpp=\"NddlResource\" include=\"NddlResource.hh\"/>"                    >> $DIRECTORY/NDDL.cfg
+echo " <binding nddl=\"Resource.change\" cpp=\"NddlResource::change\" include=\"NddlResource.hh\"/>"     >> $DIRECTORY/NDDL.cfg
+echo " <binding nddl=\"Reservoir\" cpp=\"NddlReservoir\" include=\"NddlResource.hh\"/>"                  >> $DIRECTORY/NDDL.cfg
+echo " <binding nddl=\"Reservoir.produce\" cpp=\"NddlReservoir::produce\" include=\"NddlResource.hh\"/>" >> $DIRECTORY/NDDL.cfg
+echo " <binding nddl=\"Reservoir.consume\" cpp=\"NddlReservoir::consume\" include=\"NddlResource.hh\"/>" >> $DIRECTORY/NDDL.cfg
+echo " <binding nddl=\"Reusable\" cpp=\"NddlReusable\" include=\"NddlResource.hh\"/>"                    >> $DIRECTORY/NDDL.cfg
+echo " <binding nddl=\"Reusable.uses\" cpp=\"NddlReusable::uses\" include=\"NddlResource.hh\"/>"         >> $DIRECTORY/NDDL.cfg
+echo " <binding nddl=\"Unary\" cpp=\"NddlUnary\" include=\"NddlResource.hh\"/>"                          >> $DIRECTORY/NDDL.cfg
+echo " <binding nddl=\"Unary.use\" cpp=\"NddlUnary::use\" include=\"NddlResource.hh\"/>"                 >> $DIRECTORY/NDDL.cfg
+echo " <include path=\"$PLASMA_HOME/NDDL/base;$PLASMA_HOME/NDDL/component/Resource\"/>"                  >> $DIRECTORY/NDDL.cfg
+echo "</configuration>"                                                                                  >> $DIRECTORY/NDDL.cfg
+echo ""                                                                                                  >> $DIRECTORY/NDDL.cfg
 
 echo "Adding build.xml"
 cp makeproject.java.build.xml $DIRECTORY/build.xml
