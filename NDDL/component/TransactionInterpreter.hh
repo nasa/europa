@@ -218,6 +218,18 @@ namespace EUROPA {
     mutable EvalContext*      m_evalContext;
   };  
   
+  class ObjectEvalContext : public EvalContext
+  {
+    public:
+        ObjectEvalContext(EvalContext* parent, const ObjectId& objInstance);
+        virtual ~ObjectEvalContext();    
+        
+        virtual ConstrainedVariableId getVar(const char* name);  
+        
+    protected:
+        ObjectId m_obj;
+  };  
+    
   class ExprConstraint;
   
   // InterpretedToken is the interpreted version of NddlToken

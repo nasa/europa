@@ -1334,13 +1334,13 @@ namespace EUROPA {
 	                                           const std::vector<const AbstractDomain*>& arguments) const
 	{	    
 		// TODO: should pass in eval context from outside to have access to globals
-	    ObjectFactoryEvalContext evalContext(
+	    ObjectFactoryEvalContext factoryEvalContext(
 	        instance->getPlanDatabase(),
 		    m_constructorArgNames,
 		    m_constructorArgTypes,
 		    arguments
         );
-        evalContext.addVar("this",instance->getThis());
+	    ObjectEvalContext evalContext(&factoryEvalContext,instance);
         
         if (m_superCallExpr != NULL)
     	    m_superCallExpr->eval(evalContext);
@@ -1365,6 +1365,37 @@ namespace EUROPA {
         debugMsg("XMLInterpreter:evalConstructorBody",
 	             "Evaluated constructor for " << instance->toString());
     }	
+	
+	  /*
+	   * ObjectEvalContext
+	   * Puts Object member variables in context
+	   */            
+	  ObjectEvalContext::ObjectEvalContext(EvalContext* parent, const ObjectId& objInstance) 
+	    : EvalContext(parent) 
+	    , m_obj(objInstance)
+	  {
+	  }
+	     
+	  ObjectEvalContext::~ObjectEvalContext()
+	  {
+	  }     
+	        
+	  ConstrainedVariableId ObjectEvalContext::getVar(const char* name)
+	  {
+	    if (strcmp(name,"this") == 0)
+	        return m_obj->getThis();
+	    	    
+	    ConstrainedVariableId var = m_obj->getVariable(m_obj->getName().toString()+"."+name);
+	        
+	    if (!var.isNoId()) {
+	      debugMsg("XMLInterpreter:EvalContext:Object","Found var in object instance:" << name);
+	      return var;
+	    }           
+	    else {
+	      debugMsg("XMLInterpreter:EvalContext:Object","Didn't find var in object instance:" << name);
+	      return EvalContext::getVar(name);
+	    }
+	  } 	  	
 	
     /*
      * InterpretedToken
