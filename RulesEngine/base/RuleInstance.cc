@@ -370,6 +370,7 @@ namespace EUROPA {
     m_constraintsByName.erase(name.getKey());
     m_constraintsByName.insert(std::pair<double, ConstraintId>(name.getKey(), constraint));
     constraint->addDependent((Entity*) this);
+    debugMsg("RuleInstance:addConstraint", "added constraint:" << constraint->toString());    
   }
 
   void RuleInstance::addChildRule(RuleInstance* instance){
