@@ -1746,15 +1746,14 @@ namespace EUROPA {
 	// TODO: this can be done more efficiently
 	int cnt = predicateInstance.countElements(".");
 	std::string ownerName(predicateInstance.getElement(0,".").toString());
-	std::string prefix(predicateInstance.getElement(1,".").toString());
 	std::string tokenName(predicateInstance.getElement(cnt-1,".").toString());
-	std::string asString = predicateInstance.toString();
-	std::string suffix = asString.substr(
-					     ownerName.size()+prefix.size()+2,
-					     asString.size()-(prefix.size()+tokenName.size()+2)
+	std::string fullName = predicateInstance.toString();
+	std::string objectPath = fullName.substr(
+					     ownerName.size()+1,
+					     fullName.size()-(ownerName.size()+tokenName.size()+2)
 					     );
-	debugMsg("XMLInterpreter:InterpretedRule","Subgoal slave object constraint. prefix=" << prefix << " suffix=" << suffix << " tokenName=" << tokenName);
-	vars.push_back(varFromObject(owner,prefix,suffix));
+	debugMsg("XMLInterpreter:InterpretedRule","Subgoal slave object constraint. fullName=" << fullName << " owner=" << ownerName << " objPath=" << objectPath << " tokenName=" << tokenName);
+	vars.push_back(varFromObject(owner,objectPath,fullName));
       }
   			
       vars.push_back(slave->getObject());
