@@ -1,7 +1,0 @@
-ANMLLexer.*
-ANMLParser.*
-ANMLTokenTypes.*
-ANMLTreeParser*.*
-ANML2NDDL.hpp
-ANML2NDDL.cpp
-ANML2NDDLTokenTypes.*
