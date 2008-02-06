@@ -279,7 +279,7 @@ class RuleWriter {
         boolean leaveOpen = false;
         if(variable.hasAttribute("filterOnly") && XMLUtil.getAttribute(variable, "filterOnly").equals("true"))
           leaveOpen = true;
-        writer.write("objectVar("+type+", "+name+", "+guarded+", "+leaveOpen+");\n");
+        writer.write("objectVar("+ModelAccessor.getCppClass(type)+", "+name+", "+guarded+", "+leaveOpen+");\n");
       }
     }
   }
@@ -393,30 +393,35 @@ class RuleWriter {
     predicate = predicate.substring(predicate.lastIndexOf(".") + 1);
 
     String nddlClass = predicateObjectType + "." + predicate;
-    String cppClass = predicateObjectType + "::" + predicate;
+
+    String cppClass;
+    if(ModelAccessor.isPredefinedClass(nddlClass))
+      cppClass = ModelAccessor.getCppClass(nddlClass);
+    else
+      cppClass = ModelAccessor.getCppClass(predicateObjectType) + "::" + predicate;
 
     // If on the same object, use a special form to allocate a local slave that uses the type
     // of the current object and also constrain the object variable.
     if(slaveType.indexOf(".") == -1 || (slaveType.indexOf("object.") == 0 && slaveType.lastIndexOf(".") == 6))
-	writer.write("localSlave(" + predicate + ", " + slaveName + ", \"" + relation + "\");\n");
+      writer.write("localSlave(" + predicate + ", " + slaveName + ", \"" + relation + "\");\n");
     else 
-	writer.write("slave(" + cppClass + ", " + nddlClass + ", " + slaveName + ", LabelStr(\"" + relation + "\"));\n");
+      writer.write("slave(" + cppClass + ", " + nddlClass + ", " + slaveName + ", LabelStr(\"" + relation + "\"));\n");
 
     // Constrain the object variable if necessary
     if(constrainObjectVariable) {
-	String suffix = "object";
+      String suffix = "object";
 
-	// If it has a delimiter, extract the prefix
-	if(slaveType.indexOf(".") > -1) 
-	    suffix = slaveType.substring(0, slaveType.lastIndexOf("."));
+      // If it has a delimiter, extract the prefix
+      if(slaveType.indexOf(".") > -1) 
+        suffix = slaveType.substring(0, slaveType.lastIndexOf("."));
 
-	if(suffix.indexOf(".") < 0)
-	    writer.write("sameObject(" + suffix + ", " + slaveName + ");\n");
-	else {
-	    String prefix = suffix.substring(0, suffix.indexOf("."));
-	    suffix = suffix.substring(suffix.indexOf(".") + 1, suffix.length());
-	    writer.write("constrainObject("+prefix+" ," + suffix + "," + slaveName +  ");\n");
-	}
+      if(suffix.indexOf(".") < 0)
+        writer.write("sameObject(" + suffix + ", " + slaveName + ");\n");
+      else {
+        String prefix = suffix.substring(0, suffix.indexOf("."));
+        suffix = suffix.substring(suffix.indexOf(".") + 1, suffix.length());
+        writer.write("constrainObject(" + prefix + " ," + suffix + "," + slaveName + ");\n");
+      }
     }
 
     return slaveName;
