@@ -47,9 +47,19 @@ public class PSGanttPSEModel
 		PSTokenList tokens = resources_.get(resource).getTokens();
 		for (int i=0;i<tokens.size();i++) {
 			PSToken token = tokens.get(i);
+			
+			// If the token overlaps startHorizon, pretend it starts at time 0
+			// (otherwise, it won't get shown in our gantt table)
+			int start = (int) token.getStart().getLowerBound();
+			int end = (int) token.getEnd().getLowerBound();
+			if(start < 0 && 0 < end)
+			{
+				start = 0;
+			}
+			
 			acts.add(new PSGanttActivityImpl(token.getKey(),
-					                         instantToCalendar(token.getStart().getLowerBound()),
-					                         instantToCalendar(token.getEnd().getLowerBound()),
+					                         instantToCalendar(start),
+					                         instantToCalendar(end),
 					                         token.getViolation()
 					                         )
 			);
