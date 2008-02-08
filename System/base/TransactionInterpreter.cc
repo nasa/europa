@@ -80,6 +80,12 @@ namespace EUROPA {
     m_systemClasses.insert("Timeline");
     //I'm not sure exactly what to do about these, as far as dealing with resources goes...
     //~MJI
+
+    // JLB: Needed currently for transactions from new resource class
+    // to take effect
+    m_systemClasses.insert("SaturatedResource"); 
+    m_systemTokens.insert("SaturatedResource.change");
+
     m_systemClasses.insert("Resource"); 
     m_systemTokens.insert("Resource.change");
 
@@ -1285,6 +1291,7 @@ namespace EUROPA {
     // go up the hierarchy and give the parents a chance to create the object, this allows native classes to be exported
     // TODO: some effort can be saved by keeping track of whether a class has a native ancestor different from Object.
     // If it doesn't, the object can be created right away and this traversal up the hierarchy can be skipped
+    
     if (m_canMakeNewObject) {
       debugMsg("XMLInterpreter:InterpretedObject","Created Object:" << objectName.toString() << " type:" << objectType.toString());
       return (new Object(planDb, objectType, objectName,true))->getId();
