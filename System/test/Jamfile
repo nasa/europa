@@ -109,7 +109,7 @@ rule RunPlannerProblem {
   local lib = $(model:S=) ;
 
   # create .hh, .cc, .o, and .xml for a .nddl
-  Includes $(cc) : $(hh) ;
+  Includes $(cc) : $(hh) $(xml) ;
   Nddl $(xml) $(hh) $(cc) : $(model) ;
   ModuleObjects $(cc) : NDDL ;
 
