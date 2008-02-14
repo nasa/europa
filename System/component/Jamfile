@@ -8,4 +8,11 @@ if ( "Resources" in $(NO) ) {
 
 ModuleComponent System	: SolverAssembly.cc MasterController.cc SingleSolverController.cc ;
 
+PSUI_HOME ?= [ FDirName $(PLASMA_HOME) System component PSUI ] ;
+
+Depends lib : PSEngine.jar PSUI.jar ;
+Depends PSUI.jar : $(PSUI_HOME) PSEngine.jar ;
+ApacheAnt PSUI.jar : $(PSUI_HOME)/build.xml : dist ;
+LOCATE on PSUI.jar = [ FDirName $(PLASMA_HOME) lib ] ;
+
 } # PLASMA_READY

@@ -13,29 +13,7 @@ if SHARED in $(LIBRARIES) {
   }
 }
 
-Depends plasma-all : all ;
-
 Module plasma : all System ;
-
-Depends run-tests : tests ;
-
-Depends run-all-tests : run-checkin-tests ;
-Depends run-all-tests : run-all-module-tests ; 
-Depends run-all-tests : run-examples-tests ;
-Depends run-all-tests : run-nddl-tests ;
-Depends run-all-tests : run-hsts-planner-tests ;
-
-Depends run-checkin-tests : check-svn-changes ;
-Depends run-checkin-tests : run-tests ;
-Depends run-checkin-tests : run-nddl-planner-tests ;
-Depends run-checkin-tests : run-makefile-tests ;
-
-Depends run-makefile-tests : check-makefile ;
-
-# install tests designed for off site customers to check system is installed without svn update
-Depends run-install-tests : run-tests ;
-
-NOCARE run-all-tests run-tests run-checkin-tests run-nddl-tests run-nddl-planner-tests tests run-hsts-planner-tests ;
 
 SubInclude PLASMA TinyXml ;
 if ! ( "Antlr" in $(NO) ) {
@@ -56,17 +34,34 @@ SubInclude PLASMA System ;
 if ! ( "Examples" in $(NO) ) {
   SubInclude PLASMA Examples ;
 }
-#SubInclude PLASMA DSA ;
 
+Depends build : lib ;
 
-Depends lib : PSEngine.jar ;
+Depends plasma-all : all ;
 
-PSUI_HOME ?= [ FDirName $(PLASMA_HOME) System component PSUI ] ;
-Depends lib : PSUI.jar ;
-Depends PSUI.jar : $(PSUI_HOME) ;
-Depends PSUI.jar : PSEngine.jar ;
-ApacheAnt PSUI.jar : $(PSUI_HOME)/build.xml : dist ;
-LOCATE on PSUI.jar = [ FDirName lib ] ;
+Depends run-tests : tests ;
+
+Depends run-all-tests : 
+    run-checkin-tests 
+    run-all-module-tests  
+    run-examples-tests 
+    run-nddl-tests 
+    run-hsts-planner-tests 
+;
+
+Depends run-checkin-tests : 
+    check-svn-changes 
+    run-tests 
+    run-nddl-planner-tests 
+    run-makefile-tests 
+;
+
+Depends run-makefile-tests : check-makefile ;
+
+# install tests designed for off site customers to check system is installed without svn update
+Depends run-install-tests : run-tests ;
+
+NOCARE run-all-tests run-tests run-checkin-tests run-nddl-tests run-nddl-planner-tests tests run-hsts-planner-tests ;
 
 RemoveBinaries clean-all ;
 Depends clean-all : clean clean-nddl-xml clean-system-xml ;
