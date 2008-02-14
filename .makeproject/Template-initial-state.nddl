@@ -10,7 +10,7 @@ YourObject object = new YourObject();
 // Close the the PLASMA Database - no more objects can be created.
 close();
 
- place your goals here.
+// place your goals here.
 goal(YourObject.helloWorld initialToken);
 initialToken.start.specify(0); // Starts at beginning of the horizon
 
