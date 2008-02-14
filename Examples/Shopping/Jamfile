@@ -4,7 +4,7 @@ if ! $(Shopping_READY) && ! $(PLASMA_READY) {
  # Declare a library for PlanWorks Control
 
  ModuleSharedLibrary ShoppingController 
-     : $(PLASMA_HOME)/ControllerStub.cc $(PLASMA_HOME)/MasterController.cc $(PLASMA_HOME)/SingleSolverController.cc 
+     : ControllerStub.cc 
      : System : ShoppingController ;
 
  # Create a build target to run a problem

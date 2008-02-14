@@ -4,7 +4,7 @@ if ! $(BlocksWorld_READY) && ! $(PLASMA_READY) {
  # Declare a library for PlanWorks Control
 
  ModuleSharedLibrary BlocksWorldController 
-     : $(PLASMA_HOME)/ControllerStub.cc $(PLASMA_HOME)/MasterController.cc $(PLASMA_HOME)/SingleSolverController.cc 
+     : ControllerStub.cc 
      : System : BlocksWorldController ;
 
  # Create a build target to run a problem

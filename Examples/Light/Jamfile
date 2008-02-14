@@ -4,8 +4,8 @@ if ! $(Light_READY)  && ! $(PLASMA_READY) {
  # Declare a library for PlanWorks Control
 
  ModuleSharedLibrary LightController 
-     : $(PLASMA_HOME)/ControllerStub.cc $(PLASMA_HOME)/MasterController.cc $(PLASMA_HOME)/SingleSolverController.cc 
-     : System : LightController ;
+    : ControllerStub.cc 
+    : System : LightController ;
 
  # Create a build target to run a problem
  RunNDDLProblem Light : Light-initial-state.nddl : Light-planner : PlannerConfig.xml ;

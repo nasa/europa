@@ -4,7 +4,7 @@ if ! $(UBO_READY) && ! $(PLASMA_READY) {
  # Declare a library for PlanWorks Control
 
  ModuleSharedLibrary UBOController 
-     : $(PLASMA_HOME)/ControllerStub.cc $(PLASMA_HOME)/MasterController.cc $(PLASMA_HOME)/SingleSolverController.cc 
+     : ControllerStub.cc 
      : System : UBOController ;
 
  # Create a build target to run a problem
