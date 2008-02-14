@@ -154,7 +154,7 @@ void initialize() {
   REGISTER_CONSTRAINT(CommonAncestorConstraint, "commonAncestor", "Default");
   REGISTER_CONSTRAINT(HasAncestorConstraint, "hasAncestor", "Default");
   REGISTER_CONSTRAINT(TestEQ, "testEQ", "Default");
-  REGISTER_CONSTRAINT(TestLessThan, "testLEQ", "Default");
+  REGISTER_CONSTRAINT(TestLEQ, "testLEQ", "Default");
   REGISTER_CONSTRAINT(EqualSumConstraint, "sum", "Default");
 
 }
