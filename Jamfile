@@ -13,8 +13,6 @@ if SHARED in $(LIBRARIES) {
   }
 }
 
-PLANWORKS_COMPONENTS = $(PLASMA)/MasterController.cc $(PLASMA)/SingleSolverController.cc ;
-
 Depends plasma-all : all ;
 
 Module plasma : all System ;
