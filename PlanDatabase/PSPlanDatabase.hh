@@ -38,7 +38,7 @@ namespace EUROPA {
   class PSObject : public PSEntity
   {
     public:
-      PSObject(const EntityId& id) : PSEntity(id) {}	
+      PSObject() {}	
       virtual ~PSObject() {}
 
       virtual const std::string& getEntityType() const = 0;
@@ -60,7 +60,7 @@ namespace EUROPA {
   {
     public:
       
-      PSToken(const EntityId& id) : PSEntity(id) {}	
+      PSToken() {}	
       virtual ~PSToken() {}
 
       virtual const std::string& getEntityType() const = 0;

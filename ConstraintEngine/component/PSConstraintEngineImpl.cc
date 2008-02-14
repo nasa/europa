@@ -72,8 +72,10 @@ namespace EUROPA {
 	  return m_constraintEngine->getViolationExpl();
   }
 
-  PSVariableImpl::PSVariableImpl(const ConstrainedVariableId& var) : PSVariable(var), m_var(var) 
+  PSVariableImpl::PSVariableImpl(const ConstrainedVariableId& var) 
+      : m_var(var) 
   {
+      m_entity = m_var;
     check_runtime_error(m_var.isValid());
     if(m_var->baseDomain().isString())
       m_type =  STRING;
@@ -295,7 +297,7 @@ namespace EUROPA {
   		case OBJECT:
   		    {
   		        PSEntity* obj = asObject();
-                os << "OBJECT:" << obj->getName() << "(" << obj->getKey() << ")";
+                os << "OBJECT:" << obj->getEntityName() << "(" << obj->getEntityKey() << ")";
                 delete obj;
   		    }
   		    break;

@@ -19,10 +19,12 @@ namespace EUROPA {
       m_variables(variables), m_id(this), m_isUnary(true), 
       m_createdBy(LockManager::instance().getCurrentUser()),
       m_deactivationRefCount(0),
-      m_isRedundant(false){
+      m_isRedundant(false)
+   {
     check_error(m_constraintEngine.isValid());
     check_error(!m_variables.empty());
     m_constraintEngine->add(m_id, propagatorName);
+    m_entity = m_id;
 
     debugMsg("Constraint:Constraint", 
 	     "Creating constraint " << getKey() << ":" << name.toString() <<
@@ -66,6 +68,12 @@ namespace EUROPA {
     debugMsg("Constraint:~Constraint", Entity::toString() << " Id=" << m_id);
     discard(false);
     m_id.remove();
+  }
+
+  const std::string& Constraint::getEntityType() const
+  {
+      static const std::string CONSTRAINT_STR("CONSTRAINT");
+      return CONSTRAINT_STR;
   }
 
   void Constraint::handleDiscard(){

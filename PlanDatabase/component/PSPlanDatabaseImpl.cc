@@ -115,13 +115,18 @@ namespace EUROPA
     return NULL;
   }
     
-  PSObjectImpl::PSObjectImpl(const ObjectId& obj) : PSObject(obj), m_obj(obj) {
+  PSObjectImpl::PSObjectImpl(const ObjectId& obj) 
+      : m_obj(obj) 
+  {
+      m_entity = m_obj;
   }
 
-  PSObjectImpl::~PSObjectImpl() {
+  PSObjectImpl::~PSObjectImpl() 
+  {
   }
 
-  PSList<PSVariable*> PSObjectImpl::getMemberVariables() {
+  PSList<PSVariable*> PSObjectImpl::getMemberVariables() 
+  {
     PSList<PSVariable*> retval;
     const std::vector<ConstrainedVariableId>& vars = m_obj->getVariables();
     for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
@@ -173,8 +178,8 @@ namespace EUROPA
 
   void PSObjectImpl::addPrecedence(PSToken* pred,PSToken* succ)
   {
-	  TokenId p = m_obj->getPlanDatabase()->getEntityByKey(pred->getKey());
-	  TokenId s = m_obj->getPlanDatabase()->getEntityByKey(succ->getKey());
+	  TokenId p = m_obj->getPlanDatabase()->getEntityByKey(pred->getEntityKey());
+	  TokenId s = m_obj->getPlanDatabase()->getEntityByKey(succ->getEntityKey());
 	  m_obj->constrain(p,s);
 	  // TODO: move this to Object::constrain()
       if (m_obj->getPlanDatabase()->getConstraintEngine()->getAutoPropagation())
@@ -183,8 +188,8 @@ namespace EUROPA
   
   void PSObjectImpl::removePrecedence(PSToken* pred,PSToken* succ)
   {
-	  TokenId p = m_obj->getPlanDatabase()->getEntityByKey(pred->getKey());
-	  TokenId s = m_obj->getPlanDatabase()->getEntityByKey(succ->getKey());
+	  TokenId p = m_obj->getPlanDatabase()->getEntityByKey(pred->getEntityKey());
+	  TokenId s = m_obj->getPlanDatabase()->getEntityByKey(succ->getEntityKey());
 	  m_obj->free(p,s);	  
       // TODO: move this to Object::free()
       if (m_obj->getPlanDatabase()->getConstraintEngine()->getAutoPropagation())
@@ -192,7 +197,10 @@ namespace EUROPA
   }
 
   
-  PSTokenImpl::PSTokenImpl(const TokenId& tok) : PSToken(tok), m_tok(tok) {
+  PSTokenImpl::PSTokenImpl(const TokenId& tok) 
+      : m_tok(tok) 
+  {
+      m_entity = m_tok;
   }
 
   const std::string TOKEN_STR("TOKEN");
@@ -319,7 +327,7 @@ namespace EUROPA
   void PSTokenImpl::merge(PSToken* activeToken) 
   {
       check_error(activeToken != NULL, "Can't merge on NULL token");
-      TokenId tok = m_tok->getPlanDatabase()->getEntityByKey(activeToken->getKey());
+      TokenId tok = m_tok->getPlanDatabase()->getEntityByKey(activeToken->getEntityKey());
       m_tok->merge(tok);
   }        
 
@@ -354,7 +362,7 @@ namespace EUROPA
 
 	PSList<PSVariable*> vars = getParameters();
   	for (int i=0;i<vars.size();i++) {
-  	    os << "    " << vars.get(i)->getName() << " : " << vars.get(i)->toString() << std::endl;
+  	    os << "    " << vars.get(i)->getEntityName() << " : " << vars.get(i)->toString() << std::endl;
 	    delete vars.get(i);
   	}
   	

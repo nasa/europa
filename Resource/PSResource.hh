@@ -14,7 +14,7 @@ namespace EUROPA {
   class PSResource : public virtual PSObject
   {
     public:
-      PSResource(const EntityId& id) : PSObject(id) {}	
+      PSResource() {}	
   	  virtual ~PSResource() {}
   	  
       virtual PSResourceProfile* getLimits() = 0;

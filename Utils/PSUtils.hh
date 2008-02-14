@@ -30,17 +30,20 @@ namespace EUROPA {
   class PSEntity
   {
     public: 
+      PSEntity();
       PSEntity(const EntityId& entity);
       virtual ~PSEntity() {}
     
-      virtual PSEntityKey getKey() const;
-      virtual const std::string& getName() const;
+      virtual PSEntityKey getEntityKey() const;
+      virtual const std::string& getEntityName() const;
       virtual const std::string& getEntityType() const;
 
-      virtual std::string toString();
+      virtual std::string toString() const;
 
-    private:
-    	EntityId m_entity;
+    protected:
+      EntityId m_entity;    
+
+      virtual const EntityId getEntity() const { return m_entity; }
   };	      
 }
 

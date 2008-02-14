@@ -65,27 +65,29 @@ namespace EUROPA {
   typedef int TimePoint;
   typedef int PSEntityKey;
 
+  class PSConstraint;
   class PSObject;
-  class PSToken;
   class PSSolver;
+  class PSToken;
   class PSVariable;
   class PSVarValue;
 
   template<class T>
   class PSList {
   public:
+    PSList();
     int size() const;
     T& get(int idx);
-  protected:
-    PSList();
+    void push_back(const T& value);        
+    void remove(const T& value); 
   };
 
   %template(PSObjectList) PSList<PSObject*>;
   %template(PSTokenList) PSList<PSToken*>;
   %template(PSVariableList) PSList<PSVariable*>;
-  %template(PSValueList) PSList<PSVarValue>;
+  //%template(PSValueList) PSList<PSVarValue>;
 
-  //trying template instantiation to get the right results.
+  // using template instantiation to get the right results.
 
   %rename(PSStringList) PSList<std::string>;
   class PSList<std::string> {
@@ -99,6 +101,13 @@ namespace EUROPA {
   public:
     int size() const;
     int get(int idx);
+  };
+
+  %rename(PSValueList) PSList<EUROPA::PSVarValue>;
+  class PSList<EUROPA::PSVarValue> {
+  public:
+    int size() const; 
+    PSVarValue get(int idx);
   };
 
 // If the output language is java, add a method to the PSEngine
@@ -200,6 +209,8 @@ namespace EUROPA {
     PSList<PSVariable*> getGlobalVariables();
     PSVariable* getVariableByKey(PSEntityKey id);
     PSVariable* getVariableByName(const std::string& name);
+    PSConstraint* addConstraint(const std::string& type, PSList<PSVariable*> args);
+    void removeConstraint(PSEntityKey id);
 
     PSList<PSToken*> getTokens();
     PSToken* getTokenByKey(PSEntityKey id);
@@ -222,11 +233,11 @@ namespace EUROPA {
   class PSEntity
   {
   public:
-    PSEntityKey getKey() const;
-    const std::string& getName() const;
+    PSEntityKey getEntityKey() const;
+    const std::string& getEntityName() const;
     const std::string& getEntityType() const;
     
-    std::string toString();
+    std::string toString() const;
         
   protected:
     PSEntity(); //protected constructors prevent wrapper generation
@@ -366,6 +377,22 @@ namespace EUROPA {
     
   protected:
     PSVarValue();
+  };
+
+  class PSConstraint : public PSEntity
+  {
+    public:
+      bool isActive() const;
+      void deactivate();
+      void undoDeactivation();
+      
+      double getViolation() const;
+      std::string getViolationExpl() const;     
+      
+      std::string toString() const;
+
+    protected:
+      PSConstraint();                    
   };
 
   // TODO: move this to a separate file?

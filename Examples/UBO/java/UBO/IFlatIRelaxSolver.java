@@ -99,7 +99,7 @@ public class IFlatIRelaxSolver
         activities_ = new TreeMap<Integer,PSToken>();
         for (int i=0;i<tokens.size();i++) {
         	PSToken tok = tokens.get(i);
-        	if (tok.getName().startsWith("CapacityResource")) {
+        	if (tok.getEntityName().startsWith("CapacityResource")) {
         		int ownerIdx = RCPSPUtil.getActivity(tok);
         	    activities_.put(ownerIdx,tok);
         	}

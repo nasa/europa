@@ -12,9 +12,7 @@ namespace EUROPA
   }
 
   PSResourceImpl::PSResourceImpl(const SAVH::ResourceId& res) 
-      : PSObject(res)
-      , PSResource(res)
-      , PSObjectImpl(res) 
+      : PSObjectImpl(res) 
       , m_res(res) 
   {	  
   }

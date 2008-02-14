@@ -190,13 +190,13 @@ public class TSNQueensSolver
     
     void addToTabuList(PSVariable queenToMove,int orig,int dest)
     {
-        String key = queenToMove.getName() + "_" +orig+"_"+dest;
+        String key = queenToMove.getEntityName() + "_" +orig+"_"+dest;
         tabuList_.put(key,curIteration_+tabuTenure_);        
     }
     
     boolean isTabu(PSVariable queenToMove,int orig,int dest)
     {
-        String key = queenToMove.getName() + "_" +orig+"_"+dest;
+        String key = queenToMove.getEntityName() + "_" +orig+"_"+dest;
         Integer iteration = (Integer)tabuList_.get(key);
         if (iteration == null)
         	return false;
@@ -212,7 +212,7 @@ public class TSNQueensSolver
     	if (force || !isTabu(queenToMove,curPos,m.slot_)) {
 		    PSVarValue value = PSVarValue.getInstance(m.slot_);
 		    queenToMove.specifyValue(value);
-		    dbgout("Moved queen "+queenToMove.getName()+" from "+curPos+" to "+m.slot_); 
+		    dbgout("Moved queen "+queenToMove.getEntityName()+" from "+curPos+" to "+m.slot_); 
 	        addToTabuList(queenToMove,curPos,m.slot_);
 	        return true;
     	}

@@ -10,6 +10,7 @@ namespace EUROPA {
 
   class PSVariable;
   class PSVarValue;
+  class PSConstraint;
   class PSObject;
   
   class PSConstraintEngine : public EngineComponent
@@ -28,13 +29,13 @@ namespace EUROPA {
   	  virtual void setAllowViolations(bool v) = 0;
 
   	  virtual double getViolation() const = 0;
-  	  virtual std::string getViolationExpl() const = 0;    
+  	  virtual std::string getViolationExpl() const = 0;      	  
   };
   
   class PSVariable : public PSEntity
   {
     public:
-    	PSVariable(const EntityId& id) : PSEntity(id) {}	
+    	PSVariable() {}	
     	virtual ~PSVariable() {}
 
     	virtual const std::string& getEntityType() const = 0;
@@ -89,6 +90,22 @@ namespace EUROPA {
 	  double m_val;
 	  PSVarType m_type;
   };                
+  
+  class PSConstraint : public PSEntity
+  {
+    public:    
+      PSConstraint() {}    
+      virtual ~PSConstraint() {}
+
+      virtual const std::string& getEntityType() const = 0;
+      
+      virtual bool isActive() const = 0;
+      virtual void deactivate() = 0;
+      virtual void undoDeactivation() = 0;
+      
+      virtual double getViolation() const = 0;
+      virtual std::string getViolationExpl() const = 0;     
+  };
 
 }
 

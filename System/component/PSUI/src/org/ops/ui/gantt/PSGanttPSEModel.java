@@ -57,7 +57,7 @@ public class PSGanttPSEModel
 				start = 0;
 			}
 			
-			acts.add(new PSGanttActivityImpl(token.getKey(),
+			acts.add(new PSGanttActivityImpl(token.getEntityKey(),
 					                         instantToCalendar(start),
 					                         instantToCalendar(end),
 					                         token.getViolation()
@@ -79,7 +79,7 @@ public class PSGanttPSEModel
 	public String getResourceColumn(int resource, int column) 
 	{
 		if (column == 0 && resource < getResourceCount())
-			return resources_.get(resource).getName();
+			return resources_.get(resource).getEntityName();
 		
 		return "";
 	}

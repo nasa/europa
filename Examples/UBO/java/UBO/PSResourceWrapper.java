@@ -45,7 +45,7 @@ public class PSResourceWrapper extends ResourceBase
 		}
 		
 		if (t>=0)
-		    RCPSPUtil.dbgout("MaxViolation for "+res_.getName()+" "+lowestLevel+" at time "+t);
+		    RCPSPUtil.dbgout("MaxViolation for "+res_.getEntityName()+" "+lowestLevel+" at time "+t);
 		
 		return new ResourceViolationInfo(t,lowestLevel);    	
     }        

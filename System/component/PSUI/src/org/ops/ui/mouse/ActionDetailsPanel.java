@@ -36,8 +36,8 @@ public class ActionDetailsPanel
 	{
 		StringBuffer buf = new StringBuffer();
 
-        buf.append("ID     : ").append(t.getKey()).append("\n")
-           .append("Name   : ").append(t.getName()).append("\n")
+        buf.append("ID     : ").append(t.getEntityKey()).append("\n")
+           .append("Name   : ").append(t.getEntityName()).append("\n")
            .append("isFact  : ").append(t.isFact()).append("\n")
         ;
         
@@ -46,7 +46,7 @@ public class ActionDetailsPanel
             PSVariableList parameters = t.getParameters();
             for (int i = 0; i< parameters.size(); i++) {
             	PSVariable p = parameters.get(i);
-                buf.append(p.getName()).append(" : ").append(p.toString()).append("\n");
+                buf.append(p.getEntityName()).append(" : ").append(p.toString()).append("\n");
             }
         }
            

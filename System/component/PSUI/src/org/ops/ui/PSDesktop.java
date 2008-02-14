@@ -245,7 +245,7 @@ public class PSDesktop
     public void showTokens(PSObject o)
     {
          PSTokenList l = o.getTokens();
-         showTokens("Activities for "+o.getName(),l);
+         showTokens("Activities for "+o.getEntityName(),l);
     }
 
     public void showTokens(String title,PSTokenList l)
@@ -259,8 +259,8 @@ public class PSDesktop
         for (int i=0; i<l.size();i++) {
        	 List row = new Vector();
        	 PSToken t = l.get(i);
-       	 row.add(t.getKey());
-       	 row.add(t.getName());
+       	 row.add(t.getEntityKey());
+       	 row.add(t.getEntityName());
        	 row.add(t.getEntityType());
        	 PSVariableList vars = t.getParameters();
        	 for (int j=0; j<vars.size();j++) {
@@ -269,7 +269,7 @@ public class PSDesktop
 
        		 // Only add cols for the first row
        		 if (i==0)
-       			 columnNames.add(var.getName());
+       			 columnNames.add(var.getEntityName());
        	 }
        	 data.add(row);
         }
@@ -307,7 +307,7 @@ public class PSDesktop
     public PSResourceChart makeResourceChart(PSResource r,Calendar start)
     {
     	return new PSJFreeResourceChart(
-    			r.getName(),
+    			r.getEntityName(),
     			new PSResourceChartPSEModel(r),
     			start);
     }
@@ -317,7 +317,7 @@ public class PSDesktop
         JTabbedPane resourceTabs = new JTabbedPane();
         List<PSResource> resources = PSUtil.toResourceList(getPSEngine().getObjectsByType(type));
         for (PSResource r : resources) 
-            resourceTabs.add(r.getName(),makeResourceChart(r,start));
+            resourceTabs.add(r.getEntityName(),makeResourceChart(r,start));
 
         JInternalFrame frame = makeNewFrame("Resources");
         frame.getContentPane().add(resourceTabs);

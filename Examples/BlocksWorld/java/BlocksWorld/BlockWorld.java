@@ -109,7 +109,7 @@ public class BlockWorld
     	if ("BOOLEAN".equals(type))
     		return new Boolean(v.asBoolean()).toString();
     	if ("OBJECT".equals(type))
-    		return v.asObject().getName();
+    		return v.asObject().getEntityName();
     	
     	return "ERROR!!! UNKNOWN TYPE :" + type;
     }
@@ -137,7 +137,7 @@ public class BlockWorld
     	    return buf.toString();
     	}
     	
-    	throw new RuntimeException("Unexpected ERROR: variable "+var.getName()+" is not one of {Singleton, Interval, Enumeration}");
+    	throw new RuntimeException("Unexpected ERROR: variable "+var.getEntityName()+" is not one of {Singleton, Interval, Enumeration}");
     }
 
     public static String getBounds(PSToken t)

@@ -32,10 +32,10 @@ void addRows(Vector data, PSTokenList tl, Vector columnNames)
 			
 			// Three special cases before we get to generic case:
 			if(col == "Key") {
-				row.add(t.getKey());
+				row.add(t.getEntityKey());
 			}
 			else if(col == "Name") {
-				row.add(t.getName());
+				row.add(t.getEntityName());
 			}
 			else if(col == "ES") {
 				row.add(t.getStart().getLowerBound());
@@ -47,7 +47,7 @@ void addRows(Vector data, PSTokenList tl, Vector columnNames)
         			for (int j=0; j<vars.size();j++) 
        			{	
        				PSVariable var = vars.get(j);
-        			if (var.getName().equals(col)) 
+        			if (var.getEntityName().equals(col)) 
        				{
        					entry = var.toString();
        				}

@@ -25,6 +25,9 @@ namespace EUROPA {
     virtual PSVariable* getVariableByKey(PSEntityKey id);
     virtual PSVariable* getVariableByName(const std::string& name);
     
+    virtual PSConstraint* addConstraint(const std::string& type, PSList<PSVariable*> args);
+    virtual void removeConstraint(PSEntityKey id);
+
     virtual bool getAutoPropagation() const;
     virtual void setAutoPropagation(bool v);      
     virtual bool propagate(); 

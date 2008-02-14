@@ -17,7 +17,7 @@ public abstract class ResourceBase implements Resource
     
     public int getCapacity() { return capacity_; }
     public PSResource getPSResource() { return res_; }
-    public String getName() { return res_.getName(); }
+    public String getName() { return res_.getEntityName(); }
     
     public ResourceProfile getLevels()
     {
@@ -27,7 +27,7 @@ public abstract class ResourceBase implements Resource
 	public String toString()
 	{
 		StringBuffer buf = new StringBuffer();
-		buf.append(res_.getName()).append(" ").append(getLevels().toString());
+		buf.append(res_.getEntityName()).append(" ").append(getLevels().toString());
 		return buf.toString();
 	}    
 }

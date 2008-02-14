@@ -87,7 +87,7 @@ public class UBOSolverListener
             StringBuffer decisionBuf = new StringBuffer();
             decisionBuf.append("{").append(predAct).append("} < {").append(succAct).append("}");
             String decision = decisionBuf.toString();
-            String decisionMsg = s.getStepCount() + ": "+ decision + " because of " + resource.getName() + tokenDecision;
+            String decisionMsg = s.getStepCount() + ": "+ decision + " because of " + resource.getEntityName() + tokenDecision;
             decisionHistory_.add(decisionMsg);
             //System.out.println(decisionMsg);            
 

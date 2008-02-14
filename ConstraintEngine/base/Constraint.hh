@@ -11,6 +11,7 @@
 
 #include "Entity.hh"
 #include "ConstraintEngineDefs.hh"
+#include "PSConstraintEngine.hh"
 #include "DomainListener.hh"
 #include "LabelStr.hh"
 
@@ -43,7 +44,7 @@ namespace EUROPA {
    *
    * @see canIgnore(), handleExecute()
    */
-  class Constraint : public Entity {
+  class Constraint : public Entity, public PSConstraint {
   public:
     DECLARE_ENTITY_TYPE(Constraint);
 
@@ -62,6 +63,8 @@ namespace EUROPA {
 	       const std::vector<ConstrainedVariableId>& variables);
 
     virtual ~Constraint();
+
+    virtual const std::string& getEntityType() const;
 
     /**
      * @brief Accessor
@@ -94,7 +97,7 @@ namespace EUROPA {
      * @brief Check if the constraint is to be actively used in propagation.
      * @return true if the constraint is activated. otherwise false.
      */
-    inline bool isActive() const {return m_deactivationRefCount == 0;}
+    virtual bool isActive() const {return m_deactivationRefCount == 0;}
 
     /**
      * @brief Check of the constraint is a unary constraint
@@ -107,14 +110,14 @@ namespace EUROPA {
      *
      * Responsibility lies with the client to ensure that the correctness is not impacted by doing this.
      */
-    void deactivate();
+    virtual void deactivate();
 
     /**
      * @brief This will turn on propagation of this constraint.
      *
      * Has the same impact as if the constraint was added for the first time.
      */
-    void undoDeactivation();
+    virtual void undoDeactivation();
 
     /**
      * @brief the number of outstanding deactivation calls

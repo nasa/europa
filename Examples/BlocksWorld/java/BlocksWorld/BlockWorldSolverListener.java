@@ -52,7 +52,7 @@ public class BlockWorldSolverListener
         Collections.sort(actions,actionComparator_); 
     	for (Object o : actions) {
     		PSToken a = (PSToken)o;
-    		buf.append("{").append(a.getName()) //append(a.getName().substring(9,a.getName().length()))
+    		buf.append("{").append(a.getEntityName()) //append(a.getEntityName().substring(9,a.getEntityName().length()))
     		   .append(BlockWorld.getBounds(a))
     		   .append("(");
     		PSVariableList parameters = a.getParameters();
@@ -60,7 +60,7 @@ public class BlockWorldSolverListener
     		    PSVariable p = parameters.get(i);
     		    if (i>5) buf.append(",");
     		    String value = BlockWorld.varValueToString(p);
-                buf//.append(p.getName().substring(10,p.getName().length())).append("=")
+                buf//.append(p.getEntityName().substring(10,p.getEntityName().length())).append("=")
                    //.append(p.getSingletonValue().asString().substring(23,p.getSingletonValue().asString().length()-6));
                    .append(value.substring(10,value.length()));
     		}
@@ -78,8 +78,8 @@ public class BlockWorldSolverListener
     	
     	for (int i=0;i<components.size(); i++) {
     		PSObject c = components.get(i);
-    		if (c.getName().endsWith("Bottom")) {
-    			String blockName = getBlockName(c.getName());
+    		if (c.getEntityName().endsWith("Bottom")) {
+    			String blockName = getBlockName(c.getEntityName());
     			blockName = blockName.substring(0,blockName.length()-5);
                 List actions = Util.SWIGList(c.getTokens()); 
                 Collections.sort(actions,actionComparator_); 
@@ -91,10 +91,10 @@ public class BlockWorldSolverListener
     			String blockState=null;
     			String bottomBlock=null;
 
-    			if (a.getName().endsWith("OnTable")) {
+    			if (a.getEntityName().endsWith("OnTable")) {
     				blockState = "OnTable";
     			}
-    			else if (a.getName().endsWith("On")) {
+    			else if (a.getEntityName().endsWith("On")) {
     				blockState = "On";
     				bottomBlock = BlockWorld.varValueToString(a.getParameters().get(5));
     				int start = bottomBlock.lastIndexOf('.');
@@ -105,7 +105,7 @@ public class BlockWorldSolverListener
     			    bw.addBlock(blockName,blockState,bottomBlock,a);
     		}	
     		
-    		if (c.getName().endsWith("operatorTL"))
+    		if (c.getEntityName().endsWith("operatorTL"))
     			operatorHistory = getHistory(c);
     	}
     	

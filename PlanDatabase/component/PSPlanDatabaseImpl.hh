@@ -53,7 +53,7 @@ namespace EUROPA {
       virtual void removePrecedence(PSToken* pred,PSToken* succ);
 
     protected:
-    	ObjectId m_obj;
+    	ObjectId m_obj;    	
   };
 
   class PSTokenImpl : public PSToken

@@ -27,7 +27,10 @@ namespace EUROPA {
       // Constraint Engine methods
       virtual PSVariable* getVariableByKey(PSEntityKey id) = 0;
       virtual PSVariable* getVariableByName(const std::string& name) = 0;
-
+      
+      virtual PSConstraint* addConstraint(const std::string& type, PSList<PSVariable*> args) = 0;
+      virtual void removeConstraint(PSEntityKey id) = 0;
+      
       virtual bool getAutoPropagation() const = 0;
       virtual void setAutoPropagation(bool v) = 0;
       virtual bool propagate() = 0; 

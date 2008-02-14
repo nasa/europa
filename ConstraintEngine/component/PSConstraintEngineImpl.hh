@@ -62,9 +62,10 @@ namespace EUROPA {
     virtual PSEntity* getParent();
 	    
     virtual std::string toString();
+    
   protected:
-    ConstrainedVariableId m_var;
     PSVarType m_type;
+    ConstrainedVariableId m_var;    
   };   
   
 }	

@@ -9,6 +9,8 @@
 #include "Pdlfcn.hh"
 #include "Schema.hh"
 
+#include "Constraint.hh"
+#include "PlanDatabase.hh"
 #include "PSConstraintEngineImpl.hh"
 #include "PSPlanDatabaseImpl.hh"
 #include "PSSolversImpl.hh"
@@ -177,6 +179,33 @@ namespace EUROPA {
 	return m_psConstraintEngine->getVariableByName(name);  
   }
 
+  // TODO: these 2 need to be pushed into the PSConstraintEngine
+  PSConstraint* PSEngineImpl::addConstraint(const std::string& type, PSList<PSVariable*> args)
+  {
+      std::vector<ConstrainedVariableId> variables;
+      for (int i=0;i<args.size();i++) {
+          ConstrainedVariableId arg = m_planDatabase->getEntityByKey(args.get(i)->getEntityKey());
+          variables.push_back(arg);
+      }
+      
+      ConstraintId c = m_planDatabase->getClient()->createConstraint(type.c_str(), variables);
+
+      // TODO: this must be pushed to the CE
+      if (getAutoPropagation())
+          propagate();
+      
+      return (Constraint*)c;      
+  }
+  
+  void PSEngineImpl::removeConstraint(PSEntityKey id)
+  {
+      ConstraintId c = m_planDatabase->getEntityByKey(id);
+      m_planDatabase->getClient()->deleteConstraint(c);      
+      // TODO: this must be pushed to the CE
+      if (getAutoPropagation())
+          propagate();      
+  }
+  
   bool PSEngineImpl::getAutoPropagation() const
   {
     return m_psConstraintEngine->getAutoPropagation();

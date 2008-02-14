@@ -395,8 +395,8 @@ namespace EUROPA
     PropagatorId propagator = m_propagatorsByName.find(propagatorName.getKey())->second;
     propagator->addConstraint(constraint);
     constraint->setPropagator(propagator);
-    publish(notifyAdded(constraint));
 
+    publish(notifyAdded(constraint));
     debugMsg("ConstraintEngine:add:constraint:Propagator",
 	     constraint->getName().toString() << "(" << constraint->getKey() <<  ") added to " << propagatorName.toString());
   }
@@ -428,7 +428,6 @@ namespace EUROPA
     }
 
     publish(notifyRemoved(constraint));
-
     debugMsg("ConstraintEngine:remove:Constraint",
 	     constraint->getName().toString() << "(" << constraint->getKey() <<  ")");
   }
