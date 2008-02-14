@@ -6,6 +6,6 @@ if ( "Resources" in $(NO) ) {
   SubDirC++Flags -DNO_RESOURCES ;
 }
 
-ModuleComponent System	: SolverAssembly.cc ;
+ModuleComponent System	: SolverAssembly.cc MasterController.cc SingleSolverController.cc ;
 
 } # PLASMA_READY

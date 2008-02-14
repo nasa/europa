@@ -13,6 +13,16 @@
 #include <list>
 
 namespace EUROPA {
+
+  class MasterController;
+  
+  class MasterControllerFactory
+  {
+  public:
+      virtual ~MasterControllerFactory() {}
+      virtual MasterController* createInstance() = 0;
+  };
+  
   /**
    * @brief
    */
@@ -26,6 +36,8 @@ namespace EUROPA {
 		  INITIALLY_INCONSISTENT
     };
 
+    static MasterControllerFactory* s_factory;
+    
     /**
      * @brief Implement this function to link to specific concrete class.
      */

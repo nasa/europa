@@ -4,7 +4,7 @@ if ! $(%PROJECT%_READY) {
   # Declare a library for PlanWorks Control
 
   ModuleSharedLibrary %Project%Controller
-     : $(PLASMA_HOME)/ControllerStub.cc $(PLASMA_HOME)/MasterController.cc $(PLASMA_HOME)/SingleSolverController.cc
+     : ControllerStub.cc 
      : System : %Project%Controller ;
 
   # Create a build target to run a problem

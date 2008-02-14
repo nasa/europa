@@ -35,6 +35,7 @@
 
 namespace EUROPA {
 
+  MasterControllerFactory* MasterController::s_factory = NULL;
   MasterController* MasterController::s_instance = NULL;
 
   /** IMPLEMENTATION FOR C-CALL of JNI INTERFACE **/
@@ -200,6 +201,14 @@ namespace EUROPA {
     return s_instance;
   }
 
+  MasterController* MasterController::createInstance() 
+  {
+      if (s_factory != NULL)
+          return s_factory->createInstance(); 
+      
+      return NULL;
+  }      
+  
   MasterController::MasterController()
     : m_stepCount(0), m_status(IN_PROGRESS), m_libHandle(NULL), m_debugStream(NULL){
   }
