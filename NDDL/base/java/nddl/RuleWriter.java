@@ -5,6 +5,7 @@ import net.n3.nanoxml.*;
 import java.util.*;
 
 class RuleWriter {
+  private static final Set defaultFilter = NddlUtil.immutableSet(new String[]{"if", "invoke", "subgoal"});
   public static String delimiter = "$";
   private static Set s_rules = new TreeSet(); /* The set of all rules built up. Used to generate rules for system initialization. */
   private static int s_counter = 0; /* Used to ensure rule names are unique when you have more than one rule for the same predicate */
@@ -35,7 +36,7 @@ class RuleWriter {
     ModelAccessor.setCurrentPredicate(name);
 
     // Top-level call to generate necessary class declaration
-    generateDeclaration(writer, ruleInstanceName , rule.getFirstChildNamed("group"), "", 0);
+    generateDeclaration(writer, ruleInstanceName , rule.getFirstChildNamed("group"), new HashSet(), 0);
 
     // Construct a rule class for this which can allocate rule instances.
     // The rule is declared with a hook to source code for rerference.
@@ -45,7 +46,7 @@ class RuleWriter {
 
     // Top level call to output the implementations of functions. All of these functions
     // map to the ::handleExecute method.
-    generateExecution(writer, ruleInstanceName, rule.getFirstChildNamed("group"), "", 0);
+    generateExecution(writer, ruleInstanceName, rule.getFirstChildNamed("group"), new HashSet(), 0);
 
     // Store rule name for later generation
     s_rules.add("Rule" + delimiter + ruleInstanceName); 
@@ -68,13 +69,13 @@ class RuleWriter {
   private static boolean generateDeclaration(IndentWriter writer, 
                                              String ruleInstanceClass, 
                                              IXMLElement ruleNode,
-                                             String guards,
+                                             Set guards,
                                              int index) throws IOException {
     assert(DebugMsg.debugMsg("RuleWriter:generateDeclaration","Rule Instance is " + ruleInstanceClass + " with current guards = " + guards));
 
     // Establish default values for filtering child nodes for recurive invocation of this
     // method
-    String filter = "if:invoke:subgoal";
+		Set filter = defaultFilter;
 
     boolean result = true;
 
@@ -103,19 +104,19 @@ class RuleWriter {
     }
     else if(ModelAccessor.hasImplicitGuard(ruleNode, guards)) { // Implicitly guarded rule
       ruleInstanceClass += delimiter + index;
-      filter = "group";
-      String newGuards = ModelAccessor.getOutstandingGuards(ruleNode, guards);
-      guards = guards + ":" + newGuards + ":";
+      filter = Collections.singleton("group");
+      Set newGuards = ModelAccessor.getOutstandingGuards(ruleNode, guards);
+      newGuards.addAll(guards);
       assert(DebugMsg.debugMsg("RuleWriter:generateDeclaration","implicit  " + ruleInstanceClass));
-      declareGuardedRuleInstance(writer, ruleInstanceClass, ruleNode, guards);
+      declareGuardedRuleInstance(writer, ruleInstanceClass, ruleNode, newGuards);
     }
     else if(ModelAccessor.hasExplicitGuard(ruleNode)){
       ruleInstanceClass += delimiter + index;
-      filter = "group";
-      String newGuards = ModelAccessor.getOutstandingGuards(ruleNode, guards);
-      guards = guards + ":" + newGuards + ":";
+      filter = Collections.singleton("group");
+      Set newGuards = ModelAccessor.getOutstandingGuards(ruleNode, guards);
+      newGuards.addAll(guards);
       assert(DebugMsg.debugMsg("RuleWriter:generateDeclaration","explicit  " + ruleInstanceClass));
-      declareGuardedRuleInstance(writer, ruleInstanceClass, ruleNode, guards);
+      declareGuardedRuleInstance(writer, ruleInstanceClass, ruleNode, newGuards);
     }
     else // No new declaration introduced
       result = false;
@@ -125,7 +126,7 @@ class RuleWriter {
     childRuleIndex = 0;
     for (int i=0; i< children.size(); i++) {
       IXMLElement child = (IXMLElement) children.elementAt(i);
-      if(filter.indexOf(child.getName()) >= 0 &&
+      if(filter.contains(child.getName()) &&
          generateDeclaration(writer, ruleInstanceClass, child, guards, childRuleIndex)){
         childRuleIndex++;
       }
@@ -144,13 +145,13 @@ class RuleWriter {
   private static boolean generateExecution(IndentWriter writer, 
                                            String ruleInstanceClass, 
                                            IXMLElement ruleNode,
-                                           String guards,
+                                           Set guards,
                                            int index) throws IOException {
     assert(DebugMsg.debugMsg("RuleWriter:generateExecution","Rule Instance class is " + ruleInstanceClass + " with guards = " + guards));
 
     ModelAccessor.setCurrentRule(ruleInstanceClass);
 
-    String filter = "if:invoke:subgoal";
+    Set filter = defaultFilter;
     boolean result = true;
 
     if(ruleNode.getName().equals("group") && ruleNode.getParent().getName().equals("compat")) {
@@ -159,9 +160,9 @@ class RuleWriter {
     }
     else if (ModelAccessor.hasImplicitGuard(ruleNode, guards)) {
       ruleInstanceClass += delimiter + index;
-      String newGuards = ModelAccessor.getOutstandingGuards(ruleNode, guards);
-      guards = guards + ":" + newGuards + ":";
-      generateExecuteImplementation(writer, ruleNode, ruleInstanceClass, guards);
+      Set newGuards = ModelAccessor.getOutstandingGuards(ruleNode, guards);
+      newGuards.addAll(guards);
+      generateExecuteImplementation(writer, ruleNode, ruleInstanceClass, newGuards);
 
       // Reset current rule on exit
       ModelAccessor.resetCurrentRule();
@@ -169,8 +170,9 @@ class RuleWriter {
     }
     else if (ModelAccessor.hasExplicitGuard(ruleNode)) {
       ruleInstanceClass += delimiter + index;
-      filter = "group";
-      guards = guards + ":" + ModelAccessor.getExplicitGuard(ruleNode) + ":";
+      filter = Collections.singleton("group");
+      guards = new HashSet(guards);
+      guards.add(ModelAccessor.getExplicitGuard(ruleNode));
       generateExecuteImplementation(writer, ruleNode.getFirstChildNamed("group"), ruleInstanceClass, guards);
     }
     else
@@ -181,7 +183,7 @@ class RuleWriter {
     int childRuleIndex = 0;
     for (int i=0; i< children.size(); i++) {
       IXMLElement child = (IXMLElement) children.elementAt(i);
-      if(filter.indexOf(child.getName()) >= 0 &&
+      if(filter.contains(child.getName()) &&
          generateExecution(writer, ruleInstanceClass, child, guards, childRuleIndex)) {
         childRuleIndex++;
       }
@@ -202,7 +204,7 @@ class RuleWriter {
   private static void generateExecuteImplementation(IndentWriter writer, 
                                                     IXMLElement ruleBody, 
                                                     String ruleInstanceClass,
-                                                    String guards) throws IOException {
+                                                    Set guards) throws IOException {
     assert(DebugMsg.debugMsg("RuleWriter:generateExecutionImplementation","Generating execution implementation for rule instance " + ruleInstanceClass + " with current guards = " + guards));
     ModelAccessor.setCurrentRule(ruleInstanceClass);
     writer.write("void " + ruleInstanceClass + "::handleExecute() {\n");
@@ -236,9 +238,9 @@ class RuleWriter {
       generateSubgoals(writer, ruleBody, ruleInstanceClass);
     }
     else if (ruleBody.getName().equals("if")) { // Implied guards on conditional
-      String guardScope = ModelAccessor.getOutstandingGuards(ruleBody, guards);
+      Set guardScope = ModelAccessor.getOutstandingGuards(ruleBody, guards);
       writer.write("addChildRule(new "+ ruleInstanceClass + 
-                   "$0(m_id, getVariables(\""+guardScope+"\"), true));\n");
+                   "$0(m_id, getVariables(\"" + NddlUtil.toDelimitedString(guardScope, ":") + "\"), true));\n");
     }
 
     writer.unindent();
@@ -437,7 +439,7 @@ class RuleWriter {
   private static void generateChildRules(IndentWriter writer, 
                                          IXMLElement ruleBody, 
                                          String ruleInstanceClass,
-                                         String guards) throws IOException{
+                                         Set guards) throws IOException{
     Vector children = ruleBody.getChildren();
     int childIndex = 0;
     for (int i=0;i<children.size();i++) {
@@ -445,9 +447,9 @@ class RuleWriter {
 
       // Process child rule with implied guard(s) on constraint arguments
       if(ModelAccessor.hasImplicitGuard(child, guards)) {
-        String guardScope = ModelAccessor.getOutstandingGuards(child, guards);
+        Set guardScope = ModelAccessor.getOutstandingGuards(child, guards);
         writer.write("addChildRule(new "+ ruleInstanceClass + 
-            delimiter  + childIndex++ + "(m_id, getVariables(\""+guardScope+"\"),true));\n");
+            delimiter + childIndex++ + "(m_id, getVariables(\"" + NddlUtil.toDelimitedString(guardScope, ":") + "\"),true));\n");
       }
       else if(child.getName().equals("if")) {
         if(ModelAccessor.guardedBySingleton(child.getChildAtIndex(0))) {
@@ -481,7 +483,7 @@ class RuleWriter {
   private static void generateUnguardedConstraints(IndentWriter writer, 
                                                    IXMLElement ruleBody, 
                                                    String ruleInstanceClass,
-                                                   String guards) throws IOException {
+                                                   Set guards) throws IOException {
     XMLUtil.checkExpectedNode("group", ruleBody);
     Vector children = ruleBody.getChildrenNamed("invoke");
     for (int i=0;i<children.size();i++) {
@@ -627,8 +629,8 @@ class RuleWriter {
   private static void declareGuardedRuleInstance(IndentWriter writer, 
                                                  String ruleInstanceClass,
                                                  IXMLElement node,
-                                                 String guards) throws IOException {
-    XMLUtil.checkExpectedNode("if:invoke:", node);
+                                                 Set guards) throws IOException {
+    XMLUtil.checkExpectedNode("if:invoke", node);
 
     assert(DebugMsg.debugMsg("RuleWriter:declareGuardedRuleInstance","Generating guarded declaration for " + ruleInstanceClass + " with guards " + guards));
 

@@ -3,6 +3,7 @@ package nddl;
 
 import net.n3.nanoxml.*;
 import java.io.*;
+import java.util.Set;
 
 public class XMLUtil {
 
@@ -56,14 +57,14 @@ public class XMLUtil {
   }
 
   public static String locationString(IXMLElement element) {
-		return locationString(element, ':');
-	}
+    return locationString(element, ':');
+  }
 
   public static String locationString(IXMLElement element, char seperator) {
     String filename = inheritAttribute(element,"filename");
     String line = inheritAttribute(element,"line");
-		// if we don't have a filename, we need to ditch any line information we
-		// have and claim what little we can guess.
+    // if we don't have a filename, we need to ditch any line information we
+    // have and claim what little we can guess.
     if (filename == null)
       return ModelAccessor.getModelName()+".xml";
     if (line == null)

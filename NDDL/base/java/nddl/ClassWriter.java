@@ -5,6 +5,7 @@ import net.n3.nanoxml.*;
 import java.util.*;
 
 class ClassWriter {
+	public static final Set primitives = NddlUtil.immutableSet(new String[]{"int", "float", "bool"});
 
   public static void writeTypedefs(IndentWriter writer, IXMLElement klass) throws IOException {
     String name = ModelAccessor.getClassName(klass);
@@ -299,7 +300,6 @@ class ClassWriter {
 					 Set constructorArguments, 
 					 Set allocatedMemberVariables, 
 					 IXMLElement element) throws IOException  {
-    String primitives = "int:float:bool";
     XMLUtil.checkExpectedNode("new", element);
 
     boolean comma = false;
@@ -310,7 +310,7 @@ class ClassWriter {
       String value = ModelAccessor.getValue(argument);
 
       /* Exclude cases where we do nothing to the value */
-      if(primitives.indexOf(argType) < 0 && !value.equals("true") && !value.equals("false")){
+      if(!primitives.contains(argType) && !value.equals("true") && !value.equals("false")){
 	// CASE 0: Translate 'this'
 	if (value.equalsIgnoreCase("this")){
 	  value = "m_id";
@@ -319,7 +319,7 @@ class ClassWriter {
 	// CASE 1: It is a singleton member variable which must be mapped to the singleton
 	else if(allocatedMemberVariables.contains(value)){
 	    String singletonType = getVariableType(classVariables, value);
-	    if(primitives.indexOf(singletonType) >= 0){
+	    if(primitives.contains(singletonType)){
 		value = "(" + singletonType + ") singleton(" + value + ")";
 	    }
 	    else 
@@ -509,8 +509,7 @@ class ClassWriter {
   }
 
   static private String makeArgumentType(String argType){
-    final String s_noChanges = "int:float:bool";
-    if(s_noChanges.indexOf(argType) >= 0)
+    if(primitives.contains(argType))
       return argType;
     else if(argType.equals("string") || ModelAccessor.isEnumeration(argType))
       return "LabelStr";

@@ -167,14 +167,14 @@ class ConstraintWriter{
    * name is of the loop variable is given by 'filteredVariable'. Tail-recursive implementation.
    */
   private static boolean usedInForEach(IXMLElement container, String filteredVariable){
-    String canIgnoreFromHere = "subgoal:invoke:ident:var:";
+    final Set canIgnoreFromHere = NddlUtil.immutableSet(new String[]{"subgoal", "invoke", "ident", "var"});
 
     // If we get a hit, return true
     if(container.getName().equals("loop") && XMLUtil.getAttribute(container, "value").equals(filteredVariable))
       return true;
 
     // If a node is in 'canIgnoreFromHere', we can ignore further exploration
-    if(canIgnoreFromHere.indexOf(container.getName()) >=0)
+    if(canIgnoreFromHere.contains(container.getName()))
       return false;
 
     // Otherwise, try exploring the children
