@@ -14,7 +14,7 @@ import stat
 projectSource = ".makeproject"
 
 projectName = sys.argv[1]
-projectDest = os.path.join("..", projectName)
+projectDest = os.path.join("../..", projectName)
 if len(sys.argv) > 2:
   projectDest = os.path.join(sys.argv[2], projectName)
 
