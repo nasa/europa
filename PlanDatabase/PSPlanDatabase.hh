@@ -25,10 +25,10 @@ namespace EUROPA {
       virtual PSObject* getObjectByKey(PSEntityKey id) = 0;
       virtual PSObject* getObjectByName(const std::string& name) = 0;
 
-      virtual PSList<PSToken*> getTokens() = 0;    	 
+      virtual PSList<PSToken*> getAllTokens() = 0;    	 
       virtual PSToken* getTokenByKey(PSEntityKey id) = 0;	
 
-      virtual PSList<PSVariable*> getGlobalVariables() = 0;
+      virtual PSList<PSVariable*> getAllGlobalVariables() = 0;
 
       virtual void addObjectWrapperGenerator(const LabelStr& type,ObjectWrapperGenerator* wrapper) = 0;    
       

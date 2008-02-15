@@ -29,9 +29,6 @@ namespace EUROPA {
       
     protected:
       PlanDatabaseId m_planDatabase;	
-      std::map<double, ObjectWrapperGenerator*> m_objectWrapperGenerators;            
-
-      ObjectWrapperGenerator* getObjectWrapperGenerator(const LabelStr& type);
   };
 
   class PSObjectImpl : public virtual PSObject

@@ -1,4 +1,7 @@
 #include "PlanDatabase.hh"
+#include "PlanDatabaseWriter.hh"
+#include "PSConstraintEngineImpl.hh"
+#include "PSPlanDatabaseImpl.hh"
 #include "Object.hh"
 #include "Schema.hh"
 #include "Token.hh"
@@ -30,29 +33,6 @@ namespace EUROPA{
 
   DEFINE_GLOBAL_CONST(std::string, g_ClassDelimiter, ":");
 
-/*  
-  class PlanDatabaseLocalStatic{
-  public:
-    PlanDatabaseLocalStatic(){
-      static bool sl_registerConstraints = false;
-      check_error(sl_registerConstraints == false, "Should only be called once.");
-      if(sl_registerConstraints == false){
-	REGISTER_SYSTEM_CONSTRAINT(CommonAncestorConstraint, "commonAncestor", "Default");
-	REGISTER_SYSTEM_CONSTRAINT(HasAncestorConstraint, "hasAncestor", "Default");
-	REGISTER_SYSTEM_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
-        // Temporal Constraints
-        REGISTER_SYSTEM_CONSTRAINT(EqualConstraint, "concurrent", "Temporal");
-        REGISTER_SYSTEM_CONSTRAINT(LessThanEqualConstraint, "precedes", "Temporal"); 
-        REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporaldistance", "Temporal");
-        REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporalDistance", "Temporal");
-        sl_registerConstraints = true;
-      }
-    }
-  };
-
-  PlanDatabaseLocalStatic sl_planDatabase;
-*/
-  
   /**
    * @brief Impements a Listener to handle deletions of variables of type ObjectDomain. 
    *
@@ -82,11 +62,21 @@ namespace EUROPA{
       (*lit)->message;							\
   }
 
+  class BaseObjectWrapperGenerator : public ObjectWrapperGenerator 
+  {
+    public:
+        PSObject* wrap(const EntityId& obj) {
+            return new PSObjectImpl(obj);
+        }
+  };
+
+  
   PlanDatabase::PlanDatabase(const ConstraintEngineId& constraintEngine, const SchemaId& schema)
     : m_id(this), m_constraintEngine(constraintEngine), m_schema(schema), m_state(OPEN), m_deleted(false) {
     m_client = (new DbClient(m_id))->getId();
     check_error(m_constraintEngine.isValid());
     check_error(m_schema.isValid());
+    addObjectWrapperGenerator("Object", new BaseObjectWrapperGenerator());          
   }
 
   PlanDatabase::~PlanDatabase(){
@@ -956,4 +946,95 @@ namespace EUROPA{
       predicate = predStr;
     }
   }
+  
+  // PSPlanDatabase methods
+  PSList<PSObject*> PlanDatabase::getObjectsByType(const std::string& objectType) 
+  {
+    PSList<PSObject*> retval;
+
+    const ObjectSet& objects = getObjects();
+    for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
+        ObjectId object = *it;
+        if(Schema::instance()->isA(object->getType(), objectType.c_str()))
+            retval.push_back(getObjectWrapperGenerator(object->getType())->wrap(object));
+    }
+
+    return retval;
+  }
+  
+  PSObject* PlanDatabase::getObjectByKey(PSEntityKey id) 
+  {
+    EntityId entity = Entity::getEntity(id);
+    check_runtime_error(entity.isValid());
+    return new PSObjectImpl(entity);
+  }
+
+  PSObject* PlanDatabase::getObjectByName(const std::string& name) {
+    ObjectId obj = getObject(LabelStr(name));
+    check_runtime_error(obj.isValid());
+    return new PSObjectImpl(obj);
+  }
+
+  PSList<PSToken*> PlanDatabase::getAllTokens() {
+    const TokenSet& tokens = getTokens();
+    PSList<PSToken*> retval;
+
+    for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+      PSToken* tok = new PSTokenImpl(*it);
+      retval.push_back(tok);
+    }
+    
+    return retval;
+  }
+
+  PSToken* PlanDatabase::getTokenByKey(PSEntityKey id) 
+  {
+
+    EntityId entity = Entity::getEntity(id);
+    check_runtime_error(entity.isValid());
+    return new PSTokenImpl(entity);
+  }
+
+  PSList<PSVariable*>  PlanDatabase::getAllGlobalVariables() {
+
+    const ConstrainedVariableSet& vars = getGlobalVariables();
+    PSList<PSVariable*> retval;
+
+    for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
+      PSVariable* v = new PSVariableImpl(*it);
+      retval.push_back(v);
+    }
+    return retval;
+  }  
+
+  std::string PlanDatabase::toString() 
+  {
+      PlanDatabaseWriter* pdw = new PlanDatabaseWriter();
+      std::string planOutput = pdw->toString(this);
+      delete pdw;
+      return planOutput;
+  }
+
+  void PlanDatabase::addObjectWrapperGenerator(const LabelStr& type,
+                       ObjectWrapperGenerator* wrapper) {
+    std::map<double, ObjectWrapperGenerator*>::iterator it =
+      m_objectWrapperGenerators.find(type);
+    if(it == m_objectWrapperGenerators.end())
+      m_objectWrapperGenerators.insert(std::make_pair(type, wrapper));
+    else {
+      delete it->second;
+      it->second = wrapper;
+    }
+  }
+
+  ObjectWrapperGenerator* PlanDatabase::getObjectWrapperGenerator(const LabelStr& type) {
+    const std::vector<LabelStr>& types = Schema::instance()->getAllObjectTypes(type);
+    for(std::vector<LabelStr>::const_iterator it = types.begin(); it != types.end(); ++it) {
+      std::map<double, ObjectWrapperGenerator*>::iterator wrapper = m_objectWrapperGenerators.find(*it);
+      if(wrapper != m_objectWrapperGenerators.end())
+          return wrapper->second;
+    }
+    checkRuntimeError(ALWAYS_FAIL,"Don't know how to wrap objects of type " << type.toString());
+    return NULL;
+  }     
 }

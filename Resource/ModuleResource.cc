@@ -67,15 +67,13 @@ namespace EUROPA {
   {
 	  PlanDatabaseId& pdb = (PlanDatabaseId&)(engine->getComponent("PlanDatabase"));
 	  ConstraintEngineId& ce = (ConstraintEngineId&)(engine->getComponent("ConstraintEngine"));
+
 	  new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), ce);
 	  new ResourcePropagator(LabelStr("Resource"), ce, pdb);	  	  
 	  
-	  PSPlanDatabase* pspdb = dynamic_cast<PSPlanDatabase*>(engine->getComponentPtr("PSPlanDatabase"));
-	  if (pspdb != NULL) {
-          pspdb->addObjectWrapperGenerator("Reservoir", new ResourceWrapperGenerator());
-          pspdb->addObjectWrapperGenerator("Reusable", new ResourceWrapperGenerator());
-          pspdb->addObjectWrapperGenerator("Unary", new ResourceWrapperGenerator());
-	  }
+      pdb->addObjectWrapperGenerator("Reservoir", new ResourceWrapperGenerator());
+      pdb->addObjectWrapperGenerator("Reusable", new ResourceWrapperGenerator());
+      pdb->addObjectWrapperGenerator("Unary", new ResourceWrapperGenerator());
   }
   
   void ModuleResource::uninitialize(EngineId engine)

@@ -9,6 +9,7 @@
  */
 
 #include "PlanDatabaseDefs.hh"
+#include "PSPlanDatabase.hh"
 #include "PlanDatabaseListener.hh"
 #include "Schema.hh"
 #include "LabelStr.hh"
@@ -28,7 +29,7 @@ namespace EUROPA {
   /**
    * @brief The main mediator for interaction with entities of the plan and managing their relationships.
    */
-  class PlanDatabase : public EngineComponent {
+  class PlanDatabase : public PSPlanDatabase {
   public:
 
     enum Event { TOKEN_ADDED = 0,
@@ -283,6 +284,21 @@ namespace EUROPA {
      */
     unsigned int archive(unsigned int tick = PLUS_INFINITY);
 
+    
+    // PSPlanDatabase methods
+    virtual PSList<PSObject*> getObjectsByType(const std::string& objectType);
+    virtual PSObject* getObjectByKey(PSEntityKey id);
+    virtual PSObject* getObjectByName(const std::string& name);
+
+    virtual PSList<PSToken*> getAllTokens();      
+    virtual PSToken* getTokenByKey(PSEntityKey id);   
+
+    virtual PSList<PSVariable*> getAllGlobalVariables();
+
+    virtual std::string toString();
+
+    virtual void addObjectWrapperGenerator(const LabelStr& type,ObjectWrapperGenerator* wrapper);    
+    
   private:
     friend class Token;
     friend class Object;
@@ -348,19 +364,6 @@ namespace EUROPA {
 				      const ConstrainedVariableId& objectVar,
 				      bool leaveOpen = false);
 
-    PlanDatabaseId m_id;
-    const ConstraintEngineId m_constraintEngine;
-    const SchemaId m_schema;
-    TemporalAdvisorId m_temporalAdvisor;
-    DbClientId m_client; /*!< A client interface which provides an interception point for transaction logging */
-    State m_state;
-    TokenSet m_tokens;
-    ObjectSet m_objects;
-    ConstrainedVariableSet m_globalVariables;
-
-    bool m_deleted;
-    std::set<PlanDatabaseListenerId> m_listeners;
-
     /* Useful internal accessors and indexes for accessing objects and tokens in the PlanDatabase. */
 
     /**
@@ -381,8 +384,23 @@ namespace EUROPA {
      */
     void removeActiveToken(const TokenId& token);
 
+    ObjectWrapperGenerator* getObjectWrapperGenerator(const LabelStr& type);
+
+    PlanDatabaseId m_id;
+    const ConstraintEngineId m_constraintEngine;
+    const SchemaId m_schema;
+    TemporalAdvisorId m_temporalAdvisor;
+    DbClientId m_client; /*!< A client interface which provides an interception point for transaction logging */
+    State m_state;
+    TokenSet m_tokens;
+    ObjectSet m_objects;
+    ConstrainedVariableSet m_globalVariables;
+    bool m_deleted;
+    std::set<PlanDatabaseListenerId> m_listeners;
+
     /* In the data structures below, the key is a LabelStr representation of a name */
 
+    std::map<double, ObjectWrapperGenerator*> m_objectWrapperGenerators;            
     std::map<double, ObjectId> m_objectsByName; /*!< Object names are unique. Holds all objects m_objectsByName.size() == m_objects.size(). */
     std::multimap<double, ObjectId> m_objectsByPredicate; /*!< May be updated every time we add a Token, or remove an object. */
     std::multimap<double, ObjectId> m_objectsByType; /*!< May be updated every time we add a Token, or remove an object. */

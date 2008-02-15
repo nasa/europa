@@ -57,7 +57,6 @@ namespace EUROPA {
   protected:
     bool m_started;
     PSConstraintEngine* m_psConstraintEngine;
-    PSPlanDatabase*     m_psPlanDatabase;
     PSSolverManager*    m_psSolverManager;
     
   	virtual void allocateComponents();

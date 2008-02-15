@@ -77,14 +77,12 @@ namespace EUROPA {
   {
 	  EngineBase::allocateComponents();
 	  m_psConstraintEngine = new PSConstraintEngineImpl(m_constraintEngine);
-	  m_psPlanDatabase = new PSPlanDatabaseImpl(m_planDatabase);
 	  m_psSolverManager = new PSSolverManagerImpl(m_constraintEngine,m_planDatabase,m_rulesEngine);
   }
   
   void PSEngineImpl::deallocateComponents()
   {
 	  delete m_psConstraintEngine;
-	  delete m_psPlanDatabase;
 	  delete m_psSolverManager;
 	  EngineBase::deallocateComponents();
   }
@@ -93,8 +91,6 @@ namespace EUROPA {
   {
   	  if (name == "PSConstraintEngine")
   		  return (EngineComponent*)m_psConstraintEngine;
-  	  if (name == "PSPlanDatabase")
-  		  return (EngineComponent*)m_psPlanDatabase;
   	  if (name == "PSSolverManager")
   		  return (EngineComponent*)m_psSolverManager;
   	  
@@ -127,43 +123,43 @@ namespace EUROPA {
   PSList<PSObject*> PSEngineImpl::getObjectsByType(const std::string& objectType) 
   {
     check_runtime_error(m_started,"PSEngine has not been started");
-    return m_psPlanDatabase->getObjectsByType(objectType);  
+    return m_planDatabase->getObjectsByType(objectType);  
   }
 
   PSObject* PSEngineImpl::getObjectByKey(PSEntityKey id) 
   {
     check_runtime_error(m_started,"PSEngine has not been started");
-    return m_psPlanDatabase->getObjectByKey(id);  
+    return m_planDatabase->getObjectByKey(id);  
   }
 
   PSObject* PSEngineImpl::getObjectByName(const std::string& name) 
   {
     check_runtime_error(m_started,"PSEngine has not been started");
-    return m_psPlanDatabase->getObjectByName(name);  
+    return m_planDatabase->getObjectByName(name);  
   }
 
   PSList<PSToken*> PSEngineImpl::getTokens() 
   {
     check_runtime_error(m_started,"PSEngine has not been started");
-    return m_psPlanDatabase->getTokens();  
+    return m_planDatabase->getAllTokens();  
   }
 
   PSToken* PSEngineImpl::getTokenByKey(PSEntityKey id) 
   {
     check_runtime_error(m_started,"PSEngine has not been started");
-    return m_psPlanDatabase->getTokenByKey(id);  
+    return m_planDatabase->getTokenByKey(id);  
   }
 
   PSList<PSVariable*>  PSEngineImpl::getGlobalVariables() 
   {
     check_runtime_error(m_started,"PSEngine has not been started");
-    return m_psPlanDatabase->getGlobalVariables();  
+    return m_planDatabase->getAllGlobalVariables();  
   }  
 
   std::string PSEngineImpl::planDatabaseToString() 
   {
     check_runtime_error(m_started,"PSEngine has not been started");
-	return m_psPlanDatabase->toString();  
+	return m_planDatabase->toString();  
   }
 
   // Constraint Engine methods
