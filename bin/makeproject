@@ -12,6 +12,7 @@ import stat
 #       use a rewrite, but it's functional for now.
 
 projectSource = ".makeproject"
+configDir = "../config"
 
 projectName = sys.argv[1]
 projectDest = os.path.join("../..", projectName)
@@ -47,8 +48,11 @@ def copytemplate (source, dest, isDir):
       destfile.write(detemplate(line, False))
 
 def copytree (sourcedir, destdir):
+  ignore = ['.svn']
   names = os.listdir(sourcedir)
   for name in names:
+    if (name in ignore):
+        continue
     source = os.path.join(sourcedir, name)
     dest = os.path.join(destdir, detemplate(name, True))
     try:
@@ -63,3 +67,4 @@ def copytree (sourcedir, destdir):
 
 os.makedirs(projectDest, 0755)
 copytree(projectSource, projectDest)
+copytree(configDir, projectDest)
