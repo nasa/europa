@@ -66,10 +66,10 @@ NOCARE run-all-tests run-tests run-checkin-tests run-nddl-tests run-nddl-planner
 RemoveBinaries clean-all ;
 Depends clean-all : clean clean-nddl-xml clean-system-xml ;
 
-ExecuteScript check-svn-changes : checksvn : $(PLASMA) ;
+ExecuteScript check-svn-changes : bin/checksvn : $(PLASMA) ;
 
 if ! ( "Resources" in $(NO) ) {
-  ExecuteScript check-makefile : checkmakeproject : $(PLASMA) ;
+  ExecuteScript check-makefile : bin/checkmakeproject : $(PLASMA) ;
 }
 
 } # PLASMA_READY

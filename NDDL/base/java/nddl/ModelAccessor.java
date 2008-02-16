@@ -1108,8 +1108,8 @@ public class ModelAccessor {
         }
       }
       if(!cfgFile.exists() && s_plasmaHome != null) {
-        // if all else fails, attempt to look in $PLASMA_HOME (ignore any custom s_cfgFilename)
-        cfgFile = new File(s_plasmaHome, DEFAULT_CFG);
+        // if all else fails, attempt to look in $PLASMA_HOME/config (ignore any custom s_cfgFilename)
+        cfgFile = new File(s_plasmaHome+"/config", DEFAULT_CFG);
       }
       if(!cfgFile.exists())
         // we're done trying, throw an error.
@@ -1137,18 +1137,18 @@ public class ModelAccessor {
       Vector includes = root.getChildrenNamed("include");
       for(Iterator it = includes.iterator(); it.hasNext();) {
         IXMLElement path = (IXMLElement) it.next();
-        String pathAsString = NddlUtil.expandEnvVariables(XMLUtil.getAttribute(path, "path"));
+        String pathAsString = XMLUtil.getAttribute(path, "path");
         // record custom search path for nddl files.
 
         String[]paths = pathAsString.split(";");
         for(int i=0; i < paths.length; ++i) {
-          if(new File(paths[i]).isAbsolute())
-            addSearchPath(paths[i]);
+          String aPath=NddlUtil.expandEnvVariables(paths[i]);   
+          if(new File(aPath).isAbsolute())
+            addSearchPath(aPath);
           else
-            addSearchPath(cfgFile.getParent() + File.separator + paths[i]);
+            addSearchPath(cfgFile.getParent() + File.separator + aPath);
         }
       }
-
 
 
       // process constraint registration
