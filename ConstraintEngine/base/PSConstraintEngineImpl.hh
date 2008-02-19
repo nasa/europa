@@ -7,29 +7,6 @@
 
 namespace EUROPA {
     
-  class PSConstraintEngineImpl : public PSConstraintEngine
-  {
-    public:
-    	PSConstraintEngineImpl(ConstraintEngineId ce);	    
-    	virtual ~PSConstraintEngineImpl();
-
-        virtual PSVariable* getVariableByKey(PSEntityKey id);
-  	    virtual PSVariable* getVariableByName(const std::string& name);
-  	    
-        virtual bool getAutoPropagation() const;
-        virtual void setAutoPropagation(bool v);        
-        virtual bool propagate(); 
-
-        virtual bool getAllowViolations() const;
-    	virtual void setAllowViolations(bool v);
-
-    	virtual double getViolation() const;
-    	virtual std::string getViolationExpl() const;    
-
-    protected:
-    	ConstraintEngineId m_constraintEngine;
-  };
-
   class PSVariableImpl : public PSVariable
   {
   public:

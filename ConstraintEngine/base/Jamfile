@@ -11,6 +11,7 @@ ModuleBase ConstraintEngine
 	ConstraintEngineListener.cc
 	ConstraintLibrary.cc
 	Propagator.cc
+        PSConstraintEngineImpl.cc
 	TypeFactory.cc
 	VariableChangeListener.cc
 	;

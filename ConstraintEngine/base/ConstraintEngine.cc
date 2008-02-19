@@ -1,4 +1,5 @@
 #include "ConstraintEngine.hh"
+#include "PSConstraintEngineImpl.hh"
 #include "VariableChangeListener.hh"
 #include "ConstraintEngineListener.hh"
 #include "Propagator.hh"
@@ -932,6 +933,28 @@ namespace EUROPA
 
   bool ConstraintEngine::isRelaxed() const {return m_relaxed;}
 
+  PSVariable* ConstraintEngine::getVariableByKey(PSEntityKey id)
+  {
+    EntityId entity = Entity::getEntity(id);
+    check_runtime_error(entity.isValid());
+    return new PSVariableImpl(entity);
+  }
+
+  // TODO: this needs to be optimized
+  PSVariable* ConstraintEngine::getVariableByName(const std::string& name)
+  {
+    const ConstrainedVariableSet& vars = getVariables();
+
+    for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
+        ConstrainedVariableId v = *it;
+        if (v->getName().toString() == name)
+            return new PSVariableImpl(*it);
+    }
+    
+    return NULL;
+  }
+  
+  
   int ConstraintEngine::addLinkedVarsForRelaxation(const ConstrainedVariableId& var,
 						   std::list<ConstrainedVariableId>& dest,
 						   std::list<ConstrainedVariableId>::iterator pos,

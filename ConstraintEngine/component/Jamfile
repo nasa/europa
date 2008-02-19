@@ -4,7 +4,6 @@ if ! $(PLASMA_READY) {
 
 ModuleComponent ConstraintEngine
 	:
-	PSConstraintEngineImpl.cc
 	BoolDomain.cc
 	BoolTypeFactory.cc
 	Constraints.cc

@@ -10,6 +10,7 @@
  */
 
 #include "ConstraintEngineDefs.hh"
+#include "PSConstraintEngine.hh"
 #include "DomainListener.hh"
 #include "LabelStr.hh"
 #include "ConstraintEngineListener.hh"
@@ -105,7 +106,7 @@ namespace EUROPA {
    * @see Constraint, ConstrainedVariable, AbstractDomain, VariableChangeListener, Propagator
    * @see "Propagator: A Family of Patterns, Peter H. Feiler, Walter F. Tichy"
    */
-  class ConstraintEngine : public EngineComponent {
+  class ConstraintEngine : public PSConstraintEngine {
 
   public:
     enum State { PROVEN_INCONSISTENT = 0, /**< A domain has been emptied, and no subsequent retractions have occurred yet. */
@@ -200,7 +201,7 @@ namespace EUROPA {
      * otherwise return false, indicating the state is
      * PROVEN_INCONSISTENT.
      */
-    bool propagate();
+    virtual bool propagate();
 
     /**
      * @brief Indicates whether the ConstraintEngine is able to continue propagation.
@@ -251,32 +252,32 @@ namespace EUROPA {
      * after variable or constraint modifications (create/delete/change) caused through calls in the public API
      * (mainly PSConstraintEngine, PSVariable, PSConstraint, although calls in some other classes may indirectly trigger propagation in the future)
      */
-    void setAutoPropagation(bool v);
+    virtual void setAutoPropagation(bool v);
 
     /**
      * @see setAutoPropagation
      */
-    bool getAutoPropagation() const;
+    virtual bool getAutoPropagation() const;
             
     /**
      * @brief If violations are allowed propagation will continue and the constraint engine will keep track of violated constraints
      */
-    void setAllowViolations(bool v);
+    virtual void setAllowViolations(bool v);
       
     /**
      * @see setAllowViolations
      */
-    bool getAllowViolations() const;
+    virtual bool getAllowViolations() const;
     
     /**
      * @brief returns total violation in the constraint engine
      */
-    double getViolation() const;
+    virtual double getViolation() const;
     
     /**
      * @brief returns string explanation for total violation in the constraint engine
      */
-    std::string getViolationExpl() const;
+    virtual std::string getViolationExpl() const;
 
     /**
      * @brief is constraint c violated?
@@ -287,7 +288,12 @@ namespace EUROPA {
      * @brief Test of the network is in a relaxed state
      */
     bool isRelaxed() const;
-  	
+
+    // PSConstraintEngine methods
+    virtual PSVariable* getVariableByKey(PSEntityKey id);
+    virtual PSVariable* getVariableByName(const std::string& name);
+    
+    
   protected:
 
     /**

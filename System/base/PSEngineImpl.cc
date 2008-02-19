@@ -76,21 +76,17 @@ namespace EUROPA {
   void PSEngineImpl::allocateComponents()
   {
 	  EngineBase::allocateComponents();
-	  m_psConstraintEngine = new PSConstraintEngineImpl(m_constraintEngine);
 	  m_psSolverManager = new PSSolverManagerImpl(m_constraintEngine,m_planDatabase,m_rulesEngine);
   }
   
   void PSEngineImpl::deallocateComponents()
   {
-	  delete m_psConstraintEngine;
 	  delete m_psSolverManager;
 	  EngineBase::deallocateComponents();
   }
   
   EngineComponent* PSEngineImpl::getComponentPtr(const std::string& name)
   {
-  	  if (name == "PSConstraintEngine")
-  		  return (EngineComponent*)m_psConstraintEngine;
   	  if (name == "PSSolverManager")
   		  return (EngineComponent*)m_psSolverManager;
   	  
@@ -166,13 +162,13 @@ namespace EUROPA {
   PSVariable* PSEngineImpl::getVariableByKey(PSEntityKey id)
   {
     check_runtime_error(m_started,"PSEngine has not been started");
-	return m_psConstraintEngine->getVariableByKey(id);  
+	return m_constraintEngine->getVariableByKey(id);  
   }
 
   PSVariable* PSEngineImpl::getVariableByName(const std::string& name)
   {
     check_runtime_error(m_started,"PSEngine has not been started");
-	return m_psConstraintEngine->getVariableByName(name);  
+	return m_constraintEngine->getVariableByName(name);  
   }
 
   // TODO: these 2 need to be pushed into the PSConstraintEngine
@@ -204,17 +200,17 @@ namespace EUROPA {
   
   bool PSEngineImpl::getAutoPropagation() const
   {
-    return m_psConstraintEngine->getAutoPropagation();
+    return m_constraintEngine->getAutoPropagation();
   }
 
   void PSEngineImpl::setAutoPropagation(bool v)      
   {
-    m_psConstraintEngine->setAutoPropagation(v);
+    m_constraintEngine->setAutoPropagation(v);
   }
 
   bool PSEngineImpl::propagate() 
   {
-    return m_psConstraintEngine->propagate();
+    return m_constraintEngine->propagate();
   }
     
   bool PSEngineImpl::getAllowViolations() const
