@@ -19,7 +19,7 @@ if ! $(%PROJECT%_READY) {
   NOTFILE %Project% %Project%Controller ;
 
   # Only let all run Project if we're in this directory:
-  if $(SUBDIR) = %Project% {
+  if $(SUBDIR) = . {
     Depends all : %Project% %Project%Controller ;
   }
   Depends run-%Project%-tests : %Project% %Project%Controller ;
