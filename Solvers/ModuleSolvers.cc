@@ -87,6 +87,8 @@ namespace EUROPA {
     	  return;
       
 	  // TODO: cleanup  
+      EUROPA::SOLVERS::MatchingEngine::removeMatchFinder(ConstrainedVariable::entityTypeName()); 
+      EUROPA::SOLVERS::MatchingEngine::removeMatchFinder(Token::entityTypeName()); 
 	  SolversInitialized() = false;
   }  
   

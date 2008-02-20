@@ -114,6 +114,12 @@ namespace EUROPA {
       getEntityMatchers().insert(std::make_pair((double) type, finder));
     }
 
+    void MatchingEngine::removeMatchFinder(const LabelStr& type) {
+      checkError(getEntityMatchers().find(type) != getEntityMatchers().end(),
+         "Could not find matcher for entities of  type " << type.toString());
+      getEntityMatchers().erase((double) type);
+    }
+
     template<>
     void MatchingEngine::getMatches(const EntityId& entity,
 				    std::vector<MatchingRuleId>& results) {

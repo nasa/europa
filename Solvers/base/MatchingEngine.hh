@@ -62,6 +62,7 @@ namespace EUROPA {
       const std::set<MatchingRuleId>& getRules() const {return m_rules;}
 
       static void addMatchFinder(const LabelStr& type, const MatchFinderId& finder);
+      static void removeMatchFinder(const LabelStr& type);
 
     private:
 
