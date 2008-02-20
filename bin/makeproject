@@ -11,13 +11,21 @@ import stat
 # Note: I'm new to python, and so this script could probably
 #       use a rewrite, but it's functional for now.
 
-projectSource = ".makeproject"
-configDir = "../config"
-
 projectName = sys.argv[1]
-projectDest = os.path.join("../..", projectName)
+
+projectSource = ".makeproject"
+configDir = os.path.join("..", "config")
+projectDest = os.path.join("..", "..", projectName)
+
+# If PLASMA_HOME defined, allow script to be run from anywhere:
+if os.environ.has_key("PLASMA_HOME"):
+  projectSource = os.path.join(os.environ["PLASMA_HOME"], "bin", ".makeproject")
+  configDir = os.path.join(os.environ["PLASMA_HOME"],"config")
+  projectDest = os.path.join(os.environ["PLASMA_HOME"], "..", projectName)
+
 if len(sys.argv) > 2:
   projectDest = os.path.join(sys.argv[2], projectName)
+
 
 if os.path.exists(projectDest):
   print "Error: " + projectDest + " already exists!"
