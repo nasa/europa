@@ -3,12 +3,10 @@ SubDir PLASMA Solvers ;
 if ! $(PLASMA_READY) {
 
 Module Solvers : RulesEngine ;
+ModuleFiles Solvers : ModuleSolvers.cc ;
 
 SubInclude PLASMA Solvers base ;
 SubInclude PLASMA Solvers component ;
-
-ModuleFiles Solvers : ModuleSolvers.cc ;
-
 SubInclude PLASMA Solvers test ;
 
 } # PLASMA_READY

@@ -22,10 +22,7 @@ local solverInputFiles = 	UnboundVariableFiltering.nddl
   LocalDepends run-solvers-module-tests : $(fullPathName:S=.xml) ;
  }
 
- if "Resources" in $(NO) {
-    SubDirC++Flags -DNO_RESOURCES ;
- }
- NddlMain solvers-module-tests : module-tests.cc solvers-test-module.cc : Model.nddl : Solvers NDDL ;
+ NddlMain solvers-module-tests : module-tests.cc solvers-test-module.cc : Model.nddl : Solvers NDDL : solvers-tests ;
  RunModuleMain run-solvers-module-tests : solvers-module-tests ;
  LocalDepends tests : run-solvers-module-tests ;
 } # PLASMA_READY

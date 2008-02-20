@@ -30,11 +30,26 @@
 #include "EventToken.hh"
 #include "TokenVariable.hh"
 #include "Debug.hh"
-
 #include "LockManager.hh"
+
+#include "ResourceThreatDecisionPoint.hh"
+#include "SAVH_Profile.hh"
+#include "SAVH_FlowProfile.hh"
+#include "SAVH_IncrementalFlowProfile.hh"
+#include "SAVH_Reusable.hh"
+#include "SAVH_FVDetector.hh"
+#include "SAVH_ReusableFVDetector.hh"
+#include "SAVH_DurativeTokens.hh"
+#include "SAVH_ThreatDecisionPoint.hh"
+#include "SAVH_ThreatManager.hh"
+#include "SAVH_ProfilePropagator.hh"
+#include "ResourceMatching.hh"
+#include "ResourcePropagator.hh"
+
 #include "ModuleConstraintEngine.hh"
 #include "ModulePlanDatabase.hh"
 #include "ModuleTemporalNetwork.hh"
+#include "ModuleSolvers.hh"
 #include "ModuleResource.hh"
 
 #include <iostream>
@@ -76,6 +91,7 @@ void ResourceTestEngine::createModules()
     m_modules.push_back(new ModuleConstraintLibrary());
     m_modules.push_back(new ModulePlanDatabase());
     m_modules.push_back(new ModuleTemporalNetwork());
+    m_modules.push_back(new ModuleSolvers());
     m_modules.push_back(new ModuleResource());
 }
 
@@ -1975,4 +1991,476 @@ void ResourceModuleTests::runTests(std::string path) {
 }
 
   
+/*
+ * TODO JRB : Enable these tests. Moved here from Solvers/test/solvers-test-module.cc
+ *   static bool testResourceDecisionPoint() {
+    TestAssembly assembly;
+    PlanDatabaseId db = assembly.getPlanDatabase();
+    ConstraintEngineId ce = assembly.getConstraintEngine();
+    DbClientId client = db->getClient();
 
+    SAVH::Reusable reusable(db, "Reusable", "myReusable", "ReusableFVDetector", "IncrementalFlowProfile", 2, 2, 0);
+
+    SAVH::ReusableToken tok1(db, "Reusable.uses", IntervalIntDomain(1, 3), IntervalIntDomain(10, 12), IntervalIntDomain(1, PLUS_INFINITY),
+                 IntervalDomain(1.0, 1.0), "myReusable");
+    
+    SAVH::ReusableToken tok2(db, "Reusable.uses", IntervalIntDomain(11, 13), IntervalIntDomain(15, 17), IntervalIntDomain(1, PLUS_INFINITY),
+                 IntervalDomain(1.0, 1.0), "myReusable");
+
+    SAVH::ReusableToken tok3(db, "Reusable.uses", IntervalIntDomain(11, 16), IntervalIntDomain(18, 19), IntervalIntDomain(1, PLUS_INFINITY),
+                 IntervalDomain(1.0, 1.0), "myReusable");
+    
+    assertTrue(ce->propagate());
+    assertTrue(reusable.hasTokensToOrder());
+    TiXmlElement dummy("");
+    ResourceThreatDecisionPoint dp1(client, tok1.getId(), dummy);
+
+    int choiceCount = 0;
+    dp1.initialize();
+    while(dp1.hasNext()) {
+      dp1.execute();
+      ce->propagate();
+      dp1.undo();
+      ce->propagate();
+      choiceCount++;
+    }
+    assertTrue(choiceCount == 3);
+
+    choiceCount = 0;
+    ResourceThreatDecisionPoint dp2(client, tok2.getId(), dummy);
+    dp2.initialize();
+    while(dp2.hasNext()) {
+      dp2.execute();
+      ce->propagate();
+      dp2.undo();
+      ce->propagate();
+      choiceCount++;
+    }
+    assertTrue(choiceCount == 3);
+
+    choiceCount = 0;
+    ResourceThreatDecisionPoint dp3(client, tok3.getId(), dummy);
+    dp3.initialize();
+    while(dp3.hasNext()) {
+      dp3.execute();
+      ce->propagate();
+      dp3.undo();
+      ce->propagate();
+      choiceCount++;
+    }
+    assertTrue(choiceCount == 3);
+
+    return true;
+  }
+
+  static bool testSAVHThreatDecisionPoint() {
+    TestAssembly assembly;
+    PlanDatabaseId db = assembly.getPlanDatabase();
+    ConstraintEngineId ce = assembly.getConstraintEngine();
+    DbClientId client = db->getClient();
+
+    SAVH::Reusable reusable(db, "Reusable", "myReusable", "ReusableFVDetector", "IncrementalFlowProfile", 1, 1, 0);
+
+    SAVH::ReusableToken tok1(db, "Reusable.uses", IntervalIntDomain(1, 3), IntervalIntDomain(10, 12), IntervalIntDomain(1, PLUS_INFINITY),
+                 IntervalDomain(1.0, 1.0), "myReusable");
+    
+    SAVH::ReusableToken tok2(db, "Reusable.uses", IntervalIntDomain(11, 13), IntervalIntDomain(15, 17), IntervalIntDomain(1, PLUS_INFINITY),
+                 IntervalDomain(1.0, 1.0), "myReusable");
+
+    SAVH::ReusableToken tok3(db, "Reusable.uses", IntervalIntDomain(11, 16), IntervalIntDomain(18, 19), IntervalIntDomain(1, PLUS_INFINITY),
+                 IntervalDomain(1.0, 1.0), "myReusable");
+    
+    assertTrue(ce->propagate());
+
+    assertTrue(reusable.hasTokensToOrder());
+    std::vector<SAVH::InstantId> flawedInstants;
+    reusable.getFlawedInstants(flawedInstants);
+    assertTrue(flawedInstants.size() == 5);
+    assertTrue(flawedInstants[0]->getTime() == 11);
+
+    TiXmlElement dummy("");
+    SAVH::ThreatDecisionPoint dp1(client, flawedInstants[0], dummy);
+
+    dp1.initialize();
+
+    assertTrue(dp1.getChoices().size() == 8);
+
+    std::string noFilter = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"none\"/>";
+    TiXmlElement* noFilterXml = initXml(noFilter);
+    SAVH::ThreatDecisionPoint dp2(client, flawedInstants[0], *noFilterXml);
+    dp2.initialize();
+    assertTrue(dp2.getChoices().size() == 8);
+
+    std::string predFilter = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"predecessorNot\"/>"; 
+    TiXmlElement* predFilterXml = initXml(predFilter);
+    SAVH::ThreatDecisionPoint dp3(client, flawedInstants[0], *predFilterXml);
+    dp3.initialize();
+    assertTrue(dp3.getChoices().size() == 3);
+    assertTrue(dp3.getChoices()[0].first->time() == tok1.getEnd());
+    assertTrue(dp3.getChoices()[0].second->time() == tok2.getStart());
+    assertTrue(dp3.getChoices()[1].first->time() == tok1.getEnd());
+    assertTrue(dp3.getChoices()[1].second->time() == tok3.getStart());
+    assertTrue(dp3.getChoices()[2].first->time() == tok2.getEnd());
+    assertTrue(dp3.getChoices()[2].second->time() == tok3.getStart());
+
+    std::string sucFilter = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"successor\"/>";
+    TiXmlElement* sucFilterXml = initXml(sucFilter);
+    SAVH::ThreatDecisionPoint dp4(client, flawedInstants[0], *sucFilterXml);
+    dp4.initialize();
+    assertTrue(dp4.getChoices().size() == 5);
+    assertTrue(dp4.getChoices()[0].first->time() == tok1.getEnd());
+    assertTrue(dp4.getChoices()[0].second->time() == tok2.getStart());
+    assertTrue(dp4.getChoices()[1].first->time() == tok1.getEnd());
+    assertTrue(dp4.getChoices()[1].second->time() == tok3.getStart());
+    assertTrue(dp4.getChoices()[2].first->time() == tok2.getStart());
+    assertTrue(dp4.getChoices()[2].second->time() == tok3.getStart());
+    assertTrue(dp4.getChoices()[3].first->time() == tok2.getEnd());
+    assertTrue(dp4.getChoices()[3].second->time() == tok3.getStart());
+    assertTrue(dp4.getChoices()[4].first->time() == tok3.getStart());
+    assertTrue(dp4.getChoices()[4].second->time() == tok2.getStart());
+
+    std::string bothFilter = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\"/>";
+    TiXmlElement* bothFilterXml = initXml(bothFilter);
+    SAVH::ThreatDecisionPoint dp5(client, flawedInstants[0], *bothFilterXml);
+    dp5.initialize();
+    assertTrue(dp5.getChoices().size() == 3);
+    assertTrue(dp5.getChoices()[0].first->time() == tok1.getEnd());
+    assertTrue(dp5.getChoices()[0].second->time() == tok2.getStart());
+    assertTrue(dp5.getChoices()[1].first->time() == tok1.getEnd());
+    assertTrue(dp5.getChoices()[1].second->time() == tok3.getStart());
+    assertTrue(dp5.getChoices()[2].first->time() == tok2.getEnd());
+    assertTrue(dp5.getChoices()[2].second->time() == tok3.getStart());
+
+    //the combination of ascendingKeyPredecessor and ascendingKeySuccessor have already been tested by now
+
+    std::string earliestPred = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"earliestPredecessor\"/>";
+    TiXmlElement* earliestPredXml = initXml(earliestPred);
+    SAVH::ThreatDecisionPoint dp6(client, flawedInstants[0], *earliestPredXml);
+    dp6.initialize();
+    assertTrue(dp6.getChoices().size() == 3);
+    assertTrue(dp6.getChoices()[0].first->time() == tok1.getEnd());
+    assertTrue(dp6.getChoices()[0].second->time() == tok2.getStart());
+    assertTrue(dp6.getChoices()[1].first->time() == tok1.getEnd());
+    assertTrue(dp6.getChoices()[1].second->time() == tok3.getStart());
+    assertTrue(dp6.getChoices()[2].first->time() == tok2.getEnd());
+    assertTrue(dp6.getChoices()[2].second->time() == tok3.getStart());
+
+    std::string latestPred = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"latestPredecessor\"/>";
+    TiXmlElement* latestPredXml = initXml(latestPred);
+    SAVH::ThreatDecisionPoint dp7(client, flawedInstants[0], *latestPredXml);
+    dp7.initialize();
+    assertTrue(dp7.getChoices().size() == 3);
+    assertTrue(dp7.getChoices()[0].first->time() == tok2.getEnd());
+    assertTrue(dp7.getChoices()[0].second->time() == tok3.getStart());
+    assertTrue(dp7.getChoices()[1].first->time() == tok1.getEnd());
+    assertTrue(dp7.getChoices()[1].second->time() == tok2.getStart());
+    assertTrue(dp7.getChoices()[2].first->time() == tok1.getEnd());
+    assertTrue(dp7.getChoices()[2].second->time() == tok3.getStart());
+
+
+    std::string longestPred = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"successor\" order=\"longestPredecessor\"/>";
+    TiXmlElement* longestPredXml = initXml(longestPred);
+    SAVH::ThreatDecisionPoint dp8(client, flawedInstants[0], *longestPredXml);
+    dp8.initialize();
+    assertTrue(dp8.getChoices().size() == 5);
+    assertTrue(dp8.getChoices()[0].first->time() == tok3.getStart());
+
+
+    std::string shortestPred = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"shortestPredecessor\"/>";
+    TiXmlElement* shortestPredXml = initXml(shortestPred);
+    SAVH::ThreatDecisionPoint dp9(client, flawedInstants[0], *shortestPredXml);
+    dp9.initialize();
+    assertTrue(dp9.getChoices().size() == 3);
+    assertTrue(dp9.getChoices()[0].first->time() == tok2.getStart() || 
+               dp9.getChoices()[0].first->time() == tok1.getEnd());
+
+    std::string descendingKeyPred = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"descendingKeyPredecessor\"/>";
+    TiXmlElement* descendingKeyPredXml = initXml(descendingKeyPred);
+    SAVH::ThreatDecisionPoint dp10(client, flawedInstants[0], *descendingKeyPredXml);
+    dp10.initialize();
+    assertTrue(dp10.getChoices().size() == 3);
+    assertTrue(dp10.getChoices()[0].first->time() == tok2.getEnd());
+    assertTrue(dp10.getChoices()[1].first->time() == tok1.getEnd());
+
+
+    std::string earliestSucc = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"earliestSuccessor\"/>";
+    TiXmlElement* earliestSuccXml = initXml(earliestSucc);
+    SAVH::ThreatDecisionPoint dp11(client, flawedInstants[0], *earliestSuccXml);
+    dp11.initialize();
+    assertTrue(dp11.getChoices().size() == 3);
+    assertTrue(dp11.getChoices()[0].second->time() == tok2.getStart() ||
+               dp11.getChoices()[0].second->time() == tok3.getStart());
+
+    std::string latestSucc = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"latestSuccessor\"/>";
+    TiXmlElement* latestSuccXml = initXml(latestSucc);
+    SAVH::ThreatDecisionPoint dp12(client, flawedInstants[0], *latestSuccXml);
+    dp12.initialize();
+    assertTrue(dp12.getChoices().size() == 3);
+    assertTrue(dp12.getChoices()[0].second->time() == tok3.getStart());
+    assertTrue(dp12.getChoices()[1].second->time() == tok3.getStart());
+    assertTrue(dp12.getChoices()[2].second->time() == tok2.getStart());
+
+
+    std::string longestSucc = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"longestSuccessor\"/>";
+    TiXmlElement* longestSuccXml = initXml(longestSucc);
+    SAVH::ThreatDecisionPoint dp13(client, flawedInstants[0], *longestSuccXml);
+    dp13.initialize();
+    assertTrue(dp13.getChoices().size() == 3);
+    assertTrue(dp13.getChoices()[0].second->time() == tok3.getStart());
+    assertTrue(dp13.getChoices()[1].second->time() == tok3.getStart());
+    assertTrue(dp13.getChoices()[2].second->time() == tok2.getStart());
+
+    std::string shortestSucc = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"shortestSuccessor\"/>";
+    TiXmlElement* shortestSuccXml = initXml(shortestSucc);
+    SAVH::ThreatDecisionPoint dp14(client, flawedInstants[0], *shortestSuccXml);
+    dp14.initialize();
+    assertTrue(dp14.getChoices().size() == 3);
+    assertTrue(dp14.getChoices()[0].second->time() == tok2.getStart());
+    assertTrue(dp14.getChoices()[1].second->time() == tok3.getStart());
+    assertTrue(dp14.getChoices()[2].second->time() == tok3.getStart());
+
+    std::string descendingKeySucc = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"descendingKeySuccessor\"/>";
+    TiXmlElement* descendingKeySuccXml = initXml(descendingKeySucc);
+    SAVH::ThreatDecisionPoint dp15(client, flawedInstants[0], *descendingKeySuccXml);
+    dp15.initialize();
+    assertTrue(dp15.getChoices().size() == 3);
+    assertTrue(dp15.getChoices()[0].second->time() == tok3.getStart());
+    assertTrue(dp15.getChoices()[1].second->time() == tok3.getStart());
+    assertTrue(dp15.getChoices()[2].second->time() == tok2.getStart());
+
+
+    std::string ascendingKeySucc = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"ascendingKeySuccessor\"/>";
+    TiXmlElement* ascendingKeySuccXml = initXml(ascendingKeySucc);
+    SAVH::ThreatDecisionPoint dp16(client, flawedInstants[0], *ascendingKeySuccXml);
+    dp16.initialize();
+    assertTrue(dp16.getChoices().size() == 3);
+    assertTrue(dp16.getChoices()[0].second->time() == tok2.getStart());
+    assertTrue(dp16.getChoices()[1].second->time() == tok3.getStart());
+    assertTrue(dp16.getChoices()[2].second->time() == tok3.getStart());
+    
+
+    std::string leastImpact = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"successor\" order=\"leastImpact,earliestPredecessor,shortestSuccessor\"/>";
+    TiXmlElement* leastImpactXml = initXml(leastImpact);
+    SAVH::ThreatDecisionPoint dp17(client, flawedInstants[0], *leastImpactXml);
+    dp17.initialize();
+    assertTrue(dp17.getChoices().size() == 5);
+    assertTrue(dp17.getChoices()[0].first->time() == tok1.getEnd());
+    assertTrue(dp17.getChoices()[0].second->time() == tok2.getStart());
+    assertTrue(dp17.getChoices()[1].first->time() == tok1.getEnd());
+    assertTrue(dp17.getChoices()[1].second->time() == tok3.getStart());
+    assertTrue(dp17.getChoices()[2].first->time() == tok2.getStart());
+    assertTrue(dp17.getChoices()[2].second->time() == tok3.getStart());
+    assertTrue(dp17.getChoices()[3].first->time() == tok3.getStart());
+    assertTrue(dp17.getChoices()[3].second->time() == tok2.getStart());
+    assertTrue(dp17.getChoices()[4].first->time() == tok2.getEnd());
+    assertTrue(dp17.getChoices()[4].second->time() == tok3.getStart());
+
+    std::string precedesOnly = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" constraint=\"precedesOnly\"/>";
+    TiXmlElement* precedesOnlyXml = initXml(precedesOnly);
+    SAVH::ThreatDecisionPoint dp18(client, flawedInstants[0], *precedesOnlyXml);
+    dp18.initialize();
+    ConstraintNameListener* nameListener = new ConstraintNameListener(dp18.getChoices()[0].first->time());
+    dp18.execute();
+    ce->propagate();
+    assertTrue(nameListener->getName() == LabelStr("precedes"));
+    dp18.undo();
+    dp18.getChoices()[0].first->time()->notifyRemoved(nameListener->getId());
+    delete (ConstrainedVariableListener*) nameListener;
+    ce->propagate();
+    nameListener = new ConstraintNameListener(dp18.getChoices()[1].first->time());
+    dp18.execute();
+    ce->propagate();
+    assertTrue(nameListener->getName() == LabelStr("precedes"));
+    dp18.undo();
+    ce->propagate();
+    dp18.getChoices()[1].first->time()->notifyRemoved(nameListener->getId());
+    delete (ConstrainedVariableListener*) nameListener;
+
+    std::string concurrentOnly = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" constraint=\"concurrentOnly\"/>";
+    TiXmlElement* concurrentOnlyXml = initXml(concurrentOnly);
+    SAVH::ThreatDecisionPoint dp19(client, flawedInstants[0], *concurrentOnlyXml);
+    dp19.initialize();
+    nameListener = new ConstraintNameListener(dp19.getChoices()[0].first->time());
+    dp19.execute();
+    ce->propagate();
+    assertTrue(nameListener->getName() == LabelStr("concurrent"));
+    dp19.undo();
+    dp19.getChoices()[0].first->time()->notifyRemoved(nameListener->getId());
+    delete (ConstrainedVariableListener*) nameListener;
+    ce->propagate();
+    nameListener = new ConstraintNameListener(dp19.getChoices()[1].first->time());
+    dp19.execute();
+    ce->propagate();
+    assertTrue(nameListener->getName() == LabelStr("concurrent"));
+    dp19.undo();
+    ce->propagate();
+    dp19.getChoices()[1].first->time()->notifyRemoved(nameListener->getId());
+    delete (ConstrainedVariableListener*) nameListener;
+
+    //pair first has already been implicitly tested and constraint first is necessary to make this easy anyway, so it'll get tested as well.
+
+    std::string precedesFirst = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" constraint=\"precedesFirst\" iterate=\"constraintFirst\"/>";
+    TiXmlElement* precedesFirstXml = initXml(precedesFirst);
+    SAVH::ThreatDecisionPoint dp20(client, flawedInstants[0], *precedesFirstXml);
+    dp20.initialize();
+    nameListener = new ConstraintNameListener(dp20.getChoices()[0].first->time());
+    dp20.execute();
+    ce->propagate();
+    assertTrue(nameListener->getName() == LabelStr("precedes"));
+    dp20.undo();
+    ce->propagate();
+    dp20.execute();
+    ce->propagate();
+    assertTrue(nameListener->getName() == LabelStr("concurrent"));
+    dp20.undo();
+    ce->propagate();
+    dp20.getChoices()[0].first->time()->notifyRemoved(nameListener->getId());
+    delete (ConstrainedVariableListener*) nameListener;
+    //step once more to test creating a constraint on the next choice
+    nameListener = new ConstraintNameListener(dp20.getChoices()[1].first->time());
+    dp20.execute();
+    ce->propagate();
+    assertTrue(nameListener->getName() == LabelStr("precedes"));
+    dp20.undo();
+    ce->propagate();
+    dp20.getChoices()[1].first->time()->notifyRemoved(nameListener->getId());
+    delete nameListener;
+
+    std::string concurrentFirst = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" constraint=\"concurrentFirst\" iterate=\"constraintFirst\"/>";
+    TiXmlElement* concurrentFirstXml = initXml(concurrentFirst);
+    SAVH::ThreatDecisionPoint dp21(client, flawedInstants[0], *concurrentFirstXml);
+    dp21.initialize();
+    nameListener = new ConstraintNameListener(dp21.getChoices()[0].first->time());
+    dp21.execute();
+    ce->propagate();
+    assertTrue(nameListener->getName() == LabelStr("concurrent"));
+    dp21.undo();
+    ce->propagate();
+    dp21.execute();
+    ce->propagate();
+    assertTrue(nameListener->getName() == LabelStr("precedes"));
+    dp21.undo();
+    ce->propagate();
+    dp21.getChoices()[0].first->time()->notifyRemoved(nameListener->getId());
+    delete (ConstrainedVariableListener*) nameListener;
+    //step once more to test creating a constraint on the next choice
+    nameListener = new ConstraintNameListener(dp21.getChoices()[1].first->time());
+    dp21.execute();
+    ce->propagate();
+    assertTrue(nameListener->getName() == LabelStr("concurrent"));
+    dp21.undo();
+    ce->propagate();
+    dp21.getChoices()[1].first->time()->notifyRemoved(nameListener->getId());
+    delete nameListener;
+
+    
+
+    delete concurrentFirstXml;
+    delete precedesFirstXml;
+    delete concurrentOnlyXml;
+    delete precedesOnlyXml;
+    delete leastImpactXml;
+    delete ascendingKeySuccXml;
+    delete descendingKeySuccXml;
+    delete shortestSuccXml;
+    delete longestSuccXml;
+    delete latestSuccXml;
+    delete earliestSuccXml;
+    delete descendingKeyPredXml;
+    delete shortestPredXml;
+    delete longestPredXml;
+    delete latestPredXml;
+    delete earliestPredXml;
+    delete bothFilterXml;
+    delete sucFilterXml;
+    delete predFilterXml;
+    delete noFilterXml;
+ 
+    return true;
+  }
+  
+  static bool testSAVHThreatManager() {
+    TestAssembly assembly;
+    PlanDatabaseId db = assembly.getPlanDatabase();
+    ConstraintEngineId ce = assembly.getConstraintEngine();
+    DbClientId client = db->getClient();
+
+    SAVH::Reusable reusable(db, "Reusable", "myReusable", "ReusableFVDetector", "IncrementalFlowProfile", 1, 1, 0);
+
+    SAVH::ReusableToken tok1(db, "Reusable.uses", IntervalIntDomain(1, 3), IntervalIntDomain(10, 12), IntervalIntDomain(1, PLUS_INFINITY),
+                 IntervalDomain(1.0, 1.0), "myReusable");
+    
+    SAVH::ReusableToken tok2(db, "Reusable.uses", IntervalIntDomain(11, 13), IntervalIntDomain(15, 17), IntervalIntDomain(1, PLUS_INFINITY),
+                 IntervalDomain(1.0, 1.0), "myReusable");
+
+    SAVH::ReusableToken tok3(db, "Reusable.uses", IntervalIntDomain(11, 16), IntervalIntDomain(18, 19), IntervalIntDomain(1, PLUS_INFINITY),
+                 IntervalDomain(1.0, 1.0), "myReusable");
+
+    assertTrue(ce->propagate());
+
+    std::vector<SAVH::InstantId> instants;
+    reusable.getFlawedInstants(instants);
+    
+    LabelStr explanation;
+    std::string earliest = "<SAVHThreatManager order=\"earliest\"><FlawHandler component=\"SAVHThreatHandler\"/></SAVHThreatManager>";
+    TiXmlElement* earliestXml = initXml(earliest);
+    SAVH::ThreatManager earliestManager(*earliestXml);
+    earliestManager.initialize(db, ContextId::noId(), FlawManagerId::noId());   
+    assertTrue(earliestManager.betterThan(instants[0], instants[1], explanation)); //these are identical except for the time
+    assertTrue(earliestManager.betterThan(instants[1], instants[2], explanation)); //these have different levels
+    assertTrue(!earliestManager.betterThan(instants[0], instants[0], explanation));
+
+    std::string latest = "<SAVHThreatManager order=\"latest\"><FlawHandler component=\"SAVHThreatHandler\"/></SAVHThreatManager>";
+    TiXmlElement* latestXml = initXml(latest);
+    SAVH::ThreatManager latestManager(*latestXml);
+    latestManager.initialize(db, ContextId::noId(), FlawManagerId::noId());
+    assertTrue(latestManager.betterThan(instants[3], instants[2], explanation));
+    assertTrue(latestManager.betterThan(instants[2], instants[1], explanation));
+    assertTrue(!latestManager.betterThan(instants[0], instants[0], explanation));
+
+    std::string most = "<SAVHThreatManager order=\"most\"><FlawHandler component=\"SAVHThreatHandler\"/></SAVHThreatManager>";
+    TiXmlElement* mostXml = initXml(most);
+    SAVH::ThreatManager mostManager(*mostXml);
+    mostManager.initialize(db, ContextId::noId(), FlawManagerId::noId());
+    assertTrue(mostManager.betterThan(instants[0], instants[1], explanation));
+    assertTrue(!mostManager.betterThan(instants[1], instants[0], explanation))
+    assertTrue(!mostManager.betterThan(instants[1], instants[2], explanation));
+    assertTrue(!mostManager.betterThan(instants[3], instants[4], explanation));
+
+    std::string least = "<SAVHThreatManager order=\"least\"><FlawHandler component=\"SAVHThreatHandler\"/></SAVHThreatManager>";
+    TiXmlElement* leastXml = initXml(least);
+    SAVH::ThreatManager leastManager(*leastXml);
+    leastManager.initialize(db, ContextId::noId(), FlawManagerId::noId());
+    assertTrue(!leastManager.betterThan(instants[0], instants[1], explanation));
+    assertTrue(leastManager.betterThan(instants[1], instants[0], explanation));
+    assertTrue(!leastManager.betterThan(instants[3], instants[4], explanation));
+    assertTrue(!leastManager.betterThan(instants[4], instants[3], explanation));
+
+    //can't test upper/lower with reusables
+
+    delete leastXml;
+    delete mostXml;
+    delete latestXml;
+    delete earliestXml;
+    return true;
+  }
+
+void initSolverModuleTests() {
+ 
+  // Allocate the schema with a call to the linked in model function - eventually
+  // make this called via dlopen
+  EUROPA::NDDL::loadSchema();
+ 
+#ifndef NO_RESOURCES
+  Schema::instance()->addObjectType("Reusable");
+  Schema::instance()->addMember("Reusable", "float", "capacity");
+  Schema::instance()->addMember("Reusable", "float", "levelLimitMin");
+  Schema::instance()->addMember("Reusable", "float", "consumptionMax");
+  Schema::instance()->addMember("Reusable", "float", "consumptionRateMax");
+
+  Schema::instance()->addPredicate("Reusable.uses");
+  Schema::instance()->addMember("Reusable.uses", "float", "quantity");
+#endif
+}
+  
+ */

@@ -111,7 +111,7 @@ rule RunPlannerProblem {
   # create .hh, .cc, .o, and .xml for a .nddl
   Includes $(cc) : $(hh) $(xml) ;
   Nddl $(xml) $(hh) $(cc) : $(model) ;
-  ModuleObjects $(cc) : NDDL ;
+  ModuleObjects $(cc) : NDDL Resource ;
 
   # create planner with linked model
   ModuleMain $(exe) : $(o) runProblem_link_$(PLANNER).o : System ;
