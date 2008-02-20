@@ -5,7 +5,6 @@
 #include "intType.hh"
 #include "floatType.hh"
 #include "TransactionInterpreter.hh"
-#include "TransactionInterpreterInitializer.hh"
 
 namespace EUROPA {
 
@@ -39,7 +38,8 @@ namespace EUROPA {
     new intTypeFactory();
     new floatTypeFactory();
       
-    TransactionInterpreterInitializer::initialize();      
+    InterpretedDbClientTransactionPlayer::createDefaultObjectFactory("Object", true);
+    REGISTER_OBJECT_FACTORY(TimelineObjectFactory, Timeline);                     
       
     nddlInitialized() = true;
   }
@@ -50,7 +50,7 @@ namespace EUROPA {
     	return;
     
     TypeFactory::purgeAll();
-    TransactionInterpreterInitializer::uninitialize();      
+    // TODO: Finish cleanup
     nddlInitialized() = false;
   }
   

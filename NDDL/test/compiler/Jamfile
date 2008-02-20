@@ -27,9 +27,10 @@ local nddl_tests =   class-constructor.nddl  composition.0.nddl  constraint-test
   simple-class.nddl simple-predicate.nddl simple-rules.nddl
   subtype-extension.nddl ;
 
-if ! ( "Resources" in $(NO) ) {
-  nddl_tests += multi-resources.nddl simple-resources.nddl ;
-}
+# TODO: move these tests to the Resource module
+#if ! ( "Resources" in $(NO) ) {
+#  nddl_tests += multi-resources.nddl simple-resources.nddl ;
+#}
 
 local model ;
 

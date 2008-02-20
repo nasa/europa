@@ -15,21 +15,26 @@ if SHARED in $(LIBRARIES) {
 
 Module plasma : all System ;
 
+# 3rd party
 SubInclude PLASMA TinyXml ;
 if ! ( "Antlr" in $(NO) ) {
   SubInclude PLASMA Antlr ;
 }
+
+# kernel
 SubInclude PLASMA Utils ;
 SubInclude PLASMA ConstraintEngine ;
 SubInclude PLASMA PlanDatabase ;
 SubInclude PLASMA RulesEngine ;
+SubInclude PLASMA Solvers ;
+
+# extensions
 SubInclude PLASMA TemporalNetwork ;
+SubInclude PLASMA NDDL ;
 if ! ( "Resources" in $(NO) ) {
   SubInclude PLASMA Resource ;
   SubInclude PLASMA ANML ;
 }
-SubInclude PLASMA NDDL ;
-SubInclude PLASMA Solvers ;
 SubInclude PLASMA System ;
 if ! ( "Examples" in $(NO) ) {
   SubInclude PLASMA Examples ;

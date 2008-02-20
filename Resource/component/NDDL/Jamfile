@@ -1,8 +1,9 @@
-SubDir PLASMA NDDL component Resource ;
+SubDir PLASMA Resource component NDDL ;
 
 if ! $(PLASMA_READY) {
-   Module NDDL : Resource RulesEngine ;
-   ModuleComponent NDDL 
+   Module Resource : NDDL RulesEngine ;
+   
+   ModuleComponent Resource 
        : 
        NddlResource.cc 
        TransactionInterpreterResources.cc 

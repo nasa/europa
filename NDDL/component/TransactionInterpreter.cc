@@ -6,7 +6,6 @@
  */
 
 #include "TransactionInterpreter.hh"
-#include "TransactionInterpreterInitializer.hh"
 
 #include "tinyxml.h"
 #include "Debug.hh"
@@ -117,7 +116,8 @@ namespace EUROPA {
   {
 	  if (strcmp(element.Value(), "nddl") && !initialized()) {
 		  // This call is needed because the code generator calls Schema::reset() and may wipe everything out
-		  TransactionInterpreterInitializer::initialize(); 
+	      // TODO!: need to deal with this now that TransactionInterpreterInitializer is gone
+		  //TransactionInterpreterInitializer::initialize(); 
 	  }
 	  DbClientTransactionPlayer::processTransaction(element);
   }

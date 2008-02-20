@@ -8,19 +8,20 @@
 #include "DefaultPropagator.hh"
 
 #ifndef NO_RESOURCES
+/*
 #include "Resource.hh"
 #include "ResourceConstraint.hh"
 #include "ResourceDefs.hh"
-#include "ResourcePropagator.hh"
 #include "Transaction.hh"
-
 #include "SAVH_Profile.hh"
 #include "SAVH_FVDetector.hh"
 #include "SAVH_TimetableProfile.hh"
 #include "SAVH_TimetableFVDetector.hh"
-#include "SAVH_ProfilePropagator.hh"
 #include "SAVH_FlowProfile.hh"
 #include "SAVH_IncrementalFlowProfile.hh"
+#include "ResourcePropagator.hh"
+#include "SAVH_ProfilePropagator.hh"
+*/
 #endif
 
 // Transactions
@@ -58,7 +59,7 @@
 #include "ModuleRulesEngine.hh"
 #include "ModuleNddl.hh"
 #ifndef NO_RESOURCES
-#include "ModuleResource.hh"
+//#include "ModuleResource.hh"
 #endif
 
 #include <fstream>
@@ -104,7 +105,7 @@ void NddlTestEngine::createModules()
     m_modules.push_back(new ModuleTemporalNetwork());
     m_modules.push_back(new ModuleNddl());
 #ifndef NO_RESOURCES	    
-    m_modules.push_back(new ModuleResource());
+ //   m_modules.push_back(new ModuleResource());
 #endif
 }
 
@@ -198,8 +199,8 @@ int main(int argc, const char ** argv) {
   m_planDatabase->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
 
 #ifndef NO_RESOURCES
-  new ResourcePropagator(LabelStr("Resource"), m_constraintEngine, m_planDatabase);
-  new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), m_constraintEngine);
+//  new ResourcePropagator(LabelStr("Resource"), m_constraintEngine, m_planDatabase);
+//  new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), m_constraintEngine);
 #endif
 
   // Allocate the rules engine to process rules

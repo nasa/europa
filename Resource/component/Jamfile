@@ -21,4 +21,6 @@ ModuleComponent Resource
 		SAVH_ReusableFVDetector.cc
 		;
 
+SubInclude PLASMA Resource component NDDL ;
+
 } # PLASMA_READY

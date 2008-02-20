@@ -9,11 +9,4 @@ ModuleComponent NDDL
 	TransactionInterpreter.cc
 	;
 
-if ! ( "Resources" in $(NO) ) {
-   SubInclude PLASMA NDDL component Resource ;
-}
-else {
-   ModuleComponent NDDL : TransactionInterpreterInitializer.cc ;
-}
-
 } # PLASMA_READY
