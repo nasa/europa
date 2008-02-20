@@ -26,11 +26,6 @@
 #include "RulesEngineDefs.hh"
 #include "RuleInstance.hh"
 
-#ifndef NO_RESOURCES
-#include "Resource.hh"
-#include "Instant.hh"
-#endif
-
 #include "Debug.hh"
 
 #include "tinyxml.h"
@@ -645,12 +640,13 @@ namespace EUROPA {
 	    objOut << std::endl;
 	  }
 #ifndef NO_RESOURCES
+/* TODO JRB: move this to resource module	  
 	  else if(ResourceId::convertable(objId)) {
 	    outputObject(objId, O_RESOURCE, objOut, varOut);
 
 	    ResourceId &rId = (ResourceId &) objId;
           
-	    /*ExtraData: resource info*/
+	    //ExtraData: resource info
 	    objOut << MINUS_INFINITY << COMMA << PLUS_INFINITY << COMMA
 		   << rId->getInitialCapacity() << COMMA << rId->getLimitMin() << COMMA
 		   << rId->getLimitMax() << COMMA;
@@ -674,6 +670,7 @@ namespace EUROPA {
 	    }
 	    objOut << std::endl;
 	  }
+*/	  
 #endif
 	  else {
 	    outputObject(objId, O_OBJECT, objOut, varOut);
@@ -861,11 +858,13 @@ namespace EUROPA {
 	  tokOut << slotOrder;
 	}
 #ifndef NO_RESOURCES
-	/*ExtraInfo: QuantityMin:QuantityMax*/
+	/* TODO JRB: move this to Resource module
+	//ExtraInfo: QuantityMin:QuantityMax
         else{
 	  TransactionId trans = (TransactionId) token;
 	  tokOut << trans->getMin() << COMMA << trans->getMax();
 	}
+	*/
 #endif
       
 	tokOut << std::endl;
@@ -1057,6 +1056,8 @@ namespace EUROPA {
       }
 
 #ifndef NO_RESOURCES
+/* TODO JRB: move this to Resource module      
+      
       void PartialPlanWriter::outputInstant(const InstantId &instId, const int resId, 
 					    std::ofstream &instOut) {
 	instOut << ppId << TAB << resId << TAB << instId->getKey() << TAB << instId->getTime() 
@@ -1069,6 +1070,7 @@ namespace EUROPA {
 	}
 	instOut << std::endl;
       }
+*/      
 #endif
 
       const std::string PartialPlanWriter::getUpperBoundStr(IntervalDomain &dom) const {

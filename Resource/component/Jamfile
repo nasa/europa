@@ -22,5 +22,6 @@ ModuleComponent Resource
 		;
 
 SubInclude PLASMA Resource component NDDL ;
+SubInclude PLASMA Resource component Solvers ;
 
 } # PLASMA_READY

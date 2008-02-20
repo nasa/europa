@@ -14,6 +14,12 @@
 #include "TransactionInterpreter.hh"
 #include "TransactionInterpreterResources.hh"
 #include "Schema.hh"
+#include "ResourceMatching.hh"
+#include "ResourceThreatDecisionPoint.hh"
+#include "SAVH_Instant.hh"
+#include "SAVH_ThreatDecisionPoint.hh"
+#include "SAVH_ThreatManager.hh"
+#include "FlawHandler.hh"
 
 
 namespace EUROPA {
@@ -71,6 +77,12 @@ namespace EUROPA {
       REGISTER_OBJECT_FACTORY(ReservoirObjectFactory, Reservoir:float:float:float:float:float:float:float);                   
       new ReservoirProduceTokenFactory("Reservoir.produce");      
       new ReservoirConsumeTokenFactory("Reservoir.consume");      
+
+      // Solver
+      REGISTER_FLAW_MANAGER(SAVH::ThreatManager, SAVHThreatManager); 
+      REGISTER_FLAW_HANDLER(SAVH::ThreatDecisionPoint, SAVHThreatHandler); 
+      REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreat); 
+      EUROPA::SOLVERS::MatchingEngine::addMatchFinder(SAVH::Instant::entityTypeName(),(new EUROPA::SOLVERS::InstantMatchFinder())->getId()); 
       
 	  resourceInitialized() = true;
   }  
