@@ -7,6 +7,5 @@ if ! $(PLASMA_READY) {
        : 
        NddlResource.cc 
        TransactionInterpreterResources.cc 
-       TransactionInterpreterInitializer.cc 
        ;
 }
