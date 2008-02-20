@@ -112,15 +112,6 @@ namespace EUROPA {
 	  
 	  return (!(ObjectFactory::getFactory(objectType,arguments)).isNoId());
   }
-  void InterpretedDbClientTransactionPlayer::processTransaction(const TiXmlElement & element)
-  {
-	  if (strcmp(element.Value(), "nddl") && !initialized()) {
-		  // This call is needed because the code generator calls Schema::reset() and may wipe everything out
-	      // TODO!: need to deal with this now that TransactionInterpreterInitializer is gone
-		  //TransactionInterpreterInitializer::initialize(); 
-	  }
-	  DbClientTransactionPlayer::processTransaction(element);
-  }
   
   void InterpretedDbClientTransactionPlayer::playDeclareClass(const TiXmlElement& element) 
   {
