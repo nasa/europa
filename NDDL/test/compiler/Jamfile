@@ -2,10 +2,6 @@ SubDir PLASMA NDDL test compiler ;
 
 if ! $(PLASMA_READY) {
 
-if "Resources" in $(NO) {
-  SubDirC++Flags -DNO_RESOURCES ;
-}
-
 local compiler_test = no-world.nddl ;
 local hh = $(compiler_test:S=.hh) ;
 local cc = $(compiler_test:S=.cc) ;
@@ -26,11 +22,6 @@ local nddl_tests =   class-constructor.nddl  composition.0.nddl  constraint-test
   nddl.tx.nddl nddl.tx.0.nddl nddl.tx.1.nddl nddl.tx.2.nddl
   simple-class.nddl simple-predicate.nddl simple-rules.nddl
   subtype-extension.nddl ;
-
-# TODO: move these tests to the Resource module
-#if ! ( "Resources" in $(NO) ) {
-#  nddl_tests += multi-resources.nddl simple-resources.nddl ;
-#}
 
 local model ;
 
