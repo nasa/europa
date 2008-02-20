@@ -1,6 +1,6 @@
 SubDir PLASMA Resource ;
 
-if ! $(PLASMA_READY) {
+if ! $(PLASMA_READY)  && ! ( "Resources" in $(NO) ) {
 
 Module Resource : TemporalNetwork ;
 

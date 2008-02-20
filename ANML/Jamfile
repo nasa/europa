@@ -1,6 +1,6 @@
 SubDir PLASMA ANML ;
 
-if ! $(PLASMA_READY) {
+if ! $(PLASMA_READY) && ! ( "Resources" in $(NO) ) {
 
 Module ANML : Antlr RulesEngine Resource TemporalNetwork PlanDatabase ;
 
@@ -9,7 +9,6 @@ SubInclude PLASMA ANML component ;
 
 ModuleFiles ANML : ModuleAnml.cc ;
 
-# SubInclude PLASMA ANML documentation ;
 SubInclude PLASMA ANML test ;
 
 } # PLASMA_READY

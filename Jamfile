@@ -17,28 +17,23 @@ Module plasma : all System ;
 
 # 3rd party
 SubInclude PLASMA TinyXml ;
-if ! ( "Antlr" in $(NO) ) {
-  SubInclude PLASMA Antlr ;
-}
+SubInclude PLASMA Antlr ;
 
-# kernel
+# kernel. order is important, it indicates dependencies
 SubInclude PLASMA Utils ;
 SubInclude PLASMA ConstraintEngine ;
 SubInclude PLASMA PlanDatabase ;
 SubInclude PLASMA RulesEngine ;
+SubInclude PLASMA TemporalNetwork ;
+SubInclude PLASMA NDDL ;
 SubInclude PLASMA Solvers ;
 
 # extensions
-SubInclude PLASMA TemporalNetwork ;
-SubInclude PLASMA NDDL ;
-if ! ( "Resources" in $(NO) ) {
-  SubInclude PLASMA Resource ;
-  SubInclude PLASMA ANML ;
-}
+SubInclude PLASMA Resource ;
+SubInclude PLASMA ANML ;
+
 SubInclude PLASMA System ;
-if ! ( "Examples" in $(NO) ) {
-  SubInclude PLASMA Examples ;
-}
+SubInclude PLASMA Examples ;
 
 Depends build : lib ;
 

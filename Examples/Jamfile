@@ -1,6 +1,6 @@
 SubDir PLASMA Examples ;
 
-if ! $(PLASMA_READY) {
+if ! $(PLASMA_READY) && ! ( "Examples" in $(NO) ) {
 
 Module Examples : System ;
 
