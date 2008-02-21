@@ -264,7 +264,9 @@ namespace EUROPA {
   public:
     void step();
     void solve(int maxSteps,int maxDepth);
+    bool backjump(unsigned int stepCount);
     void reset();
+    void reset(unsigned int depth);
 
     int getStepCount();
     int getDepth();

@@ -32,7 +32,9 @@ namespace EUROPA
   
       virtual void step();
       virtual void solve(int maxSteps,int maxDepth);
+      virtual bool backjump(unsigned int stepCount);
       virtual void reset();
+      virtual void reset(unsigned int depth);
       virtual void destroy();
 
       virtual int getStepCount();

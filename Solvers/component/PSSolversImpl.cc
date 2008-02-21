@@ -49,9 +49,17 @@ namespace EUROPA
     m_solver->solve(maxSteps, maxDepth);
   }
 
+  bool PSSolverImpl::backjump(unsigned int stepCount) {
+	return m_solver->backjump(stepCount);
+  }
+  
   void PSSolverImpl::reset() {
     m_solver->reset();
   }
+
+  void PSSolverImpl::reset(unsigned int depth) {
+     m_solver->reset(depth);
+   }
 
   void PSSolverImpl::destroy() {
     m_ppw->clearSolver();
