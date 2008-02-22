@@ -35,9 +35,10 @@ SubInclude PLASMA ANML ;
 SubInclude PLASMA System ;
 SubInclude PLASMA Examples ;
 
-Depends build : lib ;
+RemoveBinaries clean-all ;
+Depends clean-all : clean clean-nddl-xml clean-system-xml ;
 
-Depends plasma-all : all ;
+Depends build : build-modules ;
 
 Depends run-tests : tests ;
 
@@ -63,8 +64,7 @@ Depends run-install-tests : run-tests ;
 
 NOCARE run-all-tests run-tests run-checkin-tests run-nddl-tests run-nddl-planner-tests tests run-hsts-planner-tests ;
 
-RemoveBinaries clean-all ;
-Depends clean-all : clean clean-nddl-xml clean-system-xml ;
+Depends plasma-all : all ;
 
 ExecuteScript check-svn-changes : bin/checksvn : $(PLASMA) ;
 

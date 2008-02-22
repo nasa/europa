@@ -32,7 +32,7 @@ rule Module {
   LOCATE_SHARED on $(module) += [ FDirName $($(_top)) lib ] ;
   INCLUDES on $(module) += $(SUBDIR) ;
   INCLUDES on $(module) += [ FDirName $(SUBDIR) base ] ;
-  INCLUDES on $(module) += [ FDirName $(SUBDIR) component ] ;
+  INCLUDES on $(module) += [ FDirName $(SUBDIR) component ] ;  
 }
 
 # ModuleFiles <name> : <files for this module> ;
@@ -52,6 +52,16 @@ rule ModuleFiles {
 # ModuleBase <name> : <files for this module > ;
 rule ModuleBase {
   ModuleFiles $(1) : $(2) ;
+  
+  for variant in $(VARIANTS) {
+      for library in $(LIBRARIES) {
+          local libName = [ FModuleLibraryName $(1) : $(library) : $(variant) ] ;
+          Depends build-modules : $(libName) ;
+          if $(TRACE_MODULE) = TRUE {
+              Echo Depends build-modules $(libName) ;
+          }
+      }
+  }    
 }
 
 # ModuleComponent <name> : <files for this module > ;
@@ -559,6 +569,21 @@ rule ModuleSharedLibraryFromObjects {
   if $(files) {
     SharedLibraryFromObjects $(name) : $(files) : $(suppress_global_dependencies)  ;
   }
+}
+
+rule FModuleLibraryName {
+  local module = $(1) ;
+  local library = $(2) ;
+  local variant = $(3) ;
+  
+  if $(library) = SHARED {
+      return [ FModuleSharedLibraryName $(module) : $(variant) ] ;
+  } else if $(library) = STATIC {
+      return [ FModuleStaticLibraryName $(module) : $(variant) ] ;      
+  } else {
+      Echo can't create library name for $(library), returning lib ; 
+      return "lib" ;
+  }  
 }
 
 } # ModuleRules_INCLUDED

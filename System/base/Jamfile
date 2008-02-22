@@ -21,4 +21,7 @@ ModuleBaseSwig System : [ FSwigWrapperName PSEngine.i : cpp ] ;
 
 LOCATE on PSEngine.jar = [ FDirName $(SUBDIR) .. .. lib ] ;
 
+Depends lib : PSEngine.jar ;
+Depends build-modules : PSEngine.jar ;
+
 } # PLASMA_READY
