@@ -32,6 +32,7 @@ SubInclude PLASMA Solvers ;
 SubInclude PLASMA Resource ;
 SubInclude PLASMA ANML ;
 
+# engine-level modules
 SubInclude PLASMA System ;
 SubInclude PLASMA Examples ;
 
@@ -68,8 +69,6 @@ Depends plasma-all : all ;
 
 ExecuteScript check-svn-changes : bin/checksvn : $(PLASMA) ;
 
-if ! ( "Resources" in $(NO) ) {
-  ExecuteScript check-makefile : bin/checkmakeproject : $(PLASMA) ;
-}
+ExecuteScript check-makefile : bin/checkmakeproject : $(PLASMA) ;
 
 } # PLASMA_READY
