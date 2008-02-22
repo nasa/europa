@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="PLASMA" default="dist" basedir=".">
+
+  <description>PLASMA</description>
+
+  <property environment="env"/>
+
+  <!-- load overrides -->
+  <property file="${env.HOME}/.ant.plasma.properties"/>
+
+  <property name="dir.plasma" value="."/>
+  <property name="dir.planworks" value="../PlanWorks"/>
+  <property name="dir.dist" value="dist"/>
+  <property name="dir.dist.base" location="${dir.dist}/europa"/>
+  <property name="file.europa_dist" value="europa.zip"/>
+  <property name="jam.opts" value=""/>
+	
+  <target name="clean">
+    <delete dir="${dir.dist}"/>
+    <exec executable="jam" dir="${dir.plasma}">
+	<arg line="clean-all"/>
+    </exec>	
+  </target>
+
+  <target name="build">
+    <exec executable="jam" dir="${dir.plasma}">
+        <arg line="${jam.opts} build"/>
+    </exec>     
+  </target>
+
+  <target name="test">
+    <exec executable="jam" dir="${dir.plasma}">
+        <arg line="${jam.opts} run-all-tests"/>
+    </exec>     
+  </target>
+
+  <!-- This target assumes that PLASMA and PlanWorks have already been built so that all the products are in place -->
+  <target name="dist" description="Creates the binary distribution and packages it up into ${dir.dist}/${file.plasma_dist}">
+    <!-- Create the distribution directory  -->
+    <mkdir dir="${dir.dist}"/>
+
+    <copy todir="${dir.dist.base}/bin">
+      <!-- TODO: copy scripts to run PlanWorks and PSDesktop -->
+      <!-- TODO: modify makeproject so that it can work with makefile, PSEngine and binary release -->
+      <fileset dir="${dir.plasma}/bin"/>
+    </copy>
+
+    <copy todir="${dir.dist.base}/lib">
+      <fileset dir="${dir.plasma}/lib"/>
+      <!-- TODO: copy PlanWorks libraries -->
+    </copy>
+
+    <copy todir="${dir.dist.base}/include" flatten="true">
+      <fileset file="${dir.plasma}">
+      	<include name="**/PS*.hh"/>
+   	<exclude name="**/PS*Impl.hh"/>
+      </fileset>		
+      <fileset dir="${dir.plasma}/NDDL/base">
+        <include name="*.nddl"/>
+      </fileset>
+      <fileset dir="${dir.plasma}/Resource/component/NDDL">
+        <include name="*.nddl"/>
+      </fileset>	
+    </copy>
+    <copy todir="${dir.dist.base}/include/PLASMA" flatten="true">
+      <fileset dir="${dir.plasma}">
+        <include name="**/*.hh"/>
+        <exclude name="**/test/*.hh"/>
+      </fileset>        
+    </copy>
+
+    <copy todir="${dir.dist.base}/config">
+      <!-- TODO: include path in NDDL.cfg needs to support layout of binary release -->
+      <fileset dir="${dir.plasma}/config"/>
+    </copy>
+
+    <!-- Finally, zip everything up -->
+    <zip destfile="${dir.dist}/${file.europa_dist}" basedir="${dir.dist.base}"/>
+  </target>
+</project>
