@@ -57,6 +57,8 @@ public class PSDesktop
 		run(args);
 	}
 	
+	public String getLibsMode() { return debugMode_; }
+	
 	public static Map<String,String> parseArgs(String args[])
 	{
 		Map<String,String> retval = new HashMap<String,String>();
