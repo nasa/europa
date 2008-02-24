@@ -11,6 +11,9 @@
 #include "PSEngine.hh" 
 #include "Debug.hh"
 
+#include "ConstraintLibrary.hh"  // Not actually needed unless custom constraints defined and regsitered here
+#include "%Project%CustomCode.hh" 
+
 using namespace EUROPA;
 
 void executeWithAssembly(const char* plannerConfig, const char* txSource);

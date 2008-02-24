@@ -11,10 +11,16 @@ if ! $(%PROJECT%_READY) {
   RunNDDLProblem %Project% : %Project%-initial-state.nddl : %Project%-planner : PlannerConfig.xml ;
 
   # Create a build target for the planner executable with the given model.
-  NddlMain %Project%-planner : %Project%-Main.cc : %Project%-model.nddl : System : %Project%-planner ;
+  NddlMain %Project%-planner : %Project%-Main.cc %Project%CustomCode.cc : %Project%-model.nddl : System : %Project%-planner ;
 
   # Create a build target for the planner shared library with model.
   ModuleSharedLibrary %Project% : %Project%-model.o : System : %Project% ;
+
+  # A module to hold any custom Java or swig-wrapped C++ code  
+  Module %Project% : System ; 
+  ModuleBase %Project% : %Project%CustomCode.cc ; 
+  SwigJava %Project%.i : %Project% : swig/%Project% : cpp : %Project% : %Project% ; 
+  ModuleBaseSwig %Project% : [ FSwigWrapperName %Project%.i : cpp ] ; 
 
   NOTFILE %Project% %Project%Controller ;
 

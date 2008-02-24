@@ -7,16 +7,14 @@
   <!-- load overrides from build.properties file -->
   <property file="build.properties"/>
 
-  <property name="src.dir"       value="java"/>
-  <property name="build.dir"     value="build"/>
-  <property name="dist.dir"      value="dist"/>
-
   <property name="plasma.dir"   value="${env.PLASMA_HOME}"/>
   <property name="psui.dir"     value="${plasma.dir}/System/component/PSUI"/>
   <property name="psui.lib.dir" value="${psui.dir}/lib"/>
 
   <property name="debug"  value="true"/>
   <property name="deprecation"  value="true"/>
+  <property name="dist" value="lib"/>    
+
 
   <path id="psui.class.path">
     <pathelement location="${plasma.dir}/lib/nddl.jar"/>
@@ -39,19 +37,40 @@
     <mkdir dir="${build.dir}"/>
   </target>
 
-  <target name="clean" description="delete the 'classes' directory tree" >
-   <delete dir="${build.dir}"/>
+  <property name="java.src.dir" value="java"/> 
+  <property name="swig.src.dir" value="swig/%Project%/"/>
+  <property name="build.dir"     value="build"/> 
+
+  <!-- Create .jar to include any custom Java and swig-wrapped C++ -->
+  <target name="%Project%" depends="compile">
+     <mkdir dir="${dist}"/>  				<!-- if necessary -->
+     <jar jarfile="${dist}/%Project%.jar">
+	 <fileset dir="${build.dir}"/>
+     </jar>
+     <touch file="${dist}/%Project%.jar"/>
+  </target> 
+   
+  <target name="clean" description="delete the 'classes' directory trees" >
+    <delete dir="${build.dir}"/>
   </target>
 
   <target name="compile" depends="init" description="compile 'src' tree into 'classes' tree" >
-    <javac srcdir="${src.dir}"
-           destdir="${build.dir}"
-         debug="${debug}"
-         deprecation="${deprecation}">
-    <classpath refid="psui.class.path"/>
+  <!-- Compile Main.java and any custom java code -->
+    <javac srcdir="${java.src.dir}" 
+           destdir="${build.dir}" 
+    	   debug="${debug}" 
+    	   deprecation="${deprecation}">
+	  <classpath refid="psui.class.path"/>
+    </javac>
+  <!-- Compile any swig-wrapped custom C++ code -->
+   <javac srcdir="${swig.src.dir}" 
+           destdir="${build.dir}" 
+    	   debug="${debug}" 
+    	   deprecation="${deprecation}">
+	  <classpath refid="psui.class.path"/>
     </javac>
   </target>
-
+	
   <!-- project,project.dir,project.mode and project.bsh.script are read from build.properties -->
   <target name="run" depends="compile" description="build and run">
     <echo message="Running ${project} project"/>
