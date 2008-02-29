@@ -139,7 +139,8 @@ sub init {
 	$ENV{AUTOBUILD_HOME} = "$ENV{HOME}/${svnname}_autobuilds" if(!defined($ENV{AUTOBUILD_HOME}));
 	mkdir($ENV{AUTOBUILD_HOME});
 
-	$ENV{PLASMA_HOME} = "$ENV{AUTOBUILD_HOME}/$svnname";
+	$ENV{EUROPA_HOME} = "$ENV{AUTOBUILD_HOME}/$svnname";
+	$ENV{PLASMA_HOME} = "$ENV{AUTOBUILD_HOME}/$svnname/src/PLASMA";
 
 	# build path from common directories, if they exist.
 	# the directories containing version checked execs (to follow) will take precidence.
@@ -171,7 +172,7 @@ sub init {
 
 	#gcc *must* be in the normal location on darwin
 	if($ENV{OSTYPE} eq "darwin") {
-		$ENV{DYLD_LIBRARY_PATH} = "$ENV{PLASMA_HOME}/lib";
+		$ENV{DYLD_LIBRARY_PATH} = "$ENV{EUROPA_HOME}/lib";
 		$ENV{DYLD_BIND_AT_LAUNCH} = "YES";
 		$ENV{PATH} = "$ENV{JAVA_HOME}/bin:$ENV{JAM_HOME}:$ENV{PATH}";
 	}
@@ -184,7 +185,7 @@ sub init {
 				$ENV{GCC_ROOTDIR} = undef;
 			}
 		}
-		$ENV{LD_LIBRARY_PATH} = "$ENV{PLASMA_HOME}/lib";
+		$ENV{LD_LIBRARY_PATH} = "$ENV{EUROPA_HOME}/lib";
 		$ENV{LD_LIBRARY_PATH} = "$ENV{GCC_ROOTDIR}/lib:$ENV{LD_LIBRARY_PATH}" if(-x "$ENV{GCC_ROOTDIR}/lib");
 		$ENV{LD_LIBRARY_PATH} = "/usr/local/beta/lib:$ENV{LD_LIBRARY_PATH}" if(-x "/usr/local/beta/lib");
 
@@ -298,7 +299,7 @@ sub mailresults {
 	$mailserver->datasend(envString("  ","GCC_ROOTDIR","\n"));
 	$mailserver->datasend(envString("  ","JAM_HOME","\n"));
 	$mailserver->datasend(envString("  ","PATH","\n"));
-	$mailserver->datasend(envString("  ","PLASMA_HOME","\n"));
+	$mailserver->datasend(envString("  ","EUROPA_HOME","\n"));
 	$mailserver->datasend(envString("  ","LD_LIBRARY_PATH","\n"));
 	$mailserver->datasend(envString("  ","DYLD_LIBRARY_PATH","\n"));
 
@@ -386,7 +387,7 @@ sub softdie {
 	$mailserver->datasend(envString("  ","GCC_ROOTDIR","\n"));
 	$mailserver->datasend(envString("  ","JAM_HOME","\n"));
 	$mailserver->datasend(envString("  ","PATH","\n"));
-	$mailserver->datasend(envString("  ","PLASMA_HOME","\n"));
+	$mailserver->datasend(envString("  ","EUROPA_HOME","\n"));
 	$mailserver->datasend(envString("  ","LD_LIBRARY_PATH","\n"));
 	$mailserver->datasend(envString("  ","DYLD_LIBRARY_PATH","\n"));
 	$mailserver->datasend("--------------------------------------------------------------\n");
