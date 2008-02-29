@@ -48,7 +48,6 @@ Depends run-tests : tests ;
 Depends run-all-tests : 
     run-checkin-tests 
     run-all-module-tests  
-    run-examples-tests 
     run-nddl-tests 
     run-hsts-planner-tests 
 ;
