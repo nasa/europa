@@ -1,9 +1,6 @@
 #!/bin/sh
 #
-# checkmakeproject: sh script for checking makeproject is
-#                   working and that nddl path is correctly
-#                   searched when specified in NDDL.cfg files. 
-#
+# checkmakeproject: sh script for checking makeproject is working 
 #   Argument: relative location of PLASMA root
 #
 
@@ -25,13 +22,10 @@ fi
 echo "Creating test project - $TEST_PROJECT_NAME"
 # Run makeproject.
 cd "$RELDIR"
-cd $PLASMA_HOME/bin 
+cd $PLASMA_HOME/../../bin 
 ./makeproject "$TEST_PROJECT_NAME"
 cd ../..
 cd "$TEST_PROJECT_NAME"
-
-# Copy in NDDL.cfg file with search path set
-cp $PLASMA_HOME/NDDL/test/cfg-path-test/NDDL.cfg .
 
 # Execute project.
  jam "$TEST_PROJECT_NAME"
