@@ -2,10 +2,13 @@
 
 <project name="PSEngine" default="PSEngine" basedir=".">
   
+  <property environment="env"/>
+  <property name="plasma.dir" value="${env.PLASMA_HOME}"/>
+	
   <property name="build.dir" value="${src.dir}/classes"/>
   <property name="cache" value="${src.dir}/.cache"/>
-  <property name="dist" location="../../lib"/>
-  <property name="libraries" location="../../ext/lib"/>
+  <property name="dist" location="${plasma.dir}/lib"/>
+  <property name="libraries" location="${plasma.dir}/../../ext/lib"/>
 
   <fileset dir="${libraries}" id="psengine.libfiles">
     <include name="utils.jar"/>

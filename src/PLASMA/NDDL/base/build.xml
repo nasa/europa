@@ -3,12 +3,16 @@
 	<description>
   New Domain Definition Language
 	</description>
+	
+        <property environment="env"/>
+        <property name="plasma.dir" value="${env.PLASMA_HOME}"/>
+	
 	<property name="grammars" location="antlr"/>
 	<property name="src" location="java"/>
 	<property name="class" location="classes"/>
 	<property name="cache" location=".cache"/>
-	<property name="dist" location="../../lib"/>
-	<property name="libraries" location="../../ext/lib"/>
+	<property name="dist" location="${plasma.dir}/lib"/>
+	<property name="libraries" location="${plasma.dir}/../../ext/lib"/>
 
 	<fileset dir="${libraries}" id="nddl.libfiles">
 		<include name="antlr.jar"/>
