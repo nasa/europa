@@ -15,11 +15,13 @@ if SHARED in $(LIBRARIES) {
 
 Module plasma : all System ;
 
+# Order of SubIncludes is important, it implies dependencies in many cases
+
 # 3rd party
 SubInclude PLASMA TinyXml ;
 SubInclude PLASMA Antlr ;
 
-# kernel. order is important, it indicates dependencies
+# kernel. 
 SubInclude PLASMA Utils ;
 SubInclude PLASMA ConstraintEngine ;
 SubInclude PLASMA PlanDatabase ;
@@ -28,13 +30,13 @@ SubInclude PLASMA TemporalNetwork ;
 SubInclude PLASMA NDDL ;
 SubInclude PLASMA Solvers ;
 
-# extensions
+# extensions. 
+# TODO: dependencies need to be fixed so that NDDL and TemporalNetwork can be moved down here
 SubInclude PLASMA Resource ;
 SubInclude PLASMA ANML ;
 
 # engine-level modules
 SubInclude PLASMA System ;
-SubInclude PLASMA Examples ;
 
 RemoveBinaries clean-all ;
 Depends clean-all : clean clean-nddl-xml clean-system-xml ;
@@ -55,10 +57,10 @@ Depends run-checkin-tests :
     check-svn-changes 
     run-tests 
     run-nddl-planner-tests 
-    run-makefile-tests 
+    run-makeproject-tests 
 ;
 
-Depends run-makefile-tests : check-makefile ;
+Depends run-makeproject-tests : check-makeproject ;
 
 # install tests designed for off site customers to check system is installed without svn update
 Depends run-install-tests : run-tests ;
@@ -67,8 +69,8 @@ NOCARE run-all-tests run-tests run-checkin-tests run-nddl-tests run-nddl-planner
 
 Depends plasma-all : all ;
 
-ExecuteScript check-svn-changes : bin/checksvn : $(PLASMA) ;
+ExecuteScript check-svn-changes : ../../bin/checksvn : $(PLASMA) ;
 
-ExecuteScript check-makefile : bin/checkmakeproject : $(PLASMA) ;
+ExecuteScript check-makeproject : ../../bin/checkmakeproject : $(PLASMA) ;
 
 } # PLASMA_READY
