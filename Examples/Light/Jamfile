@@ -1,4 +1,4 @@
-SubDir PLASMA Examples Light ;
+SubDir Light ;
 
 if ! $(Light_READY)  && ! $(PLASMA_READY) {
  # Declare a library for PlanWorks Control

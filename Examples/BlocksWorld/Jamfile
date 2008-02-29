@@ -1,4 +1,4 @@
-SubDir PLASMA Examples BlocksWorld ;
+SubDir BlocksWorld ;
 
 if ! $(BlocksWorld_READY) && ! $(PLASMA_READY) {
  # Declare a library for PlanWorks Control

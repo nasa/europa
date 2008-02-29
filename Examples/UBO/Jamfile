@@ -1,4 +1,4 @@
-SubDir PLASMA Examples UBO ;
+SubDir UBO ;
 
 if ! $(UBO_READY) && ! $(PLASMA_READY) {
  # Declare a library for PlanWorks Control
