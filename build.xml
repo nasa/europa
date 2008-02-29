@@ -9,6 +9,7 @@
   <property file="${env.HOME}/.ant.plasma.properties"/>
 
   <property name="dir.plasma" value="."/>
+  <property name="dir.src" value="src/PLASMA"/>
   <property name="dir.planworks" value="../PlanWorks"/>
   <property name="dir.dist" value="dist"/>
   <property name="dir.dist.base" location="${dir.dist}/europa"/>
@@ -17,19 +18,19 @@
 	
   <target name="clean">
     <delete dir="${dir.dist}"/>
-    <exec executable="jam" dir="${dir.plasma}">
+    <exec executable="jam" dir="${dir.src}">
 	<arg line="clean-all"/>
     </exec>	
   </target>
 
   <target name="build">
-    <exec executable="jam" dir="${dir.plasma}">
+    <exec executable="jam" dir="${dir.src}">
         <arg line="${jam.opts} build"/>
     </exec>     
   </target>
 
   <target name="test">
-    <exec executable="jam" dir="${dir.plasma}">
+    <exec executable="jam" dir="${dir.src}">
         <arg line="${jam.opts} run-all-tests"/>
     </exec>     
   </target>
@@ -51,19 +52,19 @@
     </copy>
 
     <copy todir="${dir.dist.base}/include" flatten="true">
-      <fileset file="${dir.plasma}">
+      <fileset file="${dir.src}">
       	<include name="**/PS*.hh"/>
    	<exclude name="**/PS*Impl.hh"/>
       </fileset>		
-      <fileset dir="${dir.plasma}/NDDL/base">
+      <fileset dir="${dir.src}/NDDL/base">
         <include name="*.nddl"/>
       </fileset>
-      <fileset dir="${dir.plasma}/Resource/component/NDDL">
+      <fileset dir="${dir.src}/Resource/component/NDDL">
         <include name="*.nddl"/>
       </fileset>	
     </copy>
     <copy todir="${dir.dist.base}/include/PLASMA" flatten="true">
-      <fileset dir="${dir.plasma}">
+      <fileset dir="${dir.src}">
         <include name="**/*.hh"/>
         <exclude name="**/test/*.hh"/>
       </fileset>        
