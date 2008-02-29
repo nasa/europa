@@ -3,7 +3,7 @@ AntlrRules_INCLUDED = TRUE ;
 
 include [ FDirName $(SUBDIR) JavaRules ] ;
 
-ANTLR_JAR ?= [ FDirName $(SUBDIR) ext lib antlr.jar ] ;
+ANTLR_JAR ?= [ FDirName $(SUBDIR) .. .. ext lib antlr.jar ] ;
 
 # AntlrGrammar ParserPrefix : grammar.g grammar.tree.g ;
 rule AntlrGrammar
