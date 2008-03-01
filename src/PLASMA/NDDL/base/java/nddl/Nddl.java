@@ -360,7 +360,9 @@ public class Nddl {
     StringBuffer includes = new StringBuffer(1024);
     if(new File(plasmaHome).isDirectory()) {
       for(int i=0;i<iDirs.length;i++)
-        includes.append(" -I").append(plasmaHome).append(File.separator).append(iDirs[i]);
+        includes.append(" -I").append(plasmaHome).append(File.separator).append("src").
+                                                  append(File.separator).append("PLASMA").
+                                                  append(File.separator).append(iDirs[i]);
     }
 
     assert(DebugMsg.debugMsg(compiler+": Compiling \""+source+"\""));

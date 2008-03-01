@@ -151,7 +151,7 @@ if $(JAVA_HOME) {
   JAR ?= jar ;
 }
 
-ANT_HOME ?= [ FDirName $(PLASMA) ext ant ] ;
+ANT_HOME ?= [ FDirName .. .. ext ant ] ;
 ANT ?= [ FDirName $(ANT_HOME) bin ant ] ;
 
 #SWIG_HOME ?= [ FDirName $(PLASMA) ext swig ] ;

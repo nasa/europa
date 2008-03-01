@@ -139,7 +139,7 @@ rule RunPlannerProblem {
       local libname = [ FModuleSharedLibraryName $(lib) : $(variant) ] ;
       local run_variant_name = [ FVariantName runProblem_$(PLANNER) : $(variant) ] ;
       run_variant_name = $(run_variant_name)_rt ;
-      local arguments = $(PLASMA_HOME)$(SLASH)$(SUBDIR)$(SLASH)$(libname) $(xml) $(configurationFile) ;
+      local arguments = $(PLASMA_HOME)$(SLASH)src$(SLASH)PLASMA$(SLASH)$(SUBDIR)$(SLASH)$(libname) $(xml) $(configurationFile) ;
       Depends run-problem-$(exe) : $(libname) ;
       RunModuleMain run-problem-$(exe) : runProblem_$(PLANNER) : $(arguments) ;
       Depends RUN_$(run_variant_name).$(arguments:J=.) : $(libname) $(xml) ;

@@ -17,7 +17,7 @@ local solverInputFiles = 	UnboundVariableFiltering.nddl
  # Create dependency for initial state files to be parsed
  local solversInputFile ;
  for solversInputFile in $(solverInputFiles) {
-  local fullPathName = [ FDirName $(PLASMA_HOME) Solvers test $(solversInputFile) ] ; 
+  local fullPathName = [ FDirName $(PLASMA_HOME) src PLASMA Solvers test $(solversInputFile) ] ; 
   NddlParser $(fullPathName:S=.xml) : $(fullPathName) ;
   LocalDepends run-solvers-module-tests : $(fullPathName:S=.xml) ;
  }

@@ -14,25 +14,30 @@
   <property name="dir.dist" value="dist"/>
   <property name="dir.dist.base" location="${dir.dist}/europa"/>
   <property name="file.europa_dist" value="europa.zip"/>
-  <property name="jam.opts" value=""/>
-	
+  <property name="jam.libraries" value="SHARED"/>
+  <property name="jam.variant" value="DEV"/>
+  <property name="jam.opts" value="-sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries}"/>
+
   <target name="clean">
     <delete dir="${dir.dist}"/>
     <exec executable="jam" dir="${dir.src}">
-	<arg line="clean-all"/>
-    </exec>	
+      <arg line="clean-all"/>
+			<env key="PLASMA_HOME" value="${basedir}"/>
+    </exec>
   </target>
 
   <target name="build">
     <exec executable="jam" dir="${dir.src}">
-        <arg line="${jam.opts} build"/>
-    </exec>     
+      <arg line="${jam.opts} build"/>
+			<env key="PLASMA_HOME" value="${basedir}"/>
+    </exec>
   </target>
 
   <target name="test">
     <exec executable="jam" dir="${dir.src}">
-        <arg line="${jam.opts} run-all-tests"/>
-    </exec>     
+      <arg line="${jam.opts} run-all-tests"/>
+			<env key="PLASMA_HOME" value="${basedir}"/>
+    </exec>
   </target>
 
   <!-- This target assumes that PLASMA and PlanWorks have already been built so that all the products are in place -->
@@ -53,21 +58,21 @@
 
     <copy todir="${dir.dist.base}/include" flatten="true">
       <fileset file="${dir.src}">
-      	<include name="**/PS*.hh"/>
-   	<exclude name="**/PS*Impl.hh"/>
-      </fileset>		
+        <include name="**/PS*.hh"/>
+        <exclude name="**/PS*Impl.hh"/>
+      </fileset>
       <fileset dir="${dir.src}/NDDL/base">
         <include name="*.nddl"/>
       </fileset>
       <fileset dir="${dir.src}/Resource/component/NDDL">
         <include name="*.nddl"/>
-      </fileset>	
+      </fileset>
     </copy>
     <copy todir="${dir.dist.base}/include/PLASMA" flatten="true">
       <fileset dir="${dir.src}">
         <include name="**/*.hh"/>
-        <exclude name="**/test/*.hh"/>
-      </fileset>        
+        <exclude name="**/test/**"/>
+      </fileset>
     </copy>
 
     <copy todir="${dir.dist.base}/config">

@@ -8,7 +8,7 @@ if ( "Resources" in $(NO) ) {
 
 ModuleComponent System	: SolverAssembly.cc MasterController.cc SingleSolverController.cc ;
 
-PSUI_HOME ?= [ FDirName $(PLASMA_HOME) System component PSUI ] ;
+PSUI_HOME ?= [ FDirName $(PLASMA_HOME) src PLASMA System component PSUI ] ;
 
 Depends PSUI.jar : PSEngine.jar ;
 ApacheAnt PSUI.jar : $(PSUI_HOME)/build.xml : dist ;
