@@ -22,8 +22,8 @@
   <property name="deprecation"  value="true"/>
 
   <path id="psui.class.path">
-    <pathelement location="${plasma.dir}/lib/PSEngine.jar"/>
-    <pathelement location="${plasma.dir}/lib/nddl.jar"/>
+    <pathelement location="${plasma.dir}/build/lib/PSEngine.jar"/>
+    <pathelement location="${plasma.dir}/build/lib/nddl.jar"/>
     <pathelement location="${lib.dir}/nanoxml/nanoxml.jar"/>
     <pathelement location="${lib.dir}/jfreechart/jcommon-1.0.5.jar"/>
     <pathelement location="${lib.dir}/jfreechart/jfreechart-1.0.2.jar"/>
@@ -43,7 +43,7 @@
 
   <target name="clean" description="delete the 'classes' directory tree" >
 	 <delete dir="${build.dir}"/>
-         <delete file="${plasma.dir}/lib/PSUI.jar"/>
+         <delete file="${plasma.dir}/build/lib/PSUI.jar"/>
   </target>
 
   <target name="compile" depends="init" description="compile 'src' tree into 'classes' tree" >
