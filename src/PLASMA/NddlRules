@@ -5,7 +5,7 @@ include [ FDirName $(SUBDIR) JavaRules ] ;
 
 # TRACE_NDDL ?= TRUE ;
 
-NDDL_JAR = [ FDirName $(SUBDIR) lib nddl.jar ] ;
+NDDL_JAR = [ FDirName $(PLASMA_BUILD) lib nddl.jar ] ;
 
 # Runs a planner problem: RunNDDLProblem test-01 : initial-state.nddl : planner : planner-config.xml : model : path ;
 # Will ensure initial state is parsed into xml first
