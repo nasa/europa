@@ -28,7 +28,7 @@ rule Module {
 
   LINK_LIBRARIES on $(module) = $(NEEDSHARES) ;
   LINK_MODULES on $(module) += $(modules:G=module) ;
-  LOCATE_OBJECTS on $(module) += [ FDirName $(SUBDIR) [ ObjectsSubdirName $(VARIANTS) ] ] ;
+  LOCATE_OBJECTS on $(module) += [ FDirName $(PLASMA_BUILD) [ ObjectsSubdirName $(VARIANTS) ] ] ;
   LOCATE_SHARED on $(module) += [ FDirName $(PLASMA_BUILD) lib ] ;
   INCLUDES on $(module) += $(SUBDIR) ;
   INCLUDES on $(module) += [ FDirName $(SUBDIR) base ] ;
