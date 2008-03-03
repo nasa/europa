@@ -52,6 +52,7 @@
     </copy>
 
     <copy todir="${dir.dist.base}/lib">
+      <fileset dir="${dir.plasma}/build/lib"/>
       <fileset dir="${dir.src}/lib"/>
       <!-- TODO: copy PlanWorks libraries -->
     </copy>

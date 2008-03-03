@@ -11,7 +11,7 @@
 	<property name="src" location="java"/>
 	<property name="class" location="classes"/>
 	<property name="cache" location=".cache"/>
-	<property name="dist" location="${plasma.dir}/lib"/>
+	<property name="dist" location="${plasma.dir}/build/lib"/>
 	<property name="libraries" location="${plasma.dir}/ext/lib"/>
 
 	<fileset dir="${libraries}" id="nddl.libfiles">

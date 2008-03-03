@@ -52,7 +52,7 @@ ApacheAnt nddl.jar :
 	java/nddl/NddlUtil.java
 	;
 
-LOCATE on nddl.jar = [ FDirName $(SUBDIR) .. .. lib ] ;
+LOCATE on nddl.jar = [ FDirName $(PLASMA_BUILD) lib ] ;
 
 Depends lib : nddl.jar ;
 Depends build-modules : nddl.jar ;

@@ -56,7 +56,7 @@
   </target>
 	
   <target name="dist" depends="compile">
-    <jar jarfile="${plasma.dir}/lib/PSUI.jar" basedir="${build.dir}"/>             
+    <jar jarfile="${plasma.dir}/build/lib/PSUI.jar" basedir="${build.dir}"/>             
   </target>
 
   <target name="run" depends="compile" description="build and run">

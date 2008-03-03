@@ -7,7 +7,7 @@
 	
   <property name="build.dir" value="${src.dir}/classes"/>
   <property name="cache" value="${src.dir}/.cache"/>
-  <property name="dist" location="${plasma.dir}/lib"/>
+  <property name="dist" location="${plasma.dir}/build/lib"/>
   <property name="libraries" location="${plasma.dir}/ext/lib"/>
 
   <fileset dir="${libraries}" id="psengine.libfiles">
