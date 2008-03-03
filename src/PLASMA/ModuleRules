@@ -465,7 +465,7 @@ rule ModulePart {
           Exit ModulePart unknown library type: $(library) ;
         }
         if $(library) = SHARED {
-          local LOCATE_TARGET = [ FDirName $($(_top)) lib ] ;
+          local LOCATE_TARGET = [ FDirName $(PLASMA_BUILD) lib ] ;
           LINKFLAGS on $(libname) = $(LINKFLAGS)
                                     $(LINKER_PASSTHROUGH_FLAG)$(LIBRARY_PATH_SEARCH_FLAG)$(LOCATE_TARGET) ;
           LINKLIBS on $(libname) = $(LINKLIBS) ;
