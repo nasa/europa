@@ -133,7 +133,7 @@ rule RunPlannerProblem {
 
   if $(LIBRARIES) = SHARED {
     # create planner with dlopen model
-    ModuleSharedLibrary $(lib) : $(o) : NDDL ;
+    ModuleSharedLibrary $(lib) : $(o) : NDDL Resource ;
     local variant ;
     for variant in $(VARIANTS) {
       local libname = [ FModuleSharedLibraryName $(lib) : $(variant) ] ;

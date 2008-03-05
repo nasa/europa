@@ -3,7 +3,7 @@ SubDir PLASMA Solvers test ;
 if ! $(PLASMA_READY) {
 
  # All input file names used for the tests
-local solverInputFiles = 	UnboundVariableFiltering.nddl	
+local solverInputFiles = 	[ FGristFiles UnboundVariableFiltering.nddl	
 				OpenConditionFiltering.nddl
 				ThreatFiltering.nddl
 				StaticCSP.nddl 
@@ -12,14 +12,13 @@ local solverInputFiles = 	UnboundVariableFiltering.nddl
 				SimpleActivation.nddl 
 				SimpleRejection.nddl 
 				BacktrackFirstDecision.nddl 
-				GNATS_3196.nddl ;
+				GNATS_3196.nddl ] ;
  
  # Create dependency for initial state files to be parsed
  local solversInputFile ;
  for solversInputFile in $(solverInputFiles) {
-  local fullPathName = [ FDirName $(PLASMA_HOME) src PLASMA Solvers test $(solversInputFile) ] ; 
-  NddlParser $(fullPathName:S=.xml) : $(fullPathName) ;
-  LocalDepends run-solvers-module-tests : $(fullPathName:S=.xml) ;
+  NddlParser $(solversInputFile:S=.xml) : $(solversInputFile) ;
+  LocalDepends run-solvers-module-tests : $(solversInputFile:S=.xml) ;
  }
 
  NddlMain solvers-module-tests : module-tests.cc solvers-test-module.cc : Model.nddl : Solvers NDDL : solvers-tests ;
