@@ -20,7 +20,11 @@ projectDest = os.path.join("..", "..", projectName)
 # If PLASMA_HOME defined, allow script to be run from anywhere:
 if os.environ.has_key("PLASMA_HOME"):
   plasmaHome = os.environ["PLASMA_HOME"]
-  europaHome = plasmaHome+"/../.."
+  projectSource = os.path.join(plasmaHome, "bin", ".makeproject")
+  configDir = os.path.join(plasmaHome, "config")
+  projectDest = os.path.join(plasmaHome, "..", projectName)
+elif os.environ.has_key("EUROPA_HOME"):
+  europaHome = os.environ["EUROPA_HOME"]
   projectSource = os.path.join(europaHome, "bin", ".makeproject")
   configDir = os.path.join(europaHome, "config")
   projectDest = os.path.join(europaHome, "..", projectName)
