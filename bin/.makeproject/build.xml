@@ -7,9 +7,8 @@
   <!-- load overrides from build.properties file -->
   <property file="build.properties"/>
 
-  <property name="plasma.dir"   value="${env.PLASMA_HOME}"/>
-  <property name="psui.dir"     value="${plasma.dir}/src/PLASMA/System/component/PSUI"/>
-  <property name="psui.lib.dir" value="${psui.dir}/lib"/>
+  <property name="europa.dir"   value="${env.EUROPA_HOME}"/>
+  <property name="psui.lib.dir" value="${europa.dir}/lib/PSUI"/>
 
   <property name="debug"  value="true"/>
   <property name="deprecation"  value="true"/>
@@ -17,9 +16,9 @@
 
 
   <path id="psui.class.path">
-    <pathelement location="${plasma.dir}/build/lib/nddl.jar"/>
-    <pathelement location="${plasma.dir}/build/lib/PSEngine.jar"/>
-    <pathelement location="${plasma.dir}/build/lib/PSUI.jar"/>
+    <pathelement location="${europa.dir}/lib/nddl.jar"/>
+    <pathelement location="${europa.dir}/lib/PSEngine.jar"/>
+    <pathelement location="${europa.dir}/lib/PSUI.jar"/>
     <pathelement location="${psui.lib.dir}/nanoxml/nanoxml.jar"/>
     <pathelement location="${psui.lib.dir}/jfreechart/jcommon-1.0.5.jar"/>
     <pathelement location="${psui.lib.dir}/jfreechart/jfreechart-1.0.2.jar"/>
@@ -35,6 +34,7 @@
   <target name="init">
     <tstamp/>
     <mkdir dir="${build.dir}"/>
+    <mkdir dir="${swig.src.dir}"/>
   </target>
 
   <property name="java.src.dir" value="java"/> 

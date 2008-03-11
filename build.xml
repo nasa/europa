@@ -22,21 +22,21 @@
     <delete dir="${dir.dist}"/>
     <exec executable="jam" dir="${dir.src}">
       <arg line="clean-all"/>
-			<env key="PLASMA_HOME" value="${basedir}"/>
+      <env key="PLASMA_HOME" value="${basedir}"/>
     </exec>
   </target>
 
   <target name="build">
     <exec executable="jam" dir="${dir.src}">
       <arg line="${jam.opts} build"/>
-			<env key="PLASMA_HOME" value="${basedir}"/>
+      <env key="PLASMA_HOME" value="${basedir}"/>
     </exec>
   </target>
 
   <target name="test">
     <exec executable="jam" dir="${dir.src}">
       <arg line="${jam.opts} run-all-tests"/>
-			<env key="PLASMA_HOME" value="${basedir}"/>
+      <env key="PLASMA_HOME" value="${basedir}"/>
     </exec>
   </target>
 
@@ -50,13 +50,22 @@
       <!-- TODO: modify makeproject so that it can work with makefile, PSEngine and binary release -->
       <fileset dir="${dir.plasma}/bin"/>
     </copy>
-
+    <!-- ant doesn't preserve permissions --> 	
+    <chmod perm="+x">
+      <fileset dir="${dir.dist.base}/bin"/>
+    </chmod>
+  	
     <copy todir="${dir.dist.base}/lib">
       <fileset dir="${dir.plasma}/build/lib"/>
       <!-- TODO: copy PlanWorks libraries -->
     </copy>
 
-    <copy todir="${dir.dist.base}/include" flatten="true">
+    <!-- TODO: put all this libs into PSUI.jar --> 	
+    <copy todir="${dir.dist.base}/lib/PSUI">
+      <fileset dir="${dir.src}/System/component/PSUI/lib"/>
+    </copy>
+  	
+    <copy todir="${dir.dist.base}/include" flatten="true" includeEmptyDirs="false">
       <fileset file="${dir.src}">
         <include name="**/PS*.hh"/>
         <exclude name="**/PS*Impl.hh"/>
@@ -68,6 +77,11 @@
         <include name="*.nddl"/>
       </fileset>
     </copy>
+    <copy todir="${dir.dist.base}/include/jam" flatten="true" includeEmptyDirs="false">
+      <fileset file="${dir.src}">
+        <include name="**/*Rules"/>
+      </fileset>
+    </copy>	
     <copy todir="${dir.dist.base}/include/PLASMA" flatten="true">
       <fileset dir="${dir.src}">
         <include name="**/*.hh"/>
