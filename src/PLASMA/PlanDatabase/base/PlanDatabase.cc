@@ -964,15 +964,15 @@ namespace EUROPA{
   
   PSObject* PlanDatabase::getObjectByKey(PSEntityKey id) 
   {
-    EntityId entity = Entity::getEntity(id);
-    check_runtime_error(entity.isValid());
-    return new PSObjectImpl(entity);
+    ObjectId object = Entity::getEntity(id);
+    check_runtime_error(object.isValid());
+    return getObjectWrapperGenerator(object->getType())->wrap(object);
   }
 
   PSObject* PlanDatabase::getObjectByName(const std::string& name) {
-    ObjectId obj = getObject(LabelStr(name));
-    check_runtime_error(obj.isValid());
-    return new PSObjectImpl(obj);
+    ObjectId object = getObject(LabelStr(name));
+    check_runtime_error(object.isValid());
+    return getObjectWrapperGenerator(object->getType())->wrap(object);
   }
 
   PSList<PSToken*> PlanDatabase::getAllTokens() {
