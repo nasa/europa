@@ -7,6 +7,8 @@
 #include "SAVH_ProfilePropagator.hh"
 #include "SAVH_ReusableFVDetector.hh"
 #include "SAVH_TimetableFVDetector.hh"
+#include "SAVH_OpenWorldFVDetector.hh"
+#include "SAVH_ClosedWorldFVDetector.hh"
 #include "ResourcePropagator.hh"
 #include "PSPlanDatabase.hh"
 #include "PSResource.hh"
@@ -52,7 +54,9 @@ namespace EUROPA {
       
    	  REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
       REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
-      
+  	  REGISTER_FVDETECTOR(EUROPA::SAVH::OpenWorldFVDetector, OpenWorldFVDetector);
+      REGISTER_FVDETECTOR(EUROPA::SAVH::ClosedWorldFVDetector, ClosedWorldFVDetector);
+         
       
       Id<Schema> schema = Schema::instance();
       schema->declareObjectType("Resource");

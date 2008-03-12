@@ -5,6 +5,9 @@
 namespace EUROPA {
 namespace SAVH {
 
+OpenWorldFVDetector::OpenWorldFVDetector(const ResourceId res) : GenericFVDetector(res) {
+}
+
 ResourceProblem::Type OpenWorldFVDetector::getResourceLevelViolation(const InstantId inst) const
 {
 	if (inst->getUpperLevel() + (m_maxCumulativeProduction - inst->getMinCumulativeProduction()) < m_lowerLimit)
@@ -13,11 +16,10 @@ ResourceProblem::Type OpenWorldFVDetector::getResourceLevelViolation(const Insta
 				" Maximum remaining production: " << (m_maxCumulativeProduction - inst->getMinCumulativeProduction()));
 		return ResourceProblem::LevelTooLow;
 	}
-
 	if (inst->getLowerLevel() - (m_maxCumulativeConsumption - inst->getMinCumulativeConsumption()) > m_upperLimit)
 	{
-    	debugMsg("OpenWorldFVDetector:detect", "Upper limit violation.  Limit: " << m_upperLimit << " Lower level: " << inst->getLowerLevel() <<
-    			" Maxumum remaining consumption: " << (m_maxCumulativeConsumption - inst->getMinCumulativeConsumption()));
+		debugMsg("OpenWorldFVDetector:detect", "Upper limit violation.  Limit: " << m_upperLimit << " Lower level: " << inst->getLowerLevel() <<
+				" Maxumum remaining consumption: " << (m_maxCumulativeConsumption - inst->getMinCumulativeConsumption()));
     	return ResourceProblem::LevelTooHigh;
 	}
 	return ResourceProblem::NoProblem;

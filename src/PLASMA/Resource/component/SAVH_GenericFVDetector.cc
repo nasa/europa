@@ -21,7 +21,7 @@ namespace EUROPA {
 
     ResourceProblem::Type GenericFVDetector::getResourceViolation(const InstantId inst) const
     {
-    if (inst->getMinCumulativeConsumption() > m_maxCumulativeConsumption)
+    	if (inst->getMinCumulativeConsumption() > m_maxCumulativeConsumption)
     	{
     		debugMsg("GenericFVDetector:detect", "Cumulative consumption violation.");
     		return ResourceProblem::ConsumptionSumExceeded;
@@ -92,11 +92,11 @@ namespace EUROPA {
        		debugMsg("GenericFVDetector:detect", "Instantaneous production flaw.");
     	}
     	handleResourceLevelFlaws(inst);
-   
     }
     
     bool GenericFVDetector::detect(const InstantId inst) {
-    	debugMsg("GenericFVDetector:detect", "Max cumulative consumption: " << m_maxCumulativeConsumption << 
+        debugMsg("GenericFVDetector:detect", "Detecting flaws and violations at time " << inst->getTime());
+     	debugMsg("GenericFVDetector:detect", "Max cumulative consumption: " << m_maxCumulativeConsumption << 
     			".  At instant: " << inst->getMaxCumulativeConsumption() << ".");
     	debugMsg("GenericFVDetector:detect", "Max cumulative production: " << m_maxCumulativeConsumption << 
     			".  At instant: " << inst->getMaxCumulativeProduction() << ".");
@@ -140,7 +140,7 @@ namespace EUROPA {
     	}
     	
     	// Return true if there was a violation and we're not allowing violations:
-    	return(violation && !allowViolations());
+    	return(inst->isViolated() && !allowViolations());
     }
   }
 }

@@ -5,6 +5,9 @@
 namespace EUROPA {
 namespace SAVH {
 
+ClosedWorldFVDetector::ClosedWorldFVDetector(const ResourceId res) : GenericFVDetector(res) {
+}
+
 ResourceProblem::Type ClosedWorldFVDetector::getResourceLevelViolation(const InstantId inst) const
 {
 	if (inst->getUpperLevel() < m_lowerLimit)
