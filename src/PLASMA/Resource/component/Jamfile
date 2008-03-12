@@ -19,6 +19,9 @@ ModuleComponent Resource
 		SAVH_DurativeTokens.cc
 		SAVH_Reusable.cc
 		SAVH_ReusableFVDetector.cc
+                SAVH_GenericFVDetector.cc
+                SAVH_OpenWorldFVDetector.cc
+                SAVH_ClosedWorldFVDetector.cc
 		;
 
 SubInclude PLASMA Resource component NDDL ;
