@@ -17,9 +17,7 @@ namespace EUROPA {
                                   "ProductionSumExceeded",
                                   "ConsumptionSumExceeded",
                                   "LevelTooHigh",
-				  "LevelTooLow",
-				  "NoWayOutConsumption",
-				  "NoWayOutProduction"
+				  "LevelTooLow"
   };
 
   /**
@@ -37,9 +35,7 @@ namespace EUROPA {
                 ProductionSumExceeded, /**< Total production for the resource exceded. */
                 ConsumptionSumExceeded, /**< Total consumption fo rthe resource exceded. */
                 LevelTooHigh, /**< Level is outside the upper limit, taking into account remaining possible production or consumption. */
-                LevelTooLow, /**< Level is outside the lower limit, taking into account remaining possible production or consumption. */
-		NoWayOutConsumption,
-		NoWayOutProduction
+                LevelTooLow /**< Level is outside the lower limit, taking into account remaining possible production or consumption. */
 	};
 
     static const char* getString(Type t) { return labels[t]; }

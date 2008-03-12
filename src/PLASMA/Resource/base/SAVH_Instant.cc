@@ -76,61 +76,22 @@ namespace EUROPA {
       m_startingTransactions.erase(t);
     }
 
-    double Instant::getLowerLevel() {
-      return recomputeAndReturn(m_lowerLevel);
-    }
-
-    double Instant::getLowerLevelMax() {
-      return recomputeAndReturn(m_lowerLevelMax);
-    }
-
-    double Instant::getUpperLevelMin() {
-      return recomputeAndReturn(m_upperLevelMin);
-    }
-
-    double Instant::getUpperLevel() {
-      return recomputeAndReturn(m_upperLevel);
-    }
-
-    double Instant::getMaxInstantProduction() {
-      return recomputeAndReturn(m_maxInstProduction);
-    }
-
-    double Instant::getMinInstantProduction() {
-      return recomputeAndReturn(m_minInstProduction);
-    }
-
-    double Instant::getMaxInstantConsumption() {
-      return recomputeAndReturn(m_maxInstConsumption);
-    }
-
-    double Instant::getMinInstantConsumption() {
-      return recomputeAndReturn(m_minInstConsumption);
-    }
-
-    double Instant::getMaxCumulativeConsumption() {return recomputeAndReturn(m_maxCumulativeConsumption);}
-    
-    double Instant::getMaxCumulativeProduction() {return recomputeAndReturn(m_maxCumulativeProduction);}
-    
-    double Instant::getMinCumulativeConsumption() {return recomputeAndReturn(m_minCumulativeConsumption);}
-    
-    double Instant::getMinCumulativeProduction() {return recomputeAndReturn(m_minCumulativeProduction);}
-    
-
-    double Instant::getMaxPrevConsumption() {return recomputeAndReturn(m_maxPrevConsumption);}
-    
-    double Instant::getMaxPrevProduction() {return recomputeAndReturn(m_maxPrevProduction);}
-    
-    double Instant::getMinPrevConsumption() {return recomputeAndReturn(m_minPrevConsumption);}
-    
-    double Instant::getMinPrevProduction() {return recomputeAndReturn(m_minPrevProduction);}
-
-    double Instant::recomputeAndReturn(double retval) {
-      //       if(m_profile->m_needsRecompute)
-      // 	m_profile->handleRecompute();
-      return retval;
-    }
-
+    double Instant::getLowerLevel() {return m_lowerLevel;}
+    double Instant::getLowerLevelMax() {return m_lowerLevelMax;}
+    double Instant::getUpperLevelMin() {return m_upperLevelMin;}
+    double Instant::getUpperLevel() {return m_upperLevel;}
+    double Instant::getMaxInstantProduction() {return m_maxInstProduction;}
+    double Instant::getMinInstantProduction() {return m_minInstProduction;}
+    double Instant::getMaxInstantConsumption() {return m_maxInstConsumption;}
+    double Instant::getMinInstantConsumption() {return m_minInstConsumption;}
+    double Instant::getMaxCumulativeConsumption() {return m_maxCumulativeConsumption;}
+    double Instant::getMaxCumulativeProduction() {return m_maxCumulativeProduction;}
+    double Instant::getMinCumulativeConsumption() {return m_minCumulativeConsumption;}
+    double Instant::getMinCumulativeProduction() {return m_minCumulativeProduction;}
+    double Instant::getMaxPrevConsumption() {return m_maxPrevConsumption;}
+    double Instant::getMaxPrevProduction() {return m_maxPrevProduction;}
+    double Instant::getMinPrevConsumption() {return m_minPrevConsumption;}
+    double Instant::getMinPrevProduction() {return m_minPrevProduction;}
 
     void Instant::update(double lowerLevelMin, double lowerLevelMax, double upperLevelMin, double upperLevelMax,
                          double minInstConsumption, double maxInstConsumption, double minInstProduction, double maxInstProduction,

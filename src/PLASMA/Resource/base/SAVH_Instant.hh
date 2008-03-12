@@ -235,8 +235,6 @@ namespace EUROPA {
        */
       void removeTransaction(const TransactionId t);
 
-      double recomputeAndReturn(double retval);
-
       /**
        * @brief Determines if this Instant is at the start or end of a transaction.  Used to decide if an Instant that has transactions should be deleted.
        * @return True if the time of the Instant is equal to one of the bounds of one of the times of the transactions overlapping this instant.
