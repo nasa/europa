@@ -44,7 +44,7 @@
   <target name="dist" description="Creates the binary distribution and packages it up into ${dir.dist}/${file.plasma_dist}">
     <antcall target="build"/>
     <antcall target="build">
-      <param name="jam.variant" value="OPTIMIZED"/>
+      <param name="jam.opts" value="-sVARIANTS=OPTIMIZED -sLIBRARIES=${jam.libraries}"/>
     </antcall>
     <!-- Create the distribution directory  -->
     <mkdir dir="${dir.dist}"/>
