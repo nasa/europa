@@ -17,6 +17,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 namespace EUROPA 
 {
@@ -71,25 +72,31 @@ namespace EUROPA
 #endif
     }
 
+    void EngineBase::initializeModule(ModuleId module)
+    {
+      	module->initialize();
+      	debugMsg("EngineBase","Initialized Module " << module->getName());		  
+    }
+    
+    void EngineBase::uninitializeModule(ModuleId module)
+    {
+    	module->uninitialize();
+    	debugMsg("EngineBase","Uninitialized Module " << module->getName());
+    	module.release();
+    }
+        
     void EngineBase::initializeModules()
     {
 	    createModules();
-	  
-	    for (unsigned int i=0;i<m_modules.size();i++) {
-	    	m_modules[i]->initialize();
-	    	debugMsg("PSEngine","Initialized Module " << m_modules[i]->getName());		  
-	    }	  
+	    for (unsigned int i=0;i<m_modules.size();i++)
+	    	initializeModule(m_modules[i]);
     }
 
     void EngineBase::uninitializeModules()
     {
         Entity::purgeStarted();      
-        for (unsigned int i=m_modules.size();i>0;i--) {
-        	unsigned int idx = i-1;
-        	m_modules[idx]->uninitialize();
-        	debugMsg("PSEngine","Uninitialized Module " << m_modules[idx]->getName());
-        	m_modules[idx].release();
-        }	  
+        for (unsigned int i=m_modules.size(); i>0 ;i--)
+        	uninitializeModule(m_modules[i-1]);
         Entity::purgeEnded();	  
 
         m_modules.clear();	  
@@ -106,22 +113,48 @@ namespace EUROPA
     	uninitializeByModules();
     	deallocateComponents();
     }
+    
 
+    // NOTE: Assumption that other modules are already initialized
+	void EngineBase::addModule(ModuleId module)
+	{
+		m_modules.push_back(module);
+		initializeModule(module);
+		initializeByModule(module);
+	}
+
+	// NOTE:  Assumption that we haven't yet invoked doStop() or uninitialize()
+	void EngineBase::removeModule(ModuleId module)
+	{
+		std::vector<ModuleId>::iterator it = find(m_modules.begin(), m_modules.end(), module);	
+		checkError(it != m_modules.end(), "EngineBase: removeModule Module not found." << module->getName());
+		uninitializeByModule(module);
+		uninitializeModule(module);
+		m_modules.erase(it);
+	}
+    
+    void EngineBase::initializeByModule(ModuleId module)
+    {
+    	module->initialize(getId());
+    	debugMsg("EngineBase","Engine initialized by Module " << module->getName());		  
+    }
+    
+    void EngineBase::uninitializeByModule(ModuleId module)
+    {
+    	module->uninitialize(getId());
+    	debugMsg("EngineBase","Engine uninitialized by Module " << module->getName());
+    }
+    
     void EngineBase::initializeByModules()
     {
-	    for (unsigned int i=0;i<m_modules.size();i++) {
-	    	m_modules[i]->initialize(getId());
-	    	debugMsg("PSEngine","Engine initialized by Module " << m_modules[i]->getName());		  
-	    }	  	      	
+	    for (unsigned int i=0;i<m_modules.size();i++)
+	    	initializeByModule(m_modules[i]);
     }
     
     void EngineBase::uninitializeByModules()
     {
-    	  for (unsigned int i=m_modules.size();i>0;i--) {
-    		  unsigned int idx = i-1;
-    		  m_modules[idx]->uninitialize(getId());
-    		  debugMsg("PSEngine","Engine uninitialized by Module " << m_modules[idx]->getName());		  
-    	  }	  
+    	for (int i=m_modules.size(); i>0; i--)
+    		uninitializeByModule(m_modules[i-1]);	  
     }
     
     void EngineBase::allocateComponents()

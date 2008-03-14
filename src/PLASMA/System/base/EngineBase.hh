@@ -18,6 +18,9 @@ namespace EUROPA {
     	virtual void doStart();
     	virtual void doShutdown();
     	
+    	virtual void addModule(ModuleId module);
+    	virtual void removeModule(ModuleId module);
+    	
         virtual EngineComponentId& getComponent(const std::string& name);
         
         virtual std::string executeScript(const std::string& language, const std::string& script, bool isFile);        
@@ -32,13 +35,21 @@ namespace EUROPA {
     	EngineBase() {}
     	virtual ~EngineBase() {}
 
+    	void initializeByModule(ModuleId module);
+    	void uninitializeByModule(ModuleId module);
+    	
     	void initializeByModules();
     	void uninitializeByModules();
     	
     	// TODO: Modules should not be static, they are for now because of all the singletons we still have laying around
     	static void createModules();
+    	
+    	static void initializeModule(ModuleId module);
+    	static void uninitializeModule(ModuleId module);
+    	
     	static void initializeModules();
     	static void uninitializeModules();
+    	
     	static ModuleId getModuleByName(const std::string& name);
     	
     	virtual void allocateComponents();
