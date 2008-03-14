@@ -250,7 +250,7 @@ namespace EUROPA {
       check_error(m_libHandle == NULL, "Model already loaded.");
       m_libHandle = p_dlopen(libPath, RTLD_NOW);
       if (!m_libHandle) {
-        const char* error_msg = p_dlerror();
+        check_error_variable(const char* error_msg = p_dlerror());
         check_error(!error_msg, error_msg); 
       }
     }
@@ -267,7 +267,7 @@ namespace EUROPA {
     try {
       fcn_loadSchema = (SchemaId (*)())p_dlsym(m_libHandle, "loadSchema");
       if (!fcn_loadSchema) {
-        const char* error_msg = p_dlerror();
+        check_error_variable(const char* error_msg = p_dlerror());
         check_error(!error_msg, error_msg); 
       }
     }
@@ -387,7 +387,7 @@ namespace EUROPA {
       logMsg("In MasterController: Closing");
 
       if (p_dlclose(m_libHandle)) {
-        const char* error_msg = p_dlerror();
+        check_error_variable(const char* error_msg = p_dlerror());
         try {
           check_error(!error_msg, error_msg); 
         }
