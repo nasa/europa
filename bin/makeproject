@@ -35,9 +35,9 @@ def detemplate (string, isFilename):
     toret = re.sub("TEMPLATE", projectName.upper(), toret)
     toret = re.sub("template", projectName.lower(), toret)
   else:
-    toret = re.sub("%Project%", projectName, toret)
-    toret = re.sub("%PROJECT%", projectName.upper(), toret)
-    toret = re.sub("%project%", projectName.lower(), toret)
+    toret = re.sub("%%Project%%", projectName, toret)
+    toret = re.sub("%%PROJECT%%", projectName.upper(), toret)
+    toret = re.sub("%%project%%", projectName.lower(), toret)
   return toret
 
 def copytemplate (source, dest, isDir):

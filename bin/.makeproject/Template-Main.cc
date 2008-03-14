@@ -12,7 +12,7 @@
 #include "Debug.hh"
 
 #include "ConstraintLibrary.hh"  // Not actually needed unless custom constraints defined and regsitered here
-#include "%Project%CustomCode.hh" 
+#include "%%Project%%CustomCode.hh" 
 
 using namespace EUROPA;
 

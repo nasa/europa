@@ -1,4 +1,4 @@
-package %project%;
+package %%project%%;
 
 import org.ops.ui.PSDesktop;
 import org.ops.ui.util.LibraryLoader;

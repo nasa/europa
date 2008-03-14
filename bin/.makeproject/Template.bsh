@@ -1,16 +1,16 @@
 import psengine.*;
 import org.ops.ui.util.Util;
 
-String project="%Project%";
+String project="%%Project%%";
 
 // Import any swig-wrapped custom C++ code:
 // (WARNING:  Need './lib' added to LD_LIBRARY_PATH for this to work)
-import %Project%.*; 
+import %%Project%%.*; 
 import org.ops.ui.util.LibraryLoader;
 String debugMode = desktop.getLibsMode();
-LibraryLoader.loadLibrary("%Project%_"+debugMode);
+LibraryLoader.loadLibrary("%%Project%%_"+debugMode);
 
-psengine.executeScript("nddl",bsh.cwd+"/%Project%-initial-state.nddl",true/*isFile*/);
+psengine.executeScript("nddl",bsh.cwd+"/%%Project%%-initial-state.nddl",true/*isFile*/);
 desktop.makeNddlConsole();
 solver = desktop.makeSolver(
                             "PlannerConfig.xml" // config

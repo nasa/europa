@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- This file is placed by the makeproject script in new projects -->
-<project name="%Project%" default="run" basedir=".">
+<project name="%%Project%%" default="run" basedir=".">
   <description>A EUROPA PSDesktop Project</description>
 
   <property environment="env"/>
@@ -12,7 +12,7 @@
 
   <property name="debug"  value="true"/>
   <property name="deprecation"  value="true"/>
-  <property name="dist" value="lib"/>    
+  <property name="dist" value="build/lib"/>    
 
 
   <path id="psui.class.path">
@@ -38,16 +38,16 @@
   </target>
 
   <property name="java.src.dir" value="java"/> 
-  <property name="swig.src.dir" value="swig/%Project%/"/>
+  <property name="swig.src.dir" value="build/swig/%%Project%%/"/>
   <property name="build.dir"     value="build"/> 
 
   <!-- Create .jar to include any custom Java and swig-wrapped C++ -->
-  <target name="%Project%" depends="compile">
+  <target name="%%Project%%" depends="compile">
      <mkdir dir="${dist}"/>  				<!-- if necessary -->
-     <jar jarfile="${dist}/%Project%.jar">
+     <jar jarfile="${dist}/%%Project%%.jar">
 	 <fileset dir="${build.dir}"/>
      </jar>
-     <touch file="${dist}/%Project%.jar"/>
+     <touch file="${dist}/%%Project%%.jar"/>
   </target> 
    
   <target name="clean" description="delete the 'classes' directory trees" >

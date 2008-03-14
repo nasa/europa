@@ -1,4 +1,4 @@
-#include "%Project%-model.nddl"
+#include "%%Project%%-model.nddl"
 
 // Create a planner configuration instance in PLASMA.
 // Horizon Start, Horizon End, MaxPlannerSteps, MaxPlannerDepth
