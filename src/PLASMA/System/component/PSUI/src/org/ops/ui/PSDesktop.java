@@ -47,7 +47,8 @@ public class PSDesktop
 	protected JDesktopPane desktop_;
 	protected int windowCnt_=0;
 	protected PSEngine psEngine_=null;
-
+    protected Interpreter bshInterpreter_;
+    
 	protected static NddlInterpreter nddlInterpreter = new NddlInterpreter();
 	protected static String debugMode_="g";
 	protected static String bshFile_=null;
@@ -78,10 +79,15 @@ public class PSDesktop
 
 	public static void run(String[] args)
 	{
-		init(parseArgs(args));
+		init(args);
 		desktop.runUI();		
 	}
 	
+    public static void init(String[] args)
+    {   
+        init(parseArgs(args));    
+    }
+    
 	public static void init(Map<String,String> args)
 	{
 		PSDesktop.desktop = new PSDesktop();
@@ -145,31 +151,45 @@ public class PSDesktop
     }
 
     private void createDesktop()
-        throws Exception
     {
-			desktop = this;
+        desktop = this;
     	desktop_ = new JDesktopPane();
 
         // BeanShell scripting
         JConsole console = new JConsole();
         JInternalFrame consoleFrame = makeNewFrame("Console");
         consoleFrame.getContentPane().add(console);
-        Interpreter interp = new Interpreter(console);
-        new Thread(interp).start();
+        bshInterpreter_ = new Interpreter(console);
+        new Thread(bshInterpreter_).start();
 
-        registerVariables(interp);
+        registerBshVariables();
 
-        if (bshFile_ != null)
-        	interp.eval("source(\""+bshFile_+"\");");
+        if (bshFile_ != null) {
+            try {
+        	    bshInterpreter_.eval("source(\""+bshFile_+"\");");
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
         //consoleFrame.setIcon(true);
     }
 
-    protected void registerVariables(Interpreter interp)
-        throws Exception
+    public void addBshVariable(String name,Object obj)
     {
-        interp.set("desktop",this);
-        interp.set("psengine",getPSEngine());
-				interp.set("nddlInterp", nddlInterpreter);
+        try {
+            bshInterpreter_.set(name,obj);
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    protected void registerBshVariables()
+    {
+        addBshVariable("desktop",this);
+        addBshVariable("psengine",getPSEngine());
+        addBshVariable("nddlInterp", nddlInterpreter);
     }
 
     public void makeTableFrame(String title,List l,String fields[])
@@ -211,6 +231,11 @@ public class PSDesktop
     	}
     }
 
+    public void setPSEngine(PSEngine pse)
+    {
+        psEngine_ = pse;
+    }
+    
     public PSEngine getPSEngine()
     {
     	if (psEngine_ == null) {
