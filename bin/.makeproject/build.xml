@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- This file is placed by the makeproject script in new projects -->
 <project name="%%Project%%" default="run" basedir=".">
-  <description>A EUROPA PSDesktop Project</description>
+  <description>%%Project%% -- A EUROPA PSDesktop Project</description>
 
   <property environment="env"/>
   <!-- load overrides from build.properties file -->
@@ -33,38 +33,38 @@
 
   <target name="init">
     <tstamp/>
-    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${class.dir}"/>
     <mkdir dir="${swig.src.dir}"/>
   </target>
 
   <property name="java.src.dir" value="java"/> 
   <property name="swig.src.dir" value="build/swig/%%Project%%/"/>
-  <property name="build.dir"     value="build"/> 
+  <property name="class.dir"     value="build/classes"/> 
 
   <!-- Create .jar to include any custom Java and swig-wrapped C++ -->
   <target name="%%Project%%" depends="compile">
      <mkdir dir="${dist}"/>  				<!-- if necessary -->
      <jar jarfile="${dist}/%%Project%%.jar">
-	 <fileset dir="${build.dir}"/>
+       <fileset dir="${class.dir}"/>
      </jar>
      <touch file="${dist}/%%Project%%.jar"/>
-  </target> 
-   
+  </target>
+
   <target name="clean" description="delete the 'classes' directory trees" >
-    <delete dir="${build.dir}"/>
+    <delete dir="${class.dir}"/>
   </target>
 
   <target name="compile" depends="init" description="compile 'src' tree into 'classes' tree" >
   <!-- Compile Main.java and any custom java code -->
     <javac srcdir="${java.src.dir}" 
-           destdir="${build.dir}" 
+           destdir="${class.dir}" 
     	   debug="${debug}" 
     	   deprecation="${deprecation}">
 	  <classpath refid="psui.class.path"/>
     </javac>
   <!-- Compile any swig-wrapped custom C++ code -->
    <javac srcdir="${swig.src.dir}" 
-           destdir="${build.dir}" 
+           destdir="${class.dir}" 
     	   debug="${debug}" 
     	   deprecation="${deprecation}">
 	  <classpath refid="psui.class.path"/>
@@ -81,7 +81,7 @@
       <arg value="${project.bsh.script}"/>
       <classpath>
       <path refid="psui.class.path"/>
-      <pathelement location="${build.dir}"/>
+      <pathelement location="${class.dir}"/>
        </classpath>
     </java>
   </target>

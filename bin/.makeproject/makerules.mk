@@ -1,6 +1,6 @@
 # insane function call which will place targets in the correct locations
 
-findtarget = $(if $(findstring .$(LIB_EXT),$(suffix $(1))),build/lib/$(1),$(if $(findstring .o,$(suffix $(1))),build/object/$(1),$(if $(findstring .exe,$(patsubst %$(RT_SUFFIX),%.exe,$(1))),build/bin/$(1),build/$(1))))
+findtarget = $(if $(findstring .$(LIB_EXT),$(suffix $(1))),build/lib/$(1),$(if $(findstring .jar,$(suffix $(1))),build/lib/$(1),$(if $(findstring .o,$(suffix $(1))),build/object/$(1),$(if $(findstring .exe,$(patsubst %$(RT_SUFFIX),%.exe,$(1))),build/bin/$(1),build/$(1)))))
 
 %_wrap.cc: %.i
 	$(SWIG) -java -package $(basename $<) -o $@ -c++ -outdir build/swig/$(basename $<) $<
