@@ -1,9 +1,9 @@
 {
   PLASMA_HOME ?= [ FDirName .. PLASMA ] ;
-  local SUBDIR = $(%Project%) ;
+  local SUBDIR = $(%%Project%%) ;
   local PLASMA = [ FDirName $(PLASMA_HOME) src PLASMA ] ;
   include [ FDirName $(PLASMA_HOME) src PLASMA Jamrules ] ;
   include [ FDirName $(PLASMA_HOME) src PLASMA SWIGRules ] ; 
   include [ FDirName $(SUBDIR) Jamfile ] ;
-  %PROJECT%_READY = TRUE ;
+  %%PROJECT%%_READY = TRUE ;
 }
