@@ -47,6 +47,7 @@ public class PSDesktop
 	protected JDesktopPane desktop_;
 	protected int windowCnt_=0;
 	protected PSEngine psEngine_=null;
+	protected JConsole bshConsole_;
     protected Interpreter bshInterpreter_;
     
 	protected static NddlInterpreter nddlInterpreter = new NddlInterpreter();
@@ -93,6 +94,12 @@ public class PSDesktop
 		PSDesktop.desktop = new PSDesktop();
 		debugMode_ = args.get("debugMode");
 		bshFile_ = args.get("bshFile");		
+	}
+	
+	protected PSDesktop()
+	{
+        bshConsole_ = new JConsole();
+        bshInterpreter_ = new Interpreter(bshConsole_);                	    
 	}
 	
     public void runUI()
@@ -156,10 +163,8 @@ public class PSDesktop
     	desktop_ = new JDesktopPane();
 
         // BeanShell scripting
-        JConsole console = new JConsole();
         JInternalFrame consoleFrame = makeNewFrame("Console");
-        consoleFrame.getContentPane().add(console);
-        bshInterpreter_ = new Interpreter(console);
+        consoleFrame.getContentPane().add(bshConsole_);
         new Thread(bshInterpreter_).start();
 
         registerBshVariables();
