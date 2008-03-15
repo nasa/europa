@@ -8,7 +8,7 @@ else
   CXXFLAGS += -ggdb3
 endif
 
-ifdef $(ANT_HOME)
+ifdef ANT_HOME
   ANT := $(ANT_HOME)/bin/ant
 else
   ANT := ant
@@ -18,7 +18,7 @@ RM := rm -rf
 MV := mv
 MKDIR := mkdir -p
 CXX := g++
-ifdef $(JAVA_HOME)
+ifdef JAVA_HOME
   JAVA := $(JAVA_HOME)/bin/java
 else
   JAVA := java
@@ -33,7 +33,7 @@ SHARED_LINK_FLAG := -shared
 ifneq (,$(findstring Linux,$(UNAME)))
   LINUX := 1
   LIB_EXT := so
-  ifdef $(JAVA_HOME)
+  ifdef JAVA_HOME
     CXXFLAGS += -I"$(JAVA_HOME)/include"
     CXXFLAGS += -I"$(JAVA_HOME)/include/linux"
   endif
@@ -43,7 +43,7 @@ ifneq (,$(findstring CYGWIN,$(UNAME)))
   CYGWIN := 1
   LIB_EXT := dll
   RT_SUFFIX := _rt.exe
-  ifdef $(JAVA_HOME)
+  ifdef JAVA_HOME
     CXXFLAGS += -I"$(JAVA_HOME)/include"
     CXXFLAGS += -I"$(JAVA_HOME)/include/win32"
   endif
