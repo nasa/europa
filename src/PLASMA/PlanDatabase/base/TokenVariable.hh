@@ -142,9 +142,7 @@ namespace EUROPA{
 	       "Attempted to specify " << this->toString() << 
 	       " of merged token " << this->m_parentToken->toString() << ". ");
 
-    // if not already specifed through merged variables, then specify it
-    if(!this->specifiedFlag())
-      this->internalSpecify(singletonValue);
+    this->internalSpecify(singletonValue);
 
     m_isLocallySpecified = true;
     m_localSpecifiedValue = singletonValue;
