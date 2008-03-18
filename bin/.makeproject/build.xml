@@ -14,21 +14,8 @@
   <property name="deprecation"  value="true"/>
   <property name="dist" value="build/lib"/>    
 
-
   <path id="psui.class.path">
-    <pathelement location="${europa.dir}/lib/nddl.jar"/>
-    <pathelement location="${europa.dir}/lib/PSEngine.jar"/>
     <pathelement location="${europa.dir}/lib/PSUI.jar"/>
-    <pathelement location="${psui.lib.dir}/nanoxml/nanoxml.jar"/>
-    <pathelement location="${psui.lib.dir}/jfreechart/jcommon-1.0.5.jar"/>
-    <pathelement location="${psui.lib.dir}/jfreechart/jfreechart-1.0.2.jar"/>
-    <pathelement location="${psui.lib.dir}/egantt/egantt-core.jar"/>
-    <pathelement location="${psui.lib.dir}/egantt/egantt-ext.jar"/>
-    <pathelement location="${psui.lib.dir}/egantt/egantt-resources.jar"/>
-    <pathelement location="${psui.lib.dir}/beanshell/bsh-2.0b4.jar"/>
-    <pathelement location="${psui.lib.dir}/junit/junit-4.1.jar"/>
-    <pathelement location="${psui.lib.dir}/josql/JoSQL-1.9.jar"/>
-    <pathelement location="${psui.lib.dir}/josql/gentlyWEB-utils-1.1.jar"/>
   </path>
 
   <target name="init">
