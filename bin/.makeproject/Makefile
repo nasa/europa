@@ -59,4 +59,4 @@ $(PROJECT_JAR): $(PROJECT_SWIG)
 	$(ANT) $(PROJECT) 
 
 clean:
-	$(RM) build $(RUN_PROJECT) $(PROJECT)-model.hh $(PROJECT_INITIAL_STATE)
+	$(RM) build $(RUN_PROJECT) $(PROJECT)-model.hh $(PROJECT_INITIAL_STATE) $(PROJECT)-model.cc $(PROJECT)_wrap.cc
