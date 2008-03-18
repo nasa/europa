@@ -27,7 +27,6 @@ endif
 
 RT_SUFFIX := _rt
 LIB_PREFIX := lib
-BUILD_SUFFIX := _g
 SHARED_LINK_FLAG := -shared
 
 ifneq (,$(findstring Linux,$(UNAME)))
