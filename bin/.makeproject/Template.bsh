@@ -1,14 +1,19 @@
 import psengine.*;
 import org.ops.ui.util.Util;
-
-String project="%%Project%%";
-
-// Import any swig-wrapped custom C++ code:
-// (WARNING:  Need './lib' added to LD_LIBRARY_PATH for this to work)
-import %%Project%%.*; 
 import org.ops.ui.util.LibraryLoader;
+
+//Load module with any custom code if it exists:
 String debugMode = desktop.getLibsMode();
-LibraryLoader.loadLibrary("%%Project%%_"+debugMode);
+String libName = "%%Project%%_" + debugMode;
+String fullLibName = LibraryLoader.getResolvedName(libName); 
+if(fullLibName == null) {
+	// Run 'make' to compile the library if you need it:
+	System.out.println("WARNING: Your custom library " + libName + " wasn't found and won't be loaded.");  
+}
+else {
+	psengine.loadModule(fullLibName);
+}
+
 
 psengine.executeScript("nddl",bsh.cwd+"/%%Project%%-initial-state.nddl",true/*isFile*/);
 desktop.makeNddlConsole();

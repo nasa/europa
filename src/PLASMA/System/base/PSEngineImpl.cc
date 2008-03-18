@@ -54,7 +54,8 @@ namespace EUROPA {
   {
 	EngineBase::terminate();  
   }
-  
+ 
+
   void PSEngineImpl::start() 
   {		
 	if (m_started)
@@ -93,6 +94,26 @@ namespace EUROPA {
       return EngineBase::getComponent(name);  	
   }   
   
+  
+  // TODO:  Note similarity with loadModel (ugly code duplication).  However, the last line here is different.
+  void PSEngineImpl::loadModule(const std::string& moduleFileName) 
+   {
+     check_runtime_error(m_started,"PSEngine has not been started");
+ 	    
+     void* libHandle = p_dlopen(moduleFileName.c_str(), RTLD_NOW);
+     checkRuntimeError(libHandle != NULL,
+ 	       "Error opening module " << moduleFileName << ": " << p_dlerror());
+
+     ModuleId (*fcn_module)();
+     fcn_module = (ModuleId (*)()) p_dlsym(libHandle, "initializeModule");
+     checkError(fcn_module != NULL,
+ 	       "Error locating symbol 'initializeModule' in " << moduleFileName << ": " <<
+ 	       p_dlerror());
+
+     ModuleId module = (*fcn_module)();
+     EngineBase::addModule(module);
+  }
+  
   void PSEngineImpl::loadModel(const std::string& modelFileName) 
   {
     check_runtime_error(m_started,"PSEngine has not been started");
@@ -109,7 +130,7 @@ namespace EUROPA {
 
     SchemaId schema = (*fcn_schema)();
   }
-
+  
   std::string PSEngineImpl::executeScript(const std::string& language, const std::string& script, bool isFile) 
   {
     return EngineBase::executeScript(language,script,isFile);

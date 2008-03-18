@@ -17,22 +17,29 @@ public class LibraryLoader {
   }
 
   public static void loadLibrary(String libname) {
-    String localName = mapLibraryName(libname);
-    String[]libpath = System.getProperty("java.library.path").split(File.pathSeparator);
-    for(int i=0; i<libpath.length; ++i) {
-      File lib = new File(libpath[i], localName);
-      if(lib.exists()) {
-        String resolvedLibName = null;
-        try {
-          resolvedLibName = lib.getCanonicalPath();
-        }
-        catch(IOException ex) {
-          resolvedLibName = lib.getAbsolutePath();
-        }
-        System.load(resolvedLibName);
-        return;
-      }
-    }
-    throw new UnsatisfiedLinkError("no " + libname + " in java.library.path");
+	  String resolvedLibName = getResolvedName(libname);
+	  if(resolvedLibName == null) {
+		  throw new UnsatisfiedLinkError("no " + libname + " in java.library.path");
+	  }
+      System.load(resolvedLibName);
+  }
+
+  public static String getResolvedName(String libname) {
+	  String resolvedLibName = null;
+	  String localName = mapLibraryName(libname);
+	  String[]libpath = System.getProperty("java.library.path").split(File.pathSeparator);
+	  for(int i=0; i<libpath.length; ++i) {
+		  File lib = new File(libpath[i], localName);
+		  if(lib.exists()) {
+			  try {
+				  resolvedLibName = lib.getCanonicalPath();
+			  }
+			  catch(IOException ex) {
+				  resolvedLibName = lib.getAbsolutePath();
+			  }
+			  break;
+		  }
+	  }
+	  return resolvedLibName;
   }
 }

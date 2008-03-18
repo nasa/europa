@@ -38,13 +38,15 @@ PROJECT_LIB = $(call findtarget,$(LIB_PREFIX)$(PROJECT)$(BUILD_SUFFIX).$(LIB_EXT
 project-lib: prebuild $(PROJECT_LIB)
 $(PROJECT_LIB): $(PROJECT_MODEL) \
                 $(PROJECT_SWIG) \
-                $(call findtarget,$(PROJECT)CustomCode$(BUILD_SUFFIX).o)
+                $(call findtarget,$(PROJECT)CustomCode$(BUILD_SUFFIX).o) \
+                $(call findtarget,Module$(PROJECT)$(BUILD_SUFFIX).o)
 
 PROJECT_RT = $(call findtarget,$(PROJECT)-planner$(BUILD_SUFFIX)$(RT_SUFFIX))
 project-rt: prebuild $(PROJECT_RT)
 $(PROJECT_RT): $(PROJECT_MODEL) \
                $(call findtarget,$(PROJECT)-Main$(BUILD_SUFFIX).o) \
-               $(call findtarget,$(PROJECT)CustomCode$(BUILD_SUFFIX).o)
+               $(call findtarget,$(PROJECT)CustomCode$(BUILD_SUFFIX).o) \
+                $(call findtarget,Module$(PROJECT)$(BUILD_SUFFIX).o)
 
 RUN_PROJECT = RUN_$(notdir $(PROJECT_RT)).$(notdir $(PROJECT_INITIAL_STATE)).PlannerConfig.xml.output
 run-project: prebuild $(RUN_PROJECT)

@@ -11,8 +11,7 @@
 #include "PSEngine.hh" 
 #include "Debug.hh"
 
-#include "ConstraintLibrary.hh"  // Not actually needed unless custom constraints defined and regsitered here
-#include "%%Project%%CustomCode.hh" 
+#include "Module%%Project%%.hh"
 
 using namespace EUROPA;
 
@@ -56,6 +55,7 @@ void executeWithAssembly(const char* plannerConfig, const char* txSource)
   
   { // Encapsualte allocation so that they go out of scope before calling terminate  
     SolverAssembly assembly(schema);    
+    assembly.addModule(new Module%%Project%%());
     assembly.plan(txSource, plannerConfig); // Run the planner    
     assembly.write(std::cout); // Dump the results
   }
@@ -73,6 +73,9 @@ bool executeWithPSEngine(const char* plannerConfig, const char* txSource, int st
       {
 	      PSEngine* engine = PSEngine::makeInstance();	
 	      engine->start();
+	      
+	      // TODO: Needs to be generic
+	      // engine->loadModule("build/lib/lib%%Project%%_g.so");  
 	      
 	      engine->executeScript("nddl-xml",txSource,true/*isFile*/);
 

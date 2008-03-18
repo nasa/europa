@@ -199,12 +199,13 @@ namespace EUROPA {
     void start();
     void shutdown();
 
+    void loadModule(const std::string& moduleFileName);
     void loadModel(const std::string& modelFileName);
     std::string executeScript(const std::string& language, const std::string& script, bool isFile) throw(Error);
 
     PSList<PSObject*> getObjectsByType(const std::string& objectType);
     PSObject* getObjectByKey(PSEntityKey id);
-	PSObject* getObjectByName(const std::string& name);
+	  PSObject* getObjectByName(const std::string& name);
 
     PSList<PSVariable*> getGlobalVariables();
     PSVariable* getVariableByKey(PSEntityKey id);

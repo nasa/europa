@@ -3,15 +3,5 @@
 
 %{
   #include "%%Project%%CustomCode.hh"
+  #include "Module%%Project%%.hh"
 %}
-
-
-// Example of how to incorporate the ExampleConstraint declared in %%Project%%CustomCode.hh
-
-//%nodefaultctor ExampleConstraint;   
- 
-//class ExampleConstraint {
-//  public:
-//    static void ExampleConstraint::registerSelf(std::string name, std::string propagator);
-//};
- 	       
