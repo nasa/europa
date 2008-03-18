@@ -6,7 +6,7 @@
 
   <!-- load overrides from ~/.ant.psui.properties -->
   <property file="${env.HOME}/.ant.psui.properties"/>
-	
+
   <property name="src.dir"     value="src"/>
   <property name="build.dir"   value="build"/>
   <property name="lib.dir"     value="lib"/>
@@ -14,62 +14,76 @@
   <property name="project"        value="NDDLHelloWorld"/>
   <property name="project.dir"    value="${env.HOME}/workspace/${project}"/>
   <property name="plasma.dir"    value="${env.PLASMA_HOME}"/>
-  <!-- project.mode = o for optimized, g for debug --> 	
+  <!-- project.mode = o for optimized, g for debug -->
   <property name="project.mode" value="o"/>
   <property name="project.bsh.script" value="${project}.bsh"/>
-	
+
   <property name="debug"  value="true"/>
   <property name="deprecation"  value="true"/>
 
-  <path id="psui.class.path">
-    <pathelement location="${plasma.dir}/build/lib/PSEngine.jar"/>
-    <pathelement location="${plasma.dir}/build/lib/nddl.jar"/>
-    <pathelement location="${lib.dir}/nanoxml/nanoxml.jar"/>
-    <pathelement location="${lib.dir}/jfreechart/jcommon-1.0.5.jar"/>
-    <pathelement location="${lib.dir}/jfreechart/jfreechart-1.0.2.jar"/>
-    <pathelement location="${lib.dir}/egantt/egantt-core.jar"/>
-    <pathelement location="${lib.dir}/egantt/egantt-ext.jar"/>
-    <pathelement location="${lib.dir}/egantt/egantt-resources.jar"/>
-    <pathelement location="${lib.dir}/beanshell/bsh-2.0b4.jar"/>
-    <pathelement location="${lib.dir}/junit/junit-4.1.jar"/>
-    <pathelement location="${lib.dir}/josql/JoSQL-1.9.jar"/>
-    <pathelement location="${lib.dir}/josql/gentlyWEB-utils-1.1.jar"/>
+  <fileset dir="${lib.dir}" id="psui.libfiles">
+    <include name="nanoxml/nanoxml.jar"/>
+    <include name="jfreechart/jcommon-1.0.5.jar"/>
+    <include name="jfreechart/jfreechart-1.0.2.jar"/>
+    <include name="egantt/egantt-core.jar"/>
+    <include name="egantt/egantt-ext.jar"/>
+    <include name="egantt/egantt-resources.jar"/>
+    <include name="beanshell/bsh-2.0b4.jar"/>
+    <include name="junit/junit-4.1.jar"/>
+    <include name="josql/JoSQL-1.9.jar"/>
+    <include name="josql/gentlyWEB-utils-1.1.jar"/>
+  </fileset>
+
+  <fileset dir="${plasma.dir}/build/lib" id="plasma.libfiles">
+    <include name="PSEngine.jar"/>
+    <include name="nddl.jar"/>
+  </fileset>
+
+  <path id="psui.classpath">
+    <fileset refid="psui.libfiles"/>
+    <fileset refid="plasma.libfiles"/>
   </path>
-	
+
   <target name="init">
     <tstamp/>
     <mkdir dir="${build.dir}"/>
   </target>
 
-  <target name="clean" description="delete the 'classes' directory tree" >
-	 <delete dir="${build.dir}"/>
-         <delete file="${plasma.dir}/build/lib/PSUI.jar"/>
+  <target name="clean" description="delete the 'classes' directory tree">
+    <delete dir="${build.dir}"/>
+    <delete file="${plasma.dir}/build/lib/PSUI.jar"/>
   </target>
 
-  <target name="compile" depends="init" description="compile 'src' tree into 'classes' tree" >
-	<javac srcdir="${src.dir}" 
-		   destdir="${build.dir}" 
-		   debug="${debug}" 
-		   deprecation="${deprecation}">
-	  <classpath refid="psui.class.path"/>
+  <target name="compile" depends="init" description="compile 'src' tree into 'classes' tree">
+    <javac srcdir="${src.dir}"
+           destdir="${build.dir}"
+           debug="${debug}"
+           deprecation="${deprecation}">
+      <classpath refid="psui.classpath"/>
     </javac>
   </target>
-	
+
   <target name="dist" depends="compile">
-    <jar jarfile="${plasma.dir}/build/lib/PSUI.jar" basedir="${build.dir}"/>             
+    <mkdir dir="${build.dir}"/>
+    <unjar dest="${build.dir}">
+      <fileset refid="psui.libfiles"/>
+      <fileset refid="plasma.libfiles"/>
+    </unjar>
+    <delete dir="${build.dir}/META-INF"/>
+    <jar jarfile="${plasma.dir}/build/lib/PSUI.jar" basedir="${build.dir}"/>
   </target>
 
   <target name="run" depends="compile" description="build and run">
-  	<echo message="Running ${project} project"/>
+    <echo message="Running ${project} project"/>
     <java classname="org.ops.ui.PSDesktop" dir="${project.dir}" fork="yes">
-      <jvmarg value="-Xms256m"/> 	
-      <jvmarg value="-Xmx2048m"/> 	
-      <arg value="${project.mode}"/>    	
-      <arg value="${project.bsh.script}"/>    	
+      <jvmarg value="-Xms256m"/>
+      <jvmarg value="-Xmx2048m"/>
+      <arg value="${project.mode}"/>
+      <arg value="${project.bsh.script}"/>
       <classpath>
-	    <path refid="psui.class.path"/>
-	    <pathelement location="${build.dir}"/>
-       </classpath>
+        <path refid="psui.classpath"/>
+        <pathelement location="${build.dir}"/>
+      </classpath>
     </java>
   </target>
 </project>
