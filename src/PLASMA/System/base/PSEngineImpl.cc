@@ -32,15 +32,13 @@ namespace EUROPA {
 	  return new PSEngineImpl();
   }
 
-  PSEngineImpl::PSEngineImpl() 
-      : m_started(false)
+  PSEngineImpl::PSEngineImpl()
   {
-  }
-
+  }	 
+  
   PSEngineImpl::~PSEngineImpl() 
   {
-	  if (m_started)
-		  shutdown();
+	  shutdown();
   }
 
   void PSEngineImpl::initialize()
@@ -58,20 +56,12 @@ namespace EUROPA {
 
   void PSEngineImpl::start() 
   {		
-	if (m_started)
-		return;
-	
-    doStart();   
-    m_started = true;
+	  doStart();   
   }
 
   void PSEngineImpl::shutdown() 
   {
-	if (!m_started)
-		return;
-	
-    doShutdown();    
-    m_started = false;
+	  doShutdown();    
   }
     
   void PSEngineImpl::allocateComponents()
@@ -109,7 +99,7 @@ namespace EUROPA {
 
   void PSEngineImpl::loadModel(const std::string& modelFileName) 
    {
-	   check_runtime_error(m_started,"PSEngine has not been started");
+	   check_runtime_error(isStarted(),"PSEngine has not been started");
 
 	   void* libHandle = p_dlopen(modelFileName.c_str(), RTLD_NOW);
 	   checkRuntimeError(libHandle != NULL,
@@ -132,56 +122,56 @@ namespace EUROPA {
   // Plan Database methods
   PSList<PSObject*> PSEngineImpl::getObjectsByType(const std::string& objectType) 
   {
-    check_runtime_error(m_started,"PSEngine has not been started");
+    check_runtime_error(isStarted(),"PSEngine has not been started");
     return m_planDatabase->getObjectsByType(objectType);  
   }
 
   PSObject* PSEngineImpl::getObjectByKey(PSEntityKey id) 
   {
-    check_runtime_error(m_started,"PSEngine has not been started");
+    check_runtime_error(isStarted(),"PSEngine has not been started");
     return m_planDatabase->getObjectByKey(id);  
   }
 
   PSObject* PSEngineImpl::getObjectByName(const std::string& name) 
   {
-    check_runtime_error(m_started,"PSEngine has not been started");
+    check_runtime_error(isStarted(),"PSEngine has not been started");
     return m_planDatabase->getObjectByName(name);  
   }
 
   PSList<PSToken*> PSEngineImpl::getTokens() 
   {
-    check_runtime_error(m_started,"PSEngine has not been started");
+    check_runtime_error(isStarted(),"PSEngine has not been started");
     return m_planDatabase->getAllTokens();  
   }
 
   PSToken* PSEngineImpl::getTokenByKey(PSEntityKey id) 
   {
-    check_runtime_error(m_started,"PSEngine has not been started");
+    check_runtime_error(isStarted(),"PSEngine has not been started");
     return m_planDatabase->getTokenByKey(id);  
   }
 
   PSList<PSVariable*>  PSEngineImpl::getGlobalVariables() 
   {
-    check_runtime_error(m_started,"PSEngine has not been started");
+    check_runtime_error(isStarted(),"PSEngine has not been started");
     return m_planDatabase->getAllGlobalVariables();  
   }  
 
   std::string PSEngineImpl::planDatabaseToString() 
   {
-    check_runtime_error(m_started,"PSEngine has not been started");
+    check_runtime_error(isStarted(),"PSEngine has not been started");
 	return m_planDatabase->toString();  
   }
 
   // Constraint Engine methods
   PSVariable* PSEngineImpl::getVariableByKey(PSEntityKey id)
   {
-    check_runtime_error(m_started,"PSEngine has not been started");
+    check_runtime_error(isStarted(),"PSEngine has not been started");
 	return m_constraintEngine->getVariableByKey(id);  
   }
 
   PSVariable* PSEngineImpl::getVariableByName(const std::string& name)
   {
-    check_runtime_error(m_started,"PSEngine has not been started");
+    check_runtime_error(isStarted(),"PSEngine has not been started");
 	return m_constraintEngine->getVariableByName(name);  
   }
 
@@ -250,7 +240,7 @@ namespace EUROPA {
   // Solver methods
   PSSolver* PSEngineImpl::createSolver(const std::string& configurationFile) 
   {
-    check_runtime_error(m_started,"PSEngine has not been started");
+    check_runtime_error(isStarted(),"PSEngine has not been started");
     return m_psSolverManager->createSolver(configurationFile);
   }
 }

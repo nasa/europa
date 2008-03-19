@@ -30,6 +30,10 @@ namespace EUROPA
       return sl_isInitialized;
     }
 
+    EngineBase::EngineBase()
+    {
+    	m_started = false;
+    }
     
     void EngineBase::initialize()
     {
@@ -102,6 +106,12 @@ namespace EUROPA
         m_modules.clear();	  
     }
     
+    
+    bool EngineBase::isStarted()
+    {
+    	return m_started;
+    }
+   
     void EngineBase::doStart()
     {
     	if(!m_started)
@@ -121,12 +131,7 @@ namespace EUROPA
     		m_started = false;
     	}
     }
-    
-    bool EngineBase::isStarted()
-    {
-    	return m_started;
-    }
-    
+   
 	void EngineBase::addModule(ModuleId module)
 	{
 		m_modules.push_back(module);
@@ -277,6 +282,6 @@ namespace EUROPA
   		  return (EngineComponentId&)m_constraintEngine;
 
   	  return noId;
-    }            
+    }                
 }
 

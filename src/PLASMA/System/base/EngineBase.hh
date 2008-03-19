@@ -12,12 +12,14 @@ namespace EUROPA {
   class EngineBase : public Engine 
   {
     public:  
+       	EngineBase();          
+    	
     	static void initialize();
     	static void terminate();
     	
     	virtual void doStart();
     	virtual void doShutdown();
-    	virtual bool isStarted();
+    	bool isStarted();
     	
     	virtual void addModule(ModuleId module);
     	virtual void removeModule(ModuleId module);
@@ -34,7 +36,6 @@ namespace EUROPA {
         RulesEngineId&      getRulesEngine()      { return m_rulesEngine; }
         
     protected: 
-    	EngineBase() {}
     	virtual ~EngineBase() {}
 
     	void initializeByModule(ModuleId module);
@@ -58,12 +59,14 @@ namespace EUROPA {
     	virtual void deallocateComponents();
     			
 	    std::map<double, LanguageInterpreter*>& getLanguageInterpreters();
-	    
+	        
 	    ConstraintEngineId m_constraintEngine;
 	    PlanDatabaseId m_planDatabase;
 	    RulesEngineId m_rulesEngine;	
 	    std::map<double, LanguageInterpreter*> m_languageInterpreters;    	    
-	    static std::vector<ModuleId> m_modules;	    
+	    static std::vector<ModuleId> m_modules;
+	    
+    private:
 	    bool m_started;
   };
 }

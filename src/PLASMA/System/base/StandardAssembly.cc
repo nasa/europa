@@ -32,7 +32,7 @@ namespace EUROPA {
   }
 
   StandardAssembly::StandardAssembly(const SchemaId& schema) 
-  {
+  {	 
     doStart();
     m_planDatabase->getClient()->enableTransactionLogging();
   }
