@@ -5,6 +5,7 @@
 #include "PSPlanDatabase.hh"
 #include "PSResource.hh"
 #include "PSSolvers.hh"
+#include "Module.hh"
 
 namespace EUROPA {
 
@@ -21,7 +22,10 @@ namespace EUROPA {
       virtual void start() = 0;
       virtual void shutdown() = 0;
 
+      virtual void addModule(ModuleId module) = 0;
+      virtual void removeModule(ModuleId module) = 0;
       virtual void loadModule(const std::string& moduleFileName) = 0;
+      
       virtual void loadModel(const std::string& modelFileName) = 0; // Loads a planning model in binary format
       virtual std::string executeScript(const std::string& language, const std::string& script, bool isFile) = 0;
 

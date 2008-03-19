@@ -6,6 +6,7 @@
 #include "ModuleTemporalNetwork.hh"
 #include "ModuleSolvers.hh"
 #include "ModuleNddl.hh"
+#include "Pdlfcn.hh"
 #ifndef NO_RESOURCES
 #include "ModuleResource.hh"
 #include "ModuleAnml.hh"
@@ -52,7 +53,6 @@ namespace EUROPA
 	    	if (m_modules[i]->getName() == name)
 	    		return m_modules[i];
 	    }
-
 	    return ModuleId::noId();
     }
 
@@ -104,35 +104,77 @@ namespace EUROPA
     
     void EngineBase::doStart()
     {
-    	allocateComponents();
-    	initializeByModules();
+    	if(!m_started)
+    	{
+    		allocateComponents();
+    		initializeByModules();
+    		m_started = true;
+    	}
     }
 
     void EngineBase::doShutdown()
     {
-    	uninitializeByModules();
-    	deallocateComponents();
+    	if(m_started) 
+    	{
+    		uninitializeByModules();
+    		deallocateComponents();
+    		m_started = false;
+    	}
     }
     
-
-    // NOTE: Assumption that other modules are already initialized
+    bool EngineBase::isStarted()
+    {
+    	return m_started;
+    }
+    
 	void EngineBase::addModule(ModuleId module)
 	{
 		m_modules.push_back(module);
-		initializeModule(module);
-		initializeByModule(module);
+		if(isInitialized())
+		{
+			initializeModule(module);
+		}
+		if(isStarted()) 
+		{
+			initializeByModule(module);
+		}
 	}
 
-	// NOTE:  Assumption that we haven't yet invoked doStop() or uninitialize()
 	void EngineBase::removeModule(ModuleId module)
 	{
 		std::vector<ModuleId>::iterator it = find(m_modules.begin(), m_modules.end(), module);	
 		checkError(it != m_modules.end(), "EngineBase: removeModule Module not found." << module->getName());
-		uninitializeByModule(module);
-		uninitializeModule(module);
+		if(isStarted())
+		{
+			uninitializeByModule(module);
+		}
+		if(isInitialized())
+		{
+			uninitializeModule(module);
+		}
 		m_modules.erase(it);
 	}
     
+	// Basically a copy of PSEngineImpl::loadModel
+	void EngineBase::loadModule(const std::string& moduleFileName) 
+	{
+		check_runtime_error(m_started,"PSEngine has not been started");
+
+		void* libHandle = p_dlopen(moduleFileName.c_str(), RTLD_NOW);
+		checkRuntimeError(libHandle != NULL,
+				"Error opening module " << moduleFileName << ": " << p_dlerror());
+
+		ModuleId (*fcn_module)();
+		fcn_module = (ModuleId (*)()) p_dlsym(libHandle, "initializeModule");
+		checkError(fcn_module != NULL,
+				"Error locating symbol 'initializeModule' in " << moduleFileName << ": " <<
+				p_dlerror());
+
+		ModuleId module = (*fcn_module)();
+		addModule(module);
+	}
+
+	
     void EngineBase::initializeByModule(ModuleId module)
     {
     	module->initialize(getId());

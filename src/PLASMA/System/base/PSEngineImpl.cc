@@ -93,43 +93,36 @@ namespace EUROPA {
   	  
       return EngineBase::getComponent(name);  	
   }   
-  
-  
-  // TODO:  Note similarity with loadModel (ugly code duplication).  However, the last line here is different.
-  void PSEngineImpl::loadModule(const std::string& moduleFileName) 
-   {
-     check_runtime_error(m_started,"PSEngine has not been started");
- 	    
-     void* libHandle = p_dlopen(moduleFileName.c_str(), RTLD_NOW);
-     checkRuntimeError(libHandle != NULL,
- 	       "Error opening module " << moduleFileName << ": " << p_dlerror());
 
-     ModuleId (*fcn_module)();
-     fcn_module = (ModuleId (*)()) p_dlsym(libHandle, "initializeModule");
-     checkError(fcn_module != NULL,
- 	       "Error locating symbol 'initializeModule' in " << moduleFileName << ": " <<
- 	       p_dlerror());
-
-     ModuleId module = (*fcn_module)();
-     EngineBase::addModule(module);
-  }
-  
-  void PSEngineImpl::loadModel(const std::string& modelFileName) 
+  void PSEngineImpl::addModule(ModuleId module)
   {
-    check_runtime_error(m_started,"PSEngine has not been started");
-	    
-    void* libHandle = p_dlopen(modelFileName.c_str(), RTLD_NOW);
-    checkRuntimeError(libHandle != NULL,
-	       "Error opening model " << modelFileName << ": " << p_dlerror());
-
-    SchemaId (*fcn_schema)();
-    fcn_schema = (SchemaId (*)()) p_dlsym(libHandle, "loadSchema");
-    checkError(fcn_schema != NULL,
-	       "Error locating symbol 'loadSchema' in " << modelFileName << ": " <<
-	       p_dlerror());
-
-    SchemaId schema = (*fcn_schema)();
+	  EngineBase::addModule(module);
   }
+  void PSEngineImpl::removeModule(ModuleId module)
+  {
+	  EngineBase::removeModule(module);
+  }
+  void PSEngineImpl::loadModule(const std::string& moduleFileName) 
+  {
+	  EngineBase::loadModule(moduleFileName);
+  }
+
+  void PSEngineImpl::loadModel(const std::string& modelFileName) 
+   {
+	   check_runtime_error(m_started,"PSEngine has not been started");
+
+	   void* libHandle = p_dlopen(modelFileName.c_str(), RTLD_NOW);
+	   checkRuntimeError(libHandle != NULL,
+			   "Error opening model " << modelFileName << ": " << p_dlerror());
+
+	   SchemaId (*fcn_schema)();
+	   fcn_schema = (SchemaId (*)()) p_dlsym(libHandle, "loadSchema");
+	   checkError(fcn_schema != NULL,
+			   "Error locating symbol 'loadSchema' in " << modelFileName << ": " <<
+			   p_dlerror());
+
+	   SchemaId schema = (*fcn_schema)();
+   }
   
   std::string PSEngineImpl::executeScript(const std::string& language, const std::string& script, bool isFile) 
   {

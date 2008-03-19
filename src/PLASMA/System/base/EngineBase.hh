@@ -17,10 +17,12 @@ namespace EUROPA {
     	
     	virtual void doStart();
     	virtual void doShutdown();
+    	virtual bool isStarted();
     	
     	virtual void addModule(ModuleId module);
     	virtual void removeModule(ModuleId module);
-    	
+        virtual void loadModule(const std::string& moduleFileName);
+      
         virtual EngineComponentId& getComponent(const std::string& name);
         
         virtual std::string executeScript(const std::string& language, const std::string& script, bool isFile);        
@@ -62,6 +64,7 @@ namespace EUROPA {
 	    RulesEngineId m_rulesEngine;	
 	    std::map<double, LanguageInterpreter*> m_languageInterpreters;    	    
 	    static std::vector<ModuleId> m_modules;	    
+	    bool m_started;
   };
 }
 
