@@ -38,9 +38,6 @@ extern "C"
   {
       if(%%Project%%Initialized())
     	  return;
-      
-      // Example of how to incorporate the ExampleConstraint declared in %%Project%%CustomCode.hh
-      // REGISTER_CONSTRAINT(ExampleConstraint, "example", "Default");
 	  %%Project%%Initialized() = true;
   }  
 
