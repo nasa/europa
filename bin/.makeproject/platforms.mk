@@ -32,6 +32,7 @@ SHARED_LINK_FLAG := -shared
 ifneq (,$(findstring Linux,$(UNAME)))
   LINUX := 1
   LIB_EXT := so
+  CXXFLAGS += -fPIC
   ifdef JAVA_HOME
     CXXFLAGS += -I"$(JAVA_HOME)/include"
     CXXFLAGS += -I"$(JAVA_HOME)/include/linux"
@@ -52,6 +53,7 @@ ifneq (,$(findstring Darwin,$(UNAME)))
   DARWIN := 1
   LIB_EXT := dylib
   SHARED_LINK_FLAG := -dynamiclib
+  CXXFLAGS += -fPIC
   ifdef $(JAVA_HOME)
     CXXFLAGS += -I"$(JAVA_HOME)/include"
   else
@@ -62,6 +64,7 @@ endif
 ifneq (,$(findstring Solaris,$(UNAME)))
   SOLARIS := 1
   LIB_EXT := so
+  CXXFLAGS += -fPIC
   ifdef $(JAVA_HOME)
     CXXFLAGS += -I"$(JAVA_HOME)/include"
   else
