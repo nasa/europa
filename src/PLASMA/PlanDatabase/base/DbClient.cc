@@ -232,8 +232,9 @@ namespace EUROPA {
   }
 
   void DbClient::specify(const ConstrainedVariableId& variable, double value){
-    debugMsg("DbClient:specify", variable->toString() << " to " << variable->toString(value));
+    debugMsg("DbClient:specify", "before:" << variable->toString() << " to " << variable->toString(value));
     variable->specify(value);
+    debugMsg("DbClient:specify", "after:" << variable->toString());
     publish(notifyVariableSpecified(variable));
   }
 
@@ -243,8 +244,9 @@ namespace EUROPA {
     publish(notifyVariableClosed(variable));
   }
   void DbClient::reset(const ConstrainedVariableId& variable){
+    debugMsg("DbClient:reset","before:" << variable->toString());
     variable->reset();
-    debugMsg("DbClient:reset", variable->toString());
+    debugMsg("DbClient:reset", "after:" << variable->toString());
     publish(notifyVariableReset(variable));
   }
 
