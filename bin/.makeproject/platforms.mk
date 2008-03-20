@@ -2,7 +2,8 @@ UNAME := $(shell uname)
 
 ifeq (1,$(FAST))
   BUILD_SUFFIX := _o
-  CXXFLAGS += -O3
+  CXXFLAGS += -O3 -DEUROPA_FAST
+  LDFLAGS += -O3
 else
   BUILD_SUFFIX := _g
   CXXFLAGS += -ggdb3
@@ -28,11 +29,11 @@ endif
 RT_SUFFIX := _rt
 LIB_PREFIX := lib
 SHARED_LINK_FLAG := -shared
+POSITION_INDEPENDENT_FLAG := -fPIC
 
 ifneq (,$(findstring Linux,$(UNAME)))
   LINUX := 1
   LIB_EXT := so
-  CXXFLAGS += -fPIC
   ifdef JAVA_HOME
     CXXFLAGS += -I"$(JAVA_HOME)/include"
     CXXFLAGS += -I"$(JAVA_HOME)/include/linux"
@@ -43,6 +44,7 @@ ifneq (,$(findstring CYGWIN,$(UNAME)))
   CYGWIN := 1
   LIB_EXT := dll
   RT_SUFFIX := _rt.exe
+  POSITION_INDEPENDENT_FLAG := 
   ifdef JAVA_HOME
     CXXFLAGS += -I"$(JAVA_HOME)/include"
     CXXFLAGS += -I"$(JAVA_HOME)/include/win32"
@@ -53,7 +55,6 @@ ifneq (,$(findstring Darwin,$(UNAME)))
   DARWIN := 1
   LIB_EXT := dylib
   SHARED_LINK_FLAG := -dynamiclib
-  CXXFLAGS += -fPIC
   ifdef $(JAVA_HOME)
     CXXFLAGS += -I"$(JAVA_HOME)/include"
   else
@@ -64,7 +65,6 @@ endif
 ifneq (,$(findstring Solaris,$(UNAME)))
   SOLARIS := 1
   LIB_EXT := so
-  CXXFLAGS += -fPIC
   ifdef $(JAVA_HOME)
     CXXFLAGS += -I"$(JAVA_HOME)/include"
   else
@@ -72,8 +72,8 @@ ifneq (,$(findstring Solaris,$(UNAME)))
   endif
 endif
 
-CXXFLAGS += -I$(EUROPA_HOME)/include/PLASMA
-LDFLAGS += -L$(EUROPA_HOME)/lib
+CXXFLAGS += $(POSITION_INDEPENDENT_FLAG) -I$(EUROPA_HOME)/include/PLASMA
+LDFLAGS += $(POSITION_INDEPENDENT_FLAG) -L$(EUROPA_HOME)/lib
 LOADLIBS += -lSystem$(BUILD_SUFFIX) \
             -ldl \
             -lANML$(BUILD_SUFFIX) \
