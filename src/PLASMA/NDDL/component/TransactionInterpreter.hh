@@ -28,6 +28,7 @@ namespace EUROPA {
       virtual ~InterpretedDbClientTransactionPlayer();
 
       static void createDefaultObjectFactory(const char* className, bool canCreateObjects);
+      void addNativeClass(const std::string& className);
       
     protected:
       virtual void playDeclareClass(const TiXmlElement &); 
@@ -45,8 +46,8 @@ namespace EUROPA {
       Expr* valueToExpr(const TiXmlElement* element,bool isRule=true);
       
       // TODO: move these to schema
-      std::set<std::string> m_systemClasses;      
-      std::set<std::string> m_systemTokens;      
+      std::set<std::string> m_nativeClasses;      
+      std::set<std::string> m_nativeTokens;      
   };
   
   class DataRef

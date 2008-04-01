@@ -76,19 +76,19 @@ namespace EUROPA {
   InterpretedDbClientTransactionPlayer::InterpretedDbClientTransactionPlayer(const DbClientId & client)                                                              
     : DbClientTransactionPlayer(client) 
   {  	  
-    m_systemClasses.insert("Object");
-    m_systemClasses.insert("Timeline");
+    addNativeClass("Object");
+    addNativeClass("Timeline");
     //I'm not sure exactly what to do about these, as far as dealing with resources goes...
     //~MJI
-    m_systemClasses.insert("Resource"); 
-    m_systemTokens.insert("Resource.change");
+    addNativeClass("Resource"); 
+    m_nativeTokens.insert("Resource.change");
 
-    m_systemClasses.insert("Reusable");
-    m_systemTokens.insert("Reusable.uses");
+    addNativeClass("Reusable");
+    m_nativeTokens.insert("Reusable.uses");
 
-    m_systemClasses.insert("Reservoir");
-    m_systemTokens.insert("Reservoir.produce");
-    m_systemTokens.insert("Reservoir.consume");
+    addNativeClass("Reservoir");
+    m_nativeTokens.insert("Reservoir.produce");
+    m_nativeTokens.insert("Reservoir.consume");
 
     // TODO: expose Unary  	  
   }
@@ -97,6 +97,11 @@ namespace EUROPA {
   {
   }
 
+  void InterpretedDbClientTransactionPlayer::addNativeClass(const std::string& className)
+  { 
+	  m_nativeClasses.insert(className);
+  }
+  
   const char* safeStr(const char* str)
   {
     return (str !=NULL ? str : "NULL");
@@ -156,7 +161,7 @@ namespace EUROPA {
       if (strcmp(tagname, "var") == 0) 
 	defineClassMember(schema,className,child);
       else if (strcmp(tagname, "constructor") == 0) { 
-	if (m_systemClasses.find(className) == m_systemClasses.end()) {
+	if (m_nativeClasses.find(className) == m_nativeClasses.end()) {
 	  defineConstructor(schema,className,child);
 	  definedConstructor = true;
 	}
@@ -175,7 +180,7 @@ namespace EUROPA {
 
     // Register a default factory with no arguments if one is not provided explicitly
     if (!definedConstructor &&
-        m_systemClasses.find(className) == m_systemClasses.end()) { 
+        m_nativeClasses.find(className) == m_nativeClasses.end()) { 
       createDefaultObjectFactory(className, false);
       dbgout << "    generated default constructor" << std::endl;
     }
@@ -346,7 +351,7 @@ namespace EUROPA {
     }	
     dbgout << ")" << std::endl;
 
-    if (m_systemTokens.find(predName) != m_systemTokens.end()) {
+    if (m_nativeTokens.find(predName) != m_nativeTokens.end()) {
       // TODO: should always be displayed as WARNING!
       debugMsg("XMLInterpreter:XML","Skipping factory registration for System token : " << predName); 
       return;    
