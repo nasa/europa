@@ -1,34 +1,56 @@
 package %%project%%;
 
-import org.ops.ui.PSDesktop;
-import org.ops.ui.util.LibraryLoader;
+import psengine.PSUtil;
+import psengine.util.LibraryLoader;
 import psengine.PSEngine;
+import org.ops.ui.PSDesktop;
 
-class Main {
-  public static void main(String args[]) {
-    PSDesktop.run(args);
-  }
+class Main 
+{
+    protected static PSEngine psEngine_;
+    
+    public static void main(String args[]) 
+    {
+	    String debugMode = args[0];
+        PSUtil.loadLibraries(debugMode);	   
+	    PSEngine.initialize();
 
-  /*
-   * PSDesktop instantiates its own EUROPA PSEngine internally, you can get a handle on it by calling
-   * PSDesktop.desktop.getPSEngine()
-   *
-   * If you don't want to use PSDesktop, but instead create your own instance of EUROPA to manipulate programmatically
-   * you can use this method. For now, only one PSEngine instance can be create per process.
-   *
-   * debugMode = "g" for debug, "o" for optimized
-   */
-  public static void nonPSDesktopMain(String args[]) {
-    String debugMode = args[0];
-    LibraryLoader.loadLibrary("System_"+debugMode);
+	    psEngine_ = PSEngine.makeInstance();
+	    psEngine_.start();
+		Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+		loadCustomCode(debugMode);
+		
+		PSDesktop d = PSDesktop.makeInstance(psEngine_,args);
+		d.runUI();
+    }
 
-    PSEngine.initialize();
-
-    PSEngine engine = PSEngine.makeInstance();
-    engine.start();
-    // use engine....
-    engine.shutdown();
-
-    PSEngine.terminate();
-  }
+    protected static void loadCustomCode(String debugMode)
+    {
+    	//Load module with any custom code if it exists:
+    	String libName = "%%Project%%_" + debugMode;
+    	String fullLibName = LibraryLoader.getResolvedName(libName); 
+    	if(fullLibName == null) {
+    		// Run 'make' to compile the library if you need it:
+    		System.out.println("INFO: Custom library " + libName + " wasn't found and won't be loaded.");  
+    	}
+    	else {
+    		// WARNING: Shared library loaded twice (see ticket #164)
+    		System.load(fullLibName);
+    		psEngine_.loadModule(fullLibName);
+    	}  	
+    }
+    
+    static class ShutdownHook extends Thread 
+    {
+	    public ShutdownHook()
+	    {
+	        super("ShutdownHook");
+	    }
+	    
+	    public void run() 
+	    {
+	        //psEngine_.shutdown(); TODO this is causing deallocation errors (see ticket #165)
+	        PSEngine.terminate();
+	    }
+    }	  
 }
