@@ -183,8 +183,9 @@ else {
 # Other miscellaneous platform tweaks
 #
 
+# The cygwin stack size defaults to about 2 megs which isn't enough (changed to linux default)
 if $(OS) = CYGWIN {
-  LINKFLAGS += -Wl,--enable-auto-import ;
+  LINKFLAGS += -Wl,--enable-auto-import,--stack,10485760 ;
 }
 
 
