@@ -67,7 +67,8 @@
     <uptodate property="uptodate.jar" targetfile="${plasma.dir}/build/lib/PSUI.jar" >
       <srcfiles dir="${build.dir}"/>
       <srcfiles refid="psui.libfiles"/>
-    </uptodate>  	
+      <srcfiles refid="plasma.libfiles"/>
+   </uptodate>  	
   </target>
 	
   <target name="unjar-libs" depends="check-jar-uptodate" unless="uptodate.jar">
