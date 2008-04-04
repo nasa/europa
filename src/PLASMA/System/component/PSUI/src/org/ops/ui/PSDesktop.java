@@ -27,7 +27,6 @@ import org.ops.ui.gantt.PSGantt;
 import org.ops.ui.gantt.PSGanttPSEModel;
 import org.ops.ui.solver.PSSolverDialog;
 import org.ops.ui.util.Util;
-import org.ops.ui.util.LibraryLoader;
 import org.ops.ui.mouse.ActionViolationsPanel;
 import org.ops.ui.mouse.ActionDetailsPanel;
 import org.ops.ui.nddl.NddlInterpreter;
@@ -39,6 +38,7 @@ import org.ops.ui.ash.AshConsole;
 import org.josql.contrib.JoSQLSwingTableModel;
 
 import psengine.*;
+import psengine.util.*;
 
 public class PSDesktop
 {
