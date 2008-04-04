@@ -64,7 +64,7 @@ public class NddlInterpreter extends AshInterpreter {
     }
 
 		try {
-    	PSDesktop.desktop.getPSEngine().executeScript("nddl-xml",string.toString(), false /*isFile*/);
+    	PSDesktop.getInstance().getPSEngine().executeScript("nddl-xml",string.toString(), false /*isFile*/);
     	persistantState = parser.getState();
 		}
 		catch(PSException ex) {

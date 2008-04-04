@@ -41,7 +41,7 @@ public class AnmlInterpreter extends AshInterpreter {
 		if(toEval.equals(""))
 			return true;
 		try {
-    	PSDesktop.desktop.getPSEngine().executeScript("anml", toEval, false /*isFile*/);
+    	    PSDesktop.getInstance().getPSEngine().executeScript("anml", toEval, false /*isFile*/);
 		}
 		catch(PSException ex) {
 			consoleErr.print(ex.getFile());
@@ -61,7 +61,7 @@ public class AnmlInterpreter extends AshInterpreter {
 
   public void source(String filename) {
 		try {
-    	PSDesktop.desktop.getPSEngine().executeScript("anml", filename, true /*isFile*/);
+    	    PSDesktop.getInstance().getPSEngine().executeScript("anml", filename, true /*isFile*/);
 		}
 		catch(PSException ex) {
 			consoleErr.print(ex.getFile());

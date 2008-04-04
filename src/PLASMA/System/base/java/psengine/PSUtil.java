@@ -3,6 +3,7 @@ package psengine;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Vector;
+import psengine.util.LibraryLoader;
 
 public class PSUtil
 {
@@ -39,6 +40,11 @@ public class PSUtil
    	    	retval.add(PSResource.asPSResource(psList.get(i)));
     	    	
        	return retval;
-    }	    
+    }	
+    
+    public static void loadLibraries(String debugMode)
+    {
+        LibraryLoader.loadLibrary("System_"+debugMode);	
+    }
 }
 

@@ -42,7 +42,7 @@ import psengine.util.*;
 
 public class PSDesktop
 {
-	public static PSDesktop desktop;
+	public static PSDesktop instance_=null;
 
 	protected JDesktopPane desktop_;
 	protected int windowCnt_=0;
@@ -56,11 +56,42 @@ public class PSDesktop
 
 	public static void main(String[] args)
 	{		
-		run(args);
+	    String debugMode = args[0];
+        PSUtil.loadLibraries(debugMode);	   
+	    PSEngine.initialize();
+
+	    PSEngine engine = PSEngine.makeInstance();
+	    engine.start();
+		Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+		
+		PSDesktop d = PSDesktop.makeInstance(engine,args);
+		d.runUI();
 	}
 	
-	public String getLibsMode() { return debugMode_; }
+    static class ShutdownHook extends Thread 
+    {
+	    public ShutdownHook()
+	    {
+	        super("ShutdownHook");
+	    }
+	    
+	    public void run() 
+	    {
+	        PSDesktop.getInstance().getPSEngine().shutdown();
+	        PSEngine.terminate();
+	    }
+    }	  
+
+    public String getLibsMode() { return debugMode_; }
 	
+    public static PSDesktop getInstance()
+    {
+    	if (instance_ == null)
+    		instance_ = makeInstance(PSEngine.makeInstance(),new String[]{"g",null});
+    	
+    	return instance_;
+    }
+    
 	public static Map<String,String> parseArgs(String args[])
 	{
 		Map<String,String> retval = new HashMap<String,String>();
@@ -77,27 +108,32 @@ public class PSDesktop
 		
 		return retval;
 	}
-
-	public static void run(String[] args)
-	{
-		init(args);
-		desktop.runUI();		
-	}
 	
-    public static void init(String[] args)
+	public static PSDesktop makeInstance(PSEngine pse,String args[])
+	{
+		if (instance_ != null) 
+			throw new RuntimeException("PSDesktop is a singleton");
+
+		init(args);
+        instance_ = new PSDesktop(pse);
+ 	}
+
+   public static void init(String[] args)
     {   
         init(parseArgs(args));    
     }
     
 	public static void init(Map<String,String> args)
 	{
-		PSDesktop.desktop = new PSDesktop();
 		debugMode_ = args.get("debugMode");
 		bshFile_ = args.get("bshFile");		
 	}
 	
-	protected PSDesktop()
+	protected PSDesktop(PSEngine pse)
 	{
+		assert (pse != null);
+	    psEngine_ = pse;
+	    psEngine_.nddlInterpreter = nddlInterpreter; // TODO !! this must be done as part of PSEngine packaging, not here 
         bshConsole_ = new JConsole();
         bshInterpreter_ = new Interpreter(bshConsole_);                	    
 	}
@@ -159,7 +195,6 @@ public class PSDesktop
 
     private void createDesktop()
     {
-        desktop = this;
     	desktop_ = new JDesktopPane();
 
         // BeanShell scripting
@@ -235,27 +270,11 @@ public class PSDesktop
     		throw new RuntimeException(e);
     	}
     }
-
-    public void setPSEngine(PSEngine pse)
-    {
-        psEngine_ = pse;
-    }
     
     public PSEngine getPSEngine()
     {
-    	if (psEngine_ == null) {
-            LibraryLoader.loadLibrary("System_"+debugMode_);
-    		PSEngine.initialize();
-            psEngine_ = PSEngine.makeInstance();
-            psEngine_.nddlInterpreter = nddlInterpreter;
-            psEngine_.start();
-            
-            // TODO: call PSEngine.shutdown() and PSEngine.terminate() before program quits
-    	}
-
     	return psEngine_;
     }
-
 
     public PSSolverDialog makeSolverDialog(PSSolver solver)
     {
@@ -390,7 +409,7 @@ public class PSDesktop
     
     public void makeNddlConsole()
     {
-    	JInternalFrame nddlInterpFrame = desktop.makeNewFrame("Nddl Console");
+    	JInternalFrame nddlInterpFrame = makeNewFrame("Nddl Console");
     	AshConsole console = new AshConsole(nddlInterpreter);
     	nddlInterpreter.setConsole(console);
     	console.setTokenMarker(new NddlTokenMarker());
@@ -400,7 +419,7 @@ public class PSDesktop
     public void makeAnmlConsole()
     {
       AnmlInterpreter anmlInterpreter = new AnmlInterpreter();
-      JInternalFrame anmlInterpFrame = desktop.makeNewFrame("Anml Console");
+      JInternalFrame anmlInterpFrame = makeNewFrame("Anml Console");
       AshConsole console = new AshConsole(anmlInterpreter);
       anmlInterpreter.setConsole(console);
       console.setTokenMarker(new AnmlTokenMarker());
