@@ -12,6 +12,7 @@
 #include "Debug.hh"
 
 #include "Module%%Project%%.hh"
+#include "%%Project%%CustomCode.hh"
 
 using namespace EUROPA;
 

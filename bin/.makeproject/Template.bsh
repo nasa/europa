@@ -1,6 +1,7 @@
 import psengine.*;
 import org.ops.ui.util.Util;
 import org.ops.ui.util.LibraryLoader;
+import %%Project%%.*;
 
 //Load module with any custom code if it exists:
 String debugMode = desktop.getLibsMode();
@@ -11,6 +12,8 @@ if(fullLibName == null) {
 	System.out.println("WARNING: Your custom library " + libName + " wasn't found and won't be loaded.");  
 }
 else {
+        // WARNING: Shared library loaded twice (see ticket #164)
+        System.load(fullLibName);
 	psengine.loadModule(fullLibName);
 }
 

@@ -42,15 +42,15 @@
   </target>
 
   <target name="compile" depends="init" description="compile 'src' tree into 'classes' tree" >
-  <!-- Compile Main.java and any custom java code -->
-    <javac srcdir="${java.src.dir}" 
+  <!-- Compile any swig-wrapped custom C++ code -->
+   <javac srcdir="${swig.src.dir}" 
            destdir="${class.dir}" 
     	   debug="${debug}" 
     	   deprecation="${deprecation}">
 	  <classpath refid="psui.class.path"/>
     </javac>
-  <!-- Compile any swig-wrapped custom C++ code -->
-   <javac srcdir="${swig.src.dir}" 
+  <!-- Compile Main.java and any custom java code -->
+    <javac srcdir="${java.src.dir}" 
            destdir="${class.dir}" 
     	   debug="${debug}" 
     	   deprecation="${deprecation}">
