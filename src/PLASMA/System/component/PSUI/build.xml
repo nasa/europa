@@ -62,14 +62,24 @@
       <classpath refid="psui.classpath"/>
     </javac>
   </target>
-
-  <target name="dist" depends="compile">
-    <mkdir dir="${build.dir}"/>
-    <unjar dest="${build.dir}">
+ 
+  <target name="check-jar-uptodate"> 
+    <uptodate property="uptodate.jar" targetfile="${plasma.dir}/build/lib/PSUI.jar" >
+      <srcfiles dir="${build.dir}"/>
+      <srcfiles refid="psui.libfiles"/>
+    </uptodate>  	
+  </target>
+	
+  <target name="unjar-libs" depends="check-jar-uptodate" unless="uptodate.jar">
+    <unjar dest="${build.dir}" overwrite="false">
       <fileset refid="psui.libfiles"/>
       <fileset refid="plasma.libfiles"/>
     </unjar>
     <delete dir="${build.dir}/META-INF"/>
+  </target>
+	
+  <target name="dist" depends="compile,unjar-libs">
+    <mkdir dir="${build.dir}"/>
     <jar jarfile="${plasma.dir}/build/lib/PSUI.jar" basedir="${build.dir}"/>
   </target>
 
