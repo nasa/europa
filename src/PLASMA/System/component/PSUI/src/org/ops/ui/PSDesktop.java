@@ -38,7 +38,6 @@ import org.ops.ui.ash.AshConsole;
 import org.josql.contrib.JoSQLSwingTableModel;
 
 import psengine.*;
-import psengine.util.*;
 
 public class PSDesktop
 {
@@ -116,6 +115,8 @@ public class PSDesktop
 
 		init(args);
         instance_ = new PSDesktop(pse);
+        
+        return instance_;
  	}
 
    public static void init(String[] args)
