@@ -4,28 +4,46 @@
   New Domain Definition Language
 	</description>
 	
-	<property environment="env"/>
-	<property name="plasma.dir" value="${env.PLASMA_HOME}"/>
+	<target name="init">
+		<exec executable="uname" outputproperty="uname.o">
+			<arg value="-o"/>
+		</exec>
+		<condition property="os.isCygwin">
+			<equals arg1="${uname.o}" arg2="Cygwin"/>
+		</condition>
+		<property environment="env"/>
+	</target>
+
+	<target name="cygwin-init" depends="init" if="os.isCygwin">
+		<exec executable="cygpath" outputproperty="plasma.dir">
+			<arg value="--windows"/>
+			<arg value="${env.PLASMA_HOME}"/>
+		</exec>
+	</target>
+
+	<target name="init-final" depends="init,cygwin-init">
+		<property name="plasma.dir" value="${env.PLASMA_HOME}"/>
 	
-	<property name="grammars" location="antlr"/>
-	<property name="src" location="java"/>
-	<property name="class" location="classes"/>
-	<property name="cache" location=".cache"/>
-	<property name="dist" location="${plasma.dir}/build/lib"/>
-	<property name="libraries" location="${plasma.dir}/ext/lib"/>
+		<property name="grammars" location="antlr"/>
+		<property name="src" location="java"/>
+		<property name="class" location="classes"/>
+		<property name="cache" location=".cache"/>
+		<property name="dist" location="${plasma.dir}/build/lib"/>
+		<property name="libraries" location="${plasma.dir}/ext/lib"/>
 
-	<fileset dir="${libraries}" id="nddl.libfiles">
-		<include name="antlr.jar"/>
-		<include name="nanoxml.jar"/>
-		<include name="java-getopt.jar"/>
-	</fileset>
+		<fileset dir="${libraries}" id="nddl.libfiles">
+			<include name="antlr.jar"/>
+			<include name="nanoxml.jar"/>
+			<include name="java-getopt.jar"/>
+		</fileset>
 
-	<path id="nddl.classpath">
-		<fileset refid="nddl.libfiles"/>
-	</path>
+		<path id="nddl.classpath">
+			<fileset refid="nddl.libfiles"/>
+		</path>
+	</target>
 
 	<target name="antlr"
-	        description="Generate java sources from ANTLR grammars">
+	        description="Generate java sources from ANTLR grammars" depends="init-final">
 		<antlr target="${grammars}/nddl.g" outputdirectory="${src}/nddl" traceParser="ON">
 			<classpath refid="nddl.classpath"/>
 		</antlr>
@@ -76,7 +94,7 @@
 	</target>
 
 	<target name="clean"
-	        description="Remove all generated files and directories">
+	        description="Remove all generated files and directories" depends="init-final">
 		<delete dir="${cache}"/>
 		<delete dir="${class}"/>
 		<delete file="${dist}/nddl.jar"/>

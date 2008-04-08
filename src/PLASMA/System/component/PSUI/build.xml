@@ -2,51 +2,66 @@
 <project name="PSUI" default="run" basedir=".">
   <description>PSUI</description>
 
-  <property environment="env"/>
-
-  <!-- load overrides from ~/.ant.psui.properties -->
-  <property file="${env.HOME}/.ant.psui.properties"/>
-
-  <property name="src.dir"     value="src"/>
-  <property name="build.dir"   value="build"/>
-  <property name="lib.dir"     value="lib"/>
-
-  <property name="project"        value="NDDLHelloWorld"/>
-  <property name="project.dir"    value="${env.HOME}/workspace/${project}"/>
-  <property name="plasma.dir"    value="${env.PLASMA_HOME}"/>
-  <!-- project.mode = o for optimized, g for debug -->
-  <property name="project.mode" value="o"/>
-  <property name="project.bsh.script" value="${project}.bsh"/>
-
-  <property name="debug"  value="true"/>
-  <property name="deprecation"  value="true"/>
-
-  <fileset dir="${lib.dir}" id="psui.libfiles">
-    <include name="nanoxml/nanoxml.jar"/>
-    <include name="jfreechart/jcommon-1.0.5.jar"/>
-    <include name="jfreechart/jfreechart-1.0.2.jar"/>
-    <include name="egantt/egantt-core.jar"/>
-    <include name="egantt/egantt-ext.jar"/>
-    <include name="egantt/egantt-resources.jar"/>
-    <include name="beanshell/bsh-2.0b4.jar"/>
-    <include name="junit/junit-4.1.jar"/>
-    <include name="josql/JoSQL-1.9.jar"/>
-    <include name="josql/gentlyWEB-utils-1.1.jar"/>
-  </fileset>
-
-  <fileset dir="${plasma.dir}/build/lib" id="plasma.libfiles">
-    <include name="PSEngine.jar"/>
-    <include name="nddl.jar"/>
-  </fileset>
-
-  <path id="psui.classpath">
-    <fileset refid="psui.libfiles"/>
-    <fileset refid="plasma.libfiles"/>
-  </path>
-
   <target name="init">
     <tstamp/>
+    <exec executable="uname" outputproperty="uname.o">
+      <arg value="-o"/>
+    </exec>
+    <condition property="os.isCygwin">
+      <equals arg1="${uname.o}" arg2="Cygwin"/>
+    </condition>
+    <property environment="env"/>
+  </target>
+
+  <target name="cygwin-init" depends="init" if="os.isCygwin">
+    <exec executable="cygpath" outputproperty="plasma.dir">
+      <arg value="--windows"/>
+      <arg value="${env.PLASMA_HOME}"/>
+    </exec>
+  </target>
+
+  <target name="init-final" depends="init,cygwin-init">
+    <property name="plasma.dir" value="${env.PLASMA_HOME}"/>
+    <property file="${user.home}/.ant.psui.properties"/>
+
+    <property name="src.dir"     value="src"/>
+    <property name="build.dir"   value="build"/>
+    <property name="lib.dir"     value="lib"/>
+
+    <property name="project"        value="NDDLHelloWorld"/>
+    <property name="project.dir"    value="${user.home}/workspace/${project}"/>
+    <!-- project.mode = o for optimized, g for debug -->
+    <property name="project.mode" value="o"/>
+    <property name="project.bsh.script" value="${project}.bsh"/>
+
+    <property name="debug"  value="true"/>
+    <property name="deprecation"  value="true"/>
+
     <mkdir dir="${build.dir}"/>
+
+    <fileset dir="${lib.dir}" id="psui.libfiles">
+      <include name="nanoxml/nanoxml.jar"/>
+      <include name="jfreechart/jcommon-1.0.5.jar"/>
+      <include name="jfreechart/jfreechart-1.0.2.jar"/>
+      <include name="egantt/egantt-core.jar"/>
+      <include name="egantt/egantt-ext.jar"/>
+      <include name="egantt/egantt-resources.jar"/>
+      <include name="beanshell/bsh-2.0b4.jar"/>
+      <include name="junit/junit-4.1.jar"/>
+      <include name="josql/JoSQL-1.9.jar"/>
+      <include name="josql/gentlyWEB-utils-1.1.jar"/>
+    </fileset>
+
+    <fileset dir="${plasma.dir}/build/lib" id="plasma.libfiles">
+      <include name="PSEngine.jar"/>
+      <include name="nddl.jar"/>
+    </fileset>
+
+    <path id="psui.classpath">
+      <fileset refid="psui.libfiles"/>
+      <fileset refid="plasma.libfiles"/>
+    </path>
+
   </target>
 
   <target name="clean" description="delete the 'classes' directory tree">
@@ -54,7 +69,7 @@
     <delete file="${plasma.dir}/build/lib/PSUI.jar"/>
   </target>
 
-  <target name="compile" depends="init" description="compile 'src' tree into 'classes' tree">
+  <target name="compile" depends="init-final" description="compile 'src' tree into 'classes' tree">
     <javac srcdir="${src.dir}"
            destdir="${build.dir}"
            debug="${debug}"

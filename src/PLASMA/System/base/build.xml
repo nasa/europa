@@ -2,29 +2,44 @@
 
 <project name="PSEngine" default="PSEngine" basedir=".">
   
-  <property environment="env"/>
-  <property name="plasma.dir" value="${env.PLASMA_HOME}"/>
-	
-  <property name="build.dir" value="${src.dir}/classes"/>
-  <property name="cache" value="${src.dir}/.cache"/>
-  <property name="dist" location="${plasma.dir}/build/lib"/>
-  <property name="libraries" location="${plasma.dir}/ext/lib"/>
-
-  <fileset dir="${libraries}" id="psengine.libfiles">
-    <include name="utils.jar"/>
-  </fileset>
-
-  <path id="psengine.classpath">
-    <fileset refid="psengine.libfiles"/>
-  </path>
-
   <target name="init">
     <tstamp/>
+    <exec executable="uname" outputproperty="uname.o">
+      <arg value="-o"/>
+    </exec>
+    <condition property="os.isCygwin">
+      <equals arg1="${uname.o}" arg2="Cygwin"/>
+    </condition>
+    <property environment="env"/>
+  </target>
+
+  <target name="cygwin-init" depends="init" if="os.isCygwin">
+    <exec executable="cygpath" outputproperty="plasma.dir">
+      <arg value="--windows"/>
+      <arg value="${env.PLASMA_HOME}"/>
+    </exec>
+  </target>
+
+  <target name="init-final" depends="init,cygwin-init">
+    <property name="plasma.dir" value="${env.PLASMA_HOME}"/>
+    <property name="build.dir" value="${src.dir}/classes"/>
+    <property name="cache" value="${src.dir}/.cache"/>
+    <property name="dist" location="${plasma.dir}/build/lib"/>
+    <property name="libraries" location="${plasma.dir}/ext/lib"/>
+  
+    <fileset dir="${libraries}" id="psengine.libfiles">
+      <include name="utils.jar"/>
+    </fileset>
+
+    <path id="psengine.classpath">
+      <fileset refid="psengine.libfiles"/>
+    </path>
+
     <mkdir dir="${build.dir}"/>
     <mkdir dir="${cache}"/>
   </target>
-
-  <target name="compile" depends="init">
+	
+  <target name="compile" depends="init-final">
     <depend srcdir="${src.dir}" destdir="${build.dir}" cache="${cache}" closure="yes"/>
     <javac classpathref="psengine.classpath" 
            destdir="${build.dir}">

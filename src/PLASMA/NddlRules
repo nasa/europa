@@ -98,7 +98,8 @@ rule Nddl {
 
 # send the flag -Wall to Nddl to enable warning messages
 actions Nddl {
-$(JAVA) $(JREFLAGS) -jar "$(NDDL_JAR)" -C "$(2:D)" $(NDDL_FLAGS) $(2)
+#$(JAVA) $(JREFLAGS) -jar `cygpath --windows $(NDDL_JAR)` -C "$(2:D)" $(NDDL_FLAGS) $(2)
+$(JAVA) $(JREFLAGS) -jar $(NDDL_JAR) -C "$(2:D)" $(NDDL_FLAGS) $(2)
 }
 
 # NddlParser model.xml : model.nddl ;
@@ -132,7 +133,8 @@ rule NddlParser1 {
 }
 
 actions NddlParser1 {
-$(JAVA) $(JREFLAGS) -jar "$(NDDL_JAR)" --NddlParser -C "$(2:D)" $(NDDL_FLAGS) -q $(2) 
+#$(JAVA) $(JREFLAGS) -jar `cygpath --windows $(NDDL_JAR)` --NddlParser -C "$(2:D)" $(NDDL_FLAGS) -q $(2) 
+$(JAVA) $(JREFLAGS) -jar $(NDDL_JAR) --NddlParser -C "$(2:D)" $(NDDL_FLAGS) -q $(2) 
 }
 
 } # NddlRules_INCLUDED
