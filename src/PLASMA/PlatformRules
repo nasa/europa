@@ -175,6 +175,14 @@ if $(OS) = CYGWIN {
   CLASSPATH_SEPARATOR = ":" ;
 }
 
+#
+
+if $(OS) = CYGWIN {
+  PATH_PREPROCESSOR = "cygpath --windows" ;
+} else {
+  PATH_PREPROCESSOR = "echo" ;
+}
+
 # DLOPEN_LIBRARY = library with open libraries functions
 
 if $(OS) = CYGWIN {
