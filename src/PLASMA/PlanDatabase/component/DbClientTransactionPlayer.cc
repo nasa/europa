@@ -1527,7 +1527,11 @@ namespace EUROPA {
          check_error(ALWAYS_FAILS);
       }
     }
+
     // return the domain
+    if (otherTypeName != NULL)
+        typeName = otherTypeName;
+    
     switch (type) {
     case BOOL: case INT: case FLOAT:
       return(new EnumeratedDomain(values, true, typeName.c_str()));
