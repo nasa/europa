@@ -1,4 +1,4 @@
-package %%project%%;
+package %%Project%%;
 
 import psengine.PSUtil;
 import psengine.util.LibraryLoader;
