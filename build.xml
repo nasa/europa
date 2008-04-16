@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="PLASMA" default="dist" basedir=".">
+<project name="PLASMA" default="default" basedir=".">
 
   <description>PLASMA</description>
 
@@ -36,6 +36,7 @@
     <property name="file.europa_dist" value="europa.zip"/>
     <property name="jam.libraries" value="SHARED"/>
     <property name="jam.variant" value="DEV"/>
+    <property name="jam.misc" value=""/>
     <property name="jam.opts" value="${jam.misc} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries}"/>
   </target>
 
@@ -62,13 +63,17 @@
     </exec>
   </target>
 
-  <!-- This target assumes that PLASMA and PlanWorks have already been built so that all the products are in place -->
-  <target name="dist" description="Creates the binary distribution and packages it up into ${dir.dist}/${file.plasma_dist}" depends="init-final">
+	<target name="default">
     <antcall target="build"/>
     <antcall target="build">
       <param name="jam.opts" value="${jam.misc} -sVARIANTS=OPTIMIZED -sLIBRARIES=${jam.libraries}"/>
     </antcall>
-    <!-- Create the distribution directory  -->
+		<antcall target="dist"/>
+ 	</target>
+
+  <!-- This target assumes that PLASMA and PlanWorks have already been built so that all the products are in place -->
+  <target name="dist" description="Creates the binary distribution and packages it up into ${dir.dist}/${file.plasma_dist}">
+   <!-- Create the distribution directory  -->
     <mkdir dir="${dir.dist}"/>
     <mkdir dir="${dir.dist.base}/bin"/>
 
