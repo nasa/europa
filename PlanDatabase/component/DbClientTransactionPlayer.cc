@@ -1091,6 +1091,8 @@ namespace EUROPA {
   }
 
   void DbClientTransactionPlayer::playVariableReset(const TiXmlElement & element) {
+     debugMsg("DbClientTransactionPlayer:playVariableReset",
+           "Playing " << element);
     ConstrainedVariableId var = ConstrainedVariableId::noId();
     if(strcmp(element.Value(), "invoke") == 0) {
       check_error(element.Attribute("identifier") != NULL);
@@ -1103,6 +1105,8 @@ namespace EUROPA {
     }
     check_error(var.isValid());
     m_client->reset(var);
+    debugMsg("DbClientTransactionPlayer:playVariableReset",
+          "Played " << element);
   }
 
   template<typename Iterator>
@@ -1523,7 +1527,11 @@ namespace EUROPA {
          check_error(ALWAYS_FAILS);
       }
     }
+
     // return the domain
+    if (otherTypeName != NULL)
+        typeName = otherTypeName;
+    
     switch (type) {
     case BOOL: case INT: case FLOAT:
       return(new EnumeratedDomain(values, true, typeName.c_str()));
