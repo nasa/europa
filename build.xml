@@ -16,9 +16,10 @@
   </target>
 
   <target name="cygwin-init" depends="init" if="os.isCygwin">
+    <echo message="Running as a Cygwin build."/>
     <exec executable="cygpath" outputproperty="local.env.PLASMA_HOME">
       <arg value="--unix"/>
-      <arg value="--absolute"/>
+      <!--<arg value="-absolute"/>-->
       <arg value="${basedir}"/>
     </exec>
     <property name="jam.libraries" value="STATIC"/>
@@ -47,6 +48,7 @@
   </target>
 
   <target name="build" depends="init-final">
+    <echo message="jam ${jam.opts}"/>
     <exec executable="jam" dir="${dir.src}">
       <arg line="${jam.opts} build"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
