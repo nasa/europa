@@ -203,6 +203,7 @@ else {
 #
 
 if $(OS) = CYGWIN {
+  MKDIR = mkdir -p ;
   LINKFLAGS += -I$(PLASMA_HOME)/build/lib -Wl,--enable-auto-import ;
 }
 
