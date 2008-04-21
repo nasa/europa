@@ -12,7 +12,6 @@
 #include "Error.hh"
 #include <map>
 #include <string>
-#include <pthread.h>
 #include <ext/hash_map>
 #if (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4))
 #include <ext/hash_fun.h>
@@ -213,24 +212,10 @@ namespace EUROPA {
     /*static std::map< double, std::string>& stringFromKeys();*/ /**< Map keys to strings for string retrieval - i.e. toString(). */
     static __gnu_cxx::hash_map<std::string, double>& keysFromString();
     static __gnu_cxx::hash_map<double, std::string>& stringFromKeys();
-    static pthread_mutex_t s_mutex;
 
 #ifndef EUROPA_FAST
     const char* m_chars;
 #endif
-
-  protected:
-    friend class ThreadedLockManager;
-
-    /**
-     *@brief Lock the LabelStr class.
-     */
-    static void lock() {pthread_mutex_lock(&s_mutex);}
-    
-    /**
-     *@brief Unlock the LabelStr class.
-     */
-    static void unlock() {pthread_mutex_unlock(&s_mutex);}
 
   };
 }

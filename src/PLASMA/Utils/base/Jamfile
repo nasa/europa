@@ -4,7 +4,6 @@ if ! $(PLASMA_READY) {
 
 ModuleBase Utils
 	:
-  	LockManager.cc
 	Debug.cc
 	LabelStr.cc
 	Entity.cc

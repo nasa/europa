@@ -17,7 +17,6 @@
 #include "EqualityConstraintPropagator.hh"
 #include "StringDomain.hh"
 #include "NumericDomain.hh"
-#include "LockManager.hh"
 #include "ProxyVariableRelation.hh"
 
 #include "Constraints.hh"
@@ -580,8 +579,6 @@ private:
 };
 
 void RulesEngineModuleTests::runTests(std::string path) {
-    LockManager::instance().connect();
-    LockManager::instance().lock();
 
     RETestEngine::initialize();
     // TODO: This introduces a dependency to the TemporalNetwork, why here?

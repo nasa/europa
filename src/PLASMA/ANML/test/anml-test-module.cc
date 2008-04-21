@@ -17,13 +17,9 @@
 #include "Constraints.hh"
 #include "ANMLParser.hpp"
 
-#include "LockManager.hh"
-
 using namespace EUROPA;
 
 void ANMLModuleTests::runTests(std::string path) {
-  LockManager::instance().connect();
-  LockManager::instance().lock();
   initConstraintLibrary();
   setTestLoadLibraryPath(path);
 

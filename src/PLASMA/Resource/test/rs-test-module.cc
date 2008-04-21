@@ -30,7 +30,6 @@
 #include "EventToken.hh"
 #include "TokenVariable.hh"
 #include "Debug.hh"
-#include "LockManager.hh"
 
 #include "ResourceThreatDecisionPoint.hh"
 #include "SAVH_Profile.hh"
@@ -1974,8 +1973,6 @@ private:
 };
 
 void ResourceModuleTests::runTests(std::string path) {
-  LockManager::instance().connect();
-  LockManager::instance().lock();
   setTestLoadLibraryPath(path);  
 
   Schema::instance();

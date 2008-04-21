@@ -17,7 +17,6 @@
 #include "CommonDefs.hh"
 #include "IdTable.hh"
 #include "Error.hh"
-#include "LockManager.hh"
 #include <typeinfo>
 
 /**
@@ -230,8 +229,6 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      * @see operator X*()
      */
     inline T* operator->() const {
-      check_error(LockManager::instance().hasLock(),
-                  std::string("Must have lock to dereference an Id<") + typeid(T).name() + ">");
       return(m_ptr);
     }
 
@@ -241,8 +238,6 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      */
     template <class X>
     inline operator X* () const {
-      check_error(LockManager::instance().hasLock(),
-                  std::string("Must have lock to dereference an Id<") + typeid(T).name() + ">");
       return(static_cast<X*>(m_ptr));
     }
 
@@ -252,8 +247,6 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      * @see operator X->()
      */
     inline T& operator*() const {
-      check_error(LockManager::instance().hasLock(),
-                  std::string("Must have lock to dereference an Id<") + typeid(T).name() + ">");
       return(*m_ptr);
     }
 

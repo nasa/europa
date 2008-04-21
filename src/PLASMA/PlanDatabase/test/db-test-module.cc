@@ -25,8 +25,6 @@
 #include "PlanDatabaseTestSupport.hh"
 #include "PlanDatabaseWriter.hh"
 
-#include "LockManager.hh"
-
 #include "Constraints.hh"
 #include "ModuleConstraintEngine.hh"
 #include "ModulePlanDatabase.hh"
@@ -5613,177 +5611,9 @@ std::string DbTransPlayerTest::buildXMLDomainStr(const AbstractDomain& dom) {
 /* Done with class DbTransPlayerTest, so drop this macro. */
 #undef TEST_PLAYING_XML
 
-class MultithreadedTest {
-public:
-  static bool test(void) {
-    runTest(testBasicMultithread);
-    runTest(testMultiDb);
-    return true;
-  }
-private:
-  
-  static bool testBasicMultithread() {
-    bool retval = true;
-    for(int i = 0; i < 200 && retval; i++)
-      retval = retval && basicMultithread1();
-    return retval;
-  }
- 
-  static bool basicMultithread1() {
-    const int nthreads = 8;
-    pthread_t threads[nthreads];
-
-    new ThreadedLockManager();
-    LockManager::instance().connect(LabelStr("MainThread"));
-
-    LockManager::instance().lock();
-    DEFAULT_SETUP(ce, db, false);
-    LockManager::instance().unlock();
-
-    for(int i = 0; i < nthreads; i++) {
-      (i % 2 ? pthread_create(&threads[i], NULL, multiBasicAllocation1, &db) :
-       pthread_create(&threads[i], NULL, multiBasicAllocation2, &db));
-    }
-    for(int i = 0; i < nthreads; i++)
-      pthread_join(threads[i], NULL);
-    
-    LockManager::instance().lock();
-    DEFAULT_TEARDOWN();
-    LockManager::instance().unlock();
-
-    new LockManager();
-    LockManager::instance().connect();
-    return true;
-  }
-
-  static void* multiBasicAllocation1(void* arg) {
-    LockManager::instance().connect(LabelStr("multiBasicAllocation1"));
-    LockManager::instance().lock();
-    PlanDatabaseId db = *((PlanDatabaseId*)arg);
-    LockManager::instance().unlock();
-
-    LockManager::instance().lock();
-    if(!db->getClient()->isTransactionLoggingEnabled())
-      db->getClient()->enableTransactionLogging();
-    DbClientTransactionLog* txLog = new DbClientTransactionLog(db->getClient());
-    LockManager::instance().unlock();
-
-    LockManager::instance().lock();
-    TokenId token = db->getClient()->createToken(LabelStr(DEFAULT_PREDICATE).c_str());
-    LockManager::instance().unlock();
-    
-    LockManager::instance().lock();
-    std::vector<ConstrainedVariableId> scope;
-    scope.push_back(token->getStart());
-    scope.push_back(token->getDuration());
-    db->getClient()->createConstraint("eq", scope);
-    LockManager::instance().unlock();
-
-    LockManager::instance().lock();
-    delete txLog;
-    LockManager::instance().unlock();
-
-    pthread_exit(0);
-    return NULL;
-  }
-  
-  static void* multiBasicAllocation2(void* arg) {
-    LockManager::instance().connect(LabelStr("multiBasicAllocation2"));
-    LockManager::instance().lock();
-    PlanDatabaseId db = *((PlanDatabaseId*)arg);
-    LockManager::instance().unlock();
-
-    LockManager::instance().lock();
-    if(!db->getClient()->isTransactionLoggingEnabled())
-      db->getClient()->enableTransactionLogging();
-    DbClientTransactionLog* txLog = new DbClientTransactionLog(db->getClient());
-    LockManager::instance().unlock();
-
-    LockManager::instance().lock();
-    TokenId token = db->getClient()->createToken(LabelStr(DEFAULT_PREDICATE).c_str());
-    LockManager::instance().unlock();
-    
-    LockManager::instance().lock();
-    std::vector<ConstrainedVariableId> scope;
-    scope.push_back(token->getStart());
-    scope.push_back(token->getDuration());
-    db->getClient()->createConstraint("eq", scope);
-    LockManager::instance().unlock();
-
-    LockManager::instance().lock();
-    delete txLog;
-    LockManager::instance().unlock();
-
-    pthread_exit(0);
-    return NULL;
-  }
-
-  static bool testMultiDb() {
-    const int nthreads = 8;
-    pthread_t threads[nthreads];
-
-    new ThreadedLockManager();
-    LockManager::instance().connect(LabelStr("testMultiDb"));
-
-    LockManager::instance().lock();
-    DEFAULT_SETUP(ce1, db1, false);
-    DEFAULT_SETUP(ce2, db2, false);
-    DEFAULT_SETUP(ce3, db3, false);
-    DEFAULT_SETUP(ce4, db4, false);
-    LockManager::instance().unlock();
-
-    for(int i = 0; i < nthreads; i++) {
-      if(i % 4 == 0)
-        pthread_create(&threads[i], NULL, multiDbAllocation, &db4);
-      else if(i % 3 == 0)
-        pthread_create(&threads[i], NULL, multiDbAllocation, &db3);
-      else if(i % 2 == 0)
-        pthread_create(&threads[i], NULL, multiDbAllocation, &db2);
-      else
-        pthread_create(&threads[i], NULL, multiDbAllocation, &db1);
-    }
-    for(int i = 0; i < nthreads; i++)
-      pthread_join(threads[i], NULL);
-
-    LockManager::instance().lock();
-    DEFAULT_TEARDOWN_MULTI(ce4, db4);
-    DEFAULT_TEARDOWN_MULTI(ce3, db3);
-    DEFAULT_TEARDOWN_MULTI(ce2, db2);
-    DEFAULT_TEARDOWN_MULTI(ce1, db1);
-    LockManager::instance().unlock();
-
-    LockManager::instance().disconnect();
-    new LockManager();
-    LockManager::instance().connect();
-    return true;
-  }
-
-  static void* multiDbAllocation(void* arg) {
-    const int nthreads = 8;
-    pthread_t threads[nthreads];
-
-    LockManager::instance().connect(LabelStr("multiDbAllocation"));
-
-    LockManager::instance().lock();
-    PlanDatabaseId db = *((PlanDatabaseId*)arg);
-    LockManager::instance().unlock();
-
-    for(int i = 0; i < nthreads; i++) {
-      (i % 2 ? pthread_create(&threads[i], NULL, multiBasicAllocation1, &db) :
-       pthread_create(&threads[i], NULL, multiBasicAllocation2, &db));
-    }
-    for(int i = 0; i < nthreads; i++)
-      pthread_join(threads[i], NULL);
-    pthread_exit(0);
-    return NULL;
-  }
-};
-
 void PlanDatabaseModuleTests::runTests(std::string path) {
  
-  LockManager::instance().connect();
   setTestLoadLibraryPath(path);
-  LockManager::instance().lock();
 
   PDBTestEngine::initialize();
   // TODO: This introduces a dependency to the TemporalNetwork, why here?
@@ -5792,27 +5622,19 @@ void PlanDatabaseModuleTests::runTests(std::string path) {
   REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporaldistance", "Temporal");
   REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporalDistance", "Temporal");  
   initDbModuleTests();
-  
-  LockManager::instance().unlock();
 
   for (int i = 0; i < 1; i++) {
-    LockManager::instance().lock();
     runTestSuite(SchemaTest::test);
     runTestSuite(ObjectTest::test);
     runTestSuite(TokenTest::test);
     runTestSuite(TimelineTest::test);
     runTestSuite(DbClientTest::test);
-    runTestSuite(MultithreadedTest::test);
     runTestSuite(DbTransPlayerTest::test);
     std::cout << "Finished #" << i << std::endl;
-    LockManager::instance().unlock();
   }
 
-  LockManager::instance().lock();
   PDBTestEngine::terminate();
-  LockManager::instance().unlock();
 
-  LockManager::instance().lock();
   std::cout << "All done and purged" << std::endl;
 }
 

@@ -14,7 +14,6 @@
 #include "IdTable.hh"
 #include "CommonDefs.hh"
 #include "Debug.hh"
-#include "LockManager.hh"
 
 /**
  * @file IdTable.cc
@@ -100,7 +99,6 @@ namespace EUROPA {
 
   IdTable& IdTable::getInstance() {
     static IdTable sl_instance;
-    check_error(LockManager::instance().hasLock());
     return(sl_instance);
   }
 }

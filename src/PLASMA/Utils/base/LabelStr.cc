@@ -1,6 +1,5 @@
 #include "Debug.hh"
 #include "LabelStr.hh"
-#include "LockManager.hh"
 #include "Error.hh"
 #include "Utils.hh"
 #include <string.h>
@@ -9,7 +8,6 @@ namespace EUROPA {
 
   DEFINE_GLOBAL_CONST(LabelStr, EMPTY_LABEL, "");
 
-  pthread_mutex_t LabelStr::s_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 //   std::map< std::string, double>& LabelStr::keysFromString() {
 //     static std::map< std::string, double> sl_keysFromString;
@@ -100,23 +98,19 @@ namespace EUROPA {
   }
 
   unsigned int LabelStr::getSize() {
-    lock();
     check_error(keysFromString().size() == stringFromKeys().size());
     int toRet = keysFromString().size();
-    unlock();
     return toRet;
   }
 
   double LabelStr::getKey(const std::string& label) {
     static double sl_counter = EPSILON;
 
-    lock();
     __gnu_cxx::hash_map<std::string, double>::iterator it = 
       keysFromString().find(label);
 
     if (it != keysFromString().end()) {
       double toRet = it->second;
-      unlock();
       return toRet; // Found it; return the key.
     }
 
@@ -127,7 +121,6 @@ namespace EUROPA {
     check_error(key < 1.0, "More strings allocated than permitted");
     
     handleInsertion(key, label);
-    unlock();
     return(key);
   }
 
@@ -138,25 +131,19 @@ namespace EUROPA {
   }
 
   const std::string& LabelStr::getString(double key){
-    lock();
     __gnu_cxx::hash_map< double, std::string >::const_iterator it = stringFromKeys().find(key);
     check_error(it != stringFromKeys().end());
     const std::string& toRet = it->second;
-    unlock();
     return toRet;
   }
 
   bool LabelStr::isString(double key) {
-    lock();
     bool toRet = (stringFromKeys().find(key) != stringFromKeys().end());
-    unlock();
     return toRet;
   }
 
   bool LabelStr::isString(const std::string& candidate){
-    lock();
     bool toRet = (keysFromString().find(candidate) != keysFromString().end());
-    unlock();
     return toRet;
   }
 

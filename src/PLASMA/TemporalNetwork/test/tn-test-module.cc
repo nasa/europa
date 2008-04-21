@@ -12,7 +12,6 @@
 #include "Timeline.hh"
 #include "Utils.hh"
 #include "IntervalIntDomain.hh"
-#include "LockManager.hh"
 #include "TokenVariable.hh"
 
 #include "RulesEngine.hh"
@@ -873,8 +872,6 @@ private:
 
 
 void TemporalNetworkModuleTests::runTests(std::string path) {
-  LockManager::instance().connect();
-  LockManager::instance().lock();
   setTestLoadLibraryPath(path);
 
   Schema::instance();

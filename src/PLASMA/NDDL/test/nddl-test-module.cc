@@ -13,8 +13,6 @@
 #include "Constraints.hh"
 #include "NddlTestSupport.hh"
 
-#include "LockManager.hh"
-
 using namespace EUROPA;
 using namespace NDDL;
 
@@ -47,8 +45,6 @@ public:
 
 
 void NDDLModuleTests::runTests(std::string path) {
-  LockManager::instance().connect();
-  LockManager::instance().lock();
 
   initConstraintLibrary();
   //REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");

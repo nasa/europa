@@ -34,8 +34,6 @@
 
 #include "Debug.hh"
 
-#include "LockManager.hh"
-
 #include <iostream>
 #include <string>
 #include <list>
@@ -1432,8 +1430,6 @@ private:
 };
 
 void FlowProfileModuleTests::runTests( const std::string& path) {
-  LockManager::instance().connect();
-  LockManager::instance().lock();
   setTestLoadLibraryPath(path);  
 
   

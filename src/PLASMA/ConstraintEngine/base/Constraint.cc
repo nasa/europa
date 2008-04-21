@@ -5,7 +5,6 @@
 #include "AbstractDomain.hh"
 #include "Debug.hh"
 #include "Error.hh"
-#include "LockManager.hh"
 
 #include <sstream>
 
@@ -17,7 +16,7 @@ namespace EUROPA {
 			 const std::vector<ConstrainedVariableId>& variables)
     : Entity(), m_name(name), m_constraintEngine(constraintEngine),
       m_variables(variables), m_id(this), m_isUnary(true), 
-      m_createdBy(LockManager::instance().getCurrentUser()),
+      m_createdBy("UNKNOWN"),
       m_deactivationRefCount(0),
       m_isRedundant(false)
    {

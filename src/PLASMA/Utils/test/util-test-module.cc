@@ -27,7 +27,6 @@
 #include "LabelStr.hh"
 #include "TestData.hh"
 #include "Id.hh"
-#include "LockManager.hh"
 #include "Entity.hh"
 #include "XMLUtils.hh"
 
@@ -323,7 +322,6 @@ private:
 };
 
 bool IdTests::test() {
-  LockManager::instance().lock();
   runTest(testBasicAllocation);
   runTest(testCollectionSupport);
   runTest(testDoubleConversion);
@@ -334,7 +332,6 @@ bool IdTests::test() {
   runTest(testBadIdUsage);
   runTest(testIdConversion);
   runTest(testConstId);
-  LockManager::instance().unlock();
   return(true);
 }
 
@@ -640,92 +637,6 @@ private:
   }
 };
 
-class MultithreadTest {
-public:
-  static bool test() {
-    runTest(testConnection);
-    runTest(testRecursiveLock);
-    return true;
-  }
-private:
-  static bool testRecursiveLock() {
-    new RecursiveLockManager();
-    LockManager::instance().connect(LabelStr("Test"));
-    assert(!LockManager::instance().hasLock());
-    LockManager::instance().lock();
-    assert(LockManager::instance().hasLock());
-    LockManager::instance().lock();
-    assert(LockManager::instance().hasLock());
-    LockManager::instance().unlock();
-    assert(LockManager::instance().hasLock());
-    LockManager::instance().unlock();
-    assert(!LockManager::instance().hasLock());
-    assert(runConnectionTest());
-    new LockManager();
-    LockManager::instance().connect();
-    return true;
-  }
-
-  static bool testConnection() {
-    new ThreadedLockManager(); //ensure that we have a threaded model
-    assert(runConnectionTest());
-    new LockManager(); //return to your regularly scheduled threading
-    LockManager::instance().connect();
-    return true;
-  }
-  
-  static bool runConnectionTest() {
-    const int numthreads = 100;
-    //assertTrue(numthreads + 2 < PTHREAD_THREADS_MAX, "Running connection test will exceed the thread limit.");
-    LockManager::instance().connect(LabelStr("Test"));
-    LockManager::instance().lock();
-    assertTrue(LockManager::instance().getCurrentUser() == LabelStr("Test"));
-    LockManager::instance().unlock();
-    pthread_t threads[numthreads];
-    int tids[numthreads];
-    for(int i = 0; i < numthreads; i++) {
-      tids[i] = i;
-      int temp = pthread_create(&threads[i], NULL, connectionTestThread, (int*) (tids + i));
-      assertTrue(temp == 0, "Error while creating thread: " + temp);
-    }
-    for(int i = numthreads - 1; i >= 0; i--) {
-      pthread_join(threads[i], NULL);
-    }
-    return true;
-  }
-
-  static void* connectionTestThread(void* arg) {
-    const int numconnects = 100;
-    bool toggle = false;
- 
-    int tid = *((int*) arg);
-    for(int i = 0; i < numconnects; i++) {
-      if(toggle) 
-        LockManager::instance().connect(LabelStr("FIRST_USER"));
-      else
-        LockManager::instance().connect(LabelStr("SECOND_USER"));
-      
-      LockManager::instance().lock();
-
-      if(toggle) {
-        assertTrue(LockManager::instance().getCurrentUser() == LabelStr("FIRST_USER"),
-                   "Failed to get expected user.  Instead got \"" + LockManager::instance().getCurrentUser().toString() + "\"");
-      }
-      else {
-				LabelStr temp = LockManager::instance().getCurrentUser();
-        assertTrue(temp == LabelStr("SECOND_USER"),
-                   "Failed to get expected user.  Instead got \"" + temp.toString() + "\"");
-      }
-
-      LockManager::instance().unlock();
-      LockManager::instance().disconnect();
-      toggle = !toggle;
-    }
-    pthread_exit(0);
-    return NULL;
-  }
-};
-
 class EntityTest {
 public:
   static bool test(){
@@ -837,13 +748,10 @@ private:
 void UtilModuleTests::runTests(std::string path) {
 	setTestLoadLibraryPath(path);
 
-  LockManager::instance().connect();
-  
   runTestSuite(ErrorTest::test);
   runTestSuite(DebugTest::test);
   runTestSuite(IdTests::test);
   runTestSuite(LabelTests::test);
-  runTestSuite(MultithreadTest::test);
   runTestSuite(EntityTest::test);
   runTestSuite(XMLTest::test);
 

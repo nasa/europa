@@ -31,8 +31,6 @@
 
 #include "module-tests.hh"
 
-#include "LockManager.hh"
-
 #include "ModuleConstraintEngine.hh"
 
 #include <iostream>
@@ -147,19 +145,6 @@ private:
 };
 
 
-class TestLockManager: public LockManager {
-public:
-  TestLockManager()
-    : LockManager(), m_currentUser("TEST_HARNESS") {
-  }
-
-  const LabelStr& getCurrentUser() const {
-    return(m_currentUser);
-  }
-
-private:
-  const LabelStr m_currentUser;
-};
 
 class TypeFactoryTests {
 public:
@@ -756,7 +741,6 @@ public:
     runTest(testTestEqConstraint);
     runTest(testTestLessThanConstraint);
     runTest(testTestLEQConstraint);
-    runTest(testLockManager);
     runTest(testGNATS_3075);
     return(true);
   }
@@ -2450,32 +2434,6 @@ private:
     return true;
   }
 
-  static bool testLockManager() {
-    assertTrue(LockManager::instance().getCurrentUser() == LabelStr("ANONYMOUS"));
-
-    // Ensure new instance overwrites old
-    {
-      LockManager std_manager;
-      assertTrue(&std_manager == &LockManager::instance());
-    }
-
-    // Now allocate the test allocator and confirm it is assigned
-    TestLockManager testManager;
-    assertTrue(LockManager::instance().getCurrentUser() == LabelStr("TEST_HARNESS"));
-    {
-      Variable<BoolDomain> v0(ENGINE, BoolDomain());
-      Variable<LabelSet> v1(ENGINE, LabelSet(LabelStr("C")));
-      Variable<LabelSet> v2(ENGINE, LabelSet(LabelStr("E")));
-      TestEQ c0(LabelStr("TestEQ"), LabelStr("Default"), 
-		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
-
-      // Now ensure the appropriate identifer has been passed to the constraint
-      assertTrue(c0.getCreatedBy() == LabelStr("TEST_HARNESS"));
-    }
-
-    return true;
-  }
-
   /**
    * @brief Derived from an example from Nicola
    */
@@ -2725,8 +2683,6 @@ private:
 };
 
 void ConstraintEngineModuleTests::runTests(std::string path) {
-    LockManager::instance().connect();
-    LockManager::instance().lock();
     setTestLoadLibraryPath(path);
 
     CETestEngine::initialize();
