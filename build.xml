@@ -63,7 +63,7 @@
     </exec>
   </target>
 
-	<target name="default">
+	<target name="default" depends="init-final">
     <antcall target="build"/>
     <antcall target="build">
       <param name="jam.opts" value="${jam.misc} -sVARIANTS=OPTIMIZED -sLIBRARIES=${jam.libraries}"/>
