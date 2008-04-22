@@ -42,7 +42,7 @@
 
   <target name="clean" depends="init-final">
     <delete dir="${dir.dist}"/>
-    <exec executable="jam" dir="${dir.src}">
+    <exec executable="jam" dir="${dir.src}" failonerror="true">
       <arg line="clean-all"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
     </exec>
@@ -50,26 +50,26 @@
 
   <target name="build" depends="init-final">
     <echo message="jam ${jam.opts}"/>
-    <exec executable="jam" dir="${dir.src}">
+    <exec executable="jam" dir="${dir.src}" failonerror="true">
       <arg line="${jam.opts} build"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
     </exec>
   </target>
 
   <target name="test" depends="init-final">
-    <exec executable="jam" dir="${dir.src}">
+    <exec executable="jam" dir="${dir.src}" failonerror="true">
       <arg line="${jam.opts} run-all-tests"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
     </exec>
   </target>
 
-	<target name="default" depends="init-final">
+  <target name="default" depends="init-final">
     <antcall target="build"/>
     <antcall target="build">
       <param name="jam.opts" value="${jam.misc} -sVARIANTS=OPTIMIZED -sLIBRARIES=${jam.libraries}"/>
     </antcall>
-		<antcall target="dist"/>
- 	</target>
+    <antcall target="dist"/>
+  </target>
 
   <!-- This target assumes that PLASMA and PlanWorks have already been built so that all the products are in place -->
   <target name="dist" description="Creates the binary distribution and packages it up into ${dir.dist}/${file.plasma_dist}">
