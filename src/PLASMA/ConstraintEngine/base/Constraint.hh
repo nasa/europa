@@ -327,5 +327,19 @@ namespace EUROPA {
 						const ConstrainedVariableId& arg6,
 						const ConstrainedVariableId& arg7,
 						const ConstrainedVariableId& arg8);
+
+  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1,
+						const ConstrainedVariableId& arg2,
+						const ConstrainedVariableId& arg3,
+						const ConstrainedVariableId& arg4,
+						const ConstrainedVariableId& arg5,
+						const ConstrainedVariableId& arg6,
+						const ConstrainedVariableId& arg7,
+						const ConstrainedVariableId& arg8,
+						const ConstrainedVariableId& arg9,
+						const ConstrainedVariableId& arg10,
+						const ConstrainedVariableId& arg11,
+						const ConstrainedVariableId& arg12,
+						const ConstrainedVariableId& arg13);
 }
 #endif
