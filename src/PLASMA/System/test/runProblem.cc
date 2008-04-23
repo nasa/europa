@@ -150,7 +150,7 @@ int internalMain(int argc, const char** argv){
   const char* libPath;
   SchemaId (*fcn_schema)();
 
-  if(argc != ARGC && argc != ARGC - 1) {
+  if(argc != ARGC) {
     std::cout << "usage: runProblem <model shared library path>" <<
       " <initial transaction file> <planner config file>" << std::endl;
     return 1;
@@ -190,7 +190,7 @@ int internalMain(int argc, const char** argv){
 #define TRANS_INDEX 1
 #define PCONF_INDEX 2
 #define ARGC 3
-  if(argc != ARGC && argc != ARGC-1) {
+  if(argc != ARGC) {
     std::cout << "usage: runProblem <initial transaction file> "
 	      << "<planner config>" << std::endl;
     std::cout << ARGC << " " << argc << std::endl;
@@ -207,7 +207,7 @@ int internalMain(int argc, const char** argv){
 #define TRANS_INDEX 1
 #define PCONF_INDEX 2
 #define ARGC 3
-  if(argc != ARGC && argc != ARGC-1) {
+  if(argc != ARGC) {
     std::cout << "usage: runProblem <initial transaction file> "
 	      << "<planner config>" << std::endl;
     std::cout << ARGC << " " << argc << std::endl;
