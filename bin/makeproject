@@ -15,6 +15,10 @@ else:
   print "Error: EUROPA_HOME is not defined"
   sys.exit(1)
 
+if len(sys.argv) < 2:
+  print "Expected use: " + sys.argv[0] + " <projectName> <projectDest - optional>"
+  sys.exit(1);
+
 projectName = sys.argv[1]
 projectSource = os.path.join(europaHome, "bin", ".makeproject")
 configDir = os.path.join(europaHome, "config")
