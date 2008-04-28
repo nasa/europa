@@ -339,7 +339,7 @@ namespace EUROPA {
     PSEntity* getParent();
 
     bool isSingleton();
-    PSVarValue getSingletonValue();    // Call to get value if isSingleton()==true
+    PSVarValue getSingletonValue() throw(Error);    // Call to get value if isSingleton()==true
 
     bool isInterval();
     double getLowerBound();  // if isSingleton()==false && isInterval() == true
