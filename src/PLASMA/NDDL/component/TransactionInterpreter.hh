@@ -45,6 +45,19 @@ namespace EUROPA {
       
       Expr* valueToExpr(const TiXmlElement* element,bool isRule=true);
       
+      const SchemaId& getSchema() const;
+      bool isClass(const LabelStr& className) const;
+
+      LabelStr predicateInstanceToType(const char* className,
+                                       const char* predicateName, 
+                                       const char* predicateInstance,
+                                       std::map<std::string,std::string>& localVars) const;
+      
+      LabelStr getObjectVarClass(const LabelStr& className,const LabelStr& var) const;
+      LabelStr getTokenVarClass(const LabelStr& className,const LabelStr& predName,const LabelStr& var) const;
+      LabelStr checkPredicateType(const LabelStr& type) const;
+      
+      
       // TODO: move these to schema
       std::set<std::string> m_nativeClasses;      
       std::set<std::string> m_nativeTokens;      
@@ -77,12 +90,16 @@ namespace EUROPA {
   	    virtual void addToken(const char* name,const TokenId& t); 
   	    virtual TokenId getToken(const char* name);
 
+        virtual bool isClass(const LabelStr& className) const;
+        
+        virtual const SchemaId& getSchema() const; // TODO: expose specific methods instead, or extend simplified schema interface
+        
         virtual std::string toString() const;
   	    
   	protected:
   	    EvalContext* m_parent;      	    
   	    std::map<std::string,ConstrainedVariableId> m_variables;
-  	    std::map<std::string,TokenId> m_tokens;
+  	    std::map<std::string,TokenId> m_tokens;  	    
   };
   
   class Expr
@@ -459,6 +476,8 @@ namespace EUROPA {
   	    LabelStr m_predicateType;
   	    LabelStr m_predicateInstance;
   	    LabelStr m_relation;
+  	    
+  	  bool isConstrained(RuleInstanceEvalContext& context, const LabelStr& predicateInstance) const;  	    
   };
   
   class ExprLocalVar : public RuleExpr

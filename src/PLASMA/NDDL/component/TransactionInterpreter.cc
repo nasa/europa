@@ -75,11 +75,11 @@ namespace EUROPA {
   
   InterpretedDbClientTransactionPlayer::InterpretedDbClientTransactionPlayer(const DbClientId & client)                                                              
     : DbClientTransactionPlayer(client) 
-  {  	  
+  { 
     addNativeClass("Object");
-    addNativeClass("Timeline");
-    //I'm not sure exactly what to do about these, as far as dealing with resources goes...
-    //~MJI
+    addNativeClass("Timeline");     // TODO: this must be registered by NDDL module
+
+    // TODO: all these must be registered by Resource module 
     addNativeClass("Resource"); 
     m_nativeTokens.insert("Resource.change");
 
@@ -102,6 +102,12 @@ namespace EUROPA {
 	  m_nativeClasses.insert(className);
   }
   
+  const SchemaId& InterpretedDbClientTransactionPlayer::getSchema() const
+  {
+      // TODO: this must be passed in
+      return Schema::instance();   
+  }
+
   const char* safeStr(const char* str)
   {
     return (str !=NULL ? str : "NULL");
@@ -121,8 +127,7 @@ namespace EUROPA {
   void InterpretedDbClientTransactionPlayer::playDeclareClass(const TiXmlElement& element) 
   {
     const char* className = element.Attribute("name");
-    Id<Schema> schema = Schema::instance();
-    schema->declareObjectType(className);
+    getSchema()->declareObjectType(className);
 
     dbgout.str("");
     dbgout << "Declared class " << className << std::endl;
@@ -137,7 +142,7 @@ namespace EUROPA {
     parentClassName = (parentClassName == NULL ? "Object" : parentClassName);
 
     // TODO: should do nothing here for native classes, need to make Plasma.nddl consistent with this
-    Id<Schema> schema = Schema::instance();
+    Id<Schema> schema = getSchema();
     schema->addObjectType(className,parentClassName);
     
     // The TypeFactory constructor automatically registers the factory
@@ -243,7 +248,7 @@ namespace EUROPA {
 	for(const TiXmlElement* argChild = child->FirstChildElement(); argChild; argChild = argChild->NextSiblingElement() ) 
 	  argExprs.push_back(valueToExpr(argChild,false));
 
-	superCallExpr = new ExprConstructorSuperCall(Schema::instance()->getParent(className),argExprs);
+	superCallExpr = new ExprConstructorSuperCall(getSchema()->getParent(className),argExprs);
       }
       else if (strcmp(child->Value(),"assign") == 0) {
 	const TiXmlElement* rhsChild = child->FirstChildElement();
@@ -278,9 +283,9 @@ namespace EUROPA {
 
     // If constructor for super class isn't called explicitly, call default one with no args
     if (superCallExpr == NULL){
-      bool hasParent = Schema::instance()->hasParent(className);
+      bool hasParent = getSchema()->hasParent(className);
       if(hasParent)
-	superCallExpr = new ExprConstructorSuperCall(Schema::instance()->getParent(className),std::vector<Expr*>());
+	superCallExpr = new ExprConstructorSuperCall(getSchema()->getParent(className),std::vector<Expr*>());
       else
 	superCallExpr = new ExprConstructorSuperCall("Object",std::vector<Expr*>());
     }
@@ -302,7 +307,7 @@ namespace EUROPA {
   {	
     std::string predName = std::string(className) + "." + element->Attribute("name");	
 
-    if (Schema::instance()->isPredicate(predName)) {
+    if (getSchema()->isPredicate(predName)) {
     	// TODO: this is different from the behavior from code generation, fix it.
     	// In code generation the definition in a subclass extends the one if a superclass
     	std::cerr << "Predicate " << predName << " has already been defined in a superclass."
@@ -374,24 +379,24 @@ namespace EUROPA {
     playDefineEnumeration(*element);
   }
 
-  bool isClass(LabelStr className)
+  bool InterpretedDbClientTransactionPlayer::isClass(const LabelStr& className) const
   {  	  
-    return Schema::instance()->isObjectType(className);
+    return getSchema()->isObjectType(className);
   }
     
-  LabelStr getObjectVarClass(LabelStr className,LabelStr var)
+  LabelStr InterpretedDbClientTransactionPlayer::getObjectVarClass(const LabelStr& className,const LabelStr& var) const
   {
-    const SchemaId& schema = Schema::instance();
+    const SchemaId& schema = getSchema();
     check_runtime_error(schema->hasMember(className,var),className.toString()+" has no member called "+var.toString());
     return schema->getMemberType(className,var);
   }
 
-  LabelStr getTokenVarClass(LabelStr className,LabelStr predName,LabelStr var)
+  LabelStr InterpretedDbClientTransactionPlayer::getTokenVarClass(const LabelStr& className,const LabelStr& predName,const LabelStr& var) const
   {
     if (strcmp(var.c_str(),"object") == 0) // is it the object variable? 
       return className;
     else { // look through the parameters to the token
-      const SchemaId& schema = Schema::instance();
+      const SchemaId& schema = getSchema();
       if (schema->hasMember(predName,var))
 	return schema->getMemberType(predName,var); 	
     } 
@@ -400,9 +405,9 @@ namespace EUROPA {
     return getObjectVarClass(className,var);
   }
 
-  LabelStr checkPredicateType(LabelStr type)
+  LabelStr InterpretedDbClientTransactionPlayer::checkPredicateType(const LabelStr& type) const
   {
-    check_runtime_error(Schema::instance()->isPredicate(type),type.toString()+" is not a Type");
+    check_runtime_error(getSchema()->isPredicate(type),type.toString()+" is not a Type");
     return type;
   }
   
@@ -410,10 +415,10 @@ namespace EUROPA {
    * figures out the type of a predicate given an instance
    * 
    */
-  LabelStr predicateInstanceToType(const char* className,
+  LabelStr InterpretedDbClientTransactionPlayer::predicateInstanceToType(const char* className,
                                    const char* predicateName, 
                                    const char* predicateInstance,
-                                   std::map<std::string,std::string>& localVars)
+                                   std::map<std::string,std::string>& localVars) const
   {
     // see ModelAccessor.getSlaveObjectType() in NDDL compiler  	
     LabelStr str(predicateInstance);
@@ -607,7 +612,7 @@ namespace EUROPA {
     const TiXmlElement* setElement = element.FirstChildElement();
     check_error(strcmp(setElement->Value(),"set") == 0, "Expected value set as part of Enum definition");
       
-    Id<Schema> schema = Schema::instance();
+    Id<Schema> schema = getSchema();
     schema->addEnum(enumName);
       
     std::list<double> values;
@@ -663,7 +668,7 @@ namespace EUROPA {
       delete restrictedDomain;   
           
     // TODO: this is what the code generator does for every typedef, it doesn't seem right for interval types though    
-    Schema::instance()->addEnum(name);          
+    getSchema()->addEnum(name);          
   }  
   
   /*
@@ -699,6 +704,17 @@ namespace EUROPA {
   {
   }
 
+  const SchemaId& EvalContext::getSchema() const
+  {
+      // TODO: this must be passed in
+      return Schema::instance();   
+  }
+
+  bool EvalContext::isClass(const LabelStr& className) const
+  {       
+    return getSchema()->isObjectType(className);
+  }
+      
   void EvalContext::addVar(const char* name,const ConstrainedVariableId& v)
   {
     m_variables[name] = v;
@@ -878,7 +894,7 @@ namespace EUROPA {
       check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+varName+" in Evaluation Context");
      	
     for (unsigned int idx = 1;idx<vars.size();idx++) {
-      check_error(isClass(rhs->baseDomain().getTypeName()), std::string("Can't apply dot operator to:")+rhs->baseDomain().getTypeName().toString());
+      check_error(context.isClass(rhs->baseDomain().getTypeName()), std::string("Can't apply dot operator to:")+rhs->baseDomain().getTypeName().toString());
       check_runtime_error(rhs->derivedDomain().isSingleton(),varName+" must be singleton to be able to get to "+vars[idx]);
       ObjectId object = rhs->derivedDomain().getSingletonValue();
       rhs = object->getVariable(object->getName().toString()+"."+vars[idx]);
@@ -1039,7 +1055,7 @@ namespace EUROPA {
   }
 
   // see ModelAccessor.isConstrained in Nddl compiler 
-  bool isConstrained(const LabelStr& predicateInstance)
+  bool ExprSubgoal::isConstrained(RuleInstanceEvalContext& context, const LabelStr& predicateInstance) const
   {
     unsigned int tokenCnt = predicateInstance.countElements(".");
     	
@@ -1049,7 +1065,7 @@ namespace EUROPA {
     	    
     // If the prefix is a class, it means it can be any object instance, so it must not be constrained    
     LabelStr prefix(predicateInstance.getElement(0,"."));
-    if (!isClass(prefix))
+    if (!context.isClass(prefix))
       return true;
     	
     return false;
@@ -1059,7 +1075,7 @@ namespace EUROPA {
   {
     debugMsg("XMLInterpreter:InterpretedRule","Creating subgoal " << m_predicateType.toString() << ":" << m_name.toString());
   		
-    bool constrained = isConstrained(m_predicateInstance);
+    bool constrained = isConstrained(context,m_predicateInstance);
     ConstrainedVariableId owner;
     if (constrained) {
       unsigned int tokenCnt = m_predicateInstance.countElements(".");
@@ -1099,7 +1115,7 @@ namespace EUROPA {
   DataRef ExprLocalVar::doEval(RuleInstanceEvalContext& context) const
   {
     ConstrainedVariableId localVar;
-    if (isClass(m_type))
+    if (context.isClass(m_type))
       localVar = context.getRuleInstance()->addObjectVariable(
 							      m_type,
 							      ObjectDomain(m_type.c_str()),
@@ -1345,7 +1361,7 @@ namespace EUROPA {
             m_constructorBody[i]->eval(evalContext);
 
         // Initialize any variables that were not explicitly initialized
-        const Schema::NameValueVector& members = Schema::instance()->getMembers(m_className);
+        const Schema::NameValueVector& members = evalContext.getSchema()->getMembers(m_className);
         for (unsigned int i=0; i < members.size(); i++) {
             std::string varName = instance->getName().toString() + "." + members[i].second.toString();
             if (instance->getVariable(varName) == ConstrainedVariableId::noId()) {
@@ -1466,7 +1482,11 @@ namespace EUROPA {
 				    const std::vector<ExprConstraint*>& constraints,
 				    const bool& autoClose)
   {
-    debugMsg("XMLInterpreter","Token " << getName().toString() << " has " << parameterNames.size() << " parameters"); 
+    debugMsg("XMLInterpreter","Token " << getName().toString() << " has " << parameterNames.size() << " parameters");
+    
+    // TODO: Pass in EvalContext
+    TokenEvalContext context(NULL,getId()); // TODO: give access to class or global context?
+    
     for (unsigned int i=0; i < parameterNames.size(); i++) {
       check_runtime_error(getVariable(parameterNames[i]) == ConstrainedVariableId::noId(), "Token parameter "+parameterNames[i].toString()+ " already exists!"); 
 	    	
@@ -1474,7 +1494,7 @@ namespace EUROPA {
       ConstrainedVariableId parameter;
 	        
       // same as completeObjectParam in NddlRules.hh
-      if (isClass(parameterTypes[i])) {
+      if (context.isClass(parameterTypes[i])) {
 	parameter = addParameter(
 				 ObjectDomain(parameterTypes[i].c_str()),
 				 parameterNames[i]
@@ -1495,7 +1515,6 @@ namespace EUROPA {
     if (autoClose)
       close();    	
 	    
-    TokenEvalContext context(NULL,getId()); // TODO: give access to class or global context?
    	     
     // Take care of initializations that were part of the predicate declaration
     for (unsigned int i=0; i < assignVars.size(); i++) 
