@@ -17,6 +17,7 @@ else:
 
 if len(sys.argv) < 2:
   print "Expected use: " + sys.argv[0] + " <projectName> <projectDest - optional>"
+  print "  (if no projectDest specified, EUROPA_HOME/../ is used)"
   sys.exit(1);
 
 projectName = sys.argv[1]
