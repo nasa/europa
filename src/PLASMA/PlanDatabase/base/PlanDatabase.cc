@@ -383,7 +383,7 @@ namespace EUROPA{
                << inactiveToken->getKey() << ")");
 
       // Validate expectation about being active and predicate being the same
-      check_error(Schema::instance()->isA(candidate->getPredicateName(), inactiveToken->getPredicateName()),
+      check_error(m_schema->isA(candidate->getPredicateName(), inactiveToken->getPredicateName()),
                   candidate->getPredicateName().toString() + " is not a " + inactiveToken->getPredicateName().toString());
 
       check_error(candidate->isActive(), "Should not be trying to merge an active token.");
@@ -955,7 +955,7 @@ namespace EUROPA{
     const ObjectSet& objects = getObjects();
     for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
         ObjectId object = *it;
-        if(Schema::instance()->isA(object->getType(), objectType.c_str()))
+        if(m_schema->isA(object->getType(), objectType.c_str()))
             retval.push_back(getObjectWrapperGenerator(object->getType())->wrap(object));
     }
 
@@ -1028,7 +1028,7 @@ namespace EUROPA{
   }
 
   ObjectWrapperGenerator* PlanDatabase::getObjectWrapperGenerator(const LabelStr& type) {
-    const std::vector<LabelStr>& types = Schema::instance()->getAllObjectTypes(type);
+    const std::vector<LabelStr>& types = m_schema->getAllObjectTypes(type);
     for(std::vector<LabelStr>::const_iterator it = types.begin(); it != types.end(); ++it) {
       std::map<double, ObjectWrapperGenerator*>::iterator wrapper = m_objectWrapperGenerators.find(*it);
       if(wrapper != m_objectWrapperGenerators.end())
