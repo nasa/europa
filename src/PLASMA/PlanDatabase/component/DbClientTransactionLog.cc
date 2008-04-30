@@ -298,7 +298,7 @@ namespace EUROPA {
   DbClientTransactionLog::domainValueAsXml(const AbstractDomain * domain, double value)
   {
     LabelStr typeName = domain->getTypeName();
-    if (Schema::instance()->isObjectType(typeName)) {
+    if (m_client->getSchema()->isObjectType(typeName)) {
       TiXmlElement * element = allocateXmlElement("object");
       element->SetAttribute("value", domainValueAsString(domain, value));
       return element;
