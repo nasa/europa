@@ -6,19 +6,27 @@ import java.text.NumberFormat;
  */
 public class SimpleTimer 
 {
-  private long    time_; 
+  private long    startTime_; 
+  private long 	  totalTime_;
   private boolean running_;
 
   public SimpleTimer ()
   {
-    time_ = 0;
-    running_ = false;
+	reset();
   }
 
+  public SimpleTimer reset()
+  {
+	  startTime_ = 0;
+	  totalTime_ = 0;    
+	  running_ = false;
+	  return this;
+  }
+  
   public SimpleTimer start ()
   {
-    running_ = true;
-    time_ = System.currentTimeMillis();
+	  running_ = true;
+    startTime_ = System.currentTimeMillis();
     return this;
   }
 
@@ -26,12 +34,13 @@ public class SimpleTimer
   public SimpleTimer stop ()
   {
     if (running_)
-    { time_ =  System.currentTimeMillis() - time_;
+    { 
+    	updateTotal();
       running_ = false;
     }
     return this;
   }
-
+  
   /**
    * @return ElapsedTime in miliseconds 
    */
@@ -39,12 +48,9 @@ public class SimpleTimer
   {
     if (running_)
     {
-      return System.currentTimeMillis() - time_;
+    	updateTotal();
     }
-    else 
-    {
-      return time_;
-    }
+    return totalTime_;
   }
 
   /**
@@ -80,6 +86,13 @@ public class SimpleTimer
       return decimal3.format(msecs / (60*1000.0)) + " mins";
   }
 
+  private void updateTotal()
+  {
+	  long snapshot = System.currentTimeMillis();
+	  totalTime_ +=  snapshot - startTime_;
+	  startTime_ = snapshot;
+  }
+  
   private final static NumberFormat decimal3 = NumberFormat.getNumberInstance();
   {
     decimal3.setMaximumFractionDigits(3);
