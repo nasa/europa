@@ -22,10 +22,10 @@ namespace EUROPA {
         delete m_choices;
 
         debugMsg("Solver:ValueEnum", "Instantiating value source for " << flawedVariable->toString());
-        m_choices = ValueSource::getSource(flawedVariable, true);
+        m_choices = ValueSource::getSource(client->getSchema(),flawedVariable, true);
         checkError(m_choices != NULL, "Failed to correctly allocate a value source for " << flawedVariable->toString());
 
-        bool convertToObject = Schema::instance()->isObjectType(flawedVariable->baseDomain().getTypeName());
+        bool convertToObject = client->getSchema()->isObjectType(flawedVariable->baseDomain().getTypeName());
 
         if(flawedVariable->lastDomain().isSingleton()) {
           debugMsg("Solver:ValueEnum", "Ignoring ordering heuristic because '" << flawedVariable->toString() << "' is singleton.");

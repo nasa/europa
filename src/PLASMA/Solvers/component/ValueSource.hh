@@ -17,7 +17,7 @@ namespace EUROPA {
       /**
        * @brief Factory method to create appropriate concrete source
        */
-      static ValueSource* getSource(const ConstrainedVariableId& var, bool externalOrder = false);
+      static ValueSource* getSource(const SchemaId& schema, const ConstrainedVariableId& var, bool externalOrder = false);
 
       /**
        * @brief Accessor for total number of values available
@@ -42,7 +42,7 @@ namespace EUROPA {
 
     class EnumValueSource : public ValueSource {
     public:
-      EnumValueSource(const AbstractDomain& dom);
+      EnumValueSource(const SchemaId& schema, const AbstractDomain& dom);
       double getValue(unsigned int index) const;
     private:
       std::vector<double> m_values;

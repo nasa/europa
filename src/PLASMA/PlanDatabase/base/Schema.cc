@@ -32,9 +32,14 @@ namespace EUROPA {
     return sl_instance;
   }
 
+  // Hack!: remove when Schema::instance is gone
+  SchemaId sl_schemaInstanceId;
+  
   const SchemaId& Schema::instance(const LabelStr& name){
-    static Schema sl_instance(name);
-    return sl_instance.getId();
+    if (sl_schemaInstanceId.isNoId())
+        sl_schemaInstanceId = (new Schema(name))->getId();
+    
+    return sl_schemaInstanceId;
   }
 
   const LabelStr Schema::makeQualifiedName(const LabelStr& objectType, 
@@ -43,11 +48,21 @@ namespace EUROPA {
     return LabelStr(fullName.c_str());
   }
 
-  Schema::Schema(const LabelStr& name): m_id(this), m_name(name){
-    reset();
+  Schema::Schema(const LabelStr& name)
+      : m_id(this)
+      , m_name(name)
+  {
+      if (sl_schemaInstanceId.isNoId())
+          sl_schemaInstanceId = m_id;
+      
+      reset();
+      debugMsg("Schema:constructor", "created Schema:" << name.toString());
   }
 
-  Schema::~Schema(){m_id.remove();}
+  Schema::~Schema()
+  {
+      m_id.remove();
+  }
 
   const SchemaId& Schema::getId() const {return m_id;}
 

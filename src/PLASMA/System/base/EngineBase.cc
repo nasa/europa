@@ -22,7 +22,9 @@
 
 namespace EUROPA
 {
+    // TODO: these must become instance variables
     std::vector<ModuleId> EngineBase::m_modules;
+    SchemaId EngineBase::m_schema;
 
     bool& isInitialized()
     {
@@ -38,6 +40,7 @@ namespace EUROPA
     void EngineBase::initialize()
     {
     	if (!isInitialized()) {
+            m_schema = (new Schema("EngineSchema"))->getId(); // TODO: use engine name
     	    initializeModules();
     	    isInitialized() = true;
     	}
@@ -47,6 +50,7 @@ namespace EUROPA
     {
     	if (isInitialized()) {
     	    uninitializeModules();
+    	    if(m_schema.isValid()) delete (Schema*) m_schema;    	    
     	    isInitialized() = false;
     	}
     }
@@ -207,7 +211,7 @@ namespace EUROPA
     void EngineBase::allocateComponents()
     {
 	    m_constraintEngine = (new ConstraintEngine())->getId();
-	    m_planDatabase = (new PlanDatabase(m_constraintEngine, Schema::instance()))->getId();
+	    m_planDatabase = (new PlanDatabase(m_constraintEngine, m_schema))->getId();
 	    m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();
     }
 

@@ -172,15 +172,17 @@ namespace EUROPA {
       debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for predicate " << unqualifiedName.toString());
       trigger(unqualifiedName, m_rulesByPredicate, results);
 
+      SchemaId schema = token->getPlanDatabase()->getSchema();
+      
       // Fire for class and all super classes
       debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for object types (" << token->getBaseObjectType() << ")");
-      trigger(Schema::instance()->getAllObjectTypes(token->getBaseObjectType()), 
+      trigger(schema->getAllObjectTypes(token->getBaseObjectType()), 
               m_rulesByObjectType, results);
 
       // If it has a master, trigger on the relation
       if(token->getMaster().isId()){
         debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for master object types (" << token->getMaster()->getBaseObjectType().toString() << ")");
-        trigger(Schema::instance()->getAllObjectTypes(token->getMaster()->getBaseObjectType()), 
+        trigger(schema->getAllObjectTypes(token->getMaster()->getBaseObjectType()), 
                 m_rulesByMasterObjectType, results);
         debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for master predicate " << token->getMaster()->getUnqualifiedPredicateName().toString());
         trigger(token->getMaster()->getUnqualifiedPredicateName(), m_rulesByMasterPredicate, results);

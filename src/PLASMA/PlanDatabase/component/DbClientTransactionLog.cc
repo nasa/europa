@@ -14,6 +14,7 @@ namespace EUROPA {
 
   DbClientTransactionLog::DbClientTransactionLog(const DbClientId& client, bool chronologicalBacktracking)
     : DbClientListener(client)
+    , m_client(client)
   {
     m_chronologicalBacktracking = chronologicalBacktracking;
     m_tokensCreated = 0;
@@ -53,7 +54,7 @@ namespace EUROPA {
     TiXmlElement * element = allocateXmlElement("var");
     const AbstractDomain& baseDomain = variable->baseDomain();
     std::string type = baseDomain.getTypeName().toString();
-    if (Schema::instance()->isObjectType(type)) {
+    if (m_client->getSchema()->isObjectType(type)) {
       ObjectId object = baseDomain.getLowerBound();
       check_error(object.isValid());
       type = object->getType().toString();

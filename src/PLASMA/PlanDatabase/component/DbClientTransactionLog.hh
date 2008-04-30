@@ -66,7 +66,8 @@ namespace EUROPA {
     std::list<TiXmlElement*> m_bufferedTransactions;
     bool m_chronologicalBacktracking;
     int m_tokensCreated;
-
+    const DbClientId& m_client;
+    
   //! string output functions
 
     /** 

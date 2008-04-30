@@ -15,11 +15,11 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    ValueSource* ValueSource::getSource(const ConstrainedVariableId& var, bool externalOrder) {
+    ValueSource* ValueSource::getSource(const SchemaId& schema, const ConstrainedVariableId& var, bool externalOrder) {
       if(externalOrder)
 	return new OrderedValueSource(var->lastDomain());
       if(var->lastDomain().isEnumerated())
-	  return new EnumValueSource(var->lastDomain());
+	  return new EnumValueSource(schema, var->lastDomain());
       else
 	return new IntervalValueSource(var->lastDomain());
     }
@@ -32,11 +32,11 @@ namespace EUROPA {
 
     unsigned int ValueSource::getCount() const { return m_count;}
 
-    EnumValueSource::EnumValueSource(const AbstractDomain& dom)
+    EnumValueSource::EnumValueSource(const SchemaId& schema, const AbstractDomain& dom)
       : ValueSource(dom.getSize()) {
       std::list<double> values;
       dom.getValues(values);
-      if(Schema::instance()->isObjectType(dom.getTypeName())) {
+      if(schema->isObjectType(dom.getTypeName())) {
 	EntityComparator<EntityId> foo;
 	values.sort<EntityComparator<EntityId> >(foo);
       }

@@ -59,11 +59,14 @@ namespace EUROPA {
     	virtual void deallocateComponents();
     			
 	    std::map<double, LanguageInterpreter*>& getLanguageInterpreters();
-	        
+	       
 	    ConstraintEngineId m_constraintEngine;
 	    PlanDatabaseId m_planDatabase;
 	    RulesEngineId m_rulesEngine;	
 	    std::map<double, LanguageInterpreter*> m_languageInterpreters;    	    
+
+	    // TODO: these must become instance variables
+	    static SchemaId m_schema; 
 	    static std::vector<ModuleId> m_modules;
 	    
     private:

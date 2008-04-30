@@ -40,8 +40,12 @@ namespace EUROPA {
     typedef std::map<double, ValueSet > LabelStr_ValueSet_Map;
     typedef std::map<double,LabelStr_LabelStr_Map> LabelStr_LabelStrLabelStrMap_Map;
 
+    Schema(const LabelStr& name);
+    ~Schema();
+
     /**
      * @brief Accessor for singleton instance, if present
+     * TODO: this is deprecated and will be removed soon, don't use for any new code
      */
     static const SchemaId& instance(const LabelStr& name = LabelStr("Model"));
 
@@ -62,7 +66,6 @@ namespace EUROPA {
      */
     static const LabelStr& rootObject();
 
-    ~Schema();
 
     const SchemaId& getId() const;
 
@@ -340,11 +343,6 @@ namespace EUROPA {
   private:
 
     static const std::set<LabelStr>& getBuiltInVariableNames();
-
-    /**
-     * @brief Private constructor to avoid attempts to violate singleton pattern
-     */
-    Schema(const LabelStr& name);
 
     SchemaId m_id;
     const LabelStr m_name;

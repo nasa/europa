@@ -183,7 +183,7 @@ int internalMain(int argc, const char** argv){
     check_error(!error_msg, error_msg);
   }
   
-  assert(Schema::instance().isValid());
+//  assert(Schema::instance().isValid());
   ASSEMBLY::initialize();
   schema = (*fcn_schema)();
 #elif INTERPRETED

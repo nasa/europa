@@ -23,7 +23,7 @@ namespace EUROPA {
                                                                const LabelStr& explanation)
       : DecisionPoint(dbClient, flawedVariable->getKey(), explanation),
         m_flawedVariable(flawedVariable),
-        m_choices(ValueSource::getSource(flawedVariable)){
+        m_choices(ValueSource::getSource(dbClient->getSchema(),flawedVariable)){
       checkError(flawedVariable->lastDomain().areBoundsFinite(),
                  "Attempted to allocate a Decision Point for a domain with infinite bounds for variable " 
                  << flawedVariable->toString());
