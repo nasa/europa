@@ -41,6 +41,12 @@ namespace EUROPA {
 
   const DbClientId& DbClient::getId() const{return m_id;}
 
+  const SchemaId& DbClient::getSchema() const
+  {
+      return m_planDb->getSchema();   
+  }
+
+  
   ConstrainedVariableId
   DbClient::createVariable(const char* typeName, const AbstractDomain& baseDomain, const char* name, bool isTmpVar,bool canBeSpecified)
   {

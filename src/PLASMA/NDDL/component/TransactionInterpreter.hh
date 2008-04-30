@@ -45,7 +45,6 @@ namespace EUROPA {
       
       Expr* valueToExpr(const TiXmlElement* element,bool isRule=true);
       
-      const SchemaId& getSchema() const;
       bool isClass(const LabelStr& className) const;
 
       LabelStr predicateInstanceToType(const char* className,

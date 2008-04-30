@@ -122,6 +122,8 @@ namespace EUROPA {
     void getElementsFromConstrain(const TiXmlElement& elem, ObjectId& obj, TokenId& pred,
 				  TokenId& succ);
 
+    const SchemaId& getSchema() const;
+    
     DbClientId m_client;
     int m_objectCount;
     int m_varCount;
@@ -191,6 +193,8 @@ namespace EUROPA {
      */
     TokenId createToken(const char* name,const char* type,bool rejectable,bool isFact);
 
+    const char* getObjectAndType(DbClientId& client, const char* predicate,ObjectId& object) const;
+    
 #define construct_constraint(relation, ftoken, fvar, stoken, svar){\
         std::vector<ConstrainedVariableId> variables;\
         variables.push_back( ftoken##_token->get##fvar());\

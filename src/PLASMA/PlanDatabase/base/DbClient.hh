@@ -317,6 +317,9 @@ namespace EUROPA {
      */
     bool isTransactionLoggingEnabled() const;
 
+    // Temporarily exposing this to remove Schema singleton, need to review DbClient concept in general
+    const SchemaId& getSchema() const;
+    
   private:
     friend class PlanDatabase;
 

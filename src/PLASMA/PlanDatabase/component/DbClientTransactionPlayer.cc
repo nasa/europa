@@ -98,6 +98,13 @@ namespace EUROPA {
   DbClientTransactionPlayer::~DbClientTransactionPlayer() {
   }
 
+  
+  const SchemaId& DbClientTransactionPlayer::getSchema() const
+  {
+      return m_client->getSchema();   
+  }
+
+
   void DbClientTransactionPlayer::setFilter(const std::set<std::string>& filters) {
     
   }
@@ -439,9 +446,9 @@ namespace EUROPA {
     checkError(ALWAYS_FAIL, "No creation transaction to complement " << element);
   }
 
-  const char* getObjectAndType(DbClientId& client, const char* predicate,ObjectId& object)
+  const char* DbClientTransactionPlayer::getObjectAndType(DbClientId& client, const char* predicate,ObjectId& object) const 
   {
-    if (!Schema::instance()->isPredicate(predicate)) {
+    if (!getSchema()->isPredicate(predicate)) {
       LabelStr typeStr(predicate);
       int cnt = typeStr.countElements(Schema::getDelimiter());
       LabelStr prefix = typeStr.getElement(0, Schema::getDelimiter());
@@ -451,7 +458,7 @@ namespace EUROPA {
       LabelStr suffix = typeStr.getElement(1, Schema::getDelimiter());
       
       for (int i=2; i<cnt;i++) {
-          objType = Schema::instance()->getMemberType(objType,suffix);
+          objType = getSchema()->getMemberType(objType,suffix);
           suffix = typeStr.getElement(i, Schema::getDelimiter());           	
       }
       

@@ -102,12 +102,6 @@ namespace EUROPA {
 	  m_nativeClasses.insert(className);
   }
   
-  const SchemaId& InterpretedDbClientTransactionPlayer::getSchema() const
-  {
-      // TODO: this must be passed in
-      return Schema::instance();   
-  }
-
   const char* safeStr(const char* str)
   {
     return (str !=NULL ? str : "NULL");
