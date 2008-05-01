@@ -2,8 +2,8 @@ UNAME := $(shell uname)
 
 ifeq (1,$(FAST))
   BUILD_SUFFIX := _o
-  CXXFLAGS += -O3 -DEUROPA_FAST
-  LDFLAGS += -O3
+  CXXFLAGS += -O3 -DEUROPA_FAST  -fno-strict-aliasing
+  LDFLAGS += -O3  -fno-strict-aliasing
 else
   BUILD_SUFFIX := _g
   CXXFLAGS += -ggdb3
