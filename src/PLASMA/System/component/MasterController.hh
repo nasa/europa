@@ -132,7 +132,7 @@ namespace EUROPA {
      */
     static std::string extractPath(const char* configPath);
 
-  private:
+  protected:
 
     /**
      * @brief Unloads the model
@@ -155,7 +155,9 @@ namespace EUROPA {
     void* m_libHandle;
     std::ofstream* m_debugStream;
 
+    // TODO: use an engine instead of individual components
     ConstraintEngineId m_constraintEngine; /*!< A Constraint Engine for propagation of relations */
+    SchemaId m_schema; 
     PlanDatabaseId m_planDatabase; /*!< A PlanDatabase as central state representation */
     RulesEngineId m_rulesEngine; /*!< A Rules Engine to enforce model rules. */
     SOLVERS::PlanWriter::PartialPlanWriter* m_ppw;

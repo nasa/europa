@@ -36,7 +36,7 @@ namespace EUROPA {
 
       // Configure the planner from data in the initial state
       std::list<ObjectId> configObjects;
-      if(Schema::instance()->isType("PlannerConfig")){
+      if(m_schema->isType("PlannerConfig")){
 	getPlanDatabase()->getObjectsByType("PlannerConfig", configObjects); // Standard configuration class
 
 

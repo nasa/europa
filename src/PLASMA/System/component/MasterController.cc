@@ -221,7 +221,8 @@ namespace EUROPA {
       delete (RulesEngine*) m_rulesEngine;
       delete (PlanDatabase*) m_planDatabase;
       delete (ConstraintEngine*) m_constraintEngine;
-
+      delete (Schema*)m_schema;
+      
       // Return to standard behavior for deletion
       Entity::purgeEnded();
     }
@@ -316,7 +317,8 @@ namespace EUROPA {
     m_constraintEngine = (new ConstraintEngine())->getId();
 
     // Allocate the plan database
-    m_planDatabase = (new PlanDatabase(m_constraintEngine, Schema::instance()))->getId();
+    m_schema = (new Schema("MasterController"))->getId();
+    m_planDatabase = (new PlanDatabase(m_constraintEngine, m_schema))->getId();
 
     configureDatabase();
 
