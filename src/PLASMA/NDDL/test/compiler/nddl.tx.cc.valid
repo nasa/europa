@@ -137,7 +137,7 @@ namespace NDDL {
 namespace NDDL {
   // Boot-strap code to initialize schema
   extern "C" SchemaId loadSchema(){
-    Id<Schema> id = Schema::instance("nddl.tx");
+    Id<Schema> id = Schema::testInstance("nddl.tx");
     // Register Constraints
     // Invoke commands to populate schema with type definitions
     id->addObjectType("Timeline","Object");
