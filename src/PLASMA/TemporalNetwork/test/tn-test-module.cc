@@ -33,14 +33,14 @@
 
 #define CD_DEFAULT_SETUP(ce, db,  autoClose) \
     ConstraintEngine ce; \
-    Schema::instance()->reset();\
-    Schema::instance()->addObjectType("Objects"); \
-    Schema::instance()->addPredicate("Objects.Predicate"); \
-    Schema::instance()->addPredicate("Objects.PredicateA"); \
-    Schema::instance()->addMember("Objects.PredicateA", IntervalIntDomain().getTypeName(), "IntervalParam"); \
-    Schema::instance()->addPredicate("Objects.PredicateB"); \
-    Schema::instance()->addMember("Objects.PredicateB", IntervalIntDomain().getTypeName(), "IntervalParam"); \
-    PlanDatabase db(ce.getId(), Schema::instance());\
+    Schema::testInstance()->reset();\
+    Schema::testInstance()->addObjectType("Objects"); \
+    Schema::testInstance()->addPredicate("Objects.Predicate"); \
+    Schema::testInstance()->addPredicate("Objects.PredicateA"); \
+    Schema::testInstance()->addMember("Objects.PredicateA", IntervalIntDomain().getTypeName(), "IntervalParam"); \
+    Schema::testInstance()->addPredicate("Objects.PredicateB"); \
+    Schema::testInstance()->addMember("Objects.PredicateB", IntervalIntDomain().getTypeName(), "IntervalParam"); \
+    PlanDatabase db(ce.getId(), Schema::testInstance());\
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     new TemporalPropagator(LabelStr("Temporal"), ce.getId()); \
     db.setTemporalAdvisor((new STNTemporalAdvisor(ce.getPropagatorByName(LabelStr("Temporal"))))->getId()); \
@@ -52,14 +52,14 @@
 
 #define DEFAULT_SETUP_RULES(ce, db,  autoClose) \
     ConstraintEngine ce; \
-    Schema::instance()->reset();\
-    Schema::instance()->addObjectType("Objects"); \
-    Schema::instance()->addPredicate("Objects.Predicate"); \
-    Schema::instance()->addPredicate("Objects.PredicateA"); \
-    Schema::instance()->addMember("Objects.PredicateA", IntervalIntDomain().getTypeName(), "IntervalParam"); \
-    Schema::instance()->addPredicate("Objects.PredicateB"); \
-    Schema::instance()->addMember("Objects.PredicateB", IntervalIntDomain().getTypeName(), "IntervalParam"); \
-    PlanDatabase db(ce.getId(), Schema::instance());\
+    Schema::testInstance()->reset();\
+    Schema::testInstance()->addObjectType("Objects"); \
+    Schema::testInstance()->addPredicate("Objects.Predicate"); \
+    Schema::testInstance()->addPredicate("Objects.PredicateA"); \
+    Schema::testInstance()->addMember("Objects.PredicateA", IntervalIntDomain().getTypeName(), "IntervalParam"); \
+    Schema::testInstance()->addPredicate("Objects.PredicateB"); \
+    Schema::testInstance()->addMember("Objects.PredicateB", IntervalIntDomain().getTypeName(), "IntervalParam"); \
+    PlanDatabase db(ce.getId(), Schema::testInstance());\
     new DefaultPropagator(LabelStr("Default"), ce.getId()); \
     new TemporalPropagator(LabelStr("Temporal"), ce.getId()); \
     db.setTemporalAdvisor((new STNTemporalAdvisor(ce.getPropagatorByName(LabelStr("Temporal"))))->getId()); \
@@ -470,7 +470,7 @@ private:
     ConstraintEngine ce; 
     new DefaultPropagator(LabelStr("Default"), ce.getId()); 
     new TemporalPropagator(LabelStr("Temporal"), ce.getId());
-    PlanDatabase db(ce.getId(), Schema::instance());
+    PlanDatabase db(ce.getId(), Schema::testInstance());
     db.setTemporalAdvisor((new STNTemporalAdvisor( ce.getPropagatorByName(LabelStr("Temporal"))))->getId() ); 
 
     IntervalIntDomain d1 = IntervalIntDomain(-10, 10);
@@ -874,7 +874,7 @@ private:
 void TemporalNetworkModuleTests::runTests(std::string path) {
   setTestLoadLibraryPath(path);
 
-  Schema::instance();
+  Schema::testInstance();
   ModuleConstraintEngine moduleCE;
   ModuleConstraintLibrary moduleCL;
   ModuleTemporalNetwork moduleTN;

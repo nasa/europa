@@ -22,9 +22,8 @@
 
 namespace EUROPA
 {
-    // TODO: these must become instance variables
+    // TODO: must become instance var
     std::vector<ModuleId> EngineBase::m_modules;
-    SchemaId EngineBase::m_schema;
 
     bool& isInitialized()
     {
@@ -40,7 +39,6 @@ namespace EUROPA
     void EngineBase::initialize()
     {
     	if (!isInitialized()) {
-            m_schema = (new Schema("EngineSchema"))->getId(); // TODO: use engine name
     	    initializeModules();
     	    isInitialized() = true;
     	}
@@ -50,7 +48,6 @@ namespace EUROPA
     {
     	if (isInitialized()) {
     	    uninitializeModules();
-    	    if(m_schema.isValid()) delete (Schema*) m_schema;    	    
     	    isInitialized() = false;
     	}
     }
@@ -210,6 +207,7 @@ namespace EUROPA
 
     void EngineBase::allocateComponents()
     {
+        m_schema = (new Schema("EngineSchema"))->getId(); // TODO: use engine name
 	    m_constraintEngine = (new ConstraintEngine())->getId();
 	    m_planDatabase = (new PlanDatabase(m_constraintEngine, m_schema))->getId();
 	    m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();
@@ -222,6 +220,7 @@ namespace EUROPA
       if(m_rulesEngine.isValid()) delete (RulesEngine*) m_rulesEngine;
   	  if(m_planDatabase.isValid()) delete (PlanDatabase*) m_planDatabase;
   	  if(m_constraintEngine.isValid()) delete (ConstraintEngine*) m_constraintEngine;
+      if(m_schema.isValid()) delete (Schema*) m_schema;           
 
   	  Entity::purgeEnded();
     }
@@ -280,6 +279,8 @@ namespace EUROPA
     {
   	  static EngineComponentId noId = EngineComponentId::noId();
 
+      if (name == "Schema")
+          return (EngineComponentId&)m_schema;
   	  if (name == "ConstraintEngine")
   		  return (EngineComponentId&)m_constraintEngine;
   	  if (name == "PlanDatabase")

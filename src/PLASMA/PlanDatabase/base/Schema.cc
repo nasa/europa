@@ -42,6 +42,10 @@ namespace EUROPA {
     return sl_schemaInstanceId;
   }
 
+  const SchemaId& Schema::testInstance(const LabelStr& name){
+      return Schema::instance(name);
+  }
+  
   const LabelStr Schema::makeQualifiedName(const LabelStr& objectType, 
 					   const LabelStr& unqualifiedPredicateName){
     std::string fullName = objectType.toString() + getDelimiter() + unqualifiedPredicateName.toString();

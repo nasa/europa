@@ -46,7 +46,7 @@ using namespace EUROPA;
 const char* DEFAULT_OBJECT_TYPE = "DEFAULT_OBJECT_TYPE";
 const char* DEFAULT_PREDICATE = "DEFAULT_OBJECT_TYPE.DEFAULT_PREDICATE";
 
-#define SCHEMA Schema::instance()
+#define SCHEMA Schema::testInstance()
 
 
 void initDbTestSchema(const SchemaId& schema) {

@@ -40,7 +40,6 @@ namespace EUROPA {
 
   void ModulePlanDatabase::uninitialize()
   {
-      Schema::instance()->reset();
 	  ObjectFactory::purgeAll();
 	  TokenFactory::purgeAll();	  
 	  

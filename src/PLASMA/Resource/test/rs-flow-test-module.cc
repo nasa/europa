@@ -40,7 +40,7 @@
 
 #define RESOURCE_DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngine ce; \
-    SchemaId schema = Schema::instance();\
+    SchemaId schema = Schema::testInstance();\
     schema->reset();\
     schema->addObjectType(LabelStr("Resource")); \
     schema->addObjectType(LabelStr("SAVHResource")); \
@@ -1433,7 +1433,7 @@ void FlowProfileModuleTests::runTests( const std::string& path) {
   setTestLoadLibraryPath(path);  
 
   
-  Schema::instance();
+  Schema::testInstance();
   initConstraintLibrary();
   REGISTER_PROFILE(EUROPA::SAVH::FlowProfile, FlowProfile);
   REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile);

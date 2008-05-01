@@ -146,7 +146,7 @@ void SolversTestEngine::uninitializeModules()
 void SolversTestEngine::allocateComponents()
 {
     m_constraintEngine = (new ConstraintEngine())->getId();	  
-    m_planDatabase = (new PlanDatabase(m_constraintEngine, Schema::instance()))->getId();	
+    m_planDatabase = (new PlanDatabase(m_constraintEngine, Schema::testInstance()))->getId();	
     m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();	  
 
     for (unsigned int i=0;i<m_modules.size();i++) {
@@ -899,7 +899,7 @@ private:
 
   static bool testTokenComparators() {
     TestAssembly assembly;
-    Schema::instance()->addPredicate("A.Foo");
+    Schema::testInstance()->addPredicate("A.Foo");
     PlanDatabaseId db = assembly.getPlanDatabase();
 
     Object o1(db, "A", "o1");

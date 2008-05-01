@@ -55,13 +55,7 @@ namespace EUROPA {
    	  REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
       REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
   	  REGISTER_FVDETECTOR(EUROPA::SAVH::OpenWorldFVDetector, OpenWorldFVDetector);
-      REGISTER_FVDETECTOR(EUROPA::SAVH::ClosedWorldFVDetector, ClosedWorldFVDetector);
-         
-      
-      Id<Schema> schema = Schema::instance();
-      schema->declareObjectType("Resource");
-      schema->declareObjectType("Reusable");
-      schema->declareObjectType("Reservoir");
+      REGISTER_FVDETECTOR(EUROPA::SAVH::ClosedWorldFVDetector, ClosedWorldFVDetector);               
 
       REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource);                   
       REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float);                     
@@ -110,7 +104,12 @@ namespace EUROPA {
   
   void ModuleResource::initialize(EngineId engine)
   {
-	  PlanDatabaseId& pdb = (PlanDatabaseId&)(engine->getComponent("PlanDatabase"));
+      SchemaId schema = (SchemaId&)(engine->getComponent("Schema"));
+      schema->declareObjectType("Resource");
+      schema->declareObjectType("Reusable");
+      schema->declareObjectType("Reservoir");
+      
+      PlanDatabaseId& pdb = (PlanDatabaseId&)(engine->getComponent("PlanDatabase"));
 	  ConstraintEngineId& ce = (ConstraintEngineId&)(engine->getComponent("ConstraintEngine"));
 
 	  new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), ce);

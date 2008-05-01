@@ -15,7 +15,13 @@ namespace EUROPA {
       virtual PSObject* wrap(const EntityId& obj) = 0;
   };
 
-
+  class PSSchema : public EngineComponent
+  {
+    public:
+        // TODO: flesh this interface out
+      virtual ~PSSchema() {}
+  };
+  
   class PSPlanDatabase : public EngineComponent
   {
     public:

@@ -128,7 +128,7 @@ const double consumptionMax = -50;
 
 #define RESOURCE_DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngine ce; \
-    SchemaId schema = Schema::instance();\
+    SchemaId schema = Schema::testInstance();\
     schema->reset();\
     schema->addObjectType(LabelStr("Resource")); \
     schema->addObjectType(LabelStr("Reservoir")); \
@@ -1975,7 +1975,7 @@ private:
 void ResourceModuleTests::runTests(std::string path) {
   setTestLoadLibraryPath(path);  
 
-  Schema::instance();
+  Schema::testInstance();
   ResourceTestEngine::initialize();
   
   runTestSuite(DefaultSetupTest::test);
@@ -2449,14 +2449,14 @@ void initSolverModuleTests() {
   EUROPA::NDDL::loadSchema();
  
 #ifndef NO_RESOURCES
-  Schema::instance()->addObjectType("Reusable");
-  Schema::instance()->addMember("Reusable", "float", "capacity");
-  Schema::instance()->addMember("Reusable", "float", "levelLimitMin");
-  Schema::instance()->addMember("Reusable", "float", "consumptionMax");
-  Schema::instance()->addMember("Reusable", "float", "consumptionRateMax");
+  Schema::testInstance()->addObjectType("Reusable");
+  Schema::testInstance()->addMember("Reusable", "float", "capacity");
+  Schema::testInstance()->addMember("Reusable", "float", "levelLimitMin");
+  Schema::testInstance()->addMember("Reusable", "float", "consumptionMax");
+  Schema::testInstance()->addMember("Reusable", "float", "consumptionRateMax");
 
-  Schema::instance()->addPredicate("Reusable.uses");
-  Schema::instance()->addMember("Reusable.uses", "float", "quantity");
+  Schema::testInstance()->addPredicate("Reusable.uses");
+  Schema::testInstance()->addMember("Reusable.uses", "float", "quantity");
 #endif
 }
   

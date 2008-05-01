@@ -60,13 +60,13 @@ namespace EUROPA {
     			
 	    std::map<double, LanguageInterpreter*>& getLanguageInterpreters();
 	       
+        SchemaId m_schema; 
 	    ConstraintEngineId m_constraintEngine;
 	    PlanDatabaseId m_planDatabase;
 	    RulesEngineId m_rulesEngine;	
 	    std::map<double, LanguageInterpreter*> m_languageInterpreters;    	    
 
-	    // TODO: these must become instance variables
-	    static SchemaId m_schema; 
+	    // TODO: must be instance var
 	    static std::vector<ModuleId> m_modules;
 	    
     private:

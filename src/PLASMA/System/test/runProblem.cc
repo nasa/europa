@@ -24,6 +24,30 @@
 #include "SAVH_ReusableFVDetector.hh"
 #endif
 
+#ifdef CBPLANNER
+#error "CBPlanner is now deprecated."
+#endif
+
+#ifdef __BEOS__
+void __assert_fail(const char *__assertion,
+                   const char *__file,
+                   unsigned int __line,
+                   const char *__function)
+{
+  debugger(__assertion);
+}
+#endif
+
+
+bool isInterpreted()
+{
+#ifdef INTERPRETED
+    return true;
+#else
+    return false;
+#endif
+}
+
 SchemaId schema;
 const char* initialTransactions = NULL;
 const char* plannerConfig = NULL;
@@ -38,14 +62,17 @@ void replay(const PlanDatabaseId& db, const DbClientTransactionLogId& txLog) {
   std::ofstream out(ASSEMBLY::TX_LOG());
   txLog->flush(out);
   out.close();
-#ifdef INTERPRETED
-  Schema::instance()->reset();
-  Rule::purgeAll();
-#endif
-  ASSEMBLY replayed(Schema::instance());
-#ifdef INTERPRETED
-  replayed.playTransactions(initialTransactions, true);
-#endif
+  
+  if (isInterpreted()) {
+      Schema::testInstance()->reset();
+      Rule::purgeAll();
+  }
+  
+  ASSEMBLY replayed(Schema::testInstance());
+  
+  if (isInterpreted()) 
+      replayed.playTransactions(initialTransactions, true);
+  
   replayed.playTransactions(ASSEMBLY::TX_LOG());
   std::string s2 = PlanDatabaseWriter::toString(replayed.getPlanDatabase(), false);
   condDebugMsg(s1 != s2, "Main", "S1" << std::endl << s1 << std::endl << "S2" << std::endl << s2);
@@ -61,15 +88,15 @@ std::string dumpIdTable(const char* title)
   return os.str();
 }
 
+void initSchema();
+
 template<class ASSEMBLY>
-bool runPlanner(){
+bool runPlanner(ASSEMBLY* newAssembly){
   check_error(DebugMessage::isGood());
+  ASSEMBLY& assembly = *newAssembly;
 
   debugMsg("IdTypeCounts", dumpIdTable("before"));  
-  
-  ASSEMBLY* newAssembly = new ASSEMBLY(schema);
-  ASSEMBLY& assembly=*newAssembly;
-  
+    
   DbClientTransactionLogId txLog;
   if(replayRequired)
     txLog = (new DbClientTransactionLog(assembly.getPlanDatabase()->getClient()))->getId();
@@ -78,12 +105,7 @@ bool runPlanner(){
   TiXmlDocument doc(plannerConfig);
   doc.LoadFile();
 
-  bool interpreted = false;
-#ifdef INTERPRETED
-  interpreted = true;
-#endif
-
-  assert(assembly.plan(initialTransactions,*(doc.RootElement()), interpreted));
+  assert(assembly.plan(initialTransactions,*(doc.RootElement()), isInterpreted()));
 
   debugMsg("Main:runPlanner", "Found a plan at depth " 
 	   << assembly.getDepthReached() << " after " << assembly.getTotalNodesSearched());
@@ -92,7 +114,6 @@ bool runPlanner(){
     assembly.write(std::cout);
 
   // Store transactions for recreation of database
-
   if(replayRequired)
     replay<ASSEMBLY>(assembly.getPlanDatabase(), txLog);
 
@@ -101,12 +122,12 @@ bool runPlanner(){
   //HACK!  The runTest() macro expects an identical Id count at the beginning and end
   //of the test.  This fails with the interpreter because it creates these factories
   //at run-time
-#ifdef INTERPRETED
-  ObjectFactory::purgeAll();
-  TokenFactory::purgeAll();
-  TypeFactory::purgeAll();
-#endif
-
+  if (isInterpreted()) {
+      ObjectFactory::purgeAll();
+      TokenFactory::purgeAll();
+      TypeFactory::purgeAll();
+  }
+  
   debugMsg("IdTypeCounts", dumpIdTable("after"));  
 
   return true;
@@ -137,141 +158,144 @@ bool copyFromFile(){
   return true;
 }
 
-template<class ASSEMBLY>
-int internalMain(int argc, const char** argv){
 #ifdef STANDALONE
+
 #define MODEL_INDEX 1
 #define TRANS_INDEX 2
 #define PCONF_INDEX 3
 #define ARGC 4
 
-  const char* error_msg;
-  void* libHandle;
-  const char* libPath;
-  SchemaId (*fcn_schema)();
-
-  if(argc != ARGC) {
-    std::cout << "usage: runProblem <model shared library path>" <<
-      " <initial transaction file> <planner config file>" << std::endl;
-    return 1;
-  }
-  
-  libPath = argv[MODEL_INDEX];
-  initialTransactions = argv[TRANS_INDEX];
-  plannerConfig = argv[PCONF_INDEX];
-
-  std::cout << "runProblem: p_dlopen() file: " << libPath << std::endl;
-  std::cout.flush();
-  
-  libHandle = p_dlopen(libPath, RTLD_NOW);
-  
-  std::cout << "runProblem: returned from p_dlopen() file: " << libPath << std::endl;
-  std::cout.flush();
-
-  if(!libHandle) {
-    error_msg = p_dlerror();
-    std::cout << "Error during p_dlopen() of " << libPath << ":" << std::endl;
-    check_error(!error_msg, error_msg);
-  }
-  std::cout << "runProblem: p_dlsym() symbol: loadSchema" << std::endl;
-  std::cout.flush();
-  
-  fcn_schema = (SchemaId (*)())p_dlsym(libHandle, "loadSchema");
-  if(!fcn_schema) {
-    error_msg = p_dlerror();
-    std::cout << "p_dlsym: Error locating NDDL::schema:" << std::endl;
-    check_error(!error_msg, error_msg);
-  }
-  
-//  assert(Schema::instance().isValid());
-  ASSEMBLY::initialize();
-  schema = (*fcn_schema)();
 #elif INTERPRETED
+
 #define TRANS_INDEX 1
 #define PCONF_INDEX 2
 #define ARGC 3
-  if(argc != ARGC) {
-    std::cout << "usage: runProblem <initial transaction file> "
-	      << "<planner config>" << std::endl;
-    std::cout << ARGC << " " << argc << std::endl;
-    return 1;
-  }
-  initialTransactions = argv[TRANS_INDEX];
-  plannerConfig = argv[PCONF_INDEX];
 
-  ASSEMBLY::initialize();
-  std::string modelName(initialTransactions);
-  modelName = modelName.substr(0, modelName.find(".xml"));
-  schema = Schema::instance(modelName);
-#else //STANDALONE
+#else 
+
 #define TRANS_INDEX 1
 #define PCONF_INDEX 2
 #define ARGC 3
-  if(argc != ARGC) {
-    std::cout << "usage: runProblem <initial transaction file> "
-	      << "<planner config>" << std::endl;
-    std::cout << ARGC << " " << argc << std::endl;
-    return 1;
-  }
-  initialTransactions = argv[TRANS_INDEX];
-  plannerConfig = argv[PCONF_INDEX];
 
-  ASSEMBLY::initialize();
-  schema = NDDL::loadSchema();
-#endif //STANDALONE
-
-  const char* performanceTest = getenv("EUROPA_PERFORMANCE");
-
-  if (performanceTest != NULL && strcmp(performanceTest, "1") == 0) {
-    replayRequired = false;
-    for(int i = 0; i < 1; i++) {
-      runTest(runPlanner<ASSEMBLY>);
-    }
-  }
-  else {
-    for(int i = 0; i < 1; i++) {
-      replayRequired = false; //= true;
-      runTest(runPlanner<ASSEMBLY>);
-      //runTest(copyFromFile<ASSEMBLY>);
-    }
-  }
-
-  ASSEMBLY::terminate();
-
-#ifdef STANDALONE
-  if(p_dlclose(libHandle)) {
-    error_msg = p_dlerror();
-    std::cout << "Error during p_dlclose():" << std::endl;
-    check_error(!error_msg, error_msg);
-  }
-  
-  std::cout << "Model Library Unloaded" << std::endl;
-  std::cout.flush();
 #endif
-  
-  std::cout << "Finished" << std::endl;
-  return 0;
+
+const char* error_msg;
+void* libHandle;
+SchemaId (*fcn_schema)();
+
+
+void loadLibrary(const char* libPath)
+{    
+    std::cout << "runProblem: p_dlopen() file: " << libPath << std::endl;
+    std::cout.flush();
+    
+    libHandle = p_dlopen(libPath, RTLD_NOW);
+    
+    std::cout << "runProblem: returned from p_dlopen() file: " << libPath << std::endl;
+    std::cout.flush();
+
+    if(!libHandle) {
+      error_msg = p_dlerror();
+      std::cout << "Error during p_dlopen() of " << libPath << ":" << std::endl;
+      check_error(!error_msg, error_msg);
+    }
+    std::cout << "runProblem: p_dlsym() symbol: loadSchema" << std::endl;
+    std::cout.flush();
+    
+    fcn_schema = (SchemaId (*)())p_dlsym(libHandle, "loadSchema");
+    if(!fcn_schema) {
+      error_msg = p_dlerror();
+      std::cout << "p_dlsym: Error locating NDDL::schema:" << std::endl;
+      check_error(!error_msg, error_msg);
+    }    
 }
 
-
-
-#ifdef __BEOS__
-
-void __assert_fail(const char *__assertion,
-                   const char *__file,
-                   unsigned int __line,
-                   const char *__function)
+void unloadLibrary()
 {
-  debugger(__assertion);
+    if(p_dlclose(libHandle)) {
+      error_msg = p_dlerror();
+      std::cout << "Error during p_dlclose():" << std::endl;
+      check_error(!error_msg, error_msg);
+    }
+    
+    std::cout << "Model Library Unloaded" << std::endl;
+    std::cout.flush();    
 }
 
-#endif
+void setup(const char** argv)
+{
+    initialTransactions = argv[TRANS_INDEX];
+    plannerConfig = argv[PCONF_INDEX];
+    
+#ifdef STANDALONE
+    loadLibrary(argv[MODEL_INDEX]);
+#endif 
+}
+
+void cleanup()
+{
+#ifdef STANDALONE
+    unloadLibrary();
+#endif    
+}
+
+void initSchema()
+{
+#ifdef STANDALONE
+    schema = (*fcn_schema)();
+#elif INTERPRETED
+    std::string modelName(initialTransactions);
+    modelName = modelName.substr(0, modelName.find(".xml"));
+    schema = Schema::testInstance(modelName);
+#else 
+    schema = NDDL::loadSchema();
+#endif     
+}
+
+template<class ASSEMBLY>
+void runTestSafely()
+{
+    ASSEMBLY* newAssembly = new ASSEMBLY(schema);
+    initSchema();
+    runTest(runPlanner<ASSEMBLY>,newAssembly);
+    //delete newAssembly;    
+}
+
+template<class ASSEMBLY>
+int internalMain(int argc, const char** argv)
+{
+    if(argc != ARGC) {
+      std::cout << "usage: runProblem <model shared library path>" <<
+        " <initial transaction file> <planner config file>" << std::endl;
+      return 1;
+    }
+        
+    setup(argv);
+    ASSEMBLY::initialize();
+
+    const char* performanceTest = getenv("EUROPA_PERFORMANCE");
+
+    if (performanceTest != NULL && strcmp(performanceTest, "1") == 0) {
+        replayRequired = false;
+        for (int i = 0; i < 1; i++) 
+            runTestSafely<ASSEMBLY>();
+    }
+    else {
+        replayRequired = false; //= true;
+        for (int i = 0; i < 1; i++) {
+            runTestSafely<ASSEMBLY>();
+            //runTest(copyFromFile<ASSEMBLY>);
+        }
+    }
+
+    ASSEMBLY::terminate();
+    cleanup();
+  
+    std::cout << "Finished" << std::endl;
+    return 0;
+}
 
 int main(int argc, const char** argv) 
 {
-#ifdef CBPLANNER
-#error "CBPlanner is now deprecated."
-#else
   return internalMain<SolverAssembly>(argc, argv);
-#endif
 }

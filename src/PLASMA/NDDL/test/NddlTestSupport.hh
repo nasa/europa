@@ -53,7 +53,7 @@ const LabelStr& NDDL_DEFAULT_PREDICATE(){
   return sl_local;
 }
 
-#define SCHEMA Schema::instance()
+#define SCHEMA Schema::testInstance()
 
 
 void nddlInitDbTestSchema(const SchemaId& schema) {

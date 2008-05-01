@@ -248,12 +248,12 @@ void LocalVariableGuard_0_0::handleExecute(){
 
 #define RE_DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngine ce; \
-    Schema::instance()->reset();\
-    Schema::instance()->addObjectType(LabelStr("AllObjects")); \
-    Schema::instance()->addObjectType(LabelStr("Objects")); \
-    Schema::instance()->addMember(LabelStr("Objects"), IntervalIntDomain::getDefaultTypeName(), "m_int"); \
-    Schema::instance()->addPredicate(LabelStr("AllObjects.Predicate")); \
-    PlanDatabase db(ce.getId(), Schema::instance()); \
+    Schema::testInstance()->reset();\
+    Schema::testInstance()->addObjectType(LabelStr("AllObjects")); \
+    Schema::testInstance()->addObjectType(LabelStr("Objects")); \
+    Schema::testInstance()->addMember(LabelStr("Objects"), IntervalIntDomain::getDefaultTypeName(), "m_int"); \
+    Schema::testInstance()->addPredicate(LabelStr("AllObjects.Predicate")); \
+    PlanDatabase db(ce.getId(), Schema::testInstance()); \
     { new DefaultPropagator(LabelStr("Default"), ce.getId()); \
       new DefaultPropagator(LabelStr("Temporal"), ce.getId()); \
     } \
@@ -590,7 +590,7 @@ void RulesEngineModuleTests::runTests(std::string path) {
     setTestLoadLibraryPath(path);
 
     // Allocate default schema initially so tests don't fail because of ID's
-    Schema::instance();
+    Schema::testInstance();
     runTestSuite(RulesEngineTest::test);
     std::cout << "Finished" << std::endl;
 

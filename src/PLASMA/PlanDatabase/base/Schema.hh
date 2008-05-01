@@ -9,6 +9,7 @@
 #define _H_Schema
 
 #include "PlanDatabaseDefs.hh"
+#include "PSPlanDatabase.hh"
 #include "LabelStr.hh"
 #include "AbstractDomain.hh"
 
@@ -29,7 +30,7 @@ namespace EUROPA {
    * interfaces to allow for the possibility of making incremental changes to cache for speed.
    * @see PlanDatabase
    */
-  class Schema: public DomainComparator {
+  class Schema: public DomainComparator, public PSSchema {
   public:
 
     typedef std::pair<LabelStr, LabelStr> NameValuePair;
@@ -49,6 +50,8 @@ namespace EUROPA {
      */
     static const SchemaId& instance(const LabelStr& name = LabelStr("Model"));
 
+    static const SchemaId& testInstance(const LabelStr& name = LabelStr("Model"));
+    
     /**
      * @brief Retrieve the delimiter for separating elements in schema element names.
      */
