@@ -53,9 +53,7 @@ namespace EUROPA{
       ruleInstance->discard();
     }
 
-    cleanup(m_listeners);
-
-    delete (PlanDatabaseListener*) m_planDbListener;
+    delete (PlanDatabaseListener*) m_planDbListener;  // removes itself from the plan database set of listeners
 
     m_id.remove();
   }

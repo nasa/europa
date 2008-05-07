@@ -35,7 +35,6 @@ namespace EUROPA {
 
   DbClient::~DbClient(){
     m_deleted = true;
-    cleanup(m_listeners);
     m_id.remove();
   }
 

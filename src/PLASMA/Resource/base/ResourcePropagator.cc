@@ -13,8 +13,6 @@
 #include "ConstrainedVariable.hh"
 #include "Variable.hh"
 #include "Constraint.hh"
-#include "PlanDatabaseListener.hh"
-
 namespace EUROPA {
 
   ResourcePropagator::ResourcePropagator(const LabelStr& name, 

@@ -432,7 +432,7 @@ namespace EUROPA {
       }
 
       PartialPlanWriter::~PartialPlanWriter(void) {
-	if (!cel.isNoId())
+	if (!cel.isNoId())  // not always allocated
 	  delete (ConstraintEngineListener*) cel;
 	if(!sl.isNoId())
 	 delete (SOLVERS::SearchListener*) sl;

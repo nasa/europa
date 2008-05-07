@@ -280,8 +280,6 @@ namespace EUROPA
     if(!m_purged)
       purge();
 
-    cleanup(m_listeners);
-
     m_id.remove();
     
     delete m_violationMgr;

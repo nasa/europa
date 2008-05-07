@@ -9,7 +9,6 @@
 
 #include "DefaultPropagator.hh"
 #include "PlanDatabaseDefs.hh"
-#include "PlanDatabaseListener.hh"
 #include "ResourceDefs.hh"
 #include <set>
 

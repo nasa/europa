@@ -6,7 +6,6 @@
 #include "ConstraintEngineDefs.hh"
 #include "RulesEngineDefs.hh"
 #include "DomainListener.hh"
-#include "PlanDatabaseListener.hh"
 #include "ConstraintEngineListener.hh"
 #include "RulesEngineListener.hh"
 #include "SearchListener.hh"

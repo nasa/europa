@@ -41,12 +41,15 @@ namespace EUROPA{
    */
   class ObjectVariableListener: public ConstrainedVariableListener {
   public:
-    ~ObjectVariableListener(){
-      check_error(m_var.isValid());
-      check_error(m_planDb.isValid());
-      if(!Entity::isPurging()) // Don't bother with synching cached data if we are cleaning up
-        m_planDb->handleObjectVariableDeletion(m_var);
-    }
+	  ~ObjectVariableListener(){
+		  //	  void notifyDiscard(){
+		  if(!Entity::isPurging()) // Don't bother with synching cached data if we are cleaning up
+		  {
+			  check_error(m_var.isValid());
+			  check_error(m_planDb.isValid());
+			  m_planDb->handleObjectVariableDeletion(m_var);
+		  }
+	  }
 
   private:
     friend class PlanDatabase; // Only one, since use of this listener is only for internal data synch for plandb.
@@ -89,9 +92,7 @@ namespace EUROPA{
     if (!m_temporalAdvisor.isNoId())
       delete (TemporalAdvisor*) m_temporalAdvisor;
 
-    cleanup(m_listeners);
-
-    // Delete the client
+      // Delete the client
     check_error(m_client.isValid());
     delete (DbClient*) m_client;
 
@@ -135,7 +136,7 @@ namespace EUROPA{
     Entity::discardAll(m_globalVariables);
 
     // Now purge the Constraint Engine
-    m_constraintEngine->purge();
+    // m_constraintEngine->purge();
 
     // Finally, run the garbage collector
     Entity::garbageCollect();

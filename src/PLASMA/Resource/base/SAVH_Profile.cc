@@ -582,7 +582,6 @@ namespace EUROPA {
       : ConstrainedVariableListener(var), m_profile(profile) {}
 
     Profile::ConstraintAdditionListener::~ConstraintAdditionListener() {
-      m_var->notifyRemoved(getId());
     }
 
     void Profile::ConstraintAdditionListener::notifyConstraintAdded(const ConstraintId& constr, int argIndex) {

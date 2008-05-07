@@ -23,6 +23,7 @@ namespace EUROPA {
   public:
     virtual ~ConstrainedVariableListener();
     const ConstrainedVariableListenerId& getId() const;
+    virtual void notifyDiscard() {}
     virtual void notifyConstraintAdded(const ConstraintId& constr, int argIndex) {}
     virtual void notifyConstraintRemoved(const ConstraintId& constr, int argIndex) {}
   protected:

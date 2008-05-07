@@ -4,7 +4,6 @@
 #include "SolverDefs.hh"
 #include "FlawManager.hh"
 #include "OpenConditionDecisionPoint.hh"
-#include "PlanDatabaseListener.hh"
 
 #include <vector>
 

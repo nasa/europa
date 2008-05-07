@@ -49,7 +49,7 @@ class Main
 	    
 	    public void run() 
 	    {
-	        //psEngine_.shutdown(); TODO this is causing deallocation errors (see ticket #165)
+            	psEngine_.shutdown();
 	        PSEngine.terminate();
 	    }
     }	  

@@ -71,7 +71,6 @@ namespace EUROPA {
     Solver::~Solver(){
       cleanupDecisions();
       EUROPA::cleanup(m_flawManagers);
-      EUROPA::cleanup(m_listeners);
       delete (Context*) m_context;
       m_id.remove();
     }

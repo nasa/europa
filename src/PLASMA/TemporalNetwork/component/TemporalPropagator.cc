@@ -46,7 +46,6 @@ namespace EUROPA {
   void TemporalPropagator::handleDiscard(){
     check_error(Entity::isPurging() || m_wrappedTimepoints.empty());
     Entity::discardAll(m_wrappedTimepoints);
-    cleanup(m_listeners);
     check_error(m_tnet.isValid());
     delete (TemporalNetwork*) m_tnet;
 

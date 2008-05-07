@@ -5,6 +5,7 @@
 #include "Utils.hh"
 #include "Debug.hh"
 #include "Error.hh"
+#include "VariableChangeListener.hh"
 #include <sstream>
 
 namespace EUROPA {
@@ -19,12 +20,13 @@ namespace EUROPA {
   }
 
   ConstrainedVariableListener::~ConstrainedVariableListener() {
-    m_id.remove();
+	  m_var->notifyRemoved(m_id);
+	  m_id.remove();
   }
 
   ConstrainedVariable::ConstrainedVariable(const ConstraintEngineId& constraintEngine,
-                                           bool canBeSpecified,
-                                           const LabelStr& name,
+		  								   bool canBeSpecified,
+		  								   const LabelStr& name,
                                            const EntityId& parent,
                                            int index)
     : Entity(), m_id(this), m_lastRelaxed(0), m_constraintEngine(constraintEngine), m_name(name),
@@ -76,7 +78,7 @@ namespace EUROPA {
       constraint->notifyBaseDomainRestricted(m_id);
     }
   }
-
+  
   void ConstrainedVariable::handleDiscard(){
     debugMsg("ConstrainedVariable:handleDiscard", "Discarding " << toString());
 
@@ -96,7 +98,7 @@ namespace EUROPA {
     m_constraintEngine->remove(m_id);
 
     cleanup(m_listeners);
-
+    
     delete (DomainListener*) m_listener;
 
     Entity::handleDiscard();
