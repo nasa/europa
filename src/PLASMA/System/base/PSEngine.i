@@ -8,13 +8,50 @@
 #include "Error.hh"
 %}
 
-%rename(PSException) Error;
-%typemap(javabase) Error "java.lang.RuntimeException";
-%typemap(javacode) Error %{
+%rename(PSException) Error;  // Our Error C++ class is wrapped instead as PSException
+%typemap(javabase) Error "java.lang.RuntimeException";  // extends RuntimeException
+%typemap(javacode) Error %{  // copied verbatim into the java code (so java's standard getMessage function is available)
   public String getMessage() {
     return getMsg();
   }
 %}
+
+// Generic exception handling will wrap all functions with the following try/catch block:
+// copied from http://www.swig.org/Doc1.3/Java.html#exception_handling
+%exception {
+	try {
+		$action
+	}
+	catch (Error e) {
+
+		// Version A:  This works but only preserves the exception's message:
+		jclass clazz = jenv->FindClass("java/lang/RuntimeException");
+		std::string s = "C++ Error exception thrown through PSEngine.i: " + e.getMsg();
+		jenv->ThrowNew(clazz, s.c_str());
+		return $null; 
+
+		// Version B:  This doesn't work, but would (I think?) gives us more info:
+		// (copied from the Error typemap code that was an attempt, I think, to do this exception handling)
+		// TODO: There's probably a better way to refer to both package and class name here.
+//		jclass excepClass = jenv->FindClass("psengine/PSException");
+//		if (excepClass == NULL)
+//			return $null;
+//
+//		jmethodID excepConstructor = jenv->GetMethodID(excepClass, "<init>", "(JZ)V");
+//		if(excepConstructor == NULL)
+//			return $null;
+//
+//		// XXX:  What to use as 3rd argument to NewObject?
+//		jthrowable excep = static_cast<jthrowable> (jenv->NewObject(excepClass, excepConstructor, &e, true));
+//		if(excep == NULL)
+//			return $null;
+//		else
+//			jenv->Throw(excep);
+//
+//		return $null;
+	}
+}
+
 
 %typemap(javabody) SWIGTYPE %{
   private long swigCPtr;
@@ -30,24 +67,25 @@
   }
 %}
 
-// TODO: There's probably a better way to refer to both package and class name here.
-%typemap(throws, throws="psengine.PSException") Error {
-  jclass excepClass = jenv->FindClass("psengine/PSException");
-  if (excepClass == NULL)
-    return $null;
-
-  jmethodID excepConstructor = jenv->GetMethodID(excepClass, "<init>", "(JZ)V");
-  if(excepConstructor == NULL)
-    return $null;
-
-  jthrowable excep = static_cast<jthrowable> (jenv->NewObject(excepClass, excepConstructor, &$1, true));
-  if(excep == NULL)
-    return $null;
-  else
-    jenv->Throw(excep);
-
-  return $null;
-}
+// NOTE:  This ONLY works for C++ methods that have declared the exceptions they will throw
+// TODO:  Therefore not needed, since we never declare in C++ that we will throw?
+//%typemap(throws, throws="psengine.PSException") Error {
+//  jclass excepClass = jenv->FindClass("psengine/PSException");
+//  if (excepClass == NULL)
+//    return $null;
+//
+//  jmethodID excepConstructor = jenv->GetMethodID(excepClass, "<init>", "(JZ)V");
+//  if(excepConstructor == NULL)
+//    return $null;
+//
+//  jthrowable excep = static_cast<jthrowable> (jenv->NewObject(excepClass, excepConstructor, &$1, true));
+//  if(excep == NULL)
+//    return $null;
+//  else
+//    jenv->Throw(excep);
+//
+//  return $null;
+//}
 
 class Error {
 public:
@@ -201,7 +239,7 @@ namespace EUROPA {
 
     void loadModule(const std::string& moduleFileName);
     void loadModel(const std::string& modelFileName);
-    std::string executeScript(const std::string& language, const std::string& script, bool isFile) throw(Error);
+    std::string executeScript(const std::string& language, const std::string& script, bool isFile);
 
     PSList<PSObject*> getObjectsByType(const std::string& objectType);
     PSObject* getObjectByKey(PSEntityKey id);
@@ -339,7 +377,7 @@ namespace EUROPA {
     PSEntity* getParent();
 
     bool isSingleton();
-    PSVarValue getSingletonValue() throw(Error);    // Call to get value if isSingleton()==true
+    PSVarValue getSingletonValue();    // Call to get value if isSingleton()==true
 
     bool isInterval();
     double getLowerBound();  // if isSingleton()==false && isInterval() == true
