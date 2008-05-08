@@ -173,6 +173,12 @@ namespace EUROPA {
                                                    const TransactionId successor, const int sucArgIndex);
 
 
+      /**
+       * @brief Helper method for subclasses to respond to a variable deletion (the listener on that variable may need destruction).
+       * @param t The transaction that has been removed.
+       */
+      void handleTransactionVariableDeletion(const TransactionId& t);
+      
       bool needsRecompute() const {return m_needsRecompute;}
 
       std::string toString() const;
@@ -212,12 +218,14 @@ namespace EUROPA {
 
       class ConstraintAdditionListener : public ConstrainedVariableListener {
       public:
-        ConstraintAdditionListener(const ConstrainedVariableId& var, ProfileId profile);
+        ConstraintAdditionListener(const ConstrainedVariableId& var, TransactionId tid, ProfileId profile);
         ~ConstraintAdditionListener();
+        void notifyDiscard();
         void notifyConstraintAdded(const ConstraintId& constr, int argIndex);
         void notifyConstraintRemoved(const ConstraintId& constr, int argIndex);
       private:
         ProfileId m_profile;
+        TransactionId m_tid;
       };
 
       struct ConstraintMessage {

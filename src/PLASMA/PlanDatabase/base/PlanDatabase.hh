@@ -26,6 +26,8 @@
 
 namespace EUROPA {
 
+	class ObjectVariableListener;
+
   /**
    * @brief The main mediator for interaction with entities of the plan and managing their relationships.
    */
@@ -404,7 +406,6 @@ namespace EUROPA {
     std::map<double, ObjectId> m_objectsByName; /*!< Object names are unique. Holds all objects m_objectsByName.size() == m_objects.size(). */
     std::multimap<double, ObjectId> m_objectsByPredicate; /*!< May be updated every time we add a Token, or remove an object. */
     std::multimap<double, ObjectId> m_objectsByType; /*!< May be updated every time we add a Token, or remove an object. */
-    std::multimap<double, ConstrainedVariableId> m_objectVariablesByObjectType; /*!< Stores variables for Open Object Types */
     std::set<double> m_closedObjectTypes; /*!< The set of explicitly closed object types. 
 					     If present here, it cannot be present in m_objectVariablesByType */
     std::map<double, ConstrainedVariableId> m_globalVarsByName;
@@ -412,6 +413,12 @@ namespace EUROPA {
 								     inducing the requirement stored in the set */
 
     std::map<double, TokenSet > m_activeTokensByPredicate; /*!< All active tokens sorted by predicate */
+
+    // All this to store variables (and their listeners) for Open Object Types
+    typedef std::multimap<double, std::pair<ConstrainedVariableId, ConstrainedVariableListenerId> > ObjVarsByObjType;
+    typedef ObjVarsByObjType::iterator ObjVarsByObjType_I;
+    typedef ObjVarsByObjType::iterator ObjVarsByObjType_CI;
+    ObjVarsByObjType m_objectVariablesByObjectType;
   };
 
 

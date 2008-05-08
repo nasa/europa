@@ -34,21 +34,18 @@ namespace EUROPA{
   DEFINE_GLOBAL_CONST(std::string, g_ClassDelimiter, ":");
 
   /**
-   * @brief Impements a Listener to handle deletions of variables of type ObjectDomain. 
+   * @brief Implements a Listener to handle deletions of variables of type ObjectDomain. 
    *
    * Object Variable deletions must be handled where the object type is dynamic, so that 
    * cached variables used in synchronization of dynamic contents can be updated.
    */
   class ObjectVariableListener: public ConstrainedVariableListener {
   public:
-	  ~ObjectVariableListener(){
-		  //	  void notifyDiscard(){
+	  void notifyDiscard(){
+		  check_error(m_var.isValid());
+		  check_error(m_planDb.isValid());
 		  if(!Entity::isPurging()) // Don't bother with synching cached data if we are cleaning up
-		  {
-			  check_error(m_var.isValid());
-			  check_error(m_planDb.isValid());
 			  m_planDb->handleObjectVariableDeletion(m_var);
-		  }
 	  }
 
   private:
@@ -82,8 +79,7 @@ namespace EUROPA{
     addObjectWrapperGenerator("Object", new BaseObjectWrapperGenerator());          
   }
 
-  PlanDatabase::~PlanDatabase(){
-    check_error(m_constraintEngine.isValid());
+  PlanDatabase::~PlanDatabase(){	  
     m_deleted = true;
 
     if(!isPurged())
@@ -92,17 +88,22 @@ namespace EUROPA{
     if (!m_temporalAdvisor.isNoId())
       delete (TemporalAdvisor*) m_temporalAdvisor;
 
-      // Delete the client
+    // Delete the client
     check_error(m_client.isValid());
     delete (DbClient*) m_client;
 
+    // Delete all object variable listeners:
+    for(ObjVarsByObjType_CI it = m_objectVariablesByObjectType.begin();
+    	it != m_objectVariablesByObjectType.end(); ++it)
+     	delete (ObjectVariableListener*) it->second.second; 	  
+    
     m_id.remove();
   }
 
   void PlanDatabase::purge(){
-    check_error(m_constraintEngine.isValid());
-    check_error(m_state != PURGED);
-    m_state = PURGED;
+	  check_error(m_constraintEngine.isValid());
+	  check_error(m_state != PURGED);
+	  m_state = PURGED;
 
     if(!Entity::isPurging()){ // Clean up exploiting relationships
       // Retrieve only the tokens at the root
@@ -134,9 +135,6 @@ namespace EUROPA{
     }
     // Purge global variables
     Entity::discardAll(m_globalVariables);
-
-    // Now purge the Constraint Engine
-    // m_constraintEngine->purge();
 
     // Finally, run the garbage collector
     Entity::garbageCollect();
@@ -171,9 +169,9 @@ namespace EUROPA{
     }
 
     // Now we must push the insertion to any connected variables.
-    std::multimap<double, ConstrainedVariableId>::const_iterator it = m_objectVariablesByObjectType.find(object->getType());
+    ObjVarsByObjType_CI it = m_objectVariablesByObjectType.find(object->getType());
     while (it != m_objectVariablesByObjectType.end() && it->first == object->getType()){
-      ConstrainedVariableId connectedObjectVariable = it->second;
+      ConstrainedVariableId connectedObjectVariable = it->second.first;
       check_error(connectedObjectVariable.isValid());
       if(!connectedObjectVariable->isClosed())
         connectedObjectVariable->insert(object);
@@ -210,9 +208,9 @@ namespace EUROPA{
     }
 
     // Now we must push the removal to any connected variables.
-    std::multimap<double, ConstrainedVariableId>::const_iterator it = m_objectVariablesByObjectType.find(object->getType());
+    ObjVarsByObjType_CI it = m_objectVariablesByObjectType.find(object->getType());
     while (it != m_objectVariablesByObjectType.end() && it->first == object->getType()){
-      ConstrainedVariableId connectedObjectVariable = it->second;
+      ConstrainedVariableId connectedObjectVariable = it->second.first;
       check_error(connectedObjectVariable.isValid());
       connectedObjectVariable->remove(object);
       ++it;
@@ -613,12 +611,13 @@ namespace EUROPA{
 
   void PlanDatabase::close() {
     check_error(m_state == OPEN);
-    std::multimap<double, ConstrainedVariableId>::iterator it = m_objectVariablesByObjectType.begin();
+    ObjVarsByObjType_CI it = m_objectVariablesByObjectType.begin();
     while (it != m_objectVariablesByObjectType.end()){
-      ConstrainedVariableId connectedObjectVariable = it->second;
+      ConstrainedVariableId connectedObjectVariable = it->second.first;
       check_error(connectedObjectVariable.isValid());
       if(!connectedObjectVariable->isClosed())
-        connectedObjectVariable->close();
+    	  connectedObjectVariable->close();
+      delete (ObjectVariableListener*) it->second.second;
       m_objectVariablesByObjectType.erase(it++);
     }
 
@@ -630,12 +629,13 @@ namespace EUROPA{
     check_error(!isClosed(objectType));
 
     // Now we must close all the object variables associated with this type
-    std::multimap<double, ConstrainedVariableId>::iterator it = m_objectVariablesByObjectType.find(objectType);
+    ObjVarsByObjType_CI it = m_objectVariablesByObjectType.find(objectType);
     while (it != m_objectVariablesByObjectType.end() && it->first == objectType){
-      ConstrainedVariableId connectedObjectVariable = it->second;
+      ConstrainedVariableId connectedObjectVariable = it->second.first;
       check_error(connectedObjectVariable.isValid());
       if(!connectedObjectVariable->isClosed())
         connectedObjectVariable->close();
+      delete (ObjectVariableListener*) it->second.second;
       m_objectVariablesByObjectType.erase(it++);
     }
     m_closedObjectTypes.insert(objectType);
@@ -817,10 +817,11 @@ namespace EUROPA{
   void PlanDatabase::handleObjectVariableDeletion(const ConstrainedVariableId& objectVar){
 
     // Now iterate over objectVariables stored and remove them - should be at least one reference
-    for(std::multimap<double, ConstrainedVariableId>::iterator it = m_objectVariablesByObjectType.begin();
+    for(ObjVarsByObjType_CI it = m_objectVariablesByObjectType.begin();
         it != m_objectVariablesByObjectType.end();){
-      if(it->second == objectVar){
-        m_objectVariablesByObjectType.erase(it++);
+      if(it->second.first == objectVar){
+    	  delete (ObjectVariableListener*) it->second.second;
+    	  m_objectVariablesByObjectType.erase(it++);
       }
       else
         ++it;
@@ -831,8 +832,8 @@ namespace EUROPA{
 						  const ConstrainedVariableId& objectVar,
 						  bool leaveOpen){
     if(!isClosed(objectType)){
-      new ObjectVariableListener(objectVar, m_id);
-      m_objectVariablesByObjectType.insert(std::pair<double, ConstrainedVariableId>(objectType, objectVar));
+    	ObjectVariableListener* ovl = new ObjectVariableListener(objectVar, m_id);
+    	m_objectVariablesByObjectType.insert(std::make_pair(objectType, std::make_pair(objectVar, ovl->getId())));
     }
     else if(!leaveOpen)// Close the given variable
       objectVar->close();

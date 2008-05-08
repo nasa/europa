@@ -11,7 +11,7 @@
 
 namespace EUROPA {
   namespace SAVH {
-
+  
     ProfileId ProfileFactory::createInstance(const LabelStr& name, const PlanDatabaseId db, const FVDetectorId detector,
                                              const double initCapacityLb, const double initCapacityUb) {
       std::map<double, ProfileFactory*>::const_iterator it = factoryMap().find(name);
@@ -56,11 +56,11 @@ namespace EUROPA {
       for(std::multimap<TransactionId, ConstraintId>::iterator it = m_variableListeners.begin(); 
           it != m_variableListeners.end(); ++it)
         it->second->discard();
-      //       debugMsg("Profile:~Profile", "Cleaning up constraint addition listeners...");
-      //       for(std::map<TransactionId, ConstrainedVariableListenerId>::iterator it = m_otherListeners.begin();
-      // 	  it != m_otherListeners.end(); ++it)
-      // 	delete (ConstraintAdditionListener*) (it->second);
-      
+      debugMsg("Profile:~Profile", "Cleaning up constraint addition listeners...");
+      for(std::map<TransactionId, ConstrainedVariableListenerId>::iterator it = m_otherListeners.begin();
+      it != m_otherListeners.end(); ++it)
+    	  delete (ConstraintAdditionListener*) (it->second);
+
       if(m_recomputeInterval.isValid()) {
         debugMsg("Profile:~Profile", "Deleting profile iterator " << m_recomputeInterval->getId() );
         delete (ProfileIterator*) m_recomputeInterval;
@@ -93,7 +93,7 @@ namespace EUROPA {
       //add listener
       m_variableListeners.insert(std::pair<TransactionId, ConstraintId>(t, (new VariableListener(m_planDatabase->getConstraintEngine(), m_id, t, makeScope(t->time())))->getId()));
       m_variableListeners.insert(std::pair<TransactionId, ConstraintId>(t, (new VariableListener(m_planDatabase->getConstraintEngine(), m_id, t, makeScope(t->quantity()), true))->getId()));
-      m_otherListeners.insert(std::pair<TransactionId, ConstrainedVariableListenerId>(t, (new ConstraintAdditionListener(t->time(), m_id))->getId()));
+      m_otherListeners.insert(std::pair<TransactionId, ConstrainedVariableListenerId>(t, (new ConstraintAdditionListener(t->time(), t, m_id))->getId()));
 
       m_transactions.insert(t);
       m_transactionsByTime.insert(std::make_pair(t->time(), t));
@@ -145,12 +145,8 @@ namespace EUROPA {
       }
                  
       m_variableListeners.erase(t);
-      std::map<TransactionId, ConstrainedVariableListenerId>::iterator listIt = m_otherListeners.find(t);
-      checkError(listIt != m_otherListeners.end(),
-                 "Attempted to remove variable listener for transaction at time " << t->time()->toString() << " with quantity " << t->quantity()->toString() << ".");
-      delete (ConstraintAdditionListener*) listIt->second;
-      m_otherListeners.erase(t);
-
+      handleTransactionVariableDeletion(t);
+      
       for(std::vector<int>::const_iterator it = emptyInstants.begin(); it != emptyInstants.end(); ++it) {
         std::map<int, InstantId>::iterator instIt = m_instants.find(*it);
         //this can't be an error because the discard above constitues a relaxation of the variable, which will get handled in-situ
@@ -391,6 +387,17 @@ namespace EUROPA {
         delete (ProfileIterator*) m_recomputeInterval;
       m_recomputeInterval = (new ProfileIterator(getId()))->getId();
     }
+    
+    /**
+      * @brief Remove
+      */
+     void Profile::handleTransactionVariableDeletion(const TransactionId& t){
+         std::map<TransactionId, ConstrainedVariableListenerId>::iterator listIt = m_otherListeners.find(t);
+         checkError(listIt != m_otherListeners.end(),
+                    "Attempted to remove variable listener for transaction at time " << t->time()->toString() << " with quantity " << t->quantity()->toString() << ".");
+         delete (ConstraintAdditionListener*) listIt->second;
+         m_otherListeners.erase(t);
+     }
 
     void Profile::getLevel(const int time, IntervalDomain& dest) {
       if(needsRecompute())
@@ -578,12 +585,16 @@ namespace EUROPA {
       return false;
     }
 
-    Profile::ConstraintAdditionListener::ConstraintAdditionListener(const ConstrainedVariableId& var, ProfileId profile)
-      : ConstrainedVariableListener(var), m_profile(profile) {}
+    Profile::ConstraintAdditionListener::ConstraintAdditionListener(const ConstrainedVariableId& var, TransactionId tid, ProfileId profile)
+      : ConstrainedVariableListener(var), m_profile(profile), m_tid(tid) {}
 
     Profile::ConstraintAdditionListener::~ConstraintAdditionListener() {
     }
 
+    void Profile::ConstraintAdditionListener::notifyDiscard() {
+    	m_profile->handleTransactionVariableDeletion(m_tid);
+    }
+    
     void Profile::ConstraintAdditionListener::notifyConstraintAdded(const ConstraintId& constr, int argIndex) {
       static const LabelStr temporal("Temporal");
       if(constr->getPropagator()->getName() == temporal) {

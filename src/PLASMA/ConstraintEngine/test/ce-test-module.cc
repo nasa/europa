@@ -408,15 +408,19 @@ public:
   }
 };
 
+
+// notifyDiscard is intended to notify the listener creator to delete the listener
+// (which in fact must happen immediately, because the delete notifies the listenee, which therefore
+// must still be around)
+// Assumes listener has been created using new
 class TestVariableListener: public ConstrainedVariableListener{
 public:
-  TestVariableListener(const ConstrainedVariableId& observedVar, const ConstrainedVariableId& managedVar)
-    : ConstrainedVariableListener(observedVar), m_managedVar(managedVar){}
-  ~TestVariableListener(){
-    delete (ConstrainedVariable*) m_managedVar;
+  TestVariableListener(const ConstrainedVariableId& observedVar)
+    : ConstrainedVariableListener(observedVar) {}
+  void notifyDiscard() {
+	  delete this;
   }
-private:
-  ConstrainedVariableId m_managedVar;
+  
 };
 
 class VariableTest
@@ -591,9 +595,8 @@ private:
 
   static bool testListener(){
     ConstrainedVariableId v0 = (new Variable<IntervalIntDomain>(ENGINE, IntervalIntDomain()))->getId();
-    ConstrainedVariableId v1 = (new Variable<IntervalIntDomain>(ENGINE, IntervalIntDomain()))->getId();
-    new TestVariableListener(v0, v1);
-    delete (ConstrainedVariable*) v0; // Should force deletion of all
+    TestVariableListener* tvl = new TestVariableListener(v0); // deletes itself when v0 deleted
+    delete (ConstrainedVariable*) v0; 
     return true;
   }
 

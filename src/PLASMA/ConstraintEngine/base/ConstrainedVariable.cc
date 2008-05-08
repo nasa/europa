@@ -12,7 +12,7 @@ namespace EUROPA {
 
   ConstrainedVariableListener::ConstrainedVariableListener(const ConstrainedVariableId& var)
     : m_id(this), m_var(var) {
-    var->notifyAdded(m_id);
+	  var->notifyAdded(m_id);
   }
 
   const ConstrainedVariableListenerId& ConstrainedVariableListener::getId() const {
@@ -20,7 +20,7 @@ namespace EUROPA {
   }
 
   ConstrainedVariableListener::~ConstrainedVariableListener() {
-	  m_var->notifyRemoved(m_id);
+	  m_var->notifyRemoved(m_id);   
 	  m_id.remove();
   }
 
@@ -97,8 +97,10 @@ namespace EUROPA {
 
     m_constraintEngine->remove(m_id);
 
-    cleanup(m_listeners);
-    
+    // Let listeners know the variable has been 
+    for(std::set<ConstrainedVariableListenerId>::const_iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
+        (*it)->notifyDiscard();					
+    		  
     delete (DomainListener*) m_listener;
 
     Entity::handleDiscard();
