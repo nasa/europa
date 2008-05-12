@@ -97,9 +97,13 @@ namespace EUROPA {
 
     m_constraintEngine->remove(m_id);
 
-    // Let listeners know the variable has been 
-    for(std::set<ConstrainedVariableListenerId>::const_iterator it = m_listeners.begin(); it != m_listeners.end(); ++it)
-        (*it)->notifyDiscard();					
+    // Let listeners know the variable is about to be discarded.
+    // NOTE:  We don't just iterate through here, because when a listener is notified, it should be deleted, which
+    // in turn calls our notifyRemoved method, which removes it from m_listeners (ie. listeners are disappearing out from under us)
+    while(!m_listeners.empty())
+    {
+    	(*m_listeners.begin())->notifyDiscard();
+    }	
     		  
     delete (DomainListener*) m_listener;
 
