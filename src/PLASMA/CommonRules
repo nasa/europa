@@ -63,7 +63,7 @@ if ( PROFILE in $(VARIANTS) ) || ( ( CUSTOM in $(VARIANTS) ) && ( $(EUROPA_PROFI
 } else {
   actions ExecuteTarget {
     cd $(2:D)
-    $(PREFIX) ./$(2:BS) $(ARGUMENTS) > "$(OUTPUTFN:BS)"
+    $(PREFIX) ./$(2:BS) $(ARGUMENTS) > "$(OUTPUTFN)"
   }
 }
 
