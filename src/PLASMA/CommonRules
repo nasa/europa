@@ -21,7 +21,7 @@ rule Execute {
     target_exec_arg = RUN_$(executable:G=) ;
     local arg ;
     for arg in $(arguments) {
-      target_exec_arg = "$(target_exec_arg).$(arg:B)$(arg:S)" ;
+      target_exec_arg = "$(target_exec_arg).$(arg:BS)" ;
     }
   } else {
     target_exec_arg = RUN_$(executable:G=) ;
@@ -54,16 +54,16 @@ rule ExecuteTarget {
 
 if ( PROFILE in $(VARIANTS) ) || ( ( CUSTOM in $(VARIANTS) ) && ( $(EUROPA_PROFILE) ) ) {
   actions ExecuteTarget {
-    cd `dirname $(2)`
+    cd $(2:D)
     rm -f gmon.out
-    $(PREFIX) ./`basename "$(2)"` $(ARGUMENTS) > "$(OUTPUTFN)" && \
-    ( ( test -s gmon.out && gprof -b `basename "$(2)"` gmon.out > "`basename "$(OUTPUTFN)" .output`.gprof" ) || true ) && \
+    $(PREFIX) ./$(2:BS) $(ARGUMENTS) > "$(OUTPUTFN)" && \
+    ( ( test -s gmon.out && gprof -b $(2:BS) gmon.out > "$(OUTPUTFN:BS).output.gprof" ) || true ) && \
     rm -f gmon.out
   }
 } else {
   actions ExecuteTarget {
-    cd `dirname $(2)`
-    $(PREFIX) ./`basename "$(2)"` $(ARGUMENTS) > "$(OUTPUTFN)"
+    cd $(2:D)
+    $(PREFIX) ./$(2:BS) $(ARGUMENTS) > "$(OUTPUTFN:BS)"
   }
 }
 
@@ -87,7 +87,7 @@ rule ExecuteSO {
     target_exec_arg = RUN_$(executable) ;
     local arg ;
     for arg in $(arguments) {
-      target_exec_arg = "$(target_exec_arg).$(arg:B)$(arg:S)" ;
+      target_exec_arg = "$(target_exec_arg).$(arg:BS)" ;
     }
   } else {
     target_exec_arg = RUN_$(executable) ;
@@ -111,7 +111,7 @@ rule ExecuteScript {
     target_exec_arg = RUN_$(executable) ;
     local arg ;
     for arg in $(arguments) {
-      target_exec_arg = "$(target_exec_arg).$(arg:B)$(arg:S)" ;
+      target_exec_arg = "$(target_exec_arg).$(arg:BS)" ;
     }
   } else {
     target_exec_arg = RUN_$(executable) ;
@@ -137,9 +137,9 @@ rule ExecuteTargetSO {
 }
 
 actions ExecuteTargetSO {
-cd `dirname $(2)`
-echo $(PREFIX) ./$(2) $(ARGUMENTS)
-$(PREFIX) ./`basename $(2)` $(ARGUMENTS)
+cd $(2:D)
+echo $(PREFIX) ./$(2:BS) $(ARGUMENTS)
+$(PREFIX) ./$(2:BS) $(ARGUMENTS)
 }
 
 #
