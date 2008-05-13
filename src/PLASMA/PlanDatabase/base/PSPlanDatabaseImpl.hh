@@ -8,29 +8,6 @@
 
 namespace EUROPA {
 
-  class PSPlanDatabaseImpl : public PSPlanDatabase
-  {
-    public:
-      PSPlanDatabaseImpl(PlanDatabaseId& pdb);	
-      virtual ~PSPlanDatabaseImpl();
-
-      virtual PSList<PSObject*> getObjectsByType(const std::string& objectType);
-      virtual PSObject* getObjectByKey(PSEntityKey id);
-      virtual PSObject* getObjectByName(const std::string& name);
-
-      virtual PSList<PSToken*> getTokens();    	 
-      virtual PSToken* getTokenByKey(PSEntityKey id);	
-
-      virtual PSList<PSVariable*> getGlobalVariables();
-
-      virtual std::string toString();
-
-      virtual void addObjectWrapperGenerator(const LabelStr& type,ObjectWrapperGenerator* wrapper);    
-      
-    protected:
-      PlanDatabaseId m_planDatabase;	
-  };
-
   class PSObjectImpl : public virtual PSObject
   {
     public:
