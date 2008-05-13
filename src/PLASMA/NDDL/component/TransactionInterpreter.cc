@@ -46,11 +46,38 @@ namespace EUROPA {
 
   /*
    * 
-   * InterpretedDbClientTransactionPlayer
+   * NddlXmlInterpreter
    * 
    */ 
        
-  void InterpretedDbClientTransactionPlayer::createDefaultObjectFactory(const char* className, bool canCreateObjects)
+  NddlXmlInterpreter::NddlXmlInterpreter(const DbClientId & client)                                                              
+    : DbClientTransactionPlayer(client) 
+  { 
+    // TODO: Add native class method must be modified to also register native factories
+    // also, get NddlModule to register these instead?  
+    std::vector<std::string> noNativeTokens;
+    addNativeClass("Object",noNativeTokens);
+    addNativeClass("Timeline", noNativeTokens);     
+  }
+
+  NddlXmlInterpreter::~NddlXmlInterpreter() 
+  {
+  }
+
+  std::string NddlXmlInterpreter::interpret(std::istream& input, const std::string& script) 
+  {
+      play(input);
+      return "";
+  } 
+    
+  void NddlXmlInterpreter::addNativeClass(const std::string& className, const std::vector<std::string>& nativeTokens)
+  { 
+	  m_nativeClasses.insert(className);
+	  for (unsigned int i=0;i<nativeTokens.size();i++)
+	      m_nativeTokens.insert(nativeTokens[i]);
+  }
+  
+  void NddlXmlInterpreter::createDefaultObjectFactory(const char* className, bool canCreateObjects)
   {
     std::vector<std::string> constructorArgNames;
     std::vector<std::string> constructorArgTypes;
@@ -59,47 +86,18 @@ namespace EUROPA {
       
     // If it can't create objects, generate default super call
     if (!canCreateObjects) 
-      superCallExpr = new ExprConstructorSuperCall(Schema::instance()->getParent(className),std::vector<Expr*>());                 	
+      superCallExpr = new ExprConstructorSuperCall(Schema::instance()->getParent(className),std::vector<Expr*>());                  
       
     // The ObjectFactory constructor automatically registers the factory
     new InterpretedObjectFactory(
-				 className,
-				 className,
-				 constructorArgNames,
-				 constructorArgTypes,
-				 superCallExpr,
-				 constructorBody,
-				 canCreateObjects
-				 );       
-  }
-  
-  InterpretedDbClientTransactionPlayer::InterpretedDbClientTransactionPlayer(const DbClientId & client)                                                              
-    : DbClientTransactionPlayer(client) 
-  { 
-    addNativeClass("Object");
-    addNativeClass("Timeline");     // TODO: this must be registered by NDDL module
-
-    // TODO: all these must be registered by Resource module 
-    addNativeClass("Resource"); 
-    m_nativeTokens.insert("Resource.change");
-
-    addNativeClass("Reusable");
-    m_nativeTokens.insert("Reusable.uses");
-
-    addNativeClass("Reservoir");
-    m_nativeTokens.insert("Reservoir.produce");
-    m_nativeTokens.insert("Reservoir.consume");
-
-    // TODO: expose Unary  	  
-  }
-
-  InterpretedDbClientTransactionPlayer::~InterpretedDbClientTransactionPlayer() 
-  {
-  }
-
-  void InterpretedDbClientTransactionPlayer::addNativeClass(const std::string& className)
-  { 
-	  m_nativeClasses.insert(className);
+                 className,
+                 className,
+                 constructorArgNames,
+                 constructorArgTypes,
+                 superCallExpr,
+                 constructorBody,
+                 canCreateObjects
+                 );       
   }
   
   const char* safeStr(const char* str)
@@ -118,7 +116,7 @@ namespace EUROPA {
 	  return (!(ObjectFactory::getFactory(objectType,arguments)).isNoId());
   }
   
-  void InterpretedDbClientTransactionPlayer::playDeclareClass(const TiXmlElement& element) 
+  void NddlXmlInterpreter::playDeclareClass(const TiXmlElement& element) 
   {
     const char* className = element.Attribute("name");
     getSchema()->declareObjectType(className);
@@ -128,7 +126,7 @@ namespace EUROPA {
     debugMsg("XMLInterpreter:XML",dbgout.str());
   }
   
-  void InterpretedDbClientTransactionPlayer::playDefineClass(const TiXmlElement& element) 
+  void NddlXmlInterpreter::playDefineClass(const TiXmlElement& element) 
   {
     const char* className = element.Attribute("name");
 
@@ -188,7 +186,7 @@ namespace EUROPA {
     debugMsg("XMLInterpreter:XML",dbgout.str());     
   }
 
-  Expr* InterpretedDbClientTransactionPlayer::valueToExpr(const TiXmlElement* element, bool isRule)
+  Expr* NddlXmlInterpreter::valueToExpr(const TiXmlElement* element, bool isRule)
   {  	
     check_runtime_error(element != NULL,"Unexpected NULL element, expected value or id element");
     
@@ -211,7 +209,7 @@ namespace EUROPA {
     return NULL;        
   }
   
-  void InterpretedDbClientTransactionPlayer::defineClassMember(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
+  void NddlXmlInterpreter::defineClassMember(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
   {	
     const char* type = safeStr(element->Attribute("type"));	
     const char* name = safeStr(element->Attribute("name"));	
@@ -219,7 +217,7 @@ namespace EUROPA {
     schema->addMember(className, type, name);
   }
 
-  int InterpretedDbClientTransactionPlayer::defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
+  int NddlXmlInterpreter::defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
   {	
     std::ostringstream signature;
     signature << className;
@@ -266,7 +264,7 @@ namespace EUROPA {
 	}
 	else 
 	  rhs = valueToExpr(rhsChild,false);
-	debugMsg("InterpretedDbClientTransactionPlayer:defineConstructor",
+	debugMsg("NddlXmlInterpreter:defineConstructor",
 		 "Adding an assignment to " << lhs);
 	constructorBody.push_back(new ExprConstructorAssignment(lhs,rhs));
       }
@@ -297,7 +295,7 @@ namespace EUROPA {
     return constructorArgNames.size();
   }
 
-  void InterpretedDbClientTransactionPlayer::declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
+  void NddlXmlInterpreter::declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
   {	
     std::string predName = std::string(className) + "." + element->Attribute("name");	
 
@@ -367,25 +365,25 @@ namespace EUROPA {
 				);
   }
     
-  void InterpretedDbClientTransactionPlayer::defineEnum(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
+  void NddlXmlInterpreter::defineEnum(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
   {	
     // Enum is scoped within the class but in the generated code it doesn't make a difference
     playDefineEnumeration(*element);
   }
 
-  bool InterpretedDbClientTransactionPlayer::isClass(const LabelStr& className) const
+  bool NddlXmlInterpreter::isClass(const LabelStr& className) const
   {  	  
     return getSchema()->isObjectType(className);
   }
     
-  LabelStr InterpretedDbClientTransactionPlayer::getObjectVarClass(const LabelStr& className,const LabelStr& var) const
+  LabelStr NddlXmlInterpreter::getObjectVarClass(const LabelStr& className,const LabelStr& var) const
   {
     const SchemaId& schema = getSchema();
     check_runtime_error(schema->hasMember(className,var),className.toString()+" has no member called "+var.toString());
     return schema->getMemberType(className,var);
   }
 
-  LabelStr InterpretedDbClientTransactionPlayer::getTokenVarClass(const LabelStr& className,const LabelStr& predName,const LabelStr& var) const
+  LabelStr NddlXmlInterpreter::getTokenVarClass(const LabelStr& className,const LabelStr& predName,const LabelStr& var) const
   {
     if (strcmp(var.c_str(),"object") == 0) // is it the object variable? 
       return className;
@@ -399,7 +397,7 @@ namespace EUROPA {
     return getObjectVarClass(className,var);
   }
 
-  LabelStr InterpretedDbClientTransactionPlayer::checkPredicateType(const LabelStr& type) const
+  LabelStr NddlXmlInterpreter::checkPredicateType(const LabelStr& type) const
   {
     check_runtime_error(getSchema()->isPredicate(type),type.toString()+" is not a Type");
     return type;
@@ -409,7 +407,7 @@ namespace EUROPA {
    * figures out the type of a predicate given an instance
    * 
    */
-  LabelStr InterpretedDbClientTransactionPlayer::predicateInstanceToType(const char* className,
+  LabelStr NddlXmlInterpreter::predicateInstanceToType(const char* className,
                                    const char* predicateName, 
                                    const char* predicateInstance,
                                    std::map<std::string,std::string>& localVars) const
@@ -490,7 +488,7 @@ namespace EUROPA {
     return false;
   }
   
-  void InterpretedDbClientTransactionPlayer::buildRuleBody(
+  void NddlXmlInterpreter::buildRuleBody(
 							   const char* className,
 							   const std::string& predName,
 							   const TiXmlElement* element, 
@@ -585,7 +583,7 @@ namespace EUROPA {
     }      
   }
   
-  void InterpretedDbClientTransactionPlayer::playDefineCompat(const TiXmlElement& element)
+  void NddlXmlInterpreter::playDefineCompat(const TiXmlElement& element)
   {
     const char* className = element.Attribute("class");
     std::string predName = std::string(className) + "." + element.Attribute("name");	
@@ -600,7 +598,7 @@ namespace EUROPA {
     new InterpretedRuleFactory(predName,source,ruleBody);
   }
   
-  void InterpretedDbClientTransactionPlayer::playDefineEnumeration(const TiXmlElement &element)
+  void NddlXmlInterpreter::playDefineEnumeration(const TiXmlElement &element)
   {
     const char* enumName = element.Attribute("name");
     const TiXmlElement* setElement = element.FirstChildElement();
@@ -634,7 +632,7 @@ namespace EUROPA {
       
   }
 
-  void InterpretedDbClientTransactionPlayer::playDefineType(const TiXmlElement& element)
+  void NddlXmlInterpreter::playDefineType(const TiXmlElement& element)
   {
     const char* name = element.Attribute("name");
 

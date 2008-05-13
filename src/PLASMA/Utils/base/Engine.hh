@@ -41,6 +41,7 @@ namespace EUROPA {
 	  
       virtual void addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter) = 0;
       virtual void removeLanguageInterpreter(const std::string& language) = 0;
+      virtual LanguageInterpreter* getLanguageInterpreter(const std::string& language) = 0;
 
     protected :
   	  Engine() : m_id(this) {}

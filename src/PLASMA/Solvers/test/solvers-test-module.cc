@@ -68,6 +68,7 @@ class SolversTestEngine : public Engine
     
     virtual void addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter) {}
     virtual void removeLanguageInterpreter(const std::string& language) {}       
+    virtual LanguageInterpreter* getLanguageInterpreter(const std::string& language) { return NULL; }
 
     const PlanDatabaseId& getPlanDatabase() const          { return m_planDatabase; }
 	const ConstraintEngineId& getConstraintEngine() const  {return m_constraintEngine;} 

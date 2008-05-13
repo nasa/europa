@@ -22,14 +22,15 @@ namespace EUROPA {
     	bool isStarted();
     	
     	virtual void addModule(ModuleId module);
-    	virtual void removeModule(ModuleId module);
         virtual void loadModule(const std::string& moduleFileName);
+    	virtual void removeModule(ModuleId module);
       
         virtual EngineComponentId& getComponent(const std::string& name);
         
         virtual std::string executeScript(const std::string& language, const std::string& script, bool isFile);        
         virtual void addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter);
         virtual void removeLanguageInterpreter(const std::string& language);    
+        virtual LanguageInterpreter* getLanguageInterpreter(const std::string& language);
         
         ConstraintEngineId& getConstraintEngine() { return m_constraintEngine; }
         PlanDatabaseId&     getPlanDatabase()     { return m_planDatabase; }

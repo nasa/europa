@@ -23,7 +23,6 @@
 #include "SAVH_ThreatManager.hh"
 #include "FlawHandler.hh"
 
-
 namespace EUROPA {
 
   static bool & resourceInitialized() {
@@ -33,8 +32,7 @@ namespace EUROPA {
 
   ModuleResource::ModuleResource()
       : Module("Resource")
-  {
-	  
+  {	  
   }
 
   ModuleResource::~ModuleResource()
@@ -118,6 +116,23 @@ namespace EUROPA {
       pdb->addObjectWrapperGenerator("Reservoir", new ResourceWrapperGenerator());
       pdb->addObjectWrapperGenerator("Reusable", new ResourceWrapperGenerator());
       pdb->addObjectWrapperGenerator("Unary", new ResourceWrapperGenerator());
+
+      // TODO: check if NDDL module is available?
+      NddlXmlInterpreter* nddlXml = (NddlXmlInterpreter*)engine->getLanguageInterpreter("nddl-xml");
+      std::vector<std::string> nativeTokens;
+      nativeTokens.push_back("Resource.change");
+      nddlXml->addNativeClass("Resource",nativeTokens); 
+
+      nativeTokens.clear();
+      nativeTokens.push_back("Reusable.uses");
+      nddlXml->addNativeClass("Reusable",nativeTokens);
+
+      nativeTokens.clear();
+      nativeTokens.push_back("Reservoir.produce");
+      nativeTokens.push_back("Reservoir.consume");
+      nddlXml->addNativeClass("Reservoir",nativeTokens);
+
+      // TODO: expose Unary           
   }
   
   void ModuleResource::uninitialize(EngineId engine)

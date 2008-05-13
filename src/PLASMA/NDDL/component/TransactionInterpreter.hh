@@ -22,13 +22,16 @@ namespace EUROPA {
   class Expr;
   class RuleExpr;
   
-  class InterpretedDbClientTransactionPlayer : public DbClientTransactionPlayer {
+  class NddlXmlInterpreter : public DbClientTransactionPlayer, public LanguageInterpreter 
+  {
     public:
-      InterpretedDbClientTransactionPlayer(const DbClientId & client);
-      virtual ~InterpretedDbClientTransactionPlayer();
+      NddlXmlInterpreter(const DbClientId & client);
+      virtual ~NddlXmlInterpreter();
 
+      virtual std::string interpret(std::istream& input, const std::string& source);
+      
       static void createDefaultObjectFactory(const char* className, bool canCreateObjects);
-      void addNativeClass(const std::string& className);
+      void addNativeClass(const std::string& className, const std::vector<std::string>& nativeTokens);
       
     protected:
       virtual void playDeclareClass(const TiXmlElement &); 

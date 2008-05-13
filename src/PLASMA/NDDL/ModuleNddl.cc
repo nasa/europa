@@ -38,7 +38,7 @@ namespace EUROPA {
     new intTypeFactory();
     new floatTypeFactory();
       
-    InterpretedDbClientTransactionPlayer::createDefaultObjectFactory("Object", true);
+    NddlXmlInterpreter::createDefaultObjectFactory("Object", true);
     REGISTER_OBJECT_FACTORY(TimelineObjectFactory, Timeline);                     
       
     nddlInitialized() = true;
@@ -74,24 +74,7 @@ namespace EUROPA {
 
   std::string NddlInterpreter::interpret(std::istream& input, const std::string& script) 
   {
-	  check_error(ALWAYS_FAIL,"nddl parser is only available in Java for now");
-      return "";
-  } 
-  
-  class NddlXmlInterpreter : public LanguageInterpreter 
-  {
-    public:
-      NddlXmlInterpreter(const DbClientId& client) : m_interpreter(client) {}	
-      virtual ~NddlXmlInterpreter() {}	
-      virtual std::string interpret(std::istream& input, const std::string& source);
-      
-    protected:
-      InterpretedDbClientTransactionPlayer m_interpreter;	
-  };
-
-  std::string NddlXmlInterpreter::interpret(std::istream& input, const std::string& script) 
-  {
-	  m_interpreter.play(input);
+	  check_error(ALWAYS_FAIL,"nddl parser is only available in Java for now. nddl-xml is supported in C++, you can use the nddl parser to generate nddl-xml from nddl source.");
       return "";
   } 
   

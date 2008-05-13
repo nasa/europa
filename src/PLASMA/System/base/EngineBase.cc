@@ -275,6 +275,15 @@ namespace EUROPA
       }
     }
 
+    LanguageInterpreter* EngineBase::getLanguageInterpreter(const std::string& language)
+    {
+        std::map<double, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
+        if(it != getLanguageInterpreters().end()) 
+            return it->second;
+        
+        return NULL;
+    }
+
     EngineComponentId& EngineBase::getComponent(const std::string& name)
     {
   	  static EngineComponentId noId = EngineComponentId::noId();
