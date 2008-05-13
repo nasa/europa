@@ -64,6 +64,10 @@ namespace EUROPA {
     
   	virtual void allocateComponents();
   	virtual void deallocateComponents();
+  	
+  	// Is there a way to avoid these:
+  	virtual PlanDatabaseId getPlanDatabase();
+  	friend class PSPlanDatabaseListener;
   };
     
 }	

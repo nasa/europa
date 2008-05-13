@@ -1,4 +1,4 @@
-%module PSEngineInterface
+%module(directors="1") PSEngineInterface
 %include "std_string.i"
 
 %rename(executeScript_internal) executeScript;
@@ -6,6 +6,7 @@
 %{
 #include "PSEngine.hh"
 #include "Error.hh"
+#include "PSPlanDatabaseListener.hh"
 %}
 
 %rename(PSException) Error;  // Our Error C++ class is wrapped instead as PSException
@@ -454,6 +455,7 @@ namespace EUROPA {
     PSResource();
   };
 
+
   class PSResourceProfile
   {
   public:
@@ -463,5 +465,18 @@ namespace EUROPA {
   protected:
     PSResourceProfile();
   };
-
+  
+// generate directors for all virtual methods in class Foo
+// (enables calls from C++ to inherited java code)
+  %feature("director") PSPlanDatabaseListener;        
+  
+  
+  class PSPlanDatabaseListener
+  {
+  public:
+    virtual ~PSPlanDatabaseListener();
+    virtual void notifyAdded(PSObject* obj);
+// protected:  (alas, SWIG won't wrap a protected constructor)
+  	PSPlanDatabaseListener(PSEngine* engine);
+  };
 }

@@ -75,6 +75,15 @@ namespace EUROPA {
 	  delete m_psSolverManager;
 	  EngineBase::deallocateComponents();
   }
+
+  PlanDatabaseId PSEngineImpl::getPlanDatabase()
+  {
+	  std::cout << "GETTING PDB" << std::endl;
+	  return m_planDatabase->getId();
+	  std::cout << "GOT PDB" << m_planDatabase->getId() << std::endl;
+
+  }
+
   
   EngineComponent* PSEngineImpl::getComponentPtr(const std::string& name)
   {
