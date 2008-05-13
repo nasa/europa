@@ -15,6 +15,10 @@
 #include <map>
 #include <vector>
 
+#ifdef __MINGW32__
+  #include <windows.h>
+#endif
+
 #ifdef ERROR
 #undef ERROR
 #endif
