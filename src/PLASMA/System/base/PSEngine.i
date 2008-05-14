@@ -23,33 +23,23 @@
 	try {
 		$action
 	}
-	catch (Error e) {
-
-		// Version A:  This works but only preserves the exception's message:
-		jclass clazz = jenv->FindClass("java/lang/RuntimeException");
-		std::string s = "C++ Error exception thrown through PSEngine.i: " + e.getMsg();
-		jenv->ThrowNew(clazz, s.c_str());
-		return $null; 
-
-		// Version B:  This doesn't work, but would (I think?) gives us more info:
-		// (copied from the Error typemap code that was an attempt, I think, to do this exception handling)
+	catch (Error& e) {
 		// TODO: There's probably a better way to refer to both package and class name here.
-//		jclass excepClass = jenv->FindClass("psengine/PSException");
-//		if (excepClass == NULL)
-//			return $null;
-//
-//		jmethodID excepConstructor = jenv->GetMethodID(excepClass, "<init>", "(JZ)V");
-//		if(excepConstructor == NULL)
-//			return $null;
-//
-//		// XXX:  What to use as 3rd argument to NewObject?
-//		jthrowable excep = static_cast<jthrowable> (jenv->NewObject(excepClass, excepConstructor, &e, true));
-//		if(excep == NULL)
-//			return $null;
-//		else
-//			jenv->Throw(excep);
-//
-//		return $null;
+		jclass excepClass = jenv->FindClass("psengine/PSException");
+		if (excepClass == NULL)
+			return $null;
+
+		jmethodID excepConstructor = jenv->GetMethodID(excepClass, "<init>", "(JZ)V");
+		if(excepConstructor == NULL)
+			return $null;
+
+		jthrowable excep = static_cast<jthrowable> (jenv->NewObject(excepClass, excepConstructor, new Error(e), true));
+		if(excep == NULL)
+			return $null;
+		else
+			jenv->Throw(excep);
+
+		return $null;
 	}
 }
 
@@ -67,26 +57,6 @@
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 %}
-
-// NOTE:  This ONLY works for C++ methods that have declared the exceptions they will throw
-// TODO:  Therefore not needed, since we never declare in C++ that we will throw?
-//%typemap(throws, throws="psengine.PSException") Error {
-//  jclass excepClass = jenv->FindClass("psengine/PSException");
-//  if (excepClass == NULL)
-//    return $null;
-//
-//  jmethodID excepConstructor = jenv->GetMethodID(excepClass, "<init>", "(JZ)V");
-//  if(excepConstructor == NULL)
-//    return $null;
-//
-//  jthrowable excep = static_cast<jthrowable> (jenv->NewObject(excepClass, excepConstructor, &$1, true));
-//  if(excep == NULL)
-//    return $null;
-//  else
-//    jenv->Throw(excep);
-//
-//  return $null;
-//}
 
 class Error {
 public:

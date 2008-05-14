@@ -40,11 +40,11 @@
   </target>
 	
   <target name="compile" depends="init-final">
-    <depend srcdir="${src.dir}" destdir="${build.dir}" cache="${cache}" closure="yes"/>
+    <depend srcdir="${src.dir}:java" destdir="${build.dir}" cache="${cache}" closure="yes"/>
     <javac classpathref="psengine.classpath" 
            destdir="${build.dir}">
   	<src path="${src.dir}"/>
-        <src path="java"/>    	
+		<src path="java"/>    	
     </javac>	
   </target>
 
