@@ -32,9 +32,9 @@ public class LibraryLoader {
       resolvedLibName = testLibName(libpath[i], localName);
     }
     // We're all nice people here... you meant to define LD_LIBRARY_PATH and just forgot right?
-    if(resolvedLibName == null)
+    if(resolvedLibName == null && System.getenv("EUROPA_HOME") != null)
       resolvedLibName = testLibName(System.getenv("EUROPA_HOME") + File.separator + "lib", localName);
-    if(resolvedLibName == null)
+    if(resolvedLibName == null && System.getenv("PLASMA_HOME") != null)
       resolvedLibName = testLibName(System.getenv("PLASMA_HOME") + File.separator + "lib", localName);
 
     return resolvedLibName;
