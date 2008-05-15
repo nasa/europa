@@ -204,7 +204,7 @@ else {
 
 if $(OS) = CYGWIN {
   MKDIR = mkdir -p ;
-  LINKFLAGS += -I$(PLASMA_HOME)/build/lib -Wl,--enable-auto-import ;
+  LINKFLAGS += -Wl,--add-stdcall-alias -I$(PLASMA_HOME)/build/lib -Wl,--enable-auto-import ;
 }
 
 if $(OS) = CYGWIN && $(NOCYGWIN) {

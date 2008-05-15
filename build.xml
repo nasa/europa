@@ -23,7 +23,7 @@
       <arg value="${basedir}"/>
     </exec>
     <property name="jam.libraries" value="STATIC"/>
-    <property name="jam.misc" value="-sOS=CYGWIN"/>
+    <property name="jam.misc" value="-sOS=CYGWIN -sNOCYGWIN=TRUE"/>
   </target>
 
   <target name="init-final" depends="init,cygwin-init">
@@ -128,6 +128,7 @@
     </copy>
 
     <!-- Finally, zip everything up -->
+    <delete file="${dir.dist}/${file.europa_dist}"/>
     <zip destfile="${dir.dist}/${file.europa_dist}" basedir="${dir.dist.base}"/>
   </target>
 </project>

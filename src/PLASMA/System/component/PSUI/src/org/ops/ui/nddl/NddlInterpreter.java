@@ -27,7 +27,7 @@ import psengine.PSException;
 
 public class NddlInterpreter extends AshInterpreter {
   NddlParserState persistantState = null;
-	PrintStream consoleErr = null;
+  PrintStream consoleErr = System.err;
 
   public NddlInterpreter() {
     super("Nddl");
@@ -36,7 +36,7 @@ public class NddlInterpreter extends AshInterpreter {
   }
 
   public void setConsole(AshConsole console) {
-    consoleErr= new PrintStream(new BufferedOutputStream(new DocumentOutputStream(console.getDocument(), "!!")), true);
+    consoleErr = new PrintStream(new BufferedOutputStream(new DocumentOutputStream(console.getDocument(), "!!")), true);
     persistantState.setErrStream(consoleErr);
   }
 
@@ -63,30 +63,36 @@ public class NddlInterpreter extends AshInterpreter {
       return false;
     }
 
-		try {
-    	PSDesktop.getInstance().getPSEngine().executeScript("nddl-xml",string.toString(), false /*isFile*/);
-    	persistantState = parser.getState();
-		}
-		catch(PSException ex) {
-			consoleErr.print(ex.getFile());
-			consoleErr.print(":");
-			consoleErr.print(ex.getLine());
-			consoleErr.print(": error: ");
-			consoleErr.println(ex.getMessage());
-			return false;
-		}
+    try {
+      PSDesktop.getInstance().getPSEngine().executeScript("nddl-xml",string.toString(), false /*isFile*/);
+      persistantState = parser.getState();
+    }
+    catch(PSException ex) {
+      consoleErr.print(ex.getFile());
+      consoleErr.print(":");
+      consoleErr.print(ex.getLine());
+      consoleErr.print(": error: ");
+      consoleErr.println(ex.getMessage());
+      return false;
+    }
     return true;
   }
 
   public void source(String filename) {
     try {
       File modelFile =  ModelAccessor.generateIncludeFileName("",filename);
+      if(modelFile == null)
+        modelFile = new File(filename);
+      if(modelFile == null) {
+        consoleErr.println("error: Failed to find file named \"" + filename + "\"");
+        return;
+      }
       NddlParser parser = NddlParser.parse(persistantState, modelFile, null);
       execute(parser);
     }
     catch(Exception ex) {
-			consoleErr.print("error: ");
-			consoleErr.println(ex.getMessage());
+      consoleErr.print("error: ");
+      ex.printStackTrace(consoleErr);
     }
   }
 
@@ -100,8 +106,8 @@ public class NddlInterpreter extends AshInterpreter {
       return false;
     }
     catch(Exception ex) {
-			consoleErr.print("error: ");
-			ex.printStackTrace(consoleErr);
+      consoleErr.print("error: ");
+      ex.printStackTrace(consoleErr);
     }
     return true;
   }

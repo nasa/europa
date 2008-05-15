@@ -1,9 +1,12 @@
 package psengine.util;
 
+import java.util.List;
+import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
 
 public class LibraryLoader {
+  private static List tested = null;
 
   // This class only contains static functions.
   private LibraryLoader() {}
@@ -19,15 +22,20 @@ public class LibraryLoader {
   public static void loadLibrary(String libname) {
     String resolvedLibName = getResolvedName(libname);
     if(resolvedLibName == null) {
-      throw new UnsatisfiedLinkError("no " + libname + " in java.library.path");
+      String testedList = "";
+      for(int i=0; i < tested.size(); ++i)
+        testedList += "\n" + tested.get(i).toString();
+      throw new UnsatisfiedLinkError("no " + libname + " in java.library.path tested for:" + testedList);
     }
     System.load(resolvedLibName);
+    tested = null;
   }
 
   public static String getResolvedName(String libname) {
     String resolvedLibName = null;
     String localName = mapLibraryName(libname);
     String[] libpath = System.getProperty("java.library.path").split(File.pathSeparator);
+    tested = new ArrayList(libpath.length + 2);
     for(int i=0; i < libpath.length && resolvedLibName == null; ++i) {
       resolvedLibName = testLibName(libpath[i], localName);
     }
@@ -42,6 +50,7 @@ public class LibraryLoader {
 
   private static String testLibName(String path, String localName) {
     File lib = new File(path, localName);
+    tested.add(lib);
     if(lib.exists()) {
       try {
         return lib.getCanonicalPath();
