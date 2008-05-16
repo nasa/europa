@@ -42,20 +42,20 @@ namespace EUROPA {
   }
 
   bool SolverAssembly::plan(const char* txSource, const TiXmlElement& config, bool interp){
-    SOLVERS::SolverId solver = (new SOLVERS::Solver(m_planDatabase, config))->getId();
+    SOLVERS::SolverId solver = (new SOLVERS::Solver(getPlanDatabase(), config))->getId();
 
     SOLVERS::PlanWriter::PartialPlanWriter* ppw = 
-      new SOLVERS::PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine, m_rulesEngine, solver);
+      new SOLVERS::PlanWriter::PartialPlanWriter(getPlanDatabase(), getConstraintEngine(), getRulesEngine(), solver);
 
     // Now process the transactions
     if(!playTransactions(txSource, interp))
       return false;
 
-    debugMsg("SolverAssembly:plan", "Initial state: " << std::endl << PlanDatabaseWriter::toString(m_planDatabase));
+    debugMsg("SolverAssembly:plan", "Initial state: " << std::endl << PlanDatabaseWriter::toString(getPlanDatabase()));
 
     // Configure the planner from data in the initial state
     std::list<ObjectId> configObjects;
-    m_planDatabase->getObjectsByType("PlannerConfig", configObjects); // Standard configuration class
+    getPlanDatabase()->getObjectsByType("PlannerConfig", configObjects); // Standard configuration class
 
     check_error(configObjects.size() == 1,
 		"Expect exactly one instance of the class 'PlannerConfig'");

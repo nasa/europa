@@ -63,6 +63,7 @@ namespace EUROPA {
 
       static void addMatchFinder(const LabelStr& type, const MatchFinderId& finder);
       static void removeMatchFinder(const LabelStr& type);
+      static void purgeAll();
 
     private:
 
@@ -144,7 +145,7 @@ namespace EUROPA {
     public:
       MatchFinder() : m_id(this) {}
       const MatchFinderId& getId() const {return m_id;}
-      virtual ~MatchFinder() { m_id.remove();}
+      virtual ~MatchFinder() {}
       virtual void getMatches(const MatchingEngineId& engine, const EntityId& entity,
 			      std::vector<MatchingRuleId>& results) = 0;
     private:

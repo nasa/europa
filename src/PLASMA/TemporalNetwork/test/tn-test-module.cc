@@ -17,12 +17,42 @@
 #include "RulesEngine.hh"
 #include "TestSubgoalRule.hh"
 
+#include "Engine.hh"
 #include "ModuleConstraintEngine.hh"
 #include "ModuleTemporalNetwork.hh"
 
 #include <iostream>
 #include <string>
 #include <list>
+
+class TNTestEngine : public EngineBase 
+{
+  public:  
+    TNTestEngine();
+    virtual ~TNTestEngine();
+          
+  protected: 
+    void createModules();       
+};
+
+TNTestEngine::TNTestEngine()
+{
+    createModules();
+    doStart();
+}
+
+TNTestEngine::~TNTestEngine()
+{
+    doShutdown();
+}
+
+void TNTestEngine::createModules()
+{
+    addModule((new ModuleConstraintEngine())->getId());
+    addModule((new ModuleConstraintLibrary())->getId());
+    addModule((new ModuleTemporalNetwork())->getId());
+}
+
 
 #define DEFAULT_SETUP_CE_ONLY(ce) \
   ConstraintEngine ce; \
@@ -875,13 +905,7 @@ void TemporalNetworkModuleTests::runTests(std::string path) {
   setTestLoadLibraryPath(path);
 
   Schema::testInstance();
-  ModuleConstraintEngine moduleCE;
-  ModuleConstraintLibrary moduleCL;
-  ModuleTemporalNetwork moduleTN;
-  
-  moduleCE.initialize();
-  moduleCL.initialize();
-  moduleTN.initialize();
+  TNTestEngine engine;
 
   for(int i=0;i<1;i++){
     runTestSuite(TemporalNetworkTest::test);
@@ -889,8 +913,4 @@ void TemporalNetworkModuleTests::runTests(std::string path) {
     runTestSuite(TemporalPropagatorTest::test);
   }
   std::cout << "Finished" << std::endl;
-  
-  moduleTN.uninitialize();
-  moduleCL.uninitialize();
-  moduleCE.uninitialize();
 }

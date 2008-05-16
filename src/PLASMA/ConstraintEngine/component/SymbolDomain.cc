@@ -22,7 +22,7 @@ namespace EUROPA {
   const LabelStr&
   SymbolDomain::getDefaultTypeName()
   {
-    static const LabelStr sl_typeName("SYMBOL_ENUMERATION");
+    static const LabelStr sl_typeName("symbol");
     return(sl_typeName);
   }
 

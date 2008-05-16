@@ -5,14 +5,15 @@ if ! $(PLASMA_READY) {
 ModuleBase Utils
 	:
 	Debug.cc
-	LabelStr.cc
+	Engine.cc
 	Entity.cc
 	Error.cc
 	IdTable.cc
-	TestData.cc
+        LabelStr.cc
+        Pdlfcn.cc
+        TestData.cc
+        Utils.cc
 	XMLUtils.cc
-	Utils.cc
-	Pdlfcn.cc
 	;
 
 } # PLASMA_READY

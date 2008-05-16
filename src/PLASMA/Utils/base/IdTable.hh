@@ -41,7 +41,7 @@ namespace EUROPA {
   class IdTable {
   public:
     static unsigned int size();
-    static std::map<unsigned long int, unsigned int> getCollection();
+    std::map<unsigned long int, std::pair<unsigned int,double> > getCollection();
     static IdTable& getInstance();
 
     /**
@@ -57,7 +57,7 @@ namespace EUROPA {
     ~IdTable(); // deallocating statics requires public access on beos
   private:
     IdTable();
-    std::map<unsigned long int, unsigned int> m_collection;  /*<! Map from pointers to keys*/
+    std::map<unsigned long int, std::pair<unsigned int,double> > m_collection;  /*<! Map from pointers to keys*/
     std::map<std::string, unsigned int> m_typeCnts;
   };
 }

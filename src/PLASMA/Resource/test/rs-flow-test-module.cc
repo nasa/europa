@@ -40,6 +40,8 @@
 
 #define RESOURCE_DEFAULT_SETUP(ce, db, autoClose) \
     ConstraintEngine ce; \
+    REGISTER_SYSTEM_CONSTRAINT(LessThanEqualConstraint, "precedes", "Temporal"); \
+    REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporalDistance", "Temporal"); \
     SchemaId schema = Schema::testInstance();\
     schema->reset();\
     schema->addObjectType(LabelStr("Resource")); \
@@ -1442,9 +1444,8 @@ void FlowProfileModuleTests::runTests( const std::string& path) {
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(FlowProfileTest::test);
   runTestSuite(FVDetectorTest::test);
-  std::cout << "Finished" << std::endl;
-  ConstraintLibrary::purgeAll();
   uninitConstraintLibrary();
+  std::cout << "Finished" << std::endl;
 }
 
 

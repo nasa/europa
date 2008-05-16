@@ -54,8 +54,6 @@ void initDbTestSchema(const SchemaId& schema) {
 
   schema->addPrimitive(IntervalDomain::getDefaultTypeName());
   schema->addPrimitive(IntervalIntDomain::getDefaultTypeName());
-  schema->addPrimitive(BoolDomain::getDefaultTypeName());
-  schema->addPrimitive(LabelSet::getDefaultTypeName());
   schema->addPrimitive(EnumeratedDomain::getDefaultTypeName());
 
   // Set up object types and compositions for testing - builds a recursive structure

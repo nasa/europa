@@ -26,6 +26,7 @@
 #include "PlanDatabaseWriter.hh"
 
 #include "Constraints.hh"
+#include "Engine.hh"
 #include "ModuleConstraintEngine.hh"
 #include "ModulePlanDatabase.hh"
 
@@ -35,63 +36,33 @@
 #include <pthread.h>
 #include <string>
 
-class PDBTestEngine  
+class PDBTestEngine  : public EngineBase
 {
   public:  
-	PDBTestEngine() {}
-	virtual ~PDBTestEngine() {}
+	PDBTestEngine();
+	virtual ~PDBTestEngine();
 	
-	static void initialize();
-	static void terminate();
-
   protected: 
-	static void createModules();
-	static void initializeModules();
-	static void uninitializeModules();
-	static std::vector<ModuleId> m_modules;	    
+	void createModules();
 };
 
-std::vector<ModuleId> PDBTestEngine::m_modules;
-
-void PDBTestEngine::initialize()
+PDBTestEngine::PDBTestEngine() 
 {
-	initializeModules();    	
+    createModules();
+    doStart();
 }
 
-void PDBTestEngine::terminate()
+PDBTestEngine::~PDBTestEngine() 
 {
-	uninitializeModules();
+    doShutdown();
 }
 
 void PDBTestEngine::createModules()
 {
-    m_modules.push_back(new ModuleConstraintEngine()); 
-    m_modules.push_back(new ModuleConstraintLibrary());
-    m_modules.push_back(new ModulePlanDatabase());
+    addModule((new ModuleConstraintEngine())->getId());
+    addModule((new ModuleConstraintLibrary())->getId());
+    addModule((new ModulePlanDatabase())->getId());
 }
-
-void PDBTestEngine::initializeModules()
-{
-    createModules();
-  
-    for (unsigned int i=0;i<m_modules.size();i++) {
-    	m_modules[i]->initialize();
-    }	  
-}
-
-void PDBTestEngine::uninitializeModules()
-{
-    Entity::purgeStarted();      
-    for (unsigned int i=m_modules.size();i>0;i--) {
-    	unsigned int idx = i-1;
-    	m_modules[idx]->uninitialize();
-    	m_modules[idx].release();
-    }	  
-    Entity::purgeEnded();	  
-
-    m_modules.clear();	  
-}
-
 
   class DBFoo;
   typedef Id<DBFoo> DBFooId;
@@ -3803,10 +3774,8 @@ public:
     /* This does not use REGISTER_TYPE_FACTORY to avoid depending on anything under PLASMA/NDDL. */
     new EnumeratedTypeFactory("Locations", "Locations", LocationsBaseDomain());
 
-    // new TestClass2Factory("TestClass2");
     REGISTER_OBJECT_FACTORY(TestClass2Factory, TestClass2);
-    // new TestClass2Factory("TestClass2:STRING_ENUMERATION:INT_INTERVAL:REAL_INTERVAL:Locations");
-    REGISTER_OBJECT_FACTORY(TestClass2Factory, TestClass2:STRING_ENUMERATION:INT_INTERVAL:REAL_INTERVAL:Locations);
+    REGISTER_OBJECT_FACTORY(TestClass2Factory, TestClass2:string:INT_INTERVAL:REAL_INTERVAL:Locations);
 
     /* Token factory for predicate Sample */
     new TestClass2::Sample::Factory();
@@ -5611,11 +5580,12 @@ std::string DbTransPlayerTest::buildXMLDomainStr(const AbstractDomain& dom) {
 /* Done with class DbTransPlayerTest, so drop this macro. */
 #undef TEST_PLAYING_XML
 
-void PlanDatabaseModuleTests::runTests(std::string path) {
- 
+void PlanDatabaseModuleTests::runTests(std::string path) 
+{ 
   setTestLoadLibraryPath(path);
 
-  PDBTestEngine::initialize();
+  PDBTestEngine engine;
+  
   // TODO: This introduces a dependency to the TemporalNetwork, why here?
   REGISTER_SYSTEM_CONSTRAINT(EqualConstraint, "concurrent", "Temporal");
   REGISTER_SYSTEM_CONSTRAINT(LessThanEqualConstraint, "precedes", "Temporal"); 
@@ -5632,8 +5602,6 @@ void PlanDatabaseModuleTests::runTests(std::string path) {
     runTestSuite(DbTransPlayerTest::test);
     std::cout << "Finished #" << i << std::endl;
   }
-
-  PDBTestEngine::terminate();
 
   std::cout << "All done and purged" << std::endl;
 }

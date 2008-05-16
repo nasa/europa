@@ -8,15 +8,9 @@
 
 namespace EUROPA {
 
-  static bool & TemporalNetworkInitialized() {
-    static bool sl_alreadyDone(false);
-    return sl_alreadyDone;
-  }
-
   ModuleTemporalNetwork::ModuleTemporalNetwork()
       : Module("TemporalNetwork")
-  {
-	  
+  {	  
   }
 
   ModuleTemporalNetwork::~ModuleTemporalNetwork()
@@ -25,33 +19,31 @@ namespace EUROPA {
   
   void ModuleTemporalNetwork::initialize()
   {
-      if(TemporalNetworkInitialized())
-    	  return;
-      
-      REGISTER_SYSTEM_CONSTRAINT(EqualConstraint, "concurrent", "Temporal");
-      REGISTER_SYSTEM_CONSTRAINT(LessThanEqualConstraint, "precedes", "Temporal"); 
-      REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporaldistance", "Temporal");
-      REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporalDistance", "Temporal");
-
-      TemporalNetworkInitialized() = true;
   }  
 
   void ModuleTemporalNetwork::uninitialize()
   {
-	  TemporalNetworkInitialized() = false;
   }  
   
   void ModuleTemporalNetwork::initialize(EngineId engine)
   {
-	  PlanDatabaseId& pdb = (PlanDatabaseId&)(engine->getComponent("PlanDatabase"));
-	  ConstraintEngineId& ce = (ConstraintEngineId&)(engine->getComponent("ConstraintEngine"));
+      REGISTER_SYSTEM_CONSTRAINT(EqualConstraint, "concurrent", "Temporal");
+      REGISTER_SYSTEM_CONSTRAINT(LessThanEqualConstraint, "precedes", "Temporal"); 
+      //REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporaldistance", "Temporal");
+      REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporalDistance", "Temporal");
 
-	  new TemporalPropagator(LabelStr("Temporal"), ce);
+	  ConstraintEngine* ce = (ConstraintEngine*)engine->getComponent("ConstraintEngine");
+
+	  new TemporalPropagator(LabelStr("Temporal"), ce->getId());
 	  PropagatorId temporalPropagator = ce->getPropagatorByName(LabelStr("Temporal"));
-	  pdb->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
+
+	  PlanDatabase* pdb = (PlanDatabase*)engine->getComponent("PlanDatabase");
+	  if (pdb != NULL)
+	     pdb->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
   }
   
   void ModuleTemporalNetwork::uninitialize(EngineId engine)
   {	 
+      // TODO: cleanup
   }  
 }

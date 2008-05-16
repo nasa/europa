@@ -26,7 +26,7 @@ namespace EUROPA {
   const LabelStr&
   StringDomain::getDefaultTypeName()
   {
-    static const LabelStr sl_typeName("STRING_ENUMERATION");
+    static const LabelStr sl_typeName("string");
     return(sl_typeName);
   }
 

@@ -1472,21 +1472,21 @@ namespace EUROPA {
 
       copyPtr = falseDom.copy();
       assertTrue(copyPtr->isBool());
-      assertTrue(copyPtr->getTypeName() == LabelStr("BOOL"));
+      assertTrue(copyPtr->getTypeName() == LabelStr("bool"));
       assertTrue((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
       assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
       delete copyPtr;
 
       copyPtr = trueDom.copy();
       assertTrue(copyPtr->isBool());
-      assertTrue(copyPtr->getTypeName() == LabelStr("BOOL"));
+      assertTrue(copyPtr->getTypeName() == LabelStr("bool"));
       assertTrue((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
       assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
       delete copyPtr;
 
       copyPtr = both.copy();
       assertTrue(copyPtr->isBool());
-      assertTrue(copyPtr->getTypeName() == LabelStr("BOOL"));
+      assertTrue(copyPtr->getTypeName() == LabelStr("bool"));
       assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
       assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
       delete copyPtr;

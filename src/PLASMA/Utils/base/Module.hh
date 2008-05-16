@@ -8,12 +8,16 @@
 
 namespace EUROPA {
 
+  class Module;
+  typedef Id<Module> ModuleId;
+
   class Module 
   {
     public :
-	  Module(const std::string& name) : m_name(name) {}
+	  Module(const std::string& name) : m_id(this), m_name(name) {}
 	  virtual ~Module() {}
 	  
+	  ModuleId& getId() { return m_id; }
 	  const std::string getName() const { return m_name; }
 	  
 	  virtual void initialize() = 0;                  // module initialization  
@@ -23,10 +27,10 @@ namespace EUROPA {
 	  virtual void uninitialize(EngineId engine) = 0; // cleanup of a particular engine instance
 	  
     protected :
+      ModuleId m_id;  
       std::string m_name; 	
   };
 
-  typedef Id<Module> ModuleId;
   
 } // End namespace
 

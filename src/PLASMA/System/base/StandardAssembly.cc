@@ -18,12 +18,10 @@ namespace EUROPA {
 
   void StandardAssembly::initialize()
   {
-    EngineBase::initialize(); 
   }
 
   void StandardAssembly::terminate() 
   {
-    EngineBase::terminate(); 
   }
 
   StandardAssembly::StandardAssembly() 
@@ -34,7 +32,7 @@ namespace EUROPA {
   StandardAssembly::StandardAssembly(const SchemaId& schema) 
   {	 
     doStart();
-    m_planDatabase->getClient()->enableTransactionLogging();
+    getPlanDatabase()->getClient()->enableTransactionLogging();
   }
 
   StandardAssembly::~StandardAssembly() 
@@ -52,12 +50,12 @@ namespace EUROPA {
     else
     	executeScript("nddl-xml-txn",txSource,isFile);
 
-    return m_constraintEngine->constraintConsistent();
+    return getConstraintEnginePtr()->constraintConsistent();
   }
 
   void StandardAssembly::write(std::ostream& os) const 
   {
-    PlanDatabaseWriter::write(m_planDatabase, os);
+    PlanDatabaseWriter::write(getPlanDatabasePtr()->getId(), os);
   }
 
   std::string StandardAssembly::toString() const 

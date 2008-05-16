@@ -30,7 +30,6 @@ namespace EUROPA {
 
       virtual std::string interpret(std::istream& input, const std::string& source);
       
-      static void createDefaultObjectFactory(const char* className, bool canCreateObjects);
       void addNativeClass(const std::string& className, const std::vector<std::string>& nativeTokens);
       
     protected:
@@ -46,6 +45,8 @@ namespace EUROPA {
       void declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
       void defineEnum(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
       
+      void createDefaultObjectFactory(const char* className, bool canCreateObjects);
+
       Expr* valueToExpr(const TiXmlElement* element,bool isRule=true);
       
       bool isClass(const LabelStr& className) const;

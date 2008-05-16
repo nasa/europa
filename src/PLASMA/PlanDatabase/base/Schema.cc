@@ -65,6 +65,8 @@ namespace EUROPA {
 
   Schema::~Schema()
   {
+      if (m_id == sl_schemaInstanceId)
+          sl_schemaInstanceId = SchemaId::noId();
       m_id.remove();
   }
 

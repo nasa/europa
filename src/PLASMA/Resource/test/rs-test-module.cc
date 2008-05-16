@@ -45,9 +45,11 @@
 #include "ResourceMatching.hh"
 #include "ResourcePropagator.hh"
 
+#include "Engine.hh"
 #include "ModuleConstraintEngine.hh"
 #include "ModulePlanDatabase.hh"
 #include "ModuleTemporalNetwork.hh"
+#include "ModuleRulesEngine.hh"
 #include "ModuleSolvers.hh"
 #include "ModuleResource.hh"
 
@@ -55,67 +57,37 @@
 #include <string>
 #include <list>
 
-class ResourceTestEngine  
+class ResourceTestEngine  : public EngineBase
 {
   public:  
-	ResourceTestEngine() {}
-	virtual ~ResourceTestEngine() {}
+	ResourceTestEngine();
+	virtual ~ResourceTestEngine();
 	
-	static void initialize();
-	static void terminate();
-
   protected: 
-	static void createModules();
-	static void initializeModules();
-	static void uninitializeModules();
-	static std::vector<ModuleId> m_modules;	    
+	void createModules();
 };
 
-std::vector<ModuleId> ResourceTestEngine::m_modules;
-
-void ResourceTestEngine::initialize()
+ResourceTestEngine::ResourceTestEngine()
 {
-	initializeModules();    	
+    createModules();
+    doStart();
 }
 
-void ResourceTestEngine::terminate()
+ResourceTestEngine::~ResourceTestEngine()
 {
-	uninitializeModules();
+    doShutdown();
 }
 
 void ResourceTestEngine::createModules()
 {
-    // TODO: make this data-driven
-    m_modules.push_back(new ModuleConstraintEngine()); 
-    m_modules.push_back(new ModuleConstraintLibrary());
-    m_modules.push_back(new ModulePlanDatabase());
-    m_modules.push_back(new ModuleTemporalNetwork());
-    m_modules.push_back(new ModuleSolvers());
-    m_modules.push_back(new ModuleResource());
+    addModule((new ModuleConstraintEngine())->getId());
+    addModule((new ModuleConstraintLibrary())->getId());
+    addModule((new ModulePlanDatabase())->getId());
+    addModule((new ModuleRulesEngine())->getId());
+    addModule((new ModuleTemporalNetwork())->getId());
+    addModule((new ModuleSolvers())->getId());
+    addModule((new ModuleResource())->getId());
 }
-
-void ResourceTestEngine::initializeModules()
-{
-    createModules();
-  
-    for (unsigned int i=0;i<m_modules.size();i++) {
-    	m_modules[i]->initialize();
-    }	  
-}
-
-void ResourceTestEngine::uninitializeModules()
-{
-    Entity::purgeStarted();      
-    for (unsigned int i=m_modules.size();i>0;i--) {
-    	unsigned int idx = i-1;
-    	m_modules[idx]->uninitialize();
-    	m_modules[idx].release();
-    }	  
-    Entity::purgeEnded();	  
-
-    m_modules.clear();	  
-}
-
 
 // Useful constants when doing constraint vio9lation tests
 const double initialCapacity = 5;
@@ -1972,19 +1944,17 @@ private:
   }
 };
 
-void ResourceModuleTests::runTests(std::string path) {
+void ResourceModuleTests::runTests(std::string path) 
+{
   setTestLoadLibraryPath(path);  
-
   Schema::testInstance();
-  ResourceTestEngine::initialize();
+  ResourceTestEngine engine;
   
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(ResourceTest::test);
   runTestSuite(ProfileTest::test);
   runTestSuite(SAVHResourceTest::test);
   std::cout << "Finished" << std::endl;
-
-  ResourceTestEngine::terminate();
 }
 
   

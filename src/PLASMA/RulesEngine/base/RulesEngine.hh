@@ -26,6 +26,7 @@ namespace EUROPA {
     RulesEngine(const PlanDatabaseId& planDatabase);
     ~RulesEngine();
     const RulesEngineId& getId() const;
+    
     const PlanDatabaseId& getPlanDatabase() const;
 
     void notifyActivated(const TokenId& token);

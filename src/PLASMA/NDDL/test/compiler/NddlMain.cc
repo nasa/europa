@@ -35,7 +35,7 @@
 
 // Misc
 #include "Utils.hh"
-
+#include "Engine.hh"
 #include "ModuleConstraintEngine.hh"
 #include "ModulePlanDatabase.hh"
 #include "ModuleTemporalNetwork.hh"
@@ -47,69 +47,8 @@
 
 using namespace EUROPA;
 
-class NddlTestEngine  
+void initialize() 
 {
-  public:  
-	NddlTestEngine() {}
-	virtual ~NddlTestEngine() {}
-	
-	static void initialize();
-	static void terminate();
-
-  protected: 
-	static void createModules();
-	static void initializeModules();
-	static void uninitializeModules();
-	static std::vector<ModuleId> m_modules;	    
-};
-
-std::vector<ModuleId> NddlTestEngine::m_modules;
-
-void NddlTestEngine::initialize()
-{
-	initializeModules();    	
-}
-
-void NddlTestEngine::terminate()
-{
-	uninitializeModules();
-}
-
-void NddlTestEngine::createModules()
-{
-    // TODO: make this data-driven
-    m_modules.push_back(new ModuleConstraintEngine()); 
-    m_modules.push_back(new ModuleConstraintLibrary());
-    m_modules.push_back(new ModulePlanDatabase());
-    m_modules.push_back(new ModuleRulesEngine());
-    m_modules.push_back(new ModuleTemporalNetwork());
-    m_modules.push_back(new ModuleNddl());
-}
-
-void NddlTestEngine::initializeModules()
-{
-    createModules();
-  
-    for (unsigned int i=0;i<m_modules.size();i++) {
-    	m_modules[i]->initialize();
-    }	  
-}
-
-void NddlTestEngine::uninitializeModules()
-{
-    Entity::purgeStarted();      
-    for (unsigned int i=m_modules.size();i>0;i--) {
-    	unsigned int idx = i-1;
-    	m_modules[idx]->uninitialize();
-    	m_modules[idx].release();
-    }	  
-    Entity::purgeEnded();	  
-
-    m_modules.clear();	  
-}
-
-
-void initialize() {
   /*
    *  TODO: constraint registration below needs to be removed, initConstraintLibrary takes care of this
    *  leaving it for now for backwards compatibility since some constraints are named differently
@@ -134,68 +73,69 @@ void initialize() {
   REGISTER_CONSTRAINT(TestEQ, "testEQ", "Default");
   REGISTER_CONSTRAINT(TestLEQ, "testLEQ", "Default");
   REGISTER_CONSTRAINT(EqualSumConstraint, "sum", "Default");
+}
 
+class NddlTestEngine : public EngineBase  
+{
+  public:  
+	NddlTestEngine();
+	virtual ~NddlTestEngine();
+	
+  protected: 
+	void createModules();
+};
+
+NddlTestEngine::NddlTestEngine() 
+{
+    createModules();
+    doStart();
+    initialize();
+}
+
+NddlTestEngine::~NddlTestEngine() 
+{
+    // TODO: this is going into an infinite loop!!!
+    // in the debugger, it's happenning when the PlanDatabase is deleted and the listeners are notified
+    // ask Tristan since he recently did some cleanupin the listeners
+    //doShutdown(); 
+}
+
+void NddlTestEngine::createModules()
+{
+    addModule((new ModuleConstraintEngine())->getId());
+    addModule((new ModuleConstraintLibrary())->getId());
+    addModule((new ModulePlanDatabase())->getId());
+    addModule((new ModuleRulesEngine())->getId());
+    addModule((new ModuleTemporalNetwork())->getId());
+    addModule((new ModuleNddl())->getId());
 }
 
 /**
  * @file Provides main execution program to run a test which plays transactions
  * on a database for a given model. The model must currently be linked to the executable
  * statically, but we will eventually get to dynamically linking to a model as an argumnet.
- * @author Conor McGann
  */
-int main(int argc, const char ** argv) {
+int main(int argc, const char ** argv) 
+{
   if (argc != 2) {
     std::cerr << "Must provide initial transactions file." << std::endl;
     return -1;
   }
 
+  NddlTestEngine engine;
+
+  SchemaId schema = EUROPA::NDDL::loadSchema(); // Allocate the schema with a call to the linked in model function - eventually make this call via dlopen  
+  PlanDatabase* planDatabase = (PlanDatabase*) engine.getComponent("PlanDatabase");   
+  planDatabase->getClient()->enableTransactionLogging();
+
   const char* txSource = argv[1];
+  engine.executeScript("nddl-xml-txn",txSource,true /*isFile*/);  
 
-  NddlTestEngine::initialize();  
-  initialize();
+  ConstraintEngine* ce = (ConstraintEngine*)engine.getComponent("ConstraintEngine");
+  assert(ce->constraintConsistent());
 
-  // Allocate the schema with a call to the linked in model function - eventually
-  // make this called via dlopen
-  SchemaId schema = EUROPA::NDDL::loadSchema();
-
-  
-  // Allocate the Constraint Engine
-  ConstraintEngineId m_constraintEngine = (new ConstraintEngine())->getId();
-
-  // Allocate the plan database
-  PlanDatabaseId m_planDatabase = (new PlanDatabase(m_constraintEngine, schema))->getId();
-
-  // Construct propagators - order of introduction determines order of propagation.
-  // Note that propagators will subsequently be managed by the constraint engine
-  new DefaultPropagator(LabelStr("Default"), m_constraintEngine);
-  new TemporalPropagator(LabelStr("Temporal"), m_constraintEngine);
-  // Link up the Temporal Advisor in the PlanDatabase so that it can use the temporal
-  // network for determining temporal distances between time points.
-  PropagatorId temporalPropagator =
-    m_constraintEngine->getPropagatorByName(LabelStr("Temporal"));
-  m_planDatabase->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
-
-  // Allocate the rules engine to process rules
-  RulesEngineId m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();
-
-  m_planDatabase->getClient()->enableTransactionLogging();
-
-  // Obtain the client to play transactions on.
-  DbClientId client = m_planDatabase->getClient();
-  
-  // Construct player
-  DbClientTransactionPlayer player(client);
-  
-  // Open transaction source and play transactions
-  std::ifstream in(txSource);
-  
-  check_error(in, "Invalid transaction source '" + std::string(txSource) + "'.");
-  player.play(in);
-  
-  assert(m_constraintEngine->constraintConsistent());
-  PlanDatabaseWriter::write(m_planDatabase, std::cout);
-
-  NddlTestEngine::terminate();
+  PlanDatabaseWriter::write(planDatabase->getId(), std::cout);
   std::cout << "Finished\n";
-  exit(0);
+  
+  return 0;
 }

@@ -1,20 +1,10 @@
 
-#include "EngineBase.hh"
-#include "ModuleConstraintEngine.hh"
-#include "ModulePlanDatabase.hh"
-#include "ModuleRulesEngine.hh"
-#include "ModuleTemporalNetwork.hh"
-#include "ModuleSolvers.hh"
-#include "ModuleNddl.hh"
+#include "Engine.hh"
+#include "Debug.hh"
+#include "LabelStr.hh"
+#include "Entity.hh"
+#include "Module.hh"
 #include "Pdlfcn.hh"
-#ifndef NO_RESOURCES
-#include "ModuleResource.hh"
-#include "ModuleAnml.hh"
-#endif
-
-#include "ConstraintEngine.hh"
-#include "PlanDatabase.hh"
-#include "RulesEngine.hh"
 
 #include <fstream>
 #include <sstream>
@@ -22,59 +12,37 @@
 
 namespace EUROPA
 {
-    // TODO: must become instance var
-    std::vector<ModuleId> EngineBase::m_modules;
-
-    bool& isInitialized()
-    {
-      static bool sl_isInitialized(false);
-      return sl_isInitialized;
-    }
-
     EngineBase::EngineBase()
     {
     	m_started = false;
     }
 
-    void EngineBase::initialize()
-    {
-    	if (!isInitialized()) {
-    	    initializeModules();
-    	    isInitialized() = true;
-    	}
+    EngineBase::~EngineBase()
+    {  
+        releaseModules();
     }
 
-    void EngineBase::terminate()
+    void EngineBase::releaseModules()
     {
-    	if (isInitialized()) {
-    	    uninitializeModules();
-    	    isInitialized() = false;
-    	}
+        std::vector<ModuleId>::iterator it;
+        for (it = m_modules.begin(); it != m_modules.end(); ++it) {
+            ModuleId& m = *it;
+            m.release();
+        }
+        m_modules.clear();
     }
 
-    ModuleId EngineBase::getModuleByName(const std::string& name)
+    
+    ModuleId& EngineBase::getModule(const std::string& name)
     {
+        static ModuleId noId=ModuleId::noId();
+        
 	    for (unsigned int i=0;i<m_modules.size();i++) {
 	    	if (m_modules[i]->getName() == name)
 	    		return m_modules[i];
 	    }
-	    return ModuleId::noId();
-    }
-
-    void EngineBase::createModules()
-    {
-	    // TODO: make this data-driven
-	    m_modules.push_back(new ModuleConstraintEngine());
-	    m_modules.push_back(new ModuleConstraintLibrary());
-	    m_modules.push_back(new ModulePlanDatabase());
-	    m_modules.push_back(new ModuleRulesEngine());
-	    m_modules.push_back(new ModuleTemporalNetwork());
-	    m_modules.push_back(new ModuleSolvers());
-	    m_modules.push_back(new ModuleNddl());
-#ifndef NO_RESOURCES
-        m_modules.push_back(new ModuleResource());
-	    m_modules.push_back(new ModuleAnml());
-#endif
+	    
+	    return noId;
     }
 
     void EngineBase::initializeModule(ModuleId module)
@@ -87,26 +55,19 @@ namespace EUROPA
     {
     	module->uninitialize();
     	debugMsg("EngineBase","Uninitialized Module " << module->getName());
-    	module.release();
     }
 
     void EngineBase::initializeModules()
     {
-	    createModules();
 	    for (unsigned int i=0;i<m_modules.size();i++)
 	    	initializeModule(m_modules[i]);
     }
 
     void EngineBase::uninitializeModules()
     {
-        Entity::purgeStarted();
         for (unsigned int i=m_modules.size(); i>0 ;i--)
         	uninitializeModule(m_modules[i-1]);
-        Entity::purgeEnded();
-
-        m_modules.clear();
     }
-
 
     bool EngineBase::isStarted()
     {
@@ -117,7 +78,7 @@ namespace EUROPA
     {
     	if(!m_started)
     	{
-    		allocateComponents();
+            initializeModules();
     		initializeByModules();
     		m_started = true;
     	}
@@ -127,8 +88,10 @@ namespace EUROPA
     {
     	if(m_started)
     	{
+            Entity::purgeStarted();
     		uninitializeByModules();
-    		deallocateComponents();
+            uninitializeModules();
+            Entity::purgeEnded();
     		m_started = false;
     	}
     }
@@ -136,12 +99,9 @@ namespace EUROPA
 	void EngineBase::addModule(ModuleId module)
 	{
 		m_modules.push_back(module);
-		if(isInitialized())
-		{
-			initializeModule(module);
-		}
-		if(isStarted())
-		{
+
+		if(isStarted()) {
+            initializeModule(module);
 			initializeByModule(module);
 		}
 	}
@@ -150,21 +110,19 @@ namespace EUROPA
 	{
 		std::vector<ModuleId>::iterator it = find(m_modules.begin(), m_modules.end(), module);
 		checkError(it != m_modules.end(), "EngineBase: removeModule Module not found." << module->getName());
-		if(isStarted())
-		{
+
+		if(isStarted()) {
 			uninitializeByModule(module);
-		}
-		if(isInitialized())
-		{
 			uninitializeModule(module);
 		}
+		
 		m_modules.erase(it);
 	}
 
 	// Basically a copy of PSEngineImpl::loadModel
 	void EngineBase::loadModule(const std::string& moduleFileName)
 	{
-		check_runtime_error(m_started,"PSEngine has not been started");
+		check_runtime_error(m_started,"Engine has not been started");
 
 		void* libHandle = p_dlopen(moduleFileName.c_str(), RTLD_NOW);
 		checkRuntimeError(libHandle != NULL,
@@ -205,32 +163,11 @@ namespace EUROPA
     		uninitializeByModule(m_modules[i-1]);
     }
 
-    void EngineBase::allocateComponents()
-    {
-        m_schema = (new Schema("EngineSchema"))->getId(); // TODO: use engine name
-	    m_constraintEngine = (new ConstraintEngine())->getId();
-	    m_planDatabase = (new PlanDatabase(m_constraintEngine, m_schema))->getId();
-	    m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();
-    }
-
-    void EngineBase::deallocateComponents()
-    {
-  	  Entity::purgeStarted();
-
-      if(m_rulesEngine.isValid()) delete (RulesEngine*) m_rulesEngine;
-  	  if(m_planDatabase.isValid()) delete (PlanDatabase*) m_planDatabase;
-  	  if(m_constraintEngine.isValid()) delete (ConstraintEngine*) m_constraintEngine;
-      if(m_schema.isValid()) delete (Schema*) m_schema;           
-
-  	  Entity::purgeEnded();
-    }
-
     std::string EngineBase::executeScript(const std::string& language, const std::string& script, bool isFile)
     {
       std::map<double, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
       checkRuntimeError(it != getLanguageInterpreters().end(),
   		      "Cannot execute script for unknown language \"" << language << "\"");
-
 
       std::istream *in;
       std::string source;
@@ -248,11 +185,6 @@ namespace EUROPA
       delete in;
 
       return retval;
-    }
-
-    std::map<double, LanguageInterpreter*>& EngineBase::getLanguageInterpreters()
-    {
-        return m_languageInterpreters;
     }
 
     void EngineBase::addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter)
@@ -284,20 +216,53 @@ namespace EUROPA
         return NULL;
     }
 
-    EngineComponentId& EngineBase::getComponent(const std::string& name)
+    std::map<double, LanguageInterpreter*>& EngineBase::getLanguageInterpreters()
     {
-  	  static EngineComponentId noId = EngineComponentId::noId();
-
-      if (name == "Schema")
-          return (EngineComponentId&)m_schema;
-  	  if (name == "ConstraintEngine")
-  		  return (EngineComponentId&)m_constraintEngine;
-  	  if (name == "PlanDatabase")
-  		  return (EngineComponentId&)m_planDatabase;
-  	  if (name == "RulesEngine")
-  		  return (EngineComponentId&)m_constraintEngine;
-
-  	  return noId;
+        return m_languageInterpreters;
     }
+
+    void EngineBase::addComponent(const std::string& name,EngineComponent* component)
+    {
+        std::map<double, EngineComponent*>::iterator it = getComponents().find(LabelStr(name));
+        if(it == getComponents().end())
+          getComponents().insert(std::make_pair(LabelStr(name), component));
+        else {
+          delete it->second;
+          it->second = component;
+        }        
+    }
+    
+    EngineComponent* EngineBase::getComponent(const std::string& name)
+    {
+      std::map<double, EngineComponent*>::iterator it = getComponents().find(LabelStr(name));
+      if(it != getComponents().end()) 
+          return it->second;
+      
+  	  return NULL;
+    }
+    
+    const EngineComponent* EngineBase::getComponent(const std::string& name) const
+    {
+      std::map<double, EngineComponent*>::const_iterator it = m_components.find(LabelStr(name));
+      if(it != m_components.end()) 
+          return it->second;
+      
+      return NULL;
+    }
+    
+    EngineComponent* EngineBase::removeComponent(const std::string& name)
+    {
+        EngineComponent* c = getComponent(name);
+        
+        if (c != NULL)
+            getComponents().erase(LabelStr(name));
+        
+        return c;
+    }    
+    
+    std::map<double, EngineComponent*>& EngineBase::getComponents()
+    {
+        return m_components;
+    }        
 }
 

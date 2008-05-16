@@ -58,6 +58,9 @@ namespace EUROPA {
     std::vector<std::string> noNativeTokens;
     addNativeClass("Object",noNativeTokens);
     addNativeClass("Timeline", noNativeTokens);     
+
+    createDefaultObjectFactory("Object", true);
+    REGISTER_OBJECT_FACTORY(TimelineObjectFactory, Timeline);                              
   }
 
   NddlXmlInterpreter::~NddlXmlInterpreter() 
@@ -86,7 +89,7 @@ namespace EUROPA {
       
     // If it can't create objects, generate default super call
     if (!canCreateObjects) 
-      superCallExpr = new ExprConstructorSuperCall(Schema::instance()->getParent(className),std::vector<Expr*>());                  
+      superCallExpr = new ExprConstructorSuperCall(getSchema()->getParent(className),std::vector<Expr*>());                  
       
     // The ObjectFactory constructor automatically registers the factory
     new InterpretedObjectFactory(

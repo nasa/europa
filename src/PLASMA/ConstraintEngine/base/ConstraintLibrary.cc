@@ -78,12 +78,8 @@ namespace EUROPA {
       ConstraintFactoryId factory = it->second;
       check_error(factory.isValid());
       debugMsg("ConstraintLibrary:purgeAll", "Removing constraint factory " << factory->getName().toString());
-      if(!factory->isSystemDefined()){
-	factories.erase(it++);
-	factory.release();
-      }
-      else
-	++it;
+	  factories.erase(it++);
+	  factory.release();
     }
   }
 

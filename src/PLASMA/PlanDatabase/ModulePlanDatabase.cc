@@ -31,18 +31,11 @@ namespace EUROPA {
       if(planDatabaseInitialized())
     	  return;
 
-      REGISTER_SYSTEM_CONSTRAINT(CommonAncestorConstraint, "commonAncestor", "Default");
-  	  REGISTER_SYSTEM_CONSTRAINT(HasAncestorConstraint, "hasAncestor", "Default");
-  	  REGISTER_SYSTEM_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
-      
 	  planDatabaseInitialized() = true;
   }  
 
   void ModulePlanDatabase::uninitialize()
   {
-	  ObjectFactory::purgeAll();
-	  TokenFactory::purgeAll();	  
-	  
 	  planDatabaseInitialized() = false;
   }  
   
@@ -65,12 +58,32 @@ namespace EUROPA {
   
   void ModulePlanDatabase::initialize(EngineId engine)
   {
-	  PlanDatabaseId& pdb = (PlanDatabaseId&)(engine->getComponent("PlanDatabase"));	  
+      Schema* schema = new Schema("EngineSchema"); // TODO: use engine name
+      engine->addComponent("Schema",schema);
+
+      ConstraintEngine* ce = (ConstraintEngine*)engine->getComponent("ConstraintEngine");
+      PlanDatabase* pdb = new PlanDatabase(ce->getId(), schema->getId());      
+      engine->addComponent("PlanDatabase",pdb);
+
+      REGISTER_SYSTEM_CONSTRAINT(CommonAncestorConstraint, "commonAncestor", "Default");
+      REGISTER_SYSTEM_CONSTRAINT(HasAncestorConstraint, "hasAncestor", "Default");
+      REGISTER_SYSTEM_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
+      
 	  engine->addLanguageInterpreter("nddl-xml-txn", new NddlXmlTxnInterpreter(pdb->getClient()));
   }
   
   void ModulePlanDatabase::uninitialize(EngineId engine)
   {	  
 	  engine->removeLanguageInterpreter("nddl-xml-txn"); 
+
+      PlanDatabase* pdb = (PlanDatabase*)engine->removeComponent("PlanDatabase");      
+      delete pdb;
+
+      Schema* schema = (Schema*)engine->removeComponent("Schema");      
+      delete schema;
+	  
+	  // TODO: these need to be member variables in PlanDatabase
+      ObjectFactory::purgeAll();
+      TokenFactory::purgeAll();         
   }  
 }

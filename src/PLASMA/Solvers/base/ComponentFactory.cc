@@ -31,8 +31,10 @@ namespace EUROPA {
       return allocator->create(configData);
     }
 
-    void Component::AbstractFactory::purge(){
-      factories().clear();
+    void Component::AbstractFactory::purge()
+    {
+        while (factories().size() > 0)
+            remove(factories().begin()->first);
     }
 
     Component::AbstractFactory::~AbstractFactory(){

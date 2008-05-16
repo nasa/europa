@@ -27,6 +27,8 @@
 #include "STNTemporalAdvisor.hh"
 #include "DbClientTransactionPlayer.hh"
 #include "TemporalPropagator.hh"
+#include "TypeFactory.hh"
+#include "Rule.hh"
 
 #include "ModuleConstraintEngine.hh"
 #include "ModulePlanDatabase.hh"
@@ -55,144 +57,68 @@ using namespace EUROPA;
 using namespace EUROPA::SOLVERS;
 using namespace EUROPA::SOLVERS::HSTS;
 
-class SolversTestEngine : public Engine 
+void initSolverModuleTests() 
+{
+  // Allocate the schema with a call to the linked in model function - eventually
+  // make this called via dlopen
+  EUROPA::NDDL::loadSchema(); 
+}
+
+void registerTestElements();
+
+class SolversTestEngine : public EngineBase 
 {
   public:  
 	SolversTestEngine();
 	virtual ~SolversTestEngine();
 	
-	static void initialize();
-	static void terminate();
-
-	virtual EngineComponentId& getComponent(const std::string& name);
-    
-    virtual void addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter) {}
-    virtual void removeLanguageInterpreter(const std::string& language) {}       
-    virtual LanguageInterpreter* getLanguageInterpreter(const std::string& language) { return NULL; }
-
-    const PlanDatabaseId& getPlanDatabase() const          { return m_planDatabase; }
-	const ConstraintEngineId& getConstraintEngine() const  {return m_constraintEngine;} 
-	const RulesEngineId& getRulesEngine() const            {return m_rulesEngine;}
+    SchemaId&           getSchema()           { return (SchemaId&)((Schema*)getComponent("Schema"))->getId(); }
+    ConstraintEngineId& getConstraintEngine() { return (ConstraintEngineId&)((ConstraintEngine*)getComponent("ConstraintEngine"))->getId(); }
+    PlanDatabaseId&     getPlanDatabase()     { return (PlanDatabaseId&)((PlanDatabase*)getComponent("PlanDatabase"))->getId(); }
+    RulesEngineId&      getRulesEngine()      { return (RulesEngineId&)((RulesEngine*)getComponent("RulesEngine"))->getId(); }    
 	  
   protected: 
-	ConstraintEngineId m_constraintEngine;
-	PlanDatabaseId m_planDatabase;
-	RulesEngineId m_rulesEngine;
-	    
-	void allocateComponents();
-	void deallocateComponents();
-	
-	static void createModules();
-	static void initializeModules();
-	static void uninitializeModules();
-	static std::vector<ModuleId> m_modules;	    
+    void createModules();       
 };
-
-std::vector<ModuleId> SolversTestEngine::m_modules;
 
 SolversTestEngine::SolversTestEngine()
 {
-   allocateComponents();	
+    createModules();
+    doStart();
+    initSolverModuleTests();
+    registerTestElements();
 }
 
 SolversTestEngine::~SolversTestEngine()
 {
-   deallocateComponents();	
-}
-
-void SolversTestEngine::initialize()
-{
-	initializeModules();    	
-}
-
-void SolversTestEngine::terminate()
-{
-	uninitializeModules();
+    doShutdown();
 }
 
 void SolversTestEngine::createModules()
 {
-    m_modules.push_back(new ModuleConstraintEngine()); 
-    m_modules.push_back(new ModuleConstraintLibrary());
-    m_modules.push_back(new ModulePlanDatabase());
-    m_modules.push_back(new ModuleRulesEngine());
-    m_modules.push_back(new ModuleTemporalNetwork());
-    m_modules.push_back(new ModuleSolvers());
-    m_modules.push_back(new ModuleNddl());
+    addModule((new ModuleConstraintEngine())->getId());
+    addModule((new ModuleConstraintLibrary())->getId());
+    addModule((new ModulePlanDatabase())->getId());
+    addModule((new ModuleRulesEngine())->getId());
+    addModule((new ModuleTemporalNetwork())->getId());
+    addModule((new ModuleSolvers())->getId());
+    addModule((new ModuleNddl())->getId());
 }
 
-void SolversTestEngine::initializeModules()
-{
-    createModules();
-  
-    for (unsigned int i=0;i<m_modules.size();i++) {
-    	m_modules[i]->initialize();
-    }	  
-}
-
-void SolversTestEngine::uninitializeModules()
-{
-    Entity::purgeStarted();      
-    for (unsigned int i=m_modules.size();i>0;i--) {
-    	unsigned int idx = i-1;
-    	m_modules[idx]->uninitialize();
-    	m_modules[idx].release();
-    }	  
-    Entity::purgeEnded();	  
-
-    m_modules.clear();	  
-}
-
-
-void SolversTestEngine::allocateComponents()
-{
-    m_constraintEngine = (new ConstraintEngine())->getId();	  
-    m_planDatabase = (new PlanDatabase(m_constraintEngine, Schema::testInstance()))->getId();	
-    m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();	  
-
-    for (unsigned int i=0;i<m_modules.size();i++) {
-    	m_modules[i]->initialize(getId());
-    }	  	  
-}	  
-
-void SolversTestEngine::deallocateComponents()
-{
-	for (unsigned int i=m_modules.size();i>0;i--) {
-	  unsigned int idx = i-1;
-	  m_modules[idx]->uninitialize(getId());
-    }	  
-
-	Entity::purgeStarted();
-    
-    if(m_rulesEngine.isValid()) delete (RulesEngine*) m_rulesEngine;
-	if(m_planDatabase.isValid()) delete (PlanDatabase*) m_planDatabase; 
-	if(m_constraintEngine.isValid()) delete (ConstraintEngine*) m_constraintEngine;
-
-	Entity::purgeEnded();	  
-}    
-
-EngineComponentId& SolversTestEngine::getComponent(const std::string& name)
-{
-	  static EngineComponentId noId = EngineComponentId::noId();
-	  
-	  if (name == "ConstraintEngine")
-		  return (EngineComponentId&)m_constraintEngine;
-	  if (name == "PlanDatabase")
-		  return (EngineComponentId&)m_planDatabase;
-	  if (name == "RulesEngine")
-		  return (EngineComponentId&)m_constraintEngine;
-
-	  return noId;
-}          
 
 class TestAssembly : public SolversTestEngine 
 {
 public:
-  bool playTransactions(const char* txSource){
+  TestAssembly()
+  {
+  }
+  
+  bool playTransactions(const char* txSource)
+  {
     check_error(txSource != NULL, "NULL transaction source provided.");
     
     // Obtain the client to play transactions on.
-    DbClientId client = m_planDatabase->getClient();
+    DbClientId client = getPlanDatabase()->getClient();
     
     // Construct player
     DbClientTransactionPlayer player(client);
@@ -203,7 +129,7 @@ public:
     check_error(in, "Invalid transaction source '" + std::string(txSource) + "'.");
     player.play(in);
     
-    return m_constraintEngine->constraintConsistent();
+    return getConstraintEngine()->constraintConsistent();
   }  
 };
 
@@ -284,6 +210,8 @@ public:
 
 private:
   static bool testBasicAllocation(){
+    TestAssembly assembly;
+    
     TiXmlElement* configXml = initXml((getTestLoadLibraryPath() + "/ComponentFactoryTest.xml").c_str());
 
     for (TiXmlElement * child = configXml->FirstChildElement(); 
@@ -314,6 +242,8 @@ public:
 
 private:
   static bool testRuleMatching() {
+    TestAssembly assembly;
+    
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/RuleMatchingTests.xml").c_str(), "MatchingEngine");
     MatchingEngine me(*root);
     assertTrue(me.ruleCount() == 13, toString(me.ruleCount()));
@@ -331,7 +261,6 @@ private:
     assertTrue(me.hasRule("[R10]*.*.*.before.*.*"));
     assertTrue(me.hasRule("[R11]*.*.neverMatched.*.*.*"));
 
-    TestAssembly assembly;
     PlanDatabaseId db = assembly.getPlanDatabase();
     Object o1(db, "A", "o1");
     Object o2(db, "D", "o2");
@@ -605,9 +534,9 @@ public:
 
 private:
   static bool testPriorities(){
+    TestAssembly assembly;
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestPriorities");
     MatchingEngine me(*root, "FlawHandler");
-    TestAssembly assembly;
     PlanDatabaseId db = assembly.getPlanDatabase();
     Object o1(db, "A", "o1");
     Object o2(db, "D", "o2");
@@ -666,9 +595,9 @@ private:
   }
 
   static bool testGuards(){
+    TestAssembly assembly;
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestGuards");
     MatchingEngine me(*root, "FlawHandler");
-    TestAssembly assembly;
     PlanDatabaseId db = assembly.getPlanDatabase();
     Object o1(db, "A", "o1");
     Object o2(db, "D", "o2");
@@ -751,9 +680,9 @@ private:
   }
 
   static bool testDynamicFlawManagement(){
+    TestAssembly assembly;
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestDynamicFlaws");
     TiXmlElement* child = root->FirstChildElement();
-    TestAssembly assembly;
     PlanDatabaseId db = assembly.getPlanDatabase();
     Object o1(db, "A", "o1");
     Object o2(db, "D", "o2");
@@ -900,7 +829,7 @@ private:
 
   static bool testTokenComparators() {
     TestAssembly assembly;
-    Schema::testInstance()->addPredicate("A.Foo");
+    assembly.getSchema()->addPredicate("A.Foo");
     PlanDatabaseId db = assembly.getPlanDatabase();
 
     Object o1(db, "A", "o1");
@@ -1417,6 +1346,7 @@ private:
   }
   static bool testHSTSOpenConditionDecisionPoint() {
     TestAssembly assembly;
+    assembly.getSchema()->addPredicate("A.Foo");
     PlanDatabaseId db = assembly.getPlanDatabase();
     DbClientId client = db->getClient();
     Object o1(db, "A", "o1");    
@@ -1536,6 +1466,7 @@ private:
   }
   static bool testHSTSThreatDecisionPoint() {
     TestAssembly assembly;
+    assembly.getSchema()->addPredicate("A.Foo");
     PlanDatabaseId db = assembly.getPlanDatabase();
     DbClientId client = db->getClient();
     Timeline o1(db, "A", "o1");
@@ -2095,8 +2026,6 @@ private:
     horizon = IntervalIntDomain(0, 1000);
 
     assert(assembly.playTransactions((getTestLoadLibraryPath() + "/ThreatFiltering.xml").c_str()));
-    //assert(assembly.playTransactions((getTestLoadLibraryPath() + "/OpenConditionFiltering.xml").c_str()));
-    //assert(assembly.playTransactions((getTestLoadLibraryPath() + "/UnboundVariableFiltering.xml").c_str()));
 
     tm.initialize(assembly.getPlanDatabase());
     ocm.initialize(assembly.getPlanDatabase());
@@ -2149,45 +2078,31 @@ public:
   }
 };
 
-void initSolverModuleTests() {
- 
-  // Allocate the schema with a call to the linked in model function - eventually
-  // make this called via dlopen
-  EUROPA::NDDL::loadSchema(); 
-}
-
-void SolversModuleTests::runTests(std::string path) {
-   SolversTestEngine::initialize();
-   setTestLoadLibraryPath(path);
-
+void registerTestElements()
+{
    // For tests on the matching engine
    REGISTER_COMPONENT_FACTORY(MatchingRule, MatchingRule);
 
-   // Register components under program execution so that static allocation can have occurred
-   // safely. This was required due to problems on the MAC.
    REGISTER_COMPONENT_FACTORY(TestComponent, A);
    REGISTER_COMPONENT_FACTORY(TestComponent, B);
    REGISTER_COMPONENT_FACTORY(TestComponent, C);
    REGISTER_COMPONENT_FACTORY(TestComponent, D);
    REGISTER_COMPONENT_FACTORY(TestComponent, E);
 
-   // Initialization of various ids and other required elements
-   initSolverModuleTests();
-
-   // Set up the required components. Should eventually go into an assembly. Note they are allocated on the stack, not the heap
    REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::RandomValue, Random);
 
-   // Constraints used for testing
    REGISTER_CONSTRAINT(LazyAllDiff, "lazyAllDiff",  "Default");
    REGISTER_CONSTRAINT(LazyAlwaysFails, "lazyAlwaysFails",  "Default");
+}
 
+void SolversModuleTests::runTests(std::string path) 
+{
+   setTestLoadLibraryPath(path);
    runTestSuite(ComponentFactoryTests::test);
    runTestSuite(FilterTests::test);
    runTestSuite(FlawIteratorTests::test);
    runTestSuite(FlawManagerTests::test);
    runTestSuite(FlawHandlerTests::test);
    runTestSuite(SolverTests::test);
-
-   SolversTestEngine::terminate();
 }
 

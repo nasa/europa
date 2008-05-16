@@ -28,19 +28,6 @@ namespace EUROPA {
     if(nddlInitialized())
     	return;
 
-    /* Allocate NDDL Type Factories */
-    // Default names are uppercase, TODO: change default names so that this isn't necessary
-    new BoolTypeFactory("bool");
-    new StringTypeFactory("string");
-    new SymbolTypeFactory("symbol");
-      
-    // These are Nddl specific, so they belong here
-    new intTypeFactory();
-    new floatTypeFactory();
-      
-    NddlXmlInterpreter::createDefaultObjectFactory("Object", true);
-    REGISTER_OBJECT_FACTORY(TimelineObjectFactory, Timeline);                     
-      
     nddlInitialized() = true;
   }
 
@@ -49,8 +36,6 @@ namespace EUROPA {
     if(!nddlInitialized())
     	return;
     
-    TypeFactory::purgeAll();
-    // TODO: Finish cleanup
     nddlInitialized() = false;
   }
   
@@ -80,14 +65,19 @@ namespace EUROPA {
   
   void ModuleNddl::initialize(EngineId engine)
   {
-	  PlanDatabaseId& pdb = (PlanDatabaseId&)(engine->getComponent("PlanDatabase"));	  
+      // These are Nddl specific, so they belong here
+      new intTypeFactory();
+      new floatTypeFactory();      
+
+      PlanDatabase* pdb = (PlanDatabase*)engine->getComponent("PlanDatabase");	  
 	  engine->addLanguageInterpreter("nddl", new NddlInterpreter());
-	  engine->addLanguageInterpreter("nddl-xml", new NddlXmlInterpreter(pdb->getClient()));
+	  engine->addLanguageInterpreter("nddl-xml", new NddlXmlInterpreter(pdb->getClient()));	  
   }
   
   void ModuleNddl::uninitialize(EngineId engine)
   {	  
 	  engine->removeLanguageInterpreter("nddl"); 
 	  engine->removeLanguageInterpreter("nddl-xml"); 
+	  // TODO: Finish cleanup
   }  
 }

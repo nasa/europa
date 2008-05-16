@@ -63,7 +63,7 @@ namespace EUROPA {
       
       // TODO:  Is there a way to avoid this (for PSPLanDatabaseListener)?
     private:
-      	virtual PlanDatabaseId getPlanDatabase() = 0;
+      	virtual PlanDatabaseId& getPlanDatabase() = 0;
      	friend class PSPlanDatabaseListener;
   };
   

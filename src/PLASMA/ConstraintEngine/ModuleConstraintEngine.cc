@@ -32,14 +32,6 @@ namespace EUROPA {
 	    if(constraintEngineInitialized())
 	    	return;
 	  
-	    /* Allocate Standard Type Factories */
-	    new BoolTypeFactory();
-	    new IntervalIntTypeFactory();
-	    new IntervalTypeFactory();
-	    new StringTypeFactory();
-	    new SymbolTypeFactory();
-	    new EnumeratedTypeFactory("REAL_ENUMERATION", "ELEMENT", EnumeratedDomain(true, "REAL_ENUMERATION"));
-
 	    constraintEngineInitialized() = true;	  
   }
   
@@ -63,12 +55,26 @@ namespace EUROPA {
   
   void ModuleConstraintEngine::initialize(EngineId engine)
   {
-	  ConstraintEngineId& ce = (ConstraintEngineId&)(engine->getComponent("ConstraintEngine"));
-	  new DefaultPropagator(LabelStr("Default"), ce);	  
+      ConstraintEngine* ce = new ConstraintEngine();
+      engine->addComponent("ConstraintEngine",ce);
+      
+      /* Allocate Standard Type Factories */
+      new BoolTypeFactory();
+      new IntervalIntTypeFactory();
+      new IntervalTypeFactory();
+      new StringTypeFactory();
+      new SymbolTypeFactory();
+      new EnumeratedTypeFactory("REAL_ENUMERATION", "ELEMENT", EnumeratedDomain(true, "REAL_ENUMERATION"));
+
+	  new DefaultPropagator(LabelStr("Default"), ce->getId());	  
   }
   
   void ModuleConstraintEngine::uninitialize(EngineId engine)
   {	  
+      ConstraintEngine* ce = (ConstraintEngine*)engine->removeComponent("ConstraintEngine");      
+      delete ce;
+      
+      TypeFactory::purgeAll();      
   }
     
   /**************************************************************************************/
@@ -193,31 +199,30 @@ namespace EUROPA {
   
   ModuleConstraintLibrary::ModuleConstraintLibrary()
       : Module("ConstraintLibrary")
-  {
-	  
+  {	  
   }
 
   ModuleConstraintLibrary::~ModuleConstraintLibrary()
   {	  
   }
 
-  // TODO: move the meat from old functions into these methods, remove old functions
   void ModuleConstraintLibrary::initialize()
   {
-      initConstraintLibrary();
   }
 
   void ModuleConstraintLibrary::uninitialize()
   {
-	  uninitConstraintLibrary();
   }     
   
+  // TODO: move the meat from old functions into these methods, remove old functions
   void ModuleConstraintLibrary::initialize(EngineId engine)
   {
+      initConstraintLibrary();
   }
   
   void ModuleConstraintLibrary::uninitialize(EngineId engine)
   {	  
+      uninitConstraintLibrary();
   }
   
 }

@@ -29,63 +29,33 @@
 
 using namespace EUROPA;
 
-class RETestEngine  
+class RETestEngine : public EngineBase
 {
   public:  
-	RETestEngine() {}
-	virtual ~RETestEngine() {}
+	RETestEngine();
+	virtual ~RETestEngine();
 	
-	static void initialize();
-	static void terminate();
-
   protected: 
-	static void createModules();
-	static void initializeModules();
-	static void uninitializeModules();
-	static std::vector<ModuleId> m_modules;	    
+	void createModules();
 };
 
-std::vector<ModuleId> RETestEngine::m_modules;
-
-void RETestEngine::initialize()
+RETestEngine::RETestEngine()
 {
-	initializeModules();    	
+    createModules();
+    doStart();
 }
 
-void RETestEngine::terminate()
+RETestEngine::~RETestEngine()
 {
-	uninitializeModules();
+    doShutdown();
 }
 
 void RETestEngine::createModules()
 {
-    // TODO: make this data-driven
-    m_modules.push_back(new ModuleConstraintEngine()); 
-    m_modules.push_back(new ModuleConstraintLibrary());
-    m_modules.push_back(new ModulePlanDatabase());
-    m_modules.push_back(new ModuleRulesEngine());
-}
-
-void RETestEngine::initializeModules()
-{
-    createModules();
-  
-    for (unsigned int i=0;i<m_modules.size();i++) {
-    	m_modules[i]->initialize();
-    }	  
-}
-
-void RETestEngine::uninitializeModules()
-{
-    Entity::purgeStarted();      
-    for (unsigned int i=m_modules.size();i>0;i--) {
-    	unsigned int idx = i-1;
-    	m_modules[idx]->uninitialize();
-    	m_modules[idx].release();
-    }	  
-    Entity::purgeEnded();	  
-
-    m_modules.clear();	  
+    addModule((new ModuleConstraintEngine())->getId());
+    addModule((new ModuleConstraintLibrary())->getId());
+    addModule((new ModulePlanDatabase())->getId());
+    addModule((new ModuleRulesEngine())->getId());
 }
 
 class SimpleSubGoal: public Rule {
@@ -578,9 +548,10 @@ private:
   }
 };
 
-void RulesEngineModuleTests::runTests(std::string path) {
-
-    RETestEngine::initialize();
+void RulesEngineModuleTests::runTests(std::string path) 
+{
+    RETestEngine engine;
+    
     // TODO: This introduces a dependency to the TemporalNetwork, why here?
     REGISTER_SYSTEM_CONSTRAINT(EqualConstraint, "concurrent", "Temporal");
     REGISTER_SYSTEM_CONSTRAINT(LessThanEqualConstraint, "precedes", "Temporal"); 
@@ -593,6 +564,4 @@ void RulesEngineModuleTests::runTests(std::string path) {
     Schema::testInstance();
     runTestSuite(RulesEngineTest::test);
     std::cout << "Finished" << std::endl;
-
-    RETestEngine::terminate();
   }

@@ -31,6 +31,7 @@
 
 #include "module-tests.hh"
 
+#include "Engine.hh"
 #include "ModuleConstraintEngine.hh"
 
 #include <iostream>
@@ -41,69 +42,12 @@
 
 using namespace EUROPA;
 
-class CETestEngine  
-{
-  public:  
-	CETestEngine() {}
-	virtual ~CETestEngine() {}
-	
-	static void initialize();
-	static void terminate();
-
-  protected: 
-	static void createModules();
-	static void initializeModules();
-	static void uninitializeModules();
-	static std::vector<ModuleId> m_modules;	    
-};
-
-std::vector<ModuleId> CETestEngine::m_modules;
-
-void CETestEngine::initialize()
-{
-	initializeModules();    	
-}
-
-void CETestEngine::terminate()
-{
-	uninitializeModules();
-}
-
-void CETestEngine::createModules()
-{
-    m_modules.push_back(new ModuleConstraintEngine()); 
-    m_modules.push_back(new ModuleConstraintLibrary());
-}
-
-void CETestEngine::initializeModules()
-{
-    createModules();
-  
-    for (unsigned int i=0;i<m_modules.size();i++) {
-    	m_modules[i]->initialize();
-    }	  
-}
-
-void CETestEngine::uninitializeModules()
-{
-    Entity::purgeStarted();      
-    for (unsigned int i=m_modules.size();i>0;i--) {
-    	unsigned int idx = i-1;
-    	m_modules[idx]->uninitialize();
-    	m_modules[idx].release();
-    }	  
-    Entity::purgeEnded();	  
-
-    m_modules.clear();	  
-}
-
-
 class DelegationTestConstraint : public Constraint {
 public:
   DelegationTestConstraint(const LabelStr& name,
-			   const LabelStr& propagatorName,
-			   const ConstraintEngineId& constraintEngine,
-			   const std::vector<ConstrainedVariableId>& variables)
+               const LabelStr& propagatorName,
+               const ConstraintEngineId& constraintEngine,
+               const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables){s_instanceCount++;}
   ~DelegationTestConstraint(){s_instanceCount--;}
 
@@ -121,6 +65,36 @@ public:
 
 int DelegationTestConstraint::s_executionCount = 0;
 int DelegationTestConstraint::s_instanceCount = 0;
+
+class CETestEngine : public EngineBase
+{
+  public:  
+	CETestEngine();
+	virtual ~CETestEngine();
+	
+  protected: 
+	void createModules();
+};
+
+CETestEngine::CETestEngine()
+{
+    createModules();
+    REGISTER_CONSTRAINT(DelegationTestConstraint, "TestOnly", "Default");
+    doStart();
+    TypeFactory::createValue("INT_INTERVAL", std::string("5"));    
+}
+
+CETestEngine::~CETestEngine()
+{    
+    doShutdown();
+    TypeFactory::purgeAll();    
+}
+
+void CETestEngine::createModules()
+{
+    addModule((new ModuleConstraintEngine())->getId());
+    addModule((new ModuleConstraintLibrary())->getId());
+}
 
 class TestListener: public ConstraintEngineListener{
 public:
@@ -2688,9 +2662,8 @@ private:
 void ConstraintEngineModuleTests::runTests(std::string path) {
     setTestLoadLibraryPath(path);
 
-    CETestEngine::initialize();
-    REGISTER_CONSTRAINT(DelegationTestConstraint, "TestOnly", "Default");
-    TypeFactory::createValue("INT_INTERVAL", std::string("5"));
+    CETestEngine engine;
+    
     runTestSuite(DomainTests::test);
     runTestSuite(TypeFactoryTests::test);
     runTestSuite(EntityTests::test);
@@ -2700,7 +2673,6 @@ void ConstraintEngineModuleTests::runTests(std::string path) {
     runTestSuite(ConstraintFactoryTest::test);
     runTestSuite(EquivalenceClassTest::test);
     std::cout << "Finished" << std::endl;
-    CETestEngine::terminate();
   }
 
 

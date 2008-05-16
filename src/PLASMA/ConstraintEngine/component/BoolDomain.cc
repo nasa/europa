@@ -47,7 +47,7 @@ namespace EUROPA {
   }
 
   const LabelStr& BoolDomain::getDefaultTypeName() {
-    static const LabelStr sl_typeName("BOOL");
+    static const LabelStr sl_typeName("bool");
     return(sl_typeName);
   }
 

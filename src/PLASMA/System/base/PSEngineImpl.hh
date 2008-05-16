@@ -2,11 +2,11 @@
 #define _H_PSEngineImpl
 
 #include "PSEngine.hh"
-#include "EngineBase.hh"
+#include "EuropaEngineBase.hh"
 
 namespace EUROPA {
 
-  class PSEngineImpl : public PSEngine, public EngineBase
+  class PSEngineImpl : public PSEngine, public EuropaEngineBase
   {
   public:
     PSEngineImpl();
@@ -18,8 +18,8 @@ namespace EUROPA {
     virtual void start();
     virtual void shutdown();
 	     
-    void addModule(ModuleId module);
-    void removeModule(ModuleId module);
+    virtual void addModule(ModuleId module);
+    virtual void removeModule(ModuleId module);
     virtual void loadModule(const std::string& moduleFileName);
 
     virtual void loadModel(const std::string& modelFileName);        		
@@ -56,17 +56,13 @@ namespace EUROPA {
     // Solver methods
     virtual PSSolver* createSolver(const std::string& configurationFile);
     
-	virtual EngineComponent* getComponentPtr(const std::string& name); 
-	
   protected:
     bool m_started;
     PSSolverManager*    m_psSolverManager;
-    
-  	virtual void allocateComponents();
-  	virtual void deallocateComponents();
-  	
+        
+  private:	
   	// Is there a way to avoid these:
-  	virtual PlanDatabaseId getPlanDatabase();
+    virtual PlanDatabaseId& getPlanDatabase() { return EuropaEngineBase::getPlanDatabase(); }      
   	friend class PSPlanDatabaseListener;
   };
     

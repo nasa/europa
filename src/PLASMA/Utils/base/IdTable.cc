@@ -14,6 +14,7 @@
 #include "IdTable.hh"
 #include "CommonDefs.hh"
 #include "Debug.hh"
+#include "LabelStr.hh"
 
 /**
  * @file IdTable.cc
@@ -40,16 +41,20 @@ namespace EUROPA {
   unsigned int IdTable::insert(unsigned long int id, const char* baseType) {
     static unsigned int sl_nextId(1);
     debugMsg("IdTable:insert", "id,key:" << id << ", " << sl_nextId << ")");
-    std::map<unsigned long int, unsigned int>::iterator it = 
+    std::map<unsigned long int, std::pair<unsigned int,double> >::iterator it = 
       getInstance().m_collection.find(id);
+    
     if (it != getInstance().m_collection.end())
       return(0); /* Already in table. */
-    getInstance().m_collection.insert(std::make_pair(id, sl_nextId));
+    
+    getInstance().m_collection.insert(std::make_pair(id, std::make_pair(sl_nextId,LabelStr(baseType))));
+    
     std::map<std::string, unsigned int>::iterator tCit = getInstance().m_typeCnts.find(baseType);
     if (tCit == getInstance().m_typeCnts.end())
       getInstance().m_typeCnts.insert(std::pair<std::string, unsigned int>(baseType, 1));
     else
       tCit->second++;
+    
     return(sl_nextId++);
   }
 
@@ -57,17 +62,32 @@ namespace EUROPA {
     return(getInstance().m_collection.find(id) != getInstance().m_collection.end());
   }
 
+  unsigned int getEntryKey(std::pair<unsigned int,double>& entry)
+  {
+      return entry.first;
+  }
+  
+  LabelStr getEntryType(std::pair<unsigned int,double>& entry)
+  {
+      return entry.second;
+  }
+  
   unsigned int IdTable::getKey(unsigned long int id) {
-    std::map<unsigned long int, unsigned int>::iterator it = getInstance().m_collection.find(id);
+    std::map<unsigned long int, std::pair<unsigned int,double> >::iterator it = getInstance().m_collection.find(id);
     if (it != getInstance().m_collection.end())
-      return(it->second);
+      return getEntryKey(it->second);
     else
       return(0);
   }
 
   void IdTable::remove(unsigned long int id) {
     static unsigned int sl_key;
-    debugMsg("IdTable:remove", "<" << id << ", " << (sl_key = getInstance().m_collection.find(id)->second) << ">");
+    std::map<unsigned long int, std::pair<unsigned int,double> >::iterator it = getInstance().m_collection.find(id);    
+    debugMsg("IdTable:remove", "<" << id << ", " << (sl_key = getEntryKey(it->second)) << "," << getEntryType(it->second).toString() << ">");
+    std::string type = getEntryType(it->second).toString();
+    std::map<std::string, unsigned int>::iterator tCit = getInstance().m_typeCnts.find(type);
+    tCit->second--;
+    
     getInstance().m_collection.erase(id);
   }
 
@@ -75,8 +95,8 @@ namespace EUROPA {
     return(getInstance().m_collection.size());
   }
 
-  std::map<unsigned long int, unsigned int> IdTable::getCollection() {
-    return(getInstance().m_collection);
+  std::map<unsigned long int, std::pair<unsigned int,double> > IdTable::getCollection() {
+    return(getCollection());
   }
 
   void IdTable::printTypeCnts(std::ostream& os) {
@@ -89,11 +109,12 @@ namespace EUROPA {
   }
 
   void IdTable::output(std::ostream& os) {
+    printTypeCnts(os);  
     os << "Id Contents:";
-    for (std::map<unsigned long int, unsigned int>::iterator it = getInstance().m_collection.begin();
+    for (std::map<unsigned long int, std::pair<unsigned int,double> >::iterator it = getInstance().m_collection.begin();
          it != getInstance().m_collection.end();
          ++it)
-      os << " (" << it->first << ", " << it->second << ')';
+      os << " (" << it->first << ", " << getEntryKey(it->second) << "," << getEntryType(it->second).toString() << ')';
     os << std::endl;
   }
 

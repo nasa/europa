@@ -25,11 +25,6 @@
 
 namespace EUROPA {
 
-  static bool & resourceInitialized() {
-    static bool sl_alreadyDone(false);
-    return sl_alreadyDone;
-  }
-
   ModuleResource::ModuleResource()
       : Module("Resource")
   {	  
@@ -41,20 +36,74 @@ namespace EUROPA {
   
   void ModuleResource::initialize()
   {
-      if(resourceInitialized())
-    	  return;
+  }  
 
-  	  REGISTER_SYSTEM_CONSTRAINT(ResourceConstraint, "ResourceTransactionRelation", "Resource");
+  void ModuleResource::uninitialize()
+  {
+  }  
+  
+  class ResourceWrapperGenerator : public ObjectWrapperGenerator 
+  {
+  public:
+    PSObject* wrap(const PSEntityId& obj) {
+      checkRuntimeError(SAVH::ResourceId::convertable(obj),
+			"Object " << obj->toString() << " is not a resource.");
+      return new PSResourceImpl(SAVH::ResourceId(obj));
+    }
+  }; 
+  
+  void ModuleResource::initialize(EngineId engine)
+  {
+      REGISTER_SYSTEM_CONSTRAINT(ResourceConstraint, "ResourceTransactionRelation", "Resource");
 
-  	  REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile );
+      REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile );
       REGISTER_PROFILE(EUROPA::SAVH::FlowProfile, FlowProfile);
       REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile );
       
-   	  REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
+      REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
       REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
-  	  REGISTER_FVDETECTOR(EUROPA::SAVH::OpenWorldFVDetector, OpenWorldFVDetector);
+      REGISTER_FVDETECTOR(EUROPA::SAVH::OpenWorldFVDetector, OpenWorldFVDetector);
       REGISTER_FVDETECTOR(EUROPA::SAVH::ClosedWorldFVDetector, ClosedWorldFVDetector);               
 
+      // Solver
+      REGISTER_FLAW_MANAGER(SAVH::ThreatManager, SAVHThreatManager); 
+      REGISTER_FLAW_HANDLER(SAVH::ThreatDecisionPoint, SAVHThreatHandler); 
+      REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreat); 
+      EUROPA::SOLVERS::MatchingEngine::addMatchFinder(SAVH::Instant::entityTypeName(),(new EUROPA::SOLVERS::InstantMatchFinder())->getId()); 
+      
+      Schema* schema = (Schema*)(engine->getComponent("Schema"));
+      schema->declareObjectType("Resource");
+      schema->declareObjectType("Reusable");
+      schema->declareObjectType("Reservoir");
+      
+      PlanDatabase* pdb = (PlanDatabase*)(engine->getComponent("PlanDatabase"));
+	  ConstraintEngine* ce = (ConstraintEngine*)(engine->getComponent("ConstraintEngine"));
+
+	  new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), ce->getId());
+	  new ResourcePropagator(LabelStr("Resource"), ce->getId(), pdb->getId());	  	  
+	  
+      pdb->addObjectWrapperGenerator("Reservoir", new ResourceWrapperGenerator());
+      pdb->addObjectWrapperGenerator("Reusable", new ResourceWrapperGenerator());
+      pdb->addObjectWrapperGenerator("Unary", new ResourceWrapperGenerator());
+
+      // TODO: check if NDDL module is available?
+      NddlXmlInterpreter* nddlXml = (NddlXmlInterpreter*)engine->getLanguageInterpreter("nddl-xml");
+      if (nddlXml != NULL) {
+          std::vector<std::string> nativeTokens;
+          nativeTokens.push_back("Resource.change");
+          nddlXml->addNativeClass("Resource",nativeTokens); 
+
+          nativeTokens.clear();
+          nativeTokens.push_back("Reusable.uses");
+          nddlXml->addNativeClass("Reusable",nativeTokens);
+
+          nativeTokens.clear();
+          nativeTokens.push_back("Reservoir.produce");
+          nativeTokens.push_back("Reservoir.consume");
+          nddlXml->addNativeClass("Reservoir",nativeTokens);
+      }
+      
+      // TODO: expose Unary           
       REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource);                   
       REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float);                     
       REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float:float:float);                     
@@ -73,70 +122,11 @@ namespace EUROPA {
       REGISTER_OBJECT_FACTORY(ReservoirObjectFactory, Reservoir:float:float:float:float:float:float:float);                   
       new ReservoirProduceTokenFactory("Reservoir.produce");      
       new ReservoirConsumeTokenFactory("Reservoir.consume");      
-
-      // Solver
-      REGISTER_FLAW_MANAGER(SAVH::ThreatManager, SAVHThreatManager); 
-      REGISTER_FLAW_HANDLER(SAVH::ThreatDecisionPoint, SAVHThreatHandler); 
-      REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreat); 
-      EUROPA::SOLVERS::MatchingEngine::addMatchFinder(SAVH::Instant::entityTypeName(),(new EUROPA::SOLVERS::InstantMatchFinder())->getId()); 
-      
-	  resourceInitialized() = true;
-  }  
-
-  void ModuleResource::uninitialize()
-  {
-	  // TODO: clean up
-	  SAVH::ProfileFactory::purgeAll();
-	  resourceInitialized() = false;
-  }  
-  
-  class ResourceWrapperGenerator : public ObjectWrapperGenerator 
-  {
-  public:
-    PSObject* wrap(const PSEntityId& obj) {
-      checkRuntimeError(SAVH::ResourceId::convertable(obj),
-			"Object " << obj->toString() << " is not a resource.");
-      return new PSResourceImpl(SAVH::ResourceId(obj));
-    }
-  }; 
-  
-  void ModuleResource::initialize(EngineId engine)
-  {
-      SchemaId schema = (SchemaId&)(engine->getComponent("Schema"));
-      schema->declareObjectType("Resource");
-      schema->declareObjectType("Reusable");
-      schema->declareObjectType("Reservoir");
-      
-      PlanDatabaseId& pdb = (PlanDatabaseId&)(engine->getComponent("PlanDatabase"));
-	  ConstraintEngineId& ce = (ConstraintEngineId&)(engine->getComponent("ConstraintEngine"));
-
-	  new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), ce);
-	  new ResourcePropagator(LabelStr("Resource"), ce, pdb);	  	  
-	  
-      pdb->addObjectWrapperGenerator("Reservoir", new ResourceWrapperGenerator());
-      pdb->addObjectWrapperGenerator("Reusable", new ResourceWrapperGenerator());
-      pdb->addObjectWrapperGenerator("Unary", new ResourceWrapperGenerator());
-
-      // TODO: check if NDDL module is available?
-      NddlXmlInterpreter* nddlXml = (NddlXmlInterpreter*)engine->getLanguageInterpreter("nddl-xml");
-      std::vector<std::string> nativeTokens;
-      nativeTokens.push_back("Resource.change");
-      nddlXml->addNativeClass("Resource",nativeTokens); 
-
-      nativeTokens.clear();
-      nativeTokens.push_back("Reusable.uses");
-      nddlXml->addNativeClass("Reusable",nativeTokens);
-
-      nativeTokens.clear();
-      nativeTokens.push_back("Reservoir.produce");
-      nativeTokens.push_back("Reservoir.consume");
-      nddlXml->addNativeClass("Reservoir",nativeTokens);
-
-      // TODO: expose Unary           
   }
   
   void ModuleResource::uninitialize(EngineId engine)
   {	  
-	  // TODO: clean up
+      SAVH::ProfileFactory::purgeAll();
+      // TODO: clean up
   }  
 }

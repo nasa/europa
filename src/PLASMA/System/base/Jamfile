@@ -10,7 +10,7 @@ if "Resources" in $(NO) {
 
 ModuleBase System 
 	: 
-	EngineBase.cc
+	EuropaEngineBase.cc
 	PSEngineImpl.cc
 	StandardAssembly.cc
 	PSPlanDatabaseListener.cc
