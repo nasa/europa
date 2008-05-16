@@ -8,42 +8,16 @@ PLANNER ?= SOLVER ;
 
 SubDirHdrs $(PLASMA) PlanDatabase test ;
 
-#ModuleMain all-module-tests : test-main.cc
-#made switch to nddlMain as we Solvers test needs some nddl compiled.
-
-local global-module-tests = module-tests.cc
-                                           all-test-module.cc
-                                           ../../NDDL/test/nddl-test-module.cc
-                                           ../../PlanDatabase/test/db-test-module.cc
-                                           ../../Solvers/test/solvers-test-module.cc
-                                           ../../RulesEngine/test/re-test-module.cc 
-                                           ../../RulesEngine/test/TestRule.cc                                  
-                                           ../../ConstraintEngine/test/ce-test-module.cc
-                                           ../../ConstraintEngine/test/domain-tests.cc
-                                           ../../TemporalNetwork/test/TestSubgoalRule.cc
-                                           ../../TemporalNetwork/test/tn-test-module.cc
-                                           ../../ConstraintEngine/test/ce-test-module.cc
-                                           ../../Utils/test/util-test-module.cc
-                                           $(PlanDatabase_Test_Files:S=$(SUFOBJ))
-                                           $(CET_Files:S=$(SUFOBJ)) ;
-
-local global-test-deps = System NDDL ;
-
-if ! ( "Resources" in $(NO) ) {
-  global-module-tests += ../../Resource/test/rs-test-module.cc ;
-  global-test-deps += Resource ;
-}
-else {
+if ( "Resources" in $(NO) ) {
   SubDirC++Flags -DNO_RESOURCES ;
 }
 
-NddlMain all-module-tests : $(global-module-tests)
-                                           : 
-                                           ../../Solvers/test/Model.nddl
-                                           :
-                                            $(global-test-deps) ;
+ModuleMain system-module-tests : module-tests.cc
+;
 
-RunModuleMain run-all-module-tests : all-module-tests ;
+RunModuleMain run-system-module-tests : system-module-tests ;
+
+LocalDepends tests : run-system-module-tests ;
 
 #
 # TRANSACTION TESTS

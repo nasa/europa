@@ -1,6 +1,5 @@
-#include "all-test-module.hh"
 
-int main() {
-  AllModuleTests::runTests();
+int main() 
+{
   return 0;   
 }
