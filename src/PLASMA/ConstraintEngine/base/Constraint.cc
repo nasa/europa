@@ -23,7 +23,7 @@ namespace EUROPA {
     check_error(m_constraintEngine.isValid());
     check_error(!m_variables.empty());
     m_constraintEngine->add(m_id, propagatorName);
-    m_entity = m_id;
+    //m_entityId = m_id;
 
     debugMsg("Constraint:Constraint", 
 	     "Creating constraint " << getKey() << ":" << name.toString() <<

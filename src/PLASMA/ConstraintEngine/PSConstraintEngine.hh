@@ -3,6 +3,7 @@
 
 #include "Engine.hh"
 #include "PSUtils.hh"
+#include "LabelStr.hh"
 
 namespace EUROPA {
 
@@ -91,7 +92,7 @@ namespace EUROPA {
 	  PSVarType m_type;
   };                
   
-  class PSConstraint : public PSEntity
+  class PSConstraint : public virtual PSEntity
   {
     public:    
       PSConstraint() {}    

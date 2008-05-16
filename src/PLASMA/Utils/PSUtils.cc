@@ -4,34 +4,37 @@
 
 namespace EUROPA 
 {
-  PSEntity::PSEntity() 
-  {      
+  PSEntity::PSEntity()
+  	:m_key(allocateKey())
+  {      	  
   }
 
-  PSEntity::PSEntity(const EntityId& entity)
-      : m_entity(entity)
-  {      
+  int PSEntity::allocateKey(){
+    static int sl_key(0);
+    sl_key++;
+    return sl_key;
   }
-  
-  PSEntityKey PSEntity::getEntityKey() const 
-  {
-      return (getEntity().isId() ? PSEntityKey(getEntity()->getKey()) : PSEntityKey(-1));
-  }
-  
-  const std::string NULL_STR("NULL");
-  const std::string UNKNOWN_STR("UNKNOWN");
-  
+
   const std::string& PSEntity::getEntityName() const 
   {      
-      return (getEntity().isId() ? getEntity()->getName().toString() : NULL_STR);
+	  return getName().toString();
   }
   
-  const std::string& PSEntity::getEntityType() const {return UNKNOWN_STR;}
+  const LabelStr& PSEntity::getName() const {
+	  static const LabelStr NO_NAME("NO_NAME");
+	  return NO_NAME;
+  }
+  
+  const std::string& PSEntity::getEntityType() const {
+	  static const std::string UNKNOWN_STR("UNKNOWN");
+	  return UNKNOWN_STR; 
+  }
+  
   
   std::string PSEntity::toString() const
   {
   	std::ostringstream os;  	
-  	os << "Entity(" << getEntityKey() << "," << getEntityName() << ")";
+  	os << "PSEntity(" << getKey() << "," << getName() << ")";
   	return os.str();
   }
 }

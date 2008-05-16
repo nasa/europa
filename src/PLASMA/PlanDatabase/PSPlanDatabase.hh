@@ -12,7 +12,7 @@ namespace EUROPA {
   {
     public:
       virtual ~ObjectWrapperGenerator() {}
-      virtual PSObject* wrap(const EntityId& obj) = 0;
+      virtual PSObject* wrap(const PSEntityId& obj) = 0;
   };
 
   class PSSchema : public EngineComponent

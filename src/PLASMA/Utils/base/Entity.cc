@@ -4,7 +4,7 @@
 
 namespace EUROPA {
 
-  Entity::Entity():m_key(allocateKey()), m_refCount(1), m_discarded(false){
+  Entity::Entity(): m_refCount(1), m_discarded(false){
     entitiesByKey().insert(std::pair<int, unsigned long int>(m_key, (unsigned long int) this));
     check_error(!isPurging());
     debugMsg("Entity:Entity", "Allocating " << m_key);
@@ -39,11 +39,6 @@ namespace EUROPA {
 		   "(" << getKey() << ") being deleted with " << m_refCount << " outstanding references.");
     }
     entitiesByKey().erase(m_key);
-  }
-
-  const LabelStr& Entity::getName() const {
-    static const LabelStr NO_NAME("NO_NAME");
-    return NO_NAME;
   }
 
   std::string Entity::toString() const{
@@ -88,12 +83,6 @@ namespace EUROPA {
   std::map<int, unsigned long int>& Entity::entitiesByKey(){
     static std::map<int, unsigned long int> sl_entitiesByKey;
     return sl_entitiesByKey;
-  }
-
-  int Entity::allocateKey(){
-    static int sl_key(0);
-    sl_key++;
-    return sl_key;
   }
 
   void Entity::purgeStarted(){

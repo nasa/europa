@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+#include "PSUtils.hh"
+
 namespace EUROPA{
 
 #define DECLARE_ENTITY_TYPE(type) \
@@ -29,7 +31,8 @@ namespace EUROPA{
   class Entity;
   typedef Id<Entity> EntityId;
 
-  class Entity{
+  // virtual inheritance because we have a diamond (Constraint inherits both Entity and PSConstraint, ie two PSEntities) 
+  class Entity: public virtual PSEntity {
   public:
     DECLARE_ENTITY_TYPE(Entity);
 
@@ -44,9 +47,7 @@ namespace EUROPA{
       objects.clear();
     }
 
-    inline int getKey() const {return m_key;}
     virtual ~Entity();
-    virtual const LabelStr& getName() const;
 
     virtual std::string toString() const;
 
@@ -121,10 +122,6 @@ namespace EUROPA{
      */
     static void getEntities(std::set<EntityId>& resultSet);
 
-    /**
-     * @brief Retrieve a key
-     */
-    static int allocateKey();
 
     /**
      * @brief Indicates a system is being terminated
@@ -179,7 +176,6 @@ namespace EUROPA{
      */
     virtual void notifyDiscarded(const Entity* entity);
 
-    const int m_key;
     unsigned int m_refCount;
     bool m_discarded;
     std::set<Entity*> m_dependents;

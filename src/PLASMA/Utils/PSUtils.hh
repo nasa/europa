@@ -1,12 +1,13 @@
 #ifndef _H_PSUtils
 #define _H_PSUtils
 
-#include "Entity.hh"
+#include <vector>
+#include <algorithm>
+#include "Id.hh"
+#include "LabelStr.hh"
 
 namespace EUROPA {
 
-  typedef int PSEntityKey;
-  
   template<class T>
   class PSList
   {
@@ -27,24 +28,34 @@ namespace EUROPA {
       std::vector<T> m_elements;    	
   };
 
+  // TODO:  Use PSEntityKey everywhere, or just int
+  typedef int PSEntityKey;
+ 
   class PSEntity
   {
     public: 
       PSEntity();
-      PSEntity(const EntityId& entity);
       virtual ~PSEntity() {}
     
-      virtual PSEntityKey getEntityKey() const;
+      inline PSEntityKey getKey() const {return m_key;}
+
+      // TODO:  Do we need two get name methods?
       virtual const std::string& getEntityName() const;
+      virtual const LabelStr& getName() const;
+            
       virtual const std::string& getEntityType() const;
 
       virtual std::string toString() const;
 
-    protected:
-      EntityId m_entity;    
+      static int allocateKey();
 
-      virtual const EntityId getEntity() const { return m_entity; }
+    protected:
+    	const int m_key;
   };	      
+
+  // TODO:  Move elsewhere (if we really need this)
+  typedef Id<PSEntity> PSEntityId;
+ 
 }
 
 #endif

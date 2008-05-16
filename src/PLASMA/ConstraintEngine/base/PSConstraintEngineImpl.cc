@@ -10,7 +10,7 @@ namespace EUROPA {
   PSVariableImpl::PSVariableImpl(const ConstrainedVariableId& var) 
       : m_var(var) 
   {
-      m_entity = m_var;
+      //m_entityId = m_var;
     check_runtime_error(m_var.isValid());
     if(m_var->baseDomain().isString())
       m_type =  STRING;
@@ -162,7 +162,8 @@ namespace EUROPA {
 			"object, or rule: " << m_var->getParent()->toString());
     }
     */
-    return new PSEntity(parent);
+    //return new PSEntity(parent);
+    return parent;
   }
   
   std::string PSVariableImpl::toString() {
@@ -210,7 +211,8 @@ namespace EUROPA {
   {
     check_runtime_error(m_type == OBJECT);
     /* TODO: provide hooks to return PSObject or other objects */
-    return new PSEntity(EntityId(m_val));
+    //return new PSEntity(EntityId(m_val));
+    return EntityId(m_val);
   }
 
   std::string PSVarValue::toString() const {
@@ -232,7 +234,7 @@ namespace EUROPA {
   		case OBJECT:
   		    {
   		        PSEntity* obj = asObject();
-                os << "OBJECT:" << obj->getEntityName() << "(" << obj->getEntityKey() << ")";
+                os << "OBJECT:" << obj->getEntityName() << "(" << obj->getKey() << ")";
                 delete obj;
   		    }
   		    break;

@@ -93,7 +93,7 @@ namespace EUROPA {
   class ResourceWrapperGenerator : public ObjectWrapperGenerator 
   {
   public:
-    PSObject* wrap(const EntityId& obj) {
+    PSObject* wrap(const PSEntityId& obj) {
       checkRuntimeError(SAVH::ResourceId::convertable(obj),
 			"Object " << obj->toString() << " is not a resource.");
       return new PSResourceImpl(SAVH::ResourceId(obj));

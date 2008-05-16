@@ -12,7 +12,7 @@ namespace EUROPA
   PSObjectImpl::PSObjectImpl(const ObjectId& obj) 
       : m_obj(obj) 
   {
-      m_entity = m_obj;
+      //m_entityId = m_obj;
   }
 
   PSObjectImpl::~PSObjectImpl() 
@@ -72,8 +72,8 @@ namespace EUROPA
 
   void PSObjectImpl::addPrecedence(PSToken* pred,PSToken* succ)
   {
-	  TokenId p = m_obj->getPlanDatabase()->getEntityByKey(pred->getEntityKey());
-	  TokenId s = m_obj->getPlanDatabase()->getEntityByKey(succ->getEntityKey());
+	  TokenId p = m_obj->getPlanDatabase()->getEntityByKey(pred->getKey());
+	  TokenId s = m_obj->getPlanDatabase()->getEntityByKey(succ->getKey());
 	  m_obj->constrain(p,s);
 	  // TODO: move this to Object::constrain()
       if (m_obj->getPlanDatabase()->getConstraintEngine()->getAutoPropagation())
@@ -82,8 +82,8 @@ namespace EUROPA
   
   void PSObjectImpl::removePrecedence(PSToken* pred,PSToken* succ)
   {
-	  TokenId p = m_obj->getPlanDatabase()->getEntityByKey(pred->getEntityKey());
-	  TokenId s = m_obj->getPlanDatabase()->getEntityByKey(succ->getEntityKey());
+	  TokenId p = m_obj->getPlanDatabase()->getEntityByKey(pred->getKey());
+	  TokenId s = m_obj->getPlanDatabase()->getEntityByKey(succ->getKey());
 	  m_obj->free(p,s);	  
       // TODO: move this to Object::free()
       if (m_obj->getPlanDatabase()->getConstraintEngine()->getAutoPropagation())
@@ -94,7 +94,7 @@ namespace EUROPA
   PSTokenImpl::PSTokenImpl(const TokenId& tok) 
       : m_tok(tok) 
   {
-      m_entity = m_tok;
+      //m_entityId = m_tok;
   }
 
   const std::string TOKEN_STR("TOKEN");
@@ -221,7 +221,7 @@ namespace EUROPA
   void PSTokenImpl::merge(PSToken* activeToken) 
   {
       check_error(activeToken != NULL, "Can't merge on NULL token");
-      TokenId tok = m_tok->getPlanDatabase()->getEntityByKey(activeToken->getEntityKey());
+      TokenId tok = m_tok->getPlanDatabase()->getEntityByKey(activeToken->getKey());
       m_tok->merge(tok);
   }        
 

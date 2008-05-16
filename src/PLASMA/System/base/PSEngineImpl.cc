@@ -189,7 +189,7 @@ namespace EUROPA {
   {
       std::vector<ConstrainedVariableId> variables;
       for (int i=0;i<args.size();i++) {
-          ConstrainedVariableId arg = m_planDatabase->getEntityByKey(args.get(i)->getEntityKey());
+          ConstrainedVariableId arg = m_planDatabase->getEntityByKey(args.get(i)->getKey());
           variables.push_back(arg);
       }
       

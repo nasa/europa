@@ -65,7 +65,7 @@ namespace EUROPA{
   class BaseObjectWrapperGenerator : public ObjectWrapperGenerator 
   {
     public:
-        PSObject* wrap(const EntityId& obj) {
+        PSObject* wrap(const PSEntityId& obj) {
             return new PSObjectImpl(obj);
         }
   };
