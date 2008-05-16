@@ -57,7 +57,7 @@ public class PSGanttPSEModel
 				start = 0;
 			}
 			
-			acts.add(new PSGanttActivityImpl(token.getEntityKey(),
+			acts.add(new PSGanttActivityImpl(token.getKey(),
 					                         instantToCalendar(start),
 					                         instantToCalendar(end),
 					                         token.getViolation()

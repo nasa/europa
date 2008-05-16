@@ -311,7 +311,7 @@ public class PSDesktop
         for (int i=0; i<l.size();i++) {
        	 List row = new Vector();
        	 PSToken t = l.get(i);
-       	 row.add(t.getEntityKey());
+       	 row.add(t.getKey());
        	 row.add(t.getEntityName());
        	 row.add(t.getEntityType());
        	 PSVariableList vars = t.getParameters();
