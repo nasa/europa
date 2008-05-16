@@ -31,6 +31,7 @@
     <property name="dir.plasma" value="${basedir}"/>
     <property name="dir.src" value="src/PLASMA"/>
     <property name="dir.planworks" value="../PlanWorks"/>
+    <property name="dir.build" value="build"/>
     <property name="dir.dist" value="dist"/>
     <property name="dir.dist.base" location="${dir.dist}/europa"/>
     <property name="file.europa_dist" value="europa.zip"/>
@@ -46,6 +47,7 @@
       <arg line="clean-all"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
     </exec>
+    <delete dir="${dir.build}"/>
   </target>
 
   <target name="build" depends="init-final">
@@ -72,7 +74,8 @@
   </target>
 
   <!-- This target assumes that PLASMA and PlanWorks have already been built so that all the products are in place -->
-  <target name="dist" description="Creates the binary distribution and packages it up into ${dir.dist}/${file.plasma_dist}">
+  <target name="dist" depends="init-final" 
+  	  description="Creates the binary distribution and packages it up into ${dir.dist}/${file.plasma_dist}">
    <!-- Create the distribution directory  -->
     <mkdir dir="${dir.dist}"/>
     <mkdir dir="${dir.dist.base}/bin"/>

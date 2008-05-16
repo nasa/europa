@@ -25,7 +25,7 @@
     <property file="${user.home}/.ant.psui.properties"/>
 
     <property name="src.dir"     value="src"/>
-    <property name="build.dir"   value="build"/>
+    <property name="build.dir"   value="${plasma.dir}/build/PSUI"/>
     <property name="lib.dir"     value="lib"/>
 
     <property name="project"        value="NDDLHelloWorld"/>
