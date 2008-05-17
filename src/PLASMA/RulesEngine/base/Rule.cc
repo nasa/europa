@@ -39,8 +39,8 @@ namespace EUROPA{
     return sl_rulesByName;
   }
 
-  void Rule::getRules(const LabelStr& name, std::vector<RuleId>& results){
-    SchemaId schema = Schema::instance();
+  void Rule::getRules(const PlanDatabaseId& pdb, const LabelStr& name, std::vector<RuleId>& results){
+    const SchemaId& schema = pdb->getSchema();
 
     std::multimap<double, RuleId>::const_iterator it = rulesByName().find(name.getKey());
     while(it != rulesByName().end()){
@@ -57,7 +57,7 @@ namespace EUROPA{
     // If the predicate is defined on the parent class, then
     // call this function recursively
     if(schema->hasParent(name))
-      getRules(schema->getParent(name), results);
+      getRules(pdb,schema->getParent(name), results);
   }
 
   const std::multimap<double, RuleId>& Rule::getRules(){

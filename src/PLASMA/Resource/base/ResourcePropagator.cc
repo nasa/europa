@@ -56,7 +56,7 @@ namespace EUROPA {
   // This check can't be made when the propagator is created, since the Schema may not have been populated by then
   bool ResourcePropagator::isEnabled() const
   {
-	  return Schema::instance()->isObjectType(resourceString());
+	  return m_planDb->getSchema()->isObjectType(resourceString());
   }
   
   bool ResourcePropagator::updateRequired() const {

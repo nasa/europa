@@ -153,7 +153,7 @@ namespace EUROPA {
           getMatchesInternal(RuleInstanceId(var->getParent())->getToken(), results);
         else if(ObjectId::convertable(var->getParent())){
           ObjectId object = var->getParent();
-          trigger(Schema::instance()->getAllObjectTypes(object->getType()), m_rulesByObjectType, results);
+          trigger(object->getPlanDatabase()->getSchema()->getAllObjectTypes(object->getType()), m_rulesByObjectType, results);
         }
       }
 

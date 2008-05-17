@@ -50,7 +50,7 @@ namespace EUROPA {
      * @brief Retrieve all registered rules for the given predicate. This will include rules
      * defined in ancestors of the current predicate also.
      */
-    static void getRules(const LabelStr& predicate, std::vector<RuleId>& results);
+    static void getRules(const PlanDatabaseId& pdb, const LabelStr& predicate, std::vector<RuleId>& results);
 
     static const std::multimap<double, RuleId>& getRules();
 

@@ -1,8 +1,9 @@
 #include "ResourceMatching.hh"
+#include "Schema.hh"
+#include "PlanDatabase.hh"
 #include "SAVH_Instant.hh"
 #include "SAVH_Profile.hh"
 #include "SAVH_Resource.hh"
-#include "Schema.hh"
 
 namespace EUROPA {
   namespace SOLVERS {
@@ -17,11 +18,14 @@ namespace EUROPA {
 
     template<>
     void MatchingEngine::getMatchesInternal(const SAVH::InstantId& inst,
-					    std::vector<MatchingRuleId>& results) {
+					    std::vector<MatchingRuleId>& results) 
+    {
+      const SAVH::ResourceId& res = inst->getProfile()->getResource();   
       debugMsg("MatchingEngine:getMatchesInternal",
 	       "Triggering matches for object types (" <<
-	       inst->getProfile()->getResource()->getType().toString() << ")");
-      trigger(Schema::instance()->getAllObjectTypes(inst->getProfile()->getResource()->getType()), m_rulesByObjectType, results);
+	       res->getType().toString() << ")");
+      const SchemaId& schema = res->getPlanDatabase()->getSchema();
+      trigger(schema->getAllObjectTypes(res->getType()), m_rulesByObjectType, results);
     }
 
     void InstantMatchFinder::getMatches(const MatchingEngineId& engine, const EntityId& entity,

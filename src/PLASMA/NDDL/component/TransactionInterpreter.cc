@@ -110,15 +110,7 @@ namespace EUROPA {
 
   std::ostringstream dbgout;
   const char* ident="    ";
-  
-  bool initialized()
-  {
-	  static LabelStr objectType("Object");
-	  static std::vector<const AbstractDomain*> arguments;
-	  
-	  return (!(ObjectFactory::getFactory(objectType,arguments)).isNoId());
-  }
-  
+   
   void NddlXmlInterpreter::playDeclareClass(const TiXmlElement& element) 
   {
     const char* className = element.Attribute("name");

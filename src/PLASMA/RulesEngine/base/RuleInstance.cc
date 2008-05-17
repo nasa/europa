@@ -383,7 +383,7 @@ namespace EUROPA {
     check_error(m_token.isValid());
     check_error(m_token->isActive(), 
 		m_token->getPredicateName().toString() + " is not active");
-    check_error(Schema::instance()->isA(m_token->getPredicateName(), m_rule->getName()),
+    check_error(m_planDb->getSchema()->isA(m_token->getPredicateName(), m_rule->getName()),
 		"Cannot have rule " + m_rule->getName().toString() + 
 		" on predicate " + m_token->getPredicateName().toString());
     return true;

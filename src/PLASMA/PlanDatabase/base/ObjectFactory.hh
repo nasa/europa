@@ -55,7 +55,7 @@ namespace EUROPA {
     /**
      * @brief Obtain the factory based on the type of object to create and the types of the arguments to the constructor
      */ 
-    static ConcreteObjectFactoryId getFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments);
+    static ConcreteObjectFactoryId getFactory(const PlanDatabaseId& planDb, const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments);
 
     /**
      * @brief Delete all factory instances stored. Should only be used to support testing, since

@@ -1,5 +1,6 @@
 #include "ObjectFactory.hh"
 #include "Schema.hh"
+#include "PlanDatabase.hh"
 #include "TypeFactory.hh"
 #include "Debug.hh"
 #include "Object.hh"
@@ -30,7 +31,10 @@ namespace EUROPA {
    * matches(descendant, ancestor)
    * matches(x, x)
    */
-  ConcreteObjectFactoryId ObjectFactory::getFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments){
+  ConcreteObjectFactoryId ObjectFactory::getFactory(const PlanDatabaseId& planDb,
+                                                    const LabelStr& objectType, 
+                                                    const std::vector<const AbstractDomain*>& arguments)
+  {
     std::map<double, ConcreteObjectFactoryId>& factories = getInstance().m_factories;
 
     // Build the full signature for the factory
@@ -47,7 +51,7 @@ namespace EUROPA {
     if(it != factories.end())
       return it->second;
 
-    SchemaId schema = Schema::instance();
+    const SchemaId& schema = planDb->getSchema();
 
     // Otherwise, loop over all factories, and test for a match
     for(it = factories.begin(); it != factories.end(); ++it){
@@ -134,7 +138,7 @@ namespace EUROPA {
     debugMsg("ObjectFactory:createInstance", "objectType " << objectType.toString() << " objectName " << objectName.toString());
 
     // Obtain the factory 
-    ConcreteObjectFactoryId factory = getFactory(objectType, arguments);
+    ConcreteObjectFactoryId factory = getFactory(planDb,objectType, arguments);
 
     ObjectId object = factory->createInstance(planDb, objectType, objectName, arguments);
 
@@ -149,7 +153,7 @@ namespace EUROPA {
 	                        const LabelStr& objectName,
 	                        const std::vector<const AbstractDomain*>& arguments) 
   {
-  	ConcreteObjectFactoryId factory = ObjectFactory::getFactory(ancestorType,arguments);
+  	ConcreteObjectFactoryId factory = ObjectFactory::getFactory(planDb, ancestorType,arguments);
   	return factory->makeNewObject(planDb,objectType,objectName,arguments);
   }	                     
 
@@ -158,7 +162,7 @@ namespace EUROPA {
                             const LabelStr& objectType, 
                             const std::vector<const AbstractDomain*>& arguments)
   {
-  	ConcreteObjectFactoryId factory = ObjectFactory::getFactory(objectType,arguments);
+  	ConcreteObjectFactoryId factory = ObjectFactory::getFactory(instance->getPlanDatabase(),objectType,arguments);
   	factory->evalConstructorBody(instance,arguments);
   }				   
 

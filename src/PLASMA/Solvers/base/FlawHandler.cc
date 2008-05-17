@@ -132,7 +132,7 @@ namespace EUROPA {
                                                 const ConstrainedVariableId& guardVar,
                                                 const double& testValue){
       // Convert if an object variable. Make it the object id.
-      if(Schema::instance()->isObjectType(guardVar->baseDomain().getTypeName())){
+      if(db->getSchema()->isObjectType(guardVar->baseDomain().getTypeName())){
         checkError(LabelStr::isString(testValue), "Should be a declared string since it must be the object name.");
         return db->getObject(LabelStr(testValue));
       }
@@ -267,9 +267,10 @@ namespace EUROPA {
       if(!guardVar->lastDomain().isSingleton())
         return false;
 
-      double convertedValue = convertValueIfNecessary(getPlanDatabase(guardVar), guardVar, testValue);
+      const PlanDatabaseId& pdb = getPlanDatabase(guardVar);
+      double convertedValue = convertValueIfNecessary(pdb, guardVar, testValue);
 
-      condDebugMsg(Schema::instance()->isObjectType(guardVar->baseDomain().getTypeName()),"FlawHandler:matches",
+      condDebugMsg(pdb->getSchema()->isObjectType(guardVar->baseDomain().getTypeName()),"FlawHandler:matches",
                    "Comparing " << guardVar->lastDomain() << " with " << LabelStr(testValue).toString());
       condDebugMsg(LabelStr::isString(testValue), "FlawHandler:matches", 
                    "Comparing " << guardVar->lastDomain() << " with " << LabelStr(testValue).toString());

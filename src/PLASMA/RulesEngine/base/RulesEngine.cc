@@ -103,7 +103,7 @@ namespace EUROPA{
 
     // Allocate a rule instance for all rules that apply
     std::vector<RuleId> allRules;
-    Rule::getRules(token->getPredicateName(), allRules);
+    Rule::getRules(getPlanDatabase(),token->getPredicateName(), allRules);
     for(std::vector<RuleId>::const_iterator it = allRules.begin(); it != allRules.end(); ++it){
       RuleId rule = *it;
       check_error(rule.isValid());
