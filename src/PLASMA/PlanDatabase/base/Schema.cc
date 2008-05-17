@@ -32,20 +32,16 @@ namespace EUROPA {
     return sl_instance;
   }
 
-  // Hack!: remove when Schema::instance is gone
+  // Hack!: remove when Schema::testInstance is gone
   SchemaId sl_schemaInstanceId;
   
-  const SchemaId& Schema::instance(const LabelStr& name){
+  const SchemaId& Schema::testInstance(const LabelStr& name){
     if (sl_schemaInstanceId.isNoId())
         sl_schemaInstanceId = (new Schema(name))->getId();
     
     return sl_schemaInstanceId;
   }
 
-  const SchemaId& Schema::testInstance(const LabelStr& name){
-      return Schema::instance(name);
-  }
-  
   const LabelStr Schema::makeQualifiedName(const LabelStr& objectType, 
 					   const LabelStr& unqualifiedPredicateName){
     std::string fullName = objectType.toString() + getDelimiter() + unqualifiedPredicateName.toString();

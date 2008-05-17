@@ -92,10 +92,6 @@ namespace EUROPA {
   	
   	    virtual void addToken(const char* name,const TokenId& t); 
   	    virtual TokenId getToken(const char* name);
-
-        virtual bool isClass(const LabelStr& className) const;
-        
-        virtual const SchemaId& getSchema() const; // TODO: expose specific methods instead, or extend simplified schema interface
         
         virtual std::string toString() const;
   	    
@@ -164,13 +160,14 @@ namespace EUROPA {
   class ExprVariableRef : public Expr
   {
   	public:
-  	    ExprVariableRef(const char* name);
+  	    ExprVariableRef(const char* name, const SchemaId& schema);
   	    virtual ~ExprVariableRef();
 
   	    virtual DataRef eval(EvalContext& context) const;  
   	    
   	protected:
-  	    LabelStr m_varName;    	    
+  	    LabelStr m_varName;
+  	    const SchemaId& m_schema;
   };
   
   class ExprNewObject : public Expr
@@ -293,10 +290,12 @@ namespace EUROPA {
   class TokenEvalContext : public EvalContext
   {
   	public:
-  	    TokenEvalContext(EvalContext* parent, const TokenId& ruleInstance);
+  	    TokenEvalContext(EvalContext* parent, const TokenId& tok);
   	    virtual ~TokenEvalContext();   	
   	    
   	    virtual ConstrainedVariableId getVar(const char* name);  
+
+  	    virtual bool isClass(const LabelStr& className) const;
   	    
   	protected:
   	    TokenId m_token;	    
@@ -396,8 +395,10 @@ namespace EUROPA {
   	     
   	    virtual TokenId getToken(const char* name);
   	    
-        virtual std::string toString() const;
+        virtual bool isClass(const LabelStr& className) const;
   	    
+        virtual std::string toString() const;
+  	            
   	protected:
   	    InterpretedRuleInstanceId m_ruleInstance;	    
   };

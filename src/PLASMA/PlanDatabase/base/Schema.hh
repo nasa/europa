@@ -44,12 +44,7 @@ namespace EUROPA {
     Schema(const LabelStr& name);
     ~Schema();
 
-    /**
-     * @brief Accessor for singleton instance, if present
-     * TODO: this is deprecated and will be removed soon, don't use for any new code
-     */
-    static const SchemaId& instance(const LabelStr& name = LabelStr("Model"));
-
+    // TODO: this must be removed, don't use. remains only to support some old tests
     static const SchemaId& testInstance(const LabelStr& name = LabelStr("Model"));
     
     /**

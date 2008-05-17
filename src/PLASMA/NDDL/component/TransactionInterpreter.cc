@@ -196,7 +196,7 @@ namespace EUROPA {
       if (isRule)
 	return new ExprRuleVariableRef(varName);
       else
-	return new ExprVariableRef(varName);
+	return new ExprVariableRef(varName, getSchema());
     }
     else
       check_runtime_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + element->Value() + ", expected constant(value,symbol,interval) or id element");
@@ -368,7 +368,7 @@ namespace EUROPA {
 
   bool NddlXmlInterpreter::isClass(const LabelStr& className) const
   {  	  
-    return getSchema()->isObjectType(className);
+      return getSchema()->isObjectType(className);
   }
     
   LabelStr NddlXmlInterpreter::getObjectVarClass(const LabelStr& className,const LabelStr& var) const
@@ -691,17 +691,6 @@ namespace EUROPA {
   {
   }
 
-  const SchemaId& EvalContext::getSchema() const
-  {
-      // TODO: this must be passed in
-      return Schema::instance();   
-  }
-
-  bool EvalContext::isClass(const LabelStr& className) const
-  {       
-    return getSchema()->isObjectType(className);
-  }
-      
   void EvalContext::addVar(const char* name,const ConstrainedVariableId& v)
   {
     m_variables[name] = v;
@@ -859,8 +848,9 @@ namespace EUROPA {
   /*
    * ExprVariableRef
    */   
-  ExprVariableRef::ExprVariableRef(const char* varName)
+  ExprVariableRef::ExprVariableRef(const char* varName, const SchemaId& schema)
     : m_varName(varName)
+    , m_schema(schema)
   {
   }
   	
@@ -881,13 +871,14 @@ namespace EUROPA {
       check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+varName+" in Evaluation Context");
      	
     for (unsigned int idx = 1;idx<vars.size();idx++) {
-      check_error(context.isClass(rhs->baseDomain().getTypeName()), std::string("Can't apply dot operator to:")+rhs->baseDomain().getTypeName().toString());
+      check_error(m_schema->isObjectType(rhs->baseDomain().getTypeName()), std::string("Can't apply dot operator to:")+rhs->baseDomain().getTypeName().toString());
       check_runtime_error(rhs->derivedDomain().isSingleton(),varName+" must be singleton to be able to get to "+vars[idx]);
       ObjectId object = rhs->derivedDomain().getSingletonValue();
       rhs = object->getVariable(object->getName().toString()+"."+vars[idx]);
       varName += "." + vars[idx];
+      
       if (rhs.isNoId()) 
-	check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+vars[idx]+
+	      check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+vars[idx]+
 			    " in object \""+object->getName().toString()+"\" of type "+object->getType().toString());
     }
      	    
@@ -968,7 +959,6 @@ namespace EUROPA {
 
   DataRef ExprRuleVariableRef::doEval(RuleInstanceEvalContext& context) const 	    
   {
-
     ConstrainedVariableId var; 
      	
     if (m_parentName == "") {
@@ -1348,7 +1338,7 @@ namespace EUROPA {
             m_constructorBody[i]->eval(evalContext);
 
         // Initialize any variables that were not explicitly initialized
-        const Schema::NameValueVector& members = evalContext.getSchema()->getMembers(m_className);
+        const Schema::NameValueVector& members = instance->getPlanDatabase()->getSchema()->getMembers(m_className);
         for (unsigned int i=0; i < members.size(); i++) {
             std::string varName = instance->getName().toString() + "." + members[i].second.toString();
             if (instance->getVariable(varName) == ConstrainedVariableId::noId()) {
@@ -1395,7 +1385,7 @@ namespace EUROPA {
 	      return EvalContext::getVar(name);
 	    }
 	  } 	  	
-	
+	  
     /*
      * InterpretedToken
      */     	     
@@ -1611,6 +1601,11 @@ namespace EUROPA {
         return EvalContext::getToken(name);
       }
   }  
+
+  bool RuleInstanceEvalContext::isClass(const LabelStr& className) const
+  {
+     return m_ruleInstance->getPlanDatabase()->getSchema()->isObjectType(className); 
+  }  
   	 
   std::string RuleInstanceEvalContext::toString() const 
   {
@@ -1654,7 +1649,12 @@ namespace EUROPA {
     else
       return EvalContext::getVar(name);
   }  	    
-	 
+
+  bool TokenEvalContext::isClass(const LabelStr& className) const
+  {
+     return m_token->getPlanDatabase()->getSchema()->isObjectType(className); 
+  }
+  
   /*
    * InterpretedRuleInstance
    */     	     
