@@ -10,6 +10,15 @@
     <condition property="os.isCygwin">
       <equals arg1="${uname.o}" arg2="Cygwin"/>
     </condition>
+    <condition property="os.isLinux">
+      <or>
+      	<equals arg1="${uname.o}" arg2="Linux"/>
+      	<equals arg1="${uname.o}" arg2="GNU/Linux"/>
+      </or>
+    </condition>
+    <condition property="os.isOSX">
+      <equals arg1="${uname.o}" arg2="Darwin"/>
+    </condition>
 
     <!-- load overrides -->
     <property file="${user.home}/.ant.plasma.properties"/>
@@ -26,7 +35,15 @@
     <property name="jam.misc" value="-sOS=CYGWIN -sNOCYGWIN=TRUE"/>
   </target>
 
-  <target name="init-final" depends="init,cygwin-init">
+  <target name="linux-init" depends="init" if="os.isLinux">
+  </target>
+
+  <target name="osx-init" depends="init" if="os.isOSX">
+    <property name="env.LD_LIBRARY_PATH.name" value="DYLD_LIBRARY_PATH"/>
+  </target>
+
+  <target name="init-final" depends="init,cygwin-init,linux-init,osx-init">
+    <property name="env.LD_LIBRARY_PATH.name" value="LD_LIBRARY_PATH"/>
     <property name="local.env.PLASMA_HOME" value="${basedir}"/>
     <property name="dir.plasma" value="${basedir}"/>
     <property name="dir.src" value="src/PLASMA"/>
@@ -55,6 +72,7 @@
     <exec executable="jam" dir="${dir.src}" failonerror="true">
       <arg line="${jam.opts} build"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
+      <env key="${env.LD_LIBRARY_PATH.name}" value="${local.env.PLASMA_HOME}/lib"/>
     </exec>
   </target>
 
@@ -62,6 +80,7 @@
     <exec executable="jam" dir="${dir.src}" failonerror="true">
       <arg line="${jam.opts} run-all-tests"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
+      <env key="${env.LD_LIBRARY_PATH.name}" value="${local.env.PLASMA_HOME}/lib"/>
     </exec>
   </target>
 

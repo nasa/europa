@@ -208,7 +208,7 @@ if $(OS) = CYGWIN {
 }
 
 if $(OS) = CYGWIN && $(NOCYGWIN) {
-  LINKFLAGS += -L/usr/local/mingw/lib -mno-cygwin ;
+  LINKFLAGS += $(LIBRARY_PATH_SEARCH_FLAG)/usr/local/mingw/lib -mno-cygwin ;
   PLATFORM_FLAGS += -D_NO_W32_PSEUDO_MODIFIERS -D__MINGW32__ -I/usr/local/mingw/include -mno-cygwin ;
 }
 
