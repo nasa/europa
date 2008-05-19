@@ -72,7 +72,7 @@
     <exec executable="jam" dir="${dir.src}" failonerror="true">
       <arg line="${jam.opts} build"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
-      <env key="${env.LD_LIBRARY_PATH.name}" value="${local.env.PLASMA_HOME}/lib"/>
+      <env key="${env.LD_LIBRARY_PATH.name}" value="${local.env.PLASMA_HOME}/build/lib"/>
     </exec>
   </target>
 
@@ -80,7 +80,7 @@
     <exec executable="jam" dir="${dir.src}" failonerror="true">
       <arg line="${jam.opts} run-all-tests"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
-      <env key="${env.LD_LIBRARY_PATH.name}" value="${local.env.PLASMA_HOME}/lib"/>
+      <env key="${env.LD_LIBRARY_PATH.name}" value="${local.env.PLASMA_HOME}/build/lib"/>
     </exec>
   </target>
 
