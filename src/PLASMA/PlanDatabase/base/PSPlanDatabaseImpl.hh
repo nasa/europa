@@ -14,6 +14,8 @@ namespace EUROPA {
       PSObjectImpl(const ObjectId& obj);
       virtual ~PSObjectImpl();
   
+      virtual const LabelStr& getName() const;
+      
       virtual const std::string& getEntityType() const;
 
       virtual std::string getObjectType() const; 
@@ -36,6 +38,8 @@ namespace EUROPA {
       PSTokenImpl(const TokenId& tok);
       virtual ~PSTokenImpl() {}
 
+      virtual const LabelStr& getName() const;
+      
       virtual const std::string& getEntityType() const;
 
       virtual std::string getTokenType() const; 

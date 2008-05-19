@@ -207,12 +207,11 @@ namespace EUROPA {
     return LabelStr(m_val).toString();
   }
   
-  PSEntity* PSVarValue::asObject() const 
+  PSEntity* PSVarValue::asObject() const
   {
     check_runtime_error(m_type == OBJECT);
     /* TODO: provide hooks to return PSObject or other objects */
-    //return new PSEntity(EntityId(m_val));
-    return EntityId(m_val);
+    return (PSEntity*) EntityId(m_val); // According to Id.hh
   }
 
   std::string PSVarValue::toString() const {
@@ -234,8 +233,8 @@ namespace EUROPA {
   		case OBJECT:
   		    {
   		        PSEntity* obj = asObject();
-                os << "OBJECT:" << obj->getEntityName() << "(" << obj->getKey() << ")";
-                delete obj;
+  		        os << "OBJECT:" << obj->getEntityName() << "(" << obj->getKey() << ")";
+                //delete obj;
   		    }
   		    break;
   		

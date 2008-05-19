@@ -33,6 +33,11 @@ namespace EUROPA
     return retval;
   }
 
+  const LabelStr& PSObjectImpl::getName() const {
+	  static const LabelStr NULL_NAME("NO_NAME_PSObject");
+	  return (m_obj.isId() ? m_obj->getName() : NULL_NAME);
+  }
+  
   const std::string& PSObjectImpl::getEntityType() const 
   {
 	static const std::string OBJECT_STR("OBJECT");
@@ -95,6 +100,11 @@ namespace EUROPA
       : m_tok(tok) 
   {
       //m_entityId = m_tok;
+  }
+
+  const LabelStr& PSTokenImpl::getName() const {
+	  static const LabelStr NULL_NAME("NO_NAME_PSToken");
+	  return (m_tok.isId() ? m_tok->getName() : NULL_NAME);
   }
 
   const std::string TOKEN_STR("TOKEN");

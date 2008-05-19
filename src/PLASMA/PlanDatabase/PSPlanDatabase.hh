@@ -47,6 +47,8 @@ namespace EUROPA {
       PSObject() {}	
       virtual ~PSObject() {}
 
+      virtual const LabelStr& getName() const = 0;
+
       virtual const std::string& getEntityType() const = 0;
 
       virtual std::string getObjectType() const = 0; 
@@ -68,6 +70,8 @@ namespace EUROPA {
       
       PSToken() {}	
       virtual ~PSToken() {}
+
+      virtual const LabelStr& getName() const = 0;
 
       virtual const std::string& getEntityType() const = 0;
       virtual std::string getTokenType() const = 0; 

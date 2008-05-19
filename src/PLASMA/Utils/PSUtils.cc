@@ -21,7 +21,7 @@ namespace EUROPA
   }
   
   const LabelStr& PSEntity::getName() const {
-	  static const LabelStr NO_NAME("NO_NAME");
+	  static const LabelStr NO_NAME("NO_NAME_PSEntity");
 	  return NO_NAME;
   }
   
