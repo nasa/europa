@@ -1,17 +1,7 @@
-#include <iostream>
-#include "NddlUtils.hh"
-#include "TestSupport.hh"
 
 #include "nddl-test-module.hh"
-// Support for default setup
-#include "ConstraintEngine.hh"
-#include "PlanDatabase.hh"
-#include "RulesEngine.hh"
-#include "Schema.hh"
-#include "DefaultPropagator.hh"
-#include "Object.hh"
-#include "Constraints.hh"
-#include "NddlTestSupport.hh"
+#include "NddlUtils.hh"
+#include "TestSupport.hh"
 
 using namespace EUROPA;
 using namespace NDDL;
@@ -31,7 +21,7 @@ public:
 
     std::string numberStr("1$2.45$3.04$-8.9$");
     const std::list<double>& numbers= listFromString(numberStr, true);
-    double sum = 0;
+    double sum = 0; 
 
     for(std::list<double>::const_iterator it = numbers.begin(); it != numbers.end(); ++it){
       double number = *it;
@@ -43,22 +33,9 @@ public:
   }
 };
 
-
-void NDDLModuleTests::runTests(std::string path) {
-
-  initConstraintLibrary();
-  //REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");
-
-  // Pre-allocate a schema
-  SCHEMA;
-  initNDDL();
-
+void NDDLModuleTests::runTests(std::string path) 
+{
   runTestSuite(UtilitiesTest::test);
-
-  uninitNDDL();
-  ConstraintLibrary::purgeAll();
-  uninitConstraintLibrary();
-  std::cout << "Finished" << std::endl;
-  }
+}
 
 
