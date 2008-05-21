@@ -498,7 +498,7 @@ namespace EUROPA {
       m_tokens[std_name] = token;
     }
     else {
-    	name = "NO_NAME";
+    	name = "NO_NAME_DBCTP";
     }
     
     debugMsg("DbClientTransactionPlayer:createToken", "created Token:" << name << " of type " << predicateType << " isFact:" << isFact);      
