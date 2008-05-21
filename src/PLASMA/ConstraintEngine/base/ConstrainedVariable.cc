@@ -35,6 +35,7 @@ namespace EUROPA {
     check_error(m_constraintEngine.isValid());
     check_error(m_index >= NO_INDEX);
     check_error(m_index == NO_INDEX || parent.isValid());
+    // determineType(); can't call during construction, since baseDomain is virtual and is used...
     m_constraintEngine->add(m_id);
     m_listener = m_constraintEngine->allocateVariableListener(m_id, m_constraints);
   }
@@ -178,7 +179,7 @@ namespace EUROPA {
   }
 
   const EntityId& ConstrainedVariable::getParent() const {
-    return(m_parent);
+    return m_parent;
   }
 
   const ConstraintEngineId& ConstrainedVariable::getConstraintEngine() const {
@@ -228,8 +229,13 @@ namespace EUROPA {
   double ConstrainedVariable::getSpecifiedValue() const {
     checkError(isSpecified(), toString());
     if(m_specifiedFlag)
-      return m_specifiedValue;
+    {
+    	debugMsg("TBS:" , "Is specified with val " << m_specifiedValue);
+    	return m_specifiedValue;
+    }
     else
+    	debugMsg("TBS:", "Returning " << baseDomain().getSingletonValue());
+    	debugMsg("TBS:", "Last domain is " << lastDomain().getSingletonValue());
       return baseDomain().getSingletonValue();
   }
 
@@ -355,6 +361,9 @@ namespace EUROPA {
 
   void ConstrainedVariable::reset() {
     reset(internal_baseDomain());
+    // TODO: Turn this on  (it makes a test fail, in the expected way
+//    if (getConstraintEngine()->getAutoPropagation())
+//       getConstraintEngine()->propagate();
   }
 
   void ConstrainedVariable::reset(const AbstractDomain& domain){
@@ -465,4 +474,141 @@ namespace EUROPA {
   	  
   	  return os.str();
   }    
+
+  // PS-Specific stuff below here:
+  
+  void ConstrainedVariable::determineType() 
+  {
+	  if(baseDomain().isString())
+		  m_type =  STRING;
+	  else if(baseDomain().isSymbolic()) {
+		  if(baseDomain().isEmpty() || LabelStr::isString(baseDomain().getLowerBound()))
+			  m_type =  STRING;
+		  else
+			  m_type =  OBJECT; //this may not be the best assumption ~MJI
+	  }
+	  else if(baseDomain().isBool())
+		  m_type =  BOOLEAN;
+	  else if(baseDomain().isNumeric()) {
+		  if(baseDomain().minDelta() < 1)
+			  m_type =  DOUBLE;
+		  else
+			  m_type =  INTEGER;
+	  }
+	  else {
+		  checkError(ALWAYS_FAIL, "Failed to correctly determine the type of " << toString());
+	  }
+	  debugMsg("TBS:", "Options are " << STRING << " or " << OBJECT);
+	  debugMsg("TBS", "Determined type " << m_type << " of " << toString());
+  }
+
+
+  bool ConstrainedVariable::isEnumerated() {
+    check_runtime_error(isValid());
+    return baseDomain().isEnumerated();
+  }
+
+  bool ConstrainedVariable::isInterval() {
+    check_runtime_error(isValid());
+    return baseDomain().isInterval();
+  }
+  
+
+  bool ConstrainedVariable::isNull() {
+    check_runtime_error(isValid());
+    return lastDomain().isEmpty() && !isSpecified();
+  }
+
+  bool ConstrainedVariable::isSingleton() {
+    check_runtime_error(isValid());
+    return isSpecified() || lastDomain().isSingleton();
+  }
+
+  PSVarValue ConstrainedVariable::getSingletonValue() {
+    check_runtime_error(isValid());
+    check_runtime_error(isSingleton());
+    debugMsg("TBS:", "getSingleton called");
+    if (isSpecified())
+    {
+    	debugMsg("TBS: ", "specified");
+      return PSVarValue(getSpecifiedValue(), getType());
+    
+    }
+      else
+      return PSVarValue(lastDomain().getSingletonValue(), getType());
+    
+    debugMsg("TBS:", "getSingleton ending");
+  }
+  
+
+  PSList<PSVarValue> ConstrainedVariable::getValues() {
+    check_runtime_error(isValid());
+    check_runtime_error(!isSingleton() && isEnumerated());
+    PSList<PSVarValue> retval;
+    std::list<double> values;
+    lastDomain().getValues(values);
+    PSVarType type = getType();
+
+    for(std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it) {
+      PSVarValue value(*it, type);
+      retval.push_back(value);
+    }
+    return retval;
+  }
+
+
+  double ConstrainedVariable::getLowerBound() {
+    check_runtime_error(isValid());
+    check_runtime_error(isInterval());
+    return lastDomain().getLowerBound();
+  }
+
+  double ConstrainedVariable::getUpperBound() {
+    check_runtime_error(isValid());
+    check_runtime_error(isInterval());
+    return lastDomain().getUpperBound();
+  }
+
+  void ConstrainedVariable::specifyValue(PSVarValue& v) {
+    check_runtime_error(isValid());
+    check_runtime_error(getType() == v.getType());
+
+    debugMsg("ConstrainedVariable:specify","Specifying var:" << toString() << " to value:" << v.toString());
+    
+    // If specifying to the same value it already has, do nothing
+    if (isSpecified() && (getSpecifiedValue() == v.asDouble())) {
+        debugMsg("ConstrainedVariable:specify","Tried to specify to same value, so bailing out without doing any work");
+        return;
+    }
+    
+    specify(v.asDouble());
+    debugMsg("ConstrainedVariable:specify","After specify for var:" << toString() << " to value:" << v.toString());
+    // TODO: move this to ConstrainedVariable::specify()
+    if (getConstraintEngine()->getAutoPropagation())
+       getConstraintEngine()->propagate();
+    debugMsg("ConstrainedVariable:specify","After propagate for var:" << toString());
+  }
+  
+  	PSEntity* ConstrainedVariable::getPSParent() const {
+    //EntityId parent(m_parent);//getParentEntity());
+    if(m_parent.isNoId())
+      return NULL;
+    
+    /* TODO: fix this
+    else if(TokenId::convertable(parent))
+      return new PSTokenImpl((TokenId) parent);
+    else if(ObjectId::convertable(parent))
+      return new PSObjectImpl((ObjectId) parent);
+    else if(RuleInstanceId::convertable(parent))
+      return new PSTokenImpl(((RuleInstanceId)parent)->getToken());
+    else {
+      checkRuntimeError(ALWAYS_FAIL,
+			"Variable " << toString() << " has a parent that isn't a token, " <<
+			"object, or rule: " << m_var->getParent()->toString());
+    }
+    */
+    
+    return (PSEntity *) m_parent;
+  }
+  
 }

@@ -9,6 +9,7 @@
  */
 
 #include "ConstraintEngineDefs.hh"
+#include "PSConstraintEngine.hh"
 #include "Entity.hh"
 #include "LabelStr.hh"
 #include "AbstractDomain.hh"
@@ -51,7 +52,7 @@ namespace EUROPA {
    * a failure will occur - see isValid().
    * @see AbstractDomain, Constraint, ConstraintEngine, DomainListener, isValid
    */
-  class ConstrainedVariable : public Entity {
+  class ConstrainedVariable : public Entity, public PSVariable {
   public:
     DECLARE_ENTITY_TYPE(ConstrainedVariable);
 
@@ -448,6 +449,33 @@ namespace EUROPA {
     // keeps track of who's the current propagating constraint, in case there is a violation
     ConstraintId m_propagatingConstraint;
 
+    // PS Methods:
+	virtual bool isEnumerated();
+	virtual bool isInterval();
+
+	virtual bool isNull();    
+	virtual bool isSingleton();
+
+	virtual PSVarValue getSingletonValue(); 
+
+	virtual PSList<PSVarValue> getValues();
+
+	virtual double getLowerBound();  // if isSingleton()==false && isInterval() == true
+	virtual double getUpperBound();  // if isSingleton()==false && isInterval() == true
+
+	virtual void specifyValue(PSVarValue& v);
+//	virtual void reset();
+
+//	virtual double getViolation() const = 0;
+//	virtual std::string getViolationExpl() const = 0;
+
+	virtual PSEntity* getPSParent() const;
+
+  protected:
+	  // TODO:  Clean up how this is called/used (defined in ConstrainedVariable, called in Variable constructor to set variable in PSVariable is ugly!
+	  virtual void determineType();
+	      
+    
   private:
     /**
      * @brief An internal utility to ensure the relationship between the constraints and the variable are valid.
@@ -470,6 +498,8 @@ namespace EUROPA {
      */
     int lastRelaxed() const;
 
+    
+    
     int m_lastRelaxed; /**< Holds the cycle in which the variable was last relaxed */
     const ConstraintEngineId m_constraintEngine; /**< Reference to the ConstraintEngine to which this variable belongs. 
 						    The  construction model of this class ensures 

@@ -1,6 +1,5 @@
 #include "PlanDatabase.hh"
 #include "PlanDatabaseWriter.hh"
-#include "PSConstraintEngineImpl.hh"
 #include "PSPlanDatabaseImpl.hh"
 #include "Object.hh"
 #include "Schema.hh"
@@ -1003,8 +1002,8 @@ namespace EUROPA{
     PSList<PSVariable*> retval;
 
     for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
-      PSVariable* v = new PSVariableImpl(*it);
-      retval.push_back(v);
+    	ConstrainedVariableId id = *it;
+    	retval.push_back((PSVariable *) id);
     }
     return retval;
   }  

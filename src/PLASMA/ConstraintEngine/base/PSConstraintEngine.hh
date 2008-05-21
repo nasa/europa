@@ -33,16 +33,19 @@ namespace EUROPA {
   	  virtual std::string getViolationExpl() const = 0;      	  
   };
   
-  class PSVariable : public PSEntity
+  class PSVariable : public virtual PSEntity
   {
     public:
-    	PSVariable() {}	
+//    	PSVariable();
     	virtual ~PSVariable() {}
 
-    	virtual const std::string& getEntityType() const = 0;
+    	virtual const std::string& getEntityType() const;
 
-    	virtual PSVarType getType() = 0; // Data Type 
+    	virtual PSVarType getType(); // Data Type 
 
+    	virtual std::string toString();
+
+    	
     	virtual bool isEnumerated() = 0;
     	virtual bool isInterval() = 0;
 
@@ -62,9 +65,13 @@ namespace EUROPA {
     	virtual double getViolation() const = 0;
     	virtual std::string getViolationExpl() const = 0;
 
-    	virtual PSEntity* getParent() = 0;
+    	virtual PSEntity* getPSParent() const = 0;
 
-    	virtual std::string toString() = 0;
+    	
+    protected:
+       PSVarType m_type;
+       virtual void determineType() = 0;
+     
   };
 
   class PSVarValue

@@ -1,6 +1,5 @@
 
 #include "PSPlanDatabaseImpl.hh"
-#include "PSConstraintEngineImpl.hh"
 #include "Object.hh"
 #include "Token.hh"
 #include "TokenVariable.hh"
@@ -12,7 +11,6 @@ namespace EUROPA
   PSObjectImpl::PSObjectImpl(const ObjectId& obj) 
       : m_obj(obj) 
   {
-      //m_entityId = m_obj;
   }
 
   PSObjectImpl::~PSObjectImpl() 
@@ -25,9 +23,8 @@ namespace EUROPA
     const std::vector<ConstrainedVariableId>& vars = m_obj->getVariables();
     for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
 	++it) {
-      PSVariable* var = new PSVariableImpl(*it); 
-      check_runtime_error(var != NULL);
-      retval.push_back(var);
+    	ConstrainedVariableId id = *it;
+    	retval.push_back((PSVariable *) id);
     }
 
     return retval;
@@ -55,8 +52,9 @@ namespace EUROPA
     const std::vector<ConstrainedVariableId>& vars = m_obj->getVariables();
     for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
 	++it) {
-      if((*it)->getName() == realName) {
-	retval = new PSVariableImpl(*it);
+    	ConstrainedVariableId id = *it;
+    	if(id->getName() == realName) {
+		retval = (PSVariable*) id;
 	break;
       }
     }
@@ -99,7 +97,6 @@ namespace EUROPA
   PSTokenImpl::PSTokenImpl(const TokenId& tok) 
       : m_tok(tok) 
   {
-      //m_entityId = m_tok;
   }
 
   const LabelStr& PSTokenImpl::getName() const {
@@ -165,17 +162,17 @@ namespace EUROPA
   
   PSVariable* PSTokenImpl::getStart()
   {
-      return new PSVariableImpl(m_tok->getStart());
+      return m_tok->getStart();
   }
   
   PSVariable* PSTokenImpl::getEnd()
   {
-      return new PSVariableImpl(m_tok->getEnd());      
+	  return m_tok->getEnd();
   }
   
   PSVariable* PSTokenImpl::getDuration()
   {
-      return new PSVariableImpl(m_tok->getDuration());            
+	  return m_tok->getDuration();
   }
 
   double PSTokenImpl::getViolation() const 
@@ -192,9 +189,20 @@ namespace EUROPA
     PSList<PSVariable*> retval;
     const std::vector<ConstrainedVariableId>& vars = m_tok->getVariables();
     for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();++it) {
-      PSVariable* var = new PSVariableImpl(*it);
-      check_runtime_error(var != NULL);
-      retval.push_back(var);
+      //PSVariable* var = new PSVariableImpl(*it);
+    
+    	
+    	//check_runtime_error(var != NULL);
+    	ConstrainedVariableId id = *it;
+      debugMsg("TBS: ", "Version 1 " << (*it)->toString() << " and " << 
+    		  ((*it)->baseDomain().isSingleton() ? (*it)->baseDomain().getSingletonValue() : -909)
+    		  << " and " << (*it)->getType());
+    
+      PSVariable* psVar = (PSVariable *) id;
+      debugMsg("TBS:", "Version 2 type " << psVar->getType());
+      debugMsg("TBS:", "Version 2 " << psVar->toString());
+    	
+    	retval.push_back(psVar);
     }
     return retval;
   }
@@ -205,8 +213,9 @@ namespace EUROPA
     const std::vector<ConstrainedVariableId>& vars = m_tok->getVariables();
     for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
 	++it) {
+    	ConstrainedVariableId id = *it;
       if((*it)->getName() == realName) {
-	retval = new PSVariableImpl(*it);
+	retval = (PSVariable *) id;
 	break;
       }
     }
@@ -256,6 +265,7 @@ namespace EUROPA
   
   std::string PSTokenImpl::toString()
   {
+	  debugMsg("TBS:", "Starting token toString");
   	std::ostringstream os;
   	
   	os << "Token(" << PSEntity::toString() << ") {" << std::endl;
@@ -265,12 +275,15 @@ namespace EUROPA
   	    os << "    mergedInto:" << m_tok->getActiveToken()->getKey() << std::endl;
 
 	PSList<PSVariable*> vars = getParameters();
-  	for (int i=0;i<vars.size();i++) {
+  	debugMsg("TBS:", "Printing " << vars.size() << " vars of " << PSEntity::toString());
+	for (int i=0;i<vars.size();i++) {
+  		//debugMsg("TBS:", "Trying" << vars.get(i)->getEntityName());
   	    os << "    " << vars.get(i)->getEntityName() << " : " << vars.get(i)->toString() << std::endl;
 	    delete vars.get(i);
   	}
   	
   	os << "}" << std::endl;
+  	debugMsg("TBS:", "Done");
   	
   	return os.str();
   }

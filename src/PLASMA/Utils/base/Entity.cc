@@ -47,6 +47,12 @@ namespace EUROPA {
     return sstr.str();
   }
 
+
+  const LabelStr& Entity::getName() const {
+	  static const LabelStr NO_NAME("NO_NAME_Entity");
+	  return NO_NAME;
+  }
+  
   bool Entity::canBeCompared(const EntityId&) const{ return true;}
 
   EntityId Entity::getEntity(int key){

@@ -346,7 +346,7 @@ namespace EUROPA {
   public:
 
     PSVarType getType();
-    PSEntity* getParent();
+    PSEntity* getPSParent();
 
     bool isSingleton();
     PSVarValue getSingletonValue();    // Call to get value if isSingleton()==true

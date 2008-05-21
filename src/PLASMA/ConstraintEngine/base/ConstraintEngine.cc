@@ -1,5 +1,5 @@
 #include "ConstraintEngine.hh"
-#include "PSConstraintEngineImpl.hh"
+#include "PSConstraintEngine.hh"
 #include "VariableChangeListener.hh"
 #include "ConstraintEngineListener.hh"
 #include "Propagator.hh"
@@ -933,22 +933,24 @@ namespace EUROPA
 
   PSVariable* ConstraintEngine::getVariableByKey(PSEntityKey id)
   {
-    EntityId entity = Entity::getEntity(id);
+    ConstrainedVariableId entity = Entity::getEntity(id);
     check_runtime_error(entity.isValid());
-    return new PSVariableImpl(entity);
+    
+//    ConstrainedVariableId varId = entity;
+    //return new ConstrainedVariable(entity);
+    // TODO:  No idea if this is correct....
+    return entity; 
   }
 
   // TODO: this needs to be optimized
   PSVariable* ConstraintEngine::getVariableByName(const std::string& name)
   {
     const ConstrainedVariableSet& vars = getVariables();
-
     for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
-        ConstrainedVariableId v = *it;
-        if (v->getName().toString() == name)
-            return new PSVariableImpl(*it);
+        ConstrainedVariableId id = *it;
+        if (id->getName().toString() == name)
+        	return (PSVariable *) id; 
     }
-    
     return NULL;
   }
   

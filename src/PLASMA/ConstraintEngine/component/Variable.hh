@@ -115,10 +115,19 @@ namespace EUROPA {
     m_baseDomain(static_cast<DomainType*>(baseDomain.copy())),
     m_derivedDomain(static_cast<DomainType*>(baseDomain.copy())) {
     debugMsg("Variable:Variable", "Base Domain = " << baseDomain.toString());
-
+    debugMsg("Variable:Variable", "Name " << name);
+    if(baseDomain.isSingleton())
+    {
+    	debugMsg("Variable:Variable", "Base domain singleton; " << baseDomain.getSingletonValue());
+    }
+    
+    
+    
     // Note that we permit the domain to be empty initially
     m_derivedDomain->setListener(m_listener);
 
+    determineType();
+    
     // Don't propagate set operations on dynamic or empty domains.
     if (baseDomain.isOpen() || baseDomain.isEmpty())
       return;
