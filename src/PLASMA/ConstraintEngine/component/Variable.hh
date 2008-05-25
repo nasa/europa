@@ -126,8 +126,6 @@ namespace EUROPA {
     // Note that we permit the domain to be empty initially
     m_derivedDomain->setListener(m_listener);
 
-    determineType();
-    
     // Don't propagate set operations on dynamic or empty domains.
     if (baseDomain.isOpen() || baseDomain.isEmpty())
       return;

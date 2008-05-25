@@ -35,7 +35,6 @@ namespace EUROPA {
     check_error(m_constraintEngine.isValid());
     check_error(m_index >= NO_INDEX);
     check_error(m_index == NO_INDEX || parent.isValid());
-    // determineType(); can't call during construction, since baseDomain is virtual and is used...
     m_constraintEngine->add(m_id);
     m_listener = m_constraintEngine->allocateVariableListener(m_id, m_constraints);
   }
@@ -473,24 +472,24 @@ namespace EUROPA {
   }    
 
   // PS-Specific stuff below here:
-  
-  void ConstrainedVariable::determineType() 
+  PSVarType ConstrainedVariable::getType() 
   {
+	  PSVarType answer;
 	  if(baseDomain().isString())
-		  m_type =  STRING;
+		  answer =  STRING;
 	  else if(baseDomain().isSymbolic()) {
 		  if(baseDomain().isEmpty() || LabelStr::isString(baseDomain().getLowerBound()))
-			  m_type =  STRING;
+			  answer =  STRING;
 		  else
-			  m_type =  OBJECT; //this may not be the best assumption ~MJI
+			  answer =  OBJECT; //this may not be the best assumption ~MJI
 	  }
 	  else if(baseDomain().isBool())
-		  m_type =  BOOLEAN;
+		  answer =  BOOLEAN;
 	  else if(baseDomain().isNumeric()) {
 		  if(baseDomain().minDelta() < 1)
-			  m_type =  DOUBLE;
+			  answer =  DOUBLE;
 		  else
-			  m_type =  INTEGER;
+			  answer =  INTEGER;
 	  }
 	  else {
 		  checkError(ALWAYS_FAIL, "Failed to correctly determine the type of " << toString());
@@ -522,7 +521,6 @@ namespace EUROPA {
   PSVarValue ConstrainedVariable::getSingletonValue() {
     check_runtime_error(isValid());
     check_runtime_error(isSingleton());
-    determineType();
     if (isSpecified())
     	return PSVarValue(getSpecifiedValue(), getType());
     else

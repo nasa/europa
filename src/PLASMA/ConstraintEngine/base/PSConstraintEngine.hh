@@ -41,7 +41,7 @@ namespace EUROPA {
 
     	virtual const std::string& getEntityType() const;
 
-    	virtual PSVarType getType(); // Data Type 
+    	virtual PSVarType getType() = 0; // Data Type 
 
     	virtual std::string toString();
 
@@ -66,12 +66,7 @@ namespace EUROPA {
     	virtual std::string getViolationExpl() const = 0;
 
     	virtual PSEntity* getPSParent() const = 0;
-
     	
-    protected:
-       PSVarType m_type;
-       virtual void determineType() = 0;
-     
   };
 
   class PSVarValue

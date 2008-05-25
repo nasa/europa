@@ -457,24 +457,17 @@ namespace EUROPA {
 	virtual bool isSingleton();
 
 	virtual PSVarValue getSingletonValue(); 
-
+	virtual PSVarType getType();
+	
+	
 	virtual PSList<PSVarValue> getValues();
 
 	virtual double getLowerBound();  // if isSingleton()==false && isInterval() == true
 	virtual double getUpperBound();  // if isSingleton()==false && isInterval() == true
 
 	virtual void specifyValue(PSVarValue& v);
-//	virtual void reset();
 
-//	virtual double getViolation() const = 0;
-//	virtual std::string getViolationExpl() const = 0;
-
-	virtual PSEntity* getPSParent() const;
-
-  protected:
-	  // TODO:  Clean up how this is called/used (defined in ConstrainedVariable, called in Variable constructor to set variable in PSVariable is ugly!
-	  virtual void determineType();
-	      
+	virtual PSEntity* getPSParent() const;	      
     
   private:
     /**

@@ -13,10 +13,6 @@ namespace EUROPA {
   	return VARIABLE_STR;
   }
 
-  PSVarType PSVariable::getType() {
-	  return m_type;
-  }
-
   std::string PSVariable::toString() {
     std::ostringstream os;
     
@@ -45,7 +41,7 @@ namespace EUROPA {
   std::string PSVarValue::toString() const {
   	std::ostringstream os;
   	
-  	switch (m_type) {
+  	switch (getType()) {
   		case INTEGER:
             os << asInt();
   		    break;
