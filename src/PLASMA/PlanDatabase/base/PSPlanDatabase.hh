@@ -20,14 +20,14 @@ namespace EUROPA {
     public:
       virtual ~PSPlanDatabase() {}
 
-      virtual PSList<PSObject*> getObjectsByType(const std::string& objectType) = 0;
-      virtual PSObject* getObjectByKey(PSEntityKey id) = 0;
-      virtual PSObject* getObjectByName(const std::string& name) = 0;
+      virtual PSList<PSObject*> getObjectsByType(const std::string& objectType) const = 0;
+      virtual PSObject* getObjectByKey(PSEntityKey id) const = 0;
+      virtual PSObject* getObjectByName(const std::string& name) const = 0;
 
-      virtual PSList<PSToken*> getAllTokens() = 0;    	 
-      virtual PSToken* getTokenByKey(PSEntityKey id) = 0;	
+      virtual PSList<PSToken*> getAllTokens() const = 0;
+      virtual PSToken* getTokenByKey(PSEntityKey id) const = 0;	
 
-      virtual PSList<PSVariable*> getAllGlobalVariables() = 0;
+      virtual PSList<PSVariable*> getAllGlobalVariables() const = 0;
 
       virtual std::string toString() = 0;
   };

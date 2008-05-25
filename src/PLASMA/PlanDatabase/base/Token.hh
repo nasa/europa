@@ -424,9 +424,7 @@ namespace EUROPA {
     // returns active tokens that this token can be merged to
     virtual PSList<PSToken*> getCompatibleTokens(unsigned int limit, bool useExactTest);
 
-    virtual std::string toPSString() const;
-    
-    
+    virtual std::string toPSString() const;    
     
   protected:
 

@@ -13,7 +13,7 @@ namespace EUROPA {
   	return VARIABLE_STR;
   }
 
-  std::string PSVariable::toString() {
+  std::string PSVariable::toString() const {
     std::ostringstream os;
     
     if (isNull())

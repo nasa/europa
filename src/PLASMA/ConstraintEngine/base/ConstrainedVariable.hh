@@ -450,20 +450,20 @@ namespace EUROPA {
     ConstraintId m_propagatingConstraint;
 
     // PS Methods:
-	virtual bool isEnumerated();
-	virtual bool isInterval();
+	virtual bool isEnumerated() const;
+	virtual bool isInterval() const;
 
-	virtual bool isNull();    
-	virtual bool isSingleton();
+	virtual bool isNull() const;
+	virtual bool isSingleton() const;
 
-	virtual PSVarValue getSingletonValue(); 
-	virtual PSVarType getType();
+	virtual PSVarValue getSingletonValue() const; 
+	virtual PSVarType getType() const;
 	
 	
-	virtual PSList<PSVarValue> getValues();
+	virtual PSList<PSVarValue> getValues() const;
 
-	virtual double getLowerBound();  // if isSingleton()==false && isInterval() == true
-	virtual double getUpperBound();  // if isSingleton()==false && isInterval() == true
+	virtual double getLowerBound() const;  // if isSingleton()==false && isInterval() == true
+	virtual double getUpperBound() const;  // if isSingleton()==false && isInterval() == true
 
 	virtual void specifyValue(PSVarValue& v);
 

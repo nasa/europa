@@ -939,7 +939,7 @@ namespace EUROPA{
   }
   
   // PSPlanDatabase methods
-  PSList<PSObject*> PlanDatabase::getObjectsByType(const std::string& objectType) 
+  PSList<PSObject*> PlanDatabase::getObjectsByType(const std::string& objectType) const 
   {
     PSList<PSObject*> retval;
 
@@ -953,20 +953,20 @@ namespace EUROPA{
     return retval;
   }
   
-  PSObject* PlanDatabase::getObjectByKey(PSEntityKey id) 
+  PSObject* PlanDatabase::getObjectByKey(PSEntityKey id) const
   {
     ObjectId object = Entity::getEntity(id);
     check_runtime_error(object.isValid());
     return (PSObject *) object;
   }
 
-  PSObject* PlanDatabase::getObjectByName(const std::string& name) {
+  PSObject* PlanDatabase::getObjectByName(const std::string& name) const {
     ObjectId object = getObject(LabelStr(name));
     check_runtime_error(object.isValid());
     return (PSObject *) object;
   }
 
-  PSList<PSToken*> PlanDatabase::getAllTokens() {
+  PSList<PSToken*> PlanDatabase::getAllTokens() const {
     const TokenSet& tokens = getTokens();
     PSList<PSToken*> retval;
 
@@ -978,7 +978,7 @@ namespace EUROPA{
     return retval;
   }
 
-  PSToken* PlanDatabase::getTokenByKey(PSEntityKey id) 
+  PSToken* PlanDatabase::getTokenByKey(PSEntityKey id) const
   {
 	  //TODO:  define PSTokenId or don't use it :)
     Id <PSToken> psId = Entity::getEntity(id);
@@ -986,7 +986,7 @@ namespace EUROPA{
     return (PSToken *) psId; 
   }
 
-  PSList<PSVariable*>  PlanDatabase::getAllGlobalVariables() {
+  PSList<PSVariable*>  PlanDatabase::getAllGlobalVariables() const {
 
     const ConstrainedVariableSet& vars = getGlobalVariables();
     PSList<PSVariable*> retval;
@@ -998,7 +998,7 @@ namespace EUROPA{
     return retval;
   }  
 
-  std::string PlanDatabase::toString() 
+  std::string PlanDatabase::toString()
   {
       PlanDatabaseWriter* pdw = new PlanDatabaseWriter();
       std::string planOutput = pdw->toString(this);

@@ -288,17 +288,17 @@ namespace EUROPA {
 
     
     // PSPlanDatabase methods
-    virtual PSList<PSObject*> getObjectsByType(const std::string& objectType);
-    virtual PSObject* getObjectByKey(PSEntityKey id);
-    virtual PSObject* getObjectByName(const std::string& name);
+    virtual PSList<PSObject*> getObjectsByType(const std::string& objectType) const;
+    virtual PSObject* getObjectByKey(PSEntityKey id) const;
+    virtual PSObject* getObjectByName(const std::string& name) const;
 
-    virtual PSList<PSToken*> getAllTokens();      
-    virtual PSToken* getTokenByKey(PSEntityKey id);   
+    virtual PSList<PSToken*> getAllTokens() const; 
+    virtual PSToken* getTokenByKey(PSEntityKey id) const;   
 
-    virtual PSList<PSVariable*> getAllGlobalVariables();
+    virtual PSList<PSVariable*> getAllGlobalVariables() const;
 
     virtual std::string toString();
- 
+
   private:
     friend class Token;
     friend class Object;

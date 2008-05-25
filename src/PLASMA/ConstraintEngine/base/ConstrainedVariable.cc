@@ -472,7 +472,7 @@ namespace EUROPA {
   }    
 
   // PS-Specific stuff below here:
-  PSVarType ConstrainedVariable::getType() 
+  PSVarType ConstrainedVariable::getType() const
   {
 	  PSVarType answer = STRING;
 	  if(baseDomain().isString())
@@ -498,28 +498,28 @@ namespace EUROPA {
   }
 
 
-  bool ConstrainedVariable::isEnumerated() {
+  bool ConstrainedVariable::isEnumerated() const {
     check_runtime_error(isValid());
     return baseDomain().isEnumerated();
   }
 
-  bool ConstrainedVariable::isInterval() {
+  bool ConstrainedVariable::isInterval() const {
     check_runtime_error(isValid());
     return baseDomain().isInterval();
   }
   
 
-  bool ConstrainedVariable::isNull() {
+  bool ConstrainedVariable::isNull() const {
     check_runtime_error(isValid());
     return lastDomain().isEmpty() && !isSpecified();
   }
 
-  bool ConstrainedVariable::isSingleton() {
+  bool ConstrainedVariable::isSingleton() const {
     check_runtime_error(isValid());
     return isSpecified() || lastDomain().isSingleton();
   }
 
-  PSVarValue ConstrainedVariable::getSingletonValue() {
+  PSVarValue ConstrainedVariable::getSingletonValue() const {
     check_runtime_error(isValid());
     check_runtime_error(isSingleton());
     if (isSpecified())
@@ -529,7 +529,7 @@ namespace EUROPA {
   }
   
 
-  PSList<PSVarValue> ConstrainedVariable::getValues() {
+  PSList<PSVarValue> ConstrainedVariable::getValues() const {
     check_runtime_error(isValid());
     check_runtime_error(!isSingleton() && isEnumerated());
     PSList<PSVarValue> retval;
@@ -545,13 +545,13 @@ namespace EUROPA {
   }
 
 
-  double ConstrainedVariable::getLowerBound() {
+  double ConstrainedVariable::getLowerBound() const {
     check_runtime_error(isValid());
     check_runtime_error(isInterval());
     return lastDomain().getLowerBound();
   }
 
-  double ConstrainedVariable::getUpperBound() {
+  double ConstrainedVariable::getUpperBound() const {
     check_runtime_error(isValid());
     check_runtime_error(isInterval());
     return lastDomain().getUpperBound();

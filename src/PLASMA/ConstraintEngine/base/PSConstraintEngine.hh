@@ -40,23 +40,23 @@ namespace EUROPA {
 
     	virtual const std::string& getEntityType() const;
 
-    	virtual PSVarType getType() = 0; // Data Type 
+    	virtual PSVarType getType() const = 0; // Data Type 
 
-    	virtual std::string toString();
+    	virtual std::string toString() const;
 
     	
-    	virtual bool isEnumerated() = 0;
-    	virtual bool isInterval() = 0;
+    	virtual bool isEnumerated() const = 0;
+    	virtual bool isInterval() const = 0;
 
-    	virtual bool isNull() = 0;      // iif CurrentDomain is empty and the variable hasn't been specified    
-    	virtual bool isSingleton() = 0;
+    	virtual bool isNull() const = 0;      // iif CurrentDomain is empty and the variable hasn't been specified    
+    	virtual bool isSingleton() const = 0;
 
-    	virtual PSVarValue getSingletonValue() = 0;    // Call to get value if isSingleton()==true 
+    	virtual PSVarValue getSingletonValue() const = 0;    // Call to get value if isSingleton()==true 
 
-    	virtual PSList<PSVarValue> getValues() = 0;  // if isSingleton()==false && isEnumerated() == true
+    	virtual PSList<PSVarValue> getValues() const = 0;  // if isSingleton()==false && isEnumerated() == true
 
-    	virtual double getLowerBound() = 0;  // if isSingleton()==false && isInterval() == true
-    	virtual double getUpperBound() = 0;  // if isSingleton()==false && isInterval() == true
+    	virtual double getLowerBound() const = 0;  // if isSingleton()==false && isInterval() == true
+    	virtual double getUpperBound() const = 0;  // if isSingleton()==false && isInterval() == true
 
     	virtual void specifyValue(PSVarValue& v) = 0;
     	virtual void reset() = 0;
