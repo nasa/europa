@@ -640,9 +640,16 @@ namespace EUROPA {
 
   std::string ObjectDomain::toString(double value) const {
     check_error(isMember(value), "Caught an invalid attempt to display a value not in this domain");
-    ObjectId object = value;
     std::ostringstream os;
-    os << object->getName().toString()<<"("<< object->getKey() <<")";
+    if(!Entity::isPurging())
+    {
+        ObjectId object = value;
+        os << object->getName().toString()<<"("<< object->getKey() <<")";
+    }
+    else
+    {
+    	os << "Object data unavailable while purging (might no longer exist)";
+    }
     return  os.str();
   }
 
