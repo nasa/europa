@@ -123,6 +123,8 @@ namespace EUROPA {
     return rootType;
   }
 
+ 
+  
   const LabelStr& Object::getName() const {
     return(m_name);
   }
@@ -772,74 +774,74 @@ namespace EUROPA {
   }
 
 // PS Methods:
-const std::string& Object::getEntityType() const 
-{
-	static const std::string OBJECT_STR("OBJECT");
-	return OBJECT_STR;
-}
-
-std::string Object::getObjectType() const 
-{
-	return getType().toString();
-}
-PSList<PSVariable*> Object::getMemberVariables() 
-{
-  PSList<PSVariable*> retval;
-  const std::vector<ConstrainedVariableId>& vars = getVariables();
-  for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
-	++it) {
-  	ConstrainedVariableId id = *it;
-  	retval.push_back((PSVariable *) id);
+  const std::string& Object::getEntityType() const 
+  {
+	  static const std::string OBJECT_STR("OBJECT");
+	  return OBJECT_STR;
   }
 
-  return retval;
-}
-
-PSVariable* Object::getMemberVariable(const std::string& name) {
-  LabelStr realName(name);
-  PSVariable* retval = NULL;
-  const std::vector<ConstrainedVariableId>& vars = getVariables();
-  for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
-	++it) {
-  	ConstrainedVariableId id = *it;
-  	if(id->getName() == realName) {
-		retval = (PSVariable*) id;
-	break;
-    }
+  std::string Object::getObjectType() const 
+  {
+	  return getType().toString();
   }
-  return retval;
-}
+  PSList<PSVariable*> Object::getMemberVariables() 
+  {
+	  PSList<PSVariable*> retval;
+	  const std::vector<ConstrainedVariableId>& vars = getVariables();
+	  for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
+	  ++it) {
+		  ConstrainedVariableId id = *it;
+		  retval.push_back((PSVariable *) id);
+	  }
 
-PSList<PSToken*> Object::getPSTokens() const {
-  PSList<PSToken*> retval;
-  const TokenSet& tokens = getTokens();
-  for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
-	  TokenId id = *it;
-	  retval.push_back((PSToken *) id);
+	  return retval;
   }
-  return retval;
-}
+
+  PSVariable* Object::getMemberVariable(const std::string& name) {
+	  LabelStr realName(name);
+	  PSVariable* retval = NULL;
+	  const std::vector<ConstrainedVariableId>& vars = getVariables();
+	  for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
+	  ++it) {
+		  ConstrainedVariableId id = *it;
+		  if(id->getName() == realName) {
+			  retval = (PSVariable*) id;
+			  break;
+		  }
+	  }
+	  return retval;
+  }
+
+  PSList<PSToken*> Object::getPSTokens() const {
+	  PSList<PSToken*> retval;
+	  const TokenSet& tokens = getTokens();
+	  for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+		  TokenId id = *it;
+		  retval.push_back((PSToken *) id);
+	  }
+	  return retval;
+  }
 
 
-void Object::addPrecedence(PSToken* pred,PSToken* succ)
-{
-	TokenId p = getPlanDatabase()->getEntityByKey(pred->getKey());
-	TokenId s = getPlanDatabase()->getEntityByKey(succ->getKey());
-	constrain(p,s);
-	// TODO: move this to Object::constrain()
-	if (getPlanDatabase()->getConstraintEngine()->getAutoPropagation())
-		getPlanDatabase()->getConstraintEngine()->propagate();	  
-}
+  void Object::addPrecedence(PSToken* pred,PSToken* succ)
+  {
+	  TokenId p = getPlanDatabase()->getEntityByKey(pred->getKey());
+	  TokenId s = getPlanDatabase()->getEntityByKey(succ->getKey());
+	  constrain(p,s);
+	  // TODO: move this to Object::constrain()
+	  if (getPlanDatabase()->getConstraintEngine()->getAutoPropagation())
+		  getPlanDatabase()->getConstraintEngine()->propagate();	  
+  }
 
-void Object::removePrecedence(PSToken* pred,PSToken* succ)
-{
-	TokenId p = getPlanDatabase()->getEntityByKey(pred->getKey());
-	TokenId s = getPlanDatabase()->getEntityByKey(succ->getKey());
-	free(p,s);	  
-	// TODO: move this to Object::free()
-	if (getPlanDatabase()->getConstraintEngine()->getAutoPropagation())
-		getPlanDatabase()->getConstraintEngine()->propagate();   
-}
+  void Object::removePrecedence(PSToken* pred,PSToken* succ)
+  {
+	  TokenId p = getPlanDatabase()->getEntityByKey(pred->getKey());
+	  TokenId s = getPlanDatabase()->getEntityByKey(succ->getKey());
+	  free(p,s);	  
+	  // TODO: move this to Object::free()
+	  if (getPlanDatabase()->getConstraintEngine()->getAutoPropagation())
+		  getPlanDatabase()->getConstraintEngine()->propagate();   
+  }
 
 }
 

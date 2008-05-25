@@ -404,12 +404,8 @@ namespace EUROPA {
     virtual std::string toLongString() const;
      
     // PS Methods:
-//    virtual const LabelStr& getName() const;
-
     virtual const std::string& getEntityType() const;
     virtual std::string getTokenType() const; 
-
-//    virtual bool isFact(); 
 
     virtual PSTokenState getTokenState() const;
     virtual PSVariable* getPSStart() const;

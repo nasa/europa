@@ -474,7 +474,7 @@ namespace EUROPA {
   // PS-Specific stuff below here:
   PSVarType ConstrainedVariable::getType() 
   {
-	  PSVarType answer;
+	  PSVarType answer = STRING;
 	  if(baseDomain().isString())
 		  answer =  STRING;
 	  else if(baseDomain().isSymbolic()) {

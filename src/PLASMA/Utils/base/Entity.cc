@@ -41,6 +41,11 @@ namespace EUROPA {
     entitiesByKey().erase(m_key);
   }
 
+  const std::string& Entity::getEntityName() const
+  {
+	  return getName().toString();
+  }
+  
   const LabelStr& Entity::getName() const {
 	  static const LabelStr NO_NAME("NO_NAME_Entity");
 	  return NO_NAME;

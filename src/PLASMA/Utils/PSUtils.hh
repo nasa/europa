@@ -39,10 +39,7 @@ namespace EUROPA {
     
       inline PSEntityKey getKey() const {return m_key;}
 
-      // TODO:  Do we need two get name methods?
-      virtual const std::string& getEntityName() const;
-      virtual const LabelStr& getName() const;
-            
+      virtual const std::string& getEntityName() const = 0;        
       virtual const std::string& getEntityType() const;
 
       virtual std::string toString() const;

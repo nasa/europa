@@ -928,11 +928,6 @@ namespace EUROPA{
   }
 
 // PS Methods:
-//const LabelStr& PSToken::getName() const {
-//	  static const LabelStr NULL_NAME("NO_NAME_PSToken");
-//	  return (m_tok.isId() ? m_tok->getName() : NULL_NAME);
-//}
-
 const std::string& Token::getEntityType() const 
 {
 	static const std::string TOKEN_STR("TOKEN");

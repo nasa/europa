@@ -14,16 +14,6 @@ namespace EUROPA
     sl_key++;
     return sl_key;
   }
-
-  const std::string& PSEntity::getEntityName() const 
-  {      
-	  return getName().toString();
-  }
-  
-  const LabelStr& PSEntity::getName() const {
-	  static const LabelStr NO_NAME("NO_NAME_PSEntity");
-	  return NO_NAME;
-  }
   
   const std::string& PSEntity::getEntityType() const {
 	  static const std::string UNKNOWN_STR("UNKNOWN");
@@ -33,7 +23,7 @@ namespace EUROPA
   std::string PSEntity::toString() const
   {
 	  std::stringstream sstr;
-	  sstr << getName().toString() << "(" << getKey() << ")";
+	  sstr << getEntityName() << "(" << getKey() << ")";
 	  return sstr.str();
   }
 }
