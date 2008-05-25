@@ -49,7 +49,6 @@ namespace EUROPA{
 
     virtual ~Entity();
 
-    virtual std::string toString() const;
     virtual const LabelStr& getName() const;
 
     virtual bool canBeCompared(const EntityId&) const;

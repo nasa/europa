@@ -44,14 +44,14 @@ public class PSGanttPSEModel
 		// TODO: cache activities?
 		List<PSGanttActivity> acts = new ArrayList<PSGanttActivity>();
 		
-		PSTokenList tokens = resources_.get(resource).getTokens();
+		PSTokenList tokens = resources_.get(resource).getPSTokens();
 		for (int i=0;i<tokens.size();i++) {
 			PSToken token = tokens.get(i);
 			
 			// If the token overlaps startHorizon, pretend it starts at time 0
 			// (otherwise, it won't get shown in our gantt table)
-			int start = (int) token.getStart().getLowerBound();
-			int end = (int) token.getEnd().getLowerBound();
+			int start = (int) token.getPSStart().getLowerBound();
+			int end = (int) token.getPSEnd().getLowerBound();
 			if(start < 0 && 0 < end)
 			{
 				start = 0;

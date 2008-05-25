@@ -41,9 +41,9 @@ public class ActionDetailsPanel
            .append("isFact  : ").append(t.isFact()).append("\n")
         ;
         
-        if (t.getParameters().size() > 0) {
+        if (t.getPSParameters().size() > 0) {
             buf.append("Parameters:").append("\n");
-            PSVariableList parameters = t.getParameters();
+            PSVariableList parameters = t.getPSParameters();
             for (int i = 0; i< parameters.size(); i++) {
             	PSVariable p = parameters.get(i);
                 buf.append(p.getEntityName()).append(" : ").append(p.toString()).append("\n");

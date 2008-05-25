@@ -14,6 +14,7 @@
 #include "Constraint.hh"
 #include "PlanDatabaseDefs.hh"
 #include "ResourceProblem.hh"
+#include "PSResource.hh"
 
 namespace EUROPA {
   namespace SAVH {
@@ -25,7 +26,7 @@ namespace EUROPA {
      * The Resource is provided as a base class from which a variety of implementations for similar resources or
      * a variety of resources can be derived.
      */
-    class Resource : public Object {
+    class Resource : public Object, public virtual PSResource {
     public:
 
       /**
@@ -115,6 +116,15 @@ namespace EUROPA {
       //subclasses will need to override getOrderingChoices, getTokensToOrder
 
       int getFlawCount(const TokenId& token) const;
+      
+      // PS Methods:
+      virtual PSResourceProfile* getLimits();
+      virtual PSResourceProfile* getLevels();    
+      
+      virtual PSList<PSEntityKey> getOrderingChoices(TimePoint t);    
+    
+      
+      
     protected:
       friend class FVDetector;
       /**

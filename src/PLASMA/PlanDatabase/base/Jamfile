@@ -23,8 +23,7 @@ ModuleBase PlanDatabase
 	PlanDatabase.cc
 	PlanDatabaseListener.cc
         PlanDatabaseWriter.cc
-        PSPlanDatabaseImpl.cc
-	StackMemento.cc
+ 	StackMemento.cc
 	Token.cc
 	TokenFactory.cc
 	UnifyMemento.cc

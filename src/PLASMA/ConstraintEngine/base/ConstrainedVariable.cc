@@ -230,12 +230,9 @@ namespace EUROPA {
     checkError(isSpecified(), toString());
     if(m_specifiedFlag)
     {
-    	debugMsg("TBS:" , "Is specified with val " << m_specifiedValue);
     	return m_specifiedValue;
     }
     else
-    	debugMsg("TBS:", "Returning " << baseDomain().getSingletonValue());
-    	debugMsg("TBS:", "Last domain is " << lastDomain().getSingletonValue());
       return baseDomain().getSingletonValue();
   }
 
@@ -498,8 +495,6 @@ namespace EUROPA {
 	  else {
 		  checkError(ALWAYS_FAIL, "Failed to correctly determine the type of " << toString());
 	  }
-	  debugMsg("TBS:", "Options are " << STRING << " or " << OBJECT);
-	  debugMsg("TBS", "Determined type " << m_type << " of " << toString());
   }
 
 
@@ -527,17 +522,11 @@ namespace EUROPA {
   PSVarValue ConstrainedVariable::getSingletonValue() {
     check_runtime_error(isValid());
     check_runtime_error(isSingleton());
-    debugMsg("TBS:", "getSingleton called");
+    determineType();
     if (isSpecified())
-    {
-    	debugMsg("TBS: ", "specified");
-      return PSVarValue(getSpecifiedValue(), getType());
-    
-    }
-      else
-      return PSVarValue(lastDomain().getSingletonValue(), getType());
-    
-    debugMsg("TBS:", "getSingleton ending");
+    	return PSVarValue(getSpecifiedValue(), getType());
+    else
+    	return PSVarValue(lastDomain().getSingletonValue(), getType());
   }
   
 

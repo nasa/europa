@@ -926,4 +926,155 @@ namespace EUROPA{
     ss << sl_varKey++;
     return ss.str();
   }
+
+// PS Methods:
+//const LabelStr& PSToken::getName() const {
+//	  static const LabelStr NULL_NAME("NO_NAME_PSToken");
+//	  return (m_tok.isId() ? m_tok->getName() : NULL_NAME);
+//}
+
+const std::string& Token::getEntityType() const 
+{
+	static const std::string TOKEN_STR("TOKEN");
+	return TOKEN_STR;
+}
+
+std::string Token::getTokenType() const 
+{
+	return getUnqualifiedPredicateName().toString();
+}
+
+PSObject* Token::getOwner() const {
+  if(!isAssigned())
+    return NULL;
+    
+  ObjectVarId objVar = getObject();
+  ObjectId id = ObjectId(objVar->lastDomain().getSingletonValue());
+  return (PSObject *) id;
+  //  return new PSObject(ObjectId(objVar->lastDomain().getSingletonValue()));
+}
+
+PSToken* Token::getPSMaster() const {
+	TokenId master = getMaster();
+	if (master.isNoId())
+	    return NULL;
+	
+	return (PSToken *) master;
+	//return new PSToken(master);    
+}
+
+PSList<PSToken*> Token::getPSSlaves() const {
+  const TokenSet& tokens = getSlaves();
+  PSList<PSToken*> retval;
+
+  for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+    TokenId id = *it;
+	  //PSToken* tok = new PSToken(*it);
+    retval.push_back((PSToken *) id);
+  }
+  return retval;    	
+}  
+
+PSToken::PSTokenState Token::getTokenState() const
+{
+    if (isActive())
+        return PSToken::ACTIVE;
+    
+    if (isInactive())
+        return PSToken::INACTIVE;
+    
+    if (isMerged())
+        return PSToken::MERGED;
+    
+    if (isRejected())
+        return PSToken::REJECTED;
+    
+    check_error(ALWAYS_FAIL,"Unknown token state");
+    return PSToken::INACTIVE;
+}
+
+PSVariable* Token::getPSStart() const
+{
+    return (PSVariable *) getStart();
+}
+
+PSVariable* Token::getPSEnd() const
+{
+	  return (PSVariable *) getEnd();
+}
+
+PSVariable* Token::getPSDuration() const
+{
+	  return (PSVariable *) getDuration();
+}
+
+PSList<PSVariable*> Token::getPSParameters() const
+{
+  PSList<PSVariable*> retval;
+  const std::vector<ConstrainedVariableId>& vars = getVariables();
+  for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();++it) {
+	  ConstrainedVariableId id = *it;
+	  PSVariable* psVar = (PSVariable *) id;
+	  retval.push_back(psVar);
+  }
+  return retval;
+}
+
+PSVariable* Token::getParameter(const std::string& name) const
+{
+  LabelStr realName(name);
+  PSVariable* retval = NULL;
+  const std::vector<ConstrainedVariableId>& vars = getVariables();
+  for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();
+	++it) {
+  	ConstrainedVariableId id = *it;
+    if((*it)->getName() == realName) {
+	retval = (PSVariable *) id;
+	break;
+    }
+  }
+  return retval;
+}
+
+void Token::mergePS(PSToken* activeToken) 
+{
+    check_error(activeToken != NULL, "Can't merge on NULL token");
+    TokenId tok = getPlanDatabase()->getEntityByKey(activeToken->getKey());
+    merge(tok);
+}        
+
+PSList<PSToken*> Token::getCompatibleTokens(unsigned int limit, bool useExactTest) 
+{
+    std::vector<TokenId> tokens; 
+    getPlanDatabase()->getCompatibleTokens(this,tokens,limit,useExactTest);
+    PSList<PSToken*> retval;
+
+    for(unsigned int i=0;i<tokens.size();i++) {
+    	TokenId id = tokens[i];
+    	retval.push_back((PSToken *) id);
+    }
+    
+    return retval;      
+}
+
+std::string Token::toPSString() const
+{
+	std::ostringstream os;
+	
+	os << "Token(" << PSEntity::toString() << ") {" << std::endl;
+	os << "    isFact:" << isFact() << std::endl;
+	
+	if (isMerged())
+	    os << "    mergedInto:" << getActiveToken()->getKey() << std::endl;
+
+	PSList<PSVariable*> vars = getPSParameters();
+	for (int i=0;i<vars.size();i++) {
+	    os << "    " << vars.get(i)->getEntityName() << " : " << vars.get(i)->toString() << std::endl;
+	}
+
+	os << "}" << std::endl;
+	
+	return os.str();
+}
+
 }

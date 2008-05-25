@@ -10,10 +10,10 @@
 
 
 #include "PlanDatabaseDefs.hh"
-#include "Entity.hh"
 #include "LabelStr.hh"
 #include "Variable.hh"
 #include "EnumeratedDomain.hh"
+#include "PSPlanDatabase.hh"
 
 #include <set>
 #include <vector>
@@ -25,7 +25,9 @@ namespace EUROPA {
    * as object with type Rover in the plan database. 
    */
  
-  class Object: public Entity {
+	// XXX:  CANNOT INHERIT VIRTUALLY FROM 'Entity' or pointers get messed up!
+
+  class Object: public virtual PSObject, public Entity {
   public:
     DECLARE_ENTITY_TYPE(Object);
 
@@ -76,7 +78,7 @@ namespace EUROPA {
      * @brief Access the instance name of this object.
      * Instance names include the full path, delimited by ':' in the composition hierarchy.
      */
-    const LabelStr& getName() const;
+    virtual const LabelStr& getName() const;
 
     /**
      * @brief Retrieve verbose a String description.
@@ -245,6 +247,20 @@ namespace EUROPA {
     ConstraintId getPrecedenceConstraint(const TokenId& predecessor, const TokenId& successor) const;
 
     void getPrecedenceConstraints(const TokenId& token,  std::vector<ConstraintId>& results) const;
+    
+    // PS Methods:
+    virtual const std::string& getEntityType() const;
+
+    virtual std::string getObjectType() const; 
+
+    virtual PSList<PSVariable*> getMemberVariables();
+    virtual PSVariable* getMemberVariable(const std::string& name);
+
+    virtual PSList<PSToken*> getPSTokens() const;
+
+    virtual void addPrecedence(PSToken* pred,PSToken* succ);
+    virtual void removePrecedence(PSToken* pred,PSToken* succ);
+    
 
   protected:
 

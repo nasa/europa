@@ -1,14 +1,13 @@
 #ifndef _H_PSResource
 #define _H_PSResource
 
-#include "PSUtils.hh"
 #include "PSPlanDatabase.hh"
+#include "SAVH_ResourceDefs.hh"
 
 namespace EUROPA {
 
   typedef int TimePoint;
 
-  class PSResource;
   class PSResourceProfile;
   
   class PSResource : public virtual PSObject
@@ -30,9 +29,18 @@ namespace EUROPA {
     public:
       virtual ~PSResourceProfile() {}
       
-      virtual const PSList<TimePoint>& getTimes() = 0;
-      virtual double getLowerBound(TimePoint time) = 0;
-      virtual double getUpperBound(TimePoint time) = 0;
+      virtual const PSList<TimePoint>& getTimes();
+      virtual double getLowerBound(TimePoint time);
+      virtual double getUpperBound(TimePoint time);
+    protected:
+       friend class SAVH::Resource;
+       PSResourceProfile(const double lb, const double ub);
+       PSResourceProfile(const SAVH::ProfileId& profile);
+     private:
+       bool m_isConst;
+       double m_lb, m_ub;
+       PSList<TimePoint> m_times;
+       SAVH::ProfileId m_profile;
   };
 }
 

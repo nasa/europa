@@ -60,10 +60,10 @@ namespace EUROPA {
   		    break;
   		case OBJECT:
   		    {
-  		        PSEntity* obj = asObject();
-  		        debugMsg("TBS:", "About to print out object...");
+  		    	// WARNING:  Can't use PSEntityId because it's pointer is different due to 
+  		    	// virtual inheritance...
+  		    	EntityId obj(m_val);
   		        os << "OBJECT:" << obj->getEntityName() << "(" << obj->getKey() << ")";
-  		        debugMsg("TBS:", "Done printing object...");
   		    }
   		    break;
   		
@@ -86,19 +86,17 @@ namespace EUROPA {
 
   const std::string& PSVarValue::asString() const {
     check_runtime_error(m_type == STRING);
-    debugMsg("TBS:", "asString called with " << m_val);
     return LabelStr(m_val).toString();
   }
 
-  // TODO:  DON'T NEED THIS ANYMORE?
-  PSEntity* PSVarValue::asObject() const 
-  {
-    check_runtime_error(m_type == OBJECT);
-    /* TODO: provide hooks to return PSObject or other objects */
-    //return new PSEntity(EntityId(m_val));
-    PSEntityId id = PSEntityId(m_val);
-    return (PSEntity *) id;
-  }
+//  PSEntity* PSVarValue::asObject() const 
+//  {
+//    check_runtime_error(m_type == OBJECT);
+//    /* TODO: provide hooks to return PSObject or other objects */
+//    //return new PSEntity(EntityId(m_val));
+//    PSEntityId id = PSEntityId(m_val);
+//    return (PSEntity *) id;
+//  }
 
 
 }

@@ -61,21 +61,12 @@ namespace EUROPA{
       (*lit)->message;							\
   }
 
-  class BaseObjectWrapperGenerator : public ObjectWrapperGenerator 
-  {
-    public:
-        PSObject* wrap(const PSEntityId& obj) {
-            return new PSObjectImpl(obj);
-        }
-  };
-
   
   PlanDatabase::PlanDatabase(const ConstraintEngineId& constraintEngine, const SchemaId& schema)
     : m_id(this), m_constraintEngine(constraintEngine), m_schema(schema), m_state(OPEN), m_deleted(false) {
     m_client = (new DbClient(m_id))->getId();
     check_error(m_constraintEngine.isValid());
     check_error(m_schema.isValid());
-    addObjectWrapperGenerator("Object", new BaseObjectWrapperGenerator());          
   }
 
   PlanDatabase::~PlanDatabase(){	  
@@ -957,7 +948,7 @@ namespace EUROPA{
     for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it){
         ObjectId object = *it;
         if(m_schema->isA(object->getType(), objectType.c_str()))
-            retval.push_back(getObjectWrapperGenerator(object->getType())->wrap(object));
+            retval.push_back((PSObject *) object);
     }
 
     return retval;
@@ -967,13 +958,13 @@ namespace EUROPA{
   {
     ObjectId object = Entity::getEntity(id);
     check_runtime_error(object.isValid());
-    return getObjectWrapperGenerator(object->getType())->wrap(object);
+    return (PSObject *) object;
   }
 
   PSObject* PlanDatabase::getObjectByName(const std::string& name) {
     ObjectId object = getObject(LabelStr(name));
     check_runtime_error(object.isValid());
-    return getObjectWrapperGenerator(object->getType())->wrap(object);
+    return (PSObject *) object;
   }
 
   PSList<PSToken*> PlanDatabase::getAllTokens() {
@@ -981,8 +972,8 @@ namespace EUROPA{
     PSList<PSToken*> retval;
 
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
-      PSToken* tok = new PSTokenImpl(*it);
-      retval.push_back(tok);
+    	TokenId id = *it;    	
+    	retval.push_back((PSToken *) id);
     }
     
     return retval;
@@ -990,10 +981,10 @@ namespace EUROPA{
 
   PSToken* PlanDatabase::getTokenByKey(PSEntityKey id) 
   {
-
-    EntityId entity = Entity::getEntity(id);
-    check_runtime_error(entity.isValid());
-    return new PSTokenImpl(entity);
+	  //TODO:  define PSTokenId or don't use it :)
+    Id <PSToken> psId = Entity::getEntity(id);
+    check_runtime_error(psId.isValid());
+    return (PSToken *) psId; 
   }
 
   PSList<PSVariable*>  PlanDatabase::getAllGlobalVariables() {
@@ -1015,27 +1006,4 @@ namespace EUROPA{
       delete pdw;
       return planOutput;
   }
-
-  void PlanDatabase::addObjectWrapperGenerator(const LabelStr& type,
-                       ObjectWrapperGenerator* wrapper) {
-    std::map<double, ObjectWrapperGenerator*>::iterator it =
-      m_objectWrapperGenerators.find(type);
-    if(it == m_objectWrapperGenerators.end())
-      m_objectWrapperGenerators.insert(std::make_pair(type, wrapper));
-    else {
-      delete it->second;
-      it->second = wrapper;
-    }
-  }
-
-  ObjectWrapperGenerator* PlanDatabase::getObjectWrapperGenerator(const LabelStr& type) {
-    const std::vector<LabelStr>& types = m_schema->getAllObjectTypes(type);
-    for(std::vector<LabelStr>::const_iterator it = types.begin(); it != types.end(); ++it) {
-      std::map<double, ObjectWrapperGenerator*>::iterator wrapper = m_objectWrapperGenerators.find(*it);
-      if(wrapper != m_objectWrapperGenerators.end())
-          return wrapper->second;
-    }
-    checkRuntimeError(ALWAYS_FAIL,"Don't know how to wrap objects of type " << type.toString());
-    return NULL;
-  }     
 }

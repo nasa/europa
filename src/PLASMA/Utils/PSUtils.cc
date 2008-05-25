@@ -30,12 +30,11 @@ namespace EUROPA
 	  return UNKNOWN_STR; 
   }
   
-  
   std::string PSEntity::toString() const
   {
-  	std::ostringstream os;  	
-  	os << "PSEntity(" << getKey() << "," << getName() << ")";
-  	return os.str();
+	  std::stringstream sstr;
+	  sstr << getName().toString() << "(" << getKey() << ")";
+	  return sstr.str();
   }
 }
 

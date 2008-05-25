@@ -535,5 +535,47 @@ namespace EUROPA {
 //       }
 //       return false;
     }
+    
+    // PS Methods:
+    PSResourceProfile* Resource::getLimits() {
+      return new PSResourceProfile(getLowerLimit(), getUpperLimit());
+    }
+
+    PSResourceProfile* Resource::getLevels() {
+      return new PSResourceProfile(getProfile());
+    }
+    
+    PSList<PSEntityKey> Resource::getOrderingChoices(TimePoint t)
+    {
+  	  PSList<PSEntityKey> retval;
+  	  
+  	  SAVH::InstantId instant;
+  	  
+  	  SAVH::ProfileIterator it(getProfile());
+  	  while(!it.done()) {
+  	      TimePoint inst = (TimePoint) it.getTime();
+  	      if (inst == t) {
+  	          instant = it.getInstant();
+  	          break;
+  	      }
+  	      it.next();
+  	  }
+  	  
+  	  if (instant.isNoId()) {
+  		  // TODO: log error
+  		  return retval;
+  	  }
+  	  
+  	  std::vector<std::pair<SAVH::TransactionId, SAVH::TransactionId> > results;
+  	  getOrderingChoices(instant,results);
+  	  for (unsigned int i = 0;i<results.size(); i++) {
+  	      SAVH::TransactionId predecessor = results[i].first;
+  	      SAVH::TransactionId successor = results[i].second;	
+  	      retval.push_back(predecessor->time()->getParent()->getKey());
+  	      retval.push_back(successor->time()->getParent()->getKey());
+  	  }
+  	  
+  	  return retval;
+    }
   }
 }

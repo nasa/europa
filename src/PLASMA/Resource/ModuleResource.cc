@@ -10,9 +10,6 @@
 #include "SAVH_OpenWorldFVDetector.hh"
 #include "SAVH_ClosedWorldFVDetector.hh"
 #include "ResourcePropagator.hh"
-#include "PSPlanDatabase.hh"
-#include "PSResource.hh"
-#include "PSResourceImpl.hh"
 #include "TransactionInterpreter.hh"
 #include "TransactionInterpreterResources.hh"
 #include "Schema.hh"
@@ -42,15 +39,6 @@ namespace EUROPA {
   {
   }  
   
-  class ResourceWrapperGenerator : public ObjectWrapperGenerator 
-  {
-  public:
-    PSObject* wrap(const PSEntityId& obj) {
-      checkRuntimeError(SAVH::ResourceId::convertable(obj),
-			"Object " << obj->toString() << " is not a resource.");
-      return new PSResourceImpl(SAVH::ResourceId(obj));
-    }
-  }; 
   
   void ModuleResource::initialize(EngineId engine)
   {
@@ -82,10 +70,6 @@ namespace EUROPA {
 	  new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), ce->getId());
 	  new ResourcePropagator(LabelStr("Resource"), ce->getId(), pdb->getId());	  	  
 	  
-      pdb->addObjectWrapperGenerator("Reservoir", new ResourceWrapperGenerator());
-      pdb->addObjectWrapperGenerator("Reusable", new ResourceWrapperGenerator());
-      pdb->addObjectWrapperGenerator("Unary", new ResourceWrapperGenerator());
-
       // TODO: check if NDDL module is available?
       NddlXmlInterpreter* nddlXml = (NddlXmlInterpreter*)engine->getLanguageInterpreter("nddl-xml");
       if (nddlXml != NULL) {

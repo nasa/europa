@@ -14,8 +14,8 @@
 #include "LabelStr.hh"
 #include "EnumeratedDomain.hh"
 #include "IntervalIntDomain.hh"
+//#include "PSPlanDatabase.hh"
 #include "PlanDatabase.hh"
-
 
 #include <vector>
 #include <set>
@@ -32,7 +32,7 @@ namespace EUROPA {
    * @li One can speak of the start, end or duration of a Token when dealing with the temporal scope of a Token.
    * @li The following relationship holds among the temporal variables: start + duration == end.
    */
-  class Token: public Entity {
+  class Token: public virtual PSToken, public Entity {
   public:
     DECLARE_ENTITY_TYPE(Token);
 
@@ -193,12 +193,12 @@ namespace EUROPA {
     /**
      * @brief Sum of violation value for all the constraints attached to this token
      */
-    double getViolation() const; 
+    virtual double getViolation() const; 
 
     /**
      * @brief Concatenation of violation expl for all the constraints attached to this token
      */
-    std::string getViolationExpl() const;
+    virtual std::string getViolationExpl() const;
     
     /**< State checks */
     bool isIncomplete() const;
@@ -227,7 +227,7 @@ namespace EUROPA {
     /**
      * @brief True if the token was established as a fact
      */
-    bool isFact() const { return m_isFact; }
+    virtual bool isFact() const { return m_isFact; }
 
     /**
      * @brief Token becomes a fact, it's ok to call if token is already a fact
@@ -296,7 +296,7 @@ namespace EUROPA {
      * @pre isInactive
      * @post isActive
      */
-    void activate();
+    virtual void activate();
 
     /**
      * @brief Reject a token, thereby removing it from consideration in the plan.
@@ -304,7 +304,7 @@ namespace EUROPA {
      * @pre isInactive
      * @post isRejected
      */
-    void reject();
+    virtual void reject();
 
     /**
      * @brief Retracts :merge, activate, reeject
@@ -316,7 +316,7 @@ namespace EUROPA {
      * @see deactivate
      * @see reinstate
      */
-    void cancel();
+    virtual void cancel();
 
     /**
      * @brief Invoked when a constraint is added to a merged token
@@ -403,6 +403,35 @@ namespace EUROPA {
 
     virtual std::string toLongString() const;
      
+    // PS Methods:
+//    virtual const LabelStr& getName() const;
+
+    virtual const std::string& getEntityType() const;
+    virtual std::string getTokenType() const; 
+
+//    virtual bool isFact(); 
+
+    virtual PSTokenState getTokenState() const;
+    virtual PSVariable* getPSStart() const;
+    virtual PSVariable* getPSEnd() const;
+    virtual PSVariable* getPSDuration() const;
+    
+    virtual PSObject* getOwner() const; 
+    virtual PSToken* getPSMaster() const;
+    virtual PSList<PSToken*> getPSSlaves() const;
+
+    virtual PSList<PSVariable*> getPSParameters() const;
+    virtual PSVariable* getParameter(const std::string& name) const;
+
+    virtual void mergePS(PSToken* activeToken);            
+    
+    // returns active tokens that this token can be merged to
+    virtual PSList<PSToken*> getCompatibleTokens(unsigned int limit, bool useExactTest);
+
+    virtual std::string toPSString() const;
+    
+    
+    
   protected:
 
     /**

@@ -296,7 +296,7 @@ public class PSDesktop
 
     public void showTokens(PSObject o)
     {
-         PSTokenList l = o.getTokens();
+         PSTokenList l = o.getPSTokens();
          showTokens("Activities for "+o.getEntityName(),l);
     }
 
@@ -314,7 +314,7 @@ public class PSDesktop
        	 row.add(t.getKey());
        	 row.add(t.getEntityName());
        	 row.add(t.getEntityType());
-       	 PSVariableList vars = t.getParameters();
+       	 PSVariableList vars = t.getPSParameters();
        	 for (int j=0; j<vars.size();j++) {
        		 PSVariable var = vars.get(j);
        		 row.add(var.toString());

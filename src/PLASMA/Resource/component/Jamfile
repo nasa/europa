@@ -4,7 +4,6 @@ if ! $(PLASMA_READY) {
 
 ModuleComponent Resource
 		:
-		PSResourceImpl.cc
 		SAVH_TimetableProfile.cc
 		SAVH_TimetableFVDetector.cc
 		SAVH_Node.cc 

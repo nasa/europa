@@ -261,7 +261,7 @@ namespace EUROPA {
     std::string getObjectType() const;
     PSList<PSVariable*> getMemberVariables();
     PSVariable* getMemberVariable(const std::string& name);
-    PSList<PSToken*> getTokens();
+    PSList<PSToken*> getPSTokens();
     void addPrecedence(PSToken* pred,PSToken* succ);
     void removePrecedence(PSToken* pred,PSToken* succ);
     
@@ -301,34 +301,34 @@ namespace EUROPA {
     PSSolver();
   };
 
-  enum PSTokenState { INACTIVE,ACTIVE,MERGED,REJECTED };
   
   class PSToken : public PSEntity
   {
   public:
+	enum PSTokenState { INACTIVE,ACTIVE,MERGED,REJECTED };
     std::string getTokenType() const;
     
     bool isFact();
     
     PSObject* getOwner();
 
-    PSToken* getMaster();
-    PSList<PSToken*> getSlaves();
+    PSToken* getPSMaster();
+    PSList<PSToken*> getPSSlaves();
     
     PSTokenState getTokenState() const;
-    PSVariable* getStart();
-    PSVariable* getEnd();
-    PSVariable* getDuration();
+    PSVariable* getPSStart();
+    PSVariable* getPSEnd();
+    PSVariable* getPSDuration();
 
     double getViolation() const;
     std::string getViolationExpl() const;
 
-    PSList<PSVariable*> getParameters();
+    PSList<PSVariable*> getPSParameters();
     PSVariable* getParameter(const std::string& name);
     
     void activate();      
     void reject();      
-    void merge(PSToken* activeToken);            
+    void mergePS(PSToken* activeToken);            
     void cancel(); 
     
     PSList<PSToken*> getCompatibleTokens(unsigned int limit, bool useExactTest);
@@ -380,7 +380,7 @@ namespace EUROPA {
 
     PSVarType getType() const;
 
-    PSEntity*           asObject() const;
+   // PSEntity*           asObject() const;
     int                 asInt() const;
     double              asDouble() const;
     bool                asBoolean() const;

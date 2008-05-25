@@ -4,6 +4,8 @@ if ! $(PLASMA_READY) {
 
 ModuleBase Resource
 	:
+	PSResource.cc
+	SAVH_Resource.cc
 	Resource.cc
 	Transaction.cc
 	Instant.cc
@@ -14,7 +16,6 @@ ModuleBase Resource
 	SAVH_Instant.cc
 	SAVH_FVDetector.cc
 	SAVH_Profile.cc
-	SAVH_Resource.cc
 	SAVH_ProfilePropagator.cc
 	SAVH_ResourceTokenRelation.cc
 	;
