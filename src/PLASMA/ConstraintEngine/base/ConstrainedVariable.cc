@@ -494,6 +494,7 @@ namespace EUROPA {
 	  else {
 		  checkError(ALWAYS_FAIL, "Failed to correctly determine the type of " << toString());
 	  }
+	  return answer;
   }
 
 

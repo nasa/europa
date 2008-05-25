@@ -36,7 +36,6 @@ namespace EUROPA {
   class PSVariable : public virtual PSEntity
   {
     public:
-//    	PSVariable();
     	virtual ~PSVariable() {}
 
     	virtual const std::string& getEntityType() const;

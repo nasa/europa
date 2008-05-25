@@ -53,9 +53,6 @@ namespace EUROPA {
     	const int m_key;
   };	      
 
-  // TODO:  Move elsewhere (if we really need this)
-  typedef Id<PSEntity> PSEntityId;
- 
 }
 
 #endif
