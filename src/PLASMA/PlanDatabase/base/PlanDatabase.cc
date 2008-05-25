@@ -1,6 +1,5 @@
 #include "PlanDatabase.hh"
 #include "PlanDatabaseWriter.hh"
-#include "PSPlanDatabaseImpl.hh"
 #include "Object.hh"
 #include "Schema.hh"
 #include "Token.hh"

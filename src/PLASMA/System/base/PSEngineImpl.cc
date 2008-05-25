@@ -11,7 +11,6 @@
 
 #include "Constraint.hh"
 #include "PlanDatabase.hh"
-#include "PSPlanDatabaseImpl.hh"
 #include "PSSolversImpl.hh"
 
 namespace EUROPA {
