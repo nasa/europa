@@ -122,17 +122,6 @@ namespace EUROPA {
       REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreat); 
       EUROPA::SOLVERS::MatchingEngine::addMatchFinder(SAVH::Instant::entityTypeName(),(new EUROPA::SOLVERS::InstantMatchFinder())->getId()); 
       
-      Schema* schema = (Schema*)(engine->getComponent("Schema"));
-      schema->declareObjectType("Resource");
-      schema->declareObjectType("Reusable");
-      schema->declareObjectType("Reservoir");
-      
-      PlanDatabase* pdb = (PlanDatabase*)(engine->getComponent("PlanDatabase"));
-	  ConstraintEngine* ce = (ConstraintEngine*)(engine->getComponent("ConstraintEngine"));
-
-	  new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), ce->getId());
-	  new ResourcePropagator(LabelStr("Resource"), ce->getId(), pdb->getId());	  	  
-	  
       NddlXmlInterpreter* nddlXml = (NddlXmlInterpreter*)engine->getLanguageInterpreter("nddl-xml");
       if (nddlXml != NULL) {
           std::vector<std::string> nativeTokens;
