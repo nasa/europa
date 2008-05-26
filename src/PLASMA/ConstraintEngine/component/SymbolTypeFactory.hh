@@ -6,7 +6,7 @@
 
 namespace EUROPA {
 
-  class SymbolTypeFactory : public ConcreteTypeFactory {
+  class SymbolTypeFactory : public TypeFactory {
   public:
     SymbolTypeFactory(const char* name = SymbolDomain::getDefaultTypeName().c_str());
     SymbolTypeFactory(const char* name, const SymbolDomain& baseDomain);

@@ -258,7 +258,7 @@ namespace EUROPA
     return ((new VariableChangeListener(variable, m_id))->getId());
   }
 
-  ConstraintEngine::ConstraintEngine() 
+  ConstraintEngine::ConstraintEngine(const TypeFactoryMgrId& tfm) 
     : m_id(this)
     , m_relaxing(false)
     , m_relaxingViolation(false)
@@ -270,6 +270,7 @@ namespace EUROPA
     , m_cycleCount(1)
     , m_mostRecentRepropagation(1)
     , m_autoPropagate(true)
+    , m_typeFactoryMgr(tfm)
   {
     m_violationMgr = new ViolationMgrImpl(0);
   }
@@ -299,10 +300,16 @@ namespace EUROPA
      }
   }
     
-  const ConstraintEngineId& ConstraintEngine::getId() const {
+  const ConstraintEngineId& ConstraintEngine::getId() const 
+  {
     return(m_id);
   }
 
+  const TypeFactoryMgrId& ConstraintEngine::getTypeFactoryMgr() const
+  {
+      return m_typeFactoryMgr;
+  }
+  
   void ConstraintEngine::purge() {
     m_purged = true;
     // Iteratively delete constraints. Note that each deletion will update the set

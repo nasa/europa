@@ -58,8 +58,11 @@ namespace EUROPA {
   
   void ModulePlanDatabase::initialize(EngineId engine)
   {
-      Schema* schema = new Schema("EngineSchema"); // TODO: use engine name
+      TypeFactoryMgr* tfm = (TypeFactoryMgr*)engine->getComponent("TypeFactoryMgr");
+      
+      Schema* schema = new Schema("EngineSchema",tfm->getId()); // TODO: use engine name
       engine->addComponent("Schema",schema);
+      schema->addObjectType("Timeline");
 
       ConstraintEngine* ce = (ConstraintEngine*)engine->getComponent("ConstraintEngine");
       PlanDatabase* pdb = new PlanDatabase(ce->getId(), schema->getId());      

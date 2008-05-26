@@ -42,18 +42,87 @@ namespace EUROPA {
   
   void ModuleResource::initialize(EngineId engine)
   {
-      REGISTER_SYSTEM_CONSTRAINT(ResourceConstraint, "ResourceTransactionRelation", "Resource");
+      ConstraintEngine* ce = (ConstraintEngine*)(engine->getComponent("ConstraintEngine"));
+      Schema* schema = (Schema*)(engine->getComponent("Schema"));
+      PlanDatabase* pdb = (PlanDatabase*)(engine->getComponent("PlanDatabase"));
 
+      REGISTER_SYSTEM_CONSTRAINT(ResourceConstraint, "ResourceTransactionRelation", "Resource");
+	  new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), ce->getId());
+	  new ResourcePropagator(LabelStr("Resource"), ce->getId(), pdb->getId());	  	  
+	  
+      // TODO: this should go away soon
+      pdb->addObjectWrapperGenerator("Resource", new ResourceWrapperGenerator());
+      pdb->addObjectWrapperGenerator("Reservoir", new ResourceWrapperGenerator());
+      pdb->addObjectWrapperGenerator("Reusable", new ResourceWrapperGenerator());
+      pdb->addObjectWrapperGenerator("Unary", new ResourceWrapperGenerator());
+      
+      schema->addObjectType("Resource");      
+      schema->addMember("Resource", "float", "initialCapacity");
+      schema->addMember("Resource", "float", "levelLimitMin");
+      schema->addMember("Resource", "float", "levelLimitMax");
+      schema->addMember("Resource", "float", "productionRateMax");
+      schema->addMember("Resource", "float", "productionMax");
+      schema->addMember("Resource", "float", "consumptionRateMax");
+      schema->addMember("Resource", "float", "consumptionMax");
+      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource);                   
+      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float);                     
+      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float:float:float);                     
+      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float:float:float:float:float);                     
+      schema->addPredicate("Resource.change");      
+      schema->addMember("Resource.change", "float", "quantity");
+      new ResourceChangeTokenFactory("Resource.change");
+
+      schema->addObjectType("Reusable");
+      schema->addMember("Reusable", "float", "capacity");
+      schema->addMember("Reusable", "float", "levelLimitMin");
+      schema->addMember("Reusable", "float", "consumptionMax");
+      schema->addMember("Reusable", "float", "consumptionRateMax");
+      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable);                   
+      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:float:float);                   
+      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:float:float:float);                     
+      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:float:float:float:float);                   
+      schema->addPredicate("Reusable.uses");      
+      schema->addMember("Reusable.uses", "float", "quantity");
+      new ReusableUsesTokenFactory("Reusable.uses");
+
+      schema->addObjectType("Reservoir");
+      schema->addMember("Reservoir", "float", "initialCapacity");
+      schema->addMember("Reservoir", "float", "levelLimitMin");
+      schema->addMember("Reservoir", "float", "levelLimitMax");
+      schema->addMember("Reservoir", "float", "productionRateMax");
+      schema->addMember("Reservoir", "float", "productionMax");
+      schema->addMember("Reservoir", "float", "consumptionRateMax");
+      schema->addMember("Reservoir", "float", "consumptionMax");
+      REGISTER_OBJECT_FACTORY(ReservoirObjectFactory, Reservoir);                     
+      REGISTER_OBJECT_FACTORY(ReservoirObjectFactory, Reservoir:float:float:float);                   
+      REGISTER_OBJECT_FACTORY(ReservoirObjectFactory, Reservoir:float:float:float:float:float);                   
+      REGISTER_OBJECT_FACTORY(ReservoirObjectFactory, Reservoir:float:float:float:float:float:float:float);                   
+
+      schema->addPredicate("Reservoir.produce");      
+      schema->addMember("Reservoir.produce", "float", "quantity");
+      new ReservoirProduceTokenFactory("Reservoir.produce");      
+
+      schema->addPredicate("Reservoir.consume");      
+      schema->addMember("Reservoir.consume", "float", "quantity");
+      new ReservoirConsumeTokenFactory("Reservoir.consume");      
+      
+      schema->addObjectType("Unary");
+      schema->addMember("Unary", "float", "consumptionMax");
+      REGISTER_OBJECT_FACTORY(UnaryObjectFactory, Unary);                     
+      REGISTER_OBJECT_FACTORY(UnaryObjectFactory, Unary:float);                   
+      schema->addPredicate("Unary.use");
+      new UnaryUseTokenFactory("Unary.use");             
+      
       REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile );
       REGISTER_PROFILE(EUROPA::SAVH::FlowProfile, FlowProfile);
       REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile );
       
+      // Solver
       REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
       REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
       REGISTER_FVDETECTOR(EUROPA::SAVH::OpenWorldFVDetector, OpenWorldFVDetector);
       REGISTER_FVDETECTOR(EUROPA::SAVH::ClosedWorldFVDetector, ClosedWorldFVDetector);               
 
-      // Solver
       REGISTER_FLAW_MANAGER(SAVH::ThreatManager, SAVHThreatManager); 
       REGISTER_FLAW_HANDLER(SAVH::ThreatDecisionPoint, SAVHThreatHandler); 
       REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreat); 
@@ -70,7 +139,6 @@ namespace EUROPA {
 	  new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), ce->getId());
 	  new ResourcePropagator(LabelStr("Resource"), ce->getId(), pdb->getId());	  	  
 	  
-      // TODO: check if NDDL module is available?
       NddlXmlInterpreter* nddlXml = (NddlXmlInterpreter*)engine->getLanguageInterpreter("nddl-xml");
       if (nddlXml != NULL) {
           std::vector<std::string> nativeTokens;
@@ -85,27 +153,14 @@ namespace EUROPA {
           nativeTokens.push_back("Reservoir.produce");
           nativeTokens.push_back("Reservoir.consume");
           nddlXml->addNativeClass("Reservoir",nativeTokens);
+          
+          nativeTokens.clear();
+          nativeTokens.push_back("Unary.use");
+          nddlXml->addNativeClass("Unary",nativeTokens);
       }
-      
-      // TODO: expose Unary           
-      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource);                   
-      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float);                     
-      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float:float:float);                     
-      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float:float:float:float:float);                     
-      new ResourceChangeTokenFactory("Resource.change");
-
-      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable);                   
-      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:float:float);                   
-      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:float:float:float);                     
-      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:float:float:float:float);                   
-      new ReusableUsesTokenFactory("Reusable.uses");
-
-      REGISTER_OBJECT_FACTORY(ReservoirObjectFactory, Reservoir);                     
-      REGISTER_OBJECT_FACTORY(ReservoirObjectFactory, Reservoir:float:float:float);                   
-      REGISTER_OBJECT_FACTORY(ReservoirObjectFactory, Reservoir:float:float:float:float:float);                   
-      REGISTER_OBJECT_FACTORY(ReservoirObjectFactory, Reservoir:float:float:float:float:float:float:float);                   
-      new ReservoirProduceTokenFactory("Reservoir.produce");      
-      new ReservoirConsumeTokenFactory("Reservoir.consume");      
+      else {
+          // TODO: log a warning/info?
+      }      
   }
   
   void ModuleResource::uninitialize(EngineId engine)

@@ -694,17 +694,20 @@ namespace EUROPA {
       std::string fullVariableName(m_name.toString() + "." + name);
       
       ConstrainedVariableId id = 
-    	  TypeFactory::createVariable(baseDomain.getTypeName().c_str(),
+          m_planDatabase->getConstraintEngine()->getTypeFactoryMgr()->createVariable(
+	                baseDomain.getTypeName().c_str(),
 				    m_planDatabase->getConstraintEngine(), 
 				    baseDomain,
 				    true,
 				    fullVariableName.c_str(),
 				    m_id,
-				    m_variables.size());
+				    m_variables.size()
+	      );
+      
       m_variables.push_back(id);
 
       if(id->baseDomain().isSingleton())
-	id->specify(id->baseDomain().getSingletonValue());
+          id->specify(id->baseDomain().getSingletonValue());
 
       return(id);
     }

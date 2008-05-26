@@ -33,30 +33,27 @@
 #include "SAVH_DurativeTokens.hh"
 
 #include "Debug.hh"
+#include "Engine.hh"
 
 #include <iostream>
 #include <string>
 #include <list>
 
+class ResourceTestEngine  : public EngineBase
+{
+  public:  
+    ResourceTestEngine();
+    virtual ~ResourceTestEngine();
+    
+  protected: 
+    void createModules();
+};
+
+
 #define RESOURCE_DEFAULT_SETUP(ce, db, autoClose) \
-    ConstraintEngine ce; \
-    REGISTER_SYSTEM_CONSTRAINT(LessThanEqualConstraint, "precedes", "Temporal"); \
-    REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporalDistance", "Temporal"); \
-    SchemaId schema = Schema::testInstance();\
-    schema->reset();\
-    schema->addObjectType(LabelStr("Resource")); \
-    schema->addObjectType(LabelStr("SAVHResource")); \
-    schema->addPredicate(LabelStr("Resource.change"));\
-    schema->addMember(LabelStr("Resource.change"), IntervalDomain().getTypeName(), LabelStr("quantity")); \
-    schema->addObjectType(LabelStr("Reusable")); \
-    schema->addPredicate(LabelStr("Reusable.uses")); \
-  schema->addMember(LabelStr("Reusable.uses"), IntervalDomain().getTypeName(), LabelStr("quantity")); \
-    PlanDatabase db(ce.getId(), schema); \
-    new DefaultPropagator(LabelStr("Default"), ce.getId()); \
-    new ResourcePropagator(LabelStr("Resource"), ce.getId(), db.getId()); \
-    new TemporalPropagator(LabelStr("Temporal"), ce.getId()); \
-    new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), ce.getId()); \
-    db.setTemporalAdvisor((new STNTemporalAdvisor(ce.getPropagatorByName(LabelStr("Temporal"))))->getId()); \
+    ResourceTestEngine rte; \
+    ConstraintEngine& ce = *((ConstraintEngine*)rte.getComponent("ConstraintEngine")); \
+    PlanDatabase& db = *((PlanDatabase*)rte.getComponent("PlanDatabase")); \
     if (autoClose) \
       db.close();
 
@@ -75,6 +72,7 @@ private:
     assertTrue(db.isClosed() == false);
     db.close();
     assertTrue(db.isClosed() == true);
+    assertTrue(ce.constraintConsistent() == true);
 
     RESOURCE_DEFAULT_TEARDOWN();
     return true;
@@ -1433,18 +1431,9 @@ private:
 
 void FlowProfileModuleTests::runTests( const std::string& path) {
   setTestLoadLibraryPath(path);  
-
-  
-  Schema::testInstance();
-  initConstraintLibrary();
-  REGISTER_PROFILE(EUROPA::SAVH::FlowProfile, FlowProfile);
-  REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile);
-  REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
-
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(FlowProfileTest::test);
   runTestSuite(FVDetectorTest::test);
-  uninitConstraintLibrary();
   std::cout << "Finished" << std::endl;
 }
 

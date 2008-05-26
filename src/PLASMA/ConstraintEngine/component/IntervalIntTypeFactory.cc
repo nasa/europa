@@ -9,12 +9,12 @@ namespace EUROPA {
   //
 
   IntervalIntTypeFactory::IntervalIntTypeFactory(const char* name)
-   : ConcreteTypeFactory(name), m_baseDomain(name)
+   : TypeFactory(name), m_baseDomain(name)
   {
   }
 
   IntervalIntTypeFactory::IntervalIntTypeFactory(const char* name, const IntervalIntDomain& baseDomain)
-   : ConcreteTypeFactory(name), m_baseDomain(baseDomain)
+   : TypeFactory(name), m_baseDomain(baseDomain)
   {
   }
 

@@ -44,16 +44,6 @@ namespace EUROPA {
   typedef std::list<ConstraintEntry> ConstraintList;
 
   /**
-   * @brief Initialize all default elements of the module e.g. factories
-   */
-  void initConstraintEngine();
-
-  /**
-   * @brief Uninitialize all default elements of the module e.g. factories
-   */
-  void uninitConstraintEngine();
-
-  /**
    * @brief Helper method to cast singleton values
    */
   template<class T>

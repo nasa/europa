@@ -229,7 +229,6 @@ namespace EUROPA {
 
   bool executeTestCases(const ConstraintEngineId& engine,
 			std::list<ConstraintTestCase>& testCases) {
-    initConstraintEngine();
     // Run each test, in the same order they appear in the list,
     //   keeping a count of failed test cases.
     unsigned int problemCount = 0;
@@ -240,7 +239,9 @@ namespace EUROPA {
 	it != ConstraintTestCase::symbolDomainsMap().end(); ++it) {
       debugMsg("ConstraintTesting:executeTestCases","Attempting to register a type factory for symbolic type " << it->first);
       it->second->close();
-      new SymbolTypeFactory(it->first.c_str(), *it->second);
+      engine->getTypeFactoryMgr()->registerFactory(
+              (new SymbolTypeFactory(it->first.c_str(), *it->second))->getId()
+      );
     }
 
     for ( ; !testCases.empty(); testCases.pop_front()) {
@@ -270,7 +271,7 @@ namespace EUROPA {
         testDomains.pop_front();
 
 	LabelStr typeName = domPtr->getTypeName();
-	cVarId = TypeFactory::createVariable(typeName.c_str(), engine, *domPtr);
+	cVarId = engine->getTypeFactoryMgr()->createVariable(typeName.c_str(), engine, *domPtr);
 
         delete domPtr;
         scope.push_back(cVarId);
@@ -353,8 +354,6 @@ namespace EUROPA {
                 << problemCount << " test cases" << std::endl;
       throw Error::GeneralUnknownError();
     }
-    //TypeFactory::purgeAll();
-    uninitConstraintEngine();
     return(true);
   }
 

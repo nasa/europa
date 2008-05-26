@@ -58,7 +58,7 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("string")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("string")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
       check_error(arguments[0]->isSingleton());
       LabelStr _data((LabelStr)arguments[0]->getSingletonValue());
@@ -205,7 +205,6 @@ namespace NDDL {
     Id<Schema> id = Schema::testInstance("nddl.tx.2");
     // Register Constraints
     // Invoke commands to populate schema with type definitions
-    id->addObjectType("Timeline","Object");
     id->addObjectType("StringData", "Object");
     id->addObjectType("Foo", "Timeline");
     id->addEnum("TokenStates");
@@ -226,12 +225,9 @@ namespace NDDL {
     REGISTER_TOKEN_FACTORY(Foo::pred2::Factory);
     REGISTER_TOKEN_FACTORY(Foo::pred3::Factory);
     REGISTER_TOKEN_FACTORY(Foo::pred4::Factory);
-    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
-    REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
-    REGISTER_TYPE_FACTORY(Timeline, ObjectDomain("Timeline"));
-    REGISTER_TYPE_FACTORY(StringData, ObjectDomain("StringData"));
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),TokenStates, TokenStatesBaseDomain());
     REGISTER_OBJECT_FACTORY(StringDataFactory0, StringData:string);
-    REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
     REGISTER_OBJECT_FACTORY(FooFactory1, Foo);
     // Allocate rules
     return id;

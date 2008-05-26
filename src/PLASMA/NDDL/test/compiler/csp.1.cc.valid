@@ -102,7 +102,6 @@ namespace NDDL {
     Id<Schema> id = Schema::testInstance("csp.1");
     // Register Constraints
     // Invoke commands to populate schema with type definitions
-    id->addObjectType("Timeline","Object");
     id->addEnum("Ints");
     id->addEnum("Floats");
     id->addEnum("Strings");
@@ -129,14 +128,14 @@ namespace NDDL {
     id->addValue("Color", LabelStr("Blue"));
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
-    REGISTER_TYPE_FACTORY(Ints, IntsBaseDomain());
-    REGISTER_TYPE_FACTORY(Floats, FloatsBaseDomain());
-    REGISTER_TYPE_FACTORY(Strings, StringsBaseDomain());
-    REGISTER_TYPE_FACTORY(Symbol, SymbolBaseDomain());
-    REGISTER_TYPE_FACTORY(Fruit, FruitBaseDomain());
-    REGISTER_TYPE_FACTORY(Speed, SpeedBaseDomain());
-    REGISTER_TYPE_FACTORY(Color, ColorBaseDomain());
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Ints, IntsBaseDomain());
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Floats, FloatsBaseDomain());
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Strings, StringsBaseDomain());
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Symbol, SymbolBaseDomain());
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Fruit, FruitBaseDomain());
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Speed, SpeedBaseDomain());
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Color, ColorBaseDomain());
     // Allocate rules
     return id;
   }

@@ -56,10 +56,12 @@ namespace EUROPA {
     // TODO: Add native class method must be modified to also register native factories
     // also, get NddlModule to register these instead?  
     std::vector<std::string> noNativeTokens;
-    addNativeClass("Object",noNativeTokens);
+    std::string root = Schema::rootObject().toString();
+    
+    addNativeClass(root,noNativeTokens);
+    createDefaultObjectFactory(root.c_str(), true);
+    
     addNativeClass("Timeline", noNativeTokens);     
-
-    createDefaultObjectFactory("Object", true);
     REGISTER_OBJECT_FACTORY(TimelineObjectFactory, Timeline);                              
   }
 
@@ -125,21 +127,18 @@ namespace EUROPA {
   {
     const char* className = element.Attribute("name");
 
+    if (m_nativeClasses.find(className) != m_nativeClasses.end()) {
+        // TODO: should always be displayed as WARNING!
+        debugMsg("XMLInterpreter:XML","Skipping definition for native class : " << className);
+        return;
+    }
+    
     const char* parentClassName = element.Attribute("extends");
     parentClassName = (parentClassName == NULL ? "Object" : parentClassName);
 
-    // TODO: should do nothing here for native classes, need to make Plasma.nddl consistent with this
     Id<Schema> schema = getSchema();
     schema->addObjectType(className,parentClassName);
     
-    // The TypeFactory constructor automatically registers the factory
-    // TODO: This should probably be done by Schema::addObjectType
-    new EnumeratedTypeFactory(
-			      className,
-			      className,
-			      ObjectDomain(className)
-			      );             
- 
     dbgout.str("");
     dbgout << "class " << className  
 	   << (parentClassName != NULL ? " extends " : "") 
@@ -151,23 +150,17 @@ namespace EUROPA {
       const char * tagname = child->Value();
     	
       if (strcmp(tagname, "var") == 0) 
-	defineClassMember(schema,className,child);
+          defineClassMember(schema,className,child);
       else if (strcmp(tagname, "constructor") == 0) { 
-	if (m_nativeClasses.find(className) == m_nativeClasses.end()) {
-	  defineConstructor(schema,className,child);
-	  definedConstructor = true;
-	}
-	else {	
-	  // TODO: should always be displayed as WARNING!
-	  debugMsg("XMLInterpreter:XML","Skipping constructor declaration for System class : " << className);
-	}	  
-      }  	    	
+	      defineConstructor(schema,className,child);
+	      definedConstructor = true;
+	  }
       else if (strcmp(tagname, "predicate") == 0) 
-	declarePredicate(schema,className,child);	    	
+          declarePredicate(schema,className,child);	    	
       else if (strcmp(tagname, "enum") == 0) 
-	defineEnum(schema,className,child);	  
+          defineEnum(schema,className,child);	  
       else
-	check_runtime_error(ALWAYS_FAILS,std::string("Unexpected element ")+tagname+" while defining class "+className);  	
+          check_runtime_error(ALWAYS_FAILS,std::string("Unexpected element ")+tagname+" while defining class "+className);  	
     }
 
     // Register a default factory with no arguments if one is not provided explicitly
@@ -490,92 +483,93 @@ namespace EUROPA {
 							   std::vector<RuleExpr*>& ruleBody,
 							   std::map<std::string,std::string>& localVars)
   {
-    int slave_cnt = 0;      
-      
-    for(const TiXmlElement* child = element->FirstChildElement(); child; child = child->NextSiblingElement() ) {
-      if (strcmp(child->Value(),"invoke") == 0) {
+      int slave_cnt = 0;      
 
-	std::vector<Expr*> constraintArgs;
-	for(const TiXmlElement* arg = child->FirstChildElement(); arg; arg = arg->NextSiblingElement() ) 
-	  constraintArgs.push_back(valueToExpr(arg));
-            	
-      		ruleBody.push_back(new ExprConstraint(child->Attribute("name"),constraintArgs));
-      	}
-      	else if (strcmp(child->Value(),"subgoal") == 0) {
-      		const char* predicateInstance = NULL;
-      		const char* name = NULL;
-      		const char* relation = child->Attribute("relation");
-      		const char* origin = child->Attribute("origin");
-      		
-      		if (origin == NULL) {
-	            for(const TiXmlElement* arg = child->FirstChildElement(); arg; arg = arg->NextSiblingElement() ) {
-	            	if (strcmp(arg->Value(),"predicateinstance") == 0) { 
-	            		predicateInstance = arg->Attribute("type");
-	            		name = arg->Attribute("name");
-	            	}            		
-	             	else 
-	      	            check_runtime_error(ALWAYS_FAILS,std::string("Unknown subgoal element:") + arg->Value());
-	            }
-	            check_runtime_error(predicateInstance != NULL,"predicate instance in a subgoal cannot be null");
-	
-	            const char* predicateType = predicateInstanceToType(className, predName.c_str(), predicateInstance,localVars).c_str();    
-	            if (name == NULL) {
-	            	std::ostringstream tmpname;
-	            	tmpname << "slave" << (slave_cnt++);            
-	                name = LabelStr(tmpname.str()).c_str();
-	            }                 
-	      		ruleBody.push_back(new ExprSubgoal(name,predicateType,predicateInstance,relation));
-      		}
-      		else {
-      		  const char* target = child->Attribute("target");
-      		  // TODO:	
-         	  //ruleBody.push_back(new ExprRelation(relation,origin,target));
-         	  check_runtime_error(ALWAYS_FAIL,"don't know how to deal with relation-only subgoals yet. relation="+std::string(relation)+" origin="+origin+" target="+target); 
-      		}
-      	}
-      	else if (strcmp(child->Value(),"var") == 0) {
-      		LabelStr name(child->Attribute("name"));
-      		LabelStr type(child->Attribute("type"));
-      		localVars[name.toString()]=type.toString();
+      for(const TiXmlElement* child = element->FirstChildElement(); child; child = child->NextSiblingElement() ) {
+          if (strcmp(child->Value(),"invoke") == 0) {
 
-	Expr* domainRestriction=NULL;        		
-	if (child->FirstChildElement() != NULL)
-	  domainRestriction=valueToExpr(child->FirstChildElement());
-      	              		
-	ruleBody.push_back(new ExprLocalVar(name,type, isGuarded(name,element), domainRestriction));
-      }
-      else if (strcmp(child->Value(),"if") == 0) {
-	const TiXmlElement* opElement = child->FirstChildElement();
-	const TiXmlElement* opArg = opElement->FirstChildElement();
-      		
-	Expr *lhs=NULL,*rhs=NULL;
-	std::string op = "equals";      		
-      		      		
-	if (opArg != NULL) {
-	  lhs = valueToExpr(opArg);
-	  rhs = valueToExpr(opArg->NextSiblingElement());
-	  op = opElement->Value();
-	}
-	else {
-	  lhs = valueToExpr(opElement);
-	}
-      		
-	std::vector<RuleExpr*> ifBody;
-	buildRuleBody(className,predName,opElement->NextSiblingElement(),ifBody,localVars);
-	ruleBody.push_back(new ExprIf(op.c_str(),lhs,rhs,ifBody));
-      }
-      else if (strcmp(child->Value(),"loop") == 0) {
-	const char* varName = child->Attribute("name");
-	const char* varType = child->Attribute("type");
-	const char* varValue = child->Attribute("value");
-	localVars[varName]=varType;
-	std::vector<RuleExpr*> loopBody;
-	buildRuleBody(className,predName,child->FirstChildElement(),loopBody,localVars);
-	ruleBody.push_back(new ExprLoop(varName,varType,varValue,loopBody));
-      }
-      else 
-	check_runtime_error(ALWAYS_FAILS,std::string("Unknown Compatibility element:") + child->Value());
-    }      
+              std::vector<Expr*> constraintArgs;
+              for(const TiXmlElement* arg = child->FirstChildElement(); arg; arg = arg->NextSiblingElement() ) 
+                  constraintArgs.push_back(valueToExpr(arg));
+
+              ruleBody.push_back(new ExprConstraint(child->Attribute("name"),constraintArgs));
+          }
+          else if (strcmp(child->Value(),"subgoal") == 0) {
+              const char* predicateInstance = NULL;
+              const char* name = NULL;
+              const char* relation = child->Attribute("relation");
+              const char* origin = child->Attribute("origin");
+
+              if (origin == NULL) {
+                  for(const TiXmlElement* arg = child->FirstChildElement(); arg; arg = arg->NextSiblingElement() ) {
+                      if (strcmp(arg->Value(),"predicateinstance") == 0) { 
+                          predicateInstance = arg->Attribute("type");
+                          name = arg->Attribute("name");
+                      }            		
+                      else 
+                          check_runtime_error(ALWAYS_FAILS,std::string("Unknown subgoal element:") + arg->Value());
+                  }
+                  check_runtime_error(predicateInstance != NULL,"predicate instance in a subgoal cannot be null");
+
+                  const char* predicateType = predicateInstanceToType(className, predName.c_str(), predicateInstance,localVars).c_str();    
+                  if (name == NULL) {
+                      std::ostringstream tmpname;
+                      tmpname << "slave" << (slave_cnt++);            
+                      name = LabelStr(tmpname.str()).c_str();
+                  }                 
+                  ruleBody.push_back(new ExprSubgoal(name,predicateType,predicateInstance,relation));
+              }
+              else {
+                  const char* target = child->Attribute("target");
+                  // TODO:	
+                  //ruleBody.push_back(new ExprRelation(relation,origin,target));
+                  check_runtime_error(ALWAYS_FAIL,"don't know how to deal with relation-only subgoals yet. relation="+std::string(relation)+" origin="+origin+" target="+target); 
+              }
+          }
+          else if (strcmp(child->Value(),"var") == 0) {
+              LabelStr name(child->Attribute("name"));
+              LabelStr type(child->Attribute("type"));
+              localVars[name.toString()]=type.toString();
+
+              Expr* domainRestriction=NULL;        		
+              if (child->FirstChildElement() != NULL)
+                  domainRestriction=valueToExpr(child->FirstChildElement());   
+              
+              const AbstractDomain& baseDomain = getTypeFactoryMgr()->baseDomain(type.c_str());
+              ruleBody.push_back(new ExprLocalVar(name,type, isGuarded(name,element), domainRestriction, baseDomain));
+          }
+          else if (strcmp(child->Value(),"if") == 0) {
+              const TiXmlElement* opElement = child->FirstChildElement();
+              const TiXmlElement* opArg = opElement->FirstChildElement();
+
+              Expr *lhs=NULL,*rhs=NULL;
+              std::string op = "equals";      		
+
+              if (opArg != NULL) {
+                  lhs = valueToExpr(opArg);
+                  rhs = valueToExpr(opArg->NextSiblingElement());
+                  op = opElement->Value();
+              }
+              else {
+                  lhs = valueToExpr(opElement);
+              }
+
+              std::vector<RuleExpr*> ifBody;
+              buildRuleBody(className,predName,opElement->NextSiblingElement(),ifBody,localVars);
+              ruleBody.push_back(new ExprIf(op.c_str(),lhs,rhs,ifBody));
+          }
+          else if (strcmp(child->Value(),"loop") == 0) {
+              const char* varName = child->Attribute("name");
+              const char* varType = child->Attribute("type");
+              const char* varValue = child->Attribute("value");
+              localVars[varName]=varType;
+              std::vector<RuleExpr*> loopBody;
+              buildRuleBody(className,predName,child->FirstChildElement(),loopBody,localVars);
+              ruleBody.push_back(new ExprLoop(varName,varType,varValue,loopBody));
+          }
+          else 
+              check_runtime_error(ALWAYS_FAILS,std::string("Unknown Compatibility element:") + child->Value());
+      }      
   }
   
   void NddlXmlInterpreter::playDefineCompat(const TiXmlElement& element)
@@ -619,11 +613,11 @@ namespace EUROPA {
       values.push_back(newValue);
     }	      
       
-    new EnumeratedTypeFactory(
+    getTypeFactoryMgr()->registerFactory((new EnumeratedTypeFactory(
 			      enumName,
 			      enumName,
 			      EnumeratedDomain(values,false,enumName)
-			      );             
+			      ))->getId());             
       
   }
 
@@ -638,7 +632,7 @@ namespace EUROPA {
     const AbstractDomain& domain = (
 				    restrictedDomain != NULL 
 				    ? *restrictedDomain 
-				    : TypeFactory::baseDomain(element.Attribute("basetype"))
+				    : getTypeFactoryMgr()->baseDomain(element.Attribute("basetype"))
 				    );
       
       
@@ -1076,12 +1070,16 @@ namespace EUROPA {
     return DataRef::null;
   }  
   	 
-  ExprLocalVar::ExprLocalVar(const LabelStr& name,const LabelStr& type, bool guarded, Expr* domainRestriction)
+  ExprLocalVar::ExprLocalVar(const LabelStr& name,
+                             const LabelStr& type, 
+                             bool guarded, 
+                             Expr* domainRestriction,
+                             const AbstractDomain& baseDomain)
     : m_name(name)
     , m_type(type)
     , m_guarded(guarded)
     , m_domainRestriction(domainRestriction)
-    , m_baseDomain(TypeFactory::baseDomain(type.c_str())) 		
+    , m_baseDomain(baseDomain) 		
   {
   }
   	
@@ -1342,7 +1340,8 @@ namespace EUROPA {
         for (unsigned int i=0; i < members.size(); i++) {
             std::string varName = instance->getName().toString() + "." + members[i].second.toString();
             if (instance->getVariable(varName) == ConstrainedVariableId::noId()) {
-	            const AbstractDomain& baseDomain = TypeFactory::baseDomain(members[i].first.c_str()); 
+	            const AbstractDomain& baseDomain = 
+	                instance->getPlanDatabase()->getConstraintEngine()->getTypeFactoryMgr()->baseDomain(members[i].first.c_str()); 
 	            instance->addVariable(
 			      baseDomain,
 			      members[i].second.c_str()
@@ -1480,7 +1479,7 @@ namespace EUROPA {
       }
       else {
 	parameter = addParameter(
-				 TypeFactory::baseDomain(parameterTypes[i].c_str()),
+				 getPlanDatabase()->getConstraintEngine()->getTypeFactoryMgr()->baseDomain(parameterTypes[i].c_str()),
 				 parameterNames[i]
 				 );
       }

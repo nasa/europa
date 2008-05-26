@@ -66,11 +66,30 @@ public:
 int DelegationTestConstraint::s_executionCount = 0;
 int DelegationTestConstraint::s_instanceCount = 0;
 
+typedef SymbolDomain Locations;
+
+/**
+ * Locations enumeration's base domain, as required by class TypeFactory.
+ * @note Copied from System/test/basic-model-transaction.cc
+ * as created from basic-model-transaction.nddl v1.3 with the NDDL compiler.
+ */
+static const Locations& LocationsBaseDomain() {
+  static Locations sl_enum("Locations");
+  if (sl_enum.isOpen()) {
+    sl_enum.insert(LabelStr("Hill"));
+    sl_enum.insert(LabelStr("Rock"));
+    sl_enum.insert(LabelStr("Lander"));
+    sl_enum.close();
+  }
+  return(sl_enum);
+}
+
 class CETestEngine : public EngineBase
 {
   public:  
 	CETestEngine();
 	virtual ~CETestEngine();
+	const ConstraintEngineId& getConstraintEngine() const;
 	
   protected: 
 	void createModules();
@@ -79,21 +98,29 @@ class CETestEngine : public EngineBase
 CETestEngine::CETestEngine()
 {
     createModules();
-    REGISTER_CONSTRAINT(DelegationTestConstraint, "TestOnly", "Default");
     doStart();
-    TypeFactory::createValue("INT_INTERVAL", std::string("5"));    
+    ConstraintEngine* ce = (ConstraintEngine*)getComponent("ConstraintEngine");    
+    ce->getTypeFactoryMgr()->createValue("INT_INTERVAL", std::string("5"));    
+    ce->getTypeFactoryMgr()->registerFactory(
+       (new EnumeratedTypeFactory("Locations", "Locations", LocationsBaseDomain()))->getId()
+    );
+    REGISTER_CONSTRAINT(DelegationTestConstraint, "TestOnly", "Default");
 }
 
 CETestEngine::~CETestEngine()
 {    
     doShutdown();
-    TypeFactory::purgeAll();    
 }
 
 void CETestEngine::createModules()
 {
     addModule((new ModuleConstraintEngine())->getId());
     addModule((new ModuleConstraintLibrary())->getId());
+}
+
+const ConstraintEngineId& CETestEngine::getConstraintEngine() const
+{
+    return ((ConstraintEngine*)getComponent("ConstraintEngine"))->getId();    
 }
 
 class TestListener: public ConstraintEngineListener{
@@ -124,59 +151,42 @@ class TypeFactoryTests {
 public:
   static bool test() {
     runTest(testValueCreation);
-
-    // This is needed by the next test and is done outside it to avoid the
-    // need to purge the type factories, which might affect other tests.
-    new EnumeratedTypeFactory("Locations", "Locations", LocationsBaseDomain());
     runTest(testDomainCreation);
-
     runTest(testVariableCreation);
     runTest(testVariableWithDomainCreation);
     return true; 
   }
 
   static bool testValueCreation(){
+      CETestEngine engine;
+      TypeFactoryMgr* tfm = (TypeFactoryMgr*)engine.getComponent("TypeFactoryMgr");
+      
     IntervalIntDomain d0(5);
-    int v0 = (int) TypeFactory::createValue(d0.getTypeName().c_str(), std::string("5"));
+    int v0 = (int) tfm->createValue(d0.getTypeName().c_str(), std::string("5"));
     assertTrue(d0.compareEqual(d0.getSingletonValue(), v0));
 
     IntervalDomain d1(2.3);
-    double v1 = (double) TypeFactory::createValue(d1.getTypeName().c_str(), std::string("2.3"));
+    double v1 = (double) tfm->createValue(d1.getTypeName().c_str(), std::string("2.3"));
     assertTrue(d1.compareEqual(d1.getSingletonValue(), v1));
 
     BoolDomain d2(true);
-    bool v2 = (bool) TypeFactory::createValue(d2.getTypeName().c_str(), std::string("true"));
+    bool v2 = (bool) tfm->createValue(d2.getTypeName().c_str(), std::string("true"));
     assertTrue(d2.compareEqual(d2.getSingletonValue(), v2));
 
     return true;
   }
 
-  typedef SymbolDomain Locations;
-
-  /**
-   * Locations enumeration's base domain, as required by class TypeFactory.
-   * @note Copied from System/test/basic-model-transaction.cc
-   * as created from basic-model-transaction.nddl v1.3 with the NDDL compiler.
-   */
-  static const Locations& LocationsBaseDomain() {
-    static Locations sl_enum("Locations");
-    if (sl_enum.isOpen()) {
-      sl_enum.insert(LabelStr("Hill"));
-      sl_enum.insert(LabelStr("Rock"));
-      sl_enum.insert(LabelStr("Lander"));
-      sl_enum.close();
-    }
-    return(sl_enum);
-  }
-
   static bool testDomainCreation() {
-    const IntervalIntDomain & bd0 = dynamic_cast<const IntervalIntDomain &>(TypeFactory::baseDomain(IntervalIntDomain().getTypeName().c_str()));
+      CETestEngine engine;
+      TypeFactoryMgr* tfm = (TypeFactoryMgr*)engine.getComponent("TypeFactoryMgr");
+
+    const IntervalIntDomain & bd0 = dynamic_cast<const IntervalIntDomain &>(tfm->baseDomain(IntervalIntDomain().getTypeName().c_str()));
     assertTrue(bd0.isMember(0));
     assertTrue(!bd0.isBool());
-    const IntervalDomain & bd1 = dynamic_cast<const IntervalDomain &>(TypeFactory::baseDomain(IntervalDomain().getTypeName().c_str()));
+    const IntervalDomain & bd1 = dynamic_cast<const IntervalDomain &>(tfm->baseDomain(IntervalDomain().getTypeName().c_str()));
     assertTrue(bd1.isMember(0.1));
     assertTrue(!bd1.isBool());
-    const BoolDomain & bd2 = dynamic_cast<const BoolDomain &>(TypeFactory::baseDomain(BoolDomain().getTypeName().c_str()));
+    const BoolDomain & bd2 = dynamic_cast<const BoolDomain &>(tfm->baseDomain(BoolDomain().getTypeName().c_str()));
     assertTrue(bd2.isMember(false));
     assertTrue(bd2.isMember(true));
     assertTrue(bd2.isBool());
@@ -185,8 +195,8 @@ public:
     assertTrue(LocationsBaseDomain().isMember(LabelStr("Lander")));
     assertTrue(!LocationsBaseDomain().isMember(LabelStr("true")));
     //!!This (and SymbolDomain) die with complaints of a "bad cast"
-    //!!const Locations & loc0 = dynamic_cast<const Locations&>(TypeFactory::baseDomain("Locations"));
-    const EnumeratedDomain & loc0 = dynamic_cast<const EnumeratedDomain &>(TypeFactory::baseDomain("Locations"));
+    //!!const Locations & loc0 = dynamic_cast<const Locations&>(tfm->baseDomain("Locations"));
+    const EnumeratedDomain & loc0 = dynamic_cast<const EnumeratedDomain &>(tfm->baseDomain("Locations"));
     assertTrue(!loc0.isBool());
     assertTrue(loc0.isMember(LabelStr("Hill")));
     assertTrue(loc0.isMember(LabelStr("Rock")));
@@ -225,36 +235,35 @@ public:
   }
 
   static bool testVariableCreation(){
-    ConstraintEngineId ce = (new ConstraintEngine())->getId();
-    ConstrainedVariableId cv0 = TypeFactory::createVariable(IntervalIntDomain().getTypeName().c_str(), ce);
-    assertTrue(cv0->baseDomain().getTypeName() == IntervalIntDomain().getTypeName());
-    ConstrainedVariableId cv1 = TypeFactory::createVariable(IntervalDomain().getTypeName().c_str(), ce);
-    assertTrue(cv1->baseDomain().getTypeName() == IntervalDomain().getTypeName());
-    ConstrainedVariableId cv2 = TypeFactory::createVariable(BoolDomain().getTypeName().c_str(), ce);
-    assertTrue(cv2->baseDomain().getTypeName() == BoolDomain().getTypeName());
-    Entity::purgeStarted();
-    delete (ConstraintEngine*) ce;
-    Entity::purgeEnded();
-    return true;
+      CETestEngine engine;
+      TypeFactoryMgr* tfm = (TypeFactoryMgr*)engine.getComponent("TypeFactoryMgr");
+
+      ConstraintEngineId ce = ((ConstraintEngine*)engine.getComponent("ConstraintEngine"))->getId();
+      ConstrainedVariableId cv0 = tfm->createVariable(IntervalIntDomain().getTypeName().c_str(), ce);
+      assertTrue(cv0->baseDomain().getTypeName() == IntervalIntDomain().getTypeName());
+      ConstrainedVariableId cv1 = tfm->createVariable(IntervalDomain().getTypeName().c_str(), ce);
+      assertTrue(cv1->baseDomain().getTypeName() == IntervalDomain().getTypeName());
+      ConstrainedVariableId cv2 = tfm->createVariable(BoolDomain().getTypeName().c_str(), ce);
+      assertTrue(cv2->baseDomain().getTypeName() == BoolDomain().getTypeName());
+      return true;
   }
 
   static bool testVariableWithDomainCreation(){
-    IntervalIntDomain d0(5);
-    IntervalDomain d1(2.3);
-    BoolDomain d2(true);
+      CETestEngine engine;
+      TypeFactoryMgr* tfm = (TypeFactoryMgr*)engine.getComponent("TypeFactoryMgr");
 
-    ConstraintEngineId ce = (new ConstraintEngine())->getId();
-    ConstrainedVariableId cv0 = TypeFactory::createVariable(d0.getTypeName().c_str(), ce, d0);
-    assertTrue(cv0->baseDomain() == d0);
-    ConstrainedVariableId cv1 = TypeFactory::createVariable(d1.getTypeName().c_str(), ce, d1);
-    assertTrue(cv1->baseDomain() == d1);
-    ConstrainedVariableId cv2 = TypeFactory::createVariable(d2.getTypeName().c_str(), ce, d2);
-    assertTrue(cv2->baseDomain() == d2);
+      IntervalIntDomain d0(5);
+      IntervalDomain d1(2.3);
+      BoolDomain d2(true);
 
-    Entity::purgeStarted();
-    delete (ConstraintEngine*) ce;
-    Entity::purgeEnded();
-    return true;
+      ConstraintEngineId ce = ((ConstraintEngine*)engine.getComponent("ConstraintEngine"))->getId();
+      ConstrainedVariableId cv0 = tfm->createVariable(d0.getTypeName().c_str(), ce, d0);
+      assertTrue(cv0->baseDomain() == d0);
+      ConstrainedVariableId cv1 = tfm->createVariable(d1.getTypeName().c_str(), ce, d1);
+      assertTrue(cv1->baseDomain() == d1);
+      ConstrainedVariableId cv2 = tfm->createVariable(d2.getTypeName().c_str(), ce, d2);
+      assertTrue(cv2->baseDomain() == d2);
+      return true;
   }
 };
 
@@ -277,8 +286,8 @@ public:
   }
 
   static bool testDeallocationWithPurging(){
-    ConstraintEngineId ce = (new ConstraintEngine())->getId();
-    new DefaultPropagator(LabelStr("Default"), ce);
+      CETestEngine engine;
+      ConstraintEngineId ce = ((ConstraintEngine*)engine.getComponent("ConstraintEngine"))->getId();
 
     // Set up a base domain
     NumericDomain intBaseDomain;
@@ -296,9 +305,6 @@ public:
     }
 
     assertTrue(ce->propagate());
-    Entity::purgeStarted();
-    delete (ConstraintEngine*) ce;
-    Entity::purgeEnded();
 
     return true;
   }
@@ -1226,6 +1232,8 @@ private:
   }
 
   static bool testDelegation(){
+      CETestEngine engine;
+      
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(0, 1000));
     ConstraintId c0 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, makeScope(v0.getId()));
     ConstraintId c1 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, makeScope(v0.getId()));
@@ -2064,6 +2072,7 @@ private:
    * comparing the propagated domains with the expected output domains.
    */
   static bool testArbitraryConstraints() {
+      CETestEngine testEngine;
     // Input to this test: a list of constraint calls and expected output domains.
     std::list<ConstraintTestCase> tests;
 
@@ -2092,7 +2101,7 @@ private:
     assertTrue(readTestCases(getTestLoadLibraryPath() + std::string("/CLibTestCases.xml"), tests) ||
                readTestCases(std::string("ConstraintEngine/test/CLibTestCases.xml"), tests));
 
-    return(executeTestCases(ENGINE, tests));
+    return(executeTestCases(testEngine.getConstraintEngine(), tests));
   }
 
   static bool testLockConstraint() {
@@ -2469,6 +2478,7 @@ public:
 
 private:
   static bool testAllocation(){
+      CETestEngine testEngine;
     std::vector<ConstrainedVariableId> variables;
     // v0 == v1
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
@@ -2608,7 +2618,9 @@ private:
   }
 
   static bool testEqualityConstraintPropagator(){
-    ConstraintEngineId ce((new ConstraintEngine())->getId());
+      CETestEngine engine;
+      ConstraintEngineId ce = ((ConstraintEngine*)engine.getComponent("ConstraintEngine"))->getId();
+      
     new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce);
     {
       std::vector<ConstrainedVariableId> variables;
@@ -2654,16 +2666,13 @@ private:
       assertTrue(ce->constraintConsistent());
       assertTrue(v0.getDerivedDomain().getSingletonValue() == 10);
     }
-    delete (ConstraintEngine*) ce;
     return(true);
   }
 };
 
-void ConstraintEngineModuleTests::runTests(std::string path) {
+void ConstraintEngineModuleTests::runTests(std::string path) 
+{
     setTestLoadLibraryPath(path);
-
-    CETestEngine engine;
-    
     runTestSuite(DomainTests::test);
     runTestSuite(TypeFactoryTests::test);
     runTestSuite(EntityTests::test);

@@ -16,7 +16,8 @@ class DefaultEngineAccessor {
 public:
   static const ConstraintEngineId& instance() {
     if (s_instance.isNoId()) {
-      s_instance = (new ConstraintEngine())->getId();
+        TypeFactoryMgr* tfm = new TypeFactoryMgr();
+      s_instance = (new ConstraintEngine(tfm->getId()))->getId();
       new DefaultPropagator(LabelStr("Default"), s_instance);
       new DefaultPropagator(LabelStr("Temporal"), s_instance);
     }
@@ -25,7 +26,9 @@ public:
 
   static void reset() {
     if (!s_instance.isNoId()) {
+        const TypeFactoryMgrId& tfm = s_instance->getTypeFactoryMgr();
       delete (ConstraintEngine*) s_instance;
+      delete (TypeFactoryMgr*) tfm;
       s_instance = ConstraintEngineId::noId(); 
      }
   }

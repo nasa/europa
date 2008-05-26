@@ -9,6 +9,7 @@
 #include "PlannerControlIntf.hh"
 #include "SolverDefs.hh"
 #include "RulesEngineDefs.hh"
+#include "EuropaEngineBase.hh"
 #include <string>
 #include <list>
 
@@ -26,7 +27,8 @@ namespace EUROPA {
   /**
    * @brief
    */
-  class MasterController {
+  class MasterController : public EuropaEngineBase 
+  {
   public:
 
     enum Status { IN_PROGRESS=0,
@@ -43,6 +45,8 @@ namespace EUROPA {
      */
     static MasterController* createInstance();
 
+    virtual ~MasterController();
+    
     /**
      * @brief Loads the model.
      */
@@ -62,8 +66,6 @@ namespace EUROPA {
      */
     static MasterController* instance();
 
-    virtual ~MasterController();
-
     /**
      * @brief Complete planning, writing out the last step only
      */
@@ -73,8 +75,6 @@ namespace EUROPA {
      * @brief Termination
      */
     static void terminate();
-
-    const PlanDatabaseId& getPlanDatabase() const;
 
     Status getStatus();
 
@@ -118,21 +118,9 @@ namespace EUROPA {
     MasterController();
 
     /**
-     * @brief Called after model is loaded
-     */
-    virtual void handleRegistration();
-
-    /**
-     * @brief
-     */
-    virtual void configureDatabase();
-
-    /**
      * @brief Utility for path extraction
      */
     static std::string extractPath(const char* configPath);
-
-  protected:
 
     /**
      * @brief Unloads the model
@@ -154,12 +142,6 @@ namespace EUROPA {
     std::string m_destPath;
     void* m_libHandle;
     std::ofstream* m_debugStream;
-
-    // TODO: use an engine instead of individual components
-    ConstraintEngineId m_constraintEngine; /*!< A Constraint Engine for propagation of relations */
-    SchemaId m_schema; 
-    PlanDatabaseId m_planDatabase; /*!< A PlanDatabase as central state representation */
-    RulesEngineId m_rulesEngine; /*!< A Rules Engine to enforce model rules. */
     SOLVERS::PlanWriter::PartialPlanWriter* m_ppw;
 
     static MasterController* s_instance;

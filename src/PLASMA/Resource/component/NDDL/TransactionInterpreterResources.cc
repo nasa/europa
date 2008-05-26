@@ -175,4 +175,55 @@ namespace EUROPA {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reservoir.consume"); 
     return (new NDDL::NddlReservoir::consume(master,name,relation,true))->getId();
   }        
+  
+  
+  UnaryObjectFactory::UnaryObjectFactory(const LabelStr& signature) 
+    : NativeObjectFactory("Unary",signature) 
+  {
+  }
+     
+  UnaryObjectFactory::~UnaryObjectFactory() 
+  {
+  } 
+    
+  ObjectId UnaryObjectFactory::makeNewObject( 
+                        const PlanDatabaseId& planDb, 
+                        const LabelStr& objectType, 
+                        const LabelStr& objectName, 
+                        const std::vector<const AbstractDomain*>& arguments) const 
+  { 
+    Id<NDDL::NddlUnary>  instance = (new NDDL::NddlUnary(planDb, objectType, objectName,true))->getId();
+        
+    std::vector<float> argValues;
+    for (unsigned int i=0;i<arguments.size();i++)
+      argValues.push_back((float)(arguments[i]->getSingletonValue()));
+            
+    if (argValues.size() == 0) 
+      instance->constructor();
+    else if (argValues.size() == 1)
+      instance->constructor(argValues[0]);
+    else {
+      std::ostringstream os;
+      os << "Unexpected number of args in Unary constructor:" << argValues.size();
+      check_runtime_error(ALWAYS_FAILS,os.str());
+    }   
+                
+    instance->handleDefaults(false /*don't close the object yet*/);             
+    debugMsg("XMLInterpreter:NativeObjectFactory","Created Native " << m_className.toString() << ":" << objectName.toString() << " type:" << objectType.toString()); 
+
+    return instance;    
+  }       
+
+  TokenId UnaryUseTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
+  {
+    debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Unary.Use"); 
+    return (new NDDL::NddlUnary::use(planDb,name,rejectable,isFact,true))->getId();
+  }
+    
+  TokenId UnaryUseTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
+  {
+    debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Unary.Use"); 
+    return (new NDDL::NddlUnary::use(master,name,relation,true))->getId();
+  }        
+  
 }

@@ -20,8 +20,6 @@ class ClassWriter {
     String superClass = ModelAccessor.getSuperClass(klass);
     String name = XMLUtil.getAttribute(klass,"name");
 
-    SchemaWriter.addFactory("REGISTER_TYPE_FACTORY("+name+", ObjectDomain(\""+name+"\"));\n");
-
     if(ModelAccessor.isPredefinedClass(name)){
 	writer.write("// SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS " + name + "\n\n");
 	return;
@@ -416,7 +414,7 @@ class ClassWriter {
       String target = XMLUtil.getAttribute(element,"name");
       String type = XMLUtil.getAttribute(element, "type");
       writer.write("check_error(AbstractDomain::canBeCompared(*arguments["+i+"], \n");
-      writer.write("                                          TypeFactory::baseDomain(\""+type+"\")), \n");
+      writer.write("                                          planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain(\""+type+"\")), \n");
       writer.write("            \"Cannot convert \" + arguments["+i+"]->getTypeName().toString() + \" to "+type+"\");\n");
       writer.write("check_error(arguments["+i+"]->isSingleton());\n");
 

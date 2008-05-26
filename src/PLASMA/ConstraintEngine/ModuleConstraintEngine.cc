@@ -12,11 +12,6 @@
 
 namespace EUROPA {
 
-  static bool & constraintEngineInitialized() {
-    static bool sl_alreadyDone(false);
-    return sl_alreadyDone;
-  }
-
   ModuleConstraintEngine::ModuleConstraintEngine()
       : Module("ConstraintEngine")
   {
@@ -27,46 +22,28 @@ namespace EUROPA {
   {	  
   }
   
-  void initConstraintEngine()
-  {
-	    if(constraintEngineInitialized())
-	    	return;
-	  
-	    constraintEngineInitialized() = true;	  
-  }
-  
-  void uninitConstraintEngine()
-  {
-      if (constraintEngineInitialized()) {
-	      TypeFactory::purgeAll();
-	      constraintEngineInitialized() = false;
-	  }	  
-  }
-  
   void ModuleConstraintEngine::initialize()
   {
-	  initConstraintEngine();
   }
 
   void ModuleConstraintEngine::uninitialize()
   {
-	  uninitConstraintEngine();
   }
   
   void ModuleConstraintEngine::initialize(EngineId engine)
   {
-      ConstraintEngine* ce = new ConstraintEngine();
-      engine->addComponent("ConstraintEngine",ce);
-      
-      /* Allocate Standard Type Factories */
-      new BoolTypeFactory();
-      new IntervalIntTypeFactory();
-      new IntervalTypeFactory();
-      new StringTypeFactory();
-      new SymbolTypeFactory();
-      new EnumeratedTypeFactory("REAL_ENUMERATION", "ELEMENT", EnumeratedDomain(true, "REAL_ENUMERATION"));
+      TypeFactoryMgr* tfm = new TypeFactoryMgr();
+      tfm->registerFactory((new BoolTypeFactory())->getId());
+      tfm->registerFactory((new IntervalIntTypeFactory())->getId());
+      tfm->registerFactory((new IntervalTypeFactory())->getId());
+      tfm->registerFactory((new EnumeratedTypeFactory("REAL_ENUMERATION", "ELEMENT", EnumeratedDomain(true, "REAL_ENUMERATION")))->getId());
+      tfm->registerFactory((new StringTypeFactory())->getId());
+      tfm->registerFactory((new SymbolTypeFactory())->getId());
+      engine->addComponent("TypeFactoryMgr",tfm);      
 
+      ConstraintEngine* ce = new ConstraintEngine(tfm->getId());
 	  new DefaultPropagator(LabelStr("Default"), ce->getId());	  
+      engine->addComponent("ConstraintEngine",ce);      
   }
   
   void ModuleConstraintEngine::uninitialize(EngineId engine)
@@ -74,7 +51,8 @@ namespace EUROPA {
       ConstraintEngine* ce = (ConstraintEngine*)engine->removeComponent("ConstraintEngine");      
       delete ce;
       
-      TypeFactory::purgeAll();      
+      TypeFactoryMgr* tfm = (TypeFactoryMgr*)engine->removeComponent("TypeFactoryMgr");      
+      delete tfm;
   }
     
   /**************************************************************************************/

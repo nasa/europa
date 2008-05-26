@@ -2,10 +2,6 @@ SubDir PLASMA PlanDatabase test ;
 
 if ! $(PLASMA_READY) {
 
-#PlanDatabase_Test_Files = [ FGristFiles PlanDbModuleTests.cc ] ;
-#ModuleObjects $(PlanDatabase_Test_Files:S=.cc) : PlanDatabase ;
-
-#ModuleMain db-module-tests : $(PlanDatabase_Test_Files:S=$(SUFOBJ)) module-tests.cc : PlanDatabase ;
 ModuleMain db-module-tests : module-tests.cc db-test-module.cc : PlanDatabase ;
 RunModuleMain run-db-module-tests : db-module-tests ;
 LocalDepends tests : run-db-module-tests ;

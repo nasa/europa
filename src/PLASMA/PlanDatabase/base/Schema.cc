@@ -3,6 +3,8 @@
 #include "TokenFactory.hh"
 #include "Debug.hh"
 #include "Utils.hh"
+#include "EnumeratedTypeFactory.hh"
+#include "Object.hh"
 
 namespace EUROPA {
 
@@ -33,11 +35,10 @@ namespace EUROPA {
   }
 
   // Hack!: remove when Schema::testInstance is gone
-  SchemaId sl_schemaInstanceId;
-  
+  SchemaId sl_schemaInstanceId;  
   const SchemaId& Schema::testInstance(const LabelStr& name){
     if (sl_schemaInstanceId.isNoId())
-        sl_schemaInstanceId = (new Schema(name))->getId();
+        sl_schemaInstanceId = (new Schema(name, (new TypeFactoryMgr())->getId()))->getId();
     
     return sl_schemaInstanceId;
   }
@@ -48,8 +49,9 @@ namespace EUROPA {
     return LabelStr(fullName.c_str());
   }
 
-  Schema::Schema(const LabelStr& name)
+  Schema::Schema(const LabelStr& name, const TypeFactoryMgrId& tfm)
       : m_id(this)
+      , m_typeFactoryMgr(tfm)
       , m_name(name)
   {
       if (sl_schemaInstanceId.isNoId())
@@ -520,6 +522,14 @@ namespace EUROPA {
     objectTypes.insert(objectType);
     membershipRelation.insert(std::pair<LabelStr, NameValueVector>(objectType, NameValueVector()));
     childOfRelation.insert(std::pair<LabelStr, LabelStr>(objectType, parent));
+    
+    // Add type for constrained variables to be able to hold references to objects of the new type 
+    getTypeFactoryMgr()->registerFactory((new EnumeratedTypeFactory(
+                  objectType.c_str(),
+                  objectType.c_str(),
+                  ObjectDomain(objectType.c_str())
+                  ))->getId());             
+    
     debugMsg("Schema:addObjectType",
 	     "[" << m_name.toString() << "] " << "Added object type " << objectType.toString() << " that extends " <<
 	     parent.toString());

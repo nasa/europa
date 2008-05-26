@@ -53,25 +53,15 @@ const char* initialTransactions = NULL;
 const char* plannerConfig = NULL;
 bool replayRequired = false;
 
+void initSchema();
+
 /**
    REPLAY IS BROKEN WITH THE INTERPRETER AND NEEDS TO BE FIXED!!!!
  */
 template<class ASSEMBLY>
-void replay(const PlanDatabaseId& db, const DbClientTransactionLogId& txLog) {
-  std::string s1 = PlanDatabaseWriter::toString(db, false);
-  std::ofstream out(ASSEMBLY::TX_LOG());
-  txLog->flush(out);
-  out.close();
-  
-  if (isInterpreted()) {
-      Schema::testInstance()->reset();
-      Rule::purgeAll();
-  }
-  
-  ASSEMBLY replayed(Schema::testInstance());
-  
-  if (isInterpreted()) 
-      replayed.playTransactions(initialTransactions, true);
+void replay(const std::string& s1,const DbClientTransactionLogId& txLog) {
+  ASSEMBLY replayed(schema);
+  initSchema();
   
   replayed.playTransactions(ASSEMBLY::TX_LOG());
   std::string s2 = PlanDatabaseWriter::toString(replayed.getPlanDatabase(), false);
@@ -88,12 +78,13 @@ std::string dumpIdTable(const char* title)
   return os.str();
 }
 
-void initSchema();
-
 template<class ASSEMBLY>
-bool runPlanner(ASSEMBLY* newAssembly){
+bool runPlanner()
+{
   check_error(DebugMessage::isGood());
-  ASSEMBLY& assembly = *newAssembly;
+
+  ASSEMBLY assembly(schema);
+  initSchema();
 
   debugMsg("IdTypeCounts", dumpIdTable("before"));  
     
@@ -110,24 +101,17 @@ bool runPlanner(ASSEMBLY* newAssembly){
   debugMsg("Main:runPlanner", "Found a plan at depth " 
 	   << assembly.getDepthReached() << " after " << assembly.getTotalNodesSearched());
 
-  if (replayRequired)  // this ensures we're not running the performance tests.
-    assembly.write(std::cout);
-
-  // Store transactions for recreation of database
-  if(replayRequired)
-    replay<ASSEMBLY>(assembly.getPlanDatabase(), txLog);
-
-  delete newAssembly;
-  
-  //HACK!  The runTest() macro expects an identical Id count at the beginning and end
-  //of the test.  This fails with the interpreter because it creates these factories
-  //at run-time
-  if (isInterpreted()) {
-      ObjectFactory::purgeAll();
-      TokenFactory::purgeAll();
-      TypeFactory::purgeAll();
+  if(replayRequired) {
+      assembly.write(std::cout);
+      std::string s1 = PlanDatabaseWriter::toString(assembly.getPlanDatabase(), false);
+      std::ofstream out(ASSEMBLY::TX_LOG());
+      txLog->flush(out);
+      out.close();
+      assembly.doShutdown(); // TODO: remove this when all static data structures are gone
+      
+      replay<ASSEMBLY>(s1, txLog);
   }
-  
+
   debugMsg("IdTypeCounts", dumpIdTable("after"));  
 
   return true;
@@ -252,17 +236,7 @@ void initSchema()
 #endif     
 }
 
-template<class ASSEMBLY>
-void runTestSafely()
-{
-    ASSEMBLY* newAssembly = new ASSEMBLY(schema);
-    initSchema();
-    runTest(runPlanner<ASSEMBLY>,newAssembly);
-    //delete newAssembly;    
-}
-
-template<class ASSEMBLY>
-int internalMain(int argc, const char** argv)
+int main(int argc, const char** argv) 
 {
     if(argc != ARGC) {
       std::cout << "usage: runProblem <model shared library path>" <<
@@ -271,31 +245,26 @@ int internalMain(int argc, const char** argv)
     }
         
     setup(argv);
-    ASSEMBLY::initialize();
+    SolverAssembly::initialize();
 
     const char* performanceTest = getenv("EUROPA_PERFORMANCE");
 
     if (performanceTest != NULL && strcmp(performanceTest, "1") == 0) {
         replayRequired = false;
         for (int i = 0; i < 1; i++) 
-            runTestSafely<ASSEMBLY>();
+            runTest(runPlanner<SolverAssembly>);
     }
     else {
         replayRequired = false; //= true;
         for (int i = 0; i < 1; i++) {
-            runTestSafely<ASSEMBLY>();
-            //runTest(copyFromFile<ASSEMBLY>);
+            runTest(runPlanner<SolverAssembly>);
+            //runTest(copyFromFile<SolverAssembly>);
         }
     }
 
-    ASSEMBLY::terminate();
+    SolverAssembly::terminate();
     cleanup();
   
     std::cout << "Finished" << std::endl;
     return 0;
-}
-
-int main(int argc, const char** argv) 
-{
-  return internalMain<SolverAssembly>(argc, argv);
 }

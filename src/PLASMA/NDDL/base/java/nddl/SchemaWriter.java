@@ -101,9 +101,4 @@ class SchemaWriter {
     private static Vector s_commands = new Vector();
     private static Vector s_factoryAllocations = new Vector();
     private static Vector s_constraintRegistrations = new Vector();
-
-  static {
-	  // Load built-in types
-      s_objectTypeCommands.add("addObjectType(\"Timeline\",\"Object\")");
-  }
 }

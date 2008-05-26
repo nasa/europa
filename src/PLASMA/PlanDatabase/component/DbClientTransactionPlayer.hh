@@ -2,6 +2,7 @@
 #define _H_DbClientTransactionPlayer
 
 #include "PlanDatabaseDefs.hh"
+#include "TypeFactory.hh"
 #include <iostream>
 #include <map>
 #include <list>
@@ -122,6 +123,7 @@ namespace EUROPA {
     void getElementsFromConstrain(const TiXmlElement& elem, ObjectId& obj, TokenId& pred,
 				  TokenId& succ);
 
+    const TypeFactoryMgrId& getTypeFactoryMgr() const;
     const SchemaId& getSchema() const;
     
     DbClientId m_client;

@@ -66,8 +66,9 @@ namespace EUROPA {
   void ModuleNddl::initialize(EngineId engine)
   {
       // These are Nddl specific, so they belong here
-      new intTypeFactory();
-      new floatTypeFactory();      
+      TypeFactoryMgr* tfm = (TypeFactoryMgr*)engine->getComponent("TypeFactoryMgr");
+      tfm->registerFactory((new intTypeFactory())->getId());
+      tfm->registerFactory((new floatTypeFactory())->getId());      
 
       PlanDatabase* pdb = (PlanDatabase*)engine->getComponent("PlanDatabase");	  
 	  engine->addLanguageInterpreter("nddl", new NddlInterpreter());

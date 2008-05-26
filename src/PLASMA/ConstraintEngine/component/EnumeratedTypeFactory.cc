@@ -5,11 +5,11 @@
 namespace EUROPA {
   
   EnumeratedTypeFactory::EnumeratedTypeFactory(const char* typeName, const char* elementName)
-    : ConcreteTypeFactory(typeName), m_elementName(elementName), m_baseDomain(false, typeName) {
+    : TypeFactory(typeName), m_elementName(elementName), m_baseDomain(false, typeName) {
   }
 
   EnumeratedTypeFactory::EnumeratedTypeFactory(const char* typeName, const char* elementName, const EnumeratedDomain& baseDomain)
-    : ConcreteTypeFactory(typeName), m_elementName(elementName), m_baseDomain(baseDomain) {
+    : TypeFactory(typeName), m_elementName(elementName), m_baseDomain(baseDomain) {
   }
 
   ConstrainedVariableId

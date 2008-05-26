@@ -19,6 +19,8 @@
 
 #include "Engine.hh"
 #include "ModuleConstraintEngine.hh"
+#include "ModulePlanDatabase.hh"
+#include "ModuleRulesEngine.hh"
 #include "ModuleTemporalNetwork.hh"
 
 #include <iostream>
@@ -39,6 +41,13 @@ TNTestEngine::TNTestEngine()
 {
     createModules();
     doStart();
+    Schema* schema = (Schema*)getComponent("Schema");  
+    schema->addObjectType("Objects"); 
+    schema->addPredicate("Objects.Predicate"); 
+    schema->addPredicate("Objects.PredicateA"); 
+    schema->addMember("Objects.PredicateA", IntervalIntDomain().getTypeName(), "IntervalParam"); 
+    schema->addPredicate("Objects.PredicateB"); 
+    schema->addMember("Objects.PredicateB", IntervalIntDomain().getTypeName(), "IntervalParam"); 
 }
 
 TNTestEngine::~TNTestEngine()
@@ -50,30 +59,24 @@ void TNTestEngine::createModules()
 {
     addModule((new ModuleConstraintEngine())->getId());
     addModule((new ModuleConstraintLibrary())->getId());
+    // TODO: TN is just an extension to CE, shouldn't have other dependencies
+    addModule((new ModulePlanDatabase())->getId());
+    // This is needed for the tests that use TestSubgoalRule
+    // TODO: should probably remove this dependency
+    addModule((new ModuleRulesEngine())->getId());
     addModule((new ModuleTemporalNetwork())->getId());
 }
 
-
 #define DEFAULT_SETUP_CE_ONLY(ce) \
-  ConstraintEngine ce; \
-  new DefaultPropagator(LabelStr("Default"), ce.getId()); \
-  new TemporalPropagator(LabelStr("Temporal"), ce.getId());
+    TNTestEngine tnte; \
+    ConstraintEngine& ce = *((ConstraintEngine*)tnte.getComponent("ConstraintEngine")); ; \
 
 #define DEFAULT_TEARDOWN_CE_ONLY()
 
 #define CD_DEFAULT_SETUP(ce, db,  autoClose) \
-    ConstraintEngine ce; \
-    Schema::testInstance()->reset();\
-    Schema::testInstance()->addObjectType("Objects"); \
-    Schema::testInstance()->addPredicate("Objects.Predicate"); \
-    Schema::testInstance()->addPredicate("Objects.PredicateA"); \
-    Schema::testInstance()->addMember("Objects.PredicateA", IntervalIntDomain().getTypeName(), "IntervalParam"); \
-    Schema::testInstance()->addPredicate("Objects.PredicateB"); \
-    Schema::testInstance()->addMember("Objects.PredicateB", IntervalIntDomain().getTypeName(), "IntervalParam"); \
-    PlanDatabase db(ce.getId(), Schema::testInstance());\
-    new DefaultPropagator(LabelStr("Default"), ce.getId()); \
-    new TemporalPropagator(LabelStr("Temporal"), ce.getId()); \
-    db.setTemporalAdvisor((new STNTemporalAdvisor(ce.getPropagatorByName(LabelStr("Temporal"))))->getId()); \
+    TNTestEngine tnte; \
+    ConstraintEngine& ce = *((ConstraintEngine*)tnte.getComponent("ConstraintEngine")); ; \
+    PlanDatabase& db = *((PlanDatabase*)tnte.getComponent("PlanDatabase")); \
     if (autoClose) \
       db.close();
 
@@ -81,19 +84,10 @@ void TNTestEngine::createModules()
 
 
 #define DEFAULT_SETUP_RULES(ce, db,  autoClose) \
-    ConstraintEngine ce; \
-    Schema::testInstance()->reset();\
-    Schema::testInstance()->addObjectType("Objects"); \
-    Schema::testInstance()->addPredicate("Objects.Predicate"); \
-    Schema::testInstance()->addPredicate("Objects.PredicateA"); \
-    Schema::testInstance()->addMember("Objects.PredicateA", IntervalIntDomain().getTypeName(), "IntervalParam"); \
-    Schema::testInstance()->addPredicate("Objects.PredicateB"); \
-    Schema::testInstance()->addMember("Objects.PredicateB", IntervalIntDomain().getTypeName(), "IntervalParam"); \
-    PlanDatabase db(ce.getId(), Schema::testInstance());\
-    new DefaultPropagator(LabelStr("Default"), ce.getId()); \
-    new TemporalPropagator(LabelStr("Temporal"), ce.getId()); \
-    db.setTemporalAdvisor((new STNTemporalAdvisor(ce.getPropagatorByName(LabelStr("Temporal"))))->getId()); \
-    RulesEngine re(db.getId()); \
+    TNTestEngine tnte; \
+    ConstraintEngine& ce = *((ConstraintEngine*)tnte.getComponent("ConstraintEngine")); ; \
+    RulesEngine& re = *((RulesEngine*)tnte.getComponent("RulesEngine")); \
+    PlanDatabase& db = *((PlanDatabase*)tnte.getComponent("PlanDatabase")); \
     if (autoClose) \
       db.close();
 
@@ -497,11 +491,9 @@ private:
   }
 
   static bool testTemporalDistance() {
-    ConstraintEngine ce; 
-    new DefaultPropagator(LabelStr("Default"), ce.getId()); 
-    new TemporalPropagator(LabelStr("Temporal"), ce.getId());
-    PlanDatabase db(ce.getId(), Schema::testInstance());
-    db.setTemporalAdvisor((new STNTemporalAdvisor( ce.getPropagatorByName(LabelStr("Temporal"))))->getId() ); 
+    TNTestEngine tnte; 
+    ConstraintEngine& ce = *((ConstraintEngine*)tnte.getComponent("ConstraintEngine")); ; 
+    PlanDatabase& db = *((PlanDatabase*)tnte.getComponent("PlanDatabase")); 
 
     IntervalIntDomain d1 = IntervalIntDomain(-10, 10);
     IntervalIntDomain d2 = IntervalIntDomain( 20, 30);
@@ -848,9 +840,10 @@ private:
   }
 
   static bool testTemporalNogood() {
-    ConstraintEngine ce;
-    TemporalPropagator*
-      tp = new TemporalPropagator(LabelStr("Temporal"), ce.getId());
+    TNTestEngine tnte; 
+    ConstraintEngine& ce = *((ConstraintEngine*)tnte.getComponent("ConstraintEngine"));  
+    TemporalPropagator* tp = (TemporalPropagator*) 
+        ((Propagator*)ce.getPropagatorByName(LabelStr("Temporal")));
 
     IntervalIntDomain domStart = IntervalIntDomain(1,10);
     IntervalIntDomain domEnd = IntervalIntDomain(0,1);
@@ -903,14 +896,8 @@ private:
 
 void TemporalNetworkModuleTests::runTests(std::string path) {
   setTestLoadLibraryPath(path);
-
-  Schema::testInstance();
-  TNTestEngine engine;
-
-  for(int i=0;i<1;i++){
-    runTestSuite(TemporalNetworkTest::test);
-    runTestSuite(TemporalNetworkConstraintEngineOnlyTest::test);
-    runTestSuite(TemporalPropagatorTest::test);
-  }
+  runTestSuite(TemporalNetworkTest::test);
+  runTestSuite(TemporalNetworkConstraintEngineOnlyTest::test);
+  runTestSuite(TemporalPropagatorTest::test);
   std::cout << "Finished" << std::endl;
 }

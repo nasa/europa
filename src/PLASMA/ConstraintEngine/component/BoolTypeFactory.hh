@@ -6,7 +6,7 @@
 
 namespace EUROPA {
 
-  class BoolTypeFactory : public ConcreteTypeFactory {
+  class BoolTypeFactory : public TypeFactory {
   public:
     BoolTypeFactory(const char* name = BoolDomain::getDefaultTypeName().toString().c_str());
 

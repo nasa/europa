@@ -58,7 +58,7 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("string")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("string")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
       check_error(arguments[0]->isSingleton());
       LabelStr _data((LabelStr)arguments[0]->getSingletonValue());
@@ -133,7 +133,7 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("Foo")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Foo")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to Foo");
       check_error(arguments[0]->isSingleton());
       FooId foo((FooId)arguments[0]->getSingletonValue());
@@ -185,13 +185,13 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 2);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("Bar")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Bar")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to Bar");
       check_error(arguments[0]->isSingleton());
       BarId bar((BarId)arguments[0]->getSingletonValue());
       
       check_error(AbstractDomain::canBeCompared(*arguments[1], 
-                                                TypeFactory::baseDomain("Foo")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Foo")), 
                   "Cannot convert " + arguments[1]->getTypeName().toString() + " to Foo");
       check_error(arguments[1]->isSingleton());
       FooId foo((FooId)arguments[1]->getSingletonValue());
@@ -316,7 +316,7 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("Baz")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Baz")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to Baz");
       check_error(arguments[0]->isSingleton());
       BazId baz((BazId)arguments[0]->getSingletonValue());
@@ -380,7 +380,6 @@ namespace NDDL {
     Id<Schema> id = Schema::testInstance("multidot");
     // Register Constraints
     // Invoke commands to populate schema with type definitions
-    id->addObjectType("Timeline","Object");
     id->addObjectType("StringData", "Object");
     id->addObjectType("Foo", "Object");
     id->addObjectType("Bar", "Object");
@@ -407,22 +406,16 @@ namespace NDDL {
     REGISTER_TOKEN_FACTORY(Baz::apred::Factory);
     REGISTER_TOKEN_FACTORY(Baz::bpred::Factory);
     REGISTER_TOKEN_FACTORY(Mumble::mumbPred::Factory);
-    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
-    REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
-    REGISTER_TYPE_FACTORY(Timeline, ObjectDomain("Timeline"));
-    REGISTER_TYPE_FACTORY(StringData, ObjectDomain("StringData"));
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),TokenStates, TokenStatesBaseDomain());
     REGISTER_OBJECT_FACTORY(StringDataFactory0, StringData:string);
-    REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
     REGISTER_OBJECT_FACTORY(FooFactory1, Foo);
-    REGISTER_TYPE_FACTORY(Bar, ObjectDomain("Bar"));
     REGISTER_OBJECT_FACTORY(BarFactory2, Bar:Foo);
     REGISTER_OBJECT_FACTORY(BarFactory2, Bar:Object);
-    REGISTER_TYPE_FACTORY(Baz, ObjectDomain("Baz"));
     REGISTER_OBJECT_FACTORY(BazFactory3, Baz:Bar:Foo);
     REGISTER_OBJECT_FACTORY(BazFactory3, Baz:Bar:Object);
     REGISTER_OBJECT_FACTORY(BazFactory3, Baz:Object:Foo);
     REGISTER_OBJECT_FACTORY(BazFactory3, Baz:Object:Object);
-    REGISTER_TYPE_FACTORY(Mumble, ObjectDomain("Mumble"));
     REGISTER_OBJECT_FACTORY(MumbleFactory4, Mumble:Baz);
     REGISTER_OBJECT_FACTORY(MumbleFactory4, Mumble:Timeline);
     // Allocate rules

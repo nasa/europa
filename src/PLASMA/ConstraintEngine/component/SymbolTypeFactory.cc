@@ -9,12 +9,12 @@ namespace EUROPA {
   //
 
   SymbolTypeFactory::SymbolTypeFactory(const char* name)
-   : ConcreteTypeFactory(name), m_baseDomain(name)
+   : TypeFactory(name), m_baseDomain(name)
   {
   }
 
   SymbolTypeFactory::SymbolTypeFactory(const char* name, const SymbolDomain& baseDomain)
-   : ConcreteTypeFactory(name), m_baseDomain(baseDomain)
+   : TypeFactory(name), m_baseDomain(baseDomain)
   {
   }
 

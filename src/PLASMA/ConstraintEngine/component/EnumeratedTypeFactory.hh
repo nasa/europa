@@ -6,7 +6,7 @@
 
 namespace EUROPA {
 
-  class EnumeratedTypeFactory : public ConcreteTypeFactory {
+  class EnumeratedTypeFactory : public TypeFactory {
   public:
     EnumeratedTypeFactory(const char* typeName, const char* elementName);
     EnumeratedTypeFactory(const char* typeName, const char* elementName, const EnumeratedDomain& baseDomain);

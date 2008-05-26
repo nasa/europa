@@ -317,7 +317,8 @@ namespace EUROPA {
      */
     bool isTransactionLoggingEnabled() const;
 
-    // Temporarily exposing this to remove Schema singleton, need to review DbClient concept in general
+    // Temporarily exposing these to remove singletons, need to review DbClient concept in general
+    const TypeFactoryMgrId& getTypeFactoryMgr() const;
     const SchemaId& getSchema() const;
     
   private:

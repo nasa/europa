@@ -210,36 +210,24 @@ namespace EUROPA {
   }      
   
   MasterController::MasterController()
-    : m_stepCount(0), m_status(IN_PROGRESS), m_libHandle(NULL), m_debugStream(NULL){
+      : m_stepCount(0)
+      , m_status(IN_PROGRESS)
+      , m_libHandle(NULL)
+      , m_debugStream(NULL)
+  {
+      doStart();
   }
 
-  MasterController::~MasterController(){
-    if(m_planDatabase.isId()){
-      // Indicate a mode swith to purging to avoid propagation of deletion and removal
-      // messages. Makes for much more efficient deletion
-      Entity::purgeStarted();
-      delete (RulesEngine*) m_rulesEngine;
-      delete (PlanDatabase*) m_planDatabase;
-      delete (ConstraintEngine*) m_constraintEngine;
-      delete (Schema*)m_schema;
-      
-      // Return to standard behavior for deletion
-      Entity::purgeEnded();
-    }
-
+  MasterController::~MasterController()
+  {
     if(m_debugStream != NULL){
       m_debugStream->flush(); 
       m_debugStream->close(); 
       delete m_debugStream;
     }
 
-    // Remove static factories
-    ObjectFactory::purgeAll();
-    TokenFactory::purgeAll();
-    ConstraintLibrary::purgeAll();
-    Rule::purgeAll();
-    uninitNDDL();
-
+    doShutdown();
+    
     // Finally, unload the model
     unloadModel();
   }
@@ -288,11 +276,6 @@ namespace EUROPA {
       e.display();
       throw;
     }
-
-    // Register factories
-    logMsg("Calling handleRegistration");
-
-    handleRegistration();
   }
 
   int MasterController::loadInitialState(const char* configPath, 
@@ -313,28 +296,15 @@ namespace EUROPA {
 
     logMsg("loadInitialState: Allocating components");
 
-    // Allocate the Constraint Engine
-    m_constraintEngine = (new ConstraintEngine())->getId();
-
-    // Allocate the plan database
-    m_schema = (new Schema("MasterController"))->getId();
-    m_planDatabase = (new PlanDatabase(m_constraintEngine, m_schema))->getId();
-
-    configureDatabase();
 
     logMsg("loadInitialState: Configuring Partial PlanWriter");
-    m_ppw = new SOLVERS::PlanWriter::PartialPlanWriter(m_planDatabase, m_constraintEngine, m_rulesEngine);
+    m_ppw = new SOLVERS::PlanWriter::PartialPlanWriter(getPlanDatabase(), getConstraintEngine(), getRulesEngine());
     m_ppw->setDest(destination);
     SOLVERS::PlanWriter::PartialPlanWriter::noFullWrite = 1;
     SOLVERS::PlanWriter::PartialPlanWriter::writeStep = 1;
 
-    /*
-    for(int i=0;i<numPaths;i++)
-      m_ppw->addSourcePath(sourcePaths[i]);
-    */
-
     // Obtain the client to play transactions on.
-    DbClientId client = m_planDatabase->getClient();
+    DbClientId client = getPlanDatabase()->getClient();
 
     // Construct player
     DbClientTransactionPlayer player(client);
@@ -349,7 +319,7 @@ namespace EUROPA {
     logMsg("loadInitialState: Calling configureSolvers");
     configureSolvers(configPath);
 
-    if(!m_constraintEngine->propagate()){
+    if(!getConstraintEngine()->propagate()){
       logMsg("loadInitialState: Found to be initially inconsistent");
       m_status = INITIALLY_INCONSISTENT;
     }
@@ -361,25 +331,6 @@ namespace EUROPA {
     write();
 
     return m_status;
-  }
-
-  void MasterController::configureDatabase(){
-    // Construct propagators - order of introduction determines order of propagation.
-    // Note that propagators will subsequently be managed by the constraint engine
-    new DefaultPropagator(LabelStr("Default"), m_constraintEngine);
-    new TemporalPropagator(LabelStr("Temporal"), m_constraintEngine);
-    new ResourcePropagator(LabelStr("Resource"), m_constraintEngine, m_planDatabase);
-    //new ProfilePropagator(LabelStr("Profile"), m_constraintEngine, m_planDatabase);
-
-    // Link up the Temporal Advisor in the PlanDatabase so that it can use the temporal
-    // network for determining temporal distances between time points.
-    PropagatorId temporalPropagator = m_constraintEngine->getPropagatorByName(LabelStr("Temporal"));
-    m_planDatabase->setTemporalAdvisor((new STNTemporalAdvisor(temporalPropagator))->getId());
-
-    // Allocate the rules engine to process rules
-    m_rulesEngine = (new RulesEngine(m_planDatabase))->getId();
-
-    m_planDatabase->getClient()->enableTransactionLogging();
   }
 
   void MasterController::unloadModel(){
@@ -406,11 +357,8 @@ namespace EUROPA {
   void MasterController::terminate(){
     delete s_instance;
     s_instance = NULL;
-    uninitConstraintLibrary();
   }
 
-
-  const PlanDatabaseId& MasterController::getPlanDatabase() const{ return m_planDatabase; }
 
   MasterController::Status MasterController::getStatus(){
     return m_status;
@@ -434,21 +382,14 @@ namespace EUROPA {
 
   void MasterController::write(){
     debugMsg("MasterController:write", "Step " << m_stepCount);
-    if(!m_constraintEngine->provenInconsistent())
+    if(!getConstraintEngine()->provenInconsistent())
       m_ppw->write();
   }
 
   void MasterController::writeStatistics(){
     debugMsg("MasterController:Statistics", "Step " << m_stepCount);
-    if(!m_constraintEngine->provenInconsistent())
+    if(!getConstraintEngine()->provenInconsistent())
       m_ppw->writeStatistics();
-  }
-
-  void MasterController::handleRegistration(){
-    initNDDL();
-    
-    // Use usual function to register constraints:
-    initConstraintLibrary();
   }
 
   void MasterController::logMsg(std::string msg){

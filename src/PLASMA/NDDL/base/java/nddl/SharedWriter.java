@@ -27,10 +27,12 @@ class SharedWriter {
 
     if (ModelAccessor.isPredicate(element)) { // Declare constructors for Tokens
       String parentName = ModelAccessor.getPredicateClassName(element);
-      SchemaWriter.addCommand("addPredicate(\""+parentName + "." + name+"\")");
+      if(!ModelAccessor.isPredefinedClass(parentName))
+          SchemaWriter.addCommand("addPredicate(\""+parentName + "." + name+"\")");
       ModelAccessor.registerPredicate(element);
     } else if(!name.equals(superClass) && !name.equals("Object") && !name.equals("Timeline")) { // Declare constructors for Objects
-      SchemaWriter.addObjectType("addObjectType(\""+name+"\", \""+superClass+"\")");
+      if(!ModelAccessor.isPredefinedClass(name))
+          SchemaWriter.addObjectType("addObjectType(\""+name+"\", \""+superClass+"\")");
       ModelAccessor.addParentChildRelation(superClass, name);
     }
 
@@ -82,7 +84,8 @@ class SharedWriter {
       writer.write(name+"(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);\n");
       writer.write(name+"(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);\n");
       String parentName = ModelAccessor.getPredicateClassName(element);
-      SchemaWriter.addCommand("addPredicate(\""+parentName + "." + name+"\")");
+      if(!ModelAccessor.isPredefinedClass(parentName))
+          SchemaWriter.addCommand("addPredicate(\""+parentName + "." + name+"\")");
     } else { // Declare constructors for Objects
       writer.write(name+"(const PlanDatabaseId& planDatabase, const LabelStr& name);\n");
       writer.write(name+"(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);\n");

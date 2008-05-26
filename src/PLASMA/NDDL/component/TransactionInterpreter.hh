@@ -490,7 +490,8 @@ namespace EUROPA {
   	    ExprLocalVar(const LabelStr& name,
   	                 const LabelStr& type,
   	                 bool guarded,
-  	                 Expr* domainRestriction);
+  	                 Expr* domainRestriction,
+  	                 const AbstractDomain& baseDomain);
   	    virtual ~ExprLocalVar();
 
   	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;  	    

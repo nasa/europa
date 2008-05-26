@@ -40,12 +40,10 @@ namespace NDDL {
     Id<Schema> id = Schema::testInstance("csp.2");
     // Register Constraints
     // Invoke commands to populate schema with type definitions
-    id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Object");
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
-    REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Object, ObjectDomain("Object"));
     REGISTER_OBJECT_FACTORY(FooFactory0, Foo);
     // Allocate rules
     return id;

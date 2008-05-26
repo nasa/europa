@@ -6,7 +6,7 @@
 
 namespace EUROPA {
 
-  class StringTypeFactory : public ConcreteTypeFactory {
+  class StringTypeFactory : public TypeFactory {
   public:
     StringTypeFactory(const char* name = StringDomain::getDefaultTypeName().c_str());
 

@@ -58,7 +58,7 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("string")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("string")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
       check_error(arguments[0]->isSingleton());
       LabelStr _data((LabelStr)arguments[0]->getSingletonValue());
@@ -108,7 +108,7 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("string")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("string")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
       check_error(arguments[0]->isSingleton());
       LabelStr _name((LabelStr)arguments[0]->getSingletonValue());
@@ -163,13 +163,13 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 2);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("Location")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Location")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to Location");
       check_error(arguments[0]->isSingleton());
       LocationId _from((LocationId)arguments[0]->getSingletonValue());
       
       check_error(AbstractDomain::canBeCompared(*arguments[1], 
-                                                TypeFactory::baseDomain("Location")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Location")), 
                   "Cannot convert " + arguments[1]->getTypeName().toString() + " to Location");
       check_error(arguments[1]->isSingleton());
       LocationId _to((LocationId)arguments[1]->getSingletonValue());
@@ -198,7 +198,7 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("Location")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Location")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to Location");
       check_error(arguments[0]->isSingleton());
       LocationId loc((LocationId)arguments[0]->getSingletonValue());
@@ -228,19 +228,19 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 3);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("Location")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Location")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to Location");
       check_error(arguments[0]->isSingleton());
       LocationId _from((LocationId)arguments[0]->getSingletonValue());
       
       check_error(AbstractDomain::canBeCompared(*arguments[1], 
-                                                TypeFactory::baseDomain("Location")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Location")), 
                   "Cannot convert " + arguments[1]->getTypeName().toString() + " to Location");
       check_error(arguments[1]->isSingleton());
       LocationId _to((LocationId)arguments[1]->getSingletonValue());
       
       check_error(AbstractDomain::canBeCompared(*arguments[2], 
-                                                TypeFactory::baseDomain("float")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("float")), 
                   "Cannot convert " + arguments[2]->getTypeName().toString() + " to float");
       check_error(arguments[2]->isSingleton());
       float _cost((float)arguments[2]->getSingletonValue());
@@ -261,7 +261,6 @@ namespace NDDL {
     Id<Schema> id = Schema::testInstance("classes.0.tx");
     // Register Constraints
     // Invoke commands to populate schema with type definitions
-    id->addObjectType("Timeline","Object");
     id->addObjectType("StringData", "Object");
     id->addObjectType("Location", "Object");
     id->addObjectType("Path", "Object");
@@ -277,14 +276,10 @@ namespace NDDL {
     id->addValue("TokenStates", LabelStr("REJECTED"));
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
-    REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
-    REGISTER_TYPE_FACTORY(Timeline, ObjectDomain("Timeline"));
-    REGISTER_TYPE_FACTORY(StringData, ObjectDomain("StringData"));
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),TokenStates, TokenStatesBaseDomain());
     REGISTER_OBJECT_FACTORY(StringDataFactory0, StringData:string);
-    REGISTER_TYPE_FACTORY(Location, ObjectDomain("Location"));
     REGISTER_OBJECT_FACTORY(LocationFactory1, Location:string);
-    REGISTER_TYPE_FACTORY(Path, ObjectDomain("Path"));
     REGISTER_OBJECT_FACTORY(PathFactory2, Path:Location:Location);
     REGISTER_OBJECT_FACTORY(PathFactory2, Path:Location:Object);
     REGISTER_OBJECT_FACTORY(PathFactory2, Path:Object:Location);

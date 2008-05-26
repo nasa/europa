@@ -71,6 +71,8 @@ ResourceTestEngine::ResourceTestEngine()
 {
     createModules();
     doStart();
+    Schema* schema = (Schema*)getComponent("Schema");
+    schema->addObjectType("SAVHResource");
 }
 
 ResourceTestEngine::~ResourceTestEngine()
@@ -99,24 +101,9 @@ const double consumptionRateMax = -8;
 const double consumptionMax = -50;
 
 #define RESOURCE_DEFAULT_SETUP(ce, db, autoClose) \
-    ConstraintEngine ce; \
-    SchemaId schema = Schema::testInstance();\
-    schema->reset();\
-    schema->addObjectType(LabelStr("Resource")); \
-    schema->addObjectType(LabelStr("Reservoir")); \
-    schema->addPredicate(LabelStr("Reservoir.consume")); \
-    schema->addMember(LabelStr("Reservoir.consume"), IntervalDomain().getTypeName(), LabelStr("quantity")); \
-    schema->addObjectType(LabelStr("Reusable")); \
-    schema->addPredicate("Reusable.uses"); \
-    schema->addMember(LabelStr("Reusable.uses"), IntervalDomain().getTypeName(), LabelStr("quantity")); \
-    schema->addObjectType(LabelStr("SAVHResource")); \
-    schema->addPredicate(LabelStr("Resource.change"));\
-    schema->addMember(LabelStr("Resource.change"), IntervalDomain().getTypeName(), LabelStr("quantity")); \
-    PlanDatabase db(ce.getId(), schema); \
-    new DefaultPropagator(LabelStr("Default"), ce.getId()); \
-    new DefaultPropagator(LabelStr("Temporal"), ce.getId()); \
-    new ResourcePropagator(LabelStr("Resource"), ce.getId(), db.getId()); \
-    new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), ce.getId()); \
+    ResourceTestEngine rte; \
+    ConstraintEngine& ce = *((ConstraintEngine*)rte.getComponent("ConstraintEngine")); \
+    PlanDatabase& db = *((PlanDatabase*)rte.getComponent("PlanDatabase")); \
     if (autoClose) \
       db.close();
 
@@ -1947,8 +1934,8 @@ private:
 void ResourceModuleTests::runTests(std::string path) 
 {
   setTestLoadLibraryPath(path);  
-  Schema::testInstance();
-  ResourceTestEngine engine;
+  //Schema::testInstance();
+  //ResourceTestEngine engine;
   
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(ResourceTest::test);

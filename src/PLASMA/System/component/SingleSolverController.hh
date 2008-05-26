@@ -13,11 +13,6 @@ namespace EUROPA {
 
     private:
       /**
-       * @brief Called after model is loaded
-       */
-      void handleRegistration();
-
-      /**
        * @brief Called after the initial transactions are loaded into the database.
        */
       void configureSolvers(const char* configPath);
@@ -28,7 +23,6 @@ namespace EUROPA {
       Status handleNext();
 
       SolverId m_solver;
-
 
       unsigned int m_maxDepth;
       unsigned int m_maxSteps;

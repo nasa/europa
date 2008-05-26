@@ -194,11 +194,6 @@ public class ModelAccessor {
       klass = XMLUtil.getAttribute(element,"class", "extends");
     else if(s_customClassesByNddlName.get(className) != null) // Lookup custom registrations first
       klass = "Object";
-
-    // This is in error as of parser version 1.1.  Fear the worst now that this is fixed!
-    //else if(element.getFirstChildNamed("predicate") != null) // Backward compatibility - Predicates imply a Timeline
-    //klass = "Timeline";
-
     else
       klass = "Object"; // Otherwise it is an object. Saves explicit declaration of base class
 
@@ -451,7 +446,7 @@ public class ModelAccessor {
       varType = (String)s_allEnumerations.get(varType);
 
     // If the current scope is not a rule, then register this in the schema
-    if(s_currentRule.empty())
+    if(s_currentRule.empty() && !ModelAccessor.isPredefinedClass(getCurrentObjectType()))
       SchemaWriter.addCommand("addMember(\""+parentType+"\", \""+varType+"\", \""+varName+"\")");
 
     assert(DebugMsg.debugMsg("ModelAccessor:registerVariable",qualifiedName + " of type " + varType));

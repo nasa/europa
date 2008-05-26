@@ -14,7 +14,8 @@
 using namespace EUROPA;
 
 #define NDDL_DEFAULT_SETUP(ce, db, autoClose) \
-    ConstraintEngineId ce = (new ConstraintEngine())->getId(); \
+    TypeFactoryMgr* tfm = new TypeFactoryMgr(); \
+    ConstraintEngineId ce = (new ConstraintEngine(tfm->getId()))->getId(); \
     SchemaId schema = SCHEMA; \
     nddlInitDbTestSchema(schema); \
     PlanDatabaseId db = (new PlanDatabase(ce, schema))->getId(); \
@@ -33,7 +34,9 @@ using namespace EUROPA;
     } \
     Entity::purgeStarted(); \
     delete (PlanDatabase*) db; \
+    const TypeFactoryMgrId& tfm = ce->getTypeFactoryMgr(); \
     delete (ConstraintEngine*) ce; \
+    delete (TypeFactoryMgr*)tfm; \
     Entity::purgeEnded();
 
 #define NDDL_DEFAULT_TEARDOWN_MULTI(ce, db) \

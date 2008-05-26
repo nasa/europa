@@ -63,15 +63,12 @@ namespace NDDL {
     Id<Schema> id = Schema::testInstance("gnats-3100");
     // Register Constraints
     // Invoke commands to populate schema with type definitions
-    id->addObjectType("Timeline","Object");
     id->addObjectType("Base", "Object");
     id->addObjectType("Derived", "Base");
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
-    REGISTER_TYPE_FACTORY(Base, ObjectDomain("Base"));
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Object, ObjectDomain("Object"));
     REGISTER_OBJECT_FACTORY(BaseFactory0, Base);
-    REGISTER_TYPE_FACTORY(Derived, ObjectDomain("Derived"));
     REGISTER_OBJECT_FACTORY(DerivedFactory1, Derived);
     // Allocate rules
     return id;

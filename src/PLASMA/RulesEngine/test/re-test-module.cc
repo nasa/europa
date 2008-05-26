@@ -29,35 +29,6 @@
 
 using namespace EUROPA;
 
-class RETestEngine : public EngineBase
-{
-  public:  
-	RETestEngine();
-	virtual ~RETestEngine();
-	
-  protected: 
-	void createModules();
-};
-
-RETestEngine::RETestEngine()
-{
-    createModules();
-    doStart();
-}
-
-RETestEngine::~RETestEngine()
-{
-    doShutdown();
-}
-
-void RETestEngine::createModules()
-{
-    addModule((new ModuleConstraintEngine())->getId());
-    addModule((new ModuleConstraintLibrary())->getId());
-    addModule((new ModulePlanDatabase())->getId());
-    addModule((new ModuleRulesEngine())->getId());
-}
-
 class SimpleSubGoal: public Rule {
 public:
   SimpleSubGoal(): Rule(LabelStr("AllObjects.Predicate")){}
@@ -216,26 +187,89 @@ void LocalVariableGuard_0_0::handleExecute(){
   addSlave(new IntervalToken(m_token, "any", LabelStr("AllObjects.Predicate")));
 }
 
-#define RE_DEFAULT_SETUP(ce, db, autoClose) \
-    ConstraintEngine ce; \
-    Schema::testInstance()->reset();\
-    Schema::testInstance()->addObjectType(LabelStr("AllObjects")); \
-    Schema::testInstance()->addObjectType(LabelStr("Objects")); \
-    Schema::testInstance()->addMember(LabelStr("Objects"), IntervalIntDomain::getDefaultTypeName(), "m_int"); \
-    Schema::testInstance()->addPredicate(LabelStr("AllObjects.Predicate")); \
-    PlanDatabase db(ce.getId(), Schema::testInstance()); \
-    { new DefaultPropagator(LabelStr("Default"), ce.getId()); \
-      new DefaultPropagator(LabelStr("Temporal"), ce.getId()); \
-    } \
-    RulesEngine re(db.getId()); \
-    Object* objectPtr = new Object(db.getId(), LabelStr("AllObjects"), LabelStr("o1")); \
-    assertTrue(objectPtr != 0); \
-    Object& object = *objectPtr; \
-    assertTrue(objectPtr->getId() == object.getId()); \
-    if (autoClose) \
-      db.close();
+class RETestEngine : public EngineBase
+{
+  public:  
+    RETestEngine();
+    virtual ~RETestEngine();
+    
+    const ConstraintEngineId& getConstraintEngine() const;
+    const SchemaId& getSchema() const;
+    const PlanDatabaseId& getPlanDatabase() const;    
+    const RulesEngineId& getRulesEngine() const;
+    
+  protected: 
+    void createModules();
+};
 
-#define RE_DEFAULT_TEARDOWN()
+RETestEngine::RETestEngine()
+{
+    createModules();
+    doStart();
+    SchemaId sch = getSchema();
+    sch->reset();
+    sch->addObjectType(LabelStr("AllObjects")); 
+    sch->addObjectType(LabelStr("Objects")); 
+    sch->addMember(LabelStr("Objects"), IntervalIntDomain::getDefaultTypeName(), "m_int"); 
+    sch->addPredicate(LabelStr("AllObjects.Predicate")); 
+    Object* objectPtr = new Object(getPlanDatabase(), "AllObjects", LabelStr("defaultObj")); 
+    assert(objectPtr != 0); 
+    Object& object = *objectPtr; 
+    assert(objectPtr->getId() == object.getId()); 
+    REGISTER_SYSTEM_CONSTRAINT(EqualConstraint, "concurrent", "Default");
+    REGISTER_SYSTEM_CONSTRAINT(LessThanEqualConstraint, "precedes", "Default"); 
+    REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporaldistance", "Default");
+    REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporalDistance", "Default");      
+}
+
+RETestEngine::~RETestEngine()
+{
+    doShutdown();
+}
+
+const ConstraintEngineId& RETestEngine::getConstraintEngine() const
+{
+    return ((ConstraintEngine*)getComponent("ConstraintEngine"))->getId();     
+}
+
+const SchemaId& RETestEngine::getSchema() const
+{
+    return ((Schema*)getComponent("Schema"))->getId();     
+}
+
+const PlanDatabaseId& RETestEngine::getPlanDatabase() const
+{
+    return ((PlanDatabase*)getComponent("PlanDatabase"))->getId();     
+}
+
+const RulesEngineId& RETestEngine::getRulesEngine() const
+{
+    return ((RulesEngine*)getComponent("RulesEngine"))->getId();     
+}
+
+void RETestEngine::createModules()
+{
+    addModule((new ModuleConstraintEngine())->getId());
+    addModule((new ModuleConstraintLibrary())->getId());
+    addModule((new ModulePlanDatabase())->getId());
+    addModule((new ModuleRulesEngine())->getId());
+}
+
+ConstraintEngineId ce;
+SchemaId schema;
+PlanDatabaseId db;
+RulesEngineId re; 
+
+#define RE_DEFAULT_SETUP(ce, db, autoClose) \
+    RETestEngine testEngine; \
+    ce = testEngine.getConstraintEngine(); \
+    schema = testEngine.getSchema(); \
+    db = testEngine.getPlanDatabase(); \
+    re = testEngine.getRulesEngine(); \
+    if (autoClose) \
+      db->close();
+
+#define RE_DEFAULT_TEARDOWN() 
 
 class RulesEngineTest {
 public:
@@ -253,12 +287,12 @@ private:
 
   static bool testSimpleSubGoal(){
     RE_DEFAULT_SETUP(ce, db, false);
-    db.close();
+    db->close();
 
     SimpleSubGoal r;
     // Create a token of an expected type
 
-    IntervalToken t0(db.getId(), 
+    IntervalToken t0(db, 
 		     LabelStr("AllObjects.Predicate"), 
 		     true,
 		     false,
@@ -268,7 +302,7 @@ private:
     // Activate it and confirm we are getting a subgoal and that the expected constraint holds.
     assertTrue(t0.getSlaves().empty());
     t0.activate();
-    assertTrue(db.getTokens().size() == 2);
+    assertTrue(db->getTokens().size() == 2);
     assertTrue(t0.getSlaves().size() == 1);
 
     TokenId slaveToken = *(t0.getSlaves().begin());
@@ -280,13 +314,14 @@ private:
 
   static bool testNestedGuards(){
     RE_DEFAULT_SETUP(ce, db, false);
-    Object o2(db.getId(), LabelStr("AllObjects"), LabelStr("o2"));
-    db.close();
+    Object o1(db, LabelStr("AllObjects"), LabelStr("o1"));
+    Object o2(db, LabelStr("AllObjects"), LabelStr("o2"));
+    db->close();
 
     NestedGuards_0 r;
     // Create a token of an expected type
 
-    IntervalToken t0(db.getId(), 
+    IntervalToken t0(db, 
 		     LabelStr("AllObjects.Predicate"), 
 		     true,
 		     false,
@@ -296,32 +331,32 @@ private:
     // Activate it and confirm we are getting a subgoal and that the expected constraint holds.
     assertTrue(t0.getSlaves().empty());
     t0.activate();
-    assertTrue(db.getTokens().size() == 1);
-    t0.getObject()->specify(object.getId());
-    ce.propagate();
+    assertTrue(db->getTokens().size() == 1);
+    t0.getObject()->specify(o1.getId());
+    ce->propagate();
     assertTrue(t0.getSlaves().size() == 1);
-    assertTrue(db.getTokens().size() == 2);
+    assertTrue(db->getTokens().size() == 2);
 
     TokenId slaveToken = *(t0.getSlaves().begin());
 
     // Set start time to 10 will trigger another guard
     t0.getStart()->specify(10); // Will trigger nested guard
-    ce.propagate();
+    ce->propagate();
     assertTrue(t0.getSlaves().size() == 2);
 
     // Now set the object variable of the slaveToken to trigger additional guard
     slaveToken->getObject()->specify(o2.getId());
-    ce.propagate();
+    ce->propagate();
     assertTrue(t0.getSlaves().size() == 3);
 
     // Now retract a decision and confirm the slave is removed
     t0.getStart()->reset();
-    ce.propagate();
+    ce->propagate();
     assertTrue(t0.getSlaves().size() == 2);
 
     // Now deactivate the master token and confirm all salves are gone
     t0.cancel();
-    ce.propagate();
+    ce->propagate();
     assertTrue(t0.getSlaves().empty());
     RE_DEFAULT_TEARDOWN();
     return true;
@@ -329,11 +364,11 @@ private:
 
   static bool testLocalVariable(){
     RE_DEFAULT_SETUP(ce, db, false);
-    db.close();
+    db->close();
 
     LocalVariableGuard_0 r;
 
-    IntervalToken t0(db.getId(), 
+    IntervalToken t0(db, 
 		     LabelStr("AllObjects.Predicate"), 
 		     true,
 		     false,
@@ -345,18 +380,18 @@ private:
     assertTrue(guard.isNoId());
 
     t0.activate();
-    ce.propagate();
+    ce->propagate();
     assertTrue(t0.getSlaves().empty());
 
     guard = LocalVariableGuard_0_Root::getGuard();
     assertTrue(guard.isValid());
     guard->specify(LabelStr("A")); // Should not succeed
-    ce.propagate();
+    ce->propagate();
     assertTrue(t0.getSlaves().empty());
 
     guard->reset(); // Reset and try correct value
     guard->specify(LabelStr("B")); // Should succeed
-    ce.propagate();
+    ce->propagate();
     assertTrue(t0.getSlaves().size() == 1);
 
     RE_DEFAULT_TEARDOWN();
@@ -365,11 +400,11 @@ private:
 
   static bool testTestRule(){
     RE_DEFAULT_SETUP(ce, db, false);
-    db.close();
+    db->close();
 
     TestRule r(LabelStr("AllObjects.Predicate"));
 
-    IntervalToken t0(db.getId(), 
+    IntervalToken t0(db, 
 		     LabelStr("AllObjects.Predicate"), 
 		     true,
 		     false,
@@ -383,7 +418,7 @@ private:
        second level of execution should also occur, since by default, the local guard base domain
        is a singleton. Note that this addresses a case for GNATS_ */
     t0.activate();
-    ce.propagate();
+    ce->propagate();
     assertTrue(t0.getSlaves().size() == 2, toString(t0.getSlaves().size()));
 
     RE_DEFAULT_TEARDOWN();
@@ -392,7 +427,7 @@ private:
 
   static bool testPurge(){
     RE_DEFAULT_SETUP(ce, db, false);
-    db.close();
+    db->close();
 
     new TestRule(LabelStr("AllObjects.Predicate"));
 
@@ -404,14 +439,14 @@ private:
 
   static bool testGNATS_3157(){
     RE_DEFAULT_SETUP(ce, db, false);
-    db.close();
+    db->close();
 
     SimpleSubGoal r;
 
     // Case where we have a master's rule that remains even though slaves and constraints are removed.
     {
       // Create a token of an expected type
-      IntervalToken t0(db.getId(), 
+      IntervalToken t0(db, 
 		       LabelStr("AllObjects.Predicate"), 
 		       true,
 		       false,
@@ -421,7 +456,7 @@ private:
       // Activate it and confirm we are getting a subgoal and that the expected constraint holds.
       assertTrue(t0.getSlaves().empty());
       t0.activate();
-      assertTrue(db.getTokens().size() == 2);
+      assertTrue(db->getTokens().size() == 2);
       assertTrue(t0.getSlaves().size() == 1);
 
       TokenId slaveToken = *(t0.getSlaves().begin());
@@ -437,7 +472,7 @@ private:
       TokenId slaveToken;
       {
 	// Create a token of an expected type
-	IntervalToken t0(db.getId(), 
+	IntervalToken t0(db, 
 			 LabelStr("AllObjects.Predicate"), 
 			 true,
 			 false,
@@ -447,7 +482,7 @@ private:
 	// Activate it and confirm we are getting a subgoal and that the expected constraint holds.
 	assertTrue(t0.getSlaves().empty());
 	t0.activate();
-	assertTrue(db.getTokens().size() == 2);
+	assertTrue(db->getTokens().size() == 2);
 	assertTrue(t0.getSlaves().size() == 1);
 
 	slaveToken = *(t0.getSlaves().begin());
@@ -467,15 +502,15 @@ private:
 
   static bool testProxyVariableRelation(){
     RE_DEFAULT_SETUP(ce, db, false);
-    Object obj0(db.getId(), "Objects", "obj0", true);
+    Object obj0(db, "Objects", "obj0", true);
     assertFalse(obj0.isComplete());
     obj0.addVariable(IntervalIntDomain(0, 0), "m_int");
     obj0.close();
-    Object obj1(db.getId(), "Objects", "obj1", true);
+    Object obj1(db, "Objects", "obj1", true);
     assertFalse(obj1.isComplete());
     obj1.addVariable(IntervalIntDomain(1, 1), "m_int");
     obj1.close();
-    Object obj2(db.getId(), "Objects", "obj2", true);
+    Object obj2(db, "Objects", "obj2", true);
     assertFalse(obj2.isComplete());
     obj2.addVariable(IntervalIntDomain(2, 2), "m_int");
     obj2.close();
@@ -483,10 +518,10 @@ private:
     ObjectDomain emptyDomain("Objects");
 
     // Allocate an object variable with an empty domain
-    Variable<ObjectDomain> objVar(ce.getId(), emptyDomain);
+    Variable<ObjectDomain> objVar(ce, emptyDomain);
 
     // populate the domain, leaving it open
-    db.makeObjectVariableFromType("Objects", objVar.getId(), true);
+    db->makeObjectVariableFromType("Objects", objVar.getId(), true);
     assertTrue(objVar.lastDomain().getSize() == 3, objVar.toString());
 
     // Create the initial proxy variable
@@ -494,7 +529,7 @@ private:
     dom.insert(0);
     dom.insert(1);
     dom.insert(2);
-    Variable<NumericDomain> proxyVar(ce.getId(), dom);
+    Variable<NumericDomain> proxyVar(ce, dom);
     assertFalse(proxyVar.isClosed());
 
     // Allocate the constraint
@@ -502,27 +537,27 @@ private:
     path.push_back(0);
     ProxyVariableRelation c(objVar.getId(), proxyVar.getId(), path);
 
-    assertTrue(ce.propagate());
+    assertTrue(ce->propagate());
 
     // Specify the proxy and ensure the object variable is propagated
     proxyVar.specify(1);
-    assertTrue(ce.propagate());
+    assertTrue(ce->propagate());
     assertTrue(objVar.lastDomain().isSingleton());
     assertTrue(objVar.lastDomain().getSingletonValue() == obj1.getId());
 
     // Reset and ensure things go back to normal
     proxyVar.reset();
-    ce.propagate();
+    ce->propagate();
     assertTrue(objVar.lastDomain().getSize() == 3, objVar.toString());
 
     // Specify the object var and ensure the proxy var also becomes specified
     objVar.specify(obj2.getId());
-    assertTrue(ce.propagate());
+    assertTrue(ce->propagate());
     assertTrue(proxyVar.isSpecified());
 
     // Reset and ensure things go back to normal
     objVar.reset();
-    ce.propagate();
+    ce->propagate();
     assertFalse(proxyVar.isSpecified());
 
     // First set the proxy, then set the object. Retract the proxy but ensure it is not reset
@@ -538,11 +573,11 @@ private:
     // specify both such that there is an inconsistency
     proxyVar.specify(2);
     objVar.specify(obj1.getId());
-    assertFalse(ce.propagate());
+    assertFalse(ce->propagate());
 
     // Back off an fix it
     proxyVar.reset();
-    assertTrue(ce.propagate());
+    assertTrue(ce->propagate());
 
     return true;
   }
@@ -550,18 +585,7 @@ private:
 
 void RulesEngineModuleTests::runTests(std::string path) 
 {
-    RETestEngine engine;
-    
-    // TODO: This introduces a dependency to the TemporalNetwork, why here?
-    REGISTER_SYSTEM_CONSTRAINT(EqualConstraint, "concurrent", "Temporal");
-    REGISTER_SYSTEM_CONSTRAINT(LessThanEqualConstraint, "precedes", "Temporal"); 
-    REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporaldistance", "Temporal");
-    REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporalDistance", "Temporal");  
-
     setTestLoadLibraryPath(path);
-
-    // Allocate default schema initially so tests don't fail because of ID's
-    Schema::testInstance();
     runTestSuite(RulesEngineTest::test);
     std::cout << "Finished" << std::endl;
   }

@@ -58,7 +58,6 @@ namespace EUROPA {
     
   protected:
     bool m_started;
-    PSSolverManager*    m_psSolverManager;
         
   private:	
   	// Is there a way to avoid these:

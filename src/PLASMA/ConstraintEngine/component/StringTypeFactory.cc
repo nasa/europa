@@ -9,7 +9,7 @@ namespace EUROPA {
   //
 
   StringTypeFactory::StringTypeFactory(const char* name)
-   : ConcreteTypeFactory(name), m_baseDomain(name) {}
+   : TypeFactory(name), m_baseDomain(name) {}
 
   ConstrainedVariableId
   StringTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 

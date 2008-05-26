@@ -9,7 +9,7 @@ namespace EUROPA {
   //
 
   BoolTypeFactory::BoolTypeFactory(const char* name)
-   : ConcreteTypeFactory(name), m_baseDomain(name)
+   : TypeFactory(name), m_baseDomain(name)
   {
   }
 

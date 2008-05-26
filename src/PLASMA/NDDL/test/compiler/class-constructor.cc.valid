@@ -80,7 +80,7 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("World")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("World")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to World");
       check_error(arguments[0]->isSingleton());
       WorldId w((WorldId)arguments[0]->getSingletonValue());
@@ -113,31 +113,31 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 5);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("World")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("World")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to World");
       check_error(arguments[0]->isSingleton());
       WorldId w((WorldId)arguments[0]->getSingletonValue());
       
       check_error(AbstractDomain::canBeCompared(*arguments[1], 
-                                                TypeFactory::baseDomain("int")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("int")), 
                   "Cannot convert " + arguments[1]->getTypeName().toString() + " to int");
       check_error(arguments[1]->isSingleton());
       int a((int)arguments[1]->getSingletonValue());
       
       check_error(AbstractDomain::canBeCompared(*arguments[2], 
-                                                TypeFactory::baseDomain("bool")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("bool")), 
                   "Cannot convert " + arguments[2]->getTypeName().toString() + " to bool");
       check_error(arguments[2]->isSingleton());
       bool b((bool)arguments[2]->getSingletonValue());
       
       check_error(AbstractDomain::canBeCompared(*arguments[3], 
-                                                TypeFactory::baseDomain("string")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("string")), 
                   "Cannot convert " + arguments[3]->getTypeName().toString() + " to string");
       check_error(arguments[3]->isSingleton());
       LabelStr c((LabelStr)arguments[3]->getSingletonValue());
       
       check_error(AbstractDomain::canBeCompared(*arguments[4], 
-                                                TypeFactory::baseDomain("Locations")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Locations")), 
                   "Cannot convert " + arguments[4]->getTypeName().toString() + " to Locations");
       check_error(arguments[4]->isSingleton());
       LabelStr loc((LabelStr)arguments[4]->getSingletonValue());
@@ -170,19 +170,19 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 3);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("World")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("World")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to World");
       check_error(arguments[0]->isSingleton());
       WorldId w((WorldId)arguments[0]->getSingletonValue());
       
       check_error(AbstractDomain::canBeCompared(*arguments[1], 
-                                                TypeFactory::baseDomain("int")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("int")), 
                   "Cannot convert " + arguments[1]->getTypeName().toString() + " to int");
       check_error(arguments[1]->isSingleton());
       int a((int)arguments[1]->getSingletonValue());
       
       check_error(AbstractDomain::canBeCompared(*arguments[2], 
-                                                TypeFactory::baseDomain("bool")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("bool")), 
                   "Cannot convert " + arguments[2]->getTypeName().toString() + " to bool");
       check_error(arguments[2]->isSingleton());
       bool b((bool)arguments[2]->getSingletonValue());
@@ -234,13 +234,13 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 2);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("float")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("float")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to float");
       check_error(arguments[0]->isSingleton());
       float m8((float)arguments[0]->getSingletonValue());
       
       check_error(AbstractDomain::canBeCompared(*arguments[1], 
-                                                TypeFactory::baseDomain("World")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("World")), 
                   "Cannot convert " + arguments[1]->getTypeName().toString() + " to World");
       check_error(arguments[1]->isSingleton());
       WorldId w((WorldId)arguments[1]->getSingletonValue());
@@ -289,7 +289,7 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("Foo")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Foo")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to Foo");
       check_error(arguments[0]->isSingleton());
       FooId _foo((FooId)arguments[0]->getSingletonValue());
@@ -340,7 +340,7 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("Foo")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Foo")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to Foo");
       check_error(arguments[0]->isSingleton());
       FooId _foo((FooId)arguments[0]->getSingletonValue());
@@ -439,7 +439,7 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("Locations")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Locations")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to Locations");
       check_error(arguments[0]->isSingleton());
       LabelStr loc((LabelStr)arguments[0]->getSingletonValue());
@@ -489,7 +489,7 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("string")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("string")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
       check_error(arguments[0]->isSingleton());
       LabelStr _arg0((LabelStr)arguments[0]->getSingletonValue());
@@ -633,7 +633,6 @@ namespace NDDL {
     Id<Schema> id = Schema::testInstance("class-constructor");
     // Register Constraints
     // Invoke commands to populate schema with type definitions
-    id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Object");
     id->addObjectType("Bar", "Foo");
     id->addObjectType("Baz", "Object");
@@ -672,35 +671,25 @@ namespace NDDL {
     id->addValue("Locations", LabelStr("Lander"));
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
-    REGISTER_TYPE_FACTORY(Locations, LocationsBaseDomain());
-    REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Locations, LocationsBaseDomain());
     REGISTER_OBJECT_FACTORY(FooFactory0, Foo:World);
     REGISTER_OBJECT_FACTORY(FooFactory0, Foo:Object);
     REGISTER_OBJECT_FACTORY(FooFactory1, Foo:World:int:bool:string:Locations);
     REGISTER_OBJECT_FACTORY(FooFactory1, Foo:Object:int:bool:string:Locations);
     REGISTER_OBJECT_FACTORY(FooFactory2, Foo:World:int:bool);
     REGISTER_OBJECT_FACTORY(FooFactory2, Foo:Object:int:bool);
-    REGISTER_TYPE_FACTORY(Bar, ObjectDomain("Bar"));
     REGISTER_OBJECT_FACTORY(BarFactory3, Bar:float:World);
     REGISTER_OBJECT_FACTORY(BarFactory3, Bar:float:Object);
-    REGISTER_TYPE_FACTORY(Baz, ObjectDomain("Baz"));
     REGISTER_OBJECT_FACTORY(BazFactory4, Baz:Foo);
     REGISTER_OBJECT_FACTORY(BazFactory4, Baz:Object);
-    REGISTER_TYPE_FACTORY(Bat, ObjectDomain("Bat"));
     REGISTER_OBJECT_FACTORY(BatFactory5, Bat:Foo);
     REGISTER_OBJECT_FACTORY(BatFactory5, Bat:Object);
-    REGISTER_TYPE_FACTORY(Bing, ObjectDomain("Bing"));
     REGISTER_OBJECT_FACTORY(BingFactory6, Bing);
-    REGISTER_TYPE_FACTORY(Bang, ObjectDomain("Bang"));
     REGISTER_OBJECT_FACTORY(BangFactory7, Bang);
-    REGISTER_TYPE_FACTORY(Baluga, ObjectDomain("Baluga"));
     REGISTER_OBJECT_FACTORY(BalugaFactory8, Baluga:Locations);
-    REGISTER_TYPE_FACTORY(StringBase, ObjectDomain("StringBase"));
     REGISTER_OBJECT_FACTORY(StringBaseFactory9, StringBase:string);
-    REGISTER_TYPE_FACTORY(StringDerived, ObjectDomain("StringDerived"));
     REGISTER_OBJECT_FACTORY(StringDerivedFactory10, StringDerived);
-    REGISTER_TYPE_FACTORY(World, ObjectDomain("World"));
     REGISTER_OBJECT_FACTORY(WorldFactory11, World);
     // Allocate rules
     return id;

@@ -6,7 +6,7 @@
 
 namespace EUROPA {
 
-  class IntervalIntTypeFactory : public ConcreteTypeFactory {
+  class IntervalIntTypeFactory : public TypeFactory {
   public:
     /**
      * Permit registration by an external name

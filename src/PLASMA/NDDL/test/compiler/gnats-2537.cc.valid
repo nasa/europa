@@ -108,7 +108,7 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("Foo")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Foo")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to Foo");
       check_error(arguments[0]->isSingleton());
       FooId _foo((FooId)arguments[0]->getSingletonValue());
@@ -139,7 +139,7 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                TypeFactory::baseDomain("Location")), 
+                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Location")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to Location");
       check_error(arguments[0]->isSingleton());
       LabelStr loc((LabelStr)arguments[0]->getSingletonValue());
@@ -160,7 +160,6 @@ namespace NDDL {
     Id<Schema> id = Schema::testInstance("gnats-2537");
     // Register Constraints
     // Invoke commands to populate schema with type definitions
-    id->addObjectType("Timeline","Object");
     id->addObjectType("Foo", "Object");
     id->addObjectType("Region", "Object");
     id->addEnum("Location");
@@ -171,11 +170,9 @@ namespace NDDL {
     id->addValue("Location", LabelStr("Lander"));
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
-    REGISTER_TYPE_FACTORY(Location, LocationBaseDomain());
-    REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Location, LocationBaseDomain());
     REGISTER_OBJECT_FACTORY(FooFactory0, Foo);
-    REGISTER_TYPE_FACTORY(Region, ObjectDomain("Region"));
     REGISTER_OBJECT_FACTORY(RegionFactory1, Region);
     REGISTER_OBJECT_FACTORY(RegionFactory2, Region:Foo);
     REGISTER_OBJECT_FACTORY(RegionFactory2, Region:Object);

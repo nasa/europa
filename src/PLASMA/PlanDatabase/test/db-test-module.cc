@@ -22,7 +22,6 @@
 
 #include "TestSupport.hh"
 #include "Debug.hh"
-#include "PlanDatabaseTestSupport.hh"
 #include "PlanDatabaseWriter.hh"
 
 #include "Constraints.hh"
@@ -36,33 +35,10 @@
 #include <pthread.h>
 #include <string>
 
-class PDBTestEngine  : public EngineBase
-{
-  public:  
-	PDBTestEngine();
-	virtual ~PDBTestEngine();
-	
-  protected: 
-	void createModules();
-};
+const char* DEFAULT_OBJECT_TYPE = "Object";
+const char* DEFAULT_PREDICATE = "Object.DEFAULT_PREDICATE";
 
-PDBTestEngine::PDBTestEngine() 
-{
-    createModules();
-    doStart();
-}
-
-PDBTestEngine::~PDBTestEngine() 
-{
-    doShutdown();
-}
-
-void PDBTestEngine::createModules()
-{
-    addModule((new ModuleConstraintEngine())->getId());
-    addModule((new ModuleConstraintLibrary())->getId());
-    addModule((new ModulePlanDatabase())->getId());
-}
+#define SCHEMA Schema::testInstance()
 
   class DBFoo;
   typedef Id<DBFoo> DBFooId;
@@ -126,8 +102,8 @@ void PDBTestEngine::createModules()
   class SpecialDBFooFactory: public ConcreteObjectFactory{
   public:
     SpecialDBFooFactory(): ConcreteObjectFactory(LabelStr(DEFAULT_OBJECT_TYPE).toString() +
-					       ":" + IntervalIntDomain::getDefaultTypeName().toString() +
-					       ":" + LabelSet::getDefaultTypeName().toString())
+                           ":" + IntervalIntDomain::getDefaultTypeName().toString() +
+                           ":" + LabelSet::getDefaultTypeName().toString())
     {}
     
   private:
@@ -165,6 +141,137 @@ void PDBTestEngine::createModules()
     }
   };
 
+void initDbTestSchema(const SchemaId& schema) {
+  schema->reset();
+
+  schema->addPrimitive(IntervalDomain::getDefaultTypeName());
+  schema->addPrimitive(IntervalIntDomain::getDefaultTypeName());
+  schema->addPrimitive(EnumeratedDomain::getDefaultTypeName());
+
+  // Set up object types and compositions for testing - builds a recursive structure
+  schema->addObjectType(LabelStr(DEFAULT_OBJECT_TYPE));
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id0");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id1");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id2");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id3");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id4");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id5");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id6");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id7");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id8");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id9");
+
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o0");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o3");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o4");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o5");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o6");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o7");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o8");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o9");
+
+  // Set up primitive object type member variables for testing
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), IntervalDomain::getDefaultTypeName(), "IntervalVar");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), IntervalIntDomain::getDefaultTypeName(), "IntervalIntVar");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), BoolDomain::getDefaultTypeName(), "BoolVar");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelSet::getDefaultTypeName(), "LabelSetVar");
+  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), EnumeratedDomain::getDefaultTypeName(), "EnumeratedVar");
+
+  // Set up predicates for testing
+  schema->addPredicate(LabelStr(DEFAULT_PREDICATE));
+  schema->addMember(LabelStr(DEFAULT_PREDICATE), IntervalDomain::getDefaultTypeName(), "IntervalParam");
+  schema->addMember(LabelStr(DEFAULT_PREDICATE), IntervalIntDomain::getDefaultTypeName(), "IntervalIntParam");
+  schema->addMember(LabelStr(DEFAULT_PREDICATE), BoolDomain::getDefaultTypeName(), "BoolParam");
+  schema->addMember(LabelStr(DEFAULT_PREDICATE), LabelSet::getDefaultTypeName(), "LabelSetParam");
+  schema->addMember(LabelStr(DEFAULT_PREDICATE), EnumeratedDomain::getDefaultTypeName(), "EnumeratedParam");
+}
+
+class PDBTestEngine  : public EngineBase
+{
+  public:  
+    PDBTestEngine();
+    virtual ~PDBTestEngine();
+    
+    const ConstraintEngineId& getConstraintEngine() const;
+    const SchemaId& getSchema() const;
+    const PlanDatabaseId& getPlanDatabase() const;
+    
+  protected: 
+    void createModules();
+};
+
+PDBTestEngine::PDBTestEngine() 
+{
+    createModules();
+    doStart();
+    const SchemaId& schema = ((Schema*)getComponent("Schema"))->getId(); 
+    initDbTestSchema(schema); 
+    const PlanDatabaseId& db = ((PlanDatabase*)getComponent("PlanDatabase"))->getId(); 
+    Object* objectPtr = new Object(db, LabelStr(DEFAULT_OBJECT_TYPE), LabelStr("o1")); 
+    assert(objectPtr != 0); 
+    Object& object = *objectPtr; 
+    assert(objectPtr->getId() == object.getId());    
+    
+    // Tokens require temporal distance constraints
+    REGISTER_SYSTEM_CONSTRAINT(EqualConstraint, "concurrent", "Default");
+    REGISTER_SYSTEM_CONSTRAINT(LessThanEqualConstraint, "precedes", "Default"); 
+    REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporaldistance", "Default");
+    REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporalDistance", "Default");  
+
+    // Have to register factories for testing.
+    new StandardDBFooFactory();
+    new SpecialDBFooFactory();
+    new IntervalTokenFactory();
+}
+
+PDBTestEngine::~PDBTestEngine() 
+{
+    doShutdown();
+}
+
+const ConstraintEngineId& PDBTestEngine::getConstraintEngine() const
+{
+    return ((ConstraintEngine*)getComponent("ConstraintEngine"))->getId();     
+}
+
+const SchemaId& PDBTestEngine::getSchema() const
+{
+    return ((Schema*)getComponent("Schema"))->getId();     
+}
+
+const PlanDatabaseId& PDBTestEngine::getPlanDatabase() const
+{
+    return ((PlanDatabase*)getComponent("PlanDatabase"))->getId();     
+}
+
+void PDBTestEngine::createModules()
+{
+    addModule((new ModuleConstraintEngine())->getId());
+    addModule((new ModuleConstraintLibrary())->getId());
+    addModule((new ModulePlanDatabase())->getId());
+}
+
+ConstraintEngineId ce;
+SchemaId schema;
+PlanDatabaseId db;
+
+#define DEFAULT_SETUP(ce, db, autoClose) \
+    PDBTestEngine testEngine; \
+    ce = testEngine.getConstraintEngine(); \
+    schema = testEngine.getSchema(); \
+    db = testEngine.getPlanDatabase(); \
+    if (autoClose) \
+      db->close();\
+    {
+
+#define DEFAULT_TEARDOWN() \
+    } \
+
+#define DEFAULT_TEARDOWN_MULTI(ce, db) \
+    }\
+
   /**
    * @brief Declaration and definition for test constraint to force a failure when the domain becomes a singleton
    */
@@ -187,12 +294,7 @@ void PDBTestEngine::createModules()
     // Allocate default schema initially so tests don't fail because of ID's
     SCHEMA;
     initDbTestSchema(SCHEMA);
-
-    // Have to register factories for testing.
-    new StandardDBFooFactory();
-    new SpecialDBFooFactory();
-    new IntervalTokenFactory();
-  }
+ }
 
 class SchemaTest {
 public:
@@ -208,41 +310,42 @@ public:
 private:
 
   static bool testPrimitives(){
-    SCHEMA->reset();
-    ////SCHEMA->addPrimitive("int");
-    //SCHEMA->addPrimitive("float");
-    //SCHEMA->addPrimitive("bool");
-    //SCHEMA->addPrimitive("string");
-    assertTrue(SCHEMA->isPrimitive("int"));
-    assertTrue(SCHEMA->isPrimitive("float"));
-    assertTrue(SCHEMA->isPrimitive("bool"));
-    assertTrue(SCHEMA->isPrimitive("string"));
-    assertTrue(SCHEMA->isType("int"));
-    assertFalse(SCHEMA->isPrimitive("strong"));
+      DEFAULT_SETUP(ce, db, true);
+      
+    schema->reset();
+    assertTrue(schema->isPrimitive("int"));
+    assertTrue(schema->isPrimitive("float"));
+    assertTrue(schema->isPrimitive("bool"));
+    assertTrue(schema->isPrimitive("string"));
+    assertTrue(schema->isType("int"));
+    assertFalse(schema->isPrimitive("strong"));
+    DEFAULT_TEARDOWN();
+    
     return true;
   }
 
   static bool testEnumerations(){
-    SCHEMA->reset();
-    SCHEMA->addEnum(LabelStr("FooEnum"));
-    SCHEMA->addValue(LabelStr("FooEnum"), LabelStr("FOO"));
-    SCHEMA->addValue(LabelStr("FooEnum"), LabelStr("BAR"));
-    SCHEMA->addValue(LabelStr("FooEnum"), LabelStr("BAZ"));
-    SCHEMA->addEnum(LabelStr("BarEnum"));
-    SCHEMA->addValue(LabelStr("BarEnum"), 0);
-    SCHEMA->addValue(LabelStr("BarEnum"), 5);
-    SCHEMA->addValue(LabelStr("BarEnum"), 10);
+      DEFAULT_SETUP(ce, db, true);
+    schema->reset();
+    schema->addEnum(LabelStr("FooEnum"));
+    schema->addValue(LabelStr("FooEnum"), LabelStr("FOO"));
+    schema->addValue(LabelStr("FooEnum"), LabelStr("BAR"));
+    schema->addValue(LabelStr("FooEnum"), LabelStr("BAZ"));
+    schema->addEnum(LabelStr("BarEnum"));
+    schema->addValue(LabelStr("BarEnum"), 0);
+    schema->addValue(LabelStr("BarEnum"), 5);
+    schema->addValue(LabelStr("BarEnum"), 10);
 
-    assertTrue(SCHEMA->isEnum(LabelStr("FooEnum")));
-    assertTrue(SCHEMA->isEnum(LabelStr("BarEnum")));
-    assertFalse(SCHEMA->isEnum(LabelStr("BazEnum")));
-    assertTrue(SCHEMA->isEnumValue(LabelStr("FooEnum"), LabelStr("FOO")));
-    assertTrue(SCHEMA->isEnumValue(LabelStr("FooEnum"), LabelStr("BAZ")));
-    assertTrue(SCHEMA->isEnumValue(LabelStr("BarEnum"), 5));
-    assertFalse(SCHEMA->isEnumValue(LabelStr("BarEnum"), 6));
+    assertTrue(schema->isEnum(LabelStr("FooEnum")));
+    assertTrue(schema->isEnum(LabelStr("BarEnum")));
+    assertFalse(schema->isEnum(LabelStr("BazEnum")));
+    assertTrue(schema->isEnumValue(LabelStr("FooEnum"), LabelStr("FOO")));
+    assertTrue(schema->isEnumValue(LabelStr("FooEnum"), LabelStr("BAZ")));
+    assertTrue(schema->isEnumValue(LabelStr("BarEnum"), 5));
+    assertFalse(schema->isEnumValue(LabelStr("BarEnum"), 6));
 
     std::list<LabelStr> allenums;
-    SCHEMA->getEnumerations(allenums);
+    schema->getEnumerations(allenums);
     assert(allenums.size() == 2);
     assert(allenums.back() == LabelStr("BarEnum"));
     assert(allenums.front() == LabelStr("FooEnum"));
@@ -254,179 +357,185 @@ private:
     testEnumDomain.insert( 2 );
     testEnumDomain.insert( 3 );
 
-    SCHEMA->addEnum( enumDomainName );
+    schema->addEnum( enumDomainName );
     std::set<double>::iterator i;
     for ( i = testEnumDomain.begin(); i != testEnumDomain.end(); ++i ) {
-      SCHEMA->addValue( enumDomainName, *i );
+      schema->addValue( enumDomainName, *i );
     }
 
     std::set<double> enumDomainReturned;
-    enumDomainReturned = SCHEMA->getEnumValues( enumDomainName );
+    enumDomainReturned = schema->getEnumValues( enumDomainName );
     assert( enumDomainReturned == testEnumDomain );
 
+    DEFAULT_TEARDOWN();    
     return true;
   }
 
 
   static bool testObjectTypeRelationships() {
-    SCHEMA->reset();
-    //SCHEMA->addPrimitive("int");
-    //SCHEMA->addPrimitive("float");
-    //SCHEMA->addPrimitive("bool");
-    SCHEMA->addObjectType(LabelStr("Foo"));
-    SCHEMA->addObjectType(LabelStr("Baz"));
-    SCHEMA->addPredicate("Baz.pred");
+      DEFAULT_SETUP(ce, db, true);
+    schema->reset();
+    schema->addObjectType(LabelStr("Foo"));
+    schema->addObjectType(LabelStr("Baz"));
+    schema->addPredicate("Baz.pred");
 
-    assertTrue(SCHEMA->isObjectType(LabelStr("Foo")));
-    assertTrue(SCHEMA->isA(LabelStr("Foo"), LabelStr("Foo")));
-    assertFalse(SCHEMA->isObjectType(LabelStr("Bar")));
-    assertFalse(SCHEMA->isA(LabelStr("Foo"), LabelStr("Baz")));
+    assertTrue(schema->isObjectType(LabelStr("Foo")));
+    assertTrue(schema->isA(LabelStr("Foo"), LabelStr("Foo")));
+    assertFalse(schema->isObjectType(LabelStr("Bar")));
+    assertFalse(schema->isA(LabelStr("Foo"), LabelStr("Baz")));
 
     // Inheritance
-    SCHEMA->addObjectType(LabelStr("Bar"), LabelStr("Foo"));
-    assertTrue(SCHEMA->isObjectType(LabelStr("Bar")));
-    assertTrue(SCHEMA->isA(LabelStr("Bar"), LabelStr("Foo")));
-    assertFalse(SCHEMA->isA(LabelStr("Foo"), LabelStr("Bar")));
-    assertTrue(SCHEMA->getAllObjectTypes(LabelStr("Bar")).size() == 3);
+    schema->addObjectType(LabelStr("Bar"), LabelStr("Foo"));
+    assertTrue(schema->isObjectType(LabelStr("Bar")));
+    assertTrue(schema->isA(LabelStr("Bar"), LabelStr("Foo")));
+    assertFalse(schema->isA(LabelStr("Foo"), LabelStr("Bar")));
+    assertTrue(schema->getAllObjectTypes(LabelStr("Bar")).size() == 3);
     
     // Composition
-    SCHEMA->addMember(LabelStr("Foo"), LabelStr("float"), LabelStr("arg0"));
-    SCHEMA->addMember(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg1"));
-    SCHEMA->addMember(LabelStr("Foo"), LabelStr("Bar"), LabelStr("arg2"));
+    schema->addMember(LabelStr("Foo"), LabelStr("float"), LabelStr("arg0"));
+    schema->addMember(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg1"));
+    schema->addMember(LabelStr("Foo"), LabelStr("Bar"), LabelStr("arg2"));
 
-    assertTrue(SCHEMA->canContain(LabelStr("Foo"), LabelStr("float"), LabelStr("arg0")));
-    assertTrue(SCHEMA->canContain(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg1")));
-    assertTrue(SCHEMA->canContain(LabelStr("Foo"), LabelStr("Bar"), LabelStr("arg2")));
-    assertTrue(SCHEMA->canContain(LabelStr("Foo"), LabelStr("Bar"), LabelStr("arg1"))); // isA(Bar,Foo)
+    assertTrue(schema->canContain(LabelStr("Foo"), LabelStr("float"), LabelStr("arg0")));
+    assertTrue(schema->canContain(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg1")));
+    assertTrue(schema->canContain(LabelStr("Foo"), LabelStr("Bar"), LabelStr("arg2")));
+    assertTrue(schema->canContain(LabelStr("Foo"), LabelStr("Bar"), LabelStr("arg1"))); // isA(Bar,Foo)
 
-    assertFalse(SCHEMA->canContain(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg2")));
-    assertFalse(SCHEMA->canContain(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg3")));
-    assertFalse(SCHEMA->canContain(LabelStr("Foo"), LabelStr("float"), LabelStr("arg1")));
+    assertFalse(schema->canContain(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg2")));
+    assertFalse(schema->canContain(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg3")));
+    assertFalse(schema->canContain(LabelStr("Foo"), LabelStr("float"), LabelStr("arg1")));
 
-    assertTrue(SCHEMA->canContain(LabelStr("Bar"), LabelStr("float"), LabelStr("arg0")));
-    assertTrue(SCHEMA->canContain(LabelStr("Bar"), LabelStr("Foo"), LabelStr("arg1")));
-    assertTrue(SCHEMA->canContain(LabelStr("Bar"), LabelStr("Bar"), LabelStr("arg1")));
+    assertTrue(schema->canContain(LabelStr("Bar"), LabelStr("float"), LabelStr("arg0")));
+    assertTrue(schema->canContain(LabelStr("Bar"), LabelStr("Foo"), LabelStr("arg1")));
+    assertTrue(schema->canContain(LabelStr("Bar"), LabelStr("Bar"), LabelStr("arg1")));
 
-    assert(SCHEMA->getAllObjectTypes().size() == 4);
+    assert(schema->getAllObjectTypes().size() == 4);
 
-    assertFalse(SCHEMA->hasPredicates("Foo"));
-    assertFalse(SCHEMA->hasPredicates("Foo")); // Call again for cached result
-    assertTrue(SCHEMA->hasPredicates("Baz")); // Call again for cached result
+    assertFalse(schema->hasPredicates("Foo"));
+    assertFalse(schema->hasPredicates("Foo")); // Call again for cached result
+    assertTrue(schema->hasPredicates("Baz")); // Call again for cached result
+
+    DEFAULT_TEARDOWN();    
 
     return true;
   }
 
   static bool testObjectPredicateRelationships() {
-    SCHEMA->reset();
-    SCHEMA->addObjectType(LabelStr("Resource"));
-    SCHEMA->addObjectType(LabelStr("NddlResource"), LabelStr("Resource"));
-    SCHEMA->addPredicate(LabelStr("Resource.change"));
-    assertTrue(SCHEMA->isPredicate(LabelStr("Resource.change")));
+      DEFAULT_SETUP(ce, db, true);
+    schema->reset();
+    schema->addObjectType(LabelStr("Resource"));
+    schema->addObjectType(LabelStr("NddlResource"), LabelStr("Resource"));
+    schema->addPredicate(LabelStr("Resource.change"));
+    assertTrue(schema->isPredicate(LabelStr("Resource.change")));
 
-    SCHEMA->addMember(LabelStr("Resource.change"), LabelStr("float"), LabelStr("quantity"));
+    schema->addMember(LabelStr("Resource.change"), LabelStr("float"), LabelStr("quantity"));
 
-    SCHEMA->addObjectType(LabelStr("Battery"), LabelStr("Resource"));
-    assertTrue(SCHEMA->hasParent(LabelStr("Battery.change")));
-    assertTrue(SCHEMA->getParent(LabelStr("Battery.change")) == LabelStr("Resource.change"));
+    schema->addObjectType(LabelStr("Battery"), LabelStr("Resource"));
+    assertTrue(schema->hasParent(LabelStr("Battery.change")));
+    assertTrue(schema->getParent(LabelStr("Battery.change")) == LabelStr("Resource.change"));
 
-    SCHEMA->addObjectType(LabelStr("World"));
-    SCHEMA->addPredicate(LabelStr("World.initialState"));
+    schema->addObjectType(LabelStr("World"));
+    schema->addPredicate(LabelStr("World.initialState"));
  
-    assertTrue(SCHEMA->isPredicate(LabelStr("Battery.change")));
-    assertTrue(SCHEMA->isPredicate(LabelStr("World.initialState")));
-    assertFalse(SCHEMA->isPredicate(LabelStr("World.NOPREDICATE")));
-    assertTrue(SCHEMA->isObjectType(LabelStr("Resource")));
-    assertTrue(SCHEMA->isObjectType(LabelStr("World")));
-    assertTrue(SCHEMA->isObjectType(LabelStr("Battery")));
-    assertFalse(SCHEMA->isObjectType(LabelStr("NOTYPE")));
+    assertTrue(schema->isPredicate(LabelStr("Battery.change")));
+    assertTrue(schema->isPredicate(LabelStr("World.initialState")));
+    assertFalse(schema->isPredicate(LabelStr("World.NOPREDICATE")));
+    assertTrue(schema->isObjectType(LabelStr("Resource")));
+    assertTrue(schema->isObjectType(LabelStr("World")));
+    assertTrue(schema->isObjectType(LabelStr("Battery")));
+    assertFalse(schema->isObjectType(LabelStr("NOTYPE")));
 
-    assertTrue(SCHEMA->canContain(LabelStr("Resource.change"), LabelStr("float"), LabelStr("quantity")));
-    assertTrue(SCHEMA->canContain(LabelStr("Battery.change"), LabelStr("float"), LabelStr("quantity")));
-    assertTrue(SCHEMA->canContain(LabelStr("NddlResource.change"), LabelStr("float"), LabelStr("quantity")));
-    assertTrue(SCHEMA->hasMember(LabelStr("Resource.change"), LabelStr("quantity")));
-    assertTrue(SCHEMA->hasMember(LabelStr("NddlResource.change"), LabelStr("quantity")));
-    assertTrue(SCHEMA->hasMember(LabelStr("Battery.change"), LabelStr("quantity")));
+    assertTrue(schema->canContain(LabelStr("Resource.change"), LabelStr("float"), LabelStr("quantity")));
+    assertTrue(schema->canContain(LabelStr("Battery.change"), LabelStr("float"), LabelStr("quantity")));
+    assertTrue(schema->canContain(LabelStr("NddlResource.change"), LabelStr("float"), LabelStr("quantity")));
+    assertTrue(schema->hasMember(LabelStr("Resource.change"), LabelStr("quantity")));
+    assertTrue(schema->hasMember(LabelStr("NddlResource.change"), LabelStr("quantity")));
+    assertTrue(schema->hasMember(LabelStr("Battery.change"), LabelStr("quantity")));
 
-    assertTrue(SCHEMA->canBeAssigned(LabelStr("World"), LabelStr("World.initialState")));
-    assertTrue(SCHEMA->canBeAssigned(LabelStr("Resource"), LabelStr("Resource.change")));
-    assertTrue(SCHEMA->canBeAssigned(LabelStr("Battery"), LabelStr("Resource.change")));
-    assertFalse(SCHEMA->canBeAssigned(LabelStr("World"), LabelStr("Resource.change")));
-    assertFalse(SCHEMA->canBeAssigned(LabelStr("Resource"), LabelStr("Battery.change")));
+    assertTrue(schema->canBeAssigned(LabelStr("World"), LabelStr("World.initialState")));
+    assertTrue(schema->canBeAssigned(LabelStr("Resource"), LabelStr("Resource.change")));
+    assertTrue(schema->canBeAssigned(LabelStr("Battery"), LabelStr("Resource.change")));
+    assertFalse(schema->canBeAssigned(LabelStr("World"), LabelStr("Resource.change")));
+    assertFalse(schema->canBeAssigned(LabelStr("Resource"), LabelStr("Battery.change")));
 
-    assertFalse(SCHEMA->isA(LabelStr("Resource"), LabelStr("Battery")));
-    assertTrue(SCHEMA->isA(LabelStr("Battery"), LabelStr("Resource")));
-    assertTrue(SCHEMA->isA(LabelStr("Battery"), LabelStr("Battery")));
-    assertTrue(SCHEMA->hasParent(LabelStr("Battery")));
-    assertTrue(SCHEMA->getParent(LabelStr("Battery")) == LabelStr("Resource"));
-    assertTrue(SCHEMA->getObjectType(LabelStr("World.initialState")) == LabelStr("World"));
-    assertTrue(SCHEMA->getObjectType(LabelStr("Battery.change")) == LabelStr("Battery"));
-    assertTrue(SCHEMA->getObjectType(LabelStr("Battery.change")) != LabelStr("Resource"));
+    assertFalse(schema->isA(LabelStr("Resource"), LabelStr("Battery")));
+    assertTrue(schema->isA(LabelStr("Battery"), LabelStr("Resource")));
+    assertTrue(schema->isA(LabelStr("Battery"), LabelStr("Battery")));
+    assertTrue(schema->hasParent(LabelStr("Battery")));
+    assertTrue(schema->getParent(LabelStr("Battery")) == LabelStr("Resource"));
+    assertTrue(schema->getObjectType(LabelStr("World.initialState")) == LabelStr("World"));
+    assertTrue(schema->getObjectType(LabelStr("Battery.change")) == LabelStr("Battery"));
+    assertTrue(schema->getObjectType(LabelStr("Battery.change")) != LabelStr("Resource"));
 
-    SCHEMA->addObjectType("Base");
-    SCHEMA->addObjectType("Derived");
-    SCHEMA->addPredicate("Derived.Predicate");
-    SCHEMA->addMember("Derived.Predicate", "Battery", "battery");
+    schema->addObjectType("Base");
+    schema->addObjectType("Derived");
+    schema->addPredicate("Derived.Predicate");
+    schema->addMember("Derived.Predicate", "Battery", "battery");
 
 
-    assertTrue(SCHEMA->getParameterCount(LabelStr("Resource.change")) == 1);
-    assertTrue(SCHEMA->getParameterType(LabelStr("Resource.change"), 0) == LabelStr("float"));
+    assertTrue(schema->getParameterCount(LabelStr("Resource.change")) == 1);
+    assertTrue(schema->getParameterType(LabelStr("Resource.change"), 0) == LabelStr("float"));
 
     std::set<LabelStr> predicates;
-    SCHEMA->getPredicates(LabelStr("Battery"), predicates);
+    schema->getPredicates(LabelStr("Battery"), predicates);
     assertTrue(predicates.size() == 1);
     predicates.clear();
-    SCHEMA->getPredicates(LabelStr("Resource"), predicates);
+    schema->getPredicates(LabelStr("Resource"), predicates);
     assertTrue(predicates.size() == 1);
 
-    SCHEMA->addObjectType("One");
-    SCHEMA->addPredicate("One.Predicate1");
-    SCHEMA->addPredicate("One.Predicate2");
-    SCHEMA->addPredicate("One.Predicate3");
-    SCHEMA->addPredicate("One.Predicate4");
+    schema->addObjectType("One");
+    schema->addPredicate("One.Predicate1");
+    schema->addPredicate("One.Predicate2");
+    schema->addPredicate("One.Predicate3");
+    schema->addPredicate("One.Predicate4");
 
     predicates.clear();
-    SCHEMA->getPredicates(LabelStr("One"), predicates);
+    schema->getPredicates(LabelStr("One"), predicates);
     assertTrue(predicates.size() == 4);
 
+    DEFAULT_TEARDOWN();
+    
     return(true);
   }
 
   static bool testPredicateParameterAccessors() {
-    SCHEMA->reset();
-    SCHEMA->addObjectType(LabelStr("Resource"));
-    SCHEMA->addObjectType(LabelStr("NddlResource"), LabelStr("Resource"));
-    SCHEMA->addPredicate(LabelStr("Resource.change"));
-    SCHEMA->addObjectType(LabelStr("Battery"), LabelStr("Resource"));
-    SCHEMA->addMember(LabelStr("Resource.change"), LabelStr("float"), LabelStr("quantity"));
-    SCHEMA->addMember(LabelStr("Resource.change"), LabelStr("float"), LabelStr("quality"));
-    assertTrue(SCHEMA->getIndexFromName(LabelStr("Resource.change"), LabelStr("quality")) == 1);
-    assertTrue(SCHEMA->getNameFromIndex(LabelStr("Resource.change"), 0).getKey() == LabelStr("quantity").getKey());
+      DEFAULT_SETUP(ce, db, true);
+    schema->reset();
+    schema->addObjectType(LabelStr("Resource"));
+    schema->addObjectType(LabelStr("NddlResource"), LabelStr("Resource"));
+    schema->addPredicate(LabelStr("Resource.change"));
+    schema->addObjectType(LabelStr("Battery"), LabelStr("Resource"));
+    schema->addMember(LabelStr("Resource.change"), LabelStr("float"), LabelStr("quantity"));
+    schema->addMember(LabelStr("Resource.change"), LabelStr("float"), LabelStr("quality"));
+    assertTrue(schema->getIndexFromName(LabelStr("Resource.change"), LabelStr("quality")) == 1);
+    assertTrue(schema->getNameFromIndex(LabelStr("Resource.change"), 0).getKey() == LabelStr("quantity").getKey());
 
-    SCHEMA->addObjectType(LabelStr("Foo"));
-    SCHEMA->addPredicate(LabelStr("Foo.Argle"));
-    SCHEMA->addPrimitive("Bargle");
-    SCHEMA->addMember(LabelStr("Foo.Argle"), LabelStr("Bargle"), LabelStr("bargle"));
-    SCHEMA->addPrimitive("Targle");
-    SCHEMA->addMember(LabelStr("Foo.Argle"), LabelStr("Targle"), LabelStr("targle"));
+    schema->addObjectType(LabelStr("Foo"));
+    schema->addPredicate(LabelStr("Foo.Argle"));
+    schema->addPrimitive("Bargle");
+    schema->addMember(LabelStr("Foo.Argle"), LabelStr("Bargle"), LabelStr("bargle"));
+    schema->addPrimitive("Targle");
+    schema->addMember(LabelStr("Foo.Argle"), LabelStr("Targle"), LabelStr("targle"));
 
-    assertTrue(SCHEMA->getMemberType(LabelStr("Foo.Argle"), LabelStr("bargle")) == LabelStr("Bargle"));
-    assertTrue(SCHEMA->getMemberType(LabelStr("Foo.Argle"), LabelStr("targle")) == LabelStr("Targle"));
+    assertTrue(schema->getMemberType(LabelStr("Foo.Argle"), LabelStr("bargle")) == LabelStr("Bargle"));
+    assertTrue(schema->getMemberType(LabelStr("Foo.Argle"), LabelStr("targle")) == LabelStr("Targle"));
 
     // Extend attributes on a derived class. Must declare predicate with derived type qualifier
-    SCHEMA->addObjectType(LabelStr("Bar"), LabelStr("Foo"));
-    SCHEMA->addPredicate(LabelStr("Bar.Argle"));
-    assertTrue(SCHEMA->hasParent(LabelStr("Bar.Argle")));
-    //SCHEMA->addPrimitive("float");
-    SCHEMA->addMember(LabelStr("Bar.Argle"), LabelStr("float"), LabelStr("huey"));
-    assertTrue(SCHEMA->getMemberType(LabelStr("Bar.Argle"), LabelStr("huey")) == LabelStr("float"));
+    schema->addObjectType(LabelStr("Bar"), LabelStr("Foo"));
+    schema->addPredicate(LabelStr("Bar.Argle"));
+    assertTrue(schema->hasParent(LabelStr("Bar.Argle")));
+    schema->addMember(LabelStr("Bar.Argle"), LabelStr("float"), LabelStr("huey"));
+    assertTrue(schema->getMemberType(LabelStr("Bar.Argle"), LabelStr("huey")) == LabelStr("float"));
 
-    SCHEMA->addObjectType(LabelStr("Baz"), LabelStr("Bar"));
-    assertTrue(SCHEMA->getMemberType(LabelStr("Baz.Argle"), LabelStr("targle")) == LabelStr("Targle"));
+    schema->addObjectType(LabelStr("Baz"), LabelStr("Bar"));
+    assertTrue(schema->getMemberType(LabelStr("Baz.Argle"), LabelStr("targle")) == LabelStr("Targle"));
 
-    assert(SCHEMA->getParameterCount(LabelStr("Foo.Argle")) == 2);
-    assert(SCHEMA->getParameterType(LabelStr("Foo.Argle"), 0) == LabelStr("Bargle"));
-    assert(SCHEMA->getParameterType(LabelStr("Foo.Argle"), 1) == LabelStr("Targle"));
+    assert(schema->getParameterCount(LabelStr("Foo.Argle")) == 2);
+    assert(schema->getParameterType(LabelStr("Foo.Argle"), 0) == LabelStr("Bargle"));
+    assert(schema->getParameterType(LabelStr("Foo.Argle"), 1) == LabelStr("Targle"));
 
+    DEFAULT_TEARDOWN();
+    
     return true;
   }
 };
@@ -522,26 +631,26 @@ private:
   }
   
   static bool testObjectVariables(){
-    initDbTestSchema(SCHEMA);
-    PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1", true);
+    DEFAULT_SETUP(ce, db, false);
+    
+    Object o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "o11", true);
     assertFalse(o1.isComplete());
     o1.addVariable(IntervalIntDomain(), "IntervalIntVar");
     o1.addVariable(BoolDomain(), "BoolVar");
     o1.close();
     assertTrue(o1.isComplete());
-    assertTrue(o1.getVariable("o1.BoolVar") != o1.getVariable("o1IntervalIntVar"));
+    assertTrue(o1.getVariable("o11.BoolVar") != o1.getVariable("o1IntervalIntVar"));
 
-    Object o2(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2", true);
+    Object o2(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2", true);
     assertFalse(o2.isComplete());
     o2.addVariable(IntervalIntDomain(15, 200), "IntervalIntVar");
     o2.close();
 
     // Add a unary constraint
-    Variable<IntervalIntDomain> superset(db.getConstraintEngine(), IntervalIntDomain(10, 20));;
+    Variable<IntervalIntDomain> superset(db->getConstraintEngine(), IntervalIntDomain(10, 20));;
 
     ConstraintId subsetConstraint = ConstraintLibrary::createConstraint("SubsetOf", 
-					db.getConstraintEngine(), 
+					db->getConstraintEngine(), 
 					makeScope(o1.getVariables()[0], superset.getId()));
 
     // Now add a constraint equating the variables and test propagation
@@ -549,16 +658,18 @@ private:
     constrainedVars.push_back(o1.getVariables()[0]);
     constrainedVars.push_back(o2.getVariables()[0]);
     ConstraintId constraint = ConstraintLibrary::createConstraint("Equal",
-								  db.getConstraintEngine(),
+								  db->getConstraintEngine(),
 								  constrainedVars);
 
-    assertTrue(db.getConstraintEngine()->propagate());
+    assertTrue(db->getConstraintEngine()->propagate());
     assertTrue(o1.getVariables()[0]->lastDomain() == o1.getVariables()[0]->lastDomain());
 
     // Delete one of the constraints to force automatic clean-up path and explciit clean-up
     delete (Constraint*) constraint;
     delete (Constraint*) subsetConstraint;
 
+    DEFAULT_TEARDOWN();
+    
     return(true);
   }
   
@@ -886,12 +997,10 @@ private:
   }
 
   static bool testFreeAndConstrain(){
-    initDbTestSchema(SCHEMA);
-    PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
-    db.close();                                                                          
+      DEFAULT_SETUP(ce,db,true);
+    Object& o1 = *(db->getObject("o1"));
   
-    IntervalToken t1(db.getId(),  
+    IntervalToken t1(db,  
                      LabelStr(DEFAULT_PREDICATE),                                                     
                      true,      
                      false,                                                         
@@ -899,7 +1008,7 @@ private:
                      IntervalIntDomain(0, 20),                                           
                      IntervalIntDomain(1, 1000));                                        
   
-    IntervalToken t2(db.getId(),                                                         
+    IntervalToken t2(db,                                                         
                      LabelStr(DEFAULT_PREDICATE),                                                     
                      true,             
                      false,                                                  
@@ -907,7 +1016,7 @@ private:
                      IntervalIntDomain(0, 20),                                           
                      IntervalIntDomain(1, 1000));                                        
   
-    IntervalToken t3(db.getId(),                                                         
+    IntervalToken t3(db,                                                         
                      LabelStr(DEFAULT_PREDICATE),                                                     
                      true,       
                      false,                                                        
@@ -934,7 +1043,7 @@ private:
 
     // Also use a locally scoped token to force a different deletion path
     {
-      IntervalToken t4(db.getId(),                                                         
+      IntervalToken t4(db,                                                         
 		       LabelStr(DEFAULT_PREDICATE),                                                     
 		       true,         
 		       false,                                                      
@@ -945,7 +1054,10 @@ private:
       o1.constrain(t3.getId(), t4.getId());
     }
 
-    assertTrue(ENGINE->propagate());
+    assertTrue(ce->propagate());
+    
+    DEFAULT_TEARDOWN();
+    
     return true;
   }
 };
@@ -1696,7 +1808,7 @@ private:
 
     // Add parameters to schema
     for(int i=0;i< UNIFIED; i++)
-      SCHEMA->addMember(LabelStr(DEFAULT_PREDICATE), IntervalIntDomain::getDefaultTypeName(), LabelStr("P" + i).c_str());
+      schema->addMember(LabelStr(DEFAULT_PREDICATE), IntervalIntDomain::getDefaultTypeName(), LabelStr("P" + i).c_str());
 
     for (int i=0; i < NUMTOKS; i++) {
       std::vector<IntervalTokenId> tmp;
@@ -2123,9 +2235,7 @@ private:
 
   static bool testOpenMerge() {
     DEFAULT_SETUP(ce, db, true);
-    
-		//SCHEMA->addPrimitive("int");
-		SCHEMA->addMember(LabelStr(DEFAULT_PREDICATE),"int",LabelStr("FOO"));
+    schema->addMember(LabelStr(DEFAULT_PREDICATE),"int",LabelStr("FOO"));
 
     EnumeratedDomain zero(true, "int");
     zero.insert(0); zero.close();
@@ -2340,14 +2450,13 @@ private:
   }
 
   static bool testAssignemnt(){
-    initDbTestSchema(SCHEMA);
-    PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
-    Object o2(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
-    db.close();
+      DEFAULT_SETUP(ce, db, false);
+    Object& o1 = *(db->getObject("o1"));
+    Object o2(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2");
+    db->close();
 
     //create a token that has to end later
-    IntervalToken t0(db.getId(), 
+    IntervalToken t0(db, 
                      LabelStr(DEFAULT_PREDICATE), 
                      true,
                      false,
@@ -2355,7 +2464,7 @@ private:
                      IntervalIntDomain(0, 9),
                      IntervalIntDomain(1, 1000));
 
-    ENGINE->propagate();
+    ce->propagate();
 
     // Should not be assigned since inactive and object domain not a sinleton
     assertFalse(t0.isAssigned());
@@ -2366,7 +2475,7 @@ private:
     // Now activate it, situation should be unchanged
     t0.activate();
 
-    ENGINE->propagate();
+    ce->propagate();
 
     // Should not be assigned since inactive and object domain not a singleton
     assertFalse(t0.isAssigned());
@@ -2374,17 +2483,18 @@ private:
     
     // Now specify the object value. Expect it to be assigned.	
     t0.getObject()->specify(o1.getId());
-    ENGINE->propagate();
+    ce->propagate();
 
     assertTrue(t0.isAssigned());
     assertTrue(o1.hasToken(t0.getId()));
 
     // Now we can reset and expect it to go back	
     t0.getObject()->reset();
-    ENGINE->propagate();
+    ce->propagate();
 
     assertTrue(!t0.isAssigned());
     assertTrue(!o1.hasToken(t0.getId()));
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -2394,12 +2504,11 @@ private:
    * retractions.
    */
   static bool testDeleteMasterAndPreserveSlave(){
-    initDbTestSchema(SCHEMA);
-    PlanDatabase db(ENGINE, SCHEMA);
-    Timeline o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
-    db.close();                                                                
+      DEFAULT_SETUP(ce, db, false);
+    Timeline o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "tl1");
+    db->close();                                                                
   
-    TokenId master = (new IntervalToken(db.getId(),  
+    TokenId master = (new IntervalToken(db,  
 				       LabelStr(DEFAULT_PREDICATE),                                                     
 				       true, 
 				       false,                                                              
@@ -2433,6 +2542,7 @@ private:
     assertTrue(slaveB->isCommitted());
 
     delete (Token*) slaveB;
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -2441,12 +2551,11 @@ private:
    * retractions.
    */
   static bool testPreserveMergeWithNonChronSplit(){
-    initDbTestSchema(SCHEMA);
-    PlanDatabase db(ENGINE, SCHEMA);
-    Timeline o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
-    db.close();                                                                
+      DEFAULT_SETUP(ce, db, false);
+    Timeline o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "tl1");
+    db->close();                                                                
   
-    TokenId master = (new IntervalToken(db.getId(),  
+    TokenId master = (new IntervalToken(db,  
 				       LabelStr(DEFAULT_PREDICATE),                                                     
 				       true,  
 				       false,                                                             
@@ -2457,7 +2566,7 @@ private:
 
                                                      
   
-    TokenId orphan = (new IntervalToken(db.getId(),  
+    TokenId orphan = (new IntervalToken(db,  
 					LabelStr(DEFAULT_PREDICATE),                                                     
 					true,  
 					false,                                                             
@@ -2508,6 +2617,7 @@ private:
     assertTrue(orphan->isInactive());
 
     delete (Token*) orphan;
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -2518,12 +2628,11 @@ private:
    * we over-ride 'specify' and it thinks the variable is already specified.
    */
   static bool testGNATS_3163(){
-    initDbTestSchema(SCHEMA);
-    PlanDatabase db(ENGINE, SCHEMA);
-    Timeline o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
-    db.close();
+      DEFAULT_SETUP(ce, db, false);
+    Timeline o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "tl1");
+    db->close();
 
-    TokenId master = (new IntervalToken(db.getId(),  
+    TokenId master = (new IntervalToken(db,  
 				       LabelStr(DEFAULT_PREDICATE),                                                     
 				       true, 
 				       false,                                                              
@@ -2534,6 +2643,7 @@ private:
     master->getStart()->restrictBaseDomain(IntervalIntDomain(1, 1));
     assertTrue(master->getStart()->specifiedFlag());    
     master->discard();
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -2543,12 +2653,11 @@ private:
    * variable will be grounded). Also want to ensure that if we delete the constraint, it will be removed safely.
    */ 
   static bool testGNATS_3193(){
-    initDbTestSchema(SCHEMA);
-    PlanDatabase db(ENGINE, SCHEMA);
-    Timeline o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
-    db.close();
+      DEFAULT_SETUP(ce, db, false);
+    Timeline o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "tl1");
+    db->close();
 
-    TokenId t0 = (new IntervalToken(db.getId(),  
+    TokenId t0 = (new IntervalToken(db,  
 				       LabelStr(DEFAULT_PREDICATE),                                                     
 				       true,    
 				       false,                                                           
@@ -2557,7 +2666,7 @@ private:
 				       IntervalIntDomain(1, 1000)))->getId();  
     t0->activate();
 
-    TokenId t1 = (new IntervalToken(db.getId(),  
+    TokenId t1 = (new IntervalToken(db,  
 				       LabelStr(DEFAULT_PREDICATE),                                                     
 				       true, 
 				       false,                                                              
@@ -2570,7 +2679,7 @@ private:
       dom.close();
 
       Variable<StateDomain> v(ENGINE, dom);
-      EqualConstraint c0("eq", "Default", ENGINE, makeScope(t1->getState(), v.getId()));
+      EqualConstraint c0("eq", "Default", ce, makeScope(t1->getState(), v.getId()));
 
       t1->merge(t0);
     }
@@ -2578,6 +2687,7 @@ private:
     t1->discard();
     t0->discard();
 
+    DEFAULT_TEARDOWN();
     return true;
   }
 };
@@ -3143,14 +3253,13 @@ private:
   }
 
   static bool testAssignment(){
-    initDbTestSchema(SCHEMA);
-    PlanDatabase db(ENGINE, SCHEMA);
-    Timeline o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
-    Timeline o2(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
-    db.close();
+      DEFAULT_SETUP(ce, db, false);
+    Timeline o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "tl1");
+    Timeline o2(db, LabelStr(DEFAULT_OBJECT_TYPE), "tl2");
+    db->close();
 
     //create a token that has to end later
-    IntervalToken t0(db.getId(), 
+    IntervalToken t0(db, 
                      LabelStr(DEFAULT_PREDICATE), 
                      true,
                      false,
@@ -3158,7 +3267,7 @@ private:
                      IntervalIntDomain(0, 9),
                      IntervalIntDomain(1, 1000));
 
-    ENGINE->propagate();
+    ce->propagate();
 
     // Should not be assigned since inactive and object domain not a sinleton
     assertFalse(t0.isAssigned());
@@ -3169,7 +3278,7 @@ private:
     // Now activate it, situation should be unchanged
     t0.activate();
 
-    ENGINE->propagate();
+    ce->propagate();
 
     // Should not be assigned since inactive and object domain not a singleton
     assertFalse(t0.isAssigned());
@@ -3177,7 +3286,7 @@ private:
     
     // Now specify the object value.	
     t0.getObject()->specify(o1.getId());
-    ENGINE->propagate();
+    ce->propagate();
 
     // It should still not be assigned
     assertFalse(t0.isAssigned());
@@ -3185,7 +3294,7 @@ private:
 
     // Now constrain the token and finnaly expect it to be assigned
     o1.constrain(t0.getId(), t0.getId());
-    ENGINE->propagate();
+    ce->propagate();
 
     assertTrue(t0.isAssigned());
     assertTrue(o1.hasToken(t0.getId()));
@@ -3194,16 +3303,16 @@ private:
     o1.free(t0.getId(), t0.getId());
     assertFalse(t0.isAssigned());
     assertFalse(o1.hasToken(t0.getId()));
+    DEFAULT_TEARDOWN();
     return true;
   }
 
   static bool testFreeAndConstrain(){
-    initDbTestSchema(SCHEMA);
-    PlanDatabase db(ENGINE, SCHEMA);
-    Timeline o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
-    db.close();                                                                          
+      DEFAULT_SETUP(ce, db, false);
+    Timeline o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "tl1");
+    db->close();                                                                          
   
-    IntervalToken t1(db.getId(),  
+    IntervalToken t1(db,  
                      LabelStr(DEFAULT_PREDICATE),                                                     
                      true,   
                      false,                                                            
@@ -3211,7 +3320,7 @@ private:
                      IntervalIntDomain(0, 20),                                           
                      IntervalIntDomain(1, 1000));                                        
   
-    IntervalToken t2(db.getId(),                                                         
+    IntervalToken t2(db,                                                         
                      LabelStr(DEFAULT_PREDICATE),                                                     
                      true, 
                      false,                                                              
@@ -3219,7 +3328,7 @@ private:
                      IntervalIntDomain(0, 20),                                           
                      IntervalIntDomain(1, 1000));                                        
   
-    IntervalToken t3(db.getId(),                                                         
+    IntervalToken t3(db,                                                         
                      LabelStr(DEFAULT_PREDICATE),                                                     
                      true,  
                      false,                                                             
@@ -3242,7 +3351,7 @@ private:
     o1.constrain(t1.getId(), t3.getId());                                 
 
     // Also use a locally scoped token to force a different deletion path
-    TokenId t4 = (new IntervalToken(db.getId(),                                                         
+    TokenId t4 = (new IntervalToken(db,                                                         
 				    LabelStr(DEFAULT_PREDICATE),                                                     
 				    true,  
 				    false,                                                             
@@ -3253,11 +3362,12 @@ private:
     t4->activate();
     o1.constrain(t4, t3.getId());   
     o1.constrain(t2.getId(), t4);  
-    assertTrue(ENGINE->propagate()); 
+    assertTrue(ce->propagate()); 
     
     // Now delete t4 to leave a hole which will require repair
     delete (Token*) t4; 
-    assertTrue(ENGINE->propagate()); 
+    assertTrue(ce->propagate());
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -3772,7 +3882,7 @@ public:
     assertTrue(s_dbPlayer != 0);
 
     /* This does not use REGISTER_TYPE_FACTORY to avoid depending on anything under PLASMA/NDDL. */
-    new EnumeratedTypeFactory("Locations", "Locations", LocationsBaseDomain());
+    ce->getTypeFactoryMgr()->registerFactory((new EnumeratedTypeFactory("Locations", "Locations", LocationsBaseDomain()))->getId());
 
     REGISTER_OBJECT_FACTORY(TestClass2Factory, TestClass2);
     REGISTER_OBJECT_FACTORY(TestClass2Factory, TestClass2:string:INT_INTERVAL:REAL_INTERVAL:Locations);
@@ -3849,7 +3959,6 @@ public:
     testUncancel();
 
     TokenFactory::purgeAll();
-    TypeFactory::purgeAll();
     delete s_dbPlayer;
     DEFAULT_TEARDOWN();
     return(true);
@@ -5583,26 +5692,13 @@ std::string DbTransPlayerTest::buildXMLDomainStr(const AbstractDomain& dom) {
 void PlanDatabaseModuleTests::runTests(std::string path) 
 { 
   setTestLoadLibraryPath(path);
-
-  PDBTestEngine engine;
-  
-  // TODO: This introduces a dependency to the TemporalNetwork, why here?
-  REGISTER_SYSTEM_CONSTRAINT(EqualConstraint, "concurrent", "Temporal");
-  REGISTER_SYSTEM_CONSTRAINT(LessThanEqualConstraint, "precedes", "Temporal"); 
-  REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporaldistance", "Temporal");
-  REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporalDistance", "Temporal");  
   initDbModuleTests();
-
-  for (int i = 0; i < 1; i++) {
-    runTestSuite(SchemaTest::test);
-    runTestSuite(ObjectTest::test);
-    runTestSuite(TokenTest::test);
-    runTestSuite(TimelineTest::test);
-    runTestSuite(DbClientTest::test);
-    runTestSuite(DbTransPlayerTest::test);
-    std::cout << "Finished #" << i << std::endl;
-  }
-
+  runTestSuite(SchemaTest::test);
+  runTestSuite(ObjectTest::test);
+  runTestSuite(TokenTest::test);
+  runTestSuite(TimelineTest::test);
+  runTestSuite(DbClientTest::test);
+  runTestSuite(DbTransPlayerTest::test);
   std::cout << "All done and purged" << std::endl;
 }
 

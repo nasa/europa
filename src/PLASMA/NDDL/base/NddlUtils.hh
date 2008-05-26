@@ -26,22 +26,6 @@
 namespace NDDL {
 
   /**
-   * @brief Helper method to handle the conversion from NDDL language types to the registered
-   * type names. The main issue is handling the NDDL primitives: int, float, bool, string
-   * @see TypeFactory
-   */
-  /*
-  LabelStr getType(const char* nddlType){
-    static const std::string sl_nddlPrimitives(":int:float:string:bool:");
-
-    // If it is a primitive, then return the type name obtained through the type factory
-    if(sl_nddlPrimitives.find(nddlType) >= 0)
-      return TypeFactory::baseDomain(nddlType).getTypeName();
-    else
-      return nddlType;
-  }
-*/
-  /**
    * @brief Helper method to construct a singleton variable, and place it on a vector. 
    * Used in rule firing and generating pseudo variables on tokens. They cannot be specified.
    */ 
@@ -115,10 +99,10 @@ private: \
 
 #define REGISTER_TOKEN_FACTORY(klass) (new klass::Factory())
 
-#define REGISTER_TYPE_FACTORY(klass, domain) \
-  (new EnumeratedTypeFactory(#klass, #klass, domain))
+#define REGISTER_TYPE_FACTORY(typeFactoryMgr, klass, domain) \
+  typeFactoryMgr->registerFactory((new EnumeratedTypeFactory(#klass, #klass, domain))->getId())
 	
-#define REGISTER_ITYPE_FACTORY(klass, domain) \
-  (new IntervalTypeFactory(#klass, domain))
+#define REGISTER_ITYPE_FACTORY(typeFactoryMgr, klass, domain) \
+  typeFactoryMgr->registerFactory((new IntervalTypeFactory(#klass, domain))->getId())
 
 #endif
