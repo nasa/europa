@@ -50,12 +50,6 @@ namespace EUROPA {
 	  new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), ce->getId());
 	  new ResourcePropagator(LabelStr("Resource"), ce->getId(), pdb->getId());	  	  
 	  
-      // TODO: this should go away soon
-      pdb->addObjectWrapperGenerator("Resource", new ResourceWrapperGenerator());
-      pdb->addObjectWrapperGenerator("Reservoir", new ResourceWrapperGenerator());
-      pdb->addObjectWrapperGenerator("Reusable", new ResourceWrapperGenerator());
-      pdb->addObjectWrapperGenerator("Unary", new ResourceWrapperGenerator());
-      
       schema->addObjectType("Resource");      
       schema->addMember("Resource", "float", "initialCapacity");
       schema->addMember("Resource", "float", "levelLimitMin");
