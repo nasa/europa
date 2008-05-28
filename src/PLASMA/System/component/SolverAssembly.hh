@@ -16,7 +16,7 @@ namespace EUROPA {
 
   class SolverAssembly : public StandardAssembly {
   public:
-    SolverAssembly(const SchemaId& schema);
+    SolverAssembly();
 
     virtual ~SolverAssembly();
 

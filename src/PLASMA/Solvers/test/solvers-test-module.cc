@@ -57,13 +57,6 @@ using namespace EUROPA;
 using namespace EUROPA::SOLVERS;
 using namespace EUROPA::SOLVERS::HSTS;
 
-void initSolverModuleTests() 
-{
-  // Allocate the schema with a call to the linked in model function - eventually
-  // make this called via dlopen
-  EUROPA::NDDL::loadSchema(); 
-}
-
 void registerTestElements();
 
 class SolversTestEngine : public EngineBase 
@@ -72,10 +65,10 @@ class SolversTestEngine : public EngineBase
 	SolversTestEngine();
 	virtual ~SolversTestEngine();
 	
-    SchemaId&           getSchema()           { return (SchemaId&)((Schema*)getComponent("Schema"))->getId(); }
-    ConstraintEngineId& getConstraintEngine() { return (ConstraintEngineId&)((ConstraintEngine*)getComponent("ConstraintEngine"))->getId(); }
-    PlanDatabaseId&     getPlanDatabase()     { return (PlanDatabaseId&)((PlanDatabase*)getComponent("PlanDatabase"))->getId(); }
-    RulesEngineId&      getRulesEngine()      { return (RulesEngineId&)((RulesEngine*)getComponent("RulesEngine"))->getId(); }    
+    const SchemaId&           getSchema()           { return ((Schema*)getComponent("Schema"))->getId(); }
+    const ConstraintEngineId& getConstraintEngine() { return ((ConstraintEngine*)getComponent("ConstraintEngine"))->getId(); }
+    const PlanDatabaseId&     getPlanDatabase()     { return ((PlanDatabase*)getComponent("PlanDatabase"))->getId(); }
+    const RulesEngineId&      getRulesEngine()      { return ((RulesEngine*)getComponent("RulesEngine"))->getId(); }    
 	  
   protected: 
     void createModules();       
@@ -85,7 +78,8 @@ SolversTestEngine::SolversTestEngine()
 {
     createModules();
     doStart();
-    initSolverModuleTests();
+    
+    EUROPA::NDDL::loadSchema(getSchema()); 
     registerTestElements();
 }
 

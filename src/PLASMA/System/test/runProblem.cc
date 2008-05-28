@@ -48,20 +48,19 @@ bool isInterpreted()
 #endif
 }
 
-SchemaId schema;
 const char* initialTransactions = NULL;
 const char* plannerConfig = NULL;
 bool replayRequired = false;
 
-void initSchema();
+void initSchema(const SchemaId& schema);
 
 /**
    REPLAY IS BROKEN WITH THE INTERPRETER AND NEEDS TO BE FIXED!!!!
  */
 template<class ASSEMBLY>
 void replay(const std::string& s1,const DbClientTransactionLogId& txLog) {
-  ASSEMBLY replayed(schema);
-  initSchema();
+  ASSEMBLY replayed;
+  initSchema(((Schema*)replayed.getComponent("Schema"))->getId());
   
   replayed.playTransactions(ASSEMBLY::TX_LOG());
   std::string s2 = PlanDatabaseWriter::toString(replayed.getPlanDatabase(), false);
@@ -83,8 +82,8 @@ bool runPlanner()
 {
   check_error(DebugMessage::isGood());
 
-  ASSEMBLY assembly(schema);
-  initSchema();
+  ASSEMBLY assembly;
+  initSchema(((Schema*)assembly.getComponent("Schema"))->getId());
 
   debugMsg("IdTypeCounts", dumpIdTable("before"));  
     
@@ -123,7 +122,7 @@ bool copyFromFile(){
   // Populate plan database from transaction log
   std::string s1;
   {
-    ASSEMBLY assembly(schema);
+    ASSEMBLY assembly;
     assembly.playTransactions(ASSEMBLY::TX_LOG());
     s1 = PlanDatabaseWriter::toString(assembly.getPlanDatabase(), false);
     assembly.getPlanDatabase()->archive();
@@ -131,7 +130,7 @@ bool copyFromFile(){
 
   std::string s2;
   {
-    ASSEMBLY assembly(schema);
+    ASSEMBLY assembly;
     assembly.playTransactions(ASSEMBLY::TX_LOG());
     s2 = PlanDatabaseWriter::toString(assembly.getPlanDatabase(), false);
     assembly.getPlanDatabase()->archive();
@@ -165,7 +164,7 @@ bool copyFromFile(){
 
 const char* error_msg;
 void* libHandle;
-SchemaId (*fcn_schema)();
+SchemaId (*fcn_schema)(const SchemaId&);
 
 
 void loadLibrary(const char* libPath)
@@ -186,7 +185,7 @@ void loadLibrary(const char* libPath)
     std::cout << "runProblem: p_dlsym() symbol: loadSchema" << std::endl;
     std::cout.flush();
     
-    fcn_schema = (SchemaId (*)())p_dlsym(libHandle, "loadSchema");
+    fcn_schema = (SchemaId (*)(const SchemaId&))p_dlsym(libHandle, "loadSchema");
     if(!fcn_schema) {
       error_msg = p_dlerror();
       std::cout << "p_dlsym: Error locating NDDL::schema:" << std::endl;
@@ -223,16 +222,15 @@ void cleanup()
 #endif    
 }
 
-void initSchema()
+void initSchema(const SchemaId& schema)
 {
 #ifdef STANDALONE
-    schema = (*fcn_schema)();
+    (*fcn_schema)(schema);
 #elif INTERPRETED
     std::string modelName(initialTransactions);
     modelName = modelName.substr(0, modelName.find(".xml"));
-    schema = Schema::testInstance(modelName);
 #else 
-    schema = NDDL::loadSchema();
+    NDDL::loadSchema(schema);
 #endif     
 }
 

@@ -39,9 +39,8 @@ namespace EUROPA {
 
     /**
      * @brief Constructor
-     * @param schema The model for type enforcement.
      */
-    StandardAssembly(const SchemaId& schema);
+    StandardAssembly();
 
     /**
      * @brief Deallocate all data associated with this instance.
@@ -63,9 +62,6 @@ namespace EUROPA {
      * @brief Writes the current state of the plan database to a string and returns the string
      */
     std::string toString() const;
-
-  protected:
-    StandardAssembly();
   };
 }
 #endif

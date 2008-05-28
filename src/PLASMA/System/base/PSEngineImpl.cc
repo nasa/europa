@@ -81,13 +81,14 @@ namespace EUROPA {
 	   checkRuntimeError(libHandle != NULL,
 			   "Error opening model " << modelFileName << ": " << p_dlerror());
 
-	   SchemaId (*fcn_schema)();
-	   fcn_schema = (SchemaId (*)()) p_dlsym(libHandle, "loadSchema");
+	   SchemaId (*fcn_schema)(const SchemaId&);
+	   fcn_schema = (SchemaId (*)(const SchemaId&)) p_dlsym(libHandle, "loadSchema");
 	   checkError(fcn_schema != NULL,
 			   "Error locating symbol 'loadSchema' in " << modelFileName << ": " <<
 			   p_dlerror());
 
-	   SchemaId schema = (*fcn_schema)();
+	   SchemaId schema = ((Schema*)getComponent("Schema"))->getId(); 
+	   (*fcn_schema)(schema);
    }
   
   std::string PSEngineImpl::executeScript(const std::string& language, const std::string& script, bool isFile) 

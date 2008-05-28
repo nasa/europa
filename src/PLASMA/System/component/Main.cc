@@ -48,11 +48,11 @@ void executeWithAssembly(const char* plannerConfig, const char* txSource)
 {
   SolverAssembly::initialize();
 
-  // Allocate the schema with a call to the linked in model function   
-  SchemaId schema = NDDL::loadSchema(); // eventually make this called via dlopen
   
   { // Encapsualte allocation so that they go out of scope before calling terminate  
-    SolverAssembly assembly(schema);    
+    SolverAssembly assembly;    
+    SchemaId schema = ((Schema*)assembly.getComponent("Schema"));
+    NDDL::loadSchema(schema); // eventually make this called via dlopen
     assembly.plan(txSource, plannerConfig); // Run the planner    
     assembly.write(std::cout); // Dump the results
   }

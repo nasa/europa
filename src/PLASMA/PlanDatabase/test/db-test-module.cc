@@ -38,8 +38,6 @@
 const char* DEFAULT_OBJECT_TYPE = "Object";
 const char* DEFAULT_PREDICATE = "Object.DEFAULT_PREDICATE";
 
-#define SCHEMA Schema::testInstance()
-
   class DBFoo;
   typedef Id<DBFoo> DBFooId;
 
@@ -208,11 +206,6 @@ PDBTestEngine::PDBTestEngine()
     doStart();
     const SchemaId& schema = ((Schema*)getComponent("Schema"))->getId(); 
     initDbTestSchema(schema); 
-    const PlanDatabaseId& db = ((PlanDatabase*)getComponent("PlanDatabase"))->getId(); 
-    Object* objectPtr = new Object(db, LabelStr(DEFAULT_OBJECT_TYPE), LabelStr("o1")); 
-    assert(objectPtr != 0); 
-    Object& object = *objectPtr; 
-    assert(objectPtr->getId() == object.getId());    
     
     // Tokens require temporal distance constraints
     REGISTER_SYSTEM_CONSTRAINT(EqualConstraint, "concurrent", "Default");
@@ -289,12 +282,6 @@ PlanDatabaseId db;
     }
   };
 
-
-  void initDbModuleTests() {
-    // Allocate default schema initially so tests don't fail because of ID's
-    SCHEMA;
-    initDbTestSchema(SCHEMA);
- }
 
 class SchemaTest {
 public:
@@ -559,24 +546,26 @@ public:
   
 private:
   static bool testBasicAllocation() {
-    initDbTestSchema(SCHEMA);
-    PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
-    Object o2(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
+      DEFAULT_SETUP(ce, db, false);
+    Object o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "o1");
+    Object o2(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2");
+
+    Object* objectPtr = &o1; 
+    assert(objectPtr->getId() == o1.getId());    
 
     ObjectId id0((new Object(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "id0"))->getId());
     Object o3(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o3");
-    assertTrue(db.getObjects().size() == 4);
+    assertTrue(db->getObjects().size() == 4);
     assertTrue(o1.getComponents().size() == 1);
     assertTrue(o3.getParent() == o2.getId());
     delete (Object*) id0;
-    assertTrue(db.getObjects().size() == 3);
+    assertTrue(db->getObjects().size() == 3);
     assertTrue(o1.getComponents().empty());
 
-    ObjectId id1((new Object(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "id1"))->getId());
+    ObjectId id1((new Object(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "id1"))->getId());
     new Object(id1, LabelStr(DEFAULT_OBJECT_TYPE), "id2");
     ObjectId id3((new Object(id1, LabelStr(DEFAULT_OBJECT_TYPE), "id3"))->getId());
-    assertTrue(db.getObjects().size() == 6);
+    assertTrue(db->getObjects().size() == 6);
     assertTrue(id3->getName().toString() == "id1.id3");
 
     // Test ancestor call
@@ -588,21 +577,23 @@ private:
 
     // Force cascaded delete
     delete (Object*) id1;
-    assertTrue(db.getObjects().size() == 3);
+    assertTrue(db->getObjects().size() == 3);
 
     // Now allocate dynamically and allow the plan database to clean it up when it deallocates
-    ObjectId id5 = ((new Object(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "id5"))->getId());
+    ObjectId id5 = ((new Object(db, LabelStr(DEFAULT_OBJECT_TYPE), "id5"))->getId());
     new Object(id5, LabelStr(DEFAULT_OBJECT_TYPE), "id6");
+    
+    DEFAULT_TEARDOWN();
+    
     return(true);
   }
   
   static bool testObjectDomain(){
-    initDbTestSchema(SCHEMA);
-    PlanDatabase db(ENGINE, SCHEMA);
+      DEFAULT_SETUP(ce, db, false);
     std::list<ObjectId> values;
-    Object o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
-    Object o2(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
-    assertTrue(db.getObjects().size() == 2);
+    Object o1(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
+    Object o2(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
+    assertTrue(db->getObjects().size() == 2);
     values.push_back(o1.getId());
     values.push_back(o2.getId());
     ObjectDomain os1(values, LabelStr(DEFAULT_OBJECT_TYPE).c_str());
@@ -627,6 +618,7 @@ private:
       assertTrue(value == 0);
     }
 
+    DEFAULT_TEARDOWN();    
     return true;
   }
   
@@ -675,17 +667,16 @@ private:
   
   
   static bool testObjectTokenRelation(){
-    initDbTestSchema(SCHEMA);
-    PlanDatabase db(ENGINE, SCHEMA);
+      DEFAULT_SETUP(ce, db, false);
     // 1. Create 2 objects
-    ObjectId object1 = (new Object(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "O1"))->getId();
-    ObjectId object2 = (new Object(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "O2"))->getId();    
-    db.close();
+    ObjectId object1 = (new Object(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "O1"))->getId();
+    ObjectId object2 = (new Object(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "O2"))->getId();    
+    db->close();
 
     assertTrue(object1 != object2);
-    assertTrue(db.getObjects().size() == 2);
+    assertTrue(db->getObjects().size() == 2);
     // 2. Create 1 token.
-    EventToken eventToken(db.getId(), LabelStr(DEFAULT_PREDICATE), false, false, IntervalIntDomain(0, 10));
+    EventToken eventToken(db->getId(), LabelStr(DEFAULT_PREDICATE), false, false, IntervalIntDomain(0, 10));
 
     // Confirm not added to the object
     assertFalse(eventToken.getObject()->getDerivedDomain().isSingleton());
@@ -704,7 +695,7 @@ private:
     assertTrue(eventToken.getObject()->getDerivedDomain().isSingleton());
 
     // 5. propagate
-    db.getConstraintEngine()->propagate();
+    db->getConstraintEngine()->propagate();
 
     // 6. reset object variables domain.
     eventToken.getObject()->reset();
@@ -713,13 +704,13 @@ private:
     // Confirm not added to the object
     assertFalse(eventToken.getObject()->getDerivedDomain().isSingleton());
 
+    DEFAULT_TEARDOWN();    
     return true;
   }
   
   static bool testCommonAncestorConstraint(){
-    initDbTestSchema(SCHEMA);
-    PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
+      DEFAULT_SETUP(ce, db, false);
+    Object o1(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
     Object o2(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
     Object o3(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o3");
     Object o4(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o4");
@@ -798,20 +789,20 @@ private:
       first.specify(o4.getId());
       assertTrue(ENGINE->propagate());
     }    
+    DEFAULT_TEARDOWN();    
     return true;
   }
   
   static bool testHasAncestorConstraint(){
-    initDbTestSchema(SCHEMA);
-    PlanDatabase db(ENGINE, SCHEMA);
-    Object o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
+      DEFAULT_SETUP(ce, db, false);
+    Object o1(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
     Object o2(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
     Object o3(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o3");
     Object o4(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o4");
     Object o5(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o5");
     Object o6(o3.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o6");
     Object o7(o3.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o7");
-    Object o8(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o8");
+    Object o8(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o8");
     
     
     // Positive test immediate ancestor
@@ -896,6 +887,7 @@ private:
       assertTrue(first.getDerivedDomain().getSize() == 2);
     }
     
+    DEFAULT_TEARDOWN();    
     return true;
   }
   /**
@@ -903,23 +895,23 @@ private:
    * and synchronize its values.
    */
   static bool testMakeObjectVariable(){
-    initDbTestSchema(SCHEMA);
-    PlanDatabase db(ENGINE, SCHEMA);
+      DEFAULT_SETUP(ce, db, false);
     ConstrainedVariableId v0 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain(LabelStr(DEFAULT_OBJECT_TYPE).c_str())))->getId();
     assertFalse(v0->isClosed());
-    db.makeObjectVariableFromType(LabelStr(DEFAULT_OBJECT_TYPE), v0);
+    db->makeObjectVariableFromType(LabelStr(DEFAULT_OBJECT_TYPE), v0);
     assertFalse(v0->isClosed());
     assertTrue(ENGINE->propagate());
 
     // Now add an object and we should expect the constraint network to be consistent
-    Object o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
+    Object o1(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
     assertTrue(ENGINE->propagate());
-    assertFalse(db.isClosed(LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+    assertFalse(db->isClosed(LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
     assertTrue(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getId());
 
     // Now delete the variable. This should remove the listener
     delete (ConstrainedVariable*) v0;
 
+    DEFAULT_TEARDOWN();    
     return true;
   }
 
@@ -927,23 +919,22 @@ private:
    * Ensure that we can allocate variables, interleaved with Object creation,and get correct results
    */
   static bool testInterleavedDynamicObjetAndVariableCreation(){
-    initDbTestSchema(SCHEMA);
-    PlanDatabase db(ENGINE, SCHEMA);
+      DEFAULT_SETUP(ce, db, false);
 
     // Now add an object and we should expect the constraint network to be consistent
-    Object o1(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
+    Object o1(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
     assertTrue(ENGINE->propagate());
 
     ConstrainedVariableId v0 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain(LabelStr(DEFAULT_OBJECT_TYPE).c_str())))->getId();
     assertFalse(v0->isClosed());
-    db.makeObjectVariableFromType(LabelStr(DEFAULT_OBJECT_TYPE), v0);
+    db->makeObjectVariableFromType(LabelStr(DEFAULT_OBJECT_TYPE), v0);
     assertFalse(v0->isClosed());
     assertTrue(ENGINE->propagate());
-    assertFalse(db.isClosed(LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+    assertFalse(db->isClosed(LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
     assertTrue(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getId());
 
     // Now create another object and verify it is part of the initial domain of the next variable
-    Object o2(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
+    Object o2(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
     assertTrue(ENGINE->propagate());
 
     // Confirm the first variable has the value
@@ -952,7 +943,7 @@ private:
     // Allocate another variable and confirm the domains are equal
     ConstrainedVariableId v1 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain(LabelStr(DEFAULT_OBJECT_TYPE).c_str())))->getId();
     assertFalse(v1->isClosed());
-    db.makeObjectVariableFromType(LabelStr(DEFAULT_OBJECT_TYPE), v1);
+    db->makeObjectVariableFromType(LabelStr(DEFAULT_OBJECT_TYPE), v1);
     assertFalse(v1->isClosed());
     assertTrue(v0->lastDomain() == v1->lastDomain() && 
 	       v1->lastDomain().isMember(o1.getId())  && 
@@ -962,6 +953,7 @@ private:
     delete (ConstrainedVariable*) v0;
     delete (ConstrainedVariable*) v1;
 
+    DEFAULT_TEARDOWN();    
     return true;
   }
 
@@ -970,13 +962,12 @@ private:
    * a token. Show that the object variable is closed.
    */
   static bool testTokenObjectVariable(){
-    initDbTestSchema(SCHEMA);
-    PlanDatabase db(ENGINE, SCHEMA);
+      DEFAULT_SETUP(ce, db, false);
 
     assertTrue(ENGINE->propagate());
     // Now add an object and we should expect the constraint network to be consistent next time we add the token.
-    ObjectId o1 = (new Object(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1"))->getId();
-    EventToken eventToken(db.getId(), LabelStr(DEFAULT_PREDICATE), false, false, IntervalIntDomain(0, 10));
+    ObjectId o1 = (new Object(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1"))->getId();
+    EventToken eventToken(db->getId(), LabelStr(DEFAULT_PREDICATE), false, false, IntervalIntDomain(0, 10));
 
     eventToken.activate(); // Must be activate to eventually propagate the objectTokenRelation
     assertTrue(ENGINE->propagate());
@@ -989,16 +980,17 @@ private:
     assertTrue(!o1->getTokens().empty());
 
     // Insertion of a new object should not affect the given event token
-    ObjectId o2 = (new Object(db.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+    ObjectId o2 = (new Object(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
     assertTrue(ENGINE->constraintConsistent());
     assertTrue(!eventToken.getObject()->baseDomain().isMember(o2));
 
+    DEFAULT_TEARDOWN();    
     return true;
   }
 
   static bool testFreeAndConstrain(){
-      DEFAULT_SETUP(ce,db,true);
-    Object& o1 = *(db->getObject("o1"));
+      DEFAULT_SETUP(ce,db,false);
+      Object o1(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
   
     IntervalToken t1(db,  
                      LabelStr(DEFAULT_PREDICATE),                                                     
@@ -1095,7 +1087,9 @@ public:
 private:
   
   static bool testBasicTokenAllocation() {
-    DEFAULT_SETUP(ce, db, true);
+      DEFAULT_SETUP(ce, db, false);
+      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      db->close();
     // Event Token
     EventToken eventToken(db, LabelStr(DEFAULT_PREDICATE), true, false, IntervalIntDomain(0, 1000), Token::noObject(), false);
     assertTrue(eventToken.getStart()->getDerivedDomain() == eventToken.getEnd()->getDerivedDomain());
@@ -1163,7 +1157,9 @@ private:
   }                            
 
   static bool testStateModel(){
-    DEFAULT_SETUP(ce, db, true);
+      DEFAULT_SETUP(ce, db, false);
+      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      db->close();
     IntervalToken t0(db, 
                      LabelStr(DEFAULT_PREDICATE), 
                      true, 
@@ -1217,7 +1213,9 @@ private:
   }
 
   static bool testMasterSlaveRelationship(){
-    DEFAULT_SETUP(ce, db, true);
+      DEFAULT_SETUP(ce, db, false);
+      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      db->close();
     IntervalToken t0(db, 
                      LabelStr(DEFAULT_PREDICATE), 
                      false, 
@@ -1288,7 +1286,9 @@ private:
    * without causing prpagation.
    */
   static bool testTermination(){
-    DEFAULT_SETUP(ce, db, true);
+      DEFAULT_SETUP(ce, db, false);
+      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      db->close();
 
     {    
       IntervalToken t0(db, 
@@ -1378,7 +1378,9 @@ private:
 
   // Added for GNATS 3077
   static bool testMergingWithEmptyDomains() {
-    DEFAULT_SETUP(ce, db, true);
+      DEFAULT_SETUP(ce, db, false);
+      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      db->close();
     // Create 2 mergeable tokens.
     
     IntervalToken t0(db, 
@@ -1425,7 +1427,9 @@ private:
   }
 
   static bool testBasicMerging(){
-    DEFAULT_SETUP(ce, db, true);
+      DEFAULT_SETUP(ce, db, false);
+      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      db->close();
     // Create 2 mergeable tokens - predicates, types and base domaiuns match
     IntervalToken t0(db, 
                      LabelStr(DEFAULT_PREDICATE), 
@@ -1905,7 +1909,9 @@ private:
   }    
 
   static bool testTokenCompatibility(){
-    DEFAULT_SETUP(ce, db, true);
+      DEFAULT_SETUP(ce, db, false);
+      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      db->close();
 
     // Create 2 mergeable tokens - predicates, types and base domaiuns match
     IntervalToken t0(db, 
@@ -2158,8 +2164,11 @@ private:
   }
 
   static bool testTokenFactory(){
-    DEFAULT_SETUP(ce, db, true);
-    TokenId master = TokenFactory::createInstance(db, LabelStr(DEFAULT_PREDICATE), true);
+      DEFAULT_SETUP(ce, db, false);
+      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      db->close();
+
+      TokenId master = TokenFactory::createInstance(db, LabelStr(DEFAULT_PREDICATE), true);
     master->activate();
     TokenId slave = TokenFactory::createInstance(master, LabelStr(DEFAULT_PREDICATE), LabelStr("any"));
     assertTrue(slave->getMaster() == master); 
@@ -2176,7 +2185,10 @@ private:
    * to be relaxed to the base domain.
    */
   static bool testCorrectSplit_Gnats2450(){
-    DEFAULT_SETUP(ce, db, true);
+    DEFAULT_SETUP(ce, db, false);
+    ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+    db->close();
+
     IntervalToken tokenA(db, 
                          LabelStr(LabelStr(DEFAULT_PREDICATE)), 
                          true,
@@ -2234,7 +2246,10 @@ private:
   }
 
   static bool testOpenMerge() {
-    DEFAULT_SETUP(ce, db, true);
+      DEFAULT_SETUP(ce, db, false);
+      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      db->close();
+      
     schema->addMember(LabelStr(DEFAULT_PREDICATE),"int",LabelStr("FOO"));
 
     EnumeratedDomain zero(true, "int");
@@ -2341,7 +2356,9 @@ private:
 
 
   static bool testGNATS_3086() {
-    DEFAULT_SETUP(ce, db, true);
+      DEFAULT_SETUP(ce, db, false);
+      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      db->close();
     
     LabelSet lbl;
     lbl.insert(LabelStr("L1"));
@@ -2393,7 +2410,9 @@ private:
   }
 
   static bool testCompatCacheReset() {
-    DEFAULT_SETUP(ce, db, true);
+      DEFAULT_SETUP(ce, db, false);
+      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      db->close();
     //create a regular token
     IntervalToken t0(db, 
                      LabelStr(DEFAULT_PREDICATE), 
@@ -2451,7 +2470,7 @@ private:
 
   static bool testAssignemnt(){
       DEFAULT_SETUP(ce, db, false);
-    Object& o1 = *(db->getObject("o1"));
+    Object o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "o1");
     Object o2(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2");
     db->close();
 
@@ -2981,7 +3000,7 @@ private:
                                          IntervalIntDomain(start, start),
                                          IntervalIntDomain(start+DURATION, start+DURATION),
                                          IntervalIntDomain(DURATION, DURATION)))->getId();
-      assertFalse(token->getObject()->getBaseDomain().isSingleton());
+      assertTrue(token->getObject()->getBaseDomain().isSingleton());
       token->getObject()->specify(timeline->getId());
       token->activate();
     }
@@ -3743,7 +3762,10 @@ private:
   }
 
   static bool testPathBasedRetrieval(){
-    DEFAULT_SETUP(ce, db, true);
+      DEFAULT_SETUP(ce, db, false);
+      ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
+      db->close();
+      
     db->getClient()->enableTransactionLogging();
     TokenId t0 = db->getClient()->createToken(LabelStr(DEFAULT_PREDICATE).c_str());
     t0->activate();
@@ -5692,7 +5714,6 @@ std::string DbTransPlayerTest::buildXMLDomainStr(const AbstractDomain& dom) {
 void PlanDatabaseModuleTests::runTests(std::string path) 
 { 
   setTestLoadLibraryPath(path);
-  initDbModuleTests();
   runTestSuite(SchemaTest::test);
   runTestSuite(ObjectTest::test);
   runTestSuite(TokenTest::test);

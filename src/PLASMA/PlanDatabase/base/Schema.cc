@@ -34,15 +34,6 @@ namespace EUROPA {
     return sl_instance;
   }
 
-  // Hack!: remove when Schema::testInstance is gone
-  SchemaId sl_schemaInstanceId;  
-  const SchemaId& Schema::testInstance(const LabelStr& name){
-    if (sl_schemaInstanceId.isNoId())
-        sl_schemaInstanceId = (new Schema(name, (new TypeFactoryMgr())->getId()))->getId();
-    
-    return sl_schemaInstanceId;
-  }
-
   const LabelStr Schema::makeQualifiedName(const LabelStr& objectType, 
 					   const LabelStr& unqualifiedPredicateName){
     std::string fullName = objectType.toString() + getDelimiter() + unqualifiedPredicateName.toString();
@@ -54,17 +45,12 @@ namespace EUROPA {
       , m_typeFactoryMgr(tfm)
       , m_name(name)
   {
-      if (sl_schemaInstanceId.isNoId())
-          sl_schemaInstanceId = m_id;
-      
       reset();
       debugMsg("Schema:constructor", "created Schema:" << name.toString());
   }
 
   Schema::~Schema()
   {
-      if (m_id == sl_schemaInstanceId)
-          sl_schemaInstanceId = SchemaId::noId();
       m_id.remove();
   }
 

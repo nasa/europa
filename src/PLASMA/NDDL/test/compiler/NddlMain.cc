@@ -124,7 +124,8 @@ int main(int argc, const char ** argv)
 
   NddlTestEngine engine;
 
-  SchemaId schema = EUROPA::NDDL::loadSchema(); // Allocate the schema with a call to the linked in model function - eventually make this call via dlopen  
+  Schema* schema = (Schema*) engine.getComponent("Schema");   
+  EUROPA::NDDL::loadSchema(schema->getId()); // Allocate the schema with a call to the linked in model function - eventually make this call via dlopen  
   PlanDatabase* planDatabase = (PlanDatabase*) engine.getComponent("PlanDatabase");   
   planDatabase->getClient()->enableTransactionLogging();
 

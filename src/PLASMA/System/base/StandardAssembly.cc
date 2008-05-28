@@ -26,11 +26,6 @@ namespace EUROPA {
 
   StandardAssembly::StandardAssembly() 
   {
-    check_error(ALWAYS_FAIL, "Should never get here.");
-  }
-
-  StandardAssembly::StandardAssembly(const SchemaId& schema) 
-  {	 
     doStart();
     getPlanDatabase()->getClient()->enableTransactionLogging();
   }

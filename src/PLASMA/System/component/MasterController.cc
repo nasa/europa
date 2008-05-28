@@ -252,9 +252,9 @@ namespace EUROPA {
     logMsg("Loading function pointer");
 
     //locate the NDDL 'loadSchema' function in the library and check for errors
-    SchemaId (*fcn_loadSchema)();   //function pointer to NDDL::loadSchema()
+    SchemaId (*fcn_loadSchema)(const SchemaId&);   //function pointer to NDDL::loadSchema()
     try {
-      fcn_loadSchema = (SchemaId (*)())p_dlsym(m_libHandle, "loadSchema");
+      fcn_loadSchema = (SchemaId (*)(const SchemaId&))p_dlsym(m_libHandle, "loadSchema");
       if (!fcn_loadSchema) {
         check_error_variable(const char* error_msg = p_dlerror());
         check_error(!error_msg, error_msg); 
@@ -269,7 +269,8 @@ namespace EUROPA {
     // call the NDDL::loadSchema function
     logMsg("Calling NDDL:loadSchema");
     try {
-      (*fcn_loadSchema)();
+        SchemaId schema = ((Schema*)getComponent("Schema"))->getId();
+      (*fcn_loadSchema)(schema);
     }
     catch (Error e) {
       logMsg("Unexpected exception in NDDL::loadSchema()");

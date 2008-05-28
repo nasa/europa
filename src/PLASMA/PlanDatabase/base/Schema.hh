@@ -44,9 +44,6 @@ namespace EUROPA {
     Schema(const LabelStr& name, const TypeFactoryMgrId& tfm);
     ~Schema();
 
-    // TODO: this must be removed, don't use. remains only to support some old tests
-    static const SchemaId& testInstance(const LabelStr& name = LabelStr("Model"));
-    
     /**
      * @brief Retrieve the delimiter for separating elements in schema element names.
      */

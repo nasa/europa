@@ -1934,9 +1934,6 @@ private:
 void ResourceModuleTests::runTests(std::string path) 
 {
   setTestLoadLibraryPath(path);  
-  //Schema::testInstance();
-  //ResourceTestEngine engine;
-  
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(ResourceTest::test);
   runTestSuite(ProfileTest::test);
@@ -2398,23 +2395,5 @@ void ResourceModuleTests::runTests(std::string path)
     delete earliestXml;
     return true;
   }
-
-void initSolverModuleTests() {
- 
-  // Allocate the schema with a call to the linked in model function - eventually
-  // make this called via dlopen
-  EUROPA::NDDL::loadSchema();
- 
-#ifndef NO_RESOURCES
-  Schema::testInstance()->addObjectType("Reusable");
-  Schema::testInstance()->addMember("Reusable", "float", "capacity");
-  Schema::testInstance()->addMember("Reusable", "float", "levelLimitMin");
-  Schema::testInstance()->addMember("Reusable", "float", "consumptionMax");
-  Schema::testInstance()->addMember("Reusable", "float", "consumptionRateMax");
-
-  Schema::testInstance()->addPredicate("Reusable.uses");
-  Schema::testInstance()->addMember("Reusable.uses", "float", "quantity");
-#endif
-}
   
  */

@@ -41,7 +41,7 @@ class SchemaWriter {
 
     // Implement expected initialization hooks
     writer.write("// Boot-strap code to initialize schema\n");
-    writer.write("extern \"C\" SchemaId loadSchema(){\n");
+    writer.write("extern \"C\" SchemaId loadSchema(const SchemaId& schema){\n");
     writer.indent();
 
 
@@ -49,7 +49,7 @@ class SchemaWriter {
     if(modelName == null)
       throw new RuntimeException("Failed to set model name. Bug in NddlCompiler");
 
-    writer.write("Id<Schema> id = Schema::testInstance(\""+modelName+"\");\n");
+    writer.write("SchemaId id = schema;\n");
 
 		// Register Constraints
 		writer.write("// Register Constraints\n");

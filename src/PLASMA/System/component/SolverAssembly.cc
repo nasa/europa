@@ -26,7 +26,7 @@ namespace EUROPA {
     return sl_txLog;
   }
 
-  SolverAssembly::SolverAssembly(const SchemaId& schema) : StandardAssembly(schema) 
+  SolverAssembly::SolverAssembly() 
   {
   }
 
