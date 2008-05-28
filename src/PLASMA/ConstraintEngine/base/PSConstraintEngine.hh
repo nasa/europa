@@ -38,12 +38,11 @@ namespace EUROPA {
     public:
     	virtual ~PSVariable() {}
 
-    	virtual const std::string& getEntityType() const;
+    	virtual const std::string& getEntityType() const = 0;
 
     	virtual PSVarType getType() const = 0; // Data Type 
 
-    	virtual std::string toString() const;
-
+    	virtual std::string toString() const = 0;
     	
     	virtual bool isEnumerated() const = 0;
     	virtual bool isInterval() const = 0;
@@ -67,31 +66,6 @@ namespace EUROPA {
     	virtual PSEntity* getPSParent() const = 0;
     	
   };
-
-  class PSVarValue
-  {
-    public:
-	  PSVarValue(const double val, const PSVarType type);
-	  PSVarType getType() const;
-
-	  PSEntity*           asObject() const;
-	  int                 asInt() const;
-	  double              asDouble() const;
-	  bool                asBoolean() const;
-	  const std::string&  asString() const; 
-
-	  std::string toString() const;
-
-	  static PSVarValue getInstance(std::string val) {return PSVarValue((double)LabelStr(val), STRING);}
-	  static PSVarValue getInstance(int val) {return PSVarValue((double)val, INTEGER);}
-	  static PSVarValue getInstance(double val) {return PSVarValue((double)val, DOUBLE);}
-	  static PSVarValue getInstance(bool val) {return PSVarValue((double)val, BOOLEAN);}
-	  static PSVarValue getObjectInstance(double obj) {return PSVarValue(obj, OBJECT);} // cast an EntityId to double to call this
-
-    private:
-	  double m_val;
-	  PSVarType m_type;
-  };                
   
   class PSConstraint : public virtual PSEntity
   {

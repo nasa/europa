@@ -13,7 +13,7 @@ ModuleBase ConstraintEngine
 	Propagator.cc
 	TypeFactory.cc
 	VariableChangeListener.cc
-	PSConstraintEngine.cc
+	PSVarValue.cc
 	;
 
 } # PLASMA_READY

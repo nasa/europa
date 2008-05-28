@@ -9,6 +9,7 @@
  */
 
 #include "ConstraintEngineDefs.hh"
+#include "PSVarValue.hh"
 #include "PSConstraintEngine.hh"
 #include "Entity.hh"
 #include "LabelStr.hh"
@@ -470,7 +471,7 @@ namespace EUROPA {
 	virtual void specifyValue(PSVarValue& v);
 
 	virtual PSEntity* getPSParent() const;	      
-    
+   
   private:
     /**
      * @brief An internal utility to ensure the relationship between the constraints and the variable are valid.

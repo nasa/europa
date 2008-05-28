@@ -604,5 +604,33 @@ namespace EUROPA {
     
     return (PSEntity *) m_parent;
   }
-  
+
+  	// OLD PSVariable toString method ... does it provide anything over the existing toString that we want to keep?
+//  	std::string ConstrainedVariable::toString() const {
+//  		std::ostringstream os;
+//
+//  		if (isNull())
+//  			os << "NULL";
+//  		else if (isSingleton()) 
+//  			os << getSingletonValue().toString();    	    
+//  		else if (isInterval()) 
+//  			os << "[" << getLowerBound() << "," << getUpperBound() << "]";
+//  		else if (isEnumerated()) {
+//  			os << "{";
+//  			PSList<PSVarValue> values = getValues();
+//  			for (int i=0;i<values.size();i++) {
+//  				if (i > 0)
+//  					os << ", ";
+//  				os << values.get(i).toString();    
+//  			}
+//  			os << "}";
+//  		}
+//  		else 
+//  			os << "ERROR!";    
+//
+//  		return os.str();
+//  	}
+
+
+  	
 }
