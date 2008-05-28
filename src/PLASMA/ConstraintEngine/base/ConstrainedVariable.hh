@@ -71,6 +71,8 @@ namespace EUROPA {
      */
     const ConstrainedVariableId& getId() const;
 
+    const std::string& getEntityType() const;
+    
     /**
      * @brief Validates the relationships of the class.
      *

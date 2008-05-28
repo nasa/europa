@@ -74,9 +74,7 @@ namespace EUROPA {
 	  PSVarValue(const double val, const PSVarType type);
 	  PSVarType getType() const;
 
-	  // Doesn't work?  Conversion to PSEntity by Id class returns something bogus, I think?
-	  // (at least trying to then call simple methods on this failed ... needs further investigation)
-//	  PSEntity*           asObject() const;
+	  PSEntity*           asObject() const;
 	  int                 asInt() const;
 	  double              asDouble() const;
 	  bool                asBoolean() const;

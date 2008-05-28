@@ -49,9 +49,14 @@ namespace EUROPA{
 
     virtual ~Entity();
 
+    inline int getKey() const {return m_key;}
+
+    
     virtual const std::string& getEntityName() const;
     virtual const LabelStr& getName() const;
 
+    virtual const std::string& getEntityType() const;
+    
     virtual bool canBeCompared(const EntityId&) const;
 
     /**
@@ -167,6 +172,10 @@ namespace EUROPA{
 
   private:
 
+	  
+	  static PSEntityKey allocateKey();
+
+	  
     /**
      * @brief Internal variable indicating if garbage collection is active
      */
@@ -177,6 +186,8 @@ namespace EUROPA{
      */
     virtual void notifyDiscarded(const Entity* entity);
 
+	const PSEntityKey m_key;
+    
     unsigned int m_refCount;
     bool m_discarded;
     std::set<Entity*> m_dependents;

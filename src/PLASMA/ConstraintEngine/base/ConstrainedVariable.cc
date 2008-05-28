@@ -114,6 +114,12 @@ namespace EUROPA {
     return(m_id);
   }
 
+  const std::string& ConstrainedVariable::getEntityType() const {
+ 	  static const std::string CV_STR("ConstrainedVariable");
+ 	  return CV_STR; 
+   }
+  
+  
   int ConstrainedVariable::getIndex() const {
     return(m_index);
   }

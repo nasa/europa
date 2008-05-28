@@ -28,8 +28,6 @@ namespace EUROPA {
       virtual PSToken* getTokenByKey(PSEntityKey id) const = 0;	
 
       virtual PSList<PSVariable*> getAllGlobalVariables() const = 0;
-
-      virtual std::string toString() = 0;
   };
     
   class PSObject : public virtual PSEntity
@@ -48,6 +46,8 @@ namespace EUROPA {
 
       virtual void addPrecedence(PSToken* pred,PSToken* succ) = 0;
       virtual void removePrecedence(PSToken* pred,PSToken* succ) = 0;
+      
+//      virtual std::string toString() const = 0;
   };
 
   

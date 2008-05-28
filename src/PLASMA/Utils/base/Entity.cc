@@ -4,7 +4,7 @@
 
 namespace EUROPA {
 
-  Entity::Entity(): m_refCount(1), m_discarded(false){
+  Entity::Entity(): m_key(allocateKey()), m_refCount(1), m_discarded(false){
     entitiesByKey().insert(std::pair<int, unsigned long int>(m_key, (unsigned long int) this));
     check_error(!isPurging());
     debugMsg("Entity:Entity", "Allocating " << m_key);
@@ -41,6 +41,12 @@ namespace EUROPA {
     entitiesByKey().erase(m_key);
   }
 
+
+  const std::string& Entity::getEntityType() const {
+	  static const std::string ENTITY_STR("Entity");
+	  return ENTITY_STR; 
+  }
+  
   const std::string& Entity::getEntityName() const
   {
 	  return getName().toString();
@@ -199,4 +205,13 @@ namespace EUROPA {
     static std::set<Entity*> sl_instance;
     return sl_instance;
   }
+
+  PSEntityKey Entity::allocateKey(){
+    static int sl_key(0);
+    sl_key++;
+    return sl_key;
+  }
+
+
+
 }

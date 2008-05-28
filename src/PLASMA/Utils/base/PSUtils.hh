@@ -28,26 +28,22 @@ namespace EUROPA {
       std::vector<T> m_elements;    	
   };
 
-  // TODO:  Use PSEntityKey everywhere, or just int
   typedef int PSEntityKey;
  
   class PSEntity
   {
     public: 
-      PSEntity();
       virtual ~PSEntity() {}
     
-      inline PSEntityKey getKey() const {return m_key;}
-
+      virtual PSEntityKey getKey() const = 0;
       virtual const std::string& getEntityName() const = 0;        
-      virtual const std::string& getEntityType() const;
-
-      virtual std::string toString() const;
-
-      static int allocateKey();
-
-    protected:
-    	const int m_key;
+      virtual const std::string& getEntityType() const = 0;
+      virtual std::string toString() const
+      {
+     	  std::stringstream sstr;
+     	  sstr << getEntityName() << "(" << getKey() << ")";
+     	  return sstr.str();
+       }
   };	      
 
 }

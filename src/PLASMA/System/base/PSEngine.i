@@ -380,7 +380,7 @@ namespace EUROPA {
 
     PSVarType getType() const;
 
-   // PSEntity*           asObject() const;
+    PSEntity*           asObject() const;
     int                 asInt() const;
     double              asDouble() const;
     bool                asBoolean() const;

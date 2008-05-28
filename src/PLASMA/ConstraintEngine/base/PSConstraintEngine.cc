@@ -85,14 +85,14 @@ namespace EUROPA {
     return LabelStr(m_val).toString();
   }
 
-//  PSEntity* PSVarValue::asObject() const 
-//  {
-//    check_runtime_error(m_type == OBJECT);
-//    /* TODO: provide hooks to return PSObject or other objects */
-//    //return new PSEntity(EntityId(m_val));
-//    PSEntityId id = PSEntityId(m_val);
-//    return (PSEntity *) id;
-//  }
+  PSEntity* PSVarValue::asObject() const 
+  {
+    check_runtime_error(m_type == OBJECT);
+    /* TODO: provide hooks to return PSObject or other objects */
+    //return new PSEntity(EntityId(m_val));
+    Id<PSEntity> id(m_val);
+    return (PSEntity *) id;
+  }
 
 
 }
