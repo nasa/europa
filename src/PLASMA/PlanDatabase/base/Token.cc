@@ -1056,7 +1056,7 @@ std::string Token::toPSString() const
 {
 	std::ostringstream os;
 	
-	os << "Token(" << PSEntity::toString() << ") {" << std::endl;
+	os << "Token(" << toString() << ") {" << std::endl;
 	os << "    isFact:" << isFact() << std::endl;
 	
 	if (isMerged())

@@ -47,6 +47,13 @@ namespace EUROPA {
 	  return ENTITY_STR; 
   }
   
+  std::string Entity::toString() const
+  {
+	  std::stringstream sstr;
+	  sstr << getEntityName() << "(" << getKey() << ")";
+	  return sstr.str();
+  }
+  
   const std::string& Entity::getEntityName() const
   {
 	  return getName().toString();

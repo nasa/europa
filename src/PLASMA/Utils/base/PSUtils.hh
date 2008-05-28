@@ -38,12 +38,7 @@ namespace EUROPA {
       virtual PSEntityKey getKey() const = 0;
       virtual const std::string& getEntityName() const = 0;        
       virtual const std::string& getEntityType() const = 0;
-      virtual std::string toString() const
-      {
-     	  std::stringstream sstr;
-     	  sstr << getEntityName() << "(" << getKey() << ")";
-     	  return sstr.str();
-       }
+      virtual std::string toString() const = 0;
   };	      
 
 }

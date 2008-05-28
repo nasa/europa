@@ -46,8 +46,6 @@ namespace EUROPA {
 
       virtual void addPrecedence(PSToken* pred,PSToken* succ) = 0;
       virtual void removePrecedence(PSToken* pred,PSToken* succ) = 0;
-      
-//      virtual std::string toString() const = 0;
   };
 
   
