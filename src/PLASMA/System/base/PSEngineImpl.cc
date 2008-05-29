@@ -60,13 +60,13 @@ namespace EUROPA {
 	  doShutdown();    
   }
     
-  void PSEngineImpl::addModule(ModuleId module)
+  void PSEngineImpl::addModule(Module* module)
   {
-	  EuropaEngineBase::addModule(module);
+	  EuropaEngineBase::addModule(module->getId());
   }
-  void PSEngineImpl::removeModule(ModuleId module)
+  void PSEngineImpl::removeModule(Module* module)
   {
-	  EuropaEngineBase::removeModule(module);
+	  EuropaEngineBase::removeModule(module->getId());
   }
   void PSEngineImpl::loadModule(const std::string& moduleFileName) 
   {

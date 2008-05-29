@@ -50,12 +50,9 @@ int main(int argc, const char ** argv)
 void executeWithAssembly(const char* plannerConfig, const char* txSource)
 {
   SolverAssembly::initialize();
-
-  // Allocate the schema with a call to the linked in model function   
-  SchemaId schema = NDDL::loadSchema(); // eventually make this called via dlopen
   
   { // Encapsualte allocation so that they go out of scope before calling terminate  
-    SolverAssembly assembly(schema);    
+    SolverAssembly assembly;    
     assembly.addModule((new Module%%Project%%())->getId());
     
     assembly.plan(txSource, plannerConfig); // Run the planner    
@@ -76,7 +73,7 @@ bool executeWithPSEngine(const char* plannerConfig, const char* txSource, int st
 	      PSEngine* engine = PSEngine::makeInstance();	
 	      engine->start();
 	      
-	      engine->addModule((new Module%%Project%%())->getId());
+	      engine->addModule((new Module%%Project%%()));
 	      engine->executeScript("nddl-xml",txSource,true/*isFile*/);
 
 	      PSSolver* solver = engine->createSolver(plannerConfig);
