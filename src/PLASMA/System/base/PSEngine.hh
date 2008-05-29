@@ -7,6 +7,7 @@
 #include "PSResource.hh"
 #include "PSSolvers.hh"
 #include "Module.hh"
+#include "PSPlanDatabaseListener.hh"
 
 namespace EUROPA {
 
@@ -60,11 +61,9 @@ namespace EUROPA {
 
       // Solver methods
       virtual PSSolver* createSolver(const std::string& configurationFile) = 0;
-      
-      // TODO:  Is there a way to avoid this (for PSPLanDatabaseListener)?
-    private:
-      	virtual PlanDatabaseId& getPlanDatabase() = 0;
-     	friend class PSPlanDatabaseListener;
+
+      // Listener methods
+      virtual void addPlanDatabaseListener(PSPlanDatabaseListener& listener) = 0;
   };
   
 }

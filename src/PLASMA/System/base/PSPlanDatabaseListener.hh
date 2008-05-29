@@ -2,33 +2,27 @@
 #define _H_PSPlanDatabaseListener
 
 #include "PlanDatabaseListener.hh"
-#include "PSEngine.hh"
 
 namespace EUROPA {
 
- 	/* Private inheritance from PlanDatabaseListener so that:
- 	 *  a) We receive the usual notifications, but 
- 	 *  b) Any class that inherits from this one only cares/knows about the PS versions of methods
- 	 * 
- 	 *  TODO:  Figure out how to have a protected constructor (swig issue)
- 	 *  TODO:  Figure out how privately inherit from PlanDatabaseListener (so all it's methods aren't accessible to any subclasses)
- 	 *  TODO:  Reverse the inheritance once the other classes are prepared for it (see #)
+ 	/* Inheritance here is backwards from most PS classes (here PSPlanDatabaseListener inherits from PlanDatabaseListener instead
+ 	 * of the other way around).  We couldn't come up with a clean way to make this work the other way.
+ 	 *  
+ 	 * We were prevented by swig from:
+ 	 * a) Having a protected constructor
+ 	 * b) Privately inheriting from PlanDatabaseListener (so all it's methods aren't accessible to any subclasses)
  	 */
 
   class PSPlanDatabaseListener : public PlanDatabaseListener {
   public:
+	  PSPlanDatabaseListener();
 	  virtual ~PSPlanDatabaseListener() {}
 	  
-	  virtual void notifyAdded(PSObject* obj) {}
-	  
-//  protected:	(alas, SWIG won't wrap a protected constructor) 
-	  PSPlanDatabaseListener(PSEngine* engine);
+	  virtual void notifyAdded(PSObject* obj) {std::cout << "WRONG ONE " << std::endl;}
 	  
   private:
 	  
 	  virtual void notifyAdded(const ObjectId& object);
-	  
-	  PSEngine& m_psengine;
   };	  
 	  
 }

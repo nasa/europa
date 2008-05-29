@@ -55,14 +55,13 @@ namespace EUROPA {
     
     // Solver methods
     virtual PSSolver* createSolver(const std::string& configurationFile);
+
+    // Listener methods
+    virtual void addPlanDatabaseListener(PSPlanDatabaseListener& listener);
+
     
   protected:
     bool m_started;
-        
-  private:	
-  	// Is there a way to avoid these:
-    virtual PlanDatabaseId& getPlanDatabase() { return EuropaEngineBase::getPlanDatabase(); }      
-  	friend class PSPlanDatabaseListener;
   };
     
 }	

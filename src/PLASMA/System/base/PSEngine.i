@@ -80,6 +80,7 @@ namespace EUROPA {
   class PSToken;
   class PSVariable;
   class PSVarValue;
+  class PSPlanDatabaseListener;
 
   template<class T>
   class PSList {
@@ -236,7 +237,8 @@ namespace EUROPA {
     double getViolation() const;    
     std::string getViolationExpl() const;
 
-    PSSolver* createSolver(const std::string& configurationFile);   
+    PSSolver* createSolver(const std::string& configurationFile); 
+    void addPlanDatabaseListener(PSPlanDatabaseListener& listener);
 
     std::string planDatabaseToString();    
   };
@@ -448,6 +450,6 @@ namespace EUROPA {
     virtual ~PSPlanDatabaseListener();
     virtual void notifyAdded(PSObject* obj);
 // protected:  (alas, SWIG won't wrap a protected constructor)
-  	PSPlanDatabaseListener(PSEngine* engine);
+  	PSPlanDatabaseListener();
   };
 }

@@ -220,5 +220,12 @@ namespace EUROPA {
     check_runtime_error(isStarted(),"PSEngine has not been started");
     return ((PSSolverManager*)getComponent("PSSolverManager"))->createSolver(configurationFile);
   }
+
+  // Listener methods
+  void PSEngineImpl::addPlanDatabaseListener(PSPlanDatabaseListener& listener)
+  {
+	  check_runtime_error(isStarted(),"PSEngine has not been started");
+	  listener.setPlanDatabase(EuropaEngineBase::getPlanDatabase());
+  }
 }
 

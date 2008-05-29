@@ -5,7 +5,7 @@
 
 namespace EUROPA {
 
-  class PlanDatabaseListener{
+  class PlanDatabaseListener {
   public:
     virtual ~PlanDatabaseListener();
 
@@ -98,10 +98,19 @@ namespace EUROPA {
 
     const PlanDatabaseListenerId& getId() const;
 
+    // for PSPlanDatabaseListener, where we don't have access to plan database
+    // at construction time
+    virtual void setPlanDatabase(const PlanDatabaseId& planDatabase);
+
+  
   protected:
     PlanDatabaseListener(const PlanDatabaseId& planDatabase);
     PlanDatabaseListenerId m_id;
-    const PlanDatabaseId m_planDatabase;
+    PlanDatabaseId m_planDatabase;
+
+    // for PSPlanDatabaseListener, where we don't have access to plan database
+    // at construction time
+    PlanDatabaseListener();
   };
 
 }

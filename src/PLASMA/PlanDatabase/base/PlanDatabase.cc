@@ -980,7 +980,6 @@ namespace EUROPA{
 
   PSToken* PlanDatabase::getTokenByKey(PSEntityKey id) const
   {
-	  //TODO:  define PSTokenId or don't use it :)
     Id <PSToken> psId = Entity::getEntity(id);
     check_runtime_error(psId.isValid());
     return (PSToken *) psId; 

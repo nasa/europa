@@ -4,18 +4,32 @@
 namespace EUROPA {
 
   PlanDatabaseListener::PlanDatabaseListener(const PlanDatabaseId& planDatabase)
-    :m_id(this), m_planDatabase(planDatabase){
-    check_error(m_planDatabase.isValid());
-    m_planDatabase->notifyAdded(m_id);
+    :m_id(this) {
+	  setPlanDatabase(planDatabase);
   }
 
+  PlanDatabaseListener::PlanDatabaseListener()
+    :m_id(this) {
+  }
+  
   PlanDatabaseListener::~PlanDatabaseListener(){
     check_error(m_id.isValid());
-    check_error(m_planDatabase.isValid());
-    m_planDatabase->notifyRemoved(m_id);
+    if(m_planDatabase.isId())
+    {
+    	check_error(m_planDatabase.isValid());
+    	m_planDatabase->notifyRemoved(m_id);
+    }    	
     m_id.remove();
   }
 
+  void PlanDatabaseListener::setPlanDatabase(const PlanDatabaseId& planDatabase) {
+	  m_planDatabase = planDatabase;
+	  check_error(m_planDatabase.isValid());
+	  std::cout << "Notifying plan database of addition" << std::endl;
+	  m_planDatabase->notifyAdded(m_id);
+  }
+
+  
   void PlanDatabaseListener::notifyAdded(const ObjectId& object){}
 
   void PlanDatabaseListener::notifyRemoved(const ObjectId& object){}

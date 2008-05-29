@@ -1,18 +1,15 @@
 #include "PSPlanDatabaseListener.hh"
-#include "PSPlanDatabase.hh"
-#include "PlanDatabase.hh"
-#include "PSEngine.hh"
+#include "Object.hh"
 
 namespace EUROPA {
-	  
-PSPlanDatabaseListener::PSPlanDatabaseListener(PSEngine* engine)
-	: PlanDatabaseListener(engine->getPlanDatabase()), 
-	  m_psengine(*engine)	
+
+PSPlanDatabaseListener::PSPlanDatabaseListener()
+: PlanDatabaseListener()
 {}
 
 // Methods to convert notifications involving internal Europa types to notifications involving 'PS' types:
-void PSPlanDatabaseListener::notifyAdded(const ObjectId& object)
-{
-	notifyAdded(m_psengine.getObjectByKey(object->getKey()));
+void PSPlanDatabaseListener::notifyAdded(const ObjectId& object) {
+	notifyAdded((PSObject *) object);
 }
+
 }
