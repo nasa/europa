@@ -3,46 +3,51 @@
 
   <description>PLASMA</description>
 
+  <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+    <classpath>
+      <pathelement location="ext/ant/lib/ant-contrib-1.0b3.jar"/>
+    </classpath>
+  </taskdef>
+
   <target name="init">
     <exec executable="uname" outputproperty="uname.o">
       <arg value="-o"/>
     </exec>
-    <condition property="os.isCygwin">
-      <equals arg1="${uname.o}" arg2="Cygwin"/>
-    </condition>
-    <condition property="os.isLinux">
-      <or>
-      	<equals arg1="${uname.o}" arg2="Linux"/>
-      	<equals arg1="${uname.o}" arg2="GNU/Linux"/>
-      </or>
-    </condition>
-    <condition property="os.isOSX">
-      <equals arg1="${uname.o}" arg2="Darwin"/>
-    </condition>
 
     <!-- load overrides -->
     <property file="${user.home}/.ant.plasma.properties"/>
-  </target>
 
-  <target name="cygwin-init" depends="init" if="os.isCygwin">
-    <echo message="Running as a Cygwin build."/>
-    <exec executable="cygpath" outputproperty="local.env.PLASMA_HOME">
-      <arg value="--unix"/>
-      <!--<arg value="-absolute"/>-->
-      <arg value="${basedir}"/>
-    </exec>
-    <property name="jam.libraries" value="STATIC"/>
-    <property name="jam.misc" value="-sOS=CYGWIN -sNOCYGWIN=TRUE"/>
-  </target>
+    <if>
+      <or>
+        <equals arg1="${uname.o}" arg2="Linux"/>
+        <equals arg1="${uname.o}" arg2="GNU/Linux"/>
+      </or>
+      <then>
+      </then>
+      <!-- Mac OS X -->
+      <elseif>
+        <equals arg1="${uname.o}" arg2="Darwin"/>
+				<then>
+          <property name="env.LD_LIBRARY_PATH.name" value="DYLD_LIBRARY_PATH"/>
+				</then>
+      </elseif>
 
-  <target name="linux-init" depends="init" if="os.isLinux">
-  </target>
+      <!-- CYGWIN -->
+      <elseif>
+        <equals arg1="${uname.o}" arg2="Cygwin"/>
+				<then>
+          <echo message="Running as a Cygwin build."/>
+          <exec executable="cygpath" outputproperty="local.env.PLASMA_HOME">
+            <arg value="--unix"/>
+            <!--<arg value="-absolute"/>-->
+            <arg value="${basedir}"/>
+          </exec>
+          <property name="jam.libraries" value="STATIC"/>
+          <property name="jam.misc" value="-sOS=CYGWIN -sNOCYGWIN=TRUE"/>
+				</then>
+      </elseif>
+    </if>
 
-  <target name="osx-init" depends="init" if="os.isOSX">
-    <property name="env.LD_LIBRARY_PATH.name" value="DYLD_LIBRARY_PATH"/>
-  </target>
-
-  <target name="init-final" depends="init,cygwin-init,linux-init,osx-init">
     <property name="env.LD_LIBRARY_PATH.name" value="LD_LIBRARY_PATH"/>
     <property name="local.env.PLASMA_HOME" value="${basedir}"/>
     <property name="dir.plasma" value="${basedir}"/>
@@ -58,7 +63,7 @@
     <property name="jam.opts" value="${jam.misc} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries}"/>
   </target>
 
-  <target name="clean" depends="init-final">
+  <target name="clean" depends="init">
     <delete dir="${dir.dist}"/>
     <exec executable="jam" dir="${dir.src}" failonerror="true">
       <arg line="clean-all"/>
@@ -67,7 +72,7 @@
     <delete dir="${dir.build}"/>
   </target>
 
-  <target name="build" depends="init-final">
+  <target name="build" depends="init">
     <echo message="jam ${jam.opts}"/>
     <exec executable="jam" dir="${dir.src}" failonerror="true">
       <arg line="${jam.opts} build"/>
@@ -76,7 +81,7 @@
     </exec>
   </target>
 
-  <target name="test" depends="init-final">
+  <target name="test" depends="init">
     <exec executable="jam" dir="${dir.src}" failonerror="true">
       <arg line="${jam.opts} run-all-tests"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
@@ -84,7 +89,7 @@
     </exec>
   </target>
 
-  <target name="default" depends="init-final">
+  <target name="default" depends="init">
     <antcall target="build"/>
     <antcall target="build">
       <param name="jam.opts" value="${jam.misc} -sVARIANTS=OPTIMIZED -sLIBRARIES=${jam.libraries}"/>
@@ -93,8 +98,8 @@
   </target>
 
   <!-- This target assumes that PLASMA and PlanWorks have already been built so that all the products are in place -->
-  <target name="dist" depends="init-final" 
-  	  description="Creates the binary distribution and packages it up into ${dir.dist}/${file.plasma_dist}">
+  <target name="dist" depends="init" 
+          description="Creates the binary distribution and packages it up into ${dir.dist}/${file.plasma_dist}">
    <!-- Create the distribution directory  -->
     <mkdir dir="${dir.dist}"/>
     <mkdir dir="${dir.dist.base}/bin"/>

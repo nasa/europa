@@ -2,25 +2,28 @@
 <project name="PSUI" default="run" basedir=".">
   <description>PSUI</description>
 
+  <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+    <classpath>
+      <pathelement location="../../../../ext/ant/lib/ant-contrib-1.0b3.jar"/>
+    </classpath>
+  </taskdef>
+
   <target name="init">
     <tstamp/>
     <exec executable="uname" outputproperty="uname.o">
       <arg value="-o"/>
     </exec>
-    <condition property="os.isCygwin">
-      <equals arg1="${uname.o}" arg2="Cygwin"/>
-    </condition>
     <property environment="env"/>
-  </target>
+    <if>
+      <equals arg1="${uname.o}" arg2="Cygwin"/>
+      <then>
+        <exec executable="cygpath" outputproperty="plasma.dir">
+          <arg value="--windows"/>
+          <arg value="${env.PLASMA_HOME}"/>
+        </exec>
+      </then>
+    </if>
 
-  <target name="cygwin-init" depends="init" if="os.isCygwin">
-    <exec executable="cygpath" outputproperty="plasma.dir">
-      <arg value="--windows"/>
-      <arg value="${env.PLASMA_HOME}"/>
-    </exec>
-  </target>
-
-  <target name="init-final" depends="init,cygwin-init">
     <property name="plasma.dir" value="${env.PLASMA_HOME}"/>
     <property file="${user.home}/.ant.psui.properties"/>
 
@@ -69,7 +72,7 @@
     <delete file="${plasma.dir}/build/lib/PSUI.jar"/>
   </target>
 
-  <target name="compile" depends="init-final" description="compile 'src' tree into 'classes' tree">
+  <target name="compile" depends="init" description="compile 'src' tree into 'classes' tree">
     <javac srcdir="${src.dir}"
            destdir="${build.dir}"
            debug="${debug}"
@@ -77,15 +80,15 @@
       <classpath refid="psui.classpath"/>
     </javac>
   </target>
- 
-  <target name="check-jar-uptodate"> 
+
+  <target name="check-jar-uptodate">
     <uptodate property="uptodate.jar" targetfile="${plasma.dir}/build/lib/PSUI.jar" >
       <srcfiles dir="${build.dir}"/>
       <srcfiles refid="psui.libfiles"/>
       <srcfiles refid="plasma.libfiles"/>
-   </uptodate>  	
+   </uptodate>
   </target>
-	
+
   <target name="unjar-libs" depends="check-jar-uptodate" unless="uptodate.jar">
     <unjar dest="${build.dir}" overwrite="false">
       <fileset refid="psui.libfiles"/>
@@ -93,7 +96,7 @@
     </unjar>
     <delete dir="${build.dir}/META-INF"/>
   </target>
-	
+
   <target name="dist" depends="compile,unjar-libs">
     <mkdir dir="${build.dir}"/>
     <jar jarfile="${plasma.dir}/build/lib/PSUI.jar" basedir="${build.dir}"/>
