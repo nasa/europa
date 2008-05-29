@@ -443,13 +443,25 @@ namespace EUROPA {
 // (enables calls from C++ to inherited java code)
   %feature("director") PSPlanDatabaseListener;        
   
-  
   class PSPlanDatabaseListener
   {
   public:
-    virtual ~PSPlanDatabaseListener();
-    virtual void notifyAdded(PSObject* obj);
-// protected:  (alas, SWIG won't wrap a protected constructor)
-  	PSPlanDatabaseListener();
+	  virtual ~PSPlanDatabaseListener();
+	  virtual void notifyAdded(PSObject* obj);
+	  virtual void notifyRemoved(PSObject* object);
+	  virtual void notifyAdded(PSToken* token);
+	  virtual void notifyRemoved(PSToken* token);
+	  virtual void notifyActivated(PSToken* token);
+	  virtual void notifyDeactivated(PSToken* token);
+	  virtual void notifyMerged(PSToken* token);
+	  virtual void notifySplit(PSToken* token);
+	  virtual void notifyRejected(PSToken* token);
+	  virtual void notifyReinstated(PSToken* token);
+	  virtual void notifyConstrained(PSObject* object, PSToken* predecessor, PSToken* successor);
+	  virtual void notifyFreed(PSObject* object, PSToken* predecessor, PSToken* successor);
+	  virtual void notifyAdded(PSObject* object, PSToken* token);
+	  virtual void notifyRemoved(PSObject* object, PSToken* token);
+	  virtual void notifyCommitted(PSToken* token);
+	  virtual void notifyTerminated(PSToken* token);
   };
 }

@@ -22,7 +22,8 @@ ModuleBase PlanDatabase
 	ObjectTokenRelation.cc
 	PlanDatabase.cc
 	PlanDatabaseListener.cc
-        PlanDatabaseWriter.cc
+	PSPlanDatabaseListener.cc
+    PlanDatabaseWriter.cc
  	StackMemento.cc
 	Token.cc
 	TokenFactory.cc
