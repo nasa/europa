@@ -524,7 +524,10 @@ invocation![IXMLElement parent]
       invocation.setAttribute(NddlXmlStrings.x_name, "reject"); })
   | #(CANCEL_KEYWORD i8:IDENT
      { invocation.setAttribute(NddlXmlStrings.x_identifier,i8.getText());
-       invocation.setAttribute(NddlXmlStrings.x_name, "cancel"); }))
+       invocation.setAttribute(NddlXmlStrings.x_name, "cancel"); })
+  | #(RESET_KEYWORD i9:IDENT
+    { invocation.setAttribute(NddlXmlStrings.x_identifier,i9.getText());
+      invocation.setAttribute(NddlXmlStrings.x_name, "reset"); }))
   ;
 // ==========================================================
 // variables/identifiers
