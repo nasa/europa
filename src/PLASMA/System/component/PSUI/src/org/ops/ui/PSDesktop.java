@@ -314,7 +314,7 @@ public class PSDesktop
        	 row.add(t.getKey());
        	 row.add(t.getEntityName());
        	 row.add(t.getEntityType());
-       	 PSVariableList vars = t.getPSParameters();
+       	 PSVariableList vars = t.getParameters();
        	 for (int j=0; j<vars.size();j++) {
        		 PSVariable var = vars.get(j);
        		 row.add(var.toString());
