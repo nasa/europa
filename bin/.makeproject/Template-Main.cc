@@ -52,7 +52,8 @@ void executeWithAssembly(const char* plannerConfig, const char* txSource)
   SolverAssembly::initialize();
   
   { // Encapsualte allocation so that they go out of scope before calling terminate  
-    SolverAssembly assembly;    
+    SolverAssembly assembly;
+    NDDL::loadSchema(assembly->getSchema());
     assembly.addModule((new Module%%Project%%())->getId());
     
     assembly.plan(txSource, plannerConfig); // Run the planner    
