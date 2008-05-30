@@ -1,7 +1,0 @@
-{
-  local SUBDIR = $(BlocksWorld) ;
-  local PLASMA = $(PLASMA_HOME) ;
-  include [ FDirName $(PLASMA_HOME) Jamrules ] ;
-  include [ FDirName $(SUBDIR) Jamfile ] ;
-  BlocksWorld_READY = TRUE ;
-}
