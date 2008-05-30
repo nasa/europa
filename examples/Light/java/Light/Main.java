@@ -1,37 +1,56 @@
 package Light;
 
-import org.ops.ui.PSDesktop;
-import org.ops.ui.util.LibraryLoader;
+import psengine.PSUtil;
+import psengine.util.LibraryLoader;
 import psengine.PSEngine;
+import org.ops.ui.PSDesktop;
 
-class Main
+class Main 
 {
-	public static void main(String args[])
-	{
-		PSDesktop.run(args);
-	}
-	
-	/*
-	 * PSDesktop instantiates its own EUROPA PSEngine internally, you can get a handle on it by calling
-	 * PSDesktop.desktop.getPSEngine()
-	 * 
-	 * If you don't want to use PSDesktop, but instead create your own instance of EUROPA to manipulate programmatically
-	 * you can use this method. For now, only one PSEngine instance can be create per process.
-	 * 
-	 * debugMode = "g" for debug, "o" for optimized
-	 */
-	public static void nonPSDesktopMain(String args[])
-	{
-		String debugMode = args[0];
-        LibraryLoader.loadLibrary("System_"+debugMode);
-        
+    protected static PSEngine psEngine_;
+    
+    public static void main(String args[]) 
+    {
+	    String debugMode = args[0];
+        PSUtil.loadLibraries(debugMode);	   
 	    PSEngine.initialize();
+
+	    psEngine_ = PSEngine.makeInstance();
+	    psEngine_.start();
+		Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+		loadCustomCode(debugMode);
+		
+		PSDesktop d = PSDesktop.makeInstance(psEngine_,args);
+		d.runUI();
+    }
+
+    protected static void loadCustomCode(String debugMode)
+    {
+    	//Load module with any custom code if it exists:
+    	String libName = "Light_" + debugMode;
+    	String fullLibName = LibraryLoader.getResolvedName(libName); 
+    	if(fullLibName == null) {
+    		// Run 'make' to compile the library if you need it:
+    		System.out.println("INFO: Custom library " + libName + " wasn't found and won't be loaded.");  
+    	}
+    	else {
+    		// WARNING: Shared library loaded twice (see ticket #164)
+    		System.load(fullLibName);
+    		psEngine_.loadModule(fullLibName);
+    	}  	
+    }
+    
+    static class ShutdownHook extends Thread 
+    {
+	    public ShutdownHook()
+	    {
+	        super("ShutdownHook");
+	    }
 	    
-	    PSEngine engine = PSEngine.makeInstance();
-        engine.start();
-    	// use engine....
-        engine.shutdown();
-        
-	    PSEngine.terminate();
-	}	
+	    public void run() 
+	    {
+            	psEngine_.shutdown();
+	        PSEngine.terminate();
+	    }
+    }	  
 }

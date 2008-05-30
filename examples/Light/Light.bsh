@@ -20,10 +20,15 @@ solver = desktop.makeSolver(
 desktop.makeSolverDialog(solver);
 
 // call showPlan() after you've run the solver to see the resulting plan
-
 void showPlan()
 {
-    PSObjectList l = psengine.getObjectsByType("Object");    	 
+	PSObjectList l = psengine.getObjectsByType("Object");
     for (int i=0;i<l.size();i++) 
-    	desktop.showTokens(l.get(i));
+    {
+    	PSObject o = l.get(i);
+    	if(o.toString().startsWith("Light"))  // ie LightBulb or LightSwitch
+    	{
+    		desktop.showTokens(l.get(i));
+    	}
+    }
 }
