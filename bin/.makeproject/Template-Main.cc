@@ -10,6 +10,7 @@
 #include "SolverAssembly.hh" /*!< For using a test EUROPA Assembly */
 #include "PSEngine.hh" 
 #include "Debug.hh"
+#include "PlanDatabase.hh"
 
 #include "Module%%Project%%.hh"
 #include "%%Project%%CustomCode.hh"
@@ -53,7 +54,7 @@ void executeWithAssembly(const char* plannerConfig, const char* txSource)
   
   { // Encapsualte allocation so that they go out of scope before calling terminate  
     SolverAssembly assembly;
-    NDDL::loadSchema(assembly->getSchema());
+    NDDL::loadSchema(assembly.getPlanDatabase()->getSchema());
     assembly.addModule((new Module%%Project%%())->getId());
     
     assembly.plan(txSource, plannerConfig); // Run the planner    
