@@ -21,9 +21,9 @@ namespace NDDL {
 
     StateVarId state;
     ObjectVarId object;
-    TempVarId start;
-    TempVarId end;
-    TempVarId duration;
+    TempVarId tStart;
+    TempVarId tEnd;
+    TempVarId tDuration;
   protected:
     virtual void handleDefaults(const bool&);
   private:
@@ -59,9 +59,9 @@ namespace NDDL {
       
       StateVarId state;
       ObjectVarId object;
-      TempVarId start;
-      TempVarId end;
-      TempVarId duration;
+      TempVarId tStart;
+      TempVarId tEnd;
+      TempVarId tDuration;
       
       virtual void close();
     protected:
@@ -104,9 +104,9 @@ namespace NDDL {
       
       StateVarId state;
       ObjectVarId object;
-      TempVarId start;
-      TempVarId end;
-      TempVarId duration;
+      TempVarId tStart;
+      TempVarId tEnd;
+      TempVarId tDuration;
       
       ConstrainedVariableId quantity;
       virtual void close();
@@ -158,9 +158,9 @@ namespace NDDL {
       /* Access to primitives of a token as public members. */
       StateVarId state;
       ObjectVarId object;
-      TempVarId start;
-      TempVarId end;
-      TempVarId duration;
+      TempVarId tStart;
+      TempVarId tEnd;
+      TempVarId tDuration;
       TempVarId time;
 
       ConstrainedVariableId quantity; /*!< Add member specific for a resource */
@@ -182,9 +182,9 @@ namespace NDDL {
       /* Access to primitives of a token as public members. */
       StateVarId state;
       ObjectVarId object;
-      TempVarId start;
-      TempVarId end;
-      TempVarId duration;
+      TempVarId tStart;
+      TempVarId tEnd;
+      TempVarId tDuration;
       TempVarId time;
 
       ConstrainedVariableId quantity; /*!< Add member specific for a resource */
@@ -245,9 +245,9 @@ namespace NDDL {
       /* Access to primitives of a token as public members. */
       StateVarId state;
       ObjectVarId object;
-      TempVarId start;
-      TempVarId end;
-      TempVarId duration;
+      TempVarId tStart;
+      TempVarId tEnd;
+      TempVarId tDuration;
       TempVarId time;
 
       ConstrainedVariableId quantity; /*!< Add member specific for a resource */

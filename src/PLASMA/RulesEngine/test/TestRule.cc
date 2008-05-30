@@ -49,7 +49,7 @@ namespace EUROPA {
    */
   void TestRule_Root::handleExecute(){
     TokenId slave = addSlave(new IntervalToken(m_token, "met_by", LabelStr("AllObjects.Predicate")));
-    addConstraint(LabelStr("eq"), makeScope(m_token->getEnd(), slave->getStart()));
+    addConstraint(LabelStr("eq"), makeScope(m_token->end(), slave->start()));
 
     Id<TestRule> rule = m_rule;
     addChildRule(new TestRule_0(m_id, addVariable(rule->getGuardBaseDomain(), true, LabelStr("RuleGuardLocal"))));
@@ -57,9 +57,9 @@ namespace EUROPA {
 
   void TestRule_0::handleExecute(){
     TokenId slave = addSlave(new IntervalToken(m_token, "met_by", LabelStr("AllObjects.Predicate")));
-    addConstraint(LabelStr("eq"), makeScope(m_token->getEnd(), slave->getStart()));
+    addConstraint(LabelStr("eq"), makeScope(m_token->end(), slave->start()));
     ConstrainedVariableId interimVariable = addVariable(IntervalIntDomain(), false, LabelStr("BogusRuleVariable"));
     addConstraint(LabelStr("eq"), makeScope(interimVariable, m_localGuard));
-    addConstraint(LabelStr("eq"), makeScope(interimVariable, slave->getDuration()));
+    addConstraint(LabelStr("eq"), makeScope(interimVariable, slave->duration()));
   }
 }

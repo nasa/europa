@@ -39,7 +39,7 @@ namespace EUROPA {
 	  toks = timeline->getTokenSequence();
 	}
 	else { // Treat as any object
-	  const TokenSet& tokens = object->getTokens(); 
+	  const TokenSet& tokens = object->tokens(); 
 	  for(TokenSet::const_iterator tokit = tokens.begin(); tokit != tokens.end(); ++tokit){
 	    TokenId t = *tokit;
 	    toks.push_back(t);
@@ -142,10 +142,10 @@ namespace EUROPA {
     void PlanDatabaseWriter::writeToken(const TokenId& t, std::ostream& os) {
       indent()++;
       check_error(t.isValid());
-      TempVarId st = t->getStart();
+      TempVarId st = t->start();
       os << indentation() << "[ " << st->lastDomain() << " ]"<< std::endl;
       os << indentation() << "\t" << t->getPredicateName().toString() << "(" ;
-      std::vector<ConstrainedVariableId> vars = t->getParameters();
+      std::vector<ConstrainedVariableId> vars = t->parameters();
       for (std::vector<ConstrainedVariableId>::const_iterator varit = vars.begin(); varit != vars.end(); ++varit) {
 	ConstrainedVariableId v = (*varit);
 	checkError(v.isValid(), v);
@@ -161,10 +161,10 @@ namespace EUROPA {
       }
       os << ")" <<std::endl;
       os << indentation() << "\tKey=" << getKey(t);
-      if (t->getMaster().isNoId())
+      if (t->master().isNoId())
 	os << "  Master=NONE" << std::endl;
       else
-	os << "  Master=" << getKey(t->getMaster()) << std::endl;
+	os << "  Master=" << getKey(t->master()) << std::endl;
 
 
       TokenSet mergedtoks = t->getMergedTokens();
@@ -172,7 +172,7 @@ namespace EUROPA {
       for (TokenSet::const_iterator mit = mergedtoks.begin(); mit != mergedtoks.end(); ++mit) 
 	os << indentation() << "\t\tMerged Key=" << getKey(*mit) << std::endl;
 
-      os << indentation() << "[ " << t->getEnd()->lastDomain() << " ]"<< std::endl;
+      os << indentation() << "[ " << t->end()->lastDomain() << " ]"<< std::endl;
       indent()--;
     }
 

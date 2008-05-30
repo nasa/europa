@@ -216,7 +216,7 @@ namespace EUROPA {
 
     PSList<PSObject*> getObjectsByType(const std::string& objectType);
     PSObject* getObjectByKey(PSEntityKey id);
-	  PSObject* getObjectByName(const std::string& name);
+	PSObject* getObjectByName(const std::string& name);
 
     PSList<PSVariable*> getGlobalVariables();
     PSVariable* getVariableByKey(PSEntityKey id);
@@ -263,7 +263,7 @@ namespace EUROPA {
     std::string getObjectType() const;
     PSList<PSVariable*> getMemberVariables();
     PSVariable* getMemberVariable(const std::string& name);
-    PSList<PSToken*> getPSTokens();
+    PSList<PSToken*> getTokens();
     void addPrecedence(PSToken* pred,PSToken* succ);
     void removePrecedence(PSToken* pred,PSToken* succ);
     
@@ -314,23 +314,23 @@ namespace EUROPA {
     
     PSObject* getOwner();
 
-    PSToken* getPSMaster();
-    PSList<PSToken*> getPSSlaves();
+    PSToken* getMaster();
+    PSList<PSToken*> getSlaves();
     
     PSTokenState getTokenState() const;
-    PSVariable* getPSStart();
-    PSVariable* getPSEnd();
-    PSVariable* getPSDuration();
+    PSVariable* getStart();
+    PSVariable* getEnd();
+    PSVariable* getDuration();
 
     double getViolation() const;
     std::string getViolationExpl() const;
 
-    PSList<PSVariable*> getPSParameters();
+    PSList<PSVariable*> getParameters();
     PSVariable* getParameter(const std::string& name);
     
     void activate();      
     void reject();      
-    void mergePS(PSToken* activeToken);            
+    void merge(PSToken* activeToken);            
     void cancel(); 
     
     PSList<PSToken*> getCompatibleTokens(unsigned int limit, bool useExactTest);
@@ -348,7 +348,7 @@ namespace EUROPA {
   public:
 
     PSVarType getType();
-    PSEntity* getPSParent();
+    PSEntity* getParent();
 
     bool isSingleton();
     PSVarValue getSingletonValue();    // Call to get value if isSingleton()==true

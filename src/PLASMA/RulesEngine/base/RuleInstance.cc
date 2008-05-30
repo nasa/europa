@@ -257,7 +257,7 @@ namespace EUROPA {
       for(std::vector<TokenId>::const_iterator it = slaves.begin(); it != slaves.end(); ++it){
 	TokenId slave = *it;
 	checkError(slave.isValid(), slave);
-	TokenId master = slave->getMaster();
+	TokenId master = slave->master();
 	checkError(master.isNoId() || master == m_token, master);
 
 	// Remove the dependent since the slave MAY NOT GO AWAY
@@ -280,7 +280,7 @@ namespace EUROPA {
 	debugMsg("RuleInstance:undo", "Removing " << var->toString());
 	getToken()->removeLocalVariable(var);
 
-	if(var->getParent() == m_id)
+	if(var->parent() == m_id)
 	  var->discard();
 
 	checkError(var.isValid(), var << " should still be va;id after a discard.");
@@ -331,7 +331,7 @@ namespace EUROPA {
       const LabelStr& name = it->first;
       const ConstrainedVariableId& var = it->second;
       // If we get a match straight away, remove the entry.
-      if(var->getParent() == getId() && (name == loopVarName ||	(name.countElements(".") > 0 && loopVarName == name.getElement(0, "."))))
+      if(var->parent() == getId() && (name == loopVarName ||	(name.countElements(".") > 0 && loopVarName == name.getElement(0, "."))))
 	m_variablesByName.erase(it++);
       else
 	++it;
@@ -624,7 +624,7 @@ namespace EUROPA {
     for(std::vector<ConstrainedVariableId>::const_iterator it = constraint->getScope().begin();
 	it != constraint->getScope().end(); ++it){
       ConstrainedVariableId var = *it;
-      EntityId parent = var->getParent();
+      EntityId parent = var->parent();
       if(parent == token || parent == m_id)
 	return true;
     }

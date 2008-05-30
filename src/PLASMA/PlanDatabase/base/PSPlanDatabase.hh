@@ -42,7 +42,7 @@ namespace EUROPA {
       virtual PSList<PSVariable*> getMemberVariables() = 0;
       virtual PSVariable* getMemberVariable(const std::string& name) = 0;
 
-      virtual PSList<PSToken*> getPSTokens() const = 0;
+      virtual PSList<PSToken*> getTokens() const = 0;
 
       virtual void addPrecedence(PSToken* pred,PSToken* succ) = 0;
       virtual void removePrecedence(PSToken* pred,PSToken* succ) = 0;
@@ -63,23 +63,23 @@ namespace EUROPA {
       virtual bool isFact() const = 0; 
 
       virtual PSTokenState getTokenState() const = 0;
-      virtual PSVariable* getPSStart() const = 0;
-      virtual PSVariable* getPSEnd() const = 0;
-      virtual PSVariable* getPSDuration() const = 0;
+      virtual PSVariable* getStart() const = 0;
+      virtual PSVariable* getEnd() const = 0;
+      virtual PSVariable* getDuration() const = 0;
       
       virtual PSObject* getOwner() const = 0; 
-      virtual PSToken* getPSMaster() const = 0;
-      virtual PSList<PSToken*> getPSSlaves() const = 0;
+      virtual PSToken* getMaster() const = 0;
+      virtual PSList<PSToken*> getSlaves() const = 0;
 
       virtual double getViolation() const = 0;
       virtual std::string getViolationExpl() const = 0;
 
-      virtual PSList<PSVariable*> getPSParameters() const = 0;
+      virtual PSList<PSVariable*> getParameters() const = 0;
       virtual PSVariable* getParameter(const std::string& name) const = 0;
 
       virtual void activate() = 0;      
       virtual void reject() = 0;      
-      virtual void mergePS(PSToken* activeToken) = 0;            
+      virtual void merge(PSToken* activeToken) = 0;            
       virtual void cancel() = 0; // Retracts merge, activate, reject    
 
       // returns active tokens that this token can be merged to

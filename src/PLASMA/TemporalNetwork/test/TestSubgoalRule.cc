@@ -36,7 +36,7 @@ namespace EUROPA {
     slave->addParameter(IntervalIntDomain(0,10),"IntervalParam");
     slave->close();
     addSlave(slave);
-    addConstraint("eq", makeScope(m_token->getEnd(), slave->getStart()));
+    addConstraint("eq", makeScope(m_token->end(), slave->start()));
   }
 
 }

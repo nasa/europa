@@ -216,7 +216,7 @@ namespace EUROPA {
       }
 
       if(!m_masterGuards.empty()){
-        TokenId master = token->getMaster();
+        TokenId master = token->master();
 
         // If no master and we expect it, retrun false
         if(master.isNoId())
@@ -282,9 +282,9 @@ namespace EUROPA {
 
     const PlanDatabaseId& FlawHandler::getPlanDatabase(const ConstrainedVariableId& tokenVar){
       if(m_db.isNoId()){
-        checkError(tokenVar->getParent().isId() && TokenId::convertable(tokenVar->getParent()),
+        checkError(tokenVar->parent().isId() && TokenId::convertable(tokenVar->parent()),
                    tokenVar->toString() << " should have a parent token.");
-        m_db = TokenId(tokenVar->getParent())->getPlanDatabase();
+        m_db = TokenId(tokenVar->parent())->getPlanDatabase();
       }
 
       checkError(m_db.isValid(), m_db);
@@ -297,7 +297,7 @@ namespace EUROPA {
 
       checkError(ConstrainedVariableId::convertable(entity), entity->toString());
       ConstrainedVariableId var = entity;
-      EntityId parent = var->getParent();
+      EntityId parent = var->parent();
       if(parent.isNoId() || ObjectId::convertable(parent))
         return TokenId::noId();
 

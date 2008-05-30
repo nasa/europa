@@ -70,9 +70,9 @@ namespace EUROPA {
     if(!Entity::isPurging()){ // Exploit relationships to cascade delete.
       //!!! Relaxing this so we can play some transactions backwards.  I'm not sure this
       //!!! is safe, but we'll see.
-//       checkError(m_planDatabase->getTokens().empty(),
+//       checkError(m_planDatabase->tokens().empty(),
 // 		 "Objects cannot be deleted while there remain tokens in the database.");
-      checkError(getTokens().empty(),
+      checkError(tokens().empty(),
 		 "Object cannot be deleted while there remain active tokens that could be on them.");
 
       check_error(isValid());
@@ -227,7 +227,7 @@ namespace EUROPA {
     m_planDatabase->notifyRemoved(m_id, token);
   }
 
-  const TokenSet& Object::getTokens() const {
+  const TokenSet& Object::tokens() const {
     return(m_tokens);
   }
 
@@ -293,8 +293,8 @@ namespace EUROPA {
 
       // Create the precedence constraint
       std::vector<ConstrainedVariableId> vars;
-      vars.push_back(predecessor->getEnd());
-      vars.push_back(successor->getStart());
+      vars.push_back(predecessor->end());
+      vars.push_back(successor->start());
       constraint =  ConstraintLibrary::createConstraint(LabelStr("precedes"),
 								     getPlanDatabase()->getConstraintEngine(),
 								     vars);
@@ -444,8 +444,8 @@ namespace EUROPA {
     std::multimap<int, ConstraintId>::const_iterator it = m_constraintsByKeyPair.find(encodedKey);
     while(it != m_constraintsByKeyPair.end() && it->first == encodedKey){
       ConstraintId constraint = it->second;
-      if(constraint->getScope()[0] == predecessor->getEnd() &&
-	 constraint->getScope()[1] == successor->getStart())
+      if(constraint->getScope()[0] == predecessor->end() &&
+	 constraint->getScope()[1] == successor->start())
 	return constraint;
       ++it;
     }
@@ -498,7 +498,7 @@ namespace EUROPA {
 	++it){
       ConstraintId constraint = *it;
 
-      checkError(constraint->getScope()[1]->getParent() == token || constraint->getScope()[0]->getParent() == token,
+      checkError(constraint->getScope()[1]->parent() == token || constraint->getScope()[0]->parent() == token,
 		 "Problem with constraint caching.");
 
       // If an explict constraint, and the given token is the successor
@@ -562,8 +562,8 @@ namespace EUROPA {
       check_error(m_explicitConstraints.find(constraint->getKey()) == m_explicitConstraints.end(),
 		  "Should never be freeing explicit constraints in this manner.");
 
-      TokenId predecessor = constraint->getScope()[0]->getParent();
-      TokenId successor = constraint->getScope()[1]->getParent();
+      TokenId predecessor = constraint->getScope()[0]->parent();
+      TokenId successor = constraint->getScope()[1]->parent();
       free(predecessor, successor, false);
     }
   }
@@ -750,8 +750,8 @@ namespace EUROPA {
   }
 
   void Object::removePrecedenceConstraint(const ConstraintId& constraint){
-    TokenId predecessor = constraint->getScope()[0]->getParent();
-    TokenId successor = constraint->getScope()[1]->getParent();
+    TokenId predecessor = constraint->getScope()[0]->parent();
+    TokenId successor = constraint->getScope()[1]->parent();
 
     int encodedKey = makeKey(predecessor, successor);
     std::multimap<int, ConstraintId>::iterator it = m_constraintsByKeyPair.find(encodedKey);
@@ -815,10 +815,10 @@ namespace EUROPA {
 	  return retval;
   }
 
-  PSList<PSToken*> Object::getPSTokens() const {
+  PSList<PSToken*> Object::getTokens() const {
 	  PSList<PSToken*> retval;
-	  const TokenSet& tokens = getTokens();
-	  for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+	  const TokenSet& t = tokens();
+	  for(TokenSet::const_iterator it = t.begin(); it != t.end(); ++it) {
 		  TokenId id = *it;
 		  retval.push_back((PSToken *) id);
 	  }

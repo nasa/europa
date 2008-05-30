@@ -28,9 +28,9 @@ namespace NDDL {
   void NddlUnaryToken::commonInit(const bool& autoClose) {
     state = getState();
     object = getObject();
-    start = getStart();
-    end = getEnd();
-    duration = getDuration();
+    tStart = start();
+    tEnd = end();
+    tDuration = duration();
     if(autoClose)
       close();
   }
@@ -109,9 +109,9 @@ namespace NDDL {
   void NddlUnary::use::handleDefaults(bool autoClose) {
     state = getState();
     object = getObject();
-    start = getStart();
-    end = getEnd();
-    duration = getDuration();
+    tStart = start();
+    tEnd = end();
+    tDuration = duration();
 
     if(autoClose)
       close();
@@ -258,9 +258,9 @@ namespace NDDL {
   void NddlReusable::uses::handleDefaults(bool autoClose) {
     state = getState();
     object = getObject();
-    start = getStart();
-    end = getEnd();
-    duration = getDuration();
+    tStart = start();
+    tEnd = end();
+    tDuration = duration();
     quantity = getQuantity();
 
     if(autoClose)
@@ -417,9 +417,9 @@ namespace NDDL {
   void NddlReservoir::produce::handleDefaults(bool autoClose) {
     state = getState();
     object = getObject();
-    start = getStart();
-    end = getEnd();
-    duration = getDuration();
+    tStart = start();
+    tEnd = end();
+    tDuration = duration();
     time = getTime();
     quantity = getQuantity();
 
@@ -451,9 +451,9 @@ namespace NDDL {
   void NddlReservoir::consume::handleDefaults(bool autoClose) {
     state = getState();
     object = getObject();
-    start = getStart();
-    end = getEnd();
-    duration = getDuration();
+    tStart = start();
+    tEnd = end();
+    tDuration = duration();
     time = getTime();
     quantity = getQuantity();
 
@@ -625,9 +625,9 @@ namespace NDDL {
   void NddlResource::change::handleDefaults(bool autoClose) {
     state = getState();
     object = getObject();
-    start = getStart();
-    end = getEnd();
-    duration = getDuration();
+    tStart = start();
+    tEnd = end();
+    tDuration = duration();
     time = getTime();
     quantity = m_usage;
 

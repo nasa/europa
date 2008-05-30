@@ -38,7 +38,7 @@ public:
     RuleInstanceId rootInstance = (new RootInstance(m_id, token, planDb))->getId();
     std::vector<ConstrainedVariableId> vars = rootInstance->getVariables("start:end:duration:object:state");
     assertTrue(vars.size() == 5);
-    assertTrue(vars[0] == token->getStart());
+    assertTrue(vars[0] == token->start());
     assertTrue(vars[4] == token->getState());
     rootInstance->setRulesEngine(rulesEngine);
     return rootInstance;
@@ -52,7 +52,7 @@ private:
 
     void handleExecute(){
       m_onlySlave = addSlave(new IntervalToken(m_token, "met_by", LabelStr("AllObjects.Predicate")));
-      addConstraint(LabelStr("eq"), makeScope(m_token->getEnd(), m_onlySlave->getStart()));
+      addConstraint(LabelStr("eq"), makeScope(m_token->end(), m_onlySlave->start()));
     }
 
     TokenId m_onlySlave;
@@ -102,8 +102,8 @@ NestedGuards_0_Root::NestedGuards_0_Root(const RuleId& rule, const TokenId& toke
 
 void NestedGuards_0_Root::handleExecute(){
   m_onlySlave = addSlave(new IntervalToken(m_token, "met_by", LabelStr("AllObjects.Predicate")));
-  addConstraint(LabelStr("eq"), makeScope(m_token->getEnd(), m_onlySlave->getStart()));
-  addChildRule(new NestedGuards_0_0(m_id, m_token->getStart(), IntervalIntDomain(8, 12))); /*!< Add child context with guards - start == 10 */
+  addConstraint(LabelStr("eq"), makeScope(m_token->end(), m_onlySlave->start()));
+  addChildRule(new NestedGuards_0_0(m_id, m_token->start(), IntervalIntDomain(8, 12))); /*!< Add child context with guards - start == 10 */
   addChildRule(new NestedGuards_0_1(m_id, makeScope(m_onlySlave->getObject()))); /*!< Add child context with guards - object set to singleton */
 }
 
@@ -112,7 +112,7 @@ NestedGuards_0_0::NestedGuards_0_0(const RuleInstanceId& parentInstance, const C
 
 void NestedGuards_0_0::handleExecute(){
   m_onlySlave = addSlave(new IntervalToken(m_token, "met_by", LabelStr("AllObjects.Predicate")));
-  addConstraint(LabelStr("eq"), makeScope(m_token->getStart(), m_onlySlave->getEnd())); // Place before
+  addConstraint(LabelStr("eq"), makeScope(m_token->start(), m_onlySlave->end())); // Place before
 }
 
 NestedGuards_0_1::NestedGuards_0_1(const RuleInstanceId& parentInstance, const std::vector<ConstrainedVariableId>& guards)
@@ -120,7 +120,7 @@ NestedGuards_0_1::NestedGuards_0_1(const RuleInstanceId& parentInstance, const s
 
 void NestedGuards_0_1::handleExecute(){
   m_onlySlave = addSlave(new IntervalToken(m_token, "met_by",  LabelStr("AllObjects.Predicate")));
-  addConstraint(LabelStr("eq"), makeScope(m_token->getStart(), m_onlySlave->getEnd())); // Place before
+  addConstraint(LabelStr("eq"), makeScope(m_token->start(), m_onlySlave->end())); // Place before
 }
 
 class LocalVariableGuard_0: public Rule {
@@ -300,13 +300,13 @@ private:
 		     IntervalIntDomain(0, 1000),
 		     IntervalIntDomain(1, 1000));
     // Activate it and confirm we are getting a subgoal and that the expected constraint holds.
-    assertTrue(t0.getSlaves().empty());
+    assertTrue(t0.slaves().empty());
     t0.activate();
     assertTrue(db->getTokens().size() == 2);
-    assertTrue(t0.getSlaves().size() == 1);
+    assertTrue(t0.slaves().size() == 1);
 
-    TokenId slaveToken = *(t0.getSlaves().begin());
-    assertTrue(t0.getEnd()->getDerivedDomain() == slaveToken->getStart()->getDerivedDomain());
+    TokenId slaveToken = *(t0.slaves().begin());
+    assertTrue(t0.end()->getDerivedDomain() == slaveToken->start()->getDerivedDomain());
 
     RE_DEFAULT_TEARDOWN();
     return true;
@@ -329,35 +329,35 @@ private:
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
     // Activate it and confirm we are getting a subgoal and that the expected constraint holds.
-    assertTrue(t0.getSlaves().empty());
+    assertTrue(t0.slaves().empty());
     t0.activate();
     assertTrue(db->getTokens().size() == 1);
     t0.getObject()->specify(o1.getId());
     ce->propagate();
-    assertTrue(t0.getSlaves().size() == 1);
+    assertTrue(t0.slaves().size() == 1);
     assertTrue(db->getTokens().size() == 2);
 
-    TokenId slaveToken = *(t0.getSlaves().begin());
+    TokenId slaveToken = *(t0.slaves().begin());
 
     // Set start time to 10 will trigger another guard
-    t0.getStart()->specify(10); // Will trigger nested guard
+    t0.start()->specify(10); // Will trigger nested guard
     ce->propagate();
-    assertTrue(t0.getSlaves().size() == 2);
+    assertTrue(t0.slaves().size() == 2);
 
     // Now set the object variable of the slaveToken to trigger additional guard
     slaveToken->getObject()->specify(o2.getId());
     ce->propagate();
-    assertTrue(t0.getSlaves().size() == 3);
+    assertTrue(t0.slaves().size() == 3);
 
     // Now retract a decision and confirm the slave is removed
-    t0.getStart()->reset();
+    t0.start()->reset();
     ce->propagate();
-    assertTrue(t0.getSlaves().size() == 2);
+    assertTrue(t0.slaves().size() == 2);
 
     // Now deactivate the master token and confirm all salves are gone
     t0.cancel();
     ce->propagate();
-    assertTrue(t0.getSlaves().empty());
+    assertTrue(t0.slaves().empty());
     RE_DEFAULT_TEARDOWN();
     return true;
   }
@@ -381,18 +381,18 @@ private:
 
     t0.activate();
     ce->propagate();
-    assertTrue(t0.getSlaves().empty());
+    assertTrue(t0.slaves().empty());
 
     guard = LocalVariableGuard_0_Root::getGuard();
     assertTrue(guard.isValid());
     guard->specify(LabelStr("A")); // Should not succeed
     ce->propagate();
-    assertTrue(t0.getSlaves().empty());
+    assertTrue(t0.slaves().empty());
 
     guard->reset(); // Reset and try correct value
     guard->specify(LabelStr("B")); // Should succeed
     ce->propagate();
-    assertTrue(t0.getSlaves().size() == 1);
+    assertTrue(t0.slaves().size() == 1);
 
     RE_DEFAULT_TEARDOWN();
     return true;
@@ -419,7 +419,7 @@ private:
        is a singleton. Note that this addresses a case for GNATS_ */
     t0.activate();
     ce->propagate();
-    assertTrue(t0.getSlaves().size() == 2, toString(t0.getSlaves().size()));
+    assertTrue(t0.slaves().size() == 2, toString(t0.slaves().size()));
 
     RE_DEFAULT_TEARDOWN();
     return true;
@@ -454,13 +454,13 @@ private:
 		       IntervalIntDomain(0, 1000),
 		       IntervalIntDomain(1, 1000));
       // Activate it and confirm we are getting a subgoal and that the expected constraint holds.
-      assertTrue(t0.getSlaves().empty());
+      assertTrue(t0.slaves().empty());
       t0.activate();
       assertTrue(db->getTokens().size() == 2);
-      assertTrue(t0.getSlaves().size() == 1);
+      assertTrue(t0.slaves().size() == 1);
 
-      TokenId slaveToken = *(t0.getSlaves().begin());
-      assertTrue(t0.getEnd()->getDerivedDomain() == slaveToken->getStart()->getDerivedDomain());
+      TokenId slaveToken = *(t0.slaves().begin());
+      assertTrue(t0.end()->getDerivedDomain() == slaveToken->start()->getDerivedDomain());
 
       t0.commit();
       delete (Token*) slaveToken;
@@ -480,13 +480,13 @@ private:
 			 IntervalIntDomain(0, 1000),
 			 IntervalIntDomain(1, 1000));
 	// Activate it and confirm we are getting a subgoal and that the expected constraint holds.
-	assertTrue(t0.getSlaves().empty());
+	assertTrue(t0.slaves().empty());
 	t0.activate();
 	assertTrue(db->getTokens().size() == 2);
-	assertTrue(t0.getSlaves().size() == 1);
+	assertTrue(t0.slaves().size() == 1);
 
-	slaveToken = *(t0.getSlaves().begin());
-	assertTrue(t0.getEnd()->getDerivedDomain() == slaveToken->getStart()->getDerivedDomain());
+	slaveToken = *(t0.slaves().begin());
+	assertTrue(t0.end()->getDerivedDomain() == slaveToken->start()->getDerivedDomain());
 
 	slaveToken->activate();
 	slaveToken->commit();

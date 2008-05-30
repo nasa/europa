@@ -35,8 +35,8 @@ namespace NDDL {
 
 #define relation(relationname, origin, originvar, target, targetvar) {	\
     std::vector<ConstrainedVariableId> vars;				\
-    vars.push_back(getSlave(LabelStr(origin))->get##originvar());	\
-    vars.push_back(getSlave(LabelStr(target))->get##targetvar());	\
+    vars.push_back(getSlave(LabelStr(origin))->originvar());	\
+    vars.push_back(getSlave(LabelStr(target))->targetvar());	\
     rule_constraint(relationname,vars);					\
   } 
 }  
@@ -1791,12 +1791,12 @@ namespace EUROPA {
       ends("this",name);
     }   	  		   
     else if (strcmp(relationName, "paralleled_by") == 0) {
-      relation(precedes, "this", Start, name, Start);
-      relation(precedes, "this", End, name, End);
+      relation(precedes, "this", start, name, start);
+      relation(precedes, "this", end, name, end);
     }
     else if (strcmp(relationName, "parallels") == 0) {
-      relation(precedes, "this", Start, name, Start);
-      relation(precedes, "this", End, name, End);
+      relation(precedes, "this", start, name, start);
+      relation(precedes, "this", end, name, end);
     }
     else if (strcmp(relationName,"ends_after") == 0) {
       ends_after("this",name);

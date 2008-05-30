@@ -509,10 +509,10 @@ namespace EUROPA {
 
       dom.intersect(lb, ub);
 
-      if(TokenId::convertable(var->getParent())){
-	TokenId token = var->getParent();
+      if(TokenId::convertable(var->parent())){
+	TokenId token = var->parent();
 	// If we get a hit, then buffer the token for later update to duartion (so we only do it once with updated bounds
-	if (var == token->getStart() || var == token->getEnd())
+	if (var == token->start() || var == token->end())
 	  updatedTokens.push_back(token);
       }
     }
@@ -533,15 +533,15 @@ namespace EUROPA {
     // 1. The domains are not empty
     // 2. The duration will necessarily be restricted.
     // 3. The start and end bounds are current
-    const AbstractDomain& start = token->getStart()->lastDomain();
+    const AbstractDomain& start = token->start()->lastDomain();
     if(!start.areBoundsFinite())
       return;
 
-    const AbstractDomain& end = token->getEnd()->lastDomain();
+    const AbstractDomain& end = token->end()->lastDomain();
     if(!end.areBoundsFinite())
       return;
 
-    IntervalIntDomain& duration = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(token->getDuration()));
+    IntervalIntDomain& duration = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(token->duration()));
 
     // TODO JRB : this check may may fail if we support violations
     check_error(!start.isEmpty() && !end.isEmpty() && !duration.isEmpty(), "Can't update token duration with empty variable. Token:" 
@@ -966,7 +966,7 @@ namespace EUROPA {
         newreftimes[i] = ub;
       else
         newreftimes[i] = oldreftimes[i];
-      //std::cerr << timevars[i]->getParent()->toString() << " "
+      //std::cerr << timevars[i]->parent()->toString() << " "
                 //<< timevars[i]->lastDomain().getLowerBound() << " "
                 //<< timevars[i]->lastDomain().getUpperBound() << " "
                 //<< newreftimes[i] << " " << oldreftimes[i] << "\n";

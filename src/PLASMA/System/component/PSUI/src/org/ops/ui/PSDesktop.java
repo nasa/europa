@@ -296,7 +296,7 @@ public class PSDesktop
 
     public void showTokens(PSObject o)
     {
-         PSTokenList l = o.getPSTokens();
+         PSTokenList l = o.getTokens();
          showTokens("Activities for "+o.getEntityName(),l);
     }
 

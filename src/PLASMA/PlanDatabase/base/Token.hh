@@ -72,7 +72,7 @@ namespace EUROPA {
      * @return TokenId::noId() if this is a Master Token, otherwise returns the Token from 
      * which this token was sub-goaled.
      */
-    const TokenId& getMaster() const;
+    const TokenId& master() const;
 
     /** 
      * @brief Accessor for the relation to the master token.
@@ -137,23 +137,23 @@ namespace EUROPA {
      * @brief The start variable is a pure virtual function since we derived classes with no duration
      * may have an optimized implementation that shares start and end variable as the same variable.
      */
-    virtual const TempVarId& getStart() const = 0;
+    virtual const TempVarId& start() const = 0;
 
     /**
      * @brief The end variable is a pure virtual function since we derived classes with no duration
      * may have an optimized implementation that shares start and end variable as the same variable.
      */
-    virtual const TempVarId& getEnd() const = 0;
+    virtual const TempVarId& end() const = 0;
 
     /**
      * @brief All Tokens will have a temporal duration.
      */
-    const TempVarId& getDuration() const;
+    const TempVarId& duration() const;
 
     /**
      * @brief Access all Parameter variables for the token. May be empty.
      */
-    const std::vector<ConstrainedVariableId>& getParameters() const;
+    const std::vector<ConstrainedVariableId>& parameters() const;
 
     /**
      * @brief Access all variables (state, object, start, end, duration, parameters).
@@ -168,7 +168,7 @@ namespace EUROPA {
     /**
      * @brief Access all tokens generated as sub-goals of this token.
      */
-    const TokenSet& getSlaves() const;
+    const TokenSet& slaves() const;
 
     /**
      * @brief Access all tokens supported by this token. A Token must be active to support merged tokens.
@@ -288,7 +288,7 @@ namespace EUROPA {
      * @pre isInactive
      * @post isMerged
      */
-    void merge(const TokenId& activeToken);
+    void doMerge(const TokenId& activeToken);
 
     /**
      * @brief Activate a token, thereby inserting it into the plan.
@@ -408,18 +408,18 @@ namespace EUROPA {
     virtual std::string getTokenType() const; 
 
     virtual PSTokenState getTokenState() const;
-    virtual PSVariable* getPSStart() const;
-    virtual PSVariable* getPSEnd() const;
-    virtual PSVariable* getPSDuration() const;
+    virtual PSVariable* getStart() const;
+    virtual PSVariable* getEnd() const;
+    virtual PSVariable* getDuration() const;
     
     virtual PSObject* getOwner() const; 
-    virtual PSToken* getPSMaster() const;
-    virtual PSList<PSToken*> getPSSlaves() const;
+    virtual PSToken* getMaster() const;
+    virtual PSList<PSToken*> getSlaves() const;
 
-    virtual PSList<PSVariable*> getPSParameters() const;
+    virtual PSList<PSVariable*> getParameters() const;
     virtual PSVariable* getParameter(const std::string& name) const;
 
-    virtual void mergePS(PSToken* activeToken);            
+    virtual void merge(PSToken* activeToken);            
     
     // returns active tokens that this token can be merged to
     virtual PSList<PSToken*> getCompatibleTokens(unsigned int limit, bool useExactTest);

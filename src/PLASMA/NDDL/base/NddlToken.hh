@@ -27,9 +27,9 @@ namespace NDDL {
 
     StateVarId state; /**<Tracks token's state: active, merged, rejected, etc. */
     ObjectVarId object; /**<Tracks the objects the token could be associated with. */
-    TempVarId start; /**<Tracks the token's possible start times. */
-    TempVarId end; /**<Tracks the token's possible end times. */
-    TempVarId duration; /**<Tracks the token's possible durations. */
+    TempVarId tStart; /**<Tracks the token's possible start times. */
+    TempVarId tEnd; /**<Tracks the token's possible end times. */
+    TempVarId tDuration; /**<Tracks the token's possible durations. */
 
   protected:
     virtual void handleDefaults(const bool&);

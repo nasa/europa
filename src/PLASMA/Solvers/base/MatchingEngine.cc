@@ -146,13 +146,13 @@ namespace EUROPA {
       results = m_unfilteredRules;
       
       // If it has a parent, then process that too
-      if(var->getParent().isId()){
-        if(TokenId::convertable(var->getParent()))
-          getMatchesInternal(TokenId(var->getParent()), results);
-        else if(RuleInstanceId::convertable(var->getParent()))
-          getMatchesInternal(RuleInstanceId(var->getParent())->getToken(), results);
-        else if(ObjectId::convertable(var->getParent())){
-          ObjectId object = var->getParent();
+      if(var->parent().isId()){
+        if(TokenId::convertable(var->parent()))
+          getMatchesInternal(TokenId(var->parent()), results);
+        else if(RuleInstanceId::convertable(var->parent()))
+          getMatchesInternal(RuleInstanceId(var->parent())->getToken(), results);
+        else if(ObjectId::convertable(var->parent())){
+          ObjectId object = var->parent();
           trigger(object->getPlanDatabase()->getSchema()->getAllObjectTypes(object->getType()), m_rulesByObjectType, results);
         }
       }
@@ -189,12 +189,12 @@ namespace EUROPA {
               m_rulesByObjectType, results);
 
       // If it has a master, trigger on the relation
-      if(token->getMaster().isId()){
-        debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for master object types (" << token->getMaster()->getBaseObjectType().toString() << ")");
-        trigger(schema->getAllObjectTypes(token->getMaster()->getBaseObjectType()), 
+      if(token->master().isId()){
+        debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for master object types (" << token->master()->getBaseObjectType().toString() << ")");
+        trigger(schema->getAllObjectTypes(token->master()->getBaseObjectType()), 
                 m_rulesByMasterObjectType, results);
-        debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for master predicate " << token->getMaster()->getUnqualifiedPredicateName().toString());
-        trigger(token->getMaster()->getUnqualifiedPredicateName(), m_rulesByMasterPredicate, results);
+        debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for master predicate " << token->master()->getUnqualifiedPredicateName().toString());
+        trigger(token->master()->getUnqualifiedPredicateName(), m_rulesByMasterPredicate, results);
         debugMsg("MatchingEngine:getMatchesInternal", "Triggering matches for master relation " << token->getRelation().toString());
         trigger(token->getRelation(), m_rulesByMasterRelation, results);
       }

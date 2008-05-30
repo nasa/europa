@@ -183,7 +183,7 @@ namespace EUROPA {
     m_constraintEngine->propagate();
   }
 
-  const EntityId& ConstrainedVariable::getParent() const {
+  const EntityId& ConstrainedVariable::parent() const {
     return m_parent;
   }
 
@@ -583,7 +583,7 @@ namespace EUROPA {
     debugMsg("ConstrainedVariable:specify","After propagate for var:" << toString());
   }
   
-  	PSEntity* ConstrainedVariable::getPSParent() const {
+  	PSEntity* ConstrainedVariable::getParent() const {
     //EntityId parent(m_parent);//getParentEntity());
     if(m_parent.isNoId())
       return NULL;

@@ -626,7 +626,7 @@ namespace EUROPA {
 	      /*ExtraData: empty slot info*/
 	      if(tokenIterator != orderedTokens.end()) {
 		const TokenId &nextToken = *tokenIterator;
-		if(token->getEnd()->lastDomain() != nextToken->getStart()->lastDomain()) {
+		if(token->end()->lastDomain() != nextToken->start()->lastDomain()) {
 		  objOut << slotId << COMMA << slotIndex << COLON;
 		  emptySlots++;
 		  slotId++;
@@ -789,12 +789,12 @@ namespace EUROPA {
 	}
 	/*end VariableIds*/
 	/*TokenIds*/
-	if(objId->getTokens().empty()) {
+	if(objId->tokens().empty()) {
 	  objOut << SNULL << TAB;
 	}
 	else {
-	  for(TokenSet::const_iterator tokIt = objId->getTokens().begin();
-	      tokIt != objId->getTokens().end(); ++tokIt) {
+	  for(TokenSet::const_iterator tokIt = objId->tokens().begin();
+	      tokIt != objId->tokens().end(); ++tokIt) {
 	    TokenId token = *tokIt;
 	    objOut << token->getKey() << COMMA;
 	  }
@@ -814,31 +814,31 @@ namespace EUROPA {
 	}
 	if(!tId.isNoId()) {
 	  tokOut << token->getKey() << TAB << type << TAB << slotId << TAB << slotIndex << TAB 
-		 << ppId << TAB << 0 << TAB << 1 << TAB << token->getStart()->getKey() << TAB 
-		 << token->getEnd()->getKey() << TAB << token->getDuration()->getKey() << TAB 
+		 << ppId << TAB << 0 << TAB << 1 << TAB << token->start()->getKey() << TAB 
+		 << token->end()->getKey() << TAB << token->duration()->getKey() << TAB 
 		 << token->getState()->getKey() << TAB << token->getPredicateName().toString() 
 		 << TAB << tId->getKey() << TAB << tId->getName().toString() << TAB 
 		 << token->getObject()->getKey() << TAB;
 	}
 	else {
 	  tokOut << token->getKey() << TAB << type << TAB << SNULL << TAB << SNULL << TAB << ppId 
-		 << TAB << 1 << TAB << 1 << TAB << token->getStart()->getKey() << TAB 
-		 << token->getEnd()->getKey() << TAB << token->getDuration()->getKey() << TAB 
+		 << TAB << 1 << TAB << 1 << TAB << token->start()->getKey() << TAB 
+		 << token->end()->getKey() << TAB << token->duration()->getKey() << TAB 
 		 << token->getState()->getKey() << TAB << token->getPredicateName().toString() 
 		 << TAB << SNULL << TAB << SNULL << TAB << token->getObject()->getKey() << TAB;
 	}
 	outputObjVar(token->getObject(), token->getKey(), I_OBJECT, varOut);
-	outputIntIntVar(token->getStart(), token->getKey(), I_START, varOut);
-	outputIntIntVar(token->getEnd(), token->getKey(), I_END, varOut);
-	outputIntIntVar(token->getDuration(), token->getKey(), I_DURATION, varOut);
+	outputIntIntVar(token->start(), token->getKey(), I_START, varOut);
+	outputIntIntVar(token->end(), token->getKey(), I_END, varOut);
+	outputIntIntVar(token->duration(), token->getKey(), I_DURATION, varOut);
 	//outputEnumVar(token->getState(), token->getKey(), I_STATE, varOut);
 	outputStateVar(token->getState(), token->getKey(), I_STATE, varOut);
 
 	std::string paramVarIds;
 	char paramIdStr[NBBY * sizeof(int) * 28/93 + 4];
 	for(std::vector<ConstrainedVariableId>::const_iterator paramVarIterator = 
-	      token->getParameters().begin();
-	    paramVarIterator != token->getParameters().end(); ++paramVarIterator) {
+	      token->parameters().begin();
+	    paramVarIterator != token->parameters().end(); ++paramVarIterator) {
 	  ConstrainedVariableId varId = *paramVarIterator;
 	  check_error(varId.isValid());
 	  outputConstrVar(varId, token->getKey(), I_PARAMETER, varOut);
@@ -1044,7 +1044,7 @@ namespace EUROPA {
 	for(std::vector<ConstrainedVariableId>::const_iterator varIt = ruleId->getVariables().begin();
 	    varIt != ruleId->getVariables().end(); ++varIt) {
 	  ConstrainedVariableId var = *varIt;
-	  if(RuleInstanceId::convertable(var->getParent())) {
+	  if(RuleInstanceId::convertable(var->parent())) {
 	    varSet.insert(var);
 	  }
 	}
@@ -1250,11 +1250,11 @@ namespace EUROPA {
 	  type = PARAMETER_VAR;
 	  paramName = varId->getName().toString();
 	}
-	if(TokenId::convertable(varId->getParent())) {
-	  predName = ((TokenId &)varId->getParent())->getPredicateName().toString();
+	if(TokenId::convertable(varId->parent())) {
+	  predName = ((TokenId &)varId->parent())->getPredicateName().toString();
 	}
-	else if(ObjectId::convertable(varId->getParent())) {
-	  predName = ((ObjectId &)varId->getParent())->getName().toString();
+	else if(ObjectId::convertable(varId->parent())) {
+	  predName = ((ObjectId &)varId->parent())->getName().toString();
 	}
 	else {
 	  predName = "UNKNOWN VARIABLE PARENT";

@@ -525,13 +525,13 @@ namespace EUROPA
       // if the two transistion belong to a start and end variable of the same
       // token we know the ordering without having to ask for the temporal 
       // distance
-      if( t1->time()->getParent() == t2->time()->getParent()
+      if( t1->time()->parent() == t2->time()->parent()
 	  &&
-	  TokenId::convertable( t1->time()->getParent() ) )
+	  TokenId::convertable( t1->time()->parent() ) )
 	{
-	  TokenId token( t1->time()->getParent() );
+	  TokenId token( t1->time()->parent() );
 
-	  if( token->getStart() == t1->time() )
+	  if( token->start() == t1->time() )
 	    {
 	      returnValue = BEFORE_OR_AT;
 	    }

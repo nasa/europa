@@ -199,11 +199,11 @@ namespace EUROPA {
     
 #define construct_constraint(relation, ftoken, fvar, stoken, svar){\
         std::vector<ConstrainedVariableId> variables;\
-        variables.push_back( ftoken##_token->get##fvar());\
-        variables.push_back( stoken##_token->get##svar());\
+        variables.push_back( ftoken##_token->fvar());\
+        variables.push_back( stoken##_token->svar());\
         m_relations.insert(std::make_pair(std::make_pair(variables[0], variables[1]), m_client->createConstraint(#relation, variables))); \
         }
-
+    
   };
 }
 

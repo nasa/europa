@@ -100,7 +100,7 @@ namespace EUROPA{
       for(TokenSet::const_iterator it = m_tokens.begin(); it != m_tokens.end(); ++it){
         TokenId token = *it;
         check_error(token.isValid());
-        if(token->getMaster().isNoId()) // It is a root object and so can be deleted
+        if(token->master().isNoId()) // It is a root object and so can be deleted
           masterTokens.insert(token);
       }
 
@@ -852,18 +852,18 @@ namespace EUROPA{
 	if(token->isMerged())
 	  continue;
 
-	unsigned int latestEndTime = (unsigned int) token->getEnd()->lastDomain().getUpperBound();
+	unsigned int latestEndTime = (unsigned int) token->end()->lastDomain().getUpperBound();
 
 	if(latestEndTime <= tick && token->canBeTerminated(tick)){
 	  debugMsg("PlanDatabase:archive:remove", 
 		   token->toString() << " ending by " << latestEndTime << " for tick " << tick);
-	  int earliestStartTime = (int) token->getStart()->lastDomain().getLowerBound();
+	  int earliestStartTime = (int) token->start()->lastDomain().getLowerBound();
 	  std::pair<int, TokenId> entry(earliestStartTime , token);
 	  tokensToRemove.insert(entry);
 	}
 	else {
 	  condDebugMsg(!token->isMerged(), "PlanDatabase:archive:skip", 
-		       token->toString() << " with end time " << token->getEnd()->toString() << " for tick " << tick);
+		       token->toString() << " with end time " << token->end()->toString() << " for tick " << tick);
 	}
       }
     }

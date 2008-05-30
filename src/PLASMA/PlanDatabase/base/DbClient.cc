@@ -176,7 +176,7 @@ namespace EUROPA {
     static unsigned int sl_counter(0);
     sl_counter++;
     checkError(token.isValid(), token << ":" << sl_counter);
-    token->merge(activeToken);
+    token->doMerge(activeToken);
     debugMsg("DbClient:merge", token->toString() << " onto " << activeToken->toString());
     publish(notifyMerged(token, activeToken));
   }
@@ -318,15 +318,15 @@ namespace EUROPA {
     check_error(isTransactionLoggingEnabled());
     std::list<int> path; // Used to build up the path from the bottom up.
 
-    TokenId master = targetToken->getMaster();
+    TokenId master = targetToken->master();
     TokenId slave = targetToken;
 
     while(!master.isNoId()){
       int slavePosition = master->getSlavePosition(slave);
       check_error(slavePosition >= 0);
       path.push_front(slavePosition);
-      slave = slave->getMaster();
-      master = master->getMaster();
+      slave = slave->master();
+      master = master->master();
     }
 
     // Loop terminates where slave is the root, so get the masters key from the slave pointer.

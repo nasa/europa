@@ -158,7 +158,7 @@ namespace EUROPA{
     return m_id;
   }
 
-  const TokenId& Token::getMaster() const {
+  const TokenId& Token::master() const {
     check_error(m_master.isNoId() || m_master.isValid()); 
     return m_master;
   }
@@ -212,13 +212,13 @@ namespace EUROPA{
     checkError(m_object.isValid(), m_object); 
     return m_object;
   }
-  const TempVarId& Token::getDuration() const{
+  const TempVarId& Token::duration() const{
     checkError(m_duration.isValid(), m_duration); 
     return m_duration;
   }
-  const std::vector<ConstrainedVariableId>& Token::getParameters() const {return m_parameters;}
+  const std::vector<ConstrainedVariableId>& Token::parameters() const {return m_parameters;}
   const std::vector<ConstrainedVariableId>& Token::getVariables() const {return m_allVariables;}
-  const TokenSet& Token::getSlaves() const {return m_slaves;}
+  const TokenSet& Token::slaves() const {return m_slaves;}
   const TokenSet& Token::getMergedTokens() const {return m_mergedTokens;}
   const TokenId& Token::getActiveToken() const {return m_activeToken;}
 
@@ -241,7 +241,7 @@ namespace EUROPA{
     check_error(!isIncomplete());
     check_error(m_slaves.find(slave) == m_slaves.end());
     check_error(slave->getPlanDatabase() == m_planDatabase);
-    check_error(slave->getMaster() == m_id);
+    check_error(slave->master() == m_id);
     m_slaves.insert(slave);
   }
 
@@ -295,7 +295,7 @@ namespace EUROPA{
       check_error(ALWAYS_FAILS);
   }
 
-  void Token::merge(const TokenId& activeToken){
+  void Token::doMerge(const TokenId& activeToken){
     check_error(isValid());
     check_error(isInactive());
     check_error(activeToken.isValid());
@@ -759,7 +759,7 @@ namespace EUROPA{
 
 	// If the variable has no parent, its scope is not defined temporally. This is typically only arising
 	// in initialization.
-	if (var->getParent().isNoId())
+	if (var->parent().isNoId())
 	  continue;
 
 	// If it is a culprit with an unbound domain, and an external variable, 
@@ -820,7 +820,7 @@ namespace EUROPA{
 	check_error(constraint.isValid());
 	const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
 	for(unsigned int j=0;j<scope.size();j++){
-	  EntityId parent = scope[j]->getParent();
+	  EntityId parent = scope[j]->parent();
 	  // It must not be related to a variable of another token in the plan
 	  if(!parent.isNoId() && parent != m_id && TokenId::convertable(parent)){
 	    debugMsg("Token:noExternalConstraints", "Found external constraint " << constraint->toString());
@@ -886,7 +886,7 @@ namespace EUROPA{
     bool result = (var->getName() == sl_stateStr);
 
     // It is possible a StateVar could be allocated without it being a TokenStateVariable. Discourage this practice
-    checkError(!result || (var->getIndex() == 0 && TokenId::convertable(var->getParent())),
+    checkError(!result || (var->getIndex() == 0 && TokenId::convertable(var->parent())),
 			   var->toString() << " is not really a token state variable.");
     return result;
   }
@@ -911,9 +911,9 @@ namespace EUROPA{
   	
   	os << "Token(" << getKey() << "," << getName().toString() << ") {" << std::endl;
   	os << ident << "object:" << getObject()->toString() << std::endl;
-  	os << ident << "start:" << getStart()->toString() << std::endl;
-  	os << ident << "end:" << getStart()->toString() << std::endl;
-  	os << ident << "duration:" << getDuration()->toString() << std::endl;
+  	os << ident << "start:" << start()->toString() << std::endl;
+  	os << ident << "end:" << start()->toString() << std::endl;
+  	os << ident << "duration:" << duration()->toString() << std::endl;
   	os << "}" << std::endl; 
   	return os.str();
   }
@@ -949,17 +949,16 @@ PSObject* Token::getOwner() const {
   //  return new PSObject(ObjectId(objVar->lastDomain().getSingletonValue()));
 }
 
-PSToken* Token::getPSMaster() const {
-	TokenId master = getMaster();
-	if (master.isNoId())
+PSToken* Token::getMaster() const {
+	TokenId m = master();
+	if (m.isNoId())
 	    return NULL;
 	
-	return (PSToken *) master;
-	//return new PSToken(master);    
+	return (PSToken *) m;
 }
 
-PSList<PSToken*> Token::getPSSlaves() const {
-  const TokenSet& tokens = getSlaves();
+PSList<PSToken*> Token::getSlaves() const {
+  const TokenSet& tokens = slaves();
   PSList<PSToken*> retval;
 
   for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
@@ -988,22 +987,22 @@ PSToken::PSTokenState Token::getTokenState() const
     return PSToken::INACTIVE;
 }
 
-PSVariable* Token::getPSStart() const
+PSVariable* Token::getStart() const
 {
-    return (PSVariable *) getStart();
+    return (PSVariable *) start();
 }
 
-PSVariable* Token::getPSEnd() const
+PSVariable* Token::getEnd() const
 {
-	  return (PSVariable *) getEnd();
+	  return (PSVariable *) end();
 }
 
-PSVariable* Token::getPSDuration() const
+PSVariable* Token::getDuration() const
 {
-	  return (PSVariable *) getDuration();
+	  return (PSVariable *) duration();
 }
 
-PSList<PSVariable*> Token::getPSParameters() const
+PSList<PSVariable*> Token::getParameters() const
 {
   PSList<PSVariable*> retval;
   const std::vector<ConstrainedVariableId>& vars = getVariables();
@@ -1031,11 +1030,11 @@ PSVariable* Token::getParameter(const std::string& name) const
   return retval;
 }
 
-void Token::mergePS(PSToken* activeToken) 
+void Token::merge(PSToken* activeToken) 
 {
     check_error(activeToken != NULL, "Can't merge on NULL token");
     TokenId tok = getPlanDatabase()->getEntityByKey(activeToken->getKey());
-    merge(tok);
+    doMerge(tok);
 }        
 
 PSList<PSToken*> Token::getCompatibleTokens(unsigned int limit, bool useExactTest) 
@@ -1062,7 +1061,7 @@ std::string Token::toPSString() const
 	if (isMerged())
 	    os << "    mergedInto:" << getActiveToken()->getKey() << std::endl;
 
-	PSList<PSVariable*> vars = getPSParameters();
+	PSList<PSVariable*> vars = getParameters();
 	for (int i=0;i<vars.size();i++) {
 	    os << "    " << vars.get(i)->getEntityName() << " : " << vars.get(i)->toString() << std::endl;
 	}

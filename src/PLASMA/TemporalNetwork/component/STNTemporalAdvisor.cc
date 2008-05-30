@@ -19,7 +19,7 @@ namespace EUROPA {
     if (!DefaultTemporalAdvisor::canPrecede(first, second))
       return false;
 
-    bool retval = m_propagator->canPrecede(first->getEnd(), second->getStart());
+    bool retval = m_propagator->canPrecede(first->end(), second->start());
     return (retval);
   }
 
@@ -32,18 +32,18 @@ namespace EUROPA {
   bool STNTemporalAdvisor::canFitBetween(const TokenId& token, const TokenId& predecessor, const TokenId& successor){
     if (!DefaultTemporalAdvisor::canFitBetween(token, predecessor, successor))
       return false;
-    return m_propagator->canFitBetween(token->getStart(), token->getEnd(), predecessor->getEnd(), successor->getStart());
+    return m_propagator->canFitBetween(token->start(), token->end(), predecessor->end(), successor->start());
   }
 
   /**
    * @brief 2 tokens can be concurrent if the temporal distance between them can be 0
    */
   bool STNTemporalAdvisor::canBeConcurrent(const TokenId& first, const TokenId& second){
-    debugMsg("STNTemporalAdvisor:canBeConcurrent", "first [" << first->getStart() << ", " << first->getEnd() << "]");
-    debugMsg("STNTemporalAdvisor:canBeConcurrent", "second[" << second->getStart() << ", " << second->getEnd() << "]"); 
+    debugMsg("STNTemporalAdvisor:canBeConcurrent", "first [" << first->start() << ", " << first->end() << "]");
+    debugMsg("STNTemporalAdvisor:canBeConcurrent", "second[" << second->start() << ", " << second->end() << "]"); 
 
-   return (m_propagator->canBeConcurrent(first->getStart(), second->getStart()) &&
-	    m_propagator->canBeConcurrent(first->getEnd(), second->getEnd()));
+   return (m_propagator->canBeConcurrent(first->start(), second->start()) &&
+	    m_propagator->canBeConcurrent(first->end(), second->end()));
   }
 
   /**

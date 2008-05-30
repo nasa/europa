@@ -34,9 +34,9 @@ namespace NDDL {
   void NddlToken::commonInit(const bool& autoClose) {
     state = getState();
     object = getObject();
-    start = getStart();
-    end = getEnd();
-    duration = getDuration();
+    tStart = start();
+    tEnd = end();
+    tDuration = duration();
     if (autoClose)
       close();
   }

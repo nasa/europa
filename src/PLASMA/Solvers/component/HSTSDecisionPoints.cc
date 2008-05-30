@@ -196,7 +196,7 @@ namespace EUROPA {
       }
 
       bool EarlyTokenComparator::compare(const TokenId x, const TokenId y) {
-        return x->getStart()->lastDomain().getLowerBound() < y->getStart()->lastDomain().getLowerBound();
+        return x->start()->lastDomain().getLowerBound() < y->start()->lastDomain().getLowerBound();
       }
 
       bool EarlyTokenComparator::compare(const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
@@ -204,8 +204,8 @@ namespace EUROPA {
         check_error(m_flawedTok.isValid());
         if(m_flawedTok == p1.second.second) {
           if(m_flawedTok == p2.second.second) {
-            return p1.second.second->getEnd()->lastDomain().getLowerBound() <
-              p2.second.second->getEnd()->lastDomain().getLowerBound();
+            return p1.second.second->end()->lastDomain().getLowerBound() <
+              p2.second.second->end()->lastDomain().getLowerBound();
           }
           else
             return false;
@@ -224,7 +224,7 @@ namespace EUROPA {
       }
 
       bool LateTokenComparator::compare(const TokenId x, const TokenId y) {
-        return x->getStart()->lastDomain().getLowerBound() > y->getStart()->lastDomain().getLowerBound();
+        return x->start()->lastDomain().getLowerBound() > y->start()->lastDomain().getLowerBound();
       }
 
       bool LateTokenComparator::compare(const std::pair<ObjectId, std::pair<TokenId, TokenId> >& p1,
@@ -232,8 +232,8 @@ namespace EUROPA {
         check_error(m_flawedTok.isValid());
         if(m_flawedTok == p1.second.second) {
           if(m_flawedTok == p2.second.second) {
-            return p1.second.second->getEnd()->lastDomain().getLowerBound() >
-              p2.second.second->getEnd()->lastDomain().getLowerBound();
+            return p1.second.second->end()->lastDomain().getLowerBound() >
+              p2.second.second->end()->lastDomain().getLowerBound();
           }
           else
             return true;
@@ -266,9 +266,9 @@ namespace EUROPA {
       }
 
       int NearTokenComparator::midpoint(const TokenId& token) {
-        int maxTemporalExtent = (int) (token->getEnd()->lastDomain().getUpperBound() -
-                                       token->getStart()->lastDomain().getLowerBound());
-        return (int)(token->getStart()->lastDomain().getLowerBound() + maxTemporalExtent / 2);
+        int maxTemporalExtent = (int) (token->end()->lastDomain().getUpperBound() -
+                                       token->start()->lastDomain().getLowerBound());
+        return (int)(token->start()->lastDomain().getLowerBound() + maxTemporalExtent / 2);
       }
 
       bool FarTokenComparator::compare(const TokenId x, const TokenId y) {

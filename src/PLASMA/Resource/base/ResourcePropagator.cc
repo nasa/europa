@@ -39,7 +39,7 @@ namespace EUROPA {
     for (std::list<ResourceId>::const_iterator it = resources.begin(); it != resources.end(); ++it){
       ResourceId r = *it;
       if (r->isViolated()) { // Find a variable and empty it. Should be once connected to resource constraints.
-	TokenId tx = *(r->getTokens().begin());
+	TokenId tx = *(r->tokens().begin());
 	check_error(tx.isValid());
 	ConstrainedVariableId varToEmpty = tx->getObject();
 	ResourceConstraint::getCurrentDomain(varToEmpty).empty();

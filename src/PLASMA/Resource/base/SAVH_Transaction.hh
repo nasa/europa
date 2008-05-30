@@ -50,7 +50,7 @@ namespace EUROPA {
       bool isConsumer() const {return m_isConsumer;}
       TransactionId getId() const {return m_id;}
       std::string toString() const {
-      	EntityId parent = m_time->getParent();
+      	EntityId parent = m_time->parent();
         std::stringstream os;
         os << "{"
            << "(token=" << parent->getKey() << ")"

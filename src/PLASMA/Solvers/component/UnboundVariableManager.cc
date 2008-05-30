@@ -174,8 +174,8 @@ namespace EUROPA {
 
     bool UnboundVariableManager::variableOfNonActiveToken(const ConstrainedVariableId& var){
       // If var parent is a token and the state is active, then true.
-      if(TokenId::convertable(var->getParent())){
-	TokenId token(var->getParent());
+      if(TokenId::convertable(var->parent())){
+	TokenId token(var->parent());
 	return !token->isActive();
       }
 
@@ -196,7 +196,7 @@ namespace EUROPA {
       if(changeType == DomainListener::SET_TO_SINGLETON){
 	// If it is a token state variable, we test if a case for activation
 	if(Token::isStateVariable(variable) && variable->getSpecifiedValue() == Token::ACTIVE){
-	  TokenId token = variable->getParent();
+	  TokenId token = variable->parent();
 	  const std::vector<ConstrainedVariableId>& variables = token->getVariables();
 	  for(std::vector<ConstrainedVariableId>::const_iterator it = variables.begin(); it != variables.end(); ++it){
 	    ConstrainedVariableId var = *it;
@@ -211,7 +211,7 @@ namespace EUROPA {
       }
 
       if(changeType == DomainListener::RESET && Token::isStateVariable(variable)){
-	TokenId token = variable->getParent();
+	TokenId token = variable->parent();
 	const std::vector<ConstrainedVariableId>& variables = token->getVariables();
 	for(std::vector<ConstrainedVariableId>::const_iterator it = variables.begin(); it != variables.end(); ++it){
 	  ConstrainedVariableId var = *it;

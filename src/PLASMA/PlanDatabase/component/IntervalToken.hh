@@ -31,8 +31,8 @@ namespace EUROPA {
 		  const LabelStr& objectName = Token::noObject(),
 		  bool closed = true);
 
-    const TempVarId& getStart() const;
-    const TempVarId& getEnd() const;
+    const TempVarId& start() const;
+    const TempVarId& end() const;
 
   private:
     void commonInit(const IntervalIntDomain& startBaseDomain,

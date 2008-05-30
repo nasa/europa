@@ -246,9 +246,9 @@ private:
     		     IntervalIntDomain(0, 20),
     		     IntervalIntDomain(1, 1000));
 
-    t1.getDuration()->restrictBaseDomain(IntervalIntDomain(5, 7));
-    assertTrue(t1.getEnd()->getDerivedDomain().getLowerBound() == 5);
-    assertTrue(t1.getEnd()->getDerivedDomain().getUpperBound() == 17);
+    t1.duration()->restrictBaseDomain(IntervalIntDomain(5, 7));
+    assertTrue(t1.end()->getDerivedDomain().getLowerBound() == 5);
+    assertTrue(t1.end()->getDerivedDomain().getUpperBound() == 17);
 
     IntervalToken t2(db.getId(), 
     		     "Objects.Predicate", 
@@ -258,11 +258,11 @@ private:
     		     IntervalIntDomain(0, 20),
     		     IntervalIntDomain(1, 1000));
 
-    //t2.getEnd()->restrictBaseDomain(IntervalIntDomain(8, 10));
+    //t2.end()->restrictBaseDomain(IntervalIntDomain(8, 10));
 
     std::vector<ConstrainedVariableId> temp;
-    temp.push_back(t1.getEnd());
-    temp.push_back(t2.getStart());
+    temp.push_back(t1.end());
+    temp.push_back(t2.start());
     
 
     ConstraintId beforeConstraint = ConstraintLibrary::createConstraint(LabelStr("precedes"),
@@ -270,14 +270,14 @@ private:
                                                                         temp);
     assertTrue(!beforeConstraint.isNoId());
 
-    assertTrue(t1.getStart()->getDerivedDomain().getLowerBound() == 0);
-    assertTrue(t1.getStart()->getDerivedDomain().getUpperBound() == 5);
-    assertTrue(t1.getEnd()->getDerivedDomain().getLowerBound() == 5);
-    assertTrue(t1.getEnd()->getDerivedDomain().getUpperBound() == 10);
-    assertTrue(t2.getStart()->getDerivedDomain().getLowerBound() == 5);
-    assertTrue(t2.getStart()->getDerivedDomain().getUpperBound() == 10);
-    assertTrue(t2.getEnd()->getDerivedDomain().getLowerBound() == 6);
-    assertTrue(t2.getEnd()->getDerivedDomain().getUpperBound() == 20);
+    assertTrue(t1.start()->getDerivedDomain().getLowerBound() == 0);
+    assertTrue(t1.start()->getDerivedDomain().getUpperBound() == 5);
+    assertTrue(t1.end()->getDerivedDomain().getLowerBound() == 5);
+    assertTrue(t1.end()->getDerivedDomain().getUpperBound() == 10);
+    assertTrue(t2.start()->getDerivedDomain().getLowerBound() == 5);
+    assertTrue(t2.start()->getDerivedDomain().getUpperBound() == 10);
+    assertTrue(t2.end()->getDerivedDomain().getLowerBound() == 6);
+    assertTrue(t2.end()->getDerivedDomain().getUpperBound() == 20);
 
     delete (Constraint*) beforeConstraint;
     TN_DEFAULT_TEARDOWN();
@@ -313,23 +313,23 @@ private:
     const TemporalPropagatorId& tp = (TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal"));
 
     // assert from propagator directly
-    assertTrue (tp->canPrecede(first.getEnd(), second.getStart()));
-    assertTrue (tp->canPrecede(second.getEnd(), first.getStart()));
+    assertTrue (tp->canPrecede(first.end(), second.start()));
+    assertTrue (tp->canPrecede(second.end(), first.start()));
 
     // compute from advisor
     assertTrue (db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
     
-    second.getStart()->reset();
-    second.getEnd()->reset();
+    second.start()->reset();
+    second.end()->reset();
 
-    first.getStart()->reset();
-    first.getEnd()->reset();
+    first.start()->reset();
+    first.end()->reset();
 
     // restrict via a constraint
 
     std::vector<ConstrainedVariableId> temp;
-    temp.push_back(first.getEnd());
-    temp.push_back(second.getStart());
+    temp.push_back(first.end());
+    temp.push_back(second.start());
 
     ConstraintId beforeConstraint = ConstraintLibrary::createConstraint(LabelStr("precedes"),
 									db.getConstraintEngine(),
@@ -340,9 +340,9 @@ private:
     assertTrue(res);
     
     // compute from propagator directly
-    res = tp->canPrecede(first.getEnd(), second.getStart());
+    res = tp->canPrecede(first.end(), second.start());
     assertTrue (res);
-    assertTrue (!tp->canPrecede(second.getEnd(), first.getStart()));
+    assertTrue (!tp->canPrecede(second.end(), first.start()));
 
     // compute from advisor
     assertTrue (db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
@@ -353,19 +353,19 @@ private:
     // restrict via specifying the domain
 
     IntervalIntDomain dom(21, 31);
-    first.getStart()->restrictBaseDomain(dom);
-    first.getEnd()->restrictBaseDomain(dom);
+    first.start()->restrictBaseDomain(dom);
+    first.end()->restrictBaseDomain(dom);
 
     IntervalIntDomain dom2(1, 20);
-    second.getStart()->restrictBaseDomain(dom2);
-    second.getEnd()->restrictBaseDomain(dom2);
+    second.start()->restrictBaseDomain(dom2);
+    second.end()->restrictBaseDomain(dom2);
 
     res = ce.propagate();
     assertTrue(res);
     
     // compute from propagator directly
-    assertTrue (!tp->canPrecede(first.getEnd(), second.getStart()));
-    assertTrue (tp->canPrecede(second.getEnd(), first.getStart()));
+    assertTrue (!tp->canPrecede(first.end(), second.start()));
+    assertTrue (tp->canPrecede(second.end(), first.start()));
     // compute from advisor
     assertTrue (!db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
 
@@ -405,7 +405,7 @@ private:
     ce.propagate();
 
     // compute from propagator directly
-    assertTrue (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canFitBetween(token.getStart(), token.getEnd(), predecessor.getEnd(), successor.getStart()));
+    assertTrue (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canFitBetween(token.start(), token.end(), predecessor.end(), successor.start()));
 
     // compute from advisor
     assertTrue (db.getTemporalAdvisor()->canFitBetween(token.getId(), predecessor.getId(), successor.getId()));
@@ -452,30 +452,30 @@ private:
     assertTrue(db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t1.getId()));
 
     // May 1 very tight, but still ok
-    t0.getStart()->specify(1);
-    t0.getEnd()->specify(2);
+    t0.start()->specify(1);
+    t0.end()->specify(2);
     assertTrue(ce.propagate());
     assertTrue(db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t1.getId()));
 
     // Make it too tight.
-    t1.getEnd()->specify(10);
+    t1.end()->specify(10);
     ce.propagate();
     assertTrue(!db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t1.getId()));
 
     // Reset, but impose constraints
-    t0.getStart()->reset();
-    t0.getEnd()->reset();
-    t1.getEnd()->reset();
+    t0.start()->reset();
+    t0.end()->reset();
+    t1.end()->reset();
 
 
     ConstraintId c0 = ConstraintLibrary::createConstraint(LabelStr("precedes"),
 							  ce.getId(), 
-							  makeScope(t0.getEnd(), t1.getStart()));
+							  makeScope(t0.end(), t1.start()));
 
 
     ConstraintId c1 = ConstraintLibrary::createConstraint(LabelStr("precedes"),
 							  ce.getId(),
-							  makeScope(t1.getEnd(), t2.getStart()));
+							  makeScope(t1.end(), t2.start()));
 
     assertTrue(ce.propagate());
 
@@ -650,20 +650,20 @@ private:
 
     // Allocate a constraint on the inactive token, to constrain a timepoint
     Variable<IntervalIntDomain> v0(ce.getId(), IntervalIntDomain());
-    EqualConstraint c0(LabelStr("eq"), LabelStr("Default"), ce.getId() , makeScope(t2.getEnd(), v0.getId()));
+    EqualConstraint c0(LabelStr("eq"), LabelStr("Default"), ce.getId() , makeScope(t2.end(), v0.getId()));
 
     // Conduct the merge.
-    t2.merge(t1.getId());
+    t2.doMerge(t1.getId());
 
     // Now changes on v0 should propagate to the end variable of t1.
     v0.restrictBaseDomain(IntervalIntDomain(8, 10));
-    assertTrue(t1.getEnd()->getDerivedDomain() == IntervalIntDomain(8, 10));
+    assertTrue(t1.end()->getDerivedDomain() == IntervalIntDomain(8, 10));
 
     // If we split again, expect that the restriction now applies to the end-point
     // of the inactive token
     t2.cancel();
 
-    assertTrue(t2.getEnd()->getDerivedDomain() == IntervalIntDomain(8, 10));
+    assertTrue(t2.end()->getDerivedDomain() == IntervalIntDomain(8, 10));
 
     TN_DEFAULT_TEARDOWN();
     return true;
@@ -705,45 +705,45 @@ private:
 
     // Activate immediately to trigger the rule.
     t1.activate();
-    assertTrue(t1.getSlaves().size() == 1);
+    assertTrue(t1.slaves().size() == 1);
 
     assertTrue (ce.propagate());
 
-    TokenId slave = *t1.getSlaves().begin();
+    TokenId slave = *t1.slaves().begin();
 
-    assertTrue(t1.getStart()->derivedDomain().getLowerBound() == 0);
-    assertTrue(t1.getStart()->derivedDomain().getUpperBound() == 10);
-    assertTrue(t1.getEnd()->derivedDomain().getLowerBound() == 1);
-    assertTrue(t1.getEnd()->derivedDomain().getUpperBound() == 15);
-    assertTrue(slave->getStart()->derivedDomain().getLowerBound() == 1);
-    assertTrue(slave->getStart()->derivedDomain().getUpperBound() == 15);
-    assertTrue(slave->getEnd()->derivedDomain().getLowerBound() == 2);
-    assertTrue(slave->getEnd()->derivedDomain().getUpperBound() == 100);
+    assertTrue(t1.start()->derivedDomain().getLowerBound() == 0);
+    assertTrue(t1.start()->derivedDomain().getUpperBound() == 10);
+    assertTrue(t1.end()->derivedDomain().getLowerBound() == 1);
+    assertTrue(t1.end()->derivedDomain().getUpperBound() == 15);
+    assertTrue(slave->start()->derivedDomain().getLowerBound() == 1);
+    assertTrue(slave->start()->derivedDomain().getUpperBound() == 15);
+    assertTrue(slave->end()->derivedDomain().getLowerBound() == 2);
+    assertTrue(slave->end()->derivedDomain().getUpperBound() == 100);
 
     std::vector<ConstrainedVariableId> scope;
-    scope.push_back(slave->getEnd());
-    scope.push_back(t1.getParameters()[0]);
+    scope.push_back(slave->end());
+    scope.push_back(t1.parameters()[0]);
     ConstraintLibrary::createConstraint(LabelStr("leq"), ce.getId(), scope);
 
     assertTrue (!ce.propagate());
 
-    assertTrue(t1.getStart()->derivedDomain().getLowerBound() == 3);
-    assertTrue(t1.getStart()->derivedDomain().getUpperBound() == -2);
-    assertTrue(t1.getEnd()->derivedDomain().getLowerBound() == 3);
-    assertTrue(t1.getEnd()->derivedDomain().getUpperBound() == -2);
-    assertTrue(slave->getStart()->derivedDomain().getLowerBound() == 3);
-    assertTrue(slave->getStart()->derivedDomain().getUpperBound() == -2);
-    assertTrue(slave->getEnd()->derivedDomain().getLowerBound() == 3);
-    assertTrue(slave->getEnd()->derivedDomain().getUpperBound() == -2);
+    assertTrue(t1.start()->derivedDomain().getLowerBound() == 3);
+    assertTrue(t1.start()->derivedDomain().getUpperBound() == -2);
+    assertTrue(t1.end()->derivedDomain().getLowerBound() == 3);
+    assertTrue(t1.end()->derivedDomain().getUpperBound() == -2);
+    assertTrue(slave->start()->derivedDomain().getLowerBound() == 3);
+    assertTrue(slave->start()->derivedDomain().getUpperBound() == -2);
+    assertTrue(slave->end()->derivedDomain().getLowerBound() == 3);
+    assertTrue(slave->end()->derivedDomain().getUpperBound() == -2);
 
     t1.cancel();
 
     assertTrue(ce.propagate());
 
-    assertTrue(t1.getStart()->derivedDomain().getLowerBound() == 0);
-    assertTrue(t1.getStart()->derivedDomain().getUpperBound() == 10);
-    assertTrue(t1.getEnd()->derivedDomain().getLowerBound() == 1);
-    assertTrue(t1.getEnd()->derivedDomain().getUpperBound() == 15);
+    assertTrue(t1.start()->derivedDomain().getLowerBound() == 0);
+    assertTrue(t1.start()->derivedDomain().getUpperBound() == 10);
+    assertTrue(t1.end()->derivedDomain().getLowerBound() == 1);
+    assertTrue(t1.end()->derivedDomain().getUpperBound() == 15);
 
     DEFAULT_TEARDOWN_RULES();
     return true;

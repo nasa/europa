@@ -201,7 +201,7 @@ namespace EUROPA {
      * variables may not have a parent entity, so the default implementation
      * is to return noId.
      */
-    const EntityId& getParent() const;
+    const EntityId& parent() const;
 
     /**
      * @brief Accessor for the ConstraintEngine
@@ -470,7 +470,7 @@ namespace EUROPA {
 
 	virtual void specifyValue(PSVarValue& v);
 
-	virtual PSEntity* getPSParent() const;	      
+	virtual PSEntity* getParent() const;	      
    
   private:
     /**

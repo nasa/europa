@@ -35,8 +35,8 @@ namespace EUROPA{
     commonInit(timeBaseDomain);
   }
 
-  const TempVarId& EventToken::getStart() const{return m_time;}
-  const TempVarId& EventToken::getEnd() const{return m_time;}
+  const TempVarId& EventToken::start() const{return m_time;}
+  const TempVarId& EventToken::end() const{return m_time;}
   const TempVarId& EventToken::getTime() const{return m_time;}
 
   void EventToken::commonInit(const IntervalIntDomain& timeBaseDomain){

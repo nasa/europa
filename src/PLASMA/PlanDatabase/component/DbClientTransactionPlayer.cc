@@ -636,77 +636,77 @@ namespace EUROPA {
     checkError(origin_token.isValid(), "Invalid token for label '" << origin << "'");
     checkError(target_token.isValid(), "Invalid token for label '" << target << "'");
     if (strcmp(relation, "before") == 0) {
-      construct_constraint(precedes, origin, End, target, Start);
+      construct_constraint(precedes, origin, end, target, start);
     }
     else if (strcmp(relation, "after") == 0) {
-      construct_constraint(precedes, target, End, origin, Start);
+      construct_constraint(precedes, target, end, origin, start);
     }
     else if (strcmp(relation, "meets") == 0) {
-      construct_constraint(concurrent, origin, End, target, Start);
+      construct_constraint(concurrent, origin, end, target, start);
     }
     else if (strcmp(relation, "met_by") == 0) {
-      construct_constraint(concurrent, origin, Start, target, End);
+      construct_constraint(concurrent, origin, start, target, end);
     }
     else if ((strcmp(relation, "equal") == 0) || 
 	     (strcmp(relation, "equals") == 0)) {
-      construct_constraint(concurrent, origin, Start, target, Start);
-      construct_constraint(concurrent, origin, End, target, End);
+      construct_constraint(concurrent, origin, start, target, start);
+      construct_constraint(concurrent, origin, end, target, end);
     }
     else if (strcmp(relation, "contains") == 0) {
-      construct_constraint(precedes, origin, Start, target, Start);
-      construct_constraint(precedes, target, End, origin, End);
+      construct_constraint(precedes, origin, start, target, start);
+      construct_constraint(precedes, target, end, origin, end);
     }
     else if (strcmp(relation, "contained_by") == 0) {
-      construct_constraint(precedes, target, Start, origin, Start);
-      construct_constraint(precedes, origin, End, target, End);
+      construct_constraint(precedes, target, start, origin, start);
+      construct_constraint(precedes, origin, end, target, end);
     }
     else if (strcmp(relation, "paralleled_by") == 0) {
-      construct_constraint(precedes, target, Start, origin, Start);
-      construct_constraint(precedes, target, End, origin, End);
+      construct_constraint(precedes, target, start, origin, start);
+      construct_constraint(precedes, target, end, origin, end);
     }
     else if (strcmp(relation, "parallels") == 0) {
-      construct_constraint(precedes, origin, Start, target, Start);
-      construct_constraint(precedes, origin, End, target, End);
+      construct_constraint(precedes, origin, start, target, start);
+      construct_constraint(precedes, origin, end, target, end);
     }
     else if (strcmp(relation, "starts") == 0) {
-      construct_constraint(concurrent, origin, Start, target, Start);
+      construct_constraint(concurrent, origin, start, target, start);
     }
     else if (strcmp(relation, "ends") == 0) {
-      construct_constraint(concurrent, origin, End, target, End);
+      construct_constraint(concurrent, origin, end, target, end);
     }
     else if (strcmp(relation, "ends_after") == 0) {
-      construct_constraint(precedes, target, Start, origin, End);
+      construct_constraint(precedes, target, start, origin, end);
     }
     else if (strcmp(relation, "ends_before") == 0) {
-      construct_constraint(precedes, origin, End, target, Start);
+      construct_constraint(precedes, origin, end, target, start);
     }
     else if (strcmp(relation, "ends_after_start") == 0) {
-      construct_constraint(precedes, target, Start, origin, End);
+      construct_constraint(precedes, target, start, origin, end);
     }
     else if (strcmp(relation, "starts_before_end") == 0) {
-      construct_constraint(precedes, origin, Start, target, End);
+      construct_constraint(precedes, origin, start, target, end);
     }
     else if (strcmp(relation, "starts_during") == 0) {
-      construct_constraint(precedes, target, Start, origin, Start);
-      construct_constraint(precedes, origin, Start, target, End);
+      construct_constraint(precedes, target, start, origin, start);
+      construct_constraint(precedes, origin, start, target, end);
     }
     else if (strcmp(relation, "contains_start") == 0) {
-      construct_constraint(precedes, origin, Start, target, Start);
-      construct_constraint(precedes, target, Start, origin, End);
+      construct_constraint(precedes, origin, start, target, start);
+      construct_constraint(precedes, target, start, origin, end);
     }
     else if (strcmp(relation, "ends_during") == 0) {
-      construct_constraint(precedes, target, Start, origin, End);
-      construct_constraint(precedes, origin, End, target, End);
+      construct_constraint(precedes, target, start, origin, end);
+      construct_constraint(precedes, origin, end, target, end);
     }
     else if (strcmp(relation, "contains_end") == 0) {
-      construct_constraint(precedes, origin, Start, target, End);
-      construct_constraint(precedes, target, End, origin, End);
+      construct_constraint(precedes, origin, start, target, end);
+      construct_constraint(precedes, target, end, origin, end);
     }
     else if (strcmp(relation, "starts_after") == 0) {
-      construct_constraint(precedes, target, Start, origin, Start);
+      construct_constraint(precedes, target, start, origin, start);
     }
     else if (strcmp(relation, "starts_before") == 0) {
-      construct_constraint(precedes, origin, Start, target, Start);
+      construct_constraint(precedes, origin, start, target, start);
     }
     else {
       checkError(strcmp(relation, "any") == 0,
@@ -760,73 +760,73 @@ namespace EUROPA {
     checkError(origin_token.isValid(), "Invalid token for label '" << origin << "'");
     checkError(target_token.isValid(), "Invalid token for label '" << target << "'");
     if (strcmp(relation, "before") == 0)
-      removeTemporalConstraint(origin_token->getEnd(), target_token->getStart(), "precedes");
+      removeTemporalConstraint(origin_token->end(), target_token->start(), "precedes");
     else if (strcmp(relation, "after") == 0)
-      removeTemporalConstraint(target_token->getEnd(), origin_token->getStart(), "precedes");
+      removeTemporalConstraint(target_token->end(), origin_token->start(), "precedes");
     else if (strcmp(relation, "meets") == 0)
-      removeTemporalConstraint(origin_token->getEnd(), target_token->getStart(), "concurrent");
+      removeTemporalConstraint(origin_token->end(), target_token->start(), "concurrent");
     else if (strcmp(relation, "met_by") == 0)
-      removeTemporalConstraint(origin_token->getStart(), target_token->getEnd(), "concurrent");
+      removeTemporalConstraint(origin_token->start(), target_token->end(), "concurrent");
     else if ((strcmp(relation, "equal") == 0) || 
 	     (strcmp(relation, "equals") == 0)) {
-      removeTemporalConstraint(origin_token->getStart(), target_token->getStart(), "concurrent");
-      removeTemporalConstraint(origin_token->getEnd(), target_token->getEnd(), "concurrent");
+      removeTemporalConstraint(origin_token->start(), target_token->start(), "concurrent");
+      removeTemporalConstraint(origin_token->end(), target_token->end(), "concurrent");
     }
     else if (strcmp(relation, "contains") == 0) {
-      removeTemporalConstraint(origin_token->getStart(), target_token->getStart(), "precedes");
-      removeTemporalConstraint(target_token->getEnd(), origin_token->getEnd(), "precedes");
+      removeTemporalConstraint(origin_token->start(), target_token->start(), "precedes");
+      removeTemporalConstraint(target_token->end(), origin_token->end(), "precedes");
     }
     else if (strcmp(relation, "contained_by") == 0) {
-      removeTemporalConstraint(target_token->getStart(), origin_token->getStart(), "precedes");
-      removeTemporalConstraint(origin_token->getEnd(), target_token->getEnd(), "precedes");
+      removeTemporalConstraint(target_token->start(), origin_token->start(), "precedes");
+      removeTemporalConstraint(origin_token->end(), target_token->end(), "precedes");
     }
     else if (strcmp(relation, "paralleled_by") == 0) {
-      removeTemporalConstraint(target_token->getStart(), origin_token->getStart(), "precedes");
-      removeTemporalConstraint(target_token->getEnd(), origin_token->getEnd(), "precedes");
+      removeTemporalConstraint(target_token->start(), origin_token->start(), "precedes");
+      removeTemporalConstraint(target_token->end(), origin_token->end(), "precedes");
     }
     else if (strcmp(relation, "parallels") == 0) {
-      removeTemporalConstraint(origin_token->getStart(), target_token->getStart(), "precedes");
-      removeTemporalConstraint(origin_token->getEnd(), target_token->getEnd(), "precedes");
+      removeTemporalConstraint(origin_token->start(), target_token->start(), "precedes");
+      removeTemporalConstraint(origin_token->end(), target_token->end(), "precedes");
     }
     else if (strcmp(relation, "starts") == 0) {
-      removeTemporalConstraint(origin_token->getStart(), target_token->getStart(), "concurrent");
+      removeTemporalConstraint(origin_token->start(), target_token->start(), "concurrent");
     }
     else if (strcmp(relation, "ends") == 0) {
-      removeTemporalConstraint(origin_token->getEnd(), target_token->getEnd(), "concurrent");
+      removeTemporalConstraint(origin_token->end(), target_token->end(), "concurrent");
     }
     else if (strcmp(relation, "ends_after") == 0) {
-      removeTemporalConstraint(target_token->getStart(), origin_token->getEnd(), "precedes");
+      removeTemporalConstraint(target_token->start(), origin_token->end(), "precedes");
     }
     else if (strcmp(relation, "ends_before") == 0) {
-      removeTemporalConstraint(origin_token->getEnd(), target_token->getStart(), "precedes");
+      removeTemporalConstraint(origin_token->end(), target_token->start(), "precedes");
     }
     else if (strcmp(relation, "ends_after_start") == 0) {
-      removeTemporalConstraint(target_token->getStart(), origin_token->getEnd(), "precedes");
+      removeTemporalConstraint(target_token->start(), origin_token->end(), "precedes");
     }
     else if (strcmp(relation, "starts_before_end") == 0) {
-      removeTemporalConstraint(origin_token->getStart(), target_token->getEnd(), "precedes");
+      removeTemporalConstraint(origin_token->start(), target_token->end(), "precedes");
     }
     else if (strcmp(relation, "starts_during") == 0) {
-      removeTemporalConstraint(target_token->getStart(), origin_token->getStart(), "precedes");
-      removeTemporalConstraint(origin_token->getStart(), target_token->getEnd(), "precedes");
+      removeTemporalConstraint(target_token->start(), origin_token->start(), "precedes");
+      removeTemporalConstraint(origin_token->start(), target_token->end(), "precedes");
     }
     else if (strcmp(relation, "contains_start") == 0) {
-      removeTemporalConstraint(origin_token->getStart(), target_token->getStart(), "precedes");
-      removeTemporalConstraint(target_token->getStart(), origin_token->getEnd(), "precedes");
+      removeTemporalConstraint(origin_token->start(), target_token->start(), "precedes");
+      removeTemporalConstraint(target_token->start(), origin_token->end(), "precedes");
     }
     else if (strcmp(relation, "ends_during") == 0) {
-      removeTemporalConstraint(target_token->getStart(), origin_token->getEnd(), "precedes");
-      removeTemporalConstraint(origin_token->getEnd(), target_token->getEnd(), "precedes");
+      removeTemporalConstraint(target_token->start(), origin_token->end(), "precedes");
+      removeTemporalConstraint(origin_token->end(), target_token->end(), "precedes");
     }
     else if (strcmp(relation, "contains_end") == 0) {
-      removeTemporalConstraint(origin_token->getStart(), target_token->getEnd(), "precedes");
-      removeTemporalConstraint(target_token->getEnd(), origin_token->getEnd(), "precedes");
+      removeTemporalConstraint(origin_token->start(), target_token->end(), "precedes");
+      removeTemporalConstraint(target_token->end(), origin_token->end(), "precedes");
     }
     else if (strcmp(relation, "starts_after") == 0) {
-      removeTemporalConstraint(target_token->getStart(), origin_token->getStart(), "precedes");
+      removeTemporalConstraint(target_token->start(), origin_token->start(), "precedes");
     }
     else if (strcmp(relation, "starts_before") == 0) {
-      removeTemporalConstraint(origin_token->getStart(), target_token->getStart(), "precedes");
+      removeTemporalConstraint(origin_token->start(), target_token->start(), "precedes");
     }
     else {
       check_error(strcmp(relation, "any") == 0,

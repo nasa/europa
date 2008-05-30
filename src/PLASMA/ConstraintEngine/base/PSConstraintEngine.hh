@@ -63,7 +63,7 @@ namespace EUROPA {
     	virtual double getViolation() const = 0;
     	virtual std::string getViolationExpl() const = 0;
 
-    	virtual PSEntity* getPSParent() const = 0;
+    	virtual PSEntity* getParent() const = 0;
     	
   };
   

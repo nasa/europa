@@ -283,7 +283,7 @@ private:
                           Token::noObject(), true);
 
       std::vector<MatchingRuleId> rules;
-      me.getMatches(ConstrainedVariableId(token.getStart()), rules);
+      me.getMatches(ConstrainedVariableId(token.start()), rules);
       assertTrue(rules.size() == 2, toString(rules.size()));
       assertTrue(rules[1]->toString() == "[R1]*.*.start.*.*.*", rules[1]->toString());
     }
@@ -342,9 +342,9 @@ private:
     {
       TokenId token = db->getClient()->createToken("D.predicateF", false);
       token->activate();
-      TokenId E_predicateC = *(token->getSlaves().begin());
+      TokenId E_predicateC = *(token->slaves().begin());
       std::vector<MatchingRuleId> rules;
-      me.getMatches(ConstrainedVariableId(E_predicateC->getDuration()), rules);
+      me.getMatches(ConstrainedVariableId(E_predicateC->duration()), rules);
       assertTrue(rules.size() == 2, toString(rules.size()) + " for " + token->getUnqualifiedPredicateName().toString());
       assertTrue(rules[1]->toString() == "[R7]*.*.duration.*.Object.*", rules[1]->toString());
       token->discard();
@@ -354,7 +354,7 @@ private:
     {
       TokenId token = db->getClient()->createToken("E.predicateC", false);
       std::vector<MatchingRuleId> rules;
-      me.getMatches(ConstrainedVariableId(token->getDuration()), rules);
+      me.getMatches(ConstrainedVariableId(token->duration()), rules);
       assertTrue(rules.size() == 2, toString(rules.size()) + " for " + token->getPredicateName().toString());
       assertTrue(rules[1]->toString() == "[R7a]*.*.duration.none.*.*", rules[1]->toString());
       token->discard();
@@ -364,9 +364,9 @@ private:
     {
       TokenId token = db->getClient()->createToken("B.predicateC", false);
       token->activate();
-      TokenId E_predicateC = *(token->getSlaves().begin());
+      TokenId E_predicateC = *(token->slaves().begin());
       std::vector<MatchingRuleId> rules;
-      me.getMatches(ConstrainedVariableId(E_predicateC->getDuration()), rules);
+      me.getMatches(ConstrainedVariableId(E_predicateC->duration()), rules);
       assertTrue(rules.size() == 3, toString(rules.size()) + " for " + token->getPredicateName().toString());
       assertTrue(rules[1]->toString() == "[R8]*.*.*.*.B.*", rules[1]->toString());
       assertTrue(rules[2]->toString() == "[R7]*.*.duration.*.Object.*", rules[2]->toString());
@@ -377,7 +377,7 @@ private:
     {
       TokenId token = db->getClient()->createToken("D.predicateG", false);
       token->activate();
-      TokenId E_predicateC = *(token->getSlaves().begin());
+      TokenId E_predicateC = *(token->slaves().begin());
 
       // Expect to fire R8, R9 and R10
       std::set<LabelStr> expectedRules;
@@ -385,7 +385,7 @@ private:
       expectedRules.insert(LabelStr("[R9]*.*.*.meets.D.predicateG"));
       expectedRules.insert(LabelStr("[R10]*.*.*.before.*.*"));
       std::vector<MatchingRuleId> rules;
-      me.getMatches(ConstrainedVariableId(E_predicateC->getDuration()), rules);
+      me.getMatches(ConstrainedVariableId(E_predicateC->duration()), rules);
       assertTrue(rules.size() == 4, toString(rules.size()) + " for " + token->getPredicateName().toString());
       for(int i=0;i>4; i++)
         assertTrue(expectedRules.find(LabelStr(rules[i]->toString())) != expectedRules.end(), rules[i]->toString());
@@ -575,9 +575,9 @@ private:
     {
       TokenId token = db->getClient()->createToken("D.predicateG", false);
       token->activate();
-      TokenId E_predicateC = *(token->getSlaves().begin());
+      TokenId E_predicateC = *(token->slaves().begin());
       std::vector<MatchingRuleId> rules;
-      me.getMatches(ConstrainedVariableId(E_predicateC->getEnd()), rules);
+      me.getMatches(ConstrainedVariableId(E_predicateC->end()), rules);
       assertTrue(rules.size() == 3, toString(rules.size()));
       FlawHandlerId flawHandler = rules[2];
       assertTrue(flawHandler->getPriority() == 1, toString(flawHandler->getPriority()));
@@ -610,10 +610,10 @@ private:
       std::vector<ConstrainedVariableId> guards;
       assertTrue(flawHandler->makeConstraintScope(token, guards));
       assertTrue(guards.size() == 2, toString(guards.size()));
-      assertTrue(guards[0] == token->getStart(), guards[0]->toString());
+      assertTrue(guards[0] == token->start(), guards[0]->toString());
       assertTrue(guards[1] == token->getObject(), guards[1]->toString());
       assertFalse(flawHandler->test(guards));
-      token->getStart()->specify(30);
+      token->start()->specify(30);
       assertFalse(flawHandler->test(guards));
       token->getObject()->specify(o2.getId());
       assertTrue(flawHandler->test(guards));
@@ -645,7 +645,7 @@ private:
       }
       // Now fire on the subgoal. Rule will match as it has a master
       token->activate();
-      TokenId B_predicateC = *(token->getSlaves().begin());
+      TokenId B_predicateC = *(token->slaves().begin());
       std::vector<MatchingRuleId> rules;
       me.getMatches(B_predicateC, rules);
       assertTrue(rules.size() == 1, toString(rules.size()));
@@ -654,7 +654,7 @@ private:
       assertTrue(flawHandler->makeConstraintScope(B_predicateC, guards));
       assertFalse(flawHandler->test(guards));
       // Specify the master guard variable
-      token->getStart()->specify(30);
+      token->start()->specify(30);
       assertTrue(flawHandler->test(guards));
       token->discard();
     }
@@ -692,49 +692,49 @@ private:
       db->getConstraintEngine()->propagate();
       // Initially the token is in scope and the variable is not
       assertTrue(solver.inScope(token));
-      assertTrue(!solver.inScope(token->getStart()));
-      assertTrue(solver.getFlawHandler(token->getStart()).isNoId());
+      assertTrue(!solver.inScope(token->start()));
+      assertTrue(solver.getFlawHandler(token->start()).isNoId());
       assertTrue(solver.getFlawHandler(token).isValid());
 
       // Activate the token. The variable will still no be in scope since it is not finite.
       token->activate();
       db->getConstraintEngine()->propagate();
-      assertTrue(solver.getFlawHandler(token->getStart()).isNoId());
+      assertTrue(solver.getFlawHandler(token->start()).isNoId());
 
       // The token should not be a flaw since it is nota timeline!
       assertTrue(solver.getFlawHandler(token).isNoId());
 
       // Restrict the base domain to finite bounds for the start variable
-      token->getStart()->restrictBaseDomain(IntervalIntDomain(0, 50));
+      token->start()->restrictBaseDomain(IntervalIntDomain(0, 50));
       db->getConstraintEngine()->propagate();
-      assertTrue(solver.getFlawHandler(token->getStart()).isValid());
+      assertTrue(solver.getFlawHandler(token->start()).isValid());
 
       // Now insert the token and bind the variable
-      token->getStart()->specify(30);
+      token->start()->specify(30);
       db->getConstraintEngine()->propagate();
       assertTrue(!solver.inScope(token));
-      assertTrue(!solver.inScope(token->getStart()));
+      assertTrue(!solver.inScope(token->start()));
 
       // Reset the variable and it should be back in business
-      token->getStart()->reset();
+      token->start()->reset();
       db->getConstraintEngine()->propagate();
-      assertTrue(solver.getFlawHandler(token->getStart()).isValid());
+      assertTrue(solver.getFlawHandler(token->start()).isValid());
 
       // Deactivation of the token will introduce it as a flaw, and nuke the start variable
       token->cancel();
       db->getConstraintEngine()->propagate();
       assertTrue(solver.inScope(token));
-      assertTrue(!solver.inScope(token->getStart()));
+      assertTrue(!solver.inScope(token->start()));
 
       // Now activate it and the variable should be back
       token->activate();
       db->getConstraintEngine()->propagate();
-      assertTrue(solver.getFlawHandler(token->getStart()).isId());
+      assertTrue(solver.getFlawHandler(token->start()).isId());
 
       // Restrict the base domain of the variable to a singleton. It should no longer be a flaw
-      token->getStart()->restrictBaseDomain(IntervalIntDomain(0, 0));
+      token->start()->restrictBaseDomain(IntervalIntDomain(0, 0));
       db->getConstraintEngine()->propagate();
-      assertTrue(solver.getFlawHandler(token->getStart()).isNoId());
+      assertTrue(solver.getFlawHandler(token->start()).isNoId());
 
       solver.reset();
       token->discard();
@@ -752,11 +752,11 @@ private:
       db->getConstraintEngine()->propagate();
       assertTrue(solver.getFlawHandler(slave)->getPriority() == 99999);
 
-      slave->getStart()->specify(10);
+      slave->start()->specify(10);
       db->getConstraintEngine()->propagate();
       assertTrue(solver.getFlawHandler(slave)->getPriority() == 1);
 
-      slave->getEnd()->specify(20);
+      slave->end()->specify(20);
       db->getConstraintEngine()->propagate();
       assertTrue(solver.getFlawHandler(slave)->getPriority() == 2);
 
@@ -764,16 +764,16 @@ private:
       db->getConstraintEngine()->propagate();
       assertTrue(solver.getFlawHandler(slave)->getPriority() == 3);
 
-      master->getStart()->specify(10);
+      master->start()->specify(10);
       db->getConstraintEngine()->propagate();
       assertTrue(solver.getFlawHandler(slave)->getPriority() == 4);
 
-      master->getEnd()->specify(20);
+      master->end()->specify(20);
       db->getConstraintEngine()->propagate();
       assertTrue(solver.getFlawHandler(slave)->getPriority() == 5);
 
-      slave->getStart()->reset();
-      slave->getStart()->specify(11);
+      slave->start()->reset();
+      slave->start()->specify(11);
       db->getConstraintEngine()->propagate();
       assertTrue(solver.getFlawHandler(slave)->getPriority() == 99999);
 
@@ -1423,8 +1423,8 @@ private:
 
     //test near
     //tok1 has midpoint at 11, tok2 has midpoint at 13, so put flawedToken's midpoint at 10
-    const_cast<AbstractDomain&>(flawedToken.getStart()->lastDomain()).intersect(4, 10);
-    const_cast<AbstractDomain&>(flawedToken.getEnd()->lastDomain()).intersect(5, 12);
+    const_cast<AbstractDomain&>(flawedToken.start()->lastDomain()).intersect(4, 10);
+    const_cast<AbstractDomain&>(flawedToken.end()->lastDomain()).intersect(5, 12);
     assertTrue(assembly.getConstraintEngine()->propagate());
     std::string mNearHeur("<FlawHandler component=\"HSTSOpenConditionDecisionPoint\" choice=\"mergeOnly\" order=\"near\"/>");
     TiXmlElement* mNearHeurXml = initXml(mNearHeur);
@@ -1851,7 +1851,7 @@ private:
    		IntervalIntDomain& horizon = HorizonFilter::getHorizon();
    		horizon = IntervalIntDomain(0, 40);
       TokenId first = db->getClient()->createToken("CommitTest.chaina", false);
-      first->getStart()->specify(0);
+      first->start()->specify(0);
       solver.solve(100,100);
 
       TokenId second = first->getSlave(0);

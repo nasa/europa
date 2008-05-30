@@ -98,18 +98,18 @@ namespace EUROPA {
       }
 
       std::multimap<TokenId, TokenId> pairs;
-      std::map<int, InstantId>::iterator first = m_flawedInstants.lower_bound((int)token->getStart()->lastDomain().getLowerBound());
+      std::map<int, InstantId>::iterator first = m_flawedInstants.lower_bound((int)token->start()->lastDomain().getLowerBound());
       if(first == m_flawedInstants.end()) {
-        debugMsg("Resource:getOrderingChoices", "No ordering choices:  no flawed instants after token start: " << token->getStart()->lastDomain().getLowerBound());
+        debugMsg("Resource:getOrderingChoices", "No ordering choices:  no flawed instants after token start: " << token->start()->lastDomain().getLowerBound());
         return;
       }
       //       checkError(first != m_flawedInstants.end(), 
       // 		 "No flawed instants within token " << token->getPredicateName().toString() << "(" << token->getKey() << ")");
-      std::map<int, InstantId>::iterator last = m_flawedInstants.lower_bound((int)token->getEnd()->lastDomain().getUpperBound());
+      std::map<int, InstantId>::iterator last = m_flawedInstants.lower_bound((int)token->end()->lastDomain().getUpperBound());
       
       debugMsg("Resource:getOrderingChoices", "Looking at flawed instants in interval [" << first->second->getTime() << " " << 
                (last == m_flawedInstants.end() ? PLUS_INFINITY : last->second->getTime()) << "]");
-      if(last != m_flawedInstants.end() && last->second->getTime() == token->getEnd()->lastDomain().getUpperBound())
+      if(last != m_flawedInstants.end() && last->second->getTime() == token->end()->lastDomain().getUpperBound())
         ++last;
       
       unsigned int count = 0;
@@ -571,8 +571,8 @@ namespace EUROPA {
   	  for (unsigned int i = 0;i<results.size(); i++) {
   	      SAVH::TransactionId predecessor = results[i].first;
   	      SAVH::TransactionId successor = results[i].second;	
-  	      retval.push_back(predecessor->time()->getParent()->getKey());
-  	      retval.push_back(successor->time()->getParent()->getKey());
+  	      retval.push_back(predecessor->time()->parent()->getKey());
+  	      retval.push_back(successor->time()->parent()->getKey());
   	  }
   	  
   	  return retval;

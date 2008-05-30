@@ -204,30 +204,30 @@ namespace EUROPA {
       if(Token::isStateVariable(var)){
         debugMsg("FlawManager:notifyRemoved", 
                  getId() << " Variable " << var->toString() << " is a state variable.  Removing flaw handlers and guards for " <<
-                 ((Token*)var->getParent())->getPredicateName().toString());
-        unsigned int parentKey = (unsigned int)var->getParent()->getKey();
+                 ((Token*)var->parent())->getPredicateName().toString());
+        unsigned int parentKey = (unsigned int)var->parent()->getKey();
         debugMsg("FlawManager:notifyRemoved", "Parent Key: " << parentKey);
         debugMsg("FlawManager:notifyRemoved", "m_flawHandlerGuards.size() == " << m_flawHandlerGuards.size());
         for(std::multimap<unsigned int, ConstraintId>::iterator it = m_flawHandlerGuards.find(parentKey);
             it != m_flawHandlerGuards.end() && it->first == parentKey;) {
           check_error(it->second.isValid());
           ConstraintId cid = it->second;
-					debugMsg("FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entry with key " << var->getParent()->getKey() << " from m_flawHandlerGuards");
+					debugMsg("FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entry with key " << var->parent()->getKey() << " from m_flawHandlerGuards");
           m_flawHandlerGuards.erase(it++);
 					debugMsg("FlawManager:discard", " [" << __FILE__ << ":" << __LINE__ << "] discarding a constraint in m_flawHandlerGuards: " << cid->toString());
           cid->discard();
         }
-				condDebugMsg(m_flawHandlerGuards.find(var->getParent()->getKey()) != m_flawHandlerGuards.end(), "FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << var->getParent()->getKey() << " from m_flawHandlerGuards");
-        m_flawHandlerGuards.erase(var->getParent()->getKey());
+				condDebugMsg(m_flawHandlerGuards.find(var->parent()->getKey()) != m_flawHandlerGuards.end(), "FlawManager:erase:guards", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << var->parent()->getKey() << " from m_flawHandlerGuards");
+        m_flawHandlerGuards.erase(var->parent()->getKey());
 
-				condDebugMsg(m_activeFlawHandlersByKey.find(var->getParent()->getKey()) != m_activeFlawHandlersByKey.end(), "FlawManager:erase:active", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << var->getParent()->getKey() << " from m_activeFlawHandlersByKey");
-        m_activeFlawHandlersByKey.erase(var->getParent()->getKey());
+				condDebugMsg(m_activeFlawHandlersByKey.find(var->parent()->getKey()) != m_activeFlawHandlersByKey.end(), "FlawManager:erase:active", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << var->parent()->getKey() << " from m_activeFlawHandlersByKey");
+        m_activeFlawHandlersByKey.erase(var->parent()->getKey());
 
-				condDebugMsg(m_staticFiltersByKey.find(var->getParent()->getKey()) != m_staticFiltersByKey.end(), "FlawManager:erase:static", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << var->getParent()->getKey() << " from m_staticFiltersByKey");
-        m_staticFiltersByKey.erase(var->getParent()->getKey());
+				condDebugMsg(m_staticFiltersByKey.find(var->parent()->getKey()) != m_staticFiltersByKey.end(), "FlawManager:erase:static", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << var->parent()->getKey() << " from m_staticFiltersByKey");
+        m_staticFiltersByKey.erase(var->parent()->getKey());
 
-				condDebugMsg(m_dynamicFiltersByKey.find(var->getParent()->getKey()) != m_dynamicFiltersByKey.end(), "FlawManager:erase:dynamic", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << var->getParent()->getKey() << " from m_dynamicFiltersByKey");
-        m_dynamicFiltersByKey.erase(var->getParent()->getKey());
+				condDebugMsg(m_dynamicFiltersByKey.find(var->parent()->getKey()) != m_dynamicFiltersByKey.end(), "FlawManager:erase:dynamic", " [" << __FILE__ << ":" << __LINE__ << "] removing entries with key " << var->parent()->getKey() << " from m_dynamicFiltersByKey");
+        m_dynamicFiltersByKey.erase(var->parent()->getKey());
       }
       condDebugMsg(!isValid(), "FlawManager:isValid", "Invalid datastructures in flaw manger.");
     }

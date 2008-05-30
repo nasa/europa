@@ -1909,8 +1909,8 @@ private:
     assertTrue(trans.size() == 2);
     assertTrue(instCount == 4);
     
-    use.getStart()->specify(0);
-    use.getEnd()->specify(10);
+    use.start()->specify(0);
+    use.end()->specify(10);
     assertTrue(db.getConstraintEngine()->propagate());
 
     //should reduce the instant count to 2
@@ -2047,40 +2047,40 @@ void ResourceModuleTests::runTests(std::string path)
     SAVH::ThreatDecisionPoint dp3(client, flawedInstants[0], *predFilterXml);
     dp3.initialize();
     assertTrue(dp3.getChoices().size() == 3);
-    assertTrue(dp3.getChoices()[0].first->time() == tok1.getEnd());
-    assertTrue(dp3.getChoices()[0].second->time() == tok2.getStart());
-    assertTrue(dp3.getChoices()[1].first->time() == tok1.getEnd());
-    assertTrue(dp3.getChoices()[1].second->time() == tok3.getStart());
-    assertTrue(dp3.getChoices()[2].first->time() == tok2.getEnd());
-    assertTrue(dp3.getChoices()[2].second->time() == tok3.getStart());
+    assertTrue(dp3.getChoices()[0].first->time() == tok1.end());
+    assertTrue(dp3.getChoices()[0].second->time() == tok2.start());
+    assertTrue(dp3.getChoices()[1].first->time() == tok1.end());
+    assertTrue(dp3.getChoices()[1].second->time() == tok3.start());
+    assertTrue(dp3.getChoices()[2].first->time() == tok2.end());
+    assertTrue(dp3.getChoices()[2].second->time() == tok3.start());
 
     std::string sucFilter = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"successor\"/>";
     TiXmlElement* sucFilterXml = initXml(sucFilter);
     SAVH::ThreatDecisionPoint dp4(client, flawedInstants[0], *sucFilterXml);
     dp4.initialize();
     assertTrue(dp4.getChoices().size() == 5);
-    assertTrue(dp4.getChoices()[0].first->time() == tok1.getEnd());
-    assertTrue(dp4.getChoices()[0].second->time() == tok2.getStart());
-    assertTrue(dp4.getChoices()[1].first->time() == tok1.getEnd());
-    assertTrue(dp4.getChoices()[1].second->time() == tok3.getStart());
-    assertTrue(dp4.getChoices()[2].first->time() == tok2.getStart());
-    assertTrue(dp4.getChoices()[2].second->time() == tok3.getStart());
-    assertTrue(dp4.getChoices()[3].first->time() == tok2.getEnd());
-    assertTrue(dp4.getChoices()[3].second->time() == tok3.getStart());
-    assertTrue(dp4.getChoices()[4].first->time() == tok3.getStart());
-    assertTrue(dp4.getChoices()[4].second->time() == tok2.getStart());
+    assertTrue(dp4.getChoices()[0].first->time() == tok1.end());
+    assertTrue(dp4.getChoices()[0].second->time() == tok2.start());
+    assertTrue(dp4.getChoices()[1].first->time() == tok1.end());
+    assertTrue(dp4.getChoices()[1].second->time() == tok3.start());
+    assertTrue(dp4.getChoices()[2].first->time() == tok2.start());
+    assertTrue(dp4.getChoices()[2].second->time() == tok3.start());
+    assertTrue(dp4.getChoices()[3].first->time() == tok2.end());
+    assertTrue(dp4.getChoices()[3].second->time() == tok3.start());
+    assertTrue(dp4.getChoices()[4].first->time() == tok3.start());
+    assertTrue(dp4.getChoices()[4].second->time() == tok2.start());
 
     std::string bothFilter = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\"/>";
     TiXmlElement* bothFilterXml = initXml(bothFilter);
     SAVH::ThreatDecisionPoint dp5(client, flawedInstants[0], *bothFilterXml);
     dp5.initialize();
     assertTrue(dp5.getChoices().size() == 3);
-    assertTrue(dp5.getChoices()[0].first->time() == tok1.getEnd());
-    assertTrue(dp5.getChoices()[0].second->time() == tok2.getStart());
-    assertTrue(dp5.getChoices()[1].first->time() == tok1.getEnd());
-    assertTrue(dp5.getChoices()[1].second->time() == tok3.getStart());
-    assertTrue(dp5.getChoices()[2].first->time() == tok2.getEnd());
-    assertTrue(dp5.getChoices()[2].second->time() == tok3.getStart());
+    assertTrue(dp5.getChoices()[0].first->time() == tok1.end());
+    assertTrue(dp5.getChoices()[0].second->time() == tok2.start());
+    assertTrue(dp5.getChoices()[1].first->time() == tok1.end());
+    assertTrue(dp5.getChoices()[1].second->time() == tok3.start());
+    assertTrue(dp5.getChoices()[2].first->time() == tok2.end());
+    assertTrue(dp5.getChoices()[2].second->time() == tok3.start());
 
     //the combination of ascendingKeyPredecessor and ascendingKeySuccessor have already been tested by now
 
@@ -2089,24 +2089,24 @@ void ResourceModuleTests::runTests(std::string path)
     SAVH::ThreatDecisionPoint dp6(client, flawedInstants[0], *earliestPredXml);
     dp6.initialize();
     assertTrue(dp6.getChoices().size() == 3);
-    assertTrue(dp6.getChoices()[0].first->time() == tok1.getEnd());
-    assertTrue(dp6.getChoices()[0].second->time() == tok2.getStart());
-    assertTrue(dp6.getChoices()[1].first->time() == tok1.getEnd());
-    assertTrue(dp6.getChoices()[1].second->time() == tok3.getStart());
-    assertTrue(dp6.getChoices()[2].first->time() == tok2.getEnd());
-    assertTrue(dp6.getChoices()[2].second->time() == tok3.getStart());
+    assertTrue(dp6.getChoices()[0].first->time() == tok1.end());
+    assertTrue(dp6.getChoices()[0].second->time() == tok2.start());
+    assertTrue(dp6.getChoices()[1].first->time() == tok1.end());
+    assertTrue(dp6.getChoices()[1].second->time() == tok3.start());
+    assertTrue(dp6.getChoices()[2].first->time() == tok2.end());
+    assertTrue(dp6.getChoices()[2].second->time() == tok3.start());
 
     std::string latestPred = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"latestPredecessor\"/>";
     TiXmlElement* latestPredXml = initXml(latestPred);
     SAVH::ThreatDecisionPoint dp7(client, flawedInstants[0], *latestPredXml);
     dp7.initialize();
     assertTrue(dp7.getChoices().size() == 3);
-    assertTrue(dp7.getChoices()[0].first->time() == tok2.getEnd());
-    assertTrue(dp7.getChoices()[0].second->time() == tok3.getStart());
-    assertTrue(dp7.getChoices()[1].first->time() == tok1.getEnd());
-    assertTrue(dp7.getChoices()[1].second->time() == tok2.getStart());
-    assertTrue(dp7.getChoices()[2].first->time() == tok1.getEnd());
-    assertTrue(dp7.getChoices()[2].second->time() == tok3.getStart());
+    assertTrue(dp7.getChoices()[0].first->time() == tok2.end());
+    assertTrue(dp7.getChoices()[0].second->time() == tok3.start());
+    assertTrue(dp7.getChoices()[1].first->time() == tok1.end());
+    assertTrue(dp7.getChoices()[1].second->time() == tok2.start());
+    assertTrue(dp7.getChoices()[2].first->time() == tok1.end());
+    assertTrue(dp7.getChoices()[2].second->time() == tok3.start());
 
 
     std::string longestPred = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"successor\" order=\"longestPredecessor\"/>";
@@ -2114,7 +2114,7 @@ void ResourceModuleTests::runTests(std::string path)
     SAVH::ThreatDecisionPoint dp8(client, flawedInstants[0], *longestPredXml);
     dp8.initialize();
     assertTrue(dp8.getChoices().size() == 5);
-    assertTrue(dp8.getChoices()[0].first->time() == tok3.getStart());
+    assertTrue(dp8.getChoices()[0].first->time() == tok3.start());
 
 
     std::string shortestPred = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"shortestPredecessor\"/>";
@@ -2122,16 +2122,16 @@ void ResourceModuleTests::runTests(std::string path)
     SAVH::ThreatDecisionPoint dp9(client, flawedInstants[0], *shortestPredXml);
     dp9.initialize();
     assertTrue(dp9.getChoices().size() == 3);
-    assertTrue(dp9.getChoices()[0].first->time() == tok2.getStart() || 
-               dp9.getChoices()[0].first->time() == tok1.getEnd());
+    assertTrue(dp9.getChoices()[0].first->time() == tok2.start() || 
+               dp9.getChoices()[0].first->time() == tok1.end());
 
     std::string descendingKeyPred = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"descendingKeyPredecessor\"/>";
     TiXmlElement* descendingKeyPredXml = initXml(descendingKeyPred);
     SAVH::ThreatDecisionPoint dp10(client, flawedInstants[0], *descendingKeyPredXml);
     dp10.initialize();
     assertTrue(dp10.getChoices().size() == 3);
-    assertTrue(dp10.getChoices()[0].first->time() == tok2.getEnd());
-    assertTrue(dp10.getChoices()[1].first->time() == tok1.getEnd());
+    assertTrue(dp10.getChoices()[0].first->time() == tok2.end());
+    assertTrue(dp10.getChoices()[1].first->time() == tok1.end());
 
 
     std::string earliestSucc = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"earliestSuccessor\"/>";
@@ -2139,17 +2139,17 @@ void ResourceModuleTests::runTests(std::string path)
     SAVH::ThreatDecisionPoint dp11(client, flawedInstants[0], *earliestSuccXml);
     dp11.initialize();
     assertTrue(dp11.getChoices().size() == 3);
-    assertTrue(dp11.getChoices()[0].second->time() == tok2.getStart() ||
-               dp11.getChoices()[0].second->time() == tok3.getStart());
+    assertTrue(dp11.getChoices()[0].second->time() == tok2.start() ||
+               dp11.getChoices()[0].second->time() == tok3.start());
 
     std::string latestSucc = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"latestSuccessor\"/>";
     TiXmlElement* latestSuccXml = initXml(latestSucc);
     SAVH::ThreatDecisionPoint dp12(client, flawedInstants[0], *latestSuccXml);
     dp12.initialize();
     assertTrue(dp12.getChoices().size() == 3);
-    assertTrue(dp12.getChoices()[0].second->time() == tok3.getStart());
-    assertTrue(dp12.getChoices()[1].second->time() == tok3.getStart());
-    assertTrue(dp12.getChoices()[2].second->time() == tok2.getStart());
+    assertTrue(dp12.getChoices()[0].second->time() == tok3.start());
+    assertTrue(dp12.getChoices()[1].second->time() == tok3.start());
+    assertTrue(dp12.getChoices()[2].second->time() == tok2.start());
 
 
     std::string longestSucc = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"longestSuccessor\"/>";
@@ -2157,27 +2157,27 @@ void ResourceModuleTests::runTests(std::string path)
     SAVH::ThreatDecisionPoint dp13(client, flawedInstants[0], *longestSuccXml);
     dp13.initialize();
     assertTrue(dp13.getChoices().size() == 3);
-    assertTrue(dp13.getChoices()[0].second->time() == tok3.getStart());
-    assertTrue(dp13.getChoices()[1].second->time() == tok3.getStart());
-    assertTrue(dp13.getChoices()[2].second->time() == tok2.getStart());
+    assertTrue(dp13.getChoices()[0].second->time() == tok3.start());
+    assertTrue(dp13.getChoices()[1].second->time() == tok3.start());
+    assertTrue(dp13.getChoices()[2].second->time() == tok2.start());
 
     std::string shortestSucc = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"shortestSuccessor\"/>";
     TiXmlElement* shortestSuccXml = initXml(shortestSucc);
     SAVH::ThreatDecisionPoint dp14(client, flawedInstants[0], *shortestSuccXml);
     dp14.initialize();
     assertTrue(dp14.getChoices().size() == 3);
-    assertTrue(dp14.getChoices()[0].second->time() == tok2.getStart());
-    assertTrue(dp14.getChoices()[1].second->time() == tok3.getStart());
-    assertTrue(dp14.getChoices()[2].second->time() == tok3.getStart());
+    assertTrue(dp14.getChoices()[0].second->time() == tok2.start());
+    assertTrue(dp14.getChoices()[1].second->time() == tok3.start());
+    assertTrue(dp14.getChoices()[2].second->time() == tok3.start());
 
     std::string descendingKeySucc = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"descendingKeySuccessor\"/>";
     TiXmlElement* descendingKeySuccXml = initXml(descendingKeySucc);
     SAVH::ThreatDecisionPoint dp15(client, flawedInstants[0], *descendingKeySuccXml);
     dp15.initialize();
     assertTrue(dp15.getChoices().size() == 3);
-    assertTrue(dp15.getChoices()[0].second->time() == tok3.getStart());
-    assertTrue(dp15.getChoices()[1].second->time() == tok3.getStart());
-    assertTrue(dp15.getChoices()[2].second->time() == tok2.getStart());
+    assertTrue(dp15.getChoices()[0].second->time() == tok3.start());
+    assertTrue(dp15.getChoices()[1].second->time() == tok3.start());
+    assertTrue(dp15.getChoices()[2].second->time() == tok2.start());
 
 
     std::string ascendingKeySucc = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"ascendingKeySuccessor\"/>";
@@ -2185,9 +2185,9 @@ void ResourceModuleTests::runTests(std::string path)
     SAVH::ThreatDecisionPoint dp16(client, flawedInstants[0], *ascendingKeySuccXml);
     dp16.initialize();
     assertTrue(dp16.getChoices().size() == 3);
-    assertTrue(dp16.getChoices()[0].second->time() == tok2.getStart());
-    assertTrue(dp16.getChoices()[1].second->time() == tok3.getStart());
-    assertTrue(dp16.getChoices()[2].second->time() == tok3.getStart());
+    assertTrue(dp16.getChoices()[0].second->time() == tok2.start());
+    assertTrue(dp16.getChoices()[1].second->time() == tok3.start());
+    assertTrue(dp16.getChoices()[2].second->time() == tok3.start());
     
 
     std::string leastImpact = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"successor\" order=\"leastImpact,earliestPredecessor,shortestSuccessor\"/>";
@@ -2195,16 +2195,16 @@ void ResourceModuleTests::runTests(std::string path)
     SAVH::ThreatDecisionPoint dp17(client, flawedInstants[0], *leastImpactXml);
     dp17.initialize();
     assertTrue(dp17.getChoices().size() == 5);
-    assertTrue(dp17.getChoices()[0].first->time() == tok1.getEnd());
-    assertTrue(dp17.getChoices()[0].second->time() == tok2.getStart());
-    assertTrue(dp17.getChoices()[1].first->time() == tok1.getEnd());
-    assertTrue(dp17.getChoices()[1].second->time() == tok3.getStart());
-    assertTrue(dp17.getChoices()[2].first->time() == tok2.getStart());
-    assertTrue(dp17.getChoices()[2].second->time() == tok3.getStart());
-    assertTrue(dp17.getChoices()[3].first->time() == tok3.getStart());
-    assertTrue(dp17.getChoices()[3].second->time() == tok2.getStart());
-    assertTrue(dp17.getChoices()[4].first->time() == tok2.getEnd());
-    assertTrue(dp17.getChoices()[4].second->time() == tok3.getStart());
+    assertTrue(dp17.getChoices()[0].first->time() == tok1.end());
+    assertTrue(dp17.getChoices()[0].second->time() == tok2.start());
+    assertTrue(dp17.getChoices()[1].first->time() == tok1.end());
+    assertTrue(dp17.getChoices()[1].second->time() == tok3.start());
+    assertTrue(dp17.getChoices()[2].first->time() == tok2.start());
+    assertTrue(dp17.getChoices()[2].second->time() == tok3.start());
+    assertTrue(dp17.getChoices()[3].first->time() == tok3.start());
+    assertTrue(dp17.getChoices()[3].second->time() == tok2.start());
+    assertTrue(dp17.getChoices()[4].first->time() == tok2.end());
+    assertTrue(dp17.getChoices()[4].second->time() == tok3.start());
 
     std::string precedesOnly = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" constraint=\"precedesOnly\"/>";
     TiXmlElement* precedesOnlyXml = initXml(precedesOnly);

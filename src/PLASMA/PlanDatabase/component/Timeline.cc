@@ -169,7 +169,7 @@ namespace EUROPA {
 	       "Should be consistent to continue here. Should have checked before you called the method in the first place.");
     check_error(isValid());
 
-    const TokenSet& tokensForThisObject = getTokens();
+    const TokenSet& tokensForThisObject = tokens();
     for (TokenSet::const_iterator it = tokensForThisObject.begin(); it != tokensForThisObject.end(); ++it) {
       TokenId token = *it;
       if (m_tokenIndex.find(token->getKey()) == m_tokenIndex.end() && token->isActive())
@@ -178,7 +178,7 @@ namespace EUROPA {
   }
 
   bool Timeline::hasTokensToOrder() const {
-    const TokenSet& tokensForThisObject = getTokens();
+    const TokenSet& tokensForThisObject = tokens();
 
     // Quits on the first token that is active and not yet sequenced
     for (TokenSet::const_iterator it = tokensForThisObject.begin(); it != tokensForThisObject.end(); ++it) {
@@ -408,13 +408,13 @@ namespace EUROPA {
       // Also ensure x.end <= (x+1).start.
       if (!cleaningUp && getPlanDatabase()->getConstraintEngine()->constraintConsistent()) {
         check_error(predecessor.isNoId() || isConstrainedToPrecede(predecessor, token));
-        int earliest_start = (int) token->getStart()->lastDomain().getLowerBound();
-        int latest_start = (int) token->getStart()->lastDomain().getUpperBound();
+        int earliest_start = (int) token->start()->lastDomain().getLowerBound();
+        int latest_start = (int) token->start()->lastDomain().getUpperBound();
         check_error(earliest_start == MINUS_INFINITY || earliest_start == PLUS_INFINITY || earliest_start > prior_earliest_start);
         check_error(prior_earliest_end <= earliest_start);
         check_error(prior_latest_end <= latest_start);
-        prior_earliest_end = (int) token->getEnd()->lastDomain().getLowerBound();
-        prior_latest_end = (int) token->getEnd()->lastDomain().getLowerBound();
+        prior_earliest_end = (int) token->end()->lastDomain().getLowerBound();
+        prior_latest_end = (int) token->end()->lastDomain().getLowerBound();
         prior_earliest_start = earliest_start;
       }
       predecessor = token;

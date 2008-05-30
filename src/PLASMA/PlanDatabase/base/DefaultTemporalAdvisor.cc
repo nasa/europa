@@ -23,8 +23,8 @@ namespace EUROPA {
   bool DefaultTemporalAdvisor::canPrecede(const TokenId& first, const TokenId& second){    
     //    std::cout << "DefaultTemporalAdvisor canPrecede (" << first->getKey() << ") and (" << second->getKey() << ")" << std::endl;
 
-    int earliest_end = (int) first->getEnd()->getDerivedDomain().getLowerBound();
-    int latest_start = (int) second->getStart()->getDerivedDomain().getUpperBound();
+    int earliest_end = (int) first->end()->getDerivedDomain().getLowerBound();
+    int latest_start = (int) second->start()->getDerivedDomain().getUpperBound();
 
     return (earliest_end <= latest_start);
   }
@@ -41,11 +41,11 @@ namespace EUROPA {
     check_error(token != successor);
     check_error(token != predecessor);
 
-    int latest_start = (int) successor->getStart()->getDerivedDomain().getUpperBound();
-    int earliest_end = (int) predecessor->getEnd()->getDerivedDomain().getLowerBound();
+    int latest_start = (int) successor->start()->getDerivedDomain().getUpperBound();
+    int earliest_end = (int) predecessor->end()->getDerivedDomain().getLowerBound();
     int min_duration = latest_start - earliest_end;
 
-    if(min_duration >= token->getDuration()->getDerivedDomain().getLowerBound())
+    if(min_duration >= token->duration()->getDerivedDomain().getLowerBound())
       return true;
     else 
       return false;

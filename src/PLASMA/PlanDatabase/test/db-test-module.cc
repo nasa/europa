@@ -977,7 +977,7 @@ private:
 
     // Since the object type should be closed automatically, the object variable will propagate changes,
     // so the object token relation will link up the Token and the object.
-    assertTrue(!o1->getTokens().empty());
+    assertTrue(!o1->tokens().empty());
 
     // Insertion of a new object should not affect the given event token
     ObjectId o2 = (new Object(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
@@ -1092,10 +1092,10 @@ private:
       db->close();
     // Event Token
     EventToken eventToken(db, LabelStr(DEFAULT_PREDICATE), true, false, IntervalIntDomain(0, 1000), Token::noObject(), false);
-    assertTrue(eventToken.getStart()->getDerivedDomain() == eventToken.getEnd()->getDerivedDomain());
-    assertTrue(eventToken.getDuration()->getDerivedDomain() == IntervalIntDomain(0, 0));
-    eventToken.getStart()->restrictBaseDomain(IntervalIntDomain(5, 10));
-    assertTrue(eventToken.getEnd()->getDerivedDomain() == IntervalIntDomain(5, 10));
+    assertTrue(eventToken.start()->getDerivedDomain() == eventToken.end()->getDerivedDomain());
+    assertTrue(eventToken.duration()->getDerivedDomain() == IntervalIntDomain(0, 0));
+    eventToken.start()->restrictBaseDomain(IntervalIntDomain(5, 10));
+    assertTrue(eventToken.end()->getDerivedDomain() == IntervalIntDomain(5, 10));
     eventToken.addParameter(IntervalDomain(-1.08, 20.18), "IntervalParam");
     eventToken.close();
   
@@ -1117,12 +1117,12 @@ private:
     values.push_back(EUROPA::LabelStr("L3"));
     intervalToken.addParameter(LabelSet(values), "LabelSetParam");
     intervalToken.close();
-    assertTrue(intervalToken.getEnd()->getDerivedDomain().getLowerBound() == 2);
-    intervalToken.getStart()->restrictBaseDomain(IntervalIntDomain(5, 10));
-    assertTrue(intervalToken.getEnd()->getDerivedDomain() == IntervalIntDomain(7, 20));
-    intervalToken.getEnd()->restrictBaseDomain(IntervalIntDomain(9, 10));
-    assertTrue(intervalToken.getStart()->getDerivedDomain() == IntervalIntDomain(5, 8));
-    assertTrue(intervalToken.getDuration()->getDerivedDomain() == IntervalIntDomain(2, 5));
+    assertTrue(intervalToken.end()->getDerivedDomain().getLowerBound() == 2);
+    intervalToken.start()->restrictBaseDomain(IntervalIntDomain(5, 10));
+    assertTrue(intervalToken.end()->getDerivedDomain() == IntervalIntDomain(7, 20));
+    intervalToken.end()->restrictBaseDomain(IntervalIntDomain(9, 10));
+    assertTrue(intervalToken.start()->getDerivedDomain() == IntervalIntDomain(5, 8));
+    assertTrue(intervalToken.duration()->getDerivedDomain() == IntervalIntDomain(2, 5));
 
     // Create and delete a Token
     TokenId token = (new IntervalToken(db, 
@@ -1191,15 +1191,15 @@ private:
                      Token::noObject(), true);
   
     // Constraint the start variable of both tokens
-    EqualConstraint c0("eq", "Default", ENGINE, makeScope(t0.getStart(), t1.getStart()));
+    EqualConstraint c0("eq", "Default", ENGINE, makeScope(t0.start(), t1.start()));
   
     assertTrue(t1.isInactive());
     t0.activate();
-    t1.merge(t0.getId());
+    t1.doMerge(t0.getId());
     assertTrue(t1.isMerged());
     t1.cancel();
     assertTrue(t1.isInactive());
-    t1.merge(t0.getId());
+    t1.doMerge(t0.getId());
 
     // Test that we can allocate a token, but if we constrain it with any external entity, 
     // then the state variable will be restricted
@@ -1269,7 +1269,7 @@ private:
     // Delete slave only - master must be committed to allow this
     t0.commit();
     delete (Token*) t2;
-    assertTrue(t0.getSlaves().size() == 3);
+    assertTrue(t0.slaves().size() == 3);
 
     // Should verify correct count of tokens remain. --wedgingt 2004 Feb 27
   
@@ -1367,7 +1367,7 @@ private:
     // Make sure the slave remains, since it was committed explicitly
     assertTrue(t1.isValid());
     assertTrue(ce->constraintConsistent());
-    assertTrue(t1->getMaster().isNoId());
+    assertTrue(t1->master().isNoId());
     t1->terminate();
     delete (Token*) t1;
     assertTrue(ce->constraintConsistent());
@@ -1439,7 +1439,7 @@ private:
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
   
-    assertTrue(t0.getDuration()->getDerivedDomain().getUpperBound() == 20);
+    assertTrue(t0.duration()->getDerivedDomain().getUpperBound() == 20);
   
     IntervalToken t1(db,
                      LabelStr(DEFAULT_PREDICATE), 
@@ -1449,7 +1449,7 @@ private:
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
   
-    t1.getDuration()->restrictBaseDomain(IntervalIntDomain(5, 7));
+    t1.duration()->restrictBaseDomain(IntervalIntDomain(5, 7));
   
     // Activate & deactivate - ensure proper handling of rejectability variable
     assertFalse(t0.getState()->getDerivedDomain().isSingleton());
@@ -1461,15 +1461,15 @@ private:
   
     // Now activate and merge
     t0.activate();
-    t1.merge(t0.getId());
+    t1.doMerge(t0.getId());
   
     // Make sure the necessary restrictions have been imposed due to merging i.e. restruction due to specified domain
-    assertTrue(t0.getDuration()->getDerivedDomain().getUpperBound() == 7, t0.getDuration()->toString());
+    assertTrue(t0.duration()->getDerivedDomain().getUpperBound() == 7, t0.duration()->toString());
     assertTrue(t1.isMerged());
   
     // Do a split and make sure the old values are reinstated.
     t1.cancel();
-    assertTrue(t0.getDuration()->getDerivedDomain().getUpperBound() == 20, t0.getDuration()->toString());
+    assertTrue(t0.duration()->getDerivedDomain().getUpperBound() == 20, t0.duration()->toString());
     assertTrue(t1.isInactive());
   
     // Now post equality constraint between t1 and extra token t2 and remerge
@@ -1481,34 +1481,34 @@ private:
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
   
-    t2.getEnd()->restrictBaseDomain(IntervalIntDomain(8, 10));
+    t2.end()->restrictBaseDomain(IntervalIntDomain(8, 10));
   
     std::vector<ConstrainedVariableId> temp;
-    temp.push_back(t1.getEnd());
-    temp.push_back(t2.getEnd());
+    temp.push_back(t1.end());
+    temp.push_back(t2.end());
     ConstraintId equalityConstraint = ConstraintLibrary::createConstraint("concurrent",
                                                                           db->getConstraintEngine(),
                                                                           temp);
-    t1.merge(t0.getId());
+    t1.doMerge(t0.getId());
   
     assertFalse(t0.getMergedTokens().empty());
   
     // Verify that the equality constraint has migrated and original has been deactivated.
     //TBW: when stacking instead of merging tokens, the next check is not true
     // assert(!equalityConstraint->isActive());
-    assertTrue(t0.getEnd()->getDerivedDomain().getLowerBound() == 8);
-    assertTrue(t0.getEnd()->getDerivedDomain() == t2.getEnd()->getDerivedDomain());
+    assertTrue(t0.end()->getDerivedDomain().getLowerBound() == 8);
+    assertTrue(t0.end()->getDerivedDomain() == t2.end()->getDerivedDomain());
   
     // Undo the merge and check for initial conditions being established
     t1.cancel();
     assertTrue(equalityConstraint->isActive());
   
     // Redo the merge
-    t1.merge(t0.getId());
+    t1.doMerge(t0.getId());
   
     // Confirm deletion of the constraint is handled correctly
     delete (Constraint*) equalityConstraint;
-    assertTrue(t0.getEnd()->getDerivedDomain() != t2.getEnd()->getDerivedDomain());
+    assertTrue(t0.end()->getDerivedDomain() != t2.end()->getDerivedDomain());
   
   
     // Test subset path
@@ -1517,9 +1517,9 @@ private:
 
     ConstraintId subsetOfConstraint = ConstraintLibrary::createConstraint("SubsetOf",
                                                                           db->getConstraintEngine(),
-                                                                          makeScope(t1.getDuration(), superset.getId()));
-    t1.merge(t0.getId());
-    assertTrue(t0.getDuration()->getDerivedDomain().getUpperBound() == 6);
+                                                                          makeScope(t1.duration(), superset.getId()));
+    t1.doMerge(t0.getId());
+    assertTrue(t0.duration()->getDerivedDomain().getUpperBound() == 6);
     delete (Constraint*) subsetOfConstraint;
 
     DEFAULT_TEARDOWN();
@@ -1573,7 +1573,7 @@ private:
                      IntervalIntDomain(1, 1000));
 
 
-    LessThanEqualConstraint c0("leq", "Default", db->getConstraintEngine(), makeScope(t1.getStart(), t3.getStart()));
+    LessThanEqualConstraint c0("leq", "Default", db->getConstraintEngine(), makeScope(t1.start(), t3.start()));
 
     t0.activate();
     t2.activate();
@@ -1582,8 +1582,8 @@ private:
 
     db->getConstraintEngine()->propagate();
 
-    t1.merge(t0.getId());
-    t3.merge(t2.getId());
+    t1.doMerge(t0.getId());
+    t3.doMerge(t2.getId());
 
     t3.cancel();
     t1.cancel();
@@ -1630,23 +1630,23 @@ private:
                      IntervalIntDomain(1, 1000));
 
     t0.activate();
-    t1.merge(t0.getId());
+    t1.doMerge(t0.getId());
 
     // Post a constraint between an active variable (t1.start) and a deactivated variable (t2.start)
-    LessThanEqualConstraint c0("leq", "Default", db->getConstraintEngine(), makeScope(t1.getStart(), t2.getStart()));
+    LessThanEqualConstraint c0("leq", "Default", db->getConstraintEngine(), makeScope(t1.start(), t2.start()));
 
     assertTrue(!c0.isActive(), "Failed to deactive constraint on merged token");
 
     // Now restrict t2.start and verify that t0.start is impacted
-    t2.getStart()->specify(5);
-    assertTrue(t0.getStart()->getDerivedDomain().getUpperBound() == 5, "Failed to migrate constraint");
+    t2.start()->specify(5);
+    assertTrue(t0.start()->getDerivedDomain().getUpperBound() == 5, "Failed to migrate constraint");
 
 
     // Split and verify the new constraint is activated
     t1.cancel();
     assertTrue(c0.isActive(), "Failed to reactivate migrated constraint.");
-    assertTrue(t0.getStart()->getDerivedDomain().getUpperBound() == 10, "Failed to clean up migrated constraint");
-    assertTrue(t1.getStart()->getDerivedDomain().getUpperBound() == 5, "Failed to reinstate migrated constraint");
+    assertTrue(t0.start()->getDerivedDomain().getUpperBound() == 10, "Failed to clean up migrated constraint");
+    assertTrue(t1.start()->getDerivedDomain().getUpperBound() == 5, "Failed to reinstate migrated constraint");
 
     DEFAULT_TEARDOWN();
     return true;
@@ -1713,38 +1713,38 @@ private:
     token3.close();
 
     // create a test constraint between t2 and t3
-    ConstraintLibrary::createConstraint(LabelStr("precedes"),ce,makeScope(token2.getEnd(),token3.getStart()));
+    ConstraintLibrary::createConstraint(LabelStr("precedes"),ce,makeScope(token2.end(),token3.start()));
 
     assertTrue(ce->propagate());
 
     // after constraining t2 to come before t3, only t2 and t3 start and
     // end domains should've changed.
 
-    assertTrue(token0.getStart()->lastDomain().getLowerBound() == 0);
-    assertTrue(token0.getStart()->lastDomain().getUpperBound() == 10);
-    assertTrue(token0.getEnd()->lastDomain().getLowerBound() == 1);
-    assertTrue(token0.getEnd()->lastDomain().getUpperBound() == 200);
+    assertTrue(token0.start()->lastDomain().getLowerBound() == 0);
+    assertTrue(token0.start()->lastDomain().getUpperBound() == 10);
+    assertTrue(token0.end()->lastDomain().getLowerBound() == 1);
+    assertTrue(token0.end()->lastDomain().getUpperBound() == 200);
 
-    assertTrue(token1.getStart()->lastDomain().getLowerBound() == 0);
-    assertTrue(token1.getStart()->lastDomain().getUpperBound() == 10);
-    assertTrue(token1.getEnd()->lastDomain().getLowerBound() == 1);
-    assertTrue(token1.getEnd()->lastDomain().getUpperBound() == 200);
+    assertTrue(token1.start()->lastDomain().getLowerBound() == 0);
+    assertTrue(token1.start()->lastDomain().getUpperBound() == 10);
+    assertTrue(token1.end()->lastDomain().getLowerBound() == 1);
+    assertTrue(token1.end()->lastDomain().getUpperBound() == 200);
 
-    assertTrue(token2.getStart()->lastDomain().getLowerBound() == 0);
-    assertTrue(token2.getStart()->lastDomain().getUpperBound() == 9);
-    assertTrue(token2.getEnd()->lastDomain().getLowerBound() == 1);
-    assertTrue(token2.getEnd()->lastDomain().getUpperBound() == 10);
+    assertTrue(token2.start()->lastDomain().getLowerBound() == 0);
+    assertTrue(token2.start()->lastDomain().getUpperBound() == 9);
+    assertTrue(token2.end()->lastDomain().getLowerBound() == 1);
+    assertTrue(token2.end()->lastDomain().getUpperBound() == 10);
 
-    assertTrue(token3.getStart()->lastDomain().getLowerBound() == 1);
-    assertTrue(token3.getStart()->lastDomain().getUpperBound() == 10);
-    assertTrue(token3.getEnd()->lastDomain().getLowerBound() == 2);
-    assertTrue(token3.getEnd()->lastDomain().getUpperBound() == 200);
+    assertTrue(token3.start()->lastDomain().getLowerBound() == 1);
+    assertTrue(token3.start()->lastDomain().getUpperBound() == 10);
+    assertTrue(token3.end()->lastDomain().getLowerBound() == 2);
+    assertTrue(token3.end()->lastDomain().getUpperBound() == 200);
 
     token0.activate();
-    token2.merge(token0.getId());
+    token2.doMerge(token0.getId());
     assertTrue(ce->propagate());
     token1.activate();
-    token3.merge(token1.getId());
+    token3.doMerge(token1.getId());
     assertTrue(ce->propagate());
 
     // after merging t2->t0 and t3->t1, all parameters should be
@@ -1752,20 +1752,20 @@ private:
     // relation between t2 and t3).
 
 
-    assertTrue(token0.getParameters()[0]->lastDomain().isSingleton());
-    assertTrue(token1.getParameters()[0]->lastDomain().isSingleton());
-    assertTrue(token2.getParameters()[0]->lastDomain().isSingleton());
-    assertTrue(token3.getParameters()[0]->lastDomain().isSingleton());
+    assertTrue(token0.parameters()[0]->lastDomain().isSingleton());
+    assertTrue(token1.parameters()[0]->lastDomain().isSingleton());
+    assertTrue(token2.parameters()[0]->lastDomain().isSingleton());
+    assertTrue(token3.parameters()[0]->lastDomain().isSingleton());
 
-    assertTrue(token0.getStart()->lastDomain().getLowerBound() == 0);
-    assertTrue(token0.getStart()->lastDomain().getUpperBound() == 9);
-    assertTrue(token0.getEnd()->lastDomain().getLowerBound() == 1);
-    assertTrue(token0.getEnd()->lastDomain().getUpperBound() == 10);
+    assertTrue(token0.start()->lastDomain().getLowerBound() == 0);
+    assertTrue(token0.start()->lastDomain().getUpperBound() == 9);
+    assertTrue(token0.end()->lastDomain().getLowerBound() == 1);
+    assertTrue(token0.end()->lastDomain().getUpperBound() == 10);
 
-    assertTrue(token1.getStart()->lastDomain().getLowerBound() == 1);
-    assertTrue(token1.getStart()->lastDomain().getUpperBound() == 10);
-    assertTrue(token1.getEnd()->lastDomain().getLowerBound() == 2);
-    assertTrue(token1.getEnd()->lastDomain().getUpperBound() == 200);
+    assertTrue(token1.start()->lastDomain().getLowerBound() == 1);
+    assertTrue(token1.start()->lastDomain().getUpperBound() == 10);
+    assertTrue(token1.end()->lastDomain().getLowerBound() == 2);
+    assertTrue(token1.end()->lastDomain().getUpperBound() == 200);
 
     token2.cancel();
     assertTrue(ce->propagate());
@@ -1776,15 +1776,15 @@ private:
     // However, t1 should remain constrained to be before t2 since it still
     // inherits the before constraint between t2 and t3.
 
-    assertFalse(token0.getParameters()[0]->lastDomain().isSingleton());
-    assertTrue(token1.getParameters()[0]->lastDomain().isSingleton(), token1.getParameters()[0]->toString());
-    assertTrue(token2.getParameters()[0]->lastDomain().isSingleton());
-    assertTrue(token3.getParameters()[0]->lastDomain().isSingleton());
+    assertFalse(token0.parameters()[0]->lastDomain().isSingleton());
+    assertTrue(token1.parameters()[0]->lastDomain().isSingleton(), token1.parameters()[0]->toString());
+    assertTrue(token2.parameters()[0]->lastDomain().isSingleton());
+    assertTrue(token3.parameters()[0]->lastDomain().isSingleton());
 
-    assertTrue(token0.getStart()->lastDomain().getLowerBound() == 0);
-    assertTrue(token0.getStart()->lastDomain().getUpperBound() == 10);
-    assertTrue(token0.getEnd()->lastDomain().getLowerBound() == 1);
-    assertTrue(token0.getEnd()->lastDomain().getUpperBound() == 200);
+    assertTrue(token0.start()->lastDomain().getLowerBound() == 0);
+    assertTrue(token0.start()->lastDomain().getUpperBound() == 10);
+    assertTrue(token0.end()->lastDomain().getLowerBound() == 1);
+    assertTrue(token0.end()->lastDomain().getUpperBound() == 200);
 
     assertTrue(token3.isMerged());
     token3.cancel();
@@ -1833,15 +1833,15 @@ private:
       tokens.push_back(tmp);
     }
 
-    IntervalIntDomain sdom1(tokens[0][0]->getStart()->getDerivedDomain());
+    IntervalIntDomain sdom1(tokens[0][0]->start()->getDerivedDomain());
     assertTrue(sdom1.getLowerBound() == 0);
     assertTrue(sdom1.getUpperBound() == 210);
 
-    IntervalIntDomain edom1(tokens[0][0]->getEnd()->getDerivedDomain());
+    IntervalIntDomain edom1(tokens[0][0]->end()->getDerivedDomain());
     assertTrue(edom1.getLowerBound() == 1);
     assertTrue(edom1.getUpperBound() == 220);
 
-    Id<TokenVariable<IntervalIntDomain> > pvar1(tokens[0][0]->getParameters()[0]);
+    Id<TokenVariable<IntervalIntDomain> > pvar1(tokens[0][0]->parameters()[0]);
     IntervalIntDomain pdom1(pvar1->getDerivedDomain());
     assertTrue(pdom1.getLowerBound() == 500);
     assertTrue(pdom1.getUpperBound() == 1000);
@@ -1853,34 +1853,34 @@ private:
       timeline->constrain(tokens[i-1][0], tokens[i][0]);
     }
 
-    IntervalIntDomain sdom2(tokens[0][0]->getStart()->getDerivedDomain());
+    IntervalIntDomain sdom2(tokens[0][0]->start()->getDerivedDomain());
     assertTrue(sdom2.getLowerBound() == 0);
     assertTrue(sdom2.getUpperBound() == 208);
 
-    IntervalIntDomain edom2(tokens[0][0]->getEnd()->getDerivedDomain());
+    IntervalIntDomain edom2(tokens[0][0]->end()->getDerivedDomain());
     assertTrue(edom2.getLowerBound() == 1);
     assertTrue(edom2.getUpperBound() == 209);
 
-    Id<TokenVariable<IntervalIntDomain> > pvar2(tokens[0][0]->getParameters()[0]);
+    Id<TokenVariable<IntervalIntDomain> > pvar2(tokens[0][0]->parameters()[0]);
     IntervalIntDomain pdom2(pvar2->getDerivedDomain());
     assertTrue(pdom2.getLowerBound() == 500);
     assertTrue(pdom2.getUpperBound() == 1000);
 
     for (int i=0; i < NUMTOKS; i++)
       for (int j=1; j < UNIFIED; j++) { 
-        tokens[i][j]->merge(tokens[i][0]);
+        tokens[i][j]->doMerge(tokens[i][0]);
         ce->propagate();
       }
 
-    IntervalIntDomain sdom3(tokens[0][0]->getStart()->getDerivedDomain());
+    IntervalIntDomain sdom3(tokens[0][0]->start()->getDerivedDomain());
     assertTrue(sdom3.getLowerBound() == 0);
     assertTrue(sdom3.getUpperBound() == 208);
 
-    IntervalIntDomain edom3(tokens[0][0]->getEnd()->getDerivedDomain());
+    IntervalIntDomain edom3(tokens[0][0]->end()->getDerivedDomain());
     assertTrue(edom3.getLowerBound() == 1);
     assertTrue(edom3.getUpperBound() == 209);
 
-    Id<TokenVariable<IntervalIntDomain> > pvar3(tokens[0][0]->getParameters()[0]);
+    Id<TokenVariable<IntervalIntDomain> > pvar3(tokens[0][0]->parameters()[0]);
     IntervalIntDomain pdom3(pvar3->getDerivedDomain());
     assertTrue(pdom3.getLowerBound() == 500+UNIFIED-1);
     assertTrue(pdom3.getUpperBound() == 1000);
@@ -1891,15 +1891,15 @@ private:
         ce->propagate();
       }
 
-    IntervalIntDomain sdom4(tokens[0][0]->getStart()->getDerivedDomain());
+    IntervalIntDomain sdom4(tokens[0][0]->start()->getDerivedDomain());
     assertTrue(sdom4.getLowerBound() == sdom2.getLowerBound());
     assertTrue(sdom4.getUpperBound() == sdom2.getUpperBound());
 
-    IntervalIntDomain edom4(tokens[0][0]->getEnd()->getDerivedDomain());
+    IntervalIntDomain edom4(tokens[0][0]->end()->getDerivedDomain());
     assertTrue(edom4.getLowerBound() == edom2.getLowerBound());
     assertTrue(edom4.getUpperBound() == edom2.getUpperBound());
 
-    Id<TokenVariable<IntervalIntDomain> > pvar4(tokens[0][0]->getParameters()[0]);
+    Id<TokenVariable<IntervalIntDomain> > pvar4(tokens[0][0]->parameters()[0]);
     IntervalIntDomain pdom4(pvar4->getDerivedDomain());
     assertTrue(pdom4.getLowerBound() == pdom2.getLowerBound());
     assertTrue(pdom4.getUpperBound() == pdom2.getUpperBound());
@@ -1985,7 +1985,7 @@ private:
     t3.close();
 
     // Post equality constraint between t3 and t0. Should permit a match since it is a binary constraint
-    EqualConstraint c0("eq", "Default", db->getConstraintEngine(), makeScope(t0.getStart(), t3.getStart()));
+    EqualConstraint c0("eq", "Default", db->getConstraintEngine(), makeScope(t0.start(), t3.start()));
     db->getConstraintEngine()->propagate();
     compatibleTokens.clear();
     db->getCompatibleTokens(t3.getId(), compatibleTokens);
@@ -2171,7 +2171,7 @@ private:
       TokenId master = TokenFactory::createInstance(db, LabelStr(DEFAULT_PREDICATE), true);
     master->activate();
     TokenId slave = TokenFactory::createInstance(master, LabelStr(DEFAULT_PREDICATE), LabelStr("any"));
-    assertTrue(slave->getMaster() == master); 
+    assertTrue(slave->master() == master); 
     TokenId rejectable = TokenFactory::createInstance(db, LabelStr(DEFAULT_PREDICATE), false);
     rejectable->activate();
     //!!Should try rejecting master and verify inconsistency
@@ -2198,7 +2198,7 @@ private:
                          IntervalIntDomain(1, 1000));
 
     // Change to base class to excercise problem with wrong signature on TokenVariable
-    ConstrainedVariableId start = tokenA.getStart();
+    ConstrainedVariableId start = tokenA.start();
     start->specify(5);
 
     tokenA.activate();
@@ -2225,20 +2225,20 @@ private:
 
     // Propagate and test our specified value
     assertTrue(ce->propagate());
-    assertTrue(tokenA.getStart()->lastDomain().getSingletonValue() == 5);
+    assertTrue(tokenA.start()->lastDomain().getSingletonValue() == 5);
 
     // Now do the merges and test
-    tokenB.merge(tokenA.getId());
+    tokenB.doMerge(tokenA.getId());
     assertTrue(ce->propagate());
-    assertTrue(tokenA.getStart()->lastDomain().getSingletonValue() == 5);
+    assertTrue(tokenA.start()->lastDomain().getSingletonValue() == 5);
 
-    tokenC.merge(tokenA.getId());
+    tokenC.doMerge(tokenA.getId());
     assertFalse(ce->propagate()); // Should always fail
 
     // Now split it and test that the specified domain is unchanged
     tokenC.cancel();
     assertTrue(ce->propagate()); // Should be OK now
-    assertTrue(tokenA.getStart()->lastDomain().getSingletonValue() == 5);
+    assertTrue(tokenA.start()->lastDomain().getSingletonValue() == 5);
 
 
     DEFAULT_TEARDOWN();
@@ -2346,8 +2346,8 @@ private:
     assertTrue((compatibleTokens3[0] == t2.getId() && compatibleTokens3[1] == t4.getId()) ||
 		           (compatibleTokens3[1] == t2.getId() && compatibleTokens3[0] == t4.getId()));
 
-    t1.merge(t0.getId());
-		t3.merge(t2.getId());
+    t1.doMerge(t0.getId());
+		t3.doMerge(t2.getId());
 
     DEFAULT_TEARDOWN();
     return true;
@@ -2395,7 +2395,7 @@ private:
 
     // Now activate and merge onto it.
     t1.activate();
-    t0.merge(t1.getId());
+    t0.doMerge(t1.getId());
 
     assertTrue(param0->lastDomain().isClosed());
     assertTrue(param1->lastDomain().isClosed());
@@ -2436,8 +2436,8 @@ private:
 
     //equate the end times
     std::vector<ConstrainedVariableId> temp;
-    temp.push_back(t0.getEnd());
-    temp.push_back(t1.getEnd());
+    temp.push_back(t0.end());
+    temp.push_back(t1.end());
     ConstraintId eq = ConstraintLibrary::createConstraint("concurrent",
                                                           db->getConstraintEngine(),
                                                           temp);
@@ -2616,14 +2616,14 @@ private:
 
     // Activate C and merge other 2 slaves onto it
     slaveC->activate();
-    slaveB->merge(slaveC);
-    slaveA->merge(slaveC);
+    slaveB->doMerge(slaveC);
+    slaveA->doMerge(slaveC);
 
     // Commit C so it will survive deletion of the master
     slaveC->commit();
 
     // Now merge the orphan onto it
-    orphan->merge(slaveC);
+    orphan->doMerge(slaveC);
 
     // Now delete the master - should force slaves A and B to be deleted
     delete (Token*) master;
@@ -2659,8 +2659,8 @@ private:
 				       IntervalIntDomain(0, 20),                                           
 				       IntervalIntDomain(1, 1000)))->getId();                                  
 
-    master->getStart()->restrictBaseDomain(IntervalIntDomain(1, 1));
-    assertTrue(master->getStart()->specifiedFlag());    
+    master->start()->restrictBaseDomain(IntervalIntDomain(1, 1));
+    assertTrue(master->start()->specifiedFlag());    
     master->discard();
     DEFAULT_TEARDOWN();
     return true;
@@ -2700,7 +2700,7 @@ private:
       Variable<StateDomain> v(ENGINE, dom);
       EqualConstraint c0("eq", "Default", ce, makeScope(t1->getState(), v.getId()));
 
-      t1->merge(t0);
+      t1->doMerge(t0);
     }
 
     t1->discard();
@@ -2833,7 +2833,7 @@ private:
       num_constraints += 2; // Object variable and a single temporal constraint since placing at the beginning
       assertTrue(ce->getConstraints().size() == num_constraints);
 
-      assertTrue(tokenA.getEnd()->getDerivedDomain().getUpperBound() <= tokenB.getStart()->getDerivedDomain().getUpperBound());
+      assertTrue(tokenA.end()->getDerivedDomain().getUpperBound() <= tokenB.start()->getDerivedDomain().getUpperBound());
       assertTrue(timeline.getTokenSequence().size() == 3);
 
       timeline.free(tokenA.getId(), tokenB.getId());
@@ -3005,9 +3005,9 @@ private:
       token->activate();
     }
 
-    assertTrue(timeline->getTokens().size() == (unsigned int) COUNT);
+    assertTrue(timeline->tokens().size() == (unsigned int) COUNT);
     ce->propagate(); // Should not alter the count. Relationship updated eagerly
-    assertTrue(timeline->getTokens().size() == (unsigned int) COUNT);
+    assertTrue(timeline->tokens().size() == (unsigned int) COUNT);
 
     int i = 0;
     std::vector<TokenId> tokensToOrder;
@@ -3037,8 +3037,8 @@ private:
     }
 
     const std::list<TokenId>& tokenSequence = timeline->getTokenSequence();
-    assertTrue(tokenSequence.front()->getStart()->getDerivedDomain().getSingletonValue() == 0);
-    assertTrue(tokenSequence.back()->getEnd()->getDerivedDomain().getSingletonValue() == COUNT*DURATION);
+    assertTrue(tokenSequence.front()->start()->getDerivedDomain().getSingletonValue() == 0);
+    assertTrue(tokenSequence.back()->end()->getDerivedDomain().getSingletonValue() == COUNT*DURATION);
 
     // Now ensure the query can correctly indicate no options available
     TokenId token = (new IntervalToken(db, 
@@ -3049,7 +3049,7 @@ private:
                                        IntervalIntDomain(),
                                        IntervalIntDomain(DURATION, DURATION)))->getId();
     token->getObject()->specify(timeline->getId());
-    token->getStart()->specify(0);
+    token->start()->specify(0);
     token->activate();
     std::vector<std::pair<TokenId, TokenId> > choices;
     timeline->getOrderingChoices(token, choices);
@@ -3058,7 +3058,7 @@ private:
     // Now back off restrictions to token and try patterns which excercise cache management in the face of merging and rejection
     token->cancel();
     token->getObject()->reset();
-    token->getStart()->reset();
+    token->start()->reset();
     assertTrue(ce->propagate());
 
 
@@ -3088,7 +3088,7 @@ private:
     std::vector< TokenId > mergeChoices;
     db->getCompatibleTokens(token, mergeChoices);
     assertFalse(mergeChoices.empty());
-    token->merge(mergeChoices.front());
+    token->doMerge(mergeChoices.front());
     assertTrue(ce->propagate());
 
     choices.clear();
@@ -3133,7 +3133,7 @@ private:
     et1.getObject()->specify(timeline.getId());
     et1.activate();
     timeline.constrain(it1.getId(), et1.getId());
-    assertTrue(it1.getEnd()->getDerivedDomain().getUpperBound() == 100);
+    assertTrue(it1.end()->getDerivedDomain().getUpperBound() == 100);
 
     // Insert between a token and an event
     EventToken et2(db, 
@@ -3146,7 +3146,7 @@ private:
     et2.getObject()->specify(timeline.getId());
     et2.activate();
     timeline.constrain(et2.getId(), et1.getId());
-    assertTrue(it1.getEnd()->getDerivedDomain().getUpperBound() == 100);
+    assertTrue(it1.end()->getDerivedDomain().getUpperBound() == 100);
 
     // Insert before a token
     EventToken et3(db, 
@@ -3159,7 +3159,7 @@ private:
     et3.getObject()->specify(timeline.getId());
     et3.activate();
     timeline.constrain(et3.getId(), it1.getId());
-    assertTrue(it1.getStart()->getDerivedDomain().getLowerBound() == 10);
+    assertTrue(it1.start()->getDerivedDomain().getLowerBound() == 10);
 
     // Insert between events
     EventToken et4(db, 
@@ -3213,12 +3213,12 @@ private:
     tokenC.activate();
 
     timeline.constrain(tokenA.getId(), tokenB.getId()); // Insert A and B.
-    assertTrue(tokenA.getEnd()->getDerivedDomain().getUpperBound() <= tokenB.getStart()->getDerivedDomain().getUpperBound());
+    assertTrue(tokenA.end()->getDerivedDomain().getUpperBound() <= tokenB.start()->getDerivedDomain().getUpperBound());
 
     // Now insert token C in the middle.
     timeline.constrain(tokenC.getId(), tokenB.getId());
-    assertTrue(tokenA.getEnd()->getDerivedDomain().getUpperBound() <= tokenC.getStart()->getDerivedDomain().getUpperBound());
-    assertTrue(tokenC.getEnd()->getDerivedDomain().getUpperBound() <= tokenB.getStart()->getDerivedDomain().getUpperBound());
+    assertTrue(tokenA.end()->getDerivedDomain().getUpperBound() <= tokenC.start()->getDerivedDomain().getUpperBound());
+    assertTrue(tokenC.end()->getDerivedDomain().getUpperBound() <= tokenB.start()->getDerivedDomain().getUpperBound());
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -3693,7 +3693,7 @@ private:
 					IntervalIntDomain(startTick, startTick),
 					IntervalIntDomain(),
 					IntervalIntDomain(1, 1)))->getId();
-    tokenB->merge(tokenA);
+    tokenB->doMerge(tokenA);
     tokenA->restrictBaseDomains();
     tokenA->commit();
     ce->propagate();
@@ -3752,8 +3752,8 @@ private:
 
     // Constrain the token duration
     std::vector<ConstrainedVariableId> scope;
-    scope.push_back(token->getStart());
-    scope.push_back(token->getDuration());
+    scope.push_back(token->start());
+    scope.push_back(token->duration());
     client->createConstraint("eq", scope);
 
     delete txLog;
@@ -4348,7 +4348,7 @@ public:
       std::set<ConstraintId> constraints;
       var->constraints(constraints);
       assertTrue(constraints.empty());
-      assertTrue(var->getParent() == obj2a);
+      assertTrue(var->parent() == obj2a);
       assertTrue(i == var->getIndex());
       switch (i) {
       case 0:
@@ -4386,7 +4386,7 @@ public:
       std::set<ConstraintId> constraints;
       var->constraints(constraints);
       assertTrue(constraints.empty());
-      assertTrue(var->getParent() == obj2b);
+      assertTrue(var->parent() == obj2b);
       assertTrue(i == var->getIndex());
       switch (i) {
       case 0:
@@ -4793,7 +4793,7 @@ public:
     assertTrue(!obj2b.isNoId() && obj2b.isValid());
     assertTrue(obj2b->getType() == LabelStr("TestClass2"));
     assertTrue(obj2b->getName() == LabelStr("testObj2b"));
-    const unsigned int initialObjectTokenCount_B = obj2b->getTokens().size();
+    const unsigned int initialObjectTokenCount_B = obj2b->tokens().size();
 
     TokenId constrainedToken = createToken("constrainedSample", true);
     TEST_PLAYING_XML(buildXMLObjTokTokStr("activate", "", "constrainedSample", ""));
@@ -4821,7 +4821,7 @@ public:
     assertTrue(constrained2->getObject()->derivedDomain().isSingleton(), "player did not constrain token to one object");
     assertTrue(constrained2->getObject()->derivedDomain() == objDom2b, "player did not constrain token to expected object");
     assertTrue(verifyTokenRelation(constrainedToken, constrained2, "before")); //!! "precedes" ?
-    assertTrue(obj2b->getTokens().size() == initialObjectTokenCount_B + 2);
+    assertTrue(obj2b->tokens().size() == initialObjectTokenCount_B + 2);
     /* Leave them in plan db for testFree(). */
 
     /* Create two rejectable tokens and do the same tests, but with testObj2a. */
@@ -4830,7 +4830,7 @@ public:
     assertTrue(obj2a->getType() == LabelStr("TestClass2"));
     assertTrue(obj2a->getName() == LabelStr("testObj2a"));
     ObjectDomain objDom2a(obj2a, "TestClass2");
-    const unsigned int initialObjectTokenCount_A = obj2a->getTokens().size();
+    const unsigned int initialObjectTokenCount_A = obj2a->tokens().size();
 
     TokenId rejectable = createToken("rejectableConstrainedSample", false);
     std::cout << __FILE__ << ':' << __LINE__ << ": rejectable is " << rejectable << '\n';
@@ -4853,7 +4853,7 @@ public:
     assertTrue(rejectable2->getObject()->derivedDomain().isSingleton(), "player did not constrain token to one object");
     assertTrue(rejectable2->getObject()->derivedDomain() == objDom2a, "player did not constrain token to expected object");
     assertTrue(verifyTokenRelation(rejectable, rejectable2, "before")); //!! "precedes" ?
-    assertTrue(obj2a->getTokens().size() == initialObjectTokenCount_A + 2);
+    assertTrue(obj2a->tokens().size() == initialObjectTokenCount_A + 2);
     /* Leave them in plan db for testFree(). */
 
     TEST_REWINDING_XML(transaction);
@@ -4863,7 +4863,7 @@ public:
 	       "player did not constrain token to one object");
     assertTrue(rejectable2->getObject()->derivedDomain() != objDom2a,
 	       "player did not constrain token to expected object");
-    assertTrue(obj2a->getTokens().size() == initialObjectTokenCount_A + 2);
+    assertTrue(obj2a->tokens().size() == initialObjectTokenCount_A + 2);
     
     TEST_PLAYING_XML(transaction);
     assertTrue(rejectable2->getObject()->derivedDomain().isSingleton(),
@@ -4871,7 +4871,7 @@ public:
     assertTrue(rejectable2->getObject()->derivedDomain() == objDom2a,
 	       "player did not constrain token to expected object");
     assertTrue(verifyTokenRelation(rejectable, rejectable2, "before")); //!! "precedes" ?
-    assertTrue(obj2a->getTokens().size() == initialObjectTokenCount_A + 2);
+    assertTrue(obj2a->tokens().size() == initialObjectTokenCount_A + 2);
   }
 
   /** Test freeing tokens. */
@@ -4881,14 +4881,14 @@ public:
     assertTrue(obj2a->getType() == LabelStr("TestClass2"));
     assertTrue(obj2a->getName() == LabelStr("testObj2a"));
     ObjectDomain objDom2a(obj2a, "TestClass2");
-    const unsigned int initialObjectTokenCount_A = obj2a->getTokens().size();
+    const unsigned int initialObjectTokenCount_A = obj2a->tokens().size();
 
     ObjectId obj2b = s_db->getObject("testObj2b");
     assertTrue(!obj2b.isNoId() && obj2b.isValid());
     assertTrue(obj2b->getType() == LabelStr("TestClass2"));
     assertTrue(obj2b->getName() == LabelStr("testObj2b"));
     ObjectDomain objDom2b(obj2b, "TestClass2");
-    TokenSet tokens = obj2b->getTokens();
+    TokenSet tokens = obj2b->tokens();
     std::cout << __FILE__ << ':' << __LINE__ << ": there are " << tokens.size() << " tokens on testObj2b; should be 2.\n";
     /*!!For debugging:
     TokenSet tokens2 = tokens;
@@ -4926,7 +4926,7 @@ public:
     //!!Next fails because the base domain is still open
     //!!assertTrue(two->getObject()->derivedDomain() == ObjectDomain("TestClass2"));
 
-    tokens = obj2a->getTokens();
+    tokens = obj2a->tokens();
     /*!!For debugging:
     TokenSet tokens3 = tokens;
     for (int i = 1; !tokens3.empty(); i++) {
@@ -4934,7 +4934,7 @@ public:
       tokens3.erase(tokens3.begin());
     }
     !!*/
-    // This is correct because Object::getTokens() returns tokens that _could_ go on the object,
+    // This is correct because Object::tokens() returns tokens that _could_ go on the object,
     //   not just the tokens that _are_ on the object.
     assertTrue(tokens.size() == initialObjectTokenCount_A + 2);
     TokenId three, four;
@@ -5077,7 +5077,7 @@ public:
                                           std::list<AbstractDomain*>& intervals) {
     assertTrue(s_tempRels.find(relation) != s_tempRels.end(), "unknown temporal relation name given");
     if (relation == LabelStr("after")) {
-      ADD_TR_DESC(slave->getEnd(), master->getStart(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(slave->end(), master->start(), 0, PLUS_INFINITY);
       return;
     }
     if (relation == LabelStr("any")) {
@@ -5085,93 +5085,93 @@ public:
       return;
     }
     if (relation == LabelStr("before")) {
-      ADD_TR_DESC(master->getEnd(), slave->getStart(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(master->end(), slave->start(), 0, PLUS_INFINITY);
       return;
     }
     if (relation == LabelStr("contained_by")) {
-      ADD_TR_DESC(slave->getStart(), master->getStart(), 0, PLUS_INFINITY);
-      ADD_TR_DESC(master->getEnd(), slave->getEnd(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(slave->start(), master->start(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(master->end(), slave->end(), 0, PLUS_INFINITY);
       return;
     }
     if (relation == LabelStr("contains")) {
-      ADD_TR_DESC(master->getStart(), slave->getStart(), 0, PLUS_INFINITY);
-      ADD_TR_DESC(slave->getEnd(), master->getEnd(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(master->start(), slave->start(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(slave->end(), master->end(), 0, PLUS_INFINITY);
       return;
     }
     if (relation == LabelStr("contains_end")) {
-      ADD_TR_DESC(master->getStart(), slave->getEnd(), 0, PLUS_INFINITY);
-      ADD_TR_DESC(slave->getEnd(), master->getEnd(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(master->start(), slave->end(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(slave->end(), master->end(), 0, PLUS_INFINITY);
       return;
     }
     if (relation == LabelStr("contains_start")) {
-      ADD_TR_DESC(master->getStart(), slave->getStart(), 0, PLUS_INFINITY);
-      ADD_TR_DESC(slave->getEnd(), master->getStart(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(master->start(), slave->start(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(slave->end(), master->start(), 0, PLUS_INFINITY);
       return;
     }
     if (relation == LabelStr("ends")) {
-      ADD_TR_DESC(master->getEnd(), slave->getEnd(), 0, 0);
+      ADD_TR_DESC(master->end(), slave->end(), 0, 0);
       return;
     }
     if (relation == LabelStr("ends_after")) {
-      ADD_TR_DESC(slave->getEnd(), master->getEnd(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(slave->end(), master->end(), 0, PLUS_INFINITY);
       return;
     }
     if (relation == LabelStr("ends_after_start")) {
-      ADD_TR_DESC(slave->getStart(), master->getEnd(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(slave->start(), master->end(), 0, PLUS_INFINITY);
       return;
     }
     if (relation == LabelStr("ends_before")) {
-      ADD_TR_DESC(master->getEnd(), slave->getEnd(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(master->end(), slave->end(), 0, PLUS_INFINITY);
       return;
     }
     if (relation == LabelStr("ends_during")) {
-      ADD_TR_DESC(slave->getStart(), master->getEnd(), 0, PLUS_INFINITY);
-      ADD_TR_DESC(master->getEnd(), slave->getEnd(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(slave->start(), master->end(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(master->end(), slave->end(), 0, PLUS_INFINITY);
       return;
     }
     if (relation == LabelStr("equal") || relation == LabelStr("equals")) {
-      ADD_TR_DESC(master->getStart(), slave->getStart(), 0, 0);
-      ADD_TR_DESC(master->getEnd(), slave->getEnd(), 0, 0);
+      ADD_TR_DESC(master->start(), slave->start(), 0, 0);
+      ADD_TR_DESC(master->end(), slave->end(), 0, 0);
       return;
     }
     if (relation == LabelStr("meets")) {
-      ADD_TR_DESC(master->getEnd(), slave->getStart(), 0, 0);
+      ADD_TR_DESC(master->end(), slave->start(), 0, 0);
       return;
     }
     if (relation == LabelStr("met_by")) {
-      ADD_TR_DESC(slave->getEnd(), master->getStart(), 0, 0);
+      ADD_TR_DESC(slave->end(), master->start(), 0, 0);
       return;
     }
     if (relation == LabelStr("paralleled_by")) {
-      ADD_TR_DESC(slave->getStart(), master->getStart(), 0, PLUS_INFINITY);
-      ADD_TR_DESC(slave->getEnd(), master->getEnd(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(slave->start(), master->start(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(slave->end(), master->end(), 0, PLUS_INFINITY);
       return;
     }
     if (relation == LabelStr("parallels")) {
-      ADD_TR_DESC(master->getStart(), slave->getStart(), 0, PLUS_INFINITY);
-      ADD_TR_DESC(master->getEnd(), slave->getEnd(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(master->start(), slave->start(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(master->end(), slave->end(), 0, PLUS_INFINITY);
       return;
     }
     if (relation == LabelStr("starts")) {
-      ADD_TR_DESC(master->getStart(), slave->getStart(), 0, 0);
+      ADD_TR_DESC(master->start(), slave->start(), 0, 0);
       return;
     }
     if (relation == LabelStr("starts_after")) {
-      ADD_TR_DESC(slave->getStart(), master->getStart(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(slave->start(), master->start(), 0, PLUS_INFINITY);
       return;
     }
     if (relation == LabelStr("starts_before")) {
-      ADD_TR_DESC(master->getStart(), slave->getStart(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(master->start(), slave->start(), 0, PLUS_INFINITY);
       return;
     }
     if (relation == LabelStr("starts_before_end")) {
-      ADD_TR_DESC(master->getStart(), slave->getEnd(), 0, PLUS_INFINITY);
+      ADD_TR_DESC(master->start(), slave->end(), 0, PLUS_INFINITY);
       return;
     }
     assertTrue(relation == LabelStr("starts_during"),
                 "when a new temporal relation name was added, s_tempRels was updated but getConstraintsFromRelation() was not");
-    ADD_TR_DESC(slave->getStart(), master->getStart(), 0, PLUS_INFINITY);
-    ADD_TR_DESC(master->getStart(), slave->getEnd(), 0, PLUS_INFINITY);
+    ADD_TR_DESC(slave->start(), master->start(), 0, PLUS_INFINITY);
+    ADD_TR_DESC(master->start(), slave->end(), 0, PLUS_INFINITY);
     return;
   }
 
@@ -5533,18 +5533,18 @@ std::string DbTransPlayerTest::buildXMLInvokeSpecifyVariableStr(const Constraine
                                                                 const AbstractDomain& dom) {
   std::string str("<invoke name=\"specify\" identifier=\""); 
   //!!Would like to re-use buildXMLVariableStr() here, but this wants a different syntax(!)
-  if (var->getParent().isNoId())
+  if (var->parent().isNoId())
     str += var->getName().toString();
   else {
-    if (TokenId::convertable(var->getParent())) {
+    if (TokenId::convertable(var->parent())) {
       //!!For token variables, the player's name for the token is needed: identifier="tokenName.varName"
       //!!  To implement this, a map of the ids to the names will have to be kept as they are created.
       assertTrue(false, "sorry: specifying variables of tokens in tests of <invoke> is presently unsupported");
     }
-    assertTrue(ObjectId::convertable(var->getParent()), "var's parent is neither token nor object");
+    assertTrue(ObjectId::convertable(var->parent()), "var's parent is neither token nor object");
     //!!I don't understand the details in DbClientTransactionPlayer.cc:parseVariable() well enough to figure this out yet
     //!!But here's a guess:
-    str += var->getParent()->getName();
+    str += var->parent()->getName();
     str += ".";
     str += var->getName();
   }
@@ -5629,25 +5629,25 @@ std::string DbTransPlayerTest::buildXMLObjTokTokStr(const LabelStr& tag, const L
 
 std::string DbTransPlayerTest::buildXMLVariableStr(const ConstrainedVariableId& var) {
   std::string str(" <");
-  if (var->getParent().isNoId()) {
+  if (var->parent().isNoId()) {
     str += "id name =\"";
     str += var->getName().toString();
   } else {
     str += "variable index=\"";
     std::ostringstream oss;
     oss << var->getIndex() << "\" ";
-    if (ObjectId::convertable(var->getParent()))
-      oss << "object=\"" << var->getParent()->getName().toString();
+    if (ObjectId::convertable(var->parent()))
+      oss << "object=\"" << var->parent()->getName().toString();
     else {
-      assertTrue(TokenId::convertable(var->getParent()), "unknown or unsupported (C++) type of parent of variable");
+      assertTrue(TokenId::convertable(var->parent()), "unknown or unsupported (C++) type of parent of variable");
       oss << "token=\"";
-      TokenId token = var->getParent();
-      if (token->getMaster().isNoId())
+      TokenId token = var->parent();
+      if (token->master().isNoId())
         oss << token->getKey();
       else {
-        TokenId rootToken = token->getMaster();
-        while (!rootToken->getMaster().isNoId())
-          rootToken = rootToken->getMaster();
+        TokenId rootToken = token->master();
+        while (!rootToken->master().isNoId())
+          rootToken = rootToken->master();
         oss << s_db->getClient()->getPathAsString(rootToken);
       }
     }

@@ -535,7 +535,7 @@ namespace EUROPA {
     }
 
     bool Solver::hasDecidedParameter(const TokenId& token) {
-      for(std::vector<ConstrainedVariableId>::const_iterator it = token->getParameters().begin(); it != token->getParameters().end(); ++it) {
+      for(std::vector<ConstrainedVariableId>::const_iterator it = token->parameters().begin(); it != token->parameters().end(); ++it) {
         if(isDecided(*it))
           return true;
       }

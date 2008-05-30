@@ -49,7 +49,7 @@ namespace EUROPA {
     void OpenConditionManager::notifyRemoved(const ConstrainedVariableId& variable){
       FlawManager::notifyRemoved(variable);
       if(Token::isStateVariable(variable))
-	removeFlaw(variable->getParent());
+	removeFlaw(variable->parent());
     }
 
     void OpenConditionManager::notifyChanged(const ConstrainedVariableId& variable, 
@@ -58,11 +58,11 @@ namespace EUROPA {
 	return;
 
       if(changeType == DomainListener::RESET)
-	addFlaw(variable->getParent());
+	addFlaw(variable->parent());
       else if(changeType == DomainListener::SET_TO_SINGLETON)
-	removeFlaw(variable->getParent());
+	removeFlaw(variable->parent());
       else if(changeType == DomainListener::CLOSED)
-	addFlaw(variable->getParent());
+	addFlaw(variable->parent());
     }
 
     std::string OpenConditionManager::toString(const EntityId& entity) const {

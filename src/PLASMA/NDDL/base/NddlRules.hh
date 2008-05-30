@@ -118,60 +118,60 @@ getPlanDatabase()->makeObjectVariableFromType(#type, name, !guarded && leaveOpen
  * Macro definitions for temporal relations
  */
 
-#define meets(origin, target)  relation(concurrent, origin, End, target, Start)
-#define met_by(origin, target) relation(concurrent, target, End, origin, Start)
+#define meets(origin, target)  relation(concurrent, origin, end, target, start)
+#define met_by(origin, target) relation(concurrent, target, end, origin, start)
 #define contains(origin, target)\
 {\
-  relation(precedes, origin, Start, target, Start)\
-  relation(precedes, target, End, origin, End)\
+  relation(precedes, origin, start, target, start)\
+  relation(precedes, target, end, origin, end)\
 }
 #define contained_by(origin, target)\
 {\
-  relation(precedes, target, Start, origin, Start)\
-  relation(precedes, origin, End, target, End)\
+  relation(precedes, target, start, origin, start)\
+  relation(precedes, origin, end, target, end)\
 }
-#define before(origin, target) relation(precedes, origin, End, target, Start)
-#define after(origin, target) relation(precedes, target, End, origin, Start)
-#define starts(origin, target) relation(concurrent, origin, Start, target, Start)
-#define ends(origin, target) relation(concurrent, origin, End, target, End)
-#define ends_after(origin, target) relation(precedes, target, End, origin, End)
+#define before(origin, target) relation(precedes, origin, end, target, start)
+#define after(origin, target) relation(precedes, target, end, origin, start)
+#define starts(origin, target) relation(concurrent, origin, start, target, start)
+#define ends(origin, target) relation(concurrent, origin, end, target, end)
+#define ends_after(origin, target) relation(precedes, target, end, origin, end)
 #define ends_before(origin, target) ends_after(target, origin)
-#define ends_after_start(origin, target) relation(precedes, target, Start, origin, End)
-#define starts_before_end(origin, target) relation(precedes, origin, Start, target, End)
+#define ends_after_start(origin, target) relation(precedes, target, start, origin, end)
+#define starts_before_end(origin, target) relation(precedes, origin, start, target, end)
 #define starts_during(origin, target)\
 {\
-   relation(precedes, target, Start, origin, Start)\
-   relation(precedes, origin, Start, target, End)\
+   relation(precedes, target, start, origin, start)\
+   relation(precedes, origin, start, target, end)\
 }
 
 #define contains_start(origin, target)\
 {\
-  relation(precedes, origin, Start, target, Start)\
-  relation(precedes, target, Start, origin, End)\
+  relation(precedes, origin, start, target, start)\
+  relation(precedes, target, start, origin, end)\
 }
 #define ends_during(origin, target)\
 {\
-  relation(precedes, target, Start, origin, End)\
-  relation(precedes, origin, End, target, End)\
+  relation(precedes, target, start, origin, end)\
+  relation(precedes, origin, end, target, end)\
 }
 #define contains_end(origin, target)\
 {\
-  relation(precedes, origin, Start, target, End)\
-  relation(precedes, target, End, origin, End)\
+  relation(precedes, origin, start, target, end)\
+  relation(precedes, target, end, origin, end)\
 }
-#define starts_after(origin, target) relation(precedes, target, Start, origin, Start)
-#define starts_before(origin, target) relation(precedes, origin, Start, target, Start)
+#define starts_after(origin, target) relation(precedes, target, start, origin, start)
+#define starts_before(origin, target) relation(precedes, origin, start, target, start)
 #define equals(origin, target)\
 {\
-  relation(concurrent, origin, Start, target, Start)\
-  relation(concurrent, origin, End, target, End)\
+  relation(concurrent, origin, start, target, start)\
+  relation(concurrent, origin, end, target, end)\
 }
 #define equal(origin, target) equals(origin, target)
 
 #define relation(relationname, origin, originvar, target, targetvar) {\
  std::vector<ConstrainedVariableId> origin##target##vars;\
- origin##target##vars.push_back(getSlave(LabelStr(#origin))->get##originvar());\
- origin##target##vars.push_back(getSlave(LabelStr(#target))->get##targetvar());\
+ origin##target##vars.push_back(getSlave(LabelStr(#origin))->originvar());\
+ origin##target##vars.push_back(getSlave(LabelStr(#target))->targetvar());\
  rule_constraint(relationname,origin##target##vars);\
   } 
 

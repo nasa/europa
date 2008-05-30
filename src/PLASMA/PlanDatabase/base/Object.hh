@@ -101,7 +101,7 @@ namespace EUROPA {
     /**
      * @brief Retrieves all active tokens whose object variable includes this object
      */       
-    const TokenSet& getTokens() const;
+    const TokenSet& tokens() const;
 
     /**
      * @brief Test if the given token is actually assigned to this object.
@@ -256,7 +256,7 @@ namespace EUROPA {
     virtual PSList<PSVariable*> getMemberVariables();
     virtual PSVariable* getMemberVariable(const std::string& name);
 
-    virtual PSList<PSToken*> getPSTokens() const;
+    virtual PSList<PSToken*> getTokens() const;
 
     virtual void addPrecedence(PSToken* pred,PSToken* succ);
     virtual void removePrecedence(PSToken* pred,PSToken* succ);

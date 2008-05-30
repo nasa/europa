@@ -168,7 +168,7 @@ namespace EUROPA{
       ConstrainedVariableId var = variables[i];
 
       // If not a variable of the source token, add directly
-      if(var->getParent() != m_inactiveToken)
+      if(var->parent() != m_inactiveToken)
 	newScope.push_back(var);
       else if(var == m_inactiveToken->getState())
 	return;
@@ -176,7 +176,7 @@ namespace EUROPA{
 	ConstrainedVariableId newVar = m_activeToken->getVariables()[var->getIndex()];
 
 	checkError(newVar.isValid(), newVar << " is invalid for index " << var->getIndex() << " in " << m_activeToken->toString() <<
-		   " from parent " << var->getParent()->toString() << " and constraint " << constraint->toString());
+		   " from parent " << var->parent()->toString() << " and constraint " << constraint->toString());
 
 	newScope.push_back(newVar);
       }

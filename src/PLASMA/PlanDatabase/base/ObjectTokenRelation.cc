@@ -17,10 +17,10 @@ namespace EUROPA {
 					   const ConstraintEngineId& constraintEngine,
 					   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_token(variables[STATE_VAR]->getParent()),
+      m_token(variables[STATE_VAR]->parent()),
       m_currentDomain(static_cast<ObjectDomain&>(getCurrentDomain(variables[OBJECT_VAR]))){
     check_error(m_token.isValid());
-    check_error(variables[OBJECT_VAR]->getParent() == m_token);
+    check_error(variables[OBJECT_VAR]->parent() == m_token);
     checkError(variables[OBJECT_VAR]->isClosed(), 
 	       "The Object Variable must be closed to correctly maintain the object token relationship through propagation.");
   }

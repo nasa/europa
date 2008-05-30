@@ -88,14 +88,14 @@ namespace EUROPA {
 
       debugMsg("TokenMustBeAssignedFilter:test", "Evaluating " << var->toString() << " for token assignment filter.");
 
-      if(var->getParent().isNoId() || ObjectId::convertable(var->getParent()))
+      if(var->parent().isNoId() || ObjectId::convertable(var->parent()))
         return false;
 
       TokenId parentToken;
-      if(RuleInstanceId::convertable(var->getParent()))
-        parentToken = (RuleInstanceId(var->getParent())->getToken());
+      if(RuleInstanceId::convertable(var->parent()))
+        parentToken = (RuleInstanceId(var->parent())->getToken());
       else
-        parentToken = var->getParent();
+        parentToken = var->parent();
       
       // Indicate a match if it is not an assigned token
       return !parentToken->isAssigned();
@@ -112,10 +112,10 @@ namespace EUROPA {
       TokenId tok = entity;
       debugMsg("MasterMustBeAssignedFilter:test", "Evaluation " << tok->toString() << " for master assignment filter.");
       
-      if(tok->getMaster().isNoId())
+      if(tok->master().isNoId())
         return false;
       
-      return !tok->getMaster()->isAssigned();
+      return !tok->master()->isAssigned();
     }
 
     /** HORIZON FILTERING **/
@@ -145,7 +145,7 @@ namespace EUROPA {
 
       TokenId token;
       if(ConstrainedVariableId::convertable(entity)){
-        EntityId parent = ConstrainedVariableId(entity)->getParent();
+        EntityId parent = ConstrainedVariableId(entity)->parent();
         if(parent.isNoId() || ObjectId::convertable(parent))
           return false;
 
@@ -159,8 +159,8 @@ namespace EUROPA {
 
       const IntervalIntDomain& horizon = getHorizon();
       checkError(horizon.isFinite(), "Infinite Horizon not permitted." << horizon.toString());
-      const IntervalIntDomain& startTime = token->getStart()->lastDomain();
-      const IntervalIntDomain& endTime = token->getEnd()->lastDomain();
+      const IntervalIntDomain& startTime = token->start()->lastDomain();
+      const IntervalIntDomain& endTime = token->end()->lastDomain();
 
       bool withinHorizon = false;
 
@@ -205,7 +205,7 @@ namespace EUROPA {
 
       debugMsg("HorizonVariableFilter:test", "Evaluating " << var->toString() << " for horizon filter.");
 
-      EntityId parent = var->getParent();
+      EntityId parent = var->parent();
 
       if(parent.isNoId() || ObjectId::convertable(parent))
         return false;

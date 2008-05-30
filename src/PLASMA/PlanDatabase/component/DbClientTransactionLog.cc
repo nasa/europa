@@ -369,7 +369,7 @@ namespace EUROPA {
   DbClientTransactionLog::variableAsXml(const ConstrainedVariableId& variable) const
   {
     TiXmlElement * var_el = allocateXmlElement("variable");
-    const EntityId& parent = variable->getParent();
+    const EntityId& parent = variable->parent();
     if (parent != EntityId::noId()) {
       if (TokenId::convertable(parent)) {
         TokenId token = parent;

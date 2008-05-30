@@ -95,7 +95,7 @@ namespace EUROPA {
      * A list indicating the temporal order of Tokens constrained for this timeline.
      * @note All Tokens in the sequence == all Tokens in the index.
      * @note Each Token appears in the sequence at most once.
-     * @note All Tokens in the sequence are part of Object::getTokens().
+     * @note All Tokens in the sequence are part of Object::tokens().
      * @note All Tokens in the sequence must be active.
      */
     std::list<TokenId> m_tokenSequence;

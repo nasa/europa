@@ -42,11 +42,11 @@ namespace EUROPA{
     commonInit(startBaseDomain, endBaseDomain, closed);
   }
 
-  const TempVarId& IntervalToken::getStart() const{
+  const TempVarId& IntervalToken::start() const{
     checkError(m_start.isValid(), m_start);
     return m_start;}
 
-  const TempVarId& IntervalToken::getEnd() const{
+  const TempVarId& IntervalToken::end() const{
     checkError(m_end.isValid(), m_end);
     return m_end;
   }
