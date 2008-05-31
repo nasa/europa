@@ -10,6 +10,10 @@
 #include "SolverAssembly.hh" /*!< For using a test EUROPA Assembly */
 #include "PSEngine.hh" 
 #include "Debug.hh"
+#include "PlanDatabase.hh"
+
+#include "ModuleRover.hh"
+#include "RoverCustomCode.hh"
 
 using namespace EUROPA;
 
@@ -29,8 +33,9 @@ int main(int argc, const char ** argv)
   const char* txSource = argv[1];
   const char* plannerConfig = argv[2];
   
-  //executeWithAssembly(plannerConfig,txSource);
+  executeWithAssembly(plannerConfig,txSource);
   
+  /*
   executeWithPSEngine(
       plannerConfig,
       txSource,
@@ -38,6 +43,7 @@ int main(int argc, const char ** argv)
       100, // endHorizon
       1000 // maxSteps
   ); 
+  */
      
   return 0;
 }
@@ -45,12 +51,12 @@ int main(int argc, const char ** argv)
 void executeWithAssembly(const char* plannerConfig, const char* txSource)
 {
   SolverAssembly::initialize();
-
-  // Allocate the schema with a call to the linked in model function   
-  SchemaId schema = NDDL::loadSchema(); // eventually make this called via dlopen
   
   { // Encapsualte allocation so that they go out of scope before calling terminate  
-    SolverAssembly assembly(schema);    
+    SolverAssembly assembly;
+    NDDL::loadSchema(assembly.getPlanDatabase()->getSchema());
+    assembly.addModule((new ModuleRover())->getId());
+    
     assembly.plan(txSource, plannerConfig); // Run the planner    
     assembly.write(std::cout); // Dump the results
   }
@@ -69,12 +75,13 @@ bool executeWithPSEngine(const char* plannerConfig, const char* txSource, int st
 	      PSEngine* engine = PSEngine::makeInstance();	
 	      engine->start();
 	      
+	      engine->addModule((new ModuleRover()));
 	      engine->executeScript("nddl-xml",txSource,true/*isFile*/);
 
 	      PSSolver* solver = engine->createSolver(plannerConfig);
 	      runSolver(solver,startHorizon,endHorizon,maxSteps);
-	      delete solver;
-	      
+	      delete solver;	
+
 	      delete engine;
       }
       
@@ -93,7 +100,7 @@ void printFlaws(int it, PSList<std::string>& flaws)
 	debugMsg("Main","Iteration:" << it << " " << flaws.size() << " flaws");
 	
 	for (int i=0; i<flaws.size(); i++) {
-		std::cout << "    " << (i+1) << " - " << flaws.get(i) << std::endl;
+		debugMsg("Main", "    " << (i+1) << " - " << flaws.get(i));
 	}
 }
 

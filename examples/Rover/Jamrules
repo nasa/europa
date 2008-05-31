@@ -1,7 +1,0 @@
-{
-  local SUBDIR = $(Rover) ;
-  local PLASMA = $(PLASMA_HOME) ;
-  include [ FDirName $(PLASMA_HOME) Jamrules ] ;
-  include [ FDirName $(SUBDIR) Jamfile ] ;
-  Rover_READY = TRUE ;
-}
