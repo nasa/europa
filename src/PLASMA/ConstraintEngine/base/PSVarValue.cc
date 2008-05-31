@@ -21,7 +21,8 @@ namespace EUROPA {
 			break;
 		case OBJECT:
 		{
-			os << asObject()->toString();
+			PSEntity* obj = asObject();
+			os << "OBJECT:" << obj->getEntityName() << "(" << obj->getKey() << ")";
 		}
 		break;
 
