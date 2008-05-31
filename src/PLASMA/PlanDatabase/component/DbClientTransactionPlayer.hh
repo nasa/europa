@@ -123,7 +123,7 @@ namespace EUROPA {
     void getElementsFromConstrain(const TiXmlElement& elem, ObjectId& obj, TokenId& pred,
 				  TokenId& succ);
 
-    const TypeFactoryMgrId& getTypeFactoryMgr() const;
+    const CESchemaId& getCESchema() const;
     const SchemaId& getSchema() const;
     
     DbClientId m_client;

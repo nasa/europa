@@ -535,7 +535,7 @@ namespace EUROPA {
               if (child->FirstChildElement() != NULL)
                   domainRestriction=valueToExpr(child->FirstChildElement());   
               
-              const AbstractDomain& baseDomain = getTypeFactoryMgr()->baseDomain(type.c_str());
+              const AbstractDomain& baseDomain = getCESchema()->baseDomain(type.c_str());
               ruleBody.push_back(new ExprLocalVar(name,type, isGuarded(name,element), domainRestriction, baseDomain));
           }
           else if (strcmp(child->Value(),"if") == 0) {
@@ -613,7 +613,7 @@ namespace EUROPA {
       values.push_back(newValue);
     }	      
       
-    getTypeFactoryMgr()->registerFactory((new EnumeratedTypeFactory(
+    getCESchema()->registerFactory((new EnumeratedTypeFactory(
 			      enumName,
 			      enumName,
 			      EnumeratedDomain(values,false,enumName)
@@ -632,7 +632,7 @@ namespace EUROPA {
     const AbstractDomain& domain = (
 				    restrictedDomain != NULL 
 				    ? *restrictedDomain 
-				    : getTypeFactoryMgr()->baseDomain(element.Attribute("basetype"))
+				    : getCESchema()->baseDomain(element.Attribute("basetype"))
 				    );
       
       
@@ -1341,7 +1341,7 @@ namespace EUROPA {
             std::string varName = instance->getName().toString() + "." + members[i].second.toString();
             if (instance->getVariable(varName) == ConstrainedVariableId::noId()) {
 	            const AbstractDomain& baseDomain = 
-	                instance->getPlanDatabase()->getConstraintEngine()->getTypeFactoryMgr()->baseDomain(members[i].first.c_str()); 
+	                instance->getPlanDatabase()->getConstraintEngine()->getCESchema()->baseDomain(members[i].first.c_str()); 
 	            instance->addVariable(
 			      baseDomain,
 			      members[i].second.c_str()
@@ -1479,7 +1479,7 @@ namespace EUROPA {
       }
       else {
 	parameter = addParameter(
-				 getPlanDatabase()->getConstraintEngine()->getTypeFactoryMgr()->baseDomain(parameterTypes[i].c_str()),
+				 getPlanDatabase()->getConstraintEngine()->getCESchema()->baseDomain(parameterTypes[i].c_str()),
 				 parameterNames[i]
 				 );
       }

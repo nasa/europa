@@ -100,8 +100,8 @@ CETestEngine::CETestEngine()
     createModules();
     doStart();
     ConstraintEngine* ce = (ConstraintEngine*)getComponent("ConstraintEngine");    
-    ce->getTypeFactoryMgr()->createValue("INT_INTERVAL", std::string("5"));    
-    ce->getTypeFactoryMgr()->registerFactory(
+    ce->getCESchema()->createValue("INT_INTERVAL", std::string("5"));    
+    ce->getCESchema()->registerFactory(
        (new EnumeratedTypeFactory("Locations", "Locations", LocationsBaseDomain()))->getId()
     );
     REGISTER_CONSTRAINT(DelegationTestConstraint, "TestOnly", "Default");
@@ -159,7 +159,7 @@ public:
 
   static bool testValueCreation(){
       CETestEngine engine;
-      TypeFactoryMgr* tfm = (TypeFactoryMgr*)engine.getComponent("TypeFactoryMgr");
+      CESchema* tfm = (CESchema*)engine.getComponent("CESchema");
       
     IntervalIntDomain d0(5);
     int v0 = (int) tfm->createValue(d0.getTypeName().c_str(), std::string("5"));
@@ -178,7 +178,7 @@ public:
 
   static bool testDomainCreation() {
       CETestEngine engine;
-      TypeFactoryMgr* tfm = (TypeFactoryMgr*)engine.getComponent("TypeFactoryMgr");
+      CESchema* tfm = (CESchema*)engine.getComponent("CESchema");
 
     const IntervalIntDomain & bd0 = dynamic_cast<const IntervalIntDomain &>(tfm->baseDomain(IntervalIntDomain().getTypeName().c_str()));
     assertTrue(bd0.isMember(0));
@@ -236,7 +236,7 @@ public:
 
   static bool testVariableCreation(){
       CETestEngine engine;
-      TypeFactoryMgr* tfm = (TypeFactoryMgr*)engine.getComponent("TypeFactoryMgr");
+      CESchema* tfm = (CESchema*)engine.getComponent("CESchema");
 
       ConstraintEngineId ce = ((ConstraintEngine*)engine.getComponent("ConstraintEngine"))->getId();
       ConstrainedVariableId cv0 = tfm->createVariable(IntervalIntDomain().getTypeName().c_str(), ce);
@@ -250,7 +250,7 @@ public:
 
   static bool testVariableWithDomainCreation(){
       CETestEngine engine;
-      TypeFactoryMgr* tfm = (TypeFactoryMgr*)engine.getComponent("TypeFactoryMgr");
+      CESchema* tfm = (CESchema*)engine.getComponent("CESchema");
 
       IntervalIntDomain d0(5);
       IntervalDomain d1(2.3);

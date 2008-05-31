@@ -32,14 +32,14 @@ namespace EUROPA {
   
   void ModuleConstraintEngine::initialize(EngineId engine)
   {
-      TypeFactoryMgr* tfm = new TypeFactoryMgr();
+      CESchema* tfm = new CESchema();
       tfm->registerFactory((new BoolTypeFactory())->getId());
       tfm->registerFactory((new IntervalIntTypeFactory())->getId());
       tfm->registerFactory((new IntervalTypeFactory())->getId());
       tfm->registerFactory((new EnumeratedTypeFactory("REAL_ENUMERATION", "ELEMENT", EnumeratedDomain(true, "REAL_ENUMERATION")))->getId());
       tfm->registerFactory((new StringTypeFactory())->getId());
       tfm->registerFactory((new SymbolTypeFactory())->getId());
-      engine->addComponent("TypeFactoryMgr",tfm);      
+      engine->addComponent("CESchema",tfm);      
 
       ConstraintEngine* ce = new ConstraintEngine(tfm->getId());
 	  new DefaultPropagator(LabelStr("Default"), ce->getId());	  
@@ -51,7 +51,7 @@ namespace EUROPA {
       ConstraintEngine* ce = (ConstraintEngine*)engine->removeComponent("ConstraintEngine");      
       delete ce;
       
-      TypeFactoryMgr* tfm = (TypeFactoryMgr*)engine->removeComponent("TypeFactoryMgr");      
+      CESchema* tfm = (CESchema*)engine->removeComponent("CESchema");      
       delete tfm;
   }
     

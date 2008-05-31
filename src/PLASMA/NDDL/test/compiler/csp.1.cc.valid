@@ -128,14 +128,14 @@ namespace NDDL {
     id->addValue("Color", LabelStr("Blue"));
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Object, ObjectDomain("Object"));
-    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Ints, IntsBaseDomain());
-    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Floats, FloatsBaseDomain());
-    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Strings, StringsBaseDomain());
-    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Symbol, SymbolBaseDomain());
-    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Fruit, FruitBaseDomain());
-    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Speed, SpeedBaseDomain());
-    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Color, ColorBaseDomain());
+    REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(id->getCESchema(),Ints, IntsBaseDomain());
+    REGISTER_TYPE_FACTORY(id->getCESchema(),Floats, FloatsBaseDomain());
+    REGISTER_TYPE_FACTORY(id->getCESchema(),Strings, StringsBaseDomain());
+    REGISTER_TYPE_FACTORY(id->getCESchema(),Symbol, SymbolBaseDomain());
+    REGISTER_TYPE_FACTORY(id->getCESchema(),Fruit, FruitBaseDomain());
+    REGISTER_TYPE_FACTORY(id->getCESchema(),Speed, SpeedBaseDomain());
+    REGISTER_TYPE_FACTORY(id->getCESchema(),Color, ColorBaseDomain());
     // Allocate rules
     return id;
   }

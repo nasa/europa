@@ -239,7 +239,7 @@ namespace EUROPA {
 	it != ConstraintTestCase::symbolDomainsMap().end(); ++it) {
       debugMsg("ConstraintTesting:executeTestCases","Attempting to register a type factory for symbolic type " << it->first);
       it->second->close();
-      engine->getTypeFactoryMgr()->registerFactory(
+      engine->getCESchema()->registerFactory(
               (new SymbolTypeFactory(it->first.c_str(), *it->second))->getId()
       );
     }
@@ -271,7 +271,7 @@ namespace EUROPA {
         testDomains.pop_front();
 
 	LabelStr typeName = domPtr->getTypeName();
-	cVarId = engine->getTypeFactoryMgr()->createVariable(typeName.c_str(), engine, *domPtr);
+	cVarId = engine->getCESchema()->createVariable(typeName.c_str(), engine, *domPtr);
 
         delete domPtr;
         scope.push_back(cVarId);

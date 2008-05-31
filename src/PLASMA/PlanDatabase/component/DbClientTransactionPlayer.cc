@@ -104,9 +104,9 @@ namespace EUROPA {
       return m_client->getSchema();   
   }
 
-  const TypeFactoryMgrId& DbClientTransactionPlayer::getTypeFactoryMgr() const
+  const CESchemaId& DbClientTransactionPlayer::getCESchema() const
   {
-      return m_client->getTypeFactoryMgr();    
+      return m_client->getCESchema();    
   }
 
   void DbClientTransactionPlayer::setFilter(const std::set<std::string>& filters) {
@@ -1380,9 +1380,9 @@ namespace EUROPA {
       const char * name = element.Attribute("name");
       check_error(name != NULL, "missing name for domain in transaction XML");
 
-      AbstractDomain * domain = getTypeFactoryMgr()->baseDomain(type).copy();
+      AbstractDomain * domain = getCESchema()->baseDomain(type).copy();
       check_error(domain != 0, "unknown type, lack of memory, or other problem with domain in transaction XML");
-      double value = getTypeFactoryMgr()->createValue(type, name);
+      double value = getCESchema()->createValue(type, name);
       if(domain->isOpen() && !domain->isMember(value))
 	domain->insert(value);
       domain->set(value);
@@ -1393,8 +1393,8 @@ namespace EUROPA {
     if (strcmp(tag, "symbol") == 0) {
       const char * type = element.Attribute("type");
       check_error(type != NULL);
-      AbstractDomain * domain = getTypeFactoryMgr()->baseDomain(type).copy();
-      domain->set(getTypeFactoryMgr()->createValue(tag, value_st));
+      AbstractDomain * domain = getCESchema()->baseDomain(type).copy();
+      domain->set(getCESchema()->createValue(tag, value_st));
       return(domain);
     }
 
@@ -1415,21 +1415,21 @@ namespace EUROPA {
     check_error(max_st != NULL);
     IntervalDomain * domain = NULL;
     if(typeName != NULL) {
-      if(getTypeFactoryMgr()->baseDomain(type_st).minDelta() == 1)
+      if(getCESchema()->baseDomain(type_st).minDelta() == 1)
 	domain = new IntervalIntDomain(typeName);
-      else if(getTypeFactoryMgr()->baseDomain(type_st).minDelta() < 1 &&
-	      getTypeFactoryMgr()->baseDomain(type_st).minDelta() > 0)
+      else if(getCESchema()->baseDomain(type_st).minDelta() < 1 &&
+	      getCESchema()->baseDomain(type_st).minDelta() > 0)
 	domain = new IntervalDomain(typeName);
       else {
 	checkError(ALWAYS_FAIL, "Having trouble trying to duplicate type " << type_st);
       }
     }
     else
-      domain = dynamic_cast<IntervalDomain*>(getTypeFactoryMgr()->baseDomain(type_st).copy());
+      domain = dynamic_cast<IntervalDomain*>(getCESchema()->baseDomain(type_st).copy());
     check_error(domain != NULL,
 		"type '" + std::string(type_st) + "' should indicate an interval domain type");
-    double min = getTypeFactoryMgr()->createValue(type_st, min_st);
-    double max = getTypeFactoryMgr()->createValue(type_st, max_st);
+    double min = getCESchema()->createValue(type_st, min_st);
+    double max = getCESchema()->createValue(type_st, max_st);
     domain->intersect(min, max);
     debugMsg("DbClientTransactionPlayer:xmlAsIntervalDomain",
 	     "For " << element << ", created domain " << (*domain).toString());
@@ -1529,7 +1529,7 @@ namespace EUROPA {
       check_error(value_st != NULL);
       switch (type) {
        case BOOL: case INT: case FLOAT: case STRING: case SYMBOL:
-         values.push_back(getTypeFactoryMgr()->createValue(typeName.c_str(), value_st));
+         values.push_back(getCESchema()->createValue(typeName.c_str(), value_st));
          break;
        case OBJECT:
          values.push_back(m_client->getObject(value_st));
@@ -1592,14 +1592,14 @@ namespace EUROPA {
       check_error(type_st != NULL, "missing type for value in transaction XML");
       const char * name_st = value.Attribute("name");
       check_error(name_st != NULL, "missing name for value in transaction XML");
-      return(getTypeFactoryMgr()->createValue(type_st, name_st));
+      return(getCESchema()->createValue(type_st, name_st));
     }
     const char * value_st = value.Attribute("value");
     check_error(value_st != NULL, "missing value in transaction xml");
     if (strcmp(tag, "symbol") == 0) {
       const char * type_st = value.Attribute("type");
       check_error(type_st != NULL, "missing type for symbol '" + std::string(value_st) + "' in transaction xml");
-      return(getTypeFactoryMgr()->createValue(type_st, value_st));
+      return(getCESchema()->createValue(type_st, value_st));
     }
     if (strcmp(tag, "object") == 0) {
       ObjectId object = m_client->getObject(value_st);

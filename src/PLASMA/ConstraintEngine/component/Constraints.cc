@@ -877,7 +877,7 @@ namespace EUROPA {
                                                const ConstraintEngineId& constraintEngine,
                                                const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_interimVariable(constraintEngine, constraintEngine->getTypeFactoryMgr()->baseDomain(m_variables[0]->baseDomain().getTypeName().c_str()), 
+      m_interimVariable(constraintEngine, constraintEngine->getCESchema()->baseDomain(m_variables[0]->baseDomain().getTypeName().c_str()), 
 			false, LabelStr("InternalConstraintVariable"), getId()),
       m_lessThanConstraint(LabelStr("LessThan"), propagatorName, constraintEngine,
                            makeScope(m_interimVariable.getId(), m_variables[0]))
@@ -1616,7 +1616,7 @@ namespace EUROPA {
                                                  const ConstraintEngineId& constraintEngine,
                                                  const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_sumVar(constraintEngine, constraintEngine->getTypeFactoryMgr()->baseDomain(m_variables[1]->baseDomain().getTypeName().c_str()),
+      m_sumVar(constraintEngine, constraintEngine->getCESchema()->baseDomain(m_variables[1]->baseDomain().getTypeName().c_str()),
 	       false, LabelStr("InternalConstraintVariable"), getId()),
       m_condAllSameConstraint(LabelStr("CondAllSame"), propagatorName, constraintEngine,
                               makeScope(m_variables[0], m_variables[1], m_sumVar.getId()))

@@ -41,7 +41,7 @@ namespace EUROPA {
     typedef std::map<double, ValueSet > LabelStr_ValueSet_Map;
     typedef std::map<double,LabelStr_LabelStr_Map> LabelStr_LabelStrLabelStrMap_Map;
 
-    Schema(const LabelStr& name, const TypeFactoryMgrId& tfm);
+    Schema(const LabelStr& name, const CESchemaId& cesch);
     ~Schema();
 
     /**
@@ -335,14 +335,14 @@ namespace EUROPA {
      */
     void write (ostream& os) const;
     
-    const TypeFactoryMgrId& getTypeFactoryMgr() const { return m_typeFactoryMgr; }
+    const CESchemaId& getCESchema() const { return m_ceSchema; }
 
   private:
 
     static const std::set<LabelStr>& getBuiltInVariableNames();
 
     SchemaId m_id;
-    const TypeFactoryMgrId& m_typeFactoryMgr;
+    const CESchemaId& m_ceSchema;
     const LabelStr m_name;
     LabelStr_ValueSet_Map enumValues;
     LabelStrSet objectTypes;

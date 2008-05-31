@@ -58,7 +58,7 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("string")), 
+                                                planDb->getConstraintEngine()->getCESchema()->baseDomain("string")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
       check_error(arguments[0]->isSingleton());
       LabelStr _data((LabelStr)arguments[0]->getSingletonValue());
@@ -108,7 +108,7 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("string")), 
+                                                planDb->getConstraintEngine()->getCESchema()->baseDomain("string")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
       check_error(arguments[0]->isSingleton());
       LabelStr _name((LabelStr)arguments[0]->getSingletonValue());
@@ -163,13 +163,13 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 2);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Location")), 
+                                                planDb->getConstraintEngine()->getCESchema()->baseDomain("Location")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to Location");
       check_error(arguments[0]->isSingleton());
       LocationId _from((LocationId)arguments[0]->getSingletonValue());
       
       check_error(AbstractDomain::canBeCompared(*arguments[1], 
-                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Location")), 
+                                                planDb->getConstraintEngine()->getCESchema()->baseDomain("Location")), 
                   "Cannot convert " + arguments[1]->getTypeName().toString() + " to Location");
       check_error(arguments[1]->isSingleton());
       LocationId _to((LocationId)arguments[1]->getSingletonValue());
@@ -198,7 +198,7 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Location")), 
+                                                planDb->getConstraintEngine()->getCESchema()->baseDomain("Location")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to Location");
       check_error(arguments[0]->isSingleton());
       LocationId loc((LocationId)arguments[0]->getSingletonValue());
@@ -228,19 +228,19 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 3);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Location")), 
+                                                planDb->getConstraintEngine()->getCESchema()->baseDomain("Location")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to Location");
       check_error(arguments[0]->isSingleton());
       LocationId _from((LocationId)arguments[0]->getSingletonValue());
       
       check_error(AbstractDomain::canBeCompared(*arguments[1], 
-                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Location")), 
+                                                planDb->getConstraintEngine()->getCESchema()->baseDomain("Location")), 
                   "Cannot convert " + arguments[1]->getTypeName().toString() + " to Location");
       check_error(arguments[1]->isSingleton());
       LocationId _to((LocationId)arguments[1]->getSingletonValue());
       
       check_error(AbstractDomain::canBeCompared(*arguments[2], 
-                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("float")), 
+                                                planDb->getConstraintEngine()->getCESchema()->baseDomain("float")), 
                   "Cannot convert " + arguments[2]->getTypeName().toString() + " to float");
       check_error(arguments[2]->isSingleton());
       float _cost((float)arguments[2]->getSingletonValue());
@@ -276,8 +276,8 @@ namespace NDDL {
     id->addValue("TokenStates", LabelStr("REJECTED"));
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Object, ObjectDomain("Object"));
-    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),TokenStates, TokenStatesBaseDomain());
+    REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(id->getCESchema(),TokenStates, TokenStatesBaseDomain());
     REGISTER_OBJECT_FACTORY(StringDataFactory0, StringData:string);
     REGISTER_OBJECT_FACTORY(LocationFactory1, Location:string);
     REGISTER_OBJECT_FACTORY(PathFactory2, Path:Location:Location);

@@ -16,7 +16,7 @@ namespace NDDL {
     // Invoke commands to populate schema with type definitions
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
     // Allocate rules
     return id;
   }

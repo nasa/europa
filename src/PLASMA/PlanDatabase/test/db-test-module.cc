@@ -3904,7 +3904,7 @@ public:
     assertTrue(s_dbPlayer != 0);
 
     /* This does not use REGISTER_TYPE_FACTORY to avoid depending on anything under PLASMA/NDDL. */
-    ce->getTypeFactoryMgr()->registerFactory((new EnumeratedTypeFactory("Locations", "Locations", LocationsBaseDomain()))->getId());
+    ce->getCESchema()->registerFactory((new EnumeratedTypeFactory("Locations", "Locations", LocationsBaseDomain()))->getId());
 
     REGISTER_OBJECT_FACTORY(TestClass2Factory, TestClass2);
     REGISTER_OBJECT_FACTORY(TestClass2Factory, TestClass2:string:INT_INTERVAL:REAL_INTERVAL:Locations);

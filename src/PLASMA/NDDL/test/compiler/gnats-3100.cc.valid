@@ -67,7 +67,7 @@ namespace NDDL {
     id->addObjectType("Derived", "Base");
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
     REGISTER_OBJECT_FACTORY(BaseFactory0, Base);
     REGISTER_OBJECT_FACTORY(DerivedFactory1, Derived);
     // Allocate rules

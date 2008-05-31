@@ -40,9 +40,9 @@ namespace EUROPA {
     return LabelStr(fullName.c_str());
   }
 
-  Schema::Schema(const LabelStr& name, const TypeFactoryMgrId& tfm)
+  Schema::Schema(const LabelStr& name, const CESchemaId& ces)
       : m_id(this)
-      , m_typeFactoryMgr(tfm)
+      , m_ceSchema(ces)
       , m_name(name)
   {
       reset();
@@ -510,7 +510,7 @@ namespace EUROPA {
     childOfRelation.insert(std::pair<LabelStr, LabelStr>(objectType, parent));
     
     // Add type for constrained variables to be able to hold references to objects of the new type 
-    getTypeFactoryMgr()->registerFactory((new EnumeratedTypeFactory(
+    getCESchema()->registerFactory((new EnumeratedTypeFactory(
                   objectType.c_str(),
                   objectType.c_str(),
                   ObjectDomain(objectType.c_str())

@@ -70,7 +70,7 @@ class EnumerationWriter {
     	writer.unindent();
     	writer.write("}\n");
     	writer.write("return(sl_enum);\n");
-    	SchemaWriter.addFactory("REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),"+name+", " +name+"BaseDomain());\n");
+    	SchemaWriter.addFactory("REGISTER_TYPE_FACTORY(id->getCESchema(),"+name+", " +name+"BaseDomain());\n");
 		}
 		else if(values.getName().equals("interval"))
 		{
@@ -78,7 +78,7 @@ class EnumerationWriter {
 			                                              XMLUtil.getAttribute(values,"max")+", "+ 
 																										"\""+name+"\");\n");
 			writer.write("return(sl_interval);\n");
-    	SchemaWriter.addFactory("REGISTER_ITYPE_FACTORY(id->getTypeFactoryMgr(),"+name+", " +name+"BaseDomain());\n");
+    	SchemaWriter.addFactory("REGISTER_ITYPE_FACTORY(id->getCESchema(),"+name+", " +name+"BaseDomain());\n");
 		}
 		else
 			throw new RuntimeException("Typedef/enumeration generation had child other than set or interval.");

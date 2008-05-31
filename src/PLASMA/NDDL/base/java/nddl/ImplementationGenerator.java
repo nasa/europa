@@ -23,7 +23,7 @@ public class ImplementationGenerator {
     writer.indent();
 
 		// all models require a type factory for Objects (this is implicit)
-		SchemaWriter.addFactory("REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Object, ObjectDomain(\"Object\"));\n");
+		SchemaWriter.addFactory("REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain(\"Object\"));\n");
 
     for (Enumeration e = element.enumerateChildren() ; e.hasMoreElements() ; )
 	generateImplementation((IXMLElement)e.nextElement());

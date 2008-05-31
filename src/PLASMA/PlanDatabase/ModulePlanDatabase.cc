@@ -58,7 +58,7 @@ namespace EUROPA {
   
   void ModulePlanDatabase::initialize(EngineId engine)
   {
-      TypeFactoryMgr* tfm = (TypeFactoryMgr*)engine->getComponent("TypeFactoryMgr");
+      CESchema* tfm = (CESchema*)engine->getComponent("CESchema");
       
       Schema* schema = new Schema("EngineSchema",tfm->getId()); // TODO: use engine name
       engine->addComponent("Schema",schema);

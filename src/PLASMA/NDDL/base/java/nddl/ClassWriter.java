@@ -414,7 +414,7 @@ class ClassWriter {
       String target = XMLUtil.getAttribute(element,"name");
       String type = XMLUtil.getAttribute(element, "type");
       writer.write("check_error(AbstractDomain::canBeCompared(*arguments["+i+"], \n");
-      writer.write("                                          planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain(\""+type+"\")), \n");
+      writer.write("                                          planDb->getConstraintEngine()->getCESchema()->baseDomain(\""+type+"\")), \n");
       writer.write("            \"Cannot convert \" + arguments["+i+"]->getTypeName().toString() + \" to "+type+"\");\n");
       writer.write("check_error(arguments["+i+"]->isSingleton());\n");
 

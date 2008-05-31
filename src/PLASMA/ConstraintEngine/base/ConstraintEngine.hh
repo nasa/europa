@@ -11,7 +11,7 @@
 
 #include "ConstraintEngineDefs.hh"
 #include "PSConstraintEngine.hh"
-#include "TypeFactory.hh"
+#include "CESchema.hh"
 #include "DomainListener.hh"
 #include "LabelStr.hh"
 #include "ConstraintEngineListener.hh"
@@ -146,7 +146,7 @@ namespace EUROPA {
     /**
      * @brief Constructor currently creates a basic configuration of propagators.
      */
-    ConstraintEngine(const TypeFactoryMgrId& tfm);
+    ConstraintEngine(const CESchemaId& schema);
 
     /**
      * @brief Destructor.
@@ -290,7 +290,7 @@ namespace EUROPA {
      */
     bool isRelaxed() const;
 
-    const TypeFactoryMgrId& getTypeFactoryMgr() const;
+    const CESchemaId& getCESchema() const;
     
     // PSConstraintEngine methods
     virtual PSVariable* getVariableByKey(PSEntityKey id);
@@ -500,7 +500,7 @@ namespace EUROPA {
     ViolationMgr* m_violationMgr;
     bool m_autoPropagate;
     
-    const TypeFactoryMgrId& m_typeFactoryMgr;
+    const CESchemaId& m_schema;
   };
 }
 #endif

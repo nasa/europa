@@ -66,7 +66,7 @@ namespace EUROPA {
   void ModuleNddl::initialize(EngineId engine)
   {
       // These are Nddl specific, so they belong here
-      TypeFactoryMgr* tfm = (TypeFactoryMgr*)engine->getComponent("TypeFactoryMgr");
+      CESchema* tfm = (CESchema*)engine->getComponent("CESchema");
       tfm->registerFactory((new intTypeFactory())->getId());
       tfm->registerFactory((new floatTypeFactory())->getId());      
 

@@ -258,7 +258,7 @@ namespace EUROPA
     return ((new VariableChangeListener(variable, m_id))->getId());
   }
 
-  ConstraintEngine::ConstraintEngine(const TypeFactoryMgrId& tfm) 
+  ConstraintEngine::ConstraintEngine(const CESchemaId& schema) 
     : m_id(this)
     , m_relaxing(false)
     , m_relaxingViolation(false)
@@ -270,7 +270,7 @@ namespace EUROPA
     , m_cycleCount(1)
     , m_mostRecentRepropagation(1)
     , m_autoPropagate(true)
-    , m_typeFactoryMgr(tfm)
+    , m_schema(schema)
   {
     m_violationMgr = new ViolationMgrImpl(0);
   }
@@ -305,9 +305,9 @@ namespace EUROPA
     return(m_id);
   }
 
-  const TypeFactoryMgrId& ConstraintEngine::getTypeFactoryMgr() const
+  const CESchemaId& ConstraintEngine::getCESchema() const
   {
-      return m_typeFactoryMgr;
+      return m_schema;
   }
   
   void ConstraintEngine::purge() {

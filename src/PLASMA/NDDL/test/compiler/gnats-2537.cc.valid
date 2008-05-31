@@ -108,7 +108,7 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Foo")), 
+                                                planDb->getConstraintEngine()->getCESchema()->baseDomain("Foo")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to Foo");
       check_error(arguments[0]->isSingleton());
       FooId _foo((FooId)arguments[0]->getSingletonValue());
@@ -139,7 +139,7 @@ namespace NDDL {
                             const std::vector<const AbstractDomain*>& arguments) const {
       check_error(arguments.size() == 1);
       check_error(AbstractDomain::canBeCompared(*arguments[0], 
-                                                planDb->getConstraintEngine()->getTypeFactoryMgr()->baseDomain("Location")), 
+                                                planDb->getConstraintEngine()->getCESchema()->baseDomain("Location")), 
                   "Cannot convert " + arguments[0]->getTypeName().toString() + " to Location");
       check_error(arguments[0]->isSingleton());
       LabelStr loc((LabelStr)arguments[0]->getSingletonValue());
@@ -170,8 +170,8 @@ namespace NDDL {
     id->addValue("Location", LabelStr("Lander"));
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Object, ObjectDomain("Object"));
-    REGISTER_TYPE_FACTORY(id->getTypeFactoryMgr(),Location, LocationBaseDomain());
+    REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(id->getCESchema(),Location, LocationBaseDomain());
     REGISTER_OBJECT_FACTORY(FooFactory0, Foo);
     REGISTER_OBJECT_FACTORY(RegionFactory1, Region);
     REGISTER_OBJECT_FACTORY(RegionFactory2, Region:Foo);

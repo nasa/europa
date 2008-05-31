@@ -40,9 +40,9 @@ namespace EUROPA {
 
   const DbClientId& DbClient::getId() const{return m_id;}
 
-  const TypeFactoryMgrId& DbClient::getTypeFactoryMgr() const
+  const CESchemaId& DbClient::getCESchema() const
   {
-      return m_planDb->getConstraintEngine()->getTypeFactoryMgr();   
+      return m_planDb->getConstraintEngine()->getCESchema();   
   }
 
   const SchemaId& DbClient::getSchema() const
@@ -54,7 +54,7 @@ namespace EUROPA {
   ConstrainedVariableId
   DbClient::createVariable(const char* typeName, const AbstractDomain& baseDomain, const char* name, bool isTmpVar,bool canBeSpecified)
   {
-    ConstrainedVariableId variable = getTypeFactoryMgr()->createVariable(typeName, m_planDb->getConstraintEngine(), baseDomain, canBeSpecified, name);
+    ConstrainedVariableId variable = getCESchema()->createVariable(typeName, m_planDb->getConstraintEngine(), baseDomain, canBeSpecified, name);
     if (m_planDb->getSchema()->isObjectType(typeName) && !variable->isClosed()) {
       m_planDb->makeObjectVariableFromType(typeName, variable);
     }
@@ -71,7 +71,7 @@ namespace EUROPA {
   ConstrainedVariableId
   DbClient::createVariable(const char* typeName, const char* name, bool isTmpVar)
   {
-    ConstrainedVariableId variable = getTypeFactoryMgr()->createVariable(typeName, m_planDb->getConstraintEngine(), true, name);
+    ConstrainedVariableId variable = getCESchema()->createVariable(typeName, m_planDb->getConstraintEngine(), true, name);
     if (m_planDb->getSchema()->isObjectType(typeName)) {
       m_planDb->makeObjectVariableFromType(typeName, variable);
     }
