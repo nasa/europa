@@ -5,6 +5,7 @@ import psengine.*;
 import org.ops.ui.PSDesktop;
 import org.ops.ui.solver.*;
 import java.util.regex.*;
+import psengine.util.SimpleTimer;
 
 public class UBOSolverListener
     implements PSSolverDialogListener
@@ -28,7 +29,8 @@ public class UBOSolverListener
     
     PSEngine getPSEngine()
     {
-    	return PSDesktop.desktop.getPSEngine();
+    	return PSDesktop.getInstance().getPSEngine(); 
+    //	return PSDesktop.desktop.getPSEngine();
     }
     
     public Vector getDecisionHistory() { return decisionHistory_; }

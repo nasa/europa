@@ -6,10 +6,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import org.ops.ui.util.SimpleTimer;
-
 import psengine.PSEngine;
 import psengine.PSToken;
+import psengine.util.SimpleTimer;
 
 /*
  * this is a different version of the Exhaustive solver that didn't turn out to be an improvement

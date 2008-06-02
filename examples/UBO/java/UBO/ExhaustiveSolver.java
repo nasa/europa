@@ -14,10 +14,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import org.ops.ui.util.SimpleTimer;
-
 import psengine.PSEngine;
 import psengine.PSToken;
+import psengine.util.SimpleTimer;
 
 public class ExhaustiveSolver
     extends RCPSPSolverBase 

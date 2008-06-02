@@ -10,7 +10,7 @@ import java.util.TreeSet;
 import java.util.HashSet;
 import java.util.Vector;
 import psengine.*;
-import org.ops.ui.util.SimpleTimer;
+import psengine.util.SimpleTimer;
 
 /*
  * This is a solver based on the Iterative flattening and relaxation algorithm. 

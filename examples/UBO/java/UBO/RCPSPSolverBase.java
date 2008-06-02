@@ -8,11 +8,10 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import org.ops.ui.util.SimpleTimer;
-
 import psengine.PSEngine;
 import psengine.PSToken;
 import psengine.PSVariable;
+import psengine.util.SimpleTimer;
 
 public abstract class RCPSPSolverBase 
     implements RCPSPSolver 

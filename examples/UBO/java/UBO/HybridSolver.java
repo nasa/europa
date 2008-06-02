@@ -4,9 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
 
-import org.ops.ui.util.SimpleTimer;
-
 import psengine.*;
+import psengine.util.SimpleTimer;
 
 /*
  * Seeing the the IFIRSolver very quickly finds good quality solutions, and that optimal solutions are normally not far away
