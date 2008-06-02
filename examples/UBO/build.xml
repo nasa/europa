@@ -1,72 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- This file is placed by the makeproject script in new projects -->
-<project name="PSDesktop" default="run" basedir=".">
-  <description>PSDesktop App</description>
+<project name="UBO" default="run" basedir=".">
+  <description>UBO -- A EUROPA PSDesktop Project</description>
 
   <property environment="env"/>
   <!-- load overrides from build.properties file -->
   <property file="build.properties"/>
-	
-  <property name="src.dir"       value="java"/>
-  <property name="build.dir"     value="build"/>
-  <property name="dist.dir"      value="dist"/>
 
-  <property name="plasma.dir"   value="${env.PLASMA_HOME}"/>
-  <property name="psui.dir"     value="${plasma.dir}/System/component/PSUI"/>
-  <property name="psui.lib.dir" value="${psui.dir}/lib"/>
-	
+  <property name="europa.dir"   value="${env.EUROPA_HOME}"/>
+  <property name="psui.lib.dir" value="${europa.dir}/lib/PSUI"/>
+
   <property name="debug"  value="true"/>
   <property name="deprecation"  value="true"/>
+  <property name="dist" value="build/lib"/>    
 
   <path id="psui.class.path">
-    <pathelement location="${plasma.dir}/lib/nddl.jar"/>
-    <pathelement location="${plasma.dir}/lib/PSEngine.jar"/>
-    <pathelement location="${plasma.dir}/lib/PSUI.jar"/>
-    <pathelement location="${psui.lib.dir}/nanoxml/nanoxml.jar"/>
-    <pathelement location="${psui.lib.dir}/jfreechart/jcommon-1.0.5.jar"/>
-    <pathelement location="${psui.lib.dir}/jfreechart/jfreechart-1.0.2.jar"/>
-    <pathelement location="${psui.lib.dir}/egantt/egantt-core.jar"/>
-    <pathelement location="${psui.lib.dir}/egantt/egantt-ext.jar"/>
-    <pathelement location="${psui.lib.dir}/egantt/egantt-resources.jar"/>
-    <pathelement location="${psui.lib.dir}/beanshell/bsh-2.0b4.jar"/>
-    <pathelement location="${psui.lib.dir}/junit/junit-4.1.jar"/>
-    <pathelement location="${psui.lib.dir}/josql/JoSQL-1.9.jar"/>
-    <pathelement location="${psui.lib.dir}/josql/gentlyWEB-utils-1.1.jar"/>
+    <pathelement location="${europa.dir}/lib/PSUI.jar"/>
   </path>
-	
+
   <target name="init">
     <tstamp/>
-    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${class.dir}"/>
+    <mkdir dir="${swig.src.dir}"/>
   </target>
 
-  <target name="clean" description="delete the 'classes' directory tree" >
-	 <delete dir="${build.dir}"/>
+  <property name="java.src.dir" value="java"/> 
+  <property name="swig.src.dir" value="build/swig/UBO/"/>
+  <property name="class.dir"     value="build/classes"/> 
+
+  <!-- Create .jar to include any custom Java and swig-wrapped C++ -->
+  <target name="UBO" depends="compile">
+     <mkdir dir="${dist}"/>  				<!-- if necessary -->
+     <jar jarfile="${dist}/UBO.jar">
+       <fileset dir="${class.dir}"/>
+     </jar>
+     <touch file="${dist}/UBO.jar"/>
   </target>
 
-   <target name="compile" depends="init" description="compile 'src' tree into 'classes' tree" >
-    <javac srcdir="${src.dir}" 
-           destdir="${build.dir}" 
+  <target name="clean" description="delete the 'classes' directory trees" >
+    <delete dir="${class.dir}"/>
+  </target>
+
+  <target name="compile" depends="init" description="compile 'src' tree into 'classes' tree" >
+  <!-- Compile any swig-wrapped custom C++ code -->
+   <javac srcdir="${swig.src.dir}" 
+           destdir="${class.dir}" 
+    	   debug="${debug}" 
+    	   deprecation="${deprecation}">
+	  <classpath refid="psui.class.path"/>
+    </javac>
+  <!-- Compile Main.java and any custom java code -->
+    <javac srcdir="${java.src.dir}" 
+           destdir="${class.dir}" 
     	   debug="${debug}" 
     	   deprecation="${deprecation}">
 	  <classpath refid="psui.class.path"/>
     </javac>
   </target>
 	
-  <!-- project,project.dir,project.mode and project.bsh.script are read from build.properties -->  
+  <!-- project,project.dir,project.mode and project.bsh.script are read from build.properties -->
   <target name="run" depends="compile" description="build and run">
-  	<echo message="Running ${project} project"/>
+    <echo message="Running ${project} project"/>
     <java classname="${project}.Main" dir="${project.dir}" fork="yes">
-      <jvmarg value="-Xms256m"/> 	
-      <jvmarg value="-Xmx2048m"/> 	
-      <arg value="${project.mode}"/>    	
-      <arg value="${project.bsh.script}"/>    	
-      <arg value="${project.test}"/>      
-      <arg value="${project.bound}"/>      
-      <arg value="${project.timeout}"/>      
-      <arg value="${project.solver}"/>      
+      <jvmarg value="-Xms256m"/>
+      <jvmarg value="-Xmx2048m"/>
+      <arg value="${project.mode}"/>
+      <arg value="${project.bsh.script}"/>
       <classpath>
-	    <path refid="psui.class.path"/>
-	    <pathelement location="${build.dir}"/>
+      <path refid="psui.class.path"/>
+      <pathelement location="${class.dir}"/>
        </classpath>
     </java>
   </target>

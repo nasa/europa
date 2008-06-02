@@ -10,6 +10,10 @@
 #include "SolverAssembly.hh" /*!< For using a test EUROPA Assembly */
 #include "PSEngine.hh" 
 #include "Debug.hh"
+#include "PlanDatabase.hh"
+
+#include "ModuleUBO.hh"
+#include "UBOCustomCode.hh"
 
 using namespace EUROPA;
 
@@ -29,9 +33,9 @@ int main(int argc, const char ** argv)
   const char* txSource = argv[1];
   const char* plannerConfig = argv[2];
   
-  //executeWithAssembly(plannerConfig,txSource);
+  executeWithAssembly(plannerConfig,txSource);
   
-  /**/
+  /*
   executeWithPSEngine(
       plannerConfig,
       txSource,
@@ -39,7 +43,7 @@ int main(int argc, const char ** argv)
       100, // endHorizon
       1000 // maxSteps
   ); 
-  /**/
+  */
      
   return 0;
 }
@@ -47,12 +51,12 @@ int main(int argc, const char ** argv)
 void executeWithAssembly(const char* plannerConfig, const char* txSource)
 {
   SolverAssembly::initialize();
-
-  // Allocate the schema with a call to the linked in model function   
-  SchemaId schema = NDDL::loadSchema(); // eventually make this called via dlopen
   
   { // Encapsualte allocation so that they go out of scope before calling terminate  
-    SolverAssembly assembly(schema);    
+    SolverAssembly assembly;
+    NDDL::loadSchema(assembly.getPlanDatabase()->getSchema());
+    assembly.addModule((new ModuleUBO())->getId());
+    
     assembly.plan(txSource, plannerConfig); // Run the planner    
     assembly.write(std::cout); // Dump the results
   }
@@ -71,6 +75,7 @@ bool executeWithPSEngine(const char* plannerConfig, const char* txSource, int st
 	      PSEngine* engine = PSEngine::makeInstance();	
 	      engine->start();
 	      
+	      engine->addModule((new ModuleUBO()));
 	      engine->executeScript("nddl-xml",txSource,true/*isFile*/);
 
 	      PSSolver* solver = engine->createSolver(plannerConfig);

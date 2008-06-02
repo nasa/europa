@@ -112,6 +112,8 @@ void printProfile(PSResource r)
 }
 
 //main()
+
+System.out.println("HI");
 horizonStart = 0;
 horizonEnd = 1000;
 maxSteps = 1000;
@@ -127,6 +129,9 @@ try {
 	// Run built-in solver to activate ActivityTimeline::act tokens used for gantt display
     // Priorities are set up in PlannerConfig.xml to make sure that happens first
     // TODO: hardcoded 24 steps, it'll only work for problem with 11 activities
+
+    System.out.println("Starting...");
+    
     for (int i=0;i<24;i++)
     	solver.step();
 
