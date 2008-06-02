@@ -27,15 +27,15 @@
       <!-- Mac OS X -->
       <elseif>
         <equals arg1="${uname.o}" arg2="Darwin"/>
-				<then>
+        <then>
           <property name="env.LD_LIBRARY_PATH.name" value="DYLD_LIBRARY_PATH"/>
-				</then>
+        </then>
       </elseif>
 
       <!-- CYGWIN -->
       <elseif>
         <equals arg1="${uname.o}" arg2="Cygwin"/>
-				<then>
+        <then>
           <echo message="Running as a Cygwin build."/>
           <exec executable="cygpath" outputproperty="local.env.PLASMA_HOME">
             <arg value="--unix"/>
@@ -44,7 +44,7 @@
           </exec>
           <property name="jam.libraries" value="STATIC"/>
           <property name="jam.misc" value="-sOS=CYGWIN -sNOCYGWIN=TRUE"/>
-				</then>
+        </then>
       </elseif>
     </if>
 
@@ -154,6 +154,28 @@
       <fileset dir="${dir.plasma}/config"/>
     </copy>
 
+    <if>
+      <equals arg1="${uname.o}" arg2="Cygwin"/>
+      <then>
+        <echo message="Building System dlls for Windows."/>
+        <exec executable="g++" dir="${dir.dist.base}/lib">
+          <arg line="-mno-cygwin -shared -Wl,-v -Wl,--add-stdcall-alias -Wl,--whole-archive"/>
+          <arg line="-oSystem_g.dll"/>
+          <arg line="libSystem_g.a libSolvers_g.a libResource_g.a libANML_g.a libNDDL_g.a"/>
+          <arg line="libRulesEngine_g.a libTemporalNetwork_g.a libPlanDatabase_g.a"/>
+          <arg line="libConstraintEngine_g.a libUtils_g.a libTinyXml_g.a libAntlr_g.a"/>
+          <arg line="-Wl,--no-whole-archive"/>
+        </exec>
+        <exec executable="g++" dir="${dir.dist.base}/lib">
+          <arg line="-mno-cygwin -shared -Wl,-v -Wl,--add-stdcall-alias -Wl,--whole-archive"/>
+          <arg line="-oSystem_o.dll"/>
+          <arg line="libSystem_o.a libSolvers_o.a libResource_o.a libANML_o.a libNDDL_o.a"/>
+          <arg line="libRulesEngine_o.a libTemporalNetwork_o.a libPlanDatabase_o.a"/>
+          <arg line="libConstraintEngine_o.a libUtils_o.a libTinyXml_o.a libAntlr_o.a"/>
+          <arg line="-Wl,--no-whole-archive"/>
+        </exec>
+      </then>
+    </if>
     <!-- Finally, zip everything up -->
     <delete file="${dir.dist}/${file.europa_dist}"/>
     <zip destfile="${dir.dist}/${file.europa_dist}" basedir="${dir.dist.base}"/>
