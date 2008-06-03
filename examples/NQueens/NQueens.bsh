@@ -64,14 +64,12 @@ String generateModel(int n)
 {
     StringBuffer buf = new StringBuffer();
 
-//    buf.append("typedef int [0 ").append(n-1).append("] Row;\n\n");
-//    buf.append("Row ");
+    buf.append("typedef int [0 ").append(n-1).append("] Row;\n\n");
+    buf.append("Row ");
     for (int i=0; i<n;i++) {
-//    	if (i>0)
-//    		buf.append(",");
-//    	buf.append("v").append(i);
-//  
-    	buf.append("int v").append(i).append(" = [0 7];");
+    	if (i>0)
+    		buf.append(",");
+    	buf.append("v").append(i);
     }
     buf.append(";\n\n");
     
@@ -128,9 +126,7 @@ String generateModel(int n)
         	   .append(");").append("\n");            
     	}
     }
-
-    System.out.println(buf.toString());
-    return buf.toString();
+   return buf.toString();
 }
 
 void loadModel()

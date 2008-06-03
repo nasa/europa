@@ -796,6 +796,7 @@ namespace EUROPA {
   {
 	  return getType().toString();
   }
+  
   PSList<PSVariable*> Object::getMemberVariables() 
   {
 	  PSList<PSVariable*> retval;

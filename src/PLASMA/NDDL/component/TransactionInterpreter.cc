@@ -636,10 +636,11 @@ namespace EUROPA {
 				    );
       
       
+    TypeFactory * factory = NULL;
     if (domain.isEnumerated()) 
-      new EnumeratedTypeFactory(name,name,domain);
+      factory = new EnumeratedTypeFactory(name,name,domain);
     else
-      new IntervalTypeFactory(name,domain);         
+      factory = new IntervalTypeFactory(name,domain);         
               
     std::string domainString = domain.toString();        
     debugMsg("XMLInterpreter:typedef", "Created type factory " << name 
@@ -650,10 +651,7 @@ namespace EUROPA {
           
     // TODO: this is what the code generator does for every typedef, it doesn't seem right for interval types though    
     getSchema()->addEnum(name);          
-    getCESchema()->registerFactory((new EnumeratedTypeFactory(
-			      name,
-			      name
-			      ))->getId());             
+    getCESchema()->registerFactory(factory->getId());             
   }  
   
   /*
