@@ -123,18 +123,29 @@ namespace EUROPA {
 // If the output language is java, add a method to the PSEngine
 // that can get at the NDDL implementation.
 %typemap(javacode) PSEngine %{
+  protected Class getClassForName(String name)
+  {
+      try {
+          return Class.forName(name);
+      }
+      catch (Exception e) {
+          try {
+              return ClassLoader.getSystemClassLoader().loadClass(name);
+          }
+          catch (Exception ex) {
+              throw new RuntimeException("Failed to load class "+name,ex);
+          }
+      }
+  }
+
   public void executeScript(String language, java.io.Reader reader) throws PSException {
     String txns = null;
     if(language.equalsIgnoreCase("nddl")) {
       try {
-        Class nddlClass = ClassLoader.getSystemClassLoader().loadClass("nddl.Nddl");
+        Class nddlClass = getClassForName("nddl.Nddl");
         Class[] parameters = new Class[]{java.io.Reader.class, boolean.class};
         Object[] arguments = new Object[]{reader, new Boolean(false)};
         txns = (String) nddlClass.getMethod("nddlToXML", parameters).invoke(null, arguments);
-      }
-      catch(ClassNotFoundException ex) {
-        System.err.println("Cannot execute NDDL source: failed to find NDDL implementation.");
-        throw new RuntimeException(ex);
       }
       catch(NoSuchMethodException ex) {
         System.err.println("Cannot execute NDDL source: Unexpected NDDL implementation (nddlToXML not found).");
@@ -171,7 +182,7 @@ namespace EUROPA {
       try {
         if (language.equalsIgnoreCase("nddl")) {
             if (nddlInterpreter != null) {
-                Class nddlClass = ClassLoader.getSystemClassLoader().loadClass("org.ops.ui.nddl.NddlInterpreter");
+                Class nddlClass = getClassForName("org.ops.ui.nddl.NddlInterpreter");
                 Class[] parameters = new Class[]{String.class};
                 Object[] arguments = new Object[]{script};
                 String methodName = (isFile ? "source" : "eval");
