@@ -264,12 +264,6 @@ namespace EUROPA {
     check_error(!isConstrainedToPrecede(predecessor, successor),
 		"Attempted to constrain previously constrained tokens.");
 
-    // NOTE: Used to force propagation here, claiming that it was necessary for TokenRelationships
-    // to be up to date. However, if all we are doing is adding constraints, that should not be required. However,
-    // if there has been a relaxtion, we will require that the state is not 'provenInconsistent'.
-    check_error(!m_planDatabase->getConstraintEngine()->provenInconsistent(),
-		"Cannot constrain " + predecessor->getPredicateName().toString() + " when the database is already inconsistent.");
-
     // Post constraints on object variable, predecessor only in event they are equal
     constrainToThisObjectAsNeeded(predecessor);
 
@@ -307,6 +301,10 @@ namespace EUROPA {
 
     m_planDatabase->notifyConstrained(m_id, predecessor, successor);
     check_error(isValid());
+    
+    if (getPlanDatabase()->getConstraintEngine()->getAutoPropagation())
+    	getPlanDatabase()->getConstraintEngine()->propagate();	  
+
   }
 
   void Object::free(const TokenId& predecessor, const TokenId& successor){
@@ -353,6 +351,9 @@ namespace EUROPA {
 
     m_planDatabase->notifyFreed(m_id, predecessor, successor);
     check_error(isValid());
+    
+    if (getPlanDatabase()->getConstraintEngine()->getAutoPropagation())
+    	getPlanDatabase()->getConstraintEngine()->propagate();   
   }
 
   void Object::cascadeDelete() {
@@ -841,9 +842,6 @@ namespace EUROPA {
 	  TokenId p = getPlanDatabase()->getEntityByKey(pred->getKey());
 	  TokenId s = getPlanDatabase()->getEntityByKey(succ->getKey());
 	  constrain(p,s);
-	  // TODO: move this to Object::constrain()
-	  if (getPlanDatabase()->getConstraintEngine()->getAutoPropagation())
-		  getPlanDatabase()->getConstraintEngine()->propagate();	  
   }
 
   void Object::removePrecedence(PSToken* pred,PSToken* succ)
@@ -851,10 +849,7 @@ namespace EUROPA {
 	  TokenId p = getPlanDatabase()->getEntityByKey(pred->getKey());
 	  TokenId s = getPlanDatabase()->getEntityByKey(succ->getKey());
 	  free(p,s);	  
-	  // TODO: move this to Object::free()
-	  if (getPlanDatabase()->getConstraintEngine()->getAutoPropagation())
-		  getPlanDatabase()->getConstraintEngine()->propagate();   
-  }
+}
 
 }
 
