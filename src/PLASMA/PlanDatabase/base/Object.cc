@@ -129,12 +129,6 @@ namespace EUROPA {
     return(m_name);
   }
 
-  std::string Object::toString() const {
-    std::stringstream sstr;
-    sstr << getType().toString() << ":" << getName().toString();
-    return sstr.str();
-  }
-
   const PlanDatabaseId& Object::getPlanDatabase() const {
     return(m_planDatabase);
   }
@@ -636,9 +630,6 @@ namespace EUROPA {
     return false;
   }
 
-  std::string ObjectDomain::toString() const{ 
-     return "OBJECT-"+EnumeratedDomain::toString();
-  }
 
   std::string ObjectDomain::toString(double value) const {
     check_error(isMember(value), "Caught an invalid attempt to display a value not in this domain");
@@ -646,7 +637,7 @@ namespace EUROPA {
     if(!Entity::isPurging())
     {
         ObjectId object = value;
-        os << object->getName().toString()<<"("<< object->getKey() <<")";
+        os << object->toString();
     }
     else
     {
@@ -654,7 +645,12 @@ namespace EUROPA {
     }
     return  os.str();
   }
+  
+  std::string ObjectDomain::toString() const{ 
+     return "OBJECT-"+EnumeratedDomain::toString();
+  }
 
+  
   std::list<ObjectId> ObjectDomain::makeObjectList(const std::list<double>& inputs){
     std::list<ObjectId> outputs;
     for (std::list<double>::const_iterator it = inputs.begin(); it != inputs.end(); ++it)
@@ -736,7 +732,7 @@ namespace EUROPA {
   	std::ostringstream os;
   	if (objVar->lastDomain().isSingleton()) {
   		ObjectId obj = objVar->lastDomain().getSingletonValue(); 
-  	    os << obj->getName().toString();
+  	    os << obj->toString();
   	}
   	else {
   		os << objVar->toString();
@@ -745,6 +741,19 @@ namespace EUROPA {
   	return os.str();
   }
 
+  // Do we need this?  Shouldn't this happen automatically?
+  std::string Object::toString() const {
+	  return Entity::toString();
+  }
+  
+  // The old toString method
+  std::string Object::toLongString() const {
+    std::stringstream sstr;
+    sstr << getType().toString() << ":" << getName().toString();
+    return sstr.str();
+  }
+  
+  
   int Object::makeKey(const TokenId& a, const TokenId& b){
     return (a->getKey() << 16) ^ b->getKey();
   }

@@ -54,6 +54,12 @@ namespace EUROPA {
 	  return sstr.str();
   }
   
+  // By default, same thing as toString()
+  std::string Entity::toLongString() const
+  {
+	  return toString();
+  }
+
   const std::string& Entity::getEntityName() const
   {
 	  return getName().toString();

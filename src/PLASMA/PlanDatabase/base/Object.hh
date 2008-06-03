@@ -80,10 +80,7 @@ namespace EUROPA {
      */
     virtual const LabelStr& getName() const;
 
-    /**
-     * @brief Retrieve verbose a String description.
-     */
-    std::string toString() const;
+  
 
     /**
      * @brief Obtain the key ordered set of component objects i.e. objects constructed with this
@@ -241,8 +238,14 @@ namespace EUROPA {
    */
     void setParent(const ObjectId& parent);
 
-    static std::string toString(ObjectVarId objVar);
     
+    /**
+     * @brief Retrieve verbose a String description.
+     */
+    static std::string toString(ObjectVarId objVar);
+    std::string toString() const;
+    std::string toLongString() const;
+        
     // Looking for pairwise precedence constraints
     ConstraintId getPrecedenceConstraint(const TokenId& predecessor, const TokenId& successor) const;
 

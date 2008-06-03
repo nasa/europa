@@ -903,20 +903,6 @@ namespace EUROPA{
     return m_localVariables;
   }
 
-  std::string Token::toLongString() const
-  {
-  	static std::string ident="    ";
-  	
-  	std::ostringstream os;
-  	
-  	os << "Token(" << getKey() << "," << getName().toString() << ") {" << std::endl;
-  	os << ident << "object:" << getObject()->toString() << std::endl;
-  	os << ident << "start:" << start()->toString() << std::endl;
-  	os << ident << "end:" << start()->toString() << std::endl;
-  	os << ident << "duration:" << duration()->toString() << std::endl;
-  	os << "}" << std::endl; 
-  	return os.str();
-  }
 
   LabelStr Token::makePseudoVarName(){
     static int sl_varKey(0);
@@ -1051,7 +1037,7 @@ PSList<PSToken*> Token::getCompatibleTokens(unsigned int limit, bool useExactTes
     return retval;      
 }
 
-std::string Token::toPSString() const
+std::string Token::toLongString() const
 {
 	std::ostringstream os;
 	
@@ -1070,5 +1056,21 @@ std::string Token::toPSString() const
 	
 	return os.str();
 }
+
+// OLD toLongString only printed 5 built-in variables
+//std::string Token::toLongString() const
+//{
+//	static std::string ident="    ";
+//	
+//	std::ostringstream os;
+//	
+//	os << "Token(" << getKey() << "," << getName().toString() << ") {" << std::endl;
+//	os << ident << "object:" << getObject()->toString() << std::endl;
+//	os << ident << "start:" << start()->toString() << std::endl;
+//	os << ident << "end:" << start()->toString() << std::endl;
+//	os << ident << "duration:" << duration()->toString() << std::endl;
+//	os << "}" << std::endl; 
+//	return os.str();
+//}
 
 }

@@ -43,6 +43,7 @@ namespace EUROPA {
     	virtual PSVarType getType() const = 0; // Data Type 
 
     	virtual std::string toString() const = 0;
+    	virtual std::string toLongString() const = 0;
     	
     	virtual bool isEnumerated() const = 0;
     	virtual bool isInterval() const = 0;

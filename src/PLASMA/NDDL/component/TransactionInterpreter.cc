@@ -650,6 +650,10 @@ namespace EUROPA {
           
     // TODO: this is what the code generator does for every typedef, it doesn't seem right for interval types though    
     getSchema()->addEnum(name);          
+    getCESchema()->registerFactory((new EnumeratedTypeFactory(
+			      name,
+			      name
+			      ))->getId());             
   }  
   
   /*

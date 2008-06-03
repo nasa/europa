@@ -212,6 +212,7 @@ namespace EUROPA {
      * @brief Utility to capture the state of the constraint.
      */ 
     virtual std::string toString() const;
+    virtual std::string toLongString() const;
 
     static const int NO_INDEX = -1;
 

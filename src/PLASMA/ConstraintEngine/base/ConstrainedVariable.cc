@@ -599,14 +599,6 @@ namespace EUROPA {
     return (PSEntity *) m_parent;
   }
 
-//	OLD ConstrainedVariable method.  If this is useful, perhaps it can be the toLongString method?  	
-//    std::string ConstrainedVariable::toString() const{
-//      std::stringstream sstr;
-//      sstr << Entity::toString() << (specifiedFlag() ? " (S) " : "") << " DERIVED=" << lastDomain().toString();
-//      return sstr.str();
-//    }
-
-  	// OLD PSVariable toString method ... does it provide anything over the existing toString that we want to keep?
   	std::string ConstrainedVariable::toString() const {
   		std::ostringstream os;
 
@@ -632,6 +624,10 @@ namespace EUROPA {
   		return os.str();
   	}
 
-
-  	
+  	// Used to be toString, but the above is shorter and more user-friendly
+  	std::string ConstrainedVariable::toLongString() const{
+  		std::stringstream sstr;
+  		sstr << Entity::toString() << (specifiedFlag() ? " (S) " : "") << " DERIVED=" << lastDomain().toString();
+  		return sstr.str();
+  	}
 }

@@ -22,7 +22,7 @@ namespace EUROPA {
 		case OBJECT:
 		{
 			PSEntity* obj = asObject();
-			os << "OBJECT:" << obj->getEntityName() << "(" << obj->getKey() << ")";
+			os << "OBJECT:" << obj->toString();
 		}
 		break;
 
