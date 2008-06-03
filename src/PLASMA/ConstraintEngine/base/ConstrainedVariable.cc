@@ -80,7 +80,8 @@ namespace EUROPA {
   }
   
   void ConstrainedVariable::handleDiscard(){
-    debugMsg("ConstrainedVariable:handleDiscard", "Discarding " << toString());
+	  // TODO:  using toString here breaks during shutdown (see #170)
+    debugMsg("ConstrainedVariable:handleDiscard", "Discarding " << toLongString());
 
     check_error(m_constraintEngine.isValid());
     m_deleted = true;

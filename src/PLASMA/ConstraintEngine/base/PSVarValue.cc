@@ -50,7 +50,7 @@ namespace EUROPA {
   PSEntity* PSVarValue::asObject() const 
   {
     check_runtime_error(m_type == OBJECT);
-    Id<PSEntity> id(m_val);
+    Id<PSEntity> id(m_val);  // only works if PSEntity remains pure virtual
     return (PSEntity *) id;
   }
 
