@@ -9,7 +9,7 @@
 #include "PlannerControlIntf.hh"
 #include "SolverDefs.hh"
 #include "RulesEngineDefs.hh"
-#include "EuropaEngineBase.hh"
+#include "EuropaEngine.hh"
 #include <string>
 #include <list>
 
@@ -27,7 +27,7 @@ namespace EUROPA {
   /**
    * @brief
    */
-  class MasterController : public EuropaEngineBase 
+  class MasterController : public EuropaEngine
   {
   public:
 

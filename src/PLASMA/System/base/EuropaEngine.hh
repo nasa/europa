@@ -1,5 +1,5 @@
-#ifndef _H_EngineBase
-#define _H_EngineBase
+#ifndef _H_EuropaEngine
+#define _H_EuropaEngine
 
 #include "Engine.hh"
 #include "Module.hh"
@@ -9,10 +9,10 @@
 
 namespace EUROPA {
 
-  class EuropaEngineBase : public EngineBase 
+  class EuropaEngine : public EngineBase 
   {
     public:  
-       	EuropaEngineBase();          
+       	EuropaEngine();          
     	
         virtual ConstraintEngineId& getConstraintEngine();
         virtual PlanDatabaseId&     getPlanDatabase();
@@ -23,7 +23,7 @@ namespace EUROPA {
         virtual const RulesEngine*      getRulesEnginePtr() const;
         
     protected: 
-    	virtual ~EuropaEngineBase();    	
+    	virtual ~EuropaEngine();    	
     	void createModules();    	    			
   };
 }

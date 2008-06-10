@@ -6,7 +6,7 @@
  * @author Conor McGann
  */
 
-#include "EuropaEngineBase.hh"
+#include "EuropaEngine.hh"
 #include "PlanDatabaseDefs.hh"
 #include "RulesEngineDefs.hh"
 
@@ -22,7 +22,7 @@ namespace EUROPA {
    * @li Resources
    * @li TemporalNetwork
    */
-  class StandardAssembly : public EuropaEngineBase {
+  class StandardAssembly : public EuropaEngine {
   public:
 
     /**

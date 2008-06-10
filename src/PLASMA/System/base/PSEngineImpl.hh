@@ -2,11 +2,11 @@
 #define _H_PSEngineImpl
 
 #include "PSEngine.hh"
-#include "EuropaEngineBase.hh"
+#include "EuropaEngine.hh"
 
 namespace EUROPA {
 
-  class PSEngineImpl : public PSEngine, public EuropaEngineBase
+  class PSEngineImpl : public PSEngine, public EuropaEngine
   {
   public:
     PSEngineImpl();

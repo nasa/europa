@@ -10,7 +10,7 @@ if "Resources" in $(NO) {
 
 ModuleBase System 
 	: 
-	EuropaEngineBase.cc
+	EuropaEngine.cc
 	PSEngineImpl.cc
 	StandardAssembly.cc
 	;

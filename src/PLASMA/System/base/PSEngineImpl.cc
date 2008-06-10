@@ -62,15 +62,15 @@ namespace EUROPA {
     
   void PSEngineImpl::addModule(Module* module)
   {
-	  EuropaEngineBase::addModule(module->getId());
+	  EuropaEngine::addModule(module->getId());
   }
   void PSEngineImpl::removeModule(Module* module)
   {
-	  EuropaEngineBase::removeModule(module->getId());
+	  EuropaEngine::removeModule(module->getId());
   }
   void PSEngineImpl::loadModule(const std::string& moduleFileName) 
   {
-	  EuropaEngineBase::loadModule(moduleFileName);
+	  EuropaEngine::loadModule(moduleFileName);
   }
 
   void PSEngineImpl::loadModel(const std::string& modelFileName) 
@@ -93,7 +93,7 @@ namespace EUROPA {
   
   std::string PSEngineImpl::executeScript(const std::string& language, const std::string& script, bool isFile) 
   {
-    return EuropaEngineBase::executeScript(language,script,isFile);
+    return EuropaEngine::executeScript(language,script,isFile);
   }
 
   // Plan Database methods
@@ -225,7 +225,7 @@ namespace EUROPA {
   void PSEngineImpl::addPlanDatabaseListener(PSPlanDatabaseListener& listener)
   {
 	  check_runtime_error(isStarted(),"PSEngine has not been started");
-	  listener.setPlanDatabase(EuropaEngineBase::getPlanDatabase());
+	  listener.setPlanDatabase(EuropaEngine::getPlanDatabase());
   }
 }
 
