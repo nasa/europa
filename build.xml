@@ -52,7 +52,10 @@
     <property name="local.env.PLASMA_HOME" value="${basedir}"/>
     <property name="dir.plasma" value="${basedir}"/>
     <property name="dir.src" value="src/PLASMA"/>
-    <property name="dir.planworks" value="../PlanWorks"/>
+    <condition property="dir.planworks" value="{env.PLANWORKS_HOME}">
+      <isset property="${env.PLANWORKS_HOME}"/>
+    </condition>
+    <property name="dir.planworks" value="${basedir}/../PlanWorks"/>
     <property name="dir.build" value="build"/>
     <property name="dir.dist" value="dist"/>
     <property name="dir.dist.base" location="${dir.dist}/europa"/>
@@ -94,6 +97,8 @@
     <antcall target="build">
       <param name="jam.opts" value="${jam.misc} -sVARIANTS=OPTIMIZED -sLIBRARIES=${jam.libraries}"/>
     </antcall>
+    <ant dir="${dir.planworks}" target="createJNI"/>
+    <ant dir="${dir.planworks}" target="compile"/>
     <antcall target="dist"/>
   </target>
 
@@ -105,8 +110,8 @@
     <mkdir dir="${dir.dist.base}/bin"/>
 
     <copy todir="${dir.dist.base}/bin">
-      <!-- TODO: copy scripts to run PlanWorks and PSDesktop -->
-      <!-- TODO: modify makeproject so that it can work with makefile, PSEngine and binary release -->
+      <!-- TODO: copy script to run PSDesktop -->
+      <fileset file="${dir.planworks}/bin/PlanWorks.sh"/>
       <fileset dir="${dir.plasma}/bin"/>
     </copy>
     <!-- ant doesn't preserve permissions -->
@@ -116,10 +121,9 @@
 
     <copy todir="${dir.dist.base}/lib">
       <fileset dir="${dir.plasma}/build/lib"/>
-      <!-- TODO: copy PlanWorks libraries -->
+      <fileset dir="${dir.planworks}/build/lib"/>
     </copy>
 
-    <!-- TODO: put all this libs into PSUI.jar -->
     <copy todir="${dir.dist.base}/lib/PSUI">
       <fileset dir="${dir.src}/System/component/PSUI/lib"/>
     </copy>
@@ -150,8 +154,12 @@
     </copy>
 
     <copy todir="${dir.dist.base}/config">
-      <!-- TODO: include path in NDDL.cfg needs to support layout of binary release -->
       <fileset dir="${dir.plasma}/config"/>
+      <fileset dir="${dir.planworks}/config"/>
+    </copy>
+
+    <copy todir="${dir.dist.base}/res">
+      <fileset dir="${dir.planworks}/res"/>
     </copy>
 
     <if>
