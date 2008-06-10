@@ -18,21 +18,23 @@ import net.n3.nanoxml.IXMLElement;
 import net.n3.nanoxml.XMLElement;
 import net.n3.nanoxml.XMLWriter;
 
-import org.ops.ui.PSDesktop;
 import org.ops.ui.ash.AshConsole;
 import org.ops.ui.ash.AshInterpreter;
 import org.ops.ui.ash.DocumentOutputStream;
 
+import psengine.PSEngine;
 import psengine.PSException;
 
 public class NddlInterpreter extends AshInterpreter {
   NddlParserState persistantState = null;
   PrintStream consoleErr = System.err;
+  PSEngine psengine_;
 
-  public NddlInterpreter() {
+  public NddlInterpreter(PSEngine pse) {
     super("Nddl");
     ModelAccessor.init();
     persistantState = new NddlParserState(null);
+    psengine_ = pse;
   }
 
   public void setConsole(AshConsole console) {
@@ -64,7 +66,7 @@ public class NddlInterpreter extends AshInterpreter {
     }
 
     try {
-      PSDesktop.getInstance().getPSEngine().executeScript("nddl-xml",string.toString(), false /*isFile*/);
+      psengine_.executeScript("nddl-xml",string.toString(), false /*isFile*/);
       persistantState = parser.getState();
     }
     catch(PSException ex) {

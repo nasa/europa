@@ -46,10 +46,10 @@ public class PSDesktop
 	protected JDesktopPane desktop_;
 	protected int windowCnt_=0;
 	protected PSEngine psEngine_=null;
+    protected NddlInterpreter nddlInterpreter_;
 	protected JConsole bshConsole_;
     protected Interpreter bshInterpreter_;
     
-	protected static NddlInterpreter nddlInterpreter = new NddlInterpreter();
 	protected static String debugMode_="g";
 	protected static String bshFile_=null;
 
@@ -134,7 +134,8 @@ public class PSDesktop
 	{
 		assert (pse != null);
 	    psEngine_ = pse;
-	    psEngine_.nddlInterpreter = nddlInterpreter; // TODO !! this must be done as part of PSEngine packaging, not here 
+	    nddlInterpreter_ = new NddlInterpreter(psEngine_);
+	    psEngine_.nddlInterpreter = nddlInterpreter_; // TODO !! this must be done as part of PSEngine packaging, not here 
         bshConsole_ = new JConsole();
         bshInterpreter_ = new Interpreter(bshConsole_);                	    
 	}
@@ -230,7 +231,7 @@ public class PSDesktop
     {
         addBshVariable("desktop",this);
         addBshVariable("psengine",getPSEngine());
-        addBshVariable("nddlInterp", nddlInterpreter);
+        addBshVariable("nddlInterp", nddlInterpreter_);
     }
 
     public void makeTableFrame(String title,List l,String fields[])
@@ -411,8 +412,8 @@ public class PSDesktop
     public void makeNddlConsole()
     {
     	JInternalFrame nddlInterpFrame = makeNewFrame("Nddl Console");
-    	AshConsole console = new AshConsole(nddlInterpreter);
-    	nddlInterpreter.setConsole(console);
+    	AshConsole console = new AshConsole(nddlInterpreter_);
+    	nddlInterpreter_.setConsole(console);
     	console.setTokenMarker(new NddlTokenMarker());
     	nddlInterpFrame.setContentPane(console);    
     }
