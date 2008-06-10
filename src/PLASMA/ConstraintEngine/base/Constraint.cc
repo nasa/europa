@@ -118,6 +118,17 @@ namespace EUROPA {
   	return os.str();
   }
 
+  PSList<PSVariable*> Constraint::getVariables() const
+  {
+	  PSList<PSVariable*> retval;
+	  for(size_t i = 0; i < m_variables.size(); ++i)
+	  {
+		  ConstrainedVariableId id = m_variables[i];
+		  retval.push_back((PSVariable *) id);
+	  }
+	  return retval;
+  }
+  
   const ConstraintId& Constraint::getId() const {
     return m_id;
   }

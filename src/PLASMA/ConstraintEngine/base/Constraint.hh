@@ -163,6 +163,9 @@ namespace EUROPA {
      * TODO: this must be allowed to be set from the model
      */
     virtual std::string getViolationExpl() const;
+    
+    // PS-Specific Methods:
+    virtual PSList<PSVariable*> getVariables() const;
 
   protected:
     /**

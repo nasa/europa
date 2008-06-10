@@ -546,7 +546,21 @@ namespace EUROPA {
     return retval;
   }
 
+  PSList<PSConstraint*> ConstrainedVariable::getConstraints() const
+  {
+	  check_runtime_error(isValid());
+	  check_error(!Entity::isPurging());
+	  PSList<PSConstraint*> retval;
+	  ConstraintList::const_iterator it = m_constraints.begin();
+	  for ( ; it != m_constraints.end(); ++it) {
+		  ConstraintId cId = it->first;
+		  retval.push_back( (PSConstraint *) cId);
+	  }
+	  return retval;
+    }
 
+  
+  
   double ConstrainedVariable::getLowerBound() const {
     check_runtime_error(isValid());
     check_runtime_error(isInterval());

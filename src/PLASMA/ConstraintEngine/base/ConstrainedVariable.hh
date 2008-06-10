@@ -465,6 +465,7 @@ namespace EUROPA {
 	
 	
 	virtual PSList<PSVarValue> getValues() const;
+	virtual PSList<PSConstraint*> getConstraints() const;
 
 	virtual double getLowerBound() const;  // if isSingleton()==false && isInterval() == true
 	virtual double getUpperBound() const;  // if isSingleton()==false && isInterval() == true

@@ -95,10 +95,10 @@ namespace EUROPA {
   %template(PSObjectList) PSList<PSObject*>;
   %template(PSTokenList) PSList<PSToken*>;
   %template(PSVariableList) PSList<PSVariable*>;
+  %template(PSConstraintList) PSList<PSConstraint*>;
   //%template(PSValueList) PSList<PSVarValue>;
 
   // using template instantiation to get the right results.
-
   %rename(PSStringList) PSList<std::string>;
   class PSList<std::string> {
   public:
@@ -262,6 +262,7 @@ namespace EUROPA {
     const std::string& getEntityType() const;
     
     std::string toString() const;
+    std::string toLongString() const;
         
   protected:
     PSEntity(); //protected constructors prevent wrapper generation
@@ -370,7 +371,9 @@ namespace EUROPA {
 
     bool isEnumerated();
     PSList<PSVarValue> getValues();  // if isSingleton()==false && isEnumerated() == true
-
+    PSList<PSConstraint*> getConstraints();
+    
+    
     void specifyValue(PSVarValue& v);
     void reset();
     
@@ -416,7 +419,8 @@ namespace EUROPA {
       std::string getViolationExpl() const;     
       
       std::string toString() const;
-
+      PSList<PSVariable*> getVariables() const;
+      
     protected:
       PSConstraint();                    
   };

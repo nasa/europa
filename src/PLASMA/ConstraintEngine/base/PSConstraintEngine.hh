@@ -54,6 +54,7 @@ namespace EUROPA {
     	virtual PSVarValue getSingletonValue() const = 0;    // Call to get value if isSingleton()==true 
 
     	virtual PSList<PSVarValue> getValues() const = 0;  // if isSingleton()==false && isEnumerated() == true
+    	virtual PSList<PSConstraint*> getConstraints() const = 0;
 
     	virtual double getLowerBound() const = 0;  // if isSingleton()==false && isInterval() == true
     	virtual double getUpperBound() const = 0;  // if isSingleton()==false && isInterval() == true
@@ -81,7 +82,9 @@ namespace EUROPA {
       virtual void undoDeactivation() = 0;
       
       virtual double getViolation() const = 0;
-      virtual std::string getViolationExpl() const = 0;     
+      virtual std::string getViolationExpl() const = 0;
+      
+      virtual PSList<PSVariable*> getVariables() const = 0;
   };
 
 }
