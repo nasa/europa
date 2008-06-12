@@ -134,10 +134,16 @@ public class PSDesktop
 	{
 		assert (pse != null);
 	    psEngine_ = pse;
-	    nddlInterpreter_ = new NddlInterpreter(psEngine_);
-	    psEngine_.nddlInterpreter = nddlInterpreter_; // TODO !! this must be done as part of PSEngine packaging, not here 
+	    initPSEngine();
         bshConsole_ = new JConsole();
         bshInterpreter_ = new Interpreter(bshConsole_);                	    
+	}
+	
+    // TODO !! this must be done as part of PSEngine packaging, not here 
+	public void initPSEngine()
+	{
+        nddlInterpreter_ = new NddlInterpreter(psEngine_);
+        psEngine_.nddlInterpreter = nddlInterpreter_; 
 	}
 	
     public void runUI()
