@@ -45,9 +45,9 @@ namespace NDDL {
   }
   
   // PlannerConfig.nddl:7 PlannerConfig
-  class PlannerConfigFactory0: public ConcreteObjectFactory {
+  class PlannerConfigFactory0: public ObjectFactory {
   public:
-    PlannerConfigFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
+    PlannerConfigFactory0(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -94,9 +94,9 @@ namespace NDDL {
   }
   
   // PlannerConfig.nddl:7 PlannerConfig
-  class PlannerConfigFactory1: public ConcreteObjectFactory {
+  class PlannerConfigFactory1: public ObjectFactory {
   public:
-    PlannerConfigFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
+    PlannerConfigFactory1(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -137,9 +137,9 @@ namespace NDDL {
   }
   
   // PlannerConfig.nddl:7 PlannerConfig
-  class PlannerConfigFactory2: public ConcreteObjectFactory {
+  class PlannerConfigFactory2: public ObjectFactory {
   public:
-    PlannerConfigFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
+    PlannerConfigFactory2(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -196,9 +196,9 @@ namespace NDDL {
   }
   
   // StringData.nddl:5 StringData
-  class StringDataFactory3: public ConcreteObjectFactory {
+  class StringDataFactory3: public ObjectFactory {
   public:
-    StringDataFactory3(const LabelStr& name): ConcreteObjectFactory(name){}
+    StringDataFactory3(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -262,9 +262,9 @@ namespace NDDL {
   }
   
   // gnats_2830.nddl:6 Path
-  class PathFactory4: public ConcreteObjectFactory {
+  class PathFactory4: public ObjectFactory {
   public:
-    PathFactory4(const LabelStr& name): ConcreteObjectFactory(name){}
+    PathFactory4(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -321,9 +321,9 @@ namespace NDDL {
   }
   
   // gnats_2830.nddl:16 Enable
-  class EnableFactory5: public ConcreteObjectFactory {
+  class EnableFactory5: public ObjectFactory {
   public:
-    EnableFactory5(const LabelStr& name): ConcreteObjectFactory(name){}
+    EnableFactory5(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -603,17 +603,17 @@ namespace NDDL {
     REGISTER_TOKEN_FACTORY(Position::Navigate::Factory);
     REGISTER_TOKEN_FACTORY(Foo::FooPred::Factory);
     REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
-    REGISTER_OBJECT_FACTORY(PlannerConfigFactory0, PlannerConfig:int:int:int:int);
-    REGISTER_OBJECT_FACTORY(PlannerConfigFactory1, PlannerConfig:int:int:int);
-    REGISTER_OBJECT_FACTORY(PlannerConfigFactory2, PlannerConfig);
+    REGISTER_OBJECT_FACTORY(id,PlannerConfigFactory0, PlannerConfig:int:int:int:int);
+    REGISTER_OBJECT_FACTORY(id,PlannerConfigFactory1, PlannerConfig:int:int:int);
+    REGISTER_OBJECT_FACTORY(id,PlannerConfigFactory2, PlannerConfig);
     REGISTER_TYPE_FACTORY(id->getCESchema(),TokenStates, TokenStatesBaseDomain());
-    REGISTER_OBJECT_FACTORY(StringDataFactory3, StringData:string);
+    REGISTER_OBJECT_FACTORY(id,StringDataFactory3, StringData:string);
     REGISTER_TYPE_FACTORY(id->getCESchema(),Location, LocationBaseDomain());
-    REGISTER_OBJECT_FACTORY(PathFactory4, Path:Location:Location);
-    REGISTER_OBJECT_FACTORY(EnableFactory5, Enable:Location:Path);
-    REGISTER_OBJECT_FACTORY(EnableFactory5, Enable:Location:Object);
-    REGISTER_OBJECT_FACTORY(PositionFactory6, Position);
-    REGISTER_OBJECT_FACTORY(FooFactory7, Foo);
+    REGISTER_OBJECT_FACTORY(id,PathFactory4, Path:Location:Location);
+    REGISTER_OBJECT_FACTORY(id,EnableFactory5, Enable:Location:Path);
+    REGISTER_OBJECT_FACTORY(id,EnableFactory5, Enable:Location:Object);
+    REGISTER_OBJECT_FACTORY(id,PositionFactory6, Position);
+    REGISTER_OBJECT_FACTORY(id,FooFactory7, Foo);
     // Allocate rules
     new Rule$Position$Navigate$0();
     return id;

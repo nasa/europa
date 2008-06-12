@@ -80,9 +80,9 @@ const char* DEFAULT_PREDICATE = "Object.DEFAULT_PREDICATE";
     m_1 = addVariable(LabelSet(LabelStr("Hello World")), "LabelSetVar");
   }
 
-  class StandardDBFooFactory: public ConcreteObjectFactory {
+  class StandardDBFooFactory: public ObjectFactory {
   public:
-    StandardDBFooFactory(): ConcreteObjectFactory(LabelStr(DEFAULT_OBJECT_TYPE)){}
+    StandardDBFooFactory(): ObjectFactory(LabelStr(DEFAULT_OBJECT_TYPE)){}
 
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb, 
@@ -97,9 +97,9 @@ const char* DEFAULT_PREDICATE = "Object.DEFAULT_PREDICATE";
     }
   };
 
-  class SpecialDBFooFactory: public ConcreteObjectFactory{
+  class SpecialDBFooFactory: public ObjectFactory{
   public:
-    SpecialDBFooFactory(): ConcreteObjectFactory(LabelStr(DEFAULT_OBJECT_TYPE).toString() +
+    SpecialDBFooFactory(): ObjectFactory(LabelStr(DEFAULT_OBJECT_TYPE).toString() +
                            ":" + IntervalIntDomain::getDefaultTypeName().toString() +
                            ":" + LabelSet::getDefaultTypeName().toString())
     {}
@@ -214,8 +214,8 @@ PDBTestEngine::PDBTestEngine()
     REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporalDistance", "Default");  
 
     // Have to register factories for testing.
-    new StandardDBFooFactory();
-    new SpecialDBFooFactory();
+    schema->registerObjectFactory((new StandardDBFooFactory())->getId());
+    schema->registerObjectFactory((new SpecialDBFooFactory())->getId());
     new IntervalTokenFactory();
 }
 
@@ -3724,7 +3724,7 @@ private:
     LabelSet arg1(LabelStr("Label"), "string");
     arguments.push_back(&arg0); 
     arguments.push_back(&arg1);
-    LabelStr factoryName = ObjectFactory::makeFactoryName(LabelStr("Foo"), arguments);
+    LabelStr factoryName = ObjectTypeMgr::makeFactoryName(LabelStr("Foo"), arguments);
     assertTrue(factoryName == LabelStr("Foo:int:string"));
     return true;
   }
@@ -3906,8 +3906,8 @@ public:
     /* This does not use REGISTER_TYPE_FACTORY to avoid depending on anything under PLASMA/NDDL. */
     ce->getCESchema()->registerFactory((new EnumeratedTypeFactory("Locations", "Locations", LocationsBaseDomain()))->getId());
 
-    REGISTER_OBJECT_FACTORY(TestClass2Factory, TestClass2);
-    REGISTER_OBJECT_FACTORY(TestClass2Factory, TestClass2:string:INT_INTERVAL:REAL_INTERVAL:Locations);
+    REGISTER_OBJECT_FACTORY(db->getSchema(),TestClass2Factory, TestClass2);
+    REGISTER_OBJECT_FACTORY(db->getSchema(),TestClass2Factory, TestClass2:string:INT_INTERVAL:REAL_INTERVAL:Locations);
 
     /* Token factory for predicate Sample */
     new TestClass2::Sample::Factory();
@@ -4109,10 +4109,10 @@ public:
 
   };
 
-  class TestClass2Factory: public ConcreteObjectFactory {
+  class TestClass2Factory: public ObjectFactory {
   public:
     TestClass2Factory(const LabelStr& name)
-      : ConcreteObjectFactory(name) {
+      : ObjectFactory(name) {
     }
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,

@@ -12,6 +12,7 @@
 #include "PSPlanDatabase.hh"
 #include "LabelStr.hh"
 #include "AbstractDomain.hh"
+#include "ObjectFactory.hh"
 
 #include <vector>
 
@@ -336,6 +337,10 @@ namespace EUROPA {
     void write (ostream& os) const;
     
     const CESchemaId& getCESchema() const { return m_ceSchema; }
+        
+    void registerObjectFactory(const ObjectFactoryId& obj_fact);
+    ObjectFactoryId getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments);
+    
 
   private:
 
@@ -343,6 +348,8 @@ namespace EUROPA {
 
     SchemaId m_id;
     const CESchemaId& m_ceSchema;
+    const ObjectTypeMgrId m_objectTypeMgr;
+    
     const LabelStr m_name;
     LabelStr_ValueSet_Map enumValues;
     LabelStrSet objectTypes;

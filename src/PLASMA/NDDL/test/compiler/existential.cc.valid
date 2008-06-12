@@ -48,9 +48,9 @@ namespace NDDL {
   }
   
   // StringData.nddl:5 StringData
-  class StringDataFactory0: public ConcreteObjectFactory {
+  class StringDataFactory0: public ObjectFactory {
   public:
-    StringDataFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
+    StringDataFactory0(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -98,9 +98,9 @@ namespace NDDL {
   }
   
   // existential.nddl:3 Location
-  class LocationFactory1: public ConcreteObjectFactory {
+  class LocationFactory1: public ObjectFactory {
   public:
-    LocationFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
+    LocationFactory1(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -154,9 +154,9 @@ namespace NDDL {
   }
   
   // existential.nddl:10 Path
-  class PathFactory2: public ConcreteObjectFactory {
+  class PathFactory2: public ObjectFactory {
   public:
-    PathFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
+    PathFactory2(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -302,9 +302,9 @@ namespace NDDL {
   }
   
   // existential.nddl:21 World
-  class WorldFactory3: public ConcreteObjectFactory {
+  class WorldFactory3: public ObjectFactory {
   public:
-    WorldFactory3(const LabelStr& name): ConcreteObjectFactory(name){}
+    WorldFactory3(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -521,13 +521,13 @@ namespace NDDL {
     REGISTER_TOKEN_FACTORY(World::initialState::Factory);
     REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(id->getCESchema(),TokenStates, TokenStatesBaseDomain());
-    REGISTER_OBJECT_FACTORY(StringDataFactory0, StringData:string);
-    REGISTER_OBJECT_FACTORY(LocationFactory1, Location:string);
-    REGISTER_OBJECT_FACTORY(PathFactory2, Path:Location:Location);
-    REGISTER_OBJECT_FACTORY(PathFactory2, Path:Location:Object);
-    REGISTER_OBJECT_FACTORY(PathFactory2, Path:Object:Location);
-    REGISTER_OBJECT_FACTORY(PathFactory2, Path:Object:Object);
-    REGISTER_OBJECT_FACTORY(WorldFactory3, World);
+    REGISTER_OBJECT_FACTORY(id,StringDataFactory0, StringData:string);
+    REGISTER_OBJECT_FACTORY(id,LocationFactory1, Location:string);
+    REGISTER_OBJECT_FACTORY(id,PathFactory2, Path:Location:Location);
+    REGISTER_OBJECT_FACTORY(id,PathFactory2, Path:Location:Object);
+    REGISTER_OBJECT_FACTORY(id,PathFactory2, Path:Object:Location);
+    REGISTER_OBJECT_FACTORY(id,PathFactory2, Path:Object:Object);
+    REGISTER_OBJECT_FACTORY(id,WorldFactory3, World);
     // Allocate rules
     new Rule$World$Going$0();
     new Rule$World$initialState$1();

@@ -189,7 +189,7 @@ namespace EUROPA {
 	    std::vector<Expr*>    m_argExprs;  
   };
     
-  class InterpretedObjectFactory : public ConcreteObjectFactory
+  class InterpretedObjectFactory : public ObjectFactory
   {
   	public:
   	    InterpretedObjectFactory(

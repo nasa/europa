@@ -48,9 +48,9 @@ namespace NDDL {
   }
   
   // StringData.nddl:5 StringData
-  class StringDataFactory0: public ConcreteObjectFactory {
+  class StringDataFactory0: public ObjectFactory {
   public:
-    StringDataFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
+    StringDataFactory0(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -175,9 +175,9 @@ namespace NDDL {
   }
   
   // guards.nddl:11 Foo
-  class FooFactory2: public ConcreteObjectFactory {
+  class FooFactory2: public ObjectFactory {
   public:
-    FooFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
+    FooFactory2(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -866,11 +866,11 @@ namespace NDDL {
     REGISTER_TOKEN_FACTORY(Foo::multipleNestedGuards::Factory);
     REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(id->getCESchema(),TokenStates, TokenStatesBaseDomain());
-    REGISTER_OBJECT_FACTORY(StringDataFactory0, StringData:string);
+    REGISTER_OBJECT_FACTORY(id,StringDataFactory0, StringData:string);
     REGISTER_TYPE_FACTORY(id->getCESchema(),Locations, LocationsBaseDomain());
     REGISTER_TYPE_FACTORY(id->getCESchema(),StringEnum, StringEnumBaseDomain());
-    REGISTER_OBJECT_FACTORY(BarFactory1, Bar);
-    REGISTER_OBJECT_FACTORY(FooFactory2, Foo);
+    REGISTER_OBJECT_FACTORY(id,BarFactory1, Bar);
+    REGISTER_OBJECT_FACTORY(id,FooFactory2, Foo);
     // Allocate rules
     new Rule$Foo$impliedLocalVariableGuard$1();
     new Rule$Foo$impliedObjectGuard$0();

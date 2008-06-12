@@ -41,9 +41,9 @@ namespace NDDL {
   }
   
   // inheritance.1.nddl:2 Foo
-  class FooFactory0: public ConcreteObjectFactory {
+  class FooFactory0: public ObjectFactory {
   public:
-    FooFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
+    FooFactory0(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -65,9 +65,9 @@ namespace NDDL {
   }
   
   // inheritance.1.nddl:2 Foo
-  class FooFactory1: public ConcreteObjectFactory {
+  class FooFactory1: public ObjectFactory {
   public:
-    FooFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
+    FooFactory1(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -101,9 +101,9 @@ namespace NDDL {
   }
   
   // inheritance.1.nddl:2 Foo
-  class FooFactory2: public ConcreteObjectFactory {
+  class FooFactory2: public ObjectFactory {
   public:
-    FooFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
+    FooFactory2(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -165,9 +165,9 @@ namespace NDDL {
   }
   
   // inheritance.1.nddl:31 Bar
-  class BarFactory3: public ConcreteObjectFactory {
+  class BarFactory3: public ObjectFactory {
   public:
-    BarFactory3(const LabelStr& name): ConcreteObjectFactory(name){}
+    BarFactory3(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -188,9 +188,9 @@ namespace NDDL {
   }
   
   // inheritance.1.nddl:31 Bar
-  class BarFactory4: public ConcreteObjectFactory {
+  class BarFactory4: public ObjectFactory {
   public:
-    BarFactory4(const LabelStr& name): ConcreteObjectFactory(name){}
+    BarFactory4(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -217,9 +217,9 @@ namespace NDDL {
   }
   
   // inheritance.1.nddl:31 Bar
-  class BarFactory5: public ConcreteObjectFactory {
+  class BarFactory5: public ObjectFactory {
   public:
-    BarFactory5(const LabelStr& name): ConcreteObjectFactory(name){}
+    BarFactory5(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -275,12 +275,12 @@ namespace NDDL {
     // Force allocation of model specific type factories
     // Allocate factories
     REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
-    REGISTER_OBJECT_FACTORY(FooFactory0, Foo);
-    REGISTER_OBJECT_FACTORY(FooFactory1, Foo:int:float);
-    REGISTER_OBJECT_FACTORY(FooFactory2, Foo:int:float:bool);
-    REGISTER_OBJECT_FACTORY(BarFactory3, Bar);
-    REGISTER_OBJECT_FACTORY(BarFactory4, Bar:string);
-    REGISTER_OBJECT_FACTORY(BarFactory5, Bar:string:int:float:bool);
+    REGISTER_OBJECT_FACTORY(id,FooFactory0, Foo);
+    REGISTER_OBJECT_FACTORY(id,FooFactory1, Foo:int:float);
+    REGISTER_OBJECT_FACTORY(id,FooFactory2, Foo:int:float:bool);
+    REGISTER_OBJECT_FACTORY(id,BarFactory3, Bar);
+    REGISTER_OBJECT_FACTORY(id,BarFactory4, Bar:string);
+    REGISTER_OBJECT_FACTORY(id,BarFactory5, Bar:string:int:float:bool);
     // Allocate rules
     return id;
   }

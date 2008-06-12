@@ -375,7 +375,7 @@ class ClassWriter {
     writer.write("DECLARE_DEFAULT_OBJECT_FACTORY("+longname+", "+klassName+");\n");
 
     // Generate all appropriate registration information
-    SchemaWriter.addFactory("REGISTER_OBJECT_FACTORY("+longname+", "+klassName+");\n");
+    SchemaWriter.addFactory("REGISTER_OBJECT_FACTORY(id,"+longname+", "+klassName+");\n");
   }
 
   public static void generateFactory(IndentWriter writer, IXMLElement constructor) throws IOException {
@@ -387,10 +387,10 @@ class ClassWriter {
 
     String longname = XMLUtil.nameOf(klass) + "Factory" + s_factoryCounter++;
 
-    writer.write("class "+longname+": public ConcreteObjectFactory {\n");
+    writer.write("class "+longname+": public ObjectFactory {\n");
     writer.write("public:\n");
     writer.indent();
-    writer.write(longname + "(const LabelStr& name): ConcreteObjectFactory(name){}\n");
+    writer.write(longname + "(const LabelStr& name): ObjectFactory(name){}\n");
     writer.unindent();
     writer.write("private:\n");
     writer.indent();
@@ -440,7 +440,7 @@ class ClassWriter {
     Vector factoryNames = makeFactoryNames(constructor);
     for(int i=0;i<factoryNames.size();i++){
       String factoryName = (String) factoryNames.elementAt(i);
-      SchemaWriter.addFactory("REGISTER_OBJECT_FACTORY("+longname+", "+factoryName+");\n");
+      SchemaWriter.addFactory("REGISTER_OBJECT_FACTORY(id,"+longname+", "+factoryName+");\n");
     }
   }
 

@@ -249,15 +249,12 @@ int main(int argc, const char** argv)
 
     if (performanceTest != NULL && strcmp(performanceTest, "1") == 0) {
         replayRequired = false;
-        for (int i = 0; i < 1; i++) 
-            runTest(runPlanner<SolverAssembly>);
+        runTest(runPlanner<SolverAssembly>);
     }
     else {
         replayRequired = false; //= true;
-        for (int i = 0; i < 1; i++) {
-            runTest(runPlanner<SolverAssembly>);
-            //runTest(copyFromFile<SolverAssembly>);
-        }
+        runTest(runPlanner<SolverAssembly>);
+        //runTest(copyFromFile<SolverAssembly>);
     }
 
     SolverAssembly::terminate();

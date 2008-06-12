@@ -297,6 +297,10 @@ namespace EUROPA {
 
     virtual PSList<PSVariable*> getAllGlobalVariables() const;
 
+    ObjectId createInstance(const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments);    
+
     virtual std::string toString();
 
   private:

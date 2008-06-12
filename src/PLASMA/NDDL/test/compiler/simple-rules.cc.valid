@@ -48,9 +48,9 @@ namespace NDDL {
   }
   
   // StringData.nddl:5 StringData
-  class StringDataFactory0: public ConcreteObjectFactory {
+  class StringDataFactory0: public ObjectFactory {
   public:
-    StringDataFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
+    StringDataFactory0(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -320,9 +320,9 @@ namespace NDDL {
   }
   
   // simple-rules.nddl:11 Rover
-  class RoverFactory2: public ConcreteObjectFactory {
+  class RoverFactory2: public ObjectFactory {
   public:
-    RoverFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
+    RoverFactory2(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -427,9 +427,9 @@ namespace NDDL {
   }
   
   // simple-rules.nddl:67 SuperRover
-  class SuperRoverFactory3: public ConcreteObjectFactory {
+  class SuperRoverFactory3: public ObjectFactory {
   public:
-    SuperRoverFactory3(const LabelStr& name): ConcreteObjectFactory(name){}
+    SuperRoverFactory3(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -492,9 +492,9 @@ namespace NDDL {
   }
   
   // simple-rules.nddl:74 World
-  class WorldFactory4: public ConcreteObjectFactory {
+  class WorldFactory4: public ObjectFactory {
   public:
-    WorldFactory4(const LabelStr& name): ConcreteObjectFactory(name){}
+    WorldFactory4(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -655,14 +655,14 @@ namespace NDDL {
     REGISTER_TOKEN_FACTORY(World::initialState::Factory);
     REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(id->getCESchema(),TokenStates, TokenStatesBaseDomain());
-    REGISTER_OBJECT_FACTORY(StringDataFactory0, StringData:string);
+    REGISTER_OBJECT_FACTORY(id,StringDataFactory0, StringData:string);
     REGISTER_TYPE_FACTORY(id->getCESchema(),Locations, LocationsBaseDomain());
     REGISTER_TYPE_FACTORY(id->getCESchema(),StringEnum, StringEnumBaseDomain());
     REGISTER_TYPE_FACTORY(id->getCESchema(),NumericEnum, NumericEnumBaseDomain());
-    REGISTER_OBJECT_FACTORY(FooFactory1, Foo);
-    REGISTER_OBJECT_FACTORY(RoverFactory2, Rover);
-    REGISTER_OBJECT_FACTORY(SuperRoverFactory3, SuperRover);
-    REGISTER_OBJECT_FACTORY(WorldFactory4, World);
+    REGISTER_OBJECT_FACTORY(id,FooFactory1, Foo);
+    REGISTER_OBJECT_FACTORY(id,RoverFactory2, Rover);
+    REGISTER_OBJECT_FACTORY(id,SuperRoverFactory3, SuperRover);
+    REGISTER_OBJECT_FACTORY(id,WorldFactory4, World);
     // Allocate rules
     new Rule$Rover$At$0();
     new Rule$Rover$Going$1();

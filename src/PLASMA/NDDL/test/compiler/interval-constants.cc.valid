@@ -48,9 +48,9 @@ namespace NDDL {
   }
   
   // StringData.nddl:5 StringData
-  class StringDataFactory0: public ConcreteObjectFactory {
+  class StringDataFactory0: public ObjectFactory {
   public:
-    StringDataFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
+    StringDataFactory0(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -132,9 +132,9 @@ namespace NDDL {
   }
   
   // interval-constants.nddl:3 Foo
-  class FooFactory1: public ConcreteObjectFactory {
+  class FooFactory1: public ObjectFactory {
   public:
-    FooFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
+    FooFactory1(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -216,9 +216,9 @@ namespace NDDL {
   }
   
   // interval-constants.nddl:19 World
-  class WorldFactory2: public ConcreteObjectFactory {
+  class WorldFactory2: public ObjectFactory {
   public:
-    WorldFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
+    WorldFactory2(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -274,9 +274,9 @@ namespace NDDL {
     REGISTER_TOKEN_FACTORY(World::initialState::Factory);
     REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(id->getCESchema(),TokenStates, TokenStatesBaseDomain());
-    REGISTER_OBJECT_FACTORY(StringDataFactory0, StringData:string);
-    REGISTER_OBJECT_FACTORY(FooFactory1, Foo);
-    REGISTER_OBJECT_FACTORY(WorldFactory2, World);
+    REGISTER_OBJECT_FACTORY(id,StringDataFactory0, StringData:string);
+    REGISTER_OBJECT_FACTORY(id,FooFactory1, Foo);
+    REGISTER_OBJECT_FACTORY(id,WorldFactory2, World);
     // Allocate rules
     new Rule$Foo$pred1$0();
     new Rule$World$initialState$1();

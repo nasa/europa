@@ -58,10 +58,10 @@ namespace EUROPA {
       schema->addMember("Resource", "float", "productionMax");
       schema->addMember("Resource", "float", "consumptionRateMax");
       schema->addMember("Resource", "float", "consumptionMax");
-      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource);                   
-      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float);                     
-      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float:float:float);                     
-      REGISTER_OBJECT_FACTORY(ResourceObjectFactory, Resource:float:float:float:float:float:float:float);                     
+      REGISTER_OBJECT_FACTORY(schema,ResourceObjectFactory, Resource);                   
+      REGISTER_OBJECT_FACTORY(schema,ResourceObjectFactory, Resource:float:float:float);                     
+      REGISTER_OBJECT_FACTORY(schema,ResourceObjectFactory, Resource:float:float:float:float:float);                     
+      REGISTER_OBJECT_FACTORY(schema,ResourceObjectFactory, Resource:float:float:float:float:float:float:float);                     
       schema->addPredicate("Resource.change");      
       schema->addMember("Resource.change", "float", "quantity");
       new ResourceChangeTokenFactory("Resource.change");
@@ -71,10 +71,10 @@ namespace EUROPA {
       schema->addMember("Reusable", "float", "levelLimitMin");
       schema->addMember("Reusable", "float", "consumptionMax");
       schema->addMember("Reusable", "float", "consumptionRateMax");
-      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable);                   
-      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:float:float);                   
-      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:float:float:float);                     
-      REGISTER_OBJECT_FACTORY(ReusableObjectFactory, Reusable:float:float:float:float);                   
+      REGISTER_OBJECT_FACTORY(schema,ReusableObjectFactory, Reusable);                   
+      REGISTER_OBJECT_FACTORY(schema,ReusableObjectFactory, Reusable:float:float);                   
+      REGISTER_OBJECT_FACTORY(schema,ReusableObjectFactory, Reusable:float:float:float);                     
+      REGISTER_OBJECT_FACTORY(schema,ReusableObjectFactory, Reusable:float:float:float:float);                   
       schema->addPredicate("Reusable.uses");      
       schema->addMember("Reusable.uses", "float", "quantity");
       new ReusableUsesTokenFactory("Reusable.uses");
@@ -87,10 +87,10 @@ namespace EUROPA {
       schema->addMember("Reservoir", "float", "productionMax");
       schema->addMember("Reservoir", "float", "consumptionRateMax");
       schema->addMember("Reservoir", "float", "consumptionMax");
-      REGISTER_OBJECT_FACTORY(ReservoirObjectFactory, Reservoir);                     
-      REGISTER_OBJECT_FACTORY(ReservoirObjectFactory, Reservoir:float:float:float);                   
-      REGISTER_OBJECT_FACTORY(ReservoirObjectFactory, Reservoir:float:float:float:float:float);                   
-      REGISTER_OBJECT_FACTORY(ReservoirObjectFactory, Reservoir:float:float:float:float:float:float:float);                   
+      REGISTER_OBJECT_FACTORY(schema,ReservoirObjectFactory, Reservoir);                     
+      REGISTER_OBJECT_FACTORY(schema,ReservoirObjectFactory, Reservoir:float:float:float);                   
+      REGISTER_OBJECT_FACTORY(schema,ReservoirObjectFactory, Reservoir:float:float:float:float:float);                   
+      REGISTER_OBJECT_FACTORY(schema,ReservoirObjectFactory, Reservoir:float:float:float:float:float:float:float);                   
 
       schema->addPredicate("Reservoir.produce");      
       schema->addMember("Reservoir.produce", "float", "quantity");
@@ -102,8 +102,8 @@ namespace EUROPA {
       
       schema->addObjectType("Unary");
       schema->addMember("Unary", "float", "consumptionMax");
-      REGISTER_OBJECT_FACTORY(UnaryObjectFactory, Unary);                     
-      REGISTER_OBJECT_FACTORY(UnaryObjectFactory, Unary:float);                   
+      REGISTER_OBJECT_FACTORY(schema,UnaryObjectFactory, Unary);                     
+      REGISTER_OBJECT_FACTORY(schema,UnaryObjectFactory, Unary:float);                   
       schema->addPredicate("Unary.use");
       new UnaryUseTokenFactory("Unary.use");             
       

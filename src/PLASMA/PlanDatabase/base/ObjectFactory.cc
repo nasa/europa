@@ -9,7 +9,60 @@ namespace EUROPA {
 
   static const char* TYPE_DELIMITER = ":"; /*!< Used to delimit types in the factory signature*/
 
-  LabelStr ObjectFactory::makeFactoryName(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments){
+  ObjectFactory::ObjectFactory(const LabelStr& signature)
+    : m_id(this), m_signature(signature){
+
+    debugMsg("ObjectFactory:ObjectFactory", "Creating factory " << signature.toString());
+
+    // Now we want to populate the signature types
+    unsigned int count = signature.countElements(TYPE_DELIMITER);
+    for(unsigned int i=0;i<count;i++){
+      LabelStr labelStr = signature.getElement(i, TYPE_DELIMITER);
+      m_signatureTypes.push_back(labelStr);
+    }
+  }
+
+  ObjectFactory::~ObjectFactory()
+  {
+    m_id.remove();
+  }
+
+  const ObjectFactoryId& ObjectFactory::getId() const {return m_id;}
+
+  const LabelStr& ObjectFactory::getSignature() const {return m_signature;}
+
+  const std::vector<LabelStr>& ObjectFactory::getSignatureTypes() const {return m_signatureTypes;}   
+
+  ObjectTypeMgr::ObjectTypeMgr()
+      : m_id(this)
+  {      
+  }
+
+  ObjectTypeMgr::~ObjectTypeMgr()
+  {
+      purgeAll();
+      m_id.remove();
+  }
+  
+  const ObjectTypeMgrId& ObjectTypeMgr::getId() const
+  {
+      return m_id;
+  }
+    
+  void ObjectTypeMgr::purgeAll(){
+    debugMsg("ObjectFactory:purgeAll", "Purging all");
+    std::set<double> alreadyDeleted;
+    for(std::map<double, ObjectFactoryId>::const_iterator it = m_factories.begin(); it != m_factories.end(); ++it) {
+      if(alreadyDeleted.find(it->second) == alreadyDeleted.end()) {
+          alreadyDeleted.insert(it->second);
+          delete (ObjectFactory*) it->second;
+      }
+    }
+    
+    m_factories.clear();
+  }
+
+  LabelStr ObjectTypeMgr::makeFactoryName(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments){
     std::string signature = objectType.toString();
 
     debugMsg("ObjectFactory:makeFactoryName", "Making factory name " << signature);
@@ -31,12 +84,10 @@ namespace EUROPA {
    * matches(descendant, ancestor)
    * matches(x, x)
    */
-  ConcreteObjectFactoryId ObjectFactory::getFactory(const PlanDatabaseId& planDb,
-                                                    const LabelStr& objectType, 
-                                                    const std::vector<const AbstractDomain*>& arguments)
+  ObjectFactoryId ObjectTypeMgr::getFactory(const SchemaId& schema,
+                                            const LabelStr& objectType, 
+                                            const std::vector<const AbstractDomain*>& arguments)
   {
-    std::map<double, ConcreteObjectFactoryId>& factories = getInstance().m_factories;
-
     // Build the full signature for the factory
     LabelStr factoryName = makeFactoryName(objectType,arguments);
 
@@ -45,160 +96,68 @@ namespace EUROPA {
 
 
     // Try to find a hit straight off
-    std::map<double, ConcreteObjectFactoryId>::const_iterator it = factories.find(factoryName.getKey());
+    std::map<double, ObjectFactoryId>::const_iterator it = m_factories.find(factoryName.getKey());
 
     // If we have a hit, return it
-    if(it != factories.end())
+    if(it != m_factories.end())
       return it->second;
 
-    const SchemaId& schema = planDb->getSchema();
-
     // Otherwise, loop over all factories, and test for a match
-    for(it = factories.begin(); it != factories.end(); ++it){
-      ConcreteObjectFactoryId factory = it->second;
+    for(it = m_factories.begin(); it != m_factories.end(); ++it){
+      ObjectFactoryId factory = it->second;
       const std::vector<LabelStr>& signatureTypes = factory->getSignatureTypes();
 
       // if there is no hit for the object type, move on immediately
       if(!schema->isA(objectType, signatureTypes[0]))
-	continue;
+    continue;
 
       // If the argument length does not match the signature, which includes the extra for the class
       if(signatureTypes.size() - arguments.size() != 1)
-	continue;
+    continue;
 
       // Now do a type by type comparison
       bool found = true;
       for (unsigned int j=1;j<signatureTypes.size();j++){
-	if(schema->isType(arguments[j-1]->getTypeName()) &&
-	   schema->isType(signatureTypes[j])){
-	  if(!schema->isA(arguments[j-1]->getTypeName(), signatureTypes[j])){
-	    found = false;
-	    break;
-	  }
-	}
-	else if(arguments[j-1]->getTypeName() != signatureTypes[j]){
-	  found = false;
-	  break;
-	}
+    if(schema->isType(arguments[j-1]->getTypeName()) &&
+       schema->isType(signatureTypes[j])){
+      if(!schema->isA(arguments[j-1]->getTypeName(), signatureTypes[j])){
+        found = false;
+        break;
+      }
+    }
+    else if(arguments[j-1]->getTypeName() != signatureTypes[j]){
+      found = false;
+      break;
+    }
       }
 
       if(found){
-	// Cache for next time and return
-	factories.insert(std::pair<double, ConcreteObjectFactoryId>(factoryName, factory));
-	return factory;
+    // Cache for next time and return
+    m_factories.insert(std::pair<double, ObjectFactoryId>(factoryName, factory));
+    return factory;
       }
     }
 
     // At this point, we should have a hit
     check_error(ALWAYS_FAILS, "Factory '" + factoryName.toString() + "' is not registered.");
-    return ConcreteObjectFactoryId::noId();
+    return ObjectFactoryId::noId();
   }
 
-  ObjectFactory::ObjectFactory(){}
-
-  ObjectFactory& ObjectFactory::getInstance(){
-    static ObjectFactory* sl_instance = new ObjectFactory();
-    return *sl_instance;
-  }
-
-  ObjectFactory::~ObjectFactory(){
-    std::map<double, ConcreteObjectFactoryId>& factories = getInstance().m_factories;
-    for(std::map<double, ConcreteObjectFactoryId>::const_iterator it = factories.begin(); it != factories.end(); ++it){
-      ConcreteObjectFactoryId factory = it->second;
-      check_error(factory.isValid());
-      debugMsg("ObjectFactory:~ObjectFactory", "Deleting factory with signature "  << factory->getSignature().toString());
-      delete (ConcreteObjectFactory*) factory;
-    }
-  }
-
-  void ObjectFactory::registerFactory(const ConcreteObjectFactoryId& factory){
-    std::map<double, ConcreteObjectFactoryId>& factories = getInstance().m_factories;
+  void ObjectTypeMgr::registerFactory(const ObjectFactoryId& factory){
     check_error(factory.isValid());
 
     debugMsg("ObjectFactory:registerFactory", "Registering factory with signature " << factory->getSignature().toString());
 
-    if(factories.find(factory->getSignature().getKey()) != factories.end()){
-      ConcreteObjectFactoryId oldFactory = factories.find(factory->getSignature().getKey())->second;
-      factories.erase(factory->getSignature().getKey());
-      delete (ConcreteObjectFactory*) oldFactory;
+    if(m_factories.find(factory->getSignature().getKey()) != m_factories.end()){
+      ObjectFactoryId oldFactory = m_factories.find(factory->getSignature().getKey())->second;
+      m_factories.erase(factory->getSignature().getKey());
+      delete (ObjectFactory*) oldFactory;
       debugMsg("ObjectFactory:registerFactory", "Over-riding registeration for factory with signature " << factory->getSignature().toString());
     }
 
     // Ensure it is not present already
-    check_error(factories.find(factory->getSignature().getKey()) == factories.end());
-    factories.insert(std::pair<double, ConcreteObjectFactoryId>(factory->getSignature().getKey(), factory));
+    check_error(m_factories.find(factory->getSignature().getKey()) == m_factories.end());
+    m_factories.insert(std::pair<double, ObjectFactoryId>(factory->getSignature().getKey(), factory));
   }
-
-  ObjectId ObjectFactory::createInstance(const PlanDatabaseId& planDb, 
-					 const LabelStr& objectType, 
-					 const LabelStr& objectName,
-					 const std::vector<const AbstractDomain*>& arguments){
-    check_error(planDb.isValid());
-
-    debugMsg("ObjectFactory:createInstance", "objectType " << objectType.toString() << " objectName " << objectName.toString());
-
-    // Obtain the factory 
-    ConcreteObjectFactoryId factory = getFactory(planDb,objectType, arguments);
-
-    ObjectId object = factory->createInstance(planDb, objectType, objectName, arguments);
-
-    check_error(object.isValid());
-    return object;
-  }
-
-  ObjectId ObjectFactory::makeNewObject(
-	                        const PlanDatabaseId& planDb,
-	                        const LabelStr& ancestorType, 
-	                        const LabelStr& objectType, 
-	                        const LabelStr& objectName,
-	                        const std::vector<const AbstractDomain*>& arguments) 
-  {
-  	ConcreteObjectFactoryId factory = ObjectFactory::getFactory(planDb, ancestorType,arguments);
-  	return factory->makeNewObject(planDb,objectType,objectName,arguments);
-  }	                     
-
-  void ObjectFactory::evalConstructorBody(
-                            ObjectId& instance, 
-                            const LabelStr& objectType, 
-                            const std::vector<const AbstractDomain*>& arguments)
-  {
-  	ConcreteObjectFactoryId factory = ObjectFactory::getFactory(instance->getPlanDatabase(),objectType,arguments);
-  	factory->evalConstructorBody(instance,arguments);
-  }				   
-
-  void ObjectFactory::purgeAll(){
-    debugMsg("ObjectFactory:purgeAll", "Purging all");
-    std::map<double,ConcreteObjectFactoryId >& factories = getInstance().m_factories;
-    std::set<double> alreadyDeleted;
-    for(std::map<double, ConcreteObjectFactoryId>::const_iterator it = factories.begin(); it != factories.end(); ++it)
-      if(alreadyDeleted.find(it->second) == alreadyDeleted.end()){
-	alreadyDeleted.insert(it->second);
-	delete (ConcreteObjectFactory*) it->second;
-      }
-    factories.clear();
-  }
-
-  ConcreteObjectFactory::ConcreteObjectFactory(const LabelStr& signature)
-    : m_id(this), m_signature(signature){
-    ObjectFactory::registerFactory(m_id);
-
-    debugMsg("ConcreteObjectFactory:ConcreteObjectFactory", "Creating factory " << signature.toString());
-
-    // Now we want to populate the signature types
-    unsigned int count = signature.countElements(TYPE_DELIMITER);
-    for(unsigned int i=0;i<count;i++){
-      LabelStr labelStr = signature.getElement(i, TYPE_DELIMITER);
-      m_signatureTypes.push_back(labelStr);
-    }
-  }
-
-  ConcreteObjectFactory::~ConcreteObjectFactory(){
-    m_id.remove();
-  }
-
-  const ConcreteObjectFactoryId& ConcreteObjectFactory::getId() const {return m_id;}
-
-  const LabelStr& ConcreteObjectFactory::getSignature() const {return m_signature;}
-
-  const std::vector<LabelStr>& ConcreteObjectFactory::getSignatureTypes() const {return m_signatureTypes;}
+  
 }

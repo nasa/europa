@@ -48,9 +48,9 @@ namespace NDDL {
   }
   
   // StringData.nddl:5 StringData
-  class StringDataFactory0: public ConcreteObjectFactory {
+  class StringDataFactory0: public ObjectFactory {
   public:
-    StringDataFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
+    StringDataFactory0(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -168,9 +168,9 @@ namespace NDDL {
     REGISTER_TOKEN_FACTORY(Foo::Bar::Factory);
     REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(id->getCESchema(),TokenStates, TokenStatesBaseDomain());
-    REGISTER_OBJECT_FACTORY(StringDataFactory0, StringData:string);
-    REGISTER_OBJECT_FACTORY(TestDataFactory1, TestData);
-    REGISTER_OBJECT_FACTORY(FooFactory2, Foo);
+    REGISTER_OBJECT_FACTORY(id,StringDataFactory0, StringData:string);
+    REGISTER_OBJECT_FACTORY(id,TestDataFactory1, TestData);
+    REGISTER_OBJECT_FACTORY(id,FooFactory2, Foo);
     // Allocate rules
     return id;
   }

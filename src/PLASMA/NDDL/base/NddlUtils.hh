@@ -61,9 +61,9 @@ namespace NDDL {
 #include "ObjectFactory.hh"
 
 #define DECLARE_DEFAULT_OBJECT_FACTORY(Factory, Klass)\
-class Factory: public ConcreteObjectFactory{\
+class Factory: public ObjectFactory{\
 public:\
-  Factory(const LabelStr& name): ConcreteObjectFactory(name) {}\
+  Factory(const LabelStr& name): ObjectFactory(name) {}\
 private:\
   ObjectId createInstance(const PlanDatabaseId& planDb,\
 			  const LabelStr& objectType, \

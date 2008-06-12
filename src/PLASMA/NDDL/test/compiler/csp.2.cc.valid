@@ -44,7 +44,7 @@ namespace NDDL {
     // Force allocation of model specific type factories
     // Allocate factories
     REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
-    REGISTER_OBJECT_FACTORY(FooFactory0, Foo);
+    REGISTER_OBJECT_FACTORY(id,FooFactory0, Foo);
     // Allocate rules
     return id;
   }

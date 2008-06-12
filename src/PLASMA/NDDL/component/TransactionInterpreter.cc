@@ -62,7 +62,7 @@ namespace EUROPA {
     createDefaultObjectFactory(root.c_str(), true);
     
     addNativeClass("Timeline", noNativeTokens);     
-    REGISTER_OBJECT_FACTORY(TimelineObjectFactory, Timeline);                              
+    REGISTER_OBJECT_FACTORY(getSchema(), TimelineObjectFactory, Timeline);                              
   }
 
   NddlXmlInterpreter::~NddlXmlInterpreter() 
@@ -93,8 +93,8 @@ namespace EUROPA {
     if (!canCreateObjects) 
       superCallExpr = new ExprConstructorSuperCall(getSchema()->getParent(className),std::vector<Expr*>());                  
       
-    // The ObjectFactory constructor automatically registers the factory
-    new InterpretedObjectFactory(
+    getSchema()->registerObjectFactory(
+            (new InterpretedObjectFactory(
                  className,
                  className,
                  constructorArgNames,
@@ -102,7 +102,9 @@ namespace EUROPA {
                  superCallExpr,
                  constructorBody,
                  canCreateObjects
-                 );       
+                 )
+            )->getId()
+    );       
   }
   
   const char* safeStr(const char* str)
@@ -271,14 +273,17 @@ namespace EUROPA {
     }
 
     // The ObjectFactory constructor automatically registers the factory
-    new InterpretedObjectFactory(
+    getSchema()->registerObjectFactory(
+            (new InterpretedObjectFactory(
 				 className,
 				 signature.str(),
 				 constructorArgNames,
 				 constructorArgTypes,
 				 superCallExpr,
 				 constructorBody
-				 ); 
+				 )
+            )->getId()
+    ); 
       
     return constructorArgNames.size();
   }
@@ -769,8 +774,9 @@ namespace EUROPA {
 
     std::vector<const AbstractDomain*> arguments;
 
-    evalArgs(context,arguments);  		
-    ObjectFactory::evalConstructorBody(object,m_superClassName,arguments);
+    evalArgs(context,arguments); 
+    ObjectFactoryId objFactory = object->getPlanDatabase()->getSchema()->getObjectFactory(m_superClassName,arguments);
+    objFactory->evalConstructorBody(object,arguments);
   		
     return DataRef::null;
   }      	 
@@ -1193,7 +1199,7 @@ namespace EUROPA {
 						     ExprConstructorSuperCall* superCallExpr,
 						     const std::vector<Expr*>& constructorBody,
 						     bool canMakeNewObject)
-    : ConcreteObjectFactory(signature) 
+    : ObjectFactory(signature) 
     , m_className(className)
     , m_constructorArgNames(constructorArgNames)
     , m_constructorArgTypes(constructorArgTypes)
@@ -1306,9 +1312,9 @@ namespace EUROPA {
       std::vector<const AbstractDomain*> argumentsForSuper;
       m_superCallExpr->evalArgs(evalContext,argumentsForSuper);
             
-      ObjectId retval = ObjectFactory::makeNewObject(
+      ObjectFactoryId objFactory = planDb->getSchema()->getObjectFactory(m_superCallExpr->getSuperClassName(),argumentsForSuper);
+      ObjectId retval = objFactory->makeNewObject(
           planDb, 
-          m_superCallExpr->getSuperClassName(), 
           objectType, 
           objectName,
           argumentsForSuper

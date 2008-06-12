@@ -86,7 +86,6 @@ namespace EUROPA {
       delete schema;
 	  
 	  // TODO: these need to be member variables in PlanDatabase
-      ObjectFactory::purgeAll();
       TokenFactory::purgeAll();         
   }  
 }

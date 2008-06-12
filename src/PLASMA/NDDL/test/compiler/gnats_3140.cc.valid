@@ -48,9 +48,9 @@ namespace NDDL {
   }
   
   // StringData.nddl:5 StringData
-  class StringDataFactory0: public ConcreteObjectFactory {
+  class StringDataFactory0: public ObjectFactory {
   public:
-    StringDataFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
+    StringDataFactory0(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -165,9 +165,9 @@ namespace NDDL {
   }
   
   // gnats_3140.nddl:11 Foo
-  class FooFactory2: public ConcreteObjectFactory {
+  class FooFactory2: public ObjectFactory {
   public:
-    FooFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
+    FooFactory2(const LabelStr& name): ObjectFactory(name){}
   private:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType, 
@@ -357,13 +357,13 @@ namespace NDDL {
     REGISTER_TOKEN_FACTORY(Bar::pred::Factory);
     REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(id->getCESchema(),TokenStates, TokenStatesBaseDomain());
-    REGISTER_OBJECT_FACTORY(StringDataFactory0, StringData:string);
+    REGISTER_OBJECT_FACTORY(id,StringDataFactory0, StringData:string);
     REGISTER_TYPE_FACTORY(id->getCESchema(),numericEnum, numericEnumBaseDomain());
     REGISTER_TYPE_FACTORY(id->getCESchema(),symbolicEnum, symbolicEnumBaseDomain());
-    REGISTER_OBJECT_FACTORY(BooFactory1, Boo);
-    REGISTER_OBJECT_FACTORY(FooFactory2, Foo:bool:int:float:symbolicEnum:Boo);
-    REGISTER_OBJECT_FACTORY(FooFactory2, Foo:bool:int:float:symbolicEnum:Object);
-    REGISTER_OBJECT_FACTORY(BarFactory3, Bar);
+    REGISTER_OBJECT_FACTORY(id,BooFactory1, Boo);
+    REGISTER_OBJECT_FACTORY(id,FooFactory2, Foo:bool:int:float:symbolicEnum:Boo);
+    REGISTER_OBJECT_FACTORY(id,FooFactory2, Foo:bool:int:float:symbolicEnum:Object);
+    REGISTER_OBJECT_FACTORY(id,BarFactory3, Bar);
     // Allocate rules
     new Rule$Bar$pred$0();
     return id;

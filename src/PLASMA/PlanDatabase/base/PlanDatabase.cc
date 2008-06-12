@@ -996,6 +996,20 @@ namespace EUROPA{
     }
     return retval;
   }  
+  
+  ObjectId PlanDatabase::createInstance(const LabelStr& objectType, 
+                          const LabelStr& objectName,
+                          const std::vector<const AbstractDomain*>& arguments)
+  {
+      debugMsg("PlanDatabase:createInstance", "objectType " << objectType.toString() << " objectName " << objectName.toString());
+
+      ObjectFactoryId factory = getSchema()->getObjectFactory(objectType, arguments);
+      ObjectId object = factory->createInstance(getId(), objectType, objectName, arguments);
+      check_error(object.isValid());
+      
+      return object;
+  }
+  
 
   std::string PlanDatabase::toString()
   {

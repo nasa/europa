@@ -43,6 +43,7 @@ namespace EUROPA {
   Schema::Schema(const LabelStr& name, const CESchemaId& ces)
       : m_id(this)
       , m_ceSchema(ces)
+      , m_objectTypeMgr((new ObjectTypeMgr())->getId())
       , m_name(name)
   {
       reset();
@@ -51,6 +52,7 @@ namespace EUROPA {
 
   Schema::~Schema()
   {
+      delete (ObjectTypeMgr*)m_objectTypeMgr;
       m_id.remove();
   }
 
@@ -607,5 +609,15 @@ namespace EUROPA {
         it != enumValues.end(); ++it)
       results.push_back(it->first);
   }
-
+  
+  void Schema::registerObjectFactory(const ObjectFactoryId& of)
+  {
+      m_objectTypeMgr->registerFactory(of);
+  }
+  
+  ObjectFactoryId Schema::getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments)
+  {
+      return m_objectTypeMgr->getFactory(getId(),objectType,arguments);
+  }
+  
 } // namespace NDDL
