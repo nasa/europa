@@ -304,38 +304,55 @@ namespace EUROPA {
 
     std::vector<LabelStr> parameterNames;
     std::vector<LabelStr> parameterTypes;
+    std::vector<Expr*> parameterValues;
     std::vector<LabelStr> assignVars;
     std::vector<Expr*> assignValues;
     std::vector<ExprConstraint*> constraints;
-      
+
     dbgout << ident << "predicate " <<  predName << "(";
     for(const TiXmlElement* predArg = element->FirstChildElement(); predArg; predArg = predArg->NextSiblingElement() ) {
       if (strcmp(predArg->Value(),"var") == 0) {
-	const char* type = safeStr(predArg->Attribute("type"));	
-	const char* name = safeStr(predArg->Attribute("name"));	
+	const char* type = safeStr(predArg->Attribute("type"));
+	const char* name = safeStr(predArg->Attribute("name"));
 	dbgout << type << " " << name << ",";
 	schema->addMember(predName.c_str(), type, name);
 	parameterNames.push_back(name);
 	parameterTypes.push_back(type);
+        if(!predArg->NoChildren())
+          parameterValues.push_back(valueToExpr(predArg->FirstChildElement()));
+        else
+          parameterValues.push_back(NULL);
       }
       else if (strcmp(predArg->Value(),"assign") == 0) {
-	const char* type = safeStr(predArg->Attribute("type"));	
+	const char* type = safeStr(predArg->Attribute("type"));
 	const char* name = safeStr(predArg->Attribute("name"));
-	bool inherited = (predArg->Attribute("inherited") != NULL ? true : false);	
+	bool inherited = (predArg->Attribute("inherited") != NULL ? true : false);
 	dbgout << type << " " << name << ",";
-	if (!inherited)
-	  schema->addMember(predName.c_str(), type, name);
-	assignVars.push_back(name);
-	assignValues.push_back(valueToExpr(predArg->FirstChildElement()));                 
+	if (!inherited) {
+          // it *should* be a parameter, find it and tag it
+          std::vector<Expr*>::iterator vit = parameterValues.begin();
+          for(std::vector<LabelStr>::const_iterator it = parameterNames.begin(); it != parameterNames.end(); ++it) {
+            if(strcmp(it->c_str(), name) == 0)
+              break;
+            ++vit;
+          }
+	  check_runtime_error(vit != parameterValues.end(), std::string("Cannot assign to undeclared parameter:") + name + " in predicate "+predName);
+          // should probably say something about redefinition, but meh
+          *vit = valueToExpr(predArg->FirstChildElement());
+        }
+        else {
+	  assignVars.push_back(name);
+	  assignValues.push_back(valueToExpr(predArg->FirstChildElement()));
+        }
       }
       else if (strcmp(predArg->Value(),"invoke") == 0) {
 	dbgout << "constraint " << predArg->Attribute("name");
 	std::vector<Expr*> constraintArgs;
 	for(const TiXmlElement* arg = predArg->FirstChildElement(); arg; arg = arg->NextSiblingElement() ) 
 	  constraintArgs.push_back(valueToExpr(arg));
-            	
+
 	constraints.push_back(new ExprConstraint(predArg->Attribute("name"),constraintArgs));
-      }             
+      }
       else
 	check_runtime_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + predArg->Value()+ " in predicate "+predName);
     }	
@@ -352,6 +369,7 @@ namespace EUROPA {
 				predName,
 				parameterNames,
 				parameterTypes,
+				parameterValues,
 				assignVars,
 				assignValues,
 				constraints
@@ -1400,6 +1418,7 @@ namespace EUROPA {
                      const LabelStr& predicateName, 
                      const std::vector<LabelStr>& parameterNames,
                      const std::vector<LabelStr>& parameterTypes, 
+                     const std::vector<Expr*>& parameterValues, 
                      const std::vector<LabelStr>& assignVars,
                      const std::vector<Expr*>& assignValues,
                      const std::vector<ExprConstraint*>& constraints,
@@ -1416,7 +1435,7 @@ namespace EUROPA {
                         Token::noObject(),                    // Object Name
                         false) 
     {
-    	commonInit(parameterNames, parameterTypes, assignVars, assignValues, constraints, close);
+    	commonInit(parameterNames, parameterTypes, parameterValues, assignVars, assignValues, constraints, close);
     	debugMsg("XMLInterpreter:InterpretedToken","Created token(" << getKey() << ") of type:" << predicateName.toString() << " objectVar=" << getVariable("object")->toString());
     }
   	                     
@@ -1425,6 +1444,7 @@ namespace EUROPA {
 				     const LabelStr& relation, 
 				     const std::vector<LabelStr>& parameterNames,
 				     const std::vector<LabelStr>& parameterTypes, 
+				     const std::vector<Expr*>& parameterValues, 
 				     const std::vector<LabelStr>& assignVars,
 				     const std::vector<Expr*>& assignValues,
 				     const std::vector<ExprConstraint*>& constraints,
@@ -1438,7 +1458,7 @@ namespace EUROPA {
 		    Token::noObject(),                   // Object Name
 		    false) 
   {
-    commonInit(parameterNames, parameterTypes, assignVars, assignValues, constraints, close);
+    commonInit(parameterNames, parameterTypes, parameterValues, assignVars, assignValues, constraints, close);
     debugMsg("XMLInterpreter:InterpretedToken","Created slave token(" << getKey() << ") of type:" << predicateName.toString() << " objectVar=" << getVariable("object")->toString());
   }
         
@@ -1461,6 +1481,7 @@ namespace EUROPA {
   void InterpretedToken::commonInit(
 				    const std::vector<LabelStr>& parameterNames,
 				    const std::vector<LabelStr>& parameterTypes, 
+				    const std::vector<Expr*>& parameterValues, 
 				    const std::vector<LabelStr>& assignVars,
 				    const std::vector<Expr*>& assignValues,
 				    const std::vector<ExprConstraint*>& constraints,
@@ -1478,18 +1499,28 @@ namespace EUROPA {
       ConstrainedVariableId parameter;
 	        
       // same as completeObjectParam in NddlRules.hh
-      if (context.isClass(parameterTypes[i])) {
-	parameter = addParameter(
-				 ObjectDomain(parameterTypes[i].c_str()),
-				 parameterNames[i]
-				 );
-	getPlanDatabase()->makeObjectVariableFromType(parameterTypes[i], parameter);
+      if(parameterValues[i] != NULL) {
+        parameter = addParameter(
+                                 parameterValues[i]->eval(context).getValue()->baseDomain(),
+                                 parameterNames[i]
+                                );
+        if (context.isClass(parameterTypes[i]))
+          getPlanDatabase()->makeObjectVariableFromType(parameterTypes[i], parameter);
       }
       else {
-	parameter = addParameter(
-				 getPlanDatabase()->getConstraintEngine()->getCESchema()->baseDomain(parameterTypes[i].c_str()),
-				 parameterNames[i]
-				 );
+        if (context.isClass(parameterTypes[i])) {
+          parameter = addParameter(
+                                   ObjectDomain(parameterTypes[i].c_str()),
+                                   parameterNames[i]
+                                  );
+          getPlanDatabase()->makeObjectVariableFromType(parameterTypes[i], parameter);
+        }
+        else {
+          parameter = addParameter(
+                                   getPlanDatabase()->getConstraintEngine()->getCESchema()->baseDomain(parameterTypes[i].c_str()),
+                                   parameterNames[i]
+                                  );
+        }
       }
                 	        
       debugMsg("XMLInterpreter:InterpretedToken","Token " << getName().toString() << " added Parameter " 
@@ -1523,12 +1554,14 @@ namespace EUROPA {
 						   const LabelStr& predicateName,
 						   const std::vector<LabelStr>& parameterNames,
 						   const std::vector<LabelStr>& parameterTypes, 
+						   const std::vector<Expr*>& parameterValues, 
 						   const std::vector<LabelStr>& assignVars,
 						   const std::vector<Expr*>& assignValues,
 						   const std::vector<ExprConstraint*>& constraints)
     : ConcreteTokenFactory(predicateName) 
     , m_parameterNames(parameterNames)
     , m_parameterTypes(parameterTypes)
+    , m_parameterValues(parameterValues)
     , m_assignVars(assignVars)
     , m_assignValues(assignValues)
     , m_constraints(constraints)
@@ -1542,6 +1575,7 @@ namespace EUROPA {
 	        name, 
 	        m_parameterNames, 
 	        m_parameterTypes,
+	        m_parameterValues,
 	        m_assignVars,
 	        m_assignValues,
 	        m_constraints, 
@@ -1559,6 +1593,7 @@ namespace EUROPA {
 					  relation, 
 					  m_parameterNames, 
 					  m_parameterTypes, 
+					  m_parameterValues, 
 					  m_assignVars,
 					  m_assignValues,
 					  m_constraints, 
