@@ -56,6 +56,7 @@
       <isset property="${env.PLANWORKS_HOME}"/>
     </condition>
     <property name="dir.planworks" value="${basedir}/../PlanWorks"/>
+    <available property="planworks.present" file="${dir.planworks}"/>
     <property name="dir.build" value="build"/>
     <property name="dir.dist" value="dist"/>
     <property name="dir.dist.base" location="${dir.dist}/europa"/>
@@ -97,8 +98,13 @@
     <antcall target="build">
       <param name="jam.opts" value="${jam.misc} -sVARIANTS=OPTIMIZED -sLIBRARIES=${jam.libraries}"/>
     </antcall>
-    <ant dir="${dir.planworks}" target="createJNI"/>
-    <ant dir="${dir.planworks}" target="compile"/>
+    <if>
+      <isset property="planworks.present"/>
+      <then>
+        <ant dir="${dir.planworks}" target="createJNI"/>
+        <ant dir="${dir.planworks}" target="compile"/>
+      </then>
+    </if>
     <antcall target="dist"/>
   </target>
 
@@ -111,17 +117,10 @@
 
     <copy todir="${dir.dist.base}/bin">
       <!-- TODO: copy script to run PSDesktop -->
-      <fileset file="${dir.planworks}/bin/PlanWorks.sh"/>
       <fileset dir="${dir.plasma}/bin"/>
     </copy>
-    <!-- ant doesn't preserve permissions -->
-    <chmod perm="+x">
-      <fileset dir="${dir.dist.base}/bin"/>
-    </chmod>
-
     <copy todir="${dir.dist.base}/lib">
       <fileset dir="${dir.plasma}/build/lib"/>
-      <fileset dir="${dir.planworks}/build/lib"/>
     </copy>
 
     <copy todir="${dir.dist.base}/lib/PSUI">
@@ -155,12 +154,29 @@
 
     <copy todir="${dir.dist.base}/config">
       <fileset dir="${dir.plasma}/config"/>
-      <fileset dir="${dir.planworks}/config"/>
     </copy>
 
-    <copy todir="${dir.dist.base}/res">
-      <fileset dir="${dir.planworks}/res"/>
-    </copy>
+    <!-- if PlanWorks is present, copy it into the distribution -->
+    <if>
+      <isset property="planworks.present"/>
+      <then>
+        <copy todir="${dir.dist.base}/bin">
+          <fileset file="${dir.planworks}/bin/PlanWorks.sh"/>
+        </copy>
+
+        <copy todir="${dir.dist.base}/lib">
+          <fileset dir="${dir.planworks}/build/lib"/>
+        </copy>
+
+        <copy todir="${dir.dist.base}/config">
+          <fileset dir="${dir.planworks}/config"/>
+        </copy>
+
+        <copy todir="${dir.dist.base}/res">
+          <fileset dir="${dir.planworks}/res"/>
+        </copy>
+      </then>
+    </if>
 
     <if>
       <equals arg1="${uname.o}" arg2="Cygwin"/>
@@ -184,6 +200,12 @@
         </exec>
       </then>
     </if>
+
+    <!-- ant doesn't preserve permissions -->
+    <chmod perm="+x">
+      <fileset dir="${dir.dist.base}/bin"/>
+    </chmod>
+
     <!-- Finally, zip everything up -->
     <delete file="${dir.dist}/${file.europa_dist}"/>
     <zip destfile="${dir.dist}/${file.europa_dist}" basedir="${dir.dist.base}"/>
