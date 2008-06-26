@@ -26,7 +26,7 @@ void showPlan()
     for (int i=0;i<l.size();i++) 
     {
     	PSObject o = l.get(i);
-    	if(o.toString().startsWith("Light"))  // ie LightBulb or LightSwitch
+   	if(o.toLongString().startsWith("Light"))  // ie LightBulb or LightSwitch
     	{
     		desktop.showTokens(l.get(i));
     	}
