@@ -101,8 +101,8 @@
     <if>
       <isset property="planworks.present"/>
       <then>
-        <ant dir="${dir.planworks}" target="createJNI"/>
-        <ant dir="${dir.planworks}" target="compile"/>
+        <ant inheritAll="false" dir="${dir.planworks}" target="createJNI"/>
+        <ant inheritAll="false" dir="${dir.planworks}" target="compile"/>
       </then>
     </if>
     <antcall target="dist"/>
