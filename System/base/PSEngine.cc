@@ -164,7 +164,11 @@ namespace EUROPA {
   }
 
   PSToken* PSToken::getActiveToken() {
-    return new PSToken(m_tok->getActiveToken());
+  	TokenId active = m_tok->getActiveToken();
+  	if (active.isNoId())
+  	    return NULL;
+  	
+  	return new PSToken(active);    
   }
 
   PSList<PSToken*> PSToken::getMergedTokens() {
