@@ -161,7 +161,22 @@ namespace EUROPA {
       retval.push_back(tok);
     }
     return retval;    	
-  }  
+  }
+
+  PSToken* PSToken::getActiveToken() {
+    return new PSToken(m_tok->getActiveToken());
+  }
+
+  PSList<PSToken*> PSToken::getMergedTokens() {
+    const TokenSet& tokens = m_tok->getMergedTokens();
+    PSList<PSToken*> retval;
+
+    for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+      PSToken* tok = new PSToken(*it);
+      retval.push_back(tok);
+    }
+    return retval;
+  }
 
   // TODO: Implement these
   double PSToken::getViolation() const 

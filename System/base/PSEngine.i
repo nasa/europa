@@ -6,12 +6,57 @@
 %}
 
 %rename(PSException) Error;
-%typemap(javabase) Error "java.lang.Exception";
+%typemap(javabase) Error "java.lang.RuntimeException";
 %typemap(javacode) Error %{
   public String getMessage() {
-    return getMsg();
+    StringBuffer toRet = new StringBuffer(256);
+    if(getFile() != null) {
+      toRet.append(getFile());
+      if(getLine() > 0) {
+        toRet.append(":").append(getLine());
+      }
+    }
+    if(toRet.length() != 0)
+      toRet.append(": ");
+    if(getType() != null && getType().length() > 0)
+      toRet.append(getType());
+    else
+      toRet.append("Error");
+    if(getMsg() != null) {
+       toRet.append(": ").append(getMsg());
+    }
+    if(getCondition() != null) {
+      toRet.append(" (").append(getCondition()).append(" is false)");
+    }
+    return toRet.toString();
   }
 %}
+
+// Generic exception handling will wrap all functions with the following try/catch block:
+// copied from http://www.swig.org/Doc1.3/Java.html#exception_handling
+%exception {
+  try {
+    $action
+  }
+  catch (Error& e) {
+    // TODO: There's probably a better way to refer to both package and class name here.
+    jclass excepClass = jenv->FindClass("psengine/PSException");
+    if (excepClass == NULL)
+      return $null;
+
+    jmethodID excepConstructor = jenv->GetMethodID(excepClass, "<init>", "(JZ)V");
+    if(excepConstructor == NULL)
+      return $null;
+
+    jthrowable excep = static_cast<jthrowable> (jenv->NewObject(excepClass, excepConstructor, new Error(e), true));
+    if(excep == NULL)
+      return $null;
+    else
+      jenv->Throw(excep);
+
+    return $null;
+  }
+}
 
 %typemap(javabody) SWIGTYPE %{
   private long swigCPtr;
@@ -26,25 +71,6 @@
     return (obj == null) ? 0 : obj.swigCPtr;
   }
 %}
-
-// TODO: There's probably a better way to refer to both package and class name here.
-%typemap(throws, throws="psengine.PSException") Error {
-  jclass excepClass = jenv->FindClass("psengine/PSException");
-  if (excepClass == NULL)
-    return $null;
-
-  jmethodID excepConstructor = jenv->GetMethodID(excepClass, "<init>", "(JZ)V");
-  if(excepConstructor == NULL)
-    return $null;
-
-  jthrowable excep = static_cast<jthrowable> (jenv->NewObject(excepClass, excepConstructor, &$1, true));
-  if(excep == NULL)
-    return $null;
-  else
-    jenv->Throw(excep);
-
-  return $null;
-}
 
 class Error {
 public:
@@ -151,8 +177,8 @@ namespace EUROPA {
     void shutdown();
 
     void loadModel(const std::string& modelFileName);
-    void executeTxns(const std::string& xmlTxnSource, bool isFile, bool useInterpreter) throw(Error);
-    std::string executeScript(const std::string& language, const std::string& script) throw(Error);
+    void executeTxns(const std::string& xmlTxnSource, bool isFile, bool useInterpreter);
+    std::string executeScript(const std::string& language, const std::string& script);
 
     PSList<PSObject*> getObjectsByType(const std::string& objectType);
     PSObject* getObjectByKey(PSEntityKey id);
@@ -242,6 +268,9 @@ namespace EUROPA {
 
     PSToken* getMaster();
     PSList<PSToken*> getSlaves();
+
+    PSToken* getActiveToken();
+    PSList<PSToken*> getMergedTokens();
     
     double getViolation() const;
     std::string getViolationExpl() const;

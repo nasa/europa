@@ -147,7 +147,7 @@ namespace EUROPA {
   	    virtual DataRef eval(EvalContext& context) const;  
   	    
   	protected:
-  	    LabelStr m_varName;    	    
+  	    LabelStr m_varName;
   };
   
   class ExprNewObject : public Expr
@@ -226,6 +226,7 @@ namespace EUROPA {
   	                     const LabelStr& predicateName, 
                          const std::vector<LabelStr>& parameterNames,
                          const std::vector<LabelStr>& parameterTypes,
+                         const std::vector<Expr*>& parameterValues,
 	                     const std::vector<LabelStr>& assignVars,
                          const std::vector<Expr*>& assignValues,
                          const std::vector<ExprConstraint*>& constraints,
@@ -238,6 +239,7 @@ namespace EUROPA {
                          const LabelStr& relation, 
                          const std::vector<LabelStr>& parameterNames,
                          const std::vector<LabelStr>& parameterTypes,
+                         const std::vector<Expr*>& parameterValues,
                          const std::vector<LabelStr>& assignVars,
                          const std::vector<Expr*>& assignValues,
                          const std::vector<ExprConstraint*>& constraints,
@@ -249,6 +251,7 @@ namespace EUROPA {
     protected:
         void commonInit(const std::vector<LabelStr>& parameterNames,
                         const std::vector<LabelStr>& parameterTypes,
+                        const std::vector<Expr*>& parameterValues,
 			const std::vector<LabelStr>& assignVars,
 			const std::vector<Expr*>& assignValues,
 			const std::vector<ExprConstraint*>& constraints,
@@ -262,6 +265,8 @@ namespace EUROPA {
   	    virtual ~TokenEvalContext();   	
   	    
   	    virtual ConstrainedVariableId getVar(const char* name);  
+
+  	    virtual bool isClass(const LabelStr& className) const;
   	    
   	protected:
   	    TokenId m_token;	    
@@ -273,6 +278,7 @@ namespace EUROPA {
 	  InterpretedTokenFactory(const LabelStr& predicateName,
 	                          const std::vector<LabelStr>& parameterNames,
                               const std::vector<LabelStr>& parameterTypes,
+                              const std::vector<Expr*>& parameterValues,
 	                          const std::vector<LabelStr>& assignVars,
                               const std::vector<Expr*>& assignValues,
                               const std::vector<ExprConstraint*>& constraints);
@@ -280,6 +286,7 @@ namespace EUROPA {
 	protected:
 	  std::vector<LabelStr> m_parameterNames;    
 	  std::vector<LabelStr> m_parameterTypes;    
+	  std::vector<Expr*> m_parameterValues;    
 	  std::vector<LabelStr> m_assignVars;    
 	  std::vector<Expr*> m_assignValues;    
 	  std::vector<ExprConstraint*> m_constraints;

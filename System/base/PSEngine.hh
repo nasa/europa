@@ -241,6 +241,9 @@ namespace EUROPA {
     PSToken* getMaster();
 	
     PSList<PSToken*> getSlaves();
+
+    PSList<PSToken*> getMergedTokens();
+    PSToken* getActiveToken();
 	    
     // TODO: Add setStatus(int newStatus)?; ask Mike Iatauro
     // TODO: getStatus()? -> MERGED, ACTIVE, REJECTED, etc
