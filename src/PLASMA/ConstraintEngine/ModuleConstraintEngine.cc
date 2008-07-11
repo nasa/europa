@@ -56,17 +56,27 @@ namespace EUROPA {
   }
     
   /**************************************************************************************/
-
-  static bool & constraintLibraryInitialized() {
-    static bool sl_constraintLibraryInit(false);
-    return sl_constraintLibraryInit;
+  
+  ModuleConstraintLibrary::ModuleConstraintLibrary()
+      : Module("ConstraintLibrary")
+  {	  
   }
 
-  void initConstraintLibrary() {
-    if( !constraintLibraryInitialized()) {
-      constraintLibraryInitialized() = true;
-     
-      debugMsg("ModuleConstraintLibrary:initConstraintLibrary", "Initializing the constraint library");
+  ModuleConstraintLibrary::~ModuleConstraintLibrary()
+  {	  
+  }
+
+  void ModuleConstraintLibrary::initialize()
+  {
+  }
+
+  void ModuleConstraintLibrary::uninitialize()
+  {
+  }     
+  
+  void ModuleConstraintLibrary::initialize(EngineId engine)
+  {
+      debugMsg("ModuleConstraintLibrary:initialize", "Initializing the constraint library");
       // Register constraint Factories
       REGISTER_CONSTRAINT(UnaryConstraint, "UNARY", "Default");
       REGISTER_CONSTRAINT(AddEqualConstraint, "AddEqual", "Default");
@@ -163,44 +173,10 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(CalcDistanceConstraint, "calcDistance", "Default");
 
       REGISTER_CONSTRAINT(SineFunction, "sin", "Default");
-    } else {
-       debugMsg("ModuleConstraintLibrary:initConstriantLibrary", "Constraint library already initalized - no action taken");
-    }
-  }
-  
-  void uninitConstraintLibrary() {
-    if (constraintLibraryInitialized()) {
-      ConstraintLibrary::purgeAll();
-      constraintLibraryInitialized() = false;
-    }
-  }
-  
-  ModuleConstraintLibrary::ModuleConstraintLibrary()
-      : Module("ConstraintLibrary")
-  {	  
-  }
-
-  ModuleConstraintLibrary::~ModuleConstraintLibrary()
-  {	  
-  }
-
-  void ModuleConstraintLibrary::initialize()
-  {
-  }
-
-  void ModuleConstraintLibrary::uninitialize()
-  {
-  }     
-  
-  // TODO: move the meat from old functions into these methods, remove old functions
-  void ModuleConstraintLibrary::initialize(EngineId engine)
-  {
-      initConstraintLibrary();
   }
   
   void ModuleConstraintLibrary::uninitialize(EngineId engine)
   {	  
-      uninitConstraintLibrary();
-  }
-  
+      ConstraintLibrary::purgeAll();
+  }  
 }

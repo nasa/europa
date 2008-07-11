@@ -36,9 +36,9 @@ using namespace EUROPA;
 void initialize() 
 {
   /*
-   *  TODO: constraint registration below needs to be removed, initConstraintLibrary takes care of this
+   *  TODO: constraint registration below needs to be removed, ModuleConstraintLibrary::initialize takes care of this
    *  leaving it for now for backwards compatibility since some constraints are named differently
-   * and some other constraints like Lock and Ancestor are not registered by initConstraintLibrary for some reason
+   * and some other constraints like Lock and Ancestor are not registered by ModuleConstraintLibrary::initialize for some reason
    */
      
   // Procedural Constraints used with Default Propagation

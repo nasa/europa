@@ -978,16 +978,5 @@ namespace EUROPA {
     static const int RES = 2;
     static const int ARG_COUNT = 3;
   };
-
-
-  /**
-   * @brief initialize constraint library by registering default constraint set
-   */
-   extern void initConstraintLibrary();
-
-  /**
-   * @brief reset constraint library to its pre initConstraintLibrary() state
-   */
-  void uninitConstraintLibrary();
 }
 #endif
