@@ -8,11 +8,6 @@
 
 namespace EUROPA {
 
-  static bool & nddlInitialized() {
-    static bool sl_alreadyDone(false);
-    return sl_alreadyDone;
-  }
-
   ModuleNddl::ModuleNddl()
       : Module("NDDL")
   {
@@ -23,31 +18,12 @@ namespace EUROPA {
   {	  
   }  
   
-  void initNDDL()
-  {
-    if(nddlInitialized())
-    	return;
-
-    nddlInitialized() = true;
-  }
-
-  void uninitNDDL()
-  {
-    if(!nddlInitialized())
-    	return;
-    
-    nddlInitialized() = false;
-  }
-  
-  // TODO: remove initNDDL() and uninitNDDL()
   void ModuleNddl::initialize()
   {
-	  initNDDL();
   }  
 
   void ModuleNddl::uninitialize()
   {
-	  uninitNDDL();
   }
   
   class NddlInterpreter : public LanguageInterpreter 
