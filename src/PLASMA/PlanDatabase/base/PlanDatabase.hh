@@ -297,7 +297,7 @@ namespace EUROPA {
 
     virtual PSList<PSVariable*> getAllGlobalVariables() const;
 
-    ObjectId createInstance(const LabelStr& objectType, 
+    ObjectId createObject(const LabelStr& objectType, 
                             const LabelStr& objectName,
                             const std::vector<const AbstractDomain*>& arguments);    
 

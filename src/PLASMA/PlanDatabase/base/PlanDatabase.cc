@@ -997,11 +997,11 @@ namespace EUROPA{
     return retval;
   }  
   
-  ObjectId PlanDatabase::createInstance(const LabelStr& objectType, 
-                          const LabelStr& objectName,
-                          const std::vector<const AbstractDomain*>& arguments)
+  ObjectId PlanDatabase::createObject(const LabelStr& objectType, 
+                                      const LabelStr& objectName,
+                                      const std::vector<const AbstractDomain*>& arguments)
   {
-      debugMsg("PlanDatabase:createInstance", "objectType " << objectType.toString() << " objectName " << objectName.toString());
+      debugMsg("PlanDatabase:createObject", "objectType " << objectType.toString() << " objectName " << objectName.toString());
 
       ObjectFactoryId factory = getSchema()->getObjectFactory(objectType, arguments);
       ObjectId object = factory->createInstance(getId(), objectType, objectName, arguments);
@@ -1014,13 +1014,15 @@ namespace EUROPA{
                                     bool rejectable,
                                     bool isFact) 
   {
-    TokenFactoryId factory = getSchema()->getTokenFactory(predicateName);
-    check_error(factory.isValid());
+      debugMsg("PlanDatabase:createToken", "type " << predicateName.toString());
 
-    TokenId token = factory->createInstance(getId(), predicateName, rejectable, isFact);
-    check_error(token.isValid());
+      TokenFactoryId factory = getSchema()->getTokenFactory(predicateName);
+      check_error(factory.isValid());
+
+      TokenId token = factory->createInstance(getId(), predicateName, rejectable, isFact);
+      check_error(token.isValid());
     
-    return token;
+      return token;
   }
   
   TokenId PlanDatabase::createSlaveToken(const TokenId& master,
