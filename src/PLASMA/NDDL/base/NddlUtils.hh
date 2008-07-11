@@ -82,11 +82,10 @@ private:\
  * Declare a token factory - inline.
  */
 #define DECLARE_TOKEN_FACTORY(klass, predicateName) \
-class Factory: public ConcreteTokenFactory { \
+class Factory: public TokenFactory { \
 public: \
-  Factory() : ConcreteTokenFactory(LabelStr(#predicateName)) { \
+  Factory() : TokenFactory(LabelStr(#predicateName)) { \
   } \
-private: \
   TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false, bool isFact = false) const { \
     TokenId token = (new klass(planDb, name, rejectable, isFact, true))->getId(); \
     return(token); \
@@ -97,7 +96,8 @@ private: \
   } \
 };
 
-#define REGISTER_TOKEN_FACTORY(klass) (new klass::Factory())
+#define REGISTER_TOKEN_FACTORY(schema_id,klass) \
+  schema_id->registerTokenFactory((new klass::Factory())->getId())
 
 #define REGISTER_TYPE_FACTORY(typeFactoryMgr, klass, domain) \
   typeFactoryMgr->registerFactory((new EnumeratedTypeFactory(#klass, #klass, domain))->getId())

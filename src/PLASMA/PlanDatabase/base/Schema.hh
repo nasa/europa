@@ -13,6 +13,7 @@
 #include "LabelStr.hh"
 #include "AbstractDomain.hh"
 #include "ObjectFactory.hh"
+#include "TokenFactory.hh"
 
 #include <vector>
 
@@ -270,7 +271,6 @@ namespace EUROPA {
      */
     const LabelStr getParameterType(const LabelStr& predicate, unsigned int paramIndex) const;
 
-
     /**
      * @brief Introduce a primitive type name to be used
      */
@@ -341,7 +341,10 @@ namespace EUROPA {
     void registerObjectFactory(const ObjectFactoryId& obj_fact);
     ObjectFactoryId getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments);
     
-
+    void registerTokenFactory(const TokenFactoryId& obj_fact);
+    TokenFactoryId getTokenFactory(const LabelStr& tokenType);
+    bool hasTokenFactories() const;
+    
   private:
 
     static const std::set<LabelStr>& getBuiltInVariableNames();
@@ -349,6 +352,7 @@ namespace EUROPA {
     SchemaId m_id;
     const CESchemaId& m_ceSchema;
     const ObjectTypeMgrId m_objectTypeMgr;
+    const TokenTypeMgrId m_tokenTypeMgr;
     
     const LabelStr m_name;
     LabelStr_ValueSet_Map enumValues;

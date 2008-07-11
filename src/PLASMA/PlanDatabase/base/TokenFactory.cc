@@ -5,112 +5,87 @@
 
 namespace EUROPA {
 
-  /**
-   * First try a hit for the predicate name as provided. If that does not work, extract the object,
-   * and try each parent object untill we get a hit.
-   */
-  ConcreteTokenFactoryId TokenFactory::getFactory(const SchemaId& schema, const LabelStr& predicateName){
-    check_error(schema->isPredicate(predicateName), predicateName.toString() + " is undefined.");
-
-    // Confirm it is present
-    const std::map<double, ConcreteTokenFactoryId>::const_iterator pos =  
-      getInstance().m_factoriesByPredicate.find(predicateName.getKey());
-
-    if (pos != getInstance().m_factoriesByPredicate.end()) // We have found what we are looking for
-      return(pos->second);
-
-    // If we are here, we have not found it, so build up a list of parents, and try each one. We have to use the schema
-    // for this.
-
-    // Call recursively if we have a parent
-    if (schema->hasParent(predicateName)) {
-      ConcreteTokenFactoryId factory =  getFactory(schema, schema->getParent(predicateName));
-
-      check_error(factory.isValid(), "No factory found for " + predicateName.toString());
-
-      // Log the mapping in this case, from the original predicate, to make it faster the next time around
-      getInstance().m_factoriesByPredicate.insert(std::pair<double, ConcreteTokenFactoryId>(predicateName, factory));
-      return(factory);
+    TokenTypeMgr::TokenTypeMgr()
+        : m_id(this)
+    {
     }
 
-    // If we get here, it is an error
-    check_error(ALWAYS_FAILS, "Failed in TokenFactory::getFactory for " + predicateName.toString());
+    TokenTypeMgr::~TokenTypeMgr() 
+    {
+        cleanup(m_factories);
+        m_id.remove();    
+    }
+    
+    const TokenTypeMgrId& TokenTypeMgr::getId() const {return m_id;}   
 
-    return ConcreteTokenFactoryId::noId();
-  }
+    void TokenTypeMgr::registerFactory(const TokenFactoryId& factory) {
+      check_error(factory.isValid());
 
-  TokenFactory::TokenFactory() {
-  }
+      // Ensure it is not present already
+      check_error(m_factories.find(factory) == m_factories.end()) ;
 
-  TokenFactory& TokenFactory::getInstance() {
-    static TokenFactory sl_instance;
-    return(sl_instance);
-  }
+      m_factories.insert(factory);
+      m_factoriesByPredicate.insert(std::pair<double, TokenFactoryId>(factory->getSignature().getKey(), factory));
+    }
 
-  TokenFactory::~TokenFactory() {
-    cleanup(m_factories);
-  }
+    /**
+     * First try a hit for the predicate name as provided. If that does not work, extract the object,
+     * and try each parent object untill we get a hit.
+     */
+    TokenFactoryId TokenTypeMgr::getFactory(const SchemaId& schema, const LabelStr& predicateName){
+        check_error(schema->isPredicate(predicateName), predicateName.toString() + " is undefined.");
 
-  void TokenFactory::registerFactory(const ConcreteTokenFactoryId& factory) {
-    check_error(factory.isValid());
+        // Confirm it is present
+        const std::map<double, TokenFactoryId>::const_iterator pos =  
+            m_factoriesByPredicate.find(predicateName.getKey());
 
-    // Ensure it is not present already
-    check_error(getInstance().m_factories.find(factory) == getInstance().m_factories.end()) ;
+        if (pos != m_factoriesByPredicate.end()) // We have found what we are looking for
+            return(pos->second);
 
-    getInstance().m_factories.insert(factory);
-    getInstance().m_factoriesByPredicate.insert(std::pair<double, ConcreteTokenFactoryId>(factory->getSignature().getKey(), factory));
-  }
+        // If we are here, we have not found it, so build up a list of parents, and try each one. We have to use the schema
+        // for this.
 
-  TokenId TokenFactory::createInstance(const PlanDatabaseId& planDb,
-                                       const LabelStr& predicateName,
-                                       bool rejectable,
-                                       bool isFact) {
-    check_error(planDb.isValid());
+        // Call recursively if we have a parent
+        if (schema->hasParent(predicateName)) {
+            TokenFactoryId factory =  getFactory(schema, schema->getParent(predicateName));
 
-    // Obtain the factory 
-    ConcreteTokenFactoryId factory = getFactory(planDb->getSchema(), predicateName);
+            check_error(factory.isValid(), "No factory found for " + predicateName.toString());
 
-    check_error(factory.isValid());
+            // Log the mapping in this case, from the original predicate, to make it faster the next time around
+            m_factoriesByPredicate.insert(std::pair<double, TokenFactoryId>(predicateName, factory));
+            return(factory);
+        }
 
-    TokenId token = factory->createInstance(planDb, predicateName, rejectable, isFact);
+        // If we get here, it is an error
+        check_error(ALWAYS_FAILS, "Failed in TokenTypeMgr::getFactory for " + predicateName.toString());
 
-    check_error(token.isValid());
-    return(token);
-  }
+        return TokenFactoryId::noId();
+    }
 
-  TokenId TokenFactory::createInstance(const TokenId& master,
-				       const LabelStr& predicateName,
-				       const LabelStr& relation) {
-    check_error(master.isValid());
+    bool TokenTypeMgr::hasFactory()
+    {
+        return (!m_factories.empty());
+    }
 
-    // Obtain the factory 
-    ConcreteTokenFactoryId factory = getFactory(master->getPlanDatabase()->getSchema(), predicateName);
-    check_error(factory.isValid());
+    void TokenTypeMgr::purgeAll()
+    {
+        cleanup(m_factories);
+        m_factoriesByPredicate.clear();
+    }
 
-    TokenId token = factory->createInstance(master, predicateName, relation);
 
-    check_error(token.isValid());
-    return(token);
-  }
+    TokenFactory::TokenFactory(const LabelStr& signature)
+        : m_id(this)
+        , m_signature(signature)
+    {
+    }
 
-  bool TokenFactory::hasFactory(){
-    return (!getInstance().m_factories.empty());
-  }
+    TokenFactory::~TokenFactory()
+    {
+        m_id.remove();
+    }
 
-  void TokenFactory::purgeAll(){
-    cleanup(getInstance().m_factories);
-    getInstance().m_factoriesByPredicate.clear();
-  }
-  ConcreteTokenFactory::ConcreteTokenFactory(const LabelStr& signature)
-    : m_id(this), m_signature(signature){
-    TokenFactory::registerFactory(m_id);
-  }
+    const TokenFactoryId& TokenFactory::getId() const {return m_id;}
 
-  ConcreteTokenFactory::~ConcreteTokenFactory(){
-    m_id.remove();
-  }
-
-  const ConcreteTokenFactoryId& ConcreteTokenFactory::getId() const {return m_id;}
-
-  const LabelStr& ConcreteTokenFactory::getSignature() const {return m_signature;}
+    const LabelStr& TokenFactory::getSignature() const {return m_signature;}
 }

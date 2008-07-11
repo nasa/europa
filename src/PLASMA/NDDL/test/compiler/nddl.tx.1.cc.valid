@@ -262,13 +262,13 @@ namespace NDDL {
     id->addValue("TokenStates", LabelStr("REJECTED"));
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TOKEN_FACTORY(Foo::pred0::Factory);
-    REGISTER_TOKEN_FACTORY(Foo::pred1::Factory);
-    REGISTER_TOKEN_FACTORY(Foo::pred2::Factory);
-    REGISTER_TOKEN_FACTORY(Foo::pred3::Factory);
-    REGISTER_TOKEN_FACTORY(Foo::pred4::Factory);
-    REGISTER_TOKEN_FACTORY(Foo::pred5::Factory);
-    REGISTER_TOKEN_FACTORY(Foo::pred6::Factory);
+    REGISTER_TOKEN_FACTORY(id,Foo::pred0::Factory);
+    REGISTER_TOKEN_FACTORY(id,Foo::pred1::Factory);
+    REGISTER_TOKEN_FACTORY(id,Foo::pred2::Factory);
+    REGISTER_TOKEN_FACTORY(id,Foo::pred3::Factory);
+    REGISTER_TOKEN_FACTORY(id,Foo::pred4::Factory);
+    REGISTER_TOKEN_FACTORY(id,Foo::pred5::Factory);
+    REGISTER_TOKEN_FACTORY(id,Foo::pred6::Factory);
     REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(id->getCESchema(),TokenStates, TokenStatesBaseDomain());
     REGISTER_OBJECT_FACTORY(id,StringDataFactory0, StringData:string);

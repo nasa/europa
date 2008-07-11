@@ -3,6 +3,7 @@
 #include "Object.hh"
 #include "Schema.hh"
 #include "Token.hh"
+#include "TokenFactory.hh"
 #include "TokenVariable.hh"
 #include "DefaultTemporalAdvisor.hh"
 #include "Constraints.hh"
@@ -42,8 +43,7 @@ namespace EUROPA{
 	  void notifyDiscard(){
 		  check_error(m_var.isValid());
 		  check_error(m_planDb.isValid());
-		  if(!Entity::isPurging()) // Don't bother with synching cached data if we are cleaning up
-			  m_planDb->handleObjectVariableDeletion(m_var);
+		  m_planDb->handleObjectVariableDeletion(m_var);
 	  }
 
   private:
@@ -1010,6 +1010,34 @@ namespace EUROPA{
       return object;
   }
   
+  TokenId PlanDatabase::createToken(const LabelStr& predicateName,
+                                    bool rejectable,
+                                    bool isFact) 
+  {
+    TokenFactoryId factory = getSchema()->getTokenFactory(predicateName);
+    check_error(factory.isValid());
+
+    TokenId token = factory->createInstance(getId(), predicateName, rejectable, isFact);
+    check_error(token.isValid());
+    
+    return token;
+  }
+  
+  TokenId PlanDatabase::createSlaveToken(const TokenId& master,
+                const LabelStr& predicateName,
+                const LabelStr& relation)
+  {
+      check_error(master.isValid());
+
+      TokenFactoryId factory = getSchema()->getTokenFactory(predicateName);
+      check_error(factory.isValid());
+
+      TokenId token = factory->createInstance(master, predicateName, relation);
+
+      check_error(token.isValid());
+      return token;      
+  }
+  
 
   std::string PlanDatabase::toString()
   {
@@ -1018,4 +1046,10 @@ namespace EUROPA{
       delete pdw;
       return planOutput;
   }
+  
+  bool PlanDatabase::hasTokenFactories() const
+  {
+      return getSchema()->hasTokenFactories() > 0;
+  }
+  
 }

@@ -1,5 +1,6 @@
 // Include prototypes required to integrate to the NDDL generated model
 #include "Nddl.hh"
+#include "NddlDefs.hh"
 
 #include "PlanDatabase.hh"
 #include "PlanDatabaseWriter.hh"
@@ -10,14 +11,6 @@
 // Transactions
 #include "DbClientTransactionPlayer.hh"
 #include "DbClientTransactionLog.hh"
-#include "BoolTypeFactory.hh"
-#include "StringTypeFactory.hh"
-#include "floatType.hh"
-#include "intType.hh"
-
-// Support for Temporal Network
-#include "TemporalPropagator.hh"
-#include "STNTemporalAdvisor.hh"
 
 // Support for registered constraints
 #include "ConstraintLibrary.hh"
@@ -25,13 +18,6 @@
 #include "EqualityConstraintPropagator.hh"
 #include "CommonAncestorConstraint.hh"
 #include "HasAncestorConstraint.hh"
-
-#include "NddlDefs.hh"
-
-// For cleanup purging
-#include "TokenFactory.hh"
-#include "ObjectFactory.hh"
-#include "Rule.hh"
 
 // Misc
 #include "Utils.hh"
@@ -94,10 +80,7 @@ NddlTestEngine::NddlTestEngine()
 
 NddlTestEngine::~NddlTestEngine() 
 {
-    // TODO: this is going into an infinite loop!!!
-    // in the debugger, it's happenning when the PlanDatabase is deleted and the listeners are notified
-    // ask Tristan since he recently did some cleanupin the listeners
-    //doShutdown(); 
+    doShutdown();
 }
 
 void NddlTestEngine::createModules()

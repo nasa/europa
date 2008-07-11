@@ -156,7 +156,7 @@ namespace NDDL {
     id->addValue("Color", LabelStr("Blue"));
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TOKEN_FACTORY(Foo::pred::Factory);
+    REGISTER_TOKEN_FACTORY(id,Foo::pred::Factory);
     REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(id->getCESchema(),TokenStates, TokenStatesBaseDomain());
     REGISTER_OBJECT_FACTORY(id,StringDataFactory0, StringData:string);

@@ -7,7 +7,6 @@
 #include "PlanDatabaseWriter.hh"
 #include "ObjectFactory.hh"
 #include "TypeFactory.hh"
-#include "TokenFactory.hh"
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>

@@ -304,7 +304,7 @@ namespace EUROPA {
   	    TokenId m_token;	    
   };
   
-  class InterpretedTokenFactory: public ConcreteTokenFactory 
+  class InterpretedTokenFactory: public TokenFactory 
   { 
     public: 
 	  InterpretedTokenFactory(const LabelStr& predicateName,
@@ -315,17 +315,16 @@ namespace EUROPA {
                               const std::vector<Expr*>& assignValues,
                               const std::vector<ExprConstraint*>& constraints);
 	  
-	protected:
-	  std::vector<LabelStr> m_parameterNames;    
-	  std::vector<LabelStr> m_parameterTypes;    
-	  std::vector<Expr*> m_parameterValues;    
-	  std::vector<LabelStr> m_assignVars;    
-	  std::vector<Expr*> m_assignValues;    
-	  std::vector<ExprConstraint*> m_constraints;
-
-	private: 
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const;
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
+	  
+    protected:
+      std::vector<LabelStr> m_parameterNames;    
+      std::vector<LabelStr> m_parameterTypes;    
+      std::vector<Expr*> m_parameterValues;    
+      std::vector<LabelStr> m_assignVars;    
+      std::vector<Expr*> m_assignValues;    
+      std::vector<ExprConstraint*> m_constraints;
   };
 
   class RuleExpr;
@@ -567,12 +566,11 @@ namespace EUROPA {
 	                        const std::vector<const AbstractDomain*>& arguments) const = 0;
   };
   
-  class NativeTokenFactory: public ConcreteTokenFactory 
+  class NativeTokenFactory: public TokenFactory 
   { 
     public: 
-	  NativeTokenFactory(const LabelStr& predicateName) : ConcreteTokenFactory(predicateName) {}
+	  NativeTokenFactory(const LabelStr& predicateName) : TokenFactory(predicateName) {}
 	  
-	private: 
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const = 0;
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const = 0;
   };  

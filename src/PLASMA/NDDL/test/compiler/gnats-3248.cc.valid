@@ -396,8 +396,8 @@ namespace NDDL {
     id->addValue("TokenStates", LabelStr("REJECTED"));
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TOKEN_FACTORY(Foo::guard::Factory);
-    REGISTER_TOKEN_FACTORY(Foo::boring::Factory);
+    REGISTER_TOKEN_FACTORY(id,Foo::guard::Factory);
+    REGISTER_TOKEN_FACTORY(id,Foo::boring::Factory);
     REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
     REGISTER_OBJECT_FACTORY(id,PlannerConfigFactory0, PlannerConfig:int:int:int:int);
     REGISTER_OBJECT_FACTORY(id,PlannerConfigFactory1, PlannerConfig:int:int:int);

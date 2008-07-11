@@ -5,8 +5,6 @@
 #include "CommonAncestorConstraint.hh"
 #include "HasAncestorConstraint.hh"
 #include "ObjectTokenRelation.hh"
-#include "ObjectFactory.hh"
-#include "TokenFactory.hh"
 #include "DbClientTransactionPlayer.hh"
 
 namespace EUROPA {
@@ -58,19 +56,19 @@ namespace EUROPA {
   
   void ModulePlanDatabase::initialize(EngineId engine)
   {
-      CESchema* tfm = (CESchema*)engine->getComponent("CESchema");
-      
-      Schema* schema = new Schema("EngineSchema",tfm->getId()); // TODO: use engine name
-      engine->addComponent("Schema",schema);
-      schema->addObjectType("Timeline");
-
       ConstraintEngine* ce = (ConstraintEngine*)engine->getComponent("ConstraintEngine");
-      PlanDatabase* pdb = new PlanDatabase(ce->getId(), schema->getId());      
-      engine->addComponent("PlanDatabase",pdb);
-
       REGISTER_SYSTEM_CONSTRAINT(CommonAncestorConstraint, "commonAncestor", "Default");
       REGISTER_SYSTEM_CONSTRAINT(HasAncestorConstraint, "hasAncestor", "Default");
       REGISTER_SYSTEM_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
+
+      CESchema* ceSchema = (CESchema*)engine->getComponent("CESchema");      
+      Schema* schema = new Schema("EngineSchema",ceSchema->getId()); // TODO: use engine name
+      engine->addComponent("Schema",schema);
+
+      schema->addObjectType("Timeline");
+
+      PlanDatabase* pdb = new PlanDatabase(ce->getId(), schema->getId());      
+      engine->addComponent("PlanDatabase",pdb);
       
 	  engine->addLanguageInterpreter("nddl-xml-txn", new NddlXmlTxnInterpreter(pdb->getClient()));
   }
@@ -84,8 +82,5 @@ namespace EUROPA {
 
       Schema* schema = (Schema*)engine->removeComponent("Schema");      
       delete schema;
-	  
-	  // TODO: these need to be member variables in PlanDatabase
-      TokenFactory::purgeAll();         
   }  
 }

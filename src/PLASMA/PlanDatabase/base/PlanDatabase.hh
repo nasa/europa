@@ -301,6 +301,16 @@ namespace EUROPA {
                             const LabelStr& objectName,
                             const std::vector<const AbstractDomain*>& arguments);    
 
+    TokenId createToken(const LabelStr& predicateName,
+                        bool rejectable=false,
+                        bool isFact=false); 
+    
+    TokenId createSlaveToken(const TokenId& master,
+                             const LabelStr& predicateName,
+                             const LabelStr& relation);
+    
+    bool hasTokenFactories() const;
+    
     virtual std::string toString();
 
   private:

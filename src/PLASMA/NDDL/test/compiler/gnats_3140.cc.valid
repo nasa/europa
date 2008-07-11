@@ -354,7 +354,7 @@ namespace NDDL {
     id->addValue("symbolicEnum", LabelStr("ABC"));
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TOKEN_FACTORY(Bar::pred::Factory);
+    REGISTER_TOKEN_FACTORY(id,Bar::pred::Factory);
     REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(id->getCESchema(),TokenStates, TokenStatesBaseDomain());
     REGISTER_OBJECT_FACTORY(id,StringDataFactory0, StringData:string);

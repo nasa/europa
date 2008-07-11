@@ -599,9 +599,9 @@ namespace NDDL {
     id->addValue("Location", LabelStr("Lander"));
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TOKEN_FACTORY(Position::At::Factory);
-    REGISTER_TOKEN_FACTORY(Position::Navigate::Factory);
-    REGISTER_TOKEN_FACTORY(Foo::FooPred::Factory);
+    REGISTER_TOKEN_FACTORY(id,Position::At::Factory);
+    REGISTER_TOKEN_FACTORY(id,Position::Navigate::Factory);
+    REGISTER_TOKEN_FACTORY(id,Foo::FooPred::Factory);
     REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
     REGISTER_OBJECT_FACTORY(id,PlannerConfigFactory0, PlannerConfig:int:int:int:int);
     REGISTER_OBJECT_FACTORY(id,PlannerConfigFactory1, PlannerConfig:int:int:int);

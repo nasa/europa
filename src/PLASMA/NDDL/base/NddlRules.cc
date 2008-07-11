@@ -1,6 +1,5 @@
 #include "NddlRules.hh"
 #include "Utils.hh"
-#include "TokenFactory.hh"
 #include "Token.hh"
 
 /**
@@ -33,7 +32,7 @@ namespace NDDL {
 
   TokenId allocateOnSameObject(const TokenId& master, const LabelStr& predicateSuffix, const LabelStr& relationToMaster){
     std::string tokenType = master->getBaseObjectType().toString() + "." + predicateSuffix.toString();
-    TokenId slave = TokenFactory::createInstance(master, tokenType, relationToMaster);
+    TokenId slave = master->getPlanDatabase()->createSlaveToken(master, tokenType, relationToMaster);
     return slave;
   }
 }

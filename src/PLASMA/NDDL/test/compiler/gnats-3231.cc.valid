@@ -96,7 +96,7 @@ namespace NDDL {
     id->addPredicate("GnatsClass.p");
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TOKEN_FACTORY(GnatsClass::p::Factory);
+    REGISTER_TOKEN_FACTORY(id,GnatsClass::p::Factory);
     REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
     REGISTER_OBJECT_FACTORY(id,GnatsClassFactory0, GnatsClass);
     // Allocate rules

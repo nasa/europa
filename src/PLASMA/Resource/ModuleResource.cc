@@ -64,7 +64,7 @@ namespace EUROPA {
       REGISTER_OBJECT_FACTORY(schema,ResourceObjectFactory, Resource:float:float:float:float:float:float:float);                     
       schema->addPredicate("Resource.change");      
       schema->addMember("Resource.change", "float", "quantity");
-      new ResourceChangeTokenFactory("Resource.change");
+      schema->registerTokenFactory((new ResourceChangeTokenFactory("Resource.change"))->getId());
 
       schema->addObjectType("Reusable");
       schema->addMember("Reusable", "float", "capacity");
@@ -77,7 +77,7 @@ namespace EUROPA {
       REGISTER_OBJECT_FACTORY(schema,ReusableObjectFactory, Reusable:float:float:float:float);                   
       schema->addPredicate("Reusable.uses");      
       schema->addMember("Reusable.uses", "float", "quantity");
-      new ReusableUsesTokenFactory("Reusable.uses");
+      schema->registerTokenFactory((new ReusableUsesTokenFactory("Reusable.uses"))->getId());
 
       schema->addObjectType("Reservoir");
       schema->addMember("Reservoir", "float", "initialCapacity");
@@ -94,18 +94,18 @@ namespace EUROPA {
 
       schema->addPredicate("Reservoir.produce");      
       schema->addMember("Reservoir.produce", "float", "quantity");
-      new ReservoirProduceTokenFactory("Reservoir.produce");      
+      schema->registerTokenFactory((new ReservoirProduceTokenFactory("Reservoir.produce"))->getId());      
 
       schema->addPredicate("Reservoir.consume");      
       schema->addMember("Reservoir.consume", "float", "quantity");
-      new ReservoirConsumeTokenFactory("Reservoir.consume");      
+      schema->registerTokenFactory((new ReservoirConsumeTokenFactory("Reservoir.consume"))->getId());      
       
       schema->addObjectType("Unary");
       schema->addMember("Unary", "float", "consumptionMax");
       REGISTER_OBJECT_FACTORY(schema,UnaryObjectFactory, Unary);                     
       REGISTER_OBJECT_FACTORY(schema,UnaryObjectFactory, Unary:float);                   
       schema->addPredicate("Unary.use");
-      new UnaryUseTokenFactory("Unary.use");             
+      schema->registerTokenFactory((new UnaryUseTokenFactory("Unary.use"))->getId());             
       
       REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile );
       REGISTER_PROFILE(EUROPA::SAVH::FlowProfile, FlowProfile);

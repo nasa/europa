@@ -13,78 +13,64 @@
  */
 namespace EUROPA {
 
-  class ConcreteTokenFactory;
-  typedef Id<ConcreteTokenFactory> ConcreteTokenFactoryId;
+  class TokenTypeMgr;
+  typedef Id<TokenTypeMgr> TokenTypeMgrId;
+
+  class TokenFactory;
+  typedef Id<TokenFactory> TokenFactoryId;
 
   /**
    * @brief Singleton, abstract factory which provides main point for token allocation. It relies
    * on binding to concrete token factories for eacy distinct class.
-   * @see ConcreteTokenFactory
+   * @see TokenFactory
    */
-  class TokenFactory {
+  class TokenTypeMgr {
   public:
-    /**
-     * @brief Should be private, but breaks with Andrews compiler if it is.
-     */
-    ~TokenFactory();
+      
+    TokenTypeMgr();  
+    ~TokenTypeMgr();
 
-    /**
-     * @brief Create a root token instance
-     * @see DbClient::createToken(const LabelStr& type, const LabelStr& name)
-     */
-    static TokenId createInstance(const PlanDatabaseId& planDb,
-                                  const LabelStr& predicateName,
-                                  bool rejectable = false,
-                                  bool isFact = false);
-
-    /**
-     * @brief Create a slave token.
-     */
-    static TokenId createInstance(const TokenId& master,
-				  const LabelStr& predicateName,
-				  const LabelStr& relation);
-
-    static void purgeAll();
+    const TokenTypeMgrId& getId() const;   
+    
+    void purgeAll();
 
     /**
      * @brief Test if any factories are registered.
      */
-    static bool hasFactory();
+    bool hasFactory();
 
-  private:
-    friend class ConcreteTokenFactory; /*!< Requires access to registerFactory */
-
-    /**
+     /**
      * @brief Add a factory to provide instantiation of particular concrete types based on a label.
      */
-    static void registerFactory(const ConcreteTokenFactoryId& factory);
+    void registerFactory(const TokenFactoryId& factory);
 
     /**
      * @brief Obtain the factory based on the predicate name
      */ 
-    static ConcreteTokenFactoryId getFactory(const SchemaId& schema, const LabelStr& predicateName);
+    TokenFactoryId getFactory(const SchemaId& schema, const LabelStr& predicateName);
 
-    static TokenFactory& getInstance();
-
-    TokenFactory();
-
-    std::map<double, ConcreteTokenFactoryId> m_factoriesByPredicate;
-    std::set<ConcreteTokenFactoryId> m_factories;
+  protected:
+    TokenTypeMgrId m_id;
+    std::map<double, TokenFactoryId> m_factoriesByPredicate;
+    std::set<TokenFactoryId> m_factories;
   };
 
   /**
    * @brief Each concrete class must provide an implementation for this.
    */
-  class ConcreteTokenFactory {
+  class TokenFactory {
   public:
+    TokenFactory(const LabelStr& signature);
+
+    virtual ~TokenFactory();
+
+    const TokenFactoryId& getId() const;
+
     /**
-     * @brief Prefer to be protected, but required to use cleanup utilities
+     * @brief Return the type for which this factory is registered.
      */
-    virtual ~ConcreteTokenFactory();
-
-  protected:
-    friend class TokenFactory;
-
+    const LabelStr& getSignature() const;
+    
     /**
      * @brief Create a root token instance
      * @see DbClient::createToken(const LabelStr& type, const LabelStr& name)
@@ -94,26 +80,15 @@ namespace EUROPA {
                                    bool rejectable = false,
                                    bool isFact = false) const = 0;
 
-
     /**
      * @brief Create a slave token
      */
     virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const = 0;
 
-    const ConcreteTokenFactoryId& getId() const;
-
-    /**
-     * @brief Return the type for which this factory is registered.
-     */
-    const LabelStr& getSignature() const;
-
-    ConcreteTokenFactory(const LabelStr& signature);
-
-  private:
-    ConcreteTokenFactoryId m_id;
+  protected:
+    TokenFactoryId m_id;
     LabelStr m_signature;
   };
-
 }
 
 #endif

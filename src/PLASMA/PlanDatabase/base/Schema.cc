@@ -44,6 +44,7 @@ namespace EUROPA {
       : m_id(this)
       , m_ceSchema(ces)
       , m_objectTypeMgr((new ObjectTypeMgr())->getId())
+      , m_tokenTypeMgr((new TokenTypeMgr())->getId())
       , m_name(name)
   {
       reset();
@@ -52,6 +53,7 @@ namespace EUROPA {
 
   Schema::~Schema()
   {
+      delete (TokenTypeMgr*)m_tokenTypeMgr;
       delete (ObjectTypeMgr*)m_objectTypeMgr;
       m_id.remove();
   }
@@ -619,5 +621,21 @@ namespace EUROPA {
   {
       return m_objectTypeMgr->getFactory(getId(),objectType,arguments);
   }
+  
+  void Schema::registerTokenFactory(const TokenFactoryId& f)
+  {
+      m_tokenTypeMgr->registerFactory(f);
+  }
+  
+  TokenFactoryId Schema::getTokenFactory(const LabelStr& type)
+  {
+      return m_tokenTypeMgr->getFactory(getId(),type);
+  }
+  
+  bool Schema::hasTokenFactories() const
+  {
+      return m_tokenTypeMgr->hasFactory();
+  }
+  
   
 } // namespace NDDL

@@ -386,8 +386,8 @@ namespace NDDL {
     id->addValue("Strings", LabelStr("Martian City"));
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TOKEN_FACTORY(World::initialState::Factory);
-    REGISTER_TOKEN_FACTORY(World::Hill::Factory);
+    REGISTER_TOKEN_FACTORY(id,World::initialState::Factory);
+    REGISTER_TOKEN_FACTORY(id,World::Hill::Factory);
     REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(id->getCESchema(),TokenStates, TokenStatesBaseDomain());
     REGISTER_OBJECT_FACTORY(id,StringDataFactory0, StringData:string);

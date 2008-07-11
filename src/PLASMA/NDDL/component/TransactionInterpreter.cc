@@ -364,8 +364,7 @@ namespace EUROPA {
       return;    
     }    
     
-    // The TokenFactory's constructor automatically registers the factory
-    new InterpretedTokenFactory(
+    getSchema()->registerTokenFactory((new InterpretedTokenFactory(
 				predName,
 				parameterNames,
 				parameterTypes,
@@ -373,7 +372,7 @@ namespace EUROPA {
 				assignVars,
 				assignValues,
 				constraints
-				);
+				))->getId());
   }
     
   void NddlXmlInterpreter::defineEnum(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
@@ -1558,7 +1557,7 @@ namespace EUROPA {
 						   const std::vector<LabelStr>& assignVars,
 						   const std::vector<Expr*>& assignValues,
 						   const std::vector<ExprConstraint*>& constraints)
-    : ConcreteTokenFactory(predicateName) 
+    : TokenFactory(predicateName) 
     , m_parameterNames(parameterNames)
     , m_parameterTypes(parameterTypes)
     , m_parameterValues(parameterValues)
@@ -1774,7 +1773,7 @@ namespace EUROPA {
         slave = NDDL::allocateOnSameObject(m_token,suffix,relation);
     }
     else {
-          slave = TokenFactory::createInstance(m_token,predicateType,relation);
+        slave = m_token->getPlanDatabase()->createSlaveToken(m_token,predicateType,relation);
     }
     addSlave(slave,name);  		
 

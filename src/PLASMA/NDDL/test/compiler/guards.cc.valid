@@ -855,15 +855,15 @@ namespace NDDL {
     id->addValue("StringEnum", LabelStr("THREE"));
     // Force allocation of model specific type factories
     // Allocate factories
-    REGISTER_TOKEN_FACTORY(Bar::pred::Factory);
-    REGISTER_TOKEN_FACTORY(Foo::basicToken::Factory);
-    REGISTER_TOKEN_FACTORY(Foo::tokenWithParameters::Factory);
-    REGISTER_TOKEN_FACTORY(Foo::impliedObjectGuard::Factory);
-    REGISTER_TOKEN_FACTORY(Foo::impliedLocalVariableGuard::Factory);
-    REGISTER_TOKEN_FACTORY(Foo::singletonGuard::Factory);
-    REGISTER_TOKEN_FACTORY(Foo::mixGuardedWithUnguarded::Factory);
-    REGISTER_TOKEN_FACTORY(Foo::localVariableGuard::Factory);
-    REGISTER_TOKEN_FACTORY(Foo::multipleNestedGuards::Factory);
+    REGISTER_TOKEN_FACTORY(id,Bar::pred::Factory);
+    REGISTER_TOKEN_FACTORY(id,Foo::basicToken::Factory);
+    REGISTER_TOKEN_FACTORY(id,Foo::tokenWithParameters::Factory);
+    REGISTER_TOKEN_FACTORY(id,Foo::impliedObjectGuard::Factory);
+    REGISTER_TOKEN_FACTORY(id,Foo::impliedLocalVariableGuard::Factory);
+    REGISTER_TOKEN_FACTORY(id,Foo::singletonGuard::Factory);
+    REGISTER_TOKEN_FACTORY(id,Foo::mixGuardedWithUnguarded::Factory);
+    REGISTER_TOKEN_FACTORY(id,Foo::localVariableGuard::Factory);
+    REGISTER_TOKEN_FACTORY(id,Foo::multipleNestedGuards::Factory);
     REGISTER_TYPE_FACTORY(id->getCESchema(),Object, ObjectDomain("Object"));
     REGISTER_TYPE_FACTORY(id->getCESchema(),TokenStates, TokenStatesBaseDomain());
     REGISTER_OBJECT_FACTORY(id,StringDataFactory0, StringData:string);

@@ -123,10 +123,10 @@ const char* DEFAULT_PREDICATE = "Object.DEFAULT_PREDICATE";
     }
   };
 
-  class IntervalTokenFactory: public ConcreteTokenFactory {
+  class IntervalTokenFactory: public TokenFactory {
   public:
     IntervalTokenFactory()
-      : ConcreteTokenFactory(LabelStr(DEFAULT_PREDICATE)) {
+      : TokenFactory(LabelStr(DEFAULT_PREDICATE)) {
     }
   private:
     TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false, bool isFact = false) const {
@@ -216,7 +216,7 @@ PDBTestEngine::PDBTestEngine()
     // Have to register factories for testing.
     schema->registerObjectFactory((new StandardDBFooFactory())->getId());
     schema->registerObjectFactory((new SpecialDBFooFactory())->getId());
-    new IntervalTokenFactory();
+    schema->registerTokenFactory((new IntervalTokenFactory())->getId());
 }
 
 PDBTestEngine::~PDBTestEngine() 
@@ -2168,11 +2168,11 @@ private:
       ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
 
-      TokenId master = TokenFactory::createInstance(db, LabelStr(DEFAULT_PREDICATE), true);
+      TokenId master = db->createToken(LabelStr(DEFAULT_PREDICATE), true);
     master->activate();
-    TokenId slave = TokenFactory::createInstance(master, LabelStr(DEFAULT_PREDICATE), LabelStr("any"));
+    TokenId slave = db->createSlaveToken(master, LabelStr(DEFAULT_PREDICATE), LabelStr("any"));
     assertTrue(slave->master() == master); 
-    TokenId rejectable = TokenFactory::createInstance(db, LabelStr(DEFAULT_PREDICATE), false);
+    TokenId rejectable = db->createToken(LabelStr(DEFAULT_PREDICATE), false);
     rejectable->activate();
     //!!Should try rejecting master and verify inconsistency
     //!!Should try rejecting rejectable and verify consistency
@@ -3910,7 +3910,7 @@ public:
     REGISTER_OBJECT_FACTORY(db->getSchema(),TestClass2Factory, TestClass2:string:INT_INTERVAL:REAL_INTERVAL:Locations);
 
     /* Token factory for predicate Sample */
-    new TestClass2::Sample::Factory();
+    db->getSchema()->registerTokenFactory((new TestClass2::Sample::Factory())->getId());
 
     /* Initialize state-domain-at-creation of mandatory and rejectable tokens.  Const after this. */
     s_mandatoryStateDom.insert(Token::ACTIVE);
@@ -3980,7 +3980,6 @@ public:
     testCancel();
     testUncancel();
 
-    TokenFactory::purgeAll();
     delete s_dbPlayer;
     DEFAULT_TEARDOWN();
     return(true);
@@ -4086,10 +4085,10 @@ public:
       // Would do:
       // DECLARE_TOKEN_FACTORY(TestClass2::Sample, TestClass2.Sample);
       // ... but that is in NDDL/base/NddlUtils.hh, which this should not depend on, so:
-      class Factory : public ConcreteTokenFactory {
+      class Factory : public TokenFactory {
       public:
         Factory()
-          : ConcreteTokenFactory(LabelStr("TestClass2.Sample")) {
+          : TokenFactory(LabelStr("TestClass2.Sample")) {
         }
       private:
         TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false, bool isFact = false) const {

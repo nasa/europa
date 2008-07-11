@@ -10,7 +10,6 @@
 #include "ConstraintEngine.hh"
 #include "ConstraintLibrary.hh"
 #include "TypeFactory.hh"
-#include "TokenFactory.hh"
 #include "Debug.hh"
 
 #include <string>
@@ -399,12 +398,12 @@ namespace EUROPA {
   }
 
   bool DbClient::supportsAutomaticAllocation() const{
-    return TokenFactory::hasFactory();
+    return m_planDb->hasTokenFactories();
   }
 
   TokenId DbClient::allocateToken(const LabelStr& predicateName, bool rejectable, bool isFact) {
     checkError(supportsAutomaticAllocation(), "Cannot allocate tokens from the schema.");
-    TokenId token = TokenFactory::createInstance(m_planDb, predicateName, rejectable, isFact);
+    TokenId token = m_planDb->createToken(predicateName, rejectable, isFact);
 
     if (isTransactionLoggingEnabled()) {
       debugMsg("DbClient:allocateToken",

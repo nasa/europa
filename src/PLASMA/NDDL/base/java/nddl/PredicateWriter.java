@@ -14,7 +14,7 @@ class PredicateWriter {
     String predicateName = XMLUtil.getAttribute(objectClass, "name") + "." + XMLUtil.getAttribute(predicate, "name");
     writer.write("DECLARE_TOKEN_FACTORY("+klass+", "+predicateName+");\n");
 
-    SchemaWriter.addFactory("REGISTER_TOKEN_FACTORY("+klass + "::Factory);\n");
+    SchemaWriter.addFactory("REGISTER_TOKEN_FACTORY(id,"+klass + "::Factory);\n");
   }
 
   public static void generateImplementation(IndentWriter writer, IXMLElement predicate) throws IOException {
