@@ -43,7 +43,7 @@ namespace EUROPA {
     return m_baseDomain;
   }
 
-  double IntervalIntTypeFactory::createValue(std::string value) const
+  double IntervalIntTypeFactory::createValue(const std::string& value) const
   {
     return atoi(value.c_str());
   }

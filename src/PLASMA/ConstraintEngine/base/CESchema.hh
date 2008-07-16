@@ -29,6 +29,7 @@ namespace EUROPA {
   
       const CESchemaId& getId() const;
       
+      // Methods to Manage Type Factories
       /**
        * @brief Add a factory to provide instantiation of particular concrete types based on a label.
        */
@@ -39,46 +40,14 @@ namespace EUROPA {
        */ 
       TypeFactoryId getFactory(const char* typeName);
 
-      void purgeTypeFactories();
-      
-      /**
-       * @brief Delete all factory instances stored. 
-       */
-      void purgeAll();
-      
-
-      /**
-       * @brief Create a variable
-       */
-      ConstrainedVariableId createVariable(const char* typeName,
-                                                  const ConstraintEngineId& constraintEngine, 
-                                                  bool canBeSpecified = true,
-                                                  const char* name = NO_VAR_NAME,
-                                                  const EntityId& parent = EntityId::noId(),
-                                                  int index = ConstrainedVariable::NO_INDEX);
-
-      /**
-       * @brief Create a variable
-       */
-      ConstrainedVariableId createVariable(const char* typeName,
-                                                  const ConstraintEngineId& constraintEngine, 
-                                                  const AbstractDomain& baseDomain,
-                                                  bool canBeSpecified = true,
-                                                  const char* name = NO_VAR_NAME,
-                                                  const EntityId& parent = EntityId::noId(),
-                                                  int index = ConstrainedVariable::NO_INDEX);
-
-      /**
-       * @brief Create a value for a string
-       */
-      double createValue(const char* typeName, 
-                         std::string value);
-
       /**
        * @brief Return the base domain
        */
       const AbstractDomain & baseDomain(const char* typeName);
 
+      void purgeTypeFactories();
+
+      // Methods to Manage Constraint Factories
       void registerConstraintFactory(ConstraintFactory* factory);
       void registerConstraintFactory(ConstraintFactory* factory, const LabelStr& name);
 
@@ -90,6 +59,12 @@ namespace EUROPA {
 
       void purgeConstraintFactories();
       
+      /**
+       * @brief Delete all factory instances stored. 
+       */
+      void purgeAll();
+      
+
     protected:
       CESchemaId m_id;
       std::map<double, TypeFactoryId> m_typeFactories;   

@@ -271,7 +271,7 @@ namespace EUROPA {
         testDomains.pop_front();
 
 	LabelStr typeName = domPtr->getTypeName();
-	cVarId = engine->getCESchema()->createVariable(typeName.c_str(), engine, *domPtr);
+	cVarId = engine->createVariable(typeName.c_str(), *domPtr);
 
         delete domPtr;
         scope.push_back(cVarId);

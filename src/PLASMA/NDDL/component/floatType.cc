@@ -10,7 +10,7 @@ namespace EUROPA {
   floatTypeFactory::floatTypeFactory()
     : IntervalTypeFactory(getDefaultTypeName().c_str(), getDefaultTypeName().c_str()){}
 
-  double floatTypeFactory::createValue(std::string value) const
+  double floatTypeFactory::createValue(const std::string& value) const
   {
     if (value == "-inf") {
       return MINUS_INFINITY;

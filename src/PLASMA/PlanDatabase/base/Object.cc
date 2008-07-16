@@ -690,9 +690,8 @@ namespace EUROPA {
       std::string fullVariableName(m_name.toString() + "." + name);
       
       ConstrainedVariableId id = 
-          m_planDatabase->getConstraintEngine()->getCESchema()->createVariable(
+          m_planDatabase->getConstraintEngine()->createVariable(
 	                baseDomain.getTypeName().c_str(),
-				    m_planDatabase->getConstraintEngine(), 
 				    baseDomain,
 				    true,
 				    fullVariableName.c_str(),

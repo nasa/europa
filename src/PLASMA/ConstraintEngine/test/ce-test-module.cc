@@ -100,7 +100,7 @@ CETestEngine::CETestEngine()
     createModules();
     doStart();
     ConstraintEngine* ce = (ConstraintEngine*)getComponent("ConstraintEngine");    
-    ce->getCESchema()->createValue("INT_INTERVAL", std::string("5"));    
+    ce->createValue("INT_INTERVAL", std::string("5"));    
     ce->getCESchema()->registerFactory(
        (new EnumeratedTypeFactory("Locations", "Locations", LocationsBaseDomain()))->getId()
     );
@@ -159,18 +159,18 @@ public:
 
   static bool testValueCreation(){
       CETestEngine engine;
-      CESchema* tfm = (CESchema*)engine.getComponent("CESchema");
+      ConstraintEngine* ce = (ConstraintEngine*)engine.getComponent("ConstraintEngine");
       
     IntervalIntDomain d0(5);
-    int v0 = (int) tfm->createValue(d0.getTypeName().c_str(), std::string("5"));
+    int v0 = (int) ce->createValue(d0.getTypeName().c_str(), "5");
     assertTrue(d0.compareEqual(d0.getSingletonValue(), v0));
 
     IntervalDomain d1(2.3);
-    double v1 = (double) tfm->createValue(d1.getTypeName().c_str(), std::string("2.3"));
+    double v1 = (double) ce->createValue(d1.getTypeName().c_str(), "2.3");
     assertTrue(d1.compareEqual(d1.getSingletonValue(), v1));
 
     BoolDomain d2(true);
-    bool v2 = (bool) tfm->createValue(d2.getTypeName().c_str(), std::string("true"));
+    bool v2 = (bool) ce->createValue(d2.getTypeName().c_str(), "true");
     assertTrue(d2.compareEqual(d2.getSingletonValue(), v2));
 
     return true;
@@ -236,32 +236,30 @@ public:
 
   static bool testVariableCreation(){
       CETestEngine engine;
-      CESchema* tfm = (CESchema*)engine.getComponent("CESchema");
 
       ConstraintEngineId ce = ((ConstraintEngine*)engine.getComponent("ConstraintEngine"))->getId();
-      ConstrainedVariableId cv0 = tfm->createVariable(IntervalIntDomain().getTypeName().c_str(), ce);
+      ConstrainedVariableId cv0 = ce->createVariable(IntervalIntDomain().getTypeName().c_str());
       assertTrue(cv0->baseDomain().getTypeName() == IntervalIntDomain().getTypeName());
-      ConstrainedVariableId cv1 = tfm->createVariable(IntervalDomain().getTypeName().c_str(), ce);
+      ConstrainedVariableId cv1 = ce->createVariable(IntervalDomain().getTypeName().c_str());
       assertTrue(cv1->baseDomain().getTypeName() == IntervalDomain().getTypeName());
-      ConstrainedVariableId cv2 = tfm->createVariable(BoolDomain().getTypeName().c_str(), ce);
+      ConstrainedVariableId cv2 = ce->createVariable(BoolDomain().getTypeName().c_str());
       assertTrue(cv2->baseDomain().getTypeName() == BoolDomain().getTypeName());
       return true;
   }
 
   static bool testVariableWithDomainCreation(){
       CETestEngine engine;
-      CESchema* tfm = (CESchema*)engine.getComponent("CESchema");
 
       IntervalIntDomain d0(5);
       IntervalDomain d1(2.3);
       BoolDomain d2(true);
 
       ConstraintEngineId ce = ((ConstraintEngine*)engine.getComponent("ConstraintEngine"))->getId();
-      ConstrainedVariableId cv0 = tfm->createVariable(d0.getTypeName().c_str(), ce, d0);
+      ConstrainedVariableId cv0 = ce->createVariable(d0.getTypeName().c_str(), d0);
       assertTrue(cv0->baseDomain() == d0);
-      ConstrainedVariableId cv1 = tfm->createVariable(d1.getTypeName().c_str(), ce, d1);
+      ConstrainedVariableId cv1 = ce->createVariable(d1.getTypeName().c_str(), d1);
       assertTrue(cv1->baseDomain() == d1);
-      ConstrainedVariableId cv2 = tfm->createVariable(d2.getTypeName().c_str(), ce, d2);
+      ConstrainedVariableId cv2 = ce->createVariable(d2.getTypeName().c_str(), d2);
       assertTrue(cv2->baseDomain() == d2);
       return true;
   }

@@ -316,7 +316,12 @@ namespace EUROPA {
      * @see enableTransactionLoggng
      */
     bool isTransactionLoggingEnabled() const;
-
+    
+    /**
+     * @brief Create a value for a string
+     */
+    double createValue(const char* typeName, const std::string& value);
+        
     // Temporarily exposing these to remove singletons, need to review DbClient concept in general
     const CESchemaId& getCESchema() const;
     const SchemaId& getSchema() const;

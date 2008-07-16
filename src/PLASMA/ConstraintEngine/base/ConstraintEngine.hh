@@ -296,13 +296,34 @@ namespace EUROPA {
     virtual PSVariable* getVariableByKey(PSEntityKey id);
     virtual PSVariable* getVariableByName(const std::string& name);
     
- 
+
+    /**
+     * @brief Create a variable
+     */
+    ConstrainedVariableId createVariable(const char* typeName,
+                                                bool canBeSpecified = true,
+                                                const char* name = NO_VAR_NAME,
+                                                const EntityId& parent = EntityId::noId(),
+                                                int index = ConstrainedVariable::NO_INDEX);
+
+    /**
+     * @brief Create a variable
+     */
+    ConstrainedVariableId createVariable(const char* typeName,
+                                                const AbstractDomain& baseDomain,
+                                                bool canBeSpecified = true,
+                                                const char* name = NO_VAR_NAME,
+                                                const EntityId& parent = EntityId::noId(),
+                                                int index = ConstrainedVariable::NO_INDEX);
+
+    
     ConstraintId createConstraint(const LabelStr& name, 
                      const std::vector<ConstrainedVariableId>& scope);
 
-    ConstraintId createConstraint(const LabelStr& name, 
-                     const ConstrainedVariableId& variable,
-                     const AbstractDomain& domain);
+    /**
+     * @brief Create a value for a string
+     */
+    double createValue(const char* typeName, const std::string& value);
     
   protected:
 

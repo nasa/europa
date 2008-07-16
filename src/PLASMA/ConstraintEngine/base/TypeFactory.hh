@@ -48,7 +48,7 @@ namespace EUROPA {
       /**
        * @brief Create a value for a string
        */
-      virtual double createValue(std::string value) const = 0;
+      virtual double createValue(const std::string& value) const = 0;
 
       /**
        * @brief Return the base domain

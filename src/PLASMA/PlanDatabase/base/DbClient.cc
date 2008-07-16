@@ -53,7 +53,7 @@ namespace EUROPA {
   ConstrainedVariableId
   DbClient::createVariable(const char* typeName, const AbstractDomain& baseDomain, const char* name, bool isTmpVar,bool canBeSpecified)
   {
-    ConstrainedVariableId variable = getCESchema()->createVariable(typeName, m_planDb->getConstraintEngine(), baseDomain, canBeSpecified, name);
+    ConstrainedVariableId variable = m_planDb->getConstraintEngine()->createVariable(typeName, baseDomain, canBeSpecified, name);
     if (m_planDb->getSchema()->isObjectType(typeName) && !variable->isClosed()) {
       m_planDb->makeObjectVariableFromType(typeName, variable);
     }
@@ -70,7 +70,7 @@ namespace EUROPA {
   ConstrainedVariableId
   DbClient::createVariable(const char* typeName, const char* name, bool isTmpVar)
   {
-    ConstrainedVariableId variable = getCESchema()->createVariable(typeName, m_planDb->getConstraintEngine(), true, name);
+    ConstrainedVariableId variable = m_planDb->getConstraintEngine()->createVariable(typeName, true, name);
     if (m_planDb->getSchema()->isObjectType(typeName)) {
       m_planDb->makeObjectVariableFromType(typeName, variable);
     }
@@ -425,4 +425,10 @@ namespace EUROPA {
   }
 
   bool DbClient::isTransactionLoggingEnabled() const { return m_transactionLoggingEnabled; }
+  
+  double DbClient::createValue(const char* typeName, const std::string& value) 
+  {
+    return m_planDb->getConstraintEngine()->createValue(typeName,value);
+  }
+  
 }

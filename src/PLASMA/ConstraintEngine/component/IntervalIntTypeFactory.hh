@@ -36,7 +36,7 @@ namespace EUROPA {
     /**
      * @brief Create a value for a string
      */
-    virtual double createValue(std::string value) const;
+    virtual double createValue(const std::string& value) const;
 
   private:
     const IntervalIntDomain m_baseDomain;

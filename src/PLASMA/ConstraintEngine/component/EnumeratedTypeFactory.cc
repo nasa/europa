@@ -35,7 +35,7 @@ namespace EUROPA {
     return(m_baseDomain);
   }
 
-  double EnumeratedTypeFactory::createValue(std::string value) const {
+  double EnumeratedTypeFactory::createValue(const std::string& value) const {
     if (m_baseDomain.isNumeric())
       return(atof(value.c_str()));
     return(LabelStr(value));

@@ -992,6 +992,33 @@ namespace EUROPA
     return count;
   }
 
+  ConstrainedVariableId
+  ConstraintEngine::createVariable(const char* typeName,
+                              bool canBeSpecified,
+                              const char* name,
+                              const EntityId& parent,
+                              int index)
+  {
+    TypeFactoryId factory = getCESchema()->getFactory(typeName);
+    check_error(factory.isValid(), "no TypeFactory found for type '" + std::string(typeName) + "'");
+    return createVariable(typeName, factory->baseDomain(), canBeSpecified, name, parent, index);
+  }
+
+  ConstrainedVariableId
+  ConstraintEngine::createVariable(const char* typeName,
+                              const AbstractDomain& baseDomain,
+                              bool canBeSpecified,
+                              const char* name,
+                              const EntityId& parent,
+                              int index)
+  {
+    TypeFactoryId factory = getCESchema()->getFactory(typeName);
+    check_error(factory.isValid(), "no TypeFactory found for type '" + std::string(typeName) + "'");
+    ConstrainedVariableId variable = factory->createVariable(getId(), baseDomain, canBeSpecified, name, parent, index);
+    check_error(variable.isValid());
+    return variable;
+  }
+  
   ConstraintId ConstraintEngine::createConstraint(const LabelStr& name, 
                            const std::vector<ConstrainedVariableId>& scope) 
   {
@@ -1001,4 +1028,14 @@ namespace EUROPA
       
       return(constraint);
   }  
+  
+  
+  double ConstraintEngine::createValue(const char* typeName, const std::string& value)
+  {
+    TypeFactoryId factory = getCESchema()->getFactory(typeName);
+    check_error(factory.isValid(), "no TypeFactory found for type '" + std::string(typeName) + "'");
+    return factory->createValue(value);
+  }
+
+  
 }

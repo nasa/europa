@@ -10,7 +10,7 @@ namespace EUROPA {
   intTypeFactory::intTypeFactory()
     : IntervalIntTypeFactory(getDefaultTypeName().c_str(), getDefaultTypeName().c_str()){}
 
-  double intTypeFactory::createValue(std::string value) const
+  double intTypeFactory::createValue(const std::string& value) const
   {
     if (value == "-inf") {
       return MINUS_INFINITY;

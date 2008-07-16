@@ -34,7 +34,7 @@ namespace EUROPA {
     return m_baseDomain;
   }
 
-  double StringTypeFactory::createValue(std::string value) const
+  double StringTypeFactory::createValue(const std::string& value) const
   {
     return LabelStr(value);
   }

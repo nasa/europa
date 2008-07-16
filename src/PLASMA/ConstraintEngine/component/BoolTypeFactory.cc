@@ -38,7 +38,7 @@ namespace EUROPA {
     return m_baseDomain;
   }
 
-  double BoolTypeFactory::createValue(std::string value) const
+  double BoolTypeFactory::createValue(const std::string& value) const
   {
     if (value == "true") {
       return true;

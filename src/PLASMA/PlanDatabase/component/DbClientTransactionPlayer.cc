@@ -1382,7 +1382,7 @@ namespace EUROPA {
 
       AbstractDomain * domain = getCESchema()->baseDomain(type).copy();
       check_error(domain != 0, "unknown type, lack of memory, or other problem with domain in transaction XML");
-      double value = getCESchema()->createValue(type, name);
+      double value = m_client->createValue(type, name);
       if(domain->isOpen() && !domain->isMember(value))
 	domain->insert(value);
       domain->set(value);
@@ -1394,7 +1394,7 @@ namespace EUROPA {
       const char * type = element.Attribute("type");
       check_error(type != NULL);
       AbstractDomain * domain = getCESchema()->baseDomain(type).copy();
-      domain->set(getCESchema()->createValue(tag, value_st));
+      domain->set(m_client->createValue(tag, value_st));
       return(domain);
     }
 
@@ -1428,8 +1428,8 @@ namespace EUROPA {
       domain = dynamic_cast<IntervalDomain*>(getCESchema()->baseDomain(type_st).copy());
     check_error(domain != NULL,
 		"type '" + std::string(type_st) + "' should indicate an interval domain type");
-    double min = getCESchema()->createValue(type_st, min_st);
-    double max = getCESchema()->createValue(type_st, max_st);
+    double min = m_client->createValue(type_st, min_st);
+    double max = m_client->createValue(type_st, max_st);
     domain->intersect(min, max);
     debugMsg("DbClientTransactionPlayer:xmlAsIntervalDomain",
 	     "For " << element << ", created domain " << (*domain).toString());
@@ -1529,7 +1529,7 @@ namespace EUROPA {
       check_error(value_st != NULL);
       switch (type) {
        case BOOL: case INT: case FLOAT: case STRING: case SYMBOL:
-         values.push_back(getCESchema()->createValue(typeName.c_str(), value_st));
+         values.push_back(m_client->createValue(typeName.c_str(), value_st));
          break;
        case OBJECT:
          values.push_back(m_client->getObject(value_st));
@@ -1592,14 +1592,14 @@ namespace EUROPA {
       check_error(type_st != NULL, "missing type for value in transaction XML");
       const char * name_st = value.Attribute("name");
       check_error(name_st != NULL, "missing name for value in transaction XML");
-      return(getCESchema()->createValue(type_st, name_st));
+      return(m_client->createValue(type_st, name_st));
     }
     const char * value_st = value.Attribute("value");
     check_error(value_st != NULL, "missing value in transaction xml");
     if (strcmp(tag, "symbol") == 0) {
       const char * type_st = value.Attribute("type");
       check_error(type_st != NULL, "missing type for symbol '" + std::string(value_st) + "' in transaction xml");
-      return(getCESchema()->createValue(type_st, value_st));
+      return(m_client->createValue(type_st, value_st));
     }
     if (strcmp(tag, "object") == 0) {
       ObjectId object = m_client->getObject(value_st);
