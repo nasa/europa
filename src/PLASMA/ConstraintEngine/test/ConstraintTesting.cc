@@ -23,7 +23,7 @@
 #include "IntervalDomain.hh"
 #include "NumericDomain.hh"
 #include "SymbolDomain.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "Variable.hh"
 #include "Constraint.hh"
 #include "ConstrainedVariable.hh"
@@ -246,7 +246,7 @@ namespace EUROPA {
 
     for ( ; !testCases.empty(); testCases.pop_front()) {
       // Warn about unregistered constraint names and otherwise ignore tests using them.
-      if (!ConstraintLibrary::isRegistered(LabelStr(testCases.front().m_constraintName), false)) {
+      if (!engine->getCESchema()->isConstraintFactoryRegistered(LabelStr(testCases.front().m_constraintName), false)) {
         if (warned.find(testCases.front().m_constraintName) == warned.end()) {
           std::cout << "\n    Warning: " 
                     << testCases.front().m_fileName << ':' << testCases.front().m_case
@@ -288,7 +288,7 @@ namespace EUROPA {
       for(std::vector<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it)
 	scopeStr << " " << (*it)->toString();
 
-      ConstraintId constraint = ConstraintLibrary::createConstraint(LabelStr(testCases.front().m_constraintName), engine, scope);
+      ConstraintId constraint = engine->createConstraint(LabelStr(testCases.front().m_constraintName), scope);
      
       debugMsg("ConstraintTesting:executeTestCases", "Created constraint " << constraint->toString() <<
 	       " with scope " << scopeStr.str() << " for test " 

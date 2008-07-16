@@ -1157,15 +1157,13 @@ public class ModelAccessor {
           continue;
         }
         String propagator =  NddlUtil.expandEnvVariables(constraint.getAttribute("propagator", "Default"));
-        SchemaWriter.addConstraintRegistration("REGISTER_CONSTRAINT(" +cpp +", \"" + name + "\", \"" + propagator +"\")");
+        SchemaWriter.addConstraintRegistration("REGISTER_CONSTRAINT(id->getCESchema()," +cpp +", \"" + name + "\", \"" + propagator +"\")");
       }
     }
     catch(FileNotFoundException e) {
       assert(DebugMsg.debugMsg("ModelAccessor:init", "File not found: "+e.getMessage()));
       s_customClassesByNddlName.put("Object", "Object");
       s_customClassesByNddlName.put("Timeline", "Timeline");
-//       s_customClassesByNddlName.put("Resource", "NddlResource");
-//       s_customClassesByNddlName.put("Resource.change", "NddlResource::change");
     }
     catch(Exception e) {
       e.printStackTrace();

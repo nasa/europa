@@ -5,7 +5,7 @@
 #include "PlanDatabase.hh"
 #include "IntervalDomain.hh"
 #include "Constraint.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include <vector>
 
 
@@ -75,8 +75,7 @@ namespace EUROPA {
 
     // add the resource constraint which will act as a messenger to changes and inform the ResourcePropagator.
     ConstraintId constraint = 
-      ConstraintLibrary::createConstraint("ResourceTransactionRelation", 
-					  m_planDatabase->getConstraintEngine(), 
+        m_planDatabase->getConstraintEngine()->createConstraint("ResourceTransactionRelation", 
 					  makeScope(getObject(), getTime(), m_usage));
     m_standardConstraints.insert(constraint);
    

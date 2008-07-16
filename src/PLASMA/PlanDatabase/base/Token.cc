@@ -9,7 +9,7 @@
 #include "Schema.hh"
 #include "IntervalIntDomain.hh"
 #include "Constraint.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "Utils.hh"
 #include "Debug.hh"
 #include <map>

@@ -1,7 +1,7 @@
 #include "ModulePlanDatabase.hh"
 #include "Schema.hh"
 #include "PlanDatabase.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "CommonAncestorConstraint.hh"
 #include "HasAncestorConstraint.hh"
 #include "ObjectTokenRelation.hh"
@@ -57,11 +57,11 @@ namespace EUROPA {
   void ModulePlanDatabase::initialize(EngineId engine)
   {
       ConstraintEngine* ce = (ConstraintEngine*)engine->getComponent("ConstraintEngine");
-      REGISTER_SYSTEM_CONSTRAINT(CommonAncestorConstraint, "commonAncestor", "Default");
-      REGISTER_SYSTEM_CONSTRAINT(HasAncestorConstraint, "hasAncestor", "Default");
-      REGISTER_SYSTEM_CONSTRAINT(ObjectTokenRelation, "ObjectTokenRelation", "Default");
-
       CESchema* ceSchema = (CESchema*)engine->getComponent("CESchema");      
+      REGISTER_SYSTEM_CONSTRAINT(ceSchema,CommonAncestorConstraint, "commonAncestor", "Default");
+      REGISTER_SYSTEM_CONSTRAINT(ceSchema,HasAncestorConstraint, "hasAncestor", "Default");
+      REGISTER_SYSTEM_CONSTRAINT(ceSchema,ObjectTokenRelation, "ObjectTokenRelation", "Default");
+
       Schema* schema = new Schema("EngineSchema",ceSchema->getId()); // TODO: use engine name
       engine->addComponent("Schema",schema);
 

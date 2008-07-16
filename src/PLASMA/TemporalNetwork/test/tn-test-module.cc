@@ -265,8 +265,7 @@ private:
     temp.push_back(t2.start());
     
 
-    ConstraintId beforeConstraint = ConstraintLibrary::createConstraint(LabelStr("precedes"),
-                                                                        db.getConstraintEngine(),
+    ConstraintId beforeConstraint = db.getConstraintEngine()->createConstraint(LabelStr("precedes"),                                                                        
                                                                         temp);
     assertTrue(!beforeConstraint.isNoId());
 
@@ -331,8 +330,7 @@ private:
     temp.push_back(first.end());
     temp.push_back(second.start());
 
-    ConstraintId beforeConstraint = ConstraintLibrary::createConstraint(LabelStr("precedes"),
-									db.getConstraintEngine(),
+    ConstraintId beforeConstraint = db.getConstraintEngine()->createConstraint(LabelStr("precedes"),
 									temp);
     assertTrue(beforeConstraint.isValid());
 
@@ -468,13 +466,11 @@ private:
     t1.end()->reset();
 
 
-    ConstraintId c0 = ConstraintLibrary::createConstraint(LabelStr("precedes"),
-							  ce.getId(), 
+    ConstraintId c0 = ce.getId()->createConstraint(LabelStr("precedes"),
 							  makeScope(t0.end(), t1.start()));
 
 
-    ConstraintId c1 = ConstraintLibrary::createConstraint(LabelStr("precedes"),
-							  ce.getId(),
+    ConstraintId c1 = ce.getId()->createConstraint(LabelStr("precedes"),
 							  makeScope(t1.end(), t2.start()));
 
     assertTrue(ce.propagate());
@@ -723,7 +719,7 @@ private:
     std::vector<ConstrainedVariableId> scope;
     scope.push_back(slave->end());
     scope.push_back(t1.parameters()[0]);
-    ConstraintLibrary::createConstraint(LabelStr("leq"), ce.getId(), scope);
+    ce.getId()->createConstraint(LabelStr("leq"), scope);
 
     assertTrue (!ce.propagate());
 
@@ -795,7 +791,7 @@ private:
     temp.push_back(v2);
     temp.push_back(v3);
     ConstraintId duration1 = 
-      ConstraintLibrary::createConstraint(LabelStr("temporalDistance"), ce.getId(), temp);
+        ce.getId()->createConstraint(LabelStr("temporalDistance"), temp);
 
     assertTrue(!duration1.isNoId());
 
@@ -804,7 +800,7 @@ private:
     temp.push_back(v5);
     temp.push_back(v6);
     ConstraintId duration2 = 
-      ConstraintLibrary::createConstraint(LabelStr("temporalDistance"), ce.getId(), temp);
+        ce.getId()->createConstraint(LabelStr("temporalDistance"), temp);
 
     assertTrue(!duration2.isNoId());
 
@@ -812,7 +808,7 @@ private:
     temp.push_back(v3);
     temp.push_back(v4);
     ConstraintId beforeConstraint = 
-      ConstraintLibrary::createConstraint(LabelStr("precedes"), ce.getId(), temp);
+        ce.getId()->createConstraint(LabelStr("precedes"), temp);
 
     assertTrue(!beforeConstraint.isNoId());
 
@@ -858,8 +854,8 @@ private:
     temp.push_back(v2);
     temp.push_back(v3);
     ConstraintId constraint = 
-      ConstraintLibrary::createConstraint(LabelStr("temporalDistance"),
-                                          ce.getId(), temp);
+        ce.getId()->createConstraint(LabelStr("temporalDistance"),
+                                          temp);
     bool consistent = ce.propagate();
     std::vector<ConstrainedVariableId> fromvars;
     std::vector<ConstrainedVariableId> tovars;

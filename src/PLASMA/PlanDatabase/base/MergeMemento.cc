@@ -1,7 +1,7 @@
 #include "MergeMemento.hh"
 #include "Token.hh"
 #include "PlanDatabase.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "TokenVariable.hh"
 #include "Utils.hh"
 #include <map>
@@ -188,8 +188,8 @@ namespace EUROPA{
     // If it is not a standard constraint, then we need to create a surrogate as the target active token
     // may not have it already.
     if(!m_inactiveToken->isStandardConstraint(constraint)){
-      newConstraint = ConstraintLibrary::createConstraint(constraint->getName(),
-							  m_activeToken->getPlanDatabase()->getConstraintEngine(),
+      newConstraint = m_activeToken->getPlanDatabase()->getConstraintEngine()->createConstraint(
+                              constraint->getName(),
 							  newScope);
 
       // Now set the source on the new constraint to give opportunity to pass data

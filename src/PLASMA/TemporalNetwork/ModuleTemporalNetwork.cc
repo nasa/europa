@@ -1,6 +1,6 @@
 #include "ModuleTemporalNetwork.hh"
 #include "ConstraintEngine.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "Constraints.hh"
 #include "PlanDatabase.hh"
 #include "TemporalPropagator.hh"
@@ -27,12 +27,12 @@ namespace EUROPA {
   
   void ModuleTemporalNetwork::initialize(EngineId engine)
   {
-      REGISTER_SYSTEM_CONSTRAINT(EqualConstraint, "concurrent", "Temporal");
-      REGISTER_SYSTEM_CONSTRAINT(LessThanEqualConstraint, "precedes", "Temporal"); 
-      //REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporaldistance", "Temporal");
-      REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporalDistance", "Temporal");
+      ConstraintEngine* ce = (ConstraintEngine*)engine->getComponent("ConstraintEngine");
+      CESchema* ces = ce->getCESchema();
 
-	  ConstraintEngine* ce = (ConstraintEngine*)engine->getComponent("ConstraintEngine");
+      REGISTER_SYSTEM_CONSTRAINT(ces,EqualConstraint, "concurrent", "Temporal");
+      REGISTER_SYSTEM_CONSTRAINT(ces,LessThanEqualConstraint, "precedes", "Temporal"); 
+      REGISTER_SYSTEM_CONSTRAINT(ces,AddEqualConstraint, "temporalDistance", "Temporal");
 
 	  new TemporalPropagator(LabelStr("Temporal"), ce->getId());
 	  PropagatorId temporalPropagator = ce->getPropagatorByName(LabelStr("Temporal"));

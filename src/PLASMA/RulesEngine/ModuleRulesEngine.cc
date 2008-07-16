@@ -1,5 +1,5 @@
 #include "ModuleRulesEngine.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "PlanDatabase.hh"
 #include "ProxyVariableRelation.hh"
 #include "Rule.hh"
@@ -31,8 +31,9 @@ namespace EUROPA {
       RulesEngine* re = new RulesEngine(pdb->getId());      
       engine->addComponent("RulesEngine",re);        
       
-      REGISTER_SYSTEM_CONSTRAINT(ProxyVariableRelation, "proxyRelation", "Default");
-      REGISTER_SYSTEM_CONSTRAINT(RuleVariableListener, RuleVariableListener::CONSTRAINT_NAME(),RuleVariableListener::PROPAGATOR_NAME());      
+      CESchema* ces = (CESchema*)engine->getComponent("CESchema");
+      REGISTER_SYSTEM_CONSTRAINT(ces,ProxyVariableRelation, "proxyRelation", "Default");
+      REGISTER_SYSTEM_CONSTRAINT(ces,RuleVariableListener, RuleVariableListener::CONSTRAINT_NAME(),RuleVariableListener::PROPAGATOR_NAME());      
   }
   
   void ModuleRulesEngine::uninitialize(EngineId engine)

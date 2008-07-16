@@ -1,6 +1,6 @@
 #include "Constraints.hh"
 #include "ConstraintEngine.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "ConstrainedVariable.hh"
 #include "IntervalIntDomain.hh"
 #include "BoolDomain.hh"
@@ -1660,7 +1660,7 @@ namespace EUROPA {
         otherScope.push_back(m_variables[i]);
     }
     check_error(m_variables.size() == otherScope.size());
-    m_otherConstraint = ConstraintLibrary::createConstraint(otherName, constraintEngine, otherScope);
+    m_otherConstraint = constraintEngine->createConstraint(otherName, otherScope);
   }
 
   SwapTwoVarsConstraint::SwapTwoVarsConstraint(const LabelStr& name,
@@ -1681,7 +1681,7 @@ namespace EUROPA {
     std::vector<ConstrainedVariableId> otherScope(m_variables);
     otherScope[firstIndex] = m_variables[secondIndex];
     otherScope[secondIndex] = m_variables[firstIndex];
-    m_otherConstraint = ConstraintLibrary::createConstraint(otherName, constraintEngine, otherScope);
+    m_otherConstraint = constraintEngine->createConstraint(otherName, otherScope);
   }
 
 

@@ -1,7 +1,7 @@
 #include "ModuleSolvers.hh"
 #include "SolverDefs.hh"
 #include "ConstrainedVariable.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "ComponentFactory.hh"
 #include "Filters.hh"
 #include "FlawFilter.hh"
@@ -50,7 +50,7 @@ namespace EUROPA {
       PSSolverManager* sm = new PSSolverManagerImpl(ce->getId(),pdb->getId(),re->getId());
       engine->addComponent("PSSolverManager",sm);
       
-      REGISTER_SYSTEM_CONSTRAINT(SOLVERS::FlawHandler::VariableListener,SOLVERS::FlawHandler::VariableListener::CONSTRAINT_NAME(),SOLVERS::FlawHandler::VariableListener::PROPAGATOR_NAME());
+      REGISTER_SYSTEM_CONSTRAINT(ce->getCESchema(),SOLVERS::FlawHandler::VariableListener,SOLVERS::FlawHandler::VariableListener::CONSTRAINT_NAME(),SOLVERS::FlawHandler::VariableListener::PROPAGATOR_NAME());
       
       REGISTER_COMPONENT_FACTORY(SOLVERS::FlawFilter, FlawFilter); 
       

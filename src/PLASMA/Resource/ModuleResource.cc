@@ -1,6 +1,6 @@
 #include "ModuleResource.hh"
 #include "ResourceConstraint.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "SAVH_FlowProfile.hh"
 #include "SAVH_IncrementalFlowProfile.hh"
 #include "SAVH_TimetableProfile.hh"
@@ -46,7 +46,7 @@ namespace EUROPA {
       Schema* schema = (Schema*)(engine->getComponent("Schema"));
       PlanDatabase* pdb = (PlanDatabase*)(engine->getComponent("PlanDatabase"));
 
-      REGISTER_SYSTEM_CONSTRAINT(ResourceConstraint, "ResourceTransactionRelation", "Resource");
+      REGISTER_SYSTEM_CONSTRAINT(ce->getCESchema(),ResourceConstraint, "ResourceTransactionRelation", "Resource");
 	  new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), ce->getId());
 	  new ResourcePropagator(LabelStr("Resource"), ce->getId(), pdb->getId());	  	  
 	  

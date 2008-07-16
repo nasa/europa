@@ -992,4 +992,13 @@ namespace EUROPA
     return count;
   }
 
+  ConstraintId ConstraintEngine::createConstraint(const LabelStr& name, 
+                           const std::vector<ConstrainedVariableId>& scope) 
+  {
+      ConstraintFactoryId factory = getCESchema()->getConstraintFactory(name);     
+      check_error(factory.isValid());
+      ConstraintId constraint = factory->createConstraint(getId(), scope);
+      
+      return(constraint);
+  }  
 }

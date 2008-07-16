@@ -8,7 +8,7 @@
 #include "TokenVariable.hh"
 #include "DbClientListener.hh"
 #include "ConstraintEngine.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "TypeFactory.hh"
 #include "Debug.hh"
 
@@ -221,8 +221,7 @@ namespace EUROPA {
 				 const std::vector<ConstrainedVariableId>& scope){
 
     // Use the constraint library factories to create the constraint
-    ConstraintId constraint = ConstraintLibrary::createConstraint(name, 
-								  m_planDb->getConstraintEngine(), 
+    ConstraintId constraint = m_planDb->getConstraintEngine()->createConstraint(name, 
 								  scope);
     debugMsg("DbClient:createConstraint", constraint->toString());
     publish(notifyConstraintCreated(constraint));

@@ -2,7 +2,7 @@
 #include "PlanDatabase.hh"
 #include "StackMemento.hh"
 #include "Constraint.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include <map>
 #include <list>
 #include <set>
@@ -26,9 +26,9 @@ namespace EUROPA{
       newScope.clear();
       newScope.push_back(stackVariables[i]);
       newScope.push_back(activeVariables[i]);
-      ConstraintId newConstraint = ConstraintLibrary::createConstraint(LabelStr("eq"),
-							  m_activeToken->getPlanDatabase()->getConstraintEngine(),
-							  newScope);
+      ConstraintId newConstraint = m_activeToken->getPlanDatabase()->getConstraintEngine()->createConstraint(
+                                      LabelStr("eq"),
+          							  newScope);
       check_error(newConstraint.isValid());
       m_stackConstraints.push_back(newConstraint);
     }

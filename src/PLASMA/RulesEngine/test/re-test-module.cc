@@ -216,10 +216,11 @@ RETestEngine::RETestEngine()
     assert(objectPtr != 0); 
     Object& object = *objectPtr; 
     assert(objectPtr->getId() == object.getId()); 
-    REGISTER_SYSTEM_CONSTRAINT(EqualConstraint, "concurrent", "Default");
-    REGISTER_SYSTEM_CONSTRAINT(LessThanEqualConstraint, "precedes", "Default"); 
-    REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporaldistance", "Default");
-    REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporalDistance", "Default");      
+    CESchema* ces = (CESchema*)getComponent("CESchema");
+    REGISTER_SYSTEM_CONSTRAINT(ces,EqualConstraint, "concurrent", "Default");
+    REGISTER_SYSTEM_CONSTRAINT(ces,LessThanEqualConstraint, "precedes", "Default"); 
+    REGISTER_SYSTEM_CONSTRAINT(ces,AddEqualConstraint, "temporaldistance", "Default");
+    REGISTER_SYSTEM_CONSTRAINT(ces,AddEqualConstraint, "temporalDistance", "Default");      
 }
 
 RETestEngine::~RETestEngine()

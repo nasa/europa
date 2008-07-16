@@ -16,7 +16,7 @@
 #include "HasAncestorConstraint.hh"
 #include "NddlDefs.hh"
 #include "ObjectFactory.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "Constraints.hh"
 #include "Rule.hh"
 #include "BoolTypeFactory.hh"

@@ -2,7 +2,7 @@
 #include "TokenVariable.hh"
 #include "PlanDatabase.hh"
 #include "IntervalIntDomain.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 
 namespace EUROPA{
 

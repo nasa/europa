@@ -103,9 +103,7 @@ getPlanDatabase()->makeObjectVariableFromType(#type, name, !guarded && leaveOpen
  */
 #define token_constraint(name, vars)\
 {\
-  ConstraintId c0 = ConstraintLibrary::createConstraint(LabelStr(#name),\
-							m_planDatabase->getConstraintEngine(),\
-							vars);\
+  ConstraintId c0 = m_planDatabase->getConstraintEngine()->createConstraint(LabelStr(#name),vars);\
   m_standardConstraints.insert(c0);\
 }
 

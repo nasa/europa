@@ -10,7 +10,6 @@ ModuleBase ConstraintEngine
 	Constraint.cc
 	ConstraintEngine.cc
 	ConstraintEngineListener.cc
-	ConstraintLibrary.cc
 	Propagator.cc
 	TypeFactory.cc
 	VariableChangeListener.cc

@@ -11,7 +11,7 @@
 #include "Debug.hh"
 #include "Error.hh"
 
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "DbClient.hh"
 #include "EnumeratedDomain.hh"
 #include "EnumeratedTypeFactory.hh"
@@ -1470,9 +1470,8 @@ namespace EUROPA {
   // TODO: make code generator use this instead
 #define token_constraint1(name, vars)					\
   {									\
-    ConstraintId c0 = ConstraintLibrary::createConstraint(		\
+    ConstraintId c0 = m_planDatabase->getConstraintEngine()->createConstraint(		\
 							  name,		\
-							  m_planDatabase->getConstraintEngine(), \
 							  vars);	\
     m_standardConstraints.insert(c0);					\
   }

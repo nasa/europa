@@ -13,7 +13,7 @@
 #include "DbClientTransactionLog.hh"
 
 // Support for registered constraints
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "Constraints.hh"
 #include "EqualityConstraintPropagator.hh"
 #include "CommonAncestorConstraint.hh"
@@ -33,7 +33,7 @@
 
 using namespace EUROPA;
 
-void initialize() 
+void initialize(CESchema* ces) 
 {
   /*
    *  TODO: constraint registration below needs to be removed, ModuleConstraintLibrary::initialize takes care of this
@@ -42,23 +42,23 @@ void initialize()
    */
      
   // Procedural Constraints used with Default Propagation
-  REGISTER_CONSTRAINT(EqualConstraint, "eq", "Default");
-  REGISTER_CONSTRAINT(NotEqualConstraint, "neq", "Default");
-  REGISTER_CONSTRAINT(LessThanEqualConstraint, "leq", "Default");
-  REGISTER_CONSTRAINT(LessThanConstraint, "lessThan", "Default");
-  REGISTER_CONSTRAINT(AddEqualConstraint, "addEq", "Default");
-  REGISTER_CONSTRAINT(NegateConstraint, "neg", "Default");
-  REGISTER_CONSTRAINT(MultEqualConstraint, "mulEq", "Default");
-  REGISTER_CONSTRAINT(AddMultEqualConstraint, "addMulEq", "Default");
-  REGISTER_CONSTRAINT(AddMultEqualConstraint, "addmuleq", "Default");
-  REGISTER_CONSTRAINT(SubsetOfConstraint, "subsetOf", "Default");
-  REGISTER_CONSTRAINT(SubsetOfConstraint, "Singleton", "Default");
-  REGISTER_CONSTRAINT(LockConstraint, "Lock", "Default");
-  REGISTER_CONSTRAINT(CommonAncestorConstraint, "commonAncestor", "Default");
-  REGISTER_CONSTRAINT(HasAncestorConstraint, "hasAncestor", "Default");
-  REGISTER_CONSTRAINT(TestEQ, "testEQ", "Default");
-  REGISTER_CONSTRAINT(TestLEQ, "testLEQ", "Default");
-  REGISTER_CONSTRAINT(EqualSumConstraint, "sum", "Default");
+  REGISTER_CONSTRAINT(ces,EqualConstraint, "eq", "Default");
+  REGISTER_CONSTRAINT(ces,NotEqualConstraint, "neq", "Default");
+  REGISTER_CONSTRAINT(ces,LessThanEqualConstraint, "leq", "Default");
+  REGISTER_CONSTRAINT(ces,LessThanConstraint, "lessThan", "Default");
+  REGISTER_CONSTRAINT(ces,AddEqualConstraint, "addEq", "Default");
+  REGISTER_CONSTRAINT(ces,NegateConstraint, "neg", "Default");
+  REGISTER_CONSTRAINT(ces,MultEqualConstraint, "mulEq", "Default");
+  REGISTER_CONSTRAINT(ces,AddMultEqualConstraint, "addMulEq", "Default");
+  REGISTER_CONSTRAINT(ces,AddMultEqualConstraint, "addmuleq", "Default");
+  REGISTER_CONSTRAINT(ces,SubsetOfConstraint, "subsetOf", "Default");
+  REGISTER_CONSTRAINT(ces,SubsetOfConstraint, "Singleton", "Default");
+  REGISTER_CONSTRAINT(ces,LockConstraint, "Lock", "Default");
+  REGISTER_CONSTRAINT(ces,CommonAncestorConstraint, "commonAncestor", "Default");
+  REGISTER_CONSTRAINT(ces,HasAncestorConstraint, "hasAncestor", "Default");
+  REGISTER_CONSTRAINT(ces,TestEQ, "testEQ", "Default");
+  REGISTER_CONSTRAINT(ces,TestLEQ, "testLEQ", "Default");
+  REGISTER_CONSTRAINT(ces,EqualSumConstraint, "sum", "Default");
 }
 
 class NddlTestEngine : public EngineBase  
@@ -75,7 +75,7 @@ NddlTestEngine::NddlTestEngine()
 {
     createModules();
     doStart();
-    initialize();
+    initialize((CESchema*)getComponent("CESchema"));
 }
 
 NddlTestEngine::~NddlTestEngine() 

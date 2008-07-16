@@ -1,5 +1,5 @@
-#ifndef _H_ConstraintLibrary
-#define _H_ConstraintLibrary
+#ifndef _H_ConstraintFactory
+#define _H_ConstraintFactory
 
 #include "ConstraintEngineDefs.hh"
 #include "AbstractDomain.hh"
@@ -11,57 +11,13 @@
 #include <map>
 
 /**
- * @file ConstraintLibrary.hh
+ * @file ConstraintFactory.hh
  */
 
 namespace EUROPA {
 
   class ConstraintFactory;
   typedef Id<ConstraintFactory> ConstraintFactoryId;
-
-  class ConstraintLibrary{
-  public:
-    static ConstraintId createConstraint(const LabelStr& name, 
-					 const ConstraintEngineId constraintEngine, 
-					 const std::vector<ConstrainedVariableId>& scope);
-
-    static ConstraintId createConstraint(const LabelStr& name, 
-					 const ConstraintEngineId constraintEngine, 
-					 const ConstrainedVariableId& variable,
-					 const AbstractDomain& domain);
-
-    static void registerFactory(ConstraintFactory* factory);
-
-    ~ConstraintLibrary();
-
-    /**
-     * @brief Delete all factory user defined instances stored. Should only be used to support testing, since
-     * factories should remain for all instances of the constraint engine in the same process.
-     */
-    static void purgeAll();
-
-    /**
-     * @brief Validation function.
-     */
-    static bool isRegistered(const LabelStr& name, const bool& warn = false);
-
-  private:
-    static ConstraintLibrary& getInstance();
-
-    const void registerFactory(ConstraintFactory* factory, const LabelStr& name);
-
-    const ConstraintFactoryId& getFactory(const LabelStr& name);
-
-    /**
-     * @brief Validation function. 
-     */
-    bool isNotRegistered(const LabelStr& name);
-
-    /**
-     * @brief Mapping from constraint name to constraint factory.
-     */
-    std::map<double, ConstraintFactoryId > m_constraintsByName;
-  };
 
   class ConstraintFactory {
   public:
@@ -176,8 +132,8 @@ namespace EUROPA {
    * @param ConstraintName The constraint's name as used in a model, for example.
    * @param PropagatorName The constraint's propagator's name.
    */
-#define REGISTER_SYSTEM_CONSTRAINT(ConstraintType, ConstraintName, PropagatorName) \
-  (ConstraintLibrary::registerFactory(new ConcreteConstraintFactory<ConstraintType>(LabelStr(ConstraintName), LabelStr(PropagatorName), true)))
+#define REGISTER_SYSTEM_CONSTRAINT(ceSchema, ConstraintType, ConstraintName, PropagatorName) \
+  (ceSchema->registerConstraintFactory(new ConcreteConstraintFactory<ConstraintType>(LabelStr(ConstraintName), LabelStr(PropagatorName), true)))
 
   /**
    * @def REGISTER_CONSTRAINT
@@ -187,8 +143,8 @@ namespace EUROPA {
    * @param ConstraintName The constraint's name as used in NDDL models.
    * @param PropagatorName The constraint's propagator's name.
    */
-#define REGISTER_CONSTRAINT(ConstraintType, ConstraintName, PropagatorName) \
-  (ConstraintLibrary::registerFactory(new ConcreteConstraintFactory<ConstraintType>(LabelStr(ConstraintName), LabelStr(PropagatorName))))
+#define REGISTER_CONSTRAINT(ceSchema,ConstraintType, ConstraintName, PropagatorName) \
+  (ceSchema->registerConstraintFactory(new ConcreteConstraintFactory<ConstraintType>(LabelStr(ConstraintName), LabelStr(PropagatorName))))
 
   /**
    * @def REGISTER_ROTATED_CONSTRAINT
@@ -203,8 +159,8 @@ namespace EUROPA {
    * to the start of the scope.  E.g., if 1, move the last variable to the front;
    * if -1, move the first variable to the end.
    */
-#define REGISTER_ROTATED_CONSTRAINT(ConstraintName, PropagatorName, RotateName, RotateCount) \
-  (ConstraintLibrary::registerFactory(new RotatedNaryConstraintFactory<RotateScopeRightConstraint>(LabelStr(ConstraintName), LabelStr(PropagatorName),\
+#define REGISTER_ROTATED_CONSTRAINT(ceSchema,ConstraintName, PropagatorName, RotateName, RotateCount) \
+  (ceSchema->registerConstraintFactory(new RotatedNaryConstraintFactory<RotateScopeRightConstraint>(LabelStr(ConstraintName), LabelStr(PropagatorName),\
                                                                                                    LabelStr(RotateName), (RotateCount))))
 
   /**
@@ -222,8 +178,8 @@ namespace EUROPA {
    * @note An index of -1 indicates the last variable in the scope, -2 the one
    * before the last variable, etc.
    */
-#define REGISTER_SWAP_TWO_VARS_CONSTRAINT(ConstraintName, PropagatorName, RotateName, FirstVar, SecondVar) \
-  (ConstraintLibrary::registerFactory(new SwapTwoVarsNaryConstraintFactory<SwapTwoVarsConstraint>(LabelStr(ConstraintName), LabelStr(PropagatorName), \
+#define REGISTER_SWAP_TWO_VARS_CONSTRAINT(ceSchema,ConstraintName, PropagatorName, RotateName, FirstVar, SecondVar) \
+  (ceSchema->registerConstraintFactory(new SwapTwoVarsNaryConstraintFactory<SwapTwoVarsConstraint>(LabelStr(ConstraintName), LabelStr(PropagatorName), \
                                                                                                   LabelStr(RotateName), (FirstVar), (SecondVar))))
 
 }

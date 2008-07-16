@@ -4,7 +4,7 @@
 #include "Token.hh"
 #include "TokenVariable.hh"
 #include "Constraint.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "ConstraintEngine.hh"
 #include "EnumeratedDomain.hh"
 #include "TypeFactory.hh"
@@ -283,9 +283,9 @@ namespace EUROPA {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(predecessor->end());
       vars.push_back(successor->start());
-      constraint =  ConstraintLibrary::createConstraint(LabelStr("precedes"),
-								     getPlanDatabase()->getConstraintEngine(),
-								     vars);
+      constraint =  getPlanDatabase()->getConstraintEngine()->createConstraint(
+                        LabelStr("precedes"),
+						vars);
 
       // Store for bi-directional access by encoded key pair and constraint
       m_constraintsByKeyPair.insert(std::pair<int, ConstraintId>(encodedKey, constraint));
@@ -536,8 +536,7 @@ namespace EUROPA {
     // the object variable. This only needs to be done once, so test first if it has already been constrained
     if (!isConstrainedToThisObject(token)) {
       ConstraintId thisObject =
-	ConstraintLibrary::createConstraint(LabelStr("eq"),
-					    getPlanDatabase()->getConstraintEngine(),
+          getPlanDatabase()->getConstraintEngine()->createConstraint(LabelStr("eq"),					    
 					    makeScope(token->getObject(), m_thisVar));
       m_constraintsByTokenKey.insert(std::pair<int, ConstraintId>(token->getKey(), thisObject));
     }

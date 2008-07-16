@@ -5,7 +5,7 @@
 #include "Object.hh"
 #include "IntervalToken.hh"
 #include "PlanDatabase.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "IntervalIntDomain.hh"
 #include "Variable.hh"
 #include "Utils.hh"

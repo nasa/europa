@@ -4,7 +4,7 @@
 
 #include "ConstraintEngine.hh"
 #include "DefaultPropagator.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "Constraints.hh"
 #include "Error.hh"
 #include "Utils.hh"
@@ -16,8 +16,8 @@ class DefaultEngineAccessor {
 public:
   static const ConstraintEngineId& instance() {
     if (s_instance.isNoId()) {
-        CESchema* tfm = new CESchema();
-      s_instance = (new ConstraintEngine(tfm->getId()))->getId();
+        CESchema* ces = new CESchema();
+      s_instance = (new ConstraintEngine(ces->getId()))->getId();
       new DefaultPropagator(LabelStr("Default"), s_instance);
       new DefaultPropagator(LabelStr("Temporal"), s_instance);
     }

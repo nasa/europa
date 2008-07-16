@@ -7,6 +7,7 @@
 #include "LabelStr.hh"
 #include "Engine.hh"
 #include "TypeFactory.hh"
+#include "ConstraintFactory.hh"
 #include <map>
 #include <string>
 
@@ -38,10 +39,13 @@ namespace EUROPA {
        */ 
       TypeFactoryId getFactory(const char* typeName);
 
+      void purgeTypeFactories();
+      
       /**
        * @brief Delete all factory instances stored. 
        */
       void purgeAll();
+      
 
       /**
        * @brief Create a variable
@@ -75,9 +79,21 @@ namespace EUROPA {
        */
       const AbstractDomain & baseDomain(const char* typeName);
 
+      void registerConstraintFactory(ConstraintFactory* factory);
+      void registerConstraintFactory(ConstraintFactory* factory, const LabelStr& name);
+
+      const ConstraintFactoryId& getConstraintFactory(const LabelStr& name);
+
+      bool isConstraintFactoryRegistered(const LabelStr& name, const bool& warn = false);
+
+      bool isConstraintFactoryNotRegistered(const LabelStr& name);      
+
+      void purgeConstraintFactories();
+      
     protected:
       CESchemaId m_id;
-      std::map<double, TypeFactoryId> m_factories;                    
+      std::map<double, TypeFactoryId> m_typeFactories;   
+      std::map<double, ConstraintFactoryId > m_constraintFactories;      
   };
   
 } // namespace EUROPA

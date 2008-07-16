@@ -9,7 +9,7 @@
 #include "Utils.hh"
 #include "Variable.hh"
 #include "Constraints.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "IdTable.hh"
 #include "EquivalenceClassCollection.hh"
 #include "EqualityConstraintPropagator.hh"
@@ -104,7 +104,7 @@ CETestEngine::CETestEngine()
     ce->getCESchema()->registerFactory(
        (new EnumeratedTypeFactory("Locations", "Locations", LocationsBaseDomain()))->getId()
     );
-    REGISTER_CONSTRAINT(DelegationTestConstraint, "TestOnly", "Default");
+    REGISTER_CONSTRAINT(ce->getCESchema(),DelegationTestConstraint, "TestOnly", "Default");
 }
 
 CETestEngine::~CETestEngine()
@@ -1232,16 +1232,17 @@ private:
   }
 
   static bool testDelegation(){
-      CETestEngine engine;
+      CETestEngine eng;
+      const ConstraintEngineId& engine=((ConstraintEngine*)eng.getComponent("ConstraintEngine"))->getId();
       
-    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(0, 1000));
-    ConstraintId c0 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, makeScope(v0.getId()));
-    ConstraintId c1 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, makeScope(v0.getId()));
-    ConstraintId c2 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, makeScope(v0.getId()));
-    ConstraintId c3 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, makeScope(v0.getId()));
-    ConstraintId c4 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, makeScope(v0.getId()));
-    ENGINE->propagate();
-    assertTrue(ENGINE->constraintConsistent());
+    Variable<IntervalIntDomain> v0(engine, IntervalIntDomain(0, 1000));
+    ConstraintId c0 = engine->createConstraint(LabelStr("TestOnly"), makeScope(v0.getId()));
+    ConstraintId c1 = engine->createConstraint(LabelStr("TestOnly"), makeScope(v0.getId()));
+    ConstraintId c2 = engine->createConstraint(LabelStr("TestOnly"), makeScope(v0.getId()));
+    ConstraintId c3 = engine->createConstraint(LabelStr("TestOnly"), makeScope(v0.getId()));
+    ConstraintId c4 = engine->createConstraint(LabelStr("TestOnly"), makeScope(v0.getId()));
+    engine->propagate();
+    assertTrue(engine->constraintConsistent());
     assertTrue(DelegationTestConstraint::s_instanceCount == 5);
     assertTrue(DelegationTestConstraint::s_executionCount == 5);
 
@@ -1249,32 +1250,32 @@ private:
     v0.restrictBaseDomain(IntervalIntDomain(0, 900));
     c0->deactivate();
     assertTrue(!c0->isActive());
-    ENGINE->propagate();
-    assertTrue(ENGINE->constraintConsistent());
+    engine->propagate();
+    assertTrue(engine->constraintConsistent());
     assertTrue(DelegationTestConstraint::s_instanceCount == 5);
     assertTrue(DelegationTestConstraint::s_executionCount == 9);
 
     // Delete the delegate and verify instance counts and that the prior delegate has been reinstated and executed.
     delete (Constraint*) c1;
     c0->undoDeactivation();
-    ENGINE->propagate();
-    assertTrue(ENGINE->constraintConsistent());
+    engine->propagate();
+    assertTrue(engine->constraintConsistent());
     assertTrue(DelegationTestConstraint::s_instanceCount == 4);
     assertTrue(DelegationTestConstraint::s_executionCount == 10);
 
     // Now create a new instance and mark it for delegation only. Add remaining constraints as delegates
-    ConstraintId c5 = ConstraintLibrary::createConstraint(LabelStr("TestOnly"), ENGINE, makeScope(v0.getId()));
+    ConstraintId c5 = engine->createConstraint(LabelStr("TestOnly"), makeScope(v0.getId()));
     c0->deactivate();
     c2->deactivate();
     c3->deactivate();
     c4->deactivate();
     assertTrue(DelegationTestConstraint::s_instanceCount == 5);
-    ENGINE->propagate();
+    engine->propagate();
     assertTrue(DelegationTestConstraint::s_executionCount == 11);
 
     // Force propagation and confirm only one instance executes
     v0.restrictBaseDomain(IntervalIntDomain(100, 900));
-    ENGINE->propagate();
+    engine->propagate();
     assertTrue(DelegationTestConstraint::s_executionCount == 12);
 
     // Now confirm correct handling of constraint deletions
@@ -2479,14 +2480,16 @@ public:
 private:
   static bool testAllocation(){
       CETestEngine testEngine;
+      const ConstraintEngineId& ce=((ConstraintEngine*)testEngine.getComponent("ConstraintEngine"))->getId();
+      
     std::vector<ConstrainedVariableId> variables;
     // v0 == v1
-    Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
+    Variable<IntervalIntDomain> v0(ce, IntervalIntDomain(1, 10));
     variables.push_back(v0.getId());
-    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 1));
+    Variable<IntervalIntDomain> v1(ce, IntervalIntDomain(1, 1));
     variables.push_back(v1.getId());
-    ConstraintId c0 = ConstraintLibrary::createConstraint(LabelStr("Equal"), ENGINE, variables);    
-    ENGINE->propagate();
+    ConstraintId c0 = ce->createConstraint(LabelStr("Equal"), variables);    
+    ce->propagate();
     assertTrue(v0.getDerivedDomain().getSingletonValue() == 1);
     delete (Constraint*) c0;
     return true;

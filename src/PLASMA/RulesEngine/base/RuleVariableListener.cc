@@ -2,7 +2,7 @@
 #include "RuleInstance.hh"
 #include "DomainListener.hh"
 #include "ConstrainedVariable.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "LabelStr.hh"
 #include "Rule.hh"
 

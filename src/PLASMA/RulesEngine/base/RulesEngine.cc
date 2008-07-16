@@ -10,7 +10,7 @@
 #include "Utils.hh"
 #include "RuleVariableListener.hh"
 #include "ProxyVariableRelation.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include <list>
 
 namespace EUROPA{

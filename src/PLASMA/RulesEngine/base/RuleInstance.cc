@@ -1,5 +1,5 @@
 #include "Utils.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "UnifyMemento.hh"
 #include "Token.hh"
 #include "TokenVariable.hh"
@@ -358,8 +358,7 @@ namespace EUROPA {
   }
 
   void RuleInstance::addConstraint(const LabelStr& name, std::vector<ConstrainedVariableId>& scope){
-    ConstraintId constraint =  ConstraintLibrary::createConstraint(name,
-								   getPlanDatabase()->getConstraintEngine(),
+    ConstraintId constraint =  getPlanDatabase()->getConstraintEngine()->createConstraint(name,								   
 								   scope);
     addConstraint(constraint);
   }

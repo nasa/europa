@@ -2,7 +2,7 @@
 #include "TokenVariable.hh"
 #include "PlanDatabase.hh"
 #include "IntervalIntDomain.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 
 namespace EUROPA{
 
@@ -81,8 +81,7 @@ namespace EUROPA{
     temp.push_back(m_end);
 
     ConstraintId temporalRelation = 
-      ConstraintLibrary::createConstraint(LabelStr("temporalDistance"), 
-					  m_planDatabase->getConstraintEngine(), temp);
+        m_planDatabase->getConstraintEngine()->createConstraint(LabelStr("temporalDistance"),temp);
 
     m_standardConstraints.insert(temporalRelation);
 

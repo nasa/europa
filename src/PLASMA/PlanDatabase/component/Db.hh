@@ -15,7 +15,7 @@
 #include "ConstraintEngine.hh"
 #include "IntervalIntDomain.hh"
 #include "BoolDomain.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "Constraint.hh"
 #include "Constraints.hh"
 #include "TestSupport.hh"

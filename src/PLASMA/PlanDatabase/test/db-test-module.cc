@@ -208,10 +208,11 @@ PDBTestEngine::PDBTestEngine()
     initDbTestSchema(schema); 
     
     // Tokens require temporal distance constraints
-    REGISTER_SYSTEM_CONSTRAINT(EqualConstraint, "concurrent", "Default");
-    REGISTER_SYSTEM_CONSTRAINT(LessThanEqualConstraint, "precedes", "Default"); 
-    REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporaldistance", "Default");
-    REGISTER_SYSTEM_CONSTRAINT(AddEqualConstraint, "temporalDistance", "Default");  
+    CESchema* ces = (CESchema*)getComponent("CESchema");
+    REGISTER_SYSTEM_CONSTRAINT(ces,EqualConstraint, "concurrent", "Default");
+    REGISTER_SYSTEM_CONSTRAINT(ces,LessThanEqualConstraint, "precedes", "Default"); 
+    REGISTER_SYSTEM_CONSTRAINT(ces,AddEqualConstraint, "temporaldistance", "Default");
+    REGISTER_SYSTEM_CONSTRAINT(ces,AddEqualConstraint, "temporalDistance", "Default");  
 
     // Have to register factories for testing.
     schema->registerObjectFactory((new StandardDBFooFactory())->getId());
@@ -641,16 +642,14 @@ private:
     // Add a unary constraint
     Variable<IntervalIntDomain> superset(db->getConstraintEngine(), IntervalIntDomain(10, 20));;
 
-    ConstraintId subsetConstraint = ConstraintLibrary::createConstraint("SubsetOf", 
-					db->getConstraintEngine(), 
+    ConstraintId subsetConstraint = db->getConstraintEngine()->createConstraint("SubsetOf", 					
 					makeScope(o1.getVariables()[0], superset.getId()));
 
     // Now add a constraint equating the variables and test propagation
     std::vector<ConstrainedVariableId> constrainedVars;
     constrainedVars.push_back(o1.getVariables()[0]);
     constrainedVars.push_back(o2.getVariables()[0]);
-    ConstraintId constraint = ConstraintLibrary::createConstraint("Equal",
-								  db->getConstraintEngine(),
+    ConstraintId constraint = db->getConstraintEngine()->createConstraint("Equal",
 								  constrainedVars);
 
     assertTrue(db->getConstraintEngine()->propagate());
@@ -1486,8 +1485,7 @@ private:
     std::vector<ConstrainedVariableId> temp;
     temp.push_back(t1.end());
     temp.push_back(t2.end());
-    ConstraintId equalityConstraint = ConstraintLibrary::createConstraint("concurrent",
-                                                                          db->getConstraintEngine(),
+    ConstraintId equalityConstraint = db->getConstraintEngine()->createConstraint("concurrent",
                                                                           temp);
     t1.doMerge(t0.getId());
   
@@ -1515,8 +1513,7 @@ private:
     t1.cancel();
     Variable<IntervalIntDomain> superset(db->getConstraintEngine(), IntervalIntDomain(5, 6));
 
-    ConstraintId subsetOfConstraint = ConstraintLibrary::createConstraint("SubsetOf",
-                                                                          db->getConstraintEngine(),
+    ConstraintId subsetOfConstraint = db->getConstraintEngine()->createConstraint("SubsetOf",
                                                                           makeScope(t1.duration(), superset.getId()));
     t1.doMerge(t0.getId());
     assertTrue(t0.duration()->getDerivedDomain().getUpperBound() == 6);
@@ -1713,7 +1710,7 @@ private:
     token3.close();
 
     // create a test constraint between t2 and t3
-    ConstraintLibrary::createConstraint(LabelStr("precedes"),ce,makeScope(token2.end(),token3.start()));
+    ce->createConstraint(LabelStr("precedes"),makeScope(token2.end(),token3.start()));
 
     assertTrue(ce->propagate());
 
@@ -2438,8 +2435,7 @@ private:
     std::vector<ConstrainedVariableId> temp;
     temp.push_back(t0.end());
     temp.push_back(t1.end());
-    ConstraintId eq = ConstraintLibrary::createConstraint("concurrent",
-                                                          db->getConstraintEngine(),
+    ConstraintId eq = db->getConstraintEngine()->createConstraint("concurrent",                                                          
                                                           temp);
 
 

@@ -3,7 +3,7 @@
 #include "Solver.hh"
 #include "ComponentFactory.hh"
 #include "Constraint.hh"
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "UnboundVariableManager.hh"
 #include "OpenConditionManager.hh"
 #include "ThreatManager.hh"
@@ -57,7 +57,7 @@ using namespace EUROPA;
 using namespace EUROPA::SOLVERS;
 using namespace EUROPA::SOLVERS::HSTS;
 
-void registerTestElements();
+void registerTestElements(CESchema* ces);
 
 class SolversTestEngine : public EngineBase 
 {
@@ -80,7 +80,7 @@ SolversTestEngine::SolversTestEngine()
     doStart();
     
     EUROPA::NDDL::loadSchema(getSchema()); 
-    registerTestElements();
+    registerTestElements((CESchema*)getComponent("CESchema"));
 }
 
 SolversTestEngine::~SolversTestEngine()
@@ -2072,7 +2072,7 @@ public:
   }
 };
 
-void registerTestElements()
+void registerTestElements(CESchema* ces)
 {
    // For tests on the matching engine
    REGISTER_COMPONENT_FACTORY(MatchingRule, MatchingRule);
@@ -2085,8 +2085,8 @@ void registerTestElements()
 
    REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::RandomValue, Random);
 
-   REGISTER_CONSTRAINT(LazyAllDiff, "lazyAllDiff",  "Default");
-   REGISTER_CONSTRAINT(LazyAlwaysFails, "lazyAlwaysFails",  "Default");
+   REGISTER_CONSTRAINT(ces,LazyAllDiff, "lazyAllDiff",  "Default");
+   REGISTER_CONSTRAINT(ces,LazyAlwaysFails, "lazyAlwaysFails",  "Default");
 }
 
 void SolversModuleTests::runTests(std::string path) 
