@@ -16,6 +16,7 @@ namespace EUROPA {
      */
     virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine, 
                                                  const AbstractDomain& baseDomain,
+                                                 const bool internal = false,
                                                  bool canBeSpecified = true,
                                                  const char* name = NO_VAR_NAME,
                                                  const EntityId& parent = EntityId::noId(),

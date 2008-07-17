@@ -28,14 +28,14 @@ namespace EUROPA {
 
   const bool DbClientTransactionLog::isBool(const std::string& typeName)  {
     return (strcmp(typeName.c_str(),"bool") == 0 || 
-	strcmp(typeName.c_str(), "BOOL" ) == 0 || 
-              strcmp(typeName.c_str(),BoolDomain::getDefaultTypeName().c_str()) == 0);
+            strcmp(typeName.c_str(), "BOOL" ) == 0 || 
+            strcmp(typeName.c_str(),BoolDomain::getDefaultTypeName().c_str()) == 0);
   }
 
   const bool DbClientTransactionLog::isInt(const std::string& typeName)  {
     return (strcmp(typeName.c_str(),"int") == 0 || 
-	strcmp(typeName.c_str(), "INT_INTERVAL" ) == 0 || 
-              strcmp(typeName.c_str(),BoolDomain::getDefaultTypeName().c_str()) == 0);
+            strcmp(typeName.c_str(), "INT_INTERVAL" ) == 0 || 
+            strcmp(typeName.c_str(),BoolDomain::getDefaultTypeName().c_str()) == 0);
   }
 
   void DbClientTransactionLog::insertBreakpoint() {
@@ -45,41 +45,45 @@ namespace EUROPA {
   void DbClientTransactionLog::removeBreakpoint() {
     check_error(!m_bufferedTransactions.empty());
     checkError(m_bufferedTransactions.back()->Value() == std::string("breakpoint"),
-	       "Last transaction is a " << m_bufferedTransactions.back()->Value() <<
-	       ", not a breakpoint.");
+               "Last transaction is a " << m_bufferedTransactions.back()->Value() <<
+               ", not a breakpoint.");
     popTransaction();
   }
 
   void DbClientTransactionLog::notifyVariableCreated(const ConstrainedVariableId& variable){
-    TiXmlElement * element = allocateXmlElement("var");
-    const AbstractDomain& baseDomain = variable->baseDomain();
-    std::string type = baseDomain.getTypeName().toString();
-    if (m_client->getSchema()->isObjectType(type)) {
-      ObjectId object = baseDomain.getLowerBound();
-      check_error(object.isValid());
-      type = object->getType().toString();
-    }
-    element->SetAttribute("type", type);
-    if (LabelStr::isString(variable->getName())) {
-      element->SetAttribute("name", variable->getName().toString());
-    }
-    debugMsg("notifyVariableCreated"," variable name = " << variable->getName().c_str() << " typeName = " << type << " type = " << baseDomain.getTypeName().c_str());
+		if(!variable->isInternal()) {
+			TiXmlElement * element = allocateXmlElement("var");
+			const AbstractDomain& baseDomain = variable->baseDomain();
+			std::string type = baseDomain.getTypeName().toString();
+			if (m_client->getSchema()->isObjectType(type)) {
+				ObjectId object = baseDomain.getLowerBound();
+				check_error(object.isValid());
+				type = object->getType().toString();
+			}
+			element->SetAttribute("type", type);
+			if (LabelStr::isString(variable->getName())) {
+				element->SetAttribute("name", variable->getName().toString());
+			}
+			debugMsg("notifyVariableCreated"," variable name = " << variable->getName().c_str() << " typeName = " << type << " type = " << baseDomain.getTypeName().c_str());
 
-    element->SetAttribute("index", m_client->getIndexByVariable(variable));
+			element->SetAttribute("index", m_client->getIndexByVariable(variable));
 
-    if (!baseDomain.isEmpty()) {
-      TiXmlElement * value = abstractDomainAsXml(&baseDomain);
-      element->LinkEndChild(value);
-    }
-    pushTransaction(element);
+			if (!baseDomain.isEmpty()) {
+				TiXmlElement * value = abstractDomainAsXml(&baseDomain);
+				element->LinkEndChild(value);
+			}
+			pushTransaction(element);
+		}
   }
 
   void DbClientTransactionLog::notifyVariableDeleted(const ConstrainedVariableId& variable) {
-    TiXmlElement* element = allocateXmlElement("deletevar");
-    element->SetAttribute("index", m_client->getIndexByVariable(variable));
-    element->SetAttribute("name", variable->getName().toString());
-    element->SetAttribute("type", variable->baseDomain().getTypeName().toString());
-    pushTransaction(element);
+		if(!variable->isInternal()) {
+			TiXmlElement* element = allocateXmlElement("deletevar");
+			element->SetAttribute("index", m_client->getIndexByVariable(variable));
+			element->SetAttribute("name", variable->getName().toString());
+			element->SetAttribute("type", variable->baseDomain().getTypeName().toString());
+			pushTransaction(element);
+		}
   }
 
   void DbClientTransactionLog::notifyObjectCreated(const ObjectId& object){
@@ -121,7 +125,7 @@ namespace EUROPA {
 
   void DbClientTransactionLog::notifyTokenCreated(const TokenId& token){
     TiXmlElement * element = (token->isFact() ? allocateXmlElement("fact") : 
-			      allocateXmlElement("goal"));
+                              allocateXmlElement("goal"));
     TiXmlElement * instance = allocateXmlElement("predicateinstance");
     instance->SetAttribute("name", m_tokensCreated++);
     check_error(LabelStr::isString(token->getName()));
@@ -132,7 +136,7 @@ namespace EUROPA {
   }
 
   void DbClientTransactionLog::notifyTokenDeleted(const TokenId& token,
-						  const std::string& name) {
+                                                  const std::string& name) {
     TiXmlElement* element = allocateXmlElement("deletetoken");
     element->SetAttribute("type", token->getName().toString());
     element->SetAttribute("path", m_client->getPathAsString(token));
@@ -155,7 +159,7 @@ namespace EUROPA {
   void DbClientTransactionLog::notifyFreed(const ObjectId& object, const TokenId& predecessor, const TokenId& successor){
     if(m_chronologicalBacktracking) {
       check_error(strcmp(m_bufferedTransactions.back()->Value(), "constrain") == 0,
-		  "Chronological backtracking assumption violated");
+                  "Chronological backtracking assumption violated");
       popTransaction();
       return;
     }
@@ -233,31 +237,37 @@ namespace EUROPA {
     pushTransaction(element);
   }
 
-  void DbClientTransactionLog::notifyVariableSpecified(const ConstrainedVariableId& variable){
-    checkError(variable->lastDomain().isSingleton(), variable->toString() << " is not a singleton.");
-    TiXmlElement * element = allocateXmlElement("specify");
-    element->LinkEndChild(variableAsXml(variable));
-    element->LinkEndChild(domainValueAsXml(&variable->lastDomain(), variable->lastDomain().getSingletonValue()));
-    pushTransaction(element);
-  }
+	void DbClientTransactionLog::notifyVariableSpecified(const ConstrainedVariableId& variable){
+		if(!variable->isInternal()) {
+			checkError(variable->lastDomain().isSingleton(), variable->toString() << " is not a singleton.");
+			TiXmlElement * element = allocateXmlElement("specify");
+			element->LinkEndChild(variableAsXml(variable));
+			element->LinkEndChild(domainValueAsXml(&variable->lastDomain(), variable->lastDomain().getSingletonValue()));
+			pushTransaction(element);
+		}
+	}
 
-  void DbClientTransactionLog::notifyVariableRestricted(const ConstrainedVariableId& variable){
-    TiXmlElement * element = allocateXmlElement("restrict");
-    element->LinkEndChild(variableAsXml(variable));
-    element->LinkEndChild(abstractDomainAsXml(&variable->baseDomain()));
-    pushTransaction(element);
+	void DbClientTransactionLog::notifyVariableRestricted(const ConstrainedVariableId& variable){
+		if(!variable->isInternal()) {
+			TiXmlElement * element = allocateXmlElement("restrict");
+			element->LinkEndChild(variableAsXml(variable));
+			element->LinkEndChild(abstractDomainAsXml(&variable->baseDomain()));
+			pushTransaction(element);
+		}
   }
 
   void DbClientTransactionLog::notifyVariableReset(const ConstrainedVariableId& variable){
-    if (m_chronologicalBacktracking) {
-      check_error(strcmp(m_bufferedTransactions.back()->Value(), "specify") == 0,
-                  "Chronological backtracking assumption violated");
-      popTransaction();
-      return;
-    }
-    TiXmlElement * element = allocateXmlElement("reset");
-    element->LinkEndChild(variableAsXml(variable));
-    pushTransaction(element);
+		if(!variable->isInternal()) {
+			if (m_chronologicalBacktracking) {
+				check_error(strcmp(m_bufferedTransactions.back()->Value(), "specify") == 0,
+										"Chronological backtracking assumption violated");
+				popTransaction();
+				return;
+			}
+			TiXmlElement * element = allocateXmlElement("reset");
+			element->LinkEndChild(variableAsXml(variable));
+			pushTransaction(element);
+		}
   }
 
   void DbClientTransactionLog::flush(std::ostream& os){
@@ -274,24 +284,24 @@ namespace EUROPA {
     if (isBool(domain->getTypeName().toString())) {
       return (value ? "true" : "false");
     }
-   else 
-     if (domain->isNumeric()) {
-       // CMG: Do not use snprintf. Not supported on DEC
-       std::stringstream ss;
-       if (isInt(domain->getTypeName().toString())) {
-	 ss << (int) value;
-       } else {
-	 ss << value;
-       }
-       return ss.str();
-     } else if (LabelStr::isString(domain->getUpperBound())) {
-       const LabelStr& label = value;
-       return label.toString();
-     } else {
-       ObjectId object = value;
-       check_error(object.isValid());
-       return object->getName().toString();
-     }
+    else 
+      if (domain->isNumeric()) {
+        // CMG: Do not use snprintf. Not supported on DEC
+        std::stringstream ss;
+        if (isInt(domain->getTypeName().toString())) {
+          ss << (int) value;
+        } else {
+          ss << value;
+        }
+        return ss.str();
+      } else if (LabelStr::isString(domain->getUpperBound())) {
+        const LabelStr& label = value;
+        return label.toString();
+      } else {
+        ObjectId object = value;
+        check_error(object.isValid());
+        return object->getName().toString();
+      }
   }
 
   TiXmlElement *
@@ -313,18 +323,18 @@ namespace EUROPA {
       return(element);
     }
     else {
-    if (domain->isNumeric()) {
-      TiXmlElement * element = allocateXmlElement("value");
-      element->SetAttribute("type", typeName.toString());
-      element->SetAttribute("name", domainValueAsString(domain, value));
-      return(element);
-    }
-    else {
-      TiXmlElement * element = allocateXmlElement("symbol");
-      element->SetAttribute("type", typeName.toString());
-      element->SetAttribute("value", domainValueAsString(domain, value));
-      return(element);
-    }
+      if (domain->isNumeric()) {
+        TiXmlElement * element = allocateXmlElement("value");
+        element->SetAttribute("type", typeName.toString());
+        element->SetAttribute("name", domainValueAsString(domain, value));
+        return(element);
+      }
+      else {
+        TiXmlElement * element = allocateXmlElement("symbol");
+        element->SetAttribute("type", typeName.toString());
+        element->SetAttribute("value", domainValueAsString(domain, value));
+        return(element);
+      }
     }
 
   }
@@ -356,7 +366,7 @@ namespace EUROPA {
     check_error(ALWAYS_FAILS);
     return NULL;
   }
-  
+
   TiXmlElement *
   DbClientTransactionLog::tokenAsXml(const TokenId& token) const
   {

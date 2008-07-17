@@ -563,7 +563,7 @@ namespace EUROPA {
                                                  const ConstraintEngineId& constraintEngine,
                                                  const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_interimVariable(constraintEngine, IntervalDomain(), false, LabelStr("InternalConstraintVariable"), getId()),
+      m_interimVariable(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalConstraintVariable"), getId()),
       m_multEqualConstraint(LabelStr("MultEqual"), propagatorName, constraintEngine,
 			    makeScope(m_variables[B], m_variables[C], m_interimVariable.getId())),
       m_addEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine,
@@ -586,10 +586,10 @@ namespace EUROPA {
                                          const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       ARG_COUNT(variables.size()),
-      m_sum1(constraintEngine, IntervalDomain(), false, LabelStr("InternalEqSumVariable"), getId()),
-      m_sum2(constraintEngine, IntervalDomain(), false, LabelStr("InternalEqSumVariable"), getId()),
-      m_sum3(constraintEngine, IntervalDomain(), false, LabelStr("InternalEqSumVariable"), getId()),
-      m_sum4(constraintEngine, IntervalDomain(), false, LabelStr("InternalEqSumVariable"), getId()) {
+      m_sum1(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqSumVariable"), getId()),
+      m_sum2(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqSumVariable"), getId()),
+      m_sum3(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqSumVariable"), getId()),
+      m_sum4(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqSumVariable"), getId()) {
     check_error(ARG_COUNT > 2 && ARG_COUNT == (unsigned int)m_variables.size());
     std::vector<ConstrainedVariableId> scope;
     // B is always first and C is always second for the first set, so:
@@ -704,10 +704,10 @@ namespace EUROPA {
                                                  const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       ARG_COUNT(variables.size()),
-      m_product1(constraintEngine, IntervalDomain(), false, LabelStr("InternalEqProductVariable"), getId()),
-      m_product2(constraintEngine, IntervalDomain(), false, LabelStr("InternalEqProductVariable"), getId()),
-      m_product3(constraintEngine, IntervalDomain(), false, LabelStr("InternalEqProductVariable"), getId()),
-      m_product4(constraintEngine, IntervalDomain(), false, LabelStr("InternalEqProductVariable"), getId()) {
+      m_product1(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqProductVariable"), getId()),
+      m_product2(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqProductVariable"), getId()),
+      m_product3(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqProductVariable"), getId()),
+      m_product4(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalEqProductVariable"), getId()) {
     check_error(ARG_COUNT > 2 && ARG_COUNT == (unsigned int)m_variables.size());
     std::vector<ConstrainedVariableId> scope;
     // B is always first and C is always second for the first set, so:
@@ -821,7 +821,7 @@ namespace EUROPA {
                                                        const ConstraintEngineId& constraintEngine,
                                                        const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_interimVariable(constraintEngine, IntervalDomain(), false, LabelStr("InternalConstraintVariable"), getId()),
+      m_interimVariable(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalConstraintVariable"), getId()),
       m_lessOrEqualConstraint(LabelStr("LessThanEq"), propagatorName, constraintEngine,
                               makeScope(m_variables[0], m_interimVariable.getId())) {
     std::vector<ConstrainedVariableId> eqSumScope = m_variables;
@@ -848,7 +848,7 @@ namespace EUROPA {
                                                const ConstraintEngineId& constraintEngine,
                                                const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_interimVariable(constraintEngine, IntervalDomain(), false, LabelStr("InternalConstraintVariable"), getId()),
+      m_interimVariable(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalConstraintVariable"), getId()),
       m_lessThanConstraint(LabelStr("LessThan"), propagatorName, constraintEngine,
                            makeScope(m_variables[0], m_interimVariable.getId())) {
     std::vector<ConstrainedVariableId> eqSumScope = m_variables;
@@ -863,7 +863,7 @@ namespace EUROPA {
                                                        const ConstraintEngineId& constraintEngine,
                                                        const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_interimVariable(constraintEngine, IntervalDomain(), false, LabelStr("InternalConstraintVariable"), getId()),
+      m_interimVariable(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalConstraintVariable"), getId()),
       m_lessOrEqualConstraint(LabelStr("LessThanEqual"), propagatorName, constraintEngine,
                               makeScope(m_interimVariable.getId(), m_variables[0])) {
     std::vector<ConstrainedVariableId> eqSumScope = m_variables;
@@ -878,7 +878,7 @@ namespace EUROPA {
                                                const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_interimVariable(constraintEngine, constraintEngine->getCESchema()->baseDomain(m_variables[0]->baseDomain().getTypeName().c_str()), 
-			false, LabelStr("InternalConstraintVariable"), getId()),
+			true, false, LabelStr("InternalConstraintVariable"), getId()),
       m_lessThanConstraint(LabelStr("LessThan"), propagatorName, constraintEngine,
                            makeScope(m_interimVariable.getId(), m_variables[0]))
   {
@@ -1271,7 +1271,7 @@ namespace EUROPA {
                                        const ConstraintEngineId& constraintEngine,
                                        const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_condVar(constraintEngine, BoolDomain(true), false, LabelStr("Internal:AllDiff:cond"), getId())
+      m_condVar(constraintEngine, BoolDomain(true), true, false, LabelStr("Internal:AllDiff:cond"), getId())
   {
     std::vector<ConstrainedVariableId> condAllDiffScope;
     condAllDiffScope.reserve(m_variables.size() + 1);
@@ -1393,9 +1393,9 @@ namespace EUROPA {
                                                    const ConstraintEngineId& constraintEngine,
                                                    const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_zeros(constraintEngine, IntervalDomain(), false, LabelStr("InternalCountNonZerosVar"), getId()),
-      m_otherVars(constraintEngine, IntervalDomain(), false, LabelStr("InternalCountNonZerosOtherVars"), getId()),
-      m_superset(constraintEngine, IntervalDomain((double)(variables.size() - 1)), false, LabelStr("InternalCountNonZerosSuperset"), getId()),
+      m_zeros(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalCountNonZerosVar"), getId()),
+      m_otherVars(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalCountNonZerosOtherVars"), getId()),
+      m_superset(constraintEngine, IntervalDomain((double)(variables.size() - 1)), true, false, LabelStr("InternalCountNonZerosSuperset"), getId()),
       m_addEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine,
                            makeScope(m_zeros.getId(), m_variables[0], m_otherVars.getId()))
   {
@@ -1413,7 +1413,7 @@ namespace EUROPA {
                                                const ConstraintEngineId& constraintEngine,
                                                const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_nonZeros(constraintEngine, IntervalIntDomain(0, PLUS_INFINITY), false, LabelStr("InternalCardinalityVar"), getId()),
+      m_nonZeros(constraintEngine, IntervalIntDomain(0, PLUS_INFINITY), true, false, LabelStr("InternalCardinalityVar"), getId()),
       m_lessThanEqualConstraint(LabelStr("LessThanEqual"), propagatorName,
                                 constraintEngine, makeScope(m_nonZeros.getId(), m_variables[0]))
   {
@@ -1429,8 +1429,8 @@ namespace EUROPA {
                              const ConstraintEngineId& constraintEngine,
                              const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_nonZeros(constraintEngine, IntervalIntDomain(1, PLUS_INFINITY), false, LabelStr("InternalVar:Or:nonZeros"), getId()),
-      m_superset(constraintEngine, IntervalIntDomain(1, variables.size()), false, LabelStr("InternalVar:Or:superset"), getId())
+      m_nonZeros(constraintEngine, IntervalIntDomain(1, PLUS_INFINITY), true, false, LabelStr("InternalVar:Or:nonZeros"), getId()),
+      m_superset(constraintEngine, IntervalIntDomain(1, variables.size()), true, false, LabelStr("InternalVar:Or:superset"), getId())
   {
     m_subsetConstraint = (new SubsetOfConstraint(LabelStr("SubsetOf"), propagatorName, constraintEngine,
                                                  makeScope(m_nonZeros.getId(), m_superset.getId())))->getId();
@@ -1617,7 +1617,7 @@ namespace EUROPA {
                                                  const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_sumVar(constraintEngine, constraintEngine->getCESchema()->baseDomain(m_variables[1]->baseDomain().getTypeName().c_str()),
-	       false, LabelStr("InternalConstraintVariable"), getId()),
+	       true, false, LabelStr("InternalConstraintVariable"), getId()),
       m_condAllSameConstraint(LabelStr("CondAllSame"), propagatorName, constraintEngine,
                               makeScope(m_variables[0], m_variables[1], m_sumVar.getId()))
   {

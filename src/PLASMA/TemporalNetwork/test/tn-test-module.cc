@@ -495,8 +495,8 @@ private:
     IntervalIntDomain d2 = IntervalIntDomain( 20, 30);
 
 
-    ConstrainedVariableId v1 = (new Variable<IntervalIntDomain> (ce.getId(), d1, true, "v1"))->getId();
-    ConstrainedVariableId v2 = (new Variable<IntervalIntDomain> (ce.getId(), d2, true, "v2"))->getId();
+    ConstrainedVariableId v1 = (new Variable<IntervalIntDomain> (ce.getId(), d1, false, true, "v1"))->getId();
+    ConstrainedVariableId v2 = (new Variable<IntervalIntDomain> (ce.getId(), d2, false, true, "v2"))->getId();
 
     // <-10>----------<10>
     //                          <20>----------<30>
@@ -515,7 +515,7 @@ private:
     }
     
     IntervalIntDomain d3 = IntervalIntDomain( 5, 15 );
-    ConstrainedVariableId v3 = (new Variable<IntervalIntDomain> (ce.getId(), d3, true, "v3"))->getId();
+    ConstrainedVariableId v3 = (new Variable<IntervalIntDomain> (ce.getId(), d3, false, true, "v3"))->getId();
 
     // <-10>----------<10>
     //        <5>----------<15>
@@ -535,7 +535,7 @@ private:
 
 
     IntervalIntDomain d4 = IntervalIntDomain( 0, 5 );
-    ConstrainedVariableId v4 = (new Variable<IntervalIntDomain> (ce.getId(), d4, true, "v4"))->getId();
+    ConstrainedVariableId v4 = (new Variable<IntervalIntDomain> (ce.getId(), d4, false, true, "v4"))->getId();
 
     // <-10>--------------<10>
     //           <0>-<5>
@@ -554,7 +554,7 @@ private:
     }
 
     IntervalIntDomain d5 = IntervalIntDomain( -20, 20 );
-    ConstrainedVariableId v5 = (new Variable<IntervalIntDomain> (ce.getId(), d5, true, "v5"))->getId();
+    ConstrainedVariableId v5 = (new Variable<IntervalIntDomain> (ce.getId(), d5, false, true, "v5"))->getId();
 
     //           <-10>--------------<10>
     //  <-20>---------------------------------<20>
@@ -573,12 +573,12 @@ private:
     }
 
     IntervalIntDomain d6 = IntervalIntDomain( -g_infiniteTime(), g_infiniteTime() );
-    ConstrainedVariableId v6 = (new Variable<IntervalIntDomain> (ce.getId(), d6, true, "v6"))->getId();
+    ConstrainedVariableId v6 = (new Variable<IntervalIntDomain> (ce.getId(), d6, false, true, "v6"))->getId();
 
     //            <-10>------------<10>
     //  <-inf>--------------------------------<inf>
 
-    ConstrainedVariableId v7 = (new Variable<IntervalIntDomain> (ce.getId(), d6, true, "v7"))->getId();
+    ConstrainedVariableId v7 = (new Variable<IntervalIntDomain> (ce.getId(), d6, false, true, "v7"))->getId();
 
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v1, v7, true );
@@ -777,12 +777,12 @@ private:
     IntervalIntDomain domEnd = IntervalIntDomain(0,20);
     IntervalIntDomain domDur = IntervalIntDomain(1,1000);
 
-    ConstrainedVariableId v1 = (new Variable<IntervalIntDomain> (ce.getId(), domStart, true, "v1"))->getId();
-    ConstrainedVariableId v2 = (new Variable<IntervalIntDomain> (ce.getId(), domDur, true, "v2"))->getId();
-    ConstrainedVariableId v3 = (new Variable<IntervalIntDomain> (ce.getId(), domEnd, true, "v3"))->getId();
-    ConstrainedVariableId v4 = (new Variable<IntervalIntDomain> (ce.getId(), domStart, true, "v4"))->getId();
-    ConstrainedVariableId v5 = (new Variable<IntervalIntDomain> (ce.getId(), domDur, true, "v5"))->getId();
-    ConstrainedVariableId v6 = (new Variable<IntervalIntDomain> (ce.getId(), domEnd, true, "v6"))->getId();
+    ConstrainedVariableId v1 = (new Variable<IntervalIntDomain> (ce.getId(), domStart, false, true, "v1"))->getId();
+    ConstrainedVariableId v2 = (new Variable<IntervalIntDomain> (ce.getId(), domDur, false, true, "v2"))->getId();
+    ConstrainedVariableId v3 = (new Variable<IntervalIntDomain> (ce.getId(), domEnd, false, true, "v3"))->getId();
+    ConstrainedVariableId v4 = (new Variable<IntervalIntDomain> (ce.getId(), domStart, false, true, "v4"))->getId();
+    ConstrainedVariableId v5 = (new Variable<IntervalIntDomain> (ce.getId(), domDur, false, true, "v5"))->getId();
+    ConstrainedVariableId v6 = (new Variable<IntervalIntDomain> (ce.getId(), domEnd, false, true, "v6"))->getId();
 
     v2->restrictBaseDomain(IntervalIntDomain(5, 7));
 
@@ -845,9 +845,9 @@ private:
     IntervalIntDomain domEnd = IntervalIntDomain(0,1);
     IntervalIntDomain domDur = IntervalIntDomain(1,1);
 
-    ConstrainedVariableId v1 = (new Variable<IntervalIntDomain> (ce.getId(), domStart, true, "v1"))->getId();
-    ConstrainedVariableId v2 = (new Variable<IntervalIntDomain> (ce.getId(), domDur, true, "v2"))->getId();
-    ConstrainedVariableId v3 = (new Variable<IntervalIntDomain> (ce.getId(), domEnd, true, "v3"))->getId();
+    ConstrainedVariableId v1 = (new Variable<IntervalIntDomain> (ce.getId(), domStart, false, true, "v1"))->getId();
+    ConstrainedVariableId v2 = (new Variable<IntervalIntDomain> (ce.getId(), domDur, false, true, "v2"))->getId();
+    ConstrainedVariableId v3 = (new Variable<IntervalIntDomain> (ce.getId(), domEnd, false, true, "v3"))->getId();
 
     std::vector<ConstrainedVariableId> temp;
     temp.push_back(v1);

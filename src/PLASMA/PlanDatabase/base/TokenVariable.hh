@@ -29,6 +29,7 @@ namespace EUROPA{
 		  int index, 
 		  const ConstraintEngineId& constraintEngine, 
 		  const AbstractDomain& baseDomain,
+		  const bool internal = false,
 		  bool canBeSpecified = true,
 		  const LabelStr& name = ConstrainedVariable::NO_NAME());
 
@@ -79,9 +80,10 @@ namespace EUROPA{
 					   int index, 
 					   const ConstraintEngineId& constraintEngine, 
 					   const AbstractDomain& baseDomain,
+					   const bool internal,
 					   bool canBeSpecified,
 					   const LabelStr& name)
-    : Variable<DomainType>(constraintEngine, baseDomain, canBeSpecified, name, parent, index), 
+    : Variable<DomainType>(constraintEngine, baseDomain, internal, canBeSpecified, name, parent, index), 
       m_integratedBaseDomain(static_cast<DomainType*>(baseDomain.copy())), m_isLocallySpecified(false), m_localSpecifiedValue(0),
       m_parentToken(parent){
     check_error(m_parentToken.isValid());

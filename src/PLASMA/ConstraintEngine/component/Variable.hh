@@ -34,6 +34,7 @@ namespace EUROPA {
      */
     Variable(const ConstraintEngineId& constraintEngine, 
              const AbstractDomain& baseDomain,
+             const bool internal = false,
              bool canBeSpecified = true,
              const LabelStr& name = ConstrainedVariable::NO_NAME(),
              const EntityId& parent = EntityId::noId(),
@@ -107,11 +108,12 @@ namespace EUROPA {
   template<class DomainType>
   Variable<DomainType>::Variable(const ConstraintEngineId& constraintEngine, 
                                  const AbstractDomain& baseDomain,
+                                 const bool internal,
                                  bool canBeSpecified,
                                  const LabelStr& name,
                                  const EntityId& parent,
                                  int index) 
-    : ConstrainedVariable(constraintEngine, canBeSpecified, name, parent, index), 
+    : ConstrainedVariable(constraintEngine, internal, canBeSpecified, name, parent, index), 
     m_baseDomain(static_cast<DomainType*>(baseDomain.copy())),
     m_derivedDomain(static_cast<DomainType*>(baseDomain.copy())) {
     debugMsg("Variable:Variable", "Base Domain = " << baseDomain.toString());

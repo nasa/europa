@@ -264,7 +264,7 @@ private:
 
     // test RO
     {
-      Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), true, "v0");
+      Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), false, true, "v0");
       std::vector<MatchingRuleId> rules;
       me.getMatches(v0.getId(), rules);
       assertTrue(rules.size() == 1, toString(rules.size()));
@@ -290,7 +290,7 @@ private:
 
     // test R2 
     {
-      Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), true, "arg3");
+      Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), false, true, "arg3");
       std::vector<MatchingRuleId> rules;
       me.getMatches(v0.getId(), rules);
       assertTrue(rules.size() == 2, toString(rules.size()));
@@ -540,7 +540,7 @@ private:
 
     // test H0
     {
-      Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), true, "v0");
+      Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), false, true, "v0");
       std::vector<MatchingRuleId> rules;
       me.getMatches(v0.getId(), rules);
       assertTrue(rules.size() == 1, toString(rules.size()));
@@ -551,7 +551,7 @@ private:
 
     // test H1
     {
-      Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), true, "start");
+      Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), false, true, "start");
       std::vector<MatchingRuleId> rules;
       me.getMatches(v0.getId(), rules);
       assertTrue(rules.size() == 2, toString(rules.size()));
@@ -562,7 +562,7 @@ private:
 
     // test H2
     {
-      Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), true, "end");
+      Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), false, true, "end");
       std::vector<MatchingRuleId> rules;
       me.getMatches(v0.getId(), rules);
       assertTrue(rules.size() == 2, toString(rules.size()));
@@ -661,7 +661,7 @@ private:
 
     // test H3
     {
-      Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), true, "FreeVariable");
+      Variable<IntervalIntDomain> v0(assembly.getConstraintEngine(), IntervalIntDomain(0, 10), false, true, "FreeVariable");
       std::vector<MatchingRuleId> rules;
       me.getMatches(v0.getId(), rules);
       assertTrue(rules.size() == 1, toString(rules.size()));
@@ -1192,20 +1192,20 @@ private:
     PlanDatabaseId db = assembly.getPlanDatabase();
     ConstraintEngineId ce = assembly.getConstraintEngine();
 
-    Variable<IntervalIntDomain> intIntVar(ce, IntervalIntDomain(1, 5), true);
+    Variable<IntervalIntDomain> intIntVar(ce, IntervalIntDomain(1, 5), false, true);
 
     std::list<double> ints;
     ints.push_back(1);
 
     EnumeratedDomain singletonEnumIntDom(ints, true, "INTEGER_ENUMERATION");
-    Variable<EnumeratedDomain> singletonEnumIntVar(ce, singletonEnumIntDom, true);
+    Variable<EnumeratedDomain> singletonEnumIntVar(ce, singletonEnumIntDom, false, true);
 
     ints.push_back(2);
     ints.push_back(3);
     ints.push_back(4);
     ints.push_back(5);
     EnumeratedDomain enumIntDom(ints, true, "INTEGER_ENUMERATION");
-    Variable<EnumeratedDomain> enumIntVar(ce, enumIntDom, true);
+    Variable<EnumeratedDomain> enumIntVar(ce, enumIntDom, false, true);
 
     std::list<double> strings;
     strings.push_back(LabelStr("foo"));
@@ -1213,11 +1213,11 @@ private:
     strings.push_back(LabelStr("baz"));
     strings.push_back(LabelStr("quux"));
     EnumeratedDomain enumStrDom(strings, false, "SYMBOL_ENUMERATION");
-    Variable<EnumeratedDomain> enumStrVar(ce, enumStrDom, true);
+    Variable<EnumeratedDomain> enumStrVar(ce, enumStrDom, false, true);
 
 
     EnumeratedDomain enumObjDom(false, "A");
-    Variable<EnumeratedDomain> enumObjVar(ce, enumObjDom, true);
+    Variable<EnumeratedDomain> enumObjVar(ce, enumObjDom, false, true);
     Object o1(db, "A", "o1");
     Object o2(db, "A", "o2");
     Object o3(db, "A", "o3");

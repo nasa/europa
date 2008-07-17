@@ -25,12 +25,13 @@ namespace EUROPA {
   }
 
   ConstrainedVariable::ConstrainedVariable(const ConstraintEngineId& constraintEngine,
-		  								   bool canBeSpecified,
-		  								   const LabelStr& name,
+                                           const bool internal,
+                                           bool canBeSpecified,
+                                           const LabelStr& name,
                                            const EntityId& parent,
                                            int index)
     : Entity(), m_id(this), m_lastRelaxed(0), m_constraintEngine(constraintEngine), m_name(name),
-      m_canBeSpecified(canBeSpecified), m_specifiedFlag(false), m_specifiedValue(0),  
+      m_internal(internal), m_canBeSpecified(canBeSpecified), m_specifiedFlag(false), m_specifiedValue(0),  
       m_index(index), m_parent(parent), m_deactivationRefCount(0), m_deleted(false) {
     check_error(m_constraintEngine.isValid());
     check_error(m_index >= NO_INDEX);

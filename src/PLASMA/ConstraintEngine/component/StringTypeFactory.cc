@@ -14,13 +14,14 @@ namespace EUROPA {
   ConstrainedVariableId
   StringTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
                                     const AbstractDomain& baseDomain,
+                                    const bool internal,
                                     bool canBeSpecified,
                                     const char* name,
                                     const EntityId& parent,
                                     int index) const
   {
     Variable<StringDomain> * variable
-      = new Variable<StringDomain>(constraintEngine, baseDomain, canBeSpecified, name, parent, index);
+      = new Variable<StringDomain>(constraintEngine, baseDomain, internal, canBeSpecified, name, parent, index);
     check_error(variable != NULL,
                 "failed to create Variable for StringDomain with name '" + std::string(name) + "'");
     ConstrainedVariableId id = variable->getId();

@@ -68,6 +68,7 @@ namespace EUROPA {
 						 m_allVariables.size(),
 						 m_planDatabase->getConstraintEngine(), 
 						 IntervalDomain(),
+						 false, // TODO: fixme
 						 true,
 						 LabelStr("quantity")))->getId();
 

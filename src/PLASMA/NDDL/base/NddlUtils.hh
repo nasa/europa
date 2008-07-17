@@ -40,6 +40,7 @@ namespace NDDL {
     ConstrainedVariableId var = (new Variable< ELEMENT_TYPE >(ce, 
 							      domain,
 							      false,
+							      false,
 							      LabelStr(sstr.str()),
 							      parent))->getId();
     vars.push_back(var);

@@ -301,6 +301,7 @@ namespace EUROPA {
      * @brief Create a variable
      */
     ConstrainedVariableId createVariable(const char* typeName,
+                                                const bool internal = false,
                                                 bool canBeSpecified = true,
                                                 const char* name = NO_VAR_NAME,
                                                 const EntityId& parent = EntityId::noId(),
@@ -311,6 +312,7 @@ namespace EUROPA {
      */
     ConstrainedVariableId createVariable(const char* typeName,
                                                 const AbstractDomain& baseDomain,
+                                                const bool internal = false,
                                                 bool canBeSpecified = true,
                                                 const char* name = NO_VAR_NAME,
                                                 const EntityId& parent = EntityId::noId(),

@@ -63,6 +63,7 @@ namespace EUROPA{
 						    m_allVariables.size(),
 						    m_planDatabase->getConstraintEngine(), 
 						    startBaseDomain,
+						    false, // TODO: fixme
 						    true,
 						    LabelStr("start")))->getId();
     m_allVariables.push_back(m_start);
@@ -71,6 +72,7 @@ namespace EUROPA{
 						  m_allVariables.size(),
 						  m_planDatabase->getConstraintEngine(), 
 						  endBaseDomain,
+						  false, // TODO: fixme
 						  true,
 						  LabelStr("end")))->getId();
     m_allVariables.push_back(m_end);

@@ -430,7 +430,7 @@ private:
     v0.restrictBaseDomain(dom2);
     assertTrue(v0.getDerivedDomain() == dom2);
 
-    Variable<IntervalIntDomain> v1(ENGINE, dom1, false, LabelStr("TEST VARIABLE"));
+    Variable<IntervalIntDomain> v1(ENGINE, dom1, false, false, LabelStr("TEST VARIABLE"));
     assertTrue(!v1.canBeSpecified());
     assertTrue(v1.getName() == LabelStr("TEST VARIABLE"));
     assertTrue(v1.isValid());

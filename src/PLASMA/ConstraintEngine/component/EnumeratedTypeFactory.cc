@@ -15,6 +15,7 @@ namespace EUROPA {
   ConstrainedVariableId
   EnumeratedTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
                                         const AbstractDomain& baseDomain,
+                                        const bool internal,
                                         bool canBeSpecified,
                                         const char* name,
                                         const EntityId& parent,
@@ -22,7 +23,7 @@ namespace EUROPA {
     const EnumeratedDomain * enumeratedDomain = dynamic_cast<const EnumeratedDomain*>(&baseDomain);
     check_error(enumeratedDomain != NULL, "tried to create a EnumeratedDomain variable with a different kind of base domain");
     Variable<EnumeratedDomain> * variable
-      = new Variable<EnumeratedDomain>(constraintEngine, *enumeratedDomain, canBeSpecified, name, parent, index);
+      = new Variable<EnumeratedDomain>(constraintEngine, *enumeratedDomain, internal, canBeSpecified, name, parent, index);
     check_error(variable != NULL,
                 "failed to create Variable for EnumeratedDomain with name '" + std::string(name) + "'");
     ConstrainedVariableId id = variable->getId();

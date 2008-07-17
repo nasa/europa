@@ -693,6 +693,7 @@ namespace EUROPA {
           m_planDatabase->getConstraintEngine()->createVariable(
 	                baseDomain.getTypeName().c_str(),
 				    baseDomain,
+				    false, // TODO: Should this be considered internal, I think so?
 				    true,
 				    fullVariableName.c_str(),
 				    m_id,

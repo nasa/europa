@@ -1244,8 +1244,10 @@ namespace EUROPA {
 			     const std::vector<const AbstractDomain*>& args)
       : EvalContext(NULL) // TODO: should pass in eval context from outside to have access to globals                        
     {
+			debugMsg("ObjectFactoryEvalContext", ">> ");
       // Add arguments to eval context		
       for (unsigned int i=0;i<argNames.size();i++) {
+				debugMsg("ObjectFactoryEvalContext:createVariable", argTypes[i] << " " << argNames[i] << " = " << *(args[i]));
 	      ConstrainedVariableId arg = planDb->getClient()->createVariable(
 									argTypes[i].c_str(),
 									*(args[i]),
@@ -1255,6 +1257,7 @@ namespace EUROPA {
 	       m_tmpVars.push_back(arg);
 	       addVar(argNames[i].c_str(),arg);
       }
+			debugMsg("ObjectFactoryEvalContext", "<< ");
     }
           
     virtual ~ObjectFactoryEvalContext()

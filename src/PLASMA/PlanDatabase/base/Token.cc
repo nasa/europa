@@ -515,6 +515,7 @@ namespace EUROPA{
 					      m_allVariables.size(),
 					      m_planDatabase->getConstraintEngine(),
 					      stateBaseDomain,
+					      false, // TODO: fixme
 					      false,
 					      LabelStr("state")))->getId();
     m_allVariables.push_back(m_state);
@@ -530,6 +531,7 @@ namespace EUROPA{
 						m_allVariables.size(),
 						m_planDatabase->getConstraintEngine(),
 						ObjectDomain(m_baseObjectType.c_str()),
+						false, // TODO: fixme
 						true,
 						LabelStr("object")))->getId();
 
@@ -555,6 +557,7 @@ namespace EUROPA{
 						       m_allVariables.size(), 
 						       m_planDatabase->getConstraintEngine(), 
 						       durationBaseDomain,
+						       false, // TODO: fixme
 						       true,
 						       LabelStr("duration")))->getId();
 

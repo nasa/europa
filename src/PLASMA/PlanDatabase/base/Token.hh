@@ -382,6 +382,7 @@ namespace EUROPA {
 								m_allVariables.size(),
 								m_planDatabase->getConstraintEngine(),
 								baseDomain,
+								false,
 								true,
 								name))->getId();
       m_parameters.push_back(id);

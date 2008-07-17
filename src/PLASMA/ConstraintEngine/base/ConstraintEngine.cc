@@ -994,6 +994,7 @@ namespace EUROPA
 
   ConstrainedVariableId
   ConstraintEngine::createVariable(const char* typeName,
+                              const bool internal,
                               bool canBeSpecified,
                               const char* name,
                               const EntityId& parent,
@@ -1001,12 +1002,13 @@ namespace EUROPA
   {
     TypeFactoryId factory = getCESchema()->getFactory(typeName);
     check_error(factory.isValid(), "no TypeFactory found for type '" + std::string(typeName) + "'");
-    return createVariable(typeName, factory->baseDomain(), canBeSpecified, name, parent, index);
+    return createVariable(typeName, factory->baseDomain(), internal, canBeSpecified, name, parent, index);
   }
 
   ConstrainedVariableId
   ConstraintEngine::createVariable(const char* typeName,
                               const AbstractDomain& baseDomain,
+                              const bool internal,
                               bool canBeSpecified,
                               const char* name,
                               const EntityId& parent,
@@ -1014,7 +1016,7 @@ namespace EUROPA
   {
     TypeFactoryId factory = getCESchema()->getFactory(typeName);
     check_error(factory.isValid(), "no TypeFactory found for type '" + std::string(typeName) + "'");
-    ConstrainedVariableId variable = factory->createVariable(getId(), baseDomain, canBeSpecified, name, parent, index);
+    ConstrainedVariableId variable = factory->createVariable(getId(), baseDomain, internal, canBeSpecified, name, parent, index);
     check_error(variable.isValid());
     return variable;
   }

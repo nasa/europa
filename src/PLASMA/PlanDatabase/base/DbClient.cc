@@ -51,9 +51,9 @@ namespace EUROPA {
 
   
   ConstrainedVariableId
-  DbClient::createVariable(const char* typeName, const AbstractDomain& baseDomain, const char* name, bool isTmpVar,bool canBeSpecified)
+  DbClient::createVariable(const char* typeName, const AbstractDomain& baseDomain, const char* name, bool isTmpVar, bool canBeSpecified)
   {
-    ConstrainedVariableId variable = m_planDb->getConstraintEngine()->createVariable(typeName, baseDomain, canBeSpecified, name);
+    ConstrainedVariableId variable = m_planDb->getConstraintEngine()->createVariable(typeName, baseDomain, isTmpVar, canBeSpecified, name);
     if (m_planDb->getSchema()->isObjectType(typeName) && !variable->isClosed()) {
       m_planDb->makeObjectVariableFromType(typeName, variable);
     }
@@ -70,7 +70,7 @@ namespace EUROPA {
   ConstrainedVariableId
   DbClient::createVariable(const char* typeName, const char* name, bool isTmpVar)
   {
-    ConstrainedVariableId variable = m_planDb->getConstraintEngine()->createVariable(typeName, true, name);
+    ConstrainedVariableId variable = m_planDb->getConstraintEngine()->createVariable(typeName, isTmpVar, true, name);
     if (m_planDb->getSchema()->isObjectType(typeName)) {
       m_planDb->makeObjectVariableFromType(typeName, variable);
     }

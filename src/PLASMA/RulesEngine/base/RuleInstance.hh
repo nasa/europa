@@ -226,13 +226,14 @@ namespace EUROPA{
       // looping construct used to implement the 'foreach' semantics. Therefore, we overwrite the old
       // value with the new value.
       if(!getVariable(name).isNoId())
-	m_variablesByName.erase(name.getKey());
+        m_variablesByName.erase(name.getKey());
 
       ConstrainedVariableId localVariable = (new Variable<DomainType>(m_planDb->getConstraintEngine(),
-								      baseDomain,
-								      canBeSpecified,
-								      name,
-								      m_id))->getId();
+                                                                      baseDomain,
+                                                                      false, // TODO: Maybe true?
+                                                                      canBeSpecified,
+                                                                      name,
+                                                                      m_id))->getId();
       // Only allowed add a variable for an executed rule instance
       check_error(isExecuted());
 

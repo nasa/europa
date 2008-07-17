@@ -1326,7 +1326,7 @@ namespace EUROPA {
         ConstrainedVariableId variable = *iter++;
         if (LabelStr(name.c_str()) == variable->getName()) {
           return variable;
-        }        
+        }
       }
       check_error(ALWAYS_FAILS, "Failed to process transaction for " + ident + ":" + name);
     }

@@ -153,6 +153,11 @@ namespace EUROPA {
     inline bool isActive() const {return m_deactivationRefCount == 0;}
 
     /**
+     * @brief True if variable is internal to PLASMA and transactions are not recorded for it. Otherwise false.
+     */
+    inline bool isInternal() const {return m_internal;}
+
+    /**
      * @brief the number of outstanding deactivation calls
      */
     unsigned int refCount() const;
@@ -307,7 +312,6 @@ namespace EUROPA {
      */
     bool canBeSpecified() const;
 
-
     /**
      * @brief Supports the merging of variables by propagating messages on restriction of a base domain of a variable
      */
@@ -366,6 +370,7 @@ namespace EUROPA {
      * @param index An optional index indicating the position in the parent entity collection.
      */
     ConstrainedVariable(const ConstraintEngineId& constraintEngine,
+			const bool internal,
 			bool canBeSpecified,
 			const LabelStr& name,
 			const EntityId& parent = EntityId::noId(), 
@@ -503,6 +508,7 @@ namespace EUROPA {
 						    The  construction model of this class ensures 
 						    that it is always set to a valid ConstraintEngineId. */
     LabelStr m_name;
+    const bool m_internal;
     const bool m_canBeSpecified;
     bool m_specifiedFlag; /**< True of internalSpecify is called. 
 			   It is possible that !canBeSpecified() && m_hasBeenSpecified */

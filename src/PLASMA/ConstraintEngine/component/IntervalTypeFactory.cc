@@ -21,6 +21,7 @@ namespace EUROPA {
   ConstrainedVariableId
   IntervalTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
                                       const AbstractDomain& baseDomain,
+                                      const bool internal,
                                       bool canBeSpecified,
                                       const char* name,
                                       const EntityId& parent,
@@ -29,7 +30,7 @@ namespace EUROPA {
     const IntervalDomain * intervalDomain = dynamic_cast<const IntervalDomain*>(&baseDomain);
     check_error(intervalDomain != NULL, "tried to create an IntervalDomain variable with a different kind of base domain");
     Variable<IntervalDomain> * variable
-      = new Variable<IntervalDomain>(constraintEngine, *intervalDomain, canBeSpecified, name, parent, index);
+      = new Variable<IntervalDomain>(constraintEngine, *intervalDomain, internal, canBeSpecified, name, parent, index);
     check_error(variable != NULL,
                 "failed to create Variable for IntervalDomain with name '" + std::string(name) + "'");
     ConstrainedVariableId id = variable->getId();

@@ -16,6 +16,7 @@ namespace EUROPA {
   ConstrainedVariableId
   BoolTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
                                   const AbstractDomain& baseDomain,
+                                  const bool internal,
                                   bool canBeSpecified,
                                   const char* name,
                                   const EntityId& parent,
@@ -24,7 +25,7 @@ namespace EUROPA {
     const BoolDomain * boolDomain = dynamic_cast<const BoolDomain*>(&baseDomain);
     check_error(boolDomain != NULL, "tried to create a BoolDomain variable with a different kind of base domain");
     Variable<BoolDomain> * variable
-      = new Variable<BoolDomain>(constraintEngine, *boolDomain, canBeSpecified, name, parent, index);
+      = new Variable<BoolDomain>(constraintEngine, *boolDomain, internal, canBeSpecified, name, parent, index);
     check_error(variable != NULL,
                 "failed to create Variable for BoolDomain with name '" + std::string(name) + "'");
     ConstrainedVariableId id = variable->getId();

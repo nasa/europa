@@ -21,6 +21,7 @@ namespace EUROPA {
   ConstrainedVariableId
   SymbolTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
                                     const AbstractDomain& baseDomain,
+                                    const bool internal,
                                     bool canBeSpecified,
                                     const char* name,
                                     const EntityId& parent,
@@ -29,7 +30,7 @@ namespace EUROPA {
     const SymbolDomain * stringDomain = dynamic_cast<const SymbolDomain*>(&baseDomain);
     check_error(stringDomain != NULL, "tried to create a SymbolDomain variable with a different kind of base domain");
     Variable<SymbolDomain> * variable
-      = new Variable<SymbolDomain>(constraintEngine, *stringDomain, canBeSpecified, name, parent, index);
+      = new Variable<SymbolDomain>(constraintEngine, *stringDomain, internal, canBeSpecified, name, parent, index);
     check_error(variable != NULL,
                 "failed to create Variable for SymbolDomain with name '" + std::string(name) + "'");
     ConstrainedVariableId id = variable->getId();

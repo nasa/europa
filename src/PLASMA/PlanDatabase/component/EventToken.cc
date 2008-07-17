@@ -44,6 +44,7 @@ namespace EUROPA{
 						   m_allVariables.size(),
 						   m_planDatabase->getConstraintEngine(), 
 						   timeBaseDomain,
+						   false, // TODO: fixme
 						   true,
 						   LabelStr("time")))->getId();
     m_allVariables.push_back(m_time);

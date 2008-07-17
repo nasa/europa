@@ -56,7 +56,7 @@ namespace EUROPA {
       m_quantity = (new TokenVariable<IntervalDomain>(m_id, m_allVariables.size(),
 						      m_planDatabase->getConstraintEngine(),
 						      quantityBaseDomain,
-						      true, LabelStr("quantity")))->getId();
+						      false, true, LabelStr("quantity")))->getId();
       m_allVariables.push_back(m_quantity);
       ConstraintId relation = (new ResourceTokenRelation(m_planDatabase->getConstraintEngine(),
 							 makeScope(m_state, m_object),
