@@ -380,36 +380,42 @@ namespace EUROPA {
 	  }
       
 	  std::set<std::string> modelFiles;
-	  char realModelPaths[PATH_MAX];
-	  bool foundModelPath = false;
-	  for(std::multimap<double, RuleId>::const_iterator it = Rule::getRules().begin(); 
-	      it != Rule::getRules().end(); ++it) {
-	    std::string ruleSrc = ((*it).second)->getSource().toString();
-	    if(ruleSrc == "noSrc")
-	      continue;
-	    std::string modelFile = ruleSrc.substr(1, ruleSrc.rfind(",")-1);
-	    std::string lineNumber = ruleSrc.substr(ruleSrc.rfind(","), ruleSrc.size()-1);
-	    lineNumber.replace(lineNumber.rfind('"'), 1, "\0");
-	    foundModelPath = false;
-	    for(std::list<std::string>::iterator pathIt = sourcePaths.begin();
-		pathIt != sourcePaths.end(); ++pathIt) {
-	      std::string modelPath = (*pathIt) + "/" + modelFile;
-	      if(realpath(modelPath.c_str(), realModelPaths) == NULL) {
-		continue;
+	  
+	  const RuleSchemaId& rs = reId->getRuleSchema();
+	  
+	  if (!rs.isNoId()) {
+	      char realModelPaths[PATH_MAX];
+	      bool foundModelPath = false;  	  
+	      const std::multimap<double, RuleId>& allRules = rs->getRules(); 
+	      for(std::multimap<double, RuleId>::const_iterator it = allRules.begin(); it != allRules.end(); ++it) {
+	          std::string ruleSrc = ((*it).second)->getSource().toString();
+	          if(ruleSrc == "noSrc")
+	              continue;
+	          std::string modelFile = ruleSrc.substr(1, ruleSrc.rfind(",")-1);
+	          std::string lineNumber = ruleSrc.substr(ruleSrc.rfind(","), ruleSrc.size()-1);
+	          lineNumber.replace(lineNumber.rfind('"'), 1, "\0");
+	          foundModelPath = false;
+	          for(std::list<std::string>::iterator pathIt = sourcePaths.begin();
+	          pathIt != sourcePaths.end(); ++pathIt) {
+	              std::string modelPath = (*pathIt) + "/" + modelFile;
+	              if(realpath(modelPath.c_str(), realModelPaths) == NULL) {
+	                  continue;
+	              }
+	              modelPath = realModelPaths;
+	              modelFiles.insert(modelPath);
+	              foundModelPath = true;
+	              rulesOut << seqId << TAB << (*it).second->getName().toString() << TAB << modelPath << lineNumber 
+	              << std::endl;
+	              break;
+	          }
+	          if (foundModelPath == false) {
+	              std::cerr << "Warning: PPW could not find path to model file for rule " 
+	              << (*it).second->getName().toString() << std::endl;
+	              std::cerr << "         Check configuration of RuleConfigSection in PlanWorks.cfg " << std::endl;
+	          }
 	      }
-	      modelPath = realModelPaths;
-	      modelFiles.insert(modelPath);
-	      foundModelPath = true;
-	      rulesOut << seqId << TAB << (*it).second->getKey() << TAB << modelPath << lineNumber 
-		       << std::endl;
-	      break;
-	    }
-	    if (foundModelPath == false) {
-	      std::cerr << "Warning: PPW could not find path to model file for rule " 
-			<< (*it).second->getKey() << std::endl;
-	      std::cerr << "         Check configuration of RuleConfigSection in PlanWorks.cfg " << std::endl;
-	    }
 	  }
+	  
 	  {
 	    std::ostream_iterator<unsigned char> out(seqOut);
 	    for(std::set<std::string>::const_iterator it = modelFiles.begin(); 
@@ -997,7 +1003,7 @@ namespace EUROPA {
 						 std::ofstream &rismOut) {
 
 	ruleInstanceOut << ruleId->getKey() << TAB << ppId << TAB << seqId
-			<< TAB << ruleId->getRule()->getKey()
+			<< TAB << ruleId->getRule()->getName().toString()
 			<< TAB << ruleId->getToken()->getKey() << TAB;
 
 	/*SlaveTokenIds*/

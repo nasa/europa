@@ -23,8 +23,9 @@ namespace EUROPA {
    */
   class RulesEngine : public EngineComponent {
   public:
-    RulesEngine(const PlanDatabaseId& planDatabase);
+    RulesEngine(const RuleSchemaId& schema, const PlanDatabaseId& planDatabase);
     ~RulesEngine();
+    
     const RulesEngineId& getId() const;
     
     const PlanDatabaseId& getPlanDatabase() const;
@@ -36,6 +37,8 @@ namespace EUROPA {
     std::set<RuleInstanceId> getRuleInstances() const;
     void getRuleInstances(const TokenId& token,std::set<RuleInstanceId>& results) const;
     bool hasPendingRuleInstances(const TokenId& token) const;
+    
+    const RuleSchemaId& getRuleSchema() const;
 
   private:
     friend class RulesEngineListener;
@@ -47,7 +50,9 @@ namespace EUROPA {
     void notifyUndone(const RuleInstanceId &rule);
     void cleanupRuleInstances(const TokenId& token);
     bool isPending(const RuleInstanceId& r) const;
+    
     RulesEngineId m_id;
+    RuleSchemaId m_schema;
     const PlanDatabaseId m_planDb;
     PlanDatabaseListenerId m_planDbListener;
     std::multimap<int, RuleInstanceId> m_ruleInstancesByToken;

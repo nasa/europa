@@ -5,6 +5,7 @@
 #include "PlanDatabase.hh"
 #include "PlanDatabaseWriter.hh"
 #include "ConstraintEngine.hh"
+#include "Rule.hh"
 #include "RulesEngine.hh"
 #include "DefaultPropagator.hh"
 
@@ -108,7 +109,8 @@ int main(int argc, const char ** argv)
   NddlTestEngine engine;
 
   Schema* schema = (Schema*) engine.getComponent("Schema");   
-  EUROPA::NDDL::loadSchema(schema->getId()); // Allocate the schema with a call to the linked in model function - eventually make this call via dlopen  
+  RuleSchema* ruleSchema = (RuleSchema*) engine.getComponent("RuleSchema");   
+  EUROPA::NDDL::loadSchema(schema->getId(),ruleSchema->getId());   
   PlanDatabase* planDatabase = (PlanDatabase*) engine.getComponent("PlanDatabase");   
   planDatabase->getClient()->enableTransactionLogging();
 

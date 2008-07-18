@@ -606,7 +606,8 @@ namespace NDDL {
 
 namespace NDDL {
   // Boot-strap code to initialize schema
-  extern "C" SchemaId loadSchema(const SchemaId& schema){
+  extern "C" SchemaId loadSchema(const SchemaId& schema,const RuleSchemaId& ruleSchema)
+  {
     SchemaId id = schema;
     // Register Constraints
     // Invoke commands to populate schema with type definitions
@@ -664,9 +665,9 @@ namespace NDDL {
     REGISTER_OBJECT_FACTORY(id,SuperRoverFactory3, SuperRover);
     REGISTER_OBJECT_FACTORY(id,WorldFactory4, World);
     // Allocate rules
-    new Rule$Rover$At$0();
-    new Rule$Rover$Going$1();
-    new Rule$World$initialState$2();
+    ruleSchema->registerRule((new Rule$Rover$At$0())->getId());
+    ruleSchema->registerRule((new Rule$Rover$Going$1())->getId());
+    ruleSchema->registerRule((new Rule$World$initialState$2())->getId());
     return id;
   }
   

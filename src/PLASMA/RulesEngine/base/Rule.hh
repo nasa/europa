@@ -11,77 +11,87 @@
  */
 
 #include "RulesEngineDefs.hh"
-#include "Entity.hh"
 #include "LabelStr.hh"
+#include "Engine.hh"
 #include <vector>
 #include <map>
 
 namespace EUROPA {
 
   /**
+   * @class RuleSchema
+   * @brief Meta-info about rules
+   */
+  class RuleSchema : public EngineComponent
+  {
+    public:
+      RuleSchema();
+      ~RuleSchema();
+      
+      /**
+       * @brief Accessor
+       */
+      const RuleSchemaId& getId() const;
+      
+      void registerRule(const RuleId& rule);
+
+      /**
+       * @brief Retrieve all registered rules for the given predicate. This will include rules
+       * defined in ancestors of the current predicate also.
+       */
+      void getRules(const PlanDatabaseId& pdb, const LabelStr& predicate, std::vector<RuleId>& results);
+
+      const std::multimap<double, RuleId>& getRules();
+
+      /**
+       * @brief Delete all rules stored. 
+       */
+      void purgeAll();
+
+    protected:
+      RuleSchemaId m_id; /*!< Id for reference */
+      std::multimap<double, RuleId> m_rulesByName;
+  };
+  
+  /**
    * @class Rule
    * @brief Defines an abstract base class that is implemented by a provider of rules.
    * @see RuleContext, RulesEngine
    */
-  class Rule: public Entity {
-  public:
+  class Rule 
+  {
+    public:
+      virtual ~Rule();
+      
+      /**
+       * @brief Accessor
+       */
+      const RuleId& getId() const;
 
-    /**
-     * @brief Accessor
-     */
-    const RuleId& getId() const;
+      /**
+       * @brief Accessor
+       * @return The predicate for which this rule applies.
+       */
+      const LabelStr& getName() const;
 
-    /**
-     * @brief Accessor
-     * @return The predicate for which this rule applies.
-     */
-    const LabelStr& getName() const;
+      const LabelStr& getSource() const;
 
-    const LabelStr &getSource() const {return m_source;};
+      virtual RuleInstanceId createInstance(const TokenId& token, 
+                                            const PlanDatabaseId& planDb, 
+                                            const RulesEngineId &rulesEngine) const = 0;
 
-    /**
-     * Destructor
-     */
-    virtual ~Rule();
+    protected:
+      /**
+       * @brief Constructor.
+       * @param name A unique name for the rule.
+       */
+      Rule(const LabelStr& name);
+      Rule(const LabelStr& name, const LabelStr &src);
 
-    virtual RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb, const RulesEngineId &rulesEngine) const = 0;
-
-    /**
-     * @brief Retrieve all registered rules for the given predicate. This will include rules
-     * defined in ancestors of the current predicate also.
-     */
-    static void getRules(const PlanDatabaseId& pdb, const LabelStr& predicate, std::vector<RuleId>& results);
-
-    static const std::multimap<double, RuleId>& getRules();
-
-    /**
-     * @brief Delete all rule instances stored. Should only be used to support testing, since
-     * rules should remain for all instances of the plan database in the same process.
-     */
-    static void purgeAll();
-
-  protected:
-
-    /**
-     * @brief Constructor.
-     * @param rulesEngine The Rules Engine to which this rule will belong.
-     * @param name A unique name for the rule.
-     */
-    Rule(const LabelStr& name);
-
-    Rule(const LabelStr& name, const LabelStr &src);
-
-    /**
-     * @brief static accessor for getting the rule ids by name. Map is a static local variable of the function.
-     */
-    static std::multimap<double, RuleId>& rulesByName();
-
-    static bool & isPurging();
-
-    RuleId m_id; /*!< Id for reference */
-    const LabelStr m_name; /*! Unique name for the rule */
-    const LabelStr m_source;
-  };
+      RuleId m_id; /*!< Id for reference */
+      const LabelStr m_name; /*! Unique name for the rule */
+      const LabelStr m_source;
+  };  
 }
 
 #endif

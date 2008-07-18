@@ -28,7 +28,9 @@ namespace EUROPA {
   void ModuleRulesEngine::initialize(EngineId engine)
   {
       PlanDatabase* pdb = (PlanDatabase*)engine->getComponent("PlanDatabase");
-      RulesEngine* re = new RulesEngine(pdb->getId());      
+      RuleSchema* rs = new RuleSchema();
+      engine->addComponent("RuleSchema",rs);        
+      RulesEngine* re = new RulesEngine(rs->getId(),pdb->getId());      
       engine->addComponent("RulesEngine",re);        
       
       CESchema* ces = (CESchema*)engine->getComponent("CESchema");
@@ -40,7 +42,8 @@ namespace EUROPA {
   {	 
       RulesEngine* re = (RulesEngine*)engine->removeComponent("RulesEngine");      
       delete re;
-      
-      Rule::purgeAll();      
+
+      RuleSchema* rs = (RuleSchema*)engine->removeComponent("RuleSchema");      
+      delete rs;
   }  
 }

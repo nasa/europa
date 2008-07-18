@@ -28,8 +28,12 @@ namespace EUROPA{
     const RulesEngineId m_rulesEngine;
   };
  
-  RulesEngine::RulesEngine(const PlanDatabaseId& planDatabase)
-    :m_id(this), m_planDb(planDatabase), m_deleted(false) {
+  RulesEngine::RulesEngine(const RuleSchemaId& schema, const PlanDatabaseId& planDatabase)
+    : m_id(this)
+    , m_schema(schema)
+    , m_planDb(planDatabase)
+    , m_deleted(false) 
+  {
     m_planDbListener = (new DbRuleEngineConnector(m_planDb, m_id))->getId();
 
     // Allocate an instance of Default Propagator to handle the rule variable listener. 
@@ -61,6 +65,9 @@ namespace EUROPA{
   const RulesEngineId& RulesEngine::getId() const{return m_id;}
 
   const PlanDatabaseId& RulesEngine::getPlanDatabase() const {return m_planDb;}
+  
+  const RuleSchemaId& RulesEngine::getRuleSchema() const { return m_schema; }
+
 
   std::set<RuleInstanceId> RulesEngine::getRuleInstances() const{
     std::set<RuleInstanceId> ruleInstances;
@@ -103,7 +110,7 @@ namespace EUROPA{
 
     // Allocate a rule instance for all rules that apply
     std::vector<RuleId> allRules;
-    Rule::getRules(getPlanDatabase(),token->getPredicateName(), allRules);
+    m_schema->getRules(getPlanDatabase(),token->getPredicateName(), allRules);
     for(std::vector<RuleId>::const_iterator it = allRules.begin(); it != allRules.end(); ++it){
       RuleId rule = *it;
       check_error(rule.isValid());

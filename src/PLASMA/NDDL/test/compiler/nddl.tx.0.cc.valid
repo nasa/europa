@@ -124,7 +124,8 @@ namespace NDDL {
 
 namespace NDDL {
   // Boot-strap code to initialize schema
-  extern "C" SchemaId loadSchema(const SchemaId& schema){
+  extern "C" SchemaId loadSchema(const SchemaId& schema,const RuleSchemaId& ruleSchema)
+  {
     SchemaId id = schema;
     // Register Constraints
     // Invoke commands to populate schema with type definitions

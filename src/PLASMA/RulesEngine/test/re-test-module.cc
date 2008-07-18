@@ -31,7 +31,10 @@ using namespace EUROPA;
 
 class SimpleSubGoal: public Rule {
 public:
-  SimpleSubGoal(): Rule(LabelStr("AllObjects.Predicate")){}
+  SimpleSubGoal()
+      : Rule(LabelStr("AllObjects.Predicate"))
+  {
+  }
 
   RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb, 
                                 const RulesEngineId &rulesEngine) const{
@@ -88,7 +91,10 @@ public:
 };
 
 
-NestedGuards_0::NestedGuards_0(): Rule(LabelStr("AllObjects.Predicate")){}
+NestedGuards_0::NestedGuards_0()
+    : Rule(LabelStr("AllObjects.Predicate"))
+{
+}
 RuleInstanceId NestedGuards_0::createInstance(const TokenId& token, const PlanDatabaseId& planDb,
                                               const RulesEngineId &rulesEngine) const{
   RuleInstanceId rootInstance = (new NestedGuards_0_Root(m_id, token, planDb))->getId();
@@ -147,7 +153,10 @@ public:
 
 ConstrainedVariableId LocalVariableGuard_0_Root::s_guard;
 
-LocalVariableGuard_0::LocalVariableGuard_0(): Rule(LabelStr("AllObjects.Predicate")){}
+LocalVariableGuard_0::LocalVariableGuard_0()
+    : Rule(LabelStr("AllObjects.Predicate"))
+{
+}
 
 RuleInstanceId LocalVariableGuard_0::createInstance(const TokenId& token, 
                                                     const PlanDatabaseId& planDb, 
@@ -290,7 +299,7 @@ private:
     RE_DEFAULT_SETUP(ce, db, false);
     db->close();
 
-    SimpleSubGoal r;
+    re->getRuleSchema()->registerRule((new SimpleSubGoal())->getId());
     // Create a token of an expected type
 
     IntervalToken t0(db, 
@@ -319,7 +328,7 @@ private:
     Object o2(db, LabelStr("AllObjects"), LabelStr("o2"));
     db->close();
 
-    NestedGuards_0 r;
+    re->getRuleSchema()->registerRule((new NestedGuards_0())->getId());
     // Create a token of an expected type
 
     IntervalToken t0(db, 
@@ -367,7 +376,7 @@ private:
     RE_DEFAULT_SETUP(ce, db, false);
     db->close();
 
-    LocalVariableGuard_0 r;
+    re->getRuleSchema()->registerRule((new LocalVariableGuard_0())->getId());
 
     IntervalToken t0(db, 
 		     LabelStr("AllObjects.Predicate"), 
@@ -403,7 +412,7 @@ private:
     RE_DEFAULT_SETUP(ce, db, false);
     db->close();
 
-    TestRule r(LabelStr("AllObjects.Predicate"));
+    re->getRuleSchema()->registerRule((new TestRule(LabelStr("AllObjects.Predicate")))->getId()); 
 
     IntervalToken t0(db, 
 		     LabelStr("AllObjects.Predicate"), 
@@ -430,10 +439,10 @@ private:
     RE_DEFAULT_SETUP(ce, db, false);
     db->close();
 
-    new TestRule(LabelStr("AllObjects.Predicate"));
-
-    Rule::purgeAll();
-
+    RuleSchema rs;
+    rs.registerRule((new TestRule(LabelStr("AllObjects.Predicate")))->getId()); 
+    rs.purgeAll();
+    
     RE_DEFAULT_TEARDOWN();
     return true;
   }
@@ -442,7 +451,7 @@ private:
     RE_DEFAULT_SETUP(ce, db, false);
     db->close();
 
-    SimpleSubGoal r;
+    re->getRuleSchema()->registerRule((new SimpleSubGoal())->getId());
 
     // Case where we have a master's rule that remains even though slaves and constraints are removed.
     {

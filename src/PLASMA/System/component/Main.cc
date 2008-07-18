@@ -51,8 +51,9 @@ void executeWithAssembly(const char* plannerConfig, const char* txSource)
   
   { // Encapsualte allocation so that they go out of scope before calling terminate  
     SolverAssembly assembly;    
-    SchemaId schema = ((Schema*)assembly.getComponent("Schema"));
-    NDDL::loadSchema(schema); // eventually make this called via dlopen
+    SchemaId schema = ((Schema*)assembly.getComponent("Schema"))->getId();
+    RuleSchemaId ruleSchema = ((RuleSchema*)assembly.getComponent("RuleSchema"))->getId();   
+    NDDL::loadSchema(schema,ruleSchema); // eventually make this called via dlopen
     assembly.plan(txSource, plannerConfig); // Run the planner    
     assembly.write(std::cout); // Dump the results
   }

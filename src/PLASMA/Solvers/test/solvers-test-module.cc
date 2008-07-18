@@ -21,6 +21,7 @@
 #include "MatchingEngine.hh"
 #include "HSTSDecisionPoints.hh"
 #include "PlanDatabaseWriter.hh"
+#include "Rule.hh"
 #include "RulesEngine.hh"
 #include "NddlDefs.hh"
 #include "Context.hh"
@@ -28,7 +29,6 @@
 #include "DbClientTransactionPlayer.hh"
 #include "TemporalPropagator.hh"
 #include "TypeFactory.hh"
-#include "Rule.hh"
 
 #include "ModuleConstraintEngine.hh"
 #include "ModulePlanDatabase.hh"
@@ -79,7 +79,7 @@ SolversTestEngine::SolversTestEngine()
     createModules();
     doStart();
     
-    EUROPA::NDDL::loadSchema(getSchema()); 
+    EUROPA::NDDL::loadSchema(getSchema(),((RuleSchema*)getComponent("RuleSchema"))->getId()); 
     registerTestElements((CESchema*)getComponent("CESchema"));
 }
 

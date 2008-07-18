@@ -814,7 +814,8 @@ namespace NDDL {
 
 namespace NDDL {
   // Boot-strap code to initialize schema
-  extern "C" SchemaId loadSchema(const SchemaId& schema){
+  extern "C" SchemaId loadSchema(const SchemaId& schema,const RuleSchemaId& ruleSchema)
+  {
     SchemaId id = schema;
     // Register Constraints
     // Invoke commands to populate schema with type definitions
@@ -872,14 +873,14 @@ namespace NDDL {
     REGISTER_OBJECT_FACTORY(id,BarFactory1, Bar);
     REGISTER_OBJECT_FACTORY(id,FooFactory2, Foo);
     // Allocate rules
-    new Rule$Foo$impliedLocalVariableGuard$1();
-    new Rule$Foo$impliedObjectGuard$0();
-    new Rule$Foo$localVariableGuard$6();
-    new Rule$Foo$mixGuardedWithUnguarded$5();
-    new Rule$Foo$multipleNestedGuards$7();
-    new Rule$Foo$singletonGuard$2();
-    new Rule$Foo$tokenWithParameters$3();
-    new Rule$Foo$tokenWithParameters$4();
+    ruleSchema->registerRule((new Rule$Foo$impliedLocalVariableGuard$1())->getId());
+    ruleSchema->registerRule((new Rule$Foo$impliedObjectGuard$0())->getId());
+    ruleSchema->registerRule((new Rule$Foo$localVariableGuard$6())->getId());
+    ruleSchema->registerRule((new Rule$Foo$mixGuardedWithUnguarded$5())->getId());
+    ruleSchema->registerRule((new Rule$Foo$multipleNestedGuards$7())->getId());
+    ruleSchema->registerRule((new Rule$Foo$singletonGuard$2())->getId());
+    ruleSchema->registerRule((new Rule$Foo$tokenWithParameters$3())->getId());
+    ruleSchema->registerRule((new Rule$Foo$tokenWithParameters$4())->getId());
     return id;
   }
   

@@ -683,7 +683,7 @@ private:
     db.close();
 
     // create the rule
-    TestSubgoalRule r("Objects.PredicateA");
+    re.getRuleSchema()->registerRule((new TestSubgoalRule("Objects.PredicateA"))->getId());
 
     // Allocate a token
     IntervalToken t1(db.getId(),

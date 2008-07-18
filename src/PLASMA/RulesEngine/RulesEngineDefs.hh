@@ -8,6 +8,9 @@ namespace EUROPA {
   class Rule;
   typedef Id<Rule> RuleId;
 
+  class RuleSchema;
+  typedef Id<RuleSchema> RuleSchemaId;
+    
   class RulesEngine;
   typedef Id<RulesEngine> RulesEngineId;
 

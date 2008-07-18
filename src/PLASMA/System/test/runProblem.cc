@@ -13,15 +13,6 @@
 
 #include "SolverAssembly.hh"
 #include "Rule.hh"
-#ifndef NO_RESOURCES
-#include "SAVH_FVDetector.hh"
-#include "SAVH_Profile.hh"
-#include "SAVH_TimetableFVDetector.hh"
-#include "SAVH_TimetableProfile.hh"
-#include "SAVH_FlowProfile.hh"
-#include "SAVH_IncrementalFlowProfile.hh"
-#include "SAVH_ReusableFVDetector.hh"
-#endif
 
 #ifdef CBPLANNER
 #error "CBPlanner is now deprecated."
@@ -51,15 +42,17 @@ const char* initialTransactions = NULL;
 const char* plannerConfig = NULL;
 bool replayRequired = false;
 
-void initSchema(const SchemaId& schema);
+void initSchema(const SchemaId& schema, const RuleSchemaId& ruleSchema);
 
 /**
    REPLAY IS BROKEN WITH THE INTERPRETER AND NEEDS TO BE FIXED!!!!
  */
 template<class ASSEMBLY>
-void replay(const std::string& s1,const DbClientTransactionLogId& txLog) {
+void replay(const std::string& s1,const DbClientTransactionLogId& txLog) 
+{
   ASSEMBLY replayed;
-  initSchema(((Schema*)replayed.getComponent("Schema"))->getId());
+  initSchema(((Schema*)replayed.getComponent("Schema"))->getId(),
+             ((RuleSchema*)replayed.getComponent("RuleSchema"))->getId());
   
   replayed.playTransactions(ASSEMBLY::TX_LOG());
   std::string s2 = PlanDatabaseWriter::toString(replayed.getPlanDatabase(), false);
@@ -82,7 +75,8 @@ bool runPlanner()
   check_error(DebugMessage::isGood());
 
   ASSEMBLY assembly;
-  initSchema(((Schema*)assembly.getComponent("Schema"))->getId());
+  initSchema(((Schema*)assembly.getComponent("Schema"))->getId(),
+             ((RuleSchema*)assembly.getComponent("RuleSchema"))->getId());
 
   debugMsg("IdTypeCounts", dumpIdTable("before"));  
     
@@ -163,7 +157,7 @@ bool copyFromFile(){
 
 const char* error_msg;
 void* libHandle;
-SchemaId (*fcn_schema)(const SchemaId&);
+SchemaId (*fcn_schema)(const SchemaId&,const RuleSchemaId&);
 
 
 void loadLibrary(const char* libPath)
@@ -184,7 +178,7 @@ void loadLibrary(const char* libPath)
     std::cout << "runProblem: p_dlsym() symbol: loadSchema" << std::endl;
     std::cout.flush();
     
-    fcn_schema = (SchemaId (*)(const SchemaId&))p_dlsym(libHandle, "loadSchema");
+    fcn_schema = (SchemaId (*)(const SchemaId&,const RuleSchemaId&))p_dlsym(libHandle, "loadSchema");
     if(!fcn_schema) {
       error_msg = p_dlerror();
       std::cout << "p_dlsym: Error locating NDDL::schema:" << std::endl;
@@ -221,15 +215,15 @@ void cleanup()
 #endif    
 }
 
-void initSchema(const SchemaId& schema)
+void initSchema(const SchemaId& schema, const RuleSchemaId& ruleSchema)
 {
 #ifdef STANDALONE
-    (*fcn_schema)(schema);
+    (*fcn_schema)(schema,ruleSchema);
 #elif INTERPRETED
     std::string modelName(initialTransactions);
     modelName = modelName.substr(0, modelName.find(".xml"));
 #else 
-    NDDL::loadSchema(schema);
+    NDDL::loadSchema(schema,ruleSchema);
 #endif     
 }
 

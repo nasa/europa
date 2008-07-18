@@ -8,6 +8,7 @@
 #include "LabelStr.hh"
 #include "Pdlfcn.hh"
 #include "Schema.hh"
+#include "Rule.hh"
 
 #include "Constraint.hh"
 #include "PlanDatabase.hh"
@@ -81,14 +82,15 @@ namespace EUROPA {
 	   checkRuntimeError(libHandle != NULL,
 			   "Error opening model " << modelFileName << ": " << p_dlerror());
 
-	   SchemaId (*fcn_schema)(const SchemaId&);
-	   fcn_schema = (SchemaId (*)(const SchemaId&)) p_dlsym(libHandle, "loadSchema");
+	   SchemaId (*fcn_schema)(const SchemaId&,const RuleSchemaId&);
+	   fcn_schema = (SchemaId (*)(const SchemaId&,const RuleSchemaId&)) p_dlsym(libHandle, "loadSchema");
 	   checkError(fcn_schema != NULL,
 			   "Error locating symbol 'loadSchema' in " << modelFileName << ": " <<
 			   p_dlerror());
 
 	   SchemaId schema = ((Schema*)getComponent("Schema"))->getId(); 
-	   (*fcn_schema)(schema);
+       RuleSchemaId ruleSchema = ((RuleSchema*)getComponent("RuleSchema"))->getId(); 
+	   (*fcn_schema)(schema,ruleSchema);
    }
   
   std::string PSEngineImpl::executeScript(const std::string& language, const std::string& script, bool isFile) 

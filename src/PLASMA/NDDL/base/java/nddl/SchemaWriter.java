@@ -41,7 +41,7 @@ class SchemaWriter {
 
     // Implement expected initialization hooks
     writer.write("// Boot-strap code to initialize schema\n");
-    writer.write("extern \"C\" SchemaId loadSchema(const SchemaId& schema){\n");
+    writer.write("extern \"C\" SchemaId loadSchema(const SchemaId& schema,const RuleSchemaId& ruleSchema)\n{\n");
     writer.indent();
 
 
@@ -86,7 +86,7 @@ class SchemaWriter {
     Set ruleNames = RuleWriter.getRules();
     for(Iterator it = ruleNames.iterator(); it.hasNext(); ){
 	    String ruleName = (String)it.next();
-	    writer.write("new " + ruleName + "();\n");
+	    writer.write("ruleSchema->registerRule((new " + ruleName + "())->getId());\n");
     }
 
     writer.write("return id;\n");

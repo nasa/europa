@@ -10,13 +10,14 @@
  */
 
 #include "PlanDatabaseDefs.hh"
+#include "RulesEngineDefs.hh"
 
 namespace EUROPA {
   namespace NDDL {
     /**
      * @brief Allocator function to be implemented by code generated from the model.
      */
-    extern "C" SchemaId loadSchema(const SchemaId& schema);
+    extern "C" SchemaId loadSchema(const SchemaId& schema, const RuleSchemaId& ruleSchema);
   }
 }
 

@@ -25,7 +25,7 @@ namespace EUROPA {
   class NddlXmlInterpreter : public DbClientTransactionPlayer, public LanguageInterpreter 
   {
     public:
-      NddlXmlInterpreter(const DbClientId & client);
+      NddlXmlInterpreter(const DbClientId & client, const RuleSchemaId& ruleSchema);
       virtual ~NddlXmlInterpreter();
 
       virtual std::string interpret(std::istream& input, const std::string& source);
@@ -60,6 +60,7 @@ namespace EUROPA {
       LabelStr getTokenVarClass(const LabelStr& className,const LabelStr& predName,const LabelStr& var) const;
       LabelStr checkPredicateType(const LabelStr& type) const;
       
+      RuleSchemaId m_ruleSchema;
       
       // TODO: move these to schema
       std::set<std::string> m_nativeClasses;      

@@ -42,13 +42,15 @@ namespace EUROPA {
   void ModuleNddl::initialize(EngineId engine)
   {
       // These are Nddl specific, so they belong here
-      CESchema* tfm = (CESchema*)engine->getComponent("CESchema");
-      tfm->registerFactory((new intTypeFactory())->getId());
-      tfm->registerFactory((new floatTypeFactory())->getId());      
+      CESchema* ces = (CESchema*)engine->getComponent("CESchema");
+      ces->registerFactory((new intTypeFactory())->getId());
+      ces->registerFactory((new floatTypeFactory())->getId());      
 
       PlanDatabase* pdb = (PlanDatabase*)engine->getComponent("PlanDatabase");	  
 	  engine->addLanguageInterpreter("nddl", new NddlInterpreter());
-	  engine->addLanguageInterpreter("nddl-xml", new NddlXmlInterpreter(pdb->getClient()));	  
+	  
+      RuleSchema* rs = (RuleSchema*)engine->getComponent("RuleSchema");
+	  engine->addLanguageInterpreter("nddl-xml", new NddlXmlInterpreter(pdb->getClient(),rs->getId()));	  
   }
   
   void ModuleNddl::uninitialize(EngineId engine)

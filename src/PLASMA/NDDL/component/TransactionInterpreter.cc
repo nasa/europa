@@ -50,8 +50,9 @@ namespace EUROPA {
    * 
    */ 
        
-  NddlXmlInterpreter::NddlXmlInterpreter(const DbClientId & client)                                                              
+  NddlXmlInterpreter::NddlXmlInterpreter(const DbClientId & client, const RuleSchemaId& ruleSchema)                                                              
     : DbClientTransactionPlayer(client) 
+    , m_ruleSchema(ruleSchema)
   { 
     // TODO: Add native class method must be modified to also register native factories
     // also, get NddlModule to register these instead?  
@@ -605,8 +606,7 @@ namespace EUROPA {
     std::map<std::string,std::string> localVars; // name-type map for local vars
     buildRuleBody(className,predName,element.FirstChildElement(),ruleBody,localVars);      
 
-    // The RuleFactory's constructor automatically registers the factory
-    new InterpretedRuleFactory(predName,source,ruleBody);
+    m_ruleSchema->registerRule((new InterpretedRuleFactory(predName,source,ruleBody))->getId());
   }
   
   void NddlXmlInterpreter::playDefineEnumeration(const TiXmlElement &element)

@@ -1,6 +1,7 @@
 #include "MasterController.hh"
 #include "PlanDatabase.hh"
 #include "ConstraintEngine.hh"
+#include "Rule.hh"
 #include "RulesEngine.hh"
 #include "ResourcePropagator.hh"
 #include "DefaultPropagator.hh"
@@ -251,9 +252,9 @@ namespace EUROPA {
     logMsg("Loading function pointer");
 
     //locate the NDDL 'loadSchema' function in the library and check for errors
-    SchemaId (*fcn_loadSchema)(const SchemaId&);   //function pointer to NDDL::loadSchema()
+    SchemaId (*fcn_loadSchema)(const SchemaId&,const RuleSchemaId&);   //function pointer to NDDL::loadSchema()
     try {
-      fcn_loadSchema = (SchemaId (*)(const SchemaId&))p_dlsym(m_libHandle, "loadSchema");
+      fcn_loadSchema = (SchemaId (*)(const SchemaId&,const RuleSchemaId&))p_dlsym(m_libHandle, "loadSchema");
       if (!fcn_loadSchema) {
         check_error_variable(const char* error_msg = p_dlerror());
         check_error(!error_msg, error_msg); 
@@ -269,7 +270,8 @@ namespace EUROPA {
     logMsg("Calling NDDL:loadSchema");
     try {
         SchemaId schema = ((Schema*)getComponent("Schema"))->getId();
-      (*fcn_loadSchema)(schema);
+        RuleSchemaId ruleSchema = ((RuleSchema*)getComponent("RuleSchema"))->getId();   
+      (*fcn_loadSchema)(schema,ruleSchema);
     }
     catch (Error e) {
       logMsg("Unexpected exception in NDDL::loadSchema()");
