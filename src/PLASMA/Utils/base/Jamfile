@@ -10,6 +10,7 @@ ModuleBase Utils
 	Error.cc
 	IdTable.cc
         LabelStr.cc
+        Mutex.cc
         Pdlfcn.cc
         TestData.cc
         Utils.cc

@@ -15,6 +15,7 @@
 #include "CommonDefs.hh"
 #include "Debug.hh"
 #include "LabelStr.hh"
+#include "Mutex.hh"
 
 /**
  * @file IdTable.cc
@@ -32,13 +33,53 @@
 
 namespace EUROPA {
 
+  unsigned int getEntryKey(std::pair<unsigned int,double>& entry)
+  {
+    return entry.first;
+  }
+
+  LabelStr getEntryType(std::pair<unsigned int,double>& entry)
+  {
+    return entry.second;
+  }
+
+  pthread_mutex_t& IdTableMutex()
+  {
+      static pthread_mutex_t sl_mutex = PTHREAD_MUTEX_INITIALIZER;
+      return sl_mutex;      
+  }
+  
   IdTable::IdTable() {
   }
 
   IdTable::~IdTable() {
   }
 
+  IdTable& IdTable::getInstance() {
+    static IdTable sl_instance;
+    return(sl_instance);
+  }
+  unsigned int IdTable::size() {
+    MutexGrabber mg(IdTableMutex());
+    return(getInstance().m_collection.size());
+  }
+
+  bool IdTable::allocated(unsigned long int id) {
+    MutexGrabber mg(IdTableMutex());
+    return(getInstance().m_collection.find(id) != getInstance().m_collection.end());
+  }
+
+  unsigned int IdTable::getKey(unsigned long int id) {
+    MutexGrabber mg(IdTableMutex());
+    std::map<unsigned long int, std::pair<unsigned int,double> >::iterator it = getInstance().m_collection.find(id);
+    if (it != getInstance().m_collection.end())
+      return getEntryKey(it->second);
+    else
+      return(0);
+  }
+
   unsigned int IdTable::insert(unsigned long int id, const char* baseType) {
+    MutexGrabber mg(IdTableMutex());
     static unsigned int sl_nextId(1);
     debugMsg("IdTable:insert", "id,key:" << id << ", " << sl_nextId << ")");
     std::map<unsigned long int, std::pair<unsigned int,double> >::iterator it = 
@@ -58,29 +99,8 @@ namespace EUROPA {
     return(sl_nextId++);
   }
 
-  bool IdTable::allocated(unsigned long int id) {
-    return(getInstance().m_collection.find(id) != getInstance().m_collection.end());
-  }
-
-  unsigned int getEntryKey(std::pair<unsigned int,double>& entry)
-  {
-      return entry.first;
-  }
-  
-  LabelStr getEntryType(std::pair<unsigned int,double>& entry)
-  {
-      return entry.second;
-  }
-  
-  unsigned int IdTable::getKey(unsigned long int id) {
-    std::map<unsigned long int, std::pair<unsigned int,double> >::iterator it = getInstance().m_collection.find(id);
-    if (it != getInstance().m_collection.end())
-      return getEntryKey(it->second);
-    else
-      return(0);
-  }
-
   void IdTable::remove(unsigned long int id) {
+    MutexGrabber mg(IdTableMutex());
     static unsigned int sl_key;
     std::map<unsigned long int, std::pair<unsigned int,double> >::iterator it = getInstance().m_collection.find(id);    
     debugMsg("IdTable:remove", "<" << id << ", " << (sl_key = getEntryKey(it->second)) << "," << getEntryType(it->second).toString() << ">");
@@ -91,15 +111,8 @@ namespace EUROPA {
     getInstance().m_collection.erase(id);
   }
 
-  unsigned int IdTable::size() {
-    return(getInstance().m_collection.size());
-  }
-
-  std::map<unsigned long int, std::pair<unsigned int,double> > IdTable::getCollection() {
-    return(getCollection());
-  }
-
   void IdTable::printTypeCnts(std::ostream& os) {
+    MutexGrabber mg(IdTableMutex());
     os << "Id instances by type:\n";
     for (std::map<std::string, unsigned int>::iterator it = getInstance().m_typeCnts.begin();
          it != getInstance().m_typeCnts.end();
@@ -110,16 +123,12 @@ namespace EUROPA {
 
   void IdTable::output(std::ostream& os) {
     printTypeCnts(os);  
+    MutexGrabber mg(IdTableMutex());
     os << "Id Contents:";
     for (std::map<unsigned long int, std::pair<unsigned int,double> >::iterator it = getInstance().m_collection.begin();
          it != getInstance().m_collection.end();
          ++it)
       os << " (" << it->first << ", " << getEntryKey(it->second) << "," << getEntryType(it->second).toString() << ')';
     os << std::endl;
-  }
-
-  IdTable& IdTable::getInstance() {
-    static IdTable sl_instance;
-    return(sl_instance);
   }
 }

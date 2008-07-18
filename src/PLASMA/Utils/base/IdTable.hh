@@ -40,23 +40,23 @@ namespace EUROPA {
    */
   class IdTable {
   public:
-    static unsigned int size();
-    std::map<unsigned long int, std::pair<unsigned int,double> > getCollection();
-    static IdTable& getInstance();
-
-    /**
-     * Print the number of times each type has been allocated.
-     */
-    static void printTypeCnts(std::ostream& os);
-
-    static void output(std::ostream& os);
-    static unsigned int insert(unsigned long int id, const char* baseType);
-    static bool allocated(unsigned long int id);
-    static unsigned int getKey(unsigned long int id);
-    static void remove(unsigned long int id);
     ~IdTable(); // deallocating statics requires public access on beos
-  private:
+     
+    static unsigned int size();    
+
+    static unsigned int insert(unsigned long int id, const char* baseType);
+    static void remove(unsigned long int id);
+
+    static unsigned int getKey(unsigned long int id);
+    static bool allocated(unsigned long int id);
+
+    static void printTypeCnts(std::ostream& os);
+    static void output(std::ostream& os);
+    
+  protected:
     IdTable();
+    static IdTable& getInstance();
+    
     std::map<unsigned long int, std::pair<unsigned int,double> > m_collection;  /*<! Map from pointers to keys*/
     std::map<std::string, unsigned int> m_typeCnts;
   };

@@ -1,6 +1,7 @@
 #include "Debug.hh"
 #include "LabelStr.hh"
 #include "Error.hh"
+#include "Mutex.hh"
 #include "Utils.hh"
 #include <string.h>
 
@@ -37,6 +38,13 @@ namespace EUROPA {
 #endif
   }
 
+  pthread_mutex_t& LabelStrMutex()
+  {
+      static pthread_mutex_t sl_mutex = PTHREAD_MUTEX_INITIALIZER;
+      return sl_mutex;      
+  }
+  
+  
   /**
    * Construction must obtain a key that is efficient to use for later
    * calculations in the domain and must maintain the ordering defined
@@ -104,6 +112,8 @@ namespace EUROPA {
   }
 
   double LabelStr::getKey(const std::string& label) {
+    MutexGrabber mg(LabelStrMutex());
+    
     static double sl_counter = EPSILON;
 
     __gnu_cxx::hash_map<std::string, double>::iterator it = 
@@ -131,6 +141,7 @@ namespace EUROPA {
   }
 
   const std::string& LabelStr::getString(double key){
+    MutexGrabber mg(LabelStrMutex());
     __gnu_cxx::hash_map< double, std::string >::const_iterator it = stringFromKeys().find(key);
     check_error(it != stringFromKeys().end());
     const std::string& toRet = it->second;
@@ -138,11 +149,13 @@ namespace EUROPA {
   }
 
   bool LabelStr::isString(double key) {
+    MutexGrabber mg(LabelStrMutex());
     bool toRet = (stringFromKeys().find(key) != stringFromKeys().end());
     return toRet;
   }
 
   bool LabelStr::isString(const std::string& candidate){
+    MutexGrabber mg(LabelStrMutex());
     bool toRet = (keysFromString().find(candidate) != keysFromString().end());
     return toRet;
   }
