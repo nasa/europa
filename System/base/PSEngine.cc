@@ -33,6 +33,7 @@
 #include "SolverPartialPlanWriter.hh"
 
 #include <fstream>
+#include <iomanip>
 
 namespace EUROPA {
   
@@ -408,6 +409,9 @@ namespace EUROPA {
     check_runtime_error(m_var.isValid());
     std::ostringstream os;
     
+    if(getType() == DOUBLE)
+      os << std::setprecision(20);
+
     if (isNull())
         os << "NULL";
     else if (isSingleton()) 
@@ -458,7 +462,7 @@ namespace EUROPA {
             os << asInt();
   		    break;
   		case DOUBLE:
-            os << asDouble();
+		  os << std::setprecision(20) << asDouble();
   		    break;
   		case BOOLEAN:
             os << asBoolean();
