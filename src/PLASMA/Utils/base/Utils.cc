@@ -1,5 +1,6 @@
 #include "Utils.hh"
 #include <sstream>
+#include <iomanip>
 
 DEFINE_GLOBAL_CONST(bool, g_alwaysFails, false);
 
@@ -7,7 +8,7 @@ namespace EUROPA {
 
   std::string toString(double value) {
     std::stringstream s;
-    s << value;
+    s << std::setprecision(MAX_PRECISION) << value;
     return(s.str());
   }
 

@@ -1,6 +1,8 @@
 #include "PSVarValue.hh"
 #include "Debug.hh"
 
+#include <iomanip>
+
 namespace EUROPA {
 
 	std::string PSVarValue::toString() const {
@@ -11,6 +13,7 @@ namespace EUROPA {
 			os << asInt();
 			break;
 		case DOUBLE:
+		  os << std::setprecision(MAX_PRECISION);
 			os << asDouble();
 			break;
 		case BOOLEAN:

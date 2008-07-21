@@ -87,4 +87,12 @@ namespace EUROPA {
  */
 #define EPSILON (EUROPA::g_epsilon())
 
+#include <cmath>
+
+/**
+ * @def MAX_PRECISION
+ * The maximum number of digits of precision possible in a EUROPA floaing-point number.
+ */
+#define MAX_PRECISION (static_cast<int>(std::log10(static_cast<double>(MAX_INT) + EPSILON) + 1.0))
+
 #endif
