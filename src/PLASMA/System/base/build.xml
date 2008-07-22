@@ -25,14 +25,18 @@
     <property name="build.dir" value="${src.dir}/classes"/>
     <property name="cache" value="${src.dir}/.cache"/>
     <property name="dist" location="${plasma.dir}/build/lib"/>
-    <property name="libraries" location="${plasma.dir}/ext/lib"/>
   
-    <fileset dir="${libraries}" id="psengine.libfiles">
-      <include name="utils.jar"/>
+    <fileset dir="${plasma.dir}/ext/lib" id="plasma.extlibfiles">
+      <include name="util.jar"/>
+    </fileset>
+
+    <fileset dir="${plasma.dir}/build/lib" id="plasma.libfiles">
+      <include name="nddl.jar"/>
     </fileset>
 
     <path id="psengine.classpath">
-      <fileset refid="psengine.libfiles"/>
+      <fileset refid="plasma.libfiles"/>
+      <fileset refid="plasma.extlibfiles"/>
     </path>
 
     <mkdir dir="${build.dir}"/>
@@ -43,15 +47,15 @@
     <depend srcdir="${src.dir}:java" destdir="${build.dir}" cache="${cache}" closure="yes"/>
     <javac classpathref="psengine.classpath" 
            destdir="${build.dir}">
-  	<src path="${src.dir}"/>
-		<src path="java"/>    	
+        <src path="${src.dir}"/>
+        <src path="java"/>    	
     </javac>	
   </target>
 
   <target name="PSEngine" depends="compile">
     <mkdir dir="${cache}/unjar"/>
     <unjar dest="${cache}/unjar">
-      <fileset refid="psengine.libfiles"/>
+      <fileset refid="plasma.libfiles"/>
     </unjar>
     <delete dir="${cache}/unjar/META-INF"/>
     <mkdir dir="${dist}"/>

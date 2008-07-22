@@ -29,7 +29,7 @@ import org.ops.ui.solver.PSSolverDialog;
 import org.ops.ui.util.Util;
 import org.ops.ui.mouse.ActionViolationsPanel;
 import org.ops.ui.mouse.ActionDetailsPanel;
-import org.ops.ui.nddl.NddlInterpreter;
+import org.ops.ui.nddl.NddlAshInterpreter;
 import org.ops.ui.nddl.NddlTokenMarker;
 import org.ops.ui.anml.AnmlInterpreter;
 import org.ops.ui.anml.AnmlTokenMarker;
@@ -46,7 +46,7 @@ public class PSDesktop
 	protected JDesktopPane desktop_;
 	protected int windowCnt_=0;
 	protected PSEngine psEngine_=null;
-    protected NddlInterpreter nddlInterpreter_;
+    protected NddlAshInterpreter nddlInterpreter_;
 	protected JConsole bshConsole_;
     protected Interpreter bshInterpreter_;
     
@@ -134,18 +134,11 @@ public class PSDesktop
 	{
 		assert (pse != null);
 	    psEngine_ = pse;
-	    initPSEngine();
+        nddlInterpreter_ = new NddlAshInterpreter(psEngine_);
         bshConsole_ = new JConsole();
         bshInterpreter_ = new Interpreter(bshConsole_);                	    
 	}
-	
-    // TODO !! this must be done as part of PSEngine packaging, not here 
-	public void initPSEngine()
-	{
-        nddlInterpreter_ = new NddlInterpreter(psEngine_);
-        psEngine_.nddlInterpreter = nddlInterpreter_; 
-	}
-	
+		
     public void runUI()
     {
 	    SwingUtilities.invokeLater(new UICreator());

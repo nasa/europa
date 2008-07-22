@@ -175,27 +175,24 @@ namespace EUROPA {
     }
   }
 
-  // NddlInterpreter class must be moved to psengine package  
-  public Object nddlInterpreter=null; // For PSDesktop
+  protected NddlInterpreter nddlInterpreter_=null; 
+  
+  public NddlInterpreter getNddlInterpreter()
+  {
+      if (nddlInterpreter_ == null) 
+          nddlInterpreter_ = new NddlInterpreter(this);
+          
+      return nddlInterpreter_;
+  }
+   
   public void executeScript(String language, String script, boolean isFile) throws PSException 
   {
       try {
-        if (language.equalsIgnoreCase("nddl")) {
-            if (nddlInterpreter != null) {
-                Class nddlClass = getClassForName("org.ops.ui.nddl.NddlInterpreter");
-                Class[] parameters = new Class[]{String.class};
-                Object[] arguments = new Object[]{script};
-                String methodName = (isFile ? "source" : "eval");
-                nddlClass.getMethod(methodName, parameters).invoke(nddlInterpreter, arguments);
-            }
-            else {
-                java.io.Reader input;
-                if (isFile)
-                    input = new java.io.BufferedReader(new java.io.FileReader(script));
-                else 
-                    input = new java.io.BufferedReader(new java.io.StringReader(script));
-                executeScript(language,input);
-            }
+        if (language.equalsIgnoreCase("nddl")) {                
+            if (isFile)
+                getNddlInterpreter().source(script);
+            else 
+                getNddlInterpreter().eval(script);
         }
         else {
             executeScript_internal(language,script,isFile);
