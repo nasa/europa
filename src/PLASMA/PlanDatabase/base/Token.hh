@@ -417,6 +417,9 @@ namespace EUROPA {
     virtual PSToken* getMaster() const;
     virtual PSList<PSToken*> getSlaves() const;
 
+    virtual PSToken* getActive() const;
+    virtual PSList<PSToken*> getMerged() const;
+    
     virtual PSList<PSVariable*> getParameters() const;
     virtual PSVariable* getParameter(const std::string& name) const;
 

@@ -328,6 +328,9 @@ namespace EUROPA {
 
     PSToken* getMaster();
     PSList<PSToken*> getSlaves();
+ 
+    PSToken* getActive() const;
+    PSList<PSToken*> getMerged() const;
     
     PSTokenState getTokenState() const;
     PSVariable* getStart();

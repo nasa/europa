@@ -958,6 +958,24 @@ PSList<PSToken*> Token::getSlaves() const {
   return retval;    	
 }  
 
+PSToken* Token::getActive() const
+{
+    return (PSToken*)((Token*)getActiveToken());
+}
+
+PSList<PSToken*> Token::getMerged() const
+{
+    PSList<PSToken*> retval;
+    
+    TokenSet::const_iterator it=m_mergedTokens.begin();
+    for (;it != m_mergedTokens.end(); ++it) {
+        retval.push_back(*it);
+    }
+    
+    return retval;
+}
+
+
 PSToken::PSTokenState Token::getTokenState() const
 {
     if (isActive())
@@ -1059,21 +1077,5 @@ std::string Token::toLongString() const
 	
 	return os.str();
 }
-
-// OLD toLongString only printed 5 built-in variables
-//std::string Token::toLongString() const
-//{
-//	static std::string ident="    ";
-//	
-//	std::ostringstream os;
-//	
-//	os << "Token(" << getKey() << "," << getName().toString() << ") {" << std::endl;
-//	os << ident << "object:" << getObject()->toString() << std::endl;
-//	os << ident << "start:" << start()->toString() << std::endl;
-//	os << ident << "end:" << start()->toString() << std::endl;
-//	os << ident << "duration:" << duration()->toString() << std::endl;
-//	os << "}" << std::endl; 
-//	return os.str();
-//}
 
 }

@@ -70,6 +70,9 @@ namespace EUROPA {
       virtual PSObject* getOwner() const = 0; 
       virtual PSToken* getMaster() const = 0;
       virtual PSList<PSToken*> getSlaves() const = 0;
+      
+      virtual PSToken* getActive() const = 0;
+      virtual PSList<PSToken*> getMerged() const = 0;
 
       virtual double getViolation() const = 0;
       virtual std::string getViolationExpl() const = 0;
