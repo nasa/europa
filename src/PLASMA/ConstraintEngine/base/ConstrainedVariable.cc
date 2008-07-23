@@ -619,11 +619,6 @@ namespace EUROPA {
   	std::string ConstrainedVariable::toString() const {
   		std::ostringstream os;
 
-  		if (specifiedFlag()) {
-  		    os << lastDomain().toString();
-  		    return os.str();
-  		}
-  		
   		if (isNull())
   			os << "NULL";
   		else if (isSingleton()) 
