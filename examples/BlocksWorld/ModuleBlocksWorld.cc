@@ -2,7 +2,7 @@
 #include "BlocksWorldCustomCode.hh"
 
 // Pieces necessary for various customizations:
-#include "ConstraintLibrary.hh"
+#include "ConstraintFactory.hh"
 #include "PSPlanDatabase.hh"
 #include "TransactionInterpreter.hh"
 #include "Schema.hh"

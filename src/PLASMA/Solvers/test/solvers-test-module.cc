@@ -100,10 +100,10 @@ void SolversTestEngine::createModules()
 }
 
 
-class TestAssembly : public SolversTestEngine 
+class TestEngine : public SolversTestEngine 
 {
 public:
-  TestAssembly()
+  TestEngine()
   {
   }
   
@@ -204,7 +204,7 @@ public:
 
 private:
   static bool testBasicAllocation(){
-    TestAssembly assembly;
+    TestEngine assembly;
     
     TiXmlElement* configXml = initXml((getTestLoadLibraryPath() + "/ComponentFactoryTest.xml").c_str());
 
@@ -236,7 +236,7 @@ public:
 
 private:
   static bool testRuleMatching() {
-    TestAssembly assembly;
+    TestEngine assembly;
     
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/RuleMatchingTests.xml").c_str(), "MatchingEngine");
     MatchingEngine me(*root);
@@ -399,7 +399,7 @@ private:
   static bool testVariableFiltering(){
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawFilterTests.xml").c_str(), "UnboundVariableManager");
 
-    TestAssembly assembly;
+    TestEngine assembly;
     UnboundVariableManager fm(*root);
     assert(assembly.playTransactions( (getTestLoadLibraryPath() + "/UnboundVariableFiltering.xml").c_str() ));
 
@@ -450,7 +450,7 @@ private:
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawFilterTests.xml").c_str(), "OpenConditionManager");
                 check_error(root != NULL, "Error loading xml: " + getTestLoadLibraryPath() + "/FlawFilterTests.xml");
 
-    TestAssembly assembly;
+    TestEngine assembly;
     OpenConditionManager fm(*root);
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
@@ -477,7 +477,7 @@ private:
   static bool testThreatFiltering(){
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawFilterTests.xml" ).c_str(), "ThreatManager");
 
-    TestAssembly assembly;
+    TestEngine assembly;
     ThreatManager fm(*root);
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
@@ -528,7 +528,7 @@ public:
 
 private:
   static bool testPriorities(){
-    TestAssembly assembly;
+    TestEngine assembly;
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestPriorities");
     MatchingEngine me(*root, "FlawHandler");
     PlanDatabaseId db = assembly.getPlanDatabase();
@@ -589,7 +589,7 @@ private:
   }
 
   static bool testGuards(){
-    TestAssembly assembly;
+    TestEngine assembly;
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestGuards");
     MatchingEngine me(*root, "FlawHandler");
     PlanDatabaseId db = assembly.getPlanDatabase();
@@ -674,7 +674,7 @@ private:
   }
 
   static bool testDynamicFlawManagement(){
-    TestAssembly assembly;
+    TestEngine assembly;
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestDynamicFlaws");
     TiXmlElement* child = root->FirstChildElement();
     PlanDatabaseId db = assembly.getPlanDatabase();
@@ -784,7 +784,7 @@ private:
   }
 
   static bool testDefaultVariableOrdering(){
-    TestAssembly assembly;
+    TestEngine assembly;
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "DefaultVariableOrdering");
     TiXmlElement* child = root->FirstChildElement();
     {
@@ -803,7 +803,7 @@ private:
   }
 
   static bool testHeuristicVariableOrdering(){
-    TestAssembly assembly;
+    TestEngine assembly;
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "HeuristicVariableOrdering");
     TiXmlElement* child = root->FirstChildElement();
     {
@@ -822,7 +822,7 @@ private:
   }
 
   static bool testTokenComparators() {
-    TestAssembly assembly;
+    TestEngine assembly;
     assembly.getSchema()->addPredicate("A.Foo");
     PlanDatabaseId db = assembly.getPlanDatabase();
 
@@ -1188,7 +1188,7 @@ private:
   }
 
   static bool testValueEnum() {
-    TestAssembly assembly;
+    TestEngine assembly;
     PlanDatabaseId db = assembly.getPlanDatabase();
     ConstraintEngineId ce = assembly.getConstraintEngine();
 
@@ -1339,7 +1339,7 @@ private:
     return true;
   }
   static bool testHSTSOpenConditionDecisionPoint() {
-    TestAssembly assembly;
+    TestEngine assembly;
     assembly.getSchema()->addPredicate("A.Foo");
     PlanDatabaseId db = assembly.getPlanDatabase();
     DbClientId client = db->getClient();
@@ -1459,7 +1459,7 @@ private:
     return true;
   }
   static bool testHSTSThreatDecisionPoint() {
-    TestAssembly assembly;
+    TestEngine assembly;
     assembly.getSchema()->addPredicate("A.Foo");
     PlanDatabaseId db = assembly.getPlanDatabase();
     DbClientId client = db->getClient();
@@ -1557,7 +1557,7 @@ private:
    * @brief Will load an intial state and solve a csp with only variables.
    */
   static bool testMinValuesSimpleCSP(){
-    TestAssembly assembly;
+    TestEngine assembly;
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
@@ -1601,7 +1601,7 @@ private:
 
 
   static bool testSuccessfulSearch(){
-    TestAssembly assembly;
+    TestEngine assembly;
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
@@ -1613,7 +1613,7 @@ private:
   }
 
   static bool testExhaustiveSearch(){
-    TestAssembly assembly;
+    TestEngine assembly;
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
@@ -1638,7 +1638,7 @@ private:
   }
 
   static bool testSimpleActivation() {
-    TestAssembly assembly;
+    TestEngine assembly;
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleActivationSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
@@ -1653,7 +1653,7 @@ private:
   }
 
   static bool testSimpleRejection() {
-    TestAssembly assembly;
+    TestEngine assembly;
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleRejectionSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
@@ -1672,7 +1672,7 @@ private:
 
 
   static bool testMultipleSearch(){
-    TestAssembly assembly;
+    TestEngine assembly;
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
 
@@ -1690,7 +1690,7 @@ private:
 
   //to test GNATS 3068
   static bool testOversearch() {
-    TestAssembly assembly;
+    TestEngine assembly;
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
 
@@ -1703,7 +1703,7 @@ private:
   }
 
   static bool testBacktrackFirstDecisionPoint(){
-    TestAssembly assembly;
+    TestEngine assembly;
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "BacktrackSolver");
     TiXmlElement* child = root->FirstChildElement();
     assert(assembly.playTransactions((getTestLoadLibraryPath() +"/BacktrackFirstDecision.xml").c_str()));
@@ -1725,7 +1725,7 @@ private:
    * we are better off trying anoher branch with the time we have rather than working the current one.
    */
   static bool testMultipleSolutionsSearch(){
-    TestAssembly assembly;
+    TestEngine assembly;
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
     assert(assembly.playTransactions( (getTestLoadLibraryPath() + "/StaticCSP.xml").c_str()));
@@ -1774,7 +1774,7 @@ private:
   }
 
   static bool testGNATS_3196(){
-    TestAssembly assembly;
+    TestEngine assembly;
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "GNATS_3196");
     TiXmlElement* child = root->FirstChildElement();
     assert(assembly.playTransactions( (getTestLoadLibraryPath() + "/GNATS_3196.xml").c_str()));
@@ -1788,7 +1788,7 @@ private:
   }
 
   static bool testContext() {
-    TestAssembly assembly;
+    TestEngine assembly;
     std::stringstream data;
     data << "<Solver name=\"TestSolver\">" << std::endl;
     data << "</Solver>" << std::endl;
@@ -1806,7 +1806,7 @@ private:
 
   static bool testDeletedFlaw() {
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestDynamicFlaws");
-    TestAssembly assembly;
+    TestEngine assembly;
     PlanDatabaseId db = assembly.getPlanDatabase();
     Object o1(db, "GuardTest", "o1");
     db->close();
@@ -1839,7 +1839,7 @@ private:
   static bool testDeleteAfterCommit() {
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestCommit");
     TiXmlElement* child = root->FirstChildElement();
-    TestAssembly assembly;
+    TestEngine assembly;
     PlanDatabaseId db = assembly.getPlanDatabase();
     Object o1(db, "CommitTest", "o1");
     db->close();
@@ -1914,7 +1914,7 @@ private:
   static bool testUnboundVariableFlawIteration() {
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawFilterTests.xml" ).c_str(), "UnboundVariableManager");
     
-    TestAssembly assembly;
+    TestEngine assembly;
     UnboundVariableManager fm(*root);
     fm.initialize(assembly.getPlanDatabase());
     assert(assembly.playTransactions((getTestLoadLibraryPath() + "/UnboundVariableFiltering.xml").c_str()));
@@ -1946,7 +1946,7 @@ private:
   static bool testOpenConditionFlawIteration() {
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawFilterTests.xml" ).c_str(), "OpenConditionManager");
     
-    TestAssembly assembly;
+    TestEngine assembly;
     OpenConditionManager fm(*root);
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
@@ -1979,7 +1979,7 @@ private:
   static bool testThreatFlawIteration() {
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawFilterTests.xml" ).c_str(), "ThreatManager");
 
-    TestAssembly assembly;
+    TestEngine assembly;
     ThreatManager fm(*root);
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
@@ -2010,7 +2010,7 @@ private:
 
   static bool testSolverIteration() {
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/IterationTests.xml" ).c_str(), "Solver");
-    TestAssembly assembly;
+    TestEngine assembly;
     ThreatManager tm(*(root->FirstChildElement("ThreatManager")));
     OpenConditionManager ocm(*(root->FirstChildElement("OpenConditionManager")));
     UnboundVariableManager uvm(*(root->FirstChildElement("UnboundVariableManager")));

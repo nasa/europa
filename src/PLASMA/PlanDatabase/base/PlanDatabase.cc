@@ -1040,13 +1040,9 @@ namespace EUROPA{
       return token;      
   }
   
-
   std::string PlanDatabase::toString()
   {
-      PlanDatabaseWriter* pdw = new PlanDatabaseWriter();
-      std::string planOutput = pdw->toString(this);
-      delete pdw;
-      return planOutput;
+      return PlanDatabaseWriter::toString(this);
   }
   
   bool PlanDatabase::hasTokenFactories() const

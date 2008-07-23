@@ -6,6 +6,7 @@
 #include "ConstraintEngineDefs.hh"
 #include "PlanDatabaseDefs.hh"
 #include "RulesEngineDefs.hh"
+#include "tinyxml.h"
 
 namespace EUROPA {
 
@@ -13,6 +14,7 @@ namespace EUROPA {
   {
     public:  
        	EuropaEngine();          
+        virtual ~EuropaEngine();        
     	
         virtual ConstraintEngineId& getConstraintEngine();
         virtual PlanDatabaseId&     getPlanDatabase();
@@ -22,9 +24,20 @@ namespace EUROPA {
         virtual const PlanDatabase*     getPlanDatabasePtr() const;
         virtual const RulesEngine*      getRulesEnginePtr() const;
         
+        // TODO: remains of the old Assemblies, these are only used by test code, should be dropped, eventually.
+        bool playTransactions(const char* txSource, bool interp = false);
+        bool plan(const char* txSource, const char* config, bool interp = false);
+        bool plan(const char* txSource, const TiXmlElement& config, bool interp = false);
+        void write(std::ostream& os) const;
+        unsigned int getTotalNodesSearched() const;
+        unsigned int getDepthReached() const;
+        static const char* TX_LOG();
+        
     protected: 
-    	virtual ~EuropaEngine();    	
-    	void createModules();    	    			
+    	void createModules();    
+    	
+        unsigned int m_totalNodes;
+        unsigned int m_finalDepth;    	
   };
 }
 

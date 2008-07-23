@@ -11,7 +11,7 @@
 #include <iostream>
 #include <stdlib.h>
 
-#include "SolverAssembly.hh"
+#include "EuropaEngine.hh"
 #include "Rule.hh"
 
 #ifdef CBPLANNER
@@ -44,17 +44,23 @@ bool replayRequired = false;
 
 void initSchema(const SchemaId& schema, const RuleSchemaId& ruleSchema);
 
+class TestEngine : public EuropaEngine
+{
+  public:
+    TestEngine() { doStart(); }
+    ~TestEngine() { doShutdown(); }
+};
+
 /**
    REPLAY IS BROKEN WITH THE INTERPRETER AND NEEDS TO BE FIXED!!!!
  */
-template<class ASSEMBLY>
 void replay(const std::string& s1,const DbClientTransactionLogId& txLog) 
 {
-  ASSEMBLY replayed;
+  TestEngine replayed;   
   initSchema(((Schema*)replayed.getComponent("Schema"))->getId(),
              ((RuleSchema*)replayed.getComponent("RuleSchema"))->getId());
   
-  replayed.playTransactions(ASSEMBLY::TX_LOG());
+  replayed.playTransactions(TestEngine::TX_LOG());
   std::string s2 = PlanDatabaseWriter::toString(replayed.getPlanDatabase(), false);
   condDebugMsg(s1 != s2, "Main", "S1" << std::endl << s1 << std::endl << "S2" << std::endl << s2);
   // TO FIX: assertTrue(s1 == s2);
@@ -69,39 +75,38 @@ std::string dumpIdTable(const char* title)
   return os.str();
 }
 
-template<class ASSEMBLY>
 bool runPlanner()
 {
   check_error(DebugMessage::isGood());
 
-  ASSEMBLY assembly;
-  initSchema(((Schema*)assembly.getComponent("Schema"))->getId(),
-             ((RuleSchema*)assembly.getComponent("RuleSchema"))->getId());
+  TestEngine engine; 
+  initSchema(((Schema*)engine.getComponent("Schema"))->getId(),
+             ((RuleSchema*)engine.getComponent("RuleSchema"))->getId());
 
   debugMsg("IdTypeCounts", dumpIdTable("before"));  
     
   DbClientTransactionLogId txLog;
   if(replayRequired)
-    txLog = (new DbClientTransactionLog(assembly.getPlanDatabase()->getClient()))->getId();
+    txLog = (new DbClientTransactionLog(engine.getPlanDatabase()->getClient()))->getId();
 
   check_error(plannerConfig != NULL, "Must have a planner config argument.");
   TiXmlDocument doc(plannerConfig);
   doc.LoadFile();
 
-  assert(assembly.plan(initialTransactions,*(doc.RootElement()), isInterpreted()));
+  assert(engine.plan(initialTransactions,*(doc.RootElement()), isInterpreted()));
 
   debugMsg("Main:runPlanner", "Found a plan at depth " 
-	   << assembly.getDepthReached() << " after " << assembly.getTotalNodesSearched());
+	   << engine.getDepthReached() << " after " << engine.getTotalNodesSearched());
 
   if(replayRequired) {
-      assembly.write(std::cout);
-      std::string s1 = PlanDatabaseWriter::toString(assembly.getPlanDatabase(), false);
-      std::ofstream out(ASSEMBLY::TX_LOG());
+      engine.write(std::cout);
+      std::string s1 = PlanDatabaseWriter::toString(engine.getPlanDatabase(), false);
+      std::ofstream out(TestEngine::TX_LOG());
       txLog->flush(out);
       out.close();
-      assembly.doShutdown(); // TODO: remove this when all static data structures are gone
+      engine.doShutdown(); // TODO: remove this when all static data structures are gone
       
-      replay<ASSEMBLY>(s1, txLog);
+      replay(s1, txLog);
   }
 
   debugMsg("IdTypeCounts", dumpIdTable("after"));  
@@ -110,23 +115,23 @@ bool runPlanner()
 }
 
 
-template<class ASSEMBLY>
 bool copyFromFile(){
   // Populate plan database from transaction log
   std::string s1;
   {
-    ASSEMBLY assembly;
-    assembly.playTransactions(ASSEMBLY::TX_LOG());
-    s1 = PlanDatabaseWriter::toString(assembly.getPlanDatabase(), false);
-    assembly.getPlanDatabase()->archive();
+    TestEngine engine; 
+    engine.playTransactions(TestEngine::TX_LOG());
+    s1 = PlanDatabaseWriter::toString(engine.getPlanDatabase(), false);
+    engine.getPlanDatabase()->archive();
   }
 
   std::string s2;
   {
-    ASSEMBLY assembly;
-    assembly.playTransactions(ASSEMBLY::TX_LOG());
-    s2 = PlanDatabaseWriter::toString(assembly.getPlanDatabase(), false);
-    assembly.getPlanDatabase()->archive();
+    TestEngine engine; 
+    
+    engine.playTransactions(TestEngine::TX_LOG());
+    s2 = PlanDatabaseWriter::toString(engine.getPlanDatabase(), false);
+    engine.getPlanDatabase()->archive();
   }
 
   assert(s1 == s2);
@@ -236,21 +241,19 @@ int main(int argc, const char** argv)
     }
         
     setup(argv);
-    SolverAssembly::initialize();
 
     const char* performanceTest = getenv("EUROPA_PERFORMANCE");
 
     if (performanceTest != NULL && strcmp(performanceTest, "1") == 0) {
         replayRequired = false;
-        runTest(runPlanner<SolverAssembly>);
+        runTest(runPlanner);
     }
     else {
         replayRequired = false; //= true;
-        runTest(runPlanner<SolverAssembly>);
-        //runTest(copyFromFile<SolverAssembly>);
+        runTest(runPlanner);
+        //runTest(copyFromFile);
     }
 
-    SolverAssembly::terminate();
     cleanup();
   
     std::cout << "Finished" << std::endl;

@@ -138,7 +138,7 @@ namespace EUROPA {
   std::string PSEngineImpl::planDatabaseToString() 
   {
     check_runtime_error(isStarted(),"PSEngine has not been started");
-	return getPlanDatabase()->toString();  
+    return getPlanDatabase()->toString();  
   }
 
   // Constraint Engine methods

@@ -6,7 +6,7 @@ if ( "Resources" in $(NO) ) {
   SubDirC++Flags -DNO_RESOURCES ;
 }
 
-ModuleComponent System	: SolverAssembly.cc MasterController.cc SingleSolverController.cc ;
+ModuleComponent System	: MasterController.cc SingleSolverController.cc ;
 
 PSUI_HOME ?= [ FDirName $(PLASMA_HOME) src PLASMA System component PSUI ] ;
 

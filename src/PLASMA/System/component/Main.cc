@@ -1,68 +1,51 @@
 /**
  * @file Main.cc
  *
- * @brief Provides an executable for your project which will use a
- * standard Chronological backtracking planner and a StandardAssembly or a PSEngine
- * to encapsulate EUROPA
+ * @brief Provides an executable for your project which uses 
+ * - a standard chronological backtracking planner 
+ * - a PSEngine to encapsulate EUROPA
  */
 
 #include "Nddl.hh" /*!< Includes protypes required to load a model */
-#include "SolverAssembly.hh" /*!< For using a test EUROPA Assembly */
 #include "PSEngine.hh" 
 #include "Debug.hh"
 
 using namespace EUROPA;
 
-void executeWithAssembly(const char* plannerConfig, const char* txSource);
-bool executeWithPSEngine(const char* plannerConfig, const char* txSource, int startHorizon, int endHorizon, int maxSteps);
-void printFlaws(int it, PSList<std::string>& flaws);
+bool solve(bool useInterpreter, const char* plannerConfig, const char* txSource, int startHorizon, int endHorizon, int maxSteps);
 void runSolver(PSSolver* solver, int startHorizon, int endHorizon, int maxSteps);
 void checkSolver(PSSolver* solver, int i);
+void printFlaws(int it, PSList<std::string>& flaws);
 
 int main(int argc, const char ** argv)
 {
-  if (argc != 3) {
+  if (argc < 3) {
     std::cerr << "Must provide initial transactions file." << std::endl;
     return -1;
   }
 
   const char* txSource = argv[1];
   const char* plannerConfig = argv[2];
+  bool useInterpreter = (argc > 3);
   
-  executeWithAssembly(plannerConfig,txSource);
-  
-  /*
-  executeWithPSEngine(
+  solve(
+      useInterpreter,    
       plannerConfig,
       txSource,
       0,   // startHorizon
       100, // endHorizon
       1000 // maxSteps
   ); 
-  */
      
   return 0;
 }
 
-void executeWithAssembly(const char* plannerConfig, const char* txSource)
-{
-  SolverAssembly::initialize();
-
-  
-  { // Encapsualte allocation so that they go out of scope before calling terminate  
-    SolverAssembly assembly;    
-    SchemaId schema = ((Schema*)assembly.getComponent("Schema"))->getId();
-    RuleSchemaId ruleSchema = ((RuleSchema*)assembly.getComponent("RuleSchema"))->getId();   
-    NDDL::loadSchema(schema,ruleSchema); // eventually make this called via dlopen
-    assembly.plan(txSource, plannerConfig); // Run the planner    
-    assembly.write(std::cout); // Dump the results
-  }
-
-  SolverAssembly::terminate();
-  std::cout << "Finished\n";
-}
-
-bool executeWithPSEngine(const char* plannerConfig, const char* txSource, int startHorizon, int endHorizon, int maxSteps)
+bool solve(bool useInterpreter,
+           const char* plannerConfig, 
+           const char* txSource, 
+           int startHorizon, 
+           int endHorizon, 
+           int maxSteps)
 {
     try {
     	
@@ -70,9 +53,16 @@ bool executeWithPSEngine(const char* plannerConfig, const char* txSource, int st
       
       {
 	      PSEngine* engine = PSEngine::makeInstance();	
-	      engine->start();
+          engine->start();
 	      
-	      engine->executeScript("nddl-xml",txSource,true/*isFile*/);
+          if (!useInterpreter) {
+              SchemaId schema = ((Schema*)assembly.getComponent("Schema"))->getId();
+              RuleSchemaId ruleSchema = ((RuleSchema*)assembly.getComponent("RuleSchema"))->getId();   
+              NDDL::loadSchema(schema,ruleSchema); // eventually make this called via dlopen              
+              engine->executeScript("nddl-xml-txn",txSource,true/*isFile*/);
+          }        
+          else	      
+	          engine->executeScript("nddl-xml",txSource,true/*isFile*/);
 
 	      PSSolver* solver = engine->createSolver(plannerConfig);
 	      runSolver(solver,startHorizon,endHorizon,maxSteps);

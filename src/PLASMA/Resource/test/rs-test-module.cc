@@ -1945,7 +1945,7 @@ void ResourceModuleTests::runTests(std::string path)
 /*
  * TODO JRB : Enable these tests. Moved here from Solvers/test/solvers-test-module.cc
  *   static bool testResourceDecisionPoint() {
-    TestAssembly assembly;
+    TestEngine assembly;
     PlanDatabaseId db = assembly.getPlanDatabase();
     ConstraintEngineId ce = assembly.getConstraintEngine();
     DbClientId client = db->getClient();
@@ -2005,7 +2005,7 @@ void ResourceModuleTests::runTests(std::string path)
   }
 
   static bool testSAVHThreatDecisionPoint() {
-    TestAssembly assembly;
+    TestEngine assembly;
     PlanDatabaseId db = assembly.getPlanDatabase();
     ConstraintEngineId ce = assembly.getConstraintEngine();
     DbClientId client = db->getClient();
@@ -2331,7 +2331,7 @@ void ResourceModuleTests::runTests(std::string path)
   }
   
   static bool testSAVHThreatManager() {
-    TestAssembly assembly;
+    TestEngine assembly;
     PlanDatabaseId db = assembly.getPlanDatabase();
     ConstraintEngineId ce = assembly.getConstraintEngine();
     DbClientId client = db->getClient();
