@@ -188,7 +188,7 @@
           <arg line="libSystem_g.a libSolvers_g.a libResource_g.a libANML_g.a libNDDL_g.a"/>
           <arg line="libRulesEngine_g.a libTemporalNetwork_g.a libPlanDatabase_g.a"/>
           <arg line="libConstraintEngine_g.a libUtils_g.a libTinyXml_g.a libAntlr_g.a"/>
-          <arg line="-Wl,--no-whole-archive"/>
+          <arg line="-Wl,--no-whole-archive -lpthread"/>
         </exec>
         <exec executable="g++" dir="${dir.dist.base}/lib">
           <arg line="-mno-cygwin -shared -Wl,-v -Wl,--add-stdcall-alias -Wl,--whole-archive"/>
@@ -196,7 +196,7 @@
           <arg line="libSystem_o.a libSolvers_o.a libResource_o.a libANML_o.a libNDDL_o.a"/>
           <arg line="libRulesEngine_o.a libTemporalNetwork_o.a libPlanDatabase_o.a"/>
           <arg line="libConstraintEngine_o.a libUtils_o.a libTinyXml_o.a libAntlr_o.a"/>
-          <arg line="-Wl,--no-whole-archive"/>
+          <arg line="-Wl,--no-whole-archive -lpthread"/>
         </exec>
       </then>
     </if>
