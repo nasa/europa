@@ -46,6 +46,10 @@ namespace EUROPA {
 
       virtual void addPrecedence(PSToken* pred,PSToken* succ) = 0;
       virtual void removePrecedence(PSToken* pred,PSToken* succ) = 0;
+      
+      virtual PSVarValue asPSVarValue() const = 0;
+      
+      static PSObject* asPSObject(PSEntity* entity);      
   };
 
   

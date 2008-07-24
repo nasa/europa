@@ -275,6 +275,9 @@ namespace EUROPA {
     PSList<PSToken*> getTokens();
     void addPrecedence(PSToken* pred,PSToken* succ);
     void removePrecedence(PSToken* pred,PSToken* succ);
+    PSVarValue asPSVarValue() const;
+    
+    static PSObject* asPSObject(PSEntity* entity);
     
     ~PSObject();
   protected:

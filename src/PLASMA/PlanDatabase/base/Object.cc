@@ -848,8 +848,20 @@ namespace EUROPA {
 	  TokenId p = getPlanDatabase()->getEntityByKey(pred->getKey());
 	  TokenId s = getPlanDatabase()->getEntityByKey(succ->getKey());
 	  free(p,s);	  
-}
-
+  }
+  
+  PSVarValue Object::asPSVarValue() const
+  {
+      PSVarValue retval((double)getId(),OBJECT);
+     
+      return retval;
+  }
+  
+  PSObject* PSObject::asPSObject(PSEntity* entity)
+  {
+      return dynamic_cast<PSObject*>(entity);    
+  }
+ 
 }
 
 

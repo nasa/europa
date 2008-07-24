@@ -264,7 +264,8 @@ namespace EUROPA {
     virtual void addPrecedence(PSToken* pred,PSToken* succ);
     virtual void removePrecedence(PSToken* pred,PSToken* succ);
     
-
+    virtual PSVarValue asPSVarValue() const;
+    
   protected:
 
     /**
