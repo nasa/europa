@@ -6,7 +6,7 @@ Module Utils : TinyXml ;
 
 ModuleFiles Utils : CommonDefs.cc ;
 
-ModuleLibraries Utils : $(DLOPEN_LIBRARY) ;
+ModuleLibraries Utils : $(DLOPEN_LIBRARY) $(PTHREADS_LIBRARY) ;
 
 SubInclude PLASMA Utils base ;
 SubInclude PLASMA Utils component ;

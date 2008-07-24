@@ -81,15 +81,15 @@ rule FVariantLinkFlags
 
   switch $(variant) {
   case DEV :
-    return $(THREADED_LINK_FLAGS) ;
+    return ;
   case OPTIMIZED :
-    return $(THREADED_LINK_FLAGS) ;
+    return ;
   case PROFILE :
-    return $(PROFILE_FLAGS) $(THREADED_LINK_FLAGS) ;
+    return $(PROFILE_FLAGS) ;
   case COVERAGE :
-    return $(COVERAGE_FLAGS) $(THREADED_LINK_FLAGS) ;
+    return $(COVERAGE_FLAGS) ;
   case CUSTOM :
-    local flags = $(THREADED_LINK_FLAGS) ;
+    local flags = ;
     if $(EUROPA_PROFILE) {
       flags += $(PROFILE_FLAGS) ;
     }

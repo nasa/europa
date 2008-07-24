@@ -110,12 +110,13 @@ DEBUG_FLAGS ?= -g3 ;
 if $(OS) = BEOS {
   PTHREADS_LIBRARY = condvar ;
 } else {
-  PTHREADS_LIBRARY = pthread ;
+  if $(OS) = MINGW {
+    PTHREADS_LIBRARY = pthreadGC2 ;
+  }
+  else {
+    PTHREADS_LIBRARY = pthread ;
+  }
 }
-
-# THREADED_LINK_FLAGS = flags to enable multi-threaded execution
-
-THREADED_LINK_FLAGS ?= -l$(PTHREADS_LIBRARY) ;
 
 # SUFSHARE = suffix for shared libraries
 

@@ -32,7 +32,6 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
-#include <pthread.h>
 #include <string>
 
 const char* DEFAULT_OBJECT_TYPE = "Object";
