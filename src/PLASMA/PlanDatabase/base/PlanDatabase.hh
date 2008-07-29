@@ -311,6 +311,8 @@ namespace EUROPA {
     
     bool hasTokenFactories() const;
     
+    PSPlanDatabaseClient* getPDBClient();
+    
     virtual std::string toString();
 
   private:
@@ -403,6 +405,7 @@ namespace EUROPA {
     const SchemaId m_schema;
     TemporalAdvisorId m_temporalAdvisor;
     DbClientId m_client; /*!< A client interface which provides an interception point for transaction logging */
+    PSPlanDatabaseClient* m_psClient; // PSEngine wrapper for m_client
     State m_state;
     TokenSet m_tokens;
     ObjectSet m_objects;
@@ -425,7 +428,7 @@ namespace EUROPA {
     // All this to store variables (and their listeners) for Open Object Types
     typedef std::multimap<double, std::pair<ConstrainedVariableId, ConstrainedVariableListenerId> > ObjVarsByObjType;
     typedef ObjVarsByObjType::iterator ObjVarsByObjType_I;
-    typedef ObjVarsByObjType::iterator ObjVarsByObjType_CI;
+    typedef ObjVarsByObjType::const_iterator ObjVarsByObjType_CI;
     ObjVarsByObjType m_objectVariablesByObjectType;
   };
 

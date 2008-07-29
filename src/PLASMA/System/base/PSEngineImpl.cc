@@ -141,6 +141,18 @@ namespace EUROPA {
     return getPlanDatabase()->toString();  
   }
 
+  PSPlanDatabaseClient* PSEngineImpl::getPlanDatabaseClient()
+  {
+     check_runtime_error(isStarted(),"PSEngine has not been started");
+     return getPlanDatabase()->getPDBClient();       
+  }
+  
+  void PSEngineImpl::addPlanDatabaseListener(PSPlanDatabaseListener& listener)
+  {
+      check_runtime_error(isStarted(),"PSEngine has not been started");
+      listener.setPlanDatabase(EuropaEngine::getPlanDatabase());
+  }
+  
   // Constraint Engine methods
   PSVariable* PSEngineImpl::getVariableByKey(PSEntityKey id)
   {
@@ -154,33 +166,6 @@ namespace EUROPA {
 	return getConstraintEngine()->getVariableByName(name);  
   }
 
-  // TODO: these 2 need to be pushed into the PSConstraintEngine
-  PSConstraint* PSEngineImpl::addConstraint(const std::string& type, PSList<PSVariable*> args)
-  {
-      std::vector<ConstrainedVariableId> variables;
-      for (int i=0;i<args.size();i++) {
-          ConstrainedVariableId arg = getPlanDatabase()->getEntityByKey(args.get(i)->getKey());
-          variables.push_back(arg);
-      }
-      
-      ConstraintId c = getPlanDatabase()->getClient()->createConstraint(type.c_str(), variables);
-
-      // TODO: this must be pushed to the CE
-      if (getAutoPropagation())
-          propagate();
-      
-      return (Constraint*)c;      
-  }
-  
-  void PSEngineImpl::removeConstraint(PSEntityKey id)
-  {
-      ConstraintId c = getPlanDatabase()->getEntityByKey(id);
-      getPlanDatabase()->getClient()->deleteConstraint(c);      
-      // TODO: this must be pushed to the CE
-      if (getAutoPropagation())
-          propagate();      
-  }
-  
   bool PSEngineImpl::getAutoPropagation() const
   {
     return getConstraintEnginePtr()->getAutoPropagation();
@@ -223,11 +208,5 @@ namespace EUROPA {
     return ((PSSolverManager*)getComponent("PSSolverManager"))->createSolver(configurationFile);
   }
 
-  // Listener methods
-  void PSEngineImpl::addPlanDatabaseListener(PSPlanDatabaseListener& listener)
-  {
-	  check_runtime_error(isStarted(),"PSEngine has not been started");
-	  listener.setPlanDatabase(EuropaEngine::getPlanDatabase());
-  }
 }
 

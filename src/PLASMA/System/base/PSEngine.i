@@ -80,6 +80,7 @@ namespace EUROPA {
   class PSToken;
   class PSVariable;
   class PSVarValue;
+  class PSPlanDatabaseClient;
   class PSPlanDatabaseListener;
 
   template<class T>
@@ -224,13 +225,15 @@ namespace EUROPA {
 
     PSList<PSObject*> getObjectsByType(const std::string& objectType);
     PSObject* getObjectByKey(PSEntityKey id);
-	PSObject* getObjectByName(const std::string& name);
+    PSObject* getObjectByName(const std::string& name);
 
+    PSPlanDatabaseClient* getPlanDatabaseClient();
+    void addPlanDatabaseListener(PSPlanDatabaseListener& listener);
+    std::string planDatabaseToString();    
+      
     PSList<PSVariable*> getGlobalVariables();
     PSVariable* getVariableByKey(PSEntityKey id);
     PSVariable* getVariableByName(const std::string& name);
-    PSConstraint* addConstraint(const std::string& type, PSList<PSVariable*> args);
-    void removeConstraint(PSEntityKey id);
 
     PSList<PSToken*> getTokens();
     PSToken* getTokenByKey(PSEntityKey id);
@@ -246,9 +249,6 @@ namespace EUROPA {
     std::string getViolationExpl() const;
 
     PSSolver* createSolver(const std::string& configurationFile); 
-    void addPlanDatabaseListener(PSPlanDatabaseListener& listener);
-
-    std::string planDatabaseToString();    
   };
 
   class PSEntity
@@ -391,11 +391,11 @@ namespace EUROPA {
   class PSVarValue
   {
   public:
-    static PSVarValue getInstance(std::string val);
+    static PSVarValue getInstance(const std::string& val);
     static PSVarValue getInstance(int val);
     static PSVarValue getInstance(double val);
     static PSVarValue getInstance(bool val);
-	static PSVarValue getObjectInstance(double obj);
+    static PSVarValue getObjectInstance(double obj);
 
     PSVarType getType() const;
 
@@ -455,6 +455,36 @@ namespace EUROPA {
     double getUpperBound(TimePoint time);
   protected:
     PSResourceProfile();
+  };
+  
+  class PSPlanDatabaseClient  
+  {
+    public:    
+      PSVariable* createVariable(const std::string& typeName, const std::string& name, bool isTmpVar) = 0;
+      void deleteVariable(PSVariable* var) = 0;
+      
+      PSObject* createObject(const std::string& type, const std::string& name) = 0;
+      void deleteObject(PSObject* obj) = 0;
+      
+      PSToken* createToken(const std::string& predicateName, bool rejectable, bool isFact) = 0;
+      void deleteToken(PSToken* token) = 0;
+
+      void constrain(PSObject* object, PSToken* predecessor, PSToken* successor) = 0;
+      void free(PSObject* object, PSToken* predecessor, PSToken* successor) = 0;
+      void activate(PSToken* token) = 0;
+      void merge(PSToken* token, PSToken* activeToken) = 0;
+      void reject(PSToken* token) = 0;
+      void cancel(PSToken* token) = 0;
+      
+      PSConstraint* createConstraint(const std::string& name, PSList<PSVariable*>& scope) = 0;
+      void deleteConstraint(PSConstraint* constr) = 0;
+
+      void specify(PSVariable* variable, double value) = 0;
+      void reset(PSVariable* variable) = 0;      
+      
+      void close(PSVariable* variable) = 0;
+      void close(const std::string& objectType) = 0;
+      void close() = 0;      
   };
   
 // generate directors for all virtual methods in class Foo

@@ -1028,8 +1028,20 @@ namespace EUROPA
       check_error(factory.isValid());
       ConstraintId constraint = factory->createConstraint(getId(), scope);
       
+      if (getAutoPropagation())
+          propagate();            
+      
       return(constraint);
   }  
+  
+  void ConstraintEngine::deleteConstraint(const ConstraintId& c)
+  {
+      check_error(c.isValid());
+      delete (Constraint*)c;
+      
+      if (getAutoPropagation())
+          propagate();            
+  }
   
   
   double ConstraintEngine::createValue(const char* typeName, const std::string& value)

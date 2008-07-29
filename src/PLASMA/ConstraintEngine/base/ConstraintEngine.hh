@@ -322,6 +322,8 @@ namespace EUROPA {
     ConstraintId createConstraint(const LabelStr& name, 
                      const std::vector<ConstrainedVariableId>& scope);
 
+    void deleteConstraint(const ConstraintId& c);
+    
     /**
      * @brief Create a value for a string
      */

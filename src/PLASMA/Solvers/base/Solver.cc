@@ -89,6 +89,10 @@ namespace EUROPA {
     }
 
     bool Solver::solve(unsigned int maxSteps, unsigned int maxDepth){
+      ConstraintEngineId ce = m_db->getConstraintEngine();  
+      bool autoPropagation = ce->getAutoPropagation();
+      ce->setAutoPropagation(false);
+      
       // Initialize the step count floor with the prior step count so we can apply limits
       m_stepCountFloor = getStepCount();
       m_depthFloor = getDepth();
@@ -107,6 +111,7 @@ namespace EUROPA {
 
       debugMsg("Solver:solve", "Finished with " << m_stepCount << " steps and depth of " << m_decisionStack.size());
 
+      ce->setAutoPropagation(autoPropagation);
       return m_noFlawsFound;
     }
 

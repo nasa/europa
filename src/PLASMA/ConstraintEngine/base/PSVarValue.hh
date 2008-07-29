@@ -20,7 +20,7 @@ namespace EUROPA {
 
 	  std::string toString() const;
 
-	  static PSVarValue getInstance(std::string val) {return PSVarValue((double)LabelStr(val), STRING);}
+	  static PSVarValue getInstance(const std::string& val) {return PSVarValue((double)LabelStr(val), STRING);}
 	  static PSVarValue getInstance(int val) {return PSVarValue((double)val, INTEGER);}
 	  static PSVarValue getInstance(double val) {return PSVarValue((double)val, DOUBLE);}
 	  static PSVarValue getInstance(bool val) {return PSVarValue((double)val, BOOLEAN);}

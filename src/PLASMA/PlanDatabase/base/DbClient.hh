@@ -2,6 +2,7 @@
 #define _H_DbClient
 
 #include "PlanDatabaseDefs.hh"
+#include "PSPlanDatabase.hh"
 #include "Variable.hh"
 #include <vector>
 
@@ -344,6 +345,48 @@ namespace EUROPA {
     bool m_deleted; /*!< Used to indicate a deletion and this ignore synchronization of listeners on removal */
     bool m_transactionLoggingEnabled; /*!< Used to configure transaction loggng services required for Key Matching */
   };
+  
+  class PSPlanDatabaseClientImpl : public PSPlanDatabaseClient
+  {
+    public:   
+      PSPlanDatabaseClientImpl(const DbClientId& c);
+        
+      virtual PSVariable* createVariable(const std::string& typeName, const std::string& name, bool isTmpVar);
+      virtual void deleteVariable( PSVariable* var);
+      
+      virtual PSObject* createObject(const std::string& type, const std::string& name);
+      //virtual PSObject* createObject(const std::string& type, const std::string& name, PSList<PSVariable*>& arguments);
+      virtual void deleteObject(PSObject* obj);
+      
+      virtual PSToken* createToken(const std::string& predicateName, bool rejectable, bool isFact);
+      virtual void deleteToken(PSToken* token);
+
+      virtual void constrain(PSObject* object, PSToken* predecessor, PSToken* successor);
+      virtual void free(PSObject* object, PSToken* predecessor, PSToken* successor);
+      virtual void activate(PSToken* token);
+      virtual void merge(PSToken* token, PSToken* activeToken);
+      virtual void reject(PSToken* token);
+      virtual void cancel(PSToken* token);
+      
+      virtual PSConstraint* createConstraint(const std::string& name, PSList<PSVariable*>& scope);
+      virtual void deleteConstraint(PSConstraint* constr);
+
+      virtual void specify(PSVariable* variable, double value);
+      virtual void reset(PSVariable* variable);      
+      
+      virtual void close(PSVariable* variable);
+      virtual void close(const std::string& objectType);
+      virtual void close();      
+      
+    protected:
+      DbClientId m_client;  
+      
+      ConstrainedVariableId toId(PSVariable* v);
+      ConstraintId          toId(PSConstraint* c);
+      ObjectId              toId(PSObject* o);
+      TokenId               toId(PSToken* t);      
+  };
+  
 }
 
 #endif

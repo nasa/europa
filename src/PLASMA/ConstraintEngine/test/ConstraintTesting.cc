@@ -293,9 +293,6 @@ namespace EUROPA {
       debugMsg("ConstraintTesting:executeTestCases", "Created constraint " << constraint->toString() <<
 	       " with scope " << scopeStr.str() << " for test " 
 	       << testCases.front().m_case);
-      assertTrue(engine->pending());
-      engine->propagate();
-      assertFalse(engine->pending());
 
       // Compare derived domains with outputDoms.
       std::vector<ConstrainedVariableId>::iterator scopeIter = scope.begin();

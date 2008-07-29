@@ -29,9 +29,6 @@ namespace EUROPA {
     virtual PSVariable* getVariableByKey(PSEntityKey id);
     virtual PSVariable* getVariableByName(const std::string& name);
     
-    virtual PSConstraint* addConstraint(const std::string& type, PSList<PSVariable*> args);
-    virtual void removeConstraint(PSEntityKey id);
-
     virtual bool getAutoPropagation() const;
     virtual void setAutoPropagation(bool v);      
     virtual bool propagate(); 
@@ -51,14 +48,14 @@ namespace EUROPA {
 		
     virtual PSList<PSVariable*> getGlobalVariables();
 		
+    virtual void addPlanDatabaseListener(PSPlanDatabaseListener& listener);
+
+    virtual PSPlanDatabaseClient* getPlanDatabaseClient();
+    
     virtual std::string planDatabaseToString();    
     
     // Solver methods
     virtual PSSolver* createSolver(const std::string& configurationFile);
-
-    // Listener methods
-    virtual void addPlanDatabaseListener(PSPlanDatabaseListener& listener);
-
     
   protected:
     bool m_started;

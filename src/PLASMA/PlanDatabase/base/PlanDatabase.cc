@@ -62,31 +62,39 @@ namespace EUROPA{
 
   
   PlanDatabase::PlanDatabase(const ConstraintEngineId& constraintEngine, const SchemaId& schema)
-    : m_id(this), m_constraintEngine(constraintEngine), m_schema(schema), m_state(OPEN), m_deleted(false) {
-    m_client = (new DbClient(m_id))->getId();
-    check_error(m_constraintEngine.isValid());
-    check_error(m_schema.isValid());
+    : m_id(this)
+    , m_constraintEngine(constraintEngine)
+    , m_schema(schema)
+    , m_state(OPEN)
+    , m_deleted(false) 
+  {
+      check_error(m_constraintEngine.isValid());
+      check_error(m_schema.isValid());
+      m_client = (new DbClient(m_id))->getId();
+      m_psClient = new PSPlanDatabaseClientImpl(m_client);
   }
 
-  PlanDatabase::~PlanDatabase(){	  
-    m_deleted = true;
+  PlanDatabase::~PlanDatabase()
+  {	  
+      m_deleted = true;
 
-    if(!isPurged())
-      purge();
+      if(!isPurged())
+        purge();
 
-    if (!m_temporalAdvisor.isNoId())
-      delete (TemporalAdvisor*) m_temporalAdvisor;
+      if (!m_temporalAdvisor.isNoId())
+        delete (TemporalAdvisor*) m_temporalAdvisor;
 
-    // Delete the client
-    check_error(m_client.isValid());
-    delete (DbClient*) m_client;
+      // Delete the client
+      check_error(m_client.isValid());
+      delete (DbClient*) m_client;
+      delete m_psClient;
 
-    // Delete all object variable listeners:
-    for(ObjVarsByObjType_CI it = m_objectVariablesByObjectType.begin();
-    	it != m_objectVariablesByObjectType.end(); ++it)
+      // Delete all object variable listeners:
+      for(ObjVarsByObjType_CI it = m_objectVariablesByObjectType.begin();
+        it != m_objectVariablesByObjectType.end(); ++it)
      	delete (ObjectVariableListener*) it->second.second; 	  
     
-    m_id.remove();
+      m_id.remove();
   }
 
   void PlanDatabase::purge(){
@@ -600,7 +608,7 @@ namespace EUROPA{
 
   void PlanDatabase::close() {
     check_error(m_state == OPEN);
-    ObjVarsByObjType_CI it = m_objectVariablesByObjectType.begin();
+    ObjVarsByObjType_I it = m_objectVariablesByObjectType.begin();
     while (it != m_objectVariablesByObjectType.end()){
       ConstrainedVariableId connectedObjectVariable = it->second.first;
       check_error(connectedObjectVariable.isValid());
@@ -618,7 +626,7 @@ namespace EUROPA{
     check_error(!isClosed(objectType));
 
     // Now we must close all the object variables associated with this type
-    ObjVarsByObjType_CI it = m_objectVariablesByObjectType.find(objectType);
+    ObjVarsByObjType_I it = m_objectVariablesByObjectType.find(objectType);
     while (it != m_objectVariablesByObjectType.end() && it->first == objectType){
       ConstrainedVariableId connectedObjectVariable = it->second.first;
       check_error(connectedObjectVariable.isValid());
@@ -806,7 +814,7 @@ namespace EUROPA{
   void PlanDatabase::handleObjectVariableDeletion(const ConstrainedVariableId& objectVar){
 
     // Now iterate over objectVariables stored and remove them - should be at least one reference
-    for(ObjVarsByObjType_CI it = m_objectVariablesByObjectType.begin();
+    for(ObjVarsByObjType_I it = m_objectVariablesByObjectType.begin();
         it != m_objectVariablesByObjectType.end();){
       if(it->second.first == objectVar){
     	  delete (ObjectVariableListener*) it->second.second;
@@ -1049,5 +1057,9 @@ namespace EUROPA{
   {
       return getSchema()->hasTokenFactories() > 0;
   }
-  
+
+  PSPlanDatabaseClient* PlanDatabase::getPDBClient() 
+  {
+    return m_psClient;
+  }  
 }
