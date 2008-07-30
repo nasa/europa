@@ -157,6 +157,11 @@ namespace EUROPA {
     virtual bool isSymbolic() const {return !isNumeric();}
 
     /**
+      * @brief Check if the domain contains entities
+      */
+    virtual bool isEntity() const {return false;}
+
+    /**
      * @brief Check if the domain is numeric.
      */
     virtual bool isNumeric() const = 0;

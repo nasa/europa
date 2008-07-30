@@ -381,6 +381,8 @@ namespace EUROPA {
     std::list<ObjectId> makeObjectList() const;
 
     virtual ObjectDomain *copy() const;
+
+    virtual bool isEntity() const {return true;}
     
     /**
      * @brief Translate the double encoded value to a suitable output. In this case, the object name

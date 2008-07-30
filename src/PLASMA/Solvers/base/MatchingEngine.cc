@@ -109,18 +109,18 @@ namespace EUROPA {
     }
 
     void MatchingEngine::addMatchFinder(const LabelStr& type, const MatchFinderId& finder) {
-      checkError(getEntityMatchers().find(type) == getEntityMatchers().end(),
-		 "Already know how to match entities of type " << type.toString());
-      getEntityMatchers().insert(std::make_pair((double) type, finder));
+        // Remove first in case one already exists
+        removeMatchFinder(type);
+        getEntityMatchers().insert(std::make_pair((double) type, finder));
     }
 
     void MatchingEngine::removeMatchFinder(const LabelStr& type)
     {
       std::map<double, MatchFinderId>::iterator it = getEntityMatchers().find(type);
-      checkError(it != getEntityMatchers().end(),
-         "Could not find matcher for entities of  type " << type.toString());
-      getEntityMatchers().erase((double) type);
-      it->second.release();
+      if(it != getEntityMatchers().end()) {
+          getEntityMatchers().erase((double) type);
+          it->second.release();
+      }      
     }
 
     void MatchingEngine::purgeAll() 
