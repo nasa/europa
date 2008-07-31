@@ -39,7 +39,7 @@ int main(int argc, const char ** argv)
       plannerConfig,
       txSource,
       0,   // startHorizon
-      100, // endHorizon
+      1000, // endHorizon
       1000 // maxSteps
   ); 
      
