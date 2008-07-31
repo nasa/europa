@@ -143,7 +143,9 @@ catch (Exception e) {
 }
 
 //ifirSolver = runIFIR(60000/*timeout*/,47/*bound*/,false/*usePSResources*/);
-//setupDesktop();
-//showHistory();
-//undoIFIR(ifirSolver);
+/*
+setupDesktop();
+howHistory();
+undoIFIR(ifirSolver);
+*/
 

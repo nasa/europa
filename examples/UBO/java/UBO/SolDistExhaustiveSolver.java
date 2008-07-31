@@ -30,7 +30,6 @@ public class SolDistExhaustiveSolver
     {        
     }
     
-    @Override
     public void solve(
             PSEngine psengine, 
             long timeout, 

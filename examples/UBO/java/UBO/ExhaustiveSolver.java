@@ -31,7 +31,6 @@ public class ExhaustiveSolver
     {        
     }
     
-    @Override
     public void solve(
             PSEngine psengine, 
             long timeout, 
