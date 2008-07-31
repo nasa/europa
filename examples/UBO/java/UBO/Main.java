@@ -18,9 +18,8 @@ class Main
 	   
 	public static void main(String args[])
 	{
-		//  NOT SURE HOW THIS USED TO BEHAVE...  runBatchTests currently diabled...
-//		if ("".equals(args[2]))
-//		{
+		if ("".equals(args[2]))
+		{
 		    String debugMode = args[0];
 	        PSUtil.loadLibraries(debugMode);	   
 		    PSEngine.initialize();
@@ -32,11 +31,11 @@ class Main
 			
 			PSDesktop d = PSDesktop.makeInstance(psEngine_,args);
 			d.runUI();
-//		}
-//	    else
-//	    {
-//	        runBatchTest(args);
-//	    }
+		}
+	    else
+	    {
+	        runBatchTest(args);
+	    }
 	}
 	
     protected static void loadCustomCode(String debugMode)

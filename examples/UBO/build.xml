@@ -66,6 +66,10 @@
       <jvmarg value="-Xmx2048m"/>
       <arg value="${project.mode}"/>
       <arg value="${project.bsh.script}"/>
+      <arg value="${project.test}"/>      
+      <arg value="${project.bound}"/>      
+      <arg value="${project.timeout}"/>      
+      <arg value="${project.solver}"/>      
       <classpath>
       <path refid="psui.class.path"/>
       <pathelement location="${class.dir}"/>
