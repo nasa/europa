@@ -34,7 +34,6 @@ class Main
     		System.out.println("INFO: Custom library " + libName + " wasn't found and won't be loaded.");  
     	}
     	else {
-    		// WARNING: Shared library loaded twice (see ticket #164)
     		System.load(fullLibName);
     		psEngine_.loadModule(fullLibName);
     	}  	
