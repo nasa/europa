@@ -10,7 +10,9 @@
   </taskdef>
 
   <target name="init">
-    <exec executable="uname" outputproperty="uname.o">
+    <property environment="env"/>
+
+  	<exec executable="uname" outputproperty="uname.o">
       <arg value="-o"/>
     </exec>
 
@@ -52,7 +54,7 @@
     <property name="local.env.PLASMA_HOME" value="${basedir}"/>
     <property name="dir.plasma" value="${basedir}"/>
     <property name="dir.src" value="src/PLASMA"/>
-    <condition property="dir.planworks" value="{env.PLANWORKS_HOME}">
+    <condition property="dir.planworks" value="${env.PLANWORKS_HOME}">
       <isset property="${env.PLANWORKS_HOME}"/>
     </condition>
     <property name="dir.planworks" value="${basedir}/../PlanWorks"/>
@@ -121,6 +123,10 @@
     </copy>
     <copy todir="${dir.dist.base}/lib">
       <fileset dir="${dir.plasma}/build/lib"/>
+    </copy>
+
+    <copy todir="${dir.dist.base}/examples">
+      <fileset dir="${dir.plasma}/examples"/>
     </copy>
 
     <copy todir="${dir.dist.base}/lib/PSUI">
@@ -209,5 +215,23 @@
     <!-- Finally, zip everything up -->
     <delete file="${dir.dist}/${file.europa_dist}"/>
     <zip destfile="${dir.dist}/${file.europa_dist}" basedir="${dir.dist.base}"/>
+  </target>
+
+  <!-- test-dist.args=FAST=1 will run optimized versions -->
+  <property name="test-dist.args" value=""/>	
+  <target name="run-example">
+    <exec executable="make" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
+      <arg line="${test-dist.args}"/>
+      <env key="EUROPA_HOME" value="${basedir}/dist/europa"/>
+      <env key="${env.LD_LIBRARY_PATH.name}" value="${basedir}/dist/europa/lib"/>
+    </exec>
+  </target>
+	
+  <target name="test-dist" depends="init" 
+	      description="Runs tests on release">
+  	  <antcall target="run-example"><param name="example.name" value="BlocksWorld"/></antcall>	
+	  <antcall target="run-example"><param name="example.name" value="Light"/></antcall>	
+	  <antcall target="run-example"><param name="example.name" value="Rover"/></antcall>	
+	  <antcall target="run-example"><param name="example.name" value="UBO"/></antcall>	
   </target>
 </project>
