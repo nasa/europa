@@ -219,11 +219,18 @@
 
   <!-- test-dist.args=FAST=1 will run optimized versions -->
   <property name="test-dist.args" value=""/>	
-  <target name="run-example">
+  <target name="run-example-cpp">
     <exec executable="make" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
       <arg line="${test-dist.args}"/>
       <env key="EUROPA_HOME" value="${basedir}/dist/europa"/>
     </exec>
+  </target>
+	
+  <target name="run-example-java">
+      <exec executable="ant" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
+          <arg line="-Dproject.bsh.script=Batch.bsh"/>
+          <env key="EUROPA_HOME" value="${basedir}/dist/europa"/>
+      </exec>
   </target>
 	
   <target name="test-makeproject"
@@ -245,9 +252,15 @@
 	        
   <target name="test-dist" depends="init,test-makeproject" 
 	      description="Runs tests on release">
-  	  <antcall target="run-example"><param name="example.name" value="BlocksWorld"/></antcall>	
-	  <antcall target="run-example"><param name="example.name" value="Light"/></antcall>	
-	  <antcall target="run-example"><param name="example.name" value="Rover"/></antcall>	
-	  <antcall target="run-example"><param name="example.name" value="UBO"/></antcall>	
+  	  <antcall target="run-example-cpp"><param name="example.name" value="BlocksWorld"/></antcall>	
+	  <antcall target="run-example-cpp"><param name="example.name" value="Light"/></antcall>	
+	  <antcall target="run-example-cpp"><param name="example.name" value="Rover"/></antcall>	
+	  <antcall target="run-example-cpp"><param name="example.name" value="UBO"/></antcall>
+
+          <antcall target="run-example-java"><param name="example.name" value="BlocksWorld"/></antcall>  
+          <antcall target="run-example-java"><param name="example.name" value="Light"/></antcall>        
+          <antcall target="run-example-java"><param name="example.name" value="Shopping"/></antcall>        
+          <antcall target="run-example-java"><param name="example.name" value="Rover"/></antcall> 
+  	  <!-- TODO: add NQueens and UBO -->
   </target>
 </project>
