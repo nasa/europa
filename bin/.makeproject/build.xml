@@ -64,6 +64,7 @@
     <java classname="${project}.Main" dir="${project.dir}" fork="yes">
       <jvmarg value="-Xms256m"/>
       <jvmarg value="-Xmx2048m"/>
+      <jvmarg value="-Djava.library.path=build/lib"/>
       <arg value="${project.mode}"/>
       <arg value="${project.bsh.script}"/>
       <classpath>
