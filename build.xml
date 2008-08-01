@@ -223,11 +223,27 @@
     <exec executable="make" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
       <arg line="${test-dist.args}"/>
       <env key="EUROPA_HOME" value="${basedir}/dist/europa"/>
-      <env key="${env.LD_LIBRARY_PATH.name}" value="${basedir}/dist/europa/lib"/>
     </exec>
   </target>
 	
-  <target name="test-dist" depends="init" 
+  <target name="test-makeproject"
+  	  description="Tests makeproject script">
+      <exec executable="./makeproject" dir="${basedir}/dist/europa/bin" failonerror="true">
+          <arg line="MakeProjectTest ${basedir}/dist/europa"/>
+	  <env key="EUROPA_HOME" value="${basedir}/dist/europa"/>
+      </exec>
+      <exec executable="make" dir="${basedir}/dist/europa/MakeProjectTest" failonerror="true">
+          <arg line="${test-dist.args}"/>
+  	  <env key="EUROPA_HOME" value="${basedir}/dist/europa"/>
+      </exec>
+      <exec executable="ant" dir="${basedir}/dist/europa/MakeProjectTest" failonerror="true">
+          <arg line="-Dproject.bsh.script=Batch.bsh"/>
+          <env key="EUROPA_HOME" value="${basedir}/dist/europa"/>
+      </exec>
+      <delete dir="${basedir}/dist/europa/MakeProjectTest"/>
+  </target>
+	        
+  <target name="test-dist" depends="init,test-makeproject" 
 	      description="Runs tests on release">
   	  <antcall target="run-example"><param name="example.name" value="BlocksWorld"/></antcall>	
 	  <antcall target="run-example"><param name="example.name" value="Light"/></antcall>	

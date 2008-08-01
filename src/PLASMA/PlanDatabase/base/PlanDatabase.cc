@@ -1050,7 +1050,7 @@ namespace EUROPA{
   
   std::string PlanDatabase::toString()
   {
-      return PlanDatabaseWriter::toString(this);
+      return PlanDatabaseWriter::toString(getId());
   }
   
   bool PlanDatabase::hasTokenFactories() const
