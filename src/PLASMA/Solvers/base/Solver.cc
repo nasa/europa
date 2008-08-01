@@ -89,6 +89,16 @@ namespace EUROPA {
     }
 
     bool Solver::solve(unsigned int maxSteps, unsigned int maxDepth){
+        ConstraintEngineId ce = m_db->getConstraintEngine();  
+        bool autoPropagation = ce->getAutoPropagation();
+        ce->setAutoPropagation(false);
+        bool retval = doSolve(maxSteps,maxDepth);
+        ce->setAutoPropagation(autoPropagation);
+        
+        return retval;
+    }
+    
+    bool Solver::doSolve(unsigned int maxSteps, unsigned int maxDepth){
       ConstraintEngineId ce = m_db->getConstraintEngine();  
       bool autoPropagation = ce->getAutoPropagation();
       ce->setAutoPropagation(false);
@@ -232,10 +242,18 @@ namespace EUROPA {
       return m_timedOut;
     }
 
+    void Solver::step(){
+        ConstraintEngineId ce = m_db->getConstraintEngine();  
+        bool autoPropagation = ce->getAutoPropagation();
+        ce->setAutoPropagation(false);
+        doStep();
+        ce->setAutoPropagation(autoPropagation);
+    }
+    
     /**
      * @brief Handles a single step in the search
      */
-    void Solver::step(){
+    void Solver::doStep(){
       static unsigned int sl_counter(0);
       sl_counter++;
 
@@ -283,7 +301,7 @@ namespace EUROPA {
 
       if(!m_activeDecision->cut() && m_activeDecision->hasNext()){
         m_activeDecision->execute();
-	bool isConsistent = m_db->getConstraintEngine()->propagate();
+	    bool isConsistent = m_db->getClient()->propagate();
         m_lastExecutedDecision = (isConsistent ? m_activeDecision->toString() : "Failed.");
         m_stepCount++;
 

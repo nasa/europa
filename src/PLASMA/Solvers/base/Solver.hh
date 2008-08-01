@@ -203,6 +203,9 @@ namespace EUROPA {
        * @return DecisionPointId::noId() if there is no such flaw, otherwise the decision point to take next.
        */
       DecisionPointId getZeroCommitmentDecision();
+      
+      bool doSolve(unsigned int maxSteps, unsigned int maxDepth);
+      void doStep();
 
       static void cleanup(DecisionStack& decisionStack);
 
