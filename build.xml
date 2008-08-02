@@ -24,7 +24,6 @@
     	<then>
     	    <property name="run-example-cpp.mode" value="FAST=1"/>	
             <property name="run-example-java.mode" value="o"/>     
-    	    <echo message="RUNNING OPTIMIZED!!! cpp:${run-example-cpp.mode} java:${run-example-java.mode}"/>	
     	</then>
     	<else>
             <property name="run-example-cpp.mode" value=""/>      
@@ -216,7 +215,6 @@
   </target>
 
   <target name="run-example-cpp">
-  	<echo message="run-example-cpp, mode is: ${run-example-cpp.mode}"/>
     <exec executable="make" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
       <arg line="${run-example-cpp.mode}"/>
       <env key="EUROPA_HOME" value="${basedir}/dist/europa"/>
@@ -238,7 +236,6 @@
           <arg line="makeproject MakeProjectTest ${basedir}/dist/europa"/>
 	  <env key="EUROPA_HOME" value="${basedir}/dist/europa"/>
       </exec>
-        <echo message="run-example-cpp, mode is: ${run-example-cpp.mode}"/>
       <exec executable="make" dir="${basedir}/dist/europa/MakeProjectTest" failonerror="true">
           <arg line="${run-example-cpp.mode}"/>
   	  <env key="EUROPA_HOME" value="${basedir}/dist/europa"/>
@@ -252,11 +249,6 @@
       <delete dir="${basedir}/dist/europa/MakeProjectTest"/>
   </target>
 	        
-  <target name="test-one" depends="init" 
-	              description="Runs tests on release">
-        <antcall target="run-example-java"><param name="example.name" value="UBO"/></antcall>        
-  </target>
-  	
   <target name="test-dist" depends="init,test-makeproject" 
 	      description="Runs tests on release">
   	  <antcall target="run-example-cpp"><param name="example.name" value="BlocksWorld"/></antcall>	
