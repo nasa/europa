@@ -113,7 +113,6 @@ void printProfile(PSResource r)
 
 //main()
 
-System.out.println("HI");
 horizonStart = 0;
 horizonEnd = 1000;
 maxSteps = 1000;

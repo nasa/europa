@@ -1,0 +1,9 @@
+// Batch.bsh
+
+source("Common.bsh");
+
+loadModel();
+initQueens();
+solve(10);
+System.out.println(queensToString());
+Runtime.getRuntime().exit(0);

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="PLASMA" default="default" basedir=".">
+<project name="PLASMA" default="build" basedir=".">
 
   <description>PLASMA</description>
 
@@ -19,6 +19,19 @@
     <!-- load overrides -->
     <property file="${user.home}/.ant.plasma.properties"/>
 
+    <if>
+    	<equals arg1="${jam.variant}" arg2="OPTIMIZED"/>
+    	<then>
+    	    <property name="run-example-cpp.mode" value="FAST=1"/>	
+            <property name="run-example-java.mode" value="o"/>     
+    	    <echo message="RUNNING OPTIMIZED!!! cpp:${run-example-cpp.mode} java:${run-example-java.mode}"/>	
+    	</then>
+    	<else>
+            <property name="run-example-cpp.mode" value=""/>      
+            <property name="run-example-java.mode" value="g"/>     
+    	</else>
+    </if>	
+  	
     <if>
       <or>
         <equals arg1="${uname.o}" arg2="Linux"/>
@@ -93,21 +106,6 @@
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
       <env key="${env.LD_LIBRARY_PATH.name}" value="${local.env.PLASMA_HOME}/build/lib"/>
     </exec>
-  </target>
-
-  <target name="default" depends="init">
-    <antcall target="build"/>
-    <antcall target="build">
-      <param name="jam.opts" value="${jam.misc} -sVARIANTS=OPTIMIZED -sLIBRARIES=${jam.libraries}"/>
-    </antcall>
-    <if>
-      <isset property="planworks.present"/>
-      <then>
-        <ant inheritAll="false" dir="${dir.planworks}" target="createJNI"/>
-        <ant inheritAll="false" dir="${dir.planworks}" target="compile"/>
-      </then>
-    </if>
-    <antcall target="dist"/>
   </target>
 
   <!-- This target assumes that PLASMA and PlanWorks have already been built so that all the products are in place -->
@@ -217,30 +215,30 @@
     <zip destfile="${dir.dist}/${file.europa_dist}" basedir="${dir.dist.base}"/>
   </target>
 
-  <!-- test-dist.args=FAST=1 will run optimized versions -->
-  <property name="test-dist.args" value=""/>	
   <target name="run-example-cpp">
+  	<echo message="run-example-cpp, mode is: ${run-example-cpp.mode}"/>
     <exec executable="make" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
-      <arg line="${test-dist.args}"/>
+      <arg line="${run-example-cpp.mode}"/>
       <env key="EUROPA_HOME" value="${basedir}/dist/europa"/>
     </exec>
   </target>
 	
   <target name="run-example-java">
       <exec executable="ant" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
-          <arg line="-Dproject.bsh.script=Batch.bsh"/>
+          <arg line="-Dproject.bsh.script=Batch.bsh -Dproject.mode=${run-example-java.mode}"/>
           <env key="EUROPA_HOME" value="${basedir}/dist/europa"/>
       </exec>
   </target>
 	
-  <target name="test-makeproject"
+  <target name="test-makeproject" depends="init"
   	  description="Tests makeproject script">
-      <exec executable="./makeproject" dir="${basedir}/dist/europa/bin" failonerror="true">
-          <arg line="MakeProjectTest ${basedir}/dist/europa"/>
+      <exec executable="python" dir="${basedir}/dist/europa/bin" failonerror="true">
+          <arg line="makeproject MakeProjectTest ${basedir}/dist/europa"/>
 	  <env key="EUROPA_HOME" value="${basedir}/dist/europa"/>
       </exec>
+        <echo message="run-example-cpp, mode is: ${run-example-cpp.mode}"/>
       <exec executable="make" dir="${basedir}/dist/europa/MakeProjectTest" failonerror="true">
-          <arg line="${test-dist.args}"/>
+          <arg line="${run-example-cpp.mode}"/>
   	  <env key="EUROPA_HOME" value="${basedir}/dist/europa"/>
       </exec>
       <exec executable="ant" dir="${basedir}/dist/europa/MakeProjectTest" failonerror="true">
@@ -250,17 +248,42 @@
       <delete dir="${basedir}/dist/europa/MakeProjectTest"/>
   </target>
 	        
+  <target name="test-one" depends="init" 
+	              description="Runs tests on release">
+        <antcall target="run-example-java"><param name="example.name" value="UBO"/></antcall>        
+  </target>
+  	
   <target name="test-dist" depends="init,test-makeproject" 
 	      description="Runs tests on release">
   	  <antcall target="run-example-cpp"><param name="example.name" value="BlocksWorld"/></antcall>	
 	  <antcall target="run-example-cpp"><param name="example.name" value="Light"/></antcall>	
 	  <antcall target="run-example-cpp"><param name="example.name" value="Rover"/></antcall>	
+          <antcall target="run-example-cpp"><param name="example.name" value="Shopping"/></antcall>        
 	  <antcall target="run-example-cpp"><param name="example.name" value="UBO"/></antcall>
 
           <antcall target="run-example-java"><param name="example.name" value="BlocksWorld"/></antcall>  
           <antcall target="run-example-java"><param name="example.name" value="Light"/></antcall>        
-          <antcall target="run-example-java"><param name="example.name" value="Shopping"/></antcall>        
+          <antcall target="run-example-java"><param name="example.name" value="NQueens"/></antcall>        
           <antcall target="run-example-java"><param name="example.name" value="Rover"/></antcall> 
-  	  <!-- TODO: add NQueens and UBO -->
+          <antcall target="run-example-java"><param name="example.name" value="Shopping"/></antcall>        
+          <antcall target="run-example-java"><param name="example.name" value="UBO"/></antcall>        
   </target>
+	
+  <target name="release-dist" depends="init"
+  	description="Creates a binary distribution that includes all the variants">
+    <antcall target="build"><param name="jam.opts" value="-sVARIANTS=DEV -sLIBRARIES=SHARED"/></antcall>
+    <antcall target="build"><param name="jam.opts" value="-sVARIANTS=DEV -sLIBRARIES=STATIC"/></antcall>
+    <antcall target="build"><param name="jam.opts" value="-sVARIANTS=OPTIMIZED -sLIBRARIES=SHARED"/></antcall>
+    <antcall target="build"><param name="jam.opts" value="-sVARIANTS=OPTIMIZED -sLIBRARIES=STATIC"/></antcall>
+    <antcall target="build"><param name="jam.opts" value="-sVARIANTS=PROFILE -sLIBRARIES=STATIC"/></antcall>
+    <if>
+      <isset property="planworks.present"/>
+      <then>
+        <ant inheritAll="false" dir="${dir.planworks}" target="createJNI"/>
+        <ant inheritAll="false" dir="${dir.planworks}" target="compile"/>
+      </then>
+    </if>
+    <antcall target="dist"/>
+  </target>
+	
 </project>
