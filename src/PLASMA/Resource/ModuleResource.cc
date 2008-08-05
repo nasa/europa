@@ -107,9 +107,11 @@ namespace EUROPA {
       schema->addPredicate("Unary.use");
       schema->registerTokenFactory((new UnaryUseTokenFactory("Unary.use"))->getId());             
       
-      REGISTER_PROFILE(EUROPA::SAVH::TimetableProfile, TimetableProfile );
-      REGISTER_PROFILE(EUROPA::SAVH::FlowProfile, FlowProfile);
-      REGISTER_PROFILE(EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile );
+      EUROPA::SAVH::ProfileFactoryMgr* pfm = new EUROPA::SAVH::ProfileFactoryMgr();
+      engine->addComponent("ProfileFactoryMgr",pfm);
+      REGISTER_PROFILE(pfm,EUROPA::SAVH::TimetableProfile, TimetableProfile );
+      REGISTER_PROFILE(pfm,EUROPA::SAVH::FlowProfile, FlowProfile);
+      REGISTER_PROFILE(pfm,EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile );
       
       // Solver
       REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
@@ -148,7 +150,8 @@ namespace EUROPA {
   
   void ModuleResource::uninitialize(EngineId engine)
   {	  
-      SAVH::ProfileFactory::purgeAll();
+      EUROPA::SAVH::ProfileFactoryMgr* pfm = (EUROPA::SAVH::ProfileFactoryMgr*)engine->getComponent("ProfileFactoryMgr");
+      delete pfm;
       // TODO: clean up
   }  
 }

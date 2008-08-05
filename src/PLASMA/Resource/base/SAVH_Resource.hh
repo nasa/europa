@@ -44,10 +44,19 @@ namespace EUROPA {
        * @param maxProduction The maximum amount of production possible on this resource.
        * @param maxConsumption The maximum amount of consumption possible on this resource.
        */
-      Resource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName, const LabelStr& profileName,
-	       double initCapacityLb = 0, double initCapacityUb = 0, double lowerLimit = MINUS_INFINITY,
-	       double upperLimit = PLUS_INFINITY, double maxInstProduction = PLUS_INFINITY, double maxInstConsumption = PLUS_INFINITY,
-	       double maxProduction = PLUS_INFINITY, double maxConsumption = PLUS_INFINITY);
+      Resource(const PlanDatabaseId& planDatabase, 
+               const LabelStr& type, 
+               const LabelStr& name, 
+               const LabelStr& detectorName, 
+               const LabelStr& profileName,
+	           double initCapacityLb = 0, 
+	           double initCapacityUb = 0, 
+	           double lowerLimit = MINUS_INFINITY,
+	           double upperLimit = PLUS_INFINITY, 
+	           double maxInstProduction = PLUS_INFINITY, 
+	           double maxInstConsumption = PLUS_INFINITY,
+	           double maxProduction = PLUS_INFINITY, 
+	           double maxConsumption = PLUS_INFINITY);
 
       /**
        * @brief Constructor

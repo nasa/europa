@@ -12,6 +12,16 @@
 
 namespace EUROPA
 {
+    void EngineComponent::setEngine(EngineId& engine)
+    {
+        m_engine = engine;
+    }
+    
+    EngineId& EngineComponent::getEngine()
+    {
+        return m_engine;    
+    }
+
     EngineBase::EngineBase()
     {
     	m_started = false;
@@ -229,7 +239,8 @@ namespace EUROPA
         else {
           delete it->second;
           it->second = component;
-        }        
+        }     
+        component->setEngine(getId());
     }
     
     EngineComponent* EngineBase::getComponent(const std::string& name)
@@ -256,7 +267,9 @@ namespace EUROPA
         
         if (c != NULL)
             getComponents().erase(LabelStr(name));
-        
+
+        static EngineId s_nullEngineId;
+        c->setEngine(s_nullEngineId);
         return c;
     }    
     

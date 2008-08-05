@@ -19,22 +19,33 @@
 namespace EUROPA {
   namespace SAVH {
     
-    Resource::Resource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name,
-                       const LabelStr& detectorName, const LabelStr& profileName,
-                       double initCapacityLb, double initCapacityUb, double lowerLimit,
-                       double upperLimit, double maxInstProduction, double maxInstConsumption,
+    Resource::Resource(const PlanDatabaseId& planDatabase,                       
+                       const LabelStr& type, const LabelStr& name,
+                       const LabelStr& detectorName, 
+                       const LabelStr& profileName,
+                       double initCapacityLb, double initCapacityUb, 
+                       double lowerLimit, double upperLimit, 
+                       double maxInstProduction, double maxInstConsumption,
                        double maxProduction, double maxConsumption)
-      : Object(planDatabase, type, name, false) {
-      init(initCapacityLb, initCapacityUb, lowerLimit, upperLimit, maxInstProduction, maxInstConsumption,
-           maxProduction, maxConsumption, detectorName, profileName);
+      : Object(planDatabase, type, name, false) 
+    {
+      init(initCapacityLb, initCapacityUb, 
+           lowerLimit, upperLimit, 
+           maxInstProduction, maxInstConsumption,
+           maxProduction, maxConsumption, 
+           detectorName, 
+           profileName
+      );
     }
+    
     Resource::Resource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
       : Object(planDatabase, type, name, open) {}
 
     Resource::Resource(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open) 
       : Object(parent, type, localName, open) {}
 
-    Resource::~Resource() {
+    Resource::~Resource() 
+    {
       for(std::map<TransactionId, TokenId>::const_iterator it = m_transactionsToTokens.begin(); it != m_transactionsToTokens.end();
           ++it) {
         delete (Transaction*) it->first;
@@ -43,9 +54,11 @@ namespace EUROPA {
       delete (Profile*) m_profile;
     }
 
-    void Resource::init(const double initCapacityLb, const double initCapacityUb, const double lowerLimit,
-                        const double upperLimit, const double maxInstProduction, const double maxInstConsumption,
-                        const double maxProduction, const double maxConsumption, const LabelStr& detectorName,
+    void Resource::init(const double initCapacityLb, const double initCapacityUb, 
+                        const double lowerLimit, const double upperLimit, 
+                        const double maxInstProduction, const double maxInstConsumption,
+                        const double maxProduction, const double maxConsumption, 
+                        const LabelStr& detectorName,
                         const LabelStr& profileName) {
       debugMsg("Resource:init", "In base init function.");
       m_initCapacityLb = initCapacityLb;
@@ -59,8 +72,18 @@ namespace EUROPA {
       m_maxConsumption = maxConsumption;
 
       m_detector = FVDetectorFactory::createInstance(detectorName, getId());
-      m_profile = ProfileFactory::createInstance(profileName, getPlanDatabase(), m_detector,
-                                                 m_initCapacityLb, m_initCapacityUb);
+      
+      // TODO: make profile creation more robust?
+      EngineId& engine = this->getPlanDatabase()->getEngine();
+      ProfileFactoryMgr* pfm = (ProfileFactoryMgr*)engine->getComponent("ProfileFactoryMgr");
+      m_profile = pfm->createInstance(
+              profileName, 
+              getPlanDatabase(), 
+              m_detector,
+              m_initCapacityLb, 
+              m_initCapacityUb
+      );
+      
       debugMsg("Resource:init", "Initialized Resource " << getName().toString() << "{"
               << "initCapacity=[" << m_initCapacityLb << "," << m_initCapacityUb << "],"
               << "usageLimits=[" << m_lowerLimit << "," << m_upperLimit << "],"

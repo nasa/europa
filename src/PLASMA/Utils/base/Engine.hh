@@ -9,6 +9,15 @@
 
 namespace EUROPA {
 
+  class Engine;
+  typedef Id<Engine> EngineId;
+
+  class EngineComponent; 
+  typedef Id<EngineComponent> EngineComponentId;
+
+  class Module;
+  typedef Id<Module> ModuleId;
+
   class LanguageInterpreter 
   {
     public:
@@ -16,25 +25,19 @@ namespace EUROPA {
       virtual std::string interpret(std::istream& input, const std::string& source) = 0;
   };
 
-
-  class EngineComponent; 
-  typedef Id<EngineComponent> EngineComponentId;
-  
   class EngineComponent 
   {
     public :
 	  virtual ~EngineComponent() {}	  
 	  
+	  void setEngine(EngineId& engine);
+	  EngineId& getEngine();
+	  
     protected:
-  	  EngineComponent() {}  	  
+  	  EngineComponent() {}
+  	  
+  	  EngineId m_engine;
   };
-
-
-  class Module;
-  typedef Id<Module> ModuleId;
-  
-  class Engine;
-  typedef Id<Engine> EngineId;
 
   class Engine 
   {

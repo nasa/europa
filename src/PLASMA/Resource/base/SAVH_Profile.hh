@@ -18,6 +18,7 @@
 #include "SAVH_FVDetector.hh"
 #include "LabelStr.hh"
 #include "Debug.hh"
+#include "Engine.hh"
 
 #include <map>
 #include <utility>
@@ -26,6 +27,12 @@ namespace EUROPA {
 
   namespace SAVH {
 
+    class ProfileFactory;
+    typedef Id<ProfileFactory> ProfileFactoryId;
+  
+    class ProfileFactoryMgr;
+    typedef Id<ProfileFactoryMgr> ProfileFactoryMgrId;
+    
     /**
      * @class Profile
      * @brief The base class for managing Resource level profiles
@@ -355,37 +362,51 @@ namespace EUROPA {
 
     class ProfileFactory {
     public:
-      static ProfileId createInstance(const LabelStr& name, const PlanDatabaseId db, const FVDetectorId detector, 
-                                      const double initCapacityLb = 0, const double initCapacityUb = 0);
-
+      ProfileFactory(const LabelStr& name);
+      virtual ~ProfileFactory();
+      
+      ProfileFactoryId& getId();
+      
       const LabelStr& getName() const {return m_name;}
-      
-      static void purgeAll();
-      
-    protected:
-      virtual ~ProfileFactory(){}
-      static void registerFactory(const LabelStr& name, ProfileFactory* factory);
+
       virtual ProfileId create(const PlanDatabaseId db, const FVDetectorId detector,
                                const double initCapacityLb = 0, const double initCapacityUb = 0) const = 0;
-      ProfileFactory(const LabelStr& name) : m_name(name) {registerFactory(m_name, this);}
-    private:
-      static std::map<double, ProfileFactory*>& factoryMap();
+      
+    protected:
+      ProfileFactoryId m_id;  
       const LabelStr m_name;
+    };
+
+    class ProfileFactoryMgr : public EngineComponent {
+    public:
+      ProfileFactoryMgr();  
+      virtual ~ProfileFactoryMgr();
+
+      ProfileFactoryMgrId& getId();
+      
+      void registerFactory(ProfileFactoryId& factory);
+      
+      ProfileId createInstance(const LabelStr& name, const PlanDatabaseId db, const FVDetectorId detector, 
+                                      const double initCapacityLb = 0, const double initCapacityUb = 0);
+
+      void purgeAll();
+      
+    protected:
+      ProfileFactoryMgrId m_id;  
+      std::map<double, ProfileFactoryId> m_factoryMap;
     };
 
     template<class ProfileType>
     class ConcreteProfileFactory : public ProfileFactory {
     public:
       ConcreteProfileFactory(const LabelStr& name) : ProfileFactory(name) {}
-    protected:
-    private:
+      
       ProfileId create(const PlanDatabaseId db, const FVDetectorId detector,
                        const double initCapacityLb = 0, const double initCapacityUb = 0) const 
       {return (new ProfileType(db, detector, initCapacityLb, initCapacityUb))->getId();}
     };
 
-    //#define REGISTER_PROFILE(CLASS, NAME) (new EUROPA::SAVH::ConcreteProfileFactory<CLASS>(EUROPA::LabelStr(#NAME)));
-#define REGISTER_PROFILE(CLASS, NAME) (new EUROPA::SAVH::ConcreteProfileFactory<CLASS>(#NAME));
+    #define REGISTER_PROFILE(MGR, CLASS, NAME) (MGR->registerFactory((new EUROPA::SAVH::ConcreteProfileFactory<CLASS>(#NAME))->getId()));
 
   }
 }

@@ -11,36 +11,66 @@
 
 namespace EUROPA {
   namespace SAVH {
+
+    ProfileFactory::ProfileFactory(const LabelStr& name) 
+        : m_id(this)
+        , m_name(name) 
+    {        
+    }
+    
+    ProfileFactory::~ProfileFactory()
+    {
+        m_id.remove();
+    }
   
-    ProfileId ProfileFactory::createInstance(const LabelStr& name, const PlanDatabaseId db, const FVDetectorId detector,
-                                             const double initCapacityLb, const double initCapacityUb) {
-      std::map<double, ProfileFactory*>::const_iterator it = factoryMap().find(name);
-      checkError(it != factoryMap().end(), "No factory registered for profile '" << name.toString() << "'");
+    ProfileFactoryId& ProfileFactory::getId()
+    {
+        return m_id;
+    }
+    
+    ProfileFactoryMgr::ProfileFactoryMgr() 
+        : m_id(this)
+    {      
+    }  
+   
+    ProfileFactoryMgr::~ProfileFactoryMgr()
+    {
+        purgeAll();
+        m_id.remove();
+    }
+
+    ProfileFactoryMgrId& ProfileFactoryMgr::getId()
+    {
+        return m_id;
+    }
+    
+    void ProfileFactoryMgr::purgeAll()
+    {
+        std::map<double, ProfileFactoryId>::iterator factories_iter = m_factoryMap.begin();
+        while (factories_iter != m_factoryMap.end()) {
+          ProfileFactory* factory = (ProfileFactory*)((factories_iter++)->second);
+          debugMsg("ProfileFactory:purgeAll",
+               "Removing factory for " << factory->getName().toString());
+          delete factory;
+        }
+        m_factoryMap.clear();
+    }
+    
+    ProfileId ProfileFactoryMgr::createInstance(const LabelStr& name, 
+                                                const PlanDatabaseId db, const FVDetectorId detector,
+                                                const double initCapacityLb, 
+                                                const double initCapacityUb) 
+    {
+      std::map<double, ProfileFactoryId>::const_iterator it = m_factoryMap.find(name);
+      checkError(it != m_factoryMap.end(), "No factory registered for profile '" << name.toString() << "'");
       
-      ProfileFactory* factory = it->second;
+      ProfileFactoryId factory = it->second;
       return factory->create(db, detector, initCapacityLb, initCapacityUb);
     }
     
-    void ProfileFactory::purgeAll()
-    {
-        std::map<double, ProfileFactory*>::iterator factories_iter = factoryMap().begin();
-        while (factories_iter != factoryMap().end()) {
-          ProfileFactory* factory = (factories_iter++)->second;
-          debugMsg("ProfileFactory:purgeAll",
-    	       "Removing factory for " << factory->getName().toString());
-          delete factory;
-        }
-     	factoryMap().clear();
-    }
-    
-    void ProfileFactory::registerFactory(const LabelStr& name, ProfileFactory* factory) {
-      checkError(factoryMap().find(name) == factoryMap().end(), "Tried to register factory '" << name.toString() << "' twice.");
-      factoryMap().insert(std::pair<double, ProfileFactory*>(name, factory));
-    }
-
-    std::map<double, ProfileFactory*>& ProfileFactory::factoryMap() {
-      static std::map<double, ProfileFactory*> sl_factoryMap;
-      return sl_factoryMap;
+    void ProfileFactoryMgr::registerFactory(ProfileFactoryId& factory) {
+      checkError(m_factoryMap.find(factory->getName()) == m_factoryMap.end(), "Tried to register factory '" << factory->getName().toString() << "' twice.");
+      m_factoryMap.insert(std::pair<double, ProfileFactoryId>(factory->getName(), factory));
     }
 
     Profile::Profile(const PlanDatabaseId db, const FVDetectorId flawDetector, const double initLevelLb, const double initLevelUb) 
