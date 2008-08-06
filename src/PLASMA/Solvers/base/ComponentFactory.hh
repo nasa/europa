@@ -104,7 +104,7 @@ namespace EUROPA {
     /**
      * @brief Use to register factory classes.
      */
-#define REGISTER_COMPONENT_FACTORY(CLASS, NAME) new EUROPA::SOLVERS::Component::ConcreteFactory<CLASS>(#NAME);
+#define REGISTER_COMPONENT_FACTORY(CLASS, NAME) new EUROPA::SOLVERS::Component::ConcreteFactory< CLASS >(#NAME);
   }
 } // namespace
 #endif
