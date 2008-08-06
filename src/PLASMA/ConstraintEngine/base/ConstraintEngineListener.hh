@@ -58,12 +58,28 @@ namespace EUROPA{
     virtual void notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType){
     }
 
+    virtual void notifyViolationAdded(const ConstraintId& constraint){
+    }
+
+    virtual void notifyViolationRemoved(const ConstraintId& constraint){
+    }
+
+
     const ConstraintEngineListenerId& getId() const;
+
+    // for PSConstraintEngineListener, where we don't have access to plan database
+    // at construction time:
+    virtual void setConstraintEngine(const ConstraintEngineId& constraintEngine);
+
 
   protected:
     ConstraintEngineListener(const ConstraintEngineId& constraintEngine);
     ConstraintEngineListenerId m_id;
     ConstraintEngineId m_constraintEngine;
+
+    // for PSConstraintEngineListener, where we don't have access to constraint engine
+     // at construction time
+     ConstraintEngineListener();
   };
 }
 #endif

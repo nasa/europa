@@ -44,7 +44,8 @@ namespace EUROPA {
    *
    * @see canIgnore(), handleExecute()
    */
-  class Constraint : public Entity, public PSConstraint {
+
+  class Constraint : public virtual PSConstraint, public Entity {
   public:
     DECLARE_ENTITY_TYPE(Constraint);
 
@@ -163,7 +164,7 @@ namespace EUROPA {
      * TODO: this must be allowed to be set from the model
      */
     virtual std::string getViolationExpl() const;
-    
+
     // PS-Specific Methods:
     virtual PSList<PSVariable*> getVariables() const;
 
@@ -190,9 +191,9 @@ namespace EUROPA {
      * @brief Wrapper for handleExecute calls, will set propagation context for all the variables in this constraint
      *
      */
-    virtual void execute(); 
+    virtual void execute();
     virtual void execute(const ConstrainedVariableId& variable,int argIndex,const DomainListener::ChangeType& changeType);
-     
+
     /**
      * @brief Called when no specific change event on a variable is reported.
      *
@@ -263,9 +264,9 @@ namespace EUROPA {
     const LabelStr m_name; /**< Name used on stratup to bind to the correct factory and then present as a debugging aid. */
     const ConstraintEngineId m_constraintEngine; /**< The owner ConstraintEngine */
     std::vector<ConstrainedVariableId> m_variables; /**< The variable scope of the Constraint. */
-    
+
     void notifyViolated();
-    void notifyNoLongerViolated();    
+    void notifyNoLongerViolated();
 
   private:
     /**

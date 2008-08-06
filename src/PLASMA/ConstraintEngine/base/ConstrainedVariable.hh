@@ -38,7 +38,7 @@ namespace EUROPA {
    * @class ConstrainedVariable
    * @brief Provides the specification for a variable to interact in the ConstraintEngine.
    *
-   * The ConstrainedVariable specifies the semantics of a variable from the perspective of a 
+   * The ConstrainedVariable specifies the semantics of a variable from the perspective of a
    * ConstraintEngine and a Constraint. The public interface is very restricted, and specifies what can be
    * exposed to a customized Constraint. Much of the functionality of the interface is provided
    * through protected or private members.
@@ -53,7 +53,7 @@ namespace EUROPA {
    * a failure will occur - see isValid().
    * @see AbstractDomain, Constraint, ConstraintEngine, DomainListener, isValid
    */
-  class ConstrainedVariable : public Entity, public PSVariable {
+  class ConstrainedVariable : public virtual PSVariable, public Entity {
   public:
     DECLARE_ENTITY_TYPE(ConstrainedVariable);
 
@@ -73,7 +73,7 @@ namespace EUROPA {
     const ConstrainedVariableId& getId() const;
 
     const std::string& getEntityType() const;
-    
+
     /**
      * @brief Validates the relationships of the class.
      *
@@ -103,7 +103,7 @@ namespace EUROPA {
     /**
      * @brief Retrieve one constraint on this variable.  Returns noId if there are none.
      */
-    const ConstraintId& getFirstConstraint() const;    
+    const ConstraintId& getFirstConstraint() const;
 
     /**
      * @brief Test of the variable has at least one active constraint
@@ -215,7 +215,7 @@ namespace EUROPA {
 
     /**
      * @brief Utility to capture the state of the constraint.
-     */ 
+     */
     virtual std::string toString() const;
     virtual std::string toLongString() const;
 
@@ -287,7 +287,7 @@ namespace EUROPA {
      * @brief Remove a value from its domain. Variable must be dynamic.
      */
     virtual void remove(double value);
-    
+
     /**
      * @brief Restricts the domain to a singleton value.
      * @param singletonValue to specify it to.
@@ -345,7 +345,7 @@ namespace EUROPA {
      * @brief Accessor
      */
     bool specifiedFlag() const;
-    
+
     /**
      * @brief Sum of the violation values for all the constraints attached to this variable
      */
@@ -359,9 +359,9 @@ namespace EUROPA {
     /**
      * @brief Keeps track of who's the current propagating constraint, so if there is a violation the ConstraintEngine can get to it
      */
-    void setCurrentPropagatingConstraint(ConstraintId c); 
-    ConstraintId getCurrentPropagatingConstraint() const;    
-     
+    void setCurrentPropagatingConstraint(ConstraintId c);
+    ConstraintId getCurrentPropagatingConstraint() const;
+
   protected:
     /**
      * @brief Ensure the constrained variable is part of a ConstraintEngine.
@@ -373,7 +373,7 @@ namespace EUROPA {
 			const bool internal,
 			bool canBeSpecified,
 			const LabelStr& name,
-			const EntityId& parent = EntityId::noId(), 
+			const EntityId& parent = EntityId::noId(),
 			int index = NO_INDEX);
 
     /**
@@ -411,7 +411,7 @@ namespace EUROPA {
     /**
      * @brief This is the only method to return a mutable copy of the domain.
      * Purpose is to restrict access to the current domain to avoid improper use. Note that we ensure
-     * the current domain has a listener attached to connect the Constraint Engine. Use is intended strictly for Constraints 
+     * the current domain has a listener attached to connect the Constraint Engine. Use is intended strictly for Constraints
      * and ConstraintEngine, as well as for access in derived classes.
      * @return A reference to the domain under management of the ConstraintEngine.
      * @see lastDomain(), AbstractDomain
@@ -420,7 +420,7 @@ namespace EUROPA {
 
     ConstrainedVariableId m_id; /**< Id of this. */
 
-    DomainListenerId m_listener; /**< The listener provided by the Constraint Engine. This is the key connection point. 
+    DomainListenerId m_listener; /**< The listener provided by the Constraint Engine. This is the key connection point.
 				    We require and ensure that the listener is in fact connected to the
 				    current domain defined by the derived class.*/
 
@@ -454,7 +454,7 @@ namespace EUROPA {
      * @brief Helper method to reset to a specific domain
      */
     void reset(const AbstractDomain& domain);
-    
+
     // keeps track of who's the current propagating constraint, in case there is a violation
     ConstraintId m_propagatingConstraint;
 
@@ -465,10 +465,10 @@ namespace EUROPA {
 	virtual bool isNull() const;
 	virtual bool isSingleton() const;
 
-	virtual PSVarValue getSingletonValue() const; 
+	virtual PSVarValue getSingletonValue() const;
 	virtual PSVarType getType() const;
-	
-	
+
+
 	virtual PSList<PSVarValue> getValues() const;
 	virtual PSList<PSConstraint*> getConstraints() const;
 
@@ -477,8 +477,8 @@ namespace EUROPA {
 
 	virtual void specifyValue(PSVarValue& v);
 
-	virtual PSEntity* getParent() const;	      
-   
+	virtual PSEntity* getParent() const;
+
   private:
     /**
      * @brief An internal utility to ensure the relationship between the constraints and the variable are valid.
@@ -501,16 +501,16 @@ namespace EUROPA {
      */
     int lastRelaxed() const;
 
-    
-    
+
+
     int m_lastRelaxed; /**< Holds the cycle in which the variable was last relaxed */
-    const ConstraintEngineId m_constraintEngine; /**< Reference to the ConstraintEngine to which this variable belongs. 
-						    The  construction model of this class ensures 
+    const ConstraintEngineId m_constraintEngine; /**< Reference to the ConstraintEngine to which this variable belongs.
+						    The  construction model of this class ensures
 						    that it is always set to a valid ConstraintEngineId. */
     LabelStr m_name;
     const bool m_internal;
     const bool m_canBeSpecified;
-    bool m_specifiedFlag; /**< True of internalSpecify is called. 
+    bool m_specifiedFlag; /**< True of internalSpecify is called.
 			   It is possible that !canBeSpecified() && m_hasBeenSpecified */
     double m_specifiedValue; /**< Only meaningful if specifiedFlag set */
     const int m_index; /**< Locator for variable if constained by some entity. Default is NO_INDEX */

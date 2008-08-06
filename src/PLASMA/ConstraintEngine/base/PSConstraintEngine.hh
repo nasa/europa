@@ -13,26 +13,26 @@ namespace EUROPA {
   class PSVarValue;
   class PSConstraint;
   class PSObject;
-  
+
   class PSConstraintEngine : public EngineComponent
   {
     public:
       virtual ~PSConstraintEngine() {}
-    	
+
 	  virtual PSVariable* getVariableByKey(PSEntityKey id) = 0;
 	  virtual PSVariable* getVariableByName(const std::string& name) = 0;
-	  
+
       virtual bool getAutoPropagation() const = 0;
-	  virtual void setAutoPropagation(bool v) = 0;	  
-	  virtual bool propagate() = 0; 
-	  
+	  virtual void setAutoPropagation(bool v) = 0;
+	  virtual bool propagate() = 0;
+
   	  virtual bool getAllowViolations() const = 0;
   	  virtual void setAllowViolations(bool v) = 0;
 
   	  virtual double getViolation() const = 0;
-  	  virtual std::string getViolationExpl() const = 0;      	  
+  	  virtual PSList <std::string> getViolationExpl() const = 0;
   };
-  
+
   class PSVariable : public virtual PSEntity
   {
     public:
@@ -40,18 +40,18 @@ namespace EUROPA {
 
     	virtual const std::string& getEntityType() const = 0;
 
-    	virtual PSVarType getType() const = 0; // Data Type 
+    	virtual PSVarType getType() const = 0; // Data Type
 
     	virtual std::string toString() const = 0;
     	virtual std::string toLongString() const = 0;
-    	
+
     	virtual bool isEnumerated() const = 0;
     	virtual bool isInterval() const = 0;
 
-    	virtual bool isNull() const = 0;      // iif CurrentDomain is empty and the variable hasn't been specified    
+    	virtual bool isNull() const = 0;      // iif CurrentDomain is empty and the variable hasn't been specified
     	virtual bool isSingleton() const = 0;
 
-    	virtual PSVarValue getSingletonValue() const = 0;    // Call to get value if isSingleton()==true 
+    	virtual PSVarValue getSingletonValue() const = 0;    // Call to get value if isSingleton()==true
 
     	virtual PSList<PSVarValue> getValues() const = 0;  // if isSingleton()==false && isEnumerated() == true
     	virtual PSList<PSConstraint*> getConstraints() const = 0;
@@ -66,24 +66,24 @@ namespace EUROPA {
     	virtual std::string getViolationExpl() const = 0;
 
     	virtual PSEntity* getParent() const = 0;
-    	
+
   };
-  
+
   class PSConstraint : public virtual PSEntity
   {
-    public:    
-      PSConstraint() {}    
+    public:
+      PSConstraint() {}
       virtual ~PSConstraint() {}
 
       virtual const std::string& getEntityType() const = 0;
-      
+
       virtual bool isActive() const = 0;
       virtual void deactivate() = 0;
       virtual void undoDeactivation() = 0;
-      
+
       virtual double getViolation() const = 0;
       virtual std::string getViolationExpl() const = 0;
-      
+
       virtual PSList<PSVariable*> getVariables() const = 0;
   };
 

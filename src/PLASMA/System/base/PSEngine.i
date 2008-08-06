@@ -7,6 +7,7 @@
 #include "PSEngine.hh"
 #include "Error.hh"
 #include "PSPlanDatabaseListener.hh"
+#include "PSConstraintEngineListener.hh"
 %}
 
 %rename(PSException) Error;  // Our Error C++ class is wrapped instead as PSException
@@ -56,6 +57,7 @@
   public static long getCPtr($javaclassname obj) {
     return (obj == null) ? 0 : obj.swigCPtr;
   }
+
 %}
 
 class Error {
@@ -82,6 +84,7 @@ namespace EUROPA {
   class PSVarValue;
   class PSPlanDatabaseClient;
   class PSPlanDatabaseListener;
+  class PSConstraintEngineListener;
 
   template<class T>
   class PSList {
@@ -229,6 +232,7 @@ namespace EUROPA {
 
     PSPlanDatabaseClient* getPlanDatabaseClient();
     void addPlanDatabaseListener(PSPlanDatabaseListener& listener);
+    void addConstraintEngineListener(PSConstraintEngineListener& listener);
     std::string planDatabaseToString();    
       
     PSList<PSVariable*> getGlobalVariables();
@@ -246,7 +250,7 @@ namespace EUROPA {
     void setAllowViolations(bool v);
 
     double getViolation() const;    
-    std::string getViolationExpl() const;
+    PSList<std::string> getViolationExpl() const;
 
     PSSolver* createSolver(const std::string& configurationFile); 
   };
@@ -497,19 +501,26 @@ namespace EUROPA {
 	  virtual ~PSPlanDatabaseListener();
 	  virtual void notifyAdded(PSObject* obj);
 	  virtual void notifyRemoved(PSObject* object);
-	  virtual void notifyAdded(PSToken* token);
-	  virtual void notifyRemoved(PSToken* token);
 	  virtual void notifyActivated(PSToken* token);
 	  virtual void notifyDeactivated(PSToken* token);
 	  virtual void notifyMerged(PSToken* token);
 	  virtual void notifySplit(PSToken* token);
 	  virtual void notifyRejected(PSToken* token);
-	  virtual void notifyReinstated(PSToken* token);
-	  virtual void notifyConstrained(PSObject* object, PSToken* predecessor, PSToken* successor);
-	  virtual void notifyFreed(PSObject* object, PSToken* predecessor, PSToken* successor);
 	  virtual void notifyAdded(PSObject* object, PSToken* token);
 	  virtual void notifyRemoved(PSObject* object, PSToken* token);
-	  virtual void notifyCommitted(PSToken* token);
-	  virtual void notifyTerminated(PSToken* token);
   };
+
+// generate directors for all virtual methods in class Foo
+// (enables calls from C++ to inherited java code)
+  %feature("director") PSConstraintEngineListener;        
+  
+  class PSConstraintEngineListener
+  {
+  public:
+	virtual ~PSConstraintEngineListener();
+	virtual void notifyViolationAdded(PSConstraint* constraint);
+	virtual void notifyViolationRemoved(PSConstraint* constraint);
+  };
+
+
 }

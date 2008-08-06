@@ -29,35 +29,35 @@ namespace EUROPA {
   	public:
   	  virtual unsigned int getMaxViolationsAllowed() = 0;
   	  virtual void setMaxViolationsAllowed(unsigned int i) = 0;
-  	  
+
   	  virtual double getViolation() const = 0;
-  	  virtual std::string getViolationExpl() const = 0;
-  	  
+  	  virtual PSList<std::string> getViolationExpl() const = 0;
+
   	  virtual bool handleEmpty(ConstrainedVariableId v) = 0;
   	  virtual bool handleRelax(ConstrainedVariableId v) = 0;
       virtual bool canContinuePropagation() = 0;
-  	  
+
   	  virtual bool isViolated(ConstraintId c) const = 0;
   	  virtual void addViolatedConstraint(ConstraintId c) = 0;
-	  virtual void removeViolatedConstraint(ConstraintId c) = 0;	
+	  virtual void removeViolatedConstraint(ConstraintId c) = 0;
 
 	  virtual bool isEmpty(ConstrainedVariableId v) const = 0;
   	  virtual void addEmptyVariable(ConstrainedVariableId c) = 0;
   	  virtual const ConstrainedVariableSet& getEmptyVariables() const = 0;
   	  virtual void clearEmptyVariables() = 0;
       virtual void relaxEmptyVariables() = 0;
-      
+
   	protected:
   	   ViolationMgr() {}
-  	   virtual ~ViolationMgr() {}  
-  	   
+  	   virtual ~ViolationMgr() {}
+
   	   friend class ConstraintEngine;
   };
-  
+
   /**
    * @class ConstraintEngine
    * @brief Base Class from which specific Constraint Engine Framework Instances can be derived.
-   * 
+   *
    * The ConstraintEngine is the core of the framework for building particular constraint processing
    * components. It defines a public interface which presents a state model, and s small set of operations to
    * query state and take appropriate action. Much of the functionality of the ConstraintEngine is provided by its
@@ -67,7 +67,7 @@ namespace EUROPA {
    * action.
    * @li Enforce the proper relationships between the component classes
    * @li Define and enforce the boundaries for extension and customization
-   * 
+   *
    * The ConstraintEngine plays the role of
    * mediator between Constraint, ConstrainedVariable, AbstractDomain, VariableChangeListener, and Propagator. As such, it is
    * the central controller for the state of the constraint network and the sle delegator of responsibility for managing
@@ -82,8 +82,8 @@ namespace EUROPA {
    * @par Relationships Enforced
    * @li Each spoke component (ConstrainedVariable, Constraint, Propagator) instance belongs to exactly one ConstraintEngine (hub) instance.
    * @li Each Constraint instance belongs to exaclty one Propagator instance.
-   * @li There is exactly one Propagator instance which will accept any given Constraint instance.  The criteria for acceptance of a 
-   * Constraint by a Propagator is a completely customizable feature of the Propagator class. However, a safety check is conducted 
+   * @li There is exactly one Propagator instance which will accept any given Constraint instance.  The criteria for acceptance of a
+   * Constraint by a Propagator is a completely customizable feature of the Propagator class. However, a safety check is conducted
    * when running under normal compilation which ensures the integrity of the relationship.
    *
    * @par Propagation Policy Constraints Enforced
@@ -96,7 +96,7 @@ namespace EUROPA {
    * all subsequent calls routed through the ConstraintEngine can be checked for this.
    * @li During propagation, all Propagator instances are executed in prioriy order until quiescence, where priority is based on the
    * order of insertion into the ConstraintEngine. Thus, the configuration of Propagator instances is the primary means of customization
-   * of propagation. 
+   * of propagation.
    *
    * @par Extension and Customization
    * @li Implement custom propagator to define agenda management scheme for targetted constraints.
@@ -159,7 +159,7 @@ namespace EUROPA {
     const ConstraintEngineId& getId() const;
 
     /**
-     * @brief purge all elements from the Engine. Will delete all variables, constraints, and propagators. 
+     * @brief purge all elements from the Engine. Will delete all variables, constraints, and propagators.
      */
     void purge();
 
@@ -209,7 +209,7 @@ namespace EUROPA {
      * should be invoked after the constraint has been proven inconsistent so that Propagators
      * and other classes can decide whether to keep relevant state for when propagation resumes
      */
-    bool canContinuePropagation() const; 
+    bool canContinuePropagation() const;
 
     /**
      * @brief Accessor for all constrained variables.
@@ -247,9 +247,9 @@ namespace EUROPA {
      * @brief Accessor for all propagators
      */
     const PropagatorId& getPropagatorByName(const LabelStr& name)  const;
-       
+
     /**
-     * @see If AutoPropagation is enabled, the constraint engine will automatically invoke propagate() 
+     * @see If AutoPropagation is enabled, the constraint engine will automatically invoke propagate()
      * after variable or constraint modifications (create/delete/change) caused through calls in the public API
      * (mainly PSConstraintEngine, PSVariable, PSConstraint, although calls in some other classes may indirectly trigger propagation in the future)
      */
@@ -259,26 +259,26 @@ namespace EUROPA {
      * @see setAutoPropagation
      */
     virtual bool getAutoPropagation() const;
-            
+
     /**
      * @brief If violations are allowed propagation will continue and the constraint engine will keep track of violated constraints
      */
     virtual void setAllowViolations(bool v);
-      
+
     /**
      * @see setAllowViolations
      */
     virtual bool getAllowViolations() const;
-    
+
     /**
      * @brief returns total violation in the constraint engine
      */
     virtual double getViolation() const;
-    
+
     /**
      * @brief returns string explanation for total violation in the constraint engine
      */
-    virtual std::string getViolationExpl() const;
+    virtual PSList <std::string> getViolationExpl() const;
 
     /**
      * @brief is constraint c violated?
@@ -291,11 +291,11 @@ namespace EUROPA {
     bool isRelaxed() const;
 
     const CESchemaId& getCESchema() const;
-    
+
     // PSConstraintEngine methods
     virtual PSVariable* getVariableByKey(PSEntityKey id);
     virtual PSVariable* getVariableByName(const std::string& name);
-    
+
 
     /**
      * @brief Create a variable
@@ -318,17 +318,17 @@ namespace EUROPA {
                                                 const EntityId& parent = EntityId::noId(),
                                                 int index = ConstrainedVariable::NO_INDEX);
 
-    
-    ConstraintId createConstraint(const LabelStr& name, 
+
+    ConstraintId createConstraint(const LabelStr& name,
                      const std::vector<ConstrainedVariableId>& scope);
 
     void deleteConstraint(const ConstraintId& c);
-    
+
     /**
      * @brief Create a value for a string
      */
     double createValue(const char* typeName, const std::string& value);
-    
+
   protected:
 
     /**
@@ -343,7 +343,7 @@ namespace EUROPA {
      */
     DomainListenerId allocateVariableListener(const ConstrainedVariableId& variable,
                                               const ConstraintList& constraints) const;
-    
+
     ViolationMgr& getViolationMgr() { return *m_violationMgr; }
     const ViolationMgr& getViolationMgr() const { return *m_violationMgr; }
 
@@ -352,6 +352,7 @@ namespace EUROPA {
     friend class VariableChangeListener;
     friend class Propagator;
     friend class ConstraintEngineListener;
+    friend class ViolationMgrImpl;
 
     /**
      * @brief Constraint Constructor will call this method to establish linkage with the ConstraintEngine.
@@ -440,7 +441,7 @@ namespace EUROPA {
      */
     void execute(const ConstraintId& constraint,
                  const ConstrainedVariableId& variable,
-                 int argIndex, 
+                 int argIndex,
                  const DomainListener::ChangeType& changeType);
 
     friend class ConstrainedVariable;
@@ -496,6 +497,13 @@ namespace EUROPA {
      */
     void processRedundantConstraints();
 
+    /**
+     * @brief Allow ViolationMgr to inform us of updates we should publish
+     */
+    void notifyViolationAdded(ConstraintId variable);
+    void notifyViolationRemoved(ConstraintId variable);
+
+
     // debug methods
     std::string dumpPropagatorState(const std::list<PropagatorId>& propagators) const;
 
@@ -508,7 +516,7 @@ namespace EUROPA {
     ConstraintEngineId m_id;
     ConstrainedVariableSet m_variables; /*!< The set of all variables under the control of the ConstraintEngine. */
     ConstraintSet m_constraints; /*!< The set of all constraints. */
-    std::list<PropagatorId> m_propagators; /*!< The list of all propagators. 
+    std::list<PropagatorId> m_propagators; /*!< The list of all propagators.
 					     Position in the list indicates execution priority. This
 					     is determined by the order of construction. */
     std::map<double, PropagatorId> m_propagatorsByName; /*!< Support configuration and lookup by name. */
@@ -524,14 +532,14 @@ namespace EUROPA {
     int m_cycleCount; /*!< A monotonically increasing count of propagation cycles. Identifies
                          when propagation events have already been queued or handled. */
     unsigned int m_mostRecentRepropagation; /*!< A monotonically increasing record of cycles where a relaxation occurred. */
-    
+
     std::set<ConstraintEngineListenerId> m_listeners; /*!< Stores the set of registered listeners. */
 
     ConstraintSet m_redundantConstraints; /*!< Pending redundant constraints awaiting deactivation */
 
     ViolationMgr* m_violationMgr;
     bool m_autoPropagate;
-    
+
     const CESchemaId& m_schema;
   };
 }

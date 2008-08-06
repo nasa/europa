@@ -19,157 +19,160 @@ namespace EUROPA
   class ViolationMgrImpl : public ViolationMgr
   {
   public:
-    ViolationMgrImpl(unsigned int maxViolationsAllowed);
+    ViolationMgrImpl(unsigned int maxViolationsAllowed, ConstraintEngine& ce);
     virtual ~ViolationMgrImpl();
-	
+
     virtual unsigned int getMaxViolationsAllowed();
     virtual void setMaxViolationsAllowed(unsigned int i);
-	
+
     virtual double getViolation() const;
-    virtual std::string getViolationExpl() const;
-	
+    virtual PSList <std::string> getViolationExpl() const;
+
     virtual bool handleEmpty(ConstrainedVariableId v);
     virtual bool handleRelax(ConstrainedVariableId v);
     virtual bool canContinuePropagation();
-	
-    virtual bool isViolated(ConstraintId c) const;		
+
+    virtual bool isViolated(ConstraintId c) const;
     virtual void addViolatedConstraint(ConstraintId c);
     virtual void removeViolatedConstraint(ConstraintId c);
-		
+
     virtual bool isEmpty(ConstrainedVariableId v) const;
     virtual void addEmptyVariable(ConstrainedVariableId c);
     virtual const ConstrainedVariableSet& getEmptyVariables() const;
     virtual void clearEmptyVariables();
-    virtual void relaxEmptyVariables();		
-	
+    virtual void relaxEmptyVariables();
+
   protected:
     unsigned int m_maxViolationsAllowed;
     ConstraintSet m_violatedConstraints;
     ConstrainedVariableSet m_emptyVariables;
     bool m_relaxing;
-  };  
-	
-  ViolationMgrImpl::ViolationMgrImpl(unsigned int maxViolationsAllowed)
-    : m_maxViolationsAllowed(maxViolationsAllowed)
-    , m_relaxing(false)
+
+    ConstraintEngine & m_ce; // for sending back messages
+  };
+
+  ViolationMgrImpl::ViolationMgrImpl(unsigned int maxViolationsAllowed, ConstraintEngine& ce)
+    : m_maxViolationsAllowed(maxViolationsAllowed), m_relaxing(false), m_ce(ce)
   {
   }
-	
-  ViolationMgrImpl::~ViolationMgrImpl() 
+
+  ViolationMgrImpl::~ViolationMgrImpl()
   {
-  }  
-	
-  unsigned int ViolationMgrImpl::getMaxViolationsAllowed() 
-  { 
-    return m_maxViolationsAllowed; 
   }
-	
+
+  unsigned int ViolationMgrImpl::getMaxViolationsAllowed()
+  {
+    return m_maxViolationsAllowed;
+  }
+
   void ViolationMgrImpl::setMaxViolationsAllowed(unsigned int i)
   {
     check_runtime_error(m_violatedConstraints.size() == 0, "Can only call ViolationMgrImpl::setMaxViolationsAllowed if there are no violations");
     m_maxViolationsAllowed = i;
   }
-	
-  double ViolationMgrImpl::getViolation() const 
-  { 
+
+  double ViolationMgrImpl::getViolation() const
+  {
     double total = 0.0;
     for (ConstraintSet::const_iterator it = m_violatedConstraints.begin(); it != m_violatedConstraints.end(); ++it) {
       ConstraintId c = *it;
       total += c->getViolation();
-    }  
+    }
 
     // hack to report violation when operating in 0 violations allowed mode
     if (total == 0 && m_emptyVariables.size()>0)
     	total = 1.0;
-    
+
     return total;
   }
-	
-  std::string ViolationMgrImpl::getViolationExpl() const 
-  { 
-    std::ostringstream os;
-	
+
+  PSList <std::string> ViolationMgrImpl::getViolationExpl() const
+  {
+    PSList<std::string> retval;
+
     for (ConstraintSet::const_iterator it = m_violatedConstraints.begin(); it != m_violatedConstraints.end(); ++it) {
       ConstraintId c = *it;
-      os << c->getViolationExpl() << std::endl;
-    }  
-	
-    return os.str();
+      retval.push_back(c->getViolationExpl());
+    }
+
+    return retval;
   }
-	
+
   bool ViolationMgrImpl::isViolated(ConstraintId c) const
   {
     return m_violatedConstraints.find(c) != m_violatedConstraints.end();
   }
-	
+
   bool ViolationMgrImpl::canContinuePropagation()
   {
     return m_violatedConstraints.size() < m_maxViolationsAllowed;
-  } 
-	
+  }
+
   void ViolationMgrImpl::addViolatedConstraint(ConstraintId c)
   {
     debugMsg("ConstraintEngine:ViolationMgr", "Marking constraint as violated : " << c->toString());
-    m_violatedConstraints.insert(c);		
-    c->deactivate(); // Deactivate will cause propagators to ignore constraint, including removing from current agendas  	
+    m_violatedConstraints.insert(c);
+    c->deactivate(); // Deactivate will cause propagators to ignore constraint, including removing from current agendas
+    m_ce.notifyViolationAdded(c); // tell constraint engine to publish
   }
-	
+
   void ViolationMgrImpl::removeViolatedConstraint(ConstraintId c)
   {
     check_error(isViolated(c),"Tried to remove constraint that is not violated "+c->toString());
     debugMsg("ConstraintEngine:ViolationMgr", "Removing constraint from violated set : " << c->toString());
     c->undoDeactivation(); // This will put the constraint back on the Propagators' agendas
     m_violatedConstraints.erase(c);
+    m_ce.notifyViolationRemoved(c); // tell constraint engine to publish
   }
 
-  bool ViolationMgrImpl::handleEmpty(ConstrainedVariableId v) 
+  bool ViolationMgrImpl::handleEmpty(ConstrainedVariableId v)
   {
     if (m_violatedConstraints.size() >= m_maxViolationsAllowed)
       return false;
-	
+
     ConstraintId c = v->getCurrentPropagatingConstraint();
-	
+
     // if c is noId, this was caused directly by an specify, just relax the var and the next time around we'll catch the constraint
-    if (c != ConstraintId::noId()) 
-      addViolatedConstraint(c);		
-	
+    if (c != ConstraintId::noId())
+      addViolatedConstraint(c);
+
     return true;
   }
-	
-  bool ViolationMgrImpl::handleRelax(ConstrainedVariableId v) 
+
+  bool ViolationMgrImpl::handleRelax(ConstrainedVariableId v)
   {
     if (m_violatedConstraints.size() == 0)
       return true;
-	
+
     // restore all constraints attached to v to propagation
     // as long as all the vars in the constraint are now non-empty
     std::set<ConstraintId> constraints;
     v->constraints(constraints);
     for (std::set<ConstraintId>::iterator it = constraints.begin(); it != constraints.end(); ++it) {
       ConstraintId c = *it;
-      if (isViolated(c)) 
+      if (isViolated(c))
 	removeViolatedConstraint(c);
     }
-	
+
     return true;
-  }  	    
-	
+  }
+
   bool ViolationMgrImpl::isEmpty(ConstrainedVariableId v) const
   {
     return m_emptyVariables.find(v) != m_emptyVariables.end();
   }
-	
+
   void ViolationMgrImpl::addEmptyVariable(ConstrainedVariableId c)
   {
     debugMsg("ConstraintEngine:ViolationMgr", "Marking ConstrainedVariable as empty : " << c->toString());
     m_emptyVariables.insert(c); // TODO: make sure set is avoiding duplicates correctly
   }
-  	
+
   const ConstrainedVariableSet& ViolationMgrImpl::getEmptyVariables() const
   {
     return m_emptyVariables;
   }
-  	
+
   void ViolationMgrImpl::clearEmptyVariables()
   {
     m_emptyVariables.clear();
@@ -179,7 +182,7 @@ namespace EUROPA
   {
     if (m_relaxing)
       return;
-    	
+
     m_relaxing = true;
     ConstrainedVariableSet::const_iterator it = m_emptyVariables.begin();
     for(;it != m_emptyVariables.end();++it) {
@@ -187,7 +190,7 @@ namespace EUROPA
       check_error(!v.isNoId(),"Tried to relax ConstrainedVariableId::noId()");
       v->relax();
     }
-    	
+
     m_emptyVariables.clear();
     m_relaxing = false;
   }
@@ -258,7 +261,7 @@ namespace EUROPA
     return ((new VariableChangeListener(variable, m_id))->getId());
   }
 
-  ConstraintEngine::ConstraintEngine(const CESchemaId& schema) 
+  ConstraintEngine::ConstraintEngine(const CESchemaId& schema)
     : m_id(this)
     , m_relaxing(false)
     , m_relaxingViolation(false)
@@ -266,13 +269,13 @@ namespace EUROPA
     , m_propInProgress(false)
     , m_deleted(false)
     , m_purged(false)
-    , m_dirty(false)    
+    , m_dirty(false)
     , m_cycleCount(1)
     , m_mostRecentRepropagation(1)
     , m_autoPropagate(true)
     , m_schema(schema)
   {
-    m_violationMgr = new ViolationMgrImpl(0);
+    m_violationMgr = new ViolationMgrImpl(0, *this);
   }
 
   ConstraintEngine::~ConstraintEngine(){
@@ -282,7 +285,7 @@ namespace EUROPA
       purge();
 
     m_id.remove();
-    
+
     delete m_violationMgr;
   }
 
@@ -290,7 +293,7 @@ namespace EUROPA
   {
       return m_autoPropagate;
   }
-  
+
   void ConstraintEngine::setAutoPropagation(bool v)
   {
      if (v != m_autoPropagate) {
@@ -299,8 +302,8 @@ namespace EUROPA
              propagate();
      }
   }
-    
-  const ConstraintEngineId& ConstraintEngine::getId() const 
+
+  const ConstraintEngineId& ConstraintEngine::getId() const
   {
     return(m_id);
   }
@@ -309,7 +312,7 @@ namespace EUROPA
   {
       return m_schema;
   }
-  
+
   void ConstraintEngine::purge() {
     m_purged = true;
     // Iteratively delete constraints. Note that each deletion will update the set
@@ -350,7 +353,7 @@ namespace EUROPA
 
   bool ConstraintEngine::pending() const {
     // Quick check for cases where there is nothing to do for sure
-    if(m_dirty == false) 
+    if(m_dirty == false)
       return false;
 
     return (m_relaxed || (!provenInconsistent() && !constraintConsistent()));
@@ -467,7 +470,7 @@ namespace EUROPA
     deactivatedConstraint->getPropagator()->handleConstraintDeactivated(deactivatedConstraint);
     publish(notifyDeactivated(deactivatedConstraint));
 
-    debugMsg("ConstraintEngine:notifyDeactivated:Constraint",  
+    debugMsg("ConstraintEngine:notifyDeactivated:Constraint",
 	     deactivatedConstraint->getName().toString() << "(" << deactivatedConstraint->getKey() << ")");
   }
 
@@ -477,10 +480,10 @@ namespace EUROPA
     constraint->getPropagator()->handleConstraintActivated(constraint);
     publish(notifyActivated(constraint));
 
-    condDebugMsg(constraint->isRedundant(), "ConstraintEngine:notifyRedundant:Constraint",  
+    condDebugMsg(constraint->isRedundant(), "ConstraintEngine:notifyRedundant:Constraint",
 		 constraint->getName().toString() << "(" << constraint->getKey() << ")");
 
-    condDebugMsg(!constraint->isRedundant(), "ConstraintEngine:notifyActivated:Constraint",  
+    condDebugMsg(!constraint->isRedundant(), "ConstraintEngine:notifyActivated:Constraint",
 		 constraint->getName().toString() << "(" << constraint->getKey() << ")");
   }
 
@@ -505,7 +508,7 @@ namespace EUROPA
 
     publish(notifyDeactivated(var));
 
-    debugMsg("ConstraintEngine:notifyDeactivated:ConstrainedVariable",  
+    debugMsg("ConstraintEngine:notifyDeactivated:ConstrainedVariable",
 	     var->getName().toString() << "(" << var->getKey() << ")");
   }
 
@@ -520,48 +523,48 @@ namespace EUROPA
 
     publish(notifyActivated(var));
 
-    debugMsg("ConstraintEngine:notifyActivated:ConstrainedVariable",  
+    debugMsg("ConstraintEngine:notifyActivated:ConstrainedVariable",
 	     var->getName().toString() << "(" << var->getKey() << ")");
   }
-  
+
   std::string ConstraintEngine::dumpPropagatorState(const std::list<PropagatorId>& propagators) const
   {
     std::ostringstream os;
-  	
+
     os << std::endl;
     for(std::list<PropagatorId>::const_iterator it = propagators.begin(); it != propagators.end(); ++it){
       PropagatorId propagator = *it;
       os << propagator->getName().toString() << "(";
-      
+
       const std::set<ConstraintId>& constraints = propagator->getConstraints();
       int i=0;
       for(std::set<ConstraintId>::const_iterator cit = constraints.begin(); cit != constraints.end(); ++cit){
 	if (i>0)
 	  os << ",";
 	i++;
-	os << (*cit)->getName().toString();        	
+	os << (*cit)->getName().toString();
       }
       os << ")";
-      
-      os << " enabled=" << propagator->isEnabled() 
+
+      os << " enabled=" << propagator->isEnabled()
          << " updateRequired=" << propagator->updateRequired()
-         << std::endl; 
+         << std::endl;
     }
     os << std::endl;
-  	
+
     return os.str();
   }
 
-  bool ConstraintEngine::hasEmptyVariables() const 
+  bool ConstraintEngine::hasEmptyVariables() const
   {
     return (getViolationMgr().getEmptyVariables().size() > 0);
   }
-  
-  void ConstraintEngine::clearEmptyVariables() 
-  { 
+
+  void ConstraintEngine::clearEmptyVariables()
+  {
     getViolationMgr().clearEmptyVariables();
-  }  
-  
+  }
+
   bool ConstraintEngine::doPropagate()
   {
     check_error(!Entity::isPurging(), "Cannot propagate the network when purging. Messages are not sent or processed.");
@@ -588,7 +591,7 @@ namespace EUROPA
     bool started = false;
     incrementCycle();
 
-    // Now we have the main propagation loop. 
+    // Now we have the main propagation loop.
     PropagatorId activePropagator = getNextPropagator();
     while(!activePropagator.isNoId() && !provenInconsistent()){
       // Publish this event first time around only
@@ -598,27 +601,27 @@ namespace EUROPA
 	debugMsg("ConstraintEngine:propagate", "Commenced");
       }
 
-      debugMsg("ConstraintEngine:propagate", 
+      debugMsg("ConstraintEngine:propagate",
 	       "Executing " << activePropagator->getName().toString() << " propagator.");
 
       activePropagator->execute();
       activePropagator = getNextPropagator();
     }
-    
+
     incrementCycle();
     check_error(!pending());
 
     m_propInProgress = false;
-    
+
     bool result = constraintConsistent();
     if (result && started){
       publish(notifyPropagationCompleted());
       m_dirty = false;
 
       // Clean up now that we are in a quiescent state
-      processRedundantConstraints(); 
+      processRedundantConstraints();
       Entity::garbageCollect();
-      checkError(constraintConsistent(), 
+      checkError(constraintConsistent(),
 		 "Must be a bug in cleaning up constraints since we have regressed through garbage collection." <<
 		 " See discard and handleDiscard.");
 
@@ -639,24 +642,24 @@ namespace EUROPA
   {
     return m_violationMgr->canContinuePropagation();
   }
-  
-  bool ConstraintEngine::propagate(){  	
+
+  bool ConstraintEngine::propagate(){
     bool result = true;
-  	
-    bool done = false;  	
+
+    bool done = false;
     while (!done) {
-      result = doPropagate();	
+      result = doPropagate();
       if (!result && canContinuePropagation()) {
 	m_relaxingViolation = true;
 	getViolationMgr().relaxEmptyVariables();
-	m_relaxingViolation = false;	  
+	m_relaxingViolation = false;
       }
       else {
       	done = true;
       }
     }
-  	
-    return result;  
+
+    return result;
   }
 
   void ConstraintEngine::notify(const ConstrainedVariableId& source, const DomainListener::ChangeType& changeType){
@@ -705,8 +708,8 @@ namespace EUROPA
     getViolationMgr().addEmptyVariable(variable);
     debugMsg("ConstraintEngine:emptied","Emptied var:" << variable->toString()
 	     << " parent:" << (variable->parent().isNoId() ? "NULL" : variable->parent()->toString()));
-    check_error(m_relaxed == false);    
-    getViolationMgr().handleEmpty(variable);            
+    check_error(m_relaxed == false);
+    getViolationMgr().handleEmpty(variable);
   }
 
   void ConstraintEngine::handleRelax(const ConstrainedVariableId& variable) {
@@ -718,7 +721,7 @@ namespace EUROPA
     debugMsg("ConstraintEngine:relaxed",
 	     "Handling relaxation of " << variable->toString());
 
-    if (!m_relaxingViolation)    
+    if (!m_relaxingViolation)
       m_violationMgr->handleRelax(variable);
 
     // If we are not currently in a relaxed state then this is the initiating
@@ -734,10 +737,10 @@ namespace EUROPA
     // Now this should be true for all
     check_error(variable->lastRelaxed() == m_cycleCount);
 
-    if(hasEmptyVariables()) {    
+    if(hasEmptyVariables()) {
       // If this isn't one of the empty variables, relax the empty variables.
-      if (!getViolationMgr().isEmpty(variable))     	
-	getViolationMgr().relaxEmptyVariables(); 
+      if (!getViolationMgr().isEmpty(variable))
+	getViolationMgr().relaxEmptyVariables();
     }
 
 
@@ -777,7 +780,7 @@ namespace EUROPA
     check_error(constraint->isActive());
     check_error(constraint->isValid());
     check_error(m_propInProgress);
-    checkError(allActiveVariables(constraint->getScope()), 
+    checkError(allActiveVariables(constraint->getScope()),
 	       "All variables of an active constraint must also be active. Clients must ensure this happens. " <<
 	       constraint->toString());
 
@@ -789,7 +792,7 @@ namespace EUROPA
   }
 
   void ConstraintEngine::execute(const ConstraintId& constraint,
-				 const ConstrainedVariableId& variable, 
+				 const ConstrainedVariableId& variable,
 				 int argIndex,
 				 const DomainListener::ChangeType& changeType){
     check_error(!provenInconsistent() && constraint.isValid());
@@ -907,34 +910,45 @@ namespace EUROPA
 
     m_redundantConstraints.clear();
   }
-  
+
+
   bool ConstraintEngine::getAllowViolations() const
   {
     return m_violationMgr->getMaxViolationsAllowed() > 0;
   }
-  
+
   void ConstraintEngine::setAllowViolations(bool v)
   {
-    if (v) 
+    if (v)
       m_violationMgr->setMaxViolationsAllowed((unsigned int)INT_MAX);
     else
       m_violationMgr->setMaxViolationsAllowed(0);
   }
-    
+
   double ConstraintEngine::getViolation() const
   {
     return m_violationMgr->getViolation();
   }
-  
-  std::string ConstraintEngine::getViolationExpl() const
+
+  PSList <std::string> ConstraintEngine::getViolationExpl() const
   {
     return m_violationMgr->getViolationExpl();
   }
-  
+
+  void ConstraintEngine::notifyViolationAdded(ConstraintId variable)
+  {
+	  publish(notifyViolationAdded(variable));
+  }
+
+  void ConstraintEngine::notifyViolationRemoved(ConstraintId variable)
+  {
+	  publish(notifyViolationRemoved(variable));
+  }
+
   bool ConstraintEngine::isViolated(ConstraintId c) const
   {
     return m_violationMgr->isViolated(c);
-  }  
+  }
 
   bool ConstraintEngine::isRelaxed() const {return m_relaxed;}
 
@@ -942,11 +956,11 @@ namespace EUROPA
   {
     ConstrainedVariableId entity = Entity::getEntity(id);
     check_runtime_error(entity.isValid());
-    
+
 //    ConstrainedVariableId varId = entity;
     //return new ConstrainedVariable(entity);
     // TODO:  No idea if this is correct....
-    return entity; 
+    return entity;
   }
 
   // TODO: this needs to be optimized
@@ -956,12 +970,12 @@ namespace EUROPA
     for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
         ConstrainedVariableId id = *it;
         if (id->getName().toString() == name)
-        	return (PSVariable *) id; 
+        	return (PSVariable *) id;
     }
     return NULL;
   }
-  
-  
+
+
   int ConstraintEngine::addLinkedVarsForRelaxation(const ConstrainedVariableId& var,
 						   std::list<ConstrainedVariableId>& dest,
 						   std::list<ConstrainedVariableId>::iterator pos,
@@ -1020,30 +1034,30 @@ namespace EUROPA
     check_error(variable.isValid());
     return variable;
   }
-  
-  ConstraintId ConstraintEngine::createConstraint(const LabelStr& name, 
-                           const std::vector<ConstrainedVariableId>& scope) 
+
+  ConstraintId ConstraintEngine::createConstraint(const LabelStr& name,
+                           const std::vector<ConstrainedVariableId>& scope)
   {
-      ConstraintFactoryId factory = getCESchema()->getConstraintFactory(name);     
+      ConstraintFactoryId factory = getCESchema()->getConstraintFactory(name);
       check_error(factory.isValid());
       ConstraintId constraint = factory->createConstraint(getId(), scope);
-      
+
       if (getAutoPropagation())
-          propagate();            
-      
+          propagate();
+
       return(constraint);
-  }  
-  
+  }
+
   void ConstraintEngine::deleteConstraint(const ConstraintId& c)
   {
       check_error(c.isValid());
       delete (Constraint*)c;
-      
+
       if (getAutoPropagation())
-          propagate();            
+          propagate();
   }
-  
-  
+
+
   double ConstraintEngine::createValue(const char* typeName, const std::string& value)
   {
     TypeFactoryId factory = getCESchema()->getFactory(typeName);
@@ -1051,5 +1065,5 @@ namespace EUROPA
     return factory->createValue(value);
   }
 
-  
+
 }
