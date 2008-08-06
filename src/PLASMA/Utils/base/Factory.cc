@@ -18,7 +18,8 @@ Factory::~Factory()
 
 FactoryId& Factory::getId() 
 { 
-    return m_id; 
+    return m_id;         // TODO: log a message notifying of new registration
+
 }
 
 const LabelStr& Factory::getName() const
@@ -48,7 +49,9 @@ void FactoryMgr::registerFactory(FactoryId& factory)
     if(it != m_factoryMap.end()) {
         delete ((Factory*)it->second);
         m_factoryMap.erase(it);
-        // TODO: log a message notifying of new registration
+        std::cout << "FactoryMgr::registerFactory: Registered new factory for " << factory->getName().toString() << std::endl;
+        // TODO: log INFO message notifying of new registration
+        //debugMsg("FactoryMgr:registerFactory","Registered new factory for " << factory->getName().toString());
     }
     m_factoryMap.insert(std::pair<double,FactoryId>(factory->getName(), factory));
 }
@@ -64,11 +67,17 @@ void FactoryMgr::purgeAll()
     m_factoryMap.clear();
 }
 
-Factory* FactoryMgr::getFactory(const LabelStr& name) const
+FactoryObjId& FactoryMgr::createInstance(const LabelStr& name, const FactoryArgs& args) 
+{
+  FactoryId& factory = getFactory(name);
+  return factory->createInstance(args);
+}
+
+FactoryId& FactoryMgr::getFactory(const LabelStr& name)
 {   
-    std::map<double,FactoryId>::const_iterator it = m_factoryMap.find(name);
+    std::map<double,FactoryId>::iterator it = m_factoryMap.find(name);
     checkError(it != m_factoryMap.end(), "No factory registered for '" << name.toString() << "'");    
-    return (Factory*)(it->second);
+    return it->second;
 }
 
 }

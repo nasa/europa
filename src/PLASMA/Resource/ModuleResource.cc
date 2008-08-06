@@ -107,14 +107,14 @@ namespace EUROPA {
       schema->addPredicate("Unary.use");
       schema->registerTokenFactory((new UnaryUseTokenFactory("Unary.use"))->getId());             
       
-      EUROPA::SAVH::ProfileFactoryMgr* pfm = new EUROPA::SAVH::ProfileFactoryMgr();
+      FactoryMgr* pfm = new FactoryMgr();
       engine->addComponent("ProfileFactoryMgr",pfm);
       REGISTER_PROFILE(pfm,EUROPA::SAVH::TimetableProfile, TimetableProfile );
       REGISTER_PROFILE(pfm,EUROPA::SAVH::FlowProfile, FlowProfile);
       REGISTER_PROFILE(pfm,EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile );
       
       // Solver
-      EUROPA::SAVH::FVDetectorFactoryMgr* fvdfm = new EUROPA::SAVH::FVDetectorFactoryMgr();
+      FactoryMgr* fvdfm = new FactoryMgr();
       engine->addComponent("FVDetectorFactoryMgr",fvdfm);
       REGISTER_FVDETECTOR(fvdfm,EUROPA::SAVH::TimetableFVDetector,TimetableFVDetector);
       REGISTER_FVDETECTOR(fvdfm,EUROPA::SAVH::ReusableFVDetector,ReusableFVDetector);
@@ -152,10 +152,11 @@ namespace EUROPA {
   
   void ModuleResource::uninitialize(EngineId engine)
   {	  
-      EUROPA::SAVH::ProfileFactoryMgr* pfm = (EUROPA::SAVH::ProfileFactoryMgr*)engine->getComponent("ProfileFactoryMgr");
-      delete pfm;
-      EUROPA::SAVH::FVDetectorFactoryMgr* fvdfm = (EUROPA::SAVH::FVDetectorFactoryMgr*)engine->getComponent("FVDetectorFactoryMgr");
-      delete fvdfm;
+      const char* fmgrs[] = {"ProfileFactoryMgr","FVDetectorFactoryMgr"};
+      for (int i=0;i<2;i++) {
+          FactoryMgr* fm = (FactoryMgr*)engine->getComponent(fmgrs[i]);
+          delete fm;
+      }
 
       // TODO: clean up more
   }  

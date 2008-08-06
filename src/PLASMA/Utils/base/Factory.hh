@@ -7,13 +7,28 @@
 
 namespace EUROPA {
 
+class FactoryObj;
+typedef Id<FactoryObj> FactoryObjId;
+
 class Factory;
 typedef Id<Factory> FactoryId;
 
 class FactoryMgr;
 typedef Id<FactoryMgr> FactoryMgrId;
 
-// TODO: template <class FactoryType>
+
+class FactoryArgs
+{
+public:
+    virtual ~FactoryArgs() {}
+};
+
+class FactoryObj
+{
+public:
+    virtual ~FactoryObj() {}
+};
+
 class Factory
 {
 public:
@@ -22,6 +37,8 @@ public:
     
     FactoryId& getId(); 
     const LabelStr& getName() const;
+
+    virtual FactoryObjId& createInstance(const FactoryArgs& args) = 0;
     
 protected:
     FactoryId m_id;
@@ -40,13 +57,13 @@ public:
     void registerFactory(FactoryId& factory);
     void purgeAll();
         
-    // TODO: make createInstance method generic        
+    FactoryObjId& createInstance(const LabelStr& name, const FactoryArgs& args);
     
 protected:
     FactoryMgrId m_id;     
     std::map<double,FactoryId> m_factoryMap;   
     
-    Factory* getFactory(const LabelStr& name) const;    
+    FactoryId& getFactory(const LabelStr& name);    
 };
 
 }

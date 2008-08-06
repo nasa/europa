@@ -27,7 +27,7 @@ namespace EUROPA {
      * but all of said classes have them, this base class defines the interface for detecting flaws and violations
      * and informing the Resource about it.
      */
-    class FVDetector {
+    class FVDetector : public FactoryObj {
     public:
       /**
        * @brief Constructor
@@ -55,7 +55,7 @@ namespace EUROPA {
        */
       virtual bool detect(const InstantId inst) = 0;
 
-      FVDetectorId getId() {return m_id;}
+      FVDetectorId& getId() {return m_id;}
 
       const ResourceId& getResource() const {return m_res;}
     protected:
@@ -87,29 +87,26 @@ namespace EUROPA {
       ResourceId m_res;
     };
     
-    class FVDetectorFactoryMgr : public FactoryMgr 
+    class FVDetectorArgs : public FactoryArgs 
     {
     public:
-      FVDetectorId createInstance(const LabelStr& name, const ResourceId res);
-    };
-
-    class FVDetectorFactory : public Factory 
-    {
-    public:
-      FVDetectorFactory(const EUROPA::LabelStr& name) : Factory(name) {}      
-      virtual FVDetectorId create(const ResourceId res) const = 0;
+        const ResourceId& resource;        
+        FVDetectorArgs(const ResourceId& r) : resource(r) {}      
     };
 
     template<class FVDetectorType>
-    class ConcreteFVDetectorFactory : public FVDetectorFactory 
+    class FVDetectorFactory : public Factory 
     {
     public:
-      ConcreteFVDetectorFactory(const EUROPA::LabelStr& name) : FVDetectorFactory(name) {}
-      virtual FVDetectorId create(const ResourceId res) const {return (new FVDetectorType(res))->getId();}
+      FVDetectorFactory(const EUROPA::LabelStr& name) : Factory(name) {}
+      virtual EUROPA::FactoryObjId& createInstance(const EUROPA::FactoryArgs& fa) {
+          const FVDetectorArgs& args = (const FVDetectorArgs&)fa;
+          return (EUROPA::FactoryObjId&)(new FVDetectorType(args.resource))->getId();
+      }
     };
 
 #define REGISTER_FVDETECTOR(MGR, CLASS, NAME) \
-    (MGR->registerFactory((new EUROPA::SAVH::ConcreteFVDetectorFactory<CLASS>(EUROPA::LabelStr(#NAME)))->getId()));
+    (MGR->registerFactory((new EUROPA::SAVH::FVDetectorFactory<CLASS>(EUROPA::LabelStr(#NAME)))->getId()));
   }
 }
 

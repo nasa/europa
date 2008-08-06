@@ -19,6 +19,7 @@
 #include "LabelStr.hh"
 #include "Debug.hh"
 #include "Engine.hh"
+#include "Factory.hh"
 
 #include <map>
 #include <utility>
@@ -27,12 +28,6 @@ namespace EUROPA {
 
   namespace SAVH {
 
-    class ProfileFactory;
-    typedef Id<ProfileFactory> ProfileFactoryId;
-  
-    class ProfileFactoryMgr;
-    typedef Id<ProfileFactoryMgr> ProfileFactoryMgrId;
-    
     /**
      * @class Profile
      * @brief The base class for managing Resource level profiles
@@ -45,7 +40,7 @@ namespace EUROPA {
      * for causing subclasses to recalculate the profile.
      * When should we recalculate?
      */
-    class Profile {
+    class Profile : public FactoryObj {
     public:
 
       /**
@@ -54,7 +49,7 @@ namespace EUROPA {
        */
       Profile(const PlanDatabaseId ce, const FVDetectorId flawDetector, const double initLevelLb = 0, const double initLevelUb = 0);
       virtual ~Profile();
-      ProfileId getId() {return m_id;}
+      ProfileId& getId() {return m_id;}
 
       /**
        * @brief Adds a Transaction to the profile.  Creates Instants for the lower and upper bounds of the timepoint if necessary,
@@ -360,53 +355,35 @@ namespace EUROPA {
       std::map<int, InstantId>::const_iterator m_start, m_end, m_realEnd; /*<! The start and end times over which this iterator goes*/
     };
 
-    class ProfileFactory {
+    class ProfileArgs : public FactoryArgs
+    {
     public:
-      ProfileFactory(const LabelStr& name);
-      virtual ~ProfileFactory();
-      
-      ProfileFactoryId& getId();
-      
-      const LabelStr& getName() const {return m_name;}
-
-      virtual ProfileId create(const PlanDatabaseId db, const FVDetectorId detector,
-                               const double initCapacityLb = 0, const double initCapacityUb = 0) const = 0;
-      
-    protected:
-      ProfileFactoryId m_id;  
-      const LabelStr m_name;
+        ProfileArgs(const PlanDatabaseId db, const FVDetectorId detector,
+                    const double initCapacityLb = 0, const double initCapacityUb = 0) 
+            : m_db(db), m_detector(detector), m_initCapacityLb(initCapacityLb), m_initCapacityUb(initCapacityUb) 
+        {            
+        }
+        
+        const PlanDatabaseId& m_db;
+        const FVDetectorId& m_detector;
+        const double m_initCapacityLb;
+        const double m_initCapacityUb;
     };
-
-    class ProfileFactoryMgr : public EngineComponent {
-    public:
-      ProfileFactoryMgr();  
-      virtual ~ProfileFactoryMgr();
-
-      ProfileFactoryMgrId& getId();
-      
-      void registerFactory(ProfileFactoryId& factory);
-      
-      ProfileId createInstance(const LabelStr& name, const PlanDatabaseId db, const FVDetectorId detector, 
-                                      const double initCapacityLb = 0, const double initCapacityUb = 0);
-
-      void purgeAll();
-      
-    protected:
-      ProfileFactoryMgrId m_id;  
-      std::map<double, ProfileFactoryId> m_factoryMap;
-    };
-
+    
     template<class ProfileType>
-    class ConcreteProfileFactory : public ProfileFactory {
+    class ProfileFactory : public Factory {
     public:
-      ConcreteProfileFactory(const LabelStr& name) : ProfileFactory(name) {}
+      ProfileFactory(const LabelStr& name) : Factory(name) {}
       
-      ProfileId create(const PlanDatabaseId db, const FVDetectorId detector,
-                       const double initCapacityLb = 0, const double initCapacityUb = 0) const 
-      {return (new ProfileType(db, detector, initCapacityLb, initCapacityUb))->getId();}
+      virtual EUROPA::FactoryObjId& createInstance(const EUROPA::FactoryArgs& fa) 
+      {
+          const ProfileArgs& args = (const ProfileArgs&)fa;
+          return (EUROPA::FactoryObjId&)
+              (new ProfileType(args.m_db, args.m_detector, args.m_initCapacityLb, args.m_initCapacityUb))->getId();
+      }
     };
 
-    #define REGISTER_PROFILE(MGR, CLASS, NAME) (MGR->registerFactory((new EUROPA::SAVH::ConcreteProfileFactory<CLASS>(#NAME))->getId()));
+    #define REGISTER_PROFILE(MGR, CLASS, NAME) (MGR->registerFactory((new EUROPA::SAVH::ProfileFactory<CLASS>(#NAME))->getId()));
 
   }
 }

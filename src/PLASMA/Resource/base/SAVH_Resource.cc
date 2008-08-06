@@ -75,16 +75,18 @@ namespace EUROPA {
       // TODO: make profile this  more robust?      
       EngineId& engine = this->getPlanDatabase()->getEngine();
       
-      FVDetectorFactoryMgr* fvdfm = (FVDetectorFactoryMgr*)engine->getComponent("FVDetectorFactoryMgr");
-      m_detector = fvdfm->createInstance(detectorName, getId());
+      FactoryMgr* fvdfm = (FactoryMgr*)engine->getComponent("FVDetectorFactoryMgr");
+      m_detector = fvdfm->createInstance(detectorName, FVDetectorArgs(getId()));
       
-      ProfileFactoryMgr* pfm = (ProfileFactoryMgr*)engine->getComponent("ProfileFactoryMgr");
+      FactoryMgr* pfm = (FactoryMgr*)engine->getComponent("ProfileFactoryMgr");
       m_profile = pfm->createInstance(
               profileName, 
-              getPlanDatabase(), 
-              m_detector,
-              m_initCapacityLb, 
-              m_initCapacityUb
+              ProfileArgs(
+                  getPlanDatabase(), 
+                  m_detector,
+                  m_initCapacityLb, 
+                  m_initCapacityUb
+              )
       );
       
       debugMsg("Resource:init", "Initialized Resource " << getName().toString() << "{"
