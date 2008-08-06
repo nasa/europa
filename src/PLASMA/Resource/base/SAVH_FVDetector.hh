@@ -11,10 +11,14 @@
 
 #include "SAVH_ResourceDefs.hh"
 #include "SAVH_Resource.hh"
+#include "Factory.hh"
 
 namespace EUROPA {
   namespace SAVH {
 
+    class FVDetectorFactoryMgr;
+    typedef Id<FVDetectorFactoryMgr> FVDetectoryFactoryMgrId;
+    
     /**
      * @class FVDetector
      * @brief The base class for detecting flaws and violations.
@@ -83,30 +87,29 @@ namespace EUROPA {
       ResourceId m_res;
     };
     
-    class FVDetectorFactory {
+    class FVDetectorFactoryMgr : public FactoryMgr 
+    {
     public:
-      static FVDetectorId createInstance(const LabelStr& name, const ResourceId res);
-      const LabelStr& getName() const {return m_name;}
-    protected:
-      virtual ~FVDetectorFactory(){}
-      static void registerFactory(const LabelStr& name, FVDetectorFactory* factory);
+      FVDetectorId createInstance(const LabelStr& name, const ResourceId res);
+    };
+
+    class FVDetectorFactory : public Factory 
+    {
+    public:
+      FVDetectorFactory(const EUROPA::LabelStr& name) : Factory(name) {}      
       virtual FVDetectorId create(const ResourceId res) const = 0;
-      FVDetectorFactory(const LabelStr& name) : m_name(name) {registerFactory(m_name, this);}
-    private:
-      static std::map<double, FVDetectorFactory*>& factoryMap();
-      const LabelStr m_name;
     };
 
     template<class FVDetectorType>
-    class ConcreteFVDetectorFactory : public FVDetectorFactory {
+    class ConcreteFVDetectorFactory : public FVDetectorFactory 
+    {
     public:
       ConcreteFVDetectorFactory(const EUROPA::LabelStr& name) : FVDetectorFactory(name) {}
-    protected:
-    private:
-      FVDetectorId create(const ResourceId res) const {return (new FVDetectorType(res))->getId();}
+      virtual FVDetectorId create(const ResourceId res) const {return (new FVDetectorType(res))->getId();}
     };
 
-#define REGISTER_FVDETECTOR(CLASS, NAME) (new EUROPA::SAVH::ConcreteFVDetectorFactory<CLASS>(EUROPA::LabelStr(#NAME)));
+#define REGISTER_FVDETECTOR(MGR, CLASS, NAME) \
+    (MGR->registerFactory((new EUROPA::SAVH::ConcreteFVDetectorFactory<CLASS>(EUROPA::LabelStr(#NAME)))->getId()));
   }
 }
 

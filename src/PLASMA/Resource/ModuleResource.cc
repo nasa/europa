@@ -114,10 +114,12 @@ namespace EUROPA {
       REGISTER_PROFILE(pfm,EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile );
       
       // Solver
-      REGISTER_FVDETECTOR(EUROPA::SAVH::TimetableFVDetector, TimetableFVDetector);
-      REGISTER_FVDETECTOR(EUROPA::SAVH::ReusableFVDetector, ReusableFVDetector);
-      REGISTER_FVDETECTOR(EUROPA::SAVH::OpenWorldFVDetector, OpenWorldFVDetector);
-      REGISTER_FVDETECTOR(EUROPA::SAVH::ClosedWorldFVDetector, ClosedWorldFVDetector);               
+      EUROPA::SAVH::FVDetectorFactoryMgr* fvdfm = new EUROPA::SAVH::FVDetectorFactoryMgr();
+      engine->addComponent("FVDetectorFactoryMgr",fvdfm);
+      REGISTER_FVDETECTOR(fvdfm,EUROPA::SAVH::TimetableFVDetector,TimetableFVDetector);
+      REGISTER_FVDETECTOR(fvdfm,EUROPA::SAVH::ReusableFVDetector,ReusableFVDetector);
+      REGISTER_FVDETECTOR(fvdfm,EUROPA::SAVH::OpenWorldFVDetector,OpenWorldFVDetector);
+      REGISTER_FVDETECTOR(fvdfm,EUROPA::SAVH::ClosedWorldFVDetector,ClosedWorldFVDetector);               
 
       REGISTER_FLAW_MANAGER(SAVH::ThreatManager, SAVHThreatManager); 
       REGISTER_FLAW_HANDLER(SAVH::ThreatDecisionPoint, SAVHThreatHandler); 
@@ -152,6 +154,9 @@ namespace EUROPA {
   {	  
       EUROPA::SAVH::ProfileFactoryMgr* pfm = (EUROPA::SAVH::ProfileFactoryMgr*)engine->getComponent("ProfileFactoryMgr");
       delete pfm;
-      // TODO: clean up
+      EUROPA::SAVH::FVDetectorFactoryMgr* fvdfm = (EUROPA::SAVH::FVDetectorFactoryMgr*)engine->getComponent("FVDetectorFactoryMgr");
+      delete fvdfm;
+
+      // TODO: clean up more
   }  
 }

@@ -71,10 +71,13 @@ namespace EUROPA {
       m_maxInstConsumption = (maxInstConsumption == PLUS_INFINITY ? maxConsumption : maxInstConsumption);
       m_maxConsumption = maxConsumption;
 
-      m_detector = FVDetectorFactory::createInstance(detectorName, getId());
       
-      // TODO: make profile creation more robust?
+      // TODO: make profile this  more robust?      
       EngineId& engine = this->getPlanDatabase()->getEngine();
+      
+      FVDetectorFactoryMgr* fvdfm = (FVDetectorFactoryMgr*)engine->getComponent("FVDetectorFactoryMgr");
+      m_detector = fvdfm->createInstance(detectorName, getId());
+      
       ProfileFactoryMgr* pfm = (ProfileFactoryMgr*)engine->getComponent("ProfileFactoryMgr");
       m_profile = pfm->createInstance(
               profileName, 

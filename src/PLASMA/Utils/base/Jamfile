@@ -5,6 +5,7 @@ if ! $(PLASMA_READY) {
 ModuleBase Utils
 	:
 	Debug.cc
+	Factory.cc
 	Engine.cc
 	Entity.cc
 	Error.cc
