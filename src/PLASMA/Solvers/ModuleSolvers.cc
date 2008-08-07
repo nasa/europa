@@ -78,24 +78,27 @@ namespace EUROPA {
       REGISTER_FLAW_FILTER(cfm,SOLVERS::TokenMustBeAssignedFilter, TokenMustBeAssignedFilter); 
       REGISTER_FLAW_FILTER(cfm,SOLVERS::TokenMustBeAssignedFilter, ParentMustBeInsertedFilter); 
       
-      SOLVERS::MatchingEngine::addMatchFinder(ConstrainedVariable::entityTypeName(),(new SOLVERS::VariableMatchFinder())->getId()); 
-      SOLVERS::MatchingEngine::addMatchFinder(Token::entityTypeName(),(new SOLVERS::TokenMatchFinder())->getId()); 
-      
       REGISTER_TOKEN_SORTER(cfm,SOLVERS::HSTS::EarlyTokenComparator, early); 
       REGISTER_TOKEN_SORTER(cfm,SOLVERS::HSTS::LateTokenComparator, late); 
       REGISTER_TOKEN_SORTER(cfm,SOLVERS::HSTS::NearTokenComparator, near); 
       REGISTER_TOKEN_SORTER(cfm,SOLVERS::HSTS::FarTokenComparator, far); 
       REGISTER_TOKEN_SORTER(cfm,SOLVERS::HSTS::AscendingKeyTokenComparator, ascendingKey);       
+      
+      EUROPA::SOLVERS::MatchFinderMgr* mfm = new EUROPA::SOLVERS::MatchFinderMgr();
+      engine->addComponent("MatchFinderMgr",mfm);
+      REGISTER_MATCH_FINDER(mfm,SOLVERS::VariableMatchFinder,ConstrainedVariable::entityTypeName());
+      REGISTER_MATCH_FINDER(mfm,SOLVERS::TokenMatchFinder,Token::entityTypeName());
   }
   
   void ModuleSolvers::uninitialize(EngineId engine)
   {	 
-      PSSolverManager* sm = (PSSolverManager*)engine->removeComponent("PSSolverManager");
-      delete sm;
+      EUROPA::SOLVERS::MatchFinderMgr* mfm = (EUROPA::SOLVERS::MatchFinderMgr*)engine->removeComponent("MatchFinderMgr");
+      delete mfm;
       
       EUROPA::SOLVERS::ComponentFactoryMgr* cfm = (EUROPA::SOLVERS::ComponentFactoryMgr*)engine->removeComponent("ComponentFactoryMgr");
       delete cfm;
       
-      SOLVERS::MatchingEngine::purgeAll();
+      PSSolverManager* sm = (PSSolverManager*)engine->removeComponent("PSSolverManager");
+      delete sm;
   }  
 }

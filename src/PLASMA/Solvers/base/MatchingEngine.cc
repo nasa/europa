@@ -12,13 +12,6 @@ namespace EUROPA {
   namespace SOLVERS {
 
     
-    std::map<double, MatchFinderId>& MatchingEngine::getEntityMatchers() 
-    { 
-        static std::map<double, MatchFinderId> entityMatchers;
-    	
-    	return entityMatchers; 
-    }
-
     MatchingEngine::MatchingEngine(EngineId& engine,const TiXmlElement& configData, const char* ruleTag) 
       : m_id(this)
       , m_engine(engine)
@@ -112,27 +105,6 @@ namespace EUROPA {
       return m_cycleCount;
     }
 
-    void MatchingEngine::addMatchFinder(const LabelStr& type, const MatchFinderId& finder) {
-        // Remove first in case one already exists
-        removeMatchFinder(type);
-        getEntityMatchers().insert(std::make_pair((double) type, finder));
-    }
-
-    void MatchingEngine::removeMatchFinder(const LabelStr& type)
-    {
-      std::map<double, MatchFinderId>::iterator it = getEntityMatchers().find(type);
-      if(it != getEntityMatchers().end()) {
-          getEntityMatchers().erase((double) type);
-          it->second.release();
-      }      
-    }
-
-    void MatchingEngine::purgeAll() 
-    {
-        while (getEntityMatchers().size() > 0)
-            removeMatchFinder(getEntityMatchers().begin()->first);    
-    }    
-    
     template<>
     void MatchingEngine::getMatches(const EntityId& entity,
 				    std::vector<MatchingRuleId>& results) {
@@ -251,7 +223,45 @@ namespace EUROPA {
       }
       return str.str();
     }
+    
+    std::map<double, MatchFinderId>& MatchingEngine::getEntityMatchers() 
+    { 
+        MatchFinderMgr* mfm = (MatchFinderMgr*)m_engine->getComponent("MatchFinderMgr");        
+        return mfm->getEntityMatchers(); 
+    }    
+    
+    MatchFinderMgr::MatchFinderMgr()
+    {        
+    }
+    
+    MatchFinderMgr::~MatchFinderMgr()
+    {
+        purgeAll();
+    }    
+    
+    void MatchFinderMgr::addMatchFinder(const LabelStr& type, const MatchFinderId& finder) {
+        // Remove first in case one already exists
+        removeMatchFinder(type);
+        getEntityMatchers().insert(std::make_pair((double) type, finder));
+    }
 
+    void MatchFinderMgr::removeMatchFinder(const LabelStr& type)
+    {
+      std::map<double, MatchFinderId>::iterator it = getEntityMatchers().find(type);
+      if(it != getEntityMatchers().end()) {
+          getEntityMatchers().erase((double) type);
+          it->second.release();
+      }      
+    }
+
+    void MatchFinderMgr::purgeAll() 
+    {
+        while (getEntityMatchers().size() > 0)
+            removeMatchFinder(getEntityMatchers().begin()->first);    
+    }    
+    
+    std::map<double, MatchFinderId>& MatchFinderMgr::getEntityMatchers() { return m_entityMatchers; }
+    
     void VariableMatchFinder::getMatches(const MatchingEngineId& engine, const EntityId& entity,
 					 std::vector<MatchingRuleId>& results) {
       engine->getMatches(ConstrainedVariableId(entity), results);
@@ -260,6 +270,6 @@ namespace EUROPA {
     void TokenMatchFinder::getMatches(const MatchingEngineId& engine, const EntityId& entity,
 				      std::vector<MatchingRuleId>& results) {
       engine->getMatches(TokenId(entity), results);
-    }
+    }    
   }
 }

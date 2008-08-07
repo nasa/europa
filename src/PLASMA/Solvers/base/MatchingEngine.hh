@@ -19,6 +19,22 @@ namespace EUROPA {
     class MatchFinder;
     typedef Id<MatchFinder> MatchFinderId;
 
+    class MatchFinderMgr : public EngineComponent
+    {
+    public:
+        MatchFinderMgr();
+        virtual ~MatchFinderMgr();
+        
+        void addMatchFinder(const LabelStr& type, const MatchFinderId& finder);
+        void removeMatchFinder(const LabelStr& type);
+        void purgeAll();
+        
+        std::map<double, MatchFinderId>& getEntityMatchers();
+        
+    protected:
+        std::map<double, MatchFinderId> m_entityMatchers;        
+    };
+    
     class MatchingEngine {
     public:
       MatchingEngine(EngineId& engine,const TiXmlElement& configData, const char* ruleTag = "MatchingRule");
@@ -61,10 +77,6 @@ namespace EUROPA {
       unsigned int ruleCount() const;
 
       const std::set<MatchingRuleId>& getRules() const {return m_rules;}
-
-      static void addMatchFinder(const LabelStr& type, const MatchFinderId& finder);
-      static void removeMatchFinder(const LabelStr& type);
-      static void purgeAll();
 
     private:
 
@@ -114,7 +126,7 @@ namespace EUROPA {
       std::multimap<double, MatchingRuleId> m_rulesByExpression; /*!< All rules by expression */
       std::vector<MatchingRuleId> m_unfilteredRules; /*!< All rules without filters */
 
-      static std::map<double, MatchFinderId>& getEntityMatchers();
+      std::map<double, MatchFinderId>& getEntityMatchers();
     };
     
     template<>
@@ -165,6 +177,9 @@ namespace EUROPA {
       void getMatches(const MatchingEngineId& engine, const EntityId& entity,
 		      std::vector<MatchingRuleId>& results);
     };
+    
+#define REGISTER_MATCH_FINDER(MGR,CLASS,NAME) \
+    (MGR->addMatchFinder(NAME,(new CLASS())->getId())); 
 
   }
 }

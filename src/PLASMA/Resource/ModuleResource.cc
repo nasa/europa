@@ -124,8 +124,10 @@ namespace EUROPA {
       EUROPA::SOLVERS::ComponentFactoryMgr* cfm = (EUROPA::SOLVERS::ComponentFactoryMgr*)engine->getComponent("ComponentFactoryMgr");      
       REGISTER_FLAW_MANAGER(cfm,SAVH::ThreatManager, SAVHThreatManager); 
       REGISTER_FLAW_HANDLER(cfm,SAVH::ThreatDecisionPoint, SAVHThreatHandler); 
-      REGISTER_FLAW_HANDLER(cfm,EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreat); 
-      EUROPA::SOLVERS::MatchingEngine::addMatchFinder(SAVH::Instant::entityTypeName(),(new EUROPA::SOLVERS::InstantMatchFinder())->getId()); 
+      REGISTER_FLAW_HANDLER(cfm,EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreat);
+      
+      EUROPA::SOLVERS::MatchFinderMgr* mfm = (EUROPA::SOLVERS::MatchFinderMgr*)engine->getComponent("MatchFinderMgr");
+      REGISTER_MATCH_FINDER(mfm,EUROPA::SOLVERS::InstantMatchFinder,SAVH::Instant::entityTypeName());
       
       NddlXmlInterpreter* nddlXml = (NddlXmlInterpreter*)engine->getLanguageInterpreter("nddl-xml");
       if (nddlXml != NULL) {
