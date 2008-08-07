@@ -293,14 +293,6 @@ namespace EUROPA {
   {	
     std::string predName = std::string(className) + "." + element->Attribute("name");	
 
-    if (getSchema()->isPredicate(predName)) {
-    	// TODO: this is different from the behavior from code generation, fix it.
-    	// In code generation the definition in a subclass extends the one if a superclass
-    	std::cerr << "Predicate " << predName << " has already been defined in a superclass."
-    	          << "  New definition will be ignored" << std::endl;
-    	return;
-    }
-         
     schema->addPredicate(predName.c_str());
 
     std::vector<LabelStr> parameterNames;
