@@ -52,38 +52,40 @@ namespace EUROPA {
       
       REGISTER_SYSTEM_CONSTRAINT(ce->getCESchema(),SOLVERS::FlawHandler::VariableListener,SOLVERS::FlawHandler::VariableListener::CONSTRAINT_NAME(),SOLVERS::FlawHandler::VariableListener::PROPAGATOR_NAME());
       
-      REGISTER_COMPONENT_FACTORY(SOLVERS::FlawFilter, FlawFilter); 
+      EUROPA::SOLVERS::ComponentFactoryMgr* cfm = new EUROPA::SOLVERS::ComponentFactoryMgr();
+      engine->addComponent("ComponentFactoryMgr",cfm);
+      REGISTER_COMPONENT_FACTORY(cfm,SOLVERS::FlawFilter, FlawFilter); 
       
-      REGISTER_FLAW_MANAGER(SOLVERS::UnboundVariableManager, UnboundVariableManager); 
-      REGISTER_FLAW_HANDLER(SOLVERS::MinValue, StandardVariableHandler); 
-      REGISTER_FLAW_HANDLER(SOLVERS::MinValue, Min); 
-      REGISTER_FLAW_HANDLER(SOLVERS::MaxValue, Max); 
-      REGISTER_FLAW_HANDLER(SOLVERS::HSTS::ValueEnum, ValEnum); 
+      REGISTER_FLAW_MANAGER(cfm,SOLVERS::UnboundVariableManager, UnboundVariableManager); 
+      REGISTER_FLAW_HANDLER(cfm,SOLVERS::MinValue, StandardVariableHandler); 
+      REGISTER_FLAW_HANDLER(cfm,SOLVERS::MinValue, Min); 
+      REGISTER_FLAW_HANDLER(cfm,SOLVERS::MaxValue, Max); 
+      REGISTER_FLAW_HANDLER(cfm,SOLVERS::HSTS::ValueEnum, ValEnum); 
       
-      REGISTER_FLAW_MANAGER(SOLVERS::OpenConditionManager, OpenConditionManager); 
-      REGISTER_FLAW_HANDLER(SOLVERS::OpenConditionDecisionPoint, StandardOpenConditionHandler); 
-      REGISTER_FLAW_HANDLER(SOLVERS::HSTS::OpenConditionDecisionPoint, HSTSOpenConditionDecisionPoint); 
+      REGISTER_FLAW_MANAGER(cfm,SOLVERS::OpenConditionManager, OpenConditionManager); 
+      REGISTER_FLAW_HANDLER(cfm,SOLVERS::OpenConditionDecisionPoint, StandardOpenConditionHandler); 
+      REGISTER_FLAW_HANDLER(cfm,SOLVERS::HSTS::OpenConditionDecisionPoint, HSTSOpenConditionDecisionPoint); 
       
-      REGISTER_FLAW_MANAGER(SOLVERS::ThreatManager, ThreatManager); 
-      REGISTER_FLAW_HANDLER(SOLVERS::ThreatDecisionPoint, StandardThreatHandler); 
-      REGISTER_FLAW_HANDLER(SOLVERS::HSTS::ThreatDecisionPoint, HSTSThreatDecisionPoint); 
+      REGISTER_FLAW_MANAGER(cfm,SOLVERS::ThreatManager, ThreatManager); 
+      REGISTER_FLAW_HANDLER(cfm,SOLVERS::ThreatDecisionPoint, StandardThreatHandler); 
+      REGISTER_FLAW_HANDLER(cfm,SOLVERS::HSTS::ThreatDecisionPoint, HSTSThreatDecisionPoint); 
       
-      REGISTER_FLAW_FILTER(SOLVERS::SingletonFilter, Singleton); 
-      REGISTER_FLAW_FILTER(SOLVERS::InfiniteDynamicFilter, InfiniteDynamicFilter); 
-      REGISTER_FLAW_FILTER(SOLVERS::HorizonFilter, HorizonFilter); 
-      REGISTER_FLAW_FILTER(SOLVERS::HorizonVariableFilter, HorizonVariableFilter); 
-      REGISTER_FLAW_FILTER(SOLVERS::MasterMustBeAssignedFilter, MasterMustBeInsertedFilter); 
-      REGISTER_FLAW_FILTER(SOLVERS::TokenMustBeAssignedFilter, TokenMustBeAssignedFilter); 
-      REGISTER_FLAW_FILTER(SOLVERS::TokenMustBeAssignedFilter, ParentMustBeInsertedFilter); 
+      REGISTER_FLAW_FILTER(cfm,SOLVERS::SingletonFilter, Singleton); 
+      REGISTER_FLAW_FILTER(cfm,SOLVERS::InfiniteDynamicFilter, InfiniteDynamicFilter); 
+      REGISTER_FLAW_FILTER(cfm,SOLVERS::HorizonFilter, HorizonFilter); 
+      REGISTER_FLAW_FILTER(cfm,SOLVERS::HorizonVariableFilter, HorizonVariableFilter); 
+      REGISTER_FLAW_FILTER(cfm,SOLVERS::MasterMustBeAssignedFilter, MasterMustBeInsertedFilter); 
+      REGISTER_FLAW_FILTER(cfm,SOLVERS::TokenMustBeAssignedFilter, TokenMustBeAssignedFilter); 
+      REGISTER_FLAW_FILTER(cfm,SOLVERS::TokenMustBeAssignedFilter, ParentMustBeInsertedFilter); 
       
       SOLVERS::MatchingEngine::addMatchFinder(ConstrainedVariable::entityTypeName(),(new SOLVERS::VariableMatchFinder())->getId()); 
       SOLVERS::MatchingEngine::addMatchFinder(Token::entityTypeName(),(new SOLVERS::TokenMatchFinder())->getId()); 
       
-      REGISTER_TOKEN_SORTER(SOLVERS::HSTS::EarlyTokenComparator, early); 
-      REGISTER_TOKEN_SORTER(SOLVERS::HSTS::LateTokenComparator, late); 
-      REGISTER_TOKEN_SORTER(SOLVERS::HSTS::NearTokenComparator, near); 
-      REGISTER_TOKEN_SORTER(SOLVERS::HSTS::FarTokenComparator, far); 
-      REGISTER_TOKEN_SORTER(SOLVERS::HSTS::AscendingKeyTokenComparator, ascendingKey);       
+      REGISTER_TOKEN_SORTER(cfm,SOLVERS::HSTS::EarlyTokenComparator, early); 
+      REGISTER_TOKEN_SORTER(cfm,SOLVERS::HSTS::LateTokenComparator, late); 
+      REGISTER_TOKEN_SORTER(cfm,SOLVERS::HSTS::NearTokenComparator, near); 
+      REGISTER_TOKEN_SORTER(cfm,SOLVERS::HSTS::FarTokenComparator, far); 
+      REGISTER_TOKEN_SORTER(cfm,SOLVERS::HSTS::AscendingKeyTokenComparator, ascendingKey);       
   }
   
   void ModuleSolvers::uninitialize(EngineId engine)
@@ -91,7 +93,9 @@ namespace EUROPA {
       PSSolverManager* sm = (PSSolverManager*)engine->removeComponent("PSSolverManager");
       delete sm;
       
-      SOLVERS::Component::AbstractFactory::purge();
+      EUROPA::SOLVERS::ComponentFactoryMgr* cfm = (EUROPA::SOLVERS::ComponentFactoryMgr*)engine->removeComponent("ComponentFactoryMgr");
+      delete cfm;
+      
       SOLVERS::MatchingEngine::purgeAll();
   }  
 }

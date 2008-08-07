@@ -17,14 +17,17 @@ namespace EUROPA {
   namespace SOLVERS {
 
     FlawManager::FlawManager(const TiXmlElement& configData)
-      : Component(configData), 
-        m_flawFilters(configData, "FlawFilter"), 
-        m_flawHandlers(configData, "FlawHandler"),
-        m_timestamp(0){
+      : Component(configData) 
+      , m_timestamp(0)
+    {
     }
 
-    FlawManager::~FlawManager(){
-
+    FlawManager::~FlawManager()
+    {
+        if (!m_flawFilters.isNoId())
+            delete (MatchingEngine*)m_flawFilters;
+        if (!m_flawHandlers.isNoId())
+            delete (MatchingEngine*)m_flawHandlers;
     }
 
     bool FlawManager::isValid() const {
@@ -71,17 +74,26 @@ namespace EUROPA {
       return true;
     }
 
-    void FlawManager::initialize(const PlanDatabaseId& db, const ContextId& ctx, const FlawManagerId& parent){
+    void FlawManager::initialize(const TiXmlElement& configData, 
+                                 const PlanDatabaseId& db, 
+                                 const ContextId& ctx, 
+                                 const FlawManagerId& parent)
+    {
       checkError(m_db.isNoId(), "Can only be initialized once.");
       m_db = db;
       m_parent = parent;
       m_context = ctx;
-      for(std::set<MatchingRuleId>::iterator it = m_flawFilters.getRules().begin(); it != m_flawFilters.getRules().end(); ++it) {
+      
+      EngineId& engine = m_db->getEngine();
+      m_flawFilters = (new MatchingEngine(engine,configData,"FlawFilter"))->getId();
+      m_flawHandlers = (new MatchingEngine(engine,configData,"FlawHandler"))->getId();
+      
+      for(std::set<MatchingRuleId>::iterator it = m_flawFilters->getRules().begin(); it != m_flawFilters->getRules().end(); ++it) {
         MatchingRuleId rule = *it;
         check_error(rule.isValid());
         rule->setContext(m_context);
       }
-      for(std::set<MatchingRuleId>::iterator it = m_flawHandlers.getRules().begin(); it != m_flawHandlers.getRules().end(); ++it) {
+      for(std::set<MatchingRuleId>::iterator it = m_flawHandlers->getRules().begin(); it != m_flawHandlers->getRules().end(); ++it) {
         MatchingRuleId rule = *it;
         check_error(rule.isValid());
         rule->setContext(m_context);
@@ -381,9 +393,9 @@ namespace EUROPA {
       // Load filters
       std::vector<MatchingRuleId> filters;
       if(TokenId::convertable(entity))
-        m_flawFilters.getMatches(TokenId(entity), filters);
+        m_flawFilters->getMatches(TokenId(entity), filters);
       else
-        m_flawFilters.getMatches(ConstrainedVariableId(entity), filters);
+        m_flawFilters->getMatches(ConstrainedVariableId(entity), filters);
 
       std::vector<FlawFilterId> dynamicFilters;
       for(std::vector<MatchingRuleId>::const_iterator it = filters.begin(); it!= filters.end(); ++it){
@@ -491,7 +503,7 @@ namespace EUROPA {
       else { // Have to load heuristics
         debugMsg("FlawManager:getFlawHandler", "Loading heuristics.");
         std::vector<MatchingRuleId> candidates;
-	m_flawHandlers.getMatches(entity, candidates);
+	m_flawHandlers->getMatches(entity, candidates);
 
         FlawHandlerEntry entry;
         bool requiresPropagation = false;

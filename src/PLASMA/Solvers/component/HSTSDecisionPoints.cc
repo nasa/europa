@@ -104,7 +104,10 @@ namespace EUROPA {
         TiXmlElement orderElem("order");
         orderElem.SetAttribute("component", order);
 
-        m_comparator = new TokenComparatorWrapper((TokenComparator*) Component::AbstractFactory::allocate(orderElem), flawedToken);
+        EngineId& engine = flawedToken->getPlanDatabase()->getEngine();
+        ComponentFactoryMgr* cfm = (ComponentFactoryMgr*)engine->getComponent("ComponentFactoryMgr");        
+        ComponentId newComponent = cfm->createInstance(orderElem);
+        m_comparator = new TokenComparatorWrapper((TokenComparator*) newComponent, flawedToken);
 
         checkError(m_comparator != NULL, "Failed to allocate comparator.");
       }
@@ -323,7 +326,10 @@ namespace EUROPA {
         debugMsg("ThreatDecisionPoint:constructor", "Constructing for " << tokenToOrder->getKey() << " with choice order " << order);
         TiXmlElement orderElem("order");
         orderElem.SetAttribute("component", order);
-        m_comparator = new ThreatComparator((TokenComparator*) Component::AbstractFactory::allocate(orderElem), tokenToOrder);
+        EngineId& engine = tokenToOrder->getPlanDatabase()->getEngine();
+        ComponentFactoryMgr* cfm = (ComponentFactoryMgr*)engine->getComponent("ComponentFactoryMgr");
+        ComponentId newComponent = cfm->createInstance(orderElem);
+        m_comparator = new ThreatComparator((TokenComparator*) newComponent, tokenToOrder);
       }
 
       //       class ObjectComparator {

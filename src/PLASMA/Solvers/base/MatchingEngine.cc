@@ -19,8 +19,11 @@ namespace EUROPA {
     	return entityMatchers; 
     }
 
-    MatchingEngine::MatchingEngine(const TiXmlElement& configData, const char* ruleTag) 
-      : m_id(this), m_cycleCount(1) {
+    MatchingEngine::MatchingEngine(EngineId& engine,const TiXmlElement& configData, const char* ruleTag) 
+      : m_id(this)
+      , m_engine(engine)
+      , m_cycleCount(1) 
+    {
       // Now load all the flaw managers
       std::string ruleTagStr(ruleTag);
 
@@ -36,7 +39,8 @@ namespace EUROPA {
             child->SetAttribute("component", child->Value());
 
           // Now allocate the particular flaw manager using an abstract factory pattern.
-          ComponentId componentInstance = Component::AbstractFactory::allocate(*child);
+          ComponentFactoryMgr* cfm = (ComponentFactoryMgr*)engine->getComponent("ComponentFactoryMgr");
+          ComponentId componentInstance = cfm->createInstance(*child);
           checkError(componentInstance.isValid(), componentInstance << ":" << child->Value());
           checkError(MatchingRuleId::convertable(componentInstance), "Bad component for " << child->Value());
           MatchingRuleId rule = componentInstance;
@@ -51,7 +55,7 @@ namespace EUROPA {
       m_id.remove();
     }
 
-    const MatchingEngineId& MatchingEngine::getId() const { return m_id; }
+    MatchingEngineId& MatchingEngine::getId() { return m_id; }
 
     void MatchingEngine::registerRule(const MatchingRuleId& rule){
       checkError(m_rules.find(rule) == m_rules.end(), rule->toString() << " already regisered.");

@@ -99,6 +99,7 @@ namespace EUROPA {
     {
     public:
       FVDetectorFactory(const EUROPA::LabelStr& name) : Factory(name) {}
+      
       virtual EUROPA::FactoryObjId& createInstance(const EUROPA::FactoryArgs& fa) {
           const FVDetectorArgs& args = (const FVDetectorArgs&)fa;
           return (EUROPA::FactoryObjId&)(new FVDetectorType(args.resource))->getId();

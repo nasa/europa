@@ -41,7 +41,7 @@ namespace EUROPA {
        * @brief Initialize the constructed FlawManager.
        * @see handleInitialize for extension point.
        */
-      void initialize(const PlanDatabaseId& db, const ContextId& ctx = ContextId::noId(), const FlawManagerId& parent = FlawManagerId::noId());
+      void initialize(const TiXmlElement& configData, const PlanDatabaseId& db, const ContextId& ctx = ContextId::noId(), const FlawManagerId& parent = FlawManagerId::noId());
 
 
       /**
@@ -154,8 +154,8 @@ namespace EUROPA {
       bool isValid() const;
 
       FlawManagerId m_parent;
-      MatchingEngine m_flawFilters;
-      MatchingEngine m_flawHandlers;
+      MatchingEngineId m_flawFilters;
+      MatchingEngineId m_flawHandlers;
       std::map<unsigned int, bool> m_staticFiltersByKey; /*!< Summary of static filter outcome for the entity */
       /*std::map<unsigned int, std::vector<FlawFilterId> > m_dynamicFiltersByKey;*/ /*!< Dynamic conditions for the entity */
       __gnu_cxx::hash_map<unsigned int, std::vector<FlawFilterId> > m_dynamicFiltersByKey;
@@ -187,6 +187,6 @@ namespace EUROPA {
   }
 }
 
-#define REGISTER_FLAW_MANAGER(CLASS, NAME) REGISTER_COMPONENT_FACTORY(CLASS, NAME)
+#define REGISTER_FLAW_MANAGER(MGR,CLASS, NAME) REGISTER_COMPONENT_FACTORY(MGR,CLASS, NAME)
 
 #endif

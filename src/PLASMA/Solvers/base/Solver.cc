@@ -45,7 +45,7 @@ namespace EUROPA {
 
       m_context = ((new Context(m_name.toString() + "Context"))->getId());
       // Initialize the common filter
-      m_masterFlawFilter.initialize(m_db, m_context);
+      m_masterFlawFilter.initialize(configData, m_db, m_context);
 
       // Now load all the flaw managers
       for (TiXmlElement * child = configData.FirstChildElement(); 
@@ -60,9 +60,11 @@ namespace EUROPA {
             child->SetAttribute("component", child->Value());
 
           // Now allocate the particular flaw manager using an abstract factory pattern.
-          FlawManagerId flawManager = Component::AbstractFactory::allocate(*child);
+          EngineId& engine = db->getEngine();          
+          ComponentFactoryMgr* cfm = (ComponentFactoryMgr*)engine->getComponent("ComponentFactoryMgr");
+          FlawManagerId flawManager = cfm->createInstance(*child);
           debugMsg("Solver:Solver", "Created FlawManager with id " << flawManager);
-          flawManager->initialize(m_db, m_context, m_masterFlawFilter.getId());
+          flawManager->initialize(*child, m_db, m_context, m_masterFlawFilter.getId());
           m_flawManagers.push_back(flawManager);
         }
       }

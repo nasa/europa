@@ -8,6 +8,7 @@
 
 #include "SolverDefs.hh"
 #include "XMLUtils.hh"
+#include "Engine.hh"
 #include <map>
 #include <set>
 #include <typeinfo>
@@ -20,11 +21,11 @@ namespace EUROPA {
 
     class MatchingEngine {
     public:
-      MatchingEngine(const TiXmlElement& configData, const char* ruleTag = "MatchingRule");
+      MatchingEngine(EngineId& engine,const TiXmlElement& configData, const char* ruleTag = "MatchingRule");
 
       virtual ~MatchingEngine();
 
-      const MatchingEngineId& getId() const;
+      MatchingEngineId& getId();
 
       /**
        * @brief Retrieves all relevent matching rules for the given entity.
@@ -96,7 +97,8 @@ namespace EUROPA {
        * @brief Utility to handle the recursive triggering for a class and its super class.
        */
       MatchingEngineId m_id;
-
+      EngineId& m_engine;
+      
       /**
        * Declarations basically support indexing by each criteria.
        */

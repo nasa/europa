@@ -121,9 +121,10 @@ namespace EUROPA {
       REGISTER_FVDETECTOR(fvdfm,EUROPA::SAVH::OpenWorldFVDetector,OpenWorldFVDetector);
       REGISTER_FVDETECTOR(fvdfm,EUROPA::SAVH::ClosedWorldFVDetector,ClosedWorldFVDetector);               
 
-      REGISTER_FLAW_MANAGER(SAVH::ThreatManager, SAVHThreatManager); 
-      REGISTER_FLAW_HANDLER(SAVH::ThreatDecisionPoint, SAVHThreatHandler); 
-      REGISTER_FLAW_HANDLER(EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreat); 
+      EUROPA::SOLVERS::ComponentFactoryMgr* cfm = (EUROPA::SOLVERS::ComponentFactoryMgr*)engine->getComponent("ComponentFactoryMgr");      
+      REGISTER_FLAW_MANAGER(cfm,SAVH::ThreatManager, SAVHThreatManager); 
+      REGISTER_FLAW_HANDLER(cfm,SAVH::ThreatDecisionPoint, SAVHThreatHandler); 
+      REGISTER_FLAW_HANDLER(cfm,EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreat); 
       EUROPA::SOLVERS::MatchingEngine::addMatchFinder(SAVH::Instant::entityTypeName(),(new EUROPA::SOLVERS::InstantMatchFinder())->getId()); 
       
       NddlXmlInterpreter* nddlXml = (NddlXmlInterpreter*)engine->getLanguageInterpreter("nddl-xml");
@@ -154,10 +155,10 @@ namespace EUROPA {
   {	  
       const char* fmgrs[] = {"ProfileFactoryMgr","FVDetectorFactoryMgr"};
       for (int i=0;i<2;i++) {
-          FactoryMgr* fm = (FactoryMgr*)engine->getComponent(fmgrs[i]);
+          FactoryMgr* fm = (FactoryMgr*)engine->removeComponent(fmgrs[i]);
           delete fm;
       }
 
-      // TODO: clean up more
+      // TODO: clean up other pieces added by this module
   }  
 }

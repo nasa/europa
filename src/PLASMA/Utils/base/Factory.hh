@@ -57,7 +57,7 @@ public:
     void registerFactory(FactoryId& factory);
     void purgeAll();
         
-    FactoryObjId& createInstance(const LabelStr& name, const FactoryArgs& args);
+    virtual FactoryObjId& createInstance(const LabelStr& name, const FactoryArgs& args);
     
 protected:
     FactoryMgrId m_id;     
