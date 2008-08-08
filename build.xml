@@ -126,10 +126,6 @@
       <fileset dir="${dir.plasma}/examples"/>
     </copy>
 
-    <copy todir="${dir.dist.base}/lib/PSUI">
-      <fileset dir="${dir.src}/System/component/PSUI/lib"/>
-    </copy>
-
     <copy todir="${dir.dist.base}/include" flatten="true" includeEmptyDirs="false">
       <fileset file="${dir.src}">
         <include name="**/PS*.hh"/>
