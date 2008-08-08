@@ -234,10 +234,11 @@ rule ModuleMain {
         } else if $(library) != STATIC {
           Exit ModuleMain unknown library type: $(library) ;
         }
+				target = [ FAppendSuffix $(target) : $(SUFEXE) ] ;
         LINKFLAGS on $(target) = $(LINKFLAGS) [ FVariantLinkFlags $(variant) ] ;
-		LINKLIBS on $(target) = $(LINKLIBS) ;
+        LINKLIBS on $(target) = $(LINKLIBS) ;
         NEEDSHARES on $(target) = ;
-		LinkSharedLibrariesNoDeps $(target) : [ on $(name:G=module) return $(LINK_LIBRARIES) ] ;
+        LinkSharedLibrariesNoDeps $(target) : [ on $(name:G=module) return $(LINK_LIBRARIES) ] ;
         local shared_dirs ;
         local link ;
         for link in $(links) {
