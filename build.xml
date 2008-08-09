@@ -204,12 +204,13 @@
     <chmod perm="+x">
       <fileset dir="${dir.dist.base}/bin"/>
     </chmod>
+  </target>
 
-    <!-- Finally, zip everything up -->
+  <target name="zip-dist" depends="dist">
     <delete file="${dir.dist}/${file.europa_dist}"/>
     <zip destfile="${dir.dist}/${file.europa_dist}" basedir="${dir.dist.base}"/>
   </target>
-
+		
   <target name="run-example-cpp">
     <exec executable="make" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
       <arg line="${run-example-cpp.mode}"/>
