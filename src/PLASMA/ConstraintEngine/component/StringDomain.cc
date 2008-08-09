@@ -48,4 +48,15 @@ namespace EUROPA {
     EnumeratedDomain::set(value);
   }
 
+  bool StringDomain::isMember(double value) const {
+      // This is a hack so that specify() will work
+      // string domain needs to be able to handle all situations that involve literal string gracefully
+      // for example :
+      // string str; str.specify("foo"); eq(str,"bar");
+      if (isOpen())
+          return true;
+      
+      return EnumeratedDomain::isMember(value);
+  }
+  
 } // namespace EUROPA

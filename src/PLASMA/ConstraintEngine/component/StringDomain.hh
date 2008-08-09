@@ -65,6 +65,8 @@ namespace EUROPA {
      * @param value The value to set. Must be a LabelStr.
      */
     void set(double value);
+    
+    bool isMember(double value) const;    
 
   };
 
