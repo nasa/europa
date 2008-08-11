@@ -11,8 +11,24 @@
 
 namespace NDDL {
 
+bool isValidProfile(ConstrainedVariableId profileNameVar)
+{
+	if (!profileNameVar->derivedDomain().isSingleton())
+		return false;
+
+	std::string profileName = LabelStr(profileNameVar->derivedDomain().getSingletonValue()).toString();
+
+	if (profileName == "FlowProfile" ||
+			profileName == "IncrementalFlowProfile" ||
+			profileName == "TimetableProfile")
+		return true;
+
+	return false;
+}
+
+
   NddlUnaryToken::NddlUnaryToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, const bool& rejectable, const bool& isFact, const bool& close)
-    : EUROPA::SAVH::UnaryToken(planDatabase, predicateName, rejectable, isFact, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY), 
+    : EUROPA::SAVH::UnaryToken(planDatabase, predicateName, rejectable, isFact, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
 			       EUROPA::Token::noObject(), false, false) {
     commonInit(close);
   }
@@ -24,7 +40,7 @@ namespace NDDL {
   }
 
   void NddlUnaryToken::handleDefaults(const bool&) {}
-  
+
   void NddlUnaryToken::commonInit(const bool& autoClose) {
     state = getState();
     object = getObject();
@@ -55,15 +71,26 @@ namespace NDDL {
 
     check_error(m_variables.size() >= ARG_COUNT);
     check_error(m_variables[CMAX]->getName().toString().find(PARAM_CONSUMPTION_MAX) != std::string::npos);
-    
+
     check_error(m_variables[CMAX]->derivedDomain().isSingleton());
-    
+
+    static const std::string PARAM_PROFILE_TYPE("profileType");
+    std::string fullName = getName().toString()+"."+PARAM_PROFILE_TYPE;
+    ConstrainedVariableId profileNameVar = getVariable(fullName);
+    LabelStr profileName("IncrementalFlowProfile");
+    if (!profileNameVar.isNoId()) {
+    	debugMsg("NddlUnary","Using Profile : " << profileNameVar->toString());
+    	check_error(isValidProfile(profileNameVar),"Invalid resource profile type:"+profileNameVar->toString());
+    	profileName = LabelStr(profileNameVar->derivedDomain().getSingletonValue());
+     }
+     debugMsg("NddlUnary","Using Profile : " << profileName.toString())
+
     init(1, 1, //capacity lb, capacity ub
          0, 1,//lower limit, upper limit
          PLUS_INFINITY, PLUS_INFINITY, //max inst production, max inst consumption
          m_variables[CMAX]->derivedDomain().getSingletonValue(), m_variables[CMAX]->derivedDomain().getSingletonValue(), //max production, max consumption
          //"ReusableFVDetector", "FlowProfile");
-         "ReusableFVDetector", "IncrementalFlowProfile");
+         "ReusableFVDetector", profileName);
     EUROPA::SAVH::Resource::close();
   }
 
@@ -131,22 +158,6 @@ namespace NDDL {
 			     bool open)
     : EUROPA::SAVH::Reusable(parent, type, name, open) {}
 
-  
-  bool isValidProfile(ConstrainedVariableId profileNameVar)
-  {
-      if (!profileNameVar->derivedDomain().isSingleton())
-          return false;
-      
-      std::string profileName = LabelStr(profileNameVar->derivedDomain().getSingletonValue()).toString();
-      
-      if (profileName == "FlowProfile" ||
-          profileName == "IncrementalFlowProfile" ||
-          profileName == "TimetableProfile")
-            return true;
-      
-      return false;      
-  }
-
   void NddlReusable::close() {
     static const unsigned int C = 0;
     static const unsigned int LLMIN = 1;
@@ -163,13 +174,13 @@ namespace NDDL {
     check_error(m_variables[LLMIN]->getName().toString().find(PARAM_LEVEL_LIMIT_MIN) != std::string::npos);
     check_error(m_variables[CRMAX]->getName().toString().find(PARAM_CONSUMPTION_RATE_MAX) != std::string::npos);
     check_error(m_variables[CMAX]->getName().toString().find(PARAM_CONSUMPTION_MAX) != std::string::npos);
-    
+
     check_error(m_variables[C]->derivedDomain().isSingleton());
     check_error(m_variables[LLMIN]->derivedDomain().isSingleton());
     check_error(m_variables[CRMAX]->derivedDomain().isSingleton());
     check_error(m_variables[CMAX]->derivedDomain().isSingleton());
-    
-    static const std::string PARAM_PROFILE_TYPE("profileType"); 
+
+    static const std::string PARAM_PROFILE_TYPE("profileType");
     std::string fullName = getName().toString()+"."+PARAM_PROFILE_TYPE;
     ConstrainedVariableId profileNameVar = getVariable(fullName);
     LabelStr profileName("IncrementalFlowProfile");
@@ -179,13 +190,13 @@ namespace NDDL {
         profileName = LabelStr(profileNameVar->derivedDomain().getSingletonValue());
     }
     debugMsg("NddlReusable","Using Profile : " << profileName.toString())
-            
-    init(m_variables[C]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(), 
+
+    init(m_variables[C]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(),
 	 m_variables[LLMIN]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(),
 	 m_variables[CRMAX]->derivedDomain().getSingletonValue(), m_variables[CRMAX]->derivedDomain().getSingletonValue(),
 	 m_variables[CMAX]->derivedDomain().getSingletonValue(), m_variables[CMAX]->derivedDomain().getSingletonValue(),
 	 "ReusableFVDetector", profileName);
-    
+
     EUROPA::SAVH::Resource::close();
   }
 
@@ -270,13 +281,13 @@ namespace NDDL {
   NddlReservoir::NddlReservoir(const PlanDatabaseId& planDatabase,
 			       const LabelStr& type,
 			       const LabelStr& name,
-			       bool open) 
+			       bool open)
     : EUROPA::SAVH::Reservoir(planDatabase, type, name, open) {}
 
   NddlReservoir::NddlReservoir(const ObjectId parent,
 			       const LabelStr& type,
 			       const LabelStr& name,
-			       bool open) 
+			       bool open)
     : EUROPA::SAVH::Reservoir(parent, type, name, open) {}
 
   void NddlReservoir::close() {
@@ -306,7 +317,7 @@ namespace NDDL {
     check_error(m_variables[PMAX]->getName().toString().find(PARAM_PRODUCTION_MAX)  != std::string::npos);
     check_error(m_variables[CRMAX]->getName().toString().find(PARAM_CONSUMPTION_RATE_MAX)  != std::string::npos);
     check_error(m_variables[CMAX]->getName().toString().find(PARAM_CONSUMPTION_MAX)  != std::string::npos);
-    
+
 
     // Ensure all values have been set to singletons already
     check_error(m_variables[IC]->derivedDomain().isSingleton());
@@ -462,7 +473,7 @@ namespace NDDL {
   }
 
   /******************************************************************************
-   *  Implementation for NddlReservoir 
+   *  Implementation for NddlReservoir
    ******************************************************************************/
   NddlResource::NddlResource(const PlanDatabaseId& planDatabase,
 			     const LabelStr& type,
@@ -504,7 +515,7 @@ namespace NDDL {
     check_error(m_variables[PMAX]->getName().toString().find(PARAM_PRODUCTION_MAX)  != std::string::npos);
     check_error(m_variables[CRMAX]->getName().toString().find(PARAM_CONSUMPTION_RATE_MAX)  != std::string::npos);
     check_error(m_variables[CMAX]->getName().toString().find(PARAM_CONSUMPTION_MAX)  != std::string::npos);
-    
+
 
     // Ensure all values have been set to singletons already
     check_error(m_variables[IC]->derivedDomain().isSingleton());
@@ -553,7 +564,7 @@ namespace NDDL {
     if (autoClose)
       close();
   }
-  
+
   void NddlResource::constructor(float ic, float ll_min, float ll_max) {
     initialCapacity = addVariable(IntervalDomain(ic, ic, "float"), "initialCapacity");
     levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
@@ -563,7 +574,7 @@ namespace NDDL {
     consumptionRateMax = addVariable(IntervalDomain(-inf, -inf, "float"), "consumptionRateMax");
     consumptionMax = addVariable(IntervalDomain(-inf, -inf, "float"), "consumptionMax");
   }
-  
+
   // Plasma.nddl:20 Resource
   void NddlResource::constructor(float ic, float ll_min, float ll_max, float p_max, float c_max) {
     initialCapacity = addVariable(IntervalDomain(ic, ic, "float"), "initialCapacity");
@@ -574,7 +585,7 @@ namespace NDDL {
     consumptionRateMax = addVariable(IntervalDomain(-16, -16, "float"), "consumptionRateMax");
     consumptionMax = addVariable(IntervalDomain(c_max, c_max, "float"), "consumptionMax");
   }
-  
+
   // Plasma.nddl:20 Resource
   void NddlResource::constructor(float ic, float ll_min, float ll_max, float pr_max, float p_max, float cr_max, float c_max) {
     initialCapacity = addVariable(IntervalDomain(ic, ic, "float"), "initialCapacity");
@@ -585,7 +596,7 @@ namespace NDDL {
     consumptionRateMax = addVariable(IntervalDomain(cr_max, cr_max, "float"), "consumptionRateMax");
     consumptionMax = addVariable(IntervalDomain(c_max, c_max, "float"), "consumptionMax");
   }
-  
+
   // Plasma.nddl:20 Resource
   void NddlResource::constructor() {
     initialCapacity = addVariable(IntervalDomain(0, 0, "float"), "initialCapacity");
