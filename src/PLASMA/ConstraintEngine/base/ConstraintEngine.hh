@@ -32,6 +32,7 @@ namespace EUROPA {
 
   	  virtual double getViolation() const = 0;
   	  virtual PSList<std::string> getViolationExpl() const = 0;
+  	  virtual PSList <PSConstraint*> getAllViolations() const = 0;
 
   	  virtual bool handleEmpty(ConstrainedVariableId v) = 0;
   	  virtual bool handleRelax(ConstrainedVariableId v) = 0;
@@ -278,7 +279,12 @@ namespace EUROPA {
     /**
      * @brief returns string explanation for total violation in the constraint engine
      */
-    virtual PSList <std::string> getViolationExpl() const;
+    virtual PSList<std::string> getViolationExpl() const;
+
+    /**
+     * @brief returns set of constraint violations
+     */
+  	virtual PSList<PSConstraint*> getAllViolations() const;
 
     /**
      * @brief is constraint c violated?

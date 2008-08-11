@@ -26,7 +26,8 @@ namespace EUROPA
     virtual void setMaxViolationsAllowed(unsigned int i);
 
     virtual double getViolation() const;
-    virtual PSList <std::string> getViolationExpl() const;
+    virtual PSList<std::string> getViolationExpl() const;
+    virtual PSList<PSConstraint*> getAllViolations() const;
 
     virtual bool handleEmpty(ConstrainedVariableId v);
     virtual bool handleRelax(ConstrainedVariableId v);
@@ -96,6 +97,16 @@ namespace EUROPA
     }
 
     return retval;
+  }
+
+  PSList<PSConstraint*> ViolationMgrImpl::getAllViolations() const
+  {
+	  PSList<PSConstraint*> retval;
+	  for (ConstraintSet::const_iterator it = m_violatedConstraints.begin(); it != m_violatedConstraints.end(); ++it) {
+		  ConstraintId id = *it;
+		  retval.push_back((PSConstraint *) id);
+	  }
+	  return retval;
   }
 
   bool ViolationMgrImpl::isViolated(ConstraintId c) const
@@ -930,10 +941,16 @@ namespace EUROPA
     return m_violationMgr->getViolation();
   }
 
-  PSList <std::string> ConstraintEngine::getViolationExpl() const
+  PSList<std::string> ConstraintEngine::getViolationExpl() const
   {
     return m_violationMgr->getViolationExpl();
   }
+
+  PSList<PSConstraint*> ConstraintEngine::getAllViolations() const
+  {
+	return m_violationMgr->getAllViolations();
+  }
+
 
   void ConstraintEngine::notifyViolationAdded(ConstraintId variable)
   {

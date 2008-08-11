@@ -251,6 +251,7 @@ namespace EUROPA {
 
     double getViolation() const;    
     PSList<std::string> getViolationExpl() const;
+	PSList<PSConstraint*> getAllViolations() const;
 
     PSSolver* createSolver(const std::string& configurationFile); 
   };

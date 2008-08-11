@@ -207,6 +207,11 @@ namespace EUROPA {
   	return getConstraintEnginePtr()->getViolationExpl();
   }
 
+  PSList<PSConstraint*> PSEngineImpl::getAllViolations() const
+  {
+	  return getConstraintEnginePtr()->getAllViolations();
+  }
+
   // Solver methods
   PSSolver* PSEngineImpl::createSolver(const std::string& configurationFile)
   {
