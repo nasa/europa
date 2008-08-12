@@ -15,6 +15,8 @@
   	<exec executable="uname" outputproperty="uname.o">
       <arg value="-o"/>
     </exec>
+  	
+    <property name="europa.version" value="2.1.2"/> 	
 
     <!-- load overrides -->
     <property file="${user.home}/.ant.plasma.properties"/>
@@ -37,20 +39,22 @@
         <equals arg1="${uname.o}" arg2="GNU/Linux"/>
       </or>
       <then>
+      	<property name="local.os" value="linux"/>
       </then>
       <!-- Mac OS X -->
       <elseif>
         <equals arg1="${uname.o}" arg2="Darwin"/>
         <then>
+          <property name="local.os" value="mac"/>
           <property name="local.env.LD_LIBRARY_PATH.name" value="DYLD_LIBRARY_PATH"/>
         </then>
       </elseif>
 
-      <!-- CYGWIN -->
+      <!-- Windows-CYGWIN -->
       <elseif>
         <equals arg1="${uname.o}" arg2="Cygwin"/>
         <then>
-          <echo message="Running as a Cygwin build."/>
+          <property name="local.os" value="windows"/>
           <exec executable="cygpath" outputproperty="local.env.PLASMA_HOME">
             <arg value="--unix"/>
             <!--<arg value="-absolute"/>-->
@@ -60,8 +64,17 @@
           <property name="jam.misc" value="-sOS=CYGWIN -sNOCYGWIN=TRUE"/>
         </then>
       </elseif>
+    	
+      <!-- Solaris -->
+      <elseif>
+        <equals arg1="${uname.o}" arg2="SunOS"/>
+        <then>
+          <property name="local.os" value="solaris"/>
+      	</then>
+      </elseif>
     </if>
-
+    <echo message="Running as a ${local.os} build."/>
+  	
     <property name="local.env.LD_LIBRARY_PATH.name" value="LD_LIBRARY_PATH"/>
     <property name="local.env.PLASMA_HOME" value="${basedir}"/>
     <property name="dir.plasma" value="${basedir}"/>
@@ -74,7 +87,8 @@
     <property name="dir.build" value="build"/>
     <property name="dir.dist" value="dist"/>
     <property name="dir.dist.base" location="${dir.dist}/europa"/>
-    <property name="file.europa_dist" value="europa.zip"/>
+    <property name="file.europa-dist" value="europa-${europa.version}-${local.os}.zip"/>
+    <property name="file.europa-static-libs" value="europa-${europa.version}-${local.os}-static-libs.zip"/>
     <property name="jam.libraries" value="SHARED"/>
     <property name="jam.variant" value="DEV"/>
     <property name="jam.misc" value=""/>
@@ -99,7 +113,7 @@
     </exec>
   </target>
 
-  <target name="test" depends="init">
+  <target name="test" depends="build">
     <exec executable="jam" dir="${dir.src}" failonerror="true">
       <arg line="${jam.opts} run-all-tests"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
@@ -206,11 +220,23 @@
     </chmod>
   </target>
 
-  <target name="zip-dist" depends="dist">
-    <delete file="${dir.dist}/${file.europa_dist}"/>
-    <zip destfile="${dir.dist}/${file.europa_dist}" basedir="${dir.dist.base}"/>
+  <target name="zip-dist" depends="dist"
+        description="Puts distribution in a single zip file, excludes static libs">
+    <delete file="${dir.dist}/${file.europa-dist}"/>
+    <zip destfile="${dir.dist}/${file.europa-dist}" 
+    	 basedir="${dir.dist.base}"
+    	 excludes="lib/*.a"
+    />
   </target>
 		
+  <target name="zip-static-libs" depends="dist"
+  	description="Puts distribution in a single zip file, includes static libs">
+    <delete file="${dir.dist}/${file.europa-static-libs}"/>
+    <zip destfile="${dir.dist}/${file.europa-static-libs}" 
+    	 basedir="${dir.dist.base}"
+         includes="lib/*.a"/>
+  </target>
+	                
   <target name="run-example-cpp">
     <exec executable="make" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
       <arg line="${run-example-cpp.mode}"/>
@@ -276,7 +302,8 @@
         <ant inheritAll="false" dir="${dir.planworks}" target="compile"/>
       </then>
     </if>
-    <antcall target="dist"/>
+    <antcall target="zip-dist"/>
+    <antcall target="zip-static-libs"/>
   </target>
 	
 </project>
