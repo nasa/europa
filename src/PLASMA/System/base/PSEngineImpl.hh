@@ -37,6 +37,7 @@ namespace EUROPA {
     virtual void setAllowViolations(bool v);
     virtual double getViolation() const;
     virtual PSList<std::string> getViolationExpl() const;
+    virtual PSList<PSConstraint*> getAllViolations() const;
 
     // Plan Database methods
     virtual PSList<PSObject*> getObjectsByType(const std::string& objectType);

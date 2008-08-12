@@ -30,7 +30,9 @@ namespace EUROPA {
   	  virtual void setAllowViolations(bool v) = 0;
 
   	  virtual double getViolation() const = 0;
-  	  virtual PSList <std::string> getViolationExpl() const = 0;
+  	  virtual PSList<std::string> getViolationExpl() const = 0;
+  	  virtual PSList<PSConstraint*> getAllViolations() const = 0;
+
   };
 
   class PSVariable : public virtual PSEntity
