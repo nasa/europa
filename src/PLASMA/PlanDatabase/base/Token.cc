@@ -841,7 +841,7 @@ namespace EUROPA{
   }
 
   const LabelStr&  Token::getName() const{
-    return m_name;
+    return m_predicateName;
   }
 
   void Token::activateInternal(){
