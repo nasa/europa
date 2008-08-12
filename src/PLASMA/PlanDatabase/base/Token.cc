@@ -67,33 +67,33 @@ namespace EUROPA{
     return sl_noObject;
   }
 
-  Token::Token(const PlanDatabaseId& planDatabase, 
+  Token::Token(const PlanDatabaseId& planDatabase,
 	       const LabelStr& predicateName,
 	       bool rejectable,
 	       bool isFact,
 	       const IntervalIntDomain& durationBaseDomain,
 	       const LabelStr& objectName,
 	       bool closed)
-      :Entity(), 
-       m_id(this), 
-       m_relation("none"), 
-       m_predicateName(predicateName), 
+      :Entity(),
+       m_id(this),
+       m_relation("none"),
+       m_predicateName(predicateName),
        m_planDatabase(planDatabase) {
     commonInit(predicateName, rejectable, isFact, durationBaseDomain, objectName, closed);
   }
 
   // Slave tokens cannot be rejectable.
-  Token::Token(const TokenId& master, 
+  Token::Token(const TokenId& master,
 	       const LabelStr& relation,
-	       const LabelStr& predicateName, 
+	       const LabelStr& predicateName,
 	       const IntervalIntDomain& durationBaseDomain,
 	       const LabelStr& objectName,
 	       bool closed)
-     :Entity(), 
-      m_id(this), 
-      m_master(master), 
+     :Entity(),
+      m_id(this),
+      m_master(master),
       m_relation(relation),
-      m_predicateName(predicateName), 
+      m_predicateName(predicateName),
       m_planDatabase((*master).m_planDatabase) {
 
        // Master must be active to add children
@@ -154,12 +154,12 @@ namespace EUROPA{
   }
 
   const TokenId& Token::getId() const {
-    check_error(m_id.isValid()); 
+    check_error(m_id.isValid());
     return m_id;
   }
 
   const TokenId& Token::master() const {
-    check_error(m_master.isNoId() || m_master.isValid()); 
+    check_error(m_master.isNoId() || m_master.isValid());
     return m_master;
   }
 
@@ -201,19 +201,19 @@ namespace EUROPA{
   const LabelStr& Token::getUnqualifiedPredicateName() const {return m_unqualifiedPredicateName;}
 
   const PlanDatabaseId& Token::getPlanDatabase() const {
-    check_error(m_planDatabase.isValid()); 
+    check_error(m_planDatabase.isValid());
     return m_planDatabase;
 }
   const StateVarId& Token::getState() const{
-    checkError(m_state.isValid(), m_state); 
+    checkError(m_state.isValid(), m_state);
     return m_state;
   }
   const ObjectVarId& Token::getObject() const{
-    checkError(m_object.isValid(), m_object); 
+    checkError(m_object.isValid(), m_object);
     return m_object;
   }
   const TempVarId& Token::duration() const{
-    checkError(m_duration.isValid(), m_duration); 
+    checkError(m_duration.isValid(), m_duration);
     return m_duration;
   }
   const std::vector<ConstrainedVariableId>& Token::parameters() const {return m_parameters;}
@@ -268,7 +268,7 @@ namespace EUROPA{
     checkError(m_state.isValid(), "ID:"<< m_state << " Token Key:" << getKey());
     return (m_state->isSpecified() && m_state->getSpecifiedValue() == MERGED);
   }
- 
+
   bool Token::isRejected() const {
     checkError(m_state.isValid(), "ID:"<< m_state << " Token Key:" << getKey());
     return (m_state->isSpecified() && m_state->getSpecifiedValue() == REJECTED);
@@ -301,8 +301,8 @@ namespace EUROPA{
     check_error(activeToken.isValid());
     check_error(activeToken->isActive());
     checkError(m_state->lastDomain().isMember(MERGED), "Not permitted to merge." << toString());
-    check_error(getPlanDatabase()->getSchema()->isA(activeToken->getPredicateName(), m_predicateName), 
-		"Cannot merge tokens with different predicates: " + 
+    check_error(getPlanDatabase()->getSchema()->isA(activeToken->getPredicateName(), m_predicateName),
+		"Cannot merge tokens with different predicates: " +
 		m_predicateName.toString() + ", " + activeToken->getPredicateName().toString());
 
     m_state->setSpecified(MERGED);
@@ -333,7 +333,7 @@ namespace EUROPA{
     m_unifyMemento = UnifyMementoId::noId();
     m_activeToken = TokenId::noId();
 
-    // Now clean up 
+    // Now clean up
     bool activeTokenDeleted = activeToken->removeMergedToken(m_id);
     memento->undo(activeTokenDeleted);
     memento.release();
@@ -353,7 +353,7 @@ namespace EUROPA{
      * CMG: This is to strong. If the problem is posed with such constraints, we will allow them to persist. It will
      * be up to the user/modeler to handle correct logic of rejection vs activation should the constraints matter.
      */
-    //check_error(noExternalConstraints(), 
+    //check_error(noExternalConstraints(),
     //	"Attempted to reject token '" + getName().toString() + "' that has external constraints on it.");
 
     m_state->setSpecified(REJECTED);
@@ -376,8 +376,8 @@ namespace EUROPA{
   }
 
   void Token::activate(){
-    checkError(isInactive(), 
-	       "Token " << Entity::toString() << 
+    checkError(isInactive(),
+	       "Token " << Entity::toString() <<
 		" is not INACTIVE. Only inactive tokens may be activated.");
     check_error(isValid());
     m_state->setSpecified(ACTIVE);
@@ -398,7 +398,7 @@ namespace EUROPA{
 
 
     // If it has any remaining slaves, remove them. Keep pulling from the beginning
-    // since the slave may make a call back and remove itself from this buffer. 
+    // since the slave may make a call back and remove itself from this buffer.
     while(!m_slaves.empty()){
       TokenId slave = *(m_slaves.begin());
       slave->removeMaster(m_id);
@@ -415,36 +415,36 @@ namespace EUROPA{
   bool Token::isStandardConstraint(const ConstraintId& constraint) const{
     return(m_standardConstraints.find(constraint) != m_standardConstraints.end());
   }
-  
+
   const std::set<ConstraintId>& Token::getStandardConstraints() const
   {
 	  return m_standardConstraints;
   }
-  
-  
+
+
   // TODO: include constraints currently held by the RuleInstance that was triggered by this token
-  double Token::getViolation() const 
+  double Token::getViolation() const
   {
   	  double total = 0.0;
       for (std::set<ConstraintId>::const_iterator it = m_standardConstraints.begin(); it != m_standardConstraints.end(); ++it) {
   	      ConstraintId c = *it;
   	      total += c->getViolation();
-      }  
-      
+      }
+
       return total;
   }
-  
+
   std::string Token::getViolationExpl() const
   {
   	  std::ostringstream os;
-  	  
+
       for (std::set<ConstraintId>::const_iterator it = m_standardConstraints.begin(); it != m_standardConstraints.end(); ++it) {
   	      ConstraintId c = *it;
   	      if (c->getViolation() > 0.0)
   	          os << c->getViolationExpl() << std::endl;
-      }  
-      
-      return os.str();  
+      }
+
+      return os.str();
   }
 
   bool Token::isValid() const {
@@ -478,7 +478,7 @@ namespace EUROPA{
   /**
    * @todo - add typechecking here
    */
-  void Token::commonInit(const LabelStr& predicateName, 
+  void Token::commonInit(const LabelStr& predicateName,
 			 bool rejectable,
 			 bool isFact,
 			 const IntervalIntDomain& durationBaseDomain,
@@ -491,16 +491,16 @@ namespace EUROPA{
       m_unqualifiedPredicateName = predicateName.getElement(1, ".");
     else
       m_unqualifiedPredicateName = predicateName;
-    
+
     m_committed = false;
     m_deleted = false;
     m_terminated = false;
     m_isFact = false;
-    
+
     if (isFact)
         makeFact();
 
-    debugMsg("Token:commonInit", 
+    debugMsg("Token:commonInit",
 	     "Initializing token (" << getKey() << ") for predicate " << predicateName.toString()
 	     << " on object " << objectName.toString());
 
@@ -521,13 +521,13 @@ namespace EUROPA{
     m_allVariables.push_back(m_state);
 
     // If present the schema must be valid and the predicate must be OK.
-    check_error(m_planDatabase->getSchema().isNoId() || 
+    check_error(m_planDatabase->getSchema().isNoId() ||
 		m_planDatabase->getSchema()->isPredicate(predicateName),
 		"Invalid predicate: " + predicateName.toString());
 
     // Allocate an object variable with an empty domain
     m_baseObjectType = m_planDatabase->getSchema()->getObjectType(m_predicateName);
-    m_object = (new TokenVariable<ObjectDomain>(m_id,  
+    m_object = (new TokenVariable<ObjectDomain>(m_id,
 						m_allVariables.size(),
 						m_planDatabase->getConstraintEngine(),
 						ObjectDomain(m_baseObjectType.c_str()),
@@ -554,8 +554,8 @@ namespace EUROPA{
       m_object->close();
 
     m_duration = (new TokenVariable<IntervalIntDomain>(m_id,
-						       m_allVariables.size(), 
-						       m_planDatabase->getConstraintEngine(), 
+						       m_allVariables.size(),
+						       m_planDatabase->getConstraintEngine(),
 						       durationBaseDomain,
 						       false, // TODO: fixme
 						       true,
@@ -573,10 +573,10 @@ namespace EUROPA{
 
     // Allocate constraint directly. No factory used or required as this constraint
     // is not dynamically created.
-    Id<ObjectTokenRelation> objectTokenRelation = 
-      (new ObjectTokenRelation("ObjectTokenRelation", 
-			       "Default", 
-			       m_planDatabase->getConstraintEngine(), 
+    Id<ObjectTokenRelation> objectTokenRelation =
+      (new ObjectTokenRelation("ObjectTokenRelation",
+			       "Default",
+			       m_planDatabase->getConstraintEngine(),
 			       makeScope(m_state, m_object)))->getId();
 
     m_standardConstraints.insert(objectTokenRelation);
@@ -617,7 +617,7 @@ namespace EUROPA{
   void Token::makeFact() {
   	m_isFact = true;
   }
-  
+
   void Token::commit() {
     static StateDomain sl_activeOnly;
     static bool sl_initialized(false);
@@ -647,7 +647,7 @@ namespace EUROPA{
    * @brief Review tighter specification for commitment
    */
   bool Token::canBeCommitted() const {
-    return isPending() && isActive(); 
+    return isPending() && isActive();
   }
 
   bool Token::isCommitted() const {
@@ -717,7 +717,7 @@ namespace EUROPA{
 	const AbstractDomain& activeBaseDomain = activeVariables[i]->baseDomain();
 	const AbstractDomain& inactiveDerivedDomain = m_allVariables[i]->lastDomain();
 	if(!activeBaseDomain.isSubsetOf(inactiveDerivedDomain)){
-	  debugMsg("Token:canBeTerminated", 
+	  debugMsg("Token:canBeTerminated",
 		   "Cannot terminate " << this->toString() << activeBaseDomain.toString() << " can be further restricted by " << inactiveDerivedDomain.toString() << std::endl <<
 		   "Active Variable: " << activeVariables[i]->toString() << " Inactive Variable: " << m_allVariables[i]->toString());
 
@@ -728,8 +728,8 @@ namespace EUROPA{
       return true;
     }
 
-    // 
-    // Declare a set to pull together all variables in the scope of a token into a single easy to check collection. 
+    //
+    // Declare a set to pull together all variables in the scope of a token into a single easy to check collection.
     // Could manage this incrementally on the token also for greater efficiency
     std::set<int> allVars;
 
@@ -765,11 +765,11 @@ namespace EUROPA{
 	if (var->parent().isNoId())
 	  continue;
 
-	// If it is a culprit with an unbound domain, and an external variable, 
+	// If it is a culprit with an unbound domain, and an external variable,
 	// then it is an external constraint that must be retained and so we cannot terminate
 	if(allVars.find(var->getKey()) == allVars.end() && !var->baseDomain().isSingleton()){
-	  debugMsg("Token:canBeTerminated", 
-		   "Cannot terminate " << toString() << ". " 
+	  debugMsg("Token:canBeTerminated",
+		   "Cannot terminate " << toString() << ". "
 		   << var->toString() << " has an active external constraint "
 		   << constraint->toString() << ".");
 
@@ -787,24 +787,24 @@ namespace EUROPA{
 
     // Deactivate all variables to ensure the termination will not cause a relaxation. It is important to do this prior to treating
     // merged tokens
-    for(std::vector<ConstrainedVariableId>::const_iterator it = m_allVariables.begin(); 
-	it != m_allVariables.end(); 
+    for(std::vector<ConstrainedVariableId>::const_iterator it = m_allVariables.begin();
+	it != m_allVariables.end();
 	++it){
       ConstrainedVariableId var = *it;
       checkError(var.isValid(), var << " is not valid for token " << getKey());
       var->deactivate();
     }
 
-    for(std::vector<ConstrainedVariableId>::const_iterator it = m_pseudoVariables.begin(); 
-	it != m_pseudoVariables.end(); 
+    for(std::vector<ConstrainedVariableId>::const_iterator it = m_pseudoVariables.begin();
+	it != m_pseudoVariables.end();
 	++it){
       ConstrainedVariableId var = *it;
       checkError(var.isValid(), var << " is not valid for token " << getKey());
       var->deactivate();
     }
 
-    for(ConstrainedVariableSet::const_iterator it = m_localVariables.begin(); 
-	it != m_localVariables.end(); 
+    for(ConstrainedVariableSet::const_iterator it = m_localVariables.begin();
+	it != m_localVariables.end();
 	++it){
       ConstrainedVariableId var = *it;
       checkError(var.isValid(), var << " is not valid for token " << getKey());
@@ -841,7 +841,7 @@ namespace EUROPA{
   }
 
   const LabelStr&  Token::getName() const{
-    return m_predicateName;
+    return m_name;
   }
 
   void Token::activateInternal(){
@@ -917,13 +917,13 @@ namespace EUROPA{
   }
 
 // PS Methods:
-const std::string& Token::getEntityType() const 
+const std::string& Token::getEntityType() const
 {
 	static const std::string TOKEN_STR("TOKEN");
 	return TOKEN_STR;
 }
 
-std::string Token::getTokenType() const 
+std::string Token::getTokenType() const
 {
 	return getUnqualifiedPredicateName().toString();
 }
@@ -931,7 +931,7 @@ std::string Token::getTokenType() const
 PSObject* Token::getOwner() const {
   if(!isAssigned())
     return NULL;
-    
+
   ObjectVarId objVar = getObject();
   ObjectId id = ObjectId(objVar->lastDomain().getSingletonValue());
   return (PSObject *) id;
@@ -942,7 +942,7 @@ PSToken* Token::getMaster() const {
 	TokenId m = master();
 	if (m.isNoId())
 	    return NULL;
-	
+
 	return (PSToken *) m;
 }
 
@@ -955,8 +955,8 @@ PSList<PSToken*> Token::getSlaves() const {
 	  //PSToken* tok = new PSToken(*it);
     retval.push_back((PSToken *) id);
   }
-  return retval;    	
-}  
+  return retval;
+}
 
 PSToken* Token::getActive() const
 {
@@ -966,12 +966,12 @@ PSToken* Token::getActive() const
 PSList<PSToken*> Token::getMerged() const
 {
     PSList<PSToken*> retval;
-    
+
     TokenSet::const_iterator it=m_mergedTokens.begin();
     for (;it != m_mergedTokens.end(); ++it) {
         retval.push_back(*it);
     }
-    
+
     return retval;
 }
 
@@ -980,16 +980,16 @@ PSToken::PSTokenState Token::getTokenState() const
 {
     if (isActive())
         return PSToken::ACTIVE;
-    
+
     if (isInactive())
         return PSToken::INACTIVE;
-    
+
     if (isMerged())
         return PSToken::MERGED;
-    
+
     if (isRejected())
         return PSToken::REJECTED;
-    
+
     check_error(ALWAYS_FAIL,"Unknown token state");
     return PSToken::INACTIVE;
 }
@@ -1037,16 +1037,16 @@ PSVariable* Token::getParameter(const std::string& name) const
   return retval;
 }
 
-void Token::merge(PSToken* activeToken) 
+void Token::merge(PSToken* activeToken)
 {
     check_error(activeToken != NULL, "Can't merge on NULL token");
     TokenId tok = getPlanDatabase()->getEntityByKey(activeToken->getKey());
     doMerge(tok);
-}        
+}
 
-PSList<PSToken*> Token::getCompatibleTokens(unsigned int limit, bool useExactTest) 
+PSList<PSToken*> Token::getCompatibleTokens(unsigned int limit, bool useExactTest)
 {
-    std::vector<TokenId> tokens; 
+    std::vector<TokenId> tokens;
     getPlanDatabase()->getCompatibleTokens(this,tokens,limit,useExactTest);
     PSList<PSToken*> retval;
 
@@ -1054,17 +1054,17 @@ PSList<PSToken*> Token::getCompatibleTokens(unsigned int limit, bool useExactTes
     	TokenId id = tokens[i];
     	retval.push_back((PSToken *) id);
     }
-    
-    return retval;      
+
+    return retval;
 }
 
 std::string Token::toLongString() const
 {
 	std::ostringstream os;
-	
+
 	os << "Token(" << toString() << ") {" << std::endl;
 	os << "    isFact:" << isFact() << std::endl;
-	
+
 	if (isMerged())
 	    os << "    mergedInto:" << getActiveToken()->getKey() << std::endl;
 
@@ -1074,7 +1074,7 @@ std::string Token::toLongString() const
 	}
 
 	os << "}" << std::endl;
-	
+
 	return os.str();
 }
 

@@ -1,9 +1,5 @@
 #include "%%Project%%-model.nddl"
 
-// Create a planner configuration instance in PLASMA.
-// Horizon Start, Horizon End, MaxPlannerSteps, MaxPlannerDepth
-PlannerConfig plannerConfiguration = new PlannerConfig(0, 100, 500, +inf);
-
 // Sample object
 YourObject object = new YourObject();
 
