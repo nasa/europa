@@ -163,7 +163,7 @@ namespace EUROPA {
     /**
      * @brief Access all variables (state, object, start, end, duration, parameters).
      */
-    const ConstrainedVariableId getVariable(const LabelStr& name) const;
+    const ConstrainedVariableId getVariable(const LabelStr& name, bool checkGlobalContext=true) const;
 
     /**
      * @brief Access all tokens generated as sub-goals of this token.

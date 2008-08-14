@@ -1486,7 +1486,7 @@ namespace EUROPA {
     TokenEvalContext context(NULL,getId()); // TODO: give access to class or global context?
     
     for (unsigned int i=0; i < parameterNames.size(); i++) {
-      check_runtime_error(getVariable(parameterNames[i]) == ConstrainedVariableId::noId(), "Token parameter "+parameterNames[i].toString()+ " already exists!"); 
+      check_runtime_error(getVariable(parameterNames[i],false) == ConstrainedVariableId::noId(), "Token parameter "+parameterNames[i].toString()+ " already exists!"); 
 	    	
       // This is a hack needed because TokenVariable is parametrized by the domain arg to addParameter 
       ConstrainedVariableId parameter;

@@ -222,19 +222,20 @@ namespace EUROPA{
   const TokenSet& Token::getMergedTokens() const {return m_mergedTokens;}
   const TokenId& Token::getActiveToken() const {return m_activeToken;}
 
-  const ConstrainedVariableId Token::getVariable(const LabelStr& name) const{
+  const ConstrainedVariableId Token::getVariable(const LabelStr& name, bool checkGlobalContext) const{
     const std::vector<ConstrainedVariableId>& vars = getVariables();
     for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin();
 	it != vars.end(); ++it){
       ConstrainedVariableId var = *it;
       checkError(var.isValid(), "Invalid variable id: " << var << " found in token: " << m_id);
       if(var->getName() == name)
-	return var;
+        return var;
     }
-    if(getPlanDatabase()->isGlobalVariable(name))
-      return getPlanDatabase()->getGlobalVariable(name);
-    else
-      return ConstrainedVariableId::noId();
+    
+    if (checkGlobalContext && getPlanDatabase()->isGlobalVariable(name))
+        return getPlanDatabase()->getGlobalVariable(name);
+    
+    return ConstrainedVariableId::noId();
   }
 
   void Token::add(const TokenId& slave){
