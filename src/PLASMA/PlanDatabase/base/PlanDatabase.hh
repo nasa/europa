@@ -4,7 +4,7 @@
  * @file   PlanDatabase.hh
  * @author Conor McGann
  * @date   Mon Dec 27 17:09:14 2004
- * @brief  
+ * @brief
  * @ingroup PlanDatabase
  */
 
@@ -135,25 +135,25 @@ namespace EUROPA {
     bool hasCompatibleTokens(const TokenId& inactiveToken);
 
     /**
-     * @brief Retrieves a collection of all Tokens that are compatible with the given token. 
+     * @brief Retrieves a collection of all Tokens that are compatible with the given token.
      * Database must be constraintConsistent.
      * @param inactiveToken The token to drive the search. It must be inActive().
-     * @param results A (initially empty) collection to be populated with all compatible tokens. 
+     * @param results A (initially empty) collection to be populated with all compatible tokens.
      * All returned elements must be active().
      */
-    void getCompatibleTokens(const TokenId& inactiveToken, 
+    void getCompatibleTokens(const TokenId& inactiveToken,
 			     std::vector<TokenId>& results);
 
     /**
-     * @brief Retrieves a collection of all Tokens that are compatible with the given token. 
+     * @brief Retrieves a collection of all Tokens that are compatible with the given token.
      * Database must be constraintConsistent.
      * @param inactiveToken The token to drive the search. It must be inActive().
-     * @param results A (initially empty) collection to be populated with all compatible tokens. 
+     * @param results A (initially empty) collection to be populated with all compatible tokens.
      * All returned elements must be active().
      * @param limit Sets a limit to the quantity returned. Use to reduce cost of getting choices.
      * @param useExactTest If true, use a much more expensive but more rigorous comparison of timepoints.
      */
-    void getCompatibleTokens(const TokenId& inactiveToken, 
+    void getCompatibleTokens(const TokenId& inactiveToken,
 			     std::vector<TokenId>& results,
 			     unsigned int limit,
 			     bool useExactTest);
@@ -162,7 +162,7 @@ namespace EUROPA {
      * @brief Returns a count of compatible tokens up to the given limit
      * @see getCompatibleTokens
      */
-    unsigned int countCompatibleTokens(const TokenId& inactiveToken, 
+    unsigned int countCompatibleTokens(const TokenId& inactiveToken,
 				       unsigned int limit = PLUS_INFINITY,
 				       bool useExactTest = false);
 
@@ -211,7 +211,7 @@ namespace EUROPA {
     /**
      * @brief Retrieves a collection of object instances of the given type. Database must be closed.
      * @param type The type of object sought.
-     * @param results A (initially empty) collection to be populated with all instances of that type. 
+     * @param results A (initially empty) collection to be populated with all instances of that type.
      */
     template<class ID>
     void getObjectsByType(const LabelStr& type, std::list<ID>& results);
@@ -273,7 +273,7 @@ namespace EUROPA {
      * @param objectVar The variable to be populated and possibly synchronized. Must be open.
      * @param leaveOpen If true, the object var will remain open on completion.
      */
-    void makeObjectVariableFromType(const LabelStr& objectType, 
+    void makeObjectVariableFromType(const LabelStr& objectType,
 				    const ConstrainedVariableId& objectVar,
 				    bool leaveOpen = false);
 
@@ -286,33 +286,33 @@ namespace EUROPA {
      */
     unsigned int archive(unsigned int tick = PLUS_INFINITY);
 
-    
+
     // PSPlanDatabase methods
     virtual PSList<PSObject*> getObjectsByType(const std::string& objectType) const;
     virtual PSObject* getObjectByKey(PSEntityKey id) const;
     virtual PSObject* getObjectByName(const std::string& name) const;
 
-    virtual PSList<PSToken*> getAllTokens() const; 
-    virtual PSToken* getTokenByKey(PSEntityKey id) const;   
+    virtual PSList<PSToken*> getAllTokens() const;
+    virtual PSToken* getTokenByKey(PSEntityKey id) const;
 
     virtual PSList<PSVariable*> getAllGlobalVariables() const;
 
-    ObjectId createObject(const LabelStr& objectType, 
+    ObjectId createObject(const LabelStr& objectType,
                             const LabelStr& objectName,
-                            const std::vector<const AbstractDomain*>& arguments);    
+                            const std::vector<const AbstractDomain*>& arguments);
 
     TokenId createToken(const LabelStr& predicateName,
                         bool rejectable=false,
-                        bool isFact=false); 
-    
+                        bool isFact=false);
+
     TokenId createSlaveToken(const TokenId& master,
                              const LabelStr& predicateName,
                              const LabelStr& relation);
-    
+
     bool hasTokenFactories() const;
-    
+
     PSPlanDatabaseClient* getPDBClient();
-    
+
     virtual std::string toString();
 
   private:
@@ -370,13 +370,13 @@ namespace EUROPA {
      */
     void notifyOrderingNoLongerRequired(const ObjectId& object, const TokenId& token);
 
-    void makeObjectVariable(const LabelStr& objectType, const std::list<ObjectId>& objects, 
+    void makeObjectVariable(const LabelStr& objectType, const std::list<ObjectId>& objects,
 			    const ConstrainedVariableId& objectVar,
 			    bool leaveOpen = false);
 
     void handleObjectVariableDeletion(const ConstrainedVariableId& objectVar);
 
-    void handleObjectVariableCreation(const LabelStr& objectType, 
+    void handleObjectVariableCreation(const LabelStr& objectType,
 				      const ConstrainedVariableId& objectVar,
 				      bool leaveOpen = false);
 
@@ -411,16 +411,16 @@ namespace EUROPA {
     ObjectSet m_objects;
     ConstrainedVariableSet m_globalVariables;
     bool m_deleted;
-    std::set<PlanDatabaseListenerId> m_listeners;
+    std::vector<PlanDatabaseListenerId> m_listeners;
 
     /* In the data structures below, the key is a LabelStr representation of a name */
     std::map<double, ObjectId> m_objectsByName; /*!< Object names are unique. Holds all objects m_objectsByName.size() == m_objects.size(). */
     std::multimap<double, ObjectId> m_objectsByPredicate; /*!< May be updated every time we add a Token, or remove an object. */
     std::multimap<double, ObjectId> m_objectsByType; /*!< May be updated every time we add a Token, or remove an object. */
-    std::set<double> m_closedObjectTypes; /*!< The set of explicitly closed object types. 
+    std::set<double> m_closedObjectTypes; /*!< The set of explicitly closed object types.
 					     If present here, it cannot be present in m_objectVariablesByType */
     std::map<double, ConstrainedVariableId> m_globalVarsByName;
-    std::map<int, std::pair<TokenId, ObjectSet> > m_tokensToOrder; /*!< All tokens to order, with the object 
+    std::map<int, std::pair<TokenId, ObjectSet> > m_tokensToOrder; /*!< All tokens to order, with the object
 								     inducing the requirement stored in the set */
 
     std::map<double, TokenSet > m_activeTokensByPredicate; /*!< All active tokens sorted by predicate */
@@ -441,7 +441,7 @@ namespace EUROPA {
     for (std::multimap<double, ObjectId>::const_iterator it = m_objectsByType.find(type.getKey());
 	 it != m_objectsByType.end() && it->first == type.getKey();
 	 ++it) {
-      debugMsg("PlanDatabase:getObjectsByType", "Adding object '" << it->second->getName().toString() << "' of type '" << 
+      debugMsg("PlanDatabase:getObjectsByType", "Adding object '" << it->second->getName().toString() << "' of type '" <<
 	       it->second->getType().toString() << "' for type '" << type.toString() << "'");
       debugMsg("PlanDatabase:getObjectsByType", "Typeid for object: " << typeid((*(it->second))).name());
       results.push_back(ID(it->second));

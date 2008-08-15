@@ -33,9 +33,9 @@ namespace EUROPA{
   DEFINE_GLOBAL_CONST(std::string, g_ClassDelimiter, ":");
 
   /**
-   * @brief Implements a Listener to handle deletions of variables of type ObjectDomain. 
+   * @brief Implements a Listener to handle deletions of variables of type ObjectDomain.
    *
-   * Object Variable deletions must be handled where the object type is dynamic, so that 
+   * Object Variable deletions must be handled where the object type is dynamic, so that
    * cached variables used in synchronization of dynamic contents can be updated.
    */
   class ObjectVariableListener: public ConstrainedVariableListener {
@@ -56,17 +56,17 @@ namespace EUROPA{
 
 #define  publish(message){						\
     check_error(!Entity::isPurging());					\
-    for(std::set<PlanDatabaseListenerId>::const_iterator lit = m_listeners.begin(); lit != m_listeners.end(); ++lit) \
+    for(std::vector<PlanDatabaseListenerId>::const_reverse_iterator lit = m_listeners.rbegin(); lit != m_listeners.rend(); ++lit) \
       (*lit)->message;							\
   }
 
-  
+
   PlanDatabase::PlanDatabase(const ConstraintEngineId& constraintEngine, const SchemaId& schema)
     : m_id(this)
     , m_constraintEngine(constraintEngine)
     , m_schema(schema)
     , m_state(OPEN)
-    , m_deleted(false) 
+    , m_deleted(false)
   {
       check_error(m_constraintEngine.isValid());
       check_error(m_schema.isValid());
@@ -75,7 +75,7 @@ namespace EUROPA{
   }
 
   PlanDatabase::~PlanDatabase()
-  {	  
+  {
       m_deleted = true;
 
       if(!isPurged())
@@ -92,8 +92,8 @@ namespace EUROPA{
       // Delete all object variable listeners:
       for(ObjVarsByObjType_CI it = m_objectVariablesByObjectType.begin();
         it != m_objectVariablesByObjectType.end(); ++it)
-     	delete (ObjectVariableListener*) it->second.second; 	  
-    
+     	delete (ObjectVariableListener*) it->second.second;
+
       m_id.remove();
   }
 
@@ -142,8 +142,8 @@ namespace EUROPA{
 
     check_error(object.isValid());
 
-    check_error(!isClosed(object->getType()), 
-                "Cannot add object " + object->getName().toString() + 
+    check_error(!isClosed(object->getType()),
+                "Cannot add object " + object->getName().toString() +
                 " if type " + object->getType().toString() + " is already closed.");
 
     check_error(m_objects.find(object) == m_objects.end(),
@@ -177,7 +177,7 @@ namespace EUROPA{
 
     publish(notifyAdded(object));
 
-    debugMsg("PlanDatabase:notifyAdded:Object", 
+    debugMsg("PlanDatabase:notifyAdded:Object",
              object->getType().toString() << CLASS_DELIMITER << object->getName().toString() << " (" << object->getKey() << ")");
   }
 
@@ -215,7 +215,7 @@ namespace EUROPA{
 
     publish(notifyRemoved(object));
 
-    debugMsg("PlanDatabase:notifyRemoved:Object", 
+    debugMsg("PlanDatabase:notifyRemoved:Object",
              object->getType().toString() << CLASS_DELIMITER << object->getName().toString() << " (" << object->getKey() << ")");
   }
 
@@ -234,34 +234,36 @@ namespace EUROPA{
     m_tokensToOrder.erase(token->getKey());
     publish(notifyRemoved(token));
 
-    debugMsg("PlanDatabase:notifyRemoved:Token", 
+    debugMsg("PlanDatabase:notifyRemoved:Token",
              token->getPredicateName().toString()  << " (" << token->getKey() << ")");
   }
 
   void PlanDatabase::notifyAdded(const ObjectId& object, const TokenId& token){
     publish(notifyAdded(object, token));
 
-    debugMsg("PlanDatabase:notifyAdded:Object:Token", 
+    debugMsg("PlanDatabase:notifyAdded:Object:Token",
              token->toString() << " added to " << object->toString());
   }
 
   void PlanDatabase::notifyRemoved(const ObjectId& object, const TokenId& token){
     publish(notifyRemoved(object,token));
-    debugMsg("PlanDatabase:notifyRemoved:Object:Token", 
+    debugMsg("PlanDatabase:notifyRemoved:Object:Token",
              token->toString() << " removed from " << object->toString());
   }
 
   void PlanDatabase::notifyAdded(const PlanDatabaseListenerId& listener){
     check_error(listener.isValid());
-    check_error(m_listeners.count(listener) == 0);
-    m_listeners.insert(listener);
+    check_error(find(m_listeners.begin(), m_listeners.end(), listener) == m_listeners.end());
+    m_listeners.push_back(listener);
   }
 
   void PlanDatabase::notifyRemoved(const PlanDatabaseListenerId& listener){
     if(!m_deleted) {
       debugMsg("PlanDatabase:notifyRemoved:Listener",
 	       "Not in PlanDatabase destructor, so erasing " << listener);
-      m_listeners.erase(listener);
+      std::vector<PlanDatabaseListenerId>::iterator it =
+    	  find(m_listeners.begin(), m_listeners.end(), listener);
+      m_listeners.erase(it);
     }
     else {
       debugMsg("PlanDatabase:notifyRemoved:Listener",
@@ -282,9 +284,9 @@ namespace EUROPA{
     return m_temporalAdvisor;
   }
 
-  void PlanDatabase::setTemporalAdvisor(const TemporalAdvisorId& temporalAdvisor) { 
-    check_error(m_temporalAdvisor.isNoId()); 
-    m_temporalAdvisor = temporalAdvisor; 
+  void PlanDatabase::setTemporalAdvisor(const TemporalAdvisorId& temporalAdvisor) {
+    check_error(m_temporalAdvisor.isNoId());
+    m_temporalAdvisor = temporalAdvisor;
   }
 
   const DbClientId& PlanDatabase::getClient() const {
@@ -303,7 +305,7 @@ namespace EUROPA{
     for (std::multimap<double, ObjectId>::const_iterator it = m_objectsByType.find(objectType.getKey());
          it != m_objectsByType.end() && it->first == objectType.getKey();
          ++it) {
-      debugMsg("PlanDatabase:getObjectsByType", "Adding object '" << it->second->getName().toString() << "' of type '" << 
+      debugMsg("PlanDatabase:getObjectsByType", "Adding object '" << it->second->getName().toString() << "' of type '" <<
 	       it->second->getType().toString() << "' for type '" << objectType.toString() << "'");
       sl_results.insert(it->second);
     }
@@ -351,7 +353,7 @@ namespace EUROPA{
       return false;
   }
 
-  void PlanDatabase::getCompatibleTokens(const TokenId& inactiveToken, 
+  void PlanDatabase::getCompatibleTokens(const TokenId& inactiveToken,
                                          std::vector<TokenId>& results,
                                          unsigned int limit,
                                          bool useExactTest) {
@@ -361,7 +363,7 @@ namespace EUROPA{
     // Draw from list of active tokens of the same predicate
     const TokenSet& candidates = getActiveTokens(inactiveToken->getPredicateName());
 
-    condDebugMsg(candidates.empty(), 
+    condDebugMsg(candidates.empty(),
 		 "PlanDatabase:getCompatibleTokens", "No candidates to evaluate for " << inactiveToken->toString());
 
     const std::vector<ConstrainedVariableId>& inactiveTokenVariables = inactiveToken->getVariables();
@@ -375,7 +377,7 @@ namespace EUROPA{
       TokenId candidate = *it;
 
       debugMsg("PlanDatabase:getCompatibleTokens",
-               "Evaluating candidate token (" << candidate->getKey() << ") for token (" 
+               "Evaluating candidate token (" << candidate->getKey() << ") for token ("
                << inactiveToken->getKey() << ")");
 
       // Validate expectation about being active and predicate being the same
@@ -419,15 +421,15 @@ namespace EUROPA{
 
 	if(!isCompatible) {
 	  debugMsg("PlanDatabase:getCompatibleTokens",
-		   "EXCLUDING (" << candidate->getKey() << ")" << 
-		   "VAR=" << candidateTokenVariables[i]->getName().toString() << 
+		   "EXCLUDING (" << candidate->getKey() << ")" <<
+		   "VAR=" << candidateTokenVariables[i]->getName().toString() <<
 		   "(" << candidateTokenVariables[i]->getKey() << ") " <<
 		   "Cannot intersect " << domA.toString() << " with " << domB.toString());
 	  break;
 	}
 
 	debugMsg("PlanDatabase:getCompatibleTokens",
-		 "VAR=" << candidateTokenVariables[i]->getName().toString() << 
+		 "VAR=" << candidateTokenVariables[i]->getName().toString() <<
 		 "(" << candidateTokenVariables[i]->getKey() << ") " <<
 		 "Can intersect " << domA.toString() << " with " << domB.toString());
       }
@@ -437,12 +439,12 @@ namespace EUROPA{
       // temporal distance. This is because temporal propagation is insufficient to ensure that if 2 timepoints
       // have an intersection that they can actually co-exist. For example, if a < b, then there may well
       // be an intersection but t would be immediately inconsistent of they were required to be concurrent.
-      if (isCompatible && 
+      if (isCompatible &&
           (!useExactTest || temporalAdvisor->canBeConcurrent(inactiveToken, candidate))){
         results.push_back(candidate);
 
-        debugMsg("PlanDatabase:getCompatibleTokens", 
-                 "EXACT=" << useExactTest << ". Adding " << candidate->getKey() << 
+        debugMsg("PlanDatabase:getCompatibleTokens",
+                 "EXACT=" << useExactTest << ". Adding " << candidate->getKey() <<
                  " for token " << inactiveToken->getKey());
 
         choiceCount++;
@@ -453,12 +455,12 @@ namespace EUROPA{
     }
   }
 
-  void PlanDatabase::getCompatibleTokens(const TokenId& inactiveToken, 
+  void PlanDatabase::getCompatibleTokens(const TokenId& inactiveToken,
                                          std::vector<TokenId>& results) {
     getCompatibleTokens(inactiveToken, results, PLUS_INFINITY, false);
   }
 
-  unsigned int PlanDatabase::countCompatibleTokens(const TokenId& inactiveToken, 
+  unsigned int PlanDatabase::countCompatibleTokens(const TokenId& inactiveToken,
                                                    unsigned int limit,
                                                    bool useExactTest){
     std::vector<TokenId> results;
@@ -476,7 +478,7 @@ namespace EUROPA{
     if(!m_constraintEngine->propagate())
       return;
 
-    checkError(m_tokensToOrder.find(tokenToOrder->getKey()) != m_tokensToOrder.end(), 
+    checkError(m_tokensToOrder.find(tokenToOrder->getKey()) != m_tokensToOrder.end(),
                "Should not be calling this method if it is not a token in need of ordering. " << tokenToOrder->toString());
 
     ObjectSet& objects = m_tokensToOrder.find(tokenToOrder->getKey())->second.second;
@@ -532,7 +534,7 @@ namespace EUROPA{
       ObjectId object = *it;
       choiceCount = choiceCount + object->lastOrderingChoiceCount(token);
     }
-    
+
     return choiceCount;
   }
   /**
@@ -573,7 +575,7 @@ namespace EUROPA{
       return ObjectId::noId();
     return m_objectsByName.find(name.getKey())->second;
   }
-  
+
   const TokenSet& PlanDatabase::getTokens() const {
     return m_tokens;
   }
@@ -649,10 +651,9 @@ namespace EUROPA{
 
     insertActiveToken(token);
 
-    publish(notifyActivated(token));
-
-    debugMsg("PlanDatabase:notifyActivated", 
+    debugMsg("PlanDatabase:notifyActivated",
              token->getPredicateName().toString()  << "(" << token->getKey() << "}");
+    publish(notifyActivated(token));
   }
 
   /**
@@ -676,7 +677,7 @@ namespace EUROPA{
 
     debugMsg("PlanDatabase:notifyMerged",
              token->getPredicateName().toString()  << "(" << token->getKey() << "}" <<
-             " merged with (" << token->getActiveToken()->getKey() << ")"); 
+             " merged with (" << token->getActiveToken()->getKey() << ")");
   }
 
   void PlanDatabase::notifySplit(const TokenId& token){
@@ -722,8 +723,8 @@ namespace EUROPA{
     publish(notifyConstrained(object, predecessor, successor));
 
     debugMsg("PlanDatabase:notifyConstrained",
-             "(" << predecessor->getKey() << ") On Object " << 
-             object->getType().toString() << CLASS_DELIMITER << object->getName().toString() << " (" 
+             "(" << predecessor->getKey() << ") On Object " <<
+             object->getType().toString() << CLASS_DELIMITER << object->getName().toString() << " ("
              << object->getKey() << ") Constrained Before Token (" << successor->getKey() << ")");
   }
 
@@ -732,13 +733,13 @@ namespace EUROPA{
     publish(notifyFreed(object, predecessor, successor));
 
     debugMsg("PlanDatabase:notifyFreed",
-             "(" << predecessor->getKey() << ") On Object " << 
-             object->getType().toString() << CLASS_DELIMITER << object->getName().toString() << " (" 
+             "(" << predecessor->getKey() << ") On Object " <<
+             object->getType().toString() << CLASS_DELIMITER << object->getName().toString() << " ("
              << object->getKey() << ") Freed from Before Token (" << successor->getKey() << ")");
   }
 
   void PlanDatabase::notifyOrderingRequired(const ObjectId& object, const TokenId& token){
-    debugMsg("PlanDatabase:notifyOrderingRequired", 
+    debugMsg("PlanDatabase:notifyOrderingRequired",
 	     object->getName().toString() << "(" << object->getKey() << ") from " << token->toString());
 
     checkError(token->isActive(), "Token must be active to induce an ordering:" << token->toString());
@@ -761,15 +762,15 @@ namespace EUROPA{
   }
 
   void PlanDatabase::notifyOrderingNoLongerRequired(const ObjectId& object, const TokenId& token){
-    debugMsg("PlanDatabase:notifyOrderingNoLongerRequired", 
+    debugMsg("PlanDatabase:notifyOrderingNoLongerRequired",
 	     object->getName().toString() << "(" << object->getKey() << ") from " << token->toString());
     std::map<int, std::pair<TokenId, ObjectSet> >::iterator it = m_tokensToOrder.find(token->getKey());
 
-    checkError(it != m_tokensToOrder.end(), 
+    checkError(it != m_tokensToOrder.end(),
 	       "Expect there to be a stored entry. Must be a bug in synchronization. Failed to send initial message.");
 
     ObjectSet& objects = it->second.second;
-    checkError(objects.find(object) != objects.end(), 
+    checkError(objects.find(object) != objects.end(),
 	       "Expect the object to be present. Again, must have failed to send initial message.");
 
     // Now remove the object
@@ -781,7 +782,7 @@ namespace EUROPA{
   }
 
 
-  void PlanDatabase::makeObjectVariableFromType(const LabelStr& objectType, 
+  void PlanDatabase::makeObjectVariableFromType(const LabelStr& objectType,
 						const ConstrainedVariableId& objectVar,
 						bool leaveOpen){
     std::list<ObjectId> objects;
@@ -789,8 +790,8 @@ namespace EUROPA{
     makeObjectVariable(objectType, objects, objectVar, leaveOpen);
   }
 
-  void PlanDatabase::makeObjectVariable(const LabelStr& objectType, 
-					const std::list<ObjectId>& objects, 
+  void PlanDatabase::makeObjectVariable(const LabelStr& objectType,
+					const std::list<ObjectId>& objects,
 					const ConstrainedVariableId& objectVar,
 					bool leaveOpen){
     check_error(objectVar.isValid());
@@ -801,7 +802,7 @@ namespace EUROPA{
       check_error(object.isValid());
       objectVar->insert(object);
       debugMsg("PlanDatabase:makeObjectVariable",
-               "Inserting object " << object->getName().toString() << " of type " 
+               "Inserting object " << object->getName().toString() << " of type "
                << object->getType().toString() << " for base type " << objectType.toString());
     }
 
@@ -825,7 +826,7 @@ namespace EUROPA{
     }
   }
 
-  void PlanDatabase::handleObjectVariableCreation(const LabelStr& objectType, 
+  void PlanDatabase::handleObjectVariableCreation(const LabelStr& objectType,
 						  const ConstrainedVariableId& objectVar,
 						  bool leaveOpen){
     if(!isClosed(objectType)){
@@ -863,14 +864,14 @@ namespace EUROPA{
 	unsigned int latestEndTime = (unsigned int) token->end()->lastDomain().getUpperBound();
 
 	if(latestEndTime <= tick && token->canBeTerminated(tick)){
-	  debugMsg("PlanDatabase:archive:remove", 
+	  debugMsg("PlanDatabase:archive:remove",
 		   token->toString() << " ending by " << latestEndTime << " for tick " << tick);
 	  int earliestStartTime = (int) token->start()->lastDomain().getLowerBound();
 	  std::pair<int, TokenId> entry(earliestStartTime , token);
 	  tokensToRemove.insert(entry);
 	}
 	else {
-	  condDebugMsg(!token->isMerged(), "PlanDatabase:archive:skip", 
+	  condDebugMsg(!token->isMerged(), "PlanDatabase:archive:skip",
 		       token->toString() << " with end time " << token->end()->toString() << " for tick " << tick);
 	}
       }
@@ -945,9 +946,9 @@ namespace EUROPA{
       predicate = predStr;
     }
   }
-  
+
   // PSPlanDatabase methods
-  PSList<PSObject*> PlanDatabase::getObjectsByType(const std::string& objectType) const 
+  PSList<PSObject*> PlanDatabase::getObjectsByType(const std::string& objectType) const
   {
     PSList<PSObject*> retval;
 
@@ -960,7 +961,7 @@ namespace EUROPA{
 
     return retval;
   }
-  
+
   PSObject* PlanDatabase::getObjectByKey(PSEntityKey id) const
   {
     ObjectId object = Entity::getEntity(id);
@@ -979,18 +980,18 @@ namespace EUROPA{
     PSList<PSToken*> retval;
 
     for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
-    	TokenId id = *it;    	
+    	TokenId id = *it;
     	retval.push_back((PSToken *) id);
     }
-    
+
     return retval;
   }
 
   PSToken* PlanDatabase::getTokenByKey(PSEntityKey id) const
   {
-	Id <Token> psId = Entity::getEntity(id); 
+	Id <Token> psId = Entity::getEntity(id);
     check_runtime_error(psId.isValid());
-    return (PSToken *) psId; 
+    return (PSToken *) psId;
   }
 
   PSList<PSVariable*>  PlanDatabase::getAllGlobalVariables() const {
@@ -1003,9 +1004,9 @@ namespace EUROPA{
     	retval.push_back((PSVariable *) id);
     }
     return retval;
-  }  
-  
-  ObjectId PlanDatabase::createObject(const LabelStr& objectType, 
+  }
+
+  ObjectId PlanDatabase::createObject(const LabelStr& objectType,
                                       const LabelStr& objectName,
                                       const std::vector<const AbstractDomain*>& arguments)
   {
@@ -1014,13 +1015,13 @@ namespace EUROPA{
       ObjectFactoryId factory = getSchema()->getObjectFactory(objectType, arguments);
       ObjectId object = factory->createInstance(getId(), objectType, objectName, arguments);
       check_error(object.isValid());
-      
+
       return object;
   }
-  
+
   TokenId PlanDatabase::createToken(const LabelStr& predicateName,
                                     bool rejectable,
-                                    bool isFact) 
+                                    bool isFact)
   {
       debugMsg("PlanDatabase:createToken", "type " << predicateName.toString());
 
@@ -1029,10 +1030,10 @@ namespace EUROPA{
 
       TokenId token = factory->createInstance(getId(), predicateName, rejectable, isFact);
       check_error(token.isValid());
-    
+
       return token;
   }
-  
+
   TokenId PlanDatabase::createSlaveToken(const TokenId& master,
                 const LabelStr& predicateName,
                 const LabelStr& relation)
@@ -1045,21 +1046,21 @@ namespace EUROPA{
       TokenId token = factory->createInstance(master, predicateName, relation);
 
       check_error(token.isValid());
-      return token;      
+      return token;
   }
-  
+
   std::string PlanDatabase::toString()
   {
       return PlanDatabaseWriter::toString(getId());
   }
-  
+
   bool PlanDatabase::hasTokenFactories() const
   {
       return getSchema()->hasTokenFactories() > 0;
   }
 
-  PSPlanDatabaseClient* PlanDatabase::getPDBClient() 
+  PSPlanDatabaseClient* PlanDatabase::getPDBClient()
   {
     return m_psClient;
-  }  
+  }
 }
