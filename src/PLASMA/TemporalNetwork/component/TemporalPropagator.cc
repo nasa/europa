@@ -511,7 +511,7 @@ namespace EUROPA {
 
       if(TokenId::convertable(var->parent())){
 	TokenId token = var->parent();
-	// If we get a hit, then buffer the token for later update to duartion (so we only do it once with updated bounds
+	// If we get a hit, then buffer the token for later update to duration (so we only do it once with updated bounds
 	if (var == token->start() || var == token->end())
 	  updatedTokens.push_back(token);
       }
@@ -519,10 +519,10 @@ namespace EUROPA {
 
     // TODO JRB: looks like this call should be skipped since updateTemporalConstraint will always be called before 
     // this and already seems to be doing it 
-    /*
+    // CMG: updateTemporalConstraint is only called for local changes. Here we are applying the propagated effect of the constraint network back to
+    // the token duration. The network should be consistent.
     for(std::vector<TokenId>::const_iterator it = updatedTokens.begin(); it != updatedTokens.end(); ++it)
       updateDuration(*it);
-    */
     
     m_tnet->resetUpdatedTimepoints();
   }
@@ -701,6 +701,8 @@ namespace EUROPA {
       // In order to avoid the unhappy situation where temporalDistance does not maintain the semantics of addEq
       // we now apply the distance bounds to the distance variable.
       // TODO JRB: this seems to be done already by the updateDuration() method, what's the difference?
+      // CMG: The temporal distance constraint can apply to relationships between timepoints in general. The later use of updateDuration
+      // applies to update the duration of a token specifically.
       const IntervalIntDomain& sourceDom = constraint->getScope()[0]->lastDomain();
       const IntervalIntDomain& targetDom = constraint->getScope()[2]->lastDomain();
 
