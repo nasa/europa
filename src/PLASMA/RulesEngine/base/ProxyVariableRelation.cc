@@ -9,7 +9,8 @@ namespace EUROPA {
     : Constraint("proxyRelation", "Default", objectVar->getConstraintEngine(), makeScope(objectVar, proxyVar)),
       m_objectDomain(static_cast<ObjectDomain&>(getCurrentDomain(objectVar))),
       m_proxyDomain(static_cast<EnumeratedDomain&>(getCurrentDomain(proxyVar))),
-      m_path(path){
+      m_path(path),
+      m_sourceConstraintKey(0){
     checkError(getScope().size() == ARG_COUNT, toString());
   }
 
@@ -24,6 +25,9 @@ namespace EUROPA {
   }
 
   void ProxyVariableRelation::handleExecute(){
+    // Update path rfom source constraint if necessary. Lazy evaluation pattern
+    updatePathFromSource();
+
     // Handle case of closure from the object
     if(m_objectDomain.isClosed() && m_proxyDomain.isOpen())
       m_proxyDomain.close();
@@ -101,7 +105,21 @@ namespace EUROPA {
   void ProxyVariableRelation::setSource(const ConstraintId& sourceConstraint){
     checkError(sourceConstraint->getName() == LabelStr("proxyRelation"), sourceConstraint->toString());
     checkError(m_path.empty(), "Should be empty when setting up the source from " << sourceConstraint->toString());
-    ProxyVariableRelation* proxyConstraint = (ProxyVariableRelation*) sourceConstraint;
-    m_path = proxyConstraint->m_path;
+    m_sourceConstraint = sourceConstraint;
+  }
+
+  /**
+   * In the lifetime of a constraint, this should only be called at most once. It is used to lazily copy a source path under conditions
+   * of migration. The reason for this is that we cannot guarantee the source constraint is fully constructed when the copy is
+   * invoked.
+   * @see MergeMemento
+   * @see Constraint::handleAddition
+   */
+  void ProxyVariableRelation::updatePathFromSource(){
+    if(m_sourceConstraint.isId() && m_sourceConstraintKey != (signed int) m_sourceConstraint->getKey()){
+      ProxyVariableRelation* proxyConstraint = (ProxyVariableRelation*) m_sourceConstraint;
+      m_path = proxyConstraint->m_path;
+      m_sourceConstraint = ConstraintId::noId();
+    }
   }
 }
