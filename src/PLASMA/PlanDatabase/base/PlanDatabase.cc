@@ -56,8 +56,8 @@ namespace EUROPA{
 
 #define  publish(message){						\
     check_error(!Entity::isPurging());					\
-    for(std::vector<PlanDatabaseListenerId>::const_reverse_iterator lit = m_listeners.rbegin(); lit != m_listeners.rend(); ++lit) \
-      (*lit)->message;							\
+    for(std::vector<PlanDatabaseListenerId>::const_reverse_iterator rit = m_listeners.rbegin(), rend = m_listeners.rend(); rit != rend; ++rit) \
+      (*rit)->message;							\
   }
 
 
