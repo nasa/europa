@@ -35,14 +35,14 @@
   	
     <if>
       <or>
-        <equals arg1="${uname.s}" arg2="Linux"/>
+        <contains string="${uname.s}" substring="Linux" casesensitive="false"/>
       </or>
       <then>
       	<property name="local.os" value="linux"/>
       </then>
       <!-- Mac OS X -->
       <elseif>
-        <equals arg1="${uname.s}" arg2="Darwin"/>
+        <contains string="${uname.s}" substring="Darwin" casesensitive="false"/>
         <then>
           <property name="local.os" value="darwin"/>
           <property name="local.env.LD_LIBRARY_PATH.name" value="DYLD_LIBRARY_PATH"/>
@@ -51,7 +51,7 @@
 
       <!-- Windows-CYGWIN -->
       <elseif>
-        <equals arg1="${uname.s}" arg2="Cygwin"/>
+        <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
         <then>
           <property name="local.os" value="windows"/>
           <exec executable="cygpath" outputproperty="local.env.PLASMA_HOME">
@@ -66,7 +66,7 @@
     	
       <!-- Solaris -->
       <elseif>
-        <equals arg1="${uname.s}" arg2="SunOS"/>
+        <contains string="${uname.s}" substring="SunOS" casesensitive="false"/>
         <then>
           <property name="local.os" value="solaris"/>
       	</then>
@@ -191,7 +191,7 @@
     </if>
 
     <if>
-      <equals arg1="${uname.o}" arg2="Cygwin"/>
+      <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
       <then>
         <echo message="Building System dlls for Windows."/>
         <exec executable="g++" dir="${dir.dist.base}/lib">

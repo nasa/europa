@@ -56,9 +56,7 @@ if ( PROFILE in $(VARIANTS) ) || ( ( CUSTOM in $(VARIANTS) ) && ( $(EUROPA_PROFI
   actions ExecuteTarget {
     cd ./$(2:D)
     rm -f gmon.out
-    $(PREFIX) ./$(2:BS) $(ARGUMENTS) > "$(OUTPUTFN)" && \
-    ( ( test -s gmon.out && gprof -b $(2:BS) gmon.out > "$(OUTPUTFN:BS).output.gprof" ) || true ) && \
-    rm -f gmon.out
+    $(PREFIX) ./$(2:BS) $(ARGUMENTS) > "$(OUTPUTFN)" && ( ( test -f gmon.out && gprof -b $(2:BS) gmon.out > "$(OUTPUTFN:BS).output.gprof" ) || true ) && rm -f gmon.out
   }
 } else {
   actions ExecuteTarget {
