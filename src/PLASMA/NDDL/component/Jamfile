@@ -6,7 +6,8 @@ ModuleComponent NDDL
 	:
 	floatType.cc
 	intType.cc
-	TransactionInterpreter.cc
+        Interpreter.cc
+	NddlXml.cc
 	;
 
 } # PLASMA_READY

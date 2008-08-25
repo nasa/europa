@@ -6,6 +6,6 @@ if ! $(PLASMA_READY) {
    ModuleComponent Resource 
        : 
        NddlResource.cc 
-       TransactionInterpreterResources.cc 
+       InterpreterResources.cc 
        ;
 }
