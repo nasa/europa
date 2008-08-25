@@ -4,7 +4,6 @@
 // Pieces necessary for various customizations:
 #include "ConstraintFactory.hh"
 #include "PSPlanDatabase.hh"
-#include "TransactionInterpreter.hh"
 #include "Schema.hh"
 #include "FlawHandler.hh"
 
@@ -12,7 +11,7 @@
 namespace EUROPA {
 
 // static C init method to get handle when loading module as shared library
-extern "C" 
+extern "C"
 {
 	ModuleId initializeModule()
 	{
@@ -31,26 +30,26 @@ extern "C"
   }
 
   ModuleRover::~ModuleRover()
-  {	  
-  }  
-  
+  {
+  }
+
   void ModuleRover::initialize()
   {
       if(RoverInitialized())
     	  return;
 	  RoverInitialized() = true;
-  }  
+  }
 
   void ModuleRover::uninitialize()
   {
 	  RoverInitialized() = false;
-  }  
-  
+  }
+
   void ModuleRover::initialize(EngineId engine)
   {
   }
-  
+
   void ModuleRover::uninitialize(EngineId engine)
-  {	  
-  }  
+  {
+  }
 }

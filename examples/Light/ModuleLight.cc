@@ -4,7 +4,6 @@
 // Pieces necessary for various customizations:
 #include "ConstraintFactory.hh"
 #include "PSPlanDatabase.hh"
-#include "TransactionInterpreter.hh"
 #include "Schema.hh"
 #include "FlawHandler.hh"
 
@@ -12,7 +11,7 @@
 namespace EUROPA {
 
 // static C init method to get handle when loading module as shared library
-extern "C" 
+extern "C"
 {
 	ModuleId initializeModule()
 	{
@@ -31,26 +30,26 @@ extern "C"
   }
 
   ModuleLight::~ModuleLight()
-  {	  
-  }  
-  
+  {
+  }
+
   void ModuleLight::initialize()
   {
       if(LightInitialized())
     	  return;
 	  LightInitialized() = true;
-  }  
+  }
 
   void ModuleLight::uninitialize()
   {
 	  LightInitialized() = false;
-  }  
-  
+  }
+
   void ModuleLight::initialize(EngineId engine)
   {
   }
-  
+
   void ModuleLight::uninitialize(EngineId engine)
-  {	  
-  }  
+  {
+  }
 }
