@@ -1,12 +1,12 @@
 /**
  * @file Main.cc
  *
- * @brief Provides an executable for your project which uses 
- * - a standard chronological backtracking planner 
+ * @brief Provides an executable for your project which uses
+ * - a standard chronological backtracking planner
  * - a PSEngine to encapsulate EUROPA
  */
 
-#include "PSEngine.hh" 
+#include "PSEngine.hh"
 #include "Debug.hh"
 #include "PlanDatabase.hh"
 #include "EuropaEngine.hh"
@@ -31,54 +31,55 @@ int main(int argc, const char ** argv)
 
   const char* txSource = argv[1];
   const char* plannerConfig = argv[2];
-  
+
   solve(
       plannerConfig,
       txSource,
       0,   // startHorizon
       100, // endHorizon
       1000 // maxSteps
-  ); 
-     
+  );
+
   return 0;
 }
 
-bool solve(const char* plannerConfig, 
-           const char* txSource, 
-           int startHorizon, 
-           int endHorizon, 
+bool solve(const char* plannerConfig,
+           const char* txSource,
+           int startHorizon,
+           int endHorizon,
            int maxSteps)
 {
     try {
-        
+
       PSEngine::initialize();
-      
+
       {
-          PSEngine* engine = PSEngine::makeInstance();  
+          PSEngine* engine = PSEngine::makeInstance();
           engine->start();
+          engine->addModule((new Module%%Project%%()));
           engine->executeScript("nddl-xml",txSource,true/*isFile*/);
 
           PSSolver* solver = engine->createSolver(plannerConfig);
           runSolver(solver,startHorizon,endHorizon,maxSteps);
-          delete solver;    
+          delete solver;
 
           delete engine;
       }
-      
-      PSEngine::terminate();      
-      
+
+      PSEngine::terminate();
+
       return true;
     }
     catch (Error& e) {
         std::cerr << "PSEngine failed:" << e.getMsg() << std::endl;
         return false;
-    }   
+    }
 }
 
 void printFlaws(int it, PSList<std::string>& flaws)
 {
     debugMsg("Main","Iteration:" << it << " " << flaws.size() << " flaws");
-    
+
     for (int i=0; i<flaws.size(); i++) {
         debugMsg("Main", "    " << (i+1) << " - " << flaws.get(i));
     }
@@ -88,12 +89,12 @@ void runSolver(PSSolver* solver, int startHorizon, int endHorizon, int maxSteps)
 {
     solver->configure(startHorizon,endHorizon);
     int i;
-    for (i = 0; 
+    for (i = 0;
          !solver->isExhausted() &&
          !solver->isTimedOut() &&
-         i<maxSteps; 
+         i<maxSteps;
          i = solver->getStepCount()) {
-      
+
       solver->step();
       PSList<std::string> flaws;
       if (solver->isConstraintConsistent()) {
@@ -104,9 +105,9 @@ void runSolver(PSSolver* solver, int startHorizon, int endHorizon, int maxSteps)
       }
       else
           debugMsg("Main","Iteration " << i << " Solver is not constraint consistent");
-    }   
+    }
 
-    checkSolver(solver,i);    
+    checkSolver(solver,i);
 }
 
 void checkSolver(PSSolver* solver, int i)
@@ -114,10 +115,10 @@ void checkSolver(PSSolver* solver, int i)
     if (solver->isExhausted()) {
       debugMsg("Main","Solver was exhausted after " << i << " steps");
     }
-    else if (solver->isTimedOut()) { 
+    else if (solver->isTimedOut()) {
       debugMsg("Main","Solver timed out after " << i << " steps");
     }
-    else {     
+    else {
       debugMsg("Main","Solver finished after " << i << " steps");
     }
 }
