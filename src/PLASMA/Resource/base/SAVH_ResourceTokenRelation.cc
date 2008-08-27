@@ -8,7 +8,7 @@
 
 namespace EUROPA {
   namespace SAVH {
-    
+
     ResourceTokenRelation::ResourceTokenRelation(const ConstraintEngineId& constraintEngine,
                                                  const std::vector<ConstrainedVariableId>& scope,
                                                  const TokenId& tok)
@@ -24,11 +24,11 @@ namespace EUROPA {
         m_resource = ResourceId(scope[1]->lastDomain().getSingletonValue());
         check_error(m_resource.isValid());
 	debugMsg("ResourceTokenRelation:ResourceTokenRelation", "Adding token " << m_token->toString() << " to resource-profile of resource " << m_resource->toString() );
- 
+
         m_resource->addToProfile(m_token);
       }
     }
-    
+
     bool ResourceTokenRelation::canIgnore(const ConstrainedVariableId& variable,
                                           int argIndex, const DomainListener::ChangeType& changeType) {
       debugMsg("ResourceTokenRelation:canIgnore", "Received notification of change type " << changeType << " on variable " << variable->toString());
@@ -37,8 +37,8 @@ namespace EUROPA {
       ConstrainedVariableId state = m_variables[STATE_VAR];
       ConstrainedVariableId object = m_variables[OBJECT_VAR];
 
-      debugMsg("ResourceTokenRelation:canIgnore", "Current state: " << std::endl << 
-               "  " << object->toString() << std::endl << 
+      debugMsg("ResourceTokenRelation:canIgnore", "Current state: " << std::endl <<
+               "  " << object->toString() << std::endl <<
                "  " << state->toString());
       //if this is a singleton message
       if(changeType == DomainListener::RESTRICT_TO_SINGLETON ||
@@ -57,28 +57,29 @@ namespace EUROPA {
                changeType == DomainListener::RELAXED) && m_resource.isValid()) {
         if(!(object->lastDomain().isSingleton() && object->lastDomain().isMember(m_resource->getKey())) ||
            !(state->isSpecified() && state->getSpecifiedValue() == Token::ACTIVE)) {
+            debugMsg("ResourceTokenRelation:canIgnore", "Removing " << m_token->toString() << " from profile for resource " << m_resource->toString());
           m_resource->removeFromProfile(m_token);
           m_resource = ResourceId::noId();
         }
       }
       return true;
-    }    
-    
+    }
+
     void ResourceTokenRelation::notifyViolated(ResourceProblem::Type problem, const InstantId inst)
     {
     	m_violationProblem = problem;
-    	m_violationTime = inst->getTime();    	
+    	m_violationTime = inst->getTime();
     	Constraint::notifyViolated();
     }
 
     std::string ResourceTokenRelation::getViolationExpl() const
     {
     	std::ostringstream os;
-    	
-    	os << ResourceProblem::getString(m_violationProblem) 
+
+    	os << ResourceProblem::getString(m_violationProblem)
     	      << " for resource " << m_resource->getName().toString()
     	      << " at instant " << m_violationTime;
-    	
+
     	return os.str();
     }
   }
