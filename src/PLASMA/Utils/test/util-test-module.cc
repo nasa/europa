@@ -43,7 +43,7 @@
 #define non_fast_only_assert(T) //NO-OP
 #endif
 
-#define runTest(test) { \
+#define EUROPA_runTest(test) { \
   try { \
     std::cout << "      " << #test; \
     bool result = test(); \
@@ -83,7 +83,7 @@ public:
 class ErrorTest {
 public:
   static bool test() {
-    runTest(testExceptions);
+    EUROPA_runTest(testExceptions);
     return true;
   }
 private:
@@ -171,8 +171,8 @@ private:
 class DebugTest {
 public:
   static bool test() {
-    runTest(testDebugError);
-    runTest(testDebugFiles);
+    EUROPA_runTest(testDebugError);
+    EUROPA_runTest(testDebugFiles);
     return true;
   }
 private:
@@ -322,16 +322,16 @@ private:
 };
 
 bool IdTests::test() {
-  runTest(testBasicAllocation);
-  runTest(testCollectionSupport);
-  runTest(testDoubleConversion);
-  runTest(testCastingSupport);
-  // NOT APPLICABLE: runTest(testMultipleInheritanceCasting);
-  runTest(testTypicalConversionsAndComparisons);
-  runTest(testBadAllocationErrorHandling);
-  runTest(testBadIdUsage);
-  runTest(testIdConversion);
-  runTest(testConstId);
+  EUROPA_runTest(testBasicAllocation);
+  EUROPA_runTest(testCollectionSupport);
+  EUROPA_runTest(testDoubleConversion);
+  EUROPA_runTest(testCastingSupport);
+  // NOT APPLICABLE: EUROPA_runTest(testMultipleInheritanceCasting);
+  EUROPA_runTest(testTypicalConversionsAndComparisons);
+  EUROPA_runTest(testBadAllocationErrorHandling);
+  EUROPA_runTest(testBadIdUsage);
+  EUROPA_runTest(testIdConversion);
+  EUROPA_runTest(testConstId);
   return(true);
 }
 
@@ -560,10 +560,10 @@ bool IdTests::testConstId()
 class LabelTests {
 public:
   static bool test(){
-    runTest(testBasicAllocation);
-    runTest(testElementCounting);
-    runTest(testElementAccess);
-    runTest(testComparisons);
+    EUROPA_runTest(testBasicAllocation);
+    EUROPA_runTest(testElementCounting);
+    EUROPA_runTest(testElementAccess);
+    EUROPA_runTest(testComparisons);
     return true;
   }
 
@@ -640,7 +640,7 @@ private:
 class EntityTest {
 public:
   static bool test(){
-    runTest(testReferenceCounting);
+    EUROPA_runTest(testReferenceCounting);
     return true;
   }
 
@@ -672,11 +672,11 @@ private:
 class XMLTest {
 public:
   static bool test() {
-    runTest(testInitXmlString);
-    runTest(testExtractData);
-    runTest(testInitXmlFile);
-		runTest(testGetTextChild);
-		runTest(testIsNumber);
+    EUROPA_runTest(testInitXmlString);
+    EUROPA_runTest(testExtractData);
+    EUROPA_runTest(testInitXmlFile);
+		EUROPA_runTest(testGetTextChild);
+		EUROPA_runTest(testIsNumber);
     return true;
   }
 private:

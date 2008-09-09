@@ -2,10 +2,12 @@ SubDir PLASMA ConstraintEngine test ;
 
 if ! $(PLASMA_READY) {
 
-SubDirC++Flags -Wno-unknown-pragmas -Wno-format ;
+#SubDirC++Flags -lcppunit -Wno-unknown-pragmas -Wno-format ;
+#SubDirC++Flags -I/usr/include ; #-lcppunit -Wno-unknown-pragmas -Wno-format ;
 
 CET_Files = [ FGristFiles ConstraintTesting ] ; #<ConstraintEngine!test>ConstraintTesting ;
 
+ModuleLibraries ce-module-tests : cppunit ;
 ModuleMain ce-module-tests
 	:
 	module-tests.cc
@@ -17,5 +19,9 @@ ModuleMain ce-module-tests
 	;
 RunModuleMain run-ce-module-tests : ce-module-tests ;
 LocalDepends tests : run-ce-module-tests ;
+
+ModuleLibraries ce-cppunit-tests : cppunit ;
+ModuleMain ce-cppunit-tests : complex.cpp : ConstraintEngine ;
+RunModuleMain run-ce-cppunit-tests : ce-cppunit-tests ;
 
 } # PLASMA_READY

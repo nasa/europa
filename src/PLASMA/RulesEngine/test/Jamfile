@@ -2,6 +2,10 @@ SubDir PLASMA RulesEngine test ;
 
 if ! $(PLASMA_READY) {
 
+#SubDirC++Flags -lcppunit -Wno-unknown-pragmas -Wno-format ;
+#SubDirC++Flags -I/usr/include ; #-lcppunit -Wno-unknown-pragmas -Wno-format ;
+
+ModuleLibraries re-module-tests : cppunit ;
 ModuleMain re-module-tests : module-tests.cc re-test-module.cc TestRule.cc : RulesEngine ;
 
 RunModuleMain run-re-module-tests : re-module-tests ;

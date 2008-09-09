@@ -10,7 +10,11 @@ if ! $(PLASMA_READY) {
  SubInclude PLASMA NDDL test project ;
  SubDirHdrs $(PLASMA) PlanDatabase test ;
 
- ModuleMain nddl-module-tests : $(PlanDatabase_Test_Files:S=$(SUFOBJ)) module-tests.cc nddl-test-module.cc : NDDL ;
+#SubDirC++Flags -lcppunit -Wno-unknown-pragmas -Wno-format ;
+#SubDirC++Flags -I/usr/include ; #-lcppunit -Wno-unknown-pragmas -Wno-format ;
+ModuleLibraries nddl-module-tests : cppunit ;
+
+ModuleMain nddl-module-tests : $(PlanDatabase_Test_Files:S=$(SUFOBJ)) module-tests.cc nddl-test-module.cc : NDDL ;
  RunModuleMain run-nddl-module-tests : nddl-module-tests ;
  LocalDepends tests : run-nddl-module-tests ;
 

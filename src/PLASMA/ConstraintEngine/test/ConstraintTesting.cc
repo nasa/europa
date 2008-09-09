@@ -14,6 +14,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cppunit/extensions/HelperMacros.h>
 
 #include "Error.hh"
 #include "tinyxml.h"
@@ -206,7 +207,7 @@ namespace EUROPA {
 
 
       // Simple checks that this test case is OK.
-      assertTrue(inputDoms.size() == outputDoms.size());
+      CPPUNIT_ASSERT(inputDoms.size() == outputDoms.size());
 	
       // OK, done with a line, each line being a test, so
       // interleave the input and output domains to make
@@ -259,7 +260,7 @@ namespace EUROPA {
 
       std::list<AbstractDomain*> testDomains(testCases.front().m_domains);
       // Each input domain must have a matching output domain.
-      assertTrue(testDomains.size() % 2 == 0);
+      CPPUNIT_ASSERT(testDomains.size() % 2 == 0);
 
       // Build the scope and the list of expected output domains.
       std::vector<ConstrainedVariableId> scope;
@@ -267,7 +268,7 @@ namespace EUROPA {
       ConstrainedVariableId cVarId;
       while (!testDomains.empty()) {
         AbstractDomain *domPtr = testDomains.front();
-        assertTrue(domPtr != 0 && (domPtr->isOpen() || !domPtr->isEmpty()));
+        CPPUNIT_ASSERT(domPtr != 0 && (domPtr->isOpen() || !domPtr->isEmpty()));
         testDomains.pop_front();
 
 	LabelStr typeName = domPtr->getTypeName();
@@ -280,7 +281,7 @@ namespace EUROPA {
         outputDoms.push_back(domPtr);
         testDomains.pop_front();
       }
-      assertTrue(scope.size() == outputDoms.size());
+      CPPUNIT_ASSERT(scope.size() == outputDoms.size());
 
       // Create and execute the constraint.
       

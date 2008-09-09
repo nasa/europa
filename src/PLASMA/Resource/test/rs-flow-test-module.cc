@@ -62,17 +62,17 @@ class ResourceTestEngine  : public EngineBase
 class DefaultSetupTest {
 public:
   static bool test() {
-    runTest(testDefaultSetup);
+    EUROPA_runTest(testDefaultSetup);
     return true;
   }
 private:
   static bool testDefaultSetup() {
     RESOURCE_DEFAULT_SETUP(ce,db,false);
     
-    assertTrue(db.isClosed() == false);
+    CPPUNIT_ASSERT(db.isClosed() == false);
     db.close();
-    assertTrue(db.isClosed() == true);
-    assertTrue(ce.constraintConsistent() == true);
+    CPPUNIT_ASSERT(db.isClosed() == true);
+    CPPUNIT_ASSERT(ce.constraintConsistent() == true);
 
     RESOURCE_DEFAULT_TEARDOWN();
     return true;
@@ -223,7 +223,7 @@ private:
 
     bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
-    assertTrue( profileMatches );
+    CPPUNIT_ASSERT( profileMatches );
   }
 
   static void executeScenario2( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
@@ -244,7 +244,7 @@ private:
 
     bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
-    assertTrue( profileMatches );
+    CPPUNIT_ASSERT( profileMatches );
   }
 
   static void executeScenario3( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
@@ -268,7 +268,7 @@ private:
 
     bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
-    assertTrue( profileMatches );
+    CPPUNIT_ASSERT( profileMatches );
   }
 
   static void executeScenario4( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
@@ -292,7 +292,7 @@ private:
 
     bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
-    assertTrue( profileMatches );
+    CPPUNIT_ASSERT( profileMatches );
   }
 
   static void executeScenario5( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
@@ -318,7 +318,7 @@ private:
 
     bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
-    assertTrue( profileMatches );
+    CPPUNIT_ASSERT( profileMatches );
   }
 
   static void executeScenario6( SAVH::Profile& profile, ConstraintEngine& ce ) {
@@ -368,7 +368,7 @@ private:
     {
       bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
       
-      assertTrue( profileMatches );
+      CPPUNIT_ASSERT( profileMatches );
     }
 
     /*!
@@ -396,7 +396,7 @@ private:
     {
       bool profileMatches = verifyProfile( profile, nrInstances, itimes, postq2eq1LowerLevels, upperLevels );
       
-      assertTrue( profileMatches );
+      CPPUNIT_ASSERT( profileMatches );
     }
 
     /*!
@@ -427,7 +427,7 @@ private:
     {
       bool profileMatches = verifyProfile( profile, postt2to10NrInstances, postt2to10Itimes, postt2to10LowerLevels, postt2to10UpperLevels );
       
-      assertTrue( profileMatches );
+      CPPUNIT_ASSERT( profileMatches );
     }
     
     /*!
@@ -459,7 +459,7 @@ private:
     {
       bool profileMatches = verifyProfile( profile, postt2to11NrInstances, postt2to11Itimes, postt2to11LowerLevels, postt2to11UpperLevels );
       
-      assertTrue( profileMatches );
+      CPPUNIT_ASSERT( profileMatches );
     }
 
     /*!
@@ -494,7 +494,7 @@ private:
     {
       bool profileMatches = verifyProfile( profile, postt3eqt4NrInstances, postt3eqt4Itimes, postt3eqt4LowerLevels, postt3eqt4UpperLevels );
       
-      assertTrue( profileMatches );
+      CPPUNIT_ASSERT( profileMatches );
     }
   }
 
@@ -519,7 +519,7 @@ private:
 
     bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
-    assertTrue( profileMatches );
+    CPPUNIT_ASSERT( profileMatches );
   }
 
   static void executeScenario8( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
@@ -543,7 +543,7 @@ private:
 
     bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
-    assertTrue( profileMatches );
+    CPPUNIT_ASSERT( profileMatches );
   }
 
   static void executeScenario9( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
@@ -572,7 +572,7 @@ private:
 
     bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
-    assertTrue( profileMatches );
+    CPPUNIT_ASSERT( profileMatches );
   }
 
   static void executeScenario10( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
@@ -639,7 +639,7 @@ private:
 
     bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
-    assertTrue( profileMatches );
+    CPPUNIT_ASSERT( profileMatches );
   }
 
   static void executeScenario11( SAVH::Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
@@ -676,7 +676,7 @@ private:
 
     bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
-    assertTrue( profileMatches );
+    CPPUNIT_ASSERT( profileMatches );
   }
 
   static void executeScenario12( SAVH::Profile& profile, ConstraintEngine& ce ) {
@@ -724,7 +724,7 @@ private:
       
       bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
       
-      assertTrue( profileMatches );
+      CPPUNIT_ASSERT( profileMatches );
     }
 
     std::cout << "    Case 2" << std::endl;
@@ -744,7 +744,7 @@ private:
       
       bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
       
-      assertTrue( profileMatches );
+      CPPUNIT_ASSERT( profileMatches );
     }
 
   }
@@ -789,7 +789,7 @@ private:
 
     bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
-    assertTrue( profileMatches );
+    CPPUNIT_ASSERT( profileMatches );
   }
 
   static void executeScenario14( SAVH::Profile& profile, ConstraintEngine& ce ) {
@@ -822,7 +822,7 @@ private:
       
       bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
-      assertTrue( profileMatches );
+      CPPUNIT_ASSERT( profileMatches );
     }    
     
     /*!
@@ -854,7 +854,7 @@ private:
       
       bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
-      assertTrue( profileMatches );
+      CPPUNIT_ASSERT( profileMatches );
     }    
 
 
@@ -889,7 +889,7 @@ private:
       
       bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
-      assertTrue( profileMatches );
+      CPPUNIT_ASSERT( profileMatches );
     }    
 
     /*!
@@ -924,7 +924,7 @@ private:
       
       bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
-      assertTrue( profileMatches );
+      CPPUNIT_ASSERT( profileMatches );
     }    
   }
 
@@ -1389,7 +1389,7 @@ private:
 class FVDetectorTest {
 public:
   static bool test() {
-    runTest(testReusableDetector);
+    EUROPA_runTest(testReusableDetector);
     return true;
   }
 private:
@@ -1402,39 +1402,60 @@ private:
     //create a token that violates the limit (i.e. consumes 2)
     SAVH::ReusableToken tok1(db.getId(), LabelStr("Reusable.uses"), IntervalIntDomain(1), IntervalIntDomain(10), 
 			     IntervalIntDomain(9), IntervalDomain(2));
-    assertTrue(!ce.propagate());
+    CPPUNIT_ASSERT(!ce.propagate());
     tok1.discard(false);
     
     //create a token that doesn't
     SAVH::ReusableToken tok2(db.getId(), LabelStr("Reusable.uses"), IntervalIntDomain(1, 3), IntervalIntDomain(10, 12), IntervalIntDomain(9),
 		       IntervalDomain(1));
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
     //create a token that doesn't, but must start during the previous token, causing a violation
     SAVH::ReusableToken tok3(db.getId(), LabelStr("Reusable.uses"), IntervalIntDomain(9), IntervalIntDomain(11), IntervalIntDomain(2),
 		       IntervalDomain(1));
-    assertTrue(!ce.propagate());
+    CPPUNIT_ASSERT(!ce.propagate());
     tok3.discard(false);
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
     //create a token that doesn't, and may start afterwards, creating a flaw
     SAVH::ReusableToken tok4(db.getId(), LabelStr("Reusable.uses"), IntervalIntDomain(10, 13), IntervalIntDomain(15, 18), IntervalIntDomain(5),
 		       IntervalDomain(1));
-    assertTrue(ce.propagate());
-    assertTrue(db.hasOrderingChoice(tok4.getId()));
+    CPPUNIT_ASSERT(ce.propagate());
+    CPPUNIT_ASSERT(db.hasOrderingChoice(tok4.getId()));
     std::cout << "CREATING THE CONSTRAINT" << std::endl;
     res.constrain(tok2.getId(), tok4.getId());
-    assertTrue(ce.propagate());
-    assertTrue(!db.hasOrderingChoice(tok4.getId()));
+    CPPUNIT_ASSERT(ce.propagate());
+    CPPUNIT_ASSERT(!db.hasOrderingChoice(tok4.getId()));
     RESOURCE_DEFAULT_TEARDOWN();
     return true;
   }
 };
 
-void FlowProfileModuleTests::runTests( const std::string& path) {
+//void FlowProfileModuleTests::runTests( const std::string& path) {
+void FlowProfileModuleTests::runTests( std::string path) {
   setTestLoadLibraryPath(path);  
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(FlowProfileTest::test);
   runTestSuite(FVDetectorTest::test);
   std::cout << "Finished" << std::endl;
+}
+
+void FlowProfileModuleTests::cppSetup(void) 
+{
+    setTestLoadLibraryPath(".");
+}
+
+void FlowProfileModuleTests::defaultSetupTests(void) 
+{
+  runTestSuite(DefaultSetupTest::test);
+}
+
+void FlowProfileModuleTests::flowProfileTests(void) 
+{
+  runTestSuite(FlowProfileTest::test);
+}
+
+void FlowProfileModuleTests::FVDetectorTests(void) 
+{
+  runTestSuite(FVDetectorTest::test);
 }
 
 

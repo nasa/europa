@@ -39,15 +39,15 @@ private:
 
 #define ENGINE DefaultEngineAccessor::instance()
 
-#define runTest(test, args...) {			\
+#define EUROPA_runTest(test, args...) {			\
   try { \
-  std::cout << "   " << #test << " "; \
   unsigned int id_count = IdTable::size(); \
   bool result = test(args); \
   DefaultEngineAccessor::reset(); \
   Entity::garbageCollect(); \
-  if (result && IdTable::size() <= id_count) \
-    std::cout << " PASSED." << std::endl; \
+  if (result && IdTable::size() <= id_count) { \
+    /*std::cout << " PASSED." << std::endl;*/ \
+  } \
   else \
     if (result) { \
       std::cout << " FAILED = DID NOT CLEAN UP ALLOCATED IDs:\n"; \
@@ -77,6 +77,7 @@ private:
    err.print(std::cout);\
   }\
   }
+
 #endif
 
 

@@ -40,6 +40,7 @@
 
 #include <fstream>
 
+
 using namespace EUROPA;
 
 class DelegationTestConstraint : public Constraint {
@@ -54,7 +55,7 @@ public:
   void handleExecute(){
     s_executionCount++;
     ConstrainedVariableId var = getScope().front();
-    assertTrue(!var->derivedDomain().isSingleton(), "Should be able to access derived domain during propagation safely.");
+    CPPUNIT_ASSERT_MESSAGE("Should be able to access derived domain during propagation safely.", !var->derivedDomain().isSingleton());
   }
 
   void handleExecute(const ConstrainedVariableId&,int, const DomainListener::ChangeType&){}
@@ -150,10 +151,10 @@ private:
 class TypeFactoryTests {
 public:
   static bool test() {
-    runTest(testValueCreation);
-    runTest(testDomainCreation);
-    runTest(testVariableCreation);
-    runTest(testVariableWithDomainCreation);
+    EUROPA_runTest(testValueCreation);
+    EUROPA_runTest(testDomainCreation);
+    EUROPA_runTest(testVariableCreation);
+    EUROPA_runTest(testVariableWithDomainCreation);
     return true; 
   }
 
@@ -163,15 +164,15 @@ public:
       
     IntervalIntDomain d0(5);
     int v0 = (int) ce->createValue(d0.getTypeName().c_str(), "5");
-    assertTrue(d0.compareEqual(d0.getSingletonValue(), v0));
+    CPPUNIT_ASSERT(d0.compareEqual(d0.getSingletonValue(), v0));
 
     IntervalDomain d1(2.3);
     double v1 = (double) ce->createValue(d1.getTypeName().c_str(), "2.3");
-    assertTrue(d1.compareEqual(d1.getSingletonValue(), v1));
+    CPPUNIT_ASSERT(d1.compareEqual(d1.getSingletonValue(), v1));
 
     BoolDomain d2(true);
     bool v2 = (bool) ce->createValue(d2.getTypeName().c_str(), "true");
-    assertTrue(d2.compareEqual(d2.getSingletonValue(), v2));
+    CPPUNIT_ASSERT(d2.compareEqual(d2.getSingletonValue(), v2));
 
     return true;
   }
@@ -181,55 +182,55 @@ public:
       CESchema* tfm = (CESchema*)engine.getComponent("CESchema");
 
     const IntervalIntDomain & bd0 = dynamic_cast<const IntervalIntDomain &>(tfm->baseDomain(IntervalIntDomain().getTypeName().c_str()));
-    assertTrue(bd0.isMember(0));
-    assertTrue(!bd0.isBool());
+    CPPUNIT_ASSERT(bd0.isMember(0));
+    CPPUNIT_ASSERT(!bd0.isBool());
     const IntervalDomain & bd1 = dynamic_cast<const IntervalDomain &>(tfm->baseDomain(IntervalDomain().getTypeName().c_str()));
-    assertTrue(bd1.isMember(0.1));
-    assertTrue(!bd1.isBool());
+    CPPUNIT_ASSERT(bd1.isMember(0.1));
+    CPPUNIT_ASSERT(!bd1.isBool());
     const BoolDomain & bd2 = dynamic_cast<const BoolDomain &>(tfm->baseDomain(BoolDomain().getTypeName().c_str()));
-    assertTrue(bd2.isMember(false));
-    assertTrue(bd2.isMember(true));
-    assertTrue(bd2.isBool());
-    assertTrue(LocationsBaseDomain().isMember(LabelStr("Hill")));
-    assertTrue(LocationsBaseDomain().isMember(LabelStr("Rock")));
-    assertTrue(LocationsBaseDomain().isMember(LabelStr("Lander")));
-    assertTrue(!LocationsBaseDomain().isMember(LabelStr("true")));
+    CPPUNIT_ASSERT(bd2.isMember(false));
+    CPPUNIT_ASSERT(bd2.isMember(true));
+    CPPUNIT_ASSERT(bd2.isBool());
+    CPPUNIT_ASSERT(LocationsBaseDomain().isMember(LabelStr("Hill")));
+    CPPUNIT_ASSERT(LocationsBaseDomain().isMember(LabelStr("Rock")));
+    CPPUNIT_ASSERT(LocationsBaseDomain().isMember(LabelStr("Lander")));
+    CPPUNIT_ASSERT(!LocationsBaseDomain().isMember(LabelStr("true")));
     //!!This (and SymbolDomain) die with complaints of a "bad cast"
     //!!const Locations & loc0 = dynamic_cast<const Locations&>(tfm->baseDomain("Locations"));
     const EnumeratedDomain & loc0 = dynamic_cast<const EnumeratedDomain &>(tfm->baseDomain("Locations"));
-    assertTrue(!loc0.isBool());
-    assertTrue(loc0.isMember(LabelStr("Hill")));
-    assertTrue(loc0.isMember(LabelStr("Rock")));
-    assertTrue(loc0.isMember(LabelStr("Lander")));
-    assertTrue(!loc0.isMember(LabelStr("true")));
+    CPPUNIT_ASSERT(!loc0.isBool());
+    CPPUNIT_ASSERT(loc0.isMember(LabelStr("Hill")));
+    CPPUNIT_ASSERT(loc0.isMember(LabelStr("Rock")));
+    CPPUNIT_ASSERT(loc0.isMember(LabelStr("Lander")));
+    CPPUNIT_ASSERT(!loc0.isMember(LabelStr("true")));
     //!!The compiler complains about using Locations here when EnumeratedDomain is used above.
     //!!Locations *loc1 = loc0.copy();
     EnumeratedDomain *loc1 = loc0.copy();
     loc1->open();
     loc1->remove(LabelStr("Hill"));
-    assertTrue(!loc1->isMember(LabelStr("Hill")));
-    assertTrue(loc1->isMember(LabelStr("Rock")));
-    assertTrue(loc1->isMember(LabelStr("Lander")));
+    CPPUNIT_ASSERT(!loc1->isMember(LabelStr("Hill")));
+    CPPUNIT_ASSERT(loc1->isMember(LabelStr("Rock")));
+    CPPUNIT_ASSERT(loc1->isMember(LabelStr("Lander")));
     loc1->remove(LabelStr("Rock"));
-    assertTrue(!loc1->isMember(LabelStr("Hill")));
-    assertTrue(!loc1->isMember(LabelStr("Rock")));
-    assertTrue(loc1->isMember(LabelStr("Lander")));
+    CPPUNIT_ASSERT(!loc1->isMember(LabelStr("Hill")));
+    CPPUNIT_ASSERT(!loc1->isMember(LabelStr("Rock")));
+    CPPUNIT_ASSERT(loc1->isMember(LabelStr("Lander")));
     loc1->insert(LabelStr("Hill"));
-    assertTrue(loc1->isMember(LabelStr("Hill")));
-    assertTrue(!loc1->isMember(LabelStr("Rock")));
-    assertTrue(loc1->isMember(LabelStr("Lander")));
+    CPPUNIT_ASSERT(loc1->isMember(LabelStr("Hill")));
+    CPPUNIT_ASSERT(!loc1->isMember(LabelStr("Rock")));
+    CPPUNIT_ASSERT(loc1->isMember(LabelStr("Lander")));
     loc1->remove(LabelStr("Lander"));
-    assertTrue(loc1->isMember(LabelStr("Hill")));
-    assertTrue(!loc1->isMember(LabelStr("Rock")));
-    assertTrue(!loc1->isMember(LabelStr("Lander")));
+    CPPUNIT_ASSERT(loc1->isMember(LabelStr("Hill")));
+    CPPUNIT_ASSERT(!loc1->isMember(LabelStr("Rock")));
+    CPPUNIT_ASSERT(!loc1->isMember(LabelStr("Lander")));
     loc1->insert(LabelStr("Rock"));
-    assertTrue(loc1->isMember(LabelStr("Hill")));
-    assertTrue(loc1->isMember(LabelStr("Rock")));
-    assertTrue(!loc1->isMember(LabelStr("Lander")));
+    CPPUNIT_ASSERT(loc1->isMember(LabelStr("Hill")));
+    CPPUNIT_ASSERT(loc1->isMember(LabelStr("Rock")));
+    CPPUNIT_ASSERT(!loc1->isMember(LabelStr("Lander")));
     loc1->remove(LabelStr("Hill"));
-    assertTrue(!loc1->isMember(LabelStr("Hill")));
-    assertTrue(loc1->isMember(LabelStr("Rock")));
-    assertTrue(!loc1->isMember(LabelStr("Lander")));
+    CPPUNIT_ASSERT(!loc1->isMember(LabelStr("Hill")));
+    CPPUNIT_ASSERT(loc1->isMember(LabelStr("Rock")));
+    CPPUNIT_ASSERT(!loc1->isMember(LabelStr("Lander")));
     delete loc1;
     return true;
   }
@@ -239,11 +240,11 @@ public:
 
       ConstraintEngineId ce = ((ConstraintEngine*)engine.getComponent("ConstraintEngine"))->getId();
       ConstrainedVariableId cv0 = ce->createVariable(IntervalIntDomain().getTypeName().c_str());
-      assertTrue(cv0->baseDomain().getTypeName() == IntervalIntDomain().getTypeName());
+      CPPUNIT_ASSERT(cv0->baseDomain().getTypeName() == IntervalIntDomain().getTypeName());
       ConstrainedVariableId cv1 = ce->createVariable(IntervalDomain().getTypeName().c_str());
-      assertTrue(cv1->baseDomain().getTypeName() == IntervalDomain().getTypeName());
+      CPPUNIT_ASSERT(cv1->baseDomain().getTypeName() == IntervalDomain().getTypeName());
       ConstrainedVariableId cv2 = ce->createVariable(BoolDomain().getTypeName().c_str());
-      assertTrue(cv2->baseDomain().getTypeName() == BoolDomain().getTypeName());
+      CPPUNIT_ASSERT(cv2->baseDomain().getTypeName() == BoolDomain().getTypeName());
       return true;
   }
 
@@ -256,11 +257,11 @@ public:
 
       ConstraintEngineId ce = ((ConstraintEngine*)engine.getComponent("ConstraintEngine"))->getId();
       ConstrainedVariableId cv0 = ce->createVariable(d0.getTypeName().c_str(), d0);
-      assertTrue(cv0->baseDomain() == d0);
+      CPPUNIT_ASSERT(cv0->baseDomain() == d0);
       ConstrainedVariableId cv1 = ce->createVariable(d1.getTypeName().c_str(), d1);
-      assertTrue(cv1->baseDomain() == d1);
+      CPPUNIT_ASSERT(cv1->baseDomain() == d1);
       ConstrainedVariableId cv2 = ce->createVariable(d2.getTypeName().c_str(), d2);
-      assertTrue(cv2->baseDomain() == d2);
+      CPPUNIT_ASSERT(cv2->baseDomain() == d2);
       return true;
   }
 };
@@ -276,10 +277,10 @@ class ConstraintEngineTest
 {
 public:
   static bool test(){
-    runTest(testDeallocationWithPurging);
-    runTest(testInconsistentInitialVariableDomain);
-    runTest(testVariableLookupByIndex);
-    runTest(testGNATS_3133);
+    EUROPA_runTest(testDeallocationWithPurging);
+    EUROPA_runTest(testInconsistentInitialVariableDomain);
+    EUROPA_runTest(testVariableLookupByIndex);
+    EUROPA_runTest(testGNATS_3133);
     return true;
   }
 
@@ -302,7 +303,7 @@ public:
       new EqualConstraint(LabelStr("EqualConstraint"), LabelStr("Default"), ce, makeScope(v0, v1));
     }
 
-    assertTrue(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
 
     return true;
   }
@@ -312,9 +313,9 @@ public:
     emptyDomain.close();
     {
       Variable<NumericDomain> v0(ENGINE, emptyDomain);
-      assertTrue(ENGINE->provenInconsistent()); // Should be immediately inconsistent!
+      CPPUNIT_ASSERT(ENGINE->provenInconsistent()); // Should be immediately inconsistent!
     }
-    assertTrue(ENGINE->propagate()); // Should be fixed by deletion of the variable
+    CPPUNIT_ASSERT(ENGINE->propagate()); // Should be fixed by deletion of the variable
 
     return true;
   }
@@ -324,8 +325,8 @@ public:
 
     for(unsigned int i=0;i<10;i++){
       ConstrainedVariableId var = (new Variable<IntervalIntDomain> (ENGINE, IntervalIntDomain()))->getId();
-      assertTrue(var == ENGINE->getVariable(i));
-      assertTrue(ENGINE->getIndex(var) == i);
+      CPPUNIT_ASSERT(var == ENGINE->getVariable(i));
+      CPPUNIT_ASSERT(ENGINE->getIndex(var) == i);
       vars.push_back(var);
     }
 
@@ -356,18 +357,18 @@ public:
     v1.specify(2);
     v2.specify(3);
     v3.specify(3);
-    assertFalse(ENGINE->propagate());
+    CPPUNIT_ASSERT(!ENGINE->propagate());
 
     v2.reset();
-    //DEPRECATED (GNATS 3140):assertTrue(ENGINE->provenInconsistent());
-    assertFalse(ENGINE->propagate());
+    //DEPRECATED (GNATS 3140):CPPUNIT_ASSERT(ENGINE->provenInconsistent());
+    CPPUNIT_ASSERT(!ENGINE->propagate());
     v3.reset();
-    assertFalse(ENGINE->propagate())
-    assertTrue(ENGINE->provenInconsistent());;
+    CPPUNIT_ASSERT(!ENGINE->propagate());
+    CPPUNIT_ASSERT(ENGINE->provenInconsistent());;
     v0.reset();
     v1.reset();
-    assertFalse(ENGINE->provenInconsistent());
-    assertTrue(ENGINE->propagate());
+    CPPUNIT_ASSERT(!ENGINE->provenInconsistent());
+    CPPUNIT_ASSERT(ENGINE->propagate());
 
     v0.specify(1);
     v1.specify(2);
@@ -376,11 +377,11 @@ public:
 
     // Now delete constraints in the order that relaxes the empty variable last
     delete (Constraint*) c1;
-    assertFalse(ENGINE->propagate());
+    CPPUNIT_ASSERT(!ENGINE->propagate());
     delete (Constraint*) c2;
-    assertFalse(ENGINE->propagate());
+    CPPUNIT_ASSERT(!ENGINE->propagate());
     delete (Constraint*) c0;
-    assertTrue(ENGINE->propagate());
+    CPPUNIT_ASSERT(ENGINE->propagate());
 
     return true;
   }
@@ -405,13 +406,13 @@ class VariableTest
 {
 public:
   static bool test() {
-    runTest(testAllocation);
-    runTest(testMessaging);
-    runTest(testDynamicVariable);
-    runTest(testListener);
-    runTest(testVariablesWithOpenDomains);
-    runTest(testRestrictionScenarios);
-    runTest(testSpecification);
+    EUROPA_runTest(testAllocation);
+    EUROPA_runTest(testMessaging);
+    EUROPA_runTest(testDynamicVariable);
+    EUROPA_runTest(testListener);
+    EUROPA_runTest(testVariablesWithOpenDomains);
+    EUROPA_runTest(testRestrictionScenarios);
+    EUROPA_runTest(testSpecification);
     return true;
   }
 
@@ -421,19 +422,19 @@ private:
     IntervalIntDomain dom0(0, 1000);
     Variable<IntervalIntDomain> v0(ENGINE, dom0);
     const IntervalIntDomain& dom1 = v0.getBaseDomain();
-    assertTrue(dom0 == dom1);
-    assertTrue(v0.isValid());
-    assertTrue(v0.canBeSpecified());
+    CPPUNIT_ASSERT(dom0 == dom1);
+    CPPUNIT_ASSERT(v0.isValid());
+    CPPUNIT_ASSERT(v0.canBeSpecified());
 
     // Now restrict the base domain
     IntervalIntDomain dom2(3, 10);
     v0.restrictBaseDomain(dom2);
-    assertTrue(v0.getDerivedDomain() == dom2);
+    CPPUNIT_ASSERT(v0.getDerivedDomain() == dom2);
 
     Variable<IntervalIntDomain> v1(ENGINE, dom1, false, false, LabelStr("TEST VARIABLE"));
-    assertTrue(!v1.canBeSpecified());
-    assertTrue(v1.getName() == LabelStr("TEST VARIABLE"));
-    assertTrue(v1.isValid());
+    CPPUNIT_ASSERT(!v1.canBeSpecified());
+    CPPUNIT_ASSERT(v1.getName() == LabelStr("TEST VARIABLE"));
+    CPPUNIT_ASSERT(v1.isValid());
     return true;
   }
 
@@ -443,11 +444,11 @@ private:
     // Add, Specify, Remove
     {
       Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(0, 100));
-      assertTrue(listener.getCount(ConstraintEngine::VARIABLE_ADDED) == 1);
+      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::VARIABLE_ADDED) == 1);
       v0.specify(5);
-      assertTrue(listener.getCount(ConstraintEngine::SET_TO_SINGLETON) == 1);
+      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::SET_TO_SINGLETON) == 1);
     }
-    assertTrue(listener.getCount(ConstraintEngine::VARIABLE_REMOVED) == 1);
+    CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::VARIABLE_REMOVED) == 1);
 
     // Bounds restriction messages for derived domain
     listener.reset();
@@ -456,20 +457,20 @@ private:
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(0, 10));
       EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
       ENGINE->propagate();
-      assertTrue(listener.getCount(ConstraintEngine::UPPER_BOUND_DECREASED) == 1);
+      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::UPPER_BOUND_DECREASED) == 1);
       v0.specify(7);
       ENGINE->propagate(); // Expect a RESTRICT_TO_SINGLETON event through propagation
-      assertTrue(listener.getCount(ConstraintEngine::RESTRICT_TO_SINGLETON) == 1);
+      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::RESTRICT_TO_SINGLETON) == 1);
 
       v0.reset(); // Expect a RESET message for v0 and a RELAXATION message for both variables
-      assertTrue(listener.getCount(ConstraintEngine::RESET) == 1);
-      assertTrue(listener.getCount(ConstraintEngine::RELAXED) == 2);
-      assertTrue(ENGINE->pending());
+      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::RESET) == 1);
+      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::RELAXED) == 2);
+      CPPUNIT_ASSERT(ENGINE->pending());
 
       v0.specify(0); // Expect EMPTIED
       v1.specify(1); // Expect EMPTIED
       ENGINE->propagate();
-      assertTrue(listener.getCount(ConstraintEngine::EMPTIED) == 1);
+      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::EMPTIED) == 1);
     }
 
     // Now tests message handling on Enumerated Domain
@@ -480,9 +481,9 @@ private:
       v0.insert(3);
       v0.insert(5);
       v0.insert(10);
-      assertTrue(listener.getCount(ConstraintEngine::RELAXED) == 4);
+      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::RELAXED) == 4);
       v0.close();
-      assertTrue(listener.getCount(ConstraintEngine::CLOSED) == 1);
+      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::CLOSED) == 1);
 
       NumericDomain d0;
       d0.insert(2);
@@ -494,15 +495,15 @@ private:
 
       EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
       ENGINE->propagate(); // Should see values removed from both variables domains. 
-      assertTrue(listener.getCount(ConstraintEngine::VALUE_REMOVED) == 2);
+      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::VALUE_REMOVED) == 2);
       v0.specify(3);
-      assertTrue(listener.getCount(ConstraintEngine::SET_TO_SINGLETON) == 1);
+      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::SET_TO_SINGLETON) == 1);
       v1.specify(5);
-      assertTrue(listener.getCount(ConstraintEngine::SET_TO_SINGLETON) == 2);
+      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::SET_TO_SINGLETON) == 2);
       ENGINE->propagate(); // Expect to see exactly one domain emptied
-      assertTrue(listener.getCount(ConstraintEngine::EMPTIED) == 1);
+      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::EMPTIED) == 1);
       v1.reset(); // Should now see 2 domains relaxed.
-      assertTrue(listener.getCount(ConstraintEngine::RELAXED) == 6);
+      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::RELAXED) == 6);
     }
 
     return true;
@@ -512,9 +513,9 @@ private:
     // Test empty on closure forces inconsistency
     {
       Variable<NumericDomain> v0(ENGINE,NumericDomain());
-      assertTrue(ENGINE->propagate()); // No reason to be inconsistent
+      CPPUNIT_ASSERT(ENGINE->propagate()); // No reason to be inconsistent
       v0.close(); // Should push empty event.
-      assertTrue(ENGINE->provenInconsistent()); // Should be inconsistent
+      CPPUNIT_ASSERT(ENGINE->provenInconsistent()); // Should be inconsistent
     }
 
     // Test that insertion is possible for variables and that it is handled correctly through propagation
@@ -532,40 +533,40 @@ private:
       // Post equality constraint between v0 and v1. It should not cause any restriction yet
       // since v0 has not been closed      
       EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
-      assertTrue(ENGINE->propagate());
-      assertTrue(v1.getDerivedDomain().getSize() == 3);
+      CPPUNIT_ASSERT(ENGINE->propagate());
+      CPPUNIT_ASSERT(v1.getDerivedDomain().getSize() == 3);
 
       // Now close v0, and we should see a restriction on v1
       v0.close();
-      assertTrue(v1.getDerivedDomain().isSingleton());
+      CPPUNIT_ASSERT(v1.getDerivedDomain().isSingleton());
 
       // insert further, and propagate again, the domain should grow by one
       v0.open();
       v0.insert(2);
       v0.close();
-      assertTrue(v1.getDerivedDomain().getSize() == 2);
+      CPPUNIT_ASSERT(v1.getDerivedDomain().getSize() == 2);
 
       // Open it and ensure that the engine is pending once again
       v0.open();
-      assertTrue(ENGINE->pending());
-      assertTrue(v1.getDerivedDomain().getSize() == 3);
+      CPPUNIT_ASSERT(ENGINE->pending());
+      CPPUNIT_ASSERT(v1.getDerivedDomain().getSize() == 3);
 
       v0.specify(2);
-      assertTrue(v0.lastDomain().isClosed());
-      assertTrue(v1.getDerivedDomain().isSingleton());
+      CPPUNIT_ASSERT(v0.lastDomain().isClosed());
+      CPPUNIT_ASSERT(v1.getDerivedDomain().isSingleton());
 
       // Now insert and confirm it does not affect v1. Shoud insert to base domain but
       // not push to the specified or derived domain.
       v0.insert(3);
-      assertTrue(v0.lastDomain().isSingleton()); // Still, since spec domain is closed.
-      assertTrue(v1.getDerivedDomain().isSingleton());
-      assertFalse(v0.baseDomain().isClosed());
-      assertTrue(v1.getDerivedDomain().isSingleton());
+      CPPUNIT_ASSERT(v0.lastDomain().isSingleton()); // Still, since spec domain is closed.
+      CPPUNIT_ASSERT(v1.getDerivedDomain().isSingleton());
+      CPPUNIT_ASSERT(!v0.baseDomain().isClosed());
+      CPPUNIT_ASSERT(v1.getDerivedDomain().isSingleton());
 
       // Now if we reset, the base domain will have 3 elements in it, so derived domain of v1 will also have 3 elements
       // in it since v0 should be relaxed to the base domain.
       v0.reset();
-      assertTrue(v1.getDerivedDomain().getSize() == 3);
+      CPPUNIT_ASSERT(v1.getDerivedDomain().getSize() == 3);
     }
 
     return true;
@@ -573,7 +574,7 @@ private:
 
   static bool testListener(){
     ConstrainedVariableId v0 = (new Variable<IntervalIntDomain>(ENGINE, IntervalIntDomain()))->getId();
-    TestVariableListener* tvl = new TestVariableListener(v0); // deletes itself when v0 deleted
+    new TestVariableListener(v0); // deletes itself when v0 deleted
     delete (ConstrainedVariable*) v0; 
     return true;
   }
@@ -583,25 +584,25 @@ private:
     e0.insert(0); e0.insert(1); e0.insert(2); e0.insert(3);
     Variable<EnumeratedDomain> v0(ENGINE, e0);
 
-    assertTrue(v0.baseDomain().isOpen());
-    assertTrue(v0.derivedDomain().isOpen());
+    CPPUNIT_ASSERT(v0.baseDomain().isOpen());
+    CPPUNIT_ASSERT(v0.derivedDomain().isOpen());
 
     v0.close();
-    assertTrue(v0.baseDomain().isClosed());
-    assertTrue(v0.derivedDomain().isClosed());
+    CPPUNIT_ASSERT(v0.baseDomain().isClosed());
+    CPPUNIT_ASSERT(v0.derivedDomain().isClosed());
 
     v0.open();
-    assertTrue(v0.baseDomain().isOpen());
-    assertTrue(v0.derivedDomain().isOpen());
+    CPPUNIT_ASSERT(v0.baseDomain().isOpen());
+    CPPUNIT_ASSERT(v0.derivedDomain().isOpen());
 
     e0.close();
     v0.specify(1);
-    assertTrue(v0.baseDomain().isOpen());
-    assertFalse(v0.derivedDomain().isOpen());
+    CPPUNIT_ASSERT(v0.baseDomain().isOpen());
+    CPPUNIT_ASSERT(!v0.derivedDomain().isOpen());
 
     v0.restrictBaseDomain(e0);
-    assertTrue(v0.baseDomain().isClosed());
-    assertTrue(v0.isClosed());
+    CPPUNIT_ASSERT(v0.baseDomain().isClosed());
+    CPPUNIT_ASSERT(v0.isClosed());
 
     return true;
   }
@@ -622,21 +623,21 @@ private:
 
     // Specify v0 and propagate
     v0.specify(1);
-    assertTrue(ENGINE->propagate());
+    CPPUNIT_ASSERT(ENGINE->propagate());
 
     // Now v1's derived domain will also be a singleton. However, I want to restrict the base domain of v1 partially.
     v1.restrictBaseDomain(e1);
-    assertTrue(ENGINE->propagate());
+    CPPUNIT_ASSERT(ENGINE->propagate());
 
     // Now specify v1 to a singleton also, a different value than that already specified.
     v0.reset();
     v1.specify(3);
     v0.specify(1);
-    assertFalse(ENGINE->propagate());
+    CPPUNIT_ASSERT(!ENGINE->propagate());
 
     // Repair by reseting v0
     v0.reset();
-    assertTrue(ENGINE->propagate());
+    CPPUNIT_ASSERT(ENGINE->propagate());
     return true;
   }
 
@@ -644,7 +645,7 @@ private:
     // Variable with a base domain that is a singleton
     {
       Variable<IntervalIntDomain> v(ENGINE, IntervalIntDomain(0, 0));
-      assertTrue(v.isSpecified());
+      CPPUNIT_ASSERT(v.isSpecified());
     }
 
     // Variable with a base domain that is left open but then closed
@@ -653,14 +654,14 @@ private:
       e0.insert(0);
 
       Variable<EnumeratedDomain> v(ENGINE, e0);
-      assertFalse(v.isSpecified());
+      CPPUNIT_ASSERT(!v.isSpecified());
 
       v.close();
-      assertTrue(v.isSpecified());
-      assertTrue(v.getSpecifiedValue() == 0);
+      CPPUNIT_ASSERT(v.isSpecified());
+      CPPUNIT_ASSERT(v.getSpecifiedValue() == 0);
 
       v.open();
-      assertFalse(v.isSpecified());
+      CPPUNIT_ASSERT(!v.isSpecified());
     }
 
 
@@ -670,23 +671,23 @@ private:
       e0.insert(0);
 
       Variable<EnumeratedDomain> v(ENGINE, e0);
-      assertFalse(v.isSpecified());
+      CPPUNIT_ASSERT(!v.isSpecified());
 
-      assertFalse(v.isSpecified());
+      CPPUNIT_ASSERT(!v.isSpecified());
       v.specify(0);
-      assertTrue(v.isSpecified());
+      CPPUNIT_ASSERT(v.isSpecified());
 
       v.reset();
-      assertFalse(v.isSpecified());
+      CPPUNIT_ASSERT(!v.isSpecified());
     }
 
     // Restrict base domain
     {
       Variable<IntervalIntDomain> v(ENGINE, IntervalIntDomain(0, 10));
-      assertFalse(v.isSpecified());
+      CPPUNIT_ASSERT(!v.isSpecified());
       v.restrictBaseDomain(IntervalIntDomain(0, 0));
-      assertTrue(v.isSpecified());
-      assertTrue(v.getSpecifiedValue() == 0);
+      CPPUNIT_ASSERT(v.isSpecified());
+      CPPUNIT_ASSERT(v.getSpecifiedValue() == 0);
     }
 
     return true;
@@ -697,32 +698,32 @@ class ConstraintTest
 {
 public:
   static bool test() {
-    runTest(testGNATS_3181);
-    runTest(testUnaryConstraint);
-    runTest(testAddEqualConstraint);
-    runTest(testLessThanEqualConstraint);
-    runTest(testLessOrEqThanSumConstraint);
-    runTest(testBasicPropagation);
-    runTest(testDeactivation);
-    runTest(testForceInconsistency);
-    runTest(testRepropagation);
-    runTest(testConstraintRemoval);
-    runTest(testDelegation);
-    runTest(testNotEqual);
-    runTest(testMultEqualConstraint);
-    runTest(testAddMultEqualConstraint);
-    runTest(testEqualSumConstraint);
-    runTest(testCondAllSameConstraint);
-    runTest(testCondAllDiffConstraint);
-    runTest(testConstraintDeletion);
-    runTest(testArbitraryConstraints);
-    runTest(testLockConstraint);
-    runTest(testNegateConstraint);
-    runTest(testUnaryQuery);
-    runTest(testTestEqConstraint);
-    runTest(testTestLessThanConstraint);
-    runTest(testTestLEQConstraint);
-    runTest(testGNATS_3075);
+    EUROPA_runTest(testGNATS_3181);
+    EUROPA_runTest(testUnaryConstraint);
+    EUROPA_runTest(testAddEqualConstraint);
+    EUROPA_runTest(testLessThanEqualConstraint);
+    EUROPA_runTest(testLessOrEqThanSumConstraint);
+    EUROPA_runTest(testBasicPropagation);
+    EUROPA_runTest(testDeactivation);
+    EUROPA_runTest(testForceInconsistency);
+    EUROPA_runTest(testRepropagation);
+    EUROPA_runTest(testConstraintRemoval);
+    EUROPA_runTest(testDelegation);
+    EUROPA_runTest(testNotEqual);
+    EUROPA_runTest(testMultEqualConstraint);
+    EUROPA_runTest(testAddMultEqualConstraint);
+    EUROPA_runTest(testEqualSumConstraint);
+    EUROPA_runTest(testCondAllSameConstraint);
+    EUROPA_runTest(testCondAllDiffConstraint);
+    EUROPA_runTest(testConstraintDeletion);
+    EUROPA_runTest(testArbitraryConstraints);
+    EUROPA_runTest(testLockConstraint);
+    EUROPA_runTest(testNegateConstraint);
+    EUROPA_runTest(testUnaryQuery);
+    EUROPA_runTest(testTestEqConstraint);
+    EUROPA_runTest(testTestLessThanConstraint);
+    EUROPA_runTest(testTestLEQConstraint);
+    EUROPA_runTest(testGNATS_3075);
     return(true);
   }
 
@@ -749,23 +750,23 @@ private:
     EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"),
 		       ENGINE, makeScope(v0.getId(), v1.getId()));
 
-    assertTrue(ENGINE->propagate());
+    CPPUNIT_ASSERT(ENGINE->propagate());
 
-    assertTrue(!v0.isClosed(), v0.toString());
-    assertTrue(!v1.isClosed(), v1.toString());
-    assertFalse(v0.lastDomain() == v1.lastDomain());
+    CPPUNIT_ASSERT_MESSAGE(v0.toString(), !v0.isClosed());
+    CPPUNIT_ASSERT_MESSAGE(v1.toString(), !v1.isClosed());
+    CPPUNIT_ASSERT(!(v0.lastDomain() == v1.lastDomain()));
 
     // Close 1 variable. It should prune values, but not propagate closure
     v1.close();
-    assertTrue(ENGINE->propagate());
-    assertTrue(!v0.isClosed(), v0.toString());
-    assertTrue(v1.isClosed(), v1.toString());
-    assertFalse(v0.lastDomain() == v1.lastDomain(), v0.toString() + " == " + v1.toString());
+    CPPUNIT_ASSERT(ENGINE->propagate());
+    CPPUNIT_ASSERT_MESSAGE(v0.toString(), !v0.isClosed());
+    CPPUNIT_ASSERT_MESSAGE(v1.toString(), v1.isClosed());
+    CPPUNIT_ASSERT_MESSAGE(v0.toString() + " == " + v1.toString(), !(v0.lastDomain() == v1.lastDomain()) );
 
     // Value test to ensure the restriction has occurred and that we have retained the inequality also.
     // Basically one way propagation.
-    assertFalse(v0.lastDomain().isMember(1), v0.lastDomain().toString());
-    assertTrue(v1.lastDomain().isMember(6), v1.toString());
+    CPPUNIT_ASSERT_MESSAGE(v0.lastDomain().toString(), !v0.lastDomain().isMember(1) );
+    CPPUNIT_ASSERT_MESSAGE(v1.toString(), v1.lastDomain().isMember(6));
 
     // Re-open the variable, it should no longer propagate the equality
     return true;
@@ -775,13 +776,13 @@ private:
     {
       Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(-10, 10));
       UnaryConstraint c0(IntervalDomain(4, 6), v0.getId());
-      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(4, 6), v0.toString());
+      CPPUNIT_ASSERT_MESSAGE(v0.toString(), v0.getDerivedDomain() == IntervalIntDomain(4, 6));
       v0.specify(5);
-      assertTrue(v0.constraintConsistent());
+      CPPUNIT_ASSERT(v0.constraintConsistent());
       v0.reset();
-      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(4, 6), v0.toString());
+      CPPUNIT_ASSERT_MESSAGE(v0.toString(), v0.getDerivedDomain() == IntervalIntDomain(4, 6));
       c0.discard();
-      assertTrue(v0.lastDomain() == IntervalIntDomain(-10, 10), v0.toString());
+      CPPUNIT_ASSERT_MESSAGE(v0.toString(), v0.lastDomain() == IntervalIntDomain(-10, 10));
     }
 
     {
@@ -790,7 +791,7 @@ private:
       UnaryConstraint c0(IntervalDomain(4, 6), v0.getId());
       UnaryConstraint c1("UNARY", "Default", ENGINE, makeScope(v1.getId()));
       c1.getId()->setSource(c0.getId());
-      assertTrue(v1.getDerivedDomain() == IntervalIntDomain(4, 6), v0.toString());
+      CPPUNIT_ASSERT_MESSAGE(v0.toString(), v1.getDerivedDomain() == IntervalIntDomain(4, 6));
     }
 
     return true;
@@ -805,7 +806,7 @@ private:
       Variable<IntervalDomain> v2(ENGINE, IntervalDomain(0.01, 0.99));
       AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       bool res = ENGINE->propagate();
-      assertTrue(!res);
+      CPPUNIT_ASSERT(!res);
     }
 
     // Another, similar, case of rounding with negative domain bounds.
@@ -815,11 +816,11 @@ private:
       Variable<IntervalDomain> v2(ENGINE, IntervalDomain(0.01, 1.99));
       AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       bool res = ENGINE->propagate();
-      assertTrue(res);
+      CPPUNIT_ASSERT(res);
       // Require correct result to be in v2's domain.
-      assertTrue(v2.getDerivedDomain().isMember(1.0));
+      CPPUNIT_ASSERT(v2.getDerivedDomain().isMember(1.0));
       // Following is false because implementation of AddEqualConstraint is not smart enough to deduce it.
-      //assertTrue(v2.getDerivedDomain().getSingletonValue() == 1.0);
+      //CPPUNIT_ASSERT(v2.getDerivedDomain().getSingletonValue() == 1.0);
     }
 
     // Confirm correct result with all singletons.
@@ -829,7 +830,7 @@ private:
       Variable<IntervalDomain> v2(ENGINE, IntervalDomain(9.4, 9.4));
       AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       bool res = ENGINE->propagate();
-      assertTrue(res);
+      CPPUNIT_ASSERT(res);
     }
 
     // Confirm inconsistency detected with all singletons.
@@ -839,7 +840,7 @@ private:
       Variable<IntervalDomain> v2(ENGINE, IntervalDomain(9.39, 9.39));
       AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       bool res = ENGINE->propagate();
-      assertTrue(!res);
+      CPPUNIT_ASSERT(!res);
     }
 
     // Obtain factors correct values for fixed result.
@@ -849,9 +850,9 @@ private:
       Variable<IntervalDomain> v2(ENGINE, IntervalDomain(9.390, 9.390));
       AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       bool res = ENGINE->propagate();
-      assertTrue(res);
-      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(0, 9));
-      assertTrue(v1.getDerivedDomain() == IntervalDomain(0.39, 9.39));
+      CPPUNIT_ASSERT(res);
+      CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(0, 9));
+      CPPUNIT_ASSERT(v1.getDerivedDomain() == IntervalDomain(0.39, 9.39));
     }
 
     // Test handling with all infinites
@@ -861,10 +862,10 @@ private:
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(PLUS_INFINITY, PLUS_INFINITY));
       AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       bool res = ENGINE->propagate();
-      assertTrue(res);
-      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(MINUS_INFINITY, MINUS_INFINITY));
-      assertTrue(v1.getDerivedDomain() == IntervalIntDomain(1, PLUS_INFINITY));
-      assertTrue(v2.getDerivedDomain() == IntervalIntDomain(PLUS_INFINITY, PLUS_INFINITY));
+      CPPUNIT_ASSERT(res);
+      CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(MINUS_INFINITY, MINUS_INFINITY));
+      CPPUNIT_ASSERT(v1.getDerivedDomain() == IntervalIntDomain(1, PLUS_INFINITY));
+      CPPUNIT_ASSERT(v2.getDerivedDomain() == IntervalIntDomain(PLUS_INFINITY, PLUS_INFINITY));
     }
 
     // Test handling with infinites and non-infinites
@@ -874,10 +875,10 @@ private:
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(MINUS_INFINITY, 100));
       AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       bool res = ENGINE->propagate();
-      assertTrue(res);
-      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(10, 99));
-      assertTrue(v1.getDerivedDomain() == IntervalIntDomain(1, 90));
-      assertTrue(v2.getDerivedDomain() == IntervalIntDomain(11, 100));
+      CPPUNIT_ASSERT(res);
+      CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(10, 99));
+      CPPUNIT_ASSERT(v1.getDerivedDomain() == IntervalIntDomain(1, 90));
+      CPPUNIT_ASSERT(v2.getDerivedDomain() == IntervalIntDomain(11, 100));
     }
 
     // Test propagating infinites: start + duration == end.
@@ -887,10 +888,10 @@ private:
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(MINUS_INFINITY, PLUS_INFINITY));
       AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       bool res = ENGINE->propagate();
-      assertTrue(res);
-      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(MINUS_INFINITY, PLUS_INFINITY));
-      assertTrue(v1.getDerivedDomain() == IntervalIntDomain(1));
-      assertTrue(v2.getDerivedDomain() == IntervalIntDomain(MINUS_INFINITY, PLUS_INFINITY));
+      CPPUNIT_ASSERT(res);
+      CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(MINUS_INFINITY, PLUS_INFINITY));
+      CPPUNIT_ASSERT(v1.getDerivedDomain() == IntervalIntDomain(1));
+      CPPUNIT_ASSERT(v2.getDerivedDomain() == IntervalIntDomain(MINUS_INFINITY, PLUS_INFINITY));
     }
 
     // Test that we can use the constraint on a variable that is present in the constraint more than once
@@ -899,14 +900,14 @@ private:
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(0, 1));
       AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v0.getId()));
       bool res = ENGINE->propagate();
-      assertTrue(res);
+      CPPUNIT_ASSERT(res);
       v1.specify(1);
-      assertFalse(ENGINE->propagate());
+      CPPUNIT_ASSERT(!ENGINE->propagate());
       v1.reset();
-      assertTrue(ENGINE->propagate());
+      CPPUNIT_ASSERT(ENGINE->propagate());
       v0.specify(11);
-      assertTrue(ENGINE->propagate());
-      assertTrue(v1.getDerivedDomain() == IntervalIntDomain(0));
+      CPPUNIT_ASSERT(ENGINE->propagate());
+      CPPUNIT_ASSERT(v1.getDerivedDomain() == IntervalIntDomain(0));
     }
 
     return true;
@@ -917,28 +918,28 @@ private:
     Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 100));
     LessThanEqualConstraint c0(LabelStr("LessThanEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
     ENGINE->propagate();
-    assertTrue(ENGINE->constraintConsistent());
-    assertTrue(v0.getDerivedDomain() == v1.getDerivedDomain());
+    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(v0.getDerivedDomain() == v1.getDerivedDomain());
 
     v0.specify(IntervalIntDomain(50, 100));
-    assertTrue(v1.getDerivedDomain().getLowerBound() == 50);
+    CPPUNIT_ASSERT(v1.getDerivedDomain().getLowerBound() == 50);
     IntervalIntDomain copy(v1.getDerivedDomain());
     v0.specify(IntervalIntDomain(50, 80));
-    assertTrue(v1.getDerivedDomain() == copy);
+    CPPUNIT_ASSERT(v1.getDerivedDomain() == copy);
     v1.specify(IntervalIntDomain(60, 70));
-    assertTrue(v0.getDerivedDomain() == IntervalIntDomain(50, 70));
+    CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(50, 70));
     v1.reset();
-    assertTrue(v0.getDerivedDomain() == IntervalIntDomain(50, 80));
-    assertTrue(v1.getDerivedDomain() == IntervalIntDomain(50, 100));
+    CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(50, 80));
+    CPPUNIT_ASSERT(v1.getDerivedDomain() == IntervalIntDomain(50, 100));
 
     // Handle propagation of infinities
     Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(2, PLUS_INFINITY));
     Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(MINUS_INFINITY, 100));
     LessThanEqualConstraint c2(LabelStr("LessThanEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v2.getId(), v3.getId()));
     bool res = ENGINE->propagate();
-    assertTrue(res);
-    assertTrue(v2.getDerivedDomain().getUpperBound() == 100);
-    assertTrue(v3.getDerivedDomain().getLowerBound() == 2);
+    CPPUNIT_ASSERT(res);
+    CPPUNIT_ASSERT(v2.getDerivedDomain().getUpperBound() == 100);
+    CPPUNIT_ASSERT(v3.getDerivedDomain().getLowerBound() == 2);
 
     // Handle restriction to singleton
     Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(0, 10));
@@ -947,11 +948,11 @@ private:
     LessThanEqualConstraint c3(LabelStr("LessThanEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v4.getId(), v5.getId()));
     EqualConstraint c4(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v5.getId(), v6.getId()));
     res = ENGINE->propagate();
-    assertTrue(res);
+    CPPUNIT_ASSERT(res);
     v6.specify(9);
     res = ENGINE->propagate();
-    assertTrue(res);
-    assertTrue(v4.getDerivedDomain().getUpperBound() == 9);
+    CPPUNIT_ASSERT(res);
+    CPPUNIT_ASSERT(v4.getDerivedDomain().getUpperBound() == 9);
 
     // Test with Numeric Domains
     NumericDomain realBaseDomain;
@@ -968,12 +969,12 @@ private:
     LessThanEqualConstraint cRealTest(LabelStr("LessThanEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(realVar2.getId(), realVar1.getId()));
     
     res = ENGINE->propagate();
-    assertTrue(res);
+    CPPUNIT_ASSERT(res);
     
     realVar2.specify(2.2);
     res = ENGINE->propagate();
-    assertTrue(res);
-    assertTrue(realVar2.getDerivedDomain().getUpperBound() == 2.2);
+    CPPUNIT_ASSERT(res);
+    CPPUNIT_ASSERT(realVar2.getDerivedDomain().getUpperBound() == 2.2);
 					     */
     return(true);
   }
@@ -985,21 +986,21 @@ private:
     LessOrEqThanSumConstraint c0(LabelStr("LessOrEqThanSumConstraint"), LabelStr("Default"), ENGINE,
                                  makeScope(v0.getId(), v1.getId(), v2.getId()));
     bool res = ENGINE->propagate();
-    assertTrue(res);
-    assertTrue(ENGINE->constraintConsistent());
-    assertTrue(v0.getDerivedDomain() == v1.getDerivedDomain());
-    assertTrue(v1.getDerivedDomain() == v2.getDerivedDomain());
+    CPPUNIT_ASSERT(res);
+    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(v0.getDerivedDomain() == v1.getDerivedDomain());
+    CPPUNIT_ASSERT(v1.getDerivedDomain() == v2.getDerivedDomain());
 
     v1.specify(IntervalIntDomain(0, 50));
     v2.specify(IntervalIntDomain(0, 40));
-    assertTrue(v0.getDerivedDomain() == IntervalIntDomain(0, 90));
+    CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(0, 90));
     v0.specify(IntervalIntDomain(60, 70));
-    assertTrue(v1.getDerivedDomain() == IntervalIntDomain(20, 50));
-    assertTrue(v2.getDerivedDomain() == IntervalIntDomain(10, 40));
+    CPPUNIT_ASSERT(v1.getDerivedDomain() == IntervalIntDomain(20, 50));
+    CPPUNIT_ASSERT(v2.getDerivedDomain() == IntervalIntDomain(10, 40));
     v1.reset();
-    assertTrue(v0.getDerivedDomain() == IntervalIntDomain(60, 70));
-    assertTrue(v1.getDerivedDomain() == IntervalIntDomain(20, 100));
-    assertTrue(v2.getDerivedDomain() == IntervalIntDomain(0, 40));
+    CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(60, 70));
+    CPPUNIT_ASSERT(v1.getDerivedDomain() == IntervalIntDomain(20, 100));
+    CPPUNIT_ASSERT(v2.getDerivedDomain() == IntervalIntDomain(0, 40));
 
     // @todo Lots more ...
     */
@@ -1016,7 +1017,7 @@ private:
     Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 4));
     Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 1));
     AddEqualConstraint c1(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v2.getId(), v3.getId(), v0.getId()));
-    assertTrue(!v0.getDerivedDomain().isEmpty());
+    CPPUNIT_ASSERT(!v0.getDerivedDomain().isEmpty());
 
     // v4 + v5 == v1
     Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(1, 10));
@@ -1024,8 +1025,8 @@ private:
     AddEqualConstraint c2(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v4.getId(), v5.getId(), v1.getId()));
 
     ENGINE->propagate();
-    assertTrue(ENGINE->constraintConsistent());
-    assertTrue(!v4.getDerivedDomain().isEmpty());
+    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(!v4.getDerivedDomain().isEmpty());
     return true;
   }
 
@@ -1036,42 +1037,42 @@ private:
     EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
 
     ENGINE->propagate();
-    assertTrue(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
 
     v0.deactivate();
-    assertTrue(!c0.isActive());
-    assertTrue(c0.deactivationCount() == 1);
+    CPPUNIT_ASSERT(!c0.isActive());
+    CPPUNIT_ASSERT(c0.deactivationCount() == 1);
 
     v1.deactivate();
-    assertTrue(!c0.isActive());
-    assertTrue(c0.deactivationCount() == 2);
+    CPPUNIT_ASSERT(!c0.isActive());
+    CPPUNIT_ASSERT(c0.deactivationCount() == 2);
 
     c0.deactivate();
-    assertTrue(c0.deactivationCount() == 3);
+    CPPUNIT_ASSERT(c0.deactivationCount() == 3);
     v0.undoDeactivation();
     v1.undoDeactivation();
-    assertTrue(c0.deactivationCount() == 1);
-    assertTrue(!c0.isActive());
+    CPPUNIT_ASSERT(c0.deactivationCount() == 1);
+    CPPUNIT_ASSERT(!c0.isActive());
 
     v1.deactivate();
-    assertTrue(!c0.isActive());
-    assertTrue(c0.deactivationCount() == 2);
+    CPPUNIT_ASSERT(!c0.isActive());
+    CPPUNIT_ASSERT(c0.deactivationCount() == 2);
     v1.undoDeactivation();
-    assertTrue(c0.deactivationCount() == 1);
+    CPPUNIT_ASSERT(c0.deactivationCount() == 1);
     c0.undoDeactivation();
-    assertTrue(c0.isActive());
+    CPPUNIT_ASSERT(c0.isActive());
 
     // Now restrict the base domains to automatically deactivate
     v0.restrictBaseDomain(IntervalIntDomain(1, 1));
-    assertTrue(c0.isActive());
+    CPPUNIT_ASSERT(c0.isActive());
     v1.restrictBaseDomain(IntervalIntDomain(1, 1));
-    assertTrue(c0.isActive()); // Have not propagated yet!
+    CPPUNIT_ASSERT(c0.isActive()); // Have not propagated yet!
     ENGINE->propagate();
-    assertFalse(c0.isActive()); // Now we have propagated, so should be deactivated.
+    CPPUNIT_ASSERT(!c0.isActive()); // Now we have propagated, so should be deactivated.
 
     // Make sure it stays deactive
     c0.undoDeactivation();
-    assertFalse(c0.isActive());
+    CPPUNIT_ASSERT(!c0.isActive());
 
     Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 10));
     Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 10));
@@ -1082,7 +1083,7 @@ private:
 
     // Now propagate. The constraint will not be deactivated.
     ENGINE->propagate();
-    assertTrue(c1.isActive());
+    CPPUNIT_ASSERT(c1.isActive());
 
     return true;
   }
@@ -1104,8 +1105,8 @@ private:
     AddEqualConstraint c2(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v4.getId(), v5.getId(), v1.getId()));
     
     ENGINE->propagate();
-    assertTrue(ENGINE->provenInconsistent());
-    assertTrue(v1.getDerivedDomain().isEmpty() || v2.getDerivedDomain().isEmpty());
+    CPPUNIT_ASSERT(ENGINE->provenInconsistent());
+    CPPUNIT_ASSERT(v1.getDerivedDomain().isEmpty() || v2.getDerivedDomain().isEmpty());
 
     std::vector<ConstrainedVariableId> variables;
     variables.push_back(v0.getId());
@@ -1121,7 +1122,7 @@ private:
       if(id->lastDomain().isEmpty())
 	emptyCount++;
     }
-    assertTrue(emptyCount == 1);
+    CPPUNIT_ASSERT(emptyCount == 1);
     return true;
   }
 
@@ -1145,26 +1146,26 @@ private:
 
     ENGINE->propagate();
     /* TODO
-    assertTrue(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
     v0.specify(IntervalIntDomain(8, 10));
     v1.specify(IntervalIntDomain(2, 7));
-    assertTrue(ENGINE->pending());
+    CPPUNIT_ASSERT(ENGINE->pending());
     
     ENGINE->propagate();
-    assertTrue(ENGINE->provenInconsistent());
+    CPPUNIT_ASSERT(ENGINE->provenInconsistent());
     */
     v0.reset();
-    assertTrue(ENGINE->pending());
+    CPPUNIT_ASSERT(ENGINE->pending());
     ENGINE->propagate();
-    assertTrue(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
 
     /* Call reset on a constraint consistent network - not sure one would want to do this. */
     v1.reset();
-    assertTrue(ENGINE->pending()); /* Strictly speaking we know it is not inconsistent here since all we have done is relax a previously
+    CPPUNIT_ASSERT(ENGINE->pending()); /* Strictly speaking we know it is not inconsistent here since all we have done is relax a previously
 				  consistent network. However, we have to propagate to find the new derived domains based on relaxed
 				  domains. */
     ENGINE->propagate();
-    assertTrue(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
     return true;
   }
 
@@ -1188,12 +1189,12 @@ private:
     ConstraintId c1((new AddEqualConstraint(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, variables))->getId());
 
     ENGINE->propagate();
-    assertTrue(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
 
     /* Show that we can simply delete a constraint and confirm that the system is still consistent. */
     delete (Constraint*) c1;
     ENGINE->propagate();
-    assertTrue(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
 
     variables.clear();
     Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(1, 1));
@@ -1201,13 +1202,13 @@ private:
     variables.push_back(v4.getId());
     ConstraintId c2((new EqualConstraint(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, variables))->getId());
     ENGINE->propagate();
-    assertTrue(ENGINE->constraintConsistent());
-    assertTrue(v1.getDerivedDomain().getSingletonValue() == 1);
+    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(v1.getDerivedDomain().getSingletonValue() == 1);
 
     delete (Constraint*) c2;
     ENGINE->propagate();
-    assertTrue(ENGINE->constraintConsistent());
-    assertTrue(v1.getDerivedDomain().getUpperBound() == 10);
+    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(v1.getDerivedDomain().getUpperBound() == 10);
 
     /* Add a constraint to force an inconsistency and show that consistency can be restored by removing the
      * constraint. */
@@ -1217,15 +1218,15 @@ private:
     variables.push_back(v5.getId());
     ConstraintId c3((new EqualConstraint(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, variables))->getId());
     ENGINE->propagate();
-    assertTrue(ENGINE->provenInconsistent());
+    CPPUNIT_ASSERT(ENGINE->provenInconsistent());
     delete (Constraint*) c3;
     ENGINE->propagate();
-    assertTrue(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
 
     // Clean up remaining constraint
     delete (Constraint*) c0;
     ENGINE->propagate();
-    assertTrue(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
     return true;
   }
 
@@ -1240,26 +1241,26 @@ private:
     ConstraintId c3 = engine->createConstraint(LabelStr("TestOnly"), makeScope(v0.getId()));
     ConstraintId c4 = engine->createConstraint(LabelStr("TestOnly"), makeScope(v0.getId()));
     engine->propagate();
-    assertTrue(engine->constraintConsistent());
-    assertTrue(DelegationTestConstraint::s_instanceCount == 5);
-    assertTrue(DelegationTestConstraint::s_executionCount == 5);
+    CPPUNIT_ASSERT(engine->constraintConsistent());
+    CPPUNIT_ASSERT(DelegationTestConstraint::s_instanceCount == 5);
+    CPPUNIT_ASSERT(DelegationTestConstraint::s_executionCount == 5);
 
     // Cause a change in the domain which will impact agenda, then deactivate a constraint and verify the correct execution count
     v0.restrictBaseDomain(IntervalIntDomain(0, 900));
     c0->deactivate();
-    assertTrue(!c0->isActive());
+    CPPUNIT_ASSERT(!c0->isActive());
     engine->propagate();
-    assertTrue(engine->constraintConsistent());
-    assertTrue(DelegationTestConstraint::s_instanceCount == 5);
-    assertTrue(DelegationTestConstraint::s_executionCount == 9);
+    CPPUNIT_ASSERT(engine->constraintConsistent());
+    CPPUNIT_ASSERT(DelegationTestConstraint::s_instanceCount == 5);
+    CPPUNIT_ASSERT(DelegationTestConstraint::s_executionCount == 9);
 
     // Delete the delegate and verify instance counts and that the prior delegate has been reinstated and executed.
     delete (Constraint*) c1;
     c0->undoDeactivation();
     engine->propagate();
-    assertTrue(engine->constraintConsistent());
-    assertTrue(DelegationTestConstraint::s_instanceCount == 4);
-    assertTrue(DelegationTestConstraint::s_executionCount == 10);
+    CPPUNIT_ASSERT(engine->constraintConsistent());
+    CPPUNIT_ASSERT(DelegationTestConstraint::s_instanceCount == 4);
+    CPPUNIT_ASSERT(DelegationTestConstraint::s_executionCount == 10);
 
     // Now create a new instance and mark it for delegation only. Add remaining constraints as delegates
     ConstraintId c5 = engine->createConstraint(LabelStr("TestOnly"), makeScope(v0.getId()));
@@ -1267,14 +1268,14 @@ private:
     c2->deactivate();
     c3->deactivate();
     c4->deactivate();
-    assertTrue(DelegationTestConstraint::s_instanceCount == 5);
+    CPPUNIT_ASSERT(DelegationTestConstraint::s_instanceCount == 5);
     engine->propagate();
-    assertTrue(DelegationTestConstraint::s_executionCount == 11);
+    CPPUNIT_ASSERT(DelegationTestConstraint::s_executionCount == 11);
 
     // Force propagation and confirm only one instance executes
     v0.restrictBaseDomain(IntervalIntDomain(100, 900));
     engine->propagate();
-    assertTrue(DelegationTestConstraint::s_executionCount == 12);
+    CPPUNIT_ASSERT(DelegationTestConstraint::s_executionCount == 12);
 
     // Now confirm correct handling of constraint deletions
     delete (Constraint*) c5;
@@ -1282,7 +1283,7 @@ private:
     delete (Constraint*) c3;
     delete (Constraint*) c2;
     delete (Constraint*) c0;
-    assertTrue(DelegationTestConstraint::s_instanceCount == 0);
+    CPPUNIT_ASSERT(DelegationTestConstraint::s_instanceCount == 0);
     return true;
   }
 
@@ -1311,37 +1312,37 @@ private:
 
     NotEqualConstraint c4(LabelStr("neq"), LabelStr("Default"), ENGINE, makeScope(v4.getId(), v5.getId()));
     NotEqualConstraint c3(LabelStr("neq"), LabelStr("Default"), ENGINE, makeScope(v4.getId(), v3.getId()));
-    assertTrue(ENGINE->pending());
+    CPPUNIT_ASSERT(ENGINE->pending());
     bool res = ENGINE->propagate();
-    assertTrue(res);
-    assertTrue(v4.getDerivedDomain().isSingleton());
-    assertTrue(v4.getDerivedDomain().getSingletonValue() == 3);
+    CPPUNIT_ASSERT(res);
+    CPPUNIT_ASSERT(v4.getDerivedDomain().isSingleton());
+    CPPUNIT_ASSERT(v4.getDerivedDomain().getSingletonValue() == 3);
 
     // Test not equals among variables which are not singletons
 
     NotEqualConstraint c0(LabelStr("neq"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
     NotEqualConstraint c1(LabelStr("neq"), LabelStr("Default"), ENGINE, makeScope(v1.getId(), v2.getId()));
     NotEqualConstraint c2(LabelStr("neq"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v2.getId()));
-    assertTrue(ENGINE->pending());
+    CPPUNIT_ASSERT(ENGINE->pending());
     res = ENGINE->propagate();
-    assertTrue(res);
+    CPPUNIT_ASSERT(res);
 
     dom0.remove(2);
     v0.specify(dom0);
-    assertTrue(!ENGINE->pending()); // No propagation required
+    CPPUNIT_ASSERT(!ENGINE->pending()); // No propagation required
 
     v1.specify(3);
-    assertTrue(ENGINE->pending());
+    CPPUNIT_ASSERT(ENGINE->pending());
     res = ENGINE->propagate();
-    assertTrue(res);
-    assertTrue(v0.getDerivedDomain().getSingletonValue() == 1);
-    assertTrue(v2.getDerivedDomain().getSingletonValue() == 2);
+    CPPUNIT_ASSERT(res);
+    CPPUNIT_ASSERT(v0.getDerivedDomain().getSingletonValue() == 1);
+    CPPUNIT_ASSERT(v2.getDerivedDomain().getSingletonValue() == 2);
 
     v0.reset();
-    assertTrue(ENGINE->pending());
+    CPPUNIT_ASSERT(ENGINE->pending());
     res = ENGINE->propagate();
-    assertTrue(res);
-    assertTrue(v0.getDerivedDomain() == v2.getDerivedDomain());
+    CPPUNIT_ASSERT(res);
+    CPPUNIT_ASSERT(v0.getDerivedDomain() == v2.getDerivedDomain());
 			     */
     return true;
   }
@@ -1353,8 +1354,8 @@ private:
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 2));
       MultEqualConstraint c0(LabelStr("MultEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(v0.getDerivedDomain() == v2.getDerivedDomain());
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(v0.getDerivedDomain() == v2.getDerivedDomain());
     }
 
     // Now test with 0 valued denominators and infinites
@@ -1364,10 +1365,10 @@ private:
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(MINUS_INFINITY, 6));
       MultEqualConstraint c0(LabelStr("MultEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(v0.getDerivedDomain().getUpperBound() == 6);
-      assertTrue(v2.getDerivedDomain().getLowerBound() == 0);
-      assertTrue(v1.getDerivedDomain().getUpperBound() == PLUS_INFINITY);
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().getUpperBound() == 6);
+      CPPUNIT_ASSERT(v2.getDerivedDomain().getLowerBound() == 0);
+      CPPUNIT_ASSERT(v1.getDerivedDomain().getUpperBound() == PLUS_INFINITY);
     }
 
 
@@ -1378,8 +1379,8 @@ private:
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain());
       MultEqualConstraint c0(LabelStr("MultEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(v2.getDerivedDomain().getLowerBound() == -40);
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(v2.getDerivedDomain().getLowerBound() == -40);
     }
 
     // Part of test 157 of CLibTestCases, which incorrectly claimed to be
@@ -1390,8 +1391,8 @@ private:
       Variable<IntervalDomain> v2(ENGINE, IntervalDomain(1.0, 2.0));
       MultEqualConstraint c0(LabelStr("MultEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(v1.getDerivedDomain() == IntervalDomain(1.0, 2.0));
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(v1.getDerivedDomain() == IntervalDomain(1.0, 2.0));
     }
     // Signs tested
     {
@@ -1400,10 +1401,10 @@ private:
       Variable<IntervalDomain> v2(ENGINE, IntervalDomain(-11.6, 12.4));
       MultEqualConstraint c0(LabelStr("MultEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(v0.getDerivedDomain() == IntervalDomain(-2.3, -1.8), v0.getDerivedDomain().toString());
-      assertTrue(v1.getDerivedDomain() == IntervalIntDomain(1, 6), v1.getDerivedDomain().toString());
-      assertTrue(v2.getDerivedDomain() == IntervalDomain(-11.6, -1.8), v2.getDerivedDomain().toString());
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT_MESSAGE(v0.getDerivedDomain().toString(), v0.getDerivedDomain() == IntervalDomain(-2.3, -1.8));
+      CPPUNIT_ASSERT_MESSAGE(v1.getDerivedDomain().toString(), v1.getDerivedDomain() == IntervalIntDomain(1, 6));
+      CPPUNIT_ASSERT_MESSAGE(v2.getDerivedDomain().toString(), v2.getDerivedDomain() == IntervalDomain(-11.6, -1.8));
     }
 
     // Signs tested
@@ -1413,17 +1414,17 @@ private:
       Variable<IntervalDomain> v2(ENGINE, IntervalDomain(-11.6, 12.4));
       MultEqualConstraint c0(LabelStr("MultEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(1, 6), v0.getDerivedDomain().toString());
-      assertTrue(v1.getDerivedDomain() == IntervalDomain(-2.3, -1.8), v1.getDerivedDomain().toString());
-      assertTrue(v2.getDerivedDomain() == IntervalDomain(-11.6, -1.8), v2.getDerivedDomain().toString());
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT_MESSAGE(v0.getDerivedDomain().toString(), v0.getDerivedDomain() == IntervalIntDomain(1, 6));
+      CPPUNIT_ASSERT_MESSAGE(v1.getDerivedDomain().toString(), v1.getDerivedDomain() == IntervalDomain(-2.3, -1.8));
+      CPPUNIT_ASSERT_MESSAGE(v2.getDerivedDomain().toString(), v2.getDerivedDomain() == IntervalDomain(-11.6, -1.8));
     }
 
     // Special test for roundig errors
     IntervalDomain dom;
     MultEqualConstraint::updateMinAndMax(dom, 3.225, 3.225, -1, -1);
     IntervalDomain expectedResult(-1.0 / 3.225, -1.0 / 3.225);
-    assertTrue(dom == expectedResult, dom.toString() + " != " + expectedResult.toString());
+    CPPUNIT_ASSERT_MESSAGE(dom.toString() + " != " + expectedResult.toString(), dom == expectedResult);
     return true;
   }
 
@@ -1439,7 +1440,7 @@ private:
 				ENGINE, 
 				makeScope(v0.getId(), v1.getId(), v2.getId(), v3.getId()));
       bool res = ENGINE->propagate();
-      assertTrue(res);
+      CPPUNIT_ASSERT(res);
     }
 
     // 1 + 2 * 3 == 8 => empty
@@ -1453,7 +1454,7 @@ private:
 				ENGINE, 
 				makeScope(v0.getId(), v1.getId(), v2.getId(), v3.getId()));
       bool res = ENGINE->propagate();
-      assertTrue(!res);
+      CPPUNIT_ASSERT(!res);
     }
 
     // 1 + 1 * [-infty 0] = 1 -> 1 + 1 * 0 = 1
@@ -1467,8 +1468,8 @@ private:
 				ENGINE, 
 				makeScope(v0.getId(), v1.getId(), v2.getId(), v3.getId()));
       bool res = ENGINE->propagate();
-      assertTrue(res);
-      assertTrue(v2.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(res);
+      CPPUNIT_ASSERT(v2.getDerivedDomain().getSingletonValue() == 0);
     }
 
     // [1.0 10.0] + 1.0 * [1.0 10.0] = 10.0 ->  [1.0 9.0] + 1.0 * [1.0 9.0] = 10.0
@@ -1482,9 +1483,9 @@ private:
 				ENGINE, 
 				makeScope(v0.getId(), v1.getId(), v2.getId(), v3.getId()));
       bool res = ENGINE->propagate();
-      assertTrue(res);
-      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(1, 9));
-      assertTrue(v2.getDerivedDomain() == IntervalDomain(1.0, 9.0));
+      CPPUNIT_ASSERT(res);
+      CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(1, 9));
+      CPPUNIT_ASSERT(v2.getDerivedDomain() == IntervalDomain(1.0, 9.0));
     }
 
 
@@ -1513,10 +1514,10 @@ private:
       //   but note args are in different order in scope to get same result
       EqualSumConstraint c0(LabelStr("EqualSumConstraint"), LabelStr("Default"), ENGINE, makeScope(v2.getId(), v0.getId(), v1.getId()));
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(v0.getDerivedDomain().getSingletonValue() == 1);
-      assertTrue(v1.getDerivedDomain().getSingletonValue() == 1);
-      assertTrue(v2.getDerivedDomain().getSingletonValue() == 2);
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().getSingletonValue() == 1);
+      CPPUNIT_ASSERT(v1.getDerivedDomain().getSingletonValue() == 1);
+      CPPUNIT_ASSERT(v2.getDerivedDomain().getSingletonValue() == 2);
     }
     { // Same, but add another variable that will be constrained to 0
       std::vector<ConstrainedVariableId> scope;
@@ -1526,11 +1527,11 @@ private:
       scope.push_back(v3.getId());
       EqualSumConstraint c0(LabelStr("EqualSumConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(v0.getDerivedDomain().getSingletonValue() == 1);
-      assertTrue(v1.getDerivedDomain().getSingletonValue() == 1);
-      assertTrue(v2.getDerivedDomain().getSingletonValue() == 2);
-      assertTrue(v3.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().getSingletonValue() == 1);
+      CPPUNIT_ASSERT(v1.getDerivedDomain().getSingletonValue() == 1);
+      CPPUNIT_ASSERT(v2.getDerivedDomain().getSingletonValue() == 2);
+      CPPUNIT_ASSERT(v3.getDerivedDomain().getSingletonValue() == 0);
     }
     { // Same, but add more variables that will be constrained to 0
       std::vector<ConstrainedVariableId> scope;
@@ -1553,24 +1554,24 @@ private:
       scope.push_back(vG.getId());
       EqualSumConstraint c0(LabelStr("EqualSumConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(v0.getDerivedDomain().getSingletonValue() == 1);
-      assertTrue(v1.getDerivedDomain().getSingletonValue() == 1);
-      assertTrue(v2.getDerivedDomain().getSingletonValue() == 2);
-      assertTrue(v3.getDerivedDomain().getSingletonValue() == 0);
-      assertTrue(v4.getDerivedDomain().getSingletonValue() == 0);
-      assertTrue(v5.getDerivedDomain().getSingletonValue() == 0);
-      assertTrue(v6.getDerivedDomain().getSingletonValue() == 0);
-      assertTrue(v7.getDerivedDomain().getSingletonValue() == 0);
-      assertTrue(v8.getDerivedDomain().getSingletonValue() == 0);
-      assertTrue(v9.getDerivedDomain().getSingletonValue() == 0);
-      assertTrue(vA.getDerivedDomain().getSingletonValue() == 0);
-      assertTrue(vB.getDerivedDomain().getSingletonValue() == 0);
-      assertTrue(vC.getDerivedDomain().getSingletonValue() == 0);
-      assertTrue(vD.getDerivedDomain().getSingletonValue() == 0);
-      assertTrue(vE.getDerivedDomain().getSingletonValue() == 0);
-      assertTrue(vF.getDerivedDomain().getSingletonValue() == 0);
-      assertTrue(vG.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().getSingletonValue() == 1);
+      CPPUNIT_ASSERT(v1.getDerivedDomain().getSingletonValue() == 1);
+      CPPUNIT_ASSERT(v2.getDerivedDomain().getSingletonValue() == 2);
+      CPPUNIT_ASSERT(v3.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(v4.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(v5.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(v6.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(v7.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(v8.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(v9.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(vA.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(vB.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(vC.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(vD.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(vE.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(vF.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(vG.getDerivedDomain().getSingletonValue() == 0);
     }
 
     return(true);
@@ -1601,12 +1602,12 @@ private:
       scope.push_back(v1.getId());
       CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(!bothVar.getDerivedDomain().isSingleton());
-      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(1, 10));
-      assertTrue(v1.getDerivedDomain().getSingletonValue() == 1);
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(!bothVar.getDerivedDomain().isSingleton());
+      CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(1, 10));
+      CPPUNIT_ASSERT(v1.getDerivedDomain().getSingletonValue() == 1);
     }
-    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    CPPUNIT_ASSERT(!bothVar.getDerivedDomain().isSingleton());
     scope.clear();
     {
       scope.push_back(bothVar.getId());
@@ -1614,10 +1615,10 @@ private:
       scope.push_back(vA.getId());
       CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(bothVar.getDerivedDomain() == BoolDomain(false));
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(bothVar.getDerivedDomain() == BoolDomain(false));
     }
-    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    CPPUNIT_ASSERT(!bothVar.getDerivedDomain().isSingleton());
     scope.clear();
     {
       scope.push_back(bothVar.getId());
@@ -1626,10 +1627,10 @@ private:
       scope.push_back(v8.getId());
       CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(bothVar.getDerivedDomain() == BoolDomain(true));
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(bothVar.getDerivedDomain() == BoolDomain(true));
     }
-    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    CPPUNIT_ASSERT(!bothVar.getDerivedDomain().isSingleton());
     scope.clear();
     {
       scope.push_back(bothVar.getId());
@@ -1639,10 +1640,10 @@ private:
       scope.push_back(v8.getId());
       CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(!bothVar.getDerivedDomain().isSingleton());
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(!bothVar.getDerivedDomain().isSingleton());
     }
-    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    CPPUNIT_ASSERT(!bothVar.getDerivedDomain().isSingleton());
     scope.clear();
     {
       scope.push_back(bothVar.getId());
@@ -1652,10 +1653,10 @@ private:
       scope.push_back(v2.getId());
       CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(!bothVar.getDerivedDomain().isSingleton());
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(!bothVar.getDerivedDomain().isSingleton());
     }
-    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    CPPUNIT_ASSERT(!bothVar.getDerivedDomain().isSingleton());
     scope.clear();
     {
       scope.push_back(bothVar.getId());
@@ -1665,10 +1666,10 @@ private:
       scope.push_back(v8.getId());
       CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(!bothVar.getDerivedDomain().isSingleton());
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(!bothVar.getDerivedDomain().isSingleton());
     }
-    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    CPPUNIT_ASSERT(!bothVar.getDerivedDomain().isSingleton());
     scope.clear();
     {
       scope.push_back(trueVar.getId());
@@ -1677,32 +1678,32 @@ private:
       scope.push_back(v7.getId());
       CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(v2.getDerivedDomain() == IntervalIntDomain(0));
-    }
-    scope.clear();
-    {
-      scope.push_back(trueVar.getId());
-      scope.push_back(v2.getId());
-      scope.push_back(v3.getId());
-      scope.push_back(v6.getId());
-      scope.push_back(v7.getId());
-      CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
-      ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(v2.getDerivedDomain() == IntervalIntDomain(0));
-      assertTrue(v3.getDerivedDomain() == IntervalIntDomain(0));
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(v2.getDerivedDomain() == IntervalIntDomain(0));
     }
     scope.clear();
     {
       scope.push_back(trueVar.getId());
       scope.push_back(v2.getId());
       scope.push_back(v3.getId());
+      scope.push_back(v6.getId());
+      scope.push_back(v7.getId());
       CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(v2.getDerivedDomain() == IntervalIntDomain(0, 2));
-      assertTrue(v3.getDerivedDomain() == IntervalIntDomain(0, 2));
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(v2.getDerivedDomain() == IntervalIntDomain(0));
+      CPPUNIT_ASSERT(v3.getDerivedDomain() == IntervalIntDomain(0));
+    }
+    scope.clear();
+    {
+      scope.push_back(trueVar.getId());
+      scope.push_back(v2.getId());
+      scope.push_back(v3.getId());
+      CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
+      ENGINE->propagate();
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(v2.getDerivedDomain() == IntervalIntDomain(0, 2));
+      CPPUNIT_ASSERT(v3.getDerivedDomain() == IntervalIntDomain(0, 2));
     }
     scope.clear();
     {
@@ -1712,12 +1713,12 @@ private:
       scope.push_back(v3.getId());
       CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(v2.getDerivedDomain() == IntervalIntDomain(1));
-      assertTrue(v3.getDerivedDomain() == IntervalIntDomain(1));
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(v2.getDerivedDomain() == IntervalIntDomain(1));
+      CPPUNIT_ASSERT(v3.getDerivedDomain() == IntervalIntDomain(1));
     }
-    assertTrue(v2.getDerivedDomain() == IntervalIntDomain(0, 2));
-    assertTrue(v3.getDerivedDomain() == IntervalIntDomain(0, 27));
+    CPPUNIT_ASSERT(v2.getDerivedDomain() == IntervalIntDomain(0, 2));
+    CPPUNIT_ASSERT(v3.getDerivedDomain() == IntervalIntDomain(0, 27));
     scope.clear();
     {
       scope.push_back(falseVar.getId());
@@ -1726,8 +1727,8 @@ private:
       scope.push_back(v7.getId());
       CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(v3.getDerivedDomain().isSubsetOf(IntervalIntDomain(1, 27)));
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(v3.getDerivedDomain().isSubsetOf(IntervalIntDomain(1, 27)));
     }
     scope.clear();
     {
@@ -1736,10 +1737,10 @@ private:
       scope.push_back(v7.getId());
       CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(!ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(!ENGINE->constraintConsistent());
     }
     ENGINE->propagate();
-    assertTrue(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
     scope.clear();
     {
       scope.push_back(falseVar.getId());
@@ -1747,12 +1748,12 @@ private:
       scope.push_back(v3.getId());
       CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(v2.getDerivedDomain() == IntervalIntDomain(0, 2));
-      assertTrue(v3.getDerivedDomain() == IntervalIntDomain(0, 27));
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(v2.getDerivedDomain() == IntervalIntDomain(0, 2));
+      CPPUNIT_ASSERT(v3.getDerivedDomain() == IntervalIntDomain(0, 27));
     }
     ENGINE->propagate();
-    assertTrue(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
     scope.clear();
     {
       scope.push_back(trueVar.getId());
@@ -1760,11 +1761,11 @@ private:
       scope.push_back(vA.getId());
       CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(!ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(!ENGINE->constraintConsistent());
     }
     ENGINE->propagate();
-    assertTrue(ENGINE->constraintConsistent());
-    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(!bothVar.getDerivedDomain().isSingleton());
     scope.clear();
     return(true);
   }
@@ -1810,10 +1811,10 @@ private:
       scope.push_back(v1.getId());
       CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(!bothVar.getDerivedDomain().isSingleton());
-      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(1, 10));
-      assertTrue(v1.getDerivedDomain().getSingletonValue() == 1);
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(!bothVar.getDerivedDomain().isSingleton());
+      CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(1, 10));
+      CPPUNIT_ASSERT(v1.getDerivedDomain().getSingletonValue() == 1);
     }
     scope.clear();
     {
@@ -1823,13 +1824,13 @@ private:
       scope.push_back(vA.getId());
       CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(bothVar.getDerivedDomain().getSingletonValue());
-      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(1, 10));
-      assertTrue(v6.getDerivedDomain().getSingletonValue() == 0);
-      assertTrue(vA.getDerivedDomain() == IntervalIntDomain(11, 27));
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(bothVar.getDerivedDomain().getSingletonValue());
+      CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(1, 10));
+      CPPUNIT_ASSERT(v6.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(vA.getDerivedDomain() == IntervalIntDomain(11, 27));
     }
-    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    CPPUNIT_ASSERT(!bothVar.getDerivedDomain().isSingleton());
     scope.clear();
     {
       scope.push_back(bothVar.getId());
@@ -1839,12 +1840,12 @@ private:
       scope.push_back(vA.getId());
       CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(!bothVar.getDerivedDomain().isSingleton());
-      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(1, 10));
-      assertTrue(v6.getDerivedDomain().getSingletonValue() == 0);
-      assertTrue(v9.getDerivedDomain().getSingletonValue() == 1);
-      assertTrue(vA.getDerivedDomain() == IntervalIntDomain(11, 27));
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(!bothVar.getDerivedDomain().isSingleton());
+      CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(1, 10));
+      CPPUNIT_ASSERT(v6.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(v9.getDerivedDomain().getSingletonValue() == 1);
+      CPPUNIT_ASSERT(vA.getDerivedDomain() == IntervalIntDomain(11, 27));
     }
     scope.clear();
     {
@@ -1857,18 +1858,18 @@ private:
       scope.push_back(vB.getId()); // 3 10, 2, 0, 1, 11 27, -1
       CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(trueVar.getDerivedDomain().isSingleton());
-      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(3, 10));
-      assertTrue(v2.getDerivedDomain().getSingletonValue() == 2);
-      assertTrue(v6.getDerivedDomain().getSingletonValue() == 0);
-      assertTrue(v9.getDerivedDomain().getSingletonValue() == 1);
-      assertTrue(vA.getDerivedDomain() == IntervalIntDomain(11, 27));
-      assertTrue(vB.getDerivedDomain().getSingletonValue() == -1);
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(trueVar.getDerivedDomain().isSingleton());
+      CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(3, 10));
+      CPPUNIT_ASSERT(v2.getDerivedDomain().getSingletonValue() == 2);
+      CPPUNIT_ASSERT(v6.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(v9.getDerivedDomain().getSingletonValue() == 1);
+      CPPUNIT_ASSERT(vA.getDerivedDomain() == IntervalIntDomain(11, 27));
+      CPPUNIT_ASSERT(vB.getDerivedDomain().getSingletonValue() == -1);
     }
-    assertTrue(v0.getDerivedDomain() == IntervalIntDomain(1, 10));
-    assertTrue(v2.getDerivedDomain() == IntervalIntDomain(0, 2));
-    assertTrue(vB.getDerivedDomain() == IntervalIntDomain(-1, 2));
+    CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(1, 10));
+    CPPUNIT_ASSERT(v2.getDerivedDomain() == IntervalIntDomain(0, 2));
+    CPPUNIT_ASSERT(vB.getDerivedDomain() == IntervalIntDomain(-1, 2));
     scope.clear();
     {
       scope.push_back(falseVar.getId());
@@ -1878,15 +1879,15 @@ private:
       scope.push_back(vA.getId()); // 1, 0, 1, 11 27
       CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
       // This next restriction is correct but the current implementation
       //   does not enforce it, as it requires checking all pairs to see
       //   that two individual vars are the only ones that overlap and
       //   therefore must be equal.
-      // assertTrue(v0.getDerivedDomain().getSingletonValue() == 1);
-      assertTrue(v6.getDerivedDomain().getSingletonValue() == 0);
-      assertTrue(v9.getDerivedDomain().getSingletonValue() == 1);
-      assertTrue(vA.getDerivedDomain() == IntervalIntDomain(11, 27));
+      // CPPUNIT_ASSERT(v0.getDerivedDomain().getSingletonValue() == 1);
+      CPPUNIT_ASSERT(v6.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(v9.getDerivedDomain().getSingletonValue() == 1);
+      CPPUNIT_ASSERT(vA.getDerivedDomain() == IntervalIntDomain(11, 27));
     }
     scope.clear();
     {
@@ -1898,15 +1899,15 @@ private:
       scope.push_back(vA.getId());
       CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(!bothVar.getDerivedDomain().getSingletonValue());
-      assertTrue(v6.getDerivedDomain() == IntervalIntDomain(0));
-      assertTrue(v7.getDerivedDomain() == IntervalIntDomain(0));
-      assertTrue(v8.getDerivedDomain() == IntervalIntDomain(0));
-      assertTrue(v9.getDerivedDomain() == IntervalIntDomain(1));
-      assertTrue(vA.getDerivedDomain() == IntervalIntDomain(11, 27));
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(!bothVar.getDerivedDomain().getSingletonValue());
+      CPPUNIT_ASSERT(v6.getDerivedDomain() == IntervalIntDomain(0));
+      CPPUNIT_ASSERT(v7.getDerivedDomain() == IntervalIntDomain(0));
+      CPPUNIT_ASSERT(v8.getDerivedDomain() == IntervalIntDomain(0));
+      CPPUNIT_ASSERT(v9.getDerivedDomain() == IntervalIntDomain(1));
+      CPPUNIT_ASSERT(vA.getDerivedDomain() == IntervalIntDomain(11, 27));
     }
-    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    CPPUNIT_ASSERT(!bothVar.getDerivedDomain().isSingleton());
     scope.clear();
     {
       scope.push_back(bothVar.getId());
@@ -1914,8 +1915,8 @@ private:
       scope.push_back(vD.getId()); // 10 11, 10 11
       CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(!bothVar.getDerivedDomain().isSingleton());
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(!bothVar.getDerivedDomain().isSingleton());
     }
     scope.clear();
     {
@@ -1925,10 +1926,10 @@ private:
       scope.push_back(vE.getId()); // 10 11, 10 11, 10 11 -> false: three vars but only two values
       CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(!bothVar.getDerivedDomain().getSingletonValue());
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(!bothVar.getDerivedDomain().getSingletonValue());
     }
-    assertTrue(!bothVar.getDerivedDomain().isSingleton());
+    CPPUNIT_ASSERT(!bothVar.getDerivedDomain().isSingleton());
     scope.clear();
     {
       scope.push_back(trueVar.getId());
@@ -1939,7 +1940,7 @@ private:
       scope.push_back(vD.getId()); // 1 10, 11 27, -1 2, 10 11, 10 11
       CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
       // 10 could be removed from v0 and 11 from vA, but current
       //   implementation doesn't check for such things.
     }
@@ -1970,29 +1971,29 @@ private:
       scope.push_back(vQ.getId()); // 10, 1, 2, 16 27, 16 27, 16 27, 0, 16 27, -1, 11, 3, 12, 4, 7, 8, 9, 13, 5, 14, 6, -2, 15
       CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(v0.getDerivedDomain() == IntervalIntDomain(10));
-      assertTrue(v1.getDerivedDomain() == IntervalIntDomain(1));
-      assertTrue(v2.getDerivedDomain() == IntervalIntDomain(2));
-      assertTrue(v3.getDerivedDomain() == IntervalIntDomain(16, 27));
-      assertTrue(v4.getDerivedDomain() == IntervalIntDomain(16, 27));
-      assertTrue(v5.getDerivedDomain() == IntervalIntDomain(16, 27));
-      assertTrue(v6.getDerivedDomain() == IntervalIntDomain(0));
-      assertTrue(vA.getDerivedDomain() == IntervalIntDomain(16, 27));
-      assertTrue(vB.getDerivedDomain() == IntervalIntDomain(-1));
-      assertTrue(vC.getDerivedDomain() == IntervalIntDomain(11));
-      assertTrue(vF.getDerivedDomain() == IntervalIntDomain(3));
-      assertTrue(vG.getDerivedDomain() == IntervalIntDomain(12));
-      assertTrue(vH.getDerivedDomain() == IntervalIntDomain(4));
-      assertTrue(vI.getDerivedDomain() == IntervalIntDomain(7));
-      assertTrue(vJ.getDerivedDomain() == IntervalIntDomain(8));
-      assertTrue(vK.getDerivedDomain() == IntervalIntDomain(9));
-      assertTrue(vL.getDerivedDomain() == IntervalIntDomain(13));
-      assertTrue(vM.getDerivedDomain() == IntervalIntDomain(5));
-      assertTrue(vN.getDerivedDomain() == IntervalIntDomain(14));
-      assertTrue(vO.getDerivedDomain() == IntervalIntDomain(6));
-      assertTrue(vP.getDerivedDomain() == IntervalIntDomain(-2));
-      assertTrue(vQ.getDerivedDomain() == IntervalIntDomain(15));
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(10));
+      CPPUNIT_ASSERT(v1.getDerivedDomain() == IntervalIntDomain(1));
+      CPPUNIT_ASSERT(v2.getDerivedDomain() == IntervalIntDomain(2));
+      CPPUNIT_ASSERT(v3.getDerivedDomain() == IntervalIntDomain(16, 27));
+      CPPUNIT_ASSERT(v4.getDerivedDomain() == IntervalIntDomain(16, 27));
+      CPPUNIT_ASSERT(v5.getDerivedDomain() == IntervalIntDomain(16, 27));
+      CPPUNIT_ASSERT(v6.getDerivedDomain() == IntervalIntDomain(0));
+      CPPUNIT_ASSERT(vA.getDerivedDomain() == IntervalIntDomain(16, 27));
+      CPPUNIT_ASSERT(vB.getDerivedDomain() == IntervalIntDomain(-1));
+      CPPUNIT_ASSERT(vC.getDerivedDomain() == IntervalIntDomain(11));
+      CPPUNIT_ASSERT(vF.getDerivedDomain() == IntervalIntDomain(3));
+      CPPUNIT_ASSERT(vG.getDerivedDomain() == IntervalIntDomain(12));
+      CPPUNIT_ASSERT(vH.getDerivedDomain() == IntervalIntDomain(4));
+      CPPUNIT_ASSERT(vI.getDerivedDomain() == IntervalIntDomain(7));
+      CPPUNIT_ASSERT(vJ.getDerivedDomain() == IntervalIntDomain(8));
+      CPPUNIT_ASSERT(vK.getDerivedDomain() == IntervalIntDomain(9));
+      CPPUNIT_ASSERT(vL.getDerivedDomain() == IntervalIntDomain(13));
+      CPPUNIT_ASSERT(vM.getDerivedDomain() == IntervalIntDomain(5));
+      CPPUNIT_ASSERT(vN.getDerivedDomain() == IntervalIntDomain(14));
+      CPPUNIT_ASSERT(vO.getDerivedDomain() == IntervalIntDomain(6));
+      CPPUNIT_ASSERT(vP.getDerivedDomain() == IntervalIntDomain(-2));
+      CPPUNIT_ASSERT(vQ.getDerivedDomain() == IntervalIntDomain(15));
     }
     scope.clear();
     {
@@ -2001,9 +2002,9 @@ private:
       scope.push_back(v7.getId()); // 0
       CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(v6.getDerivedDomain().getSingletonValue() == 0);
-      assertTrue(v7.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(v6.getDerivedDomain().getSingletonValue() == 0);
+      CPPUNIT_ASSERT(v7.getDerivedDomain().getSingletonValue() == 0);
     }
     scope.clear();
     {
@@ -2012,9 +2013,9 @@ private:
       scope.push_back(v4.getId()); // 0 27
       CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
-      assertTrue(v3.getDerivedDomain() == IntervalIntDomain(0, 27));
-      assertTrue(v4.getDerivedDomain() == IntervalIntDomain(0, 27));
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(v3.getDerivedDomain() == IntervalIntDomain(0, 27));
+      CPPUNIT_ASSERT(v4.getDerivedDomain() == IntervalIntDomain(0, 27));
     }
     scope.clear();
     {
@@ -2025,14 +2026,14 @@ private:
       scope.push_back(vC.getId()); // 10 11
       CondAllDiffConstraint c0(LabelStr("CondAllDiffConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
-      assertTrue(ENGINE->constraintConsistent());
+      CPPUNIT_ASSERT(ENGINE->constraintConsistent());
       // Only vF and vI overlap, so they have to be equal.
-      assertTrue(vF.getDerivedDomain() == IntervalIntDomain(0, 3));
+      CPPUNIT_ASSERT(vF.getDerivedDomain() == IntervalIntDomain(0, 3));
       // This next restriction is correct but the current implementation
       //   does not enforce it, as it requires checking all pairs to see
       //   that two individual vars are the only ones that overlap and
       //   therefore must be equal.
-      // assertTrue(vI.getDerivedDomain() == IntervalIntDomain(0, 3));
+      // CPPUNIT_ASSERT(vI.getDerivedDomain() == IntervalIntDomain(0, 3));
     }
     return(true);
   }
@@ -2051,7 +2052,7 @@ private:
     v0.specify(1);
     v1.specify(1);
     bool res = ENGINE->propagate();
-    assertTrue(!res);
+    CPPUNIT_ASSERT(!res);
 
     // Reset, and delete constraint, but it should not matter
     v1.reset();
@@ -2059,7 +2060,7 @@ private:
 
     // Confirm still inconsistent
     res = ENGINE->propagate();
-    assertTrue(!res);
+    CPPUNIT_ASSERT(!res);
 
     delete (Constraint*) c0;
     delete (Constraint*) c1;
@@ -2094,10 +2095,10 @@ private:
     //   "CLibTestCases".
     // For each file, try twice with different relative paths since we don't know what
     //   the current working directory is.
-    assertTrue(readTestCases(getTestLoadLibraryPath() + std::string("/NewTestCases.xml"), tests) ||
+    CPPUNIT_ASSERT(readTestCases(getTestLoadLibraryPath() + std::string("/NewTestCases.xml"), tests) ||
                readTestCases(std::string("ConstraintEngine/test/NewTestCases.xml"), tests));
 
-    assertTrue(readTestCases(getTestLoadLibraryPath() + std::string("/CLibTestCases.xml"), tests) ||
+    CPPUNIT_ASSERT(readTestCases(getTestLoadLibraryPath() + std::string("/CLibTestCases.xml"), tests) ||
                readTestCases(std::string("ConstraintEngine/test/CLibTestCases.xml"), tests));
 
     return(executeTestCases(testEngine.getConstraintEngine(), tests));
@@ -2121,25 +2122,25 @@ private:
 
     // Set up variable with base domain - will exceed lock domain
     Variable<LabelSet> v0(ENGINE, baseDomain);
-    assertTrue(v0.getDerivedDomain() != lockDomain);
+    CPPUNIT_ASSERT(v0.getDerivedDomain() != lockDomain);
     Variable<LabelSet> v1(ENGINE, lockDomain);
 
     // Post constraint, and ensure it is propagated to equality with lock domain
     LockConstraint c0(LabelStr("Lock"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
-    assertTrue(ENGINE->propagate());
-    assertTrue(v0.getDerivedDomain() == lockDomain);
+    CPPUNIT_ASSERT(ENGINE->propagate());
+    CPPUNIT_ASSERT(v0.getDerivedDomain() == lockDomain);
 
     // Now specify to a restricted value, and ensure an inconsistency
     v0.specify(EUROPA::LabelStr("C"));
-    assertTrue(!ENGINE->propagate());
+    CPPUNIT_ASSERT(!ENGINE->propagate());
 
     // Now ensure that we can rty again, without changing anything, and get the same result.
-    assertTrue(!ENGINE->propagate());
+    CPPUNIT_ASSERT(!ENGINE->propagate());
 
     // Reset the variable and ensure we can repropagate it correctly
     v0.reset();
-    assertTrue(ENGINE->propagate());
-    assertTrue(v0.getDerivedDomain() == lockDomain);
+    CPPUNIT_ASSERT(ENGINE->propagate());
+    CPPUNIT_ASSERT(v0.getDerivedDomain() == lockDomain);
 
     return true;
   }
@@ -2149,18 +2150,18 @@ private:
     Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(MINUS_INFINITY, 0));
     NegateConstraint c0(LabelStr("NegateConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
     ENGINE->propagate();
-    assertTrue(ENGINE->constraintConsistent());
-    assertTrue(v0.getDerivedDomain() == IntervalIntDomain(0, PLUS_INFINITY));
-    assertTrue(v1.getDerivedDomain() == IntervalIntDomain(MINUS_INFINITY, 0));
+    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(0, PLUS_INFINITY));
+    CPPUNIT_ASSERT(v1.getDerivedDomain() == IntervalIntDomain(MINUS_INFINITY, 0));
 
     v0.restrictBaseDomain(IntervalIntDomain(20, 30));
-    assertTrue(v1.getDerivedDomain() == IntervalIntDomain(-30, -20));
+    CPPUNIT_ASSERT(v1.getDerivedDomain() == IntervalIntDomain(-30, -20));
 
     v1.restrictBaseDomain(IntervalIntDomain(-22, -21));
-    assertTrue(v0.getDerivedDomain() == IntervalIntDomain(21, 22));
+    CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(21, 22));
 
     v0.specify(21);
-    assertTrue(v1.getDerivedDomain().getSingletonValue() == -21);
+    CPPUNIT_ASSERT(v1.getDerivedDomain().getSingletonValue() == -21);
     return true;
   }
 
@@ -2168,11 +2169,11 @@ private:
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain());
     Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain());
     NegateConstraint c0(LabelStr("NegateConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
-    assertTrue(!c0.isUnary());
+    CPPUNIT_ASSERT(!c0.isUnary());
 
     Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1));
     NegateConstraint c1(LabelStr("NegateConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v2.getId()));
-    assertTrue(c1.isUnary());
+    CPPUNIT_ASSERT(c1.isUnary());
 
     return true;
   }
@@ -2219,7 +2220,7 @@ private:
       TestEQ c0(LabelStr("TestEQ"), LabelStr("Default"), 
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(v0.getDerivedDomain().isTrue());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().isTrue());
     }
     {
       Variable<BoolDomain> v0(ENGINE, BoolDomain());
@@ -2228,7 +2229,7 @@ private:
       TestEQ c0(LabelStr("TestEQ"), LabelStr("Default"), 
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(v0.getDerivedDomain().isFalse());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().isFalse());
     }
     {
       Variable<BoolDomain> v0(ENGINE, BoolDomain());
@@ -2237,14 +2238,14 @@ private:
       TestEQ c0(LabelStr("TestEQ"), LabelStr("Default"), 
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(!v0.getDerivedDomain().isSingleton());
+      CPPUNIT_ASSERT(!v0.getDerivedDomain().isSingleton());
       v1.specify(7);
       v2.specify(7);
       ENGINE->propagate();
-      assertTrue(v0.getDerivedDomain().isTrue());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().isTrue());
       v1.reset();
       ENGINE->propagate();
-      assertTrue(!v0.getDerivedDomain().isSingleton());      
+      CPPUNIT_ASSERT(!v0.getDerivedDomain().isSingleton());      
     }
     {
       Variable<BoolDomain> v0(ENGINE, BoolDomain());
@@ -2253,7 +2254,7 @@ private:
       TestEQ c0("TestEQ", "Default", 
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(v0.getDerivedDomain().isTrue());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().isTrue());
     }
     {
       Variable<BoolDomain> v0(ENGINE, BoolDomain());
@@ -2262,7 +2263,7 @@ private:
       TestEQ c0(LabelStr("TestEQ"), LabelStr("Default"), 
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(v0.getDerivedDomain().isFalse());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().isFalse());
     }
     return true;
   }
@@ -2275,7 +2276,7 @@ private:
       TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"), 
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(v0.getDerivedDomain().isTrue());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().isTrue());
     }
 
     {
@@ -2285,7 +2286,7 @@ private:
       TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"), 
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(v0.getDerivedDomain().isFalse());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().isFalse());
     }
 
     {
@@ -2295,7 +2296,7 @@ private:
       TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"), 
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(v0.getDerivedDomain().isFalse());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().isFalse());
     }
 
     {
@@ -2305,7 +2306,7 @@ private:
       TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"), 
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(v0.getDerivedDomain().isTrue());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().isTrue());
     }
 
     {
@@ -2315,7 +2316,7 @@ private:
       TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"), 
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
-      assertTrue(!v0.getDerivedDomain().isSingleton());
+      CPPUNIT_ASSERT(!v0.getDerivedDomain().isSingleton());
     }
 
     return true;
@@ -2331,7 +2332,7 @@ private:
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
 
-      assertTrue(v0.getDerivedDomain().isTrue());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().isTrue());
     }
 
     {
@@ -2343,7 +2344,7 @@ private:
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
 
-      assertTrue(v0.getDerivedDomain().isFalse());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().isFalse());
     }
 
     {
@@ -2353,8 +2354,8 @@ private:
 
       TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
-      assertTrue(ENGINE->propagate());
-      assertTrue(v0.getDerivedDomain().isTrue());
+      CPPUNIT_ASSERT(ENGINE->propagate());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().isTrue());
     }
 
     {
@@ -2365,9 +2366,9 @@ private:
       TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
 
-      assertTrue(ENGINE->propagate());
+      CPPUNIT_ASSERT(ENGINE->propagate());
 
-      assertTrue(!v0.getDerivedDomain().isSingleton());
+      CPPUNIT_ASSERT(!v0.getDerivedDomain().isSingleton());
     }
 
     {
@@ -2378,7 +2379,7 @@ private:
       TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
 
-      assertTrue(!ENGINE->propagate());
+      CPPUNIT_ASSERT(!ENGINE->propagate());
     }
 
     {
@@ -2389,7 +2390,7 @@ private:
       TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
 
-      assertTrue(!ENGINE->propagate());
+      CPPUNIT_ASSERT(!ENGINE->propagate());
     }
 
     {
@@ -2400,8 +2401,8 @@ private:
       TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
 
-      assertTrue(ENGINE->propagate());
-      assertTrue(v0.getDerivedDomain().isTrue());
+      CPPUNIT_ASSERT(ENGINE->propagate());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().isTrue());
     }
 
     {
@@ -2412,8 +2413,8 @@ private:
       TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
 
-      assertTrue(ENGINE->propagate());
-      assertTrue(v0.getDerivedDomain().isFalse());
+      CPPUNIT_ASSERT(ENGINE->propagate());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().isFalse());
     }
 
     return true;
@@ -2471,7 +2472,7 @@ class ConstraintFactoryTest
 {
 public:
   static bool test() {
-    runTest(testAllocation);
+    EUROPA_runTest(testAllocation);
     return true;
   }
 
@@ -2488,7 +2489,7 @@ private:
     variables.push_back(v1.getId());
     ConstraintId c0 = ce->createConstraint(LabelStr("Equal"), variables);    
     ce->propagate();
-    assertTrue(v0.getDerivedDomain().getSingletonValue() == 1);
+    CPPUNIT_ASSERT(v0.getDerivedDomain().getSingletonValue() == 1);
     delete (Constraint*) c0;
     return true;
   }
@@ -2497,11 +2498,11 @@ private:
 class EquivalenceClassTest{
 public:
   static bool test() {
-    runTest(testBasicAllocation);
-    runTest(testConstructionOfSingleGraph);
-    runTest(testSplittingOfSingleGraph);
-    runTest(testMultiGraphMerging);
-    runTest(testEqualityConstraintPropagator);
+    EUROPA_runTest(testBasicAllocation);
+    EUROPA_runTest(testConstructionOfSingleGraph);
+    EUROPA_runTest(testSplittingOfSingleGraph);
+    EUROPA_runTest(testMultiGraphMerging);
+    EUROPA_runTest(testEqualityConstraintPropagator);
     return true;
   }
 
@@ -2511,7 +2512,7 @@ private:
     Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(2, 8));
     EquivalenceClassCollection g0;
     g0.addConnection(v0.getId(), v1.getId());
-    assertTrue(g0.getGraphCount() == 1);
+    CPPUNIT_ASSERT(g0.getGraphCount() == 1);
     v0.specify(10);
     return true;
   }
@@ -2523,17 +2524,17 @@ private:
     Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(8, 20));
     g0.addConnection(v0.getId(), v1.getId());
     g0.addConnection(v1.getId(), v2.getId());
-    assertTrue(g0.getGraphCount() == 1);
+    CPPUNIT_ASSERT(g0.getGraphCount() == 1);
     int graphKey = g0.getGraphKey(v0.getId());
-    assertTrue(g0.getGraphKey(v1.getId()) == graphKey);
-    assertTrue(g0.getGraphKey(v2.getId()) == graphKey);
+    CPPUNIT_ASSERT(g0.getGraphKey(v1.getId()) == graphKey);
+    CPPUNIT_ASSERT(g0.getGraphKey(v2.getId()) == graphKey);
 
     Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 100));
     Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(-100, 100));
     g0.addConnection(v2.getId(), v3.getId());
     g0.addConnection(v3.getId(), v4.getId());
-    assertTrue(g0.getGraphCount() == 1);
-    assertTrue(graphKey != g0.getGraphKey(v0.getId())); // Should have updated for all
+    CPPUNIT_ASSERT(g0.getGraphCount() == 1);
+    CPPUNIT_ASSERT(graphKey != g0.getGraphKey(v0.getId())); // Should have updated for all
     return true;
   }
 
@@ -2556,20 +2557,20 @@ private:
     g0.addConnection(v5.getId(), v6.getId());
     g0.addConnection(v6.getId(), v7.getId());
     g0.addConnection(v7.getId(), v8.getId());
-    assertTrue(g0.getGraphCount() == 1);
+    CPPUNIT_ASSERT(g0.getGraphCount() == 1);
 
     // Cause a split by removing a connection in the middle
     g0.removeConnection(v3.getId(), v4.getId());
-    assertTrue(g0.getGraphCount() == 2);
+    CPPUNIT_ASSERT(g0.getGraphCount() == 2);
 
     // Cause another split
     g0.removeConnection(v5.getId(), v6.getId());
-    assertTrue(g0.getGraphCount() == 3);
+    CPPUNIT_ASSERT(g0.getGraphCount() == 3);
 
     // Test membership of resulting classes
-    assertTrue((g0.getGraphKey(v1.getId()) + g0.getGraphKey(v2.getId()) + g0.getGraphKey(v3.getId()))/3 == g0.getGraphKey(v0.getId()));
-    assertTrue(g0.getGraphKey(v4.getId()) == g0.getGraphKey(v5.getId()));
-    assertTrue((g0.getGraphKey(v6.getId()) + g0.getGraphKey(v7.getId()))/2   == g0.getGraphKey(v8.getId()));
+    CPPUNIT_ASSERT((g0.getGraphKey(v1.getId()) + g0.getGraphKey(v2.getId()) + g0.getGraphKey(v3.getId()))/3 == g0.getGraphKey(v0.getId()));
+    CPPUNIT_ASSERT(g0.getGraphKey(v4.getId()) == g0.getGraphKey(v5.getId()));
+    CPPUNIT_ASSERT((g0.getGraphKey(v6.getId()) + g0.getGraphKey(v7.getId()))/2   == g0.getGraphKey(v8.getId()));
 
     return true;
   }
@@ -2598,22 +2599,22 @@ private:
     g0.addConnection(v7.getId(), v8.getId());
 
     // Test resulting classes
-    assertTrue(g0.getGraphCount() == 3);
-    assertTrue((g0.getGraphKey(v1.getId()) + g0.getGraphKey(v2.getId()) + g0.getGraphKey(v3.getId()))/3 == g0.getGraphKey(v0.getId()));
-    assertTrue(g0.getGraphKey(v4.getId()) == g0.getGraphKey(v5.getId()));
-    assertTrue((g0.getGraphKey(v6.getId()) + g0.getGraphKey(v7.getId()))/2   == g0.getGraphKey(v8.getId()));
+    CPPUNIT_ASSERT(g0.getGraphCount() == 3);
+    CPPUNIT_ASSERT((g0.getGraphKey(v1.getId()) + g0.getGraphKey(v2.getId()) + g0.getGraphKey(v3.getId()))/3 == g0.getGraphKey(v0.getId()));
+    CPPUNIT_ASSERT(g0.getGraphKey(v4.getId()) == g0.getGraphKey(v5.getId()));
+    CPPUNIT_ASSERT((g0.getGraphKey(v6.getId()) + g0.getGraphKey(v7.getId()))/2   == g0.getGraphKey(v8.getId()));
 
     // Add connectionto cause a merge
     g0.addConnection(v3.getId(), v4.getId());
-    assertTrue(g0.getGraphCount() == 2);
-    assertTrue((g0.getGraphKey(v1.getId()) + g0.getGraphKey(v2.getId()) + g0.getGraphKey(v3.getId()))/3 == g0.getGraphKey(v0.getId()));
-    assertTrue((g0.getGraphKey(v4.getId()) + g0.getGraphKey(v5.getId()))/2 == g0.getGraphKey(v0.getId()));
-    assertTrue((g0.getGraphKey(v6.getId()) + g0.getGraphKey(v7.getId()))/2   == g0.getGraphKey(v8.getId()));
+    CPPUNIT_ASSERT(g0.getGraphCount() == 2);
+    CPPUNIT_ASSERT((g0.getGraphKey(v1.getId()) + g0.getGraphKey(v2.getId()) + g0.getGraphKey(v3.getId()))/3 == g0.getGraphKey(v0.getId()));
+    CPPUNIT_ASSERT((g0.getGraphKey(v4.getId()) + g0.getGraphKey(v5.getId()))/2 == g0.getGraphKey(v0.getId()));
+    CPPUNIT_ASSERT((g0.getGraphKey(v6.getId()) + g0.getGraphKey(v7.getId()))/2   == g0.getGraphKey(v8.getId()));
 
 
     // Add connectionto cause a merge
     g0.addConnection(v5.getId(), v6.getId());
-    assertTrue(g0.getGraphCount() == 1);
+    CPPUNIT_ASSERT(g0.getGraphCount() == 1);
 
     return true;
   }
@@ -2641,8 +2642,8 @@ private:
       EqualConstraint c1(LabelStr("EqualConstraint"), LabelStr("EquivalenceClass"), ce, variables);
       ce->propagate();
 
-      assertTrue(v0.getDerivedDomain().getUpperBound() == 10);
-      assertTrue(v2.getDerivedDomain().getSingletonValue() == 10);
+      CPPUNIT_ASSERT(v0.getDerivedDomain().getUpperBound() == 10);
+      CPPUNIT_ASSERT(v2.getDerivedDomain().getSingletonValue() == 10);
 
       variables.clear();
       variables.push_back(v3.getId());
@@ -2650,8 +2651,8 @@ private:
       EqualConstraint c2(LabelStr("EqualConstraint"), LabelStr("EquivalenceClass"), ce, variables);
 
       ce->propagate();
-      assertTrue(ce->constraintConsistent());
-      assertTrue(v0.getDerivedDomain().getSingletonValue() == 10);
+      CPPUNIT_ASSERT(ce->constraintConsistent());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().getSingletonValue() == 10);
 
       variables.clear();
       Variable<IntervalIntDomain> v4(ce, IntervalIntDomain(1, 9));
@@ -2659,13 +2660,13 @@ private:
       variables.push_back(v4.getId());
       ConstraintId c3((new EqualConstraint(LabelStr("EqualConstraint"), LabelStr("EquivalenceClass"), ce, variables))->getId());
       ce->propagate();
-      assertTrue(ce->provenInconsistent());
+      CPPUNIT_ASSERT(ce->provenInconsistent());
 
       delete (Constraint*) c3;
-      assertTrue(ce->pending());
+      CPPUNIT_ASSERT(ce->pending());
       ce->propagate();
-      assertTrue(ce->constraintConsistent());
-      assertTrue(v0.getDerivedDomain().getSingletonValue() == 10);
+      CPPUNIT_ASSERT(ce->constraintConsistent());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().getSingletonValue() == 10);
     }
     return(true);
   }
@@ -2683,7 +2684,50 @@ void ConstraintEngineModuleTests::runTests(std::string path)
     runTestSuite(ConstraintFactoryTest::test);
     runTestSuite(EquivalenceClassTest::test);
     std::cout << "Finished" << std::endl;
-  }
+}
 
+void ConstraintEngineModuleTests::cppSetup(void) 
+{
+    setTestLoadLibraryPath(".");
+}
 
+void ConstraintEngineModuleTests::domainTests(void) 
+{
+    DomainTests::test();
+}
+
+void ConstraintEngineModuleTests::typeFactoryTests(void) 
+{
+    TypeFactoryTests::test();
+}
+
+void ConstraintEngineModuleTests::entityTests(void) 
+{
+    EntityTests::test();
+}
+
+void ConstraintEngineModuleTests::constraintEngineTests(void) 
+{
+    ConstraintEngineTest::test();
+}
+
+void ConstraintEngineModuleTests::variableTests(void) 
+{
+    VariableTest::test(); 
+}
+
+void ConstraintEngineModuleTests::constraintTests(void) 
+{
+    ConstraintTest::test(); 
+}
+
+void ConstraintEngineModuleTests::constraintFactoryTests(void) 
+{
+    ConstraintFactoryTest::test();
+}
+
+void ConstraintEngineModuleTests::equivalenceClassTests(void) 
+{
+    EquivalenceClassTest::test();
+}
 

@@ -2,6 +2,11 @@ SubDir PLASMA Resource test ;
 
 if ! $(PLASMA_READY) {
 
+#SubDirC++Flags -lcppunit -Wno-unknown-pragmas -Wno-format ;
+#SubDirC++Flags -I/usr/include ; #-lcppunit -Wno-unknown-pragmas -Wno-format ;
+
+ModuleLibraries rs-module-tests : cppunit ;
+
 ModuleMain rs-module-tests : module-tests.cc rs-test-module.cc rs-flow-test-module.cc : Resource ;
 RunModuleMain run-rs-module-tests : rs-module-tests ;
 LocalDepends tests : run-rs-module-tests ;

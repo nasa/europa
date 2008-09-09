@@ -18,6 +18,7 @@
 #include <iostream>
 #include <list>
 #include <vector>
+#include <cppunit/extensions/HelperMacros.h>
 
 using namespace EUROPA;
 using namespace std;
@@ -160,8 +161,8 @@ static void testLabelSetEqualityPerformance(const ConstraintEngineId& ce) {
     Variable<LabelSet>*  p_v = (Variable<LabelSet>*) variables[i-1];
     p_v->specify(newDomain);
     ce->propagate();
-    assertTrue(ce->constraintConsistent());
-    assertTrue(p_v0->getDerivedDomain().getSize() == i-1);
+    CPPUNIT_ASSERT(ce->constraintConsistent());
+    CPPUNIT_ASSERT(p_v0->getDerivedDomain().getSize() == i-1);
   }
 }
 
@@ -260,9 +261,9 @@ static void testIntervalEqualityPerformance(const ConstraintEngineId& ce) {
     Variable<IntervalIntDomain>* p_v = (Variable<IntervalIntDomain>*) variables[i-1];
     p_v->specify(newDomain);
     ce->propagate();
-    assertTrue(ce->constraintConsistent());
-    assertTrue(p_v0->getDerivedDomain().getUpperBound() == ub);
-    assertTrue(p_v0->getDerivedDomain().getLowerBound() == lb);
+    CPPUNIT_ASSERT(ce->constraintConsistent());
+    CPPUNIT_ASSERT(p_v0->getDerivedDomain().getUpperBound() == ub);
+    CPPUNIT_ASSERT(p_v0->getDerivedDomain().getLowerBound() == lb);
   }
 }
 

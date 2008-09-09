@@ -246,12 +246,12 @@ int main(int argc, const char** argv)
 
     if (performanceTest != NULL && strcmp(performanceTest, "1") == 0) {
         replayRequired = false;
-        runTest(runPlanner);
+        EUROPA_runTest(runPlanner);
     }
     else {
         replayRequired = false; //= true;
-        runTest(runPlanner);
-        //runTest(copyFromFile);
+        EUROPA_runTest(runPlanner);
+        //EUROPA_runTest(copyFromFile);
     }
 
     cleanup();

@@ -1,6 +1,16 @@
 #include "nddl-test-module.hh"
 
-int main(int argc, const char** argv) {
-  NDDLModuleTests::runTests(".");  
+#include <cppunit/ui/text/TestRunner.h>
+#include <cppunit/extensions/TestFactoryRegistry.h>
+
+CPPUNIT_TEST_SUITE_REGISTRATION( NDDLModuleTests );
+
+int main( int argc, char **argv)
+{
+  CppUnit::TextUi::TestRunner runner;
+  CppUnit::TestFactoryRegistry &registry = CppUnit::TestFactoryRegistry::getRegistry();
+  runner.addTest( registry.makeTest() );
+  runner.run("", false);
   return 0;
 }
+

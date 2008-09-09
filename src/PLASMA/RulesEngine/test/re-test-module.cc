@@ -40,9 +40,9 @@ public:
                                 const RulesEngineId &rulesEngine) const{
     RuleInstanceId rootInstance = (new RootInstance(m_id, token, planDb))->getId();
     std::vector<ConstrainedVariableId> vars = rootInstance->getVariables("start:end:duration:object:state");
-    assertTrue(vars.size() == 5);
-    assertTrue(vars[0] == token->start());
-    assertTrue(vars[4] == token->getState());
+    CPPUNIT_ASSERT(vars.size() == 5);
+    CPPUNIT_ASSERT(vars[0] == token->start());
+    CPPUNIT_ASSERT(vars[4] == token->getState());
     rootInstance->setRulesEngine(rulesEngine);
     return rootInstance;
   }
@@ -284,13 +284,13 @@ RulesEngineId re;
 class RulesEngineTest {
 public:
   static bool test(){
-    runTest(testSimpleSubGoal);
-    runTest(testNestedGuards);
-    runTest(testLocalVariable);
-    runTest(testTestRule);
-    runTest(testPurge);
-    runTest(testGNATS_3157);
-    runTest(testProxyVariableRelation);
+    EUROPA_runTest(testSimpleSubGoal);
+    EUROPA_runTest(testNestedGuards);
+    EUROPA_runTest(testLocalVariable);
+    EUROPA_runTest(testTestRule);
+    EUROPA_runTest(testPurge);
+    EUROPA_runTest(testGNATS_3157);
+    EUROPA_runTest(testProxyVariableRelation);
     return true;
   }
 private:
@@ -310,13 +310,13 @@ private:
 		     IntervalIntDomain(0, 1000),
 		     IntervalIntDomain(1, 1000));
     // Activate it and confirm we are getting a subgoal and that the expected constraint holds.
-    assertTrue(t0.slaves().empty());
+    CPPUNIT_ASSERT(t0.slaves().empty());
     t0.activate();
-    assertTrue(db->getTokens().size() == 2);
-    assertTrue(t0.slaves().size() == 1);
+    CPPUNIT_ASSERT(db->getTokens().size() == 2);
+    CPPUNIT_ASSERT(t0.slaves().size() == 1);
 
     TokenId slaveToken = *(t0.slaves().begin());
-    assertTrue(t0.end()->getDerivedDomain() == slaveToken->start()->getDerivedDomain());
+    CPPUNIT_ASSERT(t0.end()->getDerivedDomain() == slaveToken->start()->getDerivedDomain());
 
     RE_DEFAULT_TEARDOWN();
     return true;
@@ -339,35 +339,35 @@ private:
 		     IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000));
     // Activate it and confirm we are getting a subgoal and that the expected constraint holds.
-    assertTrue(t0.slaves().empty());
+    CPPUNIT_ASSERT(t0.slaves().empty());
     t0.activate();
-    assertTrue(db->getTokens().size() == 1);
+    CPPUNIT_ASSERT(db->getTokens().size() == 1);
     t0.getObject()->specify(o1.getId());
     ce->propagate();
-    assertTrue(t0.slaves().size() == 1);
-    assertTrue(db->getTokens().size() == 2);
+    CPPUNIT_ASSERT(t0.slaves().size() == 1);
+    CPPUNIT_ASSERT(db->getTokens().size() == 2);
 
     TokenId slaveToken = *(t0.slaves().begin());
 
     // Set start time to 10 will trigger another guard
     t0.start()->specify(10); // Will trigger nested guard
     ce->propagate();
-    assertTrue(t0.slaves().size() == 2);
+    CPPUNIT_ASSERT(t0.slaves().size() == 2);
 
     // Now set the object variable of the slaveToken to trigger additional guard
     slaveToken->getObject()->specify(o2.getId());
     ce->propagate();
-    assertTrue(t0.slaves().size() == 3);
+    CPPUNIT_ASSERT(t0.slaves().size() == 3);
 
     // Now retract a decision and confirm the slave is removed
     t0.start()->reset();
     ce->propagate();
-    assertTrue(t0.slaves().size() == 2);
+    CPPUNIT_ASSERT(t0.slaves().size() == 2);
 
     // Now deactivate the master token and confirm all salves are gone
     t0.cancel();
     ce->propagate();
-    assertTrue(t0.slaves().empty());
+    CPPUNIT_ASSERT(t0.slaves().empty());
     RE_DEFAULT_TEARDOWN();
     return true;
   }
@@ -387,22 +387,22 @@ private:
 		     IntervalIntDomain(1, 1000));
     // Activate it and confirm we are not sub-goaling yet
     ConstrainedVariableId guard = LocalVariableGuard_0_Root::getGuard();
-    assertTrue(guard.isNoId());
+    CPPUNIT_ASSERT(guard.isNoId());
 
     t0.activate();
     ce->propagate();
-    assertTrue(t0.slaves().empty());
+    CPPUNIT_ASSERT(t0.slaves().empty());
 
     guard = LocalVariableGuard_0_Root::getGuard();
-    assertTrue(guard.isValid());
+    CPPUNIT_ASSERT(guard.isValid());
     guard->specify(LabelStr("A")); // Should not succeed
     ce->propagate();
-    assertTrue(t0.slaves().empty());
+    CPPUNIT_ASSERT(t0.slaves().empty());
 
     guard->reset(); // Reset and try correct value
     guard->specify(LabelStr("B")); // Should succeed
     ce->propagate();
-    assertTrue(t0.slaves().size() == 1);
+    CPPUNIT_ASSERT(t0.slaves().size() == 1);
 
     RE_DEFAULT_TEARDOWN();
     return true;
@@ -429,7 +429,7 @@ private:
        is a singleton. Note that this addresses a case for GNATS_ */
     t0.activate();
     ce->propagate();
-    assertTrue(t0.slaves().size() == 2, toString(t0.slaves().size()));
+    CPPUNIT_ASSERT_MESSAGE(toString(t0.slaves().size()), t0.slaves().size() == 2);
 
     RE_DEFAULT_TEARDOWN();
     return true;
@@ -464,13 +464,13 @@ private:
 		       IntervalIntDomain(0, 1000),
 		       IntervalIntDomain(1, 1000));
       // Activate it and confirm we are getting a subgoal and that the expected constraint holds.
-      assertTrue(t0.slaves().empty());
+      CPPUNIT_ASSERT(t0.slaves().empty());
       t0.activate();
-      assertTrue(db->getTokens().size() == 2);
-      assertTrue(t0.slaves().size() == 1);
+      CPPUNIT_ASSERT(db->getTokens().size() == 2);
+      CPPUNIT_ASSERT(t0.slaves().size() == 1);
 
       TokenId slaveToken = *(t0.slaves().begin());
-      assertTrue(t0.end()->getDerivedDomain() == slaveToken->start()->getDerivedDomain());
+      CPPUNIT_ASSERT(t0.end()->getDerivedDomain() == slaveToken->start()->getDerivedDomain());
 
       t0.commit();
       delete (Token*) slaveToken;
@@ -490,13 +490,13 @@ private:
 			 IntervalIntDomain(0, 1000),
 			 IntervalIntDomain(1, 1000));
 	// Activate it and confirm we are getting a subgoal and that the expected constraint holds.
-	assertTrue(t0.slaves().empty());
+	CPPUNIT_ASSERT(t0.slaves().empty());
 	t0.activate();
-	assertTrue(db->getTokens().size() == 2);
-	assertTrue(t0.slaves().size() == 1);
+	CPPUNIT_ASSERT(db->getTokens().size() == 2);
+	CPPUNIT_ASSERT(t0.slaves().size() == 1);
 
 	slaveToken = *(t0.slaves().begin());
-	assertTrue(t0.end()->getDerivedDomain() == slaveToken->start()->getDerivedDomain());
+	CPPUNIT_ASSERT(t0.end()->getDerivedDomain() == slaveToken->start()->getDerivedDomain());
 
 	slaveToken->activate();
 	slaveToken->commit();
@@ -513,15 +513,15 @@ private:
   static bool testProxyVariableRelation(){
     RE_DEFAULT_SETUP(ce, db, false);
     Object obj0(db, "Objects", "obj0", true);
-    assertFalse(obj0.isComplete());
+    CPPUNIT_ASSERT(!obj0.isComplete());
     obj0.addVariable(IntervalIntDomain(0, 0), "m_int");
     obj0.close();
     Object obj1(db, "Objects", "obj1", true);
-    assertFalse(obj1.isComplete());
+    CPPUNIT_ASSERT(!obj1.isComplete());
     obj1.addVariable(IntervalIntDomain(1, 1), "m_int");
     obj1.close();
     Object obj2(db, "Objects", "obj2", true);
-    assertFalse(obj2.isComplete());
+    CPPUNIT_ASSERT(!obj2.isComplete());
     obj2.addVariable(IntervalIntDomain(2, 2), "m_int");
     obj2.close();
 
@@ -532,7 +532,7 @@ private:
 
     // populate the domain, leaving it open
     db->makeObjectVariableFromType("Objects", objVar.getId(), true);
-    assertTrue(objVar.lastDomain().getSize() == 3, objVar.toString());
+    CPPUNIT_ASSERT_MESSAGE(objVar.toString(), objVar.lastDomain().getSize() == 3);
 
     // Create the initial proxy variable
     NumericDomain dom(IntervalIntDomain::getDefaultTypeName().c_str());
@@ -540,62 +540,73 @@ private:
     dom.insert(1);
     dom.insert(2);
     Variable<NumericDomain> proxyVar(ce, dom);
-    assertFalse(proxyVar.isClosed());
+    CPPUNIT_ASSERT(!proxyVar.isClosed());
 
     // Allocate the constraint
     std::vector<unsigned int> path;
     path.push_back(0);
     ProxyVariableRelation c(objVar.getId(), proxyVar.getId(), path);
 
-    assertTrue(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
 
     // Specify the proxy and ensure the object variable is propagated
     proxyVar.specify(1);
-    assertTrue(ce->propagate());
-    assertTrue(objVar.lastDomain().isSingleton());
-    assertTrue(objVar.lastDomain().getSingletonValue() == obj1.getId());
+    CPPUNIT_ASSERT(ce->propagate());
+    CPPUNIT_ASSERT(objVar.lastDomain().isSingleton());
+    CPPUNIT_ASSERT(objVar.lastDomain().getSingletonValue() == obj1.getId());
 
     // Reset and ensure things go back to normal
     proxyVar.reset();
     ce->propagate();
-    assertTrue(objVar.lastDomain().getSize() == 3, objVar.toString());
+    CPPUNIT_ASSERT_MESSAGE(objVar.toString(), objVar.lastDomain().getSize() == 3);
 
     // Specify the object var and ensure the proxy var also becomes specified
     objVar.specify(obj2.getId());
-    assertTrue(ce->propagate());
-    assertTrue(proxyVar.isSpecified());
+    CPPUNIT_ASSERT(ce->propagate());
+    CPPUNIT_ASSERT(proxyVar.isSpecified());
 
     // Reset and ensure things go back to normal
     objVar.reset();
     ce->propagate();
-    assertFalse(proxyVar.isSpecified());
+    CPPUNIT_ASSERT(!proxyVar.isSpecified());
 
     // First set the proxy, then set the object. Retract the proxy but ensure it is not reset
     proxyVar.specify(1);
     objVar.specify(obj1.getId());
     proxyVar.reset();
-    assertTrue(proxyVar.isSpecified());
+    CPPUNIT_ASSERT(proxyVar.isSpecified());
 
     // Now reset the object var also, and ensure all is back to normal
     objVar.reset();
-    assertFalse(proxyVar.isSpecified());
+    CPPUNIT_ASSERT(!proxyVar.isSpecified());
 
     // specify both such that there is an inconsistency
     proxyVar.specify(2);
     objVar.specify(obj1.getId());
-    assertFalse(ce->propagate());
+    CPPUNIT_ASSERT(!ce->propagate());
 
     // Back off an fix it
     proxyVar.reset();
-    assertTrue(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
 
     return true;
   }
 };
 
-void RulesEngineModuleTests::runTests(std::string path) 
+/*void RulesEngineModuleTests::runTests(std::string path) 
 {
     setTestLoadLibraryPath(path);
     runTestSuite(RulesEngineTest::test);
     std::cout << "Finished" << std::endl;
-  }
+}*/
+
+void RulesEngineModuleTests::cppTest()
+{
+  setTestLoadLibraryPath(".");
+}
+
+void RulesEngineModuleTests::rulesEngineTests()
+{
+  RulesEngineTest::test();
+}
+

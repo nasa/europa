@@ -96,10 +96,10 @@ void TNTestEngine::createModules()
 class TemporalNetworkTest {
 public:
   static bool test(){
-    runTest(testBasicAllocation);
-    runTest(testTemporalConstraints);
-    runTest(testFixForReversingEndpoints);
-    runTest(testMemoryCleanups);
+    EUROPA_runTest(testBasicAllocation);
+    EUROPA_runTest(testTemporalConstraints);
+    EUROPA_runTest(testFixForReversingEndpoints);
+    EUROPA_runTest(testMemoryCleanups);
     return true;
   }
 
@@ -110,10 +110,10 @@ private:
     Time delta = g_noTime();
     Time epsilon = g_noTime();
     tn.getTimepointBounds(origin, delta, epsilon);
-    assertTrue(delta == 0 && epsilon == 0);
+    CPPUNIT_ASSERT(delta == 0 && epsilon == 0);
 
     tn.calcDistanceBounds(origin, origin, delta, epsilon);
-    assertTrue(delta == 0 && epsilon == 0);
+    CPPUNIT_ASSERT(delta == 0 && epsilon == 0);
     return true;
   }
 
@@ -127,16 +127,16 @@ private:
     TemporalConstraintId start_before_end = tn.addTemporalConstraint(b_start, b_end, 1, g_infiniteTime());
     TemporalConstraintId a_meets_c = tn.addTemporalConstraint(a_end, c_start, 0, 0);
     bool res = tn.propagate();
-    assertTrue(res);
+    CPPUNIT_ASSERT(res);
 
     Time dist_lb, dist_ub;
     tn.calcDistanceBounds(c_start, b_end, dist_lb, dist_ub);
-    assertTrue(dist_lb > 0);
+    CPPUNIT_ASSERT(dist_lb > 0);
 
     // Force failure where b meets c
     TemporalConstraintId b_meets_c = tn.addTemporalConstraint(b_end, c_start, 0, 0);
     res = tn.propagate();
-    assertTrue(!res);
+    CPPUNIT_ASSERT(!res);
 
     // Cleanup
     tn.removeTemporalConstraint(b_meets_c);
@@ -162,13 +162,13 @@ private:
     TemporalConstraintId tango = tn.addTemporalConstraint(y, x, 200, 200);
 
     bool res = tn.propagate();
-    assertTrue(!res);
+    CPPUNIT_ASSERT(!res);
 
     tn.removeTemporalConstraint(fromage);
     tn.removeTemporalConstraint(tango);
 
     res = tn.propagate();
-    assertTrue(res); // Consistency restored
+    CPPUNIT_ASSERT(res); // Consistency restored
 
     TemporalConstraintId c0 = tn.addTemporalConstraint(y, x, -200, g_infiniteTime());
     TemporalConstraintId c1 = tn.addTemporalConstraint(x, z, 0, g_infiniteTime());
@@ -176,7 +176,7 @@ private:
     TemporalConstraintId c3 = tn.addTemporalConstraint(x, y, 200, g_infiniteTime());
 
     res = tn.propagate();
-    assertTrue(res);
+    CPPUNIT_ASSERT(res);
 
     // Clean up
     tn.removeTemporalConstraint(c0);
@@ -210,14 +210,14 @@ private:
 class TemporalPropagatorTest {
 public:
   static bool test(){
-    runTest(testBasicAllocation);
-    runTest(testTemporalPropagation);
-    runTest(testCanPrecede);
-    runTest(testCanFitBetween);
-    runTest(testCanBeConcurrent);
-    runTest(testTemporalDistance);
-    runTest(testTokenStateChangeSynchronization);
-    runTest(testInconsistencySynchronization);
+    EUROPA_runTest(testBasicAllocation);
+    EUROPA_runTest(testTemporalPropagation);
+    EUROPA_runTest(testCanPrecede);
+    EUROPA_runTest(testCanFitBetween);
+    EUROPA_runTest(testCanBeConcurrent);
+    EUROPA_runTest(testTemporalDistance);
+    EUROPA_runTest(testTokenStateChangeSynchronization);
+    EUROPA_runTest(testInconsistencySynchronization);
     return true;
   }
 
@@ -234,7 +234,7 @@ private:
     CD_DEFAULT_SETUP(ce,db,false);
 
     ObjectId timeline = (new Timeline(db.getId(), "Objects", "o2"))->getId();
-    assertTrue(!timeline.isNoId());
+    CPPUNIT_ASSERT(!timeline.isNoId());
 
     db.close();
 
@@ -247,8 +247,8 @@ private:
     		     IntervalIntDomain(1, 1000));
 
     t1.duration()->restrictBaseDomain(IntervalIntDomain(5, 7));
-    assertTrue(t1.end()->getDerivedDomain().getLowerBound() == 5);
-    assertTrue(t1.end()->getDerivedDomain().getUpperBound() == 17);
+    CPPUNIT_ASSERT(t1.end()->getDerivedDomain().getLowerBound() == 5);
+    CPPUNIT_ASSERT(t1.end()->getDerivedDomain().getUpperBound() == 17);
 
     IntervalToken t2(db.getId(), 
     		     "Objects.Predicate", 
@@ -267,16 +267,16 @@ private:
 
     ConstraintId beforeConstraint = db.getConstraintEngine()->createConstraint(LabelStr("precedes"),                                                                        
                                                                         temp);
-    assertTrue(!beforeConstraint.isNoId());
+    CPPUNIT_ASSERT(!beforeConstraint.isNoId());
 
-    assertTrue(t1.start()->getDerivedDomain().getLowerBound() == 0);
-    assertTrue(t1.start()->getDerivedDomain().getUpperBound() == 5);
-    assertTrue(t1.end()->getDerivedDomain().getLowerBound() == 5);
-    assertTrue(t1.end()->getDerivedDomain().getUpperBound() == 10);
-    assertTrue(t2.start()->getDerivedDomain().getLowerBound() == 5);
-    assertTrue(t2.start()->getDerivedDomain().getUpperBound() == 10);
-    assertTrue(t2.end()->getDerivedDomain().getLowerBound() == 6);
-    assertTrue(t2.end()->getDerivedDomain().getUpperBound() == 20);
+    CPPUNIT_ASSERT(t1.start()->getDerivedDomain().getLowerBound() == 0);
+    CPPUNIT_ASSERT(t1.start()->getDerivedDomain().getUpperBound() == 5);
+    CPPUNIT_ASSERT(t1.end()->getDerivedDomain().getLowerBound() == 5);
+    CPPUNIT_ASSERT(t1.end()->getDerivedDomain().getUpperBound() == 10);
+    CPPUNIT_ASSERT(t2.start()->getDerivedDomain().getLowerBound() == 5);
+    CPPUNIT_ASSERT(t2.start()->getDerivedDomain().getUpperBound() == 10);
+    CPPUNIT_ASSERT(t2.end()->getDerivedDomain().getLowerBound() == 6);
+    CPPUNIT_ASSERT(t2.end()->getDerivedDomain().getUpperBound() == 20);
 
     delete (Constraint*) beforeConstraint;
     TN_DEFAULT_TEARDOWN();
@@ -287,7 +287,7 @@ private:
     CD_DEFAULT_SETUP(ce,db,false);
 
     ObjectId timeline = (new Timeline(db.getId(), "Objects", LabelStr("o2")))->getId();
-    assertTrue(!timeline.isNoId());
+    CPPUNIT_ASSERT(!timeline.isNoId());
 
     db.close();
     
@@ -312,11 +312,11 @@ private:
     const TemporalPropagatorId& tp = (TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal"));
 
     // assert from propagator directly
-    assertTrue (tp->canPrecede(first.end(), second.start()));
-    assertTrue (tp->canPrecede(second.end(), first.start()));
+    CPPUNIT_ASSERT (tp->canPrecede(first.end(), second.start()));
+    CPPUNIT_ASSERT (tp->canPrecede(second.end(), first.start()));
 
     // compute from advisor
-    assertTrue (db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
+    CPPUNIT_ASSERT (db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
     
     second.start()->reset();
     second.end()->reset();
@@ -332,19 +332,19 @@ private:
 
     ConstraintId beforeConstraint = db.getConstraintEngine()->createConstraint(LabelStr("precedes"),
 									temp);
-    assertTrue(beforeConstraint.isValid());
+    CPPUNIT_ASSERT(beforeConstraint.isValid());
 
     bool res = ce.propagate();
-    assertTrue(res);
+    CPPUNIT_ASSERT(res);
     
     // compute from propagator directly
     res = tp->canPrecede(first.end(), second.start());
-    assertTrue (res);
-    assertTrue (!tp->canPrecede(second.end(), first.start()));
+    CPPUNIT_ASSERT (res);
+    CPPUNIT_ASSERT (!tp->canPrecede(second.end(), first.start()));
 
     // compute from advisor
-    assertTrue (db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
-    assertTrue (!db.getTemporalAdvisor()->canPrecede(second.getId(), first.getId()));
+    CPPUNIT_ASSERT (db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
+    CPPUNIT_ASSERT (!db.getTemporalAdvisor()->canPrecede(second.getId(), first.getId()));
 
     delete (Constraint*) beforeConstraint;
 
@@ -359,13 +359,13 @@ private:
     second.end()->restrictBaseDomain(dom2);
 
     res = ce.propagate();
-    assertTrue(res);
+    CPPUNIT_ASSERT(res);
     
     // compute from propagator directly
-    assertTrue (!tp->canPrecede(first.end(), second.start()));
-    assertTrue (tp->canPrecede(second.end(), first.start()));
+    CPPUNIT_ASSERT (!tp->canPrecede(first.end(), second.start()));
+    CPPUNIT_ASSERT (tp->canPrecede(second.end(), first.start()));
     // compute from advisor
-    assertTrue (!db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
+    CPPUNIT_ASSERT (!db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
 
     TN_DEFAULT_TEARDOWN();
     return true;
@@ -375,7 +375,7 @@ private:
     CD_DEFAULT_SETUP(ce,db,false);
 
     ObjectId timeline = (new Timeline(db.getId(), "Objects", LabelStr("o2")))->getId();
-    assertTrue(!timeline.isNoId());
+    CPPUNIT_ASSERT(!timeline.isNoId());
 
     db.close();
 
@@ -403,10 +403,10 @@ private:
     ce.propagate();
 
     // compute from propagator directly
-    assertTrue (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canFitBetween(token.start(), token.end(), predecessor.end(), successor.start()));
+    CPPUNIT_ASSERT (((TemporalPropagatorId)ce.getPropagatorByName(LabelStr("Temporal")))->canFitBetween(token.start(), token.end(), predecessor.end(), successor.start()));
 
     // compute from advisor
-    assertTrue (db.getTemporalAdvisor()->canFitBetween(token.getId(), predecessor.getId(), successor.getId()));
+    CPPUNIT_ASSERT (db.getTemporalAdvisor()->canFitBetween(token.getId(), predecessor.getId(), successor.getId()));
 
     TN_DEFAULT_TEARDOWN();
     return true;
@@ -416,7 +416,7 @@ private:
     CD_DEFAULT_SETUP(ce,db,false);
 
     ObjectId timeline = (new Timeline(db.getId(), "Objects", LabelStr("o2")))->getId();
-    assertTrue(!timeline.isNoId());
+    CPPUNIT_ASSERT(!timeline.isNoId());
 
     db.close();
 
@@ -447,18 +447,18 @@ private:
     ce.propagate();
 
     // Check that they can coincide, trivially.
-    assertTrue(db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t1.getId()));
+    CPPUNIT_ASSERT(db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t1.getId()));
 
     // May 1 very tight, but still ok
     t0.start()->specify(1);
     t0.end()->specify(2);
-    assertTrue(ce.propagate());
-    assertTrue(db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t1.getId()));
+    CPPUNIT_ASSERT(ce.propagate());
+    CPPUNIT_ASSERT(db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t1.getId()));
 
     // Make it too tight.
     t1.end()->specify(10);
     ce.propagate();
-    assertTrue(!db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t1.getId()));
+    CPPUNIT_ASSERT(!db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t1.getId()));
 
     // Reset, but impose constraints
     t0.start()->reset();
@@ -473,11 +473,11 @@ private:
     ConstraintId c1 = ce.getId()->createConstraint(LabelStr("precedes"),
 							  makeScope(t1.end(), t2.start()));
 
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
 
-    assertTrue(!db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t1.getId()));
-    assertTrue(!db.getTemporalAdvisor()->canBeConcurrent(t1.getId(), t2.getId()));
-    assertTrue(!db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t2.getId()));
+    CPPUNIT_ASSERT(!db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t1.getId()));
+    CPPUNIT_ASSERT(!db.getTemporalAdvisor()->canBeConcurrent(t1.getId(), t2.getId()));
+    CPPUNIT_ASSERT(!db.getTemporalAdvisor()->canBeConcurrent(t0.getId(), t2.getId()));
 
     delete (Constraint*) c0;
     delete (Constraint*) c1;
@@ -503,15 +503,15 @@ private:
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v1, v2, true );      
 
-      assertTrue( 10 == distance.getLowerBound() );
-      assertTrue( 40 == distance.getUpperBound() );
+      CPPUNIT_ASSERT( 10 == distance.getLowerBound() );
+      CPPUNIT_ASSERT( 40 == distance.getUpperBound() );
     }
     
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v2, v1, true );
       
-      assertTrue( -40 == distance.getLowerBound() );
-      assertTrue( -10 == distance.getUpperBound() );
+      CPPUNIT_ASSERT( -40 == distance.getLowerBound() );
+      CPPUNIT_ASSERT( -10 == distance.getUpperBound() );
     }
     
     IntervalIntDomain d3 = IntervalIntDomain( 5, 15 );
@@ -522,15 +522,15 @@ private:
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v1, v3, true );
       
-      assertTrue( -5 == distance.getLowerBound() );
-      assertTrue( 25 == distance.getUpperBound() );
+      CPPUNIT_ASSERT( -5 == distance.getLowerBound() );
+      CPPUNIT_ASSERT( 25 == distance.getUpperBound() );
     }
     
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v3, v1, true );
       
-      assertTrue( -25 == distance.getLowerBound() );
-      assertTrue(   5 == distance.getUpperBound() );
+      CPPUNIT_ASSERT( -25 == distance.getLowerBound() );
+      CPPUNIT_ASSERT(   5 == distance.getUpperBound() );
     }
 
 
@@ -542,15 +542,15 @@ private:
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v1, v4, true );
       
-      assertTrue( -10 == distance.getLowerBound() );
-      assertTrue(  15 == distance.getUpperBound() );
+      CPPUNIT_ASSERT( -10 == distance.getLowerBound() );
+      CPPUNIT_ASSERT(  15 == distance.getUpperBound() );
     }
     
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v4, v1, true );
       
-      assertTrue( -15 == distance.getLowerBound() );
-      assertTrue(  10 == distance.getUpperBound() );
+      CPPUNIT_ASSERT( -15 == distance.getLowerBound() );
+      CPPUNIT_ASSERT(  10 == distance.getUpperBound() );
     }
 
     IntervalIntDomain d5 = IntervalIntDomain( -20, 20 );
@@ -561,15 +561,15 @@ private:
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v1, v5, true );
       
-      assertTrue( -30 == distance.getLowerBound() );
-      assertTrue(  30 == distance.getUpperBound() );
+      CPPUNIT_ASSERT( -30 == distance.getLowerBound() );
+      CPPUNIT_ASSERT(  30 == distance.getUpperBound() );
     }
 
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v5, v1, true );
       
-      assertTrue( -30 == distance.getLowerBound() );
-      assertTrue(  30 == distance.getUpperBound() );
+      CPPUNIT_ASSERT( -30 == distance.getLowerBound() );
+      CPPUNIT_ASSERT(  30 == distance.getUpperBound() );
     }
 
     IntervalIntDomain d6 = IntervalIntDomain( -g_infiniteTime(), g_infiniteTime() );
@@ -583,15 +583,15 @@ private:
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v1, v7, true );
       
-      assertTrue( -g_infiniteTime() == distance.getLowerBound() );
-      assertTrue(  g_infiniteTime() == distance.getUpperBound() );
+      CPPUNIT_ASSERT( -g_infiniteTime() == distance.getLowerBound() );
+      CPPUNIT_ASSERT(  g_infiniteTime() == distance.getUpperBound() );
     }
 
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v7, v1, true );
       
-      assertTrue( -g_infiniteTime() == distance.getLowerBound() );
-      assertTrue(  g_infiniteTime() == distance.getUpperBound() );
+      CPPUNIT_ASSERT( -g_infiniteTime() == distance.getLowerBound() );
+      CPPUNIT_ASSERT(  g_infiniteTime() == distance.getUpperBound() );
     }
 
     //  <-inf>--------------------------------<inf>
@@ -600,8 +600,8 @@ private:
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v6, v7, true );
       
-      assertTrue( -g_infiniteTime() == distance.getLowerBound() );
-      assertTrue(  g_infiniteTime() == distance.getUpperBound() );
+      CPPUNIT_ASSERT( -g_infiniteTime() == distance.getLowerBound() );
+      CPPUNIT_ASSERT(  g_infiniteTime() == distance.getUpperBound() );
     }
 
     delete (ConstrainedVariable*) v1;
@@ -619,7 +619,7 @@ private:
     CD_DEFAULT_SETUP(ce,db,false);
 
     ObjectId timeline = (new Timeline(db.getId(), "Objects", LabelStr("o2")))->getId();
-    assertTrue(!timeline.isNoId());
+    CPPUNIT_ASSERT(!timeline.isNoId());
 
     db.close();
 
@@ -653,13 +653,13 @@ private:
 
     // Now changes on v0 should propagate to the end variable of t1.
     v0.restrictBaseDomain(IntervalIntDomain(8, 10));
-    assertTrue(t1.end()->getDerivedDomain() == IntervalIntDomain(8, 10));
+    CPPUNIT_ASSERT(t1.end()->getDerivedDomain() == IntervalIntDomain(8, 10));
 
     // If we split again, expect that the restriction now applies to the end-point
     // of the inactive token
     t2.cancel();
 
-    assertTrue(t2.end()->getDerivedDomain() == IntervalIntDomain(8, 10));
+    CPPUNIT_ASSERT(t2.end()->getDerivedDomain() == IntervalIntDomain(8, 10));
 
     TN_DEFAULT_TEARDOWN();
     return true;
@@ -678,7 +678,7 @@ private:
     DEFAULT_SETUP_RULES(ce,db,false);
 
     ObjectId timeline = (new Timeline(db.getId(), "Objects", LabelStr("o2")))->getId();
-    assertTrue(!timeline.isNoId());
+    CPPUNIT_ASSERT(!timeline.isNoId());
 
     db.close();
 
@@ -697,49 +697,49 @@ private:
     t1.addParameter(IntervalIntDomain(0,1),"IntervalParam");
     t1.close();
 
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
 
     // Activate immediately to trigger the rule.
     t1.activate();
-    assertTrue(t1.slaves().size() == 1);
+    CPPUNIT_ASSERT(t1.slaves().size() == 1);
 
-    assertTrue (ce.propagate());
+    CPPUNIT_ASSERT (ce.propagate());
 
     TokenId slave = *t1.slaves().begin();
 
-    assertTrue(t1.start()->derivedDomain().getLowerBound() == 0);
-    assertTrue(t1.start()->derivedDomain().getUpperBound() == 10);
-    assertTrue(t1.end()->derivedDomain().getLowerBound() == 1);
-    assertTrue(t1.end()->derivedDomain().getUpperBound() == 15);
-    assertTrue(slave->start()->derivedDomain().getLowerBound() == 1);
-    assertTrue(slave->start()->derivedDomain().getUpperBound() == 15);
-    assertTrue(slave->end()->derivedDomain().getLowerBound() == 2);
-    assertTrue(slave->end()->derivedDomain().getUpperBound() == 100);
+    CPPUNIT_ASSERT(t1.start()->derivedDomain().getLowerBound() == 0);
+    CPPUNIT_ASSERT(t1.start()->derivedDomain().getUpperBound() == 10);
+    CPPUNIT_ASSERT(t1.end()->derivedDomain().getLowerBound() == 1);
+    CPPUNIT_ASSERT(t1.end()->derivedDomain().getUpperBound() == 15);
+    CPPUNIT_ASSERT(slave->start()->derivedDomain().getLowerBound() == 1);
+    CPPUNIT_ASSERT(slave->start()->derivedDomain().getUpperBound() == 15);
+    CPPUNIT_ASSERT(slave->end()->derivedDomain().getLowerBound() == 2);
+    CPPUNIT_ASSERT(slave->end()->derivedDomain().getUpperBound() == 100);
 
     std::vector<ConstrainedVariableId> scope;
     scope.push_back(slave->end());
     scope.push_back(t1.parameters()[0]);
     ce.getId()->createConstraint(LabelStr("leq"), scope);
 
-    assertTrue (!ce.propagate());
+    CPPUNIT_ASSERT (!ce.propagate());
 
-    assertTrue(t1.start()->derivedDomain().getLowerBound() == 3);
-    assertTrue(t1.start()->derivedDomain().getUpperBound() == -2);
-    assertTrue(t1.end()->derivedDomain().getLowerBound() == 3);
-    assertTrue(t1.end()->derivedDomain().getUpperBound() == -2);
-    assertTrue(slave->start()->derivedDomain().getLowerBound() == 3);
-    assertTrue(slave->start()->derivedDomain().getUpperBound() == -2);
-    assertTrue(slave->end()->derivedDomain().getLowerBound() == 3);
-    assertTrue(slave->end()->derivedDomain().getUpperBound() == -2);
+    CPPUNIT_ASSERT(t1.start()->derivedDomain().getLowerBound() == 3);
+    CPPUNIT_ASSERT(t1.start()->derivedDomain().getUpperBound() == -2);
+    CPPUNIT_ASSERT(t1.end()->derivedDomain().getLowerBound() == 3);
+    CPPUNIT_ASSERT(t1.end()->derivedDomain().getUpperBound() == -2);
+    CPPUNIT_ASSERT(slave->start()->derivedDomain().getLowerBound() == 3);
+    CPPUNIT_ASSERT(slave->start()->derivedDomain().getUpperBound() == -2);
+    CPPUNIT_ASSERT(slave->end()->derivedDomain().getLowerBound() == 3);
+    CPPUNIT_ASSERT(slave->end()->derivedDomain().getUpperBound() == -2);
 
     t1.cancel();
 
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
 
-    assertTrue(t1.start()->derivedDomain().getLowerBound() == 0);
-    assertTrue(t1.start()->derivedDomain().getUpperBound() == 10);
-    assertTrue(t1.end()->derivedDomain().getLowerBound() == 1);
-    assertTrue(t1.end()->derivedDomain().getUpperBound() == 15);
+    CPPUNIT_ASSERT(t1.start()->derivedDomain().getLowerBound() == 0);
+    CPPUNIT_ASSERT(t1.start()->derivedDomain().getUpperBound() == 10);
+    CPPUNIT_ASSERT(t1.end()->derivedDomain().getLowerBound() == 1);
+    CPPUNIT_ASSERT(t1.end()->derivedDomain().getUpperBound() == 15);
 
     DEFAULT_TEARDOWN_RULES();
     return true;
@@ -751,9 +751,9 @@ private:
 class TemporalNetworkConstraintEngineOnlyTest {
 public:
   static bool test() {
-    runTest(testBasicAllocation);
-    runTest(testTemporalPropagation);
-    runTest(testTemporalNogood);
+    EUROPA_runTest(testBasicAllocation);
+    EUROPA_runTest(testTemporalPropagation);
+    EUROPA_runTest(testTemporalNogood);
     return true;
   }
 private:
@@ -793,7 +793,7 @@ private:
     ConstraintId duration1 = 
         ce.getId()->createConstraint(LabelStr("temporalDistance"), temp);
 
-    assertTrue(!duration1.isNoId());
+    CPPUNIT_ASSERT(!duration1.isNoId());
 
     temp.clear();
     temp.push_back(v4);
@@ -802,7 +802,7 @@ private:
     ConstraintId duration2 = 
         ce.getId()->createConstraint(LabelStr("temporalDistance"), temp);
 
-    assertTrue(!duration2.isNoId());
+    CPPUNIT_ASSERT(!duration2.isNoId());
 
     temp.clear();
     temp.push_back(v3);
@@ -810,16 +810,16 @@ private:
     ConstraintId beforeConstraint = 
         ce.getId()->createConstraint(LabelStr("precedes"), temp);
 
-    assertTrue(!beforeConstraint.isNoId());
+    CPPUNIT_ASSERT(!beforeConstraint.isNoId());
 
-    assertTrue(v1->derivedDomain().getLowerBound() == 0);
-    assertTrue(v1->derivedDomain().getUpperBound() == 5);
-    assertTrue(v3->derivedDomain().getLowerBound() == 5);
-    assertTrue(v3->derivedDomain().getUpperBound() == 10);
-    assertTrue(v4->derivedDomain().getLowerBound() == 5);
-    assertTrue(v4->derivedDomain().getUpperBound() == 10);
-    assertTrue(v6->derivedDomain().getLowerBound() == 6);
-    assertTrue(v6->derivedDomain().getUpperBound() == 20);
+    CPPUNIT_ASSERT(v1->derivedDomain().getLowerBound() == 0);
+    CPPUNIT_ASSERT(v1->derivedDomain().getUpperBound() == 5);
+    CPPUNIT_ASSERT(v3->derivedDomain().getLowerBound() == 5);
+    CPPUNIT_ASSERT(v3->derivedDomain().getUpperBound() == 10);
+    CPPUNIT_ASSERT(v4->derivedDomain().getLowerBound() == 5);
+    CPPUNIT_ASSERT(v4->derivedDomain().getUpperBound() == 10);
+    CPPUNIT_ASSERT(v6->derivedDomain().getLowerBound() == 6);
+    CPPUNIT_ASSERT(v6->derivedDomain().getUpperBound() == 20);
     
     delete (Constraint*) beforeConstraint;
     delete (Constraint*) duration1;
@@ -863,23 +863,23 @@ private:
     ConstrainedVariableId origin;
     tp->getTemporalNogood(origin,fromvars,tovars,lengths);
 
-    assertTrue(!consistent);
+    CPPUNIT_ASSERT(!consistent);
 
-    assertTrue(fromvars.size()==3);
-    assertTrue(tovars.size()==3);
-    assertTrue(lengths.size()==3);
+    CPPUNIT_ASSERT(fromvars.size()==3);
+    CPPUNIT_ASSERT(tovars.size()==3);
+    CPPUNIT_ASSERT(lengths.size()==3);
 
-    assertTrue(fromvars.at(0)==origin);
-    assertTrue(tovars.at(0)==v3);
-    assertTrue(lengths.at(0)==1);
+    CPPUNIT_ASSERT(fromvars.at(0)==origin);
+    CPPUNIT_ASSERT(tovars.at(0)==v3);
+    CPPUNIT_ASSERT(lengths.at(0)==1);
 
-    assertTrue(fromvars.at(1)==v1);
-    assertTrue(tovars.at(1)==origin);
-    assertTrue(lengths.at(1)==-1);
+    CPPUNIT_ASSERT(fromvars.at(1)==v1);
+    CPPUNIT_ASSERT(tovars.at(1)==origin);
+    CPPUNIT_ASSERT(lengths.at(1)==-1);
 
-    assertTrue(fromvars.at(2)==v3);
-    assertTrue(tovars.at(2)==v1);
-    assertTrue(lengths.at(2)==-1);
+    CPPUNIT_ASSERT(fromvars.at(2)==v3);
+    CPPUNIT_ASSERT(tovars.at(2)==v1);
+    CPPUNIT_ASSERT(lengths.at(2)==-1);
 
     delete (Constraint*) constraint;
     delete (ConstrainedVariable*) v1;
@@ -897,3 +897,24 @@ void TemporalNetworkModuleTests::runTests(std::string path) {
   runTestSuite(TemporalPropagatorTest::test);
   std::cout << "Finished" << std::endl;
 }
+
+void TemporalNetworkModuleTests::cppSetup()
+{
+  setTestLoadLibraryPath(".");
+}
+
+void TemporalNetworkModuleTests::temporalNetworkTests()
+{
+  TemporalNetworkTest::test();
+}
+
+void TemporalNetworkModuleTests::temporalNetworkConstraintEngineOnlyTests()
+{
+  TemporalNetworkConstraintEngineOnlyTest::test();
+}
+
+void TemporalNetworkModuleTests::temporalPropagatorTests()
+{
+  TemporalPropagatorTest::test();
+}
+

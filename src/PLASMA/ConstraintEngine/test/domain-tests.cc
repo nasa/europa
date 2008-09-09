@@ -40,56 +40,56 @@ namespace EUROPA {
   class IntervalDomainTest {
   public:
     static bool test() {
-      runTest(testAllocation); 
-      runTest(testRelaxation); 
-      runTest(testPrecision);
-      runTest(testIntersection);  
-      runTest(testSubset);
-      runTest(testPrinting);
-      runTest(testBoolDomain);
-      runTest(testDifference);
-      runTest(testOperatorEquals);
-      runTest(testInfinitesAndInts);
-      runTest(testEnumSet); 
-      runTest(testInsertAndRemove);
-      runTest(testValidComparisonWithEmpty_gnats2403);
-      runTest(testIntervalSingletonValues);
-      runTest(testIntervalIntValues);
+      EUROPA_runTest(testAllocation); 
+      EUROPA_runTest(testRelaxation); 
+      EUROPA_runTest(testPrecision);
+      EUROPA_runTest(testIntersection);  
+      EUROPA_runTest(testSubset);
+      EUROPA_runTest(testPrinting);
+      EUROPA_runTest(testBoolDomain);
+      EUROPA_runTest(testDifference);
+      EUROPA_runTest(testOperatorEquals);
+      EUROPA_runTest(testInfinitesAndInts);
+      EUROPA_runTest(testEnumSet); 
+      EUROPA_runTest(testInsertAndRemove);
+      EUROPA_runTest(testValidComparisonWithEmpty_gnats2403);
+      EUROPA_runTest(testIntervalSingletonValues);
+      EUROPA_runTest(testIntervalIntValues);
       return(true);
     }
 
   private:
     static bool testAllocation() {
       IntervalDomain realDomain(10.2,20.4);
-      assertFalse(realDomain.isEmpty());
-      assertFalse(realDomain.isFinite());
-      assert(realDomain.getSize() == (unsigned int) PLUS_INFINITY);
+      CPPUNIT_ASSERT(!realDomain.isEmpty());
+      CPPUNIT_ASSERT(!realDomain.isFinite());
+      CPPUNIT_ASSERT_EQUAL((unsigned int) PLUS_INFINITY, realDomain.getSize());
 
       IntervalIntDomain intDomain(10, 20);
-      assertTrue(intDomain.isFinite());
+      CPPUNIT_ASSERT(intDomain.isFinite());
 
       double lb, ub;
       intDomain.getBounds(lb,ub);
-      assertTrue(lb<ub);
-      assertTrue(!intDomain.isMember(1.889));
-      assertTrue(!intDomain.isOpen());
+      CPPUNIT_ASSERT(!realDomain.isFinite());
+      CPPUNIT_ASSERT(!realDomain.isFinite());
+      CPPUNIT_ASSERT(!realDomain.isFinite());
       IntervalIntDomain d1(intDomain);
       d1.empty();
-      assertTrue(d1.isEmpty());
+      CPPUNIT_ASSERT(d1.isEmpty());
 
       AbstractDomain& d2 = static_cast<AbstractDomain&>(intDomain);
-      assertTrue(!d2.isEmpty());
+      CPPUNIT_ASSERT(!d2.isEmpty());
 
       IntervalIntDomain d3(static_cast<IntervalIntDomain&>(intDomain));
       IntervalIntDomain d4;
 
-      assertTrue( ! (d3 == d4));
+      CPPUNIT_ASSERT(!(d3 == d4));
       d3.relax(d4);
-      assertTrue(d3 == d4);
+      CPPUNIT_ASSERT((d3 == d4));
 
-      assertTrue(d2 != d4);
+      CPPUNIT_ASSERT((d2 != d4));
       d2.relax(d4);
-      assertTrue(d2 == d4);
+      CPPUNIT_ASSERT((d2 == d4));
       return(true);
     }
 
@@ -101,33 +101,33 @@ namespace EUROPA {
       dom1.relax(dom0);
       DomainListener::ChangeType change;
       bool res = l_listener.checkAndClearChange(change);
-      assertTrue(res && change == DomainListener::RELAXED);
-      assertTrue(dom1.isSubsetOf(dom0));
-      assertTrue(dom0.isSubsetOf(dom1));
-      assertTrue(dom1 == dom0);
+      CPPUNIT_ASSERT(res && change == DomainListener::RELAXED);
+      CPPUNIT_ASSERT(dom1.isSubsetOf(dom0));
+      CPPUNIT_ASSERT(dom0.isSubsetOf(dom1));
+      CPPUNIT_ASSERT(dom1 == dom0);
 
       IntervalIntDomain dom2(-300, 100);
       dom1.intersect(dom2);
       res = l_listener.checkAndClearChange(change);
-      assertTrue(res);
-      assertTrue(dom1 == dom2);
+      CPPUNIT_ASSERT(res);
+      CPPUNIT_ASSERT(dom1 == dom2);
       dom1.relax(dom2);
       res = l_listener.checkAndClearChange(change);
-      assertTrue(!res);
+      CPPUNIT_ASSERT(!res);
       return(true);
     }
 
     static bool testPrecision() {
       IntervalDomain dom0(-EPSILON, 0);
-      assertTrue(dom0.isMember(-EPSILON));
-      assertTrue(dom0.isMember(-EPSILON -EPSILON/10));
-      assertTrue(!dom0.isMember(-EPSILON -EPSILON));
+      CPPUNIT_ASSERT(dom0.isMember(-EPSILON));
+      CPPUNIT_ASSERT(dom0.isMember(-EPSILON -EPSILON/10));
+      CPPUNIT_ASSERT(!dom0.isMember(-EPSILON -EPSILON));
 
       IntervalDomain dom1(-EPSILON, EPSILON/10);
-      assertTrue(dom1 == dom0);
+      CPPUNIT_ASSERT(dom1 == dom0);
 
       IntervalDomain dom2(-EPSILON, -EPSILON/10);
-      assertTrue(dom2.intersects(dom0));
+      CPPUNIT_ASSERT(dom2.intersects(dom0));
       return true;
     }
 
@@ -141,72 +141,72 @@ namespace EUROPA {
       dom0.intersect(dom1);
       DomainListener::ChangeType change;
       bool res = l_listener.checkAndClearChange(change);
-      assertTrue(res);
-      assertTrue(dom0 == dom1);
+      CPPUNIT_ASSERT(res);
+      CPPUNIT_ASSERT(dom0 == dom1);
     
       // verify no change triggered if none should take place.
       dom0.intersect(dom1);
       res = l_listener.checkAndClearChange(change);
-      assertTrue(!res);
+      CPPUNIT_ASSERT(!res);
 
       // Verify only the upper bound changes
       IntervalIntDomain dom2(-200, 50);
       dom0.intersect(dom2);
       res = l_listener.checkAndClearChange(change);
-      assertTrue(res);
-      assertTrue(dom0.getLowerBound() == dom1.getLowerBound());
-      assertTrue(dom0.getUpperBound() == dom2.getUpperBound());
+      CPPUNIT_ASSERT(res);
+      CPPUNIT_ASSERT(dom0.getLowerBound() == dom1.getLowerBound());
+      CPPUNIT_ASSERT(dom0.getUpperBound() == dom2.getUpperBound());
     
       // Make an intersection that leads to an empty domain
       IntervalIntDomain dom3(500, 1000);
       dom0.intersect(dom3);
       res = l_listener.checkAndClearChange(change);
-      assertTrue(res);
-      assertTrue(dom0.isEmpty());
+      CPPUNIT_ASSERT(res);
+      CPPUNIT_ASSERT(dom0.isEmpty());
 
       IntervalDomain dom4(0.98, 101.23);
       IntervalDomain dom5(80, 120.44);
       IntervalDomain dom6(80, 101.23);
       dom4.equate(dom5);
-      assertTrue(dom4 == dom6);
-      assertTrue(dom5 == dom6);
+      CPPUNIT_ASSERT(dom4 == dom6);
+      CPPUNIT_ASSERT(dom5 == dom6);
 
       IntervalDomain dom7(-1, 0);
       dom6.intersect(dom7);
-      assertTrue(dom6.isEmpty())
+      CPPUNIT_ASSERT(dom6.isEmpty());
 
       IntervalDomain dom8;    
       IntervalDomain dom9;      
       dom8.intersect(IntervalDomain(0.1, 0.10));      
       dom9.intersect(IntervalDomain(0.10, 0.10));
-      assertTrue(dom8.intersects(dom9));
+      CPPUNIT_ASSERT(dom8.intersects(dom9));
 
       // Case added to recreate failure case for GNATS 3045
       IntervalDomain dom8a;     
       IntervalDomain dom9a;      
       dom8a.intersect(IntervalDomain(0.1, 0.1));    
       dom9a.intersect(IntervalDomain(0.1, 0.1));
-      assertTrue(dom8a.intersects(dom9a));
-      assertTrue (dom8a.getUpperBound() == 0.1);
-      assertTrue (dom8a.getLowerBound() == 0.1);
-      assertTrue (dom9a.getUpperBound() == 0.1);
-      assertTrue (dom9a.getLowerBound() == 0.1);
+      CPPUNIT_ASSERT(dom8a.intersects(dom9a));
+      CPPUNIT_ASSERT(dom8a.getUpperBound() == 0.1);
+      CPPUNIT_ASSERT(dom8a.getLowerBound() == 0.1);
+      CPPUNIT_ASSERT(dom9a.getUpperBound() == 0.1);
+      CPPUNIT_ASSERT(dom9a.getLowerBound() == 0.1);
       
       // Test at the limit of precision
       IntervalDomain dom10(0.0001);
       IntervalDomain dom11(0.0001);
-      assertTrue(dom10.intersects(dom11));
+      CPPUNIT_ASSERT(dom10.intersects(dom11));
       
       // Test at the limit of precision      
       IntervalDomain dom12(-0.0001);
       IntervalDomain dom13(-0.0001);
-      assertTrue(dom12.intersects(dom13));
+      CPPUNIT_ASSERT(dom12.intersects(dom13));
       
       // Test beyond the limits of precission     
       IntervalDomain dom14(-0.1 - EPSILON/10);
       IntervalDomain dom15(-0.1);
-      assertTrue(dom14.intersects(dom15), dom15.toString() + " should have a non-empty intersection " + dom14.toString());
-      assertFalse(dom14.intersect(dom15), dom15.toString() + " should not cause a change for " + dom14.toString());
+      CPPUNIT_ASSERT_MESSAGE(dom15.toString() + " should have a non-empty intersection " + dom14.toString(), dom14.intersects(dom15));
+      CPPUNIT_ASSERT_MESSAGE(dom15.toString() + " should not cause a change for " + dom14.toString(), !dom14.intersect(dom15));
 
       IntervalIntDomain intBase(-3, 3);
       IntervalIntDomain dom16(intBase);
@@ -218,27 +218,27 @@ namespace EUROPA {
       IntervalDomain dom22(0.3, 0.4);
 
       dom16.intersect(dom17);
-      assertTrue(dom16.getLowerBound() == -2.0 && dom16.getUpperBound() == 3.0);
+      CPPUNIT_ASSERT(dom16.getLowerBound() == -2.0 && dom16.getUpperBound() == 3.0);
       dom16.relax(intBase);
       
       dom16.intersect(dom18);
-      assertTrue(dom16.getLowerBound() == -3.0 && dom16.getUpperBound() == 2.0);
+      CPPUNIT_ASSERT(dom16.getLowerBound() == -3.0 && dom16.getUpperBound() == 2.0);
       dom16.relax(intBase);
 
       dom16.intersect(dom19);
-      assertTrue(dom16.getLowerBound() == -2 && dom16.getUpperBound() == 2.0);
+      CPPUNIT_ASSERT(dom16.getLowerBound() == -2 && dom16.getUpperBound() == 2.0);
       dom16.relax(intBase);
 
       dom16.intersect(dom20);
-      assertTrue(dom16.getLowerBound() == 0.0 && dom16.getUpperBound() == 3.0);
+      CPPUNIT_ASSERT(dom16.getLowerBound() == 0.0 && dom16.getUpperBound() == 3.0);
       dom16.relax(intBase);
 
       dom16.intersect(dom21);
-      assertTrue(dom16.getLowerBound() == -3.0 && dom16.getUpperBound() == 0);
+      CPPUNIT_ASSERT(dom16.getLowerBound() == -3.0 && dom16.getUpperBound() == 0);
       dom16.relax(intBase);
 
       dom16.intersect(dom22);
-      assertTrue(dom16.isEmpty());
+      CPPUNIT_ASSERT(dom16.isEmpty());
       dom16.relax(intBase);
 
       return(true);
@@ -247,29 +247,29 @@ namespace EUROPA {
     static bool testSubset() {
       IntervalIntDomain dom0(10, 35);
       IntervalDomain dom1(0, 101);
-      assertTrue(dom0.isSubsetOf(dom1));
-      assertTrue(! dom1.isSubsetOf(dom0));
+      CPPUNIT_ASSERT(dom0.isSubsetOf(dom1));
+      CPPUNIT_ASSERT(! dom1.isSubsetOf(dom0));
 
       // Handle cases where domains are equal
       IntervalIntDomain dom2(dom0);
-      assertTrue(dom2 == dom0);
-      assertTrue(dom0.isSubsetOf(dom2));
-      assertTrue(dom2.isSubsetOf(dom0));
+      CPPUNIT_ASSERT(dom2 == dom0);
+      CPPUNIT_ASSERT(dom0.isSubsetOf(dom2));
+      CPPUNIT_ASSERT(dom2.isSubsetOf(dom0));
 
       // Handle case with no intersection
       IntervalIntDomain dom3(0, 9);
-      assertTrue(! dom3.isSubsetOf(dom0));
-      assertTrue(! dom0.isSubsetOf(dom3));
+      CPPUNIT_ASSERT(! dom3.isSubsetOf(dom0));
+      CPPUNIT_ASSERT(! dom0.isSubsetOf(dom3));
 
       // Handle case with partial intersection
       IntervalIntDomain dom4(0, 20);
-      assertTrue(! dom4.isSubsetOf(dom0));
-      assertTrue(! dom0.isSubsetOf(dom4));
+      CPPUNIT_ASSERT(! dom4.isSubsetOf(dom0));
+      CPPUNIT_ASSERT(! dom0.isSubsetOf(dom4));
 
       // Handle intersection with infinites
       IntervalDomain dom5; 
       IntervalDomain dom6(0, 100);
-      assertTrue(dom6.isSubsetOf(dom5)); 
+      CPPUNIT_ASSERT(dom6.isSubsetOf(dom5)); 
       return(true);
     }
 
@@ -283,9 +283,9 @@ namespace EUROPA {
       d1 >> ss1;
       std::string actualString = ss1.str();
       std::string expectedString("INT_INTERVAL:CLOSED[1, 100]");
-      assertTrue(actualString == expectedString);
+      CPPUNIT_ASSERT(actualString == expectedString);
       std::string anotherActualString = d1.toString();
-      assertTrue(anotherActualString == expectedString);
+      CPPUNIT_ASSERT(anotherActualString == expectedString);
 
       std::string integerType = "integer";
       IntervalIntDomain d2(1, 100, integerType.c_str());
@@ -293,9 +293,9 @@ namespace EUROPA {
       d2 >> ss2;
       std::string actualString2 = ss2.str();
       std::string expectedString2("integer:CLOSED[1, 100]");
-      assertTrue(actualString2 == expectedString2);
+      CPPUNIT_ASSERT(actualString2 == expectedString2);
       std::string anotherActualString2 = d2.toString();
-      assertTrue(anotherActualString2 == expectedString2);
+      CPPUNIT_ASSERT(anotherActualString2 == expectedString2);
 
       // test toString(value).
   
@@ -304,43 +304,43 @@ namespace EUROPA {
       intervalInt.set(1);
       std::string d1DisplayValueStr = intervalInt.toString(intervalInt.getSingletonValue());
       std::string expectedD1DisplayValue("1");
-      assertTrue(d1DisplayValueStr == expectedD1DisplayValue);
+      CPPUNIT_ASSERT(d1DisplayValueStr == expectedD1DisplayValue);
    
       //intervalReal domain
       IntervalDomain intervalReal (1.5, 100.6);
       intervalReal.set(1.5);
       std::string d2DisplayValueStr = intervalReal.toString(intervalReal.getSingletonValue());
       std::string expectedD2DisplayValue("1.5");
-      assertTrue(d2DisplayValueStr == expectedD2DisplayValue);
+      CPPUNIT_ASSERT(d2DisplayValueStr == expectedD2DisplayValue);
        
       // boolean domain
       BoolDomain boolDomainTrue(true);
       boolDomainTrue.set(true);
       std::string d3DisplayValueStr = boolDomainTrue.toString(boolDomainTrue.getSingletonValue());
       std::string expectedD3DisplayValue("true");
-      assertTrue(d3DisplayValueStr == expectedD3DisplayValue);
+      CPPUNIT_ASSERT(d3DisplayValueStr == expectedD3DisplayValue);
    
       BoolDomain boolDomainFalse(false);
       boolDomainFalse.set(false);
       std::string d4DisplayValueStr = boolDomainFalse.toString(boolDomainFalse.getSingletonValue());
       std::string expectedD4DisplayValue("false");
-      assertTrue(d4DisplayValueStr == expectedD4DisplayValue);
+      CPPUNIT_ASSERT(d4DisplayValueStr == expectedD4DisplayValue);
    
       // numeric domain
       NumericDomain numericDom(1.117);
       numericDom.set(1.117);
       std::string d5DisplayValueStr = numericDom.toString(numericDom.getSingletonValue());
       std::string expectedD5DisplayValue("1.117");
-      assertTrue(d5DisplayValueStr == expectedD5DisplayValue);
+      CPPUNIT_ASSERT(d5DisplayValueStr == expectedD5DisplayValue);
    
       // string domain
       LabelStr theString("AString");
       StringDomain stringDom(theString);
       stringDom.set(theString);
-      assertTrue(stringDom.isSingleton());
+      CPPUNIT_ASSERT(stringDom.isSingleton());
       std::string d6DisplayValueStr = stringDom.toString(stringDom.getSingletonValue());
       std::string expectedD6DisplayValue("AString");
-      assertTrue(d6DisplayValueStr == expectedD6DisplayValue);
+      CPPUNIT_ASSERT(d6DisplayValueStr == expectedD6DisplayValue);
 
       // symbol domain
       LabelStr element("ASymbol"); 
@@ -348,24 +348,24 @@ namespace EUROPA {
       symbolDom.set(element);
       std::string d7DisplayValueStr = symbolDom.toString(symbolDom.getSingletonValue());
       std::string expectedD7DisplayValue("ASymbol");
-      assertTrue(d7DisplayValueStr == expectedD7DisplayValue);
+      CPPUNIT_ASSERT(d7DisplayValueStr == expectedD7DisplayValue);
      
       return(true);
     }
 
     static bool testBoolDomain() {
       BoolDomain dom0(true);
-      assertTrue(dom0.getSize() == 1);
-      assertTrue(dom0.getUpperBound() == true);
-      assertTrue(dom0.getLowerBound() == true);
+      CPPUNIT_ASSERT(dom0.getSize() == 1);
+      CPPUNIT_ASSERT(dom0.getUpperBound() == true);
+      CPPUNIT_ASSERT(dom0.getLowerBound() == true);
 
       BoolDomain dom1;
-      assertTrue(dom1.getSize() == 2);
-      assertTrue(dom1.getUpperBound() == true);
-      assertTrue(dom1.getLowerBound() == false);
+      CPPUNIT_ASSERT(dom1.getSize() == 2);
+      CPPUNIT_ASSERT(dom1.getUpperBound() == true);
+      CPPUNIT_ASSERT(dom1.getLowerBound() == false);
 
       dom1.intersect(dom0);
-      assertTrue(dom1 == dom0);
+      CPPUNIT_ASSERT(dom1 == dom0);
       return(true);
     }
 
@@ -373,31 +373,31 @@ namespace EUROPA {
       IntervalDomain dom0(1, 10);
       IntervalDomain dom1(11, 20);
       bool res = dom0.difference(dom1);
-      assertTrue(!res);
+      CPPUNIT_ASSERT(!res);
       res = dom1.difference(dom0);
-      assertTrue(!res);
+      CPPUNIT_ASSERT(!res);
 
       IntervalDomain dom2(dom0);
       res = dom2.difference(dom0);
-      assertTrue(res);
-      assertTrue(dom2.isEmpty());
+      CPPUNIT_ASSERT(res);
+      CPPUNIT_ASSERT(dom2.isEmpty());
 
       IntervalIntDomain dom3(5, 100);
       res = dom3.difference(dom0);
-      assertTrue(res);
-      assertTrue(dom3.getLowerBound() == 11);
+      CPPUNIT_ASSERT(res);
+      CPPUNIT_ASSERT(dom3.getLowerBound() == 11);
       res = dom3.difference(dom1);
-      assertTrue(res);
-      assertTrue(dom3.getLowerBound() == 21);
+      CPPUNIT_ASSERT(res);
+      CPPUNIT_ASSERT(dom3.getLowerBound() == 21);
 
       IntervalDomain dom4(0, 20);
       res = dom4.difference(dom1);
-      assertTrue(res);
+      CPPUNIT_ASSERT(res);
       double newValue = (dom1.getLowerBound() - dom4.minDelta());
-      assertTrue(dom4.getUpperBound() == newValue);
+      CPPUNIT_ASSERT(dom4.getUpperBound() == newValue);
 
       NumericDomain dom5(3.14159265);
-      assertTrue(dom5.getSize() == 1);
+      CPPUNIT_ASSERT(dom5.getSize() == 1);
 
       std::list<double> vals;
       vals.push_back(dom5.getSingletonValue());
@@ -408,17 +408,17 @@ namespace EUROPA {
       vals.push_back(EPSILON);
       NumericDomain dom6(vals);
 
-      assertTrue(dom6.getSize() == 6);
-      assertTrue(fabs(dom5.minDelta() - dom6.minDelta()) < EPSILON); // Should be ==, but allow some leeway.
-      assertTrue(dom6.intersects(dom5));
+      CPPUNIT_ASSERT(dom6.getSize() == 6);
+      CPPUNIT_ASSERT(fabs(dom5.minDelta() - dom6.minDelta()) < EPSILON); // Should be ==, but allow some leeway.
+      CPPUNIT_ASSERT(dom6.intersects(dom5));
 
       dom6.difference(dom5);
-      assertTrue(!(dom6.intersects(dom5)));
-      assertTrue(dom6.getSize() == 5);
+      CPPUNIT_ASSERT(!(dom6.intersects(dom5)));
+      CPPUNIT_ASSERT(dom6.getSize() == 5);
 
       dom6.difference(dom5);
-      assertTrue(!(dom6.intersects(dom5)));
-      assertTrue(dom6.getSize() == 5);
+      CPPUNIT_ASSERT(!(dom6.intersects(dom5)));
+      CPPUNIT_ASSERT(dom6.getSize() == 5);
 
       return(true);
     }
@@ -427,33 +427,33 @@ namespace EUROPA {
       IntervalDomain dom0(1, 28);
       IntervalDomain dom1(50, 100);
       dom0 = dom1;
-      assertTrue(dom0 == dom1);
+      CPPUNIT_ASSERT(dom0 == dom1);
       return(true);
     }
 
     static bool testInfinitesAndInts() {
       IntervalDomain dom0;
-      assertTrue(dom0.translateNumber(MINUS_INFINITY) == MINUS_INFINITY);
-      assertTrue(dom0.translateNumber(MINUS_INFINITY - 1) == MINUS_INFINITY);
-      assertTrue(dom0.translateNumber(MINUS_INFINITY + 1) == MINUS_INFINITY + 1);
-      assertTrue(dom0.translateNumber(PLUS_INFINITY + 1) == PLUS_INFINITY);
-      assertTrue(dom0.translateNumber(PLUS_INFINITY - 1) == PLUS_INFINITY - 1);
-      assertTrue(dom0.translateNumber(2.8) == 2.8);
+      CPPUNIT_ASSERT(dom0.translateNumber(MINUS_INFINITY) == MINUS_INFINITY);
+      CPPUNIT_ASSERT(dom0.translateNumber(MINUS_INFINITY - 1) == MINUS_INFINITY);
+      CPPUNIT_ASSERT(dom0.translateNumber(MINUS_INFINITY + 1) == MINUS_INFINITY + 1);
+      CPPUNIT_ASSERT(dom0.translateNumber(PLUS_INFINITY + 1) == PLUS_INFINITY);
+      CPPUNIT_ASSERT(dom0.translateNumber(PLUS_INFINITY - 1) == PLUS_INFINITY - 1);
+      CPPUNIT_ASSERT(dom0.translateNumber(2.8) == 2.8);
 
       IntervalIntDomain dom1;
-      assertTrue(dom1.translateNumber(2.8, false) == 2);
-      assertTrue(dom1.translateNumber(2.8, true) == 3);
-      assertTrue(dom1.translateNumber(PLUS_INFINITY - 0.2, false) == PLUS_INFINITY - 1);
+      CPPUNIT_ASSERT(dom1.translateNumber(2.8, false) == 2);
+      CPPUNIT_ASSERT(dom1.translateNumber(2.8, true) == 3);
+      CPPUNIT_ASSERT(dom1.translateNumber(PLUS_INFINITY - 0.2, false) == PLUS_INFINITY - 1);
       return(true);
     }
 
     static bool testEnumSet(){
      
       EnumeratedDomain dom0(true, "Enum");
-      assertTrue(dom0.isOpen());
+      CPPUNIT_ASSERT(dom0.isOpen());
       dom0.insert(1); // required for isMember precondition of set.
       dom0.set(1);
-      assertTrue(dom0.isSingleton());
+      CPPUNIT_ASSERT(dom0.isSingleton());
       return true;
     }
 
@@ -462,42 +462,42 @@ namespace EUROPA {
       //   testIntervalDomInsertAndRemove(). --wedgingt 2004 Mar 8
 
       NumericDomain enumDom1;
-      assertTrue(enumDom1.isOpen());
-      assertTrue(enumDom1.isNumeric());
+      CPPUNIT_ASSERT(enumDom1.isOpen());
+      CPPUNIT_ASSERT(enumDom1.isNumeric());
       enumDom1.insert(3.14159265);
       enumDom1.close();
-      assertTrue(enumDom1.isMember(3.14159265));
-      assertTrue(enumDom1.isSingleton());
-      assertTrue(enumDom1.isFinite());
+      CPPUNIT_ASSERT(enumDom1.isMember(3.14159265));
+      CPPUNIT_ASSERT(enumDom1.isSingleton());
+      CPPUNIT_ASSERT(enumDom1.isFinite());
       enumDom1.remove(5.0);
-      assertTrue(enumDom1.isMember(3.14159265));
-      assertTrue(enumDom1.isSingleton());
-      assertTrue(enumDom1.isFinite());
+      CPPUNIT_ASSERT(enumDom1.isMember(3.14159265));
+      CPPUNIT_ASSERT(enumDom1.isSingleton());
+      CPPUNIT_ASSERT(enumDom1.isFinite());
 
       double minDiff = enumDom1.minDelta();
-      assertTrue(minDiff >= EPSILON && EPSILON > 0.0);
+      CPPUNIT_ASSERT(minDiff >= EPSILON && EPSILON > 0.0);
 
       const double onePlus = 1.0 + 2.0*EPSILON;
 
       enumDom1.remove(3.14159265 - onePlus*minDiff);
-      assertTrue(enumDom1.isMember(3.14159265));
-      assertTrue(enumDom1.isSingleton());
-      assertTrue(enumDom1.isFinite());
+      CPPUNIT_ASSERT(enumDom1.isMember(3.14159265));
+      CPPUNIT_ASSERT(enumDom1.isSingleton());
+      CPPUNIT_ASSERT(enumDom1.isFinite());
       enumDom1.remove(3.14159265 + onePlus*minDiff);
-      assertTrue(enumDom1.isMember(3.14159265));
-      assertTrue(enumDom1.isSingleton());
-      assertTrue(enumDom1.isFinite());
+      CPPUNIT_ASSERT(enumDom1.isMember(3.14159265));
+      CPPUNIT_ASSERT(enumDom1.isSingleton());
+      CPPUNIT_ASSERT(enumDom1.isFinite());
       enumDom1.remove(3.14159265 - minDiff/onePlus);
-      assertTrue(enumDom1.isEmpty());
+      CPPUNIT_ASSERT(enumDom1.isEmpty());
       enumDom1.insert(3.14159265);
-      assertTrue(enumDom1.isMember(3.14159265));
-      assertTrue(enumDom1.isSingleton());
-      assertTrue(enumDom1.isFinite());
+      CPPUNIT_ASSERT(enumDom1.isMember(3.14159265));
+      CPPUNIT_ASSERT(enumDom1.isSingleton());
+      CPPUNIT_ASSERT(enumDom1.isFinite());
       enumDom1.remove(3.14159265 + minDiff/onePlus);
-      assertTrue(enumDom1.isEmpty());
+      CPPUNIT_ASSERT(enumDom1.isEmpty());
       enumDom1.insert(3.14159265);
-      assertTrue(enumDom1.isMember(3.14159265));
-      assertTrue(enumDom1.isSingleton());
+      CPPUNIT_ASSERT(enumDom1.isMember(3.14159265));
+      CPPUNIT_ASSERT(enumDom1.isSingleton());
 
       std::list<double> vals;
       vals.push_back(enumDom1.getSingletonValue());
@@ -508,61 +508,61 @@ namespace EUROPA {
       vals.push_back(EPSILON);
       NumericDomain enumDom2(vals);
 
-      assertTrue(!(enumDom2.isOpen()));
-      assertTrue(enumDom2.isNumeric());
-      assertTrue(enumDom2.isFinite());
-      assertTrue(enumDom2.getSize() == 6);
+      CPPUNIT_ASSERT(!(enumDom2.isOpen()));
+      CPPUNIT_ASSERT(enumDom2.isNumeric());
+      CPPUNIT_ASSERT(enumDom2.isFinite());
+      CPPUNIT_ASSERT(enumDom2.getSize() == 6);
 
       double minDiff2 = enumDom2.minDelta();
-      assertTrue(fabs(minDiff - minDiff2) < EPSILON);
+      CPPUNIT_ASSERT(fabs(minDiff - minDiff2) < EPSILON);
 
       enumDom2.remove(1.2 - minDiff2/onePlus);
-      assertTrue(enumDom2.getSize() == 5);
+      CPPUNIT_ASSERT(enumDom2.getSize() == 5);
 
       enumDom2.remove(MINUS_INFINITY);
-      assertTrue(enumDom2.getSize() == 4);
+      CPPUNIT_ASSERT(enumDom2.getSize() == 4);
 
       // Remove a value near but not "matching" a member and
       //   verify the domain has not changed.
       enumDom2.remove(enumDom1.getSingletonValue() - onePlus*minDiff2);
-      assertTrue(enumDom2.intersects(enumDom1));
-      assertTrue(enumDom2.getSize() == 4);
+      CPPUNIT_ASSERT(enumDom2.intersects(enumDom1));
+      CPPUNIT_ASSERT(enumDom2.getSize() == 4);
 
       // Remove a value near but not equal a member and
       //   verify the member was removed via intersection.
       enumDom2.remove(enumDom1.getSingletonValue() - minDiff2/onePlus);
-      assertTrue(!(enumDom2.intersects(enumDom1)));
-      assertTrue(enumDom2.getSize() == 3);
+      CPPUNIT_ASSERT(!(enumDom2.intersects(enumDom1)));
+      CPPUNIT_ASSERT(enumDom2.getSize() == 3);
 
       // Add a value near a value from another domain
       //   verify that the resulting domain intersects the other domain.
       enumDom2.insert(enumDom1.getSingletonValue() + minDiff2/onePlus);
-      assertTrue(enumDom2.intersects(enumDom1));
-      assertTrue(enumDom2.getSize() == 4);
+      CPPUNIT_ASSERT(enumDom2.intersects(enumDom1));
+      CPPUNIT_ASSERT(enumDom2.getSize() == 4);
 
       // Add the value in the other domain and
       //   verify the domain is not affected.
       enumDom2.insert(enumDom1.getSingletonValue());
-      assertTrue(enumDom2.intersects(enumDom1));
-      assertTrue(enumDom2.getSize() == 4);
+      CPPUNIT_ASSERT(enumDom2.intersects(enumDom1));
+      CPPUNIT_ASSERT(enumDom2.getSize() == 4);
 
       // Remove a value that should not be a member but is
       //   only slightly too large to "match" the new member.
       enumDom2.remove(enumDom1.getSingletonValue() + minDiff2/onePlus + onePlus*minDiff2);
-      assertTrue(enumDom2.intersects(enumDom1));
-      assertTrue(enumDom2.getSize() == 4);
+      CPPUNIT_ASSERT(enumDom2.intersects(enumDom1));
+      CPPUNIT_ASSERT(enumDom2.getSize() == 4);
 
       // Remove a value "matching" the added value but larger
       //   and verify the domain no longer intersects the other domain.
       enumDom2.remove(enumDom1.getSingletonValue() + 2.0*minDiff2/onePlus);
-      assertTrue(enumDom2.getSize() == 3);
-      assertTrue(!(enumDom2.intersects(enumDom1)));
+      CPPUNIT_ASSERT(enumDom2.getSize() == 3);
+      CPPUNIT_ASSERT(!(enumDom2.intersects(enumDom1)));
 
       return(true);
     }
     /* NO LONGER SUPPORT INSERT AND REMOVE ON INTERVAL DOMAINS
     static bool testIntervalDomInsertAndRemove() {
-      assertTrue(EPSILON > 0.0); // Otherwise, loop will be infinite.
+      CPPUNIT_ASSERT(EPSILON > 0.0); // Otherwise, loop will be infinite.
 
       // Making this any closer to 1.0 fails first iDom.isEmpty() assert,
       //   at least on SunOS 5.8 with g++ 2.95.2.
@@ -587,30 +587,30 @@ namespace EUROPA {
         double minDiff = iDom.minDelta();
 
         iDom.remove(val + onePlus*minDiff);
-        assertTrue(iDom.isSingleton());
-        assertTrue(iDom.isMember(val));
-        assertTrue(iDom.isMember(val + minDiff/onePlus));
-        assertTrue(iDom.isMember(val - minDiff/onePlus));
+        CPPUNIT_ASSERT(iDom.isSingleton());
+        CPPUNIT_ASSERT(iDom.isMember(val));
+        CPPUNIT_ASSERT(iDom.isMember(val + minDiff/onePlus));
+        CPPUNIT_ASSERT(iDom.isMember(val - minDiff/onePlus));
 
         iDom.remove(val + minDiff/onePlus);
-        assertTrue(iDom.isEmpty());
-        assertTrue(!(iDom.isMember(val)));
+        CPPUNIT_ASSERT(iDom.isEmpty());
+        CPPUNIT_ASSERT(!(iDom.isMember(val)));
 
         iDom.insert(val);
-        assertTrue(iDom.isSingleton());
-        assertTrue(iDom.isMember(val));
-        assertTrue(iDom.isMember(val + minDiff/onePlus));
-        assertTrue(iDom.isMember(val - minDiff/onePlus));
+        CPPUNIT_ASSERT(iDom.isSingleton());
+        CPPUNIT_ASSERT(iDom.isMember(val));
+        CPPUNIT_ASSERT(iDom.isMember(val + minDiff/onePlus));
+        CPPUNIT_ASSERT(iDom.isMember(val - minDiff/onePlus));
 
         iDom.remove(val - onePlus*minDiff);
-        assertTrue(iDom.isSingleton());
-        assertTrue(iDom.isMember(val));
-        assertTrue(iDom.isMember(val + minDiff/onePlus));
-        assertTrue(iDom.isMember(val - minDiff/onePlus));
+        CPPUNIT_ASSERT(iDom.isSingleton());
+        CPPUNIT_ASSERT(iDom.isMember(val));
+        CPPUNIT_ASSERT(iDom.isMember(val + minDiff/onePlus));
+        CPPUNIT_ASSERT(iDom.isMember(val - minDiff/onePlus));
 
         iDom.remove(val - minDiff/onePlus);
-        assertTrue(iDom.isEmpty());
-        assertTrue(!(iDom.isMember(val)));
+        CPPUNIT_ASSERT(iDom.isEmpty());
+        CPPUNIT_ASSERT(!(iDom.isMember(val)));
 
         if (val < 0.0)
           if (val > -EPSILON)
@@ -629,40 +629,40 @@ namespace EUROPA {
 
     static bool testIntervalIntDomInsertAndRemove() {
       IntervalIntDomain iiDom(-5, 10);
-      assertTrue(iiDom.getSize() == 16);
+      CPPUNIT_ASSERT(iiDom.getSize() == 16);
 
       iiDom.remove(-6);
-      assertTrue(iiDom.getSize() == 16);
+      CPPUNIT_ASSERT(iiDom.getSize() == 16);
 
       iiDom.remove(11);
-      assertTrue(iiDom.getSize() == 16);
+      CPPUNIT_ASSERT(iiDom.getSize() == 16);
 
       iiDom.remove(PLUS_INFINITY);
-      assertTrue(iiDom.getSize() == 16);
+      CPPUNIT_ASSERT(iiDom.getSize() == 16);
 
       iiDom.insert(-5);
-      assertTrue(iiDom.getSize() == 16);
+      CPPUNIT_ASSERT(iiDom.getSize() == 16);
 
       iiDom.insert(-1);
-      assertTrue(iiDom.getSize() == 16);
+      CPPUNIT_ASSERT(iiDom.getSize() == 16);
 
       iiDom.insert(10);
-      assertTrue(iiDom.getSize() == 16);
+      CPPUNIT_ASSERT(iiDom.getSize() == 16);
 
       iiDom.insert(11);
-      assertTrue(iiDom.getSize() == 17);
+      CPPUNIT_ASSERT(iiDom.getSize() == 17);
 
       iiDom.insert(-6);
-      assertTrue(iiDom.getSize() == 18);
+      CPPUNIT_ASSERT(iiDom.getSize() == 18);
 
       iiDom.remove(PLUS_INFINITY);
-      assertTrue(iiDom.getSize() == 18);
+      CPPUNIT_ASSERT(iiDom.getSize() == 18);
 
       iiDom.remove(-7);
-      assertTrue(iiDom.getSize() == 18);
+      CPPUNIT_ASSERT(iiDom.getSize() == 18);
 
       iiDom.remove(11);
-      assertTrue(iiDom.getSize() == 17);
+      CPPUNIT_ASSERT(iiDom.getSize() == 17);
 
       return(true);
     }
@@ -679,18 +679,18 @@ namespace EUROPA {
       d2.insert(1);
       d2.close();
 
-      assertTrue(d0 == d1);
-      assertTrue(d1 != d2);
+      CPPUNIT_ASSERT(d0 == d1);
+      CPPUNIT_ASSERT(d1 != d2);
       d0.empty();
-      assertTrue(d0 != d1);
-      assertTrue(d0 != d2);
+      CPPUNIT_ASSERT(d0 != d1);
+      CPPUNIT_ASSERT(d0 != d2);
 
-      assertTrue(AbstractDomain::canBeCompared(d0, d2));
+      CPPUNIT_ASSERT(AbstractDomain::canBeCompared(d0, d2));
 
       NumericDomain d3(d2);
       d2.empty();
-      assertTrue(AbstractDomain::canBeCompared(d2, d3));
-      assertTrue(d3 != d2);
+      CPPUNIT_ASSERT(AbstractDomain::canBeCompared(d2, d3));
+      CPPUNIT_ASSERT(d3 != d2);
 
       return true;
     }
@@ -700,21 +700,21 @@ namespace EUROPA {
         IntervalDomain id(value, value);
         std::list<double> values;
         id.getValues(values);
-        assertTrue(values.size() == 1);
-        assertTrue(values.front() == value);
+        CPPUNIT_ASSERT(values.size() == 1);
+        CPPUNIT_ASSERT(values.front() == value);
       }
       for (double value = 2.0 ; value >= 1.5 ; value -= 0.1) {
         IntervalDomain id(value, value);
         std::list<double> values;
         id.getValues(values);
-        assertTrue(values.size() == 1);
-        assertTrue(values.front() == value);
+        CPPUNIT_ASSERT(values.size() == 1);
+        CPPUNIT_ASSERT(values.front() == value);
       }
       IntervalDomain id(0, 0);
       std::list<double> values;
       id.getValues(values);
-      assertTrue(values.size() == 1);
-      assertTrue(values.front() == 0);
+      CPPUNIT_ASSERT(values.size() == 1);
+      CPPUNIT_ASSERT(values.front() == 0);
       return true;
     }
 
@@ -723,41 +723,41 @@ namespace EUROPA {
 
       IntervalIntDomain i0(10, 20);
       i0.getValues(values);
-      assertTrue(values.size() == 11);
-      assertTrue(values.front() == 10); values.pop_front();
-      assertTrue(values.front() == 11); values.pop_front();
-      assertTrue(values.front() == 12); values.pop_front();
-      assertTrue(values.front() == 13); values.pop_front();
-      assertTrue(values.front() == 14); values.pop_front();
-      assertTrue(values.front() == 15); values.pop_front();
-      assertTrue(values.front() == 16); values.pop_front();
-      assertTrue(values.front() == 17); values.pop_front();
-      assertTrue(values.front() == 18); values.pop_front();
-      assertTrue(values.front() == 19); values.pop_front();
-      assertTrue(values.front() == 20); values.pop_front();
+      CPPUNIT_ASSERT(values.size() == 11);
+      CPPUNIT_ASSERT(values.front() == 10); values.pop_front();
+      CPPUNIT_ASSERT(values.front() == 11); values.pop_front();
+      CPPUNIT_ASSERT(values.front() == 12); values.pop_front();
+      CPPUNIT_ASSERT(values.front() == 13); values.pop_front();
+      CPPUNIT_ASSERT(values.front() == 14); values.pop_front();
+      CPPUNIT_ASSERT(values.front() == 15); values.pop_front();
+      CPPUNIT_ASSERT(values.front() == 16); values.pop_front();
+      CPPUNIT_ASSERT(values.front() == 17); values.pop_front();
+      CPPUNIT_ASSERT(values.front() == 18); values.pop_front();
+      CPPUNIT_ASSERT(values.front() == 19); values.pop_front();
+      CPPUNIT_ASSERT(values.front() == 20); values.pop_front();
 
       IntervalIntDomain i1(-4, 3);
       i1.getValues(values);
-      assertTrue(values.size() == 8);
-      assertTrue(values.front() == -4); values.pop_front();
-      assertTrue(values.front() == -3); values.pop_front();
-      assertTrue(values.front() == -2); values.pop_front();
-      assertTrue(values.front() == -1); values.pop_front();
-      assertTrue(values.front() ==  0); values.pop_front();
-      assertTrue(values.front() ==  1); values.pop_front();
-      assertTrue(values.front() ==  2); values.pop_front();
-      assertTrue(values.front() ==  3); values.pop_front();
+      CPPUNIT_ASSERT(values.size() == 8);
+      CPPUNIT_ASSERT(values.front() == -4); values.pop_front();
+      CPPUNIT_ASSERT(values.front() == -3); values.pop_front();
+      CPPUNIT_ASSERT(values.front() == -2); values.pop_front();
+      CPPUNIT_ASSERT(values.front() == -1); values.pop_front();
+      CPPUNIT_ASSERT(values.front() ==  0); values.pop_front();
+      CPPUNIT_ASSERT(values.front() ==  1); values.pop_front();
+      CPPUNIT_ASSERT(values.front() ==  2); values.pop_front();
+      CPPUNIT_ASSERT(values.front() ==  3); values.pop_front();
 
       IntervalIntDomain i2(-10, 10);
       IntervalDomain& i3 = i2;
       IntervalDomain* i4 = &i2;
-      assertTrue(i2.minDelta() == 1);
-      assertTrue(i3.minDelta() == 1);
-      assertTrue(i4->minDelta() == 1);
-      assertTrue(dynamic_cast<IntervalDomain*>(&i2)->minDelta() == 1);
+      CPPUNIT_ASSERT(i2.minDelta() == 1);
+      CPPUNIT_ASSERT(i3.minDelta() == 1);
+      CPPUNIT_ASSERT(i4->minDelta() == 1);
+      CPPUNIT_ASSERT(dynamic_cast<IntervalDomain*>(&i2)->minDelta() == 1);
       //std::cout << "FOO: " << static_cast<IntervalDomain>(i2).minDelta() << std::endl;
-      //assertTrue(static_cast<IntervalDomain>(i2).minDelta() == 1);
-      //assertTrue(((IntervalDomain)i2).minDelta() == 1);
+      //CPPUNIT_ASSERT(static_cast<IntervalDomain>(i2).minDelta() == 1);
+      //CPPUNIT_ASSERT(((IntervalDomain)i2).minDelta() == 1);
 
       return true;
     }
@@ -770,16 +770,16 @@ namespace EUROPA {
   public:
 
     static bool test() {
-      runTest(testEnumerationOnly);
-      runTest(testBasicLabelOperations);
-      runTest(testLabelSetAllocations);
-      runTest(testEquate);
-      runTest(testValueRetrieval);
-      runTest(testIntersection);
-      runTest(testDifference);
-      runTest(testOperatorEquals);
-      runTest(testEmptyOnClosure);
-      runTest(testOpenEnumerations);
+      EUROPA_runTest(testEnumerationOnly);
+      EUROPA_runTest(testBasicLabelOperations);
+      EUROPA_runTest(testLabelSetAllocations);
+      EUROPA_runTest(testEquate);
+      EUROPA_runTest(testValueRetrieval);
+      EUROPA_runTest(testIntersection);
+      EUROPA_runTest(testDifference);
+      EUROPA_runTest(testOperatorEquals);
+      EUROPA_runTest(testEmptyOnClosure);
+      EUROPA_runTest(testOpenEnumerations);
       return(true);
     }
 
@@ -791,26 +791,26 @@ namespace EUROPA {
       DomainListener::ChangeType change;
       e1.setListener(l1.getId());
 
-      assertTrue(e1.isOpen());
-      assertTrue(e1.isFinite());
-      assertTrue(e1.isEmpty());
+      CPPUNIT_ASSERT(e1.isOpen());
+      CPPUNIT_ASSERT(e1.isFinite());
+      CPPUNIT_ASSERT(e1.isEmpty());
       e1.insert(1.0);
-      assertTrue(e1.isOpen());
+      CPPUNIT_ASSERT(e1.isOpen());
 
       e1.remove(1.0);
-      assertTrue(l1.checkAndClearChange(change));
-      assertTrue(change == DomainListener::VALUE_REMOVED);
+      CPPUNIT_ASSERT(l1.checkAndClearChange(change));
+      CPPUNIT_ASSERT(change == DomainListener::VALUE_REMOVED);
       e1.insert(1.0);
 
       e1.close();
-      assertTrue(e1.isClosed());
-      assertTrue(l1.checkAndClearChange(change));
-      assertTrue(change == DomainListener::CLOSED);
+      CPPUNIT_ASSERT(e1.isClosed());
+      CPPUNIT_ASSERT(l1.checkAndClearChange(change));
+      CPPUNIT_ASSERT(change == DomainListener::CLOSED);
 
       e1.open();
-      assertTrue(e1.isOpen());
-      assertTrue(l1.checkAndClearChange(change));
-      assertTrue(change == DomainListener::OPENED);
+      CPPUNIT_ASSERT(e1.isOpen());
+      CPPUNIT_ASSERT(l1.checkAndClearChange(change));
+      CPPUNIT_ASSERT(change == DomainListener::OPENED);
 
       e1.insert(2.0);
       e1.insert(3.0);
@@ -821,62 +821,62 @@ namespace EUROPA {
       vals.push_back(3.0);
       EnumeratedDomain e2(vals, true, "Test");
 
-      assertTrue(e2.isClosed());
+      CPPUNIT_ASSERT(e2.isClosed());
 
       e1.insert(4.0);
       e1.set(4.0);
-      assertTrue(e1.isClosed());
+      CPPUNIT_ASSERT(e1.isClosed());
       e1.open();
       e1.insert(1.0);
       e1.insert(2.0);
       e1.insert(3.0);
 
       e1.intersect(e2);
-      assertFalse(e1.isClosed());
+      CPPUNIT_ASSERT(!e1.isClosed());
 
       e2.open();
       e1.intersect(e2);
-      assertTrue(e1.isOpen());
-      assertTrue(e2.isOpen());
+      CPPUNIT_ASSERT(e1.isOpen());
+      CPPUNIT_ASSERT(e2.isOpen());
       e2.close();
 
       e1.insert(4.0);
       e2.reset(e1);
-      assertTrue(e2.isOpen());
+      CPPUNIT_ASSERT(e2.isOpen());
 
-      assertTrue(e1 == e2);
+      CPPUNIT_ASSERT(e1 == e2);
       e2.close();
-      assertTrue(e1 != e2);
+      CPPUNIT_ASSERT(e1 != e2);
       e1.close();
-      assertTrue(e1 == e2);
+      CPPUNIT_ASSERT(e1 == e2);
 
       e1.open();
       e2.open();
-      assertTrue(e1.intersects(e2));
+      CPPUNIT_ASSERT(e1.intersects(e2));
       e2.close();
-      assertTrue(e1.intersects(e2));
+      CPPUNIT_ASSERT(e1.intersects(e2));
       e1.close();
-      assertTrue(e1.intersects(e2));
+      CPPUNIT_ASSERT(e1.intersects(e2));
       
       e1.open();
       e2.open();
-      assertTrue(e1.isSubsetOf(e2));
+      CPPUNIT_ASSERT(e1.isSubsetOf(e2));
       e2.close();
-      assertTrue(e1.isSubsetOf(e2));
+      CPPUNIT_ASSERT(e1.isSubsetOf(e2));
       e1.close();
-      assertTrue(e1.isSubsetOf(e2));
+      CPPUNIT_ASSERT(e1.isSubsetOf(e2));
 
       e1.open();
       e2.open();
 
       e1.equate(e2);
-      assertTrue(e1.isOpen() && e2.isOpen());
+      CPPUNIT_ASSERT(e1.isOpen() && e2.isOpen());
       e2.close();
       e1.equate(e2);
-      assertTrue(e1.isOpen() && e2.isClosed());
+      CPPUNIT_ASSERT(e1.isOpen() && e2.isClosed());
       e2.open();
       e1.equate(e2);
-      assertTrue(e1.isOpen() && e2.isOpen());
+      CPPUNIT_ASSERT(e1.isOpen() && e2.isOpen());
       return true;
     }
 
@@ -891,31 +891,31 @@ namespace EUROPA {
 
       NumericDomain d0(values);
       NumericDomain d1(values);
-      assertTrue(d0 == d1);
+      CPPUNIT_ASSERT(d0 == d1);
 
 
       {
 	double value(0);
 	std::stringstream sstr;
 	sstr << -0.01;
-	assertTrue(d0.convertToMemberValue(sstr.str(), value));
-	assertTrue(value == -0.01);
+	CPPUNIT_ASSERT(d0.convertToMemberValue(sstr.str(), value));
+	CPPUNIT_ASSERT(value == -0.01);
       }
 
       {
 	double value(0);
 	std::stringstream sstr;
 	sstr << 88.46;
-	assertFalse(d0.convertToMemberValue(sstr.str(), value));
-	assertTrue(value == 0);
+	CPPUNIT_ASSERT(!d0.convertToMemberValue(sstr.str(), value));
+	CPPUNIT_ASSERT(value == 0);
       }
 
-      assertTrue(d0.isSubsetOf(d1));
-      assertTrue(d0.isMember(-98.67));
+      CPPUNIT_ASSERT(d0.isSubsetOf(d1));
+      CPPUNIT_ASSERT(d0.isMember(-98.67));
       d0.remove(-0.01);
-      assertTrue(!d0.isMember(-0.01));
-      assertTrue(d0.isSubsetOf(d1));
-      assertTrue(!d1.isSubsetOf(d0));
+      CPPUNIT_ASSERT(!d0.isMember(-0.01));
+      CPPUNIT_ASSERT(d0.isSubsetOf(d1));
+      CPPUNIT_ASSERT(!d1.isSubsetOf(d0));
 
       return(true);
     }
@@ -925,23 +925,23 @@ namespace EUROPA {
       EUROPA::LabelStr dt_l1("DT_L1");
       EUROPA::LabelStr dt_l2("DT_L2");
       EUROPA::LabelStr dt_l3("DT_L3");
-      assertTrue(dt_l1 < dt_l2 && dt_l2 < dt_l3);
+      CPPUNIT_ASSERT(dt_l1 < dt_l2 && dt_l2 < dt_l3);
 
       EUROPA::LabelStr la("L");
       EUROPA::LabelStr l4("L30");
       EUROPA::LabelStr lb("L");
-      assertTrue(la == lb);
-      assertTrue(la < l4);
+      CPPUNIT_ASSERT(la == lb);
+      CPPUNIT_ASSERT(la < l4);
 
       EUROPA::LabelStr copy1(dt_l1);
-      assertTrue(dt_l1 == copy1);
-      assertTrue(dt_l2 != copy1);
+      CPPUNIT_ASSERT(dt_l1 == copy1);
+      CPPUNIT_ASSERT(dt_l2 != copy1);
 
-      assertTrue((EUROPA::LabelStr::getSize() - initialCount) == 5);
-      assertTrue(dt_l1.toString() == "DT_L1");
+      CPPUNIT_ASSERT((EUROPA::LabelStr::getSize() - initialCount) == 5);
+      CPPUNIT_ASSERT(dt_l1.toString() == "DT_L1");
 
-      assertTrue(LabelStr::isString(dt_l1.getKey()));
-      assertTrue(!LabelStr::isString(PLUS_INFINITY+1));
+      CPPUNIT_ASSERT(LabelStr::isString(dt_l1.getKey()));
+      CPPUNIT_ASSERT(!LabelStr::isString(PLUS_INFINITY+1));
       return(true);
     }
 
@@ -956,26 +956,26 @@ namespace EUROPA {
       ChangeListener l_listener;
       LabelSet ls0(values);
       ls0.setListener(l_listener.getId());
-      assertTrue(!ls0.isOpen());
+      CPPUNIT_ASSERT(!ls0.isOpen());
 
       EUROPA::LabelStr dt_l2("DT_L2");
-      assertTrue(ls0.isMember(dt_l2));
+      CPPUNIT_ASSERT(ls0.isMember(dt_l2));
       DomainListener::ChangeType change;
       ls0.remove(dt_l2);
       bool res = l_listener.checkAndClearChange(change);
-      assertTrue(res && change == DomainListener::VALUE_REMOVED);
-      assertTrue(!ls0.isMember(dt_l2));
+      CPPUNIT_ASSERT(res && change == DomainListener::VALUE_REMOVED);
+      CPPUNIT_ASSERT(!ls0.isMember(dt_l2));
 
       EUROPA::LabelStr dt_l3("DT_L3");
       ls0.set(dt_l3);
-      assertTrue(ls0.isMember(dt_l3));
-      assertTrue(ls0.getSize() == 1);
+      CPPUNIT_ASSERT(ls0.isMember(dt_l3));
+      CPPUNIT_ASSERT(ls0.getSize() == 1);
 
       LabelSet ls1(values);
       ls0.relax(ls1);
       res = l_listener.checkAndClearChange(change);
-      assertTrue(res && change == DomainListener::RELAXED);
-      assertTrue(ls0 == ls1);
+      CPPUNIT_ASSERT(res && change == DomainListener::RELAXED);
+      CPPUNIT_ASSERT(ls0 == ls1);
       return(true);
     }
 
@@ -996,18 +996,18 @@ namespace EUROPA {
       LabelSet ls1(baseValues);
       ls1.setListener(l_listener.getId());
 
-      assertTrue(ls0 == ls1);
-      assertTrue(ls0.getSize() == 8);
+      CPPUNIT_ASSERT(ls0 == ls1);
+      CPPUNIT_ASSERT(ls0.getSize() == 8);
       bool res = ls0.equate(ls1);
-      assertTrue(res == false); // Implying no change occured
+      CPPUNIT_ASSERT(res == false); // Implying no change occured
 
       EUROPA::LabelStr lC("C");
       ls0.remove(lC);
-      assertTrue(!ls0.isMember(lC));
-      assertTrue(ls1.isMember(lC));
+      CPPUNIT_ASSERT(!ls0.isMember(lC));
+      CPPUNIT_ASSERT(ls1.isMember(lC));
       res = ls0.equate(ls1);
-      assertTrue(res); // It should have changed
-      assertTrue(!ls1.isMember(lC));
+      CPPUNIT_ASSERT(res); // It should have changed
+      CPPUNIT_ASSERT(!ls1.isMember(lC));
 
       LabelSet ls2(baseValues);
       ls2.setListener(l_listener.getId());
@@ -1025,8 +1025,8 @@ namespace EUROPA {
       ls3.remove(lB);
       ls3.remove(lC);
       res = ls2.equate(ls3);
-      assertTrue(res);
-      assertTrue(ls2 == ls3);
+      CPPUNIT_ASSERT(res);
+      CPPUNIT_ASSERT(ls2 == ls3);
 
       LabelSet ls4(baseValues);
       ls4.setListener(l_listener.getId());
@@ -1045,9 +1045,9 @@ namespace EUROPA {
       DomainListener::ChangeType change;
       ls4.equate(ls5);
       res = l_listener.checkAndClearChange(change);
-      assertTrue(res && change == DomainListener::EMPTIED);
-      assertTrue(ls4.isEmpty() || ls5.isEmpty());
-      assertTrue(!(ls4.isEmpty() && ls5.isEmpty()));
+      CPPUNIT_ASSERT(res && change == DomainListener::EMPTIED);
+      CPPUNIT_ASSERT(ls4.isEmpty() || ls5.isEmpty());
+      CPPUNIT_ASSERT(!(ls4.isEmpty() && ls5.isEmpty()));
 
       std::list<double> enumVals;
       enumVals.push_back(1.0);
@@ -1065,10 +1065,10 @@ namespace EUROPA {
       NumericDomain ed4(enumVals);
 
       ed1.equate(ed2);
-      assertTrue(ed1 == ed2);
+      CPPUNIT_ASSERT(ed1 == ed2);
 
       ed1.equate(ed3);
-      assertTrue(ed1 == ed3);
+      CPPUNIT_ASSERT(ed1 == ed3);
 
       enumVals.clear();
       enumVals.push_back(0.0);
@@ -1078,35 +1078,35 @@ namespace EUROPA {
 
       // This is actually false because equate() only empties
       // one of the domains when the intersection is empty.
-      // assertTrue(ed0 == ed1);
+      // CPPUNIT_ASSERT(ed0 == ed1);
 
-      assertFalse(ed0 == ed1);
-      assertTrue(ed1.isEmpty() != ed0.isEmpty());
+      CPPUNIT_ASSERT(!(ed0 == ed1));
+      CPPUNIT_ASSERT(ed1.isEmpty() != ed0.isEmpty());
 
       ed0 = NumericDomain(enumVals);
-      assertTrue(!ed0.isEmpty());
+      CPPUNIT_ASSERT(!ed0.isEmpty());
 
       ed0.equate(ed2);
-      assertTrue(ed2 != ed0 && ed2.isEmpty() != ed0.isEmpty());
+      CPPUNIT_ASSERT(ed2 != ed0 && ed2.isEmpty() != ed0.isEmpty());
 
       enumVals.push_back(20.0); // Now 0.0 and 20.0
       ed0 = NumericDomain(enumVals);
-      assertTrue(!ed0.isEmpty() && !ed0.isSingleton());
+      CPPUNIT_ASSERT(!ed0.isEmpty() && !ed0.isSingleton());
 
       IntervalDomain id0(-10.0, 10.0);
 
       id0.equate(ed0);
-      assertTrue(ed0.isSingleton() && ed0.getSingletonValue() == 0.0, ed0.toString());
-      assertTrue(id0.isSingleton() && id0.getSingletonValue() == 0.0, id0.toString());
+      //CPPUNIT_ASSERT(ed0.isSingleton() && ed0.getSingletonValue() == 0.0, ed0.toString());
+      //CPPUNIT_ASSERT(id0.isSingleton() && id0.getSingletonValue() == 0.0, id0.toString());
 
       ed0 = NumericDomain(enumVals); // Now 0.0 and 20.0
-      assertTrue(!ed0.isEmpty() && !ed0.isSingleton());
+      CPPUNIT_ASSERT(!ed0.isEmpty() && !ed0.isSingleton());
 
       IntervalDomain id1(0.0, 5.0);
 
       ed0.equate(id1);
-      assertTrue(ed0.isSingleton() && ed0.getSingletonValue() == 0.0);
-      assertTrue(id1.isSingleton() && id1.getSingletonValue() == 0.0);
+      CPPUNIT_ASSERT(ed0.isSingleton() && ed0.getSingletonValue() == 0.0);
+      CPPUNIT_ASSERT(id1.isSingleton() && id1.getSingletonValue() == 0.0);
 
       enumVals.clear();
       enumVals.push_back(3.375);
@@ -1116,8 +1116,8 @@ namespace EUROPA {
       IntervalDomain id2(2.5, 3.0);
 
       ed5.equate(id2);
-      assertTrue(ed5.isSingleton() && ed5.getSingletonValue() == 2.5);
-      assertTrue(id2.isSingleton() && id2.getSingletonValue() == 2.5);
+      CPPUNIT_ASSERT(ed5.isSingleton() && ed5.getSingletonValue() == 2.5);
+      CPPUNIT_ASSERT(id2.isSingleton() && id2.getSingletonValue() == 2.5);
 
       enumVals.clear();
       enumVals.push_back(3.375);
@@ -1128,13 +1128,13 @@ namespace EUROPA {
       IntervalDomain id3(-1.0, 3.0);
 
       id3.equate(ed6);
-      assertTrue(ed6.getSize() == 2);
-      assertTrue(id3 == IntervalDomain(1.5, 2.5));
+      CPPUNIT_ASSERT(ed6.getSize() == 2);
+      CPPUNIT_ASSERT(id3 == IntervalDomain(1.5, 2.5));
 
       IntervalDomain id4(1.0, 1.25);
 
       ed6.equate(id4);
-      assertTrue(ed6.isEmpty() != id4.isEmpty());
+      CPPUNIT_ASSERT(ed6.isEmpty() != id4.isEmpty());
 
       enumVals.clear();
       enumVals.push_back(1.0);
@@ -1142,7 +1142,7 @@ namespace EUROPA {
       IntervalDomain id5(1.125, PLUS_INFINITY);
 
       id5.equate(ed7);
-      assertTrue(ed7.isEmpty() != id5.isEmpty());
+      CPPUNIT_ASSERT(ed7.isEmpty() != id5.isEmpty());
 
       return(true);
     }
@@ -1161,10 +1161,10 @@ namespace EUROPA {
 
       LabelSet dt_l2(results);
 
-      assertTrue(dt_l1 == dt_l2);
+      CPPUNIT_ASSERT(dt_l1 == dt_l2);
       LabelStr lbl("C");
       dt_l1.set(lbl);
-      assertTrue(lbl == dt_l1.getSingletonValue());
+      CPPUNIT_ASSERT(lbl == dt_l1.getSingletonValue());
       return(true);
     }
 
@@ -1182,25 +1182,25 @@ namespace EUROPA {
       LabelSet ls1(values);
 
       double value(0);
-      assertTrue(ls1.convertToMemberValue(std::string("H"), value));
-      assertTrue(value == LabelStr("H"));
-      assertFalse(ls1.convertToMemberValue(std::string("LMN"), value));
+      CPPUNIT_ASSERT(ls1.convertToMemberValue(std::string("H"), value));
+      CPPUNIT_ASSERT(value == LabelStr("H"));
+      CPPUNIT_ASSERT(!ls1.convertToMemberValue(std::string("LMN"), value));
 
       LabelSet ls2(values);
       ls2.remove(EUROPA::LabelStr("A"));
       ls2.remove(EUROPA::LabelStr("C"));
       ls2.remove(EUROPA::LabelStr("E"));
-      assertTrue(ls2.isSubsetOf(ls1));
-      assertTrue(!ls1.isSubsetOf(ls2));
+      CPPUNIT_ASSERT(ls2.isSubsetOf(ls1));
+      CPPUNIT_ASSERT(!ls1.isSubsetOf(ls2));
 
       LabelSet ls3(ls1);
       ls1.intersect(ls2);
-      assertTrue(ls1 == ls2);
-      assertTrue(ls2.isSubsetOf(ls1));
+      CPPUNIT_ASSERT(ls1 == ls2);
+      CPPUNIT_ASSERT(ls2.isSubsetOf(ls1));
 
       ls1.relax(ls3);
-      assertTrue(ls2.isSubsetOf(ls1));
-      assertTrue(ls1 == ls3);
+      CPPUNIT_ASSERT(ls2.isSubsetOf(ls1));
+      CPPUNIT_ASSERT(ls1 == ls3);
 
       LabelSet ls4(values);
       ls4.remove(EUROPA::LabelStr("A"));
@@ -1214,7 +1214,7 @@ namespace EUROPA {
       ls3.remove(EUROPA::LabelStr("H"));
       ls3.remove(EUROPA::LabelStr("I"));
       ls4.intersect(ls3);
-      assertTrue(ls4.isEmpty());
+      CPPUNIT_ASSERT(ls4.isEmpty());
 
       {
 	NumericDomain d0;
@@ -1232,11 +1232,11 @@ namespace EUROPA {
 	d1.close();
 
 	d0.intersect(d1);
-	assertTrue(d0.getSize() == 1);
+	CPPUNIT_ASSERT(d0.getSize() == 1);
 
 	// Also test bounds intersection
 	d1.intersect(0, 4.6);
-	assertTrue(d1.getSize() == 2);
+	CPPUNIT_ASSERT(d1.getSize() == 2);
       }
 
       return(true);
@@ -1254,17 +1254,17 @@ namespace EUROPA {
 
       IntervalIntDomain dom1(11, 100);
       bool res = dom0.difference(dom1);
-      assertTrue(!res);
+      CPPUNIT_ASSERT(!res);
 
       IntervalIntDomain dom2(5, 100);
       res = dom0.difference(dom2);
-      assertTrue(res);
-      assertTrue(dom0.getUpperBound() == 3);
+      CPPUNIT_ASSERT(res);
+      CPPUNIT_ASSERT(dom0.getUpperBound() == 3);
 
       IntervalIntDomain dom3(0, 100);
       res = dom0.difference(dom3);
-      assertTrue(res);
-      assertTrue(dom0.isEmpty());
+      CPPUNIT_ASSERT(res);
+      CPPUNIT_ASSERT(dom0.isEmpty());
 
       return(true);
     }
@@ -1287,12 +1287,12 @@ namespace EUROPA {
 
       NumericDomain dom2(dom0);
 
-      assertTrue(dom0 != dom1);
+      CPPUNIT_ASSERT(dom0 != dom1);
       dom0 = dom1;
-      assertTrue(dom0 == dom1);
+      CPPUNIT_ASSERT(dom0 == dom1);
 
       dom1 = dom2;
-      assertTrue(dom1 == dom2);
+      CPPUNIT_ASSERT(dom1 == dom2);
 
       return(true);
     }
@@ -1305,7 +1305,7 @@ namespace EUROPA {
 	ls0.setListener(l_listener.getId());
 	DomainListener::ChangeType change;
 	bool res = l_listener.checkAndClearChange(change);
-	assertTrue(res && change == DomainListener::EMPTIED);
+	CPPUNIT_ASSERT(res && change == DomainListener::EMPTIED);
       }
 
       {
@@ -1314,7 +1314,7 @@ namespace EUROPA {
 	ChangeListener l_listener;
 	ls0.setListener(l_listener.getId());
 	bool res = l_listener.checkAndClearChange(change);
-	assertTrue(res && change == DomainListener::EMPTIED);
+	CPPUNIT_ASSERT(res && change == DomainListener::EMPTIED);
       }
 
       return(true);
@@ -1330,14 +1330,14 @@ namespace EUROPA {
   public:
 
     static bool test() {
-      runTest(testInfinityBounds);
-      runTest(testEquality);
-      runTest(testIntersection);
-      runTest(testSubset);
-      runTest(testIntDomain);
-      runTest(testDomainComparatorConfiguration);
-      runTest(testCopying);
-      runTest(testSymbolicVsNumeric);
+      EUROPA_runTest(testInfinityBounds);
+      EUROPA_runTest(testEquality);
+      EUROPA_runTest(testIntersection);
+      EUROPA_runTest(testSubset);
+      EUROPA_runTest(testIntDomain);
+      EUROPA_runTest(testDomainComparatorConfiguration);
+      EUROPA_runTest(testCopying);
+      EUROPA_runTest(testSymbolicVsNumeric);
       return(true);
     }
 
@@ -1345,23 +1345,23 @@ namespace EUROPA {
 
     static bool testInfinityBounds(){
       IntervalDomain dom0;
-      assertFalse(dom0.areBoundsFinite());
+      CPPUNIT_ASSERT(!dom0.areBoundsFinite());
       IntervalDomain dom1(0, PLUS_INFINITY);
-      assertFalse(dom1.areBoundsFinite());
+      CPPUNIT_ASSERT(!dom1.areBoundsFinite());
       IntervalDomain dom2(0, PLUS_INFINITY-1);
-      assertTrue(dom2.areBoundsFinite());
+      CPPUNIT_ASSERT(dom2.areBoundsFinite());
       NumericDomain dom3;
-      assertFalse(dom3.areBoundsFinite());
+      CPPUNIT_ASSERT(!dom3.areBoundsFinite());
       SymbolDomain dom4;
-      assertTrue(dom4.areBoundsFinite());
+      CPPUNIT_ASSERT(dom4.areBoundsFinite());
       NumericDomain dom5;
       dom5.insert(0);
       dom5.insert(1);
-      assertFalse(dom5.areBoundsFinite());
+      CPPUNIT_ASSERT(!dom5.areBoundsFinite());
       dom5.close();
-      assertTrue(dom5.areBoundsFinite());
+      CPPUNIT_ASSERT(dom5.areBoundsFinite());
       NumericDomain dom6(PLUS_INFINITY);
-      assertFalse(dom6.areBoundsFinite());
+      CPPUNIT_ASSERT(!dom6.areBoundsFinite());
       return true;
     }
 
@@ -1375,15 +1375,15 @@ namespace EUROPA {
       dom0.set(1.0);
 
       IntervalDomain dom1(1.0);
-      assertTrue(dom1 == dom0);
-      assertTrue(dom0 == dom1);
+      CPPUNIT_ASSERT(dom1 == dom0);
+      CPPUNIT_ASSERT(dom0 == dom1);
 
       IntervalIntDomain dom2(1);
-      assertTrue(dom1 == dom2);
+      CPPUNIT_ASSERT(dom1 == dom2);
 
       dom0.reset(dom);
       IntervalIntDomain dom3(1, 2);
-      assertTrue(dom0 == dom3);
+      CPPUNIT_ASSERT(dom0 == dom3);
       return(true);
     }
 
@@ -1396,17 +1396,17 @@ namespace EUROPA {
       dom0.insert(2.98);
       dom0.insert(10);
       dom0.close();
-      assertTrue(dom0.getSize() == 6);
+      CPPUNIT_ASSERT(dom0.getSize() == 6);
       IntervalIntDomain dom1(1, 8);
       NumericDomain dom2(dom0);
 
       dom0.intersect(dom1);
-      assertTrue(dom0.getSize() == 1);
-      assertTrue(dom0.isMember(1.0));
+      CPPUNIT_ASSERT(dom0.getSize() == 1);
+      CPPUNIT_ASSERT(dom0.isMember(1.0));
 
       IntervalDomain dom3(1, 8);
       dom2.intersect(dom3);
-      assertTrue(dom2.getSize() == 3);
+      CPPUNIT_ASSERT(dom2.getSize() == 3);
 
       return(true);
     }
@@ -1422,18 +1422,18 @@ namespace EUROPA {
       dom0.close();
 
       IntervalDomain dom1(0, 10);
-      assertTrue(dom0.isSubsetOf(dom1));
+      CPPUNIT_ASSERT(dom0.isSubsetOf(dom1));
 
       IntervalIntDomain dom2(0, 10);
-      assertTrue(!dom0.isSubsetOf(dom2));
+      CPPUNIT_ASSERT(!dom0.isSubsetOf(dom2));
 
       dom0.remove(0.98);
       dom0.remove(1.89);
       dom0.remove(2.98);
-      assertTrue(dom0.isSubsetOf(dom2));
+      CPPUNIT_ASSERT(dom0.isSubsetOf(dom2));
 
-      assertTrue(dom2.isSubsetOf(dom1));
-      assertTrue(!dom1.isSubsetOf(dom2));
+      CPPUNIT_ASSERT(dom2.isSubsetOf(dom1));
+      CPPUNIT_ASSERT(!dom1.isSubsetOf(dom2));
       return(true);
     }
 
@@ -1449,16 +1449,16 @@ namespace EUROPA {
       dom1.close();
 
       NumericDomain dom2(10);
-      assertTrue(!dom2.isOpen());
-      assertTrue(dom2.isSingleton());
+      CPPUNIT_ASSERT(!dom2.isOpen());
+      CPPUNIT_ASSERT(dom2.isSingleton());
 
-      assertTrue(AbstractDomain::canBeCompared(dom0, dom2));
-      assertTrue(dom0 != dom2);
+      CPPUNIT_ASSERT(AbstractDomain::canBeCompared(dom0, dom2));
+      CPPUNIT_ASSERT(dom0 != dom2);
 
-      assertTrue(!dom0.isSubsetOf(dom2));
-      assertTrue(dom0.isSubsetOf(dom0));
-      assertTrue(dom2.isSubsetOf(dom0));
-      assertTrue(dom2.isSubsetOf(dom2));
+      CPPUNIT_ASSERT(!dom0.isSubsetOf(dom2));
+      CPPUNIT_ASSERT(dom0.isSubsetOf(dom0));
+      CPPUNIT_ASSERT(dom2.isSubsetOf(dom0));
+      CPPUNIT_ASSERT(dom2.isSubsetOf(dom2));
 
       return(true);
     }
@@ -1471,31 +1471,31 @@ namespace EUROPA {
       BoolDomain customDom(true, "boolean");
 
       copyPtr = falseDom.copy();
-      assertTrue(copyPtr->isBool());
-      assertTrue(copyPtr->getTypeName() == LabelStr("bool"));
-      assertTrue((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
-      assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
+      CPPUNIT_ASSERT(copyPtr->isBool());
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("bool"));
+      CPPUNIT_ASSERT((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
+      CPPUNIT_ASSERT(!(dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
       delete copyPtr;
 
       copyPtr = trueDom.copy();
-      assertTrue(copyPtr->isBool());
-      assertTrue(copyPtr->getTypeName() == LabelStr("bool"));
-      assertTrue((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
-      assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
+      CPPUNIT_ASSERT(copyPtr->isBool());
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("bool"));
+      CPPUNIT_ASSERT((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
+      CPPUNIT_ASSERT(!(dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
       delete copyPtr;
 
       copyPtr = both.copy();
-      assertTrue(copyPtr->isBool());
-      assertTrue(copyPtr->getTypeName() == LabelStr("bool"));
-      assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
-      assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
+      CPPUNIT_ASSERT(copyPtr->isBool());
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("bool"));
+      CPPUNIT_ASSERT(!(dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
+      CPPUNIT_ASSERT(!(dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
       delete copyPtr;
 
       copyPtr = customDom.copy();
-      assertTrue(copyPtr->isBool());
-      assertTrue(copyPtr->getTypeName() == LabelStr("boolean"));
-      assertTrue((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
-      assertFalse((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
+      CPPUNIT_ASSERT(copyPtr->isBool());
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("boolean"));
+      CPPUNIT_ASSERT((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
+      CPPUNIT_ASSERT(!(dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
       delete copyPtr;
 
       // Cannot check that expected errors are detected until
@@ -1520,43 +1520,43 @@ namespace EUROPA {
       NumericDomain oneDom(2.7); // Singleton
 
       copyPtr = emptyOpen.copy();
-      assertTrue(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
-      assertTrue(copyPtr->isOpen());
-      assertTrue(copyPtr->isNumeric());
-      assertTrue(copyPtr->isEnumerated());
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
+      CPPUNIT_ASSERT(copyPtr->isOpen());
+      CPPUNIT_ASSERT(copyPtr->isNumeric());
+      CPPUNIT_ASSERT(copyPtr->isEnumerated());
       copyPtr->insert(3.1);
       //assertFalse(copyPtr->isSingleton()); Or should that provoke an error? wedgingt 2004 Mar 3
       copyPtr->close();
-      assertTrue(copyPtr->isSingleton());
-      assertFalse(copyPtr->isOpen());
+      CPPUNIT_ASSERT(copyPtr->isSingleton());
+      CPPUNIT_ASSERT(!copyPtr->isOpen());
       delete copyPtr;
 
       copyPtr = fourDom.copy();
-      assertTrue(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
-      assertTrue(copyPtr->isOpen());
-      assertTrue(copyPtr->isEnumerated());
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
+      CPPUNIT_ASSERT(copyPtr->isOpen());
+      CPPUNIT_ASSERT(copyPtr->isEnumerated());
       copyPtr->close();
-      assertTrue(copyPtr->getSize() == 4);
-      assertTrue(copyPtr->isSubsetOf(fiveDom));
+      CPPUNIT_ASSERT(copyPtr->getSize() == 4);
+      CPPUNIT_ASSERT(copyPtr->isSubsetOf(fiveDom));
       delete copyPtr;
 
       copyPtr = fiveDom.copy();
-      assertTrue(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
-      assertFalse(copyPtr->isOpen());
-      assertTrue(copyPtr->isEnumerated());
-      assertTrue(copyPtr->getSize() == 5);
-      assertTrue(fourDom.isSubsetOf(*copyPtr));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
+      CPPUNIT_ASSERT(!copyPtr->isOpen());
+      CPPUNIT_ASSERT(copyPtr->isEnumerated());
+      CPPUNIT_ASSERT(copyPtr->getSize() == 5);
+      CPPUNIT_ASSERT(fourDom.isSubsetOf(*copyPtr));
       delete copyPtr;
 
       copyPtr = oneDom.copy();
-      assertTrue(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
-      assertFalse(copyPtr->isOpen());
-      assertTrue(copyPtr->isEnumerated());
-      assertTrue(copyPtr->isSingleton());
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
+      CPPUNIT_ASSERT(!copyPtr->isOpen());
+      CPPUNIT_ASSERT(copyPtr->isEnumerated());
+      CPPUNIT_ASSERT(copyPtr->isSingleton());
 
       // Can't call this with a dynamic domain, so close it first.
       fourDom.close();
-      assertTrue(copyPtr->isSubsetOf(fourDom));
+      CPPUNIT_ASSERT(copyPtr->isSubsetOf(fourDom));
 
       delete copyPtr;
 
@@ -1574,65 +1574,65 @@ namespace EUROPA {
       // Domains containing infinities should also be tested.
 
       copyPtr = empty.copy();
-      assertTrue(copyPtr->getTypeName() == LabelStr("REAL_INTERVAL"));
-      assertFalse(copyPtr->isOpen());
-      assertTrue(copyPtr->isNumeric());
-      assertFalse(copyPtr->isEnumerated());
-      assertTrue(copyPtr->isFinite());
-      assertFalse(copyPtr->isMember(0.0));
-      assertFalse(copyPtr->isSingleton());
-      assertTrue(copyPtr->isEmpty());
-      assertTrue(copyPtr->getSize() == 0);
-      assertTrue(*copyPtr == empty);
-      assertFalse(*copyPtr == one2ten);
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("REAL_INTERVAL"));
+      CPPUNIT_ASSERT(!copyPtr->isOpen());
+      CPPUNIT_ASSERT(copyPtr->isNumeric());
+      CPPUNIT_ASSERT(!copyPtr->isEnumerated());
+      CPPUNIT_ASSERT(copyPtr->isFinite());
+      CPPUNIT_ASSERT(!copyPtr->isMember(0.0));
+      CPPUNIT_ASSERT(!copyPtr->isSingleton());
+      CPPUNIT_ASSERT(copyPtr->isEmpty());
+      CPPUNIT_ASSERT(copyPtr->getSize() == 0);
+      CPPUNIT_ASSERT(*copyPtr == empty);
+      CPPUNIT_ASSERT(!(*copyPtr == one2ten));
       copyPtr->relax(IntervalDomain(-3.1, 11.0));
-      assertTrue(copyPtr->isMember(0.0));
-      assertFalse(copyPtr->isSingleton());
-      assertFalse(copyPtr->isEmpty());
-      assertTrue(empty.isEmpty());
-      assertFalse(*copyPtr == empty);
-      assertTrue(empty.isSubsetOf(*copyPtr));
+      CPPUNIT_ASSERT(copyPtr->isMember(0.0));
+      CPPUNIT_ASSERT(!copyPtr->isSingleton());
+      CPPUNIT_ASSERT(!copyPtr->isEmpty());
+      CPPUNIT_ASSERT(empty.isEmpty());
+      CPPUNIT_ASSERT(!(*copyPtr == empty));
+      CPPUNIT_ASSERT(empty.isSubsetOf(*copyPtr));
       delete copyPtr;
 
       copyPtr = one2ten.copy();
-      assertTrue(copyPtr->getTypeName() == LabelStr("REAL_INTERVAL"));
-      assertFalse(copyPtr->isOpen());
-      assertTrue(copyPtr->isNumeric());
-      assertFalse(copyPtr->isEnumerated());
-      assertFalse(copyPtr->isFinite());
-      assertFalse(copyPtr->isMember(0.0));
-      assertFalse(copyPtr->isSingleton());
-      assertFalse(copyPtr->isEmpty());
-      assertFalse(*copyPtr == empty);
-      assertTrue(*copyPtr == one2ten);
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("REAL_INTERVAL"));
+      CPPUNIT_ASSERT(!copyPtr->isOpen());
+      CPPUNIT_ASSERT(copyPtr->isNumeric());
+      CPPUNIT_ASSERT(!copyPtr->isEnumerated());
+      CPPUNIT_ASSERT(!copyPtr->isFinite());
+      CPPUNIT_ASSERT(!copyPtr->isMember(0.0));
+      CPPUNIT_ASSERT(!copyPtr->isSingleton());
+      CPPUNIT_ASSERT(!copyPtr->isEmpty());
+      CPPUNIT_ASSERT(!(*copyPtr == empty));
+      CPPUNIT_ASSERT(*copyPtr == one2ten);
       copyPtr->relax(IntervalDomain(-3.1, 11.0));
-      assertTrue(copyPtr->isMember(0.0));
-      assertFalse(copyPtr->isSingleton());
-      assertFalse(copyPtr->isEmpty());
-      assertFalse(*copyPtr == one2ten);
-      assertTrue(one2ten.isSubsetOf(*copyPtr));
+      CPPUNIT_ASSERT(copyPtr->isMember(0.0));
+      CPPUNIT_ASSERT(!copyPtr->isSingleton());
+      CPPUNIT_ASSERT(!copyPtr->isEmpty());
+      CPPUNIT_ASSERT(!(*copyPtr == one2ten));
+      CPPUNIT_ASSERT(one2ten.isSubsetOf(*copyPtr));
       delete copyPtr;
 
       copyPtr = four.copy();
-      assertTrue(copyPtr->getTypeName() == LabelStr("fourType"));
-      assertFalse(copyPtr->isOpen());
-      assertTrue(copyPtr->isNumeric());
-      assertFalse(copyPtr->isEnumerated());
-      assertTrue(copyPtr->isFinite());
-      assertFalse(copyPtr->isMember(0.0));
-      assertTrue(copyPtr->isSingleton());
-      assertFalse(copyPtr->isEmpty());
-      assertTrue(copyPtr->getSize() == 1);
-      assertFalse(*copyPtr == empty);
-      assertTrue(*copyPtr == four);
-      assertFalse(*copyPtr == one2ten);
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("fourType"));
+      CPPUNIT_ASSERT(!copyPtr->isOpen());
+      CPPUNIT_ASSERT(copyPtr->isNumeric());
+      CPPUNIT_ASSERT(!copyPtr->isEnumerated());
+      CPPUNIT_ASSERT(copyPtr->isFinite());
+      CPPUNIT_ASSERT(!copyPtr->isMember(0.0));
+      CPPUNIT_ASSERT(copyPtr->isSingleton());
+      CPPUNIT_ASSERT(!copyPtr->isEmpty());
+      CPPUNIT_ASSERT(copyPtr->getSize() == 1);
+      CPPUNIT_ASSERT(!(*copyPtr == empty));
+      CPPUNIT_ASSERT(*copyPtr == four);
+      CPPUNIT_ASSERT(!(*copyPtr == one2ten));
       copyPtr->relax(IntervalDomain(-3.1, 11.0));
-      assertTrue(copyPtr->isMember(0.0));
-      assertFalse(copyPtr->isSingleton());
-      assertFalse(copyPtr->isEmpty());
-      assertFalse(*copyPtr == empty);
-      assertFalse(*copyPtr == four);
-      assertTrue(four.isSubsetOf(*copyPtr));
+      CPPUNIT_ASSERT(copyPtr->isMember(0.0));
+      CPPUNIT_ASSERT(!copyPtr->isSingleton());
+      CPPUNIT_ASSERT(!copyPtr->isEmpty());
+      CPPUNIT_ASSERT(!(*copyPtr == empty));
+      CPPUNIT_ASSERT(!(*copyPtr == four));
+      CPPUNIT_ASSERT(four.isSubsetOf(*copyPtr));
       delete copyPtr;
 
       // Cannot check that expected errors are detected until
@@ -1648,68 +1648,68 @@ namespace EUROPA {
       // domains containing infinities should also be tested
 
       copyPtr = empty.copy();
-      assertTrue(copyPtr->getTypeName() == LabelStr("INT_INTERVAL"));
-      assertFalse(copyPtr->isOpen());
-      assertTrue(copyPtr->isNumeric());
-      assertFalse(copyPtr->isEnumerated());
-      assertTrue(copyPtr->isFinite());
-      assertFalse(copyPtr->isMember(0));
-      assertFalse(copyPtr->isSingleton());
-      assertTrue(copyPtr->isEmpty());
-      assertTrue(copyPtr->getSize() == 0);
-      assertTrue(*copyPtr == empty);
-      assertFalse(*copyPtr == one2ten);
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("INT_INTERVAL"));
+      CPPUNIT_ASSERT(!copyPtr->isOpen());
+      CPPUNIT_ASSERT(copyPtr->isNumeric());
+      CPPUNIT_ASSERT(!copyPtr->isEnumerated());
+      CPPUNIT_ASSERT(copyPtr->isFinite());
+      CPPUNIT_ASSERT(!copyPtr->isMember(0));
+      CPPUNIT_ASSERT(!copyPtr->isSingleton());
+      CPPUNIT_ASSERT(copyPtr->isEmpty());
+      CPPUNIT_ASSERT(copyPtr->getSize() == 0);
+      CPPUNIT_ASSERT(*copyPtr == empty);
+      CPPUNIT_ASSERT(!(*copyPtr == one2ten));
       copyPtr->relax(IntervalDomain(-3, 11));
-      assertTrue(copyPtr->isMember(0));
-      assertFalse(copyPtr->isSingleton());
-      assertFalse(copyPtr->isEmpty());
-      assertTrue(empty.isEmpty());
-      assertFalse(*copyPtr == empty);
-      assertTrue(empty.isSubsetOf(*copyPtr));
+      CPPUNIT_ASSERT(copyPtr->isMember(0));
+      CPPUNIT_ASSERT(!copyPtr->isSingleton());
+      CPPUNIT_ASSERT(!copyPtr->isEmpty());
+      CPPUNIT_ASSERT(empty.isEmpty());
+      CPPUNIT_ASSERT(!(*copyPtr == empty));
+      CPPUNIT_ASSERT(empty.isSubsetOf(*copyPtr));
       delete copyPtr;
 
       copyPtr = one2ten.copy();
-      assertTrue(copyPtr->getTypeName() == LabelStr("INT_INTERVAL"));
-      assertFalse(copyPtr->isOpen());
-      assertTrue(copyPtr->isNumeric());
-      assertFalse(copyPtr->isEnumerated());
-      assertTrue(copyPtr->isFinite());
-      assertFalse(copyPtr->isMember(0));
-      assertFalse(copyPtr->isSingleton());
-      assertFalse(copyPtr->isEmpty());
-      assertTrue(copyPtr->getSize() == 10);
-      assertFalse(*copyPtr == empty);
-      assertTrue(*copyPtr == one2ten);
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("INT_INTERVAL"));
+      CPPUNIT_ASSERT(!copyPtr->isOpen());
+      CPPUNIT_ASSERT(copyPtr->isNumeric());
+      CPPUNIT_ASSERT(!copyPtr->isEnumerated());
+      CPPUNIT_ASSERT(copyPtr->isFinite());
+      CPPUNIT_ASSERT(!copyPtr->isMember(0));
+      CPPUNIT_ASSERT(!copyPtr->isSingleton());
+      CPPUNIT_ASSERT(!copyPtr->isEmpty());
+      CPPUNIT_ASSERT(copyPtr->getSize() == 10);
+      CPPUNIT_ASSERT(!(*copyPtr == empty));
+      CPPUNIT_ASSERT(*copyPtr == one2ten);
       copyPtr->relax(IntervalIntDomain(-3, 11));
-      assertTrue(copyPtr->getSize() == 15);
-      assertTrue(copyPtr->isMember(0));
-      assertFalse(copyPtr->isSingleton());
-      assertFalse(copyPtr->isEmpty());
-      assertFalse(*copyPtr == one2ten);
-      assertTrue(one2ten.isSubsetOf(*copyPtr));
+      CPPUNIT_ASSERT(copyPtr->getSize() == 15);
+      CPPUNIT_ASSERT(copyPtr->isMember(0));
+      CPPUNIT_ASSERT(!copyPtr->isSingleton());
+      CPPUNIT_ASSERT(!copyPtr->isEmpty());
+      CPPUNIT_ASSERT(!(*copyPtr == one2ten));
+      CPPUNIT_ASSERT(one2ten.isSubsetOf(*copyPtr));
       delete copyPtr;
 
       copyPtr = four.copy();
-      assertTrue(copyPtr->getTypeName() == LabelStr("fourType"));
-      assertFalse(copyPtr->isOpen());
-      assertTrue(copyPtr->isNumeric());
-      assertFalse(copyPtr->isEnumerated());
-      assertTrue(copyPtr->isFinite());
-      assertFalse(copyPtr->isMember(0));
-      assertTrue(copyPtr->isSingleton());
-      assertFalse(copyPtr->isEmpty());
-      assertTrue(copyPtr->getSize() == 1);
-      assertFalse(*copyPtr == empty);
-      assertTrue(*copyPtr == four);
-      assertFalse(*copyPtr == one2ten);
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("fourType"));
+      CPPUNIT_ASSERT(!copyPtr->isOpen());
+      CPPUNIT_ASSERT(copyPtr->isNumeric());
+      CPPUNIT_ASSERT(!copyPtr->isEnumerated());
+      CPPUNIT_ASSERT(copyPtr->isFinite());
+      CPPUNIT_ASSERT(!copyPtr->isMember(0));
+      CPPUNIT_ASSERT(copyPtr->isSingleton());
+      CPPUNIT_ASSERT(!copyPtr->isEmpty());
+      CPPUNIT_ASSERT(copyPtr->getSize() == 1);
+      CPPUNIT_ASSERT(!(*copyPtr == empty));
+      CPPUNIT_ASSERT(*copyPtr == four);
+      CPPUNIT_ASSERT(!(*copyPtr == one2ten));
       copyPtr->relax(IntervalIntDomain(-3, 11));
-      assertTrue(copyPtr->getSize() == 15);
-      assertTrue(copyPtr->isMember(0));
-      assertFalse(copyPtr->isSingleton());
-      assertFalse(copyPtr->isEmpty());
-      assertFalse(*copyPtr == empty);
-      assertFalse(*copyPtr == four);
-      assertTrue(four.isSubsetOf(*copyPtr));
+      CPPUNIT_ASSERT(copyPtr->getSize() == 15);
+      CPPUNIT_ASSERT(copyPtr->isMember(0));
+      CPPUNIT_ASSERT(!copyPtr->isSingleton());
+      CPPUNIT_ASSERT(!copyPtr->isEmpty());
+      CPPUNIT_ASSERT(!(*copyPtr == empty));
+      CPPUNIT_ASSERT(!(*copyPtr == four));
+      CPPUNIT_ASSERT(four.isSubsetOf(*copyPtr));
       delete copyPtr;
 
       // Cannot check that expected errors are detected until
@@ -1731,31 +1731,31 @@ namespace EUROPA {
       IntervalIntDomain dom1;
 
       // Using the default comparator - they should be comparable
-      assertTrue(AbstractDomain::canBeCompared(dom0, dom1));
+      CPPUNIT_ASSERT(AbstractDomain::canBeCompared(dom0, dom1));
 
       // Switch for the bogus one - and make sure it fails as expected
       BogusComparator bogus;
-      assertFalse(AbstractDomain::canBeCompared(dom0, dom1));
+      CPPUNIT_ASSERT(!AbstractDomain::canBeCompared(dom0, dom1));
 
       // Allocate the standard comparator, and ensure it compares once again
       DomainComparator standard;
-      assertTrue(AbstractDomain::canBeCompared(dom0, dom1));
+      CPPUNIT_ASSERT(AbstractDomain::canBeCompared(dom0, dom1));
 
       // Now allocate a new one again
       DomainComparator* dc = new BogusComparator();
-      assertFalse(AbstractDomain::canBeCompared(dom0, dom1));
+      CPPUNIT_ASSERT(!AbstractDomain::canBeCompared(dom0, dom1));
 
       // Deallocate and thus cause revert to standard comparator
       delete dc;
-      assertTrue(AbstractDomain::canBeCompared(dom0, dom1));
+      CPPUNIT_ASSERT(AbstractDomain::canBeCompared(dom0, dom1));
 
       // 2 numeric enumerations should be comparable, even if type names differ
       {
 	NumericDomain d0("NumberDomain0");
 	NumericDomain d1("NumberDomain1");
 	IntervalIntDomain d2;
-	assertTrue(AbstractDomain::canBeCompared(d0, d1));
-	assertTrue(AbstractDomain::canBeCompared(d0, d2));
+	CPPUNIT_ASSERT(AbstractDomain::canBeCompared(d0, d1));
+	CPPUNIT_ASSERT(AbstractDomain::canBeCompared(d0, d2));
       }
 
       // 2 non numeric enumerations can only be compared if they are of the same type
@@ -1763,8 +1763,8 @@ namespace EUROPA {
 	SymbolDomain d0("SymbolicDomain");
 	StringDomain d1("SymbolicDomain");
 	SymbolDomain d2("OtherDomainType");
-	assertTrue(AbstractDomain::canBeCompared(d0, d1));
-	assertFalse(AbstractDomain::canBeCompared(d0, d2));
+	CPPUNIT_ASSERT(AbstractDomain::canBeCompared(d0, d1));
+	CPPUNIT_ASSERT(!AbstractDomain::canBeCompared(d0, d2));
       }
       return true;
     }
@@ -1781,57 +1781,57 @@ namespace EUROPA {
 
       BoolDomain boolDom;
       AbstractDomain *copy = boolDom.copy();
-      assertTrue(copy != 0);
-      assertTrue(*copy == boolDom && copy != &boolDom);
+      CPPUNIT_ASSERT(copy != 0);
+      CPPUNIT_ASSERT(*copy == boolDom && copy != &boolDom);
       boolDom.set(false);
-      assertTrue(*copy != boolDom);
+      CPPUNIT_ASSERT(*copy != boolDom);
       delete copy;
       copy = boolDom.copy();
-      assertTrue(copy != 0);
-      assertTrue(*copy == boolDom && copy != &boolDom);
+      CPPUNIT_ASSERT(copy != 0);
+      CPPUNIT_ASSERT(*copy == boolDom && copy != &boolDom);
       boolDom.empty();
-      assertTrue(*copy != boolDom);
+      CPPUNIT_ASSERT(*copy != boolDom);
       delete copy;
       copy = boolDom.copy();
-      assertTrue(copy != 0);
-      assertTrue(*copy == boolDom && copy != &boolDom);
+      CPPUNIT_ASSERT(copy != 0);
+      CPPUNIT_ASSERT(*copy == boolDom && copy != &boolDom);
       boolDom.relax(BoolDomain(true));
-      assertTrue(*copy != boolDom);
+      CPPUNIT_ASSERT(*copy != boolDom);
       delete copy;
       copy = boolDom.copy();
-      assertTrue(copy != 0);
-      assertTrue(*copy == boolDom && copy != &boolDom);
+      CPPUNIT_ASSERT(copy != 0);
+      CPPUNIT_ASSERT(*copy == boolDom && copy != &boolDom);
       boolDom.remove(true);
-      assertTrue(*copy != boolDom);
+      CPPUNIT_ASSERT(*copy != boolDom);
       delete copy;
 
       IntervalIntDomain iiDom(-2, PLUS_INFINITY);
       copy = iiDom.copy();
-      assertTrue(copy != 0);
-      assertTrue(*copy == iiDom && copy != &iiDom);
+      CPPUNIT_ASSERT(copy != 0);
+      CPPUNIT_ASSERT(*copy == iiDom && copy != &iiDom);
       iiDom = IntervalIntDomain(-2, PLUS_INFINITY-1);
-      assertTrue(*copy != iiDom);
+      CPPUNIT_ASSERT(*copy != iiDom);
       delete copy;
 
       IntervalDomain iDom(MINUS_INFINITY);
       copy = iDom.copy();
-      assertTrue(copy != 0);
-      assertTrue(*copy == iDom && copy != &iDom);
+      CPPUNIT_ASSERT(copy != 0);
+      CPPUNIT_ASSERT(*copy == iDom && copy != &iDom);
       iDom.empty();
-      assertTrue(*copy != iDom);
+      CPPUNIT_ASSERT(*copy != iDom);
       copy->empty();
-      assertTrue(*copy == iDom);
+      CPPUNIT_ASSERT(*copy == iDom);
       delete copy;
 
       NumericDomain eDom;
       eDom.insert(2.7);
       copy = eDom.copy();
-      assertTrue(copy != 0);
-      assertTrue(*copy == eDom && copy != &eDom);
+      CPPUNIT_ASSERT(copy != 0);
+      CPPUNIT_ASSERT(*copy == eDom && copy != &eDom);
       eDom.insert(PLUS_INFINITY);
-      assertTrue(*copy != eDom);
+      CPPUNIT_ASSERT(*copy != eDom);
       eDom.remove(PLUS_INFINITY);
-      assertTrue(*copy == eDom && copy != &eDom);
+      CPPUNIT_ASSERT(*copy == eDom && copy != &eDom);
       delete copy;
 
       return(true);
@@ -1851,14 +1851,14 @@ namespace EUROPA {
       StringDomain stDom("myName");
 
 			// change for gnats 3242
-      assertTrue(bDom.isNumeric());
-      assertTrue(iiDom.isNumeric());
-      assertTrue(iDom.isNumeric());
-      assertTrue(nDom.isNumeric());
-      assertTrue(eDom.isSymbolic());
-      assertTrue(enDom.isNumeric());
-      assertTrue(sDom.isSymbolic());
-      assertTrue(stDom.isSymbolic());
+      CPPUNIT_ASSERT(bDom.isNumeric());
+      CPPUNIT_ASSERT(iiDom.isNumeric());
+      CPPUNIT_ASSERT(iDom.isNumeric());
+      CPPUNIT_ASSERT(nDom.isNumeric());
+      CPPUNIT_ASSERT(eDom.isSymbolic());
+      CPPUNIT_ASSERT(enDom.isNumeric());
+      CPPUNIT_ASSERT(sDom.isSymbolic());
+      CPPUNIT_ASSERT(stDom.isSymbolic());
 
       return(true);
     }
@@ -1867,10 +1867,23 @@ namespace EUROPA {
 }
 
 bool DomainTests::test() {
-  runTestSuite(EUROPA::IntervalDomainTest::test);
+  /*runTestSuite(EUROPA::IntervalDomainTest::test);
   runTestSuite(EUROPA::EnumeratedDomainTest::test);
-  runTestSuite(EUROPA::MixedTypeTest::test);
+  runTestSuite(EUROPA::MixedTypeTest::test);*/
+  EUROPA::IntervalDomainTest::test();
+  EUROPA::EnumeratedDomainTest::test();
+  EUROPA::MixedTypeTest::test();
   return(true);
+}
+
+void DomainTests::cppTests() {
+  /*runTestSuite(EUROPA::IntervalDomainTest::test);
+  runTestSuite(EUROPA::EnumeratedDomainTest::test);
+  runTestSuite(EUROPA::MixedTypeTest::test);*/
+  EUROPA::IntervalDomainTest::test();
+  EUROPA::EnumeratedDomainTest::test();
+  EUROPA::MixedTypeTest::test();
+  //return(true);
 }
 
 

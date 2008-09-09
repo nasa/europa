@@ -112,16 +112,16 @@ const double consumptionMax = -50;
 class DefaultSetupTest {
 public:
   static bool test() {
-    runTest(testDefaultSetup);
+    EUROPA_runTest(testDefaultSetup);
     return true;
   }
 private:
   static bool testDefaultSetup() {
     RESOURCE_DEFAULT_SETUP(ce,db,false);
     
-    assertTrue(db.isClosed() == false);
+    CPPUNIT_ASSERT(db.isClosed() == false);
     db.close();
-    assertTrue(db.isClosed() == true);
+    CPPUNIT_ASSERT(db.isClosed() == true);
 
     RESOURCE_DEFAULT_TEARDOWN();
     return true;
@@ -152,20 +152,20 @@ class ResourceTest
 public:
 
   static bool test(){
-    runTest(testResourceConstructionAndDestruction);
-    runTest(testBasicTransactionInsertion);
-    runTest(testTransactionChangeHandling);
-    runTest(testCorrectTransactionAllocation);
-    runTest(testLevelCalculation);
-    runTest(testTransactionUpdates);
-    runTest(testTransactionRemoval);
-    runTest(testIntervalCapacityValues);
-    runTest(testConstraintCheckOnInsertion);
-    runTest(testLowerTotalProductionExceededResourceViolation);
-    runTest(testLowerTotalConsumptionExceededResourceViolation);
-    runTest(testUpperLimitExceededResourceViolation);
-    runTest(testSummationConstraintResourceViolation);
-    runTest(testPointProfileQueries);
+    EUROPA_runTest(testResourceConstructionAndDestruction);
+    EUROPA_runTest(testBasicTransactionInsertion);
+    EUROPA_runTest(testTransactionChangeHandling);
+    EUROPA_runTest(testCorrectTransactionAllocation);
+    EUROPA_runTest(testLevelCalculation);
+    EUROPA_runTest(testTransactionUpdates);
+    EUROPA_runTest(testTransactionRemoval);
+    EUROPA_runTest(testIntervalCapacityValues);
+    EUROPA_runTest(testConstraintCheckOnInsertion);
+    EUROPA_runTest(testLowerTotalProductionExceededResourceViolation);
+    EUROPA_runTest(testLowerTotalConsumptionExceededResourceViolation);
+    EUROPA_runTest(testUpperLimitExceededResourceViolation);
+    EUROPA_runTest(testSummationConstraintResourceViolation);
+    EUROPA_runTest(testPointProfileQueries);
     return true;
   }
     
@@ -178,7 +178,7 @@ private:
     ResourceId r = (new Resource (db.getId(), LabelStr("Resource"), LabelStr("r1")))->getId();
     std::list<InstantId> instants;
     r->getInstants(instants);
-    assertTrue(instants.size() == 0);
+    CPPUNIT_ASSERT(instants.size() == 0);
 
     // Construction with argument setting
     new Resource(db.getId(), LabelStr("Resource"), LabelStr("r2"), 189.34, 0, 1000);
@@ -197,24 +197,24 @@ private:
     //just another resource so that the resource doesnt get bound to singleton and get autoinserted by the propagator
     ResourceId r2 = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r2"), 10, 0, 2000))->getId();
 
-    assertTrue(!r.isNoId() && !r2.isNoId() && r != r2);
+    CPPUNIT_ASSERT(!r.isNoId() && !r2.isNoId() && r != r2);
 
     db.close();
 
     // Test insertion of transaction constructed with defaults
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change")))->getId();
     bool prop = ce.propagate();
-    assertTrue(prop);
+    CPPUNIT_ASSERT(prop);
     r->constrain(t1, t1);
     ce.propagate();
 
     std::set<TransactionId> transactions;
     r->getTransactions(transactions);
-    assertTrue(transactions.size() == 1);
+    CPPUNIT_ASSERT(transactions.size() == 1);
     r->free(t1, t1);
     transactions.clear();
     r->getTransactions(transactions);
-    assertTrue(transactions.empty());
+    CPPUNIT_ASSERT(transactions.empty());
 
     // Test double insertion 
     r->constrain(t1, t1);
@@ -235,32 +235,32 @@ private:
 
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 1000))->getId();
     db.close();
-    assertTrue(checkLevelArea(r) == 0);
+    CPPUNIT_ASSERT(checkLevelArea(r) == 0);
 
     TokenId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, HORIZON_END), 45, 45))->getId();
     ce.propagate();
-    assertTrue(checkSum(r) == (1*1 + 2*1));
-    assertTrue(checkLevelArea(r) == 1000 * 45);
+    CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*1));
+    CPPUNIT_ASSERT(checkLevelArea(r) == 1000 * 45);
 
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, HORIZON_END), 35, 35))->getId();
-    assertTrue(ce.propagate());
-    assertTrue(checkSum(r) == (1*1 + 2*2 + 3*2));
-    assertTrue(checkLevelArea(r) == (1*45 + 80*999));
+    CPPUNIT_ASSERT(ce.propagate());
+    CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*2 + 3*2));
+    CPPUNIT_ASSERT(checkLevelArea(r) == (1*45 + 80*999));
 
     TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, HORIZON_END), 20, 20))->getId();
-    assertTrue(ce.propagate());
-    assertTrue(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*3));
-    assertTrue(checkLevelArea(r) == (1*45 + 1*80 + 998*100));
+    CPPUNIT_ASSERT(ce.propagate());
+    CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*3));
+    CPPUNIT_ASSERT(checkLevelArea(r) == (1*45 + 1*80 + 998*100));
 
     t2->setEarliest(1);
-    assertTrue(ce.propagate());
-    assertTrue(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*3));
-    assertTrue(checkLevelArea(r) == (1*45 + 1*80 + 998*100));
+    CPPUNIT_ASSERT(ce.propagate());
+    CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*3));
+    CPPUNIT_ASSERT(checkLevelArea(r) == (1*45 + 1*80 + 998*100));
 
     t2->setEarliest(2);
-    assertTrue(ce.propagate());
-    assertTrue(checkSum(r) == (1*1 + 2*3 + 3*3));
-    assertTrue(checkLevelArea(r) == (2*45 + 998*100));
+    CPPUNIT_ASSERT(ce.propagate());
+    CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*3 + 3*3));
+    CPPUNIT_ASSERT(checkLevelArea(r) == (2*45 + 998*100));
 
     delete (Token*) t1;
     delete (Token*) t2;
@@ -277,53 +277,53 @@ private:
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 1000))->getId();
     db.close();
-    assertTrue(ce.propagate() && checkSum(r) == 0); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == 0); 
 
     TokenId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 6)))->getId();
     //r->constrain(t1);
-    assertTrue(ce.propagate() && checkSum(r) == (1*1 + 2*1));
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == (1*1 + 2*1));
 
     TokenId t2  = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(-4, 10)))->getId();
     //r->constrain(t2);
-    assertTrue(ce.propagate() && checkSum(r) == (1*1 + 2*2 + 3*2 + 4*1));
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == (1*1 + 2*2 + 3*2 + 4*1));
 
     TokenId t3  = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, 3)))->getId();
     //r->constrain(t3);
-    assertTrue(ce.propagate() && checkSum(r) == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1)); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1)); 
 
     TokenId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, 2)))->getId();
     //r->constrain(t4);
-    assertTrue(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1)); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1)); 
 
     TokenId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 7)))->getId();
     //r->constrain(t5);
-    assertTrue(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1)); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1)); 
 
     TokenId t6 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 7)))->getId();
     //r->constrain(t6);
-    assertTrue(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1)); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1)); 
 
     // Insert for a singleton value
     TokenId t7 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(5,5)))->getId();
     //r->constrain(t7);
-    assertTrue(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*5 + 7*4 + 8*3 + 9*1)); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*5 + 7*4 + 8*3 + 9*1)); 
 
     // Now free them and check the retractions are working correctly
     delete (Transaction*) (t7);
-    assertTrue(ce.propagate());
-    assertTrue(ce.propagate() && checkSum(r)  == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1));
+    CPPUNIT_ASSERT(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r)  == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1));
     delete (Transaction*) (t6);
-    assertTrue(ce.propagate() && checkSum(r)  == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1));
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r)  == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1));
     delete (Transaction*) (t5);
-    assertTrue(ce.propagate() && checkSum(r)  == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1));
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r)  == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1));
     delete (Transaction*) (t4);
-    assertTrue(ce.propagate() && checkSum(r)  == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1));
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r)  == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1));
     delete (Transaction*) (t3);
-    assertTrue(ce.propagate() && checkSum(r)  == (1*1 + 2*2 + 3*2 + 4*1));
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r)  == (1*1 + 2*2 + 3*2 + 4*1));
     delete (Transaction*) (t2);
-    assertTrue(ce.propagate() && checkSum(r)  == (1*1 + 2*1));
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r)  == (1*1 + 2*1));
     delete (Transaction*) (t1);
-    assertTrue(ce.propagate() && checkSum(r) == 0);
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == 0);
 
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
@@ -339,38 +339,38 @@ private:
 
     TokenId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), 1, 1))->getId();
     ce.propagate();
-    assertTrue(checkSum(r) == (1*1 + 2*1)); 
-    assertTrue(checkLevelArea(r) == 1);
+    CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*1)); 
+    CPPUNIT_ASSERT(checkLevelArea(r) == 1);
 
     TokenId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, 3), -4, -4))->getId();
     ce.propagate();
-    assertTrue(checkSum(r) == (1*1 + 2*2 + 3*1)); 
-    assertTrue(checkLevelArea(r) == (1 + 4*2));
+    CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*2 + 3*1)); 
+    CPPUNIT_ASSERT(checkLevelArea(r) == (1 + 4*2));
 
     TokenId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 4), 8, 8))->getId();
     ce.propagate();
-    assertTrue(checkSum(r) == (1*1 + 2*2 + 3*2 + 4*2 + 5*1)); 
-    assertTrue(checkLevelArea(r) == (1*1 + 4*1 + 12*1 + 8*1));
+    CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*2 + 3*2 + 4*2 + 5*1)); 
+    CPPUNIT_ASSERT(checkLevelArea(r) == (1*1 + 4*1 + 12*1 + 8*1));
 
     TokenId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 6), 2, 2))->getId();
     ce.propagate();
-    assertTrue(checkSum(r) == (1*1 + 2*2 + 3*2 + 4*3 + 5*2 + 6*1));
-    assertTrue(checkLevelArea(r) == (1*1 + 4*1 + 12*1 + 10*1 + 2*2));
+    CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*2 + 3*2 + 4*3 + 5*2 + 6*1));
+    CPPUNIT_ASSERT(checkLevelArea(r) == (1*1 + 4*1 + 12*1 + 10*1 + 2*2));
  
     TokenId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 10), -6, -6))->getId(); 
     ce.propagate();
-    assertTrue(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*2 + 7*1));
-    assertTrue(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 6*4));
+    CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*2 + 7*1));
+    CPPUNIT_ASSERT(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 6*4));
 
     TokenId t6 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(6, 8), 3, 3))->getId();
     ce.propagate();
-    assertTrue(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + 7*2 + 8*1));
-    assertTrue(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*2 + 6*2));
+    CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + 7*2 + 8*1));
+    CPPUNIT_ASSERT(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*2 + 6*2));
 
     TokenId t7 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(7, 8), -4, -4))->getId();
     ce.propagate();
-    assertTrue(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + +7* 3 + 8*3 + 9*1));
-    assertTrue(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*1 + 13*1 + 6*2));
+    CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + +7* 3 + 8*3 + 9*1));
+    CPPUNIT_ASSERT(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*1 + 13*1 + 6*2));
 
     delete (Token*) t1;
     delete (Token*) t2;
@@ -394,16 +394,16 @@ private:
 
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 10), 10, 10))->getId();
     ce.propagate();
-    assertTrue(checkLevelArea(r) == 10*10);
+    CPPUNIT_ASSERT(checkLevelArea(r) == 10*10);
 
     t1->setEarliest(1);
-    assertTrue(checkLevelArea(r) == 10*9);
+    CPPUNIT_ASSERT(checkLevelArea(r) == 10*9);
 
     t1->setLatest(8);
-    assertTrue(checkLevelArea(r) == 10*7);
+    CPPUNIT_ASSERT(checkLevelArea(r) == 10*7);
 
     t1->setLatest(6);
-    assertTrue(checkLevelArea(r) == 10*5);
+    CPPUNIT_ASSERT(checkLevelArea(r) == 10*5);
 
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
@@ -479,17 +479,17 @@ private:
     // Test producer
     TokenId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 10), 5, 10))->getId();
     ce.propagate();
-    assertTrue(checkLevelArea(r) == 10*10);
+    CPPUNIT_ASSERT(checkLevelArea(r) == 10*10);
 
     // This tests a transaction that could be a producer or a consumer. We don't know yet!
     TokenId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 8), -4, 3))->getId();
     ce.propagate();
-    assertTrue(checkLevelArea(r) == 10*4 + 17*4 + 17*2);
+    CPPUNIT_ASSERT(checkLevelArea(r) == 10*4 + 17*4 + 17*2);
 
     // Test consumer
     TokenId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, 5), -4, -1))->getId();
     ce.propagate();
-    assertTrue(checkLevelArea(r) == 10*1 + 14*3 + 21*1 + 20*3 + 20*2);
+    CPPUNIT_ASSERT(checkLevelArea(r) == 10*1 + 14*3 + 21*1 + 20*3 + 20*2);
 
     delete (Token*) t1;
     delete (Token*) t2;
@@ -510,12 +510,12 @@ private:
 
     // Make sure that it will reject a transaction that violates the spec up front
     TransactionId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), productionRateMax + 1, productionRateMax + 1))->getId();
-    assertTrue(!ce.propagate());
+    CPPUNIT_ASSERT(!ce.propagate());
     delete (Transaction*) t1;
 
     // Make sure that it will reject a transaction that violates the spec up front
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), consumptionRateMax - 1, consumptionRateMax - 1))->getId();
-    assertTrue(!ce.propagate());
+    CPPUNIT_ASSERT(!ce.propagate());
     delete (Transaction*) t2;
 
     RESOURCE_DEFAULT_TEARDOWN();
@@ -539,34 +539,34 @@ private:
     TransactionId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), 1, 1))->getId();
 
     // no violation because of temporal flexibility
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
     t1->setEarliest(1);
     t3->setEarliest(1);
-    assertTrue(!ce.propagate());
+    CPPUNIT_ASSERT(!ce.propagate());
 
     r->getResourceViolations(violations);
-    assertTrue(violations.size() == 1);
-    assertTrue(violations.front()->getType() == ResourceViolation::ProductionRateExceeded);
+    CPPUNIT_ASSERT(violations.size() == 1);
+    CPPUNIT_ASSERT(violations.front()->getType() == ResourceViolation::ProductionRateExceeded);
     delete (Transaction*) t1;
     delete (Transaction*) t3;
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
 
     TransactionId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), consumptionRateMax -1, consumptionRateMax))->getId();
     ce.propagate();
     TransactionId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), -1, -1))->getId();
     // no violation because of temporal flexibility
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
     t2->setEarliest(1);
     t4->setEarliest(1);
-    assertTrue(!ce.propagate());
+    CPPUNIT_ASSERT(!ce.propagate());
 
     violations.clear();
     r->getResourceViolations(violations);
-    assertTrue(violations.size() == 1);
-    assertTrue(violations.front()->getType() == ResourceViolation::ConsumptionRateExceeded);
+    CPPUNIT_ASSERT(violations.size() == 1);
+    CPPUNIT_ASSERT(violations.front()->getType() == ResourceViolation::ConsumptionRateExceeded);
     delete (Transaction*) t2;
     delete (Transaction*) t4;
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
       
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
@@ -587,21 +587,21 @@ private:
     // Test that a violation is detected when the excess in the level cannot be overcome by remaining
     // production
     TokenId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 2), -8, -8))->getId();
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
     TokenId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 3), -8, -8))->getId();
-    assertTrue(ce.propagate());    
+    CPPUNIT_ASSERT(ce.propagate());    
     TokenId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 4), -8, -8))->getId();
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
     TokenId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(5, 5), -8, -8))->getId();
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
     TokenId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(6, 6), -8, -8))->getId();
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
     // This will push it over the edge
     TokenId t6 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(10, 10), -8, -8))->getId();
-    assertTrue(!ce.propagate());
-    assertTrue(checkLevelArea(r) == 0);
+    CPPUNIT_ASSERT(!ce.propagate());
+    CPPUNIT_ASSERT(checkLevelArea(r) == 0);
     r->getResourceViolations(violations);
-    assertTrue(violations.front()->getType() == ResourceViolation::LevelTooLow);
+    CPPUNIT_ASSERT(violations.front()->getType() == ResourceViolation::LevelTooLow);
 
     delete (Token*) t1;
     delete (Token*) t2;
@@ -629,25 +629,25 @@ private:
     // Test that a violation is detected when the excess in the level cannot be overcome by remaining
     // production
     TokenId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 2), -8, -8))->getId();
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
     TokenId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 3), -8, -8))->getId();
-    assertTrue(ce.propagate());    
+    CPPUNIT_ASSERT(ce.propagate());    
     TokenId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 4), -8, -8))->getId();
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
     TokenId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(5, 5), -8, -8))->getId();
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
     TokenId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(6, 6), -8, -8))->getId();
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
     TokenId t6 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(8, 8), -8, -8))->getId();
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
     // This will push it over the edge
     TokenId t7 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(10, 10), -8, -8))->getId();
-    assertTrue(!ce.propagate());
+    CPPUNIT_ASSERT(!ce.propagate());
 
-    assertTrue(checkLevelArea(r) == 0);
+    CPPUNIT_ASSERT(checkLevelArea(r) == 0);
     r->getResourceViolations(violations);
-    assertTrue(!violations.empty());
-    assertTrue(violations.front()->getType() == ResourceViolation::ConsumptionSumExceeded);
+    CPPUNIT_ASSERT(!violations.empty());
+    CPPUNIT_ASSERT(violations.front()->getType() == ResourceViolation::ConsumptionSumExceeded);
 
     delete (Token*) t1;
     delete (Token*) t2;
@@ -681,12 +681,12 @@ private:
       transactions.push_back(t);
     }
 
-    assertTrue(checkLevelArea(r) == 0);
+    CPPUNIT_ASSERT(checkLevelArea(r) == 0);
 
     std::list<ResourceViolationId> violations;
     r->getResourceViolations(violations);
-    assertTrue(violations.size() == 1);
-    assertTrue(violations.front()->getType() == ResourceViolation::LevelTooHigh);
+    CPPUNIT_ASSERT(violations.size() == 1);
+    CPPUNIT_ASSERT(violations.front()->getType() == ResourceViolation::LevelTooHigh);
 
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
@@ -715,12 +715,12 @@ private:
     }
 
     ce.propagate();
-    assertTrue(checkLevelArea(r) == 0);
+    CPPUNIT_ASSERT(checkLevelArea(r) == 0);
 
     // Ensure the violations remain unchanged
     std::list<ResourceViolationId> violations;     
     r->getResourceViolations(violations);
-    assertTrue(violations.size() > 0);
+    CPPUNIT_ASSERT(violations.size() > 0);
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
   }
@@ -737,7 +737,7 @@ private:
     IntervalDomain result;
     // Verify correct behaviour for the case with no transactions
     r->getLevelAt(10, result);
-    assertTrue(result.isSingleton() && result.getSingletonValue() == initialCapacity);
+    CPPUNIT_ASSERT(result.isSingleton() && result.getSingletonValue() == initialCapacity);
 
     // Test that a flaw is signalled when there is a possibility to violate limits
     TransactionId producer = (new Transaction(db.getId(), LabelStr("Resource.change"), 
@@ -745,11 +745,11 @@ private:
 
     // Have a single transaction, test before, at and after.
     r->getLevelAt(0, result);
-    assertTrue(result.isSingleton() && result.getSingletonValue() == initialCapacity);
+    CPPUNIT_ASSERT(result.isSingleton() && result.getSingletonValue() == initialCapacity);
     r->getLevelAt(5, result);
-    assertTrue(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5));
+    CPPUNIT_ASSERT(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5));
     r->getLevelAt(1000, result);
-    assertTrue(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5));
+    CPPUNIT_ASSERT(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5));
 
     TransactionId c1 = (new Transaction(db.getId(), LabelStr("Resource.change"), 
 					IntervalIntDomain(0, 7), -5, -5))->getId();
@@ -759,14 +759,14 @@ private:
 
     // Confirm that we can query in the middle
     r->getLevelAt(6, result);
-    assertTrue(result == IntervalDomain(initialCapacity+5-10, initialCapacity+5));
+    CPPUNIT_ASSERT(result == IntervalDomain(initialCapacity+5-10, initialCapacity+5));
 
     // Confirm that we can query at the end
     r->getLevelAt(1000, result);
-    assertTrue(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5 - 10));
+    CPPUNIT_ASSERT(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5 - 10));
 
     // There should be no violations, only flaws
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
 
     delete (Token*) producer;
     delete (Token*) c1;
@@ -783,7 +783,7 @@ private:
    * Sums the instances of transactions in each instant.
    */
   static int checkSum(ResourceId r) {
-    assertTrue(r != ResourceId::noId());
+    CPPUNIT_ASSERT(r != ResourceId::noId());
 
     if(r->getPlanDatabase()->getConstraintEngine()->pending())
       r->getPlanDatabase()->getConstraintEngine()->propagate();
@@ -805,7 +805,7 @@ private:
    * Sums the instances of transactions in each instant.
    */
   static double checkLevelArea(ResourceId r) {
-    assertTrue(r != ResourceId::noId());
+    CPPUNIT_ASSERT(r != ResourceId::noId());
 
     if(r->getPlanDatabase()->getConstraintEngine()->pending())
       r->getPlanDatabase()->getConstraintEngine()->propagate();
@@ -923,41 +923,41 @@ private:
 class ProfileTest {
 public:
   static bool test() {
-    runTest(testAdditionRemovalAndIteration);
-    runTest(testRestrictionAndRelaxation);
+    EUROPA_runTest(testAdditionRemovalAndIteration);
+    EUROPA_runTest(testRestrictionAndRelaxation);
     //converted from old timetable profile tests
-    runTest(testTransactionChangeHandling);
-    runTest(testCorrectTransactionAllocation);
-    runTest(testLevelCalculation);
-    runTest(testTransactionUpdates);
+    EUROPA_runTest(testTransactionChangeHandling);
+    EUROPA_runTest(testCorrectTransactionAllocation);
+    EUROPA_runTest(testLevelCalculation);
+    EUROPA_runTest(testTransactionUpdates);
     //testTransactionRemoval only relevent for tokens--use to test reservoir
-    runTest(testIntervalCapacityValues);
+    EUROPA_runTest(testIntervalCapacityValues);
     //violation tests
-    runTest(testRateConstraintViolation);
-    runTest(testLowerTotalProductionExceededResourceViolation);
-    runTest(testLowerTotalConsumptionExceededResourceViolation);
-    runTest(testUpperLimitExceededResourceViolation);
-    runTest(testSummationConstraintResourceViolation);
+    EUROPA_runTest(testRateConstraintViolation);
+    EUROPA_runTest(testLowerTotalProductionExceededResourceViolation);
+    EUROPA_runTest(testLowerTotalConsumptionExceededResourceViolation);
+    EUROPA_runTest(testUpperLimitExceededResourceViolation);
+    EUROPA_runTest(testSummationConstraintResourceViolation);
     //other tests
-    runTest(testPointProfileQueries);
-    runTest(testGnats3244);
+    EUROPA_runTest(testPointProfileQueries);
+    EUROPA_runTest(testGnats3244);
     return true;
   }
 private:
   static bool checkTimes(const std::set<int>& times, SAVH::ProfileIterator& profIt) {
-    assertTrue(!profIt.done());
-    assertTrue(!times.empty());
+    CPPUNIT_ASSERT(!profIt.done());
+    CPPUNIT_ASSERT(!times.empty());
 
     int retval = 0;
     std::set<int>::const_iterator it = times.begin();
     while(!profIt.done()) {
       debugMsg("ResourceTest:checkTimes", *it << " " << profIt.getTime());
-      assertTrue(profIt.getInstant()->getTime() == *it);
+      CPPUNIT_ASSERT(profIt.getInstant()->getTime() == *it);
       profIt.next();
       ++it;
       ++retval;
     }
-    assertTrue((unsigned) retval == times.size());
+    CPPUNIT_ASSERT((unsigned) retval == times.size());
     return true;
   }
 
@@ -1023,60 +1023,60 @@ private:
     profile.addTransaction(trans1.getId());
     times.insert(0);
     SAVH::ProfileIterator prof1(profile.getId());
-    assertTrue(checkTimes(times, prof1));
+    CPPUNIT_ASSERT(checkTimes(times, prof1));
 
     profile.addTransaction(trans2.getId());
     times.insert(10);
     SAVH::ProfileIterator prof2(profile.getId());
-    assertTrue(checkTimes(times, prof2));
+    CPPUNIT_ASSERT(checkTimes(times, prof2));
 
     profile.addTransaction(trans3.getId());
     times.insert(3);
     SAVH::ProfileIterator prof3(profile.getId());
-    assertTrue(checkTimes(times, prof3));
+    CPPUNIT_ASSERT(checkTimes(times, prof3));
     SAVH::ProfileIterator oCheck1(profile.getId(), 0, 0);
-    assertTrue(!oCheck1.done());
-    assertTrue(oCheck1.getInstant()->getTransactions().size() == 2);
+    CPPUNIT_ASSERT(!oCheck1.done());
+    CPPUNIT_ASSERT(oCheck1.getInstant()->getTransactions().size() == 2);
     
     profile.addTransaction(trans4.getId());
     times.insert(1);
     times.insert(4);
     SAVH::ProfileIterator prof4(profile.getId());
-    assertTrue(checkTimes(times, prof4));
+    CPPUNIT_ASSERT(checkTimes(times, prof4));
     SAVH::ProfileIterator oCheck2(profile.getId(), 3, 3);
-    assertTrue(!oCheck2.done());
-    assertTrue(oCheck2.getInstant()->getTransactions().size() == 2);
+    CPPUNIT_ASSERT(!oCheck2.done());
+    CPPUNIT_ASSERT(oCheck2.getInstant()->getTransactions().size() == 2);
 
     profile.addTransaction(trans5.getId());
     times.insert(6);
     SAVH::ProfileIterator prof5(profile.getId());
-    assertTrue(checkTimes(times, prof5));
+    CPPUNIT_ASSERT(checkTimes(times, prof5));
     SAVH::ProfileIterator oCheck3(profile.getId(), 4, 4);
-    assertTrue(!oCheck3.done());
-    assertTrue(oCheck3.getInstant()->getTransactions().size() == 2);
+    CPPUNIT_ASSERT(!oCheck3.done());
+    CPPUNIT_ASSERT(oCheck3.getInstant()->getTransactions().size() == 2);
 
     profile.removeTransaction(trans4.getId());
     times.erase(1);
     SAVH::ProfileIterator prof6(profile.getId());
-    assertTrue(checkTimes(times, prof6));
+    CPPUNIT_ASSERT(checkTimes(times, prof6));
     SAVH::ProfileIterator oCheck4(profile.getId(), 3, 3);
-    assertTrue(oCheck4.getInstant()->getTransactions().size() == 1);
+    CPPUNIT_ASSERT(oCheck4.getInstant()->getTransactions().size() == 1);
     SAVH::ProfileIterator oCheck5(profile.getId(), 4, 4);
-    assertTrue(oCheck5.getInstant()->getTransactions().size() == 1);
+    CPPUNIT_ASSERT(oCheck5.getInstant()->getTransactions().size() == 1);
 
     profile.removeTransaction(trans1.getId());
     profile.removeTransaction(trans2.getId());
     times.erase(10);
     SAVH::ProfileIterator prof7(profile.getId());
-    assertTrue(checkTimes(times, prof7));
+    CPPUNIT_ASSERT(checkTimes(times, prof7));
     SAVH::ProfileIterator oCheck6(profile.getId(), 0, 0);
-    assertTrue(oCheck6.getInstant()->getTransactions().size() == 1);
+    CPPUNIT_ASSERT(oCheck6.getInstant()->getTransactions().size() == 1);
 
     profile.removeTransaction(trans3.getId());
     profile.removeTransaction(trans5.getId());
 
     SAVH::ProfileIterator prof8(profile.getId());
-    assertTrue(prof8.done());
+    CPPUNIT_ASSERT(prof8.done());
 
     return true;
   }
@@ -1111,45 +1111,45 @@ private:
     profile.addTransaction(trans5.getId());
 
     SAVH::ProfileIterator baseTest(profile.getId());
-    assertTrue(checkTimes(times, baseTest));
+    CPPUNIT_ASSERT(checkTimes(times, baseTest));
 
     //should remove the instant at 3 and add an instant at 2.  the instant at 2 should have two transactions (t3 and t4).
     times.erase(3);
     times.insert(2);
     const_cast<AbstractDomain&>(t3.lastDomain()).intersect(0, 2);
     SAVH::ProfileIterator prof1(profile.getId());
-    assertTrue(checkTimes(times, prof1));
+    CPPUNIT_ASSERT(checkTimes(times, prof1));
     SAVH::ProfileIterator oCheck1(profile.getId(), 2, 2);
-    assertTrue(oCheck1.getInstant()->getTransactions().size() == 2);
-    assertTrue(oCheck1.getInstant()->getTransactions().find(trans3.getId()) != oCheck1.getInstant()->getTransactions().end());
-    assertTrue(oCheck1.getInstant()->getTransactions().find(trans4.getId()) != oCheck1.getInstant()->getTransactions().end());
+    CPPUNIT_ASSERT(oCheck1.getInstant()->getTransactions().size() == 2);
+    CPPUNIT_ASSERT(oCheck1.getInstant()->getTransactions().find(trans3.getId()) != oCheck1.getInstant()->getTransactions().end());
+    CPPUNIT_ASSERT(oCheck1.getInstant()->getTransactions().find(trans4.getId()) != oCheck1.getInstant()->getTransactions().end());
     SAVH::ProfileIterator oCheck1_1(profile.getId(), 3, 3);
-    assertTrue(oCheck1_1.done());
+    CPPUNIT_ASSERT(oCheck1_1.done());
 
     times.erase(2);
     times.insert(3);
     t3.reset();
     SAVH::ProfileIterator prof2(profile.getId());
-    assertTrue(checkTimes(times, prof2));
+    CPPUNIT_ASSERT(checkTimes(times, prof2));
     SAVH::ProfileIterator oCheck2(profile.getId(), 3, 3);
-    assertTrue(oCheck2.getInstant()->getTransactions().size() == 2);
+    CPPUNIT_ASSERT(oCheck2.getInstant()->getTransactions().size() == 2);
     SAVH::ProfileIterator oCheck2_1(profile.getId(), 2, 2);
-    assertTrue(oCheck2_1.done());
+    CPPUNIT_ASSERT(oCheck2_1.done());
     
 
-    assertTrue(profile.gotNotified() == 0);
+    CPPUNIT_ASSERT(profile.gotNotified() == 0);
     ConstraintId constr = db.getClient()->createConstraint("precedes", makeScope(t1.getId(), t2.getId()));
-    assertTrue(profile.gotNotified() == 1);
+    CPPUNIT_ASSERT(profile.gotNotified() == 1);
     profile.resetNotified();
     constr->discard();
-    assertTrue(profile.gotNotified() == 1);
+    CPPUNIT_ASSERT(profile.gotNotified() == 1);
 
     profile.resetNotified();
     Variable<IntervalIntDomain> temp(ce.getId(), IntervalIntDomain(-1, -1));
     ConstraintId constr2 = db.getClient()->createConstraint("precedes", makeScope(temp.getId(), t1.getId()));
-    assertTrue(profile.gotNotified() == 0);
+    CPPUNIT_ASSERT(profile.gotNotified() == 0);
     constr2->discard();
-    assertTrue(profile.gotNotified() == 0);
+    CPPUNIT_ASSERT(profile.gotNotified() == 0);
     return true;
   }
 
@@ -1166,41 +1166,41 @@ private:
 //     SAVH::Transaction trans0(t0.getId(), q0.getId(), false);
 //     r.addTransaction(trans0.getId());
 
-    assertTrue(checkLevelArea(r.getId()) == 0);
+    CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 0);
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, HORIZON_END));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(45, 45));
     SAVH::Transaction trans1(t1.getId(), q1.getId(), false);
     r.addTransaction(trans1.getId());
-    assertTrue(ce.propagate());
-    assertTrue(checkSum(r.getId()) == (1*1 + 2*1));
-    assertTrue(checkLevelArea(r.getId()) == 1000 * 45);
+    CPPUNIT_ASSERT(ce.propagate());
+    CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*1));
+    CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 1000 * 45);
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(1, HORIZON_END));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(35, 35));
     SAVH::Transaction trans2(t2.getId(), q2.getId(), false);
     r.addTransaction(trans2.getId());
-    assertTrue(ce.propagate());
-    assertTrue(checkSum(r.getId()) == (1*1 + 2*2 + 3*2));
-    assertTrue(checkLevelArea(r.getId()) == (1*45 + 80*999));
+    CPPUNIT_ASSERT(ce.propagate());
+    CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*2));
+    CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*45 + 80*999));
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(2, HORIZON_END));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(20, 20));
     SAVH::Transaction trans3(t3.getId(), q3.getId(), false);
     r.addTransaction(trans3.getId());
-    assertTrue(ce.propagate());
-    assertTrue(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*3));
-    assertTrue(checkLevelArea(r.getId()) == (1*45 + 1*80 + 998*100));
+    CPPUNIT_ASSERT(ce.propagate());
+    CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*3));
+    CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*45 + 1*80 + 998*100));
 
     trans2.time()->restrictBaseDomain(IntervalIntDomain(1, (int)trans2.time()->lastDomain().getUpperBound()));
-    assertTrue(ce.propagate());
-    assertTrue(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*3));
-    assertTrue(checkLevelArea(r.getId()) == (1*45 + 1*80 + 998*100));
+    CPPUNIT_ASSERT(ce.propagate());
+    CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*3));
+    CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*45 + 1*80 + 998*100));
 
     trans2.time()->restrictBaseDomain(IntervalIntDomain(2, (int)trans2.time()->lastDomain().getUpperBound()));
-    assertTrue(ce.propagate());
-    assertTrue(checkSum(r.getId()) == (1*1 + 2*3 + 3*3));
-    assertTrue(checkLevelArea(r.getId()) == (2*45 + 998*100));
+    CPPUNIT_ASSERT(ce.propagate());
+    CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*3 + 3*3));
+    CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (2*45 + 998*100));
 
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
@@ -1214,68 +1214,68 @@ private:
     DummyDetector detector(SAVH::ResourceId::noId());
     SAVH::TimetableProfile r(db.getId(), detector.getId());
 
-    assertTrue(ce.propagate() && checkSum(r.getId()) == 0); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == 0); 
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(4, 6));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
     SAVH::Transaction trans1(t1.getId(), q1.getId(), false);
     r.addTransaction(trans1.getId());
-    assertTrue(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*1));
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*1));
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(-4, 10));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
     SAVH::Transaction trans2(t2.getId(), q2.getId(), false);
     r.addTransaction(trans2.getId());
-    assertTrue(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*2 + 3*2 + 4*1));
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*2 + 3*2 + 4*1));
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(1, 3));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
     SAVH::Transaction trans3(t3.getId(), q3.getId(), false);
     r.addTransaction(trans3.getId());
-    assertTrue(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1)); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1)); 
 
     Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(1, 2));
     Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
     SAVH::Transaction trans4(t4.getId(), q4.getId(), false);
     r.addTransaction(trans4.getId());    
-    assertTrue(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1)); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1)); 
 
     Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(3, 7));
     Variable<IntervalDomain> q5(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
     SAVH::Transaction trans5(t5.getId(), q5.getId(), false);
     r.addTransaction(trans5.getId());
-    assertTrue(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1)); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1)); 
 
     Variable<IntervalIntDomain> t6(ce.getId(), IntervalIntDomain(4, 7));
     Variable<IntervalDomain> q6(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
     SAVH::Transaction trans6(t6.getId(), q6.getId(), false);
     r.addTransaction(trans6.getId());
-    assertTrue(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1)); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1)); 
 
     // Insert for a singleton value
     Variable<IntervalIntDomain> t7(ce.getId(), IntervalIntDomain(5, 5));
     Variable<IntervalDomain> q7(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
     SAVH::Transaction trans7(t7.getId(), q7.getId(), false);
     r.addTransaction(trans7.getId());
-    assertTrue(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*5 + 7*4 + 8*3 + 9*1)); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*5 + 7*4 + 8*3 + 9*1)); 
 
     // Now free them and check the retractions are working correctly
 
     r.removeTransaction(trans7.getId());
-    assertTrue(ce.propagate());
-    assertTrue(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1));
+    CPPUNIT_ASSERT(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1));
     r.removeTransaction(trans6.getId());
-    assertTrue(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1));
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1));
     r.removeTransaction(trans5.getId());
-    assertTrue(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1));
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1));
     r.removeTransaction(trans4.getId());
-    assertTrue(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1));
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1));
     r.removeTransaction(trans3.getId());
-    assertTrue(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*2 + 3*2 + 4*1));
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*2 + 3*2 + 4*1));
     r.removeTransaction(trans2.getId());
-    assertTrue(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*1));
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId())  == (1*1 + 2*1));
     r.removeTransaction(trans1.getId());
-    assertTrue(ce.propagate() && checkSum(r.getId()) == 0);
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == 0);
 
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
@@ -1293,56 +1293,56 @@ private:
     SAVH::Transaction trans1(t1.getId(), q1.getId(), false);
     r.addTransaction(trans1.getId());    
     ce.propagate();
-    assertTrue(checkSum(r.getId()) == (1*1 + 2*1)); 
-    assertTrue(checkLevelArea(r.getId()) == 1);
+    CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*1)); 
+    CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 1);
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(1, 3));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(4, 4));
     SAVH::Transaction trans2(t2.getId(), q2.getId(), true);
     r.addTransaction(trans2.getId());
     ce.propagate();
-    assertTrue(checkSum(r.getId()) == (1*1 + 2*2 + 3*1)); 
-    assertTrue(checkLevelArea(r.getId()) == (1 + 4*2));
+    CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*1)); 
+    CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1 + 4*2));
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(2, 4));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(8, 8));
     SAVH::Transaction trans3(t3.getId(), q3.getId(), false);
     r.addTransaction(trans3.getId());
     ce.propagate();
-    assertTrue(checkSum(r.getId()) == (1*1 + 2*2 + 3*2 + 4*2 + 5*1)); 
-    assertTrue(checkLevelArea(r.getId()) == (1*1 + 4*1 + 12*1 + 8*1));
+    CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*2 + 4*2 + 5*1)); 
+    CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*1 + 4*1 + 12*1 + 8*1));
 
     Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(3, 6));
     Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(2, 2));
     SAVH::Transaction trans4(t4.getId(), q4.getId(), false);
     r.addTransaction(trans4.getId());
     ce.propagate();
-    assertTrue(checkSum(r.getId()) == (1*1 + 2*2 + 3*2 + 4*3 + 5*2 + 6*1));
-    assertTrue(checkLevelArea(r.getId()) == (1*1 + 4*1 + 12*1 + 10*1 + 2*2));
+    CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*2 + 4*3 + 5*2 + 6*1));
+    CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*1 + 4*1 + 12*1 + 10*1 + 2*2));
  
     Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(2, 10));
     Variable<IntervalDomain> q5(ce.getId(), IntervalDomain(6, 6));
     SAVH::Transaction trans5(t5.getId(), q5.getId(), true);
     r.addTransaction(trans5.getId());
     ce.propagate();
-    assertTrue(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*2 + 7*1));
-    assertTrue(checkLevelArea(r.getId()) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 6*4));
+    CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*2 + 7*1));
+    CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 6*4));
 
     Variable<IntervalIntDomain> t6(ce.getId(), IntervalIntDomain(6, 8));
     Variable<IntervalDomain> q6(ce.getId(), IntervalDomain(3, 3));
     SAVH::Transaction trans6(t6.getId(), q6.getId(), false);
     r.addTransaction(trans6.getId());
     ce.propagate();
-    assertTrue(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + 7*2 + 8*1));
-    assertTrue(checkLevelArea(r.getId()) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*2 + 6*2));
+    CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + 7*2 + 8*1));
+    CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*2 + 6*2));
 
     Variable<IntervalIntDomain> t7(ce.getId(), IntervalIntDomain(7, 8));
     Variable<IntervalDomain> q7(ce.getId(), IntervalDomain(4, 4));
     SAVH::Transaction trans7(t7.getId(), q7.getId(), true);
     r.addTransaction(trans7.getId());
     ce.propagate();
-    assertTrue(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + +7* 3 + 8*3 + 9*1));
-    assertTrue(checkLevelArea(r.getId()) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*1 + 13*1 + 6*2));
+    CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*3 + +7* 3 + 8*3 + 9*1));
+    CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 9*1 + 13*1 + 6*2));
 
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
@@ -1360,16 +1360,16 @@ private:
     SAVH::Transaction trans1(t1.getId(), q1.getId(), false);
     r.addTransaction(trans1.getId());
     ce.propagate();
-    assertTrue(checkLevelArea(r.getId()) == 10*10);
+    CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*10);
 
     trans1.time()->restrictBaseDomain(IntervalIntDomain(1, (int)trans1.time()->lastDomain().getUpperBound()));
-    assertTrue(checkLevelArea(r.getId()) == 10*9);
+    CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*9);
 
     trans1.time()->restrictBaseDomain(IntervalIntDomain((int)trans1.time()->lastDomain().getLowerBound(), 8));
-    assertTrue(checkLevelArea(r.getId()) == 10*7);
+    CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*7);
 
     trans1.time()->restrictBaseDomain(IntervalIntDomain((int)trans1.time()->lastDomain().getLowerBound(), 6));
-    assertTrue(checkLevelArea(r.getId()) == 10*5);
+    CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*5);
 
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
@@ -1389,13 +1389,13 @@ private:
     SAVH::Transaction trans1(t1.getId(), q1.getId(), false);
     r.addTransaction(trans1.getId());
     ce.propagate();
-    assertTrue(checkLevelArea(r.getId()) == 10*10);
+    CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*10);
 
     //test elided: we don't allow transactions that could produce or consume anymore
     // This tests a transaction that could be a producer or a consumer. We don't know yet!
 //     TokenId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 8), -4, 3))->getId();
 //     ce.propagate();
-//     assertTrue(checkLevelArea(r.getId()) == 10*4 + 17*4 + 17*2);
+//     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*4 + 17*4 + 17*2);
 
     // Test consumer
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(1, 5));
@@ -1403,7 +1403,7 @@ private:
     SAVH::Transaction trans3(t3.getId(), q3.getId(), true);
     r.addTransaction(trans3.getId());
     ce.propagate();
-    assertTrue(checkLevelArea(r.getId()) == 10*1 + 14*4 + 13*5);//+ 14*3 + 21*1 + 20*3 + 20*2);
+    CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*1 + 14*4 + 13*5);//+ 14*3 + 21*1 + 20*3 + 20*2);
 
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
@@ -1431,19 +1431,19 @@ private:
     r.addTransaction(trans3.getId());
 
     // no violation because of temporal flexibility
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
 
     trans1.time()->restrictBaseDomain(IntervalIntDomain(1, (int)trans1.time()->lastDomain().getUpperBound()));
     trans3.time()->restrictBaseDomain(IntervalIntDomain(1, (int)trans3.time()->lastDomain().getUpperBound()));
-    assertTrue(!ce.propagate());
+    CPPUNIT_ASSERT(!ce.propagate());
 
     //r->getResourceViolations(violations);
-    //assertTrue(violations.size() == 1);
-    //assertTrue(violations.front()->getType() == ResourceViolation::ProductionRateExceeded);
+    //CPPUNIT_ASSERT(violations.size() == 1);
+    //CPPUNIT_ASSERT(violations.front()->getType() == ResourceViolation::ProductionRateExceeded);
     
     r.removeTransaction(trans3.getId());
     r.removeTransaction(trans1.getId());
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(0, 1));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(-(consumptionRateMax), -(consumptionRateMax - 1)));
@@ -1456,18 +1456,18 @@ private:
     SAVH::Transaction trans4(t4.getId(), q4.getId(), true);
     r.addTransaction(trans4.getId());
     // no violation because of temporal flexibility
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
     trans2.time()->restrictBaseDomain(IntervalIntDomain(1, (int)trans2.time()->lastDomain().getUpperBound()));
     trans4.time()->restrictBaseDomain(IntervalIntDomain(1, (int)trans4.time()->lastDomain().getUpperBound()));
-    assertTrue(!ce.propagate());
+    CPPUNIT_ASSERT(!ce.propagate());
 
     //violations.clear();
     //r->getResourceViolations(violations);
-    //assertTrue(violations.size() == 1);
-    //assertTrue(violations.front()->getType() == ResourceViolation::ConsumptionRateExceeded);
+    //CPPUNIT_ASSERT(violations.size() == 1);
+    //CPPUNIT_ASSERT(violations.front()->getType() == ResourceViolation::ConsumptionRateExceeded);
     r.removeTransaction(trans4.getId());
     r.removeTransaction(trans2.getId());
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
       
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
@@ -1489,42 +1489,42 @@ private:
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(8, 8));
     SAVH::Transaction trans1(t1.getId(), q1.getId(), true);
     r.addTransaction(trans1.getId());
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(3, 3));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(8, 8));
     SAVH::Transaction trans2(t2.getId(), q2.getId(), true);
     r.addTransaction(trans2.getId());
-    assertTrue(ce.propagate());    
+    CPPUNIT_ASSERT(ce.propagate());    
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(4, 4));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(8, 8));
     SAVH::Transaction trans3(t3.getId(), q3.getId(), true);
     r.addTransaction(trans3.getId());    
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(5, 5));
     Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(8, 8));
     SAVH::Transaction trans4(t4.getId(), q4.getId(), true);
     r.addTransaction(trans4.getId());
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(6, 6));
     Variable<IntervalDomain> q5(ce.getId(), IntervalDomain(8, 8));
     SAVH::Transaction trans5(t5.getId(), q5.getId(), true);
     r.addTransaction(trans5.getId());
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
 
     // This will push it over the edge
     Variable<IntervalIntDomain> t6(ce.getId(), IntervalIntDomain(10, 10));
     Variable<IntervalDomain> q6(ce.getId(), IntervalDomain(8, 8));
     SAVH::Transaction trans6(t6.getId(), q6.getId(), true);
     r.addTransaction(trans6.getId());
-    assertTrue(!ce.propagate());
+    CPPUNIT_ASSERT(!ce.propagate());
 
-    assertTrue(checkLevelArea(r.getProfile()) == 0);
+    CPPUNIT_ASSERT(checkLevelArea(r.getProfile()) == 0);
 //     r.getResourceViolations(violations);
-//     assertTrue(violations.front()->getType() == ResourceViolation::LevelTooLow);
+//     CPPUNIT_ASSERT(violations.front()->getType() == ResourceViolation::LevelTooLow);
 
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
@@ -1548,49 +1548,49 @@ private:
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(8, 8));
     SAVH::Transaction trans1(t1.getId(), q1.getId(), true);
     r.addTransaction(trans1.getId());
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(3, 3));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(8, 8));
     SAVH::Transaction trans2(t2.getId(), q2.getId(), true);
     r.addTransaction(trans2.getId());
-    assertTrue(ce.propagate());   
+    CPPUNIT_ASSERT(ce.propagate());   
  
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(4, 4));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(8, 8));
     SAVH::Transaction trans3(t3.getId(), q3.getId(), true);
     r.addTransaction(trans3.getId());
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(5, 5));
     Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(8, 8));
     SAVH::Transaction trans4(t4.getId(), q4.getId(), true);
     r.addTransaction(trans4.getId());
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(6, 6));
     Variable<IntervalDomain> q5(ce.getId(), IntervalDomain(8, 8));
     SAVH::Transaction trans5(t5.getId(), q5.getId(), true);
     r.addTransaction(trans5.getId());
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t6(ce.getId(), IntervalIntDomain(8, 8));
     Variable<IntervalDomain> q6(ce.getId(), IntervalDomain(8, 8));
     SAVH::Transaction trans6(t6.getId(), q6.getId(), true);
     r.addTransaction(trans6.getId());
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
 
     // This will push it over the edge
     Variable<IntervalIntDomain> t7(ce.getId(), IntervalIntDomain(10, 10));
     Variable<IntervalDomain> q7(ce.getId(), IntervalDomain(8, 8));
     SAVH::Transaction trans7(t7.getId(), q7.getId(), true);
     r.addTransaction(trans7.getId());
-    assertTrue(!ce.propagate());
+    CPPUNIT_ASSERT(!ce.propagate());
 
-    assertTrue(checkLevelArea(r.getProfile()) == 0);
+    CPPUNIT_ASSERT(checkLevelArea(r.getProfile()) == 0);
 //     r->getResourceViolations(violations);
-//     assertTrue(!violations.empty());
-//     assertTrue(violations.front()->getType() == ResourceViolation::ConsumptionSumExceeded);
+//     CPPUNIT_ASSERT(!violations.empty());
+//     CPPUNIT_ASSERT(violations.front()->getType() == ResourceViolation::ConsumptionSumExceeded);
 
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
@@ -1619,19 +1619,19 @@ private:
       vars.push_back(time);
       //r->constrain(t);
       if(i < 10) {
-	assertTrue(ce.propagate());
+	CPPUNIT_ASSERT(ce.propagate());
       }
       else {
-	assertTrue(!ce.propagate());
+	CPPUNIT_ASSERT(!ce.propagate());
       }
     }
 
-    assertTrue(checkLevelArea(r.getProfile()) == 0);
+    CPPUNIT_ASSERT(checkLevelArea(r.getProfile()) == 0);
 
 //     std::list<ResourceViolationId> violations;
 //     r->getResourceViolations(violations);
-//     assertTrue(violations.size() == 1);
-//     assertTrue(violations.front()->getType() == ResourceViolation::LevelTooHigh);
+//     CPPUNIT_ASSERT(violations.size() == 1);
+//     CPPUNIT_ASSERT(violations.front()->getType() == ResourceViolation::LevelTooHigh);
 
     for(std::list<SAVH::TransactionId>::iterator it = transactions.begin(); it != transactions.end(); ++it)
       delete (SAVH::Transaction*) (*it);
@@ -1675,13 +1675,13 @@ private:
       variables.push_back(quantity);
     }
 
-    assertTrue(!ce.propagate());
-    assertTrue(checkLevelArea(r.getProfile()) == 0);
+    CPPUNIT_ASSERT(!ce.propagate());
+    CPPUNIT_ASSERT(checkLevelArea(r.getProfile()) == 0);
 
     // Ensure the violations remain unchanged
 //     std::list<ResourceViolationId> violations;     
 //     r->getResourceViolations(violations);
-//     assertTrue(violations.size() > 0);
+//     CPPUNIT_ASSERT(violations.size() > 0);
 
     for(std::list<SAVH::TransactionId>::iterator it = transactions.begin(); it != transactions.end(); ++it)
       delete (SAVH::Transaction*) (*it);
@@ -1703,7 +1703,7 @@ private:
     IntervalDomain result;
     // Verify correct behaviour for the case with no transactions
     r.getProfile()->getLevel(10, result);
-    assertTrue(result.isSingleton() && result.getSingletonValue() == initialCapacity);
+    CPPUNIT_ASSERT(result.isSingleton() && result.getSingletonValue() == initialCapacity);
 
     // Test that a flaw is signalled when there is a possibility to violate limits
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(5, 5));
@@ -1713,11 +1713,11 @@ private:
 
     // Have a single transaction, test before, at and after.
     r.getProfile()->getLevel(0, result);
-    assertTrue(result.isSingleton() && result.getSingletonValue() == initialCapacity);
+    CPPUNIT_ASSERT(result.isSingleton() && result.getSingletonValue() == initialCapacity);
     r.getProfile()->getLevel(5, result);
-    assertTrue(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5));
+    CPPUNIT_ASSERT(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5));
     r.getProfile()->getLevel(1000, result);
-    assertTrue(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5));
+    CPPUNIT_ASSERT(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5));
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(0, 7));
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(5, 5));
@@ -1731,14 +1731,14 @@ private:
 
     // Confirm that we can query in the middle
     r.getProfile()->getLevel(6, result);
-    assertTrue(result == IntervalDomain(initialCapacity+5-10, initialCapacity+5));
+    CPPUNIT_ASSERT(result == IntervalDomain(initialCapacity+5-10, initialCapacity+5));
 
     // Confirm that we can query at the end
     r.getProfile()->getLevel(1000, result);
-    assertTrue(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5 - 10));
+    CPPUNIT_ASSERT(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5 - 10));
 
     // There should be no violations, only flaws
-    assertTrue(ce.propagate());
+    CPPUNIT_ASSERT(ce.propagate());
 
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
@@ -1775,12 +1775,12 @@ private:
 
 
     SAVH::InstantId inst = profile.getInstant(0);
-    assertTrue(inst.isValid());
-    assertTrue(inst->getTime() == 0);
+    CPPUNIT_ASSERT(inst.isValid());
+    CPPUNIT_ASSERT(inst->getTime() == 0);
     for(std::set<SAVH::TransactionId>::const_iterator it = inst->getTransactions().begin();
 	it != inst->getTransactions().end(); ++it) {
-      assertTrue((*it).isValid());
-      assertTrue((*it) == trans1.getId());
+      CPPUNIT_ASSERT((*it).isValid());
+      CPPUNIT_ASSERT((*it) == trans1.getId());
     }
 
     //for time 5
@@ -1790,15 +1790,15 @@ private:
     trans.insert(trans4.getId());
 
     inst = profile.getInstant(5);
-    assertTrue(inst.isValid());
-    assertTrue(inst->getTime() == 5);
+    CPPUNIT_ASSERT(inst.isValid());
+    CPPUNIT_ASSERT(inst->getTime() == 5);
     for(std::set<SAVH::TransactionId>::const_iterator it = inst->getTransactions().begin();
 	it != inst->getTransactions().end(); ++it) {
-      assertTrue((*it).isValid());
-      assertTrue(trans.find(*it) != trans.end());
+      CPPUNIT_ASSERT((*it).isValid());
+      CPPUNIT_ASSERT(trans.find(*it) != trans.end());
       trans.erase(*it);
     }
-    assertTrue(trans.empty());
+    CPPUNIT_ASSERT(trans.empty());
 
     //for time 10
     trans.insert(trans1.getId());
@@ -1807,15 +1807,15 @@ private:
     trans.insert(trans4.getId());
     
     inst = profile.getInstant(10);
-    assertTrue(inst.isValid());
-    assertTrue(inst->getTime() == 10);
+    CPPUNIT_ASSERT(inst.isValid());
+    CPPUNIT_ASSERT(inst->getTime() == 10);
     for(std::set<SAVH::TransactionId>::const_iterator it = inst->getTransactions().begin();
 	it != inst->getTransactions().end(); ++it) {
-      assertTrue((*it).isValid());
-      assertTrue(trans.find(*it) != trans.end());
+      CPPUNIT_ASSERT((*it).isValid());
+      CPPUNIT_ASSERT(trans.find(*it) != trans.end());
       trans.erase(*it);
     }
-    assertTrue(trans.empty());
+    CPPUNIT_ASSERT(trans.empty());
 
     //for time 15
     trans.insert(trans2.getId());
@@ -1823,15 +1823,15 @@ private:
     trans.insert(trans4.getId());
 
     inst = profile.getInstant(15);
-    assertTrue(inst.isValid());
-    assertTrue(inst->getTime() == 15);
+    CPPUNIT_ASSERT(inst.isValid());
+    CPPUNIT_ASSERT(inst->getTime() == 15);
     for(std::set<SAVH::TransactionId>::const_iterator it = inst->getTransactions().begin();
 	it != inst->getTransactions().end(); ++it) {
-      assertTrue((*it).isValid());
-      assertTrue(trans.find(*it) != trans.end());
+      CPPUNIT_ASSERT((*it).isValid());
+      CPPUNIT_ASSERT(trans.find(*it) != trans.end());
       trans.erase(*it);
     }
-    assertTrue(trans.empty());
+    CPPUNIT_ASSERT(trans.empty());
 
     
     RESOURCE_DEFAULT_TEARDOWN();
@@ -1842,8 +1842,8 @@ private:
 class SAVHResourceTest {
 public:
   static bool test() {
-    runTest(testReservoir);
-    runTest(testReusable);
+    EUROPA_runTest(testReservoir);
+    EUROPA_runTest(testReusable);
     return true;
   }
 private:
@@ -1859,22 +1859,22 @@ private:
 			   IntervalDomain(5));
 
     SAVH::ProfileIterator it1(res1.getProfile());
-    assertTrue(it1.done());
+    CPPUNIT_ASSERT(it1.done());
     SAVH::ProfileIterator it2(res2.getProfile());
-    assertTrue(it2.done());
+    CPPUNIT_ASSERT(it2.done());
 
     const_cast<AbstractDomain&>(consumer.getObject()->lastDomain()).remove(res2.getId());
     ce.propagate();
     SAVH::ProfileIterator it3(res1.getProfile());
-    assertTrue(!it3.done());
+    CPPUNIT_ASSERT(!it3.done());
     SAVH::ProfileIterator it4(res2.getProfile());
-    assertTrue(it4.done());
+    CPPUNIT_ASSERT(it4.done());
     
     const_cast<AbstractDomain&>(consumer.getObject()->lastDomain()).relax(consumer.getObject()->baseDomain());
     SAVH::ProfileIterator it5(res1.getProfile());
-    assertTrue(it5.done());
+    CPPUNIT_ASSERT(it5.done());
     SAVH::ProfileIterator it6(res2.getProfile());
-    assertTrue(it6.done());
+    CPPUNIT_ASSERT(it6.done());
 
     SAVH::ConsumerToken throwaway(db.getId(), LabelStr("Reservoir.consume"), IntervalIntDomain(10),
 				  IntervalDomain(5));
@@ -1896,7 +1896,7 @@ private:
 
     //should create two transactions and four instants
     SAVH::ProfileIterator it(res.getProfile());
-    assertTrue(!it.done());
+    CPPUNIT_ASSERT(!it.done());
     std::set<SAVH::TransactionId> trans;
     int instCount = 0;
     while(!it.done()) {
@@ -1906,22 +1906,22 @@ private:
       instCount++;
       it.next();
     }
-    assertTrue(trans.size() == 2);
-    assertTrue(instCount == 4);
+    CPPUNIT_ASSERT(trans.size() == 2);
+    CPPUNIT_ASSERT(instCount == 4);
     
     use.start()->specify(0);
     use.end()->specify(10);
-    assertTrue(db.getConstraintEngine()->propagate());
+    CPPUNIT_ASSERT(db.getConstraintEngine()->propagate());
 
     //should reduce the instant count to 2
     SAVH::ProfileIterator it1(res.getProfile());
-    assertTrue(!it1.done());
+    CPPUNIT_ASSERT(!it1.done());
     instCount = 0;
     while(!it1.done()) {
       instCount++;
       it1.next();
     }
-    assertTrue(instCount == 2);
+    CPPUNIT_ASSERT(instCount == 2);
 
     SAVH::ReusableToken throwaway(db.getId(), LabelStr("Reusable.uses"), IntervalIntDomain(50), IntervalIntDomain(51), IntervalIntDomain(1), IntervalDomain(1));
     throwaway.discard(false);
@@ -1939,6 +1939,31 @@ void ResourceModuleTests::runTests(std::string path)
   runTestSuite(ProfileTest::test);
   runTestSuite(SAVHResourceTest::test);
   std::cout << "Finished" << std::endl;
+}
+
+void ResourceModuleTests::cppSetup(void) 
+{
+  setTestLoadLibraryPath(".");
+}
+
+void ResourceModuleTests::defaultSetupTests(void)
+{
+  DefaultSetupTest::test();
+}
+
+void ResourceModuleTests::resourceTests(void)
+{
+  ResourceTest::test();
+}
+
+void ResourceModuleTests::profileTests(void)
+{
+  ProfileTest::test();
+}
+
+void ResourceModuleTests::SAVHResourceTests(void)
+{
+  SAVHResourceTest::test();
 }
 
   
@@ -1961,8 +1986,8 @@ void ResourceModuleTests::runTests(std::string path)
     SAVH::ReusableToken tok3(db, "Reusable.uses", IntervalIntDomain(11, 16), IntervalIntDomain(18, 19), IntervalIntDomain(1, PLUS_INFINITY),
                  IntervalDomain(1.0, 1.0), "myReusable");
     
-    assertTrue(ce->propagate());
-    assertTrue(reusable.hasTokensToOrder());
+    CPPUNIT_ASSERT(ce->propagate());
+    CPPUNIT_ASSERT(reusable.hasTokensToOrder());
     TiXmlElement dummy("");
     ResourceThreatDecisionPoint dp1(client, tok1.getId(), dummy);
 
@@ -1975,7 +2000,7 @@ void ResourceModuleTests::runTests(std::string path)
       ce->propagate();
       choiceCount++;
     }
-    assertTrue(choiceCount == 3);
+    CPPUNIT_ASSERT(choiceCount == 3);
 
     choiceCount = 0;
     ResourceThreatDecisionPoint dp2(client, tok2.getId(), dummy);
@@ -1987,7 +2012,7 @@ void ResourceModuleTests::runTests(std::string path)
       ce->propagate();
       choiceCount++;
     }
-    assertTrue(choiceCount == 3);
+    CPPUNIT_ASSERT(choiceCount == 3);
 
     choiceCount = 0;
     ResourceThreatDecisionPoint dp3(client, tok3.getId(), dummy);
@@ -1999,7 +2024,7 @@ void ResourceModuleTests::runTests(std::string path)
       ce->propagate();
       choiceCount++;
     }
-    assertTrue(choiceCount == 3);
+    CPPUNIT_ASSERT(choiceCount == 3);
 
     return true;
   }
@@ -2021,66 +2046,66 @@ void ResourceModuleTests::runTests(std::string path)
     SAVH::ReusableToken tok3(db, "Reusable.uses", IntervalIntDomain(11, 16), IntervalIntDomain(18, 19), IntervalIntDomain(1, PLUS_INFINITY),
                  IntervalDomain(1.0, 1.0), "myReusable");
     
-    assertTrue(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
 
-    assertTrue(reusable.hasTokensToOrder());
+    CPPUNIT_ASSERT(reusable.hasTokensToOrder());
     std::vector<SAVH::InstantId> flawedInstants;
     reusable.getFlawedInstants(flawedInstants);
-    assertTrue(flawedInstants.size() == 5);
-    assertTrue(flawedInstants[0]->getTime() == 11);
+    CPPUNIT_ASSERT(flawedInstants.size() == 5);
+    CPPUNIT_ASSERT(flawedInstants[0]->getTime() == 11);
 
     TiXmlElement dummy("");
     SAVH::ThreatDecisionPoint dp1(client, flawedInstants[0], dummy);
 
     dp1.initialize();
 
-    assertTrue(dp1.getChoices().size() == 8);
+    CPPUNIT_ASSERT(dp1.getChoices().size() == 8);
 
     std::string noFilter = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"none\"/>";
     TiXmlElement* noFilterXml = initXml(noFilter);
     SAVH::ThreatDecisionPoint dp2(client, flawedInstants[0], *noFilterXml);
     dp2.initialize();
-    assertTrue(dp2.getChoices().size() == 8);
+    CPPUNIT_ASSERT(dp2.getChoices().size() == 8);
 
     std::string predFilter = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"predecessorNot\"/>"; 
     TiXmlElement* predFilterXml = initXml(predFilter);
     SAVH::ThreatDecisionPoint dp3(client, flawedInstants[0], *predFilterXml);
     dp3.initialize();
-    assertTrue(dp3.getChoices().size() == 3);
-    assertTrue(dp3.getChoices()[0].first->time() == tok1.end());
-    assertTrue(dp3.getChoices()[0].second->time() == tok2.start());
-    assertTrue(dp3.getChoices()[1].first->time() == tok1.end());
-    assertTrue(dp3.getChoices()[1].second->time() == tok3.start());
-    assertTrue(dp3.getChoices()[2].first->time() == tok2.end());
-    assertTrue(dp3.getChoices()[2].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp3.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp3.getChoices()[0].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp3.getChoices()[0].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp3.getChoices()[1].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp3.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp3.getChoices()[2].first->time() == tok2.end());
+    CPPUNIT_ASSERT(dp3.getChoices()[2].second->time() == tok3.start());
 
     std::string sucFilter = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"successor\"/>";
     TiXmlElement* sucFilterXml = initXml(sucFilter);
     SAVH::ThreatDecisionPoint dp4(client, flawedInstants[0], *sucFilterXml);
     dp4.initialize();
-    assertTrue(dp4.getChoices().size() == 5);
-    assertTrue(dp4.getChoices()[0].first->time() == tok1.end());
-    assertTrue(dp4.getChoices()[0].second->time() == tok2.start());
-    assertTrue(dp4.getChoices()[1].first->time() == tok1.end());
-    assertTrue(dp4.getChoices()[1].second->time() == tok3.start());
-    assertTrue(dp4.getChoices()[2].first->time() == tok2.start());
-    assertTrue(dp4.getChoices()[2].second->time() == tok3.start());
-    assertTrue(dp4.getChoices()[3].first->time() == tok2.end());
-    assertTrue(dp4.getChoices()[3].second->time() == tok3.start());
-    assertTrue(dp4.getChoices()[4].first->time() == tok3.start());
-    assertTrue(dp4.getChoices()[4].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp4.getChoices().size() == 5);
+    CPPUNIT_ASSERT(dp4.getChoices()[0].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp4.getChoices()[0].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp4.getChoices()[1].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp4.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp4.getChoices()[2].first->time() == tok2.start());
+    CPPUNIT_ASSERT(dp4.getChoices()[2].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp4.getChoices()[3].first->time() == tok2.end());
+    CPPUNIT_ASSERT(dp4.getChoices()[3].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp4.getChoices()[4].first->time() == tok3.start());
+    CPPUNIT_ASSERT(dp4.getChoices()[4].second->time() == tok2.start());
 
     std::string bothFilter = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\"/>";
     TiXmlElement* bothFilterXml = initXml(bothFilter);
     SAVH::ThreatDecisionPoint dp5(client, flawedInstants[0], *bothFilterXml);
     dp5.initialize();
-    assertTrue(dp5.getChoices().size() == 3);
-    assertTrue(dp5.getChoices()[0].first->time() == tok1.end());
-    assertTrue(dp5.getChoices()[0].second->time() == tok2.start());
-    assertTrue(dp5.getChoices()[1].first->time() == tok1.end());
-    assertTrue(dp5.getChoices()[1].second->time() == tok3.start());
-    assertTrue(dp5.getChoices()[2].first->time() == tok2.end());
-    assertTrue(dp5.getChoices()[2].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp5.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp5.getChoices()[0].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp5.getChoices()[0].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp5.getChoices()[1].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp5.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp5.getChoices()[2].first->time() == tok2.end());
+    CPPUNIT_ASSERT(dp5.getChoices()[2].second->time() == tok3.start());
 
     //the combination of ascendingKeyPredecessor and ascendingKeySuccessor have already been tested by now
 
@@ -2088,123 +2113,123 @@ void ResourceModuleTests::runTests(std::string path)
     TiXmlElement* earliestPredXml = initXml(earliestPred);
     SAVH::ThreatDecisionPoint dp6(client, flawedInstants[0], *earliestPredXml);
     dp6.initialize();
-    assertTrue(dp6.getChoices().size() == 3);
-    assertTrue(dp6.getChoices()[0].first->time() == tok1.end());
-    assertTrue(dp6.getChoices()[0].second->time() == tok2.start());
-    assertTrue(dp6.getChoices()[1].first->time() == tok1.end());
-    assertTrue(dp6.getChoices()[1].second->time() == tok3.start());
-    assertTrue(dp6.getChoices()[2].first->time() == tok2.end());
-    assertTrue(dp6.getChoices()[2].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp6.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp6.getChoices()[0].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp6.getChoices()[0].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp6.getChoices()[1].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp6.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp6.getChoices()[2].first->time() == tok2.end());
+    CPPUNIT_ASSERT(dp6.getChoices()[2].second->time() == tok3.start());
 
     std::string latestPred = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"latestPredecessor\"/>";
     TiXmlElement* latestPredXml = initXml(latestPred);
     SAVH::ThreatDecisionPoint dp7(client, flawedInstants[0], *latestPredXml);
     dp7.initialize();
-    assertTrue(dp7.getChoices().size() == 3);
-    assertTrue(dp7.getChoices()[0].first->time() == tok2.end());
-    assertTrue(dp7.getChoices()[0].second->time() == tok3.start());
-    assertTrue(dp7.getChoices()[1].first->time() == tok1.end());
-    assertTrue(dp7.getChoices()[1].second->time() == tok2.start());
-    assertTrue(dp7.getChoices()[2].first->time() == tok1.end());
-    assertTrue(dp7.getChoices()[2].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp7.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp7.getChoices()[0].first->time() == tok2.end());
+    CPPUNIT_ASSERT(dp7.getChoices()[0].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp7.getChoices()[1].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp7.getChoices()[1].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp7.getChoices()[2].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp7.getChoices()[2].second->time() == tok3.start());
 
 
     std::string longestPred = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"successor\" order=\"longestPredecessor\"/>";
     TiXmlElement* longestPredXml = initXml(longestPred);
     SAVH::ThreatDecisionPoint dp8(client, flawedInstants[0], *longestPredXml);
     dp8.initialize();
-    assertTrue(dp8.getChoices().size() == 5);
-    assertTrue(dp8.getChoices()[0].first->time() == tok3.start());
+    CPPUNIT_ASSERT(dp8.getChoices().size() == 5);
+    CPPUNIT_ASSERT(dp8.getChoices()[0].first->time() == tok3.start());
 
 
     std::string shortestPred = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"shortestPredecessor\"/>";
     TiXmlElement* shortestPredXml = initXml(shortestPred);
     SAVH::ThreatDecisionPoint dp9(client, flawedInstants[0], *shortestPredXml);
     dp9.initialize();
-    assertTrue(dp9.getChoices().size() == 3);
-    assertTrue(dp9.getChoices()[0].first->time() == tok2.start() || 
+    CPPUNIT_ASSERT(dp9.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp9.getChoices()[0].first->time() == tok2.start() || 
                dp9.getChoices()[0].first->time() == tok1.end());
 
     std::string descendingKeyPred = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"descendingKeyPredecessor\"/>";
     TiXmlElement* descendingKeyPredXml = initXml(descendingKeyPred);
     SAVH::ThreatDecisionPoint dp10(client, flawedInstants[0], *descendingKeyPredXml);
     dp10.initialize();
-    assertTrue(dp10.getChoices().size() == 3);
-    assertTrue(dp10.getChoices()[0].first->time() == tok2.end());
-    assertTrue(dp10.getChoices()[1].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp10.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp10.getChoices()[0].first->time() == tok2.end());
+    CPPUNIT_ASSERT(dp10.getChoices()[1].first->time() == tok1.end());
 
 
     std::string earliestSucc = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"earliestSuccessor\"/>";
     TiXmlElement* earliestSuccXml = initXml(earliestSucc);
     SAVH::ThreatDecisionPoint dp11(client, flawedInstants[0], *earliestSuccXml);
     dp11.initialize();
-    assertTrue(dp11.getChoices().size() == 3);
-    assertTrue(dp11.getChoices()[0].second->time() == tok2.start() ||
+    CPPUNIT_ASSERT(dp11.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp11.getChoices()[0].second->time() == tok2.start() ||
                dp11.getChoices()[0].second->time() == tok3.start());
 
     std::string latestSucc = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"latestSuccessor\"/>";
     TiXmlElement* latestSuccXml = initXml(latestSucc);
     SAVH::ThreatDecisionPoint dp12(client, flawedInstants[0], *latestSuccXml);
     dp12.initialize();
-    assertTrue(dp12.getChoices().size() == 3);
-    assertTrue(dp12.getChoices()[0].second->time() == tok3.start());
-    assertTrue(dp12.getChoices()[1].second->time() == tok3.start());
-    assertTrue(dp12.getChoices()[2].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp12.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp12.getChoices()[0].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp12.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp12.getChoices()[2].second->time() == tok2.start());
 
 
     std::string longestSucc = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"longestSuccessor\"/>";
     TiXmlElement* longestSuccXml = initXml(longestSucc);
     SAVH::ThreatDecisionPoint dp13(client, flawedInstants[0], *longestSuccXml);
     dp13.initialize();
-    assertTrue(dp13.getChoices().size() == 3);
-    assertTrue(dp13.getChoices()[0].second->time() == tok3.start());
-    assertTrue(dp13.getChoices()[1].second->time() == tok3.start());
-    assertTrue(dp13.getChoices()[2].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp13.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp13.getChoices()[0].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp13.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp13.getChoices()[2].second->time() == tok2.start());
 
     std::string shortestSucc = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"shortestSuccessor\"/>";
     TiXmlElement* shortestSuccXml = initXml(shortestSucc);
     SAVH::ThreatDecisionPoint dp14(client, flawedInstants[0], *shortestSuccXml);
     dp14.initialize();
-    assertTrue(dp14.getChoices().size() == 3);
-    assertTrue(dp14.getChoices()[0].second->time() == tok2.start());
-    assertTrue(dp14.getChoices()[1].second->time() == tok3.start());
-    assertTrue(dp14.getChoices()[2].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp14.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp14.getChoices()[0].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp14.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp14.getChoices()[2].second->time() == tok3.start());
 
     std::string descendingKeySucc = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"descendingKeySuccessor\"/>";
     TiXmlElement* descendingKeySuccXml = initXml(descendingKeySucc);
     SAVH::ThreatDecisionPoint dp15(client, flawedInstants[0], *descendingKeySuccXml);
     dp15.initialize();
-    assertTrue(dp15.getChoices().size() == 3);
-    assertTrue(dp15.getChoices()[0].second->time() == tok3.start());
-    assertTrue(dp15.getChoices()[1].second->time() == tok3.start());
-    assertTrue(dp15.getChoices()[2].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp15.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp15.getChoices()[0].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp15.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp15.getChoices()[2].second->time() == tok2.start());
 
 
     std::string ascendingKeySucc = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"ascendingKeySuccessor\"/>";
     TiXmlElement* ascendingKeySuccXml = initXml(ascendingKeySucc);
     SAVH::ThreatDecisionPoint dp16(client, flawedInstants[0], *ascendingKeySuccXml);
     dp16.initialize();
-    assertTrue(dp16.getChoices().size() == 3);
-    assertTrue(dp16.getChoices()[0].second->time() == tok2.start());
-    assertTrue(dp16.getChoices()[1].second->time() == tok3.start());
-    assertTrue(dp16.getChoices()[2].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp16.getChoices().size() == 3);
+    CPPUNIT_ASSERT(dp16.getChoices()[0].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp16.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp16.getChoices()[2].second->time() == tok3.start());
     
 
     std::string leastImpact = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"successor\" order=\"leastImpact,earliestPredecessor,shortestSuccessor\"/>";
     TiXmlElement* leastImpactXml = initXml(leastImpact);
     SAVH::ThreatDecisionPoint dp17(client, flawedInstants[0], *leastImpactXml);
     dp17.initialize();
-    assertTrue(dp17.getChoices().size() == 5);
-    assertTrue(dp17.getChoices()[0].first->time() == tok1.end());
-    assertTrue(dp17.getChoices()[0].second->time() == tok2.start());
-    assertTrue(dp17.getChoices()[1].first->time() == tok1.end());
-    assertTrue(dp17.getChoices()[1].second->time() == tok3.start());
-    assertTrue(dp17.getChoices()[2].first->time() == tok2.start());
-    assertTrue(dp17.getChoices()[2].second->time() == tok3.start());
-    assertTrue(dp17.getChoices()[3].first->time() == tok3.start());
-    assertTrue(dp17.getChoices()[3].second->time() == tok2.start());
-    assertTrue(dp17.getChoices()[4].first->time() == tok2.end());
-    assertTrue(dp17.getChoices()[4].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp17.getChoices().size() == 5);
+    CPPUNIT_ASSERT(dp17.getChoices()[0].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp17.getChoices()[0].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp17.getChoices()[1].first->time() == tok1.end());
+    CPPUNIT_ASSERT(dp17.getChoices()[1].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp17.getChoices()[2].first->time() == tok2.start());
+    CPPUNIT_ASSERT(dp17.getChoices()[2].second->time() == tok3.start());
+    CPPUNIT_ASSERT(dp17.getChoices()[3].first->time() == tok3.start());
+    CPPUNIT_ASSERT(dp17.getChoices()[3].second->time() == tok2.start());
+    CPPUNIT_ASSERT(dp17.getChoices()[4].first->time() == tok2.end());
+    CPPUNIT_ASSERT(dp17.getChoices()[4].second->time() == tok3.start());
 
     std::string precedesOnly = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" constraint=\"precedesOnly\"/>";
     TiXmlElement* precedesOnlyXml = initXml(precedesOnly);
@@ -2213,7 +2238,7 @@ void ResourceModuleTests::runTests(std::string path)
     ConstraintNameListener* nameListener = new ConstraintNameListener(dp18.getChoices()[0].first->time());
     dp18.execute();
     ce->propagate();
-    assertTrue(nameListener->getName() == LabelStr("precedes"));
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("precedes"));
     dp18.undo();
     dp18.getChoices()[0].first->time()->notifyRemoved(nameListener->getId());
     delete (ConstrainedVariableListener*) nameListener;
@@ -2221,7 +2246,7 @@ void ResourceModuleTests::runTests(std::string path)
     nameListener = new ConstraintNameListener(dp18.getChoices()[1].first->time());
     dp18.execute();
     ce->propagate();
-    assertTrue(nameListener->getName() == LabelStr("precedes"));
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("precedes"));
     dp18.undo();
     ce->propagate();
     dp18.getChoices()[1].first->time()->notifyRemoved(nameListener->getId());
@@ -2234,7 +2259,7 @@ void ResourceModuleTests::runTests(std::string path)
     nameListener = new ConstraintNameListener(dp19.getChoices()[0].first->time());
     dp19.execute();
     ce->propagate();
-    assertTrue(nameListener->getName() == LabelStr("concurrent"));
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("concurrent"));
     dp19.undo();
     dp19.getChoices()[0].first->time()->notifyRemoved(nameListener->getId());
     delete (ConstrainedVariableListener*) nameListener;
@@ -2242,7 +2267,7 @@ void ResourceModuleTests::runTests(std::string path)
     nameListener = new ConstraintNameListener(dp19.getChoices()[1].first->time());
     dp19.execute();
     ce->propagate();
-    assertTrue(nameListener->getName() == LabelStr("concurrent"));
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("concurrent"));
     dp19.undo();
     ce->propagate();
     dp19.getChoices()[1].first->time()->notifyRemoved(nameListener->getId());
@@ -2257,12 +2282,12 @@ void ResourceModuleTests::runTests(std::string path)
     nameListener = new ConstraintNameListener(dp20.getChoices()[0].first->time());
     dp20.execute();
     ce->propagate();
-    assertTrue(nameListener->getName() == LabelStr("precedes"));
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("precedes"));
     dp20.undo();
     ce->propagate();
     dp20.execute();
     ce->propagate();
-    assertTrue(nameListener->getName() == LabelStr("concurrent"));
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("concurrent"));
     dp20.undo();
     ce->propagate();
     dp20.getChoices()[0].first->time()->notifyRemoved(nameListener->getId());
@@ -2271,7 +2296,7 @@ void ResourceModuleTests::runTests(std::string path)
     nameListener = new ConstraintNameListener(dp20.getChoices()[1].first->time());
     dp20.execute();
     ce->propagate();
-    assertTrue(nameListener->getName() == LabelStr("precedes"));
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("precedes"));
     dp20.undo();
     ce->propagate();
     dp20.getChoices()[1].first->time()->notifyRemoved(nameListener->getId());
@@ -2284,12 +2309,12 @@ void ResourceModuleTests::runTests(std::string path)
     nameListener = new ConstraintNameListener(dp21.getChoices()[0].first->time());
     dp21.execute();
     ce->propagate();
-    assertTrue(nameListener->getName() == LabelStr("concurrent"));
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("concurrent"));
     dp21.undo();
     ce->propagate();
     dp21.execute();
     ce->propagate();
-    assertTrue(nameListener->getName() == LabelStr("precedes"));
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("precedes"));
     dp21.undo();
     ce->propagate();
     dp21.getChoices()[0].first->time()->notifyRemoved(nameListener->getId());
@@ -2298,7 +2323,7 @@ void ResourceModuleTests::runTests(std::string path)
     nameListener = new ConstraintNameListener(dp21.getChoices()[1].first->time());
     dp21.execute();
     ce->propagate();
-    assertTrue(nameListener->getName() == LabelStr("concurrent"));
+    CPPUNIT_ASSERT(nameListener->getName() == LabelStr("concurrent"));
     dp21.undo();
     ce->propagate();
     dp21.getChoices()[1].first->time()->notifyRemoved(nameListener->getId());
@@ -2347,7 +2372,7 @@ void ResourceModuleTests::runTests(std::string path)
     SAVH::ReusableToken tok3(db, "Reusable.uses", IntervalIntDomain(11, 16), IntervalIntDomain(18, 19), IntervalIntDomain(1, PLUS_INFINITY),
                  IntervalDomain(1.0, 1.0), "myReusable");
 
-    assertTrue(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
 
     std::vector<SAVH::InstantId> instants;
     reusable.getFlawedInstants(instants);
@@ -2357,35 +2382,35 @@ void ResourceModuleTests::runTests(std::string path)
     TiXmlElement* earliestXml = initXml(earliest);
     SAVH::ThreatManager earliestManager(*earliestXml);
     earliestManager.initialize(db, ContextId::noId(), FlawManagerId::noId());   
-    assertTrue(earliestManager.betterThan(instants[0], instants[1], explanation)); //these are identical except for the time
-    assertTrue(earliestManager.betterThan(instants[1], instants[2], explanation)); //these have different levels
-    assertTrue(!earliestManager.betterThan(instants[0], instants[0], explanation));
+    CPPUNIT_ASSERT(earliestManager.betterThan(instants[0], instants[1], explanation)); //these are identical except for the time
+    CPPUNIT_ASSERT(earliestManager.betterThan(instants[1], instants[2], explanation)); //these have different levels
+    CPPUNIT_ASSERT(!earliestManager.betterThan(instants[0], instants[0], explanation));
 
     std::string latest = "<SAVHThreatManager order=\"latest\"><FlawHandler component=\"SAVHThreatHandler\"/></SAVHThreatManager>";
     TiXmlElement* latestXml = initXml(latest);
     SAVH::ThreatManager latestManager(*latestXml);
     latestManager.initialize(db, ContextId::noId(), FlawManagerId::noId());
-    assertTrue(latestManager.betterThan(instants[3], instants[2], explanation));
-    assertTrue(latestManager.betterThan(instants[2], instants[1], explanation));
-    assertTrue(!latestManager.betterThan(instants[0], instants[0], explanation));
+    CPPUNIT_ASSERT(latestManager.betterThan(instants[3], instants[2], explanation));
+    CPPUNIT_ASSERT(latestManager.betterThan(instants[2], instants[1], explanation));
+    CPPUNIT_ASSERT(!latestManager.betterThan(instants[0], instants[0], explanation));
 
     std::string most = "<SAVHThreatManager order=\"most\"><FlawHandler component=\"SAVHThreatHandler\"/></SAVHThreatManager>";
     TiXmlElement* mostXml = initXml(most);
     SAVH::ThreatManager mostManager(*mostXml);
     mostManager.initialize(db, ContextId::noId(), FlawManagerId::noId());
-    assertTrue(mostManager.betterThan(instants[0], instants[1], explanation));
-    assertTrue(!mostManager.betterThan(instants[1], instants[0], explanation))
-    assertTrue(!mostManager.betterThan(instants[1], instants[2], explanation));
-    assertTrue(!mostManager.betterThan(instants[3], instants[4], explanation));
+    CPPUNIT_ASSERT(mostManager.betterThan(instants[0], instants[1], explanation));
+    CPPUNIT_ASSERT(!mostManager.betterThan(instants[1], instants[0], explanation))
+    CPPUNIT_ASSERT(!mostManager.betterThan(instants[1], instants[2], explanation));
+    CPPUNIT_ASSERT(!mostManager.betterThan(instants[3], instants[4], explanation));
 
     std::string least = "<SAVHThreatManager order=\"least\"><FlawHandler component=\"SAVHThreatHandler\"/></SAVHThreatManager>";
     TiXmlElement* leastXml = initXml(least);
     SAVH::ThreatManager leastManager(*leastXml);
     leastManager.initialize(db, ContextId::noId(), FlawManagerId::noId());
-    assertTrue(!leastManager.betterThan(instants[0], instants[1], explanation));
-    assertTrue(leastManager.betterThan(instants[1], instants[0], explanation));
-    assertTrue(!leastManager.betterThan(instants[3], instants[4], explanation));
-    assertTrue(!leastManager.betterThan(instants[4], instants[3], explanation));
+    CPPUNIT_ASSERT(!leastManager.betterThan(instants[0], instants[1], explanation));
+    CPPUNIT_ASSERT(leastManager.betterThan(instants[1], instants[0], explanation));
+    CPPUNIT_ASSERT(!leastManager.betterThan(instants[3], instants[4], explanation));
+    CPPUNIT_ASSERT(!leastManager.betterThan(instants[4], instants[3], explanation));
 
     //can't test upper/lower with reusables
 

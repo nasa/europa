@@ -2,6 +2,10 @@ SubDir PLASMA TemporalNetwork test ;
 
 if ! $(PLASMA_READY) {
 
+#SubDirC++Flags -lcppunit -Wno-unknown-pragmas -Wno-format ;
+#SubDirC++Flags -I/usr/include ; #-lcppunit -Wno-unknown-pragmas -Wno-format ;
+ModuleLibraries tn-module-tests : cppunit ;
+
 ModuleMain tn-module-tests : TestSubgoalRule.cc module-tests.cc tn-test-module.cc : TemporalNetwork RulesEngine ;
 RunModuleMain run-tn-module-tests : tn-module-tests ;
 LocalDepends tests : run-tn-module-tests ;

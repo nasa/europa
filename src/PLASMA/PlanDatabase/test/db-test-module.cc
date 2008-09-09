@@ -88,7 +88,7 @@ const char* DEFAULT_PREDICATE = "Object.DEFAULT_PREDICATE";
                             const LabelStr& objectType, 
                             const LabelStr& objectName,
                             const std::vector<const AbstractDomain*>& arguments) const {
-      assert(arguments.empty());
+      CPPUNIT_ASSERT(arguments.empty());
       DBFooId foo = (new DBFoo(planDb, objectType, objectName))->getId();
       foo->constructor();
       foo->handleDefaults();
@@ -110,9 +110,9 @@ const char* DEFAULT_PREDICATE = "Object.DEFAULT_PREDICATE";
                             const std::vector<const AbstractDomain*>& arguments) const {
       DBFooId foo = (new DBFoo(planDb, objectType, objectName))->getId();
       // Type check the arguments
-      assert(arguments.size() == 2);
-      assert(arguments[0]->getTypeName() == IntervalIntDomain::getDefaultTypeName());
-      assert(arguments[1]->getTypeName() == LabelSet::getDefaultTypeName());
+      CPPUNIT_ASSERT(arguments.size() == 2);
+      CPPUNIT_ASSERT(arguments[0]->getTypeName() == IntervalIntDomain::getDefaultTypeName());
+      CPPUNIT_ASSERT(arguments[1]->getTypeName() == LabelSet::getDefaultTypeName());
 
       int arg0((int) arguments[0]->getSingletonValue());
       LabelStr arg1(arguments[1]->getSingletonValue());
@@ -286,11 +286,11 @@ PlanDatabaseId db;
 class SchemaTest {
 public:
   static bool test() {
-    runTest(testPrimitives);
-    runTest(testEnumerations);
-    runTest(testObjectTypeRelationships);
-    runTest(testObjectPredicateRelationships);
-    runTest(testPredicateParameterAccessors);
+    EUROPA_runTest(testPrimitives);
+    EUROPA_runTest(testEnumerations);
+    EUROPA_runTest(testObjectTypeRelationships);
+    EUROPA_runTest(testObjectPredicateRelationships);
+    EUROPA_runTest(testPredicateParameterAccessors);
     return(true);
   }
 
@@ -300,12 +300,12 @@ private:
       DEFAULT_SETUP(ce, db, true);
       
     schema->reset();
-    assertTrue(schema->isPrimitive("int"));
-    assertTrue(schema->isPrimitive("float"));
-    assertTrue(schema->isPrimitive("bool"));
-    assertTrue(schema->isPrimitive("string"));
-    assertTrue(schema->isType("int"));
-    assertFalse(schema->isPrimitive("strong"));
+    CPPUNIT_ASSERT(schema->isPrimitive("int"));
+    CPPUNIT_ASSERT(schema->isPrimitive("float"));
+    CPPUNIT_ASSERT(schema->isPrimitive("bool"));
+    CPPUNIT_ASSERT(schema->isPrimitive("string"));
+    CPPUNIT_ASSERT(schema->isType("int"));
+    CPPUNIT_ASSERT(!schema->isPrimitive("strong"));
     DEFAULT_TEARDOWN();
     
     return true;
@@ -323,19 +323,19 @@ private:
     schema->addValue(LabelStr("BarEnum"), 5);
     schema->addValue(LabelStr("BarEnum"), 10);
 
-    assertTrue(schema->isEnum(LabelStr("FooEnum")));
-    assertTrue(schema->isEnum(LabelStr("BarEnum")));
-    assertFalse(schema->isEnum(LabelStr("BazEnum")));
-    assertTrue(schema->isEnumValue(LabelStr("FooEnum"), LabelStr("FOO")));
-    assertTrue(schema->isEnumValue(LabelStr("FooEnum"), LabelStr("BAZ")));
-    assertTrue(schema->isEnumValue(LabelStr("BarEnum"), 5));
-    assertFalse(schema->isEnumValue(LabelStr("BarEnum"), 6));
+    CPPUNIT_ASSERT(schema->isEnum(LabelStr("FooEnum")));
+    CPPUNIT_ASSERT(schema->isEnum(LabelStr("BarEnum")));
+    CPPUNIT_ASSERT(!schema->isEnum(LabelStr("BazEnum")));
+    CPPUNIT_ASSERT(schema->isEnumValue(LabelStr("FooEnum"), LabelStr("FOO")));
+    CPPUNIT_ASSERT(schema->isEnumValue(LabelStr("FooEnum"), LabelStr("BAZ")));
+    CPPUNIT_ASSERT(schema->isEnumValue(LabelStr("BarEnum"), 5));
+    CPPUNIT_ASSERT(!schema->isEnumValue(LabelStr("BarEnum"), 6));
 
     std::list<LabelStr> allenums;
     schema->getEnumerations(allenums);
-    assert(allenums.size() == 2);
-    assert(allenums.back() == LabelStr("BarEnum"));
-    assert(allenums.front() == LabelStr("FooEnum"));
+    CPPUNIT_ASSERT(allenums.size() == 2);
+    CPPUNIT_ASSERT(allenums.back() == LabelStr("BarEnum"));
+    CPPUNIT_ASSERT(allenums.front() == LabelStr("FooEnum"));
 
     // test getEnumValues.
     LabelStr enumDomainName = "TestEnum";
@@ -352,7 +352,7 @@ private:
 
     std::set<double> enumDomainReturned;
     enumDomainReturned = schema->getEnumValues( enumDomainName );
-    assert( enumDomainReturned == testEnumDomain );
+    CPPUNIT_ASSERT( enumDomainReturned == testEnumDomain );
 
     DEFAULT_TEARDOWN();    
     return true;
@@ -366,41 +366,41 @@ private:
     schema->addObjectType(LabelStr("Baz"));
     schema->addPredicate("Baz.pred");
 
-    assertTrue(schema->isObjectType(LabelStr("Foo")));
-    assertTrue(schema->isA(LabelStr("Foo"), LabelStr("Foo")));
-    assertFalse(schema->isObjectType(LabelStr("Bar")));
-    assertFalse(schema->isA(LabelStr("Foo"), LabelStr("Baz")));
+    CPPUNIT_ASSERT(schema->isObjectType(LabelStr("Foo")));
+    CPPUNIT_ASSERT(schema->isA(LabelStr("Foo"), LabelStr("Foo")));
+    CPPUNIT_ASSERT(!schema->isObjectType(LabelStr("Bar")));
+    CPPUNIT_ASSERT(!schema->isA(LabelStr("Foo"), LabelStr("Baz")));
 
     // Inheritance
     schema->addObjectType(LabelStr("Bar"), LabelStr("Foo"));
-    assertTrue(schema->isObjectType(LabelStr("Bar")));
-    assertTrue(schema->isA(LabelStr("Bar"), LabelStr("Foo")));
-    assertFalse(schema->isA(LabelStr("Foo"), LabelStr("Bar")));
-    assertTrue(schema->getAllObjectTypes(LabelStr("Bar")).size() == 3);
+    CPPUNIT_ASSERT(schema->isObjectType(LabelStr("Bar")));
+    CPPUNIT_ASSERT(schema->isA(LabelStr("Bar"), LabelStr("Foo")));
+    CPPUNIT_ASSERT(!schema->isA(LabelStr("Foo"), LabelStr("Bar")));
+    CPPUNIT_ASSERT(schema->getAllObjectTypes(LabelStr("Bar")).size() == 3);
     
     // Composition
     schema->addMember(LabelStr("Foo"), LabelStr("float"), LabelStr("arg0"));
     schema->addMember(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg1"));
     schema->addMember(LabelStr("Foo"), LabelStr("Bar"), LabelStr("arg2"));
 
-    assertTrue(schema->canContain(LabelStr("Foo"), LabelStr("float"), LabelStr("arg0")));
-    assertTrue(schema->canContain(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg1")));
-    assertTrue(schema->canContain(LabelStr("Foo"), LabelStr("Bar"), LabelStr("arg2")));
-    assertTrue(schema->canContain(LabelStr("Foo"), LabelStr("Bar"), LabelStr("arg1"))); // isA(Bar,Foo)
+    CPPUNIT_ASSERT(schema->canContain(LabelStr("Foo"), LabelStr("float"), LabelStr("arg0")));
+    CPPUNIT_ASSERT(schema->canContain(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg1")));
+    CPPUNIT_ASSERT(schema->canContain(LabelStr("Foo"), LabelStr("Bar"), LabelStr("arg2")));
+    CPPUNIT_ASSERT(schema->canContain(LabelStr("Foo"), LabelStr("Bar"), LabelStr("arg1"))); // isA(Bar,Foo)
 
-    assertFalse(schema->canContain(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg2")));
-    assertFalse(schema->canContain(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg3")));
-    assertFalse(schema->canContain(LabelStr("Foo"), LabelStr("float"), LabelStr("arg1")));
+    CPPUNIT_ASSERT(!schema->canContain(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg2")));
+    CPPUNIT_ASSERT(!schema->canContain(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg3")));
+    CPPUNIT_ASSERT(!schema->canContain(LabelStr("Foo"), LabelStr("float"), LabelStr("arg1")));
 
-    assertTrue(schema->canContain(LabelStr("Bar"), LabelStr("float"), LabelStr("arg0")));
-    assertTrue(schema->canContain(LabelStr("Bar"), LabelStr("Foo"), LabelStr("arg1")));
-    assertTrue(schema->canContain(LabelStr("Bar"), LabelStr("Bar"), LabelStr("arg1")));
+    CPPUNIT_ASSERT(schema->canContain(LabelStr("Bar"), LabelStr("float"), LabelStr("arg0")));
+    CPPUNIT_ASSERT(schema->canContain(LabelStr("Bar"), LabelStr("Foo"), LabelStr("arg1")));
+    CPPUNIT_ASSERT(schema->canContain(LabelStr("Bar"), LabelStr("Bar"), LabelStr("arg1")));
 
-    assert(schema->getAllObjectTypes().size() == 4);
+    CPPUNIT_ASSERT(schema->getAllObjectTypes().size() == 4);
 
-    assertFalse(schema->hasPredicates("Foo"));
-    assertFalse(schema->hasPredicates("Foo")); // Call again for cached result
-    assertTrue(schema->hasPredicates("Baz")); // Call again for cached result
+    CPPUNIT_ASSERT(!schema->hasPredicates("Foo"));
+    CPPUNIT_ASSERT(!schema->hasPredicates("Foo")); // Call again for cached result
+    CPPUNIT_ASSERT(schema->hasPredicates("Baz")); // Call again for cached result
 
     DEFAULT_TEARDOWN();    
 
@@ -413,46 +413,46 @@ private:
     schema->addObjectType(LabelStr("Resource"));
     schema->addObjectType(LabelStr("NddlResource"), LabelStr("Resource"));
     schema->addPredicate(LabelStr("Resource.change"));
-    assertTrue(schema->isPredicate(LabelStr("Resource.change")));
+    CPPUNIT_ASSERT(schema->isPredicate(LabelStr("Resource.change")));
 
     schema->addMember(LabelStr("Resource.change"), LabelStr("float"), LabelStr("quantity"));
 
     schema->addObjectType(LabelStr("Battery"), LabelStr("Resource"));
-    assertTrue(schema->hasParent(LabelStr("Battery.change")));
-    assertTrue(schema->getParent(LabelStr("Battery.change")) == LabelStr("Resource.change"));
+    CPPUNIT_ASSERT(schema->hasParent(LabelStr("Battery.change")));
+    CPPUNIT_ASSERT(schema->getParent(LabelStr("Battery.change")) == LabelStr("Resource.change"));
 
     schema->addObjectType(LabelStr("World"));
     schema->addPredicate(LabelStr("World.initialState"));
  
-    assertTrue(schema->isPredicate(LabelStr("Battery.change")));
-    assertTrue(schema->isPredicate(LabelStr("World.initialState")));
-    assertFalse(schema->isPredicate(LabelStr("World.NOPREDICATE")));
-    assertTrue(schema->isObjectType(LabelStr("Resource")));
-    assertTrue(schema->isObjectType(LabelStr("World")));
-    assertTrue(schema->isObjectType(LabelStr("Battery")));
-    assertFalse(schema->isObjectType(LabelStr("NOTYPE")));
+    CPPUNIT_ASSERT(schema->isPredicate(LabelStr("Battery.change")));
+    CPPUNIT_ASSERT(schema->isPredicate(LabelStr("World.initialState")));
+    CPPUNIT_ASSERT(!schema->isPredicate(LabelStr("World.NOPREDICATE")));
+    CPPUNIT_ASSERT(schema->isObjectType(LabelStr("Resource")));
+    CPPUNIT_ASSERT(schema->isObjectType(LabelStr("World")));
+    CPPUNIT_ASSERT(schema->isObjectType(LabelStr("Battery")));
+    CPPUNIT_ASSERT(!schema->isObjectType(LabelStr("NOTYPE")));
 
-    assertTrue(schema->canContain(LabelStr("Resource.change"), LabelStr("float"), LabelStr("quantity")));
-    assertTrue(schema->canContain(LabelStr("Battery.change"), LabelStr("float"), LabelStr("quantity")));
-    assertTrue(schema->canContain(LabelStr("NddlResource.change"), LabelStr("float"), LabelStr("quantity")));
-    assertTrue(schema->hasMember(LabelStr("Resource.change"), LabelStr("quantity")));
-    assertTrue(schema->hasMember(LabelStr("NddlResource.change"), LabelStr("quantity")));
-    assertTrue(schema->hasMember(LabelStr("Battery.change"), LabelStr("quantity")));
+    CPPUNIT_ASSERT(schema->canContain(LabelStr("Resource.change"), LabelStr("float"), LabelStr("quantity")));
+    CPPUNIT_ASSERT(schema->canContain(LabelStr("Battery.change"), LabelStr("float"), LabelStr("quantity")));
+    CPPUNIT_ASSERT(schema->canContain(LabelStr("NddlResource.change"), LabelStr("float"), LabelStr("quantity")));
+    CPPUNIT_ASSERT(schema->hasMember(LabelStr("Resource.change"), LabelStr("quantity")));
+    CPPUNIT_ASSERT(schema->hasMember(LabelStr("NddlResource.change"), LabelStr("quantity")));
+    CPPUNIT_ASSERT(schema->hasMember(LabelStr("Battery.change"), LabelStr("quantity")));
 
-    assertTrue(schema->canBeAssigned(LabelStr("World"), LabelStr("World.initialState")));
-    assertTrue(schema->canBeAssigned(LabelStr("Resource"), LabelStr("Resource.change")));
-    assertTrue(schema->canBeAssigned(LabelStr("Battery"), LabelStr("Resource.change")));
-    assertFalse(schema->canBeAssigned(LabelStr("World"), LabelStr("Resource.change")));
-    assertFalse(schema->canBeAssigned(LabelStr("Resource"), LabelStr("Battery.change")));
+    CPPUNIT_ASSERT(schema->canBeAssigned(LabelStr("World"), LabelStr("World.initialState")));
+    CPPUNIT_ASSERT(schema->canBeAssigned(LabelStr("Resource"), LabelStr("Resource.change")));
+    CPPUNIT_ASSERT(schema->canBeAssigned(LabelStr("Battery"), LabelStr("Resource.change")));
+    CPPUNIT_ASSERT(!schema->canBeAssigned(LabelStr("World"), LabelStr("Resource.change")));
+    CPPUNIT_ASSERT(!schema->canBeAssigned(LabelStr("Resource"), LabelStr("Battery.change")));
 
-    assertFalse(schema->isA(LabelStr("Resource"), LabelStr("Battery")));
-    assertTrue(schema->isA(LabelStr("Battery"), LabelStr("Resource")));
-    assertTrue(schema->isA(LabelStr("Battery"), LabelStr("Battery")));
-    assertTrue(schema->hasParent(LabelStr("Battery")));
-    assertTrue(schema->getParent(LabelStr("Battery")) == LabelStr("Resource"));
-    assertTrue(schema->getObjectType(LabelStr("World.initialState")) == LabelStr("World"));
-    assertTrue(schema->getObjectType(LabelStr("Battery.change")) == LabelStr("Battery"));
-    assertTrue(schema->getObjectType(LabelStr("Battery.change")) != LabelStr("Resource"));
+    CPPUNIT_ASSERT(!schema->isA(LabelStr("Resource"), LabelStr("Battery")));
+    CPPUNIT_ASSERT(schema->isA(LabelStr("Battery"), LabelStr("Resource")));
+    CPPUNIT_ASSERT(schema->isA(LabelStr("Battery"), LabelStr("Battery")));
+    CPPUNIT_ASSERT(schema->hasParent(LabelStr("Battery")));
+    CPPUNIT_ASSERT(schema->getParent(LabelStr("Battery")) == LabelStr("Resource"));
+    CPPUNIT_ASSERT(schema->getObjectType(LabelStr("World.initialState")) == LabelStr("World"));
+    CPPUNIT_ASSERT(schema->getObjectType(LabelStr("Battery.change")) == LabelStr("Battery"));
+    CPPUNIT_ASSERT(schema->getObjectType(LabelStr("Battery.change")) != LabelStr("Resource"));
 
     schema->addObjectType("Base");
     schema->addObjectType("Derived");
@@ -460,15 +460,15 @@ private:
     schema->addMember("Derived.Predicate", "Battery", "battery");
 
 
-    assertTrue(schema->getParameterCount(LabelStr("Resource.change")) == 1);
-    assertTrue(schema->getParameterType(LabelStr("Resource.change"), 0) == LabelStr("float"));
+    CPPUNIT_ASSERT(schema->getParameterCount(LabelStr("Resource.change")) == 1);
+    CPPUNIT_ASSERT(schema->getParameterType(LabelStr("Resource.change"), 0) == LabelStr("float"));
 
     std::set<LabelStr> predicates;
     schema->getPredicates(LabelStr("Battery"), predicates);
-    assertTrue(predicates.size() == 1);
+    CPPUNIT_ASSERT(predicates.size() == 1);
     predicates.clear();
     schema->getPredicates(LabelStr("Resource"), predicates);
-    assertTrue(predicates.size() == 1);
+    CPPUNIT_ASSERT(predicates.size() == 1);
 
     schema->addObjectType("One");
     schema->addPredicate("One.Predicate1");
@@ -478,7 +478,7 @@ private:
 
     predicates.clear();
     schema->getPredicates(LabelStr("One"), predicates);
-    assertTrue(predicates.size() == 4);
+    CPPUNIT_ASSERT(predicates.size() == 4);
 
     DEFAULT_TEARDOWN();
     
@@ -494,8 +494,8 @@ private:
     schema->addObjectType(LabelStr("Battery"), LabelStr("Resource"));
     schema->addMember(LabelStr("Resource.change"), LabelStr("float"), LabelStr("quantity"));
     schema->addMember(LabelStr("Resource.change"), LabelStr("float"), LabelStr("quality"));
-    assertTrue(schema->getIndexFromName(LabelStr("Resource.change"), LabelStr("quality")) == 1);
-    assertTrue(schema->getNameFromIndex(LabelStr("Resource.change"), 0).getKey() == LabelStr("quantity").getKey());
+    CPPUNIT_ASSERT(schema->getIndexFromName(LabelStr("Resource.change"), LabelStr("quality")) == 1);
+    CPPUNIT_ASSERT(schema->getNameFromIndex(LabelStr("Resource.change"), 0).getKey() == LabelStr("quantity").getKey());
 
     schema->addObjectType(LabelStr("Foo"));
     schema->addPredicate(LabelStr("Foo.Argle"));
@@ -504,22 +504,22 @@ private:
     schema->addPrimitive("Targle");
     schema->addMember(LabelStr("Foo.Argle"), LabelStr("Targle"), LabelStr("targle"));
 
-    assertTrue(schema->getMemberType(LabelStr("Foo.Argle"), LabelStr("bargle")) == LabelStr("Bargle"));
-    assertTrue(schema->getMemberType(LabelStr("Foo.Argle"), LabelStr("targle")) == LabelStr("Targle"));
+    CPPUNIT_ASSERT(schema->getMemberType(LabelStr("Foo.Argle"), LabelStr("bargle")) == LabelStr("Bargle"));
+    CPPUNIT_ASSERT(schema->getMemberType(LabelStr("Foo.Argle"), LabelStr("targle")) == LabelStr("Targle"));
 
     // Extend attributes on a derived class. Must declare predicate with derived type qualifier
     schema->addObjectType(LabelStr("Bar"), LabelStr("Foo"));
     schema->addPredicate(LabelStr("Bar.Argle"));
-    assertTrue(schema->hasParent(LabelStr("Bar.Argle")));
+    CPPUNIT_ASSERT(schema->hasParent(LabelStr("Bar.Argle")));
     schema->addMember(LabelStr("Bar.Argle"), LabelStr("float"), LabelStr("huey"));
-    assertTrue(schema->getMemberType(LabelStr("Bar.Argle"), LabelStr("huey")) == LabelStr("float"));
+    CPPUNIT_ASSERT(schema->getMemberType(LabelStr("Bar.Argle"), LabelStr("huey")) == LabelStr("float"));
 
     schema->addObjectType(LabelStr("Baz"), LabelStr("Bar"));
-    assertTrue(schema->getMemberType(LabelStr("Baz.Argle"), LabelStr("targle")) == LabelStr("Targle"));
+    CPPUNIT_ASSERT(schema->getMemberType(LabelStr("Baz.Argle"), LabelStr("targle")) == LabelStr("Targle"));
 
-    assert(schema->getParameterCount(LabelStr("Foo.Argle")) == 2);
-    assert(schema->getParameterType(LabelStr("Foo.Argle"), 0) == LabelStr("Bargle"));
-    assert(schema->getParameterType(LabelStr("Foo.Argle"), 1) == LabelStr("Targle"));
+    CPPUNIT_ASSERT(schema->getParameterCount(LabelStr("Foo.Argle")) == 2);
+    CPPUNIT_ASSERT(schema->getParameterType(LabelStr("Foo.Argle"), 0) == LabelStr("Bargle"));
+    CPPUNIT_ASSERT(schema->getParameterType(LabelStr("Foo.Argle"), 1) == LabelStr("Targle"));
 
     DEFAULT_TEARDOWN();
     
@@ -531,16 +531,16 @@ class ObjectTest {
 public:
   
   static bool test() {
-    runTest(testBasicAllocation);
-    runTest(testObjectDomain);
-    runTest(testObjectVariables);
-    runTest(testObjectTokenRelation);
-    runTest(testCommonAncestorConstraint);
-    runTest(testHasAncestorConstraint);
-    runTest(testMakeObjectVariable);
-    runTest(testInterleavedDynamicObjetAndVariableCreation);
-    runTest(testTokenObjectVariable);
-    runTest(testFreeAndConstrain);
+    EUROPA_runTest(testBasicAllocation);
+    EUROPA_runTest(testObjectDomain);
+    EUROPA_runTest(testObjectVariables);
+    EUROPA_runTest(testObjectTokenRelation);
+    EUROPA_runTest(testCommonAncestorConstraint);
+    EUROPA_runTest(testHasAncestorConstraint);
+    EUROPA_runTest(testMakeObjectVariable);
+    EUROPA_runTest(testInterleavedDynamicObjetAndVariableCreation);
+    EUROPA_runTest(testTokenObjectVariable);
+    EUROPA_runTest(testFreeAndConstrain);
     return(true);
   }
   
@@ -551,33 +551,33 @@ private:
     Object o2(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2");
 
     Object* objectPtr = &o1; 
-    assert(objectPtr->getId() == o1.getId());    
+    CPPUNIT_ASSERT(objectPtr->getId() == o1.getId());    
 
     ObjectId id0((new Object(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "id0"))->getId());
     Object o3(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o3");
-    assertTrue(db->getObjects().size() == 4);
-    assertTrue(o1.getComponents().size() == 1);
-    assertTrue(o3.getParent() == o2.getId());
+    CPPUNIT_ASSERT(db->getObjects().size() == 4);
+    CPPUNIT_ASSERT(o1.getComponents().size() == 1);
+    CPPUNIT_ASSERT(o3.getParent() == o2.getId());
     delete (Object*) id0;
-    assertTrue(db->getObjects().size() == 3);
-    assertTrue(o1.getComponents().empty());
+    CPPUNIT_ASSERT(db->getObjects().size() == 3);
+    CPPUNIT_ASSERT(o1.getComponents().empty());
 
     ObjectId id1((new Object(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "id1"))->getId());
     new Object(id1, LabelStr(DEFAULT_OBJECT_TYPE), "id2");
     ObjectId id3((new Object(id1, LabelStr(DEFAULT_OBJECT_TYPE), "id3"))->getId());
-    assertTrue(db->getObjects().size() == 6);
-    assertTrue(id3->getName().toString() == "id1.id3");
+    CPPUNIT_ASSERT(db->getObjects().size() == 6);
+    CPPUNIT_ASSERT(id3->getName().toString() == "id1.id3");
 
     // Test ancestor call
     ObjectId id4((new Object(id3, LabelStr(DEFAULT_OBJECT_TYPE), "id4"))->getId());
     std::list<ObjectId> ancestors;
     id4->getAncestors(ancestors);
-    assertTrue(ancestors.front() == id3);
-    assertTrue(ancestors.back() == id1);
+    CPPUNIT_ASSERT(ancestors.front() == id3);
+    CPPUNIT_ASSERT(ancestors.back() == id1);
 
     // Force cascaded delete
     delete (Object*) id1;
-    assertTrue(db->getObjects().size() == 3);
+    CPPUNIT_ASSERT(db->getObjects().size() == 3);
 
     // Now allocate dynamically and allow the plan database to clean it up when it deallocates
     ObjectId id5 = ((new Object(db, LabelStr(DEFAULT_OBJECT_TYPE), "id5"))->getId());
@@ -593,29 +593,29 @@ private:
     std::list<ObjectId> values;
     Object o1(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
     Object o2(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
-    assertTrue(db->getObjects().size() == 2);
+    CPPUNIT_ASSERT(db->getObjects().size() == 2);
     values.push_back(o1.getId());
     values.push_back(o2.getId());
     ObjectDomain os1(values, LabelStr(DEFAULT_OBJECT_TYPE).c_str());
-    assertTrue(os1.isMember(o1.getId()));
+    CPPUNIT_ASSERT(os1.isMember(o1.getId()));
     os1.remove(o1.getId());
-    assertTrue(!os1.isMember(o1.getId()));
-    assertTrue(os1.isSingleton());
+    CPPUNIT_ASSERT(!os1.isMember(o1.getId()));
+    CPPUNIT_ASSERT(os1.isSingleton());
 
     {
       std::stringstream str;
       str << o2.getKey();
       double value(0);
-      assertTrue(os1.convertToMemberValue(str.str(), value));
-      assertTrue(value == o2.getId());
+      CPPUNIT_ASSERT(os1.convertToMemberValue(str.str(), value));
+      CPPUNIT_ASSERT(value == o2.getId());
     }
 
     {
       std::stringstream str;
       str << o1.getKey();
       double value(0);
-      assertFalse(os1.convertToMemberValue(str.str(), value));
-      assertTrue(value == 0);
+      CPPUNIT_ASSERT(!os1.convertToMemberValue(str.str(), value));
+      CPPUNIT_ASSERT(value == 0);
     }
 
     DEFAULT_TEARDOWN();    
@@ -626,15 +626,15 @@ private:
     DEFAULT_SETUP(ce, db, false);
     
     Object o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "o11", true);
-    assertFalse(o1.isComplete());
+    CPPUNIT_ASSERT(!o1.isComplete());
     o1.addVariable(IntervalIntDomain(), "IntervalIntVar");
     o1.addVariable(BoolDomain(), "BoolVar");
     o1.close();
-    assertTrue(o1.isComplete());
-    assertTrue(o1.getVariable("o11.BoolVar") != o1.getVariable("o1IntervalIntVar"));
+    CPPUNIT_ASSERT(o1.isComplete());
+    CPPUNIT_ASSERT(o1.getVariable("o11.BoolVar") != o1.getVariable("o1IntervalIntVar"));
 
     Object o2(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2", true);
-    assertFalse(o2.isComplete());
+    CPPUNIT_ASSERT(!o2.isComplete());
     o2.addVariable(IntervalIntDomain(15, 200), "IntervalIntVar");
     o2.close();
 
@@ -651,8 +651,8 @@ private:
     ConstraintId constraint = db->getConstraintEngine()->createConstraint("Equal",
 								  constrainedVars);
 
-    assertTrue(db->getConstraintEngine()->propagate());
-    assertTrue(o1.getVariables()[0]->lastDomain() == o1.getVariables()[0]->lastDomain());
+    CPPUNIT_ASSERT(db->getConstraintEngine()->propagate());
+    CPPUNIT_ASSERT(o1.getVariables()[0]->lastDomain() == o1.getVariables()[0]->lastDomain());
 
     // Delete one of the constraints to force automatic clean-up path and explciit clean-up
     delete (Constraint*) constraint;
@@ -671,26 +671,26 @@ private:
     ObjectId object2 = (new Object(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "O2"))->getId();    
     db->close();
 
-    assertTrue(object1 != object2);
-    assertTrue(db->getObjects().size() == 2);
+    CPPUNIT_ASSERT(object1 != object2);
+    CPPUNIT_ASSERT(db->getObjects().size() == 2);
     // 2. Create 1 token.
     EventToken eventToken(db->getId(), LabelStr(DEFAULT_PREDICATE), false, false, IntervalIntDomain(0, 10));
 
     // Confirm not added to the object
-    assertFalse(eventToken.getObject()->getDerivedDomain().isSingleton());
+    CPPUNIT_ASSERT(!eventToken.getObject()->getDerivedDomain().isSingleton());
 
     // 3. Activate token. (NO subgoals)
     eventToken.activate();
 
     // Confirm not added to the object
-    assertFalse(eventToken.getObject()->getDerivedDomain().isSingleton());
+    CPPUNIT_ASSERT(!eventToken.getObject()->getDerivedDomain().isSingleton());
 
     // 4. Specify tokens object variable to a ingletone
 
     eventToken.getObject()->specify(object1);
 
     // Confirm added to the object
-    assertTrue(eventToken.getObject()->getDerivedDomain().isSingleton());
+    CPPUNIT_ASSERT(eventToken.getObject()->getDerivedDomain().isSingleton());
 
     // 5. propagate
     db->getConstraintEngine()->propagate();
@@ -700,7 +700,7 @@ private:
 
     // Confirm it is no longer part of the object
     // Confirm not added to the object
-    assertFalse(eventToken.getObject()->getDerivedDomain().isSingleton());
+    CPPUNIT_ASSERT(!eventToken.getObject()->getDerivedDomain().isSingleton());
 
     DEFAULT_TEARDOWN();    
     return true;
@@ -736,7 +736,7 @@ private:
 					  ENGINE, 
 					  makeScope(first.getId(), second.getId(), restrictions.getId()));
 
-      assertTrue(ENGINE->propagate());
+      CPPUNIT_ASSERT(ENGINE->propagate());
     }
 
     // Now impose a different set of restrictions which will eliminate all options
@@ -749,7 +749,7 @@ private:
 					  ENGINE, 
 					  makeScope(first.getId(), second.getId(), restrictions.getId()));
 
-      assertFalse(ENGINE->propagate());
+      CPPUNIT_ASSERT(!ENGINE->propagate());
     }
 
     // Now try a set of restrictions, which will allow it to pass
@@ -762,7 +762,7 @@ private:
 					  ENGINE, 
 					  makeScope(first.getId(), second.getId(), restrictions.getId()));
 
-      assertTrue(ENGINE->propagate());
+      CPPUNIT_ASSERT(ENGINE->propagate());
     }
 
     // Now try when no variable is a singleton, and then one becomes a singleton
@@ -775,17 +775,17 @@ private:
 					  ENGINE, 
 					  makeScope(first.getId(), second.getId(), restrictions.getId()));
 
-      assertTrue(ENGINE->propagate()); // All ok so far
+      CPPUNIT_ASSERT(ENGINE->propagate()); // All ok so far
 
       restrictions.specify(o2.getId());
-      assertTrue(ENGINE->propagate()); // Nothing happens yet.
+      CPPUNIT_ASSERT(ENGINE->propagate()); // Nothing happens yet.
 
       first.specify(o6.getId()); // Now we should propagate to failure
-      assertFalse(ENGINE->propagate());
+      CPPUNIT_ASSERT(!ENGINE->propagate());
       first.reset();
 
       first.specify(o4.getId());
-      assertTrue(ENGINE->propagate());
+      CPPUNIT_ASSERT(ENGINE->propagate());
     }    
     DEFAULT_TEARDOWN();    
     return true;
@@ -812,7 +812,7 @@ private:
                                        ENGINE, 
                                        makeScope(first.getId(), restrictions.getId()));
       
-      assertTrue(ENGINE->propagate());
+      CPPUNIT_ASSERT(ENGINE->propagate());
     }
     
     // negative test immediate ancestor
@@ -824,7 +824,7 @@ private:
                                        ENGINE, 
                                        makeScope(first.getId(), restrictions.getId()));
       
-      assertFalse(ENGINE->propagate());
+      CPPUNIT_ASSERT(!ENGINE->propagate());
     }
     // Positive test higher up  ancestor
     {
@@ -835,7 +835,7 @@ private:
                                        ENGINE, 
                                        makeScope(first.getId(), restrictions.getId()));
       
-      assertTrue(ENGINE->propagate());
+      CPPUNIT_ASSERT(ENGINE->propagate());
     }
     // negative test higherup ancestor
     {
@@ -846,7 +846,7 @@ private:
                                        ENGINE, 
                                        makeScope(first.getId(), restrictions.getId()));
       
-      assertFalse(ENGINE->propagate());
+      CPPUNIT_ASSERT(!ENGINE->propagate());
     }
     
     //positive restriction of the set.
@@ -863,8 +863,8 @@ private:
                                        ENGINE, 
                                        makeScope(first.getId(), restrictions.getId()));
       
-      assertTrue(ENGINE->propagate());
-      assertTrue(first.getDerivedDomain().isSingleton());
+      CPPUNIT_ASSERT(ENGINE->propagate());
+      CPPUNIT_ASSERT(first.getDerivedDomain().isSingleton());
     }
     
     //no restriction of the set.
@@ -881,8 +881,8 @@ private:
                                        ENGINE, 
                                        makeScope(first.getId(), restrictions.getId()));
       
-      assertTrue(ENGINE->propagate());
-      assertTrue(first.getDerivedDomain().getSize() == 2);
+      CPPUNIT_ASSERT(ENGINE->propagate());
+      CPPUNIT_ASSERT(first.getDerivedDomain().getSize() == 2);
     }
     
     DEFAULT_TEARDOWN();    
@@ -895,16 +895,16 @@ private:
   static bool testMakeObjectVariable(){
       DEFAULT_SETUP(ce, db, false);
     ConstrainedVariableId v0 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain(LabelStr(DEFAULT_OBJECT_TYPE).c_str())))->getId();
-    assertFalse(v0->isClosed());
+    CPPUNIT_ASSERT(!v0->isClosed());
     db->makeObjectVariableFromType(LabelStr(DEFAULT_OBJECT_TYPE), v0);
-    assertFalse(v0->isClosed());
-    assertTrue(ENGINE->propagate());
+    CPPUNIT_ASSERT(!v0->isClosed());
+    CPPUNIT_ASSERT(ENGINE->propagate());
 
     // Now add an object and we should expect the constraint network to be consistent
     Object o1(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
-    assertTrue(ENGINE->propagate());
-    assertFalse(db->isClosed(LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-    assertTrue(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getId());
+    CPPUNIT_ASSERT(ENGINE->propagate());
+    CPPUNIT_ASSERT(!db->isClosed(LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+    CPPUNIT_ASSERT(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getId());
 
     // Now delete the variable. This should remove the listener
     delete (ConstrainedVariable*) v0;
@@ -921,31 +921,32 @@ private:
 
     // Now add an object and we should expect the constraint network to be consistent
     Object o1(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
-    assertTrue(ENGINE->propagate());
+    CPPUNIT_ASSERT(ENGINE->propagate());
 
     ConstrainedVariableId v0 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain(LabelStr(DEFAULT_OBJECT_TYPE).c_str())))->getId();
-    assertFalse(v0->isClosed());
+    CPPUNIT_ASSERT(!v0->isClosed());
     db->makeObjectVariableFromType(LabelStr(DEFAULT_OBJECT_TYPE), v0);
-    assertFalse(v0->isClosed());
-    assertTrue(ENGINE->propagate());
-    assertFalse(db->isClosed(LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-    assertTrue(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getId());
+    CPPUNIT_ASSERT(!v0->isClosed());
+    CPPUNIT_ASSERT(ENGINE->propagate());
+    CPPUNIT_ASSERT(!db->isClosed(LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+    CPPUNIT_ASSERT(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getId());
 
     // Now create another object and verify it is part of the initial domain of the next variable
     Object o2(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
-    assertTrue(ENGINE->propagate());
+    CPPUNIT_ASSERT(ENGINE->propagate());
 
     // Confirm the first variable has the value
-    assertTrue(!v0->lastDomain().isSingleton());
+    CPPUNIT_ASSERT(!v0->lastDomain().isSingleton());
 
     // Allocate another variable and confirm the domains are equal
     ConstrainedVariableId v1 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain(LabelStr(DEFAULT_OBJECT_TYPE).c_str())))->getId();
-    assertFalse(v1->isClosed());
+    CPPUNIT_ASSERT(!v1->isClosed());
     db->makeObjectVariableFromType(LabelStr(DEFAULT_OBJECT_TYPE), v1);
-    assertFalse(v1->isClosed());
-    assertTrue(v0->lastDomain() == v1->lastDomain() && 
+    CPPUNIT_ASSERT(!v1->isClosed());
+    CPPUNIT_ASSERT_MESSAGE(v1->lastDomain().toString(),
+               v0->lastDomain() == v1->lastDomain() && 
 	       v1->lastDomain().isMember(o1.getId())  && 
-	       v1->lastDomain().isMember(o2.getId()), v1->lastDomain().toString());
+	       v1->lastDomain().isMember(o2.getId()));
 
     // Now delete the variables.
     delete (ConstrainedVariable*) v0;
@@ -962,25 +963,25 @@ private:
   static bool testTokenObjectVariable(){
       DEFAULT_SETUP(ce, db, false);
 
-    assertTrue(ENGINE->propagate());
+    CPPUNIT_ASSERT(ENGINE->propagate());
     // Now add an object and we should expect the constraint network to be consistent next time we add the token.
     ObjectId o1 = (new Object(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1"))->getId();
     EventToken eventToken(db->getId(), LabelStr(DEFAULT_PREDICATE), false, false, IntervalIntDomain(0, 10));
 
     eventToken.activate(); // Must be activate to eventually propagate the objectTokenRelation
-    assertTrue(ENGINE->propagate());
+    CPPUNIT_ASSERT(ENGINE->propagate());
 
     // Make sure the object var of the token contains o1.
-    assertTrue(eventToken.getObject()->lastDomain().isMember(o1));
+    CPPUNIT_ASSERT(eventToken.getObject()->lastDomain().isMember(o1));
 
     // Since the object type should be closed automatically, the object variable will propagate changes,
     // so the object token relation will link up the Token and the object.
-    assertTrue(!o1->tokens().empty());
+    CPPUNIT_ASSERT(!o1->tokens().empty());
 
     // Insertion of a new object should not affect the given event token
     ObjectId o2 = (new Object(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
-    assertTrue(ENGINE->constraintConsistent());
-    assertTrue(!eventToken.getObject()->baseDomain().isMember(o2));
+    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(!eventToken.getObject()->baseDomain().isMember(o2));
 
     DEFAULT_TEARDOWN();    
     return true;
@@ -1044,7 +1045,7 @@ private:
       o1.constrain(t3.getId(), t4.getId());
     }
 
-    assertTrue(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
     
     DEFAULT_TEARDOWN();
     
@@ -1056,29 +1057,29 @@ class TokenTest {
 public:
   
   static bool test() {
-    runTest(testBasicTokenAllocation);
-    runTest(testBasicTokenCreation);
-    runTest(testStateModel);
-    runTest(testMasterSlaveRelationship);
-    runTest(testTermination);
-    runTest(testBasicMerging);
-    runTest(testMergingWithEmptyDomains);
-    runTest(testConstraintMigrationDuringMerge);
-    runTest(testConstraintAdditionAfterMerging);
-    runTest(testNonChronGNATS2439);
-    runTest(testMergingPerformance);
-    runTest(testTokenCompatibility);
-    runTest(testPredicateInheritance);
-    runTest(testTokenFactory);
-    runTest(testCorrectSplit_Gnats2450);
-    runTest(testOpenMerge);
-    runTest(testGNATS_3086);
-    runTest(testCompatCacheReset);
-    runTest(testAssignemnt);
-    runTest(testDeleteMasterAndPreserveSlave);
-    runTest(testPreserveMergeWithNonChronSplit);
-    runTest(testGNATS_3163);
-    runTest(testGNATS_3193);
+    EUROPA_runTest(testBasicTokenAllocation);
+    EUROPA_runTest(testBasicTokenCreation);
+    EUROPA_runTest(testStateModel);
+    EUROPA_runTest(testMasterSlaveRelationship);
+    EUROPA_runTest(testTermination);
+    EUROPA_runTest(testBasicMerging);
+    EUROPA_runTest(testMergingWithEmptyDomains);
+    EUROPA_runTest(testConstraintMigrationDuringMerge);
+    EUROPA_runTest(testConstraintAdditionAfterMerging);
+    EUROPA_runTest(testNonChronGNATS2439);
+    EUROPA_runTest(testMergingPerformance);
+    EUROPA_runTest(testTokenCompatibility);
+    EUROPA_runTest(testPredicateInheritance);
+    EUROPA_runTest(testTokenFactory);
+    EUROPA_runTest(testCorrectSplit_Gnats2450);
+    EUROPA_runTest(testOpenMerge);
+    EUROPA_runTest(testGNATS_3086);
+    EUROPA_runTest(testCompatCacheReset);
+    EUROPA_runTest(testAssignemnt);
+    EUROPA_runTest(testDeleteMasterAndPreserveSlave);
+    EUROPA_runTest(testPreserveMergeWithNonChronSplit);
+    EUROPA_runTest(testGNATS_3163);
+    EUROPA_runTest(testGNATS_3193);
     return(true);
   }
   
@@ -1090,10 +1091,10 @@ private:
       db->close();
     // Event Token
     EventToken eventToken(db, LabelStr(DEFAULT_PREDICATE), true, false, IntervalIntDomain(0, 1000), Token::noObject(), false);
-    assertTrue(eventToken.start()->getDerivedDomain() == eventToken.end()->getDerivedDomain());
-    assertTrue(eventToken.duration()->getDerivedDomain() == IntervalIntDomain(0, 0));
+    CPPUNIT_ASSERT(eventToken.start()->getDerivedDomain() == eventToken.end()->getDerivedDomain());
+    CPPUNIT_ASSERT(eventToken.duration()->getDerivedDomain() == IntervalIntDomain(0, 0));
     eventToken.start()->restrictBaseDomain(IntervalIntDomain(5, 10));
-    assertTrue(eventToken.end()->getDerivedDomain() == IntervalIntDomain(5, 10));
+    CPPUNIT_ASSERT(eventToken.end()->getDerivedDomain() == IntervalIntDomain(5, 10));
     eventToken.addParameter(IntervalDomain(-1.08, 20.18), "IntervalParam");
     eventToken.close();
   
@@ -1115,12 +1116,12 @@ private:
     values.push_back(EUROPA::LabelStr("L3"));
     intervalToken.addParameter(LabelSet(values), "LabelSetParam");
     intervalToken.close();
-    assertTrue(intervalToken.end()->getDerivedDomain().getLowerBound() == 2);
+    CPPUNIT_ASSERT(intervalToken.end()->getDerivedDomain().getLowerBound() == 2);
     intervalToken.start()->restrictBaseDomain(IntervalIntDomain(5, 10));
-    assertTrue(intervalToken.end()->getDerivedDomain() == IntervalIntDomain(7, 20));
+    CPPUNIT_ASSERT(intervalToken.end()->getDerivedDomain() == IntervalIntDomain(7, 20));
     intervalToken.end()->restrictBaseDomain(IntervalIntDomain(9, 10));
-    assertTrue(intervalToken.start()->getDerivedDomain() == IntervalIntDomain(5, 8));
-    assertTrue(intervalToken.duration()->getDerivedDomain() == IntervalIntDomain(2, 5));
+    CPPUNIT_ASSERT(intervalToken.start()->getDerivedDomain() == IntervalIntDomain(5, 8));
+    CPPUNIT_ASSERT(intervalToken.duration()->getDerivedDomain() == IntervalIntDomain(2, 5));
 
     // Create and delete a Token
     TokenId token = (new IntervalToken(db, 
@@ -1140,7 +1141,7 @@ private:
   static bool testBasicTokenCreation() {           
     DEFAULT_SETUP(ce,db, false);
     ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
-    assertFalse(timeline.isNoId());
+    CPPUNIT_ASSERT(!timeline.isNoId());
     db->close();                                                                          
   
     IntervalToken t1(db,                                                         
@@ -1167,17 +1168,17 @@ private:
                      IntervalIntDomain(2, 10),
                      Token::noObject(), false);
   
-    assertTrue(t0.isIncomplete());
+    CPPUNIT_ASSERT(t0.isIncomplete());
     t0.close();
-    assertTrue(t0.isInactive());
+    CPPUNIT_ASSERT(t0.isInactive());
     t0.reject();
-    assertTrue(t0.isRejected());
+    CPPUNIT_ASSERT(t0.isRejected());
     t0.cancel();
-    assertTrue(t0.isInactive());
+    CPPUNIT_ASSERT(t0.isInactive());
     t0.activate();
-    assertTrue(t0.isActive());
+    CPPUNIT_ASSERT(t0.isActive());
     t0.cancel();
-    assertTrue(t0.isInactive());
+    CPPUNIT_ASSERT(t0.isInactive());
   
     IntervalToken t1(db, 
                      LabelStr(DEFAULT_PREDICATE), 
@@ -1191,12 +1192,12 @@ private:
     // Constraint the start variable of both tokens
     EqualConstraint c0("eq", "Default", ENGINE, makeScope(t0.start(), t1.start()));
   
-    assertTrue(t1.isInactive());
+    CPPUNIT_ASSERT(t1.isInactive());
     t0.activate();
     t1.doMerge(t0.getId());
-    assertTrue(t1.isMerged());
+    CPPUNIT_ASSERT(t1.isMerged());
     t1.cancel();
-    assertTrue(t1.isInactive());
+    CPPUNIT_ASSERT(t1.isInactive());
     t1.doMerge(t0.getId());
 
     // Test that we can allocate a token, but if we constrain it with any external entity, 
@@ -1261,13 +1262,13 @@ private:
                                  IntervalIntDomain(0, 1)))->getId();
   
     // These are mostly to avoid compiler warnings about unused variables.
-    assertTrue(t3 != t4);
-    assertTrue(t5 != t6);
+    CPPUNIT_ASSERT(t3 != t4);
+    CPPUNIT_ASSERT(t5 != t6);
   
     // Delete slave only - master must be committed to allow this
     t0.commit();
     delete (Token*) t2;
-    assertTrue(t0.slaves().size() == 3);
+    CPPUNIT_ASSERT(t0.slaves().size() == 3);
 
     // Should verify correct count of tokens remain. --wedgingt 2004 Feb 27
   
@@ -1305,10 +1306,10 @@ private:
 		       IntervalIntDomain(0, 20),
 		       IntervalIntDomain(1, 1000));
 
-      assertTrue(ce->propagate());
+      CPPUNIT_ASSERT(ce->propagate());
     }
     // The delation of the above tokens should imply we have something to propagate
-    assertTrue(ce->pending());
+    CPPUNIT_ASSERT(ce->pending());
 
     // Now try again, but make sure that if we terminate them, the deletion causes no problems
     {    
@@ -1327,12 +1328,12 @@ private:
 		       IntervalIntDomain(0, 0),
 		       IntervalIntDomain(),
 		       IntervalIntDomain(1, 1));
-      assertTrue(ce->propagate());
+      CPPUNIT_ASSERT(ce->propagate());
       t0.terminate();
       t1.terminate();
     }
 
-    assertTrue(ce->constraintConsistent());
+    CPPUNIT_ASSERT(ce->constraintConsistent());
 
     // Now make sure that we can correctly delete a slave that has been terminated
     TokenId t1;
@@ -1354,21 +1355,21 @@ private:
 				      IntervalIntDomain(1, 1)))->getId();
 
       t1->activate();
-      assertTrue(ce->propagate());
+      CPPUNIT_ASSERT(ce->propagate());
       t1->commit();
       t0.restrictBaseDomains();
       t1->restrictBaseDomains();
-      assertTrue(ce->propagate());
+      CPPUNIT_ASSERT(ce->propagate());
       t0.terminate();
     }
 
     // Make sure the slave remains, since it was committed explicitly
-    assertTrue(t1.isValid());
-    assertTrue(ce->constraintConsistent());
-    assertTrue(t1->master().isNoId());
+    CPPUNIT_ASSERT(t1.isValid());
+    CPPUNIT_ASSERT(ce->constraintConsistent());
+    CPPUNIT_ASSERT(t1->master().isNoId());
     t1->terminate();
     delete (Token*) t1;
-    assertTrue(ce->constraintConsistent());
+    CPPUNIT_ASSERT(ce->constraintConsistent());
 
     DEFAULT_TEARDOWN();
     return true;
@@ -1411,14 +1412,14 @@ private:
     
     // propagate
     bool res = ce->propagate();
-    assertTrue(res);
+    CPPUNIT_ASSERT(res);
 
     // look for compatible tokens for t1. Should find one - t0
     std::vector<TokenId> compatibleTokens;
     db->getCompatibleTokens(t1.getId(), compatibleTokens);
 
-    assertTrue(compatibleTokens.size() == 1);
-    assertTrue(compatibleTokens[0] == t0.getId());
+    CPPUNIT_ASSERT(compatibleTokens.size() == 1);
+    CPPUNIT_ASSERT(compatibleTokens[0] == t0.getId());
 
     DEFAULT_TEARDOWN();
     return true;
@@ -1437,7 +1438,7 @@ private:
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
   
-    assertTrue(t0.duration()->getDerivedDomain().getUpperBound() == 20);
+    CPPUNIT_ASSERT(t0.duration()->getDerivedDomain().getUpperBound() == 20);
   
     IntervalToken t1(db,
                      LabelStr(DEFAULT_PREDICATE), 
@@ -1450,25 +1451,25 @@ private:
     t1.duration()->restrictBaseDomain(IntervalIntDomain(5, 7));
   
     // Activate & deactivate - ensure proper handling of rejectability variable
-    assertFalse(t0.getState()->getDerivedDomain().isSingleton());
+    CPPUNIT_ASSERT(!t0.getState()->getDerivedDomain().isSingleton());
     t0.activate();
-    assertTrue(t0.getState()->getDerivedDomain().isSingleton());
-    assertTrue(t0.getState()->getDerivedDomain().getSingletonValue() == Token::ACTIVE);
+    CPPUNIT_ASSERT(t0.getState()->getDerivedDomain().isSingleton());
+    CPPUNIT_ASSERT(t0.getState()->getDerivedDomain().getSingletonValue() == Token::ACTIVE);
     t0.cancel();
-    assertFalse(t0.getState()->getDerivedDomain().isSingleton());
+    CPPUNIT_ASSERT(!t0.getState()->getDerivedDomain().isSingleton());
   
     // Now activate and merge
     t0.activate();
     t1.doMerge(t0.getId());
   
     // Make sure the necessary restrictions have been imposed due to merging i.e. restruction due to specified domain
-    assertTrue(t0.duration()->getDerivedDomain().getUpperBound() == 7, t0.duration()->toString());
-    assertTrue(t1.isMerged());
+    CPPUNIT_ASSERT_MESSAGE(t0.duration()->toString(), t0.duration()->getDerivedDomain().getUpperBound() == 7);
+    CPPUNIT_ASSERT(t1.isMerged());
   
     // Do a split and make sure the old values are reinstated.
     t1.cancel();
-    assertTrue(t0.duration()->getDerivedDomain().getUpperBound() == 20, t0.duration()->toString());
-    assertTrue(t1.isInactive());
+    CPPUNIT_ASSERT_MESSAGE(t0.duration()->toString(), t0.duration()->getDerivedDomain().getUpperBound() == 20);
+    CPPUNIT_ASSERT(t1.isInactive());
   
     // Now post equality constraint between t1 and extra token t2 and remerge
     IntervalToken t2(db, 
@@ -1488,24 +1489,24 @@ private:
                                                                           temp);
     t1.doMerge(t0.getId());
   
-    assertFalse(t0.getMergedTokens().empty());
+    CPPUNIT_ASSERT(!t0.getMergedTokens().empty());
   
     // Verify that the equality constraint has migrated and original has been deactivated.
     //TBW: when stacking instead of merging tokens, the next check is not true
-    // assert(!equalityConstraint->isActive());
-    assertTrue(t0.end()->getDerivedDomain().getLowerBound() == 8);
-    assertTrue(t0.end()->getDerivedDomain() == t2.end()->getDerivedDomain());
+    // CPPUNIT_ASSERT(!equalityConstraint->isActive());
+    CPPUNIT_ASSERT(t0.end()->getDerivedDomain().getLowerBound() == 8);
+    CPPUNIT_ASSERT(t0.end()->getDerivedDomain() == t2.end()->getDerivedDomain());
   
     // Undo the merge and check for initial conditions being established
     t1.cancel();
-    assertTrue(equalityConstraint->isActive());
+    CPPUNIT_ASSERT(equalityConstraint->isActive());
   
     // Redo the merge
     t1.doMerge(t0.getId());
   
     // Confirm deletion of the constraint is handled correctly
     delete (Constraint*) equalityConstraint;
-    assertTrue(t0.end()->getDerivedDomain() != t2.end()->getDerivedDomain());
+    CPPUNIT_ASSERT(t0.end()->getDerivedDomain() != t2.end()->getDerivedDomain());
   
   
     // Test subset path
@@ -1515,7 +1516,7 @@ private:
     ConstraintId subsetOfConstraint = db->getConstraintEngine()->createConstraint("SubsetOf",
                                                                           makeScope(t1.duration(), superset.getId()));
     t1.doMerge(t0.getId());
-    assertTrue(t0.duration()->getDerivedDomain().getUpperBound() == 6);
+    CPPUNIT_ASSERT(t0.duration()->getDerivedDomain().getUpperBound() == 6);
     delete (Constraint*) subsetOfConstraint;
 
     DEFAULT_TEARDOWN();
@@ -1631,18 +1632,18 @@ private:
     // Post a constraint between an active variable (t1.start) and a deactivated variable (t2.start)
     LessThanEqualConstraint c0("leq", "Default", db->getConstraintEngine(), makeScope(t1.start(), t2.start()));
 
-    assertTrue(!c0.isActive(), "Failed to deactive constraint on merged token");
+    CPPUNIT_ASSERT_MESSAGE("Failed to deactive constraint on merged token", !c0.isActive());
 
     // Now restrict t2.start and verify that t0.start is impacted
     t2.start()->specify(5);
-    assertTrue(t0.start()->getDerivedDomain().getUpperBound() == 5, "Failed to migrate constraint");
+    CPPUNIT_ASSERT_MESSAGE("Failed to migrate constraint", t0.start()->getDerivedDomain().getUpperBound() == 5);
 
 
     // Split and verify the new constraint is activated
     t1.cancel();
-    assertTrue(c0.isActive(), "Failed to reactivate migrated constraint.");
-    assertTrue(t0.start()->getDerivedDomain().getUpperBound() == 10, "Failed to clean up migrated constraint");
-    assertTrue(t1.start()->getDerivedDomain().getUpperBound() == 5, "Failed to reinstate migrated constraint");
+    CPPUNIT_ASSERT_MESSAGE("Failed to reactivate migrated constraint.", c0.isActive());
+    CPPUNIT_ASSERT_MESSAGE("Failed to clean up migrated constraint", t0.start()->getDerivedDomain().getUpperBound() == 10);
+    CPPUNIT_ASSERT_MESSAGE("Failed to reinstate migrated constraint", t1.start()->getDerivedDomain().getUpperBound() == 5);
 
     DEFAULT_TEARDOWN();
     return true;
@@ -1711,60 +1712,60 @@ private:
     // create a test constraint between t2 and t3
     ce->createConstraint(LabelStr("precedes"),makeScope(token2.end(),token3.start()));
 
-    assertTrue(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
 
     // after constraining t2 to come before t3, only t2 and t3 start and
     // end domains should've changed.
 
-    assertTrue(token0.start()->lastDomain().getLowerBound() == 0);
-    assertTrue(token0.start()->lastDomain().getUpperBound() == 10);
-    assertTrue(token0.end()->lastDomain().getLowerBound() == 1);
-    assertTrue(token0.end()->lastDomain().getUpperBound() == 200);
+    CPPUNIT_ASSERT(token0.start()->lastDomain().getLowerBound() == 0);
+    CPPUNIT_ASSERT(token0.start()->lastDomain().getUpperBound() == 10);
+    CPPUNIT_ASSERT(token0.end()->lastDomain().getLowerBound() == 1);
+    CPPUNIT_ASSERT(token0.end()->lastDomain().getUpperBound() == 200);
 
-    assertTrue(token1.start()->lastDomain().getLowerBound() == 0);
-    assertTrue(token1.start()->lastDomain().getUpperBound() == 10);
-    assertTrue(token1.end()->lastDomain().getLowerBound() == 1);
-    assertTrue(token1.end()->lastDomain().getUpperBound() == 200);
+    CPPUNIT_ASSERT(token1.start()->lastDomain().getLowerBound() == 0);
+    CPPUNIT_ASSERT(token1.start()->lastDomain().getUpperBound() == 10);
+    CPPUNIT_ASSERT(token1.end()->lastDomain().getLowerBound() == 1);
+    CPPUNIT_ASSERT(token1.end()->lastDomain().getUpperBound() == 200);
 
-    assertTrue(token2.start()->lastDomain().getLowerBound() == 0);
-    assertTrue(token2.start()->lastDomain().getUpperBound() == 9);
-    assertTrue(token2.end()->lastDomain().getLowerBound() == 1);
-    assertTrue(token2.end()->lastDomain().getUpperBound() == 10);
+    CPPUNIT_ASSERT(token2.start()->lastDomain().getLowerBound() == 0);
+    CPPUNIT_ASSERT(token2.start()->lastDomain().getUpperBound() == 9);
+    CPPUNIT_ASSERT(token2.end()->lastDomain().getLowerBound() == 1);
+    CPPUNIT_ASSERT(token2.end()->lastDomain().getUpperBound() == 10);
 
-    assertTrue(token3.start()->lastDomain().getLowerBound() == 1);
-    assertTrue(token3.start()->lastDomain().getUpperBound() == 10);
-    assertTrue(token3.end()->lastDomain().getLowerBound() == 2);
-    assertTrue(token3.end()->lastDomain().getUpperBound() == 200);
+    CPPUNIT_ASSERT(token3.start()->lastDomain().getLowerBound() == 1);
+    CPPUNIT_ASSERT(token3.start()->lastDomain().getUpperBound() == 10);
+    CPPUNIT_ASSERT(token3.end()->lastDomain().getLowerBound() == 2);
+    CPPUNIT_ASSERT(token3.end()->lastDomain().getUpperBound() == 200);
 
     token0.activate();
     token2.doMerge(token0.getId());
-    assertTrue(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
     token1.activate();
     token3.doMerge(token1.getId());
-    assertTrue(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
 
     // after merging t2->t0 and t3->t1, all parameters should be
     // singletons. Also, t0 should now be before t1 (inheriting the
     // relation between t2 and t3).
 
 
-    assertTrue(token0.parameters()[0]->lastDomain().isSingleton());
-    assertTrue(token1.parameters()[0]->lastDomain().isSingleton());
-    assertTrue(token2.parameters()[0]->lastDomain().isSingleton());
-    assertTrue(token3.parameters()[0]->lastDomain().isSingleton());
+    CPPUNIT_ASSERT(token0.parameters()[0]->lastDomain().isSingleton());
+    CPPUNIT_ASSERT(token1.parameters()[0]->lastDomain().isSingleton());
+    CPPUNIT_ASSERT(token2.parameters()[0]->lastDomain().isSingleton());
+    CPPUNIT_ASSERT(token3.parameters()[0]->lastDomain().isSingleton());
 
-    assertTrue(token0.start()->lastDomain().getLowerBound() == 0);
-    assertTrue(token0.start()->lastDomain().getUpperBound() == 9);
-    assertTrue(token0.end()->lastDomain().getLowerBound() == 1);
-    assertTrue(token0.end()->lastDomain().getUpperBound() == 10);
+    CPPUNIT_ASSERT(token0.start()->lastDomain().getLowerBound() == 0);
+    CPPUNIT_ASSERT(token0.start()->lastDomain().getUpperBound() == 9);
+    CPPUNIT_ASSERT(token0.end()->lastDomain().getLowerBound() == 1);
+    CPPUNIT_ASSERT(token0.end()->lastDomain().getUpperBound() == 10);
 
-    assertTrue(token1.start()->lastDomain().getLowerBound() == 1);
-    assertTrue(token1.start()->lastDomain().getUpperBound() == 10);
-    assertTrue(token1.end()->lastDomain().getLowerBound() == 2);
-    assertTrue(token1.end()->lastDomain().getUpperBound() == 200);
+    CPPUNIT_ASSERT(token1.start()->lastDomain().getLowerBound() == 1);
+    CPPUNIT_ASSERT(token1.start()->lastDomain().getUpperBound() == 10);
+    CPPUNIT_ASSERT(token1.end()->lastDomain().getLowerBound() == 2);
+    CPPUNIT_ASSERT(token1.end()->lastDomain().getUpperBound() == 200);
 
     token2.cancel();
-    assertTrue(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
 
     // after cancelling t2->t0, all parameters remain singleton except for
     // t0's since it no longer inherits the singleton domain from t2.
@@ -1772,19 +1773,19 @@ private:
     // However, t1 should remain constrained to be before t2 since it still
     // inherits the before constraint between t2 and t3.
 
-    assertFalse(token0.parameters()[0]->lastDomain().isSingleton());
-    assertTrue(token1.parameters()[0]->lastDomain().isSingleton(), token1.parameters()[0]->toString());
-    assertTrue(token2.parameters()[0]->lastDomain().isSingleton());
-    assertTrue(token3.parameters()[0]->lastDomain().isSingleton());
+    CPPUNIT_ASSERT(!token0.parameters()[0]->lastDomain().isSingleton());
+    CPPUNIT_ASSERT_MESSAGE(token1.parameters()[0]->toString(), token1.parameters()[0]->lastDomain().isSingleton());
+    CPPUNIT_ASSERT(token2.parameters()[0]->lastDomain().isSingleton());
+    CPPUNIT_ASSERT(token3.parameters()[0]->lastDomain().isSingleton());
 
-    assertTrue(token0.start()->lastDomain().getLowerBound() == 0);
-    assertTrue(token0.start()->lastDomain().getUpperBound() == 10);
-    assertTrue(token0.end()->lastDomain().getLowerBound() == 1);
-    assertTrue(token0.end()->lastDomain().getUpperBound() == 200);
+    CPPUNIT_ASSERT(token0.start()->lastDomain().getLowerBound() == 0);
+    CPPUNIT_ASSERT(token0.start()->lastDomain().getUpperBound() == 10);
+    CPPUNIT_ASSERT(token0.end()->lastDomain().getLowerBound() == 1);
+    CPPUNIT_ASSERT(token0.end()->lastDomain().getUpperBound() == 200);
 
-    assertTrue(token3.isMerged());
+    CPPUNIT_ASSERT(token3.isMerged());
     token3.cancel();
-    assertFalse(token3.isMerged());
+    CPPUNIT_ASSERT(!token3.isMerged());
 
     DEFAULT_TEARDOWN();
     return true;
@@ -1830,17 +1831,17 @@ private:
     }
 
     IntervalIntDomain sdom1(tokens[0][0]->start()->getDerivedDomain());
-    assertTrue(sdom1.getLowerBound() == 0);
-    assertTrue(sdom1.getUpperBound() == 210);
+    CPPUNIT_ASSERT(sdom1.getLowerBound() == 0);
+    CPPUNIT_ASSERT(sdom1.getUpperBound() == 210);
 
     IntervalIntDomain edom1(tokens[0][0]->end()->getDerivedDomain());
-    assertTrue(edom1.getLowerBound() == 1);
-    assertTrue(edom1.getUpperBound() == 220);
+    CPPUNIT_ASSERT(edom1.getLowerBound() == 1);
+    CPPUNIT_ASSERT(edom1.getUpperBound() == 220);
 
     Id<TokenVariable<IntervalIntDomain> > pvar1(tokens[0][0]->parameters()[0]);
     IntervalIntDomain pdom1(pvar1->getDerivedDomain());
-    assertTrue(pdom1.getLowerBound() == 500);
-    assertTrue(pdom1.getUpperBound() == 1000);
+    CPPUNIT_ASSERT(pdom1.getLowerBound() == 500);
+    CPPUNIT_ASSERT(pdom1.getUpperBound() == 1000);
 
     TokenId predecessor = tokens[0][0];
     predecessor->activate();
@@ -1850,17 +1851,17 @@ private:
     }
 
     IntervalIntDomain sdom2(tokens[0][0]->start()->getDerivedDomain());
-    assertTrue(sdom2.getLowerBound() == 0);
-    assertTrue(sdom2.getUpperBound() == 208);
+    CPPUNIT_ASSERT(sdom2.getLowerBound() == 0);
+    CPPUNIT_ASSERT(sdom2.getUpperBound() == 208);
 
     IntervalIntDomain edom2(tokens[0][0]->end()->getDerivedDomain());
-    assertTrue(edom2.getLowerBound() == 1);
-    assertTrue(edom2.getUpperBound() == 209);
+    CPPUNIT_ASSERT(edom2.getLowerBound() == 1);
+    CPPUNIT_ASSERT(edom2.getUpperBound() == 209);
 
     Id<TokenVariable<IntervalIntDomain> > pvar2(tokens[0][0]->parameters()[0]);
     IntervalIntDomain pdom2(pvar2->getDerivedDomain());
-    assertTrue(pdom2.getLowerBound() == 500);
-    assertTrue(pdom2.getUpperBound() == 1000);
+    CPPUNIT_ASSERT(pdom2.getLowerBound() == 500);
+    CPPUNIT_ASSERT(pdom2.getUpperBound() == 1000);
 
     for (int i=0; i < NUMTOKS; i++)
       for (int j=1; j < UNIFIED; j++) { 
@@ -1869,17 +1870,17 @@ private:
       }
 
     IntervalIntDomain sdom3(tokens[0][0]->start()->getDerivedDomain());
-    assertTrue(sdom3.getLowerBound() == 0);
-    assertTrue(sdom3.getUpperBound() == 208);
+    CPPUNIT_ASSERT(sdom3.getLowerBound() == 0);
+    CPPUNIT_ASSERT(sdom3.getUpperBound() == 208);
 
     IntervalIntDomain edom3(tokens[0][0]->end()->getDerivedDomain());
-    assertTrue(edom3.getLowerBound() == 1);
-    assertTrue(edom3.getUpperBound() == 209);
+    CPPUNIT_ASSERT(edom3.getLowerBound() == 1);
+    CPPUNIT_ASSERT(edom3.getUpperBound() == 209);
 
     Id<TokenVariable<IntervalIntDomain> > pvar3(tokens[0][0]->parameters()[0]);
     IntervalIntDomain pdom3(pvar3->getDerivedDomain());
-    assertTrue(pdom3.getLowerBound() == 500+UNIFIED-1);
-    assertTrue(pdom3.getUpperBound() == 1000);
+    CPPUNIT_ASSERT(pdom3.getLowerBound() == 500+UNIFIED-1);
+    CPPUNIT_ASSERT(pdom3.getUpperBound() == 1000);
 
     for (int i=0; i < NUMTOKS; i++)
       for (int j=1; j < UNIFIED; j++) {
@@ -1888,17 +1889,17 @@ private:
       }
 
     IntervalIntDomain sdom4(tokens[0][0]->start()->getDerivedDomain());
-    assertTrue(sdom4.getLowerBound() == sdom2.getLowerBound());
-    assertTrue(sdom4.getUpperBound() == sdom2.getUpperBound());
+    CPPUNIT_ASSERT(sdom4.getLowerBound() == sdom2.getLowerBound());
+    CPPUNIT_ASSERT(sdom4.getUpperBound() == sdom2.getUpperBound());
 
     IntervalIntDomain edom4(tokens[0][0]->end()->getDerivedDomain());
-    assertTrue(edom4.getLowerBound() == edom2.getLowerBound());
-    assertTrue(edom4.getUpperBound() == edom2.getUpperBound());
+    CPPUNIT_ASSERT(edom4.getLowerBound() == edom2.getLowerBound());
+    CPPUNIT_ASSERT(edom4.getUpperBound() == edom2.getUpperBound());
 
     Id<TokenVariable<IntervalIntDomain> > pvar4(tokens[0][0]->parameters()[0]);
     IntervalIntDomain pdom4(pvar4->getDerivedDomain());
-    assertTrue(pdom4.getLowerBound() == pdom2.getLowerBound());
-    assertTrue(pdom4.getUpperBound() == pdom2.getUpperBound());
+    CPPUNIT_ASSERT(pdom4.getLowerBound() == pdom2.getLowerBound());
+    CPPUNIT_ASSERT(pdom4.getUpperBound() == pdom2.getUpperBound());
 
     DEFAULT_TEARDOWN();
     return true;
@@ -1936,19 +1937,19 @@ private:
     t0.activate();
     std::vector<TokenId> compatibleTokens;
     bool res = ce->propagate();
-    assertTrue(res);
+    CPPUNIT_ASSERT(res);
     db->getCompatibleTokens(t1.getId(), compatibleTokens);
-    assertTrue(compatibleTokens.size() == 1);
-    assertTrue(db->hasCompatibleTokens(t1.getId()));
-    assertTrue(compatibleTokens[0] == t0.getId());
+    CPPUNIT_ASSERT(compatibleTokens.size() == 1);
+    CPPUNIT_ASSERT(db->hasCompatibleTokens(t1.getId()));
+    CPPUNIT_ASSERT(compatibleTokens[0] == t0.getId());
 
     compatibleTokens.clear();
     t0.cancel();
     res = ce->propagate();
-    assertTrue(res);
+    CPPUNIT_ASSERT(res);
     db->getCompatibleTokens(t1.getId(), compatibleTokens);
-    assertTrue(compatibleTokens.empty()); // No match since no tokens are active
-    assertFalse(db->hasCompatibleTokens(t1.getId()));
+    CPPUNIT_ASSERT(compatibleTokens.empty()); // No match since no tokens are active
+    CPPUNIT_ASSERT(!db->hasCompatibleTokens(t1.getId()));
 
     IntervalToken t2(db,
                      LabelStr(LabelStr(DEFAULT_PREDICATE)), 
@@ -1963,10 +1964,10 @@ private:
 
     t0.activate();
     res = ce->propagate();
-    assertTrue(res);
+    CPPUNIT_ASSERT(res);
     compatibleTokens.clear();
     db->getCompatibleTokens(t2.getId(), compatibleTokens);
-    assertTrue(compatibleTokens.empty()); // No match since parameter variable has no intersection
+    CPPUNIT_ASSERT(compatibleTokens.empty()); // No match since parameter variable has no intersection
 
 
     IntervalToken t3(db,
@@ -1985,7 +1986,7 @@ private:
     db->getConstraintEngine()->propagate();
     compatibleTokens.clear();
     db->getCompatibleTokens(t3.getId(), compatibleTokens);
-    assertTrue(compatibleTokens.size() == 1); // Expect a single match
+    CPPUNIT_ASSERT(compatibleTokens.size() == 1); // Expect a single match
 
 
     DEFAULT_TEARDOWN();
@@ -2127,11 +2128,12 @@ private:
       t.close();
 
 
-      assertTrue(ce->propagate());
+      CPPUNIT_ASSERT(ce->propagate());
       db->getCompatibleTokens(t.getId(), results);
 
       LabelStr encodedNames = encodePredicateNames(results);
-      assertTrue(encodedNames == LabelStr("A.a:B.a:C.a:D.a:"), "Expected = A.a:B.a:C.a:D.a:, Actual =  " + encodedNames.toString());
+      CPPUNIT_ASSERT_MESSAGE("Expected = A.a:B.a:C.a:D.a:, Actual =  " + encodedNames.toString(),
+          encodedNames == LabelStr("A.a:B.a:C.a:D.a:"));
     }
 
     // A.a => A.a, B.a, C.a., D.a. This is the case for GNATS 2837
@@ -2148,11 +2150,12 @@ private:
       t.close();
 
 
-      assertTrue(ce->propagate());
+      CPPUNIT_ASSERT(ce->propagate());
       db->getCompatibleTokens(t.getId(), results);
 
       LabelStr encodedNames = encodePredicateNames(results);
-      assertTrue(encodedNames == LabelStr("D.b:"), "Expected = D.b':, Actual =  " + encodedNames.toString());
+      CPPUNIT_ASSERT_MESSAGE("Expected = D.b':, Actual =  " + encodedNames.toString(),
+          encodedNames == LabelStr("D.b:"));
     }
 
     DEFAULT_TEARDOWN();
@@ -2167,7 +2170,7 @@ private:
       TokenId master = db->createToken(LabelStr(DEFAULT_PREDICATE), true);
     master->activate();
     TokenId slave = db->createSlaveToken(master, LabelStr(DEFAULT_PREDICATE), LabelStr("any"));
-    assertTrue(slave->master() == master); 
+    CPPUNIT_ASSERT(slave->master() == master); 
     TokenId rejectable = db->createToken(LabelStr(DEFAULT_PREDICATE), false);
     rejectable->activate();
     //!!Should try rejecting master and verify inconsistency
@@ -2198,7 +2201,7 @@ private:
     start->specify(5);
 
     tokenA.activate();
-    assertTrue(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
 
     IntervalToken tokenB(db, 
                          LabelStr(LabelStr(DEFAULT_PREDICATE)), 
@@ -2220,21 +2223,21 @@ private:
     ForceFailureConstraint c0("ForceFailure", "Default", ce, makeScope(tokenC.getState()));
 
     // Propagate and test our specified value
-    assertTrue(ce->propagate());
-    assertTrue(tokenA.start()->lastDomain().getSingletonValue() == 5);
+    CPPUNIT_ASSERT(ce->propagate());
+    CPPUNIT_ASSERT(tokenA.start()->lastDomain().getSingletonValue() == 5);
 
     // Now do the merges and test
     tokenB.doMerge(tokenA.getId());
-    assertTrue(ce->propagate());
-    assertTrue(tokenA.start()->lastDomain().getSingletonValue() == 5);
+    CPPUNIT_ASSERT(ce->propagate());
+    CPPUNIT_ASSERT(tokenA.start()->lastDomain().getSingletonValue() == 5);
 
     tokenC.doMerge(tokenA.getId());
-    assertFalse(ce->propagate()); // Should always fail
+    CPPUNIT_ASSERT(!ce->propagate()); // Should always fail
 
     // Now split it and test that the specified domain is unchanged
     tokenC.cancel();
-    assertTrue(ce->propagate()); // Should be OK now
-    assertTrue(tokenA.start()->lastDomain().getSingletonValue() == 5);
+    CPPUNIT_ASSERT(ce->propagate()); // Should be OK now
+    CPPUNIT_ASSERT(tokenA.start()->lastDomain().getSingletonValue() == 5);
 
 
     DEFAULT_TEARDOWN();
@@ -2318,28 +2321,28 @@ private:
     t4.getVariable(LabelStr("FOO"))->open();
     t4.close();
 
-    assertTrue(t0.getObject()->isClosed());
+    CPPUNIT_ASSERT(t0.getObject()->isClosed());
     t1.getObject()->open();
-    assertTrue(!t1.getObject()->isClosed());
+    CPPUNIT_ASSERT(!t1.getObject()->isClosed());
 
     t0.activate();
 		t2.activate();
 		t4.activate();
-    assertTrue(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
 
     std::vector<TokenId> compatibleTokens0, compatibleTokens1, compatibleTokens3;
 
-    assertTrue(db->hasCompatibleTokens(t1.getId()));
+    CPPUNIT_ASSERT(db->hasCompatibleTokens(t1.getId()));
     db->getCompatibleTokens(t1.getId(), compatibleTokens1);
-    assertTrue(compatibleTokens1.size() == 3); // open {0} intersects with open domains and closed domains containing {0}
-    assertTrue((compatibleTokens1[0] == t0.getId() || compatibleTokens1[0] == t2.getId() || compatibleTokens1[0] == t4.getId()) &&
+    CPPUNIT_ASSERT(compatibleTokens1.size() == 3); // open {0} intersects with open domains and closed domains containing {0}
+    CPPUNIT_ASSERT((compatibleTokens1[0] == t0.getId() || compatibleTokens1[0] == t2.getId() || compatibleTokens1[0] == t4.getId()) &&
                (compatibleTokens1[1] == t0.getId() || compatibleTokens1[1] == t2.getId() || compatibleTokens1[1] == t4.getId()) &&
                (compatibleTokens1[2] == t0.getId() || compatibleTokens1[2] == t2.getId() || compatibleTokens1[2] == t4.getId()));
 
-    assertTrue(db->hasCompatibleTokens(t3.getId()));
+    CPPUNIT_ASSERT(db->hasCompatibleTokens(t3.getId()));
     db->getCompatibleTokens(t3.getId(), compatibleTokens3);
-    assertTrue(compatibleTokens3.size() == 2); // open {1} intersects with open domains
-    assertTrue((compatibleTokens3[0] == t2.getId() && compatibleTokens3[1] == t4.getId()) ||
+    CPPUNIT_ASSERT(compatibleTokens3.size() == 2); // open {1} intersects with open domains
+    CPPUNIT_ASSERT((compatibleTokens3[0] == t2.getId() && compatibleTokens3[1] == t4.getId()) ||
 		           (compatibleTokens3[1] == t2.getId() && compatibleTokens3[0] == t4.getId()));
 
     t1.doMerge(t0.getId());
@@ -2383,23 +2386,23 @@ private:
     ConstrainedVariableId param1 = t1.addParameter(lbl, "LabelSetParam");
     t1.close();
 
-    assertTrue(!param0->lastDomain().isClosed());
-    assertTrue(!param1->lastDomain().isClosed());
+    CPPUNIT_ASSERT(!param0->lastDomain().isClosed());
+    CPPUNIT_ASSERT(!param1->lastDomain().isClosed());
 
     param0->specify(LabelStr("L1"));
-    assertTrue(param0->lastDomain().isClosed());
+    CPPUNIT_ASSERT(param0->lastDomain().isClosed());
 
     // Now activate and merge onto it.
     t1.activate();
     t0.doMerge(t1.getId());
 
-    assertTrue(param0->lastDomain().isClosed());
-    assertTrue(param1->lastDomain().isClosed());
+    CPPUNIT_ASSERT(param0->lastDomain().isClosed());
+    CPPUNIT_ASSERT(param1->lastDomain().isClosed());
 
     // Reset, thus reverting to the base domain which should be open
     param0->reset();
-    assertTrue(!param0->lastDomain().isClosed(), param0->toString());
-    assertTrue(!param1->lastDomain().isClosed(), param1->toString());
+    CPPUNIT_ASSERT_MESSAGE(param0->toString(), !param0->lastDomain().isClosed());
+    CPPUNIT_ASSERT_MESSAGE(param1->toString(), !param1->lastDomain().isClosed());
 
     DEFAULT_TEARDOWN();
     return true;
@@ -2450,14 +2453,14 @@ private:
     ce->propagate(); //propagate the change
 
     //shouldn't be able to merge with anything
-    assert(db->countCompatibleTokens(t2.getId(), PLUS_INFINITY, true) == 0);
+    CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), PLUS_INFINITY, true) == 0);
     
     delete (Constraint *) eq; //remove the constraint
 
     ce->propagate();
     
     // Should now be able to merge
-    assert(db->countCompatibleTokens(t2.getId(), PLUS_INFINITY, true) > 0);
+    CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), PLUS_INFINITY, true) > 0);
 
     DEFAULT_TEARDOWN();
     return true;
@@ -2481,10 +2484,10 @@ private:
     ce->propagate();
 
     // Should not be assigned since inactive and object domain not a sinleton
-    assertFalse(t0.isAssigned());
+    CPPUNIT_ASSERT(!t0.isAssigned());
 
     // Should not have this token for the same reasons
-    assertFalse(o1.hasToken(t0.getId()));
+    CPPUNIT_ASSERT(!o1.hasToken(t0.getId()));
 
     // Now activate it, situation should be unchanged
     t0.activate();
@@ -2492,22 +2495,22 @@ private:
     ce->propagate();
 
     // Should not be assigned since inactive and object domain not a singleton
-    assertFalse(t0.isAssigned());
-    assertFalse(o1.hasToken(t0.getId()));
+    CPPUNIT_ASSERT(!t0.isAssigned());
+    CPPUNIT_ASSERT(!o1.hasToken(t0.getId()));
     
     // Now specify the object value. Expect it to be assigned.	
     t0.getObject()->specify(o1.getId());
     ce->propagate();
 
-    assertTrue(t0.isAssigned());
-    assertTrue(o1.hasToken(t0.getId()));
+    CPPUNIT_ASSERT(t0.isAssigned());
+    CPPUNIT_ASSERT(o1.hasToken(t0.getId()));
 
     // Now we can reset and expect it to go back	
     t0.getObject()->reset();
     ce->propagate();
 
-    assertTrue(!t0.isAssigned());
-    assertTrue(!o1.hasToken(t0.getId()));
+    CPPUNIT_ASSERT(!t0.isAssigned());
+    CPPUNIT_ASSERT(!o1.hasToken(t0.getId()));
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -2552,8 +2555,8 @@ private:
     // Now delete the master and expect the uncommitted slave to be discarded but the committed slave to
     // be retained.
     delete (Token*) master;
-    assertTrue(slaveA->isDiscarded());
-    assertTrue(slaveB->isCommitted());
+    CPPUNIT_ASSERT(slaveA->isDiscarded());
+    CPPUNIT_ASSERT(slaveB->isCommitted());
 
     delete (Token*) slaveB;
     DEFAULT_TEARDOWN();
@@ -2622,13 +2625,13 @@ private:
 
     // Now delete the master - should force slaves A and B to be deleted
     delete (Token*) master;
-    assertTrue(slaveA->isDiscarded());
-    assertTrue(slaveB->isDiscarded());
-    assertTrue(slaveC->isCommitted());
-    assertTrue(orphan->isMerged());
+    CPPUNIT_ASSERT(slaveA->isDiscarded());
+    CPPUNIT_ASSERT(slaveB->isDiscarded());
+    CPPUNIT_ASSERT(slaveC->isCommitted());
+    CPPUNIT_ASSERT(orphan->isMerged());
 
     delete (Token*) slaveC;
-    assertTrue(orphan->isInactive());
+    CPPUNIT_ASSERT(orphan->isInactive());
 
     delete (Token*) orphan;
     DEFAULT_TEARDOWN();
@@ -2655,7 +2658,7 @@ private:
 				       IntervalIntDomain(1, 1000)))->getId();                                  
 
     master->start()->restrictBaseDomain(IntervalIntDomain(1, 1));
-    assertTrue(master->start()->specifiedFlag());    
+    CPPUNIT_ASSERT(master->start()->specifiedFlag());    
     master->discard();
     DEFAULT_TEARDOWN();
     return true;
@@ -2709,22 +2712,22 @@ private:
 class TimelineTest {
 public:
   static bool test(){
-    runTest(testFullInsertion);
-    runTest(testBasicInsertion);
-    runTest(testObjectTokenRelation);
-    runTest(testTokenOrderQuery);
-    runTest(testEventTokenInsertion);
-    runTest(testNoChoicesThatFit);
-    runTest(testAssignment);
-    runTest(testFreeAndConstrain);
-    runTest(testRemovalOfMasterAndSlave);
+    EUROPA_runTest(testFullInsertion);
+    EUROPA_runTest(testBasicInsertion);
+    EUROPA_runTest(testObjectTokenRelation);
+    EUROPA_runTest(testTokenOrderQuery);
+    EUROPA_runTest(testEventTokenInsertion);
+    EUROPA_runTest(testNoChoicesThatFit);
+    EUROPA_runTest(testAssignment);
+    EUROPA_runTest(testFreeAndConstrain);
+    EUROPA_runTest(testRemovalOfMasterAndSlave);
 
     /* The archiving algorithm needs to be rewritten in EUROPA. Or better still, taken out of EUROPA. We can keep these tests for reference but they are both
        incomplete and incorrect. CMG
-       runTest(testArchiving1);
-       runTest(testArchiving2);
-       runTest(testArchiving3);
-       runTest(testGNATS_3162);
+       EUROPA_runTest(testArchiving1);
+       EUROPA_runTest(testArchiving2);
+       EUROPA_runTest(testArchiving3);
+       EUROPA_runTest(testGNATS_3162);
     */
     return true;
   }
@@ -2768,7 +2771,7 @@ private:
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
 
-    assertFalse(timeline.hasTokensToOrder());
+    CPPUNIT_ASSERT(!timeline.hasTokensToOrder());
     tokenA.activate();
     tokenB.activate();
     tokenC.activate();
@@ -2777,9 +2780,9 @@ private:
     // Establish preliminaries
     std::vector<TokenId> tokens;
     timeline.getTokensToOrder(tokens);
-    assertTrue(tokens.size() == 4);
-    assertTrue(timeline.getTokenSequence().size() == 0);
-    assertTrue(timeline.hasTokensToOrder());
+    CPPUNIT_ASSERT(tokens.size() == 4);
+    CPPUNIT_ASSERT(timeline.getTokenSequence().size() == 0);
+    CPPUNIT_ASSERT(timeline.hasTokensToOrder());
     unsigned int num_constraints = ce->getConstraints().size();
 
     /**
@@ -2793,23 +2796,23 @@ private:
     {
       timeline.constrain(tokenA.getId(), tokenB.getId());
       num_constraints += 3;
-      assertTrue(ce->getConstraints().size() == num_constraints);
-      assertTrue(timeline.getTokenSequence().size() == 2);
+      CPPUNIT_ASSERT(ce->getConstraints().size() == num_constraints);
+      CPPUNIT_ASSERT(timeline.getTokenSequence().size() == 2);
 
       timeline.constrain(tokenB.getId(), tokenC.getId());
       num_constraints += 2;
-      assertTrue(ce->getConstraints().size() == num_constraints);
-      assertTrue(timeline.getTokenSequence().size() == 3);
+      CPPUNIT_ASSERT(ce->getConstraints().size() == num_constraints);
+      CPPUNIT_ASSERT(timeline.getTokenSequence().size() == 3);
 
       timeline.free(tokenB.getId(), tokenC.getId());
       num_constraints -= 2;
-      assertTrue(ce->getConstraints().size() == num_constraints);
-      assertTrue(timeline.getTokenSequence().size() == 2);
+      CPPUNIT_ASSERT(ce->getConstraints().size() == num_constraints);
+      CPPUNIT_ASSERT(timeline.getTokenSequence().size() == 2);
 
       timeline.free(tokenA.getId(), tokenB.getId());
       num_constraints -= 3;
-      assertTrue(ce->getConstraints().size() == num_constraints);
-      assertTrue(timeline.getTokenSequence().size() == 0);
+      CPPUNIT_ASSERT(ce->getConstraints().size() == num_constraints);
+      CPPUNIT_ASSERT(timeline.getTokenSequence().size() == 0);
     }
 
 
@@ -2822,24 +2825,24 @@ private:
     { 
       timeline.constrain(tokenA.getId(), tokenB.getId());
       num_constraints += 3; // 2 Object variable constraints and a single temporal constraint
-      assertTrue(ce->getConstraints().size() == num_constraints);
+      CPPUNIT_ASSERT(ce->getConstraints().size() == num_constraints);
 
       timeline.constrain(tokenC.getId(), tokenA.getId());
       num_constraints += 2; // Object variable and a single temporal constraint since placing at the beginning
-      assertTrue(ce->getConstraints().size() == num_constraints);
+      CPPUNIT_ASSERT(ce->getConstraints().size() == num_constraints);
 
-      assertTrue(tokenA.end()->getDerivedDomain().getUpperBound() <= tokenB.start()->getDerivedDomain().getUpperBound());
-      assertTrue(timeline.getTokenSequence().size() == 3);
+      CPPUNIT_ASSERT(tokenA.end()->getDerivedDomain().getUpperBound() <= tokenB.start()->getDerivedDomain().getUpperBound());
+      CPPUNIT_ASSERT(timeline.getTokenSequence().size() == 3);
 
       timeline.free(tokenA.getId(), tokenB.getId());
       num_constraints -= 2; // Should remove 1 object constraint and 1 temporal constraint
-      assertTrue(ce->getConstraints().size() == num_constraints);
-      assertTrue(timeline.getTokenSequence().size() == 2);
+      CPPUNIT_ASSERT(ce->getConstraints().size() == num_constraints);
+      CPPUNIT_ASSERT(timeline.getTokenSequence().size() == 2);
 
       timeline.free(tokenC.getId(), tokenA.getId());
       num_constraints -= 3;
-      assertTrue(ce->getConstraints().size() == num_constraints);
-      assertTrue(timeline.getTokenSequence().size() == 0);
+      CPPUNIT_ASSERT(ce->getConstraints().size() == num_constraints);
+      CPPUNIT_ASSERT(timeline.getTokenSequence().size() == 0);
     }
 
     /**
@@ -2850,16 +2853,17 @@ private:
       timeline.constrain(tokenB.getId(), tokenC.getId());
       timeline.constrain(tokenC.getId(), tokenD.getId());
       num_constraints += 7; // 4 object constraints and 3 temporal constraints
-      assertTrue(ce->getConstraints().size() == num_constraints);
+      CPPUNIT_ASSERT(ce->getConstraints().size() == num_constraints);
       timeline.free(tokenB.getId(), tokenC.getId());
-      assertTrue(ce->getConstraints().size() == num_constraints); // No change. Middle link unsupported
+      CPPUNIT_ASSERT(ce->getConstraints().size() == num_constraints); // No change. Middle link unsupported
       timeline.free(tokenC.getId(), tokenD.getId()); // Should remove C, and D.
       num_constraints -= 4; // Objects constraints for C, and D, and implict constraint for B->C
-      assertTrue(ce->getConstraints().size() == num_constraints);
+      CPPUNIT_ASSERT(ce->getConstraints().size() == num_constraints);
       timeline.free(tokenA.getId(), tokenB.getId());
       num_constraints -= 3;
-      assertTrue(ce->getConstraints().size() == num_constraints, toString(ce->getConstraints().size()) + " " + toString(num_constraints));
-      assertTrue(timeline.getTokenSequence().size() == 0);
+      CPPUNIT_ASSERT_MESSAGE(toString(ce->getConstraints().size()) + " " + toString(num_constraints),
+          ce->getConstraints().size() == num_constraints);
+      CPPUNIT_ASSERT(timeline.getTokenSequence().size() == 0);
     }
 
     /**
@@ -2870,22 +2874,22 @@ private:
       timeline.constrain(tokenC.getId(), tokenD.getId()); // +3
       timeline.constrain(tokenB.getId(), tokenC.getId()); // +3
       num_constraints += 9;
-      assertTrue(ce->getConstraints().size() == num_constraints);
+      CPPUNIT_ASSERT(ce->getConstraints().size() == num_constraints);
 
       // Remove spanning link.
       timeline.free(tokenA.getId(), tokenD.getId());
       num_constraints -= 4; // One object constraint, one explciit constraint, and 2 implicit constraints
-      assertTrue(ce->getConstraints().size() == num_constraints);
+      CPPUNIT_ASSERT(ce->getConstraints().size() == num_constraints);
 
       // Remove B,C and expect to get rid of A and B from the sequence
       timeline.free(tokenB.getId(), tokenC.getId());
       num_constraints -= 2; // 1 object and 1 temporal constraints
-      assertTrue(ce->getConstraints().size() == num_constraints);
+      CPPUNIT_ASSERT(ce->getConstraints().size() == num_constraints);
 
       // Remove B,C and expect to get rid of A and B from the sequence
       timeline.free(tokenC.getId(), tokenD.getId());
       num_constraints -= 3; // 2 object and 1 temporal constraints
-      assertTrue(ce->getConstraints().size() == num_constraints);
+      CPPUNIT_ASSERT(ce->getConstraints().size() == num_constraints);
     }
 
     DEFAULT_TEARDOWN();
@@ -2924,37 +2928,37 @@ private:
     // Object variables are not singletons - so query for tokens to order should return nothing
     std::vector<TokenId> tokensToOrder;
     timeline.getTokensToOrder(tokensToOrder);
-    assertTrue(tokensToOrder.empty());
+    CPPUNIT_ASSERT(tokensToOrder.empty());
 
     // Specify the object variable of one - but still should return no tokens since they are all inactive
     tokenA.getObject()->specify(timeline.getId());
     timeline.getTokensToOrder(tokensToOrder);
-    assertTrue(tokensToOrder.empty());
+    CPPUNIT_ASSERT(tokensToOrder.empty());
 
     // Now activate all of them
     tokenA.activate();
     tokenB.activate();
     tokenC.activate();
     timeline.getTokensToOrder(tokensToOrder);
-    assertTrue(tokensToOrder.size() == 3);
+    CPPUNIT_ASSERT(tokensToOrder.size() == 3);
 
     // Set remainders so they are singeltons and get all back
     tokenB.getObject()->specify(timeline.getId());
     tokenC.getObject()->specify(timeline.getId());
     tokensToOrder.clear();
     timeline.getTokensToOrder(tokensToOrder);
-    assertTrue(tokensToOrder.size() == 3);
+    CPPUNIT_ASSERT(tokensToOrder.size() == 3);
 
     // Now incrementally constrain and show reduction in tokens to order
     timeline.constrain(tokenA.getId(), tokenB.getId());
     tokensToOrder.clear();
     timeline.getTokensToOrder(tokensToOrder);
-    assertTrue(tokensToOrder.size() == 1);
+    CPPUNIT_ASSERT(tokensToOrder.size() == 1);
 
     timeline.constrain(tokenB.getId(), tokenC.getId());
     tokensToOrder.clear();
     timeline.getTokensToOrder(tokensToOrder);
-    assertTrue(tokensToOrder.empty());
+    CPPUNIT_ASSERT(tokensToOrder.empty());
 
 
     // Test destruction call path
@@ -2967,12 +2971,12 @@ private:
                                       IntervalIntDomain(1, 1000));
     tokenD->activate();
     timeline.getTokensToOrder(tokensToOrder);
-    assertTrue(tokensToOrder.size() == 1);
+    CPPUNIT_ASSERT(tokensToOrder.size() == 1);
     timeline.constrain(tokenC.getId(), tokenD->getId());
     delete tokenD;
     tokensToOrder.clear();
     timeline.getTokensToOrder(tokensToOrder);
-    assertTrue(tokensToOrder.empty());
+    CPPUNIT_ASSERT(tokensToOrder.empty());
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -2995,45 +2999,45 @@ private:
                                          IntervalIntDomain(start, start),
                                          IntervalIntDomain(start+DURATION, start+DURATION),
                                          IntervalIntDomain(DURATION, DURATION)))->getId();
-      assertTrue(token->getObject()->getBaseDomain().isSingleton());
+      CPPUNIT_ASSERT(token->getObject()->getBaseDomain().isSingleton());
       token->getObject()->specify(timeline->getId());
       token->activate();
     }
 
-    assertTrue(timeline->tokens().size() == (unsigned int) COUNT);
+    CPPUNIT_ASSERT(timeline->tokens().size() == (unsigned int) COUNT);
     ce->propagate(); // Should not alter the count. Relationship updated eagerly
-    assertTrue(timeline->tokens().size() == (unsigned int) COUNT);
+    CPPUNIT_ASSERT(timeline->tokens().size() == (unsigned int) COUNT);
 
     int i = 0;
     std::vector<TokenId> tokensToOrder;
     timeline->getTokensToOrder(tokensToOrder);
 
     while(!tokensToOrder.empty()){
-      assertTrue(timeline->getTokenSequence().size() == (unsigned int) i);
-      assertTrue(tokensToOrder.size() == (unsigned int) (COUNT - i));
+      CPPUNIT_ASSERT(timeline->getTokenSequence().size() == (unsigned int) i);
+      CPPUNIT_ASSERT(tokensToOrder.size() == (unsigned int) (COUNT - i));
       std::vector< std::pair<TokenId, TokenId> > choices;
       TokenId toConstrain = tokensToOrder.front();
       timeline->getOrderingChoices(toConstrain, choices);
-      assertFalse(choices.empty());
+      CPPUNIT_ASSERT(!choices.empty());
       TokenId predecessor = choices.front().first;
       TokenId successor = choices.front().second;
 
-      assertTrue(toConstrain == predecessor || toConstrain == successor,
-		 "The token from the tokens to order must be a predecessor or a successor.");
+      CPPUNIT_ASSERT_MESSAGE("The token from the tokens to order must be a predecessor or a successor.",
+          toConstrain == predecessor || toConstrain == successor);
 
       timeline->constrain(predecessor, successor);
       bool res = ce->propagate();
-      assertTrue(res);
+      CPPUNIT_ASSERT(res);
       tokensToOrder.clear();
       timeline->getTokensToOrder(tokensToOrder);
       i++;
       res = ce->propagate();
-      assertTrue(res);
+      CPPUNIT_ASSERT(res);
     }
 
     const std::list<TokenId>& tokenSequence = timeline->getTokenSequence();
-    assertTrue(tokenSequence.front()->start()->getDerivedDomain().getSingletonValue() == 0);
-    assertTrue(tokenSequence.back()->end()->getDerivedDomain().getSingletonValue() == COUNT*DURATION);
+    CPPUNIT_ASSERT(tokenSequence.front()->start()->getDerivedDomain().getSingletonValue() == 0);
+    CPPUNIT_ASSERT(tokenSequence.back()->end()->getDerivedDomain().getSingletonValue() == COUNT*DURATION);
 
     // Now ensure the query can correctly indicate no options available
     TokenId token = (new IntervalToken(db, 
@@ -3048,13 +3052,13 @@ private:
     token->activate();
     std::vector<std::pair<TokenId, TokenId> > choices;
     timeline->getOrderingChoices(token, choices);
-    assertTrue(choices.empty());
+    CPPUNIT_ASSERT(choices.empty());
 
     // Now back off restrictions to token and try patterns which excercise cache management in the face of merging and rejection
     token->cancel();
     token->getObject()->reset();
     token->start()->reset();
-    assertTrue(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
 
 
     TokenId token2 = (new IntervalToken(db, 
@@ -3067,34 +3071,34 @@ private:
 
     choices.clear();
     timeline->getOrderingChoices(token2, choices);
-    assertFalse(choices.empty());
+    CPPUNIT_ASSERT(!choices.empty());
     token->reject();
-    assertTrue(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
     choices.clear();
     timeline->getOrderingChoices(token2, choices);
-    assertFalse(choices.empty());
+    CPPUNIT_ASSERT(!choices.empty());
 
     token->cancel();
-    assertTrue(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
     choices.clear();
     timeline->getOrderingChoices(token, choices);
-    assertFalse(choices.empty());
+    CPPUNIT_ASSERT(!choices.empty());
 
     std::vector< TokenId > mergeChoices;
     db->getCompatibleTokens(token, mergeChoices);
-    assertFalse(mergeChoices.empty());
+    CPPUNIT_ASSERT(!mergeChoices.empty());
     token->doMerge(mergeChoices.front());
-    assertTrue(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
 
     choices.clear();
     timeline->getOrderingChoices(token2, choices);
-    assertFalse(choices.empty());
+    CPPUNIT_ASSERT(!choices.empty());
 
     token->cancel();
-    assertTrue(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
     choices.clear();
     timeline->getOrderingChoices(token, choices);
-    assertFalse(choices.empty());
+    CPPUNIT_ASSERT(!choices.empty());
 
     DEFAULT_TEARDOWN();
     return true;
@@ -3128,7 +3132,7 @@ private:
     et1.getObject()->specify(timeline.getId());
     et1.activate();
     timeline.constrain(it1.getId(), et1.getId());
-    assertTrue(it1.end()->getDerivedDomain().getUpperBound() == 100);
+    CPPUNIT_ASSERT(it1.end()->getDerivedDomain().getUpperBound() == 100);
 
     // Insert between a token and an event
     EventToken et2(db, 
@@ -3141,7 +3145,7 @@ private:
     et2.getObject()->specify(timeline.getId());
     et2.activate();
     timeline.constrain(et2.getId(), et1.getId());
-    assertTrue(it1.end()->getDerivedDomain().getUpperBound() == 100);
+    CPPUNIT_ASSERT(it1.end()->getDerivedDomain().getUpperBound() == 100);
 
     // Insert before a token
     EventToken et3(db, 
@@ -3154,7 +3158,7 @@ private:
     et3.getObject()->specify(timeline.getId());
     et3.activate();
     timeline.constrain(et3.getId(), it1.getId());
-    assertTrue(it1.start()->getDerivedDomain().getLowerBound() == 10);
+    CPPUNIT_ASSERT(it1.start()->getDerivedDomain().getLowerBound() == 10);
 
     // Insert between events
     EventToken et4(db, 
@@ -3168,7 +3172,7 @@ private:
     et4.activate();
     timeline.constrain(et4.getId(), et1.getId());
     bool res = ce->propagate();
-    assertTrue(res);
+    CPPUNIT_ASSERT(res);
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -3202,18 +3206,18 @@ private:
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
 
-    assertFalse(timeline.hasTokensToOrder());
+    CPPUNIT_ASSERT(!timeline.hasTokensToOrder());
     tokenA.activate();
     tokenB.activate();
     tokenC.activate();
 
     timeline.constrain(tokenA.getId(), tokenB.getId()); // Insert A and B.
-    assertTrue(tokenA.end()->getDerivedDomain().getUpperBound() <= tokenB.start()->getDerivedDomain().getUpperBound());
+    CPPUNIT_ASSERT(tokenA.end()->getDerivedDomain().getUpperBound() <= tokenB.start()->getDerivedDomain().getUpperBound());
 
     // Now insert token C in the middle.
     timeline.constrain(tokenC.getId(), tokenB.getId());
-    assertTrue(tokenA.end()->getDerivedDomain().getUpperBound() <= tokenC.start()->getDerivedDomain().getUpperBound());
-    assertTrue(tokenC.end()->getDerivedDomain().getUpperBound() <= tokenB.start()->getDerivedDomain().getUpperBound());
+    CPPUNIT_ASSERT(tokenA.end()->getDerivedDomain().getUpperBound() <= tokenC.start()->getDerivedDomain().getUpperBound());
+    CPPUNIT_ASSERT(tokenC.end()->getDerivedDomain().getUpperBound() <= tokenB.start()->getDerivedDomain().getUpperBound());
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -3253,14 +3257,14 @@ private:
 
     timeline.constrain(tokenA.getId(), tokenB.getId());
     bool res = ce->propagate();
-    assertTrue(res);
+    CPPUNIT_ASSERT(res);
 
     std::vector<std::pair<TokenId, TokenId> > choices;
     timeline.getOrderingChoices(tokenC.getId(), choices);
-    assertTrue(choices.empty());
+    CPPUNIT_ASSERT(choices.empty());
     timeline.constrain(tokenC.getId(), tokenB.getId());
     res = ce->propagate();
-    assertFalse(res);
+    CPPUNIT_ASSERT(!res);
 
     DEFAULT_TEARDOWN();
     return true;
@@ -3284,10 +3288,10 @@ private:
     ce->propagate();
 
     // Should not be assigned since inactive and object domain not a sinleton
-    assertFalse(t0.isAssigned());
+    CPPUNIT_ASSERT(!t0.isAssigned());
 
     // Should not have this token for the same reasons
-    assertFalse(o1.hasToken(t0.getId()));
+    CPPUNIT_ASSERT(!o1.hasToken(t0.getId()));
 
     // Now activate it, situation should be unchanged
     t0.activate();
@@ -3295,28 +3299,28 @@ private:
     ce->propagate();
 
     // Should not be assigned since inactive and object domain not a singleton
-    assertFalse(t0.isAssigned());
-    assertFalse(o1.hasToken(t0.getId()));
+    CPPUNIT_ASSERT(!t0.isAssigned());
+    CPPUNIT_ASSERT(!o1.hasToken(t0.getId()));
     
     // Now specify the object value.	
     t0.getObject()->specify(o1.getId());
     ce->propagate();
 
     // It should still not be assigned
-    assertFalse(t0.isAssigned());
-    assertFalse(o1.hasToken(t0.getId()));
+    CPPUNIT_ASSERT(!t0.isAssigned());
+    CPPUNIT_ASSERT(!o1.hasToken(t0.getId()));
 
     // Now constrain the token and finnaly expect it to be assigned
     o1.constrain(t0.getId(), t0.getId());
     ce->propagate();
 
-    assertTrue(t0.isAssigned());
-    assertTrue(o1.hasToken(t0.getId()));
+    CPPUNIT_ASSERT(t0.isAssigned());
+    CPPUNIT_ASSERT(o1.hasToken(t0.getId()));
 
     // Free the token and it should be un assigned
     o1.free(t0.getId(), t0.getId());
-    assertFalse(t0.isAssigned());
-    assertFalse(o1.hasToken(t0.getId()));
+    CPPUNIT_ASSERT(!t0.isAssigned());
+    CPPUNIT_ASSERT(!o1.hasToken(t0.getId()));
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -3376,11 +3380,11 @@ private:
     t4->activate();
     o1.constrain(t4, t3.getId());   
     o1.constrain(t2.getId(), t4);  
-    assertTrue(ce->propagate()); 
+    CPPUNIT_ASSERT(ce->propagate()); 
     
     // Now delete t4 to leave a hole which will require repair
     delete (Token*) t4; 
-    assertTrue(ce->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -3421,7 +3425,7 @@ private:
       // Now nuke the master and make sure we safely delete both.
       delete (Token*) master;
 
-      assertTrue(db->getTokens().empty());
+      CPPUNIT_ASSERT(db->getTokens().empty());
     }
 
 
@@ -3452,7 +3456,7 @@ private:
       // Now nuke the master and make sure we safely delete both.
       delete (Token*) master;
 
-      assertTrue(db->getTokens().empty());
+      CPPUNIT_ASSERT(db->getTokens().empty());
     }
 
     DEFAULT_TEARDOWN();
@@ -3543,7 +3547,7 @@ private:
     // Now incrementally archive, verifying that no propagation is required after each
     for(unsigned int i=startTick;i<endTick;i++){
       db->archive(i+1);
-      assertTrue(ce->constraintConsistent());
+      CPPUNIT_ASSERT(ce->constraintConsistent());
     }
 
 
@@ -3594,7 +3598,7 @@ private:
 
     // Nuke one at a time, without any committing
     for(unsigned int i=startTick+1;i<=endTick;i++){
-      assertTrue(db->archive(startTick+i) == 1);
+      CPPUNIT_ASSERT(db->archive(startTick+i) == 1);
     }
 
     DEFAULT_TEARDOWN();
@@ -3648,12 +3652,12 @@ private:
     // Now incrementally archive, verifying that no propagation is required afetr each
     const unsigned int TOKENS_PER_TICK(1);
     for(unsigned int i=startTick;i<endTick;i++){
-      assertTrue(db->getTokens().size() == (endTick - i) * TOKENS_PER_TICK);
+      CPPUNIT_ASSERT(db->getTokens().size() == (endTick - i) * TOKENS_PER_TICK);
       unsigned int deletionCount = db->archive(i+1);
-      assertTrue(deletionCount == TOKENS_PER_TICK, toString(deletionCount));
-      assertTrue(ce->constraintConsistent());
+      CPPUNIT_ASSERT_MESSAGE(toString(deletionCount), deletionCount == TOKENS_PER_TICK);
+      CPPUNIT_ASSERT(ce->constraintConsistent());
     }
-    assertTrue(db->getTokens().empty());
+    CPPUNIT_ASSERT(db->getTokens().empty());
 
     DEFAULT_TEARDOWN();
     return true;
@@ -3692,8 +3696,8 @@ private:
     tokenA->restrictBaseDomains();
     tokenA->commit();
     ce->propagate();
-    //assertTrue(tokenA->canBeTerminated());
-    //assertTrue(tokenB->canBeTerminated());
+    //CPPUNIT_ASSERT(tokenA->canBeTerminated());
+    //CPPUNIT_ASSERT(tokenB->canBeTerminated());
 
     tokenA->terminate();
     tokenA->discard();
@@ -3706,10 +3710,10 @@ private:
 class DbClientTest {
 public:
   static bool test(){
-    runTest(testFactoryMethods);
-    runTest(testBasicAllocation);
-    runTest(testPathBasedRetrieval);
-    runTest(testGlobalVariables);
+    EUROPA_runTest(testFactoryMethods);
+    EUROPA_runTest(testBasicAllocation);
+    EUROPA_runTest(testPathBasedRetrieval);
+    EUROPA_runTest(testGlobalVariables);
     return true;
   }
 private:
@@ -3720,7 +3724,7 @@ private:
     arguments.push_back(&arg0); 
     arguments.push_back(&arg1);
     LabelStr factoryName = ObjectTypeMgr::makeFactoryName(LabelStr("Foo"), arguments);
-    assertTrue(factoryName == LabelStr("Foo:int:string"));
+    CPPUNIT_ASSERT(factoryName == LabelStr("Foo:int:string"));
     return true;
   }
 
@@ -3732,7 +3736,7 @@ private:
     DbClientTransactionLog* txLog = new DbClientTransactionLog(client);
 
     DBFooId foo1 = client->createObject(LabelStr(DEFAULT_OBJECT_TYPE).c_str(), "foo1");
-    assertTrue(foo1.isValid());
+    CPPUNIT_ASSERT(foo1.isValid());
 
     std::vector<const AbstractDomain*> arguments;
     IntervalIntDomain arg0(10);
@@ -3740,10 +3744,10 @@ private:
     arguments.push_back(&arg0); 
     arguments.push_back(&arg1);
     DBFooId foo2 = client->createObject(LabelStr(DEFAULT_OBJECT_TYPE).c_str(), "foo2", arguments);
-    assertTrue(foo2.isValid());
+    CPPUNIT_ASSERT(foo2.isValid());
 
     TokenId token = client->createToken(LabelStr(DEFAULT_PREDICATE).c_str());
-    assertTrue(token.isValid());
+    CPPUNIT_ASSERT(token.isValid());
 
     // Constrain the token duration
     std::vector<ConstrainedVariableId> scope;
@@ -3812,27 +3816,27 @@ private:
 
 
     // Base case with just the root
-    assertTrue(db->getClient()->getTokenByPath(path) == t0);
-    assertTrue(db->getClient()->getPathByToken(t0).size() == 1);
+    CPPUNIT_ASSERT(db->getClient()->getTokenByPath(path) == t0);
+    CPPUNIT_ASSERT(db->getClient()->getPathByToken(t0).size() == 1);
 
     // Now test a more convoluted path
     path.push_back(1);
     path.push_back(1);
-    assertTrue(db->getClient()->getTokenByPath(path) == t0_1_1);
+    CPPUNIT_ASSERT(db->getClient()->getTokenByPath(path) == t0_1_1);
 
     path.clear();
     path = db->getClient()->getPathByToken(t0_1_1);
-    assertTrue(path.size() == 3);
-    assertTrue(path[0] == 0);
-    assertTrue(path[1] == 1);
-    assertTrue(path[2] == 1);
+    CPPUNIT_ASSERT(path.size() == 3);
+    CPPUNIT_ASSERT(path[0] == 0);
+    CPPUNIT_ASSERT(path[1] == 1);
+    CPPUNIT_ASSERT(path[2] == 1);
 
 
     // Negative tests
     path.push_back(100);
-    assertTrue(db->getClient()->getTokenByPath(path) == TokenId::noId());
+    CPPUNIT_ASSERT(db->getClient()->getTokenByPath(path) == TokenId::noId());
     path[0] = 99999;
-    assertTrue(db->getClient()->getTokenByPath(path) == TokenId::noId());
+    CPPUNIT_ASSERT(db->getClient()->getTokenByPath(path) == TokenId::noId());
     DEFAULT_TEARDOWN();
     return true;
   }
@@ -3860,7 +3864,7 @@ private:
 
     v1->specify(10);
 
-    assertFalse(client->propagate());
+    CPPUNIT_ASSERT(!client->propagate());
 
     DEFAULT_TEARDOWN();
     return true;
@@ -3877,8 +3881,8 @@ public:
 
   /** Run the tests. */
   static bool test() {
-    runTest(testImpl);
-    runTest(provokeErrors);
+    EUROPA_runTest(testImpl);
+    EUROPA_runTest(provokeErrors);
     return(true);
   }
 
@@ -3896,7 +3900,7 @@ public:
     s_ce = ce;
     s_db = db;
     s_dbPlayer = new DbClientTransactionPlayer((s_db)->getClient());
-    assertTrue(s_dbPlayer != 0);
+    CPPUNIT_ASSERT(s_dbPlayer != 0);
 
     /* This does not use REGISTER_TYPE_FACTORY to avoid depending on anything under PLASMA/NDDL. */
     ce->getCESchema()->registerFactory((new EnumeratedTypeFactory("Locations", "Locations", LocationsBaseDomain()))->getId());
@@ -4113,14 +4117,14 @@ public:
                             const LabelStr& objectType,
                             const LabelStr& objectName,
                             const std::vector<const AbstractDomain*>& arguments) const {
-      assertTrue(arguments.size() == 0 || arguments.size() == 4);
+      CPPUNIT_ASSERT(arguments.size() == 0 || arguments.size() == 4);
       if (arguments.size() == 4) {
         //!!I'm not sure why this first one is passed in; it appears to be the object's type info.
         //!!--wedgingt@email.arc.nasa.gov 2004 Nov 1
-        assertTrue(arguments[0]->getTypeName() == LabelStr(StringDomain::getDefaultTypeName()));
-        assertTrue(arguments[1]->getTypeName() == LabelStr(IntervalIntDomain::getDefaultTypeName()));
-        assertTrue(arguments[2]->getTypeName() == LabelStr(IntervalDomain::getDefaultTypeName()));
-        assertTrue(arguments[3]->getTypeName() == LabelStr("Locations"));
+        CPPUNIT_ASSERT(arguments[0]->getTypeName() == LabelStr(StringDomain::getDefaultTypeName()));
+        CPPUNIT_ASSERT(arguments[1]->getTypeName() == LabelStr(IntervalIntDomain::getDefaultTypeName()));
+        CPPUNIT_ASSERT(arguments[2]->getTypeName() == LabelStr(IntervalDomain::getDefaultTypeName()));
+        CPPUNIT_ASSERT(arguments[3]->getTypeName() == LabelStr("Locations"));
       }
       TestClass2Id instance = (new TestClass2(planDb, objectType, objectName))->getId();
       instance->handleDefaults();
@@ -4206,32 +4210,32 @@ public:
               sg_location = *varIter;
             else
               g_location2 = *varIter;
-    assertTrue(!sg_int.isNoId() && sg_int.isValid());
-    assertTrue(sg_int->lastDomain() == IntervalIntDomain());
-    assertTrue(!sg_float.isNoId() && sg_float.isValid());
-    assertTrue(sg_float->lastDomain() == IntervalDomain());
-    assertTrue(!sg_location.isNoId() && sg_location.isValid());
-    assertTrue(sg_location->lastDomain() == LocationsBaseDomain());
-    assertTrue(g_int2.isNoId());
-    assertTrue(g_float2.isNoId());
-    assertTrue(g_location2.isNoId());
+    CPPUNIT_ASSERT(!sg_int.isNoId() && sg_int.isValid());
+    CPPUNIT_ASSERT(sg_int->lastDomain() == IntervalIntDomain());
+    CPPUNIT_ASSERT(!sg_float.isNoId() && sg_float.isValid());
+    CPPUNIT_ASSERT(sg_float->lastDomain() == IntervalDomain());
+    CPPUNIT_ASSERT(!sg_location.isNoId() && sg_location.isValid());
+    CPPUNIT_ASSERT(sg_location->lastDomain() == LocationsBaseDomain());
+    CPPUNIT_ASSERT(g_int2.isNoId());
+    CPPUNIT_ASSERT(g_float2.isNoId());
+    CPPUNIT_ASSERT(g_location2.isNoId());
   }
 
   static void testDeleteVariable() {
-    assertTrue(s_db->getClient()->isGlobalVariable("g_int"));
+    CPPUNIT_ASSERT(s_db->getClient()->isGlobalVariable("g_int"));
     TEST_REWINDING_XML(buildXMLNameTypeStr("var", "g_int",
 					  IntervalIntDomain::getDefaultTypeName().toString(),
 					  __FILE__, __LINE__));
-    assertTrue(!s_db->getClient()->isGlobalVariable("g_int"));
+    CPPUNIT_ASSERT(!s_db->getClient()->isGlobalVariable("g_int"));
     ConstrainedVariableSet allVars = s_ce->getVariables();
     for(ConstrainedVariableSet::iterator it = allVars.begin(); it != allVars.end(); ++it) {
-      assertTrue((*it)->getName() != LabelStr("g_int"));
+      CPPUNIT_ASSERT((*it)->getName() != LabelStr("g_int"));
     }
     //have to re-create the variable because future tests depend on it
     TEST_PLAYING_XML(buildXMLNameTypeStr("var", "g_int",
 					  IntervalIntDomain::getDefaultTypeName().toString(),
 					  __FILE__, __LINE__));
-    assertTrue(s_db->getClient()->isGlobalVariable("g_int"));
+    CPPUNIT_ASSERT(s_db->getClient()->isGlobalVariable("g_int"));
     bool found = false;
     allVars = s_ce->getVariables();
     for(ConstrainedVariableSet::iterator it = allVars.begin(); it != allVars.end() && !found;
@@ -4240,27 +4244,27 @@ public:
 	sg_int = (*it);
       }
     }
-    assertTrue(found);
+    CPPUNIT_ASSERT(found);
   }
 
   static void testUndeleteVariable() {
-    assertTrue(s_db->getClient()->isGlobalVariable("g_int"));
+    CPPUNIT_ASSERT(s_db->getClient()->isGlobalVariable("g_int"));
     bool found = false;
     ConstrainedVariableSet allVars = s_ce->getVariables();
     for(ConstrainedVariableSet::iterator it = allVars.begin(); it != allVars.end() && !found;
 	++it)
       found = ((*it)->getName() == LabelStr("g_int"));
-    assertTrue(found);
+    CPPUNIT_ASSERT(found);
 
     std::stringstream transactions;
     transactions << "<deletevar index=\"" << s_db->getClient()->getIndexByVariable(sg_int) <<
       "\" name=\"g_int\"/>";
     TEST_PLAYING_XML(transactions.str());
 
-    assertTrue(!s_db->getClient()->isGlobalVariable("g_int"));
+    CPPUNIT_ASSERT(!s_db->getClient()->isGlobalVariable("g_int"));
     allVars = s_ce->getVariables();
     for(ConstrainedVariableSet::iterator it = allVars.begin(); it != allVars.end(); ++it) {
-      assertTrue((*it)->getName() != LabelStr("g_int"));
+      CPPUNIT_ASSERT((*it)->getName() != LabelStr("g_int"));
     }
     
     std::stringstream otherTransactions;
@@ -4271,7 +4275,7 @@ public:
     otherTransactions << transactions.str();
 
     testRewindingXML(otherTransactions.str(), __FILE__, __LINE__, true);
-    assertTrue(s_db->getClient()->isGlobalVariable("g_int"));
+    CPPUNIT_ASSERT(s_db->getClient()->isGlobalVariable("g_int"));
     found = false;
     allVars = s_ce->getVariables();
     for(ConstrainedVariableSet::iterator it = allVars.begin(); it != allVars.end() && !found;
@@ -4280,19 +4284,19 @@ public:
 	sg_int = (*it);
       }
     }
-    assertTrue(found);
+    CPPUNIT_ASSERT(found);
   }
 
   /** Test defining classes. */
   static void testDefineClass() {
     s_db->getSchema()->addObjectType("TestClass1");
-    assertTrue(s_db->getSchema()->isObjectType("TestClass1"));
+    CPPUNIT_ASSERT(s_db->getSchema()->isObjectType("TestClass1"));
 
     TEST_PLAYING_XML(buildXMLNameStr("class", "TestClass1", __FILE__, __LINE__));
 
     s_db->getSchema()->addObjectType("TestClass2");
     s_db->getSchema()->addObjectType("Locations");
-    assertTrue(s_db->getSchema()->isObjectType("TestClass2"));
+    CPPUNIT_ASSERT(s_db->getSchema()->isObjectType("TestClass2"));
     s_db->getSchema()->addMember("TestClass2", IntervalIntDomain::getDefaultTypeName().toString(), "int1");
     s_db->getSchema()->addMember("TestClass2", IntervalDomain::getDefaultTypeName().toString(), "float2");
     s_db->getSchema()->addMember("TestClass2", "Locations", "where");
@@ -4330,32 +4334,32 @@ public:
     TEST_PLAYING_XML(buildXMLCreateObjectStr("TestClass2", "testObj2a", domains));
     cleanDomains(domains);
     ObjectId obj2a = s_db->getObject("testObj2a");
-    assertTrue(!obj2a.isNoId() && obj2a.isValid());
-    assertTrue(obj2a->getType() == LabelStr("TestClass2"));
-    assertTrue(obj2a->getName() == LabelStr("testObj2a"));
+    CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
+    CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
+    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
     std::vector<ConstrainedVariableId> obj2vars = obj2a->getVariables();
-    assertTrue(obj2vars.size() == 3);
+    CPPUNIT_ASSERT(obj2vars.size() == 3);
     for (int i = 0; i < 3; i++) {
       ConstrainedVariableId var = obj2vars[i];
-      assertTrue(!var.isNoId() && var.isValid());
-      assertTrue(var->isValid());
+      CPPUNIT_ASSERT(!var.isNoId() && var.isValid());
+      CPPUNIT_ASSERT(var->isValid());
       std::set<ConstraintId> constraints;
       var->constraints(constraints);
-      assertTrue(constraints.empty());
-      assertTrue(var->parent() == obj2a);
-      assertTrue(i == var->getIndex());
+      CPPUNIT_ASSERT(constraints.empty());
+      CPPUNIT_ASSERT(var->parent() == obj2a);
+      CPPUNIT_ASSERT(i == var->getIndex());
       switch (i) {
       case 0:
-        assertTrue(var->lastDomain() == IntervalIntDomain(1));
+        CPPUNIT_ASSERT(var->lastDomain() == IntervalIntDomain(1));
         break;
       case 1:
-        assertTrue(var->lastDomain() == IntervalDomain(1.414));
+        CPPUNIT_ASSERT(var->lastDomain() == IntervalDomain(1.414));
         break;
       case 2:
-        assertTrue(var->lastDomain() == SymbolDomain((double)LabelStr("Hill"), "Locations"));
+        CPPUNIT_ASSERT(var->lastDomain() == SymbolDomain((double)LabelStr("Hill"), "Locations"));
         break;
       default:
-        assertTrue(false, "erroneous variable index within obj2a");
+        CPPUNIT_ASSERT_MESSAGE("erroneous variable index within obj2a", false);
       }
     }
     domains.push_back(new IntervalIntDomain(2));
@@ -4368,32 +4372,33 @@ public:
     TEST_PLAYING_XML(buildXMLCreateObjectStr("TestClass2", "testObj2b", domains));
     cleanDomains(domains);
     ObjectId obj2b = s_db->getObject("testObj2b");
-    assertTrue(!obj2b.isNoId() && obj2b.isValid());
-    assertTrue(obj2b->getType() == LabelStr("TestClass2"));
-    assertTrue(obj2b->getName() == LabelStr("testObj2b"));
+    CPPUNIT_ASSERT(!obj2b.isNoId() && obj2b.isValid());
+    CPPUNIT_ASSERT(obj2b->getType() == LabelStr("TestClass2"));
+    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b"));
     obj2vars = obj2b->getVariables();
-    assertTrue(obj2vars.size() == 3);
+    CPPUNIT_ASSERT(obj2vars.size() == 3);
     for (int i = 0; i < 3; i++) {
       ConstrainedVariableId var = obj2vars[i];
-      assertTrue(!var.isNoId() && var.isValid());
-      assertTrue(var->isValid());
+      CPPUNIT_ASSERT(!var.isNoId() && var.isValid());
+      CPPUNIT_ASSERT(var->isValid());
       std::set<ConstraintId> constraints;
       var->constraints(constraints);
-      assertTrue(constraints.empty());
-      assertTrue(var->parent() == obj2b);
-      assertTrue(i == var->getIndex());
+      CPPUNIT_ASSERT(constraints.empty());
+      CPPUNIT_ASSERT(var->parent() == obj2b);
+      CPPUNIT_ASSERT(i == var->getIndex());
       switch (i) {
       case 0:
-        assertTrue(var->lastDomain() == IntervalIntDomain(2));
+        CPPUNIT_ASSERT(var->lastDomain() == IntervalIntDomain(2));
         break;
       case 1:
-        assertTrue(var->lastDomain() == IntervalDomain(3.14159265358979));
+        CPPUNIT_ASSERT(var->lastDomain() == IntervalDomain(3.14159265358979));
         break;
       case 2:
-        assertTrue(var->lastDomain() == toCompare);
+        CPPUNIT_ASSERT(var->lastDomain() == toCompare);
         break;
       default:
-        assertTrue(false, "erroneous variable index within obj2b");
+        CPPUNIT_ASSERT_MESSAGE("erroneous variable index within obj2b", false);
+        ;
       }
     }
     //!!ObjectSet objects = s_db->getObjects();
@@ -4408,9 +4413,9 @@ public:
 
   static void testDeleteObject() {
     ObjectId obj2a = s_db->getObject("testObj2a");
-    assertTrue(!obj2a.isNoId() && obj2a.isValid());
-    assertTrue(obj2a->getType() == LabelStr("TestClass2"));
-    assertTrue(obj2a->getName() == LabelStr("testObj2a"));
+    CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
+    CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
+    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
 
     std::vector<const AbstractDomain*> domains;
     domains.push_back(new IntervalIntDomain(1));
@@ -4422,22 +4427,22 @@ public:
     TEST_REWINDING_XML(transaction);
 
     obj2a = s_db->getObject("testObj2a");
-    assertTrue(obj2a.isNoId());
+    CPPUNIT_ASSERT(obj2a.isNoId());
 
     //have to re-play in case something needs this object
     TEST_PLAYING_XML(transaction);
     obj2a = s_db->getObject("testObj2a");
-    assertTrue(!obj2a.isNoId() && obj2a.isValid());
-    assertTrue(obj2a->getType() == LabelStr("TestClass2"));
-    assertTrue(obj2a->getName() == LabelStr("testObj2a"));
+    CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
+    CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
+    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
 
   }
 
   static void testUndeleteObject() {
     ObjectId obj2a = s_db->getObject("testObj2a");
-    assertTrue(!obj2a.isNoId() && obj2a.isValid());
-    assertTrue(obj2a->getType() == LabelStr("TestClass2"));
-    assertTrue(obj2a->getName() == LabelStr("testObj2a"));
+    CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
+    CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
+    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
 
     std::vector<const AbstractDomain*> domains;
     domains.push_back(new IntervalIntDomain(1));
@@ -4453,7 +4458,7 @@ public:
     TEST_PLAYING_XML(deleteTransaction);
 
     obj2a = s_db->getObject("testObj2a");
-    assertTrue(obj2a.isNoId());
+    CPPUNIT_ASSERT(obj2a.isNoId());
 
     std::stringstream transactions;
     transactions << createTransaction;
@@ -4463,53 +4468,53 @@ public:
     testRewindingXML(transactions.str(), __FILE__, __LINE__, true);
 
     obj2a = s_db->getObject("testObj2a");
-    assertTrue(!obj2a.isNoId() && obj2a.isValid());
-    assertTrue(obj2a->getType() == LabelStr("TestClass2"));
-    assertTrue(obj2a->getName() == LabelStr("testObj2a"));    
+    CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
+    CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
+    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));    
     
   }
 
   /** Test specifying variables. */
   static void testSpecifyVariable() {
     TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_int, IntervalIntDomain(-5)));
-    assertTrue(sg_int->lastDomain() == IntervalIntDomain(-5));
+    CPPUNIT_ASSERT(sg_int->lastDomain() == IntervalIntDomain(-5));
     TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_float, IntervalDomain(-5.0)));
-    assertTrue(sg_float->lastDomain() == IntervalDomain(-5.0));
+    CPPUNIT_ASSERT(sg_float->lastDomain() == IntervalDomain(-5.0));
     std::list<double> locs;
     locs.push_back(LabelStr("Lander"));
     TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_location, Locations(locs, "Locations")));
-    assertTrue(sg_location->lastDomain() == Locations(locs, "Locations"));
+    CPPUNIT_ASSERT(sg_location->lastDomain() == Locations(locs, "Locations"));
   }
 
   /** Test resetting variables. */
   static void testResetVariable() {
     TEST_PLAYING_XML(buildXMLResetVariableStr(sg_int));
-    assertTrue(sg_int->lastDomain() == IntervalIntDomain(), sg_int->toString());
+    CPPUNIT_ASSERT_MESSAGE(sg_int->toString(), sg_int->lastDomain() == IntervalIntDomain());
     TEST_PLAYING_XML(buildXMLResetVariableStr(sg_float));
-    assertTrue(sg_float->lastDomain() == IntervalDomain());
+    CPPUNIT_ASSERT(sg_float->lastDomain() == IntervalDomain());
     TEST_PLAYING_XML(buildXMLResetVariableStr(sg_location));
-    assertTrue(sg_location->lastDomain() == LocationsBaseDomain());
+    CPPUNIT_ASSERT(sg_location->lastDomain() == LocationsBaseDomain());
 
     ObjectId obj2b = s_db->getObject("testObj2b");
-    assertTrue(!obj2b.isNoId() && obj2b.isValid());
-    assertTrue(obj2b->getType() == LabelStr("TestClass2"));
-    assertTrue(obj2b->getName() == LabelStr("testObj2b"));
+    CPPUNIT_ASSERT(!obj2b.isNoId() && obj2b.isValid());
+    CPPUNIT_ASSERT(obj2b->getType() == LabelStr("TestClass2"));
+    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b"));
     std::vector<ConstrainedVariableId> obj2vars = obj2b->getVariables();
-    assertTrue(obj2vars.size() == 3);
+    CPPUNIT_ASSERT(obj2vars.size() == 3);
     TEST_PLAYING_XML(buildXMLResetVariableStr(obj2vars[0]));
-    assertTrue(obj2vars[0]->lastDomain() == IntervalIntDomain(), obj2vars[0]->toString());
+    CPPUNIT_ASSERT_MESSAGE(obj2vars[0]->toString(), obj2vars[0]->lastDomain() == IntervalIntDomain());
     TEST_PLAYING_XML(buildXMLResetVariableStr(obj2vars[1]));
-    assertTrue(obj2vars[1]->lastDomain() == IntervalDomain(), obj2vars[1]->toString());
+    CPPUNIT_ASSERT_MESSAGE(obj2vars[1]->toString(), obj2vars[1]->lastDomain() == IntervalDomain());
     TEST_PLAYING_XML(buildXMLResetVariableStr(obj2vars[2]));
-    assertTrue(obj2vars[2]->lastDomain() == LocationsBaseDomain(), obj2vars[2]->toString());
+    CPPUNIT_ASSERT_MESSAGE(obj2vars[2]->toString(), obj2vars[2]->lastDomain() == LocationsBaseDomain());
 
 
     std::string transaction = buildXMLSpecifyVariableStr(sg_int, IntervalIntDomain(-5));
     TEST_PLAYING_XML(transaction);
-    assertTrue(sg_int->lastDomain() == IntervalIntDomain(-5));
+    CPPUNIT_ASSERT(sg_int->lastDomain() == IntervalIntDomain(-5));
 
     TEST_REWINDING_XML(transaction);
-    assertTrue(sg_int->lastDomain() == IntervalIntDomain(), sg_int->toString());
+    CPPUNIT_ASSERT_MESSAGE(sg_int->toString(), sg_int->lastDomain() == IntervalIntDomain());
   }
 
   static void testUnresetVariable() {
@@ -4521,7 +4526,7 @@ public:
     transactions << buildXMLResetVariableStr(sg_int);
     testRewindingXML(transactions.str(), __FILE__, __LINE__, true);
 
-    assertTrue(sg_int->lastDomain() == IntervalIntDomain(-5));
+    CPPUNIT_ASSERT(sg_int->lastDomain() == IntervalIntDomain(-5));
     TEST_PLAYING_XML(buildXMLResetVariableStr(sg_int));
   }
 
@@ -4529,11 +4534,11 @@ public:
   static void testInvokeConstraint() {
     // First section: constraints between variables
     ObjectId obj2b = s_db->getObject("testObj2b");
-    assertTrue(!obj2b.isNoId() && obj2b.isValid());
-    assertTrue(obj2b->getType() == LabelStr("TestClass2"));
-    assertTrue(obj2b->getName() == LabelStr("testObj2b"));
+    CPPUNIT_ASSERT(!obj2b.isNoId() && obj2b.isValid());
+    CPPUNIT_ASSERT(obj2b->getType() == LabelStr("TestClass2"));
+    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b"));
     std::vector<ConstrainedVariableId> obj2vars = obj2b->getVariables();
-    assertTrue(obj2vars.size() == 3);
+    CPPUNIT_ASSERT(obj2vars.size() == 3);
 
     // First constraint
     std::list<ConstrainedVariableId> vars;
@@ -4543,16 +4548,16 @@ public:
     TEST_PLAYING_XML(transaction);
     std::set<ConstraintId> constraints;
     sg_int->constraints(constraints);
-    assertTrue(constraints.size() == 1);
+    CPPUNIT_ASSERT(constraints.size() == 1);
     ConstraintId constr = *(constraints.begin());
-    assertTrue(constr->getName() == LabelStr("Equal"));
-    assertTrue(constr->getScope().size() == 2);
-    assertTrue(constr->isVariableOf(sg_int));
-    assertTrue(constr->isVariableOf(obj2vars[0]));
+    CPPUNIT_ASSERT(constr->getName() == LabelStr("Equal"));
+    CPPUNIT_ASSERT(constr->getScope().size() == 2);
+    CPPUNIT_ASSERT(constr->isVariableOf(sg_int));
+    CPPUNIT_ASSERT(constr->isVariableOf(obj2vars[0]));
     constraints.clear();
     obj2vars[0]->constraints(constraints);
-    assertTrue(constraints.size() == 1);
-    assertTrue(constr == *(constraints.begin()));
+    CPPUNIT_ASSERT(constraints.size() == 1);
+    CPPUNIT_ASSERT(constr == *(constraints.begin()));
 
 
     // Second constraint
@@ -4562,18 +4567,18 @@ public:
     TEST_PLAYING_XML(buildXMLInvokeConstrainVarsStr("LessThanEqual", vars));
     constraints.clear();
     sg_int->constraints(constraints);
-    assertTrue(constraints.size() == 2);
-    assertTrue(constraints.find(constr) != constraints.end());
+    CPPUNIT_ASSERT(constraints.size() == 2);
+    CPPUNIT_ASSERT(constraints.find(constr) != constraints.end());
     constraints.erase(constraints.find(constr));
     constr = *(constraints.begin());
-    assertTrue(constr->getName() == LabelStr("LessThanEqual"));
-    assertTrue(constr->getScope().size() == 2);
-    assertTrue(constr->isVariableOf(sg_int));
-    assertTrue(constr->isVariableOf(sg_float));
+    CPPUNIT_ASSERT(constr->getName() == LabelStr("LessThanEqual"));
+    CPPUNIT_ASSERT(constr->getScope().size() == 2);
+    CPPUNIT_ASSERT(constr->isVariableOf(sg_int));
+    CPPUNIT_ASSERT(constr->isVariableOf(sg_float));
     constraints.clear();
     sg_float->constraints(constraints);
-    assertTrue(constraints.size() == 1);
-    assertTrue(constr == *(constraints.begin()));
+    CPPUNIT_ASSERT(constraints.size() == 1);
+    CPPUNIT_ASSERT(constr == *(constraints.begin()));
 
     // Third constraint
     vars.clear();
@@ -4582,29 +4587,29 @@ public:
     TEST_PLAYING_XML(buildXMLInvokeConstrainVarsStr("NotEqual", vars));
     constraints.clear();
     sg_location->constraints(constraints);
-    assertTrue(constraints.size() == 1);
+    CPPUNIT_ASSERT(constraints.size() == 1);
     constr = *(constraints.begin());
-    assertTrue(constr->getName() == LabelStr("NotEqual"));
-    assertTrue(constr->getScope().size() == 2);
-    assertTrue(constr->isVariableOf(sg_location));
-    assertTrue(constr->isVariableOf(obj2vars[2]));
+    CPPUNIT_ASSERT(constr->getName() == LabelStr("NotEqual"));
+    CPPUNIT_ASSERT(constr->getScope().size() == 2);
+    CPPUNIT_ASSERT(constr->isVariableOf(sg_location));
+    CPPUNIT_ASSERT(constr->isVariableOf(obj2vars[2]));
     constraints.clear();
     obj2vars[2]->constraints(constraints);
-    assertTrue(constraints.size() == 1);
-    assertTrue(constr == *(constraints.begin()));
+    CPPUNIT_ASSERT(constraints.size() == 1);
+    CPPUNIT_ASSERT(constr == *(constraints.begin()));
 
     // Specifying variables is one of the special cases.
     TEST_PLAYING_XML(buildXMLInvokeSpecifyVariableStr(sg_location, Locations(LabelStr("Hill"), "Locations")));
-    assertTrue(sg_location->lastDomain() == Locations(LabelStr("Hill"), "Locations"));
+    CPPUNIT_ASSERT(sg_location->lastDomain() == Locations(LabelStr("Hill"), "Locations"));
     std::list<double> locs;
     locs.push_back(LabelStr("Hill"));
     locs.push_back(LabelStr("Rock"));
 
     // Resetting variables via invoke is _not_ supported by the player, so do it the other way:
     TEST_PLAYING_XML(buildXMLResetVariableStr(sg_location));
-    assertTrue(sg_location->lastDomain() == LocationsBaseDomain());
+    CPPUNIT_ASSERT(sg_location->lastDomain() == LocationsBaseDomain());
     TEST_PLAYING_XML(buildXMLResetVariableStr(obj2vars[2]));
-    assertTrue(obj2vars[2]->lastDomain() == LocationsBaseDomain());
+    CPPUNIT_ASSERT(obj2vars[2]->lastDomain() == LocationsBaseDomain());
 
     //!!Most special cases involve tokens: constrain, free, activate, merge, reject, cancel
     //!!  Of these, only activate and constrain are used in any of PLASMA/System/test/*.xml.
@@ -4615,29 +4620,29 @@ public:
     TokenSet oldTokens = s_db->getTokens();
     TEST_PLAYING_XML(buildXMLCreateGoalStr("TestClass2.Sample", false, "invokeActivateTestToken"));
     TokenSet newTokens = s_db->getTokens();
-    assertTrue(oldTokens.size() + 1 == newTokens.size());
+    CPPUNIT_ASSERT(oldTokens.size() + 1 == newTokens.size());
     TokenId tok = *(newTokens.begin());
     while (oldTokens.find(tok) != oldTokens.end()) {
       newTokens.erase(newTokens.begin());
       tok = *(newTokens.begin());
     }
-    assertTrue(!tok->isActive());
+    CPPUNIT_ASSERT(!tok->isActive());
     TEST_PLAYING_XML(buildXMLInvokeActivateTokenStr("invokeActivateTestToken"));
-    assertTrue(tok->isActive());
+    CPPUNIT_ASSERT(tok->isActive());
     // Now, destroy it so it doesn't affect later tests.
     delete (Token*) tok;
     tok = TokenId::noId();
 
     // Special case #1: close an class object domain
-    assertTrue(!s_db->isClosed("TestClass2"));
+    CPPUNIT_ASSERT(!s_db->isClosed("TestClass2"));
     TEST_PLAYING_XML("<invoke name=\"close\" identifier=\"TestClass2\"/>");
-    assertTrue(s_db->isClosed("TestClass2"));
+    CPPUNIT_ASSERT(s_db->isClosed("TestClass2"));
     std::cout << __FILE__ << ':' << __LINE__ << ": TestClass2 object domain is "
               << ObjectDomain("TestClass2") << " (size " << ObjectDomain("TestClass2").getSize()
               << "); should be 2 members\n";
 
     //!!This is failing, despite the prior checks passing, because the domain is still open.
-    //!!assertTrue(ObjectDomain("TestClass2").getSize() == 2);
+    //!!CPPUNIT_ASSERT(ObjectDomain("TestClass2").getSize() == 2);
     if (ObjectDomain("TestClass2").isOpen())
       std::cout << __FILE__ << ':' << __LINE__ << ": TestClass2 base domain is still open, despite plan database saying otherwise\n";
     //!!See if closing the entire database takes care of this as well:
@@ -4650,7 +4655,7 @@ public:
               << ObjectDomain("TestClass2") << " (size " << ObjectDomain("TestClass2").getSize()
               << "); should be 2 members\n";
     //!!Still fails
-    //!!assertTrue(ObjectDomain("TestClass2").getSize() == 2);
+    //!!CPPUNIT_ASSERT(ObjectDomain("TestClass2").getSize() == 2);
     if (ObjectDomain("TestClass2").isOpen())
       std::cout << __FILE__ << ':' << __LINE__ << ": TestClass2 base domain is still open, despite plan database saying otherwise\n";
   }
@@ -4667,8 +4672,8 @@ public:
 
   /**
    * Test that the given token matches the criteria.
-   * @note If only used as condition in assertTrue() (or changed to
-   * return void), this could itself use 'assertTrue(cond)' rather
+   * @note If only used as condition in CPPUNIT_ASSERT() (or changed to
+   * return void), this could itself use 'CPPUNIT_ASSERT(cond)' rather
    * than 'if (!cond) return(false);', making which condition failed
    * obvious.
    */
@@ -4690,22 +4695,22 @@ public:
     TEST_PLAYING_XML(buildXMLCreateGoalStr("TestClass2.Sample", true, "sample1"));
     /* Verify it. */
     TokenSet tokens = s_db->getTokens();
-    assertTrue(tokens.size() == 1);
+    CPPUNIT_ASSERT(tokens.size() == 1);
     TokenId token = *(tokens.begin());
-    assertTrue(checkToken(token, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
+    CPPUNIT_ASSERT(checkToken(token, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
                           TokenId::noId(), s_mandatoryStateDom));
 
     /* Create a rejectable token. */
     TEST_PLAYING_XML(buildXMLCreateGoalStr("TestClass2.Sample", false, "sample2"));
     /* Find and verify it. */
     tokens = s_db->getTokens();
-    assertTrue(tokens.size() == 2);
+    CPPUNIT_ASSERT(tokens.size() == 2);
     TokenId token2 = *(tokens.begin());
     if (token2 == token) {
       tokens.erase(tokens.begin());
       token2 = *(tokens.begin());
     }
-    assertTrue(checkToken(token2, LabelStr("TestClass2.Sample"), 
+    CPPUNIT_ASSERT(checkToken(token2, LabelStr("TestClass2.Sample"), 
 			  LabelStr("TestClass2.Sample"),
 			  TokenId::noId(), s_rejectableStateDom));
 
@@ -4720,13 +4725,13 @@ public:
     /* Create a new token to use to test creating constraints between tokens. */
     TEST_PLAYING_XML(buildXMLCreateGoalStr("TestClass2.Sample", true, "sample3"));
     TokenSet currentTokens = s_db->getTokens();
-    assertTrue(oldTokens.size() + 1 == currentTokens.size());
+    CPPUNIT_ASSERT(oldTokens.size() + 1 == currentTokens.size());
     TokenId goal = *(currentTokens.begin());
     while (oldTokens.find(goal) != oldTokens.end()) {
       currentTokens.erase(currentTokens.begin());
       goal = *(currentTokens.begin());
     }
-    assertTrue(checkToken(goal, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
+    CPPUNIT_ASSERT(checkToken(goal, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
                           TokenId::noId(), s_mandatoryStateDom));
     oldTokens.insert(goal);
     /* Create a subgoal for each temporal relation. */
@@ -4738,7 +4743,7 @@ public:
       TEST_PLAYING_XML(buildXMLCreateSubgoalStr("sample1", "TestClass2.Sample", subgoalName, *which));
       /* Find it. */
       currentTokens = s_db->getTokens();
-      assertTrue(oldTokens.size() + 1 == currentTokens.size());
+      CPPUNIT_ASSERT(oldTokens.size() + 1 == currentTokens.size());
       TokenId subgoal = *(currentTokens.begin());
       while (oldTokens.find(subgoal) != oldTokens.end()) {
         currentTokens.erase(currentTokens.begin());
@@ -4748,9 +4753,9 @@ public:
       //!!Should use the master token's Id rather than TokenId::noId() here, but the player doesn't behave that way.
       //!!Is that a bug in the player or not?
       //!!  May mean that this is an inappropriate overloading of the '<goal>' XML tag per Tania and I (17 Nov 2004)
-      assertTrue(checkToken(subgoal, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
+      CPPUNIT_ASSERT(checkToken(subgoal, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
                             TokenId::noId(), s_mandatoryStateDom));
-      assertTrue(verifyTokenRelation(goal, subgoal, *which));
+      CPPUNIT_ASSERT(verifyTokenRelation(goal, subgoal, *which));
       /* Update list of old tokens. */
       oldTokens.insert(subgoal);
     }
@@ -4768,11 +4773,11 @@ public:
     }
     TEST_REWINDING_XML(transactions.str());
     TokenSet::size_type newTokenCount = s_db->getTokens().size();
-    assertTrue(newTokenCount < oldTokenCount);      
-    assertTrue((oldTokenCount - newTokenCount) == (TokenSet::size_type)(s_tempRels.size() + 1));
+    CPPUNIT_ASSERT(newTokenCount < oldTokenCount);      
+    CPPUNIT_ASSERT((oldTokenCount - newTokenCount) == (TokenSet::size_type)(s_tempRels.size() + 1));
     
     TEST_PLAYING_XML(transactions.str());
-    assertTrue(oldTokenCount == s_db->getTokens().size());
+    CPPUNIT_ASSERT(oldTokenCount == s_db->getTokens().size());
   }
 
   static void testUndeleteTokens() {
@@ -4784,23 +4789,26 @@ public:
   static void testConstrain() {
     /* Get an existing object.  See testCreateObject(). */
     ObjectId obj2b = s_db->getObject("testObj2b");
-    assertTrue(!obj2b.isNoId() && obj2b.isValid());
-    assertTrue(obj2b->getType() == LabelStr("TestClass2"));
-    assertTrue(obj2b->getName() == LabelStr("testObj2b"));
+    CPPUNIT_ASSERT(!obj2b.isNoId() && obj2b.isValid());
+    CPPUNIT_ASSERT(obj2b->getType() == LabelStr("TestClass2"));
+    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b"));
     const unsigned int initialObjectTokenCount_B = obj2b->tokens().size();
 
     TokenId constrainedToken = createToken("constrainedSample", true);
     TEST_PLAYING_XML(buildXMLObjTokTokStr("activate", "", "constrainedSample", ""));
     std::cout << __FILE__ << ':' << __LINE__ << ": constrainedToken is " << constrainedToken << '\n';
     std::cout << __FILE__ << ':' << __LINE__ << ": constrainedSample's derived object domain is " << constrainedToken->getObject()->derivedDomain() << '\n';
-    assertTrue(!constrainedToken->getObject()->derivedDomain().isSingleton(), "token already constrained to one object");
+    CPPUNIT_ASSERT_MESSAGE("token already constrained to one object",
+        !constrainedToken->getObject()->derivedDomain().isSingleton());
     /* Create the constraint. */
     TEST_PLAYING_XML(buildXMLObjTokTokStr("constrain", "testObj2b", "constrainedSample", ""));
     /* Verify its intended effect. */
     std::cout << __FILE__ << ':' << __LINE__ << ": constrainedSample's derived object domain is " << constrainedToken->getObject()->derivedDomain() << '\n';
-    assertTrue(constrainedToken->getObject()->derivedDomain().isSingleton(), "player did not constrain token to one object");
+    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to one object",
+        constrainedToken->getObject()->derivedDomain().isSingleton());
     ObjectDomain objDom2b(obj2b, "TestClass2");;
-    assertTrue(constrainedToken->getObject()->derivedDomain() == objDom2b, "player did not constrain token to expected object");
+    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to expected object", 
+        constrainedToken->getObject()->derivedDomain() == objDom2b);
     /* Leave it in plan db for testFree(). */
 
     /* Again, but also constrain it with the prior token. */
@@ -4809,20 +4817,23 @@ public:
     std::cout << __FILE__ << ':' << __LINE__ << ": constrained2 is " << constrained2 << '\n';
     std::cout << __FILE__ << ':' << __LINE__ << ": constrained2's derived object domain is " << constrained2->getObject()->derivedDomain() << '\n';
     std::cout << __FILE__ << ':' << __LINE__ << ": constrained2's derived object domain is " << constrained2->getObject()->derivedDomain() << '\n';
-    assertTrue(!constrained2->getObject()->derivedDomain().isSingleton(), "token already constrained to one object");
+    CPPUNIT_ASSERT_MESSAGE("token already constrained to one object",
+        !constrained2->getObject()->derivedDomain().isSingleton());
     TEST_PLAYING_XML(buildXMLObjTokTokStr("constrain", "testObj2b", "constrainedSample2", "constrainedSample"));
     std::cout << __FILE__ << ':' << __LINE__ << ": constrained2's derived object domain is " << constrained2->getObject()->derivedDomain() << '\n';
-    assertTrue(constrained2->getObject()->derivedDomain().isSingleton(), "player did not constrain token to one object");
-    assertTrue(constrained2->getObject()->derivedDomain() == objDom2b, "player did not constrain token to expected object");
-    assertTrue(verifyTokenRelation(constrainedToken, constrained2, "before")); //!! "precedes" ?
-    assertTrue(obj2b->tokens().size() == initialObjectTokenCount_B + 2);
+    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to one object", 
+        constrained2->getObject()->derivedDomain().isSingleton());
+    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to expected object",
+        constrained2->getObject()->derivedDomain() == objDom2b);
+    CPPUNIT_ASSERT(verifyTokenRelation(constrainedToken, constrained2, "before")); //!! "precedes" ?
+    CPPUNIT_ASSERT(obj2b->tokens().size() == initialObjectTokenCount_B + 2);
     /* Leave them in plan db for testFree(). */
 
     /* Create two rejectable tokens and do the same tests, but with testObj2a. */
     ObjectId obj2a = s_db->getObject("testObj2a");
-    assertTrue(!obj2a.isNoId() && obj2a.isValid());
-    assertTrue(obj2a->getType() == LabelStr("TestClass2"));
-    assertTrue(obj2a->getName() == LabelStr("testObj2a"));
+    CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
+    CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
+    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
     ObjectDomain objDom2a(obj2a, "TestClass2");
     const unsigned int initialObjectTokenCount_A = obj2a->tokens().size();
 
@@ -4831,56 +4842,64 @@ public:
     std::cout << __FILE__ << ':' << __LINE__ << ": rejectable's derived object domain is " << rejectable->getObject()->derivedDomain() << '\n';
     TEST_PLAYING_XML(buildXMLObjTokTokStr("activate", "", "rejectableConstrainedSample", ""));
     std::cout << __FILE__ << ':' << __LINE__ << ": rejectable's derived object domain is " << rejectable->getObject()->derivedDomain() << '\n';
-    assertTrue(!rejectable->getObject()->derivedDomain().isSingleton(), "token already constrained to one object");
+    CPPUNIT_ASSERT_MESSAGE("token already constrained to one object",
+        !rejectable->getObject()->derivedDomain().isSingleton());
     TEST_PLAYING_XML(buildXMLObjTokTokStr("constrain", "testObj2a", "rejectableConstrainedSample", ""));
     std::cout << __FILE__ << ':' << __LINE__ << ": rejectable's derived object domain is " << rejectable->getObject()->derivedDomain() << '\n';
-    assertTrue(rejectable->getObject()->derivedDomain().isSingleton(), "player did not constrain token to one object");
-    assertTrue(rejectable->getObject()->derivedDomain() == objDom2a, "player did not constrain token to expected object");
+    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to one object", 
+        rejectable->getObject()->derivedDomain().isSingleton());
+    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to expected object",
+        rejectable->getObject()->derivedDomain() == objDom2a);
 
     TokenId rejectable2 = createToken("rejectable2", false);
     TEST_PLAYING_XML(buildXMLObjTokTokStr("activate", "", "rejectable2", ""));
-    assertTrue(!rejectable2->getObject()->derivedDomain().isSingleton(), "token already constrained to one object");
+    CPPUNIT_ASSERT_MESSAGE("token already constrained to one object",
+        !rejectable2->getObject()->derivedDomain().isSingleton());
     std::string transaction =
       buildXMLObjTokTokStr("constrain", "testObj2a", "rejectable2",
 			   "rejectableConstrainedSample");
     TEST_PLAYING_XML(transaction);
-    assertTrue(rejectable2->getObject()->derivedDomain().isSingleton(), "player did not constrain token to one object");
-    assertTrue(rejectable2->getObject()->derivedDomain() == objDom2a, "player did not constrain token to expected object");
-    assertTrue(verifyTokenRelation(rejectable, rejectable2, "before")); //!! "precedes" ?
-    assertTrue(obj2a->tokens().size() == initialObjectTokenCount_A + 2);
+    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to one object",
+        rejectable2->getObject()->derivedDomain().isSingleton());
+    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to expected object",
+        rejectable2->getObject()->derivedDomain() == objDom2a);
+    CPPUNIT_ASSERT(verifyTokenRelation(rejectable, rejectable2, "before")); //!! "precedes" ?
+    CPPUNIT_ASSERT(obj2a->tokens().size() == initialObjectTokenCount_A + 2);
     /* Leave them in plan db for testFree(). */
 
     TEST_REWINDING_XML(transaction);
-    assertTrue(rejectable->getObject()->derivedDomain().isSingleton(), "player did not constrain token to one object");
-    assertTrue(rejectable->getObject()->derivedDomain() == objDom2a, "player did not constrain token to expected object");
-    assertTrue(!rejectable2->getObject()->derivedDomain().isSingleton(),
-	       "player did not constrain token to one object");
-    assertTrue(rejectable2->getObject()->derivedDomain() != objDom2a,
-	       "player did not constrain token to expected object");
-    assertTrue(obj2a->tokens().size() == initialObjectTokenCount_A + 2);
+    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to one object",
+        rejectable->getObject()->derivedDomain().isSingleton());
+    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to expected object",
+        rejectable->getObject()->derivedDomain() == objDom2a);
+    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to one object",
+        !rejectable2->getObject()->derivedDomain().isSingleton());
+    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to expected object",
+        rejectable2->getObject()->derivedDomain() != objDom2a);
+    CPPUNIT_ASSERT(obj2a->tokens().size() == initialObjectTokenCount_A + 2);
     
     TEST_PLAYING_XML(transaction);
-    assertTrue(rejectable2->getObject()->derivedDomain().isSingleton(),
-	       "player did not constrain token to one object");
-    assertTrue(rejectable2->getObject()->derivedDomain() == objDom2a,
-	       "player did not constrain token to expected object");
-    assertTrue(verifyTokenRelation(rejectable, rejectable2, "before")); //!! "precedes" ?
-    assertTrue(obj2a->tokens().size() == initialObjectTokenCount_A + 2);
+    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to one object",
+        rejectable2->getObject()->derivedDomain().isSingleton());
+    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to expected object",
+        rejectable2->getObject()->derivedDomain() == objDom2a);
+    CPPUNIT_ASSERT(verifyTokenRelation(rejectable, rejectable2, "before")); //!! "precedes" ?
+    CPPUNIT_ASSERT(obj2a->tokens().size() == initialObjectTokenCount_A + 2);
   }
 
   /** Test freeing tokens. */
   static void testFree() {
     ObjectId obj2a = s_db->getObject("testObj2a");
-    assertTrue(!obj2a.isNoId() && obj2a.isValid());
-    assertTrue(obj2a->getType() == LabelStr("TestClass2"));
-    assertTrue(obj2a->getName() == LabelStr("testObj2a"));
+    CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
+    CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
+    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
     ObjectDomain objDom2a(obj2a, "TestClass2");
     const unsigned int initialObjectTokenCount_A = obj2a->tokens().size();
 
     ObjectId obj2b = s_db->getObject("testObj2b");
-    assertTrue(!obj2b.isNoId() && obj2b.isValid());
-    assertTrue(obj2b->getType() == LabelStr("TestClass2"));
-    assertTrue(obj2b->getName() == LabelStr("testObj2b"));
+    CPPUNIT_ASSERT(!obj2b.isNoId() && obj2b.isValid());
+    CPPUNIT_ASSERT(obj2b->getType() == LabelStr("TestClass2"));
+    CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b"));
     ObjectDomain objDom2b(obj2b, "TestClass2");
     TokenSet tokens = obj2b->tokens();
     std::cout << __FILE__ << ':' << __LINE__ << ": there are " << tokens.size() << " tokens on testObj2b; should be 2.\n";
@@ -4888,37 +4907,37 @@ public:
     TokenSet tokens2 = tokens;
     for (int i = 1; !tokens2.empty(); i++) {
       TokenId tok = *(tokens2.begin());	
-      assertTrue(tok.isValid());
+      CPPUNIT_ASSERT(tok.isValid());
       std::cout << __FILE__ << ':' << __LINE__ << ": testFree(): on obj2b, token " << i << " is " << *(tokens2.begin()) << '\n';
       tokens2.erase(tokens2.begin());
     }
     !!*/
     TokenId one = *(tokens.begin());
-    assertTrue(one.isValid());
-    assertTrue(one->getObject()->derivedDomain().isSingleton());
-    assertTrue(one->getObject()->derivedDomain() == objDom2b);
+    CPPUNIT_ASSERT(one.isValid());
+    CPPUNIT_ASSERT(one->getObject()->derivedDomain().isSingleton());
+    CPPUNIT_ASSERT(one->getObject()->derivedDomain() == objDom2b);
     TokenId two = *(tokens.rbegin());
-    assertTrue(two.isValid() && one != two);
-    assertTrue(two->getObject()->derivedDomain().isSingleton());
-    assertTrue(two->getObject()->derivedDomain() == objDom2b);
+    CPPUNIT_ASSERT(two.isValid() && one != two);
+    CPPUNIT_ASSERT(two->getObject()->derivedDomain().isSingleton());
+    CPPUNIT_ASSERT(two->getObject()->derivedDomain() == objDom2b);
     TEST_PLAYING_XML(buildXMLObjTokTokStr("free", "testObj2b", "constrainedSample2", "constrainedSample"));
-    assertTrue(one->getObject()->derivedDomain().isSingleton());
-    assertTrue(one->getObject()->derivedDomain() == objDom2b);
+    CPPUNIT_ASSERT(one->getObject()->derivedDomain().isSingleton());
+    CPPUNIT_ASSERT(one->getObject()->derivedDomain() == objDom2b);
 
     //!!Next fails because the base domain is still open
-    //!!assertTrue(one->getObject()->derivedDomain() == ObjectDomain("TestClass2"));
+    //!!CPPUNIT_ASSERT(one->getObject()->derivedDomain() == ObjectDomain("TestClass2"));
 
-    assertTrue(!two->getObject()->derivedDomain().isSingleton());
+    CPPUNIT_ASSERT(!two->getObject()->derivedDomain().isSingleton());
     TEST_PLAYING_XML(buildXMLObjTokTokStr("free", "testObj2b", "constrainedSample", ""));
-    assertTrue(!two->getObject()->derivedDomain().isSingleton());
+    CPPUNIT_ASSERT(!two->getObject()->derivedDomain().isSingleton());
 
     //!!Next fails because the base domain is still open
-    //!!assertTrue(one->getObject()->derivedDomain() == ObjectDomain("TestClass2"));
+    //!!CPPUNIT_ASSERT(one->getObject()->derivedDomain() == ObjectDomain("TestClass2"));
 
-    assertTrue(!one->getObject()->derivedDomain().isSingleton());
+    CPPUNIT_ASSERT(!one->getObject()->derivedDomain().isSingleton());
 
     //!!Next fails because the base domain is still open
-    //!!assertTrue(two->getObject()->derivedDomain() == ObjectDomain("TestClass2"));
+    //!!CPPUNIT_ASSERT(two->getObject()->derivedDomain() == ObjectDomain("TestClass2"));
 
     tokens = obj2a->tokens();
     /*!!For debugging:
@@ -4930,20 +4949,21 @@ public:
     !!*/
     // This is correct because Object::tokens() returns tokens that _could_ go on the object,
     //   not just the tokens that _are_ on the object.
-    assertTrue(tokens.size() == initialObjectTokenCount_A + 2);
+    CPPUNIT_ASSERT(tokens.size() == initialObjectTokenCount_A + 2);
     TokenId three, four;
     tokens.erase(one);
     tokens.erase(two);
     three = *(--tokens.rbegin());
     tokens.erase(three);
     four = *(tokens.rbegin());
-    assertTrue(three->getObject()->derivedDomain().isSingleton());
-    assertTrue(four->getObject()->derivedDomain() == objDom2a);
+    CPPUNIT_ASSERT(three->getObject()->derivedDomain().isSingleton());
+    CPPUNIT_ASSERT(four->getObject()->derivedDomain() == objDom2a);
     TEST_PLAYING_XML(buildXMLObjTokTokStr("free", "testObj2a", "rejectableConstrainedSample", ""));
-    assertTrue(three->getObject()->derivedDomain().isSingleton(), "Should still be a singleton, since still required.");
+    CPPUNIT_ASSERT_MESSAGE("Should still be a singleton, since still required.",
+        three->getObject()->derivedDomain().isSingleton());
 
     //!!Next fails because the base domain is still open
-    //!!assertTrue(three->getObject()->derivedDomain() == ObjectDomain("TestClass2"));
+    //!!CPPUNIT_ASSERT(three->getObject()->derivedDomain() == ObjectDomain("TestClass2"));
   }
 
   static void testUnfree() {
@@ -4965,11 +4985,11 @@ public:
     std::cout << __FILE__ << ':' << __LINE__ << ": s_activatedToken is " << s_activatedToken << '\n';
     std::string transaction = buildXMLObjTokTokStr("activate", "", "activateSample", "");
     TEST_PLAYING_XML(transaction);
-    assertTrue(s_activatedToken->isActive(), "token not activated by player");
+    CPPUNIT_ASSERT_MESSAGE("token not activated by player", s_activatedToken->isActive());
     TEST_REWINDING_XML(transaction);
-    assertTrue(s_activatedToken->isInactive());
+    CPPUNIT_ASSERT(s_activatedToken->isInactive());
     TEST_PLAYING_XML(transaction);
-    assertTrue(s_activatedToken->isActive(), "token not activated by player");
+    CPPUNIT_ASSERT_MESSAGE("token not activated by player", s_activatedToken->isActive());
     /* Leave activated for testMerge(). */
   }
 
@@ -4980,11 +5000,11 @@ public:
     std::string transaction = buildXMLObjTokTokStr("merge", "", "mergeSample",
 						   "activateSample");
     TEST_PLAYING_XML(transaction);
-    assertTrue(s_mergedToken->isMerged(), "token not merged by player");
+    CPPUNIT_ASSERT_MESSAGE("token not merged by player", s_mergedToken->isMerged());
     TEST_REWINDING_XML(transaction);
-    assertTrue(s_mergedToken->isInactive());
+    CPPUNIT_ASSERT(s_mergedToken->isInactive());
     TEST_PLAYING_XML(transaction);
-    assertTrue(s_mergedToken->isMerged(), "token not merged by player");    
+    CPPUNIT_ASSERT_MESSAGE("token not merged by player", s_mergedToken->isMerged());    
     /* Leave merged for testCancel(). */
   }
 
@@ -4994,22 +5014,22 @@ public:
     std::cout << __FILE__ << ':' << __LINE__ << ": s_rejectedToken is " << s_rejectedToken << '\n';
     std::string transaction = buildXMLObjTokTokStr("reject", "", "rejectSample", "");
     TEST_PLAYING_XML(transaction);
-    assertTrue(s_rejectedToken->isRejected(), "token not rejected by player");
+    CPPUNIT_ASSERT_MESSAGE("token not rejected by player", s_rejectedToken->isRejected());
     TEST_REWINDING_XML(transaction);
-    assertTrue(s_rejectedToken->isInactive());
+    CPPUNIT_ASSERT(s_rejectedToken->isInactive());
     TEST_PLAYING_XML(transaction);
-    assertTrue(s_rejectedToken->isRejected(), "token not rejected by player");
+    CPPUNIT_ASSERT_MESSAGE("token not rejected by player", s_rejectedToken->isRejected());
     /* Leave rejected for testCancel(). */
   }
 
   /** Test cancelling tokens. */
   static void testCancel() {
     TEST_PLAYING_XML(buildXMLObjTokTokStr("cancel", "", "rejectSample", ""));
-    assertTrue(!s_rejectedToken->isRejected(), "token not unrejected by player");
+    CPPUNIT_ASSERT_MESSAGE("token not unrejected by player", !s_rejectedToken->isRejected());
     TEST_PLAYING_XML(buildXMLObjTokTokStr("cancel", "", "mergeSample", ""));
-    assertTrue(!s_mergedToken->isMerged(), "token not unmerged by player");
+    CPPUNIT_ASSERT_MESSAGE("token not unmerged by player", !s_mergedToken->isMerged());
     TEST_PLAYING_XML(buildXMLObjTokTokStr("cancel", "", "activateSample", ""));
-    assertTrue(!s_activatedToken->isActive(), "token not unactivated by player");
+    CPPUNIT_ASSERT_MESSAGE("token not unactivated by player", !s_activatedToken->isActive());
   }
 
   static void testUncancel() {
@@ -5024,9 +5044,9 @@ public:
     transactions << buildXMLObjTokTokStr("cancel", "", "mergeSample", "");
     transactions << buildXMLObjTokTokStr("cancel", "", "activateSample", "");
     testRewindingXML(transactions.str(), __FILE__, __LINE__, true);
-    assertTrue(s_rejectedToken->isRejected());
-    assertTrue(s_mergedToken->isMerged());
-    assertTrue(s_activatedToken->isActive());
+    CPPUNIT_ASSERT(s_rejectedToken->isRejected());
+    CPPUNIT_ASSERT(s_mergedToken->isMerged());
+    CPPUNIT_ASSERT(s_activatedToken->isActive());
     testCancel(); //just to clean up
   }
 
@@ -5037,14 +5057,14 @@ public:
     TEST_PLAYING_XML(buildXMLCreateGoalStr("TestClass2.Sample", mandatory, name));
     /* Find it. */
     TokenSet currentTokens = s_db->getTokens();
-    assertTrue(oldTokens.size() + 1 == currentTokens.size());
+    CPPUNIT_ASSERT(oldTokens.size() + 1 == currentTokens.size());
     TokenId tok = *(currentTokens.begin());
     while (oldTokens.find(tok) != oldTokens.end()) {
       currentTokens.erase(currentTokens.begin());
       tok = *(currentTokens.begin());
     }
     /* Check it. */
-    assertTrue(checkToken(tok, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
+    CPPUNIT_ASSERT(checkToken(tok, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
                           TokenId::noId(), mandatory ? s_mandatoryStateDom : s_rejectableStateDom));
     return(tok);
   }
@@ -5069,7 +5089,8 @@ public:
                                           std::list<ConstrainedVariableId>& firsts,
                                           std::list<ConstrainedVariableId>& seconds,
                                           std::list<AbstractDomain*>& intervals) {
-    assertTrue(s_tempRels.find(relation) != s_tempRels.end(), "unknown temporal relation name given");
+    CPPUNIT_ASSERT_MESSAGE("unknown temporal relation name given",
+        s_tempRels.find(relation) != s_tempRels.end());
     if (relation == LabelStr("after")) {
       ADD_TR_DESC(slave->end(), master->start(), 0, PLUS_INFINITY);
       return;
@@ -5162,8 +5183,8 @@ public:
       ADD_TR_DESC(master->start(), slave->end(), 0, PLUS_INFINITY);
       return;
     }
-    assertTrue(relation == LabelStr("starts_during"),
-                "when a new temporal relation name was added, s_tempRels was updated but getConstraintsFromRelation() was not");
+    CPPUNIT_ASSERT_MESSAGE("when a new temporal relation name was added, s_tempRels was updated but getConstraintsFromRelation() was not",
+        relation == LabelStr("starts_during"));
     ADD_TR_DESC(slave->start(), master->start(), 0, PLUS_INFINITY);
     ADD_TR_DESC(master->start(), slave->end(), 0, PLUS_INFINITY);
     return;
@@ -5175,8 +5196,8 @@ public:
     std::list<AbstractDomain*> intervals;
     // Get the appropriate list of timepoint pairs and bounds from the relation name.
     getConstraintsFromRelations(master, slave, relation, firstVars, secondVars, intervals);
-    assertTrue(firstVars.size() == secondVars.size());
-    assertTrue(firstVars.size() == intervals.size());
+    CPPUNIT_ASSERT(firstVars.size() == secondVars.size());
+    CPPUNIT_ASSERT(firstVars.size() == intervals.size());
     while (!firstVars.empty()) {
       ConstrainedVariableId one = *(firstVars.begin());
       ConstrainedVariableId two = *(secondVars.begin());
@@ -5186,7 +5207,7 @@ public:
       intervals.erase(intervals.begin());
       std::set<ConstraintId> oneConstraints, twoConstraints;
       one->constraints(oneConstraints);
-      assertTrue(!oneConstraints.empty());
+      CPPUNIT_ASSERT(!oneConstraints.empty());
       two->constraints(twoConstraints);
       // Look for a constraint in both lists.
       for ( ; !twoConstraints.empty(); twoConstraints.erase(twoConstraints.begin())) {
@@ -5196,7 +5217,7 @@ public:
         ConstraintId both = *(twoConstraints.begin());
         if (both->getScope().size() > 2)
           continue; // Yes: can't be the one we're looking for.
-        assertTrue(both->getScope().size() == 2);
+        CPPUNIT_ASSERT(both->getScope().size() == 2);
         //!!How to get the bound from the constraint to compare with *dom ?
       }
       delete dom;
@@ -5348,14 +5369,14 @@ std::set<LabelStr> DbTransPlayerTest::s_tempRels;
 
 /** Run a single test, reading the XML from the given string. */
 void DbTransPlayerTest::testPlayingXML(const std::string& xml, const char *file, const int& line) {
-  assertTrue(s_dbPlayer != 0);
+  CPPUNIT_ASSERT(s_dbPlayer != 0);
   std::istringstream iss(xml);
   s_dbPlayer->play(iss);
 }
 
 void DbTransPlayerTest::testRewindingXML(const std::string& xml, const char* file, const int & line,
 					 bool breakpoint) {
-  assertTrue(s_dbPlayer != 0);
+  CPPUNIT_ASSERT(s_dbPlayer != 0);
   std::istringstream iss(xml);
   s_dbPlayer->rewind(iss, breakpoint);
 }
@@ -5390,7 +5411,7 @@ std::string DbTransPlayerTest::buildXMLEnumStr(const std::string& name, const st
   str += name;
   str += "\"> <set>";
   std::list<std::string>::const_iterator it = entries.begin();
-  assertTrue(it != entries.end());
+  CPPUNIT_ASSERT(it != entries.end());
   for ( ; it != entries.end(); it++) {
     str += " <symbol value=\"";
     str += *it;
@@ -5433,7 +5454,7 @@ std::string str("<class line=\"");
   str += className;
   str += "\">";
   ArgIter it = args.begin();
-  assertTrue(it != args.end());
+  CPPUNIT_ASSERT(it != args.end());
   int l_line = line - args.size(); /* "Guess" that args was create line by line in same file. */
   for ( ; it != args.end(); it++) {
     str += " <var line=\"";
@@ -5446,7 +5467,7 @@ std::string str("<class line=\"");
     str += it->first;
     str += "\"/>";
   }
-assertTrue(line == l_line);
+CPPUNIT_ASSERT(line == l_line);
   str += " <constructor line=\"";
   str += oss.str();
   str += "\" column=\"1\">";
@@ -5477,7 +5498,7 @@ assertTrue(line == l_line);
 
 std::string DbTransPlayerTest::buildXMLCreateObjectStr(const std::string& className, const std::string& objName,
                                                        const std::vector<const AbstractDomain*>& domains) {
-  assertTrue(!domains.empty());
+  CPPUNIT_ASSERT(!domains.empty());
   std::string str("<new type=\"");
   str += className;
   str += "\" name=\"";
@@ -5533,9 +5554,9 @@ std::string DbTransPlayerTest::buildXMLInvokeSpecifyVariableStr(const Constraine
     if (TokenId::convertable(var->parent())) {
       //!!For token variables, the player's name for the token is needed: identifier="tokenName.varName"
       //!!  To implement this, a map of the ids to the names will have to be kept as they are created.
-      assertTrue(false, "sorry: specifying variables of tokens in tests of <invoke> is presently unsupported");
+      CPPUNIT_ASSERT_MESSAGE("sorry: specifying variables of tokens in tests of <invoke> is presently unsupported", false);
     }
-    assertTrue(ObjectId::convertable(var->parent()), "var's parent is neither token nor object");
+    CPPUNIT_ASSERT_MESSAGE("var's parent is neither token nor object", ObjectId::convertable(var->parent()));
     //!!I don't understand the details in DbClientTransactionPlayer.cc:parseVariable() well enough to figure this out yet
     //!!But here's a guess:
     str += var->parent()->getName();
@@ -5633,7 +5654,8 @@ std::string DbTransPlayerTest::buildXMLVariableStr(const ConstrainedVariableId& 
     if (ObjectId::convertable(var->parent()))
       oss << "object=\"" << var->parent()->getName().toString();
     else {
-      assertTrue(TokenId::convertable(var->parent()), "unknown or unsupported (C++) type of parent of variable");
+      CPPUNIT_ASSERT_MESSAGE("unknown or unsupported (C++) type of parent of variable",
+          TokenId::convertable(var->parent()));
       oss << "token=\"";
       TokenId token = var->parent();
       if (token->master().isNoId())
@@ -5676,7 +5698,7 @@ std::string DbTransPlayerTest::buildXMLDomainStr(const AbstractDomain& dom) {
     str += "\"/>";
     return(str);
   }
-  assertTrue(dom.isEnumerated(), "domain is not singleton, interval, nor enumerated");
+  CPPUNIT_ASSERT_MESSAGE("domain is not singleton, interval, nor enumerated", dom.isEnumerated());
   str += "set> ";
   std::list<double> vals;
   for (dom.getValues(vals); !vals.empty(); vals.pop_front()) {
@@ -5689,7 +5711,8 @@ std::string DbTransPlayerTest::buildXMLDomainStr(const AbstractDomain& dom) {
     if (dom.isSymbolic())
       str += LabelStr(*(vals.begin())).toString();
     else {
-      assertTrue(!dom.isInterval(), "sorry: only string, symbol, and real enumerations are supported");
+      CPPUNIT_ASSERT_MESSAGE("sorry: only string, symbol, and real enumerations are supported",
+          !dom.isInterval());
       std::ostringstream oss4;
       oss4 << *(vals.begin());
       str += oss4.str();
@@ -5717,5 +5740,39 @@ void PlanDatabaseModuleTests::runTests(std::string path)
   std::cout << "All done and purged" << std::endl;
 }
 
+void PlanDatabaseModuleTests::schemaTest(void)
+{
+  SchemaTest::test();
+}
+
+void PlanDatabaseModuleTests::objectTest(void)
+{
+  ObjectTest::test();
+}
+
+void PlanDatabaseModuleTests::tokenTest(void)
+{
+  TokenTest::test();
+}
+
+void PlanDatabaseModuleTests::timelineTest(void)
+{
+  TimelineTest::test();
+}
+
+void PlanDatabaseModuleTests::DBClientTest(void)
+{
+  DbClientTest::test();
+}
+
+void PlanDatabaseModuleTests::DBTransPlayerTest(void)
+{
+  DbTransPlayerTest::test();
+}
+
+void PlanDatabaseModuleTests::cppSetup(void)
+{
+  setTestLoadLibraryPath(".");
+}
 
 
