@@ -19,4 +19,11 @@ void PSConstraintEngineListener::notifyViolationAdded(const ConstraintId& constr
 void PSConstraintEngineListener::notifyViolationRemoved(const ConstraintId& constraint){
 	notifyViolationRemoved((PSConstraint *) constraint);
 }
+
+void PSConstraintEngineListener::notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType) {
+	notifyChanged((PSVariable *) variable, (PSChangeType) changeType);
 }
+
+}
+
+

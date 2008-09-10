@@ -328,6 +328,7 @@ namespace EUROPA {
     std::string getTokenType() const;
     
     bool isFact();
+    bool isIncomplete();
     
     PSObject* getOwner();
 
@@ -361,7 +362,8 @@ namespace EUROPA {
     PSToken();
   };
 
-  enum PSVarType {INTEGER,DOUBLE,BOOLEAN,STRING,OBJECT};
+  	enum PSVarType {INTEGER,DOUBLE,BOOLEAN,STRING,OBJECT};
+	enum PSTokenState { INACTIVE,ACTIVE,MERGED,REJECTED };
 
   class PSVariable : public PSEntity
   {
@@ -514,13 +516,21 @@ namespace EUROPA {
 // generate directors for all virtual methods in class Foo
 // (enables calls from C++ to inherited java code)
   %feature("director") PSConstraintEngineListener;        
+
+
+ 
   
   class PSConstraintEngineListener
   {
   public:
-	virtual ~PSConstraintEngineListener();
+	enum PSChangeType { UPPER_BOUND_DECREASED, LOWER_BOUND_INCREASED,  BOUNDS_RESTRICTED,  
+                                     VALUE_REMOVED, RESTRICT_TO_SINGLETON,  SET_TO_SINGLETON,  RESET,
+                      	 			 RELAXED, CLOSED, OPENED,  EMPTIED,  LAST_CHANGE_TYPE};
+    
+    virtual ~PSConstraintEngineListener();
 	virtual void notifyViolationAdded(PSConstraint* constraint);
 	virtual void notifyViolationRemoved(PSConstraint* constraint);
+    virtual void notifyChanged(PSVariable* variable, PSChangeType changeType);
   };
 
 

@@ -16,13 +16,20 @@
 
 namespace EUROPA {
 
+
+
 class PSConstraintEngineListener: public ConstraintEngineListener {
 public:
+	enum PSChangeType { UPPER_BOUND_DECREASED, LOWER_BOUND_INCREASED,  BOUNDS_RESTRICTED,
+		              VALUE_REMOVED, RESTRICT_TO_SINGLETON,  SET_TO_SINGLETON,  RESET,
+		              RELAXED, CLOSED, OPENED,  EMPTIED,  LAST_CHANGE_TYPE};
+
 	virtual ~PSConstraintEngineListener() {}
 
 	/* The subset of notifications available through PSEngine interface */
 	virtual void notifyViolationAdded(PSConstraint* constraint) {}
 	virtual void notifyViolationRemoved(PSConstraint* constraint) {}
+	virtual void notifyChanged(PSVariable* variable, PSChangeType changeType){}
 
 private:
 
@@ -31,6 +38,7 @@ private:
 	 */
 	virtual void notifyViolationAdded(const ConstraintId& variable);
 	virtual void notifyViolationRemoved(const ConstraintId& variable);
+	virtual void notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType);
 
 	/* These methods are likely unnecessary to a user.  We override the base
 	 * class version only to make private (they still don't do anything)
@@ -48,7 +56,6 @@ private:
 	virtual void notifyActivated(const ConstrainedVariableId& variable) {}
 	virtual void notifyAdded(const ConstrainedVariableId& variable) {}
 	virtual void notifyRemoved(const ConstrainedVariableId& variable) {}
-	virtual void notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType) {}
 };
 }
 
