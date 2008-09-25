@@ -217,3 +217,4 @@ getMissingSymbol			(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_INT_STREAM	istre
 #ifdef ANTLR3_WINDOWS
 #pragma warning	(pop)
 #endif
+
