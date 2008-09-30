@@ -398,6 +398,7 @@ namespace EUROPA {
   class PSVarValue
   {
   public:
+  	PSVarValue(const double val, const PSVarType type);
     static PSVarValue getInstance(const std::string& val);
     static PSVarValue getInstance(int val);
     static PSVarValue getInstance(double val);
