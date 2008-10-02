@@ -59,11 +59,11 @@
 
 class ResourceTestEngine  : public EngineBase
 {
-  public:  
+  public:
 	ResourceTestEngine();
 	virtual ~ResourceTestEngine();
-	
-  protected: 
+
+  protected:
 	void createModules();
 };
 
@@ -118,7 +118,7 @@ public:
 private:
   static bool testDefaultSetup() {
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    
+
     CPPUNIT_ASSERT(db.isClosed() == false);
     db.close();
     CPPUNIT_ASSERT(db.isClosed() == true);
@@ -168,13 +168,13 @@ public:
     EUROPA_runTest(testPointProfileQueries);
     return true;
   }
-    
+
 private:
-  
+
   static bool testResourceConstructionAndDestruction()
   {
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    
+
     ResourceId r = (new Resource (db.getId(), LabelStr("Resource"), LabelStr("r1")))->getId();
     std::list<InstantId> instants;
     r->getInstants(instants);
@@ -191,7 +191,7 @@ private:
   static bool testBasicTransactionInsertion()
   {
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    
+
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 10, 0, 1000))->getId();
 
     //just another resource so that the resource doesnt get bound to singleton and get autoinserted by the propagator
@@ -216,7 +216,7 @@ private:
     r->getTransactions(transactions);
     CPPUNIT_ASSERT(transactions.empty());
 
-    // Test double insertion 
+    // Test double insertion
     r->constrain(t1, t1);
     ce.propagate();
     r->free(t1, t1);
@@ -273,11 +273,11 @@ private:
   {
     // Test that the right insertion behaviour (in terms of instants) is occuring
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    
+
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 1000))->getId();
     db.close();
-    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == 0); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == 0);
 
     TokenId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 6)))->getId();
     //r->constrain(t1);
@@ -289,24 +289,24 @@ private:
 
     TokenId t3  = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, 3)))->getId();
     //r->constrain(t3);
-    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1)); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1));
 
     TokenId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, 2)))->getId();
     //r->constrain(t4);
-    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1)); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1));
 
     TokenId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 7)))->getId();
     //r->constrain(t5);
-    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1)); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1));
 
     TokenId t6 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 7)))->getId();
     //r->constrain(t6);
-    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1)); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1));
 
     // Insert for a singleton value
     TokenId t7 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(5,5)))->getId();
     //r->constrain(t7);
-    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*5 + 7*4 + 8*3 + 9*1)); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*5 + 7*4 + 8*3 + 9*1));
 
     // Now free them and check the retractions are working correctly
     delete (Transaction*) (t7);
@@ -332,32 +332,32 @@ private:
   static bool testLevelCalculation()
   {
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    
+
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 10))->getId();
     db.close();
 
     TokenId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(0, 1), 1, 1))->getId();
     ce.propagate();
-    CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*1)); 
+    CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*1));
     CPPUNIT_ASSERT(checkLevelArea(r) == 1);
 
     TokenId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(1, 3), -4, -4))->getId();
     ce.propagate();
-    CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*2 + 3*1)); 
+    CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*2 + 3*1));
     CPPUNIT_ASSERT(checkLevelArea(r) == (1 + 4*2));
 
     TokenId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 4), 8, 8))->getId();
     ce.propagate();
-    CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*2 + 3*2 + 4*2 + 5*1)); 
+    CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*2 + 3*2 + 4*2 + 5*1));
     CPPUNIT_ASSERT(checkLevelArea(r) == (1*1 + 4*1 + 12*1 + 8*1));
 
     TokenId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 6), 2, 2))->getId();
     ce.propagate();
     CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*2 + 3*2 + 4*3 + 5*2 + 6*1));
     CPPUNIT_ASSERT(checkLevelArea(r) == (1*1 + 4*1 + 12*1 + 10*1 + 2*2));
- 
-    TokenId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 10), -6, -6))->getId(); 
+
+    TokenId t5 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 10), -6, -6))->getId();
     ce.propagate();
     CPPUNIT_ASSERT(checkSum(r) == (1*1 + 2*2 + 3*3 + 4*4 + 5*3 + 6*2 + 7*1));
     CPPUNIT_ASSERT(checkLevelArea(r) == (1*1 + 4*1 + 18*1 + 16*1 + 8*2 + 6*4));
@@ -387,7 +387,7 @@ private:
   static bool testTransactionUpdates()
   {
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    
+
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 10))->getId();
     db.close();
@@ -412,7 +412,7 @@ private:
   static bool testTransactionRemoval()
   {
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    
+
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r0"), 0, 0, 10))->getId();
     // Add another resource so we can assign and unassign
@@ -471,7 +471,7 @@ private:
   static bool testIntervalCapacityValues()
   {
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    
+
     std::list<InstantId> allInstants;
     ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), 0, 0, 10))->getId();
     db.close();
@@ -501,9 +501,9 @@ private:
   static bool testConstraintCheckOnInsertion()
   {
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    
+
     std::list<InstantId> allInstants;
-    new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,  
+    new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,
 		 limitMin, limitMax, productionRateMax, productionMax, consumptionRateMax, consumptionMax);
 
     db.close();
@@ -526,9 +526,9 @@ private:
   static bool testRateConstraintViolation()
   {
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    
+
     std::list<InstantId> allInstants;
-    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,  
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,
 				 limitMin, limitMax, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
     db.close();
 
@@ -567,7 +567,7 @@ private:
     delete (Transaction*) t2;
     delete (Transaction*) t4;
     CPPUNIT_ASSERT(ce.propagate());
-      
+
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
   }
@@ -577,8 +577,8 @@ private:
     // Define input constrains for the resource spec
 
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    
-    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,  
+
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,
 				 limitMin, limitMax, productionMax, productionMax, MINUS_INFINITY, MINUS_INFINITY))->getId();
     db.close();
 
@@ -589,7 +589,7 @@ private:
     TokenId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 2), -8, -8))->getId();
     CPPUNIT_ASSERT(ce.propagate());
     TokenId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 3), -8, -8))->getId();
-    CPPUNIT_ASSERT(ce.propagate());    
+    CPPUNIT_ASSERT(ce.propagate());
     TokenId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 4), -8, -8))->getId();
     CPPUNIT_ASSERT(ce.propagate());
     TokenId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(5, 5), -8, -8))->getId();
@@ -619,8 +619,8 @@ private:
     // Define input constrains for the resource spec
 
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    
-    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,  
+
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,
 				 limitMin, limitMax, PLUS_INFINITY, PLUS_INFINITY, consumptionMax, consumptionMax))->getId();
     db.close();
 
@@ -631,7 +631,7 @@ private:
     TokenId t1 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(2, 2), -8, -8))->getId();
     CPPUNIT_ASSERT(ce.propagate());
     TokenId t2 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(3, 3), -8, -8))->getId();
-    CPPUNIT_ASSERT(ce.propagate());    
+    CPPUNIT_ASSERT(ce.propagate());
     TokenId t3 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(4, 4), -8, -8))->getId();
     CPPUNIT_ASSERT(ce.propagate());
     TokenId t4 = (new Transaction(db.getId(), LabelStr("Resource.change"), IntervalIntDomain(5, 5), -8, -8))->getId();
@@ -665,8 +665,8 @@ private:
   {
     // Define input constrains for the resource spec
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    
-    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity + 1,  
+
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity + 1,
 				 limitMin, limitMax, productionRateMax, productionMax + 100, consumptionRateMax, consumptionMax))->getId();
     db.close();
 
@@ -695,8 +695,8 @@ private:
   static bool testSummationConstraintResourceViolation()
   {
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    
-    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,  
+
+    ResourceId r = (new Resource(db.getId(), LabelStr("Resource"), LabelStr("r1"), initialCapacity,
 				 limitMin, limitMax, productionRateMax, productionMax, consumptionRateMax, consumptionMax))->getId();
     db.close();
 
@@ -718,7 +718,7 @@ private:
     CPPUNIT_ASSERT(checkLevelArea(r) == 0);
 
     // Ensure the violations remain unchanged
-    std::list<ResourceViolationId> violations;     
+    std::list<ResourceViolationId> violations;
     r->getResourceViolations(violations);
     CPPUNIT_ASSERT(violations.size() > 0);
     RESOURCE_DEFAULT_TEARDOWN();
@@ -729,8 +729,8 @@ private:
   {
     // Define input constrains for the resource spec
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    ResourceId r = (new Resource( db.getId(), LabelStr("Resource"), LabelStr("r1"), 
-				  initialCapacity, 
+    ResourceId r = (new Resource( db.getId(), LabelStr("Resource"), LabelStr("r1"),
+				  initialCapacity,
 				  limitMin, limitMax, productionRateMax, 5, consumptionRateMax, consumptionMax))->getId();
     db.close();
 
@@ -740,7 +740,7 @@ private:
     CPPUNIT_ASSERT(result.isSingleton() && result.getSingletonValue() == initialCapacity);
 
     // Test that a flaw is signalled when there is a possibility to violate limits
-    TransactionId producer = (new Transaction(db.getId(), LabelStr("Resource.change"), 
+    TransactionId producer = (new Transaction(db.getId(), LabelStr("Resource.change"),
 					      IntervalIntDomain(5, 5), 5, 5))->getId();
 
     // Have a single transaction, test before, at and after.
@@ -751,10 +751,10 @@ private:
     r->getLevelAt(1000, result);
     CPPUNIT_ASSERT(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5));
 
-    TransactionId c1 = (new Transaction(db.getId(), LabelStr("Resource.change"), 
+    TransactionId c1 = (new Transaction(db.getId(), LabelStr("Resource.change"),
 					IntervalIntDomain(0, 7), -5, -5))->getId();
 
-    TransactionId c2 = (new Transaction(db.getId(), LabelStr("Resource.change"), 
+    TransactionId c2 = (new Transaction(db.getId(), LabelStr("Resource.change"),
 					IntervalIntDomain(2, 10), -5, -5))->getId();
 
     // Confirm that we can query in the middle
@@ -845,7 +845,7 @@ private:
 
 class DummyProfile : public SAVH::Profile {
 public:
-  DummyProfile(PlanDatabaseId db, const SAVH::FVDetectorId fv) 
+  DummyProfile(PlanDatabaseId db, const SAVH::FVDetectorId fv)
     : Profile(db, fv), m_receivedNotification(0) {}
   SAVH::InstantId getInstant(const int time) {
     return getGreatestInstant(time)->second;
@@ -859,7 +859,7 @@ public:
   void resetNotified(){m_receivedNotification = 0;}
 private:
   void handleTemporalConstraintAdded(const SAVH::TransactionId predecessor, int preArgIndex,
-				     const SAVH::TransactionId successor, int sucArgIndex) { 
+				     const SAVH::TransactionId successor, int sucArgIndex) {
     SAVH::Profile::handleTemporalConstraintAdded(predecessor, preArgIndex, successor, sucArgIndex);
     m_receivedNotification++;
   }
@@ -890,7 +890,7 @@ public:
 		double initCapacityLb = 0, double initCapacityUb = 0, double lowerLimit = MINUS_INFINITY,
 		double upperLimit = PLUS_INFINITY, double maxInstProduction = PLUS_INFINITY, double maxInstConsumption = PLUS_INFINITY,
 		double maxProduction = PLUS_INFINITY, double maxConsumption = PLUS_INFINITY)
-    : SAVH::Resource(planDatabase, type, name, LabelStr("TimetableFVDetector"), LabelStr("TimetableProfile"), initCapacityLb, initCapacityUb, 
+    : SAVH::Resource(planDatabase, type, name, LabelStr("TimetableFVDetector"), LabelStr("TimetableProfile"), initCapacityLb, initCapacityUb,
 		     lowerLimit, upperLimit, maxInstProduction, maxInstConsumption,
 		     maxProduction, maxConsumption) {}
 
@@ -1037,7 +1037,7 @@ private:
     SAVH::ProfileIterator oCheck1(profile.getId(), 0, 0);
     CPPUNIT_ASSERT(!oCheck1.done());
     CPPUNIT_ASSERT(oCheck1.getInstant()->getTransactions().size() == 2);
-    
+
     profile.addTransaction(trans4.getId());
     times.insert(1);
     times.insert(4);
@@ -1099,10 +1099,10 @@ private:
     times.insert(6); times.insert(10);
 
     SAVH::Transaction trans1(t1.getId(), quantity.getId(), false);
-    SAVH::Transaction trans2(t2.getId(), quantity.getId(), false); 
-    SAVH::Transaction trans3(t3.getId(), quantity.getId(), false); 
-    SAVH::Transaction trans4(t4.getId(), quantity.getId(), false); 
-    SAVH::Transaction trans5(t5.getId(), quantity.getId(), false); 
+    SAVH::Transaction trans2(t2.getId(), quantity.getId(), false);
+    SAVH::Transaction trans3(t3.getId(), quantity.getId(), false);
+    SAVH::Transaction trans4(t4.getId(), quantity.getId(), false);
+    SAVH::Transaction trans5(t5.getId(), quantity.getId(), false);
 
     profile.addTransaction(trans1.getId());
     profile.addTransaction(trans2.getId());
@@ -1135,7 +1135,7 @@ private:
     CPPUNIT_ASSERT(oCheck2.getInstant()->getTransactions().size() == 2);
     SAVH::ProfileIterator oCheck2_1(profile.getId(), 2, 2);
     CPPUNIT_ASSERT(oCheck2_1.done());
-    
+
 
     CPPUNIT_ASSERT(profile.gotNotified() == 0);
     ConstraintId constr = db.getClient()->createConstraint("precedes", makeScope(t1.getId(), t2.getId()));
@@ -1210,11 +1210,11 @@ private:
   {
     // Test that the right insertion behaviour (in terms of instants) is occuring
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    
+
     DummyDetector detector(SAVH::ResourceId::noId());
     SAVH::TimetableProfile r(db.getId(), detector.getId());
 
-    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == 0); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == 0);
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(4, 6));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
@@ -1232,32 +1232,32 @@ private:
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
     SAVH::Transaction trans3(t3.getId(), q3.getId(), false);
     r.addTransaction(trans3.getId());
-    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1)); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*2 +3*2 + 4*2 + 5*2 + 6*1));
 
     Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(1, 2));
     Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
     SAVH::Transaction trans4(t4.getId(), q4.getId(), false);
-    r.addTransaction(trans4.getId());    
-    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1)); 
+    r.addTransaction(trans4.getId());
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*2 + 5*2 + 6*2 + 7*1));
 
     Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(3, 7));
     Variable<IntervalDomain> q5(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
     SAVH::Transaction trans5(t5.getId(), q5.getId(), false);
     r.addTransaction(trans5.getId());
-    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1)); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*3 + 6*3 + 7*2 + 8*1));
 
     Variable<IntervalIntDomain> t6(ce.getId(), IntervalIntDomain(4, 7));
     Variable<IntervalDomain> q6(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
     SAVH::Transaction trans6(t6.getId(), q6.getId(), false);
     r.addTransaction(trans6.getId());
-    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1)); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*4 + 7*3 + 8*1));
 
     // Insert for a singleton value
     Variable<IntervalIntDomain> t7(ce.getId(), IntervalIntDomain(5, 5));
     Variable<IntervalDomain> q7(ce.getId(), IntervalDomain(0, PLUS_INFINITY));
     SAVH::Transaction trans7(t7.getId(), q7.getId(), false);
     r.addTransaction(trans7.getId());
-    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*5 + 7*4 + 8*3 + 9*1)); 
+    CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == (1*1 + 2*3 + 3*3 + 4*3 + 5*4 + 6*5 + 7*4 + 8*3 + 9*1));
 
     // Now free them and check the retractions are working correctly
 
@@ -1286,14 +1286,14 @@ private:
     RESOURCE_DEFAULT_SETUP(ce,db,false);
 
     DummyDetector detector(SAVH::ResourceId::noId());
-    SAVH::TimetableProfile r(db.getId(), detector.getId());    
+    SAVH::TimetableProfile r(db.getId(), detector.getId());
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 1));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(1, 1));
     SAVH::Transaction trans1(t1.getId(), q1.getId(), false);
-    r.addTransaction(trans1.getId());    
+    r.addTransaction(trans1.getId());
     ce.propagate();
-    CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*1)); 
+    CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*1));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 1);
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(1, 3));
@@ -1301,7 +1301,7 @@ private:
     SAVH::Transaction trans2(t2.getId(), q2.getId(), true);
     r.addTransaction(trans2.getId());
     ce.propagate();
-    CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*1)); 
+    CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*1));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1 + 4*2));
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(2, 4));
@@ -1309,7 +1309,7 @@ private:
     SAVH::Transaction trans3(t3.getId(), q3.getId(), false);
     r.addTransaction(trans3.getId());
     ce.propagate();
-    CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*2 + 4*2 + 5*1)); 
+    CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*2 + 4*2 + 5*1));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*1 + 4*1 + 12*1 + 8*1));
 
     Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(3, 6));
@@ -1319,7 +1319,7 @@ private:
     ce.propagate();
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*2 + 4*3 + 5*2 + 6*1));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*1 + 4*1 + 12*1 + 10*1 + 2*2));
- 
+
     Variable<IntervalIntDomain> t5(ce.getId(), IntervalIntDomain(2, 10));
     Variable<IntervalDomain> q5(ce.getId(), IntervalDomain(6, 6));
     SAVH::Transaction trans5(t5.getId(), q5.getId(), true);
@@ -1351,9 +1351,9 @@ private:
   static bool testTransactionUpdates()
   {
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    
+
     DummyDetector detector(SAVH::ResourceId::noId());
-    SAVH::TimetableProfile r(db.getId(), detector.getId());    
+    SAVH::TimetableProfile r(db.getId(), detector.getId());
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 10));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(10, 10));
@@ -1380,7 +1380,7 @@ private:
     RESOURCE_DEFAULT_SETUP(ce,db,false);
 
     DummyDetector detector(SAVH::ResourceId::noId());
-    SAVH::TimetableProfile r(db.getId(), detector.getId());        
+    SAVH::TimetableProfile r(db.getId(), detector.getId());
 
 
     // Test producer
@@ -1412,7 +1412,7 @@ private:
   static bool testRateConstraintViolation()
   {
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    
+
     DummyResource r(db.getId(), LabelStr("SAVHResource"), LabelStr("r1"), initialCapacity, initialCapacity, limitMin, limitMax,
 		    productionRateMax, -(consumptionRateMax), productionMax, -(consumptionMax));
 
@@ -1440,7 +1440,7 @@ private:
     //r->getResourceViolations(violations);
     //CPPUNIT_ASSERT(violations.size() == 1);
     //CPPUNIT_ASSERT(violations.front()->getType() == ResourceViolation::ProductionRateExceeded);
-    
+
     r.removeTransaction(trans3.getId());
     r.removeTransaction(trans1.getId());
     CPPUNIT_ASSERT(ce.propagate());
@@ -1468,7 +1468,7 @@ private:
     r.removeTransaction(trans4.getId());
     r.removeTransaction(trans2.getId());
     CPPUNIT_ASSERT(ce.propagate());
-      
+
     RESOURCE_DEFAULT_TEARDOWN();
     return(true);
   }
@@ -1478,7 +1478,7 @@ private:
     // Define input constrains for the resource spec
 
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    
+
     DummyResource r(db.getId(), LabelStr("SAVHResource"), LabelStr("r1"), initialCapacity, initialCapacity, limitMin, limitMax,
 		    productionRateMax, -(consumptionRateMax), productionMax, -(consumptionMax));
     db.close();
@@ -1495,12 +1495,12 @@ private:
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(8, 8));
     SAVH::Transaction trans2(t2.getId(), q2.getId(), true);
     r.addTransaction(trans2.getId());
-    CPPUNIT_ASSERT(ce.propagate());    
+    CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(4, 4));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(8, 8));
     SAVH::Transaction trans3(t3.getId(), q3.getId(), true);
-    r.addTransaction(trans3.getId());    
+    r.addTransaction(trans3.getId());
     CPPUNIT_ASSERT(ce.propagate());
 
     Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(5, 5));
@@ -1554,8 +1554,8 @@ private:
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(8, 8));
     SAVH::Transaction trans2(t2.getId(), q2.getId(), true);
     r.addTransaction(trans2.getId());
-    CPPUNIT_ASSERT(ce.propagate());   
- 
+    CPPUNIT_ASSERT(ce.propagate());
+
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(4, 4));
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(8, 8));
     SAVH::Transaction trans3(t3.getId(), q3.getId(), true);
@@ -1645,7 +1645,7 @@ private:
   static bool testSummationConstraintResourceViolation()
   {
     RESOURCE_DEFAULT_SETUP(ce,db,false);
-    
+
     DummyResource r(db.getId(), LabelStr("SAVHResource"), LabelStr("r1"), initialCapacity, initialCapacity, limitMin, limitMax,
 		    productionRateMax, -(consumptionRateMax), productionMax, -(consumptionMax));
     db.close();
@@ -1679,7 +1679,7 @@ private:
     CPPUNIT_ASSERT(checkLevelArea(r.getProfile()) == 0);
 
     // Ensure the violations remain unchanged
-//     std::list<ResourceViolationId> violations;     
+//     std::list<ResourceViolationId> violations;
 //     r->getResourceViolations(violations);
 //     CPPUNIT_ASSERT(violations.size() > 0);
 
@@ -1748,7 +1748,7 @@ private:
     RESOURCE_DEFAULT_SETUP(ce, db, false);
     DummyDetector detector(SAVH::ResourceId::noId());
     DummyProfile profile(db.getId(), detector.getId());
-    
+
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 10), true, "t1");
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(10, 15), true, "t2");
     Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(5, 15), true, "t3");
@@ -1757,16 +1757,11 @@ private:
     Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(1, 1), true, "q2");
     Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(1, 1), true, "q3");
     Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(1, 1), true, "q4");
-    
+
     SAVH::Transaction trans1(t1.getId(), q1.getId(), false);
     SAVH::Transaction trans2(t2.getId(), q2.getId(), true);
     SAVH::Transaction trans3(t3.getId(), q3.getId(), true);
     SAVH::Transaction trans4(t4.getId(), q4.getId(), false);
-
-    std::cout << "Creating " << trans1.getId() << std::endl;
-    std::cout << "Creating " << trans2.getId() << std::endl;
-    std::cout << "Creating " << trans3.getId() << std::endl;
-    std::cout << "Creating " << trans4.getId() << std::endl;
 
     profile.addTransaction(trans1.getId());
     profile.addTransaction(trans2.getId());
@@ -1805,7 +1800,7 @@ private:
     trans.insert(trans2.getId());
     trans.insert(trans3.getId());
     trans.insert(trans4.getId());
-    
+
     inst = profile.getInstant(10);
     CPPUNIT_ASSERT(inst.isValid());
     CPPUNIT_ASSERT(inst->getTime() == 10);
@@ -1833,7 +1828,7 @@ private:
     }
     CPPUNIT_ASSERT(trans.empty());
 
-    
+
     RESOURCE_DEFAULT_TEARDOWN();
     return true;
   }
@@ -1854,7 +1849,7 @@ private:
 			 10, 10, 0, 1000);
     SAVH::Reservoir res2(db.getId(), LabelStr("Reservoir"), LabelStr("Battery2"), LabelStr("TimetableFVDetector"), LabelStr("TimetableProfile"),
 			 10, 10, 0, 1000);
-    
+
     SAVH::ConsumerToken consumer(db.getId(), LabelStr("Reservoir.consume"), IntervalIntDomain(10),
 			   IntervalDomain(5));
 
@@ -1869,7 +1864,7 @@ private:
     CPPUNIT_ASSERT(!it3.done());
     SAVH::ProfileIterator it4(res2.getProfile());
     CPPUNIT_ASSERT(it4.done());
-    
+
     const_cast<AbstractDomain&>(consumer.getObject()->lastDomain()).relax(consumer.getObject()->baseDomain());
     SAVH::ProfileIterator it5(res1.getProfile());
     CPPUNIT_ASSERT(it5.done());
@@ -1908,7 +1903,7 @@ private:
     }
     CPPUNIT_ASSERT(trans.size() == 2);
     CPPUNIT_ASSERT(instCount == 4);
-    
+
     use.start()->specify(0);
     use.end()->specify(10);
     CPPUNIT_ASSERT(db.getConstraintEngine()->propagate());
@@ -1931,17 +1926,16 @@ private:
   }
 };
 
-void ResourceModuleTests::runTests(std::string path) 
+void ResourceModuleTests::runTests(std::string path)
 {
-  setTestLoadLibraryPath(path);  
+  setTestLoadLibraryPath(path);
   runTestSuite(DefaultSetupTest::test);
   runTestSuite(ResourceTest::test);
   runTestSuite(ProfileTest::test);
   runTestSuite(SAVHResourceTest::test);
-  std::cout << "Finished" << std::endl;
 }
 
-void ResourceModuleTests::cppSetup(void) 
+void ResourceModuleTests::cppSetup(void)
 {
   setTestLoadLibraryPath(".");
 }
@@ -1966,7 +1960,7 @@ void ResourceModuleTests::SAVHResourceTests(void)
   SAVHResourceTest::test();
 }
 
-  
+
 /*
  * TODO JRB : Enable these tests. Moved here from Solvers/test/solvers-test-module.cc
  *   static bool testResourceDecisionPoint() {
@@ -1979,13 +1973,13 @@ void ResourceModuleTests::SAVHResourceTests(void)
 
     SAVH::ReusableToken tok1(db, "Reusable.uses", IntervalIntDomain(1, 3), IntervalIntDomain(10, 12), IntervalIntDomain(1, PLUS_INFINITY),
                  IntervalDomain(1.0, 1.0), "myReusable");
-    
+
     SAVH::ReusableToken tok2(db, "Reusable.uses", IntervalIntDomain(11, 13), IntervalIntDomain(15, 17), IntervalIntDomain(1, PLUS_INFINITY),
                  IntervalDomain(1.0, 1.0), "myReusable");
 
     SAVH::ReusableToken tok3(db, "Reusable.uses", IntervalIntDomain(11, 16), IntervalIntDomain(18, 19), IntervalIntDomain(1, PLUS_INFINITY),
                  IntervalDomain(1.0, 1.0), "myReusable");
-    
+
     CPPUNIT_ASSERT(ce->propagate());
     CPPUNIT_ASSERT(reusable.hasTokensToOrder());
     TiXmlElement dummy("");
@@ -2039,13 +2033,13 @@ void ResourceModuleTests::SAVHResourceTests(void)
 
     SAVH::ReusableToken tok1(db, "Reusable.uses", IntervalIntDomain(1, 3), IntervalIntDomain(10, 12), IntervalIntDomain(1, PLUS_INFINITY),
                  IntervalDomain(1.0, 1.0), "myReusable");
-    
+
     SAVH::ReusableToken tok2(db, "Reusable.uses", IntervalIntDomain(11, 13), IntervalIntDomain(15, 17), IntervalIntDomain(1, PLUS_INFINITY),
                  IntervalDomain(1.0, 1.0), "myReusable");
 
     SAVH::ReusableToken tok3(db, "Reusable.uses", IntervalIntDomain(11, 16), IntervalIntDomain(18, 19), IntervalIntDomain(1, PLUS_INFINITY),
                  IntervalDomain(1.0, 1.0), "myReusable");
-    
+
     CPPUNIT_ASSERT(ce->propagate());
 
     CPPUNIT_ASSERT(reusable.hasTokensToOrder());
@@ -2067,7 +2061,7 @@ void ResourceModuleTests::SAVHResourceTests(void)
     dp2.initialize();
     CPPUNIT_ASSERT(dp2.getChoices().size() == 8);
 
-    std::string predFilter = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"predecessorNot\"/>"; 
+    std::string predFilter = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"predecessorNot\"/>";
     TiXmlElement* predFilterXml = initXml(predFilter);
     SAVH::ThreatDecisionPoint dp3(client, flawedInstants[0], *predFilterXml);
     dp3.initialize();
@@ -2147,7 +2141,7 @@ void ResourceModuleTests::SAVHResourceTests(void)
     SAVH::ThreatDecisionPoint dp9(client, flawedInstants[0], *shortestPredXml);
     dp9.initialize();
     CPPUNIT_ASSERT(dp9.getChoices().size() == 3);
-    CPPUNIT_ASSERT(dp9.getChoices()[0].first->time() == tok2.start() || 
+    CPPUNIT_ASSERT(dp9.getChoices()[0].first->time() == tok2.start() ||
                dp9.getChoices()[0].first->time() == tok1.end());
 
     std::string descendingKeyPred = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"both\" order=\"descendingKeyPredecessor\"/>";
@@ -2213,7 +2207,7 @@ void ResourceModuleTests::SAVHResourceTests(void)
     CPPUNIT_ASSERT(dp16.getChoices()[0].second->time() == tok2.start());
     CPPUNIT_ASSERT(dp16.getChoices()[1].second->time() == tok3.start());
     CPPUNIT_ASSERT(dp16.getChoices()[2].second->time() == tok3.start());
-    
+
 
     std::string leastImpact = "<FlawHandler component=\"SAVHThreatDecisionPoint\" filter=\"successor\" order=\"leastImpact,earliestPredecessor,shortestSuccessor\"/>";
     TiXmlElement* leastImpactXml = initXml(leastImpact);
@@ -2329,7 +2323,7 @@ void ResourceModuleTests::SAVHResourceTests(void)
     dp21.getChoices()[1].first->time()->notifyRemoved(nameListener->getId());
     delete nameListener;
 
-    
+
 
     delete concurrentFirstXml;
     delete precedesFirstXml;
@@ -2351,10 +2345,10 @@ void ResourceModuleTests::SAVHResourceTests(void)
     delete sucFilterXml;
     delete predFilterXml;
     delete noFilterXml;
- 
+
     return true;
   }
-  
+
   static bool testSAVHThreatManager() {
     TestEngine assembly;
     PlanDatabaseId db = assembly.getPlanDatabase();
@@ -2365,7 +2359,7 @@ void ResourceModuleTests::SAVHResourceTests(void)
 
     SAVH::ReusableToken tok1(db, "Reusable.uses", IntervalIntDomain(1, 3), IntervalIntDomain(10, 12), IntervalIntDomain(1, PLUS_INFINITY),
                  IntervalDomain(1.0, 1.0), "myReusable");
-    
+
     SAVH::ReusableToken tok2(db, "Reusable.uses", IntervalIntDomain(11, 13), IntervalIntDomain(15, 17), IntervalIntDomain(1, PLUS_INFINITY),
                  IntervalDomain(1.0, 1.0), "myReusable");
 
@@ -2376,12 +2370,12 @@ void ResourceModuleTests::SAVHResourceTests(void)
 
     std::vector<SAVH::InstantId> instants;
     reusable.getFlawedInstants(instants);
-    
+
     LabelStr explanation;
     std::string earliest = "<SAVHThreatManager order=\"earliest\"><FlawHandler component=\"SAVHThreatHandler\"/></SAVHThreatManager>";
     TiXmlElement* earliestXml = initXml(earliest);
     SAVH::ThreatManager earliestManager(*earliestXml);
-    earliestManager.initialize(db, ContextId::noId(), FlawManagerId::noId());   
+    earliestManager.initialize(db, ContextId::noId(), FlawManagerId::noId());
     CPPUNIT_ASSERT(earliestManager.betterThan(instants[0], instants[1], explanation)); //these are identical except for the time
     CPPUNIT_ASSERT(earliestManager.betterThan(instants[1], instants[2], explanation)); //these have different levels
     CPPUNIT_ASSERT(!earliestManager.betterThan(instants[0], instants[0], explanation));
@@ -2420,5 +2414,5 @@ void ResourceModuleTests::SAVHResourceTests(void)
     delete earliestXml;
     return true;
   }
-  
+
  */

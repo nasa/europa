@@ -18,9 +18,8 @@ public:
     FlowProfileModuleTests::cppSetup();
   }
 
-  void tearDown() 
+  void tearDown()
   {
-    std::cout << "Finished" << std::endl;
   }
 
   static void runTests(std::string path);

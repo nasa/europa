@@ -13,7 +13,4 @@ int main(int argc, const char** argv) {
   runner.run("", false);
 
   return 0;
-
-  //ResourceModuleTests::runTests(".");
-  //FlowProfileModuleTests::runTests(".");
 }

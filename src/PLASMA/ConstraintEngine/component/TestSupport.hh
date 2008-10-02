@@ -8,6 +8,7 @@
 #include "Constraints.hh"
 #include "Error.hh"
 #include "Utils.hh"
+#include "Debug.hh"
 
 
 using namespace EUROPA;
@@ -29,7 +30,7 @@ public:
         const CESchemaId& tfm = s_instance->getCESchema();
       delete (ConstraintEngine*) s_instance;
       delete (CESchema*) tfm;
-      s_instance = ConstraintEngineId::noId(); 
+      s_instance = ConstraintEngineId::noId();
      }
   }
 
@@ -46,17 +47,17 @@ private:
   DefaultEngineAccessor::reset(); \
   Entity::garbageCollect(); \
   if (result && IdTable::size() <= id_count) { \
-    /*std::cout << " PASSED." << std::endl;*/ \
+    debugMsg("Test"," PASSED."); \
   } \
   else \
     if (result) { \
-      std::cout << " FAILED = DID NOT CLEAN UP ALLOCATED IDs:\n"; \
+      std::cerr << " FAILED = DID NOT CLEAN UP ALLOCATED IDs:\n"; \
       IdTable::output(std::cerr); \
-      std::cout << "\tWere " << id_count << " IDs before; " << IdTable::size() << " now"; \
-      std::cout << std::endl; \
+      std::cerr << "\tWere " << id_count << " IDs before; " << IdTable::size() << " now"; \
+      std::cerr << std::endl; \
       throw Error::GeneralMemoryError(); \
     } else { \
-      std::cout << "      " << " FAILED TO PASS UNIT TEST." << std::endl; \
+      std::cerr << "      " << " FAILED TO PASS UNIT TEST." << std::endl; \
       throw Error::GeneralUnknownError(); \
     } \
   } \
@@ -67,16 +68,18 @@ private:
 
 #define runTestSuite(test) { \
   try{ \
-  std::cout << #test << "******************************" << std::endl;\
-  if (test()) \
-    std::cout << #test << " PASSED." << std::endl; \
-  else \
-    std::cout << #test << " FAILED." << std::endl; \
+      debugMsg("Test", #test << "******************************"); \
+      if (test()) { \
+          debugMsg("Test", #test << " PASSED."); \
+      } \
+      else {\
+          debugMsg("Test", #test << " FAILED."); \
+      } \
   }\
-  catch (Error err){\
-   err.print(std::cout);\
+  catch (Error err) {\
+   err.print(std::cerr);\
   }\
-  }
+}
 
 #endif
 
