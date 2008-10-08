@@ -1,5 +1,5 @@
 .PHONY: prebuild postbuild project-model project-initial-state project-lib project-rt run-project clean all
-all: prebuild project-controller project-lib run-project project-jar postbuild
+all: prebuild project-controller project-lib run-project postbuild
 
 include platforms.mk
 include makerules.mk

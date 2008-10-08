@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
  */
 public class ModelAccessor {
   static String s_plasmaHome = NddlUtil.getenv("PLASMA_HOME");
+  static String s_europaHome = NddlUtil.getenv("EUROPA_HOME");
   static String s_directory = System.getProperty("user.dir");
   static final String DEFAULT_CFG = "NDDL.cfg";
   static String s_cfgFilename = DEFAULT_CFG;
@@ -1092,22 +1093,41 @@ public class ModelAccessor {
     // If s_cfgFilename is available in the directory from which this
     // program is run, then use that file to load properties
     try{
-      // search for NDDL.cfg locally
+      // 1. search for NDDL.cfg in user defined start directory
       File cfgFile = new File(s_directory, s_cfgFilename);
-      if(!cfgFile.exists())
-        cfgFile = new File(System.getProperty("user.dir"), s_cfgFilename);
+
+      // 2. if we're allowed to, search in parent directories of user defined start directory
       if(!s_cfgExact) {
-        // if we're allowed to, search in parent directories.
         while(!cfgFile.exists() && cfgFile.getParentFile() != null) {
           cfgFile = new File(cfgFile.getParentFile().getParentFile(), s_cfgFilename);
         }
       }
-      if(!cfgFile.exists() && s_plasmaHome != null) {
-        // if all else fails, attempt to look in $PLASMA_HOME/config (ignore any custom s_cfgFilename)
-        cfgFile = new File(s_plasmaHome+"/config", DEFAULT_CFG);
-      }
+
+      // 3. search for NDDL.cfg in user's current directory
       if(!cfgFile.exists())
-        // we're done trying, throw an error.
+        cfgFile = new File(System.getProperty("user.dir"), s_cfgFilename);
+
+      // 4. if we're allowed to, search in parent directories of user's current directory
+      if(!s_cfgExact) {
+        while(!cfgFile.exists() && cfgFile.getParentFile() != null) {
+          cfgFile = new File(cfgFile.getParentFile().getParentFile(), s_cfgFilename);
+        }
+      }
+
+      // 5. Search for NDDL.cfg with user's (possibly) custom name in $EUROPA_HOME/config
+      if(!cfgFile.exists() && s_europaHome != null)
+        cfgFile = new File(s_europaHome+"/config", s_cfgFilename);
+
+      // 6. Search for NDDL.cfg in $EUROPA_HOME/config
+      if(!cfgFile.exists() && s_europaHome != null)
+        cfgFile = new File(s_europaHome+"/config", DEFAULT_CFG);
+
+      // 7. if all else fails, attempt to look in $PLASMA_HOME
+      if(!cfgFile.exists() && s_plasmaHome != null)
+        cfgFile = new File(s_plasmaHome+"/config", DEFAULT_CFG);
+
+      // Give up if it's still not found.
+      if(!cfgFile.exists())
         throw new FileNotFoundException("Couldn't find "+s_cfgFilename);
 
       assert(DebugMsg.debugMsg("ModelAccessor:init", "Loading Compiler configuration data from file "+cfgFile));
