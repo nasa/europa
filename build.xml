@@ -224,17 +224,18 @@
         description="Puts distribution in a single zip file, excludes static libs">
     <delete file="${dir.dist}/${file.europa-dist}"/>
     <zip destfile="${dir.dist}/${file.europa-dist}" 
-    	 basedir="${dir.dist.base}"
-    	 excludes="lib/*.a"
-    />
+    	 excludes="lib/*.a">
+		<zipfileset dir="${dir.dist.base}" dirmode="775"/>
+    </zip>
   </target>
 		
   <target name="zip-static-libs" depends="dist"
   	description="Puts distribution in a single zip file, includes static libs">
     <delete file="${dir.dist}/${file.europa-static-libs}"/>
     <zip destfile="${dir.dist}/${file.europa-static-libs}" 
-    	 basedir="${dir.dist.base}"
-         includes="lib/*.a"/>
+         includes="lib/*.a">
+		<zipfileset dir="${dir.dist.base}" dirmode="775"/>
+    </zip>
   </target>
 	                
   <target name="run-example-cpp">
