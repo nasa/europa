@@ -59,27 +59,27 @@ using namespace EUROPA::SOLVERS::HSTS;
 
 void registerTestElements(EngineId& engine);
 
-class SolversTestEngine : public EngineBase 
+class SolversTestEngine : public EngineBase
 {
-  public:  
+  public:
 	SolversTestEngine();
 	virtual ~SolversTestEngine();
-	
+
     const SchemaId&           getSchema()           { return ((Schema*)getComponent("Schema"))->getId(); }
     const ConstraintEngineId& getConstraintEngine() { return ((ConstraintEngine*)getComponent("ConstraintEngine"))->getId(); }
     const PlanDatabaseId&     getPlanDatabase()     { return ((PlanDatabase*)getComponent("PlanDatabase"))->getId(); }
-    const RulesEngineId&      getRulesEngine()      { return ((RulesEngine*)getComponent("RulesEngine"))->getId(); }    
-	  
-  protected: 
-    void createModules();       
+    const RulesEngineId&      getRulesEngine()      { return ((RulesEngine*)getComponent("RulesEngine"))->getId(); }
+
+  protected:
+    void createModules();
 };
 
 SolversTestEngine::SolversTestEngine()
 {
     createModules();
     doStart();
-    
-    EUROPA::NDDL::loadSchema(getSchema(),((RuleSchema*)getComponent("RuleSchema"))->getId()); 
+
+    EUROPA::NDDL::loadSchema(getSchema(),((RuleSchema*)getComponent("RuleSchema"))->getId());
     registerTestElements(getId());
 }
 
@@ -100,31 +100,31 @@ void SolversTestEngine::createModules()
 }
 
 
-class TestEngine : public SolversTestEngine 
+class TestEngine : public SolversTestEngine
 {
 public:
   TestEngine()
   {
   }
-  
+
   bool playTransactions(const char* txSource)
   {
     check_error(txSource != NULL, "NULL transaction source provided.");
-    
+
     // Obtain the client to play transactions on.
     DbClientId client = getPlanDatabase()->getClient();
-    
+
     // Construct player
     DbClientTransactionPlayer player(client);
-    
+
     // Open transaction source and play transactions
     std::ifstream in(txSource);
 
     check_error(in, "Invalid transaction source '" + std::string(txSource) + "'.");
     player.play(in);
-    
+
     return getConstraintEngine()->constraintConsistent();
-  }  
+  }
 };
 
 /**
@@ -205,14 +205,14 @@ public:
 private:
   static bool testBasicAllocation(){
     TestEngine testEngine;
-    
+
     TiXmlElement* configXml = initXml((getTestLoadLibraryPath() + "/ComponentFactoryTest.xml").c_str());
 
-    for (TiXmlElement * child = configXml->FirstChildElement(); 
-         child != NULL; 
+    for (TiXmlElement * child = configXml->FirstChildElement();
+         child != NULL;
          child = child->NextSiblingElement()) {
 
-      ComponentFactoryMgr* cfm = (ComponentFactoryMgr*)testEngine.getComponent("ComponentFactoryMgr");       
+      ComponentFactoryMgr* cfm = (ComponentFactoryMgr*)testEngine.getComponent("ComponentFactoryMgr");
       TestComponent * testComponent = static_cast<TestComponent*>(cfm->createInstance(*child));
       delete testComponent;
     }
@@ -238,7 +238,7 @@ public:
 private:
   static bool testRuleMatching() {
     TestEngine testEngine;
-    
+
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/RuleMatchingTests.xml").c_str(), "MatchingEngine");
     MatchingEngine me(testEngine.getId(),*root);
     CPPUNIT_ASSERT_MESSAGE(toString(me.ruleCount()), me.ruleCount() == 13);
@@ -272,11 +272,11 @@ private:
       CPPUNIT_ASSERT_MESSAGE(rules[0]->toString(), rules[0]->toString() == "[R0]*.*.*.*.*.*");
     }
 
-    // test R1 
+    // test R1
     {
-      IntervalToken token(db, 
-                          "A.predicateA", 
-                          true, 
+      IntervalToken token(db,
+                          "A.predicateA",
+                          true,
                           false,
                           IntervalIntDomain(0, 1000),
                           IntervalIntDomain(0, 1000),
@@ -289,7 +289,7 @@ private:
       CPPUNIT_ASSERT_MESSAGE(rules[1]->toString(), rules[1]->toString() == "[R1]*.*.start.*.*.*");
     }
 
-    // test R2 
+    // test R2
     {
       Variable<IntervalIntDomain> v0(testEngine.getConstraintEngine(), IntervalIntDomain(0, 10), false, true, "arg3");
       std::vector<MatchingRuleId> rules;
@@ -298,7 +298,7 @@ private:
       CPPUNIT_ASSERT_MESSAGE(rules[1]->toString(), rules[1]->toString() == "[R2]*.*.arg3.*.*.*");
     }
 
-    // test R3 
+    // test R3
     {
       TokenId token = db->getClient()->createToken("D.predicateF", false);
       std::vector<MatchingRuleId> rules;
@@ -501,16 +501,6 @@ private:
   }
 };
 
-class ConstraintNameListener : public ConstrainedVariableListener {
-public:
-  ConstraintNameListener(const ConstrainedVariableId& var) : ConstrainedVariableListener(var), m_constraintName("NO_CONSTRAINT") {}
-  void notifyConstraintAdded(const ConstraintId& constr, int argIndex) {
-    m_constraintName = constr->getName();
-  }
-  const LabelStr& getName() {return m_constraintName;}
-private:
-  LabelStr m_constraintName;
-};
 
 class FlawHandlerTests {
 public:
@@ -901,7 +891,7 @@ private:
     CPPUNIT_ASSERT(!near.compare(t11.getId(), t4.getId()));
     CPPUNIT_ASSERT(near.compare(t4.getId(), t12.getId()));
     CPPUNIT_ASSERT(!near.compare(t12.getId(), t4.getId()));
-    
+
     CPPUNIT_ASSERT(near.compare(t4.getId(), t13.getId()));
     CPPUNIT_ASSERT(!near.compare(t13.getId(), t4.getId()));
     CPPUNIT_ASSERT(near.compare(t4.getId(), t14.getId()));
@@ -923,7 +913,7 @@ private:
     CPPUNIT_ASSERT(!near.compare(t11.getId(), t5.getId()));
     CPPUNIT_ASSERT(near.compare(t5.getId(), t12.getId()));
     CPPUNIT_ASSERT(!near.compare(t12.getId(), t5.getId()));
-    
+
     CPPUNIT_ASSERT(near.compare(t5.getId(), t13.getId()));
     CPPUNIT_ASSERT(!near.compare(t13.getId(), t5.getId()));
     CPPUNIT_ASSERT(near.compare(t5.getId(), t14.getId()));
@@ -945,7 +935,7 @@ private:
     CPPUNIT_ASSERT(!near.compare(t11.getId(), t6.getId()));
     CPPUNIT_ASSERT(near.compare(t6.getId(), t12.getId()));
     CPPUNIT_ASSERT(!near.compare(t12.getId(), t6.getId()));
-    
+
     CPPUNIT_ASSERT(near.compare(t6.getId(), t13.getId()));
     CPPUNIT_ASSERT(!near.compare(t13.getId(), t6.getId()));
     CPPUNIT_ASSERT(near.compare(t6.getId(), t14.getId()));
@@ -987,7 +977,7 @@ private:
     CPPUNIT_ASSERT(!near.compare(t14.getId(), t8.getId()));
     CPPUNIT_ASSERT(near.compare(t8.getId(), t15.getId()));
     CPPUNIT_ASSERT(!near.compare(t15.getId(), t8.getId()));
-    
+
 
     CPPUNIT_ASSERT(near.compare(t9.getId(), t10.getId()));
     CPPUNIT_ASSERT(!near.compare(t10.getId(), t9.getId()));
@@ -1053,7 +1043,7 @@ private:
     CPPUNIT_ASSERT(far.compare(t11.getId(), t4.getId()));
     CPPUNIT_ASSERT(!far.compare(t4.getId(), t12.getId()));
     CPPUNIT_ASSERT(far.compare(t12.getId(), t4.getId()));
-    
+
     CPPUNIT_ASSERT(!far.compare(t4.getId(), t13.getId()));
     CPPUNIT_ASSERT(far.compare(t13.getId(), t4.getId()));
     CPPUNIT_ASSERT(!far.compare(t4.getId(), t14.getId()));
@@ -1075,7 +1065,7 @@ private:
     CPPUNIT_ASSERT(far.compare(t11.getId(), t5.getId()));
     CPPUNIT_ASSERT(!far.compare(t5.getId(), t12.getId()));
     CPPUNIT_ASSERT(far.compare(t12.getId(), t5.getId()));
-    
+
     CPPUNIT_ASSERT(!far.compare(t5.getId(), t13.getId()));
     CPPUNIT_ASSERT(far.compare(t13.getId(), t5.getId()));
     CPPUNIT_ASSERT(!far.compare(t5.getId(), t14.getId()));
@@ -1097,7 +1087,7 @@ private:
     CPPUNIT_ASSERT(far.compare(t11.getId(), t6.getId()));
     CPPUNIT_ASSERT(!far.compare(t6.getId(), t12.getId()));
     CPPUNIT_ASSERT(far.compare(t12.getId(), t6.getId()));
-    
+
     CPPUNIT_ASSERT(!far.compare(t6.getId(), t13.getId()));
     CPPUNIT_ASSERT(far.compare(t13.getId(), t6.getId()));
     CPPUNIT_ASSERT(!far.compare(t6.getId(), t14.getId()));
@@ -1139,7 +1129,7 @@ private:
     CPPUNIT_ASSERT(far.compare(t14.getId(), t8.getId()));
     CPPUNIT_ASSERT(!far.compare(t8.getId(), t15.getId()));
     CPPUNIT_ASSERT(far.compare(t15.getId(), t8.getId()));
-    
+
 
     CPPUNIT_ASSERT(!far.compare(t9.getId(), t10.getId()));
     CPPUNIT_ASSERT(far.compare(t10.getId(), t9.getId()));
@@ -1184,7 +1174,7 @@ private:
     CPPUNIT_ASSERT(!far.compare(t13.getId(), t14.getId()));
     CPPUNIT_ASSERT(!far.compare(t14.getId(), t15.getId()));
     CPPUNIT_ASSERT(!far.compare(t15.getId(), t13.getId()));
-    
+
     return true;
   }
 
@@ -1294,11 +1284,11 @@ private:
     ValueEnum trimEnumIntDP(db->getClient(), enumIntVar.getId(), *intTrimHeurXml);
 
     CPPUNIT_ASSERT(trimIntIntDP.getNext() == 3);
-    CPPUNIT_ASSERT(trimEnumIntDP.getNext() == 3); 
+    CPPUNIT_ASSERT(trimEnumIntDP.getNext() == 3);
     CPPUNIT_ASSERT(trimIntIntDP.getNext() == 2);
-    CPPUNIT_ASSERT(trimEnumIntDP.getNext() == 2); 
+    CPPUNIT_ASSERT(trimEnumIntDP.getNext() == 2);
     CPPUNIT_ASSERT(trimIntIntDP.getNext() == 4);
-    CPPUNIT_ASSERT(trimEnumIntDP.getNext() == 4); 
+    CPPUNIT_ASSERT(trimEnumIntDP.getNext() == 4);
 
     ValueEnum enumStrDP(db->getClient(), enumStrVar.getId(), *strHeurXml);
 
@@ -1308,7 +1298,7 @@ private:
     CPPUNIT_ASSERT(enumStrDP.getNext() == LabelStr("foo"));
 
     ValueEnum trimEnumStrDP(db->getClient(), enumStrVar.getId(), *strTrimHeurXml);
-    
+
     CPPUNIT_ASSERT(trimEnumStrDP.getNext() == LabelStr("quux"));
     CPPUNIT_ASSERT(trimEnumStrDP.getNext() == LabelStr("foo"));
 
@@ -1344,7 +1334,7 @@ private:
     testEngine.getSchema()->addPredicate("A.Foo");
     PlanDatabaseId db = testEngine.getPlanDatabase();
     DbClientId client = db->getClient();
-    Object o1(db, "A", "o1");    
+    Object o1(db, "A", "o1");
 
     //flawed token that should be compatible with everything
     IntervalToken flawedToken(db, "A.Foo", false, false);
@@ -1477,7 +1467,7 @@ private:
     client->constrain(o1.getId(), tok1.getId(), tok1.getId());
     client->constrain(o1.getId(), tok1.getId(), tok2.getId());
 
-    IntervalToken flawedToken(db, "A.Foo", false, false, IntervalIntDomain(1, 10), IntervalIntDomain(4, 20), 
+    IntervalToken flawedToken(db, "A.Foo", false, false, IntervalIntDomain(1, 10), IntervalIntDomain(4, 20),
                               IntervalIntDomain(3, 10), "o1");
     client->activate(flawedToken.getId());
 
@@ -1588,7 +1578,7 @@ private:
       CPPUNIT_ASSERT(solver.solve());
       CPPUNIT_ASSERT_MESSAGE(toString(solver.getStepCount()), solver.getStepCount() == 1);
       CPPUNIT_ASSERT_MESSAGE(toString(solver.getDepth()), solver.getDepth() == 2);
- 
+
       // Now we reset one decision, then clear it. Expect the solution and depth to be 1.
       solver.reset(1);
       solver.clear();
@@ -1667,7 +1657,7 @@ private:
       CPPUNIT_ASSERT(solver.solve(100, 100));
       CPPUNIT_ASSERT_MESSAGE(toString(testEngine.getPlanDatabase()->getTokens().size()), testEngine.getPlanDatabase()->getTokens().size() == 1);
     }
-  
+
     return true;
   }
 
@@ -1699,7 +1689,7 @@ private:
     Solver solver(testEngine.getPlanDatabase(), *child);
     solver.setMaxSteps(5); //arbitrary number of maximum steps
     CPPUNIT_ASSERT(solver.solve(20)); //arbitrary number of steps < max
-    
+
     return true;
   }
 
@@ -1749,7 +1739,7 @@ private:
       if(solver.noMoreFlaws()){
         solutionCount++;
 
-        debugMsg("SolverTests:testMultipleSolutionsSearch", 
+        debugMsg("SolverTests:testMultipleSolutionsSearch",
                  "Solution " << solutionCount << " found." << PlanDatabaseWriter::toString(testEngine.getPlanDatabase()));
 
         backjumpDistance = 1;
@@ -1759,14 +1749,14 @@ private:
         // further down the stack. In the latter case we will have to backjump further.
         backjumpDistance = (solver.getDepth() > priorDepth ? solver.getDepth() - priorDepth : 1 );
 
-        debugMsg("SolverTests:testMultipleSolutionsSearch", 
-                 "Timed out on iteration " << iterationCount << " at depth " << solver.getDepth() << 
+        debugMsg("SolverTests:testMultipleSolutionsSearch",
+                 "Timed out on iteration " << iterationCount << " at depth " << solver.getDepth() <<
                  ". Backjump distance = " << backjumpDistance);
 
         timeoutCount++;
       }
       else {
-        debugMsg("SolverTests:testMultipleSolutionsSearch", 
+        debugMsg("SolverTests:testMultipleSolutionsSearch",
                  "Exhausted after iteration " << iterationCount);
       }
     }
@@ -1914,7 +1904,7 @@ private:
 
   static bool testUnboundVariableFlawIteration() {
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawFilterTests.xml" ).c_str(), "UnboundVariableManager");
-    
+
     TestEngine testEngine;
     UnboundVariableManager fm(*root);
     fm.initialize(*root,testEngine.getPlanDatabase());
@@ -1933,9 +1923,9 @@ private:
       CPPUNIT_ASSERT(variables.find(var) != variables.end());
       variables.erase(var);
     }
-    
+
     CPPUNIT_ASSERT(flawIterator->done());
-    
+
     for(ConstrainedVariableSet::const_iterator it = variables.begin(); it != variables.end(); ++it)
       CPPUNIT_ASSERT(!fm.inScope(*it));
 
@@ -1943,10 +1933,10 @@ private:
     delete root;
     return true;
   }
-  
+
   static bool testOpenConditionFlawIteration() {
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawFilterTests.xml" ).c_str(), "OpenConditionManager");
-    
+
     TestEngine testEngine;
     OpenConditionManager fm(*root);
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
@@ -1956,7 +1946,7 @@ private:
 
     TokenSet tokens = testEngine.getPlanDatabase()->getTokens();
     IteratorId flawIterator = fm.createIterator();
-    
+
     while(!flawIterator->done()) {
       const TokenId token = (const TokenId) flawIterator->next();
       if(token.isNoId())
@@ -1973,7 +1963,7 @@ private:
 
     delete (Iterator*) flawIterator;
     delete root;
-    
+
     return true;
   }
 
@@ -1989,7 +1979,7 @@ private:
 
     TokenSet tokens = testEngine.getPlanDatabase()->getTokens();
     IteratorId flawIterator = fm.createIterator();
-    
+
     while(!flawIterator->done()) {
       const TokenId token = (const TokenId) flawIterator->next();
       if(token.isNoId())
@@ -2076,7 +2066,7 @@ public:
 void registerTestElements(EngineId& engine)
 {
    CESchema* ces = (CESchema*)engine->getComponent("CESchema");
-   EUROPA::SOLVERS::ComponentFactoryMgr* cfm = (EUROPA::SOLVERS::ComponentFactoryMgr*)engine->getComponent("ComponentFactoryMgr");      
+   EUROPA::SOLVERS::ComponentFactoryMgr* cfm = (EUROPA::SOLVERS::ComponentFactoryMgr*)engine->getComponent("ComponentFactoryMgr");
 
    // For tests on the matching engine
    REGISTER_COMPONENT_FACTORY(cfm,MatchingRule, MatchingRule);
@@ -2093,7 +2083,7 @@ void registerTestElements(EngineId& engine)
    REGISTER_CONSTRAINT(ces,LazyAlwaysFails, "lazyAlwaysFails",  "Default");
 }
 
-/*void SolversModuleTests::runTests(std::string path) 
+/*void SolversModuleTests::runTests(std::string path)
 {
    setTestLoadLibraryPath(path);
    runTestSuite(ComponentFactoryTests::test);
@@ -2107,36 +2097,36 @@ void registerTestElements(EngineId& engine)
 void SolversModuleTests::cppTests()
 {
    setTestLoadLibraryPath(".");
-} 
+}
 
 void SolversModuleTests::componentFactoryTests()
 {
    ComponentFactoryTests::test();
-} 
+}
 
 void SolversModuleTests::filterTests()
 {
    FilterTests::test();
-} 
+}
 
 void SolversModuleTests::flawIteratorTests()
 {
    FlawIteratorTests::test();
-} 
+}
 
 void SolversModuleTests::flawManagerTests()
 {
    FlawManagerTests::test();
-} 
+}
 
 void SolversModuleTests::flawHandlerTests()
 {
    FlawHandlerTests::test();
-} 
+}
 
 void SolversModuleTests::solverTests()
 {
    SolverTests::test();
-} 
+}
 
 

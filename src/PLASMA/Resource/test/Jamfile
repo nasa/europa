@@ -11,16 +11,15 @@ ModuleMain rs-module-tests : module-tests.cc rs-test-module.cc rs-flow-test-modu
 RunModuleMain run-rs-module-tests : rs-module-tests ;
 LocalDepends tests : run-rs-module-tests ;
 
-# TODO: put these tests back in
 local nddl_tests = 
-#    multi-resources.nddl 
-#    simple-resources.nddl 
+ #   multi-resources.nddl 
+ #   simple-resources.nddl 
 ;
 
 for model in $(nddl_tests)
 {
   local exe = $(model:S=) ;
-  NddlMain $(exe) : NddlMain.o : $(model) : NDDL ;
+  #NddlMain $(exe) : NddlMain.o : $(model) : NDDL ;
   RunModuleMain run-$(exe) : $(exe) : $(model:S=.xml) ;
 
         local hh = $(model:S=.hh) ;

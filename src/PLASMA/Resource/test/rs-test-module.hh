@@ -11,6 +11,7 @@ class ResourceModuleTests : public CppUnit::TestFixture {
   CPPUNIT_TEST(resourceTests);
   CPPUNIT_TEST(profileTests);
   CPPUNIT_TEST(SAVHResourceTests);
+  CPPUNIT_TEST(ResourceSolverTests);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -19,16 +20,17 @@ public:
     ResourceModuleTests::cppSetup();
   }
 
-  void tearDown() 
+  void tearDown()
   {
   }
 
-  static void runTests(std::string path);
+//  static void runTests(std::string path);
   void cppSetup(void);
   void defaultSetupTests(void);
   void resourceTests(void);
   void profileTests(void);
   void SAVHResourceTests(void);
+  void ResourceSolverTests(void);
 };
 
 #endif /* H_RESOURCE_MODULE_TESTS */
