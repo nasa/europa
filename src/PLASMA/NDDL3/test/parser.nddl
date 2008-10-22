@@ -1,0 +1,139 @@
+/*
+ * Simple set of tests to ensure that the parser can handle
+ * all of the grammar.
+ */
+
+// nddlStatement Tests:
+
+#include "included.nddl"
+
+constraint addEq(a, b, c) {
+  a <: numeric &&
+  b <: numeric &&
+  a <: c &&
+  b <: c
+}
+
+typedef int [1 inf] positive;
+typedef float [-inff +inff] real;
+
+positive pos;
+real r = 50f;
+
+class foo {
+  predicate p {}
+}
+
+foo::p {
+}
+
+new foo();
+
+pos = 23;
+
+foo.close();
+
+positive b;
+
+addEq(40, 90, b);
+
+a meets b;
+
+goal(foo.p);
+rejectable(foo.p somep);
+
+;;
+
+// typeDefinition tests:
+
+typedef int [0 1] bool;
+typedef int {2, 3, 5, 7, 11, 13, 17, 19} lowprime;
+typedef float [0.0 1.0] normal;
+typedef float {3.14159, 2.71828} pie;
+typedef string {"Red", "Yellow", "Blue"} primary;
+typedef boolean {false} nope;
+
+foo fooa = new foo();
+foo foob = new foo();
+foo fooc = new foo();
+typedef foo {fooa, foob, fooc} somefoos;
+
+// constraintSignature tests:
+
+constraint complex(a, b, c, d, e, f) {
+  (b <: a || a <: b) &&
+  (c <: d || d <: c) &&
+  a <: int &&
+  b <: float &&
+  c <: boolean &&
+  e <: string &&
+  f <: foo
+}
+
+// classDeclaration, classStatement, constructorStatement, predicateStatement tests:
+
+class AClass;
+class AClass {
+  int a;
+
+  AClass(int a) {
+    this.a = a;
+  }
+
+  predicate p{}
+
+  ;;
+}
+
+class BClass extends AClass {
+  BClass(int b) {
+    super(b);
+    ;;
+  }
+  predicate q{
+    geq(a, 50);
+    int c = [40 100];
+    c = 60;
+  }
+}
+
+// rule tests:
+
+BClass::q {
+  // OH NOES RELATIONS!:
+  any(object.q q0);
+  ends(object.q q1);
+  starts(object.q q2);
+  equals(object.q q3);
+  equal(object.q q4);
+  before(object.q q5);
+  after(object.q q6);
+  contains(object.q q7);
+  contained_by(object.q q8);
+  ends_before(object.q q9);
+  ends_after(object.q q10);
+  starts_before_end(object.q q11);
+  ends_after_start(object.q q12);
+  contains_start(object.q q13);
+  starts_during(object.q q14);
+  contains_end(object.q q15);
+  ends_during(object.q q16);
+  meets(object.q q17);
+  met_by(object.q q18);
+  parallels(object.q q19);
+  paralleled_by(object.q q20);
+  starts_before(object.q q21);
+  starts_after(object.q q22);
+  int d = [40 100];
+  eq(d, 50);
+  if(d == 50) {
+    debug(d);
+  }
+  else {
+    debug(d);
+  }
+  foreach(f in somefoos) {
+    debug(f);
+  }
+  ;;
+}
