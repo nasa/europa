@@ -17,7 +17,7 @@
 
    @brief A small test of classes Error and TestData and the related
    macros.
-   
+
    CMG: Added test for id's and entities
 */
 
@@ -59,19 +59,6 @@
   } \
 }
 
-#define runTestSuite(test) { \
-  try{ \
-  std::cout << #test << "***************" << std::endl; \
-  if (test()) \
-    std::cout << #test << " PASSED." << std::endl; \
-  else \
-    std::cout << #test << " FAILED." << std::endl; \
-  }\
-  catch (Error err){\
-   err.print(std::cout);\
-  }\
-  }
-
 using namespace EUROPA;
 
 class TestError {
@@ -111,7 +98,7 @@ private:
       Error::setStream(std::cout);
       warn("Warning messages working");
       Error::setStream(std::cerr);
-    } 
+    }
     catch (Error e) {
       __x__(e);
       success = false;
@@ -125,7 +112,7 @@ private:
       check_error(var == 2);
       __y__("check_error(var == 2) did not throw an exception");
       success = false;
-    } 
+    }
     catch (Error e) {
       Error::doDisplayErrors();
       __z__(e, Error("var == 2", __FILE__, __LINE__ - 5), success);
@@ -135,7 +122,7 @@ private:
       check_error(var == 2, "check_error(var == 2)");
       __y__("check_error(var == 2, blah) did not throw an exception");
       success = false;
-    } 
+    }
     catch (Error e) {
       Error::doDisplayErrors();
       __z__(e, Error("var == 2", "check_error(var == 2)", __FILE__, __LINE__ - 5), success);
@@ -145,7 +132,7 @@ private:
       check_error(var == 2, Error("check_error(var == 2)"));
       __y__("check_error(var == 2, Error(blah)) did not throw an exception");
       success = false;
-    } 
+    }
     catch (Error e) {
       Error::doDisplayErrors();
       __z__(e, Error("var == 2", "check_error(var == 2)", __FILE__, __LINE__ - 5), success);
@@ -217,7 +204,7 @@ private:
       handle_error(!DebugMessage::readConfigFile(debugStream),
                    "problems reading debug config file",
                    DebugErr::DebugConfigError());
-    
+
     debugMsg("main1", "done opening files");
     condDebugMsg(std::cout.good(), "main1a", "std::cout is good");
     debugStmt("main2a", int s = 0; for (int i = 0; i < 5; i++) { s += i; } debugOutput << "Sum is " << s << '\n'; );
@@ -289,7 +276,7 @@ public:
   }
 };
 
-class Bing: public Root 
+class Bing: public Root
 {
 public:
   Bing(){
@@ -650,7 +637,7 @@ public:
     void handleDiscard(){}
   };
 
-private:      
+private:
   static bool testReferenceCounting(){
     TestEntity* e1 = new TestEntity();
     TestEntity* e2 = new TestEntity();
@@ -745,15 +732,31 @@ private:
   }
 };
 
-void UtilModuleTests::runTests(std::string path) {
-	setTestLoadLibraryPath(path);
 
-  runTestSuite(ErrorTest::test);
-  runTestSuite(DebugTest::test);
-  runTestSuite(IdTests::test);
-  runTestSuite(LabelTests::test);
-  runTestSuite(EntityTest::test);
-  runTestSuite(XMLTest::test);
+void UtilModuleTests::errorTests()
+{
+	ErrorTest::test();
+}
 
-  std::cout << "Finished" << std::endl;
-  }
+void UtilModuleTests::debugTests()
+{
+	DebugTest::test();
+}
+void UtilModuleTests::idTests()
+{
+	IdTests::test();
+}
+void UtilModuleTests::labelTests()
+{
+	LabelTests::test();
+}
+
+void UtilModuleTests::entityTests()
+{
+	EntityTest::test();
+}
+
+void UtilModuleTests::xmlTests()
+{
+	XMLTest::test();
+}
