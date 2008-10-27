@@ -1,0 +1,15 @@
+SubDir PLASMA NDDL3 base ;
+
+if ! $(PLASMA_READY) {
+
+	SubDirC++Flags -D_NO_W32_PSEUDO_MODIFIERS ;
+  Antlr3Grammar NDDL3 : antlr/NDDL3.g ;
+
+	ModuleBase NDDL3
+	 :
+	 NDDL3Lexer.c
+	 NDDL3Parser.c
+	 #NDDL3TreeParser.c
+	 ;
+
+} # PLASMA_READY

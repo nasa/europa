@@ -29,6 +29,7 @@ SubInclude PLASMA PlanDatabase ;
 SubInclude PLASMA RulesEngine ;
 SubInclude PLASMA TemporalNetwork ;
 SubInclude PLASMA NDDL ;
+SubInclude PLASMA NDDL3 ;
 SubInclude PLASMA Solvers ;
 
 # extensions. 

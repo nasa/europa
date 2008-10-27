@@ -1,0 +1,13 @@
+SubDir PLASMA NDDL3 ;
+
+if ! $(PLASMA_READY) {
+
+Module NDDL3 : Antlr3 RulesEngine TemporalNetwork ;
+
+SubInclude PLASMA NDDL3 base ;
+
+#ModuleFiles NDDL3 : ModuleNddl.cc ;
+
+#SubInclude PLASMA NDDL3 test ;
+
+} # PLASMA_READY
