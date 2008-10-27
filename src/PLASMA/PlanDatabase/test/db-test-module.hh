@@ -21,11 +21,10 @@ class PlanDatabaseModuleTests : public CppUnit::TestFixture {
     cppSetup();
   }
 
-  void tearDown() 
+  void tearDown()
   {
   }
 
-  static void runTests(std::string path);
   static void cppSetup(void);
   void schemaTest(void);
   void objectTest(void);

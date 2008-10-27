@@ -21,22 +21,17 @@ public:
 
     std::string numberStr("1$2.45$3.04$-8.9$");
     const std::list<double>& numbers= listFromString(numberStr, true);
-    double sum = 0; 
+    double sum = 0;
 
     for(std::list<double>::const_iterator it = numbers.begin(); it != numbers.end(); ++it){
       double number = *it;
       sum += number;
     }
     CPPUNIT_ASSERT(numbers.size() == 4);
-    CPPUNIT_ASSERT(sum == (1 + 2.45 + 3.04 - 8.9));    
+    CPPUNIT_ASSERT(sum == (1 + 2.45 + 3.04 - 8.9));
     return true;
   }
 };
-
-/*void NDDLModuleTests::runTests(std::string path) 
-{
-  runTestSuite(UtilitiesTest::test);
-}*/
 
 void NDDLModuleTests::utilitiesTests()
 {

@@ -19,11 +19,10 @@ public:
     TemporalNetworkModuleTests::cppSetup();
   }
 
-  void tearDown() 
+  void tearDown()
   {
   }
 
-  static void runTests(std::string path);
   void cppSetup();
   void temporalNetworkTests();
   void temporalNetworkConstraintEngineOnlyTests();

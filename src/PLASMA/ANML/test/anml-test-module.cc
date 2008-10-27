@@ -11,8 +11,5 @@
 
 using namespace EUROPA;
 
-void ANMLModuleTests::runTests(std::string path) 
-{
-}
 
 

@@ -27,27 +27,27 @@
 #include <string>
 #include <list>
 
-class TNTestEngine : public EngineBase 
+class TNTestEngine : public EngineBase
 {
-  public:  
+  public:
     TNTestEngine();
     virtual ~TNTestEngine();
-          
-  protected: 
-    void createModules();       
+
+  protected:
+    void createModules();
 };
 
 TNTestEngine::TNTestEngine()
 {
     createModules();
     doStart();
-    Schema* schema = (Schema*)getComponent("Schema");  
-    schema->addObjectType("Objects"); 
-    schema->addPredicate("Objects.Predicate"); 
-    schema->addPredicate("Objects.PredicateA"); 
-    schema->addMember("Objects.PredicateA", IntervalIntDomain().getTypeName(), "IntervalParam"); 
-    schema->addPredicate("Objects.PredicateB"); 
-    schema->addMember("Objects.PredicateB", IntervalIntDomain().getTypeName(), "IntervalParam"); 
+    Schema* schema = (Schema*)getComponent("Schema");
+    schema->addObjectType("Objects");
+    schema->addPredicate("Objects.Predicate");
+    schema->addPredicate("Objects.PredicateA");
+    schema->addMember("Objects.PredicateA", IntervalIntDomain().getTypeName(), "IntervalParam");
+    schema->addPredicate("Objects.PredicateB");
+    schema->addMember("Objects.PredicateB", IntervalIntDomain().getTypeName(), "IntervalParam");
 }
 
 TNTestEngine::~TNTestEngine()
@@ -229,7 +229,7 @@ private:
     TN_DEFAULT_TEARDOWN();
     return true;
   }
-  
+
   static bool testTemporalPropagation() {
     CD_DEFAULT_SETUP(ce,db,false);
 
@@ -239,7 +239,7 @@ private:
     db.close();
 
     IntervalToken t1(db.getId(),
-    		     "Objects.Predicate", 
+    		     "Objects.Predicate",
     		     true,
     		     false,
     		     IntervalIntDomain(0, 10),
@@ -250,8 +250,8 @@ private:
     CPPUNIT_ASSERT(t1.end()->getDerivedDomain().getLowerBound() == 5);
     CPPUNIT_ASSERT(t1.end()->getDerivedDomain().getUpperBound() == 17);
 
-    IntervalToken t2(db.getId(), 
-    		     "Objects.Predicate", 
+    IntervalToken t2(db.getId(),
+    		     "Objects.Predicate",
     		     true,
     		     false,
     		     IntervalIntDomain(0, 10),
@@ -263,9 +263,9 @@ private:
     std::vector<ConstrainedVariableId> temp;
     temp.push_back(t1.end());
     temp.push_back(t2.start());
-    
 
-    ConstraintId beforeConstraint = db.getConstraintEngine()->createConstraint(LabelStr("precedes"),                                                                        
+
+    ConstraintId beforeConstraint = db.getConstraintEngine()->createConstraint(LabelStr("precedes"),
                                                                         temp);
     CPPUNIT_ASSERT(!beforeConstraint.isNoId());
 
@@ -290,17 +290,17 @@ private:
     CPPUNIT_ASSERT(!timeline.isNoId());
 
     db.close();
-    
+
     IntervalToken first(db.getId(),
-			"Objects.Predicate", 
+			"Objects.Predicate",
 			true,
 			false,
 			IntervalIntDomain(0, 100),
 			IntervalIntDomain(0, 100),
 			IntervalIntDomain(1, 1000));
-    
+
     IntervalToken second(db.getId(),
-			 "Objects.Predicate", 
+			 "Objects.Predicate",
 			 true,
 			 false,
 			 IntervalIntDomain(0, 100),
@@ -317,7 +317,7 @@ private:
 
     // compute from advisor
     CPPUNIT_ASSERT (db.getTemporalAdvisor()->canPrecede(first.getId(),second.getId()));
-    
+
     second.start()->reset();
     second.end()->reset();
 
@@ -336,7 +336,7 @@ private:
 
     bool res = ce.propagate();
     CPPUNIT_ASSERT(res);
-    
+
     // compute from propagator directly
     res = tp->canPrecede(first.end(), second.start());
     CPPUNIT_ASSERT (res);
@@ -360,7 +360,7 @@ private:
 
     res = ce.propagate();
     CPPUNIT_ASSERT(res);
-    
+
     // compute from propagator directly
     CPPUNIT_ASSERT (!tp->canPrecede(first.end(), second.start()));
     CPPUNIT_ASSERT (tp->canPrecede(second.end(), first.start()));
@@ -380,21 +380,21 @@ private:
     db.close();
 
     IntervalToken token(db.getId(),
-			"Objects.Predicate", 
+			"Objects.Predicate",
 			true,
 			false,
 			IntervalIntDomain(0, 10),
 			IntervalIntDomain(0, 20),
 			IntervalIntDomain(1, 1000));
     IntervalToken predecessor(db.getId(),
-			      "Objects.Predicate", 
+			      "Objects.Predicate",
 			      true,
 			      false,
 			      IntervalIntDomain(0, 10),
 			      IntervalIntDomain(0, 20),
 			      IntervalIntDomain(1, 1000));
     IntervalToken successor(db.getId(),
-			    "Objects.Predicate", 
+			    "Objects.Predicate",
 			    true,
 			    false,
 			    IntervalIntDomain(0, 10),
@@ -421,7 +421,7 @@ private:
     db.close();
 
     IntervalToken t0(db.getId(),
-		     "Objects.Predicate", 
+		     "Objects.Predicate",
 		     true,
 		     false,
 		     IntervalIntDomain(0, 10),
@@ -429,7 +429,7 @@ private:
 		     IntervalIntDomain(1, 1000));
 
     IntervalToken t1(db.getId(),
-		     "Objects.Predicate", 
+		     "Objects.Predicate",
 		     true,
 		     false,
 		     IntervalIntDomain(0, 10),
@@ -437,7 +437,7 @@ private:
 		     IntervalIntDomain(1, 1000));
 
     IntervalToken t2(db.getId(),
-		     "Objects.Predicate", 
+		     "Objects.Predicate",
 		     true,
 		     false,
 		     IntervalIntDomain(0, 10),
@@ -487,9 +487,9 @@ private:
   }
 
   static bool testTemporalDistance() {
-    TNTestEngine tnte; 
-    ConstraintEngine& ce = *((ConstraintEngine*)tnte.getComponent("ConstraintEngine")); ; 
-    PlanDatabase& db = *((PlanDatabase*)tnte.getComponent("PlanDatabase")); 
+    TNTestEngine tnte;
+    ConstraintEngine& ce = *((ConstraintEngine*)tnte.getComponent("ConstraintEngine")); ;
+    PlanDatabase& db = *((PlanDatabase*)tnte.getComponent("PlanDatabase"));
 
     IntervalIntDomain d1 = IntervalIntDomain(-10, 10);
     IntervalIntDomain d2 = IntervalIntDomain( 20, 30);
@@ -501,19 +501,19 @@ private:
     // <-10>----------<10>
     //                          <20>----------<30>
     {
-      const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v1, v2, true );      
+      const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v1, v2, true );
 
       CPPUNIT_ASSERT( 10 == distance.getLowerBound() );
       CPPUNIT_ASSERT( 40 == distance.getUpperBound() );
     }
-    
+
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v2, v1, true );
-      
+
       CPPUNIT_ASSERT( -40 == distance.getLowerBound() );
       CPPUNIT_ASSERT( -10 == distance.getUpperBound() );
     }
-    
+
     IntervalIntDomain d3 = IntervalIntDomain( 5, 15 );
     ConstrainedVariableId v3 = (new Variable<IntervalIntDomain> (ce.getId(), d3, false, true, "v3"))->getId();
 
@@ -521,14 +521,14 @@ private:
     //        <5>----------<15>
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v1, v3, true );
-      
+
       CPPUNIT_ASSERT( -5 == distance.getLowerBound() );
       CPPUNIT_ASSERT( 25 == distance.getUpperBound() );
     }
-    
+
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v3, v1, true );
-      
+
       CPPUNIT_ASSERT( -25 == distance.getLowerBound() );
       CPPUNIT_ASSERT(   5 == distance.getUpperBound() );
     }
@@ -541,14 +541,14 @@ private:
     //           <0>-<5>
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v1, v4, true );
-      
+
       CPPUNIT_ASSERT( -10 == distance.getLowerBound() );
       CPPUNIT_ASSERT(  15 == distance.getUpperBound() );
     }
-    
+
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v4, v1, true );
-      
+
       CPPUNIT_ASSERT( -15 == distance.getLowerBound() );
       CPPUNIT_ASSERT(  10 == distance.getUpperBound() );
     }
@@ -560,14 +560,14 @@ private:
     //  <-20>---------------------------------<20>
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v1, v5, true );
-      
+
       CPPUNIT_ASSERT( -30 == distance.getLowerBound() );
       CPPUNIT_ASSERT(  30 == distance.getUpperBound() );
     }
 
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v5, v1, true );
-      
+
       CPPUNIT_ASSERT( -30 == distance.getLowerBound() );
       CPPUNIT_ASSERT(  30 == distance.getUpperBound() );
     }
@@ -582,14 +582,14 @@ private:
 
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v1, v7, true );
-      
+
       CPPUNIT_ASSERT( -g_infiniteTime() == distance.getLowerBound() );
       CPPUNIT_ASSERT(  g_infiniteTime() == distance.getUpperBound() );
     }
 
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v7, v1, true );
-      
+
       CPPUNIT_ASSERT( -g_infiniteTime() == distance.getLowerBound() );
       CPPUNIT_ASSERT(  g_infiniteTime() == distance.getUpperBound() );
     }
@@ -599,7 +599,7 @@ private:
 
     {
       const IntervalIntDomain distance = db.getTemporalAdvisor()->getTemporalDistanceDomain( v6, v7, true );
-      
+
       CPPUNIT_ASSERT( -g_infiniteTime() == distance.getLowerBound() );
       CPPUNIT_ASSERT(  g_infiniteTime() == distance.getUpperBound() );
     }
@@ -625,7 +625,7 @@ private:
 
     // Allocate a token
     IntervalToken t1(db.getId(),
-    		     "Objects.Predicate", 
+    		     "Objects.Predicate",
     		     true,
     		     false,
     		     IntervalIntDomain(0, 10),
@@ -636,8 +636,8 @@ private:
     t1.activate();
 
     // Allocate another
-    IntervalToken t2(db.getId(), 
-    		     "Objects.Predicate", 
+    IntervalToken t2(db.getId(),
+    		     "Objects.Predicate",
     		     true,
     		     false,
     		     IntervalIntDomain(0, 10),
@@ -687,7 +687,7 @@ private:
 
     // Allocate a token
     IntervalToken t1(db.getId(),
-    		     "Objects.PredicateA", 
+    		     "Objects.PredicateA",
     		     true,
     		     false,
     		     IntervalIntDomain(0, 10),
@@ -764,9 +764,9 @@ private:
     DEFAULT_TEARDOWN_CE_ONLY();
     return true;
   }
-  
 
-  /**  
+
+  /**
    *  duplicates behavior of testTemporalPropagation in the TemporalPropagatorTest.
    */
 
@@ -790,7 +790,7 @@ private:
     temp.push_back(v1);
     temp.push_back(v2);
     temp.push_back(v3);
-    ConstraintId duration1 = 
+    ConstraintId duration1 =
         ce.getId()->createConstraint(LabelStr("temporalDistance"), temp);
 
     CPPUNIT_ASSERT(!duration1.isNoId());
@@ -799,7 +799,7 @@ private:
     temp.push_back(v4);
     temp.push_back(v5);
     temp.push_back(v6);
-    ConstraintId duration2 = 
+    ConstraintId duration2 =
         ce.getId()->createConstraint(LabelStr("temporalDistance"), temp);
 
     CPPUNIT_ASSERT(!duration2.isNoId());
@@ -807,7 +807,7 @@ private:
     temp.clear();
     temp.push_back(v3);
     temp.push_back(v4);
-    ConstraintId beforeConstraint = 
+    ConstraintId beforeConstraint =
         ce.getId()->createConstraint(LabelStr("precedes"), temp);
 
     CPPUNIT_ASSERT(!beforeConstraint.isNoId());
@@ -820,7 +820,7 @@ private:
     CPPUNIT_ASSERT(v4->derivedDomain().getUpperBound() == 10);
     CPPUNIT_ASSERT(v6->derivedDomain().getLowerBound() == 6);
     CPPUNIT_ASSERT(v6->derivedDomain().getUpperBound() == 20);
-    
+
     delete (Constraint*) beforeConstraint;
     delete (Constraint*) duration1;
     delete (Constraint*) duration2;
@@ -836,9 +836,9 @@ private:
   }
 
   static bool testTemporalNogood() {
-    TNTestEngine tnte; 
-    ConstraintEngine& ce = *((ConstraintEngine*)tnte.getComponent("ConstraintEngine"));  
-    TemporalPropagator* tp = (TemporalPropagator*) 
+    TNTestEngine tnte;
+    ConstraintEngine& ce = *((ConstraintEngine*)tnte.getComponent("ConstraintEngine"));
+    TemporalPropagator* tp = (TemporalPropagator*)
         ((Propagator*)ce.getPropagatorByName(LabelStr("Temporal")));
 
     IntervalIntDomain domStart = IntervalIntDomain(1,10);
@@ -853,7 +853,7 @@ private:
     temp.push_back(v1);
     temp.push_back(v2);
     temp.push_back(v3);
-    ConstraintId constraint = 
+    ConstraintId constraint =
         ce.getId()->createConstraint(LabelStr("temporalDistance"),
                                           temp);
     bool consistent = ce.propagate();
@@ -888,15 +888,6 @@ private:
     return true;
   }
 };
-
-
-void TemporalNetworkModuleTests::runTests(std::string path) {
-  setTestLoadLibraryPath(path);
-  runTestSuite(TemporalNetworkTest::test);
-  runTestSuite(TemporalNetworkConstraintEngineOnlyTest::test);
-  runTestSuite(TemporalPropagatorTest::test);
-  std::cout << "Finished" << std::endl;
-}
 
 void TemporalNetworkModuleTests::cppSetup()
 {

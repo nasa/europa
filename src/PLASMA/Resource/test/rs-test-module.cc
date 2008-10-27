@@ -2413,15 +2413,6 @@ private:
 	}
 };
 
-//void ResourceModuleTests::runTests(std::string path)
-//{
-//  setTestLoadLibraryPath(path);
-//  runTestSuite(DefaultSetupTest::test);
-//  runTestSuite(ResourceTest::test);
-//  runTestSuite(ProfileTest::test);
-//  runTestSuite(SAVHResourceTest::test);
-//}
-
 void ResourceModuleTests::cppSetup(void)
 {
   setTestLoadLibraryPath(".");
@@ -2451,5 +2442,3 @@ void ResourceModuleTests::ResourceSolverTests(void)
 {
   ResourceSolverTest::test();
 }
-
-

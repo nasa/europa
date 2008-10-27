@@ -40,17 +40,17 @@ namespace EUROPA {
   class IntervalDomainTest {
   public:
     static bool test() {
-      EUROPA_runTest(testAllocation); 
-      EUROPA_runTest(testRelaxation); 
+      EUROPA_runTest(testAllocation);
+      EUROPA_runTest(testRelaxation);
       EUROPA_runTest(testPrecision);
-      EUROPA_runTest(testIntersection);  
+      EUROPA_runTest(testIntersection);
       EUROPA_runTest(testSubset);
       EUROPA_runTest(testPrinting);
       EUROPA_runTest(testBoolDomain);
       EUROPA_runTest(testDifference);
       EUROPA_runTest(testOperatorEquals);
       EUROPA_runTest(testInfinitesAndInts);
-      EUROPA_runTest(testEnumSet); 
+      EUROPA_runTest(testEnumSet);
       EUROPA_runTest(testInsertAndRemove);
       EUROPA_runTest(testValidComparisonWithEmpty_gnats2403);
       EUROPA_runTest(testIntervalSingletonValues);
@@ -143,7 +143,7 @@ namespace EUROPA {
       bool res = l_listener.checkAndClearChange(change);
       CPPUNIT_ASSERT(res);
       CPPUNIT_ASSERT(dom0 == dom1);
-    
+
       // verify no change triggered if none should take place.
       dom0.intersect(dom1);
       res = l_listener.checkAndClearChange(change);
@@ -156,7 +156,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(res);
       CPPUNIT_ASSERT(dom0.getLowerBound() == dom1.getLowerBound());
       CPPUNIT_ASSERT(dom0.getUpperBound() == dom2.getUpperBound());
-    
+
       // Make an intersection that leads to an empty domain
       IntervalIntDomain dom3(500, 1000);
       dom0.intersect(dom3);
@@ -175,34 +175,34 @@ namespace EUROPA {
       dom6.intersect(dom7);
       CPPUNIT_ASSERT(dom6.isEmpty());
 
-      IntervalDomain dom8;    
-      IntervalDomain dom9;      
-      dom8.intersect(IntervalDomain(0.1, 0.10));      
+      IntervalDomain dom8;
+      IntervalDomain dom9;
+      dom8.intersect(IntervalDomain(0.1, 0.10));
       dom9.intersect(IntervalDomain(0.10, 0.10));
       CPPUNIT_ASSERT(dom8.intersects(dom9));
 
       // Case added to recreate failure case for GNATS 3045
-      IntervalDomain dom8a;     
-      IntervalDomain dom9a;      
-      dom8a.intersect(IntervalDomain(0.1, 0.1));    
+      IntervalDomain dom8a;
+      IntervalDomain dom9a;
+      dom8a.intersect(IntervalDomain(0.1, 0.1));
       dom9a.intersect(IntervalDomain(0.1, 0.1));
       CPPUNIT_ASSERT(dom8a.intersects(dom9a));
       CPPUNIT_ASSERT(dom8a.getUpperBound() == 0.1);
       CPPUNIT_ASSERT(dom8a.getLowerBound() == 0.1);
       CPPUNIT_ASSERT(dom9a.getUpperBound() == 0.1);
       CPPUNIT_ASSERT(dom9a.getLowerBound() == 0.1);
-      
+
       // Test at the limit of precision
       IntervalDomain dom10(0.0001);
       IntervalDomain dom11(0.0001);
       CPPUNIT_ASSERT(dom10.intersects(dom11));
-      
-      // Test at the limit of precision      
+
+      // Test at the limit of precision
       IntervalDomain dom12(-0.0001);
       IntervalDomain dom13(-0.0001);
       CPPUNIT_ASSERT(dom12.intersects(dom13));
-      
-      // Test beyond the limits of precission     
+
+      // Test beyond the limits of precission
       IntervalDomain dom14(-0.1 - EPSILON/10);
       IntervalDomain dom15(-0.1);
       CPPUNIT_ASSERT_MESSAGE(dom15.toString() + " should have a non-empty intersection " + dom14.toString(), dom14.intersects(dom15));
@@ -220,7 +220,7 @@ namespace EUROPA {
       dom16.intersect(dom17);
       CPPUNIT_ASSERT(dom16.getLowerBound() == -2.0 && dom16.getUpperBound() == 3.0);
       dom16.relax(intBase);
-      
+
       dom16.intersect(dom18);
       CPPUNIT_ASSERT(dom16.getLowerBound() == -3.0 && dom16.getUpperBound() == 2.0);
       dom16.relax(intBase);
@@ -267,9 +267,9 @@ namespace EUROPA {
       CPPUNIT_ASSERT(! dom0.isSubsetOf(dom4));
 
       // Handle intersection with infinites
-      IntervalDomain dom5; 
+      IntervalDomain dom5;
       IntervalDomain dom6(0, 100);
-      CPPUNIT_ASSERT(dom6.isSubsetOf(dom5)); 
+      CPPUNIT_ASSERT(dom6.isSubsetOf(dom5));
       return(true);
     }
 
@@ -298,41 +298,41 @@ namespace EUROPA {
       CPPUNIT_ASSERT(anotherActualString2 == expectedString2);
 
       // test toString(value).
-  
+
       //intervalInt domain
       IntervalIntDomain intervalInt (1,100);
       intervalInt.set(1);
       std::string d1DisplayValueStr = intervalInt.toString(intervalInt.getSingletonValue());
       std::string expectedD1DisplayValue("1");
       CPPUNIT_ASSERT(d1DisplayValueStr == expectedD1DisplayValue);
-   
+
       //intervalReal domain
       IntervalDomain intervalReal (1.5, 100.6);
       intervalReal.set(1.5);
       std::string d2DisplayValueStr = intervalReal.toString(intervalReal.getSingletonValue());
       std::string expectedD2DisplayValue("1.5");
       CPPUNIT_ASSERT(d2DisplayValueStr == expectedD2DisplayValue);
-       
+
       // boolean domain
       BoolDomain boolDomainTrue(true);
       boolDomainTrue.set(true);
       std::string d3DisplayValueStr = boolDomainTrue.toString(boolDomainTrue.getSingletonValue());
       std::string expectedD3DisplayValue("true");
       CPPUNIT_ASSERT(d3DisplayValueStr == expectedD3DisplayValue);
-   
+
       BoolDomain boolDomainFalse(false);
       boolDomainFalse.set(false);
       std::string d4DisplayValueStr = boolDomainFalse.toString(boolDomainFalse.getSingletonValue());
       std::string expectedD4DisplayValue("false");
       CPPUNIT_ASSERT(d4DisplayValueStr == expectedD4DisplayValue);
-   
+
       // numeric domain
       NumericDomain numericDom(1.117);
       numericDom.set(1.117);
       std::string d5DisplayValueStr = numericDom.toString(numericDom.getSingletonValue());
       std::string expectedD5DisplayValue("1.117");
       CPPUNIT_ASSERT(d5DisplayValueStr == expectedD5DisplayValue);
-   
+
       // string domain
       LabelStr theString("AString");
       StringDomain stringDom(theString);
@@ -343,13 +343,13 @@ namespace EUROPA {
       CPPUNIT_ASSERT(d6DisplayValueStr == expectedD6DisplayValue);
 
       // symbol domain
-      LabelStr element("ASymbol"); 
+      LabelStr element("ASymbol");
       SymbolDomain symbolDom(element);
       symbolDom.set(element);
       std::string d7DisplayValueStr = symbolDom.toString(symbolDom.getSingletonValue());
       std::string expectedD7DisplayValue("ASymbol");
       CPPUNIT_ASSERT(d7DisplayValueStr == expectedD7DisplayValue);
-     
+
       return(true);
     }
 
@@ -448,7 +448,7 @@ namespace EUROPA {
     }
 
     static bool testEnumSet(){
-     
+
       EnumeratedDomain dom0(true, "Enum");
       CPPUNIT_ASSERT(dom0.isOpen());
       dom0.insert(1); // required for isMember precondition of set.
@@ -764,7 +764,7 @@ namespace EUROPA {
 
   };
 
-  
+
 
   class EnumeratedDomainTest {
   public:
@@ -857,7 +857,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(e1.intersects(e2));
       e1.close();
       CPPUNIT_ASSERT(e1.intersects(e2));
-      
+
       e1.open();
       e2.open();
       CPPUNIT_ASSERT(e1.isSubsetOf(e2));
@@ -1874,16 +1874,6 @@ bool DomainTests::test() {
   EUROPA::EnumeratedDomainTest::test();
   EUROPA::MixedTypeTest::test();
   return(true);
-}
-
-void DomainTests::cppTests() {
-  /*runTestSuite(EUROPA::IntervalDomainTest::test);
-  runTestSuite(EUROPA::EnumeratedDomainTest::test);
-  runTestSuite(EUROPA::MixedTypeTest::test);*/
-  EUROPA::IntervalDomainTest::test();
-  EUROPA::EnumeratedDomainTest::test();
-  EUROPA::MixedTypeTest::test();
-  //return(true);
 }
 
 

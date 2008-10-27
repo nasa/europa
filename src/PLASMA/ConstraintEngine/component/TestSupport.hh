@@ -66,21 +66,6 @@ private:
   }\
   }
 
-#define runTestSuite(test) { \
-  try{ \
-      debugMsg("Test", #test << "******************************"); \
-      if (test()) { \
-          debugMsg("Test", #test << " PASSED."); \
-      } \
-      else {\
-          debugMsg("Test", #test << " FAILED."); \
-      } \
-  }\
-  catch (Error err) {\
-   err.print(std::cerr);\
-  }\
-}
-
 #endif
 
 

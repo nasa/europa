@@ -3,9 +3,10 @@
 
 #include <string>
 
+// TODO:  Implement tests according using new cppUnit framework
+
 class ANMLModuleTests {
   public:
-  static void runTests(std::string path);
 };
 
 #endif /* H_ANML_MODULE_TESTS */

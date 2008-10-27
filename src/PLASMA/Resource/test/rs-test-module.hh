@@ -24,7 +24,6 @@ public:
   {
   }
 
-//  static void runTests(std::string path);
   void cppSetup(void);
   void defaultSetupTests(void);
   void resourceTests(void);

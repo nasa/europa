@@ -87,12 +87,12 @@ static const Locations& LocationsBaseDomain() {
 
 class CETestEngine : public EngineBase
 {
-  public:  
+  public:
 	CETestEngine();
 	virtual ~CETestEngine();
 	const ConstraintEngineId& getConstraintEngine() const;
-	
-  protected: 
+
+  protected:
 	void createModules();
 };
 
@@ -100,8 +100,8 @@ CETestEngine::CETestEngine()
 {
     createModules();
     doStart();
-    ConstraintEngine* ce = (ConstraintEngine*)getComponent("ConstraintEngine");    
-    ce->createValue("INT_INTERVAL", std::string("5"));    
+    ConstraintEngine* ce = (ConstraintEngine*)getComponent("ConstraintEngine");
+    ce->createValue("INT_INTERVAL", std::string("5"));
     ce->getCESchema()->registerFactory(
        (new EnumeratedTypeFactory("Locations", "Locations", LocationsBaseDomain()))->getId()
     );
@@ -109,7 +109,7 @@ CETestEngine::CETestEngine()
 }
 
 CETestEngine::~CETestEngine()
-{    
+{
     doShutdown();
 }
 
@@ -121,7 +121,7 @@ void CETestEngine::createModules()
 
 const ConstraintEngineId& CETestEngine::getConstraintEngine() const
 {
-    return ((ConstraintEngine*)getComponent("ConstraintEngine"))->getId();    
+    return ((ConstraintEngine*)getComponent("ConstraintEngine"))->getId();
 }
 
 class TestListener: public ConstraintEngineListener{
@@ -155,13 +155,13 @@ public:
     EUROPA_runTest(testDomainCreation);
     EUROPA_runTest(testVariableCreation);
     EUROPA_runTest(testVariableWithDomainCreation);
-    return true; 
+    return true;
   }
 
   static bool testValueCreation(){
       CETestEngine engine;
       ConstraintEngine* ce = (ConstraintEngine*)engine.getComponent("ConstraintEngine");
-      
+
     IntervalIntDomain d0(5);
     int v0 = (int) ce->createValue(d0.getTypeName().c_str(), "5");
     CPPUNIT_ASSERT(d0.compareEqual(d0.getSingletonValue(), v0));
@@ -344,13 +344,13 @@ public:
     Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 10));
     Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(0, 10));
 
-    Constraint* c0 = new EqualConstraint(LabelStr("EqualConstraint"), 
+    Constraint* c0 = new EqualConstraint(LabelStr("EqualConstraint"),
 					 LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
 
-    Constraint* c1 = new EqualConstraint(LabelStr("EqualConstraint"), 
+    Constraint* c1 = new EqualConstraint(LabelStr("EqualConstraint"),
 					 LabelStr("Default"), ENGINE, makeScope(v2.getId(), v3.getId()));
 
-    Constraint* c2 = new EqualConstraint(LabelStr("EqualConstraint"), 
+    Constraint* c2 = new EqualConstraint(LabelStr("EqualConstraint"),
 					 LabelStr("Default"), ENGINE, makeScope(v2.getId(), v3.getId()));
 
     v0.specify(1);
@@ -399,7 +399,7 @@ public:
   void notifyDiscard() {
 	  delete this;
   }
-  
+
 };
 
 class VariableTest
@@ -494,7 +494,7 @@ private:
       Variable<NumericDomain> v1(ENGINE, d0);
 
       EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
-      ENGINE->propagate(); // Should see values removed from both variables domains. 
+      ENGINE->propagate(); // Should see values removed from both variables domains.
       CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::VALUE_REMOVED) == 2);
       v0.specify(3);
       CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::SET_TO_SINGLETON) == 1);
@@ -531,7 +531,7 @@ private:
       v1.close();
 
       // Post equality constraint between v0 and v1. It should not cause any restriction yet
-      // since v0 has not been closed      
+      // since v0 has not been closed
       EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
       CPPUNIT_ASSERT(ENGINE->propagate());
       CPPUNIT_ASSERT(v1.getDerivedDomain().getSize() == 3);
@@ -575,7 +575,7 @@ private:
   static bool testListener(){
     ConstrainedVariableId v0 = (new Variable<IntervalIntDomain>(ENGINE, IntervalIntDomain()))->getId();
     new TestVariableListener(v0); // deletes itself when v0 deleted
-    delete (ConstrainedVariable*) v0; 
+    delete (ConstrainedVariable*) v0;
     return true;
   }
 
@@ -956,21 +956,21 @@ private:
 
     // Test with Numeric Domains
     NumericDomain realBaseDomain;
-  
+
     realBaseDomain.insert(1.1);
     realBaseDomain.insert(2.2);
     realBaseDomain.insert(3.3);
- 
+
     realBaseDomain.close();
- 
+
     Variable<NumericDomain> realVar1(ENGINE, realBaseDomain);
     Variable<NumericDomain> realVar2(ENGINE, realBaseDomain);
 
     LessThanEqualConstraint cRealTest(LabelStr("LessThanEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(realVar2.getId(), realVar1.getId()));
-    
+
     res = ENGINE->propagate();
     CPPUNIT_ASSERT(res);
-    
+
     realVar2.specify(2.2);
     res = ENGINE->propagate();
     CPPUNIT_ASSERT(res);
@@ -1093,7 +1093,7 @@ private:
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 10));
     Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 10));
     EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
-    
+
     // v2 + v3 == v0
     Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(1, 1));
     Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 1));
@@ -1103,7 +1103,7 @@ private:
     Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(2, 2));
     Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(2, 2));
     AddEqualConstraint c2(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v4.getId(), v5.getId(), v1.getId()));
-    
+
     ENGINE->propagate();
     CPPUNIT_ASSERT(ENGINE->provenInconsistent());
     CPPUNIT_ASSERT(v1.getDerivedDomain().isEmpty() || v2.getDerivedDomain().isEmpty());
@@ -1150,7 +1150,7 @@ private:
     v0.specify(IntervalIntDomain(8, 10));
     v1.specify(IntervalIntDomain(2, 7));
     CPPUNIT_ASSERT(ENGINE->pending());
-    
+
     ENGINE->propagate();
     CPPUNIT_ASSERT(ENGINE->provenInconsistent());
     */
@@ -1233,7 +1233,7 @@ private:
   static bool testDelegation(){
       CETestEngine eng;
       const ConstraintEngineId& engine=((ConstraintEngine*)eng.getComponent("ConstraintEngine"))->getId();
-      
+
     Variable<IntervalIntDomain> v0(engine, IntervalIntDomain(0, 1000));
     ConstraintId c0 = engine->createConstraint(LabelStr("TestOnly"), makeScope(v0.getId()));
     ConstraintId c1 = engine->createConstraint(LabelStr("TestOnly"), makeScope(v0.getId()));
@@ -1306,9 +1306,9 @@ private:
     dom3.insert(2);
     dom3.insert(3);
     dom3.close();
-    Variable<IntervalIntDomain> v3(ENGINE, dom1); 
+    Variable<IntervalIntDomain> v3(ENGINE, dom1);
     Variable<NumericDomain> v4(ENGINE, dom3);
-    Variable<IntervalIntDomain> v5(ENGINE, dom2); 
+    Variable<IntervalIntDomain> v5(ENGINE, dom2);
 
     NotEqualConstraint c4(LabelStr("neq"), LabelStr("Default"), ENGINE, makeScope(v4.getId(), v5.getId()));
     NotEqualConstraint c3(LabelStr("neq"), LabelStr("Default"), ENGINE, makeScope(v4.getId(), v3.getId()));
@@ -1435,9 +1435,9 @@ private:
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(2, 2));
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(3, 3));
       Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(7, 7));
-      AddMultEqualConstraint c0(LabelStr("AddMultEqualConstraint"), 
-				LabelStr("Default"), 
-				ENGINE, 
+      AddMultEqualConstraint c0(LabelStr("AddMultEqualConstraint"),
+				LabelStr("Default"),
+				ENGINE,
 				makeScope(v0.getId(), v1.getId(), v2.getId(), v3.getId()));
       bool res = ENGINE->propagate();
       CPPUNIT_ASSERT(res);
@@ -1449,9 +1449,9 @@ private:
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(2, 2));
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(3, 3));
       Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(8, 8));
-      AddMultEqualConstraint c0(LabelStr("AddMultEqualConstraint"), 
-				LabelStr("Default"), 
-				ENGINE, 
+      AddMultEqualConstraint c0(LabelStr("AddMultEqualConstraint"),
+				LabelStr("Default"),
+				ENGINE,
 				makeScope(v0.getId(), v1.getId(), v2.getId(), v3.getId()));
       bool res = ENGINE->propagate();
       CPPUNIT_ASSERT(!res);
@@ -1463,9 +1463,9 @@ private:
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 1));
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(MINUS_INFINITY, 0));
       Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 1));
-      AddMultEqualConstraint c0(LabelStr("AddMultEqualConstraint"), 
-				LabelStr("Default"), 
-				ENGINE, 
+      AddMultEqualConstraint c0(LabelStr("AddMultEqualConstraint"),
+				LabelStr("Default"),
+				ENGINE,
 				makeScope(v0.getId(), v1.getId(), v2.getId(), v3.getId()));
       bool res = ENGINE->propagate();
       CPPUNIT_ASSERT(res);
@@ -1478,9 +1478,9 @@ private:
       Variable<IntervalDomain> v1(ENGINE, IntervalDomain(1.0, 1.0));
       Variable<IntervalDomain> v2(ENGINE, IntervalDomain(1.0, 10.0));
       Variable<IntervalDomain> v3(ENGINE, IntervalDomain(10.0, 10.0));
-      AddMultEqualConstraint c0(LabelStr("AddMultEqualConstraint"), 
-				LabelStr("Default"), 
-				ENGINE, 
+      AddMultEqualConstraint c0(LabelStr("AddMultEqualConstraint"),
+				LabelStr("Default"),
+				ENGINE,
 				makeScope(v0.getId(), v1.getId(), v2.getId(), v3.getId()));
       bool res = ENGINE->propagate();
       CPPUNIT_ASSERT(res);
@@ -2192,7 +2192,7 @@ private:
       Variable<EnumeratedDomain> arg2(ENGINE, baseDomain);
       TestEQ c1(LabelStr("TestEq"),
 		LabelStr("Default"),
-		ENGINE, 
+		ENGINE,
 		makeScope(test.getId(), arg1.getId(), arg2.getId()));
       assert(ENGINE->propagate());
 
@@ -2212,12 +2212,12 @@ private:
       arg2.specify(1);
       assert(!ENGINE->propagate());
     }
-    
+
     {
       Variable<BoolDomain> v0(ENGINE, BoolDomain());
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5));
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(5));
-      TestEQ c0(LabelStr("TestEQ"), LabelStr("Default"), 
+      TestEQ c0(LabelStr("TestEQ"), LabelStr("Default"),
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
       CPPUNIT_ASSERT(v0.getDerivedDomain().isTrue());
@@ -2226,7 +2226,7 @@ private:
       Variable<BoolDomain> v0(ENGINE, BoolDomain());
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5));
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(6));
-      TestEQ c0(LabelStr("TestEQ"), LabelStr("Default"), 
+      TestEQ c0(LabelStr("TestEQ"), LabelStr("Default"),
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
       CPPUNIT_ASSERT(v0.getDerivedDomain().isFalse());
@@ -2235,7 +2235,7 @@ private:
       Variable<BoolDomain> v0(ENGINE, BoolDomain());
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5,10));
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(5, 20));
-      TestEQ c0(LabelStr("TestEQ"), LabelStr("Default"), 
+      TestEQ c0(LabelStr("TestEQ"), LabelStr("Default"),
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
       CPPUNIT_ASSERT(!v0.getDerivedDomain().isSingleton());
@@ -2245,13 +2245,13 @@ private:
       CPPUNIT_ASSERT(v0.getDerivedDomain().isTrue());
       v1.reset();
       ENGINE->propagate();
-      CPPUNIT_ASSERT(!v0.getDerivedDomain().isSingleton());      
+      CPPUNIT_ASSERT(!v0.getDerivedDomain().isSingleton());
     }
     {
       Variable<BoolDomain> v0(ENGINE, BoolDomain());
       Variable<LabelSet> v1(ENGINE, LabelSet(LabelStr("C")));
       Variable<LabelSet> v2(ENGINE, LabelSet(LabelStr("C")));
-      TestEQ c0("TestEQ", "Default", 
+      TestEQ c0("TestEQ", "Default",
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
       CPPUNIT_ASSERT(v0.getDerivedDomain().isTrue());
@@ -2260,7 +2260,7 @@ private:
       Variable<BoolDomain> v0(ENGINE, BoolDomain());
       Variable<LabelSet> v1(ENGINE, LabelSet(LabelStr("C")));
       Variable<LabelSet> v2(ENGINE, LabelSet(LabelStr("E")));
-      TestEQ c0(LabelStr("TestEQ"), LabelStr("Default"), 
+      TestEQ c0(LabelStr("TestEQ"), LabelStr("Default"),
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
       CPPUNIT_ASSERT(v0.getDerivedDomain().isFalse());
@@ -2273,7 +2273,7 @@ private:
       Variable<BoolDomain> v0(ENGINE, BoolDomain());
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5));
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(6));
-      TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"), 
+      TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"),
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
       CPPUNIT_ASSERT(v0.getDerivedDomain().isTrue());
@@ -2283,7 +2283,7 @@ private:
       Variable<BoolDomain> v0(ENGINE, BoolDomain());
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5));
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(5));
-      TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"), 
+      TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"),
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
       CPPUNIT_ASSERT(v0.getDerivedDomain().isFalse());
@@ -2293,7 +2293,7 @@ private:
       Variable<BoolDomain> v0(ENGINE, BoolDomain());
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5, 10));
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(5));
-      TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"), 
+      TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"),
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
       CPPUNIT_ASSERT(v0.getDerivedDomain().isFalse());
@@ -2303,7 +2303,7 @@ private:
       Variable<BoolDomain> v0(ENGINE, BoolDomain());
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(4, 10));
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(11, 20));
-      TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"), 
+      TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"),
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
       CPPUNIT_ASSERT(v0.getDerivedDomain().isTrue());
@@ -2313,7 +2313,7 @@ private:
       Variable<BoolDomain> v0(ENGINE, BoolDomain());
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(4, 10));
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(8, 20));
-      TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"), 
+      TestLessThan c0(LabelStr("TestLessThan"), LabelStr("Default"),
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
       CPPUNIT_ASSERT(!v0.getDerivedDomain().isSingleton());
@@ -2328,7 +2328,7 @@ private:
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5));
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(5));
 
-      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
+      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"),
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
 
@@ -2340,7 +2340,7 @@ private:
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5));
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(4));
 
-      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
+      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"),
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
 
@@ -2352,7 +2352,7 @@ private:
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(4));
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(6));
 
-      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
+      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"),
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       CPPUNIT_ASSERT(ENGINE->propagate());
       CPPUNIT_ASSERT(v0.getDerivedDomain().isTrue());
@@ -2363,7 +2363,7 @@ private:
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(0, 10));
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 10));
 
-      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
+      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"),
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
 
       CPPUNIT_ASSERT(ENGINE->propagate());
@@ -2376,7 +2376,7 @@ private:
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(0, 10));
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(11, 20));
 
-      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
+      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"),
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
 
       CPPUNIT_ASSERT(!ENGINE->propagate());
@@ -2387,7 +2387,7 @@ private:
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(5, 10));
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(2, 4));
 
-      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
+      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"),
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
 
       CPPUNIT_ASSERT(!ENGINE->propagate());
@@ -2398,7 +2398,7 @@ private:
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(0, 10));
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(11, 20));
 
-      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
+      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"),
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
 
       CPPUNIT_ASSERT(ENGINE->propagate());
@@ -2410,7 +2410,7 @@ private:
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(10, 20));
       Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(0, 9));
 
-      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"), 
+      TestLEQ c0(LabelStr("TestLEQ"), LabelStr("Default"),
 		ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
 
       CPPUNIT_ASSERT(ENGINE->propagate());
@@ -2434,32 +2434,32 @@ private:
     Variable<IntervalDomain> start_x(ENGINE, IntervalDomain());
     Variable<IntervalDomain> start_y(ENGINE, IntervalDomain());
 
-    AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, 
+    AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE,
 			  makeScope(goalBox_leftBottomX.getId(), goalBoxTolerance.getId(), goalX.getId()));
 
-    AddEqualConstraint c1(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, 
+    AddEqualConstraint c1(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE,
 			  makeScope(goalBox_leftBottomY.getId(), goalBoxTolerance.getId(), goalY.getId()));
 
-    AddEqualConstraint c2(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, 
+    AddEqualConstraint c2(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE,
 			  makeScope(goalX.getId(), goalBoxTolerance.getId(), goalBox_rightTopX.getId()));
 
-    AddEqualConstraint c3(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, 
+    AddEqualConstraint c3(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE,
 			  makeScope(goalY.getId(), goalBoxTolerance.getId(), goalBox_rightTopY.getId()));
 
     Variable<BoolDomain> right_of_goalBox_left(ENGINE, BoolDomain());
-    TestLEQ c4(LabelStr("TestLEQ"), LabelStr("Default"), 
+    TestLEQ c4(LabelStr("TestLEQ"), LabelStr("Default"),
 	      ENGINE, makeScope(right_of_goalBox_left.getId(), goalBox_leftBottomX.getId(), start_x.getId()));
 
     Variable<BoolDomain> left_of_goalBox_right(ENGINE, BoolDomain());
-    TestLEQ c5(LabelStr("TestLEQ"), LabelStr("Default"), 
+    TestLEQ c5(LabelStr("TestLEQ"), LabelStr("Default"),
 	      ENGINE, makeScope(left_of_goalBox_right.getId(), start_x.getId(), goalBox_rightTopX.getId()));
 
     Variable<BoolDomain> over_goalBox_bottom(ENGINE, BoolDomain());
-    TestLEQ c6(LabelStr("TestLEQ"), LabelStr("Default"), 
+    TestLEQ c6(LabelStr("TestLEQ"), LabelStr("Default"),
 	      ENGINE, makeScope(over_goalBox_bottom.getId(), start_y.getId(), goalBox_leftBottomY.getId()));
 
     Variable<BoolDomain> under_goalBox_bottom(ENGINE, BoolDomain());
-    TestLEQ c7(LabelStr("TestLEQ"), LabelStr("Default"), 
+    TestLEQ c7(LabelStr("TestLEQ"), LabelStr("Default"),
 	      ENGINE, makeScope(under_goalBox_bottom.getId(), start_y.getId(), goalBox_rightTopY.getId()));
 
     assert(ENGINE->propagate());
@@ -2480,14 +2480,14 @@ private:
   static bool testAllocation(){
       CETestEngine testEngine;
       const ConstraintEngineId& ce=((ConstraintEngine*)testEngine.getComponent("ConstraintEngine"))->getId();
-      
+
     std::vector<ConstrainedVariableId> variables;
     // v0 == v1
     Variable<IntervalIntDomain> v0(ce, IntervalIntDomain(1, 10));
     variables.push_back(v0.getId());
     Variable<IntervalIntDomain> v1(ce, IntervalIntDomain(1, 1));
     variables.push_back(v1.getId());
-    ConstraintId c0 = ce->createConstraint(LabelStr("Equal"), variables);    
+    ConstraintId c0 = ce->createConstraint(LabelStr("Equal"), variables);
     ce->propagate();
     CPPUNIT_ASSERT(v0.getDerivedDomain().getSingletonValue() == 1);
     delete (Constraint*) c0;
@@ -2622,7 +2622,7 @@ private:
   static bool testEqualityConstraintPropagator(){
       CETestEngine engine;
       ConstraintEngineId ce = ((ConstraintEngine*)engine.getComponent("ConstraintEngine"))->getId();
-      
+
     new EqualityConstraintPropagator(LabelStr("EquivalenceClass"), ce);
     {
       std::vector<ConstrainedVariableId> variables;
@@ -2672,61 +2672,47 @@ private:
   }
 };
 
-void ConstraintEngineModuleTests::runTests(std::string path) 
-{
-    setTestLoadLibraryPath(path);
-    runTestSuite(DomainTests::test);
-    runTestSuite(TypeFactoryTests::test);
-    runTestSuite(EntityTests::test);
-    runTestSuite(ConstraintEngineTest::test);
-    runTestSuite(VariableTest::test); 
-    runTestSuite(ConstraintTest::test); 
-    runTestSuite(ConstraintFactoryTest::test);
-    runTestSuite(EquivalenceClassTest::test);
-    std::cout << "Finished" << std::endl;
-}
-
-void ConstraintEngineModuleTests::cppSetup(void) 
+void ConstraintEngineModuleTests::cppSetup(void)
 {
     setTestLoadLibraryPath(".");
 }
 
-void ConstraintEngineModuleTests::domainTests(void) 
+void ConstraintEngineModuleTests::domainTests(void)
 {
     DomainTests::test();
 }
 
-void ConstraintEngineModuleTests::typeFactoryTests(void) 
+void ConstraintEngineModuleTests::typeFactoryTests(void)
 {
     TypeFactoryTests::test();
 }
 
-void ConstraintEngineModuleTests::entityTests(void) 
+void ConstraintEngineModuleTests::entityTests(void)
 {
     EntityTests::test();
 }
 
-void ConstraintEngineModuleTests::constraintEngineTests(void) 
+void ConstraintEngineModuleTests::constraintEngineTests(void)
 {
     ConstraintEngineTest::test();
 }
 
-void ConstraintEngineModuleTests::variableTests(void) 
+void ConstraintEngineModuleTests::variableTests(void)
 {
-    VariableTest::test(); 
+    VariableTest::test();
 }
 
-void ConstraintEngineModuleTests::constraintTests(void) 
+void ConstraintEngineModuleTests::constraintTests(void)
 {
-    ConstraintTest::test(); 
+    ConstraintTest::test();
 }
 
-void ConstraintEngineModuleTests::constraintFactoryTests(void) 
+void ConstraintEngineModuleTests::constraintFactoryTests(void)
 {
     ConstraintFactoryTest::test();
 }
 
-void ConstraintEngineModuleTests::equivalenceClassTests(void) 
+void ConstraintEngineModuleTests::equivalenceClassTests(void)
 {
     EquivalenceClassTest::test();
 }

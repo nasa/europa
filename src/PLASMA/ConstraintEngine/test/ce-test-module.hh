@@ -13,8 +13,8 @@ class ConstraintEngineModuleTests : public CppUnit::TestFixture {
   CPPUNIT_TEST(typeFactoryTests);
   CPPUNIT_TEST(entityTests);
   CPPUNIT_TEST(constraintEngineTests);
-  CPPUNIT_TEST(variableTests); 
-  CPPUNIT_TEST(constraintTests); 
+  CPPUNIT_TEST(variableTests);
+  CPPUNIT_TEST(constraintTests);
   CPPUNIT_TEST(constraintFactoryTests);
   CPPUNIT_TEST(equivalenceClassTests);
   CPPUNIT_TEST_SUITE_END();
@@ -25,12 +25,11 @@ public:
     ConstraintEngineModuleTests::cppSetup();
   }
 
-  void tearDown() 
+  void tearDown()
   {
 //    std::cout << "Finished" << std::endl;
   }
 
-  static void runTests(std::string path);
   void cppSetup(void);
   void domainTests();
   void typeFactoryTests();

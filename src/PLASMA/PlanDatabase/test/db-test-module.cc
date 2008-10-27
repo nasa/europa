@@ -45,7 +45,7 @@ const char* DEFAULT_PREDICATE = "Object.DEFAULT_PREDICATE";
     DBFoo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
     DBFoo(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
     void handleDefaults(bool autoClose = true); // default variable initialization
-    
+
     // test/simple-predicate.nddl:4 DBFoo
     void constructor();
     void constructor(int arg0, LabelStr& arg1);
@@ -84,8 +84,8 @@ const char* DEFAULT_PREDICATE = "Object.DEFAULT_PREDICATE";
     StandardDBFooFactory(): ObjectFactory(LabelStr(DEFAULT_OBJECT_TYPE)){}
 
   private:
-    ObjectId createInstance(const PlanDatabaseId& planDb, 
-                            const LabelStr& objectType, 
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType,
                             const LabelStr& objectName,
                             const std::vector<const AbstractDomain*>& arguments) const {
       CPPUNIT_ASSERT(arguments.empty());
@@ -102,10 +102,10 @@ const char* DEFAULT_PREDICATE = "Object.DEFAULT_PREDICATE";
                            ":" + IntervalIntDomain::getDefaultTypeName().toString() +
                            ":" + LabelSet::getDefaultTypeName().toString())
     {}
-    
+
   private:
-    ObjectId createInstance(const PlanDatabaseId& planDb, 
-                            const LabelStr& objectType, 
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType,
                             const LabelStr& objectName,
                             const std::vector<const AbstractDomain*>& arguments) const {
       DBFooId foo = (new DBFoo(planDb, objectType, objectName))->getId();
@@ -187,31 +187,31 @@ void initDbTestSchema(const SchemaId& schema) {
 
 class PDBTestEngine  : public EngineBase
 {
-  public:  
+  public:
     PDBTestEngine();
     virtual ~PDBTestEngine();
-    
+
     const ConstraintEngineId& getConstraintEngine() const;
     const SchemaId& getSchema() const;
     const PlanDatabaseId& getPlanDatabase() const;
-    
-  protected: 
+
+  protected:
     void createModules();
 };
 
-PDBTestEngine::PDBTestEngine() 
+PDBTestEngine::PDBTestEngine()
 {
     createModules();
     doStart();
-    const SchemaId& schema = ((Schema*)getComponent("Schema"))->getId(); 
-    initDbTestSchema(schema); 
-    
+    const SchemaId& schema = ((Schema*)getComponent("Schema"))->getId();
+    initDbTestSchema(schema);
+
     // Tokens require temporal distance constraints
     CESchema* ces = (CESchema*)getComponent("CESchema");
     REGISTER_SYSTEM_CONSTRAINT(ces,EqualConstraint, "concurrent", "Default");
-    REGISTER_SYSTEM_CONSTRAINT(ces,LessThanEqualConstraint, "precedes", "Default"); 
+    REGISTER_SYSTEM_CONSTRAINT(ces,LessThanEqualConstraint, "precedes", "Default");
     REGISTER_SYSTEM_CONSTRAINT(ces,AddEqualConstraint, "temporaldistance", "Default");
-    REGISTER_SYSTEM_CONSTRAINT(ces,AddEqualConstraint, "temporalDistance", "Default");  
+    REGISTER_SYSTEM_CONSTRAINT(ces,AddEqualConstraint, "temporalDistance", "Default");
 
     // Have to register factories for testing.
     schema->registerObjectFactory((new StandardDBFooFactory())->getId());
@@ -219,24 +219,24 @@ PDBTestEngine::PDBTestEngine()
     schema->registerTokenFactory((new IntervalTokenFactory())->getId());
 }
 
-PDBTestEngine::~PDBTestEngine() 
+PDBTestEngine::~PDBTestEngine()
 {
     doShutdown();
 }
 
 const ConstraintEngineId& PDBTestEngine::getConstraintEngine() const
 {
-    return ((ConstraintEngine*)getComponent("ConstraintEngine"))->getId();     
+    return ((ConstraintEngine*)getComponent("ConstraintEngine"))->getId();
 }
 
 const SchemaId& PDBTestEngine::getSchema() const
 {
-    return ((Schema*)getComponent("Schema"))->getId();     
+    return ((Schema*)getComponent("Schema"))->getId();
 }
 
 const PlanDatabaseId& PDBTestEngine::getPlanDatabase() const
 {
-    return ((PlanDatabase*)getComponent("PlanDatabase"))->getId();     
+    return ((PlanDatabase*)getComponent("PlanDatabase"))->getId();
 }
 
 void PDBTestEngine::createModules()
@@ -298,7 +298,7 @@ private:
 
   static bool testPrimitives(){
       DEFAULT_SETUP(ce, db, true);
-      
+
     schema->reset();
     CPPUNIT_ASSERT(schema->isPrimitive("int"));
     CPPUNIT_ASSERT(schema->isPrimitive("float"));
@@ -307,7 +307,7 @@ private:
     CPPUNIT_ASSERT(schema->isType("int"));
     CPPUNIT_ASSERT(!schema->isPrimitive("strong"));
     DEFAULT_TEARDOWN();
-    
+
     return true;
   }
 
@@ -354,7 +354,7 @@ private:
     enumDomainReturned = schema->getEnumValues( enumDomainName );
     CPPUNIT_ASSERT( enumDomainReturned == testEnumDomain );
 
-    DEFAULT_TEARDOWN();    
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -377,7 +377,7 @@ private:
     CPPUNIT_ASSERT(schema->isA(LabelStr("Bar"), LabelStr("Foo")));
     CPPUNIT_ASSERT(!schema->isA(LabelStr("Foo"), LabelStr("Bar")));
     CPPUNIT_ASSERT(schema->getAllObjectTypes(LabelStr("Bar")).size() == 3);
-    
+
     // Composition
     schema->addMember(LabelStr("Foo"), LabelStr("float"), LabelStr("arg0"));
     schema->addMember(LabelStr("Foo"), LabelStr("Foo"), LabelStr("arg1"));
@@ -402,7 +402,7 @@ private:
     CPPUNIT_ASSERT(!schema->hasPredicates("Foo")); // Call again for cached result
     CPPUNIT_ASSERT(schema->hasPredicates("Baz")); // Call again for cached result
 
-    DEFAULT_TEARDOWN();    
+    DEFAULT_TEARDOWN();
 
     return true;
   }
@@ -423,7 +423,7 @@ private:
 
     schema->addObjectType(LabelStr("World"));
     schema->addPredicate(LabelStr("World.initialState"));
- 
+
     CPPUNIT_ASSERT(schema->isPredicate(LabelStr("Battery.change")));
     CPPUNIT_ASSERT(schema->isPredicate(LabelStr("World.initialState")));
     CPPUNIT_ASSERT(!schema->isPredicate(LabelStr("World.NOPREDICATE")));
@@ -481,7 +481,7 @@ private:
     CPPUNIT_ASSERT(predicates.size() == 4);
 
     DEFAULT_TEARDOWN();
-    
+
     return(true);
   }
 
@@ -522,14 +522,14 @@ private:
     CPPUNIT_ASSERT(schema->getParameterType(LabelStr("Foo.Argle"), 1) == LabelStr("Targle"));
 
     DEFAULT_TEARDOWN();
-    
+
     return true;
   }
 };
 
 class ObjectTest {
 public:
-  
+
   static bool test() {
     EUROPA_runTest(testBasicAllocation);
     EUROPA_runTest(testObjectDomain);
@@ -543,15 +543,15 @@ public:
     EUROPA_runTest(testFreeAndConstrain);
     return(true);
   }
-  
+
 private:
   static bool testBasicAllocation() {
       DEFAULT_SETUP(ce, db, false);
     Object o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "o1");
     Object o2(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2");
 
-    Object* objectPtr = &o1; 
-    CPPUNIT_ASSERT(objectPtr->getId() == o1.getId());    
+    Object* objectPtr = &o1;
+    CPPUNIT_ASSERT(objectPtr->getId() == o1.getId());
 
     ObjectId id0((new Object(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "id0"))->getId());
     Object o3(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o3");
@@ -582,12 +582,12 @@ private:
     // Now allocate dynamically and allow the plan database to clean it up when it deallocates
     ObjectId id5 = ((new Object(db, LabelStr(DEFAULT_OBJECT_TYPE), "id5"))->getId());
     new Object(id5, LabelStr(DEFAULT_OBJECT_TYPE), "id6");
-    
+
     DEFAULT_TEARDOWN();
-    
+
     return(true);
   }
-  
+
   static bool testObjectDomain(){
       DEFAULT_SETUP(ce, db, false);
     std::list<ObjectId> values;
@@ -618,13 +618,13 @@ private:
       CPPUNIT_ASSERT(value == 0);
     }
 
-    DEFAULT_TEARDOWN();    
+    DEFAULT_TEARDOWN();
     return true;
   }
-  
+
   static bool testObjectVariables(){
     DEFAULT_SETUP(ce, db, false);
-    
+
     Object o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "o11", true);
     CPPUNIT_ASSERT(!o1.isComplete());
     o1.addVariable(IntervalIntDomain(), "IntervalIntVar");
@@ -641,7 +641,7 @@ private:
     // Add a unary constraint
     Variable<IntervalIntDomain> superset(db->getConstraintEngine(), IntervalIntDomain(10, 20));;
 
-    ConstraintId subsetConstraint = db->getConstraintEngine()->createConstraint("SubsetOf", 					
+    ConstraintId subsetConstraint = db->getConstraintEngine()->createConstraint("SubsetOf",
 					makeScope(o1.getVariables()[0], superset.getId()));
 
     // Now add a constraint equating the variables and test propagation
@@ -659,16 +659,16 @@ private:
     delete (Constraint*) subsetConstraint;
 
     DEFAULT_TEARDOWN();
-    
+
     return(true);
   }
-  
-  
+
+
   static bool testObjectTokenRelation(){
       DEFAULT_SETUP(ce, db, false);
     // 1. Create 2 objects
     ObjectId object1 = (new Object(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "O1"))->getId();
-    ObjectId object2 = (new Object(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "O2"))->getId();    
+    ObjectId object2 = (new Object(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "O2"))->getId();
     db->close();
 
     CPPUNIT_ASSERT(object1 != object2);
@@ -702,10 +702,10 @@ private:
     // Confirm not added to the object
     CPPUNIT_ASSERT(!eventToken.getObject()->getDerivedDomain().isSingleton());
 
-    DEFAULT_TEARDOWN();    
+    DEFAULT_TEARDOWN();
     return true;
   }
-  
+
   static bool testCommonAncestorConstraint(){
       DEFAULT_SETUP(ce, db, false);
     Object o1(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
@@ -731,9 +731,9 @@ private:
       Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      CommonAncestorConstraint constraint("commonAncestor", 
-					  "Default", 
-					  ENGINE, 
+      CommonAncestorConstraint constraint("commonAncestor",
+					  "Default",
+					  ENGINE,
 					  makeScope(first.getId(), second.getId(), restrictions.getId()));
 
       CPPUNIT_ASSERT(ENGINE->propagate());
@@ -744,9 +744,9 @@ private:
       Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      CommonAncestorConstraint constraint("commonAncestor", 
-					  "Default", 
-					  ENGINE, 
+      CommonAncestorConstraint constraint("commonAncestor",
+					  "Default",
+					  ENGINE,
 					  makeScope(first.getId(), second.getId(), restrictions.getId()));
 
       CPPUNIT_ASSERT(!ENGINE->propagate());
@@ -757,9 +757,9 @@ private:
       Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       Variable<ObjectDomain> restrictions(ENGINE, allObjects);
-      CommonAncestorConstraint constraint("commonAncestor", 
-					  "Default", 
-					  ENGINE, 
+      CommonAncestorConstraint constraint("commonAncestor",
+					  "Default",
+					  ENGINE,
 					  makeScope(first.getId(), second.getId(), restrictions.getId()));
 
       CPPUNIT_ASSERT(ENGINE->propagate());
@@ -770,9 +770,9 @@ private:
       Variable<ObjectDomain> first(ENGINE, allObjects);
       Variable<ObjectDomain> second(ENGINE, allObjects);
       Variable<ObjectDomain> restrictions(ENGINE, allObjects);
-      CommonAncestorConstraint constraint("commonAncestor", 
-					  "Default", 
-					  ENGINE, 
+      CommonAncestorConstraint constraint("commonAncestor",
+					  "Default",
+					  ENGINE,
 					  makeScope(first.getId(), second.getId(), restrictions.getId()));
 
       CPPUNIT_ASSERT(ENGINE->propagate()); // All ok so far
@@ -786,11 +786,11 @@ private:
 
       first.specify(o4.getId());
       CPPUNIT_ASSERT(ENGINE->propagate());
-    }    
-    DEFAULT_TEARDOWN();    
+    }
+    DEFAULT_TEARDOWN();
     return true;
   }
-  
+
   static bool testHasAncestorConstraint(){
       DEFAULT_SETUP(ce, db, false);
     Object o1(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
@@ -801,91 +801,91 @@ private:
     Object o6(o3.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o6");
     Object o7(o3.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o7");
     Object o8(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o8");
-    
-    
+
+
     // Positive test immediate ancestor
     {
       Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o3.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      HasAncestorConstraint constraint("hasAncestor", 
-                                       "Default", 
-                                       ENGINE, 
+      HasAncestorConstraint constraint("hasAncestor",
+                                       "Default",
+                                       ENGINE,
                                        makeScope(first.getId(), restrictions.getId()));
-      
+
       CPPUNIT_ASSERT(ENGINE->propagate());
     }
-    
+
     // negative test immediate ancestor
     {
       Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      HasAncestorConstraint constraint("hasAncestor", 
-                                       "Default", 
-                                       ENGINE, 
+      HasAncestorConstraint constraint("hasAncestor",
+                                       "Default",
+                                       ENGINE,
                                        makeScope(first.getId(), restrictions.getId()));
-      
+
       CPPUNIT_ASSERT(!ENGINE->propagate());
     }
     // Positive test higher up  ancestor
     {
       Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      HasAncestorConstraint constraint("hasAncestor", 
-                                       "Default", 
-                                       ENGINE, 
+      HasAncestorConstraint constraint("hasAncestor",
+                                       "Default",
+                                       ENGINE,
                                        makeScope(first.getId(), restrictions.getId()));
-      
+
       CPPUNIT_ASSERT(ENGINE->propagate());
     }
     // negative test higherup ancestor
     {
       Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o8.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      HasAncestorConstraint constraint("hasAncestor", 
-                                       "Default", 
-                                       ENGINE, 
+      HasAncestorConstraint constraint("hasAncestor",
+                                       "Default",
+                                       ENGINE,
                                        makeScope(first.getId(), restrictions.getId()));
-      
+
       CPPUNIT_ASSERT(!ENGINE->propagate());
     }
-    
+
     //positive restriction of the set.
     {
       ObjectDomain obs(LabelStr(DEFAULT_OBJECT_TYPE).c_str());
       obs.insert(o7.getId());
       obs.insert(o4.getId());
       obs.close();
-      
+
       Variable<ObjectDomain> first(ENGINE, obs);
       Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      HasAncestorConstraint constraint("hasAncestor", 
-                                       "Default", 
-                                       ENGINE, 
+      HasAncestorConstraint constraint("hasAncestor",
+                                       "Default",
+                                       ENGINE,
                                        makeScope(first.getId(), restrictions.getId()));
-      
+
       CPPUNIT_ASSERT(ENGINE->propagate());
       CPPUNIT_ASSERT(first.getDerivedDomain().isSingleton());
     }
-    
+
     //no restriction of the set.
     {
       ObjectDomain obs1(LabelStr(DEFAULT_OBJECT_TYPE).c_str());
       obs1.insert(o7.getId());
       obs1.insert(o4.getId());
       obs1.close();
-      
+
       Variable<ObjectDomain> first(ENGINE, obs1);
       Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      HasAncestorConstraint constraint("hasAncestor", 
-                                       "Default", 
-                                       ENGINE, 
+      HasAncestorConstraint constraint("hasAncestor",
+                                       "Default",
+                                       ENGINE,
                                        makeScope(first.getId(), restrictions.getId()));
-      
+
       CPPUNIT_ASSERT(ENGINE->propagate());
       CPPUNIT_ASSERT(first.getDerivedDomain().getSize() == 2);
     }
-    
-    DEFAULT_TEARDOWN();    
+
+    DEFAULT_TEARDOWN();
     return true;
   }
   /**
@@ -909,7 +909,7 @@ private:
     // Now delete the variable. This should remove the listener
     delete (ConstrainedVariable*) v0;
 
-    DEFAULT_TEARDOWN();    
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -944,15 +944,15 @@ private:
     db->makeObjectVariableFromType(LabelStr(DEFAULT_OBJECT_TYPE), v1);
     CPPUNIT_ASSERT(!v1->isClosed());
     CPPUNIT_ASSERT_MESSAGE(v1->lastDomain().toString(),
-               v0->lastDomain() == v1->lastDomain() && 
-	       v1->lastDomain().isMember(o1.getId())  && 
+               v0->lastDomain() == v1->lastDomain() &&
+	       v1->lastDomain().isMember(o1.getId())  &&
 	       v1->lastDomain().isMember(o2.getId()));
 
     // Now delete the variables.
     delete (ConstrainedVariable*) v0;
     delete (ConstrainedVariable*) v1;
 
-    DEFAULT_TEARDOWN();    
+    DEFAULT_TEARDOWN();
     return true;
   }
 
@@ -983,36 +983,36 @@ private:
     CPPUNIT_ASSERT(ENGINE->constraintConsistent());
     CPPUNIT_ASSERT(!eventToken.getObject()->baseDomain().isMember(o2));
 
-    DEFAULT_TEARDOWN();    
+    DEFAULT_TEARDOWN();
     return true;
   }
 
   static bool testFreeAndConstrain(){
       DEFAULT_SETUP(ce,db,false);
       Object o1(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
-  
-    IntervalToken t1(db,  
-                     LabelStr(DEFAULT_PREDICATE),                                                     
-                     true,      
-                     false,                                                         
-                     IntervalIntDomain(0, 10),                                           
-                     IntervalIntDomain(0, 20),                                           
-                     IntervalIntDomain(1, 1000));                                        
-  
-    IntervalToken t2(db,                                                         
-                     LabelStr(DEFAULT_PREDICATE),                                                     
-                     true,             
-                     false,                                                  
-                     IntervalIntDomain(0, 10),                                           
-                     IntervalIntDomain(0, 20),                                           
-                     IntervalIntDomain(1, 1000));                                        
-  
-    IntervalToken t3(db,                                                         
-                     LabelStr(DEFAULT_PREDICATE),                                                     
-                     true,       
-                     false,                                                        
-                     IntervalIntDomain(0, 10),                                           
-                     IntervalIntDomain(0, 20),                                           
+
+    IntervalToken t1(db,
+                     LabelStr(DEFAULT_PREDICATE),
+                     true,
+                     false,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000));
+
+    IntervalToken t2(db,
+                     LabelStr(DEFAULT_PREDICATE),
+                     true,
+                     false,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000));
+
+    IntervalToken t3(db,
+                     LabelStr(DEFAULT_PREDICATE),
+                     true,
+                     false,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
 
     t1.activate();
@@ -1030,32 +1030,32 @@ private:
     // Constrain again to leave all cleanup automatic
     o1.constrain(t1.getId(), t2.getId());
     o1.constrain(t1.getId(), t3.getId());
-    o1.constrain(t2.getId(), t3.getId());                                    
+    o1.constrain(t2.getId(), t3.getId());
 
     // Also use a locally scoped token to force a different deletion path
     {
-      IntervalToken t4(db,                                                         
-		       LabelStr(DEFAULT_PREDICATE),                                                     
-		       true,         
-		       false,                                                      
-		       IntervalIntDomain(0, 10),                                           
-		       IntervalIntDomain(0, 20),                                           
+      IntervalToken t4(db,
+		       LabelStr(DEFAULT_PREDICATE),
+		       true,
+		       false,
+		       IntervalIntDomain(0, 10),
+		       IntervalIntDomain(0, 20),
 		       IntervalIntDomain(1, 1000));
       t4.activate();
       o1.constrain(t3.getId(), t4.getId());
     }
 
     CPPUNIT_ASSERT(ce->propagate());
-    
+
     DEFAULT_TEARDOWN();
-    
+
     return true;
   }
 };
 
 class TokenTest {
 public:
-  
+
   static bool test() {
     EUROPA_runTest(testBasicTokenAllocation);
     EUROPA_runTest(testBasicTokenCreation);
@@ -1082,9 +1082,9 @@ public:
     EUROPA_runTest(testGNATS_3193);
     return(true);
   }
-  
+
 private:
-  
+
   static bool testBasicTokenAllocation() {
       DEFAULT_SETUP(ce, db, false);
       ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
@@ -1097,17 +1097,17 @@ private:
     CPPUNIT_ASSERT(eventToken.end()->getDerivedDomain() == IntervalIntDomain(5, 10));
     eventToken.addParameter(IntervalDomain(-1.08, 20.18), "IntervalParam");
     eventToken.close();
-  
+
     // IntervalToken
-    IntervalToken intervalToken(db, 
-                                LabelStr(DEFAULT_PREDICATE), 
-                                true, 
+    IntervalToken intervalToken(db,
+                                LabelStr(DEFAULT_PREDICATE),
+                                true,
                                 false,
                                 IntervalIntDomain(0, 1000),
                                 IntervalIntDomain(0, 1000),
                                 IntervalIntDomain(2, 10),
                                 Token::noObject(), false);
-  
+
     std::list<double> values;
     values.push_back(EUROPA::LabelStr("L1"));
     values.push_back(EUROPA::LabelStr("L4"));
@@ -1124,10 +1124,10 @@ private:
     CPPUNIT_ASSERT(intervalToken.duration()->getDerivedDomain() == IntervalIntDomain(2, 5));
 
     // Create and delete a Token
-    TokenId token = (new IntervalToken(db, 
-                                       LabelStr(DEFAULT_PREDICATE), 
+    TokenId token = (new IntervalToken(db,
+                                       LabelStr(DEFAULT_PREDICATE),
                                        true,
-                                       false, 
+                                       false,
                                        IntervalIntDomain(0, 1000),
                                        IntervalIntDomain(0, 1000),
                                        IntervalIntDomain(2, 10),
@@ -1138,36 +1138,36 @@ private:
     return true;
   }
 
-  static bool testBasicTokenCreation() {           
+  static bool testBasicTokenCreation() {
     DEFAULT_SETUP(ce,db, false);
     ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
     CPPUNIT_ASSERT(!timeline.isNoId());
-    db->close();                                                                          
-  
-    IntervalToken t1(db,                                                         
-                     LabelStr(DEFAULT_PREDICATE),                                                     
-                     true,    
-                     false,                                                           
-                     IntervalIntDomain(0, 10),                                           
-                     IntervalIntDomain(0, 20),                                           
-                     IntervalIntDomain(1, 1000));                                        
+    db->close();
+
+    IntervalToken t1(db,
+                     LabelStr(DEFAULT_PREDICATE),
+                     true,
+                     false,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000));
     DEFAULT_TEARDOWN();
-    return true;                                                                         
-  }                            
+    return true;
+  }
 
   static bool testStateModel(){
       DEFAULT_SETUP(ce, db, false);
       ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
-    IntervalToken t0(db, 
-                     LabelStr(DEFAULT_PREDICATE), 
-                     true, 
+    IntervalToken t0(db,
+                     LabelStr(DEFAULT_PREDICATE),
+                     true,
                      false,
                      IntervalIntDomain(0, 1000),
                      IntervalIntDomain(0, 1000),
                      IntervalIntDomain(2, 10),
                      Token::noObject(), false);
-  
+
     CPPUNIT_ASSERT(t0.isIncomplete());
     t0.close();
     CPPUNIT_ASSERT(t0.isInactive());
@@ -1179,19 +1179,19 @@ private:
     CPPUNIT_ASSERT(t0.isActive());
     t0.cancel();
     CPPUNIT_ASSERT(t0.isInactive());
-  
-    IntervalToken t1(db, 
-                     LabelStr(DEFAULT_PREDICATE), 
-                     true, 
+
+    IntervalToken t1(db,
+                     LabelStr(DEFAULT_PREDICATE),
+                     true,
                      false,
                      IntervalIntDomain(0, 1000),
                      IntervalIntDomain(0, 1000),
                      IntervalIntDomain(2, 10),
                      Token::noObject(), true);
-  
+
     // Constraint the start variable of both tokens
     EqualConstraint c0("eq", "Default", ENGINE, makeScope(t0.start(), t1.start()));
-  
+
     CPPUNIT_ASSERT(t1.isInactive());
     t0.activate();
     t1.doMerge(t0.getId());
@@ -1200,7 +1200,7 @@ private:
     CPPUNIT_ASSERT(t1.isInactive());
     t1.doMerge(t0.getId());
 
-    // Test that we can allocate a token, but if we constrain it with any external entity, 
+    // Test that we can allocate a token, but if we constrain it with any external entity,
     // then the state variable will be restricted
     // to exclude the possibility of rejecting the token.
     {
@@ -1215,63 +1215,63 @@ private:
       DEFAULT_SETUP(ce, db, false);
       ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
-    IntervalToken t0(db, 
-                     LabelStr(DEFAULT_PREDICATE), 
-                     false, 
+    IntervalToken t0(db,
+                     LabelStr(DEFAULT_PREDICATE),
+                     false,
                      false,
                      IntervalIntDomain(0, 1),
                      IntervalIntDomain(0, 1),
                      IntervalIntDomain(1, 1));
     t0.activate();
-  
-    TokenId t1 = (new IntervalToken(db, 
-                                    LabelStr(DEFAULT_PREDICATE), 
+
+    TokenId t1 = (new IntervalToken(db,
+                                    LabelStr(DEFAULT_PREDICATE),
                                     false,
                                     false,
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(1, 1)))->getId();
     t1->activate();
-  
+
     TokenId t2 = (new IntervalToken(t0.getId(), "any",
-                                    LabelStr(DEFAULT_PREDICATE), 
+                                    LabelStr(DEFAULT_PREDICATE),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(1, 1)))->getId();
-  
+
     TokenId t3 = (new IntervalToken(t0.getId(), "any",
-                                    LabelStr(DEFAULT_PREDICATE), 
+                                    LabelStr(DEFAULT_PREDICATE),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(1, 1)))->getId();
-  
-    TokenId t4 = (new IntervalToken(t0.getId(), "any", 
-                                    LabelStr(DEFAULT_PREDICATE), 
+
+    TokenId t4 = (new IntervalToken(t0.getId(), "any",
+                                    LabelStr(DEFAULT_PREDICATE),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(1, 1)))->getId();
-  
-    TokenId t5 = (new IntervalToken(t1, "any", 
-                                    LabelStr(DEFAULT_PREDICATE), 
+
+    TokenId t5 = (new IntervalToken(t1, "any",
+                                    LabelStr(DEFAULT_PREDICATE),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(0, 1),
                                     IntervalIntDomain(1, 1)))->getId();
-  
-    TokenId t6 = (new EventToken(t0.getId(), "any", 
-                                 LabelStr(DEFAULT_PREDICATE), 
+
+    TokenId t6 = (new EventToken(t0.getId(), "any",
+                                 LabelStr(DEFAULT_PREDICATE),
                                  IntervalIntDomain(0, 1)))->getId();
-  
+
     // These are mostly to avoid compiler warnings about unused variables.
     CPPUNIT_ASSERT(t3 != t4);
     CPPUNIT_ASSERT(t5 != t6);
-  
+
     // Delete slave only - master must be committed to allow this
     t0.commit();
     delete (Token*) t2;
     CPPUNIT_ASSERT(t0.slaves().size() == 3);
 
     // Should verify correct count of tokens remain. --wedgingt 2004 Feb 27
-  
+
     // Delete master & slaves
     delete (Token*) t1;
     // Should verify correct count of tokens remain. --wedgingt 2004 Feb 27
@@ -1289,17 +1289,17 @@ private:
       ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
 
-    {    
-      IntervalToken t0(db, 
-		       LabelStr(DEFAULT_PREDICATE), 
+    {
+      IntervalToken t0(db,
+		       LabelStr(DEFAULT_PREDICATE),
 		       true,
 		       false,
 		       IntervalIntDomain(0, 10),
 		       IntervalIntDomain(0, 20),
 		       IntervalIntDomain(1, 1000));
-  
+
       IntervalToken t1(db,
-		       LabelStr(DEFAULT_PREDICATE), 
+		       LabelStr(DEFAULT_PREDICATE),
 		       true,
 		       false,
 		       IntervalIntDomain(0, 10),
@@ -1312,17 +1312,17 @@ private:
     CPPUNIT_ASSERT(ce->pending());
 
     // Now try again, but make sure that if we terminate them, the deletion causes no problems
-    {    
-      IntervalToken t0(db, 
-		       LabelStr(DEFAULT_PREDICATE), 
+    {
+      IntervalToken t0(db,
+		       LabelStr(DEFAULT_PREDICATE),
 		       true,
 		       false,
 		       IntervalIntDomain(0, 0),
 		       IntervalIntDomain(),
 		       IntervalIntDomain(1, 1));
-  
+
       IntervalToken t1(db,
-		       LabelStr(DEFAULT_PREDICATE), 
+		       LabelStr(DEFAULT_PREDICATE),
 		       true,
 		       false,
 		       IntervalIntDomain(0, 0),
@@ -1337,19 +1337,19 @@ private:
 
     // Now make sure that we can correctly delete a slave that has been terminated
     TokenId t1;
-    {    
-      IntervalToken t0(db, 
-		       LabelStr(DEFAULT_PREDICATE), 
+    {
+      IntervalToken t0(db,
+		       LabelStr(DEFAULT_PREDICATE),
 		       true,
 		       false,
 		       IntervalIntDomain(0, 0),
 		       IntervalIntDomain(1, 1),
 		       IntervalIntDomain(1, 1));
-  
+
       t0.activate();
 
-      t1 = (new IntervalToken(t0.getId(), "any", 
-				      LabelStr(DEFAULT_PREDICATE), 
+      t1 = (new IntervalToken(t0.getId(), "any",
+				      LabelStr(DEFAULT_PREDICATE),
 				      IntervalIntDomain(0, 0),
 				      IntervalIntDomain(1, 1),
 				      IntervalIntDomain(1, 1)))->getId();
@@ -1381,18 +1381,18 @@ private:
       ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
     // Create 2 mergeable tokens.
-    
-    IntervalToken t0(db, 
-                     LabelStr(DEFAULT_PREDICATE), 
+
+    IntervalToken t0(db,
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
 		     IntervalIntDomain(1, 1000),
 		     Token::noObject(), false);
-  
+
     IntervalToken t1(db,
-                     LabelStr(DEFAULT_PREDICATE), 
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1403,13 +1403,13 @@ private:
     // add parameters and merge
     t0.addParameter(LabelSet(), "LabelSetParam");
     t1.addParameter(LabelSet(), "LabelSetParam");
- 
+
     t0.close();
     t1.close();
 
-    // activate t0 
+    // activate t0
     t0.activate();
-    
+
     // propagate
     bool res = ce->propagate();
     CPPUNIT_ASSERT(res);
@@ -1430,26 +1430,26 @@ private:
       ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
     // Create 2 mergeable tokens - predicates, types and base domaiuns match
-    IntervalToken t0(db, 
-                     LabelStr(DEFAULT_PREDICATE), 
+    IntervalToken t0(db,
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
-  
+
     CPPUNIT_ASSERT(t0.duration()->getDerivedDomain().getUpperBound() == 20);
-  
+
     IntervalToken t1(db,
-                     LabelStr(DEFAULT_PREDICATE), 
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
-  
+
     t1.duration()->restrictBaseDomain(IntervalIntDomain(5, 7));
-  
+
     // Activate & deactivate - ensure proper handling of rejectability variable
     CPPUNIT_ASSERT(!t0.getState()->getDerivedDomain().isSingleton());
     t0.activate();
@@ -1457,58 +1457,58 @@ private:
     CPPUNIT_ASSERT(t0.getState()->getDerivedDomain().getSingletonValue() == Token::ACTIVE);
     t0.cancel();
     CPPUNIT_ASSERT(!t0.getState()->getDerivedDomain().isSingleton());
-  
+
     // Now activate and merge
     t0.activate();
     t1.doMerge(t0.getId());
-  
+
     // Make sure the necessary restrictions have been imposed due to merging i.e. restruction due to specified domain
     CPPUNIT_ASSERT_MESSAGE(t0.duration()->toString(), t0.duration()->getDerivedDomain().getUpperBound() == 7);
     CPPUNIT_ASSERT(t1.isMerged());
-  
+
     // Do a split and make sure the old values are reinstated.
     t1.cancel();
     CPPUNIT_ASSERT_MESSAGE(t0.duration()->toString(), t0.duration()->getDerivedDomain().getUpperBound() == 20);
     CPPUNIT_ASSERT(t1.isInactive());
-  
+
     // Now post equality constraint between t1 and extra token t2 and remerge
-    IntervalToken t2(db, 
-                     LabelStr(DEFAULT_PREDICATE), 
+    IntervalToken t2(db,
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
                      IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
-  
+
     t2.end()->restrictBaseDomain(IntervalIntDomain(8, 10));
-  
+
     std::vector<ConstrainedVariableId> temp;
     temp.push_back(t1.end());
     temp.push_back(t2.end());
     ConstraintId equalityConstraint = db->getConstraintEngine()->createConstraint("concurrent",
                                                                           temp);
     t1.doMerge(t0.getId());
-  
+
     CPPUNIT_ASSERT(!t0.getMergedTokens().empty());
-  
+
     // Verify that the equality constraint has migrated and original has been deactivated.
     //TBW: when stacking instead of merging tokens, the next check is not true
     // CPPUNIT_ASSERT(!equalityConstraint->isActive());
     CPPUNIT_ASSERT(t0.end()->getDerivedDomain().getLowerBound() == 8);
     CPPUNIT_ASSERT(t0.end()->getDerivedDomain() == t2.end()->getDerivedDomain());
-  
+
     // Undo the merge and check for initial conditions being established
     t1.cancel();
     CPPUNIT_ASSERT(equalityConstraint->isActive());
-  
+
     // Redo the merge
     t1.doMerge(t0.getId());
-  
+
     // Confirm deletion of the constraint is handled correctly
     delete (Constraint*) equalityConstraint;
     CPPUNIT_ASSERT(t0.end()->getDerivedDomain() != t2.end()->getDerivedDomain());
-  
-  
+
+
     // Test subset path
     t1.cancel();
     Variable<IntervalIntDomain> superset(db->getConstraintEngine(), IntervalIntDomain(5, 6));
@@ -1535,8 +1535,8 @@ private:
     db->close();
 
     // Create two base tokens
-    IntervalToken t0(db, 
-                     LabelStr(DEFAULT_PREDICATE), 
+    IntervalToken t0(db,
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1544,7 +1544,7 @@ private:
                      IntervalIntDomain(1, 1000));
 
     IntervalToken t1(db,
-                     LabelStr(DEFAULT_PREDICATE), 
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1553,8 +1553,8 @@ private:
 
 
     // Create 2 mergeable tokens - predicates, types and base domains match
-    IntervalToken t2(db, 
-                     LabelStr(DEFAULT_PREDICATE), 
+    IntervalToken t2(db,
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1562,7 +1562,7 @@ private:
                      IntervalIntDomain(1, 1000));
 
     IntervalToken t3(db,
-                     LabelStr(DEFAULT_PREDICATE), 
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1601,8 +1601,8 @@ private:
 
 
     // Create two base tokens
-    IntervalToken t0(db, 
-                     LabelStr(DEFAULT_PREDICATE), 
+    IntervalToken t0(db,
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1610,7 +1610,7 @@ private:
                      IntervalIntDomain(1, 1000));
 
     IntervalToken t1(db,
-                     LabelStr(DEFAULT_PREDICATE), 
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1619,7 +1619,7 @@ private:
 
 
     IntervalToken t2(db,
-                     LabelStr(DEFAULT_PREDICATE), 
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1661,8 +1661,8 @@ private:
     values.push_back(LabelStr("L5"));
     values.push_back(LabelStr("L3"));
 
-    IntervalToken token0(db, 
-			 LabelStr(DEFAULT_PREDICATE), 
+    IntervalToken token0(db,
+			 LabelStr(DEFAULT_PREDICATE),
 			 false,
 			 false,
 			 IntervalIntDomain(0, 10),
@@ -1672,8 +1672,8 @@ private:
     token0.addParameter(LabelSet(values), "LabelSetParam");
     token0.close();
 
-    IntervalToken token1(db, 
-			 LabelStr(DEFAULT_PREDICATE), 
+    IntervalToken token1(db,
+			 LabelStr(DEFAULT_PREDICATE),
 			 false,
 			 false,
 			 IntervalIntDomain(0, 10),
@@ -1683,8 +1683,8 @@ private:
     token1.addParameter(LabelSet(values), "LabelSetParam");
     token1.close();
 
-    IntervalToken token2(db, 
-			 LabelStr(DEFAULT_PREDICATE), 
+    IntervalToken token2(db,
+			 LabelStr(DEFAULT_PREDICATE),
 			 false,
 			 false,
 			 IntervalIntDomain(0, 10),
@@ -1696,8 +1696,8 @@ private:
     token2.addParameter(LabelSet(values2), "LabelSetParam");
     token2.close();
 
-    IntervalToken token3(db, 
-			 LabelStr(DEFAULT_PREDICATE), 
+    IntervalToken token3(db,
+			 LabelStr(DEFAULT_PREDICATE),
 			 false,
 			 false,
 			 IntervalIntDomain(0, 10),
@@ -1798,7 +1798,7 @@ private:
     db->close();
 
     typedef Id<IntervalToken> IntervalTokenId;
-    
+
     static const int NUMTOKS=3;
     static const int UNIFIED=1;
     static const int NUMPARAMS=1;
@@ -1814,8 +1814,8 @@ private:
     for (int i=0; i < NUMTOKS; i++) {
       std::vector<IntervalTokenId> tmp;
       for (int j=0; j < UNIFIED; j++) {
-        IntervalTokenId t = (new IntervalToken(db, 
-                                               LabelStr(DEFAULT_PREDICATE), 
+        IntervalTokenId t = (new IntervalToken(db,
+                                               LabelStr(DEFAULT_PREDICATE),
                                                true,
                                                false,
                                                IntervalIntDomain(0, 210),
@@ -1864,7 +1864,7 @@ private:
     CPPUNIT_ASSERT(pdom2.getUpperBound() == 1000);
 
     for (int i=0; i < NUMTOKS; i++)
-      for (int j=1; j < UNIFIED; j++) { 
+      for (int j=1; j < UNIFIED; j++) {
         tokens[i][j]->doMerge(tokens[i][0]);
         ce->propagate();
       }
@@ -1903,7 +1903,7 @@ private:
 
     DEFAULT_TEARDOWN();
     return true;
-  }    
+  }
 
   static bool testTokenCompatibility(){
       DEFAULT_SETUP(ce, db, false);
@@ -1911,8 +1911,8 @@ private:
       db->close();
 
     // Create 2 mergeable tokens - predicates, types and base domaiuns match
-    IntervalToken t0(db, 
-                     LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    IntervalToken t0(db,
+                     LabelStr(LabelStr(DEFAULT_PREDICATE)),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1924,7 +1924,7 @@ private:
 
     // Same predicate and has an intersection
     IntervalToken t1(db,
-                     LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+                     LabelStr(LabelStr(DEFAULT_PREDICATE)),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1952,7 +1952,7 @@ private:
     CPPUNIT_ASSERT(!db->hasCompatibleTokens(t1.getId()));
 
     IntervalToken t2(db,
-                     LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+                     LabelStr(LabelStr(DEFAULT_PREDICATE)),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -1971,7 +1971,7 @@ private:
 
 
     IntervalToken t3(db,
-                     LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+                     LabelStr(LabelStr(DEFAULT_PREDICATE)),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2027,7 +2027,7 @@ private:
 
     // Populate an instance of each predicate type
     IntervalToken t0(db,
-                     LabelStr("A.a"), 
+                     LabelStr("A.a"),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2038,7 +2038,7 @@ private:
     t0.activate();
 
     IntervalToken t1(db,
-                     LabelStr("A.b"), 
+                     LabelStr("A.b"),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2049,7 +2049,7 @@ private:
     t1.activate();
 
     IntervalToken t2(db,
-                     LabelStr("B.a"), 
+                     LabelStr("B.a"),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2060,7 +2060,7 @@ private:
     t2.activate();
 
     IntervalToken t3(db,
-                     LabelStr("C.a"), 
+                     LabelStr("C.a"),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2071,7 +2071,7 @@ private:
     t3.activate();
 
     IntervalToken t4(db,
-                     LabelStr("C.b"), 
+                     LabelStr("C.b"),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2082,7 +2082,7 @@ private:
     t4.activate();
 
     IntervalToken t5(db,
-                     LabelStr("C.c"), 
+                     LabelStr("C.c"),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2093,7 +2093,7 @@ private:
     t5.activate();
 
     IntervalToken t6(db,
-                     LabelStr("D.a"), 
+                     LabelStr("D.a"),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2104,7 +2104,7 @@ private:
     t6.activate();
 
     IntervalToken t7(db,
-                     LabelStr("D.b"), 
+                     LabelStr("D.b"),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2118,7 +2118,7 @@ private:
     {
       std::vector<TokenId> results;
       IntervalToken t(db,
-		      LabelStr("A.a"), 
+		      LabelStr("A.a"),
 		      true,
 		      false,
 		      IntervalIntDomain(0, 10),
@@ -2140,7 +2140,7 @@ private:
     {
       std::vector<TokenId> results;
       IntervalToken t(db,
-		      LabelStr("D.b"), 
+		      LabelStr("D.b"),
 		      true,
 		      false,
 		      IntervalIntDomain(0, 10),
@@ -2170,7 +2170,7 @@ private:
       TokenId master = db->createToken(LabelStr(DEFAULT_PREDICATE), true);
     master->activate();
     TokenId slave = db->createSlaveToken(master, LabelStr(DEFAULT_PREDICATE), LabelStr("any"));
-    CPPUNIT_ASSERT(slave->master() == master); 
+    CPPUNIT_ASSERT(slave->master() == master);
     TokenId rejectable = db->createToken(LabelStr(DEFAULT_PREDICATE), false);
     rejectable->activate();
     //!!Should try rejecting master and verify inconsistency
@@ -2188,8 +2188,8 @@ private:
     ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
     db->close();
 
-    IntervalToken tokenA(db, 
-                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    IntervalToken tokenA(db,
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)),
                          true,
                          false,
                          IntervalIntDomain(0, 10),
@@ -2203,16 +2203,16 @@ private:
     tokenA.activate();
     CPPUNIT_ASSERT(ce->propagate());
 
-    IntervalToken tokenB(db, 
-                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    IntervalToken tokenB(db,
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)),
                          true,
                          false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
 
-    IntervalToken tokenC(db, 
-                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    IntervalToken tokenC(db,
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)),
                          true,
                          false,
                          IntervalIntDomain(0, 10),
@@ -2248,7 +2248,7 @@ private:
       DEFAULT_SETUP(ce, db, false);
       ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
-      
+
     schema->addMember(LabelStr(DEFAULT_PREDICATE),"int",LabelStr("FOO"));
 
     EnumeratedDomain zero(true, "int");
@@ -2358,7 +2358,7 @@ private:
       DEFAULT_SETUP(ce, db, false);
       ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
-    
+
     LabelSet lbl;
     lbl.insert(LabelStr("L1"));
 
@@ -2413,8 +2413,8 @@ private:
       ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
     //create a regular token
-    IntervalToken t0(db, 
-                     LabelStr(DEFAULT_PREDICATE), 
+    IntervalToken t0(db,
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2422,8 +2422,8 @@ private:
                      IntervalIntDomain(1, 1000));
 
     //create a token that ends slightly later
-    IntervalToken t1(db, 
-                     LabelStr(DEFAULT_PREDICATE), 
+    IntervalToken t1(db,
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2437,13 +2437,13 @@ private:
     std::vector<ConstrainedVariableId> temp;
     temp.push_back(t0.end());
     temp.push_back(t1.end());
-    ConstraintId eq = db->getConstraintEngine()->createConstraint("concurrent",                                                          
+    ConstraintId eq = db->getConstraintEngine()->createConstraint("concurrent",
                                                           temp);
 
 
     //create a token that has to end later
-    IntervalToken t2(db, 
-                     LabelStr(DEFAULT_PREDICATE), 
+    IntervalToken t2(db,
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2454,11 +2454,11 @@ private:
 
     //shouldn't be able to merge with anything
     CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), PLUS_INFINITY, true) == 0);
-    
+
     delete (Constraint *) eq; //remove the constraint
 
     ce->propagate();
-    
+
     // Should now be able to merge
     CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), PLUS_INFINITY, true) > 0);
 
@@ -2473,8 +2473,8 @@ private:
     db->close();
 
     //create a token that has to end later
-    IntervalToken t0(db, 
-                     LabelStr(DEFAULT_PREDICATE), 
+    IntervalToken t0(db,
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -2497,15 +2497,15 @@ private:
     // Should not be assigned since inactive and object domain not a singleton
     CPPUNIT_ASSERT(!t0.isAssigned());
     CPPUNIT_ASSERT(!o1.hasToken(t0.getId()));
-    
-    // Now specify the object value. Expect it to be assigned.	
+
+    // Now specify the object value. Expect it to be assigned.
     t0.getObject()->specify(o1.getId());
     ce->propagate();
 
     CPPUNIT_ASSERT(t0.isAssigned());
     CPPUNIT_ASSERT(o1.hasToken(t0.getId()));
 
-    // Now we can reset and expect it to go back	
+    // Now we can reset and expect it to go back
     t0.getObject()->reset();
     ce->propagate();
 
@@ -2523,29 +2523,29 @@ private:
   static bool testDeleteMasterAndPreserveSlave(){
       DEFAULT_SETUP(ce, db, false);
     Timeline o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "tl1");
-    db->close();                                                                
-  
-    TokenId master = (new IntervalToken(db,  
-				       LabelStr(DEFAULT_PREDICATE),                                                     
-				       true, 
-				       false,                                                              
-				       IntervalIntDomain(0, 10),                                           
-				       IntervalIntDomain(0, 20),                                           
-				       IntervalIntDomain(1, 1000)))->getId();                                  
+    db->close();
+
+    TokenId master = (new IntervalToken(db,
+				       LabelStr(DEFAULT_PREDICATE),
+				       true,
+				       false,
+				       IntervalIntDomain(0, 10),
+				       IntervalIntDomain(0, 20),
+				       IntervalIntDomain(1, 1000)))->getId();
     master->activate();
 
-    TokenId slaveA = (new IntervalToken(master,  
+    TokenId slaveA = (new IntervalToken(master,
 					"any",
-					LabelStr(DEFAULT_PREDICATE),                                                     
-					IntervalIntDomain(0, 10),                                           
-					IntervalIntDomain(0, 20),                                           
+					LabelStr(DEFAULT_PREDICATE),
+					IntervalIntDomain(0, 10),
+					IntervalIntDomain(0, 20),
 					IntervalIntDomain(1, 1000)))->getId();
 
-    TokenId slaveB = (new IntervalToken(master,  
+    TokenId slaveB = (new IntervalToken(master,
 					"any",
-					LabelStr(DEFAULT_PREDICATE),                                                     
-					IntervalIntDomain(0, 10),                                           
-					IntervalIntDomain(0, 20),                                           
+					LabelStr(DEFAULT_PREDICATE),
+					IntervalIntDomain(0, 10),
+					IntervalIntDomain(0, 20),
 					IntervalIntDomain(1, 1000)))->getId();
 
     slaveB->activate();
@@ -2570,46 +2570,46 @@ private:
   static bool testPreserveMergeWithNonChronSplit(){
       DEFAULT_SETUP(ce, db, false);
     Timeline o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "tl1");
-    db->close();                                                                
-  
-    TokenId master = (new IntervalToken(db,  
-				       LabelStr(DEFAULT_PREDICATE),                                                     
-				       true,  
-				       false,                                                             
-				       IntervalIntDomain(0, 10),                                           
-				       IntervalIntDomain(0, 20),                                           
-				       IntervalIntDomain(1, 1000)))->getId();                                  
+    db->close();
+
+    TokenId master = (new IntervalToken(db,
+				       LabelStr(DEFAULT_PREDICATE),
+				       true,
+				       false,
+				       IntervalIntDomain(0, 10),
+				       IntervalIntDomain(0, 20),
+				       IntervalIntDomain(1, 1000)))->getId();
     master->activate();
 
-                                                     
-  
-    TokenId orphan = (new IntervalToken(db,  
-					LabelStr(DEFAULT_PREDICATE),                                                     
-					true,  
-					false,                                                             
-					IntervalIntDomain(0, 10),                                           
-					IntervalIntDomain(0, 20),                                           
-					IntervalIntDomain(1, 1000)))->getId();       
 
-    TokenId slaveA = (new IntervalToken(master,  
-					"any",
-					LabelStr(DEFAULT_PREDICATE),                                                     
-					IntervalIntDomain(0, 10),                                           
-					IntervalIntDomain(0, 20),                                           
+
+    TokenId orphan = (new IntervalToken(db,
+					LabelStr(DEFAULT_PREDICATE),
+					true,
+					false,
+					IntervalIntDomain(0, 10),
+					IntervalIntDomain(0, 20),
 					IntervalIntDomain(1, 1000)))->getId();
 
-    TokenId slaveB = (new IntervalToken(master,  
+    TokenId slaveA = (new IntervalToken(master,
 					"any",
-					LabelStr(DEFAULT_PREDICATE),                                                     
-					IntervalIntDomain(0, 10),                                           
-					IntervalIntDomain(0, 20),                                           
+					LabelStr(DEFAULT_PREDICATE),
+					IntervalIntDomain(0, 10),
+					IntervalIntDomain(0, 20),
 					IntervalIntDomain(1, 1000)))->getId();
 
-    TokenId slaveC = (new IntervalToken(master,  
+    TokenId slaveB = (new IntervalToken(master,
 					"any",
-					LabelStr(DEFAULT_PREDICATE),                                                     
-					IntervalIntDomain(0, 10),                                           
-					IntervalIntDomain(0, 20),                                           
+					LabelStr(DEFAULT_PREDICATE),
+					IntervalIntDomain(0, 10),
+					IntervalIntDomain(0, 20),
+					IntervalIntDomain(1, 1000)))->getId();
+
+    TokenId slaveC = (new IntervalToken(master,
+					"any",
+					LabelStr(DEFAULT_PREDICATE),
+					IntervalIntDomain(0, 10),
+					IntervalIntDomain(0, 20),
 					IntervalIntDomain(1, 1000)))->getId();
 
     // Activate C and merge other 2 slaves onto it
@@ -2641,7 +2641,7 @@ private:
   /**
    * After some work, we now have it boiled down to a failure to handle the case of restricting
    * a base domain correctly. Problem is that the change to use the base domain being a singleton
-   * as permiting 'isSpecified' to be true. Consequently, when restricting the base domain, 
+   * as permiting 'isSpecified' to be true. Consequently, when restricting the base domain,
    * we over-ride 'specify' and it thinks the variable is already specified.
    */
   static bool testGNATS_3163(){
@@ -2649,16 +2649,16 @@ private:
     Timeline o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "tl1");
     db->close();
 
-    TokenId master = (new IntervalToken(db,  
-				       LabelStr(DEFAULT_PREDICATE),                                                     
-				       true, 
-				       false,                                                              
-				       IntervalIntDomain(0, 10),                                           
-				       IntervalIntDomain(0, 20),                                           
-				       IntervalIntDomain(1, 1000)))->getId();                                  
+    TokenId master = (new IntervalToken(db,
+				       LabelStr(DEFAULT_PREDICATE),
+				       true,
+				       false,
+				       IntervalIntDomain(0, 10),
+				       IntervalIntDomain(0, 20),
+				       IntervalIntDomain(1, 1000)))->getId();
 
     master->start()->restrictBaseDomain(IntervalIntDomain(1, 1));
-    CPPUNIT_ASSERT(master->start()->specifiedFlag());    
+    CPPUNIT_ASSERT(master->start()->specifiedFlag());
     master->discard();
     DEFAULT_TEARDOWN();
     return true;
@@ -2668,27 +2668,27 @@ private:
    * Should be able to post a constraint on a state variable of a token which would then get merged. Confirm that
    * the constraint remains active after the merge (although it will be basically moot since if consistent the state
    * variable will be grounded). Also want to ensure that if we delete the constraint, it will be removed safely.
-   */ 
+   */
   static bool testGNATS_3193(){
       DEFAULT_SETUP(ce, db, false);
     Timeline o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "tl1");
     db->close();
 
-    TokenId t0 = (new IntervalToken(db,  
-				       LabelStr(DEFAULT_PREDICATE),                                                     
-				       true,    
-				       false,                                                           
-				       IntervalIntDomain(0, 10),                                           
-				       IntervalIntDomain(0, 20),                                           
-				       IntervalIntDomain(1, 1000)))->getId();  
+    TokenId t0 = (new IntervalToken(db,
+				       LabelStr(DEFAULT_PREDICATE),
+				       true,
+				       false,
+				       IntervalIntDomain(0, 10),
+				       IntervalIntDomain(0, 20),
+				       IntervalIntDomain(1, 1000)))->getId();
     t0->activate();
 
-    TokenId t1 = (new IntervalToken(db,  
-				       LabelStr(DEFAULT_PREDICATE),                                                     
-				       true, 
-				       false,                                                              
-				       IntervalIntDomain(0, 10),                                           
-				       IntervalIntDomain(0, 20),                                           
+    TokenId t1 = (new IntervalToken(db,
+				       LabelStr(DEFAULT_PREDICATE),
+				       true,
+				       false,
+				       IntervalIntDomain(0, 10),
+				       IntervalIntDomain(0, 20),
 				       IntervalIntDomain(1, 1000)))->getId();
     {
       StateDomain dom;
@@ -2739,32 +2739,32 @@ private:
     Timeline timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2");
     db->close();
 
-    IntervalToken tokenA(db, 
-                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    IntervalToken tokenA(db,
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)),
                          true,
                          false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
 
-    IntervalToken tokenB(db, 
-                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    IntervalToken tokenB(db,
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)),
                          true,
                          false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
 
-    IntervalToken tokenC(db, 
-                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    IntervalToken tokenC(db,
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)),
                          true,
                          false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
 
-    IntervalToken tokenD(db, 
-                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    IntervalToken tokenD(db,
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)),
                          true,
                          false,
                          IntervalIntDomain(0, 10),
@@ -2822,7 +2822,7 @@ private:
      * constrain(C,A): C => A => B; add 1 object constraint, 1 precedence constraint
      * free(A,B): C => A; remove one object constraint, 1 precedence constraint
      */
-    { 
+    {
       timeline.constrain(tokenA.getId(), tokenB.getId());
       num_constraints += 3; // 2 Object variable constraints and a single temporal constraint
       CPPUNIT_ASSERT(ce->getConstraints().size() == num_constraints);
@@ -2900,25 +2900,25 @@ private:
     DEFAULT_SETUP(ce, db, false);
     Timeline timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2");
     db->close();
-    
-    IntervalToken tokenA(db, 
-                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+
+    IntervalToken tokenA(db,
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)),
                          true,
                          false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
 
-    IntervalToken tokenB(db, 
-                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    IntervalToken tokenB(db,
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)),
                          true,
                          false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
 
-    IntervalToken tokenC(db, 
-                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    IntervalToken tokenC(db,
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)),
                          true,
                          false,
                          IntervalIntDomain(0, 10),
@@ -2962,8 +2962,8 @@ private:
 
 
     // Test destruction call path
-    Token* tokenD = new IntervalToken(db, 
-                                      LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    Token* tokenD = new IntervalToken(db,
+                                      LabelStr(LabelStr(DEFAULT_PREDICATE)),
                                       true,
                                       false,
                                       IntervalIntDomain(0, 10),
@@ -2989,10 +2989,10 @@ private:
 
     const int COUNT = 5;
     const int DURATION = 10;
-    
+
     for (int i=0;i<COUNT;i++){
       int start = i*DURATION;
-      TokenId token = (new IntervalToken(db, 
+      TokenId token = (new IntervalToken(db,
                                          LabelStr(LabelStr(DEFAULT_PREDICATE)),
                                          true,
                                          false,
@@ -3040,7 +3040,7 @@ private:
     CPPUNIT_ASSERT(tokenSequence.back()->end()->getDerivedDomain().getSingletonValue() == COUNT*DURATION);
 
     // Now ensure the query can correctly indicate no options available
-    TokenId token = (new IntervalToken(db, 
+    TokenId token = (new IntervalToken(db,
                                        LabelStr(LabelStr(DEFAULT_PREDICATE)),
                                        true,
                                        false,
@@ -3061,7 +3061,7 @@ private:
     CPPUNIT_ASSERT(ce->propagate());
 
 
-    TokenId token2 = (new IntervalToken(db, 
+    TokenId token2 = (new IntervalToken(db,
 					LabelStr(LabelStr(DEFAULT_PREDICATE)),
 					true,
 					false,
@@ -3109,8 +3109,8 @@ private:
     Timeline timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2");
     db->close();
 
-    IntervalToken it1(db, 
-                      LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    IntervalToken it1(db,
+                      LabelStr(LabelStr(DEFAULT_PREDICATE)),
                       true,
                       false,
                       IntervalIntDomain(0, 10),
@@ -3122,11 +3122,11 @@ private:
     timeline.constrain(it1.getId(), it1.getId());
 
     // Insert at the end after a token
-    EventToken et1(db, 
-                   LabelStr(DEFAULT_PREDICATE), 
-                   true, 
+    EventToken et1(db,
+                   LabelStr(DEFAULT_PREDICATE),
+                   true,
                    false,
-                   IntervalIntDomain(0, 100), 
+                   IntervalIntDomain(0, 100),
                    Token::noObject());
 
     et1.getObject()->specify(timeline.getId());
@@ -3135,11 +3135,11 @@ private:
     CPPUNIT_ASSERT(it1.end()->getDerivedDomain().getUpperBound() == 100);
 
     // Insert between a token and an event
-    EventToken et2(db, 
-                   LabelStr(DEFAULT_PREDICATE), 
-                   true, 
+    EventToken et2(db,
+                   LabelStr(DEFAULT_PREDICATE),
+                   true,
                    false,
-                   IntervalIntDomain(0, 100), 
+                   IntervalIntDomain(0, 100),
                    Token::noObject());
 
     et2.getObject()->specify(timeline.getId());
@@ -3148,11 +3148,11 @@ private:
     CPPUNIT_ASSERT(it1.end()->getDerivedDomain().getUpperBound() == 100);
 
     // Insert before a token
-    EventToken et3(db, 
-                   LabelStr(DEFAULT_PREDICATE), 
-                   true, 
+    EventToken et3(db,
+                   LabelStr(DEFAULT_PREDICATE),
+                   true,
                    false,
-                   IntervalIntDomain(10, 100), 
+                   IntervalIntDomain(10, 100),
                    Token::noObject());
 
     et3.getObject()->specify(timeline.getId());
@@ -3161,11 +3161,11 @@ private:
     CPPUNIT_ASSERT(it1.start()->getDerivedDomain().getLowerBound() == 10);
 
     // Insert between events
-    EventToken et4(db, 
-                   LabelStr(DEFAULT_PREDICATE), 
-                   true, 
+    EventToken et4(db,
+                   LabelStr(DEFAULT_PREDICATE),
+                   true,
                    false,
-                   IntervalIntDomain(0, 100), 
+                   IntervalIntDomain(0, 100),
                    Token::noObject());
 
     et4.getObject()->specify(timeline.getId());
@@ -3182,24 +3182,24 @@ private:
     Timeline timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2");
     db->close();
 
-    IntervalToken tokenA(db, 
-                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    IntervalToken tokenA(db,
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)),
                          true,
                          false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
 
-    IntervalToken tokenB(db, 
-                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    IntervalToken tokenB(db,
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)),
                          true,
                          false,
                          IntervalIntDomain(0, 10),
                          IntervalIntDomain(0, 20),
                          IntervalIntDomain(1, 1000));
 
-    IntervalToken tokenC(db, 
-                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    IntervalToken tokenC(db,
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)),
                          true,
                          false,
                          IntervalIntDomain(0, 10),
@@ -3227,24 +3227,24 @@ private:
     Timeline timeline(db, LabelStr(DEFAULT_OBJECT_TYPE) , "o2");
     db->close();
 
-    IntervalToken tokenA(db, 
-                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    IntervalToken tokenA(db,
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)),
                          true,
                          false,
                          IntervalIntDomain(10, 10),
                          IntervalIntDomain(20, 20),
                          IntervalIntDomain(1, 1000));
 
-    IntervalToken tokenB(db, 
-                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    IntervalToken tokenB(db,
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)),
                          true,
                          false,
                          IntervalIntDomain(100, 100),
                          IntervalIntDomain(120, 120),
                          IntervalIntDomain(1, 1000));
 
-    IntervalToken tokenC(db, 
-                         LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    IntervalToken tokenC(db,
+                         LabelStr(LabelStr(DEFAULT_PREDICATE)),
                          true,
                          false,
                          IntervalIntDomain(9, 9),
@@ -3277,8 +3277,8 @@ private:
     db->close();
 
     //create a token that has to end later
-    IntervalToken t0(db, 
-                     LabelStr(DEFAULT_PREDICATE), 
+    IntervalToken t0(db,
+                     LabelStr(DEFAULT_PREDICATE),
                      true,
                      false,
                      IntervalIntDomain(0, 10),
@@ -3301,8 +3301,8 @@ private:
     // Should not be assigned since inactive and object domain not a singleton
     CPPUNIT_ASSERT(!t0.isAssigned());
     CPPUNIT_ASSERT(!o1.hasToken(t0.getId()));
-    
-    // Now specify the object value.	
+
+    // Now specify the object value.
     t0.getObject()->specify(o1.getId());
     ce->propagate();
 
@@ -3328,30 +3328,30 @@ private:
   static bool testFreeAndConstrain(){
       DEFAULT_SETUP(ce, db, false);
     Timeline o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "tl1");
-    db->close();                                                                          
-  
-    IntervalToken t1(db,  
-                     LabelStr(DEFAULT_PREDICATE),                                                     
-                     true,   
-                     false,                                                            
-                     IntervalIntDomain(0, 10),                                           
-                     IntervalIntDomain(0, 20),                                           
-                     IntervalIntDomain(1, 1000));                                        
-  
-    IntervalToken t2(db,                                                         
-                     LabelStr(DEFAULT_PREDICATE),                                                     
-                     true, 
-                     false,                                                              
-                     IntervalIntDomain(0, 10),                                           
-                     IntervalIntDomain(0, 20),                                           
-                     IntervalIntDomain(1, 1000));                                        
-  
-    IntervalToken t3(db,                                                         
-                     LabelStr(DEFAULT_PREDICATE),                                                     
-                     true,  
-                     false,                                                             
-                     IntervalIntDomain(0, 10),                                           
-                     IntervalIntDomain(0, 20),                                           
+    db->close();
+
+    IntervalToken t1(db,
+                     LabelStr(DEFAULT_PREDICATE),
+                     true,
+                     false,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000));
+
+    IntervalToken t2(db,
+                     LabelStr(DEFAULT_PREDICATE),
+                     true,
+                     false,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
+                     IntervalIntDomain(1, 1000));
+
+    IntervalToken t3(db,
+                     LabelStr(DEFAULT_PREDICATE),
+                     true,
+                     false,
+                     IntervalIntDomain(0, 10),
+                     IntervalIntDomain(0, 20),
                      IntervalIntDomain(1, 1000));
 
     t1.activate();
@@ -3366,24 +3366,24 @@ private:
     o1.free(t2.getId(), t3.getId());
 
     // Constrain again to leave all cleanup automatic
-    o1.constrain(t1.getId(), t3.getId());                                 
+    o1.constrain(t1.getId(), t3.getId());
 
     // Also use a locally scoped token to force a different deletion path
-    TokenId t4 = (new IntervalToken(db,                                                         
-				    LabelStr(DEFAULT_PREDICATE),                                                     
-				    true,  
-				    false,                                                             
-				    IntervalIntDomain(0, 10),                                           
-				    IntervalIntDomain(0, 20),                                           
+    TokenId t4 = (new IntervalToken(db,
+				    LabelStr(DEFAULT_PREDICATE),
+				    true,
+				    false,
+				    IntervalIntDomain(0, 10),
+				    IntervalIntDomain(0, 20),
 				    IntervalIntDomain(1, 1000)))->getId();
 
     t4->activate();
-    o1.constrain(t4, t3.getId());   
-    o1.constrain(t2.getId(), t4);  
-    CPPUNIT_ASSERT(ce->propagate()); 
-    
+    o1.constrain(t4, t3.getId());
+    o1.constrain(t2.getId(), t4);
+    CPPUNIT_ASSERT(ce->propagate());
+
     // Now delete t4 to leave a hole which will require repair
-    delete (Token*) t4; 
+    delete (Token*) t4;
     CPPUNIT_ASSERT(ce->propagate());
     DEFAULT_TEARDOWN();
     return true;
@@ -3399,8 +3399,8 @@ private:
     db->close();
 
     {
-      TokenId master = (new IntervalToken(db, 
-					  LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+      TokenId master = (new IntervalToken(db,
+					  LabelStr(LabelStr(DEFAULT_PREDICATE)),
 					  true,
 					  false,
 					  IntervalIntDomain(0, 0),
@@ -3430,8 +3430,8 @@ private:
 
 
     {
-      TokenId master = (new IntervalToken(db, 
-					  LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+      TokenId master = (new IntervalToken(db,
+					  LabelStr(LabelStr(DEFAULT_PREDICATE)),
 					  true,
 					  false,
 					  IntervalIntDomain(1, 1),
@@ -3467,7 +3467,7 @@ private:
   /**
    * @brief This test will address the need to be able to remove active and inactive tokens
    * in the database cleanly, without propagation, in the event that no consequenmces should arise.
-   * Tokens do not reach into the furture so there is no risk of conflicts there. The idea is to 
+   * Tokens do not reach into the furture so there is no risk of conflicts there. The idea is to
    * allocate in incrementing ticks, 4 tokens at a time. Then archive over the same tick increments
    * and verify the database is reduced 4 tokens at a time. This will cover active and assigned, active and free,
    * inactive orphans, and inactive slaves.
@@ -3483,8 +3483,8 @@ private:
     // Allocate tokens in each tick
     TokenId lastToken;
     for(unsigned int i=startTick;i<endTick;i++){
-      TokenId tokenA = (new IntervalToken(db, 
-					  LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+      TokenId tokenA = (new IntervalToken(db,
+					  LabelStr(LabelStr(DEFAULT_PREDICATE)),
 					  true,
 					  false,
 					  IntervalIntDomain(i, i),
@@ -3493,8 +3493,8 @@ private:
       tokenA->activate();
 
       // Allocate an inactive orphan
-      new IntervalToken(db, 
-			LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+      new IntervalToken(db,
+			LabelStr(LabelStr(DEFAULT_PREDICATE)),
 			true,
 			false,
 			IntervalIntDomain(i, i),
@@ -3503,14 +3503,14 @@ private:
 
       // Allocate an inactive slave
       new IntervalToken(tokenA, "any",
-			LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+			LabelStr(LabelStr(DEFAULT_PREDICATE)),
 			IntervalIntDomain(i, i),
 			IntervalIntDomain(),
 			IntervalIntDomain(1, 1));
 
       // Allocate an active slave
-      Token* slaveB = new IntervalToken(tokenA, "any", 
-					LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+      Token* slaveB = new IntervalToken(tokenA, "any",
+					LabelStr(LabelStr(DEFAULT_PREDICATE)),
 					IntervalIntDomain(i, i),
 					IntervalIntDomain(),
 					IntervalIntDomain(1, 1));
@@ -3518,8 +3518,8 @@ private:
       slaveB->activate();
 
       // Allocate a committed slave
-      Token* slaveC = new IntervalToken(tokenA, "any", 
-					LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+      Token* slaveC = new IntervalToken(tokenA, "any",
+					LabelStr(LabelStr(DEFAULT_PREDICATE)),
 					IntervalIntDomain(i, i),
 					IntervalIntDomain(),
 					IntervalIntDomain(1, 1));
@@ -3567,8 +3567,8 @@ private:
     const unsigned int startTick(0);
     const unsigned int endTick(10);
 
-    TokenId tokenA = (new IntervalToken(db, 
-					LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    TokenId tokenA = (new IntervalToken(db,
+					LabelStr(LabelStr(DEFAULT_PREDICATE)),
 					true,
 					false,
 					IntervalIntDomain(startTick, startTick),
@@ -3617,8 +3617,8 @@ private:
     const unsigned int startTick(0);
     const unsigned int endTick(10);
 
-    TokenId tokenA = (new IntervalToken(db, 
-					LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    TokenId tokenA = (new IntervalToken(db,
+					LabelStr(LabelStr(DEFAULT_PREDICATE)),
 					true,
 					false,
 					IntervalIntDomain(startTick, startTick),
@@ -3674,8 +3674,8 @@ private:
 
     const unsigned int startTick(0);
 
-    TokenId tokenA = (new IntervalToken(db, 
-					LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    TokenId tokenA = (new IntervalToken(db,
+					LabelStr(LabelStr(DEFAULT_PREDICATE)),
 					true,
 					false,
 					IntervalIntDomain(startTick, startTick),
@@ -3685,8 +3685,8 @@ private:
     timeline.constrain(tokenA, tokenA);
     ce->propagate();
 
-    TokenId tokenB = (new IntervalToken(db, 
-					LabelStr(LabelStr(DEFAULT_PREDICATE)), 
+    TokenId tokenB = (new IntervalToken(db,
+					LabelStr(LabelStr(DEFAULT_PREDICATE)),
 					true,
 					false,
 					IntervalIntDomain(startTick, startTick),
@@ -3721,7 +3721,7 @@ private:
     std::vector<const AbstractDomain*> arguments;
     IntervalIntDomain arg0(10, 10, "int");
     LabelSet arg1(LabelStr("Label"), "string");
-    arguments.push_back(&arg0); 
+    arguments.push_back(&arg0);
     arguments.push_back(&arg1);
     LabelStr factoryName = ObjectTypeMgr::makeFactoryName(LabelStr("Foo"), arguments);
     CPPUNIT_ASSERT(factoryName == LabelStr("Foo:int:string"));
@@ -3741,7 +3741,7 @@ private:
     std::vector<const AbstractDomain*> arguments;
     IntervalIntDomain arg0(10);
     LabelSet arg1(LabelStr("Label"), LabelSet::getDefaultTypeName().c_str());
-    arguments.push_back(&arg0); 
+    arguments.push_back(&arg0);
     arguments.push_back(&arg1);
     DBFooId foo2 = client->createObject(LabelStr(DEFAULT_OBJECT_TYPE).c_str(), "foo2", arguments);
     CPPUNIT_ASSERT(foo2.isValid());
@@ -3764,7 +3764,7 @@ private:
       DEFAULT_SETUP(ce, db, false);
       ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
-      
+
     db->getClient()->enableTransactionLogging();
     TokenId t0 = db->getClient()->createToken(LabelStr(DEFAULT_PREDICATE).c_str());
     t0->activate();
@@ -3772,41 +3772,41 @@ private:
     TokenId t1 = db->getClient()->createToken(LabelStr(DEFAULT_PREDICATE).c_str());
     t1->activate();
 
-    TokenId t0_0 = (new IntervalToken(t0, "any", 
-                                      LabelStr(DEFAULT_PREDICATE), 
+    TokenId t0_0 = (new IntervalToken(t0, "any",
+                                      LabelStr(DEFAULT_PREDICATE),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(1, 1)))->getId();
     t0_0->activate();
 
-    TokenId t0_1 = (new IntervalToken(t0, "any",  
-                                      LabelStr(DEFAULT_PREDICATE), 
+    TokenId t0_1 = (new IntervalToken(t0, "any",
+                                      LabelStr(DEFAULT_PREDICATE),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(1, 1)))->getId();
     t0_1->activate();
 
-    TokenId t0_2 = (new IntervalToken(t0, "any", 
-                                      LabelStr(DEFAULT_PREDICATE), 
+    TokenId t0_2 = (new IntervalToken(t0, "any",
+                                      LabelStr(DEFAULT_PREDICATE),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(1, 1)))->getId();
     t0_2->activate();
 
-    TokenId t1_0 = (new IntervalToken(t1, "any", 
-                                      LabelStr(DEFAULT_PREDICATE), 
+    TokenId t1_0 = (new IntervalToken(t1, "any",
+                                      LabelStr(DEFAULT_PREDICATE),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(0, 1),
                                       IntervalIntDomain(1, 1)))->getId();
     t1_0->activate();
 
-    TokenId t0_1_0 = (new EventToken(t0_1, "any", 
-                                     LabelStr(DEFAULT_PREDICATE), 
+    TokenId t0_1_0 = (new EventToken(t0_1, "any",
+                                     LabelStr(DEFAULT_PREDICATE),
                                      IntervalIntDomain(0, 1)))->getId();
     t0_1_0->activate();
 
-    TokenId t0_1_1 = (new EventToken(t0_1, "any", 
-                                     LabelStr(DEFAULT_PREDICATE), 
+    TokenId t0_1_1 = (new EventToken(t0_1, "any",
+                                     LabelStr(DEFAULT_PREDICATE),
                                      IntervalIntDomain(0, 1)))->getId();
     t0_1_1->activate();
 
@@ -4188,7 +4188,7 @@ public:
     TEST_PLAYING_XML(buildXMLNameTypeStr("var", "g_location", "Locations", __FILE__, __LINE__));
 
     //!!Other types: symbols, objects, etc.
-      
+
     ConstrainedVariableSet allVars = s_ce->getVariables();
     ConstrainedVariableSet::iterator varIter = allVars.begin();
     ConstrainedVariableId g_int2, g_float2, g_location2;
@@ -4266,7 +4266,7 @@ public:
     for(ConstrainedVariableSet::iterator it = allVars.begin(); it != allVars.end(); ++it) {
       CPPUNIT_ASSERT((*it)->getName() != LabelStr("g_int"));
     }
-    
+
     std::stringstream otherTransactions;
     otherTransactions << buildXMLNameTypeStr("var", "g_int",
 					     IntervalIntDomain::getDefaultTypeName().toString(),
@@ -4451,7 +4451,7 @@ public:
     std::string createTransaction =
       buildXMLCreateObjectStr("TestClass2", "testObj2a", domains);
     cleanDomains(domains);
-    
+
 
     std::string deleteTransaction = "<deleteobject name=\"testObj2a\"/>";
 
@@ -4470,8 +4470,8 @@ public:
     obj2a = s_db->getObject("testObj2a");
     CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
     CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
-    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));    
-    
+    CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
+
   }
 
   /** Test specifying variables. */
@@ -4661,7 +4661,7 @@ public:
   }
 
   static void testReinvokeConstraint() {
-    
+
   }
 
   /** Test creating tokens. */
@@ -4710,7 +4710,7 @@ public:
       tokens.erase(tokens.begin());
       token2 = *(tokens.begin());
     }
-    CPPUNIT_ASSERT(checkToken(token2, LabelStr("TestClass2.Sample"), 
+    CPPUNIT_ASSERT(checkToken(token2, LabelStr("TestClass2.Sample"),
 			  LabelStr("TestClass2.Sample"),
 			  TokenId::noId(), s_rejectableStateDom));
 
@@ -4773,9 +4773,9 @@ public:
     }
     TEST_REWINDING_XML(transactions.str());
     TokenSet::size_type newTokenCount = s_db->getTokens().size();
-    CPPUNIT_ASSERT(newTokenCount < oldTokenCount);      
+    CPPUNIT_ASSERT(newTokenCount < oldTokenCount);
     CPPUNIT_ASSERT((oldTokenCount - newTokenCount) == (TokenSet::size_type)(s_tempRels.size() + 1));
-    
+
     TEST_PLAYING_XML(transactions.str());
     CPPUNIT_ASSERT(oldTokenCount == s_db->getTokens().size());
   }
@@ -4807,7 +4807,7 @@ public:
     CPPUNIT_ASSERT_MESSAGE("player did not constrain token to one object",
         constrainedToken->getObject()->derivedDomain().isSingleton());
     ObjectDomain objDom2b(obj2b, "TestClass2");;
-    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to expected object", 
+    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to expected object",
         constrainedToken->getObject()->derivedDomain() == objDom2b);
     /* Leave it in plan db for testFree(). */
 
@@ -4821,7 +4821,7 @@ public:
         !constrained2->getObject()->derivedDomain().isSingleton());
     TEST_PLAYING_XML(buildXMLObjTokTokStr("constrain", "testObj2b", "constrainedSample2", "constrainedSample"));
     std::cout << __FILE__ << ':' << __LINE__ << ": constrained2's derived object domain is " << constrained2->getObject()->derivedDomain() << '\n';
-    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to one object", 
+    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to one object",
         constrained2->getObject()->derivedDomain().isSingleton());
     CPPUNIT_ASSERT_MESSAGE("player did not constrain token to expected object",
         constrained2->getObject()->derivedDomain() == objDom2b);
@@ -4846,7 +4846,7 @@ public:
         !rejectable->getObject()->derivedDomain().isSingleton());
     TEST_PLAYING_XML(buildXMLObjTokTokStr("constrain", "testObj2a", "rejectableConstrainedSample", ""));
     std::cout << __FILE__ << ':' << __LINE__ << ": rejectable's derived object domain is " << rejectable->getObject()->derivedDomain() << '\n';
-    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to one object", 
+    CPPUNIT_ASSERT_MESSAGE("player did not constrain token to one object",
         rejectable->getObject()->derivedDomain().isSingleton());
     CPPUNIT_ASSERT_MESSAGE("player did not constrain token to expected object",
         rejectable->getObject()->derivedDomain() == objDom2a);
@@ -4877,7 +4877,7 @@ public:
     CPPUNIT_ASSERT_MESSAGE("player did not constrain token to expected object",
         rejectable2->getObject()->derivedDomain() != objDom2a);
     CPPUNIT_ASSERT(obj2a->tokens().size() == initialObjectTokenCount_A + 2);
-    
+
     TEST_PLAYING_XML(transaction);
     CPPUNIT_ASSERT_MESSAGE("player did not constrain token to one object",
         rejectable2->getObject()->derivedDomain().isSingleton());
@@ -4906,7 +4906,7 @@ public:
     /*!!For debugging:
     TokenSet tokens2 = tokens;
     for (int i = 1; !tokens2.empty(); i++) {
-      TokenId tok = *(tokens2.begin());	
+      TokenId tok = *(tokens2.begin());
       CPPUNIT_ASSERT(tok.isValid());
       std::cout << __FILE__ << ':' << __LINE__ << ": testFree(): on obj2b, token " << i << " is " << *(tokens2.begin()) << '\n';
       tokens2.erase(tokens2.begin());
@@ -5004,7 +5004,7 @@ public:
     TEST_REWINDING_XML(transaction);
     CPPUNIT_ASSERT(s_mergedToken->isInactive());
     TEST_PLAYING_XML(transaction);
-    CPPUNIT_ASSERT_MESSAGE("token not merged by player", s_mergedToken->isMerged());    
+    CPPUNIT_ASSERT_MESSAGE("token not merged by player", s_mergedToken->isMerged());
     /* Leave merged for testCancel(). */
   }
 
@@ -5546,7 +5546,7 @@ std::string DbTransPlayerTest::buildXMLInvokeConstrainVarsStr(const std::string&
 
 std::string DbTransPlayerTest::buildXMLInvokeSpecifyVariableStr(const ConstrainedVariableId& var,
                                                                 const AbstractDomain& dom) {
-  std::string str("<invoke name=\"specify\" identifier=\""); 
+  std::string str("<invoke name=\"specify\" identifier=\"");
   //!!Would like to re-use buildXMLVariableStr() here, but this wants a different syntax(!)
   if (var->parent().isNoId())
     str += var->getName().toString();
@@ -5727,18 +5727,6 @@ std::string DbTransPlayerTest::buildXMLDomainStr(const AbstractDomain& dom) {
 
 /* Done with class DbTransPlayerTest, so drop this macro. */
 #undef TEST_PLAYING_XML
-
-void PlanDatabaseModuleTests::runTests(std::string path) 
-{ 
-  setTestLoadLibraryPath(path);
-  runTestSuite(SchemaTest::test);
-  runTestSuite(ObjectTest::test);
-  runTestSuite(TokenTest::test);
-  runTestSuite(TimelineTest::test);
-  runTestSuite(DbClientTest::test);
-  runTestSuite(DbTransPlayerTest::test);
-  std::cout << "All done and purged" << std::endl;
-}
 
 void PlanDatabaseModuleTests::schemaTest(void)
 {

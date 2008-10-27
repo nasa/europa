@@ -1429,14 +1429,6 @@ private:
   }
 };
 
-//void FlowProfileModuleTests::runTests( const std::string& path) {
-void FlowProfileModuleTests::runTests( std::string path) {
-  setTestLoadLibraryPath(path);
-  runTestSuite(DefaultSetupTest::test);
-  runTestSuite(FlowProfileTest::test);
-  runTestSuite(FVDetectorTest::test);
-}
-
 void FlowProfileModuleTests::cppSetup(void)
 {
     setTestLoadLibraryPath(".");
@@ -1444,17 +1436,17 @@ void FlowProfileModuleTests::cppSetup(void)
 
 void FlowProfileModuleTests::defaultSetupTests(void)
 {
-  runTestSuite(DefaultSetupTest::test);
+	DefaultSetupTest::test();
 }
 
 void FlowProfileModuleTests::flowProfileTests(void)
 {
-  runTestSuite(FlowProfileTest::test);
+  FlowProfileTest::test();
 }
 
 void FlowProfileModuleTests::FVDetectorTests(void)
 {
-  runTestSuite(FVDetectorTest::test);
+  FVDetectorTest::test();
 }
 
 

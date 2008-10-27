@@ -2083,17 +2083,6 @@ void registerTestElements(EngineId& engine)
    REGISTER_CONSTRAINT(ces,LazyAlwaysFails, "lazyAlwaysFails",  "Default");
 }
 
-/*void SolversModuleTests::runTests(std::string path)
-{
-   setTestLoadLibraryPath(path);
-   runTestSuite(ComponentFactoryTests::test);
-   runTestSuite(FilterTests::test);
-   runTestSuite(FlawIteratorTests::test);
-   runTestSuite(FlawManagerTests::test);
-   runTestSuite(FlawHandlerTests::test);
-   runTestSuite(SolverTests::test);
-}*/
-
 void SolversModuleTests::cppTests()
 {
    setTestLoadLibraryPath(".");
