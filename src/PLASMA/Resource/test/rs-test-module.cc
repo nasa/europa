@@ -119,6 +119,8 @@ private:
   static bool testDefaultSetup() {
     RESOURCE_DEFAULT_SETUP(ce,db,false);
 
+	ce.getId(); // Only point of this is to remove a compile-time warning (unused-variable)
+
     CPPUNIT_ASSERT(db.isClosed() == false);
     db.close();
     CPPUNIT_ASSERT(db.isClosed() == true);
@@ -174,6 +176,8 @@ private:
   static bool testResourceConstructionAndDestruction()
   {
     RESOURCE_DEFAULT_SETUP(ce,db,false);
+
+	ce.getId(); // Only point of this is to remove a compile-time warning (unused-variable)
 
     ResourceId r = (new Resource (db.getId(), LabelStr("Resource"), LabelStr("r1")))->getId();
     std::list<InstantId> instants;
@@ -1845,6 +1849,7 @@ private:
 
   static bool testReservoir() {
     RESOURCE_DEFAULT_SETUP(ce, db, false);
+
     SAVH::Reservoir res1(db.getId(), LabelStr("Reservoir"), LabelStr("Battery1"), LabelStr("TimetableFVDetector"), LabelStr("TimetableProfile"),
 			 10, 10, 0, 1000);
     SAVH::Reservoir res2(db.getId(), LabelStr("Reservoir"), LabelStr("Battery2"), LabelStr("TimetableFVDetector"), LabelStr("TimetableProfile"),
@@ -1884,6 +1889,9 @@ private:
 
   static bool testReusable() {
     RESOURCE_DEFAULT_SETUP(ce, db, false);
+
+	ce.getId(); // Only point of this is to remove a compile-time warning (unused-variable)
+
     SAVH::Reusable res(db.getId(), LabelStr("Reusable"), LabelStr("Foo"), LabelStr("TimetableFVDetector"), LabelStr("TimetableProfile"));
 
     SAVH::ReusableToken use(db.getId(), LabelStr("Reusable.uses"), IntervalIntDomain(0, 5), IntervalIntDomain(10, 15), IntervalIntDomain(1, PLUS_INFINITY),

@@ -9,22 +9,27 @@ ModuleLibraries rs-module-tests : cppunit ;
 
 ModuleMain rs-module-tests : module-tests.cc rs-test-module.cc rs-flow-test-module.cc : Resource ;
 RunModuleMain run-rs-module-tests : rs-module-tests ;
-LocalDepends tests : run-rs-module-tests ;
+LocalDepends tests : run-rs-module-tests run-rs-tests ;
 
-local nddl_tests = 
- #   multi-resources.nddl 
- #   simple-resources.nddl 
+# Needed to compile NddlMainForResources (ie we need access to NddlMain)
+SubDirC++Flags -I$(PLASMA_HOME)/src/PLASMA/NDDL/test/compiler ;
+
+ModuleObjects NddlMainForResources.cc : Resource ;
+
+local nddl_tests =
+	multi-resources.nddl 
+	simple-resources.nddl 
 ;
 
 for model in $(nddl_tests)
 {
   local exe = $(model:S=) ;
-  #NddlMain $(exe) : NddlMain.o : $(model) : NDDL ;
+  NddlMain $(exe) : NddlMainForResources.o : $(model) : Resource ;
   RunModuleMain run-$(exe) : $(exe) : $(model:S=.xml) ;
 
         local hh = $(model:S=.hh) ;
         local cc = [ FGristFiles $(model:S=.cc) ] ;
-
+	
         if $(INVALID)
         {
                 GenerateValid generate-valids : $(hh) $(cc) ;
@@ -38,9 +43,7 @@ for model in $(nddl_tests)
                 Diff $(cc).diff : $(cc).valid $(cc) ;
                 LocalDepends run-rs-tests : $(hh).diff $(cc).diff ;
         }
-
   LocalDepends run-rs-tests : run-$(exe) ;
 }
-
 
 } # PLASMA_READY

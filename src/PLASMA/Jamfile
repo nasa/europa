@@ -48,7 +48,8 @@ Depends run-tests : tests ;
 
 Depends run-all-tests : 
     run-checkin-tests 
-    run-nddl-tests 
+    run-nddl-tests
+    run-rs-tests 
     run-hsts-planner-tests 
 ;
 
@@ -61,7 +62,7 @@ Depends run-checkin-tests :
 # install tests designed for off site customers to check system is installed without svn update
 Depends run-install-tests : run-tests ;
 
-NOCARE run-all-tests run-tests run-checkin-tests run-nddl-tests run-nddl-planner-tests tests run-hsts-planner-tests ;
+NOCARE run-all-tests run-tests run-checkin-tests run-nddl-tests run-rs-tests run-nddl-planner-tests tests run-hsts-planner-tests ;
 
 Depends plasma-all : all ;
 
