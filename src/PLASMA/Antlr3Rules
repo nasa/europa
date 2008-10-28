@@ -59,7 +59,7 @@ rule RunAntlr3Tool
 actions RunAntlr3Tool
 {
 rm -f $(1)
-$(JAVA) -cp $(ANTLR3_JAR) $(JREFLAGS) org.antlr.Tool -fo $(PWD)/$(1[0]:D) -traceParser $(ANTLR3FLAGS) $(2) 
+$(JAVA) -cp $(ANTLR3_JAR) $(JREFLAGS) org.antlr.Tool -fo ./$(1[0]:D) -traceParser $(ANTLR3FLAGS) $(2) 
 }
 
 rule Antlr3TreeTool
@@ -90,7 +90,7 @@ rule RunAntlr3TreeTool
 actions RunAntlr3TreeTool
 {
 rm -f $(1)
-$(JAVA) -cp $(ANTLR3_JAR) $(JREFLAGS) org.antlr.Tool -traceTreeParser -o ./$(1[0]:D) $(ANTLR3FLAGS) $(2) 
+$(JAVA) -cp $(ANTLR3_JAR) $(JREFLAGS) org.antlr.Tool -traceTreeParser -fo ./$(1[0]:D) $(ANTLR3FLAGS) $(2) 
 }
 
 } # Antlr3Rules_INCLUDED
