@@ -11,21 +11,58 @@
 
 namespace NDDL {
 
-bool isValidProfile(ConstrainedVariableId profileNameVar)
+// -------------------------------------------------------------------------------------------------------
+//  	First pass at code that allows user to use NDDL to select profile and fv detector to use
+// -------------------------------------------------------------------------------------------------------
+
+static const std::string PARAM_PROFILE_TYPE("profileType");
+static const std::string PARAM_DETECTOR_TYPE("detectorType");
+
+bool isValid(ConstrainedVariableId nameVar, const std::string param)
 {
-	if (!profileNameVar->derivedDomain().isSingleton())
+	if (!nameVar->derivedDomain().isSingleton())
 		return false;
 
-	std::string profileName = LabelStr(profileNameVar->derivedDomain().getSingletonValue()).toString();
+	std::string name = LabelStr(nameVar->derivedDomain().getSingletonValue()).toString();
 
-	if (profileName == "FlowProfile" ||
-			profileName == "IncrementalFlowProfile" ||
-			profileName == "TimetableProfile")
-		return true;
+	// Two separate cases to check here:
+	if(param == PARAM_PROFILE_TYPE) {
+		if (name == "FlowProfile" ||
+				name == "IncrementalFlowProfile" ||
+				name == "TimetableProfile")
+			return true;
+	}
+	else if (param == PARAM_DETECTOR_TYPE) {
+		if (name == "TimetableFVDetector" ||
+				name == "ReusableFVDetector" ||
+				name == "OpenWorldFVDetector" ||
+				name == "ClosedWorldFVDetector" )
+			return true;
+	}
+	else {
+		// TODO :: Add throw of some sort here...
+	}
 
 	return false;
 }
 
+
+// For getting either the profile or detector name specified by the given parameter:
+LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, const std::string& defaultValue)
+{
+	std::string fullName = res->getName().toString()+"."+param;
+	ConstrainedVariableId nameVar = res->getVariable(fullName);
+	LabelStr name(defaultValue);
+	if (!nameVar.isNoId()) {
+		debugMsg("NDDL","Using resource profile or detector variable : " << nameVar->toString());
+		check_error(isValid(nameVar, param),"Invalid resource profile or detector type:" + nameVar->toString());
+		name = LabelStr(nameVar->derivedDomain().getSingletonValue());
+	}
+	debugMsg("NDDL","Using resource profile or detector : " << name.toString())
+	return name;
+}
+
+// -------------------------------------------------------------------------------------------------------
 
   NddlUnaryToken::NddlUnaryToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, const bool& rejectable, const bool& isFact, const bool& close)
     : EUROPA::SAVH::UnaryToken(planDatabase, predicateName, rejectable, isFact, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
@@ -74,23 +111,14 @@ bool isValidProfile(ConstrainedVariableId profileNameVar)
 
     check_error(m_variables[CMAX]->derivedDomain().isSingleton());
 
-    static const std::string PARAM_PROFILE_TYPE("profileType");
-    std::string fullName = getName().toString()+"."+PARAM_PROFILE_TYPE;
-    ConstrainedVariableId profileNameVar = getVariable(fullName);
-    LabelStr profileName("IncrementalFlowProfile");
-    if (!profileNameVar.isNoId()) {
-    	debugMsg("NddlUnary","Using Profile : " << profileNameVar->toString());
-    	check_error(isValidProfile(profileNameVar),"Invalid resource profile type:"+profileNameVar->toString());
-    	profileName = LabelStr(profileNameVar->derivedDomain().getSingletonValue());
-     }
-     debugMsg("NddlUnary","Using Profile : " << profileName.toString())
+    LabelStr profileName = getProfileOrDetectorName(this, PARAM_PROFILE_TYPE, "IncrementalFlowProfile");
+    LabelStr detectorName = getProfileOrDetectorName(this, PARAM_DETECTOR_TYPE, "ReusableFVDetector");
 
     init(1, 1, //capacity lb, capacity ub
          0, 1,//lower limit, upper limit
          PLUS_INFINITY, PLUS_INFINITY, //max inst production, max inst consumption
          m_variables[CMAX]->derivedDomain().getSingletonValue(), m_variables[CMAX]->derivedDomain().getSingletonValue(), //max production, max consumption
-         //"ReusableFVDetector", "FlowProfile");
-         "ReusableFVDetector", profileName);
+         detectorName, profileName);
     EUROPA::SAVH::Resource::close();
   }
 
@@ -180,22 +208,14 @@ bool isValidProfile(ConstrainedVariableId profileNameVar)
     check_error(m_variables[CRMAX]->derivedDomain().isSingleton());
     check_error(m_variables[CMAX]->derivedDomain().isSingleton());
 
-    static const std::string PARAM_PROFILE_TYPE("profileType");
-    std::string fullName = getName().toString()+"."+PARAM_PROFILE_TYPE;
-    ConstrainedVariableId profileNameVar = getVariable(fullName);
-    LabelStr profileName("IncrementalFlowProfile");
-    if (!profileNameVar.isNoId()) {
-        debugMsg("NddlReusable","Using Profile : " << profileNameVar->toString());
-        check_error(isValidProfile(profileNameVar),"Invalid resource profile type:"+profileNameVar->toString());
-        profileName = LabelStr(profileNameVar->derivedDomain().getSingletonValue());
-    }
-    debugMsg("NddlReusable","Using Profile : " << profileName.toString())
+    LabelStr profileName = getProfileOrDetectorName(this, PARAM_PROFILE_TYPE, "IncrementalFlowProfile");
+    LabelStr detectorName = getProfileOrDetectorName(this, PARAM_DETECTOR_TYPE, "ReusableFVDetector");
 
     init(m_variables[C]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(),
 	 m_variables[LLMIN]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(),
 	 m_variables[CRMAX]->derivedDomain().getSingletonValue(), m_variables[CRMAX]->derivedDomain().getSingletonValue(),
 	 m_variables[CMAX]->derivedDomain().getSingletonValue(), m_variables[CMAX]->derivedDomain().getSingletonValue(),
-	 "ReusableFVDetector", profileName);
+	 detectorName, profileName);
 
     EUROPA::SAVH::Resource::close();
   }
@@ -328,11 +348,14 @@ bool isValidProfile(ConstrainedVariableId profileNameVar)
     check_error(m_variables[CRMAX]->derivedDomain().isSingleton());
     check_error(m_variables[CMAX]->derivedDomain().isSingleton());
 
+    LabelStr profileName = getProfileOrDetectorName(this, PARAM_PROFILE_TYPE, "IncrementalFlowProfile");
+    LabelStr detectorName = getProfileOrDetectorName(this, PARAM_DETECTOR_TYPE, "TimetableFVDetector");
+
     init(m_variables[IC]->derivedDomain().getSingletonValue(), m_variables[IC]->derivedDomain().getSingletonValue(),
 	 m_variables[LLMIN]->derivedDomain().getSingletonValue(), m_variables[LLMAX]->derivedDomain().getSingletonValue(),
 	 m_variables[PRMAX]->derivedDomain().getSingletonValue(), (m_variables[CRMAX]->derivedDomain().getSingletonValue()),
 	 m_variables[PMAX]->derivedDomain().getSingletonValue(), (m_variables[CMAX]->derivedDomain().getSingletonValue()),
-	 "TimetableFVDetector", "IncrementalFlowProfile");
+	 detectorName, profileName);
     EUROPA::SAVH::Resource::close();
   }
 
