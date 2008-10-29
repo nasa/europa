@@ -38,7 +38,7 @@
 #include <typeinfo>
 
 #ifndef EUROPA_FAST
-#define non_fast_only_assert(T) assertTrue(T)
+#define non_fast_only_assert(T) CPPUNIT_ASSERT(T)
 #else
 #define non_fast_only_assert(T) //NO-OP
 #endif
@@ -75,17 +75,17 @@ public:
   }
 private:
   static bool testExceptions() {
-    assertTrue(strcmp(TestError::TEST_CONST(), "TestData") == 0);
+    CPPUNIT_ASSERT(strcmp(TestError::TEST_CONST(), "TestData") == 0);
     bool success = true;
     Error::doThrowExceptions();
     int var = 1;
-    assertTrue(var == 1);
-    assertTrue(Error::printingErrors());
-    assertTrue(Error::displayWarnings());
-    assertTrue(Error::throwEnabled());
+    CPPUNIT_ASSERT(var == 1);
+    CPPUNIT_ASSERT(Error::printingErrors());
+    CPPUNIT_ASSERT(Error::displayWarnings());
+    CPPUNIT_ASSERT(Error::throwEnabled());
     try {
       // These are tests of check_error() and should therefore not be changed
-      //   to assertTrue() despite the usual rule for test programs.
+      //   to CPPUNIT_ASSERT() despite the usual rule for test programs.
       // --wedgingt@email.arc.nasa.gov 2005 Feb 9
       check_error(Error::printingErrors(), "not printing errors by default!");
       check_error(Error::displayWarnings(), "display warnings off by default!");
@@ -105,7 +105,7 @@ private:
     }
     // check_error will not throw the errors for EUROPA_FAST
 #if !defined(EUROPA_FAST) && !defined(__CYGWIN__)
-    assertTrue(Error::throwEnabled());
+    CPPUNIT_ASSERT(Error::throwEnabled());
     /* Do not print errors that we are provoking on purpose to ensure they are noticed. */
     try {
       Error::doNotDisplayErrors();
@@ -169,11 +169,11 @@ private:
     // check_error will not throw the errors for EUROPA_FAST
 #if !defined(EUROPA_FAST) && defined(DEBUG_MESSAGE_SUPPORT)
     Error::doThrowExceptions();
-    assertTrue(Error::throwEnabled());
+    CPPUNIT_ASSERT(Error::throwEnabled());
     //!!Add a test of DebugMessage that should throw an error here.
     //!!  Skipped for lack of time presently. --wedgingt@email.arc.nasa.gov
     Error::doNotThrowExceptions();
-    assertTrue(!Error::throwEnabled());
+    CPPUNIT_ASSERT(!Error::throwEnabled());
 #endif
     return(success);
   }
@@ -195,11 +195,10 @@ private:
     Error::doNotThrowExceptions();
     Error::doNotDisplayErrors();
     std::ofstream debugOutput(cfgOut.c_str());
-    assertTrue(debugOutput.good(), "could not open debug output file");
+    CPPUNIT_ASSERT_MESSAGE("could not open debug output file", debugOutput.good());
     DebugMessage::setStream(debugOutput);
     std::ifstream debugStream(cfgFile.c_str());
-    assertTrue(debugStream.good(), "could not open debug config file",
-                DebugErr::DebugConfigError());
+    CPPUNIT_ASSERT_MESSAGE("could not open debug config file", debugStream.good()); //, DebugErr::DebugConfigError());
     if (!DebugMessage::readConfigFile(debugStream))
       handle_error(!DebugMessage::readConfigFile(debugStream),
                    "problems reading debug config file",
@@ -284,11 +283,11 @@ public:
 };
 
 void overloadFunc(const Id<Bing>& arg) {
-  assertTrue(true);
+  CPPUNIT_ASSERT(true);
 }
 
 void overloadFunc(const Id<Foo>& arg) {
-  assertTrue(true);
+  CPPUNIT_ASSERT(true);
 }
 
 class IdTests {
@@ -329,22 +328,22 @@ bool IdTests::testBasicAllocation() {
   Foo *fooPtr = new Foo();
   Id<Foo> fId1(fooPtr);
   assert(fId1.isId());
-  assertTrue(Foo::getCount() == 1);
+  CPPUNIT_ASSERT(Foo::getCount() == 1);
   non_fast_only_assert(IdTable::size() == initialSize + 1);
 
   fId1->increment();
-  assertTrue(Foo::getCount() == 2);
+  CPPUNIT_ASSERT(Foo::getCount() == 2);
   fId1->decrement();
-  assertTrue(Foo::getCount() == 1);
+  CPPUNIT_ASSERT(Foo::getCount() == 1);
 
   Id<Foo> fId2 = fId1;
-  assertTrue(Foo::getCount() == 1);
+  CPPUNIT_ASSERT(Foo::getCount() == 1);
 
-  assertTrue(fId1.isValid() && fId2.isValid());
-  assertTrue(!fId1.isInvalid() && !fId2.isInvalid());
+  CPPUNIT_ASSERT(fId1.isValid() && fId2.isValid());
+  CPPUNIT_ASSERT(!fId1.isInvalid() && !fId2.isInvalid());
 
   fId2.release();
-  assertTrue(Foo::getCount() == 0);
+  CPPUNIT_ASSERT(Foo::getCount() == 0);
   non_fast_only_assert( fId1.isInvalid() &&  fId2.isInvalid());
   return true;
 }
@@ -355,17 +354,17 @@ bool IdTests::testTypicalConversionsAndComparisons()
   Foo* foo1 = new Foo();
   Id<Foo> fId1(foo1);
   Id<Foo> fId2(fId1);
-  assertTrue(fId1 == fId2); // Equality operator
-  assertTrue(&*fId1 == &*fId2); // Dereferencing operator
-  assertTrue(foo1 == &*fId2); // Dereferencing operator
-  assertTrue(foo1 == (Foo*) fId2); // Dereferencing operator
-  assertTrue(foo1 == fId2.operator->());
-  assertTrue( ! (fId1 > fId2));
-  assertTrue( ! (fId1 < fId2));
+  CPPUNIT_ASSERT(fId1 == fId2); // Equality operator
+  CPPUNIT_ASSERT(&*fId1 == &*fId2); // Dereferencing operator
+  CPPUNIT_ASSERT(foo1 == &*fId2); // Dereferencing operator
+  CPPUNIT_ASSERT(foo1 == (Foo*) fId2); // Dereferencing operator
+  CPPUNIT_ASSERT(foo1 == fId2.operator->());
+  CPPUNIT_ASSERT( ! (fId1 > fId2));
+  CPPUNIT_ASSERT( ! (fId1 < fId2));
 
   Foo* foo2 = new Foo();
   Id<Foo> fId3(foo2);
-  assertTrue(fId1 != fId3);
+  CPPUNIT_ASSERT(fId1 != fId3);
 
   fId1.release();
   fId3.release();
@@ -376,7 +375,7 @@ bool IdTests::testCollectionSupport()
 {
   // Test inclusion in a collection class - forces compilation test
   std::list< Id<Foo> > fooList;
-  assertTrue(fooList.size() == 0);
+  CPPUNIT_ASSERT(fooList.size() == 0);
   return true;
 }
 
@@ -385,7 +384,7 @@ bool IdTests::testDoubleConversion()
   Id<Foo> fId(new Foo());
   double fooAsDouble = (double) fId;
   Id<Foo> idFromDbl(fooAsDouble);
-  assertTrue(idFromDbl == fId);
+  CPPUNIT_ASSERT(idFromDbl == fId);
   fId.release();
   return true;
 }
@@ -395,23 +394,23 @@ bool IdTests::testCastingSupport()
   Foo* foo = new Foo();
   Id<Foo> fId(foo);
   Foo* fooByCast = (Foo*) fId;
-  assertTrue(foo == fooByCast);
+  CPPUNIT_ASSERT(foo == fooByCast);
 
-  assertTrue(Id<Bar>::convertable(fId) == false);
+  CPPUNIT_ASSERT(Id<Bar>::convertable(fId) == false);
   fId.release();
 
   Foo* bar = new Bar();
   Id<Bar> bId((Bar*) bar);
   fId = bId;
-  assertTrue(Id<Bar>::convertable(fId) == true);
+  CPPUNIT_ASSERT(Id<Bar>::convertable(fId) == true);
   bId.release();
 
   bId = Id<Bar>(new Bar());
   double ptrAsDouble = bId; // Cast to double
 
   const Id<Bar>& cbId(ptrAsDouble);
-  assertTrue(cbId.isValid());
-  assertTrue(cbId == bId);
+  CPPUNIT_ASSERT(cbId.isValid());
+  CPPUNIT_ASSERT(cbId == bId);
   bId.release();
   non_fast_only_assert(cbId.isInvalid());
 
@@ -435,13 +434,13 @@ class Z: public X, public Y {};
 
 bool IdTests::testMultipleInheritanceCasting(){
   Id<Z> z_id(new Z());
-  assertTrue(Id<X>::convertable(z_id));
-  assertTrue(Id<Y>::convertable(z_id));
+  CPPUNIT_ASSERT(Id<X>::convertable(z_id));
+  CPPUNIT_ASSERT(Id<Y>::convertable(z_id));
 
   Id<X> x_id(z_id);
   Id<Y> y_id(z_id);
 
-  assertTrue (x_id == y_id);
+  CPPUNIT_ASSERT (x_id == y_id);
   z_id.release();
 
   return true;
@@ -461,7 +460,7 @@ bool IdTests::testBadAllocationErrorHandling()
   try {
     Error::doNotDisplayErrors();
     Id<Foo> fId0((Foo*) 0);
-    assertTrue(false, "Id<Foo> fId0((Foo*) 0); failed to error out.");
+    CPPUNIT_ASSERT_MESSAGE("Id<Foo> fId0((Foo*) 0); failed to error out.", false);
     success = false;
   }
   catch (Error e) {
@@ -500,13 +499,13 @@ bool IdTests::testBadIdUsage() {
   try {
     Error::doNotDisplayErrors();
     Id<Bing> bingId = barId;
-    assertTrue(false, "Id<Bing> bingId = barId; failed to error out.");
+    CPPUNIT_ASSERT_MESSAGE("Id<Bing> bingId = barId; failed to error out.", false);
     success = false;
   }
   catch (Error e) {
     Error::doDisplayErrors();
     if (e.getType() == "Error")
-      assertTrue(false);
+      CPPUNIT_ASSERT(false);
   }
   catch (IdErr idErr) {
     Error::doDisplayErrors();
@@ -530,7 +529,7 @@ bool IdTests::testIdConversion()
   Id<Bar> barId3;
   barId3 = fooId3;
   barId3.release();
-  assertTrue(Foo::getCount() == count);
+  CPPUNIT_ASSERT(Foo::getCount() == count);
   return true;
 }
 
@@ -538,7 +537,7 @@ bool IdTests::testConstId()
 {
   Id<Foo> fooId(new Foo());
   const Id<const Foo> constFooId(fooId);
-  assertTrue(constFooId->doConstFunc());
+  CPPUNIT_ASSERT(constFooId->doConstFunc());
   fooId->increment();
   fooId.remove();
   return true;
@@ -563,43 +562,43 @@ private:
     LabelStr lbl1("");
     LabelStr lbl2("This is a char*");
     LabelStr lbl3(lbl2.toString());
-    assertTrue(lbl3 == lbl2);
+    CPPUNIT_ASSERT(lbl3 == lbl2);
     std::string labelStr2("This is another char*");
-    assertFalse(LabelStr::isString(labelStr2));
+    CPPUNIT_ASSERT(!LabelStr::isString(labelStr2));
     LabelStr lbl4(labelStr2);
-    assertTrue(LabelStr::isString(labelStr2));
-    assertTrue(lbl4 != lbl2, lbl4.toString() + " != " + lbl2.toString());
+    CPPUNIT_ASSERT(LabelStr::isString(labelStr2));
+    CPPUNIT_ASSERT_MESSAGE(lbl4.toString() + " != " + lbl2.toString(), lbl4 != lbl2);
 
     double key = lbl2.getKey();
     LabelStr lbl5(key);
-    assertTrue(lbl5 == lbl2);
-    assertTrue(LabelStr::isString(key));
-    assertFalse(LabelStr::isString(1));
+    CPPUNIT_ASSERT(lbl5 == lbl2);
+    CPPUNIT_ASSERT(LabelStr::isString(key));
+    CPPUNIT_ASSERT(!LabelStr::isString(1));
 
-    assertTrue(compare(lbl3, lbl2));
-    assertTrue(compare("This is another char*", "This is another char*"));
+    CPPUNIT_ASSERT(compare(lbl3, lbl2));
+    CPPUNIT_ASSERT(compare("This is another char*", "This is another char*"));
     return true;
   }
 
   static bool testElementCounting(){
     LabelStr lbl1("A 1B 1C 1D EFGH");
-    assertTrue(lbl1.countElements("1") == 4);
-    assertTrue(lbl1.countElements(" ") == 5);
-    assertTrue(lbl1.countElements("B") == 2);
-    assertTrue(lbl1.countElements(":") == 1);
+    CPPUNIT_ASSERT(lbl1.countElements("1") == 4);
+    CPPUNIT_ASSERT(lbl1.countElements(" ") == 5);
+    CPPUNIT_ASSERT(lbl1.countElements("B") == 2);
+    CPPUNIT_ASSERT(lbl1.countElements(":") == 1);
 
     LabelStr lbl2("A:B:C:D:");
-    assertTrue(lbl2.countElements(":") == 4);
+    CPPUNIT_ASSERT(lbl2.countElements(":") == 4);
     return true;
   }
 
   static bool testElementAccess(){
     LabelStr lbl1("A 1B 1C 1D EFGH");
     LabelStr first(lbl1.getElement(0, " "));
-    assertTrue(first == LabelStr("A"));
+    CPPUNIT_ASSERT(first == LabelStr("A"));
 
     LabelStr last(lbl1.getElement(3, "1"));
-    assertTrue(last == LabelStr("D EFGH"));
+    CPPUNIT_ASSERT(last == LabelStr("D EFGH"));
     return true;
   }
 
@@ -608,18 +607,18 @@ private:
     LabelStr lbl2("G");
     LabelStr lbl3("B");
     LabelStr lbl4("B");
-    assertTrue(lbl1 < lbl2);
-    assertTrue(lbl2 > lbl4);
-    assertTrue(lbl2 != lbl4);
-    assertTrue(lbl4 == lbl3);
+    CPPUNIT_ASSERT(lbl1 < lbl2);
+    CPPUNIT_ASSERT(lbl2 > lbl4);
+    CPPUNIT_ASSERT(lbl2 != lbl4);
+    CPPUNIT_ASSERT(lbl4 == lbl3);
 
     LabelStr lbl5("ABCDEFGH");
 
-    assertTrue(lbl5.contains("A"));
-    assertTrue(lbl5.contains("H"));
-    assertTrue(lbl5.contains("FG"));
-    assertTrue(lbl5.contains(lbl5));
-    assertFalse(lbl5.contains("I"));
+    CPPUNIT_ASSERT(lbl5.contains("A"));
+    CPPUNIT_ASSERT(lbl5.contains("H"));
+    CPPUNIT_ASSERT(lbl5.contains("FG"));
+    CPPUNIT_ASSERT(lbl5.contains(lbl5));
+    CPPUNIT_ASSERT(!lbl5.contains("I"));
     return true;
   }
 };
@@ -642,15 +641,15 @@ private:
     TestEntity* e1 = new TestEntity();
     TestEntity* e2 = new TestEntity();
     e1->discard();
-    assertTrue(e1->isDiscarded());
-    assertTrue(!e2->isDiscarded());
+    CPPUNIT_ASSERT(e1->isDiscarded());
+    CPPUNIT_ASSERT(!e2->isDiscarded());
     e2->incRefCount();
     e2->decRefCount();
-    assertTrue(!e2->isDiscarded());
+    CPPUNIT_ASSERT(!e2->isDiscarded());
     e2->decRefCount();
-    assertTrue(e2->isDiscarded());
+    CPPUNIT_ASSERT(e2->isDiscarded());
 
-    assertTrue(Entity::garbageCollect() == 2);
+    CPPUNIT_ASSERT(Entity::garbageCollect() == 2);
     return true;
   }
 };
@@ -670,64 +669,64 @@ private:
   static bool testExtractData() {
     std::string test("<Tag attribute=\"value\">");
     TiXmlElement* xml = initXml(test);
-    assertTrue(xml != NULL);
+    CPPUNIT_ASSERT(xml != NULL);
     LabelStr value = extractData(*xml,"attribute");
-    assertTrue(value == LabelStr("value"));
+    CPPUNIT_ASSERT(value == LabelStr("value"));
     return true;
   }
 
   static bool testInitXmlString() {
     std::string test("<Foo><Bar><Bing attr=\"baz\"/></Bar></Foo>");
     TiXmlElement* xml = initXml(test);
-    assertTrue(xml != NULL);
-    assertTrue(std::string(xml->Value()) == std::string("Foo"));
+    CPPUNIT_ASSERT(xml != NULL);
+    CPPUNIT_ASSERT(std::string(xml->Value()) == std::string("Foo"));
     xml = xml->FirstChildElement();
-    assertTrue(xml != NULL);
-    assertTrue(std::string(xml->Value()) == std::string("Bar"));
+    CPPUNIT_ASSERT(xml != NULL);
+    CPPUNIT_ASSERT(std::string(xml->Value()) == std::string("Bar"));
     xml = xml->FirstChildElement();
-    assertTrue(xml != NULL);
-    assertTrue(std::string(xml->Value()) == std::string("Bing"));
-    assertTrue(xml->Attribute("attr") != NULL);
-    assertTrue(std::string(xml->Attribute("attr")) == std::string("baz"));
+    CPPUNIT_ASSERT(xml != NULL);
+    CPPUNIT_ASSERT(std::string(xml->Value()) == std::string("Bing"));
+    CPPUNIT_ASSERT(xml->Attribute("attr") != NULL);
+    CPPUNIT_ASSERT(std::string(xml->Attribute("attr")) == std::string("baz"));
     return true;
   }
 
   static bool testInitXmlFile() {
 		TiXmlElement* xml = initXml((getTestLoadLibraryPath() + "/XMLUtil-test.xml").c_str());
-    assertTrue(xml != NULL);
-    assertTrue(std::string(xml->Value()) == std::string("test"));
+    CPPUNIT_ASSERT(xml != NULL);
+    CPPUNIT_ASSERT(std::string(xml->Value()) == std::string("test"));
     xml = xml->FirstChildElement();
-    assertTrue(xml != NULL);
-    assertTrue(std::string(xml->Value()) == std::string("Foo"));
+    CPPUNIT_ASSERT(xml != NULL);
+    CPPUNIT_ASSERT(std::string(xml->Value()) == std::string("Foo"));
     xml = xml->FirstChildElement();
-    assertTrue(xml != NULL);
-    assertTrue(std::string(xml->Value()) == std::string("Bar"));
+    CPPUNIT_ASSERT(xml != NULL);
+    CPPUNIT_ASSERT(std::string(xml->Value()) == std::string("Bar"));
     xml = xml->FirstChildElement();
-    assertTrue(xml != NULL);
-    assertTrue(std::string(xml->Value()) == std::string("Bing"));
-    assertTrue(xml->Attribute("attr") != NULL);
-    assertTrue(std::string(xml->Attribute("attr")) == std::string("baz"));
+    CPPUNIT_ASSERT(xml != NULL);
+    CPPUNIT_ASSERT(std::string(xml->Value()) == std::string("Bing"));
+    CPPUNIT_ASSERT(xml->Attribute("attr") != NULL);
+    CPPUNIT_ASSERT(std::string(xml->Attribute("attr")) == std::string("baz"));
     return true;
   }
 
   static bool testGetTextChild() {
     std::string test("<Foo>Ceci n'est pas un attribute</Foo>");
     TiXmlElement* xml = initXml(test);
-    assertTrue(xml != NULL);
-    assertTrue(std::string(xml->Value()) == std::string("Foo"));
-		assertTrue(std::string(getTextChild(*xml)) == std::string("Ceci n'est pas un attribute"));
+    CPPUNIT_ASSERT(xml != NULL);
+    CPPUNIT_ASSERT(std::string(xml->Value()) == std::string("Foo"));
+		CPPUNIT_ASSERT(std::string(getTextChild(*xml)) == std::string("Ceci n'est pas un attribute"));
     return true;
   }
 
   static bool testIsNumber() {
-		assertTrue(isNumber("324.34532"));
-		assertFalse(isNumber("Foo"));
+		CPPUNIT_ASSERT(isNumber("324.34532"));
+		CPPUNIT_ASSERT(!isNumber("Foo"));
 		double testNum = 0;
 		// nice and prime:
-		assertTrue(isNumber("31337",testNum));
-		assertTrue(testNum == 31337);
-		assertFalse(isNumber("Bar"));
-		assertTrue(testNum == 31337);
+		CPPUNIT_ASSERT(isNumber("31337",testNum));
+		CPPUNIT_ASSERT(testNum == 31337);
+		CPPUNIT_ASSERT(!isNumber("Bar"));
+		CPPUNIT_ASSERT(testNum == 31337);
     return true;
   }
 };
