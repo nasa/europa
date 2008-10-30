@@ -13,7 +13,7 @@
 #include "SAVH_FlowProfile.hh"
 #include "SAVH_IncrementalFlowProfile.hh"
 #include "SAVH_ProfilePropagator.hh"
-#include "SAVH_ReusableFVDetector.hh"
+#include "SAVH_ClosedWorldFVDetector.hh"
 
 #include "Debug.hh"
 #include "TestSupport.hh"
@@ -1396,7 +1396,7 @@ private:
   static bool testReusableDetector() {
     RESOURCE_DEFAULT_SETUP(ce, db, false);
 
-    SAVH::Reusable res(db.getId(), LabelStr("Reusable"), LabelStr("res1"), LabelStr("ReusableFVDetector"), LabelStr("IncrementalFlowProfile"),
+    SAVH::Reusable res(db.getId(), LabelStr("Reusable"), LabelStr("res1"), LabelStr("ClosedWorldFVDetector"), LabelStr("IncrementalFlowProfile"),
 		       1, 1, 0);
 
     //create a token that violates the limit (i.e. consumes 2)

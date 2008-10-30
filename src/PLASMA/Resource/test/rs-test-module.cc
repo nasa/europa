@@ -9,7 +9,7 @@
 #include "SAVH_Instant.hh"
 #include "SAVH_Transaction.hh"
 #include "SAVH_TimetableProfile.hh"
-#include "SAVH_TimetableFVDetector.hh"
+#include "SAVH_OpenWorldFVDetector.hh"
 #include "SAVH_Resource.hh"
 #include "SAVH_ProfilePropagator.hh"
 #include "SAVH_Reservoir.hh"
@@ -37,7 +37,7 @@
 #include "SAVH_IncrementalFlowProfile.hh"
 #include "SAVH_Reusable.hh"
 #include "SAVH_FVDetector.hh"
-#include "SAVH_ReusableFVDetector.hh"
+#include "SAVH_ClosedWorldFVDetector.hh"
 #include "SAVH_DurativeTokens.hh"
 #include "SAVH_ThreatDecisionPoint.hh"
 #include "SAVH_ThreatManager.hh"
@@ -894,7 +894,7 @@ public:
 		double initCapacityLb = 0, double initCapacityUb = 0, double lowerLimit = MINUS_INFINITY,
 		double upperLimit = PLUS_INFINITY, double maxInstProduction = PLUS_INFINITY, double maxInstConsumption = PLUS_INFINITY,
 		double maxProduction = PLUS_INFINITY, double maxConsumption = PLUS_INFINITY)
-    : SAVH::Resource(planDatabase, type, name, LabelStr("TimetableFVDetector"), LabelStr("TimetableProfile"), initCapacityLb, initCapacityUb,
+    : SAVH::Resource(planDatabase, type, name, LabelStr("OpenWorldFVDetector"), LabelStr("TimetableProfile"), initCapacityLb, initCapacityUb,
 		     lowerLimit, upperLimit, maxInstProduction, maxInstConsumption,
 		     maxProduction, maxConsumption) {}
 
@@ -1850,9 +1850,9 @@ private:
   static bool testReservoir() {
     RESOURCE_DEFAULT_SETUP(ce, db, false);
 
-    SAVH::Reservoir res1(db.getId(), LabelStr("Reservoir"), LabelStr("Battery1"), LabelStr("TimetableFVDetector"), LabelStr("TimetableProfile"),
+    SAVH::Reservoir res1(db.getId(), LabelStr("Reservoir"), LabelStr("Battery1"), LabelStr("OpenWorldFVDetector"), LabelStr("TimetableProfile"),
 			 10, 10, 0, 1000);
-    SAVH::Reservoir res2(db.getId(), LabelStr("Reservoir"), LabelStr("Battery2"), LabelStr("TimetableFVDetector"), LabelStr("TimetableProfile"),
+    SAVH::Reservoir res2(db.getId(), LabelStr("Reservoir"), LabelStr("Battery2"), LabelStr("OpenWorldFVDetector"), LabelStr("TimetableProfile"),
 			 10, 10, 0, 1000);
 
     SAVH::ConsumerToken consumer(db.getId(), LabelStr("Reservoir.consume"), IntervalIntDomain(10),
@@ -1892,7 +1892,7 @@ private:
 
 	ce.getId(); // Only point of this is to remove a compile-time warning (unused-variable)
 
-    SAVH::Reusable res(db.getId(), LabelStr("Reusable"), LabelStr("Foo"), LabelStr("TimetableFVDetector"), LabelStr("TimetableProfile"));
+    SAVH::Reusable res(db.getId(), LabelStr("Reusable"), LabelStr("Foo"), LabelStr("OpenWorldFVDetector"), LabelStr("TimetableProfile"));
 
     SAVH::ReusableToken use(db.getId(), LabelStr("Reusable.uses"), IntervalIntDomain(0, 5), IntervalIntDomain(10, 15), IntervalIntDomain(1, PLUS_INFINITY),
 			    IntervalDomain(10));
@@ -1970,7 +1970,7 @@ private:
 		ConstraintEngineId ce = ceObj.getId();
 		DbClientId client = db->getClient();
 
-		SAVH::Reusable reusable(db, "Reusable", "myReusable", "ReusableFVDetector", "IncrementalFlowProfile", 2, 2, 0);
+		SAVH::Reusable reusable(db, "Reusable", "myReusable", "ClosedWorldFVDetector", "IncrementalFlowProfile", 2, 2, 0);
 
 		SAVH::ReusableToken tok1(db, "Reusable.uses", IntervalIntDomain(1, 3), IntervalIntDomain(10, 12), IntervalIntDomain(1, PLUS_INFINITY),
 				IntervalDomain(1.0, 1.0), "myReusable");
@@ -2034,7 +2034,7 @@ private:
 		ConstraintEngineId ce = ceObj.getId();
 		DbClientId client = db->getClient();
 
-		SAVH::Reusable reusable(db, "Reusable", "myReusable", "ReusableFVDetector", "IncrementalFlowProfile", 1, 1, 0);
+		SAVH::Reusable reusable(db, "Reusable", "myReusable", "ClosedWorldFVDetector", "IncrementalFlowProfile", 1, 1, 0);
 
 		SAVH::ReusableToken tok1(db, "Reusable.uses", IntervalIntDomain(1, 3), IntervalIntDomain(10, 12), IntervalIntDomain(1, PLUS_INFINITY),
 				IntervalDomain(1.0, 1.0), "myReusable");
@@ -2353,7 +2353,7 @@ private:
 		ConstraintEngineId ce = ceObj.getId();
 		DbClientId client = db->getClient();
 
-		SAVH::Reusable reusable(db, "Reusable", "myReusable", "ReusableFVDetector", "IncrementalFlowProfile", 1, 1, 0);
+		SAVH::Reusable reusable(db, "Reusable", "myReusable", "ClosedWorldFVDetector", "IncrementalFlowProfile", 1, 1, 0);
 
 		SAVH::ReusableToken tok1(db, "Reusable.uses", IntervalIntDomain(1, 3), IntervalIntDomain(10, 12), IntervalIntDomain(1, PLUS_INFINITY),
 				IntervalDomain(1.0, 1.0), "myReusable");

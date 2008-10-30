@@ -17,7 +17,7 @@ namespace EUROPA {
 			 double maxConsumption) :
       Resource(planDatabase, type, name, detectorName, profileName, initCapacityLb, initCapacityUb, lowerLimit, initCapacityUb, maxInstConsumption,
 	       maxInstConsumption, maxConsumption, maxConsumption) {}
-    
+
     Reusable::Reusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open) :
       Resource(planDatabase, type, name, open) {}
 
@@ -34,7 +34,7 @@ namespace EUROPA {
 
     void Reusable::addToProfile(const TokenId& tok) {
       if(m_tokensToTransactions.find(tok) != m_tokensToTransactions.end()) {
-	debugMsg("Reusable:addToProfile", 
+	debugMsg("Reusable:addToProfile",
 		 "Token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ") is already in the profile.");
 	return;
       }
@@ -54,7 +54,7 @@ namespace EUROPA {
     void Reusable::removeFromProfile(const TokenId& tok) {
       if(m_tokensToTransactions.find(tok) == m_tokensToTransactions.end())
         return;
-      
+
       debugMsg("Reusable:removeFromProfile", "Removing token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
       std::pair<TransactionId, TransactionId> trans = m_tokensToTransactions.find(tok)->second;
       debugMsg("Reusable:removeFromProfile", "Removing transaction for time " << trans.first->time()->toString() << " with quantity " << trans.first->quantity()->toString());
@@ -71,13 +71,13 @@ namespace EUROPA {
       }
       delete (Transaction*) trans.first;
       delete (Transaction*) trans.second;
-      
+
     }
 
-    UnaryTimeline::UnaryTimeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open) 
-      : Reusable(planDatabase, type, name, open) {init(1, 1, 0, 1, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, "ReusableFVDetector", "IncrementalFlowProfile");}
+    UnaryTimeline::UnaryTimeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
+      : Reusable(planDatabase, type, name, open) {init(1, 1, 0, 1, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, "ClosedWorldFVDetector", "IncrementalFlowProfile");}
 
-    UnaryTimeline::UnaryTimeline(const ObjectId& parent, const LabelStr& type, const LabelStr& name, bool open) 
-      : Reusable(parent, type, name, open) {init(1, 1, 0, 1, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, "ReusableFVDetector", "IncrementalFlowProfile");}
+    UnaryTimeline::UnaryTimeline(const ObjectId& parent, const LabelStr& type, const LabelStr& name, bool open)
+      : Reusable(parent, type, name, open) {init(1, 1, 0, 1, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, PLUS_INFINITY, "ClosedWorldFVDetector", "IncrementalFlowProfile");}
   }
 }

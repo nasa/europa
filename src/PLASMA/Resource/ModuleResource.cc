@@ -5,8 +5,6 @@
 #include "SAVH_IncrementalFlowProfile.hh"
 #include "SAVH_TimetableProfile.hh"
 #include "SAVH_ProfilePropagator.hh"
-#include "SAVH_ReusableFVDetector.hh"
-#include "SAVH_TimetableFVDetector.hh"
 #include "SAVH_OpenWorldFVDetector.hh"
 #include "SAVH_ClosedWorldFVDetector.hh"
 #include "ResourcePropagator.hh"
@@ -116,8 +114,6 @@ namespace EUROPA {
       // Solver
       FactoryMgr* fvdfm = new FactoryMgr();
       engine->addComponent("FVDetectorFactoryMgr",fvdfm);
-      REGISTER_FVDETECTOR(fvdfm,EUROPA::SAVH::TimetableFVDetector,TimetableFVDetector);
-      REGISTER_FVDETECTOR(fvdfm,EUROPA::SAVH::ReusableFVDetector,ReusableFVDetector);
       REGISTER_FVDETECTOR(fvdfm,EUROPA::SAVH::OpenWorldFVDetector,OpenWorldFVDetector);
       REGISTER_FVDETECTOR(fvdfm,EUROPA::SAVH::ClosedWorldFVDetector,ClosedWorldFVDetector);
 

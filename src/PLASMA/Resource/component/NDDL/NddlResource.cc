@@ -33,10 +33,7 @@ bool isValid(ConstrainedVariableId nameVar, const std::string param)
 			return true;
 	}
 	else if (param == PARAM_DETECTOR_TYPE) {
-		if (name == "TimetableFVDetector" ||
-				name == "ReusableFVDetector" ||
-				name == "OpenWorldFVDetector" ||
-				name == "ClosedWorldFVDetector" )
+		if (name == "OpenWorldFVDetector" || name == "ClosedWorldFVDetector" )
 			return true;
 	}
 	else {
@@ -112,7 +109,7 @@ LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, c
     check_error(m_variables[CMAX]->derivedDomain().isSingleton());
 
     LabelStr profileName = getProfileOrDetectorName(this, PARAM_PROFILE_TYPE, "IncrementalFlowProfile");
-    LabelStr detectorName = getProfileOrDetectorName(this, PARAM_DETECTOR_TYPE, "ReusableFVDetector");
+    LabelStr detectorName = getProfileOrDetectorName(this, PARAM_DETECTOR_TYPE, "ClosedWorldFVDetector");
 
     init(1, 1, //capacity lb, capacity ub
          0, 1,//lower limit, upper limit
@@ -209,7 +206,7 @@ LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, c
     check_error(m_variables[CMAX]->derivedDomain().isSingleton());
 
     LabelStr profileName = getProfileOrDetectorName(this, PARAM_PROFILE_TYPE, "IncrementalFlowProfile");
-    LabelStr detectorName = getProfileOrDetectorName(this, PARAM_DETECTOR_TYPE, "ReusableFVDetector");
+    LabelStr detectorName = getProfileOrDetectorName(this, PARAM_DETECTOR_TYPE, "ClosedWorldFVDetector");
 
     init(m_variables[C]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(),
 	 m_variables[LLMIN]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(),
@@ -349,7 +346,7 @@ LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, c
     check_error(m_variables[CMAX]->derivedDomain().isSingleton());
 
     LabelStr profileName = getProfileOrDetectorName(this, PARAM_PROFILE_TYPE, "IncrementalFlowProfile");
-    LabelStr detectorName = getProfileOrDetectorName(this, PARAM_DETECTOR_TYPE, "TimetableFVDetector");
+    LabelStr detectorName = getProfileOrDetectorName(this, PARAM_DETECTOR_TYPE, "ClosedWorldFVDetector");
 
     init(m_variables[IC]->derivedDomain().getSingletonValue(), m_variables[IC]->derivedDomain().getSingletonValue(),
 	 m_variables[LLMIN]->derivedDomain().getSingletonValue(), m_variables[LLMAX]->derivedDomain().getSingletonValue(),
