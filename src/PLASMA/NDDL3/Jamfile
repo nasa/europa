@@ -2,12 +2,12 @@ SubDir PLASMA NDDL3 ;
 
 if ! $(PLASMA_READY) {
 
-Module NDDL3 : Antlr3 RulesEngine TemporalNetwork ;
+Module NDDL3 : Antlr3 NDDL ;
 
 SubInclude PLASMA NDDL3 base ;
 
-#ModuleFiles NDDL3 : ModuleNddl.cc ;
+ModuleFiles NDDL3 : ModuleNddl3.cc ;
 
-#SubInclude PLASMA NDDL3 test ;
+SubInclude PLASMA NDDL3 test ;
 
 } # PLASMA_READY

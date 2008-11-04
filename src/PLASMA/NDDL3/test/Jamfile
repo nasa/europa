@@ -1,0 +1,11 @@
+SubDir PLASMA NDDL3 test ;
+
+if ! $(PLASMA_READY) {
+
+ModuleLibraries nddl3-module-tests : cppunit ;
+
+ModuleMain nddl3-module-tests : module-tests.cc nddl-test-module.cc : NDDL3 ;
+RunModuleMain run-nddl3-module-tests : nddl3-module-tests ;
+LocalDepends tests : run-nddl3-module-tests ;
+
+} # PLASMA_READY
