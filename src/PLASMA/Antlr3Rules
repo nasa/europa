@@ -13,10 +13,10 @@ rule Antlr3Grammar
   local grammar.tree = $(2[2]) ;
 
   local sources = [ FGristFiles $(prefix)Lexer.c $(prefix)Parser.c ] ;
-  local headers = [ FGristFiles $(prefix)TokenTypes.h $(prefix)TokenTypes.txt $(prefix)Lexer.h $(prefix)Parser.h ] ;
+  local headers = [ FGristFiles $(prefix).tokens $(prefix)Lexer.h $(prefix)Parser.h ] ;
 
   local sources.tree = [ FGristFiles $(prefix)TreeParser.c ] ;
-  local headers.tree = [ FGristFiles $(prefix)TreeParserTokenTypes.h $(prefix)TreeParserTokenTypes.txt ] ;
+  local headers.tree = [ FGristFiles $(prefix)TreeParserTokenTypes.h ] ;
 
 #  Echo Antlr3Tool . $(prefix) . $(grammar) . $(grammar.tree) ;
 
