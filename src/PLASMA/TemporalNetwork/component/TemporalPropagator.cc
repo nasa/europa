@@ -233,6 +233,18 @@ namespace EUROPA {
 	return ConstraintId::noId();
   }
 
+  bool isBounded(ConstrainedVariableId& var)
+  {
+      return var->lastDomain().isSingleton() ||
+             (var->lastDomain().getUpperBound() != PLUS_INFINITY ) ||
+             (var->lastDomain().getLowerBound() != MINUS_INFINITY );
+  }
+
+  bool isKnownEdge(ConstrainedVariableId& varFrom, ConstrainedVariableId& varTo)
+  {
+      return isBounded(varFrom) && isBounded(varTo);
+  }
+
   void TemporalPropagator::execute(){
     static unsigned int sl_counter(0);
     sl_counter++;
@@ -278,16 +290,21 @@ namespace EUROPA {
     		     << tovars[i]->toString() << " "
     		     << lengths[i];
     	      debugMsg("TemporalPropagator:violations", "Violated edge:"+os1.str());
+              if (!isKnownEdge(fromvars[i],tovars[i])) {
+                  debugMsg("TemporalPropagator:violations", "Violated edge has unbounded variable, skipping");
+                  continue;
+              }
 
     	      ConstraintId c = getConstraint(fromvars[i],tovars[i],lengths[i]);
     	      if (!c.isNoId()) {
+                  debugMsg("TemporalPropagator:violations", "Dealing with violated constraint:"+c->toString());
     	          notifyConstraintViolated(c);
     	          notifyVariableEmptied(fromvars[i]);
     	          notifyVariableEmptied(tovars[i]);
-    	          debugMsg("TemporalPropagator:violations", "Violated constraint:"+c->toString());
+    	          m_changedConstraints.insert(c); // TODO: handleConstraintDeactivated should do this
               }
     	      else {
-    	    	  // TODO: why is this possible?
+    	    	  // TODO: why is this possible? what edges are introduced in the temporal graph that don't correspond to constraints?
     	          debugMsg("TemporalPropagator:violations", "No constraint found for edge, skipping");
     	      }
           }
@@ -301,6 +318,7 @@ namespace EUROPA {
       debugMsg("TemporalPropagator:execute", "Calling updateTempVar");
       updateTempVar();
     }
+    debugMsg("TemporalPropagator:execute", "Temporal propagator done");
   }
 
   bool TemporalPropagator::updateRequired() const{

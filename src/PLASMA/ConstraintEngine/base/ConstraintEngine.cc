@@ -588,14 +588,16 @@ namespace EUROPA
       return true;
     }
 
-    // If we have an empty domain, then we sould relax it.
+    // If we have an empty domain, then we should relax it.
     if(hasEmptyVariables())
       getViolationMgr().relaxEmptyVariables();
 
     // If we still have an empty variable, which we might in special cases dealing with empty
     // base or derived domains. then simply return false.
-    if(hasEmptyVariables())
+    if(hasEmptyVariables()) {
+      debugMsg("ConstraintEngine:propagate", "Found empty variable after relaxing, without doing any work");
       return false;
+    }
 
     m_relaxed = false; // Reset by default
     m_propInProgress = true;
