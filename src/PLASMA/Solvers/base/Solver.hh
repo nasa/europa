@@ -66,7 +66,7 @@ namespace EUROPA {
       void reset();
 
       /**
-       * @brief Resets (undo and delete) a specific number of decisions, in reverse chronological order, 
+       * @brief Resets (undo and delete) a specific number of decisions, in reverse chronological order,
        * in the internal decision stack
        * @param depth The number of decisions to reset.
        */
@@ -82,7 +82,7 @@ namespace EUROPA {
 
       /**
        * @brief Clears current decisions on the stack without any modifications to the plan.
-       * 
+       *
        * Used if we want the solver to work on a set of flaws without coupling this work to prior search.
        */
       void clear();
@@ -113,7 +113,7 @@ namespace EUROPA {
       bool noMoreFlaws() const;
 
       /**
-       * @brief Tests if the search space have been exhausted. 
+       * @brief Tests if the search space have been exhausted.
        */
       bool isExhausted() const;
 
@@ -126,7 +126,7 @@ namespace EUROPA {
        * @brief Retrieve all decisions on the stack.
        */
       const DecisionStack& getDecisionStack() const;
-      
+
       std::string getDecisionStackAsString() const;
 
       /**
@@ -169,10 +169,10 @@ namespace EUROPA {
 
       std::string getLastExecutedDecision() const;
 
-      std::multimap<Priority, std::string> getOpenDecisions() const; 
+      std::multimap<Priority, std::string> getOpenDecisions() const;
 
-      std::string printOpenDecisions() const;      
-      
+      std::string printOpenDecisions() const;
+
       /**
        * @brief Access the context of this Solver.
        */
@@ -203,9 +203,10 @@ namespace EUROPA {
        * @return DecisionPointId::noId() if there is no such flaw, otherwise the decision point to take next.
        */
       DecisionPointId getZeroCommitmentDecision();
-      
-      bool doSolve(unsigned int maxSteps, unsigned int maxDepth);
+
       void doStep();
+      bool conflictLevelOk();
+      double m_baseConflictLevel;  // Keeps track of initial conflict level before a solver step is taken
 
       static void cleanup(DecisionStack& decisionStack);
 
@@ -220,7 +221,7 @@ namespace EUROPA {
       void notifyAdded(const TokenId& token);
 
       void notifyRemoved(const TokenId& token);
-      
+
 			bool isDecided(const EntityId& entity);
 
 			bool hasDecidedParameter(const TokenId& token);
@@ -248,11 +249,11 @@ namespace EUROPA {
       SolverId m_id;
       LabelStr m_name;
       const PlanDatabaseId m_db;
-      DecisionPointId m_activeDecision; /*!< Stores the decision point we are currently working on. 
+      DecisionPointId m_activeDecision; /*!< Stores the decision point we are currently working on.
 					  It should not be in the decision stack. */
       unsigned int m_stepCountFloor; /*!< Stores previous step count where multiple solution iterations are tried. */
       unsigned int m_depthFloor; /*!< Stores previous depth where multiple solution iterations are tried.*/
-      unsigned int m_stepCount; /*!< The aggregate number of steps over one or more calls to solve, 
+      unsigned int m_stepCount; /*!< The aggregate number of steps over one or more calls to solve,
 				  without reseting or clearing. */
       bool m_noFlawsFound; /*!< True when we have no more flaws to work on. */
       bool m_exhausted; /*!< True when we if and only if we have failed to recover from a dead-end */
@@ -279,7 +280,7 @@ namespace EUROPA {
 	std::list<IteratorId> m_iterators;
 	std::list<IteratorId>::iterator m_it;
       };
-      
+
 
       /**
        * @brief Plugs manager into ConstraintEngine events to synchronize flaw candidates
@@ -313,10 +314,10 @@ namespace EUROPA {
       private:
 	Solver& m_solver;
       };
-      
+
       friend class Solver::DbListener;
       Solver::DbListener m_dbListener;
     };
   }
-} 
+}
 #endif

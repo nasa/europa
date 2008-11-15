@@ -31,10 +31,10 @@ namespace EUROPA {
   namespace SOLVERS {
 
     Solver::Solver(const PlanDatabaseId& db, const TiXmlElement& configData)
-      : m_id(this), m_db(db), 
-        m_stepCountFloor(0), m_depthFloor(0), m_stepCount(0), 
+      : m_id(this), m_db(db),
+        m_stepCountFloor(0), m_depthFloor(0), m_stepCount(0),
         m_noFlawsFound(false), m_exhausted(false), m_timedOut(false),
-        m_maxSteps(PLUS_INFINITY), m_maxDepth(PLUS_INFINITY), 
+        m_maxSteps(PLUS_INFINITY), m_maxDepth(PLUS_INFINITY),
         m_masterFlawFilter(configData), m_ceListener(db->getConstraintEngine(), *this),
         m_dbListener(db, *this) {
       checkError(strcmp(configData.Value(), "Solver") == 0,
@@ -48,8 +48,8 @@ namespace EUROPA {
       m_masterFlawFilter.initialize(configData, m_db, m_context);
 
       // Now load all the flaw managers
-      for (TiXmlElement * child = configData.FirstChildElement(); 
-           child != NULL; 
+      for (TiXmlElement * child = configData.FirstChildElement();
+           child != NULL;
            child = child->NextSiblingElement()) {
         const char* component = child->Attribute("component");
 
@@ -60,7 +60,7 @@ namespace EUROPA {
             child->SetAttribute("component", child->Value());
 
           // Now allocate the particular flaw manager using an abstract factory pattern.
-          EngineId& engine = db->getEngine();          
+          EngineId& engine = db->getEngine();
           ComponentFactoryMgr* cfm = (ComponentFactoryMgr*)engine->getComponent("ComponentFactoryMgr");
           FlawManagerId flawManager = cfm->createInstance(*child);
           debugMsg("Solver:Solver", "Created FlawManager with id " << flawManager);
@@ -91,20 +91,6 @@ namespace EUROPA {
     }
 
     bool Solver::solve(unsigned int maxSteps, unsigned int maxDepth){
-        ConstraintEngineId ce = m_db->getConstraintEngine();  
-        bool autoPropagation = ce->getAutoPropagation();
-        ce->setAutoPropagation(false);
-        bool retval = doSolve(maxSteps,maxDepth);
-        ce->setAutoPropagation(autoPropagation);
-        
-        return retval;
-    }
-    
-    bool Solver::doSolve(unsigned int maxSteps, unsigned int maxDepth){
-      ConstraintEngineId ce = m_db->getConstraintEngine();  
-      bool autoPropagation = ce->getAutoPropagation();
-      ce->setAutoPropagation(false);
-      
       // Initialize the step count floor with the prior step count so we can apply limits
       m_stepCountFloor = getStepCount();
       m_depthFloor = getDepth();
@@ -123,7 +109,6 @@ namespace EUROPA {
 
       debugMsg("Solver:solve", "Finished with " << m_stepCount << " steps and depth of " << m_decisionStack.size());
 
-      ce->setAutoPropagation(autoPropagation);
       return m_noFlawsFound;
     }
 
@@ -141,21 +126,21 @@ namespace EUROPA {
 
     const DecisionStack& Solver::getDecisionStack() const {return m_decisionStack;}
 
-    std::string Solver::getDecisionStackAsString() const 
+    std::string Solver::getDecisionStackAsString() const
     {
     	std::ostringstream os;
-    	
+
     	for (unsigned int i=0; i<m_decisionStack.size(); i++) {
     		if (i>0)
     		    os << ",";
     	    os << m_decisionStack[i]->toShortString();
     	}
-    	    
+
     	return os.str();
     }
 
     void Solver::setMaxSteps(const unsigned int steps) {m_maxSteps = steps;}
-    
+
     void Solver::setMaxDepth(const unsigned int depth) {m_maxDepth = depth;}
 
     /**
@@ -234,7 +219,7 @@ namespace EUROPA {
       return DecisionPointId::noId();
     }
 
-    bool Solver::isExhausted() const { 
+    bool Solver::isExhausted() const {
       checkError(!m_exhausted || m_decisionStack.empty(),
                  "Cannot be left in an exhausted state if there are still decisions to evaluate.");
       return m_exhausted;
@@ -245,13 +230,18 @@ namespace EUROPA {
     }
 
     void Solver::step(){
-        ConstraintEngineId ce = m_db->getConstraintEngine();  
+        ConstraintEngineId ce = m_db->getConstraintEngine();
         bool autoPropagation = ce->getAutoPropagation();
         ce->setAutoPropagation(false);
         doStep();
         ce->setAutoPropagation(autoPropagation);
     }
-    
+
+    bool Solver::conflictLevelOk()
+    {
+        return m_db->getConstraintEngine()->getViolation() == m_baseConflictLevel;
+    }
+
     /**
      * @brief Handles a single step in the search
      */
@@ -261,20 +251,21 @@ namespace EUROPA {
 
       checkError(!m_exhausted, "Cannot be exhausted when about to commence a step." << sl_counter);
 
+      m_baseConflictLevel = m_db->getConstraintEngine()->getViolation();
       m_db->getClient()->propagate();
 
       // If inconsistent, before doing anything, there is no solution.
-      if(!m_db->getConstraintEngine()->constraintConsistent()){
+      if(!conflictLevelOk()){
         m_exhausted = true;
-        debugMsg("Solver:step", "No solution prior to stepping.");
+        debugMsg("Solver:step", "No solution prior to stepping. Conflict before propagation: " << m_baseConflictLevel << ", after propagation:" << m_db->getConstraintEngine()->getViolation());
         publish(notifyExhausted,);
         return;
       }
 
-      debugMsg("Solver:step", 
+      debugMsg("Solver:step",
                "OpenDecisions at [stepCnt=" << getStepCount() << ",depth=" << getDepth() << "]" << std::endl << printOpenDecisions());
 
-      debugMsg("Solver:decisionStack", 
+      debugMsg("Solver:decisionStack",
                "DecisionStack at [stepCnt=" << getStepCount() << ",depth=" << getDepth() << "] " << getDecisionStackAsString());
 
       // Reset flag for flaws found
@@ -302,12 +293,12 @@ namespace EUROPA {
       condDebugMsg(m_stepCount % 50 == 0, "Solver:heartbeat", std::endl << printOpenDecisions());
 
       if(!m_activeDecision->cut() && m_activeDecision->hasNext()){
+        m_lastExecutedDecision = m_activeDecision->toString();
         m_activeDecision->execute();
-	    bool isConsistent = m_db->getClient()->propagate();
-        m_lastExecutedDecision = (isConsistent ? m_activeDecision->toString() : "Failed.");
+	    m_db->getClient()->propagate();
         m_stepCount++;
 
-        if(isConsistent){
+        if(conflictLevelOk()){
           m_decisionStack.push_back(m_activeDecision);
           publish(notifyStepSucceeded,m_activeDecision);
           m_activeDecision = DecisionPointId::noId();
@@ -315,12 +306,12 @@ namespace EUROPA {
           return;
         }
         else {
-          debugMsg("Solver:backtrack", 
-                   "Backtracking because of constraint inconsistency due to " << m_activeDecision->toString());
+          debugMsg("Solver:backtrack",
+                   "Backtracking because of constraint inconsistency due to " << m_lastExecutedDecision);
         }
       }
       else {
-        debugMsg("Solver:backtrack", "Backtracking because " << m_activeDecision->toString() << " has no further choices.");
+        debugMsg("Solver:backtrack", "Backtracking because " << m_lastExecutedDecision << " has no further choices.");
       }
 
       // If we get here then we must have to backtrack. so do it!
@@ -385,7 +376,7 @@ namespace EUROPA {
     }
 
     void Solver::reset(unsigned int depth){
-      checkError(depth <= getDepth(), "Cannot reset past current depth: " << depth << " exceeds " << getDepth()); 
+      checkError(depth <= getDepth(), "Cannot reset past current depth: " << depth << " exceeds " << getDepth());
 
       if(m_activeDecision.isId()){
         if(m_activeDecision->canUndo()) {
@@ -400,15 +391,15 @@ namespace EUROPA {
       while(depth > 0 && !m_decisionStack.empty()){
         DecisionPointId node = m_decisionStack.back();
 
-        // We assume that the stack can be rolled back such that all stored decisions are 
+        // We assume that the stack can be rolled back such that all stored decisions are
         // still valid ids and contain valid data. We also require
-        // that the underlying flaw be executed. This seens reasonable but would have to be 
+        // that the underlying flaw be executed. This seens reasonable but would have to be
         // relaxed in a scenario of non-chronological relaxations
-        // on the database. Unde such circumstances, it would be best if a DecisionPoint had 
+        // on the database. Unde such circumstances, it would be best if a DecisionPoint had
         // the means to detect if the underlying data were still
-        // retractable. This seems quite practical as long as we store the key within a 
+        // retractable. This seems quite practical as long as we store the key within a
         // decision point of the underlying flaw.
-        checkError(node.isValid(), 
+        checkError(node.isValid(),
                    "Must have deleted the decision elsewhere." <<
                    " A bug in the Solver or FlawManager. A current assumption since we do not synchronize the stack.");
 
@@ -446,7 +437,7 @@ namespace EUROPA {
       }
 
       // First reset all but the last step we want to get to
-      checkError(getDepth() >= stepCount, 
+      checkError(getDepth() >= stepCount,
                  "Cannot retract " << stepCount << " steps. Current depth only " << getDepth());
 
       if(stepCount > 0)
@@ -501,11 +492,11 @@ namespace EUROPA {
       // move it to the first real one, so that done() will allways work consistently
       while (m_it != m_iterators.end()) {
           IteratorId it = (*m_it);
-          if (it->done()) 
+          if (it->done())
       	      ++m_it;
       	  else
       	      break;
-      }        
+      }
     }
 
     Solver::FlawIterator::~FlawIterator() {
@@ -513,15 +504,15 @@ namespace EUROPA {
         delete (Iterator*) (*m_it);
     }
 
-    bool Solver::FlawIterator::done() const 
+    bool Solver::FlawIterator::done() const
     {
     	return m_it == m_iterators.end();
     }
-   
+
     const EntityId Solver::FlawIterator::next() {
       if(done())
         return EntityId::noId();
-        
+
       IteratorId it = (*m_it);
       //if current iterator is done, move to the next one
       //and return that iterator's next
@@ -596,7 +587,7 @@ namespace EUROPA {
         (*it)->notifyRemoved(constraint);
       }
     }
- 
+
     void Solver::notifyAdded(const TokenId& token) {
       notify(notifyAdded(token));
     }
@@ -634,8 +625,8 @@ namespace EUROPA {
     bool Solver::isConstraintConsistent() const {
       return m_db->getConstraintEngine()->constraintConsistent();
     }
-    
-    std::multimap<Priority, std::string> Solver::getOpenDecisions() const 
+
+    std::multimap<Priority, std::string> Solver::getOpenDecisions() const
     {
       checkError(m_db->getConstraintEngine()->constraintConsistent(),
                  "Can only call this if variable changes have been propagated first.");
@@ -656,10 +647,10 @@ namespace EUROPA {
 
         delete (Iterator*) flawIterator;
       }
-      
+
       return priorityQueue;
     }
-    
+
     /**
      * @brief Will print the open decisions in priority order
      */
@@ -668,7 +659,7 @@ namespace EUROPA {
 
       std::stringstream os;
       os << " OpenDecisions:{ ";
-      
+
       std::multimap<Priority, std::string> priorityQueue = getOpenDecisions();
       for(std::multimap<Priority, std::string>::const_iterator it=priorityQueue.begin();it!=priorityQueue.end(); ++it)
         os << std::endl << sl_indentation << it->second << " PRIORITY==" << it->first;
@@ -714,7 +705,7 @@ namespace EUROPA {
       m_solver.notifyRemoved(variable);
     }
 
-    void Solver::CeListener::notifyChanged(const ConstrainedVariableId& variable, 
+    void Solver::CeListener::notifyChanged(const ConstrainedVariableId& variable,
                                            const DomainListener::ChangeType& changeType){
       m_solver.notifyChanged(variable, changeType);
     }
@@ -733,7 +724,7 @@ namespace EUROPA {
     void Solver::DbListener::notifyRemoved(const TokenId& token) {
       m_solver.notifyRemoved(token);
     }
-    
+
     void Solver::DbListener::notifyAdded(const TokenId& token) {
       m_solver.notifyAdded(token);
     }
