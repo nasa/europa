@@ -217,6 +217,10 @@ if $(OS) = MINGW {
   PLATFORM_FLAGS += -D_NO_W32_PSEUDO_MODIFIERS ;
 }
 
+if $(OS) = MACOSX {
+  PLATFORM_FLAGS += -I/opt/local/include ;
+}
+
 if $(OS) = SOLARIS {
   LINKFLAGS += -Wl,-L/usr/local/lib ;
 }
