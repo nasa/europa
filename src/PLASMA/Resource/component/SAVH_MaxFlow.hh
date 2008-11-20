@@ -15,6 +15,13 @@
 #include "SAVH_NodeIterator.hh"
 #include "SAVH_EdgeIterator.hh"
 
+#ifndef LONG_MAX
+// Would prefer to declare a static const variable, but that would be
+// bad style inside a header, so there's another 'ifndef LONG_MAX'
+// inside MaximumFlowAlgorithm::reLabel().
+# include <limits>
+#endif
+
 namespace EUROPA 
 {
   namespace SAVH 
@@ -433,7 +440,13 @@ namespace EUROPA
       graphDebug("Relabel node "
           << *n );
 
+      // Would be better to use std::numeric_limits<> all the time but
+      // maybe not all compilers support it.
+#ifndef LONG_MAX
+      long minLabel = std::numeric_limits<long>::max();
+#else
       long minLabel = LONG_MAX;
+#endif
 
       EdgeOutIterator edgeOutIte( *n );
 

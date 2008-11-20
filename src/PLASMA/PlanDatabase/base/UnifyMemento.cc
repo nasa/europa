@@ -1,5 +1,6 @@
 #include "Id.hh"
 #include "UnifyMemento.hh"
+#include "string.h"
 
 namespace EUROPA {
   

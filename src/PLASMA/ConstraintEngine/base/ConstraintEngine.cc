@@ -13,6 +13,10 @@
 #include <string>
 #include <iterator>
 
+#ifndef INT_MAX
+static int const INT_MAX(std::numeric_limits<int>::max());
+#endif
+
 namespace EUROPA
 {
 

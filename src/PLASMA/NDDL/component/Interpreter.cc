@@ -24,6 +24,8 @@
 #include "NddlRules.hh"
 #include "NddlUtils.hh"
 
+#include <string.h>
+
 // Hack!! the macro in NddlRules.hh only works with code-generation
 // so this is redefined here. this is brittle though
 // TODO: change code-generation code to work with this macro instead

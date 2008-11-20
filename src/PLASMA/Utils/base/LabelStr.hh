@@ -13,10 +13,16 @@
 #include <map>
 #include <string>
 #include <ext/hash_map>
+
+// Come on you GCC guys...
 #if (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4))
-#include <ext/hash_fun.h>
+# if (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)
+#  include <backward/hash_fun.h>
+# else
+#  include <ext/hash_fun.h>
+# endif
 #else
-#include <ext/stl_hash_fun.h>
+# include <ext/stl_hash_fun.h>
 #endif
 
 namespace __gnu_cxx {
