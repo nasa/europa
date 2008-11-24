@@ -89,6 +89,7 @@
     <property name="dir.dist.base" location="${dir.dist}/europa"/>
     <property name="file.europa-dist" value="europa-${europa.version}-${local.os}.zip"/>
     <property name="file.europa-static-libs" value="europa-${europa.version}-${local.os}-static-libs.zip"/>
+    <property name="jam.exec" value="jam"/>
     <property name="jam.libraries" value="SHARED"/>
     <property name="jam.variant" value="DEV"/>
     <property name="jam.misc" value=""/>
@@ -97,7 +98,7 @@
 
   <target name="clean" depends="init">
     <delete dir="${dir.dist}"/>
-    <exec executable="jam" dir="${dir.src}" failonerror="true">
+    <exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
       <arg line="clean-all"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
     </exec>
@@ -106,7 +107,7 @@
 
   <target name="build" depends="init">
     <echo message="jam ${jam.opts}"/>
-    <exec executable="jam" dir="${dir.src}" failonerror="true">
+    <exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
       <arg line="${jam.opts} build"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
       <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.PLASMA_HOME}/build/lib"/>
@@ -114,7 +115,7 @@
   </target>
 
   <target name="test" depends="build">
-    <exec executable="jam" dir="${dir.src}" failonerror="true">
+    <exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
       <arg line="${jam.opts} run-all-tests"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
       <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.PLASMA_HOME}/build/lib"/>
