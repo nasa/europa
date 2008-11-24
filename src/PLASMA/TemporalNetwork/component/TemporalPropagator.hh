@@ -45,11 +45,11 @@ namespace EUROPA {
     /**
      * @see TemporalAdvisor::getTemporalDistanceDomain
      */
-    const IntervalIntDomain getTemporalDistanceDomain(const ConstrainedVariableId& first, 
+    const IntervalIntDomain getTemporalDistanceDomain(const ConstrainedVariableId& first,
 						      const ConstrainedVariableId& second, const bool exact);
-    void getTemporalDistanceDomains(const ConstrainedVariableId& first, 
+    void getTemporalDistanceDomains(const ConstrainedVariableId& first,
                                     const std::vector<ConstrainedVariableId>&
-                                    seconds, 
+                                    seconds,
                                     std::vector<IntervalIntDomain>& domains);
 
     /**
@@ -79,14 +79,14 @@ namespace EUROPA {
     void handleConstraintDeactivated(const ConstraintId& constraint);
     void handleVariableDeactivated(const ConstrainedVariableId& var);
     void handleVariableActivated(const ConstrainedVariableId& var);
-    void handleNotification(const ConstrainedVariableId& variable, 
-			    int argIndex, 
-			    const ConstraintId& constraint, 
+    void handleNotification(const ConstrainedVariableId& variable,
+			    int argIndex,
+			    const ConstraintId& constraint,
 			    const DomainListener::ChangeType& changeType);
 
   private:
     friend class TimepointWrapper;
-    
+
     TemporalConstraintId addSpecificationConstraint(const TemporalConstraintId& tc, const TimepointId& tp, const Time lb, const Time ub);
 
     void notifyDeleted(const ConstrainedVariableId& tempVar, const TimepointId& tp);
@@ -141,7 +141,7 @@ namespace EUROPA {
      * new replacement constraint.
      */
     TemporalConstraintId updateConstraint(const ConstrainedVariableId& var,
-					  const TemporalConstraintId& tnetConstraint, 
+					  const TemporalConstraintId& tnetConstraint,
 					  Time lb,
 					  Time ub);
 
@@ -161,10 +161,12 @@ namespace EUROPA {
      */
     void updateDuration(const TokenId& token) const;
 
+    bool wasRelaxed(const ConstrainedVariableId& var);
+
     TemporalNetworkId m_tnet; /*!< Temporal Network does all the propagation */
 
     /*!< Synchronization data structures */
-    std::map<int, ConstrainedVariableId> m_activeVariables; /**< Maintain the set of active start and end variables. 
+    std::map<int, ConstrainedVariableId> m_activeVariables; /**< Maintain the set of active start and end variables.
 							     Duration handled in constraints */
     std::map<int, ConstrainedVariableId> m_changedVariables; /*!< Manage the set of changed variables to be synchronized */
     std::set<ConstraintId, EntityComparator<EntityId> > m_changedConstraints; /*!< Constraint Agenda */
