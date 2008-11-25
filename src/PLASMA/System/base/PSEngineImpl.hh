@@ -18,6 +18,8 @@ namespace EUROPA {
     virtual void start();
     virtual void shutdown();
 
+    virtual EngineConfig* getConfig();
+
     virtual void addModule(Module* module);
     virtual void removeModule(Module* module);
     virtual void loadModule(const std::string& moduleFileName);

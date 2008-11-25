@@ -3,7 +3,6 @@
 
 #include "PSConstraintEngine.hh"
 #include "PSPlanDatabase.hh"
-//#include "PlanDatabaseDefs.hh"
 #include "PSResource.hh"
 #include "PSSolvers.hh"
 #include "Module.hh"
@@ -24,6 +23,8 @@ namespace EUROPA {
 
       virtual void start() = 0;
       virtual void shutdown() = 0;
+
+      virtual EngineConfig* getConfig() = 0;
 
       virtual void addModule(Module* module) = 0;
       virtual void removeModule(Module* module) = 0;

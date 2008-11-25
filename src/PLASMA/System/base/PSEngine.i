@@ -210,6 +210,14 @@ namespace EUROPA {
   
 %}
 
+  class EngineConfig
+  {
+    public:
+      const std::string& getProperty(const std::string& name) const;
+      void setProperty(const std::string& name,const std::string& value);
+  };
+
+
 %nodefaultctor PSEngine;   
 
   class PSEngine {
@@ -221,6 +229,8 @@ namespace EUROPA {
 
     void start();
     void shutdown();
+    
+    EngineConfig* getConfig();
 
     void loadModule(const std::string& moduleFileName);
     void loadModel(const std::string& modelFileName);

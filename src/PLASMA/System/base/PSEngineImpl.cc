@@ -61,6 +61,12 @@ namespace EUROPA {
 	  doShutdown();
   }
 
+  EngineConfig* PSEngineImpl::getConfig()
+  {
+      return EuropaEngine::getConfig();
+  }
+
+
   void PSEngineImpl::addModule(Module* module)
   {
 	  EuropaEngine::addModule(module->getId());
