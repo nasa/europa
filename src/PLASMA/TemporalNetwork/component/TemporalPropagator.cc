@@ -130,9 +130,14 @@ namespace EUROPA {
     if (tnetConstraint.isId()){
       tnetConstraint->clearExternalEntity();
       constraint->clearExternalEntity();
+      // if it's a violated constraint, mark deleted to force propagation in the tnet.
       bool markDeleted = (constraint->getViolation() > 0);
       m_tnet->removeTemporalConstraint(tnetConstraint, markDeleted);
+      debugMsg("TemporalPropagator:handleConstraintDeactivated","removed tnet constraint (markedDeleted=" << markDeleted<< ") for cnet constraint " << constraint->toString()
+              );
     }
+    else
+        debugMsg("TemporalPropagator:handleConstraintDeactivated","deactivation ignored. no tnet constraint found for cnet constraint " << constraint->toString());
   }
 
 
@@ -293,7 +298,6 @@ namespace EUROPA {
     	          notifyConstraintViolated(c);
     	          notifyVariableEmptied(fromvars[i]);
     	          notifyVariableEmptied(tovars[i]);
-    	          m_changedConstraints.insert(c); // TODO: handleConstraintDeactivated should do this
               }
     	      else {
     	    	  // TODO: why is this possible? what edges are introduced in the temporal graph that don't correspond to constraints?
@@ -317,7 +321,8 @@ namespace EUROPA {
     bool fullyPropagated = (m_constraintsForDeletion.empty() &&
                             m_variablesForDeletion.empty() &&
                             m_changedConstraints.empty() &&
-                            m_changedVariables.empty());
+                            m_changedVariables.empty()
+                            && !m_tnet->updateRequired());
 
     return (!fullyPropagated);
   }
