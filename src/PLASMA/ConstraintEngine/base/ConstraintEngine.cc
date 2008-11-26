@@ -125,7 +125,7 @@ namespace EUROPA
 
   void ViolationMgrImpl::addViolatedConstraint(ConstraintId c)
   {
-    debugMsg("ConstraintEngine:ViolationMgr", "Marking constraint as violated : " << c->toString());
+    debugMsg("ConstraintEngine:ViolationMgr", "Marking constraint as violated : " << c->toLongString());
     m_violatedConstraints.insert(c);
     c->deactivate(); // Deactivate will cause propagators to ignore constraint, including removing from current agendas
     m_ce.notifyViolationAdded(c); // tell constraint engine to publish
@@ -133,8 +133,8 @@ namespace EUROPA
 
   void ViolationMgrImpl::removeViolatedConstraint(ConstraintId c)
   {
-    check_error(isViolated(c),"Tried to remove constraint that is not violated "+c->toString());
-    debugMsg("ConstraintEngine:ViolationMgr", "Removing constraint from violated set : " << c->toString());
+    check_error(isViolated(c),"Tried to remove constraint that is not violated "+c->toLongString());
+    debugMsg("ConstraintEngine:ViolationMgr", "Removing constraint from violated set : " << c->toLongString());
     c->undoDeactivation(); // This will put the constraint back on the Propagators' agendas
     m_violatedConstraints.erase(c);
     m_ce.notifyViolationRemoved(c); // tell constraint engine to publish
@@ -166,7 +166,7 @@ namespace EUROPA
     for (std::set<ConstraintId>::iterator it = constraints.begin(); it != constraints.end(); ++it) {
       ConstraintId c = *it;
       if (isViolated(c))
-	removeViolatedConstraint(c);
+        removeViolatedConstraint(c);
     }
 
     return true;
@@ -179,7 +179,7 @@ namespace EUROPA
 
   void ViolationMgrImpl::addEmptyVariable(ConstrainedVariableId c)
   {
-    debugMsg("ConstraintEngine:ViolationMgr", "Marking ConstrainedVariable as empty : " << c->toString());
+    debugMsg("ConstraintEngine:ViolationMgr", "Marking ConstrainedVariable as empty : " << c->toLongString());
     m_emptyVariables.insert(c); // TODO: make sure set is avoiding duplicates correctly
   }
 
@@ -204,6 +204,7 @@ namespace EUROPA
       ConstrainedVariableId v = *it;
       check_error(!v.isNoId(),"Tried to relax ConstrainedVariableId::noId()");
       v->relax();
+      debugMsg("ConstraintEngine:ViolationMgr", "Relaxed empty variable : " << v->toLongString());
     }
 
     m_emptyVariables.clear();

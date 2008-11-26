@@ -119,7 +119,7 @@ namespace EUROPA {
     /**
      * @brief update variables in the constraint engine with changes due to Temporal Propagation
      */
-    void updateTempVar();
+    void updateCnet();
 
     /**
      * @brief Update the time point in the tnet from the given CE variable
@@ -159,9 +159,13 @@ namespace EUROPA {
     /**
      * @brief Update duration bounds
      */
-    void updateDuration(const TokenId& token) const;
+    void updateTnetDuration(const ConstraintId& c);  // incoming bounds from cnet
+    void updateCnetDuration(const TokenId& token) const; // outgoing bounds after tnet propagation
 
     bool wasRelaxed(const ConstrainedVariableId& var);
+
+    void handleViolations();
+    void collectViolations(ConstrainedVariableId& var);
 
     TemporalNetworkId m_tnet; /*!< Temporal Network does all the propagation */
 

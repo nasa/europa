@@ -217,15 +217,16 @@ namespace EUROPA {
     return consistent;
   }
 
+
   ConstraintId getConstraint(ConstrainedVariableId& fromvar,
 		                     ConstrainedVariableId& tovar,
                              Time& length)
   {
-	ConstraintSet constraints;
-	fromvar->constraints(constraints);
+	ConstraintSet fromConstraints;
+	fromvar->constraints(fromConstraints);
 
-	ConstraintSet::const_iterator it = constraints.begin();
-	for (;it != constraints.end();++it) {
+	ConstraintSet::const_iterator it = fromConstraints.begin();
+	for (;it != fromConstraints.end();++it) {
 	    ConstraintId c = (*it);
 	    if (c->isVariableOf(tovar)) {
 	    	// TODO: fromvar and tovar could be together in more than one constraint
@@ -244,77 +245,89 @@ namespace EUROPA {
    *    the tnet performs incremental propagation on whatever it can while this happens
    * 2- m_tnet->propagate() performs any inference that couldn't be done incrementally while updateTnet() happened
    * 3- If there are constraint violations, update the cnet with the new constraint violation info
-   * 4- updateTempVar() moves all the newly inferred bounds from the tnet to the cnet
+   * 4- updateCnet() moves all the newly inferred bounds from the tnet to the cnet
    */
-  void TemporalPropagator::execute(){
-    static unsigned int sl_counter(0);
-    sl_counter++;
-
+  void TemporalPropagator::execute()
+  {
     check_error(!getConstraintEngine()->provenInconsistent());
     check_error(isValidForPropagation());
-    //update the tnet
-    debugMsg("TemporalPropagator:execute", "Calling updateTnet()");
+    debugMsg("TemporalPropagator:execute", "Temporal propagator started");
+
+    debugMsg("TemporalPropagator:execute", "Updating tnet");
     updateTnet();
 
     // If already inconsistent by applying constraints directly, skip the rest
-    if(getConstraintEngine()->provenInconsistent() && !getConstraintEngine()->getAllowViolations())
+    if (getConstraintEngine()->provenInconsistent() &&
+           !getConstraintEngine()->getAllowViolations())
       return;
 
-    //propagate the tnet
-    if (!m_tnet->propagate()) {
-      debugMsg("TemporalPropagator:execute", "Tnet is inconsistent.");
+    debugMsg("TemporalPropagator:execute", "Propagating tnet");
+    bool tnetConsistent=m_tnet->propagate();
 
+    if (!tnetConsistent) {
+      debugMsg("TemporalPropagator:execute", "Handling violations");
+      handleViolations();
+    }
+    else {
+      debugMsg("TemporalPropagator:execute", "Updating cnet");
+      updateCnet();
+    }
+
+    debugMsg("TemporalPropagator:execute", "Temporal propagator done");
+  }
+
+  void TemporalPropagator::handleViolations()
+  {
       const std::set<TimepointId>& updatedTimepoints = m_tnet->getUpdatedTimepoints();
-      checkError(!updatedTimepoints.empty(), sl_counter);
+      checkError(!updatedTimepoints.empty(), "updated timepoints are expected if tnet is not consistent");
       TimepointId tp = *(updatedTimepoints.begin());
       ConstrainedVariableId var = tp->getExternalEntity();
+      check_error(!var.isNoId());
 
-      if (getConstraintEngine()->getAllowViolations()) {
-          // Map tnet violation to violated constraints
-          std::vector<ConstrainedVariableId> fromvars,tovars;
-          std::vector<Time> lengths;
-          ConstrainedVariableId origin = var;//m_tnet->getOrigin()->getExternalEntity();
+      if (getConstraintEngine()->getAllowViolations())
+          collectViolations(var);
+      else
+          Propagator::getCurrentDomain(var).empty();
+  }
 
-          getTemporalNogood(origin,fromvars,tovars,lengths);
+  void TemporalPropagator::collectViolations(ConstrainedVariableId& var)
+  {
+      // Map tnet violation to violated constraints
+      std::vector<ConstrainedVariableId> fromvars,tovars;
+      std::vector<Time> lengths;
+      ConstrainedVariableId origin = var;
 
-          for (unsigned int i=0;i<fromvars.size();i++) {
-        	  std::ostringstream os,os1;
-    		  os << (i+1) << " of " << fromvars.size();
-    	      debugMsg("TemporalPropagator:violations", "Violated edge:"+os.str());
+      getTemporalNogood(origin,fromvars,tovars,lengths);
 
-    	      if (fromvars[i].isNoId() || tovars[i].isNoId()){
-    	    	  debugMsg("TemporalPropagator:violations", "from or to var is noId, skipping");
-    	    	  continue;
-    	      }
+      for (unsigned int i=0;i<fromvars.size();i++) {
+          std::ostringstream os;
+          os << (i+1) << " of " << fromvars.size();
+          debugMsg("TemporalPropagator:violations", "Violated edge:"+os.str());
 
-    		  os1 << "{" << fromvars[i]->toLongString() << "} {"
-    		     << tovars[i]->toLongString() << "} {"
-    		     << lengths[i] << "}";
-    	      debugMsg("TemporalPropagator:violations", "Violated edge:"+os1.str());
+          if (fromvars[i].isNoId() || tovars[i].isNoId()) {
+              // TODO: why is this possible?
+              debugMsg("TemporalPropagator:violations", "fromVar or toVar is noId, skipping");
+              continue;
+          }
 
-    	      ConstraintId c = getConstraint(fromvars[i],tovars[i],lengths[i]);
-    	      if (!c.isNoId()) {
-                  debugMsg("TemporalPropagator:violations", "Dealing with violated constraint:"+c->toString());
-    	          notifyConstraintViolated(c);
-    	          notifyVariableEmptied(fromvars[i]);
-    	          notifyVariableEmptied(tovars[i]);
-              }
-    	      else {
-    	    	  // TODO: why is this possible? what edges are introduced in the temporal graph that don't correspond to constraints?
-    	          debugMsg("TemporalPropagator:violations", "No constraint found for edge, skipping");
-    	      }
+          std::ostringstream os1;
+          os1 << "{" << fromvars[i]->toLongString() << "} {"
+          << tovars[i]->toLongString() << "} {"
+          << lengths[i] << "}";
+          debugMsg("TemporalPropagator:violations", "Violated edge:"+os1.str());
+
+          ConstraintId c = getConstraint(fromvars[i],tovars[i],lengths[i]);
+          if (!c.isNoId()) {
+              debugMsg("TemporalPropagator:violations", "Dealing with violated constraint:"+c->toString());
+              notifyConstraintViolated(c);
+              notifyVariableEmptied(fromvars[i]);
+              notifyVariableEmptied(tovars[i]);
+          }
+          else {
+              // TODO: why is this possible? what edges are introduced in the temporal graph that don't correspond to cnet constraints?
+              debugMsg("TemporalPropagator:violations", "No constraint found for edge, skipping");
           }
       }
-      else {
-          check_error (!var.isNoId());
-          Propagator::getCurrentDomain(var).empty();
-      }
-    }
-    else {// update the Temp Vars of the CNET.
-      debugMsg("TemporalPropagator:execute", "Calling updateTempVar");
-      updateTempVar();
-    }
-    debugMsg("TemporalPropagator:execute", "Temporal propagator done");
   }
 
   bool TemporalPropagator::updateRequired() const{
@@ -502,61 +515,57 @@ namespace EUROPA {
 
 
   /**
-   * @brief Updates the ConstrainedEngine variable for each active timepoint.
+   * @brief Updates the cnet with the latest values in the tnet
    */
-  void TemporalPropagator::updateTempVar() {
-    debugMsg("TemporalPropagator:updateTempVar", "In updateTempVar");
+  void TemporalPropagator::updateCnet() {
+      debugMsg("TemporalPropagator:updateCnet", "In updateCnet");
 
-    std::vector<TokenId> updatedTokens; // Used to push update to duration
-    const std::set<TimepointId> updatedTimepoints = m_tnet->getUpdatedTimepoints();
-    for(std::set<TimepointId>::const_iterator it = updatedTimepoints.begin(); it != updatedTimepoints.end(); ++it){
-      const TimepointId& tp = *it;
-      check_error(tp.isValid());
-      const Time& lb = tp->getLowerBound();
-      const Time& ub = tp->getUpperBound();
+      std::vector<TokenId> updatedTokens; // Used to push update to duration
+      const std::set<TimepointId> updatedTimepoints = m_tnet->getUpdatedTimepoints();
+      for(std::set<TimepointId>::const_iterator it = updatedTimepoints.begin(); it != updatedTimepoints.end(); ++it){
+          const TimepointId& tp = *it;
+          check_error(tp.isValid());
+          const Time& lb = tp->getLowerBound();
+          const Time& ub = tp->getUpperBound();
 
-      check_error(lb <= ub);
+          check_error(lb <= ub);
 
-      check_error(tp->getExternalEntity().isValid(), "Ensure the connection between TempVar and Timepoint is correct");
-      ConstrainedVariableId var = tp->getExternalEntity();
-      if(!var->isActive()){
-	handleVariableDeactivated(var);
-	continue;
+          check_error(tp->getExternalEntity().isValid(), "Ensure the connection between TempVar and Timepoint is correct");
+          ConstrainedVariableId var = tp->getExternalEntity();
+          if(!var->isActive()){
+              handleVariableDeactivated(var);
+              continue;
+          }
+
+          IntervalIntDomain& dom = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(var));
+
+          checkError(!dom.isEmpty(), var->toString());
+
+          checkError(dom.isMember(lb) && dom.isMember(ub),
+                  "Updated bounds [" << lb << " " << ub << "] from timepoint " << tp << " are outside of "
+                  << dom.toString() << " for " << var->toString());
+
+          dom.intersect(lb, ub);
+
+          if(TokenId::convertable(var->parent())){
+              TokenId token = var->parent();
+              // If we get a hit, then buffer the token for later update to duration (so we only do it once with updated bounds
+              if (var == token->start() || var == token->end())
+                  updatedTokens.push_back(token);
+          }
       }
 
-      IntervalIntDomain& dom = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(var));
+      for(std::vector<TokenId>::const_iterator it = updatedTokens.begin(); it != updatedTokens.end(); ++it)
+          updateCnetDuration(*it);
 
-      checkError(!dom.isEmpty(), var->toString());
-
-      checkError(dom.isMember(lb) && dom.isMember(ub),
-                 "Updated bounds [" << lb << " " << ub << "] from timepoint " << tp << " are outside of "
-                 << dom.toString() << " for " << var->toString());
-
-      dom.intersect(lb, ub);
-
-      if(TokenId::convertable(var->parent())){
-	TokenId token = var->parent();
-	// If we get a hit, then buffer the token for later update to duration (so we only do it once with updated bounds
-	if (var == token->start() || var == token->end())
-	  updatedTokens.push_back(token);
-      }
-    }
-
-    // TODO JRB: looks like this call should be skipped since updateTemporalConstraint will always be called before
-    // this and already seems to be doing it
-    // CMG: updateTemporalConstraint is only called for local changes. Here we are applying the propagated effect of the constraint network back to
-    // the token duration. The network should be consistent.
-    /*
-    for(std::vector<TokenId>::const_iterator it = updatedTokens.begin(); it != updatedTokens.end(); ++it)
-      updateDuration(*it);
-    */
-
-    m_tnet->resetUpdatedTimepoints();
+      m_tnet->resetUpdatedTimepoints();
   }
 
-  // TODO JRB: why is this necessary?, start,end,duration are already under a temporal distance constraint, propagation should take care
-  // of this automatically.
-  void TemporalPropagator::updateDuration(const TokenId& token) const{
+  /*
+   * This is necessary because the tnet keeps durations on the edges of the temporal
+   * graph and therefore doesn't update them.
+   */
+  void TemporalPropagator::updateCnetDuration(const TokenId& token) const{
     // Because we know the context is an update from a temporal network, which has already factored in all of the
     // restrictions from the duration to get here, we can make the following assumptions:
     // 1. The domains are not empty
@@ -582,7 +591,7 @@ namespace EUROPA {
     double maxDuration = end.getUpperBound() - start.getLowerBound();
     double minDuration = end.getLowerBound() - start.getUpperBound();
 
-    // TODO JRB: if this causes a violation we need to assign a constraint as the culprit
+    // TODO JRB: this should never cause a new violation
     duration.intersect(minDuration, maxDuration);
   }
 
@@ -741,47 +750,55 @@ namespace EUROPA {
 	       var->toString() << " and timepoint " <<  tp);
   }
 
-  void TemporalPropagator::updateTemporalConstraint(const ConstraintId& constraint){
+  void TemporalPropagator::updateTemporalConstraint(const ConstraintId& constraint)
+  {
     debugMsg("TemporalPropagator:updateTemporalConstraint", "In updateTemporalConstraint for constraint " << constraint->getKey());
     // If the constraint has no corresponding constraint in the tnet, then add it.
     if(constraint->getExternalEntity().isNoId()){
       addTemporalConstraint(constraint);
       return;
     }
+    updateTnetDuration(constraint);
+  }
 
-    // Update for the distance variable
-    if(constraint->getScope().size() == 3) { // TODO JRB: this seems brittle, what if we get other temporal constraints with 3 parameters?
-      const ConstrainedVariableId& distance = constraint->getScope()[1];
+  /*
+   * This is necessary because the tnet keeps durations on the edges of the temporal
+   * graph and therefore doesn't update them.
+   */
+  void TemporalPropagator::updateTnetDuration(const ConstraintId& constraint)
+  {
+      // Update for the distance variable
+      if(constraint->getScope().size() == 3) { // TODO JRB: this seems brittle, what if we get other temporal constraints with 3 parameters?
+          const ConstrainedVariableId& distance = constraint->getScope()[1];
 
-      // In order to avoid the unhappy situation where temporalDistance does not maintain the semantics of addEq
-      // we now apply the distance bounds to the distance variable.
-      // TODO JRB: this seems to be done already by the updateDuration() method, what's the difference?
-      // CMG: The temporal distance constraint can apply to relationships between timepoints in general. The later use of updateDuration
-      // applies to update the duration of a token specifically.
-      const IntervalIntDomain& sourceDom = constraint->getScope()[0]->lastDomain();
-      const IntervalIntDomain& targetDom = constraint->getScope()[2]->lastDomain();
+          // In order to avoid the unhappy situation where temporalDistance does not maintain the semantics of addEq
+          // we now apply the distance bounds to the distance variable.
+          const IntervalIntDomain& sourceDom = constraint->getScope()[0]->lastDomain();
+          const IntervalIntDomain& targetDom = constraint->getScope()[2]->lastDomain();
 
-      // Checks for finiteness are to av oid overflow or underflow.
-      if(sourceDom.isFinite() && targetDom.isFinite()){
-	IntervalIntDomain& distanceDom = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(distance));
-	Time minDistance = (Time) (targetDom.getLowerBound() - sourceDom.getUpperBound());
-	Time maxDistance = (Time) (targetDom.getUpperBound() - sourceDom.getLowerBound());
-	// JRB: if this intersect() call causes a violation we need to have the constraint network know the culprit (constraint)
-	distance->setCurrentPropagatingConstraint(constraint);
-	if(distanceDom.intersect(minDistance, maxDistance) && distanceDom.isEmpty())
-	  return;
+          // Checks for finiteness are to avoid overflow or underflow.
+          if(sourceDom.isFinite() && targetDom.isFinite()){
+              IntervalIntDomain& distanceDom = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(distance));
+              Time minDistance = (Time) (targetDom.getLowerBound() - sourceDom.getUpperBound());
+              Time maxDistance = (Time) (targetDom.getUpperBound() - sourceDom.getLowerBound());
+
+              // if this intersect() call causes a violation
+              // we need to have the constraint network know the culprit (constraint)
+              distance->setCurrentPropagatingConstraint(constraint);
+              if(distanceDom.intersect(minDistance, maxDistance) && distanceDom.isEmpty())
+                  return;
+          }
+
+          checkError(distance->getExternalEntity().isNoId(),
+                  "No support for timepoints being distances. " << distance->toLongString());
+
+          check_error(distance->lastDomain().isInterval(), constraint->getKey() + " is invalid");
+          const TemporalConstraintId& tnetConstraint = constraint->getExternalEntity();
+          const IntervalIntDomain& dom = static_cast<const IntervalIntDomain&>(distance->lastDomain());
+          Time lb= (Time) dom.getLowerBound();
+          Time ub= (Time) dom.getUpperBound();
+          updateConstraint(distance, tnetConstraint, lb, ub);
       }
-
-      checkError(distance->getExternalEntity().isNoId(),
-		 "No support for timepoints being distances. " << distance->toString());
-
-      check_error(distance->lastDomain().isInterval(), constraint->getKey() + " is invalid");
-      const TemporalConstraintId& tnetConstraint = constraint->getExternalEntity();
-      const IntervalIntDomain& dom = static_cast<const IntervalIntDomain&>(distance->lastDomain());
-      Time lb= (Time) dom.getLowerBound();
-      Time ub= (Time) dom.getUpperBound();
-      updateConstraint(distance, tnetConstraint, lb, ub);
-    }
   }
 
   TemporalConstraintId TemporalPropagator::updateConstraint(const ConstrainedVariableId& var,
