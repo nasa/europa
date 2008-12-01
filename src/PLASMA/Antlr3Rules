@@ -12,10 +12,10 @@ rule Antlr3Grammar
   local grammar = $(2[1]) ;
   local grammar.tree = $(2[2]) ;
 
-  local sources = [ FGristFiles $(prefix)Lexer.c $(prefix)Parser.c ] ;
+  local sources = [ FGristFiles $(prefix)Lexer.cpp $(prefix)Parser.cpp ] ;
   local headers = [ FGristFiles $(prefix).tokens $(prefix)Lexer.h $(prefix)Parser.h ] ;
 
-  local sources.tree = [ FGristFiles $(prefix)TreeParser.c ] ;
+  local sources.tree = [ FGristFiles $(prefix)TreeParser.cpp ] ;
   local headers.tree = [ FGristFiles $(prefix)TreeParserTokenTypes.h ] ;
 
 #  Echo Antlr3Tool . $(prefix) . $(grammar) . $(grammar.tree) ;
@@ -60,6 +60,8 @@ actions RunAntlr3Tool
 {
 rm -f $(1)
 $(JAVA) -cp $(ANTLR3_JAR) $(JREFLAGS) org.antlr.Tool -fo ./$(1[0]:D) -traceParser $(ANTLR3FLAGS) $(2) 
+mv $(1[0]:D)/NDDL3Lexer.c $(1[0]:D)/NDDL3Lexer.cpp 
+mv $(1[0]:D)/NDDL3Parser.c $(1[0]:D)/NDDL3Parser.cpp 
 }
 
 rule Antlr3TreeTool
@@ -72,25 +74,6 @@ rule Antlr3TreeTool
 	LOCATE on $(files) = $(LOCATE_SOURCE) ;
   SEARCH on $(grammar) = $(SEARCH_SOURCE) ;
   RunAntlr3TreeTool $(files) : $(grammar) ;
-}
-
-rule RunAntlr3TreeTool
-{
-  local files = $(1) ;
-  local grammar = $(2) ;
-
-#  Echo RunAntlr3TreeTool . $(files) . $(grammar) ;
-
-  Depends $(files) : $(grammar) ;
-  LocalClean clean : $(files) ;
-}
-
-#  cd $(PATHNAME) 
-
-actions RunAntlr3TreeTool
-{
-rm -f $(1)
-$(JAVA) -cp $(ANTLR3_JAR) $(JREFLAGS) org.antlr.Tool -traceTreeParser -fo ./$(1[0]:D) $(ANTLR3FLAGS) $(2) 
 }
 
 } # Antlr3Rules_INCLUDED
