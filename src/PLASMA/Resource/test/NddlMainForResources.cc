@@ -6,19 +6,16 @@ using namespace EUROPA;
 
 class NddlResourceTestEngine : public NddlTestEngine
 {
-  public:
-	void init();
+  protected:
+	virtual void createModules();
 };
 
 // Same as base class method except we add one more module:
-void NddlResourceTestEngine::init()
+void NddlResourceTestEngine::createModules()
 {
-    createModules();  //everything except Resource module
+    NddlTestEngine::createModules();  //everything except Resource module
     addModule((new ModuleSolvers())->getId());
     addModule((new ModuleResource())->getId());
-
-    doStart();
-    initialize((CESchema*)getComponent("CESchema"));
 }
 
 

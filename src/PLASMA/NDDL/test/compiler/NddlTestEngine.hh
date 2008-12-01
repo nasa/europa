@@ -68,18 +68,20 @@ void initialize(CESchema* ces)
 class NddlTestEngine : public EngineBase
 {
   public:
-//	NddlTestEngine();
+	NddlTestEngine();
 	virtual ~NddlTestEngine();
-	void init();
 
+	virtual void init();
 	void run(const char* txSource);
 
   protected:
-	void createModules();
+	virtual void createModules();
 };
 
-//NddlTestEngine::NddlTestEngine()
-// Not constructor, so that NddlResourceTestEngine can initialize slightly differently
+NddlTestEngine::NddlTestEngine()
+{
+}
+
 void NddlTestEngine::init()
 {
     createModules();
