@@ -112,16 +112,16 @@ namespace EUROPA {
     protected:
         virtual ~EngineBase();
 
-        void initializeModules();
-        void initializeModule(ModuleId module);
-        void uninitializeModules();
-        void uninitializeModule(ModuleId module);
-        void releaseModules();
+        virtual void initializeModules();
+        virtual void initializeModule(ModuleId module);
+        virtual void uninitializeModules();
+        virtual void uninitializeModule(ModuleId module);
+        virtual void releaseModules();
 
-        void initializeByModules();
-        void initializeByModule(ModuleId module);
-        void uninitializeByModules();
-        void uninitializeByModule(ModuleId module);
+        virtual void initializeByModules();
+        virtual void initializeByModule(ModuleId module);
+        virtual void uninitializeByModules();
+        virtual void uninitializeByModule(ModuleId module);
 
         // TODO: use Ids for languages and components
         EngineConfig* m_config;

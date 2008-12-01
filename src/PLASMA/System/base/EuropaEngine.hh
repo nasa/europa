@@ -10,20 +10,20 @@
 
 namespace EUROPA {
 
-  class EuropaEngine : public EngineBase 
+  class EuropaEngine : public EngineBase
   {
-    public:  
-       	EuropaEngine();          
-        virtual ~EuropaEngine();        
-    	
+    public:
+       	EuropaEngine();
+        virtual ~EuropaEngine();
+
         virtual ConstraintEngineId& getConstraintEngine();
         virtual PlanDatabaseId&     getPlanDatabase();
         virtual RulesEngineId&      getRulesEngine();
-        
+
         virtual const ConstraintEngine* getConstraintEnginePtr() const;
         virtual const PlanDatabase*     getPlanDatabasePtr() const;
         virtual const RulesEngine*      getRulesEnginePtr() const;
-        
+
         // TODO: remains of the old Assemblies, these are only used by test code, should be dropped, eventually.
         bool playTransactions(const char* txSource, bool interp = false);
         bool plan(const char* txSource, const char* config, bool interp = false);
@@ -32,12 +32,13 @@ namespace EUROPA {
         unsigned int getTotalNodesSearched() const;
         unsigned int getDepthReached() const;
         static const char* TX_LOG();
-        
-    protected: 
-    	void createModules();    
-    	
+
+    protected:
+        virtual void initializeModules();
+    	virtual void createModules();
+
         unsigned int m_totalNodes;
-        unsigned int m_finalDepth;    	
+        unsigned int m_finalDepth;
   };
 }
 

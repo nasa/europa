@@ -25,37 +25,44 @@ namespace EUROPA
 {
     EuropaEngine::EuropaEngine()
     {
-        createModules();
     }
 
     EuropaEngine::~EuropaEngine()
     {
     }
 
+    void EuropaEngine::initializeModules()
+    {
+        // Only do this once
+        if (m_modules.size() == 0)
+            createModules();
+        EngineBase::initializeModules();
+    }
+
     void EuropaEngine::createModules()
     {
-	    // TODO: make this data-driven
-	    addModule((new ModuleConstraintEngine())->getId());
-	    addModule((new ModuleConstraintLibrary())->getId());
-	    addModule((new ModulePlanDatabase())->getId());
-	    addModule((new ModuleRulesEngine())->getId());
-	    addModule((new ModuleTemporalNetwork())->getId());
-	    addModule((new ModuleSolvers())->getId());
-	    addModule((new ModuleNddl())->getId());
+        // TODO: make this data-driven
+        addModule((new ModuleConstraintEngine())->getId());
+        addModule((new ModuleConstraintLibrary())->getId());
+        addModule((new ModulePlanDatabase())->getId());
+        addModule((new ModuleRulesEngine())->getId());
+        addModule((new ModuleTemporalNetwork())->getId());
+        addModule((new ModuleSolvers())->getId());
+        addModule((new ModuleNddl())->getId());
 #ifndef NO_RESOURCES
         addModule((new ModuleResource())->getId());
-	    addModule((new ModuleAnml())->getId());
+        addModule((new ModuleAnml())->getId());
 #endif
     }
-    
+
     ConstraintEngineId& EuropaEngine::getConstraintEngine() { return (ConstraintEngineId&)((ConstraintEngine*)getComponent("ConstraintEngine"))->getId(); }
     PlanDatabaseId&     EuropaEngine::getPlanDatabase()     { return (PlanDatabaseId&)((PlanDatabase*)getComponent("PlanDatabase"))->getId(); }
-    RulesEngineId&      EuropaEngine::getRulesEngine()      { return (RulesEngineId&)((RulesEngine*)getComponent("RulesEngine"))->getId(); }    
-    
+    RulesEngineId&      EuropaEngine::getRulesEngine()      { return (RulesEngineId&)((RulesEngine*)getComponent("RulesEngine"))->getId(); }
+
     const ConstraintEngine* EuropaEngine::getConstraintEnginePtr() const { return (const ConstraintEngine*)getComponent("ConstraintEngine"); }
     const PlanDatabase*     EuropaEngine::getPlanDatabasePtr()     const { return (const PlanDatabase*)getComponent("PlanDatabase"); }
     const RulesEngine*      EuropaEngine::getRulesEnginePtr()      const { return (const RulesEngine*)getComponent("RulesEngine"); }
-    
+
     // TODO: remains of the old Assemblies, these are only used by test code, should be dropped, eventually.
     bool EuropaEngine::playTransactions(const char* txSource, bool interp)
     {
@@ -70,7 +77,7 @@ namespace EUROPA
       return getConstraintEnginePtr()->constraintConsistent();
     }
 
-    void EuropaEngine::write(std::ostream& os) const 
+    void EuropaEngine::write(std::ostream& os) const
     {
       PlanDatabaseWriter::write(getPlanDatabasePtr()->getId(), os);
     }
@@ -79,7 +86,7 @@ namespace EUROPA
       static const char* sl_txLog = "TransactionLog.xml";
       return sl_txLog;
     }
-    
+
     bool EuropaEngine::plan(const char* txSource, const char* config, bool interp){
       check_error(config != NULL, "Must have a planner config argument.");
       TiXmlDocument doc(config);
@@ -90,7 +97,7 @@ namespace EUROPA
     bool EuropaEngine::plan(const char* txSource, const TiXmlElement& config, bool interp){
       SOLVERS::SolverId solver = (new SOLVERS::Solver(getPlanDatabase(), config))->getId();
 
-      SOLVERS::PlanWriter::PartialPlanWriter* ppw = 
+      SOLVERS::PlanWriter::PartialPlanWriter* ppw =
         new SOLVERS::PlanWriter::PartialPlanWriter(getPlanDatabase(), getConstraintEngine(), getRulesEngine(), solver);
 
       // Now process the transactions
@@ -128,18 +135,18 @@ namespace EUROPA
       int depth = (int) maxDepth->baseDomain().getSingletonValue();
 
       bool retval = solver->solve(steps, depth);
-      
+
       m_totalNodes = solver->getStepCount();
       m_finalDepth = solver->getDepth();
-      
+
       delete ppw;
       delete (SOLVERS::Solver*) solver;
 
       return retval;
-    } 
-    
+    }
+
     unsigned int EuropaEngine::getTotalNodesSearched() const { return m_totalNodes; }
 
-    unsigned int EuropaEngine::getDepthReached() const { return m_finalDepth; }    
+    unsigned int EuropaEngine::getDepthReached() const { return m_finalDepth; }
 }
 
