@@ -59,8 +59,33 @@ namespace EUROPA {
   class Expr
   {
   	public:
-  	    virtual DataRef eval(EvalContext& context) const = 0;
-    virtual ~Expr(){}
+        virtual DataRef eval(EvalContext& context) const = 0;
+        virtual ~Expr(){}
+  };
+
+  class ExprList : public Expr
+  {
+    public:
+        ExprList();
+        virtual ~ExprList();
+
+        virtual DataRef eval(EvalContext& context) const;
+        void addChild(Expr* child);
+
+    protected:
+        std::vector<Expr*> m_children;
+  };
+
+  class ExprNoop : public Expr
+  {
+    public:
+        ExprNoop(const std::string& str);
+        virtual ~ExprNoop();
+
+        virtual DataRef eval(EvalContext& context) const;
+
+    protected:
+        std::string m_str;
   };
 
   // Call to super inside a constructor

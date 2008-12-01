@@ -141,6 +141,48 @@ namespace EUROPA {
 
     return os.str();
   }
+
+  ExprList::ExprList()
+  {
+  }
+
+  ExprList::~ExprList()
+  {
+      for (unsigned int i=0;i<m_children.size();i++)
+          delete m_children[i];
+  }
+
+  DataRef ExprList::eval(EvalContext& context) const
+  {
+      DataRef result;
+
+      for (unsigned int i=0;i<m_children.size();i++)
+          result = m_children[i]->eval(context);
+
+      return result;
+  }
+
+  void ExprList::addChild(Expr* child)
+  {
+      m_children.push_back(child);
+  }
+
+  ExprNoop::ExprNoop(const std::string& str)
+      : m_str(str)
+  {
+  }
+
+  ExprNoop::~ExprNoop()
+  {
+  }
+
+  DataRef ExprNoop::eval(EvalContext& context) const
+  {
+      std::cout << "Noop:" << m_str << std::endl;
+      return DataRef::null;
+  }
+
+
   /*
    * ExprConstructorSuperCall
    */

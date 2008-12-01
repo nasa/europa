@@ -1,6 +1,6 @@
 #include "nddl-test-module.hh"
-#include "NDDL3Lexer.h"
 #include "NDDL3Parser.h"
+#include "NDDL3Lexer.h"
 
 void NDDLModuleTests::syntaxTests()
 {
@@ -10,7 +10,14 @@ void NDDLModuleTests::syntaxTests()
     pNDDL3Lexer lexer = NDDL3LexerNew(input);
     pANTLR3_COMMON_TOKEN_STREAM tstream = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lexer));
     pNDDL3Parser parser = NDDL3ParserNew(tstream);
-    parser->nddl(parser);
+
+    Expr* result=NULL;
+    parser->nddl(parser,result);
+
+    EvalContext globalCtx(NULL);
+    result->eval(globalCtx);
+
+    delete result;
 
     parser->free(parser);
     tstream->free(tstream);

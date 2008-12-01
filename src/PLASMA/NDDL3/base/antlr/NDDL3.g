@@ -9,23 +9,44 @@ options {
 	//k=4;
 }
 
-nddl	:	nddlStatement*
+@parser::includes
+{
+#include "Interpreter.hh"
+
+using namespace EUROPA;
+}
+
+
+nddl[Expr*& rv]	 
+@declarations 
+{
+    ExprList* parent = new ExprList(); 
+    Expr* child=NULL;
+    rv = parent;
+}
+        :
+( nddlStatement[child] {if (child!=NULL) parent->addChild(child);} )*
         ;
 
-nddlStatement
-	:	inclusion 
-        |	constraintSignature 
-        |	typeDefinition
-        |	variableDeclaration
-        |	classDeclaration 
-        |	rule 
-        |	allocationStatement
-        |	assignment
-        |	function
-        |	constraintInstantiation
-        |	relation
-        |	goal
-        |	noopstatement
+nddlStatement[Expr*& rv]
+@declarations 
+{
+    rv=NULL;
+}	
+        :       
+	inclusion 
+        |	constraintSignature     { rv = new ExprNoop("constraintSignature"); }
+        |	typeDefinition          { rv = new ExprNoop("typeDefinition"); }
+        |	variableDeclaration     { rv = new ExprNoop("variableDeclaration"); }
+        |	classDeclaration        { rv = new ExprNoop("classDeclaration"); }
+        |	rule                    { rv = new ExprNoop("rule"); }
+        |	allocationStatement     { rv = new ExprNoop("allocationStatement"); }
+        |	assignment              { rv = new ExprNoop("assignment"); }
+        |	function                { rv = new ExprNoop("function"); }
+        |	constraintInstantiation { rv = new ExprNoop("constraintInstantiation"); }
+        |	relation                { rv = new ExprNoop("relation"); }
+        |	goal                    { rv = new ExprNoop("goal"); }
+        |	noopstatement           { rv = new ExprNoop("noopstatement"); }
         ;
 
 inclusion
