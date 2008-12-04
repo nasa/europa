@@ -11,13 +11,14 @@ void NDDLModuleTests::syntaxTests()
     pANTLR3_COMMON_TOKEN_STREAM tstream = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lexer));
     pNDDL3Parser parser = NDDL3ParserNew(tstream);
 
-    Expr* result=NULL;
-    parser->nddl(parser,result);
+    NDDL3Parser_nddl_return result = parser->nddl(parser);
 
-    EvalContext globalCtx(NULL);
-    result->eval(globalCtx);
-
-    delete result;
+    if (parser->pParser->rec->state->errorCount > 0) {
+      fprintf(stderr, "The parser returned %d errors.\n", parser->pParser->rec->state->errorCount);
+    }
+    else {
+      printf("NDDL AST: \n%s\n\n", result.tree->toStringTree(result.tree)->chars);
+    }
 
     parser->free(parser);
     tstream->free(tstream);

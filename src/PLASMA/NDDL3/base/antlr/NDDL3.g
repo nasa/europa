@@ -9,62 +9,48 @@ options {
 	//k=4;
 }
 
-@parser::includes
-{
-#include "Interpreter.hh"
-
-using namespace EUROPA;
+tokens {
+	CONSTRUCTOR;
+	CONSTRUCTOR_INVOCATION;
+	CONSTRAINT_INSTANTIATION;
+	SUBGOAL;
+	VARIABLE;
 }
 
-
-nddl[Expr*& rv]	 
-@declarations 
-{
-    ExprList* parent = new ExprList(); 
-    Expr* child=NULL;
-    rv = parent;
-}
-        :
-( nddlStatement[child] {if (child!=NULL) parent->addChild(child);} )*
+nddl
+	:	nddlStatement*
         ;
 
-nddlStatement[Expr*& rv]
-@declarations 
-{
-    rv=NULL;
-}	
-        :       
-	inclusion 
-        |	constraintSignature     { rv = new ExprNoop("constraintSignature"); }
-        |	typeDefinition          { rv = new ExprNoop("typeDefinition"); }
-        |	variableDeclaration     { rv = new ExprNoop("variableDeclaration"); }
-        |	classDeclaration        { rv = new ExprNoop("classDeclaration"); }
-        |	rule                    { rv = new ExprNoop("rule"); }
-        |	allocationStatement     { rv = new ExprNoop("allocationStatement"); }
-        |	assignment              { rv = new ExprNoop("assignment"); }
-        |	function                { rv = new ExprNoop("function"); }
-        |	constraintInstantiation { rv = new ExprNoop("constraintInstantiation"); }
-        |	relation                { rv = new ExprNoop("relation"); }
-        |	goal                    { rv = new ExprNoop("goal"); }
-        |	noopstatement           { rv = new ExprNoop("noopstatement"); }
-        ;
-
-inclusion
-	:	'#include' STRING
+nddlStatement
+        :	constraintSignature
+        |	typeDefinition
+        |	variableDeclaration
+        |	classDeclaration
+        |	rule
+        |	allocationStatement
+        |	assignment
+        |	function
+        |	constraintInstantiation
+        |	relation
+        |	goal
+        |	noopstatement
         ;
 
 typeDefinition
-	:	'typedef' typeWithBaseDomain IDENT ';'
+	:	'typedef' b=typeWithBaseDomain n=IDENT ';'
+			-> ^('typedef' $n $b)
 	;
 
+// MEB Language Change: domain no longer optional
 typeWithBaseDomain
-	:	'int'     (intervalIntDomain|enumeratedIntDomain)?
-	|	'float'   (intervalFloatDomain|enumeratedFloatDomain)?
-	|	'boolean' enumeratedBoolDomain?
-	|	'string'  enumeratedStringDomain?
-	|	IDENT     enumeratedObjectDomain?
+	:	(	'int'^
+		|	'float'^
+		|	'boolean'^
+		|	'string'^
+		|	IDENT^) domain
 	;
 
+// MEB Interpreter Support Missing
 constraintSignature
 	:	'constraint' IDENT typeArgumentList
 		('extends' IDENT typeArgumentList)? 
@@ -72,26 +58,29 @@ constraintSignature
 	;
 
 signatureBlock
-	:	'{' (signatureExpression)? '}'
+	:	'{'^ (signatureExpression)? '}'!
 	;
 
 signatureExpression
-	:	signatureAtom (('&&' | '||') signatureAtom)*
+	:	signatureAtom (('&&'^ | '||'^) signatureAtom)*
 	;
 
 signatureAtom
-	:	'(' signatureExpression ')'
-	|	IDENT '<:' (type | 'numeric' )
+	:	'('^ signatureExpression ')'!
+	|	IDENT '<:'^ (type | 'numeric' )
 	;
 
 classDeclaration
-	:	'class' IDENT
-		(	(('extends' IDENT)? classBlock)
-		|	';')
+	:	'class' c=IDENT
+		(	(('extends' x=IDENT)? cb=classBlock)
+				-> ^('class' $c ^('extends' $x)? $cb)
+		|	';'
+					-> ^('class' $c ';')
+		)
 	;
 
 classBlock
-	:	'{' classStatement* '}'
+	:	'{'^ classStatement* '}'!
 	;
 
 classStatement
@@ -102,11 +91,12 @@ classStatement
 	;
 
 constructor
-	:	IDENT constructorParameterList constructorBlock
+	:	c=IDENT pl=constructorParameterList cb=constructorBlock
+			-> ^(CONSTRUCTOR $c $pl $cb)
 	;
 
 constructorBlock
-	:	'{' constructorStatement* '}'
+	:	'{'^ constructorStatement* '}'!
 	;
 
 constructorStatement
@@ -116,23 +106,24 @@ constructorStatement
 	;
 
 constructorParameterList
-	:	'(' constructorParameters? ')'
+	:	'('^ constructorParameters? ')'!
 	;
 
 constructorParameters
-	:	constructorParameter  (',' constructorParameters)?
+	:	constructorParameter  (','! constructorParameters)?
 	;
 
 constructorParameter
-	:	type IDENT
+	:	t=type n=IDENT
+			-> ^(VARIABLE $n $t)
 	;
 
 predicate
-	:	'predicate' IDENT predicateBlock 
+	:	'predicate'^ IDENT predicateBlock 
 	;
 
 predicateBlock
-	:	'{' predicateStatement* '}'
+	:	'{'^ predicateStatement* '}'!
 	;
 
 // Note: Allocations are not legal here.
@@ -143,12 +134,12 @@ predicateStatement
 	;
 
 
-rule	:	IDENT '::' IDENT ruleBlock
+rule	:	IDENT '::'^ IDENT ruleBlock
 	;
 
 ruleBlock
-	:	'{' ruleStatement* '}'
-	|	ruleStatement
+	:	'{'^ ruleStatement* '}'!
+	|	rs=ruleStatement -> ^('{' $rs)
 	;
 
 ruleStatement
@@ -166,43 +157,47 @@ type	:	'int'
 	|	IDENT
 	;
 
-relation:	(IDENT | 'this')? temporalRelation predicateArgumentList ';'
+relation:	(token=IDENT | 'this')? rel=temporalRelation args=predicateArgumentList ';'
+			-> ^(SUBGOAL $token $rel $args)
         ;
 
-goal	:	('rejectable' | 'goal') predicateArgumentList ';'
+goal	:	('rejectable'^ | 'goal'^) predicateArgumentList ';'!
 	;
 
 predicateArgumentList
 	:	IDENT
-	|	'(' predicateArguments? ')'
+	|	'('^ predicateArguments? ')'!
 	;
 
 predicateArguments
-	:	predicateArgument (',' predicateArgument)*
+	:	predicateArgument (','! predicateArgument)*
 	;
 
 predicateArgument
-	:	qualified (IDENT)?
+	:	p=qualified (n=IDENT)?
+			-> ^($p $n)
 	;
 
 constraintInstantiation
-	:	IDENT variableArgumentList ';'
+	:	c=IDENT args=variableArgumentList ';'
+			-> ^(CONSTRAINT_INSTANTIATION $c $args)
 	;
 
 constructorInvocation
-	:	IDENT variableArgumentList
+	:	c=IDENT args=variableArgumentList
+			-> ^(CONSTRUCTOR_INVOCATION $c $args)
 	;
 
 superInvocation
-	:	'super' variableArgumentList ';'
+	:	'super'^ variableArgumentList ';'!
 	;
 
 variableArgumentList
-	:	'(' variableArguments? ')'
+	:	'('^ variableArguments? ')'!
 	;
 
 variableArguments
-	:	variableArgument (',' variableArgument)*
+	:	variableArgument (','! variableArgument)*
 	;
 
 // Note: Allocation not legal here
@@ -211,101 +206,90 @@ variableArgument
 	;
 
 typeArgumentList
-	:	'(' typeArguments? ')'
+	:	'('^ typeArguments? ')'!
 	;
 
 typeArguments
-	:	typeArgument (',' typeArgument)*
+	:	typeArgument (','! typeArgument)*
 	;
 
 typeArgument
 	:	IDENT
 	;
 
-domain	:	intLiteral
-	|	intervalIntDomain
-	|	enumeratedIntDomain
-	|	floatLiteral
-	|	intervalFloatDomain
-	|	enumeratedFloatDomain
+domain	:	numericLiteral
+	|	intervalNumericDomain
+	|	enumeratedNumericDomain
 	|	enumeratedStringDomain
 	|	enumeratedBoolDomain
+	|	enumeratedObjectDomain
 	;
 
-intervalIntDomain
-	:	'[' intLiteral ','? intLiteral ']'
+intervalNumericDomain
+	:	'['^ numericLiteral (','!)? numericLiteral ']'!
 	;
 
-intervalFloatDomain
-	:	'[' floatLiteral ','? floatLiteral ']'
+enumeratedNumericDomain
+	:	'{'^ numericSet '}'!
 	;
 
-enumeratedIntDomain
-	:	'{' intSet '}'
-	;
-
-intSet	:	intLiteral (',' intLiteral)*
-	;
-
-enumeratedFloatDomain
-	:	'{' floatSet '}'
-	;
-
-floatSet:	floatLiteral (',' floatLiteral)*
+numericSet
+	:	numericLiteral (','! numericLiteral)*
 	;
 
 enumeratedObjectDomain
-	:	'{' objectSet '}'
+	:	'{'^ objectSet '}'!
 	;
 
 objectSet
-	:	(constructorInvocation|qualified) (',' (constructorInvocation|qualified))*
+	:	(constructorInvocation|qualified) (','! (constructorInvocation|qualified))*
 	;
 
 enumeratedStringDomain
-	:	'{' stringSet '}'
+	:	'{'^ stringSet '}'!
 	;
 
 stringSet
-	:	STRING (',' STRING)*
+	:	STRING (','! STRING)*
 	;
          
 enumeratedBoolDomain
-	:	'{' boolSet '}'
+	:	'{'^ boolSet '}'!
 	;
 
-boolSet	:	boolLiteral (',' boolLiteral)*
+boolSet	:	boolLiteral (','! boolLiteral)*
 	;
 
 flowControl
-	:	'if' expression ruleBlock (options {k=1;}:'else' ruleBlock)?
-	|	'foreach' '(' IDENT 'in' qualified ')' ruleBlock
+	:	'if'^ expression ruleBlock (options {k=1;}:'else'! ruleBlock)?
+	|	'foreach'^ '('! IDENT 'in'! qualified ')'! ruleBlock
 	;
 
 // Note: Allocation not legal here
 expression
-	:	'(' anyValue (('==' | '!=') anyValue)? ')'
+	:	'('! anyValue (('=='^ | '!='^) anyValue)? ')'!
 	;
           
 allocation
-	:	'new' constructorInvocation
+	:	'new'! constructorInvocation
 	;
 
 allocationStatement
-	:	allocation ';'
+	:	allocation ';'!
 	;
 
 variableDeclaration
-	:	('filter')? type nameWithBase (',' nameWithBase)* ';'
+	:	('filter')? type^ nameWithBase (','! nameWithBase)* ';'!
 	;
 
 nameWithBase
-	:	IDENT ('(' anyValue ')' )?
-	|	IDENT '=' anyValue
+	:	(	variable=IDENT ('('^ value=anyValue ')'! )?
+		|	variable=IDENT '='^ value=anyValue)
 	;
 
 assignment
-	:	qualified ('in' | '=') anyValue ';'
+	:	variable=qualified ('in' | '=') value=anyValue ';'
+		-> ^('=' $variable $value)
 	;
 
 anyValue:	STRING
@@ -317,7 +301,7 @@ anyValue:	STRING
 
 qualified
 	:	'this'
-	|	'this.'? IDENT ('.' IDENT)*
+	|	'this.'? IDENT ('.'^ IDENT)*
 	;
 
 temporalRelation
@@ -346,16 +330,11 @@ temporalRelation
 	|	'starts_after'
 	;
 
-intLiteral
+numericLiteral
 	:	INT
-	|	'+'? 'inf'
+	|	FLOAT
+	|	('+'!)? 'inf'
 	|	'-inf' 
-	;
-
-floatLiteral
-	:	FLOAT
-	|	'+'? 'inff'
-	|	'-inff' 
 	;
 
 boolLiteral
@@ -363,34 +342,64 @@ boolLiteral
 	|	'false' 
 	;
 
-function:	qualified '.' 
-		(	'specify' variableArgumentList
-		|	'free' variableArgumentList
-		|	'constrain' variableArgumentList
-		|	'merge' variableArgumentList
-		|	'activate()'
-		|	'reset()'
-		|	'reject()'
-		|	'cancel()') ';'
-	|	(IDENT '.')? 'close()' ';'
+function:	qualified '.'!
+		(	'specify'^ variableArgumentList
+		|	'free'^ variableArgumentList
+		|	'constrain'^ variableArgumentList
+		|	'merge'^ variableArgumentList
+		|	'activate'^ '('! ')'!
+		|	'reset'^ '('! ')'!
+		|	'reject'^ '('! ')'!
+		|	'cancel'^ '('! ')'!) ';'!
+	|	(IDENT '.'!)? 'close'^ '('! ')'! ';'!
 	;
 
 tokenNameList
-	:	'(' (tokenNames)? ')'
+	:	'('^ (tokenNames)? ')'!
 	;
 
 tokenNames
-	:	IDENT (',' IDENT)*
+	:	IDENT (','! IDENT)*
         ;
 
 noopstatement
-	:	';'
+	:	';'!
+	;
+	
+INCLUDE :	'#include' WS+ file=STRING '\r'? '\n'	{
+			pANTLR3_STRING      fName;
+			pANTLR3_INPUT_STREAM    in; 
+
+			// Create an initial string, then take a substring
+			// We can do this by messing with the start and end 
+			// pointers of tokens and so on. This shows a reasonable way to
+			// manipulate strings.
+
+			fName = $file.text;
+
+			// Create a new input stream and take advantage of built in stream stacking
+			// in C target runtime.
+
+			in = antlr3AsciiFileStreamNew(fName->chars);
+			PUSHSTREAM(in);
+
+			// Note that the input stream is not closed when it EOFs, I don't bother
+			// to do it here (hence this is leaked at the program end), 
+			// but it is up to you to track streams created like this
+			// and destroy them when the whole parse session is complete. Remember that you 
+			// don't want to do this until all tokens have been manipulated all the way through 
+			// your tree parsers etc as the token does not store the text it just refers
+			// back to the input stream and trying to get the text for it will abort if you 
+			// close the input stream too early.
+
+			$channel=HIDDEN;
+		}
 	;
 
 IDENT	:	 ('a'..'z'|'A'..'Z'|'_'|'$') ('a'..'z'|'A'..'Z'|'_'|'0'..'9'|'$')*
 	;
 
-STRING	:	'"' ( ESCAPE_SEQUENCE | ~('\\'|'"') )* '"'
+STRING	:	'"'! (~('\\'|'"') | ESCAPE_SEQUENCE)* '"'!
 	;
 
 fragment ESCAPE_SEQUENCE

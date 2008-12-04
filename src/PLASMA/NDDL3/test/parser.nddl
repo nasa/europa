@@ -5,7 +5,7 @@
 
 // nddlStatement Tests:
 
-#include "included.nddl"
+//#include "included.nddl"
 
 constraint addEq(a, b, c) {
   a <: numeric &&
@@ -15,7 +15,7 @@ constraint addEq(a, b, c) {
 }
 
 typedef int [1 inf] positive;
-typedef float [-inff +inff] real;
+typedef float [-inf +inf] real;
 
 positive pos;
 real r = 50f;
