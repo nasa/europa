@@ -284,6 +284,7 @@ namespace EUROPA{
   void Token::cancel(){
     checkError(!isIncomplete() && !isInactive(), getState()->toString());
     check_error(!Entity::isPurging());
+
     LabelStr state = m_state->getSpecifiedValue();
 
     if(state == ACTIVE)
@@ -388,6 +389,10 @@ namespace EUROPA{
   void Token::deactivate(){
     check_error(isActive());
     check_error(isValid());
+
+    // Will be a no-op in the case that the token is committed and we are not cleaning it up
+    if(isCommitted() && !isDeleted())
+      return;
 
     while(!m_mergedTokens.empty()){
       TokenId tokenToSplit = *(m_mergedTokens.begin());

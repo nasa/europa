@@ -1057,6 +1057,7 @@ class TokenTest {
 public:
 
   static bool test() {
+    EUROPA_runTest(testKeepingCommittedTokensInActiveSet);
     EUROPA_runTest(testBasicTokenAllocation);
     EUROPA_runTest(testBasicTokenCreation);
     EUROPA_runTest(testStateModel);
@@ -2634,6 +2635,39 @@ private:
     CPPUNIT_ASSERT(orphan->isInactive());
 
     delete (Token*) orphan;
+    DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  /**
+   * @brief Test that when a committed token is cancelled, it remains a candidate for merging
+   */
+  static bool testKeepingCommittedTokensInActiveSet(){
+    DEFAULT_SETUP(ce, db, false);
+    Timeline o1(db, LabelStr(DEFAULT_OBJECT_TYPE), "tl1");
+    db->close();
+
+    // Allocate and commit a token
+    TokenId a = (new IntervalToken(db,
+				       LabelStr(DEFAULT_PREDICATE),
+				       true,
+				       false,
+				       IntervalIntDomain(0, 10),
+				       IntervalIntDomain(0, 20),
+				       IntervalIntDomain(1, 1000)))->getId();
+    a->activate();
+    a->commit();
+
+    // Now cancel the commit
+    a->cancel();
+
+    // We should still have an active token
+    CPPUNIT_ASSERT(db->getActiveTokens(LabelStr(DEFAULT_PREDICATE)).size() == 1);
+
+    // Delete the token and ensure that we no longer have active tokens
+    delete (Token*) a;
+    CPPUNIT_ASSERT(db->getActiveTokens(LabelStr(DEFAULT_PREDICATE)).empty());
+
     DEFAULT_TEARDOWN();
     return true;
   }
