@@ -459,9 +459,15 @@ namespace EUROPA
 
   void ConstraintEngine::add(const PropagatorId& propagator){
     check_error(propagator.isValid());
-    check_error(m_propagatorsByName.find(propagator->getName().getKey()) == m_propagatorsByName.end());
+    std::map<double, PropagatorId>::iterator it = m_propagatorsByName.find(propagator->getName().getKey());
+    if(it != m_propagatorsByName.end()) {
+      warn("Overwriting propagator named " + propagator->getName().toString());
+      m_propagators.erase(std::find(m_propagators.begin(), m_propagators.end(), it->second));
+      it->second->discard();
+      m_propagatorsByName.erase(it);
+    }
     m_propagators.push_back(propagator);
-    m_propagatorsByName.insert(std::pair<double, PropagatorId>(propagator->getName().getKey(), propagator));
+    m_propagatorsByName.insert(std::make_pair(propagator->getName().getKey(), propagator));
 
     debugMsg("ConstraintEngine:add:Propagator",  propagator->getName().toString());
   }
