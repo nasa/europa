@@ -70,10 +70,9 @@ namespace EUROPA {
     if(!Entity::isPurging()){ // Exploit relationships to cascade delete.
       //!!! Relaxing this so we can play some transactions backwards.  I'm not sure this
       //!!! is safe, but we'll see.
-//       checkError(m_planDatabase->tokens().empty(),
-// 		 "Objects cannot be deleted while there remain tokens in the database.");
-      checkError(tokens().empty(),
-		 "Object cannot be deleted while there remain active tokens that could be on them.");
+      //       checkError(m_planDatabase->tokens().empty(),
+      // 		 "Objects cannot be deleted while there remain tokens in the database.");
+      //checkError(tokens().empty(), "Object cannot be deleted while there remain active tokens that could be on them.");
 
       check_error(isValid());
 
