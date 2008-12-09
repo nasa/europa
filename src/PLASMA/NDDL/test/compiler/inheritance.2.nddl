@@ -32,3 +32,8 @@ goal(foo.pred1 t0);
 goal(bar.pred1 t1);
 goal(bar.pred2 t2);
 goal(baz.pred1 t3);
+
+// Constraint values to ensure access to derived class and base class predicate parameters
+t3.arg1 = 1;
+t3.arg2 = 2.0;
+lt(t3.arg1, t3.arg2);
