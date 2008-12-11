@@ -330,11 +330,11 @@ namespace EUROPA {
     PSSolver();
   };
 
-  
+  enum PSTokenState { INACTIVE,ACTIVE,MERGED,REJECTED };
+
   class PSToken : public PSEntity
   {
   public:
-	enum PSTokenState { INACTIVE,ACTIVE,MERGED,REJECTED };
     std::string getTokenType() const;
     
     bool isFact();
@@ -372,8 +372,7 @@ namespace EUROPA {
     PSToken();
   };
 
-  	enum PSVarType {INTEGER,DOUBLE,BOOLEAN,STRING,OBJECT};
-	enum PSTokenState { INACTIVE,ACTIVE,MERGED,REJECTED };
+  enum PSVarType {INTEGER,DOUBLE,BOOLEAN,STRING,OBJECT};
 
   class PSVariable : public PSEntity
   {

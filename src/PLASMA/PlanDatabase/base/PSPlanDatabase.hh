@@ -4,6 +4,7 @@
 #include "PSConstraintEngine.hh"
 
 namespace EUROPA {
+	enum PSTokenState { INACTIVE,ACTIVE,MERGED,REJECTED };
 
   class PSObject;
   class PSToken;
@@ -57,7 +58,6 @@ namespace EUROPA {
   class PSToken : public virtual PSEntity
   {
   public:
-	  enum PSTokenState { INACTIVE,ACTIVE,MERGED,REJECTED };
 
       PSToken() {}
       virtual ~PSToken() {}

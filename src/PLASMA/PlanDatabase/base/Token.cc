@@ -982,22 +982,22 @@ PSList<PSToken*> Token::getMerged() const
 }
 
 
-PSToken::PSTokenState Token::getTokenState() const
+PSTokenState Token::getTokenState() const
 {
     if (isActive())
-        return PSToken::ACTIVE;
+        return EUROPA::ACTIVE;
 
     if (isInactive())
-        return PSToken::INACTIVE;
+        return EUROPA::INACTIVE;
 
     if (isMerged())
-        return PSToken::MERGED;
+        return EUROPA::MERGED;
 
     if (isRejected())
-        return PSToken::REJECTED;
+        return EUROPA::REJECTED;
 
     check_error(ALWAYS_FAIL,"Unknown token state");
-    return PSToken::INACTIVE;
+    return EUROPA::INACTIVE;
 }
 
 PSVariable* Token::getStart() const
