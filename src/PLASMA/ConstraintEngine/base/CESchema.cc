@@ -29,6 +29,16 @@ namespace EUROPA
     check_error(factory.isValid());
     return factory;
   }
+
+  TypeFactoryId CESchema::getFactory(const std::string& typeName) {
+    // Confirm it is present
+    check_error(m_typeFactories.find(LabelStr(typeName).getKey()) != m_typeFactories.end(),
+		"no TypeFactory found for type '" + std::string(typeName) + "'");
+    
+    TypeFactoryId factory = m_typeFactories.find(LabelStr(typeName).getKey())->second;
+    check_error(factory.isValid());
+    return factory;
+  }
 			      
   void CESchema::registerFactory(const TypeFactoryId& factory)
   {
@@ -43,12 +53,18 @@ namespace EUROPA
 
     checkError(m_typeFactories.find(factory->getTypeName().getKey()) == m_typeFactories.end(), "Already have '" + factory->getTypeName().toString() + "' registered.");
 
-    m_typeFactories.insert(std::pair<double, TypeFactoryId>(factory->getTypeName().getKey(), factory));
+    m_typeFactories.insert(std::make_pair(factory->getTypeName().getKey(), factory));
     debugMsg("TypeFactory:registerFactory", "Registered type factory " << factory->getTypeName().toString());
   }
 
   const AbstractDomain & CESchema::baseDomain(const char* typeName)
   {
+    TypeFactoryId factory = getFactory(typeName);
+    check_error(factory.isValid(), "no TypeFactory found for type '" + std::string(typeName) + "'");
+    return factory->baseDomain();
+  }
+  
+  const AbstractDomain& CESchema::baseDomain(const std::string& typeName) {
     TypeFactoryId factory = getFactory(typeName);
     check_error(factory.isValid(), "no TypeFactory found for type '" + std::string(typeName) + "'");
     return factory->baseDomain();
@@ -62,7 +78,7 @@ namespace EUROPA
 
   void CESchema::purgeTypeFactories()
   {
-      std::map<double, TypeFactoryId >::iterator factories_iter = m_typeFactories.begin();
+      std::map<edouble, TypeFactoryId >::iterator factories_iter = m_typeFactories.begin();
       while (factories_iter != m_typeFactories.end()) {
         TypeFactoryId factory = (factories_iter++)->second;
         debugMsg("TypeFactory:purgeAll",
@@ -74,7 +90,7 @@ namespace EUROPA
   
   void CESchema::purgeConstraintFactories()
   {     
-      std::map<double, ConstraintFactoryId >::iterator it = m_constraintFactories.begin();
+      std::map<edouble, ConstraintFactoryId >::iterator it = m_constraintFactories.begin();
       while (it != m_constraintFactories.end()){
         ConstraintFactoryId factory = it->second;
         check_error(factory.isValid());
@@ -93,25 +109,25 @@ namespace EUROPA
     if(isConstraintFactoryRegistered(name)){
       debugMsg("CESchema:registerFactory", "Over-riding prior registration for " << name);
       ConstraintFactoryId oldFactory = getConstraintFactory(name);
-      std::map<double, ConstraintFactoryId>& factories = m_constraintFactories;
+      std::map<edouble, ConstraintFactoryId>& factories = m_constraintFactories;
       factories.erase(name.getKey());
       oldFactory.release();
     }
 
     check_error(isConstraintFactoryNotRegistered(name), "Constraint factory for '" + name.toString() + "' should not be registered, and yet it is....");
-    m_constraintFactories.insert(std::pair<double, ConstraintFactoryId>(name.getKey(),
+    m_constraintFactories.insert(std::pair<edouble, ConstraintFactoryId>(name.getKey(),
                                       factory->getId()));
     debugMsg("CESchema:registerFactory", "Registered factory " << factory->getName().toString());
   }
 
   const ConstraintFactoryId& CESchema::getConstraintFactory(const LabelStr& name) {
     check_error(isConstraintFactoryRegistered(name), "Factory for constraint '" + name.toString() + "' is not registered.");
-    std::map< double, ConstraintFactoryId >::const_iterator it = m_constraintFactories.find(name.getKey());
+    std::map< edouble, ConstraintFactoryId >::const_iterator it = m_constraintFactories.find(name.getKey());
     return(it->second);
   }
 
   bool CESchema::isConstraintFactoryRegistered(const LabelStr& name, const bool& warn) {
-    std::map<double, ConstraintFactoryId >::const_iterator it = m_constraintFactories.find(name.getKey());
+    std::map<edouble, ConstraintFactoryId >::const_iterator it = m_constraintFactories.find(name.getKey());
     if (it == m_constraintFactories.end()) {
       if (warn)
         std::cerr << "\nConstraint <" << name.toString() << "> has not been registered\n";
@@ -121,7 +137,7 @@ namespace EUROPA
   }
 
   bool CESchema::isConstraintFactoryNotRegistered(const LabelStr& name) {
-    std::map< double, ConstraintFactoryId >::const_iterator it = m_constraintFactories.find(name.getKey());
+    std::map< edouble, ConstraintFactoryId >::const_iterator it = m_constraintFactories.find(name.getKey());
     if (it != m_constraintFactories.end()) {
       std::cerr << "\nConstraint <" << name.toString() << "> has already been registered\n";
       return(false);

@@ -585,12 +585,12 @@ namespace EUROPA {
     return true;
   }
 
-  ObjectDomain::ObjectDomain(const char* typeName)
+  ObjectDomain::ObjectDomain(const std::string& typeName)
   : EnumeratedDomain(false, typeName){
     check_error(!isNumeric());
   }
 
-  ObjectDomain::ObjectDomain(const std::list<ObjectId>& initialValues, const char* typeName)
+  ObjectDomain::ObjectDomain(const std::list<ObjectId>& initialValues, const std::string& typeName)
   : EnumeratedDomain(false, typeName){
     check_error(!isNumeric());
     for(std::list<ObjectId>::const_iterator it = initialValues.begin(); it != initialValues.end(); ++it){
@@ -601,7 +601,7 @@ namespace EUROPA {
     close();
   }
 
-  ObjectDomain::ObjectDomain(const ObjectId& initialValue, const char* typeName): 
+  ObjectDomain::ObjectDomain(const ObjectId& initialValue, const std::string& typeName): 
     EnumeratedDomain(initialValue, false, typeName){check_error(!isNumeric());}
 
   ObjectDomain::ObjectDomain(const AbstractDomain& org)
@@ -618,7 +618,7 @@ namespace EUROPA {
     return(sl_typeName);
   }
 
-  bool ObjectDomain::convertToMemberValue(const std::string& strValue, double& dblValue) const{
+  bool ObjectDomain::convertToMemberValue(const std::string& strValue, edouble& dblValue) const{
     int value = atoi(strValue.c_str());
     EntityId entity = Entity::getEntity(value);
 
@@ -631,7 +631,7 @@ namespace EUROPA {
   }
 
 
-  std::string ObjectDomain::toString(double value) const {
+  std::string ObjectDomain::toString(edouble value) const {
     check_error(isMember(value), "Caught an invalid attempt to display a value not in this domain");
     std::ostringstream os;
     if(!Entity::isPurging())
@@ -651,7 +651,7 @@ namespace EUROPA {
   }
 
   
-  std::list<ObjectId> ObjectDomain::makeObjectList(const std::list<double>& inputs){
+  std::list<ObjectId> ObjectDomain::makeObjectList(const std::list<edouble>& inputs){
     std::list<ObjectId> outputs;
     for (std::list<double>::const_iterator it = inputs.begin(); it != inputs.end(); ++it)
       outputs.push_back((ObjectId)(*it));
@@ -661,8 +661,8 @@ namespace EUROPA {
 
   std::list<ObjectId> ObjectDomain::makeObjectList() const {
     std::list<ObjectId> objects;
-    const std::set<double>& values = getValues();
-    for(std::set<double>::const_iterator it = values.begin(); it != values.end(); ++it){
+    const std::set<edouble>& values = getValues();
+    for(std::set<edouble>::const_iterator it = values.begin(); it != values.end(); ++it){
       ObjectId object = *it;
       objects.push_back(object);
     }

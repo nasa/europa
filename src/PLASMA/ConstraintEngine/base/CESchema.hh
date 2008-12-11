@@ -39,11 +39,13 @@ namespace EUROPA {
        * @brief Obtain the factory based on the type name
        */ 
       TypeFactoryId getFactory(const char* typeName);
+    TypeFactoryId getFactory(const std::string& typeName);
 
       /**
        * @brief Return the base domain
        */
       const AbstractDomain & baseDomain(const char* typeName);
+    const AbstractDomain& baseDomain(const std::string& typeName);
 
       void purgeTypeFactories();
 
@@ -67,8 +69,8 @@ namespace EUROPA {
 
     protected:
       CESchemaId m_id;
-      std::map<double, TypeFactoryId> m_typeFactories;   
-      std::map<double, ConstraintFactoryId > m_constraintFactories;      
+      std::map<edouble, TypeFactoryId> m_typeFactories;   
+      std::map<edouble, ConstraintFactoryId > m_constraintFactories;      
   };
   
 } // namespace EUROPA

@@ -3,16 +3,16 @@
 namespace EUROPA {
 
   StringDomain::StringDomain()
-    :EnumeratedDomain(false, getDefaultTypeName().c_str()){m_isString = true;}
+    :EnumeratedDomain(false, getDefaultTypeName().toString()){m_isString = true;}
 
-  StringDomain::StringDomain(const char* typeName)
+  StringDomain::StringDomain(const std::string& typeName)
     :EnumeratedDomain(false, typeName){m_isString = true;}
 
-  StringDomain::StringDomain(double value, const char* typeName) 
+  StringDomain::StringDomain(edouble value, const std::string& typeName) 
     : EnumeratedDomain(value, false, typeName){m_isString = true;}
 
-  StringDomain::StringDomain(const std::list<double>& values, 
-                             const char* typeName)
+  StringDomain::StringDomain(const std::list<edouble>& values, 
+                             const std::string& typeName)
     : EnumeratedDomain(values, false, typeName)
   {
     m_isString = true;
@@ -39,7 +39,7 @@ namespace EUROPA {
     return ptr;
   }
   
-  void StringDomain::set(double value) {
+  void StringDomain::set(edouble value) {
     check_error(LabelStr::isString(value));
     checkError(isEmpty() || isMember(value), value << " is not a member of the domain :" << toString());
 
@@ -48,7 +48,7 @@ namespace EUROPA {
     EnumeratedDomain::set(value);
   }
 
-  bool StringDomain::isMember(double value) const {
+  bool StringDomain::isMember(edouble value) const {
       // This is a hack so that specify() will work
       // string domain needs to be able to handle all situations that involve literal string gracefully
       // for example :

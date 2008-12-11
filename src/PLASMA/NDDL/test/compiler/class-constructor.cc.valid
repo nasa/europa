@@ -218,7 +218,7 @@ namespace NDDL {
   
   
   // class-constructor.nddl:49 Bar
-  void Bar::constructor(float m8, const WorldId& w) {
+  void Bar::constructor(double m8, const WorldId& w) {
     Foo::constructor(w, 10, true);
     m_8 = addVariable(IntervalDomain(m8, m8, "float"), "m_8");
   }

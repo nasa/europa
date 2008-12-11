@@ -22,7 +22,7 @@
 
 namespace EUROPA{
 
-  StateDomain::StateDomain(const char*)
+  StateDomain::StateDomain(const std::string&)
     : EnumeratedDomain(false, "TokenStates") {}
 
   StateDomain::StateDomain(const AbstractDomain& org)
@@ -39,7 +39,7 @@ namespace EUROPA{
     // First construct a lexicographic ordering for the set of values.
     std::set<std::string> orderedSet;
 
-    for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
+    for (std::set<edouble>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
       LabelStr value = *it;
       orderedSet.insert(value.toString());
     }

@@ -407,7 +407,7 @@ namespace EUROPA
        */
       void recomputeLevels(InstantId prev, InstantId inst);
 
-      typedef std::pair< int, int > IntIntPair;
+      typedef std::pair< eint, eint > IntIntPair;
       typedef hash_map< TransactionId, IntIntPair, TransactionIdHash > TransactionId2IntIntPair;
 
       TransactionId2IntIntPair m_previousTimeBounds;

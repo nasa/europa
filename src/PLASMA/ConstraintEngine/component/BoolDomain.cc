@@ -4,20 +4,20 @@ namespace EUROPA {
 
 
   BoolDomain::BoolDomain()
-    : IntervalIntDomain(0, 1, getDefaultTypeName().c_str()) {}
+    : IntervalIntDomain(0, 1, getDefaultTypeName().toString()) {}
 
-  BoolDomain::BoolDomain(const char* typeName)
+  BoolDomain::BoolDomain(const std::string& typeName)
     : IntervalIntDomain(typeName) {
     m_ub = 1;
     m_lb = 0;
   }
 
   BoolDomain::BoolDomain(bool value)
-    : IntervalIntDomain(value, value, getDefaultTypeName().c_str()) {
+    : IntervalIntDomain(value, value, getDefaultTypeName().toString()) {
     check_error(check_value(value), "Invalid value");
   }
 
-  BoolDomain::BoolDomain(bool value, const char* typeName)
+  BoolDomain::BoolDomain(bool value, const std::string& typeName)
     : IntervalIntDomain(value, value, typeName) {
     check_error(check_value(value), "Invalid value");
   }
@@ -28,7 +28,7 @@ namespace EUROPA {
     check_error(check_value(m_ub), "Invalid upper bound");
   }
 
-  void BoolDomain::testPrecision(const double& value) const {
+  void BoolDomain::testPrecision(const edouble& value) const {
     check_error(value == 0 || value == 1);
   }
 
@@ -57,7 +57,7 @@ namespace EUROPA {
     return(ptr);
   }
 
-  std::string  BoolDomain::toString(double value) const{
+  std::string  BoolDomain::toString(edouble value) const{
     check_error(isMember(value), "Caught an invalid attempt to display a value not in this domain");
 
     static const LabelStr sl_true("true");
@@ -73,9 +73,9 @@ namespace EUROPA {
     return intersect(dom.getLowerBound(), dom.getUpperBound());
   }
 
-  bool BoolDomain::intersect(double lb, double ub) {
-    double boolLb = lb;
-    double boolUb = ub;
+  bool BoolDomain::intersect(edouble lb, edouble ub) {
+    edouble boolLb = lb;
+    edouble boolUb = ub;
     if(boolLb > boolUb) {
       boolLb = boolUb;
       boolUb = lb;

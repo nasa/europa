@@ -80,7 +80,7 @@ namespace NDDL {
     virtual void constructor(const LocationId& loc);
     
     // classes.0.nddl:13 Path
-    virtual void constructor(const LocationId& _from, const LocationId& _to, float _cost);
+    virtual void constructor(const LocationId& _from, const LocationId& _to, double _cost);
   };
   
   // classes.2.nddl:5 Navigator

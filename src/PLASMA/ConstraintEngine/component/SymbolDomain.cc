@@ -3,16 +3,16 @@
 namespace EUROPA {
 
   SymbolDomain::SymbolDomain() 
-    : EnumeratedDomain(false, getDefaultTypeName().c_str()){}
+    : EnumeratedDomain(false, getDefaultTypeName().toString()){}
 
-  SymbolDomain::SymbolDomain(const char* typeName)
+  SymbolDomain::SymbolDomain(const std::string& typeName)
     : EnumeratedDomain(false, typeName){}
  
-  SymbolDomain::SymbolDomain(double value, const char* typeName)
+  SymbolDomain::SymbolDomain(edouble value, const std::string& typeName)
     : EnumeratedDomain(value, false, typeName){}
 
-  SymbolDomain::SymbolDomain(const std::list<double>& values, 
-                             const char* typeName)
+  SymbolDomain::SymbolDomain(const std::list<edouble>& values, 
+                             const std::string& typeName)
     : EnumeratedDomain(values, false, typeName){}
 
   SymbolDomain::SymbolDomain(const AbstractDomain& org)

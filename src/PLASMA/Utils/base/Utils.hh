@@ -11,6 +11,7 @@
 
 #include "Id.hh"
 #include "Entity.hh"
+#include "Number.hh"
 
 #include <vector>
 #include <set>
@@ -26,20 +27,20 @@ namespace EUROPA {
    */
   class Infinity {
   public:
-    static double plus(double n1, double n2, double defaultValue) {
-      if (fabs(n1) >= PLUS_INFINITY || fabs(n2) >= PLUS_INFINITY)
+    static edouble plus(edouble n1, edouble n2, edouble defaultValue) {
+      if (std::abs(n1) >= PLUS_INFINITY || std::abs(n2) >= PLUS_INFINITY)
 	return(defaultValue);
-      double retval = n1 + n2;
-      if(fabs(retval) >= PLUS_INFINITY)
+      edouble retval = n1 + n2;
+      if(std::abs(retval) >= PLUS_INFINITY)
 	return defaultValue;
       return retval;
     }
 
-    static double minus(double n1, double n2, double defaultValue) {
-      if (fabs(n1) >= PLUS_INFINITY || fabs(n2) >= PLUS_INFINITY)
+    static edouble minus(edouble n1, edouble n2, edouble defaultValue) {
+      if (std::abs(n1) >= PLUS_INFINITY || std::abs(n2) >= PLUS_INFINITY)
 	return(defaultValue);
-      double retval = n1 - n2;
-      if(fabs(retval) >= PLUS_INFINITY)
+      edouble retval = n1 - n2;
+      if(std::abs(retval) >= PLUS_INFINITY)
 	return defaultValue;
       return retval;
     }
@@ -49,6 +50,11 @@ namespace EUROPA {
    * @brief Utility to produce a string from a double
    */
   std::string toString(double value);
+
+  /**
+   * @brief Utility to produce a string from a double
+   */
+  std::string toString(edouble value);
 
   /**
    * @brief Utility function to tokenzie a std string 

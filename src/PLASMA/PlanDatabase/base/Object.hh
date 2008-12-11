@@ -354,9 +354,9 @@ namespace EUROPA {
 
   class ObjectDomain: public EnumeratedDomain {
   public:
-    ObjectDomain(const char* typeName);
-    ObjectDomain(const std::list<ObjectId>& initialValues, const char* typeName = getDefaultTypeName().c_str());
-    ObjectDomain(const ObjectId& initialValue, const char* typeName = getDefaultTypeName().c_str());
+    ObjectDomain(const std::string& typeName);
+    ObjectDomain(const std::list<ObjectId>& initialValues, const std::string& typeName = getDefaultTypeName().toString());
+    ObjectDomain(const ObjectId& initialValue, const std::string& typeName = getDefaultTypeName().toString());
     ObjectDomain(const AbstractDomain& org);
     /**
      * @brief Get the default name of the type of the domain.
@@ -367,13 +367,13 @@ namespace EUROPA {
     /**
      * @brief Obtain the double encoded value from the string if it is a member.
      */
-    bool convertToMemberValue(const std::string& strValue, double& dblValue) const;
+    bool convertToMemberValue(const std::string& strValue, edouble& dblValue) const;
 
 
     /**
      * @brief Generate a list of object id's from a list of doubles
      */
-    static std::list<ObjectId> makeObjectList(const std::list<double>& inputs);
+    static std::list<ObjectId> makeObjectList(const std::list<edouble>& inputs);
 
     /**
      * @brief Generate a list of object id's internal member data
@@ -388,7 +388,7 @@ namespace EUROPA {
      * @brief Translate the double encoded value to a suitable output. In this case, the object name
      * @param value must be a member of the domain. 
      */
-    virtual std::string toString(double value) const;
+    virtual std::string toString(edouble value) const;
 
     virtual std::string toString() const;
 

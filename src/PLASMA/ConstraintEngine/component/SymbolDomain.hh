@@ -26,12 +26,12 @@ namespace EUROPA {
     /**
      * @brief Initially empty and open, with specialized type name
      */
-    SymbolDomain(const char* typeName);
+    SymbolDomain(const std::string& typeName);
 
     /**
      * @brief Constructs an initial singleton with the given type name
      */
-    SymbolDomain(double value, const char* typeName = getDefaultTypeName().toString().c_str());
+    SymbolDomain(edouble value, const std::string& typeName = getDefaultTypeName().toString());
 
     /**
      * @brief Constructor.
@@ -39,8 +39,8 @@ namespace EUROPA {
      * @param typename The type name to use
      * @see AbstractDomain::isDynamic()
      */
-    SymbolDomain(const std::list<double>& values, 
-                 const char* typeName = getDefaultTypeName().toString().c_str());
+    SymbolDomain(const std::list<edouble>& values, 
+                 const std::string& typeName = getDefaultTypeName().toString());
 
     /**
      * @brief Copy constructor.

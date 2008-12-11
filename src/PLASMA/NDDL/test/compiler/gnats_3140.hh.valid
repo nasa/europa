@@ -83,7 +83,7 @@ namespace NDDL {
     ConstrainedVariableId field7; // SchemaWriter::declareVariable
     
     // gnats_3140.nddl:11 Foo
-    virtual void constructor(bool _field1, int _field2, float _field4, const LabelStr& _field6, const BooId& _field7);
+    virtual void constructor(bool _field1, int _field2, double _field4, const LabelStr& _field6, const BooId& _field7);
   };
   
   // gnats_3140.nddl:32 Bar

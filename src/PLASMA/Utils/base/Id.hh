@@ -172,6 +172,20 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
       m_ptr = (T*) (unsigned long int) val;
     }
 
+    inline Id(edouble val) {
+#ifndef EUROPA_FAST
+      if (val == 0)
+        m_key = 0;
+      else {
+        m_key = IdTable::getKey((unsigned long int) cast_double(val));
+        check_error(m_key != 0,
+                    std::string("Cannot instantiate an Id<") + typeid(T).name() + "> for this address. No instance present.",
+                    IdErr::IdMgrInvalidItemPtrError());
+      }
+#endif
+      m_ptr = (T*) (unsigned long int) cast_double(val);
+    }
+
     /**
      * @brief Copy constructor from an Id of a different type.
      * @param org The constant reference to original Id from which to copy.

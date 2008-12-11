@@ -5,25 +5,25 @@ namespace EUROPA {
 
 
   IntervalIntDomain::IntervalIntDomain()
-    : IntervalDomain(getDefaultTypeName().c_str()) {m_minDelta = 1.0;}
+    : IntervalDomain(getDefaultTypeName().toString()) {m_minDelta = 1.0;}
 
-  IntervalIntDomain::IntervalIntDomain(const char* typeName)
+  IntervalIntDomain::IntervalIntDomain(const std::string& typeName)
     : IntervalDomain(typeName) {m_minDelta = 1.0;}
 
-  IntervalIntDomain::IntervalIntDomain(int lb, int ub)
-    : IntervalDomain(lb, ub, getDefaultTypeName().c_str()) {
+  IntervalIntDomain::IntervalIntDomain(eint lb, eint ub)
+    : IntervalDomain(lb, ub, getDefaultTypeName().toString()) {
     check_error(check_value(m_lb), "Invalid lower bound");
     check_error(check_value(m_ub), "Invalid upper bound");
     m_minDelta = 1.0;
   }
 
-  IntervalIntDomain::IntervalIntDomain(int value)
-    : IntervalDomain(value, value, getDefaultTypeName().c_str()) {
+  IntervalIntDomain::IntervalIntDomain(eint value)
+    : IntervalDomain(value, value, getDefaultTypeName().toString()) {
     check_error(check_value(value), "Invalid value");
     m_minDelta = 1.0;
   }
 
-  IntervalIntDomain::IntervalIntDomain(int lb, int ub, const char* typeName)
+  IntervalIntDomain::IntervalIntDomain(eint lb, eint ub, const std::string& typeName)
     : IntervalDomain(lb, ub, typeName) {
     check_error(check_value(m_lb), "Invalid lower bound");
     check_error(check_value(m_ub), "Invalid upper bound");
@@ -46,17 +46,17 @@ namespace EUROPA {
     return(m_lb == m_ub);
   }
 
-  void IntervalIntDomain::testPrecision(const double& value) const {
+  void IntervalIntDomain::testPrecision(const edouble& value) const {
 #ifndef EUROPA_FAST
-    int intValue = (int) value;
-    double dblValue = (double) intValue;
+    eint intValue = (eint) value;
+    edouble dblValue = (edouble) intValue;
     checkError(dblValue == value,
 	       value << " must be an integer."); // confirms no loss in precision
 #endif
   }
 
-  double IntervalIntDomain::convert(const double& value) const {
-    return((int) value);
+  edouble IntervalIntDomain::convert(const edouble& value) const {
+    return((eint) value);
   }
 
   const LabelStr& IntervalIntDomain::getDefaultTypeName() {
@@ -64,7 +64,7 @@ namespace EUROPA {
     return(sl_typeName);
   }
 
-  void IntervalIntDomain::insert(double value) {
+  void IntervalIntDomain::insert(edouble value) {
     check_error(check_value(value));
     if (isMember(value))
       return; // Already in the interval.
@@ -93,24 +93,24 @@ namespace EUROPA {
     check_error(ALWAYS_FAILS);
   }
 
-  void IntervalIntDomain::getValues(std::list<double>& results) const {
+  void IntervalIntDomain::getValues(std::list<edouble>& results) const {
     check_error(isFinite());
-    int lb = (int) check(m_lb);
-    int ub = (int) check(m_ub);
-    for (int i = lb; i <= ub; i++)
+    eint lb = (eint) check(m_lb);
+    eint ub = (eint) check(m_ub);
+    for (eint i = lb; i <= ub; i++)
       results.push_back(i);
   }
 
-//   double IntervalIntDomain::minDelta() const {
+//   edouble IntervalIntDomain::minDelta() const {
 //     return(1.0);
 //   }
 
-  double IntervalIntDomain::translateNumber(double number, bool asMin) const {
-    double result = IntervalDomain::translateNumber(int(number), asMin);
+  edouble IntervalIntDomain::translateNumber(edouble number, bool asMin) const {
+    edouble result = IntervalDomain::translateNumber(eint(number), asMin);
 
     // Incrementing result will round up.
     // Why the condition that number is positive? It breaks symmetry if nothing else. --wedgingt 2004 Mar 4
-    if ((fabs(result - number) >= EPSILON) && asMin && number > 0)
+    if ((std::abs(result - number) >= EPSILON) && asMin && number > 0)
       result = result + 1;
     return(result);
   }
@@ -121,8 +121,8 @@ namespace EUROPA {
     return(ptr);
   }
 
-  bool IntervalIntDomain::intersect(double lb, double ub) {    
-    return IntervalDomain::intersect(ceil(lb), floor(ub));
+  bool IntervalIntDomain::intersect(edouble lb, edouble ub) {    
+    return IntervalDomain::intersect(std::ceil(lb), std::floor(ub));
   }
 
   bool IntervalIntDomain::intersect(const AbstractDomain& dom) {

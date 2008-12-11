@@ -24,7 +24,7 @@ namespace EUROPA {
   class TypeFactory
   {
     public:
-      TypeFactory(const char* typeName);
+      TypeFactory(const std::string& typeName);
 
       virtual ~TypeFactory();
 
@@ -42,14 +42,14 @@ namespace EUROPA {
                                                    const AbstractDomain& baseDomain,
                                                    const bool internal = false,
                                                    bool canBeSpecified = true,
-                                                   const char* name = NO_VAR_NAME,
+                                                   const std::string& name = NO_VAR_NAME,
                                                    const EntityId& parent = EntityId::noId(),
                                                    int index = ConstrainedVariable::NO_INDEX) const = 0;
 
       /**
        * @brief Create a value for a string
        */
-      virtual double createValue(const std::string& value) const = 0;
+      virtual edouble createValue(const std::string& value) const = 0;
 
       /**
        * @brief Return the base domain

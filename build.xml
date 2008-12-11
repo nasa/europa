@@ -113,6 +113,15 @@
     </exec>
   </target>
 
+  <target name="jam-target" depends="init">
+    <echo message="jam ${jam.opts} ${jam.target}"/>
+    <exec executable="jam" dir="${dir.src}" failonerror="true">
+      <arg line="${jam.opts} ${jam.target}"/>
+      <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
+      <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.PLASMA_HOME}/build/lib"/>
+    </exec>
+  </target>
+
   <target name="test" depends="build">
     <exec executable="jam" dir="${dir.src}" failonerror="true">
       <arg line="${jam.opts} run-all-tests"/>
@@ -306,5 +315,47 @@
     <antcall target="zip-dist"/>
     <antcall target="zip-static-libs"/>
   </target>
-	
+
+  <target name="tags" depends="init"
+          description="create tags and ebrowse files">
+    <delete file="${dir.src}/TAGS"/>
+    <delete file="${dir.src}/BROWSE"/>
+
+    <apply executable="etags" dir="${dir.src}" parallel="true" failonerror="true" >
+      <arg value="--declarations"/>
+      <arg value="-I"/>
+      <arg value="--members"/>
+      <fileset dir="${dir.src}">
+        <include name="*/*.hh"/>
+        <include name="*/*/*.hh"/>
+        <include name="*/*/*/*.hh"/>
+        <include name="*/*.h"/>
+        <include name="*/*/*.h"/>
+        <include name="*/*/*/*.h"/>
+        <include name="*/*.cc"/>
+        <include name="*/*/*.cc"/>
+        <include name="*/*/*/*.cc"/>
+        <include name="*/*.cpp"/>
+        <include name="*/*/*.cpp"/>
+        <include name="*/*/*/*.cpp"/>
+      </fileset>
+    </apply>
+
+    <apply executable="ebrowse" dir="${dir.src}" parallel="true" failonerror="true" >
+      <fileset dir="${dir.src}">
+        <include name="*/*.hh"/>
+        <include name="*/*/*.hh"/>
+        <include name="*/*/*/*.hh"/>
+        <include name="*/*.h"/>
+        <include name="*/*/*.h"/>
+        <include name="*/*/*/*.h"/>
+        <include name="*/*.cc"/>
+        <include name="*/*/*.cc"/>
+        <include name="*/*/*/*.cc"/>
+        <include name="*/*.cpp"/>
+        <include name="*/*/*.cpp"/>
+        <include name="*/*/*/*.cpp"/>
+      </fileset>
+    </apply>
+  </target>
 </project>

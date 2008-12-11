@@ -333,7 +333,7 @@ namespace EUROPA {
     /**
      * @brief Create a value for a string
      */
-    double createValue(const char* typeName, const std::string& value);
+    edouble createValue(const char* typeName, const std::string& value);
 
   protected:
 
@@ -525,7 +525,7 @@ namespace EUROPA {
     std::list<PropagatorId> m_propagators; /*!< The list of all propagators.
 					     Position in the list indicates execution priority. This
 					     is determined by the order of construction. */
-    std::map<double, PropagatorId> m_propagatorsByName; /*!< Support configuration and lookup by name. */
+    std::map<edouble, PropagatorId> m_propagatorsByName; /*!< Support configuration and lookup by name. */
 
     bool m_relaxing;
     bool m_relaxingViolation; /*!< Flag to record if relax events should be ignored by the ViolationMgr */

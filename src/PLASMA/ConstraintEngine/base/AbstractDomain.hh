@@ -38,6 +38,7 @@
 #include "ConstraintEngineDefs.hh"
 #include "LabelStr.hh"
 #include "DomainListener.hh"
+#include "Number.hh"
 #include <list>
 #include <map>
 #include <string>
@@ -236,17 +237,17 @@ namespace EUROPA {
     /**
      * @brief Access upper bound
      */
-    virtual double getUpperBound() const = 0;
+    virtual edouble getUpperBound() const = 0;
 
     /**
      * @brief Access lower bound
      */
-    virtual double getLowerBound() const = 0;
+    virtual edouble getLowerBound() const = 0;
 
     /**
      * @brief Access singleton value. Must be a singleton or this will fail.
      */
-    virtual double getSingletonValue() const = 0;
+    virtual edouble getSingletonValue() const = 0;
 
     /**
      * @brief Access both bounds in a convenience method, and indicates if the domain is infinite
@@ -254,14 +255,14 @@ namespace EUROPA {
      * @param ub update this value with the upper bound
      * @return true if !isFinite()
      */
-    virtual bool getBounds(double& lb, double& ub) const = 0;
+    virtual bool getBounds(edouble& lb, edouble& ub) const = 0;
 
     /**
      * @brief Set to a singleton.
      * @note May empty the domain if value is not a member of the current domain.
      * @param value the target singleton value.
      */
-    virtual void set(double value) = 0;
+    virtual void set(edouble value) = 0;
 
     /**
      * @brief Indicates assigment to the target domain as a relaxation triggered explicitly 
@@ -280,7 +281,7 @@ namespace EUROPA {
     /**
      * @brief Indicates relaxation to a singleton value. Occurs when domain has been emptied previously
      */
-    virtual void relax(double value) = 0;
+    virtual void relax(edouble value) = 0;
 
     /**
      * @brief Add an element to the set. This is only permitted on dynamic domains.
@@ -291,12 +292,12 @@ namespace EUROPA {
      * @see DomainListener::DOMAIN_RELAXED
      * @todo Consider if it makes sense to error out if isMember(value).
      */
-    virtual void insert(double value) = 0;
+    virtual void insert(edouble value) = 0;
 
     /**
      * @brief Add a list of elements to the set. Only permotted on dynamic and enumerated domains
      */
-    virtual void insert(const std::list<double>& values) = 0;
+    virtual void insert(const std::list<edouble>& values) = 0;
 
     /**
      * @brief Remove the given element form the domain.
@@ -304,7 +305,7 @@ namespace EUROPA {
      * @note If the value was in the domain, this call will generate a value removal event.
      * @see DomainListener::VALUE_REMOVED
      */
-    virtual void remove(double value) = 0;
+    virtual void remove(edouble value) = 0;
 
     /**
      * @brief Restricts this domain to the intersection of its values with the given domain.
@@ -321,7 +322,7 @@ namespace EUROPA {
      * @note ub must be >= lb.
      * @note The domain must be numeric
      */
-    virtual bool intersect(double lb, double ub) = 0;
+    virtual bool intersect(edouble lb, edouble ub) = 0;
 
     /**
      * @brief Restricts this domain to the difference of its values with the given domain.
@@ -344,7 +345,7 @@ namespace EUROPA {
      * @param value to test for membership.
      * @return true if a member of the domain, otherwise false.
      */
-    virtual bool isMember(double value) const = 0;
+    virtual bool isMember(edouble value) const = 0;
 
     /**
      * @brief Test for equality.
@@ -385,25 +386,25 @@ namespace EUROPA {
      * @note Should only be called on finite (and thus closed) domains.
      * @param results The target collection to fill with all values in the set.
      */
-    virtual void getValues(std::list<double>& results) const = 0;
+    virtual void getValues(std::list<edouble>& results) const = 0;
 
     /**
      * @brief Returns the minimum allowed delta in values between elements of the set.
      */
-    virtual double minDelta() const {return m_minDelta;}
+    virtual edouble minDelta() const {return m_minDelta;}
 
     /**
      * @brief Returns a value for number based on the semantics of the domain.
      */
-    virtual double translateNumber(double number, bool asMin) const;
+    virtual edouble translateNumber(edouble number, bool asMin) const;
 
     /**
-     * @brief Converts the string to its double representation as a value, if it is present in the domain.
+     * @brief Converts the string to its edouble representation as a value, if it is present in the domain.
      * @param strValue The value as a string
      * @param dblValue The value returned, if available. Only relevant if a member of the domain.
      * @return true if the value was present, otherwise false.
      */
-    virtual bool convertToMemberValue(const std::string& strValue, double& dblValue) const = 0;
+    virtual bool convertToMemberValue(const std::string& strValue, edouble& dblValue) const = 0;
 
     /**
      * @brief Tests if both bounds are finite. Trivially true for symbolic domains.
@@ -421,28 +422,28 @@ namespace EUROPA {
     /**
      * Tests if 2 values are the same with respect to the minimum difference for the target domain.
      */
-    inline virtual bool compareEqual(double a, double b) const {
+    inline virtual bool compareEqual(edouble a, edouble b) const {
       return(a < b ? b - a < minDelta() : a - b < minDelta());
     }
 
     /**
      * @brief Tests if one value is less than another to within minDelta
      */
-    inline bool lt(double a, double b) const {
+    inline bool lt(edouble a, edouble b) const {
       return (a + minDelta() <= b);
     }
 
     /**
      * @brief Tests if one value equals another to within minDelta
      */
-    inline bool eq(double a, double b) const {
+    inline bool eq(edouble a, edouble b) const {
       return compareEqual(a, b);
     }
 
     /**
      * @brief Tests if one value is less than or equal to another to within minDelta
      */
-    inline bool leq(double a, double b) const {
+    inline bool leq(edouble a, edouble b) const {
       return (a - minDelta() < b);
     }
 
@@ -460,7 +461,7 @@ namespace EUROPA {
      * @brief Creates a concise string for displaying the value
      * @param value must be a member of the domain.
      */
-    virtual std::string toString(double value) const;
+    virtual std::string toString(edouble value) const;
 
   protected:
     /**
@@ -471,7 +472,7 @@ namespace EUROPA {
      * @param typeName indicates the type name to use
      * @todo Review how semantics of closed can be enforced in operations.
      */
-    AbstractDomain(bool closed, bool enumerated, const char* typeName);
+    AbstractDomain(bool closed, bool enumerated, const std::string& typeName);
 
     /**
      * @brief Copy Constructor
@@ -488,14 +489,14 @@ namespace EUROPA {
     /**
      * @brief Check that the value is correct w.r.t. the semantics of the domain. Infinite safe if numeric.
      */
-    virtual bool check_value(double value) const;
+    virtual bool check_value(edouble value) const;
 
     /**
      * @brief Check the precision of a value in terms of a particular Domain class.
      * @note 'Hook' to permit subclasses to be more restrictive; called by check_value()
      * unless compiled EUROPA_FAST.
      */
-    virtual void testPrecision(const double& value) const = 0;
+    virtual void testPrecision(const edouble& value) const = 0;
 
     /**
      * @brief Utility function for internal use
@@ -506,7 +507,7 @@ namespace EUROPA {
     bool m_enumerated; /**< False if the domain is an interval, otherwise true. */
     DomainListenerId m_listener; /**< Holds reference to attached listener.  May be noId. */
     LabelStr m_typeName; /**< The name of the type of this domain. */
-    double m_minDelta; /**< The minimum amount by which elements of this domain may vary.  Once this is set, DO NOT CHANGE IT.*/
+    edouble m_minDelta; /**< The minimum amount by which elements of this domain may vary.  Once this is set, DO NOT CHANGE IT.*/
 
   };
 }

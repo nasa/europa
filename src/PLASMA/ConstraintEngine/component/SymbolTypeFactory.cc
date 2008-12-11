@@ -8,12 +8,12 @@ namespace EUROPA {
   // SymbolTypeFactory
   //
 
-  SymbolTypeFactory::SymbolTypeFactory(const char* name)
+  SymbolTypeFactory::SymbolTypeFactory(const std::string& name)
    : TypeFactory(name), m_baseDomain(name)
   {
   }
 
-  SymbolTypeFactory::SymbolTypeFactory(const char* name, const SymbolDomain& baseDomain)
+  SymbolTypeFactory::SymbolTypeFactory(const std::string& name, const SymbolDomain& baseDomain)
    : TypeFactory(name), m_baseDomain(baseDomain)
   {
   }
@@ -23,7 +23,7 @@ namespace EUROPA {
                                     const AbstractDomain& baseDomain,
                                     const bool internal,
                                     bool canBeSpecified,
-                                    const char* name,
+                                    const std::string& name,
                                     const EntityId& parent,
                                     int index) const
   {
@@ -44,7 +44,7 @@ namespace EUROPA {
     return m_baseDomain;
   }
 
-  double SymbolTypeFactory::createValue(const std::string& value) const
+  edouble SymbolTypeFactory::createValue(const std::string& value) const
   {
     return LabelStr(value);
   }

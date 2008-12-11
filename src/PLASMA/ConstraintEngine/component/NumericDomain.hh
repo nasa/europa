@@ -27,12 +27,12 @@ namespace EUROPA {
     /**
      * @breif Construct with name, open and empty
      */
-    NumericDomain(const char* typeName);
+    NumericDomain(const std::string& typeName);
 
     /**
      * @brief Constructs an initial singleton domain with the given type name
      */
-    NumericDomain(double value, const char* typeName = getDefaultTypeName().c_str());
+    NumericDomain(edouble value, const std::string& typeName = getDefaultTypeName().toString());
 
     /**
      * @brief Constructor.
@@ -40,8 +40,8 @@ namespace EUROPA {
      * @param typeName
      * @see AbstractDomain::isDynamic()
      */
-    NumericDomain(const std::list<double>& values, 
-                 const char* typeName = getDefaultTypeName().c_str());
+    NumericDomain(const std::list<edouble>& values, 
+                 const std::string& typeName = getDefaultTypeName().toString());
 
     /**
      * @brief Copy constructor.
@@ -63,7 +63,7 @@ namespace EUROPA {
     /**
      * @brief Sets the domain
      */
-    void set(double value);
+    void set(edouble value);
 
   };
 

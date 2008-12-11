@@ -31,7 +31,7 @@ void ClosedWorldFVDetector::handleResourceLevelFlaws(const InstantId inst)
 	{
 		inst->setFlawed(true);
 		inst->setLower(true);
-		inst->setLowerMagnitude(fabs(m_lowerLimit - inst->getLowerLevel()));
+		inst->setLowerMagnitude(std::abs(m_lowerLimit - inst->getLowerLevel()));
 		debugMsg("ClosedWorldFVDetector:detect", "Lower limit flaw.");
 	}
 
@@ -39,7 +39,7 @@ void ClosedWorldFVDetector::handleResourceLevelFlaws(const InstantId inst)
 	{
 		inst->setFlawed(true);	
 		inst->setUpper(true);
-		inst->setUpperMagnitude(fabs(m_upperLimit - inst->getUpperLevel()));
+		inst->setUpperMagnitude(std::abs(m_upperLimit - inst->getUpperLevel()));
 		debugMsg("ClosedWorldFVDetector:detect", "Upper limit flaw.");
 	}
 }

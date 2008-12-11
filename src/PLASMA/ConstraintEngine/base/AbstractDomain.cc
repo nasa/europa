@@ -80,7 +80,7 @@ namespace EUROPA {
     return(m_id);
   }
 
-  AbstractDomain::AbstractDomain(bool closed, bool enumerated, const char* typeName)
+  AbstractDomain::AbstractDomain(bool closed, bool enumerated, const std::string& typeName)
     : m_closed(closed), m_enumerated(enumerated),  m_typeName(typeName), m_minDelta(EPSILON) {}
 
   AbstractDomain::AbstractDomain(const AbstractDomain& org)
@@ -167,11 +167,11 @@ namespace EUROPA {
     os << getTypeName().toString() << (m_closed ? ":CLOSED" : ":OPEN");
   }
 
-  double AbstractDomain::translateNumber(double number, bool) const {
+  edouble AbstractDomain::translateNumber(edouble number, bool) const {
     return(number);
   }
 
-  bool AbstractDomain::check_value(double value) const {
+  bool AbstractDomain::check_value(edouble value) const {
     checkPrecision(value);
     return(!isNumeric() || (value >= MINUS_INFINITY && value <= PLUS_INFINITY));
   }
@@ -214,7 +214,7 @@ namespace EUROPA {
 
   }
 
-  std::string  AbstractDomain::toString(double value) const {
+  std::string  AbstractDomain::toString(edouble value) const {
     checkError(isMember(value),  value << " not in " << toString());
 
     if(isNumeric())

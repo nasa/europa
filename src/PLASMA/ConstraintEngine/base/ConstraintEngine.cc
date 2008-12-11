@@ -456,7 +456,7 @@ namespace EUROPA
     check_error(propagator.isValid());
     check_error(m_propagatorsByName.find(propagator->getName().getKey()) == m_propagatorsByName.end());
     m_propagators.push_back(propagator);
-    m_propagatorsByName.insert(std::pair<double, PropagatorId>(propagator->getName().getKey(), propagator));
+    m_propagatorsByName.insert(std::make_pair(propagator->getName().getKey(), propagator));
 
     debugMsg("ConstraintEngine:add:Propagator",  propagator->getName().toString());
   }
@@ -1077,7 +1077,7 @@ namespace EUROPA
   }
 
 
-  double ConstraintEngine::createValue(const char* typeName, const std::string& value)
+  edouble ConstraintEngine::createValue(const char* typeName, const std::string& value)
   {
     TypeFactoryId factory = getCESchema()->getFactory(typeName);
     check_error(factory.isValid(), "no TypeFactory found for type '" + std::string(typeName) + "'");

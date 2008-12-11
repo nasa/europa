@@ -29,6 +29,7 @@
 #include "Id.hh"
 #include "Entity.hh"
 #include "XMLUtils.hh"
+#include "Number.hh"
 
 #include <list>
 #include <sstream>
@@ -569,7 +570,7 @@ private:
     CPPUNIT_ASSERT(LabelStr::isString(labelStr2));
     CPPUNIT_ASSERT_MESSAGE(lbl4.toString() + " != " + lbl2.toString(), lbl4 != lbl2);
 
-    double key = lbl2.getKey();
+    edouble key = lbl2.getKey();
     LabelStr lbl5(key);
     CPPUNIT_ASSERT(lbl5 == lbl2);
     CPPUNIT_ASSERT(LabelStr::isString(key));
@@ -731,6 +732,135 @@ private:
   }
 };
 
+class NumberTest {
+public:
+  static bool test() {
+    EUROPA_runTest(testEint);
+    EUROPA_runTest(testEdouble);
+    return true;
+  }
+private:
+  static bool testEint() {
+    EUROPA::eint e(3);
+#ifdef E2_LONG_INT
+    long i = 3;
+#else
+    int i = 3;
+#endif
+
+    CPPUNIT_ASSERT(e == i);
+    CPPUNIT_ASSERT((+e) == (+i));
+    CPPUNIT_ASSERT((-e) == (-i));
+    CPPUNIT_ASSERT((~e) == (~i));
+    CPPUNIT_ASSERT((!e) == (!i));
+    CPPUNIT_ASSERT((++e) == (++i));
+    CPPUNIT_ASSERT((e++) == (i++));
+    CPPUNIT_ASSERT(e == i);
+    CPPUNIT_ASSERT((--e) == (--i));
+    CPPUNIT_ASSERT((e--) == (i--));
+    CPPUNIT_ASSERT(e == i);
+    CPPUNIT_ASSERT((e + 1) == (i + 1));
+    CPPUNIT_ASSERT((e - 1) == (i - 1));
+    CPPUNIT_ASSERT((e * 2) == (i * 2));
+    CPPUNIT_ASSERT((e / 2) == (i / 2));
+    CPPUNIT_ASSERT((e % 2) == (i % 2));
+    CPPUNIT_ASSERT((e ^ 2) == (i ^ 2));
+    CPPUNIT_ASSERT((e & 2) == (i & 2));
+    CPPUNIT_ASSERT((e | 2) == (i | 2));
+    CPPUNIT_ASSERT((e << 2) == (i << 2));
+    CPPUNIT_ASSERT((e >> 2) == (i >> 2));
+    CPPUNIT_ASSERT((e += 3) == (i += 3));
+    CPPUNIT_ASSERT(e == i);
+    CPPUNIT_ASSERT((e -= 2) == (i -= 2));
+    CPPUNIT_ASSERT(e == i);
+    CPPUNIT_ASSERT((e *= 2) == (i *= 2));
+    CPPUNIT_ASSERT(e == i);
+    CPPUNIT_ASSERT((e /= 2) == (i /= 2));
+    CPPUNIT_ASSERT(e == i);
+    CPPUNIT_ASSERT((e %= 3) == (i %= 3));
+    CPPUNIT_ASSERT(e == i);
+    CPPUNIT_ASSERT((e ^= 2) == (i ^= 2));
+    CPPUNIT_ASSERT(e == i);
+    CPPUNIT_ASSERT((e &= 2) == (i &= 2));
+    CPPUNIT_ASSERT(e == i);
+    CPPUNIT_ASSERT((e |= 2) == (i |= 2));
+    CPPUNIT_ASSERT(e == i);
+    CPPUNIT_ASSERT((e <<= 2) == (i <<= 2));
+    CPPUNIT_ASSERT(e == i);
+    CPPUNIT_ASSERT((e >>= 2) == (i >>= 2));
+    CPPUNIT_ASSERT(e == i);
+    e = 50;
+    i = 50;
+    CPPUNIT_ASSERT((e < 900) == (i < 900));
+    CPPUNIT_ASSERT((e < -900) == (i < -900));
+    CPPUNIT_ASSERT((e <= 900) == (i <= 900));
+    CPPUNIT_ASSERT((e <= -900) == (i <= -900));
+    CPPUNIT_ASSERT((e <= 50));
+    CPPUNIT_ASSERT(e == 50);
+    CPPUNIT_ASSERT((e >= 10) && (i >= 10));
+    CPPUNIT_ASSERT(e >= 50);
+    CPPUNIT_ASSERT((e > 10) && (i > 10));
+    CPPUNIT_ASSERT(e != 10);
+
+    //there's some weird compilation thing with creating an eint out of a size_t
+    std::vector<int> foo;
+    foo.push_back(1);
+    eint f(foo.size());
+    CPPUNIT_ASSERT(f == 1);
+
+    return true;
+  }
+  static bool testEdouble() {
+    edouble e(3.14);
+    double d(3.14);
+
+    CPPUNIT_ASSERT(e == d);
+    CPPUNIT_ASSERT((+e) == (+d));
+    CPPUNIT_ASSERT((-e) == (-d));
+    CPPUNIT_ASSERT((++e) == (++d));
+    CPPUNIT_ASSERT((e++) == (d++));
+    CPPUNIT_ASSERT(e == d);
+    CPPUNIT_ASSERT((--e) == (--d));
+    CPPUNIT_ASSERT((e--) == (d--));
+    CPPUNIT_ASSERT(e == d);
+    CPPUNIT_ASSERT((e + 1) == (d + 1));
+    CPPUNIT_ASSERT((e - 1) == (d - 1));
+    CPPUNIT_ASSERT((e * 2) == (d * 2));
+    CPPUNIT_ASSERT((e / 2) == (d / 2));
+    CPPUNIT_ASSERT((e += 3) == (d += 3));
+    CPPUNIT_ASSERT(e == d);
+    CPPUNIT_ASSERT((e -= 2) == (d -= 2));
+    CPPUNIT_ASSERT(e == d);
+    CPPUNIT_ASSERT((e *= 2) == (d *= 2));
+    CPPUNIT_ASSERT(e == d);
+    CPPUNIT_ASSERT((e /= 2) == (d /= 2));
+    CPPUNIT_ASSERT(e == d);
+    e = 50.9;
+    d = 50.9;
+    CPPUNIT_ASSERT((e < 900) == (d < 900));
+    CPPUNIT_ASSERT((e < -900) == (d < -900));
+    CPPUNIT_ASSERT((e <= 900) == (d <= 900));
+    CPPUNIT_ASSERT((e <= -900) == (d <= -900));
+    CPPUNIT_ASSERT((e <= 50.9));
+    CPPUNIT_ASSERT(e == 50.9);
+    CPPUNIT_ASSERT((e >= 10) && (d >= 10));
+    CPPUNIT_ASSERT(e >= 50.9);
+    CPPUNIT_ASSERT((e > 10) && (d > 10));
+    CPPUNIT_ASSERT(e != 10);
+    CPPUNIT_ASSERT((e < 900.) == (d < 900.));
+    CPPUNIT_ASSERT((e < -900.) == (d < -900.));
+    CPPUNIT_ASSERT((e <= 900.) == (d <= 900.));
+    CPPUNIT_ASSERT((e <= -900.) == (d <= -900.));
+    CPPUNIT_ASSERT((e <= 50.9));
+    CPPUNIT_ASSERT(e == 50.9);
+    CPPUNIT_ASSERT((e >= 10.0) && (d >= 10.0));
+    CPPUNIT_ASSERT(e >= 50.9);
+    CPPUNIT_ASSERT((e > 10.) && (d > 10.));
+    CPPUNIT_ASSERT(e != 10.);
+
+    return true;
+  }
+};
 
 void UtilModuleTests::errorTests()
 {
@@ -758,4 +888,8 @@ void UtilModuleTests::entityTests()
 void UtilModuleTests::xmlTests()
 {
 	XMLTest::test();
+}
+
+void UtilModuleTests::numberTests() {
+  NumberTest::test();
 }

@@ -31,14 +31,14 @@ void OpenWorldFVDetector::handleResourceLevelFlaws(const InstantId inst)
 	{
 		inst->setFlawed(true);
 		inst->setLower(true);
-		inst->setLowerMagnitude(fabs(m_lowerLimit - inst->getLowerLevelMax()));
+		inst->setLowerMagnitude(std::abs(m_lowerLimit - inst->getLowerLevelMax()));
 		debugMsg("OpenWorldFVDetector:detect", "Lower limit flaw.");
 	}
 	if(inst->getUpperLevelMin() > m_upperLimit)
 	{
 		inst->setFlawed(true);	
 		inst->setUpper(true);
-		inst->setUpperMagnitude(fabs(m_upperLimit - inst->getUpperLevelMin()));
+		inst->setUpperMagnitude(std::abs(m_upperLimit - inst->getUpperLevelMin()));
 		debugMsg("OpenWorldFVDetector:detect", "Upper limit flaw.");	
 	}
 }

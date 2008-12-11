@@ -11,12 +11,12 @@ namespace EUROPA {
     /**
      * Permit registration by an external name
      */
-    IntervalIntTypeFactory(const char* name = IntervalIntDomain::getDefaultTypeName().c_str());
+    IntervalIntTypeFactory(const std::string& name = IntervalIntDomain::getDefaultTypeName().toString());
 
     /**
      * Register with an external name and a base domain
      */
-    IntervalIntTypeFactory(const char* name, const IntervalIntDomain& baseDomain);
+    IntervalIntTypeFactory(const std::string& name, const IntervalIntDomain& baseDomain);
 
     /**
      * @brief Create a variable
@@ -25,7 +25,7 @@ namespace EUROPA {
                                                  const AbstractDomain& baseDomain,
                                                  const bool internal = false,
                                                  bool canBeSpecified = true,
-                                                 const char* name = NO_VAR_NAME,
+                                                 const std::string& name = NO_VAR_NAME,
                                                  const EntityId& parent = EntityId::noId(),
                                                  int index = ConstrainedVariable::NO_INDEX) const;
 
@@ -37,7 +37,7 @@ namespace EUROPA {
     /**
      * @brief Create a value for a string
      */
-    virtual double createValue(const std::string& value) const;
+    virtual edouble createValue(const std::string& value) const;
 
   private:
     const IntervalIntDomain m_baseDomain;

@@ -5,25 +5,25 @@
 namespace EUROPA {
 
   IntervalDomain::IntervalDomain()
-    : AbstractDomain(true, false, getDefaultTypeName().c_str()), 
+    : AbstractDomain(true, false, getDefaultTypeName().toString()), 
       m_ub(PLUS_INFINITY), m_lb(MINUS_INFINITY){}
 
-  IntervalDomain::IntervalDomain(const char* typeName)
+  IntervalDomain::IntervalDomain(const std::string& typeName)
     : AbstractDomain(true, false, typeName), 
       m_ub(PLUS_INFINITY), m_lb(MINUS_INFINITY){}
 
-  IntervalDomain::IntervalDomain(double lb, double ub, const char* typeName)
+  IntervalDomain::IntervalDomain(edouble lb, edouble ub, const std::string& typeName)
     : AbstractDomain(true, false, typeName), m_ub(ub), m_lb(lb) {
     commonInit();
   }
 
-  IntervalDomain::IntervalDomain(double lb, double ub)
-    : AbstractDomain(true, false, getDefaultTypeName().c_str()), m_ub(ub), m_lb(lb) {
+  IntervalDomain::IntervalDomain(edouble lb, edouble ub)
+    : AbstractDomain(true, false, getDefaultTypeName().toString()), m_ub(ub), m_lb(lb) {
     commonInit();
   }
 
-  IntervalDomain::IntervalDomain(double value)
-    : AbstractDomain(true, false, getDefaultTypeName().c_str()), m_ub(value), m_lb(value) {
+  IntervalDomain::IntervalDomain(edouble value)
+    : AbstractDomain(true, false, getDefaultTypeName().toString()), m_ub(value), m_lb(value) {
     commonInit();
   }
 
@@ -40,7 +40,7 @@ namespace EUROPA {
     safeComparison(*this, dom);
     check_error(dom.isOpen() || !dom.isEmpty(), dom.toString());
     checkError(isOpen() || !isEmpty(), toString());
-    double lb, ub;
+    edouble lb, ub;
     dom.getBounds(lb, ub);
     return(intersect(lb, ub));
   }
@@ -93,15 +93,15 @@ namespace EUROPA {
     relax(dom.getLowerBound(), dom.getUpperBound());
   }
 
-  void IntervalDomain::insert(double value) {
+  void IntervalDomain::insert(edouble value) {
     check_error(ALWAYS_FAILS, "Cannot insert to an interval domain");
   }
 
-  void IntervalDomain::insert(const std::list<double>& values){
+  void IntervalDomain::insert(const std::list<edouble>& values){
     check_error(ALWAYS_FAILS, "Cannot insert to an interval domain");
   }
 
-  void IntervalDomain::remove(double value) {
+  void IntervalDomain::remove(edouble value) {
     check_error(check_value(value));
     if (!isMember(value))
       return; // Outside the interval.
@@ -153,12 +153,12 @@ namespace EUROPA {
     check_error(!isOpen());
     check_error(!dom.isEmpty());
 
-    double ub = dom.getUpperBound();
+    edouble ub = dom.getUpperBound();
    
     if( lt(ub, m_lb) ) 
       return false;
    
-    double lb = dom.getLowerBound();
+    edouble lb = dom.getLowerBound();
 
     if( lt(m_ub, lb))
       return false;
@@ -182,20 +182,20 @@ namespace EUROPA {
     return(result);
   }
 
-  double IntervalDomain::getUpperBound() const {
+  edouble IntervalDomain::getUpperBound() const {
     return(m_ub);
   }
 
-  double IntervalDomain::getLowerBound() const {
+  edouble IntervalDomain::getLowerBound() const {
     return(m_lb);
   }
 
-  double IntervalDomain::getSingletonValue() const {
+  edouble IntervalDomain::getSingletonValue() const {
     check_error(isSingleton());
     return(m_ub);
   }
  
-  void IntervalDomain::set(double value) {
+  void IntervalDomain::set(edouble value) {
     if(!isMember(value))
       empty();
     else {
@@ -206,8 +206,8 @@ namespace EUROPA {
     }
   }
 
-  bool IntervalDomain::convertToMemberValue(const std::string& strValue, double& dblValue) const {
-    double value = atof(strValue.c_str());
+  bool IntervalDomain::convertToMemberValue(const std::string& strValue, edouble& dblValue) const {
+    edouble value = atof(strValue.c_str());
     if(isMember(value)){
       dblValue = value;
       return true;
@@ -224,7 +224,7 @@ namespace EUROPA {
     }
   }
 
-  bool IntervalDomain::intersect(double lb, double ub) {
+  bool IntervalDomain::intersect(edouble lb, edouble ub) {
     // Test for empty intersection while accounting for precision/rounding errors.
     if (lt(ub, lb) || lt(ub, m_lb) || lt(m_ub, lb)){
       empty();
@@ -264,7 +264,7 @@ namespace EUROPA {
    
   }
 
-  void IntervalDomain::relax(double value) {
+  void IntervalDomain::relax(edouble value) {
     bool wasEmpty = isEmpty();
     m_ub = value;
     m_lb = value;
@@ -273,7 +273,7 @@ namespace EUROPA {
     }
   }
 
-  bool IntervalDomain::relax(double lb, double ub) {
+  bool IntervalDomain::relax(edouble lb, edouble ub) {
     // Ensure given bounds are not empty
     check_error(leq(lb, ub));
 
@@ -292,8 +292,8 @@ namespace EUROPA {
     return(relaxed);
   }
 
-  bool IntervalDomain::isMember(double value) const {
-    double converted = convert(value);
+  bool IntervalDomain::isMember(edouble value) const {
+    edouble converted = convert(value);
     return(converted == value && leq(m_lb, converted) && leq(converted, m_ub));
   }
 
@@ -321,25 +321,25 @@ namespace EUROPA {
     else if (isSingleton()) // Need to test separately in case of rounding errors
         return(1);
     else if(isFinite())
-      return((int)(m_ub - m_lb + 1));
+      return(cast_int(m_ub - m_lb + 1));
     else
-      return PLUS_INFINITY;
+      return cast_int(PLUS_INFINITY);
   }
 
-  void IntervalDomain::getValues(std::list<double>& results) const {
+  void IntervalDomain::getValues(std::list<edouble>& results) const {
     check_error(isSingleton());
     if (!isEmpty()) {
       results.push_back(m_lb); // consider averaging m_lb and m_ub
     }
   }
 
-  double IntervalDomain::check(const double& value) const {
+  edouble IntervalDomain::check(const edouble& value) const {
     testPrecision(value);
     return(value);
   }
 
 
-  void IntervalDomain::testPrecision(const double& value) const {}
+  void IntervalDomain::testPrecision(const edouble& value) const {}
 
   void IntervalDomain::operator>>(ostream& os) const {
     AbstractDomain::operator>>(os);
@@ -371,7 +371,7 @@ namespace EUROPA {
    * @brief Convert the value appropriately for the particular Domain class.
    * @note A no-op for reals.
    */
-  double IntervalDomain::convert(const double& value) const {return value;}
+  edouble IntervalDomain::convert(const edouble& value) const {return value;}
 
   bool IntervalDomain::isFinite() const {
     check_error(!isOpen());
@@ -384,11 +384,11 @@ namespace EUROPA {
     return(sl_typeName);
   }
 
-  double IntervalDomain::translateNumber(double number, bool) const {
+  edouble IntervalDomain::translateNumber(edouble number, bool) const {
     if (number < 0.0)
-      return(number < MINUS_INFINITY ? MINUS_INFINITY : number);
+      return(number < MINUS_INFINITY ? edouble(MINUS_INFINITY) : number);
     if (number > 0.0)
-      return(number > PLUS_INFINITY ? PLUS_INFINITY : number);
+      return(number > PLUS_INFINITY ? edouble(PLUS_INFINITY) : number);
     // This has to be explicitly 0.0 for hardware/OS/compiler
     // combinations that have a '-0.0' (negative zero) that
     // equals 0.0 but is also negative.
@@ -402,8 +402,8 @@ namespace EUROPA {
   }
 
   void IntervalDomain::commonInit(){
-    checkError(leq(m_ub,PLUS_INFINITY), "Upper bound " << m_ub << " is too large.");
-    checkError(leq(MINUS_INFINITY, m_lb), "Lower bound " << m_lb << " is too small.");
+    checkError(leq(m_ub,PLUS_INFINITY), "Upper bound " << m_ub << " is too large (" << PLUS_INFINITY << ").");
+    checkError(leq(MINUS_INFINITY, m_lb), "Lower bound " << m_lb << " is too small (" << MINUS_INFINITY << ").");
 
     if(isEmpty())
       notifyChange(DomainListener::EMPTIED);

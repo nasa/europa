@@ -4,11 +4,11 @@
 
 namespace EUROPA {
   
-  EnumeratedTypeFactory::EnumeratedTypeFactory(const char* typeName, const char* elementName)
+  EnumeratedTypeFactory::EnumeratedTypeFactory(const std::string& typeName, const std::string& elementName)
     : TypeFactory(typeName), m_elementName(elementName), m_baseDomain(false, typeName) {
   }
 
-  EnumeratedTypeFactory::EnumeratedTypeFactory(const char* typeName, const char* elementName, const EnumeratedDomain& baseDomain)
+  EnumeratedTypeFactory::EnumeratedTypeFactory(const std::string& typeName, const std::string& elementName, const EnumeratedDomain& baseDomain)
     : TypeFactory(typeName), m_elementName(elementName), m_baseDomain(baseDomain) {
   }
 
@@ -17,7 +17,7 @@ namespace EUROPA {
                                         const AbstractDomain& baseDomain,
                                         const bool internal,
                                         bool canBeSpecified,
-                                        const char* name,
+                                        const std::string& name,
                                         const EntityId& parent,
                                         int index) const {
     const EnumeratedDomain * enumeratedDomain = dynamic_cast<const EnumeratedDomain*>(&baseDomain);
@@ -36,7 +36,7 @@ namespace EUROPA {
     return(m_baseDomain);
   }
 
-  double EnumeratedTypeFactory::createValue(const std::string& value) const {
+  edouble EnumeratedTypeFactory::createValue(const std::string& value) const {
     if (m_baseDomain.isNumeric())
       return(atof(value.c_str()));
     return(LabelStr(value));

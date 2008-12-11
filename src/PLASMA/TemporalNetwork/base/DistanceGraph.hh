@@ -31,18 +31,8 @@ namespace EUROPA {
 // This is so that the legal values will be closed under negation.
 // The following achieves that without provoking over or under flow.
 
-// #if (LONG_MIN + LONG_MAX <= 0)  // LONG_MAX has lesser or same magnitude
-// #define TIME_MAX LONG_MAX
-// #else                           // LONG_MIN has the lesser magnitude
-// #define TIME_MAX -LONG_MIN
-// #endif
-#if (INT_MIN + INT_MAX <= 0)
-#define TIME_MAX std::numeric_limits<int>::max()
-#else
-#define TIME_MAX -std::numeric_limits<int>::min()
-#endif
-
-#define TIME_MIN -TIME_MAX      // Underflow has been protected against.
+#define TIME_MAX MAX_FINITE_TIME
+#define TIME_MIN MIN_FINITE_TIME
 
 // Following gives granularity (min separation) of Time type.
 // Note that x <= y is equivalent to x < (y + TIME_TICK).
@@ -62,8 +52,8 @@ namespace EUROPA {
 //#define POS_INFINITY (TIME_MAX - MAX_LENGTH)
 //#define NEG_INFINITY (TIME_MIN - MIN_LENGTH)
 
-#define POS_INFINITY MAX_LENGTH+1
-#define NEG_INFINITY MIN_LENGTH-1
+#define POS_INFINITY PLUS_INFINITY
+#define NEG_INFINITY MINUS_INFINITY
 #define MAX_DISTANCE POS_INFINITY-1   // Largest propagated distance for node
 #define MIN_DISTANCE NEG_INFINITY+1   // Smallest propagated distance for node
 
@@ -71,13 +61,6 @@ namespace EUROPA {
 #define nullptr 0       // Use for null pointers.
 #endif
 
-
-// Global to enable Rax-derived system test where constraints may be
-// removed multiple times.  Normally, multiple removals are considered
-// an error.  IsOkToRemoveTemporalConstraintTwice may be set to true
-// to suppress the error.
-
-extern Bool IsOkToRemoveTemporalConstraintTwice;
 
 class Dnode;
 class Dedge;

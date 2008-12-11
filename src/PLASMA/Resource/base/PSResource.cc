@@ -33,7 +33,7 @@ namespace EUROPA
       return m_lb;
 
     IntervalDomain dom;
-    m_profile->getLevel((int) time, dom);
+    m_profile->getLevel((eint) time, dom);
     return dom.getLowerBound();
   }
 
@@ -41,7 +41,7 @@ namespace EUROPA
     if(m_isConst)
       return m_ub;
     IntervalDomain dom;
-    m_profile->getLevel((int) time, dom);
+    m_profile->getLevel((eint) time, dom);
     return dom.getUpperBound();
   }
 

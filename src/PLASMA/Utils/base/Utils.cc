@@ -1,12 +1,19 @@
 #include "Utils.hh"
 #include <sstream>
 #include <iomanip>
+#include <cmath>
 
 DEFINE_GLOBAL_CONST(bool, g_alwaysFails, false);
 
 namespace EUROPA {
 
   std::string toString(double value) {
+    std::stringstream s;
+    s << std::setprecision(MAX_PRECISION) << value;
+    return(s.str());
+  }
+
+  std::string toString(edouble value) {
     std::stringstream s;
     s << std::setprecision(MAX_PRECISION) << value;
     return(s.str());
@@ -31,9 +38,9 @@ namespace EUROPA {
       }
   }
 
-  //DEFINE_GLOBAL_CONST(int, g_maxInt, (LONG_MAX/8)); /*!< Same as max finite time */
-  DEFINE_GLOBAL_CONST(int, g_maxInt, (std::numeric_limits<int>::max() / 8));
-  DEFINE_GLOBAL_CONST(int, g_infiniteTime, (g_maxInt() + 1));
-  DEFINE_GLOBAL_CONST(int, g_noTime, 0);
+
+  DEFINE_GLOBAL_CONST(eint, g_maxInt, std::min((long) std::pow((double)2, 51) - 2, std::numeric_limits<long>::max() - 1));
+  DEFINE_GLOBAL_CONST(eint, g_infiniteTime, (g_maxInt() + 1));
+  DEFINE_GLOBAL_CONST(eint, g_noTime, 0);
   DEFINE_GLOBAL_CONST(double, g_epsilon, 0.00001);
 }

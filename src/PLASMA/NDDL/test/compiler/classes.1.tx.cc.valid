@@ -211,7 +211,7 @@ namespace NDDL {
   };
   
   // classes.0.nddl:13 Path
-  void Path::constructor(const LocationId& _from, const LocationId& _to, float _cost) {
+  void Path::constructor(const LocationId& _from, const LocationId& _to, double _cost) {
     from = addVariable(LocationDomain(_from, "Location"), "from");
     to = addVariable(LocationDomain(_to, "Location"), "to");
     cost = addVariable(IntervalDomain(_cost, _cost, "float"), "cost");

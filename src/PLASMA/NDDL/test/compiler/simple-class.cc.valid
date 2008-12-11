@@ -185,7 +185,7 @@ namespace NDDL {
   };
   
   // simple-class.nddl:9 Foo
-  void Foo::constructor(int _m_0, float _m_1) {
+  void Foo::constructor(int _m_0, double _m_1) {
     m_0 = addVariable(IntervalIntDomain(_m_0, _m_0, "int"), "m_0");
     m_1 = addVariable(IntervalDomain(_m_1, _m_1, "float"), "m_1");
     m_2 = addVariable(BoolDomain(false, "bool"), "m_2");

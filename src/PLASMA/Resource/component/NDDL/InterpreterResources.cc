@@ -21,9 +21,9 @@ namespace EUROPA {
   {
     Id<NDDL::NddlResource>  instance = (new NDDL::NddlResource(planDb, objectType, objectName,true))->getId();
 
-    std::vector<float> argValues;
+    std::vector<double> argValues;
     for (unsigned int i=0;i<arguments.size();i++)
-      argValues.push_back((float)(arguments[i]->getSingletonValue()));
+      argValues.push_back(arguments[i]->getSingletonValue());
 
     if (argValues.size() == 0)
       instance->constructor();
@@ -74,9 +74,9 @@ namespace EUROPA {
   {
     Id<NDDL::NddlReusable>  instance = (new NDDL::NddlReusable(planDb, objectType, objectName,true))->getId();
 
-    std::vector<float> argValues;
+    std::vector<double> argValues;
     for (unsigned int i=0;i<arguments.size();i++)
-      argValues.push_back((float)(arguments[i]->getSingletonValue()));
+      argValues.push_back(arguments[i]->getSingletonValue());
 
     if (argValues.size() == 0)
       instance->constructor();
@@ -128,9 +128,9 @@ namespace EUROPA {
   {
     Id<NDDL::NddlReservoir>  instance = (new NDDL::NddlReservoir(planDb, objectType, objectName,true))->getId();
 
-    std::vector<float> argValues;
+    std::vector<double> argValues;
     for (unsigned int i=0;i<arguments.size();i++)
-      argValues.push_back((float)(arguments[i]->getSingletonValue()));
+      argValues.push_back(arguments[i]->getSingletonValue());
 
     if (argValues.size() == 0)
       instance->constructor();
@@ -194,9 +194,9 @@ namespace EUROPA {
   {
     Id<NDDL::NddlUnary>  instance = (new NDDL::NddlUnary(planDb, objectType, objectName,true))->getId();
 
-    std::vector<float> argValues;
+    std::vector<double> argValues;
     for (unsigned int i=0;i<arguments.size();i++)
-      argValues.push_back((float)(arguments[i]->getSingletonValue()));
+      argValues.push_back(arguments[i]->getSingletonValue());
 
     if (argValues.size() == 0)
       instance->constructor();

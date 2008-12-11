@@ -8,12 +8,12 @@ namespace EUROPA {
   // IntervalIntTypeFactory
   //
 
-  IntervalIntTypeFactory::IntervalIntTypeFactory(const char* name)
+  IntervalIntTypeFactory::IntervalIntTypeFactory(const std::string& name)
    : TypeFactory(name), m_baseDomain(name)
   {
   }
 
-  IntervalIntTypeFactory::IntervalIntTypeFactory(const char* name, const IntervalIntDomain& baseDomain)
+  IntervalIntTypeFactory::IntervalIntTypeFactory(const std::string& name, const IntervalIntDomain& baseDomain)
    : TypeFactory(name), m_baseDomain(baseDomain)
   {
   }
@@ -23,7 +23,7 @@ namespace EUROPA {
                                          const AbstractDomain& baseDomain,
                                          const bool internal,
                                          bool canBeSpecified,
-                                         const char* name,
+                                         const std::string& name,
                                          const EntityId& parent,
                                          int index) const
   {
@@ -44,7 +44,7 @@ namespace EUROPA {
     return m_baseDomain;
   }
 
-  double IntervalIntTypeFactory::createValue(const std::string& value) const
+  edouble IntervalIntTypeFactory::createValue(const std::string& value) const
   {
     return atoi(value.c_str());
   }

@@ -32,10 +32,10 @@ namespace NDDL {
     virtual void constructor();
     
     // inheritance.1.nddl:2 Foo
-    virtual void constructor(int _arg1, float _arg2);
+    virtual void constructor(int _arg1, double _arg2);
     
     // inheritance.1.nddl:2 Foo
-    virtual void constructor(int _arg1, float _arg2, bool _arg3);
+    virtual void constructor(int _arg1, double _arg2, bool _arg3);
   };
   
   // inheritance.1.nddl:31 Bar
@@ -56,6 +56,6 @@ namespace NDDL {
     virtual void constructor(const LabelStr& _arg4);
     
     // inheritance.1.nddl:31 Bar
-    virtual void constructor(const LabelStr& _arg4, int _arg1, float _arg2, bool _arg3);
+    virtual void constructor(const LabelStr& _arg4, int _arg1, double _arg2, bool _arg3);
   };
 } // End NDDL namespace

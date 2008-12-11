@@ -20,13 +20,13 @@ namespace EUROPA {
 //     return(sl_stringFromKeys);
 //   }
 
-  __gnu_cxx::hash_map<std::string, double>& LabelStr::keysFromString() {
-    static __gnu_cxx::hash_map<std::string, double> sl_keysFromString;
+  __gnu_cxx::hash_map<std::string, edouble>& LabelStr::keysFromString() {
+    static __gnu_cxx::hash_map<std::string, edouble> sl_keysFromString;
     return sl_keysFromString;
   }
 
-  __gnu_cxx::hash_map< double, std::string>& LabelStr::stringFromKeys() {
-    static __gnu_cxx::hash_map<double, std::string> sl_stringFromKeys;
+  __gnu_cxx::hash_map< edouble, std::string>& LabelStr::stringFromKeys() {
+    static __gnu_cxx::hash_map<edouble, std::string> sl_stringFromKeys;
     return(sl_stringFromKeys);
   }
 
@@ -67,7 +67,7 @@ namespace EUROPA {
 #endif
   }
 
-  LabelStr::LabelStr(double key)
+  LabelStr::LabelStr(edouble key)
     : m_key(key) {
     check_error(isString(m_key), "Invalid key provided.");
 
@@ -91,7 +91,7 @@ namespace EUROPA {
     m_chars = org.m_chars;
   }
 
-  LabelStr::operator double () const {
+  LabelStr::operator edouble () const {
     return(m_key);
   }
 
@@ -105,27 +105,35 @@ namespace EUROPA {
     return toString() > lbl.toString();
   }
 
+  bool LabelStr::operator==(const LabelStr& lbl) const {
+    return m_key == lbl.m_key;
+  }
+
+  bool LabelStr::operator!=(const LabelStr& lbl) const {
+    return m_key != lbl.m_key;
+  }
+
   unsigned int LabelStr::getSize() {
     check_error(keysFromString().size() == stringFromKeys().size());
     int toRet = keysFromString().size();
     return toRet;
   }
 
-  double LabelStr::getKey(const std::string& label) {
+  edouble LabelStr::getKey(const std::string& label) {
     MutexGrabber mg(LabelStrMutex());
     
-    static double sl_counter = EPSILON;
+    static edouble sl_counter = EPSILON;
 
-    __gnu_cxx::hash_map<std::string, double>::iterator it = 
+    __gnu_cxx::hash_map<std::string, edouble>::iterator it = 
       keysFromString().find(label);
 
     if (it != keysFromString().end()) {
-      double toRet = it->second;
+      edouble toRet = it->second;
       return toRet; // Found it; return the key.
     }
 
     // Given label not found, so allocate it.
-    double key = sl_counter;
+    edouble key = sl_counter;
     sl_counter = sl_counter + 2*EPSILON;
 
     check_error(key < 1.0, "More strings allocated than permitted");
@@ -134,21 +142,21 @@ namespace EUROPA {
     return(key);
   }
 
-  void LabelStr::handleInsertion(double key, const std::string& label) {
+  void LabelStr::handleInsertion(edouble key, const std::string& label) {
     debugMsg("LabelStr:insert", " " << key << " -> " << label);
-    keysFromString().insert(std::pair< std::string, double >(label, key));
-    stringFromKeys().insert(std::pair< double, std::string >(key, label));
+    keysFromString().insert(std::make_pair(label, key));
+    stringFromKeys().insert(std::make_pair(key, label));
   }
 
-  const std::string& LabelStr::getString(double key){
+  const std::string& LabelStr::getString(edouble key){
     MutexGrabber mg(LabelStrMutex());
-    __gnu_cxx::hash_map< double, std::string >::const_iterator it = stringFromKeys().find(key);
+    __gnu_cxx::hash_map< edouble, std::string >::const_iterator it = stringFromKeys().find(key);
     check_error(it != stringFromKeys().end());
     const std::string& toRet = it->second;
     return toRet;
   }
 
-  bool LabelStr::isString(double key) {
+  bool LabelStr::isString(edouble key) {
     MutexGrabber mg(LabelStrMutex());
     bool toRet = (stringFromKeys().find(key) != stringFromKeys().end());
     return toRet;

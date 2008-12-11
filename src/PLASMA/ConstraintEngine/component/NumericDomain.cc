@@ -4,16 +4,16 @@ namespace EUROPA {
 
 
   NumericDomain::NumericDomain()
-    : EnumeratedDomain(true, getDefaultTypeName().c_str()){}
+    : EnumeratedDomain(true, getDefaultTypeName().toString()){}
 
-  NumericDomain::NumericDomain(const char* typeName)
+  NumericDomain::NumericDomain(const std::string& typeName)
     : EnumeratedDomain(true, typeName){}
 
-  NumericDomain::NumericDomain(double value, const char* typeName) 
+  NumericDomain::NumericDomain(edouble value, const std::string& typeName) 
     : EnumeratedDomain(value, true, typeName){}
 
-  NumericDomain::NumericDomain(const std::list<double>& values, 
-                             const char* typeName)
+  NumericDomain::NumericDomain(const std::list<edouble>& values, 
+                               const std::string& typeName)
     : EnumeratedDomain(values, true, typeName) {}
 
   NumericDomain::NumericDomain(const AbstractDomain& org)
@@ -38,7 +38,7 @@ namespace EUROPA {
    * This appears to be necessary, though it should be sufficient to use the
    * base class method rather than having to delegate to it.
    */
-  void NumericDomain::set(double value){
+  void NumericDomain::set(edouble value){
     EnumeratedDomain::set(value);
   }
 }

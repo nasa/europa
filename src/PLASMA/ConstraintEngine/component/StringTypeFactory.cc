@@ -8,7 +8,7 @@ namespace EUROPA {
   // StringTypeFactory
   //
 
-  StringTypeFactory::StringTypeFactory(const char* name)
+  StringTypeFactory::StringTypeFactory(const std::string& name)
    : TypeFactory(name), m_baseDomain(name) {}
 
   ConstrainedVariableId
@@ -16,7 +16,7 @@ namespace EUROPA {
                                     const AbstractDomain& baseDomain,
                                     const bool internal,
                                     bool canBeSpecified,
-                                    const char* name,
+                                    const std::string& name,
                                     const EntityId& parent,
                                     int index) const
   {
@@ -35,7 +35,7 @@ namespace EUROPA {
     return m_baseDomain;
   }
 
-  double StringTypeFactory::createValue(const std::string& value) const
+  edouble StringTypeFactory::createValue(const std::string& value) const
   {
     return LabelStr(value);
   }

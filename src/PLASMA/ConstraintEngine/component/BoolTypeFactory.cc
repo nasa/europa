@@ -8,7 +8,7 @@ namespace EUROPA {
   // BoolTypeFactory
   //
 
-  BoolTypeFactory::BoolTypeFactory(const char* name)
+  BoolTypeFactory::BoolTypeFactory(const std::string& name)
    : TypeFactory(name), m_baseDomain(name)
   {
   }
@@ -18,7 +18,7 @@ namespace EUROPA {
                                   const AbstractDomain& baseDomain,
                                   const bool internal,
                                   bool canBeSpecified,
-                                  const char* name,
+                                  const std::string& name,
                                   const EntityId& parent,
                                   int index) const
   {
@@ -39,7 +39,7 @@ namespace EUROPA {
     return m_baseDomain;
   }
 
-  double BoolTypeFactory::createValue(const std::string& value) const
+  edouble BoolTypeFactory::createValue(const std::string& value) const
   {
     if (value == "true") {
       return true;

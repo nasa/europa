@@ -72,7 +72,7 @@ namespace EUROPA {
        * @param time The time at which to get the level.
        * @param dest The interval into which the computed levels are stored.
        */
-      virtual void getLevel(const int time, IntervalDomain& dest);
+      virtual void getLevel(const eint time, IntervalDomain& dest);
       
       /**
        * @brief Validates the data structures.  Maybe this should be private.
@@ -243,13 +243,13 @@ namespace EUROPA {
        * @brief Gets the Instant with the greatest time that is not greater than the given time.
        * @return An iterator pointing to the instant.
        */
-      std::map<int, InstantId>::iterator getGreatestInstant(const int time);
+      std::map<eint, InstantId>::iterator getGreatestInstant(const eint time);
       
       /**
        * @brief Gets the Instant with the least time not less than the given time.
        * @return An iterator pointing to the instant.
        */
-      std::map<int, InstantId>::iterator getLeastInstant(const int time);
+      std::map<eint, InstantId>::iterator getLeastInstant(const eint time);
       
     private:
       /**
@@ -262,7 +262,7 @@ namespace EUROPA {
        * @brief Create an instant for a time.
        * @param time The time
        */
-      void addInstant(const int time);
+      void addInstant(const eint time);
 
       void handleConstraintMessage(const ConstraintId c, const ConstrainedVariableId var, int argIndex, bool addition);
       
@@ -281,7 +281,7 @@ namespace EUROPA {
       std::map<ConstrainedVariableId, TransactionId> m_transactionsByTime;
       std::map<ConstraintId, ConstraintMessage> m_constraintsForNotification;
     protected:
-      std::map<int, InstantId> m_instants; /*<! A map from times to Instants. */
+      std::map<eint, InstantId> m_instants; /*<! A map from times to Instants. */
       ProfileIteratorId m_recomputeInterval; /*<! The stored interval of recomputation.*/
     };
 
@@ -299,7 +299,7 @@ namespace EUROPA {
        * @param startTime The time to begin iteration.  The time of the first Instant is guaranteed to be the greatest time not greater than this value.
        * @param endTime The time to end iteration.  The time of the last Instant is guaranteed to be the greatest time not greater than this value.
        */
-      ProfileIterator(const ProfileId prof, const int startTime = MINUS_INFINITY, const int endTime = PLUS_INFINITY);
+      ProfileIterator(const ProfileId prof, const eint startTime = MINUS_INFINITY, const eint endTime = PLUS_INFINITY);
       
       ~ProfileIterator() {m_id.remove();}
 
@@ -312,7 +312,7 @@ namespace EUROPA {
        * @brief Gets the time of the current position of this ProfileIterator
        * @return The time
        */
-      int getTime() const;
+      eint getTime() const;
       
       /**
        * @brief Gets the value of the lower bound of the profile at the current instant in time.
@@ -344,14 +344,14 @@ namespace EUROPA {
        */
       bool isStale() const;
 
-      int getStartTime() const;
-      int getEndTime() const;
+      eint getStartTime() const;
+      eint getEndTime() const;
     protected:
     private:
       ProfileIteratorId m_id;
       ProfileId m_profile;
       unsigned int m_changeCount; /*<! A copy of the similar variable in Profile when this iterator was instantiated.  Used to detect staleness. */
-      int m_startTime, m_endTime;
+      eint m_startTime, m_endTime;
       std::map<int, InstantId>::const_iterator m_start, m_end, m_realEnd; /*<! The start and end times over which this iterator goes*/
     };
 

@@ -67,28 +67,28 @@ namespace EUROPA {
     	{
     		inst->setFlawed(true);
 //       		inst->set??(true);
-//       		inst->set??Magnitude(fabs(m_maxCumulativeConsumption - inst->getMaxCumulativeConsumption()));
+//       		inst->set??Magnitude(std::abs(m_maxCumulativeConsumption - inst->getMaxCumulativeConsumption()));
        		debugMsg("GenericFVDetector:detect", "Cumulative consumption flaw.");
     	}	
     	if (inst->getMaxCumulativeProduction() > m_maxCumulativeProduction)
     	{
     		inst->setFlawed(true);
 //       		inst->set??(true);
-//       		inst->set??Magnitude(fabs(m_maxCumulativeProduction - inst->getMaxCumulativeProduction()));
+//       		inst->set??Magnitude(std::abs(m_maxCumulativeProduction - inst->getMaxCumulativeProduction()));
        		debugMsg("GenericFVDetector:detect", "Cumulative production flaw.");
     	}     
     	if (inst->getMaxInstantConsumption() > m_maxInstConsumption)
     	{
     		inst->setFlawed(true);
 //       		inst->set??(true);
-//       		inst->set??Magnitude(fabs(m_maxInstConsumption - inst->getMaxInstantConsumption()));
+//       		inst->set??Magnitude(std::abs(m_maxInstConsumption - inst->getMaxInstantConsumption()));
        		debugMsg("GenericFVDetector:detect", "Instantaneous consumption flaw.");
     	} 
     	if (inst->getMaxInstantProduction() > m_maxInstProduction)
     	{
     		inst->setFlawed(true);
 //       		inst->set??(true);
-//       		inst->set??Magnitude(fabs(m_maxInstProduction - inst->getMaxInstantProduction()));
+//       		inst->set??Magnitude(std::abs(m_maxInstProduction - inst->getMaxInstantProduction()));
        		debugMsg("GenericFVDetector:detect", "Instantaneous production flaw.");
     	}
     	handleResourceLevelFlaws(inst);

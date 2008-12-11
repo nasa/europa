@@ -127,7 +127,7 @@ LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, c
       close();
   }
 
-  void NddlUnary::constructor(float c_max) {
+  void NddlUnary::constructor(double c_max) {
     consumptionMax = addVariable(IntervalDomain(c_max, c_max, "float"), "consumptionMax");
   }
 
@@ -234,19 +234,19 @@ LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, c
       close();
   }
 
-  void NddlReusable::constructor(float c, float ll_min) {
+  void NddlReusable::constructor(double c, double ll_min) {
     capacity = addVariable(IntervalDomain(c, c, "float"), "capacity");
     levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
     consumptionRateMax = addVariable(IntervalDomain(PLUS_INFINITY, PLUS_INFINITY, "float"), "consumptionRateMax");
     consumptionMax = addVariable(IntervalDomain(PLUS_INFINITY, PLUS_INFINITY, "float"), "consumptionMax");
   }
-  void NddlReusable::constructor(float c, float ll_min, float cr_max) {
+  void NddlReusable::constructor(double c, double ll_min, double cr_max) {
     capacity = addVariable(IntervalDomain(c, c, "float"), "capacity");
     levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
     consumptionRateMax = addVariable(IntervalDomain(cr_max, cr_max, "float"), "consumptionRateMax");
     consumptionMax = addVariable(IntervalDomain(PLUS_INFINITY, PLUS_INFINITY, "float"), "consumptionMax");
   }
-  void NddlReusable::constructor(float c, float ll_min, float c_max, float cr_max) {
+  void NddlReusable::constructor(double c, double ll_min, double c_max, double cr_max) {
     capacity = addVariable(IntervalDomain(c, c, "float"), "capacity");
     levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
     consumptionRateMax = addVariable(IntervalDomain(cr_max, cr_max, "float"), "consumptionRateMax");
@@ -382,7 +382,7 @@ LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, c
       close();
   }
 
-  void NddlReservoir::constructor(float ic, float ll_min, float ll_max) {
+  void NddlReservoir::constructor(double ic, double ll_min, double ll_max) {
     initialCapacity = addVariable(IntervalDomain(ic, ic, "float"), "initialCapacity");
     levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
     levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, "float"), "levelLimitMax");
@@ -392,7 +392,7 @@ LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, c
     consumptionMax = addVariable(IntervalDomain(+inf, +inf, "float"), "consumptionMax");
   }
 
-  void NddlReservoir::constructor(float ic, float ll_min, float ll_max, float p_max, float c_max) {
+  void NddlReservoir::constructor(double ic, double ll_min, double ll_max, double p_max, double c_max) {
     initialCapacity = addVariable(IntervalDomain(ic, ic, "float"), "initialCapacity");
     levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
     levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, "float"), "levelLimitMax");
@@ -402,7 +402,7 @@ LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, c
     consumptionMax = addVariable(IntervalDomain(c_max, c_max, "float"), "consumptionMax");
   }
 
-  void NddlReservoir::constructor(float ic, float ll_min, float ll_max, float pr_max, float p_max, float cr_max, float c_max) {
+  void NddlReservoir::constructor(double ic, double ll_min, double ll_max, double pr_max, double p_max, double cr_max, double c_max) {
     initialCapacity = addVariable(IntervalDomain(ic, ic, "float"), "initialCapacity");
     levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
     levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, "float"), "levelLimitMax");
@@ -585,7 +585,7 @@ LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, c
       close();
   }
 
-  void NddlResource::constructor(float ic, float ll_min, float ll_max) {
+  void NddlResource::constructor(double ic, double ll_min, double ll_max) {
     initialCapacity = addVariable(IntervalDomain(ic, ic, "float"), "initialCapacity");
     levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
     levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, "float"), "levelLimitMax");
@@ -596,7 +596,7 @@ LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, c
   }
 
   // Plasma.nddl:20 Resource
-  void NddlResource::constructor(float ic, float ll_min, float ll_max, float p_max, float c_max) {
+  void NddlResource::constructor(double ic, double ll_min, double ll_max, double p_max, double c_max) {
     initialCapacity = addVariable(IntervalDomain(ic, ic, "float"), "initialCapacity");
     levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
     levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, "float"), "levelLimitMax");
@@ -607,7 +607,7 @@ LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, c
   }
 
   // Plasma.nddl:20 Resource
-  void NddlResource::constructor(float ic, float ll_min, float ll_max, float pr_max, float p_max, float cr_max, float c_max) {
+  void NddlResource::constructor(double ic, double ll_min, double ll_max, double pr_max, double p_max, double cr_max, double c_max) {
     initialCapacity = addVariable(IntervalDomain(ic, ic, "float"), "initialCapacity");
     levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
     levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, "float"), "levelLimitMax");

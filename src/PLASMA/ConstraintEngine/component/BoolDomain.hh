@@ -24,11 +24,11 @@ namespace EUROPA {
 
     BoolDomain();
 
-    BoolDomain(const char* typeName);
+    BoolDomain(const std::string& typeName);
 
     BoolDomain(bool value);
 
-    BoolDomain(bool value, const char* typeName);
+    BoolDomain(bool value, const std::string& typeName);
 
     BoolDomain(const AbstractDomain& org);
 
@@ -56,14 +56,14 @@ namespace EUROPA {
     /**
      * @brief Convert to true or false as needed
      */
-    std::string toString(double value) const;
+    std::string toString(edouble value) const;
 
     bool intersect(const AbstractDomain& dom);
 
-    bool intersect(double lb, double ub);
+    bool intersect(edouble lb, edouble ub);
 
   private:
-    virtual void testPrecision(const double& value) const;
+    virtual void testPrecision(const edouble& value) const;
   };
 }
 #endif

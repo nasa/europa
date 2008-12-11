@@ -317,7 +317,7 @@ namespace EUROPA {
           if(bestP == getBestCasePriority())
             break;
         }
-        else if((fabs(priorityDiff) < EPSILON && betterThan(candidate, flawToResolve, explanation))){
+        else if((std::abs(priorityDiff) < EPSILON && betterThan(candidate, flawToResolve, explanation))){
           debugMsg("FlawManager:next",
                    "Updating because candidate is judged better than old candidate.");
           flawToResolve = candidate;
@@ -328,9 +328,9 @@ namespace EUROPA {
             break;
         }
         
-//         condDebugMsg(priorityDiff <= -EPSILON || fabs(priorityDiff) < EPSILON, "FlawManager:next", "Priority for " << candidate->toString() << " (" << 
+//         condDebugMsg(priorityDiff <= -EPSILON || std::abs(priorityDiff) < EPSILON, "FlawManager:next", "Priority for " << candidate->toString() << " (" << 
 //                      priority << ") is not better than the current best (" << bestP << ")");
-//         condDebugMsg(fabs(priorityDiff) < EPSILON && !betterThan(candidate, flawToResolve), "FlawManager:next", "Candidate " <<
+//         condDebugMsg(std::abs(priorityDiff) < EPSILON && !betterThan(candidate, flawToResolve), "FlawManager:next", "Candidate " <<
 //                      candidate->toString() << " isn't better than the current best flaw (" << 
 //                      flawToResolve->toString() << ")");
       }

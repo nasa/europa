@@ -27,12 +27,12 @@ namespace EUROPA {
     /**
      * @brief Initially empty but open, with special type name
      */
-    StringDomain(const char* typeName);
+    StringDomain(const std::string& typeName);
 
     /**
      * @brief Constructs an initial singleton domain with the given type name
      */
-    StringDomain(double value, const char* typeName = getDefaultTypeName().toString().c_str());
+    StringDomain(edouble value, const std::string& typeName = getDefaultTypeName().toString());
 
     /**
      * @brief Constructor.
@@ -40,8 +40,8 @@ namespace EUROPA {
      * @param typeName
      * @see AbstractDomain::isDynamic()
      */
-    StringDomain(const std::list<double>& values, 
-                 const char* typeName = getDefaultTypeName().toString().c_str());
+    StringDomain(const std::list<edouble>& values, 
+                 const std::string& typeName = getDefaultTypeName().toString());
 
     /**
      * @brief Copy constructor.
@@ -64,9 +64,9 @@ namespace EUROPA {
      * @brief Sets a singleton value.
      * @param value The value to set. Must be a LabelStr.
      */
-    void set(double value);
+    void set(edouble value);
     
-    bool isMember(double value) const;    
+    bool isMember(edouble value) const;    
 
   };
 

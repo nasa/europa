@@ -163,15 +163,15 @@ public:
       ConstraintEngine* ce = (ConstraintEngine*)engine.getComponent("ConstraintEngine");
 
     IntervalIntDomain d0(5);
-    int v0 = (int) ce->createValue(d0.getTypeName().c_str(), "5");
+    eint v0 = cast_int(ce->createValue(d0.getTypeName().c_str(), "5"));
     CPPUNIT_ASSERT(d0.compareEqual(d0.getSingletonValue(), v0));
 
     IntervalDomain d1(2.3);
-    double v1 = (double) ce->createValue(d1.getTypeName().c_str(), "2.3");
+    edouble v1 = ce->createValue(d1.getTypeName().c_str(), "2.3");
     CPPUNIT_ASSERT(d1.compareEqual(d1.getSingletonValue(), v1));
 
     BoolDomain d2(true);
-    bool v2 = (bool) ce->createValue(d2.getTypeName().c_str(), "true");
+    bool v2 = (bool) cast_int(ce->createValue(d2.getTypeName().c_str(), "true"));
     CPPUNIT_ASSERT(d2.compareEqual(d2.getSingletonValue(), v2));
 
     return true;
@@ -729,7 +729,7 @@ public:
 
 private:
   static bool testGNATS_3181(){
-    std::list<double> values;
+    std::list<edouble> values;
     values.push_back(1);
     values.push_back(2);
     values.push_back(3);
@@ -907,7 +907,7 @@ private:
       CPPUNIT_ASSERT(ENGINE->propagate());
       v0.specify(11);
       CPPUNIT_ASSERT(ENGINE->propagate());
-      CPPUNIT_ASSERT(v1.getDerivedDomain() == IntervalIntDomain(0));
+      CPPUNIT_ASSERT(v1.getDerivedDomain() == IntervalIntDomain(eint(0)));
     }
 
     return true;
@@ -1590,9 +1590,9 @@ private:
     Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(0, 27));
     Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(0, 27));
     Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(0, 27));
-    Variable<IntervalIntDomain> v6(ENGINE, IntervalIntDomain(0));
-    Variable<IntervalIntDomain> v7(ENGINE, IntervalIntDomain(0));
-    Variable<IntervalIntDomain> v8(ENGINE, IntervalIntDomain(0));
+    Variable<IntervalIntDomain> v6(ENGINE, IntervalIntDomain(eint(0)));
+    Variable<IntervalIntDomain> v7(ENGINE, IntervalIntDomain(eint(0)));
+    Variable<IntervalIntDomain> v8(ENGINE, IntervalIntDomain(eint(0)));
     Variable<IntervalIntDomain> v9(ENGINE, IntervalIntDomain(1));
     Variable<IntervalIntDomain> vA(ENGINE, IntervalIntDomain(11, 27));
     std::vector<ConstrainedVariableId> scope;
@@ -1679,7 +1679,7 @@ private:
       CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
       CPPUNIT_ASSERT(ENGINE->constraintConsistent());
-      CPPUNIT_ASSERT(v2.getDerivedDomain() == IntervalIntDomain(0));
+      CPPUNIT_ASSERT(v2.getDerivedDomain() == IntervalIntDomain(eint(0)));
     }
     scope.clear();
     {
@@ -1691,8 +1691,8 @@ private:
       CondAllSameConstraint c0(LabelStr("CondAllSameConstraint"), LabelStr("Default"), ENGINE, scope);
       ENGINE->propagate();
       CPPUNIT_ASSERT(ENGINE->constraintConsistent());
-      CPPUNIT_ASSERT(v2.getDerivedDomain() == IntervalIntDomain(0));
-      CPPUNIT_ASSERT(v3.getDerivedDomain() == IntervalIntDomain(0));
+      CPPUNIT_ASSERT(v2.getDerivedDomain() == IntervalIntDomain(eint(0)));
+      CPPUNIT_ASSERT(v3.getDerivedDomain() == IntervalIntDomain(eint(0)));
     }
     scope.clear();
     {
@@ -1783,9 +1783,9 @@ private:
     Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(0, 27));
     Variable<IntervalIntDomain> v4(ENGINE, IntervalIntDomain(0, 27));
     Variable<IntervalIntDomain> v5(ENGINE, IntervalIntDomain(0, 27));
-    Variable<IntervalIntDomain> v6(ENGINE, IntervalIntDomain(0));
-    Variable<IntervalIntDomain> v7(ENGINE, IntervalIntDomain(0));
-    Variable<IntervalIntDomain> v8(ENGINE, IntervalIntDomain(0));
+    Variable<IntervalIntDomain> v6(ENGINE, IntervalIntDomain(eint(0)));
+    Variable<IntervalIntDomain> v7(ENGINE, IntervalIntDomain(eint(0)));
+    Variable<IntervalIntDomain> v8(ENGINE, IntervalIntDomain(eint(0)));
     Variable<IntervalIntDomain> v9(ENGINE, IntervalIntDomain(1));
     Variable<IntervalIntDomain> vA(ENGINE, IntervalIntDomain(11, 27));
     Variable<IntervalIntDomain> vB(ENGINE, IntervalIntDomain(-1, 2));
@@ -1901,9 +1901,9 @@ private:
       ENGINE->propagate();
       CPPUNIT_ASSERT(ENGINE->constraintConsistent());
       CPPUNIT_ASSERT(!bothVar.getDerivedDomain().getSingletonValue());
-      CPPUNIT_ASSERT(v6.getDerivedDomain() == IntervalIntDomain(0));
-      CPPUNIT_ASSERT(v7.getDerivedDomain() == IntervalIntDomain(0));
-      CPPUNIT_ASSERT(v8.getDerivedDomain() == IntervalIntDomain(0));
+      CPPUNIT_ASSERT(v6.getDerivedDomain() == IntervalIntDomain(eint(0)));
+      CPPUNIT_ASSERT(v7.getDerivedDomain() == IntervalIntDomain(eint(0)));
+      CPPUNIT_ASSERT(v8.getDerivedDomain() == IntervalIntDomain(eint(0)));
       CPPUNIT_ASSERT(v9.getDerivedDomain() == IntervalIntDomain(1));
       CPPUNIT_ASSERT(vA.getDerivedDomain() == IntervalIntDomain(11, 27));
     }
@@ -1978,7 +1978,7 @@ private:
       CPPUNIT_ASSERT(v3.getDerivedDomain() == IntervalIntDomain(16, 27));
       CPPUNIT_ASSERT(v4.getDerivedDomain() == IntervalIntDomain(16, 27));
       CPPUNIT_ASSERT(v5.getDerivedDomain() == IntervalIntDomain(16, 27));
-      CPPUNIT_ASSERT(v6.getDerivedDomain() == IntervalIntDomain(0));
+      CPPUNIT_ASSERT(v6.getDerivedDomain() == IntervalIntDomain(eint(0)));
       CPPUNIT_ASSERT(vA.getDerivedDomain() == IntervalIntDomain(16, 27));
       CPPUNIT_ASSERT(vB.getDerivedDomain() == IntervalIntDomain(-1));
       CPPUNIT_ASSERT(vC.getDerivedDomain() == IntervalIntDomain(11));

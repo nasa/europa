@@ -542,7 +542,7 @@ namespace EUROPA {
 
   class StateDomain : public EnumeratedDomain {
   public:
-    StateDomain(const char* typeName = "States");
+    StateDomain(const std::string& typeName = "States");
     StateDomain(const AbstractDomain& org);
     virtual void operator>>(ostream& os) const;
   };

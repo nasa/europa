@@ -156,7 +156,7 @@ namespace NDDL {
   
   
   // gnats_3140.nddl:11 Foo
-  void Foo::constructor(bool _field1, int _field2, float _field4, const LabelStr& _field6, const BooId& _field7) {
+  void Foo::constructor(bool _field1, int _field2, double _field4, const LabelStr& _field6, const BooId& _field7) {
     field1 = addVariable(BoolDomain(_field1, "bool"), "field1");
     field2 = addVariable(IntervalIntDomain(_field2, _field2, "int"), "field2");
     field4 = addVariable(IntervalDomain(_field4, _field4, "float"), "field4");

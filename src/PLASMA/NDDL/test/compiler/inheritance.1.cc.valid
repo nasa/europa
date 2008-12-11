@@ -58,7 +58,7 @@ namespace NDDL {
   };
   
   // inheritance.1.nddl:2 Foo
-  void Foo::constructor(int _arg1, float _arg2) {
+  void Foo::constructor(int _arg1, double _arg2) {
     arg1 = addVariable(IntervalIntDomain(_arg1, _arg1, "int"), "arg1");
     arg2 = addVariable(IntervalDomain(_arg2, _arg2, "float"), "arg2");
     arg3 = addVariable(BoolDomain(false, "bool"), "arg3");
@@ -94,7 +94,7 @@ namespace NDDL {
   };
   
   // inheritance.1.nddl:2 Foo
-  void Foo::constructor(int _arg1, float _arg2, bool _arg3) {
+  void Foo::constructor(int _arg1, double _arg2, bool _arg3) {
     arg1 = addVariable(IntervalIntDomain(_arg1, _arg1, "int"), "arg1");
     arg2 = addVariable(IntervalDomain(_arg2, _arg2, "float"), "arg2");
     arg3 = addVariable(BoolDomain(_arg3, "bool"), "arg3");
@@ -211,7 +211,7 @@ namespace NDDL {
   };
   
   // inheritance.1.nddl:31 Bar
-  void Bar::constructor(const LabelStr& _arg4, int _arg1, float _arg2, bool _arg3) {
+  void Bar::constructor(const LabelStr& _arg4, int _arg1, double _arg2, bool _arg3) {
     Foo::constructor(_arg1, _arg2, _arg3);
     arg4 = addVariable(StringDomain(_arg4, "string"), "arg4");
   }

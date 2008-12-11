@@ -68,12 +68,12 @@ namespace EUROPA {
      * Any change to the time will cause recomputation.
      * @arg earliest - earliest must be <= m_latest or it will cause an error
      */
-    void setEarliest(int earliest);
+    void setEarliest(eint earliest);
 
     /**
      * @brief Accessor
      */
-    int getEarliest() const;
+    eint getEarliest() const;
 
 
     /**
@@ -82,12 +82,12 @@ namespace EUROPA {
      * Any change to the time may cause recomputation.
      * @arg latest - latest must be >= m_latest or it will cause an error
      */
-    void setLatest(int latest);
+    void setLatest(eint latest);
 
     /**
      * @brief Accessor
      */
-    int getLatest() const;
+    eint getLatest() const;
 
     /**
      * @brief Set the minimu quanityt of change allowed for this transaction.

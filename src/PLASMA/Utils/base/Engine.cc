@@ -175,7 +175,7 @@ namespace EUROPA
 
     std::string EngineBase::executeScript(const std::string& language, const std::string& script, bool isFile)
     {
-      std::map<double, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
+      std::map<edouble, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
       checkRuntimeError(it != getLanguageInterpreters().end(),
   		      "Cannot execute script for unknown language \"" << language << "\"");
 
@@ -199,7 +199,7 @@ namespace EUROPA
 
     void EngineBase::addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter)
     {
-      std::map<double, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
+      std::map<edouble, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
       if(it == getLanguageInterpreters().end())
         getLanguageInterpreters().insert(std::make_pair(LabelStr(language), interpreter));
       else {
@@ -210,7 +210,7 @@ namespace EUROPA
 
     void EngineBase::removeLanguageInterpreter(const std::string& language)
     {
-      std::map<double, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
+      std::map<edouble, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
       if(it != getLanguageInterpreters().end()) {
         delete it->second;
         getLanguageInterpreters().erase(it);
@@ -219,21 +219,21 @@ namespace EUROPA
 
     LanguageInterpreter* EngineBase::getLanguageInterpreter(const std::string& language)
     {
-        std::map<double, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
+        std::map<edouble, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
         if(it != getLanguageInterpreters().end()) 
             return it->second;
         
         return NULL;
     }
 
-    std::map<double, LanguageInterpreter*>& EngineBase::getLanguageInterpreters()
+    std::map<edouble, LanguageInterpreter*>& EngineBase::getLanguageInterpreters()
     {
         return m_languageInterpreters;
     }
 
     void EngineBase::addComponent(const std::string& name,EngineComponent* component)
     {
-        std::map<double, EngineComponent*>::iterator it = getComponents().find(LabelStr(name));
+        std::map<edouble, EngineComponent*>::iterator it = getComponents().find(LabelStr(name));
         if(it == getComponents().end())
           getComponents().insert(std::make_pair(LabelStr(name), component));
         else {
@@ -245,7 +245,7 @@ namespace EUROPA
     
     EngineComponent* EngineBase::getComponent(const std::string& name)
     {
-      std::map<double, EngineComponent*>::iterator it = getComponents().find(LabelStr(name));
+      std::map<edouble, EngineComponent*>::iterator it = getComponents().find(LabelStr(name));
       if(it != getComponents().end()) 
           return it->second;
       
@@ -254,7 +254,7 @@ namespace EUROPA
     
     const EngineComponent* EngineBase::getComponent(const std::string& name) const
     {
-      std::map<double, EngineComponent*>::const_iterator it = m_components.find(LabelStr(name));
+      std::map<edouble, EngineComponent*>::const_iterator it = m_components.find(LabelStr(name));
       if(it != m_components.end()) 
           return it->second;
       
@@ -273,7 +273,7 @@ namespace EUROPA
         return c;
     }    
     
-    std::map<double, EngineComponent*>& EngineBase::getComponents()
+    std::map<edouble, EngineComponent*>& EngineBase::getComponents()
     {
         return m_components;
     }        

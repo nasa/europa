@@ -9,27 +9,29 @@
 
 class UtilModuleTests : public CppUnit::TestFixture {
 
-	CPPUNIT_TEST_SUITE(UtilModuleTests);
-	CPPUNIT_TEST(errorTests);
-	CPPUNIT_TEST(debugTests);
-	CPPUNIT_TEST(idTests);
-	CPPUNIT_TEST(labelTests);
-	CPPUNIT_TEST(entityTests);
-	CPPUNIT_TEST(xmlTests);
-	CPPUNIT_TEST_SUITE_END();
+  CPPUNIT_TEST_SUITE(UtilModuleTests);
+  CPPUNIT_TEST(errorTests);
+  CPPUNIT_TEST(debugTests);
+  CPPUNIT_TEST(idTests);
+  CPPUNIT_TEST(labelTests);
+  CPPUNIT_TEST(entityTests);
+  CPPUNIT_TEST(xmlTests);
+  CPPUNIT_TEST(numberTests);
+  CPPUNIT_TEST_SUITE_END();
 
 public:
-	void setUp()
-	{
-		EUROPA::setTestLoadLibraryPath(".");
-	}
+  void setUp()
+  {
+    EUROPA::setTestLoadLibraryPath(".");
+  }
 
-	void errorTests();
-	void debugTests();
-	void idTests();
-	void labelTests();
-	void entityTests();
-	void xmlTests();
+  void errorTests();
+  void debugTests();
+  void idTests();
+  void labelTests();
+  void entityTests();
+  void xmlTests();
+  void numberTests();
 };
 
 

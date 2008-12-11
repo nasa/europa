@@ -194,7 +194,7 @@ namespace EUROPA {
     /**
      * @brief Accessor for the specified value. Will fail if the variable is not specified.
      */
-    double getSpecifiedValue() const;
+    edouble getSpecifiedValue() const;
 
     /**
      * @brief Accessor for variable name.
@@ -281,18 +281,18 @@ namespace EUROPA {
     /**
      * @brief Insert the value into its domain. Variable must be dynamic.
      */
-    virtual void insert(double value);
+    virtual void insert(edouble value);
 
     /**
      * @brief Remove a value from its domain. Variable must be dynamic.
      */
-    virtual void remove(double value);
+    virtual void remove(edouble value);
 
     /**
      * @brief Restricts the domain to a singleton value.
      * @param singletonValue to specify it to.
      */
-    virtual void specify(double singletonValue);
+    virtual void specify(edouble singletonValue);
 
     /**
      * @brief Allows a client to close a variables domain.
@@ -320,7 +320,7 @@ namespace EUROPA {
     /**
      * @brief Supports the merging of variables by propagating messages on specification of a variable
      */
-    virtual void handleSpecified(double value) {}
+    virtual void handleSpecified(edouble value) {}
 
     /**
      * @brief Supports the merging of variables by propagating message on reset of a specified domain
@@ -339,7 +339,7 @@ namespace EUROPA {
     /**
      * @brief Utility to obtain a display version of a double encoded value.
      */
-    virtual std::string toString(double value) const;
+    virtual std::string toString(edouble value) const;
 
     /**
      * @brief Accessor
@@ -397,7 +397,7 @@ namespace EUROPA {
      */
     virtual AbstractDomain& internal_baseDomain() = 0;
 
-    void internalSpecify(double singletonValue);
+    void internalSpecify(edouble singletonValue);
 
     friend class Constraint; /**< Grant access so that the relationships between Constraint and Variable can be constructed and validated
 			       without exposiing such methods publically. @see Constraint::Constraint(), Constraint::~Constraint() */
@@ -512,7 +512,7 @@ namespace EUROPA {
     const bool m_canBeSpecified;
     bool m_specifiedFlag; /**< True of internalSpecify is called.
 			   It is possible that !canBeSpecified() && m_hasBeenSpecified */
-    double m_specifiedValue; /**< Only meaningful if specifiedFlag set */
+    edouble m_specifiedValue; /**< Only meaningful if specifiedFlag set */
     const int m_index; /**< Locator for variable if constained by some entity. Default is NO_INDEX */
     const EntityId m_parent;
     unsigned int m_deactivationRefCount;/*!< The number of outstanding deactivation requests. */

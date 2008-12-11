@@ -3,7 +3,7 @@
 
 namespace EUROPA 
 {
-  TypeFactory::TypeFactory(const char* typeName)
+  TypeFactory::TypeFactory(const std::string& typeName)
     : m_id(this)
     , m_typeName(typeName)
   {

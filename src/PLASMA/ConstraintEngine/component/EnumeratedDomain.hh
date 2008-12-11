@@ -30,7 +30,7 @@ namespace EUROPA {
      * @see AbstractDomain::isDynamic()
      */
     EnumeratedDomain(bool isNumeric,
-		     const char* typeName);
+		     const std::string& typeName);
 
     /**
      * @brief Constructor.
@@ -39,9 +39,9 @@ namespace EUROPA {
      * @param typeName Indicate the type name to use as a specialization of enumeration types 
      * @see AbstractDomain::isDynamic()
      */
-    EnumeratedDomain(const std::list<double>& values, 
+    EnumeratedDomain(const std::list<edouble>& values, 
 		     bool isNumeric,
-		     const char* typeName);
+		     const std::string& typeName);
 
     /**
      * @brief Constructor.
@@ -49,9 +49,9 @@ namespace EUROPA {
      * @param isNumeric Indicate if the set is to be used to store numeric or symbolic values
      * @param typeName Indicate the type name to use as a specialization of enumeration types 
      */
-    EnumeratedDomain(double value,
+    EnumeratedDomain(edouble value,
 		     bool isNumeric,
-		     const char* typeName);
+		     const std::string& typeName);
 
     /**
      * @brief Copy constructor.
@@ -124,16 +124,16 @@ namespace EUROPA {
      * @see DomainListener::DOMAIN_RELAXED
      * @todo Consider if it makes sense to error out if isMember(value)
      */
-    virtual void insert(double value);
+    virtual void insert(edouble value);
 
-    virtual void insert(const std::list<double>& values);
+    virtual void insert(const std::list<edouble>& values);
 
     /**
      * @brief Remove the given element form the domain.
      * @param value. The value to be removed. If present, removal will generate a value removal event
      * @see DomainListener::VALUE_REMOVED
      */
-    void remove(double value);
+    void remove(edouble value);
 
     /**
      * @brief Attempt to set the domain to a singleton.
@@ -143,7 +143,7 @@ namespace EUROPA {
      * @param value The target singleton value.
      * @see DomainListener::EMPTIED, DomainListener::SET_TO_SINGLETON
      */
-    virtual void set(double value);
+    virtual void set(edouble value);
 
     /**
      * @brief Reset the domain to the target value.
@@ -161,7 +161,7 @@ namespace EUROPA {
      * @brief Indicates relaxation to a singleton value. Occurs when domain has been emptied previously
      * @param The value to relax to
      */
-    void relax(double value);
+    void relax(edouble value);
 
     /**
      * @brief Construct a mutual restriction of the 2 domains to the intersection between them.
@@ -179,7 +179,7 @@ namespace EUROPA {
      * @note Only callable when it is in fact a singleton.
      * @return A copy of the stored (and encoded) singleton value.
      */
-    double getSingletonValue() const;
+    edouble getSingletonValue() const;
 
     /**
      * @brief Fill the given list with the contents of the set.
@@ -187,23 +187,23 @@ namespace EUROPA {
      * Should only be called on finite (and thus closed) domains.
      * @param results The target collection to fill with all values in the set.
      */
-    void getValues(std::list<double>& results) const;
+    void getValues(std::list<edouble>& results) const;
 
 
     /**
      * @brief Retrieve the contents as a set
      */
-    const std::set<double>& getValues() const;
+    const std::set<edouble>& getValues() const;
 
     /**
      * @brief Access upper bound.
      */
-    double getUpperBound() const;
+    edouble getUpperBound() const;
 
     /**
      * @brief Access lower bound.
      */
-    double getLowerBound() const;
+    edouble getLowerBound() const;
 
     /**
      * @brief Access both bounds in a convenience method, and indicate if the domain is infinite.
@@ -211,7 +211,7 @@ namespace EUROPA {
      * @param ub update this value with the upper bound.
      * @return true if !isFinite()
      */
-    bool getBounds(double& lb, double& ub) const;
+    bool getBounds(edouble& lb, edouble& ub) const;
 
     /**
      * @brief Test if the given value is a member of the set.
@@ -219,12 +219,12 @@ namespace EUROPA {
      * @return true if present, otherwise false.
      * @note Not allowed to call this if the domain is empty
      */
-    bool isMember(double value) const;
+    bool isMember(edouble value) const;
 
     /**
      * @brief Obtain the double encoded value from the string if it is a member.
      */
-    virtual bool convertToMemberValue(const std::string& strValue, double& dblValue) const;
+    virtual bool convertToMemberValue(const std::string& strValue, edouble& dblValue) const;
 
     /**
      * @brief Test that the domains are exactly equal.
@@ -256,7 +256,7 @@ namespace EUROPA {
      * @return true if the intersection results in a change to this domain, otherwise false.
      * @note ub must be >= lb.
      */
-    bool intersect(double lb, double ub);
+    bool intersect(edouble lb, edouble ub);
 
     /**
      * @brief restricts this domain to the difference of its values with the given domain.
@@ -303,7 +303,7 @@ namespace EUROPA {
      * @brief Creates a concise string for displaying the value
      * @param value must be a member of the domain.
      */
-    virtual std::string toString(double value) const;    
+    virtual std::string toString(edouble value) const;    
 
   protected:
 
@@ -312,7 +312,7 @@ namespace EUROPA {
      * @note Will be compiled out for fast version.
      * @note No-op for enumerations.
      */
-    virtual void testPrecision(const double& value) const {
+    virtual void testPrecision(const edouble& value) const {
     }
 
     /**
@@ -320,7 +320,7 @@ namespace EUROPA {
      */
     bool equateClosedEnumerations(EnumeratedDomain& dom);
 
-    std::set<double> m_values; /**< Holds the contents from which the set membership is then derived. */
+    std::set<edouble> m_values; /**< Holds the contents from which the set membership is then derived. */
     bool m_isNumeric;
     bool m_isString;
   };

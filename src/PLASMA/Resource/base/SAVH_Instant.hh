@@ -37,7 +37,7 @@ namespace EUROPA {
        * @brief Get the time of the Instant.
        * @return the time
        */
-      int getTime() const;
+      eint getTime() const;
 
       /**
        * @brief Get the complete set of transactions that overlap this Instant.
@@ -216,7 +216,7 @@ namespace EUROPA {
        * @param time The time this Instant represents.
        * @param prof The profile this Instant is on.  Used to determine if queries should cause recalculation.
        */
-      Instant(const int time, const ProfileId prof);
+      Instant(const eint time, const ProfileId prof);
 
       /**
        * @brief Adds a transaction to the set overlapping this time.
@@ -242,7 +242,7 @@ namespace EUROPA {
       bool containsStartOrEnd();
 
       InstantId m_id;
-      int m_time; /*<! The time of the Instant */
+      eint m_time; /*<! The time of the Instant */
       ProfileId m_profile; /*<! The Profile the Instant is on */
       double m_lowerLevel, m_lowerLevelMax, m_upperLevelMin, m_upperLevel; /*<! The four bounds of the level. */
       double m_maxInstProduction, m_maxInstConsumption, m_minInstProduction, m_minInstConsumption; /*<! The bounds around instantaneous consumption and production */

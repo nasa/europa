@@ -23,13 +23,13 @@ namespace EUROPA{
 
     IntervalIntDomain();
 
-    IntervalIntDomain(const char* typeName);
+    IntervalIntDomain(const std::string& typeName);
 
-    IntervalIntDomain(int lb, int ub);
+    IntervalIntDomain(eint lb, eint ub);
 
-    IntervalIntDomain(int value);
+    IntervalIntDomain(eint value);
 
-    IntervalIntDomain(int lb, int ub, const char* typeName);
+    IntervalIntDomain(eint lb, eint ub, const std::string& typeName);
 
     IntervalIntDomain(const AbstractDomain& org);
 
@@ -58,23 +58,23 @@ namespace EUROPA{
      * @note This implementation might also work in IntervalDomain
      * since it uses minDelta().
      */
-    virtual void insert(double value);
+    virtual void insert(edouble value);
 
     /**
      * @brief Fill the given list with the contents of the set.
      * @note Should only be called on finite (and thus closed) domains.
      * @param results The target collection to fill with all values in the set.
      */
-    void getValues(std::list<double>& results) const;
+    void getValues(std::list<edouble>& results) const;
 
-    double translateNumber(double number, bool asMin = true) const;
+    edouble translateNumber(edouble number, bool asMin = true) const;
 
     /**
      * @brief Copy the concrete C++ object into new memory and return a pointer to it.
      */
     virtual IntervalIntDomain *copy() const;
 
-    virtual bool intersect(double lb, double ub);
+    virtual bool intersect(edouble lb, edouble ub);
 
     virtual bool intersect(const AbstractDomain& dom);
 
@@ -84,12 +84,12 @@ namespace EUROPA{
      * @brief Enforce integer semantics.
      * @note Will be compiled out for fast version.
      */
-    virtual void testPrecision(const double& value) const;
+    virtual void testPrecision(const edouble& value) const;
 
     /**
      * @brief Enforce integer semantics.
      */
-    double convert(const double& value) const;
+    edouble convert(const edouble& value) const;
   };
 }
 #endif

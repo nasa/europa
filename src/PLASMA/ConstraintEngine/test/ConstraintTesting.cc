@@ -45,7 +45,7 @@ namespace EUROPA {
    * @param a String which will be converted
    * @note roughtly the same as the standard atoi(char*), but with EUROPA's +/-inf
    */
-  static double atoef(const char * a)
+  static edouble atoef(const char * a)
   {
     if(strcmp(a,"-inf") == 0)
       return MINUS_INFINITY;
@@ -151,7 +151,7 @@ namespace EUROPA {
 	}
       check_error(lba != NULL && uba != NULL);
 
-      return new IntervalIntDomain((int)atoef(lba), (int)atoef(uba));
+      return new IntervalIntDomain(cast_int(atoef(lba)), cast_int(atoef(uba)));
     }
     else
       check_error(false);

@@ -92,7 +92,7 @@ namespace NDDL {
     ConstrainedVariableId m_8; // SchemaWriter::declareVariable
     
     // class-constructor.nddl:49 Bar
-    virtual void constructor(float m8, const WorldId& w);
+    virtual void constructor(double m8, const WorldId& w);
   };
   
   // class-constructor.nddl:57 Baz

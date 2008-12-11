@@ -88,7 +88,7 @@ namespace NDDL {
     };
     
     // simple-resources.nddl:3 Battery
-    virtual void constructor(float ic, float ll_min, float ll_max);
+    virtual void constructor(double ic, double ll_min, double ll_max);
   };
   
   

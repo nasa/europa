@@ -8,8 +8,8 @@ namespace EUROPA {
 
   class SymbolTypeFactory : public TypeFactory {
   public:
-    SymbolTypeFactory(const char* name = SymbolDomain::getDefaultTypeName().c_str());
-    SymbolTypeFactory(const char* name, const SymbolDomain& baseDomain);
+    SymbolTypeFactory(const std::string& name = SymbolDomain::getDefaultTypeName().toString());
+    SymbolTypeFactory(const std::string& name, const SymbolDomain& baseDomain);
 
     /**
      * @brief Create a variable
@@ -18,7 +18,7 @@ namespace EUROPA {
                                                  const AbstractDomain& baseDomain,
                                                  const bool internal = false,
                                                  bool canBeSpecified = true,
-                                                 const char* name = NO_VAR_NAME,
+                                                 const std::string& name = NO_VAR_NAME,
                                                  const EntityId& parent = EntityId::noId(),
                                                  int index = ConstrainedVariable::NO_INDEX) const;
 
@@ -30,7 +30,7 @@ namespace EUROPA {
     /**
      * @brief Create a value for a string
      */
-    virtual double createValue(const std::string& value) const;
+    virtual edouble createValue(const std::string& value) const;
 
   private:
     const SymbolDomain m_baseDomain;

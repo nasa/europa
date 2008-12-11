@@ -8,7 +8,7 @@ namespace EUROPA {
 
   class BoolTypeFactory : public TypeFactory {
   public:
-    BoolTypeFactory(const char* name = BoolDomain::getDefaultTypeName().toString().c_str());
+    BoolTypeFactory(const std::string& name = BoolDomain::getDefaultTypeName().toString());
 
     /**
      * @brief Create a variable
@@ -17,7 +17,7 @@ namespace EUROPA {
                                                  const AbstractDomain& baseDomain,
                                                  const bool internal = false,
                                                  bool canBeSpecified = true,
-                                                 const char* name = NO_VAR_NAME,
+                                                 const std::string& name = NO_VAR_NAME,
                                                  const EntityId& parent = EntityId::noId(),
                                                  int index = ConstrainedVariable::NO_INDEX) const;
 
@@ -29,7 +29,7 @@ namespace EUROPA {
     /**
      * @brief Create a value for a string
      */
-    virtual double createValue(const std::string& value) const;
+    virtual edouble createValue(const std::string& value) const;
 
   private:
     BoolDomain m_baseDomain;

@@ -11,6 +11,7 @@
 #include <string>
 
 #include "Error.hh"
+#include "Number.hh"
 
 #define streamIsEmpty(s) ((s).str() == ")"
 
@@ -60,9 +61,9 @@ DECLARE_GLOBAL_CONST(bool, g_alwaysFails);
 #define ALWAYS_FAILS (g_alwaysFails())
 
 namespace EUROPA {
-  DECLARE_GLOBAL_CONST(int, g_maxInt);
-  DECLARE_GLOBAL_CONST(int, g_infiniteTime);
-  DECLARE_GLOBAL_CONST(int, g_noTime);
+  DECLARE_GLOBAL_CONST(eint, g_maxInt);
+  DECLARE_GLOBAL_CONST(eint, g_infiniteTime);
+  DECLARE_GLOBAL_CONST(eint, g_noTime);
   DECLARE_GLOBAL_CONST(double, g_epsilon);
 
   void setTestLoadLibraryPath(std::string path);
@@ -93,6 +94,6 @@ namespace EUROPA {
  * @def MAX_PRECISION
  * The maximum number of digits of precision possible in a EUROPA floaing-point number.
  */
-#define MAX_PRECISION (static_cast<int>(std::log10(static_cast<double>(MAX_INT) + EPSILON) + 1.0))
+#define MAX_PRECISION (static_cast<int>(std::log10(cast_double(MAX_INT) + EPSILON) + 1.0))
 
 #endif

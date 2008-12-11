@@ -101,14 +101,14 @@ namespace EUROPA {
       return ResourceId::noId();
   }
 
-  int Transaction::getEarliest() const 
+  eint Transaction::getEarliest() const 
   {
-    return((int) getTime()->lastDomain().getLowerBound());
+    return((eint) getTime()->lastDomain().getLowerBound());
   }
 
-  int Transaction::getLatest() const 
+  eint Transaction::getLatest() const 
   {
-    return((int) getTime()->lastDomain().getUpperBound());
+    return((eint) getTime()->lastDomain().getUpperBound());
   }
 
   bool Transaction::isValid() const
