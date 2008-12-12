@@ -119,8 +119,30 @@ namespace NDDL {
   }
   
   
+  // inheritance.2.nddl:11 pred1
+  class Foo$pred1$0$0: public RuleInstance {
+  public:
+    Foo$pred1$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
   
-  // inheritance.2.nddl:12 Bar
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$pred1$0, Foo$pred1$0$0, Foo.pred1, "inheritance.2.nddl,11");
+  
+  void Foo$pred1$0$0::handleExecute() {
+    localSlave(pred1, slave0, "meets");
+    sameObject(object, slave0);
+    meets(this, slave0);
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("duration")));
+      vars.push_back(ruleVariable(IntervalIntDomain(1, 50, "int")));
+      rule_constraint(eq, vars);
+    }
+  }
+  
+  
+  // inheritance.2.nddl:18 Bar
   Bar::Bar(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Foo(planDatabase, "Bar", name) {
   }
@@ -139,11 +161,11 @@ namespace NDDL {
   }
   
   
-  // inheritance.2.nddl:12 Bar
+  // inheritance.2.nddl:18 Bar
   DECLARE_DEFAULT_OBJECT_FACTORY(BarFactory2, Bar);
   
   
-  // inheritance.2.nddl:13 pred2
+  // inheritance.2.nddl:19 pred2
   Bar::pred2::pred2(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
    : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
@@ -163,7 +185,7 @@ namespace NDDL {
   
   
   
-  // inheritance.2.nddl:18 Baz
+  // inheritance.2.nddl:25 Baz
   Baz::Baz(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Foo(planDatabase, "Baz", name) {
   }
@@ -182,11 +204,11 @@ namespace NDDL {
   }
   
   
-  // inheritance.2.nddl:18 Baz
+  // inheritance.2.nddl:25 Baz
   DECLARE_DEFAULT_OBJECT_FACTORY(BazFactory3, Baz);
   
   
-  // inheritance.2.nddl:19 pred1
+  // inheritance.2.nddl:26 pred1
   Baz::pred1::pred1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
    : Foo::pred1(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
@@ -205,16 +227,33 @@ namespace NDDL {
     }
     if (autoClose)
       close();
-    
-    // Post parameter constraints
+  }
+  
+  
+  // inheritance.2.nddl:31 pred1
+  class Baz$pred1$1$0: public RuleInstance {
+  public:
+    Baz$pred1$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$Baz$pred1$1, Baz$pred1$1$0, Baz.pred1, "inheritance.2.nddl,31");
+  
+  void Baz$pred1$1$0::handleExecute() {
     {
       std::vector<ConstrainedVariableId> vars;
       vars.push_back(var(getId(),std::string("arg1")));
-      vars.push_back(predicateVariable(IntervalIntDomain(0, 100, "int")));
-      token_constraint(eq, vars);
+      vars.push_back(ruleVariable(IntervalIntDomain(0, 100, "int")));
+      rule_constraint(eq, vars);
+    }
+    {
+      std::vector<ConstrainedVariableId> vars;
+      vars.push_back(var(getId(),std::string("arg2")));
+      vars.push_back(ruleVariable(IntervalIntDomain(0, 100, "int")));
+      rule_constraint(eq, vars);
     }
   }
-  
   
 } // namespace NDDL
 
@@ -253,6 +292,8 @@ namespace NDDL {
     REGISTER_OBJECT_FACTORY(id,BarFactory2, Bar);
     REGISTER_OBJECT_FACTORY(id,BazFactory3, Baz);
     // Allocate rules
+    ruleSchema->registerRule((new Rule$Baz$pred1$1())->getId());
+    ruleSchema->registerRule((new Rule$Foo$pred1$0())->getId());
     return id;
   }
   

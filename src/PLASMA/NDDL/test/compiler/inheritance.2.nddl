@@ -8,18 +8,30 @@ class Foo extends Timeline{
  }
 }
 
+Foo::pred1
+{
+    eq(duration,[1 50]);
+    meets(pred1);
+}
+
 // Declare a derived class which adds another predicate
 class Bar extends Foo {
  predicate pred2{}
 }
 
 
+
 // Declare a derived class which adds another argument to an inherited predicate
 class Baz extends Foo {
  predicate pred1{
   float arg2; // Add an additional parameter
-  eq(arg1, [0 100]); // Constrain inherited parameter to a more restricted domain
  }
+}
+
+Baz::pred1
+{
+    eq(arg1, [0 100]); // Constrain inherited parameter to a more restricted domain
+    eq(arg2, [0 100]);
 }
 
 // Allocate objects

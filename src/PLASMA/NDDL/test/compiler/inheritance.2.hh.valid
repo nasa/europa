@@ -70,7 +70,7 @@ namespace NDDL {
     };
   };
   
-  // inheritance.2.nddl:12 Bar
+  // inheritance.2.nddl:18 Bar
   class Bar : public Foo {
   public:
     Bar(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -82,7 +82,7 @@ namespace NDDL {
     class pred2;
     typedef Id<pred2> pred2Id;
     
-    // inheritance.2.nddl:13 pred2
+    // inheritance.2.nddl:19 pred2
     class pred2 : public NddlToken {
     public:
       pred2(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
@@ -93,7 +93,7 @@ namespace NDDL {
     };
   };
   
-  // inheritance.2.nddl:18 Baz
+  // inheritance.2.nddl:25 Baz
   class Baz : public Foo {
   public:
     Baz(const PlanDatabaseId& planDatabase, const LabelStr& name);
@@ -105,7 +105,7 @@ namespace NDDL {
     class pred1;
     typedef Id<pred1> pred1Id;
     
-    // inheritance.2.nddl:19 pred1
+    // inheritance.2.nddl:26 pred1
     class pred1 : public Foo::pred1 {
     public:
       pred1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);

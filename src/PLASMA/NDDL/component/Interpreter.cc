@@ -1188,6 +1188,8 @@ namespace EUROPA {
 
   void InterpretedRuleInstance::handleExecute()
   {
+    // Inheritance is handled by RulesEngine, see RuleSchema::getRules, where rules for the entire hierarchy are gathered
+
     // TODO: should pass in eval context from outside
     RuleInstanceEvalContext evalContext(NULL,getId());
 
