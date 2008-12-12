@@ -962,55 +962,95 @@ namespace EUROPA {
   /*
    * InterpretedTokenFactory
    */
-  InterpretedTokenFactory::InterpretedTokenFactory(
-						   const LabelStr& predicateName,
-						   const std::vector<LabelStr>& parameterNames,
-						   const std::vector<LabelStr>& parameterTypes,
-						   const std::vector<Expr*>& parameterValues,
-						   const std::vector<LabelStr>& assignVars,
-						   const std::vector<Expr*>& assignValues,
-						   const std::vector<ExprConstraint*>& constraints)
-    : TokenFactory(predicateName)
-    , m_parameterNames(parameterNames)
-    , m_parameterTypes(parameterTypes)
-    , m_parameterValues(parameterValues)
-    , m_assignVars(assignVars)
-    , m_assignValues(assignValues)
-    , m_constraints(constraints)
-  {
-  }
+    InterpretedTokenFactory::InterpretedTokenFactory(
+            const LabelStr& predicateName,
+            TokenFactoryId parentFactory,
+            const std::vector<LabelStr>& parameterNames,
+            const std::vector<LabelStr>& parameterTypes,
+            const std::vector<Expr*>& parameterValues,
+            const std::vector<LabelStr>& assignVars,
+            const std::vector<Expr*>& assignValues,
+            const std::vector<ExprConstraint*>& constraints)
+        : TokenFactory(predicateName)
+        , m_parentFactory(parentFactory)
+        , m_parameterNames(parameterNames)
+        , m_parameterTypes(parameterTypes)
+        , m_parameterValues(parameterValues)
+        , m_assignVars(assignVars)
+        , m_assignValues(assignValues)
+        , m_constraints(constraints)
+    {
+    }
 
 	TokenId InterpretedTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
 	{
-	    TokenId token = (new InterpretedToken(
-	        planDb,
-	        name,
-	        m_parameterNames,
-	        m_parameterTypes,
-	        m_parameterValues,
-	        m_assignVars,
-	        m_assignValues,
-	        m_constraints,
-	        rejectable,
-	        isFact,
-	        true))->getId();
+	    TokenId token;
+
+	    if (m_parentFactory.isNoId()) {
+	        token = (new InterpretedToken(
+	                planDb,
+	                name,
+	                m_parameterNames,
+	                m_parameterTypes,
+	                m_parameterValues,
+	                m_assignVars,
+	                m_assignValues,
+	                m_constraints,
+	                rejectable,
+	                isFact,
+	                false))->getId();
+	    }
+	    else {
+	        token = m_parentFactory->createInstance(planDb,name,rejectable,isFact);
+	        // TODO: Hack! this makes it impossible to extend native tokens
+	        // class hierarchy needs to be fixed to avoid this cast
+            InterpretedToken* it = dynamic_cast<InterpretedToken*>((Token*)token);
+            it->commonInit(
+                    m_parameterNames,
+                    m_parameterTypes,
+                    m_parameterValues,
+                    m_assignVars,
+                    m_assignValues,
+                    m_constraints,
+                    false);
+	    }
+
 	    return token;
 	}
 
   TokenId InterpretedTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
   {
-    TokenId token = (new InterpretedToken(
-					  master,
-					  name,
-					  relation,
-					  m_parameterNames,
-					  m_parameterTypes,
-					  m_parameterValues,
-					  m_assignVars,
-					  m_assignValues,
-					  m_constraints,
-					  true))->getId();
-    return token;
+      TokenId token;
+
+      if (m_parentFactory.isNoId()) {
+          token = (new InterpretedToken(
+                  master,
+                  name,
+                  relation,
+                  m_parameterNames,
+                  m_parameterTypes,
+                  m_parameterValues,
+                  m_assignVars,
+                  m_assignValues,
+                  m_constraints,
+                  false))->getId();
+      }
+      else {
+          token = m_parentFactory->createInstance(master,name,relation);
+          // TODO: Hack! this makes it impossible to extend native tokens
+          // class hierarchy needs to be fixed to avoid this cast
+          InterpretedToken* it = dynamic_cast<InterpretedToken*>((Token*)token);
+          it->commonInit(
+                  m_parameterNames,
+                  m_parameterTypes,
+                  m_parameterValues,
+                  m_assignVars,
+                  m_assignValues,
+                  m_constraints,
+                  false);
+      }
+
+      return token;
   }
 
 

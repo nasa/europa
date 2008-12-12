@@ -39,18 +39,18 @@ namespace EUROPA {
     /**
      * Begin Declaration of allowable states for a Token.
      */
-    static const LabelStr INCOMPLETE; /*!< The Token has been created, but additional 
+    static const LabelStr INCOMPLETE; /*!< The Token has been created, but additional
 				       parameter variables have yet to be added before use.*/
 
-    static const LabelStr INACTIVE; /*!< The Token has been created and closed. Its variables 
+    static const LabelStr INACTIVE; /*!< The Token has been created and closed. Its variables
 				      are accessible and may be constrained, and/or specified. */
 
-    static const LabelStr ACTIVE; /*!< The Token has been activated. It may now support merged 
-				    tokens, and cannot itself be merged or rejected. It may also 
+    static const LabelStr ACTIVE; /*!< The Token has been activated. It may now support merged
+				    tokens, and cannot itself be merged or rejected. It may also
 				    be related to an object; i.e. can be added to the object.
 				    Only active tokens are related to objects.*/
 
-    static const LabelStr MERGED; /*!< The Token has been merged i.e. it is represented in the plan 
+    static const LabelStr MERGED; /*!< The Token has been merged i.e. it is represented in the plan
 				    by the active token it has been merged with. */
 
     static const LabelStr REJECTED; /*!< The Token has been rejected. Only master tokens can be rejected. */
@@ -69,12 +69,12 @@ namespace EUROPA {
 
     /**
      * @brief Accessor for the master token for this token.
-     * @return TokenId::noId() if this is a Master Token, otherwise returns the Token from 
+     * @return TokenId::noId() if this is a Master Token, otherwise returns the Token from
      * which this token was sub-goaled.
      */
     const TokenId& master() const;
 
-    /** 
+    /**
      * @brief Accessor for the relation to the master token.
      * @return one of the supported allen relations (see documentation)
      */
@@ -186,20 +186,20 @@ namespace EUROPA {
     bool isStandardConstraint(const ConstraintId& constraint) const;
 
     /**
-     * @brief Internally generated constraints that are standard across Token instances of the same type. 
+     * @brief Internally generated constraints that are standard across Token instances of the same type.
      */
     const std::set<ConstraintId>& getStandardConstraints() const;
 
     /**
      * @brief Sum of violation value for all the constraints attached to this token
      */
-    virtual double getViolation() const; 
+    virtual double getViolation() const;
 
     /**
      * @brief Concatenation of violation expl for all the constraints attached to this token
      */
     virtual std::string getViolationExpl() const;
-    
+
     /**< State checks */
     bool isIncomplete() const;
 
@@ -233,7 +233,7 @@ namespace EUROPA {
      * @brief Token becomes a fact, it's ok to call if token is already a fact
      */
     void makeFact();
-    
+
     /**
      * Substates of Pending
      */
@@ -249,6 +249,8 @@ namespace EUROPA {
      * as a result of this operation.
      */
     virtual void close();
+
+    bool isClosed() const;
 
     /**
      * @brief Commits a token, the token will not be deleted when all the merged tokens are un-merged.
@@ -329,7 +331,7 @@ namespace EUROPA {
     void handleRemovalOfInactiveConstraint(const ConstraintId& constraint);
 
     /**
-     * @brief Test of the token is assigned to an object. 
+     * @brief Test of the token is assigned to an object.
      *
      * Will only be true if the token is active, and the
      * derived domain of the object variable is a singleton, and the inderlying singleton object says that
@@ -403,39 +405,39 @@ namespace EUROPA {
     bool removeMaster(const TokenId& token);
 
     virtual std::string toLongString() const;
-     
+
     // PS Methods:
     virtual const std::string& getEntityType() const;
-    virtual std::string getTokenType() const; 
+    virtual std::string getTokenType() const;
 
     virtual PSTokenState getTokenState() const;
     virtual PSVariable* getStart() const;
     virtual PSVariable* getEnd() const;
     virtual PSVariable* getDuration() const;
-    
-    virtual PSObject* getOwner() const; 
+
+    virtual PSObject* getOwner() const;
     virtual PSToken* getMaster() const;
     virtual PSList<PSToken*> getSlaves() const;
 
     virtual PSToken* getActive() const;
     virtual PSList<PSToken*> getMerged() const;
-    
+
     virtual PSList<PSVariable*> getParameters() const;
     virtual PSVariable* getParameter(const std::string& name) const;
 
-    virtual void merge(PSToken* activeToken);            
-    
+    virtual void merge(PSToken* activeToken);
+
     // returns active tokens that this token can be merged to
     virtual PSList<PSToken*> getCompatibleTokens(unsigned int limit, bool useExactTest);
 
-    
+
   protected:
 
     /**
      * @brief Constructor for master token creation.
      */
-    Token(const PlanDatabaseId& planDatabase, 
-          const LabelStr& predicateName, 
+    Token(const PlanDatabaseId& planDatabase,
+          const LabelStr& predicateName,
           bool rejectable,
           bool isFact,
           const IntervalIntDomain& durationBaseDomain,
@@ -445,9 +447,9 @@ namespace EUROPA {
     /**
      * @brief Constructor for slave token creation.
      */
-    Token(const TokenId& master, 
+    Token(const TokenId& master,
 	  const LabelStr& relation,
-	  const LabelStr& predicateName, 
+	  const LabelStr& predicateName,
           const IntervalIntDomain& durationBaseDomain,
           const LabelStr& objectName,
           bool closed);
@@ -493,10 +495,10 @@ namespace EUROPA {
     std::vector<ConstrainedVariableId> m_allVariables; /*!< The set of all variables of a token specification. Includes built in variables
 							 such as object, state, start, end, duration. Also includes all parameters (m_parameters). */
     TokenSet m_slaves;
-    std::set<ConstraintId> m_standardConstraints; /**< Indicates internally generated constraints that are standard 
+    std::set<ConstraintId> m_standardConstraints; /**< Indicates internally generated constraints that are standard
                                                      across Token instances of the same type. */
     std::vector<ConstrainedVariableId> m_pseudoVariables; /**< Indicates internally generated variables that are standard
-                                                             across token instances of the same type. Pseudo variables cannot be specified 
+                                                             across token instances of the same type. Pseudo variables cannot be specified
                                                              externally. */
     const PlanDatabaseId m_planDatabase;
 
@@ -514,7 +516,7 @@ namespace EUROPA {
      * @brief Shared initialization code across master and slave constructors
      * @see Token::Token
      */
-    void commonInit(const LabelStr& predicateName, 
+    void commonInit(const LabelStr& predicateName,
                     bool rejectable,
                     bool isFact,
                     const IntervalIntDomain& durationBaseDomain,
@@ -535,7 +537,7 @@ namespace EUROPA {
     bool m_deleted;
     bool m_terminated;
     ConstrainedVariableSet m_localVariables; /*!< Variables created external to the token but related to it. They are
-					       not part of the predicate definition but may be derived from the model elsewhere 
+					       not part of the predicate definition but may be derived from the model elsewhere
 					       such as via local rule variables.*/
     LabelStr m_unqualifiedPredicateName;
   };

@@ -7,9 +7,6 @@
  */
 
 class Battery extends Reservoir {
- // Must explicitly delcare the predicate so we can allocate in a transaction
- predicate consume{}
-
  Battery(float ic, float ll_min, float ll_max) {
   super(ic, ll_min, ll_max, 0.0, 0.0, +inff, +inff);
  }
@@ -35,6 +32,6 @@ Battery mainBattery = new Battery(30.0, 0.0, 50.0);
 Rover rover = new Rover(mainBattery);
 close();
 
-rejectable(Rover.Move indirectChange);    
+rejectable(Rover.Move indirectChange);
 rejectable(Battery.consume directChange); directChange.activate();
 mainBattery.constrain(directChange);

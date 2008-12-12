@@ -34,7 +34,7 @@ namespace EUROPA {
     return sl_instance;
   }
 
-  const LabelStr Schema::makeQualifiedName(const LabelStr& objectType, 
+  const LabelStr Schema::makeQualifiedName(const LabelStr& objectType,
 					   const LabelStr& unqualifiedPredicateName){
     std::string fullName = objectType.toString() + getDelimiter() + unqualifiedPredicateName.toString();
     return LabelStr(fullName.c_str());
@@ -82,12 +82,12 @@ namespace EUROPA {
     objectPredicates.clear();
     typesWithNoPredicates.clear();
 
-    // Add System entities    
-    addObjectType(rootObject());    
+    // Add System entities
+    addObjectType(rootObject());
 	addPrimitive("int");
 	addPrimitive("float");
 	addPrimitive("bool");
-	addPrimitive("string");	
+	addPrimitive("string");
   }
 
   bool Schema::isType(const LabelStr& type) const{
@@ -142,7 +142,7 @@ namespace EUROPA {
     return(members.find(value) != members.end());
   }
 
-  bool Schema::canBeAssigned(const LabelStr& objectType, 
+  bool Schema::canBeAssigned(const LabelStr& objectType,
 			     const LabelStr& predicate) const {
     check_error(isObjectType(objectType), objectType.toString() + " is not defined as an ObjectType");
     check_error(isPredicate(predicate), predicate.toString() + " is not defined as a Predicate");
@@ -159,13 +159,13 @@ namespace EUROPA {
     debugMsg("Schema:isA", "Checking if " << descendant.toString() << " is a " << ancestor.toString());
 
     // Special case if the 2 are the same, in which case we suspend any requirement that
-    // they be predefined types - class, predicate, enum, primitive. 
+    // they be predefined types - class, predicate, enum, primitive.
     if(descendant == ancestor)
       return true;
 
-    checkError(isType(descendant), 
+    checkError(isType(descendant),
 	       descendant.toString() << " is not defined.");
-    checkError(isType(ancestor), 
+    checkError(isType(ancestor),
 	       "Ancestor of '" << descendant.toString() << "' is '" << ancestor.toString() << "' which is not defined.");
 
     if(hasParent(descendant))
@@ -177,17 +177,17 @@ namespace EUROPA {
 
     return false;
   }
-  
-  bool Schema::canContain(const LabelStr& parentType, 
+
+  bool Schema::canContain(const LabelStr& parentType,
 			  const LabelStr& memberType,
 			  const LabelStr& memberName) const {
     check_error(isType(parentType), parentType.toString() + " is not defined.");
 
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<double, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(parentType);
 
-    // If no hit, then try for the parent. There must be one since it is a valid 
+    // If no hit, then try for the parent. There must be one since it is a valid
     // type but no hit yet
     if(membershipRelation_it == membershipRelation.end())
       return canContain(getParent(parentType), memberType, memberName);
@@ -206,8 +206,8 @@ namespace EUROPA {
       return true;
 
     // Allow fo rpossibility that it is declared as base type of the member type
-    if(isObjectType(memberType) && 
-       hasParent(memberType) && 
+    if(isObjectType(memberType) &&
+       hasParent(memberType) &&
        canContain(parentType,getParent(memberType), memberName))
       return true;
 
@@ -217,7 +217,7 @@ namespace EUROPA {
   const Schema::NameValueVector& Schema::getMembers(const LabelStr& objectType) const
   {
     std::map<double, NameValueVector>::const_iterator it = membershipRelation.find(objectType);
-      
+
     check_error(it != membershipRelation.end(), "Unable to find members for object type:" + objectType.toString() );
     return it->second;
   }
@@ -226,10 +226,10 @@ namespace EUROPA {
     check_error(isType(parentType), parentType.toString() + " is undefined.");
 
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<double, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(parentType);
 
-    // If no hit, then try for the parent. There must be one since it is a valid 
+    // If no hit, then try for the parent. There must be one since it is a valid
     // type but no hit yet
     if(membershipRelation_it == membershipRelation.end())
       return hasMember(getParent(parentType), memberName);
@@ -250,7 +250,7 @@ namespace EUROPA {
   }
 
   const LabelStr Schema::getObjectType(const LabelStr& predicate) const {
-    check_error(isPredicate(predicate), 
+    check_error(isPredicate(predicate),
 		"Predicate "+predicate.toString() +
 		" is not defined, but we expect all predicates to be defined. See 'isPredicate'");
     return predicate.getElement(0, getDelimiter());
@@ -317,11 +317,11 @@ namespace EUROPA {
   const LabelStrSet& Schema::getAllObjectTypes() const {
     return objectTypes;
   }
-  
+
 
   const std::set<double>& Schema::getEnumValues(const LabelStr& enumName) const {
     check_error(isEnum(enumName), enumName.toString() + " is not a defined enumeration.");
-    
+
     return enumValues.find(enumName)->second;
 
   }
@@ -367,7 +367,7 @@ namespace EUROPA {
 		memberName.toString() + " is not a member of " + parentType.toString());
 
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<double, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
@@ -385,13 +385,13 @@ namespace EUROPA {
     // If we get to here, we should pursue the parent type (and it will have to have one).
     return getMemberType(getParent(parentType), memberName);
   }
-  
+
   unsigned int Schema::getIndexFromName(const LabelStr& parentType, const LabelStr& memberName) const {
     check_error(hasMember(parentType, memberName),
 		memberName.toString() + " is not a member of " + parentType.toString());
 
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<double, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
@@ -415,7 +415,7 @@ namespace EUROPA {
 
   const LabelStr Schema::getNameFromIndex(const LabelStr& parentType, unsigned int index) const {
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<double, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
@@ -433,12 +433,12 @@ namespace EUROPA {
     }
 
     // If we get to here, we should pursue the parent type (and it will have to have one).
-    checkError(hasParent(parentType), 
+    checkError(hasParent(parentType),
 	       parentType.toString() << " has no member with index " << index);
 
     return getNameFromIndex(getParent(parentType), index);
   }
-  
+
   /**
    * @todo This may not be valid since a member name could in theory be duplicated
    * across enumerations. Look into this when we address enum scoping in a language
@@ -457,26 +457,26 @@ namespace EUROPA {
   unsigned int Schema::getParameterCount(const LabelStr& predicate) const {
     check_error(isPredicate(predicate), predicate.toString() + " is not defined as a Predicate");
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<double, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(predicate);
 
     check_error(membershipRelation_it != membershipRelation.end(), predicate.toString() + " not found in the membership relation");
     const NameValueVector& members = membershipRelation_it->second;
-    
+
     return(members.size());
   }
 
   const LabelStr Schema::getParameterType(const LabelStr& predicate, unsigned int paramIndex) const {
     check_error(isPredicate(predicate), predicate.toString() + " is not defined as a Predicate");
-    check_error(paramIndex < getParameterCount(predicate), paramIndex + " is not a valid index"); 
+    check_error(paramIndex < getParameterCount(predicate), paramIndex + " is not a valid index");
 
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<double, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(predicate);
 
     check_error(membershipRelation_it != membershipRelation.end());
     const NameValueVector& members = membershipRelation_it->second;
-    
+
     return(members[paramIndex].first);
   }
 
@@ -488,9 +488,9 @@ namespace EUROPA {
 
   void Schema::declareObjectType(const LabelStr& objectType) {
     debugMsg("Schema:declareObjectType", "[" << m_name.toString() << "] " << "Declaring object type " << objectType.toString());
-    objectTypes.insert(objectType);			                 	
+    objectTypes.insert(objectType);
   }
-  
+
   void Schema::addObjectType(const LabelStr& objectType) {
     // Enforce assumption of a singly rooted class hierarchy
     if(objectType != rootObject()){
@@ -498,7 +498,7 @@ namespace EUROPA {
       return;
     }
 
-    check_error(objectType.countElements(getDelimiter()) == 1, 
+    check_error(objectType.countElements(getDelimiter()) == 1,
 		"ObjectType must not be delimited:" + objectType.toString());
     objectTypes.insert(objectType);
     membershipRelation.insert(std::pair<LabelStr, NameValueVector>(objectType, NameValueVector()));
@@ -507,30 +507,30 @@ namespace EUROPA {
   void Schema::addObjectType(const LabelStr& objectType,
 			     const LabelStr& parent) {
     check_error(isObjectType(parent), parent.toString() + " is undefined.");
-    checkError(childOfRelation.find(objectType) == childOfRelation.end(), 
+    checkError(childOfRelation.find(objectType) == childOfRelation.end(),
 	       objectType.toString() << " is already defined.");
     objectTypes.insert(objectType);
     membershipRelation.insert(std::pair<LabelStr, NameValueVector>(objectType, NameValueVector()));
     childOfRelation.insert(std::pair<LabelStr, LabelStr>(objectType, parent));
-    
-    // Add type for constrained variables to be able to hold references to objects of the new type 
+
+    // Add type for constrained variables to be able to hold references to objects of the new type
     getCESchema()->registerFactory((new EnumeratedTypeFactory(
                   objectType.c_str(),
                   objectType.c_str(),
                   ObjectDomain(objectType.c_str())
-                  ))->getId());             
-    
+                  ))->getId());
+
     debugMsg("Schema:addObjectType",
 	     "[" << m_name.toString() << "] " << "Added object type " << objectType.toString() << " that extends " <<
 	     parent.toString());
   }
 
   void Schema::addPredicate(const LabelStr& predicate) {
-    check_error(predicate.countElements(getDelimiter()) == 2, 
-		"Expect predicate names to be structured as <objectType>.<predicate>. Not found in "+ 
+    check_error(predicate.countElements(getDelimiter()) == 2,
+		"Expect predicate names to be structured as <objectType>.<predicate>. Not found in "+
 		predicate.toString());
 
-    check_error(isObjectType(predicate.getElement(0, getDelimiter())), 
+    check_error(isObjectType(predicate.getElement(0, getDelimiter())),
 		"Object Type not defined for " + predicate.toString() + ".");
 
     check_error(predicates.find(predicate) == predicates.end(), predicate.toString() + " already defined.");
@@ -558,7 +558,7 @@ namespace EUROPA {
     NameValueVector& members = membershipRelation.find(parentType)->second;
     members.push_back(NameValuePair(memberType, memberName));
     return (members.size()-1);
-  } 
+  }
 
   void Schema::addEnum(const LabelStr& enumName) {
     check_error(!isEnum(enumName), enumName.toString() + " is already defined as an enumeration.");
@@ -578,7 +578,7 @@ namespace EUROPA {
 
   void Schema::write(ostream& os) const{
     os << "SCHEMA RULES:\n";
-    for(LabelStr_LabelStrSet_Map::const_iterator it = objectPredicates.begin(); 
+    for(LabelStr_LabelStrSet_Map::const_iterator it = objectPredicates.begin();
 	it != objectPredicates.end(); ++it){
       LabelStr objectName = it->first;
       os << objectName.toString() << ":{";
@@ -611,31 +611,46 @@ namespace EUROPA {
         it != enumValues.end(); ++it)
       results.push_back(it->first);
   }
-  
+
   void Schema::registerObjectFactory(const ObjectFactoryId& of)
   {
       m_objectTypeMgr->registerFactory(of);
   }
-  
+
   ObjectFactoryId Schema::getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments)
   {
       return m_objectTypeMgr->getFactory(getId(),objectType,arguments);
   }
-  
+
   void Schema::registerTokenFactory(const TokenFactoryId& f)
   {
       m_tokenTypeMgr->registerFactory(f);
   }
-  
+
   TokenFactoryId Schema::getTokenFactory(const LabelStr& type)
   {
       return m_tokenTypeMgr->getFactory(getId(),type);
   }
-  
+
+  TokenFactoryId Schema::getParentTokenFactory(const LabelStr& type)
+  {
+      LabelStr objType = type.getElement(0, getDelimiter());
+      std::string tokenName = type.getElement(1, getDelimiter()).toString();
+
+      while(hasParent(objType)) {
+          objType = getParent(objType);
+          std::string parentName = objType.toString()+getDelimiter()+tokenName;
+          if (isPredicate(parentName))
+              return getTokenFactory(parentName);
+      }
+
+      return TokenFactoryId::noId();
+  }
+
   bool Schema::hasTokenFactories() const
   {
       return m_tokenTypeMgr->hasFactory();
   }
-  
-  
+
+
 } // namespace NDDL

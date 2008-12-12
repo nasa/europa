@@ -320,8 +320,11 @@ namespace EUROPA {
       return;
     }
 
+    TokenFactoryId parentFactory = getSchema()->getParentTokenFactory(predName);
+
     getSchema()->registerTokenFactory((new InterpretedTokenFactory(
                 predName,
+                parentFactory,
                 parameterNames,
                 parameterTypes,
                 parameterValues,

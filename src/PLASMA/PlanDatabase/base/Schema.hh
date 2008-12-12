@@ -1,6 +1,6 @@
 /**
  * @file Schema.hh
- * @brief Introduces the interface for a Schema, which identifes the types and 
+ * @brief Introduces the interface for a Schema, which identifes the types and
  * rules of a plan database,
  * @author Conor McGann, Andrew Bachmann
  */
@@ -55,7 +55,7 @@ namespace EUROPA {
      * @brief Creates a fully qualifiedName for a predicate
      * @see getDelimiter()
      */
-    static const LabelStr makeQualifiedName(const LabelStr& objectType, 
+    static const LabelStr makeQualifiedName(const LabelStr& objectType,
 					    const LabelStr& unqualifiedPredicateName);
 
     /**
@@ -81,7 +81,7 @@ namespace EUROPA {
     void reset();
 
     /**
-     * @brief Tests if the given name is a defined objectType or predciate 
+     * @brief Tests if the given name is a defined objectType or predciate
      */
     bool isType(const LabelStr& type) const;
 
@@ -117,7 +117,7 @@ namespace EUROPA {
     /**
      * @brief Determine if a given predicate is compatible with a given object type.
      */
-    bool canBeAssigned(const LabelStr& objectType, 
+    bool canBeAssigned(const LabelStr& objectType,
 		       const LabelStr& predicate) const;
 
     /**
@@ -126,19 +126,19 @@ namespace EUROPA {
      * @param memberType the type of the composed object
      * @param memberName the member name for the composed field.
      */
-    bool canContain(const LabelStr& parentType, 
+    bool canContain(const LabelStr& parentType,
 		    const LabelStr& memberType,
 		    const LabelStr& memberName) const;
 
     /**
-     * 
+     *
      * @brief returns a vector with the members of an object type
      * each element in the vector is a pair:
      * - the first element is the member's type
-     * - the second elemnt is the member's name 
+     * - the second elemnt is the member's name
      */
     const NameValueVector& getMembers(const LabelStr& objectType) const;
-    
+
     /**
      * @brief Determines if the given member is contained in the parent
      * @param parentType the type of the composing object or predicate
@@ -178,8 +178,8 @@ namespace EUROPA {
     const LabelStr getParent(const LabelStr& objectType) const;
 
     /**
-     * @brief Obtains all the Object Types in the Schema.  
-     * @return a const ref to a set of LabelStr (each of which is the name of an  ObjectType)  
+     * @brief Obtains all the Object Types in the Schema.
+     * @return a const ref to a set of LabelStr (each of which is the name of an  ObjectType)
      */
     const LabelStrSet& getAllObjectTypes() const;
 
@@ -193,8 +193,8 @@ namespace EUROPA {
 
      /**
      * @brief Obtains the set of values for an enumeration.
-     * @param enumName enumeration type name.  
-     * @return a const ref to the set of values for enumName.  
+     * @param enumName enumeration type name.
+     * @return a const ref to the set of values for enumName.
      * @error !isEnum(enumName).
      */
     const std::set<double>& getEnumValues(const LabelStr& enumName) const;
@@ -259,7 +259,7 @@ namespace EUROPA {
     /**
      * @brief Gets the number of parameters in a predicate
      * @param predicate the name of the predicate
-     * @error !isPredicateDefined(predicate) 
+     * @error !isPredicateDefined(predicate)
      */
     unsigned int getParameterCount(const LabelStr& predicate) const;
 
@@ -267,7 +267,7 @@ namespace EUROPA {
      * @brief Gets the type of parameter at a particular index location in a predicate
      * @param predicate the name of the predicate
      * @param paramIndex the index of the parameter
-     * @error !isPredicateDefined(predicate) 
+     * @error !isPredicateDefined(predicate)
      */
     const LabelStr getParameterType(const LabelStr& predicate, unsigned int paramIndex) const;
 
@@ -279,7 +279,7 @@ namespace EUROPA {
     /**
      * @brief Declare an object type. The type can be referenced from now on.
      * I'ts the responsibility of the client to make sure that addObjectType will be called for this type eventually
-     *  
+     *
      */
     void declareObjectType(const LabelStr& objectType);
 
@@ -314,7 +314,7 @@ namespace EUROPA {
      * @param memberName The name of the composed member
      * @return The indexed position of the parameter in the predicate list of parameters.
      */
-    unsigned int addMember(const LabelStr& parentObjectType, 
+    unsigned int addMember(const LabelStr& parentObjectType,
 				   const LabelStr& memberType,
 				   const LabelStr& memberName);
 
@@ -326,7 +326,7 @@ namespace EUROPA {
     void addValue(const LabelStr& enumName, double enumValue);
 
     /**
-     * @brief Obtain a list of names of enumerations 
+     * @brief Obtain a list of names of enumerations
      * @param results a list of enumeration names
      */
     void getEnumerations(std::list<LabelStr>& results) const;
@@ -335,16 +335,17 @@ namespace EUROPA {
      * @brief Output contents to the given stream
      */
     void write (ostream& os) const;
-    
+
     const CESchemaId& getCESchema() const { return m_ceSchema; }
-        
+
     void registerObjectFactory(const ObjectFactoryId& obj_fact);
     ObjectFactoryId getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments);
-    
+
     void registerTokenFactory(const TokenFactoryId& obj_fact);
     TokenFactoryId getTokenFactory(const LabelStr& tokenType);
+    TokenFactoryId getParentTokenFactory(const LabelStr& tokenType);
     bool hasTokenFactories() const;
-    
+
   private:
 
     static const std::set<LabelStr>& getBuiltInVariableNames();
@@ -353,7 +354,7 @@ namespace EUROPA {
     const CESchemaId& m_ceSchema;
     const ObjectTypeMgrId m_objectTypeMgr;
     const TokenTypeMgrId m_tokenTypeMgr;
-    
+
     const LabelStr m_name;
     LabelStr_ValueSet_Map enumValues;
     LabelStrSet objectTypes;

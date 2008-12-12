@@ -231,10 +231,10 @@ namespace EUROPA{
       if(var->getName() == name)
         return var;
     }
-    
+
     if (checkGlobalContext && getPlanDatabase()->isGlobalVariable(name))
         return getPlanDatabase()->getGlobalVariable(name);
-    
+
     return ConstrainedVariableId::noId();
   }
 
@@ -279,6 +279,11 @@ namespace EUROPA{
     check_error(isIncomplete());
     m_state->close();
     m_planDatabase->notifyAdded(m_id);
+  }
+
+  bool Token::isClosed() const
+  {
+      return m_state->isClosed();
   }
 
   void Token::cancel(){

@@ -1030,6 +1030,8 @@ namespace EUROPA{
 
       TokenId token = factory->createInstance(getId(), predicateName, rejectable, isFact);
       check_error(token.isValid());
+      if (!token->isClosed())
+          token->close();
 
       return token;
   }
@@ -1044,8 +1046,10 @@ namespace EUROPA{
       check_error(factory.isValid());
 
       TokenId token = factory->createInstance(master, predicateName, relation);
-
       check_error(token.isValid());
+      if (!token->isClosed())
+          token->close();
+
       return token;
   }
 

@@ -268,6 +268,8 @@ namespace EUROPA {
 			const std::vector<Expr*>& assignValues,
 			const std::vector<ExprConstraint*>& constraints,
 			const bool& autoClose);
+
+        friend class InterpretedTokenFactory;
   };
 
   class TokenEvalContext : public EvalContext
@@ -288,6 +290,7 @@ namespace EUROPA {
   {
     public:
 	  InterpretedTokenFactory(const LabelStr& predicateName,
+	                          TokenFactoryId parentFactory,
 	                          const std::vector<LabelStr>& parameterNames,
                               const std::vector<LabelStr>& parameterTypes,
                               const std::vector<Expr*>& parameterValues,
@@ -299,6 +302,7 @@ namespace EUROPA {
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
 
     protected:
+      TokenFactoryId m_parentFactory;
       std::vector<LabelStr> m_parameterNames;
       std::vector<LabelStr> m_parameterTypes;
       std::vector<Expr*> m_parameterValues;
