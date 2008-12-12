@@ -25,7 +25,8 @@ for model in $(nddl_tests)
 {
   local exe = $(model:S=) ;
   NddlMain $(exe) : NddlMainForResources.o : $(model) : Resource ;
-  RunModuleMain run-$(exe) : $(exe) : $(model:S=.xml) ;
+  RunModuleMain run-$(exe) : $(exe) : $(model:S=.xml) 0 ;
+  RunModuleMain run-$(exe) : $(exe) : $(model:S=.xml) 1 ;
 
         local hh = $(model:S=.hh) ;
         local cc = [ FGristFiles $(model:S=.cc) ] ;

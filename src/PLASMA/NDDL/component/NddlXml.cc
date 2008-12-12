@@ -146,9 +146,12 @@ namespace EUROPA {
 
     if (strcmp(element->Value(),"value") == 0 ||
         strcmp(element->Value(),"symbol") == 0 ||
-        strcmp(element->Value(),"interval") == 0 ||
-        strcmp(element->Value(),"set") == 0) {
+        strcmp(element->Value(),"interval") == 0) {
       return new ExprConstant(m_client,element->Attribute("type"),xmlAsAbstractDomain(*element));
+    }
+    else if (strcmp(element->Value(),"set") == 0) {
+        TiXmlElement* child = element->FirstChildElement();
+        return new ExprConstant(m_client,child->Attribute("type"),xmlAsAbstractDomain(*element));
     }
     else if (strcmp(element->Value(),"id") == 0) {
       const char* varName = element->Attribute("name");
@@ -502,8 +505,8 @@ namespace EUROPA {
               }
               else {
                   const char* target = child->Attribute("target");
-                  // TODO:
-                  //ruleBody.push_back(new ExprRelation(relation,origin,target));
+                  target = (target != NULL ? target : "none");
+                  // TODO: ruleBody.push_back(new ExprRelation(relation,origin,target));
                   check_runtime_error(ALWAYS_FAIL,"don't know how to deal with relation-only subgoals yet. relation="+std::string(relation)+" origin="+origin+" target="+target);
               }
           }

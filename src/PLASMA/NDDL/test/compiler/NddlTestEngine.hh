@@ -1,13 +1,27 @@
 #ifndef _H_NDDL_TEST_ENGINE_
 #define _H_NDDL_TEST_ENGINE_
 
-// Include prototypes required to integrate to the NDDL generated model
-#include "Nddl.hh"
-#include "NddlDefs.hh"
+#include "Engine.hh"
 
+using namespace EUROPA;
+
+class NddlTestEngine : public EngineBase
+{
+  public:
+	NddlTestEngine();
+	virtual ~NddlTestEngine();
+
+	virtual void init();
+	void run(const char* txSource, bool useInterpreter);
+
+  protected:
+	virtual void createModules();
+};
+
+#include "Nddl.hh"
+#include "ConstraintEngine.hh"
 #include "PlanDatabase.hh"
 #include "PlanDatabaseWriter.hh"
-#include "ConstraintEngine.hh"
 #include "Rule.hh"
 #include "RulesEngine.hh"
 #include "DefaultPropagator.hh"
@@ -24,8 +38,6 @@
 #include "HasAncestorConstraint.hh"
 
 // Misc
-#include "Utils.hh"
-#include "Engine.hh"
 #include "ModuleConstraintEngine.hh"
 #include "ModulePlanDatabase.hh"
 #include "ModuleTemporalNetwork.hh"
@@ -34,8 +46,6 @@
 
 #include <fstream>
 #include <sstream>
-
-using namespace EUROPA;
 
 void initialize(CESchema* ces)
 {
@@ -65,19 +75,6 @@ void initialize(CESchema* ces)
   REGISTER_CONSTRAINT(ces,EqualSumConstraint, "sum", "Default");
 }
 
-class NddlTestEngine : public EngineBase
-{
-  public:
-	NddlTestEngine();
-	virtual ~NddlTestEngine();
-
-	virtual void init();
-	void run(const char* txSource);
-
-  protected:
-	virtual void createModules();
-};
-
 NddlTestEngine::NddlTestEngine()
 {
 }
@@ -105,21 +102,27 @@ void NddlTestEngine::createModules()
 }
 
 // Used to be in main, but now shared by NddlResourceTestEngine
-void NddlTestEngine::run(const char* txSource)
+void NddlTestEngine::run(const char* txSource, bool useInterpreter)
 {
-	Schema* schema = (Schema*) getComponent("Schema");
-	RuleSchema* ruleSchema = (RuleSchema*) getComponent("RuleSchema");
-	EUROPA::NDDL::loadSchema(schema->getId(),ruleSchema->getId());
-	PlanDatabase* planDatabase = (PlanDatabase*) getComponent("PlanDatabase");
-	planDatabase->getClient()->enableTransactionLogging();
+    PlanDatabase* planDatabase = (PlanDatabase*) getComponent("PlanDatabase");
+    planDatabase->getClient()->enableTransactionLogging();
 
-	executeScript("nddl-xml-txn",txSource,true /*isFile*/);
+    Schema* schema = (Schema*) getComponent("Schema");
+    RuleSchema* ruleSchema = (RuleSchema*) getComponent("RuleSchema");
 
-	ConstraintEngine* ce = (ConstraintEngine*)getComponent("ConstraintEngine");
-	assert(ce->constraintConsistent());
+    if (useInterpreter) {
+        executeScript("nddl-xml",txSource,true /*isFile*/);
+    }
+    else {
+        EUROPA::NDDL::loadSchema(schema->getId(),ruleSchema->getId());
+        executeScript("nddl-xml-txn",txSource,true /*isFile*/);
+    }
 
-	PlanDatabaseWriter::write(planDatabase->getId(), std::cout);
-	std::cout << "Finished\n";
+    ConstraintEngine* ce = (ConstraintEngine*)getComponent("ConstraintEngine");
+    assert(ce->constraintConsistent());
+
+    PlanDatabaseWriter::write(planDatabase->getId(), std::cout);
+    std::cout << "Finished\n";
 }
 
 #endif // _H_NDDL_TEST_ENGINE_

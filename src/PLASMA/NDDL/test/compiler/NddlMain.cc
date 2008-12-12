@@ -7,8 +7,8 @@
  */
 int main(int argc, const char ** argv)
 {
-  if (argc != 2) {
-    std::cerr << "Must provide initial transactions file." << std::endl;
+  if (argc != 3) {
+    std::cerr << "Must provide initial transactions file and flag to indicate whether to use interpreter" << std::endl;
     return -1;
   }
 
@@ -17,7 +17,8 @@ int main(int argc, const char ** argv)
   engine.init();
 
   const char* txSource = argv[1];
-  engine.run(txSource);
+  std::string useInterpreter = argv[2];
+  engine.run(txSource,useInterpreter == "1");
 
   return 0;
 }
