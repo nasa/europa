@@ -259,17 +259,32 @@ namespace EUROPA {
 
   DataRef ExprConstant::eval(EvalContext& context) const
   {
-    // need to create a new variable every time this is evaluated, since propagation
+    // TODO: need to create a new variable every time this is evaluated, since propagation
     // will affect the variable, should provide immutable variables so that a single var
-    // can be created for a constant
-    // TODO: Who destroys this variable?, need to give handle to RuleInstance
-    ConstrainedVariableId var = m_dbClient->createVariable(
-							   m_type.c_str(),
-							   *m_domain,
-							   "TMP_VAR",
-							   true, // isTmp
-							   false // cannot be specified
-							   );
+    // can be created for a constant.
+    ConstrainedVariableId var;
+
+    // TODO: this isn't pretty, have the EvalConstext create the new var, deal with it gracefully for all the possibilities
+    RuleInstanceEvalContext *riec = dynamic_cast<RuleInstanceEvalContext*>(&context);
+    bool canBeSpecified = false;
+    static int nameCnt=0;
+    std::stringstream sstr;
+    sstr << "ExprConstant_PSEUDO_VARIABLE_" << nameCnt++;
+    const char* name = sstr.str().c_str();
+
+    if (riec != NULL) {
+        var = riec->getRuleInstance()->addLocalVariable(*m_domain,canBeSpecified,name);
+    }
+    else {
+        // TODO: Who destroys this variable?
+        var = m_dbClient->createVariable(
+                m_type.c_str(),
+                *m_domain,
+                name,
+                true, // isTmp
+                canBeSpecified
+        );
+    }
 
     return DataRef(var);
   }

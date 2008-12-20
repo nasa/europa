@@ -3,7 +3,7 @@
 #include "Variable.hh"
 
 namespace EUROPA {
-  
+
   //
   // IntervalIntTypeFactory
   //
@@ -19,7 +19,7 @@ namespace EUROPA {
   }
 
   ConstrainedVariableId
-  IntervalIntTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
+  IntervalIntTypeFactory::createVariable(const ConstraintEngineId& constraintEngine,
                                          const AbstractDomain& baseDomain,
                                          const bool internal,
                                          bool canBeSpecified,
@@ -28,7 +28,7 @@ namespace EUROPA {
                                          int index) const
   {
     const IntervalIntDomain * intervalIntDomain = dynamic_cast<const IntervalIntDomain*>(&baseDomain);
-    check_error(intervalIntDomain != NULL, "tried to create an IntervalIntDomain variable with a different kind of base domain");
+    check_error(intervalIntDomain != NULL, "tried to create an IntervalIntDomain variable with a different kind of base domain: " + baseDomain.toString());
     Variable<IntervalIntDomain> * variable
       = new Variable<IntervalIntDomain>(constraintEngine, *intervalIntDomain, internal, canBeSpecified, name, parent, index);
     check_error(variable != NULL,
