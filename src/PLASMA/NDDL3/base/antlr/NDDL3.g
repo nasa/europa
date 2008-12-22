@@ -3,22 +3,22 @@
 grammar NDDL3;
 
 options {
-	output=AST;
-	language=C;
-	ASTLabelType=pANTLR3_BASE_TREE;
-	//k=4;
+language=C;
+output=AST;
+ASTLabelType=pANTLR3_BASE_TREE;
 }
 
 tokens {
 	CONSTRUCTOR;
 	CONSTRUCTOR_INVOCATION;
 	CONSTRAINT_INSTANTIATION;
+	NDDL;
 	SUBGOAL;
 	VARIABLE;
 }
 
-nddl
-	:	nddlStatement*
+nddl	:	nddlStatement*
+			-> ^(NDDL nddlStatement*)
         ;
 
 nddlStatement
@@ -37,8 +37,8 @@ nddlStatement
         ;
 
 typeDefinition
-	:	'typedef' b=typeWithBaseDomain n=IDENT ';'
-			-> ^('typedef' $n $b)
+	:	'typedef' typeWithBaseDomain IDENT ';'
+			-> ^('typedef' IDENT typeWithBaseDomain)
 	;
 
 // MEB Language Change: domain no longer optional
@@ -52,9 +52,10 @@ typeWithBaseDomain
 
 // MEB Interpreter Support Missing
 constraintSignature
-	:	'constraint' IDENT typeArgumentList
-		('extends' IDENT typeArgumentList)? 
-		(signatureBlock | ';') 
+	:	'constraint' c=IDENT args=typeArgumentList
+		('extends' x=IDENT xargs=typeArgumentList)? 
+		(sb=signatureBlock | ';')
+			-> ^('constraint' $c $args ^('extends' $x $xargs)? $sb?)
 	;
 
 signatureBlock
@@ -72,11 +73,11 @@ signatureAtom
 
 classDeclaration
 	:	'class' c=IDENT
-		(	(('extends' x=IDENT)? cb=classBlock)
-				-> ^('class' $c ^('extends' $x)? $cb)
+		(	(('extends' x=IDENT)? classBlock)
+				-> ^('class' $c ^('extends' $x)? classBlock)
 		|	';'
 					-> ^('class' $c ';')
-		)
+		) 
 	;
 
 classBlock
@@ -91,8 +92,8 @@ classStatement
 	;
 
 constructor
-	:	c=IDENT pl=constructorParameterList cb=constructorBlock
-			-> ^(CONSTRUCTOR $c $pl $cb)
+	:	IDENT constructorParameterList constructorBlock
+			-> ^(CONSTRUCTOR IDENT constructorParameterList constructorBlock)
 	;
 
 constructorBlock
@@ -114,8 +115,8 @@ constructorParameters
 	;
 
 constructorParameter
-	:	t=type n=IDENT
-			-> ^(VARIABLE $n $t)
+	:	type IDENT
+			-> ^(VARIABLE IDENT type)
 	;
 
 predicate
@@ -139,7 +140,7 @@ rule	:	IDENT '::'^ IDENT ruleBlock
 
 ruleBlock
 	:	'{'^ ruleStatement* '}'!
-	|	rs=ruleStatement -> ^('{' $rs)
+	|	ruleStatement -> ^('{' ruleStatement)
 	;
 
 ruleStatement
@@ -157,8 +158,8 @@ type	:	'int'
 	|	IDENT
 	;
 
-relation:	(token=IDENT | 'this')? rel=temporalRelation args=predicateArgumentList ';'
-			-> ^(SUBGOAL $token $rel $args)
+relation:	(token=IDENT | token='this')? temporalRelation predicateArgumentList ';'
+			-> ^(SUBGOAL $token temporalRelation predicateArgumentList)
         ;
 
 goal	:	('rejectable'^ | 'goal'^) predicateArgumentList ';'!
@@ -174,18 +175,18 @@ predicateArguments
 	;
 
 predicateArgument
-	:	p=qualified (n=IDENT)?
-			-> ^($p $n)
+	:	qualified IDENT?
+			-> ^(qualified IDENT?)
 	;
 
 constraintInstantiation
-	:	c=IDENT args=variableArgumentList ';'
-			-> ^(CONSTRAINT_INSTANTIATION $c $args)
+	:	IDENT variableArgumentList ';'
+			-> ^(CONSTRAINT_INSTANTIATION IDENT variableArgumentList)
 	;
 
 constructorInvocation
-	:	c=IDENT args=variableArgumentList
-			-> ^(CONSTRUCTOR_INVOCATION $c $args)
+	:	IDENT variableArgumentList
+			-> ^(CONSTRUCTOR_INVOCATION IDENT variableArgumentList)
 	;
 
 superInvocation
@@ -264,6 +265,7 @@ flowControl
 	:	'if'^ expression ruleBlock (options {k=1;}:'else'! ruleBlock)?
 	|	'foreach'^ '('! IDENT 'in'! qualified ')'! ruleBlock
 	;
+	
 
 // Note: Allocation not legal here
 expression
@@ -288,8 +290,8 @@ nameWithBase
 	;
 
 assignment
-	:	variable=qualified ('in' | '=') value=anyValue ';'
-		-> ^('=' $variable $value)
+	:	qualified ('in' | '=') anyValue ';'
+		-> ^('=' qualified anyValue)
 	;
 
 anyValue:	STRING
@@ -365,7 +367,7 @@ tokenNames
 noopstatement
 	:	';'!
 	;
-	
+
 INCLUDE :	'#include' WS+ file=STRING '\r'? '\n'	{
 			pANTLR3_STRING      fName;
 			pANTLR3_INPUT_STREAM    in; 
@@ -399,7 +401,12 @@ INCLUDE :	'#include' WS+ file=STRING '\r'? '\n'	{
 IDENT	:	 ('a'..'z'|'A'..'Z'|'_'|'$') ('a'..'z'|'A'..'Z'|'_'|'0'..'9'|'$')*
 	;
 
-STRING	:	'"'! (~('\\'|'"') | ESCAPE_SEQUENCE)* '"'!
+STRING	:	'"' (~('\\'|'"') | ESCAPE_SEQUENCE)* '"'
+		{
+			// Terence doesn't love us anymore, this is proof.
+			pANTLR3_STRING s = $text;
+			setText(s->substr(1, s->length));
+		}
 	;
 
 fragment ESCAPE_SEQUENCE
