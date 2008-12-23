@@ -1,22 +1,23 @@
 #include "ModuleResource.hh"
-#include "ResourceConstraint.hh"
 #include "ConstraintFactory.hh"
+#include "Schema.hh"
+#include "FlawHandler.hh"
+#include "NddlXml.hh"
+#include "InterpreterResources.hh"
+#include "ResourceConstraint.hh"
+#include "ResourcePropagator.hh"
+#include "ResourceMatching.hh"
+#include "ResourceThreatDecisionPoint.hh"
+#include "SAVH_ProfilePropagator.hh"
 #include "SAVH_FlowProfile.hh"
 #include "SAVH_IncrementalFlowProfile.hh"
 #include "SAVH_TimetableProfile.hh"
-#include "SAVH_ProfilePropagator.hh"
 #include "SAVH_OpenWorldFVDetector.hh"
 #include "SAVH_ClosedWorldFVDetector.hh"
-#include "ResourcePropagator.hh"
-#include "NddlXml.hh"
-#include "InterpreterResources.hh"
-#include "Schema.hh"
-#include "ResourceMatching.hh"
-#include "ResourceThreatDecisionPoint.hh"
 #include "SAVH_Instant.hh"
 #include "SAVH_ThreatDecisionPoint.hh"
 #include "SAVH_ThreatManager.hh"
-#include "FlawHandler.hh"
+#include "SAVH_Reusable.hh"
 
 namespace EUROPA {
 
@@ -77,6 +78,22 @@ namespace EUROPA {
       schema->addMember("Reusable.uses", "float", "quantity");
       schema->registerTokenFactory((new ReusableUsesTokenFactory("Reusable.uses"))->getId());
 
+      schema->addObjectType("CBReusable");
+      schema->addMember("CBReusable", "float", "capacity");
+      schema->addMember("CBReusable", "float", "levelLimitMin");
+      schema->addMember("CBReusable", "float", "consumptionMax");
+      schema->addMember("CBReusable", "float", "consumptionRateMax");
+      REGISTER_OBJECT_FACTORY(schema,CBReusableObjectFactory, CBReusable);
+      REGISTER_OBJECT_FACTORY(schema,CBReusableObjectFactory, CBReusable:float:float);
+      REGISTER_OBJECT_FACTORY(schema,CBReusableObjectFactory, CBReusable:float:float:float);
+      REGISTER_OBJECT_FACTORY(schema,CBReusableObjectFactory, CBReusable:float:float:float:float);
+      REGISTER_CONSTRAINT(
+        ce->getCESchema(),
+        SAVH::Uses,
+        SAVH::Uses::CONSTRAINT_NAME(),
+        SAVH::Uses::PROPAGATOR_NAME()
+      );
+
       schema->addObjectType("Reservoir");
       schema->addMember("Reservoir", "float", "initialCapacity");
       schema->addMember("Reservoir", "float", "levelLimitMin");
@@ -134,6 +151,9 @@ namespace EUROPA {
           nativeTokens.clear();
           nativeTokens.push_back("Reusable.uses");
           nddlXml->addNativeClass("Reusable",nativeTokens);
+
+          nativeTokens.clear();
+          nddlXml->addNativeClass("CBReusable",nativeTokens);
 
           nativeTokens.clear();
           nativeTokens.push_back("Reservoir.produce");

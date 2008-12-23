@@ -52,6 +52,20 @@ namespace EUROPA {
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
   };
 
+  class CBReusableObjectFactory : public NativeObjectFactory
+  {
+    public:
+        CBReusableObjectFactory(const LabelStr& signature);
+        virtual ~CBReusableObjectFactory();
+
+    protected:
+        virtual ObjectId makeNewObject(
+                            const PlanDatabaseId& planDb,
+                            const LabelStr& objectType,
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const;
+  };
+
   class ReservoirObjectFactory : public NativeObjectFactory
   {
   	public:

@@ -18,33 +18,33 @@
 
 namespace EUROPA {
   namespace SAVH {
-    
-    Resource::Resource(const PlanDatabaseId& planDatabase,                       
+
+    Resource::Resource(const PlanDatabaseId& planDatabase,
                        const LabelStr& type, const LabelStr& name,
-                       const LabelStr& detectorName, 
+                       const LabelStr& detectorName,
                        const LabelStr& profileName,
-                       double initCapacityLb, double initCapacityUb, 
-                       double lowerLimit, double upperLimit, 
+                       double initCapacityLb, double initCapacityUb,
+                       double lowerLimit, double upperLimit,
                        double maxInstProduction, double maxInstConsumption,
                        double maxProduction, double maxConsumption)
-      : Object(planDatabase, type, name, false) 
+      : Object(planDatabase, type, name, false)
     {
-      init(initCapacityLb, initCapacityUb, 
-           lowerLimit, upperLimit, 
+      init(initCapacityLb, initCapacityUb,
+           lowerLimit, upperLimit,
            maxInstProduction, maxInstConsumption,
-           maxProduction, maxConsumption, 
-           detectorName, 
+           maxProduction, maxConsumption,
+           detectorName,
            profileName
       );
     }
-    
+
     Resource::Resource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
       : Object(planDatabase, type, name, open) {}
 
-    Resource::Resource(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open) 
+    Resource::Resource(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open)
       : Object(parent, type, localName, open) {}
 
-    Resource::~Resource() 
+    Resource::~Resource()
     {
       for(std::map<TransactionId, TokenId>::const_iterator it = m_transactionsToTokens.begin(); it != m_transactionsToTokens.end();
           ++it) {
@@ -54,10 +54,10 @@ namespace EUROPA {
       delete (Profile*) m_profile;
     }
 
-    void Resource::init(const double initCapacityLb, const double initCapacityUb, 
-                        const double lowerLimit, const double upperLimit, 
+    void Resource::init(const double initCapacityLb, const double initCapacityUb,
+                        const double lowerLimit, const double upperLimit,
                         const double maxInstProduction, const double maxInstConsumption,
-                        const double maxProduction, const double maxConsumption, 
+                        const double maxProduction, const double maxConsumption,
                         const LabelStr& detectorName,
                         const LabelStr& profileName) {
       debugMsg("Resource:init", "In base init function.");
@@ -65,37 +65,37 @@ namespace EUROPA {
       m_initCapacityUb = initCapacityUb;
       m_lowerLimit = lowerLimit;
       m_upperLimit = upperLimit;
-      
+
       m_maxInstProduction = (maxInstProduction == PLUS_INFINITY ? maxProduction : maxInstProduction);
       m_maxProduction = maxProduction;
       m_maxInstConsumption = (maxInstConsumption == PLUS_INFINITY ? maxConsumption : maxInstConsumption);
       m_maxConsumption = maxConsumption;
 
-      
-      // TODO: make profile this  more robust?      
+
+      // TODO: make profile this  more robust?
       EngineId& engine = this->getPlanDatabase()->getEngine();
-      
+
       FactoryMgr* fvdfm = (FactoryMgr*)engine->getComponent("FVDetectorFactoryMgr");
       m_detector = fvdfm->createInstance(detectorName, FVDetectorArgs(getId()));
-      
+
       FactoryMgr* pfm = (FactoryMgr*)engine->getComponent("ProfileFactoryMgr");
       m_profile = pfm->createInstance(
-              profileName, 
+              profileName,
               ProfileArgs(
-                  getPlanDatabase(), 
+                  getPlanDatabase(),
                   m_detector,
-                  m_initCapacityLb, 
+                  m_initCapacityLb,
                   m_initCapacityUb
               )
       );
-      
+
       debugMsg("Resource:init", "Initialized Resource " << getName().toString() << "{"
               << "initCapacity=[" << m_initCapacityLb << "," << m_initCapacityUb << "],"
               << "usageLimits=[" << m_lowerLimit << "," << m_upperLimit << "],"
               << "productionLimits=[max=" << m_maxProduction << ",maxInst=" << m_maxInstProduction << "],"
               << "consumptionLimits=[max=" << m_maxConsumption << ",maxInst=" << m_maxInstConsumption << "],"
               << "}"
-      );      
+      );
     }
 
     void Resource::add(const TokenId& token) {
@@ -131,15 +131,15 @@ namespace EUROPA {
         debugMsg("Resource:getOrderingChoices", "No ordering choices:  no flawed instants after token start: " << token->start()->lastDomain().getLowerBound());
         return;
       }
-      //       checkError(first != m_flawedInstants.end(), 
+      //       checkError(first != m_flawedInstants.end(),
       // 		 "No flawed instants within token " << token->getPredicateName().toString() << "(" << token->getKey() << ")");
       std::map<int, InstantId>::iterator last = m_flawedInstants.lower_bound((int)token->end()->lastDomain().getUpperBound());
-      
-      debugMsg("Resource:getOrderingChoices", "Looking at flawed instants in interval [" << first->second->getTime() << " " << 
+
+      debugMsg("Resource:getOrderingChoices", "Looking at flawed instants in interval [" << first->second->getTime() << " " <<
                (last == m_flawedInstants.end() ? PLUS_INFINITY : last->second->getTime()) << "]");
       if(last != m_flawedInstants.end() && last->second->getTime() == token->end()->lastDomain().getUpperBound())
         ++last;
-      
+
       unsigned int count = 0;
 
       TemporalAdvisorId temporalAdvisor = getPlanDatabase()->getTemporalAdvisor();
@@ -152,33 +152,33 @@ namespace EUROPA {
           TransactionId predecessor = *it;
           check_error(predecessor.isValid());
           check_error(m_transactionsToTokens.find(predecessor) != m_transactionsToTokens.end());
-	  
-          debugMsg("Resource:getOrderingChoices", "Looking at predecessor transaction <" << predecessor->time()->toString() << ", " << 
+
+          debugMsg("Resource:getOrderingChoices", "Looking at predecessor transaction <" << predecessor->time()->toString() << ", " <<
                    (predecessor->isConsumer() ? "(c)" : "(p)") << predecessor->quantity()->toString() << ">");
           TokenId predecessorToken = m_transactionsToTokens.find(predecessor)->second;
           check_error(predecessorToken.isValid());
-	  
+
           for(std::set<TransactionId>::const_iterator subIt = transactions.begin(); subIt != transactions.end() && count < limit; ++subIt) {
             if(subIt == it)
               continue;
-	    
+
             TransactionId successor = *subIt;
             check_error(successor.isValid());
             check_error(m_transactionsToTokens.find(successor) != m_transactionsToTokens.end());
-	    
-            debugMsg("Resource:getOrderingChoices", "Looking at successor transaction <" << successor->time()->toString() << ", " << 
+
+            debugMsg("Resource:getOrderingChoices", "Looking at successor transaction <" << successor->time()->toString() << ", " <<
                      (successor->isConsumer() ? "(c)" : "(p)") << successor->quantity()->toString() << ">");
 
             TokenId successorToken = m_transactionsToTokens.find(successor)->second;
             check_error(successorToken.isValid());
-	    
-            debugMsg("Resource:getOrderingChoices", 
+
+            debugMsg("Resource:getOrderingChoices",
                      "Found predecessor token " << predecessorToken->getKey() << " and successorToken " << successorToken->getKey() <<
                      " " << (predecessorToken == successorToken));
             if(successorToken == predecessorToken || isConstrainedToPrecede(predecessorToken, successorToken) || !temporalAdvisor->canPrecede(predecessorToken, successorToken))
               continue;
 
-            debugMsg("Resource:getOrderingChoices", 
+            debugMsg("Resource:getOrderingChoices",
                      "Considering order <" << predecessorToken->getPredicateName().toString() << "(" << predecessorToken->getKey() << "), " <<
                      successorToken->getPredicateName().toString() << "(" << successorToken->getKey() << ")>");
 
@@ -230,14 +230,14 @@ namespace EUROPA {
         check_error(transIt != m_transactionsToTokens.end());
         TokenId tok = transIt->second;
         check_error(tok.isValid());
-        
+
         return tok;
     }
-    
+
     ResourceTokenRelationId Resource::getRTRConstraint(TokenId tok)
     {
     	ResourceTokenRelationId retval = ResourceTokenRelationId::noId();
-                
+
         const std::set<ConstraintId>& constraints = tok->getStandardConstraints();
         std::set<ConstraintId>::const_iterator constIt = constraints.begin();
         for(;constIt != constraints.end();++constIt) {
@@ -245,27 +245,27 @@ namespace EUROPA {
         	if (c->getName() == ResourceTokenRelation::CONSTRAINT_NAME())
         		return ResourceTokenRelationId(c);
         }
-        
+
         check_error(ALWAYS_FAIL,"Could not find ResourceTokenRelation for Transaction");
         return retval;
     }
-    
+
     bool isConsumptionProblem(ResourceProblem::Type problem)
     {
-        return	
+        return
             problem == ResourceProblem::ConsumptionSumExceeded ||
             problem == ResourceProblem::ConsumptionRateExceeded ||
-            problem == ResourceProblem::LevelTooLow; 
+            problem == ResourceProblem::LevelTooLow;
     }
-    
+
     bool isProductionProblem(ResourceProblem::Type problem)
     {
-        return	
+        return
             problem == ResourceProblem::ProductionSumExceeded ||
             problem == ResourceProblem::ProductionRateExceeded ||
-            problem == ResourceProblem::LevelTooHigh; 
+            problem == ResourceProblem::LevelTooHigh;
     }
-    
+
     /*
      * reset violations from instant inst
      */
@@ -274,7 +274,7 @@ namespace EUROPA {
     	// TODO: for now reset all violations, see if this can be made more efficient
     	resetViolations();
     }
-    
+
     /*
      * reset all violations
      */
@@ -288,23 +288,23 @@ namespace EUROPA {
             }
         }
     }
-    
-    void Resource::notifyViolated(const InstantId inst, ResourceProblem::Type problem) 
+
+    void Resource::notifyViolated(const InstantId inst, ResourceProblem::Type problem)
     {
       check_error(inst.isValid());
       check_error(inst->isViolated());
       check_error(!inst->getTransactions().empty());
 
-	  const std::set<TransactionId>& txns = inst->getTransactions();	  
+	  const std::set<TransactionId>& txns = inst->getTransactions();
       TransactionId txn = *(txns.begin());
       ConstraintEngineId ce = txn->quantity()->getConstraintEngine();
- 
+
       debugMsg("Resource:notifyViolated", "Received notification of violation at time " << inst->getTime());
-      
+
       if (ce->getAllowViolations()) { // TODO: move this test to the constraint?
     	  std::set<TransactionId>::const_iterator it = txns.begin();
     	  for(;it != txns.end(); ++it) {
-              txn = *it;     
+              txn = *it;
               TokenId tok = getTokenForTransaction(txn);
     		  ResourceTokenRelationId c = getRTRConstraint(tok);
 
@@ -320,16 +320,16 @@ namespace EUROPA {
       }
       else {
           const_cast<AbstractDomain&>(txn->quantity()->lastDomain()).empty();
-      }      
+      }
     }
 
-    void Resource::notifyNoLongerViolated(const InstantId inst) 
+    void Resource::notifyNoLongerViolated(const InstantId inst)
     {
         // remove all constraints associated with the instant from violated list
-  	  const std::set<TransactionId>& txns = inst->getTransactions();	  
+  	  const std::set<TransactionId>& txns = inst->getTransactions();
 	  std::set<TransactionId>::const_iterator it = txns.begin();
 	  for(;it != txns.end(); ++it) {
-          TransactionId txn = *it;      		  		  
+          TransactionId txn = *it;
           TokenId tok = getTokenForTransaction(txn);
 		  ResourceTokenRelationId c = getRTRConstraint(tok);
 		  if (c->getViolation() > 0) {
@@ -338,7 +338,7 @@ namespace EUROPA {
 		  }
 	  }
     }
-    
+
     //all ordering choices apply to all tokens in all flaws
     void Resource::notifyFlawed(const InstantId inst) {
       check_error(inst.isValid());
@@ -376,7 +376,7 @@ namespace EUROPA {
           notifyOrderingRequired(tok);
         }
         else {
-          debugMsg("Resource:notifyFlawed", 
+          debugMsg("Resource:notifyFlawed",
                    "Received a redundant notification of a flaw for token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ") at instant " <<
                    inst->getTime() << ".  Adding it to the set but not notifying.");
           flawIt->second.insert(inst);
@@ -388,13 +388,11 @@ namespace EUROPA {
 
     void Resource::notifyNoLongerFlawed(const InstantId inst) {
       check_error(inst.isValid());
-      //check_error(!inst->isFlawed());
-      //check_error(!inst->getTransactions().empty());
       debugMsg("Resource:notifyNoLongerFlawed", "Received notification that instant " << inst->getTime() << " is no longer flawed.");
 
       if(m_flawedInstants.find(inst->getTime()) == m_flawedInstants.end()) {
         checkError(!inst->isFlawed(), "Instant at time " << inst->getTime() << " claims to be flawed, but resource didn't know it.");
-        checkError(noFlawedTokensForInst(inst), 
+        checkError(noFlawedTokensForInst(inst),
                    "Error: Instant " << inst->getTime() << " not in the list of flawed instants, but there are tokens that have a recorded flaw at that time.");
         debugMsg("Resource:notifyNoLongerFlawed", "Instant wasn't flawed in the first place.  Returning.");
         return;
@@ -463,7 +461,7 @@ namespace EUROPA {
       check_error(limit > 0);
       check_error(m_flawedInstants.find(inst->getTime()) != m_flawedInstants.end());
       check_error(m_flawedInstants.find(inst->getTime())->second == inst);
-      
+
       debugMsg("Resource:getOrderingChoices", "Getting " << limit << " ordering choices for " << inst->getTime() << "(" << inst->getKey() << ") on " << toString());
 
       if(!getPlanDatabase()->getConstraintEngine()->propagate()) {
@@ -541,7 +539,7 @@ namespace EUROPA {
 //       std::set<ConstraintId> preConstrs, sucConstrs, intersection;
 //       pre->constraints(preConstrs);
 //       suc->constraints(sucConstrs);
-      
+
 //       std::set_intersection(preConstrs.begin(), preConstrs.end(),
 //                             sucConstrs.begin(), sucConstrs.end(),
 //                             inserter(intersection, intersection.begin()));
@@ -563,7 +561,7 @@ namespace EUROPA {
 //       }
 //       return false;
     }
-    
+
     // PS Methods:
     PSResourceProfile* Resource::getLimits() {
       return new PSResourceProfile(getLowerLimit(), getUpperLimit());
@@ -572,13 +570,13 @@ namespace EUROPA {
     PSResourceProfile* Resource::getLevels() {
       return new PSResourceProfile(getProfile());
     }
-    
+
     PSList<PSEntityKey> Resource::getOrderingChoices(TimePoint t)
     {
   	  PSList<PSEntityKey> retval;
-  	  
+
   	  SAVH::InstantId instant;
-  	  
+
   	  SAVH::ProfileIterator it(getProfile());
   	  while(!it.done()) {
   	      TimePoint inst = (TimePoint) it.getTime();
@@ -588,21 +586,21 @@ namespace EUROPA {
   	      }
   	      it.next();
   	  }
-  	  
+
   	  if (instant.isNoId()) {
   		  // TODO: log error
   		  return retval;
   	  }
-  	  
+
   	  std::vector<std::pair<SAVH::TransactionId, SAVH::TransactionId> > results;
   	  getOrderingChoices(instant,results);
   	  for (unsigned int i = 0;i<results.size(); i++) {
   	      SAVH::TransactionId predecessor = results[i].first;
-  	      SAVH::TransactionId successor = results[i].second;	
+  	      SAVH::TransactionId successor = results[i].second;
   	      retval.push_back(predecessor->time()->parent()->getKey());
   	      retval.push_back(successor->time()->parent()->getKey());
   	  }
-  	  
+
   	  return retval;
     }
   }

@@ -56,13 +56,13 @@ namespace NDDL {
     public:
       use(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool isFact, bool close);
       use(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, bool close);
-      
+
       StateVarId state;
       ObjectVarId object;
       TempVarId tStart;
       TempVarId tEnd;
       TempVarId tDuration;
-      
+
       virtual void close();
     protected:
       virtual void handleDefaults(bool autoClose = true);
@@ -101,19 +101,47 @@ namespace NDDL {
     public:
       uses(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool isFact, bool close);
       uses(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, bool close);
-      
+
       StateVarId state;
       ObjectVarId object;
       TempVarId tStart;
       TempVarId tEnd;
       TempVarId tDuration;
-      
+
       ConstrainedVariableId quantity;
       virtual void close();
     protected:
       virtual void handleDefaults(bool autoClose = true);
     private:
     };
+  };
+
+  class NddlCBReusable : public EUROPA::SAVH::CBReusable {
+  public:
+    NddlCBReusable(const PlanDatabaseId& planDatabase,
+         const LabelStr& type,
+         const LabelStr& name,
+         bool open);
+    NddlCBReusable(const ObjectId& parent,
+         const LabelStr& type,
+         const LabelStr& name,
+         bool open);
+
+    virtual ~NddlCBReusable(){}
+
+    virtual void close();
+
+    virtual void constructor(float c, float ll_min);
+    virtual void constructor(float c, float ll_min, float cr_max);
+    virtual void constructor(float c, float ll_min, float c_max, float cr_max);
+    virtual void constructor();
+
+    void handleDefaults(bool autoClose = true);
+
+    ConstrainedVariableId capacity;
+    ConstrainedVariableId levelLimitMin;
+    ConstrainedVariableId consumptionRateMax;
+    ConstrainedVariableId consumptionMax;
   };
 
   class NddlReservoir : public EUROPA::SAVH::Reservoir {
@@ -127,26 +155,26 @@ namespace NDDL {
 		  const LabelStr& type,
 		  const LabelStr& name,
 		  bool open);
-    
+
     virtual ~NddlReservoir(){}
 
     virtual void close();
-    
+
     virtual void constructor(float ic, float ll_min, float ll_max);
-    
+
     virtual void constructor(float ic, float ll_min, float ll_max, float p_max, float c_max);
-    
+
     virtual void constructor(float ic, float ll_min, float ll_max, float pr_max, float p_max, float cr_max, float c_max);
-    
+
     virtual void constructor();
 
     void handleDefaults(bool autoClose = true); // default variable initialization
 
     ConstrainedVariableId initialCapacity;
-    ConstrainedVariableId levelLimitMin; 
-    ConstrainedVariableId levelLimitMax; 
-    ConstrainedVariableId productionRateMax; 
-    ConstrainedVariableId productionMax; 
+    ConstrainedVariableId levelLimitMin;
+    ConstrainedVariableId levelLimitMax;
+    ConstrainedVariableId productionRateMax;
+    ConstrainedVariableId productionMax;
     ConstrainedVariableId consumptionRateMax;
     ConstrainedVariableId consumptionMax;
 
@@ -215,25 +243,25 @@ namespace NDDL {
 		 bool open);
 
     virtual void close();
-    
+
     virtual void constructor(float ic, float ll_min, float ll_max);
-    
+
     virtual void constructor(float ic, float ll_min, float ll_max, float p_max, float c_max);
-    
+
     virtual void constructor(float ic, float ll_min, float ll_max, float pr_max, float p_max, float cr_max, float c_max);
-    
+
     virtual void constructor();
 
     void handleDefaults(bool autoClose = true); // default variable initialization
 
-    
+
     class change;
     typedef Id<change> changeId;
     ConstrainedVariableId initialCapacity;
-    ConstrainedVariableId levelLimitMin; 
-    ConstrainedVariableId levelLimitMax; 
-    ConstrainedVariableId productionRateMax; 
-    ConstrainedVariableId productionMax; 
+    ConstrainedVariableId levelLimitMin;
+    ConstrainedVariableId levelLimitMax;
+    ConstrainedVariableId productionRateMax;
+    ConstrainedVariableId productionMax;
     ConstrainedVariableId consumptionRateMax;
     ConstrainedVariableId consumptionMax;
 

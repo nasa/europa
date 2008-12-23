@@ -12,20 +12,23 @@ namespace EUROPA {
     ResourceTokenRelation::ResourceTokenRelation(const ConstraintEngineId& constraintEngine,
                                                  const std::vector<ConstrainedVariableId>& scope,
                                                  const TokenId& tok)
-      : Constraint(CONSTRAINT_NAME(), PROPAGATOR_NAME(), constraintEngine, scope), m_token(tok) {
+      : Constraint(CONSTRAINT_NAME(), PROPAGATOR_NAME(), constraintEngine, scope)
+      , m_token(tok)
+      , m_violationProblem(ResourceProblem::NoProblem)
+    {
       //       debugMsg("Resource:ResourceTokenRelation", "Checking resource " << m_resource->getKey() << " against variable " << scope[0]->toString());
       //       condDebugMsg(scope[0]->lastDomain().isSingleton(), "Resource:ResourceTokenRelation",
       // 		   "Value of variable: " << scope[0]->lastDomain().getSingletonValue());
       checkError(scope.size() == 2, "Require both state and object variables, in that order.");
       checkError(scope[0] == tok->getState() && scope[1] == tok->getObject(),
                  "Require both state and object variables, in that order.");
-      if(scope[0]->isSpecified() && scope[0]->getSpecifiedValue() == Token::ACTIVE &&
-         scope[1]->lastDomain().isSingleton()) {
-        m_resource = ResourceId(scope[1]->lastDomain().getSingletonValue());
-        check_error(m_resource.isValid());
-	debugMsg("ResourceTokenRelation:ResourceTokenRelation", "Adding token " << m_token->toString() << " to resource-profile of resource " << m_resource->toString() );
+      if(scope[STATE_VAR]->isSpecified() && scope[STATE_VAR]->getSpecifiedValue() == Token::ACTIVE &&
+         scope[OBJECT_VAR]->lastDomain().isSingleton()) {
+          m_resource = ResourceId(scope[OBJECT_VAR]->lastDomain().getSingletonValue());
+          check_error(m_resource.isValid());
+          debugMsg("ResourceTokenRelation:ResourceTokenRelation", "Adding token " << m_token->toString() << " to resource-profile of resource " << m_resource->toString() );
 
-        m_resource->addToProfile(m_token);
+          m_resource->addToProfile(m_token);
       }
     }
 
@@ -72,8 +75,17 @@ namespace EUROPA {
     	Constraint::notifyViolated();
     }
 
+    void ResourceTokenRelation::notifyNoLongerViolated()
+    {
+        m_violationProblem = ResourceProblem::NoProblem;
+        Constraint::notifyNoLongerViolated();
+    }
+
     std::string ResourceTokenRelation::getViolationExpl() const
     {
+        if (m_violationProblem == ResourceProblem::NoProblem)
+            return "";
+
     	std::ostringstream os;
 
     	os << ResourceProblem::getString(m_violationProblem)

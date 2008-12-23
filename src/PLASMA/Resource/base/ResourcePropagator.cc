@@ -15,11 +15,11 @@
 #include "Constraint.hh"
 namespace EUROPA {
 
-  ResourcePropagator::ResourcePropagator(const LabelStr& name, 
-					 const ConstraintEngineId& constraintEngine, 
+  ResourcePropagator::ResourcePropagator(const LabelStr& name,
+					 const ConstraintEngineId& constraintEngine,
 					 const PlanDatabaseId& planDatabase)
     : DefaultPropagator(name, constraintEngine), m_planDb(planDatabase)
-  {	  
+  {
   }
 
   /**
@@ -58,7 +58,7 @@ namespace EUROPA {
   {
 	  return m_planDb->getSchema()->isObjectType(resourceString());
   }
-  
+
   bool ResourcePropagator::updateRequired() const {
     if(!isEnabled())
       return false;
@@ -67,11 +67,10 @@ namespace EUROPA {
   }
 
   const std::list<ResourceId> ResourcePropagator::getDirtyResources() const {
-    static const LabelStr sl_resourceString("Resource");
     std::list<ResourceId> allResources;
     std::list<ResourceId> dirtyResources;
 
-    m_planDb->getObjectsByType(sl_resourceString, allResources);
+    m_planDb->getObjectsByType(resourceString(), allResources);
 
     // Finally, iterate over all the resources we have discovered which require propagation
     for (std::list<ResourceId>::const_iterator it = allResources.begin(); it != allResources.end(); ++it){

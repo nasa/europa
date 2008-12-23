@@ -33,28 +33,28 @@ class Resource {
   consumptionMax = -inff;
  }
 
- Resource(float ic, float ll_min, float ll_max, 
+ Resource(float ic, float ll_min, float ll_max,
 	float p_max, float c_max){
   initialCapacity = ic;
   levelLimitMin = ll_min;
   levelLimitMax = ll_max;
-  productionRateMax = p_max; 
-  productionMax = p_max; 
+  productionRateMax = p_max;
+  productionMax = p_max;
   consumptionRateMax = -16.0; // !!!!!!!! bug work around cm; // -inf;
   consumptionMax = c_max; // -inf;
  }
 
- Resource(float ic, float ll_min, float ll_max, 
+ Resource(float ic, float ll_min, float ll_max,
 	float pr_max, float p_max, float cr_max, float c_max){
   initialCapacity = ic;
   levelLimitMin = ll_min;
   levelLimitMax = ll_max;
-  productionRateMax = pr_max; 
-  productionMax = p_max; 
-  consumptionRateMax = cr_max; 
-  consumptionMax = c_max; 
+  productionRateMax = pr_max;
+  productionMax = p_max;
+  consumptionRateMax = cr_max;
+  consumptionMax = c_max;
  }
-	
+
  Resource() {
   initialCapacity = 0.0;
   levelLimitMin = -inff;
@@ -85,7 +85,7 @@ class Reservoir {
     //posfloat quantity;
     float quantity = [0.0 +inff];
   }
-  
+
   predicate consume {
     //posfloat quantity;
     float quantity = [0.0 +inff];
@@ -98,7 +98,7 @@ class Reservoir {
     productionRateMax = +inff;
     productionMax = +inff;
     consumptionRateMax = +inff;
-    consumptionMax = +inff;    
+    consumptionMax = +inff;
   }
 
   Reservoir(float ic, float ll_min, float ll_max, float p_max, float c_max) {
@@ -108,7 +108,7 @@ class Reservoir {
     productionRateMax = +inff;
     productionMax = p_max;
     consumptionRateMax = +inff;
-    consumptionMax = c_max;      
+    consumptionMax = c_max;
   }
 
   Reservoir(float ic, float ll_min, float ll_max, float pr_max, float p_max,
@@ -119,7 +119,7 @@ class Reservoir {
     productionRateMax = pr_max;
     productionMax = p_max;
     consumptionRateMax = cr_max;
-    consumptionMax = c_max;      
+    consumptionMax = c_max;
   }
 }
 
@@ -128,7 +128,7 @@ class Reusable {
   float levelLimitMin;
   float consumptionMax;
   float consumptionRateMax;
- 
+
   predicate uses {
     float quantity = [0.0 +inff];
   }
@@ -148,6 +148,40 @@ class Reusable {
   }
 
   Reusable(float c, float ll_min, float c_max, float cr_max) {
+    capacity = c;
+    levelLimitMin = ll_min;
+    consumptionMax = c_max;
+    consumptionRateMax = cr_max;
+  }
+}
+
+class CBReusable {
+  float capacity;
+  float levelLimitMin;
+  float consumptionMax;
+  float consumptionRateMax;
+
+  /*
+  predicate uses {
+    float quantity = [0.0 +inff];
+  }
+  */
+
+  CBReusable(float c, float ll_min) {
+    capacity = c;
+    levelLimitMin = ll_min;
+    consumptionMax = +inff;
+    consumptionRateMax = +inff;
+  }
+
+  CBReusable(float c, float ll_min, float cr_max) {
+    capacity = c;
+    levelLimitMin = ll_min;
+    consumptionMax = +inff;
+    consumptionRateMax = cr_max;
+  }
+
+  CBReusable(float c, float ll_min, float c_max, float cr_max) {
     capacity = c;
     levelLimitMin = ll_min;
     consumptionMax = c_max;
@@ -175,6 +209,6 @@ class Unary {
  */
 class UnaryResource extends Timeline {
  predicate uses{
-  eq(state, ACTIVE); 
+  eq(state, ACTIVE);
  }
 }

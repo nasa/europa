@@ -111,6 +111,47 @@ namespace EUROPA {
   }
 
 
+  CBReusableObjectFactory::CBReusableObjectFactory(const LabelStr& signature)
+    : NativeObjectFactory("CBReusable",signature)
+  {
+  }
+
+  CBReusableObjectFactory::~CBReusableObjectFactory()
+  {
+  }
+
+  ObjectId CBReusableObjectFactory::makeNewObject(
+                        const PlanDatabaseId& planDb,
+                        const LabelStr& objectType,
+                        const LabelStr& objectName,
+                        const std::vector<const AbstractDomain*>& arguments) const
+  {
+    Id<NDDL::NddlCBReusable>  instance = (new NDDL::NddlCBReusable(planDb, objectType, objectName,true))->getId();
+
+    std::vector<float> argValues;
+    for (unsigned int i=0;i<arguments.size();i++)
+      argValues.push_back((float)(arguments[i]->getSingletonValue()));
+
+    if (argValues.size() == 0)
+      instance->constructor();
+    else if (argValues.size() == 2)
+      instance->constructor(argValues[0],argValues[1]);
+    else if (argValues.size() == 3)
+      instance->constructor(argValues[0],argValues[1],argValues[2]);
+    else if (argValues.size() == 4)
+      instance->constructor(argValues[0],argValues[1],argValues[2],argValues[3]);
+    else {
+      std::ostringstream os;
+      os << "Unexpected number of args in CBReusable constructor:" << argValues.size();
+      check_runtime_error(ALWAYS_FAILS,os.str());
+    }
+
+    instance->handleDefaults(false /*don't close the object yet*/);
+    debugMsg("XMLInterpreter:NativeObjectFactory","Created Native " << m_className.toString() << ":" << objectName.toString() << " type:" << objectType.toString());
+
+    return instance;
+  }
+
   ReservoirObjectFactory::ReservoirObjectFactory(const LabelStr& signature)
     : NativeObjectFactory("Reservoir",signature)
   {

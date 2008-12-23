@@ -31,12 +31,13 @@ namespace EUROPA {
       }
       static const int STATE_VAR = 0;
       static const int OBJECT_VAR = 1;
-            
+
       virtual std::string getViolationExpl() const;
-      
+
     protected:
-      void notifyViolated(ResourceProblem::Type problem, const InstantId inst);
-      
+      virtual void notifyViolated(ResourceProblem::Type problem, const InstantId inst);
+      virtual void notifyNoLongerViolated();
+
     private:
       bool canIgnore(const ConstrainedVariableId& variable,
 		     int argIndex,
@@ -47,7 +48,7 @@ namespace EUROPA {
 
       int m_violationTime;
       ResourceProblem::Type m_violationProblem;
-      
+
       friend class Resource;
     };
   }

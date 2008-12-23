@@ -295,6 +295,104 @@ LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, c
       close();
   }
 
+  /*===============*/
+
+  NddlCBReusable::NddlCBReusable(const PlanDatabaseId& planDatabase,
+                 const LabelStr& type,
+                 const LabelStr& name,
+                 bool open)
+    : EUROPA::SAVH::CBReusable(planDatabase, type, name, open) {}
+
+  NddlCBReusable::NddlCBReusable(const ObjectId& parent,
+                 const LabelStr& type,
+                 const LabelStr& name,
+                 bool open)
+    : EUROPA::SAVH::CBReusable(parent, type, name, open) {}
+
+  void NddlCBReusable::close() {
+    static const unsigned int C = 0;
+    static const unsigned int LLMIN = 1;
+    static const unsigned int CRMAX = 2;
+    static const unsigned int CMAX = 3;
+    check_error_variable(static const unsigned int ARG_COUNT = 4);
+    static const std::string PARAM_CAPACITY("capacity");
+    static const std::string PARAM_LEVEL_LIMIT_MIN("levelLimitMin");
+    static const std::string PARAM_CONSUMPTION_RATE_MAX("consumptionRateMax");
+    static const std::string PARAM_CONSUMPTION_MAX("consumptionMax");
+
+    check_error(m_variables.size() >= ARG_COUNT);
+    check_error(m_variables[C]->getName().toString().find(PARAM_CAPACITY) != std::string::npos);
+    check_error(m_variables[LLMIN]->getName().toString().find(PARAM_LEVEL_LIMIT_MIN) != std::string::npos);
+    check_error(m_variables[CRMAX]->getName().toString().find(PARAM_CONSUMPTION_RATE_MAX) != std::string::npos);
+    check_error(m_variables[CMAX]->getName().toString().find(PARAM_CONSUMPTION_MAX) != std::string::npos);
+
+    check_error(m_variables[C]->derivedDomain().isSingleton());
+    check_error(m_variables[LLMIN]->derivedDomain().isSingleton());
+    check_error(m_variables[CRMAX]->derivedDomain().isSingleton());
+    check_error(m_variables[CMAX]->derivedDomain().isSingleton());
+
+    LabelStr profileName = getProfileOrDetectorName(this, PARAM_PROFILE_TYPE, "IncrementalFlowProfile");
+    LabelStr detectorName = getProfileOrDetectorName(this, PARAM_DETECTOR_TYPE, "ClosedWorldFVDetector");
+
+    init(m_variables[C]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(),
+     m_variables[LLMIN]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(),
+     m_variables[CRMAX]->derivedDomain().getSingletonValue(), m_variables[CRMAX]->derivedDomain().getSingletonValue(),
+     m_variables[CMAX]->derivedDomain().getSingletonValue(), m_variables[CMAX]->derivedDomain().getSingletonValue(),
+     detectorName, profileName);
+
+    EUROPA::SAVH::Resource::close();
+  }
+
+  void NddlCBReusable::handleDefaults(bool autoClose) {
+    if(capacity.isNoId()) {
+      capacity = addVariable(IntervalDomain("float"), "capacity");
+    }
+    if(levelLimitMin.isNoId()) {
+      levelLimitMin = addVariable(IntervalDomain("float"), "levelLimitMin");
+    }
+    if(consumptionRateMax.isNoId()) {
+      consumptionRateMax = addVariable(IntervalDomain("float"), "consumptionRateMax");
+    }
+    if(consumptionMax.isNoId()) {
+      consumptionMax = addVariable(IntervalDomain("float"), "consumptionMax");
+    }
+    if(autoClose)
+      close();
+  }
+
+  void NddlCBReusable::constructor() {
+      constructor(
+              PLUS_INFINITY,  // capacity
+              MINUS_INFINITY, // level limit min
+              PLUS_INFINITY,  // consumption max
+              PLUS_INFINITY   // consumption rate max
+      );
+  }
+  void NddlCBReusable::constructor(float c, float ll_min) {
+      constructor(
+              c,              // capacity
+              ll_min,         // level limit min
+              PLUS_INFINITY,  // consumption max
+              PLUS_INFINITY   // consumption rate max
+      );
+  }
+  void NddlCBReusable::constructor(float c, float ll_min, float cr_max) {
+      constructor(
+              c,              // capacity
+              ll_min,         // level limit min
+              PLUS_INFINITY,  // consumption max
+              cr_max          // consumption rate max
+      );
+  }
+  void NddlCBReusable::constructor(float c, float ll_min, float c_max, float cr_max) {
+    capacity = addVariable(IntervalDomain(c, c, "float"), "capacity");
+    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
+    consumptionRateMax = addVariable(IntervalDomain(cr_max, cr_max, "float"), "consumptionRateMax");
+    consumptionMax = addVariable(IntervalDomain(c_max, c_max, "float"), "consumptionMax");
+  }
+
+  /*===============*/
+
   NddlReservoir::NddlReservoir(const PlanDatabaseId& planDatabase,
 			       const LabelStr& type,
 			       const LabelStr& name,

@@ -265,8 +265,8 @@ namespace EUROPA {
     const ConstraintEngineId m_constraintEngine; /**< The owner ConstraintEngine */
     std::vector<ConstrainedVariableId> m_variables; /**< The variable scope of the Constraint. */
 
-    void notifyViolated();
-    void notifyNoLongerViolated();
+    virtual void notifyViolated();
+    virtual void notifyNoLongerViolated();
 
   private:
     /**
