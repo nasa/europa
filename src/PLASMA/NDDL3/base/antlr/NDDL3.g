@@ -403,9 +403,10 @@ IDENT	:	 ('a'..'z'|'A'..'Z'|'_'|'$') ('a'..'z'|'A'..'Z'|'_'|'0'..'9'|'$')*
 
 STRING	:	'"' (~('\\'|'"') | ESCAPE_SEQUENCE)* '"'
 		{
+			// TODO: Verify this insanity works.
 			// Terence doesn't love us anymore, this is proof.
 			pANTLR3_STRING s = $text;
-			setText(s->substr(1, s->length));
+			LTOKEN->setText(LTOKEN, s->subString(s, 1, s->len-1));
 		}
 	;
 
