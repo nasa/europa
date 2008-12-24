@@ -249,7 +249,6 @@ namespace EUROPA {
             for(;it != constraints.end(); ++it) {
                 UsesId c = *it;
                 c->notifyViolated(problem,inst);
-                debugMsg("CBReusable:violations", "Marked constraint as violated : " << c->toString());
             }
         }
         else {
@@ -266,7 +265,6 @@ namespace EUROPA {
         for(;it != constraints.end(); ++it) {
             UsesId c = *it;
             c->notifyNoLongerViolated(inst);
-            debugMsg("CBReusable:violations", "Marked constraint as NoLongerViolated : " << c->toString());
         }
     }
 
@@ -289,14 +287,13 @@ namespace EUROPA {
     void CBReusable::notifyNoLongerFlawed(const InstantId inst)
     {
         check_error(inst.isValid());
-        //checkError(!inst->isFlawed(), "Instant at time " << inst->getTime() << " claims not to be flawed, but resource didn't know it.");
 
         if(m_flawedInstants.find(inst->getTime()) != m_flawedInstants.end()) {
             m_flawedInstants.erase(inst->getTime());
             debugMsg("CBReusable:flaws", "Removed instant " << inst->getTime() << " from the set of flawed instants.");
         }
         else {
-            debugMsg("CBReusable:flaws", "Ignored notification that instant " << inst->getTime() << " is no longer flawed. It wasn't flawed in the first place.");
+            debugMsg("CBReusable:flaws", "Ignored notification that instant " << inst->getTime() << " is no longer flawed. It wasn't marked as flawed in the first place.");
         }
     }
 
@@ -360,12 +357,11 @@ namespace EUROPA {
     {
         std::ostringstream os;
 
-        std::map<int,ResourceProblem::Type>::const_iterator it = m_violationProblems.begin();
+        std::map<InstantId,ResourceProblem::Type>::const_iterator it = m_violationProblems.begin();
         for(;it != m_violationProblems.end();++it) {
             os << ResourceProblem::getString(it->second)
                << " for resource " << m_resource->getName().toString()
-               << " at instant " << (it->first)
-               << std::endl;
+               << " at instant " << (it->first->getTime());
         }
 
         return os.str();
@@ -373,17 +369,39 @@ namespace EUROPA {
 
     void Uses::notifyViolated(ResourceProblem::Type problem, const InstantId inst)
     {
-        m_violationProblems[inst->getTime()] = problem;
-        Constraint::notifyViolated();
+        m_violationProblems[inst] = problem;
+        if (m_violationProblems.size() == 1) {
+            Constraint::notifyViolated();
+            debugMsg("Uses:violations", "Marked constraint as violated : " << toString());
+        }
     }
 
     void Uses::notifyNoLongerViolated(const InstantId inst)
     {
-        m_violationProblems.erase(inst->getTime());
-        if (m_violationProblems.size() == 0)
+        if (m_violationProblems.find(inst) == m_violationProblems.end()) {
+            debugMsg("Uses:violations", "Unrecognized instant " << inst << " ignoring notifyNoLongerViolated");
+            return;
+        }
+
+        bool wasViolated = (m_violationProblems.size() > 0);
+        m_violationProblems.erase(inst);
+        if (wasViolated && m_violationProblems.size() == 0) {
             Constraint::notifyNoLongerViolated();
+            debugMsg("Uses:violations", "Marked constraint as NoLongerViolated : " << toString());
+        }
     }
 
-    // TODO: finish nddl mapping for CBReusable
+    void Uses::notifyViolated()
+    {
+        check_error(ALWAYS_FAILS,"unqualified notifyViolated() should never be called for Uses constraint");
+    }
+
+    // This can be called when variables attached to the constraint are relaxed
+    void Uses::notifyNoLongerViolated()
+    {
+        m_violationProblems.clear();
+        Constraint::notifyNoLongerViolated();
+    }
+
   }
 }

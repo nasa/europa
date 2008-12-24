@@ -149,7 +149,7 @@ namespace EUROPA
 
     // if c is noId, this was caused directly by an specify, just relax the var and the next time around we'll catch the constraint
     if (c != ConstraintId::noId())
-      addViolatedConstraint(c);
+      c->notifyViolated();
 
     return true;
   }
@@ -166,7 +166,7 @@ namespace EUROPA
     for (std::set<ConstraintId>::iterator it = constraints.begin(); it != constraints.end(); ++it) {
       ConstraintId c = *it;
       if (isViolated(c))
-        removeViolatedConstraint(c);
+        c->notifyNoLongerViolated();
     }
 
     return true;

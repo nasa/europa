@@ -101,11 +101,14 @@ namespace EUROPA {
       virtual std::string getViolationExpl() const;
 
     protected:
+      virtual void notifyViolated();
+      virtual void notifyNoLongerViolated();
+
       virtual void notifyViolated(ResourceProblem::Type problem, const InstantId inst);
       virtual void notifyNoLongerViolated(const InstantId inst);
 
       CBReusableId m_resource;
-      std::map<int,ResourceProblem::Type> m_violationProblems; // time->problem map
+      std::map<InstantId,ResourceProblem::Type> m_violationProblems; // instant->problem map
 
     private:
       virtual bool canIgnore(const ConstrainedVariableId& variable,
