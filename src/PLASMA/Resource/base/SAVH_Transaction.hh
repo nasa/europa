@@ -18,7 +18,7 @@ namespace EUROPA {
     /**
      * @class Transaction
      * @brief A class representing a single "transaction" on a resource--consumption or production--that may have flexible time or quantity.
-     * In our model, transactions are instantaneous events.  Temporal flexibility merely represents a range of instants at which the 
+     * In our model, transactions are instantaneous events.  Temporal flexibility merely represents a range of instants at which the
      * transaction may occur.
      */
     class Transaction {
@@ -30,16 +30,16 @@ namespace EUROPA {
        * @param isConsumer Because all transactions have positive quantities, it is necessary to indicate that a transaction is
        *  consuming the resource in some way other than a negative quantity.  This flag is what indicates it.
        */
-      Transaction(ConstrainedVariableId time, ConstrainedVariableId quantity, bool isConsumer) 
+      Transaction(ConstrainedVariableId time, ConstrainedVariableId quantity, bool isConsumer)
 	: m_id(this), m_time(time), m_quantity(quantity), m_isConsumer(isConsumer) {}
       ~Transaction(){m_id.remove();}
 
-      /** 
+      /**
        * @brief Accessor for the time variable of the transaction.
        */
       ConstrainedVariableId time() const {return m_time;}
 
-      /** 
+      /**
        * @brief Accessor for the quantity variable of the transaction.
        */
       ConstrainedVariableId quantity() const {return m_quantity;}
@@ -49,16 +49,8 @@ namespace EUROPA {
        */
       bool isConsumer() const {return m_isConsumer;}
       TransactionId getId() const {return m_id;}
-      std::string toString() const {
-      	EntityId parent = m_time->parent();
-        std::stringstream os;
-        os << "{"
-           << "(token=" << parent->getKey() << ")"
-           << " time=[" << m_time->lastDomain().getLowerBound() << " " << m_time->lastDomain().getUpperBound() << "]"
-           << ",quantity=" << (m_isConsumer ? "-" : "+") << "[" << m_quantity->lastDomain().getLowerBound() << " " << m_quantity->lastDomain().getUpperBound() << "]"
-           << "}";
-        return os.str();
-      }
+      std::string toString() const;
+
     protected:
     private:
       TransactionId m_id;

@@ -147,8 +147,8 @@ namespace EUROPA {
 
         debugMsg("CBReusable:constraints", "Resource :" << toString() << " adding constraint:" << c->toString());
         // here's the major difference between Reusable and Reservoir:  always consume the quantity at the start and produce it again at the end
-        TransactionId t1 = (new Transaction(c->getScope()[Uses::START_VAR], c->getScope()[Uses::QTY_VAR], true))->getId();
-        TransactionId t2 = (new Transaction(c->getScope()[Uses::END_VAR], c->getScope()[Uses::QTY_VAR], false))->getId();
+        TransactionId t1 = c->getTransaction(Uses::START_VAR);
+        TransactionId t2 = c->getTransaction(Uses::END_VAR);
 
         // TODO: this is the way to add transactions to the resource, not clean because in this case there is no associated token
         m_transactionsToTokens.insert(std::make_pair(t1, TokenId::noId()));
@@ -181,9 +181,6 @@ namespace EUROPA {
         // TODO: see note in addToProfile above about relying on map to null tokens
         m_transactionsToTokens.erase(trans.first);
         m_transactionsToTokens.erase(trans.second);
-
-        delete (Transaction*) trans.first;
-        delete (Transaction*) trans.second;
 
         debugMsg("CBReusable:constraints","Resource :" << toString() << " removed constraint:" << c->toString());
     }
@@ -297,14 +294,16 @@ namespace EUROPA {
         }
     }
 
-
     Uses::Uses(const LabelStr& name,
-               const LabelStr& propagatorName,
-               const ConstraintEngineId& ce,
-               const std::vector<ConstrainedVariableId>& scope)
+            const LabelStr& propagatorName,
+            const ConstraintEngineId& ce,
+            const std::vector<ConstrainedVariableId>& scope)
         : Constraint(name, propagatorName, ce, scope)
     {
         checkError(scope.size() == 4, "Uses constraint requires resource,qty,start,end");
+
+        m_txns.push_back((new Transaction(scope[Uses::START_VAR], scope[Uses::QTY_VAR], true))->getId());
+        m_txns.push_back((new Transaction(scope[Uses::END_VAR],   scope[Uses::QTY_VAR], false))->getId());
 
         if(scope[RESOURCE_VAR]->lastDomain().isSingleton()) {
             m_resource = CBReusableId(scope[RESOURCE_VAR]->lastDomain().getSingletonValue());
@@ -312,25 +311,49 @@ namespace EUROPA {
             debugMsg("Uses:Uses", "Adding constraint " << toString() << " to resource-profile of resource " << m_resource->toString() );
             m_resource->addToProfile(getId());
         }
-   }
+    }
 
+    const TransactionId& Uses::getTransaction(int var) const
+    {
+        if (var == Uses::START_VAR)
+            return m_txns[0];
+        else
+            return m_txns[1];
+    }
+
+    void Uses::handleDiscard()
+    {
+        if (m_resource.isValid()) {
+            m_resource->removeFromProfile(getId());
+            debugMsg("Uses:Uses", "Removed " << toString() << " from profile for resource " << m_resource->toString());
+            m_resource = CBReusableId::noId();
+        }
+
+        for (unsigned int i=0;i<m_txns.size();i++) {
+            TransactionId txn = m_txns[i];
+            delete (Transaction*) txn;
+        }
+        m_txns.clear();
+
+        Constraint::handleDiscard();
+    }
 
     bool Uses::canIgnore(const ConstrainedVariableId& variable,
-           int argIndex,
-           const DomainListener::ChangeType& changeType)
+            int argIndex,
+            const DomainListener::ChangeType& changeType)
     {
         ConstrainedVariableId res = m_variables[RESOURCE_VAR];
 
         // if this is a singleton message see if we can bind the resource
         if(changeType == DomainListener::RESTRICT_TO_SINGLETON ||
-           changeType == DomainListener::SET_TO_SINGLETON ||
-           variable->lastDomain().isSingleton()) {
+                changeType == DomainListener::SET_TO_SINGLETON ||
+                variable->lastDomain().isSingleton()) {
 
             if(m_resource.isNoId() && res->lastDomain().isSingleton()) {
                 m_resource = CBReusableId(res->lastDomain().getSingletonValue());
                 check_error(m_resource.isValid());
                 m_resource->addToProfile(getId());
-                debugMsg("Uses:canIgnore", "Added " << toString() << " to profile for resource " << m_resource->toString());
+                debugMsg("Uses:Uses", "Added " << toString() << " to profile for resource " << m_resource->toString());
             }
         }
         // if this is a relax/reset message, see if we need to unbind the resource
@@ -339,7 +362,7 @@ namespace EUROPA {
 
             if((variable->getKey() == res->getKey()) && !(res->lastDomain().isSingleton())) {
                 m_resource->removeFromProfile(getId());
-                debugMsg("Uses:canIgnore", "Removed " << toString() << " from profile for resource " << m_resource->toString());
+                debugMsg("Uses:Uses", "Removed " << toString() << " from profile for resource " << m_resource->toString());
                 m_resource = CBReusableId::noId();
             }
         }
@@ -402,6 +425,17 @@ namespace EUROPA {
         m_violationProblems.clear();
         Constraint::notifyNoLongerViolated();
     }
+
+    const LabelStr& Uses::CONSTRAINT_NAME() {
+        static const LabelStr sl_const("uses");
+        return sl_const;
+    }
+
+    const LabelStr& Uses::PROPAGATOR_NAME() {
+        static const LabelStr sl_const("SAVH_Resource");
+        return sl_const;
+    }
+
 
   }
 }

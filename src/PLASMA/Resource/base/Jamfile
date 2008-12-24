@@ -18,6 +18,7 @@ ModuleBase Resource
 	SAVH_Profile.cc
 	SAVH_ProfilePropagator.cc
 	SAVH_ResourceTokenRelation.cc
+	SAVH_Transaction.cc
 	;
 
 } # PLASMA_READY

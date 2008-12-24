@@ -83,15 +83,8 @@ namespace EUROPA {
            const ConstraintEngineId& constraintEngine,
            const std::vector<ConstrainedVariableId>& scope);
 
-      static const LabelStr& CONSTRAINT_NAME() {
-          static const LabelStr sl_const("uses");
-          return sl_const;
-      }
-
-      static const LabelStr& PROPAGATOR_NAME() {
-          static const LabelStr sl_const("SAVH_Resource");
-          return sl_const;
-      }
+      static const LabelStr& CONSTRAINT_NAME();
+      static const LabelStr& PROPAGATOR_NAME();
 
       static const int RESOURCE_VAR = 0;
       static const int QTY_VAR = 1;
@@ -100,7 +93,11 @@ namespace EUROPA {
 
       virtual std::string getViolationExpl() const;
 
+      const TransactionId& getTransaction(int var) const;
+
     protected:
+      virtual void handleDiscard();
+
       virtual void notifyViolated();
       virtual void notifyNoLongerViolated();
 
@@ -108,6 +105,7 @@ namespace EUROPA {
       virtual void notifyNoLongerViolated(const InstantId inst);
 
       CBReusableId m_resource;
+      std::vector<TransactionId> m_txns;
       std::map<InstantId,ResourceProblem::Type> m_violationProblems; // instant->problem map
 
     private:
