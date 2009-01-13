@@ -93,8 +93,6 @@ namespace EUROPA {
 
       virtual std::string getViolationExpl() const;
 
-      const TransactionId& getTransaction(int var) const;
-
     protected:
       virtual void handleDiscard();
 
@@ -105,7 +103,6 @@ namespace EUROPA {
       virtual void notifyNoLongerViolated(const InstantId inst);
 
       CBReusableId m_resource;
-      std::vector<TransactionId> m_txns;
       std::map<InstantId,ResourceProblem::Type> m_violationProblems; // instant->problem map
 
     private:

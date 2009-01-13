@@ -147,8 +147,10 @@ namespace EUROPA {
 
         debugMsg("CBReusable:constraints", "Resource :" << toString() << " adding constraint:" << c->toString());
         // here's the major difference between Reusable and Reservoir:  always consume the quantity at the start and produce it again at the end
-        TransactionId t1 = c->getTransaction(Uses::START_VAR);
-        TransactionId t2 = c->getTransaction(Uses::END_VAR);
+        //TransactionId t1 = c->getTransaction(Uses::START_VAR);
+        //TransactionId t2 = c->getTransaction(Uses::END_VAR);
+        TransactionId t1 = (new Transaction(c->getScope()[Uses::START_VAR], c->getScope()[Uses::QTY_VAR], true))->getId();
+        TransactionId t2 = (new Transaction(c->getScope()[Uses::END_VAR],   c->getScope()[Uses::QTY_VAR], false))->getId();
 
         // TODO: this is the way to add transactions to the resource, not clean because in this case there is no associated token
         m_transactionsToTokens.insert(std::make_pair(t1, TokenId::noId()));
@@ -166,8 +168,10 @@ namespace EUROPA {
     {
         UsesId c = gc;
 
-        if(m_constraintsToTransactions.find(c) == m_constraintsToTransactions.end())
+        if(m_constraintsToTransactions.find(c) == m_constraintsToTransactions.end()) {
+          debugMsg("CBReusable:constraints","No Transactions found for :" << c->toString() << " ignoring CBReusable::removeFromProfile");
           return;
+        }
 
         debugMsg("CBReusable:constraints","Resource :" << toString() << " removing constraint:" << c->toString());
 
@@ -181,6 +185,9 @@ namespace EUROPA {
         // TODO: see note in addToProfile above about relying on map to null tokens
         m_transactionsToTokens.erase(trans.first);
         m_transactionsToTokens.erase(trans.second);
+
+        trans.first.release();
+        trans.second.release();
 
         debugMsg("CBReusable:constraints","Resource :" << toString() << " removed constraint:" << c->toString());
     }
@@ -302,9 +309,6 @@ namespace EUROPA {
     {
         checkError(scope.size() == 4, "Uses constraint requires resource,qty,start,end");
 
-        m_txns.push_back((new Transaction(scope[Uses::START_VAR], scope[Uses::QTY_VAR], true))->getId());
-        m_txns.push_back((new Transaction(scope[Uses::END_VAR],   scope[Uses::QTY_VAR], false))->getId());
-
         if(scope[RESOURCE_VAR]->lastDomain().isSingleton()) {
             m_resource = CBReusableId(scope[RESOURCE_VAR]->lastDomain().getSingletonValue());
             check_error(m_resource.isValid());
@@ -313,27 +317,16 @@ namespace EUROPA {
         }
     }
 
-    const TransactionId& Uses::getTransaction(int var) const
-    {
-        if (var == Uses::START_VAR)
-            return m_txns[0];
-        else
-            return m_txns[1];
-    }
-
     void Uses::handleDiscard()
     {
-        if (m_resource.isValid()) {
-            m_resource->removeFromProfile(getId());
-            debugMsg("Uses:Uses", "Removed " << toString() << " from profile for resource " << m_resource->toString());
-            m_resource = CBReusableId::noId();
+        if (!Entity::isPurging()) {
+            // TODO: object deletions are only assumed to happen when purging, it'll probably be hard to migrate later if we want more intelligent memory mgmt.
+            if (m_resource.isId()) {
+                m_resource->removeFromProfile(getId());
+                debugMsg("Uses:Uses", "Removed " << toString() << " from profile for resource " << m_resource->toString());
+                m_resource = CBReusableId::noId();
+            }
         }
-
-        for (unsigned int i=0;i<m_txns.size();i++) {
-            TransactionId txn = m_txns[i];
-            delete (Transaction*) txn;
-        }
-        m_txns.clear();
 
         Constraint::handleDiscard();
     }
