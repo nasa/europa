@@ -48,7 +48,8 @@ namespace EUROPA {
     {
       for(std::map<TransactionId, TokenId>::const_iterator it = m_transactionsToTokens.begin(); it != m_transactionsToTokens.end();
           ++it) {
-        delete (Transaction*) it->first;
+          if ((it->first->getOwner()).isNoId())
+            delete (Transaction*) it->first;
       }
       delete (FVDetector*) m_detector;
       delete (Profile*) m_profile;

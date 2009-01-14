@@ -66,11 +66,14 @@ namespace EUROPA {
       void removeFromProfile(const ConstraintId& c);
       std::set<UsesId> getConstraintsForInstant(const InstantId& instant);
 
-      std::map<UsesId, std::pair<TransactionId, TransactionId> > m_constraintsToTransactions;
+      void addToProfile(TransactionId& t);
+      void removeFromProfile(TransactionId& t);
 
       // TODO: only needed for backwards compatibility with Resource API, rework hierarchy to fix this.
       void addToProfile(const TokenId& tok);
       void removeFromProfile(const TokenId& tok);
+
+      std::map<UsesId, std::pair<TransactionId, TransactionId> > m_constraintsToTransactions;
 
       friend class Uses;
     };
@@ -93,6 +96,8 @@ namespace EUROPA {
 
       virtual std::string getViolationExpl() const;
 
+      const TransactionId& getTransaction(int var) const;
+
     protected:
       virtual void handleDiscard();
 
@@ -103,6 +108,7 @@ namespace EUROPA {
       virtual void notifyNoLongerViolated(const InstantId inst);
 
       CBReusableId m_resource;
+      std::vector<TransactionId> m_txns;
       std::map<InstantId,ResourceProblem::Type> m_violationProblems; // instant->problem map
 
     private:

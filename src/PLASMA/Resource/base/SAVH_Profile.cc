@@ -1,6 +1,6 @@
 #include "SAVH_Profile.hh"
 #include "SAVH_Transaction.hh"
-#include "SAVH_Instant.hh" 
+#include "SAVH_Instant.hh"
 #include "SAVH_FVDetector.hh"
 #include "SAVH_ProfilePropagator.hh"
 #include "ConstrainedVariable.hh"
@@ -12,8 +12,8 @@
 namespace EUROPA {
   namespace SAVH {
 
-    Profile::Profile(const PlanDatabaseId db, const FVDetectorId flawDetector, const double initLevelLb, const double initLevelUb) 
-      : m_id(this), m_changeCount(0), m_needsRecompute(false), m_initLevelLb(initLevelLb), m_initLevelUb(initLevelUb), 
+    Profile::Profile(const PlanDatabaseId db, const FVDetectorId flawDetector, const double initLevelLb, const double initLevelUb)
+      : m_id(this), m_changeCount(0), m_needsRecompute(false), m_initLevelLb(initLevelLb), m_initLevelUb(initLevelUb),
         m_planDatabase(db), m_detector(flawDetector) {}
 
     Profile::~Profile() {
@@ -22,7 +22,7 @@ namespace EUROPA {
       for(std::map<int, InstantId>::iterator it = m_instants.begin(); it != m_instants.end(); ++it)
         delete (Instant*) it->second;
       debugMsg("Profile:~Profile", "Cleaning up variable listeners...");
-      for(std::multimap<TransactionId, ConstraintId>::iterator it = m_variableListeners.begin(); 
+      for(std::multimap<TransactionId, ConstraintId>::iterator it = m_variableListeners.begin();
           it != m_variableListeners.end(); ++it)
         it->second->discard();
       debugMsg("Profile:~Profile", "Cleaning up constraint addition listeners...");
@@ -41,7 +41,7 @@ namespace EUROPA {
       checkError(m_transactions.find(t) == m_transactions.end(), "Attempted to insert a transaction twice!");
       checkError(m_variableListeners.find(t) == m_variableListeners.end(), "Already have time and/or quantity listeners for this transaction.");
       checkError(m_otherListeners.find(t) == m_otherListeners.end(), "Already a constraint addition listener for this transaction.");
-      debugMsg("Profile:addTransaction", "Adding " << (t->isConsumer() ? "consumer " : "producer ") << "transaction " << t << " for time " << 
+      debugMsg("Profile:addTransaction", "Adding " << (t->isConsumer() ? "consumer " : "producer ") << "transaction " << t << " for time " <<
                t->time()->toString() << " with quantity " << t->quantity()->toString());
 
       int startTime = (int) t->time()->lastDomain().getLowerBound();
@@ -112,10 +112,10 @@ namespace EUROPA {
         debugMsg("Profile:removeTransaction", "Discarding " << it->second->toString());
         it->second->discard();
       }
-                 
+
       m_variableListeners.erase(t);
       handleTransactionVariableDeletion(t);
-      
+
       for(std::vector<int>::const_iterator it = emptyInstants.begin(); it != emptyInstants.end(); ++it) {
         std::map<int, InstantId>::iterator instIt = m_instants.find(*it);
         //this can't be an error because the discard above constitues a relaxation of the variable, which will get handled in-situ
@@ -281,19 +281,21 @@ namespace EUROPA {
         //ConstrainedVariableId existingVar = it->second.var;
         int existingIndex = it->second.index;
         bool existingAddition = it->second.addition;
-	
+
         //it's an error for us to receive a removal message and then an addition message
         checkError(!(existingAddition == false && addition == true),
                    "Got a removal message before an addition message for constraint " << c->toString());
+
+
         //if we receive two additions or two removals
         if(existingAddition == addition) {
-          checkError(existingIndex != argIndex, 
+          checkError(existingIndex != argIndex,
                      "Got two " << (addition ? "addition" : "removal") << " notifications for index " << argIndex << " of constraint " << c->toString());
           checkError(m_transactionsByTime.find(c->getScope()[existingIndex]) != m_transactionsByTime.end(),
                      "No transaction stored for time " << c->getScope()[existingIndex]->toString());
           checkError(m_transactionsByTime.find(c->getScope()[argIndex]) != m_transactionsByTime.end(),
                      "No transaction stored for time " << c->getScope()[argIndex]->toString());
-	
+
           std::map<ConstrainedVariableId, TransactionId>::iterator transIt = m_transactionsByTime.find(c->getScope()[existingIndex]);
           checkError(transIt != m_transactionsByTime.end(),
                      "No transaction stored for time " << c->getScope()[existingIndex]->toString());
@@ -302,7 +304,7 @@ namespace EUROPA {
           checkError(transIt != m_transactionsByTime.end(),
                      "No transaction stored for time " << c->getScope()[argIndex]->toString());
           TransactionId trans2 = transIt->second;
-	  
+
           m_constraintsForNotification.erase(c);
           m_changeCount++;
           m_needsRecompute = true;
@@ -356,7 +358,7 @@ namespace EUROPA {
         delete (ProfileIterator*) m_recomputeInterval;
       m_recomputeInterval = (new ProfileIterator(getId()))->getId();
     }
-    
+
     /**
       * @brief Remove
       */
@@ -391,7 +393,7 @@ namespace EUROPA {
         return m_instants.end();
 
       std::map<int, InstantId>::iterator retval = m_instants.lower_bound(time);
-      
+
       //checkError(retval != m_instants.end(), "No instant with time not greater than " << time);
       if(retval == m_instants.end() || retval->second->getTime() > time)
         --retval;
@@ -404,14 +406,14 @@ namespace EUROPA {
       debugMsg("Profile:getGreatestInstant", "Got instant at time " << retval->second->getTime());
       return retval;
     }
-    
+
     std::map<int, InstantId>::iterator Profile::getLeastInstant(const int time) {
       debugMsg("Profile:getLeastInstant", "Least Instant not less than " << time);
       if(m_instants.empty())
         return m_instants.end();
 
       std::map<int, InstantId>::iterator retval = m_instants.lower_bound(time);
-      
+
       if(retval == m_instants.end())
         --retval;
       //checkError(retval != m_instants.end(), "No instant with time not less than " << time);
@@ -449,21 +451,21 @@ namespace EUROPA {
           initRecompute(m_recomputeInterval->getInstant());
           m_detector->initialize(m_recomputeInterval->getInstant());
 
-	  violation = m_detector->detect(m_recomputeInterval->getInstant());	    
+	  violation = m_detector->detect(m_recomputeInterval->getInstant());
 
           prev = m_recomputeInterval->getInstant();
           m_recomputeInterval->next();
         }
 
         while(!m_recomputeInterval->done()
-	      && 
+	      &&
 	      !violation ) {
           InstantId inst = m_recomputeInterval->getInstant();
           debugMsg("Profile:recompute", "Recomputing levels at instant " << inst->getTime());
           check_error(inst.isValid());
           recomputeLevels( prev, inst);
           prev = inst;
-          //stop detecting flaws and violations if the detector says so.  
+          //stop detecting flaws and violations if the detector says so.
           violation = m_detector->detect(inst);
           m_recomputeInterval->next();
         }
@@ -482,7 +484,7 @@ namespace EUROPA {
 
       {
         std::map<int, InstantId>::iterator ite = m_instants.find( first );
-	
+
         if( ite == m_instants.end() ) {
           addInstant(first);
         }
@@ -563,12 +565,12 @@ namespace EUROPA {
     void Profile::ConstraintAdditionListener::notifyDiscard() {
     	m_profile->handleTransactionVariableDeletion(m_tid);
     }
-    
+
     void Profile::ConstraintAdditionListener::notifyConstraintAdded(const ConstraintId& constr, int argIndex) {
       static const LabelStr temporal("Temporal");
       if(constr->getPropagator()->getName() == temporal) {
         debugMsg("Profile:ConstraintAdditionListener",
-                 "Notifying profile " << m_profile << " of addition of constraint " << constr->toString() << 
+                 "Notifying profile " << m_profile << " of addition of constraint " << constr->toString() <<
                  " to variable " << m_var->toString() << " at index " << argIndex);
         m_profile->temporalConstraintAdded(constr, m_var, argIndex);
       }
@@ -578,7 +580,7 @@ namespace EUROPA {
       static const LabelStr temporal("Temporal");
       if(constr->getPropagator()->getName() == temporal) {
         debugMsg("Profile:ConstraintAdditionListener",
-                 "Notifying profile " << m_profile << " of removal of constraint " << constr->toString() << 
+                 "Notifying profile " << m_profile << " of removal of constraint " << constr->toString() <<
                  " from variable " << m_var->toString() << " at index " << argIndex);
         m_profile->temporalConstraintRemoved(constr, m_var, argIndex);
       }
@@ -592,7 +594,7 @@ namespace EUROPA {
       return sstr.str();
     }
 
-    ProfileIterator::ProfileIterator(const ProfileId prof, const int startTime, const int endTime) 
+    ProfileIterator::ProfileIterator(const ProfileId prof, const int startTime, const int endTime)
       : m_id(this), m_profile(prof), m_changeCount(prof->m_changeCount) {
       //if(m_profile->m_needsRecompute)
       //m_profile->handleRecompute();
@@ -605,7 +607,7 @@ namespace EUROPA {
       m_endTime = (m_end == m_realEnd ? PLUS_INFINITY : m_end->first);
       if(m_end != m_realEnd)
         ++m_end;
-      debugMsg("ProfileIterator:ProfileIterator", "Actual interval [" << (m_start == m_realEnd ? (2 * MINUS_INFINITY) : m_start->second->getTime()) << " " << 
+      debugMsg("ProfileIterator:ProfileIterator", "Actual interval [" << (m_start == m_realEnd ? (2 * MINUS_INFINITY) : m_start->second->getTime()) << " " <<
                (m_end == m_realEnd ? (2 * PLUS_INFINITY) : m_end->second->getTime()) << ")");
     }
 
@@ -616,7 +618,7 @@ namespace EUROPA {
 
     bool ProfileIterator::done() const {
       //checkError(!isStale(), "Stale profile iterator.");
-      debugMsg("ProfileIterator:done", "Checking to see if " << (m_start == m_realEnd ? (2 * MINUS_INFINITY) : m_start->second->getTime()) << 
+      debugMsg("ProfileIterator:done", "Checking to see if " << (m_start == m_realEnd ? (2 * MINUS_INFINITY) : m_start->second->getTime()) <<
                " is less than " << (m_end == m_realEnd ? (2 * PLUS_INFINITY) : m_end->second->getTime()));
       return m_start == m_end;
     }
@@ -624,7 +626,7 @@ namespace EUROPA {
     int ProfileIterator::getStartTime() const {
       return m_startTime;
     }
-    
+
     int ProfileIterator::getTime() const {
       checkError(!isStale(), "Stale profile iterator.");
       checkError(!done(), "Attempted to get time of a done iterator.");

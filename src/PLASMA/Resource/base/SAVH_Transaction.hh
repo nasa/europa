@@ -30,9 +30,8 @@ namespace EUROPA {
        * @param isConsumer Because all transactions have positive quantities, it is necessary to indicate that a transaction is
        *  consuming the resource in some way other than a negative quantity.  This flag is what indicates it.
        */
-      Transaction(ConstrainedVariableId time, ConstrainedVariableId quantity, bool isConsumer)
-	: m_id(this), m_time(time), m_quantity(quantity), m_isConsumer(isConsumer) {}
-      ~Transaction(){m_id.remove();}
+      Transaction(ConstrainedVariableId time, ConstrainedVariableId quantity, bool isConsumer, EntityId owner=EntityId::noId());
+      ~Transaction();
 
       /**
        * @brief Accessor for the time variable of the transaction.
@@ -51,11 +50,13 @@ namespace EUROPA {
       TransactionId getId() const {return m_id;}
       std::string toString() const;
 
+      EntityId& getOwner() {return m_owner;}
+
     protected:
-    private:
       TransactionId m_id;
       ConstrainedVariableId m_time, m_quantity; /*<! The variables for the time and amount of the transaction */
       bool m_isConsumer; /*<! The flag indicating whether this transaction consumes or produces some amount of resource */
+      EntityId m_owner;
     };
   }
 }

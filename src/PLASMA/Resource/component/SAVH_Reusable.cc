@@ -141,26 +141,19 @@ namespace EUROPA {
         UsesId c = gc;
         if(m_constraintsToTransactions.find(c) != m_constraintsToTransactions.end()) {
             debugMsg("CBReusable:constraints",
-                    "Constraint " << c->toString() << " is already in the profile.");
+                    "Constraint " << c->toString() << " is already in the profile. Ignoring addToProfile().");
             return;
         }
 
         debugMsg("CBReusable:constraints", "Resource :" << toString() << " adding constraint:" << c->toString());
+
         // here's the major difference between Reusable and Reservoir:  always consume the quantity at the start and produce it again at the end
-        //TransactionId t1 = c->getTransaction(Uses::START_VAR);
-        //TransactionId t2 = c->getTransaction(Uses::END_VAR);
-        TransactionId t1 = (new Transaction(c->getScope()[Uses::START_VAR], c->getScope()[Uses::QTY_VAR], true))->getId();
-        TransactionId t2 = (new Transaction(c->getScope()[Uses::END_VAR],   c->getScope()[Uses::QTY_VAR], false))->getId();
-
-        // TODO: this is the way to add transactions to the resource, not clean because in this case there is no associated token
-        m_transactionsToTokens.insert(std::make_pair(t1, TokenId::noId()));
-        m_transactionsToTokens.insert(std::make_pair(t2, TokenId::noId()));
-
+        TransactionId t1 = c->getTransaction(Uses::START_VAR);
+        TransactionId t2 = c->getTransaction(Uses::END_VAR);
+        addToProfile(t1);
+        addToProfile(t2);
         m_constraintsToTransactions.insert(std::make_pair(c, std::make_pair(t1, t2)));
-        m_profile->addTransaction(t1);
-        debugMsg("CBReusable:constraints", "Added transaction for time " << t1->time()->toLongString() << " with quantity " << t1->quantity()->toString());
-        m_profile->addTransaction(t2);
-        debugMsg("CBReusable:constraints", "Added transaction for time " << t2->time()->toLongString() << " with quantity " << t2->quantity()->toString());
+
         debugMsg("CBReusable:constraints","Resource :" << toString() << " added constraint:" << c->toString());
     }
 
@@ -169,27 +162,33 @@ namespace EUROPA {
         UsesId c = gc;
 
         if(m_constraintsToTransactions.find(c) == m_constraintsToTransactions.end()) {
-          debugMsg("CBReusable:constraints","No Transactions found for :" << c->toString() << " ignoring CBReusable::removeFromProfile");
+          debugMsg("CBReusable:constraints","No Transactions found for :" << c->toString() << " . Ignoring removeFromProfile()");
           return;
         }
 
         debugMsg("CBReusable:constraints","Resource :" << toString() << " removing constraint:" << c->toString());
 
         std::pair<TransactionId, TransactionId> trans = m_constraintsToTransactions.find(c)->second;
-        debugMsg("CBReusable:constraints", "Removing transaction " << trans.first << " for time " << trans.first->time()->toLongString() << " with quantity " << trans.first->quantity()->toString());
-        m_profile->removeTransaction(trans.first);
-        debugMsg("CBReusable:constraints", "Removing transaction " << trans.second << " for time " << trans.second->time()->toLongString() << " with quantity " << trans.second->quantity()->toString());
-        m_profile->removeTransaction(trans.second);
+        removeFromProfile(trans.first);
+        removeFromProfile(trans.second);
         m_constraintsToTransactions.erase(c);
 
-        // TODO: see note in addToProfile above about relying on map to null tokens
-        m_transactionsToTokens.erase(trans.first);
-        m_transactionsToTokens.erase(trans.second);
-
-        trans.first.release();
-        trans.second.release();
-
         debugMsg("CBReusable:constraints","Resource :" << toString() << " removed constraint:" << c->toString());
+    }
+
+    void CBReusable::addToProfile(TransactionId& t)
+    {
+        m_profile->addTransaction(t);
+        // TODO: this is the way to add transactions to the resource, not clean because in this case there is no associated token
+        m_transactionsToTokens.insert(std::make_pair(t, TokenId::noId()));
+        debugMsg("CBReusable:constraints", "Added transaction for time " << t->time()->toLongString() << " with quantity " << t->quantity()->toString());
+    }
+
+    void CBReusable::removeFromProfile(TransactionId& t)
+    {
+        debugMsg("CBReusable:constraints", "Removing transaction " << t << " for time " << t->time()->toLongString() << " with quantity " << t->quantity()->toString());
+        m_profile->removeTransaction(t);
+        m_transactionsToTokens.erase(t); // TODO: see note in addToProfile above about relying on map to null tokens
     }
 
     // TODO: only needed for backwards compatibility with Resource API, rework hierarchy to fix this.
@@ -309,12 +308,23 @@ namespace EUROPA {
     {
         checkError(scope.size() == 4, "Uses constraint requires resource,qty,start,end");
 
+        m_txns.push_back((new Transaction(scope[Uses::START_VAR], scope[Uses::QTY_VAR], true, getId()))->getId());
+        m_txns.push_back((new Transaction(scope[Uses::END_VAR],   scope[Uses::QTY_VAR], false, getId()))->getId());
+
         if(scope[RESOURCE_VAR]->lastDomain().isSingleton()) {
             m_resource = CBReusableId(scope[RESOURCE_VAR]->lastDomain().getSingletonValue());
             check_error(m_resource.isValid());
             debugMsg("Uses:Uses", "Adding constraint " << toString() << " to resource-profile of resource " << m_resource->toString() );
             m_resource->addToProfile(getId());
         }
+    }
+
+    const TransactionId& Uses::getTransaction(int var) const
+    {
+        if (var == Uses::START_VAR)
+            return m_txns[0];
+        else
+            return m_txns[1];
     }
 
     void Uses::handleDiscard()
@@ -327,6 +337,13 @@ namespace EUROPA {
                 m_resource = CBReusableId::noId();
             }
         }
+
+        // TODO: make sure Resource destructor doesn't get to these first
+        for (unsigned int i=0;i<m_txns.size();i++) {
+            TransactionId txn = m_txns[i];
+            delete (Transaction*) txn;
+        }
+        m_txns.clear();
 
         Constraint::handleDiscard();
     }

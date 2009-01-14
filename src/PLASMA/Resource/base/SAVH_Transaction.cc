@@ -9,6 +9,20 @@
 
 namespace EUROPA {
   namespace SAVH {
+      Transaction::Transaction(ConstrainedVariableId time, ConstrainedVariableId quantity, bool isConsumer, EntityId owner)
+          : m_id(this)
+          , m_time(time)
+          , m_quantity(quantity)
+          , m_isConsumer(isConsumer)
+          , m_owner(owner)
+      {
+      }
+
+      Transaction::~Transaction()
+      {
+          m_id.remove();
+      }
+
       std::string Transaction::toString() const {
         check_error(m_time.isValid());
         check_error(m_quantity.isValid());
