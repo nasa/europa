@@ -25,11 +25,13 @@ namespace NDDL {
   
   // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Reusable
   
+  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS CBReusable
+  
   // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Unary
   
   
   
-  // Resources.nddl:176 UnaryResource
+  // Resources.nddl:210 UnaryResource
   UnaryResource::UnaryResource(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "UnaryResource", name, true) {
   }
@@ -51,11 +53,11 @@ namespace NDDL {
   }
   
   
-  // Resources.nddl:176 UnaryResource
+  // Resources.nddl:210 UnaryResource
   DECLARE_DEFAULT_OBJECT_FACTORY(UnaryResourceFactory0, UnaryResource);
   
   
-  // Resources.nddl:177 uses
+  // Resources.nddl:211 uses
   UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
    : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
