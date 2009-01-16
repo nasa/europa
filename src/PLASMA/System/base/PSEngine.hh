@@ -64,6 +64,8 @@ namespace EUROPA {
 
       virtual std::string planDatabaseToString() = 0;
 
+      virtual PSSchema* getPSSchema() = 0;
+
       // Solver methods
       virtual PSSolver* createSolver(const std::string& configurationFile) = 0;
 

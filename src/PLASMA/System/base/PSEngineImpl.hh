@@ -57,6 +57,8 @@ namespace EUROPA {
     virtual PSPlanDatabaseClient* getPlanDatabaseClient();
 
     virtual std::string planDatabaseToString();
+    virtual PSSchema* getPSSchema();
+
 
     // Solver methods
     virtual PSSolver* createSolver(const std::string& configurationFile);

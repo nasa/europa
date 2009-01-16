@@ -147,6 +147,12 @@ namespace EUROPA {
     return getPlanDatabase()->toString();
   }
 
+  PSSchema* PSEngineImpl::getPSSchema()
+  {
+	  return getPlanDatabase()->getSchema();
+  }
+
+
   PSPlanDatabaseClient* PSEngineImpl::getPlanDatabaseClient()
   {
      check_runtime_error(isStarted(),"PSEngine has not been started");

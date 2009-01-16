@@ -346,6 +346,11 @@ namespace EUROPA {
     TokenFactoryId getParentTokenFactory(const LabelStr& tokenType);
     bool hasTokenFactories() const;
 
+    //PSSchema methods:
+    PSList<std::string> getAllPredicates() const;
+    PSList<std::string> getMembers(const std::string& objectType) const;
+    bool hasMember(const std::string& parentType, const std::string& memberName) const;
+
   private:
 
     static const std::set<LabelStr>& getBuiltInVariableNames();

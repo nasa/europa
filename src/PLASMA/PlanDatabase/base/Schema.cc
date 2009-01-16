@@ -652,5 +652,42 @@ namespace EUROPA {
       return m_tokenTypeMgr->hasFactory();
   }
 
+  // PSSchema methods:
+  PSList<std::string> Schema::getAllPredicates() const
+   {
+     PSList<std::string> retval;
+     std::set<LabelStr> predicates;
+     getPredicates(predicates);
+     for(std::set<LabelStr>::const_iterator it = predicates.begin(); it != predicates.end(); ++it)
+     {
+    	 retval.push_back((*it).toString());
+     }
+     return retval;
+   }
+
+
+  // For now just return the member names, not their types:
+  // TODO:  Is it better to use an iterator in this loop?
+  PSList<std::string> Schema::getMembers(const std::string& objectType) const
+  {
+	  PSList<std::string> retval;
+	  const NameValueVector& members = getMembers(LabelStr(objectType));
+	  for(std::vector< std::pair<LabelStr, LabelStr> >::const_iterator it = members.begin();
+		  it != members.end(); ++it)
+	  {
+		  retval.push_back((*it).second.toString());
+	  }
+	  return retval;
+  }
+
+  bool Schema::hasMember(const std::string& parentType, const std::string& memberName) const
+  {
+	  return hasMember(LabelStr(parentType), LabelStr(memberName));
+  }
+
+
+
+
+
 
 } // namespace NDDL
