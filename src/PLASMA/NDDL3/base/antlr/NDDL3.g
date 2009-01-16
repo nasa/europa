@@ -405,8 +405,8 @@ STRING	:	'"' (~('\\'|'"') | ESCAPE_SEQUENCE)* '"'
 		{
 			// TODO: Verify this insanity works.
 			// Terence doesn't love us anymore, this is proof.
-			pANTLR3_STRING s = $text;
-			LTOKEN->setText(LTOKEN, s->subString(s, 1, s->len-1));
+			//pANTLR3_STRING s = $text;
+			//LTOKEN->setText(LTOKEN, s->subString(s, 1, s->len-1));
 		}
 	;
 

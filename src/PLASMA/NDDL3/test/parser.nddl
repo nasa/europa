@@ -50,7 +50,7 @@ typedef int [0 1] bool;
 typedef int {2, 3, 5, 7, 11, 13, 17, 19} lowprime;
 typedef float [0.0 1.0] normal;
 typedef float {3.14159, 2.71828} pie;
-//typedef string {"Red", "Yellow", "Blue"} primary;
+typedef string {"Red", "Yellow", "Blue"} primary;
 typedef boolean {false} nope;
 
 foo fooa = new foo();
