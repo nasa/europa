@@ -1,10 +1,11 @@
+#/usr/bin/python
 import sys
 import getopt
 import UBO
 
 #example :
 #export TEST_DIR=$PLASMA_HOME/../benchmarks/UBO/data  
-#python runTests.py -t10 $TEST_DIR benchmarks_ubo10.txt benchmarks_ubo20.txt
+#runTests.py -t10 $TEST_DIR benchmarks_ubo10.txt benchmarks_ubo20.txt
 # options -t timeout in seconds
 timeoutSecs = 20 
 
