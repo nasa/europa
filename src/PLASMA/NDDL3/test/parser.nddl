@@ -7,18 +7,14 @@
 
 //#include "included.nddl"
 
-constraint addEq(a, b, c) {
-  a <: numeric &&
-  b <: numeric &&
-  a <: c &&
-  b <: c
-}
 
-typedef int [1 inf] positive;
-typedef float [-inf +inf] real;
+//typedef int [1 inf] positive;
+//typedef float [-inf +inf] real;
+
 
 positive pos;
-real r = 50f;
+real r = 50;
+
 
 class foo {
   predicate p {}
@@ -58,17 +54,6 @@ foo foob = new foo();
 foo fooc = new foo();
 typedef foo {fooa, foob, fooc} somefoos;
 
-// constraintSignature tests:
-
-constraint complex(a, b, c, d, e, f) {
-  (b <: a || a <: b) &&
-  (c <: d || d <: c) &&
-  a <: int &&
-  b <: float &&
-  c <: boolean &&
-  e <: string &&
-  f <: foo
-}
 
 // classDeclaration, classStatement, constructorStatement, predicateStatement tests:
 
@@ -97,15 +82,15 @@ class BClass extends AClass {
   }
 }
 
-// rule tests:
 
+// rule tests:
 BClass::q {
   // OH NOES RELATIONS!:
   any(object.q q0);
   ends(object.q q1);
   starts(object.q q2);
   equals(object.q q3);
-  equal(object.q q4);
+  equals(object.q q4);
   before(object.q q5);
   after(object.q q6);
   contains(object.q q7);
@@ -137,3 +122,25 @@ BClass::q {
   }
   ;;
 }
+
+// constraintSignature tests:
+// TODO: do we still want to keep this in the language?, it's not necessary anymore
+/*
+constraint addEq(a, b, c) {
+  a <: numeric &&
+  b <: numeric &&
+  a <: c &&
+  b <: c
+}
+
+constraint complex(a, b, c, d, e, f) {
+  (b <: a || a <: b) &&
+  (c <: d || d <: c) &&
+  a <: int &&
+  b <: float &&
+  c <: boolean &&
+  e <: string &&
+  f <: foo
+}
+*/
+

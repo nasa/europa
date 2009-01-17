@@ -1,5 +1,5 @@
 /* vim: set ts=8 ft=antlr3: */
-tree grammar NDDL3tree;
+tree grammar NDDL3Tree;
 
 options {
 	language=C;
@@ -7,8 +7,20 @@ options {
 	ASTLabelType=pANTLR3_BASE_TREE;
 }
 
-nddl[Expr* expr]
-	:	^(NDDL
+@includes
+{
+#include "Interpreter.hh"
+
+using namespace EUROPA;
+}
+
+
+nddl[Expr*& expr]
+@init {
+    expr = new ExprNoop("NDDL3");	
+}
+        :               
+	^(NDDL
 		(	typeDefinition[expr]
 		|	classDeclaration[expr]
 		|	rule[expr]
@@ -38,7 +50,7 @@ enumeration[Expr* expr]
 
 typeDefinition[Expr* expr]
 	:	^('typedef'
-			IDENT
+			name=IDENT
 			type[expr]
 		)
 	;
@@ -91,7 +103,7 @@ constructorSuper[Expr* expr]
   
 assignment[Expr* expr]
 	:	^('='
-			name=IDENT
+			qualified[expr]
 			initializer[expr]
 		)
 	;
@@ -146,7 +158,6 @@ loopStatement[Expr* expr]
 	:	^('foreach'
 			name=IDENT
 			val=identifier[expr]
-			type[expr]
 			ruleBlock[expr]
 		)
 	;
@@ -204,8 +215,14 @@ predicateArgumentList[Expr* expr]
 	;
 
 predicateArgument[Expr* expr]
-	:	^(type[expr] name=IDENT?)
+	:	^(qualified[expr] name=IDENT?)
 	;
+	
+qualified[Expr* expr]
+        :       identifier[expr]                 
+        |       ^('.' identifier[expr] qualified[expr]*)
+        ;
+	
 
 temporalRelationNoInterval[Expr* expr]
 	:	'any'
@@ -258,16 +275,17 @@ invocation[Expr* expr]
 	;
 
 variableDeclaration[Expr* expr]
-	:	^(VARIABLE
-			name=IDENT
-			type[expr]
-			initializer[expr]?
-		)
+	:	^(VARIABLE type[expr] variableInitialization[expr])
 	;
+	
+variableInitialization[Expr* expr]
+        :       name=IDENT
+        |       ^('=' name=IDENT initializer[expr])
+        ;	
 
 initializer[Expr* expr]
-	:	anyValue[expr]
-	|	allocation[expr]
+	:	anyValue[expr] 
+	|       allocation[expr]
 	;
 
 allocation[Expr* expr]
@@ -289,12 +307,22 @@ identifier[Expr* expr]
 	;
 
 type[Expr* expr]
+        :       simpleType[expr] 
+        |       ^(simpleType[expr] inlineType[expr])
+        ;
+
+simpleType[Expr* expr]
 	:	'int'
 	|	'float'
 	|	'boolean'
 	|	'string'
 	|	object=IDENT
 	;
+	
+inlineType[Expr* expr]
+        :       valueSet[expr]
+        |       numericInterval[expr]
+        ;	
 
 anyValue[Expr* expr]
 	:	value[expr]
@@ -309,7 +337,7 @@ valueSet[Expr* expr]
 	;
 
 numericInterval[Expr* expr]
-	:	^('['
+	:	^('['   
 			lower=number[expr]
 			upper=number[expr]
 		)

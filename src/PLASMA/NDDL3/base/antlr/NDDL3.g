@@ -164,7 +164,7 @@ relation:	(token=IDENT | token='this')? temporalRelation predicateArgumentList '
 
 goal	:	('rejectable'^ | 'goal'^) predicateArgumentList ';'!
 	;
-
+        
 predicateArgumentList
 	:	IDENT
 	|	'('^ predicateArguments? ')'!
@@ -281,7 +281,8 @@ allocationStatement
 	;
 
 variableDeclaration
-	:	('filter')? type^ nameWithBase (','! nameWithBase)* ';'!
+	:	('filter')? type nameWithBase (',' nameWithBase)* ';'
+	        -> ^(VARIABLE type nameWithBase (nameWithBase)*)
 	;
 
 nameWithBase
@@ -302,8 +303,7 @@ anyValue:	STRING
 	;
 
 qualified
-	:	'this'
-	|	'this.'? IDENT ('.'^ IDENT)*
+	:	('this' | IDENT) ('.'^ IDENT)*
 	;
 
 temporalRelation

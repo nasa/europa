@@ -61,6 +61,8 @@ namespace EUROPA {
   	public:
         virtual DataRef eval(EvalContext& context) const = 0;
         virtual ~Expr(){}
+
+        virtual std::string toString() const { return "Expr"; }
   };
 
   class ExprList : public Expr
@@ -83,6 +85,8 @@ namespace EUROPA {
         virtual ~ExprNoop();
 
         virtual DataRef eval(EvalContext& context) const;
+
+        virtual std::string toString() const { return "ExprNoop:"+m_str; }
 
     protected:
         std::string m_str;
