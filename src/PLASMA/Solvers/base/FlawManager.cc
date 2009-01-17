@@ -505,14 +505,21 @@ namespace EUROPA {
         std::vector<MatchingRuleId> candidates;
 	m_flawHandlers->getMatches(entity, candidates);
 
+        debugMsg("FlawManager:getFlawHandler", "There are " << candidates.size() << " flaw handlers to consider.");
         FlawHandlerEntry entry;
         bool requiresPropagation = false;
         for(std::vector<MatchingRuleId>::const_iterator it = candidates.begin(); it!= candidates.end(); ++it){
           FlawHandlerId candidate = *it;
+	  debugMsg("FlawManager:getFlawHandler", "Evaluating flaw handler " << candidate->toString() << " for (" << entity->getKey() << ")");
+
+	  // If it does not pass a custom static match then ignore it
+	  if(!candidate->customStaticMatch(entity))
+	    continue;
+
           if(candidate->hasGuards()){
             std::vector<ConstrainedVariableId> guards;
             // Make the scope. If cant match up, then ignore this handler
-            if(!candidate->makeConstraintScope(entity, guards) || !candidate->customStaticMatch(entity))
+            if(!candidate->makeConstraintScope(entity, guards))
               continue;
 
             ConstraintId guardListener = (new FlawHandler::VariableListener(m_db->getConstraintEngine(),
@@ -527,7 +534,9 @@ namespace EUROPA {
             // If we are not yet ready to move on.
             if(!candidate->test(guards))
               continue;
-          }    
+          }
+
+	  // Now insert in the list according to the weight. This will give the highest weight as the last entry
           entry.insert(std::pair<double, FlawHandlerId>(candidate->getWeight(), candidate));
           debugMsg("FlawManager:getFlawHandler", "Added active FlawHandler " << candidate->toString() << std::endl << " for entity " << entity->getKey());
         }
