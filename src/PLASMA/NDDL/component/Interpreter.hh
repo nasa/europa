@@ -48,6 +48,8 @@ namespace EUROPA {
   	    virtual void addToken(const char* name,const TokenId& t);
   	    virtual TokenId getToken(const char* name);
 
+  	    virtual void* getElement(const char* name) const { return NULL; }
+
         virtual std::string toString() const;
 
   	protected:
@@ -73,6 +75,8 @@ namespace EUROPA {
 
         virtual DataRef eval(EvalContext& context) const;
         void addChild(Expr* child);
+
+        virtual std::string toString() const;
 
     protected:
         std::vector<Expr*> m_children;
@@ -148,6 +152,7 @@ namespace EUROPA {
   	    virtual ~ExprVariableRef();
 
   	    virtual DataRef eval(EvalContext& context) const;
+  	    virtual std::string toString() const;
 
   	protected:
   	    LabelStr m_varName;

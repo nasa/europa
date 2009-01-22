@@ -1,22 +1,27 @@
 #include "CESchema.hh"
 #include "Debug.hh"
 
-namespace EUROPA 
+namespace EUROPA
 {
-  CESchema::CESchema() 
+  CESchema::CESchema()
     : m_id(this)
-  {      
+  {
   }
-  
+
   CESchema::~CESchema()
   {
       purgeAll();
-      m_id.remove();      
+      m_id.remove();
   }
 
   const CESchemaId& CESchema::getId() const
   {
       return m_id;
+  }
+
+  bool CESchema::isType(const char* typeName) const
+  {
+      return (m_typeFactories.find(LabelStr(typeName).getKey()) != m_typeFactories.end());
   }
 
   TypeFactoryId CESchema::getFactory(const char* typeName)
@@ -29,7 +34,7 @@ namespace EUROPA
     check_error(factory.isValid());
     return factory;
   }
-			      
+
   void CESchema::registerFactory(const TypeFactoryId& factory)
   {
     check_error(factory.isValid());
@@ -57,7 +62,7 @@ namespace EUROPA
   void CESchema::purgeAll()
   {
       purgeConstraintFactories();
-      purgeTypeFactories();       
+      purgeTypeFactories();
   }
 
   void CESchema::purgeTypeFactories()
@@ -69,11 +74,11 @@ namespace EUROPA
              "Removing type factory for " << factory->getTypeName().toString());
         delete (TypeFactory *) factory;
       }
-      m_typeFactories.clear();      
+      m_typeFactories.clear();
   }
-  
+
   void CESchema::purgeConstraintFactories()
-  {     
+  {
       std::map<double, ConstraintFactoryId >::iterator it = m_constraintFactories.begin();
       while (it != m_constraintFactories.end()){
         ConstraintFactoryId factory = it->second;
@@ -83,8 +88,8 @@ namespace EUROPA
         factory.release();
       }
   }
-  
-  void CESchema::registerConstraintFactory(ConstraintFactory* factory) 
+
+  void CESchema::registerConstraintFactory(ConstraintFactory* factory)
   {
     registerConstraintFactory(factory, factory->getName());
   }

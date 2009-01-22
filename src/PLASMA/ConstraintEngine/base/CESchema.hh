@@ -26,9 +26,9 @@ namespace EUROPA {
     public:
       CESchema();
       virtual ~CESchema();
-  
+
       const CESchemaId& getId() const;
-      
+
       // Methods to Manage Type Factories
       /**
        * @brief Add a factory to provide instantiation of particular concrete types based on a label.
@@ -37,8 +37,13 @@ namespace EUROPA {
 
       /**
        * @brief Obtain the factory based on the type name
-       */ 
+       */
       TypeFactoryId getFactory(const char* typeName);
+
+      /**
+       * @brief Checks to see whether a type factory is registered for a name
+       */
+      bool isType(const char* typeName) const;
 
       /**
        * @brief Return the base domain
@@ -55,22 +60,22 @@ namespace EUROPA {
 
       bool isConstraintFactoryRegistered(const LabelStr& name, const bool& warn = false);
 
-      bool isConstraintFactoryNotRegistered(const LabelStr& name);      
+      bool isConstraintFactoryNotRegistered(const LabelStr& name);
 
       void purgeConstraintFactories();
-      
+
       /**
-       * @brief Delete all factory instances stored. 
+       * @brief Delete all factory instances stored.
        */
       void purgeAll();
-      
+
 
     protected:
       CESchemaId m_id;
-      std::map<double, TypeFactoryId> m_typeFactories;   
-      std::map<double, ConstraintFactoryId > m_constraintFactories;      
+      std::map<double, TypeFactoryId> m_typeFactories;
+      std::map<double, ConstraintFactoryId > m_constraintFactories;
   };
-  
+
 } // namespace EUROPA
 
 #endif // _H_CESchema

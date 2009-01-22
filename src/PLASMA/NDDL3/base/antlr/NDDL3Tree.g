@@ -7,158 +7,291 @@ options {
 	ASTLabelType=pANTLR3_BASE_TREE;
 }
 
-@includes
-{
-#include "Interpreter.hh"
-
-using namespace EUROPA;
+@context {
+    NddlSymbolTable* SymbolTable;
 }
 
+@includes
+{
+#include "NddlInterpreter.hh"
+using namespace EUROPA;
 
-nddl[Expr*& expr]
+}
+
+@members {
+
+static const char* c_str(pANTLR3_UINT8 chars)
+{
+    // TODO: what's the best way to do this?
+    return (const char*)chars;
+}
+
+}
+
+nddl returns [Expr* result]
 @init {
-    expr = new ExprNoop("NDDL3");	
+    ExprList* retval = new ExprList();
+    result = retval;
 }
         :               
 	^(NDDL
-		(	typeDefinition[expr]
-		|	classDeclaration[expr]
-		|	rule[expr]
-		|	goal[expr]
-		|	fact[expr]
-		|	relation[expr]
-		|	constraintInstantiation[expr]
-		|	allocation[expr]
-		|	assignment[expr]
-		|	variableDeclaration[expr]
-		|	invocation[expr]
-		)*)
+		(
+		  (	child=typeDefinition
+                  |     child=variableDeclaration
+                  |     allocation
+                  |     assignment
+                  |     constraintInstantiation
+		  |	classDeclaration
+		  |	rule
+		  |	goal
+		  |	fact
+		  |	relation
+		  |	invocation
+		  ) 
+		  {
+		      if (child != NULL) { 
+		          retval->addChild(child);
+		          child = NULL; 
+		      }
+		  }
+		)*  
+		
+	)
 	;
 
-// ==========================================================
-// enumerations
-// ==========================================================
-
-// enumeration defined at top level
-
-enumeration[Expr* expr]
-	:	^('enum'
-			IDENT
-			valueSet[expr]
-		)
-	;
-
-typeDefinition[Expr* expr]
+typeDefinition returns [Expr* result]
 	:	^('typedef'
 			name=IDENT
-			type[expr]
+			dataType=type
 		)
+		{
+                    // TODO: can we delay evaluation to keep consistent?
+		    ExprTypedef e(c_str($name.text->chars),dataType);
+		    e.eval(*(CTX->SymbolTable));
+		 
+		    result = NULL;   
+		}
 	;
 
-classDeclaration[Expr* expr]
+variableDeclaration returns [Expr* result]
+        :       ^(VARIABLE dataType=type initExpr=variableInitialization)
+{
+    // TODO: remove this check when we deal with classes
+    if (dataType != NULL)
+        result = new ExprVarDeclaration(initExpr->getLhs()->toString().c_str(),dataType,initExpr);
+    else { 
+        result = NULL;
+        std::cout << "Skipping definition because of unknown data type for var : " << initExpr->getLhs()->toString().c_str() << std::endl;
+    }
+}       
+        ;
+        
+variableInitialization returns [ExprAssignment* result]
+        : (      name=IDENT
+          |       ^('=' name=IDENT rhs=initializer)
+          )
+          {
+              Expr* lhs = new ExprVariableRef(c_str($name.text->chars),CTX->SymbolTable->getPlanDatabase()->getSchema());
+              //std::cout << "read var initialization for:" << $name.text->chars << std::endl;
+              result = new ExprAssignment(lhs,rhs);
+          }
+        ;       
+
+initializer returns [Expr* result]
+@init {
+    result = new ExprNoop("initializer"); // TODO: implement this
+}
+        :       anyValue 
+        |       allocation
+        ;
+
+allocation
+        :       ^(CONSTRUCTOR_INVOCATION
+                        name=IDENT 
+                        variableArgumentList?
+                )
+        ;
+
+variableArgumentList
+        :       ^('('
+                        initializer*
+                )
+        ;
+
+identifier
+        :       IDENT
+        |       'this'
+        ;
+
+type returns [AbstractDomain* result]
+        : (      retval=simpleType 
+          |       ^(baseType=simpleType retval=inlineType[baseType])
+          )
+          {
+              result = retval;
+          }
+        ;
+
+simpleType returns [AbstractDomain* result] 
+        :       'int'         { result = CTX->SymbolTable->getVarType("int"); }
+        |       'float'       { result = CTX->SymbolTable->getVarType("float"); }
+        |       'bool'        { result = CTX->SymbolTable->getVarType("bool"); }
+        |       'string'      { result = CTX->SymbolTable->getVarType("string"); }
+        |       object=IDENT  { result = CTX->SymbolTable->getVarType(c_str($object.text->chars)); }
+        ;
+        
+inlineType[AbstractDomain* baseType] returns [AbstractDomain* result]
+        : (      valueSet
+          |       numericInterval
+          )
+{
+    result = baseType; // TODO: finish this implementation
+}        
+        ;       
+
+anyValue
+        :       value
+        |       valueSet
+        |       numericInterval
+        ;
+
+valueSet
+        :       ^('{'
+                        value*
+                )
+        ;
+
+numericInterval
+        :       ^('['   
+                        lower=number
+                        upper=number
+                )
+        ;
+
+value
+        :       booleanValue
+        |       ^(i=IDENT type?)
+        |       str=STRING
+        |       element=number
+        ;
+
+booleanValue
+        :       'true'
+        |       'false'
+        ;
+
+
+number
+        :       floating=FLOAT // real number
+        |       integer=INT
+        |       pinf='inf'
+        |       ninf='-inf'
+        ;
+
+classDeclaration
 	:	^('class'
 			name=IDENT
 			((^('extends' extends=IDENT)
-				classBlock[expr])
-			|	classBlock[expr]
+				classBlock)
+			|	classBlock
 			|	';'
 			)
 		)
   ;
 
-classBlock[Expr* expr]
+classBlock
 	:	^('{'
-			componentTypeEntry[expr]*
+			componentTypeEntry*
 		)
 	;
 
-componentTypeEntry[Expr* expr]
-	:	variableDeclaration[expr]
-	|	constructor[expr]
-	|	predicate[expr]
-	|	constraintInstantiation[expr]
+componentTypeEntry
+	:	variableDeclaration
+	|	constructor
+	|	predicate
+	|	constraintInstantiation
 	;
 
-constructor[Expr* expr]
+constructor
 	:	^(CONSTRUCTOR
 			name=IDENT
-			^('(' constructorArgument[expr]*)
-			^('{'	(	constructorSuper[expr]
-				|	assignment[expr])*)
+			^('(' constructorArgument*)
+			^('{'	(	constructorSuper
+				|	assignment)*)
 		)
 	;
 
-constructorArgument[Expr* expr]
+constructorArgument
 	:	^(VARIABLE
 			IDENT
-			type[expr]
+			type
 		)
 	;
 
-constructorSuper[Expr* expr]
+constructorSuper
 	:	^('super'
-			variableArgumentList[expr]
+			variableArgumentList
 		)
 	;
   
-assignment[Expr* expr]
+assignment
 	:	^('='
-			qualified[expr]
-			initializer[expr]
+			qualified
+			initializer
 		)
 	;
 
-predicate[Expr* expr]
+predicate
 	:	^('predicate'
 			pred=IDENT
-			predicateStatements[expr]
+			predicateStatements
 		)
 	;
 
-predicateStatements[Expr* expr]
+predicateStatements
 	:	^('{'
-			ruleStatement[expr]*
+			ruleStatement*
 		)
 	;
 
-rule[Expr* expr]
+rule
  	:	^('::'
 			className=IDENT
 			predicateName=IDENT
-			ruleBlock[expr]
+			ruleBlock
 		)
 	;
 
-ruleBlock[Expr* expr]
+ruleBlock
 	:	^('{'
-			ruleStatement[expr]*
+			ruleStatement*
 		)
 	;
 
-ruleStatement[Expr* expr]
-	:	relation[expr]
-	|	constraintInstantiation[expr]
-	|	assignment[expr]
-	|	variableDeclaration[expr]
-	|	ifStatement[expr]
-	|	loopStatement[expr]
-	|	ruleBlock[expr]
+ruleStatement
+	:	relation
+	|	constraintInstantiation
+	|	assignment
+	|	variableDeclaration
+	|	ifStatement
+	|	loopStatement
+	|	ruleBlock
 	;
 
 
-ifStatement[Expr* expr]
+ifStatement
 	:	^('if'
-			expression[expr]
-			ruleBlock[expr]
-			ruleBlock[expr]?
+			expression
+			ruleBlock
+			ruleBlock?
 		)
   ;
 
-loopStatement[Expr* expr]
+loopStatement
 	:	^('foreach'
 			name=IDENT
-			val=identifier[expr]
-			ruleBlock[expr]
+			val=identifier
+			ruleBlock
 		)
 	;
 
@@ -166,72 +299,72 @@ loopStatement[Expr* expr]
 // expressions
 // ==========================================================
 
-expression[Expr* expr]
+expression
 	:	^('=='
-			anyValue[expr]
-			anyValue[expr]
+			anyValue
+			anyValue
 		)
 	|	^('!='
-			anyValue[expr]
-			anyValue[expr]
+			anyValue
+			anyValue
 		)
-	|	anyValue[expr]
+	|	anyValue
 	;
 
-goal[Expr* expr]
+goal
 	:	^('goal'
-			predicateArgumentList[expr]
+			predicateArgumentList
 		)
 	|	^('rejectable'
-			predicateArgumentList[expr]
+			predicateArgumentList
 		)
 	;
 
-fact[Expr* expr]
+fact
 	:	^('fact'
-			predicateArgumentList[expr]
+			predicateArgumentList
 		)
   ;
 
-relation[Expr* expr]
+relation
 	:	^(SUBGOAL
-			originName=identifier[expr]?
-			(	tr=temporalRelationNoInterval[expr]
-			|	tr=temporalRelationOneInterval[expr]
-				numericInterval[expr]?
-			|	tr=temporalRelationTwoIntervals[expr]
-				(numericInterval[expr]
-				numericInterval[expr]?)?
+			originName=identifier?
+			(	tr=temporalRelationNoInterval
+			|	tr=temporalRelationOneInterval
+				numericInterval?
+			|	tr=temporalRelationTwoIntervals
+				(numericInterval
+				numericInterval?)?
 			)
-			predicateArgumentList[expr]
+			predicateArgumentList
 		)
 	;
 
-predicateArgumentList[Expr* expr]
+predicateArgumentList
 	:	^('('
-			predicateArgument[expr]*
+			predicateArgument*
 		)
 		|	target=IDENT
 	;
 
-predicateArgument[Expr* expr]
-	:	^(qualified[expr] name=IDENT?)
+predicateArgument
+	:	^(qualified name=IDENT?)
 	;
 	
-qualified[Expr* expr]
-        :       identifier[expr]                 
-        |       ^('.' identifier[expr] qualified[expr]*)
+qualified
+        :       identifier                 
+        |       ^('.' identifier qualified*)
         ;
 	
 
-temporalRelationNoInterval[Expr* expr]
+temporalRelationNoInterval
 	:	'any'
 	|	'equals'
 	|	'meets'
 	|	'met_by'
 	;
   
-temporalRelationOneInterval[Expr* expr]
+temporalRelationOneInterval
 	:	'ends'
 	|	'starts'
 	|	'after'
@@ -244,7 +377,7 @@ temporalRelationOneInterval[Expr* expr]
 	|	'starts_before'
 	;
 
-temporalRelationTwoIntervals[Expr* expr]
+temporalRelationTwoIntervals
 	:	'contained_by'
 	|	'contains'
 	|	'paralleled_by'
@@ -255,18 +388,18 @@ temporalRelationTwoIntervals[Expr* expr]
 	|	'contains_end'
 	;
   
-constraintInstantiation[Expr* expr]
+constraintInstantiation
 	:	^(CONSTRAINT_INSTANTIATION
 			name=IDENT
-			variableArgumentList[expr]
+			variableArgumentList
 		)
 	;
 
-invocation[Expr* expr]
-	:	^('specify' i=IDENT variableArgumentList[expr])
-	|	^('free' i=IDENT variableArgumentList[expr])
-	|	^('constrain' i=IDENT variableArgumentList[expr])
-	|	^('merge' i=IDENT variableArgumentList[expr])
+invocation
+	:	^('specify' i=IDENT variableArgumentList)
+	|	^('free' i=IDENT variableArgumentList)
+	|	^('constrain' i=IDENT variableArgumentList)
+	|	^('merge' i=IDENT variableArgumentList)
 	|	^('close' i=IDENT)
 	|	^('activate' i=IDENT)
 	|	^('reject' i=IDENT)
@@ -274,91 +407,3 @@ invocation[Expr* expr]
 	|	^('reset' i=IDENT)
 	;
 
-variableDeclaration[Expr* expr]
-	:	^(VARIABLE type[expr] variableInitialization[expr])
-	;
-	
-variableInitialization[Expr* expr]
-        :       name=IDENT
-        |       ^('=' name=IDENT initializer[expr])
-        ;	
-
-initializer[Expr* expr]
-	:	anyValue[expr] 
-	|       allocation[expr]
-	;
-
-allocation[Expr* expr]
-	:	^(CONSTRUCTOR_INVOCATION
-			name=IDENT 
-			variableArgumentList[expr]?
-		)
-	;
-
-variableArgumentList[Expr* expr]
-	:	^('('
-			initializer[expr]*
-		)
-	;
-
-identifier[Expr* expr]
-	:	IDENT
-	|	'this'
-	;
-
-type[Expr* expr]
-        :       simpleType[expr] 
-        |       ^(simpleType[expr] inlineType[expr])
-        ;
-
-simpleType[Expr* expr]
-	:	'int'
-	|	'float'
-	|	'boolean'
-	|	'string'
-	|	object=IDENT
-	;
-	
-inlineType[Expr* expr]
-        :       valueSet[expr]
-        |       numericInterval[expr]
-        ;	
-
-anyValue[Expr* expr]
-	:	value[expr]
-	|	valueSet[expr]
-	|	numericInterval[expr]
-	;
-
-valueSet[Expr* expr]
-	:	^('{'
-			value[expr]*
-		)
-	;
-
-numericInterval[Expr* expr]
-	:	^('['   
-			lower=number[expr]
-			upper=number[expr]
-		)
-	;
-
-value[Expr* expr]
-	:	booleanValue[expr]
-	|	^(i=IDENT type[expr]?)
-	|	str=STRING
-	|	element=number[expr]
-	;
-
-booleanValue[Expr* expr]
-	:	'true'
-	|	'false'
-	;
-
-
-number[Expr* expr]
-	:	floating=FLOAT // real number
-	|	integer=INT
-	|	pinf='inf'
-	|	ninf='-inf'
-	;

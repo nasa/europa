@@ -167,6 +167,16 @@ namespace EUROPA {
       m_children.push_back(child);
   }
 
+  std::string ExprList::toString() const
+  {
+      std::ostringstream os;
+
+      for (unsigned int i=0;i<m_children.size();i++)
+          os << m_children[i]->toString() << std::endl;
+
+      return os.str();
+  }
+
   ExprNoop::ExprNoop(const std::string& str)
       : m_str(str)
   {
@@ -329,6 +339,12 @@ namespace EUROPA {
 
     return DataRef(rhs);
   }
+
+  std::string ExprVariableRef::toString() const
+  {
+      return m_varName.toString();
+  }
+
 
   /*
    * ExprNewObject

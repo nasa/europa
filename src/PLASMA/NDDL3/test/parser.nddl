@@ -8,8 +8,8 @@
 //#include "included.nddl"
 
 
-//typedef int [1 inf] positive;
-//typedef float [-inf +inf] real;
+typedef int [1 inf] positive;
+typedef float [-inf +inf] real;
 
 
 positive pos;
@@ -42,17 +42,17 @@ rejectable(foo.p somep);
 
 // typeDefinition tests:
 
-typedef int [0 1] bool;
+typedef int [0 1] boolean;
 typedef int {2, 3, 5, 7, 11, 13, 17, 19} lowprime;
 typedef float [0.0 1.0] normal;
 typedef float {3.14159, 2.71828} pie;
 typedef string {"Red", "Yellow", "Blue"} primary;
-typedef boolean {false} nope;
+typedef bool {false} nope;
 
 foo fooa = new foo();
 foo foob = new foo();
 foo fooc = new foo();
-typedef foo {fooa, foob, fooc} somefoos;
+//typedef foo {fooa, foob, fooc} somefoos;
 
 
 // classDeclaration, classStatement, constructorStatement, predicateStatement tests:

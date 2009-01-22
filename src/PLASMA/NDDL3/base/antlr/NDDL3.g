@@ -45,7 +45,7 @@ typeDefinition
 typeWithBaseDomain
 	:	(	'int'^
 		|	'float'^
-		|	'boolean'^
+		|	'bool'^
 		|	'string'^
 		|	IDENT^) domain
 	;
@@ -153,7 +153,7 @@ ruleStatement
 
 type	:	'int'
 	|	'float'
-	|	'boolean'
+	|	'bool'
 	|	'string'
 	|	IDENT
 	;
