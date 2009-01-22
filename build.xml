@@ -226,7 +226,12 @@
     <delete file="${dir.dist}/${file.europa-dist}"/>
     <zip destfile="${dir.dist}/${file.europa-dist}" 
     	 excludes="lib/*.a">
-		<zipfileset dir="${dir.dist.base}" dirmode="775" filemode="664"/>
+		<zipfileset dir="${dir.dist.base}/bin" prefix="bin" dirmode="775" filemode="775"/>
+        <zipfileset dir="${dir.dist.base}/config" prefix="config" dirmode="775" filemode="664"/>
+        <zipfileset dir="${dir.dist.base}/examples" prefix="examples" dirmode="775" filemode="664"/>
+        <zipfileset dir="${dir.dist.base}/include" prefix="include" dirmode="775" filemode="664"/>
+        <zipfileset dir="${dir.dist.base}/lib" prefix="lib" dirmode="775" filemode="664"/>
+    	<zipfileset dir="${dir.dist.base}/res" prefix="res" dirmode="775" filemode="664"/>
     </zip>
   </target>
 		
@@ -235,7 +240,12 @@
     <delete file="${dir.dist}/${file.europa-static-libs}"/>
     <zip destfile="${dir.dist}/${file.europa-static-libs}" 
          includes="lib/*.a">
-		<zipfileset dir="${dir.dist.base}" dirmode="775" filemode="664"/>
+        <zipfileset dir="${dir.dist.base}/bin" prefix="bin" dirmode="775" filemode="775"/>
+        <zipfileset dir="${dir.dist.base}/config" prefix="config" dirmode="775" filemode="664"/>
+        <zipfileset dir="${dir.dist.base}/examples" prefix="examples" dirmode="775" filemode="664"/>
+        <zipfileset dir="${dir.dist.base}/include" prefix="include" dirmode="775" filemode="664"/>
+        <zipfileset dir="${dir.dist.base}/lib" prefix="lib" dirmode="775" filemode="664"/>
+        <zipfileset dir="${dir.dist.base}/res" prefix="res" dirmode="775" filemode="664"/>
     </zip>
   </target>
 	                
