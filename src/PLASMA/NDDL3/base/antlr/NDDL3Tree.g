@@ -26,6 +26,24 @@ static const char* c_str(pANTLR3_UINT8 chars)
     return (const char*)chars;
 }
 
+// TODO: make sure we also get ANTLR errors, see apifuncs below
+static void reportSemanticError(pNDDL3Tree treeWalker, const std::string& msg)
+{
+    // get location. see displayRecognitionError() in antlr3baserecognizer.c
+    treeWalker->SymbolTable->addError(msg);
+    // TODO: throw exception to abort tree walker?
+}
+
+}
+
+@apifuncs
+{
+    // TODO: Install custom error message display that gathers them in CTX->SymbolTable
+    //RECOGNIZER->displayRecognitionError = reportAntlrError;
+
+    // Add a function with the following signature:
+    // void reportAntlrError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 *tokenNames);    
+    // use the meat from displayRecognitionError() in antlr3baserecognizer.c
 }
 
 nddl returns [Expr* result]
@@ -81,7 +99,8 @@ variableDeclaration returns [Expr* result]
         result = new ExprVarDeclaration(initExpr->getLhs()->toString().c_str(),dataType,initExpr);
     else { 
         result = NULL;
-        std::cout << "Skipping definition because of unknown data type for var : " << initExpr->getLhs()->toString().c_str() << std::endl;
+        reportSemanticError(CTX,
+            "Skipping definition because of unknown data type for var : " + initExpr->getLhs()->toString());
     }
 }       
         ;

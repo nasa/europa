@@ -1,4 +1,5 @@
 #include "ModuleNddl3.hh"
+#include "NddlInterpreter.hh"
 #include "intType.hh"
 #include "floatType.hh"
 #include "PlanDatabase.hh"
@@ -24,31 +25,13 @@ namespace EUROPA {
   {
   }
 
-  class NddlInterpreter : public LanguageInterpreter
-  {
-    public:
-      virtual ~NddlInterpreter() {}
-      virtual std::string interpret(std::istream& input, const std::string& source);
-  };
-
-  std::string NddlInterpreter::interpret(std::istream& input, const std::string& script)
-  {
-      // TODO: plug in nddl3 interpreter here
-	  check_error(ALWAYS_FAIL,"nddl parser is only available in Java for now. nddl-xml is supported in C++, you can use the nddl parser to generate nddl-xml from nddl source.");
-      return "";
-  }
-
   void ModuleNddl3::initialize(EngineId engine)
   {
-      // These are Nddl specific, so they belong here
-      /*
+      // These are Nddl specific, so they belong here. TODO: this shouldn't be necessary, include int and float in default CE types
       CESchema* ces = (CESchema*)engine->getComponent("CESchema");
       ces->registerFactory((new intTypeFactory())->getId());
       ces->registerFactory((new floatTypeFactory())->getId());
-      PlanDatabase* pdb = (PlanDatabase*)engine->getComponent("PlanDatabase");
-      RuleSchema* rs = (RuleSchema*)engine->getComponent("RuleSchema");
-      */
-	  engine->addLanguageInterpreter("nddl3", new NddlInterpreter(/*pdb->getClient(),rs->getId()*/));
+	  engine->addLanguageInterpreter("nddl3", new NddlInterpreter(engine));
   }
 
   void ModuleNddl3::uninitialize(EngineId engine)

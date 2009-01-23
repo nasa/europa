@@ -13,6 +13,19 @@
 
 namespace EUROPA {
 
+
+class NddlInterpreter : public LanguageInterpreter
+{
+public:
+    NddlInterpreter(EngineId& engine);
+    virtual ~NddlInterpreter();
+    virtual std::string interpret(std::istream& input, const std::string& source);
+
+protected:
+    EngineId m_engine;
+};
+
+
 class NddlSymbolTable : public EvalContext
 {
 public:
@@ -25,8 +38,12 @@ public:
 
     AbstractDomain* getVarType(const char* name) const;
 
+    void addError(const std::string& msg);
+    std::string getErrors() const;
+
 protected:
     PlanDatabaseId m_planDatabase;
+    std::vector<std::string> m_errors;
 };
 
 

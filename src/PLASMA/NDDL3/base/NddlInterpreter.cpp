@@ -7,10 +7,87 @@
 
 #include "NddlInterpreter.hh"
 
+#include "NDDL3Lexer.h"
+#include "NDDL3Parser.h"
+#include "NDDL3Tree.h"
+
+#include "Debug.hh"
 #include "EnumeratedTypeFactory.hh"
 #include "IntervalTypeFactory.hh"
 
 namespace EUROPA {
+
+NddlInterpreter::NddlInterpreter(EngineId& engine)
+    : m_engine(engine)
+{
+}
+
+NddlInterpreter::~NddlInterpreter()
+{
+}
+
+pANTLR3_INPUT_STREAM getInputStream(std::istream& input, const std::string& source)
+{
+    if (source == "<eval>") {
+        // TODO: this is kind of a hack, see if it can be made more robust & efficient
+        std::istringstream* is = dynamic_cast<std::istringstream*>(&input);
+        std::string strInput = is->str(); // This makes a copy of the original string that could be avoided
+
+        return antlr3NewAsciiStringInPlaceStream((pANTLR3_UINT8)strInput.c_str(),(ANTLR3_UINT32)strInput.size(),(pANTLR3_UINT8)source.c_str());
+    }
+    else {
+        return antlr3AsciiFileStreamNew((pANTLR3_UINT8)source.c_str());
+    }
+}
+
+std::string NddlInterpreter::interpret(std::istream& ins, const std::string& source)
+{
+    pANTLR3_INPUT_STREAM input = getInputStream(ins,source);
+
+    pNDDL3Lexer lexer = NDDL3LexerNew(input);
+    pANTLR3_COMMON_TOKEN_STREAM tstream = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lexer));
+    pNDDL3Parser parser = NDDL3ParserNew(tstream);
+
+    // Build he AST
+    NDDL3Parser_nddl_return result = parser->nddl(parser);
+    if (parser->pParser->rec->state->errorCount > 0) {
+        debugMsg("NddlInterpreter:interpret","The parser returned " << parser->pParser->rec->state->errorCount << " errors");
+    }
+    else {
+        debugMsg("NddlInterpreter:interpret","NDDL AST:\n" << result.tree->toStringTree(result.tree)->chars);
+    }
+
+    // Walk the AST to create nddl expr to evaluate
+    pANTLR3_COMMON_TREE_NODE_STREAM nodeStream = antlr3CommonTreeNodeStreamNewTree(result.tree, ANTLR3_SIZE_HINT);
+    pNDDL3Tree treeParser = NDDL3TreeNew(nodeStream);
+
+    NddlSymbolTable symbolTable(((PlanDatabase*)m_engine->getComponent("PlanDatabase"))->getId());
+    treeParser->SymbolTable = &symbolTable;
+
+    Expr* treeResult = treeParser->nddl(treeParser);
+    if (treeResult == NULL) {
+        debugMsg("NddlInterpreter:interpret","ERROR: the tree walk returned NULL:");
+    }
+    else {
+        debugMsg("NddlInterpreter:interpret","Result of tree walk:\n" << treeResult->toString());
+    }
+
+    // TODO: evaluate nddl expr
+    // EvalContext context;
+    // treeResult->eval(context);
+
+    // Free everything
+    treeParser->free(treeParser);
+    nodeStream->free(nodeStream);
+
+    parser->free(parser);
+    tstream->free(tstream);
+    lexer->free(lexer);
+    input->close(input);
+
+    return symbolTable.getErrors();
+}
+
 
 NddlSymbolTable::NddlSymbolTable(const PlanDatabaseId& pdb)
     : EvalContext(NULL)
@@ -20,6 +97,21 @@ NddlSymbolTable::NddlSymbolTable(const PlanDatabaseId& pdb)
 
 NddlSymbolTable::~NddlSymbolTable()
 {
+}
+
+void NddlSymbolTable::addError(const std::string& msg)
+{
+    m_errors.push_back(msg);
+}
+
+std::string NddlSymbolTable::getErrors() const
+{
+    std::ostringstream os;
+
+    for (unsigned int i=0; i<m_errors.size(); i++)
+        os << m_errors[i] << std::endl;
+
+    return os.str();
 }
 
 void* NddlSymbolTable::getElement(const char* name) const
@@ -142,5 +234,6 @@ std::string ExprAssignment::toString() const
 
     return os.str();
 }
+
 
 }
