@@ -8,10 +8,10 @@ if ! $(PLASMA_READY) {
 
   ModuleBase NDDL3
 	 :
-	 NddlInterpreter.cpp
 	 NDDL3Lexer.cpp
 	 NDDL3Parser.cpp
 	 NDDL3Tree.cpp
+	 NddlInterpreter.cpp
 	 ;
 
 } # PLASMA_READY
