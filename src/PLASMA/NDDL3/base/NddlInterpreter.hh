@@ -41,6 +41,9 @@ public:
     void addError(const std::string& msg);
     std::string getErrors() const;
 
+    // EvalContext methods
+    virtual ConstrainedVariableId getVar(const char* name);
+
 protected:
     PlanDatabaseId m_planDatabase;
     std::vector<std::string> m_errors;

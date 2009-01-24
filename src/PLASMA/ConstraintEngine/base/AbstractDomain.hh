@@ -8,7 +8,7 @@
  * @brief Declares new domain management object model.
  *
  * A new approach for domains is presented which allows for more customized domain implementations to assess possible
- * speed improvements. AbstractDomain is the base class for all other domains. It is the only domain reference 
+ * speed improvements. AbstractDomain is the base class for all other domains. It is the only domain reference
  * available in the  core of the framework.
  *
  * The semantics of a domain are described in terms of:
@@ -17,22 +17,22 @@
  * all initial values and close it upon construction implicitly. An 'open' domain is equivalently described as
  * 'dynamic'. Some operations require a domain to be closed before use.
  * @li Finite vs Infinite - A domain is finite if it has a finite number of elements in its domain.
- * @li Enumerated vs. Interval - A domain may be represented as an explicit enumeration of values or as an 
+ * @li Enumerated vs. Interval - A domain may be represented as an explicit enumeration of values or as an
  * upper and lower bound only, as a shorthand. A domain may not alter between enumerated and interval.
  * @li Symbolic vs Numeric - If the elements in the domain are numbers or symbols (including strings).
  * @li Empty vs. not Empty - If there are no elements in the domain.
  * @li Types - A domain may be further typed to restrict its semantics by constructing it with a given type
- * descriptor. 
+ * descriptor.
  *
  * Operations among domains are type checked according the compatibility rules enforced by a DomainComparator.
- * A default DomainComparator is provided. It may be extended to support additional semantic relationships 
+ * A default DomainComparator is provided. It may be extended to support additional semantic relationships
  * between types.
  *
  * A central design element is the use of a DomainListener to optionally observe changes on the domain. This is
  * an Observer pattern where the AbstractDomain is the subject and the DomainListener is the observer. This mechamism
  * is the basis for propagation.
  *
- * 
+ *
  * @see Variable, Constraint
  */
 #include "ConstraintEngineDefs.hh"
@@ -76,12 +76,12 @@ namespace EUROPA {
      * @brief Tests if domains can be compared.
      */
     virtual bool canCompare(const AbstractDomain& domx, const AbstractDomain& domy) const;
- 
+
     /**
      * @brief Set the comparator to be used. Can only be set if it is currently null.
      */
     static void setComparator(DomainComparator* comparator);
-   
+
     /**
      * @brief return true iff comparator is null. False otherwise.
      */
@@ -99,7 +99,7 @@ namespace EUROPA {
    * @brief The base class for all domains used in the ConstraintEngine.
    *
    * This base class provides the core mechanisms to integrate a domain into the ConstraintEngine framework without
-   * committing to a concrete type for the domain. This allows us to pass around and use domains in the core but still 
+   * committing to a concrete type for the domain. This allows us to pass around and use domains in the core but still
    * provide specializations as necessary in a very extendible way.
    * @see DomainListener
    */
@@ -121,7 +121,7 @@ namespace EUROPA {
 
     /**
      * @brief Re-open the domain.
-     * 
+     *
      * @note When completed, we require (isOpen() == true).
      * @see isOpen()
      */
@@ -152,31 +152,6 @@ namespace EUROPA {
     bool isInfinite() const;
 
     /**
-     * @brief Check if the domain is symbolic.
-     */
-    virtual bool isSymbolic() const {return !isNumeric();}
-
-    /**
-      * @brief Check if the domain contains entities
-      */
-    virtual bool isEntity() const {return false;}
-
-    /**
-     * @brief Check if the domain is numeric.
-     */
-    virtual bool isNumeric() const = 0;
-
-    /**
-     * @brief Check if the domain is Boolean.
-     */
-    virtual bool isBool() const = 0;
-
-    /**
-     * @brief Check if the domain is String.
-     */
-    virtual bool isString() const = 0;
-
-    /**
      * @brief Attach a DomainListener.
      * @note Requires that no domain listener is currently attached.
      * Will error out if that is not the case.
@@ -189,11 +164,6 @@ namespace EUROPA {
      * @return the listener. May be noId() if no listener attached
      */
     virtual const DomainListenerId& getListener() const;
-
-    /**
-     * @brief Get the domain's type's name.
-     */
-    virtual const LabelStr& getTypeName() const;
 
     /**
      * @brief Check if the domain is an enumerated set.
@@ -264,7 +234,7 @@ namespace EUROPA {
     virtual void set(double value) = 0;
 
     /**
-     * @brief Indicates assigment to the target domain as a relaxation triggered explicitly 
+     * @brief Indicates assigment to the target domain as a relaxation triggered explicitly
      * rather than through algorithm for relaxation.
      * @see relax
      */
@@ -411,14 +381,6 @@ namespace EUROPA {
     virtual bool areBoundsFinite() const;
 
     /**
-     * @brief Tests if two domains can be compared. For example, one cannot compare a symbolic
-     * enumerated domain with a numeric domain. This is useful to enforce type checking
-     * in constraints in particular.
-     * @see DomainComparator::canCompare
-     */
-    static bool canBeCompared(const AbstractDomain& domx, const AbstractDomain& domy);
-
-    /**
      * Tests if 2 values are the same with respect to the minimum difference for the target domain.
      */
     inline virtual bool compareEqual(double a, double b) const {
@@ -461,6 +423,61 @@ namespace EUROPA {
      * @param value must be a member of the domain.
      */
     virtual std::string toString(double value) const;
+
+    // TODO: AbstractDomain mixes 2 things : a data type, and an actual domain representation
+    // we'll probably have to separate those at some point. the methods below apply to the data type
+    /**
+     * @brief Get the domain's type's name.
+     */
+    virtual const LabelStr& getTypeName() const;
+
+    /**
+     * @brief Set the domain's type's name.
+     */
+    virtual void setTypeName(const LabelStr& name);
+
+    /**
+     * @brief Check if the domain is symbolic.
+     */
+    virtual bool isSymbolic() const {return !isNumeric();}
+
+    /**
+      * @brief Check if the domain contains entities
+      */
+    virtual bool isEntity() const {return false;}
+
+    /**
+     * @brief Check if the domain is numeric.
+     */
+    virtual bool isNumeric() const = 0;
+
+    /**
+     * @brief Check if the domain is Boolean.
+     */
+    virtual bool isBool() const = 0;
+
+    /**
+     * @brief Check if the domain is String.
+     */
+    virtual bool isString() const = 0;
+
+    /**
+     * @brief Tests if two domains can be compared. For example, one cannot compare a symbolic
+     * enumerated domain with a numeric domain. This is useful to enforce type checking
+     * in constraints in particular.
+     * @see DomainComparator::canCompare
+     */
+    static bool canBeCompared(const AbstractDomain& domx, const AbstractDomain& domy);
+
+    /**
+     * is the original definition for this domain restricted?, for instance : int [3 10], float {3.0,4.0}, etc
+     */
+    virtual bool getIsRestricted() const;
+
+    /**
+     * is the original definition for this domain restricted?, for instance : int [3 10], float {3.0,4.0}, etc
+     */
+    virtual void setIsRestricted(bool b);
 
   protected:
     /**
@@ -507,6 +524,7 @@ namespace EUROPA {
     DomainListenerId m_listener; /**< Holds reference to attached listener.  May be noId. */
     LabelStr m_typeName; /**< The name of the type of this domain. */
     double m_minDelta; /**< The minimum amount by which elements of this domain may vary.  Once this is set, DO NOT CHANGE IT.*/
+    bool m_isRestricted; /**< is the original definition for this domain restricted?, for instance : int [3 10], float {3.0,4.0}, etc */
 
   };
 }

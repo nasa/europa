@@ -13,6 +13,7 @@ options {
 
 @includes
 {
+#include "Debug.hh"
 #include "NddlInterpreter.hh"
 using namespace EUROPA;
 
@@ -46,29 +47,26 @@ static void reportSemanticError(pNDDL3Tree treeWalker, const std::string& msg)
     // use the meat from displayRecognitionError() in antlr3baserecognizer.c
 }
 
-nddl returns [Expr* result]
-@init {
-    ExprList* retval = new ExprList();
-    result = retval;
-}
-        :               
+nddl :               
 	^(NDDL
 		(
 		  (	child=typeDefinition
                   |     child=variableDeclaration
-                  |     allocation
-                  |     assignment
+                  |     child=assignment
                   |     constraintInstantiation
 		  |	classDeclaration
+                  |     allocation
 		  |	rule
 		  |	goal
 		  |	fact
-		  |	relation
+                  |     relation
 		  |	invocation
 		  ) 
 		  {
 		      if (child != NULL) { 
-		          retval->addChild(child);
+		          debugMsg("NddlInterpreter:nddl","Evaluating:" << child->toString());
+		          child->eval(*(CTX->SymbolTable));
+		          delete child;
 		          child = NULL; 
 		      }
 		  }
@@ -83,24 +81,30 @@ typeDefinition returns [Expr* result]
 			dataType=type
 		)
 		{
-                    // TODO: can we delay evaluation to keep consistent?
-		    ExprTypedef e(c_str($name.text->chars),dataType);
-		    e.eval(*(CTX->SymbolTable));
-		 
-		    result = NULL;   
+		    if (dataType != NULL) {
+		        if (!dataType->getIsRestricted()) // then this is just an alias for another type
+		            dataType = dataType->copy();
+		        
+		        dataType->setTypeName(c_str($name.text->chars));    		            
+		        result = new ExprTypedef(c_str($name.text->chars),dataType);
+		     }
+		     else {
+                         result = NULL;              
+                         reportSemanticError(CTX,
+                            "Incorrect typedef. Unknown data type for : " + std::string(c_str($name.text->chars)));
+		     }   
 		}
 	;
 
 variableDeclaration returns [Expr* result]
         :       ^(VARIABLE dataType=type initExpr=variableInitialization)
 {
-    // TODO: remove this check when we deal with classes
     if (dataType != NULL)
         result = new ExprVarDeclaration(initExpr->getLhs()->toString().c_str(),dataType,initExpr);
     else { 
         result = NULL;
         reportSemanticError(CTX,
-            "Skipping definition because of unknown data type for var : " + initExpr->getLhs()->toString());
+            "Incorrect variable declaration. Unknown data type for var : " + initExpr->getLhs()->toString());
     }
 }       
         ;
@@ -110,7 +114,7 @@ variableInitialization returns [ExprAssignment* result]
           |       ^('=' name=IDENT rhs=initializer)
           )
           {
-              Expr* lhs = new ExprVariableRef(c_str($name.text->chars),CTX->SymbolTable->getPlanDatabase()->getSchema());
+              Expr* lhs = new ExprVarRef(c_str($name.text->chars));
               //std::cout << "read var initialization for:" << $name.text->chars << std::endl;
               result = new ExprAssignment(lhs,rhs);
           }
@@ -118,7 +122,7 @@ variableInitialization returns [ExprAssignment* result]
 
 initializer returns [Expr* result]
 @init {
-    result = new ExprNoop("initializer"); // TODO: implement this
+    result = NULL; // TODO: implement this
 }
         :       anyValue 
         |       allocation
@@ -253,11 +257,14 @@ constructorSuper
 		)
 	;
   
-assignment
+assignment returns [Expr* result]
 	:	^('='
-			qualified
-			initializer
+			lhs=qualified
+			rhs=initializer
 		)
+		{
+		    result = new ExprAssignment(lhs,rhs);
+		}
 	;
 
 predicate
@@ -370,9 +377,17 @@ predicateArgument
 	:	^(qualified name=IDENT?)
 	;
 	
-qualified
-        :       identifier                 
-        |       ^('.' identifier qualified*)
+qualified returns [Expr* result]
+@init {
+    std::string varName;
+}
+        :  (      name=identifier { varName=c_str($name.text->chars); }                 
+           |       ^('.' name=identifier { if (varName.length()>0) varName+="."; varName+=c_str($name.text->chars); } qualified*)
+           )
+           {
+               // TODO!!: do type checking at each "."
+               result = new ExprVarRef(varName.c_str());
+           }
         ;
 	
 

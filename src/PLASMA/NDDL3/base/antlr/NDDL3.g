@@ -25,14 +25,14 @@ nddlStatement
         :	constraintSignature
         |	typeDefinition
         |	variableDeclaration
+        |       constraintInstantiation
+        |       assignment
         |	classDeclaration
-        |	rule
-        |	allocationStatement
-        |	assignment
+        |       allocationStatement
+        |       rule
+        |       goal
+        |       relation
         |	function
-        |	constraintInstantiation
-        |	relation
-        |	goal
         |	noopstatement
         ;
 

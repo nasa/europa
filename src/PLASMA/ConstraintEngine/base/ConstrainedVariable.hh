@@ -362,6 +362,26 @@ namespace EUROPA {
     void setCurrentPropagatingConstraint(ConstraintId c);
     ConstraintId getCurrentPropagatingConstraint() const;
 
+    // PS Methods:
+    virtual bool isEnumerated() const;
+    virtual bool isInterval() const;
+
+    virtual bool isNull() const;
+    virtual bool isSingleton() const;
+
+    virtual PSVarValue getSingletonValue() const;
+    virtual PSVarType getType() const;
+
+    virtual PSList<PSVarValue> getValues() const;
+    virtual PSList<PSConstraint*> getConstraints() const;
+
+    virtual double getLowerBound() const;  // if isSingleton()==false && isInterval() == true
+    virtual double getUpperBound() const;  // if isSingleton()==false && isInterval() == true
+
+    virtual void specifyValue(PSVarValue& v);
+
+    virtual PSEntity* getParent() const;
+
   protected:
     /**
      * @brief Ensure the constrained variable is part of a ConstraintEngine.
@@ -457,27 +477,6 @@ namespace EUROPA {
 
     // keeps track of who's the current propagating constraint, in case there is a violation
     ConstraintId m_propagatingConstraint;
-
-    // PS Methods:
-	virtual bool isEnumerated() const;
-	virtual bool isInterval() const;
-
-	virtual bool isNull() const;
-	virtual bool isSingleton() const;
-
-	virtual PSVarValue getSingletonValue() const;
-	virtual PSVarType getType() const;
-
-
-	virtual PSList<PSVarValue> getValues() const;
-	virtual PSList<PSConstraint*> getConstraints() const;
-
-	virtual double getLowerBound() const;  // if isSingleton()==false && isInterval() == true
-	virtual double getUpperBound() const;  // if isSingleton()==false && isInterval() == true
-
-	virtual void specifyValue(PSVarValue& v);
-
-	virtual PSEntity* getParent() const;
 
   private:
     /**

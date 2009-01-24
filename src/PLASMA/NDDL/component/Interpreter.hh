@@ -28,7 +28,7 @@ namespace EUROPA {
   	    DataRef(const ConstrainedVariableId& v);
   	    virtual ~DataRef();
 
-  	    ConstrainedVariableId& getValue();
+  	    const ConstrainedVariableId& getValue();
 
   	    static DataRef null;
 
@@ -145,18 +145,17 @@ namespace EUROPA {
   	    const AbstractDomain* m_domain;
   };
 
-  class ExprVariableRef : public Expr
+  class ExprVarRef : public Expr
   {
   	public:
-  	    ExprVariableRef(const char* name, const SchemaId& schema);
-  	    virtual ~ExprVariableRef();
+  	    ExprVarRef(const char* name);
+  	    virtual ~ExprVarRef();
 
   	    virtual DataRef eval(EvalContext& context) const;
   	    virtual std::string toString() const;
 
   	protected:
   	    LabelStr m_varName;
-  	    const SchemaId& m_schema;
   };
 
   class ExprNewObject : public Expr
@@ -377,7 +376,7 @@ namespace EUROPA {
         virtual void handleExecute();
 
         friend class ExprIf;
-        friend class ExprRuleVariableRef;
+        friend class ExprRuleVarRef;
   };
 
   typedef Id<InterpretedRuleInstance> InterpretedRuleInstanceId;
@@ -432,11 +431,11 @@ namespace EUROPA {
     virtual ~RuleExpr(){}
   };
 
-  class ExprRuleVariableRef : public RuleExpr
+  class ExprRuleVarRef : public RuleExpr
   {
   	public:
-  	    ExprRuleVariableRef(const char* name);
-  	    virtual ~ExprRuleVariableRef();
+  	    ExprRuleVarRef(const char* name);
+  	    virtual ~ExprRuleVarRef();
 
   	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;
 

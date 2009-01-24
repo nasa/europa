@@ -17,6 +17,16 @@
 
 namespace EUROPA {
 
+// TODO: keep using pdbClient?
+const DbClientId& getPDB(EvalContext& context)
+{
+    // TODO: Add this behavior to EvalContext instead?
+    PlanDatabase* pdb = (PlanDatabase*)context.getElement("PlanDatabase");
+    check_error(pdb != NULL,"Could not find Plan Database in context to evaluate asingment");
+    return pdb->getClient();
+}
+
+
 NddlInterpreter::NddlInterpreter(EngineId& engine)
     : m_engine(engine)
 {
@@ -64,17 +74,7 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
     NddlSymbolTable symbolTable(((PlanDatabase*)m_engine->getComponent("PlanDatabase"))->getId());
     treeParser->SymbolTable = &symbolTable;
 
-    Expr* treeResult = treeParser->nddl(treeParser);
-    if (treeResult == NULL) {
-        debugMsg("NddlInterpreter:interpret","ERROR: the tree walk returned NULL:");
-    }
-    else {
-        debugMsg("NddlInterpreter:interpret","Result of tree walk:\n" << treeResult->toString());
-    }
-
-    // TODO: evaluate nddl expr
-    // EvalContext context;
-    // treeResult->eval(context);
+    treeParser->nddl(treeParser);
 
     // Free everything
     treeParser->free(treeParser);
@@ -138,6 +138,12 @@ AbstractDomain* NddlSymbolTable::getVarType(const char* name) const
         return (AbstractDomain*)&(ces->baseDomain(name)); // TODO: deal with this ugly cast
 }
 
+ConstrainedVariableId NddlSymbolTable::getVar(const char* name)
+{
+    return m_planDatabase->getGlobalVariable(name);
+}
+
+
 ExprTypedef::ExprTypedef(const char* name, AbstractDomain* type)
     : m_name(name)
     , m_type(type)
@@ -195,8 +201,15 @@ ExprVarDeclaration::~ExprVarDeclaration()
 
 DataRef ExprVarDeclaration::eval(EvalContext& context) const
 {
-    // TODO: Implement this
-    return DataRef::null;
+    const DbClientId& pdb = getPDB(context);
+
+    ConstrainedVariableId v = pdb->createVariable(
+            m_type->getTypeName().c_str(),
+            *m_type,
+            m_name.c_str()
+    );
+
+    return DataRef(v);
 }
 
 std::string ExprVarDeclaration::toString() const
@@ -222,8 +235,23 @@ ExprAssignment::~ExprAssignment()
 
 DataRef ExprAssignment::eval(EvalContext& context) const
 {
-    // TODO: Implement this
-    return DataRef::null;
+    DataRef lhs = m_lhs->eval(context);
+
+    if (m_rhs != NULL) {
+        DataRef rhs = m_rhs->eval(context);
+        const DbClientId& pdb = getPDB(context);
+
+        if (rhs.getValue()->lastDomain().isSingleton()) {
+            pdb->specify(lhs.getValue(),rhs.getValue()->lastDomain().getSingletonValue());
+        }
+        else {
+            pdb->restrict(lhs.getValue(),rhs.getValue()->lastDomain());
+            // TODO: this behavior seems more reasonable, specially to support violation reporting
+            // lhs.getValue()->getCurrentDomain().equate(rhs.getValue()->getCurrentDomain());
+        }
+    }
+
+    return lhs;
 }
 
 std::string ExprAssignment::toString() const

@@ -156,9 +156,9 @@ namespace EUROPA {
     else if (strcmp(element->Value(),"id") == 0) {
       const char* varName = element->Attribute("name");
       if (isRule)
-    return new ExprRuleVariableRef(varName);
+          return new ExprRuleVarRef(varName);
       else
-    return new ExprVariableRef(varName, getSchema());
+          return new ExprVarRef(varName);
     }
     else
       check_runtime_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + element->Value() + ", expected constant(value,symbol,interval) or id element");

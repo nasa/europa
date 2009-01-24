@@ -64,7 +64,7 @@ namespace EUROPA {
   {
   }
 
-  ConstrainedVariableId& DataRef::getValue() { return m_value; }
+  const ConstrainedVariableId& DataRef::getValue() { return m_value; }
 
   /*
    * EvalContext
@@ -301,19 +301,18 @@ namespace EUROPA {
 
 
   /*
-   * ExprVariableRef
+   * ExprVarRef
    */
-  ExprVariableRef::ExprVariableRef(const char* varName, const SchemaId& schema)
+  ExprVarRef::ExprVarRef(const char* varName)
     : m_varName(varName)
-    , m_schema(schema)
   {
   }
 
-  ExprVariableRef::~ExprVariableRef()
+  ExprVarRef::~ExprVarRef()
   {
   }
 
-  DataRef ExprVariableRef::eval(EvalContext& context) const
+  DataRef ExprVarRef::eval(EvalContext& context) const
   {
     // TODO: do this only once
     std::vector<std::string> vars;
@@ -326,7 +325,8 @@ namespace EUROPA {
       check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+varName+" in Evaluation Context");
 
     for (unsigned int idx = 1;idx<vars.size();idx++) {
-      check_error(m_schema->isObjectType(rhs->baseDomain().getTypeName()), std::string("Can't apply dot operator to:")+rhs->baseDomain().getTypeName().toString());
+      // TODO: parser must do type checking instead
+      //check_error(m_schema->isObjectType(rhs->baseDomain().getTypeName()), std::string("Can't apply dot operator to:")+rhs->baseDomain().getTypeName().toString());
       check_runtime_error(rhs->derivedDomain().isSingleton(),varName+" must be singleton to be able to get to "+vars[idx]);
       ObjectId object = rhs->derivedDomain().getSingletonValue();
       rhs = object->getVariable(object->getName().toString()+"."+vars[idx]);
@@ -340,7 +340,7 @@ namespace EUROPA {
     return DataRef(rhs);
   }
 
-  std::string ExprVariableRef::toString() const
+  std::string ExprVarRef::toString() const
   {
       return m_varName.toString();
   }
@@ -395,9 +395,9 @@ namespace EUROPA {
 
 
   /*
-   * ExprRuleVariableRef
+   * ExprRuleVarRef
    */
-  ExprRuleVariableRef::ExprRuleVariableRef(const char* varName)
+  ExprRuleVarRef::ExprRuleVarRef(const char* varName)
     : m_varName(varName)
   {
     std::vector<std::string> vars;
@@ -414,11 +414,11 @@ namespace EUROPA {
     }
   }
 
-  ExprRuleVariableRef::~ExprRuleVariableRef()
+  ExprRuleVarRef::~ExprRuleVarRef()
   {
   }
 
-  DataRef ExprRuleVariableRef::doEval(RuleInstanceEvalContext& context) const
+  DataRef ExprRuleVarRef::doEval(RuleInstanceEvalContext& context) const
   {
     ConstrainedVariableId var;
 

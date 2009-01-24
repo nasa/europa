@@ -36,11 +36,11 @@ namespace EUROPA {
     return *s_instance;
   }
 
-  void  DomainComparator::setComparator(DomainComparator* comparator) { 
+  void  DomainComparator::setComparator(DomainComparator* comparator) {
     //check_error(s_instance == NULL, "The comparator can only be set when it is currently null");
     s_instance = comparator;
   }
-  
+
   bool DomainComparator::comparatorIsNull() {
     return s_instance == NULL;
   }
@@ -53,11 +53,11 @@ namespace EUROPA {
     // If either is Boolean, both must be Boolean. Assumes they type names don't matter
     //if(domx.isBool() || domy.isBool())
     //   return(domx.isBool() && domy.isBool());
-  
+
     // If either is numeric, both must be numeric. Assumes they type names don't matter
     if(domx.isNumeric() || domy.isNumeric())
       return(domx.isNumeric() && domy.isNumeric());
-			
+
     // If either is string, both must be string. Assumes they type names don't matter
     if(domx.isString() && domy.isString())
       return(domx.isString() && domy.isString());
@@ -81,10 +81,22 @@ namespace EUROPA {
   }
 
   AbstractDomain::AbstractDomain(bool closed, bool enumerated, const char* typeName)
-    : m_closed(closed), m_enumerated(enumerated),  m_typeName(typeName), m_minDelta(EPSILON) {}
+    : m_closed(closed)
+    , m_enumerated(enumerated)
+    , m_typeName(typeName)
+    , m_minDelta(EPSILON)
+    , m_isRestricted(false)
+    {
+    }
 
   AbstractDomain::AbstractDomain(const AbstractDomain& org)
-    : m_closed(org.m_closed), m_enumerated(org.m_enumerated), m_typeName(org.m_typeName), m_minDelta(org.m_minDelta){}
+    : m_closed(org.m_closed)
+    , m_enumerated(org.m_enumerated)
+    , m_typeName(org.m_typeName)
+    , m_minDelta(org.m_minDelta)
+    , m_isRestricted(org.m_isRestricted)
+  {
+  }
 
   AbstractDomain::~AbstractDomain() {}
 
@@ -120,6 +132,18 @@ namespace EUROPA {
 
   const LabelStr& AbstractDomain::getTypeName() const {
     return(m_typeName);
+  }
+
+  void AbstractDomain::setTypeName(const LabelStr& name) {
+    m_typeName = name;
+  }
+
+  bool AbstractDomain::getIsRestricted() const  {
+      return m_isRestricted;
+  }
+
+  void AbstractDomain::setIsRestricted(bool b) {
+      m_isRestricted = b;
   }
 
   bool AbstractDomain::isEnumerated() const {
@@ -192,8 +216,8 @@ namespace EUROPA {
 
 
   bool AbstractDomain::areBoundsFinite() const {
-    return (!isNumeric() || 
-	    (!isEmpty() && isClosed() && 
+    return (!isNumeric() ||
+	    (!isEmpty() && isClosed() &&
 	     getUpperBound() < PLUS_INFINITY && getLowerBound() > MINUS_INFINITY));
   }
 
