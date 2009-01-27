@@ -1,12 +1,22 @@
 UNAME := $(shell uname)
 
+
+OPT_FLAGS = -O3 -DEUROPA_FAST  -fno-strict-aliasing
+LD_FLAGS = -O3  -fno-strict-aliasing
+
 ifeq (1,$(FAST))
   BUILD_SUFFIX := _o
-  CXXFLAGS += -O3 -DEUROPA_FAST  -fno-strict-aliasing
-  LDFLAGS += -O3  -fno-strict-aliasing
+  CXXFLAGS += $(OPT_FLAGS)
+  LDFLAGS += $(LD_FLAGS)
 else
-  BUILD_SUFFIX := _g
-  CXXFLAGS += -ggdb3
+  ifeq (1,$(PROFILE))
+    BUILD_SUFFIX := _o_p
+    CXXFLAGS += -pg $(OPT_FLAGS)
+    LDFLAGS += -pg $(LD_FLAGS)
+  else
+    BUILD_SUFFIX := _g
+    CXXFLAGS += -ggdb3
+  endif
 endif
 
 ifdef ANT_HOME
