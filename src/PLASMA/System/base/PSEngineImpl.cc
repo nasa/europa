@@ -105,6 +105,11 @@ namespace EUROPA {
   }
 
   // Plan Database methods
+  PSList<PSObject*> PSEngineImpl::getObjects() {
+    check_runtime_error(isStarted(), "PSEngine has not been started");
+    return getPlanDatabase()->getAllObjects();
+  }
+
   PSList<PSObject*> PSEngineImpl::getObjectsByType(const std::string& objectType)
   {
     check_runtime_error(isStarted(),"PSEngine has not been started");

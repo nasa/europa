@@ -237,6 +237,7 @@ namespace EUROPA {
     void loadModel(const std::string& modelFileName);
     std::string executeScript(const std::string& language, const std::string& script, bool isFile);
 
+    PSList<PSObject*> getObjects();
     PSList<PSObject*> getObjectsByType(const std::string& objectType);
     PSObject* getObjectByKey(PSEntityKey id);
     PSObject* getObjectByName(const std::string& name);

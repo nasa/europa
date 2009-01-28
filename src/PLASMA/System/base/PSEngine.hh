@@ -48,6 +48,7 @@ namespace EUROPA {
       virtual PSList<PSConstraint*> getAllViolations() const = 0;
 
       // Plan Database methods
+    virtual PSList<PSObject*> getObjects() = 0;
       virtual PSList<PSObject*> getObjectsByType(const std::string& objectType) = 0;
       virtual PSObject* getObjectByKey(PSEntityKey id) = 0;
       virtual PSObject* getObjectByName(const std::string& name) = 0;

@@ -25,6 +25,7 @@ namespace EUROPA {
     public:
       virtual ~PSPlanDatabase() {}
 
+    virtual PSList<PSObject*> getAllObjects() const = 0;
       virtual PSList<PSObject*> getObjectsByType(const std::string& objectType) const = 0;
       virtual PSObject* getObjectByKey(PSEntityKey id) const = 0;
       virtual PSObject* getObjectByName(const std::string& name) const = 0;

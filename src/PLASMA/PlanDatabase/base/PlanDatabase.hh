@@ -288,6 +288,7 @@ namespace EUROPA {
 
 
     // PSPlanDatabase methods
+    virtual PSList<PSObject*> getAllObjects() const;
     virtual PSList<PSObject*> getObjectsByType(const std::string& objectType) const;
     virtual PSObject* getObjectByKey(PSEntityKey id) const;
     virtual PSObject* getObjectByName(const std::string& name) const;

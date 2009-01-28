@@ -948,6 +948,14 @@ namespace EUROPA{
   }
 
   // PSPlanDatabase methods
+  PSList<PSObject*> PlanDatabase::getAllObjects() const {
+    PSList<PSObject*> retval;
+    const ObjectSet& objects = getObjects();
+    for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it)
+      retval.push_back((PSObject*) *it);
+    return retval;
+  }
+
   PSList<PSObject*> PlanDatabase::getObjectsByType(const std::string& objectType) const
   {
     PSList<PSObject*> retval;
