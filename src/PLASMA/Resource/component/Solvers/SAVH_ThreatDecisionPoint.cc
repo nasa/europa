@@ -10,7 +10,7 @@
 namespace EUROPA {
   using namespace SOLVERS;
   namespace SAVH {
-    
+
     class ChoiceFilter {
     public:
       virtual bool operator()(const std::pair<TransactionId, TransactionId>& p) const = 0;
@@ -18,7 +18,7 @@ namespace EUROPA {
       virtual ~ChoiceFilter(){}
     private:
     };
-    
+
 
     class ChoiceFilters {
     public:
@@ -52,7 +52,7 @@ namespace EUROPA {
 
     class DefaultChoiceFilter : public ChoiceFilter {
     public:
-      DefaultChoiceFilter(FlowProfile* profile, const LabelStr& explanation, const InstantId& inst) 
+      DefaultChoiceFilter(Profile* profile, const LabelStr& explanation, const InstantId& inst)
         : ChoiceFilter(), m_profile(profile), m_explanation(explanation), m_inst(inst) {
         m_treatAsLowerFlaw = true;
         debugMsg("ThreatDecisionPoint:filter", "Creating filter for " << inst->getTime() << " on " << inst->getProfile()->getResource()->toString());
@@ -69,12 +69,12 @@ namespace EUROPA {
             debugMsg("ThreatDecisionPoint:filter", "Treating as upper flaw because of " << m_explanation.toString());
             m_treatAsLowerFlaw = false;
           }
-          //  if we were chosen out of a magnitude preference 
+          //  if we were chosen out of a magnitude preference
           //    pick level with greatest magnitude, treat as a flaw on that level
           //    if the level magnitude is equal, arbitrarily choose lower level
           else {
-            m_treatAsLowerFlaw = m_inst->getLowerFlawMagnitude() >= m_inst->getUpperFlawMagnitude();       
-            debugMsg("ThreatDecisionPoint:filter", "Treating as " << (m_treatAsLowerFlaw ? "lower" : "upper") << 
+            m_treatAsLowerFlaw = m_inst->getLowerFlawMagnitude() >= m_inst->getUpperFlawMagnitude();
+            debugMsg("ThreatDecisionPoint:filter", "Treating as " << (m_treatAsLowerFlaw ? "lower" : "upper") <<
                      " flaw because of magnitude.  Lower: " << m_inst->getLowerFlawMagnitude() << " Upper: " << m_inst->getUpperFlawMagnitude());
           }
         }
@@ -88,7 +88,7 @@ namespace EUROPA {
       }
       virtual std::string toString() const {return "DefaultFilter";}
     protected:
-      FlowProfile* m_profile;
+      Profile* m_profile;
       LabelStr m_explanation;
       InstantId m_inst;
       bool m_treatAsLowerFlaw;
@@ -96,8 +96,14 @@ namespace EUROPA {
 
     class PredecessorNotContributingChoiceFilter : public DefaultChoiceFilter {
     public:
-      PredecessorNotContributingChoiceFilter(FlowProfile* profile, const LabelStr& explanation, const InstantId& inst)
-        : DefaultChoiceFilter(profile, explanation, inst) {}
+      PredecessorNotContributingChoiceFilter(Profile* profile, const LabelStr& explanation, const InstantId& inst)
+        : DefaultChoiceFilter(profile, explanation, inst) {
+    	  // For this ChoiceFilter, we need the profile to be a subclass of FlowProfile:
+    	  FlowProfile * fProfile = dynamic_cast <FlowProfile*>((Profile*) profile);
+    	  check_runtime_error(fProfile != 0,
+    			  "Cannot create PredecessorNotContributingChoiceFilter for profile not derived from FlowProfile " \
+    			  " (choice of SAVHThreatHandler filter in PlannerConfig.xml probably conflicts with choice of profileType in NDDL)");
+      }
 
       bool operator()(const std::pair<TransactionId, TransactionId>& p) const {
         InstantId inst = InstantId::noId();
@@ -108,14 +114,14 @@ namespace EUROPA {
             debugMsg("ThreatDecisionPoint:filter:predecessorNot", "Rejecting choice because flaw is lower level and  predecessor is a consumer.");
             return false;
           }
-          contributing = m_profile->getEarliestLowerLevelInstant(p.first, inst);
+          contributing = ((FlowProfile*) m_profile)->getEarliestLowerLevelInstant(p.first, inst);
         }
         else {
           if(!p.first->isConsumer()) {
             debugMsg("ThreatDecisionPoint:filter:predecesorNot", "Rejecting choice because flaw is upper level and predecessor is a producer.");
             return false;
           }
-          contributing = m_profile->getEarliestUpperLevelInstant(p.first, inst);
+          contributing = ((FlowProfile*) m_profile)->getEarliestUpperLevelInstant(p.first, inst);
         }
         checkError(contributing, "Should always have an instant for transaction " << p.first->toString());
         condDebugMsg(inst->getTime() <= m_inst->getTime(), "ThreatDecisionPoint:filter:predecessorNot",
@@ -127,8 +133,14 @@ namespace EUROPA {
 
     class SuccessorContributingChoiceFilter : public DefaultChoiceFilter {
     public:
-      SuccessorContributingChoiceFilter(FlowProfile* profile, const LabelStr& explanation, const InstantId& inst) 
-        : DefaultChoiceFilter(profile, explanation, inst) {}
+      SuccessorContributingChoiceFilter(Profile* profile, const LabelStr& explanation, const InstantId& inst)
+        : DefaultChoiceFilter(profile, explanation, inst) {
+    	  // For this ChoiceFilter, we need the profile to be a subclass of FlowProfile:
+    	  FlowProfile * fProfile = dynamic_cast <FlowProfile*>((Profile*) profile);
+    	  check_runtime_error(fProfile != 0,
+    			  "Cannot create SuccessorContributingChoiceFilter for profile not derived from FlowProfile " \
+    			  " (choice of SAVHThreatHandler filter in PlannerConfig.xml probably conflicts with choice of profileType in NDDL)");
+      }
 
       bool operator()(const std::pair<TransactionId, TransactionId>& p) const {
         InstantId inst = InstantId::noId();
@@ -139,14 +151,14 @@ namespace EUROPA {
             debugMsg("ThreatDecisionPoint:filter:successor", "Rejecting choice because flaw is lower level and successor is a producer.");
             return false;
           }
-          contributing = m_profile->getEarliestLowerLevelInstant(p.second, inst);
+          contributing = ((FlowProfile*) m_profile)->getEarliestLowerLevelInstant(p.second, inst);
         }
         else {
           if(p.second->isConsumer()) {
             debugMsg("ThreatDecisionPoint:filter:successor", "Rejecting choice because flaw is upper level and successor is a consumer.");
             return false;
           }
-          contributing = m_profile->getEarliestUpperLevelInstant(p.second, inst);
+          contributing = ((FlowProfile*) m_profile)->getEarliestUpperLevelInstant(p.second, inst);
         }
         checkError(contributing, "Should always have an instant for transaction " << p.second->toString());
         condDebugMsg(inst->getTime() > m_inst->getTime(), "ThreatDecisionPoint:filter:successor",
@@ -258,7 +270,7 @@ namespace EUROPA {
         debugMsg("ThreatDecisionPoint:filter:leastImpact", std::endl <<
                  "<" << p1.first->toString() << ", " << p1.second->toString() << "> score: " << score1 << std::endl <<
                  "<" << p2.first->toString() << ", " << p2.second->toString() << "> score: " << score2);
-        return score1 < score2; 
+        return score1 < score2;
       }
       std::string toString() const {
         return "LeastImpactComparator";
@@ -294,8 +306,8 @@ namespace EUROPA {
     class LongestTransactionComparator : public TransactionComparator {
     public:
       bool operator()(const TransactionId& t1, const TransactionId& t2) const {
-        return 
-          (t1->time()->lastDomain().getUpperBound() - t1->time()->lastDomain().getLowerBound()) > 
+        return
+          (t1->time()->lastDomain().getUpperBound() - t1->time()->lastDomain().getLowerBound()) >
           (t2->time()->lastDomain().getUpperBound() - t2->time()->lastDomain().getLowerBound());
       }
       std::string toString() const {return "longest";}
@@ -305,14 +317,14 @@ namespace EUROPA {
     class ShortestTransactionComparator : public TransactionComparator {
     public:
       bool operator()(const TransactionId& t1, const TransactionId& t2) const {
-        return 
-          (t1->time()->lastDomain().getUpperBound() - t1->time()->lastDomain().getLowerBound()) < 
+        return
+          (t1->time()->lastDomain().getUpperBound() - t1->time()->lastDomain().getLowerBound()) <
           (t2->time()->lastDomain().getUpperBound() - t2->time()->lastDomain().getLowerBound());
       }
       std::string toString() const {return "shortest";}
       TransactionComparator* copy() const {return new ShortestTransactionComparator();}
     };
-    
+
     class AscendingKeyTransactionComparator : public TransactionComparator {
     public:
       bool operator()(const TransactionId& t1, const TransactionId& t2) const {
@@ -330,7 +342,7 @@ namespace EUROPA {
       std::string toString() const {return "descendingKey";}
       TransactionComparator* copy() const {return new DescendingKeyTransactionComparator();}
     };
-    
+
 
     bool ThreatDecisionPoint::test(const EntityId& entity) {
       return InstantId::convertable(entity);
@@ -363,9 +375,9 @@ namespace EUROPA {
        order="ascendingKeySuccessor" will order choices in ascending key of the time variable of the successor (default)
        order="descendingKeySuccessor" will order choices in descending key of the time variable of the successor
        order="leastImpact" will order choices by last estimated temporal impact
-       
+
      */
-    ThreatDecisionPoint::ThreatDecisionPoint(const DbClientId& client, const InstantId& flawedInstant, const TiXmlElement& configData, const LabelStr& explanation) 
+    ThreatDecisionPoint::ThreatDecisionPoint(const DbClientId& client, const InstantId& flawedInstant, const TiXmlElement& configData, const LabelStr& explanation)
       : DecisionPoint(client, flawedInstant->getKey(), explanation), m_flawedInstant(flawedInstant), m_index(0) {
       m_instTime = m_flawedInstant->getTime();
       m_resName = m_flawedInstant->getProfile()->getResource()->getName();
@@ -405,20 +417,20 @@ namespace EUROPA {
       checkError(filter == "none" || filter == "predecessorNot" || filter == "successor" || filter == "both",
                  "Unknown filter attribute '" << filter << "'");
       if(filter == "successor" || filter == "both")
-        filters.addFilter(new SuccessorContributingChoiceFilter((FlowProfile*) profile, getExplanation(), m_flawedInstant));
+    	  filters.addFilter(new SuccessorContributingChoiceFilter(profile, getExplanation(), m_flawedInstant));
       if(filter == "predecessorNot" || filter == "both")
-        filters.addFilter(new PredecessorNotContributingChoiceFilter((FlowProfile*) profile, getExplanation(), m_flawedInstant));
-      filters.addFilter(new DefaultChoiceFilter((FlowProfile*) profile, getExplanation(), m_flawedInstant));
+        filters.addFilter(new PredecessorNotContributingChoiceFilter(profile, getExplanation(), m_flawedInstant));
+      filters.addFilter(new DefaultChoiceFilter(profile, getExplanation(), m_flawedInstant));
     }
 
     std::string ThreatDecisionPoint::toShortString() const {
       std::stringstream os;
-      
+
       os << "INS(" << m_instTime << ") on " << m_resName.toString();
       TransactionId predecessor = m_choices[m_index].first;
       TransactionId successor = m_choices[m_index].second;
-      os << " {" << predecessor->toString() << " < " << successor->toString() << "}";      
-      
+      os << " {" << predecessor->toString() << " < " << successor->toString() << "}";
+
       return os.str();
     }
 
@@ -430,11 +442,11 @@ namespace EUROPA {
     	os << "NO CHOICES";
     	return os.str();
       }
-      
+
       TransactionId predecessor = m_choices[m_index].first;
       TransactionId successor = m_choices[m_index].second;
-      os << "  DECISION (CHOICE=" << (m_index+1) << " of MAX_CHOICE=" << m_choiceCount<< ") " 
-         << predecessor->toString() 
+      os << "  DECISION (CHOICE=" << (m_index+1) << " of MAX_CHOICE=" << m_choiceCount<< ") "
+         << predecessor->toString()
          << " to be before " << successor->toString()
          << " : ";
 
@@ -449,7 +461,7 @@ namespace EUROPA {
       os << "<" << choice.first->toString() << " *** " << choice.second->toString() << ">";
       return os.str();
     }
-    
+
     void ThreatDecisionPoint::handleInitialize() {
       check_error(m_flawedInstant.isValid());
       m_flawedInstant->getProfile()->getResource()->getOrderingChoices(m_flawedInstant, m_choices);
@@ -465,17 +477,17 @@ namespace EUROPA {
 
       std::set<std::pair<TransactionId, TransactionId>, ChoiceOrder> sort(order);
 
-      std::insert_iterator<std::set<std::pair<TransactionId, TransactionId>, ChoiceOrder > > choiceIt = 
+      std::insert_iterator<std::set<std::pair<TransactionId, TransactionId>, ChoiceOrder > > choiceIt =
         inserter(sort, sort.begin());
 //       std::back_insert_iterator<std::vector<std::pair<TransactionId, TransactionId> > > choiceIt =
 //         std::back_inserter(m_choices);
-      
+
       for(std::vector<std::pair<TransactionId, TransactionId> >::iterator it = m_choices.begin();
           it != m_choices.end(); ++it) {
         if(filter(*it))
           *choiceIt++ = *it;
       }
-      
+
       //       std::sort(m_choices.begin(), m_choices.end(), order);
       m_choices.clear();
       m_choices.insert(m_choices.end(), sort.begin(), sort.end());
@@ -499,7 +511,7 @@ namespace EUROPA {
       checkError(m_index < m_choiceCount, "Tried to execute past available choices:" << m_index << ">=" << m_choiceCount);
       TransactionId predecessor = m_choices[m_index].first;
       TransactionId successor = m_choices[m_index].second;
-      debugMsg("SolverDecisionPoint:handleExecute", "For " << m_instTime << " on " << m_resName.toString() << ", assigning " << 
+      debugMsg("SolverDecisionPoint:handleExecute", "For " << m_instTime << " on " << m_resName.toString() << ", assigning " <<
                predecessor->toString() << " to be before " << successor->toString() << " because of " << getExplanation().toString() << ".");
       m_constr = m_client->createConstraint((*m_constraintIt).c_str(), makeScope(predecessor->time(), successor->time()));
     }
