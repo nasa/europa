@@ -2,7 +2,7 @@
   <FlawFilter component="HorizonFilter" policy="PartiallyContained"/>
 
   <SAVHThreatManager order="most,earliest,lower" defaultPriority="2">
-    <FlawHandler component="SAVHThreatHandler" filter="both" />
+    <FlawHandler component="SAVHThreatHandler"/>
   </SAVHThreatManager>
 
   <ThreatManager defaultPriority="1">

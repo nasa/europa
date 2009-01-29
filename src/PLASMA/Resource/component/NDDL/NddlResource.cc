@@ -29,7 +29,8 @@ bool isValid(ConstrainedVariableId nameVar, const std::string param)
 	if(param == PARAM_PROFILE_TYPE) {
 		if (name == "FlowProfile" ||
 				name == "IncrementalFlowProfile" ||
-				name == "TimetableProfile")
+				name == "TimetableProfile" ||
+				name == "GroundedReusableProfile")
 			return true;
 	}
 	else if (param == PARAM_DETECTOR_TYPE) {
@@ -208,8 +209,11 @@ LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, c
     LabelStr profileName = getProfileOrDetectorName(this, PARAM_PROFILE_TYPE, "IncrementalFlowProfile");
     LabelStr detectorName = getProfileOrDetectorName(this, PARAM_DETECTOR_TYPE, "ClosedWorldFVDetector");
 
+    // TBS:  Use PLUS_INFINITY for upper limit, since TimetableProfile/GroundedReusableProfile could compute
+    // upper bounds above capacity, even though we know those don't correspond to real flaws (because a reusable
+    // resource can't ever really exceed capacity)
     init(m_variables[C]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(),
-	 m_variables[LLMIN]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(),
+	 m_variables[LLMIN]->derivedDomain().getSingletonValue(), PLUS_INFINITY,
 	 m_variables[CRMAX]->derivedDomain().getSingletonValue(), m_variables[CRMAX]->derivedDomain().getSingletonValue(),
 	 m_variables[CMAX]->derivedDomain().getSingletonValue(), m_variables[CMAX]->derivedDomain().getSingletonValue(),
 	 detectorName, profileName);
@@ -334,8 +338,11 @@ LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, c
     LabelStr profileName = getProfileOrDetectorName(this, PARAM_PROFILE_TYPE, "IncrementalFlowProfile");
     LabelStr detectorName = getProfileOrDetectorName(this, PARAM_DETECTOR_TYPE, "ClosedWorldFVDetector");
 
+    // TBS:  Use PLUS_INFINITY for upper limit, since TimetableProfile/GroundedReusableProfile could compute
+    // upper bounds above capacity, even though we know those don't correspond to real flaws (because a reusable
+    // resource can't ever really exceed capacity)
     init(m_variables[C]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(),
-     m_variables[LLMIN]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(),
+     m_variables[LLMIN]->derivedDomain().getSingletonValue(), PLUS_INFINITY,
      m_variables[CRMAX]->derivedDomain().getSingletonValue(), m_variables[CRMAX]->derivedDomain().getSingletonValue(),
      m_variables[CMAX]->derivedDomain().getSingletonValue(), m_variables[CMAX]->derivedDomain().getSingletonValue(),
      detectorName, profileName);

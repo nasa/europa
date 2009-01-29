@@ -6,7 +6,7 @@
 
 namespace EUROPA {
   namespace SAVH {
-    TimetableProfile::TimetableProfile(const PlanDatabaseId db, const FVDetectorId flawDetector, const double initCapacityLb, const double initCapacityUb) 
+    TimetableProfile::TimetableProfile(const PlanDatabaseId db, const FVDetectorId flawDetector, const double initCapacityLb, const double initCapacityUb)
       : Profile(db, flawDetector, initCapacityLb, initCapacityUb), m_lowerLevelMin(0), m_lowerLevelMax(0), m_upperLevelMin(0), m_upperLevelMax(0),
 	m_minPrevConsumption(0), m_maxPrevConsumption(0), m_minPrevProduction(0), m_maxPrevProduction(0) {}
 
@@ -35,7 +35,7 @@ namespace EUROPA {
 
     void TimetableProfile::recomputeLevels( InstantId prev, InstantId inst) {
       check_error(inst.isValid());
-      
+
       double maxInstantProduction(0), minInstantProduction(0), maxInstantConsumption(0), minInstantConsumption(0);
       double maxCumulativeProduction(m_maxPrevProduction), minCumulativeProduction(m_minPrevProduction);
       double maxCumulativeConsumption(m_maxPrevConsumption), minCumulativeConsumption(m_minPrevConsumption);
@@ -50,6 +50,7 @@ namespace EUROPA {
 	debugMsg("TimetableProfile:recomputeLevels", "Time: [" << trans->time()->lastDomain().getLowerBound() << " " <<
 		 trans->time()->lastDomain().getUpperBound() << "] Quantity: " << (isConsumer ? "-" : "+") <<
 		 "[" << lb << " " << ub << "]");
+
 	//the minInstant values are 0 unless there is a transaction that cannot happen before or after this instant, so we have to add those
 	if(trans->time()->lastDomain().isSingleton()) {
 	  if(isConsumer)
@@ -63,33 +64,22 @@ namespace EUROPA {
 	  maxInstantConsumption += ub;
 	else
 	  maxInstantProduction += ub;
-	
+
+
 	//if the transaction just started, add producer to upper bounds and consumer to lower bounds
-	if(trans->time()->lastDomain().getLowerBound() == inst->getTime()) {
-	  if(isConsumer) {
-	    m_lowerLevelMin -= ub;
-	    m_lowerLevelMax -= lb;
-	  }
-	  else {
-	    m_upperLevelMin += lb;
-	    m_upperLevelMax += ub;
-	  }
-	}
+	if(trans->time()->lastDomain().getLowerBound() == inst->getTime())
+		handleTransactionStart(isConsumer, lb, ub);
+
 	//if the transaction just ended, add producer to lower bounds and consumer to upper bounds
 	if(trans->time()->lastDomain().getUpperBound() == inst->getTime()) {
-	  if(isConsumer) {
-	    m_upperLevelMax -= lb;
-	    m_upperLevelMin -= ub;
-	    minCumulativeConsumption += lb;
-	  }
-	  else {
-	    m_lowerLevelMin += lb;
-	    m_lowerLevelMax += ub;
-	    minCumulativeProduction += lb;
-	  }
+		handleTransactionEnd(isConsumer, lb, ub);
+		if(isConsumer)
+			minCumulativeConsumption += lb;
+		else
+			minCumulativeProduction += lb;
 	}
-      }
 
+      }
       maxCumulativeConsumption += maxInstantConsumption;
       maxCumulativeProduction += maxInstantProduction;
 
@@ -127,19 +117,31 @@ namespace EUROPA {
       check_error(results.empty());
       results.insert(results.end(), inst->getTransactions().begin(), inst->getTransactions().end());
     }
-    
-    //for the moment, these always recompute over the entire interval.
-//     void TimetableProfile::handleTransactionAdded(const TransactionId t) {
-//     }
 
-//     void TimetableProfile::handleTransactionRemoved(const TransactionId t) {
-//     }
-    
-//     void TimetableProfile::handleTransactionTimeChanged(const TransactionId t, const DomainListener::ChangeType& type) {
-//     }
 
-//     void TimetableProfile::handleTransactionQuantityChanged(const TransactionId t, const DomainListener::ChangeType& type) {
+	void TimetableProfile::handleTransactionStart(bool isConsumer, const double & lb, const double & ub)
+	{
+		if(isConsumer) {
+			m_lowerLevelMin -= ub;
+			m_lowerLevelMax -= lb;
+		}
+		else {
+			m_upperLevelMin += lb;
+			m_upperLevelMax += ub;
+		}
+	}
 
-//     }
+	void TimetableProfile::handleTransactionEnd(bool isConsumer, const double & lb, const double & ub)
+	{
+		if(isConsumer) {
+			m_upperLevelMax -= lb;
+			m_upperLevelMin -= ub;
+		}
+		else {
+			m_lowerLevelMin += lb;
+			m_lowerLevelMax += ub;
+		}
+	}
+
   }
 }

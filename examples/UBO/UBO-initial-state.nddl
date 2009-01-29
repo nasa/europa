@@ -17,7 +17,8 @@ maxDuration.specify(60);
 addEq(maxDuration,1,maxDurationPlusOne);
 
 //string profileType = "TimetableProfile";
-string profileType = "IncrementalFlowProfile";
+//string profileType = "IncrementalFlowProfile";
+string profileType = "GroundedReusableProfile";
 
 CapacityResource resource0 = new CapacityResource( profileType, 0.00000 , 10.0000 );
 CapacityResource resource1 = new CapacityResource( profileType, 0.00000 , 10.0000 );
@@ -80,7 +81,7 @@ ActivityTimeline at10 = new ActivityTimeline(10);
 ActivityTimeline at11 = new ActivityTimeline(11);
 
 close();
- 
+
 goal( problem.Activity activity0 );
 eq( activity0.duration, 1 );
 eq( activity0.m_identifier, 0);
@@ -183,7 +184,7 @@ precedes(0,activity9.start);  precedes( activity9.end, maxDuration);
 precedes(0,activity10.start); precedes( activity10.end, maxDuration);
 precedes(0,activity11.start); precedes( activity11.end, maxDurationPlusOne);
 
-// We know all activity goals must be satisfied separately, therefore activate right away to prune useless search space for the planner: 
+// We know all activity goals must be satisfied separately, therefore activate right away to prune useless search space for the planner:
 activity0.activate();
 activity1.activate();
 activity2.activate();

@@ -7,7 +7,7 @@
 
 namespace EUROPA {
   namespace SAVH {
-    
+
     class TimetableProfile : public Profile {
     public:
       TimetableProfile(const PlanDatabaseId db, const FVDetectorId flawDetector,
@@ -15,22 +15,27 @@ namespace EUROPA {
 
       void getTransactionsToOrder(const InstantId& inst, std::vector<TransactionId>& results);
     protected:
+
+    	/**
+    	 * @brief Compute level changes when transaction starts at the current instant.
+    	 */
+    	virtual void handleTransactionStart(bool isConsumer, const double & lb, const double & ub);
+
+    	/**
+    	 * @brief Compute level changes when transaction ends at the current instant.
+    	 */
+    	virtual void handleTransactionEnd(bool isConsumer, const double & lb, const double & ub);
+
+
+      double m_lowerLevelMin, m_lowerLevelMax, m_upperLevelMin, m_upperLevelMax;
+      double m_minPrevConsumption, m_maxPrevConsumption;
+      double m_minPrevProduction, m_maxPrevProduction;
+
     private:
       void initRecompute(InstantId inst);
       void initRecompute();
 
       void recomputeLevels( InstantId prev, InstantId inst);
-//       void handleTransactionAdded(const TransactionId t);
-//       void handleTransactionRemoved(const TransactionId t);
-//       void handleTransactionTimeChanged(const TransactionId t, const DomainListener::ChangeType& type);
-//       void handleTransactionQuantityChanged(const TransactionId t, const DomainListener::ChangeType& type);
-//       void handleTransactionsOrdered(const TransactionId t1, const TransactionId t2);
-      
-      double m_lowerLevelMin, m_lowerLevelMax, m_upperLevelMin, m_upperLevelMax;
-//       double m_minCumulativeConsumption, m_maxCumulativeConsumption;
-//       double m_minCumulativeProduction, m_maxCumulativeProduction;
-      double m_minPrevConsumption, m_maxPrevConsumption;
-      double m_minPrevProduction, m_maxPrevProduction;
     };
   }
 }
