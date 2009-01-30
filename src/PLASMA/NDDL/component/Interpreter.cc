@@ -81,7 +81,7 @@ namespace EUROPA {
   void EvalContext::addVar(const char* name,const ConstrainedVariableId& v)
   {
     m_variables[name] = v;
-    debugMsg("XMLInterpreter:EvalContext","Added var:" << name << " to EvalContext");
+    debugMsg("Interpreter:EvalContext","Added var:" << name << " to EvalContext");
   }
 
   ConstrainedVariableId EvalContext::getVar(const char* name)
@@ -248,7 +248,7 @@ namespace EUROPA {
     ConstrainedVariableId rhsValue = m_rhs->eval(context).getValue();
     const AbstractDomain& domain = rhsValue->derivedDomain();
     object->addVariable(domain,m_lhs.c_str());
-    debugMsg("XMLInterpreter:InterpretedObject","Initialized variable:" << object->getName().toString() << "." << m_lhs.toString() << " to " << rhsValue->derivedDomain().toString() << " in constructor");
+    debugMsg("Interpreter:InterpretedObject","Initialized variable:" << object->getName().toString() << "." << m_lhs.toString() << " to " << rhsValue->derivedDomain().toString() << " in constructor");
 
     return DataRef::null;
   }
@@ -435,11 +435,11 @@ namespace EUROPA {
     if (vars.size() > 1) {
       m_parentName = vars[0];
       m_varName = m_varName.substr(m_parentName.length()+1);
-      debugMsg("XMLInterpreter:InterpretedRule","Split " << varName << " into " << m_parentName << " and " << m_varName);
+      debugMsg("Interpreter:InterpretedRule","Split " << varName << " into " << m_parentName << " and " << m_varName);
     }
     else {
       m_parentName = "";
-      debugMsg("XMLInterpreter:InterpretedRule","Didn't split " << varName);
+      debugMsg("Interpreter:InterpretedRule","Didn't split " << varName);
     }
   }
 
@@ -492,7 +492,7 @@ namespace EUROPA {
     return os.str();
   }
 
-  DataRef ExprConstraint::doEval(RuleInstanceEvalContext& context) const
+  DataRef ExprConstraint::eval(EvalContext& context) const
   {
     std::vector<ConstrainedVariableId> vars;
     for (unsigned int i=0; i < m_args.size(); i++) {
@@ -500,8 +500,17 @@ namespace EUROPA {
       vars.push_back(arg.getValue());
     }
 
-    context.getRuleInstance()->createConstraint(m_name,vars);
-    debugMsg("XMLInterpreter:InterpretedRule","Evaluated Constraint : " << m_name.toString() << " - " << varsToString(vars));
+    InterpretedRuleInstance* rule = (InterpretedRuleInstance*)(context.getElement("RuleInstance"));
+    if (rule != NULL) {
+        rule->createConstraint(m_name,vars);
+        debugMsg("Interpreter:InterpretedRule","Added Constraint : " << m_name.toString() << " - " << varsToString(vars));
+    }
+    else { // The constraint is being added in the global context
+        PlanDatabase* pdb = (PlanDatabase*)(context.getElement("PlanDatabase"));
+        pdb->getClient()->createConstraint(m_name.c_str(), vars);
+        debugMsg("Interpreter","Added Constraint : " << m_name.toString() << " - " << varsToString(vars));
+    }
+
     return DataRef::null;
   }
 
@@ -540,7 +549,7 @@ namespace EUROPA {
 
   DataRef ExprSubgoal::doEval(RuleInstanceEvalContext& context) const
   {
-    debugMsg("XMLInterpreter:InterpretedRule","Creating subgoal " << m_predicateType.toString() << ":" << m_name.toString());
+    debugMsg("Interpreter:InterpretedRule","Creating subgoal " << m_predicateType.toString() << ":" << m_name.toString());
 
     bool constrained = isConstrained(context,m_predicateInstance);
     ConstrainedVariableId owner;
@@ -562,7 +571,7 @@ namespace EUROPA {
 							     );
 
     context.addToken(m_name.c_str(),slave);
-    debugMsg("XMLInterpreter:InterpretedRule","Created  subgoal " << m_predicateType.toString() << ":" << m_name.toString());
+    debugMsg("Interpreter:InterpretedRule","Created  subgoal " << m_predicateType.toString() << ":" << m_name.toString());
     return DataRef::null;
   }
 
@@ -604,11 +613,11 @@ namespace EUROPA {
       localVar->restrictBaseDomain(m_domainRestriction->eval(context).getValue()->derivedDomain());
 
     context.addVar(m_name.c_str(),localVar);
-    debugMsg("XMLInterpreter:InterpretedRule","Added RuleInstance local var:" << localVar->toString());
+    debugMsg("Interpreter:InterpretedRule","Added RuleInstance local var:" << localVar->toString());
     return DataRef::null;
   }
 
-  ExprIf::ExprIf(const char* op, Expr* lhs,Expr* rhs,const std::vector<RuleExpr*>& ifBody)
+  ExprIf::ExprIf(const char* op, Expr* lhs,Expr* rhs,const std::vector<Expr*>& ifBody)
     : m_op(op)
     , m_lhs(lhs)
     , m_rhs(rhs)
@@ -640,7 +649,7 @@ namespace EUROPA {
 									  m_ifBody
 									  )
 					      );
-      debugMsg("XMLInterpreter:InterpretedRule","Evaluated IF " << m_op << " " << lhs.getValue()->toString() << " " << rhs.getValue()->toString());
+      debugMsg("Interpreter:InterpretedRule","Evaluated IF " << m_op << " " << lhs.getValue()->toString() << " " << rhs.getValue()->toString());
     }
     else {
       context.getRuleInstance()->addChildRule(
@@ -651,13 +660,13 @@ namespace EUROPA {
 									  m_ifBody
 									  )
 					      );
-      debugMsg("XMLInterpreter:InterpretedRule","Evaluated IF " << m_op << " " << lhs.getValue()->toString());
+      debugMsg("Interpreter:InterpretedRule","Evaluated IF " << m_op << " " << lhs.getValue()->toString());
     }
 
     return DataRef::null;
   }
 
-  ExprLoop::ExprLoop(const char* varName, const char* varType, const char* varValue,const std::vector<RuleExpr*>& loopBody)
+  ExprLoop::ExprLoop(const char* varName, const char* varType, const char* varValue,const std::vector<Expr*>& loopBody)
     : m_varName(varName)
     , m_varType(varType)
     , m_varValue(varValue)
@@ -672,7 +681,7 @@ namespace EUROPA {
   DataRef ExprLoop::doEval(RuleInstanceEvalContext& context) const
   {
     context.getRuleInstance()->executeLoop(context,m_varName,m_varType,m_varValue,m_loopBody);
-    debugMsg("XMLInterpreter:InterpretedRule","Evaluated LOOP " << m_varName.toString() << "," << m_varValue.toString());
+    debugMsg("Interpreter:InterpretedRule","Evaluated LOOP " << m_varName.toString() << "," << m_varValue.toString());
     return DataRef::null;
   }
 
@@ -785,7 +794,7 @@ namespace EUROPA {
     // TODO: some effort can be saved by keeping track of whether a class has a native ancestor different from Object.
     // If it doesn't, the object can be created right away and this traversal up the hierarchy can be skipped
     if (m_canMakeNewObject) {
-      debugMsg("XMLInterpreter:InterpretedObject","Created Object:" << objectName.toString() << " type:" << objectType.toString());
+      debugMsg("Interpreter:InterpretedObject","Created Object:" << objectName.toString() << " type:" << objectType.toString());
       return (new Object(planDb, objectType, objectName,true))->getId();
     }
     else {
@@ -845,11 +854,11 @@ namespace EUROPA {
 			      baseDomain,
 			      members[i].second.c_str()
 			    );
-	            debugMsg("XMLInterpreter:InterpretedObject","Used default initializer for " << m_className.toString() << "." << members[i].second.toString());
+	            debugMsg("Interpreter:InterpretedObject","Used default initializer for " << m_className.toString() << "." << members[i].second.toString());
             }
         }
 
-        debugMsg("XMLInterpreter:evalConstructorBody",
+        debugMsg("Interpreter:evalConstructorBody",
 	             "Evaluated constructor for " << instance->toString());
     }
 
@@ -875,11 +884,11 @@ namespace EUROPA {
 	    ConstrainedVariableId var = m_obj->getVariable(m_obj->getName().toString()+"."+name);
 
 	    if (!var.isNoId()) {
-	      debugMsg("XMLInterpreter:EvalContext:Object","Found var in object instance:" << name);
+	      debugMsg("Interpreter:EvalContext:Object","Found var in object instance:" << name);
 	      return var;
 	    }
 	    else {
-	      debugMsg("XMLInterpreter:EvalContext:Object","Didn't find var in object instance:" << name);
+	      debugMsg("Interpreter:EvalContext:Object","Didn't find var in object instance:" << name);
 	      return EvalContext::getVar(name);
 	    }
 	  }
@@ -909,7 +918,7 @@ namespace EUROPA {
                         false)
     {
     	commonInit(parameterNames, parameterTypes, parameterValues, assignVars, assignValues, constraints, close);
-    	debugMsg("XMLInterpreter:InterpretedToken","Created token(" << getKey() << ") of type:" << predicateName.toString() << " objectVar=" << getVariable("object")->toString());
+    	debugMsg("Interpreter:InterpretedToken","Created token(" << getKey() << ") of type:" << predicateName.toString() << " objectVar=" << getVariable("object")->toString());
     }
 
   InterpretedToken::InterpretedToken(const TokenId& master,
@@ -932,7 +941,7 @@ namespace EUROPA {
 		    false)
   {
     commonInit(parameterNames, parameterTypes, parameterValues, assignVars, assignValues, constraints, close);
-    debugMsg("XMLInterpreter:InterpretedToken","Created slave token(" << getKey() << ") of type:" << predicateName.toString() << " objectVar=" << getVariable("object")->toString());
+    debugMsg("Interpreter:InterpretedToken","Created slave token(" << getKey() << ") of type:" << predicateName.toString() << " objectVar=" << getVariable("object")->toString());
   }
 
   InterpretedToken::~InterpretedToken()
@@ -995,7 +1004,7 @@ namespace EUROPA {
         }
       }
 
-      debugMsg("XMLInterpreter:InterpretedToken","Token " << getName().toString() << " added Parameter "
+      debugMsg("Interpreter:InterpretedToken","Token " << getName().toString() << " added Parameter "
 	       << parameter->toString() << " " << parameterNames[i].toString());
     }
 
@@ -1128,16 +1137,25 @@ namespace EUROPA {
   {
   }
 
+  void* RuleInstanceEvalContext::getElement(const char* name) const
+  {
+      std::string str(name);
+      if (str == "RuleInstance")
+          return (InterpretedRuleInstance*)m_ruleInstance;
+
+      return EvalContext::getElement(name);
+  }
+
   ConstrainedVariableId RuleInstanceEvalContext::getVar(const char* name)
   {
     ConstrainedVariableId var = m_ruleInstance->getVariable(LabelStr(name));
 
     if (!var.isNoId()) {
-      debugMsg("XMLInterpreter:EvalContext:RuleInstance","Found var in rule instance:" << name);
+      debugMsg("Interpreter:EvalContext:RuleInstance","Found var in rule instance:" << name);
       return var;
     }
     else {
-      debugMsg("XMLInterpreter:EvalContext:RuleInstance","Didn't find var in rule instance:" << name);
+      debugMsg("Interpreter:EvalContext:RuleInstance","Didn't find var in rule instance:" << name);
       return EvalContext::getVar(name);
     }
   }
@@ -1147,11 +1165,11 @@ namespace EUROPA {
 	  LabelStr ls_name(name);
       TokenId tok = m_ruleInstance->getSlave(ls_name);
       if (!tok.isNoId()) {
-          debugMsg("XMLInterpreter:EvalContext:RuleInstance","Found token in rule instance:" << name);
+          debugMsg("Interpreter:EvalContext:RuleInstance","Found token in rule instance:" << name);
           return tok;
       }
       else {
-        debugMsg("XMLInterpreter:EvalContext:RuleInstance","Didn't find token in rule instance:" << name);
+        debugMsg("Interpreter:EvalContext:RuleInstance","Didn't find token in rule instance:" << name);
         return EvalContext::getToken(name);
       }
   }
@@ -1197,7 +1215,7 @@ namespace EUROPA {
     ConstrainedVariableId var = m_token->getVariable(LabelStr(name));
 
     if (!var.isNoId()) {
-      debugMsg("XMLInterpreter:EvalContext:Token","Found var in token :" << name);
+      debugMsg("Interpreter:EvalContext:Token","Found var in token :" << name);
       return var;
     }
     else
@@ -1215,7 +1233,7 @@ namespace EUROPA {
   InterpretedRuleInstance::InterpretedRuleInstance(const RuleId& rule,
 						   const TokenId& token,
 						   const PlanDatabaseId& planDb,
-						   const std::vector<RuleExpr*>& body)
+						   const std::vector<Expr*>& body)
     : RuleInstance(rule, token, planDb)
     , m_body(body)
   {
@@ -1226,7 +1244,7 @@ namespace EUROPA {
 						   const ConstrainedVariableId& var,
 						   const AbstractDomain& domain,
 						   const bool positive,
-						   const std::vector<RuleExpr*>& body)
+						   const std::vector<Expr*>& body)
     : RuleInstance(parent,var,domain,positive)
     , m_body(body)
   {
@@ -1236,7 +1254,7 @@ namespace EUROPA {
 						   const RuleInstanceId& parent,
 						   const std::vector<ConstrainedVariableId>& vars,
 						   const bool positive,
-						   const std::vector<RuleExpr*>& body)
+						   const std::vector<Expr*>& body)
     : RuleInstance(parent,vars,positive)
     , m_body(body)
   {
@@ -1253,10 +1271,10 @@ namespace EUROPA {
     // TODO: should pass in eval context from outside
     RuleInstanceEvalContext evalContext(NULL,getId());
 
-    debugMsg("XMLInterpreter:InterpretedRule","Executing interpreted rule:" << getRule()->getName().toString() << " token:" << m_token->toString());
+    debugMsg("Interpreter:InterpretedRule","Executing interpreted rule:" << getRule()->getName().toString() << " token:" << m_token->toString());
     for (unsigned int i=0; i < m_body.size(); i++)
       m_body[i]->eval(evalContext);
-    debugMsg("XMLInterpreter:InterpretedRule","Executed  interpreted rule:" << getRule()->getName().toString() << " token:" << m_token->toString());
+    debugMsg("Interpreter:InterpretedRule","Executed  interpreted rule:" << getRule()->getName().toString() << " token:" << m_token->toString());
   }
 
   void InterpretedRuleInstance::createConstraint(const LabelStr& name, std::vector<ConstrainedVariableId>& vars)
@@ -1310,7 +1328,7 @@ namespace EUROPA {
 					     ownerName.size()+1,
 					     fullName.size()-(ownerName.size()+tokenName.size()+2)
 					     );
-	debugMsg("XMLInterpreter:InterpretedRule","Subgoal slave object constraint. fullName=" << fullName << " owner=" << ownerName << " objPath=" << objectPath << " tokenName=" << tokenName);
+	debugMsg("Interpreter:InterpretedRule","Subgoal slave object constraint. fullName=" << fullName << " owner=" << ownerName << " objPath=" << objectPath << " tokenName=" << tokenName);
 	vars.push_back(varFromObject(owner,objectPath,fullName));
       }
 
@@ -1318,7 +1336,7 @@ namespace EUROPA {
       addConstraint(LabelStr("eq"),vars);
     }
     else {
-      debugMsg("XMLInterpreter:InterpretedRule",predicateInstance.toString() << " NotConstrained");
+      debugMsg("Interpreter:InterpretedRule",predicateInstance.toString() << " NotConstrained");
     }
 
     const char* relationName = relation.c_str();
@@ -1392,7 +1410,7 @@ namespace EUROPA {
       check_runtime_error(strcmp(relationName,"any") == 0,std::string("Unrecognized relation:")+relationName);
     }
 
-    debugMsg("XMLInterpreter:InterpretedRule","Created relation " << relationName << " " << predicateInstance.c_str());
+    debugMsg("Interpreter:InterpretedRule","Created relation " << relationName << " " << predicateInstance.c_str());
     return slave;
   }
 
@@ -1420,14 +1438,14 @@ namespace EUROPA {
 					    const LabelStr& loopVarName,
 					    const LabelStr& loopVarType,
 					    const LabelStr& valueSet,
-					    const std::vector<RuleExpr*>& loopBody)
+					    const std::vector<Expr*>& loopBody)
   {
     // Create a local domain based on the objects included in the valueSet
     ConstrainedVariableId setVar = evalContext.getVar(valueSet.c_str());
     check_error(!setVar.isNoId(),"Loop var can't be NULL");
     const AbstractDomain& loopVarDomain = setVar->derivedDomain();
-    debugMsg("XMLInterpreter:InterpretedRule","set var for loop :" << setVar->toString());
-    debugMsg("XMLInterpreter:InterpretedRule","set var domain for loop:" << loopVarDomain.toString());
+    debugMsg("Interpreter:InterpretedRule","set var for loop :" << setVar->toString());
+    debugMsg("Interpreter:InterpretedRule","set var domain for loop:" << loopVarDomain.toString());
     const ObjectDomain& loopObjectSet = dynamic_cast<const ObjectDomain&>(loopVarDomain);
 
     if (loopObjectSet.isEmpty())
@@ -1482,7 +1500,7 @@ namespace EUROPA {
    */
   InterpretedRuleFactory::InterpretedRuleFactory(const LabelStr& predicate,
 						 const LabelStr& source,
-						 const std::vector<RuleExpr*>& body)
+						 const std::vector<Expr*>& body)
     : Rule(predicate,source)
     , m_body(body)
   {
@@ -1520,7 +1538,7 @@ namespace EUROPA {
 						const std::vector<const AbstractDomain*>& arguments) const
   {
     ObjectId instance =  (new Timeline(planDb, objectType, objectName,true))->getId();
-    debugMsg("XMLInterpreter:NativeObjectFactory","Created Native " << m_className.toString() << ":" << objectName.toString() << " type:" << objectType.toString());
+    debugMsg("Interpreter:NativeObjectFactory","Created Native " << m_className.toString() << ":" << objectName.toString() << " type:" << objectType.toString());
 
     return instance;
   }

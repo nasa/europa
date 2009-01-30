@@ -120,7 +120,7 @@ void* NddlSymbolTable::getElement(const char* name) const
     if (str == "PlanDatabase")
         return (PlanDatabase*)m_planDatabase;
 
-    return NULL;
+    return EvalContext::getElement(name);
 }
 
 PlanDatabaseId& NddlSymbolTable::getPlanDatabase() { return m_planDatabase; }

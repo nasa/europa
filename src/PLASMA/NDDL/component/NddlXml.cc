@@ -464,7 +464,7 @@ namespace EUROPA {
                                const char* className,
                                const std::string& predName,
                                const TiXmlElement* element,
-                               std::vector<RuleExpr*>& ruleBody,
+                               std::vector<Expr*>& ruleBody,
                                std::map<std::string,std::string>& localVars)
   {
       int slave_cnt = 0;
@@ -538,7 +538,7 @@ namespace EUROPA {
                   lhs = valueToExpr(opElement);
               }
 
-              std::vector<RuleExpr*> ifBody;
+              std::vector<Expr*> ifBody;
               buildRuleBody(className,predName,opElement->NextSiblingElement(),ifBody,localVars);
               ruleBody.push_back(new ExprIf(op.c_str(),lhs,rhs,ifBody));
           }
@@ -547,7 +547,7 @@ namespace EUROPA {
               const char* varType = child->Attribute("type");
               const char* varValue = child->Attribute("value");
               localVars[varName]=varType;
-              std::vector<RuleExpr*> loopBody;
+              std::vector<Expr*> loopBody;
               buildRuleBody(className,predName,child->FirstChildElement(),loopBody,localVars);
               ruleBody.push_back(new ExprLoop(varName,varType,varValue,loopBody));
           }
@@ -563,7 +563,7 @@ namespace EUROPA {
     std::string source = "\"" + std::string(element.Attribute("filename")) +
       "," + element.Attribute("line") + "\"";
 
-    std::vector<RuleExpr*> ruleBody;
+    std::vector<Expr*> ruleBody;
     std::map<std::string,std::string> localVars; // name-type map for local vars
     buildRuleBody(className,predName,element.FirstChildElement(),ruleBody,localVars);
 

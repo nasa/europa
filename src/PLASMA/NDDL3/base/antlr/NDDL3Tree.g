@@ -72,7 +72,7 @@ nddl :
 		  (	child=typeDefinition
                   |     child=variableDeclaration
                   |     child=assignment
-                  |     constraintInstantiation
+                  |     child=constraintInstantiation
 		  |	classDeclaration
                   |     allocation
 		  |	rule
@@ -163,8 +163,7 @@ variableInitialization returns [ExprAssignment* result]
           )
           {
               Expr* lhs = new ExprVarRef(c_str($name.text->chars));
-              //std::cout << "read var initialization for:" << $name.text->chars << std::endl;
-              result = new ExprAssignment(lhs,rhs);
+              result = new ExprAssignment(lhs,rhs); // TODO: to preserve old semantics, this needs to restrict base domain instead
           }
         ;       
 
@@ -315,9 +314,24 @@ variableArgumentList[std::vector<Expr*>& result]
                 )
         ;
 
-identifier
-        :       IDENT
-        |       'this'
+identifier 
+        : IDENT
+          | 'this'
+        ;
+
+constraintInstantiation returns [Expr* result]
+@init {
+    std::vector<Expr*> args;
+}
+        :       
+              ^(CONSTRAINT_INSTANTIATION
+                        name=IDENT
+                        variableArgumentList[args]
+                )
+                {
+                    result = new ExprConstraint(c_str($name.text->chars),args);
+                }
+                
         ;
 
 classDeclaration
@@ -534,17 +548,6 @@ temporalRelationTwoIntervals
 	|	'contains_end'
 	;
   
-constraintInstantiation
-@init {
-    std::vector<Expr*> args;
-}
-	:	
-	      ^(CONSTRAINT_INSTANTIATION
-			name=IDENT
-			variableArgumentList[args]
-		)
-	;
-
 invocation
 @init {
     std::vector<Expr*> args;

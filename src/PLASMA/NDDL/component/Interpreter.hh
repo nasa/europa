@@ -19,7 +19,6 @@
 namespace EUROPA {
 
   class Expr;
-  class RuleExpr;
 
   class DataRef
   {
@@ -96,41 +95,6 @@ namespace EUROPA {
         std::string m_str;
   };
 
-  // Call to super inside a constructor
-  class ExprConstructorSuperCall : public Expr
-  {
-  	public:
-  	    ExprConstructorSuperCall(const LabelStr& superClassName,
-  	                             const std::vector<Expr*>& argExprs);
-  	    virtual ~ExprConstructorSuperCall();
-
-  	    virtual DataRef eval(EvalContext& context) const;
-
-  	    const LabelStr& getSuperClassName() const { return m_superClassName; }
-
-  	    void evalArgs(EvalContext& context, std::vector<const AbstractDomain*>& arguments) const;
-
-  	protected:
-  	    LabelStr m_superClassName;
-        std::vector<Expr*> m_argExprs;
-  };
-
-  // Assignment inside a constructor
-  // TODO: make lhs an Expr as well to make this a generic assignment
-  class ExprConstructorAssignment : public Expr
-  {
-  	public:
-  	    ExprConstructorAssignment(const char* lhs,
-  	                              Expr* rhs);
-  	    virtual ~ExprConstructorAssignment();
-
-  	    virtual DataRef eval(EvalContext& context) const;
-
-    protected:
-        LabelStr m_lhs;
-        Expr* m_rhs;
-  };
-
   class ExprConstant : public Expr
   {
   	public:
@@ -159,6 +123,22 @@ namespace EUROPA {
   	    LabelStr m_varName;
   };
 
+  class ExprConstraint : public Expr
+  {
+    public:
+        ExprConstraint(const char* name,const std::vector<Expr*> args);
+        virtual ~ExprConstraint();
+
+        virtual DataRef eval(EvalContext& context) const;
+
+        const LabelStr getName() const { return m_name; }
+        const std::vector<Expr*>& getArgs() const { return m_args; }
+
+    protected:
+        LabelStr m_name;
+        std::vector<Expr*> m_args;
+  };
+
   class ExprNewObject : public Expr
   {
   	public:
@@ -178,6 +158,41 @@ namespace EUROPA {
 	    LabelStr              m_objectType;
 	    LabelStr              m_objectName;
 	    std::vector<Expr*>    m_argExprs;
+  };
+
+  // Call to super inside a constructor
+  class ExprConstructorSuperCall : public Expr
+  {
+    public:
+        ExprConstructorSuperCall(const LabelStr& superClassName,
+                                 const std::vector<Expr*>& argExprs);
+        virtual ~ExprConstructorSuperCall();
+
+        virtual DataRef eval(EvalContext& context) const;
+
+        const LabelStr& getSuperClassName() const { return m_superClassName; }
+
+        void evalArgs(EvalContext& context, std::vector<const AbstractDomain*>& arguments) const;
+
+    protected:
+        LabelStr m_superClassName;
+        std::vector<Expr*> m_argExprs;
+  };
+
+  // Assignment inside a constructor
+  // TODO: make lhs an Expr as well to make this a generic assignment
+  class ExprConstructorAssignment : public Expr
+  {
+    public:
+        ExprConstructorAssignment(const char* lhs,
+                                  Expr* rhs);
+        virtual ~ExprConstructorAssignment();
+
+        virtual DataRef eval(EvalContext& context) const;
+
+    protected:
+        LabelStr m_lhs;
+        Expr* m_rhs;
   };
 
   class InterpretedObjectFactory : public ObjectFactory
@@ -237,8 +252,6 @@ namespace EUROPA {
     protected:
         ObjectId m_obj;
   };
-
-  class ExprConstraint;
 
   // InterpretedToken is the interpreted version of NddlToken
   class InterpretedToken : public IntervalToken
@@ -330,18 +343,18 @@ namespace EUROPA {
   	    InterpretedRuleInstance(const RuleId& rule,
   	                            const TokenId& token,
   	                            const PlanDatabaseId& planDb,
-                                const std::vector<RuleExpr*>& body);
+                                const std::vector<Expr*>& body);
 
         InterpretedRuleInstance(const RuleInstanceId& parent,
                                 const ConstrainedVariableId& var,
                                 const AbstractDomain& domain,
                                 const bool positive,
-                                const std::vector<RuleExpr*>& body);
+                                const std::vector<Expr*>& body);
 
         InterpretedRuleInstance(const RuleInstanceId& parent,
                                 const std::vector<ConstrainedVariableId>& vars,
                                 const bool positive,
-                                const std::vector<RuleExpr*>& body);
+                                const std::vector<Expr*>& body);
 
   	    virtual ~InterpretedRuleInstance();
 
@@ -370,11 +383,11 @@ namespace EUROPA {
                          const LabelStr& loopVarName,
                          const LabelStr& loopVarType,
                          const LabelStr& valueSet,
-                         const std::vector<RuleExpr*>& loopBody);
+                         const std::vector<Expr*>& loopBody);
 
 
     protected:
-        std::vector<RuleExpr*> m_body;
+        std::vector<Expr*> m_body;
 
         virtual void handleExecute();
 
@@ -389,7 +402,9 @@ namespace EUROPA {
   	    RuleInstanceEvalContext(EvalContext* parent, const InterpretedRuleInstanceId& ruleInstance);
   	    virtual ~RuleInstanceEvalContext();
 
-  	    virtual ConstrainedVariableId getVar(const char* name);
+  	    virtual void* getElement(const char* name) const;
+
+    	virtual ConstrainedVariableId getVar(const char* name);
   	    virtual InterpretedRuleInstanceId& getRuleInstance() { return m_ruleInstance; }
 
   	    virtual TokenId getToken(const char* name);
@@ -405,7 +420,7 @@ namespace EUROPA {
   class InterpretedRuleFactory : public Rule
   {
     public:
-        InterpretedRuleFactory(const LabelStr& predicate, const LabelStr& source, const std::vector<RuleExpr*>& ruleBody);
+        InterpretedRuleFactory(const LabelStr& predicate, const LabelStr& source, const std::vector<Expr*>& ruleBody);
         virtual ~InterpretedRuleFactory();
 
         virtual RuleInstanceId createInstance(const TokenId& token,
@@ -413,7 +428,7 @@ namespace EUROPA {
                                               const RulesEngineId &rulesEngine) const;
 
     protected:
-        std::vector<RuleExpr*> m_body;
+        std::vector<Expr*> m_body;
   };
 
   /*
@@ -445,22 +460,6 @@ namespace EUROPA {
   	protected:
   	    std::string m_parentName;
   	    std::string m_varName;
-  };
-
-  class ExprConstraint : public RuleExpr
-  {
-  	public:
-  	    ExprConstraint(const char* name,const std::vector<Expr*> args);
-  	    virtual ~ExprConstraint();
-
-  	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;
-
-  	    const LabelStr getName() const { return m_name; }
-  	    const std::vector<Expr*>& getArgs() const { return m_args; }
-
-  	protected:
-  	    LabelStr m_name;
-  	    std::vector<Expr*> m_args;
   };
 
   class ExprSubgoal : public RuleExpr
@@ -506,7 +505,7 @@ namespace EUROPA {
   class ExprIf : public RuleExpr
   {
   	public:
-  	    ExprIf(const char* op, Expr* lhs,Expr* rhs,const std::vector<RuleExpr*>& ifBody);
+  	    ExprIf(const char* op, Expr* lhs,Expr* rhs,const std::vector<Expr*>& ifBody);
   	    virtual ~ExprIf();
 
   	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;
@@ -515,14 +514,14 @@ namespace EUROPA {
         const std::string m_op;
         Expr* m_lhs;
         Expr* m_rhs;
-        const std::vector<RuleExpr*> m_ifBody;
+        const std::vector<Expr*> m_ifBody;
   };
 
 
   class ExprLoop : public RuleExpr
   {
   	public:
-  	    ExprLoop(const char* varName, const char* varType, const char* varValue,const std::vector<RuleExpr*>& loopBody);
+  	    ExprLoop(const char* varName, const char* varType, const char* varValue,const std::vector<Expr*>& loopBody);
   	    virtual ~ExprLoop();
 
   	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;
@@ -531,7 +530,7 @@ namespace EUROPA {
         LabelStr m_varName;
         LabelStr m_varType;
         LabelStr m_varValue;
-        const std::vector<RuleExpr*> m_loopBody;
+        const std::vector<Expr*> m_loopBody;
   };
 
   // TODO: create a separate file for exported C++ classes?
