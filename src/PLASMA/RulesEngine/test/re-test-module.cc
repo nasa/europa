@@ -14,7 +14,6 @@
 #include "Utils.hh"
 #include "IntervalIntDomain.hh"
 #include "DefaultPropagator.hh"
-#include "EqualityConstraintPropagator.hh"
 #include "StringDomain.hh"
 #include "NumericDomain.hh"
 #include "ProxyVariableRelation.hh"
@@ -36,7 +35,7 @@ public:
   {
   }
 
-  RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb, 
+  RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb,
                                 const RulesEngineId &rulesEngine) const{
     RuleInstanceId rootInstance = (new RootInstance(m_id, token, planDb))->getId();
     std::vector<ConstrainedVariableId> vars = rootInstance->getVariables("start:end:duration:object:state");
@@ -102,7 +101,7 @@ RuleInstanceId NestedGuards_0::createInstance(const TokenId& token, const PlanDa
   return rootInstance;
 }
 
-NestedGuards_0_Root::NestedGuards_0_Root(const RuleId& rule, const TokenId& token, 
+NestedGuards_0_Root::NestedGuards_0_Root(const RuleId& rule, const TokenId& token,
                                          const PlanDatabaseId& planDb)
   : RuleInstance(rule, token, planDb, makeScope(token->getObject())) {}
 
@@ -132,7 +131,7 @@ void NestedGuards_0_1::handleExecute(){
 class LocalVariableGuard_0: public Rule {
 public:
   LocalVariableGuard_0();
-  RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb, 
+  RuleInstanceId createInstance(const TokenId& token, const PlanDatabaseId& planDb,
                                 const RulesEngineId &rulesEngine) const;
 };
 
@@ -158,15 +157,15 @@ LocalVariableGuard_0::LocalVariableGuard_0()
 {
 }
 
-RuleInstanceId LocalVariableGuard_0::createInstance(const TokenId& token, 
-                                                    const PlanDatabaseId& planDb, 
+RuleInstanceId LocalVariableGuard_0::createInstance(const TokenId& token,
+                                                    const PlanDatabaseId& planDb,
                                                     const RulesEngineId &rulesEngine) const{
   RuleInstanceId rootInstance = (new LocalVariableGuard_0_Root(m_id, token, planDb))->getId();
   rootInstance->setRulesEngine(rulesEngine);
   return rootInstance;
 }
 
-LocalVariableGuard_0_Root::LocalVariableGuard_0_Root(const RuleId& rule, const TokenId& token, 
+LocalVariableGuard_0_Root::LocalVariableGuard_0_Root(const RuleId& rule, const TokenId& token,
                                                      const PlanDatabaseId& planDb)
   : RuleInstance(rule, token, planDb){}
 
@@ -198,16 +197,16 @@ void LocalVariableGuard_0_0::handleExecute(){
 
 class RETestEngine : public EngineBase
 {
-  public:  
+  public:
     RETestEngine();
     virtual ~RETestEngine();
-    
+
     const ConstraintEngineId& getConstraintEngine() const;
     const SchemaId& getSchema() const;
-    const PlanDatabaseId& getPlanDatabase() const;    
+    const PlanDatabaseId& getPlanDatabase() const;
     const RulesEngineId& getRulesEngine() const;
-    
-  protected: 
+
+  protected:
     void createModules();
 };
 
@@ -217,19 +216,19 @@ RETestEngine::RETestEngine()
     doStart();
     SchemaId sch = getSchema();
     sch->reset();
-    sch->addObjectType(LabelStr("AllObjects")); 
-    sch->addObjectType(LabelStr("Objects")); 
-    sch->addMember(LabelStr("Objects"), IntervalIntDomain::getDefaultTypeName(), "m_int"); 
-    sch->addPredicate(LabelStr("AllObjects.Predicate")); 
-    Object* objectPtr = new Object(getPlanDatabase(), "AllObjects", LabelStr("defaultObj")); 
-    assert(objectPtr != 0); 
-    Object& object = *objectPtr; 
-    assert(objectPtr->getId() == object.getId()); 
+    sch->addObjectType(LabelStr("AllObjects"));
+    sch->addObjectType(LabelStr("Objects"));
+    sch->addMember(LabelStr("Objects"), IntervalIntDomain::getDefaultTypeName(), "m_int");
+    sch->addPredicate(LabelStr("AllObjects.Predicate"));
+    Object* objectPtr = new Object(getPlanDatabase(), "AllObjects", LabelStr("defaultObj"));
+    assert(objectPtr != 0);
+    Object& object = *objectPtr;
+    assert(objectPtr->getId() == object.getId());
     CESchema* ces = (CESchema*)getComponent("CESchema");
     REGISTER_SYSTEM_CONSTRAINT(ces,EqualConstraint, "concurrent", "Default");
-    REGISTER_SYSTEM_CONSTRAINT(ces,LessThanEqualConstraint, "precedes", "Default"); 
+    REGISTER_SYSTEM_CONSTRAINT(ces,LessThanEqualConstraint, "precedes", "Default");
     REGISTER_SYSTEM_CONSTRAINT(ces,AddEqualConstraint, "temporaldistance", "Default");
-    REGISTER_SYSTEM_CONSTRAINT(ces,AddEqualConstraint, "temporalDistance", "Default");      
+    REGISTER_SYSTEM_CONSTRAINT(ces,AddEqualConstraint, "temporalDistance", "Default");
 }
 
 RETestEngine::~RETestEngine()
@@ -239,22 +238,22 @@ RETestEngine::~RETestEngine()
 
 const ConstraintEngineId& RETestEngine::getConstraintEngine() const
 {
-    return ((ConstraintEngine*)getComponent("ConstraintEngine"))->getId();     
+    return ((ConstraintEngine*)getComponent("ConstraintEngine"))->getId();
 }
 
 const SchemaId& RETestEngine::getSchema() const
 {
-    return ((Schema*)getComponent("Schema"))->getId();     
+    return ((Schema*)getComponent("Schema"))->getId();
 }
 
 const PlanDatabaseId& RETestEngine::getPlanDatabase() const
 {
-    return ((PlanDatabase*)getComponent("PlanDatabase"))->getId();     
+    return ((PlanDatabase*)getComponent("PlanDatabase"))->getId();
 }
 
 const RulesEngineId& RETestEngine::getRulesEngine() const
 {
-    return ((RulesEngine*)getComponent("RulesEngine"))->getId();     
+    return ((RulesEngine*)getComponent("RulesEngine"))->getId();
 }
 
 void RETestEngine::createModules()
@@ -268,7 +267,7 @@ void RETestEngine::createModules()
 ConstraintEngineId ce;
 SchemaId schema;
 PlanDatabaseId db;
-RulesEngineId re; 
+RulesEngineId re;
 
 #define RE_DEFAULT_SETUP(ce, db, autoClose) \
     RETestEngine testEngine; \
@@ -279,7 +278,7 @@ RulesEngineId re;
     if (autoClose) \
       db->close();
 
-#define RE_DEFAULT_TEARDOWN() 
+#define RE_DEFAULT_TEARDOWN()
 
 class RulesEngineTest {
 public:
@@ -302,8 +301,8 @@ private:
     re->getRuleSchema()->registerRule((new SimpleSubGoal())->getId());
     // Create a token of an expected type
 
-    IntervalToken t0(db, 
-		     LabelStr("AllObjects.Predicate"), 
+    IntervalToken t0(db,
+		     LabelStr("AllObjects.Predicate"),
 		     true,
 		     false,
 		     IntervalIntDomain(0, 1000),
@@ -331,8 +330,8 @@ private:
     re->getRuleSchema()->registerRule((new NestedGuards_0())->getId());
     // Create a token of an expected type
 
-    IntervalToken t0(db, 
-		     LabelStr("AllObjects.Predicate"), 
+    IntervalToken t0(db,
+		     LabelStr("AllObjects.Predicate"),
 		     true,
 		     false,
 		     IntervalIntDomain(0, 10),
@@ -378,8 +377,8 @@ private:
 
     re->getRuleSchema()->registerRule((new LocalVariableGuard_0())->getId());
 
-    IntervalToken t0(db, 
-		     LabelStr("AllObjects.Predicate"), 
+    IntervalToken t0(db,
+		     LabelStr("AllObjects.Predicate"),
 		     true,
 		     false,
 		     IntervalIntDomain(0, 1000),
@@ -412,10 +411,10 @@ private:
     RE_DEFAULT_SETUP(ce, db, false);
     db->close();
 
-    re->getRuleSchema()->registerRule((new TestRule(LabelStr("AllObjects.Predicate")))->getId()); 
+    re->getRuleSchema()->registerRule((new TestRule(LabelStr("AllObjects.Predicate")))->getId());
 
-    IntervalToken t0(db, 
-		     LabelStr("AllObjects.Predicate"), 
+    IntervalToken t0(db,
+		     LabelStr("AllObjects.Predicate"),
 		     true,
 		     false,
 		     IntervalIntDomain(0, 1000),
@@ -440,9 +439,9 @@ private:
     db->close();
 
     RuleSchema rs;
-    rs.registerRule((new TestRule(LabelStr("AllObjects.Predicate")))->getId()); 
+    rs.registerRule((new TestRule(LabelStr("AllObjects.Predicate")))->getId());
     rs.purgeAll();
-    
+
     RE_DEFAULT_TEARDOWN();
     return true;
   }
@@ -456,8 +455,8 @@ private:
     // Case where we have a master's rule that remains even though slaves and constraints are removed.
     {
       // Create a token of an expected type
-      IntervalToken t0(db, 
-		       LabelStr("AllObjects.Predicate"), 
+      IntervalToken t0(db,
+		       LabelStr("AllObjects.Predicate"),
 		       true,
 		       false,
 		       IntervalIntDomain(0, 1000),
@@ -482,8 +481,8 @@ private:
       TokenId slaveToken;
       {
 	// Create a token of an expected type
-	IntervalToken t0(db, 
-			 LabelStr("AllObjects.Predicate"), 
+	IntervalToken t0(db,
+			 LabelStr("AllObjects.Predicate"),
 			 true,
 			 false,
 			 IntervalIntDomain(0, 1000),
@@ -593,7 +592,7 @@ private:
   }
 };
 
-/*void RulesEngineModuleTests::runTests(std::string path) 
+/*void RulesEngineModuleTests::runTests(std::string path)
 {
     setTestLoadLibraryPath(path);
     runTestSuite(RulesEngineTest::test);
