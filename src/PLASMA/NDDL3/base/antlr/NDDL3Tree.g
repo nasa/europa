@@ -14,7 +14,10 @@ options {
 @includes
 {
 #include "Debug.hh"
+#include "BoolDomain.hh"
+#include "StringDomain.hh"
 #include "NddlInterpreter.hh"
+
 using namespace EUROPA;
 
 }
@@ -35,6 +38,20 @@ static void reportSemanticError(pNDDL3Tree treeWalker, const std::string& msg)
     // TODO: throw exception to abort tree walker?
 }
 
+static std::string getAutoLabel(const char* prefix)
+{
+    static int idx = 0;
+    std::ostringstream os;
+    os << prefix << "_" << idx++;
+    
+    return os.str();   
+}
+
+static DataRef evalExpr(pNDDL3Tree treeWalker,Expr* expr)
+{
+    return expr->eval(*(treeWalker->SymbolTable));
+}
+
 }
 
 @apifuncs
@@ -49,7 +66,9 @@ static void reportSemanticError(pNDDL3Tree treeWalker, const std::string& msg)
 
 nddl :               
 	^(NDDL
-		(
+		( {
+		     // debugMsg("NddlInterpreter:nddl","Line:" << LEXER->getLine(LEXER)); 
+		  }
 		  (	child=typeDefinition
                   |     child=variableDeclaration
                   |     child=assignment
@@ -65,7 +84,7 @@ nddl :
 		  {
 		      if (child != NULL) { 
 		          debugMsg("NddlInterpreter:nddl","Evaluating:" << child->toString());
-		          child->eval(*(CTX->SymbolTable));
+		          evalExpr(CTX,child);
 		          delete child;
 		          child = NULL; 
 		      }
@@ -85,8 +104,9 @@ typeDefinition returns [Expr* result]
 		        if (!dataType->getIsRestricted()) // then this is just an alias for another type
 		            dataType = dataType->copy();
 		        
-		        dataType->setTypeName(c_str($name.text->chars));    		            
-		        result = new ExprTypedef(c_str($name.text->chars),dataType);
+		        const char* newName = c_str($name.text->chars);
+		        dataType->setTypeName(newName);    		            
+		        result = new ExprTypedef(newName,dataType);
 		     }
 		     else {
                          result = NULL;              
@@ -95,6 +115,34 @@ typeDefinition returns [Expr* result]
 		     }   
 		}
 	;
+
+type returns [AbstractDomain* result]
+        : (      retval=simpleType 
+          |       ^(baseType=simpleType retval=inlineType[baseType])
+          )
+          {
+              result = retval;
+          }
+        ;
+
+simpleType returns [AbstractDomain* result] 
+        :       'int'         { result = CTX->SymbolTable->getVarType("int"); }
+        |       'float'       { result = CTX->SymbolTable->getVarType("float"); }
+        |       'bool'        { result = CTX->SymbolTable->getVarType("bool"); }
+        |       'string'      { result = CTX->SymbolTable->getVarType("string"); }
+        |       object=IDENT  { result = CTX->SymbolTable->getVarType(c_str($object.text->chars)); }
+        ;
+        
+inlineType[AbstractDomain* baseType] returns [AbstractDomain* result]
+        : (      child=valueSet
+          |      child=numericInterval
+          )
+{
+    // TODO: type checking. ensure inline domain is consistent with base
+    DataRef data=evalExpr(CTX,child);    
+    result = (AbstractDomain*)&(data.getValue()->lastDomain()); 
+}        
+        ;       
 
 variableDeclaration returns [Expr* result]
         :       ^(VARIABLE dataType=type initExpr=variableInitialization)
@@ -121,94 +169,155 @@ variableInitialization returns [ExprAssignment* result]
         ;       
 
 initializer returns [Expr* result]
-@init {
-    result = NULL; // TODO: implement this
-}
-        :       anyValue 
-        |       allocation
+        : (       child=anyValue 
+          |       child=allocation
+          )
+          {
+              result = child;
+          }
         ;
 
-allocation
+anyValue returns [Expr* result]
+        : (      child=value
+          |      child=valueSet
+          |      child=numericInterval
+          )
+          { 
+              result = child;
+          }
+        ;
+
+value returns [Expr* result]
+@init {
+    result = NULL;
+}
+        : (       child=booleanLiteral
+          |       child=stringLiteral
+          |       child=numericLiteral 
+          |       ^(i=IDENT type?) // TODO: what is this?, a variable ref?, an object ref?
+                   { result = new ExprVarRef(c_str($i.text->chars)); }
+          )
+          { 
+              if (result == NULL)
+                  result = new ExprConstant(
+                      CTX->SymbolTable->getPlanDatabase()->getClient(),
+                      child->getTypeName().c_str(),
+                      child); 
+          }
+        ;
+
+valueSet returns [Expr* result]
+@init {
+    bool isNumeric = false;
+    std::list<double> values;
+    std::string autoName = getAutoLabel("ENUM");
+    const char* typeName = autoName.c_str();
+}
+        :       ^('{'
+                        (element=value
+                         {
+                             DataRef elemValue = evalExpr(CTX,element);
+                             const AbstractDomain& ev = elemValue.getValue()->lastDomain(); 
+                             // TODO: delete element;
+                             double v = ev.getSingletonValue();
+                             values.push_back(v);
+                             isNumeric = ev.isNumeric();
+                             // TODO: make sure data types for all values are consistent
+                         }
+                        )*
+                 )
+                 {
+                   AbstractDomain* newDomain = new EnumeratedDomain(values,isNumeric,typeName); 
+                   result = new ExprConstant(
+                       CTX->SymbolTable->getPlanDatabase()->getClient(),
+                       typeName,
+                       newDomain                       
+                   );
+                   
+                   // TODO: this is necessary so that the Expr definaed above can be evaluated, see about fixing it.
+                   ExprTypedef newTypedef(typeName,newDomain);
+                   evalExpr(CTX,&newTypedef);
+                 }
+        ;
+
+booleanLiteral returns [AbstractDomain* result]
+        :       'true'  { result = new BoolDomain(true); }            
+        |       'false' { result = new BoolDomain(false); }
+        ;
+
+stringLiteral returns [AbstractDomain* result]
+        :    str = STRING 
+             { 
+                 LabelStr value = c_str($str.text->chars); 
+                 result = new StringDomain((double)value);
+             }
+        ; 
+
+numericLiteral returns [AbstractDomain* result]
+        :       floating=FLOAT  { result = new IntervalDomain(atof(c_str($floating.text->chars))); }
+        |       integer=INT     { result = new IntervalIntDomain(atoi(c_str($integer.text->chars))); }
+        |       'inf'           { result = new IntervalIntDomain(PLUS_INFINITY); }   // TODO: deal with real inf vs int inf?
+        |       '-inf'          { result = new IntervalIntDomain(MINUS_INFINITY); }  // TODO: deal with real inf vs int inf?
+        ;
+
+numericInterval returns [Expr* result]
+        :       ^('['   
+                        lower=numericLiteral
+                        upper=numericLiteral
+                )
+                {      
+                    double lb = lower->getSingletonValue();
+                    double ub = upper->getSingletonValue();
+                    const char* typeName;
+                    AbstractDomain* baseDomain;
+                    
+                    if (lower->getTypeName().toString()=="float" || upper->getTypeName().toString()=="float") {
+                        typeName = "float";
+                        baseDomain = new IntervalDomain(lb,ub);
+                    }
+                    else {
+                        typeName = "int";
+                        baseDomain = new IntervalIntDomain((int)lb,(int)ub);
+                    }
+                                  
+                    result = new ExprConstant(
+                        CTX->SymbolTable->getPlanDatabase()->getClient(),
+                        lower->getTypeName().c_str(),
+                        baseDomain
+                    );
+                    
+                    delete lower;
+                    delete upper;
+                }
+        ;
+
+allocation returns [Expr* result]
+@init {
+    std::vector<Expr*> args;
+}
         :       ^(CONSTRUCTOR_INVOCATION
                         name=IDENT 
-                        variableArgumentList?
+                        variableArgumentList[args]?
                 )
+                {
+                    result = new ExprNewObject(
+                        CTX->SymbolTable->getPlanDatabase()->getClient(),
+                        "", // TODO!: object name?
+                        c_str($name.text->chars), // objectType
+                        args
+                    );
+                }
         ;
 
-variableArgumentList
+variableArgumentList[std::vector<Expr*>& result]
         :       ^('('
-                        initializer*
+                        (arg=initializer {result.push_back(arg);})*
                 )
         ;
 
 identifier
         :       IDENT
         |       'this'
-        ;
-
-type returns [AbstractDomain* result]
-        : (      retval=simpleType 
-          |       ^(baseType=simpleType retval=inlineType[baseType])
-          )
-          {
-              result = retval;
-          }
-        ;
-
-simpleType returns [AbstractDomain* result] 
-        :       'int'         { result = CTX->SymbolTable->getVarType("int"); }
-        |       'float'       { result = CTX->SymbolTable->getVarType("float"); }
-        |       'bool'        { result = CTX->SymbolTable->getVarType("bool"); }
-        |       'string'      { result = CTX->SymbolTable->getVarType("string"); }
-        |       object=IDENT  { result = CTX->SymbolTable->getVarType(c_str($object.text->chars)); }
-        ;
-        
-inlineType[AbstractDomain* baseType] returns [AbstractDomain* result]
-        : (      valueSet
-          |       numericInterval
-          )
-{
-    result = baseType; // TODO: finish this implementation
-}        
-        ;       
-
-anyValue
-        :       value
-        |       valueSet
-        |       numericInterval
-        ;
-
-valueSet
-        :       ^('{'
-                        value*
-                )
-        ;
-
-numericInterval
-        :       ^('['   
-                        lower=number
-                        upper=number
-                )
-        ;
-
-value
-        :       booleanValue
-        |       ^(i=IDENT type?)
-        |       str=STRING
-        |       element=number
-        ;
-
-booleanValue
-        :       'true'
-        |       'false'
-        ;
-
-
-number
-        :       floating=FLOAT // real number
-        |       integer=INT
-        |       pinf='inf'
-        |       ninf='-inf'
         ;
 
 classDeclaration
@@ -252,8 +361,11 @@ constructorArgument
 	;
 
 constructorSuper
+@init {
+    std::vector<Expr*> args;
+}
 	:	^('super'
-			variableArgumentList
+			variableArgumentList[args]
 		)
 	;
   
@@ -423,17 +535,24 @@ temporalRelationTwoIntervals
 	;
   
 constraintInstantiation
-	:	^(CONSTRAINT_INSTANTIATION
+@init {
+    std::vector<Expr*> args;
+}
+	:	
+	      ^(CONSTRAINT_INSTANTIATION
 			name=IDENT
-			variableArgumentList
+			variableArgumentList[args]
 		)
 	;
 
 invocation
-	:	^('specify' i=IDENT variableArgumentList)
-	|	^('free' i=IDENT variableArgumentList)
-	|	^('constrain' i=IDENT variableArgumentList)
-	|	^('merge' i=IDENT variableArgumentList)
+@init {
+    std::vector<Expr*> args;
+}
+	:	^('specify' i=IDENT variableArgumentList[args])
+	|	^('free' i=IDENT variableArgumentList[args])
+	|	^('constrain' i=IDENT variableArgumentList[args])
+	|	^('merge' i=IDENT variableArgumentList[args])
 	|	^('close' i=IDENT)
 	|	^('activate' i=IDENT)
 	|	^('reject' i=IDENT)

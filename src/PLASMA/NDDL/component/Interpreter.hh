@@ -134,13 +134,14 @@ namespace EUROPA {
   class ExprConstant : public Expr
   {
   	public:
-  	    ExprConstant(DbClientId& dbClient, const char* type, const AbstractDomain* d);
+  	    ExprConstant(const DbClientId& dbClient, const char* type, const AbstractDomain* d);
   	    virtual ~ExprConstant();
 
   	    virtual DataRef eval(EvalContext& context) const;
+        virtual std::string toString() const;
 
   	protected:
-  	    DbClientId m_dbClient;
+  	    const DbClientId m_dbClient;
   	    LabelStr m_type;
   	    const AbstractDomain* m_domain;
   };
@@ -169,6 +170,8 @@ namespace EUROPA {
 	    virtual ~ExprNewObject();
 
   	    virtual DataRef eval(EvalContext& context) const;
+
+  	    virtual std::string toString() const;
 
   	protected:
         DbClientId            m_dbClient;

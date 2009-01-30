@@ -52,7 +52,7 @@ typedef bool {false} nope;
 foo fooa = new foo();
 foo foob = new foo();
 foo fooc = new foo();
-typedef foo {fooa, foob, fooc} somefoos;
+//typedef foo {fooa, foob, fooc} somefoos;
 
 
 // classDeclaration, classStatement, constructorStatement, predicateStatement tests:

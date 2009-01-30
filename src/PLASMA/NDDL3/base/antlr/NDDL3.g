@@ -22,11 +22,10 @@ nddl	:	nddlStatement*
         ;
 
 nddlStatement
-        :	constraintSignature
-        |	typeDefinition
+        :	typeDefinition
         |	variableDeclaration
-        |       constraintInstantiation
         |       assignment
+        |       constraintInstantiation
         |	classDeclaration
         |       allocationStatement
         |       rule
@@ -34,6 +33,7 @@ nddlStatement
         |       relation
         |	function
         |	noopstatement
+        |       constraintSignature
         ;
 
 typeDefinition
@@ -50,26 +50,84 @@ typeWithBaseDomain
 		|	IDENT^) domain
 	;
 
-// MEB Interpreter Support Missing
-constraintSignature
-	:	'constraint' c=IDENT args=typeArgumentList
-		('extends' x=IDENT xargs=typeArgumentList)? 
-		(sb=signatureBlock | ';')
-			-> ^('constraint' $c $args ^('extends' $x $xargs)? $sb?)
-	;
+domain  :       numericLiteral
+        |       intervalNumericDomain
+        |       enumeratedNumericDomain
+        |       enumeratedStringDomain
+        |       enumeratedBoolDomain
+        |       enumeratedObjectDomain
+        ;
 
-signatureBlock
-	:	'{'^ (signatureExpression)? '}'!
-	;
+intervalNumericDomain
+        :       '['^ numericLiteral (','!)? numericLiteral ']'!
+        ;
 
-signatureExpression
-	:	signatureAtom (('&&'^ | '||'^) signatureAtom)*
-	;
+enumeratedNumericDomain
+        :       '{'^ numericSet '}'!
+        ;
 
-signatureAtom
-	:	'('^ signatureExpression ')'!
-	|	IDENT '<:'^ (type | 'numeric' )
-	;
+numericSet
+        :       numericLiteral (','! numericLiteral)*
+        ;
+
+enumeratedObjectDomain
+        :       '{'^ objectSet '}'!
+        ;
+
+objectSet
+        :       (constructorInvocation|qualified) (','! (constructorInvocation|qualified))*
+        ;
+
+enumeratedStringDomain
+        :       '{'^ stringSet '}'!
+        ;
+
+stringSet
+        :       STRING (','! STRING)*
+        ;
+         
+enumeratedBoolDomain
+        :       '{'^ boolSet '}'!
+        ;
+
+boolSet :       boolLiteral (','! boolLiteral)*
+        ;
+
+variableDeclaration
+        :       ('filter')? type nameWithBaseDomain (',' nameWithBaseDomain)* ';'
+                -> ^(VARIABLE type nameWithBaseDomain (nameWithBaseDomain)*)
+        ;
+
+nameWithBaseDomain
+        :       (       variable=IDENT ('('^ value=anyValue ')'! )?
+                |       variable=IDENT '='^ value=anyValue)
+        ;
+
+anyValue:       STRING
+        |       boolLiteral
+        |       domain
+        |       allocation
+        |       qualified
+        ;
+
+allocation
+        :       'new'! constructorInvocation
+        ;
+
+constructorInvocation
+        :       IDENT variableArgumentList
+                        -> ^(CONSTRUCTOR_INVOCATION IDENT variableArgumentList)
+        ;
+
+qualified
+        :       ('this' | IDENT) ('.'^ IDENT)*
+        ;
+
+assignment
+        :       qualified ('in' | '=') anyValue ';'
+                -> ^('=' qualified anyValue)
+        ;
+
 
 classDeclaration
 	:	'class' c=IDENT
@@ -184,11 +242,6 @@ constraintInstantiation
 			-> ^(CONSTRAINT_INSTANTIATION IDENT variableArgumentList)
 	;
 
-constructorInvocation
-	:	IDENT variableArgumentList
-			-> ^(CONSTRUCTOR_INVOCATION IDENT variableArgumentList)
-	;
-
 superInvocation
 	:	'super'^ variableArgumentList ';'!
 	;
@@ -218,49 +271,6 @@ typeArgument
 	:	IDENT
 	;
 
-domain	:	numericLiteral
-	|	intervalNumericDomain
-	|	enumeratedNumericDomain
-	|	enumeratedStringDomain
-	|	enumeratedBoolDomain
-	|	enumeratedObjectDomain
-	;
-
-intervalNumericDomain
-	:	'['^ numericLiteral (','!)? numericLiteral ']'!
-	;
-
-enumeratedNumericDomain
-	:	'{'^ numericSet '}'!
-	;
-
-numericSet
-	:	numericLiteral (','! numericLiteral)*
-	;
-
-enumeratedObjectDomain
-	:	'{'^ objectSet '}'!
-	;
-
-objectSet
-	:	(constructorInvocation|qualified) (','! (constructorInvocation|qualified))*
-	;
-
-enumeratedStringDomain
-	:	'{'^ stringSet '}'!
-	;
-
-stringSet
-	:	STRING (','! STRING)*
-	;
-         
-enumeratedBoolDomain
-	:	'{'^ boolSet '}'!
-	;
-
-boolSet	:	boolLiteral (','! boolLiteral)*
-	;
-
 flowControl
 	:	'if'^ expression ruleBlock (options {k=1;}:'else'! ruleBlock)?
 	|	'foreach'^ '('! IDENT 'in'! qualified ')'! ruleBlock
@@ -272,38 +282,8 @@ expression
 	:	'('! anyValue (('=='^ | '!='^) anyValue)? ')'!
 	;
           
-allocation
-	:	'new'! constructorInvocation
-	;
-
 allocationStatement
 	:	allocation ';'!
-	;
-
-variableDeclaration
-	:	('filter')? type nameWithBase (',' nameWithBase)* ';'
-	        -> ^(VARIABLE type nameWithBase (nameWithBase)*)
-	;
-
-nameWithBase
-	:	(	variable=IDENT ('('^ value=anyValue ')'! )?
-		|	variable=IDENT '='^ value=anyValue)
-	;
-
-assignment
-	:	qualified ('in' | '=') anyValue ';'
-		-> ^('=' qualified anyValue)
-	;
-
-anyValue:	STRING
-	|	boolLiteral
-	|	qualified
-	|	domain
-	|	allocation
-	;
-
-qualified
-	:	('this' | IDENT) ('.'^ IDENT)*
 	;
 
 temporalRelation
@@ -367,6 +347,28 @@ tokenNames
 noopstatement
 	:	';'!
 	;
+
+// MEB Interpreter Support Missing
+constraintSignature
+        :       'constraint' c=IDENT args=typeArgumentList
+                ('extends' x=IDENT xargs=typeArgumentList)? 
+                (sb=signatureBlock | ';')
+                        -> ^('constraint' $c $args ^('extends' $x $xargs)? $sb?)
+        ;
+
+signatureBlock
+        :       '{'^ (signatureExpression)? '}'!
+        ;
+
+signatureExpression
+        :       signatureAtom (('&&'^ | '||'^) signatureAtom)*
+        ;
+
+signatureAtom
+        :       '('^ signatureExpression ')'!
+        |       IDENT '<:'^ (type | 'numeric' )
+        ;
+
 
 INCLUDE :	'#include' WS+ file=STRING '\r'? '\n'	{
 			pANTLR3_STRING      fName;

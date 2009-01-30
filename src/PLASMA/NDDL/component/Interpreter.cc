@@ -256,7 +256,7 @@ namespace EUROPA {
   /*
    * ExprConstant
    */
-  ExprConstant::ExprConstant(DbClientId& dbClient, const char* type, const AbstractDomain* domain)
+  ExprConstant::ExprConstant(const DbClientId& dbClient, const char* type, const AbstractDomain* domain)
     : m_dbClient(dbClient)
     , m_type(type)
     , m_domain(domain)
@@ -298,6 +298,15 @@ namespace EUROPA {
 
     return DataRef(var);
   }
+
+  std::string ExprConstant::toString() const
+  {
+      std::ostringstream os;
+
+      os << "{CONSTANT " << m_type.c_str() << " " << m_domain->toString() << "}";
+      return os.str();
+  }
+
 
 
   /*
@@ -380,17 +389,37 @@ namespace EUROPA {
     // This is a problem, everybody should go through the factory
     // faking it for now, but this is a hack
 
-    // This assumes for now this is only called inside a constructor, not as part of an initial-state
-    ObjectId thisObject = context.getVar("this")->derivedDomain().getSingletonValue();
-    LabelStr name(std::string(thisObject->getName().toString() + "." + m_objectName.toString()));
+    ConstrainedVariableId thisVar = context.getVar("this");
+    ObjectId thisObject = (thisVar.isId() ? ObjectId(thisVar->derivedDomain().getSingletonValue()) : ObjectId::noId());
+    std::string prefix = (thisObject.isId() ? thisObject->getName().toString() + "." : "");
+
+    LabelStr name(prefix+m_objectName.toString());
     ObjectId newObject = m_dbClient->createObject(
 						  m_objectType.c_str(),
 						  name.c_str(),
 						  arguments
 						  );
-    newObject->setParent(thisObject);
+
+    if (thisObject.isId())
+        newObject->setParent(thisObject);
 
     return DataRef(newObject->getThis());
+  }
+
+  std::string ExprNewObject::toString() const
+  {
+      std::ostringstream os;
+
+      os << "{NEW_OBJECT " << m_objectName.toString() << "(" << m_objectType.toString() << ") ";
+
+      for (unsigned int i =0; i < m_argExprs.size();i++) {
+          if (i>0)
+              os << " , ";
+          os << m_argExprs[i]->toString();
+      }
+      os << " }";
+
+      return os.str();
   }
 
 

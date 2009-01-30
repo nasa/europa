@@ -418,12 +418,6 @@ namespace EUROPA {
      */
     virtual std::string toString() const;
 
-    /**
-     * @brief Creates a concise string for displaying the value
-     * @param value must be a member of the domain.
-     */
-    virtual std::string toString(double value) const;
-
     // TODO: AbstractDomain mixes 2 things : a data type, and an actual domain representation
     // we'll probably have to separate those at some point. the methods below apply to the data type
     /**
@@ -460,6 +454,11 @@ namespace EUROPA {
      * @brief Check if the domain is String.
      */
     virtual bool isString() const = 0;
+
+    /* @brief Creates a concise string for displaying the value
+    * @param value must be a member of the domain.
+    */
+   virtual std::string toString(double value) const;
 
     /**
      * @brief Tests if two domains can be compared. For example, one cannot compare a symbolic

@@ -10,6 +10,7 @@ ModuleBase ConstraintEngine
 	Constraint.cc
 	ConstraintEngine.cc
 	ConstraintEngineListener.cc
+	DataType.cc
 	PSConstraintEngineListener.cc
 	Propagator.cc
 	TypeFactory.cc
