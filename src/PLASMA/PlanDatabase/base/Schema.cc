@@ -612,6 +612,46 @@ namespace EUROPA {
       results.push_back(it->first);
   }
 
+  void Schema::registerObjectType(const ObjectType* objType)
+  {
+      const char* className = objType->getName().c_str();
+      const char* parentClassName = objType->getParent().c_str();
+
+      if (objType->getName() == Schema::rootObject())
+          addObjectType(className);
+      else
+          addObjectType(className,parentClassName);
+
+      {
+          std::map<std::string,std::string>::const_iterator it = objType->getMembers().begin();
+          for(;it != objType->getMembers().end(); ++it)
+              addMember(className, it->second /*type*/, it->first/*name*/);
+      }
+
+      {
+          std::map<double,ObjectFactoryId>::const_iterator it = objType->getObjectFactories().begin();
+          for(;it != objType->getObjectFactories().end(); ++it)
+              registerObjectFactory(it->second);
+      }
+
+      {
+          std::map<double,TokenFactoryId>::const_iterator it = objType->getTokenFactories().begin();
+          for(;it != objType->getTokenFactories().end(); ++it) {
+              const TokenFactoryId& tokenFactory = it->second;
+              LabelStr predName = tokenFactory->getSignature();
+
+              addPredicate(predName.c_str());
+              std::map<LabelStr,LabelStr>::const_iterator paramIt = tokenFactory->getArgs().begin();
+              for(;paramIt != tokenFactory->getArgs().end();++paramIt)
+                  addMember(predName.c_str(), paramIt->second /*type*/, paramIt->first/*name*/);
+
+              registerTokenFactory(it->second);
+          }
+      }
+
+      debugMsg("Schema:registerObjectType","Registered object type:" << std::endl << objType->toString());
+  }
+
   void Schema::registerObjectFactory(const ObjectFactoryId& of)
   {
       m_objectTypeMgr->registerFactory(of);
@@ -632,16 +672,19 @@ namespace EUROPA {
       return m_tokenTypeMgr->getFactory(getId(),type);
   }
 
-  TokenFactoryId Schema::getParentTokenFactory(const LabelStr& type)
+  TokenFactoryId Schema::getParentTokenFactory(const LabelStr& tokenType, const LabelStr& parentObjType)
   {
-      LabelStr objType = type.getElement(0, getDelimiter());
-      std::string tokenName = type.getElement(1, getDelimiter()).toString();
+      LabelStr objType = parentObjType;
+      std::string tokenName = tokenType.getElement(1, getDelimiter()).toString();
 
-      while(hasParent(objType)) {
-          objType = getParent(objType);
+      for(;;) {
           std::string parentName = objType.toString()+getDelimiter()+tokenName;
           if (isPredicate(parentName))
               return getTokenFactory(parentName);
+          if (hasParent(objType))
+              objType = getParent(objType);
+          else
+              break;
       }
 
       return TokenFactoryId::noId();

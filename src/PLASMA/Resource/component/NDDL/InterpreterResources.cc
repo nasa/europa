@@ -45,6 +45,12 @@ namespace EUROPA {
     return instance;
   }
 
+  ResourceChangeTokenFactory::ResourceChangeTokenFactory(const LabelStr& predicateName)
+      : NativeTokenFactory(predicateName)
+  {
+      addArg("float","quantity");
+  }
+
   TokenId ResourceChangeTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Resource.change");
@@ -96,6 +102,12 @@ namespace EUROPA {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native " << m_className.toString() << ":" << objectName.toString() << " type:" << objectType.toString());
 
     return instance;
+  }
+
+  ReusableUsesTokenFactory::ReusableUsesTokenFactory(const LabelStr& predicateName)
+      : NativeTokenFactory(predicateName)
+  {
+      addArg("float","quantity");
   }
 
   TokenId ReusableUsesTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
@@ -193,6 +205,12 @@ namespace EUROPA {
     return instance;
   }
 
+  ReservoirProduceTokenFactory::ReservoirProduceTokenFactory(const LabelStr& predicateName)
+      : NativeTokenFactory(predicateName)
+  {
+      addArg("float","quantity");
+  }
+
   TokenId ReservoirProduceTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reservoir.produce");
@@ -203,6 +221,12 @@ namespace EUROPA {
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reservoir.produce");
     return (new NDDL::NddlReservoir::produce(master,name,relation,true))->getId();
+  }
+
+  ReservoirConsumeTokenFactory::ReservoirConsumeTokenFactory(const LabelStr& predicateName)
+      : NativeTokenFactory(predicateName)
+  {
+      addArg("float","quantity");
   }
 
   TokenId ReservoirConsumeTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const

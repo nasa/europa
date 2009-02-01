@@ -21,7 +21,7 @@ namespace EUROPA {
   class ResourceChangeTokenFactory: public NativeTokenFactory
   {
     public:
-	  ResourceChangeTokenFactory(const LabelStr& predicateName) : NativeTokenFactory(predicateName) {}
+	  ResourceChangeTokenFactory(const LabelStr& predicateName);
 
 	private:
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const;
@@ -45,7 +45,7 @@ namespace EUROPA {
   class ReusableUsesTokenFactory: public NativeTokenFactory
   {
     public:
-	  ReusableUsesTokenFactory(const LabelStr& predicateName) : NativeTokenFactory(predicateName) {}
+	  ReusableUsesTokenFactory(const LabelStr& predicateName);
 
 	private:
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable , bool isFact) const;
@@ -83,7 +83,7 @@ namespace EUROPA {
   class ReservoirProduceTokenFactory: public NativeTokenFactory
   {
     public:
-	  ReservoirProduceTokenFactory(const LabelStr& predicateName) : NativeTokenFactory(predicateName) {}
+	  ReservoirProduceTokenFactory(const LabelStr& predicateName);
 
 	private:
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable , bool isFact) const;
@@ -93,7 +93,7 @@ namespace EUROPA {
   class ReservoirConsumeTokenFactory: public NativeTokenFactory
   {
     public:
-	  ReservoirConsumeTokenFactory(const LabelStr& predicateName) : NativeTokenFactory(predicateName) {}
+	  ReservoirConsumeTokenFactory(const LabelStr& predicateName);
 
 	private:
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable , bool isFact) const;

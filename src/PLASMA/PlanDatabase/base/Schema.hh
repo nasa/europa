@@ -12,6 +12,7 @@
 #include "PSPlanDatabase.hh"
 #include "LabelStr.hh"
 #include "AbstractDomain.hh"
+#include "ObjectType.hh"
 #include "ObjectFactory.hh"
 #include "TokenFactory.hh"
 
@@ -338,12 +339,14 @@ namespace EUROPA {
 
     const CESchemaId& getCESchema() const { return m_ceSchema; }
 
+    // TODO: ObjectType is replacing ObjectFactory
+    void registerObjectType(const ObjectType* objType);
     void registerObjectFactory(const ObjectFactoryId& obj_fact);
     ObjectFactoryId getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments);
 
     void registerTokenFactory(const TokenFactoryId& obj_fact);
     TokenFactoryId getTokenFactory(const LabelStr& tokenType);
-    TokenFactoryId getParentTokenFactory(const LabelStr& tokenType);
+    TokenFactoryId getParentTokenFactory(const LabelStr& tokenType, const LabelStr& parentObjType);
     bool hasTokenFactories() const;
 
     //PSSchema methods:

@@ -1041,6 +1041,8 @@ namespace EUROPA{
       if (!token->isClosed())
           token->close();
 
+      debugMsg("PlanDatabase:createToken","Created Token:" << std::endl << token->toLongString());
+
       return token;
   }
 
@@ -1057,6 +1059,8 @@ namespace EUROPA{
       check_error(token.isValid());
       if (!token->isClosed())
           token->close();
+
+      debugMsg("PlanDatabase:createSlaveToken","Created Slave Token:" << std::endl << token->toLongString());
 
       return token;
   }

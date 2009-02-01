@@ -334,10 +334,10 @@ constraintInstantiation returns [Expr* result]
                 
         ;
 
-classDeclaration
+classDeclaration returns [Expr* result]
 	:	^('class'
-			name=IDENT
-			((^('extends' extends=IDENT)
+			className=IDENT
+			((^('extends' superClass=IDENT)
 				classBlock)
 			|	classBlock
 			|	';'

@@ -58,7 +58,7 @@ namespace EUROPA {
       sl_retval.insert("invoke");
       called = true;
     }
-    return sl_retval;    
+    return sl_retval;
   }
 
   const std::set<std::string>& DbClientTransactionPlayer::NO_TRANSACTIONS() {
@@ -71,7 +71,7 @@ namespace EUROPA {
     return sl_retval;
   }
 
-  static const std::vector<int> 
+  static const std::vector<int>
   pathAsVector(const std::string & path) {
     size_t path_back, path_front, path_end;
     std::vector<int> result;
@@ -98,19 +98,19 @@ namespace EUROPA {
   DbClientTransactionPlayer::~DbClientTransactionPlayer() {
   }
 
-  
+
   const SchemaId& DbClientTransactionPlayer::getSchema() const
   {
-      return m_client->getSchema();   
+      return m_client->getSchema();
   }
 
   const CESchemaId& DbClientTransactionPlayer::getCESchema() const
   {
-      return m_client->getCESchema();    
+      return m_client->getCESchema();
   }
 
   void DbClientTransactionPlayer::setFilter(const std::set<std::string>& filters) {
-    
+
   }
 
   void DbClientTransactionPlayer::play(std::istream& is) {
@@ -149,7 +149,7 @@ namespace EUROPA {
 	is.get(); // discard characters up to '<'
 	continue;
       }
-      
+
       TiXmlElement* elem = new TiXmlElement("");
       is >> (*elem);
       transactions.push_front(elem);
@@ -279,11 +279,11 @@ namespace EUROPA {
       //playDefineType(element);
       else if (transactionMatch(element, "compat")) {}
       //playDefineCompat(element);
-      else if (transactionMatch(element, "var")) 
+      else if (transactionMatch(element, "var"))
 	playVariableDeleted(element);
       else if(transactionMatch(element, "deletevar"))
 	playVariableUndeleted(element, start, end);
-      else if (transactionMatch(element, "new")) 
+      else if (transactionMatch(element, "new"))
 	playObjectDeleted(element);
       else if(transactionMatch(element, "deleteobject")) //has to scan backwards for "new" or "var"
 	playObjectUndeleted(element, start, end);
@@ -379,7 +379,7 @@ namespace EUROPA {
     }
 
     m_client->deleteVariable(var);
-    
+
     std::string std_name(name);
     m_variables.erase(name);
   }
@@ -432,7 +432,7 @@ namespace EUROPA {
 	     "Playing inverse of " << element);
     const char* name = element.Attribute("name");
     check_error(name != NULL);
-    
+
     debugMsg("DbClientTransactionPlayer:playObjectUndeleted",
 	     "Searching backwards for a creation transaction.");
     for(Iterator it = start; it != end; ++it) {
@@ -450,7 +450,7 @@ namespace EUROPA {
     checkError(ALWAYS_FAIL, "No creation transaction to complement " << element);
   }
 
-  const char* DbClientTransactionPlayer::getObjectAndType(DbClientId& client, const char* predicate,ObjectId& object) const 
+  const char* DbClientTransactionPlayer::getObjectAndType(DbClientId& client, const char* predicate,ObjectId& object) const
   {
     if (!getSchema()->isPredicate(predicate)) {
       LabelStr typeStr(predicate);
@@ -458,14 +458,14 @@ namespace EUROPA {
       LabelStr prefix = typeStr.getElement(0, Schema::getDelimiter());
       object = client->getObject(prefix.c_str());
       check_error(object.isValid(), "Failed to find an object named " + prefix.toString());
-      LabelStr objType = object->getType();      
+      LabelStr objType = object->getType();
       LabelStr suffix = typeStr.getElement(1, Schema::getDelimiter());
-      
+
       for (int i=2; i<cnt;i++) {
           objType = getSchema()->getMemberType(objType,suffix);
-          suffix = typeStr.getElement(i, Schema::getDelimiter());           	
+          suffix = typeStr.getElement(i, Schema::getDelimiter());
       }
-      
+
       std::string objName(predicate);
       objName = objName.substr(0,objName.length()-suffix.toString().length()-1);
       object = client->getObject(objName.c_str());
@@ -475,13 +475,13 @@ namespace EUROPA {
     }
     else {
     	return predicate;
-    }  	
+    }
   }
-  
+
   TokenId DbClientTransactionPlayer::createToken(
                                          const char* name,
-                                         const char* type, 
-                                         bool rejectable, 
+                                         const char* type,
+                                         bool rejectable,
                                          bool isFact)
   {
     // The type may be qualified with an object name, in which case we should get the
@@ -490,8 +490,8 @@ namespace EUROPA {
     ObjectId object;
     const char* predicateType = getObjectAndType(m_client,type,object);
 
-    TokenId token = m_client->createToken(predicateType,rejectable,isFact); 
-    
+    TokenId token = m_client->createToken(predicateType,rejectable,isFact);
+
     if (!object.isNoId()) {
         // We restrict the base domain permanently since the name is specifically mentioned on creation
         token->getObject()->restrictBaseDomain(object->getThis()->baseDomain());
@@ -504,12 +504,12 @@ namespace EUROPA {
     else {
     	name = "NO_NAME_DBCTP";
     }
-    
-    debugMsg("DbClientTransactionPlayer:createToken", "created Token:" << name << " of type " << predicateType << " isFact:" << isFact);      
-    
-    return token;  	
+
+    debugMsg("DbClientTransactionPlayer:createToken", "created Token:" << name << " of type " << predicateType << " isFact:" << isFact);
+
+    return token;
   }
-   
+
   void DbClientTransactionPlayer::playFactCreated(const TiXmlElement & element) {
     TiXmlElement * child = element.FirstChildElement();
     check_error(child != NULL);
@@ -519,8 +519,8 @@ namespace EUROPA {
     createToken(
         child->Attribute("name"),
         type,
-        false, // rejectable  
-        true   // isFact 
+        false, // rejectable
+        true   // isFact
     );
   }
 
@@ -544,7 +544,7 @@ namespace EUROPA {
     TokenId token = createToken(
         child->Attribute("name"),
         type,
-        rejectable, // rejectable 
+        rejectable, // rejectable
         false       // isFact
     );
   }
@@ -575,11 +575,11 @@ namespace EUROPA {
     else {
       const char* pathStr = child->Attribute("path");
       check_error(pathStr != NULL);
-      
-      
+
+
       std::vector<std::string> tokens;
       tokenize(pathStr, tokens, ".");
-      
+
       std::vector<int> path;
       for(std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); ++it) {
 	std::stringstream str;
@@ -631,7 +631,7 @@ namespace EUROPA {
     TokenId origin_token = parseToken(origin);
     TokenId target_token = parseToken(target);
     debugMsg("DbClientTransactionPlayer:playTemporalRelationCreated",
-	     "got token " << origin_token->getKey() << " and " << 
+	     "got token " << origin_token->getKey() << " and " <<
 	     target_token->getKey() << " for relation '" << relation << "'");
     checkError(origin_token.isValid(), "Invalid token for label '" << origin << "'");
     checkError(target_token.isValid(), "Invalid token for label '" << target << "'");
@@ -647,7 +647,7 @@ namespace EUROPA {
     else if (strcmp(relation, "met_by") == 0) {
       construct_constraint(concurrent, origin, start, target, end);
     }
-    else if ((strcmp(relation, "equal") == 0) || 
+    else if ((strcmp(relation, "equal") == 0) ||
 	     (strcmp(relation, "equals") == 0)) {
       construct_constraint(concurrent, origin, start, target, start);
       construct_constraint(concurrent, origin, end, target, end);
@@ -738,7 +738,7 @@ namespace EUROPA {
     m_relations.erase(it);
     m_client->deleteConstraint(constr);
   }
-  
+
   void DbClientTransactionPlayer::removeTemporalConstraint(const ConstrainedVariableId& fvar,
 							   const ConstrainedVariableId& svar,
 							   const std::string& name) {
@@ -755,7 +755,7 @@ namespace EUROPA {
     TokenId origin_token = parseToken(origin);
     TokenId target_token = parseToken(target);
     debugMsg("DbClientTransactionPlayer:playTemporalRelationDeleted",
-	     "got token " << origin_token->getKey() << " and " << 
+	     "got token " << origin_token->getKey() << " and " <<
 	     target_token->getKey() << " for relation " << relation);
     checkError(origin_token.isValid(), "Invalid token for label '" << origin << "'");
     checkError(target_token.isValid(), "Invalid token for label '" << target << "'");
@@ -767,7 +767,7 @@ namespace EUROPA {
       removeTemporalConstraint(origin_token->end(), target_token->start(), "concurrent");
     else if (strcmp(relation, "met_by") == 0)
       removeTemporalConstraint(origin_token->start(), target_token->end(), "concurrent");
-    else if ((strcmp(relation, "equal") == 0) || 
+    else if ((strcmp(relation, "equal") == 0) ||
 	     (strcmp(relation, "equals") == 0)) {
       removeTemporalConstraint(origin_token->start(), target_token->start(), "concurrent");
       removeTemporalConstraint(origin_token->end(), target_token->end(), "concurrent");
@@ -972,7 +972,7 @@ namespace EUROPA {
       token = xmlAsToken(*token_el);
     }
     check_error(token.isValid());
-    m_client->reject(token);    
+    m_client->reject(token);
   }
 
   void DbClientTransactionPlayer::playCancelled(const TiXmlElement & element)
@@ -989,7 +989,7 @@ namespace EUROPA {
       token = xmlAsToken(*token_el);
     }
     check_error(token.isValid());
-    m_client->cancel(token);    
+    m_client->cancel(token);
   }
 
   template<typename Iterator>
@@ -1084,7 +1084,7 @@ namespace EUROPA {
     if (value->isSingleton()) {
       double v = value->getSingletonValue();
       m_client->specify(var, v);
-    } 
+    }
     else
       m_client->restrict(var, *value);
   }
@@ -1126,7 +1126,7 @@ namespace EUROPA {
     TiXmlElement * var_el = element.FirstChildElement();
     check_error(var_el != NULL);
     ConstrainedVariableId var = xmlAsVariable(*var_el);
-    
+
     for(Iterator it = start; it != end; ++it) {
       if(strcmp((*it)->Value(), "specify") == 0 ||
 	 (strcmp((*it)->Value(), "invoke") == 0 && (*it)->Attribute("name") != NULL &&
@@ -1167,7 +1167,7 @@ namespace EUROPA {
     std::vector<ConstrainedVariableId> variables;
     for (TiXmlElement * child_el = element.FirstChildElement() ;
          child_el != NULL ; child_el = child_el->NextSiblingElement()) {
-       ConstrainedVariableId v = xmlAsVariable(*child_el);   	
+       ConstrainedVariableId v = xmlAsVariable(*child_el);
        variables.push_back(v);
        os << v->toString() <<",";
     }
@@ -1179,7 +1179,7 @@ namespace EUROPA {
   void DbClientTransactionPlayer::playUninvokeConstraint(const TiXmlElement& element) {
     const char* index = element.Attribute("index");
     check_error(index != NULL);
-    
+
     std::stringstream str;
     str << index;
     int key;
@@ -1271,7 +1271,7 @@ namespace EUROPA {
     const char * name = element.Attribute("name");
     check_error(name != NULL);
     if (strcmp(name, "close") == 0) {
-      debugMsg("DbClientTransactionPlayer:playUninvokeTransaction", 
+      debugMsg("DbClientTransactionPlayer:playUninvokeTransaction",
 	       "Warning:  can't un-close the database or a type.");
       return;
     }
@@ -1292,7 +1292,7 @@ namespace EUROPA {
     else {
       check_error(ALWAYS_FAILS, "unexpected transaction invoked: '" + std::string(name) + "'");
     }
-    
+
   }
 
   //! string input functions
@@ -1301,7 +1301,7 @@ namespace EUROPA {
   DbClientTransactionPlayer::parseVariable(const char * varString)
   {
     check_error(varString != NULL);
-    std::string variable = varString;    
+    std::string variable = varString;
     size_t ident_back, ident_front, variable_end;
     ident_back = 0;
     variable_end = variable.size();
@@ -1320,11 +1320,13 @@ namespace EUROPA {
     TokenId token = m_tokens[ident];
     if (token != token.noId()) {
       std::string name = variable.substr(ident_front + 1);
+      LabelStr nameAsLabelStr(name.c_str());
       const std::vector<ConstrainedVariableId> & variables = token->getVariables();
       std::vector<ConstrainedVariableId>::const_iterator iter = variables.begin();
       while (iter != variables.end()) {
         ConstrainedVariableId variable = *iter++;
-        if (LabelStr(name.c_str()) == variable->getName()) {
+        const LabelStr& varName = variable->getName();
+        if (nameAsLabelStr == varName) {
           return variable;
         }
       }
@@ -1339,7 +1341,7 @@ namespace EUROPA {
     return var;
   }
 
-  TokenId 
+  TokenId
   DbClientTransactionPlayer::parseToken(const char * tokString)
   {
      check_error(tokString != NULL);
@@ -1349,7 +1351,7 @@ namespace EUROPA {
 
   //! XML input functions
 
-  const AbstractDomain * 
+  const AbstractDomain *
   DbClientTransactionPlayer::xmlAsAbstractDomain(const TiXmlElement & element,
 						 const char * name,
 						 const char* typeName) {
@@ -1435,7 +1437,7 @@ namespace EUROPA {
 	     "For " << element << ", created domain " << (*domain).toString());
     return domain;
   }
-  
+
   EnumeratedDomain *
   DbClientTransactionPlayer::xmlAsEnumeratedDomain(const TiXmlElement & element,
 						   const char* otherTypeName) {
@@ -1542,13 +1544,13 @@ namespace EUROPA {
     // return the domain
     if (otherTypeName != NULL)
         typeName = otherTypeName;
-    
+
     switch (type) {
     case BOOL: case INT: case FLOAT:
       return(new EnumeratedDomain(values, true, typeName.c_str()));
-    case STRING: 
+    case STRING:
       return(new StringDomain(values, typeName.c_str()));
-    case SYMBOL: 
+    case SYMBOL:
       return(new SymbolDomain(values, typeName.c_str()));
     case OBJECT:
       return(new EnumeratedDomain(values, false, typeName.c_str()));
@@ -1626,7 +1628,7 @@ namespace EUROPA {
       variable.Attribute("index", &index);
       check_error(variable.Attribute("index", &index) != NULL);
       check_error(0 <= index);
-  
+
       const char * token_path = variable.Attribute("token");
       if (token_path != NULL) {
         TokenId token = m_client->getTokenByPath(pathAsVector(token_path));
@@ -1634,7 +1636,7 @@ namespace EUROPA {
         check_error((unsigned)index < token->getVariables().size());
         return token->getVariables()[index];
       }
-  
+
       const char * object_name = variable.Attribute("object");
       if (object_name != NULL) {
         ObjectId object = m_client->getObject(object_name);
@@ -1642,7 +1644,7 @@ namespace EUROPA {
         check_error((unsigned)index < object->getVariables().size());
         return object->getVariables()[index];
       }
-  
+
       // rule variables
       return m_client->getVariableByIndex(index);
     }
@@ -1668,14 +1670,14 @@ namespace EUROPA {
       if (path != NULL) {
         return m_client->getTokenByPath(pathAsVector(path));
       }
-  
+
       const char * name = token.Attribute("name");
       if (name != NULL) {
         TokenId tok = parseToken(name);
         check_error(tok.isValid());
         return tok;
       }
-    }  
+    }
     check_error(ALWAYS_FAILS);
     return TokenId::noId();
   }
@@ -1698,7 +1700,7 @@ namespace EUROPA {
       gen_name = gen_stream.str();
       name = gen_name.c_str();
     }
- 
+
     const AbstractDomain * baseDomain = NULL;
     if (value != NULL) {
       baseDomain = xmlAsAbstractDomain(*value, name);
@@ -1709,7 +1711,7 @@ namespace EUROPA {
           type = value->Attribute("type");
         }
       }
-      debugMsg("DbClientTransactionPlayer:xmlAsCreateVariable", 
+      debugMsg("DbClientTransactionPlayer:xmlAsCreateVariable",
 	       " type = " << type << " name = " << name << " domain type = " << baseDomain->getTypeName().c_str());
     }
 
@@ -1721,5 +1723,5 @@ namespace EUROPA {
     }
 
     return m_client->createVariable(type, name);
-  }  
+  }
 }

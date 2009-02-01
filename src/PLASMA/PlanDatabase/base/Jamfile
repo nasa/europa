@@ -20,10 +20,11 @@ ModuleBase PlanDatabase
 	Object.cc
 	ObjectFactory.cc
 	ObjectTokenRelation.cc
+	ObjectType.cc
 	PlanDatabase.cc
 	PlanDatabaseListener.cc
 	PSPlanDatabaseListener.cc
-    PlanDatabaseWriter.cc
+        PlanDatabaseWriter.cc
  	StackMemento.cc
 	Token.cc
 	TokenFactory.cc

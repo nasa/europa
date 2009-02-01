@@ -10,13 +10,13 @@ namespace EUROPA {
     {
     }
 
-    TokenTypeMgr::~TokenTypeMgr() 
+    TokenTypeMgr::~TokenTypeMgr()
     {
         cleanup(m_factories);
-        m_id.remove();    
+        m_id.remove();
     }
-    
-    const TokenTypeMgrId& TokenTypeMgr::getId() const {return m_id;}   
+
+    const TokenTypeMgrId& TokenTypeMgr::getId() const {return m_id;}
 
     void TokenTypeMgr::registerFactory(const TokenFactoryId& factory) {
       check_error(factory.isValid());
@@ -36,7 +36,7 @@ namespace EUROPA {
         check_error(schema->isPredicate(predicateName), predicateName.toString() + " is undefined.");
 
         // Confirm it is present
-        const std::map<double, TokenFactoryId>::const_iterator pos =  
+        const std::map<double, TokenFactoryId>::const_iterator pos =
             m_factoriesByPredicate.find(predicateName.getKey());
 
         if (pos != m_factoriesByPredicate.end()) // We have found what we are looking for
@@ -78,6 +78,7 @@ namespace EUROPA {
         : m_id(this)
         , m_signature(signature)
     {
+        m_predicateName = signature.getElement(1,".");
     }
 
     TokenFactory::~TokenFactory()
@@ -87,5 +88,14 @@ namespace EUROPA {
 
     const TokenFactoryId& TokenFactory::getId() const {return m_id;}
 
+    const LabelStr& TokenFactory::getPredicateName() const { return m_predicateName; }
+
     const LabelStr& TokenFactory::getSignature() const {return m_signature;}
+
+    const std::map<LabelStr,LabelStr>& TokenFactory::getArgs() const { return m_args; }
+
+    void TokenFactory::addArg(const LabelStr& type, const LabelStr& name)
+    {
+        m_args[name] = type;
+    }
 }

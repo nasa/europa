@@ -140,7 +140,10 @@ AbstractDomain* NddlSymbolTable::getVarType(const char* name) const
 
 ConstrainedVariableId NddlSymbolTable::getVar(const char* name)
 {
-    return m_planDatabase->getGlobalVariable(name);
+    if (m_planDatabase->isGlobalVariable(name))
+        return m_planDatabase->getGlobalVariable(name);
+    else
+        return ConstrainedVariableId::noId();
 }
 
 

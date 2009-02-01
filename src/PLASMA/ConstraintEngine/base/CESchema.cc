@@ -96,7 +96,7 @@ namespace EUROPA
 
   void CESchema::registerConstraintFactory(ConstraintFactory* factory, const LabelStr& name) {
     if(isConstraintFactoryRegistered(name)){
-      debugMsg("CESchema:registerFactory", "Over-riding prior registration for " << name);
+      debugMsg("CESchema:registerFactory", "Over-riding prior registration for " << name.c_str());
       ConstraintFactoryId oldFactory = getConstraintFactory(name);
       std::map<double, ConstraintFactoryId>& factories = m_constraintFactories;
       factories.erase(name.getKey());

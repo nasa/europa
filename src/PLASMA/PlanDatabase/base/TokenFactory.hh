@@ -26,12 +26,12 @@ namespace EUROPA {
    */
   class TokenTypeMgr {
   public:
-      
-    TokenTypeMgr();  
+
+    TokenTypeMgr();
     ~TokenTypeMgr();
 
-    const TokenTypeMgrId& getId() const;   
-    
+    const TokenTypeMgrId& getId() const;
+
     void purgeAll();
 
     /**
@@ -46,7 +46,7 @@ namespace EUROPA {
 
     /**
      * @brief Obtain the factory based on the predicate name
-     */ 
+     */
     TokenFactoryId getFactory(const SchemaId& schema, const LabelStr& predicateName);
 
   protected:
@@ -64,13 +64,18 @@ namespace EUROPA {
 
     virtual ~TokenFactory();
 
+    void addArg(const LabelStr& type, const LabelStr& name);
+
+    const LabelStr& getPredicateName() const;
+    const std::map<LabelStr,LabelStr>& getArgs() const;
+
     const TokenFactoryId& getId() const;
 
     /**
      * @brief Return the type for which this factory is registered.
      */
     const LabelStr& getSignature() const;
-    
+
     /**
      * @brief Create a root token instance
      * @see DbClient::createToken(const LabelStr& type, const LabelStr& name)
@@ -88,6 +93,8 @@ namespace EUROPA {
   protected:
     TokenFactoryId m_id;
     LabelStr m_signature;
+    LabelStr m_predicateName;
+    std::map<LabelStr,LabelStr> m_args;
   };
 }
 

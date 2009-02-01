@@ -1049,6 +1049,8 @@ namespace EUROPA {
         , m_assignValues(assignValues)
         , m_constraints(constraints)
     {
+        for (unsigned int i=0; i<parameterNames.size();i++)
+            addArg(parameterTypes[i],parameterNames[i]);
     }
 
 	TokenId InterpretedTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const

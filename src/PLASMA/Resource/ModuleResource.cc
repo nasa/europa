@@ -50,44 +50,46 @@ namespace EUROPA {
 	  new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), ce->getId());
 	  new ResourcePropagator(LabelStr("Resource"), ce->getId(), pdb->getId());
 
-      schema->addObjectType("Resource");
-      schema->addMember("Resource", "float", "initialCapacity");
-      schema->addMember("Resource", "float", "levelLimitMin");
-      schema->addMember("Resource", "float", "levelLimitMax");
-      schema->addMember("Resource", "float", "productionRateMax");
-      schema->addMember("Resource", "float", "productionMax");
-      schema->addMember("Resource", "float", "consumptionRateMax");
-      schema->addMember("Resource", "float", "consumptionMax");
-      REGISTER_OBJECT_FACTORY(schema,ResourceObjectFactory, Resource);
-      REGISTER_OBJECT_FACTORY(schema,ResourceObjectFactory, Resource:float:float:float);
-      REGISTER_OBJECT_FACTORY(schema,ResourceObjectFactory, Resource:float:float:float:float:float);
-      REGISTER_OBJECT_FACTORY(schema,ResourceObjectFactory, Resource:float:float:float:float:float:float:float);
-      schema->addPredicate("Resource.change");
-      schema->addMember("Resource.change", "float", "quantity");
-      schema->registerTokenFactory((new ResourceChangeTokenFactory("Resource.change"))->getId());
+	  ObjectType* ot;
 
-      schema->addObjectType("Reusable");
-      schema->addMember("Reusable", "float", "capacity");
-      schema->addMember("Reusable", "float", "levelLimitMin");
-      schema->addMember("Reusable", "float", "consumptionMax");
-      schema->addMember("Reusable", "float", "consumptionRateMax");
-      REGISTER_OBJECT_FACTORY(schema,ReusableObjectFactory, Reusable);
-      REGISTER_OBJECT_FACTORY(schema,ReusableObjectFactory, Reusable:float:float);
-      REGISTER_OBJECT_FACTORY(schema,ReusableObjectFactory, Reusable:float:float:float);
-      REGISTER_OBJECT_FACTORY(schema,ReusableObjectFactory, Reusable:float:float:float:float);
-      schema->addPredicate("Reusable.uses");
-      schema->addMember("Reusable.uses", "float", "quantity");
-      schema->registerTokenFactory((new ReusableUsesTokenFactory("Reusable.uses"))->getId());
+      ot = new ObjectType("Resource","Object",true /*isNative*/);
+      ot->addMember("float", "initialCapacity");
+      ot->addMember("float", "levelLimitMin");
+      ot->addMember("float", "levelLimitMax");
+      ot->addMember("float", "productionRateMax");
+      ot->addMember("float", "productionMax");
+      ot->addMember("float", "consumptionRateMax");
+      ot->addMember("float", "consumptionMax");
+      ot->addObjectFactory((new ResourceObjectFactory("Resource"))->getId());
+      ot->addObjectFactory((new ResourceObjectFactory("Resource:float:float:float"))->getId());
+      ot->addObjectFactory((new ResourceObjectFactory("Resource:float:float:float:float:float"))->getId());
+      ot->addObjectFactory((new ResourceObjectFactory("Resource:float:float:float:float:float:float:float"))->getId());
+      ot->addTokenFactory((new ResourceChangeTokenFactory("Resource.change"))->getId());
+      schema->registerObjectType(ot);
 
-      schema->addObjectType("CBReusable");
-      schema->addMember("CBReusable", "float", "capacity");
-      schema->addMember("CBReusable", "float", "levelLimitMin");
-      schema->addMember("CBReusable", "float", "consumptionMax");
-      schema->addMember("CBReusable", "float", "consumptionRateMax");
-      REGISTER_OBJECT_FACTORY(schema,CBReusableObjectFactory, CBReusable);
-      REGISTER_OBJECT_FACTORY(schema,CBReusableObjectFactory, CBReusable:float:float);
-      REGISTER_OBJECT_FACTORY(schema,CBReusableObjectFactory, CBReusable:float:float:float);
-      REGISTER_OBJECT_FACTORY(schema,CBReusableObjectFactory, CBReusable:float:float:float:float);
+      // TODO: preserve class hierarchy, all Resource types should extend Resource, not Object
+      ot = new ObjectType("Reusable","Object",true /*isNative*/);
+      ot->addMember("float", "capacity");
+      ot->addMember("float", "levelLimitMin");
+      ot->addMember("float", "consumptionMax");
+      ot->addMember("float", "consumptionRateMax");
+      ot->addObjectFactory((new ReusableObjectFactory("Reusable"))->getId());
+      ot->addObjectFactory((new ReusableObjectFactory("Reusable:float:float"))->getId());
+      ot->addObjectFactory((new ReusableObjectFactory("Reusable:float:float:float"))->getId());
+      ot->addObjectFactory((new ReusableObjectFactory("Reusable:float:float:float:float"))->getId());
+      ot->addTokenFactory((new ReusableUsesTokenFactory("Reusable.uses"))->getId());
+      schema->registerObjectType(ot);
+
+      ot = new ObjectType("CBReusable","Object",true /*isNative*/);
+      ot->addMember("float", "capacity");
+      ot->addMember("float", "levelLimitMin");
+      ot->addMember("float", "consumptionMax");
+      ot->addMember("float", "consumptionRateMax");
+      ot->addObjectFactory((new CBReusableObjectFactory("CBReusable"))->getId());
+      ot->addObjectFactory((new CBReusableObjectFactory("CBReusable:float:float"))->getId());
+      ot->addObjectFactory((new CBReusableObjectFactory("CBReusable:float:float:float"))->getId());
+      ot->addObjectFactory((new CBReusableObjectFactory("CBReusable:float:float:float:float"))->getId());
+      schema->registerObjectType(ot);
       REGISTER_CONSTRAINT(
         ce->getCESchema(),
         SAVH::Uses,
@@ -95,33 +97,28 @@ namespace EUROPA {
         SAVH::Uses::PROPAGATOR_NAME()
       );
 
-      schema->addObjectType("Reservoir");
-      schema->addMember("Reservoir", "float", "initialCapacity");
-      schema->addMember("Reservoir", "float", "levelLimitMin");
-      schema->addMember("Reservoir", "float", "levelLimitMax");
-      schema->addMember("Reservoir", "float", "productionRateMax");
-      schema->addMember("Reservoir", "float", "productionMax");
-      schema->addMember("Reservoir", "float", "consumptionRateMax");
-      schema->addMember("Reservoir", "float", "consumptionMax");
-      REGISTER_OBJECT_FACTORY(schema,ReservoirObjectFactory, Reservoir);
-      REGISTER_OBJECT_FACTORY(schema,ReservoirObjectFactory, Reservoir:float:float:float);
-      REGISTER_OBJECT_FACTORY(schema,ReservoirObjectFactory, Reservoir:float:float:float:float:float);
-      REGISTER_OBJECT_FACTORY(schema,ReservoirObjectFactory, Reservoir:float:float:float:float:float:float:float);
+      ot = new ObjectType("Reservoir","Object",true /*isNative*/);
+      ot->addMember("float", "initialCapacity");
+      ot->addMember("float", "levelLimitMin");
+      ot->addMember("float", "levelLimitMax");
+      ot->addMember("float", "productionRateMax");
+      ot->addMember("float", "productionMax");
+      ot->addMember("float", "consumptionRateMax");
+      ot->addMember("float", "consumptionMax");
+      ot->addObjectFactory((new ReservoirObjectFactory("Reservoir"))->getId());
+      ot->addObjectFactory((new ReservoirObjectFactory("Reservoir:float:float:float"))->getId());
+      ot->addObjectFactory((new ReservoirObjectFactory("Reservoir:float:float:float:float:float"))->getId());
+      ot->addObjectFactory((new ReservoirObjectFactory("Reservoir:float:float:float:float:float:float:float"))->getId());
+      ot->addTokenFactory((new ReservoirProduceTokenFactory("Reservoir.produce"))->getId());
+      ot->addTokenFactory((new ReservoirConsumeTokenFactory("Reservoir.consume"))->getId());
+      schema->registerObjectType(ot);
 
-      schema->addPredicate("Reservoir.produce");
-      schema->addMember("Reservoir.produce", "float", "quantity");
-      schema->registerTokenFactory((new ReservoirProduceTokenFactory("Reservoir.produce"))->getId());
-
-      schema->addPredicate("Reservoir.consume");
-      schema->addMember("Reservoir.consume", "float", "quantity");
-      schema->registerTokenFactory((new ReservoirConsumeTokenFactory("Reservoir.consume"))->getId());
-
-      schema->addObjectType("Unary");
-      schema->addMember("Unary", "float", "consumptionMax");
-      REGISTER_OBJECT_FACTORY(schema,UnaryObjectFactory, Unary);
-      REGISTER_OBJECT_FACTORY(schema,UnaryObjectFactory, Unary:float);
-      schema->addPredicate("Unary.use");
-      schema->registerTokenFactory((new UnaryUseTokenFactory("Unary.use"))->getId());
+      ot = new ObjectType("Unary","Object",true /*isNative*/);
+      ot->addMember("float","consumptionMax");
+      ot->addObjectFactory((new UnaryObjectFactory("Unary"))->getId());
+      ot->addObjectFactory((new UnaryObjectFactory("Unary:float"))->getId());
+      ot->addTokenFactory((new UnaryUseTokenFactory("Unary.use"))->getId());
+      schema->registerObjectType(ot);
 
       FactoryMgr* pfm = new FactoryMgr();
       engine->addComponent("ProfileFactoryMgr",pfm);
@@ -144,6 +141,7 @@ namespace EUROPA {
       EUROPA::SOLVERS::MatchFinderMgr* mfm = (EUROPA::SOLVERS::MatchFinderMgr*)engine->getComponent("MatchFinderMgr");
       REGISTER_MATCH_FINDER(mfm,EUROPA::SOLVERS::InstantMatchFinder,SAVH::Instant::entityTypeName());
 
+      // TODO: this can be removed when code generation is gone
       NddlXmlInterpreter* nddlXml = (NddlXmlInterpreter*)engine->getLanguageInterpreter("nddl-xml");
       if (nddlXml != NULL) {
           std::vector<std::string> nativeTokens;

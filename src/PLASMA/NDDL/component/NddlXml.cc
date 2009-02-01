@@ -7,6 +7,31 @@
 
 namespace EUROPA {
 
+const Id<ObjectFactory>& createDefaultObjectFactory(
+        const char* className,
+        const char* parentClassName,
+        bool canCreateObjects)
+{
+    std::vector<std::string> constructorArgNames;
+    std::vector<std::string> constructorArgTypes;
+    std::vector<Expr*> constructorBody;
+    ExprConstructorSuperCall* superCallExpr = NULL;
+
+    // If it can't create objects, generate default super call
+    if (!canCreateObjects)
+        superCallExpr = new ExprConstructorSuperCall(parentClassName,std::vector<Expr*>());
+
+    return (new InterpretedObjectFactory(
+            className,
+            className,
+            constructorArgNames,
+            constructorArgTypes,
+            superCallExpr,
+            constructorBody,
+            canCreateObjects)
+           )->getId();
+}
+
   /*
    *
    * NddlXmlInterpreter
@@ -17,16 +42,21 @@ namespace EUROPA {
     : DbClientTransactionPlayer(client)
     , m_ruleSchema(ruleSchema)
   {
-    // TODO: Add native class method must be modified to also register native factories
-    // also, get NddlModule to register these instead?
+    // TODO: these should be registered by PlanDatabase module
     std::vector<std::string> noNativeTokens;
     std::string root = Schema::rootObject().toString();
 
-    addNativeClass(root,noNativeTokens);
-    createDefaultObjectFactory(root.c_str(), true);
+    ObjectType* ot;
 
-    addNativeClass("Timeline", noNativeTokens);
-    REGISTER_OBJECT_FACTORY(getSchema(), TimelineObjectFactory, Timeline);
+    ot = new ObjectType("Object","",true /*isNative*/);
+    addNativeClass(root,noNativeTokens);// TODO: remove this
+    ot->addObjectFactory(createDefaultObjectFactory(root.c_str(), NULL, true));
+    getSchema()->registerObjectType(ot);
+
+    ot = new ObjectType("Timeline","Object",true /*isNative*/);
+    addNativeClass("Timeline", noNativeTokens); // TODO: remove this
+    ot->addObjectFactory((new TimelineObjectFactory("Timeline"))->getId());
+    getSchema()->registerObjectType(ot);
   }
 
   NddlXmlInterpreter::~NddlXmlInterpreter()
@@ -44,31 +74,6 @@ namespace EUROPA {
       m_nativeClasses.insert(className);
       for (unsigned int i=0;i<nativeTokens.size();i++)
           m_nativeTokens.insert(nativeTokens[i]);
-  }
-
-  void NddlXmlInterpreter::createDefaultObjectFactory(const char* className, bool canCreateObjects)
-  {
-    std::vector<std::string> constructorArgNames;
-    std::vector<std::string> constructorArgTypes;
-    std::vector<Expr*> constructorBody;
-    ExprConstructorSuperCall* superCallExpr = NULL;
-
-    // If it can't create objects, generate default super call
-    if (!canCreateObjects)
-      superCallExpr = new ExprConstructorSuperCall(getSchema()->getParent(className),std::vector<Expr*>());
-
-    getSchema()->registerObjectFactory(
-            (new InterpretedObjectFactory(
-                 className,
-                 className,
-                 constructorArgNames,
-                 constructorArgTypes,
-                 superCallExpr,
-                 constructorBody,
-                 canCreateObjects
-                 )
-            )->getId()
-    );
   }
 
   const char* safeStr(const char* str)
@@ -89,58 +94,7 @@ namespace EUROPA {
     debugMsg("XMLInterpreter:XML",dbgout.str());
   }
 
-  void NddlXmlInterpreter::playDefineClass(const TiXmlElement& element)
-  {
-    const char* className = element.Attribute("name");
-
-    if (m_nativeClasses.find(className) != m_nativeClasses.end()) {
-        // TODO: should always be displayed as WARNING!
-        debugMsg("XMLInterpreter:XML","Skipping definition for native class : " << className);
-        return;
-    }
-
-    const char* parentClassName = element.Attribute("extends");
-    parentClassName = (parentClassName == NULL ? "Object" : parentClassName);
-
-    Id<Schema> schema = getSchema();
-    schema->addObjectType(className,parentClassName);
-
-    dbgout.str("");
-    dbgout << "class " << className
-       << (parentClassName != NULL ? " extends " : "")
-       << (parentClassName != NULL ? parentClassName : "")
-       << " {" << std::endl;
-
-    bool definedConstructor = false;
-    for(const TiXmlElement* child = element.FirstChildElement(); child; child = child->NextSiblingElement() ) {
-      const char * tagname = child->Value();
-
-      if (strcmp(tagname, "var") == 0)
-          defineClassMember(schema,className,child);
-      else if (strcmp(tagname, "constructor") == 0) {
-          defineConstructor(schema,className,child);
-          definedConstructor = true;
-      }
-      else if (strcmp(tagname, "predicate") == 0)
-          declarePredicate(schema,className,child);
-      else if (strcmp(tagname, "enum") == 0)
-          defineEnum(schema,className,child);
-      else
-          check_runtime_error(ALWAYS_FAILS,std::string("Unexpected element ")+tagname+" while defining class "+className);
-    }
-
-    // Register a default factory with no arguments if one is not provided explicitly
-    if (!definedConstructor &&
-        m_nativeClasses.find(className) == m_nativeClasses.end()) {
-      createDefaultObjectFactory(className, false);
-      dbgout << "    generated default constructor" << std::endl;
-    }
-
-    dbgout << "}" << std::endl;
-    debugMsg("XMLInterpreter:XML",dbgout.str());
-  }
-
-  Expr* NddlXmlInterpreter::valueToExpr(const TiXmlElement* element, bool isRule)
+   Expr* NddlXmlInterpreter::valueToExpr(const TiXmlElement* element, bool isRule)
   {
     check_runtime_error(element != NULL,"Unexpected NULL element, expected value or id element");
 
@@ -166,178 +120,214 @@ namespace EUROPA {
     return NULL;
   }
 
-  void NddlXmlInterpreter::defineClassMember(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
+  void NddlXmlInterpreter::playDefineClass(const TiXmlElement& element)
+  {
+      const char* className = element.Attribute("name");
+
+      if (m_nativeClasses.find(className) != m_nativeClasses.end()) {
+          // TODO: should always be displayed as INFO!
+          debugMsg("XMLInterpreter:XML","Skipping definition for native class : " << className);
+          return;
+      }
+
+      getSchema()->declareObjectType(className);
+
+      const char* parentClassName = element.Attribute("extends");
+      parentClassName = (parentClassName == NULL ? "Object" : parentClassName);
+
+      ObjectType* objType = new ObjectType(className,parentClassName);
+
+      bool definedConstructor = false;
+      for(const TiXmlElement* child = element.FirstChildElement(); child; child = child->NextSiblingElement() ) {
+          const char * tagname = child->Value();
+
+          if (strcmp(tagname, "var") == 0)
+              defineClassMember(objType,child);
+          else if (strcmp(tagname, "constructor") == 0) {
+              defineConstructor(objType,child);
+              definedConstructor = true;
+          }
+          else if (strcmp(tagname, "predicate") == 0)
+              declarePredicate(objType,child);
+          else if (strcmp(tagname, "enum") == 0)
+              defineEnum(getSchema(),className,child); // TODO: move to ObjectType?
+          else
+              check_runtime_error(ALWAYS_FAILS,std::string("Unexpected element ")+tagname+" while defining class "+className);
+      }
+
+      // Register a default factory with no arguments if one is not provided explicitly
+      // TODO: this should automatically be done by objType
+      if (!definedConstructor)
+          objType->addObjectFactory(createDefaultObjectFactory(className, parentClassName, false));
+
+
+      getSchema()->registerObjectType(objType);
+  }
+
+  void NddlXmlInterpreter::defineClassMember(ObjectType* objType,  const TiXmlElement* element)
   {
     const char* type = safeStr(element->Attribute("type"));
     const char* name = safeStr(element->Attribute("name"));
-    dbgout << ident << type << " " << name << std::endl;
-    schema->addMember(className, type, name);
+    objType->addMember(type,name);
   }
 
-  int NddlXmlInterpreter::defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
+  int NddlXmlInterpreter::defineConstructor(ObjectType* objType, const TiXmlElement* element)
   {
-    std::ostringstream signature;
-    signature << className;
+      const char* className = objType->getName().c_str();
+      std::ostringstream signature;
+      signature << className;
 
-    std::vector<std::string> constructorArgNames;
-    std::vector<std::string> constructorArgTypes;
-    std::vector<Expr*> constructorBody;
-    ExprConstructorSuperCall* superCallExpr = NULL;
+      std::vector<std::string> constructorArgNames;
+      std::vector<std::string> constructorArgTypes;
+      std::vector<Expr*> constructorBody;
+      ExprConstructorSuperCall* superCallExpr = NULL;
 
-    for(const TiXmlElement* child = element->FirstChildElement(); child; child = child->NextSiblingElement() ) {
-      if (strcmp(child->Value(),"arg") == 0) {
-    const char* type = safeStr(child->Attribute("type"));
-    const char* name = safeStr(child->Attribute("name"));
-    constructorArgNames.push_back(name);
-    constructorArgTypes.push_back(type);
-    signature << ":" << type;
-      }
-      else if (strcmp(child->Value(),"super") == 0) {
-    std::vector<Expr*> argExprs;
-    for(const TiXmlElement* argChild = child->FirstChildElement(); argChild; argChild = argChild->NextSiblingElement() )
-      argExprs.push_back(valueToExpr(argChild,false));
-
-    superCallExpr = new ExprConstructorSuperCall(getSchema()->getParent(className),argExprs);
-      }
-      else if (strcmp(child->Value(),"assign") == 0) {
-    const TiXmlElement* rhsChild = child->FirstChildElement();
-    const char* lhs = child->Attribute("name");
-
-    Expr* rhs=NULL;
-    const char* rhsType = rhsChild->Value();
-    if (strcmp(rhsType,"new") == 0) {
-      const char* objectType = rhsChild->Attribute("type");
-
-      std::vector<Expr*> argExprs;
-      for(const TiXmlElement* argChild = rhsChild->FirstChildElement(); argChild; argChild = argChild->NextSiblingElement() )
-        argExprs.push_back(valueToExpr(argChild,false));
-
-      rhs = new ExprNewObject(
-                  m_client,
-                  objectType,
-                  lhs,
-                  argExprs
-                  );
-    }
-    else
-      rhs = valueToExpr(rhsChild,false);
-    debugMsg("NddlXmlInterpreter:defineConstructor",
-         "Adding an assignment to " << lhs);
-    constructorBody.push_back(new ExprConstructorAssignment(lhs,rhs));
-      }
-      else
-    check_runtime_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + child->Value());
-    }
-    dbgout << ident << "constructor (" << signature.str() << ")" << std::endl;
-
-    // If constructor for super class isn't called explicitly, call default one with no args
-    if (superCallExpr == NULL){
-      bool hasParent = getSchema()->hasParent(className);
-      if(hasParent)
-    superCallExpr = new ExprConstructorSuperCall(getSchema()->getParent(className),std::vector<Expr*>());
-      else
-    superCallExpr = new ExprConstructorSuperCall("Object",std::vector<Expr*>());
-    }
-
-    // The ObjectFactory constructor automatically registers the factory
-    getSchema()->registerObjectFactory(
-            (new InterpretedObjectFactory(
-                 className,
-                 signature.str(),
-                 constructorArgNames,
-                 constructorArgTypes,
-                 superCallExpr,
-                 constructorBody
-                 )
-            )->getId()
-    );
-
-    return constructorArgNames.size();
-  }
-
-  void NddlXmlInterpreter::declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
-  {
-    std::string predName = std::string(className) + "." + element->Attribute("name");
-
-    schema->addPredicate(predName.c_str());
-
-    std::vector<LabelStr> parameterNames;
-    std::vector<LabelStr> parameterTypes;
-    std::vector<Expr*> parameterValues;
-    std::vector<LabelStr> assignVars;
-    std::vector<Expr*> assignValues;
-    std::vector<ExprConstraint*> constraints;
-
-    dbgout << ident << "predicate " <<  predName << "(";
-    for(const TiXmlElement* predArg = element->FirstChildElement(); predArg; predArg = predArg->NextSiblingElement() ) {
-      if (strcmp(predArg->Value(),"var") == 0) {
-    const char* type = safeStr(predArg->Attribute("type"));
-    const char* name = safeStr(predArg->Attribute("name"));
-    dbgout << type << " " << name << ",";
-    schema->addMember(predName.c_str(), type, name);
-    parameterNames.push_back(name);
-    parameterTypes.push_back(type);
-        if(!predArg->NoChildren())
-          parameterValues.push_back(valueToExpr(predArg->FirstChildElement()));
-        else
-          parameterValues.push_back(NULL);
-      }
-      else if (strcmp(predArg->Value(),"assign") == 0) {
-    const char* type = safeStr(predArg->Attribute("type"));
-    const char* name = safeStr(predArg->Attribute("name"));
-    bool inherited = (predArg->Attribute("inherited") != NULL ? true : false);
-    dbgout << type << " " << name << ",";
-    if (!inherited) {
-          // it *should* be a parameter, find it and tag it
-          std::vector<Expr*>::iterator vit = parameterValues.begin();
-          for(std::vector<LabelStr>::const_iterator it = parameterNames.begin(); it != parameterNames.end(); ++it) {
-            if(strcmp(it->c_str(), name) == 0)
-              break;
-            ++vit;
+      for(const TiXmlElement* child = element->FirstChildElement(); child; child = child->NextSiblingElement() ) {
+          if (strcmp(child->Value(),"arg") == 0) {
+              const char* type = safeStr(child->Attribute("type"));
+              const char* name = safeStr(child->Attribute("name"));
+              constructorArgNames.push_back(name);
+              constructorArgTypes.push_back(type);
+              signature << ":" << type;
           }
-      check_runtime_error(vit != parameterValues.end(), std::string("Cannot assign to undeclared parameter:") + name + " in predicate "+predName);
-          // should probably say something about redefinition, but meh
-          *vit = valueToExpr(predArg->FirstChildElement());
-        }
-        else {
-      assignVars.push_back(name);
-      assignValues.push_back(valueToExpr(predArg->FirstChildElement()));
-        }
+          else if (strcmp(child->Value(),"super") == 0) {
+              std::vector<Expr*> argExprs;
+              for(const TiXmlElement* argChild = child->FirstChildElement(); argChild; argChild = argChild->NextSiblingElement() )
+                  argExprs.push_back(valueToExpr(argChild,false));
+
+              superCallExpr = new ExprConstructorSuperCall(objType->getParent(),argExprs);
+          }
+          else if (strcmp(child->Value(),"assign") == 0) {
+              const TiXmlElement* rhsChild = child->FirstChildElement();
+              const char* lhs = child->Attribute("name");
+
+              Expr* rhs=NULL;
+              const char* rhsType = rhsChild->Value();
+              if (strcmp(rhsType,"new") == 0) {
+                  const char* objectType = rhsChild->Attribute("type");
+
+                  std::vector<Expr*> argExprs;
+                  for(const TiXmlElement* argChild = rhsChild->FirstChildElement(); argChild; argChild = argChild->NextSiblingElement() )
+                      argExprs.push_back(valueToExpr(argChild,false));
+
+                  rhs = new ExprNewObject(
+                          m_client,
+                          objectType,
+                          lhs,
+                          argExprs
+                  );
+              }
+              else
+                  rhs = valueToExpr(rhsChild,false);
+
+              debugMsg("NddlXmlInterpreter:defineConstructor",
+                      "Adding an assignment to " << lhs);
+              constructorBody.push_back(new ExprConstructorAssignment(lhs,rhs));
+          }
+          else
+              check_runtime_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + child->Value());
       }
-      else if (strcmp(predArg->Value(),"invoke") == 0) {
-    dbgout << "constraint " << predArg->Attribute("name");
-    std::vector<Expr*> constraintArgs;
-    for(const TiXmlElement* arg = predArg->FirstChildElement(); arg; arg = arg->NextSiblingElement() )
-      constraintArgs.push_back(valueToExpr(arg));
 
-    constraints.push_back(new ExprConstraint(predArg->Attribute("name"),constraintArgs));
-      }
-      else
-    check_runtime_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + predArg->Value()+ " in predicate "+predName);
-    }
-    dbgout << ")" << std::endl;
+      // If constructor for super class isn't called explicitly, call default one with no args
+      if (superCallExpr == NULL)
+          superCallExpr = new ExprConstructorSuperCall(objType->getParent(),std::vector<Expr*>());
 
-    if (m_nativeTokens.find(predName) != m_nativeTokens.end()) {
-      // TODO: should always be displayed as WARNING!
-      debugMsg("XMLInterpreter:XML","Skipping factory registration for System token : " << predName);
-      return;
-    }
+      objType->addObjectFactory(
+              (new InterpretedObjectFactory(
+                      className,
+                      signature.str(),
+                      constructorArgNames,
+                      constructorArgTypes,
+                      superCallExpr,
+                      constructorBody
+                  )
+              )->getId()
+      );
 
-    TokenFactoryId parentFactory = getSchema()->getParentTokenFactory(predName);
-
-    getSchema()->registerTokenFactory((new InterpretedTokenFactory(
-                predName,
-                parentFactory,
-                parameterNames,
-                parameterTypes,
-                parameterValues,
-                assignVars,
-                assignValues,
-                constraints
-                ))->getId());
+      return constructorArgNames.size();
   }
 
-  void NddlXmlInterpreter::defineEnum(Id<Schema>& schema, const char* className,  const TiXmlElement* element)
+  void NddlXmlInterpreter::declarePredicate(ObjectType* objType,  const TiXmlElement* element)
+  {
+      const char* className = objType->getName().c_str();
+      std::string predName = std::string(className) + "." + element->Attribute("name");
+
+      // TODO: just check if the class is native
+      if (m_nativeTokens.find(predName) != m_nativeTokens.end()) {
+          // TODO: should always be displayed as INFO!
+          debugMsg("XMLInterpreter:XML","Skipping factory registration for native token : " << predName);
+          return;
+      }
+
+      std::vector<LabelStr> parameterNames;
+      std::vector<LabelStr> parameterTypes;
+      std::vector<Expr*> parameterValues;
+      std::vector<LabelStr> assignVars;
+      std::vector<Expr*> assignValues;
+      std::vector<ExprConstraint*> constraints;
+
+      for(const TiXmlElement* predArg = element->FirstChildElement(); predArg; predArg = predArg->NextSiblingElement() ) {
+          if (strcmp(predArg->Value(),"var") == 0) {
+              const char* type = safeStr(predArg->Attribute("type"));
+              const char* name = safeStr(predArg->Attribute("name"));
+              parameterNames.push_back(name);
+              parameterTypes.push_back(type);
+              if(!predArg->NoChildren())
+                  parameterValues.push_back(valueToExpr(predArg->FirstChildElement()));
+              else
+                  parameterValues.push_back(NULL);
+          }
+          else if (strcmp(predArg->Value(),"assign") == 0) {
+              //const char* type = safeStr(predArg->Attribute("type")); // TODO: use type?
+              const char* name = safeStr(predArg->Attribute("name"));
+              bool inherited = (predArg->Attribute("inherited") != NULL ? true : false);
+              if (inherited) {
+                  assignVars.push_back(name);
+                  assignValues.push_back(valueToExpr(predArg->FirstChildElement()));
+              }
+              else {
+                  // it *should* be a parameter, find it and tag it
+                  std::vector<Expr*>::iterator vit = parameterValues.begin();
+                  for(std::vector<LabelStr>::const_iterator it = parameterNames.begin(); it != parameterNames.end(); ++it) {
+                      if(strcmp(it->c_str(), name) == 0)
+                          break;
+                      ++vit;
+                  }
+                  check_runtime_error(vit != parameterValues.end(), std::string("Cannot assign to undeclared parameter:") + name + " in predicate "+predName);
+                  // should probably say something about redefinition, but meh
+                  *vit = valueToExpr(predArg->FirstChildElement());
+              }
+          }
+          else if (strcmp(predArg->Value(),"invoke") == 0) {
+              dbgout << "constraint " << predArg->Attribute("name");
+              std::vector<Expr*> constraintArgs;
+              for(const TiXmlElement* arg = predArg->FirstChildElement(); arg; arg = arg->NextSiblingElement() )
+                  constraintArgs.push_back(valueToExpr(arg));
+
+              constraints.push_back(new ExprConstraint(predArg->Attribute("name"),constraintArgs));
+          }
+          else
+              check_runtime_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + predArg->Value()+ " in predicate "+predName);
+      }
+      dbgout << ")" << std::endl;
+
+      TokenFactoryId parentFactory = getSchema()->getParentTokenFactory(predName, objType->getParent());
+
+      objType->addTokenFactory(
+          (new InterpretedTokenFactory(
+              predName,
+              parentFactory,
+              parameterNames,
+              parameterTypes,
+              parameterValues,
+              assignVars,
+              assignValues,
+              constraints
+          ))->getId()
+      );
+  }
+
+  void NddlXmlInterpreter::defineEnum(const SchemaId& schema, const char* className, const TiXmlElement* element)
   {
     // Enum is scoped within the class but in the generated code it doesn't make a difference
     playDefineEnumeration(*element);

@@ -7,11 +7,12 @@
 #include "DbClientTransactionPlayer.hh"
 #include "RulesEngineDefs.hh"
 #include "Engine.hh"
-
+#include "ObjectType.hh"
 
 namespace EUROPA {
 
   class Expr;
+  class ObjectFactory;
 
   class NddlXmlInterpreter : public DbClientTransactionPlayer, public LanguageInterpreter
   {
@@ -31,12 +32,10 @@ namespace EUROPA {
       virtual void playDefineType(const TiXmlElement &);
 
       void buildRuleBody(const char* className, const std::string& predName, const TiXmlElement* element, std::vector<Expr*>& ruleBody,std::map<std::string,std::string>& localVars);
-      void defineClassMember(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
-      int  defineConstructor(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
-      void declarePredicate(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
-      void defineEnum(Id<Schema>& schema, const char* className,  const TiXmlElement* element);
-
-      void createDefaultObjectFactory(const char* className, bool canCreateObjects);
+      void defineClassMember (ObjectType* objType, const TiXmlElement* element);
+      int  defineConstructor (ObjectType* objType, const TiXmlElement* element);
+      void declarePredicate  (ObjectType* objType, const TiXmlElement* element);
+      void defineEnum(const SchemaId& schema, const char* className,  const TiXmlElement* element);
 
       Expr* valueToExpr(const TiXmlElement* element,bool isRule=true);
 
