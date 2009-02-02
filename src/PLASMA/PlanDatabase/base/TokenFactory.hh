@@ -51,7 +51,7 @@ namespace EUROPA {
 
   protected:
     TokenTypeMgrId m_id;
-    std::map<double, TokenFactoryId> m_factoriesByPredicate;
+    std::map<edouble, TokenFactoryId> m_factoriesByPredicate;
     std::set<TokenFactoryId> m_factories;
   };
 

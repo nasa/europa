@@ -51,8 +51,8 @@ namespace EUROPA {
     
   void ObjectTypeMgr::purgeAll(){
     debugMsg("ObjectFactory:purgeAll", "Purging all");
-    std::set<double> alreadyDeleted;
-    for(std::map<double, ObjectFactoryId>::const_iterator it = m_factories.begin(); it != m_factories.end(); ++it) {
+    std::set<edouble> alreadyDeleted;
+    for(std::map<edouble, ObjectFactoryId>::const_iterator it = m_factories.begin(); it != m_factories.end(); ++it) {
       if(alreadyDeleted.find(it->second) == alreadyDeleted.end()) {
           alreadyDeleted.insert(it->second);
           delete (ObjectFactory*) it->second;
@@ -96,7 +96,7 @@ namespace EUROPA {
 
 
     // Try to find a hit straight off
-    std::map<double, ObjectFactoryId>::const_iterator it = m_factories.find(factoryName.getKey());
+    std::map<edouble, ObjectFactoryId>::const_iterator it = m_factories.find(factoryName.getKey());
 
     // If we have a hit, return it
     if(it != m_factories.end())
@@ -133,7 +133,7 @@ namespace EUROPA {
 
       if(found){
     // Cache for next time and return
-    m_factories.insert(std::pair<double, ObjectFactoryId>(factoryName, factory));
+    m_factories.insert(std::pair<edouble, ObjectFactoryId>(factoryName, factory));
     return factory;
       }
     }
@@ -157,7 +157,7 @@ namespace EUROPA {
 
     // Ensure it is not present already
     check_error(m_factories.find(factory->getSignature().getKey()) == m_factories.end());
-    m_factories.insert(std::pair<double, ObjectFactoryId>(factory->getSignature().getKey(), factory));
+    m_factories.insert(std::make_pair(factory->getSignature().getKey(), factory));
   }
   
 }

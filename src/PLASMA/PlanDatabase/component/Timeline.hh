@@ -33,7 +33,7 @@ namespace EUROPA {
 
     void getOrderingChoices(const TokenId& token,
 			    std::vector< std::pair<TokenId, TokenId> >& results,
-			    unsigned int limit = PLUS_INFINITY);
+			    unsigned int limit = std::numeric_limits<unsigned int>::max());
 
     void getTokensToOrder(std::vector<TokenId>& results);
 
@@ -101,7 +101,7 @@ namespace EUROPA {
     std::list<TokenId> m_tokenSequence;
 
     /** Index to find position in sequence by Token */
-    std::map<int, std::list<TokenId>::iterator > m_tokenIndex;
+    std::map<eint, std::list<TokenId>::iterator > m_tokenIndex;
 
     static const bool CLEANING_UP = true;
   };

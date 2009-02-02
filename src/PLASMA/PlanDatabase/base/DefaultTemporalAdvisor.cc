@@ -23,14 +23,14 @@ namespace EUROPA {
   bool DefaultTemporalAdvisor::canPrecede(const TokenId& first, const TokenId& second){    
     //    std::cout << "DefaultTemporalAdvisor canPrecede (" << first->getKey() << ") and (" << second->getKey() << ")" << std::endl;
 
-    int earliest_end = (int) first->end()->getDerivedDomain().getLowerBound();
-    int latest_start = (int) second->start()->getDerivedDomain().getUpperBound();
+    eint earliest_end = cast_int(first->end()->getDerivedDomain().getLowerBound());
+    eint latest_start = cast_int(second->start()->getDerivedDomain().getUpperBound());
 
     return (earliest_end <= latest_start);
   }
 
   bool DefaultTemporalAdvisor::canPrecede(const TimeVarId& first, const TimeVarId& second) {
-    return (int) first->getDerivedDomain().getLowerBound() <= (int) second->getDerivedDomain().getUpperBound();
+    return first->getDerivedDomain().getLowerBound() <= second->getDerivedDomain().getUpperBound();
   }
 
   bool DefaultTemporalAdvisor::canFitBetween(const TokenId& token, const TokenId& predecessor, const TokenId& successor){
@@ -41,9 +41,9 @@ namespace EUROPA {
     check_error(token != successor);
     check_error(token != predecessor);
 
-    int latest_start = (int) successor->start()->getDerivedDomain().getUpperBound();
-    int earliest_end = (int) predecessor->end()->getDerivedDomain().getLowerBound();
-    int min_duration = latest_start - earliest_end;
+    eint latest_start = cast_int(successor->start()->getDerivedDomain().getUpperBound());
+    eint earliest_end = cast_int(predecessor->end()->getDerivedDomain().getLowerBound());
+    eint min_duration = latest_start - earliest_end;
 
     if(min_duration >= token->duration()->getDerivedDomain().getLowerBound())
       return true;
@@ -72,19 +72,19 @@ namespace EUROPA {
 	||
 	second->getExternalEntity().isNoId() )
       {
-	int f_lb = (int) first->getDerivedDomain().getLowerBound();
-	int f_ub = (int) first->getDerivedDomain().getUpperBound();
+	eint f_lb = cast_int(first->getDerivedDomain().getLowerBound());
+	eint f_ub = cast_int(first->getDerivedDomain().getUpperBound());
 	
-	int s_lb = (int) second->getDerivedDomain().getLowerBound();
-	int s_ub = (int) second->getDerivedDomain().getUpperBound();
+	eint s_lb = cast_int(second->getDerivedDomain().getLowerBound());
+	eint s_ub = cast_int(second->getDerivedDomain().getUpperBound());
 	
-	int min_distance = -g_infiniteTime();
+	eint min_distance = -g_infiniteTime();
 
 	if( s_lb > -g_infiniteTime() && f_ub < g_infiniteTime() ) {
 	    min_distance = std::max( min_distance, s_lb - f_ub );
 	  }
 	  
-	int max_distance = g_infiniteTime();
+	eint max_distance = g_infiniteTime();
 	
 	if( f_lb > -g_infiniteTime() && s_ub < g_infiniteTime() ) {
 	  max_distance = std::min( max_distance, s_ub - f_lb );

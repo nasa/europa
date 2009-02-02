@@ -154,38 +154,39 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
     }
 
     /**
-     * @brief Permit type casting of doubles on construction.
-     * @param val A double value encoding of the address of the instance to be pointed to.
+     * @brief Permit type casting of eints on construction.
+     * @param val An eint value encoding of the address of the instance to be pointed to.
      * Must be 0, or an address for which an Id has already been allocated.
      */
-    inline Id(double val) {
-#ifndef EUROPA_FAST
-      if (val == 0)
-        m_key = 0;
-      else {
-        m_key = IdTable::getKey((unsigned long int) val);
-        check_error(m_key != 0,
-                    std::string("Cannot instantiate an Id<") + typeid(T).name() + "> for this address. No instance present.",
-                    IdErr::IdMgrInvalidItemPtrError());
-      }
-#endif
-      m_ptr = (T*) (unsigned long int) val;
-    }
-
     inline Id(edouble val) {
 #ifndef EUROPA_FAST
       if (val == 0)
         m_key = 0;
       else {
-        m_key = IdTable::getKey((unsigned long int) cast_double(val));
-        check_error(m_key != 0,
-                    std::string("Cannot instantiate an Id<") + typeid(T).name() + "> for this address. No instance present.",
-                    IdErr::IdMgrInvalidItemPtrError());
+        m_key = IdTable::getKey((unsigned long int) cast_long(val));
+        checkError(m_key != 0,
+                   "Cannot instantiate an Id<" << typeid(T).name() << "> for this address: "  <<
+                   std::hex << (unsigned long int) cast_long(val) << ". No instance present.",
+                   IdErr::IdMgrInvalidItemPtrError());
       }
 #endif
-      m_ptr = (T*) (unsigned long int) cast_double(val);
+      m_ptr = (T*) (unsigned long int) cast_long(val);
     }
 
+
+    inline Id(const unsigned long int val) {
+#ifndef EUROPA_FAST
+      if (val == 0)
+        m_key = 0;
+      else {
+        m_key = IdTable::getKey(val);
+        checkError(m_key != 0,
+                   "Cannot instantiate an Id<" << typeid(T).name() << "> for this address: "  <<
+                   std::hex << val << ". No instance present.", IdErr::IdMgrInvalidItemPtrError());
+      }
+#endif
+      m_ptr = (T*) val;
+    }
     /**
      * @brief Copy constructor from an Id of a different type.
      * @param org The constant reference to original Id from which to copy.
@@ -197,10 +198,11 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
     }
 
     /**
-     * @brief Cast the pointer to a double.
+     * @brief Cast the pointer to an int.
      */
-    inline operator double() const {
-        return((double) (unsigned long int) m_ptr);
+
+    inline operator edouble() const {
+      return edouble((unsigned long int) m_ptr);
     }
 
     /**
@@ -223,7 +225,7 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      */
     template <class X>
     inline bool equals(const Id<X>& org) const{
-      return (operator double()) == (org.operator double());
+      return (operator eint()) == (org.operator eint());
     }
 
     /**
@@ -452,7 +454,7 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
     /**
      * Key within the IdTable.
      */
-    unsigned int m_key;
+    unsigned long int m_key;
 #endif
   };
 

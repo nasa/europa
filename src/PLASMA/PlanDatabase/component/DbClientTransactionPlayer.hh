@@ -173,7 +173,7 @@ namespace EUROPA {
     /** 
      * @brief return a value as represented by an xml element
      */
-    double xmlAsValue(const TiXmlElement & value, const char * name = NULL);
+    edouble xmlAsValue(const TiXmlElement & value, const char * name = NULL);
 
     /** 
      * @brief return a variable as represented by an xml element

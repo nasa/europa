@@ -99,7 +99,7 @@ namespace EUROPA {
   }
 
   bool Schema::isPredicate(const LabelStr& predicateName) const {
-    std::set<double> sl_trueCache, sl_falseCache;
+    static std::set<edouble> sl_trueCache, sl_falseCache;
 
     if(sl_trueCache.find(predicateName) != sl_trueCache.end())
       return true;
@@ -136,9 +136,9 @@ namespace EUROPA {
     return (enumValues.find(str) != enumValues.end());
   }
 
-  bool Schema::isEnumValue(const LabelStr& enumName, double value) const {
+  bool Schema::isEnumValue(const LabelStr& enumName, edouble value) const {
     check_error(isEnum(enumName), enumName.toString() + " is not defined.");
-    const std::set<double>& members = enumValues.find(enumName)->second;
+    const std::set<edouble>& members = enumValues.find(enumName)->second;
     return(members.find(value) != members.end());
   }
 
@@ -184,7 +184,7 @@ namespace EUROPA {
     check_error(isType(parentType), parentType.toString() + " is not defined.");
 
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(parentType);
 
     // If no hit, then try for the parent. There must be one since it is a valid 
@@ -216,7 +216,7 @@ namespace EUROPA {
 
   const Schema::NameValueVector& Schema::getMembers(const LabelStr& objectType) const
   {
-    std::map<double, NameValueVector>::const_iterator it = membershipRelation.find(objectType);
+    std::map<edouble, NameValueVector>::const_iterator it = membershipRelation.find(objectType);
       
     check_error(it != membershipRelation.end(), "Unable to find members for object type:" + objectType.toString() );
     return it->second;
@@ -226,7 +226,7 @@ namespace EUROPA {
     check_error(isType(parentType), parentType.toString() + " is undefined.");
 
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(parentType);
 
     // If no hit, then try for the parent. There must be one since it is a valid 
@@ -257,7 +257,7 @@ namespace EUROPA {
   }
 
   const std::vector<LabelStr>& Schema::getAllObjectTypes(const LabelStr& objectType) {
-    std::map<double, std::vector<LabelStr> >::iterator it = allObjectTypes.find(objectType);
+    std::map<edouble, std::vector<LabelStr> >::iterator it = allObjectTypes.find(objectType);
     if(it != allObjectTypes.end())
       return it->second;
 
@@ -276,7 +276,7 @@ namespace EUROPA {
   }
 
   bool Schema::hasParent(const LabelStr& type) const {
-    static std::set<double> sl_trueCache;
+    static std::set<edouble> sl_trueCache;
 
     if(sl_trueCache.find(type) != sl_trueCache.end())
       return true;
@@ -319,7 +319,7 @@ namespace EUROPA {
   }
   
 
-  const std::set<double>& Schema::getEnumValues(const LabelStr& enumName) const {
+  const std::set<edouble>& Schema::getEnumValues(const LabelStr& enumName) const {
     check_error(isEnum(enumName), enumName.toString() + " is not a defined enumeration.");
     
     return enumValues.find(enumName)->second;
@@ -367,7 +367,7 @@ namespace EUROPA {
 		memberName.toString() + " is not a member of " + parentType.toString());
 
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
@@ -391,7 +391,7 @@ namespace EUROPA {
 		memberName.toString() + " is not a member of " + parentType.toString());
 
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
@@ -415,7 +415,7 @@ namespace EUROPA {
 
   const LabelStr Schema::getNameFromIndex(const LabelStr& parentType, unsigned int index) const {
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
@@ -457,7 +457,7 @@ namespace EUROPA {
   unsigned int Schema::getParameterCount(const LabelStr& predicate) const {
     check_error(isPredicate(predicate), predicate.toString() + " is not defined as a Predicate");
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(predicate);
 
     check_error(membershipRelation_it != membershipRelation.end(), predicate.toString() + " not found in the membership relation");
@@ -471,7 +471,7 @@ namespace EUROPA {
     check_error(paramIndex < getParameterCount(predicate), paramIndex + " is not a valid index"); 
 
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(predicate);
 
     check_error(membershipRelation_it != membershipRelation.end());
@@ -567,7 +567,7 @@ namespace EUROPA {
     enumValues.insert(std::pair<LabelStr, ValueSet>(enumName, ValueSet()));
   }
 
-  void Schema::addValue(const LabelStr& enumName, double enumValue) {
+  void Schema::addValue(const LabelStr& enumName, edouble enumValue) {
     check_error(isEnum(enumName), enumName.toString() + " is undefined.");
     debugMsg("Schema:addValue", "[" << m_name.toString() << "] " << "Added " <<
 	     (LabelStr::isString(enumValue) ? LabelStr(enumValue).toString() : toString(enumValue)) << " to " <<

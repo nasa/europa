@@ -73,14 +73,14 @@ namespace EUROPA {
     /** 
      * @brief create a string to describe a value, given its domain
      */
-    std::string domainValueAsString(const AbstractDomain * domain, double value);
+    std::string domainValueAsString(const AbstractDomain * domain, edouble value);
 
   //! XML output functions
 
     /** 
      * @brief create an xml element to represent a value, given its domain
      */
-    TiXmlElement * domainValueAsXml(const AbstractDomain * domain, double value);
+    TiXmlElement * domainValueAsXml(const AbstractDomain * domain, edouble value);
 
     /** 
      * @brief create an xml element to represent a domain

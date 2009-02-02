@@ -155,14 +155,14 @@ namespace EUROPA{
     m_objects.insert(object);
 
     // Cache by name
-    m_objectsByName.insert(std::pair<double, ObjectId>(object->getName().getKey(), object));
+    m_objectsByName.insert(std::make_pair(object->getName().getKey(), object));
 
     // Now cache by type
     LabelStr type = object->getType();
-    m_objectsByType.insert(std::pair<double, ObjectId>(type.getKey(), object));
+    m_objectsByType.insert(std::make_pair(type.getKey(), object));
     while(m_schema->hasParent(type)){
       type = m_schema->getParent(type);
-      m_objectsByType.insert(std::pair<double, ObjectId>(type.getKey(), object));
+      m_objectsByType.insert(std::make_pair(type.getKey(), object));
     }
 
     // Now we must push the insertion to any connected variables.
@@ -190,14 +190,14 @@ namespace EUROPA{
     // Clean up cached values
     m_objects.erase(object);
     m_objectsByName.erase(object->getName().getKey());
-    for(std::multimap<double, ObjectId>::iterator it = m_objectsByPredicate.begin(); it != m_objectsByPredicate.end();){
+    for(std::multimap<edouble, ObjectId>::iterator it = m_objectsByPredicate.begin(); it != m_objectsByPredicate.end();){
       if(it->second == object)
         m_objectsByPredicate.erase(it++);
       else
         ++it;
     }
 
-    for(std::multimap<double, ObjectId>::iterator it = m_objectsByType.begin(); it != m_objectsByType.end();){
+    for(std::multimap<edouble, ObjectId>::iterator it = m_objectsByType.begin(); it != m_objectsByType.end();){
       if(it->second == object)
         m_objectsByType.erase(it++);
       else
@@ -302,7 +302,7 @@ namespace EUROPA{
     check_error(m_schema->isObjectType(objectType));
     sl_results.clear();
 
-    for (std::multimap<double, ObjectId>::const_iterator it = m_objectsByType.find(objectType.getKey());
+    for (std::multimap<edouble, ObjectId>::const_iterator it = m_objectsByType.find(objectType.getKey());
          it != m_objectsByType.end() && it->first == objectType.getKey();
          ++it) {
       debugMsg("PlanDatabase:getObjectsByType", "Adding object '" << it->second->getName().toString() << "' of type '" <<
@@ -317,7 +317,7 @@ namespace EUROPA{
     const LabelStr& varName = var->getName();
     checkError(!isGlobalVariable(varName), var->toString() << " is not unique.");
     m_globalVariables.insert(var);
-    m_globalVarsByName.insert(std::pair<double, ConstrainedVariableId>(varName, var));
+    m_globalVarsByName.insert(std::make_pair(varName, var));
 
     checkError(isGlobalVariable(varName), var->toString() << " is not registered after all. This cannot be!.");
     debugMsg("PlanDatabase:registerGlobalVariable", "Registered " << var->toString());
@@ -457,7 +457,7 @@ namespace EUROPA{
 
   void PlanDatabase::getCompatibleTokens(const TokenId& inactiveToken,
                                          std::vector<TokenId>& results) {
-    getCompatibleTokens(inactiveToken, results, PLUS_INFINITY, false);
+    getCompatibleTokens(inactiveToken, results, std::numeric_limits<unsigned int>::max(), false);
   }
 
   unsigned int PlanDatabase::countCompatibleTokens(const TokenId& inactiveToken,
@@ -468,7 +468,7 @@ namespace EUROPA{
     return results.size();
   }
 
-  const std::map<int, std::pair<TokenId, ObjectSet> >& PlanDatabase::getTokensToOrder(){
+  const std::map<eint, std::pair<TokenId, ObjectSet> >& PlanDatabase::getTokensToOrder(){
     return m_tokensToOrder;
   }
 
@@ -511,10 +511,10 @@ namespace EUROPA{
     if(!m_constraintEngine->propagate())
       return 0;
 
-    std::list<double> objects;
+    std::list<edouble> objects;
     token->getObject()->lastDomain().getValues(objects);
     unsigned int choiceCount = 0;
-    for(std::list<double>::const_iterator it = objects.begin(); it != objects.end(); ++it){
+    for(std::list<edouble>::const_iterator it = objects.begin(); it != objects.end(); ++it){
       ObjectId object = *it;
       choiceCount = choiceCount + object->countOrderingChoices(token, limit-choiceCount);
       if(choiceCount >= limit)
@@ -527,10 +527,10 @@ namespace EUROPA{
   unsigned int PlanDatabase::lastOrderingChoiceCount(const TokenId& token) const{
     checkError(m_constraintEngine->constraintConsistent(),
                "Cannot query for ordering choices while database is not constraintConsistent.");
-    std::list<double> objects;
+    std::list<edouble> objects;
     unsigned int choiceCount = 0;
     token->getObject()->lastDomain().getValues(objects);
-    for(std::list<double>::const_iterator it = objects.begin(); it != objects.end(); ++it){
+    for(std::list<edouble>::const_iterator it = objects.begin(); it != objects.end(); ++it){
       ObjectId object = *it;
       choiceCount = choiceCount + object->lastOrderingChoiceCount(token);
     }
@@ -552,7 +552,7 @@ namespace EUROPA{
     check_error(m_schema->isPredicate(predicate));
 
     // First try a cache hit.
-    for(std::multimap<double, ObjectId>::const_iterator it = m_objectsByPredicate.find(predicate.getKey());
+    for(std::multimap<edouble, ObjectId>::const_iterator it = m_objectsByPredicate.find(predicate.getKey());
         (it != m_objectsByPredicate.end() && it->first == predicate.getKey());
         ++it){
       results.push_back(it->second);
@@ -564,7 +564,7 @@ namespace EUROPA{
         check_error(object.isValid());
         if(m_schema->canBeAssigned(object->getType(), predicate)){
           results.push_back(object);
-          m_objectsByPredicate.insert(std::pair<double, ObjectId>(predicate.getKey(), object));
+          m_objectsByPredicate.insert(std::make_pair(predicate.getKey(), object));
         }
       }
     }
@@ -583,7 +583,7 @@ namespace EUROPA{
 
   const TokenSet& PlanDatabase::getActiveTokens(const LabelStr& predicate) const {
     static const TokenSet sl_noTokens;
-    std::map<double, TokenSet>::const_iterator it = m_activeTokensByPredicate.find(predicate);
+    std::map<edouble, TokenSet>::const_iterator it = m_activeTokensByPredicate.find(predicate);
     if(it != m_activeTokensByPredicate.end())
       return it->second;
     else
@@ -745,10 +745,9 @@ namespace EUROPA{
     checkError(token->isActive(), "Token must be active to induce an ordering:" << token->toString());
 
     // Obtain the set of it exists already
-    std::map<int, std::pair<TokenId, ObjectSet> >::iterator it = m_tokensToOrder.find(token->getKey());
+    std::map<eint, std::pair<TokenId, ObjectSet> >::iterator it = m_tokensToOrder.find(token->getKey());
     if(it == m_tokensToOrder.end()){
-      std::pair<TokenId, ObjectSet> entry(token, ObjectSet());
-      m_tokensToOrder.insert(std::pair<int, std::pair<TokenId, ObjectSet> >(token->getKey(), entry));
+      m_tokensToOrder.insert(std::make_pair(token->getKey(), std::make_pair(token, ObjectSet())));
       it = m_tokensToOrder.find(token->getKey());
     }
 
@@ -764,7 +763,7 @@ namespace EUROPA{
   void PlanDatabase::notifyOrderingNoLongerRequired(const ObjectId& object, const TokenId& token){
     debugMsg("PlanDatabase:notifyOrderingNoLongerRequired",
 	     object->getName().toString() << "(" << object->getKey() << ") from " << token->toString());
-    std::map<int, std::pair<TokenId, ObjectSet> >::iterator it = m_tokensToOrder.find(token->getKey());
+    std::map<eint, std::pair<TokenId, ObjectSet> >::iterator it = m_tokensToOrder.find(token->getKey());
 
     checkError(it != m_tokensToOrder.end(),
 	       "Expect there to be a stored entry. Must be a bug in synchronization. Failed to send initial message.");
@@ -850,7 +849,7 @@ namespace EUROPA{
     // Build a collection of tokens ordered by earliest start time. This is done to make cleaning up
     // of structures like a timeline more efficient. No measurements backing this up or evaluating the  true cost
     // of this algorithm
-    std::multimap<int, TokenId> tokensToRemove;
+    std::multimap<eint, TokenId> tokensToRemove;
     {
       EntityIterator< TokenSet::const_iterator > tokenIterator(m_tokens.begin(), m_tokens.end());
       while(!tokenIterator.done()){
@@ -861,14 +860,13 @@ namespace EUROPA{
 	if(token->isMerged())
 	  continue;
 
-	unsigned int latestEndTime = (unsigned int) token->end()->lastDomain().getUpperBound();
+	unsigned int latestEndTime = (unsigned int) cast_int(token->end()->lastDomain().getUpperBound());
 
 	if(latestEndTime <= tick && token->canBeTerminated(tick)){
 	  debugMsg("PlanDatabase:archive:remove",
 		   token->toString() << " ending by " << latestEndTime << " for tick " << tick);
-	  int earliestStartTime = (int) token->start()->lastDomain().getLowerBound();
-	  std::pair<int, TokenId> entry(earliestStartTime , token);
-	  tokensToRemove.insert(entry);
+	  eint earliestStartTime = cast_int(token->start()->lastDomain().getLowerBound());
+          tokensToRemove.insert(std::make_pair(earliestStartTime, token));
 	}
 	else {
 	  condDebugMsg(!token->isMerged(), "PlanDatabase:archive:skip",
@@ -877,7 +875,7 @@ namespace EUROPA{
       }
     }
 
-    for(std::multimap<int, TokenId>::const_iterator it = tokensToRemove.begin(); it != tokensToRemove.end(); ++it){
+    for(std::multimap<eint, TokenId>::const_iterator it = tokensToRemove.begin(); it != tokensToRemove.end(); ++it){
       TokenId token = it->second;
       token->terminate();
       token->discard();
@@ -896,10 +894,10 @@ namespace EUROPA{
     debugMsg("PlanDatabase:insertActiveToken", token->toString());
 
     while(getSchema()->isPredicate(predicate)){
-      std::map<double, TokenSet>::iterator it = m_activeTokensByPredicate.find(predicate);
+      std::map<edouble, TokenSet>::iterator it = m_activeTokensByPredicate.find(predicate);
       if(it == m_activeTokensByPredicate.end()){
 	static const TokenSet emptySet;
-	std::pair<double, TokenSet > entry(predicate, emptySet);
+	std::pair<edouble, TokenSet > entry(predicate, emptySet);
 	m_activeTokensByPredicate.insert(entry);
 	it = m_activeTokensByPredicate.find(predicate);
       }
@@ -929,7 +927,7 @@ namespace EUROPA{
     debugMsg("PlanDatabase:removeActiveToken", token->toString());
 
     while(getSchema()->isPredicate(predicate)){
-      std::map<double, TokenSet>::iterator it = m_activeTokensByPredicate.find(predicate);
+      std::map<edouble, TokenSet>::iterator it = m_activeTokensByPredicate.find(predicate);
       checkError(it != m_activeTokensByPredicate.end(), token->toString() << " must be present but isn't.")
       TokenSet& activeTokens = it->second;
       activeTokens.erase(token);

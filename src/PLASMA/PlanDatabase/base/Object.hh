@@ -335,18 +335,18 @@ namespace EUROPA {
     ObjectSet m_components;
     TokenSet m_tokens;
     std::vector<ConstrainedVariableId> m_variables;
-    std::set<int> m_explicitConstraints; /*!< Stores list of explicitly posted constraints to order tokens. Either the key of the constraint
+    std::set<eint> m_explicitConstraints; /*!< Stores list of explicitly posted constraints to order tokens. Either the key of the constraint
 					   is stored, or in cases where it is a straight assignment of a token, the key of the token is stored. */
     unsigned int m_lastOrderingChoiceCount; /*!< The last computed count of ordering choices */
-    std::multimap<int, ConstraintId> m_constraintsByTokenKey; /**< All Precedence Constraints by Token Key */
+    std::multimap<eint, ConstraintId> m_constraintsByTokenKey; /**< All Precedence Constraints by Token Key */
     std::multimap<int, ConstraintId> m_constraintsByKeyPair; /**< Precedence Constraints by  encoded key pair */
-    std::map<int, int> m_keyPairsByConstraintKey; /**< Reverse lookup to obtain the key pair */
+    std::map<eint, int> m_keyPairsByConstraintKey; /**< Reverse lookup to obtain the key pair */
     ConstrainedVariableId m_thisVar; /**< Used to constrain against */
 
   private:
 
     void clean(const TokenId& token);
-    void clean(const ConstraintId& constraint, int tokenKey);
+    void clean(const ConstraintId& constraint, eint tokenKey);
     void constrainToThisObjectAsNeeded(const TokenId& token);
 
     Object(const Object&); /**< NO IMPL - Prevent use of copy constructor. */

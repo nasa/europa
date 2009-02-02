@@ -42,12 +42,12 @@ namespace EUROPA{
 
   void HasAncestorConstraint::apply() {
     
-    std::list<double> firstValues;
+    std::list<edouble> firstValues;
     m_first.getValues(firstValues);
 
     // Get all the ancestors into a set we can use
     std::list<ObjectId> allAncestors;
-    for(std::list<double>::const_iterator it = firstValues.begin(); it != firstValues.end(); ++it){
+    for(std::list<edouble>::const_iterator it = firstValues.begin(); it != firstValues.end(); ++it){
       std::list<ObjectId> candidatesAncestors;
       ObjectId candidate = *it;
       candidate->getAncestors(candidatesAncestors);
@@ -61,9 +61,9 @@ namespace EUROPA{
     setOfAncestors.intersect(m_restrictions);
 
     // Iterate over each value in the possible non-singleton domain, and check if it has a common ancestor
-    std::list<double> candidateValues;
+    std::list<edouble> candidateValues;
     m_first.getValues(candidateValues);
-    for(std::list<double>::const_iterator it = candidateValues.begin(); it != candidateValues.end(); ++it){
+    for(std::list<edouble>::const_iterator it = candidateValues.begin(); it != candidateValues.end(); ++it){
       std::list<ObjectId> candidatesAncestors;
       ObjectId candidate = *it;
       candidate->getAncestors(candidatesAncestors);

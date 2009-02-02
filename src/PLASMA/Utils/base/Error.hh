@@ -105,6 +105,7 @@
  */
 #define check_error(cond, optarg...)
 #define checkError(cond, msg)
+#define checkError(cond, msg, type)
 
 /**
  * @def warn
@@ -159,13 +160,14 @@
   } \
 }
 
-#define checkError(cond, msg) { \
+#define checkError(cond, msg, optarg...) {                \
   if (!(cond)) { \
     std::stringstream sstr; \
     sstr << msg; \
-    (new Error(#cond, sstr.str(), __FILE__, __LINE__))->handleAssert(); \
+    (new Error(#cond, sstr.str(), ##optarg, __FILE__, __LINE__))->handleAssert(); \
   } \
 }
+
 
 #ifndef warn
 #define warn(msg) (Error::printWarning((msg), __FILE__, __LINE__))
@@ -224,6 +226,11 @@ public:
      @brief Build an Error object from the information given, including an extra message.
   */
   Error(const std::string& condition, const std::string& msg, const std::string& file, const int& line);
+
+  /**
+     @brief Build an Error object from the information given, including an extra message.
+  */
+  Error(const std::string& condition, const std::string& msg, const Error& exception, const std::string& file, const int& line);
 
   /**
      @brief Build an Error object from the information given, including another Error object's info.

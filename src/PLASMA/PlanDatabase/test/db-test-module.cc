@@ -48,7 +48,7 @@ const char* DEFAULT_PREDICATE = "Object.DEFAULT_PREDICATE";
 
     // test/simple-predicate.nddl:4 DBFoo
     void constructor();
-    void constructor(int arg0, LabelStr& arg1);
+    void constructor(eint arg0, LabelStr& arg1);
     Id< Variable< IntervalIntDomain > > m_0;
     Id< Variable< LabelSet > > m_1;
   };
@@ -74,7 +74,7 @@ const char* DEFAULT_PREDICATE = "Object.DEFAULT_PREDICATE";
     m_1 = addVariable(LabelSet(LabelStr("Hello World")), "LabelSetVar");
   }
 
-  void DBFoo::constructor(int arg0, LabelStr& arg1) {
+  void DBFoo::constructor(eint arg0, LabelStr& arg1) {
     m_0 = addVariable(IntervalIntDomain(arg0), "IntervalIntVar");
     m_1 = addVariable(LabelSet(LabelStr("Hello World")), "LabelSetVar");
   }
@@ -114,7 +114,7 @@ const char* DEFAULT_PREDICATE = "Object.DEFAULT_PREDICATE";
       CPPUNIT_ASSERT(arguments[0]->getTypeName() == IntervalIntDomain::getDefaultTypeName());
       CPPUNIT_ASSERT(arguments[1]->getTypeName() == LabelSet::getDefaultTypeName());
 
-      int arg0((int) arguments[0]->getSingletonValue());
+      eint arg0(cast_int(arguments[0]->getSingletonValue()));
       LabelStr arg1(arguments[1]->getSingletonValue());
       foo->constructor(arg0, arg1);
       foo->handleDefaults();
@@ -339,18 +339,18 @@ private:
 
     // test getEnumValues.
     LabelStr enumDomainName = "TestEnum";
-    std::set<double> testEnumDomain;
+    std::set<edouble> testEnumDomain;
     testEnumDomain.insert( 1 );
     testEnumDomain.insert( 2 );
     testEnumDomain.insert( 3 );
 
     schema->addEnum( enumDomainName );
-    std::set<double>::iterator i;
+    std::set<edouble>::iterator i;
     for ( i = testEnumDomain.begin(); i != testEnumDomain.end(); ++i ) {
       schema->addValue( enumDomainName, *i );
     }
 
-    std::set<double> enumDomainReturned;
+    std::set<edouble> enumDomainReturned;
     enumDomainReturned = schema->getEnumValues( enumDomainName );
     CPPUNIT_ASSERT( enumDomainReturned == testEnumDomain );
 
@@ -605,7 +605,7 @@ private:
     {
       std::stringstream str;
       str << o2.getKey();
-      double value(0);
+      edouble value(0);
       CPPUNIT_ASSERT(os1.convertToMemberValue(str.str(), value));
       CPPUNIT_ASSERT(value == o2.getId());
     }
@@ -613,7 +613,7 @@ private:
     {
       std::stringstream str;
       str << o1.getKey();
-      double value(0);
+      edouble value(0);
       CPPUNIT_ASSERT(!os1.convertToMemberValue(str.str(), value));
       CPPUNIT_ASSERT(value == 0);
     }
@@ -1108,7 +1108,7 @@ private:
                                 IntervalIntDomain(2, 10),
                                 Token::noObject(), false);
 
-    std::list<double> values;
+    std::list<edouble> values;
     values.push_back(EUROPA::LabelStr("L1"));
     values.push_back(EUROPA::LabelStr("L4"));
     values.push_back(EUROPA::LabelStr("L2"));
@@ -1654,7 +1654,7 @@ private:
     new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "timeline1");
     db->close();
 
-    std::list<double> values;
+    std::list<edouble> values;
     values.push_back(LabelStr("L1"));
     values.push_back(LabelStr("L4"));
     values.push_back(LabelStr("L2"));
@@ -1691,7 +1691,7 @@ private:
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(1, 1000),
 			 Token::noObject(), false);
-    std::list<double> values2;
+    std::list<edouble> values2;
     values2.push_back(LabelStr("L2"));
     token2.addParameter(LabelSet(values2), "LabelSetParam");
     token2.close();
@@ -2453,14 +2453,14 @@ private:
     ce->propagate(); //propagate the change
 
     //shouldn't be able to merge with anything
-    CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), PLUS_INFINITY, true) == 0);
+    CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), std::numeric_limits<unsigned int>::max(), true) == 0);
 
     delete (Constraint *) eq; //remove the constraint
 
     ce->propagate();
 
     // Should now be able to merge
-    CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), PLUS_INFINITY, true) > 0);
+    CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), std::numeric_limits<unsigned int>::max(), true) > 0);
 
     DEFAULT_TEARDOWN();
     return true;
@@ -4017,10 +4017,10 @@ public:
       : EnumeratedDomain(false, "TestClass2") {
     }
     TestClass2Domain(TestClass2Id value)
-      : EnumeratedDomain((double)value, false, "TestClass2") {
+      : EnumeratedDomain((edouble)value, false, "TestClass2") {
     }
     TestClass2Domain(TestClass2Id value, const char* typeName)
-      : EnumeratedDomain((double)value, false, typeName) {
+      : EnumeratedDomain((edouble)value, false, typeName) {
     }
   };
 
@@ -4172,9 +4172,9 @@ public:
     //!!  E.g., a member function that accepted the type name and the corresponding base domain.
     //!!  Per Tania, created a change request GNATS for such a method (GNATS 2698).
     s_db->getSchema()->addEnum("Locations");
-    s_db->getSchema()->addValue("Locations", (double)LabelStr("Hill"));
-    s_db->getSchema()->addValue("Locations", (double)LabelStr("Rock"));
-    s_db->getSchema()->addValue("Locations", (double)LabelStr("Lander"));
+    s_db->getSchema()->addValue("Locations", (edouble)LabelStr("Hill"));
+    s_db->getSchema()->addValue("Locations", (edouble)LabelStr("Rock"));
+    s_db->getSchema()->addValue("Locations", (edouble)LabelStr("Lander"));
 
     /* Create the XML string and play it. */
     TEST_PLAYING_XML(buildXMLEnumStr(std::string("Locations"), locs, __FILE__, __LINE__));
@@ -4356,7 +4356,7 @@ public:
         CPPUNIT_ASSERT(var->lastDomain() == IntervalDomain(1.414));
         break;
       case 2:
-        CPPUNIT_ASSERT(var->lastDomain() == SymbolDomain((double)LabelStr("Hill"), "Locations"));
+        CPPUNIT_ASSERT(var->lastDomain() == SymbolDomain((edouble)LabelStr("Hill"), "Locations"));
         break;
       default:
         CPPUNIT_ASSERT_MESSAGE("erroneous variable index within obj2a", false);
@@ -4364,7 +4364,7 @@ public:
     }
     domains.push_back(new IntervalIntDomain(2));
     domains.push_back(new IntervalDomain(3.14159265358979));
-    std::list<double> locs;
+    std::list<edouble> locs;
     locs.push_back(LabelStr("Rock"));
     domains.push_back(new Locations(locs, "Locations"));
     Locations toCompare(locs, "Locations");
@@ -4480,7 +4480,7 @@ public:
     CPPUNIT_ASSERT(sg_int->lastDomain() == IntervalIntDomain(-5));
     TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_float, IntervalDomain(-5.0)));
     CPPUNIT_ASSERT(sg_float->lastDomain() == IntervalDomain(-5.0));
-    std::list<double> locs;
+    std::list<edouble> locs;
     locs.push_back(LabelStr("Lander"));
     TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_location, Locations(locs, "Locations")));
     CPPUNIT_ASSERT(sg_location->lastDomain() == Locations(locs, "Locations"));
@@ -4601,7 +4601,7 @@ public:
     // Specifying variables is one of the special cases.
     TEST_PLAYING_XML(buildXMLInvokeSpecifyVariableStr(sg_location, Locations(LabelStr("Hill"), "Locations")));
     CPPUNIT_ASSERT(sg_location->lastDomain() == Locations(LabelStr("Hill"), "Locations"));
-    std::list<double> locs;
+    std::list<edouble> locs;
     locs.push_back(LabelStr("Hill"));
     locs.push_back(LabelStr("Rock"));
 
@@ -5559,9 +5559,9 @@ std::string DbTransPlayerTest::buildXMLInvokeSpecifyVariableStr(const Constraine
     CPPUNIT_ASSERT_MESSAGE("var's parent is neither token nor object", ObjectId::convertable(var->parent()));
     //!!I don't understand the details in DbClientTransactionPlayer.cc:parseVariable() well enough to figure this out yet
     //!!But here's a guess:
-    str += var->parent()->getName();
+    str += var->parent()->getName().toString();
     str += ".";
-    str += var->getName();
+    str += var->getName().toString();
   }
   str += "\"> ";
   str += buildXMLDomainStr(dom);
@@ -5700,7 +5700,7 @@ std::string DbTransPlayerTest::buildXMLDomainStr(const AbstractDomain& dom) {
   }
   CPPUNIT_ASSERT_MESSAGE("domain is not singleton, interval, nor enumerated", dom.isEnumerated());
   str += "set> ";
-  std::list<double> vals;
+  std::list<edouble> vals;
   for (dom.getValues(vals); !vals.empty(); vals.pop_front()) {
     str += "<";
     if (dom.isSymbolic()) {

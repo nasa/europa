@@ -19,7 +19,7 @@
 
 namespace EUROPA {
 
-  typedef std::set<double> LabelStrSet;
+  typedef std::set<edouble> LabelStrSet;
 
   /**
    * @class Schema
@@ -37,11 +37,11 @@ namespace EUROPA {
 
     typedef std::pair<LabelStr, LabelStr> NameValuePair;
     typedef std::vector<NameValuePair> NameValueVector;
-    typedef std::set<double> ValueSet;
-    typedef std::map<double, LabelStr> LabelStr_LabelStr_Map;
-    typedef std::map<double, LabelStrSet > LabelStr_LabelStrSet_Map;
-    typedef std::map<double, ValueSet > LabelStr_ValueSet_Map;
-    typedef std::map<double,LabelStr_LabelStr_Map> LabelStr_LabelStrLabelStrMap_Map;
+    typedef std::set<edouble> ValueSet;
+    typedef std::map<edouble, LabelStr> LabelStr_LabelStr_Map;
+    typedef std::map<edouble, LabelStrSet > LabelStr_LabelStrSet_Map;
+    typedef std::map<edouble, ValueSet > LabelStr_ValueSet_Map;
+    typedef std::map<edouble,LabelStr_LabelStr_Map> LabelStr_LabelStrLabelStrMap_Map;
 
     Schema(const LabelStr& name, const CESchemaId& cesch);
     ~Schema();
@@ -102,7 +102,7 @@ namespace EUROPA {
      * @param value The value to be tested.
      * @error !isEnum(enum)
      */
-    bool isEnumValue(const LabelStr& enumName, double value) const;
+    bool isEnumValue(const LabelStr& enumName, edouble value) const;
 
     /**
      * @brief Determine of a given predicate is part of the schema
@@ -197,7 +197,7 @@ namespace EUROPA {
      * @return a const ref to the set of values for enumName.  
      * @error !isEnum(enumName).
      */
-    const std::set<double>& getEnumValues(const LabelStr& enumName) const;
+    const std::set<edouble>& getEnumValues(const LabelStr& enumName) const;
 
     /**
      * @brief Obtain the set of predicates for a given object type.
@@ -323,7 +323,7 @@ namespace EUROPA {
      * @param enumName The name of the enumeration
      * @param enumValue The member to be added
      */
-    void addValue(const LabelStr& enumName, double enumValue);
+    void addValue(const LabelStr& enumName, edouble enumValue);
 
     /**
      * @brief Obtain a list of names of enumerations 
@@ -360,11 +360,11 @@ namespace EUROPA {
     LabelStrSet predicates;
     LabelStrSet primitives;
 
-    std::map<double, NameValueVector> membershipRelation; /*! All type compositions */
-    std::map<double, LabelStr> childOfRelation; /*! Required to answer the getParent query */
+    std::map<edouble, NameValueVector> membershipRelation; /*! All type compositions */
+    std::map<edouble, LabelStr> childOfRelation; /*! Required to answer the getParent query */
     LabelStr_LabelStrSet_Map objectPredicates; /*! All predicates by object type */
     LabelStrSet typesWithNoPredicates; /*! Cache for lookup efficiently */
-    std::map<double, std::vector<LabelStr> > allObjectTypes; /*! Cache to retrieve allObjectTypes by sub-class */
+    std::map<edouble, std::vector<LabelStr> > allObjectTypes; /*! Cache to retrieve allObjectTypes by sub-class */
     Schema(const Schema&); /**< NO IMPL */
   };
 

@@ -279,17 +279,17 @@ namespace EUROPA {
   }
 
   std::string
-  DbClientTransactionLog::domainValueAsString(const AbstractDomain * domain, double value)
+  DbClientTransactionLog::domainValueAsString(const AbstractDomain * domain, edouble value)
   {
     if (isBool(domain->getTypeName().toString())) {
-      return (value ? "true" : "false");
+      return (value == 1 ? "true" : "false");
     }
     else 
       if (domain->isNumeric()) {
         // CMG: Do not use snprintf. Not supported on DEC
         std::stringstream ss;
         if (isInt(domain->getTypeName().toString())) {
-          ss << (int) value;
+          ss << cast_int(value);
         } else {
           ss << value;
         }
@@ -305,7 +305,7 @@ namespace EUROPA {
   }
 
   TiXmlElement *
-  DbClientTransactionLog::domainValueAsXml(const AbstractDomain * domain, double value)
+  DbClientTransactionLog::domainValueAsXml(const AbstractDomain * domain, edouble value)
   {
     LabelStr typeName = domain->getTypeName();
     if (m_client->getSchema()->isObjectType(typeName)) {
@@ -348,9 +348,9 @@ namespace EUROPA {
     } else if (domain->isEnumerated()) {
       TiXmlElement * element = allocateXmlElement("set");
       element->SetAttribute("type", domain->getTypeName().toString());
-      std::list<double> values;
+      std::list<edouble> values;
       domain->getValues(values);
-      std::list<double>::const_iterator iter;
+      std::list<edouble>::const_iterator iter;
       for (iter = values.begin() ; iter != values.end() ; iter++) {
         element->LinkEndChild(domainValueAsXml(domain, *iter));
       }

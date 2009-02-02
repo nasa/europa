@@ -191,7 +191,7 @@ namespace EUROPA {
      * value to specify.
      * @see getEntityByKey
      */
-    void specify(const ConstrainedVariableId& variable, double value);
+    void specify(const ConstrainedVariableId& variable, edouble value);
 
     /**
      * @brief Close the domains of a dynamic variable.
@@ -321,7 +321,7 @@ namespace EUROPA {
     /**
      * @brief Create a value for a string
      */
-    double createValue(const char* typeName, const std::string& value);
+    edouble createValue(const char* typeName, const std::string& value);
         
     // Temporarily exposing these to remove singletons, need to review DbClient concept in general
     const CESchemaId& getCESchema() const;
@@ -340,7 +340,7 @@ namespace EUROPA {
 
     DbClientId m_id;
     PlanDatabaseId m_planDb;
-    std::vector<int> m_keysOfTokensCreated; /*!< Used for managing instance independent paths */
+    std::vector<eint> m_keysOfTokensCreated; /*!< Used for managing instance independent paths */
     std::set<DbClientListenerId> m_listeners; /*! Stores current DbClientListeners */
     bool m_deleted; /*!< Used to indicate a deletion and this ignore synchronization of listeners on removal */
     bool m_transactionLoggingEnabled; /*!< Used to configure transaction loggng services required for Key Matching */

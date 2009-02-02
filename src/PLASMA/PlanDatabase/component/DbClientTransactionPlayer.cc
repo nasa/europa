@@ -1082,7 +1082,7 @@ namespace EUROPA {
 
     const AbstractDomain * value = xmlAsAbstractDomain(*value_el);
     if (value->isSingleton()) {
-      double v = value->getSingletonValue();
+      edouble v = value->getSingletonValue();
       m_client->specify(var, v);
     } 
     else
@@ -1382,7 +1382,7 @@ namespace EUROPA {
 
       AbstractDomain * domain = getCESchema()->baseDomain(type).copy();
       check_error(domain != 0, "unknown type, lack of memory, or other problem with domain in transaction XML");
-      double value = m_client->createValue(type, name);
+      edouble value = m_client->createValue(type, name);
       if(domain->isOpen() && !domain->isMember(value))
 	domain->insert(value);
       domain->set(value);
@@ -1428,8 +1428,8 @@ namespace EUROPA {
       domain = dynamic_cast<IntervalDomain*>(getCESchema()->baseDomain(type_st).copy());
     check_error(domain != NULL,
 		"type '" + std::string(type_st) + "' should indicate an interval domain type");
-    double min = m_client->createValue(type_st, min_st);
-    double max = m_client->createValue(type_st, max_st);
+    edouble min = m_client->createValue(type_st, min_st);
+    edouble max = m_client->createValue(type_st, max_st);
     domain->intersect(min, max);
     debugMsg("DbClientTransactionPlayer:xmlAsIntervalDomain",
 	     "For " << element << ", created domain " << (*domain).toString());
@@ -1520,7 +1520,7 @@ namespace EUROPA {
     }
     check_error(type != ANY);
     // gather the values
-    std::list<double> values;
+    std::list<edouble> values;
     for (TiXmlElement * child_el = element.FirstChildElement() ;
          child_el != NULL ; child_el = child_el->NextSiblingElement()) {
       const char * value_st = child_el->Attribute("value");
@@ -1558,7 +1558,7 @@ namespace EUROPA {
     }
   }
 
-  double DbClientTransactionPlayer::xmlAsValue(const TiXmlElement & value, const char * name) {
+  edouble DbClientTransactionPlayer::xmlAsValue(const TiXmlElement & value, const char * name) {
     const char * tag = value.Value();
     if (strcmp(tag, "new") == 0) {
       std::string gen_name;
@@ -1584,7 +1584,7 @@ namespace EUROPA {
       	AbstractDomain* tmp = (AbstractDomain*)(*it);
         delete tmp;
       }
-      return (double)object;
+      return (edouble)object;
     }
     if (strcmp(tag, "value") == 0) {
       // New style XML for simple types.
@@ -1604,11 +1604,11 @@ namespace EUROPA {
     if (strcmp(tag, "object") == 0) {
       ObjectId object = m_client->getObject(value_st);
       check_error(object.isValid());
-      return((double)object);
+      return((edouble)object);
     }
     ObjectId object = m_client->getObject(value_st);
     if (object != ObjectId::noId())
-      return((double)object);
+      return((edouble)object);
     check_error(ALWAYS_FAILS);
     return(0);
   }

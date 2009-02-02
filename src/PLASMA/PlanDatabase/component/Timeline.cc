@@ -237,9 +237,9 @@ namespace EUROPA {
     }
 
     // Obtain the successor and predecessor index positions
-    std::map<int, std::list<TokenId>::iterator >::const_iterator predecessorIndexPos = 
+    std::map<eint, std::list<TokenId>::iterator >::const_iterator predecessorIndexPos = 
       m_tokenIndex.find(predecessor->getKey());
-    std::map<int, std::list<TokenId>::iterator >::const_iterator successorIndexPos = 
+    std::map<eint, std::list<TokenId>::iterator >::const_iterator successorIndexPos = 
       m_tokenIndex.find(successor->getKey());
 
     // CASE 1: Only successor so so insert predecessor before it
@@ -286,7 +286,7 @@ namespace EUROPA {
       notifyOrderingNoLongerRequired(token);
 
     // CASE 0: It is not sequenced, so can ignore it
-    std::map<int, std::list<TokenId>::iterator >::iterator token_it = m_tokenIndex.find(token->getKey());
+    std::map<eint, std::list<TokenId>::iterator >::iterator token_it = m_tokenIndex.find(token->getKey());
     if (token_it == m_tokenIndex.end()) {
       Object::remove(token);
       return;
@@ -500,7 +500,7 @@ namespace EUROPA {
 
   void Timeline::insertToIndex(const TokenId& token, const std::list<TokenId>::iterator& position){
     // Remove the cache entry for this token as it is now inserted
-    m_tokenIndex.insert(std::pair<int, std::list<TokenId>::iterator>(token->getKey(), position));
+    m_tokenIndex.insert(std::make_pair(token->getKey(), position));
   }
 
   void Timeline::removeFromIndex(const TokenId& token){

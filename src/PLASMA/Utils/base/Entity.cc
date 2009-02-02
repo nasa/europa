@@ -5,7 +5,7 @@
 namespace EUROPA {
 
   Entity::Entity(): m_key(allocateKey()), m_refCount(1), m_discarded(false){
-    entitiesByKey().insert(std::pair<int, unsigned long int>(m_key, (unsigned long int) this));
+    entitiesByKey().insert(std::make_pair(m_key, (unsigned long int) this));
     check_error(!isPurging());
     debugMsg("Entity:Entity", "Allocating " << m_key);
   }
@@ -72,16 +72,16 @@ namespace EUROPA {
   
   bool Entity::canBeCompared(const EntityId&) const{ return true;}
 
-  EntityId Entity::getEntity(int key){
+  EntityId Entity::getEntity(eint key){
     EntityId entity;
-    std::map<int, unsigned long int>::const_iterator it = entitiesByKey().find(key);
+    std::map<eint, unsigned long int>::const_iterator it = entitiesByKey().find(key);
     if(it != entitiesByKey().end())
       entity = (EntityId) it->second;
     return entity;
   }
 
   void Entity::getEntities(std::set<EntityId>& resultSet){
-    for(std::map<int, unsigned long int>::const_iterator it = entitiesByKey().begin();
+    for(std::map<eint, unsigned long int>::const_iterator it = entitiesByKey().begin();
 	it != entitiesByKey().end();
 	++it){
       resultSet.insert((EntityId) it->second);
@@ -103,8 +103,8 @@ namespace EUROPA {
     return m_externalEntity;
   }
 
-  std::map<int, unsigned long int>& Entity::entitiesByKey(){
-    static std::map<int, unsigned long int> sl_entitiesByKey;
+  std::map<eint, unsigned long int>& Entity::entitiesByKey(){
+    static std::map<eint, unsigned long int> sl_entitiesByKey;
     return sl_entitiesByKey;
   }
 
@@ -219,8 +219,8 @@ namespace EUROPA {
     return sl_instance;
   }
 
-  PSEntityKey Entity::allocateKey(){
-    static int sl_key(0);
+  eint Entity::allocateKey(){
+    static eint sl_key(0);
     sl_key++;
     return sl_key;
   }

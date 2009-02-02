@@ -35,13 +35,13 @@ namespace EUROPA{
 
     virtual ~TokenVariable();
 
-    void insert(double value);
+    void insert(edouble value);
 
-    void remove(double value);
+    void remove(edouble value);
 
     void close();
 
-    void specify(double singletonValue);
+    void specify(edouble singletonValue);
 
     void relax();
 
@@ -51,7 +51,7 @@ namespace EUROPA{
 
     void handleBase(const AbstractDomain& domain);
 
-    void handleSpecified(double value);
+    void handleSpecified(edouble value);
 
     void handleReset();
 
@@ -60,7 +60,7 @@ namespace EUROPA{
   private:
     // Internal methods for specification that circumvent test for canBeSpeciifed()
     friend class Token;
-    void setSpecified(double singletonValue);
+    void setSpecified(edouble singletonValue);
     void resetSpecified();
 
     bool computeBaseDomain();
@@ -71,7 +71,7 @@ namespace EUROPA{
 			
     DomainType* m_integratedBaseDomain; /**< The integrated base domain over this and all supported tokens. */
     bool m_isLocallySpecified;
-    double m_localSpecifiedValue;
+    edouble m_localSpecifiedValue;
     const TokenId m_parentToken;
   };
 
@@ -97,13 +97,13 @@ namespace EUROPA{
   }
 
   template<class DomainType>
-  void TokenVariable<DomainType>::insert(double value) {
+  void TokenVariable<DomainType>::insert(edouble value) {
     Variable<DomainType>::insert(value);
     this->m_integratedBaseDomain->insert(value);
   }
 
   template<class DomainType>
-  void TokenVariable<DomainType>::remove(double value) {
+  void TokenVariable<DomainType>::remove(edouble value) {
     Variable<DomainType>::remove(value);
     if(this->m_integratedBaseDomain->isMember(value))
       this->m_integratedBaseDomain->remove(value);
@@ -116,7 +116,7 @@ namespace EUROPA{
   }
 
   template <class DomainType>
-  void TokenVariable<DomainType>::specify(double singletonValue){
+  void TokenVariable<DomainType>::specify(edouble singletonValue){
     check_error(this->canBeSpecified());
     setSpecified(singletonValue);
   }
@@ -138,7 +138,7 @@ namespace EUROPA{
   }
 
   template <class DomainType>
-  void TokenVariable<DomainType>::setSpecified(double singletonValue){
+  void TokenVariable<DomainType>::setSpecified(edouble singletonValue){
     check_error(this->m_parentToken.isValid());
     checkError(!this->m_parentToken->isMerged(),
 	       "Attempted to specify " << this->toString() << 
@@ -176,7 +176,7 @@ namespace EUROPA{
   }
 
   template <class DomainType>
-  void TokenVariable<DomainType>::handleSpecified(double value){
+  void TokenVariable<DomainType>::handleSpecified(edouble value){
     check_error(this->m_parentToken->isActive());
     checkError(this->lastDomain().isMember(value), value << " is not in " << this->toString());
 
@@ -210,7 +210,7 @@ namespace EUROPA{
   bool TokenVariable<DomainType>::computeBaseDomain(){
     this->m_integratedBaseDomain->relax(*(this->m_baseDomain));
     bool shouldBeSpecified(false);
-    double specifiedValue(0);
+    edouble specifiedValue(0);
 
     const TokenSet& mergedTokens = this->m_parentToken->getMergedTokens();
     for(TokenSet::const_iterator it = mergedTokens.begin(); it != mergedTokens.end(); ++it){

@@ -71,6 +71,7 @@ namespace EUROPA {
 
   unsigned int IdTable::getKey(unsigned long int id) {
     MutexGrabber mg(IdTableMutex());
+    debugMsg("IdTable:getKey", "Searching for key for " << std::hex << id << std::dec);
     std::map<unsigned long int, std::pair<unsigned int,edouble> >::iterator it = getInstance().m_collection.find(id);
     if (it != getInstance().m_collection.end())
       return getEntryKey(it->second);
@@ -81,7 +82,7 @@ namespace EUROPA {
   unsigned int IdTable::insert(unsigned long int id, const char* baseType) {
     MutexGrabber mg(IdTableMutex());
     static unsigned int sl_nextId(1);
-    debugMsg("IdTable:insert", "id,key:" << id << ", " << sl_nextId << ")");
+    debugMsg("IdTable:insert", "id,key:" << std::hex << id << std::dec << ", " << sl_nextId << ")");
     std::map<unsigned long int, std::pair<unsigned int,edouble> >::iterator it = 
       getInstance().m_collection.find(id);
     
@@ -103,7 +104,9 @@ namespace EUROPA {
     MutexGrabber mg(IdTableMutex());
     static unsigned int sl_key;
     std::map<unsigned long int, std::pair<unsigned int,edouble> >::iterator it = getInstance().m_collection.find(id);    
-    debugMsg("IdTable:remove", "<" << id << ", " << (sl_key = getEntryKey(it->second)) << "," << getEntryType(it->second).toString() << ">");
+    debugMsg("IdTable:remove",
+             "<" << std::hex << id << std::dec << ", " << (sl_key = getEntryKey(it->second)) << "," <<
+             getEntryType(it->second).toString() << ">");
     std::string type = getEntryType(it->second).toString();
     std::map<std::string, unsigned int>::iterator tCit = getInstance().m_typeCnts.find(type);
     tCit->second--;
@@ -128,7 +131,8 @@ namespace EUROPA {
     for (std::map<unsigned long int, std::pair<unsigned int,edouble> >::iterator it = getInstance().m_collection.begin();
          it != getInstance().m_collection.end();
          ++it)
-      os << " (" << it->first << ", " << getEntryKey(it->second) << "," << getEntryType(it->second).toString() << ')';
+      os << " (" << std::hex << it->first << std::dec << ", " << getEntryKey(it->second) << "," <<
+        getEntryType(it->second).toString() << ')';
     os << std::endl;
   }
 }

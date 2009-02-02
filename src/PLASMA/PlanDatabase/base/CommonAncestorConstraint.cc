@@ -74,9 +74,9 @@ namespace EUROPA{
     }
 
     // Iterate over each value in the possible non-singleton domain, and check if it has a common ancestor
-    std::list<double> candidateValues;
+    std::list<edouble> candidateValues;
     other.getValues(candidateValues);
-    for(std::list<double>::const_iterator it = candidateValues.begin(); it != candidateValues.end(); ++it){
+    for(std::list<edouble>::const_iterator it = candidateValues.begin(); it != candidateValues.end(); ++it){
       std::list<ObjectId> candidatesAncestors;
       ObjectId candidate = *it;
       check_error(candidate.isValid());

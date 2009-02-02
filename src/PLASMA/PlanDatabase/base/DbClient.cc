@@ -240,7 +240,7 @@ namespace EUROPA {
     publish(notifyVariableRestricted(variable));
   }
 
-  void DbClient::specify(const ConstrainedVariableId& variable, double value){
+  void DbClient::specify(const ConstrainedVariableId& variable, edouble value){
     debugMsg("DbClient:specify", "before:" << variable->toString() << " to " << variable->toString(value));
     variable->specify(value);
     debugMsg("DbClient:specify", "after:" << variable->toString());
@@ -283,7 +283,7 @@ namespace EUROPA {
       return TokenId::noId();
 
     // Obtain the root token key using the first element in the path to index the tokenKeys.
-    int rootTokenKey = m_keysOfTokensCreated[relativePath[0]];
+    eint rootTokenKey = m_keysOfTokensCreated[relativePath[0]];
 
     // Now source the token as an enityt lookup by key. This works because we have a shared pool
     // of entities per process
@@ -329,7 +329,7 @@ namespace EUROPA {
     }
 
     // Loop terminates where slave is the root, so get the masters key from the slave pointer.
-    int keyOfMaster = slave->getKey();
+    eint keyOfMaster = slave->getKey();
 
     // Now we must obtain a key value based on relative position in the sequence of created master
     // tokens. This is done so that we can use the path to replay transactions, but resulting in different
@@ -427,7 +427,7 @@ namespace EUROPA {
 
   bool DbClient::isTransactionLoggingEnabled() const { return m_transactionLoggingEnabled; }
   
-  double DbClient::createValue(const char* typeName, const std::string& value) 
+  edouble DbClient::createValue(const char* typeName, const std::string& value) 
   {
     return m_planDb->getConstraintEngine()->createValue(typeName,value);
   }

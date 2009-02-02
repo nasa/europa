@@ -127,8 +127,8 @@ namespace EUROPA{
 	cancel();
 
       // Notify objects that the token is being deleted. Allows synchronization
-      const std::set<double>& objects = getObject()->getBaseDomain().getValues();
-      for(std::set<double>::const_iterator it = objects.begin(); it!= objects.end(); ++it){
+      const std::set<edouble>& objects = getObject()->getBaseDomain().getValues();
+      for(std::set<edouble>::const_iterator it = objects.begin(); it!= objects.end(); ++it){
 	ObjectId object = *it;
 	object->notifyDeleted(m_id);
       }
@@ -312,8 +312,8 @@ namespace EUROPA{
     m_activeToken->addMergedToken(m_id);
 
     /** Send a message to all objects that it has been rejected **/
-    const std::set<double>& objects = getObject()->getBaseDomain().getValues();
-    for(std::set<double>::const_iterator it = objects.begin(); it!= objects.end(); ++it){
+    const std::set<edouble>& objects = getObject()->getBaseDomain().getValues();
+    for(std::set<edouble>::const_iterator it = objects.begin(); it!= objects.end(); ++it){
       ObjectId object = *it;
       object->notifyMerged(m_id);
     }
@@ -360,8 +360,8 @@ namespace EUROPA{
     m_state->setSpecified(REJECTED);
 
     /** Send a message to all objects that it has been rejected **/
-    const std::set<double>& objects = getObject()->getBaseDomain().getValues();
-    for(std::set<double>::const_iterator it = objects.begin(); it!= objects.end(); ++it){
+    const std::set<edouble>& objects = getObject()->getBaseDomain().getValues();
+    for(std::set<edouble>::const_iterator it = objects.begin(); it!= objects.end(); ++it){
       ObjectId object = *it;
       object->notifyRejected(m_id);
     }
@@ -732,7 +732,7 @@ namespace EUROPA{
     //
     // Declare a set to pull together all variables in the scope of a token into a single easy to check collection.
     // Could manage this incrementally on the token also for greater efficiency
-    std::set<int> allVars;
+    std::set<eint> allVars;
 
     // Construct the set of constraints on variables of this token. Use a constraint set to avoid memory dependent order.
     ConstraintSet constraints;
@@ -1041,7 +1041,7 @@ PSVariable* Token::getParameter(const std::string& name) const
 void Token::merge(PSToken* activeToken)
 {
     check_error(activeToken != NULL, "Can't merge on NULL token");
-    TokenId tok = getPlanDatabase()->getEntityByKey(activeToken->getKey());
+    TokenId tok = getPlanDatabase()->getEntityByKey(activeToken->getEntityKey());
     doMerge(tok);
 }
 

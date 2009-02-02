@@ -25,7 +25,7 @@ namespace EUROPA {
       check_error(m_factories.find(factory) == m_factories.end()) ;
 
       m_factories.insert(factory);
-      m_factoriesByPredicate.insert(std::pair<double, TokenFactoryId>(factory->getSignature().getKey(), factory));
+      m_factoriesByPredicate.insert(std::make_pair(factory->getSignature().getKey(), factory));
     }
 
     /**
@@ -36,7 +36,7 @@ namespace EUROPA {
         check_error(schema->isPredicate(predicateName), predicateName.toString() + " is undefined.");
 
         // Confirm it is present
-        const std::map<double, TokenFactoryId>::const_iterator pos =  
+        const std::map<edouble, TokenFactoryId>::const_iterator pos =  
             m_factoriesByPredicate.find(predicateName.getKey());
 
         if (pos != m_factoriesByPredicate.end()) // We have found what we are looking for
@@ -52,7 +52,7 @@ namespace EUROPA {
             check_error(factory.isValid(), "No factory found for " + predicateName.toString());
 
             // Log the mapping in this case, from the original predicate, to make it faster the next time around
-            m_factoriesByPredicate.insert(std::pair<double, TokenFactoryId>(predicateName, factory));
+            m_factoriesByPredicate.insert(std::make_pair(predicateName, factory));
             return(factory);
         }
 
