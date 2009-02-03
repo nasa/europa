@@ -537,7 +537,7 @@ namespace EUROPA{
 		"Invalid predicate: " + predicateName.toString());
 
     // Allocate an object variable with an empty domain
-    m_baseObjectType = m_planDatabase->getSchema()->getObjectType(m_predicateName);
+    m_baseObjectType = m_planDatabase->getSchema()->getObjectTypeForPredicate(m_predicateName);
     m_object = (new TokenVariable<ObjectDomain>(m_id,
 						m_allVariables.size(),
 						m_planDatabase->getConstraintEngine(),

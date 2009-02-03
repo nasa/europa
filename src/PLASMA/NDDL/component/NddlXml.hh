@@ -22,8 +22,6 @@ namespace EUROPA {
 
       virtual std::string interpret(std::istream& input, const std::string& source);
 
-      void addNativeClass(const std::string& className, const std::vector<std::string>& nativeTokens);
-
     protected:
       virtual void playDeclareClass(const TiXmlElement &);
       virtual void playDefineClass(const TiXmlElement &);
@@ -51,10 +49,6 @@ namespace EUROPA {
       LabelStr checkPredicateType(const LabelStr& type) const;
 
       RuleSchemaId m_ruleSchema;
-
-      // TODO: move these to schema
-      std::set<std::string> m_nativeClasses;
-      std::set<std::string> m_nativeTokens;
   };
 
 }

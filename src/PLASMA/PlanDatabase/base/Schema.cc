@@ -55,6 +55,12 @@ namespace EUROPA {
   {
       delete (TokenTypeMgr*)m_tokenTypeMgr;
       delete (ObjectTypeMgr*)m_objectTypeMgr;
+
+      std::map<double,ObjectTypeId>::iterator it = m_objTypes.begin();
+      for(;it != m_objTypes.end();++it)
+          delete (ObjectType*)it->second;
+      m_objTypes.clear();
+
       m_id.remove();
   }
 
@@ -146,7 +152,7 @@ namespace EUROPA {
 			     const LabelStr& predicate) const {
     check_error(isObjectType(objectType), objectType.toString() + " is not defined as an ObjectType");
     check_error(isPredicate(predicate), predicate.toString() + " is not defined as a Predicate");
-    return isA(objectType, getObjectType(predicate));
+    return isA(objectType, getObjectTypeForPredicate(predicate));
   }
 
   /**
@@ -249,7 +255,7 @@ namespace EUROPA {
     return isPredicate(parentType) && getBuiltInVariableNames().find(memberName) != getBuiltInVariableNames().end();
   }
 
-  const LabelStr Schema::getObjectType(const LabelStr& predicate) const {
+  const LabelStr Schema::getObjectTypeForPredicate(const LabelStr& predicate) const {
     check_error(isPredicate(predicate),
 		"Predicate "+predicate.toString() +
 		" is not defined, but we expect all predicates to be defined. See 'isPredicate'");
@@ -612,7 +618,7 @@ namespace EUROPA {
       results.push_back(it->first);
   }
 
-  void Schema::registerObjectType(const ObjectType* objType)
+  void Schema::registerObjectType(const ObjectTypeId& objType)
   {
       const char* className = objType->getName().c_str();
       const char* parentClassName = objType->getParent().c_str();
@@ -649,8 +655,21 @@ namespace EUROPA {
           }
       }
 
+      m_objTypes[objType->getName()] = objType;
+
       debugMsg("Schema:registerObjectType","Registered object type:" << std::endl << objType->toString());
   }
+
+  const ObjectTypeId& Schema::getObjectType(const LabelStr& objType)
+  {
+      std::map<double,ObjectTypeId>::const_iterator it = m_objTypes.find((double)objType);
+
+      if (it == m_objTypes.end())
+          return ObjectTypeId::noId();
+      else
+          return it->second;
+  }
+
 
   void Schema::registerObjectFactory(const ObjectFactoryId& of)
   {

@@ -235,7 +235,7 @@ namespace EUROPA {
      * @see addPredicate, isPredicateDefined
      * @error !isPredicateDefined(predicate)
      */
-    const LabelStr getObjectType(const LabelStr& predicate) const;
+    const LabelStr getObjectTypeForPredicate(const LabelStr& predicate) const;
 
     /**
      * @brief Gets the index of a named member in a types member list.
@@ -340,7 +340,9 @@ namespace EUROPA {
     const CESchemaId& getCESchema() const { return m_ceSchema; }
 
     // TODO: ObjectType is replacing ObjectFactory
-    void registerObjectType(const ObjectType* objType);
+    void registerObjectType(const ObjectTypeId& objType);
+    const ObjectTypeId& getObjectType(const LabelStr& objType);
+
     void registerObjectFactory(const ObjectFactoryId& obj_fact);
     ObjectFactoryId getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments);
 
@@ -360,6 +362,7 @@ namespace EUROPA {
 
     SchemaId m_id;
     const CESchemaId& m_ceSchema;
+    std::map<double, ObjectTypeId> m_objTypes; // TODO: this must be subsumed by ObjectTypeMgr
     const ObjectTypeMgrId m_objectTypeMgr;
     const TokenTypeMgrId m_tokenTypeMgr;
 

@@ -11,7 +11,8 @@
 namespace EUROPA {
 
 ObjectType::ObjectType(const char* name, const char* parent, bool isNative)
-    : m_name(name)
+    : m_id(this)
+    , m_name(name)
     , m_parent(parent)
     , m_isNative(isNative)
 {
@@ -19,6 +20,12 @@ ObjectType::ObjectType(const char* name, const char* parent, bool isNative)
 
 ObjectType::~ObjectType()
 {
+    m_id.remove();
+}
+
+const ObjectTypeId& ObjectType::getId() const
+{
+    return m_id;
 }
 
 const LabelStr& ObjectType::getName() const

@@ -65,7 +65,7 @@ namespace EUROPA {
       ot->addObjectFactory((new ResourceObjectFactory("Resource:float:float:float:float:float"))->getId());
       ot->addObjectFactory((new ResourceObjectFactory("Resource:float:float:float:float:float:float:float"))->getId());
       ot->addTokenFactory((new ResourceChangeTokenFactory("Resource.change"))->getId());
-      schema->registerObjectType(ot);
+      schema->registerObjectType(ot->getId());
 
       // TODO: preserve class hierarchy, all Resource types should extend Resource, not Object
       ot = new ObjectType("Reusable","Object",true /*isNative*/);
@@ -78,7 +78,7 @@ namespace EUROPA {
       ot->addObjectFactory((new ReusableObjectFactory("Reusable:float:float:float"))->getId());
       ot->addObjectFactory((new ReusableObjectFactory("Reusable:float:float:float:float"))->getId());
       ot->addTokenFactory((new ReusableUsesTokenFactory("Reusable.uses"))->getId());
-      schema->registerObjectType(ot);
+      schema->registerObjectType(ot->getId());
 
       ot = new ObjectType("CBReusable","Object",true /*isNative*/);
       ot->addMember("float", "capacity");
@@ -89,7 +89,7 @@ namespace EUROPA {
       ot->addObjectFactory((new CBReusableObjectFactory("CBReusable:float:float"))->getId());
       ot->addObjectFactory((new CBReusableObjectFactory("CBReusable:float:float:float"))->getId());
       ot->addObjectFactory((new CBReusableObjectFactory("CBReusable:float:float:float:float"))->getId());
-      schema->registerObjectType(ot);
+      schema->registerObjectType(ot->getId());
       REGISTER_CONSTRAINT(
         ce->getCESchema(),
         SAVH::Uses,
@@ -111,14 +111,14 @@ namespace EUROPA {
       ot->addObjectFactory((new ReservoirObjectFactory("Reservoir:float:float:float:float:float:float:float"))->getId());
       ot->addTokenFactory((new ReservoirProduceTokenFactory("Reservoir.produce"))->getId());
       ot->addTokenFactory((new ReservoirConsumeTokenFactory("Reservoir.consume"))->getId());
-      schema->registerObjectType(ot);
+      schema->registerObjectType(ot->getId());
 
       ot = new ObjectType("Unary","Object",true /*isNative*/);
       ot->addMember("float","consumptionMax");
       ot->addObjectFactory((new UnaryObjectFactory("Unary"))->getId());
       ot->addObjectFactory((new UnaryObjectFactory("Unary:float"))->getId());
       ot->addTokenFactory((new UnaryUseTokenFactory("Unary.use"))->getId());
-      schema->registerObjectType(ot);
+      schema->registerObjectType(ot->getId());
 
       FactoryMgr* pfm = new FactoryMgr();
       engine->addComponent("ProfileFactoryMgr",pfm);
@@ -140,33 +140,6 @@ namespace EUROPA {
 
       EUROPA::SOLVERS::MatchFinderMgr* mfm = (EUROPA::SOLVERS::MatchFinderMgr*)engine->getComponent("MatchFinderMgr");
       REGISTER_MATCH_FINDER(mfm,EUROPA::SOLVERS::InstantMatchFinder,SAVH::Instant::entityTypeName());
-
-      // TODO: this can be removed when code generation is gone
-      NddlXmlInterpreter* nddlXml = (NddlXmlInterpreter*)engine->getLanguageInterpreter("nddl-xml");
-      if (nddlXml != NULL) {
-          std::vector<std::string> nativeTokens;
-          nativeTokens.push_back("Resource.change");
-          nddlXml->addNativeClass("Resource",nativeTokens);
-
-          nativeTokens.clear();
-          nativeTokens.push_back("Reusable.uses");
-          nddlXml->addNativeClass("Reusable",nativeTokens);
-
-          nativeTokens.clear();
-          nddlXml->addNativeClass("CBReusable",nativeTokens);
-
-          nativeTokens.clear();
-          nativeTokens.push_back("Reservoir.produce");
-          nativeTokens.push_back("Reservoir.consume");
-          nddlXml->addNativeClass("Reservoir",nativeTokens);
-
-          nativeTokens.clear();
-          nativeTokens.push_back("Unary.use");
-          nddlXml->addNativeClass("Unary",nativeTokens);
-      }
-      else {
-          // TODO: log a warning/info?
-      }
   }
 
   void ModuleResource::uninitialize(EngineId engine)

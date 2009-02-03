@@ -16,13 +16,16 @@
 
 namespace EUROPA {
 
-class Schema;
+class ObjectType;
+typedef Id<ObjectType> ObjectTypeId;
 
 class ObjectType
 {
 public:
     ObjectType(const char* name, const char* parentClass, bool isNative=false);
     virtual ~ObjectType();
+
+    const ObjectTypeId& getId() const;
 
     virtual const LabelStr& getName() const;
     virtual const LabelStr& getParent() const;
@@ -40,6 +43,7 @@ public:
     virtual std::string toString() const;
 
 protected:
+    ObjectTypeId m_id;
     LabelStr m_name;
     LabelStr m_parent;
     bool m_isNative;

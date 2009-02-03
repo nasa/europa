@@ -43,20 +43,16 @@ const Id<ObjectFactory>& createDefaultObjectFactory(
     , m_ruleSchema(ruleSchema)
   {
     // TODO: these should be registered by PlanDatabase module
-    std::vector<std::string> noNativeTokens;
-    std::string root = Schema::rootObject().toString();
-
     ObjectType* ot;
+    const char* rootObjType = Schema::rootObject().c_str();
 
-    ot = new ObjectType("Object","",true /*isNative*/);
-    addNativeClass(root,noNativeTokens);// TODO: remove this
-    ot->addObjectFactory(createDefaultObjectFactory(root.c_str(), NULL, true));
-    getSchema()->registerObjectType(ot);
+    ot = new ObjectType(rootObjType,"",true /*isNative*/);
+    ot->addObjectFactory(createDefaultObjectFactory(rootObjType, NULL, true));
+    getSchema()->registerObjectType(ot->getId());
 
-    ot = new ObjectType("Timeline","Object",true /*isNative*/);
-    addNativeClass("Timeline", noNativeTokens); // TODO: remove this
+    ot = new ObjectType("Timeline",rootObjType,true /*isNative*/);
     ot->addObjectFactory((new TimelineObjectFactory("Timeline"))->getId());
-    getSchema()->registerObjectType(ot);
+    getSchema()->registerObjectType(ot->getId());
   }
 
   NddlXmlInterpreter::~NddlXmlInterpreter()
@@ -67,13 +63,6 @@ const Id<ObjectFactory>& createDefaultObjectFactory(
   {
       play(input);
       return "";
-  }
-
-  void NddlXmlInterpreter::addNativeClass(const std::string& className, const std::vector<std::string>& nativeTokens)
-  {
-      m_nativeClasses.insert(className);
-      for (unsigned int i=0;i<nativeTokens.size();i++)
-          m_nativeTokens.insert(nativeTokens[i]);
   }
 
   const char* safeStr(const char* str)
@@ -124,9 +113,13 @@ const Id<ObjectFactory>& createDefaultObjectFactory(
   {
       const char* className = element.Attribute("name");
 
-      if (m_nativeClasses.find(className) != m_nativeClasses.end()) {
+      ObjectType* objType = getSchema()->getObjectType(className);
+
+      if (objType != NULL) {
           // TODO: should always be displayed as INFO!
-          debugMsg("XMLInterpreter:XML","Skipping definition for native class : " << className);
+          // TODO: allow redefinition of non-native classes?
+          std::string isNative = (objType->isNative() ? "native" : "");
+          debugMsg("XMLInterpreter:XML","Skipping definition for "<< isNative << " class : " << className);
           return;
       }
 
@@ -135,7 +128,7 @@ const Id<ObjectFactory>& createDefaultObjectFactory(
       const char* parentClassName = element.Attribute("extends");
       parentClassName = (parentClassName == NULL ? "Object" : parentClassName);
 
-      ObjectType* objType = new ObjectType(className,parentClassName);
+      objType = new ObjectType(className,parentClassName);
 
       bool definedConstructor = false;
       for(const TiXmlElement* child = element.FirstChildElement(); child; child = child->NextSiblingElement() ) {
@@ -161,7 +154,7 @@ const Id<ObjectFactory>& createDefaultObjectFactory(
           objType->addObjectFactory(createDefaultObjectFactory(className, parentClassName, false));
 
 
-      getSchema()->registerObjectType(objType);
+      getSchema()->registerObjectType(objType->getId());
   }
 
   void NddlXmlInterpreter::defineClassMember(ObjectType* objType,  const TiXmlElement* element)
@@ -252,10 +245,9 @@ const Id<ObjectFactory>& createDefaultObjectFactory(
       const char* className = objType->getName().c_str();
       std::string predName = std::string(className) + "." + element->Attribute("name");
 
-      // TODO: just check if the class is native
-      if (m_nativeTokens.find(predName) != m_nativeTokens.end()) {
+      if (objType->isNative()) {
           // TODO: should always be displayed as INFO!
-          debugMsg("XMLInterpreter:XML","Skipping factory registration for native token : " << predName);
+          debugMsg("XMLInterpreter:XML",className << " is a native class, skipping factory registration for token : " << predName);
           return;
       }
 
