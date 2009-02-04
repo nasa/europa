@@ -267,4 +267,56 @@ std::string ExprAssignment::toString() const
 }
 
 
+ExprObjectTypeDeclaration::ExprObjectTypeDeclaration(const ObjectTypeId& objType)
+    : m_objType(objType)
+{
+}
+
+ExprObjectTypeDeclaration::~ExprObjectTypeDeclaration()
+{
+}
+
+DataRef ExprObjectTypeDeclaration::eval(EvalContext& context) const
+{
+    PlanDatabase* pdb = (PlanDatabase*)context.getElement("PlanDatabase");
+    pdb->getSchema()->declareObjectType(m_objType->getName());
+    return DataRef::null;
+}
+
+std::string ExprObjectTypeDeclaration::toString() const
+{
+    std::ostringstream os;
+
+    os << "{class " << m_objType->getName().c_str() << "}";
+
+    return os.str();
+}
+
+
+ExprObjectTypeDefinition::ExprObjectTypeDefinition(const ObjectTypeId& objType)
+    : m_objType(objType)
+{
+}
+
+ExprObjectTypeDefinition::~ExprObjectTypeDefinition()
+{
+}
+
+DataRef ExprObjectTypeDefinition::eval(EvalContext& context) const
+{
+    PlanDatabase* pdb = (PlanDatabase*)context.getElement("PlanDatabase");
+    pdb->getSchema()->registerObjectType(m_objType);
+    return DataRef::null;
+}
+
+std::string ExprObjectTypeDefinition::toString() const
+{
+    std::ostringstream os;
+
+    os << m_objType->toString();
+
+    return os.str();
+}
+
+
 }

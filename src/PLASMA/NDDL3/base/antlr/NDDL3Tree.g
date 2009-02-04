@@ -73,7 +73,7 @@ nddl :
                   |     child=variableDeclaration
                   |     child=assignment
                   |     child=constraintInstantiation
-		  |	classDeclaration
+		  |	child=classDeclaration
                   |     allocation
 		  |	rule
 		  |	goal
@@ -335,29 +335,48 @@ constraintInstantiation returns [Expr* result]
         ;
 
 classDeclaration returns [Expr* result]
+@init {
+const char* newClass = NULL;
+const char* parentClass = "Object";
+ObjectType* objType = NULL;
+}
 	:	^('class'
-			className=IDENT
-			((^('extends' superClass=IDENT)
-				classBlock)
-			|	classBlock
-			|	';'
-			)
+                   className=IDENT { newClass = c_str($className.text->chars); }
+                   
+		   (^('extends' superClass=IDENT { parentClass = c_str($superClass.text->chars); }))?
+		   
+                   {
+                       objType = new ObjectType(newClass,parentClass);
+                       
+                   }
+                   
+                   (
+		       classBlock[objType] { result = new ExprObjectTypeDefinition(objType->getId()); } 
+		       | ';' { result = new ExprObjectTypeDeclaration(objType->getId()); }
+	           )
 		)
   ;
 
-classBlock
+classBlock[ObjectType* objType]
 	:	^('{'
-			componentTypeEntry*
+			componentTypeEntry[objType]*
 		)
 	;
 
-componentTypeEntry
-	:	variableDeclaration
+componentTypeEntry[ObjectType* objType]
+	:	classVariable[objType]
 	|	constructor
 	|	predicate
-	|	constraintInstantiation
+	|	constraintInstantiation // TODO: what is this doing here?
 	;
 
+classVariable[ObjectType* objType]
+        :       ^(VARIABLE dataType=type name=IDENT)
+        {
+            objType->addMember(dataType->getTypeName().c_str(),c_str($name.text->chars)); // TODO!!: this won't work for inlined types
+        }
+        ;
+        
 constructor
 	:	^(CONSTRUCTOR
 			name=IDENT

@@ -132,9 +132,9 @@ assignment
 classDeclaration
 	:	'class' c=IDENT
 		(	(('extends' x=IDENT)? classBlock)
-				-> ^('class' $c ^('extends' $x)? classBlock)
+		            -> ^('class' $c ^('extends' $x)? classBlock)
 		|	';'
-					-> ^('class' $c ';')
+                            -> ^('class' $c ';')
 		) 
 	;
 

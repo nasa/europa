@@ -96,6 +96,32 @@ protected:
     Expr* m_rhs;
 };
 
+class ExprObjectTypeDeclaration : public Expr
+{
+public:
+    ExprObjectTypeDeclaration(const ObjectTypeId& objType);
+    virtual ~ExprObjectTypeDeclaration();
+
+    virtual DataRef eval(EvalContext& context) const;
+    virtual std::string toString() const;
+
+protected:
+    const ObjectTypeId m_objType;
+};
+
+class ExprObjectTypeDefinition : public Expr
+{
+public:
+    ExprObjectTypeDefinition(const ObjectTypeId& objType);
+    virtual ~ExprObjectTypeDefinition();
+
+    virtual DataRef eval(EvalContext& context) const;
+    virtual std::string toString() const;
+
+protected:
+    const ObjectTypeId m_objType;
+};
+
 
 }
 
