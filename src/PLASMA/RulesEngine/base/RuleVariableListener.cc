@@ -38,10 +38,6 @@ namespace EUROPA {
 
     checkError(m_ruleInstance.isNoId(), "Rule Instance should not be set when this is called");
 
-    checkError(RuleVariableListenerId::convertable(sourceConstraint), 
-		"Supposed to be sourced from constraint of same type." << sourceConstraint->toString());
-    checkError(m_ruleInstance.isNoId(), "Rule Instance should not be set when this is called");
-
     // Now obtain the rule instance from the source
     RuleVariableListener* source = (RuleVariableListener*) sourceConstraint;
     m_ruleInstance = source->m_ruleInstance;
