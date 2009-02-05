@@ -73,7 +73,9 @@ namespace EUROPA {
 
     // If not executed, and the specified domain is a singleton and the rule test passses,
     // then execute the rule.
-    if(variable->isSpecified() &&
+    // CMG: Modified this to fire without waiting for a specific decision. This aviods having to wait on a solver to make a decision
+    // and applies the model implications immediately.
+    if(variable->lastDomain().isSingleton() &&
        !m_ruleInstance->isExecuted() && 
        m_ruleInstance->test(getScope()))
       m_ruleInstance->execute();
