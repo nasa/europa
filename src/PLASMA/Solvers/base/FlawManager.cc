@@ -377,6 +377,7 @@ namespace EUROPA {
       // If there is a parent flaw manager ten it may already have excluded the given entity. Filters are inherited in this way.
       if(m_parent.isId() && m_parent->staticMatch(entity)) {
         debugMsg("FlawManager:staticMatch", "Excluding " << entity->getKey() << " based on parent flaw manager.");
+
         return true;
       }
 
@@ -406,7 +407,8 @@ namespace EUROPA {
           debugMsg("FlawManager:staticMatch", getId() << " Sticking " << entity->getKey() << " into static filters.");
           m_staticFiltersByKey.insert(std::pair<unsigned int, bool>(entity->getKey(), true));
           debugMsg("FlawManager:staticMatch", 
-                   "Excluding " << entity->getKey() << ".  Matched " << flawFilter->toString() << ".");
+		   flawFilter->getName().toString() <<" excluding " << entity->getKey() << ".  Matched " << flawFilter->toString() << ".");
+
           return true;
         }
       }
@@ -449,8 +451,9 @@ namespace EUROPA {
           FlawFilterId dynamicFilter = *it_a;
           checkError(dynamicFilter->isDynamic(), "Must be a bug in construction code.");
           if(dynamicFilter->test(entity)){
-            debugMsg("FlawManager:dynamicMatch",
-                     "Excluding " << entity->toString() << " with " << dynamicFilter->toString());
+            debugMsg("FlawManager:dynamicMatch",                     
+		     dynamicFilter->getName().toString() << " excluding " << entity->toString() << " with " << dynamicFilter->toString());
+
             condDebugMsg(!isValid(), "FlawManager:isValid", "Invalid datastructures in flaw manger.");
             return true;
           }

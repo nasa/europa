@@ -26,15 +26,18 @@ namespace EUROPA {
      */
     class Component : public FactoryObj {
     public:
-        virtual ~Component();
-        ComponentId& getId();
-        const ComponentId& getId() const;
+      virtual ~Component();
+      ComponentId& getId();
+      const ComponentId& getId() const;
+      const LabelStr& getName() const;
+      void setName(const LabelStr& name);
 
     protected:
-        ComponentId m_id;
+      ComponentId m_id;
+      LabelStr m_name;
         
-        Component(const TiXmlElement& configData);
-        Component();
+      Component(const TiXmlElement& configData);
+      Component();
     };
 
     class ComponentArgs : public FactoryArgs {
@@ -58,12 +61,14 @@ namespace EUROPA {
     class ComponentFactory: public Factory 
     {
     public:
-        ComponentFactory(const LabelStr& name) : Factory(name) {}
+      ComponentFactory(const LabelStr& name) : Factory(name) {}
 
-        virtual EUROPA::FactoryObjId& createInstance(const EUROPA::FactoryArgs& fa) {
-            const ComponentArgs& args = (const ComponentArgs&)fa;
-            return (EUROPA::FactoryObjId&)(new ComponentType(args.configData))->getId();
-        }
+      virtual EUROPA::FactoryObjId& createInstance(const EUROPA::FactoryArgs& fa) {
+	const ComponentArgs& args = (const ComponentArgs&)fa;
+	ComponentType* ct = new ComponentType(args.configData);
+	ct->setName(getName());
+	return (EUROPA::FactoryObjId&)(ct->getId());
+      }
     };
 
    /**
