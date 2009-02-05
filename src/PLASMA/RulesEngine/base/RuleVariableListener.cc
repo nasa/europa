@@ -32,6 +32,12 @@ namespace EUROPA {
    */
   void RuleVariableListener::setSource(const ConstraintId& sourceConstraint){
     check_error(sourceConstraint.isValid());
+
+    checkError(sourceConstraint->getName() == getName(), 
+	       "Supposed to be sourced from constraint of same type." << sourceConstraint->toString());
+
+    checkError(m_ruleInstance.isNoId(), "Rule Instance should not be set when this is called");
+
     checkError(RuleVariableListenerId::convertable(sourceConstraint), 
 		"Supposed to be sourced from constraint of same type." << sourceConstraint->toString());
     checkError(m_ruleInstance.isNoId(), "Rule Instance should not be set when this is called");
