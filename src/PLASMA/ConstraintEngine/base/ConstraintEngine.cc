@@ -305,6 +305,13 @@ namespace EUROPA
     delete m_violationMgr;
   }
 
+  /**
+   * Even if propagation is enabled automatically, we don't want to do it if already going on.
+   */
+  bool ConstraintEngine::shouldAutoPropagate() const {
+    return m_autoPropagate && ! m_propInProgress;
+  }
+
   bool ConstraintEngine::getAutoPropagation() const
   {
       return m_autoPropagate;
@@ -314,7 +321,7 @@ namespace EUROPA
   {
      if (v != m_autoPropagate) {
          m_autoPropagate = v;
-         if (m_autoPropagate)
+         if (shouldAutoPropagate())
              propagate();
      }
   }
@@ -1072,7 +1079,7 @@ namespace EUROPA
       check_error(factory.isValid());
       ConstraintId constraint = factory->createConstraint(getId(), scope);
 
-      if (getAutoPropagation())
+      if (shouldAutoPropagate())
           propagate();
 
       return(constraint);
@@ -1083,7 +1090,7 @@ namespace EUROPA
       check_error(c.isValid());
       delete (Constraint*)c;
 
-      if (getAutoPropagation())
+      if (shouldAutoPropagate())
           propagate();
   }
 

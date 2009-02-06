@@ -53,15 +53,14 @@ namespace EUROPA {
     check_error(!getConstraintEngine()->provenInconsistent());
     check_error(m_activeConstraint == 0);
 
-    while(!m_agenda.empty() && 
-          !getConstraintEngine()->provenInconsistent()){
+    if(!getConstraintEngine()->provenInconsistent()){
       ConstraintSet::iterator it = m_agenda.begin();
       ConstraintId constraint = *it;
       m_agenda.erase(constraint);
 
       if(constraint->isActive()){
-          m_activeConstraint = constraint->getKey();
-          Propagator::execute(constraint);
+	m_activeConstraint = constraint->getKey();
+	Propagator::execute(constraint);
       }
     }
 

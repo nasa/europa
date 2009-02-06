@@ -262,6 +262,11 @@ namespace EUROPA {
     virtual bool getAutoPropagation() const;
 
     /**
+     * @brief Integrates flag for control of auto propagation with tests for not already propagating
+     */
+    bool shouldAutoPropagate() const;
+
+    /**
      * @brief If violations are allowed propagation will continue and the constraint engine will keep track of violated constraints
      */
     virtual void setAllowViolations(bool v);

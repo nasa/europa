@@ -71,21 +71,24 @@ namespace EUROPA {
       return true;
     }
 
-    // If not executed, and the specified domain is a singleton and the rule test passses,
-    // then execute the rule.
-    // CMG: Modified this to fire without waiting for a specific decision. This aviods having to wait on a solver to make a decision
-    // and applies the model implications immediately.
-    if(variable->lastDomain().isSingleton() &&
-       !m_ruleInstance->isExecuted() && 
-       m_ruleInstance->test(getScope()))
-      m_ruleInstance->execute();
-
-    return true;
+    return false;
   }
 
   const RuleInstanceId& RuleVariableListener::getRuleInstance() const {return m_ruleInstance;}
 
-  void RuleVariableListener::handleExecute() {}
+  /**
+   * Evalautes if it should execute the rule, and does so if appropriate
+   */
+  void RuleVariableListener::handleExecute() {
+    // Only apply when all guards are singeltons
+    for(unsigned int i = 0; i < getScope().size(); i++)
+      if(!getScope()[i]->lastDomain().isSingleton())
+	return;
+
+    // Fire if appropriate
+    if(!m_ruleInstance->isExecuted() &&  m_ruleInstance->test(getScope()))
+      m_ruleInstance->execute();
+  }
 
   void RuleVariableListener::notifyDiscarded(const Entity*){
     m_ruleInstance = RuleInstanceId::noId();

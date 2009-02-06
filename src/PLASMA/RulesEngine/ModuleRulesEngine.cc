@@ -5,6 +5,7 @@
 #include "Rule.hh"
 #include "RulesEngine.hh"
 #include "RuleVariableListener.hh"
+#include "Constraints.hh"
 
 namespace EUROPA {
 
@@ -35,7 +36,8 @@ namespace EUROPA {
       
       CESchema* ces = (CESchema*)engine->getComponent("CESchema");
       REGISTER_SYSTEM_CONSTRAINT(ces,ProxyVariableRelation, "proxyRelation", "Default");
-      REGISTER_SYSTEM_CONSTRAINT(ces,RuleVariableListener, RuleVariableListener::CONSTRAINT_NAME(),RuleVariableListener::PROPAGATOR_NAME());      
+      REGISTER_SYSTEM_CONSTRAINT(ces,RuleVariableListener, RuleVariableListener::CONSTRAINT_NAME(),"Default"); 
+      REGISTER_SYSTEM_CONSTRAINT(ces,LockConstraint, "filterLock", "RulesEngine");     
   }
   
   void ModuleRulesEngine::uninitialize(EngineId engine)

@@ -99,7 +99,10 @@ namespace EUROPA {
         break;
     }
     m_values.insert(it, value);
-    notifyChange(DomainListener::RELAXED);
+
+    // CMG: Do not generate a relaxation for insertion into an open domain. The semantics of an open domain indicate that
+    // the set of values is unbound, and we are now simply adding in another explicit member.
+    // notifyChange(DomainListener::RELAXED);
   }
 
   void EnumeratedDomain::insert(const std::list<double>& values){

@@ -1212,14 +1212,13 @@ namespace EUROPA {
     if (loopObjectSet.isEmpty())
     	return; // we're done
 
-    // Post a locking constraint on the set
+    // The lock is an assert check really
     {
     	std::vector<ConstrainedVariableId> loop_vars;
     	loop_vars.push_back(setVar);
     	loop_vars.push_back(ruleVariable(loopObjectSet));
-    	rule_constraint(Lock, loop_vars);
+    	rule_constraint(filterLock, loop_vars);
     }
-
     std::list<double> loopObjectSet_values;
     loopObjectSet.getValues(loopObjectSet_values);
 

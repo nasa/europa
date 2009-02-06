@@ -132,14 +132,14 @@ namespace EUROPA {
   void RuleInstance::setRulesEngine(const RulesEngineId &rulesEngine) {
     check_error(m_rulesEngine.isNoId());
     m_rulesEngine = rulesEngine;
-    if(test(m_guards))
+    if(m_guards.empty())// && test(m_guards))
       execute();
   }
 
   bool RuleInstance::willNotFire() const{
     for(std::vector<ConstrainedVariableId>::const_iterator it = m_guards.begin(); it != m_guards.end(); ++it){
       ConstrainedVariableId guard = *it;
-      if(!guard->isSpecified())
+      if(!guard->lastDomain().isSingleton())
 	return false;
     }
 
@@ -158,18 +158,18 @@ namespace EUROPA {
     if(m_guardDomain != 0) { // Case of explicit guard on a single variable
       debugMsg("RuleInstance:test", "Case of explicit guard on a single variable");
       checkError(guards.size() == 1, "Explicit guard on one variable only");
-      bool result = guards[0]->isSpecified() &&
-      (m_guardDomain->isMember(guards[0]->getSpecifiedValue()) ^ !m_isPositive);
+      bool result = guards[0]->lastDomain().isSingleton() &&
+      (m_guardDomain->isMember(guards[0]->lastDomain().getSingletonValue()) ^ !m_isPositive);
 
       debugMsg("RuleInstance:test", "variable " << guards[0]->getId()
 	       << " name " << guards[0]->toString()
-	       << " specified " << guards[0]->isSpecified()
+	       << " specified " << guards[0]->lastDomain().isSingleton()
 	       << " guard domain " << *m_guardDomain
 	       << (result ? " passed" : " failed"));
-      condDebugMsg(!guards[0]->isSpecified(), "RuleInstance:test",
+      condDebugMsg(!guards[0]->lastDomain().isSingleton(), "RuleInstance:test",
 		   "Guard " << guards[0]->toString() << " not specified.");
-      condDebugMsg(guards[0]->isSpecified() && !m_guardDomain->isMember(guards[0]->getSpecifiedValue()), "RuleInstance:test",
-		   "Specified value '" << guards[0]->getSpecifiedValue() << "' of guard " << guards[0]->toString() << " not in guard domain " << *m_guardDomain);
+      condDebugMsg(guards[0]->lastDomain().isSingleton() && !m_guardDomain->isMember(guards[0]->lastDomain().getSingletonValue()), "RuleInstance:test",
+		   "Specified value '" << guards[0]->lastDomain().getSingletonValue() << "' of guard " << guards[0]->toString() << " not in guard domain " << *m_guardDomain);
 
       return result;
     }
@@ -184,7 +184,7 @@ namespace EUROPA {
 
       debugMsg("RuleInstance:test", "checking  " << counter << " argument:" << guard->toString());
 
-      if(!guard->isSpecified()){
+      if(!guard->lastDomain().isSingleton()){
         debugMsg("RuleInstance:test", "argument " << counter << " is not specified " << guard->baseDomain().toString());
 	return false;
       }
