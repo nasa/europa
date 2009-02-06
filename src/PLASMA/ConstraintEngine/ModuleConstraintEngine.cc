@@ -15,13 +15,13 @@ namespace EUROPA {
   ModuleConstraintEngine::ModuleConstraintEngine()
       : Module("ConstraintEngine")
   {
-	  
+
   }
 
   ModuleConstraintEngine::~ModuleConstraintEngine()
-  {	  
+  {
   }
-  
+
   void ModuleConstraintEngine::initialize()
   {
   }
@@ -29,41 +29,43 @@ namespace EUROPA {
   void ModuleConstraintEngine::uninitialize()
   {
   }
-  
+
   void ModuleConstraintEngine::initialize(EngineId engine)
   {
       CESchema* tfm = new CESchema();
       tfm->registerFactory((new BoolTypeFactory())->getId());
       tfm->registerFactory((new IntervalIntTypeFactory())->getId());
+      tfm->registerFactory((new intTypeFactory())->getId());
       tfm->registerFactory((new IntervalTypeFactory())->getId());
+      tfm->registerFactory((new floatTypeFactory())->getId());
       tfm->registerFactory((new EnumeratedTypeFactory("REAL_ENUMERATION", "ELEMENT", EnumeratedDomain(true, "REAL_ENUMERATION")))->getId());
       tfm->registerFactory((new StringTypeFactory())->getId());
       tfm->registerFactory((new SymbolTypeFactory())->getId());
-      engine->addComponent("CESchema",tfm);      
+      engine->addComponent("CESchema",tfm);
 
       ConstraintEngine* ce = new ConstraintEngine(tfm->getId());
-	  new DefaultPropagator(LabelStr("Default"), ce->getId());	  
-      engine->addComponent("ConstraintEngine",ce);      
+	  new DefaultPropagator(LabelStr("Default"), ce->getId());
+      engine->addComponent("ConstraintEngine",ce);
   }
-  
+
   void ModuleConstraintEngine::uninitialize(EngineId engine)
-  {	  
-      ConstraintEngine* ce = (ConstraintEngine*)engine->removeComponent("ConstraintEngine");      
+  {
+      ConstraintEngine* ce = (ConstraintEngine*)engine->removeComponent("ConstraintEngine");
       delete ce;
-      
-      CESchema* tfm = (CESchema*)engine->removeComponent("CESchema");      
+
+      CESchema* tfm = (CESchema*)engine->removeComponent("CESchema");
       delete tfm;
   }
-    
+
   /**************************************************************************************/
-  
+
   ModuleConstraintLibrary::ModuleConstraintLibrary()
       : Module("ConstraintLibrary")
-  {	  
+  {
   }
 
   ModuleConstraintLibrary::~ModuleConstraintLibrary()
-  {	  
+  {
   }
 
   void ModuleConstraintLibrary::initialize()
@@ -72,8 +74,8 @@ namespace EUROPA {
 
   void ModuleConstraintLibrary::uninitialize()
   {
-  }     
-  
+  }
+
   void ModuleConstraintLibrary::initialize(EngineId engine)
   {
       debugMsg("ModuleConstraintLibrary:initialize", "Initializing the constraint library");
@@ -171,17 +173,17 @@ namespace EUROPA {
 
       //constraints formerly from LORAX
       REGISTER_CONSTRAINT(ces,SquareOfDifferenceConstraint, "diffSquare", "Default");
-      REGISTER_CONSTRAINT(ces,DistanceFromSquaresConstraint, "distanceSquares", "Default");      
-   
+      REGISTER_CONSTRAINT(ces,DistanceFromSquaresConstraint, "distanceSquares", "Default");
+
       REGISTER_CONSTRAINT(ces,CalcDistanceConstraint, "calcDistance", "Default");
 
       REGISTER_CONSTRAINT(ces,SineFunction, "sin", "Default");
   }
-  
+
   void ModuleConstraintLibrary::uninitialize(EngineId engine)
-  {	  
+  {
       CESchema* ces = (CESchema*)engine->getComponent("CESchema");
       // TODO: should be more selective and only add the constraints we added above
       ces->purgeAll();
-  }  
+  }
 }

@@ -6,6 +6,7 @@
 #include "ModuleTemporalNetwork.hh"
 #include "ModuleSolvers.hh"
 #include "ModuleNddl.hh"
+#include "ModuleNddl3.hh"
 #ifndef NO_RESOURCES
 #include "ModuleResource.hh"
 #include "ModuleAnml.hh"
@@ -49,6 +50,7 @@ namespace EUROPA
         addModule((new ModuleTemporalNetwork())->getId());
         addModule((new ModuleSolvers())->getId());
         addModule((new ModuleNddl())->getId());
+        addModule((new ModuleNddl3())->getId());
 #ifndef NO_RESOURCES
         addModule((new ModuleResource())->getId());
         addModule((new ModuleAnml())->getId());

@@ -14,6 +14,7 @@
 #include "DbClient.hh"
 #include "EnumeratedDomain.hh"
 #include "EnumeratedTypeFactory.hh"
+#include "IntervalTypeFactory.hh"
 #include "Object.hh"
 #include "ObjectFactory.hh"
 #include "TokenVariable.hh"

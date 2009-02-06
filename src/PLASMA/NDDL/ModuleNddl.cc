@@ -1,6 +1,4 @@
 #include "ModuleNddl.hh"
-#include "intType.hh"
-#include "floatType.hh"
 #include "NddlXml.hh"
 #include "PlanDatabase.hh"
 #include "Rule.hh"
@@ -40,11 +38,6 @@ namespace EUROPA {
 
   void ModuleNddl::initialize(EngineId engine)
   {
-      // These are Nddl specific, so they belong here
-      CESchema* ces = (CESchema*)engine->getComponent("CESchema");
-      ces->registerFactory((new intTypeFactory())->getId());
-      ces->registerFactory((new floatTypeFactory())->getId());
-
       PlanDatabase* pdb = (PlanDatabase*)engine->getComponent("PlanDatabase");
 	  engine->addLanguageInterpreter("nddl", new NddlInterpreter());
 

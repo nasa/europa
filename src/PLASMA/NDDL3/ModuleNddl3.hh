@@ -1,6 +1,6 @@
 
-#ifndef _H_ModuleNddl
-#define _H_ModuleNddl
+#ifndef _H_ModuleNddl3
+#define _H_ModuleNddl3
 
 #include "Module.hh"
 
@@ -29,4 +29,4 @@ namespace EUROPA {
 }
 
 
-#endif /* #ifndef _H_ModuleNddl */
+#endif /* #ifndef _H_ModuleNddl3 */

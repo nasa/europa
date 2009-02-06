@@ -3,7 +3,7 @@
 #include "Variable.hh"
 
 namespace EUROPA {
-  
+
   //
   // IntervalTypeFactory
   //
@@ -19,7 +19,7 @@ namespace EUROPA {
   }
 
   ConstrainedVariableId
-  IntervalTypeFactory::createVariable(const ConstraintEngineId& constraintEngine, 
+  IntervalTypeFactory::createVariable(const ConstraintEngineId& constraintEngine,
                                       const AbstractDomain& baseDomain,
                                       const bool internal,
                                       bool canBeSpecified,
@@ -47,6 +47,29 @@ namespace EUROPA {
   double IntervalTypeFactory::createValue(const std::string& value) const
   {
     return atof(value.c_str());
+  }
+
+  //
+  // floatTypeFactory
+  //
+
+  floatTypeFactory::floatTypeFactory()
+    : IntervalTypeFactory(getDefaultTypeName().c_str(), getDefaultTypeName().c_str()){}
+
+  double floatTypeFactory::createValue(const std::string& value) const
+  {
+    if (value == "-inf") {
+      return MINUS_INFINITY;
+    }
+    if (value == "+inf") {
+      return PLUS_INFINITY;
+    }
+    return atof(value.c_str());
+  }
+
+  const LabelStr& floatTypeFactory::getDefaultTypeName() {
+    static const LabelStr sl_typeName("float");
+    return(sl_typeName);
   }
 
 } // namespace EUROPA

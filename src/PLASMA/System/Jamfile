@@ -2,7 +2,7 @@ SubDir PLASMA System ;
 
 if ! $(PLASMA_READY) {
 
-local system_deps = NDDL Solvers ;
+local system_deps = NDDL NDDL3 Solvers ;
 
 if ! ( "Resources" in $(NO) ) {
   system_deps += Resource ANML ;

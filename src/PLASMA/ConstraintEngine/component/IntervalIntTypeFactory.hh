@@ -21,7 +21,7 @@ namespace EUROPA {
     /**
      * @brief Create a variable
      */
-    virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine, 
+    virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine,
                                                  const AbstractDomain& baseDomain,
                                                  const bool internal = false,
                                                  bool canBeSpecified = true,
@@ -41,6 +41,24 @@ namespace EUROPA {
 
   private:
     const IntervalIntDomain m_baseDomain;
+  };
+
+  /**
+   * @class intTypeFactory
+   * @brief same as IntervalIntTypeFactory, except with
+   *        "int" type name, and inf parsing value
+   */
+  class intTypeFactory : public IntervalIntTypeFactory {
+  public:
+    intTypeFactory();
+
+    /**
+     * @brief Create a value for a string
+     */
+    virtual double createValue(const std::string& value) const;
+
+  private:
+    static const LabelStr& getDefaultTypeName();
   };
 
 } // namespace EUROPA

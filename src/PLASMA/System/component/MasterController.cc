@@ -3,27 +3,11 @@
 #include "ConstraintEngine.hh"
 #include "Rule.hh"
 #include "RulesEngine.hh"
-#include "ResourcePropagator.hh"
-#include "DefaultPropagator.hh"
-#include "TemporalPropagator.hh"
-#include "STNTemporalAdvisor.hh"
 #include "PlanDatabaseWriter.hh"
 #include "SolverPartialPlanWriter.hh"
 #include "DbClientTransactionPlayer.hh"
 #include "DbClientTransactionLog.hh"
 
-// Registration support
-#include "CommonAncestorConstraint.hh"
-#include "HasAncestorConstraint.hh"
-#include "NddlDefs.hh"
-#include "ObjectFactory.hh"
-#include "ConstraintFactory.hh"
-#include "Constraints.hh"
-#include "Rule.hh"
-#include "BoolTypeFactory.hh"
-#include "StringTypeFactory.hh"
-#include "floatType.hh"
-#include "intType.hh"
 
 // Utilities
 #include "Debug.hh"
@@ -40,18 +24,18 @@ namespace EUROPA {
 
   /** IMPLEMENTATION FOR C-CALL of JNI INTERFACE **/
 
-  int initModel(const char* libPath, const char* initialStatePath, const char* destPath, 
+  int initModel(const char* libPath, const char* initialStatePath, const char* destPath,
 		const char* plannerConfigPath, const char** sourcePaths, const int numPaths){
 
     int retStatus;
 
     std::string msgStr = std::string("initModel:\n") +
-      "   libPath = " + libPath + "\n" + 
-      "   initialStatePath = " + initialStatePath + "\n" + 
-      "   destPath = " + destPath + "\n" + 
-      "   plannerConfigPath = " + plannerConfigPath + "\n" + 
+      "   libPath = " + libPath + "\n" +
+      "   initialStatePath = " + initialStatePath + "\n" +
+      "   destPath = " + destPath + "\n" +
+      "   plannerConfigPath = " + plannerConfigPath + "\n" +
       "   sources = " + EUROPA::toString(numPaths);
- 
+
     MasterController::logMsg(msgStr);
 
     /*
@@ -109,7 +93,7 @@ namespace EUROPA {
 	if(ok)
 	  controller->writeStatistics();
       }
-      
+
       // Now output at step_num
       controller->write();
       retStatus = controller->getStatus();
@@ -131,7 +115,7 @@ namespace EUROPA {
 
     int currentStepCount = MasterController::instance()->getStepCount();
     const int finalStep =  currentStepCount + num_steps;
-    while(currentStepCount++ <  finalStep && 
+    while(currentStepCount++ <  finalStep &&
 	  writeStep(currentStepCount) == MasterController::IN_PROGRESS);
 
     return MasterController::instance()->getStatus();
@@ -201,14 +185,14 @@ namespace EUROPA {
     return s_instance;
   }
 
-  MasterController* MasterController::createInstance() 
+  MasterController* MasterController::createInstance()
   {
       if (s_factory != NULL)
-          return s_factory->createInstance(); 
-      
+          return s_factory->createInstance();
+
       return NULL;
-  }      
-  
+  }
+
   MasterController::MasterController()
       : m_stepCount(0)
       , m_status(IN_PROGRESS)
@@ -221,13 +205,13 @@ namespace EUROPA {
   MasterController::~MasterController()
   {
     if(m_debugStream != NULL){
-      m_debugStream->flush(); 
-      m_debugStream->close(); 
+      m_debugStream->flush();
+      m_debugStream->close();
       delete m_debugStream;
     }
 
     doShutdown();
-    
+
     // Finally, unload the model
     unloadModel();
   }
@@ -240,7 +224,7 @@ namespace EUROPA {
       m_libHandle = p_dlopen(libPath, RTLD_NOW);
       if (!m_libHandle) {
         check_error_variable(const char* error_msg = p_dlerror());
-        check_error(!error_msg, error_msg); 
+        check_error(!error_msg, error_msg);
       }
     }
     catch (Error e) {
@@ -257,7 +241,7 @@ namespace EUROPA {
       fcn_loadSchema = (SchemaId (*)(const SchemaId&,const RuleSchemaId&))p_dlsym(m_libHandle, "loadSchema");
       if (!fcn_loadSchema) {
         check_error_variable(const char* error_msg = p_dlerror());
-        check_error(!error_msg, error_msg); 
+        check_error(!error_msg, error_msg);
       }
     }
     catch (Error e) {
@@ -270,7 +254,7 @@ namespace EUROPA {
     logMsg("Calling NDDL:loadSchema");
     try {
         SchemaId schema = ((Schema*)getComponent("Schema"))->getId();
-        RuleSchemaId ruleSchema = ((RuleSchema*)getComponent("RuleSchema"))->getId();   
+        RuleSchemaId ruleSchema = ((RuleSchema*)getComponent("RuleSchema"))->getId();
       (*fcn_loadSchema)(schema,ruleSchema);
     }
     catch (Error e) {
@@ -280,10 +264,10 @@ namespace EUROPA {
     }
   }
 
-  int MasterController::loadInitialState(const char* configPath, 
+  int MasterController::loadInitialState(const char* configPath,
 					 const char* initialStatePath,
 					 const char* destination,
-					 const char** sourcePaths, 
+					 const char** sourcePaths,
 					 const int numPaths){
     logMsg("loadInitialState:setting up debug stream");
 
@@ -344,7 +328,7 @@ namespace EUROPA {
       if (p_dlclose(m_libHandle)) {
         check_error_variable(const char* error_msg = p_dlerror());
         try {
-          check_error(!error_msg, error_msg); 
+          check_error(!error_msg, error_msg);
         }
         catch (Error e) {
           logMsg("Unexpected exception in unloadModel()");
@@ -366,7 +350,7 @@ namespace EUROPA {
     return m_status;
   }
 
-  const std::string MasterController::getDestination() const { 
+  const std::string MasterController::getDestination() const {
     checkError(m_ppw != NULL, "No Partial Plan Writer allocated.");
     return m_ppw->getDest();
   }
