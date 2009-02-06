@@ -74,7 +74,7 @@ nddl :
                   |     child=assignment
                   |     child=constraintInstantiation
 		  |	child=classDeclaration
-                  |     allocation
+                  |     child=allocation
 		  |	rule
 		  |	goal
 		  |	fact
@@ -295,14 +295,14 @@ allocation returns [Expr* result]
     std::vector<Expr*> args;
 }
         :       ^(CONSTRUCTOR_INVOCATION
-                        name=IDENT 
+                        objType=IDENT 
                         variableArgumentList[args]?
                 )
                 {
                     result = new ExprNewObject(
                         CTX->SymbolTable->getPlanDatabase()->getClient(),
+                        c_str($objType.text->chars), // objectType
                         "", // TODO!: object name?
-                        c_str($name.text->chars), // objectType
                         args
                     );
                 }
@@ -367,7 +367,6 @@ componentTypeEntry[ObjectType* objType]
 	:	classVariable[objType]
 	|	constructor
 	|	predicate
-	|	constraintInstantiation // TODO: what is this doing here?
 	;
 
 classVariable[ObjectType* objType]
@@ -425,62 +424,88 @@ predicateStatements
 		)
 	;
 
-rule
+rule returns [Expr* result]
+@init {
+    std::vector<Expr*> ruleBody;
+}
  	:	^('::'
 			className=IDENT
 			predicateName=IDENT
-			ruleBlock
+			ruleBlock[ruleBody]
 		)
+		{
+		    std::string predName = std::string(c_str($className.text->chars)) + "." + std::string(c_str($predicateName.text->chars));
+		    std::string source=""; // TODO: get this from the antlr parser
+		    result = new ExprRuleTypeDefinition((new InterpretedRuleFactory(predName,source,ruleBody))->getId());
+		}
 	;
 
-ruleBlock
+ruleBlock[std::vector<Expr*>& ruleBody]
 	:	^('{'
-			ruleStatement*
+			(child=ruleStatement { if (child !=NULL) ruleBody.push_back(child); /* TODO: drop condition when all children types are handled */})*
 		)
 	;
 
-ruleStatement
-	:	relation
-	|	constraintInstantiation
-	|	assignment
-	|	variableDeclaration
-	|	ifStatement
-	|	loopStatement
-	|	ruleBlock
+ruleStatement returns [Expr* result]
+	: (	child=constraintInstantiation
+	  |	child=assignment
+	  |	child=variableDeclaration
+	  |	child=ifStatement
+	  |	child=loopStatement
+	  |     relation
+	  )
+	  {
+	      result = child;
+	  }
 	;
 
 
-ifStatement
+ifStatement returns [Expr* result]
+@init {
+std::vector<Expr*> ifBody;
+std::vector<Expr*> elseBody;
+}
 	:	^('if'
-			expression
-			ruleBlock
-			ruleBlock?
+			guard=guardExpression
+			ruleBlock[ifBody]
+			ruleBlock[elseBody]?
 		)
+		{
+		    //result = new ExprIf(guard,ifBody,elseBody);
+		}
   ;
 
-loopStatement
+loopStatement returns [Expr* result]
+@init {
+std::vector<Expr*> loopBody;
+}
 	:	^('foreach'
 			name=IDENT
-			val=identifier
-			ruleBlock
+			val=identifier // TODO: "this" doesn't make much sense here, why identifier and not IDENT?
+			ruleBlock[loopBody]
 		)
+		{
+		    result = new ExprLoop(c_str($name.text->chars),c_str($val.text->chars),loopBody);
+		}
 	;
 
-// ==========================================================
-// expressions
-// ==========================================================
-
-expression
-	:	^('=='
-			anyValue
-			anyValue
-		)
-	|	^('!='
-			anyValue
-			anyValue
-		)
-	|	anyValue
+guardExpression returns [Expr* result]
+	: ( ^(relop=guardRelop lhs=anyValue rhs=anyValue )
+	  | lhs=anyValue
+	  )
+	  {
+	  /*
+	      if (rhs != NULL) 
+	          result = new ExprRelopGuard(c_str($relop.text->chars),lhs,rhs);
+	      else
+	          result = new ExprSingletonGuard(lhs); // TODO: current nddl allows more than one variable here.
+	   */	      
+	  }
 	;
+
+guardRelop 
+    : '==' | '!='
+;
 
 goal
 	:	^('goal'
@@ -533,8 +558,7 @@ qualified returns [Expr* result]
                // TODO!!: do type checking at each "."
                result = new ExprVarRef(varName.c_str());
            }
-        ;
-	
+        ;	
 
 temporalRelationNoInterval
 	:	'any'

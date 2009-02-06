@@ -194,40 +194,6 @@ namespace EUROPA {
 
 
   /*
-   * ExprConstructorSuperCall
-   */
-  ExprConstructorSuperCall::ExprConstructorSuperCall(const LabelStr& superClassName, const std::vector<Expr*>& argExprs)
-    : m_superClassName(superClassName)
-    , m_argExprs(argExprs)
-  {
-  }
-
-  ExprConstructorSuperCall::~ExprConstructorSuperCall()
-  {
-  }
-
-  DataRef ExprConstructorSuperCall::eval(EvalContext& context) const
-  {
-    ObjectId object = context.getVar("this")->derivedDomain().getSingletonValue();
-
-    std::vector<const AbstractDomain*> arguments;
-
-    evalArgs(context,arguments);
-    ObjectFactoryId objFactory = object->getPlanDatabase()->getSchema()->getObjectFactory(m_superClassName,arguments);
-    objFactory->evalConstructorBody(object,arguments);
-
-    return DataRef::null;
-  }
-
-  void ExprConstructorSuperCall::evalArgs(EvalContext& context, std::vector<const AbstractDomain*>& arguments) const
-  {
-    for (unsigned int i=0; i < m_argExprs.size(); i++) {
-      DataRef arg = m_argExprs[i]->eval(context);
-      arguments.push_back(&(arg.getValue()->derivedDomain()));
-    }
-  }
-
-  /*
    * ExprConstructorAssignment
    */
   ExprConstructorAssignment::ExprConstructorAssignment(const char* lhs,
@@ -471,7 +437,7 @@ namespace EUROPA {
     return DataRef(var);
   }
 
-  ExprConstraint::ExprConstraint(const char* name,const std::vector<Expr*> args)
+  ExprConstraint::ExprConstraint(const char* name,const std::vector<Expr*>& args)
     : m_name(name)
     , m_args(args)
   {
@@ -666,9 +632,8 @@ namespace EUROPA {
     return DataRef::null;
   }
 
-  ExprLoop::ExprLoop(const char* varName, const char* varType, const char* varValue,const std::vector<Expr*>& loopBody)
+  ExprLoop::ExprLoop(const char* varName, const char* varValue,const std::vector<Expr*>& loopBody)
     : m_varName(varName)
-    , m_varType(varType)
     , m_varValue(varValue)
     , m_loopBody(loopBody)
   {
@@ -680,218 +645,10 @@ namespace EUROPA {
 
   DataRef ExprLoop::doEval(RuleInstanceEvalContext& context) const
   {
-    context.getRuleInstance()->executeLoop(context,m_varName,m_varType,m_varValue,m_loopBody);
+    context.getRuleInstance()->executeLoop(context,m_varName,m_varValue,m_loopBody);
     debugMsg("Interpreter:InterpretedRule","Evaluated LOOP " << m_varName.toString() << "," << m_varValue.toString());
     return DataRef::null;
   }
-
-  /*
-   * InterpretedObjectFactory
-   */
-  InterpretedObjectFactory::InterpretedObjectFactory(
-						     const char* className,
-						     const LabelStr& signature,
-						     const std::vector<std::string>& constructorArgNames,
-						     const std::vector<std::string>& constructorArgTypes,
-						     ExprConstructorSuperCall* superCallExpr,
-						     const std::vector<Expr*>& constructorBody,
-						     bool canMakeNewObject)
-    : ObjectFactory(signature)
-    , m_className(className)
-    , m_constructorArgNames(constructorArgNames)
-    , m_constructorArgTypes(constructorArgTypes)
-    , m_superCallExpr(superCallExpr)
-    , m_constructorBody(constructorBody)
-    , m_canMakeNewObject(canMakeNewObject)
-  {
-  }
-
-  InterpretedObjectFactory::~InterpretedObjectFactory()
-  {
-    if (m_superCallExpr != NULL)
-      delete m_superCallExpr;
-
-    for (unsigned int i=0; i < m_constructorBody.size(); i++)
-      delete m_constructorBody[i];
-  }
-
-  class ObjectFactoryEvalContext : public EvalContext
-  {
-  public:
-    ObjectFactoryEvalContext(const PlanDatabaseId& planDb,
-			     const std::vector<std::string>& argNames,
-			     const std::vector<std::string>& argTypes,
-			     const std::vector<const AbstractDomain*>& args)
-      : EvalContext(NULL) // TODO: should pass in eval context from outside to have access to globals
-    {
-			debugMsg("ObjectFactoryEvalContext", ">> ");
-      // Add arguments to eval context
-      for (unsigned int i=0;i<argNames.size();i++) {
-				debugMsg("ObjectFactoryEvalContext:createVariable", argTypes[i] << " " << argNames[i] << " = " << *(args[i]));
-	      ConstrainedVariableId arg = planDb->getClient()->createVariable(
-									argTypes[i].c_str(),
-									*(args[i]),
-									argNames[i].c_str(),
-									true
-									);
-	       m_tmpVars.push_back(arg);
-	       addVar(argNames[i].c_str(),arg);
-      }
-			debugMsg("ObjectFactoryEvalContext", "<< ");
-    }
-
-    virtual ~ObjectFactoryEvalContext()
-    {
-      for (unsigned int i=0;i<m_tmpVars.size();i++) {
-	      // TODO: must release temporary vars, causing crash?
-	      //m_tmpVars[i].release();
-      }
-    }
-
-  protected:
-    std::vector<ConstrainedVariableId> m_tmpVars;
-  };
-
-  ObjectId InterpretedObjectFactory::createInstance(
-						    const PlanDatabaseId& planDb,
-						    const LabelStr& objectType,
-						    const LabelStr& objectName,
-						    const std::vector<const AbstractDomain*>& arguments) const
-  {
-    check_runtime_error(checkArgs(arguments));
-
-    debugMsg("InterpretedObjectFactory:createInstance", "Creating instance for type " << objectType.toString() << " with name " << objectName.toString());
-
-	ObjectId instance = makeNewObject(planDb, objectType, objectName,arguments);
-	evalConstructorBody(instance,arguments);
-	instance->close();
-
-    debugMsg("InterpretedObjectFactory:createInstance", "Created instance " << instance->toString() << " for type " << objectType.toString() << " with name " << objectName.toString());
-
-    return instance;
-  }
-
-  bool InterpretedObjectFactory::checkArgs(const std::vector<const AbstractDomain*>& arguments) const
-  {
-    // TODO: implement this. is this even necessary?, parser should take care of it
-    return true;
-  }
-
-  /*
-   * If a class has a native C++ ancestor the ancestor instance must be instanciated instead
-   * - Every exported C++ class (like Timeline) must extend Object
-   * - Every exported C++ class must register an InterpretedObjectFactory for each one of its constructors
-   *   that overrides this method and calls the appropriate constructor
-   *
-   */
-  ObjectId InterpretedObjectFactory::makeNewObject(
-						   const PlanDatabaseId& planDb,
-						   const LabelStr& objectType,
-						   const LabelStr& objectName,
-						   const std::vector<const AbstractDomain*>& arguments) const
-  {
-    // go up the hierarchy and give the parents a chance to create the object, this allows native classes to be exported
-    // TODO: some effort can be saved by keeping track of whether a class has a native ancestor different from Object.
-    // If it doesn't, the object can be created right away and this traversal up the hierarchy can be skipped
-    if (m_canMakeNewObject) {
-      debugMsg("Interpreter:InterpretedObject","Created Object:" << objectName.toString() << " type:" << objectType.toString());
-      return (new Object(planDb, objectType, objectName,true))->getId();
-    }
-    else {
-      check_error(m_superCallExpr != NULL, std::string("Failed to find factory for object ") + objectName.toString() + " of type "+objectType.toString());
-
-	  ObjectFactoryEvalContext evalContext(
-	      planDb,
-		  m_constructorArgNames,
-		  m_constructorArgTypes,
-		  arguments
-      );
-
-      // TODO: argumentsForSuper are eval'd twice, once here and once when m_superCallExpr->eval(evalContext) is called
-      //  figure out how to do it only once
-      std::vector<const AbstractDomain*> argumentsForSuper;
-      m_superCallExpr->evalArgs(evalContext,argumentsForSuper);
-
-      ObjectFactoryId objFactory = planDb->getSchema()->getObjectFactory(m_superCallExpr->getSuperClassName(),argumentsForSuper);
-      ObjectId retval = objFactory->makeNewObject(
-          planDb,
-          objectType,
-          objectName,
-          argumentsForSuper
-      );
-
-      return retval;
-    }
-  }
-
-	void InterpretedObjectFactory::evalConstructorBody(
-	                                           ObjectId& instance,
-	                                           const std::vector<const AbstractDomain*>& arguments) const
-	{
-		// TODO: should pass in eval context from outside to have access to globals
-	    ObjectFactoryEvalContext factoryEvalContext(
-	        instance->getPlanDatabase(),
-		    m_constructorArgNames,
-		    m_constructorArgTypes,
-		    arguments
-        );
-	    ObjectEvalContext evalContext(&factoryEvalContext,instance);
-
-        if (m_superCallExpr != NULL)
-    	    m_superCallExpr->eval(evalContext);
-
-        for (unsigned int i=0; i < m_constructorBody.size(); i++)
-            m_constructorBody[i]->eval(evalContext);
-
-        // Initialize any variables that were not explicitly initialized
-        const Schema::NameValueVector& members = instance->getPlanDatabase()->getSchema()->getMembers(m_className);
-        for (unsigned int i=0; i < members.size(); i++) {
-            std::string varName = instance->getName().toString() + "." + members[i].second.toString();
-            if (instance->getVariable(varName) == ConstrainedVariableId::noId()) {
-	            const AbstractDomain& baseDomain =
-	                instance->getPlanDatabase()->getConstraintEngine()->getCESchema()->baseDomain(members[i].first.c_str());
-	            instance->addVariable(
-			      baseDomain,
-			      members[i].second.c_str()
-			    );
-	            debugMsg("Interpreter:InterpretedObject","Used default initializer for " << m_className.toString() << "." << members[i].second.toString());
-            }
-        }
-
-        debugMsg("Interpreter:evalConstructorBody",
-	             "Evaluated constructor for " << instance->toString());
-    }
-
-	  /*
-	   * ObjectEvalContext
-	   * Puts Object member variables in context
-	   */
-	  ObjectEvalContext::ObjectEvalContext(EvalContext* parent, const ObjectId& objInstance)
-	    : EvalContext(parent)
-	    , m_obj(objInstance)
-	  {
-	  }
-
-	  ObjectEvalContext::~ObjectEvalContext()
-	  {
-	  }
-
-	  ConstrainedVariableId ObjectEvalContext::getVar(const char* name)
-	  {
-	    if (strcmp(name,"this") == 0)
-	        return m_obj->getThis();
-
-	    ConstrainedVariableId var = m_obj->getVariable(m_obj->getName().toString()+"."+name);
-
-	    if (!var.isNoId()) {
-	      debugMsg("Interpreter:EvalContext:Object","Found var in object instance:" << name);
-	      return var;
-	    }
-	    else {
-	      debugMsg("Interpreter:EvalContext:Object","Didn't find var in object instance:" << name);
-	      return EvalContext::getVar(name);
-	    }
-	  }
 
     /*
      * InterpretedToken
@@ -1438,7 +1195,6 @@ namespace EUROPA {
 
   void InterpretedRuleInstance::executeLoop(EvalContext& evalContext,
 					    const LabelStr& loopVarName,
-					    const LabelStr& loopVarType,
 					    const LabelStr& valueSet,
 					    const std::vector<Expr*>& loopBody)
   {
@@ -1446,8 +1202,10 @@ namespace EUROPA {
     ConstrainedVariableId setVar = evalContext.getVar(valueSet.c_str());
     check_error(!setVar.isNoId(),"Loop var can't be NULL");
     const AbstractDomain& loopVarDomain = setVar->derivedDomain();
+    LabelStr loopVarType = loopVarDomain.getTypeName();
     debugMsg("Interpreter:InterpretedRule","set var for loop :" << setVar->toString());
     debugMsg("Interpreter:InterpretedRule","set var domain for loop:" << loopVarDomain.toString());
+    debugMsg("Interpreter:InterpretedRule","loop var type:" << loopVarType.toString());
     const ObjectDomain& loopObjectSet = dynamic_cast<const ObjectDomain&>(loopVarDomain);
 
     if (loopObjectSet.isEmpty())
@@ -1523,26 +1281,230 @@ namespace EUROPA {
   }
 
 
-  // Factories for exported C++ classes
-  TimelineObjectFactory::TimelineObjectFactory(const LabelStr& signature)
-    : NativeObjectFactory("Timeline",signature)
+  // TODO: keep using pdbClient?
+  const DbClientId& getPDB(EvalContext& context)
+  {
+      // TODO: Add this behavior to EvalContext instead?
+      DbClient* dbClient = (DbClient*)context.getElement("DbClient");
+      if (dbClient != NULL)
+          return dbClient->getId();
+
+      PlanDatabase* pdb = (PlanDatabase*)context.getElement("PlanDatabase");
+      check_error(pdb != NULL,"Could not find Plan Database in eval context");
+      return pdb->getClient();
+  }
+
+  const SchemaId& getSchema(EvalContext& context)
+  {
+      /* TODO why doesn't this work???
+      Schema* schema = (Schema*)context.getElement("Schema");
+      check_error(schema != NULL,"Could not find Schema in eval context");
+      return schema->getId();
+      */
+      return getPDB(context)->getSchema();
+  }
+
+
+  ExprTypedef::ExprTypedef(const char* name, AbstractDomain* type)
+      : m_name(name)
+      , m_type(type)
   {
   }
 
-  TimelineObjectFactory::~TimelineObjectFactory()
+  ExprTypedef::~ExprTypedef()
   {
   }
 
-  ObjectId TimelineObjectFactory::makeNewObject(
-						const PlanDatabaseId& planDb,
-						const LabelStr& objectType,
-						const LabelStr& objectName,
-						const std::vector<const AbstractDomain*>& arguments) const
+  DataRef ExprTypedef::eval(EvalContext& context) const
   {
-    ObjectId instance =  (new Timeline(planDb, objectType, objectName,true))->getId();
-    debugMsg("Interpreter:NativeObjectFactory","Created Native " << m_className.toString() << ":" << objectName.toString() << " type:" << objectType.toString());
+      const char* name = m_name.c_str();
+      const AbstractDomain& domain = *m_type;
 
-    return instance;
+      debugMsg("Interpreter:typedef","Defining type:" << name);
+
+      TypeFactory* factory = NULL;
+      if (m_type->isEnumerated())
+        factory = new EnumeratedTypeFactory(name,name,domain);
+      else
+        factory = new IntervalTypeFactory(name,domain);
+
+      // TODO: this is what the code generator does for every typedef, it doesn't seem right for interval types though
+      SchemaId schema = getSchema(context);
+      schema->addEnum(name);
+      schema->getCESchema()->registerFactory(factory->getId());
+
+      debugMsg("Interpreter:typedef"
+              , "Created type factory " << name <<
+                " with base domain " << domain.toString());
+
+      return DataRef::null;
   }
+
+  std::string ExprTypedef::toString() const
+  {
+      std::ostringstream os;
+
+      os << "TYPEDEF:" << m_type->toString() << " -> " << m_name.toString();
+
+      return os.str();
+  }
+
+  ExprVarDeclaration::ExprVarDeclaration(const char* name, AbstractDomain* type, Expr* initValue)
+      : m_name(name)
+      , m_type(type)
+      , m_initValue(initValue)
+  {
+  }
+
+  ExprVarDeclaration::~ExprVarDeclaration()
+  {
+  }
+
+  DataRef ExprVarDeclaration::eval(EvalContext& context) const
+  {
+      const DbClientId& pdb = getPDB(context);
+
+      ConstrainedVariableId v = pdb->createVariable(
+              m_type->getTypeName().c_str(),
+              *m_type,
+              m_name.c_str()
+      );
+
+      return DataRef(v);
+  }
+
+  std::string ExprVarDeclaration::toString() const
+  {
+      std::ostringstream os;
+
+      os << m_type->toString() << " " << m_name.toString();
+      if (m_initValue != NULL)
+          os << " " << m_initValue->toString();
+
+      return os.str();
+  }
+
+  ExprAssignment::ExprAssignment(Expr* lhs, Expr* rhs)
+      : m_lhs(lhs)
+      , m_rhs(rhs)
+  {
+  }
+
+  ExprAssignment::~ExprAssignment()
+  {
+  }
+
+  DataRef ExprAssignment::eval(EvalContext& context) const
+  {
+      DataRef lhs = m_lhs->eval(context);
+
+      if (m_rhs != NULL) {
+          DataRef rhs = m_rhs->eval(context);
+          const DbClientId& pdb = getPDB(context);
+
+          if (rhs.getValue()->lastDomain().isSingleton()) {
+              pdb->specify(lhs.getValue(),rhs.getValue()->lastDomain().getSingletonValue());
+          }
+          else {
+              pdb->restrict(lhs.getValue(),rhs.getValue()->lastDomain());
+              // TODO: this behavior seems more reasonable, specially to support violation reporting
+              // lhs.getValue()->getCurrentDomain().equate(rhs.getValue()->getCurrentDomain());
+          }
+      }
+
+      return lhs;
+  }
+
+  std::string ExprAssignment::toString() const
+  {
+      std::ostringstream os;
+
+      os << "{ " << m_lhs->toString() << " = " << (m_rhs != NULL ? m_rhs->toString() : "NULL") << "}";
+
+      return os.str();
+  }
+
+
+  ExprObjectTypeDeclaration::ExprObjectTypeDeclaration(const ObjectTypeId& objType)
+      : m_objType(objType)
+  {
+  }
+
+  ExprObjectTypeDeclaration::~ExprObjectTypeDeclaration()
+  {
+  }
+
+  DataRef ExprObjectTypeDeclaration::eval(EvalContext& context) const
+  {
+      SchemaId schema = getSchema(context);
+
+      schema->declareObjectType(m_objType->getName());
+
+      return DataRef::null;
+  }
+
+  std::string ExprObjectTypeDeclaration::toString() const
+  {
+      std::ostringstream os;
+
+      os << "{class " << m_objType->getName().c_str() << "}";
+
+      return os.str();
+  }
+
+
+  ExprObjectTypeDefinition::ExprObjectTypeDefinition(const ObjectTypeId& objType)
+      : m_objType(objType)
+  {
+  }
+
+  ExprObjectTypeDefinition::~ExprObjectTypeDefinition()
+  {
+  }
+
+  DataRef ExprObjectTypeDefinition::eval(EvalContext& context) const
+  {
+      SchemaId schema = getSchema(context);
+
+      schema->registerObjectType(m_objType);
+
+      return DataRef::null;
+  }
+
+  std::string ExprObjectTypeDefinition::toString() const
+  {
+      std::ostringstream os;
+
+      os << m_objType->toString();
+
+      return os.str();
+  }
+
+  ExprRuleTypeDefinition::ExprRuleTypeDefinition(const RuleId& rf)
+      : m_ruleFactory(rf)
+  {
+  }
+
+  ExprRuleTypeDefinition::~ExprRuleTypeDefinition()
+  {
+
+  }
+
+  DataRef ExprRuleTypeDefinition::eval(EvalContext& context) const
+  {
+      RuleSchema* rs = (RuleSchema*)context.getElement("RuleSchema");
+      rs->registerRule(m_ruleFactory);
+      return DataRef::null;
+  }
+
+  std::string ExprRuleTypeDefinition::toString() const
+  {
+      std::ostringstream os;
+
+      os << m_ruleFactory->toString();
+
+      return os.str();
+  }
+
 }
 

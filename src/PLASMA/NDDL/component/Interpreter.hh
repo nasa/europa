@@ -1,7 +1,7 @@
 #ifndef _H_Interpreter
 #define _H_Interpreter
 
-#include "ConstrainedVariable.hh"
+#include "PDBInterpreter.hh"
 #include "IntervalToken.hh"
 #include "Object.hh"
 #include "ObjectFactory.hh"
@@ -17,83 +17,6 @@
 
 
 namespace EUROPA {
-
-  class Expr;
-
-  class DataRef
-  {
-  	public :
-  	    DataRef();
-  	    DataRef(const ConstrainedVariableId& v);
-  	    virtual ~DataRef();
-
-  	    const ConstrainedVariableId& getValue();
-
-  	    static DataRef null;
-
-  	protected :
-  	    ConstrainedVariableId m_value;
-  };
-
-  class EvalContext
-  {
-  	public:
-  	    EvalContext(EvalContext* parent);
-  	    virtual ~EvalContext();
-
-  	    virtual void addVar(const char* name,const ConstrainedVariableId& v);
-  	    virtual ConstrainedVariableId getVar(const char* name);
-
-  	    virtual void addToken(const char* name,const TokenId& t);
-  	    virtual TokenId getToken(const char* name);
-
-  	    virtual void* getElement(const char* name) const { return NULL; }
-
-        virtual std::string toString() const;
-
-  	protected:
-  	    EvalContext* m_parent;
-  	    std::map<std::string,ConstrainedVariableId> m_variables;
-  	    std::map<std::string,TokenId> m_tokens;
-  };
-
-  class Expr
-  {
-  	public:
-        virtual DataRef eval(EvalContext& context) const = 0;
-        virtual ~Expr(){}
-
-        virtual std::string toString() const { return "Expr"; }
-  };
-
-  class ExprList : public Expr
-  {
-    public:
-        ExprList();
-        virtual ~ExprList();
-
-        virtual DataRef eval(EvalContext& context) const;
-        void addChild(Expr* child);
-
-        virtual std::string toString() const;
-
-    protected:
-        std::vector<Expr*> m_children;
-  };
-
-  class ExprNoop : public Expr
-  {
-    public:
-        ExprNoop(const std::string& str);
-        virtual ~ExprNoop();
-
-        virtual DataRef eval(EvalContext& context) const;
-
-        virtual std::string toString() const { return "ExprNoop:"+m_str; }
-
-    protected:
-        std::string m_str;
-  };
 
   class ExprConstant : public Expr
   {
@@ -126,7 +49,7 @@ namespace EUROPA {
   class ExprConstraint : public Expr
   {
     public:
-        ExprConstraint(const char* name,const std::vector<Expr*> args);
+        ExprConstraint(const char* name,const std::vector<Expr*>& args);
         virtual ~ExprConstraint();
 
         virtual DataRef eval(EvalContext& context) const;
@@ -160,25 +83,6 @@ namespace EUROPA {
 	    std::vector<Expr*>    m_argExprs;
   };
 
-  // Call to super inside a constructor
-  class ExprConstructorSuperCall : public Expr
-  {
-    public:
-        ExprConstructorSuperCall(const LabelStr& superClassName,
-                                 const std::vector<Expr*>& argExprs);
-        virtual ~ExprConstructorSuperCall();
-
-        virtual DataRef eval(EvalContext& context) const;
-
-        const LabelStr& getSuperClassName() const { return m_superClassName; }
-
-        void evalArgs(EvalContext& context, std::vector<const AbstractDomain*>& arguments) const;
-
-    protected:
-        LabelStr m_superClassName;
-        std::vector<Expr*> m_argExprs;
-  };
-
   // Assignment inside a constructor
   // TODO: make lhs an Expr as well to make this a generic assignment
   class ExprConstructorAssignment : public Expr
@@ -193,64 +97,6 @@ namespace EUROPA {
     protected:
         LabelStr m_lhs;
         Expr* m_rhs;
-  };
-
-  class InterpretedObjectFactory : public ObjectFactory
-  {
-  	public:
-  	    InterpretedObjectFactory(
-  	        const char* className,
-  	        const LabelStr& signature,
-  	        const std::vector<std::string>& constructorArgNames,
-  	        const std::vector<std::string>& constructorArgTypes,
-  	        ExprConstructorSuperCall* superCallExpr,
-  	        const std::vector<Expr*>& constructorBody,
-  	        bool canMakeNewObject = false
-  	    );
-
-  	    virtual ~InterpretedObjectFactory();
-
-	protected:
-	    // createInstance = makeNewObject + evalConstructorBody
-	    virtual ObjectId createInstance(
-	                            const PlanDatabaseId& planDb,
-	                            const LabelStr& objectType,
-	                            const LabelStr& objectName,
-	                            const std::vector<const AbstractDomain*>& arguments) const;
-
-        // Any exported C++ classes must register a factory for each C++ constructor
-        // and override this method to call the C++ constructor
-    	virtual ObjectId makeNewObject(
-	                        const PlanDatabaseId& planDb,
-	                        const LabelStr& objectType,
-	                        const LabelStr& objectName,
-	                        const std::vector<const AbstractDomain*>& arguments) const;
-
-	    virtual void evalConstructorBody(
-	                       ObjectId& instance,
-	                       const std::vector<const AbstractDomain*>& arguments) const;
-
-	    bool checkArgs(const std::vector<const AbstractDomain*>& arguments) const;
-
-        LabelStr                  m_className;
-        std::vector<std::string>  m_constructorArgNames;
-        std::vector<std::string>  m_constructorArgTypes;
-        ExprConstructorSuperCall* m_superCallExpr;
-        std::vector<Expr*>        m_constructorBody;
-        bool                      m_canMakeNewObject;
-    mutable EvalContext*      m_evalContext;
-  };
-
-  class ObjectEvalContext : public EvalContext
-  {
-    public:
-        ObjectEvalContext(EvalContext* parent, const ObjectId& objInstance);
-        virtual ~ObjectEvalContext();
-
-        virtual ConstrainedVariableId getVar(const char* name);
-
-    protected:
-        ObjectId m_obj;
   };
 
   // InterpretedToken is the interpreted version of NddlToken
@@ -381,7 +227,6 @@ namespace EUROPA {
 
         void executeLoop(EvalContext& evalContext,
                          const LabelStr& loopVarName,
-                         const LabelStr& loopVarType,
                          const LabelStr& valueSet,
                          const std::vector<Expr*>& loopBody);
 
@@ -521,43 +366,15 @@ namespace EUROPA {
   class ExprLoop : public RuleExpr
   {
   	public:
-  	    ExprLoop(const char* varName, const char* varType, const char* varValue,const std::vector<Expr*>& loopBody);
+  	    ExprLoop(const char* varName, const char* varValue,const std::vector<Expr*>& loopBody);
   	    virtual ~ExprLoop();
 
   	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;
 
     protected:
         LabelStr m_varName;
-        LabelStr m_varType;
         LabelStr m_varValue;
         const std::vector<Expr*> m_loopBody;
-  };
-
-  // TODO: create a separate file for exported C++ classes?
-  class NativeObjectFactory : public InterpretedObjectFactory
-  {
-  	public:
-  	    NativeObjectFactory(const char* className, const LabelStr& signature)
-  	        : InterpretedObjectFactory(
-  	              className,                  // className
-  	              signature,                  // signature
-  	              std::vector<std::string>(), // ConstructorArgNames
-  	              std::vector<std::string>(), // constructorArgTypes
-  	              NULL,                       // SuperCallExpr
-  	              std::vector<Expr*>(),       // constructorBody
-  	              true                        // canCreateObjects
-  	          )
-  	    {
-  	    }
-
-  	    virtual ~NativeObjectFactory() {}
-
-  	protected:
-    	virtual ObjectId makeNewObject(
-	                        const PlanDatabaseId& planDb,
-	                        const LabelStr& objectType,
-	                        const LabelStr& objectName,
-	                        const std::vector<const AbstractDomain*>& arguments) const = 0;
   };
 
   class NativeTokenFactory: public TokenFactory
@@ -569,19 +386,91 @@ namespace EUROPA {
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const = 0;
   };
 
-  class TimelineObjectFactory : public NativeObjectFactory
+  class ExprTypedef : public Expr
   {
-  	public:
-  	    TimelineObjectFactory(const LabelStr& signature);
-  	    virtual ~TimelineObjectFactory();
+  public:
+      ExprTypedef(const char* name, AbstractDomain* type);
+      virtual ~ExprTypedef();
 
-  	protected:
-    	virtual ObjectId makeNewObject(
-	                        const PlanDatabaseId& planDb,
-	                        const LabelStr& objectType,
-	                        const LabelStr& objectName,
-	                        const std::vector<const AbstractDomain*>& arguments) const;
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      LabelStr m_name;
+      AbstractDomain* m_type;
   };
+
+  class ExprVarDeclaration : public Expr
+  {
+  public:
+      ExprVarDeclaration(const char* name, AbstractDomain* type, Expr* initValue);
+      virtual ~ExprVarDeclaration();
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      LabelStr m_name;
+      AbstractDomain* m_type;
+      Expr* m_initValue;
+  };
+
+  class ExprAssignment : public Expr
+  {
+  public:
+      ExprAssignment(Expr* lhs, Expr* rhs);
+      virtual ~ExprAssignment();
+
+      Expr* getLhs() { return m_lhs; }
+      Expr* getRhs() { return m_rhs; }
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      Expr* m_lhs;
+      Expr* m_rhs;
+  };
+
+  class ExprObjectTypeDeclaration : public Expr
+  {
+  public:
+      ExprObjectTypeDeclaration(const ObjectTypeId& objType);
+      virtual ~ExprObjectTypeDeclaration();
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      const ObjectTypeId m_objType;
+  };
+
+  class ExprObjectTypeDefinition : public Expr
+  {
+  public:
+      ExprObjectTypeDefinition(const ObjectTypeId& objType);
+      virtual ~ExprObjectTypeDefinition();
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      const ObjectTypeId m_objType;
+  };
+
+  class ExprRuleTypeDefinition : public Expr
+  {
+  public:
+      ExprRuleTypeDefinition(const RuleId& rf);
+      virtual ~ExprRuleTypeDefinition();
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      const RuleId m_ruleFactory;
+  };
+
 }
 
 #endif // _H_Interpreter

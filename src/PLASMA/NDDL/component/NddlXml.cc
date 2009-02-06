@@ -7,30 +7,36 @@
 
 namespace EUROPA {
 
-const Id<ObjectFactory>& createDefaultObjectFactory(
-        const char* className,
-        const char* parentClassName,
-        bool canCreateObjects)
-{
-    std::vector<std::string> constructorArgNames;
-    std::vector<std::string> constructorArgTypes;
-    std::vector<Expr*> constructorBody;
-    ExprConstructorSuperCall* superCallExpr = NULL;
+  class NddlXmlEvalContext : public EvalContext
+  {
+  public:
+      NddlXmlEvalContext(NddlXmlInterpreter* i)
+          : EvalContext(NULL)
+          , m_interpreter(i)
+      {
+      }
 
-    // If it can't create objects, generate default super call
-    if (!canCreateObjects)
-        superCallExpr = new ExprConstructorSuperCall(parentClassName,std::vector<Expr*>());
+      virtual ~NddlXmlEvalContext()
+      {
+      }
 
-    return (new InterpretedObjectFactory(
-            className,
-            className,
-            constructorArgNames,
-            constructorArgTypes,
-            superCallExpr,
-            constructorBody,
-            canCreateObjects)
-           )->getId();
-}
+      virtual void* getElement(const char* name) const
+      {
+          std::string str(name);
+
+          if (str=="DbClient")
+              return (DbClient*)(m_interpreter->getDbClient());
+          if (str=="Schema")
+              return (Schema*)(m_interpreter->getSchema());
+          if (str=="RuleSchema")
+              return (RuleSchema*)(m_interpreter->m_ruleSchema);
+
+          return EvalContext::getElement(name);
+      }
+
+  protected:
+      NddlXmlInterpreter* m_interpreter;
+  };
 
   /*
    *
@@ -42,21 +48,12 @@ const Id<ObjectFactory>& createDefaultObjectFactory(
     : DbClientTransactionPlayer(client)
     , m_ruleSchema(ruleSchema)
   {
-    // TODO: these should be registered by PlanDatabase module
-    ObjectType* ot;
-    const char* rootObjType = Schema::rootObject().c_str();
-
-    ot = new ObjectType(rootObjType,"",true /*isNative*/);
-    ot->addObjectFactory(createDefaultObjectFactory(rootObjType, NULL, true));
-    getSchema()->registerObjectType(ot->getId());
-
-    ot = new ObjectType("Timeline",rootObjType,true /*isNative*/);
-    ot->addObjectFactory((new TimelineObjectFactory("Timeline"))->getId());
-    getSchema()->registerObjectType(ot->getId());
+    m_evalContext = new NddlXmlEvalContext(this);
   }
 
   NddlXmlInterpreter::~NddlXmlInterpreter()
   {
+      delete m_evalContext;
   }
 
   std::string NddlXmlInterpreter::interpret(std::istream& input, const std::string& script)
@@ -130,16 +127,13 @@ const Id<ObjectFactory>& createDefaultObjectFactory(
 
       objType = new ObjectType(className,parentClassName);
 
-      bool definedConstructor = false;
       for(const TiXmlElement* child = element.FirstChildElement(); child; child = child->NextSiblingElement() ) {
           const char * tagname = child->Value();
 
           if (strcmp(tagname, "var") == 0)
               defineClassMember(objType,child);
-          else if (strcmp(tagname, "constructor") == 0) {
+          else if (strcmp(tagname, "constructor") == 0)
               defineConstructor(objType,child);
-              definedConstructor = true;
-          }
           else if (strcmp(tagname, "predicate") == 0)
               declarePredicate(objType,child);
           else if (strcmp(tagname, "enum") == 0)
@@ -148,13 +142,8 @@ const Id<ObjectFactory>& createDefaultObjectFactory(
               check_runtime_error(ALWAYS_FAILS,std::string("Unexpected element ")+tagname+" while defining class "+className);
       }
 
-      // Register a default factory with no arguments if one is not provided explicitly
-      // TODO: this should automatically be done by objType
-      if (!definedConstructor)
-          objType->addObjectFactory(createDefaultObjectFactory(className, parentClassName, false));
-
-
-      getSchema()->registerObjectType(objType->getId());
+      ExprObjectTypeDefinition otd(objType->getId());
+      otd.eval(*m_evalContext);
   }
 
   void NddlXmlInterpreter::defineClassMember(ObjectType* objType,  const TiXmlElement* element)
@@ -531,7 +520,7 @@ const Id<ObjectFactory>& createDefaultObjectFactory(
               localVars[varName]=varType;
               std::vector<Expr*> loopBody;
               buildRuleBody(className,predName,child->FirstChildElement(),loopBody,localVars);
-              ruleBody.push_back(new ExprLoop(varName,varType,varValue,loopBody));
+              ruleBody.push_back(new ExprLoop(varName,varValue,loopBody));
           }
           else
               check_runtime_error(ALWAYS_FAILS,std::string("Unknown Compatibility element:") + child->Value());

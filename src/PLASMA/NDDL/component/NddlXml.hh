@@ -7,12 +7,13 @@
 #include "DbClientTransactionPlayer.hh"
 #include "RulesEngineDefs.hh"
 #include "Engine.hh"
-#include "ObjectType.hh"
 
 namespace EUROPA {
 
   class Expr;
   class ObjectFactory;
+  class ObjectType;
+  class EvalContext;
 
   class NddlXmlInterpreter : public DbClientTransactionPlayer, public LanguageInterpreter
   {
@@ -48,7 +49,11 @@ namespace EUROPA {
       LabelStr getTokenVarClass(const LabelStr& className,const LabelStr& predName,const LabelStr& var) const;
       LabelStr checkPredicateType(const LabelStr& type) const;
 
+      const DbClientId& getDbClient() const { return m_client; }
+
       RuleSchemaId m_ruleSchema;
+      EvalContext* m_evalContext;
+      friend class NddlXmlEvalContext;
   };
 
 }

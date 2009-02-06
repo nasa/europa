@@ -89,4 +89,13 @@ namespace EUROPA {
     const LabelStr& Rule::getName() const {return m_name;}
 
     const LabelStr& Rule::getSource() const {return m_source;}
+
+    std::string Rule::toString() const
+    {
+        std::ostringstream os;
+
+        os << "RuleFactory " << getName().c_str();
+
+        return os.str();
+    }
 }

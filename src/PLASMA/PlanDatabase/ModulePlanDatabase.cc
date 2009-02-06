@@ -6,6 +6,7 @@
 #include "HasAncestorConstraint.hh"
 #include "ObjectTokenRelation.hh"
 #include "DbClientTransactionPlayer.hh"
+#include "Timeline.hh"
 
 namespace EUROPA {
 
@@ -64,6 +65,16 @@ namespace EUROPA {
 
       Schema* schema = new Schema("EngineSchema",ceSchema->getId()); // TODO: use engine name
       engine->addComponent("Schema",schema);
+
+      ObjectType* ot;
+      const char* rootObjType = Schema::rootObject().c_str();
+
+      ot = new ObjectType(rootObjType,"",true /*isNative*/);
+      schema->registerObjectType(ot->getId());
+
+      ot = new ObjectType("Timeline",rootObjType,true /*isNative*/);
+      ot->addObjectFactory((new TimelineObjectFactory("Timeline"))->getId());
+      schema->registerObjectType(ot->getId());
 
       PlanDatabase* pdb = new PlanDatabase(ce->getId(), schema->getId());
       engine->addComponent("PlanDatabase",pdb);

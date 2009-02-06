@@ -21,6 +21,7 @@ ModuleBase PlanDatabase
 	ObjectFactory.cc
 	ObjectTokenRelation.cc
 	ObjectType.cc
+	PDBInterpreter.cc
 	PlanDatabase.cc
 	PlanDatabaseListener.cc
 	PSPlanDatabaseListener.cc

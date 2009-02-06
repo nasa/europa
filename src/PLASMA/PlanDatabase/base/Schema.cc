@@ -618,6 +618,31 @@ namespace EUROPA {
       results.push_back(it->first);
   }
 
+  const Id<ObjectFactory>& createDefaultObjectFactory(
+          const char* className,
+          const char* parentClassName,
+          bool canCreateObjects)
+  {
+      std::vector<std::string> constructorArgNames;
+      std::vector<std::string> constructorArgTypes;
+      std::vector<Expr*> constructorBody;
+      ExprConstructorSuperCall* superCallExpr = NULL;
+
+      // If it can't create objects, generate default super call
+      if (!canCreateObjects)
+          superCallExpr = new ExprConstructorSuperCall(parentClassName,std::vector<Expr*>());
+
+      return (new InterpretedObjectFactory(
+              className,
+              className,
+              constructorArgNames,
+              constructorArgTypes,
+              superCallExpr,
+              constructorBody,
+              canCreateObjects)
+             )->getId();
+  }
+
   void Schema::registerObjectType(const ObjectTypeId& objType)
   {
       const char* className = objType->getName().c_str();
@@ -627,6 +652,12 @@ namespace EUROPA {
           addObjectType(className);
       else
           addObjectType(className,parentClassName);
+
+      if (objType->getObjectFactories().size() == 0) {
+          bool canCreateObjects = objType->isNative();
+          objType->addObjectFactory(createDefaultObjectFactory(objType->getName().c_str(),objType->getParent().c_str(),canCreateObjects));
+          debugMsg("Schema:registerObjectType","Generated default factory for object type:" << objType->getName().c_str());
+      }
 
       {
           std::map<std::string,std::string>::const_iterator it = objType->getMembers().begin();

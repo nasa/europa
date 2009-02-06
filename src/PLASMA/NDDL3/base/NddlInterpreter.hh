@@ -29,12 +29,12 @@ protected:
 class NddlSymbolTable : public EvalContext
 {
 public:
-    NddlSymbolTable(const PlanDatabaseId& pdb);
+    NddlSymbolTable(const EngineId& engine);
     virtual ~NddlSymbolTable();
 
     virtual void* getElement(const char* name) const;
 
-    PlanDatabaseId& getPlanDatabase();
+    const PlanDatabaseId& getPlanDatabase();
 
     AbstractDomain* getVarType(const char* name) const;
 
@@ -45,83 +45,9 @@ public:
     virtual ConstrainedVariableId getVar(const char* name);
 
 protected:
-    PlanDatabaseId m_planDatabase;
+    EngineId m_engine;
     std::vector<std::string> m_errors;
 };
-
-
-class ExprTypedef : public Expr
-{
-public:
-    ExprTypedef(const char* name, AbstractDomain* type);
-    virtual ~ExprTypedef();
-
-    virtual DataRef eval(EvalContext& context) const;
-    virtual std::string toString() const;
-
-protected:
-    LabelStr m_name;
-    AbstractDomain* m_type;
-};
-
-class ExprVarDeclaration : public Expr
-{
-public:
-    ExprVarDeclaration(const char* name, AbstractDomain* type, Expr* initValue);
-    virtual ~ExprVarDeclaration();
-
-    virtual DataRef eval(EvalContext& context) const;
-    virtual std::string toString() const;
-
-protected:
-    LabelStr m_name;
-    AbstractDomain* m_type;
-    Expr* m_initValue;
-};
-
-class ExprAssignment : public Expr
-{
-public:
-    ExprAssignment(Expr* lhs, Expr* rhs);
-    virtual ~ExprAssignment();
-
-    Expr* getLhs() { return m_lhs; }
-    Expr* getRhs() { return m_rhs; }
-
-    virtual DataRef eval(EvalContext& context) const;
-    virtual std::string toString() const;
-
-protected:
-    Expr* m_lhs;
-    Expr* m_rhs;
-};
-
-class ExprObjectTypeDeclaration : public Expr
-{
-public:
-    ExprObjectTypeDeclaration(const ObjectTypeId& objType);
-    virtual ~ExprObjectTypeDeclaration();
-
-    virtual DataRef eval(EvalContext& context) const;
-    virtual std::string toString() const;
-
-protected:
-    const ObjectTypeId m_objType;
-};
-
-class ExprObjectTypeDefinition : public Expr
-{
-public:
-    ExprObjectTypeDefinition(const ObjectTypeId& objType);
-    virtual ~ExprObjectTypeDefinition();
-
-    virtual DataRef eval(EvalContext& context) const;
-    virtual std::string toString() const;
-
-protected:
-    const ObjectTypeId m_objType;
-};
-
 
 }
 

@@ -17,16 +17,6 @@
 
 namespace EUROPA {
 
-// TODO: keep using pdbClient?
-const DbClientId& getPDB(EvalContext& context)
-{
-    // TODO: Add this behavior to EvalContext instead?
-    PlanDatabase* pdb = (PlanDatabase*)context.getElement("PlanDatabase");
-    check_error(pdb != NULL,"Could not find Plan Database in context to evaluate asingment");
-    return pdb->getClient();
-}
-
-
 NddlInterpreter::NddlInterpreter(EngineId& engine)
     : m_engine(engine)
 {
@@ -71,7 +61,7 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
     pANTLR3_COMMON_TREE_NODE_STREAM nodeStream = antlr3CommonTreeNodeStreamNewTree(result.tree, ANTLR3_SIZE_HINT);
     pNDDL3Tree treeParser = NDDL3TreeNew(nodeStream);
 
-    NddlSymbolTable symbolTable(((PlanDatabase*)m_engine->getComponent("PlanDatabase"))->getId());
+    NddlSymbolTable symbolTable(m_engine);
     treeParser->SymbolTable = &symbolTable;
 
     treeParser->nddl(treeParser);
@@ -89,9 +79,9 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
 }
 
 
-NddlSymbolTable::NddlSymbolTable(const PlanDatabaseId& pdb)
+NddlSymbolTable::NddlSymbolTable(const EngineId& engine)
     : EvalContext(NULL)
-    , m_planDatabase(pdb)
+    , m_engine(engine)
 {
 }
 
@@ -116,19 +106,23 @@ std::string NddlSymbolTable::getErrors() const
 
 void* NddlSymbolTable::getElement(const char* name) const
 {
-    std::string str(name);
-    if (str == "PlanDatabase")
-        return (PlanDatabase*)m_planDatabase;
+    EngineComponent* component = m_engine->getComponent(name);
+
+    if (component != NULL)
+        return component;
 
     return EvalContext::getElement(name);
 }
 
-PlanDatabaseId& NddlSymbolTable::getPlanDatabase() { return m_planDatabase; }
+const PlanDatabaseId& NddlSymbolTable::getPlanDatabase()
+{
+    return ((PlanDatabase*)getElement("PlanDatabase"))->getId();
+}
 
 
 AbstractDomain* NddlSymbolTable::getVarType(const char* name) const
 {
-    CESchemaId ces = m_planDatabase->getSchema()->getCESchema();
+    CESchemaId ces = ((CESchema*)getElement("CESchema"))->getId();
 
     if (!ces->isType(name)) {
         return NULL;
@@ -140,183 +134,10 @@ AbstractDomain* NddlSymbolTable::getVarType(const char* name) const
 
 ConstrainedVariableId NddlSymbolTable::getVar(const char* name)
 {
-    if (m_planDatabase->isGlobalVariable(name))
-        return m_planDatabase->getGlobalVariable(name);
+    if (getPlanDatabase()->isGlobalVariable(name))
+        return getPlanDatabase()->getGlobalVariable(name);
     else
         return ConstrainedVariableId::noId();
 }
-
-
-ExprTypedef::ExprTypedef(const char* name, AbstractDomain* type)
-    : m_name(name)
-    , m_type(type)
-{
-}
-
-ExprTypedef::~ExprTypedef()
-{
-}
-
-DataRef ExprTypedef::eval(EvalContext& context) const
-{
-    const char* name = m_name.c_str();
-    const AbstractDomain& domain = *m_type;
-
-    debugMsg("NddlInterpreter:typedef","Defining type:" << name);
-
-    TypeFactory* factory = NULL;
-    if (m_type->isEnumerated())
-      factory = new EnumeratedTypeFactory(name,name,domain);
-    else
-      factory = new IntervalTypeFactory(name,domain);
-
-    debugMsg("NddlInterpreter:typedef"
-            , "Created type factory " << name <<
-              " with base domain " << domain.toString());
-
-    // TODO: this is what the code generator does for every typedef, it doesn't seem right for interval types though
-    PlanDatabase* pdb = (PlanDatabase*)context.getElement("PlanDatabase");
-    pdb->getSchema()->addEnum(name);
-    pdb->getSchema()->getCESchema()->registerFactory(factory->getId());
-
-    return DataRef::null;
-}
-
-std::string ExprTypedef::toString() const
-{
-    std::ostringstream os;
-
-    os << "TYPEDEF:" << m_type->toString() << " -> " << m_name.toString();
-
-    return os.str();
-}
-
-ExprVarDeclaration::ExprVarDeclaration(const char* name, AbstractDomain* type, Expr* initValue)
-    : m_name(name)
-    , m_type(type)
-    , m_initValue(initValue)
-{
-}
-
-ExprVarDeclaration::~ExprVarDeclaration()
-{
-}
-
-DataRef ExprVarDeclaration::eval(EvalContext& context) const
-{
-    const DbClientId& pdb = getPDB(context);
-
-    ConstrainedVariableId v = pdb->createVariable(
-            m_type->getTypeName().c_str(),
-            *m_type,
-            m_name.c_str()
-    );
-
-    return DataRef(v);
-}
-
-std::string ExprVarDeclaration::toString() const
-{
-    std::ostringstream os;
-
-    os << m_type->toString() << " " << m_name.toString();
-    if (m_initValue != NULL)
-        os << " " << m_initValue->toString();
-
-    return os.str();
-}
-
-ExprAssignment::ExprAssignment(Expr* lhs, Expr* rhs)
-    : m_lhs(lhs)
-    , m_rhs(rhs)
-{
-}
-
-ExprAssignment::~ExprAssignment()
-{
-}
-
-DataRef ExprAssignment::eval(EvalContext& context) const
-{
-    DataRef lhs = m_lhs->eval(context);
-
-    if (m_rhs != NULL) {
-        DataRef rhs = m_rhs->eval(context);
-        const DbClientId& pdb = getPDB(context);
-
-        if (rhs.getValue()->lastDomain().isSingleton()) {
-            pdb->specify(lhs.getValue(),rhs.getValue()->lastDomain().getSingletonValue());
-        }
-        else {
-            pdb->restrict(lhs.getValue(),rhs.getValue()->lastDomain());
-            // TODO: this behavior seems more reasonable, specially to support violation reporting
-            // lhs.getValue()->getCurrentDomain().equate(rhs.getValue()->getCurrentDomain());
-        }
-    }
-
-    return lhs;
-}
-
-std::string ExprAssignment::toString() const
-{
-    std::ostringstream os;
-
-    os << "{ " << m_lhs->toString() << " = " << (m_rhs != NULL ? m_rhs->toString() : "NULL") << "}";
-
-    return os.str();
-}
-
-
-ExprObjectTypeDeclaration::ExprObjectTypeDeclaration(const ObjectTypeId& objType)
-    : m_objType(objType)
-{
-}
-
-ExprObjectTypeDeclaration::~ExprObjectTypeDeclaration()
-{
-}
-
-DataRef ExprObjectTypeDeclaration::eval(EvalContext& context) const
-{
-    PlanDatabase* pdb = (PlanDatabase*)context.getElement("PlanDatabase");
-    pdb->getSchema()->declareObjectType(m_objType->getName());
-    return DataRef::null;
-}
-
-std::string ExprObjectTypeDeclaration::toString() const
-{
-    std::ostringstream os;
-
-    os << "{class " << m_objType->getName().c_str() << "}";
-
-    return os.str();
-}
-
-
-ExprObjectTypeDefinition::ExprObjectTypeDefinition(const ObjectTypeId& objType)
-    : m_objType(objType)
-{
-}
-
-ExprObjectTypeDefinition::~ExprObjectTypeDefinition()
-{
-}
-
-DataRef ExprObjectTypeDefinition::eval(EvalContext& context) const
-{
-    PlanDatabase* pdb = (PlanDatabase*)context.getElement("PlanDatabase");
-    pdb->getSchema()->registerObjectType(m_objType);
-    return DataRef::null;
-}
-
-std::string ExprObjectTypeDefinition::toString() const
-{
-    std::ostringstream os;
-
-    os << m_objType->toString();
-
-    return os.str();
-}
-
 
 }
