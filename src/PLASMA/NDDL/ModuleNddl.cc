@@ -23,23 +23,22 @@ namespace EUROPA {
   {
   }
 
-  class NddlInterpreter : public LanguageInterpreter
+  class NddlNativeInterpreter : public LanguageInterpreter
   {
     public:
-      virtual ~NddlInterpreter() {}
-      virtual std::string interpret(std::istream& input, const std::string& source);
-  };
+      virtual ~NddlNativeInterpreter() {}
+      virtual std::string interpret(std::istream& input, const std::string& source)
+      {
+          check_error(ALWAYS_FAIL,"nddl parser is only available in Java for now. nddl-xml is supported in C++, you can use the nddl parser to generate nddl-xml from nddl source.");
+          return "";
+      }
 
-  std::string NddlInterpreter::interpret(std::istream& input, const std::string& script)
-  {
-	  check_error(ALWAYS_FAIL,"nddl parser is only available in Java for now. nddl-xml is supported in C++, you can use the nddl parser to generate nddl-xml from nddl source.");
-      return "";
-  }
+  };
 
   void ModuleNddl::initialize(EngineId engine)
   {
       PlanDatabase* pdb = (PlanDatabase*)engine->getComponent("PlanDatabase");
-	  engine->addLanguageInterpreter("nddl", new NddlInterpreter());
+	  engine->addLanguageInterpreter("nddl", new NddlNativeInterpreter());
 
       RuleSchema* rs = (RuleSchema*)engine->getComponent("RuleSchema");
 	  engine->addLanguageInterpreter("nddl-xml", new NddlXmlInterpreter(pdb->getClient(),rs->getId()));
