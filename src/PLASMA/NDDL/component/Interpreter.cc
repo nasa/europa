@@ -37,9 +37,10 @@ namespace NDDL {
 
 #define relation(relationname, origin, originvar, target, targetvar) {	\
     std::vector<ConstrainedVariableId> vars;				\
-    vars.push_back(getSlave(LabelStr(origin))->originvar());	\
-    vars.push_back(getSlave(LabelStr(target))->targetvar());	\
-    rule_constraint(relationname,vars);					\
+    vars.push_back(context.getToken(origin.c_str())->originvar());	\
+    vars.push_back(context.getToken(target.c_str())->targetvar());	\
+    InterpretedRuleInstance* rule = (InterpretedRuleInstance*)(context.getElement("RuleInstance")); \
+    rule->createConstraint(LabelStr(#relationname), vars); \
   }
 }
 
@@ -539,6 +540,105 @@ namespace EUROPA {
 
     context.addToken(m_name.c_str(),slave);
     debugMsg("Interpreter:InterpretedRule","Created  subgoal " << m_predicateType.toString() << ":" << m_name.toString());
+    return DataRef::null;
+  }
+
+  ExprRelation::ExprRelation(const char* relation,
+                             const char* origin,
+                             const char* target)
+    : m_relation(relation)
+    , m_origin(origin)
+    , m_target(target)
+  {
+  }
+
+  ExprRelation::~ExprRelation()
+  {
+  }
+
+  DataRef ExprRelation::doEval(RuleInstanceEvalContext& context) const
+  {
+    const char* relationName = m_relation.c_str();
+
+    // Allen Relations according to EUROPA
+    // See ConstraintLibraryReference on the wiki
+    if (strcmp(relationName,"meets") == 0) {
+      relation(concurrent, m_origin, end, m_target, start);
+    }
+    else if (strcmp(relationName,"met_by") == 0) {
+      relation(concurrent, m_target, end, m_origin, start);
+    }
+    else if (strcmp(relationName,"contains") == 0) {
+      relation(precedes, m_origin, start, m_target, start);
+      relation(precedes, m_target, end, m_origin, end);
+    }
+    else if (strcmp(relationName,"contained_by") == 0) {
+      relation(precedes, m_target, start, m_origin, start);
+      relation(precedes, m_origin, end, m_target, end);
+    }
+    else if (strcmp(relationName,"before") == 0) {
+      relation(precedes, m_origin, end, m_target, start);
+    }
+    else if (strcmp(relationName,"after") == 0) {
+      relation(precedes, m_target, end, m_origin, start);
+    }
+    else if (strcmp(relationName,"starts") == 0) {
+      relation(concurrent, m_origin, start, m_target, start);
+    }
+    else if (strcmp(relationName,"ends") == 0) {
+      relation(concurrent, m_target, end, m_origin, end);
+    }
+    else if (strcmp(relationName, "parallels") == 0) {
+      relation(precedes, m_origin, start, m_target, start);
+      relation(precedes, m_origin, end, m_target, end);
+    }
+    else if (strcmp(relationName, "paralleled_by") == 0) {
+      relation(precedes, m_target, start, m_origin, start);
+      relation(precedes, m_target, end, m_origin, end);
+    }
+    else if (strcmp(relationName,"ends_after") == 0) {
+      relation(precedes, m_target, end, m_origin, end);
+    }
+    else if (strcmp(relationName,"ends_before") == 0) {
+      relation(precedes, m_origin, end, m_target, end);
+    }
+    else if (strcmp(relationName,"ends_after_start") == 0) {
+      relation(precedes, m_target, start, m_origin, end);
+    }
+    else if (strcmp(relationName,"starts_before_end") == 0) {
+      relation(precedes, m_origin, start, m_target, end);
+    }
+    else if (strcmp(relationName,"starts_during") == 0) {
+      relation(precedes, m_target, start, m_origin, start);
+      relation(precedes, m_target, start, m_origin, end);
+    }
+    else if (strcmp(relationName,"ends_during") == 0) {
+      relation(precedes, m_target, end, m_origin, start);
+      relation(precedes, m_target, end, m_origin, end);
+    }
+    else if (strcmp(relationName,"contains_start") == 0) {
+      relation(precedes, m_origin, start, m_target, start);
+      relation(precedes, m_origin, start, m_target, end);
+    }
+    else if (strcmp(relationName,"contains_end") == 0) {
+      relation(precedes, m_origin, end, m_target, start);
+      relation(precedes, m_origin, end, m_target, end);
+    }
+    else if (strcmp(relationName,"starts_after") == 0) {
+      relation(precedes, m_target, start, m_origin, start);
+    }
+    else if (strcmp(relationName,"starts_before") == 0) {
+      relation(precedes, m_origin, start, m_target, start);
+    }
+    else if (strcmp(relationName,"equals") == 0) {
+      relation(concurrent, m_origin, start, m_target, start);
+      relation(concurrent, m_target, end, m_origin, end);
+    }
+    else {
+      check_runtime_error(strcmp(relationName,"any") == 0,std::string("Unrecognized relation:")+relationName);
+    }
+
+    debugMsg("Interpreter:InterpretedRule","Created relation " << relationName);
     return DataRef::null;
   }
 
@@ -1099,78 +1199,6 @@ namespace EUROPA {
       debugMsg("Interpreter:InterpretedRule",predicateInstance.toString() << " NotConstrained");
     }
 
-    const char* relationName = relation.c_str();
-
-    if (strcmp(relationName,"meets") == 0) {
-      meets("this",name);
-    }
-    else if (strcmp(relationName,"met_by") == 0) {
-      met_by("this",name);
-    }
-    else if (strcmp(relationName,"contains") == 0) {
-      contains("this",name);
-    }
-    else if (strcmp(relationName,"contained_by") == 0) {
-      contained_by("this",name);
-    }
-    else if (strcmp(relationName,"before") == 0) {
-      before("this",name);
-    }
-    else if (strcmp(relationName,"after") == 0) {
-      after("this",name);
-    }
-    else if (strcmp(relationName,"starts") == 0) {
-      starts("this",name);
-    }
-    else if (strcmp(relationName,"ends") == 0) {
-      ends("this",name);
-    }
-    else if (strcmp(relationName, "paralleled_by") == 0) {
-      relation(precedes, "this", start, name, start);
-      relation(precedes, "this", end, name, end);
-    }
-    else if (strcmp(relationName, "parallels") == 0) {
-      relation(precedes, "this", start, name, start);
-      relation(precedes, "this", end, name, end);
-    }
-    else if (strcmp(relationName,"ends_after") == 0) {
-      ends_after("this",name);
-    }
-    else if (strcmp(relationName,"ends_before") == 0) {
-      ends_before("this",name);
-    }
-    else if (strcmp(relationName,"ends_after_start") == 0) {
-      ends_after_start("this",name);
-    }
-    else if (strcmp(relationName,"starts_before_end") == 0) {
-      starts_before_end("this",name);
-    }
-    else if (strcmp(relationName,"starts_during") == 0) {
-      starts_during("this",name);
-    }
-    else if (strcmp(relationName,"contains_start") == 0) {
-      contains_start("this",name);
-    }
-    else if (strcmp(relationName,"ends_during") == 0) {
-      ends_during("this",name);
-    }
-    else if (strcmp(relationName,"contains_end") == 0) {
-      contains_end("this",name);
-    }
-    else if (strcmp(relationName,"starts_after") == 0) {
-      starts_after("this",name);
-    }
-    else if (strcmp(relationName,"starts_before") == 0) {
-      starts_before("this",name);
-    }
-    else if (strcmp(relationName,"equals") == 0) {
-      equals("this",name);
-    }
-    else {
-      check_runtime_error(strcmp(relationName,"any") == 0,std::string("Unrecognized relation:")+relationName);
-    }
-
-    debugMsg("Interpreter:InterpretedRule","Created relation " << relationName << " " << predicateInstance.c_str());
     return slave;
   }
 

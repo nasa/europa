@@ -327,6 +327,22 @@ namespace EUROPA {
   	  bool isConstrained(RuleInstanceEvalContext& context, const LabelStr& predicateInstance) const;
   };
 
+  class ExprRelation : public RuleExpr
+  {
+  	public:
+  	    ExprRelation(const char* relation,
+  	                 const char* origin,
+  	                 const char* target);
+  	    virtual ~ExprRelation();
+
+  	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;
+
+  	protected:
+  	    LabelStr m_relation;
+  	    LabelStr m_origin;
+  	    LabelStr m_target;
+  };
+
   class ExprLocalVar : public RuleExpr
   {
   	public:

@@ -455,31 +455,35 @@ namespace EUROPA {
               const char* relation = child->Attribute("relation");
               const char* origin = child->Attribute("origin");
 
-              if (origin == NULL) {
-                  for(const TiXmlElement* arg = child->FirstChildElement(); arg; arg = arg->NextSiblingElement() ) {
-                      if (strcmp(arg->Value(),"predicateinstance") == 0) {
-                          predicateInstance = arg->Attribute("type");
-                          name = arg->Attribute("name");
+              for(const TiXmlElement* arg = child->FirstChildElement(); arg; arg = arg->NextSiblingElement() ) {
+                  if (strcmp(arg->Value(),"predicateinstance") == 0) {
+                      predicateInstance = arg->Attribute("type");
+                      name = arg->Attribute("name");
+                      if (name == NULL) {
+                           std::ostringstream tmpname;
+                           tmpname << "slave" << (slave_cnt++);
+                           name = LabelStr(tmpname.str()).c_str();
                       }
-                      else
-                          check_runtime_error(ALWAYS_FAILS,std::string("Unknown subgoal element:") + arg->Value());
+                      debugMsg("XMLInterpreter:rulebody", "new token for subgoal: " << predicateInstance << " " << name);
                   }
-                  check_runtime_error(predicateInstance != NULL,"predicate instance in a subgoal cannot be null");
+                  else
+                      // TODO: support interval offsets
+                      check_runtime_error(ALWAYS_FAILS,std::string("Unknown subgoal element:") + arg->Value());
+              }
 
+              // Create a token!
+              if(predicateInstance != NULL) {
                   const char* predicateType = predicateInstanceToType(className, predName.c_str(), predicateInstance,localVars).c_str();
-                  if (name == NULL) {
-                      std::ostringstream tmpname;
-                      tmpname << "slave" << (slave_cnt++);
-                      name = LabelStr(tmpname.str()).c_str();
-                  }
                   ruleBody.push_back(new ExprSubgoal(name,predicateType,predicateInstance,relation));
               }
-              else {
-                  const char* target = child->Attribute("target");
-                  target = (target != NULL ? target : "none");
-                  // TODO: ruleBody.push_back(new ExprRelation(relation,origin,target));
-                  check_runtime_error(ALWAYS_FAIL,"don't know how to deal with relation-only subgoals yet. relation="+std::string(relation)+" origin="+origin+" target="+target);
-              }
+
+              // create relation
+              if(origin == NULL)
+                  origin = "this";
+              if(name == NULL)
+                  name = child->Attribute("target");
+
+              ruleBody.push_back(new ExprRelation(relation, origin, name));
           }
           else if (strcmp(child->Value(),"var") == 0) {
               LabelStr name(child->Attribute("name"));
