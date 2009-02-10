@@ -51,24 +51,18 @@ bool solve(const char* plannerConfig,
 {
     try {
 
-      PSEngine::initialize();
+        PSEngine* engine = PSEngine::makeInstance();
+        engine->start();
+        engine->addModule((new Module%%Project%%()));
+        engine->executeScript("nddl-xml",txSource,true/*isFile*/);
 
-      {
-          PSEngine* engine = PSEngine::makeInstance();
-          engine->start();
-          engine->addModule((new Module%%Project%%()));
-          engine->executeScript("nddl-xml",txSource,true/*isFile*/);
+        PSSolver* solver = engine->createSolver(plannerConfig);
+        runSolver(solver,startHorizon,endHorizon,maxSteps);
+        delete solver;
 
-          PSSolver* solver = engine->createSolver(plannerConfig);
-          runSolver(solver,startHorizon,endHorizon,maxSteps);
-          delete solver;
+        delete engine;
 
-          delete engine;
-      }
-
-      PSEngine::terminate();
-
-      return true;
+        return true;
     }
     catch (Error& e) {
         std::cerr << "PSEngine failed:" << e.getMsg() << std::endl;

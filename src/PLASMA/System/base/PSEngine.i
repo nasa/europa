@@ -225,9 +225,6 @@ namespace EUROPA {
   public:
     static PSEngine* makeInstance();
 
-    static void initialize();
-    static void terminate();
-
     void start();
     void shutdown();
 

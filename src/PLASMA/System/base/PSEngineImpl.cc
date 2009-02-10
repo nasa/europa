@@ -16,16 +16,6 @@
 
 namespace EUROPA {
 
-  void PSEngine::initialize()
-  {
-	PSEngineImpl::initialize();
-  }
-
-  void PSEngine::terminate()
-  {
-	PSEngineImpl::terminate();
-  }
-
   PSEngine* PSEngine::makeInstance()
   {
 	  return new PSEngineImpl();
@@ -33,23 +23,14 @@ namespace EUROPA {
 
   PSEngineImpl::PSEngineImpl()
   {
+      Error::doThrowExceptions(); // throw exceptions!
+      Error::doDisplayErrors();
   }
 
   PSEngineImpl::~PSEngineImpl()
   {
 	  shutdown();
   }
-
-  void PSEngineImpl::initialize()
-  {
-    Error::doThrowExceptions(); // throw exceptions!
-    Error::doDisplayErrors();
-  }
-
-  void PSEngineImpl::terminate()
-  {
-  }
-
 
   void PSEngineImpl::start()
   {
@@ -65,7 +46,6 @@ namespace EUROPA {
   {
       return EuropaEngine::getConfig();
   }
-
 
   void PSEngineImpl::addModule(Module* module)
   {

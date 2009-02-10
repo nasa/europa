@@ -14,9 +14,6 @@ namespace EUROPA {
   class PSEngine
   {
     public:
-      static void initialize();
-      static void terminate();
-
       static PSEngine* makeInstance();
 
       virtual ~PSEngine() {}

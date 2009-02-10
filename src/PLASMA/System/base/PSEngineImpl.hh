@@ -12,9 +12,6 @@ namespace EUROPA {
     PSEngineImpl();
     virtual ~PSEngineImpl();
 
-    static void initialize();
-    static void terminate();
-
     virtual void start();
     virtual void shutdown();
 
