@@ -272,13 +272,13 @@ typeArgument
 	;
 
 flowControl
-	:	'if'^ expression ruleBlock (options {k=1;}:'else'! ruleBlock)?
+	:	'if'^ guardExpression ruleBlock (options {k=1;}:'else'! ruleBlock)?
 	|	'foreach'^ '('! IDENT 'in'! qualified ')'! ruleBlock
 	;
 	
 
 // Note: Allocation not legal here
-expression
+guardExpression
 	:	'('! anyValue (('=='^ | '!='^) anyValue)? ')'!
 	;
           

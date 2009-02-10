@@ -684,11 +684,43 @@ namespace EUROPA {
     return DataRef::null;
   }
 
-  ExprIf::ExprIf(const char* op, Expr* lhs,Expr* rhs,const std::vector<Expr*>& ifBody)
+  ExprIfGuard::ExprIfGuard(const char* op, Expr* lhs,Expr* rhs)
     : m_op(op)
     , m_lhs(lhs)
     , m_rhs(rhs)
+  {
+  }
+
+  ExprIfGuard::~ExprIfGuard()
+  {
+  }
+
+  const std::string& ExprIfGuard::getOperator() { return m_op; }
+  Expr* ExprIfGuard::getLhs() { return m_lhs; }
+  Expr* ExprIfGuard::getRhs() { return m_rhs; }
+
+  DataRef ExprIfGuard::eval(EvalContext& context) const
+  {
+      // TODO: rework ExprIf implementation so that this can be evaluated
+      check_runtime_error(ALWAYS_FAILS,"ExprIfGuard can't be evaluated");
+      return DataRef::null;
+  }
+
+  std::string ExprIfGuard::toString() const
+  {
+      std::stringstream os;
+
+      os << "{IfGuard:" << m_op << " LHS=" << m_lhs->toString() << " RHS=" << (m_rhs != NULL ? m_rhs->toString() : "NULL") << "}";
+
+      return os.str();
+  }
+
+
+
+  ExprIf::ExprIf(ExprIfGuard* guard,const std::vector<Expr*>& ifBody, const std::vector<Expr*>& elseBody)
+    : m_guard(guard)
     , m_ifBody(ifBody)
+    , m_elseBody(elseBody)
   {
   }
 
@@ -698,15 +730,15 @@ namespace EUROPA {
 
   DataRef ExprIf::doEval(RuleInstanceEvalContext& context) const
   {
-    bool isOpEquals = (m_op == "equals");
+    bool isOpEquals = (m_guard->getOperator() == "equals" || m_guard->getOperator()=="==");
 
-    DataRef lhs = m_lhs->eval(context);
+    DataRef lhs = m_guard->getLhs()->eval(context);
 
     // TODO: this assumes that the variable is always on the lhs and the value on the rhs
-    // is this enforced by the parser?
+    // is this enforced by the parser? underlying Rule implementation should be made more generic
 
-    if (m_rhs != NULL) {
-      DataRef rhs = m_rhs->eval(context);
+    if (m_guard->getRhs() != NULL) {
+      DataRef rhs = m_guard->getRhs()->eval(context);
       context.getRuleInstance()->addChildRule(
 					      new InterpretedRuleInstance(
 									  context.getRuleInstance()->getId(),
@@ -716,7 +748,20 @@ namespace EUROPA {
 									  m_ifBody
 									  )
 					      );
-      debugMsg("Interpreter:InterpretedRule","Evaluated IF " << m_op << " " << lhs.getValue()->toString() << " " << rhs.getValue()->toString());
+
+      if (m_elseBody.size() > 0) {
+          context.getRuleInstance()->addChildRule(
+                              new InterpretedRuleInstance(
+                                          context.getRuleInstance()->getId(),
+                                          lhs.getValue(),
+                                          rhs.getValue()->lastDomain(),
+                                          !isOpEquals,
+                                          m_ifBody
+                                          )
+                              );
+      }
+
+      debugMsg("Interpreter:InterpretedRule","Evaluated IF " << m_guard->toString());
     }
     else {
       context.getRuleInstance()->addChildRule(
@@ -727,10 +772,21 @@ namespace EUROPA {
 									  m_ifBody
 									  )
 					      );
-      debugMsg("Interpreter:InterpretedRule","Evaluated IF " << m_op << " " << lhs.getValue()->toString());
+
+      check_runtime_error(m_elseBody.size()==0, "Can't have else body for singleton guard");
+      debugMsg("Interpreter:InterpretedRule","Evaluated IF " << m_guard->toString());
     }
 
     return DataRef::null;
+  }
+
+  std::string ExprIf::toString() const
+  {
+      std::stringstream os;
+
+      os << "{If " << m_guard->toString() << " body(" << m_ifBody.size() << ") }";
+
+      return os.str();
   }
 
   ExprLoop::ExprLoop(const char* varName, const char* varValue,const std::vector<Expr*>& loopBody)
@@ -1176,20 +1232,20 @@ namespace EUROPA {
       std::vector<ConstrainedVariableId> vars;
 
       if (tokenCnt <= 2) {
-	vars.push_back(owner);
+          vars.push_back(owner);
       }
       else {  // equivalent of constrainObject() in NddlRules.hh
-	// TODO: this can be done more efficiently
-	int cnt = predicateInstance.countElements(".");
-	std::string ownerName(predicateInstance.getElement(0,".").toString());
-	std::string tokenName(predicateInstance.getElement(cnt-1,".").toString());
-	std::string fullName = predicateInstance.toString();
-	std::string objectPath = fullName.substr(
-					     ownerName.size()+1,
-					     fullName.size()-(ownerName.size()+tokenName.size()+2)
-					     );
-	debugMsg("Interpreter:InterpretedRule","Subgoal slave object constraint. fullName=" << fullName << " owner=" << ownerName << " objPath=" << objectPath << " tokenName=" << tokenName);
-	vars.push_back(varFromObject(owner,objectPath,fullName));
+          // TODO: this can be done more efficiently
+          int cnt = predicateInstance.countElements(".");
+          std::string ownerName(predicateInstance.getElement(0,".").toString());
+          std::string tokenName(predicateInstance.getElement(cnt-1,".").toString());
+          std::string fullName = predicateInstance.toString();
+          std::string objectPath = fullName.substr(
+                  ownerName.size()+1,
+                  fullName.size()-(ownerName.size()+tokenName.size()+2)
+          );
+          debugMsg("Interpreter:InterpretedRule","Subgoal slave object constraint. fullName=" << fullName << " owner=" << ownerName << " objPath=" << objectPath << " tokenName=" << tokenName);
+          vars.push_back(varFromObject(owner,objectPath,fullName));
       }
 
       vars.push_back(slave->getObject());

@@ -12,8 +12,6 @@
 #include "NDDL3Tree.h"
 
 #include "Debug.hh"
-#include "EnumeratedTypeFactory.hh"
-#include "IntervalTypeFactory.hh"
 
 namespace EUROPA {
 

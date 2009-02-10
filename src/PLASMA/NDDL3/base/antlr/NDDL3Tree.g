@@ -75,7 +75,7 @@ nddl :
                   |     child=constraintInstantiation
 		  |	child=classDeclaration
                   |     child=allocation
-		  |	rule
+		  |	child=rule
 		  |	goal
 		  |	fact
                   |     relation
@@ -471,9 +471,26 @@ std::vector<Expr*> elseBody;
 			ruleBlock[elseBody]?
 		)
 		{
-		    //result = new ExprIf(guard,ifBody,elseBody);
+		    result = new ExprIf(guard,ifBody,elseBody);
 		}
   ;
+
+guardExpression returns [ExprIfGuard* result]
+@init
+{
+    const char* relopStr = "==";
+}
+        : ( ^(relop=guardRelop {relopStr=c_str($relop.text->chars);} lhs=anyValue rhs=anyValue )
+          | lhs=anyValue
+          )
+          {
+              result = new ExprIfGuard(relopStr,lhs,rhs);
+          }
+        ;
+
+guardRelop 
+    : '==' | '!='
+;
 
 loopStatement returns [Expr* result]
 @init {
@@ -488,24 +505,6 @@ std::vector<Expr*> loopBody;
 		    result = new ExprLoop(c_str($name.text->chars),c_str($val.text->chars),loopBody);
 		}
 	;
-
-guardExpression returns [Expr* result]
-	: ( ^(relop=guardRelop lhs=anyValue rhs=anyValue )
-	  | lhs=anyValue
-	  )
-	  {
-	  /*
-	      if (rhs != NULL) 
-	          result = new ExprRelopGuard(c_str($relop.text->chars),lhs,rhs);
-	      else
-	          result = new ExprSingletonGuard(lhs); // TODO: current nddl allows more than one variable here.
-	   */	      
-	  }
-	;
-
-guardRelop 
-    : '==' | '!='
-;
 
 goal
 	:	^('goal'
@@ -591,18 +590,34 @@ temporalRelationTwoIntervals
 	|	'contains_end'
 	;
   
-invocation
+invocation returns [Expr* result]
+	:
+	(	child=variableOp
+        |       child=tokenOp
+        )
+        {
+            result = child;
+        }
+	;
+
+variableOp returns [Expr* result]
 @init {
     std::vector<Expr*> args;
 }
-	:	^('specify' i=IDENT variableArgumentList[args])
-	|	^('free' i=IDENT variableArgumentList[args])
-	|	^('constrain' i=IDENT variableArgumentList[args])
-	|	^('merge' i=IDENT variableArgumentList[args])
-	|	^('close' i=IDENT)
-	|	^('activate' i=IDENT)
-	|	^('reject' i=IDENT)
-	|	^('cancel' i=IDENT)
-	|	^('reset' i=IDENT)
-	;
-
+        :       ^('specify' i=IDENT variableArgumentList[args])
+        |       ^('reset' i=IDENT)
+        ;
+        
+tokenOp returns [Expr* result]    
+@init {
+    std::vector<Expr*> args;
+}
+        :       ^('activate' i=IDENT)
+        |       ^('merge' i=IDENT variableArgumentList[args])
+        |       ^('reject' i=IDENT)
+        |       ^('cancel' i=IDENT)
+        |       ^('close' i=IDENT)
+        |       ^('free' i=IDENT variableArgumentList[args])
+        |       ^('constrain' i=IDENT variableArgumentList[args])
+        ;
+        

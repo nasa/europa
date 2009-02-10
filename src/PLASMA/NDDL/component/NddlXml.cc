@@ -513,9 +513,11 @@ namespace EUROPA {
                   lhs = valueToExpr(opElement);
               }
 
+              ExprIfGuard* ifGuard = new ExprIfGuard(op.c_str(),lhs,rhs);
               std::vector<Expr*> ifBody;
+              std::vector<Expr*> elseBody;
               buildRuleBody(className,predName,opElement->NextSiblingElement(),ifBody,localVars);
-              ruleBody.push_back(new ExprIf(op.c_str(),lhs,rhs,ifBody));
+              ruleBody.push_back(new ExprIf(ifGuard,ifBody,elseBody));
           }
           else if (strcmp(child->Value(),"loop") == 0) {
               const char* varName = child->Attribute("name");

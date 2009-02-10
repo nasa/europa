@@ -134,10 +134,10 @@ namespace EUROPA {
         void commonInit(const std::vector<LabelStr>& parameterNames,
                         const std::vector<LabelStr>& parameterTypes,
                         const std::vector<Expr*>& parameterValues,
-			const std::vector<LabelStr>& assignVars,
-			const std::vector<Expr*>& assignValues,
-			const std::vector<ExprConstraint*>& constraints,
-			const bool& autoClose);
+                        const std::vector<LabelStr>& assignVars,
+                        const std::vector<Expr*>& assignValues,
+                        const std::vector<ExprConstraint*>& constraints,
+                        const bool& autoClose);
 
         friend class InterpretedTokenFactory;
   };
@@ -363,19 +363,39 @@ namespace EUROPA {
   	    const AbstractDomain& m_baseDomain;
   };
 
+  class ExprIfGuard : public Expr
+  {
+  public:
+      ExprIfGuard(const char* op, Expr* lhs,Expr* rhs);
+      virtual ~ExprIfGuard();
+
+      const std::string& getOperator();
+      Expr* getLhs();
+      Expr* getRhs();
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      const std::string m_op;
+      Expr* m_lhs;
+      Expr* m_rhs;
+
+  };
+
   class ExprIf : public RuleExpr
   {
   	public:
-  	    ExprIf(const char* op, Expr* lhs,Expr* rhs,const std::vector<Expr*>& ifBody);
+  	    ExprIf(ExprIfGuard* guard,const std::vector<Expr*>& ifBody, const std::vector<Expr*>& elseBody);
   	    virtual ~ExprIf();
 
   	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;
+        virtual std::string toString() const;
 
     protected:
-        const std::string m_op;
-        Expr* m_lhs;
-        Expr* m_rhs;
+        ExprIfGuard* m_guard;
         const std::vector<Expr*> m_ifBody;
+        const std::vector<Expr*> m_elseBody;
   };
 
 
