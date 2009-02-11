@@ -243,7 +243,7 @@ namespace EUROPA{
   template <class DomainType>
   void TokenVariable<DomainType>::handleConstraintAdded(const ConstraintId& constraint){
     // Not valid to add a constraint if token is rejected
-    check_error(!this->m_parentToken->isRejected());
+    //check_error(!this->m_parentToken->isRejected());
 
     // If the token has been merged, the new constraint should be migrated
     if(this->m_parentToken->isMerged()){
