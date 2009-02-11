@@ -60,10 +60,10 @@ namespace EUROPA {
       ot->addMember("float", "productionMax");
       ot->addMember("float", "consumptionRateMax");
       ot->addMember("float", "consumptionMax");
-      ot->addObjectFactory((new ResourceObjectFactory("Resource"))->getId());
-      ot->addObjectFactory((new ResourceObjectFactory("Resource:float:float:float"))->getId());
-      ot->addObjectFactory((new ResourceObjectFactory("Resource:float:float:float:float:float"))->getId());
-      ot->addObjectFactory((new ResourceObjectFactory("Resource:float:float:float:float:float:float:float"))->getId());
+      ot->addObjectFactory((new ResourceObjectFactory(ot->getId(),"Resource"))->getId());
+      ot->addObjectFactory((new ResourceObjectFactory(ot->getId(),"Resource:float:float:float"))->getId());
+      ot->addObjectFactory((new ResourceObjectFactory(ot->getId(),"Resource:float:float:float:float:float"))->getId());
+      ot->addObjectFactory((new ResourceObjectFactory(ot->getId(),"Resource:float:float:float:float:float:float:float"))->getId());
       ot->addTokenFactory((new ResourceChangeTokenFactory("Resource.change"))->getId());
       schema->registerObjectType(ot->getId());
 
@@ -73,10 +73,10 @@ namespace EUROPA {
       ot->addMember("float", "levelLimitMin");
       ot->addMember("float", "consumptionMax");
       ot->addMember("float", "consumptionRateMax");
-      ot->addObjectFactory((new ReusableObjectFactory("Reusable"))->getId());
-      ot->addObjectFactory((new ReusableObjectFactory("Reusable:float:float"))->getId());
-      ot->addObjectFactory((new ReusableObjectFactory("Reusable:float:float:float"))->getId());
-      ot->addObjectFactory((new ReusableObjectFactory("Reusable:float:float:float:float"))->getId());
+      ot->addObjectFactory((new ReusableObjectFactory(ot->getId(),"Reusable"))->getId());
+      ot->addObjectFactory((new ReusableObjectFactory(ot->getId(),"Reusable:float:float"))->getId());
+      ot->addObjectFactory((new ReusableObjectFactory(ot->getId(),"Reusable:float:float:float"))->getId());
+      ot->addObjectFactory((new ReusableObjectFactory(ot->getId(),"Reusable:float:float:float:float"))->getId());
       ot->addTokenFactory((new ReusableUsesTokenFactory("Reusable.uses"))->getId());
       schema->registerObjectType(ot->getId());
 
@@ -85,10 +85,10 @@ namespace EUROPA {
       ot->addMember("float", "levelLimitMin");
       ot->addMember("float", "consumptionMax");
       ot->addMember("float", "consumptionRateMax");
-      ot->addObjectFactory((new CBReusableObjectFactory("CBReusable"))->getId());
-      ot->addObjectFactory((new CBReusableObjectFactory("CBReusable:float:float"))->getId());
-      ot->addObjectFactory((new CBReusableObjectFactory("CBReusable:float:float:float"))->getId());
-      ot->addObjectFactory((new CBReusableObjectFactory("CBReusable:float:float:float:float"))->getId());
+      ot->addObjectFactory((new CBReusableObjectFactory(ot->getId(),"CBReusable"))->getId());
+      ot->addObjectFactory((new CBReusableObjectFactory(ot->getId(),"CBReusable:float:float"))->getId());
+      ot->addObjectFactory((new CBReusableObjectFactory(ot->getId(),"CBReusable:float:float:float"))->getId());
+      ot->addObjectFactory((new CBReusableObjectFactory(ot->getId(),"CBReusable:float:float:float:float"))->getId());
       schema->registerObjectType(ot->getId());
       REGISTER_CONSTRAINT(
         ce->getCESchema(),
@@ -105,18 +105,18 @@ namespace EUROPA {
       ot->addMember("float", "productionMax");
       ot->addMember("float", "consumptionRateMax");
       ot->addMember("float", "consumptionMax");
-      ot->addObjectFactory((new ReservoirObjectFactory("Reservoir"))->getId());
-      ot->addObjectFactory((new ReservoirObjectFactory("Reservoir:float:float:float"))->getId());
-      ot->addObjectFactory((new ReservoirObjectFactory("Reservoir:float:float:float:float:float"))->getId());
-      ot->addObjectFactory((new ReservoirObjectFactory("Reservoir:float:float:float:float:float:float:float"))->getId());
+      ot->addObjectFactory((new ReservoirObjectFactory(ot->getId(),"Reservoir"))->getId());
+      ot->addObjectFactory((new ReservoirObjectFactory(ot->getId(),"Reservoir:float:float:float"))->getId());
+      ot->addObjectFactory((new ReservoirObjectFactory(ot->getId(),"Reservoir:float:float:float:float:float"))->getId());
+      ot->addObjectFactory((new ReservoirObjectFactory(ot->getId(),"Reservoir:float:float:float:float:float:float:float"))->getId());
       ot->addTokenFactory((new ReservoirProduceTokenFactory("Reservoir.produce"))->getId());
       ot->addTokenFactory((new ReservoirConsumeTokenFactory("Reservoir.consume"))->getId());
       schema->registerObjectType(ot->getId());
 
       ot = new ObjectType("Unary","Object",true /*isNative*/);
       ot->addMember("float","consumptionMax");
-      ot->addObjectFactory((new UnaryObjectFactory("Unary"))->getId());
-      ot->addObjectFactory((new UnaryObjectFactory("Unary:float"))->getId());
+      ot->addObjectFactory((new UnaryObjectFactory(ot->getId(),"Unary"))->getId());
+      ot->addObjectFactory((new UnaryObjectFactory(ot->getId(),"Unary:float"))->getId());
       ot->addTokenFactory((new UnaryUseTokenFactory("Unary.use"))->getId());
       schema->registerObjectType(ot->getId());
 

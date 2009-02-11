@@ -143,11 +143,14 @@ namespace EUROPA {
         std::vector<Expr*> m_argExprs;
   };
 
+  class ObjectType;
+  typedef Id<ObjectType> ObjectTypeId;
+
   class InterpretedObjectFactory : public ObjectFactory
   {
     public:
         InterpretedObjectFactory(
-            const char* className,
+            const ObjectTypeId& objType,
             const LabelStr& signature,
             const std::vector<std::string>& constructorArgNames,
             const std::vector<std::string>& constructorArgTypes,
@@ -192,9 +195,9 @@ namespace EUROPA {
   class NativeObjectFactory : public InterpretedObjectFactory
   {
     public:
-        NativeObjectFactory(const char* className, const LabelStr& signature)
+        NativeObjectFactory(const ObjectTypeId& objType, const LabelStr& signature)
             : InterpretedObjectFactory(
-                  className,                  // className
+                  objType,                    // objType
                   signature,                  // signature
                   std::vector<std::string>(), // ConstructorArgNames
                   std::vector<std::string>(), // constructorArgTypes

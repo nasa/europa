@@ -4,8 +4,8 @@
 
 namespace EUROPA {
 
-  ResourceObjectFactory::ResourceObjectFactory(const LabelStr& signature)
-    : NativeObjectFactory("Resource",signature)
+  ResourceObjectFactory::ResourceObjectFactory(const ObjectTypeId& objType, const LabelStr& signature)
+    : NativeObjectFactory(objType,signature)
   {
   }
 
@@ -63,8 +63,8 @@ namespace EUROPA {
     return (new NDDL::NddlResource::change(master,name,relation,true))->getId();
   }
 
-  ReusableObjectFactory::ReusableObjectFactory(const LabelStr& signature)
-    : NativeObjectFactory("Reusable",signature)
+  ReusableObjectFactory::ReusableObjectFactory(const ObjectTypeId& objType, const LabelStr& signature)
+    : NativeObjectFactory(objType,signature)
   {
   }
 
@@ -123,8 +123,8 @@ namespace EUROPA {
   }
 
 
-  CBReusableObjectFactory::CBReusableObjectFactory(const LabelStr& signature)
-    : NativeObjectFactory("CBReusable",signature)
+  CBReusableObjectFactory::CBReusableObjectFactory(const ObjectTypeId& objType, const LabelStr& signature)
+    : NativeObjectFactory(objType,signature)
   {
   }
 
@@ -164,8 +164,8 @@ namespace EUROPA {
     return instance;
   }
 
-  ReservoirObjectFactory::ReservoirObjectFactory(const LabelStr& signature)
-    : NativeObjectFactory("Reservoir",signature)
+  ReservoirObjectFactory::ReservoirObjectFactory(const ObjectTypeId& objType, const LabelStr& signature)
+    : NativeObjectFactory(objType,signature)
   {
   }
 
@@ -242,8 +242,8 @@ namespace EUROPA {
   }
 
 
-  UnaryObjectFactory::UnaryObjectFactory(const LabelStr& signature)
-    : NativeObjectFactory("Unary",signature)
+  UnaryObjectFactory::UnaryObjectFactory(const ObjectTypeId& objType, const LabelStr& signature)
+    : NativeObjectFactory(objType,signature)
   {
   }
 

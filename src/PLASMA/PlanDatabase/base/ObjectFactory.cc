@@ -209,7 +209,7 @@ namespace EUROPA {
   }
 
   InterpretedObjectFactory::InterpretedObjectFactory(
-                             const char* className,
+                             const ObjectTypeId& objType,
                              const LabelStr& signature,
                              const std::vector<std::string>& constructorArgNames,
                              const std::vector<std::string>& constructorArgTypes,
@@ -217,13 +217,17 @@ namespace EUROPA {
                              const std::vector<Expr*>& constructorBody,
                              bool canMakeNewObject)
     : ObjectFactory(signature)
-    , m_className(className)
+    , m_className(objType->getName())
     , m_constructorArgNames(constructorArgNames)
     , m_constructorArgTypes(constructorArgTypes)
     , m_superCallExpr(superCallExpr)
     , m_constructorBody(constructorBody)
     , m_canMakeNewObject(canMakeNewObject)
   {
+      if (!m_canMakeNewObject && m_superCallExpr==NULL) {
+          m_superCallExpr = new ExprConstructorSuperCall(objType->getParent(),std::vector<Expr*>());
+          debugMsg("InterpretedObjectFactory:InterpretedObjectFactory","created default super call for object factory:" << signature.c_str());
+      }
   }
 
   InterpretedObjectFactory::~InterpretedObjectFactory()

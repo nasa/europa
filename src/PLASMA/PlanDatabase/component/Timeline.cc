@@ -518,8 +518,8 @@ namespace EUROPA {
     remove(token);
   }
 
-  TimelineObjectFactory::TimelineObjectFactory(const LabelStr& signature)
-    : NativeObjectFactory("Timeline",signature)
+  TimelineObjectFactory::TimelineObjectFactory(const ObjectTypeId& objType)
+    : NativeObjectFactory(objType,objType->getName())
   {
   }
 

@@ -365,8 +365,8 @@ classBlock[ObjectType* objType]
 
 componentTypeEntry[ObjectType* objType]
 	:	classVariable[objType]
-	|	constructor
-	|	predicate
+	|	constructor[objType]
+	|	predicate[objType]
 	;
 
 classVariable[ObjectType* objType]
@@ -376,29 +376,59 @@ classVariable[ObjectType* objType]
         }
         ;
         
-constructor
+constructor[ObjectType* objType]
+@init {
+    std::vector<std::string> argNames;
+    std::vector<std::string> argTypes;
+    std::vector<Expr*> body;
+}
 	:	^(CONSTRUCTOR
 			name=IDENT
-			^('(' constructorArgument*)
-			^('{'	(	constructorSuper
-				|	assignment)*)
+			^('(' constructorArgument[argNames,argTypes]*)
+			^('{' superCallExpr=constructorSuper[objType]?
+			      (child=assignment {body.push_back(child);})*)
 		)
+		{
+		    std::ostringstream signature;
+		    signature << objType->getName().c_str();
+		    
+		    for (unsigned int i=0;i<argTypes.size();i++)
+		        signature << ":" << argTypes[i];
+		        
+                    objType->addObjectFactory(
+                        (new InterpretedObjectFactory(
+                            objType->getId(),
+                            signature.str(),
+                            argNames,
+                            argTypes,
+                            superCallExpr,
+                            body)
+                        )->getId()
+                    );
+		}
 	;
 
-constructorArgument
+constructorArgument[std::vector<std::string>& argNames,std::vector<std::string>& argTypes]
 	:	^(VARIABLE
-			IDENT
-			type
+			argName=IDENT
+			argType=type
 		)
+		{
+		    argNames.push_back(std::string(c_str($argName.text->chars)));
+		    argTypes.push_back(argType->getTypeName().toString());
+		}
 	;
 
-constructorSuper
+constructorSuper[ObjectType* objType] returns [ExprConstructorSuperCall* result]
 @init {
     std::vector<Expr*> args;
 }
 	:	^('super'
 			variableArgumentList[args]
 		)
+		{
+		    result = new ExprConstructorSuperCall(objType->getParent(),args);  
+		}
 	;
   
 assignment returns [Expr* result]
@@ -411,11 +441,28 @@ assignment returns [Expr* result]
 		}
 	;
 
-predicate
+predicate[ObjectType* objType]
 	:	^('predicate'
 			pred=IDENT
 			predicateStatements
 		)
+		{
+		    const char* predName = c_str($pred.text->chars);
+		    
+		    /*
+                    objType->addTokenFactory(
+                        (new InterpretedTokenFactory(
+                            predName,
+                            parentFactory,
+                            parameterNames,
+                            parameterTypes,
+                            parameterValues,
+                            assignVars,
+                            assignValues,
+                            constraints
+                    ))->getId();
+                    */		
+		}
 	;
 
 predicateStatements

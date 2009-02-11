@@ -110,7 +110,7 @@ namespace EUROPA {
   class TimelineObjectFactory : public NativeObjectFactory
   {
     public:
-        TimelineObjectFactory(const LabelStr& signature);
+        TimelineObjectFactory(const ObjectTypeId& objType);
         virtual ~TimelineObjectFactory();
 
     protected:

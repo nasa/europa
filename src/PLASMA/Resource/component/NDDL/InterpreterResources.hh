@@ -7,7 +7,7 @@ namespace EUROPA {
   class ResourceObjectFactory : public NativeObjectFactory
   {
   	public:
-  	    ResourceObjectFactory(const LabelStr& signature);
+  	    ResourceObjectFactory(const ObjectTypeId& objType, const LabelStr& signature);
   	    virtual ~ResourceObjectFactory();
 
   	protected:
@@ -31,7 +31,7 @@ namespace EUROPA {
   class ReusableObjectFactory : public NativeObjectFactory
   {
   	public:
-  	    ReusableObjectFactory(const LabelStr& signature);
+  	    ReusableObjectFactory(const ObjectTypeId& objType, const LabelStr& signature);
   	    virtual ~ReusableObjectFactory();
 
   	protected:
@@ -55,7 +55,7 @@ namespace EUROPA {
   class CBReusableObjectFactory : public NativeObjectFactory
   {
     public:
-        CBReusableObjectFactory(const LabelStr& signature);
+        CBReusableObjectFactory(const ObjectTypeId& objType, const LabelStr& signature);
         virtual ~CBReusableObjectFactory();
 
     protected:
@@ -69,7 +69,7 @@ namespace EUROPA {
   class ReservoirObjectFactory : public NativeObjectFactory
   {
   	public:
-  	    ReservoirObjectFactory(const LabelStr& signature);
+  	    ReservoirObjectFactory(const ObjectTypeId& objType, const LabelStr& signature);
   	    virtual ~ReservoirObjectFactory();
 
   	protected:
@@ -103,7 +103,7 @@ namespace EUROPA {
   class UnaryObjectFactory : public NativeObjectFactory
   {
     public:
-        UnaryObjectFactory(const LabelStr& signature);
+        UnaryObjectFactory(const ObjectTypeId& objType, const LabelStr& signature);
         virtual ~UnaryObjectFactory();
 
     protected:

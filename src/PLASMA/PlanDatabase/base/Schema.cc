@@ -619,8 +619,7 @@ namespace EUROPA {
   }
 
   const Id<ObjectFactory>& createDefaultObjectFactory(
-          const char* className,
-          const char* parentClassName,
+          const ObjectTypeId& objType,
           bool canCreateObjects)
   {
       std::vector<std::string> constructorArgNames;
@@ -630,11 +629,11 @@ namespace EUROPA {
 
       // If it can't create objects, generate default super call
       if (!canCreateObjects)
-          superCallExpr = new ExprConstructorSuperCall(parentClassName,std::vector<Expr*>());
+          superCallExpr = new ExprConstructorSuperCall(objType->getParent(),std::vector<Expr*>());
 
       return (new InterpretedObjectFactory(
-              className,
-              className,
+              objType,
+              objType->getName(),
               constructorArgNames,
               constructorArgTypes,
               superCallExpr,
@@ -655,7 +654,7 @@ namespace EUROPA {
 
       if (objType->getObjectFactories().size() == 0) {
           bool canCreateObjects = objType->isNative();
-          objType->addObjectFactory(createDefaultObjectFactory(objType->getName().c_str(),objType->getParent().c_str(),canCreateObjects));
+          objType->addObjectFactory(createDefaultObjectFactory(objType,canCreateObjects));
           debugMsg("Schema:registerObjectType","Generated default factory for object type:" << objType->getName().c_str());
       }
 

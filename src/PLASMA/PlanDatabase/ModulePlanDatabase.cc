@@ -73,7 +73,7 @@ namespace EUROPA {
       schema->registerObjectType(ot->getId());
 
       ot = new ObjectType("Timeline",rootObjType,true /*isNative*/);
-      ot->addObjectFactory((new TimelineObjectFactory("Timeline"))->getId());
+      ot->addObjectFactory((new TimelineObjectFactory(ot->getId()))->getId());
       schema->registerObjectType(ot->getId());
 
       PlanDatabase* pdb = new PlanDatabase(ce->getId(), schema->getId());

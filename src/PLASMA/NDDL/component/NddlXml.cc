@@ -210,13 +210,9 @@ namespace EUROPA {
               check_runtime_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + child->Value());
       }
 
-      // If constructor for super class isn't called explicitly, call default one with no args
-      if (superCallExpr == NULL)
-          superCallExpr = new ExprConstructorSuperCall(objType->getParent(),std::vector<Expr*>());
-
       objType->addObjectFactory(
               (new InterpretedObjectFactory(
-                      className,
+                      objType->getId(),
                       signature.str(),
                       constructorArgNames,
                       constructorArgTypes,
