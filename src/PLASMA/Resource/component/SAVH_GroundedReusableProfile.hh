@@ -34,16 +34,12 @@
  * 	- Both TimetableProfile and GroundedReusableProfile will report a flaw.
  *  - However, if a precedence constraint is added between A and B, TimetableProfile will still report a flaw whereas
  *    GroundedReuslabeProfile will not.
- *  - If A and B are constrained to start at time 0, both TimetableProfile and GroundedReusableProfile will
- * - example where this helps
- * - really don't care about upper bounds, except you do in case where stuck (eg two fixed at beginning)
- * - example where we don't want the flaw
+ *  - If instead A and B are constrained to start at time 0, both TimetableProfile and GroundedReusableProfile will report a violation
  *
  * NOTES:
  *
  * - This profile is only intended for reusable resources because:
- *  a) If there is only production or only consumption, all flaws are violations as well, and this class is equivalent to
- *    using TimetableProfile
+ *  a) If there is only production or only consumption, I believe it provides no additional benefit.
  *  b) If (for some strange reason), you had the opposite of reusable, where every production is followed later by an equivalent
  *     consumption, you should use the opposite of this - use TimetableProfile for lower bounds, but the grounded plan for
  *     upper bounds.
