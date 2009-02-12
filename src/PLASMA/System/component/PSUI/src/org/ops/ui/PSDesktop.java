@@ -57,7 +57,6 @@ public class PSDesktop
 	{		
 	    String debugMode = args[0];
         PSUtil.loadLibraries(debugMode);	   
-	    PSEngine.initialize();
 
 	    PSEngine engine = PSEngine.makeInstance();
 	    engine.start();
@@ -77,7 +76,6 @@ public class PSDesktop
 	    public void run() 
 	    {
 	        PSDesktop.getInstance().getPSEngine().shutdown();
-	        PSEngine.terminate();
 	    }
     }	  
 
