@@ -288,12 +288,10 @@ namespace EUROPA {
       }
       dbgout << ")" << std::endl;
 
-      TokenFactoryId parentFactory = getSchema()->getParentTokenFactory(predName, objType->getParent());
-
       objType->addTokenFactory(
           (new InterpretedTokenFactory(
               predName,
-              parentFactory,
+              objType->getId(),
               parameterNames,
               parameterTypes,
               parameterValues,

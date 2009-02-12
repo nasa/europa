@@ -144,7 +144,7 @@ inlineType[AbstractDomain* baseType] returns [AbstractDomain* result]
 }        
         ;       
 
-variableDeclaration returns [Expr* result]
+variableDeclaration returns [ExprVarDeclaration* result]
         :       ^(VARIABLE dataType=type initExpr=variableInitialization)
 {
     if (dataType != NULL)
@@ -442,6 +442,20 @@ assignment returns [Expr* result]
 	;
 
 predicate[ObjectType* objType]
+@init {
+        /*
+        std::vector<LabelStr> parameterNames;
+        std::vector<LabelStr> parameterTypes;
+        std::vector<Expr*> parameterValues;
+        std::vector<LabelStr> assignVars;
+        std::vector<Expr*> assignValues;
+        */
+        
+        // TODO: change InterpretedTokenFactory to keep track of these instead
+        // TODO: also allow for assignments to inherited parameters?
+        //std::vector<ExprVarDeclaration*> parameters;
+        //std::vector<ExprConstraint*> constraints;        
+}
 	:	^('predicate'
 			pred=IDENT
 			predicateStatements
@@ -453,7 +467,7 @@ predicate[ObjectType* objType]
                     objType->addTokenFactory(
                         (new InterpretedTokenFactory(
                             predName,
-                            parentFactory,
+                            objType->getId(),
                             parameterNames,
                             parameterTypes,
                             parameterValues,
@@ -465,11 +479,23 @@ predicate[ObjectType* objType]
 		}
 	;
 
+// TODO: allow assignments to inherited parameters
 predicateStatements
 	:	^('{'
-			ruleStatement*
+			(predicateParameter | standardConstraint | assignment )*
 		)
 	;
+	
+// Note: Allocations are not legal here.        
+predicateParameter
+        :
+        variableDeclaration
+        ;       
+
+standardConstraint
+        :
+        constraintInstantiation
+        ;	
 
 rule returns [Expr* result]
 @init {
