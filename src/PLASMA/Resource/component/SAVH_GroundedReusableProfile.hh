@@ -22,8 +22,9 @@
  *
  * For reusable resources, violations occur when upper bounds get too low.  Therefore, using this class (instead of TimetableProfile)
  * has no effect on reported  violations.  However, it results in decreased flaw detection:  TimetableProfile results in a
- * flaw when any possible schedule could go below the lower limit, whereas this class results in a flaw
- * only when a specific schedule (namely the one with every transaction as early as possible) could go below the lower limit.
+ * flaw when any possible schedule (including some that aren't really possible!) could go below the lower limit, whereas this
+ * class results in a flaw only when a specific schedule (namely the one with every transaction as early as possible)
+ * could go below the lower limit.
  *
  * Therefore, this class can be used for Reusable resource situations where the TimetableProfile results in unresolveable states,
  * but FlowProfile is too slow.
