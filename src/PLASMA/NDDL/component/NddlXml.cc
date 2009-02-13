@@ -236,43 +236,38 @@ namespace EUROPA {
           return;
       }
 
-      std::vector<LabelStr> parameterNames;
-      std::vector<LabelStr> parameterTypes;
-      std::vector<Expr*> parameterValues;
-      std::vector<LabelStr> assignVars;
-      std::vector<Expr*> assignValues;
-      std::vector<ExprConstraint*> constraints;
+      InterpretedTokenFactory* tokenFactory = new InterpretedTokenFactory(predName,objType->getId());
 
       for(const TiXmlElement* predArg = element->FirstChildElement(); predArg; predArg = predArg->NextSiblingElement() ) {
           if (strcmp(predArg->Value(),"var") == 0) {
               const char* type = safeStr(predArg->Attribute("type"));
               const char* name = safeStr(predArg->Attribute("name"));
-              parameterNames.push_back(name);
-              parameterTypes.push_back(type);
+              LabelStr pType(type);
+              LabelStr pName(name);
+              Expr* pInitValue=NULL;
               if(!predArg->NoChildren())
-                  parameterValues.push_back(valueToExpr(predArg->FirstChildElement()));
-              else
-                  parameterValues.push_back(NULL);
+                  pInitValue = valueToExpr(predArg->FirstChildElement());
+
+              tokenFactory->addParameter(new ExprVarDeclaration(pName.c_str(),pType.c_str(),pInitValue));
           }
           else if (strcmp(predArg->Value(),"assign") == 0) {
               //const char* type = safeStr(predArg->Attribute("type")); // TODO: use type?
               const char* name = safeStr(predArg->Attribute("name"));
               bool inherited = (predArg->Attribute("inherited") != NULL ? true : false);
+
               if (inherited) {
-                  assignVars.push_back(name);
-                  assignValues.push_back(valueToExpr(predArg->FirstChildElement()));
+                  tokenFactory->addVarAssignment(
+                      new ExprAssignment(
+                          new ExprVarRef(name),
+                          valueToExpr(predArg->FirstChildElement())
+                      )
+                  );
               }
               else {
-                  // it *should* be a parameter, find it and tag it
-                  std::vector<Expr*>::iterator vit = parameterValues.begin();
-                  for(std::vector<LabelStr>::const_iterator it = parameterNames.begin(); it != parameterNames.end(); ++it) {
-                      if(strcmp(it->c_str(), name) == 0)
-                          break;
-                      ++vit;
-                  }
-                  check_runtime_error(vit != parameterValues.end(), std::string("Cannot assign to undeclared parameter:") + name + " in predicate "+predName);
+                  ExprVarDeclaration* parameter = tokenFactory->getParameter(name);
+                  check_runtime_error(parameter != NULL, std::string("Cannot assign to undeclared parameter:") + name + " in predicate "+predName);
                   // should probably say something about redefinition, but meh
-                  *vit = valueToExpr(predArg->FirstChildElement());
+                  parameter->setInitValue(valueToExpr(predArg->FirstChildElement()));
               }
           }
           else if (strcmp(predArg->Value(),"invoke") == 0) {
@@ -281,25 +276,14 @@ namespace EUROPA {
               for(const TiXmlElement* arg = predArg->FirstChildElement(); arg; arg = arg->NextSiblingElement() )
                   constraintArgs.push_back(valueToExpr(arg));
 
-              constraints.push_back(new ExprConstraint(predArg->Attribute("name"),constraintArgs));
+              tokenFactory->addConstraint(new ExprConstraint(predArg->Attribute("name"),constraintArgs));
           }
           else
               check_runtime_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + predArg->Value()+ " in predicate "+predName);
       }
       dbgout << ")" << std::endl;
 
-      objType->addTokenFactory(
-          (new InterpretedTokenFactory(
-              predName,
-              objType->getId(),
-              parameterNames,
-              parameterTypes,
-              parameterValues,
-              assignVars,
-              assignValues,
-              constraints
-          ))->getId()
-      );
+      objType->addTokenFactory(tokenFactory->getId());
   }
 
   void NddlXmlInterpreter::defineEnum(const SchemaId& schema, const char* className, const TiXmlElement* element)

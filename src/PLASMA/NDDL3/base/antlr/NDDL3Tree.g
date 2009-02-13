@@ -148,7 +148,7 @@ variableDeclaration returns [ExprVarDeclaration* result]
         :       ^(VARIABLE dataType=type initExpr=variableInitialization)
 {
     if (dataType != NULL)
-        result = new ExprVarDeclaration(initExpr->getLhs()->toString().c_str(),dataType,initExpr);
+        result = new ExprVarDeclaration(initExpr->getLhs()->toString().c_str(),dataType->getTypeName().c_str(),initExpr);
     else { 
         result = NULL;
         reportSemanticError(CTX,
@@ -319,7 +319,7 @@ identifier
           | 'this'
         ;
 
-constraintInstantiation returns [Expr* result]
+constraintInstantiation returns [ExprConstraint* result]
 @init {
     std::vector<Expr*> args;
 }
@@ -431,7 +431,7 @@ constructorSuper[ObjectType* objType] returns [ExprConstructorSuperCall* result]
 		}
 	;
   
-assignment returns [Expr* result]
+assignment returns [ExprAssignment* result]
 	:	^('='
 			lhs=qualified
 			rhs=initializer
@@ -443,58 +443,46 @@ assignment returns [Expr* result]
 
 predicate[ObjectType* objType]
 @init {
-        /*
-        std::vector<LabelStr> parameterNames;
-        std::vector<LabelStr> parameterTypes;
-        std::vector<Expr*> parameterValues;
-        std::vector<LabelStr> assignVars;
-        std::vector<Expr*> assignValues;
-        */
-        
-        // TODO: change InterpretedTokenFactory to keep track of these instead
-        // TODO: also allow for assignments to inherited parameters?
-        //std::vector<ExprVarDeclaration*> parameters;
-        //std::vector<ExprConstraint*> constraints;        
+    InterpretedTokenFactory* tokenFactory;
+    std::string predName;
 }
 	:	^('predicate'
-			pred=IDENT
-			predicateStatements
+			pred=IDENT 
+			{ 
+			    predName = objType->getName().toString() + "." + c_str($pred.text->chars);   
+			    tokenFactory = new InterpretedTokenFactory(predName,objType->getId()); 
+			}
+			predicateStatements[tokenFactory]
 		)
 		{
-		    const char* predName = c_str($pred.text->chars);
-		    
-		    /*
-                    objType->addTokenFactory(
-                        (new InterpretedTokenFactory(
-                            predName,
-                            objType->getId(),
-                            parameterNames,
-                            parameterTypes,
-                            parameterValues,
-                            assignVars,
-                            assignValues,
-                            constraints
-                    ))->getId();
-                    */		
+                    objType->addTokenFactory(tokenFactory->getId());
 		}
 	;
 
 // TODO: allow assignments to inherited parameters
-predicateStatements
+predicateStatements[InterpretedTokenFactory* tokenFactory]
 	:	^('{'
-			(predicateParameter | standardConstraint | assignment )*
+			( predicateParameter[tokenFactory] 
+                        | predicateParameterAssignment[tokenFactory] 
+			| standardConstraint[tokenFactory] 
+			)*
 		)
 	;
 	
 // Note: Allocations are not legal here.        
-predicateParameter
+predicateParameter[InterpretedTokenFactory* tokenFactory]
         :
-        variableDeclaration
+        child=variableDeclaration { tokenFactory->addParameter(child); }
         ;       
 
-standardConstraint
+predicateParameterAssignment[InterpretedTokenFactory* tokenFactory]
         :
-        constraintInstantiation
+        child=assignment { tokenFactory->addVarAssignment(child); }
+        ;       
+
+standardConstraint[InterpretedTokenFactory* tokenFactory]
+        :
+        child = constraintInstantiation { tokenFactory->addConstraint(child); } 
         ;	
 
 rule returns [Expr* result]

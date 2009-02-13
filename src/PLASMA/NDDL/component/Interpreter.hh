@@ -99,6 +99,9 @@ namespace EUROPA {
         Expr* m_rhs;
   };
 
+  class ExprVarDeclaration;
+  class ExprAssignment;
+
   // InterpretedToken is the interpreted version of NddlToken
   class InterpretedToken : public IntervalToken
   {
@@ -106,11 +109,8 @@ namespace EUROPA {
   	    // Same Constructor signatures as NddlToken, see if both are needed
   	    InterpretedToken(const PlanDatabaseId& planDatabase,
   	                     const LabelStr& predicateName,
-                         const std::vector<LabelStr>& parameterNames,
-                         const std::vector<LabelStr>& parameterTypes,
-                         const std::vector<Expr*>& parameterValues,
-	                     const std::vector<LabelStr>& assignVars,
-                         const std::vector<Expr*>& assignValues,
+  	                     const std::vector<ExprVarDeclaration*>& parameters,
+  	                     const std::vector<ExprAssignment*>& varAssignments,
                          const std::vector<ExprConstraint*>& constraints,
                          const bool& rejectable = false,
                          const bool& isFact = false,
@@ -119,11 +119,8 @@ namespace EUROPA {
         InterpretedToken(const TokenId& master,
                          const LabelStr& predicateName,
                          const LabelStr& relation,
-                         const std::vector<LabelStr>& parameterNames,
-                         const std::vector<LabelStr>& parameterTypes,
-                         const std::vector<Expr*>& parameterValues,
-                         const std::vector<LabelStr>& assignVars,
-                         const std::vector<Expr*>& assignValues,
+                         const std::vector<ExprVarDeclaration*>& parameters,
+                         const std::vector<ExprAssignment*>& varAssignments,
                          const std::vector<ExprConstraint*>& constraints,
                          const bool& close = false);
 
@@ -131,11 +128,8 @@ namespace EUROPA {
   	    virtual ~InterpretedToken();
 
     protected:
-        void commonInit(const std::vector<LabelStr>& parameterNames,
-                        const std::vector<LabelStr>& parameterTypes,
-                        const std::vector<Expr*>& parameterValues,
-                        const std::vector<LabelStr>& assignVars,
-                        const std::vector<Expr*>& assignValues,
+        void commonInit(const std::vector<ExprVarDeclaration*>& parameters,
+                        const std::vector<ExprAssignment*>& varAssignments,
                         const std::vector<ExprConstraint*>& constraints,
                         const bool& autoClose);
 
@@ -160,24 +154,21 @@ namespace EUROPA {
   {
     public:
 	  InterpretedTokenFactory(const LabelStr& predicateName,
-	                          const ObjectTypeId& objType,
-	                          const std::vector<LabelStr>& parameterNames,
-                              const std::vector<LabelStr>& parameterTypes,
-                              const std::vector<Expr*>& parameterValues,
-	                          const std::vector<LabelStr>& assignVars,
-                              const std::vector<Expr*>& assignValues,
-                              const std::vector<ExprConstraint*>& constraints);
+	                          const ObjectTypeId& objType);
+
+	  void addParameter(ExprVarDeclaration* parameterDecl);
+	  ExprVarDeclaration* getParameter(const LabelStr& name);
+
+      void addVarAssignment(ExprAssignment* va);
+	  void addConstraint(ExprConstraint* c);
 
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const;
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
 
     protected:
       ObjectTypeId m_objType;
-      std::vector<LabelStr> m_parameterNames;
-      std::vector<LabelStr> m_parameterTypes;
-      std::vector<Expr*> m_parameterValues;
-      std::vector<LabelStr> m_assignVars;
-      std::vector<Expr*> m_assignValues;
+      std::vector<ExprVarDeclaration*> m_parameters;
+      std::vector<ExprAssignment*> m_varAssignments;
       std::vector<ExprConstraint*> m_constraints;
 
       TokenFactoryId getParentFactory(const PlanDatabaseId& planDb) const;
@@ -441,15 +432,21 @@ namespace EUROPA {
   class ExprVarDeclaration : public Expr
   {
   public:
-      ExprVarDeclaration(const char* name, AbstractDomain* type, Expr* initValue);
+      ExprVarDeclaration(const char* name, const char* type, Expr* initValue);
       virtual ~ExprVarDeclaration();
 
       virtual DataRef eval(EvalContext& context) const;
       virtual std::string toString() const;
 
+      const LabelStr& getName() const;
+      const LabelStr& getType() const;
+
+      const Expr* getInitValue() const;
+      void setInitValue(Expr* iv);
+
   protected:
       LabelStr m_name;
-      AbstractDomain* m_type;
+      LabelStr m_type;
       Expr* m_initValue;
   };
 

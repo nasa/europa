@@ -812,11 +812,8 @@ namespace EUROPA {
      */
     InterpretedToken::InterpretedToken(const PlanDatabaseId& planDatabase,
                      const LabelStr& predicateName,
-                     const std::vector<LabelStr>& parameterNames,
-                     const std::vector<LabelStr>& parameterTypes,
-                     const std::vector<Expr*>& parameterValues,
-                     const std::vector<LabelStr>& assignVars,
-                     const std::vector<Expr*>& assignValues,
+                     const std::vector<ExprVarDeclaration*>& parameters,
+                     const std::vector<ExprAssignment*>& varAssignments,
                      const std::vector<ExprConstraint*>& constraints,
                      const bool& rejectable,
                      const bool& isFact,
@@ -831,18 +828,15 @@ namespace EUROPA {
                         Token::noObject(),                    // Object Name
                         false)
     {
-    	commonInit(parameterNames, parameterTypes, parameterValues, assignVars, assignValues, constraints, close);
+    	commonInit(parameters, varAssignments, constraints, close);
     	debugMsg("Interpreter:InterpretedToken","Created token(" << getKey() << ") of type:" << predicateName.toString() << " objectVar=" << getVariable("object")->toString());
     }
 
   InterpretedToken::InterpretedToken(const TokenId& master,
 				     const LabelStr& predicateName,
 				     const LabelStr& relation,
-				     const std::vector<LabelStr>& parameterNames,
-				     const std::vector<LabelStr>& parameterTypes,
-				     const std::vector<Expr*>& parameterValues,
-				     const std::vector<LabelStr>& assignVars,
-				     const std::vector<Expr*>& assignValues,
+                     const std::vector<ExprVarDeclaration*>& parameters,
+                     const std::vector<ExprAssignment*>& varAssignments,
 				     const std::vector<ExprConstraint*>& constraints,
 				     const bool& close)
     : IntervalToken(master,
@@ -854,7 +848,7 @@ namespace EUROPA {
 		    Token::noObject(),                   // Object Name
 		    false)
   {
-    commonInit(parameterNames, parameterTypes, parameterValues, assignVars, assignValues, constraints, close);
+    commonInit(parameters, varAssignments, constraints, close);
     debugMsg("Interpreter:InterpretedToken","Created slave token(" << getKey() << ") of type:" << predicateName.toString() << " objectVar=" << getVariable("object")->toString());
   }
 
@@ -874,69 +868,72 @@ namespace EUROPA {
   }
 
   void InterpretedToken::commonInit(
-				    const std::vector<LabelStr>& parameterNames,
-				    const std::vector<LabelStr>& parameterTypes,
-				    const std::vector<Expr*>& parameterValues,
-				    const std::vector<LabelStr>& assignVars,
-				    const std::vector<Expr*>& assignValues,
+                    const std::vector<ExprVarDeclaration*>& parameters,
+                    const std::vector<ExprAssignment*>& varAssignments,
 				    const std::vector<ExprConstraint*>& constraints,
 				    const bool& autoClose)
   {
-    debugMsg("XMLInterpreter","Token " << getName().toString() << " has " << parameterNames.size() << " parameters");
+    debugMsg("XMLInterpreter","Token " << getName().toString() << " has " << parameters.size() << " parameters");
 
     // TODO: Pass in EvalContext
     TokenEvalContext context(NULL,getId()); // TODO: give access to class or global context?
 
-    for (unsigned int i=0; i < parameterNames.size(); i++) {
-      check_runtime_error(getVariable(parameterNames[i],false) == ConstrainedVariableId::noId(), "Token parameter "+parameterNames[i].toString()+ " already exists!");
+    // TODO: just do straight evaluation of Exprs for parameters,varAssignments and constraints
+    for (unsigned int i=0; i < parameters.size(); i++) {
+        const LabelStr& parameterName = parameters[i]->getName();
+        const LabelStr& parameterType = parameters[i]->getType();
+        const Expr* initValue = parameters[i]->getInitValue();
 
-      // This is a hack needed because TokenVariable is parametrized by the domain arg to addParameter
-      ConstrainedVariableId parameter;
+        check_runtime_error(getVariable(parameterName,false) == ConstrainedVariableId::noId(),
+                            "Token parameter "+parameterName.toString()+ " already exists!");
 
-      // same as completeObjectParam in NddlRules.hh
-      if(parameterValues[i] != NULL) {
-        parameter = addParameter(
-                                 parameterValues[i]->eval(context).getValue()->baseDomain(),
-                                 parameterNames[i]
-                                );
-        if (context.isClass(parameterTypes[i]))
-          getPlanDatabase()->makeObjectVariableFromType(parameterTypes[i], parameter);
-      }
-      else {
-        if (context.isClass(parameterTypes[i])) {
-          parameter = addParameter(
-                                   ObjectDomain(parameterTypes[i].c_str()),
-                                   parameterNames[i]
-                                  );
-          getPlanDatabase()->makeObjectVariableFromType(parameterTypes[i], parameter);
+        // This is a hack needed because TokenVariable is parametrized by the domain arg to addParameter
+        ConstrainedVariableId parameter;
+
+        // same as completeObjectParam in NddlRules.hh
+        if(initValue != NULL) {
+            parameter = addParameter(
+                    initValue->eval(context).getValue()->baseDomain(),
+                    parameterName
+            );
+            if (context.isClass(parameterName))
+                getPlanDatabase()->makeObjectVariableFromType(parameterType, parameter);
         }
         else {
-          parameter = addParameter(
-                                   getPlanDatabase()->getConstraintEngine()->getCESchema()->baseDomain(parameterTypes[i].c_str()),
-                                   parameterNames[i]
-                                  );
+            if (context.isClass(parameterType)) {
+                parameter = addParameter(
+                        ObjectDomain(parameterType.c_str()),
+                        parameterName
+                );
+                getPlanDatabase()->makeObjectVariableFromType(parameterType, parameter);
+            }
+            else {
+                parameter = addParameter(
+                        getPlanDatabase()->getConstraintEngine()->getCESchema()->baseDomain(parameterType.c_str()),
+                        parameterName
+                );
+            }
         }
-      }
 
-      debugMsg("Interpreter:InterpretedToken","Token " << getName().toString() << " added Parameter "
-	       << parameter->toString() << " " << parameterNames[i].toString());
+        debugMsg("Interpreter:InterpretedToken","Token " << getName().toString() << " added Parameter "
+                << parameter->toString() << " " << parameterName.toString());
     }
 
     if (autoClose)
       close();
 
-
     // Take care of initializations that were part of the predicate declaration
-    for (unsigned int i=0; i < assignVars.size(); i++)
-      getVariable(assignVars[i])->restrictBaseDomain(assignValues[i]->eval(context).getValue()->baseDomain());
+    for (unsigned int i=0; i < varAssignments.size(); i++)
+      varAssignments[i]->eval(context).getValue()->baseDomain();
 
     // Post parameter constraints
+    // TODO: just call eval on ExprConstraints
     for (unsigned int i=0; i < constraints.size(); i++) {
       const std::vector<Expr*>& args = constraints[i]->getArgs();
       std::vector<ConstrainedVariableId> constraintArgs;
       for (unsigned int j=0; j < args.size(); j++) {
-	DataRef arg = args[j]->eval(context);
-	constraintArgs.push_back(arg.getValue());
+          DataRef arg = args[j]->eval(context);
+          constraintArgs.push_back(arg.getValue());
       }
       token_constraint1(constraints[i]->getName(),constraintArgs);
     }
@@ -947,24 +944,36 @@ namespace EUROPA {
    */
     InterpretedTokenFactory::InterpretedTokenFactory(
             const LabelStr& predicateName,
-            const ObjectTypeId& objType,
-            const std::vector<LabelStr>& parameterNames,
-            const std::vector<LabelStr>& parameterTypes,
-            const std::vector<Expr*>& parameterValues,
-            const std::vector<LabelStr>& assignVars,
-            const std::vector<Expr*>& assignValues,
-            const std::vector<ExprConstraint*>& constraints)
+            const ObjectTypeId& objType)
         : TokenFactory(predicateName)
         , m_objType(objType)
-        , m_parameterNames(parameterNames)
-        , m_parameterTypes(parameterTypes)
-        , m_parameterValues(parameterValues)
-        , m_assignVars(assignVars)
-        , m_assignValues(assignValues)
-        , m_constraints(constraints)
     {
-        for (unsigned int i=0; i<parameterNames.size();i++)
-            addArg(parameterTypes[i],parameterNames[i]);
+    }
+
+    void InterpretedTokenFactory::addParameter(ExprVarDeclaration* parameterDecl)
+    {
+        m_parameters.push_back(parameterDecl);
+        addArg(parameterDecl->getType(),parameterDecl->getName());
+    }
+
+    ExprVarDeclaration* InterpretedTokenFactory::getParameter(const LabelStr& name)
+    {
+        for (unsigned int i=0;i<m_parameters.size();i++) {
+            if ((double)(m_parameters[i]->getName()) == (double)name)
+                return m_parameters[i];
+        }
+
+        return NULL;
+    }
+
+    void InterpretedTokenFactory::addConstraint(ExprConstraint* c)
+    {
+        m_constraints.push_back(c);
+    }
+
+    void InterpretedTokenFactory::addVarAssignment(ExprAssignment* va)
+    {
+        m_varAssignments.push_back(va);
     }
 
     TokenFactoryId InterpretedTokenFactory::getParentFactory(const PlanDatabaseId& planDb) const
@@ -984,11 +993,8 @@ namespace EUROPA {
 	        token = (new InterpretedToken(
 	                planDb,
 	                name,
-	                m_parameterNames,
-	                m_parameterTypes,
-	                m_parameterValues,
-	                m_assignVars,
-	                m_assignValues,
+	                m_parameters,
+	                m_varAssignments,
 	                m_constraints,
 	                rejectable,
 	                isFact,
@@ -1000,11 +1006,8 @@ namespace EUROPA {
 	        // class hierarchy needs to be fixed to avoid this cast
             InterpretedToken* it = dynamic_cast<InterpretedToken*>((Token*)token);
             it->commonInit(
-                    m_parameterNames,
-                    m_parameterTypes,
-                    m_parameterValues,
-                    m_assignVars,
-                    m_assignValues,
+                    m_parameters,
+                    m_varAssignments,
                     m_constraints,
                     false);
 	    }
@@ -1022,11 +1025,8 @@ namespace EUROPA {
                   master,
                   name,
                   relation,
-                  m_parameterNames,
-                  m_parameterTypes,
-                  m_parameterValues,
-                  m_assignVars,
-                  m_assignValues,
+                  m_parameters,
+                  m_varAssignments,
                   m_constraints,
                   false))->getId();
       }
@@ -1036,11 +1036,8 @@ namespace EUROPA {
           // class hierarchy needs to be fixed to avoid this cast
           InterpretedToken* it = dynamic_cast<InterpretedToken*>((Token*)token);
           it->commonInit(
-                  m_parameterNames,
-                  m_parameterTypes,
-                  m_parameterValues,
-                  m_assignVars,
-                  m_assignValues,
+                  m_parameters,
+                  m_varAssignments,
                   m_constraints,
                   false);
       }
@@ -1443,7 +1440,7 @@ namespace EUROPA {
       return os.str();
   }
 
-  ExprVarDeclaration::ExprVarDeclaration(const char* name, AbstractDomain* type, Expr* initValue)
+  ExprVarDeclaration::ExprVarDeclaration(const char* name, const char* type, Expr* initValue)
       : m_name(name)
       , m_type(type)
       , m_initValue(initValue)
@@ -1454,13 +1451,17 @@ namespace EUROPA {
   {
   }
 
+  const LabelStr& ExprVarDeclaration::getName() const { return m_name; }
+  const LabelStr& ExprVarDeclaration::getType() const { return m_type; }
+  const Expr* ExprVarDeclaration::getInitValue() const { return m_initValue; }
+  void ExprVarDeclaration::setInitValue(Expr* iv) { m_initValue = iv; }
+
   DataRef ExprVarDeclaration::eval(EvalContext& context) const
   {
       const DbClientId& pdb = getPDB(context);
 
       ConstrainedVariableId v = pdb->createVariable(
-              m_type->getTypeName().c_str(),
-              *m_type,
+              m_type.c_str(),
               m_name.c_str()
       );
 
@@ -1471,7 +1472,7 @@ namespace EUROPA {
   {
       std::ostringstream os;
 
-      os << m_type->toString() << " " << m_name.toString();
+      os << m_type.c_str() << " " << m_name.toString();
       if (m_initValue != NULL)
           os << " " << m_initValue->toString();
 
