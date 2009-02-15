@@ -4,9 +4,11 @@ if ! $(PLASMA_READY) {
 
 SubDirHdrs $(PLASMA) ConstraintEngine component ;
 
-ModuleLibraries utils-module-tests : cppunit ;
+ModuleLibraries utils-module-tests : cppunit log4cpp ;
 
-ModuleMain utils-module-tests : module-tests.cc util-test-module.cc : Utils ;
+ModuleMain utils-module-tests
+ : module-tests.cc util-test-module.cc Log4CppTest.cc LoggerTest.cc
+ : Utils ;
 RunModuleMain run-utils-module-tests : utils-module-tests ;
 LocalDepends tests : run-utils-module-tests ;
 

@@ -468,7 +468,7 @@ namespace EUROPA
     check_error(propagator.isValid());
     std::map<double, PropagatorId>::iterator it = m_propagatorsByName.find(propagator->getName().getKey());
     if(it != m_propagatorsByName.end()) {
-      warn("Overwriting propagator named " + propagator->getName().toString());
+      europaWarn("Overwriting propagator named " + propagator->getName().toString());
       m_propagators.erase(std::find(m_propagators.begin(), m_propagators.end(), it->second));
       it->second->discard();
       m_propagatorsByName.erase(it);

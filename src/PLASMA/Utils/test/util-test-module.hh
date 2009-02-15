@@ -30,6 +30,7 @@ public:
 	void labelTests();
 	void entityTests();
 	void xmlTests();
+    void loggerTests();
 };
 
 
