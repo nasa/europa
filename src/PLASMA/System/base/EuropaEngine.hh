@@ -7,19 +7,25 @@
 #include "PlanDatabaseDefs.hh"
 #include "RulesEngineDefs.hh"
 #include "tinyxml.h"
+#include "Logger.hh"
+
+using EUROPA::Utils::Logger; 
 
 namespace EUROPA {
+//namespace System { //TODO: mcr
 
   class EuropaEngine : public EngineBase
   {
     public:
-       	EuropaEngine();
-        virtual ~EuropaEngine();
+        static Logger &LOGGER;
 
+        EuropaEngine();
+        virtual ~EuropaEngine();
+      
         virtual ConstraintEngineId& getConstraintEngine();
         virtual PlanDatabaseId&     getPlanDatabase();
         virtual RulesEngineId&      getRulesEngine();
-
+      
         virtual const ConstraintEngine* getConstraintEnginePtr() const;
         virtual const PlanDatabase*     getPlanDatabasePtr() const;
         virtual const RulesEngine*      getRulesEnginePtr() const;

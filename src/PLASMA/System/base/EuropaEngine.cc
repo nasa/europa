@@ -22,8 +22,11 @@
 #include "Filters.hh"
 #include "PlanDatabaseWriter.hh"
 
-namespace EUROPA
-{
+namespace EUROPA {
+//namespace System { //TODO: mcr
+
+    Logger  &EuropaEngine::LOGGER = Logger::getInstance( "EUROPA::System::EuropaEngine", Logger::DEBUG );
+
     EuropaEngine::EuropaEngine()
     {
     }
@@ -106,7 +109,8 @@ namespace EUROPA
       if(!playTransactions(txSource, interp))
         return false;
 
-      debugMsg("EuropaEngine:plan", "Initial state: " << std::endl << PlanDatabaseWriter::toString(getPlanDatabase()));
+      //debugMsg("EuropaEngine:plan", "Initial state: " << std::endl << PlanDatabaseWriter::toString(getPlanDatabase()));
+      LOGGER << Logger::DEBUG << "plan: Initial state: " << Logger::eol << PlanDatabaseWriter::toString(getPlanDatabase());
 
       // Configure the planner from data in the initial state
       std::list<ObjectId> configObjects;

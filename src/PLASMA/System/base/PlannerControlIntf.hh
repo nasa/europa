@@ -124,8 +124,8 @@ namespace EUROPA {
    */
   void setTransactionFilterStates(int* states, int numType);
 
-  void enableDebugMsg(const char* file, const char* pattern);
-  void disableDebugMsg(const char* file, const char* pattern);
+//  void enableDebugMsg(const char* file, const char* pattern);
+//  void disableDebugMsg(const char* file, const char* pattern);
 
 }
 

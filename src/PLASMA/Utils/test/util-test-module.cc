@@ -23,7 +23,7 @@
 
 #include "util-test-module.hh"
 #include "Error.hh"
-#include "Debug.hh"
+//#include "Debug.hh"
 #include "LoggerTest.hh"
 #include "LabelStr.hh"
 #include "TestData.hh"
@@ -163,7 +163,7 @@ class DebugTest {
 public:
   static bool test() {
     EUROPA_runTest(testDebugError);
-    EUROPA_runTest(testDebugFiles);
+//    EUROPA_runTest(testDebugFiles);
     EUROPA_runTest(testLog4cpp);
     EUROPA_runTest(testLogger);
     return true;
@@ -184,12 +184,13 @@ private:
     return(success);
   }
 
+/*
   static bool testDebugFiles() {
     for (int i = 1; i < 7; i++)
       runDebugTest(i);
     return(true);
   }
-
+*/
   /** Tests that log4cpp functionality is installed and working */
   static bool testLog4cpp() {
     bool success = true;
@@ -210,6 +211,7 @@ private:
   }
     
 
+/*
   static void runDebugTest(int cfgNum) {
 #if !defined(EUROPA_FAST) && defined(DEBUG_MESSAGE_SUPPORT)
     std::stringstream cfgName;
@@ -239,6 +241,8 @@ private:
     DebugMessage::setStream(std::cerr);
 #endif
   }
+*/
+    
 
 };
 

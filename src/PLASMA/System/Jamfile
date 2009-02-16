@@ -9,7 +9,7 @@ if ! ( "Resources" in $(NO) ) {
 }
 
 Module System : $(system_deps) ;
-ModuleLibraries System : $(DLOPEN_LIBRARY) ;
+ModuleLibraries System : $(DLOPEN_LIBRARY) log4cpp ;
 
 SubInclude PLASMA System base ;
 SubInclude PLASMA System component ;

@@ -126,18 +126,28 @@ private:
 class Logger {
 public:
     // Log4cpp has a very rich structure that we probably don't need:
-    //    EMERG < FATAL < ALERT < CRIT < ERROR < WARN < NOTICE < INFO < DEBUG < NOTSET 
+    //    EMERG < FATAL < ALERT < CRIT < ERROR < WARN < NOTICE < INFO < DEBUG < NOTSET
+    // we will only setup the following (to match more closely with the log4j levels):
+    //    OFF < FATAL < ERROR < WARN < INFO < DEBUG < ALL
+    // note that there are even TRACE debug levels allowed by log4j:
+    //    CONFIG < FINE < FINER < FINEST
+    // we provide these as an experimental extension (they might get unexpectedly removed)
     enum Level {
-	//EMERG = log4cpp::Priority::EMERG,
-	//FATAL = log4cpp::Priority::FATAL,
-	//ALERT = log4cpp::Priority::ALERT,
-	//CRIT = log4cpp::Priority::CRIT,
-	ERROR = log4cpp::Priority::ERROR,
-	WARN =  log4cpp::Priority::WARN,
-	//NOTICE = log4cpp::Priority::NOTICE,
-	INFO =  log4cpp::Priority::INFO,
-	DEBUG = log4cpp::Priority::DEBUG,
-	NOTSET = log4cpp::Priority::NOTSET,
+ 	OFF = log4cpp::Priority::EMERG - 1,       //log4cpp    NA   ( -1)
+	//EMERG = log4cpp::Priority::EMERG,       //log4cpp =   0
+	FATAL = log4cpp::Priority::FATAL,         //log4cpp =   0
+	//ALERT = log4cpp::Priority::ALERT,       //log4cpp = 100
+	//CRIT = log4cpp::Priority::CRIT,         //log4cpp = 200
+	ERROR = log4cpp::Priority::ERROR,         //log4cpp = 300
+	WARN =  log4cpp::Priority::WARN,          //log4cpp = 400
+	//NOTICE = log4cpp::Priority::NOTICE,     //log4cpp = 500
+	INFO =  log4cpp::Priority::INFO,          //log4cpp = 600
+	DEBUG  = log4cpp::Priority::DEBUG,        //log4cpp = 700
+	CONFIG = log4cpp::Priority::DEBUG + 20,   //log4cpp    NA   (720)
+	FINE   = log4cpp::Priority::DEBUG + 40,   //log4cpp    NA   (740)
+	FINER  = log4cpp::Priority::DEBUG + 60,   //log4cpp    NA   (760)
+	FINEST = log4cpp::Priority::DEBUG + 80,   //log4cpp    NA   (780)
+	ALL  = log4cpp::Priority::NOTSET          //log4cpp = 800
     };
 
 
@@ -217,9 +227,9 @@ public:
 //       *  For example, one could use the returned category to get the
 //       *  root category.  Or one could use the stream passing methods.
 //       */
-//      log4cpp::Category *getCategory() { 
-//   	return currentCategory;
-//      }
+      log4cpp::Category *getCategory() { 
+   	return currentCategory;
+      }
     
 
     log4cpp::CategoryStream getStream() {
@@ -232,7 +242,8 @@ public:
  //	return (*currentCategory) << (int) level;	    
      }
 
-    log4cpp::CategoryStream& eol (log4cpp::CategoryStream& os) {
+    
+    static log4cpp::CategoryStream& eol (log4cpp::CategoryStream& os) {
 	return log4cpp::eol( os );
     }                 
 
@@ -277,9 +288,9 @@ private:
   #define condDebugStmt(cond, marker, stmt)
 #else
    //legacy definitions -- will be deprecated Logger.msg( marker, data )
-   #define debugMsg(marker, data) { std::cout << "Deprecated debugMsg:"  << __FILE__ << " at " << __LINE__  << std::endl; }
-   #define condDebugMsg(cond, marker, data) { std::cout << "Deprecated condDebugMsg:"  << __FILE__ << " at " << __LINE__  << std::endl; }
-   #define debugStmt(marker, stmt) { std::cout << "Deprecated debugStmt:"  << __FILE__ << " at " << __LINE__  << std::endl; }
-   #define condDebugStmt(cond, marker, stmt) { std::cout << "Deprecated condDebugStmt:"  << __FILE__ << " at " << __LINE__  << std::endl; }
+//    #define debugMsg(marker, data) { std::cout << "Deprecated debugMsg:"  << __FILE__ << " at " << __LINE__  << std::endl; }
+//    #define condDebugMsg(cond, marker, data) { std::cout << "Deprecated condDebugMsg:"  << __FILE__ << " at " << __LINE__  << std::endl; }
+//    #define debugStmt(marker, stmt) { std::cout << "Deprecated debugStmt:"  << __FILE__ << " at " << __LINE__  << std::endl; }
+//    #define condDebugStmt(cond, marker, stmt) { std::cout << "Deprecated condDebugStmt:"  << __FILE__ << " at " << __LINE__  << std::endl; }
 #endif //NO_DEBUG_MESSAGE_SUPPORT
 #endif //LOG4CPP_DEBUG
