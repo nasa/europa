@@ -23,7 +23,7 @@ namespace EUROPA {
 
     void SingleSolverController::configureSolvers(const char* configPath)
     {
-        logMsg(std::string("SingleSolverController:configureSolvers: Configuration source is ") + configPath);
+        LOGGER.log(Logger::DEBUG, std::string("SingleSolverController:configureSolvers: Configuration source is ") + configPath);
         check_error(configPath != NULL, "Must have a planner config argument.");
         TiXmlDocument doc(configPath);
         doc.LoadFile();
@@ -68,7 +68,7 @@ namespace EUROPA {
         "    MaxSteps = " + EUROPA::toString(m_maxSteps) + "\n" +
         "    MaxDepth = " + EUROPA::toString(m_maxDepth);
 
-        logMsg(msg);
+        LOGGER.log(Logger::DEBUG, msg);
     }
 
     MasterController::Status SingleSolverController::handleNext()

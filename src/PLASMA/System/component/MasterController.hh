@@ -10,10 +10,13 @@
 #include "SolverDefs.hh"
 #include "RulesEngineDefs.hh"
 #include "EuropaEngine.hh"
+#include "Logger.hh"
+
 #include <string>
 #include <list>
 
 namespace EUROPA {
+//namespace System { //TODO mcr - a note for coming back through with namespaces
 
   class MasterController;
   
@@ -30,6 +33,7 @@ namespace EUROPA {
   class MasterController : public EuropaEngine
   {
   public:
+    static Logger &LOGGER;
 
     enum Status { IN_PROGRESS=0,
 		  TIMEOUT_REACHED,
@@ -103,10 +107,10 @@ namespace EUROPA {
      */
     void writeStatistics();
 
-    /**
-     * @brief Utility to print and flush a message
-     */
-    static void logMsg(std::string msg);
+//     /**
+//      * @brief Utility to print and flush a message
+//      */
+//     static void logMsg(std::string msg);
 
     /**
      * @brief Utility to write the database to a string

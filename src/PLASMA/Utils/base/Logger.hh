@@ -195,13 +195,9 @@ public:
     /** Logs a message at the default level for this category.  This
      * message will always be visible, regardless of the level.
      *
-     * This method is deprecated and will be removed once all old
-     * Europa debug messages are converted to the new class.
-     * 
-     * @deprecated - use a Logger instance directly
      */
     static void msg( string catName, string msg ) {
-	//not yet implemented
+
     }
 		     
 
@@ -231,18 +227,21 @@ public:
    	return currentCategory;
       }
     
-
     log4cpp::CategoryStream getStream() {
 //	return log4cpp::CategoryStream( *currentCategory, getLevel() );
 	return currentCategory->critStream();
     }
 
-     log4cpp::CategoryStream operator<<( Level level ) {
+    log4cpp::CategoryStream operator<<( Level level ) {
  	return log4cpp::CategoryStream( *currentCategory,  (int) level );
  //	return (*currentCategory) << (int) level;	    
      }
 
+    log4cpp::CategoryStream &operator<<( string msg ) {
+	return (*currentCategory) << getLevel() << msg;
+     }
     
+
     static log4cpp::CategoryStream& eol (log4cpp::CategoryStream& os) {
 	return log4cpp::eol( os );
     }                 
@@ -250,13 +249,15 @@ public:
 //     log4cpp::CategoryStream operator<<( CategoryStream stream ) {
 // 	return log4cpp::CategoryStream( *currentCategory, getLevel() );
 //     }
-//    ostream friend log4cpp::CategoryStream& operator<<( Level level );
+//     ostream friend log4cpp::CategoryStream& operator<<( Level level );
+//     ostream friend log4cpp::CategoryStream& operator<<( log4cpp::CategoryStream &cs, string msg );
     
 private:
     log4cpp::Category *currentCategory;
     string categoryName;
 
 }; //class Logger
+
 
 
 // ostream& operator<<(ostream& stream, Logger logger) {
