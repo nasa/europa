@@ -1,4 +1,4 @@
-//  Copyright Notices
+[//  Copyright Notices
 
 //  This software was developed for use by the U.S. Government as
 //  represented by the Administrator of the National Aeronautics and
