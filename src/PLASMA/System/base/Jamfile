@@ -8,6 +8,8 @@ if "Resources" in $(NO) {
   SubDirC++Flags -DNO_RESOURCES ;
 }
 
+SubDirHdrs $(PLASMA) Log4cpp log4cpp-1.0 include ;
+
 ModuleBase System 
 	: 
 	EuropaEngine.cc

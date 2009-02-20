@@ -2,6 +2,8 @@ SubDir PLASMA Utils base ;
 
 if ! $(PLASMA_READY) {
 
+SubDirHdrs $(PLASMA) Log4cpp log4cpp-1.0 include ;
+
 ModuleBase Utils
 	:
 	Debug.cc
@@ -10,11 +12,11 @@ ModuleBase Utils
 	Entity.cc
 	Error.cc
 	IdTable.cc
-        LabelStr.cc
-        Mutex.cc
-        Pdlfcn.cc
-        TestData.cc
-        Utils.cc
+  LabelStr.cc
+	Mutex.cc
+  Pdlfcn.cc
+  TestData.cc
+  Utils.cc
 	XMLUtils.cc
 	;
 

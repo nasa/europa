@@ -2,14 +2,17 @@ SubDir PLASMA System ;
 
 if ! $(PLASMA_READY) {
 
-local system_deps = NDDL NDDL3 Solvers ;
+
+local system_deps = NDDL NDDL3 Solvers Log4cpp ;
 
 if ! ( "Resources" in $(NO) ) {
   system_deps += Resource ANML ;
 }
 
+SubDirHdrs $(PLASMA) Log4cpp log4cpp-1.0 include ;
+
 Module System : $(system_deps) ;
-ModuleLibraries System : $(DLOPEN_LIBRARY) log4cpp ;
+ModuleLibraries System : $(DLOPEN_LIBRARY) ;
 
 SubInclude PLASMA System base ;
 SubInclude PLASMA System component ;

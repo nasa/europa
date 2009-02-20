@@ -18,6 +18,7 @@ Module plasma : all System ;
 # Order of SubIncludes is important, it implies dependencies in many cases
 
 # 3rd party
+SubInclude PLASMA Log4cpp ;
 SubInclude PLASMA TinyXml ;
 SubInclude PLASMA Antlr ;
 SubInclude PLASMA Antlr3 ;
