@@ -317,5 +317,18 @@
     <antcall target="zip-dist"/>
     <antcall target="zip-static-libs"/>
   </target>
+    
+  <!-- This will run the DEV variant by default, 
+       if you want other variant, you can do it specifying jam.variant on the command line
+  -->   
+  <target name="autobuild"
+          description="This target replicates what autobuild does for local testing">
+      <antcall target="build"><param name="jam.libararies" value="SHARED"/></antcall>
+      <antcall target="test"><param name="jam.libraries" value="SHARED"/></antcall>
+      <antcall target="build"><param name="jam.libraries" value="STATIC"/></antcall>
+      <antcall target="test"><param name="jam.libraries" value="STATIC"/></antcall>
+      <antcall target="dist"/>
+      <antcall target="test-dist"/>
+  </target>  
 	
 </project>
