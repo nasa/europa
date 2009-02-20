@@ -13,7 +13,7 @@ tokens {
 	CONSTRUCTOR_INVOCATION;
 	CONSTRAINT_INSTANTIATION;
 	NDDL;
-	SUBGOAL;
+	TOKEN_RELATION;
 	VARIABLE;
 }
 
@@ -217,7 +217,7 @@ type	:	'int'
 	;
 
 relation:	(token=IDENT | token='this')? temporalRelation predicateArgumentList ';'
-			-> ^(SUBGOAL $token temporalRelation predicateArgumentList)
+			-> ^(TOKEN_RELATION $token temporalRelation predicateArgumentList)
         ;
 
 goal	:	('rejectable'^ | 'goal'^) predicateArgumentList ';'!
@@ -287,29 +287,29 @@ allocationStatement
 	;
 
 temporalRelation
-	:	'any'
+        :       'after'
+	|	'any'
+        |       'before'
+        |       'contained_by'
+        |       'contains'
+        |       'contains_end'
+        |       'contains_start'
 	|	'ends'
-	|	'starts'
-	|	'equals'
-	|	'equal'
-	|	'before'
-	|	'after'
-	|	'contains'
-	|	'contained_by'
-	|	'ends_before'
-	|	'ends_after'
-	|	'starts_before_end'
-	|	'ends_after_start'
-	|	'contains_start'
-	|	'starts_during'
-	|	'contains_end'
-	|	'ends_during'
+        |       'ends_after'
+        |       'ends_after_start'
+        |       'ends_before'
+        |       'ends_during'
+        |       'equal'
+        |       'equals'
 	|	'meets'
 	|	'met_by'
 	|	'parallels'
 	| 	'paralleled_by'
-	|	'starts_before'
-	|	'starts_after'
+        |       'starts'
+        |       'starts_after'
+        |       'starts_before'
+        |       'starts_before_end'
+        |       'starts_during'
 	;
 
 numericLiteral
@@ -324,15 +324,17 @@ boolLiteral
 	|	'false' 
 	;
 
-function:	qualified '.'!
+function
+        :	qualified '.'!
 		(	'specify'^ variableArgumentList
+                |       'reset'^ '('! ')'!
+                |       'constrain'^ variableArgumentList
 		|	'free'^ variableArgumentList
-		|	'constrain'^ variableArgumentList
+                |       'activate'^ '('! ')'!
 		|	'merge'^ variableArgumentList
-		|	'activate'^ '('! ')'!
-		|	'reset'^ '('! ')'!
 		|	'reject'^ '('! ')'!
-		|	'cancel'^ '('! ')'!) ';'!
+		|	'cancel'^ '('! ')'!
+		) ';'!
 	|	(IDENT '.'!)? 'close'^ '('! ')'! ';'!
 	;
 

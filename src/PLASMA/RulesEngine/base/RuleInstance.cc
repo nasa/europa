@@ -359,7 +359,7 @@ namespace EUROPA {
     return addSlave(slave);
   }
 
-  void RuleInstance::addConstraint(const LabelStr& name, std::vector<ConstrainedVariableId>& scope){
+  void RuleInstance::addConstraint(const LabelStr& name, const std::vector<ConstrainedVariableId>& scope){
     ConstraintId constraint =  getPlanDatabase()->getConstraintEngine()->createConstraint(name,
 								   scope);
     addConstraint(constraint);

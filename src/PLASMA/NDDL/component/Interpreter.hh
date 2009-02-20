@@ -99,6 +99,37 @@ namespace EUROPA {
         Expr* m_rhs;
   };
 
+  class PredicateInstanceRef
+  {
+  public:
+      PredicateInstanceRef(const char* predInstance, const char* predName);
+      virtual ~PredicateInstanceRef();
+
+      TokenId getToken(EvalContext& ctx, const char* relationName);
+
+  protected:
+      std::string m_predicateInstance;
+      std::string m_predicateName;
+
+      TokenId createSubgoal(EvalContext& ctx, const char* relationName);
+  };
+
+  class ExprRelation : public Expr
+  {
+    public:
+        ExprRelation(const char* relation,
+                     PredicateInstanceRef* origin,
+                     const std::vector<PredicateInstanceRef*>& targets);
+        virtual ~ExprRelation();
+
+        virtual DataRef eval(EvalContext& context) const;
+
+    protected:
+        LabelStr m_relation;
+        PredicateInstanceRef* m_origin;
+        std::vector<PredicateInstanceRef*> m_targets;
+  };
+
   class ExprVarDeclaration;
   class ExprAssignment;
 
@@ -106,7 +137,7 @@ namespace EUROPA {
   class InterpretedToken : public IntervalToken
   {
   	public:
-  	    // Same Constructor signatures as NddlToken, see if both are needed
+  	    // Same Constructor signatures as NddlToken, TODO: see if both are needed
   	    InterpretedToken(const PlanDatabaseId& planDatabase,
   	                     const LabelStr& predicateName,
   	                     const std::vector<ExprVarDeclaration*>& parameters,
@@ -174,8 +205,6 @@ namespace EUROPA {
       TokenFactoryId getParentFactory(const PlanDatabaseId& planDb) const;
   };
 
-  class RuleExpr;
-
   class InterpretedRuleInstance : public RuleInstance
   {
   	public:
@@ -197,7 +226,7 @@ namespace EUROPA {
 
   	    virtual ~InterpretedRuleInstance();
 
-        void createConstraint(const LabelStr& name, std::vector<ConstrainedVariableId>& vars);
+        void createConstraint(const LabelStr& name, const std::vector<ConstrainedVariableId>& vars);
 
         TokenId createSubgoal(
                    const LabelStr& name,
@@ -300,42 +329,6 @@ namespace EUROPA {
   	    std::string m_varName;
   };
 
-  class ExprSubgoal : public RuleExpr
-  {
-  	public:
-  	    ExprSubgoal(const char* name,
-  	                const char* predicateType,
-  	                const char* predicateInstance,
-  	                const char* relation);
-  	    virtual ~ExprSubgoal();
-
-  	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;
-
-  	protected:
-  	    LabelStr m_name;
-  	    LabelStr m_predicateType;
-  	    LabelStr m_predicateInstance;
-  	    LabelStr m_relation;
-
-  	  bool isConstrained(RuleInstanceEvalContext& context, const LabelStr& predicateInstance) const;
-  };
-
-  class ExprRelation : public RuleExpr
-  {
-  	public:
-  	    ExprRelation(const char* relation,
-  	                 const char* origin,
-  	                 const char* target);
-  	    virtual ~ExprRelation();
-
-  	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;
-
-  	protected:
-  	    LabelStr m_relation;
-  	    LabelStr m_origin;
-  	    LabelStr m_target;
-  };
-
   class ExprLocalVar : public RuleExpr
   {
   	public:
@@ -390,7 +383,6 @@ namespace EUROPA {
         const std::vector<Expr*> m_ifBody;
         const std::vector<Expr*> m_elseBody;
   };
-
 
   class ExprLoop : public RuleExpr
   {
@@ -504,6 +496,36 @@ namespace EUROPA {
 
   protected:
       const RuleId m_ruleFactory;
+  };
+
+  class ExprVariableMethod : public Expr
+  {
+  public:
+      ExprVariableMethod(const char* name, Expr* varExpr, const std::vector<Expr*>& argExprs);
+      virtual ~ExprVariableMethod();
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      LabelStr m_methodName;
+      Expr* m_varExpr;
+      std::vector<Expr*> m_argExprs;
+  };
+
+  class ExprTokenMethod : public Expr
+  {
+  public:
+      ExprTokenMethod(const char* name, const char* tokenName, const std::vector<Expr*>& argExprs);
+      virtual ~ExprTokenMethod();
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      LabelStr m_methodName;
+      LabelStr m_tokenName;
+      std::vector<Expr*> m_argExprs;
   };
 
 }

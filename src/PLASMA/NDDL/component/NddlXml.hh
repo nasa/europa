@@ -38,17 +38,6 @@ namespace EUROPA {
 
       Expr* valueToExpr(const TiXmlElement* element,bool isRule=true);
 
-      bool isClass(const LabelStr& className) const;
-
-      LabelStr predicateInstanceToType(const char* className,
-                                       const char* predicateName,
-                                       const char* predicateInstance,
-                                       std::map<std::string,std::string>& localVars) const;
-
-      LabelStr getObjectVarClass(const LabelStr& className,const LabelStr& var) const;
-      LabelStr getTokenVarClass(const LabelStr& className,const LabelStr& predName,const LabelStr& var) const;
-      LabelStr checkPredicateType(const LabelStr& type) const;
-
       const DbClientId& getDbClient() const { return m_client; }
 
       RuleSchemaId m_ruleSchema;

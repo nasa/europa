@@ -76,10 +76,9 @@ nddl :
 		  |	child=classDeclaration
                   |     child=allocation
 		  |	child=rule
-		  |	goal
-		  |	fact
-                  |     relation
-		  |	invocation
+		  |	problemStmt
+                  |     child=relation
+		  |	methodInvocation
 		  ) 
 		  {
 		      if (child != NULL) { 
@@ -316,7 +315,7 @@ variableArgumentList[std::vector<Expr*>& result]
 
 identifier 
         : IDENT
-          | 'this'
+        | 'this'
         ;
 
 constraintInstantiation returns [ExprConstraint* result]
@@ -503,7 +502,7 @@ rule returns [Expr* result]
 
 ruleBlock[std::vector<Expr*>& ruleBody]
 	:	^('{'
-			(child=ruleStatement { if (child !=NULL) ruleBody.push_back(child); /* TODO: drop condition when all children types are handled */})*
+			(child=ruleStatement { ruleBody.push_back(child); })*
 		)
 	;
 
@@ -513,7 +512,7 @@ ruleStatement returns [Expr* result]
 	  |	child=variableDeclaration
 	  |	child=ifStatement
 	  |	child=loopStatement
-	  |     relation
+	  |     child=relation
 	  )
 	  {
 	      result = child;
@@ -559,52 +558,61 @@ std::vector<Expr*> loopBody;
 }
 	:	^('foreach'
 			name=IDENT
-			val=identifier // TODO: "this" doesn't make much sense here, why identifier and not IDENT?
+			val=qualified 
 			ruleBlock[loopBody]
 		)
 		{
-		    result = new ExprLoop(c_str($name.text->chars),c_str($val.text->chars),loopBody);
+		    result = new ExprLoop(c_str($name.text->chars),val->toString().c_str(),loopBody); // TODO : modify ExprLoop to pass val Expr instead
 		}
 	;
 
-goal
-	:	^('goal'
-			predicateArgumentList
+problemStmt returns [Expr* result] 
+@init {
+    std::vector<PredicateInstanceRef*> tokens;    
+}
+
+        :       ^(problemStmtType predicateInstanceList[tokens])
+        ;
+        
+problemStmtType
+        :       'goal' 
+        |       'rejectable'
+        |       'fact'
+        ;
+        
+relation returns [Expr* result]
+@init {
+    const char* relationType=NULL;
+    PredicateInstanceRef* source=NULL;
+    std::vector<PredicateInstanceRef*> targets;    
+}
+	:	^(TOKEN_RELATION
+			(i=IDENT { source = new PredicateInstanceRef(NULL,c_str($i.text->chars)); })?
+			tr=temporalRelation { relationType = c_str($tr.text->chars); } 
+			predicateInstanceList[targets]
 		)
-	|	^('rejectable'
-			predicateArgumentList
-		)
+		{
+		    result = new ExprRelation(relationType,source,targets);
+		}
 	;
 
-fact
-	:	^('fact'
-			predicateArgumentList
-		)
-  ;
-
-relation
-	:	^(SUBGOAL
-			originName=identifier?
-			(	tr=temporalRelationNoInterval
-			|	tr=temporalRelationOneInterval
-				numericInterval?
-			|	tr=temporalRelationTwoIntervals
-				(numericInterval
-				numericInterval?)?
-			)
-			predicateArgumentList
-		)
-	;
-
-predicateArgumentList
+predicateInstanceList[std::vector<PredicateInstanceRef*>& instances]
 	:	^('('
-			predicateArgument*
+			(child=predicateInstance { instances.push_back(child); })*
 		)
-		|	target=IDENT
+		|	i=IDENT 
+		        { instances.push_back(new PredicateInstanceRef(NULL,c_str($i.text->chars))); } // TODO: check predicate type and pass it along
 	;
 
-predicateArgument
-	:	^(qualified name=IDENT?)
+predicateInstance returns [PredicateInstanceRef* pi]
+@init {
+    const char* name = NULL;
+}
+	:	^(qt=qualifiedToken (i=IDENT { name = c_str($i.text->chars); })?)
+	        {
+	            pi = new PredicateInstanceRef(qt->toString().c_str(),name);
+	            delete qt;
+	        }
 	;
 	
 qualified returns [Expr* result]
@@ -620,65 +628,81 @@ qualified returns [Expr* result]
            }
         ;	
 
-temporalRelationNoInterval
-	:	'any'
-	|	'equals'
-	|	'meets'
-	|	'met_by'
-	;
+qualifiedToken returns [Expr* result]
+        :       e=qualified
+                {
+                    // TODO: type checking !
+                    result = e;
+                }
+        ;
+        
+temporalRelation
+        :       'after'
+        |       'any'
+        |       'before'
+        |       'contained_by'
+        |       'contains'
+        |       'contains_end'
+        |       'contains_start'
+        |       'ends'
+        |       'ends_after'
+        |       'ends_after_start'
+        |       'ends_before'
+        |       'ends_during'
+        |       'equal'
+        |       'equals'
+        |       'meets'
+        |       'met_by'
+        |       'parallels'
+        |       'paralleled_by'
+        |       'starts'
+        |       'starts_after'
+        |       'starts_before'
+        |       'starts_before_end'
+        |       'starts_during'
+        ;
   
-temporalRelationOneInterval
-	:	'ends'
-	|	'starts'
-	|	'after'
-	|	'before'
- 	|	'ends_after_start'
-	|	'starts_before_end'
-	|	'ends_after'
-	|	'ends_before'
-	|	'starts_after'
-	|	'starts_before'
-	;
-
-temporalRelationTwoIntervals
-	:	'contained_by'
-	|	'contains'
-	|	'paralleled_by'
-	|	'parallels'
-	|	'starts_during'
-	|	'contains_start'
-	|	'ends_during'
-	|	'contains_end'
-	;
-  
-invocation returns [Expr* result]
+methodInvocation returns [Expr* result]
 	:
-	(	child=variableOp
-        |       child=tokenOp
+	(	child=variableMethod
+        |       child=tokenMethod
         )
         {
             result = child;
         }
 	;
 
-variableOp returns [Expr* result]
+variableMethod returns [Expr* result]
 @init {
     std::vector<Expr*> args;
 }
-        :       ^('specify' i=IDENT variableArgumentList[args])
-        |       ^('reset' i=IDENT)
+        :       ^(op=variableOp v=qualified variableArgumentList[args]?)
+                {
+                    result = new ExprVariableMethod(c_str($op.text->chars),v,args);
+                }
         ;
-        
-tokenOp returns [Expr* result]    
+   
+variableOp
+        :       'specify'
+        |       'reset'
+        ;
+                
+tokenMethod returns [Expr* result]    
 @init {
     std::vector<Expr*> args;
 }
-        :       ^('activate' i=IDENT)
-        |       ^('merge' i=IDENT variableArgumentList[args])
-        |       ^('reject' i=IDENT)
-        |       ^('cancel' i=IDENT)
-        |       ^('close' i=IDENT)
-        |       ^('free' i=IDENT variableArgumentList[args])
-        |       ^('constrain' i=IDENT variableArgumentList[args])
+        :       ^(op=tokenOp tok=IDENT variableArgumentList[args]?)
+                {
+                    result = new ExprTokenMethod(c_str($op.text->chars),c_str($tok.text->chars),args); 
+                }
         ;
-        
+
+tokenOp
+        :       'activate'
+        |       'merge'
+        |       'reject'
+        |       'cancel'
+        |       'close'
+        |       'free'
+        |       'constrain'
+        ;        

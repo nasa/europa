@@ -33,10 +33,10 @@ positive b;
 
 addEq(40, 90, b);
 
-a meets b;
-
 goal(foo.p);
 rejectable(foo.p somep);
+
+// p meets somep;
 
 ;;
 

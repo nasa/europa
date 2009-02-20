@@ -292,96 +292,6 @@ namespace EUROPA {
     playDefineEnumeration(*element);
   }
 
-  bool NddlXmlInterpreter::isClass(const LabelStr& className) const
-  {
-      return getSchema()->isObjectType(className);
-  }
-
-  LabelStr NddlXmlInterpreter::getObjectVarClass(const LabelStr& className,const LabelStr& var) const
-  {
-    const SchemaId& schema = getSchema();
-    check_runtime_error(schema->hasMember(className,var),className.toString()+" has no member called "+var.toString());
-    return schema->getMemberType(className,var);
-  }
-
-  LabelStr NddlXmlInterpreter::getTokenVarClass(const LabelStr& className,const LabelStr& predName,const LabelStr& var) const
-  {
-    if (strcmp(var.c_str(),"object") == 0) // is it the object variable?
-      return className;
-    else { // look through the parameters to the token
-      const SchemaId& schema = getSchema();
-      if (schema->hasMember(predName,var))
-    return schema->getMemberType(predName,var);
-    }
-
-    // if everything else fails, see if it's an object member
-    return getObjectVarClass(className,var);
-  }
-
-  LabelStr NddlXmlInterpreter::checkPredicateType(const LabelStr& type) const
-  {
-    check_runtime_error(getSchema()->isPredicate(type),type.toString()+" is not a Type");
-    return type;
-  }
-
-  /*
-   * figures out the type of a predicate given an instance
-   *
-   */
-  LabelStr NddlXmlInterpreter::predicateInstanceToType(const char* className,
-                                   const char* predicateName,
-                                   const char* predicateInstance,
-                                   std::map<std::string,std::string>& localVars) const
-  {
-    // see ModelAccessor.getSlaveObjectType() in NDDL compiler
-    LabelStr str(predicateInstance);
-
-    unsigned int tokenCnt = str.countElements(".");
-
-    if (tokenCnt == 1) {
-      std::string retval = std::string(className)+"."+predicateInstance;
-      return checkPredicateType(LabelStr(retval));
-    }
-    else if (tokenCnt == 2) {
-      LabelStr prefix(str.getElement(0,"."));
-      LabelStr suffix(str.getElement(1,"."));
-
-      if (prefix.toString() == "object") {
-    std::string retval = std::string(className)+"."+suffix.toString();
-    return checkPredicateType(LabelStr(retval.c_str()));
-      }
-      else if (isClass(prefix)) {
-    return checkPredicateType(LabelStr(predicateInstance));
-      }
-      else if (localVars.find(prefix.toString()) != localVars.end()) {
-    std::string clazz = localVars[prefix.toString()];
-    return checkPredicateType(clazz+"."+suffix.toString());
-      }
-      else {
-    LabelStr clazz = getTokenVarClass(className,predicateName,prefix);
-    std::string retval = clazz.toString()+"."+suffix.toString();
-    return checkPredicateType(LabelStr(retval.c_str()));
-      }
-    }
-    else {
-      LabelStr var = str.getElement(0,".");
-      LabelStr clazz;
-      if (localVars.find(var.toString()) != localVars.end())
-    clazz = localVars[var.toString()];
-      else
-    clazz = getTokenVarClass(className,predicateName,var);
-
-      for (unsigned int i=1;i<tokenCnt-1;i++) {
-    LabelStr var = str.getElement(i,".");
-    clazz = getObjectVarClass(clazz,var);
-      }
-
-      LabelStr predicate = str.getElement(tokenCnt-1,".");
-      std::string retval = clazz.toString() + "." + predicate.toString();
-      return checkPredicateType(LabelStr(retval));
-    }
-  }
-
   bool isGuarded(const LabelStr& varName,const TiXmlElement* node)
   {
     if (node->Parent() == NULL)
@@ -449,19 +359,16 @@ namespace EUROPA {
                       check_runtime_error(ALWAYS_FAILS,std::string("Unknown subgoal element:") + arg->Value());
               }
 
-              // Create a token!
-              if(predicateInstance != NULL) {
-                  const char* predicateType = predicateInstanceToType(className, predName.c_str(), predicateInstance,localVars).c_str();
-                  ruleBody.push_back(new ExprSubgoal(name,predicateType,predicateInstance,relation));
-              }
-
               // create relation
               if(origin == NULL)
                   origin = "this";
               if(name == NULL)
                   name = child->Attribute("target");
 
-              ruleBody.push_back(new ExprRelation(relation, origin, name));
+              PredicateInstanceRef* orgn = new PredicateInstanceRef(NULL,origin);
+              std::vector<PredicateInstanceRef*> targets;
+              targets.push_back(new PredicateInstanceRef(predicateInstance,name));
+              ruleBody.push_back(new ExprRelation(relation, orgn, targets));
           }
           else if (strcmp(child->Value(),"var") == 0) {
               LabelStr name(child->Attribute("name"));

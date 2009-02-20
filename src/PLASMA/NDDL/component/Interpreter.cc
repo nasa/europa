@@ -27,24 +27,6 @@
 
 #include <string.h>
 
-// Hack!! the macro in NddlRules.hh only works with code-generation
-// so this is redefined here. this is brittle though
-// TODO: change code-generation code to work with this macro instead
-namespace NDDL {
-#ifdef relation
-#undef relation
-#endif
-
-#define relation(relationname, origin, originvar, target, targetvar) {	\
-    std::vector<ConstrainedVariableId> vars;				\
-    vars.push_back(context.getToken(origin.c_str())->originvar());	\
-    vars.push_back(context.getToken(target.c_str())->targetvar());	\
-    InterpretedRuleInstance* rule = (InterpretedRuleInstance*)(context.getElement("RuleInstance")); \
-    rule->createConstraint(LabelStr(#relationname), vars); \
-  }
-}
-
-
 namespace EUROPA {
 
   /*
@@ -142,6 +124,29 @@ namespace EUROPA {
       os << "}" << std::endl;
 
     return os.str();
+  }
+
+  // TODO: keep using pdbClient?
+  const DbClientId& getPDB(EvalContext& context)
+  {
+      // TODO: Add this behavior to EvalContext instead?
+      DbClient* dbClient = (DbClient*)context.getElement("DbClient");
+      if (dbClient != NULL)
+          return dbClient->getId();
+
+      PlanDatabase* pdb = (PlanDatabase*)context.getElement("PlanDatabase");
+      check_error(pdb != NULL,"Could not find Plan Database in eval context");
+      return pdb->getClient();
+  }
+
+  const SchemaId& getSchema(EvalContext& context)
+  {
+      /* TODO why doesn't this work???
+      Schema* schema = (Schema*)context.getElement("Schema");
+      check_error(schema != NULL,"Could not find Schema in eval context");
+      return schema->getId();
+      */
+      return getPDB(context)->getSchema();
   }
 
   ExprList::ExprList()
@@ -391,6 +396,7 @@ namespace EUROPA {
   }
 
 
+  //TODO:!!! unify ExprRuleVarRef and ExprVarRef
   /*
    * ExprRuleVarRef
    */
@@ -420,20 +426,20 @@ namespace EUROPA {
     ConstrainedVariableId var;
 
     if (m_parentName == "") {
-      var = context.getVar(m_varName.c_str());
-      check_runtime_error(!var.isNoId(),std::string("Couldn't find variable ")+m_varName+" in Evaluation Context");
+        var = context.getVar(m_varName.c_str());
+        check_runtime_error(!var.isNoId(),std::string("Couldn't find variable ")+m_varName+" in Evaluation Context");
     }
     else {
-      TokenId tok = context.getToken(m_parentName.c_str());
-      if (!tok.isNoId())
-	var = context.getRuleInstance()->varfromtok(tok,m_varName);
-      else {
-	var = context.getVar(m_parentName.c_str());
-	if (!var.isNoId())
-	  var = context.getRuleInstance()->varFromObject(m_parentName,m_varName,false);
-	else
-	  check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+m_parentName+" in Evaluation Context");
-      }
+        TokenId tok = context.getToken(m_parentName.c_str());
+        if (!tok.isNoId())
+            var = context.getRuleInstance()->varfromtok(tok,m_varName);
+        else {
+            var = context.getVar(m_parentName.c_str());
+            if (!var.isNoId())
+                var = context.getRuleInstance()->varFromObject(m_parentName,m_varName,false);
+            else
+                check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+m_parentName+" in Evaluation Context");
+        }
     }
 
     return DataRef(var);
@@ -460,6 +466,20 @@ namespace EUROPA {
     return os.str();
   }
 
+  void makeConstraint(EvalContext& context, const LabelStr& name, const std::vector<ConstrainedVariableId>& vars)
+  {
+      InterpretedRuleInstance* rule = (InterpretedRuleInstance*)(context.getElement("RuleInstance"));
+      if (rule != NULL) {
+          rule->createConstraint(name,vars);
+          debugMsg("Interpreter:InterpretedRule","Added Constraint : " << name.toString() << " - " << varsToString(vars));
+      }
+      else { // The constraint is being added in the global context
+          PlanDatabase* pdb = (PlanDatabase*)(context.getElement("PlanDatabase"));
+          pdb->getClient()->createConstraint(name.c_str(), vars);
+          debugMsg("Interpreter","Added Constraint : " << name.toString() << " - " << varsToString(vars));
+      }
+  }
+
   DataRef ExprConstraint::eval(EvalContext& context) const
   {
     std::vector<ConstrainedVariableId> vars;
@@ -468,38 +488,19 @@ namespace EUROPA {
       vars.push_back(arg.getValue());
     }
 
-    InterpretedRuleInstance* rule = (InterpretedRuleInstance*)(context.getElement("RuleInstance"));
-    if (rule != NULL) {
-        rule->createConstraint(m_name,vars);
-        debugMsg("Interpreter:InterpretedRule","Added Constraint : " << m_name.toString() << " - " << varsToString(vars));
-    }
-    else { // The constraint is being added in the global context
-        PlanDatabase* pdb = (PlanDatabase*)(context.getElement("PlanDatabase"));
-        pdb->getClient()->createConstraint(m_name.c_str(), vars);
-        debugMsg("Interpreter","Added Constraint : " << m_name.toString() << " - " << varsToString(vars));
-    }
+    makeConstraint(context,m_name,vars);
 
     return DataRef::null;
   }
 
 
-  ExprSubgoal::ExprSubgoal(const char* name,
-			   const char* predicateType,
-			   const char* predicateInstance,
-			   const char* relation)
-    : m_name(name)
-    , m_predicateType(predicateType)
-    , m_predicateInstance(predicateInstance)
-    , m_relation(relation)
+  bool isClass(EvalContext& ctx,const LabelStr& className)
   {
-  }
-
-  ExprSubgoal::~ExprSubgoal()
-  {
+      return getSchema(ctx)->isObjectType(className);
   }
 
   // see ModelAccessor.isConstrained in Nddl compiler
-  bool ExprSubgoal::isConstrained(RuleInstanceEvalContext& context, const LabelStr& predicateInstance) const
+  bool isConstrained(EvalContext& context, const LabelStr& predicateInstance)
   {
     unsigned int tokenCnt = predicateInstance.countElements(".");
 
@@ -509,46 +510,165 @@ namespace EUROPA {
 
     // If the prefix is a class, it means it can be any object instance, so it must not be constrained
     LabelStr prefix(predicateInstance.getElement(0,"."));
-    if (!context.isClass(prefix))
+    if (!isClass(context,prefix))
       return true;
 
     return false;
   }
 
-  DataRef ExprSubgoal::doEval(RuleInstanceEvalContext& context) const
+  LabelStr checkPredicateType(EvalContext& ctx,const LabelStr& type)
   {
-    debugMsg("Interpreter:InterpretedRule","Creating subgoal " << m_predicateType.toString() << ":" << m_name.toString());
+    check_runtime_error(getSchema(ctx)->isPredicate(type),type.toString()+" is not a Type");
+    return type;
+  }
 
-    bool constrained = isConstrained(context,m_predicateInstance);
-    ConstrainedVariableId owner;
-    if (constrained) {
-      unsigned int tokenCnt = m_predicateInstance.countElements(".");
-      if (tokenCnt == 1)
-	owner = context.getVar("object");
-      else
-	owner = context.getVar(m_predicateInstance.getElement(0,".").c_str());
-    }
+  LabelStr getObjectVarClass(EvalContext& ctx,const LabelStr& className,const LabelStr& var)
+  {
+    const SchemaId& schema = getSchema(ctx);
+    check_runtime_error(schema->hasMember(className,var),className.toString()+" has no member called "+var.toString());
+    return schema->getMemberType(className,var);
+  }
 
-    TokenId slave = context.getRuleInstance()->createSubgoal(
-							     m_name,
-							     m_predicateType,
-							     m_predicateInstance,
-							     m_relation,
-							     constrained,
-							     owner
-							     );
+  LabelStr getTokenVarClass(EvalContext& ctx,const LabelStr& className,const LabelStr& predName,const LabelStr& var)
+  {
+      if (strcmp(var.c_str(),"object") == 0) // is it the object variable?
+          return className;
+      else { // look through the parameters to the token
+          const SchemaId& schema = getSchema(ctx);
+          if (schema->hasMember(predName,var))
+              return schema->getMemberType(predName,var);
+      }
 
-    context.addToken(m_name.c_str(),slave);
-    debugMsg("Interpreter:InterpretedRule","Created  subgoal " << m_predicateType.toString() << ":" << m_name.toString());
-    return DataRef::null;
+      // if everything else fails, see if it's an object member
+      return getObjectVarClass(ctx,className,var);
+  }
+
+  /*
+   * figures out the type of a predicate given an instance
+   *
+   */
+  LabelStr predicateInstanceToType(
+               EvalContext& ctx,
+               const char* predicateName,
+               const char* predicateInstance)
+  {
+      // see ModelAccessor.getSlaveObjectType() in NDDL compiler
+      ConstrainedVariableId obj = ctx.getVar("object");
+      check_error(obj.isId(),"Failed to find 'object' var in predicateInstanceToType()");
+      const char* className = obj->baseDomain().getTypeName().c_str();
+      LabelStr str(predicateInstance);
+
+      unsigned int tokenCnt = str.countElements(".");
+
+      if (tokenCnt == 1) {
+          std::string retval = std::string(className)+"."+predicateInstance;
+          return checkPredicateType(ctx,LabelStr(retval));
+      }
+      else if (tokenCnt == 2) {
+          LabelStr prefix(str.getElement(0,"."));
+          LabelStr suffix(str.getElement(1,"."));
+
+          if (prefix.toString() == "object") {
+              std::string retval = std::string(className)+"."+suffix.toString();
+              return checkPredicateType(ctx,LabelStr(retval.c_str()));
+          }
+          else if (isClass(ctx,prefix)) {
+              return checkPredicateType(ctx,LabelStr(predicateInstance));
+          }
+          else {
+              ConstrainedVariableId var = ctx.getVar(prefix.c_str());
+              if (var.isId()) {
+                  std::string clazz = var->baseDomain().getTypeName().c_str();
+                  return checkPredicateType(ctx,clazz+"."+suffix.toString());
+              }
+              else {
+                  LabelStr clazz = getTokenVarClass(ctx,className,predicateName,prefix);
+                  std::string retval = clazz.toString()+"."+suffix.toString();
+                  return checkPredicateType(ctx,LabelStr(retval.c_str()));
+              }
+          }
+      }
+      else {
+          LabelStr var = str.getElement(0,".");
+          LabelStr clazz;
+          ConstrainedVariableId v = ctx.getVar(var.c_str());
+          if (v.isId())
+              clazz = v->baseDomain().getTypeName().c_str();
+          else
+              clazz = getTokenVarClass(ctx,className,predicateName,var);
+
+          for (unsigned int i=1;i<tokenCnt-1;i++) {
+              LabelStr var = str.getElement(i,".");
+              clazz = getObjectVarClass(ctx,clazz,var);
+          }
+
+          LabelStr predicate = str.getElement(tokenCnt-1,".");
+          std::string retval = clazz.toString() + "." + predicate.toString();
+          return checkPredicateType(ctx,LabelStr(retval));
+      }
+  }
+
+  PredicateInstanceRef::PredicateInstanceRef(const char* predInstance, const char* predName)
+      : m_predicateInstance(predInstance != NULL ? predInstance : "")
+      , m_predicateName(predName != NULL ? predName : "")
+  {
+  }
+
+  PredicateInstanceRef::~PredicateInstanceRef()
+  {
+  }
+
+  // TODO: passing relation doesn't seem like a good ideal, since a token may have more than one relation to its
+  // master. However, MatchingEngine matches on that, so keeping it for now.
+  TokenId PredicateInstanceRef::getToken(EvalContext& ctx, const char* relationName)
+  {
+      if (m_predicateInstance.length() == 0)
+          return ctx.getToken(m_predicateName.c_str());
+
+      return createSubgoal(ctx,relationName);
+  }
+
+  TokenId PredicateInstanceRef::createSubgoal(EvalContext& context, const char* relationName)
+  {
+      // TODO: cache this? new parser is able to pass this in, do it when nddl-xml is gone.
+      LabelStr predicateType = predicateInstanceToType(context,m_predicateName.c_str(),m_predicateInstance.c_str());
+      debugMsg("Interpreter:InterpretedRule","Creating subgoal " << predicateType.c_str() << ":" << m_predicateName);
+
+      LabelStr predicateName(m_predicateName);
+      LabelStr predicateInstance(m_predicateInstance);
+      bool constrained = isConstrained(context,predicateInstance);
+      ConstrainedVariableId owner;
+      if (constrained) {
+        unsigned int tokenCnt = predicateInstance.countElements(".");
+        if (tokenCnt == 1)
+            owner = context.getVar("object");
+        else
+            owner = context.getVar(predicateInstance.getElement(0,".").c_str());
+      }
+
+      InterpretedRuleInstance* rule = (InterpretedRuleInstance*)(context.getElement("RuleInstance"));
+      check_error(rule != NULL, "Subgoals can only be created in a rule context");
+      TokenId slave = rule->createSubgoal(
+                                   predicateName,
+                                   predicateType,
+                                   predicateInstance,
+                                   relationName,
+                                   constrained,
+                                   owner
+                                   );
+
+      context.addToken(m_predicateName.c_str(),slave);
+      debugMsg("Interpreter:InterpretedRule","Created  subgoal " << predicateType.toString() << ":" << m_predicateName);
+
+      return slave;
   }
 
   ExprRelation::ExprRelation(const char* relation,
-                             const char* origin,
-                             const char* target)
+                             PredicateInstanceRef* origin,
+                             const std::vector<PredicateInstanceRef*>& targets)
     : m_relation(relation)
     , m_origin(origin)
-    , m_target(target)
+    , m_targets(targets)
   {
   }
 
@@ -556,86 +676,105 @@ namespace EUROPA {
   {
   }
 
-  DataRef ExprRelation::doEval(RuleInstanceEvalContext& context) const
+#define makeRelation(relationname, origin, originvar, target, targetvar) {  \
+    std::vector<ConstrainedVariableId> vars;\
+    vars.push_back(origin->originvar());    \
+    vars.push_back(target->targetvar());    \
+    makeConstraint(context,LabelStr(#relationname), vars); \
+  }
+
+  void createRelation(EvalContext& context,
+                      const char* relationName,
+                      TokenId origin,
+                      TokenId target)
+  {
+      // Allen Relations according to EUROPA
+      // See ConstraintLibraryReference on the wiki
+      if (strcmp(relationName,"meets") == 0) {
+        makeRelation(concurrent, origin, end, target, start);
+      }
+      else if (strcmp(relationName,"met_by") == 0) {
+        makeRelation(concurrent, target, end, origin, start);
+      }
+      else if (strcmp(relationName,"contains") == 0) {
+        makeRelation(precedes, origin, start, target, start);
+        makeRelation(precedes, target, end, origin, end);
+      }
+      else if (strcmp(relationName,"contained_by") == 0) {
+        makeRelation(precedes, target, start, origin, start);
+        makeRelation(precedes, origin, end, target, end);
+      }
+      else if (strcmp(relationName,"before") == 0) {
+        makeRelation(precedes, origin, end, target, start);
+      }
+      else if (strcmp(relationName,"after") == 0) {
+        makeRelation(precedes, target, end, origin, start);
+      }
+      else if (strcmp(relationName,"starts") == 0) {
+        makeRelation(concurrent, origin, start, target, start);
+      }
+      else if (strcmp(relationName,"ends") == 0) {
+        makeRelation(concurrent, target, end, origin, end);
+      }
+      else if (strcmp(relationName, "parallels") == 0) {
+        makeRelation(precedes, origin, start, target, start);
+        makeRelation(precedes, origin, end, target, end);
+      }
+      else if (strcmp(relationName, "paralleled_by") == 0) {
+        makeRelation(precedes, target, start, origin, start);
+        makeRelation(precedes, target, end, origin, end);
+      }
+      else if (strcmp(relationName,"ends_after") == 0) {
+        makeRelation(precedes, target, end, origin, end);
+      }
+      else if (strcmp(relationName,"ends_before") == 0) {
+        makeRelation(precedes, origin, end, target, end);
+      }
+      else if (strcmp(relationName,"ends_after_start") == 0) {
+        makeRelation(precedes, target, start, origin, end);
+      }
+      else if (strcmp(relationName,"starts_before_end") == 0) {
+        makeRelation(precedes, origin, start, target, end);
+      }
+      else if (strcmp(relationName,"starts_during") == 0) {
+        makeRelation(precedes, target, start, origin, start);
+        makeRelation(precedes, target, start, origin, end);
+      }
+      else if (strcmp(relationName,"ends_during") == 0) {
+        makeRelation(precedes, target, end, origin, start);
+        makeRelation(precedes, target, end, origin, end);
+      }
+      else if (strcmp(relationName,"contains_start") == 0) {
+        makeRelation(precedes, origin, start, target, start);
+        makeRelation(precedes, origin, start, target, end);
+      }
+      else if (strcmp(relationName,"contains_end") == 0) {
+        makeRelation(precedes, origin, end, target, start);
+        makeRelation(precedes, origin, end, target, end);
+      }
+      else if (strcmp(relationName,"starts_after") == 0) {
+        makeRelation(precedes, target, start, origin, start);
+      }
+      else if (strcmp(relationName,"starts_before") == 0) {
+        makeRelation(precedes, origin, start, target, start);
+      }
+      else if (strcmp(relationName,"equals") == 0) {
+        makeRelation(concurrent, origin, start, target, start);
+        makeRelation(concurrent, target, end, origin, end);
+      }
+      else {
+        check_runtime_error(strcmp(relationName,"any") == 0,std::string("Unrecognized relation:")+relationName);
+      }
+  }
+
+  DataRef ExprRelation::eval(EvalContext& context) const
   {
     const char* relationName = m_relation.c_str();
 
-    // Allen Relations according to EUROPA
-    // See ConstraintLibraryReference on the wiki
-    if (strcmp(relationName,"meets") == 0) {
-      relation(concurrent, m_origin, end, m_target, start);
-    }
-    else if (strcmp(relationName,"met_by") == 0) {
-      relation(concurrent, m_target, end, m_origin, start);
-    }
-    else if (strcmp(relationName,"contains") == 0) {
-      relation(precedes, m_origin, start, m_target, start);
-      relation(precedes, m_target, end, m_origin, end);
-    }
-    else if (strcmp(relationName,"contained_by") == 0) {
-      relation(precedes, m_target, start, m_origin, start);
-      relation(precedes, m_origin, end, m_target, end);
-    }
-    else if (strcmp(relationName,"before") == 0) {
-      relation(precedes, m_origin, end, m_target, start);
-    }
-    else if (strcmp(relationName,"after") == 0) {
-      relation(precedes, m_target, end, m_origin, start);
-    }
-    else if (strcmp(relationName,"starts") == 0) {
-      relation(concurrent, m_origin, start, m_target, start);
-    }
-    else if (strcmp(relationName,"ends") == 0) {
-      relation(concurrent, m_target, end, m_origin, end);
-    }
-    else if (strcmp(relationName, "parallels") == 0) {
-      relation(precedes, m_origin, start, m_target, start);
-      relation(precedes, m_origin, end, m_target, end);
-    }
-    else if (strcmp(relationName, "paralleled_by") == 0) {
-      relation(precedes, m_target, start, m_origin, start);
-      relation(precedes, m_target, end, m_origin, end);
-    }
-    else if (strcmp(relationName,"ends_after") == 0) {
-      relation(precedes, m_target, end, m_origin, end);
-    }
-    else if (strcmp(relationName,"ends_before") == 0) {
-      relation(precedes, m_origin, end, m_target, end);
-    }
-    else if (strcmp(relationName,"ends_after_start") == 0) {
-      relation(precedes, m_target, start, m_origin, end);
-    }
-    else if (strcmp(relationName,"starts_before_end") == 0) {
-      relation(precedes, m_origin, start, m_target, end);
-    }
-    else if (strcmp(relationName,"starts_during") == 0) {
-      relation(precedes, m_target, start, m_origin, start);
-      relation(precedes, m_target, start, m_origin, end);
-    }
-    else if (strcmp(relationName,"ends_during") == 0) {
-      relation(precedes, m_target, end, m_origin, start);
-      relation(precedes, m_target, end, m_origin, end);
-    }
-    else if (strcmp(relationName,"contains_start") == 0) {
-      relation(precedes, m_origin, start, m_target, start);
-      relation(precedes, m_origin, start, m_target, end);
-    }
-    else if (strcmp(relationName,"contains_end") == 0) {
-      relation(precedes, m_origin, end, m_target, start);
-      relation(precedes, m_origin, end, m_target, end);
-    }
-    else if (strcmp(relationName,"starts_after") == 0) {
-      relation(precedes, m_target, start, m_origin, start);
-    }
-    else if (strcmp(relationName,"starts_before") == 0) {
-      relation(precedes, m_origin, start, m_target, start);
-    }
-    else if (strcmp(relationName,"equals") == 0) {
-      relation(concurrent, m_origin, start, m_target, start);
-      relation(concurrent, m_target, end, m_origin, end);
-    }
-    else {
-      check_runtime_error(strcmp(relationName,"any") == 0,std::string("Unrecognized relation:")+relationName);
+    TokenId origin = m_origin->getToken(context,"any"); // This will create a subgoal if necessary
+    for (unsigned int i=0;i<m_targets.size();i++) {
+        TokenId target = m_targets[i]->getToken(context,relationName); // This will create a subgoal if necessary
+        createRelation(context,relationName,origin,target);
     }
 
     debugMsg("Interpreter:InterpretedRule","Created relation " << relationName);
@@ -1065,6 +1204,8 @@ namespace EUROPA {
       std::string str(name);
       if (str == "RuleInstance")
           return (InterpretedRuleInstance*)m_ruleInstance;
+      if (str == "PlanDatabase")
+          return (PlanDatabase*)m_ruleInstance->getPlanDatabase();
 
       return EvalContext::getElement(name);
   }
@@ -1200,7 +1341,7 @@ namespace EUROPA {
     debugMsg("Interpreter:InterpretedRule","Executed  interpreted rule:" << getRule()->getName().toString() << " token:" << m_token->toString());
   }
 
-  void InterpretedRuleInstance::createConstraint(const LabelStr& name, std::vector<ConstrainedVariableId>& vars)
+  void InterpretedRuleInstance::createConstraint(const LabelStr& name, const std::vector<ConstrainedVariableId>& vars)
   {
     addConstraint(name,vars);
   }
@@ -1370,31 +1511,6 @@ namespace EUROPA {
     foo->setRulesEngine(rulesEngine);
     return foo->getId();
   }
-
-
-  // TODO: keep using pdbClient?
-  const DbClientId& getPDB(EvalContext& context)
-  {
-      // TODO: Add this behavior to EvalContext instead?
-      DbClient* dbClient = (DbClient*)context.getElement("DbClient");
-      if (dbClient != NULL)
-          return dbClient->getId();
-
-      PlanDatabase* pdb = (PlanDatabase*)context.getElement("PlanDatabase");
-      check_error(pdb != NULL,"Could not find Plan Database in eval context");
-      return pdb->getClient();
-  }
-
-  const SchemaId& getSchema(EvalContext& context)
-  {
-      /* TODO why doesn't this work???
-      Schema* schema = (Schema*)context.getElement("Schema");
-      check_error(schema != NULL,"Could not find Schema in eval context");
-      return schema->getId();
-      */
-      return getPDB(context)->getSchema();
-  }
-
 
   ExprTypedef::ExprTypedef(const char* name, AbstractDomain* type)
       : m_name(name)
@@ -1582,7 +1698,6 @@ namespace EUROPA {
 
   ExprRuleTypeDefinition::~ExprRuleTypeDefinition()
   {
-
   }
 
   DataRef ExprRuleTypeDefinition::eval(EvalContext& context) const
@@ -1601,5 +1716,58 @@ namespace EUROPA {
       return os.str();
   }
 
+  ExprVariableMethod::ExprVariableMethod(const char* name, Expr* varExpr, const std::vector<Expr*>& argExprs)
+      : m_methodName(name)
+      , m_varExpr(varExpr)
+      , m_argExprs(argExprs)
+  {
+  }
+
+  ExprVariableMethod::~ExprVariableMethod()
+  {
+  }
+
+  DataRef ExprVariableMethod::eval(EvalContext& context) const
+  {
+      // TODO: implement this
+      return DataRef::null;
+  }
+
+  std::string ExprVariableMethod::toString() const
+  {
+      std::ostringstream os;
+
+      // TODO: implement this
+      os << "VAR_METHOD:" << m_methodName;
+
+      return os.str();
+  }
+
+  ExprTokenMethod::ExprTokenMethod(const char* name, const char* tokenName, const std::vector<Expr*>& argExprs)
+     : m_methodName(name)
+     , m_tokenName(tokenName)
+     , m_argExprs(argExprs)
+  {
+  }
+
+  ExprTokenMethod::~ExprTokenMethod()
+  {
+  }
+
+  DataRef ExprTokenMethod::eval(EvalContext& context) const
+  {
+      // TODO: implement this
+      return DataRef::null;
+  }
+
+  std::string ExprTokenMethod::toString() const
+  {
+      std::ostringstream os;
+
+      // TODO: implement this
+      os << "TOKEN_METHOD:" << m_methodName;
+
+      return os.str();
+  }
 }
 
