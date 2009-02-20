@@ -319,16 +319,25 @@
   </target>
     
   <!-- This will run the DEV variant by default, 
-       if you want other variant, you can do it specifying jam.variant on the command line
+       if you want other variant, you can do it specifying jam.variant on the command line,
+       for instance:
+       ant -Djam.variant=OPTIMIZED autobuild
+       or
+       ant -Djam.variant=PROFILE -Djam.libraries=STATIC autobuild
   -->   
   <target name="autobuild"
           description="This target replicates what autobuild does for local testing">
-      <antcall target="build"><param name="jam.libararies" value="SHARED"/></antcall>
-      <antcall target="test"><param name="jam.libraries" value="SHARED"/></antcall>
-      <antcall target="build"><param name="jam.libraries" value="STATIC"/></antcall>
-      <antcall target="test"><param name="jam.libraries" value="STATIC"/></antcall>
-      <antcall target="dist"/>
-      <antcall target="test-dist"/>
+      <antcall target="build"/>
+      <antcall target="test"/>
+      <if>
+          <not><equals arg1="${jam.variant}" arg2="PROFILE"/></not>
+          <then>      
+              <antcall target="build"><param name="jam.libraries" value="STATIC"/></antcall>
+              <antcall target="test"><param name="jam.libraries" value="STATIC"/></antcall>
+              <antcall target="dist"/>
+              <antcall target="test-dist"/>
+          </then>
+      </if>    
   </target>  
 	
 </project>
