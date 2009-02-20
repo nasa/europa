@@ -1729,7 +1729,28 @@ namespace EUROPA {
 
   DataRef ExprVariableMethod::eval(EvalContext& context) const
   {
-      // TODO: implement this
+      DataRef v = m_varExpr->eval(context);
+      ConstrainedVariableId var = v.getValue();
+      // TODO: make sure any temp vars are disposed of correctly
+      std::vector<ConstrainedVariableId> args;
+      for (unsigned int i=0;i<m_argExprs.size();i++)
+          args.push_back(m_argExprs[i]->eval(context).getValue());
+      return eval(var,args);
+
+      return DataRef::null;
+  }
+
+  DataRef ExprVariableMethod::eval(ConstrainedVariableId& var, const std::vector<ConstrainedVariableId>& args) const
+  {
+      std::string method(m_methodName.toString());
+
+      if (method=="specify")
+          var->specify(args[0]->lastDomain().getSingletonValue());
+      else if (method=="reset")
+          var->reset();
+      else
+          check_runtime_error(ALWAYS_FAILS,"Unknown variable method:" + method);
+
       return DataRef::null;
   }
 

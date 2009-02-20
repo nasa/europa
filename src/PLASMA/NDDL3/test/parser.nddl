@@ -27,6 +27,9 @@ new foo();
 
 pos = 23;
 
+pos.specify(40);
+pos.reset();
+
 foo.close();
 
 positive b;
