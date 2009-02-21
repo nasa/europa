@@ -1727,27 +1727,34 @@ namespace EUROPA {
   {
   }
 
+  void evalArgs(EvalContext& context, std::vector<ConstrainedVariableId>& args,const std::vector<Expr*>& argExprs)
+  {
+      for (unsigned int i=0;i<argExprs.size();i++)
+          args.push_back(argExprs[i]->eval(context).getValue());
+  }
+
   DataRef ExprVariableMethod::eval(EvalContext& context) const
   {
       DataRef v = m_varExpr->eval(context);
       ConstrainedVariableId var = v.getValue();
+
       // TODO: make sure any temp vars are disposed of correctly
       std::vector<ConstrainedVariableId> args;
-      for (unsigned int i=0;i<m_argExprs.size();i++)
-          args.push_back(m_argExprs[i]->eval(context).getValue());
-      return eval(var,args);
-
-      return DataRef::null;
+      evalArgs(context,args,m_argExprs);
+      return eval(context,var,args);
   }
 
-  DataRef ExprVariableMethod::eval(ConstrainedVariableId& var, const std::vector<ConstrainedVariableId>& args) const
+  DataRef ExprVariableMethod::eval(EvalContext& context, ConstrainedVariableId& var, const std::vector<ConstrainedVariableId>& args) const
   {
       std::string method(m_methodName.toString());
+      DbClientId pdb = getPDB(context); // TODO: keep using db client?
 
       if (method=="specify")
-          var->specify(args[0]->lastDomain().getSingletonValue());
+          pdb->specify(var,args[0]->lastDomain().getSingletonValue());
       else if (method=="reset")
-          var->reset();
+          pdb->reset(var);
+      else if (method=="close")
+          pdb->close(var);
       else
           check_runtime_error(ALWAYS_FAILS,"Unknown variable method:" + method);
 
@@ -1777,7 +1784,37 @@ namespace EUROPA {
 
   DataRef ExprTokenMethod::eval(EvalContext& context) const
   {
-      // TODO: implement this
+      TokenId tok = context.getToken(m_tokenName.c_str());
+
+      // TODO: make sure any temp vars are disposed of correctly
+      std::vector<ConstrainedVariableId> args;
+      evalArgs(context,args,m_argExprs);
+      return eval(context,tok,args);
+  }
+
+  DataRef ExprTokenMethod::eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const
+  {
+      std::string method(m_methodName.toString());
+      DbClientId pdb = getPDB(context); // TODO: keep using db client?
+
+      if (method=="activate")
+          pdb->activate(tok);
+      else if (method=="merge") {
+          // pdb->merge(tok,activeToken);
+      }
+      else if (method=="reject")
+          pdb->reject(tok);
+      else if (method=="cancel")
+          pdb->cancel(tok);
+      else if (method=="constrain")  {
+          // pdb->constrain(obj,tok,successor);
+      }
+      else if (method=="free") {
+          // pdb->free(obj,tok,successor);
+      }
+      else
+          check_runtime_error(ALWAYS_FAILS,"Unknown token method:" + method);
+
       return DataRef::null;
   }
 

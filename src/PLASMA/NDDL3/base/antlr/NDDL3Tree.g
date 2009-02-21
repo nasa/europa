@@ -78,7 +78,7 @@ nddl :
 		  |	child=rule
 		  |	problemStmt
                   |     child=relation
-		  |	methodInvocation
+		  |	child=methodInvocation
 		  ) 
 		  {
 		      if (child != NULL) { 
@@ -678,6 +678,7 @@ variableMethod returns [Expr* result]
 }
         :       ^(op=variableOp v=qualified variableArgumentList[args]?)
                 {
+                    // TODO!: close() can also apply to the database or to a class
                     result = new ExprVariableMethod(c_str($op.text->chars),v,args);
                 }
         ;
@@ -685,6 +686,7 @@ variableMethod returns [Expr* result]
 variableOp
         :       'specify'
         |       'reset'
+        |       'close'
         ;
                 
 tokenMethod returns [Expr* result]    
@@ -702,7 +704,6 @@ tokenOp
         |       'merge'
         |       'reject'
         |       'cancel'
-        |       'close'
         |       'free'
         |       'constrain'
         ;        

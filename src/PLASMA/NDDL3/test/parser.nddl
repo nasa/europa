@@ -29,17 +29,21 @@ pos = 23;
 
 pos.specify(40);
 pos.reset();
+pos.specify(60);
 
-foo.close();
+//pos.close();
+//foo.close();
 
 positive b;
 
 addEq(40, 90, b);
 
-goal(foo.p);
+fact(foo.p fact1);
+goal(foo.p goal1);
 rejectable(foo.p somep);
 
-// p meets somep;
+//fact1 before goal1;
+//goal1 meets somep;
 
 ;;
 
@@ -55,7 +59,7 @@ typedef bool {false} nope;
 foo fooa = new foo();
 foo foob = new foo();
 foo fooc = new foo();
-//typedef foo {fooa, foob, fooc} somefoos;
+typedef foo {fooa, foob, fooc} somefoos;
 
 
 // classDeclaration, classStatement, constructorStatement, predicateStatement tests:
@@ -125,6 +129,8 @@ BClass::q {
   }
   ;;
 }
+
+//close();
 
 // constraintSignature tests:
 // TODO: do we still want to keep this in the language?, it's not necessary anymore

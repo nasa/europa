@@ -27,11 +27,11 @@ nddlStatement
         |       assignment
         |       constraintInstantiation
         |	classDeclaration
-        |       allocationStatement
+        |       allocationStmt
         |       rule
-        |       goal
+        |       problemStmt
         |       relation
-        |	function
+        |	methodInvocation
         |	noopstatement
         |       constraintSignature
         ;
@@ -220,7 +220,7 @@ relation:	(token=IDENT | token='this')? temporalRelation predicateArgumentList '
 			-> ^(TOKEN_RELATION $token temporalRelation predicateArgumentList)
         ;
 
-goal	:	('rejectable'^ | 'goal'^) predicateArgumentList ';'!
+problemStmt     :	('rejectable'^ | 'goal'^ | 'fact'^) predicateArgumentList ';'!
 	;
         
 predicateArgumentList
@@ -282,7 +282,7 @@ guardExpression
 	:	'('! anyValue (('=='^ | '!='^) anyValue)? ')'!
 	;
           
-allocationStatement
+allocationStmt
 	:	allocation ';'!
 	;
 
@@ -324,7 +324,7 @@ boolLiteral
 	|	'false' 
 	;
 
-function
+methodInvocation
         :	qualified '.'!
 		(	'specify'^ variableArgumentList
                 |       'reset'^ '('! ')'!

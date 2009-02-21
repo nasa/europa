@@ -512,7 +512,7 @@ namespace EUROPA {
       Expr* m_varExpr;
       std::vector<Expr*> m_argExprs;
 
-      DataRef eval(ConstrainedVariableId& var, const std::vector<ConstrainedVariableId>& args) const;
+      DataRef eval(EvalContext& context, ConstrainedVariableId& var, const std::vector<ConstrainedVariableId>& args) const;
   };
 
   class ExprTokenMethod : public Expr
@@ -528,6 +528,8 @@ namespace EUROPA {
       LabelStr m_methodName;
       LabelStr m_tokenName;
       std::vector<Expr*> m_argExprs;
+
+      DataRef eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const;
   };
 
 }
