@@ -29,103 +29,6 @@
 
 namespace EUROPA {
 
-  /*
-   * DataRef
-   */
-  DataRef DataRef::null;
-
-  DataRef::DataRef()
-    : m_value(ConstrainedVariableId::noId())
-  {
-  }
-
-  DataRef::DataRef(const ConstrainedVariableId& v)
-    : m_value(v)
-  {
-  }
-
-  DataRef::~DataRef()
-  {
-  }
-
-  const ConstrainedVariableId& DataRef::getValue() { return m_value; }
-
-  /*
-   * EvalContext
-   */
-  EvalContext::EvalContext(EvalContext* parent)
-    : m_parent(parent)
-  {
-  }
-
-  EvalContext::~EvalContext()
-  {
-  }
-
-  void EvalContext::addVar(const char* name,const ConstrainedVariableId& v)
-  {
-    m_variables[name] = v;
-    debugMsg("Interpreter:EvalContext","Added var:" << name << " to EvalContext");
-  }
-
-  ConstrainedVariableId EvalContext::getVar(const char* name)
-  {
-    std::map<std::string,ConstrainedVariableId>::iterator it =
-      m_variables.find(name);
-
-    if( it != m_variables.end() )
-      return it->second;
-    else if (m_parent != NULL)
-      return m_parent->getVar(name);
-    else
-      return ConstrainedVariableId::noId();
-  }
-
-  void EvalContext::addToken(const char* name,const TokenId& t)
-  {
-    m_tokens[name] = t;
-  }
-
-  TokenId EvalContext::getToken(const char* name)
-  {
-    std::map<std::string,TokenId>::iterator it =
-      m_tokens.find(name);
-
-    if( it != m_tokens.end() )
-      return it->second;
-    else if (m_parent != NULL)
-      return m_parent->getToken(name);
-    else
-      return TokenId::noId();
-  }
-
-  std::string EvalContext::toString() const
-  {
-    std::ostringstream os;
-
-    if (m_parent == NULL)
-      os << "EvalContext {" << std::endl;
-    else
-      os << m_parent->toString();
-
-    std::map<std::string,ConstrainedVariableId>::const_iterator varIt = m_variables.begin();
-    os << "    vars {";
-    for (;varIt != m_variables.end();++varIt)
-      os << varIt->first << " " << varIt->second->toString() << ",";
-    os << "    }" << std::endl;
-
-    std::map<std::string,TokenId>::const_iterator tokenIt = m_tokens.begin();
-    os << "    tokens {";
-    for (;tokenIt != m_tokens.end();++tokenIt)
-      os << tokenIt->first << " " << tokenIt->second->getPredicateName().toString() << ",";
-    os << "    }"  << std::endl;
-
-    if (m_parent == NULL)
-      os << "}" << std::endl;
-
-    return os.str();
-  }
-
   // TODO: keep using pdbClient?
   const DbClientId& getPDB(EvalContext& context)
   {
@@ -148,57 +51,6 @@ namespace EUROPA {
       */
       return getPDB(context)->getSchema();
   }
-
-  ExprList::ExprList()
-  {
-  }
-
-  ExprList::~ExprList()
-  {
-      for (unsigned int i=0;i<m_children.size();i++)
-          delete m_children[i];
-  }
-
-  DataRef ExprList::eval(EvalContext& context) const
-  {
-      DataRef result;
-
-      for (unsigned int i=0;i<m_children.size();i++)
-          result = m_children[i]->eval(context);
-
-      return result;
-  }
-
-  void ExprList::addChild(Expr* child)
-  {
-      m_children.push_back(child);
-  }
-
-  std::string ExprList::toString() const
-  {
-      std::ostringstream os;
-
-      for (unsigned int i=0;i<m_children.size();i++)
-          os << m_children[i]->toString() << std::endl;
-
-      return os.str();
-  }
-
-  ExprNoop::ExprNoop(const std::string& str)
-      : m_str(str)
-  {
-  }
-
-  ExprNoop::~ExprNoop()
-  {
-  }
-
-  DataRef ExprNoop::eval(EvalContext& context) const
-  {
-      std::cout << "Noop:" << m_str << std::endl;
-      return DataRef::null;
-  }
-
 
   /*
    * ExprConstructorAssignment
@@ -620,21 +472,51 @@ namespace EUROPA {
 
   // TODO: passing relation doesn't seem like a good ideal, since a token may have more than one relation to its
   // master. However, MatchingEngine matches on that, so keeping it for now.
-  TokenId PredicateInstanceRef::getToken(EvalContext& ctx, const char* relationName)
+  TokenId PredicateInstanceRef::getToken(EvalContext& context, const char* relationName, bool isFact, bool isRejectable)
   {
       if (m_predicateInstance.length() == 0)
-          return ctx.getToken(m_predicateName.c_str());
+          return context.getToken(m_predicateName.c_str());
 
-      return createSubgoal(ctx,relationName);
+      InterpretedRuleInstance* rule = (InterpretedRuleInstance*)(context.getElement("RuleInstance"));
+      if (rule != NULL)
+          return createSubgoal(context,rule,relationName);
+      else
+          return createGlobalToken(context, isFact, isRejectable);
   }
 
-  TokenId PredicateInstanceRef::createSubgoal(EvalContext& context, const char* relationName)
+  TokenId PredicateInstanceRef::createGlobalToken(EvalContext& context, bool isFact, bool isRejectable)
+  {
+      // The type may be qualified with an object name, in which case we should get the
+      // object and specify it. We will also have to generate the appropriate type designation
+      // by extracting the class from the object
+      ObjectId object;
+      const char* predicateType = ""; // TODO!: getObjectAndType(m_client,type,object);
+
+      TokenId token; // TODO! = m_client->createToken(predicateType,isRejectable,isFact);
+
+      if (!object.isNoId()) {
+          // We restrict the base domain permanently since the name is specifically mentioned on creation
+          token->getObject()->restrictBaseDomain(object->getThis()->baseDomain());
+      }
+
+      LabelStr predicateName(m_predicateName); // TODO: auto-generate name if not provided?
+      context.addToken(predicateName.c_str(),token); // TODO!!: plan database must keep track of global token names
+      debugMsg("Interpreter:createToken", "created Token:" << predicateName.c_str()
+                  << " of type " << predicateType
+                  << " isFact:" << isFact
+                  << " isRejectable:" << isRejectable
+      );
+
+      return token;
+  }
+
+  TokenId PredicateInstanceRef::createSubgoal(EvalContext& context, InterpretedRuleInstance* rule, const char* relationName)
   {
       // TODO: cache this? new parser is able to pass this in, do it when nddl-xml is gone.
       LabelStr predicateType = predicateInstanceToType(context,m_predicateName.c_str(),m_predicateInstance.c_str());
       debugMsg("Interpreter:InterpretedRule","Creating subgoal " << predicateType.c_str() << ":" << m_predicateName);
 
-      LabelStr predicateName(m_predicateName);
+      LabelStr predicateName(m_predicateName); // TODO: auto-generate name if not provided?
       LabelStr predicateInstance(m_predicateInstance);
       bool constrained = isConstrained(context,predicateInstance);
       ConstrainedVariableId owner;
@@ -646,8 +528,6 @@ namespace EUROPA {
             owner = context.getVar(predicateInstance.getElement(0,".").c_str());
       }
 
-      InterpretedRuleInstance* rule = (InterpretedRuleInstance*)(context.getElement("RuleInstance"));
-      check_error(rule != NULL, "Subgoals can only be created in a rule context");
       TokenId slave = rule->createSubgoal(
                                    predicateName,
                                    predicateType,
@@ -657,7 +537,7 @@ namespace EUROPA {
                                    owner
                                    );
 
-      context.addToken(m_predicateName.c_str(),slave);
+      context.addToken(predicateName.c_str(),slave);
       debugMsg("Interpreter:InterpretedRule","Created  subgoal " << predicateType.toString() << ":" << m_predicateName);
 
       return slave;
@@ -1807,10 +1687,10 @@ namespace EUROPA {
       else if (method=="cancel")
           pdb->cancel(tok);
       else if (method=="constrain")  {
-          // pdb->constrain(obj,tok,successor);
+          // TODO: pdb->constrain(obj,tok,successor);
       }
       else if (method=="free") {
-          // pdb->free(obj,tok,successor);
+          // TODO: pdb->free(obj,tok,successor);
       }
       else
           check_runtime_error(ALWAYS_FAILS,"Unknown token method:" + method);
@@ -1827,5 +1707,38 @@ namespace EUROPA {
 
       return os.str();
   }
+
+  ExprProblemStmt::ExprProblemStmt(const char* name, const std::vector<PredicateInstanceRef*>& tokens)
+      : m_name(name)
+      , m_tokens(tokens)
+  {
+  }
+
+  ExprProblemStmt::~ExprProblemStmt()
+  {
+  }
+
+  DataRef ExprProblemStmt::eval(EvalContext& context) const
+  {
+      std::string name(m_name.c_str());
+      bool isFact=(name=="fact");
+      bool isRejectable=(name=="rejectable");
+
+      for (unsigned int i=0;i<m_tokens.size();i++)
+          m_tokens[i]->getToken(context,"",isFact,isRejectable);
+
+      return DataRef::null;
+  }
+
+  std::string ExprProblemStmt::toString() const
+  {
+      std::ostringstream os;
+
+      // TODO: implement this
+      os << "PROBLEM_STMT:" << m_name.c_str();
+
+      return os.str();
+  }
+
 }
 

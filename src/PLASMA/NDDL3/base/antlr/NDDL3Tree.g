@@ -76,7 +76,7 @@ nddl :
 		  |	child=classDeclaration
                   |     child=allocation
 		  |	child=rule
-		  |	problemStmt
+		  |	child=problemStmt
                   |     child=relation
 		  |	child=methodInvocation
 		  ) 
@@ -571,7 +571,10 @@ problemStmt returns [Expr* result]
     std::vector<PredicateInstanceRef*> tokens;    
 }
 
-        :       ^(problemStmtType predicateInstanceList[tokens])
+        :       ^(t=problemStmtType predicateInstanceList[tokens])
+                {
+                    result = new ExprProblemStmt(c_str($t.text->chars),tokens);
+                }   
         ;
         
 problemStmtType

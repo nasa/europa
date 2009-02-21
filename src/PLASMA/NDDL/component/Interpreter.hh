@@ -99,19 +99,22 @@ namespace EUROPA {
         Expr* m_rhs;
   };
 
+  class InterpretedRuleInstance;
+
   class PredicateInstanceRef
   {
   public:
       PredicateInstanceRef(const char* predInstance, const char* predName);
       virtual ~PredicateInstanceRef();
 
-      TokenId getToken(EvalContext& ctx, const char* relationName);
+      TokenId getToken(EvalContext& ctx, const char* relationName, bool isFact=false, bool isRejectable=false);
 
   protected:
       std::string m_predicateInstance;
       std::string m_predicateName;
 
-      TokenId createSubgoal(EvalContext& ctx, const char* relationName);
+      TokenId createSubgoal(EvalContext& ctx, InterpretedRuleInstance* rule, const char* relationName);
+      TokenId createGlobalToken(EvalContext& context, bool isFact, bool isRejectable);
   };
 
   class ExprRelation : public Expr
@@ -528,6 +531,22 @@ namespace EUROPA {
       LabelStr m_methodName;
       LabelStr m_tokenName;
       std::vector<Expr*> m_argExprs;
+
+      DataRef eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const;
+  };
+
+  class ExprProblemStmt : public Expr
+  {
+  public:
+      ExprProblemStmt(const char* name, const std::vector<PredicateInstanceRef*>& tokens);
+      virtual ~ExprProblemStmt();
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      LabelStr m_name;
+      std::vector<PredicateInstanceRef*> m_tokens;
 
       DataRef eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const;
   };
