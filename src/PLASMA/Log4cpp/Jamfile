@@ -29,6 +29,8 @@ rule install.log4cpp
   Depends all : $(libraryBuildFile) ;
 }
 
+RmDir clean : log4cpp-1.0 ;
+
 Depends $(optimizedLibraryFile) : $(libraryMakeFile) $(libraryBuildFile) ;
 Depends $(debugLibraryFile) : $(libraryMakeFile) $(libraryBuildFile) ;
 Depends all : $(debugLibraryFile) $(optimizedLibraryFile) ;
