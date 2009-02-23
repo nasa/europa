@@ -1,12 +1,12 @@
-#ifndef LOG4CPP_DEBUG
-#define LOG4CPP_DEBUG
+#ifndef EUROPA_LOGGER
+#define EUROPA_LOGGER
 
 #include <stdio.h>
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <vector>
-    
+
 #include "log4cpp/Portability.hh"
 #include "log4cpp/Category.hh"
 #include "log4cpp/CategoryStream.hh"
@@ -44,7 +44,7 @@ public:
  *
  *  <br> For details on using the this class, see the short tutorial
  *  files labelled TestLog4CPP* in the Utils/test directory.
- *  
+ *
  *  @author Mark Roberts, 2009
  */
 class LoggerConfig {
@@ -53,7 +53,7 @@ public:
 	if( instance == NULL ) {
 	    getInstance();
 	}
-	instance->readConfiguration( configFilename ); 
+	instance->readConfiguration( configFilename );
 	return instance;
     }
 
@@ -61,7 +61,7 @@ public:
 	if( instance == NULL ) {
 	    instance = new LoggerConfig(); //no configuration file specified
 	    loggers = new set<Logger *>();
-	} 
+	}
 	return instance;
     }
     ~LoggerConfig() {
@@ -72,7 +72,7 @@ public:
 	if( instance != NULL ) {delete instance;}
     }
 
-    void readConfiguration( string configFilename ) { 
+    void readConfiguration( string configFilename ) {
 	ifstream file;
 	file.exceptions( ifstream::eofbit | ifstream::failbit | ifstream::badbit );
 	file.open( configFilename.c_str() );
@@ -80,12 +80,12 @@ public:
 	    //process config file here
 	    //while (!file.eof()) file.get();
 	} catch (ifstream::failure e) {
-	    log4cpp::Category::getRoot().log( log4cpp::Priority::WARN, 
+	    log4cpp::Category::getRoot().log( log4cpp::Priority::WARN,
 			   "EUROPA::Utils::LoggerConfig",
 			      "Exception opening/reading Logger configuration file" );
 	    //+ configFilename); // + ":" + e.what());
 	} catch( LoggerConfigException e ) {
-	    log4cpp::Category::getRoot().log( log4cpp::Priority::WARN, 
+	    log4cpp::Category::getRoot().log( log4cpp::Priority::WARN,
 			   "EUROPA::Utils::LoggerConfig",
 			      "Exception parsing Logger configuration file");
 	    //	      + configFilename );// + ":" + e.what());
@@ -99,7 +99,7 @@ public:
 	loggers->insert( logger );
     }
 
-    
+
 private:
     static LoggerConfig *instance;
     static set<Logger*> *loggers;
@@ -107,15 +107,15 @@ private:
     }
     //singleton class == private constructors (assuming no inheritance)
     LoggerConfig(LoggerConfig &) { }  //singleton class == private copy constructor
-    LoggerConfig &operator=(const LoggerConfig &) { return *instance;} 
+    LoggerConfig &operator=(const LoggerConfig &) { return *instance;}
 };
 //LoggerConfig *LoggerConfig::instance = NULL;
 //set<Logger*> *LoggerConfig::loggers = NULL;
 
 
 /**
- *  This class also consolidates the Error.hh and Debug.hh macros.  
- *  
+ *  This class also consolidates the Error.hh and Debug.hh macros.
+ *
  *  Provides a wrapper class to the Log4cpp API that (hopefully)
  *  unifies the logging for all classes.  Maintenance on this class
  *  will result in changes for all logging throughout Europa.  If, in
@@ -156,7 +156,7 @@ public:
     }
 
     static Logger &getInstance( string categoryName ) {
-	return *(new Logger( categoryName )); 
+	return *(new Logger( categoryName ));
     }
 
     static Logger &getInstance( string categoryName, Level level ) {
@@ -174,11 +174,11 @@ public:
     Logger( string catName ) {
 	categoryName = catName;
 	currentCategory = &(log4cpp::Category::getInstance( categoryName ));
-    }     	  
+    }
 
     ~Logger() { }
-//     Logger(Logger &) { }  
-//     Logger &operator=(const Logger &) { return *instance;} 
+//     Logger(Logger &) { }
+//     Logger &operator=(const Logger &) { return *instance;}
 
 
     /** Changes the debug level for the current category.
@@ -188,8 +188,8 @@ public:
     }
     /** Returns the debug level for the current category.
      */
-    Level getLevel() { 
-	return intToLevel( currentCategory->getPriority()); 
+    Level getLevel() {
+	return intToLevel( currentCategory->getPriority());
     }
 
     /** Logs a message at the default level for this category.  This
@@ -199,7 +199,7 @@ public:
     static void msg( string catName, string msg ) {
 
     }
-		     
+
 
     /** Logs a message at the default level for this category.  This
      * message will always be visible, regardless of the level.
@@ -223,10 +223,10 @@ public:
 //       *  For example, one could use the returned category to get the
 //       *  root category.  Or one could use the stream passing methods.
 //       */
-      log4cpp::Category *getCategory() { 
+      log4cpp::Category *getCategory() {
    	return currentCategory;
       }
-    
+
     log4cpp::CategoryStream getStream() {
 //	return log4cpp::CategoryStream( *currentCategory, getLevel() );
 	return currentCategory->critStream();
@@ -234,24 +234,24 @@ public:
 
     log4cpp::CategoryStream operator<<( Level level ) {
  	return log4cpp::CategoryStream( *currentCategory,  (int) level );
- //	return (*currentCategory) << (int) level;	    
+ //	return (*currentCategory) << (int) level;
      }
 
     log4cpp::CategoryStream &operator<<( string msg ) {
 	return (*currentCategory) << getLevel() << msg;
      }
-    
+
 
     static log4cpp::CategoryStream& eol (log4cpp::CategoryStream& os) {
 	return log4cpp::eol( os );
-    }                 
+    }
 
 //     log4cpp::CategoryStream operator<<( CategoryStream stream ) {
 // 	return log4cpp::CategoryStream( *currentCategory, getLevel() );
 //     }
 //     ostream friend log4cpp::CategoryStream& operator<<( Level level );
 //     ostream friend log4cpp::CategoryStream& operator<<( log4cpp::CategoryStream &cs, string msg );
-    
+
 private:
     log4cpp::Category *currentCategory;
     string categoryName;
@@ -264,7 +264,7 @@ private:
 //     stream<<  loggerob.x<<' '<<ob.y<<' '<<ob.z<<'\n';
 //     return stream;
 // }
-    
+
 
 
 	}//namespace Utils
@@ -273,14 +273,14 @@ private:
 
 
 // Pragmas defined in this declaration header also provide the basic functionality to
-// make using the logging system as easy as possible.  
+// make using the logging system as easy as possible.
 
 #ifdef NO_DEBUG_MESSAGE_SUPPORT
 // This pragma allows the compiler to completely eliminate DEBUG
 // tracing in optimized code.  Note that if NO_DEBUG_MESSAGE_SUPPORT
 // is specified, then absolutely no trace message above DEBUG is
 // produced; however trace messages set to INFO or lower are still
-// produced. 
+// produced.
 
   //legacy definitions
   #define debugMsg(marker, data)
@@ -294,4 +294,4 @@ private:
 //    #define debugStmt(marker, stmt) { std::cout << "Deprecated debugStmt:"  << __FILE__ << " at " << __LINE__  << std::endl; }
 //    #define condDebugStmt(cond, marker, stmt) { std::cout << "Deprecated condDebugStmt:"  << __FILE__ << " at " << __LINE__  << std::endl; }
 #endif //NO_DEBUG_MESSAGE_SUPPORT
-#endif //LOG4CPP_DEBUG
+#endif //EUROPA_LOGGER
