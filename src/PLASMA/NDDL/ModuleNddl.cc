@@ -1,7 +1,8 @@
 #include "ModuleNddl.hh"
-#include "NddlXml.hh"
 #include "PlanDatabase.hh"
 #include "Rule.hh"
+#include "NddlXml.hh"
+#include "NddlInterpreter.hh"
 
 namespace EUROPA {
 
@@ -37,15 +38,17 @@ namespace EUROPA {
 
   void ModuleNddl::initialize(EngineId engine)
   {
-      PlanDatabase* pdb = (PlanDatabase*)engine->getComponent("PlanDatabase");
+      engine->addLanguageInterpreter("nddl3", new NddlInterpreter(engine));
 	  engine->addLanguageInterpreter("nddl", new NddlNativeInterpreter());
 
+      PlanDatabase* pdb = (PlanDatabase*)engine->getComponent("PlanDatabase");
       RuleSchema* rs = (RuleSchema*)engine->getComponent("RuleSchema");
 	  engine->addLanguageInterpreter("nddl-xml", new NddlXmlInterpreter(pdb->getClient(),rs->getId()));
   }
 
   void ModuleNddl::uninitialize(EngineId engine)
   {
+      engine->removeLanguageInterpreter("nddl3");
 	  engine->removeLanguageInterpreter("nddl");
 	  engine->removeLanguageInterpreter("nddl-xml");
 	  // TODO: Finish cleanup

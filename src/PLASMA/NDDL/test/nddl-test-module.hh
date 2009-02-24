@@ -7,18 +7,20 @@
 
 class NDDLModuleTests : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(NDDLModuleTests);
+  CPPUNIT_TEST(syntaxTests);
   CPPUNIT_TEST(utilitiesTests);
   CPPUNIT_TEST_SUITE_END();
-  
+
 public:
   inline void setUp()
   {
   }
 
-  inline void tearDown() 
-  { 
+  inline void tearDown()
+  {
   }
-  
+
+  void syntaxTests();
   void utilitiesTests();
 };
 

@@ -2,14 +2,21 @@ SubDir PLASMA NDDL base ;
 
 if ! $(PLASMA_READY) {
 
-ModuleBase NDDL
+  SubDirC++Flags -D_NO_W32_PSEUDO_MODIFIERS ;
+  
+  Antlr3Grammar NDDL3 : antlr/NDDL3.g antlr/NDDL3Tree.g ;
+
+  ModuleBase NDDL
 	:
 	NddlToken.cc
 	NddlUtils.cc
 	NddlRules.cc
+        NDDL3Lexer.cpp
+        NDDL3Parser.cpp
+        NDDL3Tree.cpp
 	;
 
-ApacheAnt nddl.jar :
+  ApacheAnt nddl.jar :
 	[ FGristFiles build.xml ]
 	# ANTLR Grammars
 	antlr/nddl.g
