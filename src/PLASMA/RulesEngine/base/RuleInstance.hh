@@ -166,6 +166,8 @@ namespace EUROPA{
 
     const std::vector<RuleInstanceId> &getChildRules(void) const {return m_childRules;}
 
+    void addConstraint(const ConstraintId& constraint);
+
   protected:
 
     /**
@@ -243,7 +245,6 @@ namespace EUROPA{
     }
 
     void addConstraint(const LabelStr& name, const std::vector<ConstrainedVariableId>& scope);
-    void addConstraint(const ConstraintId& constraint);
     void addChildRule(RuleInstance* instance);
     void clearLoopVar(const LabelStr& loopVarName);
     std::string makeImplicitVariableName();

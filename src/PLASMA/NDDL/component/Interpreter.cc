@@ -320,20 +320,22 @@ namespace EUROPA {
 
   void makeConstraint(EvalContext& context, const LabelStr& name, const std::vector<ConstrainedVariableId>& vars)
   {
+      PlanDatabase* pdb = (PlanDatabase*)(context.getElement("PlanDatabase"));
+      ConstraintId c = pdb->getClient()->createConstraint(name.c_str(), vars);
+      debugMsg("Interpreter","Added Constraint : " << c->toString());
+
       InterpretedRuleInstance* rule = (InterpretedRuleInstance*)(context.getElement("RuleInstance"));
       if (rule != NULL) {
-          rule->createConstraint(name,vars);
-          debugMsg("Interpreter:InterpretedRule","Added Constraint : " << name.toString() << " - " << varsToString(vars));
+          rule->addConstraint(c);
+          debugMsg("Interpreter:InterpretedRule","Added Constraint : " << c->toString());
+          return;
       }
-      else { // The constraint is being added in the global context
-          PlanDatabase* pdb = (PlanDatabase*)(context.getElement("PlanDatabase"));
-          ConstraintId c = pdb->getClient()->createConstraint(name.c_str(), vars);
-          debugMsg("Interpreter","Added Constraint : " << name.toString() << " - " << varsToString(vars));
 
-          Token* t = (Token*)(context.getElement("Token"));
-          if (t != NULL) {
-              t->addStandardConstraint(c);
-          }
+      Token* t = (Token*)(context.getElement("Token"));
+      if (t != NULL) {
+          t->addStandardConstraint(c);
+          debugMsg("Interpreter:InterpretedToken","Added Constraint : " << c->toString());
+          return;
       }
   }
 
@@ -1187,11 +1189,6 @@ namespace EUROPA {
     for (unsigned int i=0; i < m_body.size(); i++)
       m_body[i]->eval(evalContext);
     debugMsg("Interpreter:InterpretedRule","Executed  interpreted rule:" << getRule()->getName().toString() << " token:" << m_token->toString());
-  }
-
-  void InterpretedRuleInstance::createConstraint(const LabelStr& name, const std::vector<ConstrainedVariableId>& vars)
-  {
-    addConstraint(name,vars);
   }
 
   TokenId InterpretedRuleInstance::createSubgoal(

@@ -231,8 +231,6 @@ namespace EUROPA {
 
   	    virtual ~InterpretedRuleInstance();
 
-        void createConstraint(const LabelStr& name, const std::vector<ConstrainedVariableId>& vars);
-
         TokenId createSubgoal(
                    const LabelStr& name,
                    const LabelStr& predicateType,
