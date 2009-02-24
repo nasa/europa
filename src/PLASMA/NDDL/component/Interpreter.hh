@@ -133,9 +133,6 @@ namespace EUROPA {
         std::vector<PredicateInstanceRef*> m_targets;
   };
 
-  class ExprVarDeclaration;
-  class ExprAssignment;
-
   // InterpretedToken is the interpreted version of NddlToken
   class InterpretedToken : public IntervalToken
   {
@@ -143,9 +140,9 @@ namespace EUROPA {
   	    // Same Constructor signatures as NddlToken, TODO: see if both are needed
   	    InterpretedToken(const PlanDatabaseId& planDatabase,
   	                     const LabelStr& predicateName,
-  	                     const std::vector<ExprVarDeclaration*>& parameters,
-  	                     const std::vector<ExprAssignment*>& varAssignments,
-                         const std::vector<ExprConstraint*>& constraints,
+  	                     const std::vector<Expr*>& parameters,
+  	                     const std::vector<Expr*>& varAssignments,
+                         const std::vector<Expr*>& constraints,
                          const bool& rejectable = false,
                          const bool& isFact = false,
   	                     const bool& close = false);
@@ -153,18 +150,18 @@ namespace EUROPA {
         InterpretedToken(const TokenId& master,
                          const LabelStr& predicateName,
                          const LabelStr& relation,
-                         const std::vector<ExprVarDeclaration*>& parameters,
-                         const std::vector<ExprAssignment*>& varAssignments,
-                         const std::vector<ExprConstraint*>& constraints,
+                         const std::vector<Expr*>& parameters,
+                         const std::vector<Expr*>& varAssignments,
+                         const std::vector<Expr*>& constraints,
                          const bool& close = false);
 
 
   	    virtual ~InterpretedToken();
 
     protected:
-        void commonInit(const std::vector<ExprVarDeclaration*>& parameters,
-                        const std::vector<ExprAssignment*>& varAssignments,
-                        const std::vector<ExprConstraint*>& constraints,
+        void commonInit(const std::vector<Expr*>& parameters,
+                        const std::vector<Expr*>& varAssignments,
+                        const std::vector<Expr*>& constraints,
                         const bool& autoClose);
 
         friend class InterpretedTokenFactory;
@@ -178,7 +175,11 @@ namespace EUROPA {
 
   	    virtual ConstrainedVariableId getVar(const char* name);
 
+        virtual void* getElement(const char* name) const;
+
   	    virtual bool isClass(const LabelStr& className) const;
+
+  	    TokenId& getToken();
 
   	protected:
   	    TokenId m_token;
@@ -190,20 +191,21 @@ namespace EUROPA {
 	  InterpretedTokenFactory(const LabelStr& predicateName,
 	                          const ObjectTypeId& objType);
 
-	  void addParameter(ExprVarDeclaration* parameterDecl);
-	  ExprVarDeclaration* getParameter(const LabelStr& name);
-
-      void addVarAssignment(ExprAssignment* va);
-	  void addConstraint(ExprConstraint* c);
+	  void addParameter(Expr* parameterDecl);
+      void addVarAssignment(Expr* va);
+	  void addConstraint(Expr* c);
 
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const;
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
 
+	  // Only needed for NddlXml
+	  void setParameterInitValue(const LabelStr& name,Expr* valueExpr);
+
     protected:
       ObjectTypeId m_objType;
-      std::vector<ExprVarDeclaration*> m_parameters;
-      std::vector<ExprAssignment*> m_varAssignments;
-      std::vector<ExprConstraint*> m_constraints;
+      std::vector<Expr*> m_parameters;
+      std::vector<Expr*> m_varAssignments;
+      std::vector<Expr*> m_constraints;
 
       TokenFactoryId getParentFactory(const PlanDatabaseId& planDb) const;
   };
@@ -443,6 +445,9 @@ namespace EUROPA {
       LabelStr m_name;
       LabelStr m_type;
       Expr* m_initValue;
+
+      ConstrainedVariableId makeGlobalVar(EvalContext& context) const;
+      ConstrainedVariableId makeTokenVar(TokenEvalContext& context) const;
   };
 
   class ExprAssignment : public Expr

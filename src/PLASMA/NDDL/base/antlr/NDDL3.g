@@ -438,14 +438,14 @@ fragment DIGIT
 	:	('0'..'9')
 	;
 	
-INT	:	('0' | '1'..'9' '0'..'9'*) INT_SUFFIX?
+INT	:	('+' | '-')? ('0' | '1'..'9' '0'..'9'*) INT_SUFFIX?
 	;
 	
 fragment INT_SUFFIX
 	:	('l'|'L')
 	;
 
-FLOAT	:	('0'..'9')+ '.' ('0'..'9')* EXPONENT? FLOAT_SUFFIX?
+FLOAT	:	('+' | '-')? ('0'..'9')+ '.' ('0'..'9')* EXPONENT? FLOAT_SUFFIX?
 	|	'.' ('0'..'9')+ EXPONENT? FLOAT_SUFFIX?
 	|	('0'..'9')+ EXPONENT FLOAT_SUFFIX?
 	|	('0'..'9')+ FLOAT_SUFFIX

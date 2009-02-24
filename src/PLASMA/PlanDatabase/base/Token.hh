@@ -181,6 +181,11 @@ namespace EUROPA {
     const TokenId& getActiveToken() const;
 
     /**
+     * @brief add a built in constraint for the token
+     */
+    void addStandardConstraint(const ConstraintId& constraint);
+
+    /**
      * @brief Test if a given constraint is a built in constraint for the token
      */
     bool isStandardConstraint(const ConstraintId& constraint) const;

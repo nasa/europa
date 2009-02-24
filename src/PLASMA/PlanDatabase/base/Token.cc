@@ -422,6 +422,10 @@ namespace EUROPA{
     m_planDatabase->notifyDeactivated(m_id);
   }
 
+  void Token::addStandardConstraint(const ConstraintId& constraint)
+  {
+      m_standardConstraints.insert(constraint);
+  }
 
   bool Token::isStandardConstraint(const ConstraintId& constraint) const{
     return(m_standardConstraints.find(constraint) != m_standardConstraints.end());

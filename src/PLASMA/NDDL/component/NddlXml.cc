@@ -264,10 +264,7 @@ namespace EUROPA {
                   );
               }
               else {
-                  ExprVarDeclaration* parameter = tokenFactory->getParameter(name);
-                  check_runtime_error(parameter != NULL, std::string("Cannot assign to undeclared parameter:") + name + " in predicate "+predName);
-                  // should probably say something about redefinition, but meh
-                  parameter->setInitValue(valueToExpr(predArg->FirstChildElement()));
+                  tokenFactory->setParameterInitValue(name,valueToExpr(predArg->FirstChildElement()));
               }
           }
           else if (strcmp(predArg->Value(),"invoke") == 0) {
