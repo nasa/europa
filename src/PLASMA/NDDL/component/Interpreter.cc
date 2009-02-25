@@ -836,11 +836,10 @@ namespace EUROPA {
     /*
      * InterpretedToken
      */
-    InterpretedToken::InterpretedToken(const PlanDatabaseId& planDatabase,
+    InterpretedToken::InterpretedToken(
+                     const PlanDatabaseId& planDatabase,
                      const LabelStr& predicateName,
-                     const std::vector<Expr*>& parameters,
-                     const std::vector<Expr*>& varAssignments,
-                     const std::vector<Expr*>& constraints,
+                     const std::vector<Expr*>& body,
                      const bool& rejectable,
                      const bool& isFact,
                      const bool& close)
@@ -854,16 +853,15 @@ namespace EUROPA {
                         Token::noObject(),                    // Object Name
                         false)
     {
-    	commonInit(parameters, varAssignments, constraints, close);
+    	commonInit(body, close);
     	debugMsg("Interpreter:InterpretedToken","Created token(" << getKey() << ") of type:" << predicateName.toString() << " objectVar=" << getVariable("object")->toString());
     }
 
-  InterpretedToken::InterpretedToken(const TokenId& master,
+  InterpretedToken::InterpretedToken(
+                     const TokenId& master,
 				     const LabelStr& predicateName,
 				     const LabelStr& relation,
-                     const std::vector<Expr*>& parameters,
-                     const std::vector<Expr*>& varAssignments,
-				     const std::vector<Expr*>& constraints,
+                     const std::vector<Expr*>& body,
 				     const bool& close)
     : IntervalToken(master,
 		    relation,
@@ -874,7 +872,7 @@ namespace EUROPA {
 		    Token::noObject(),                   // Object Name
 		    false)
   {
-    commonInit(parameters, varAssignments, constraints, close);
+    commonInit(body, close);
     debugMsg("Interpreter:InterpretedToken","Created slave token(" << getKey() << ") of type:" << predicateName.toString() << " objectVar=" << getVariable("object")->toString());
   }
 
@@ -883,29 +881,17 @@ namespace EUROPA {
   }
 
   void InterpretedToken::commonInit(
-                    const std::vector<Expr*>& parameters,
-                    const std::vector<Expr*>& varAssignments,
-				    const std::vector<Expr*>& constraints,
+                    const std::vector<Expr*>& body,
 				    const bool& autoClose)
   {
     // TODO: Pass in EvalContext to give access to class or global context
     TokenEvalContext context(NULL,getId());
 
-    // Add Parameters
-    debugMsg("Interpreter","Token " << getName().toString() << " has " << parameters.size() << " parameters");
-    for (unsigned int i=0; i < parameters.size(); i++)
-        parameters[i]->eval(context);
+    for (unsigned int i=0; i < body.size(); i++)
+        body[i]->eval(context);
 
     if (autoClose)
       close();
-
-    // Take care of initializations that were part of the predicate declaration
-    for (unsigned int i=0; i < varAssignments.size(); i++)
-      varAssignments[i]->eval(context);
-
-    // Post parameter constraints
-    for (unsigned int i=0; i < constraints.size(); i++)
-        constraints[i]->eval(context);
   }
 
   /*
@@ -919,36 +905,9 @@ namespace EUROPA {
     {
     }
 
-    void InterpretedTokenFactory::addParameter(Expr* parameterDecl)
+    void InterpretedTokenFactory::addBodyExpr(Expr* e)
     {
-        m_parameters.push_back(parameterDecl);
-        // TODO: refactor code so that this ugly cast isn't necessary anymore
-        ExprVarDeclaration* vd = dynamic_cast<ExprVarDeclaration*>(parameterDecl);
-        addArg(vd->getType(),vd->getName());
-    }
-
-    void InterpretedTokenFactory::setParameterInitValue(const LabelStr& name,Expr* valueExpr)
-    {
-        ExprVarDeclaration* vd = NULL;
-        for (unsigned int i=0;i<m_parameters.size();i++) {
-            vd = dynamic_cast<ExprVarDeclaration*>(m_parameters[i]);
-            if ((double)(vd->getName()) == (double)name)
-                break;
-            vd = NULL;
-        }
-
-        check_error(vd != NULL);
-        vd->setInitValue(valueExpr);
-    }
-
-    void InterpretedTokenFactory::addConstraint(Expr* c)
-    {
-        m_constraints.push_back(c);
-    }
-
-    void InterpretedTokenFactory::addVarAssignment(Expr* va)
-    {
-        m_varAssignments.push_back(va);
+        m_body.push_back(e);
     }
 
     TokenFactoryId InterpretedTokenFactory::getParentFactory(const PlanDatabaseId& planDb) const
@@ -968,9 +927,7 @@ namespace EUROPA {
 	        token = (new InterpretedToken(
 	                planDb,
 	                name,
-	                m_parameters,
-	                m_varAssignments,
-	                m_constraints,
+	                m_body,
 	                rejectable,
 	                isFact,
 	                false))->getId();
@@ -980,11 +937,7 @@ namespace EUROPA {
 	        // TODO: Hack! this makes it impossible to extend native tokens
 	        // class hierarchy needs to be fixed to avoid this cast
             InterpretedToken* it = dynamic_cast<InterpretedToken*>((Token*)token);
-            it->commonInit(
-                    m_parameters,
-                    m_varAssignments,
-                    m_constraints,
-                    false);
+            it->commonInit(m_body,false);
 	    }
 
 	    return token;
@@ -1000,9 +953,7 @@ namespace EUROPA {
                   master,
                   name,
                   relation,
-                  m_parameters,
-                  m_varAssignments,
-                  m_constraints,
+                  m_body,
                   false))->getId();
       }
       else {
@@ -1010,11 +961,7 @@ namespace EUROPA {
           // TODO: Hack! this makes it impossible to extend native tokens
           // class hierarchy needs to be fixed to avoid this cast
           InterpretedToken* it = dynamic_cast<InterpretedToken*>((Token*)token);
-          it->commonInit(
-                  m_parameters,
-                  m_varAssignments,
-                  m_constraints,
-                  false);
+          it->commonInit(m_body,false);
       }
 
       return token;

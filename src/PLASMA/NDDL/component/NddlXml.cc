@@ -229,6 +229,7 @@ namespace EUROPA {
   {
       const char* className = objType->getName().c_str();
       std::string predName = std::string(className) + "." + element->Attribute("name");
+      std::map<LabelStr,ExprVarDeclaration*> parameterDecls;
 
       if (objType->isNative()) {
           // TODO: should always be displayed as INFO!
@@ -248,7 +249,9 @@ namespace EUROPA {
               if(!predArg->NoChildren())
                   pInitValue = valueToExpr(predArg->FirstChildElement());
 
-              tokenFactory->addParameter(new ExprVarDeclaration(pName.c_str(),pType.c_str(),pInitValue));
+              parameterDecls[pName] = new ExprVarDeclaration(pName.c_str(),pType.c_str(),pInitValue);
+              tokenFactory->addArg(pType,pName);
+              tokenFactory->addBodyExpr(parameterDecls[pName]);
           }
           else if (strcmp(predArg->Value(),"assign") == 0) {
               //const char* type = safeStr(predArg->Attribute("type")); // TODO: use type?
@@ -256,7 +259,7 @@ namespace EUROPA {
               bool inherited = (predArg->Attribute("inherited") != NULL ? true : false);
 
               if (inherited) {
-                  tokenFactory->addVarAssignment(
+                  tokenFactory->addBodyExpr(
                       new ExprAssignment(
                           new ExprVarRef(name),
                           valueToExpr(predArg->FirstChildElement())
@@ -264,7 +267,8 @@ namespace EUROPA {
                   );
               }
               else {
-                  tokenFactory->setParameterInitValue(name,valueToExpr(predArg->FirstChildElement()));
+                  ExprVarDeclaration*& vd = parameterDecls[LabelStr(name)];
+                  vd->setInitValue(valueToExpr(predArg->FirstChildElement()));
               }
           }
           else if (strcmp(predArg->Value(),"invoke") == 0) {
@@ -273,7 +277,12 @@ namespace EUROPA {
               for(const TiXmlElement* arg = predArg->FirstChildElement(); arg; arg = arg->NextSiblingElement() )
                   constraintArgs.push_back(valueToExpr(arg));
 
-              tokenFactory->addConstraint(new ExprConstraint(predArg->Attribute("name"),constraintArgs));
+              tokenFactory->addBodyExpr(
+                      new ExprConstraint(
+                              predArg->Attribute("name"),
+                              constraintArgs
+                      )
+              );
           }
           else
               check_runtime_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + predArg->Value()+ " in predicate "+predName);

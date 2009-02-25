@@ -123,6 +123,8 @@ namespace EUROPA {
           delete m_children[i];
   }
 
+  const std::vector<Expr*>& ExprList::getChildren() { return m_children; }
+
   DataRef ExprList::eval(EvalContext& context) const
   {
       DataRef result;

@@ -70,7 +70,7 @@ nddl :
 		     // debugMsg("NddlInterpreter:nddl","Line:" << LEXER->getLine(LEXER)); 
 		  }
 		  (	child=typeDefinition
-                  |     child=variableDeclaration
+                  |     child=variableDeclarations
                   |     child=assignment
                   |     child=constraintInstantiation
 		  |	child=classDeclaration
@@ -143,26 +143,39 @@ inlineType[AbstractDomain* baseType] returns [AbstractDomain* result]
 }        
         ;       
 
-variableDeclaration returns [ExprVarDeclaration* result]
-        :       ^(VARIABLE dataType=type initExpr=variableInitialization)
-{
-    if (dataType != NULL)
-        result = new ExprVarDeclaration(initExpr->getLhs()->toString().c_str(),dataType->getTypeName().c_str(),initExpr);
-    else { 
-        result = NULL;
-        reportSemanticError(CTX,
-            "Incorrect variable declaration. Unknown data type for var : " + initExpr->getLhs()->toString());
-    }
-}       
+variableDeclarations returns [ExprList* result]
+        :       ^(VARIABLE dataType=type 
+                           {
+                               if (dataType != NULL)
+                                   result = new ExprList();
+                               else { 
+                                   result = NULL;
+                                   reportSemanticError(CTX,
+                                       "Incorrect variable declaration. Unknown data type");
+                               }
+                           }
+                           (child=variableInitialization[dataType]
+                           {
+                               result->addChild(child);
+                           }
+                           )+
+                 )
         ;
         
-variableInitialization returns [ExprAssignment* result]
+variableInitialization[AbstractDomain* dataType] returns [Expr* result]
         : (      name=IDENT
           |       ^('=' name=IDENT rhs=initializer)
           )
           {
-              Expr* lhs = new ExprVarRef(c_str($name.text->chars));
-              result = new ExprAssignment(lhs,rhs); // TODO: to preserve old semantics, this needs to restrict base domain instead
+              const char* varName = c_str($name.text->chars);
+              Expr* lhs = new ExprVarRef(varName);
+              // TODO: to preserve old semantics, this needs to restrict base domain instead              
+              Expr* initializer = new ExprAssignment(lhs,rhs);
+              result = new ExprVarDeclaration(
+                   varName,
+                   dataType->getTypeName().c_str(),
+                   initializer
+              ); 
           }
         ;       
 
@@ -461,27 +474,46 @@ predicate[ObjectType* objType]
 // TODO: allow assignments to inherited parameters
 predicateStatements[InterpretedTokenFactory* tokenFactory]
 	:	^('{'
-			( predicateParameter[tokenFactory] 
-                        | predicateParameterAssignment[tokenFactory] 
-			| standardConstraint[tokenFactory] 
-			)*
+		      (
+		        ( child=predicateParameter[tokenFactory] 
+                        | child=predicateParameterAssignment 
+			| child=standardConstraint 
+			)
+			{
+			    tokenFactory->addBodyExpr(child);
+			}
+		      )*
 		)
 	;
 	
 // Note: Allocations are not legal here.        
-predicateParameter[InterpretedTokenFactory* tokenFactory]
+predicateParameter[InterpretedTokenFactory* tokenFactory] returns [Expr* result]
         :
-        child=variableDeclaration { tokenFactory->addParameter(child); }
+        child=variableDeclarations 
+        { 
+            const std::vector<Expr*>& vars=child->getChildren();
+            for (unsigned int i=0;i<vars.size();i++) {
+                ExprVarDeclaration* vd = dynamic_cast<ExprVarDeclaration*>(vars[i]);
+                tokenFactory->addArg(vd->getType(),vd->getName());
+            }
+            result = child;            
+        }
         ;       
 
-predicateParameterAssignment[InterpretedTokenFactory* tokenFactory]
+predicateParameterAssignment returns [Expr* result]
         :
-        child=assignment { tokenFactory->addVarAssignment(child); }
+        child=assignment 
+        { 
+            result = child; 
+        }
         ;       
 
-standardConstraint[InterpretedTokenFactory* tokenFactory]
+standardConstraint returns [Expr* result]
         :
-        child = constraintInstantiation { tokenFactory->addConstraint(child); } 
+        child = constraintInstantiation 
+        { 
+            result = child; 
+        }
         ;	
 
 rule returns [Expr* result]
@@ -509,7 +541,7 @@ ruleBlock[std::vector<Expr*>& ruleBody]
 ruleStatement returns [Expr* result]
 	: (	child=constraintInstantiation
 	  |	child=assignment
-	  |	child=variableDeclaration
+	  |	child=variableDeclarations
 	  |	child=ifStatement
 	  |	child=loopStatement
 	  |     child=relation

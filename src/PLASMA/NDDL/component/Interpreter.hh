@@ -140,9 +140,7 @@ namespace EUROPA {
   	    // Same Constructor signatures as NddlToken, TODO: see if both are needed
   	    InterpretedToken(const PlanDatabaseId& planDatabase,
   	                     const LabelStr& predicateName,
-  	                     const std::vector<Expr*>& parameters,
-  	                     const std::vector<Expr*>& varAssignments,
-                         const std::vector<Expr*>& constraints,
+  	                     const std::vector<Expr*>& body,
                          const bool& rejectable = false,
                          const bool& isFact = false,
   	                     const bool& close = false);
@@ -150,39 +148,17 @@ namespace EUROPA {
         InterpretedToken(const TokenId& master,
                          const LabelStr& predicateName,
                          const LabelStr& relation,
-                         const std::vector<Expr*>& parameters,
-                         const std::vector<Expr*>& varAssignments,
-                         const std::vector<Expr*>& constraints,
+                         const std::vector<Expr*>& body,
                          const bool& close = false);
 
 
   	    virtual ~InterpretedToken();
 
     protected:
-        void commonInit(const std::vector<Expr*>& parameters,
-                        const std::vector<Expr*>& varAssignments,
-                        const std::vector<Expr*>& constraints,
+        void commonInit(const std::vector<Expr*>& body,
                         const bool& autoClose);
 
         friend class InterpretedTokenFactory;
-  };
-
-  class TokenEvalContext : public EvalContext
-  {
-  	public:
-  	    TokenEvalContext(EvalContext* parent, const TokenId& tok);
-  	    virtual ~TokenEvalContext();
-
-  	    virtual ConstrainedVariableId getVar(const char* name);
-
-        virtual void* getElement(const char* name) const;
-
-  	    virtual bool isClass(const LabelStr& className) const;
-
-  	    TokenId& getToken();
-
-  	protected:
-  	    TokenId m_token;
   };
 
   class InterpretedTokenFactory: public TokenFactory
@@ -191,23 +167,34 @@ namespace EUROPA {
 	  InterpretedTokenFactory(const LabelStr& predicateName,
 	                          const ObjectTypeId& objType);
 
-	  void addParameter(Expr* parameterDecl);
-      void addVarAssignment(Expr* va);
-	  void addConstraint(Expr* c);
+      void addBodyExpr(Expr* e);
 
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const;
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
 
-	  // Only needed for NddlXml
-	  void setParameterInitValue(const LabelStr& name,Expr* valueExpr);
-
     protected:
       ObjectTypeId m_objType;
-      std::vector<Expr*> m_parameters;
-      std::vector<Expr*> m_varAssignments;
-      std::vector<Expr*> m_constraints;
+      std::vector<Expr*> m_body;
 
       TokenFactoryId getParentFactory(const PlanDatabaseId& planDb) const;
+  };
+
+  class TokenEvalContext : public EvalContext
+  {
+    public:
+        TokenEvalContext(EvalContext* parent, const TokenId& tok);
+        virtual ~TokenEvalContext();
+
+        virtual ConstrainedVariableId getVar(const char* name);
+
+        virtual void* getElement(const char* name) const;
+
+        virtual bool isClass(const LabelStr& className) const;
+
+        TokenId& getToken();
+
+    protected:
+        TokenId m_token;
   };
 
   class InterpretedRuleInstance : public RuleInstance
@@ -266,26 +253,6 @@ namespace EUROPA {
   };
 
   typedef Id<InterpretedRuleInstance> InterpretedRuleInstanceId;
-  class RuleInstanceEvalContext : public EvalContext
-  {
-  	public:
-  	    RuleInstanceEvalContext(EvalContext* parent, const InterpretedRuleInstanceId& ruleInstance);
-  	    virtual ~RuleInstanceEvalContext();
-
-  	    virtual void* getElement(const char* name) const;
-
-    	virtual ConstrainedVariableId getVar(const char* name);
-  	    virtual InterpretedRuleInstanceId& getRuleInstance() { return m_ruleInstance; }
-
-  	    virtual TokenId getToken(const char* name);
-
-        virtual bool isClass(const LabelStr& className) const;
-
-        virtual std::string toString() const;
-
-  	protected:
-  	    InterpretedRuleInstanceId m_ruleInstance;
-  };
 
   class InterpretedRuleFactory : public Rule
   {
@@ -299,6 +266,27 @@ namespace EUROPA {
 
     protected:
         std::vector<Expr*> m_body;
+  };
+
+  class RuleInstanceEvalContext : public EvalContext
+  {
+    public:
+        RuleInstanceEvalContext(EvalContext* parent, const InterpretedRuleInstanceId& ruleInstance);
+        virtual ~RuleInstanceEvalContext();
+
+        virtual void* getElement(const char* name) const;
+
+        virtual ConstrainedVariableId getVar(const char* name);
+        virtual InterpretedRuleInstanceId& getRuleInstance() { return m_ruleInstance; }
+
+        virtual TokenId getToken(const char* name);
+
+        virtual bool isClass(const LabelStr& className) const;
+
+        virtual std::string toString() const;
+
+    protected:
+        InterpretedRuleInstanceId m_ruleInstance;
   };
 
   /*
