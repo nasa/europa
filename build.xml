@@ -256,6 +256,7 @@
   </target>
 	                
   <target name="run-example-cpp">
+    <echo> Running CPP example in ${basedir}/dist/europa/examples/${example.name}</echo>
     <exec executable="make" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
       <arg line="${run-example-cpp.mode}"/>
       <env key="EUROPA_HOME" value="${basedir}/dist/europa"/>
@@ -264,6 +265,7 @@
   </target>
 	
   <target name="run-example-java">
+    <echo> Running Java example in ${basedir}/dist/europa/examples/${example.name}</echo>
       <exec executable="ant" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
           <arg line="-Dproject.bsh.script=Batch.bsh -Dproject.mode=${run-example-java.mode}"/>
           <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
@@ -290,7 +292,7 @@
       <delete dir="${basedir}/dist/europa/MakeProjectTest"/>
   </target>
 	        
-  <target name="test-dist" depends="dist,init,test-makeproject" 
+  <target name="test-dist" depends="init,dist,test-makeproject" 
 	      description="Runs tests on release">
  	  <antcall target="run-example-cpp"><param name="example.name" value="BlocksWorld"/></antcall>	
 	  <antcall target="run-example-cpp"><param name="example.name" value="Light"/></antcall>	
