@@ -100,3 +100,4 @@ LOADLIBS += -lSystem$(BUILD_SUFFIX) \
             -lLog4cpp$(BUILD_SUFFIX) 
 
 vpath %.dylib $(EUROPA_HOME)/lib
+

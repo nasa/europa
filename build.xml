@@ -292,18 +292,18 @@
 	        
   <target name="test-dist" depends="init,test-makeproject" 
 	      description="Runs tests on release">
-  	  <antcall target="run-example-cpp"><param name="example.name" value="BlocksWorld"/></antcall>	
+ 	  <antcall target="run-example-cpp"><param name="example.name" value="BlocksWorld"/></antcall>	
 	  <antcall target="run-example-cpp"><param name="example.name" value="Light"/></antcall>	
 	  <antcall target="run-example-cpp"><param name="example.name" value="Rover"/></antcall>	
-          <antcall target="run-example-cpp"><param name="example.name" value="Shopping"/></antcall>        
+    <antcall target="run-example-cpp"><param name="example.name" value="Shopping"/></antcall>        
 	  <antcall target="run-example-cpp"><param name="example.name" value="UBO"/></antcall>
 
-          <antcall target="run-example-java"><param name="example.name" value="BlocksWorld"/></antcall>  
-          <antcall target="run-example-java"><param name="example.name" value="Light"/></antcall>        
-          <antcall target="run-example-java"><param name="example.name" value="NQueens"/></antcall>        
-          <antcall target="run-example-java"><param name="example.name" value="Rover"/></antcall> 
-          <antcall target="run-example-java"><param name="example.name" value="Shopping"/></antcall>        
-          <antcall target="run-example-java"><param name="example.name" value="UBO"/></antcall>        
+    <antcall target="run-example-java"><param name="example.name" value="BlocksWorld"/></antcall>  
+    <antcall target="run-example-java"><param name="example.name" value="Light"/></antcall>        
+    <antcall target="run-example-java"><param name="example.name" value="NQueens"/></antcall>        
+    <antcall target="run-example-java"><param name="example.name" value="Rover"/></antcall> 
+    <antcall target="run-example-java"><param name="example.name" value="Shopping"/></antcall>        
+    <antcall target="run-example-java"><param name="example.name" value="UBO"/></antcall>        
   </target>
 	
   <target name="release-dist" depends="init"
