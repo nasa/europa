@@ -82,7 +82,7 @@ ifneq (,$(findstring Solaris,$(UNAME)))
   endif
 endif
 
-CXXFLAGS += $(POSITION_INDEPENDENT_FLAG) -I$(EUROPA_HOME)/include/PLASMA
+CXXFLAGS += $(POSITION_INDEPENDENT_FLAG) -I$(EUROPA_HOME)/include/PLASMA -I$(EUROPA_HOME)/include/
 LDFLAGS += $(POSITION_INDEPENDENT_FLAG) -L$(EUROPA_HOME)/lib
 LOADLIBS += -lSystem$(BUILD_SUFFIX) \
             -ldl \

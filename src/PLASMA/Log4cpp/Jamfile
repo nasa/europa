@@ -92,7 +92,8 @@ actions Make.log4cpp
   echo Building Log4cpp  ... this can take a while on the first build
   echo "  running make in $(versionPath)/src"
   echo "  For details, see $(versionPath)/src/make.log  -- or tail -f that file"
-  cd $(versionPath)/src; make > make.log
+  cd $(versionPath)/src 
+  make > make.log
   cd $(installDir)
   cp  $(libraryBuildFile) .
   cp  $(buildDir)/$(libraryStaticFile) .
