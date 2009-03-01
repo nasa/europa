@@ -290,7 +290,7 @@
       <delete dir="${basedir}/dist/europa/MakeProjectTest"/>
   </target>
 	        
-  <target name="test-dist" depends="init,test-makeproject" 
+  <target name="test-dist" depends="dist,init,test-makeproject" 
 	      description="Runs tests on release">
  	  <antcall target="run-example-cpp"><param name="example.name" value="BlocksWorld"/></antcall>	
 	  <antcall target="run-example-cpp"><param name="example.name" value="Light"/></antcall>	
