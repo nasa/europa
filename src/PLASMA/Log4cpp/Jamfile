@@ -1,19 +1,24 @@
 SubDir PLASMA Log4cpp ;
 
-ModuleExternal Log4cpp ;
+Module Log4cpp ;
 
-versionDir = log4cpp-1.0 ;
-log4cpp.baseDir = $(PLASMA_HOME)/src/PLASMA/Log4cpp ;
-versionPath = $(log4cpp.baseDir)/$(versionDir) ;
-buildPath = $(PLASMA_HOME)/build/lib ;
-
-libraryMakeFile = $(versionPath)/Makefile ;
-librarySharedFile = liblog4cpp.so.4 ;
-libraryBuildFile = $(versionPath)/src/.libs/$(librarySharedFile) ;
+# Europa module names
+installDir = $(PLASMA_HOME)/build/lib ;
 librarySharedDebugFile = libLog4cpp_g.so ;
 librarySharedOptimizedFile = libLog4cpp_o.so ;
 libraryStaticDebugFile = libLog4cpp_g.a ;
 libraryStaticOptimizedFile = libLog4cpp_o.a ;
+
+#Actual Log4cpp build names
+log4cpp.baseDir = $(PLASMA_HOME)/src/PLASMA/Log4cpp ;
+versionDir = log4cpp-1.0 ;
+versionPath = $(log4cpp.baseDir)/$(versionDir) ;
+buildDir = $(versionPath)/src/.libs/ ;
+libraryMakeFile = $(versionPath)/Makefile ;
+librarySharedFile = liblog4cpp.so.4 ;
+libraryStaticFile = liblog4cpp.a ;
+libraryBuildFile = $(buildDir)/$(librarySharedFile) ;
+
 
 rule setup.log4cpp
 {
@@ -27,31 +32,52 @@ rule build.log4cpp
 
 rule install.shared.log4cpp
 {
-  Copy.shared.lib $(1) ;
-##  Depends all : $(libraryBuildFile) ;
+#  File $(installDir)$(librarySharedFile) :$(buildDir)$(librarySharedFile) ;
+  SoftLink $(installDir)$(librarySharedFile) : $(buildDir)$(librarySharedFile) ;
+  SoftLink $(1) : $(buildDir)$(librarySharedFile) ;
 }
 
 rule install.static.log4cpp
 {
-  Copy.static.lib $(1) ;
-##  Depends all : $(libraryBuildFile) ;
+  File $(installDir)$(libraryStaticFile) : $(buildDir)$(libraryStaticFile) ;
+  SoftLink $(1) : $(buildDir)$(libraryStaticFile)  ;
 }
 
 RmDir clean : log4cpp-1.0 ;
+Clean clean :
+  $(librarySharedOptimizedFile)
+	$(librarySharedDebugFile)
+  $(libraryStaticOptimizedFile) 
+  $(libraryStaticDebugFile) ;
 
-Depends $(librarySharedOptimizedFile) : $(libraryMakeFile) $(libraryBuildFile) ;
-Depends $(librarySharedDebugFile) : $(libraryMakeFile) $(libraryBuildFile) ;
-Depends $(libraryStaticOptimizedFile) : $(libraryMakeFile) $(libraryBuildFile) ;
-Depends $(libraryStaticDebugFile) : $(libraryMakeFile) $(libraryBuildFile) ;
+Depends $(librarySharedOptimizedFile)
+  :	$(libraryMakeFile) $(libraryBuildFile) ;
+Depends $(librarySharedDebugFile)
+  :	$(libraryMakeFile) $(libraryBuildFile) ;
+Depends $(libraryStaticOptimizedFile) 
+  :	$(libraryMakeFile) $(libraryBuildFile) ;
+Depends $(libraryStaticDebugFile)
+  :	$(libraryMakeFile) $(libraryBuildFile) ;
+Depends $(libraryBuildFile) : $(libraryMakeFile) ;
 Depends all : 
 	$(librarySharedDebugFile) 
 	$(librarySharedOptimizedFile)
 	$(libraryStaticDebugFile) 
-	$(libraryStaticOptimizedFile) 
+	$(libraryStaticOptimizedFile)
 	;
+
+LOCATE on $(librarySharedFile) =  $(buildDir) ;
+LOCATE on $(libraryStaticFile) =  $(buildDir) ;
+LOCATE on $(librarySharedDebugFile) = $(installDir) ;
+LOCATE on $(librarySharedOptimizedFile) = $(installDir) ;
+LOCATE on $(libraryStaticDebugFile) = $(installDir) ;
+LOCATE on $(libraryStaticOptimizedFile) = $(installDir) ;
 
 actions Configure.log4cpp
 {
+  if [ ! -d $(installDir) ]] ; then
+    mkdir -p $(installDir)
+  fi
   cd $(log4cpp.baseDir)
   echo -n "Unpacking $(versionDir).tar.bz2 in "
   pwd
@@ -67,30 +93,15 @@ actions Make.log4cpp
   echo "  running make in $(versionPath)/src"
   echo "  For details, see $(versionPath)/src/make.log  -- or tail -f that file"
   cd $(versionPath)/src; make > make.log
-  cd $(PLASMA_HOME)/build/lib/
+  cd $(installDir)
   cp  $(libraryBuildFile) .
-}
-
-actions Copy.shared.lib
-{
-  cd $(PLASMA_HOME)/build/lib/
-  if [ ! -e $(1) ] ; then 
-    echo "  Updated $(1)"
-		ln -sf $(librarySharedFile) $(1)
-  fi
-}
-
-actions Copy.static.lib
-{
-  cd $(PLASMA_HOME)/build/lib/
-  if [ ! -e $(1) ] ; then 
-    echo "  Updated $(1)"
-		ln -sf $(libraryStaticFile) $(1)
-  fi
+  cp  $(buildDir)/$(libraryStaticFile) .
 }
 
 setup.log4cpp $(libraryMakeFile) ;
 build.log4cpp $(libraryBuildFile) ;
+build.log4cpp $(buildDir)$(librarySharedFile) ;
+build.log4cpp $(buildDir)$(libraryStaticFile) ;
 install.shared.log4cpp $(librarySharedDebugFile) ;
 install.shared.log4cpp $(librarySharedOptimizedFile) ;
 install.static.log4cpp $(libraryStaticDebugFile) ;
