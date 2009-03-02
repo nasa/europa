@@ -21,7 +21,7 @@ namespace EUROPA {
     m_method = mergeMethod;
 
     // If the environment variable has been set, and is 1, return true, else false
-    if (envStr != NULL && strcmp(envStr, TRUE_VALUE) == 0)
+    if (envStr != NULL && std::strcmp(envStr, TRUE_VALUE) == 0)
       m_method = stackMethod;
 
     if (m_method == mergeMethod) {
