@@ -4,6 +4,7 @@ Antlr3Rules_INCLUDED = TRUE ;
 include [ FDirName $(SUBDIR) JavaRules ] ;
 
 ANTLR3_JAR ?= [ FDirName $(SUBDIR) .. .. ext lib antlr-3.jar ] ;
+ANTLR3FLAGS ?= -o [ FDirName $(SUBDIR) NDDL base ] ;
 
 # Antlr3Grammar ParserPrefix : grammar.g grammar.tree.g ;
 rule Antlr3Grammar
