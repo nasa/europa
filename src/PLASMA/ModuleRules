@@ -99,7 +99,7 @@ rule ModuleObjects {
   local variant ;
   for variant in $(ALL_VARIANTS) {
     local C++FLAGS = $(C++FLAGS) [ FVariantC++Flags $(variant) ] ;
-    local CFLAGS = $(CFLAGS) [ FVariantCFlags $(variant) ] ;
+    local CCFLAGS = $(CCFLAGS) [ FVariantCFlags $(variant) ] ;
 
     local use_pic_flags ;
     if SHARED in $(LIBRARIES) {
@@ -110,14 +110,14 @@ rule ModuleObjects {
     }
     for use_pic_flag in $(use_pic_flags) {
       local C++FLAGS = $(C++FLAGS) ;
-      local CFLAGS = $(CFLAGS) ;
+      local CCFLAGS = $(CCFLAGS) ;
 
       #MJI: changed so that the compiled static libraries can be linked
       #into shared objects.  By removing this conditional, I hope that
       #everything gets compiled with position independent code.
       #if $(use_pic_flag) = YES {
         C++FLAGS += $(POSITION_INDEPENDENT_CODE_FLAG) ;
-        CFLAGS += $(POSITION_INDEPENDENT_CODE_FLAG) ;
+        CCFLAGS += $(POSITION_INDEPENDENT_CODE_FLAG) ;
       #}
 
       local file ;
@@ -162,7 +162,7 @@ rule ModuleNamedObjects {
   local variant ;
   for variant in $(ALL_VARIANTS) {
     local C++FLAGS = $(C++FLAGS) [ FVariantC++Flags $(variant) ] ;
-    local CFLAGS = $(CFLAGS) [ FVariantCFlags $(variant) ] ;
+    local CCFLAGS = $(CCFLAGS) [ FVariantCFlags $(variant) ] ;
 
     local use_pic_flags ;
     if SHARED in $(LIBRARIES) {
@@ -173,10 +173,10 @@ rule ModuleNamedObjects {
     }
     for use_pic_flag in $(use_pic_flags) {
       local C++FLAGS = $(C++FLAGS) ;
-      local CFLAGS = $(CFLAGS) ;
+      local CCFLAGS = $(CCFLAGS) ;
       #if $(use_pic_flag) = YES {
         C++FLAGS += $(POSITION_INDEPENDENT_CODE_FLAG) ;
-        CFLAGS += $(POSITION_INDEPENDENT_CODE_FLAG) ;
+        CCFLAGS += $(POSITION_INDEPENDENT_CODE_FLAG) ;
       #}
 
       local file ;

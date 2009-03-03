@@ -59,6 +59,11 @@
             <!--<arg value="-absolute"/>-->
             <arg value="${basedir}"/>
           </exec>
+          <exec executable="cygpath" outputproperty="local.env.CYG_JAVA_HOME">
+             <arg value="--unix"/>
+             <arg value="--absolute"/>
+             <arg value="${env.JAVA_HOME}"/>
+          </exec>
           <property name="jam.libraries" value="STATIC"/>
           <property name="jam.misc" value="-sOS=CYGWIN -sNOCYGWIN=TRUE"/>
         </then>
@@ -111,6 +116,8 @@
       <arg line="${jam.opts} build"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
       <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.PLASMA_HOME}/build/lib"/>
+      <!-- This is set only for Windows, but other OS don't care anyway -->
+      <env key="CYG_JAVA_HOME" value="${local.env.CYG_JAVA_HOME}" />
     </exec>
   </target>
 

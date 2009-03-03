@@ -11,7 +11,9 @@
 #define HAVE_ACCEPT 1
 
 /* Define to 1 if you have the <arpa/nameser.h> header file. */
+#ifndef __CYGWIN__
 #define HAVE_ARPA_NAMESER_H 1
+#endif
 
 /* Define to 1 if you have the <ctype.h> header file. */
 #define HAVE_CTYPE_H 1

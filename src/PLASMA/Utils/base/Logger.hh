@@ -205,7 +205,7 @@ public:
      * message will always be visible, regardless of the level.
      */
     void log( string msg ) {
-	uint level = currentCategory->getPriority();
+	unsigned int level = currentCategory->getPriority();
 	currentCategory->log( level, msg );
     }
 

@@ -777,11 +777,11 @@ rule ApacheAnt
 # use cd to move to current subdirectory
 actions ApacheAnt
 {
-$(ANT) -f "$(2[1]:G=)" $(ARGS)
+"$(ANT)" -f "$(2[1]:G=)" $(ARGS)
 }
 
 actions ApacheAntClean {
-$(ANT) -f "$(2[1]:G=)" clean
+"$(ANT)" -f "$(2[1]:G=)" clean
 }
 
 

@@ -1158,6 +1158,12 @@ public class ModelAccessor {
         String[]paths = pathAsString.split(";");
         for(int i=0; i < paths.length; ++i) {
           String aPath=NddlUtil.expandEnvVariables(paths[i]);   
+          // CygWin hack
+          final String cygdrive = "/cygdrive/";
+          if (aPath.startsWith(cygdrive)) {
+        	  final int off = cygdrive.length();
+        	  aPath = aPath.charAt(off) + ":" + aPath.substring(off+1);
+          }
           if(new File(aPath).isAbsolute())
             addSearchPath(aPath);
           else

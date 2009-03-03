@@ -59,7 +59,7 @@ actions RunAntlr3Tool
 {
 rm -f $(1)
 #echo $(JAVA) -cp $(ANTLR3_JAR) $(JREFLAGS) org.antlr.Tool -fo ./$(1[0]:D) -traceParser $(ANTLR3FLAGS) $(2) 
-$(JAVA) -cp $(ANTLR3_JAR) $(JREFLAGS) org.antlr.Tool -fo ./$(1[0]:D) -traceParser $(ANTLR3FLAGS) $(2) 
+"$(JAVA)" -cp $(ANTLR3_JAR) $(JREFLAGS) org.antlr.Tool -fo ./$(1[0]:D) -traceParser $(ANTLR3FLAGS) $(2) 
 mv $(1[0]:D)/NDDL3Lexer.c $(1[0]:D)/NDDL3Lexer.cpp 
 mv $(1[0]:D)/NDDL3Parser.c $(1[0]:D)/NDDL3Parser.cpp 
 }
@@ -91,7 +91,7 @@ actions RunAntlr3TreeTool
 {
 rm -f $(1)
 #echo $(JAVA) -cp $(ANTLR3_JAR) $(JREFLAGS) org.antlr.Tool -fo ./$(1[0]:D) -traceParser $(ANTLR3FLAGS) $(2) 
-$(JAVA) -cp $(ANTLR3_JAR) $(JREFLAGS) org.antlr.Tool -fo ./$(1[0]:D) -traceParser $(ANTLR3FLAGS) $(2) 
+"$(JAVA)" -cp $(ANTLR3_JAR) $(JREFLAGS) org.antlr.Tool -fo ./$(1[0]:D) -traceParser $(ANTLR3FLAGS) $(2) 
 mv $(1[0]:D)/NDDL3Tree.c $(1[0]:D)/NDDL3Tree.cpp 
 }
 
