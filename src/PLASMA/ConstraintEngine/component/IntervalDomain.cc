@@ -199,10 +199,13 @@ namespace EUROPA {
     if(!isMember(value))
       empty();
     else {
-      m_lb = value;
-      m_ub = value;
+      bool changed = (m_lb != value || m_ub != value);
+      if(changed == true){ 
+	m_lb = value;
+	m_ub = value;
  
-      notifyChange(DomainListener::SET_TO_SINGLETON);
+	notifyChange(DomainListener::SET_TO_SINGLETON);
+      }
     }
   }
 
