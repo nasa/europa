@@ -108,7 +108,7 @@ namespace EUROPA{
   }
 
   void Token::handleDiscard(){
-    debugMsg("Token:handleDiscard", "Discarding (" << getKey() << ")");
+    debugMsg("Token:handleDiscard", "Discarding (" << getKey() << ") id==" << getId());
 
     m_deleted = true;
 

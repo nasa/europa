@@ -77,11 +77,18 @@ namespace EUROPA {
       ConstrainedVariableId var = entity;
 
       // We also exclude singletons unless they are guards
-      if(!isCompatGuard(var) && var->lastDomain().isSingleton())
+      if(!isCompatGuard(var) && var->lastDomain().isSingleton()){
+	debugMsg("UnboundVariableManager:dynamicMatch",  "Excluding " << var->getKey() << " as a singleton.");
 	return true;
-
+      }
+            
       // Finally, we exlude if the bounds are not finite
-      return !var->lastDomain().areBoundsFinite();
+      if(!var->lastDomain().areBoundsFinite()){
+	debugMsg("UnboundVariableManager:dynamicMatch",  "Excluding " << var->getKey() << " since bounds are infinite.");
+	return true;
+      }
+
+      return false;
     }
 
     /**
@@ -93,7 +100,7 @@ namespace EUROPA {
       m_singletonFlawCandidates.erase(var);
 
       if(variableOfNonActiveToken(var) || !var->canBeSpecified() || var->isSpecified() || staticMatch(var)){
-        debugMsg("UnboundVariableManager:updateFlaw", "Excluding: " << var->toString());
+        debugMsg("UnboundVariableManager:updateFlaw", "Excluding " << var->getKey() << ". " << var->toString());
         condDebugMsg(variableOfNonActiveToken(var), "UnboundVariableManager:updateFlaw", "Parent is not active.");
         condDebugMsg(!var->canBeSpecified(), "UnboundVariableManager:updateFlaw", "Variable can't be specified.");
         condDebugMsg(var->isSpecified(), "UnboundVariableManager:updateFlaw", "Variable is already specified.");
@@ -101,7 +108,7 @@ namespace EUROPA {
       }
 
       debugMsg("UnboundVariableManager:addFlaw",
-	       "Adding " << var->toString() << " as a candidate flaw.");
+	       "Including " << var->getKey() << ". " << var->toString() << " as a candidate flaw.");
 
       m_flawCandidates.insert(var);
 
@@ -111,7 +118,8 @@ namespace EUROPA {
 
     void UnboundVariableManager::removeFlaw(const ConstrainedVariableId& var){
       condDebugMsg(m_flawCandidates.find(var) != m_flawCandidates.end(), 
-		   "UnboundVariableManager:removeFlaw", "Removing " << var->toString() << " as a flaw.");
+		   "UnboundVariableManager:removeFlaw", 
+		   "Removing " << var->getKey() << ". " << var->toString() << " as a flaw.");
 
       m_flawCandidates.erase(var);
       m_singletonFlawCandidates.erase(var);

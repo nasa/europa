@@ -313,7 +313,7 @@ namespace EUROPA {
           flawToResolve = candidate;
           bestP = priority;
           explanation = "priority";
-          debugMsg("FlawManager:next", "Updating flaw to resolve " << candidate->toString());          
+          debugMsg("FlawManager:next", "Updating flaw to resolve " << candidate->getKey() << ") " << candidate->toString());          
           if(bestP == getBestCasePriority())
             break;
         }
@@ -323,7 +323,7 @@ namespace EUROPA {
           flawToResolve = candidate;
           bestP = priority;
           //explanation = "preference";
-          debugMsg("FlawManager:next", "Updating flaw to resolve " << candidate->toString());          
+          debugMsg("FlawManager:next", "Updating flaw to resolve (" << candidate->getKey() << ") " << candidate->toString());          
           if(bestP == getBestCasePriority())
             break;
         }
@@ -437,9 +437,11 @@ namespace EUROPA {
     }
 
     bool FlawManager::dynamicMatch(const EntityId& entity) {
-      checkError(!staticallyExcluded(entity), "Canot call dynamic match if statically excluded");
-      if(m_parent.isId() && m_parent->dynamicMatch(entity))
+      checkError(!staticallyExcluded(entity), "Cannot call dynamic match if statically excluded");
+      if(m_parent.isId() && m_parent->dynamicMatch(entity)){
+	debugMsg("FlawManager:dynamicMatch",  "Excluding " << entity->getKey() << " because of parent.");
         return true;
+      }
 
       condDebugMsg(!isValid(), "FlawManager:isValid", "Invalid datastructures in flaw manger.");
       __gnu_cxx::hash_map<unsigned int, std::vector<FlawFilterId> >::const_iterator it = 
@@ -450,8 +452,11 @@ namespace EUROPA {
         for(std::vector<FlawFilterId>::const_iterator it_a = dynamicFilters.begin(); it_a != dynamicFilters.end(); ++it_a){
           FlawFilterId dynamicFilter = *it_a;
           checkError(dynamicFilter->isDynamic(), "Must be a bug in construction code.");
+	  debugMsg("FlawManager:dynamicMatch",  "Evaluating " << entity->getKey() << ". "  <<                   
+		     dynamicFilter->getName().toString() << " excluding " << entity->toString() << " with " << dynamicFilter->toString());
+
           if(dynamicFilter->test(entity)){
-            debugMsg("FlawManager:dynamicMatch",                     
+            debugMsg("FlawManager:dynamicMatch",  "Excluding " << entity->getKey() << ". "  <<                   
 		     dynamicFilter->getName().toString() << " excluding " << entity->toString() << " with " << dynamicFilter->toString());
 
             condDebugMsg(!isValid(), "FlawManager:isValid", "Invalid datastructures in flaw manger.");
@@ -459,6 +464,8 @@ namespace EUROPA {
           }
         }
       }
+
+      debugMsg("FlawManager:dynamicMatch",  "Including " << entity->getKey());
       return false;
     }
 

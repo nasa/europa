@@ -502,7 +502,9 @@ namespace EUROPA {
     }
 
     // Finally, handle the terminal point - the field variable itself
-    ConstrainedVariableId fieldVar = iObj->getVariable(LabelStr(iObj->getName().toString() + "." + names[varindex]));
+    std::string field_name = iObj->getName().toString() + "." + names[varindex];
+    ConstrainedVariableId fieldVar = iObj->getVariable(LabelStr(field_name));
+    checkError(fieldVar.isValid(), "No variable named '" << field_name << "' in " << iObj->getName().toString());
     path.push_back(fieldVar->getIndex());
 
     // Get the field type for the resulting domain.
