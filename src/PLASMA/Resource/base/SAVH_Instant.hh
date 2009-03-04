@@ -67,7 +67,7 @@ namespace EUROPA {
        * @brief Gets the lower level of the profile at this instant.  May cause profile recalculation.
        * @return the lower level of the profile
        */
-      double getLowerLevel(); 
+      double getLowerLevel();
 
       /**
        * @brief Gets the upper bound of the lower level at this instant.  May cause profile recalculation.
@@ -176,7 +176,7 @@ namespace EUROPA {
        * @return True if there is a violation, false otherwise.
        */
       bool isViolated() const {return m_violated;}
-      
+
       /**
        * @brief Set the flaw status of this instant.
        * @param flawed True if there is a flaw, false otherwise.
@@ -192,7 +192,7 @@ namespace EUROPA {
       void setLowerMagnitude(const double m) {check_error(m_lowerFlaw); m_lowerFlawMagnitude = m;}
 
       bool hasUpperLevelFlaw() const {return m_upperFlaw;}
-      
+
       bool hasLowerLevelFlaw() const {return m_lowerFlaw;}
 
       double getUpperFlawMagnitude() const {return m_upperFlawMagnitude;}
@@ -206,7 +206,7 @@ namespace EUROPA {
       void setViolated(const bool violated) {m_violated = violated;}
 
       std::string toString() const;
-      
+
       const ProfileId& getProfile() const {return m_profile;}
     protected:
     private:
@@ -253,8 +253,6 @@ namespace EUROPA {
       std::set<TransactionId> m_transactions; /*<! The complete set of transactions */
       std::set<TransactionId> m_endingTransactions; /*<! The set of transactions whose upper bound is equal to the current time. */
       std::set<TransactionId> m_startingTransactions; /*<! The set of transactions whose lower bound is equal to the current time. */
-      std::set<TransactionId> m_overlappingTransactions; /*<! The difference of m_transactions and m_closedTransactions. */
-
     };
   }
 }

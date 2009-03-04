@@ -5,8 +5,8 @@
 
 namespace EUROPA {
   namespace SAVH {
-    
-    Instant::Instant(const int time, const ProfileId prof) 
+
+    Instant::Instant(const int time, const ProfileId prof)
       : Entity(), m_id(this), m_time(time), m_profile(prof), m_lowerLevel(0), m_lowerLevelMax(0), m_upperLevelMin(0), m_upperLevel(0),
         m_maxInstProduction(0), m_maxInstConsumption(0), m_minInstProduction(0), m_minInstConsumption(0),
         m_maxCumulativeProduction(0), m_maxCumulativeConsumption(0), m_minCumulativeProduction(0), m_minCumulativeConsumption(0),
@@ -23,56 +23,43 @@ namespace EUROPA {
     const std::set<TransactionId>& Instant::getTransactions() const {return m_transactions;}
     const std::set<TransactionId>& Instant::getEndingTransactions() const {return m_endingTransactions;}
     const std::set<TransactionId>& Instant::getStartingTransactions() const {return m_startingTransactions;}
-    const std::set<TransactionId>& Instant::getOverlappingTransactions() const {return m_overlappingTransactions;}
 
     void Instant::addTransaction(const TransactionId t) {
       checkError(m_transactions.find(t) == m_transactions.end(), "Instant for time " << m_time << " already has transaction " << t);
-      checkError(t->time()->lastDomain().isMember(m_time), "Attempted to add a transaction spanning time " << 
+      checkError(t->time()->lastDomain().isMember(m_time), "Attempted to add a transaction spanning time " <<
                  t->time()->toString() << " to instant for " << m_time);
 
       debugMsg("Instant:addTransaction", "Adding transaction to instant (" << getId() << ") for time " << t->time()->toString() << " with quantity " << t->quantity()->toString());
       m_transactions.insert(t);
 
-      if(t->time()->lastDomain().getLowerBound() == m_time ) 
+      if(t->time()->lastDomain().getLowerBound() == m_time )
         m_startingTransactions.insert(t);
 
       if(t->time()->lastDomain().getUpperBound() == m_time)
         m_endingTransactions.insert(t);
-      else
-        {
-          m_overlappingTransactions.insert(t);
-        }
-
     }
 
-    void Instant::updateTransaction(const TransactionId t) {      
-      checkError(t->time()->lastDomain().isMember(m_time), "Attempted to update a transaction spanning time " << 
+    void Instant::updateTransaction(const TransactionId t) {
+      checkError(t->time()->lastDomain().isMember(m_time), "Attempted to update a transaction spanning time " <<
                  t->time()->toString() << " to instant for " << m_time);
-      
+
       debugMsg("Instant:updateTransaction", "Updating transaction to instant (" << getId() << ") for time " << t->time()->toString() << " with quantity " << t->quantity()->toString());
 
-      if(t->time()->lastDomain().getLowerBound() == m_time ) 
+      if(t->time()->lastDomain().getLowerBound() == m_time )
         m_startingTransactions.insert(t);
       else
         m_startingTransactions.erase(t);
 
       if(t->time()->lastDomain().getUpperBound() == m_time)
-        {
           m_endingTransactions.insert(t);
-          m_overlappingTransactions.erase(t);
-        }
       else
-        {
           m_endingTransactions.erase(t);
-          m_overlappingTransactions.insert(t);
-        }
     }
 
     void Instant::removeTransaction(const TransactionId t) {
       checkError(m_transactions.find(t) != m_transactions.end(), "Instant for time " << m_time << " has no transaction " << t);
       m_transactions.erase(t);
       m_endingTransactions.erase(t);
-      m_overlappingTransactions.erase(t);
       m_startingTransactions.erase(t);
     }
 
