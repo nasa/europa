@@ -20,8 +20,9 @@ actions setup.log4cpp
   echo "  For details, see $(versionPath)/configure.log"
   cd $(versionPath)
   
-  # Hack! : config script returns failure in mac because it fails to remove for dirs, libs look ok though.
-  # assigning return value to a var prevents the build from stopping here.
+  # Hack! : config script returns failure on the mac because it fails to remove some dirs.
+  # the log2cpp libs look ok though, so here we assign the return value to a var 
+  # this prevents the build from dying here.
   export LOG4CPP_CONFIG=`./configure > configure.log`
 }
 
@@ -30,7 +31,6 @@ actions build.log4cpp
   echo Building Log4cpp  ... this can take a while on the first build
   echo "  running make in $(versionPath)/src"
   echo "  For details, see $(versionPath)/src/make.log  -- or tail -f that file"
-  echo "cd $(versionPath)/src ;  make > make.log "
   cd $(versionPath)/src 
   make > make.log
 }
@@ -39,8 +39,14 @@ rule install.log4cpp
 {
   setup.log4cpp $(1) ;
   build.log4cpp $(1) ;
-  
+
+  # need to keep the original lib around so that it can be found at runtime  
+  local target = $(1:D=$(installDir)) ;
+  Depends $(2) : $(target) ;            
+  File $(target) : $(1) ;
   SoftLink $(2) : $(1) ;
+  
+  Clean clean : $(target) ;
   RmDir clean : $(versionPath) ;
 }
 
