@@ -1,109 +1,77 @@
 SubDir PLASMA Log4cpp ;
 
-Module Log4cpp ;
+moduleName = Log4cpp ;
+ModuleExt $(moduleName) ;
 
-# Europa module names
-installDir = $(PLASMA_HOME)/build/lib ;
-librarySharedDebugFile = libLog4cpp_g.so ;
-librarySharedOptimizedFile = libLog4cpp_o.so ;
-libraryStaticDebugFile = libLog4cpp_g.a ;
-libraryStaticOptimizedFile = libLog4cpp_o.a ;
-
-#Actual Log4cpp build names
 log4cpp.baseDir = $(PLASMA_HOME)/src/PLASMA/Log4cpp ;
 versionDir = log4cpp-1.0 ;
 versionPath = $(log4cpp.baseDir)/$(versionDir) ;
-buildDir = $(versionPath)/src/.libs/ ;
-libraryMakeFile = $(versionPath)/Makefile ;
-librarySharedFile = liblog4cpp.so.4 ;
-libraryStaticFile = liblog4cpp.a ;
-libraryBuildFile = $(buildDir)/$(librarySharedFile) ;
 
+buildDir = $(versionPath)/src/.libs ;
+installDir = $(PLASMA_HOME)/build/lib ;
 
-rule setup.log4cpp
+actions setup.log4cpp
 {
-  Configure.log4cpp $(1) ;
-}
-
-rule build.log4cpp
-{
-  Make.log4cpp $(1) ;
-}
-
-rule install.shared.log4cpp
-{
-#  File $(installDir)$(librarySharedFile) :$(buildDir)$(librarySharedFile) ;
-  SoftLink $(installDir)$(librarySharedFile) : $(buildDir)$(librarySharedFile) ;
-  SoftLink $(1) : $(buildDir)$(librarySharedFile) ;
-}
-
-rule install.static.log4cpp
-{
-  File $(installDir)$(libraryStaticFile) : $(buildDir)$(libraryStaticFile) ;
-  SoftLink $(1) : $(buildDir)$(libraryStaticFile)  ;
-}
-
-RmDir clean : log4cpp-1.0 ;
-Clean clean :
-  $(librarySharedOptimizedFile)
-	$(librarySharedDebugFile)
-  $(libraryStaticOptimizedFile) 
-  $(libraryStaticDebugFile) ;
-
-Depends $(librarySharedOptimizedFile)
-  :	$(libraryMakeFile) $(libraryBuildFile) ;
-Depends $(librarySharedDebugFile)
-  :	$(libraryMakeFile) $(libraryBuildFile) ;
-Depends $(libraryStaticOptimizedFile) 
-  :	$(libraryMakeFile) $(libraryBuildFile) ;
-Depends $(libraryStaticDebugFile)
-  :	$(libraryMakeFile) $(libraryBuildFile) ;
-Depends $(libraryBuildFile) : $(libraryMakeFile) ;
-Depends all : 
-	$(librarySharedDebugFile) 
-	$(librarySharedOptimizedFile)
-	$(libraryStaticDebugFile) 
-	$(libraryStaticOptimizedFile)
-	;
-
-LOCATE on $(librarySharedFile) =  $(buildDir) ;
-LOCATE on $(libraryStaticFile) =  $(buildDir) ;
-LOCATE on $(librarySharedDebugFile) = $(installDir) ;
-LOCATE on $(librarySharedOptimizedFile) = $(installDir) ;
-LOCATE on $(libraryStaticDebugFile) = $(installDir) ;
-LOCATE on $(libraryStaticOptimizedFile) = $(installDir) ;
-
-actions Configure.log4cpp
-{
-  if [ ! -d $(installDir) ]] ; then
-    mkdir -p $(installDir)
-  fi
   cd $(log4cpp.baseDir)
-  echo -n "Unpacking $(versionDir).tar.bz2 in "
+  echo "Unpacking $(versionDir).tar.bz2 in "
   pwd
   tar jxf $(versionDir).tar.bz2
   echo Running Log4cpp configure script ... this takes about 1 minute
   echo "  For details, see $(versionPath)/configure.log"
-  cd $(versionPath);  ./configure > configure.log
+  cd $(versionPath)
+  
+  # Hack! : config script returns failure in mac because it fails to remove for dirs, libs look ok though.
+  # assigning return value to a var prevents the build from stopping here.
+  export LOG4CPP_CONFIG=`./configure > configure.log`
 }
 
-actions Make.log4cpp
+actions build.log4cpp
 {
   echo Building Log4cpp  ... this can take a while on the first build
   echo "  running make in $(versionPath)/src"
   echo "  For details, see $(versionPath)/src/make.log  -- or tail -f that file"
+  echo "cd $(versionPath)/src ;  make > make.log "
   cd $(versionPath)/src 
   make > make.log
-  cd $(installDir)
-  cp  $(libraryBuildFile) .
-  cp  $(buildDir)/$(libraryStaticFile) .
 }
 
-setup.log4cpp $(libraryMakeFile) ;
-build.log4cpp $(libraryBuildFile) ;
-build.log4cpp $(buildDir)$(librarySharedFile) ;
-build.log4cpp $(buildDir)$(libraryStaticFile) ;
-install.shared.log4cpp $(librarySharedDebugFile) ;
-install.shared.log4cpp $(librarySharedOptimizedFile) ;
-install.static.log4cpp $(libraryStaticDebugFile) ;
-install.static.log4cpp $(libraryStaticOptimizedFile) ;
+rule install.log4cpp
+{
+  setup.log4cpp $(1) ;
+  build.log4cpp $(1) ;
+  
+  SoftLink $(2) : $(1) ;
+  RmDir clean : $(versionPath) ;
+}
+
+rule Flog4cppLibName {
+  local library = $(1) ;
+  
+  if $(library) = SHARED {
+      if $(OS) = MACOSX {
+          return liblog4cpp.4$(SUFSHARE) ;
+      }
+      else {
+          return liblog4cpp$(SUFSHARE).4 ;
+      }
+  } else if $(library) = STATIC {
+      return liblog4cpp$(SUFLIB) ;
+  } else {
+      Echo can't create library name for $(library), returning lib ; 
+      return "lib" ;
+  }  
+}
+
+for variant in $(VARIANTS) {
+    for library in $(LIBRARIES) {
+        local log4cppLibName = [ Flog4cppLibName $(library) ] ;        
+        local libName = [ FModuleLibraryName $(moduleName) : $(library) : $(variant) ] ;
+                
+        LOCATE on $(log4cppLibName) = $(buildDir) ;        
+        LOCATE on $(libName) = $(installDir) ;        
+
+        Depends $(libName) : $(log4cppLibName) ;            
+        install.log4cpp $(log4cppLibName) : $(libName)  ;        
+    }
+}    
+

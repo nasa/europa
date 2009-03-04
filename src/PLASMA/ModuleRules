@@ -35,6 +35,24 @@ rule Module {
   INCLUDES on $(module) += [ FDirName $(SUBDIR) component ] ;  
 }
 
+# Adds module libs to dependencies
+rule ModuleLibDepends {
+  for variant in $(VARIANTS) {
+      for library in $(LIBRARIES) {
+          local libName = [ FModuleLibraryName $(1) : $(library) : $(variant) ] ;
+          Depends build-modules : $(libName) ;
+          if $(TRACE_MODULE) = TRUE {
+              Echo Depends build-modules $(libName) ;
+          }
+      }
+  }    
+}
+
+rule ModuleExt {
+  Module $(1) ;
+  ModuleLibDepends $(1) ;
+}
+
 # ModuleFiles <name> : <files for this module> ;
 rule ModuleFiles {
   local name = $(1) ;
@@ -52,16 +70,7 @@ rule ModuleFiles {
 # ModuleBase <name> : <files for this module > ;
 rule ModuleBase {
   ModuleFiles $(1) : $(2) ;
-  
-  for variant in $(VARIANTS) {
-      for library in $(LIBRARIES) {
-          local libName = [ FModuleLibraryName $(1) : $(library) : $(variant) ] ;
-          Depends build-modules : $(libName) ;
-          if $(TRACE_MODULE) = TRUE {
-              Echo Depends build-modules $(libName) ;
-          }
-      }
-  }    
+  ModuleLibDepends $(1) ;
 }
 
 # ModuleComponent <name> : <files for this module > ;
