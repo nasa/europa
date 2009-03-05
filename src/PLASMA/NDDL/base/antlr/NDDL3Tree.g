@@ -74,7 +74,7 @@ nddl :
                   |     child=assignment
                   |     child=constraintInstantiation
 		  |	child=classDeclaration
-                  |     child=allocation
+                  |     child=allocation[NULL]
 		  |	child=rule
 		  |	child=problemStmt
                   |     child=relation
@@ -163,25 +163,25 @@ variableDeclarations returns [ExprList* result]
         ;
         
 variableInitialization[AbstractDomain* dataType] returns [Expr* result]
-        : (      name=IDENT
-          |       ^('=' name=IDENT rhs=initializer)
+@init {
+   const char* varName; 
+}
+        : (      name=IDENT { varName = c_str($name.text->chars); }
+          |       ^('=' name=IDENT  { varName = c_str($name.text->chars); } initExpr=initializer[varName])
           )
           {
-              const char* varName = c_str($name.text->chars);
-              Expr* lhs = new ExprVarRef(varName);
-              // TODO: to preserve old semantics, this needs to restrict base domain instead              
-              Expr* initializer = new ExprAssignment(lhs,rhs);
               result = new ExprVarDeclaration(
                    varName,
                    dataType->getTypeName().c_str(),
-                   initializer
+                   initExpr
               ); 
           }
         ;       
 
-initializer returns [Expr* result]
-        : (       child=anyValue 
-          |       child=allocation
+initializer[const char* varName] returns [Expr* result]
+        : (     child=anyValue 
+          |     child=allocation[varName]
+          |     child=qualified
           )
           {
               result = child;
@@ -302,7 +302,7 @@ numericInterval returns [Expr* result]
                 }
         ;
 
-allocation returns [Expr* result]
+allocation[const char* name] returns [Expr* result]
 @init {
     std::vector<Expr*> args;
 }
@@ -311,10 +311,11 @@ allocation returns [Expr* result]
                         variableArgumentList[args]?
                 )
                 {
+                    std::string objName = (name != NULL ? name : getAutoLabel("__Object"));
                     result = new ExprNewObject(
                         CTX->SymbolTable->getPlanDatabase()->getClient(),
                         c_str($objType.text->chars), // objectType
-                        "", // TODO!: object name?
+                        objName.c_str(),
                         args
                     );
                 }
@@ -322,7 +323,7 @@ allocation returns [Expr* result]
 
 variableArgumentList[std::vector<Expr*>& result]
         :       ^('('
-                        (arg=initializer {result.push_back(arg);})*
+                        (arg=initializer[NULL] {result.push_back(arg);})*
                 )
         ;
 
@@ -446,7 +447,7 @@ constructorSuper[ObjectType* objType] returns [ExprConstructorSuperCall* result]
 assignment returns [ExprAssignment* result]
 	:	^('='
 			lhs=qualified
-			rhs=initializer
+			rhs=initializer[lhs->toString().c_str()]
 		)
 		{
 		    result = new ExprAssignment(lhs,rhs);
@@ -626,7 +627,7 @@ relation returns [Expr* result]
 			tr=temporalRelation { relationType = c_str($tr.text->chars); } 
 			predicateInstanceList[targets]
 		)
-		{
+		{		   
 		    result = new ExprRelation(relationType,source,targets);
 		}
 	;
@@ -643,7 +644,7 @@ predicateInstance returns [PredicateInstanceRef* pi]
 @init {
     const char* name = NULL;
 }
-	:	^(qt=qualifiedToken (i=IDENT { name = c_str($i.text->chars); })?)
+	:	^(PREDICATE_INSTANCE qt=qualifiedToken (i=IDENT { name = c_str($i.text->chars); })?)
 	        {
 	            pi = new PredicateInstanceRef(qt->toString().c_str(),name);
 	            delete qt;
@@ -655,14 +656,20 @@ qualified returns [Expr* result]
     std::string varName;
 }
         :  (      name=identifier { varName=c_str($name.text->chars); }                 
-           |       ^('.' name=identifier { if (varName.length()>0) varName+="."; varName+=c_str($name.text->chars); } qualified*)
+           |       ^('.' prefix=qualified 
+                         { 
+                             // TODO: Hack!, this is brittle
+                             varName = prefix->toString(); 
+                             delete prefix; 
+                         } 
+                         (q=IDENT { varName += std::string(".") + c_str($q.text->chars); })+)
            )
            {
                // TODO!!: do type checking at each "."
                result = new ExprVarRef(varName.c_str());
            }
-        ;	
-
+        ;
+        
 qualifiedToken returns [Expr* result]
         :       e=qualified
                 {

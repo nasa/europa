@@ -80,7 +80,7 @@ namespace EUROPA {
     debugMsg("XMLInterpreter:XML",dbgout.str());
   }
 
-   Expr* NddlXmlInterpreter::valueToExpr(const TiXmlElement* element, bool isRule)
+   Expr* NddlXmlInterpreter::valueToExpr(const TiXmlElement* element)
   {
     check_runtime_error(element != NULL,"Unexpected NULL element, expected value or id element");
 
@@ -95,10 +95,7 @@ namespace EUROPA {
     }
     else if (strcmp(element->Value(),"id") == 0) {
       const char* varName = element->Attribute("name");
-      if (isRule)
-          return new ExprRuleVarRef(varName);
-      else
-          return new ExprVarRef(varName);
+      return new ExprVarRef(varName);
     }
     else
       check_runtime_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + element->Value() + ", expected constant(value,symbol,interval) or id element");
@@ -175,7 +172,7 @@ namespace EUROPA {
           else if (strcmp(child->Value(),"super") == 0) {
               std::vector<Expr*> argExprs;
               for(const TiXmlElement* argChild = child->FirstChildElement(); argChild; argChild = argChild->NextSiblingElement() )
-                  argExprs.push_back(valueToExpr(argChild,false));
+                  argExprs.push_back(valueToExpr(argChild));
 
               superCallExpr = new ExprConstructorSuperCall(objType->getParent(),argExprs);
           }
@@ -190,7 +187,7 @@ namespace EUROPA {
 
                   std::vector<Expr*> argExprs;
                   for(const TiXmlElement* argChild = rhsChild->FirstChildElement(); argChild; argChild = argChild->NextSiblingElement() )
-                      argExprs.push_back(valueToExpr(argChild,false));
+                      argExprs.push_back(valueToExpr(argChild));
 
                   rhs = new ExprNewObject(
                           m_client,
@@ -200,11 +197,11 @@ namespace EUROPA {
                   );
               }
               else
-                  rhs = valueToExpr(rhsChild,false);
+                  rhs = valueToExpr(rhsChild);
 
               debugMsg("NddlXmlInterpreter:defineConstructor",
                       "Adding an assignment to " << lhs);
-              constructorBody.push_back(new ExprConstructorAssignment(lhs,rhs));
+              constructorBody.push_back(new ExprAssignment(new ExprVarRef(lhs),rhs));
           }
           else
               check_runtime_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + child->Value());

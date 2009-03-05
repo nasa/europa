@@ -36,7 +36,7 @@ namespace EUROPA {
       void declarePredicate  (ObjectType* objType, const TiXmlElement* element);
       void defineEnum(const SchemaId& schema, const char* className,  const TiXmlElement* element);
 
-      Expr* valueToExpr(const TiXmlElement* element,bool isRule=true);
+      Expr* valueToExpr(const TiXmlElement* element);
 
       const DbClientId& getDbClient() const { return m_client; }
 

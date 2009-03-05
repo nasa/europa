@@ -55,6 +55,9 @@ namespace EUROPA {
     static const std::set<std::string>& MODEL_TRANSACTIONS();
     static const std::set<std::string>& STATE_TRANSACTIONS();
     static const std::set<std::string>& NO_TRANSACTIONS();
+
+    static const char* getObjectAndType(const SchemaId& schema, const DbClientId& client, const char* predicate,ObjectId& object);
+
   protected:
     typedef std::multimap<std::pair<ConstrainedVariableId, ConstrainedVariableId>, ConstraintId> TemporalRelations;
 
@@ -66,8 +69,8 @@ namespace EUROPA {
 				   Iterator start, Iterator end);
 
     // These are handled by code-generation
-    virtual void playDeclareClass(const TiXmlElement &)       {} 
-    virtual void playDefineClass(const TiXmlElement &)        {} 
+    virtual void playDeclareClass(const TiXmlElement &)       {}
+    virtual void playDefineClass(const TiXmlElement &)        {}
     virtual void playDefineCompat(const TiXmlElement &)       {}
     virtual void playDefineEnumeration(const TiXmlElement &)  {}
     virtual void playDefineType(const TiXmlElement &)         {}
@@ -84,7 +87,7 @@ namespace EUROPA {
     void playTokenCreated(const TiXmlElement & element);
     void playTokenDeleted(const TiXmlElement& element);
     template <typename Iterator>
-    void playTokenUndeleted(const TiXmlElement& element, Iterator start, Iterator end); 
+    void playTokenUndeleted(const TiXmlElement& element, Iterator start, Iterator end);
     void playFactCreated(const TiXmlElement & element);
     void playConstrained(const TiXmlElement & element);
     void playFreed(const TiXmlElement & element);
@@ -125,7 +128,7 @@ namespace EUROPA {
 
     const CESchemaId& getCESchema() const;
     const SchemaId& getSchema() const;
-    
+
     DbClientId m_client;
     int m_objectCount;
     int m_varCount;
@@ -139,48 +142,48 @@ namespace EUROPA {
 
   //! string input functions
 
-    /** 
+    /**
      * @brief read a value string as a variable identifier
      */
     ConstrainedVariableId parseVariable(const char * varString);
 
-    /** 
+    /**
      * @brief read a value string as a token identifier
      */
     TokenId parseToken(const char * tokString);
 
   //! XML input functions
 
-    /** 
+    /**
      * @brief create an abstract domain as represented by an xml element
      */
     const AbstractDomain * xmlAsAbstractDomain(const TiXmlElement & element,
 					       const char * name = NULL,
 					       const char* typeName = NULL);
 
-    /** 
+    /**
      * @brief create an interval domain as represented by an xml element
      */
     IntervalDomain * xmlAsIntervalDomain(const TiXmlElement & element,
 					 const char* typeName = NULL);
 
-    /** 
+    /**
      * @brief create an enumerated domain as represented by an xml element
      */
     EnumeratedDomain * xmlAsEnumeratedDomain(const TiXmlElement & element,
 					     const char* typeName = NULL);
 
-    /** 
+    /**
      * @brief return a value as represented by an xml element
      */
     double xmlAsValue(const TiXmlElement & value, const char * name = NULL);
 
-    /** 
+    /**
      * @brief return a variable as represented by an xml element
      */
     ConstrainedVariableId xmlAsVariable(const TiXmlElement & variable);
 
-    /** 
+    /**
      * @brief return a token as represented by an xml element
      */
     TokenId xmlAsToken(const TiXmlElement & token);
@@ -195,15 +198,13 @@ namespace EUROPA {
      */
     TokenId createToken(const char* name,const char* type,bool rejectable,bool isFact);
 
-    const char* getObjectAndType(DbClientId& client, const char* predicate,ObjectId& object) const;
-    
 #define construct_constraint(relation, ftoken, fvar, stoken, svar){\
         std::vector<ConstrainedVariableId> variables;\
         variables.push_back( ftoken##_token->fvar());\
         variables.push_back( stoken##_token->svar());\
         m_relations.insert(std::make_pair(std::make_pair(variables[0], variables[1]), m_client->createConstraint(#relation, variables))); \
         }
-    
+
   };
 }
 

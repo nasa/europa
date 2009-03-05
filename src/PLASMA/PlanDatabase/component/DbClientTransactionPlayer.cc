@@ -450,9 +450,13 @@ namespace EUROPA {
     checkError(ALWAYS_FAIL, "No creation transaction to complement " << element);
   }
 
-  const char* DbClientTransactionPlayer::getObjectAndType(DbClientId& client, const char* predicate,ObjectId& object) const
+  const char* DbClientTransactionPlayer::getObjectAndType(
+          const SchemaId& schema,
+          const DbClientId& client,
+          const char* predicate,
+          ObjectId& object)
   {
-    if (!getSchema()->isPredicate(predicate)) {
+    if (!schema->isPredicate(predicate)) {
       LabelStr typeStr(predicate);
       int cnt = typeStr.countElements(Schema::getDelimiter());
       LabelStr prefix = typeStr.getElement(0, Schema::getDelimiter());
@@ -462,7 +466,7 @@ namespace EUROPA {
       LabelStr suffix = typeStr.getElement(1, Schema::getDelimiter());
 
       for (int i=2; i<cnt;i++) {
-          objType = getSchema()->getMemberType(objType,suffix);
+          objType = schema->getMemberType(objType,suffix);
           suffix = typeStr.getElement(i, Schema::getDelimiter());
       }
 
@@ -488,7 +492,7 @@ namespace EUROPA {
     // object and specify it. We will also have to generate the appropriate type designation
     // by extracting the class from the object
     ObjectId object;
-    const char* predicateType = getObjectAndType(m_client,type,object);
+    const char* predicateType = getObjectAndType(getSchema(),m_client,type,object);
 
     TokenId token = m_client->createToken(predicateType,rejectable,isFact);
 

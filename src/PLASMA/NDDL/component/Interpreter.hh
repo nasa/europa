@@ -43,7 +43,9 @@ namespace EUROPA {
   	    virtual std::string toString() const;
 
   	protected:
-  	    LabelStr m_varName;
+  	    std::string m_varName;
+  	    std::string m_parentName;
+  	    std::vector<std::string> m_vars;
   };
 
   class ExprConstraint : public Expr
@@ -81,22 +83,6 @@ namespace EUROPA {
 	    LabelStr              m_objectType;
 	    LabelStr              m_objectName;
 	    std::vector<Expr*>    m_argExprs;
-  };
-
-  // Assignment inside a constructor
-  // TODO: make lhs an Expr as well to make this a generic assignment
-  class ExprConstructorAssignment : public Expr
-  {
-    public:
-        ExprConstructorAssignment(const char* lhs,
-                                  Expr* rhs);
-        virtual ~ExprConstructorAssignment();
-
-        virtual DataRef eval(EvalContext& context) const;
-
-    protected:
-        LabelStr m_lhs;
-        Expr* m_rhs;
   };
 
   class InterpretedRuleInstance;
@@ -249,7 +235,7 @@ namespace EUROPA {
         virtual void handleExecute();
 
         friend class ExprIf;
-        friend class ExprRuleVarRef;
+        friend class ExprVarRef;
   };
 
   typedef Id<InterpretedRuleInstance> InterpretedRuleInstanceId;
@@ -305,19 +291,6 @@ namespace EUROPA {
 
   	    virtual DataRef doEval(RuleInstanceEvalContext& context) const = 0;
     virtual ~RuleExpr(){}
-  };
-
-  class ExprRuleVarRef : public RuleExpr
-  {
-  	public:
-  	    ExprRuleVarRef(const char* name);
-  	    virtual ~ExprRuleVarRef();
-
-  	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;
-
-  	protected:
-  	    std::string m_parentName;
-  	    std::string m_varName;
   };
 
   class ExprLocalVar : public RuleExpr

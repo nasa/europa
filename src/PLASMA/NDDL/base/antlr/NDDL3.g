@@ -15,6 +15,7 @@ tokens {
 	NDDL;
 	TOKEN_RELATION;
 	VARIABLE;
+	PREDICATE_INSTANCE;
 }
 
 nddl	:	nddlStatement*
@@ -234,7 +235,7 @@ predicateArguments
 
 predicateArgument
 	:	qualified IDENT?
-			-> ^(qualified IDENT?)
+	        -> ^(PREDICATE_INSTANCE qualified IDENT?)
 	;
 
 constraintInstantiation

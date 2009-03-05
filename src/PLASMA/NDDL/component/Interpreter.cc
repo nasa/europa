@@ -12,6 +12,7 @@
 
 #include "ConstraintFactory.hh"
 #include "DbClient.hh"
+#include "DbClientTransactionPlayer.hh"
 #include "EnumeratedDomain.hh"
 #include "EnumeratedTypeFactory.hh"
 #include "IntervalTypeFactory.hh"
@@ -53,32 +54,6 @@ namespace EUROPA {
   }
 
   /*
-   * ExprConstructorAssignment
-   */
-  ExprConstructorAssignment::ExprConstructorAssignment(const char* lhs,
-						       Expr* rhs)
-    : m_lhs(lhs)
-    , m_rhs(rhs)
-  {
-  }
-
-  ExprConstructorAssignment::~ExprConstructorAssignment()
-  {
-  }
-
-  DataRef ExprConstructorAssignment::eval(EvalContext& context) const
-  {
-    ObjectId object = context.getVar("this")->derivedDomain().getSingletonValue();
-    check_error(object->getVariable(m_lhs) == ConstrainedVariableId::noId());
-    ConstrainedVariableId rhsValue = m_rhs->eval(context).getValue();
-    const AbstractDomain& domain = rhsValue->derivedDomain();
-    object->addVariable(domain,m_lhs.c_str());
-    debugMsg("Interpreter:InterpretedObject","Initialized variable:" << object->getName().toString() << "." << m_lhs.toString() << " to " << rhsValue->derivedDomain().toString() << " in constructor");
-
-    return DataRef::null;
-  }
-
-  /*
    * ExprConstant
    */
   ExprConstant::ExprConstant(const DbClientId& dbClient, const char* type, const AbstractDomain* domain)
@@ -99,14 +74,14 @@ namespace EUROPA {
     // can be created for a constant.
     ConstrainedVariableId var;
 
-    // TODO: this isn't pretty, have the EvalConstext create the new var, deal with it gracefully for all the possibilities
-    RuleInstanceEvalContext *riec = dynamic_cast<RuleInstanceEvalContext*>(&context);
     bool canBeSpecified = false;
     static int nameCnt=0;
     std::stringstream sstr;
     sstr << "ExprConstant_PSEUDO_VARIABLE_" << nameCnt++;
     const char* name = sstr.str().c_str();
 
+    // TODO: this isn't pretty, have the different EvalContexts create the new var
+    RuleInstanceEvalContext *riec = dynamic_cast<RuleInstanceEvalContext*>(&context);
     if (riec != NULL) {
         var = riec->getRuleInstance()->addLocalVariable(*m_domain,canBeSpecified,name);
     }
@@ -140,6 +115,18 @@ namespace EUROPA {
   ExprVarRef::ExprVarRef(const char* varName)
     : m_varName(varName)
   {
+    tokenize(m_varName,m_vars,".");
+
+    if (m_vars.size() > 1) {
+      m_parentName = m_vars[0];
+      m_varName = m_varName.substr(m_parentName.length()+1);
+      m_vars.erase(m_vars.begin());
+      debugMsg("Interpreter:ExprVarRef","Split " << varName << " into " << m_parentName << " and " << m_varName);
+    }
+    else {
+      m_parentName = "";
+      debugMsg("Interpreter:ExprVarRef","Didn't split " << varName);
+    }
   }
 
   ExprVarRef::~ExprVarRef()
@@ -148,35 +135,64 @@ namespace EUROPA {
 
   DataRef ExprVarRef::eval(EvalContext& context) const
   {
-    // TODO: do this only once
-    std::vector<std::string> vars;
-    tokenize(m_varName.toString(),vars,".");
-    std::string varName=vars[0];
+    ConstrainedVariableId var;
 
-    ConstrainedVariableId rhs = context.getVar(vars[0].c_str());
+    if (m_parentName == "") {
+        var = context.getVar(m_varName.c_str());
+        check_runtime_error(!var.isNoId(),std::string("Couldn't find variable ")+m_varName+" in Evaluation Context");
+    }
+    else {
+        TokenId tok = context.getToken(m_parentName.c_str());
+        if (tok.isNoId()) {
+            var = context.getVar(m_parentName.c_str());
+            if (var.isNoId()) {
+                check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable or token")+m_parentName+" in Evaluation Context");
+                return DataRef::null;
+            }
+        }
 
-    if (rhs.isNoId())
-      check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+varName+" in Evaluation Context");
+        // TODO: this isn't pretty, have the different EvalContexts perform the lookup
+        RuleInstanceEvalContext *riec = dynamic_cast<RuleInstanceEvalContext*>(&context);
+        if (riec != NULL) {
+            if (tok.isId())
+                var = riec->getRuleInstance()->varfromtok(tok,m_varName);
+            else
+                var = riec->getRuleInstance()->varFromObject(m_parentName,m_varName,false);
+        }
+        else {
+            std::string varName=m_vars[0];
+            unsigned int idx = 0;
 
-    for (unsigned int idx = 1;idx<vars.size();idx++) {
-      // TODO: parser must do type checking instead
-      //check_error(m_schema->isObjectType(rhs->baseDomain().getTypeName()), std::string("Can't apply dot operator to:")+rhs->baseDomain().getTypeName().toString());
-      check_runtime_error(rhs->derivedDomain().isSingleton(),varName+" must be singleton to be able to get to "+vars[idx]);
-      ObjectId object = rhs->derivedDomain().getSingletonValue();
-      rhs = object->getVariable(object->getName().toString()+"."+vars[idx]);
-      varName += "." + vars[idx];
+            if (tok.isId()) {
+                var = tok->getVariable(varName,false);
+                idx++;
+            }
 
-      if (rhs.isNoId())
-	      check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+vars[idx]+
-			    " in object \""+object->getName().toString()+"\" of type "+object->getType().toString());
+            for (;idx<m_vars.size();idx++) {
+              check_runtime_error(var->derivedDomain().isSingleton(),varName+" must be singleton to be able to get to "+m_vars[idx]);
+              ObjectId object = var->derivedDomain().getSingletonValue();
+              var = object->getVariable(object->getName().toString()+"."+m_vars[idx]);
+              varName += "." + m_vars[idx];
+
+              if (var.isNoId())
+                  check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+m_vars[idx]+
+                        " in object \""+object->getName().toString()+"\" of type "+object->getType().toString());
+            }
+        }
+
+        return DataRef(var);
     }
 
-    return DataRef(rhs);
+
+    return DataRef(var);
   }
 
   std::string ExprVarRef::toString() const
   {
-      return m_varName.toString();
+      if (m_parentName.size()==0)
+          return m_varName;
+      else
+          return m_parentName + "." + m_varName;
   }
 
 
@@ -245,56 +261,6 @@ namespace EUROPA {
       os << " }";
 
       return os.str();
-  }
-
-
-  //TODO:!!! unify ExprRuleVarRef and ExprVarRef
-  /*
-   * ExprRuleVarRef
-   */
-  ExprRuleVarRef::ExprRuleVarRef(const char* varName)
-    : m_varName(varName)
-  {
-    std::vector<std::string> vars;
-    tokenize(m_varName,vars,".");
-
-    if (vars.size() > 1) {
-      m_parentName = vars[0];
-      m_varName = m_varName.substr(m_parentName.length()+1);
-      debugMsg("Interpreter:InterpretedRule","Split " << varName << " into " << m_parentName << " and " << m_varName);
-    }
-    else {
-      m_parentName = "";
-      debugMsg("Interpreter:InterpretedRule","Didn't split " << varName);
-    }
-  }
-
-  ExprRuleVarRef::~ExprRuleVarRef()
-  {
-  }
-
-  DataRef ExprRuleVarRef::doEval(RuleInstanceEvalContext& context) const
-  {
-    ConstrainedVariableId var;
-
-    if (m_parentName == "") {
-        var = context.getVar(m_varName.c_str());
-        check_runtime_error(!var.isNoId(),std::string("Couldn't find variable ")+m_varName+" in Evaluation Context");
-    }
-    else {
-        TokenId tok = context.getToken(m_parentName.c_str());
-        if (!tok.isNoId())
-            var = context.getRuleInstance()->varfromtok(tok,m_varName);
-        else {
-            var = context.getVar(m_parentName.c_str());
-            if (!var.isNoId())
-                var = context.getRuleInstance()->varFromObject(m_parentName,m_varName,false);
-            else
-                check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable ")+m_parentName+" in Evaluation Context");
-        }
-    }
-
-    return DataRef(var);
   }
 
   ExprConstraint::ExprConstraint(const char* name,const std::vector<Expr*>& args)
@@ -493,15 +459,17 @@ namespace EUROPA {
 
   TokenId PredicateInstanceRef::createGlobalToken(EvalContext& context, bool isFact, bool isRejectable)
   {
+      debugMsg("Interpreter:createToken", "creating Token:" << m_predicateInstance << " " << m_predicateName);
+
       // The type may be qualified with an object name, in which case we should get the
       // object and specify it. We will also have to generate the appropriate type designation
       // by extracting the class from the object
       ObjectId object;
-      const char* predicateType = ""; // TODO!: getObjectAndType(m_client,type,object);
+      const char* predicateType = DbClientTransactionPlayer::getObjectAndType(getSchema(context),getPDB(context),m_predicateInstance.c_str(),object);
 
-      TokenId token; // TODO! = m_client->createToken(predicateType,isRejectable,isFact);
+      TokenId token = getPDB(context)->createToken(predicateType,isRejectable,isFact);
 
-      if (!object.isNoId()) {
+      if (object.isId()) {
           // We restrict the base domain permanently since the name is specifically mentioned on creation
           token->getObject()->restrictBaseDomain(object->getThis()->baseDomain());
       }
@@ -557,10 +525,17 @@ namespace EUROPA {
     , m_origin(origin)
     , m_targets(targets)
   {
+      if (m_origin == NULL) {
+          m_origin = new PredicateInstanceRef(NULL,"this");
+      }
   }
 
   ExprRelation::~ExprRelation()
   {
+      delete m_origin;
+      for (unsigned int i =0;i<m_targets.size();i++)
+          delete m_targets[i];
+      m_targets.clear();
   }
 
 #define makeRelation(relationname, origin, originvar, target, targetvar) {  \
@@ -1379,12 +1354,29 @@ namespace EUROPA {
 
   ConstrainedVariableId ExprVarDeclaration::makeGlobalVar(EvalContext& context) const
   {
+      const LabelStr& name = getName();
+      const LabelStr& type = getType();
+      const Expr* initValue = getInitValue();
       const DbClientId& pdb = getPDB(context);
 
-      ConstrainedVariableId v = pdb->createVariable(
-              m_type.c_str(),
-              m_name.c_str()
-      );
+      ConstrainedVariableId v;
+
+      if (initValue != NULL) {
+          v = pdb->createVariable(
+              type.c_str(),
+              initValue->eval(context).getValue()->baseDomain(), // baseDomain
+              name.c_str(),
+              false, // isTmpVar
+              true   // canBeSpecified
+
+          );
+      }
+      else {
+          v = pdb->createVariable(
+              type.c_str(),
+              name.c_str()
+          );
+      }
 
       return v;
   }
@@ -1456,19 +1448,35 @@ namespace EUROPA {
 
   DataRef ExprAssignment::eval(EvalContext& context) const
   {
-      DataRef lhs = m_lhs->eval(context);
+      DataRef lhs;
 
-      if (m_rhs != NULL) {
-          DataRef rhs = m_rhs->eval(context);
-          const DbClientId& pdb = getPDB(context);
+      ConstrainedVariableId thisVar = context.getVar("this");
+      // TODO: modify interpreted object constructor to add vars upfront so that this if stmt isn't necessary
+      if (thisVar.isId()) {
+          ObjectId object = thisVar->derivedDomain().getSingletonValue();
+          const char* varName = m_lhs->toString().c_str(); // TODO: this is a hack!
+          check_error(object->getVariable(varName) == ConstrainedVariableId::noId());
+          ConstrainedVariableId rhsValue = m_rhs->eval(context).getValue();
+          const AbstractDomain& domain = rhsValue->derivedDomain();
+          ConstrainedVariableId v = object->addVariable(domain,varName);
+          lhs = DataRef(v);
+          debugMsg("Interpreter:InterpretedObject","Initialized variable:" << object->getName().toString() << "." << varName << " to " << rhsValue->derivedDomain().toString() << " in constructor");
+      }
+      else {
+          lhs = m_lhs->eval(context);
 
-          if (rhs.getValue()->lastDomain().isSingleton()) {
-              pdb->specify(lhs.getValue(),rhs.getValue()->lastDomain().getSingletonValue());
-          }
-          else {
-              pdb->restrict(lhs.getValue(),rhs.getValue()->lastDomain());
-              // TODO: this behavior seems more reasonable, specially to support violation reporting
-              // lhs.getValue()->getCurrentDomain().equate(rhs.getValue()->getCurrentDomain());
+          if (m_rhs != NULL) {
+              DataRef rhs = m_rhs->eval(context);
+              const DbClientId& pdb = getPDB(context);
+
+              if (rhs.getValue()->lastDomain().isSingleton()) {
+                  pdb->specify(lhs.getValue(),rhs.getValue()->lastDomain().getSingletonValue());
+              }
+              else {
+                  pdb->restrict(lhs.getValue(),rhs.getValue()->lastDomain());
+                  // TODO: this behavior seems more reasonable, specially to support violation reporting
+                  // lhs.getValue()->getCurrentDomain().equate(rhs.getValue()->getCurrentDomain());
+              }
           }
       }
 
