@@ -206,6 +206,7 @@ namespace EUROPA {
     m_isExecuted = true;
     handleExecute();
     m_rulesEngine->notifyExecuted(getId());
+    debugMsg("europa:model", ruleExecutionContext());
     debugMsg("RuleInstance:execute", "Executed:" << m_rule->getName().toString());
   }
 
@@ -633,5 +634,46 @@ namespace EUROPA {
     }
 
     return false;
+  }
+
+  std::string RuleInstance::ruleExecutionContext() const {
+    static const std::string TAB_DELIMITER("    ");
+    std::stringstream ss;
+
+    // What is the token
+    ss << "[" << getToken()->getKey() << "]Rule fired on master token: " << 
+      getToken()->toString() << ". The rule instance context is given below:" << std::endl << std::endl;
+
+    // What rule
+    ss << "Rule: " << getRule()->toString() << std::endl << std::endl;
+
+    // What guards are involved
+    if(m_guards.empty())
+      ss << "No Guards" << std::endl;
+    else {
+      ss << "Guards:" << std::endl;
+
+      for(std::vector<ConstrainedVariableId>::const_iterator it = m_guards.begin(); it != m_guards.end(); ++it){
+	ConstrainedVariableId guard = *it;
+	ss << TAB_DELIMITER << guard->getName().toString() << " == " << guard->lastDomain().toString() << std::endl;
+      }
+    }
+
+    ss << std::endl;
+
+    // What slaves are created
+    if(m_slaves.empty())
+      ss << "No Slaves" << std::endl;
+    else {
+      ss << "Slaves: " << std::endl;
+      for(std::map<double, TokenId>::const_iterator it = m_slavesByName.begin(); it != m_slavesByName.end(); ++it){
+	LabelStr name = (LabelStr) it->first;
+	TokenId token = it->second;
+	ss << TAB_DELIMITER << name.toString() << "==" << token->toString() << std::endl;
+      }
+    }
+
+    ss << "++++++++++++++++++x+++++++";
+    return ss.str();
   }
 }

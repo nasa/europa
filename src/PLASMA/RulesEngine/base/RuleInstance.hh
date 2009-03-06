@@ -287,6 +287,9 @@ namespace EUROPA{
      */
     bool connectedToToken(const ConstraintId& constraint, const TokenId& token) const;
 
+    /** ANALYSIS ROUTINES FOR DEBUGGING **/
+    std::string ruleExecutionContext() const;
+
     std::vector<ConstrainedVariableId> m_guards; /*!< Guard variables for implicit and explcit guards */
     AbstractDomain* m_guardDomain; /*!< If an explicit equality test, will ahve this be non-null */
     ConstraintId m_guardListener; /*!< If guarded, listener is a constraint */

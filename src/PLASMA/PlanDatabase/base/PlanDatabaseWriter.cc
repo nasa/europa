@@ -139,11 +139,50 @@ namespace EUROPA {
       }
     }
 
+  std::string PlanDatabaseWriter::timeDomain(const AbstractDomain& dom){
+    std::stringstream ss;
+
+    if(dom.isSingleton())
+      ss << "{";
+    else
+      ss << "[";
+
+    if(dom.getLowerBound() == MINUS_INFINITY)
+      ss << "-inf";
+    else if(dom.getLowerBound() == PLUS_INFINITY)
+      ss << "+inf";
+    else 
+      ss << dom.getLowerBound();
+
+    if(!dom.isSingleton()){
+      ss << ", ";
+      if(dom.getUpperBound() == MINUS_INFINITY)
+	ss << "-inf";
+      else if(dom.getUpperBound() == PLUS_INFINITY)
+	ss << "+inf";
+      else
+	ss << dom.getUpperBound();
+    }
+
+    if(dom.isSingleton())
+      ss << "}";
+    else
+      ss << "]";
+
+    return ss.str();
+  }
+
+  std::string PlanDatabaseWriter::simpleTokenSummary(const TokenId& token) {
+    std::stringstream ss;
+    ss << token->toString() << timeDomain(token->start()->lastDomain()) <<  " --> " << timeDomain(token->end()->lastDomain());
+    return ss.str();
+
+  }
     void PlanDatabaseWriter::writeToken(const TokenId& t, std::ostream& os) {
       indent()++;
       check_error(t.isValid());
       TempVarId st = t->start();
-      os << indentation() << "[ " << st->lastDomain() << " ]"<< std::endl;
+      os << indentation() << "\t" << timeDomain(st->lastDomain()) << std::endl;
       os << indentation() << "\t" << t->getPredicateName().toString() << "(" ;
       std::vector<ConstrainedVariableId> vars = t->parameters();
       for (std::vector<ConstrainedVariableId>::const_iterator varit = vars.begin(); varit != vars.end(); ++varit) {
@@ -164,15 +203,24 @@ namespace EUROPA {
       if (t->master().isNoId())
 	os << "  Master=NONE" << std::endl;
       else
-	os << "  Master=" << getKey(t->master()) << std::endl;
+	os << "  Master=" << getKey(t->master()) << " " << simpleTokenSummary(t->master()) << std::endl;
 
 
       TokenSet mergedtoks = t->getMergedTokens();
 
-      for (TokenSet::const_iterator mit = mergedtoks.begin(); mit != mergedtoks.end(); ++mit) 
-	os << indentation() << "\t\tMerged Key=" << getKey(*mit) << std::endl;
+      for (TokenSet::const_iterator mit = mergedtoks.begin(); mit != mergedtoks.end(); ++mit) {
+	TokenId mergedToken = *mit;
+	os << indentation() << "\t\tMerged Key=" << getKey(mergedToken);
+	if(mergedToken->master().isId()){
+	  os << " from " << simpleTokenSummary(mergedToken->master());
+	}
+	else 
+	  os << " ROOT";
 
-      os << indentation() << "[ " << t->end()->lastDomain() << " ]"<< std::endl;
+	os  << std::endl;
+      }
+
+      os << indentation() << "\t" << timeDomain(t->end()->lastDomain()) << std::endl;
       indent()--;
     }
 
