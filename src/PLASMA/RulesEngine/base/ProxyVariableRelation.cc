@@ -116,7 +116,7 @@ namespace EUROPA {
    * @see Constraint::handleAddition
    */
   void ProxyVariableRelation::updatePathFromSource(){
-    if(m_sourceConstraint.isId() && m_sourceConstraintKey != (signed int) m_sourceConstraint->getKey()){
+    if(m_sourceConstraint.isId() && m_sourceConstraintKey != (unsigned int) m_sourceConstraint->getKey()){
       ProxyVariableRelation* proxyConstraint = (ProxyVariableRelation*) m_sourceConstraint;
       m_path = proxyConstraint->m_path;
       m_sourceConstraint = ConstraintId::noId();

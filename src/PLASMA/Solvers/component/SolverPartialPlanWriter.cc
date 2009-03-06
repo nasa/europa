@@ -249,16 +249,13 @@ namespace EUROPA {
 	//add default directories to search for model files
 	sourcePaths.push_back(".");
 	sourcePaths.push_back("..");
-	char *configPath = getenv(envPPWConfigFile);
+	std::string configPath;
+	if(getenv(envPPWConfigFile) == NULL)
+	  configPath = "PlanWorks.cfg";
+	else
+	  configPath = std::string(getenv(envPPWConfigFile));
 
-	// If null, then also test for existence of a default config file - PlanWorks.cfg
-	if(configPath == NULL){
-	  std::ifstream config("PlanWorks.cfg");
-	  if (config.good())
-	    configPath = "PlanWorks.cfg";
-	}
-
-	if (configPath == NULL || configPath[0] == '\0') {
+	if (!std::ifstream(configPath.c_str()).good()) {
 	  debugMsg("PartialPlanWriter",  "Warning: PPW_CONFIG not set or is empty.");
 	  debugMsg("PartialPlanWriter",  "   PartialPlanWriter will not write.");
 	  stepsPerWrite = 0;
@@ -270,7 +267,7 @@ namespace EUROPA {
 	char *configBuf = new char[PATH_MAX + 100];
 	if (configBuf == 0)
 	  FatalErr("No memory for PPW_CONFIG");
-	if (realpath(configPath, configBuf) == NULL) {
+	if (realpath(configPath.c_str(), configBuf) == NULL) {
 	  std::cerr << "Failed to get config file " << configPath << std::endl;
 	  FatalErrno();
 	}
@@ -1359,10 +1356,15 @@ namespace EUROPA {
       void PartialPlanWriter::incrementStep(){nstep++;}
 
       void PartialPlanWriter::addSourcePath(const char* path) {
+	static const std::string EMPTY_STRING("");
+	static const std::string COLON_DELIMITER(":");
 	std::string spath(path);
-	if(path == "" || path == ":")
+
+	if(path == EMPTY_STRING || path == COLON_DELIMITER)
 	  return;
+
 	debugMsg("PartialPlanWriter:addSourcePath", "Adding path '" << spath << "'");
+
 	sourcePaths.push_back(spath);
       }
     }
