@@ -139,7 +139,15 @@ namespace EUROPA {
 
     if (m_parentName == "") {
         var = context.getVar(m_varName.c_str());
-        check_runtime_error(!var.isNoId(),std::string("Couldn't find variable ")+m_varName+" in Evaluation Context");
+        if (var.isNoId()) {
+            // If var evaluates to a token, return state var.
+            TokenId tok = context.getToken(m_varName.c_str());
+            if (tok.isNoId()) {
+                check_runtime_error(!var.isNoId(),std::string("Couldn't find variable or token")+m_varName+" in Evaluation Context");
+                return DataRef::null;
+            }
+            var = tok->getState();
+        }
     }
     else {
         TokenId tok = context.getToken(m_parentName.c_str());
@@ -152,6 +160,7 @@ namespace EUROPA {
         }
 
         // TODO: this isn't pretty, have the different EvalContexts perform the lookup
+        // TODO: is this really still necessary?, code in "else" block should work in ruleInstance context as well
         RuleInstanceEvalContext *riec = dynamic_cast<RuleInstanceEvalContext*>(&context);
         if (riec != NULL) {
             if (tok.isId())
@@ -179,10 +188,7 @@ namespace EUROPA {
                         " in object \""+object->getName().toString()+"\" of type "+object->getType().toString());
             }
         }
-
-        return DataRef(var);
     }
-
 
     return DataRef(var);
   }
@@ -640,48 +646,6 @@ namespace EUROPA {
     }
 
     debugMsg("Interpreter:InterpretedRule","Created relation " << relationName);
-    return DataRef::null;
-  }
-
-  ExprLocalVar::ExprLocalVar(const LabelStr& name,
-                             const LabelStr& type,
-                             bool guarded,
-                             Expr* domainRestriction,
-                             const AbstractDomain& baseDomain)
-    : m_name(name)
-    , m_type(type)
-    , m_guarded(guarded)
-    , m_domainRestriction(domainRestriction)
-    , m_baseDomain(baseDomain)
-  {
-  }
-
-  ExprLocalVar::~ExprLocalVar()
-  {
-  }
-
-  DataRef ExprLocalVar::doEval(RuleInstanceEvalContext& context) const
-  {
-    ConstrainedVariableId localVar;
-    if (context.isClass(m_type))
-      localVar = context.getRuleInstance()->addObjectVariable(
-							      m_type,
-							      ObjectDomain(m_type.c_str()),
-							      m_guarded, // can't be specified
-							      m_name
-							      );
-    else
-      localVar = context.getRuleInstance()->addLocalVariable(
-							     m_baseDomain,
-							     m_guarded, // can't be specified
-							     m_name
-							     );
-
-    if (m_domainRestriction != NULL)
-      localVar->restrictBaseDomain(m_domainRestriction->eval(context).getValue()->derivedDomain());
-
-    context.addVar(m_name.c_str(),localVar);
-    debugMsg("Interpreter:InterpretedRule","Added RuleInstance local var:" << localVar->toString());
     return DataRef::null;
   }
 
@@ -1323,10 +1287,11 @@ namespace EUROPA {
       return os.str();
   }
 
-  ExprVarDeclaration::ExprVarDeclaration(const char* name, const char* type, Expr* initValue)
+  ExprVarDeclaration::ExprVarDeclaration(const char* name, const char* type, Expr* initValue, bool canBeSpecified)
       : m_name(name)
       , m_type(type)
       , m_initValue(initValue)
+      , m_canBeSpecified(canBeSpecified)
   {
   }
 
@@ -1343,11 +1308,17 @@ namespace EUROPA {
   {
       ConstrainedVariableId v;
 
+      // TODO: delegate to contexts instead
       TokenEvalContext* ctx = dynamic_cast<TokenEvalContext*>(&context);
       if (ctx != NULL)
           v = makeTokenVar(*ctx);
-      else
-          v = makeGlobalVar(context);
+      else {
+          RuleInstanceEvalContext* riec = dynamic_cast<RuleInstanceEvalContext*>(&context);
+          if (riec != NULL)
+              v = makeRuleVar(*riec);
+          else
+              v = makeGlobalVar(context);
+      }
 
       return DataRef(v);
   }
@@ -1367,8 +1338,7 @@ namespace EUROPA {
               initValue->eval(context).getValue()->baseDomain(), // baseDomain
               name.c_str(),
               false, // isTmpVar
-              true   // canBeSpecified
-
+              m_canBeSpecified
           );
       }
       else {
@@ -1423,6 +1393,34 @@ namespace EUROPA {
               << parameter->toString() << " " << parameterName.toString());
 
       return parameter;
+  }
+
+  ConstrainedVariableId ExprVarDeclaration::makeRuleVar(RuleInstanceEvalContext& context) const
+  {
+    ConstrainedVariableId localVar;
+    if (context.isClass(m_type))
+      localVar = context.getRuleInstance()->addObjectVariable(
+                                  m_type,
+                                  ObjectDomain(m_type.c_str()),
+                                  m_canBeSpecified,
+                                  m_name
+                                  );
+    else {
+      // TODO: do we really need to pass the base domain?
+      const AbstractDomain& baseDomain = context.getRuleInstance()->getPlanDatabase()->getSchema()->getCESchema()->baseDomain(m_type.c_str());
+      localVar = context.getRuleInstance()->addLocalVariable(
+                                 baseDomain,
+                                 m_canBeSpecified,
+                                 m_name
+                                 );
+    }
+
+    if (m_initValue != NULL)
+      localVar->restrictBaseDomain(m_initValue->eval(context).getValue()->derivedDomain());
+
+    context.addVar(m_name.c_str(),localVar);
+    debugMsg("Interpreter:InterpretedRule","Added RuleInstance local var:" << localVar->toString());
+    return localVar;
   }
 
   std::string ExprVarDeclaration::toString() const
@@ -1657,17 +1655,22 @@ namespace EUROPA {
       if (method=="activate")
           pdb->activate(tok);
       else if (method=="merge") {
-          // pdb->merge(tok,activeToken);
+          StateVarId stateVar = args[0];
+          TokenId activeToken = stateVar->getParentToken();
+          pdb->merge(tok,activeToken);
       }
       else if (method=="reject")
           pdb->reject(tok);
       else if (method=="cancel")
           pdb->cancel(tok);
-      else if (method=="constrain")  {
-          // TODO: pdb->constrain(obj,tok,successor);
-      }
-      else if (method=="free") {
-          // TODO: pdb->free(obj,tok,successor);
+      else if (method=="constrain" || method=="free")  {
+          ObjectId obj = ObjectId(args[0]->derivedDomain().getSingletonValue());
+          StateVarId stateVar = args[1];
+          TokenId succ = stateVar->getParentToken();
+          if (method=="constrain")
+              pdb->constrain(obj,tok,succ);
+          else
+              pdb->free(obj,tok,succ);
       }
       else
           check_runtime_error(ALWAYS_FAILS,"Unknown token method:" + method);

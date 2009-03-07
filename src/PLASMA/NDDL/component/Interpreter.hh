@@ -33,6 +33,35 @@ namespace EUROPA {
   	    const AbstractDomain* m_domain;
   };
 
+  class TokenEvalContext;
+  class RuleInstanceEvalContext;
+
+  class ExprVarDeclaration : public Expr
+  {
+  public:
+      ExprVarDeclaration(const char* name, const char* type, Expr* initValue, bool canBeSpecified);
+      virtual ~ExprVarDeclaration();
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+      const LabelStr& getName() const;
+      const LabelStr& getType() const;
+
+      const Expr* getInitValue() const;
+      void setInitValue(Expr* iv);
+
+  protected:
+      LabelStr m_name;
+      LabelStr m_type;
+      Expr* m_initValue;
+      bool m_canBeSpecified;
+
+      ConstrainedVariableId makeGlobalVar(EvalContext& context) const;
+      ConstrainedVariableId makeTokenVar(TokenEvalContext& context) const;
+      ConstrainedVariableId makeRuleVar(RuleInstanceEvalContext& context) const;
+  };
+
   class ExprVarRef : public Expr
   {
   	public:
@@ -46,6 +75,23 @@ namespace EUROPA {
   	    std::string m_varName;
   	    std::string m_parentName;
   	    std::vector<std::string> m_vars;
+  };
+
+  class ExprAssignment : public Expr
+  {
+  public:
+      ExprAssignment(Expr* lhs, Expr* rhs);
+      virtual ~ExprAssignment();
+
+      Expr* getLhs() { return m_lhs; }
+      Expr* getRhs() { return m_rhs; }
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      Expr* m_lhs;
+      Expr* m_rhs;
   };
 
   class ExprConstraint : public Expr
@@ -62,6 +108,93 @@ namespace EUROPA {
     protected:
         LabelStr m_name;
         std::vector<Expr*> m_args;
+  };
+
+  class ExprTypedef : public Expr
+  {
+  public:
+      ExprTypedef(const char* name, AbstractDomain* type);
+      virtual ~ExprTypedef();
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      LabelStr m_name;
+      AbstractDomain* m_type;
+  };
+
+  class ExprObjectTypeDeclaration : public Expr
+  {
+  public:
+      ExprObjectTypeDeclaration(const ObjectTypeId& objType);
+      virtual ~ExprObjectTypeDeclaration();
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      const ObjectTypeId m_objType;
+  };
+
+  class ExprObjectTypeDefinition : public Expr
+  {
+  public:
+      ExprObjectTypeDefinition(const ObjectTypeId& objType);
+      virtual ~ExprObjectTypeDefinition();
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      const ObjectTypeId m_objType;
+  };
+
+  class ExprRuleTypeDefinition : public Expr
+  {
+  public:
+      ExprRuleTypeDefinition(const RuleId& rf);
+      virtual ~ExprRuleTypeDefinition();
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      const RuleId m_ruleFactory;
+  };
+
+  class ExprVariableMethod : public Expr
+  {
+  public:
+      ExprVariableMethod(const char* name, Expr* varExpr, const std::vector<Expr*>& argExprs);
+      virtual ~ExprVariableMethod();
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      LabelStr m_methodName;
+      Expr* m_varExpr;
+      std::vector<Expr*> m_argExprs;
+
+      DataRef eval(EvalContext& context, ConstrainedVariableId& var, const std::vector<ConstrainedVariableId>& args) const;
+  };
+
+  class ExprTokenMethod : public Expr
+  {
+  public:
+      ExprTokenMethod(const char* name, const char* tokenName, const std::vector<Expr*>& argExprs);
+      virtual ~ExprTokenMethod();
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      LabelStr m_methodName;
+      LabelStr m_tokenName;
+      std::vector<Expr*> m_argExprs;
+
+      DataRef eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const;
   };
 
   class ExprNewObject : public Expr
@@ -101,6 +234,22 @@ namespace EUROPA {
 
       TokenId createSubgoal(EvalContext& ctx, InterpretedRuleInstance* rule, const char* relationName);
       TokenId createGlobalToken(EvalContext& context, bool isFact, bool isRejectable);
+  };
+
+  class ExprProblemStmt : public Expr
+  {
+  public:
+      ExprProblemStmt(const char* name, const std::vector<PredicateInstanceRef*>& tokens);
+      virtual ~ExprProblemStmt();
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      LabelStr m_name;
+      std::vector<PredicateInstanceRef*> m_tokens;
+
+      DataRef eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const;
   };
 
   class ExprRelation : public Expr
@@ -293,26 +442,6 @@ namespace EUROPA {
     virtual ~RuleExpr(){}
   };
 
-  class ExprLocalVar : public RuleExpr
-  {
-  	public:
-  	    ExprLocalVar(const LabelStr& name,
-  	                 const LabelStr& type,
-  	                 bool guarded,
-  	                 Expr* domainRestriction,
-  	                 const AbstractDomain& baseDomain);
-  	    virtual ~ExprLocalVar();
-
-  	    virtual DataRef doEval(RuleInstanceEvalContext& context) const;
-
-  	protected:
-  	    LabelStr m_name;
-  	    LabelStr m_type;
-  	    bool m_guarded;
-  	    Expr* m_domainRestriction;
-  	    const AbstractDomain& m_baseDomain;
-  };
-
   class ExprIfGuard : public Expr
   {
   public:
@@ -369,150 +498,6 @@ namespace EUROPA {
 
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const = 0;
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const = 0;
-  };
-
-  class ExprTypedef : public Expr
-  {
-  public:
-      ExprTypedef(const char* name, AbstractDomain* type);
-      virtual ~ExprTypedef();
-
-      virtual DataRef eval(EvalContext& context) const;
-      virtual std::string toString() const;
-
-  protected:
-      LabelStr m_name;
-      AbstractDomain* m_type;
-  };
-
-  class ExprVarDeclaration : public Expr
-  {
-  public:
-      ExprVarDeclaration(const char* name, const char* type, Expr* initValue);
-      virtual ~ExprVarDeclaration();
-
-      virtual DataRef eval(EvalContext& context) const;
-      virtual std::string toString() const;
-
-      const LabelStr& getName() const;
-      const LabelStr& getType() const;
-
-      const Expr* getInitValue() const;
-      void setInitValue(Expr* iv);
-
-  protected:
-      LabelStr m_name;
-      LabelStr m_type;
-      Expr* m_initValue;
-
-      ConstrainedVariableId makeGlobalVar(EvalContext& context) const;
-      ConstrainedVariableId makeTokenVar(TokenEvalContext& context) const;
-  };
-
-  class ExprAssignment : public Expr
-  {
-  public:
-      ExprAssignment(Expr* lhs, Expr* rhs);
-      virtual ~ExprAssignment();
-
-      Expr* getLhs() { return m_lhs; }
-      Expr* getRhs() { return m_rhs; }
-
-      virtual DataRef eval(EvalContext& context) const;
-      virtual std::string toString() const;
-
-  protected:
-      Expr* m_lhs;
-      Expr* m_rhs;
-  };
-
-  class ExprObjectTypeDeclaration : public Expr
-  {
-  public:
-      ExprObjectTypeDeclaration(const ObjectTypeId& objType);
-      virtual ~ExprObjectTypeDeclaration();
-
-      virtual DataRef eval(EvalContext& context) const;
-      virtual std::string toString() const;
-
-  protected:
-      const ObjectTypeId m_objType;
-  };
-
-  class ExprObjectTypeDefinition : public Expr
-  {
-  public:
-      ExprObjectTypeDefinition(const ObjectTypeId& objType);
-      virtual ~ExprObjectTypeDefinition();
-
-      virtual DataRef eval(EvalContext& context) const;
-      virtual std::string toString() const;
-
-  protected:
-      const ObjectTypeId m_objType;
-  };
-
-  class ExprRuleTypeDefinition : public Expr
-  {
-  public:
-      ExprRuleTypeDefinition(const RuleId& rf);
-      virtual ~ExprRuleTypeDefinition();
-
-      virtual DataRef eval(EvalContext& context) const;
-      virtual std::string toString() const;
-
-  protected:
-      const RuleId m_ruleFactory;
-  };
-
-  class ExprVariableMethod : public Expr
-  {
-  public:
-      ExprVariableMethod(const char* name, Expr* varExpr, const std::vector<Expr*>& argExprs);
-      virtual ~ExprVariableMethod();
-
-      virtual DataRef eval(EvalContext& context) const;
-      virtual std::string toString() const;
-
-  protected:
-      LabelStr m_methodName;
-      Expr* m_varExpr;
-      std::vector<Expr*> m_argExprs;
-
-      DataRef eval(EvalContext& context, ConstrainedVariableId& var, const std::vector<ConstrainedVariableId>& args) const;
-  };
-
-  class ExprTokenMethod : public Expr
-  {
-  public:
-      ExprTokenMethod(const char* name, const char* tokenName, const std::vector<Expr*>& argExprs);
-      virtual ~ExprTokenMethod();
-
-      virtual DataRef eval(EvalContext& context) const;
-      virtual std::string toString() const;
-
-  protected:
-      LabelStr m_methodName;
-      LabelStr m_tokenName;
-      std::vector<Expr*> m_argExprs;
-
-      DataRef eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const;
-  };
-
-  class ExprProblemStmt : public Expr
-  {
-  public:
-      ExprProblemStmt(const char* name, const std::vector<PredicateInstanceRef*>& tokens);
-      virtual ~ExprProblemStmt();
-
-      virtual DataRef eval(EvalContext& context) const;
-      virtual std::string toString() const;
-
-  protected:
-      LabelStr m_name;
-      std::vector<PredicateInstanceRef*> m_tokens;
-
-      DataRef eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const;
   };
 
 }

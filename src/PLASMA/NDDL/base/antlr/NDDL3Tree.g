@@ -170,10 +170,12 @@ variableInitialization[AbstractDomain* dataType] returns [Expr* result]
           |       ^('=' name=IDENT  { varName = c_str($name.text->chars); } initExpr=initializer[varName])
           )
           {
+              // TODO: nddl-xml parser says in Rules, only guarded vars can be specified, do we need to preserve that?
               result = new ExprVarDeclaration(
                    varName,
                    dataType->getTypeName().c_str(),
-                   initExpr
+                   initExpr,
+                   true // canBeSpecified
               ); 
           }
         ;       

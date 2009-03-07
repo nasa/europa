@@ -246,7 +246,7 @@ namespace EUROPA {
               if(!predArg->NoChildren())
                   pInitValue = valueToExpr(predArg->FirstChildElement());
 
-              parameterDecls[pName] = new ExprVarDeclaration(pName.c_str(),pType.c_str(),pInitValue);
+              parameterDecls[pName] = new ExprVarDeclaration(pName.c_str(),pType.c_str(),pInitValue,true /*canBeSpecified*/);
               tokenFactory->addArg(pType,pName);
               tokenFactory->addBodyExpr(parameterDecls[pName]);
           }
@@ -382,8 +382,7 @@ namespace EUROPA {
               if (child->FirstChildElement() != NULL)
                   domainRestriction=valueToExpr(child->FirstChildElement());
 
-              const AbstractDomain& baseDomain = getCESchema()->baseDomain(type.c_str());
-              ruleBody.push_back(new ExprLocalVar(name,type, isGuarded(name,element), domainRestriction, baseDomain));
+              ruleBody.push_back(new ExprVarDeclaration(name.c_str(),type.c_str(),domainRestriction,isGuarded(name,element)));
           }
           else if (strcmp(child->Value(),"if") == 0) {
               const TiXmlElement* opElement = child->FirstChildElement();
