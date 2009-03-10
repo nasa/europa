@@ -4,6 +4,8 @@ if ! $(PLASMA_READY) {
 
 Module NDDL : Antlr3 RulesEngine TemporalNetwork ;
 
+ANTLR3FLAGS ?= -o [ FDirName $(SUBDIR) base ] ;
+
 SubInclude PLASMA NDDL base ;
 SubInclude PLASMA NDDL component ;
 

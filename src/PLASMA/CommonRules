@@ -137,7 +137,7 @@ rule ExecuteTargetSO {
 }
 
 actions ExecuteTargetSO {
-cd ./$(2:D)
+cd $(2:D)
 echo $(PREFIX) ./$(2:BS) $(ARGUMENTS)
 $(PREFIX) ./$(2:BS) $(ARGUMENTS)
 }
