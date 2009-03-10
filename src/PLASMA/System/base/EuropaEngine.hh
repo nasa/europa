@@ -9,15 +9,14 @@
 #include "tinyxml.h"
 #include "Logger.hh"
 
-using EUROPA::Utils::Logger; 
-
 namespace EUROPA {
 //namespace System { //TODO: mcr
 
   class EuropaEngine : public EngineBase
   {
     public:
-        static Logger &LOGGER;
+        LOGGER_CLASS_INSTANCE()
+        //static Logger &LOGGER;
 
         EuropaEngine();
         virtual ~EuropaEngine();

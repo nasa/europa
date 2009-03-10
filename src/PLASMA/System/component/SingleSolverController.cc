@@ -23,8 +23,9 @@ namespace EUROPA {
 
     void SingleSolverController::configureSolvers(const char* configPath)
     {
-        LOGGER.log(Logger::DEBUG, std::string("SingleSolverController:configureSolvers: Configuration source is ") + configPath);
-        check_error(configPath != NULL, "Must have a planner config argument.");
+      //LOGGER.log(Logger::DEBUG, std::string("SingleSolverController:configureSolvers: Configuration source is ") + configPath);
+      LOGGER_DEBUG_MSG( DEBUG, "SingleSolverController:configureSolvers: Configuration source is " << configPath)
+      check_error(configPath != NULL, "Must have a planner config argument.");
         TiXmlDocument doc(configPath);
         doc.LoadFile();
         m_solver = (new EUROPA::SOLVERS::Solver(getPlanDatabase(), *(doc.RootElement())))->getId();
@@ -63,12 +64,16 @@ namespace EUROPA {
 
         SOLVERS::HorizonFilter::getHorizon() = IntervalDomain(start, end);
 
-        std::string msg = std::string("SolverConfiguration: \n") +
-        "    Horizon = [" + EUROPA::toString(start) + ", " + EUROPA::toString(end) + "]\n" +
-        "    MaxSteps = " + EUROPA::toString(m_maxSteps) + "\n" +
-        "    MaxDepth = " + EUROPA::toString(m_maxDepth);
+        //std::string msg = std::string("SolverConfiguration: \n") +
+        //"    Horizon = [" + EUROPA::toString(start) + ", " + EUROPA::toString(end) + "]\n" +
+        //"    MaxSteps = " + EUROPA::toString(m_maxSteps) + "\n" +
+        //"    MaxDepth = " + EUROPA::toString(m_maxDepth);
 
-        LOGGER.log(Logger::DEBUG, msg);
+        //LOGGER.log(Logger::DEBUG, msg);
+	LOGGER_DEBUG_MSG( DEBUG, "SolverConfiguration:" << LOGGER_ENDL
+			  << "    Horizon = [" << start << ", " << EUROPA::toString(end) << "]" << LOGGER_ENDL
+			  << "    MaxSteps = " << m_maxSteps  << LOGGER_ENDL
+			  << "    MaxDepth = " << m_maxDepth );
     }
 
     MasterController::Status SingleSolverController::handleNext()

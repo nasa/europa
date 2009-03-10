@@ -24,7 +24,8 @@
 namespace EUROPA {
 //namespace System { //TODO: mcr
 
-    Logger  &EuropaEngine::LOGGER = Logger::getInstance( "EUROPA::System::EuropaEngine", Logger::DEBUG );
+  //Logger  &EuropaEngine::LOGGER = Logger::getInstance( "EUROPA::System::EuropaEngine", Logger::DEBUG );
+  LOGGER_CLASS_INSTANCE_IMPL( EuropaEngine, "EUROPA::System::EuropaEngine", DEBUG );
 
     EuropaEngine::EuropaEngine()
     {
@@ -107,8 +108,9 @@ namespace EUROPA {
       if(!playTransactions(txSource, interp))
         return false;
 
-      //debugMsg("EuropaEngine:plan", "Initial state: " << std::endl << PlanDatabaseWriter::toString(getPlanDatabase()));
-      LOGGER << Logger::DEBUG << "plan: Initial state: " << Logger::eol << PlanDatabaseWriter::toString(getPlanDatabase());
+      //debugMsg("EuropaEngine:plan", "Initial state: " << std::endl << PlanDatabaseWriter::toString(getPlanDatabase()))
+      //LOGGER << Logger::DEBUG << "plan: Initial state: " << Logger::eol << PlanDatabaseWriter::toString(getPlanDatabase());
+      LOGGER_DEBUG_MSG( DEBUG, "Initial state: " << LOGGER_ENDL << PlanDatabaseWriter::toString(getPlanDatabase()) )
 
       // Configure the planner from data in the initial state
       std::list<ObjectId> configObjects;

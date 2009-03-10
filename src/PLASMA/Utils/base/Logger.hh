@@ -32,10 +32,10 @@ public:
 };
 
 /**
- *  Singleton class to provide a way to read a configuration and
- *  prepare the necessary categories on startup.  This class depends
- *  on the Log4cpp API and requires Log4CPP to be installed on the
- *  developers workstation.  LoggerConfig is intended to be an
+ *  Singleton class to provide a way to read a configuration
+ *  and prepare the necessary categories on startup.  This class
+ *  depends on the Log4cpp API and requires Log4CPP to be installed on
+ *  the developers workstation.  LoggerConfig is intended to be an
  *  internal class for the Logger and should not be included in Europa
  *  code.
  *
@@ -114,13 +114,13 @@ private:
 
 
 /**
+ *  Provides a wrapper class to the Log4cpp API that unifies the
+ *  logging for all classes.  Maintenance on this class will result in
+ *  changes for all logging throughout Europa.  If, in the future, a
+ *  change in the logging is warranted (for example, away from
+ *  Log4cpp), this abstraction should pay off.
+
  *  This class also consolidates the Error.hh and Debug.hh macros.
- *
- *  Provides a wrapper class to the Log4cpp API that (hopefully)
- *  unifies the logging for all classes.  Maintenance on this class
- *  will result in changes for all logging throughout Europa.  If, in
- *  the future, a change in the logging is warranted (for example,
- *  away from Log4cpp), this abstraction should pay off.
  *
  */
 class Logger {
@@ -287,11 +287,48 @@ private:
   #define condDebugMsg(cond, marker, data)
   #define debugStmt(marker, stmt)
   #define condDebugStmt(cond, marker, stmt)
+
+  #define LOGGER_CLASS_INSTANCE() 
+  #define LOGGER_CLASS_INSTANCE_IMPL( className, category, level ) {  
+  #define LOGGER_CLASS_DEBUG_MSG( className, msg ) 
+  #define LOGGER_CLASS_COND_DEBUG_MSG( className, cond, msg )
+  #define LOGGER_DEBUG_MSG(category, msg)
+  #define LOGGER_COND_DEBUGM_SG(cond, category, msg)
+  #define LOGGER_DEBUG_STMT(category, stmt)
+  #define LOGGER_COND_DEBUG_STMT(cond, marker, stmt)
 #else
    //legacy definitions -- will be deprecated Logger.msg( marker, data )
 //    #define debugMsg(marker, data) { std::cout << "Deprecated debugMsg:"  << __FILE__ << " at " << __LINE__  << std::endl; }
 //    #define condDebugMsg(cond, marker, data) { std::cout << "Deprecated condDebugMsg:"  << __FILE__ << " at " << __LINE__  << std::endl; }
 //    #define debugStmt(marker, stmt) { std::cout << "Deprecated debugStmt:"  << __FILE__ << " at " << __LINE__  << std::endl; }
 //    #define condDebugStmt(cond, marker, stmt) { std::cout << "Deprecated condDebugStmt:"  << __FILE__ << " at " << __LINE__  << std::endl; }
+
+  #define LOGGER_ENDL  EUROPA::Utils::Logger::eol
+
+  #define LOGGER_CLASS_INSTANCE() static EUROPA::Utils::Logger &LOGGER;
+  #define LOGGER_CLASS_INSTANCE_IMPL( className, category, level )  \
+    EUROPA::Utils::Logger &className::LOGGER = EUROPA::Utils::Logger::getInstance( category, EUROPA::Utils::Logger::level ); 
+
+  #define LOGGER_CLASS_DEBUG_MSG( className, level, msg ) LOGGER_CLASS_COND_DEBUG_MSG(className, true, level, msg)
+  #define LOGGER_CLASS_COND_DEBUG_MSG( className, cond, level, msg ) {	\
+  if( cond ) {								\
+      className::LOGGER << EUROPA::Utils::Logger::level << msg;		\
+  }									\
+  }
+  
+  #define LOGGER_DEBUG_MSG( level, msg ) LOGGER_COND_DEBUG_MSG(true, level, msg)
+  #define LOGGER_COND_DEBUG_MSG( cond, level, msg )  {	  \
+    if( cond ) {					  \
+      LOGGER << EUROPA::Utils::Logger::level << msg;	  \
+    }                                                     \
+  }
+
+  #define LOGGER_DEBUG_STMT( stmt ) LOGGER_COND_DEBUG_STMT(true, stmt)
+  #define LOGGER_COND_DEBUG_STMT(cond, stmt) {            \
+    if( cond ) {                                          \
+      stmt ;                                              \
+    }                                                     \
+  }
+
 #endif //NO_DEBUG_MESSAGE_SUPPORT
 #endif //EUROPA_LOGGER

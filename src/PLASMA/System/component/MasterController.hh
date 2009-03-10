@@ -33,7 +33,8 @@ namespace EUROPA {
   class MasterController : public EuropaEngine
   {
   public:
-    static Logger &LOGGER;
+    //static Logger &LOGGER;
+    LOGGER_CLASS_INSTANCE()
 
     enum Status { IN_PROGRESS=0,
 		  TIMEOUT_REACHED,

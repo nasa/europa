@@ -17,15 +17,14 @@
 #include <fstream>
 #include <sstream>
 
-using EUROPA::Utils::Logger; 
-
 namespace EUROPA {
 //namespace System { //TODO mcr - a note for coming back through with namespaces
 
   MasterControllerFactory* MasterController::s_factory = NULL;
   MasterController* MasterController::s_instance = NULL;
 
-  Logger  &MasterController::LOGGER = Logger::getInstance( "EUROPA::System::MasterController", Logger::DEBUG );
+  //Logger  &MasterController::LOGGER = Logger::getInstance( "EUROPA::System::MasterController", Logger::DEBUG );
+  LOGGER_CLASS_INSTANCE_IMPL( MasterController, "EUROPA::System::MasterController", DEBUG )
 
 
   /** IMPLEMENTATION FOR C-CALL of JNI INTERFACE **/
@@ -35,6 +34,7 @@ namespace EUROPA {
 
     int retStatus;
 
+
     std::string msgStr = std::string("initModel:\n") +
       "   libPath = " + libPath + "\n" +
       "   initialStatePath = " + initialStatePath + "\n" +
@@ -42,7 +42,8 @@ namespace EUROPA {
       "   plannerConfigPath = " + plannerConfigPath + "\n" +
       "   sources = " + EUROPA::toString(numPaths);
 
-    MasterController::LOGGER << Logger::DEBUG << msgStr;
+    //MasterController::LOGGER << Logger::DEBUG << msgStr;
+    LOGGER_CLASS_DEBUG_MSG( MasterController, DEBUG, msgStr )
 
     /*
      * get full library name from model name parameter
@@ -60,7 +61,8 @@ namespace EUROPA {
       retStatus = controller->loadInitialState(plannerConfigPath, initialStatePath, destPath, sourcePaths, numPaths);
     }
     catch (Error e) {
-			MasterController::LOGGER << Logger::ERROR << "Exception in MasterController.cc:initModel()";
+      //MasterController::LOGGER << Logger::ERROR << "Exception in MasterController.cc:initModel()";
+      LOGGER_CLASS_DEBUG_MSG( MasterController, ERROR, "Exception in MasterController.cc:initModel()")
       throw;
     }
 
@@ -70,16 +72,17 @@ namespace EUROPA {
 
   int getStatus(void) {
     //debugMsg("JNI:getStatus", "Calling for controller status.");
-    MasterController::LOGGER << Logger::DEBUG << "JNI:getStatus " << "Calling for controller status.";
+    //MasterController::LOGGER << Logger::DEBUG << "JNI:getStatus " << "Calling for controller status.";
+    LOGGER_CLASS_DEBUG_MSG( MasterController, DEBUG, "JNI:getStatus " << "Calling for controller status.") 
 
     int retStatus;
     try {
       retStatus = MasterController::instance()->getStatus();
     }
     catch (Error e) {
-	//MasterController::logMsg("Exception in MasterController.cc:getgetStatus()");
-				MasterController::LOGGER << Logger::ERROR << "Exception in MasterController.cc:getgetStatus()";
-				throw;  //TODO - mcr huh!? the following line is unreachable
+      //MasterController::logMsg("Exception in MasterController.cc:getgetStatus()");
+      LOGGER_CLASS_DEBUG_MSG( MasterController, ERROR, "Exception in MasterController.cc:getgetStatus()") 
+      throw;  //TODO - mcr huh!? the following line is unreachable
       e.display(); //TODO - mcr error printing
     }
 
@@ -87,8 +90,9 @@ namespace EUROPA {
   }
 
   int writeStep(int step_num){
-      //debugMsg("JNI:writeStep", "Skipping to step " << step_num);
-			MasterController::LOGGER << Logger::DEBUG << "JNI:writeStep " << "Skipping to step " << step_num;
+    //debugMsg("JNI:writeStep", "Skipping to step " << step_num);
+    //MasterController::LOGGER << Logger::DEBUG << "JNI:writeStep " << "Skipping to step " << step_num;
+    LOGGER_CLASS_DEBUG_MSG( MasterController, DEBUG, "JNI:writeStep " << "Skipping to step " << step_num)
 
     int retStatus;
     const unsigned int stepNum = (unsigned int) step_num;
@@ -108,9 +112,10 @@ namespace EUROPA {
       retStatus = controller->getStatus();
     }
     catch (Error e) {
-				//MasterController::logMsg("Exception in MasterController.cc:getStatus()");
-				MasterController::LOGGER << Logger::ERROR << "Exception in MasterController.cc:getStatus()";
-				throw;
+      //MasterController::logMsg("Exception in MasterController.cc:getStatus()");
+      //MasterController::LOGGER << Logger::ERROR << "Exception in MasterController.cc:getStatus()";
+      LOGGER_CLASS_DEBUG_MSG( MasterController, ERROR, "Exception in MasterController.cc:getStatus()" )
+	throw;
       e.display(); //TODO - mcr error printing
     }
 
@@ -122,8 +127,8 @@ namespace EUROPA {
    */
   int writeNext(int num_steps){
     //debugMsg("JNI:writeNext","Writing next " << num_steps << " steps";
-			MasterController::LOGGER << Logger::DEBUG << "JNI:writeNext " << "Writing next " << num_steps << " steps";
-
+    //MasterController::LOGGER << Logger::DEBUG << "JNI:writeNext " << "Writing next " << num_steps << " steps";
+    LOGGER_CLASS_DEBUG_MSG( MasterController, DEBUG, "JNI:writeNext " << "Writing next " << num_steps << " steps" )
     int currentStepCount = MasterController::instance()->getStepCount();
     const int finalStep =  currentStepCount + num_steps;
     while(currentStepCount++ <  finalStep &&
@@ -133,20 +138,21 @@ namespace EUROPA {
   }
 
   int completeRun(void){
-      //debugMsg("JNI:completeRun", "Completing remaining steps.");
-			MasterController::LOGGER << Logger::DEBUG << "Completing remaining steps.";
+    //debugMsg("JNI:completeRun", "Completing remaining steps.");
+    //MasterController::LOGGER << Logger::DEBUG << "Completing remaining steps.";
+    LOGGER_CLASS_DEBUG_MSG( MasterController, DEBUG, "Completing remaining steps." )
       
     writeStep(PLUS_INFINITY);
 
     //debugMsg("JNI:completeRun", MasterController::toString(MasterController::instance()->getPlanDatabase()));
-		MasterController::LOGGER << Logger::DEBUG << MasterController::toString(MasterController::instance()->getPlanDatabase());
+    LOGGER_CLASS_DEBUG_MSG( MasterController, DEBUG,  MasterController::toString(MasterController::instance()->getPlanDatabase()))
 
     return MasterController::instance()->getStatus();
   }
 
   int terminateRun(void){
     //debugMsg("JNI:terminateRun", "Terminating.");
-			MasterController::LOGGER << Logger::DEBUG << "JNI:terminateRun " << "Terminating.";
+    LOGGER_CLASS_DEBUG_MSG( MasterController, DEBUG, "JNI:terminateRun " << "Terminating." )
     MasterController::terminate();
     return 0;
   }
@@ -232,7 +238,8 @@ namespace EUROPA {
 
   void MasterController::loadModel(const char* libPath){
     //logMsg("Opening library");
-    LOGGER << Logger::DEBUG << "Opening library";
+    //LOGGER << Logger::DEBUG << "Opening library";
+    LOGGER_DEBUG_MSG( DEBUG, "Opening library" )
 
     try {
       check_error(m_libHandle == NULL, "Model already loaded.");
@@ -243,13 +250,15 @@ namespace EUROPA {
       }
     }
     catch (Error e) {
-      LOGGER << Logger::ERROR << "Unexpected exception attempting p_dlopen()";
+      //LOGGER << Logger::ERROR << "Unexpected exception attempting p_dlopen()";
+      LOGGER_DEBUG_MSG( ERROR, "Unexpected exception attempting p_dlopen()" )
       e.display(); //TODO - mcr error printing
       throw;
     }
 
     //logMsg("Loading function pointer");
-    LOGGER << Logger::DEBUG << "Loading function pointer";
+    //LOGGER << Logger::DEBUG << "Loading function pointer";
+    LOGGER_DEBUG_MSG( DEBUG, "Loading function pointer" )
 
     //locate the NDDL 'loadSchema' function in the library and check for errors
     SchemaId (*fcn_loadSchema)(const SchemaId&,const RuleSchemaId&);   //function pointer to NDDL::loadSchema()
@@ -261,20 +270,23 @@ namespace EUROPA {
       }
     }
     catch (Error e) {
-      LOGGER << Logger::ERROR << "Unexpected exception attempting p_dlsym()";
+      //LOGGER << Logger::ERROR << "Unexpected exception attempting p_dlsym()";
+      LOGGER_DEBUG_MSG( ERROR, "Unexpected exception attempting p_dlsym()" )
       e.display(); //TODO - mcr error printing
       throw;
     }
 
     // call the NDDL::loadSchema function
-    LOGGER << Logger::DEBUG << "Calling NDDL:loadSchema";
+    //LOGGER << Logger::DEBUG << "Calling NDDL:loadSchema";
+    LOGGER_DEBUG_MSG( DEBUG, "Calling NDDL:loadSchema" )
     try {
         SchemaId schema = ((Schema*)getComponent("Schema"))->getId();
         RuleSchemaId ruleSchema = ((RuleSchema*)getComponent("RuleSchema"))->getId();
       (*fcn_loadSchema)(schema,ruleSchema);
     }
     catch (Error e) {
-      LOGGER << Logger::ERROR << "Unexpected exception in NDDL::loadSchema()";
+      //LOGGER << Logger::ERROR << "Unexpected exception in NDDL::loadSchema()";
+      LOGGER_DEBUG_MSG( ERROR, "Unexpected exception in NDDL::loadSchema()" )
       e.display(); //TODO - mcr error printing
       throw;
     }
@@ -285,21 +297,25 @@ namespace EUROPA {
 					 const char* destination,
 					 const char** sourcePaths,
 					 const int numPaths){
-			LOGGER.log(Logger::DEBUG, "loadInitialState:setting up debug stream");
+    //LOGGER.log(Logger::DEBUG, "loadInitialState:setting up debug stream");
+    LOGGER_DEBUG_MSG( DEBUG,  "loadInitialState:setting up debug stream" ) 
 
     std::string debugDest = std::string(destination) + "/DEBUG_FILE";
     m_debugStream = new std::ofstream(debugDest.c_str(), std::ios_base::out);
     if(!m_debugStream->good()) {
-      LOGGER.log(Logger::DEBUG, std::string("loadInitialState: can't open the debug file ") + debugDest);
+      //LOGGER.log(Logger::DEBUG, std::string("loadInitialState: can't open the debug file ") + debugDest);
+      LOGGER_DEBUG_MSG( DEBUG, "loadInitialState: can't open the debug file " << debugDest)
       return INITIALLY_INCONSISTENT;
     }
 
     DebugMessage::setStream(*m_debugStream);
 
-    LOGGER.log(Logger::DEBUG, "loadInitialState: Allocating components");
+    //LOGGER.log(Logger::DEBUG, "loadInitialState: Allocating components");
+    LOGGER_DEBUG_MSG(DEBUG, "loadInitialState: Allocating components")
 
 
-    LOGGER.log(Logger::DEBUG, "loadInitialState: Configuring Partial PlanWriter");
+    //LOGGER.log(Logger::DEBUG, "loadInitialState: Configuring Partial PlanWriter");
+    LOGGER_DEBUG_MSG( DEBUG, "loadInitialState: Configuring Partial PlanWriter" )
     m_ppw = new SOLVERS::PlanWriter::PartialPlanWriter(getPlanDatabase(), getConstraintEngine(), getRulesEngine());
     m_ppw->setDest(destination);
     SOLVERS::PlanWriter::PartialPlanWriter::noFullWrite = 1;
@@ -312,21 +328,25 @@ namespace EUROPA {
     DbClientTransactionPlayer player(client);
 
     // Open transaction source and play transactions
-    LOGGER.log(Logger::DEBUG, std::string("loadInitialState: Reading initial state from ") + initialStatePath);
+    //LOGGER.log(Logger::DEBUG, std::string("loadInitialState: Reading initial state from ") + initialStatePath);
+    LOGGER_DEBUG_MSG( DEBUG, "loadInitialState: Reading initial state from " << initialStatePath)
     std::ifstream in(initialStatePath);
     check_error(in, "Invalid transaction source '" + std::string(initialStatePath) + "'.");
     player.play(in);
 
     // Provide a hook to handle custom configuration of solvers
-    LOGGER.log(Logger::DEBUG, "loadInitialState: Calling configureSolvers");
+    //LOGGER.log(Logger::DEBUG, "loadInitialState: Calling configureSolvers");
+    LOGGER_DEBUG_MSG( DEBUG, "loadInitialState: Calling configureSolvers" )
     configureSolvers(configPath);
 
     if(!getConstraintEngine()->propagate()){
-      LOGGER.log(Logger::DEBUG, "loadInitialState: Found to be initially inconsistent");
+      //LOGGER.log(Logger::DEBUG, "loadInitialState: Found to be initially inconsistent");
+      LOGGER_DEBUG_MSG( DEBUG, "loadInitialState: Found to be initially inconsistent" ) 
       m_status = INITIALLY_INCONSISTENT;
     }
     else {
-				LOGGER.log(Logger::DEBUG, "loadInitialState: Successfully loaded");
+      //LOGGER.log(Logger::DEBUG, "loadInitialState: Successfully loaded");
+      LOGGER_DEBUG_MSG( DEBUG, "loadInitialState: Successfully loaded" )
       m_status = IN_PROGRESS;
     }
 
@@ -336,18 +356,20 @@ namespace EUROPA {
   }
 
   void MasterController::unloadModel(){
-			LOGGER.log(Logger::DEBUG, "In MasterController unloadModel");
+    //LOGGER.log(Logger::DEBUG, "In MasterController unloadModel");
+    LOGGER_DEBUG_MSG( DEBUG, "In MasterController unloadModel" )
 
     if (m_libHandle) {
-				LOGGER.log(Logger::DEBUG, "In MasterController: Closing");
-
+      //LOGGER.log(Logger::DEBUG, "In MasterController: Closing");
+      LOGGER_DEBUG_MSG( DEBUG, "In MasterController: Closing" )
       if (p_dlclose(m_libHandle)) {
         check_error_variable(const char* error_msg = p_dlerror());
         try {
           check_error(!error_msg, error_msg);
         }
         catch (Error e) {
-          LOGGER.log(Logger::DEBUG, "Unexpected exception in unloadModel()");
+          //LOGGER.log(Logger::DEBUG, "Unexpected exception in unloadModel()");
+	  LOGGER_DEBUG_MSG( DEBUG, "Unexpected exception in unloadModel()" )
           e.display();//TODO - mcr error printing
           throw;
         }
@@ -384,14 +406,16 @@ namespace EUROPA {
 
   void MasterController::write(){
     //debugMsg("MasterController:write", "Step " << m_stepCount);
-			LOGGER << Logger::DEBUG << "write() Step " << m_stepCount;
+    //LOGGER << Logger::DEBUG << "write() Step " << m_stepCount;
+    LOGGER_DEBUG_MSG( DEBUG, "write() Step " << m_stepCount )
     if(!getConstraintEngine()->provenInconsistent())
       m_ppw->write();
   }
 
   void MasterController::writeStatistics(){
     //debugMsg("MasterController:Statistics", "Step " << m_stepCount);
-			LOGGER << Logger::DEBUG << "writeStatistics() Step " << m_stepCount;
+    //LOGGER << Logger::DEBUG << "writeStatistics() Step " << m_stepCount;
+    LOGGER_DEBUG_MSG( DEBUG, "writeStatistics() Step " << m_stepCount )
     if(!getConstraintEngine()->provenInconsistent())
       m_ppw->writeStatistics();
   }
