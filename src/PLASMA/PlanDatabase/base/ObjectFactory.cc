@@ -4,6 +4,7 @@
 #include "TypeFactory.hh"
 #include "Debug.hh"
 #include "Object.hh"
+#include <string.h>
 
 namespace EUROPA {
 
