@@ -194,7 +194,7 @@ namespace EUROPA {
 
   ConstrainedVariableId ObjectEvalContext::getVar(const char* name)
   {
-    if (std::strcmp(name,"this") == 0)
+    if (strcmp(name,"this") == 0)
         return m_obj->getThis();
 
     ConstrainedVariableId var = m_obj->getVariable(m_obj->getName().toString()+"."+name);
