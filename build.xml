@@ -175,7 +175,7 @@
       </fileset>
     </copy>
     <copy todir="${dir.dist.base}/include" flatten="false">
-      <fileset dir="${dir.src}/Log4cpp/log4cpp-1.0/include">
+      <fileset dir="${dir.src}/Log4cpp/log4cpp-1.0.patch1/include">
         <include name="**/*.hh"/>
         <include name="**/*.h"/>
       </fileset>
