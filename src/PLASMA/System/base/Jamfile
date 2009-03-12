@@ -8,7 +8,8 @@ if "Resources" in $(NO) {
   SubDirC++Flags -DNO_RESOURCES ;
 }
 
-SubDirHdrs $(PLASMA) Log4cpp log4cpp-1.0 include ;
+#SubDirHdrs $(PLASMA_HOME) src PLASMA Log4cpp $(log4cpp.versionDir) include ;
+SubDirHdrs $(log4cpp.includeDir) ;
 
 ModuleBase System 
 	: 

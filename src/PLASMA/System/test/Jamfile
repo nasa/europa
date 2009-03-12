@@ -7,7 +7,7 @@ if ! $(PLASMA_READY) {
 PLANNER ?= SOLVER ;
 
 SubDirHdrs $(PLASMA) PlanDatabase test ;
-SubDirHdrs $(PLASMA) Log4cpp log4cpp-1.0 include ;
+SubDirHdrs $(log4cpp.include) ;
 #SubDirC++Flags -lcppunit -Wno-unknown-pragmas -Wno-format ;
 #SubDirC++Flags -I/usr/include ; #-lcppunit -Wno-unknown-pragmas -Wno-format ;
 ModuleLibraries system-module-tests : cppunit dl ;

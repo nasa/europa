@@ -4,21 +4,23 @@ moduleName = Log4cpp ;
 ModuleExt $(moduleName) ;
 
 log4cpp.baseDir = $(PLASMA_HOME)/src/PLASMA/Log4cpp ;
-versionDir = log4cpp-1.0 ;
-versionPath = $(log4cpp.baseDir)/$(versionDir) ;
+log4cpp.versionDir = log4cpp-1.0.patch1 ;
+log4cpp.versionPath = $(log4cpp.baseDir)/$(log4cpp.versionDir) ;
+log4cpp.includeDir = $(PLASMA_HOME) src PLASMA Log4cpp $(log4cpp.versionDir) include ;
 
-buildDir = $(versionPath)/src/.libs ;
+buildDir = $(log4cpp.versionPath)/src/.libs ;
 installDir = $(PLASMA_HOME)/build/lib ;
 
 actions setup.log4cpp
 {
   cd $(log4cpp.baseDir)
-  echo "Unpacking $(versionDir).tar.bz2 in "
+  echo "Unpacking $(log4cpp.versionDir).tar.bz2 in "
   pwd
-  tar jxf $(versionDir).tar.bz2
+  #tar jxf $(log4cpp.versionDir).tar.bz2
+  bunzip2 -c $(log4cpp.versionDir).tar.bz2 | tar x 
   echo Running Log4cpp configure script ... this takes about 1 minute
-  echo "  For details, see $(versionPath)/configure.log"
-  cd $(versionPath)
+  echo "  For details, see $(log4cpp.versionPath)/configure.log"
+  cd $(log4cpp.versionPath)
   
   # Hack! : config script returns failure on the mac because it fails to remove some dirs.
   # the log2cpp libs look ok though, so here we assign the return value to a var 
@@ -29,9 +31,9 @@ actions setup.log4cpp
 actions build.log4cpp
 {
   echo Building Log4cpp  ... this can take a while on the first build
-  echo "  running make in $(versionPath)/src"
-  echo "  For details, see $(versionPath)/src/make.log  -- or tail -f that file"
-  cd $(versionPath)/src 
+  echo "  running make in $(log4cpp.versionPath)/src"
+  echo "  For details, see $(log4cpp.versionPath)/src/make.log  -- or tail -f that file"
+  cd $(log4cpp.versionPath)/src 
   make > make.log
 }
 
@@ -47,7 +49,7 @@ rule install.log4cpp
   SoftLink $(2) : $(1) ;
   
   Clean clean : $(target) ;
-  RmDir clean : $(versionPath) ;
+  RmDir clean : $(log4cpp.versionPath) ;
 }
 
 rule Flog4cppLibName {

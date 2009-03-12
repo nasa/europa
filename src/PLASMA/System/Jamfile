@@ -9,7 +9,7 @@ if ! ( "Resources" in $(NO) ) {
   system_deps += Resource ANML ;
 }
 
-SubDirHdrs $(PLASMA) Log4cpp log4cpp-1.0 include ;
+SubDirHdrs $(log4cpp.include) ;
 
 Module System : $(system_deps) ;
 ModuleLibraries System : $(DLOPEN_LIBRARY) ;

@@ -1,0 +1,3 @@
+This is the version 1.0 of the log4cpp library.
+
+patch1 is to include the file include/log4cpp/config-MinGW32.h from the cvs repository.

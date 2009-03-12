@@ -65,7 +65,8 @@
              <arg value="${env.JAVA_HOME}"/>
           </exec>
           <property name="jam.libraries" value="STATIC"/>
-          <property name="jam.misc" value="-sOS=CYGWIN -sNOCYGWIN=TRUE"/>
+	  <!-- <property name="jam.misc" value="-sOS=CYGWIN -sNOCYGWIN=TRUE"/> -->
+          <property name="jam.misc" value="-sOS=CYGWIN"/>
         </then>
       </elseif>
     	
@@ -98,7 +99,8 @@
     <property name="jam.libraries" value="SHARED"/>
     <property name="jam.variant" value="DEV"/>
     <property name="jam.misc" value=""/>
-    <property name="jam.opts" value="${jam.misc} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries}"/>
+    <property name="jam.args" value=""/>
+    <property name="jam.opts" value="${jam.args} ${jam.misc} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries}"/>
   </target>
 
   <target name="clean" depends="init">
