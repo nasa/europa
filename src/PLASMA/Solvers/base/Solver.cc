@@ -311,7 +311,7 @@ namespace EUROPA {
         }
       }
       else {
-        debugMsg("Solver:backtrack", "Backtracking because " << m_lastExecutedDecision << " has no further choices.");
+        debugMsg("Solver:backtrack", "Backtracking because " << m_activeDecision->toString() << " has no available choices.");
       }
 
       // If we get here then we must have to backtrack. so do it!
