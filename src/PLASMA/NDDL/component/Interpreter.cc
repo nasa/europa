@@ -1532,7 +1532,16 @@ namespace EUROPA {
   {
       SchemaId schema = getSchema(context);
 
-      schema->registerObjectType(m_objType);
+      ObjectType* objType = schema->getObjectType(m_objType->getName());
+
+      if (objType != NULL) {
+          // TODO: should always be displayed as INFO!
+          // TODO: allow redefinition of non-native classes?
+          std::string isNative = (objType->isNative() ? "native" : "");
+          debugMsg("Interpreter","Ignoring re-definition for "<< isNative << " class : " << m_objType->getName().c_str());
+      }
+      else
+          schema->registerObjectType(m_objType);
 
       return DataRef::null;
   }

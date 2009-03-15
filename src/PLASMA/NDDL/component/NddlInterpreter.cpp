@@ -7,6 +7,8 @@
 
 #include "NddlInterpreter.hh"
 
+#include <sys/stat.h>
+
 #include "NDDL3Lexer.h"
 #include "NDDL3Parser.h"
 #include "NDDL3Tree.h"
@@ -38,6 +40,51 @@ pANTLR3_INPUT_STREAM getInputStream(std::istream& input, const std::string& sour
     }
 }
 
+bool isFile(const std::string& filename)
+{
+    struct stat my_stat;
+    return (stat(filename.c_str(), &my_stat) == 0);
+}
+
+// TODO: make this non-static, and use engine config to get include path
+std::string NddlInterpreter::getFilename(const std::string& f)
+{
+    std::string fname = f.substr(1,f.size()-2); // remove quotes
+
+    // TODO: read include path from engine config
+    std::vector<std::string> includePath;
+
+    // Look in current dir first
+    includePath.push_back(".");
+
+    // otherwise, look in include path, starting with $EUROPA_HOME, then $PLASMA_HOME
+    const char* europaHome = std::getenv("EUROPA_HOME");
+    if (europaHome != NULL)
+        includePath.push_back(std::string(europaHome)+"/include");
+    else // TODO: this should be at least INFO, possibly WARNING
+        debugMsg("NddlInterpreter","$EUROPA_HOME is not defined, therefore not added to NddlInterpreter include path");
+
+    const char* plasmaHome = std::getenv("PLASMA_HOME");
+    if (plasmaHome != NULL) {
+        includePath.push_back(std::string(plasmaHome)+"/src/PLASMA/NDDL/base");
+        includePath.push_back(std::string(plasmaHome)+"/src/PLASMA/Resource/component/NDDL");
+    }
+
+    // TODO: dump includePath to log
+    for (unsigned int i=0; i<includePath.size();i++) {
+        // TODO: this may not be portable to all OSs
+        std::string fullName = includePath[i]+"/"+fname;
+        if (isFile(fullName)) {
+            debugMsg("NddlInterpreter","Found:" << fullName);
+            return fullName;
+        }
+        else
+            debugMsg("NddlInterpreter",fullName << " doesn't exist");
+    }
+
+    return "";
+}
+
 std::string NddlInterpreter::interpret(std::istream& ins, const std::string& source)
 {
     pANTLR3_INPUT_STREAM input = getInputStream(ins,source);
@@ -50,6 +97,7 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
     NDDL3Parser_nddl_return result = parser->nddl(parser);
     if (parser->pParser->rec->state->errorCount > 0) {
         debugMsg("NddlInterpreter:interpret","The parser returned " << parser->pParser->rec->state->errorCount << " errors");
+        return "";
     }
     else {
         debugMsg("NddlInterpreter:interpret","NDDL AST:\n" << result.tree->toStringTree(result.tree)->chars);

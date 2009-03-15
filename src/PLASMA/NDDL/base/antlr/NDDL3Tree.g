@@ -79,11 +79,13 @@ nddl :
 		  |	child=problemStmt
                   |     child=relation
 		  |	child=methodInvocation
+		  |     child=constraintSignature
 		  ) 
 		  {
 		      if (child != NULL) { 
 		          debugMsg("NddlInterpreter:nddl","Evaluating:" << child->toString());
 		          evalExpr(CTX,child);
+		          // TODO!!: systematically deal with memory mgmt for all Exprs.
 		          delete child;
 		          child = NULL; 
 		      }
@@ -269,8 +271,10 @@ stringLiteral returns [AbstractDomain* result]
 numericLiteral returns [AbstractDomain* result]
         :       floating=FLOAT  { result = new IntervalDomain(atof(c_str($floating.text->chars))); }
         |       integer=INT     { result = new IntervalIntDomain(atoi(c_str($integer.text->chars))); }
-        |       'inf'           { result = new IntervalIntDomain(PLUS_INFINITY); }   // TODO: deal with real inf vs int inf?
-        |       '-inf'          { result = new IntervalIntDomain(MINUS_INFINITY); }  // TODO: deal with real inf vs int inf?
+        |       'inf'           { result = new IntervalIntDomain(PLUS_INFINITY); }   
+        |       '-inf'          { result = new IntervalIntDomain(MINUS_INFINITY); }  
+        |       'inff'          { result = new IntervalDomain(PLUS_INFINITY); }   
+        |       '-inff'         { result = new IntervalDomain(MINUS_INFINITY); }  
         ;
 
 numericInterval returns [Expr* result]
@@ -373,7 +377,8 @@ ObjectType* objType = NULL;
   ;
 
 classBlock[ObjectType* objType]
-	:	^('{'
+	:	'{'
+	        | ^('{'
 			componentTypeEntry[objType]*
 		)
 	;
@@ -751,3 +756,34 @@ tokenOp
         |       'free'
         |       'constrain'
         ;        
+        
+// This is here only for backwards compatibility, must be dropped eventually        
+constraintSignature returns [Expr* result]
+        :       ^('constraint' name=IDENT typeArgumentList constraintExtendsClause? signatureBlock?)
+        {
+            debugMsg("NddlInterpreter","Ignored constraint declaration for " << c_str($name.text->chars) 
+                                        << ". Constraint Signatures are ignored in nddl3.");
+            result = NULL;
+        }
+        ;
+        
+constraintExtendsClause
+        :       ^('extends' IDENT typeArgumentList)
+        ;        
+        
+typeArgumentList
+        :       ^('(' IDENT*)
+        ;
+
+signatureBlock
+        :       ^('{' signatureExpression*)
+        ;
+
+signatureExpression
+        :       ^(('&&' | '||') signatureAtom signatureAtom)
+        ;
+
+signatureAtom
+        :       ^('<:' IDENT  (type | 'numeric'))
+        |       ^('(' signatureExpression)
+        ;

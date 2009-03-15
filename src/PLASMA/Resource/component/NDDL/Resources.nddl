@@ -72,14 +72,10 @@ class Reservoir {
   float initialCapacity;
   float levelLimitMin;
   float levelLimitMax;
-  float productionRateMax = [0.0 +inff];
-  float productionMax = [0.0 +inff];
-  float consumptionRateMax = [0.0 +inff];
-  float consumptionMax = [0.0 +inff];
-  //posfloat productionRateMax;
-  //posfloat productionMax;
-  //posfloat consumptionRateMax;
-  //posfloat consumptionMax;
+  float productionRateMax;
+  float productionMax;
+  float consumptionRateMax;
+  float consumptionMax;
 
   predicate produce {
     //posfloat quantity;

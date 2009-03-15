@@ -5,8 +5,7 @@
 
 // nddlStatement Tests:
 
-//#include "included.nddl"
-
+#include "Plasma.nddl"
 
 typedef int [1 inf] positive;
 typedef float [-inf +inf] real;

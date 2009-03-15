@@ -10,7 +10,6 @@
 
 #include "Interpreter.hh"
 
-
 namespace EUROPA {
 
 
@@ -20,6 +19,8 @@ public:
     NddlInterpreter(EngineId& engine);
     virtual ~NddlInterpreter();
     virtual std::string interpret(std::istream& input, const std::string& source);
+
+    static std::string getFilename(const std::string& f);
 
 protected:
     EngineId m_engine;

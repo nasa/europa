@@ -18,6 +18,13 @@ tokens {
 	PREDICATE_INSTANCE;
 }
 
+@lexer::includes
+{
+#include "NddlInterpreter.hh"
+
+using namespace EUROPA;
+}
+
 nddl	:	nddlStatement*
 			-> ^(NDDL nddlStatement*)
         ;
@@ -34,9 +41,14 @@ nddlStatement
         |       relation
         |	methodInvocation
         |	noopstatement
-        |       constraintSignature
+        |       constraintSignature!
+        |       enumStmt!
         ;
 
+enumStmt
+        : 'enum' IDENT '{' IDENT (',' IDENT)* '}'
+        ;
+        
 typeDefinition
 	:	'typedef' typeWithBaseDomain IDENT ';'
 			-> ^('typedef' IDENT typeWithBaseDomain)
@@ -316,8 +328,9 @@ temporalRelation
 numericLiteral
 	:	INT
 	|	FLOAT
-	|	('+'!)? 'inf'
+	|	('+'!)? ('inf' | 'inff')
 	|	'-inf' 
+        |       '-inff' 
 	;
 
 boolLiteral
@@ -351,7 +364,6 @@ noopstatement
 	:	';'!
 	;
 
-// MEB Interpreter Support Missing
 constraintSignature
         :       'constraint' c=IDENT args=typeArgumentList
                 ('extends' x=IDENT xargs=typeArgumentList)? 
@@ -360,7 +372,7 @@ constraintSignature
         ;
 
 signatureBlock
-        :       '{'^ (signatureExpression)? '}'!
+        :       '{'^ signatureExpression? '}'!
         ;
 
 signatureExpression
@@ -374,20 +386,21 @@ signatureAtom
 
 
 INCLUDE :	'#include' WS+ file=STRING '\r'? '\n'	{
-			pANTLR3_STRING      fName;
-			pANTLR3_INPUT_STREAM    in; 
+                        std::string fullName = std::string((const char*)($file.text->chars));
+                        // Look for the included file in include path
+			fullName = NddlInterpreter::getFilename(fullName);
 
-			// Create an initial string, then take a substring
-			// We can do this by messing with the start and end 
-			// pointers of tokens and so on. This shows a reasonable way to
-			// manipulate strings.
-
-			fName = $file.text;
+                        if (fullName.length() == 0)
+                            throw std::string("ERROR!: couldn't find file:")+((const char*)$file.text->chars);
 
 			// Create a new input stream and take advantage of built in stream stacking
 			// in C target runtime.
 
-			in = antlr3AsciiFileStreamNew(fName->chars);
+                        pANTLR3_STRING_FACTORY factory = antlr3StringFactoryNew();
+                        pANTLR3_STRING fName = factory->newStr(factory,(u_int8_t*)fullName.c_str());
+                        delete factory;
+                        
+                        pANTLR3_INPUT_STREAM in = antlr3AsciiFileStreamNew(fName->chars);
 			PUSHSTREAM(in);
 
 			// Note that the input stream is not closed when it EOFs, I don't bother
