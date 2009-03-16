@@ -31,7 +31,7 @@ namespace NDDL {
   
   
   
-  // Resources.nddl:210 UnaryResource
+  // Resources.nddl:206 UnaryResource
   UnaryResource::UnaryResource(const PlanDatabaseId& planDatabase, const LabelStr& name)
    : Timeline(planDatabase, "UnaryResource", name, true) {
   }
@@ -53,11 +53,11 @@ namespace NDDL {
   }
   
   
-  // Resources.nddl:210 UnaryResource
+  // Resources.nddl:206 UnaryResource
   DECLARE_DEFAULT_OBJECT_FACTORY(UnaryResourceFactory0, UnaryResource);
   
   
-  // Resources.nddl:211 uses
+  // Resources.nddl:207 uses
   UnaryResource::uses::uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
    : NddlToken(planDatabase, name, rejectable, isFact, false) {
     handleDefaults(close);
