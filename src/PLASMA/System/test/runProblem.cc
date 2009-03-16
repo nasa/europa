@@ -32,6 +32,8 @@ bool isInterpreted()
 {
 #ifdef INTERPRETED
     return true;
+#elif FULLY_INTERPRETED
+    return true;
 #else
     return false;
 #endif
@@ -48,6 +50,16 @@ class TestEngine : public EuropaEngine
   public:
     TestEngine() { doStart(); }
     ~TestEngine() { doShutdown(); }
+
+    virtual bool playTransactions(const char* txSource, bool interp = false)
+    {
+#ifdef FULLY_INTERPRETED
+        executeScript("nddl",txSource,true /*isFile*/);
+        return getConstraintEnginePtr()->constraintConsistent();
+#else
+        return EuropaEngine::playTransactions(txSource,interp);
+#endif
+    }
 };
 
 /**
@@ -218,6 +230,8 @@ void initSchema(const SchemaId& schema, const RuleSchemaId& ruleSchema)
 #ifdef STANDALONE
     (*fcn_schema)(schema,ruleSchema);
 #elif INTERPRETED
+    // Interpreter doesn't need to load external initialization for schema
+#elif FULLY_INTERPRETED
     // Interpreter doesn't need to load external initialization for schema
 #else
     NDDL::loadSchema(schema,ruleSchema);

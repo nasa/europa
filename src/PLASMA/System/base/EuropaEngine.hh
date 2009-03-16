@@ -20,22 +20,22 @@ namespace EUROPA {
 
         EuropaEngine();
         virtual ~EuropaEngine();
-      
+
         virtual ConstraintEngineId& getConstraintEngine();
         virtual PlanDatabaseId&     getPlanDatabase();
         virtual RulesEngineId&      getRulesEngine();
-      
+
         virtual const ConstraintEngine* getConstraintEnginePtr() const;
         virtual const PlanDatabase*     getPlanDatabasePtr() const;
         virtual const RulesEngine*      getRulesEnginePtr() const;
 
         // TODO: remains of the old Assemblies, these are only used by test code, should be dropped, eventually.
-        bool playTransactions(const char* txSource, bool interp = false);
-        bool plan(const char* txSource, const char* config, bool interp = false);
-        bool plan(const char* txSource, const TiXmlElement& config, bool interp = false);
-        void write(std::ostream& os) const;
-        unsigned int getTotalNodesSearched() const;
-        unsigned int getDepthReached() const;
+        virtual bool playTransactions(const char* txSource, bool interp = false);
+        virtual bool plan(const char* txSource, const char* config, bool interp = false);
+        virtual bool plan(const char* txSource, const TiXmlElement& config, bool interp = false);
+        virtual void write(std::ostream& os) const;
+        virtual unsigned int getTotalNodesSearched() const;
+        virtual unsigned int getDepthReached() const;
         static const char* TX_LOG();
 
     protected:
