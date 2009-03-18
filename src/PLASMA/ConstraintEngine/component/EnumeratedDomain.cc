@@ -154,20 +154,14 @@ namespace EUROPA {
     if(!dom.isInterval() && dom.isClosed() && isClosed())
       return equateClosedEnumerations(static_cast<EnumeratedDomain&>(dom));
 
-    bool changed = false;
-    if(isClosed())
-      changed = dom.intersect(*this);
+    bool changed = dom.intersect(*this);
 
     if(changed && dom.isEmpty())
       return true;
 
-    if(dom.isClosed() && intersect(dom)){
-      changed = true;
-      if(!isEmpty())
-	dom.intersect(*this);
-    }
-
-    return changed;
+    // Have to intersect again for the case of mixed types (enumeration and interval)
+    if(intersect(dom) && !isEmpty())
+      return dom.intersect(*this) || changed;
   }
 
   bool EnumeratedDomain::equateClosedEnumerations(EnumeratedDomain& dom){
@@ -300,14 +294,16 @@ namespace EUROPA {
     checkError(isSubsetOf(dom), toString() << " is not a subset of " << dom.toString());
     check_error(dom.isEnumerated());
 
-    if(dom.isEmpty())
+    if(dom.isEmpty() && dom.isClosed())
       return;
 
     if (isEmpty() || this->isSubsetOf(dom)){
       const EnumeratedDomain& l_dom = static_cast<const EnumeratedDomain&>(dom);
       m_values = l_dom.m_values;
+      // Open up if we are closed and need be be relaxed to an open domain
       if(dom.isOpen() && isClosed())
         open();
+
       notifyChange(DomainListener::RELAXED);
     }
   }
@@ -361,7 +357,19 @@ namespace EUROPA {
   bool EnumeratedDomain::intersect(const AbstractDomain& dom) {
     safeComparison(*this, dom);
 
+    // If this domain is open, and the new domain is closed, then assign all
+    // values in the new domain to this domain.
+    if(isOpen() && dom.isClosed()){
+      checkError(!dom.isInterval(), "Cannot intersect a closed interval and and open enumeration.");
+      close();
+      const EnumeratedDomain& l_dom = static_cast<const EnumeratedDomain&>(dom);
+      m_values = l_dom.m_values;
+      return true;
+    }
+
+
     bool changed = false;
+
     if (dom.isInterval()) {
       std::set<double>::iterator it = m_values.begin();
       while (it != m_values.end()) {
@@ -475,6 +483,9 @@ namespace EUROPA {
   }
 
   bool EnumeratedDomain::intersects(const AbstractDomain& dom) const {
+    if(dom.isOpen() || this->isOpen())
+      return true;
+
     safeComparison(*this, dom);
     for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it)
       if (dom.isMember(*it))

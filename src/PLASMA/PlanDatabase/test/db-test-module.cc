@@ -450,9 +450,9 @@ private:
     CPPUNIT_ASSERT(schema->isA(LabelStr("Battery"), LabelStr("Battery")));
     CPPUNIT_ASSERT(schema->hasParent(LabelStr("Battery")));
     CPPUNIT_ASSERT(schema->getParent(LabelStr("Battery")) == LabelStr("Resource"));
-    CPPUNIT_ASSERT(schema->getObjectType(LabelStr("World.initialState")) == LabelStr("World"));
-    CPPUNIT_ASSERT(schema->getObjectType(LabelStr("Battery.change")) == LabelStr("Battery"));
-    CPPUNIT_ASSERT(schema->getObjectType(LabelStr("Battery.change")) != LabelStr("Resource"));
+    CPPUNIT_ASSERT(schema->getObjectTypeForPredicate(LabelStr("World.initialState")) == LabelStr("World"));
+    CPPUNIT_ASSERT(schema->getObjectTypeForPredicate(LabelStr("Battery.change")) == LabelStr("Battery"));
+    CPPUNIT_ASSERT(schema->getObjectTypeForPredicate(LabelStr("Battery.change")) != LabelStr("Resource"));
 
     schema->addObjectType("Base");
     schema->addObjectType("Derived");
@@ -2327,8 +2327,8 @@ private:
     CPPUNIT_ASSERT(!t1.getObject()->isClosed());
 
     t0.activate();
-		t2.activate();
-		t4.activate();
+    t2.activate();
+    t4.activate();
     CPPUNIT_ASSERT(ce->propagate());
 
     std::vector<TokenId> compatibleTokens0, compatibleTokens1, compatibleTokens3;
@@ -2342,12 +2342,14 @@ private:
 
     CPPUNIT_ASSERT(db->hasCompatibleTokens(t3.getId()));
     db->getCompatibleTokens(t3.getId(), compatibleTokens3);
-    CPPUNIT_ASSERT(compatibleTokens3.size() == 2); // open {1} intersects with open domains
-    CPPUNIT_ASSERT((compatibleTokens3[0] == t2.getId() && compatibleTokens3[1] == t4.getId()) ||
-		           (compatibleTokens3[1] == t2.getId() && compatibleTokens3[0] == t4.getId()));
+
+    CPPUNIT_ASSERT(compatibleTokens3.size() == 3); // open {0} intersects with open domains and closed domains containing {0}
+    CPPUNIT_ASSERT((compatibleTokens3[0] == t0.getId() || compatibleTokens3[0] == t2.getId() || compatibleTokens3[0] == t4.getId()) &&
+               (compatibleTokens3[1] == t0.getId() || compatibleTokens3[1] == t2.getId() || compatibleTokens3[1] == t4.getId()) &&
+               (compatibleTokens3[2] == t0.getId() || compatibleTokens3[2] == t2.getId() || compatibleTokens3[2] == t4.getId()));
 
     t1.doMerge(t0.getId());
-		t3.doMerge(t2.getId());
+    t3.doMerge(t2.getId());
 
     DEFAULT_TEARDOWN();
     return true;
@@ -2361,7 +2363,7 @@ private:
       db->close();
 
     LabelSet lbl;
-    lbl.insert(LabelStr("L1"));
+    lbl.insert("L1");
 
     IntervalToken t0(db,
                      LabelStr(DEFAULT_PREDICATE),

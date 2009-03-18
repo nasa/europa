@@ -65,8 +65,14 @@ namespace EUROPA {
      * @param value The value to set. Must be a LabelStr.
      */
     void set(double value);
-    
+
     bool isMember(double value) const;    
+    
+    /** String specific bindings for user convenience **/
+    void set(const std::string& value);
+    bool isMember(const std::string& value) const;
+    void insert(const std::string& value);
+    void insert(double value);
 
   };
 

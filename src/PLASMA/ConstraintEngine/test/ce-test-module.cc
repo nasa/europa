@@ -481,7 +481,8 @@ private:
       v0.insert(3);
       v0.insert(5);
       v0.insert(10);
-      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::RELAXED) == 4);
+      // We should expect no relaxation events when inserting into an open domain
+      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::RELAXED) == 0);
       v0.close();
       CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::CLOSED) == 1);
 
@@ -503,7 +504,7 @@ private:
       ENGINE->propagate(); // Expect to see exactly one domain emptied
       CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::EMPTIED) == 1);
       v1.reset(); // Should now see 2 domains relaxed.
-      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::RELAXED) == 6);
+      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::RELAXED) == 2);
     }
 
     return true;
@@ -2106,18 +2107,18 @@ private:
 
   static bool testLockConstraint() {
     LabelSet lockDomain;
-    lockDomain.insert(EUROPA::LabelStr("A"));
-    lockDomain.insert(EUROPA::LabelStr("B"));
-    lockDomain.insert(EUROPA::LabelStr("C"));
-    lockDomain.insert(EUROPA::LabelStr("D"));
+    lockDomain.insert("A");
+    lockDomain.insert("B");
+    lockDomain.insert("C");
+    lockDomain.insert("D");
     lockDomain.close();
 
     LabelSet baseDomain;
-    baseDomain.insert(EUROPA::LabelStr("A"));
-    baseDomain.insert(EUROPA::LabelStr("B"));
-    baseDomain.insert(EUROPA::LabelStr("C"));
-    baseDomain.insert(EUROPA::LabelStr("D"));
-    baseDomain.insert(EUROPA::LabelStr("E"));
+    baseDomain.insert("A");
+    baseDomain.insert("B");
+    baseDomain.insert("C");
+    baseDomain.insert("D");
+    baseDomain.insert("E");
     baseDomain.close();
 
     // Set up variable with base domain - will exceed lock domain

@@ -26,11 +26,11 @@ namespace EUROPA
 
   TypeFactoryId CESchema::getFactory(const char* typeName)
   {
-    // Confirm it is present
-    check_error(m_typeFactories.find(LabelStr(typeName).getKey()) != m_typeFactories.end(),
-		"no TypeFactory found for type '" + std::string(typeName) + "'");
+    std::map<double, TypeFactoryId>::const_iterator it =  m_typeFactories.find(LabelStr(typeName).getKey());
+    condDebugMsg(it == m_typeFactories.end(), "europa:error", "no TypeFactory found for type '" << std::string(typeName) << "'");
+    check_error(it != m_typeFactories.end(), "no TypeFactory found for type '" + std::string(typeName) + "'");
 
-    TypeFactoryId factory = m_typeFactories.find(LabelStr(typeName).getKey())->second;
+    TypeFactoryId factory = it->second;
     check_error(factory.isValid());
     return factory;
   }
@@ -110,8 +110,9 @@ namespace EUROPA
   }
 
   const ConstraintFactoryId& CESchema::getConstraintFactory(const LabelStr& name) {
-    check_error(isConstraintFactoryRegistered(name), "Factory for constraint '" + name.toString() + "' is not registered.");
     std::map< double, ConstraintFactoryId >::const_iterator it = m_constraintFactories.find(name.getKey());
+    condDebugMsg(it ==  m_constraintFactories.end(), "europa:error", "Factory for constraint '" << name.toString() << "' is not registered.");
+    check_error(it != m_constraintFactories.end(), "Factory for constraint '" + name.toString() + "' is not registered.");
     return(it->second);
   }
 

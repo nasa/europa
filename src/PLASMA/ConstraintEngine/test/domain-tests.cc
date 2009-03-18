@@ -770,6 +770,7 @@ namespace EUROPA {
   public:
 
     static bool test() {
+      EUROPA_runTest(testStrings);
       EUROPA_runTest(testEnumerationOnly);
       EUROPA_runTest(testBasicLabelOperations);
       EUROPA_runTest(testLabelSetAllocations);
@@ -780,10 +781,46 @@ namespace EUROPA {
       EUROPA_runTest(testOperatorEquals);
       EUROPA_runTest(testEmptyOnClosure);
       EUROPA_runTest(testOpenEnumerations);
-      return(true);
+      return true;
     }
 
   private:
+
+    static bool testStrings() {
+      StringDomain s1("string");
+      StringDomain s2("string");
+
+      // Open domains always intersect
+      CPPUNIT_ASSERT(s1.intersects(s2));
+
+      // Should be able to call an intersection operation and they will continue to intersect
+      s1.intersect(s2);
+      CPPUNIT_ASSERT(s1.intersects(s2));
+      CPPUNIT_ASSERT(s1.isOpen());
+      CPPUNIT_ASSERT(s2.isOpen());
+
+      // If we add a value to s2, and interesect there should be no impact to s1
+      s2.insert("string_1");
+      CPPUNIT_ASSERT(s1.intersects(s2));
+      CPPUNIT_ASSERT(s2.intersects(s1));
+      s1.intersect(s2);
+
+      // Now if we close s2, we should reduce to the singleton, and intersection applies that restriction to s1
+      s2.close();
+      CPPUNIT_ASSERT(!s2.isEmpty());
+      CPPUNIT_ASSERT(s2.isMember("string_1"));
+
+      CPPUNIT_ASSERT(s1.intersects(s2));
+      s1.intersect(s2);
+      bool result = s1.isOpen();
+      CPPUNIT_ASSERT(result == false);
+
+      StringDomain s3("string");
+      s1.reset(s3);
+      CPPUNIT_ASSERT(s1.isOpen());
+
+      return true;
+    }
 
     static bool testOpenEnumerations() {
       EnumeratedDomain e1(true, "Test");
@@ -832,14 +869,15 @@ namespace EUROPA {
       e1.insert(3.0);
 
       e1.intersect(e2);
-      CPPUNIT_ASSERT(!e1.isClosed());
+      CPPUNIT_ASSERT(e1.isClosed());
 
       e2.open();
-      e1.intersect(e2);
-      CPPUNIT_ASSERT(e1.isOpen());
       CPPUNIT_ASSERT(e2.isOpen());
-      e2.close();
+      e1.intersect(e2);
+      CPPUNIT_ASSERT(e1.isClosed());
 
+      e2.close();
+      e1.open();
       e1.insert(4.0);
       e2.reset(e1);
       CPPUNIT_ASSERT(e2.isOpen());
@@ -873,10 +911,10 @@ namespace EUROPA {
       CPPUNIT_ASSERT(e1.isOpen() && e2.isOpen());
       e2.close();
       e1.equate(e2);
-      CPPUNIT_ASSERT(e1.isOpen() && e2.isClosed());
+      CPPUNIT_ASSERT(e1.isClosed() && e2.isClosed());
       e2.open();
       e1.equate(e2);
-      CPPUNIT_ASSERT(e1.isOpen() && e2.isOpen());
+      CPPUNIT_ASSERT(e1.isClosed() && e2.isClosed());
       return true;
     }
 

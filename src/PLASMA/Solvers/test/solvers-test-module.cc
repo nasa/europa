@@ -1874,7 +1874,7 @@ private:
 
       CPPUNIT_ASSERT_MESSAGE("Solver must be valid after discards.", solver.isValid());
 
-   		horizon = IntervalIntDomain(0, 40);
+      horizon = IntervalIntDomain(0, 40);
       solver.solve(100,100);
       CPPUNIT_ASSERT_MESSAGE("Solver must be valid after continuing solving after discards.", solver.isValid());
 

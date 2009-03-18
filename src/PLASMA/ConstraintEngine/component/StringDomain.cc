@@ -59,4 +59,23 @@ namespace EUROPA {
       return EnumeratedDomain::isMember(value);
   }
   
+  void StringDomain::set(const std::string& value){
+    LabelStr lbl(value);
+    set((double) lbl);
+  }
+
+  bool StringDomain::isMember(const std::string& value) const{
+    LabelStr lbl(value);
+    return isMember((double) lbl);
+  }
+
+  void StringDomain::insert(const std::string& value){
+    LabelStr lbl(value);
+    EnumeratedDomain::insert((double) lbl);
+  }
+
+  void StringDomain::insert(double value){
+    EnumeratedDomain::insert(value);
+  }
+
 } // namespace EUROPA
