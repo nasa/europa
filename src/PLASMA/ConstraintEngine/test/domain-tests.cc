@@ -1368,6 +1368,7 @@ namespace EUROPA {
   public:
 
     static bool test() {
+      EUROPA_runTest(testOpenAndClosed);
       EUROPA_runTest(testInfinityBounds);
       EUROPA_runTest(testEquality);
       EUROPA_runTest(testIntersection);
@@ -1380,6 +1381,21 @@ namespace EUROPA {
     }
 
   private:
+    static bool testOpenAndClosed(){
+      NumericDomain a, b;
+      ChangeListener l_listener;
+      b.setListener(l_listener.getId());
+      a.insert(1.0);
+      a.insert(2.0);
+      a.close();
+
+      b.intersect(a);
+      DomainListener::ChangeType change;
+      l_listener.checkAndClearChange(change);
+      CPPUNIT_ASSERT(!b.isEmpty());
+      CPPUNIT_ASSERT(change != DomainListener::EMPTIED);
+      return true;
+    }
 
     static bool testInfinityBounds(){
       IntervalDomain dom0;

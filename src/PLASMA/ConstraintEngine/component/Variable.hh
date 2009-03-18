@@ -197,10 +197,7 @@ namespace EUROPA {
   void Variable<DomainType>::handleRestrictBaseDomain(const AbstractDomain& newBaseDomain) {
     check_error(validate());
 
-    if(newBaseDomain.isClosed() && m_baseDomain->isOpen())
-      m_baseDomain->close();
-
-    // Restrict the base domain - no change will quit
+    // Restrict the base domain - no change will quit. Note that intersection propagates closure
     if(!m_baseDomain->intersect(newBaseDomain))
       return;
 

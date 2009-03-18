@@ -362,12 +362,17 @@ namespace EUROPA {
     // values in the new domain to this domain.
     if(isOpen() && dom.isClosed()){
       checkError(!dom.isInterval(), "Cannot intersect a closed interval and and open enumeration.");
-      close();
       const EnumeratedDomain& l_dom = static_cast<const EnumeratedDomain&>(dom);
       m_values = l_dom.m_values;
+
+      // Only close when values are added as it will otherwise generate an empty domain event
+      close();
       return true;
     }
 
+    // If the given domain is open, then there is no meaningful intersection to apply
+    if(dom.isOpen())
+      return false;
 
     bool changed = false;
 
