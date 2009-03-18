@@ -900,7 +900,7 @@ namespace EUROPA {
       e2.open();
       CPPUNIT_ASSERT(e1.isSubsetOf(e2));
       e2.close();
-      CPPUNIT_ASSERT(e1.isSubsetOf(e2));
+      CPPUNIT_ASSERT(!e1.isSubsetOf(e2));
       e1.close();
       CPPUNIT_ASSERT(e1.isSubsetOf(e2));
 
@@ -1583,7 +1583,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isEnumerated());
       CPPUNIT_ASSERT(copyPtr->getSize() == 5);
-      CPPUNIT_ASSERT(fourDom.isSubsetOf(*copyPtr));
+      CPPUNIT_ASSERT(!fourDom.isSubsetOf(*copyPtr));
       delete copyPtr;
 
       copyPtr = oneDom.copy();

@@ -193,11 +193,11 @@ namespace EUROPA {
     AbstractDomain& d2 = getCurrentDomain(v2);
 
     bool changed = false;
-    if(d1.isClosed() && d2.isClosed()){
-	  debugMsg("EqualConstraint:equate","before equate " << v1->toString() << " --- " << v2->toString());
+    if((d1.isClosed() && d2.isClosed()) || (d1.isEnumerated() && d2.isEnumerated())){
+      debugMsg("EqualConstraint:equate","before equate " << v1->toString() << " --- " << v2->toString());
       changed = d1.equate(d2);
       if(changed && (d1.isEmpty() || d2.isEmpty())) {
-	      debugMsg("EqualConstraint:equate","emptied variable " << v1->toString() << " --- " << v2->toString());
+	debugMsg("EqualConstraint:equate","emptied variable " << v1->toString() << " --- " << v2->toString());
 	      isEmpty = true;
       }
     }

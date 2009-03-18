@@ -531,12 +531,28 @@ private:
       v1.insert(3);
       v1.close();
 
-      // Post equality constraint between v0 and v1. It should not cause any restriction yet
-      // since v0 has not been closed
+      // Post equality constraint between v0 and v1. 
       EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
-      CPPUNIT_ASSERT(ENGINE->propagate());
-      CPPUNIT_ASSERT(v1.getDerivedDomain().getSize() == 3);
 
+      // When we propagate, the derived domain of v0 will now be closed and bound to the same domain as v1
+      CPPUNIT_ASSERT(ENGINE->propagate());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().getSize() == 3);
+      CPPUNIT_ASSERT(v1.getDerivedDomain().getSize() == 3);
+    }
+
+    // Test that we correctly propagate  insertions and relaxations
+    {
+      Variable<NumericDomain> v0(ENGINE, NumericDomain()); // The empty one.
+      Variable<NumericDomain> v1(ENGINE, NumericDomain()); // The full one
+      v0.insert(1); // The only value, leave it open.
+
+      // Fill up v1 and close it.
+      v1.insert(1);
+      v1.insert(2);
+      v1.insert(3);
+
+      // Post equality constraint between v0 and v1. 
+      EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
       // Now close v0, and we should see a restriction on v1
       v0.close();
       CPPUNIT_ASSERT(v1.getDerivedDomain().isSingleton());
@@ -757,19 +773,20 @@ private:
     CPPUNIT_ASSERT_MESSAGE(v1.toString(), !v1.isClosed());
     CPPUNIT_ASSERT(!(v0.lastDomain() == v1.lastDomain()));
 
-    // Close 1 variable. It should prune values, but not propagate closure
+    // Close 1 variable. It should prune values, but not propagate closure to the base domain of the variable
     v1.close();
     CPPUNIT_ASSERT(ENGINE->propagate());
+    CPPUNIT_ASSERT(v0.lastDomain().isClosed());
+    CPPUNIT_ASSERT(!v0.isClosed());
     CPPUNIT_ASSERT_MESSAGE(v0.toString(), !v0.isClosed());
     CPPUNIT_ASSERT_MESSAGE(v1.toString(), v1.isClosed());
-    CPPUNIT_ASSERT_MESSAGE(v0.toString() + " == " + v1.toString(), !(v0.lastDomain() == v1.lastDomain()) );
+    CPPUNIT_ASSERT_MESSAGE(v0.toString() + " != " + v1.toString(), v0.lastDomain() == v1.lastDomain() );
 
     // Value test to ensure the restriction has occurred and that we have retained the inequality also.
     // Basically one way propagation.
     CPPUNIT_ASSERT_MESSAGE(v0.lastDomain().toString(), !v0.lastDomain().isMember(1) );
     CPPUNIT_ASSERT_MESSAGE(v1.toString(), v1.lastDomain().isMember(6));
 
-    // Re-open the variable, it should no longer propagate the equality
     return true;
   }
 

@@ -293,7 +293,6 @@ namespace EUROPA {
   }
 
   void EnumeratedDomain::relax(const AbstractDomain& dom) {
-    checkError(isSubsetOf(dom), toString() << " is not a subset of " << dom.toString());
     check_error(dom.isEnumerated());
 
     if(dom.isEmpty() && dom.isClosed())
@@ -478,9 +477,18 @@ namespace EUROPA {
 
   bool EnumeratedDomain::isSubsetOf(const AbstractDomain& dom) const {
     safeComparison(*this, dom);
+
+    // Always true if the given domain is open. Also never true if the given domain is closed
+    // but this domain is open
+    if(dom.isOpen())
+      return true;
+    else if(isOpen())
+      return false;
+
     for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it)
       if (!dom.isMember(*it))
         return(false);
+
     return(true);
   }
 
