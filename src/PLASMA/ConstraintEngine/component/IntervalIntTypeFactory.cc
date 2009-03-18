@@ -61,7 +61,7 @@ namespace EUROPA {
     if (value == "-inf") {
       return MINUS_INFINITY;
     }
-    if (value == "+inf") {
+    if (value == "+inf" || value == "inf") {
       return PLUS_INFINITY;
     }
     return atoi(value.c_str());

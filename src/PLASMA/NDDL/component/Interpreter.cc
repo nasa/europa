@@ -1520,12 +1520,15 @@ namespace EUROPA {
 
 
   ExprObjectTypeDefinition::ExprObjectTypeDefinition(const ObjectTypeId& objType)
-      : m_objType(objType)
+      : m_registered(false)
+      , m_objType(objType)
   {
   }
 
   ExprObjectTypeDefinition::~ExprObjectTypeDefinition()
   {
+      if (!m_registered)
+          delete (ObjectType*)m_objType;
   }
 
   DataRef ExprObjectTypeDefinition::eval(EvalContext& context) const
@@ -1540,8 +1543,10 @@ namespace EUROPA {
           std::string isNative = (objType->isNative() ? "native" : "");
           debugMsg("Interpreter","Ignoring re-definition for "<< isNative << " class : " << m_objType->getName().c_str());
       }
-      else
+      else {
           schema->registerObjectType(m_objType);
+          m_registered = true;
+      }
 
       return DataRef::null;
   }
@@ -1580,6 +1585,12 @@ namespace EUROPA {
       return os.str();
   }
 
+  void evalArgs(EvalContext& context, std::vector<ConstrainedVariableId>& args,const std::vector<Expr*>& argExprs)
+  {
+      for (unsigned int i=0;i<argExprs.size();i++)
+          args.push_back(argExprs[i]->eval(context).getValue());
+  }
+
   ExprVariableMethod::ExprVariableMethod(const char* name, Expr* varExpr, const std::vector<Expr*>& argExprs)
       : m_methodName(name)
       , m_varExpr(varExpr)
@@ -1591,16 +1602,14 @@ namespace EUROPA {
   {
   }
 
-  void evalArgs(EvalContext& context, std::vector<ConstrainedVariableId>& args,const std::vector<Expr*>& argExprs)
-  {
-      for (unsigned int i=0;i<argExprs.size();i++)
-          args.push_back(argExprs[i]->eval(context).getValue());
-  }
-
   DataRef ExprVariableMethod::eval(EvalContext& context) const
   {
-      DataRef v = m_varExpr->eval(context);
-      ConstrainedVariableId var = v.getValue();
+      ConstrainedVariableId var;
+
+      if (m_varExpr != NULL) {
+          DataRef v = m_varExpr->eval(context);
+          var = v.getValue();
+      }
 
       // TODO: make sure any temp vars are disposed of correctly
       std::vector<ConstrainedVariableId> args;
@@ -1617,8 +1626,12 @@ namespace EUROPA {
           pdb->specify(var,args[0]->lastDomain().getSingletonValue());
       else if (method=="reset")
           pdb->reset(var);
-      else if (method=="close")
-          pdb->close(var);
+      else if (method=="close") {
+          if (var.isId())
+              pdb->close(var);
+          else
+              pdb->close();
+      }
       else
           check_runtime_error(ALWAYS_FAILS,"Unknown variable method:" + method);
 

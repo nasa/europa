@@ -178,6 +178,18 @@ AbstractDomain* NddlSymbolTable::getVarType(const char* name) const
         return (AbstractDomain*)&(ces->baseDomain(name)); // TODO: deal with this ugly cast
 }
 
+AbstractDomain* NddlSymbolTable::makeNumericDomainFromLiteral(const std::string& type,
+                                                              const std::string& value)
+{
+    // TODO: only one copy should be kept for each literal, domains should be marked as constant
+    AbstractDomain* retval = getPlanDatabase()->getSchema()->getCESchema()->baseDomain(type.c_str()).copy();
+    double v = getPlanDatabase()->getClient()->createValue(type.c_str(), value);
+    retval->set(v);
+
+    return retval;
+}
+
+
 ConstrainedVariableId NddlSymbolTable::getVar(const char* name)
 {
     if (getPlanDatabase()->isGlobalVariable(name))

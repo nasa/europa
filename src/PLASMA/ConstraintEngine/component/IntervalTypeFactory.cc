@@ -58,10 +58,11 @@ namespace EUROPA {
 
   double floatTypeFactory::createValue(const std::string& value) const
   {
-    if (value == "-inf") {
+    // TODO: simplify this
+    if (value == "-inf" || value=="-inff") {
       return MINUS_INFINITY;
     }
-    if (value == "+inf") {
+    if (value == "inf" || value=="+inf" || value=="inff" || value=="+inff") {
       return PLUS_INFINITY;
     }
     return atof(value.c_str());

@@ -147,6 +147,7 @@ namespace EUROPA {
       virtual std::string toString() const;
 
   protected:
+      mutable bool m_registered;
       const ObjectTypeId m_objType;
   };
 

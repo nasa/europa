@@ -38,6 +38,7 @@ public:
     const PlanDatabaseId& getPlanDatabase();
 
     AbstractDomain* getVarType(const char* name) const;
+    AbstractDomain* makeNumericDomainFromLiteral(const std::string& type,const std::string& value);
 
     void addError(const std::string& msg);
     std::string getErrors() const;
