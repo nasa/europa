@@ -161,7 +161,9 @@ namespace EUROPA {
 
     // Have to intersect again for the case of mixed types (enumeration and interval)
     if(intersect(dom) && !isEmpty())
-      return dom.intersect(*this) || changed;
+      changed = dom.intersect(*this) || changed;
+
+    return changed;
   }
 
   bool EnumeratedDomain::equateClosedEnumerations(EnumeratedDomain& dom){
