@@ -143,7 +143,7 @@ namespace EUROPA {
             // If var evaluates to a token, return state var.
             TokenId tok = context.getToken(m_varName.c_str());
             if (tok.isNoId()) {
-                check_runtime_error(!var.isNoId(),std::string("Couldn't find variable or token")+m_varName+" in Evaluation Context");
+                check_runtime_error(!var.isNoId(),std::string("Couldn't find variable or token" )+m_varName+" in Evaluation Context");
                 return DataRef::null;
             }
             var = tok->getState();
@@ -154,7 +154,7 @@ namespace EUROPA {
         if (tok.isNoId()) {
             var = context.getVar(m_parentName.c_str());
             if (var.isNoId()) {
-                check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable or token")+m_parentName+" in Evaluation Context");
+                check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable or token ")+m_parentName+" in Evaluation Context");
                 return DataRef::null;
             }
         }
