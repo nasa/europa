@@ -37,6 +37,11 @@ positive b;
 
 addEq(40, 90, b);
 
+foo fooa = new foo();
+foo foob = new foo();
+foo fooc = new foo();
+close();
+
 fact(foo.p fact1);
 goal(foo.p goal1);
 rejectable(foo.p somep);
@@ -54,10 +59,6 @@ typedef float [0.0 1.0] normal;
 typedef float {3.14159, 2.71828} pie;
 typedef string {"Red", "Yellow", "Blue"} primary;
 typedef bool {false} nope;
-
-foo fooa = new foo();
-foo foob = new foo();
-foo fooc = new foo();
 typedef foo {fooa, foob, fooc} somefoos;
 
 
@@ -128,8 +129,6 @@ BClass::q {
   }
   ;;
 }
-
-//close();
 
 // constraintSignature tests:
 // TODO: do we still want to keep this in the language?, it's not necessary anymore

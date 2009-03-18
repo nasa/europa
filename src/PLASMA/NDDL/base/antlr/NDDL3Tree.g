@@ -269,14 +269,18 @@ stringLiteral returns [AbstractDomain* result]
         ; 
 
 numericLiteral returns [AbstractDomain* result]
-        :       floating=FLOAT  { result = new IntervalDomain(atof(c_str($floating.text->chars))); }
-        |       integer=INT     { result = new IntervalIntDomain(atoi(c_str($integer.text->chars))); }
-        |       'inf'           { result = new IntervalIntDomain(PLUS_INFINITY); }   
-        |       '-inf'          { result = new IntervalIntDomain(MINUS_INFINITY); }  
-        |       'inff'          { result = new IntervalDomain(PLUS_INFINITY); }   
-        |       '-inff'         { result = new IntervalDomain(MINUS_INFINITY); }  
+        :       floating=floatLiteral  { result = CTX->SymbolTable->makeNumericDomainFromLiteral("float",c_str($floating.text->chars)); }
+        |       integer=intLiteral  { result = CTX->SymbolTable->makeNumericDomainFromLiteral("int",c_str($integer.text->chars)); }
         ;
 
+floatLiteral 
+        : FLOAT | 'inff' | '-inff'
+        ;        
+
+intLiteral 
+        : INT | 'inf' | '-inf'
+        ;        
+        
 numericInterval returns [Expr* result]
         :       ^('['   
                         lower=numericLiteral
@@ -328,7 +332,8 @@ allocation[const char* name] returns [Expr* result]
         ;
 
 variableArgumentList[std::vector<Expr*>& result]
-        :       ^('('
+        :       '('
+        |       ^('('
                         (arg=initializer[NULL] {result.push_back(arg);})*
                 )
         ;
@@ -710,7 +715,8 @@ temporalRelation
         |       'starts_before_end'
         |       'starts_during'
         ;
-  
+ 
+// TODO: this is ugly, need to provide extensible method exporting mechanism  
 methodInvocation returns [Expr* result]
 	:
 	(	child=variableMethod
@@ -725,9 +731,8 @@ variableMethod returns [Expr* result]
 @init {
     std::vector<Expr*> args;
 }
-        :       ^(op=variableOp v=qualified variableArgumentList[args]?)
+        :       ^(METHOD_CALL op=variableOp v=qualified? variableArgumentList[args]?)
                 {
-                    // TODO!: close() can also apply to the database or to a class
                     result = new ExprVariableMethod(c_str($op.text->chars),v,args);
                 }
         ;
@@ -742,7 +747,7 @@ tokenMethod returns [Expr* result]
 @init {
     std::vector<Expr*> args;
 }
-        :       ^(op=tokenOp tok=IDENT variableArgumentList[args]?)
+        :       ^(METHOD_CALL op=tokenOp tok=IDENT variableArgumentList[args]?)
                 {
                     result = new ExprTokenMethod(c_str($op.text->chars),c_str($tok.text->chars),args); 
                 }

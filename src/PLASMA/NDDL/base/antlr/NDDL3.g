@@ -9,13 +9,14 @@ ASTLabelType=pANTLR3_BASE_TREE;
 }
 
 tokens {
+        CONSTRAINT_INSTANTIATION;
 	CONSTRUCTOR;
 	CONSTRUCTOR_INVOCATION;
-	CONSTRAINT_INSTANTIATION;
+	METHOD_CALL;
 	NDDL;
+        PREDICATE_INSTANCE;     
 	TOKEN_RELATION;
 	VARIABLE;
-	PREDICATE_INSTANCE;
 }
 
 @lexer::includes
@@ -338,18 +339,22 @@ boolLiteral
 	|	'false' 
 	;
 
+// TODO: this is ugly and very inflexible, need to provide extensible method exporting mechanism  
+methodName
+        :       'specify'
+        |       'reset'
+        |       'constrain'
+        |       'free'
+        |       'activate'
+        |       'merge'
+        |       'reject'
+        |       'cancel'
+        |       'close'
+        ;
+         
 methodInvocation
-        :	qualified '.'!
-		(	'specify'^ variableArgumentList
-                |       'reset'^ '('! ')'!
-                |       'constrain'^ variableArgumentList
-		|	'free'^ variableArgumentList
-                |       'activate'^ '('! ')'!
-		|	'merge'^ variableArgumentList
-		|	'reject'^ '('! ')'!
-		|	'cancel'^ '('! ')'!
-		) ';'!
-	|	(IDENT '.'!)? 'close'^ '('! ')'! ';'!
+        :	(qualified '.')? methodName variableArgumentList ';'!
+                -> ^(METHOD_CALL methodName qualified? variableArgumentList)
 	;
 
 tokenNameList

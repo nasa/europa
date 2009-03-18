@@ -670,32 +670,32 @@ namespace EUROPA {
     }
 
   bool Solver::isValid() const {
-    // validate constraints.
-    debugMsg("Solver:isValid","Entering Solver.isValid");
-    ConstraintSet l_constraints = m_db->getConstraintEngine()->getConstraints();
-    for(std::set<ConstraintId>::const_iterator it = l_constraints.begin(); it != l_constraints.end(); ++it) {
-      // all guards on flaws must be present in a FlawManager
-      if( Id<FlawHandler::VariableListener>::convertable(*it)) {
-        bool l_present = false;
-        for(FlawManagers::const_iterator fmit = m_flawManagers.begin(); fmit != m_flawManagers.end(); ++fmit) {
-					std::multimap<unsigned int, ConstraintId> fhg = (*fmit)->getFlawHandlerGuards();
-          for(std::multimap<unsigned int, ConstraintId>::const_iterator fhgit = fhg.begin();
-              fhgit != fhg.end(); ++fhgit) {
-            if(fhgit->second == (*it)) {
-              l_present = true;
-              break;
-            }
+      // validate constraints.
+      debugMsg("Solver:isValid","Entering Solver.isValid");
+      ConstraintSet l_constraints = m_db->getConstraintEngine()->getConstraints();
+      for(std::set<ConstraintId>::const_iterator it = l_constraints.begin(); it != l_constraints.end(); ++it) {
+          // all guards on flaws must be present in a FlawManager
+          if( Id<FlawHandler::VariableListener>::convertable(*it)) {
+              bool l_present = false;
+              for(FlawManagers::const_iterator fmit = m_flawManagers.begin(); fmit != m_flawManagers.end(); ++fmit) {
+                  std::multimap<unsigned int, ConstraintId> fhg = (*fmit)->getFlawHandlerGuards();
+                  for(std::multimap<unsigned int, ConstraintId>::const_iterator fhgit = fhg.begin();
+                  fhgit != fhg.end(); ++fhgit) {
+                      if(fhgit->second == (*it)) {
+                          l_present = true;
+                          break;
+                      }
+                  }
+                  if(l_present)
+                      break;
+              }
+              condDebugMsg(!l_present,"Solver:isValid",(*it)->toString() << " was not found in a FlawManager.");
+              if(!l_present)
+                  return false;
           }
-          if(l_present)
-            break;
-        }
-        condDebugMsg(!l_present,"Solver:isValid",(*it)->toString() << " was not found in a FlawManager.");
-				if(!l_present)
-        	return false;
       }
-    }
-    debugMsg("Solver:isValid","Returning true");
-    return true;
+      debugMsg("Solver:isValid","Returning true");
+      return true;
   }
 
     Solver::CeListener::CeListener(const ConstraintEngineId& ce, Solver& solver)
