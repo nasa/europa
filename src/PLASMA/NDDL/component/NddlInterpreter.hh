@@ -35,7 +35,7 @@ public:
 
     virtual void* getElement(const char* name) const;
 
-    const PlanDatabaseId& getPlanDatabase();
+    const PlanDatabaseId& getPlanDatabase() const;
 
     AbstractDomain* getVarType(const char* name) const;
     AbstractDomain* makeNumericDomainFromLiteral(const std::string& type,const std::string& value);

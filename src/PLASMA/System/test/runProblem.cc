@@ -54,8 +54,8 @@ class TestEngine : public EuropaEngine
     virtual bool playTransactions(const char* txSource, bool interp = false)
     {
 #ifdef FULLY_INTERPRETED
-        executeScript("nddl",txSource,true /*isFile*/);
-        return getConstraintEnginePtr()->constraintConsistent();
+        std::string errors = executeScript("nddl",txSource,true /*isFile*/);
+        return (errors.size()==0 && getConstraintEnginePtr()->constraintConsistent());
 #else
         return EuropaEngine::playTransactions(txSource,interp);
 #endif

@@ -20,8 +20,22 @@ ObjectType::ObjectType(const char* name, const char* parent, bool isNative)
 
 ObjectType::~ObjectType()
 {
+    // TODO: enable this when Schema API is cleaned up to reflect the fact that object factories and token factories are owned by the object type
+    // purgeAll();
     m_id.remove();
 }
+
+void ObjectType::purgeAll()
+{
+    for(std::map<double, ObjectFactoryId>::const_iterator it = m_objectFactories.begin(); it != m_objectFactories.end(); ++it)
+        delete (ObjectFactory*) it->second;
+    m_objectFactories.clear();
+
+    for(std::map<double, TokenFactoryId>::const_iterator it = m_tokenFactories.begin(); it != m_tokenFactories.end(); ++it)
+        delete (TokenFactory*) it->second;
+    m_tokenFactories.clear();
+}
+
 
 const ObjectTypeId& ObjectType::getId() const
 {

@@ -34,8 +34,8 @@
 #include <iomanip>
 #include <string>
 
-const char* DEFAULT_OBJECT_TYPE = "Object";
-const char* DEFAULT_PREDICATE = "Object.DEFAULT_PREDICATE";
+const char* DEFAULT_OBJECT_TYPE = "TestObject";
+const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
 
   class DBFoo;
   typedef Id<DBFoo> DBFooId;
@@ -126,6 +126,11 @@ const char* DEFAULT_PREDICATE = "Object.DEFAULT_PREDICATE";
   public:
     IntervalTokenFactory()
       : TokenFactory(LabelStr(DEFAULT_PREDICATE)) {
+        addArg(IntervalDomain::getDefaultTypeName(), "IntervalParam");
+        addArg(IntervalIntDomain::getDefaultTypeName(), "IntervalIntParam");
+        addArg(BoolDomain::getDefaultTypeName(), "BoolParam");
+        addArg(LabelSet::getDefaultTypeName(), "LabelSetParam");
+        addArg(EnumeratedDomain::getDefaultTypeName(), "EnumeratedParam");
     }
   private:
     TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false, bool isFact = false) const {
@@ -146,43 +151,45 @@ void initDbTestSchema(const SchemaId& schema) {
   schema->addPrimitive(EnumeratedDomain::getDefaultTypeName());
 
   // Set up object types and compositions for testing - builds a recursive structure
-  schema->addObjectType(LabelStr(DEFAULT_OBJECT_TYPE));
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id0");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id1");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id2");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id3");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id4");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id5");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id6");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id7");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id8");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "id9");
+  ObjectType* objType = new ObjectType(DEFAULT_OBJECT_TYPE,Schema::rootObject().c_str());
 
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o0");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o3");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o4");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o5");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o6");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o7");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o8");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelStr(DEFAULT_OBJECT_TYPE), "o9");
+  objType->addMember(DEFAULT_OBJECT_TYPE, "id0");
+  objType->addMember(DEFAULT_OBJECT_TYPE, "id1");
+  objType->addMember(DEFAULT_OBJECT_TYPE, "id2");
+  objType->addMember(DEFAULT_OBJECT_TYPE, "id3");
+  objType->addMember(DEFAULT_OBJECT_TYPE, "id4");
+  objType->addMember(DEFAULT_OBJECT_TYPE, "id5");
+  objType->addMember(DEFAULT_OBJECT_TYPE, "id6");
+  objType->addMember(DEFAULT_OBJECT_TYPE, "id7");
+  objType->addMember(DEFAULT_OBJECT_TYPE, "id8");
+  objType->addMember(DEFAULT_OBJECT_TYPE, "id9");
+
+  objType->addMember(DEFAULT_OBJECT_TYPE, "o0");
+  objType->addMember(DEFAULT_OBJECT_TYPE, "o1");
+  objType->addMember(DEFAULT_OBJECT_TYPE, "o2");
+  objType->addMember(DEFAULT_OBJECT_TYPE, "o3");
+  objType->addMember(DEFAULT_OBJECT_TYPE, "o4");
+  objType->addMember(DEFAULT_OBJECT_TYPE, "o5");
+  objType->addMember(DEFAULT_OBJECT_TYPE, "o6");
+  objType->addMember(DEFAULT_OBJECT_TYPE, "o7");
+  objType->addMember(DEFAULT_OBJECT_TYPE, "o8");
+  objType->addMember(DEFAULT_OBJECT_TYPE, "o9");
 
   // Set up primitive object type member variables for testing
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), IntervalDomain::getDefaultTypeName(), "IntervalVar");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), IntervalIntDomain::getDefaultTypeName(), "IntervalIntVar");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), BoolDomain::getDefaultTypeName(), "BoolVar");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), LabelSet::getDefaultTypeName(), "LabelSetVar");
-  schema->addMember(LabelStr(DEFAULT_OBJECT_TYPE), EnumeratedDomain::getDefaultTypeName(), "EnumeratedVar");
+  objType->addMember(IntervalDomain::getDefaultTypeName().c_str(), "IntervalVar");
+  objType->addMember(IntervalIntDomain::getDefaultTypeName().c_str(), "IntervalIntVar");
+  objType->addMember(BoolDomain::getDefaultTypeName().c_str(), "BoolVar");
+  objType->addMember(LabelSet::getDefaultTypeName().c_str(), "LabelSetVar");
+  objType->addMember(EnumeratedDomain::getDefaultTypeName().c_str(), "EnumeratedVar");
 
   // Set up predicates for testing
-  schema->addPredicate(LabelStr(DEFAULT_PREDICATE));
-  schema->addMember(LabelStr(DEFAULT_PREDICATE), IntervalDomain::getDefaultTypeName(), "IntervalParam");
-  schema->addMember(LabelStr(DEFAULT_PREDICATE), IntervalIntDomain::getDefaultTypeName(), "IntervalIntParam");
-  schema->addMember(LabelStr(DEFAULT_PREDICATE), BoolDomain::getDefaultTypeName(), "BoolParam");
-  schema->addMember(LabelStr(DEFAULT_PREDICATE), LabelSet::getDefaultTypeName(), "LabelSetParam");
-  schema->addMember(LabelStr(DEFAULT_PREDICATE), EnumeratedDomain::getDefaultTypeName(), "EnumeratedParam");
+  objType->addTokenFactory((new IntervalTokenFactory())->getId());
+
+  // Set up constructors for testing
+  objType->addObjectFactory((new StandardDBFooFactory())->getId());
+  objType->addObjectFactory((new SpecialDBFooFactory())->getId());
+
+  schema->registerObjectType(objType->getId());
 }
 
 class PDBTestEngine  : public EngineBase
@@ -212,11 +219,6 @@ PDBTestEngine::PDBTestEngine()
     REGISTER_SYSTEM_CONSTRAINT(ces,LessThanEqualConstraint, "precedes", "Default");
     REGISTER_SYSTEM_CONSTRAINT(ces,AddEqualConstraint, "temporaldistance", "Default");
     REGISTER_SYSTEM_CONSTRAINT(ces,AddEqualConstraint, "temporalDistance", "Default");
-
-    // Have to register factories for testing.
-    schema->registerObjectFactory((new StandardDBFooFactory())->getId());
-    schema->registerObjectFactory((new SpecialDBFooFactory())->getId());
-    schema->registerTokenFactory((new IntervalTokenFactory())->getId());
 }
 
 PDBTestEngine::~PDBTestEngine()

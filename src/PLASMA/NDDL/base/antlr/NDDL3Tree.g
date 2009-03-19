@@ -35,7 +35,8 @@ static void reportSemanticError(pNDDL3Tree treeWalker, const std::string& msg)
 {
     // get location. see displayRecognitionError() in antlr3baserecognizer.c
     treeWalker->SymbolTable->addError(msg);
-    // TODO: throw exception to abort tree walker?
+    // TODO: make sure cleanup is done correctly
+    throw msg;
 }
 
 static std::string getAutoLabel(const char* prefix)
@@ -88,6 +89,8 @@ nddl :
 		          // TODO!!: systematically deal with memory mgmt for all Exprs.
 		          delete child;
 		          child = NULL; 
+		          
+		          CTX->SymbolTable->getPlanDatabase()->getConstraintEngine()->propagate();
 		      }
 		  }
 		)*  
@@ -371,7 +374,8 @@ ObjectType* objType = NULL;
 		   
                    {
                        objType = new ObjectType(newClass,parentClass);
-                       
+                       // TODO: do this more cleanly. Needed to deal with self-reference inside class definition
+                       CTX->SymbolTable->getPlanDatabase()->getSchema()->declareObjectType(newClass);                       
                    }
                    
                    (
@@ -395,10 +399,15 @@ componentTypeEntry[ObjectType* objType]
 	;
 
 classVariable[ObjectType* objType]
-        :       ^(VARIABLE dataType=type name=IDENT)
-        {
-            objType->addMember(dataType->getTypeName().c_str(),c_str($name.text->chars)); // TODO!!: this won't work for inlined types
-        }
+        :       ^(VARIABLE 
+                  dataType=type 
+                  (name=IDENT
+                  {
+                      // TODO!!: this won't work for inlined types
+                      objType->addMember(dataType->getTypeName().c_str(),c_str($name.text->chars)); 
+                  }
+                  )+
+                 )
         ;
         
 constructor[ObjectType* objType]

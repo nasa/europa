@@ -16,7 +16,8 @@ real r = 50;
 
 
 class foo {
-  predicate p {}
+    int x,y;
+    predicate p {}
 }
 
 foo::p {

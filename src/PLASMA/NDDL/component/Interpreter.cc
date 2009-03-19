@@ -1366,10 +1366,14 @@ namespace EUROPA {
 
       // same as completeObjectParam in NddlRules.hh
       if(initValue != NULL) {
+          AbstractDomain* bd = token->getPlanDatabase()->getConstraintEngine()->getCESchema()->baseDomain(parameterType.c_str()).copy();
+          ConstrainedVariableId rhs = initValue->eval(context).getValue();
+          bd->intersect(rhs->lastDomain());
           parameter = token->addParameter(
-                  initValue->eval(context).getValue()->baseDomain(),
+                  *bd,
                   parameterName
           );
+          delete bd;
           if (context.isClass(parameterName))
               token->getPlanDatabase()->makeObjectVariableFromType(parameterType, parameter);
       }
@@ -1527,8 +1531,10 @@ namespace EUROPA {
 
   ExprObjectTypeDefinition::~ExprObjectTypeDefinition()
   {
-      if (!m_registered)
+      if (!m_registered) {
+          m_objType->purgeAll();
           delete (ObjectType*)m_objType;
+      }
   }
 
   DataRef ExprObjectTypeDefinition::eval(EvalContext& context) const
@@ -1643,7 +1649,7 @@ namespace EUROPA {
       std::ostringstream os;
 
       // TODO: implement this
-      os << "VAR_METHOD:" << m_methodName;
+      os << "VAR_METHOD:" << m_methodName.c_str();
 
       return os.str();
   }

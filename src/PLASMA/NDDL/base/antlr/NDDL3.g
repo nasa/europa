@@ -32,7 +32,7 @@ nddl	:	nddlStatement*
 
 nddlStatement
         :	typeDefinition
-        |	variableDeclaration
+        |	variableDeclarations
         |       assignment
         |       constraintInstantiation
         |	classDeclaration
@@ -107,7 +107,7 @@ enumeratedBoolDomain
 boolSet :       boolLiteral (','! boolLiteral)*
         ;
 
-variableDeclaration
+variableDeclarations
         :       ('filter')? type nameWithBaseDomain (',' nameWithBaseDomain)* ';'
                 -> ^(VARIABLE type nameWithBaseDomain (nameWithBaseDomain)*)
         ;
@@ -157,7 +157,7 @@ classBlock
 	;
 
 classStatement
-	:	variableDeclaration
+	:	variableDeclarations
 	|	constructor
 	|	predicate
 	|	noopstatement
@@ -201,7 +201,7 @@ predicateBlock
 
 // Note: Allocations are not legal here.
 predicateStatement
-	:	variableDeclaration
+	:	variableDeclarations
 	|	constraintInstantiation
 	|	assignment
 	;
@@ -217,7 +217,7 @@ ruleBlock
 
 ruleStatement
 	:	relation
-	|	variableDeclaration
+	|	variableDeclarations
 	|	constraintInstantiation
 	|	flowControl
 	|	noopstatement

@@ -110,7 +110,12 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
     NddlSymbolTable symbolTable(m_engine);
     treeParser->SymbolTable = &symbolTable;
 
-    treeParser->nddl(treeParser);
+    try {
+        treeParser->nddl(treeParser);
+    }
+    catch (const std::string& error) {
+        debugMsg("NddlInterpreter:interpret","nddl parser halted on error:" << symbolTable.getErrors());
+    }
 
     // Free everything
     treeParser->free(treeParser);
@@ -138,6 +143,7 @@ NddlSymbolTable::~NddlSymbolTable()
 void NddlSymbolTable::addError(const std::string& msg)
 {
     m_errors.push_back(msg);
+    debugMsg("NddlInterpreter:SymbolTable","SEMANTIC ERROR reported : " << msg);
 }
 
 std::string NddlSymbolTable::getErrors() const
@@ -160,7 +166,7 @@ void* NddlSymbolTable::getElement(const char* name) const
     return EvalContext::getElement(name);
 }
 
-const PlanDatabaseId& NddlSymbolTable::getPlanDatabase()
+const PlanDatabaseId& NddlSymbolTable::getPlanDatabase() const
 {
     return ((PlanDatabase*)getElement("PlanDatabase"))->getId();
 }
@@ -171,8 +177,12 @@ AbstractDomain* NddlSymbolTable::getVarType(const char* name) const
     CESchemaId ces = ((CESchema*)getElement("CESchema"))->getId();
 
     if (!ces->isType(name)) {
-        return NULL;
+        // TODO: hack!
+        if (getPlanDatabase()->getSchema()->isObjectType(name))
+            return new ObjectDomain(name);
+
         debugMsg("NddlInterpreter:SymbolTable","Unknown type " << name);
+        return NULL;
     }
     else
         return (AbstractDomain*)&(ces->baseDomain(name)); // TODO: deal with this ugly cast

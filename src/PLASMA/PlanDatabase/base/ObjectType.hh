@@ -42,6 +42,8 @@ public:
 
     virtual std::string toString() const;
 
+    void purgeAll(); // TODO: make protected after Schema API is fixed
+
 protected:
     ObjectTypeId m_id;
     LabelStr m_name;

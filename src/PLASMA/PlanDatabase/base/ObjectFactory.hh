@@ -25,6 +25,10 @@ namespace EUROPA {
    */
   class ObjectFactory{
   public:
+    ObjectFactory(const LabelStr& signature);
+
+    virtual ~ObjectFactory();
+
     const ObjectFactoryId& getId() const;
 
     /**
@@ -67,21 +71,10 @@ namespace EUROPA {
      */
     virtual void evalConstructorBody(ObjectId& instance, const std::vector<const AbstractDomain*>& arguments) const {};
 
-  protected:
-    ObjectFactory(const LabelStr& signature);
-
-    /**
-     * @brief Protected destructor ensures control so that only the object factory can
-     * delete factories.
-     */
-    virtual ~ObjectFactory();
-
   private:
     ObjectFactoryId m_id;
     LabelStr m_signature;
     std::vector<LabelStr> m_signatureTypes;
-
-    friend class ObjectTypeMgr;
   };
 
   /**
