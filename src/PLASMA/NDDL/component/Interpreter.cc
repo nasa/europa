@@ -1628,8 +1628,13 @@ namespace EUROPA {
       std::string method(m_methodName.toString());
       DbClientId pdb = getPDB(context); // TODO: keep using db client?
 
-      if (method=="specify")
-          pdb->specify(var,args[0]->lastDomain().getSingletonValue());
+      if (method=="specify") {
+          const AbstractDomain& ad = args[0]->lastDomain();
+          if (ad.isSingleton())
+              pdb->specify(var,ad.getSingletonValue());
+          else
+              pdb->restrict(var,ad);
+      }
       else if (method=="reset")
           pdb->reset(var);
       else if (method=="close") {
