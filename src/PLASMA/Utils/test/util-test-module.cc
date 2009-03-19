@@ -195,11 +195,11 @@ private:
   static bool testLog4cpp() {
     bool success = true;
 #if !defined(EUROPA_FAST) && defined(DEBUG_MESSAGE_SUPPORT)
-    
+
 #endif
     return(success);
   }
-    
+
   /** Tests that the Europa logger functionality is installed and working */
   static bool testLogger() {
     bool success = true;
@@ -209,7 +209,7 @@ private:
 #endif
     return(success);
   }
-    
+
 
 /*
   static void runDebugTest(int cfgNum) {
@@ -242,7 +242,7 @@ private:
 #endif
   }
 */
-    
+
 
 };
 
@@ -530,8 +530,12 @@ bool IdTests::testBadIdUsage() {
   try {
     Error::doNotDisplayErrors();
     Id<Bing> bingId = barId;
+#ifdef EUROPA_FAST
+    CPPUNIT_ASSERT(bingId.isNoId());
+#else
     CPPUNIT_ASSERT_MESSAGE("Id<Bing> bingId = barId; failed to error out.", false);
     success = false;
+#endif
   }
   catch (Error e) {
     Error::doDisplayErrors();
