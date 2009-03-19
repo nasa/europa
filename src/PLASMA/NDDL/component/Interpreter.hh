@@ -141,14 +141,14 @@ namespace EUROPA {
   class ExprObjectTypeDeclaration : public Expr
   {
   public:
-      ExprObjectTypeDeclaration(const ObjectTypeId& objType);
+      ExprObjectTypeDeclaration(const LabelStr& name);
       virtual ~ExprObjectTypeDeclaration();
 
       virtual DataRef eval(EvalContext& context) const;
       virtual std::string toString() const;
 
   protected:
-      const ObjectTypeId m_objType;
+      LabelStr m_name;
   };
 
   class ExprObjectTypeDefinition : public Expr

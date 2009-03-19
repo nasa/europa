@@ -403,7 +403,11 @@ ObjectType* objType = NULL;
                    
                    (
 		       classBlock[objType] { result = new ExprObjectTypeDefinition(objType->getId()); } 
-		       | ';' { result = new ExprObjectTypeDeclaration(objType->getId()); }
+		       | ';' 
+		         { 
+		             result = new ExprObjectTypeDeclaration(objType->getName());
+		             delete objType; 
+		         }
 	           )
 		)
   ;

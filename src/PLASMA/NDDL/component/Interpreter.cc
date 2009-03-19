@@ -1541,8 +1541,8 @@ namespace EUROPA {
   }
 
 
-  ExprObjectTypeDeclaration::ExprObjectTypeDeclaration(const ObjectTypeId& objType)
-      : m_objType(objType)
+  ExprObjectTypeDeclaration::ExprObjectTypeDeclaration(const LabelStr& name)
+      : m_name(name)
   {
   }
 
@@ -1554,7 +1554,7 @@ namespace EUROPA {
   {
       SchemaId schema = getSchema(context);
 
-      schema->declareObjectType(m_objType->getName());
+      schema->declareObjectType(m_name);
 
       return DataRef::null;
   }
@@ -1563,7 +1563,7 @@ namespace EUROPA {
   {
       std::ostringstream os;
 
-      os << "{class " << m_objType->getName().c_str() << "}";
+      os << "{class " << m_name.c_str() << "}";
 
       return os.str();
   }
