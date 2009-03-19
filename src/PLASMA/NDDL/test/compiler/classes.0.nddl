@@ -10,15 +10,16 @@ class Location {
 }
 
 // Declare Path as a triple of locations and cost
-class Path { 
+class Path {
  Location from; // Declare member variable 'from' of type 'Location'
  Location to; // Declare member variable 'to' of type 'Location'
- float cost = 0.0; // Declare member variable 'cost' of type 'float' with a default value. 
+ float cost; // Declare member variable 'cost' of type 'float'
 
  // Specify a constructor to initialize members
  Path(Location _from, Location _to){
   from = _from;
   to = _to;
+  cost = 0.0;
  }
 
  // Another constructor with only one Location - trivial path
