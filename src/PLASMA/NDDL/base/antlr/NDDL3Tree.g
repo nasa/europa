@@ -729,6 +729,7 @@ temporalRelation
 methodInvocation returns [Expr* result]
 	:
 	(	child=variableMethod
+	|       child=objectMethod
         |       child=tokenMethod
         )
         {
@@ -752,6 +753,21 @@ variableOp
         |       'close'
         ;
                 
+objectMethod returns [Expr* result]
+@init {
+    std::vector<Expr*> args;
+}
+        :       ^(METHOD_CALL op=objectOp obj=qualified? variableArgumentList[args]?)
+                {
+                    result = new ExprObjectMethod(c_str($op.text->chars),obj,args);
+                }
+        ;
+   
+objectOp
+        :       'constrain'
+        |       'free'
+        ;
+                
 tokenMethod returns [Expr* result]    
 @init {
     std::vector<Expr*> args;
@@ -767,8 +783,6 @@ tokenOp
         |       'merge'
         |       'reject'
         |       'cancel'
-        |       'free'
-        |       'constrain'
         ;        
         
 // This is here only for backwards compatibility, must be dropped eventually        

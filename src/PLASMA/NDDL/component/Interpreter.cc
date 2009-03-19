@@ -1659,6 +1659,62 @@ namespace EUROPA {
       return os.str();
   }
 
+  ExprObjectMethod::ExprObjectMethod(const char* name, Expr* objExpr, const std::vector<Expr*>& argExprs)
+      : m_methodName(name)
+      , m_objExpr(objExpr)
+      , m_argExprs(argExprs)
+  {
+  }
+
+  ExprObjectMethod::~ExprObjectMethod()
+  {
+  }
+
+  DataRef ExprObjectMethod::eval(EvalContext& context) const
+  {
+      ObjectId obj;
+
+      if (m_objExpr != NULL) {
+          DataRef v = m_objExpr->eval(context);
+          obj = ObjectId(v.getValue()->derivedDomain().getSingletonValue());
+      }
+
+      // TODO: make sure any temp vars are disposed of correctly
+      std::vector<ConstrainedVariableId> args;
+      evalArgs(context,args,m_argExprs);
+      return eval(context,obj,args);
+  }
+
+  DataRef ExprObjectMethod::eval(EvalContext& context, ObjectId& obj, const std::vector<ConstrainedVariableId>& args) const
+  {
+      std::string method(m_methodName.toString());
+      DbClientId pdb = getPDB(context); // TODO: keep using db client?
+
+      StateVarId stateVar = args[0];
+      TokenId pred = stateVar->getParentToken();
+      if (args.size()==2)
+          stateVar = args[1];
+      TokenId succ = stateVar->getParentToken();
+      if (method=="constrain")
+              pdb->constrain(obj,pred,succ);
+      else if (method=="free")
+              pdb->free(obj,pred,succ);
+      else
+          check_runtime_error(ALWAYS_FAILS,"Unknown variable method:" + method);
+
+      return DataRef::null;
+  }
+
+  std::string ExprObjectMethod::toString() const
+  {
+      std::ostringstream os;
+
+      // TODO: implement this
+      os << "VAR_METHOD:" << m_methodName.c_str();
+
+      return os.str();
+  }
+
   ExprTokenMethod::ExprTokenMethod(const char* name, const char* tokenName, const std::vector<Expr*>& argExprs)
      : m_methodName(name)
      , m_tokenName(tokenName)
@@ -1696,15 +1752,6 @@ namespace EUROPA {
           pdb->reject(tok);
       else if (method=="cancel")
           pdb->cancel(tok);
-      else if (method=="constrain" || method=="free")  {
-          ObjectId obj = ObjectId(args[0]->derivedDomain().getSingletonValue());
-          StateVarId stateVar = args[1];
-          TokenId succ = stateVar->getParentToken();
-          if (method=="constrain")
-              pdb->constrain(obj,tok,succ);
-          else
-              pdb->free(obj,tok,succ);
-      }
       else
           check_runtime_error(ALWAYS_FAILS,"Unknown token method:" + method);
 

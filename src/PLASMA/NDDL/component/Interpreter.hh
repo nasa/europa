@@ -181,6 +181,23 @@ namespace EUROPA {
       DataRef eval(EvalContext& context, ConstrainedVariableId& var, const std::vector<ConstrainedVariableId>& args) const;
   };
 
+  class ExprObjectMethod : public Expr
+  {
+  public:
+      ExprObjectMethod(const char* name, Expr* objExpr, const std::vector<Expr*>& argExprs);
+      virtual ~ExprObjectMethod();
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      LabelStr m_methodName;
+      Expr* m_objExpr;
+      std::vector<Expr*> m_argExprs;
+
+      DataRef eval(EvalContext& context, ObjectId& var, const std::vector<ConstrainedVariableId>& args) const;
+  };
+
   class ExprTokenMethod : public Expr
   {
   public:
