@@ -36,7 +36,8 @@ nddl	:	nddlStatement*
         ;
 
 nddlStatement
-        :	typeDefinition
+        :       typeDefinition
+        |       enumDefinition
         |	variableDeclarations
         |       assignment
         |       constraintInstantiation
@@ -48,13 +49,16 @@ nddlStatement
         |	methodInvocation
         |	noopstatement
         |       constraintSignature!
-        |       enumStmt!
         ;
 
-enumStmt
-        : 'enum' IDENT '{' IDENT (',' IDENT)* '}'
+enumDefinition
+        : 'enum'^ IDENT enumValues
         ;
-        
+   
+enumValues
+        : '{'^ IDENT (','! IDENT)* '}'!
+        ;
+                
 typeDefinition
 	:	'typedef' typeWithBaseDomain IDENT ';'
 			-> ^('typedef' IDENT typeWithBaseDomain)
@@ -358,7 +362,7 @@ methodName
         ;
          
 methodInvocation
-        :	(qualified '.')? methodName variableArgumentList ';'!
+        :	(qualified '.')? methodName variableArgumentList ';'
                 -> ^(METHOD_CALL methodName qualified? variableArgumentList)
 	;
 

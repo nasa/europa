@@ -48,9 +48,17 @@ public:
     // EvalContext methods
     virtual ConstrainedVariableId getVar(const char* name);
 
+    // Enum support methods
+    void addEnumValues(const char* enumName,const std::vector<std::string>& values);
+    bool isEnumValue(const char* value) const;
+    Expr* makeEnumRef(const char* value) const;
+
 protected:
     EngineId m_engine;
     std::vector<std::string> m_errors;
+
+    // Hack to keep track of enum values for the time being
+    std::map<std::string,std::string> m_enumValues;
 };
 
 }

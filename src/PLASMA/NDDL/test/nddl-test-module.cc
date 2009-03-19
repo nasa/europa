@@ -45,12 +45,9 @@ void NddlTestEngine::createModules()
 void NDDLModuleTests::syntaxTests()
 {
     std::string filename="parser.nddl";
-
     NddlTestEngine engine;
-
     std::string result = engine.executeScript("nddl3",filename,true /*isFile*/);
-    if (result.size() > 0)
-        std::cout << "ERROR, Nddl3 parser reported problems :\n" << result << std::endl;
+    CPPUNIT_ASSERT_MESSAGE("Nddl3 parser reported problems :\n" + result,result.size() == 0);
 }
 
 class UtilitiesTest {

@@ -129,8 +129,11 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
     // Build he AST
     NDDL3Parser_nddl_return result = parser->nddl(parser);
     if (parser->pParser->rec->state->errorCount > 0) {
-        debugMsg("NddlInterpreter:interpret","The parser returned " << parser->pParser->rec->state->errorCount << " errors");
-        return "";
+        std::ostringstream os;
+        os << "The parser returned " << parser->pParser->rec->state->errorCount << " errors";
+        // TODO: get error messages as well!
+        debugMsg("NddlInterpreter:interpret",os.str());
+        return os.str();
     }
     else {
         debugMsg("NddlInterpreter:interpret","NDDL AST:\n" << result.tree->toStringTree(result.tree)->chars);
@@ -239,6 +242,31 @@ ConstrainedVariableId NddlSymbolTable::getVar(const char* name)
         return getPlanDatabase()->getGlobalVariable(name);
     else
         return ConstrainedVariableId::noId();
+}
+
+
+void NddlSymbolTable::addEnumValues(const char* enumName,const std::vector<std::string>& values)
+{
+    std::string type(enumName);
+
+    for (unsigned int i=0;i<values.size();i++)
+        m_enumValues[values[i]]=type;
+}
+
+bool NddlSymbolTable::isEnumValue(const char* value) const
+{
+    return m_enumValues.find(value) != m_enumValues.end();
+}
+
+Expr* NddlSymbolTable::makeEnumRef(const char* value) const
+{
+    std::string enumType = m_enumValues.find(value)->second;
+    EnumeratedDomain* ad = dynamic_cast<EnumeratedDomain*>(
+            getPlanDatabase()->getSchema()->getCESchema()->baseDomain(enumType.c_str()).copy());
+    double v = LabelStr(value);
+    ad->set(v);
+
+    return new ExprConstant(getPlanDatabase()->getClient(),enumType.c_str(),ad);
 }
 
 }

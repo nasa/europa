@@ -143,7 +143,7 @@ namespace EUROPA {
             // If var evaluates to a token, return state var.
             TokenId tok = context.getToken(m_varName.c_str());
             if (tok.isNoId()) {
-                check_runtime_error(!var.isNoId(),std::string("Couldn't find variable or token" )+m_varName+" in Evaluation Context");
+                check_runtime_error(!var.isNoId(),std::string("Couldn't find variable or token '" )+m_varName+"' in Evaluation Context");
                 return DataRef::null;
             }
             var = tok->getState();
@@ -154,7 +154,7 @@ namespace EUROPA {
         if (tok.isNoId()) {
             var = context.getVar(m_parentName.c_str());
             if (var.isNoId()) {
-                check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable or token ")+m_parentName+" in Evaluation Context");
+                check_runtime_error(ALWAYS_FAILS,std::string("Couldn't find variable or token '")+m_parentName+"' in Evaluation Context");
                 return DataRef::null;
             }
         }
@@ -1283,6 +1283,52 @@ namespace EUROPA {
       std::ostringstream os;
 
       os << "TYPEDEF:" << m_type->toString() << " -> " << m_name.toString();
+
+      return os.str();
+  }
+
+  ExprEnumdef::ExprEnumdef(const char* name, const std::vector<std::string>& values)
+      : m_name(name)
+      , m_values(values)
+  {
+  }
+
+  ExprEnumdef::~ExprEnumdef()
+  {
+  }
+
+  DataRef ExprEnumdef::eval(EvalContext& context) const
+  {
+      const char* enumName = m_name.c_str();
+      debugMsg("Interpreter:enumdef","Defining enum:" << enumName);
+
+      SchemaId schema = getSchema(context);
+      schema->addEnum(enumName);
+
+      std::list<double> values;
+      for(unsigned int i=0;i<m_values.size();i++) {
+          LabelStr newValue(m_values[i]);
+          schema->addValue(enumName, newValue);
+          values.push_back(newValue);
+      }
+
+      EnumeratedDomain domain(values,false,enumName);
+      schema->getCESchema()->registerFactory(
+          (new EnumeratedTypeFactory(enumName,enumName,domain))->getId()
+      );
+
+      debugMsg("Interpreter:enumdef"
+              , "Created type factory " << enumName <<
+              " with base domain " << domain.toString());
+
+      return DataRef::null;
+  }
+
+  std::string ExprEnumdef::toString() const
+  {
+      std::ostringstream os;
+
+      os << "ENUMDEF:" << m_name.toString();
 
       return os.str();
   }

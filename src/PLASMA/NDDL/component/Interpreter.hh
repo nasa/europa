@@ -124,6 +124,20 @@ namespace EUROPA {
       AbstractDomain* m_type;
   };
 
+  class ExprEnumdef : public Expr
+  {
+  public:
+      ExprEnumdef(const char* name, const std::vector<std::string>& values);
+      virtual ~ExprEnumdef();
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      LabelStr m_name;
+      std::vector<std::string> m_values;
+  };
+
   class ExprObjectTypeDeclaration : public Expr
   {
   public:

@@ -440,32 +440,17 @@ namespace EUROPA {
     const TiXmlElement* setElement = element.FirstChildElement();
     check_error(strcmp(setElement->Value(),"set") == 0, "Expected value set as part of Enum definition");
 
-    Id<Schema> schema = getSchema();
-    schema->addEnum(enumName);
-
-    std::list<double> values;
+    std::vector<std::string> values;
     const TiXmlElement* enumValue;
     for(enumValue = setElement->FirstChildElement(); enumValue; enumValue = enumValue->NextSiblingElement() ) {
-      double newValue=0;
-
-      if (strcmp(enumValue->Value(),"symbol") == 0) {
-    LabelStr symbolValue(enumValue->Attribute("value"));
-    newValue = symbolValue;
-      }
-      else {
-    check_runtime_error(ALWAYS_FAILS,std::string("Don't know how to deal with enum values of type ") + enumValue->Value());
-      }
-
-      schema->addValue(enumName, newValue);
-      values.push_back(newValue);
+        if (strcmp(enumValue->Value(),"symbol") == 0)
+            values.push_back(enumValue->Attribute("value"));
+        else
+            check_runtime_error(ALWAYS_FAILS,std::string("Don't know how to deal with enum values of type ") + enumValue->Value());
     }
 
-    getCESchema()->registerFactory((new EnumeratedTypeFactory(
-                  enumName,
-                  enumName,
-                  EnumeratedDomain(values,false,enumName)
-                  ))->getId());
-
+    ExprEnumdef expr(enumName,values);
+    expr.eval(*m_evalContext);
   }
 
   void NddlXmlInterpreter::playDefineType(const TiXmlElement& element)

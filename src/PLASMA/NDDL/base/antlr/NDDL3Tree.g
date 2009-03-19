@@ -71,6 +71,7 @@ nddl :
 		     // debugMsg("NddlInterpreter:nddl","Line:" << LEXER->getLine(LEXER)); 
 		  }
 		  (	child=typeDefinition
+		  |     child=enumDefinition
                   |     child=variableDeclarations
                   |     child=assignment
                   |     child=constraintInstantiation
@@ -120,6 +121,22 @@ typeDefinition returns [Expr* result]
 		}
 	;
 
+enumDefinition returns [Expr* result]
+@init {
+    std::vector<std::string> values;
+}
+        :       ^('enum' name=IDENT enumValues[values])
+                {
+                    const char* enumName = c_str($name.text->chars);
+                    CTX->SymbolTable->addEnumValues(enumName,values);
+                    result = new ExprEnumdef(enumName,values);
+                }
+        ;
+
+enumValues[std::vector<std::string>& values]
+        :       ^('{' (v=IDENT {values.push_back(c_str($v.text->chars));})+ )
+        ;
+                  
 type returns [AbstractDomain* result]
         : (      retval=simpleType 
           |       ^(baseType=simpleType retval=inlineType[baseType])
@@ -213,7 +230,13 @@ value returns [Expr* result]
           |       child=stringLiteral
           |       child=numericLiteral 
           |       ^(i=IDENT type?) // TODO: what is this?, a variable ref?, an object ref?
-                   { result = new ExprVarRef(c_str($i.text->chars)); }
+                   {
+                       const char* ident = c_str($i.text->chars);
+                       if (CTX->SymbolTable->isEnumValue(ident))
+                           result = CTX->SymbolTable->makeEnumRef(ident);
+                       else  
+                           result = new ExprVarRef(ident); 
+                   }
           )
           { 
               if (result == NULL)
@@ -687,7 +710,10 @@ qualified returns [Expr* result]
            )
            {
                // TODO!!: do type checking at each "."
-               result = new ExprVarRef(varName.c_str());
+              if (CTX->SymbolTable->isEnumValue(varName.c_str()))
+                  result = CTX->SymbolTable->makeEnumRef(varName.c_str());
+               else  
+                   result = new ExprVarRef(varName.c_str());
            }
         ;
         
