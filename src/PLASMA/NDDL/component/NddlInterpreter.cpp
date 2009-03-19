@@ -46,13 +46,45 @@ bool isFile(const std::string& filename)
     return (stat(filename.c_str(), &my_stat) == 0);
 }
 
-// TODO: make this non-static, and use engine config to get include path
+std::vector<std::string> NddlInterpreter::getIncludePath()
+{
+    // TODO: cache this
+    std::vector<std::string> includePath;
+
+    // Add overrides from config;
+    const std::string& configPathStr = getEngine()->getConfig()->getProperty("nddl.includePath");
+    if (configPathStr.size() > 0) {
+        LabelStr configPath=configPathStr;
+        unsigned int cnt = configPath.countElements(":");
+        for (unsigned int i=0;i<cnt;i++)
+            includePath.push_back(configPath.getElement(i,":").c_str());
+    }
+
+    // Look in current dir first
+    includePath.push_back(".");
+
+    // otherwise, look in include path, starting with $EUROPA_HOME, then $PLASMA_HOME
+    const char* europaHome = std::getenv("EUROPA_HOME");
+    if (europaHome != NULL)
+        includePath.push_back(std::string(europaHome)+"/include");
+    else // TODO: this should be at least INFO, possibly WARNING
+        debugMsg("NddlInterpreter","$EUROPA_HOME is not defined, therefore not added to NddlInterpreter include path");
+
+    const char* plasmaHome = std::getenv("PLASMA_HOME");
+    if (plasmaHome != NULL) {
+        includePath.push_back(std::string(plasmaHome)+"/src/PLASMA/NDDL/base");
+        includePath.push_back(std::string(plasmaHome)+"/src/PLASMA/Resource/component/NDDL");
+    }
+
+    return includePath;
+}
+
+
 std::string NddlInterpreter::getFilename(const std::string& f)
 {
     std::string fname = f.substr(1,f.size()-2); // remove quotes
 
-    // TODO: read include path from engine config
-    std::vector<std::string> includePath;
+    std::vector<std::string> includePath=getIncludePath();
 
     // Look in current dir first
     includePath.push_back(".");
@@ -90,6 +122,7 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
     pANTLR3_INPUT_STREAM input = getInputStream(ins,source);
 
     pNDDL3Lexer lexer = NDDL3LexerNew(input);
+    lexer->parserObj = this;
     pANTLR3_COMMON_TOKEN_STREAM tstream = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lexer));
     pNDDL3Parser parser = NDDL3ParserNew(tstream);
 

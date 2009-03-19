@@ -23,6 +23,12 @@ namespace EUROPA {
     public:
       virtual ~LanguageInterpreter() {}
       virtual std::string interpret(std::istream& input, const std::string& source) = 0;
+
+      void setEngine(EngineId& engine);
+      EngineId& getEngine();
+
+    protected:
+      EngineId m_engine;
   };
 
   class EngineComponent

@@ -20,10 +20,12 @@ public:
     virtual ~NddlInterpreter();
     virtual std::string interpret(std::istream& input, const std::string& source);
 
-    static std::string getFilename(const std::string& f);
+    std::string getFilename(const std::string& f);
 
 protected:
     EngineId m_engine;
+
+    std::vector<std::string> getIncludePath();
 };
 
 

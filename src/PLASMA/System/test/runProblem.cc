@@ -48,8 +48,16 @@ void initSchema(const SchemaId& schema, const RuleSchemaId& ruleSchema);
 class TestEngine : public EuropaEngine
 {
   public:
-    TestEngine() { doStart(); }
-    ~TestEngine() { doShutdown(); }
+    TestEngine()
+    {
+        m_config->setProperty("nddl.includePath","../../NDDL/test/compiler");
+        doStart();
+    }
+
+    ~TestEngine()
+    {
+        doShutdown();
+    }
 
     virtual bool playTransactions(const char* txSource, bool interp = false)
     {

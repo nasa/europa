@@ -233,6 +233,7 @@ namespace EUROPA
         delete it->second;
         it->second = interpreter;
       }
+      interpreter->setEngine(getId());
     }
 
     void EngineBase::removeLanguageInterpreter(const std::string& language)
@@ -303,6 +304,16 @@ namespace EUROPA
     std::map<double, EngineComponent*>& EngineBase::getComponents()
     {
         return m_components;
+    }
+
+    void LanguageInterpreter::setEngine(EngineId& engine)
+    {
+        m_engine = engine;
+    }
+
+    EngineId& LanguageInterpreter::getEngine()
+    {
+        return m_engine;
     }
 }
 

@@ -26,6 +26,11 @@ tokens {
 using namespace EUROPA;
 }
 
+@lexer::context {
+    NddlInterpreter* parserObj;
+}
+
+
 nddl	:	nddlStatement*
 			-> ^(NDDL nddlStatement*)
         ;
@@ -390,10 +395,11 @@ signatureAtom
         ;
 
 
-INCLUDE :	'#include' WS+ file=STRING '\r'? '\n'	{
+INCLUDE :	'#include' WS+ file=STRING 
+                {
                         std::string fullName = std::string((const char*)($file.text->chars));
                         // Look for the included file in include path
-			fullName = NddlInterpreter::getFilename(fullName);
+			fullName = CTX->parserObj->getFilename(fullName);
 
                         if (fullName.length() == 0)
                             throw std::string("ERROR!: couldn't find file:")+((const char*)$file.text->chars);
