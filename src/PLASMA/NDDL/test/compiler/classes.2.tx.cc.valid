@@ -139,7 +139,7 @@ namespace NDDL {
     check_error(to.isValid(), "object variables must be initialized explicitly");
     
     if(cost.isNoId()){
-      cost = addVariable(IntervalDomain(0.0,0.0, "float"), "cost");
+      cost = addVariable(IntervalDomain("float"), "cost");
     }
     if (autoClose)
       close();
@@ -150,6 +150,7 @@ namespace NDDL {
   void Path::constructor(const LocationId& _from, const LocationId& _to) {
     from = addVariable(LocationDomain(_from, "Location"), "from");
     to = addVariable(LocationDomain(_to, "Location"), "to");
+    cost = addVariable(IntervalDomain(0.0, 0.0, "float"), "cost");
   }
   
   // classes.0.nddl:13 Path
