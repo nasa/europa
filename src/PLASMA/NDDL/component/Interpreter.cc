@@ -1787,8 +1787,10 @@ namespace EUROPA {
       std::string method(m_methodName.toString());
       DbClientId pdb = getPDB(context); // TODO: keep using db client?
 
-      if (method=="activate")
-          pdb->activate(tok);
+      if (method=="activate") {
+          if(!tok->isActive()) //Temporary.  Pull out when we scrub test input files. DbClientTransactionPlayer is doing the same
+              pdb->activate(tok);
+      }
       else if (method=="merge") {
           StateVarId stateVar = args[0];
           TokenId activeToken = stateVar->getParentToken();
@@ -1809,7 +1811,7 @@ namespace EUROPA {
       std::ostringstream os;
 
       // TODO: implement this
-      os << "TOKEN_METHOD:" << m_methodName;
+      os << "TOKEN_METHOD:" << m_methodName.c_str();
 
       return os.str();
   }

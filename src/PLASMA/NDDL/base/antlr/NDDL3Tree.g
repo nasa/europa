@@ -289,7 +289,11 @@ booleanLiteral returns [AbstractDomain* result]
 stringLiteral returns [AbstractDomain* result]
         :    str = STRING 
              { 
-                 LabelStr value = c_str($str.text->chars); 
+                 // remove quotes
+                 std::string s(c_str($str.text->chars));
+                 s = s.substr(1,s.size()-2);
+                 
+                 LabelStr value(s); 
                  result = new StringDomain((double)value);
              }
         ; 
@@ -616,12 +620,20 @@ std::vector<Expr*> elseBody;
 		}
   ;
 
+// TODO: perform systematic cleanup of lhs, rhs and constant exprs throughout
+guardLhs returns [Expr* result]
+        :    (child=anyValue | child=qualified)
+             {
+                 result = child;
+             } 
+        ;
+        
 guardExpression returns [ExprIfGuard* result]
 @init
 {
     const char* relopStr = "==";
 }
-        : ( ^(relop=guardRelop {relopStr=c_str($relop.text->chars);} lhs=anyValue rhs=anyValue )
+        : ( ^(relop=guardRelop {relopStr=c_str($relop.text->chars);} lhs=guardLhs rhs=anyValue )
           | lhs=anyValue
           )
           {

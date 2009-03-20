@@ -110,14 +110,12 @@ rule RunPlannerProblem {
   #run with fully interpreted model
   RunModuleMain run-nddl-interp-$(exe) : runProblem_nddl_interp_$(PLANNER) :
                 $(nddl) $(configurationFile) ;
-# TODO: enable this to hook in regression tests for c++ nddl parser                
-#  Depends $(deptarget) : run-nddl-interp-$(exe) $(nddl) ;
+  Depends $(deptarget) : run-nddl-interp-$(exe) $(nddl) ;
 
   if $(executable) in $(checkin-tests) {
     LocalDepends run-$(deptarget)-checkin-tests : run-$(exe) ;
     LocalDepends run-$(deptarget)-checkin-tests : run-xml-interp-$(exe) ;
-# TODO: enable this to hook in regression tests for c++ nddl parser                
-#    LocalDepends run-$(deptarget)-checkin-tests : run-nddl-interp-$(exe) ;
+    LocalDepends run-$(deptarget)-checkin-tests : run-nddl-interp-$(exe) ;
   }
 
   if $(LIBRARIES) = SHARED {

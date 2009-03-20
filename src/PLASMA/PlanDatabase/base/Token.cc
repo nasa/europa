@@ -384,7 +384,7 @@ namespace EUROPA{
 
   void Token::activate(){
     checkError(isInactive(),
-	       "Token " << Entity::toString() <<
+	       "Token " << Entity::toString() << " with state:" << m_state->toString() <<
 		" is not INACTIVE. Only inactive tokens may be activated.");
     check_error(isValid());
     m_state->setSpecified(ACTIVE);
