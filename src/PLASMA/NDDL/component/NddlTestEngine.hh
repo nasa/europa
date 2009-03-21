@@ -12,7 +12,8 @@ class NddlTestEngine : public EngineBase
 	virtual ~NddlTestEngine();
 
 	virtual void init();
-	void run(const char* txSource, const std::string& language);
+	int run(int argc,const char **argv);
+	void run(const char* txSource, const char* language);
 
   protected:
 	virtual void createModules();

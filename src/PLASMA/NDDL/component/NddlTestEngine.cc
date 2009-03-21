@@ -74,8 +74,23 @@ void NddlTestEngine::createModules()
     addModule((new ModuleNddl())->getId());
 }
 
-// Used to be in main, but now shared by NddlResourceTestEngine
-void NddlTestEngine::run(const char* txSource, const std::string& language)
+int NddlTestEngine::run(int argc, const char** argv)
+{
+  if (argc != 3) {
+    std::cerr << "Must provide model file and language to interpret" << std::endl;
+    return -1;
+  }
+
+  const char* txSource = argv[1];
+  const char* language = argv[2];
+
+  init();
+  run(txSource,language);
+
+  return 0;
+}
+
+void NddlTestEngine::run(const char* txSource, const char* language)
 {
     PlanDatabase* planDatabase = (PlanDatabase*) getComponent("PlanDatabase");
     planDatabase->getClient()->enableTransactionLogging();

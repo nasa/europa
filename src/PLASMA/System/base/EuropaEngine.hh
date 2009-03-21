@@ -30,9 +30,8 @@ namespace EUROPA {
         virtual const RulesEngine*      getRulesEnginePtr() const;
 
         // TODO: remains of the old Assemblies, these are only used by test code, should be dropped, eventually.
-        virtual bool playTransactions(const char* txSource, bool interp = false);
-        virtual bool plan(const char* txSource, const char* config, bool interp = false);
-        virtual bool plan(const char* txSource, const TiXmlElement& config, bool interp = false);
+        virtual bool playTransactions(const char* txSource, const char* language="nddl-xml-txn");
+        virtual bool plan(const char* txSource, const char* config, const char* language="nddl-xml-txn");
         virtual void write(std::ostream& os) const;
         virtual unsigned int getTotalNodesSearched() const;
         virtual unsigned int getDepthReached() const;

@@ -25,13 +25,9 @@ LocalDepends tests : run-system-module-tests ;
 #
 # NDDL TESTS
 #
-EXTRA_DEFS = -D$(PLANNER) -DINTERPRETED ;
-ModuleNamedObjects runProblem_xml_interp_$(PLANNER) : runProblem.cc : System ;
-ModuleMain runProblem_xml_interp_$(PLANNER) : runProblem_xml_interp_$(PLANNER).o : System ;
-
-EXTRA_DEFS = -D$(PLANNER) -DFULLY_INTERPRETED ;
-ModuleNamedObjects runProblem_nddl_interp_$(PLANNER) : runProblem.cc : System ;
-ModuleMain runProblem_nddl_interp_$(PLANNER) : runProblem_nddl_interp_$(PLANNER).o : System ;
+EXTRA_DEFS = -D$(PLANNER) ;
+ModuleNamedObjects runProblem_$(PLANNER) : runProblem.cc : System ;
+ModuleMain runProblem_$(PLANNER) : runProblem_$(PLANNER).o : System ;
 
 local DEFAULT_PCONFIG = "DefaultPlannerConfig.xml" ;
 
@@ -79,13 +75,13 @@ rule RunPlannerProblem {
   NddlParser $(xml) : $(nddl) ;
 
   #run with interpreted model
-  RunModuleMain run-xml-interp-$(exe) : runProblem_xml_interp_$(PLANNER) : $(xml) $(configurationFile) ;
+  RunModuleMain run-xml-interp-$(exe) : runProblem_$(PLANNER) : $(xml) $(configurationFile) nddl-xml ;
   Depends $(deptarget) : $(xml) run-xml-interp-$(exe) ;
   Depends run-system-tests : $(deptarget) ;
   Clean clean-generated-xml : $(xml) ;
 
   #run with fully interpreted model
-  RunModuleMain run-nddl-interp-$(exe) : runProblem_nddl_interp_$(PLANNER) : $(nddl) $(configurationFile) ;
+  RunModuleMain run-nddl-interp-$(exe) : runProblem_$(PLANNER) : $(nddl) $(configurationFile) nddl ;
   Depends $(deptarget) : [ FGristFiles $(nddl) ] run-nddl-interp-$(exe) ;
   Depends run-system-tests : run-nddl-interp-$(exe) ;
 

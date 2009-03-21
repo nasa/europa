@@ -68,15 +68,12 @@ namespace EUROPA {
     const RulesEngine*      EuropaEngine::getRulesEnginePtr()      const { return (const RulesEngine*)getComponent("RulesEngine"); }
 
     // TODO: remains of the old Assemblies, these are only used by test code, should be dropped, eventually.
-    bool EuropaEngine::playTransactions(const char* txSource, bool interp)
+    bool EuropaEngine::playTransactions(const char* txSource, const char* language)
     {
       check_error(txSource != NULL, "NULL transaction source provided.");
 
       static bool isFile = true;
-      if(interp)
-          executeScript("nddl-xml",txSource,isFile);
-      else
-          executeScript("nddl-xml-txn",txSource,isFile);
+      executeScript(language,txSource,isFile);
 
       return getConstraintEnginePtr()->constraintConsistent();
     }
@@ -91,21 +88,18 @@ namespace EUROPA {
       return sl_txLog;
     }
 
-    bool EuropaEngine::plan(const char* txSource, const char* config, bool interp){
-      check_error(config != NULL, "Must have a planner config argument.");
-      TiXmlDocument doc(config);
+    bool EuropaEngine::plan(const char* txSource, const char* plannerConfig, const char* language){
+      TiXmlDocument doc(plannerConfig);
       doc.LoadFile();
-      return plan(txSource, *(doc.RootElement()), interp);
-    }
+      const TiXmlElement& config = *(doc.RootElement());
 
-    bool EuropaEngine::plan(const char* txSource, const TiXmlElement& config, bool interp){
       SOLVERS::SolverId solver = (new SOLVERS::Solver(getPlanDatabase(), config))->getId();
 
       SOLVERS::PlanWriter::PartialPlanWriter* ppw =
         new SOLVERS::PlanWriter::PartialPlanWriter(getPlanDatabase(), getConstraintEngine(), getRulesEngine(), solver);
 
       // Now process the transactions
-      if(!playTransactions(txSource, interp))
+      if(!playTransactions(txSource, language))
         return false;
 
       //debugMsg("EuropaEngine:plan", "Initial state: " << std::endl << PlanDatabaseWriter::toString(getPlanDatabase()))
