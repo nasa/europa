@@ -1,21 +1,70 @@
-#include "NddlTestEngine.hh"
+
+#include "ModuleConstraintEngine.hh"
+#include "ModulePlanDatabase.hh"
+#include "ModuleTemporalNetwork.hh"
+#include "ModuleRulesEngine.hh"
+#include "ModuleNddl.hh"
 #include "ModuleResource.hh"
 #include "ModuleSolvers.hh"
+#include "ConstraintEngine.hh"
+#include "PlanDatabase.hh"
+#include "PlanDatabaseWriter.hh"
 
 using namespace EUROPA;
 
-class NddlResourceTestEngine : public NddlTestEngine
+class NddlResourceTestEngine : public EngineBase
 {
-  protected:
-	virtual void createModules();
+public:
+    NddlResourceTestEngine();
+    virtual ~NddlResourceTestEngine();
+
+    virtual void init();
+    void run(const char* txSource, const std::string& language);
+
+protected:
+    virtual void createModules();
 };
 
-// Same as base class method except we add one more module:
+NddlResourceTestEngine::NddlResourceTestEngine()
+{
+}
+
+void NddlResourceTestEngine::init()
+{
+    createModules();
+    doStart();
+    //initialize((CESchema*)getComponent("CESchema"));
+}
+
+NddlResourceTestEngine::~NddlResourceTestEngine()
+{
+    doShutdown();
+}
+
 void NddlResourceTestEngine::createModules()
 {
-    NddlTestEngine::createModules();  //everything except Resource module
+    addModule((new ModuleConstraintEngine())->getId());
+    addModule((new ModuleConstraintLibrary())->getId());
+    addModule((new ModulePlanDatabase())->getId());
+    addModule((new ModuleRulesEngine())->getId());
+    addModule((new ModuleTemporalNetwork())->getId());
+    addModule((new ModuleNddl())->getId());
     addModule((new ModuleSolvers())->getId());
     addModule((new ModuleResource())->getId());
+}
+
+void NddlResourceTestEngine::run(const char* txSource, const std::string& language)
+{
+    PlanDatabase* planDatabase = (PlanDatabase*) getComponent("PlanDatabase");
+    planDatabase->getClient()->enableTransactionLogging();
+
+    executeScript(language,txSource,true /*isFile*/);
+
+    ConstraintEngine* ce = (ConstraintEngine*)getComponent("ConstraintEngine");
+    assert(ce->constraintConsistent());
+
+    PlanDatabaseWriter::write(planDatabase->getId(), std::cout);
+    std::cout << "Finished\n";
 }
 
 
@@ -27,7 +76,7 @@ void NddlResourceTestEngine::createModules()
 int main(int argc, const char ** argv)
 {
   if (argc != 3) {
-    std::cerr << "Must provide initial transactions file and flag to indicate whether to use interpreter" << std::endl;
+    std::cerr << "Must provide initial transactions file and language to interpret" << std::endl;
     return -1;
   }
 
@@ -36,8 +85,8 @@ int main(int argc, const char ** argv)
   engine.init();
 
   const char* txSource = argv[1];
-  std::string useInterpreter = argv[2];
-  engine.run(txSource,useInterpreter == "1");
+  std::string language = argv[2];
+  engine.run(txSource,language);
 
   return 0;
 }
