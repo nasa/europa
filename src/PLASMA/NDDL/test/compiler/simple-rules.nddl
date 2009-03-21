@@ -1,7 +1,7 @@
 #include "Plasma.nddl"
 
 enum Locations {Hill, Rock, Lander};
-typedef string {'s1','s2','s3'} StringEnum;
+typedef string {"s1","s2","s3"} StringEnum;
 typedef float {1.0, 3.0, 4.0, 10.4} NumericEnum;
 
 class Foo extends Timeline {
@@ -27,7 +27,7 @@ class Rover extends Timeline {
   float v4;
 
   eq(v0, {Hill, Lander});
-  eq(v1, {'s1', 's2'});
+  eq(v1, {"s1", "s2"});
   eq(v2, {1.0, 4.0, 10.4});
   eq(v3, [0 12]);
   eq(v4, [-1.98 2.67]);

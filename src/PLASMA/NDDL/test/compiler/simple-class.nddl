@@ -1,7 +1,7 @@
 #include "Plasma.nddl"
 
 enum Locations {Hill, Rock, Lander};
-typedef string {'A1', 'B1', 'Martian City'} Strings;
+typedef string {"A1", "B1", "Martian City"} Strings;
 typedef int {1, 10, 35, 100 } Speeds;
 typedef float {1.9, 2.67, 3.78} Frequencies;
 
@@ -29,7 +29,7 @@ class Foo {
   m_2 = false;
   m_3 = "This still must be set!";
   m_4 = Hill;
-  m_5 = 100;
+  m_5 = 100;  // TODO: this causes a problem in the interpreter because of typedef
   m_6 = 3.78;
   m_8 = 'Martian City';
  }

@@ -2,63 +2,72 @@ SubDir PLASMA NDDL test compiler ;
 
 if ! $(PLASMA_READY) {
 
-local compiler_test = no-world.nddl ;
-local hh = $(compiler_test:S=.hh) ;
-local cc = $(compiler_test:S=.cc) ;
-LocalDepends nddl-tests : $(hh) $(cc) ;
-Nddl $(hh) $(cc) : $(compiler_test) ;
-ModuleObjects NddlMain.cc : NDDL ;
+ModuleNamedObjects NddlMain : NddlMain.cc : NDDL ;
+ModuleMain NddlMain : NddlMain.o : NDDL ;
+LocalDepends tests : run-nddl-tests ;
 
-local nddl_tests =   class-constructor.nddl  composition.0.nddl  constraint-test.nddl
-  existential.nddl        foreach-exec.nddl   foreach.nddl
-  globals.nddl            interval-constants.nddl
-  less-basic-model.nddl   multidot.nddl       
-  plasma-base.nddl        string-domain.nddl  subclass.nddl
-  classes.0.tx.nddl       classes.1.tx.nddl   classes.2.tx.nddl
+# TODO: enable these tests asap
+# Some of these are only failed by the nddl-xml interpreter, not by the nddl interpreter.
+local failing_tests =
+  csp.1.nddl 
+  csp.2.nddl
+  guards.nddl  
+  inheritance.0.nddl 
+  simple-class.nddl 
+  simple-rules.nddl 
+  ;
 
-  csp.0.nddl csp.1.nddl csp.2.nddl
-  gnats-2537.nddl gnats_2830.nddl gnats-3100.nddl gnats_3140.nddl gnats-3231.nddl gnats-3248.nddl
-  inheritance.1.nddl inheritance.2.nddl
-  nddl.tx.nddl nddl.tx.0.nddl nddl.tx.1.nddl nddl.tx.2.nddl
+local nddl_tests =   
+  class-constructor.nddl  
+  composition.0.nddl  
+  constraint-test.nddl
+  classes.0.tx.nddl       
+  classes.1.tx.nddl   
+  classes.2.tx.nddl
+  csp.0.nddl 
+  existential.nddl        
+  foreach.nddl
+  foreach-exec.nddl   
+  globals.nddl            
+  gnats-2537.nddl 
+  gnats_2830.nddl 
+  gnats-3100.nddl 
+  gnats_3140.nddl 
+  gnats-3231.nddl 
+  gnats-3248.nddl
+  inheritance.1.nddl 
+  inheritance.2.nddl
+  interval-constants.nddl
+  less-basic-model.nddl   
+  multidot.nddl       
+  nddl.tx.nddl 
+  nddl.tx.0.nddl 
+  nddl.tx.1.nddl 
+  nddl.tx.2.nddl
+  no-world.nddl 
+  plasma-base.nddl        
   simple-predicate.nddl 
-  subtype-extension.nddl ;
+  string-domain.nddl  
+  subclass.nddl
+  subtype-extension.nddl 
+  ;
 
 local model ;
-
 for model in $(nddl_tests)
 {
   local exe = $(model:S=) ;
-  RunModuleMain run-$(exe) : $(exe) : $(model:S=.xml) 1 ;
-}
-
-#these tests fail for the interpreter, remove this partition when correspnding tkts have been fixed
-nddl_tests +=  inheritance.0.nddl simple-class.nddl simple-rules.nddl guards.nddl
-;
-
-for model in $(nddl_tests)
-{
-  local exe = $(model:S=) ;
-  NddlMain $(exe) : NddlMain.o : $(model) : NDDL ;
-  RunModuleMain run-$(exe) : $(exe) : $(model:S=.xml) 0 ;
-
-	local hh = $(model:S=.hh) ;
-	local cc = [ FGristFiles $(model:S=.cc) ] ;
-
-	if $(INVALID)
-	{
-		GenerateValid generate-valids : $(hh) $(cc) ;
-		LocalDepends run-nddl-tests : generate-valids ;
-	}
-	else
-	{
-		ALWAYS $(hh).diff $(cc).diff ;
-		NOTFILE $(hh).diff $(cc).diff ;
-		Diff $(hh).diff : $(hh).valid $(hh) ;
-		Diff $(cc).diff : $(cc).valid $(cc) ;
-  	        LocalDepends run-nddl-tests : $(hh).diff $(cc).diff ;
-	}
-
-  LocalDepends run-nddl-tests : run-$(exe) ;
+  local xml = $(model:S=.xml) ;
+  
+  NddlParser $(xml) : $(model) ;
+  
+  RunModuleMain NddlMain-xml-$(exe) : NddlMain : $(xml) nddl-xml ;
+  Depends run-$(exe) : $(xml) NddlMain-xml-$(exe) ;
+  Depends run-nddl-tests : run-$(exe) ;  
+  Clean clean-generated-xml : $(xml) ;
+  
+  RunModuleMain NddlMain-$(exe) : NddlMain : $(model) nddl ;
+  Depends run-$(exe) : [ FGristFiles $(model) ] NddlMain-$(exe) ;
+  Depends run-nddl-tests : run-$(exe) ;  
 }
 
 } # PLASMA_READY

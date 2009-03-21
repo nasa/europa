@@ -6,7 +6,8 @@ ModuleComponent NDDL
 	:
         Interpreter.cc
 	NddlXml.cc
-        NddlInterpreter.cpp
+        NddlInterpreter.cc
+        NddlTestEngine.cc
 	;
 
 } # PLASMA_READY

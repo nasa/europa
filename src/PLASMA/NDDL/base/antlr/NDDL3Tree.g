@@ -110,7 +110,6 @@ typeDefinition returns [Expr* result]
 		            dataType = dataType->copy();
 		        
 		        const char* newName = c_str($name.text->chars);
-		        dataType->setTypeName(newName);    		            
 		        result = new ExprTypedef(newName,dataType);
 		     }
 		     else {
@@ -253,6 +252,7 @@ valueSet returns [Expr* result]
     std::list<double> values;
     std::string autoName = getAutoLabel("ENUM");
     const char* typeName = autoName.c_str();
+    const char* elementTypeName = autoName.c_str();
 }
         :       ^('{'
                         (element=value
@@ -260,6 +260,8 @@ valueSet returns [Expr* result]
                              DataRef elemValue = evalExpr(CTX,element);
                              const AbstractDomain& ev = elemValue.getValue()->lastDomain(); 
                              // TODO: delete element;
+                             elementTypeName = ev.getTypeName().c_str();
+                             // TODO! type checking, make sure all elements are compatible
                              double v = ev.getSingletonValue();
                              values.push_back(v);
                              isNumeric = ev.isNumeric();
@@ -268,14 +270,14 @@ valueSet returns [Expr* result]
                         )*
                  )
                  {
-                   AbstractDomain* newDomain = new EnumeratedDomain(values,isNumeric,typeName); 
+                   AbstractDomain* newDomain = new EnumeratedDomain(values,isNumeric,elementTypeName); 
                    result = new ExprConstant(
                        CTX->SymbolTable->getPlanDatabase()->getClient(),
                        typeName,
                        newDomain                       
                    );
                    
-                   // TODO: this is necessary so that the Expr definaed above can be evaluated, see about fixing it.
+                   // TODO: this is necessary so that the Expr defined above can be evaluated, see about fixing it.
                    ExprTypedef newTypedef(typeName,newDomain);
                    evalExpr(CTX,&newTypedef);
                  }

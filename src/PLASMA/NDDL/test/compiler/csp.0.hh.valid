@@ -1,9 +1,0 @@
-#include "Db.hh"
-#include "NddlUtils.hh"
-/** Custom Include Files **/
-
-namespace NDDL {
-
-// csp.0.nddl
-
-} // End NDDL namespace

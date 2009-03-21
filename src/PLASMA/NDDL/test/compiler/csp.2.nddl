@@ -16,7 +16,7 @@ Foo f2 = new Foo();
 Foo f3 = new Foo();
 
 
-// Allocate variables but assign them the the contents of another variable. 
+// Allocate variables but assign them the the contents of another variable.
 Foo f4 = f3;
 Foo f5 = allFoo;
 
@@ -24,4 +24,5 @@ Foo f5 = allFoo;
 neq(f5, allFoo);
 eq(f5, f1);
 
+// TODO: this is not supported by interpreter yet
 Foo.close(); // Close the type Foo. No new objects of this class permitted.

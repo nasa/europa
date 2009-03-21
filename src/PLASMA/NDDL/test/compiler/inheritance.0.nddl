@@ -17,7 +17,7 @@ Baz baz1 = new Baz();
 Bing bing1 = new Bing();
 
 // Now allocate variables that will be populated with all instances of their declared types.
-Object allObjects;
+Object allObjects; // TODO: this doesn't work with interpreter yet
 Timeline allTimelines;
 Foo allFoo;
 Bar allBar;

@@ -82,7 +82,7 @@ rule RunPlannerProblem {
   RunModuleMain run-xml-interp-$(exe) : runProblem_xml_interp_$(PLANNER) : $(xml) $(configurationFile) ;
   Depends $(deptarget) : $(xml) run-xml-interp-$(exe) ;
   Depends run-system-tests : $(deptarget) ;
-  Clean clean-system-xml : $(xml) ;
+  Clean clean-generated-xml : $(xml) ;
 
   #run with fully interpreted model
   RunModuleMain run-nddl-interp-$(exe) : runProblem_nddl_interp_$(PLANNER) : $(nddl) $(configurationFile) ;

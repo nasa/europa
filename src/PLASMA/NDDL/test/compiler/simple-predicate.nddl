@@ -5,9 +5,9 @@ enum Locations {Hill, Rock, Lander};
 
 class World;
 
-class Foo extends Timeline { 
- int m_0 = 5;
- string m_1 = "Hello"; // Default allocation
+class Foo extends Timeline {
+ int m_0;
+ string m_1;
 
  predicate pred1{
   Locations m_0 = Hill;
@@ -18,7 +18,8 @@ class Foo extends Timeline {
  }
 
  Foo(){
-  m_0 = 8; // Over-ride default allocation
+     m_0 = 5;
+     m_1 = "Hello";
  }
 
  Foo(string s){
@@ -34,10 +35,10 @@ Foo::pred1{
 
 class Bar extends Foo {
  predicate pred1{
-  // CMG: ERROR HERE - won't accept specification to an interval for built in duration 
+  // CMG: ERROR HERE - won't accept specification to an interval for built in duration
   duration = [2 100];
   // CMG: ERROR HERE - it thinks it is adding a parameter
-  m_3 = true;  
+  m_3 = true;
  }
 }
 

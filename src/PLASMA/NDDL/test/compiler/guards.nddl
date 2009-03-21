@@ -9,10 +9,11 @@ class Bar extends Timeline {
 }
 
 class Foo extends Timeline{
- int arg1=20;
+ int arg1;
  Bar arg2;
 
  Foo(){
+  arg1 = 20;
   arg2 = new Bar();
  }
 
@@ -38,7 +39,7 @@ class Foo extends Timeline{
 }
 
 // Guard on object being a singleton is implied
-// by the constrain referencing a field. Expect a single 
+// by the constrain referencing a field. Expect a single
 // RuleInstance to be created, which is an object guarded instance
 Foo::impliedObjectGuard{
  eq(allFoo.arg1, [0 100]); // 1: Guarded by allFoo
@@ -67,6 +68,7 @@ Foo::impliedLocalVariableGuard{
 }
 
 // Singleton guard. Can be variables of tokens too
+// TODO: reference to object isn't working
 Foo::singletonGuard{
  if(object){
   meets(basicToken g1);
@@ -107,7 +109,7 @@ Foo::tokenWithParameters{
 
 // TODO: Generating a singleton test instead of a value guarded test with default value of true
 Foo::tokenWithParameters{
- if(this.bool_arg){ 
+ if(this.bool_arg){
   meets(basicToken t1);
  }
 }
