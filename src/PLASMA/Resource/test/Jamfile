@@ -11,9 +11,6 @@ ModuleMain rs-module-tests : module-tests.cc rs-test-module.cc rs-flow-test-modu
 RunModuleMain run-rs-module-tests : rs-module-tests ;
 LocalDepends tests : run-rs-module-tests run-rs-tests ;
 
-# Needed to compile NddlMainForResources (ie we need access to NddlMain)
-SubDirC++Flags -I$(PLASMA_HOME)/src/PLASMA/NDDL/test/compiler ;
-
 ModuleNamedObjects rsNddlMain : NddlMainForResources.cc : Resource  ;
 ModuleMain rsNddlMain : rsNddlMain.o : Resource ;
 

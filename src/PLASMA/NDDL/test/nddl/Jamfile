@@ -1,4 +1,4 @@
-SubDir PLASMA NDDL test compiler ;
+SubDir PLASMA NDDL test nddl ;
 
 if ! $(PLASMA_READY) {
 

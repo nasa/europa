@@ -2,18 +2,18 @@ SubDir PLASMA NDDL test ;
 
 if ! $(PLASMA_READY) {
 
- # The delta between the old parser and the new parser is too
- # great for these tests to apply.  Until new tests are written,
- # the directory will just be ignored.
- #SubInclude PLASMA NDDL test parser ;
- SubInclude PLASMA NDDL test compiler ;
- SubInclude PLASMA NDDL test project ;
- SubDirHdrs $(PLASMA) PlanDatabase test ;
+  # The delta between the old parser and the new parser is too
+  # great for these tests to apply.  Until new tests are written,
+  # the directory will just be ignored.
+  #SubInclude PLASMA NDDL test parser ;
+  
+  SubInclude PLASMA NDDL test nddl ;
+  SubDirHdrs $(PLASMA) PlanDatabase test ;
 
-ModuleLibraries nddl-module-tests : cppunit ;
+  ModuleLibraries nddl-module-tests : cppunit ;
 
-ModuleMain nddl-module-tests : $(PlanDatabase_Test_Files:S=$(SUFOBJ)) module-tests.cc nddl-test-module.cc : NDDL ;
- RunModuleMain run-nddl-module-tests : nddl-module-tests ;
- LocalDepends tests : run-nddl-module-tests ;
+  ModuleMain nddl-module-tests : $(PlanDatabase_Test_Files:S=$(SUFOBJ)) module-tests.cc nddl-test-module.cc : NDDL ;
+  RunModuleMain run-nddl-module-tests : nddl-module-tests ;
+  LocalDepends tests : run-nddl-module-tests ;
 
 } # PLASMA_READY
