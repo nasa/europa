@@ -12,18 +12,29 @@ GroundedReusableProfile::GroundedReusableProfile(const PlanDatabaseId db, const 
 : TimetableProfile(db, flawDetector, initCapacityLb, initCapacityUb) {}
 
 
+// Notice that the lb value passed in is ignored?
+
+// a) LowerLevelMin and UpperLevelMax treated the same as timetable
+// b) LowerLevelMax and UpperLevelMin both happen at transaction start, and use lb and ub to set
+// ie:  LowerLevelMax should really be called GroundedMin and UpperLevelMin should really be called GroundedMax (!)
+
+// WHOA:  Timetable is really bad with flexible amount - will never go back to zero!!!
 
 void GroundedReusableProfile::handleTransactionStart(bool isConsumer, const double & lb, const double & ub)
 {
 	if(isConsumer) {
 		m_lowerLevelMin -= ub;
-		m_lowerLevelMax -= lb;
+
+		// These two are the grounded min/max profiles:
+		m_lowerLevelMax -= ub;
+		m_upperLevelMin -= lb;
 	}
 	else {
-		m_upperLevelMin += lb;
 		m_upperLevelMax += ub;
-		m_lowerLevelMin += lb;
-		m_lowerLevelMax += ub;
+
+		// These two are the grounded min/max profiles:
+		m_upperLevelMin += ub;
+		m_lowerLevelMax += lb;
 	}
 }
 
@@ -31,9 +42,10 @@ void GroundedReusableProfile::handleTransactionEnd(bool isConsumer, const double
 {
 	if(isConsumer) {
 		m_upperLevelMax -= lb;
-		m_upperLevelMin -= ub;
+	}
+	else {
+		m_lowerLevelMin += lb;
 	}
 }
-
 }
 }

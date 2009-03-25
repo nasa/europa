@@ -7,11 +7,13 @@ class CapacityResource
     //extends CBReusable
 {
     string profileType;
+    string detectorType;
 
-    CapacityResource( string pt, float mincapacity, float maxcapacity )
+    CapacityResource( string pt, string dt, float mincapacity, float maxcapacity )
     {
         super( maxcapacity, mincapacity );
         profileType = pt;
+        detectorType = dt;
     }
 }
 

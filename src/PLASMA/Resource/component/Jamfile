@@ -20,6 +20,7 @@ ModuleComponent Resource
 		SAVH_GenericFVDetector.cc
         SAVH_OpenWorldFVDetector.cc
         SAVH_ClosedWorldFVDetector.cc
+        SAVH_GroundedFVDetector.cc
 		;
 
 SubInclude PLASMA Resource component NDDL ;

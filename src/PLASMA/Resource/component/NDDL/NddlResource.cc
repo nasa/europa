@@ -34,7 +34,7 @@ bool isValid(ConstrainedVariableId nameVar, const std::string param)
 			return true;
 	}
 	else if (param == PARAM_DETECTOR_TYPE) {
-		if (name == "OpenWorldFVDetector" || name == "ClosedWorldFVDetector" )
+		if (name == "OpenWorldFVDetector" || name == "ClosedWorldFVDetector" || name == "GroundedFVDetector")
 			return true;
 	}
 	else {
@@ -44,20 +44,42 @@ bool isValid(ConstrainedVariableId nameVar, const std::string param)
 	return false;
 }
 
-
-// For getting either the profile or detector name specified by the given parameter:
-LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, const std::string& defaultValue)
+bool isValidCombo(const std::string& profileName, const std::string& detectorName)
 {
-	std::string fullName = res->getName().toString()+"."+param;
-	ConstrainedVariableId nameVar = res->getVariable(fullName);
-	LabelStr name(defaultValue);
-	if (!nameVar.isNoId()) {
-		debugMsg("NDDL","Using resource profile or detector variable : " << nameVar->toString());
-		check_error(isValid(nameVar, param),"Invalid resource profile or detector type:" + nameVar->toString());
-		name = LabelStr(nameVar->derivedDomain().getSingletonValue());
+	if(profileName == "GroundedReusableProfile" && detectorName != "GroundedFVDetector")
+		return false;
+
+	return true;
+}
+
+
+// For getting either the profile or detector name specified by the given parameter.  We also check that each is valid, and that the two
+// are valid to use together
+std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, const std::string& defaultProfile, const std::string& defaultDetector)
+{
+	std::string pFullName = res->getName().toString()+"."+PARAM_PROFILE_TYPE;
+	std::string dFullName = res->getName().toString()+"."+PARAM_DETECTOR_TYPE;
+
+	ConstrainedVariableId pNameVar = res->getVariable(pFullName);
+	ConstrainedVariableId dNameVar = res->getVariable(dFullName);
+
+	LabelStr pName(defaultProfile);
+	LabelStr dName(defaultDetector);
+
+	if (!pNameVar.isNoId()) {
+		debugMsg("NDDL","Using resource profile variable : " << pNameVar->toString());
+		check_error(isValid(pNameVar, PARAM_PROFILE_TYPE),"Invalid resource profile type:" + pNameVar->toString());
+		pName = LabelStr(pNameVar->derivedDomain().getSingletonValue());
 	}
-	debugMsg("NDDL","Using resource profile or detector : " << name.toString())
-	return name;
+
+	if (!dNameVar.isNoId()) {
+		debugMsg("NDDL","Using resource detector variable : " << dNameVar->toString());
+		check_error(isValid(dNameVar, PARAM_DETECTOR_TYPE),"Invalid resource detector type:" + dNameVar->toString());
+		dName = LabelStr(dNameVar->derivedDomain().getSingletonValue());
+	}
+
+	check_error(isValidCombo(pName.toString(), dName.toString()), "Invalid combination of profile " + pName.toString() + " and detector " + dName.toString());
+	return std::make_pair(pName, dName);
 }
 
 // -------------------------------------------------------------------------------------------------------
@@ -109,14 +131,13 @@ LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, c
 
     check_error(m_variables[CMAX]->derivedDomain().isSingleton());
 
-    LabelStr profileName = getProfileOrDetectorName(this, PARAM_PROFILE_TYPE, "IncrementalFlowProfile");
-    LabelStr detectorName = getProfileOrDetectorName(this, PARAM_DETECTOR_TYPE, "ClosedWorldFVDetector");
+    std::pair <LabelStr, LabelStr> pd = getProfileAndDetectorNames(this, "IncrementalFlowProfile", "ClosedWorldFVDetector");
 
     init(1, 1, //capacity lb, capacity ub
          0, 1,//lower limit, upper limit
          PLUS_INFINITY, PLUS_INFINITY, //max inst production, max inst consumption
          m_variables[CMAX]->derivedDomain().getSingletonValue(), m_variables[CMAX]->derivedDomain().getSingletonValue(), //max production, max consumption
-         detectorName, profileName);
+         pd.second, pd.first);
     EUROPA::SAVH::Resource::close();
   }
 
@@ -206,8 +227,7 @@ LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, c
     check_error(m_variables[CRMAX]->derivedDomain().isSingleton());
     check_error(m_variables[CMAX]->derivedDomain().isSingleton());
 
-    LabelStr profileName = getProfileOrDetectorName(this, PARAM_PROFILE_TYPE, "IncrementalFlowProfile");
-    LabelStr detectorName = getProfileOrDetectorName(this, PARAM_DETECTOR_TYPE, "ClosedWorldFVDetector");
+    std::pair <LabelStr, LabelStr> pd = getProfileAndDetectorNames(this, "IncrementalFlowProfile", "ClosedWorldFVDetector");
 
     // TBS:  Use PLUS_INFINITY for upper limit, since TimetableProfile/GroundedReusableProfile could compute
     // upper bounds above capacity, even though we know those don't correspond to real flaws (because a reusable
@@ -216,7 +236,7 @@ LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, c
 	 m_variables[LLMIN]->derivedDomain().getSingletonValue(), PLUS_INFINITY,
 	 m_variables[CRMAX]->derivedDomain().getSingletonValue(), m_variables[CRMAX]->derivedDomain().getSingletonValue(),
 	 m_variables[CMAX]->derivedDomain().getSingletonValue(), m_variables[CMAX]->derivedDomain().getSingletonValue(),
-	 detectorName, profileName);
+	 pd.second, pd.first);
 
     EUROPA::SAVH::Resource::close();
   }
@@ -335,17 +355,16 @@ LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, c
     check_error(m_variables[CRMAX]->derivedDomain().isSingleton());
     check_error(m_variables[CMAX]->derivedDomain().isSingleton());
 
-    LabelStr profileName = getProfileOrDetectorName(this, PARAM_PROFILE_TYPE, "IncrementalFlowProfile");
-    LabelStr detectorName = getProfileOrDetectorName(this, PARAM_DETECTOR_TYPE, "ClosedWorldFVDetector");
+    std::pair <LabelStr, LabelStr> pd = getProfileAndDetectorNames(this, "IncrementalFlowProfile", "ClosedWorldFVDetector");
 
-    // TBS:  Use PLUS_INFINITY for upper limit, since TimetableProfile/GroundedReusableProfile could compute
+    // TBS:  Use PLUS_INFINITY for upper limit, since TimetableProfile/GroundedProfile could compute
     // upper bounds above capacity, even though we know those don't correspond to real flaws (because a reusable
     // resource can't ever really exceed capacity)
     init(m_variables[C]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(),
      m_variables[LLMIN]->derivedDomain().getSingletonValue(), PLUS_INFINITY,
      m_variables[CRMAX]->derivedDomain().getSingletonValue(), m_variables[CRMAX]->derivedDomain().getSingletonValue(),
      m_variables[CMAX]->derivedDomain().getSingletonValue(), m_variables[CMAX]->derivedDomain().getSingletonValue(),
-     detectorName, profileName);
+     pd.second, pd.first);
 
     EUROPA::SAVH::Resource::close();
   }
@@ -450,14 +469,13 @@ LabelStr getProfileOrDetectorName(const Object* res, const std::string& param, c
     check_error(m_variables[CRMAX]->derivedDomain().isSingleton());
     check_error(m_variables[CMAX]->derivedDomain().isSingleton());
 
-    LabelStr profileName = getProfileOrDetectorName(this, PARAM_PROFILE_TYPE, "IncrementalFlowProfile");
-    LabelStr detectorName = getProfileOrDetectorName(this, PARAM_DETECTOR_TYPE, "ClosedWorldFVDetector");
+    std::pair <LabelStr, LabelStr> pd = getProfileAndDetectorNames(this, "IncrementalFlowProfile", "ClosedWorldFVDetector");
 
     init(m_variables[IC]->derivedDomain().getSingletonValue(), m_variables[IC]->derivedDomain().getSingletonValue(),
 	 m_variables[LLMIN]->derivedDomain().getSingletonValue(), m_variables[LLMAX]->derivedDomain().getSingletonValue(),
 	 m_variables[PRMAX]->derivedDomain().getSingletonValue(), (m_variables[CRMAX]->derivedDomain().getSingletonValue()),
 	 m_variables[PMAX]->derivedDomain().getSingletonValue(), (m_variables[CMAX]->derivedDomain().getSingletonValue()),
-	 detectorName, profileName);
+	 pd.second, pd.first);
     EUROPA::SAVH::Resource::close();
   }
 

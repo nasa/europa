@@ -15,6 +15,7 @@
 #include "SAVH_GroundedReusableProfile.hh"
 #include "SAVH_OpenWorldFVDetector.hh"
 #include "SAVH_ClosedWorldFVDetector.hh"
+#include "SAVH_GroundedFVDetector.hh"
 #include "SAVH_Instant.hh"
 #include "SAVH_ThreatDecisionPoint.hh"
 #include "SAVH_ThreatManager.hh"
@@ -132,6 +133,7 @@ namespace EUROPA {
       engine->addComponent("FVDetectorFactoryMgr",fvdfm);
       REGISTER_FVDETECTOR(fvdfm,EUROPA::SAVH::OpenWorldFVDetector,OpenWorldFVDetector);
       REGISTER_FVDETECTOR(fvdfm,EUROPA::SAVH::ClosedWorldFVDetector,ClosedWorldFVDetector);
+      REGISTER_FVDETECTOR(fvdfm,EUROPA::SAVH::GroundedFVDetector,GroundedFVDetector);
 
       EUROPA::SOLVERS::ComponentFactoryMgr* cfm = (EUROPA::SOLVERS::ComponentFactoryMgr*)engine->getComponent("ComponentFactoryMgr");
       REGISTER_FLAW_MANAGER(cfm,SAVH::ThreatManager, SAVHThreatManager);
