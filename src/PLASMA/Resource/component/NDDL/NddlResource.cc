@@ -30,7 +30,7 @@ bool isValid(ConstrainedVariableId nameVar, const std::string param)
 		if (name == "FlowProfile" ||
 				name == "IncrementalFlowProfile" ||
 				name == "TimetableProfile" ||
-				name == "GroundedReusableProfile")
+				name == "GroundedProfile")
 			return true;
 	}
 	else if (param == PARAM_DETECTOR_TYPE) {
@@ -46,7 +46,7 @@ bool isValid(ConstrainedVariableId nameVar, const std::string param)
 
 bool isValidCombo(const std::string& profileName, const std::string& detectorName)
 {
-	if(profileName == "GroundedReusableProfile" && detectorName != "GroundedFVDetector")
+	if(profileName == "GroundedProfile" && detectorName != "GroundedFVDetector")
 		return false;
 
 	return true;
@@ -229,7 +229,7 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 
     std::pair <LabelStr, LabelStr> pd = getProfileAndDetectorNames(this, "IncrementalFlowProfile", "ClosedWorldFVDetector");
 
-    // TBS:  Use PLUS_INFINITY for upper limit, since TimetableProfile/GroundedReusableProfile could compute
+    // TBS:  Use PLUS_INFINITY for upper limit, since TimetableProfile/GroundedProfile could compute
     // upper bounds above capacity, even though we know those don't correspond to real flaws (because a reusable
     // resource can't ever really exceed capacity)
     init(m_variables[C]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(),

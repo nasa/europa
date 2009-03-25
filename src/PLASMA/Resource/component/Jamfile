@@ -12,7 +12,7 @@ ModuleComponent Resource
 		SAVH_Types.cc
 		SAVH_FlowProfile.cc
 		SAVH_IncrementalFlowProfile.cc
-		SAVH_GroundedReusableProfile.cc
+		SAVH_GroundedProfile.cc
         SAVH_InstantTokens.cc
 		SAVH_Reservoir.cc
 		SAVH_DurativeTokens.cc

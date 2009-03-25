@@ -27,7 +27,7 @@ namespace EUROPA {
    * @li the end of the resource horizon
    * @li the earliest time for at least on transaction inserted on the resource.
    * @li the latest time for at least one transaction on the resource.
-   * 
+   *
    * An Instant refers to a set of Transactions. We require that for all t in the set referred to
    * by an Insatnt, the time of the instant is in [t.earliest, t.latest]
    *
@@ -78,7 +78,7 @@ namespace EUROPA {
     void updateBounds(double lowerMin, double lowerMax, double upperMin, double upperMax);
 
     // this is the original one
-    void updateBounds(double completedMax, double completedMin, double levelMax, double levelMin, 
+    void updateBounds(double completedMax, double completedMin, double levelMax, double levelMin,
                       double productionMin, double consumptionMin, double productionSum, double consumptionSum);
 
     void addResourceViolation(ResourceProblem::Type type);
@@ -98,12 +98,14 @@ namespace EUROPA {
 
     double m_completedMax; /**< The upper bound on a summation of transactions whose end time has occurred by this instant. */
     double m_completedMin; /**< The lower  bound on a summation of transactions whose end time has occurred by this instant. */
-    double m_levelMax; /**< The maximumn level of the resource at this time, for the set of currently inserted transactions. */
-    double m_levelMin; /**< The minimumn level of the resource at this time, for the set of currently inserted transactions. */
     double m_productionMin; /**< The minimum production occurring for this Instant. */
     double m_consumptionMin; /**< The minimum consumption occurring for this Instant. */
     double m_productionSum; /**< The sum of all m_productionMin values to date. */
     double m_consumptionSum; /**< The sume of all m_consumptionMin values to date. */
+
+	/* TBS:  Not used anywhere */
+//    double m_levelMax; /**< The maximumn level of the resource at this time, for the set of currently inserted transactions. */
+//    double m_levelMin; /**< The minimumn level of the resource at this time, for the set of currently inserted transactions. */
 
     TransactionSet m_transactions; /**< The set of all Transactions where m_time is in [earliest, latest]. */
     std::list<ResourceViolationId> m_violations; /**< The set of all Violations detected given the boundary conditions

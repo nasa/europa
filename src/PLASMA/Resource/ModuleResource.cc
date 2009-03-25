@@ -12,7 +12,7 @@
 #include "SAVH_FlowProfile.hh"
 #include "SAVH_IncrementalFlowProfile.hh"
 #include "SAVH_TimetableProfile.hh"
-#include "SAVH_GroundedReusableProfile.hh"
+#include "SAVH_GroundedProfile.hh"
 #include "SAVH_OpenWorldFVDetector.hh"
 #include "SAVH_ClosedWorldFVDetector.hh"
 #include "SAVH_GroundedFVDetector.hh"
@@ -126,7 +126,7 @@ namespace EUROPA {
       REGISTER_PROFILE(pfm,EUROPA::SAVH::TimetableProfile, TimetableProfile );
       REGISTER_PROFILE(pfm,EUROPA::SAVH::FlowProfile, FlowProfile);
       REGISTER_PROFILE(pfm,EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile );
-      REGISTER_PROFILE(pfm,EUROPA::SAVH::GroundedReusableProfile, GroundedReusableProfile );
+      REGISTER_PROFILE(pfm,EUROPA::SAVH::GroundedProfile, GroundedProfile );
 
       // Solver
       FactoryMgr* fvdfm = new FactoryMgr();
