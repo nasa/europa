@@ -11,6 +11,9 @@ namespace EUROPA {
   StringDomain::StringDomain(double value, const char* typeName) 
     : EnumeratedDomain(value, false, typeName){m_isString = true;}
 
+  StringDomain::StringDomain(const std::string& value, const char* typeName) 
+    : EnumeratedDomain(LabelStr(value), false, typeName){m_isString = true;}
+
   StringDomain::StringDomain(const std::list<double>& values, 
                              const char* typeName)
     : EnumeratedDomain(values, false, typeName)

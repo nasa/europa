@@ -35,6 +35,11 @@ namespace EUROPA {
     StringDomain(double value, const char* typeName = getDefaultTypeName().toString().c_str());
 
     /**
+     * @brief Constructs an initial singleton domain with the given type name
+     */
+    StringDomain(const std::string& value, const char* typeName = getDefaultTypeName().toString().c_str());
+
+    /**
      * @brief Constructor.
      * @param values The initial set of values to populate the domain.
      * @param typeName
