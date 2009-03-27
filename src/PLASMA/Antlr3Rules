@@ -5,6 +5,9 @@ include [ FDirName $(SUBDIR) JavaRules ] ;
 
 ANTLR3_JAR ?= [ FDirName $(SUBDIR) .. .. ext lib antlr-3.jar ] ;
 
+# This is necessary when building from external directories
+ANTLR3FLAGS ?= -o [ FDirName $(SUBDIR) NDDL base ] ;
+
 # Antlr3Grammar ParserPrefix : grammar.g grammar.tree.g ;
 rule Antlr3Grammar
 {
