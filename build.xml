@@ -174,12 +174,12 @@
         <exclude name="**/test/**"/>
       </fileset>
     </copy>
-    <copy todir="${dir.dist.base}/include" flatten="false">
+    <!-- <copy todir="${dir.dist.base}/include" flatten="false">
       <fileset dir="${dir.src}/Log4cpp/log4cpp-1.0.patch1/include">
         <include name="**/*.hh"/>
         <include name="**/*.h"/>
       </fileset>
-    </copy>
+    </copy> -->
 
     <copy todir="${dir.dist.base}/config">
       <fileset dir="${dir.plasma}/config"/>

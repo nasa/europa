@@ -2,9 +2,7 @@ SubDir PLASMA Utils ;
 
 if ! $(PLASMA_READY) {
 
-SubDirHdrs $(log4cpp.includeDir) ;
-
-Module Utils : TinyXml Log4cpp ;
+Module Utils : TinyXml  ;
 
 ModuleFiles Utils : CommonDefs.cc ;
 

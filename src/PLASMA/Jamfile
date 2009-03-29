@@ -20,7 +20,6 @@ Module plasma : all System ;
 # 3rd party
 SubInclude PLASMA Antlr ;
 SubInclude PLASMA Antlr3 ;
-SubInclude PLASMA Log4cpp ;
 SubInclude PLASMA TinyXml ;
 
 # kernel. 

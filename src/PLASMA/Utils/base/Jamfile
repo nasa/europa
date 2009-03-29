@@ -2,8 +2,6 @@ SubDir PLASMA Utils base ;
 
 if ! $(PLASMA_READY) {
 
-SubDirHdrs $(log4cpp.includeDir) ;
-
 ModuleBase Utils
 	:
 	Debug.cc

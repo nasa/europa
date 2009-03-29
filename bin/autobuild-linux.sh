@@ -10,10 +10,28 @@ libraries=(  \
 )
 
 variants=(  \
-#    DEV \
-#    OPTIMIZED \
+    DEV \
+    OPTIMIZED \
     PROFILE
 )
+
+for variant in ${variants[@]}
+do
+    for library in ${libraries[@]}
+    do
+	echo This will build  $variant $library
+    done
+done
+
+for variant in ${variants[@]}
+do
+    for library in ${libraries[@]}
+    do
+	ant -Djam.variant=$variant -Djam.libraries=$library clean
+    done
+done
+
+
 
 for variant in ${variants[@]}
 do

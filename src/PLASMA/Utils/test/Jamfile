@@ -8,7 +8,7 @@ SubDirHdrs $(log4cpp.includeDir) ;
 ModuleLibraries utils-module-tests : cppunit ;
 
 ModuleMain utils-module-tests
- : module-tests.cc util-test-module.cc Log4CppTest.cc LoggerTest.cc
+ : module-tests.cc util-test-module.cc LoggerTest.cc
  : Utils ;
 RunModuleMain run-utils-module-tests : utils-module-tests ;
 LocalDepends tests : run-utils-module-tests ;

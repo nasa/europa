@@ -1,8 +1,8 @@
 
 #include "LoggerTest.hh"
 
-using log4cpp::Category;
-using log4cpp::CategoryStream;
+// using log4cpp::Category;
+// using log4cpp::CategoryStream;
 using EUROPA::Utils::Logger; 
 
 namespace EUROPA {
@@ -27,8 +27,8 @@ int LoggerTest::testLogger()
     
     LOGGER.log( "Message that will always show");
 
-    int value = 0;
-    LOGGER << Logger::INFO <<  "test stream output value:" << value << Logger::eol;
+    //    int value = 0;
+//     LOGGER << Logger::INFO <<  "test stream output value:" << value << Logger::eol;
     return 0;
 }
 
