@@ -40,7 +40,7 @@ SubInclude PLASMA ANML ;
 SubInclude PLASMA System ;
 
 RemoveBinaries clean-all ;
-Depends clean-all : clean clean-nddl-xml clean-system-xml ;
+Depends clean-all : clean clean-generated-xml ;
 
 Depends build : build-modules ;
 
