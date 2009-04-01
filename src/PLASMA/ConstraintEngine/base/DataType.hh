@@ -20,7 +20,7 @@ public:
     virtual ~DataType();
 
     /**
-     * @brief Get the data ype's name.
+     * @brief Get the data type's name.
      */
     virtual const LabelStr& getName() const;
 

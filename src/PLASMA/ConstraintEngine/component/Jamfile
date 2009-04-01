@@ -7,6 +7,7 @@ ModuleComponent ConstraintEngine
 	BoolDomain.cc
 	BoolTypeFactory.cc
 	Constraints.cc
+	DataTypes.cc
 	DefaultPropagator.cc
 	EnumeratedDomain.cc
 	EnumeratedTypeFactory.cc

@@ -11,6 +11,7 @@ namespace EUROPA {
 
 DataType::DataType(const char* name)
     : m_name(name)
+    , m_isRestricted(false)
 {
 }
 
