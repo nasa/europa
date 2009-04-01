@@ -254,6 +254,8 @@
 // experimental .96 .97 branches..
 #	 undef ANTLR_CCTYPE_NEEDS_STD
 #	endif
+# elif ( __GNUC__ == 4 )
+#   include <string.h>
 # endif
 #endif // ! __GNUC__
 /*}}}*/
