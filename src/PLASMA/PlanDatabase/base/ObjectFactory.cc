@@ -1,7 +1,6 @@
 #include "ObjectFactory.hh"
 #include "Schema.hh"
 #include "PlanDatabase.hh"
-#include "TypeFactory.hh"
 #include "Debug.hh"
 #include "Object.hh"
 #include <string.h>

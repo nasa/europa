@@ -3,8 +3,8 @@
 #include "TokenFactory.hh"
 #include "Debug.hh"
 #include "Utils.hh"
-#include "EnumeratedTypeFactory.hh"
 #include "Object.hh"
+#include "DataTypes.hh"
 
 namespace EUROPA {
 
@@ -520,8 +520,7 @@ namespace EUROPA {
     childOfRelation.insert(std::pair<LabelStr, LabelStr>(objectType, parent));
 
     // Add type for constrained variables to be able to hold references to objects of the new type
-    getCESchema()->registerFactory((new EnumeratedTypeFactory(
-                  objectType.c_str(),
+    getCESchema()->registerDataType((new ObjectDT(
                   objectType.c_str(),
                   ObjectDomain(objectType.c_str())
                   ))->getId());

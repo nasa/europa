@@ -25,7 +25,9 @@ local solverInputFiles = 	[ FGristFiles UnboundVariableFiltering.nddl
   LocalDepends run-solvers-module-tests : $(solversInputFile:S=.xml) ;
  }
 
- NddlMain solvers-module-tests : module-tests.cc solvers-test-module.cc : Model.nddl : Solvers NDDL : solvers-tests ;
+ NddlParser Model.xml : Model.nddl ;
+ ModuleMain solvers-module-tests : module-tests.cc solvers-test-module.cc : Solvers NDDL  : solvers-tests ;
+ Depends run-solvers-module-tests : Model.xml ; 
  RunModuleMain run-solvers-module-tests : solvers-module-tests ;
  LocalDepends tests : run-solvers-module-tests ;
 } # PLASMA_READY

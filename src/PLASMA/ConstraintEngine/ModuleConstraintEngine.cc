@@ -1,10 +1,5 @@
 #include "ModuleConstraintEngine.hh"
-#include "BoolTypeFactory.hh"
-#include "IntervalIntTypeFactory.hh"
-#include "IntervalTypeFactory.hh"
-#include "StringTypeFactory.hh"
-#include "SymbolTypeFactory.hh"
-#include "EnumeratedTypeFactory.hh"
+#include "DataTypes.hh"
 #include "Constraints.hh"
 #include "ConstraintFactory.hh"
 #include "DefaultPropagator.hh"
@@ -32,18 +27,16 @@ namespace EUROPA {
 
   void ModuleConstraintEngine::initialize(EngineId engine)
   {
-      CESchema* tfm = new CESchema();
-      tfm->registerFactory((new BoolTypeFactory())->getId());
-      tfm->registerFactory((new IntervalIntTypeFactory())->getId());
-      tfm->registerFactory((new intTypeFactory())->getId());
-      tfm->registerFactory((new IntervalTypeFactory())->getId());
-      tfm->registerFactory((new floatTypeFactory())->getId());
-      tfm->registerFactory((new EnumeratedTypeFactory("REAL_ENUMERATION", "ELEMENT", EnumeratedDomain(true, "REAL_ENUMERATION")))->getId());
-      tfm->registerFactory((new StringTypeFactory())->getId());
-      tfm->registerFactory((new SymbolTypeFactory())->getId());
-      engine->addComponent("CESchema",tfm);
+      CESchema* ces = new CESchema();
+      ces->registerDataType((new VoidDT())->getId());
+      ces->registerDataType((new BoolDT())->getId());
+      ces->registerDataType((new IntDT())->getId());
+      ces->registerDataType((new FloatDT())->getId());
+      ces->registerDataType((new StringDT())->getId());
+      ces->registerDataType((new SymbolDT())->getId());
+      engine->addComponent("CESchema",ces);
 
-      ConstraintEngine* ce = new ConstraintEngine(tfm->getId());
+      ConstraintEngine* ce = new ConstraintEngine(ces->getId());
 	  new DefaultPropagator(LabelStr("Default"), ce->getId());
       engine->addComponent("ConstraintEngine",ce);
   }
@@ -53,8 +46,8 @@ namespace EUROPA {
       ConstraintEngine* ce = (ConstraintEngine*)engine->removeComponent("ConstraintEngine");
       delete ce;
 
-      CESchema* tfm = (CESchema*)engine->removeComponent("CESchema");
-      delete tfm;
+      CESchema* ces = (CESchema*)engine->removeComponent("CESchema");
+      delete ces;
   }
 
   /**************************************************************************************/
@@ -183,7 +176,7 @@ namespace EUROPA {
   void ModuleConstraintLibrary::uninitialize(EngineId engine)
   {
       CESchema* ces = (CESchema*)engine->getComponent("CESchema");
-      // TODO: should be more selective and only add the constraints we added above
-      ces->purgeAll();
+      // TODO: should be more selective and only remove the constraints we added above
+      ces->purgeConstraintFactories();
   }
 }

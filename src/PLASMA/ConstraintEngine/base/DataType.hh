@@ -8,7 +8,9 @@
 #ifndef DATATYPE_HH_
 #define DATATYPE_HH_
 
+#include "ConstraintEngineDefs.hh"
 #include "LabelStr.hh"
+#include "ConstrainedVariable.hh"
 
 namespace EUROPA {
 
@@ -18,6 +20,8 @@ public:
     DataType(const char* name);
 
     virtual ~DataType();
+
+    const DataTypeId& getId() const;
 
     /**
      * @brief Get the data type's name.
@@ -71,9 +75,32 @@ public:
      */
     virtual void setIsRestricted(bool b);
 
+    /**
+     * @brief Return the base domain
+     */
+    virtual const AbstractDomain& baseDomain() const;
+
+    /**
+     * @brief Create a value for a string
+     */
+    virtual double createValue(const std::string& value) const = 0;
+
+    /**
+     * @brief Create a variable
+     */
+    virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine,
+                                                 const AbstractDomain& baseDomain,
+                                                 const bool internal = false,
+                                                 bool canBeSpecified = true,
+                                                 const char* name = NO_VAR_NAME,
+                                                 const EntityId& parent = EntityId::noId(),
+                                                 int index = ConstrainedVariable::NO_INDEX) const;
+
 protected:
+    DataTypeId m_id;
     LabelStr m_name;
     bool m_isRestricted;
+    AbstractDomain* m_baseDomain;
 };
 
 }

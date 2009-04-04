@@ -27,14 +27,13 @@ namespace EUROPA {
   const std::list<TiXmlElement*>& DbClientTransactionLog::getBufferedTransactions() const {return m_bufferedTransactions;}
 
   const bool DbClientTransactionLog::isBool(const std::string& typeName)  {
-    return (strcmp(typeName.c_str(),"bool") == 0 || 
-            strcmp(typeName.c_str(), "BOOL" ) == 0 || 
+    return (strcmp(typeName.c_str(),"bool") == 0 ||
+            strcmp(typeName.c_str(), "BOOL" ) == 0 ||
             strcmp(typeName.c_str(),BoolDomain::getDefaultTypeName().c_str()) == 0);
   }
 
   const bool DbClientTransactionLog::isInt(const std::string& typeName)  {
-    return (strcmp(typeName.c_str(),"int") == 0 || 
-            strcmp(typeName.c_str(), "INT_INTERVAL" ) == 0 || 
+    return (strcmp(typeName.c_str(),"int") == 0 ||
             strcmp(typeName.c_str(),BoolDomain::getDefaultTypeName().c_str()) == 0);
   }
 
@@ -124,7 +123,7 @@ namespace EUROPA {
   }
 
   void DbClientTransactionLog::notifyTokenCreated(const TokenId& token){
-    TiXmlElement * element = (token->isFact() ? allocateXmlElement("fact") : 
+    TiXmlElement * element = (token->isFact() ? allocateXmlElement("fact") :
                               allocateXmlElement("goal"));
     TiXmlElement * instance = allocateXmlElement("predicateinstance");
     instance->SetAttribute("name", m_tokensCreated++);
@@ -213,7 +212,7 @@ namespace EUROPA {
 
   void DbClientTransactionLog::notifyConstraintCreated(const ConstraintId& constraint){
     TiXmlElement * element = allocateXmlElement("invoke");
-    element->SetAttribute("name", constraint->getName().toString());    
+    element->SetAttribute("name", constraint->getName().toString());
     element->SetAttribute("index", m_client->getIndexByConstraint(constraint));
     const std::vector<ConstrainedVariableId>& variables = constraint->getScope();
     std::vector<ConstrainedVariableId>::const_iterator iter;
@@ -284,7 +283,7 @@ namespace EUROPA {
     if (isBool(domain->getTypeName().toString())) {
       return (value ? "true" : "false");
     }
-    else 
+    else
       if (domain->isNumeric()) {
         // CMG: Do not use snprintf. Not supported on DEC
         std::stringstream ss;
@@ -392,7 +391,7 @@ namespace EUROPA {
       } else {
         var_el->SetAttribute("index", m_client->getIndexByVariable(variable));
         return var_el;
-      } 
+      }
     } else {
       var_el->SetAttribute("index", m_client->getIndexByVariable(variable));
       return var_el;

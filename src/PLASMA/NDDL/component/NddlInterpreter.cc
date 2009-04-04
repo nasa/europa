@@ -212,7 +212,7 @@ AbstractDomain* NddlSymbolTable::getVarType(const char* name) const
 {
     CESchemaId ces = ((CESchema*)getElement("CESchema"))->getId();
 
-    if (!ces->isType(name)) {
+    if (!ces->isDataType(name)) {
         // TODO: hack!
         if (getPlanDatabase()->getSchema()->isObjectType(name))
             return new ObjectDomain(name);

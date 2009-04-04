@@ -28,7 +28,6 @@
 #include "STNTemporalAdvisor.hh"
 #include "DbClientTransactionPlayer.hh"
 #include "TemporalPropagator.hh"
-#include "TypeFactory.hh"
 
 #include "ModuleConstraintEngine.hh"
 #include "ModulePlanDatabase.hh"
@@ -78,8 +77,7 @@ SolversTestEngine::SolversTestEngine()
 {
     createModules();
     doStart();
-
-    EUROPA::NDDL::loadSchema(getSchema(),((RuleSchema*)getComponent("RuleSchema"))->getId());
+    executeScript("nddl-xml","Model.xml",true/*isFile*/);
     registerTestElements(getId());
 }
 

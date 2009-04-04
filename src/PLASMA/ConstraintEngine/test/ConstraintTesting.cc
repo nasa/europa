@@ -29,8 +29,7 @@
 #include "Constraint.hh"
 #include "ConstrainedVariable.hh"
 #include "Debug.hh"
-#include "TypeFactory.hh"
-#include "SymbolTypeFactory.hh"
+#include "DataTypes.hh"
 
 namespace EUROPA {
 
@@ -38,6 +37,24 @@ namespace EUROPA {
   std::map<std::string, SymbolDomain*>& ConstraintTestCase::symbolDomainsMap() {
     static std::map<std::string, SymbolDomain*> sl_map;
     return sl_map;
+  }
+
+  std::string ConstraintTestCase::toString() const
+  {
+      std::ostringstream os;
+
+      os << m_fileName << " " << m_case << " " << m_constraintName << "(";
+
+      std::list<AbstractDomain*>::const_iterator it = m_domains.begin();
+      for(int i=0;it != m_domains.end();++it) {
+          if (i > 0)
+              os << ",";
+          os << (*it)->toString().c_str();
+          i++;
+      }
+      os << ")" << std::endl;
+
+      return os.str();
   }
 
   /**
@@ -208,7 +225,7 @@ namespace EUROPA {
 
       // Simple checks that this test case is OK.
       CPPUNIT_ASSERT(inputDoms.size() == outputDoms.size());
-	
+
       // OK, done with a line, each line being a test, so
       // interleave the input and output domains to make
       // things easier in caller.
@@ -222,7 +239,7 @@ namespace EUROPA {
 
       // ... and add this test to the list:
       testCases.push_back(ConstraintTestCase(constraintName, file,testcase, domains));
-    } 
+    }
 
     debugMsg("ConstraintTesting:readTestCases", "Test cases loaded from " << file);
     return true;
@@ -235,21 +252,24 @@ namespace EUROPA {
     unsigned int problemCount = 0;
     std::set<std::string> warned; /**< List of unregistered constraints seen so far. */
 
+    DataTypeId baseType = engine->getCESchema()->getDataType(SymbolDT::NAME().c_str());
+
     // Register typefactories for all SymbolDomains.
     for(std::map<std::string, SymbolDomain*>::iterator it = ConstraintTestCase::symbolDomainsMap().begin();
 	it != ConstraintTestCase::symbolDomainsMap().end(); ++it) {
       debugMsg("ConstraintTesting:executeTestCases","Attempting to register a type factory for symbolic type " << it->first);
       it->second->close();
-      engine->getCESchema()->registerFactory(
-              (new SymbolTypeFactory(it->first.c_str(), *it->second))->getId()
+      engine->getCESchema()->registerDataType(
+          (new RestrictedDT(it->first.c_str(),baseType,*it->second))->getId()
       );
     }
 
     for ( ; !testCases.empty(); testCases.pop_front()) {
+      debugMsg("ConstraintTesting:executeTestCases","Executing " << testCases.front().toString());
       // Warn about unregistered constraint names and otherwise ignore tests using them.
       if (!engine->getCESchema()->isConstraintFactoryRegistered(LabelStr(testCases.front().m_constraintName), false)) {
         if (warned.find(testCases.front().m_constraintName) == warned.end()) {
-          std::cout << "\n    Warning: " 
+          std::cout << "\n    Warning: "
                     << testCases.front().m_fileName << ':' << testCases.front().m_case
                     << ": constraint " << testCases.front().m_constraintName
                     << " is unregistered; skipping tests of it.\n";
@@ -284,15 +304,15 @@ namespace EUROPA {
       CPPUNIT_ASSERT(scope.size() == outputDoms.size());
 
       // Create and execute the constraint.
-      
+
       std::stringstream scopeStr;
       for(std::vector<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it)
 	scopeStr << " " << (*it)->toString();
 
       ConstraintId constraint = engine->createConstraint(LabelStr(testCases.front().m_constraintName), scope);
-     
+
       debugMsg("ConstraintTesting:executeTestCases", "Created constraint " << constraint->toString() <<
-	       " with scope " << scopeStr.str() << " for test " 
+	       " with scope " << scopeStr.str() << " for test "
 	       << testCases.front().m_case);
 
       // Compare derived domains with outputDoms.

@@ -1051,9 +1051,9 @@ namespace EUROPA
                               const EntityId& parent,
                               int index)
   {
-    TypeFactoryId factory = getCESchema()->getFactory(typeName);
-    check_error(factory.isValid(), "no TypeFactory found for type '" + std::string(typeName) + "'");
-    return createVariable(typeName, factory->baseDomain(), internal, canBeSpecified, name, parent, index);
+    DataTypeId dt = getCESchema()->getDataType(typeName);
+    check_error(dt.isValid(), "no DataType found for type '" + std::string(typeName) + "'");
+    return createVariable(typeName, dt->baseDomain(), internal, canBeSpecified, name, parent, index);
   }
 
   ConstrainedVariableId
@@ -1065,9 +1065,9 @@ namespace EUROPA
                               const EntityId& parent,
                               int index)
   {
-    TypeFactoryId factory = getCESchema()->getFactory(typeName);
-    check_error(factory.isValid(), "no TypeFactory found for type '" + std::string(typeName) + "'");
-    ConstrainedVariableId variable = factory->createVariable(getId(), baseDomain, internal, canBeSpecified, name, parent, index);
+    DataTypeId dt = getCESchema()->getDataType(typeName);
+    check_error(dt.isValid(), "no DataType found for type '" + std::string(typeName) + "'");
+    ConstrainedVariableId variable = dt->createVariable(getId(), baseDomain, internal, canBeSpecified, name, parent, index);
     check_error(variable.isValid());
     return variable;
   }
@@ -1097,9 +1097,9 @@ namespace EUROPA
 
   double ConstraintEngine::createValue(const char* typeName, const std::string& value)
   {
-    TypeFactoryId factory = getCESchema()->getFactory(typeName);
-    check_error(factory.isValid(), "no TypeFactory found for type '" + std::string(typeName) + "'");
-    return factory->createValue(value);
+    DataTypeId dt = getCESchema()->getDataType(typeName);
+    check_error(dt.isValid(), "no DataType found for type '" + std::string(typeName) + "'");
+    return dt->createValue(value);
   }
 
 

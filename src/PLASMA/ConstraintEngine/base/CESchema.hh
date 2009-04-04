@@ -6,7 +6,7 @@
 #include "ConstrainedVariable.hh"
 #include "LabelStr.hh"
 #include "Engine.hh"
-#include "TypeFactory.hh"
+#include "DataType.hh"
 #include "ConstraintFactory.hh"
 #include <map>
 #include <string>
@@ -29,28 +29,28 @@ namespace EUROPA {
 
       const CESchemaId& getId() const;
 
-      // Methods to Manage Type Factories
+      // Methods to Manage Data Types
       /**
-       * @brief Add a factory to provide instantiation of particular concrete types based on a label.
+       * @brief Add a data type
        */
-      void registerFactory(const TypeFactoryId& factory);
+      void registerDataType(const DataTypeId& dt);
 
       /**
-       * @brief Obtain the factory based on the type name
+       * @brief Obtain the data type on the type name
        */
-      TypeFactoryId getFactory(const char* typeName);
+      DataTypeId getDataType(const char* typeName);
 
       /**
-       * @brief Checks to see whether a type factory is registered for a name
+       * @brief Checks to see whether a data type registered for a name
        */
-      bool isType(const char* typeName) const;
+      bool isDataType(const char* typeName) const;
 
       /**
        * @brief Return the base domain
        */
       const AbstractDomain & baseDomain(const char* typeName);
 
-      void purgeTypeFactories();
+      void purgeDataTypes();
 
       // Methods to Manage Constraint Factories
       void registerConstraintFactory(ConstraintFactory* factory);
@@ -72,7 +72,7 @@ namespace EUROPA {
 
     protected:
       CESchemaId m_id;
-      std::map<double, TypeFactoryId> m_typeFactories;
+      std::map<double, DataTypeId> m_dataTypes;
       std::map<double, ConstraintFactoryId > m_constraintFactories;
   };
 

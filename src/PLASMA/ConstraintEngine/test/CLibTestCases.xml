@@ -77,9 +77,9 @@
 			<NumericDomain><element value="1"/></NumericDomain>
 		</Inputs>
 		<Outputs>
-			<SymbolDomain type="int"/>
-			<SymbolDomain type="int"/>
-			<SymbolDomain type="int"/>
+			<SymbolDomain type="integer"/>
+			<SymbolDomain type="integer"/>
+			<SymbolDomain type="integer"/>
 		</Outputs>
 	</Constraint>
 	<Constraint name="addeq" test="7">
@@ -101,9 +101,9 @@
 			<NumericDomain><element value="-1"/></NumericDomain>
 		</Inputs>
 		<Outputs>
-			<SymbolDomain type="int"/>
-			<SymbolDomain type="int"/>
-			<SymbolDomain type="int"/>
+			<SymbolDomain type="integer"/>
+			<SymbolDomain type="integer"/>
+			<SymbolDomain type="integer"/>
 		</Outputs>
 	</Constraint>
 	<Constraint name="addmuleq" test="9">

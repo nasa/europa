@@ -5,11 +5,11 @@
 namespace EUROPA {
 
   IntervalDomain::IntervalDomain()
-    : AbstractDomain(true, false, getDefaultTypeName().c_str()), 
+    : AbstractDomain(true, false, getDefaultTypeName().c_str()),
       m_ub(PLUS_INFINITY), m_lb(MINUS_INFINITY){}
 
   IntervalDomain::IntervalDomain(const char* typeName)
-    : AbstractDomain(true, false, typeName), 
+    : AbstractDomain(true, false, typeName),
       m_ub(PLUS_INFINITY), m_lb(MINUS_INFINITY){}
 
   IntervalDomain::IntervalDomain(double lb, double ub, const char* typeName)
@@ -31,7 +31,7 @@ namespace EUROPA {
 
   IntervalDomain::IntervalDomain(const AbstractDomain& org)
     : AbstractDomain(org), m_ub(org.getUpperBound()), m_lb(org.getLowerBound()){
-    check_error(org.isInterval(), 
+    check_error(org.isInterval(),
 		"Attempted to create an Interval domain from " + org.getTypeName().toString());
     commonInit();
   }
@@ -142,7 +142,7 @@ namespace EUROPA {
     safeComparison(*this, dom);
     check_error(!isOpen());
     check_error(!dom.isEmpty());
-    bool result = ((isFinite() || dom.isInfinite()) && 
+    bool result = ((isFinite() || dom.isInfinite()) &&
                    leq(m_ub, dom.getUpperBound()) &&
                    leq(dom.getLowerBound(), m_lb));
     return result;
@@ -154,10 +154,10 @@ namespace EUROPA {
     check_error(!dom.isEmpty());
 
     double ub = dom.getUpperBound();
-   
-    if( lt(ub, m_lb) ) 
+
+    if( lt(ub, m_lb) )
       return false;
-   
+
     double lb = dom.getLowerBound();
 
     if( lt(m_ub, lb))
@@ -194,16 +194,16 @@ namespace EUROPA {
     check_error(isSingleton());
     return(m_ub);
   }
- 
+
   void IntervalDomain::set(double value) {
     if(!isMember(value))
       empty();
     else {
       bool changed = (m_lb != value || m_ub != value);
-      if(changed == true){ 
+      if(changed == true){
 	m_lb = value;
 	m_ub = value;
- 
+
 	notifyChange(DomainListener::SET_TO_SINGLETON);
       }
     }
@@ -233,7 +233,7 @@ namespace EUROPA {
       empty();
       return(true);
     }
-  
+
     bool ub_decreased(false);
 
     if (lt(ub,m_ub)) {
@@ -264,7 +264,7 @@ namespace EUROPA {
 	  notifyChange(DomainListener::UPPER_BOUND_DECREASED);
 
     return(lb_increased || ub_decreased);
-   
+
   }
 
   void IntervalDomain::relax(double value) {
@@ -347,7 +347,7 @@ namespace EUROPA {
   void IntervalDomain::operator>>(ostream& os) const {
     AbstractDomain::operator>>(os);
     os << "[";
-    
+
     std::streamsize prec = os.precision();
     os.precision(15);
     if (m_lb == MINUS_INFINITY)
@@ -383,7 +383,7 @@ namespace EUROPA {
   }
 
   const LabelStr& IntervalDomain::getDefaultTypeName() {
-    static const LabelStr sl_typeName("REAL_INTERVAL");
+    static const LabelStr sl_typeName("float");
     return(sl_typeName);
   }
 

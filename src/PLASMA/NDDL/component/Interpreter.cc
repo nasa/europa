@@ -14,12 +14,10 @@
 #include "DbClient.hh"
 #include "DbClientTransactionPlayer.hh"
 #include "EnumeratedDomain.hh"
-#include "EnumeratedTypeFactory.hh"
-#include "IntervalTypeFactory.hh"
 #include "Object.hh"
 #include "ObjectFactory.hh"
 #include "TokenVariable.hh"
-#include "TypeFactory.hh"
+#include "DataTypes.hh"
 #include "Schema.hh"
 #include "Utils.hh"
 
@@ -1243,14 +1241,16 @@ namespace EUROPA {
     return foo->getId();
   }
 
-  ExprTypedef::ExprTypedef(const char* name, AbstractDomain* type)
-      : m_name(name)
+  ExprTypedef::ExprTypedef(const char* baseType, const char* name, AbstractDomain* type)
+      : m_baseType(baseType)
+      , m_name(name)
       , m_type(type)
   {
   }
 
   ExprTypedef::~ExprTypedef()
   {
+      delete m_type;
   }
 
   DataRef ExprTypedef::eval(EvalContext& context) const
@@ -1260,16 +1260,13 @@ namespace EUROPA {
 
       debugMsg("Interpreter:typedef","Defining type:" << name);
 
-      TypeFactory* factory = NULL;
-      if (m_type->isEnumerated())
-        factory = new EnumeratedTypeFactory(name,name,domain);
-      else
-        factory = new IntervalTypeFactory(name,domain);
-
       // TODO: this is what the code generator does for every typedef, it doesn't seem right for interval types though
       SchemaId schema = getSchema(context);
       schema->addEnum(name);
-      schema->getCESchema()->registerFactory(factory->getId());
+      DataTypeId baseType = schema->getCESchema()->getDataType(m_baseType.c_str());
+      schema->getCESchema()->registerDataType(
+          (new RestrictedDT(name,baseType,domain))->getId()
+      );
 
       debugMsg("Interpreter:typedef"
               , "Created type factory " << name <<
@@ -1312,9 +1309,10 @@ namespace EUROPA {
           values.push_back(newValue);
       }
 
+      DataTypeId baseType = schema->getCESchema()->getDataType(SymbolDT::NAME().c_str());
       EnumeratedDomain domain(values,false,enumName);
-      schema->getCESchema()->registerFactory(
-          (new EnumeratedTypeFactory(enumName,enumName,domain))->getId()
+      schema->getCESchema()->registerDataType(
+          (new RestrictedDT(enumName,baseType,domain))->getId()
       );
 
       debugMsg("Interpreter:enumdef"

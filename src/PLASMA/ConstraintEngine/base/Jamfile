@@ -13,7 +13,6 @@ ModuleBase ConstraintEngine
 	DataType.cc
 	PSConstraintEngineListener.cc
 	Propagator.cc
-	TypeFactory.cc
 	VariableChangeListener.cc
 	PSVarValue.cc
 	;

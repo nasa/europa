@@ -2,8 +2,6 @@
 #include "NddlXml.hh"
 #include "Interpreter.hh"
 #include "tinyxml.h"
-#include "EnumeratedTypeFactory.hh"
-#include "IntervalTypeFactory.hh"
 
 namespace EUROPA {
 
@@ -456,34 +454,20 @@ namespace EUROPA {
   void NddlXmlInterpreter::playDefineType(const TiXmlElement& element)
   {
     const char* name = element.Attribute("name");
+    const char* baseType = element.Attribute("basetype");
 
-    const AbstractDomain* restrictedDomain = NULL;
+    AbstractDomain* domain = NULL;
+
+    // Deal with restricted domain
     if (element.FirstChildElement() != NULL)
-      restrictedDomain =  xmlAsAbstractDomain(*(element.FirstChildElement()),"", name);
+      domain =  xmlAsAbstractDomain(*(element.FirstChildElement()),"", name);
 
-    const AbstractDomain& domain = (
-                    restrictedDomain != NULL
-                    ? *restrictedDomain
-                    : getCESchema()->baseDomain(element.Attribute("basetype"))
-                    );
+    // Deal with aliases
+    if (domain == NULL)
+        domain = getCESchema()->baseDomain(baseType).copy();
 
-
-    TypeFactory * factory = NULL;
-    if (domain.isEnumerated())
-      factory = new EnumeratedTypeFactory(name,name,domain);
-    else
-      factory = new IntervalTypeFactory(name,domain);
-
-    std::string domainString = domain.toString();
-    debugMsg("XMLInterpreter:typedef", "Created type factory " << name
-         << " with base domain " << domainString);
-
-    if (restrictedDomain != NULL)
-      delete restrictedDomain;
-
-    // TODO: this is what the code generator does for every typedef, it doesn't seem right for interval types though
-    getSchema()->addEnum(name);
-    getCESchema()->registerFactory(factory->getId());
+    ExprTypedef td(baseType,name,domain);
+    td.eval(*m_evalContext);
   }
 }
 

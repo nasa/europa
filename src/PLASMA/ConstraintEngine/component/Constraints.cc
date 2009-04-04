@@ -7,12 +7,11 @@
 #include "EnumeratedDomain.hh"
 #include "Utils.hh"
 #include "Debug.hh"
-#include "TypeFactory.hh"
 #include "NumericDomain.hh"
 
 namespace EUROPA {
 
-  UnaryConstraint::UnaryConstraint(const AbstractDomain& dom, 
+  UnaryConstraint::UnaryConstraint(const AbstractDomain& dom,
 				   const ConstrainedVariableId& var)
     : Constraint("UNARY", "Default", var->getConstraintEngine(), makeScope(var)),
       m_x(dom.copy()),
@@ -52,7 +51,7 @@ namespace EUROPA {
 				  const DomainListener::ChangeType& changeType){
     checkError(argIndex == 0, "Cannot have more than one variable in scope.");
 
-    // Can ignore if this is a restriction of the variable which we can assume has already been 
+    // Can ignore if this is a restriction of the variable which we can assume has already been
     // restricted by the constraint by initial execution of the constraint
     if(changeType == DomainListener::RESET || changeType == DomainListener::RELAXED)
       return false;
@@ -141,7 +140,7 @@ namespace EUROPA {
      * is not satisfied. The motivating case for this: A:Int[-10,10] +
      * B:Int[-10,10] == C:Real[0.01, 0.99].
      */
-    if (m_z.isInterval() && 
+    if (m_z.isInterval() &&
 	(!m_z.isMember(Infinity::plus(yMax, xMin, zMin)) ||
 	 !m_z.isMember(Infinity::plus(yMin, xMax, zMin))))
       m_z.empty();
@@ -173,7 +172,7 @@ namespace EUROPA {
 
     //if the previous process changed the domains, we need to make sure that
     //the change occurs everywhere.  fortunately, since the n-1st variable
-    //is now equal to the intersection of all of the variables, 
+    //is now equal to the intersection of all of the variables,
     //we can just equate backwards and they should all be equal
     if(changed && m_argCount > 2) {
       for(unsigned int i = m_argCount - 2; i >= 1; i--) {
@@ -294,8 +293,8 @@ namespace EUROPA {
     check_error(!m_x.isEmpty() && !m_y.isEmpty());
 
     // Restrict X to be no larger than Y's max
-    debugMsg("LessThanEqualConstraint:handleExecute", 
-	     "Intersecting " << m_x.toString() << " with [" << 
+    debugMsg("LessThanEqualConstraint:handleExecute",
+	     "Intersecting " << m_x.toString() << " with [" <<
 	     m_x.getLowerBound() << " " << m_y.getUpperBound() << "]");
 
     if (m_x.intersect(m_x.getLowerBound(), m_y.getUpperBound()) && m_x.isEmpty())
@@ -421,9 +420,9 @@ namespace EUROPA {
 
     debugMsg("LessThanConstraint:handleExecute", "Computing " << domx.toString() << " < " << domy.toString() << " x.minDelta = " <<
 	     domx.minDelta() << " y.minDelta = " << domy.minDelta());
-    if(domx.getUpperBound() >= domy.getUpperBound() && 
+    if(domx.getUpperBound() >= domy.getUpperBound() &&
        domy.getUpperBound() < PLUS_INFINITY &&
-       domx.intersect(domx.getLowerBound(), domy.getUpperBound() - domx.minDelta()) && 
+       domx.intersect(domx.getLowerBound(), domy.getUpperBound() - domx.minDelta()) &&
        domx.isEmpty())
       return;
 
@@ -877,7 +876,7 @@ namespace EUROPA {
                                                const ConstraintEngineId& constraintEngine,
                                                const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_interimVariable(constraintEngine, constraintEngine->getCESchema()->baseDomain(m_variables[0]->baseDomain().getTypeName().c_str()), 
+      m_interimVariable(constraintEngine, constraintEngine->getCESchema()->baseDomain(m_variables[0]->baseDomain().getTypeName().c_str()),
 			true, false, LabelStr("InternalConstraintVariable"), getId()),
       m_lessThanConstraint(LabelStr("LessThan"), propagatorName, constraintEngine,
                            makeScope(m_interimVariable.getId(), m_variables[0]))
@@ -955,7 +954,7 @@ namespace EUROPA {
       // Before it goes out of scope:
       if (common != 0)
         delete common;
-    } //if !boolDom.isSingleton 
+    } //if !boolDom.isSingleton
 
     // Whether the condition was singleton on entry to this function
     // or became singleton just above, propagate the effects of that
@@ -1304,7 +1303,7 @@ namespace EUROPA {
     AbstractDomain& domD(getCurrentDomain(m_variables[3]));
 
     assertFalse(domA.isEmpty() || domB.isEmpty() || domC.isEmpty() || domD.isEmpty());
-    
+
     if (domA.isOpen() || domB.isOpen() || domD.isOpen())
       return;
     if (domB.isSubsetOf(domC))
@@ -1703,15 +1702,15 @@ namespace EUROPA {
     if(m_lockDomain == m_currentDomain)
       return;
 
-    // If the current domain is a superset, then restrict it. 
+    // If the current domain is a superset, then restrict it.
     if(m_lockDomain.isSubsetOf(m_currentDomain))
        m_currentDomain.intersect(m_lockDomain);
     else {
-       debugMsg("LockConstraint","current domain:" << m_currentDomain.toString() 
+       debugMsg("LockConstraint","current domain:" << m_currentDomain.toString()
     		                     << " is not a superset of lock domain :" << m_lockDomain.toString()
-    		                     << " emptying current domain" 
+    		                     << " emptying current domain"
        );
-    		                     
+
        m_currentDomain.empty(); // Otherwise, the lock is enforced by forcing a relaxation
     }
   }
@@ -1761,13 +1760,13 @@ namespace EUROPA {
     check_error(variables.size() == ARG_COUNT);
   }
 
-  void TestEQ::handleExecute(){  
-     
+  void TestEQ::handleExecute(){
+
     debugMsg("TestEQ:handleExecute", "comparing " << m_arg1.toString() << " with " << m_arg2.toString());
 
-    if(m_arg1.isSingleton() && 
-       m_arg2.isSingleton() && 
-       m_arg1.intersects(m_arg2)) // Exactly equal with no flexibility 
+    if(m_arg1.isSingleton() &&
+       m_arg2.isSingleton() &&
+       m_arg1.intersects(m_arg2)) // Exactly equal with no flexibility
        m_test.remove(0);
     else if(!m_arg1.intersects(m_arg2)) // No intersection so they cannot be equal
       m_test.remove(1);
@@ -1852,10 +1851,10 @@ namespace EUROPA {
       m_y(static_cast<IntervalDomain&>(getCurrentDomain(variables[1]))) {
     check_error(variables.size() == ARG_COUNT);
   }
-  
+
   void AbsoluteValue::handleExecute() {
     double lb, ub;
-   
+
     if(m_y.getLowerBound() >= 0) {
       lb = m_y.getLowerBound();
       ub = m_y.getUpperBound();
@@ -1881,7 +1880,7 @@ namespace EUROPA {
 
     if((m_y.isMember(lb) || m_y.isMember(ub)) && (m_y.isMember(-lb) || m_y.isMember(-ub)))
       return;
-    
+
     if(m_y.isMember(lb) || m_y.isMember(ub))
       m_y.intersect(IntervalDomain(lb, ub));
     else if(m_y.isMember(-lb) || m_y.isMember(-ub))
@@ -1895,7 +1894,7 @@ namespace EUROPA {
     : Constraint(name, propagatorName, constraintEngine, variables) {
     check_error(variables.size() == (unsigned int) ARG_COUNT);
   }
-  
+
   /**
      Propagate only forward.
      Moreover, the way it is used, either the points are completely
@@ -1905,10 +1904,10 @@ namespace EUROPA {
     AbstractDomain& domx = getCurrentDomain(m_variables[V1]);
     AbstractDomain& domy = getCurrentDomain(m_variables[V2]);
     AbstractDomain& doma = getCurrentDomain(m_variables[RES]);
-    
+
     // domains should be closed
-    if ( domx.isOpen() || domy.isOpen() || 
-	 !domx.isSingleton() || !domy.isSingleton() ) 
+    if ( domx.isOpen() || domy.isOpen() ||
+	 !domx.isSingleton() || !domy.isSingleton() )
       return;
 
     // get the boundaries
@@ -1940,8 +1939,8 @@ namespace EUROPA {
     AbstractDomain& doma = getCurrentDomain(m_variables[RES]);
 
     // domains should be closed
-    if ( domx.isOpen() || domy.isOpen() || 
-	 !domx.isSingleton() || !domy.isSingleton() ) 
+    if ( domx.isOpen() || domy.isOpen() ||
+	 !domx.isSingleton() || !domy.isSingleton() )
       return;
 
     // get the boundaries
@@ -1970,7 +1969,7 @@ namespace EUROPA {
 
   void CalcDistanceConstraint::handleExecute(){
     if(!m_x1.areBoundsFinite() ||
-       !m_y1.areBoundsFinite()  || 
+       !m_y1.areBoundsFinite()  ||
        !m_x2.areBoundsFinite() ||
        !m_y2.areBoundsFinite())
       return;

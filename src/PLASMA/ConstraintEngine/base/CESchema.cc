@@ -19,62 +19,62 @@ namespace EUROPA
       return m_id;
   }
 
-  bool CESchema::isType(const char* typeName) const
+  bool CESchema::isDataType(const char* typeName) const
   {
-      return (m_typeFactories.find(LabelStr(typeName).getKey()) != m_typeFactories.end());
+      return (m_dataTypes.find(LabelStr(typeName).getKey()) != m_dataTypes.end());
   }
 
-  TypeFactoryId CESchema::getFactory(const char* typeName)
+  DataTypeId CESchema::getDataType(const char* typeName)
   {
-    std::map<double, TypeFactoryId>::const_iterator it =  m_typeFactories.find(LabelStr(typeName).getKey());
-    condDebugMsg(it == m_typeFactories.end(), "europa:error", "no TypeFactory found for type '" << std::string(typeName) << "'");
-    check_error(it != m_typeFactories.end(), "no TypeFactory found for type '" + std::string(typeName) + "'");
+    std::map<double, DataTypeId>::const_iterator it =  m_dataTypes.find(LabelStr(typeName).getKey());
+    condDebugMsg(it == m_dataTypes.end(), "europa:error", "no DataType found for type '" << std::string(typeName) << "'");
+    check_error(it != m_dataTypes.end(), "no DataType found for type '" + std::string(typeName) + "'");
 
-    TypeFactoryId factory = it->second;
-    check_error(factory.isValid());
-    return factory;
+    DataTypeId dt = it->second;
+    check_error(dt.isValid());
+    return dt;
   }
 
-  void CESchema::registerFactory(const TypeFactoryId& factory)
+  void CESchema::registerDataType(const DataTypeId& dt)
   {
-    check_error(factory.isValid());
+    check_error(dt.isValid());
 
-    if(m_typeFactories.find(factory->getTypeName().getKey()) != m_typeFactories.end()){
-      debugMsg("TypeFactory:registerFactory", "Over-writing prior registration for " << factory->getTypeName().toString());
-      TypeFactoryId oldFactory = m_typeFactories.find(factory->getTypeName().getKey())->second;
-      m_typeFactories.erase(factory->getTypeName().getKey());
-      delete (TypeFactory*) oldFactory;
+    if(m_dataTypes.find(dt->getName().getKey()) != m_dataTypes.end()){
+      debugMsg("CESchema::registerDataType", "Over-writing prior registration for " << dt->getName().toString());
+      DataTypeId oldFactory = m_dataTypes.find(dt->getName().getKey())->second;
+      m_dataTypes.erase(dt->getName().getKey());
+      delete (DataType*) oldFactory;
     }
 
-    checkError(m_typeFactories.find(factory->getTypeName().getKey()) == m_typeFactories.end(), "Already have '" + factory->getTypeName().toString() + "' registered.");
+    checkError(m_dataTypes.find(dt->getName().getKey()) == m_dataTypes.end(), "Already have '" + dt->getName().toString() + "' registered.");
 
-    m_typeFactories.insert(std::pair<double, TypeFactoryId>(factory->getTypeName().getKey(), factory));
-    debugMsg("TypeFactory:registerFactory", "Registered type factory " << factory->getTypeName().toString());
+    m_dataTypes.insert(std::pair<double, DataTypeId>(dt->getName().getKey(), dt));
+    debugMsg("CESchema::registerDataType", "Registered data type " << dt->getName().toString());
   }
 
   const AbstractDomain & CESchema::baseDomain(const char* typeName)
   {
-    TypeFactoryId factory = getFactory(typeName);
-    check_error(factory.isValid(), "no TypeFactory found for type '" + std::string(typeName) + "'");
+    DataTypeId factory = getDataType(typeName);
+    check_error(factory.isValid(), "no DataType found for type '" + std::string(typeName) + "'");
     return factory->baseDomain();
   }
 
   void CESchema::purgeAll()
   {
       purgeConstraintFactories();
-      purgeTypeFactories();
+      purgeDataTypes();
   }
 
-  void CESchema::purgeTypeFactories()
+  void CESchema::purgeDataTypes()
   {
-      std::map<double, TypeFactoryId >::iterator factories_iter = m_typeFactories.begin();
-      while (factories_iter != m_typeFactories.end()) {
-        TypeFactoryId factory = (factories_iter++)->second;
-        debugMsg("TypeFactory:purgeAll",
-             "Removing type factory for " << factory->getTypeName().toString());
-        delete (TypeFactory *) factory;
+      std::map<double, DataTypeId >::iterator it = m_dataTypes.begin();
+      while (it != m_dataTypes.end()) {
+        DataTypeId dt = (it++)->second;
+        debugMsg("DataType:purgeAll",
+             "Removing type factory for " << dt->getName().toString());
+        delete (DataType *) dt;
       }
-      m_typeFactories.clear();
+      m_dataTypes.clear();
   }
 
   void CESchema::purgeConstraintFactories()
@@ -96,7 +96,7 @@ namespace EUROPA
 
   void CESchema::registerConstraintFactory(ConstraintFactory* factory, const LabelStr& name) {
     if(isConstraintFactoryRegistered(name)){
-      debugMsg("CESchema:registerFactory", "Over-riding prior registration for " << name.c_str());
+      debugMsg("CESchema:registerConstraintFactory", "Over-riding prior registration for " << name.c_str());
       ConstraintFactoryId oldFactory = getConstraintFactory(name);
       std::map<double, ConstraintFactoryId>& factories = m_constraintFactories;
       factories.erase(name.getKey());
@@ -106,7 +106,7 @@ namespace EUROPA
     check_error(isConstraintFactoryNotRegistered(name), "Constraint factory for '" + name.toString() + "' should not be registered, and yet it is....");
     m_constraintFactories.insert(std::pair<double, ConstraintFactoryId>(name.getKey(),
                                       factory->getId()));
-    debugMsg("CESchema:registerFactory", "Registered factory " << factory->getName().toString());
+    debugMsg("CESchema:registerConstraintFactory", "Registered factory " << factory->getName().toString());
   }
 
   const ConstraintFactoryId& CESchema::getConstraintFactory(const LabelStr& name) {

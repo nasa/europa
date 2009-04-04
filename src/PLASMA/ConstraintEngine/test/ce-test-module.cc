@@ -24,8 +24,7 @@
 #include "SymbolDomain.hh"
 #include "NumericDomain.hh"
 
-#include "TypeFactory.hh"
-#include "EnumeratedTypeFactory.hh"
+#include "DataTypes.hh"
 
 #include "ConstraintTesting.hh"
 
@@ -101,9 +100,11 @@ CETestEngine::CETestEngine()
     createModules();
     doStart();
     ConstraintEngine* ce = (ConstraintEngine*)getComponent("ConstraintEngine");
-    ce->createValue("INT_INTERVAL", std::string("5"));
-    ce->getCESchema()->registerFactory(
-       (new EnumeratedTypeFactory("Locations", "Locations", LocationsBaseDomain()))->getId()
+    ce->createValue("int", std::string("5"));
+
+    DataTypeId baseType = ce->getCESchema()->getDataType(SymbolDT::NAME().c_str());
+    ce->getCESchema()->registerDataType(
+        (new RestrictedDT("Locations",baseType,LocationsBaseDomain()))->getId()
     );
     REGISTER_CONSTRAINT(ce->getCESchema(),DelegationTestConstraint, "TestOnly", "Default");
 }
@@ -531,7 +532,7 @@ private:
       v1.insert(3);
       v1.close();
 
-      // Post equality constraint between v0 and v1. 
+      // Post equality constraint between v0 and v1.
       EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
 
       // When we propagate, the derived domain of v0 will now be closed and bound to the same domain as v1
@@ -551,7 +552,7 @@ private:
       v1.insert(2);
       v1.insert(3);
 
-      // Post equality constraint between v0 and v1. 
+      // Post equality constraint between v0 and v1.
       EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
       // Now close v0, and we should see a restriction on v1
       v0.close();

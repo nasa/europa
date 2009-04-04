@@ -16,11 +16,6 @@
 #include "SymbolDomain.hh"
 #include "StringDomain.hh"
 
-#include "TypeFactory.hh"
-#include "EnumeratedTypeFactory.hh"
-#include "StringTypeFactory.hh"
-#include "SymbolTypeFactory.hh"
-
 namespace NDDL {
 
   /**

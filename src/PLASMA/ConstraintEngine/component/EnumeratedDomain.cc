@@ -19,7 +19,7 @@ namespace EUROPA {
   }
 
   const LabelStr& EnumeratedDomain::getDefaultTypeName() {
-    static const LabelStr sl_typeName("REAL_ENUMERATION");
+    static const LabelStr sl_typeName("float");
     return(sl_typeName);
   }
 
@@ -45,7 +45,7 @@ namespace EUROPA {
 
   EnumeratedDomain::EnumeratedDomain(const AbstractDomain& org)
     : AbstractDomain(org) {
-    check_error(org.isEnumerated(), 
+    check_error(org.isEnumerated(),
                 "Invalid source domain " + org.getTypeName().toString() + " for enumeration");
     const EnumeratedDomain& enumOrg = static_cast<const EnumeratedDomain&>(org);
     m_values = enumOrg.m_values;
@@ -406,7 +406,7 @@ namespace EUROPA {
           ++it_a;
           ++it_b;
         } else
-          if (val_a < val_b) { // A < B, so remove A and advance 
+          if (val_a < val_b) { // A < B, so remove A and advance
             m_values.erase(it_a++);
             changed = true;
             check_error(!isMember(val_a));
@@ -520,12 +520,12 @@ namespace EUROPA {
     for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
       double valueAsDouble = *it;
       std::string valueAsStr = toString(valueAsDouble);
-      
-      if (isNumeric()) {    	  
+
+      if (isNumeric()) {
           os << comma << valueAsStr;
           comma = ", ";
-      } 
-      else  
+      }
+      else
           orderedSet.insert(valueAsStr);
     }
 
@@ -538,7 +538,7 @@ namespace EUROPA {
 
     os << "}";
   }
-  
+
   std::string EnumeratedDomain::toString() const
   {
 	  return AbstractDomain::toString();
@@ -550,9 +550,9 @@ namespace EUROPA {
 	  static const std::string sl_true("1");
 
       if (isNumeric()) {
-    	  std::ostringstream os; 
+    	  std::ostringstream os;
     	  os << valueAsDouble;
-    	  return os.str(); 
+    	  return os.str();
       }
       else if (valueAsDouble == true)
           return sl_true;
@@ -563,9 +563,9 @@ namespace EUROPA {
       else {
           EntityId entity(valueAsDouble);
           return entity->getName().toString();
-      }	  
+      }
   }
-  
+
   EnumeratedDomain *EnumeratedDomain::copy() const {
     EnumeratedDomain *ptr = new EnumeratedDomain(*this);
     check_error(ptr != 0);

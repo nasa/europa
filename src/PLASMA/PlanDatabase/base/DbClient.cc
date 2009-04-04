@@ -9,7 +9,6 @@
 #include "DbClientListener.hh"
 #include "ConstraintEngine.hh"
 #include "ConstraintFactory.hh"
-#include "TypeFactory.hh"
 #include "Debug.hh"
 
 #include <string>
@@ -41,15 +40,15 @@ namespace EUROPA {
 
   const CESchemaId& DbClient::getCESchema() const
   {
-      return m_planDb->getConstraintEngine()->getCESchema();   
+      return m_planDb->getConstraintEngine()->getCESchema();
   }
 
   const SchemaId& DbClient::getSchema() const
   {
-      return m_planDb->getSchema();   
+      return m_planDb->getSchema();
   }
 
-  
+
   ConstrainedVariableId
   DbClient::createVariable(const char* typeName, const AbstractDomain& baseDomain, const char* name, bool isTmpVar, bool canBeSpecified)
   {
@@ -124,7 +123,7 @@ namespace EUROPA {
     debugMsg("DbClient:close", objectType);
     publish(notifyClosed(objectType));
   }
- 
+
   TokenId DbClient::createToken(const char* predicateName, bool rejectable, bool isFact) {
     TokenId token = allocateToken(predicateName, rejectable, isFact);
     debugMsg("DbClient:createToken", token->toString());
@@ -201,7 +200,7 @@ namespace EUROPA {
 
     if(activeToken.isId() && activeToken->refCount() == 1){
       // Expect that the last key created and stored will be this key
-      checkError(!isTransactionLoggingEnabled() || 
+      checkError(!isTransactionLoggingEnabled() ||
 		 m_keysOfTokensCreated.back() == activeToken->getKey(),
 		 "If transaction logging enabled then we require chronological retraction. " << activeToken->toString());
       if(isTransactionLoggingEnabled()) {
@@ -217,18 +216,18 @@ namespace EUROPA {
     debugMsg("DbClient:cancel", token->toString());
   }
 
-  ConstraintId DbClient::createConstraint(const char* name, 
+  ConstraintId DbClient::createConstraint(const char* name,
 				 const std::vector<ConstrainedVariableId>& scope){
 
     // Use the constraint library factories to create the constraint
-    ConstraintId constraint = m_planDb->getConstraintEngine()->createConstraint(name, 
+    ConstraintId constraint = m_planDb->getConstraintEngine()->createConstraint(name,
 								  scope);
     debugMsg("DbClient:createConstraint", constraint->toString());
     publish(notifyConstraintCreated(constraint));
     return constraint;
   }
 
-  void DbClient::deleteConstraint(const ConstraintId& c) 
+  void DbClient::deleteConstraint(const ConstraintId& c)
   {
     publish(notifyConstraintDeleted(c));
     m_planDb->getConstraintEngine()->deleteConstraint(c);
@@ -426,47 +425,47 @@ namespace EUROPA {
   }
 
   bool DbClient::isTransactionLoggingEnabled() const { return m_transactionLoggingEnabled; }
-  
-  double DbClient::createValue(const char* typeName, const std::string& value) 
+
+  double DbClient::createValue(const char* typeName, const std::string& value)
   {
     return m_planDb->getConstraintEngine()->createValue(typeName,value);
   }
-  
+
   PSPlanDatabaseClientImpl::PSPlanDatabaseClientImpl(const DbClientId& c)
       : m_client(c)
-  {    
+  {
   }
 
   PSVariable* PSPlanDatabaseClientImpl::createVariable(const std::string& typeName, const std::string& name, bool isTmpVar)
-  {     
+  {
       ConstrainedVariableId var = m_client->createVariable(typeName.c_str(),name.c_str(),isTmpVar);
       return dynamic_cast<PSVariable*>((ConstrainedVariable*)var);
   }
-  
+
   void PSPlanDatabaseClientImpl::deleteVariable(PSVariable* var)
   {
       m_client->deleteVariable(toId(var));
   }
-  
+
   PSObject* PSPlanDatabaseClientImpl::createObject(const std::string& type, const std::string& name)
   {
       ObjectId obj = m_client->createObject(type.c_str(),name.c_str());
       return dynamic_cast<PSObject*>((Object*)obj);
   }
-  
+
   //PSObject* PSPlanDatabaseClientImpl::createObject(const std::string& type, const std::string& name, const PSList<PSVariable*>& arguments){}
-  
+
   void PSPlanDatabaseClientImpl::deleteObject(PSObject* obj)
   {
-      m_client->deleteObject(toId(obj));      
+      m_client->deleteObject(toId(obj));
   }
-  
+
   PSToken* PSPlanDatabaseClientImpl::createToken(const std::string& predicateName, bool rejectable, bool isFact)
   {
       TokenId tok = m_client->createToken(predicateName.c_str(),rejectable,isFact);
-      return dynamic_cast<PSToken*>((Token*)tok);      
+      return dynamic_cast<PSToken*>((Token*)tok);
   }
-  
+
   void PSPlanDatabaseClientImpl::deleteToken(PSToken* token)
   {
       m_client->deleteToken(toId(token));
@@ -476,89 +475,89 @@ namespace EUROPA {
   {
       m_client->constrain(toId(object),toId(predecessor),toId(successor));
   }
-  
+
   void PSPlanDatabaseClientImpl::free(PSObject* object, PSToken* predecessor, PSToken* successor)
   {
-      m_client->free(toId(object),toId(predecessor),toId(successor));            
+      m_client->free(toId(object),toId(predecessor),toId(successor));
   }
-  
+
   void PSPlanDatabaseClientImpl::activate(PSToken* token)
   {
       m_client->activate(toId(token));
   }
-  
+
   void PSPlanDatabaseClientImpl::merge(PSToken* token, PSToken* activeToken)
   {
-      m_client->merge(toId(token),toId(activeToken));      
+      m_client->merge(toId(token),toId(activeToken));
   }
-  
+
   void PSPlanDatabaseClientImpl::reject(PSToken* token)
   {
-      m_client->reject(toId(token));      
+      m_client->reject(toId(token));
   }
-  
+
   void PSPlanDatabaseClientImpl::cancel(PSToken* token)
   {
-      m_client->cancel(toId(token));      
+      m_client->cancel(toId(token));
   }
-  
+
   PSConstraint* PSPlanDatabaseClientImpl::createConstraint(const std::string& name, PSList<PSVariable*>& scope)
   {
       std::vector<ConstrainedVariableId> idScope;
       for (int i=0;i<scope.size();i++)
           idScope.push_back(toId(scope.get(i)));
-      
+
       ConstraintId c = m_client->createConstraint(name.c_str(),idScope);
       return dynamic_cast<PSConstraint*>((Constraint*)c);
   }
-  
+
   void PSPlanDatabaseClientImpl::deleteConstraint(PSConstraint* c)
   {
-      m_client->deleteConstraint(toId(c));          
+      m_client->deleteConstraint(toId(c));
   }
 
   void PSPlanDatabaseClientImpl::specify(PSVariable* variable, double value)
   {
-      m_client->specify(toId(variable),value);      
+      m_client->specify(toId(variable),value);
   }
-  
+
   void PSPlanDatabaseClientImpl::reset(PSVariable* variable)
   {
-      m_client->reset(toId(variable));            
-  }      
-  
+      m_client->reset(toId(variable));
+  }
+
   void PSPlanDatabaseClientImpl::close(PSVariable* variable)
   {
-      m_client->close(toId(variable));            
+      m_client->close(toId(variable));
   }
-  
+
   void PSPlanDatabaseClientImpl::close(const std::string& objectType)
   {
-      m_client->close(objectType.c_str());            
-  }   
-  
+      m_client->close(objectType.c_str());
+  }
+
   void PSPlanDatabaseClientImpl::close()
   {
-      m_client->close();            
-  }   
-  
+      m_client->close();
+  }
+
   ConstrainedVariableId PSPlanDatabaseClientImpl::toId(PSVariable* v)
   {
       return dynamic_cast<ConstrainedVariable*>(v)->getId();
-  }   
-  
+  }
+
   ConstraintId PSPlanDatabaseClientImpl::toId(PSConstraint* c)
   {
       return dynamic_cast<Constraint*>(c)->getId();
-  }   
-  
+  }
+
   ObjectId PSPlanDatabaseClientImpl::toId(PSObject* o)
   {
       return dynamic_cast<Object*>(o)->getId();
-  }     
+  }
 
   TokenId PSPlanDatabaseClientImpl::toId(PSToken* t)
   {
       return dynamic_cast<Token*>(t)->getId();
-  }     
+  }
 }

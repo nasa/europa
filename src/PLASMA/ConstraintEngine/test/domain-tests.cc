@@ -282,7 +282,7 @@ namespace EUROPA {
       std::stringstream ss1;
       d1 >> ss1;
       std::string actualString = ss1.str();
-      std::string expectedString("INT_INTERVAL:CLOSED[1, 100]");
+      std::string expectedString("int:CLOSED[1, 100]");
       CPPUNIT_ASSERT(actualString == expectedString);
       std::string anotherActualString = d1.toString();
       CPPUNIT_ASSERT(anotherActualString == expectedString);
@@ -1574,7 +1574,7 @@ namespace EUROPA {
       NumericDomain oneDom(2.7); // Singleton
 
       copyPtr = emptyOpen.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
       CPPUNIT_ASSERT(copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isNumeric());
       CPPUNIT_ASSERT(copyPtr->isEnumerated());
@@ -1586,7 +1586,7 @@ namespace EUROPA {
       delete copyPtr;
 
       copyPtr = fourDom.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
       CPPUNIT_ASSERT(copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isEnumerated());
       copyPtr->close();
@@ -1595,7 +1595,7 @@ namespace EUROPA {
       delete copyPtr;
 
       copyPtr = fiveDom.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isEnumerated());
       CPPUNIT_ASSERT(copyPtr->getSize() == 5);
@@ -1603,7 +1603,7 @@ namespace EUROPA {
       delete copyPtr;
 
       copyPtr = oneDom.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isEnumerated());
       CPPUNIT_ASSERT(copyPtr->isSingleton());
@@ -1628,7 +1628,7 @@ namespace EUROPA {
       // Domains containing infinities should also be tested.
 
       copyPtr = empty.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("REAL_INTERVAL"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isNumeric());
       CPPUNIT_ASSERT(!copyPtr->isEnumerated());
@@ -1649,7 +1649,7 @@ namespace EUROPA {
       delete copyPtr;
 
       copyPtr = one2ten.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("REAL_INTERVAL"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isNumeric());
       CPPUNIT_ASSERT(!copyPtr->isEnumerated());
@@ -1702,7 +1702,7 @@ namespace EUROPA {
       // domains containing infinities should also be tested
 
       copyPtr = empty.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("INT_INTERVAL"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("int"));
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isNumeric());
       CPPUNIT_ASSERT(!copyPtr->isEnumerated());
@@ -1723,7 +1723,7 @@ namespace EUROPA {
       delete copyPtr;
 
       copyPtr = one2ten.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("INT_INTERVAL"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("int"));
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isNumeric());
       CPPUNIT_ASSERT(!copyPtr->isEnumerated());

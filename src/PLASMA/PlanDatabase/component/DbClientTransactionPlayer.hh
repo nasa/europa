@@ -2,7 +2,6 @@
 #define _H_DbClientTransactionPlayer
 
 #include "PlanDatabaseDefs.hh"
-#include "TypeFactory.hh"
 #include <iostream>
 #include <map>
 #include <list>
@@ -157,7 +156,7 @@ namespace EUROPA {
     /**
      * @brief create an abstract domain as represented by an xml element
      */
-    const AbstractDomain * xmlAsAbstractDomain(const TiXmlElement & element,
+    AbstractDomain * xmlAsAbstractDomain(const TiXmlElement & element,
 					       const char * name = NULL,
 					       const char* typeName = NULL);
 

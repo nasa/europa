@@ -110,7 +110,7 @@ typeDefinition returns [Expr* result]
 		            dataType = dataType->copy();
 		        
 		        const char* newName = c_str($name.text->chars);
-		        result = new ExprTypedef(newName,dataType);
+		        result = new ExprTypedef(dataType->getTypeName().c_str(),newName,dataType);
 		     }
 		     else {
                          result = NULL;              
@@ -278,7 +278,7 @@ valueSet returns [Expr* result]
                    );
                    
                    // TODO: this is necessary so that the Expr defined above can be evaluated, see about fixing it.
-                   ExprTypedef newTypedef(typeName,newDomain);
+                   ExprTypedef newTypedef(elementTypeName,typeName,newDomain->copy());
                    evalExpr(CTX,&newTypedef);
                  }
         ;

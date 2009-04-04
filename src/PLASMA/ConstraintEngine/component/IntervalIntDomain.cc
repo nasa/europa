@@ -60,7 +60,7 @@ namespace EUROPA {
   }
 
   const LabelStr& IntervalIntDomain::getDefaultTypeName() {
-    static const LabelStr sl_typeName("INT_INTERVAL");
+    static const LabelStr sl_typeName("int");
     return(sl_typeName);
   }
 
@@ -121,7 +121,7 @@ namespace EUROPA {
     return(ptr);
   }
 
-  bool IntervalIntDomain::intersect(double lb, double ub) {    
+  bool IntervalIntDomain::intersect(double lb, double ub) {
     return IntervalDomain::intersect(ceil(lb), floor(ub));
   }
 

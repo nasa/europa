@@ -7,7 +7,6 @@
 #include "ConstraintFactory.hh"
 #include "ConstraintEngine.hh"
 #include "EnumeratedDomain.hh"
-#include "TypeFactory.hh"
 #include "Utils.hh"
 #include "Debug.hh"
 #include "EntityIterator.hh"
@@ -18,28 +17,28 @@
  * @todo Add type checking for objects, and compositions.
  */
 namespace EUROPA {
-  
+
   Object::Object(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
-    : m_id(this), m_type(type), m_name(name), m_planDatabase(planDatabase), 
-      m_state(INCOMPLETE), m_lastOrderingChoiceCount(0), 
-      m_thisVar((new Variable< ObjectDomain>(m_planDatabase->getConstraintEngine(), 
+    : m_id(this), m_type(type), m_name(name), m_planDatabase(planDatabase),
+      m_state(INCOMPLETE), m_lastOrderingChoiceCount(0),
+      m_thisVar((new Variable< ObjectDomain>(m_planDatabase->getConstraintEngine(),
 					     ObjectDomain(m_id, type.c_str())))->getId()) {
     check_error(m_planDatabase.isValid());
     if (!open)
       close();
   }
 
-  Object::Object(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open) 
-    : m_id(this), m_parent(parent), 
-      m_type(type), 
-      m_name(std::string(parent->getName().toString() + "." + localName.toString())), 
+  Object::Object(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open)
+    : m_id(this), m_parent(parent),
+      m_type(type),
+      m_name(std::string(parent->getName().toString() + "." + localName.toString())),
       m_planDatabase(parent->getPlanDatabase()),
-      m_state(INCOMPLETE), 
-      m_thisVar((new Variable< ObjectDomain>(m_planDatabase->getConstraintEngine(), 
+      m_state(INCOMPLETE),
+      m_thisVar((new Variable< ObjectDomain>(m_planDatabase->getConstraintEngine(),
 					     ObjectDomain(m_id, type.c_str())))->getId()) {
     check_error(m_parent.isValid());
     check_error(m_planDatabase->getSchema()->canContain(parent->getType(), type, localName),
-		"Object " + parent->getName().toString() + 
+		"Object " + parent->getName().toString() +
 		" cannot contain " + localName.toString() + " of type " + type.toString());
 
     parent->add(m_id);
@@ -54,7 +53,7 @@ namespace EUROPA {
 
     m_id.remove();
   }
-  
+
   /*
    * Hack! Code generation currently skips the factories and directly calls the constructor that specifies the parent,
    * so this is necessary for the interpreter to provide the same behavior
@@ -122,8 +121,8 @@ namespace EUROPA {
     return rootType;
   }
 
- 
-  
+
+
   const LabelStr& Object::getName() const {
     return(m_name);
   }
@@ -193,14 +192,14 @@ namespace EUROPA {
 
       // If the constraint is a precedence constraint, the additional cleanup required
       std::map<int, int>::iterator pos = m_keyPairsByConstraintKey.find(constraint->getKey());
-      if(pos != m_keyPairsByConstraintKey.end()) 
+      if(pos != m_keyPairsByConstraintKey.end())
 	removePrecedenceConstraint(constraint);
     }
 
-    
+
     // If there are constraints to delete, we must go through one
     // more passof constraintsByTokenKey as there could be dangling
-    // entries still not cleaned up. A better data structure should 
+    // entries still not cleaned up. A better data structure should
     // be developed to improve this as it will be too slow.
     if(!constraints.empty()){
       it = m_constraintsByTokenKey.begin();
@@ -228,7 +227,7 @@ namespace EUROPA {
     return m_tokens.find(token) != m_tokens.end() && token->getObject()->lastDomain().isSingleton();
   }
 
-  void Object::getOrderingChoices(const TokenId& token, 
+  void Object::getOrderingChoices(const TokenId& token,
 				  std::vector< std::pair<TokenId, TokenId> >& results,
 				  unsigned int limit) {
     check_error(limit > 0, "Cannot set limit to less than 1.");
@@ -254,7 +253,7 @@ namespace EUROPA {
     constrain(predecessor, successor, true);
   }
 
-  void Object::constrain(const TokenId& predecessor, const TokenId& successor, bool isExplicit) { 
+  void Object::constrain(const TokenId& predecessor, const TokenId& successor, bool isExplicit) {
     check_error(predecessor.isValid());
     checkError(predecessor->isActive(), predecessor->toString() << ": " << predecessor->getState()->toString());
     check_error(successor.isValid());
@@ -269,7 +268,7 @@ namespace EUROPA {
     int encodedKey = makeKey(predecessor, successor);
 
     condDebugMsg(m_constraintsByKeyPair.find(encodedKey) != m_constraintsByKeyPair.end(), "Object:makeKey",
-		 "Collision detected for " << predecessor->toString() << " and " << successor->toString() << 
+		 "Collision detected for " << predecessor->toString() << " and " << successor->toString() <<
 		 " with " << encodedKey);
 
     ConstraintId constraint;
@@ -300,9 +299,9 @@ namespace EUROPA {
 
     m_planDatabase->notifyConstrained(m_id, predecessor, successor);
     check_error(isValid());
-    
+
     if (getPlanDatabase()->getConstraintEngine()->getAutoPropagation())
-    	getPlanDatabase()->getConstraintEngine()->propagate();	  
+    	getPlanDatabase()->getConstraintEngine()->propagate();
 
   }
 
@@ -350,9 +349,9 @@ namespace EUROPA {
 
     m_planDatabase->notifyFreed(m_id, predecessor, successor);
     check_error(isValid());
-    
+
     if (getPlanDatabase()->getConstraintEngine()->getAutoPropagation())
-    	getPlanDatabase()->getConstraintEngine()->propagate();   
+    	getPlanDatabase()->getConstraintEngine()->propagate();
   }
 
   void Object::cascadeDelete() {
@@ -375,7 +374,7 @@ namespace EUROPA {
   ConstrainedVariableId Object::getVariable(const std::vector<unsigned int>& path) const {
     unsigned int index = path[0];
 
-    checkError(index >= 0 && index < m_variables.size(), 
+    checkError(index >= 0 && index < m_variables.size(),
 	       "index of " << index << " out of bounds for " << getName().toString());
 
     ConstrainedVariableId var = m_variables[index];
@@ -457,7 +456,7 @@ namespace EUROPA {
   /**
    * Get all constraints for this token. And the accompanying encoded key pair
    */
-  void Object::getPrecedenceConstraints(const TokenId& token, 
+  void Object::getPrecedenceConstraints(const TokenId& token,
 					std::vector<ConstraintId>& results) const{
     check_error(isValid());
     check_error(results.empty());
@@ -467,7 +466,7 @@ namespace EUROPA {
 
     // Record if we find the singleton constraint, as we should only get one. That constraint does not have
     // a key pair.
-    bool singletonFound = false; 
+    bool singletonFound = false;
     while(it != m_constraintsByTokenKey.end() && it->first == token->getKey()){
       ConstraintId constraint = it->second;
       std::map<int, int>::const_iterator pos = m_keyPairsByConstraintKey.find(constraint->getKey());
@@ -499,7 +498,7 @@ namespace EUROPA {
       if(m_explicitConstraints.find(constraint->getKey()) != m_explicitConstraints.end())
 	return true;
     }
-    
+
 
     // Finally we try for an explicit singleton constraint. Should be a rare thing!
     return m_explicitConstraints.find(token->getKey()) != m_explicitConstraints.end();
@@ -535,7 +534,7 @@ namespace EUROPA {
     // the object variable. This only needs to be done once, so test first if it has already been constrained
     if (!isConstrainedToThisObject(token)) {
       ConstraintId thisObject =
-          getPlanDatabase()->getConstraintEngine()->createConstraint(LabelStr("eq"),					    
+          getPlanDatabase()->getConstraintEngine()->createConstraint(LabelStr("eq"),
 					    makeScope(token->getObject(), m_thisVar));
       m_constraintsByTokenKey.insert(std::pair<int, ConstraintId>(token->getKey(), thisObject));
     }
@@ -600,13 +599,13 @@ namespace EUROPA {
     close();
   }
 
-  ObjectDomain::ObjectDomain(const ObjectId& initialValue, const char* typeName): 
+  ObjectDomain::ObjectDomain(const ObjectId& initialValue, const char* typeName):
     EnumeratedDomain(initialValue, false, typeName){check_error(!isNumeric());}
 
   ObjectDomain::ObjectDomain(const AbstractDomain& org)
     : EnumeratedDomain(org){
     check_error(org.isEmpty() || ObjectId(org.getLowerBound()).isValid(),
-		"Attempted to construct an object domain with values of non-object type " + 
+		"Attempted to construct an object domain with values of non-object type " +
 		org.getTypeName().toString());
   }
 
@@ -644,12 +643,12 @@ namespace EUROPA {
     }
     return  os.str();
   }
-  
-  std::string ObjectDomain::toString() const{ 
+
+  std::string ObjectDomain::toString() const{
      return "OBJECT-"+EnumeratedDomain::toString();
   }
 
-  
+
   std::list<ObjectId> ObjectDomain::makeObjectList(const std::list<double>& inputs){
     std::list<ObjectId> outputs;
     for (std::list<double>::const_iterator it = inputs.begin(); it != inputs.end(); ++it)
@@ -668,27 +667,27 @@ namespace EUROPA {
 
     return objects;
   }
-  
+
   ObjectDomain *ObjectDomain::copy() const {
     ObjectDomain *ptr = new ObjectDomain(*this);
     check_error(ptr != 0);
     return(ptr);
   }
-  
+
 
   ConstrainedVariableId Object::addVariable(const AbstractDomain& baseDomain, const char* name){
-      check_error(!isComplete(), 
+      check_error(!isComplete(),
 		  "Cannot add variable " + std::string(name) +
 		  " after completing object construction for " + m_name.toString());
 
       check_error(m_planDatabase->getSchema()->canContain(m_type, baseDomain.getTypeName(), name),
-		  "Cannot add a variable " + std::string(name) + " of type " + 
+		  "Cannot add a variable " + std::string(name) + " of type " +
 		  baseDomain.getTypeName().toString() +
 		  " to objects of type " + m_type.toString());
 
       std::string fullVariableName(m_name.toString() + "." + name);
-      
-      ConstrainedVariableId id = 
+
+      ConstrainedVariableId id =
           m_planDatabase->getConstraintEngine()->createVariable(
 	                baseDomain.getTypeName().c_str(),
 				    baseDomain,
@@ -698,7 +697,7 @@ namespace EUROPA {
 				    m_id,
 				    m_variables.size()
 	      );
-      
+
       m_variables.push_back(id);
 
       if(id->baseDomain().isSingleton())
@@ -725,18 +724,18 @@ namespace EUROPA {
   void Object::notifyDeleted(const TokenId& token){
     remove(token);
   }
-  
+
   std::string Object::toString(ObjectVarId objVar)
   {
   	std::ostringstream os;
   	if (objVar->lastDomain().isSingleton()) {
-  		ObjectId obj = objVar->lastDomain().getSingletonValue(); 
+  		ObjectId obj = objVar->lastDomain().getSingletonValue();
   	    os << obj->toString();
   	}
   	else {
   		os << objVar->toString();
   	}
-  	
+
   	return os.str();
   }
 
@@ -744,15 +743,15 @@ namespace EUROPA {
   std::string Object::toString() const {
 	  return Entity::toString();
   }
-  
+
   // The old toString method
   std::string Object::toLongString() const {
     std::stringstream sstr;
     sstr << getType().toString() << ":" << getName().toString();
     return sstr.str();
   }
-  
-  
+
+
   int Object::makeKey(const TokenId& a, const TokenId& b){
     return (a->getKey() << 16) ^ b->getKey();
   }
@@ -785,18 +784,18 @@ namespace EUROPA {
   }
 
 // PS Methods:
-  const std::string& Object::getEntityType() const 
+  const std::string& Object::getEntityType() const
   {
 	  static const std::string OBJECT_STR("OBJECT");
 	  return OBJECT_STR;
   }
 
-  std::string Object::getObjectType() const 
+  std::string Object::getObjectType() const
   {
 	  return getType().toString();
   }
-  
-  PSList<PSVariable*> Object::getMemberVariables() 
+
+  PSList<PSVariable*> Object::getMemberVariables()
   {
 	  PSList<PSVariable*> retval;
 	  const std::vector<ConstrainedVariableId>& vars = getVariables();
@@ -846,21 +845,21 @@ namespace EUROPA {
   {
 	  TokenId p = getPlanDatabase()->getEntityByKey(pred->getKey());
 	  TokenId s = getPlanDatabase()->getEntityByKey(succ->getKey());
-	  free(p,s);	  
+	  free(p,s);
   }
-  
+
   PSVarValue Object::asPSVarValue() const
   {
       PSVarValue retval((double)getId(),OBJECT);
-     
+
       return retval;
   }
-  
+
   PSObject* PSObject::asPSObject(PSEntity* entity)
   {
-      return dynamic_cast<PSObject*>(entity);    
+      return dynamic_cast<PSObject*>(entity);
   }
- 
+
 }
 
 

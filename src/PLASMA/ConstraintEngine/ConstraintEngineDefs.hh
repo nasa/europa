@@ -13,6 +13,9 @@
 #include <set>
 
 namespace EUROPA {
+  class DataType;
+  typedef Id<DataType> DataTypeId;
+
   class AbstractDomain;
   class IntervalDomain;
   class IntervalIntDomain;
@@ -48,7 +51,7 @@ namespace EUROPA {
    */
   template<class T>
   Id<T> id(const ConstrainedVariableId& var);
-  
+
   class StringDomain;
   typedef StringDomain LabelSet;
 

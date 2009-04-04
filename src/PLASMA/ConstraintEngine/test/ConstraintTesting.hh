@@ -47,6 +47,8 @@ namespace EUROPA {
                                                  * That is, first is first input domain, second is first output domain,
                                                  * third is second input domain, fourth is second output domain, etc.
                                                  */
+    std::string toString() const;
+
   };
 
   /**

@@ -17,8 +17,7 @@
 #include "StringDomain.hh"
 #include "SymbolDomain.hh"
 
-#include "TypeFactory.hh"
-#include "EnumeratedTypeFactory.hh"
+#include "DataTypes.hh"
 
 #include "TestSupport.hh"
 #include "Debug.hh"
@@ -49,8 +48,8 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
     // test/simple-predicate.nddl:4 DBFoo
     void constructor();
     void constructor(int arg0, LabelStr& arg1);
-    Id< Variable< IntervalIntDomain > > m_0;
-    Id< Variable< LabelSet > > m_1;
+    ConstrainedVariableId m_0;
+    ConstrainedVariableId m_1;
   };
 
   DBFoo::DBFoo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
@@ -144,12 +143,6 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
   };
 
 void initDbTestSchema(const SchemaId& schema) {
-  schema->reset();
-
-  schema->addPrimitive(IntervalDomain::getDefaultTypeName());
-  schema->addPrimitive(IntervalIntDomain::getDefaultTypeName());
-  schema->addPrimitive(EnumeratedDomain::getDefaultTypeName());
-
   // Set up object types and compositions for testing - builds a recursive structure
   ObjectType* objType = new ObjectType(DEFAULT_OBJECT_TYPE,Schema::rootObject().c_str());
 
@@ -3940,11 +3933,13 @@ public:
     s_dbPlayer = new DbClientTransactionPlayer((s_db)->getClient());
     CPPUNIT_ASSERT(s_dbPlayer != 0);
 
-    /* This does not use REGISTER_TYPE_FACTORY to avoid depending on anything under PLASMA/NDDL. */
-    ce->getCESchema()->registerFactory((new EnumeratedTypeFactory("Locations", "Locations", LocationsBaseDomain()))->getId());
+    DataTypeId baseType = ce->getCESchema()->getDataType(SymbolDT::NAME().c_str());
+    ce->getCESchema()->registerDataType(
+        (new RestrictedDT("Locations",baseType,LocationsBaseDomain()))->getId()
+    );
 
     REGISTER_OBJECT_FACTORY(db->getSchema(),TestClass2Factory, TestClass2);
-    REGISTER_OBJECT_FACTORY(db->getSchema(),TestClass2Factory, TestClass2:string:INT_INTERVAL:REAL_INTERVAL:Locations);
+    REGISTER_OBJECT_FACTORY(db->getSchema(),TestClass2Factory, TestClass2:string:int:float:Locations);
 
     /* Token factory for predicate Sample */
     db->getSchema()->registerTokenFactory((new TestClass2::Sample::Factory())->getId());

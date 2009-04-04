@@ -22,6 +22,15 @@ public:
     virtual bool isBool() const;
     virtual bool isString() const;
 
+    virtual double createValue(const std::string& value) const;
+    virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine,
+                                                 const AbstractDomain& baseDomain,
+                                                 const bool internal = false,
+                                                 bool canBeSpecified = true,
+                                                 const char* name = NO_VAR_NAME,
+                                                 const EntityId& parent = EntityId::noId(),
+                                                 int index = ConstrainedVariable::NO_INDEX) const;
+
     static const std::string& NAME();
     static VoidDT& instance();
 };
@@ -35,6 +44,8 @@ public:
     virtual bool isNumeric() const;
     virtual bool isBool() const;
     virtual bool isString() const;
+
+    virtual double createValue(const std::string& value) const;
 
     static const std::string& NAME();
     static FloatDT& instance();
@@ -50,6 +61,8 @@ public:
     virtual bool isBool() const;
     virtual bool isString() const;
 
+    virtual double createValue(const std::string& value) const;
+
     static const std::string& NAME();
     static IntDT& instance();
 };
@@ -63,6 +76,8 @@ public:
     virtual bool isNumeric() const;
     virtual bool isBool() const;
     virtual bool isString() const;
+
+    virtual double createValue(const std::string& value) const;
 
     static const std::string& NAME();
     static BoolDT& instance();
@@ -78,11 +93,12 @@ public:
     virtual bool isBool() const;
     virtual bool isString() const;
 
+    virtual double createValue(const std::string& value) const;
+
     static const std::string& NAME();
     static StringDT& instance();
 };
 
-// TODO: why have strings and symbols?
 class SymbolDT : public DataType
 {
 public:
@@ -93,8 +109,42 @@ public:
     virtual bool isBool() const;
     virtual bool isString() const;
 
+    virtual double createValue(const std::string& value) const;
+
     static const std::string& NAME();
     static SymbolDT& instance();
+};
+
+
+class ObjectDT : public DataType
+{
+public:
+    ObjectDT(const char* name, const AbstractDomain& baseDomain);
+    virtual ~ObjectDT();
+
+    virtual bool isNumeric() const;
+    virtual bool isBool() const;
+    virtual bool isString() const;
+    virtual bool isEntity() const;
+
+    virtual double createValue(const std::string& value) const;
+};
+
+class RestrictedDT : public DataType
+{
+public:
+    RestrictedDT(const char* name, const DataTypeId& baseType, const AbstractDomain& baseDomain);
+    virtual ~RestrictedDT();
+
+    virtual bool isNumeric() const;
+    virtual bool isBool() const;
+    virtual bool isString() const;
+    virtual bool isEntity() const;
+
+    virtual double createValue(const std::string& value) const;
+
+protected:
+    DataTypeId m_baseType;
 };
 
 }

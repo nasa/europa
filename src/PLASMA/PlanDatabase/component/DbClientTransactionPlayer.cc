@@ -5,7 +5,6 @@
 #include "StringDomain.hh"
 #include "SymbolDomain.hh"
 #include "ConstraintEngine.hh"
-#include "TypeFactory.hh"
 #include "PlanDatabase.hh"
 #include "Object.hh"
 #include "ObjectFactory.hh"
@@ -1355,7 +1354,7 @@ namespace EUROPA {
 
   //! XML input functions
 
-  const AbstractDomain *
+  AbstractDomain *
   DbClientTransactionPlayer::xmlAsAbstractDomain(const TiXmlElement & element,
 						 const char * name,
 						 const char* typeName) {

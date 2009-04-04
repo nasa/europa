@@ -113,13 +113,14 @@ namespace EUROPA {
   class ExprTypedef : public Expr
   {
   public:
-      ExprTypedef(const char* name, AbstractDomain* type);
+      ExprTypedef(const char* baseType, const char* name, AbstractDomain* baseDomain);
       virtual ~ExprTypedef();
 
       virtual DataRef eval(EvalContext& context) const;
       virtual std::string toString() const;
 
   protected:
+      LabelStr m_baseType;
       LabelStr m_name;
       AbstractDomain* m_type;
   };

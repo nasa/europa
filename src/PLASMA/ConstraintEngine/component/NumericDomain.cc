@@ -9,10 +9,10 @@ namespace EUROPA {
   NumericDomain::NumericDomain(const char* typeName)
     : EnumeratedDomain(true, typeName){}
 
-  NumericDomain::NumericDomain(double value, const char* typeName) 
+  NumericDomain::NumericDomain(double value, const char* typeName)
     : EnumeratedDomain(value, true, typeName){}
 
-  NumericDomain::NumericDomain(const std::list<double>& values, 
+  NumericDomain::NumericDomain(const std::list<double>& values,
                              const char* typeName)
     : EnumeratedDomain(values, true, typeName) {}
 
@@ -22,7 +22,7 @@ namespace EUROPA {
   const LabelStr&
   NumericDomain::getDefaultTypeName()
   {
-    static const LabelStr sl_typeName("REAL_ENUMERATION");
+    static const LabelStr sl_typeName("float");
     return(sl_typeName);
   }
 
@@ -33,7 +33,7 @@ namespace EUROPA {
     check_error(ptr != NULL);
     return ptr;
   }
-  
+
   /**
    * This appears to be necessary, though it should be sufficient to use the
    * base class method rather than having to delegate to it.
