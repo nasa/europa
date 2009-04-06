@@ -22,10 +22,6 @@ PROJECT_CONTROLLER = $(call findtarget,$(LIB_PREFIX)$(PROJECT)Controller$(BUILD_
 project-controller: prebuild $(PROJECT_CONTROLLER)
 $(PROJECT_CONTROLLER): $(call findtarget,ControllerStub$(BUILD_SUFFIX).o)
 
-PROJECT_MODEL = $(call findtarget,$(PROJECT)-model$(BUILD_SUFFIX).o)
-project-model: prebuild $(PROJECT_MODEL)
-$(PROJECT_MODEL): $(PROJECT)-model.nddl
-
 PROJECT_INITIAL_STATE = $(PROJECT)-initial-state.xml
 project-initial-state: prebuild $(PROJECT_INITIAL_STATE)
 $(PROJECT_INITIAL_STATE): $(PROJECT)-initial-state.nddl $(PROJECT)-model.nddl
@@ -36,17 +32,15 @@ $(PROJECT_SWIG): $(PROJECT).i
 
 PROJECT_LIB = $(call findtarget,$(LIB_PREFIX)$(PROJECT)$(BUILD_SUFFIX).$(LIB_EXT))
 project-lib: prebuild $(PROJECT_LIB)
-$(PROJECT_LIB): $(PROJECT_MODEL) \
-                $(PROJECT_SWIG) \
+$(PROJECT_LIB): $(PROJECT_SWIG) \
                 $(call findtarget,$(PROJECT)CustomCode$(BUILD_SUFFIX).o) \
                 $(call findtarget,Module$(PROJECT)$(BUILD_SUFFIX).o)
 
 PROJECT_RT = $(call findtarget,$(PROJECT)-planner$(BUILD_SUFFIX)$(RT_SUFFIX))
 project-rt: prebuild $(PROJECT_RT)
-$(PROJECT_RT): $(PROJECT_MODEL) \
-               $(call findtarget,$(PROJECT)-Main$(BUILD_SUFFIX).o) \
+$(PROJECT_RT): $(call findtarget,$(PROJECT)-Main$(BUILD_SUFFIX).o) \
                $(call findtarget,$(PROJECT)CustomCode$(BUILD_SUFFIX).o) \
-                $(call findtarget,Module$(PROJECT)$(BUILD_SUFFIX).o)
+               $(call findtarget,Module$(PROJECT)$(BUILD_SUFFIX).o)
 
 RUN_PROJECT = RUN_$(notdir $(PROJECT_RT)).$(notdir $(PROJECT_INITIAL_STATE)).PlannerConfig.xml.output
 run-project: prebuild $(RUN_PROJECT)

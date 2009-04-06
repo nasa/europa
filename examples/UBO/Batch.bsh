@@ -11,11 +11,17 @@ IFlatIRelaxSolver runIFIR(long timeout,int bound, boolean usePSResources)
     return s;
 }
 
-psengine.executeScript("nddl",bsh.cwd+"/UBO-initial-state.nddl",true/*isFile*/);
-solver = psengine.createSolver("PlannerConfig.xml");
-solver.configure(0,1000);
-// Only works for problem with 11 activities
-for (int i=0;i<24;i++)
-    solver.step();
-runIFIR(5000/*timeout*/,47/*bound*/,false/*usePSResources*/);
-Runtime.getRuntime().exit(0);
+try {
+    psengine.executeScript("nddl",bsh.cwd+"/UBO-initial-state.nddl",true/*isFile*/);
+    solver = psengine.createSolver("PlannerConfig.xml");
+    solver.configure(0,1000);
+    // Only works for problem with 11 activities
+    for (int i=0;i<24;i++)
+        solver.step();
+    runIFIR(5000/*timeout*/,47/*bound*/,false/*usePSResources*/);
+    Runtime.getRuntime().exit(0);
+}
+catch (Exception e) {
+    e.printStackTrace();
+    Runtime.getRuntime().exit(-1);    
+}

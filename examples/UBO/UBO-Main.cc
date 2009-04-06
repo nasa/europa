@@ -6,19 +6,15 @@
  * to encapsulate EUROPA
  */
 
-#include "Nddl.hh" /*!< Includes protypes required to load a model */
 #include "PSEngine.hh"
 #include "Debug.hh"
-#include "PlanDatabase.hh"
-#include "EuropaEngine.hh"
-#include "Rule.hh"
 
 #include "ModuleUBO.hh"
 #include "UBOCustomCode.hh"
 
 using namespace EUROPA;
 
-bool solve(bool useInterpreter, const char* plannerConfig, const char* txSource, int startHorizon, int endHorizon, int maxSteps);
+bool solve(const char* plannerConfig, const char* txSource, int startHorizon, int endHorizon, int maxSteps);
 void runSolver(PSSolver* solver, int startHorizon, int endHorizon, int maxSteps);
 void checkSolver(PSSolver* solver, int i);
 void printFlaws(int it, PSList<std::string>& flaws);
@@ -32,10 +28,8 @@ int main(int argc, const char ** argv)
 
   const char* txSource = argv[1];
   const char* plannerConfig = argv[2];
-  bool useInterpreter = (argc > 3);
 
   solve(
-      useInterpreter,
       plannerConfig,
       txSource,
       0,   // startHorizon
@@ -46,37 +40,24 @@ int main(int argc, const char ** argv)
   return 0;
 }
 
-bool solve(bool useInterpreter,
-           const char* plannerConfig,
+bool solve(const char* plannerConfig,
            const char* txSource,
            int startHorizon,
            int endHorizon,
            int maxSteps)
 {
     try {
+        PSEngine* engine = PSEngine::makeInstance();
+        engine->start();
+        engine->executeScript("nddl-xml",txSource,true/*isFile*/);
 
-      {
-          PSEngine* engine = PSEngine::makeInstance();
-          engine->start();
+        PSSolver* solver = engine->createSolver(plannerConfig);
+        runSolver(solver,startHorizon,endHorizon,maxSteps);
+        delete solver;
 
-          if (!useInterpreter) {
-              EuropaEngine* nativeEngine = dynamic_cast<EuropaEngine*>(engine);
-              SchemaId schema = ((Schema*)nativeEngine->getComponent("Schema"))->getId();
-              RuleSchemaId ruleSchema = ((RuleSchema*)nativeEngine->getComponent("RuleSchema"))->getId();
-              NDDL::loadSchema(schema,ruleSchema); // eventually make this called via dlopen
-              engine->executeScript("nddl-xml-txn",txSource,true/*isFile*/);
-          }
-          else
-              engine->executeScript("nddl-xml",txSource,true/*isFile*/);
+        delete engine;
 
-          PSSolver* solver = engine->createSolver(plannerConfig);
-          runSolver(solver,startHorizon,endHorizon,maxSteps);
-          delete solver;
-
-          delete engine;
-      }
-
-      return true;
+        return true;
     }
     catch (Error& e) {
         std::cerr << "PSEngine failed:" << e.getMsg() << std::endl;
