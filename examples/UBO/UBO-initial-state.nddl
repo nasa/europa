@@ -18,7 +18,7 @@ addEq(maxDuration,1,maxDurationPlusOne);
 
 //string profileType = "TimetableProfile";
 //string profileType = "IncrementalFlowProfile";
-string profileType = "GroundedReusableProfile";
+string profileType = "GroundedProfile";
 string detectorType = "GroundedFVDetector";
 
 CapacityResource resource0 = new CapacityResource( profileType, detectorType, 0.00000 , 10.0000 );
