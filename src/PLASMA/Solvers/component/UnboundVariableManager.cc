@@ -38,28 +38,28 @@ namespace EUROPA {
 	updateFlaw(var);
       }
 
-      // PROCESS CONSTRAINTS TO INITIALIZE GUARDS. We are looking for RuleVariableListener constraints since they 
+      // PROCESS CONSTRAINTS TO INITIALIZE GUARDS. We are looking for RuleVariableListener constraints since they
       // determine if a variable is guarded or not.
       const ConstraintSet& allConstraints = m_db->getConstraintEngine()->getConstraints();
-      for(ConstraintSet::const_iterator it = allConstraints.begin(); it != allConstraints.end(); ++it){ 
+      for(ConstraintSet::const_iterator it = allConstraints.begin(); it != allConstraints.end(); ++it){
 	ConstraintId constraint = *it;
 	handleConstraintAddition(constraint);
       }
     }
 
     DecisionPointId UnboundVariableManager::nextZeroCommitmentDecision(){
-      for(ConstrainedVariableSet::const_iterator it = m_singletonFlawCandidates.begin(); 
+      for(ConstrainedVariableSet::const_iterator it = m_singletonFlawCandidates.begin();
           it != m_singletonFlawCandidates.end(); ++it){
         ConstrainedVariableId var = *it;
         checkError(var.isValid(), var);
         checkError(var->lastDomain().isSingleton(), "Buffer management error:" << var->toString());
-        
+
         if(!dynamicMatch(var)){
           debugMsg("UnboundVariableManager:nextZeroCommitmentDecision", "Allocating for " << var->toString());
           return allocateDecisionPoint(var, "unit");
         }
       }
-      
+
       return DecisionPointId::noId();
     }
 
@@ -81,7 +81,7 @@ namespace EUROPA {
 	debugMsg("UnboundVariableManager:dynamicMatch",  "Excluding " << var->getKey() << " as a singleton.");
 	return true;
       }
-            
+
       // Finally, we exlude if the bounds are not finite
       if(!var->lastDomain().areBoundsFinite()){
 	debugMsg("UnboundVariableManager:dynamicMatch",  "Excluding " << var->getKey() << " since bounds are infinite.");
@@ -95,12 +95,12 @@ namespace EUROPA {
      * We may filter based on static information only.
      */
     void UnboundVariableManager::updateFlaw(const ConstrainedVariableId& var){
-      debugMsg("UnboundVariableManager:updateFlaw", var->toString());
+      debugMsg("UnboundVariableManager:updateFlaw", var->toLongString());
       m_flawCandidates.erase(var);
       m_singletonFlawCandidates.erase(var);
 
       if(variableOfNonActiveToken(var) || !var->canBeSpecified() || var->isSpecified() || staticMatch(var)){
-        debugMsg("UnboundVariableManager:updateFlaw", "Excluding " << var->getKey() << ". " << var->toString());
+        debugMsg("UnboundVariableManager:updateFlaw", "Excluding  " << var->toLongString());
         condDebugMsg(variableOfNonActiveToken(var), "UnboundVariableManager:updateFlaw", "Parent is not active.");
         condDebugMsg(!var->canBeSpecified(), "UnboundVariableManager:updateFlaw", "Variable can't be specified.");
         condDebugMsg(var->isSpecified(), "UnboundVariableManager:updateFlaw", "Variable is already specified.");
@@ -117,8 +117,8 @@ namespace EUROPA {
     }
 
     void UnboundVariableManager::removeFlaw(const ConstrainedVariableId& var){
-      condDebugMsg(m_flawCandidates.find(var) != m_flawCandidates.end(), 
-		   "UnboundVariableManager:removeFlaw", 
+      condDebugMsg(m_flawCandidates.find(var) != m_flawCandidates.end(),
+		   "UnboundVariableManager:removeFlaw",
 		   "Removing " << var->getKey() << ". " << var->toString() << " as a flaw.");
 
       m_flawCandidates.erase(var);
@@ -137,7 +137,7 @@ namespace EUROPA {
       else // Insert a new pair
 	m_guardCache.insert(std::pair<ConstrainedVariableId, unsigned int>(var, 1));
 
-      debugMsg("UnboundVariableManager:addGuard", 
+      debugMsg("UnboundVariableManager:addGuard",
 	       "GUARDS=" << refCount << " for " << var->getName().toString() << "(" << var->getKey() << ")");
       updateFlaw(var);
     }
@@ -154,7 +154,7 @@ namespace EUROPA {
 	it->second = refCount;
       }
 
-      debugMsg("UnboundVariableManager:removeGuard", 
+      debugMsg("UnboundVariableManager:removeGuard",
 	       "GUARDS=" << refCount << " for " << var->getName().toString() << "(" << var->getKey() << ")");
 
       updateFlaw(var);
@@ -197,7 +197,7 @@ namespace EUROPA {
       FlawManager::notifyRemoved(variable);
     }
 
-    void UnboundVariableManager::notifyChanged(const ConstrainedVariableId& variable, 
+    void UnboundVariableManager::notifyChanged(const ConstrainedVariableId& variable,
 					       const DomainListener::ChangeType& changeType){
 
       // In the event it is bound to a singleton, we remove it altogether as a flaw.
@@ -231,7 +231,7 @@ namespace EUROPA {
       // Now listen for all the other events of interest. We can ignore other cases of restriction since
       // the event set below is sufficient to capture all the meaningful changes without incurring
       // all the evaluation costs on every propagation.
-      if(changeType == DomainListener::RESET || 
+      if(changeType == DomainListener::RESET ||
 	 changeType == DomainListener::CLOSED ||
 	 changeType == DomainListener::RELAXED ||
 	 changeType == DomainListener::RESTRICT_TO_SINGLETON)
@@ -271,13 +271,13 @@ namespace EUROPA {
         }
 
         if(va->lastDomain().getSize() < vb->lastDomain().getSize()) {
-          debugMsg("UnboundVariableManager:betterThan", a->getKey() << " is better than " << b->getKey() << 
+          debugMsg("UnboundVariableManager:betterThan", a->getKey() << " is better than " << b->getKey() <<
                    " because it has " << va->lastDomain().getSize() << " choices, as opposed to " << vb->lastDomain().getSize());
           explanation = "aSmaller";
           return true; //here goes nothin'...
         }
         else if(va->lastDomain().getSize() > vb->lastDomain().getSize()) {
-          debugMsg("UnboundVariableManager:betterThan", b->getKey() << " is better than " << a->getKey() << 
+          debugMsg("UnboundVariableManager:betterThan", b->getKey() << " is better than " << a->getKey() <<
                    " because it has " << vb->lastDomain().getSize() << " choices, as opposed to " << va->lastDomain().getSize());
           return false;
         }
@@ -292,7 +292,7 @@ namespace EUROPA {
       std::string compatStr = (isCompatGuard(var) ? " GUARD" : "");
       std::string unitStr = (var->lastDomain().isSingleton() ? " UNIT" : "");
       std::stringstream os;
-      os << "VAR:   " << var->toString() << unitStr << compatStr;
+      os << "VAR:   " << var->toLongString() << unitStr << compatStr;
       return os.str();
     }
 

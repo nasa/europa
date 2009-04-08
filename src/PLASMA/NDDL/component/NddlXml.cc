@@ -293,33 +293,6 @@ namespace EUROPA {
     playDefineEnumeration(*element);
   }
 
-  bool isGuarded(const LabelStr& varName,const TiXmlElement* node)
-  {
-    if (node->Parent() == NULL)
-      return false;
-
-    if(strcmp(node->Value(),"id") == 0) {
-      const char* name = node->Attribute("name");
-
-      const TiXmlElement* parent = (const TiXmlElement*)node->Parent();
-      if (strcmp(name,varName.c_str())==0 &&
-          (
-       strcmp(parent->Value(),"if")==0 ||
-       strcmp(parent->Value(),"equals")==0 ||
-       strcmp(parent->Value(),"nequals")==0
-       )
-      )
-        return true; /* We are done */
-    }
-
-    for(const TiXmlElement* child = node->FirstChildElement(); child; child = child->NextSiblingElement() ) {
-      if(isGuarded(varName, child))
-        return true;
-    }
-
-    return false;
-  }
-
   void NddlXmlInterpreter::buildRuleBody(
                                const char* className,
                                const std::string& predName,
@@ -380,7 +353,12 @@ namespace EUROPA {
               if (child->FirstChildElement() != NULL)
                   domainRestriction=valueToExpr(child->FirstChildElement());
 
-              ruleBody.push_back(new ExprVarDeclaration(name.c_str(),type.c_str(),domainRestriction,isGuarded(name,element)));
+              ruleBody.push_back(new ExprVarDeclaration(
+                      name.c_str(),
+                      type.c_str(),
+                      domainRestriction,
+                      true // canBeSpecified
+              ));
           }
           else if (strcmp(child->Value(),"if") == 0) {
               const TiXmlElement* opElement = child->FirstChildElement();

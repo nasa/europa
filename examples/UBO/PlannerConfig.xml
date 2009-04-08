@@ -20,6 +20,7 @@
     <FlawFilter var-match="start"/>
     <FlawFilter var-match="end"/>
     <FlawFilter var-match="duration"/>
+    <FlawFilter var-match="allocations"/>
     <!--FlawFilter class-match="Resource" var-match="time"/>
     <FlawFilter class-match="Resource" var-match="quantity"/>
     <FlawFilter class-match="Reservoir" var-match="time"/>
