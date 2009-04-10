@@ -8,10 +8,14 @@
 #include <vector>
 #include <set>
 
-using std::string;
+#include <log4cxx/logger.h>
+#include <log4cxx/basicconfigurator.h>
+#include <log4cxx/helpers/exception.h>
+
 using std::exception;
 using std::ifstream;
 using std::set;
+using std::string;
 
 namespace EUROPA {
 	namespace Utils {
@@ -144,20 +148,19 @@ public:
 // 	FINEST = log4cpp::Priority::DEBUG + 80,   //log4cpp    NA   (780)
 // 	ALL  = log4cpp::Priority::NOTSET          //log4cpp = 800
 //     };
-    enum Level {
-      OFF,
-      FATAL,
-      ERROR,
-      WARN,
-      INFO,
-      DEBUG,
-      CONFIG,
-      FINE,
-      FINER,
-      FINEST,
-      ALL
-    };
 
+
+    enum Level {
+      OFF   = log4cxx::Level::OFF_INT,     //log4cxx = MAX_INT
+      FATAL = log4cxx::Level::FATAL_INT,   //log4cxx = 50000
+      ERROR = log4cxx::Level::ERROR_INT,   //log4cxx = 40000
+      WARN  = log4cxx::Level::WARN_INT,    //log4cxx = 30000
+      INFO  = log4cxx::Level::INFO_INT,    //log4cxx = 20000
+      DEBUG = log4cxx::Level::DEBUG_INT,   //log4cxx = 10000
+      TRACE = log4cxx::Level::TRACE_INT,   //log4cxx =  5000
+      ALL   = log4cxx::Level::ALL_INT      //log4cxx = INT_MIN
+    };
+  
 
     Level intToLevel( int value ) {
 	return Level( value );
