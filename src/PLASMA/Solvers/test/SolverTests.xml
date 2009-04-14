@@ -51,3 +51,10 @@
   </OpenConditionManager>
  </Solver>
 </GNATS_3196>
+<SingletonLoop>
+  <Solver name="SingletonLoopSolver">
+    <UnboundVariableManager>
+      <FlawHandler component="Min"/>
+    </UnboundVariableManager>
+  </Solver>
+</SingletonLoop>

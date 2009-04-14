@@ -1538,10 +1538,28 @@ public:
     EUROPA_runTest(testContext);
     EUROPA_runTest(testDeletedFlaw);
     EUROPA_runTest(testDeleteAfterCommit);
+    EUROPA_runTest(testSingleonGuardLoop);
     return true;
   }
 
 private:
+
+  /**
+   * @brief Tests for an infinite loop when binding a singleton guard.
+   */
+  static bool testSingleonGuardLoop() {
+    TestEngine testEngine;
+    TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SingletonLoop");
+    TiXmlElement* child = root->FirstChildElement();
+    {
+      CPPUNIT_ASSERT(testEngine.playTransactions( (getTestLoadLibraryPath() + "/SingletonGuardLoopTest.xml").c_str()));
+      Solver solver(testEngine.getPlanDatabase(), *child);
+      CPPUNIT_ASSERT(solver.solve(50, 50));
+      CPPUNIT_ASSERT(solver.getStepCount() == solver.getDepth());
+    }
+    return true;
+  }
+
   /**
    * @brief Will load an intial state and solve a csp with only variables.
    */

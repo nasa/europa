@@ -168,6 +168,19 @@ GuardTest::pred {
   }
 }
 
+class SingletonGuardLoopTest {
+  predicate pred {}
+}
+
+SingletonGuardLoopTest::pred {
+  bool b;
+  eq(b, true);
+  int q;
+  if(b == true) {
+    eq(q, 20);
+  }
+}
+
 class CommitTest extends Timeline {
 	predicate chaina {int a;}
 	predicate chainb {int b;}

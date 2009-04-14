@@ -46,10 +46,10 @@ namespace EUROPA {
 
     void UnboundVariableDecisionPoint::handleExecute(){
       double nextValue = getNext();
-      debugMsg("SolverDecisionPoint:handleExecute", "For " << m_flawedVariable->toString() << 
+      debugMsg("SolverDecisionPoint:handleExecute", "For " << m_flawedVariable->toLongString() << 
                ", assigning value " << nextValue << ".");
       m_client->specify(m_flawedVariable, nextValue);
-      debugMsg("UnboundVariableDecisionPoint:handleExecute", m_flawedVariable->toString());
+      debugMsg("UnboundVariableDecisionPoint:handleExecute", m_flawedVariable->toLongString());
     }
 
     void UnboundVariableDecisionPoint::handleUndo(){

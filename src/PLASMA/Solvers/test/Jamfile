@@ -16,7 +16,8 @@ local solverInputFiles = 	[ FGristFiles UnboundVariableFiltering.nddl
 				SimpleActivation.nddl 
 				SimpleRejection.nddl 
 				BacktrackFirstDecision.nddl 
-				GNATS_3196.nddl ] ;
+				GNATS_3196.nddl 
+                                SingletonGuardLoopTest.nddl ] ;
  
  # Create dependency for initial state files to be parsed
  local solversInputFile ;
