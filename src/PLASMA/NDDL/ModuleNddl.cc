@@ -39,8 +39,13 @@ namespace EUROPA {
 
   void ModuleNddl::uninitialize(EngineId engine)
   {
-	  engine->removeLanguageInterpreter("nddl");
-	  engine->removeLanguageInterpreter("nddl-xml");
+	  LanguageInterpreter *old = engine->removeLanguageInterpreter("nddl");
+	  engine->removeLanguageInterpreter("nddl3");
+	  if (old)
+		  delete old;
+	  old = engine->removeLanguageInterpreter("nddl-xml");
+	  if (old)
+		  delete old;
 	  // TODO: Finish cleanup
   }
 }

@@ -224,25 +224,29 @@ namespace EUROPA
       return retval;
     }
 
-    void EngineBase::addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter)
+    LanguageInterpreter *EngineBase::addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter)
     {
+      LanguageInterpreter *old = NULL;
       std::map<double, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
       if(it == getLanguageInterpreters().end())
         getLanguageInterpreters().insert(std::make_pair(LabelStr(language), interpreter));
       else {
-        delete it->second;
+    	old = it->second;
         it->second = interpreter;
       }
       interpreter->setEngine(getId());
+      return old;
     }
 
-    void EngineBase::removeLanguageInterpreter(const std::string& language)
+    LanguageInterpreter* EngineBase::removeLanguageInterpreter(const std::string& language)
     {
+      LanguageInterpreter *old = NULL;
       std::map<double, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
       if(it != getLanguageInterpreters().end()) {
-        delete it->second;
+    	old = it->second;
         getLanguageInterpreters().erase(it);
       }
+      return old;
     }
 
     LanguageInterpreter* EngineBase::getLanguageInterpreter(const std::string& language)

@@ -71,8 +71,10 @@ namespace EUROPA {
       virtual const EngineComponent* getComponent(const std::string& name) const = 0;
       virtual const std::map<double, EngineComponent*>& getComponents() = 0;
 
-      virtual void addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter) = 0;
-      virtual void removeLanguageInterpreter(const std::string& language) = 0;
+      /** Returns an old interpreter, if any */
+      virtual LanguageInterpreter* addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter) = 0;
+      /** Returns the removed interpreter, if any */
+      virtual LanguageInterpreter* removeLanguageInterpreter(const std::string& language) = 0;
       virtual LanguageInterpreter* getLanguageInterpreter(const std::string& language) = 0;
 
       virtual EngineConfig* getConfig() = 0;
@@ -108,8 +110,10 @@ namespace EUROPA {
         virtual std::map<double, EngineComponent*>& getComponents();
 
         virtual std::string executeScript(const std::string& language, const std::string& script, bool isFile);
-        virtual void addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter);
-        virtual void removeLanguageInterpreter(const std::string& language);
+        /** Returns an old interpreter, if any */
+        virtual LanguageInterpreter *addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter);
+        /** Returns the removed interpreter, if any */
+        virtual LanguageInterpreter* removeLanguageInterpreter(const std::string& language);
         virtual LanguageInterpreter* getLanguageInterpreter(const std::string& language);
         virtual std::map<double, LanguageInterpreter*>& getLanguageInterpreters();
 

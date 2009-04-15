@@ -84,7 +84,9 @@ namespace EUROPA {
 
   void ModulePlanDatabase::uninitialize(EngineId engine)
   {
-	  engine->removeLanguageInterpreter("nddl-xml-txn");
+	  LanguageInterpreter* old = engine->removeLanguageInterpreter("nddl-xml-txn");
+	  if (old)
+		  delete old;
 
       PlanDatabase* pdb = (PlanDatabase*)engine->removeComponent("PlanDatabase");
       delete pdb;
