@@ -10,6 +10,8 @@
 
 namespace EUROPA{
 
+  // TODO! : this class seems unnecessary now that DataType has been factored out of AbstractDomain
+
   /**
    * @class IntervalIntDomain
    * @brief Imposes restrictions on the more generic super class.
@@ -21,33 +23,16 @@ namespace EUROPA{
   class IntervalIntDomain: public IntervalDomain {
   public:
 
-    IntervalIntDomain();
-
-    IntervalIntDomain(const char* typeName);
-
-    IntervalIntDomain(int lb, int ub);
-
-    IntervalIntDomain(int value);
-
-    IntervalIntDomain(int lb, int ub, const char* typeName);
-
+    IntervalIntDomain(const DataTypeId& dt = IntDT::instance());
+    IntervalIntDomain(int lb, int ub, const DataTypeId& dt = IntDT::instance());
+    IntervalIntDomain(int value, const DataTypeId& dt = IntDT::instance());
     IntervalIntDomain(const AbstractDomain& org);
 
-    virtual ~IntervalIntDomain(){}
+    virtual ~IntervalIntDomain();
 
-    bool isFinite() const;
+    virtual bool isFinite() const;
 
-    bool isSingleton() const;
-
-    virtual bool isBool() const {
-      return(false);
-    }
-
-    /**
-     * @brief Get the default name of the type of the domain.
-     * @see AbstractDomain::getTypeName
-     */
-    static const LabelStr& getDefaultTypeName();
+    virtual bool isSingleton() const;
 
     /**
      * @brief Add an element to the domain.
@@ -65,9 +50,9 @@ namespace EUROPA{
      * @note Should only be called on finite (and thus closed) domains.
      * @param results The target collection to fill with all values in the set.
      */
-    void getValues(std::list<double>& results) const;
+    virtual void getValues(std::list<double>& results) const;
 
-    double translateNumber(double number, bool asMin = true) const;
+    virtual double translateNumber(double number, bool asMin = true) const;
 
     /**
      * @brief Copy the concrete C++ object into new memory and return a pointer to it.

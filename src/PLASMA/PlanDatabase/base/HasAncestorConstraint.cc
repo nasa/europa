@@ -1,7 +1,7 @@
 #include "HasAncestorConstraint.hh"
 #include "Object.hh"
 
-namespace EUROPA{  
+namespace EUROPA{
 
   HasAncestorConstraint::HasAncestorConstraint(const LabelStr& name,
 						     const LabelStr& propagatorName,
@@ -23,13 +23,13 @@ namespace EUROPA{
     apply();
   }
 
-  void HasAncestorConstraint::handleExecute(const ConstrainedVariableId& variable, 
-					       int argIndex, 
+  void HasAncestorConstraint::handleExecute(const ConstrainedVariableId& variable,
+					       int argIndex,
 					       const DomainListener::ChangeType& changeType){
     handleExecute();
   }
 
-  bool HasAncestorConstraint::canIgnore(const ConstrainedVariableId& variable, 
+  bool HasAncestorConstraint::canIgnore(const ConstrainedVariableId& variable,
 					   int argIndex,
 					   const DomainListener::ChangeType& changeType){
     check_error(argIndex <= 1);
@@ -41,7 +41,7 @@ namespace EUROPA{
   }
 
   void HasAncestorConstraint::apply() {
-    
+
     std::list<double> firstValues;
     m_first.getValues(firstValues);
 
@@ -56,7 +56,8 @@ namespace EUROPA{
 
     allAncestors.unique();
     ObjectId object = allAncestors.front();
-    ObjectDomain setOfAncestors(allAncestors, object->getRootType().c_str());
+    const DataTypeId& dt = m_constraintEngine->getCESchema()->getDataType(object->getRootType().c_str());
+    ObjectDomain setOfAncestors(dt,allAncestors);
     // Prune this set for those elements in the set of restrictions imposed
     setOfAncestors.intersect(m_restrictions);
 

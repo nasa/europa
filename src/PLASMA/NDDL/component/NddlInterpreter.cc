@@ -169,6 +169,7 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
 NddlSymbolTable::NddlSymbolTable(const EngineId& engine)
     : EvalContext(NULL)
     , m_engine(engine)
+    , m_currentObjectType(NULL)
 {
 }
 
@@ -207,15 +208,19 @@ const PlanDatabaseId& NddlSymbolTable::getPlanDatabase() const
     return ((PlanDatabase*)getElement("PlanDatabase"))->getId();
 }
 
+void NddlSymbolTable::setCurrentObjectType(ObjectType* ot)
+{
+    m_currentObjectType = ot;
+}
+
 
 AbstractDomain* NddlSymbolTable::getVarType(const char* name) const
 {
     CESchemaId ces = ((CESchema*)getElement("CESchema"))->getId();
 
     if (!ces->isDataType(name)) {
-        // TODO: hack!
-        if (getPlanDatabase()->getSchema()->isObjectType(name))
-            return new ObjectDomain(name);
+        if (m_currentObjectType!=NULL && m_currentObjectType->getName().toString()==name)
+            return new ObjectDomain(m_currentObjectType->getVarType());
 
         debugMsg("NddlInterpreter:SymbolTable","Unknown type " << name);
         return NULL;

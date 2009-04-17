@@ -413,6 +413,7 @@ namespace EUROPA {
   void NddlXmlInterpreter::playDefineEnumeration(const TiXmlElement &element)
   {
     const char* enumName = element.Attribute("name");
+
     const TiXmlElement* setElement = element.FirstChildElement();
     check_error(strcmp(setElement->Value(),"set") == 0, "Expected value set as part of Enum definition");
 
@@ -438,7 +439,7 @@ namespace EUROPA {
 
     // Deal with restricted domain
     if (element.FirstChildElement() != NULL)
-      domain =  xmlAsAbstractDomain(*(element.FirstChildElement()),"", name);
+      domain =  xmlAsAbstractDomain(*(element.FirstChildElement()),"",NULL);
 
     // Deal with aliases
     if (domain == NULL)

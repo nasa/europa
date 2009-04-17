@@ -6,12 +6,13 @@
  */
 
 #include "ObjectType.hh"
-
+#include "Object.hh"
 
 namespace EUROPA {
 
 ObjectType::ObjectType(const char* name, const char* parent, bool isNative)
     : m_id(this)
+    , m_varType((new ObjectDT(name))->getId())
     , m_name(name)
     , m_parent(parent)
     , m_isNative(isNative)
@@ -22,7 +23,13 @@ ObjectType::~ObjectType()
 {
     // TODO: enable this when Schema API is cleaned up to reflect the fact that object factories and token factories are owned by the object type
     // purgeAll();
+    m_varType.remove();
     m_id.remove();
+}
+
+const DataTypeId& ObjectType::getVarType() const
+{
+    return m_varType;
 }
 
 void ObjectType::purgeAll()

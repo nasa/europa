@@ -1,5 +1,6 @@
 #include "NddlResource.hh"
 #include "Debug.hh"
+#include "DataTypes.hh"
 #include "IntervalDomain.hh"
 #include "Constraint.hh"
 #include "Variable.hh"
@@ -143,18 +144,18 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 
   void NddlUnary::handleDefaults(bool autoClose) {
     if(consumptionMax.isNoId()) {
-      consumptionMax = addVariable(IntervalDomain("float"), "consumptionMax");
+      consumptionMax = addVariable(IntervalDomain(FloatDT::instance()), "consumptionMax");
     }
     if(autoClose)
       close();
   }
 
   void NddlUnary::constructor(float c_max) {
-    consumptionMax = addVariable(IntervalDomain(c_max, c_max, "float"), "consumptionMax");
+    consumptionMax = addVariable(IntervalDomain(c_max, c_max, FloatDT::instance()), "consumptionMax");
   }
 
   void NddlUnary::constructor() {
-    consumptionMax = addVariable(IntervalDomain(PLUS_INFINITY, PLUS_INFINITY, "float"), "consumptionMax");
+    consumptionMax = addVariable(IntervalDomain(PLUS_INFINITY, PLUS_INFINITY, FloatDT::instance()), "consumptionMax");
   }
 
   NddlUnary::use::use(const PlanDatabaseId& planDatabase,
@@ -243,45 +244,45 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 
   void NddlReusable::handleDefaults(bool autoClose) {
     if(capacity.isNoId()) {
-      capacity = addVariable(IntervalDomain("float"), "capacity");
+      capacity = addVariable(IntervalDomain(FloatDT::instance()), "capacity");
     }
     if(levelLimitMin.isNoId()) {
-      levelLimitMin = addVariable(IntervalDomain("float"), "levelLimitMin");
+      levelLimitMin = addVariable(IntervalDomain(FloatDT::instance()), "levelLimitMin");
     }
     if(consumptionRateMax.isNoId()) {
-      consumptionRateMax = addVariable(IntervalDomain("float"), "consumptionRateMax");
+      consumptionRateMax = addVariable(IntervalDomain(FloatDT::instance()), "consumptionRateMax");
     }
     if(consumptionMax.isNoId()) {
-      consumptionMax = addVariable(IntervalDomain("float"), "consumptionMax");
+      consumptionMax = addVariable(IntervalDomain(FloatDT::instance()), "consumptionMax");
     }
     if(autoClose)
       close();
   }
 
   void NddlReusable::constructor(float c, float ll_min) {
-    capacity = addVariable(IntervalDomain(c, c, "float"), "capacity");
-    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
-    consumptionRateMax = addVariable(IntervalDomain(PLUS_INFINITY, PLUS_INFINITY, "float"), "consumptionRateMax");
-    consumptionMax = addVariable(IntervalDomain(PLUS_INFINITY, PLUS_INFINITY, "float"), "consumptionMax");
+    capacity = addVariable(IntervalDomain(c, c, FloatDT::instance()), "capacity");
+    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, FloatDT::instance()), "levelLimitMin");
+    consumptionRateMax = addVariable(IntervalDomain(PLUS_INFINITY, PLUS_INFINITY, FloatDT::instance()), "consumptionRateMax");
+    consumptionMax = addVariable(IntervalDomain(PLUS_INFINITY, PLUS_INFINITY, FloatDT::instance()), "consumptionMax");
   }
   void NddlReusable::constructor(float c, float ll_min, float cr_max) {
-    capacity = addVariable(IntervalDomain(c, c, "float"), "capacity");
-    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
-    consumptionRateMax = addVariable(IntervalDomain(cr_max, cr_max, "float"), "consumptionRateMax");
-    consumptionMax = addVariable(IntervalDomain(PLUS_INFINITY, PLUS_INFINITY, "float"), "consumptionMax");
+    capacity = addVariable(IntervalDomain(c, c, FloatDT::instance()), "capacity");
+    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, FloatDT::instance()), "levelLimitMin");
+    consumptionRateMax = addVariable(IntervalDomain(cr_max, cr_max, FloatDT::instance()), "consumptionRateMax");
+    consumptionMax = addVariable(IntervalDomain(PLUS_INFINITY, PLUS_INFINITY, FloatDT::instance()), "consumptionMax");
   }
   void NddlReusable::constructor(float c, float ll_min, float c_max, float cr_max) {
-    capacity = addVariable(IntervalDomain(c, c, "float"), "capacity");
-    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
-    consumptionRateMax = addVariable(IntervalDomain(cr_max, cr_max, "float"), "consumptionRateMax");
-    consumptionMax = addVariable(IntervalDomain(c_max, c_max, "float"), "consumptionMax");
+    capacity = addVariable(IntervalDomain(c, c, FloatDT::instance()), "capacity");
+    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, FloatDT::instance()), "levelLimitMin");
+    consumptionRateMax = addVariable(IntervalDomain(cr_max, cr_max, FloatDT::instance()), "consumptionRateMax");
+    consumptionMax = addVariable(IntervalDomain(c_max, c_max, FloatDT::instance()), "consumptionMax");
   }
 
   void NddlReusable::constructor() {
-    capacity = addVariable(IntervalDomain(PLUS_INFINITY, PLUS_INFINITY, "float"), "capacity");
-    levelLimitMin = addVariable(IntervalDomain(MINUS_INFINITY, MINUS_INFINITY, "float"), "levelLimitMin");
-    consumptionRateMax = addVariable(IntervalDomain(PLUS_INFINITY, PLUS_INFINITY, "float"), "consumptionRateMax");
-    consumptionMax = addVariable(IntervalDomain(PLUS_INFINITY, PLUS_INFINITY, "float"), "consumptionMax");
+    capacity = addVariable(IntervalDomain(PLUS_INFINITY, PLUS_INFINITY, FloatDT::instance()), "capacity");
+    levelLimitMin = addVariable(IntervalDomain(MINUS_INFINITY, MINUS_INFINITY, FloatDT::instance()), "levelLimitMin");
+    consumptionRateMax = addVariable(IntervalDomain(PLUS_INFINITY, PLUS_INFINITY, FloatDT::instance()), "consumptionRateMax");
+    consumptionMax = addVariable(IntervalDomain(PLUS_INFINITY, PLUS_INFINITY, FloatDT::instance()), "consumptionMax");
   }
 
   NddlReusable::uses::uses(const PlanDatabaseId& planDatabase,
@@ -371,16 +372,16 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 
   void NddlCBReusable::handleDefaults(bool autoClose) {
     if(capacity.isNoId()) {
-      capacity = addVariable(IntervalDomain("float"), "capacity");
+      capacity = addVariable(IntervalDomain(FloatDT::instance()), "capacity");
     }
     if(levelLimitMin.isNoId()) {
-      levelLimitMin = addVariable(IntervalDomain("float"), "levelLimitMin");
+      levelLimitMin = addVariable(IntervalDomain(FloatDT::instance()), "levelLimitMin");
     }
     if(consumptionRateMax.isNoId()) {
-      consumptionRateMax = addVariable(IntervalDomain("float"), "consumptionRateMax");
+      consumptionRateMax = addVariable(IntervalDomain(FloatDT::instance()), "consumptionRateMax");
     }
     if(consumptionMax.isNoId()) {
-      consumptionMax = addVariable(IntervalDomain("float"), "consumptionMax");
+      consumptionMax = addVariable(IntervalDomain(FloatDT::instance()), "consumptionMax");
     }
     if(autoClose)
       close();
@@ -411,10 +412,10 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
       );
   }
   void NddlCBReusable::constructor(float c, float ll_min, float c_max, float cr_max) {
-    capacity = addVariable(IntervalDomain(c, c, "float"), "capacity");
-    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
-    consumptionRateMax = addVariable(IntervalDomain(cr_max, cr_max, "float"), "consumptionRateMax");
-    consumptionMax = addVariable(IntervalDomain(c_max, c_max, "float"), "consumptionMax");
+    capacity = addVariable(IntervalDomain(c, c, FloatDT::instance()), "capacity");
+    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, FloatDT::instance()), "levelLimitMin");
+    consumptionRateMax = addVariable(IntervalDomain(cr_max, cr_max, FloatDT::instance()), "consumptionRateMax");
+    consumptionMax = addVariable(IntervalDomain(c_max, c_max, FloatDT::instance()), "consumptionMax");
   }
 
   /*===============*/
@@ -481,69 +482,69 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 
   void NddlReservoir::handleDefaults(bool autoClose) {
     if(initialCapacity.isNoId()){
-      initialCapacity = addVariable(IntervalDomain("float"), "initialCapacity");
+      initialCapacity = addVariable(IntervalDomain(FloatDT::instance()), "initialCapacity");
     }
     if(levelLimitMin.isNoId()){
-      levelLimitMin = addVariable(IntervalDomain("float"), "levelLimitMin");
+      levelLimitMin = addVariable(IntervalDomain(FloatDT::instance()), "levelLimitMin");
     }
     if(levelLimitMax.isNoId()){
-      levelLimitMax = addVariable(IntervalDomain("float"), "levelLimitMax");
+      levelLimitMax = addVariable(IntervalDomain(FloatDT::instance()), "levelLimitMax");
     }
     if(productionRateMax.isNoId()){
-      productionRateMax = addVariable(IntervalDomain("float"), "productionRateMax");
+      productionRateMax = addVariable(IntervalDomain(FloatDT::instance()), "productionRateMax");
     }
     if(productionMax.isNoId()){
-      productionMax = addVariable(IntervalDomain("float"), "productionMax");
+      productionMax = addVariable(IntervalDomain(FloatDT::instance()), "productionMax");
     }
     if(consumptionRateMax.isNoId()){
-      consumptionRateMax = addVariable(IntervalDomain("float"), "consumptionRateMax");
+      consumptionRateMax = addVariable(IntervalDomain(FloatDT::instance()), "consumptionRateMax");
     }
     if(consumptionMax.isNoId()){
-      consumptionMax = addVariable(IntervalDomain("float"), "consumptionMax");
+      consumptionMax = addVariable(IntervalDomain(FloatDT::instance()), "consumptionMax");
     }
     if (autoClose)
       close();
   }
 
   void NddlReservoir::constructor(float ic, float ll_min, float ll_max) {
-    initialCapacity = addVariable(IntervalDomain(ic, ic, "float"), "initialCapacity");
-    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
-    levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, "float"), "levelLimitMax");
-    productionRateMax = addVariable(IntervalDomain(+inf, +inf, "float"), "productionRateMax");
-    productionMax = addVariable(IntervalDomain(+inf, +inf, "float"), "productionMax");
-    consumptionRateMax = addVariable(IntervalDomain(+inf, +inf, "float"), "consumptionRateMax");
-    consumptionMax = addVariable(IntervalDomain(+inf, +inf, "float"), "consumptionMax");
+    initialCapacity = addVariable(IntervalDomain(ic, ic, FloatDT::instance()), "initialCapacity");
+    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, FloatDT::instance()), "levelLimitMin");
+    levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, FloatDT::instance()), "levelLimitMax");
+    productionRateMax = addVariable(IntervalDomain(+inf, +inf, FloatDT::instance()), "productionRateMax");
+    productionMax = addVariable(IntervalDomain(+inf, +inf, FloatDT::instance()), "productionMax");
+    consumptionRateMax = addVariable(IntervalDomain(+inf, +inf, FloatDT::instance()), "consumptionRateMax");
+    consumptionMax = addVariable(IntervalDomain(+inf, +inf, FloatDT::instance()), "consumptionMax");
   }
 
   void NddlReservoir::constructor(float ic, float ll_min, float ll_max, float p_max, float c_max) {
-    initialCapacity = addVariable(IntervalDomain(ic, ic, "float"), "initialCapacity");
-    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
-    levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, "float"), "levelLimitMax");
-    productionRateMax = addVariable(IntervalDomain(p_max, p_max, "float"), "productionRateMax");
-    productionMax = addVariable(IntervalDomain(p_max, p_max, "float"), "productionMax");
-    consumptionRateMax = addVariable(IntervalDomain(+inf, +inf, "float"), "consumptionRateMax");
-    consumptionMax = addVariable(IntervalDomain(c_max, c_max, "float"), "consumptionMax");
+    initialCapacity = addVariable(IntervalDomain(ic, ic, FloatDT::instance()), "initialCapacity");
+    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, FloatDT::instance()), "levelLimitMin");
+    levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, FloatDT::instance()), "levelLimitMax");
+    productionRateMax = addVariable(IntervalDomain(p_max, p_max, FloatDT::instance()), "productionRateMax");
+    productionMax = addVariable(IntervalDomain(p_max, p_max, FloatDT::instance()), "productionMax");
+    consumptionRateMax = addVariable(IntervalDomain(+inf, +inf, FloatDT::instance()), "consumptionRateMax");
+    consumptionMax = addVariable(IntervalDomain(c_max, c_max, FloatDT::instance()), "consumptionMax");
   }
 
   void NddlReservoir::constructor(float ic, float ll_min, float ll_max, float pr_max, float p_max, float cr_max, float c_max) {
-    initialCapacity = addVariable(IntervalDomain(ic, ic, "float"), "initialCapacity");
-    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
-    levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, "float"), "levelLimitMax");
-    productionRateMax = addVariable(IntervalDomain(pr_max, pr_max, "float"), "productionRateMax");
-    productionMax = addVariable(IntervalDomain(p_max, p_max, "float"), "productionMax");
-    consumptionRateMax = addVariable(IntervalDomain(cr_max, cr_max, "float"), "consumptionRateMax");
-    consumptionMax = addVariable(IntervalDomain(c_max, c_max, "float"), "consumptionMax");
+    initialCapacity = addVariable(IntervalDomain(ic, ic, FloatDT::instance()), "initialCapacity");
+    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, FloatDT::instance()), "levelLimitMin");
+    levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, FloatDT::instance()), "levelLimitMax");
+    productionRateMax = addVariable(IntervalDomain(pr_max, pr_max, FloatDT::instance()), "productionRateMax");
+    productionMax = addVariable(IntervalDomain(p_max, p_max, FloatDT::instance()), "productionMax");
+    consumptionRateMax = addVariable(IntervalDomain(cr_max, cr_max, FloatDT::instance()), "consumptionRateMax");
+    consumptionMax = addVariable(IntervalDomain(c_max, c_max, FloatDT::instance()), "consumptionMax");
   }
 
 
   void NddlReservoir::constructor() {
-    initialCapacity = addVariable(IntervalDomain(0, 0, "float"), "initialCapacity");
-    levelLimitMin = addVariable(IntervalDomain(-inf, -inf, "float"), "levelLimitMin");
-    levelLimitMax = addVariable(IntervalDomain(+inf, +inf, "float"), "levelLimitMax");
-    productionRateMax = addVariable(IntervalDomain(+inf, +inf, "float"), "productionRateMax");
-    productionMax = addVariable(IntervalDomain(+inf, +inf, "float"), "productionMax");
-    consumptionRateMax = addVariable(IntervalDomain(+inf, +inf, "float"), "consumptionRateMax");
-    consumptionMax = addVariable(IntervalDomain(+inf, +inf, "float"), "consumptionMax");
+    initialCapacity = addVariable(IntervalDomain(0, 0, FloatDT::instance()), "initialCapacity");
+    levelLimitMin = addVariable(IntervalDomain(-inf, -inf, FloatDT::instance()), "levelLimitMin");
+    levelLimitMax = addVariable(IntervalDomain(+inf, +inf, FloatDT::instance()), "levelLimitMax");
+    productionRateMax = addVariable(IntervalDomain(+inf, +inf, FloatDT::instance()), "productionRateMax");
+    productionMax = addVariable(IntervalDomain(+inf, +inf, FloatDT::instance()), "productionMax");
+    consumptionRateMax = addVariable(IntervalDomain(+inf, +inf, FloatDT::instance()), "consumptionRateMax");
+    consumptionMax = addVariable(IntervalDomain(+inf, +inf, FloatDT::instance()), "consumptionMax");
   }
 
 
@@ -684,71 +685,71 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 
   void NddlResource::handleDefaults(bool autoClose) {
     if(initialCapacity.isNoId()){
-      initialCapacity = addVariable(IntervalDomain("float"), "initialCapacity");
+      initialCapacity = addVariable(IntervalDomain(FloatDT::instance()), "initialCapacity");
     }
     if(levelLimitMin.isNoId()){
-      levelLimitMin = addVariable(IntervalDomain("float"), "levelLimitMin");
+      levelLimitMin = addVariable(IntervalDomain(FloatDT::instance()), "levelLimitMin");
     }
     if(levelLimitMax.isNoId()){
-      levelLimitMax = addVariable(IntervalDomain("float"), "levelLimitMax");
+      levelLimitMax = addVariable(IntervalDomain(FloatDT::instance()), "levelLimitMax");
     }
     if(productionRateMax.isNoId()){
-      productionRateMax = addVariable(IntervalDomain("float"), "productionRateMax");
+      productionRateMax = addVariable(IntervalDomain(FloatDT::instance()), "productionRateMax");
     }
     if(productionMax.isNoId()){
-      productionMax = addVariable(IntervalDomain("float"), "productionMax");
+      productionMax = addVariable(IntervalDomain(FloatDT::instance()), "productionMax");
     }
     if(consumptionRateMax.isNoId()){
-      consumptionRateMax = addVariable(IntervalDomain("float"), "consumptionRateMax");
+      consumptionRateMax = addVariable(IntervalDomain(FloatDT::instance()), "consumptionRateMax");
     }
     if(consumptionMax.isNoId()){
-      consumptionMax = addVariable(IntervalDomain("float"), "consumptionMax");
+      consumptionMax = addVariable(IntervalDomain(FloatDT::instance()), "consumptionMax");
     }
     if (autoClose)
       close();
   }
 
   void NddlResource::constructor(float ic, float ll_min, float ll_max) {
-    initialCapacity = addVariable(IntervalDomain(ic, ic, "float"), "initialCapacity");
-    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
-    levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, "float"), "levelLimitMax");
-    productionRateMax = addVariable(IntervalDomain(+inf, +inf, "float"), "productionRateMax");
-    productionMax = addVariable(IntervalDomain(+inf, +inf, "float"), "productionMax");
-    consumptionRateMax = addVariable(IntervalDomain(-inf, -inf, "float"), "consumptionRateMax");
-    consumptionMax = addVariable(IntervalDomain(-inf, -inf, "float"), "consumptionMax");
+    initialCapacity = addVariable(IntervalDomain(ic, ic, FloatDT::instance()), "initialCapacity");
+    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, FloatDT::instance()), "levelLimitMin");
+    levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, FloatDT::instance()), "levelLimitMax");
+    productionRateMax = addVariable(IntervalDomain(+inf, +inf, FloatDT::instance()), "productionRateMax");
+    productionMax = addVariable(IntervalDomain(+inf, +inf, FloatDT::instance()), "productionMax");
+    consumptionRateMax = addVariable(IntervalDomain(-inf, -inf, FloatDT::instance()), "consumptionRateMax");
+    consumptionMax = addVariable(IntervalDomain(-inf, -inf, FloatDT::instance()), "consumptionMax");
   }
 
   // Plasma.nddl:20 Resource
   void NddlResource::constructor(float ic, float ll_min, float ll_max, float p_max, float c_max) {
-    initialCapacity = addVariable(IntervalDomain(ic, ic, "float"), "initialCapacity");
-    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
-    levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, "float"), "levelLimitMax");
-    productionRateMax = addVariable(IntervalDomain(p_max, p_max, "float"), "productionRateMax");
-    productionMax = addVariable(IntervalDomain(p_max, p_max, "float"), "productionMax");
-    consumptionRateMax = addVariable(IntervalDomain(-16, -16, "float"), "consumptionRateMax");
-    consumptionMax = addVariable(IntervalDomain(c_max, c_max, "float"), "consumptionMax");
+    initialCapacity = addVariable(IntervalDomain(ic, ic, FloatDT::instance()), "initialCapacity");
+    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, FloatDT::instance()), "levelLimitMin");
+    levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, FloatDT::instance()), "levelLimitMax");
+    productionRateMax = addVariable(IntervalDomain(p_max, p_max, FloatDT::instance()), "productionRateMax");
+    productionMax = addVariable(IntervalDomain(p_max, p_max, FloatDT::instance()), "productionMax");
+    consumptionRateMax = addVariable(IntervalDomain(-16, -16, FloatDT::instance()), "consumptionRateMax");
+    consumptionMax = addVariable(IntervalDomain(c_max, c_max, FloatDT::instance()), "consumptionMax");
   }
 
   // Plasma.nddl:20 Resource
   void NddlResource::constructor(float ic, float ll_min, float ll_max, float pr_max, float p_max, float cr_max, float c_max) {
-    initialCapacity = addVariable(IntervalDomain(ic, ic, "float"), "initialCapacity");
-    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, "float"), "levelLimitMin");
-    levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, "float"), "levelLimitMax");
-    productionRateMax = addVariable(IntervalDomain(pr_max, pr_max, "float"), "productionRateMax");
-    productionMax = addVariable(IntervalDomain(p_max, p_max, "float"), "productionMax");
-    consumptionRateMax = addVariable(IntervalDomain(cr_max, cr_max, "float"), "consumptionRateMax");
-    consumptionMax = addVariable(IntervalDomain(c_max, c_max, "float"), "consumptionMax");
+    initialCapacity = addVariable(IntervalDomain(ic, ic, FloatDT::instance()), "initialCapacity");
+    levelLimitMin = addVariable(IntervalDomain(ll_min, ll_min, FloatDT::instance()), "levelLimitMin");
+    levelLimitMax = addVariable(IntervalDomain(ll_max, ll_max, FloatDT::instance()), "levelLimitMax");
+    productionRateMax = addVariable(IntervalDomain(pr_max, pr_max, FloatDT::instance()), "productionRateMax");
+    productionMax = addVariable(IntervalDomain(p_max, p_max, FloatDT::instance()), "productionMax");
+    consumptionRateMax = addVariable(IntervalDomain(cr_max, cr_max, FloatDT::instance()), "consumptionRateMax");
+    consumptionMax = addVariable(IntervalDomain(c_max, c_max, FloatDT::instance()), "consumptionMax");
   }
 
   // Plasma.nddl:20 Resource
   void NddlResource::constructor() {
-    initialCapacity = addVariable(IntervalDomain(0, 0, "float"), "initialCapacity");
-    levelLimitMin = addVariable(IntervalDomain(-inf, -inf, "float"), "levelLimitMin");
-    levelLimitMax = addVariable(IntervalDomain(+inf, +inf, "float"), "levelLimitMax");
-    productionRateMax = addVariable(IntervalDomain(+inf, +inf, "float"), "productionRateMax");
-    productionMax = addVariable(IntervalDomain(+inf, +inf, "float"), "productionMax");
-    consumptionRateMax = addVariable(IntervalDomain(-inf, -inf, "float"), "consumptionRateMax");
-    consumptionMax = addVariable(IntervalDomain(-inf, -inf, "float"), "consumptionMax");
+    initialCapacity = addVariable(IntervalDomain(0, 0, FloatDT::instance()), "initialCapacity");
+    levelLimitMin = addVariable(IntervalDomain(-inf, -inf, FloatDT::instance()), "levelLimitMin");
+    levelLimitMax = addVariable(IntervalDomain(+inf, +inf, FloatDT::instance()), "levelLimitMax");
+    productionRateMax = addVariable(IntervalDomain(+inf, +inf, FloatDT::instance()), "productionRateMax");
+    productionMax = addVariable(IntervalDomain(+inf, +inf, FloatDT::instance()), "productionMax");
+    consumptionRateMax = addVariable(IntervalDomain(-inf, -inf, FloatDT::instance()), "consumptionRateMax");
+    consumptionMax = addVariable(IntervalDomain(-inf, -inf, FloatDT::instance()), "consumptionMax");
   }
 
   /*

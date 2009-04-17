@@ -104,6 +104,7 @@ namespace EUROPA {
 
         const LabelStr getName() const { return m_name; }
         const std::vector<Expr*>& getArgs() const { return m_args; }
+        virtual std::string toString() const;
 
     protected:
         LabelStr m_name;

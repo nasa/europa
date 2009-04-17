@@ -171,7 +171,7 @@ LocalVariableGuard_0_Root::LocalVariableGuard_0_Root(const RuleId& rule, const T
 
 void LocalVariableGuard_0_Root::handleExecute(){
   // Add the guard
-  StringDomain baseDomain("TestDomainType");
+  StringDomain baseDomain;
   baseDomain.insert(LabelStr("A"));
   baseDomain.insert(LabelStr("B"));
   baseDomain.insert(LabelStr("C"));
@@ -182,7 +182,7 @@ void LocalVariableGuard_0_Root::handleExecute(){
   s_guard = guard; // To allow it to be set
 
   // Now allocate the guard domain.
-  StringDomain guardDomain("TestDomainType");
+  StringDomain guardDomain;
   guardDomain.insert(LabelStr("B"));
   guardDomain.insert(LabelStr("C"));
   guardDomain.insert(LabelStr("E"));
@@ -215,15 +215,25 @@ RETestEngine::RETestEngine()
     createModules();
     doStart();
     SchemaId sch = getSchema();
-    sch->reset();
-    sch->addObjectType(LabelStr("AllObjects"));
-    sch->addObjectType(LabelStr("Objects"));
-    sch->addMember(LabelStr("Objects"), IntervalIntDomain::getDefaultTypeName(), "m_int");
-    sch->addPredicate(LabelStr("AllObjects.Predicate"));
+
+    ObjectType* ot;
+
+    ot = new ObjectType("AllObjects","Object");
+    // TODO:
+    // ot->addTokenFactory((new TokenFactory("AllObjects.Predicate"))->getId());
+    sch->registerObjectType(ot->getId());
+    sch->addPredicate("AllObjects.Predicate");
+
+    ot = new ObjectType("Objects","Object");
+    ot->addMember("int","m_int");
+    sch->registerObjectType(ot->getId());
+
+
     Object* objectPtr = new Object(getPlanDatabase(), "AllObjects", LabelStr("defaultObj"));
     assert(objectPtr != 0);
     Object& object = *objectPtr;
     assert(objectPtr->getId() == object.getId());
+
     CESchema* ces = (CESchema*)getComponent("CESchema");
     REGISTER_SYSTEM_CONSTRAINT(ces,EqualConstraint, "concurrent", "Default");
     REGISTER_SYSTEM_CONSTRAINT(ces,LessThanEqualConstraint, "precedes", "Default");
@@ -511,6 +521,7 @@ private:
 
   static bool testProxyVariableRelation(){
     RE_DEFAULT_SETUP(ce, db, false);
+
     Object obj0(db, "Objects", "obj0", true);
     CPPUNIT_ASSERT(!obj0.isComplete());
     obj0.addVariable(IntervalIntDomain(0, 0), "m_int");
@@ -524,7 +535,7 @@ private:
     obj2.addVariable(IntervalIntDomain(2, 2), "m_int");
     obj2.close();
 
-    ObjectDomain emptyDomain("Objects");
+    ObjectDomain emptyDomain(ce->getCESchema()->getDataType("Objects"));
 
     // Allocate an object variable with an empty domain
     Variable<ObjectDomain> objVar(ce, emptyDomain);
@@ -534,7 +545,7 @@ private:
     CPPUNIT_ASSERT_MESSAGE(objVar.toString(), objVar.lastDomain().getSize() == 3);
 
     // Create the initial proxy variable
-    NumericDomain dom(IntervalIntDomain::getDefaultTypeName().c_str());
+    NumericDomain dom(IntDT::instance());
     dom.insert(0);
     dom.insert(1);
     dom.insert(2);

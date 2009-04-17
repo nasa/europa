@@ -102,7 +102,7 @@ namespace EUROPA {
       if(!playTransactions(txSource, language))
         return false;
 
-      //debugMsg("EuropaEngine:plan", "Initial state: " << std::endl << PlanDatabaseWriter::toString(getPlanDatabase()))
+      debugMsg("EuropaEngine:plan", "Initial state: " << std::endl << PlanDatabaseWriter::toString(getPlanDatabase()))
       //LOGGER << Logger::DEBUG << "plan: Initial state: " << Logger::eol << PlanDatabaseWriter::toString(getPlanDatabase());
       LOGGER_DEBUG_MSG( DEBUG, "Initial state: " << LOGGER_ENDL << PlanDatabaseWriter::toString(getPlanDatabase()) )
 

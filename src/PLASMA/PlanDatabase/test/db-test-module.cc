@@ -36,6 +36,9 @@
 const char* DEFAULT_OBJECT_TYPE = "TestObject";
 const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
 
+#define GET_DEFAULT_OBJECT_TYPE(ce) ce->getCESchema()->getDataType(DEFAULT_OBJECT_TYPE)
+#define GET_DATA_TYPE(pdb,dt) pdb->getSchema()->getCESchema()->getDataType(dt)
+
   class DBFoo;
   typedef Id<DBFoo> DBFooId;
 
@@ -98,8 +101,8 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
   class SpecialDBFooFactory: public ObjectFactory{
   public:
     SpecialDBFooFactory(): ObjectFactory(LabelStr(DEFAULT_OBJECT_TYPE).toString() +
-                           ":" + IntervalIntDomain::getDefaultTypeName().toString() +
-                           ":" + LabelSet::getDefaultTypeName().toString())
+                           ":" + IntDT::NAME() +
+                           ":" + StringDT::NAME())
     {}
 
   private:
@@ -110,8 +113,8 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
       DBFooId foo = (new DBFoo(planDb, objectType, objectName))->getId();
       // Type check the arguments
       CPPUNIT_ASSERT(arguments.size() == 2);
-      CPPUNIT_ASSERT(arguments[0]->getTypeName() == IntervalIntDomain::getDefaultTypeName());
-      CPPUNIT_ASSERT(arguments[1]->getTypeName() == LabelSet::getDefaultTypeName());
+      CPPUNIT_ASSERT(arguments[0]->getTypeName().toString() == IntDT::NAME());
+      CPPUNIT_ASSERT(arguments[1]->getTypeName().toString() == StringDT::NAME());
 
       int arg0((int) arguments[0]->getSingletonValue());
       LabelStr arg1(arguments[1]->getSingletonValue());
@@ -125,11 +128,11 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
   public:
     IntervalTokenFactory()
       : TokenFactory(LabelStr(DEFAULT_PREDICATE)) {
-        addArg(IntervalDomain::getDefaultTypeName(), "IntervalParam");
-        addArg(IntervalIntDomain::getDefaultTypeName(), "IntervalIntParam");
-        addArg(BoolDomain::getDefaultTypeName(), "BoolParam");
-        addArg(LabelSet::getDefaultTypeName(), "LabelSetParam");
-        addArg(EnumeratedDomain::getDefaultTypeName(), "EnumeratedParam");
+        addArg(FloatDT::NAME(), "IntervalParam");
+        addArg(IntDT::NAME(), "IntervalIntParam");
+        addArg(BoolDT::NAME(), "BoolParam");
+        addArg(StringDT::NAME(), "LabelSetParam");
+        addArg(FloatDT::NAME(), "EnumeratedParam");
     }
   private:
     TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false, bool isFact = false) const {
@@ -169,11 +172,11 @@ void initDbTestSchema(const SchemaId& schema) {
   objType->addMember(DEFAULT_OBJECT_TYPE, "o9");
 
   // Set up primitive object type member variables for testing
-  objType->addMember(IntervalDomain::getDefaultTypeName().c_str(), "IntervalVar");
-  objType->addMember(IntervalIntDomain::getDefaultTypeName().c_str(), "IntervalIntVar");
-  objType->addMember(BoolDomain::getDefaultTypeName().c_str(), "BoolVar");
-  objType->addMember(LabelSet::getDefaultTypeName().c_str(), "LabelSetVar");
-  objType->addMember(EnumeratedDomain::getDefaultTypeName().c_str(), "EnumeratedVar");
+  objType->addMember(FloatDT::NAME().c_str(), "IntervalVar");
+  objType->addMember(IntDT::NAME().c_str(), "IntervalIntVar");
+  objType->addMember(BoolDT::NAME().c_str(), "BoolVar");
+  objType->addMember(StringDT::NAME().c_str(), "LabelSetVar");
+  objType->addMember(FloatDT::NAME().c_str(), "EnumeratedVar");
 
   // Set up predicates for testing
   objType->addTokenFactory((new IntervalTokenFactory())->getId());
@@ -183,6 +186,14 @@ void initDbTestSchema(const SchemaId& schema) {
   objType->addObjectFactory((new SpecialDBFooFactory())->getId());
 
   schema->registerObjectType(objType->getId());
+
+  SymbolDomain locationsBaseDomain;
+  locationsBaseDomain.insert(LabelStr("Hill"));
+  locationsBaseDomain.insert(LabelStr("Rock"));
+  locationsBaseDomain.insert(LabelStr("Lander"));
+  locationsBaseDomain.close();
+
+  schema->registerEnum("Locations",locationsBaseDomain);
 }
 
 class PDBTestEngine  : public EngineBase
@@ -356,7 +367,9 @@ private:
 
   static bool testObjectTypeRelationships() {
       DEFAULT_SETUP(ce, db, true);
-    schema->reset();
+
+      unsigned int initOTcnt = schema->getAllObjectTypes().size();
+
     schema->addObjectType(LabelStr("Foo"));
     schema->addObjectType(LabelStr("Baz"));
     schema->addPredicate("Baz.pred");
@@ -391,7 +404,7 @@ private:
     CPPUNIT_ASSERT(schema->canContain(LabelStr("Bar"), LabelStr("Foo"), LabelStr("arg1")));
     CPPUNIT_ASSERT(schema->canContain(LabelStr("Bar"), LabelStr("Bar"), LabelStr("arg1")));
 
-    CPPUNIT_ASSERT(schema->getAllObjectTypes().size() == 4);
+    CPPUNIT_ASSERT(schema->getAllObjectTypes().size() == (initOTcnt+3));
 
     CPPUNIT_ASSERT(!schema->hasPredicates("Foo"));
     CPPUNIT_ASSERT(!schema->hasPredicates("Foo")); // Call again for cached result
@@ -404,7 +417,6 @@ private:
 
   static bool testObjectPredicateRelationships() {
       DEFAULT_SETUP(ce, db, true);
-    schema->reset();
     schema->addObjectType(LabelStr("Resource"));
     schema->addObjectType(LabelStr("NddlResource"), LabelStr("Resource"));
     schema->addPredicate(LabelStr("Resource.change"));
@@ -482,7 +494,6 @@ private:
 
   static bool testPredicateParameterAccessors() {
       DEFAULT_SETUP(ce, db, true);
-    schema->reset();
     schema->addObjectType(LabelStr("Resource"));
     schema->addObjectType(LabelStr("NddlResource"), LabelStr("Resource"));
     schema->addPredicate(LabelStr("Resource.change"));
@@ -591,7 +602,7 @@ private:
     CPPUNIT_ASSERT(db->getObjects().size() == 2);
     values.push_back(o1.getId());
     values.push_back(o2.getId());
-    ObjectDomain os1(values, LabelStr(DEFAULT_OBJECT_TYPE).c_str());
+    ObjectDomain os1(GET_DEFAULT_OBJECT_TYPE(ce),values);
     CPPUNIT_ASSERT(os1.isMember(o1.getId()));
     os1.remove(o1.getId());
     CPPUNIT_ASSERT(!os1.isMember(o1.getId()));
@@ -711,7 +722,7 @@ private:
     Object o6(o3.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o6");
     Object o7(o3.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o7");
 
-    ObjectDomain allObjects(LabelStr(DEFAULT_OBJECT_TYPE).c_str());
+    ObjectDomain allObjects(GET_DEFAULT_OBJECT_TYPE(ce));
     allObjects.insert(o1.getId());
     allObjects.insert(o2.getId());
     allObjects.insert(o3.getId());
@@ -723,64 +734,64 @@ private:
 
     // Ensure there they agree on a common root.
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> first(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o4.getId()));
+      Variable<ObjectDomain> second(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o7.getId()));
+      Variable<ObjectDomain> restrictions(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o1.getId()));
       CommonAncestorConstraint constraint("commonAncestor",
 					  "Default",
-					  ENGINE,
+					  ce,
 					  makeScope(first.getId(), second.getId(), restrictions.getId()));
 
-      CPPUNIT_ASSERT(ENGINE->propagate());
+      CPPUNIT_ASSERT(ce->propagate());
     }
 
     // Now impose a different set of restrictions which will eliminate all options
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> first(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o4.getId()));
+      Variable<ObjectDomain> second(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o7.getId()));
+      Variable<ObjectDomain> restrictions(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o2.getId()));
       CommonAncestorConstraint constraint("commonAncestor",
 					  "Default",
-					  ENGINE,
+					  ce,
 					  makeScope(first.getId(), second.getId(), restrictions.getId()));
 
-      CPPUNIT_ASSERT(!ENGINE->propagate());
+      CPPUNIT_ASSERT(!ce->propagate());
     }
 
     // Now try a set of restrictions, which will allow it to pass
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o4.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      Variable<ObjectDomain> second(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, allObjects);
+      Variable<ObjectDomain> first(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o4.getId()));
+      Variable<ObjectDomain> second(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o7.getId()));
+      Variable<ObjectDomain> restrictions(ce, allObjects);
       CommonAncestorConstraint constraint("commonAncestor",
 					  "Default",
-					  ENGINE,
+					  ce,
 					  makeScope(first.getId(), second.getId(), restrictions.getId()));
 
-      CPPUNIT_ASSERT(ENGINE->propagate());
+      CPPUNIT_ASSERT(ce->propagate());
     }
 
     // Now try when no variable is a singleton, and then one becomes a singleton
     {
-      Variable<ObjectDomain> first(ENGINE, allObjects);
-      Variable<ObjectDomain> second(ENGINE, allObjects);
-      Variable<ObjectDomain> restrictions(ENGINE, allObjects);
+      Variable<ObjectDomain> first(ce, allObjects);
+      Variable<ObjectDomain> second(ce, allObjects);
+      Variable<ObjectDomain> restrictions(ce, allObjects);
       CommonAncestorConstraint constraint("commonAncestor",
 					  "Default",
-					  ENGINE,
+					  ce,
 					  makeScope(first.getId(), second.getId(), restrictions.getId()));
 
-      CPPUNIT_ASSERT(ENGINE->propagate()); // All ok so far
+      CPPUNIT_ASSERT(ce->propagate()); // All ok so far
 
       restrictions.specify(o2.getId());
-      CPPUNIT_ASSERT(ENGINE->propagate()); // Nothing happens yet.
+      CPPUNIT_ASSERT(ce->propagate()); // Nothing happens yet.
 
       first.specify(o6.getId()); // Now we should propagate to failure
-      CPPUNIT_ASSERT(!ENGINE->propagate());
+      CPPUNIT_ASSERT(!ce->propagate());
       first.reset();
 
       first.specify(o4.getId());
-      CPPUNIT_ASSERT(ENGINE->propagate());
+      CPPUNIT_ASSERT(ce->propagate());
     }
     DEFAULT_TEARDOWN();
     return true;
@@ -800,83 +811,83 @@ private:
 
     // Positive test immediate ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o3.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> first(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o7.getId()));
+      Variable<ObjectDomain> restrictions(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o3.getId()));
       HasAncestorConstraint constraint("hasAncestor",
                                        "Default",
-                                       ENGINE,
+                                       ce,
                                        makeScope(first.getId(), restrictions.getId()));
 
-      CPPUNIT_ASSERT(ENGINE->propagate());
+      CPPUNIT_ASSERT(ce->propagate());
     }
 
     // negative test immediate ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> first(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o7.getId()));
+      Variable<ObjectDomain> restrictions(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o2.getId()));
       HasAncestorConstraint constraint("hasAncestor",
                                        "Default",
-                                       ENGINE,
+                                       ce,
                                        makeScope(first.getId(), restrictions.getId()));
 
-      CPPUNIT_ASSERT(!ENGINE->propagate());
+      CPPUNIT_ASSERT(!ce->propagate());
     }
     // Positive test higher up  ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> first(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o7.getId()));
+      Variable<ObjectDomain> restrictions(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o1.getId()));
       HasAncestorConstraint constraint("hasAncestor",
                                        "Default",
-                                       ENGINE,
+                                       ce,
                                        makeScope(first.getId(), restrictions.getId()));
 
-      CPPUNIT_ASSERT(ENGINE->propagate());
+      CPPUNIT_ASSERT(ce->propagate());
     }
     // negative test higherup ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o8.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> first(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o7.getId()));
+      Variable<ObjectDomain> restrictions(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o8.getId()));
       HasAncestorConstraint constraint("hasAncestor",
                                        "Default",
-                                       ENGINE,
+                                       ce,
                                        makeScope(first.getId(), restrictions.getId()));
 
-      CPPUNIT_ASSERT(!ENGINE->propagate());
+      CPPUNIT_ASSERT(!ce->propagate());
     }
 
     //positive restriction of the set.
     {
-      ObjectDomain obs(LabelStr(DEFAULT_OBJECT_TYPE).c_str());
+      ObjectDomain obs(GET_DEFAULT_OBJECT_TYPE(ce));
       obs.insert(o7.getId());
       obs.insert(o4.getId());
       obs.close();
 
-      Variable<ObjectDomain> first(ENGINE, obs);
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> first(ce, obs);
+      Variable<ObjectDomain> restrictions(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o2.getId()));
       HasAncestorConstraint constraint("hasAncestor",
                                        "Default",
-                                       ENGINE,
+                                       ce,
                                        makeScope(first.getId(), restrictions.getId()));
 
-      CPPUNIT_ASSERT(ENGINE->propagate());
+      CPPUNIT_ASSERT(ce->propagate());
       CPPUNIT_ASSERT(first.getDerivedDomain().isSingleton());
     }
 
     //no restriction of the set.
     {
-      ObjectDomain obs1(LabelStr(DEFAULT_OBJECT_TYPE).c_str());
+      ObjectDomain obs1(GET_DEFAULT_OBJECT_TYPE(ce));
       obs1.insert(o7.getId());
       obs1.insert(o4.getId());
       obs1.close();
 
-      Variable<ObjectDomain> first(ENGINE, obs1);
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> first(ce, obs1);
+      Variable<ObjectDomain> restrictions(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o1.getId()));
       HasAncestorConstraint constraint("hasAncestor",
                                        "Default",
-                                       ENGINE,
+                                       ce,
                                        makeScope(first.getId(), restrictions.getId()));
 
-      CPPUNIT_ASSERT(ENGINE->propagate());
+      CPPUNIT_ASSERT(ce->propagate());
       CPPUNIT_ASSERT(first.getDerivedDomain().getSize() == 2);
     }
 
@@ -889,15 +900,15 @@ private:
    */
   static bool testMakeObjectVariable(){
       DEFAULT_SETUP(ce, db, false);
-    ConstrainedVariableId v0 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain(LabelStr(DEFAULT_OBJECT_TYPE).c_str())))->getId();
+    ConstrainedVariableId v0 = (new Variable<ObjectDomain>(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce))))->getId();
     CPPUNIT_ASSERT(!v0->isClosed());
     db->makeObjectVariableFromType(LabelStr(DEFAULT_OBJECT_TYPE), v0);
     CPPUNIT_ASSERT(!v0->isClosed());
-    CPPUNIT_ASSERT(ENGINE->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
 
     // Now add an object and we should expect the constraint network to be consistent
     Object o1(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
-    CPPUNIT_ASSERT(ENGINE->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
     CPPUNIT_ASSERT(!db->isClosed(LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
     CPPUNIT_ASSERT(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getId());
 
@@ -916,25 +927,25 @@ private:
 
     // Now add an object and we should expect the constraint network to be consistent
     Object o1(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
-    CPPUNIT_ASSERT(ENGINE->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
 
-    ConstrainedVariableId v0 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain(LabelStr(DEFAULT_OBJECT_TYPE).c_str())))->getId();
+    ConstrainedVariableId v0 = (new Variable<ObjectDomain>(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce))))->getId();
     CPPUNIT_ASSERT(!v0->isClosed());
     db->makeObjectVariableFromType(LabelStr(DEFAULT_OBJECT_TYPE), v0);
     CPPUNIT_ASSERT(!v0->isClosed());
-    CPPUNIT_ASSERT(ENGINE->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
     CPPUNIT_ASSERT(!db->isClosed(LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
     CPPUNIT_ASSERT(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getId());
 
     // Now create another object and verify it is part of the initial domain of the next variable
     Object o2(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
-    CPPUNIT_ASSERT(ENGINE->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
 
     // Confirm the first variable has the value
     CPPUNIT_ASSERT(!v0->lastDomain().isSingleton());
 
     // Allocate another variable and confirm the domains are equal
-    ConstrainedVariableId v1 = (new Variable<ObjectDomain>(ENGINE, ObjectDomain(LabelStr(DEFAULT_OBJECT_TYPE).c_str())))->getId();
+    ConstrainedVariableId v1 = (new Variable<ObjectDomain>(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce))))->getId();
     CPPUNIT_ASSERT(!v1->isClosed());
     db->makeObjectVariableFromType(LabelStr(DEFAULT_OBJECT_TYPE), v1);
     CPPUNIT_ASSERT(!v1->isClosed());
@@ -958,13 +969,13 @@ private:
   static bool testTokenObjectVariable(){
       DEFAULT_SETUP(ce, db, false);
 
-    CPPUNIT_ASSERT(ENGINE->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
     // Now add an object and we should expect the constraint network to be consistent next time we add the token.
     ObjectId o1 = (new Object(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1"))->getId();
     EventToken eventToken(db->getId(), LabelStr(DEFAULT_PREDICATE), false, false, IntervalIntDomain(0, 10));
 
     eventToken.activate(); // Must be activate to eventually propagate the objectTokenRelation
-    CPPUNIT_ASSERT(ENGINE->propagate());
+    CPPUNIT_ASSERT(ce->propagate());
 
     // Make sure the object var of the token contains o1.
     CPPUNIT_ASSERT(eventToken.getObject()->lastDomain().isMember(o1));
@@ -975,7 +986,7 @@ private:
 
     // Insertion of a new object should not affect the given event token
     ObjectId o2 = (new Object(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
-    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(ce->constraintConsistent());
     CPPUNIT_ASSERT(!eventToken.getObject()->baseDomain().isMember(o2));
 
     DEFAULT_TEARDOWN();
@@ -1186,7 +1197,7 @@ private:
                      Token::noObject(), true);
 
     // Constraint the start variable of both tokens
-    EqualConstraint c0("eq", "Default", ENGINE, makeScope(t0.start(), t1.start()));
+    EqualConstraint c0("eq", "Default", ce, makeScope(t0.start(), t1.start()));
 
     CPPUNIT_ASSERT(t1.isInactive());
     t0.activate();
@@ -1805,7 +1816,7 @@ private:
 
     // Add parameters to schema
     for(int i=0;i< UNIFIED; i++)
-      schema->addMember(LabelStr(DEFAULT_PREDICATE), IntervalIntDomain::getDefaultTypeName(), LabelStr("P" + i).c_str());
+      schema->addMember(LabelStr(DEFAULT_PREDICATE), IntDT::NAME(), LabelStr("P" + i).c_str());
 
     for (int i=0; i < NUMTOKS; i++) {
       std::vector<IntervalTokenId> tmp;
@@ -2247,10 +2258,10 @@ private:
 
     schema->addMember(LabelStr(DEFAULT_PREDICATE),"int",LabelStr("FOO"));
 
-    EnumeratedDomain zero(true, "int");
+    EnumeratedDomain zero(IntDT::instance());
     zero.insert(0); zero.close();
 
-    EnumeratedDomain one(true, "int");
+    EnumeratedDomain one(IntDT::instance());
     one.insert(1); one.close();
 
     IntervalToken t0(db,
@@ -2726,7 +2737,7 @@ private:
       dom.insert(Token::MERGED);
       dom.close();
 
-      Variable<StateDomain> v(ENGINE, dom);
+      Variable<StateDomain> v(ce, dom);
       EqualConstraint c0("eq", "Default", ce, makeScope(t1->getState(), v.getId()));
 
       t1->doMerge(t0);
@@ -3750,8 +3761,8 @@ public:
 private:
   static bool testFactoryMethods(){
     std::vector<const AbstractDomain*> arguments;
-    IntervalIntDomain arg0(10, 10, "int");
-    LabelSet arg1(LabelStr("Label"), "string");
+    IntervalIntDomain arg0(10, 10);
+    LabelSet arg1(LabelStr("Label"));
     arguments.push_back(&arg0);
     arguments.push_back(&arg1);
     LabelStr factoryName = ObjectTypeMgr::makeFactoryName(LabelStr("Foo"), arguments);
@@ -3771,7 +3782,7 @@ private:
 
     std::vector<const AbstractDomain*> arguments;
     IntervalIntDomain arg0(10);
-    LabelSet arg1(LabelStr("Label"), LabelSet::getDefaultTypeName().c_str());
+    LabelSet arg1(LabelStr("Label"));
     arguments.push_back(&arg0);
     arguments.push_back(&arg1);
     DBFooId foo2 = client->createObject(LabelStr(DEFAULT_OBJECT_TYPE).c_str(), "foo2", arguments);
@@ -3878,9 +3889,9 @@ private:
     DbClientId client = db->getClient();
 
     // Allocate
-    client->createVariable(IntervalIntDomain().getDefaultTypeName().c_str(), "v1");
-    client->createVariable(IntervalIntDomain().getDefaultTypeName().c_str(), "v2");
-    client->createVariable(IntervalIntDomain().getDefaultTypeName().c_str(), "v3");
+    client->createVariable(IntDT::NAME().c_str(), "v1");
+    client->createVariable(IntDT::NAME().c_str(), "v2");
+    client->createVariable(IntDT::NAME().c_str(), "v3");
 
     // Retrieve
     ConstrainedVariableId v1 = client->getGlobalVariable("v1");
@@ -3901,6 +3912,24 @@ private:
     return true;
   }
 };
+
+/**
+ * Locations enumeration's base domain, as required by the schema.
+ * @note Copied from System/test/basic-model-transaction.cc
+ * as created from basic-model-transaction.nddl v1.3 with the NDDL compiler.
+ */
+const Locations& LocationsBaseDomain() {
+  static RestrictedDT dt("Locations",SymbolDT::instance(),SymbolDomain());
+  static Locations sl_enum(dt.getId());
+  if (sl_enum.isOpen()) {
+    sl_enum.insert(LabelStr("Hill"));
+    sl_enum.insert(LabelStr("Rock"));
+    sl_enum.insert(LabelStr("Lander"));
+    sl_enum.close();
+  }
+  return(sl_enum);
+}
+
 
 /**
  * @class DbTransPlayerTest
@@ -3933,11 +3962,6 @@ public:
     s_dbPlayer = new DbClientTransactionPlayer((s_db)->getClient());
     CPPUNIT_ASSERT(s_dbPlayer != 0);
 
-    DataTypeId baseType = ce->getCESchema()->getDataType(SymbolDT::NAME().c_str());
-    ce->getCESchema()->registerDataType(
-        (new RestrictedDT("Locations",baseType,LocationsBaseDomain()))->getId()
-    );
-
     REGISTER_OBJECT_FACTORY(db->getSchema(),TestClass2Factory, TestClass2);
     REGISTER_OBJECT_FACTORY(db->getSchema(),TestClass2Factory, TestClass2:string:int:float:Locations);
 
@@ -3945,12 +3969,8 @@ public:
     db->getSchema()->registerTokenFactory((new TestClass2::Sample::Factory())->getId());
 
     /* Initialize state-domain-at-creation of mandatory and rejectable tokens.  Const after this. */
-    s_mandatoryStateDom.insert(Token::ACTIVE);
-    s_mandatoryStateDom.insert(Token::MERGED); // Goals can now be merged
+    s_mandatoryStateDom.remove(Token::REJECTED);
     s_mandatoryStateDom.close();
-    s_rejectableStateDom.insert(Token::ACTIVE);
-    s_rejectableStateDom.insert(Token::MERGED);
-    s_rejectableStateDom.insert(Token::REJECTED);
     s_rejectableStateDom.close();
 
     /* Initialize the list of temporal relations.  Const after this. */
@@ -3983,9 +4003,6 @@ public:
     s_tempRels.insert(LabelStr("starts_during"));
     //!!parallels? precedes? succeeds?
     //!!each with explicit bounds?  The player does not appear to have a syntax for explicit bounds.
-
-    //!!Delete this next line once the tests are debugged and print nothing when passing
-    std::cout << '\n';
 
     testDefineEnumeration();
     testCreateVariable();
@@ -4023,39 +4040,8 @@ public:
     return(true);
   }
 
-  typedef SymbolDomain Locations;
-
-  /**
-   * Locations enumeration's base domain, as required by the schema.
-   * @note Copied from System/test/basic-model-transaction.cc
-   * as created from basic-model-transaction.nddl v1.3 with the NDDL compiler.
-   */
-  static const Locations& LocationsBaseDomain() {
-    static Locations sl_enum("Locations");
-    if (sl_enum.isOpen()) {
-      sl_enum.insert(LabelStr("Hill"));
-      sl_enum.insert(LabelStr("Rock"));
-      sl_enum.insert(LabelStr("Lander"));
-      sl_enum.close();
-    }
-    return(sl_enum);
-  }
-
   class TestClass2;
   typedef Id<TestClass2> TestClass2Id;
-
-  class TestClass2Domain : public EnumeratedDomain {
-  public:
-    TestClass2Domain()
-      : EnumeratedDomain(false, "TestClass2") {
-    }
-    TestClass2Domain(TestClass2Id value)
-      : EnumeratedDomain((double)value, false, "TestClass2") {
-    }
-    TestClass2Domain(TestClass2Id value, const char* typeName)
-      : EnumeratedDomain((double)value, false, typeName) {
-    }
-  };
 
   class TestClass2 : public Timeline {
   public:
@@ -4154,9 +4140,9 @@ public:
       if (arguments.size() == 4) {
         //!!I'm not sure why this first one is passed in; it appears to be the object's type info.
         //!!--wedgingt@email.arc.nasa.gov 2004 Nov 1
-        CPPUNIT_ASSERT(arguments[0]->getTypeName() == LabelStr(StringDomain::getDefaultTypeName()));
-        CPPUNIT_ASSERT(arguments[1]->getTypeName() == LabelStr(IntervalIntDomain::getDefaultTypeName()));
-        CPPUNIT_ASSERT(arguments[2]->getTypeName() == LabelStr(IntervalDomain::getDefaultTypeName()));
+        CPPUNIT_ASSERT(arguments[0]->getTypeName() == LabelStr(StringDT::NAME()));
+        CPPUNIT_ASSERT(arguments[1]->getTypeName() == LabelStr(IntDT::NAME()));
+        CPPUNIT_ASSERT(arguments[2]->getTypeName() == LabelStr(FloatDT::NAME()));
         CPPUNIT_ASSERT(arguments[3]->getTypeName() == LabelStr("Locations"));
       }
       TestClass2Id instance = (new TestClass2(planDb, objectType, objectName))->getId();
@@ -4200,15 +4186,6 @@ public:
     locs.push_back(std::string("Rock"));
     locs.push_back(std::string("Lander"));
 
-    /* Build it in the schema first. */
-    //!!An easier way to do this would be nice.
-    //!!  E.g., a member function that accepted the type name and the corresponding base domain.
-    //!!  Per Tania, created a change request GNATS for such a method (GNATS 2698).
-    s_db->getSchema()->addEnum("Locations");
-    s_db->getSchema()->addValue("Locations", (double)LabelStr("Hill"));
-    s_db->getSchema()->addValue("Locations", (double)LabelStr("Rock"));
-    s_db->getSchema()->addValue("Locations", (double)LabelStr("Lander"));
-
     /* Create the XML string and play it. */
     TEST_PLAYING_XML(buildXMLEnumStr(std::string("Locations"), locs, __FILE__, __LINE__));
     // Nothing to verify, since the player cannot actually create enumerations.
@@ -4216,8 +4193,8 @@ public:
 
   /** Test creating variables. */
   static void testCreateVariable() {
-    TEST_PLAYING_XML(buildXMLNameTypeStr("var", "g_int", IntervalIntDomain::getDefaultTypeName().toString(), __FILE__, __LINE__));
-    TEST_PLAYING_XML(buildXMLNameTypeStr("var", "g_float", IntervalDomain::getDefaultTypeName().toString(), __FILE__, __LINE__));
+    TEST_PLAYING_XML(buildXMLNameTypeStr("var", "g_int", IntDT::NAME(), __FILE__, __LINE__));
+    TEST_PLAYING_XML(buildXMLNameTypeStr("var", "g_float", FloatDT::NAME(), __FILE__, __LINE__));
     TEST_PLAYING_XML(buildXMLNameTypeStr("var", "g_location", "Locations", __FILE__, __LINE__));
 
     //!!Other types: symbols, objects, etc.
@@ -4243,6 +4220,7 @@ public:
               sg_location = *varIter;
             else
               g_location2 = *varIter;
+
     CPPUNIT_ASSERT(!sg_int.isNoId() && sg_int.isValid());
     CPPUNIT_ASSERT(sg_int->lastDomain() == IntervalIntDomain());
     CPPUNIT_ASSERT(!sg_float.isNoId() && sg_float.isValid());
@@ -4257,7 +4235,7 @@ public:
   static void testDeleteVariable() {
     CPPUNIT_ASSERT(s_db->getClient()->isGlobalVariable("g_int"));
     TEST_REWINDING_XML(buildXMLNameTypeStr("var", "g_int",
-					  IntervalIntDomain::getDefaultTypeName().toString(),
+					  IntDT::NAME(),
 					  __FILE__, __LINE__));
     CPPUNIT_ASSERT(!s_db->getClient()->isGlobalVariable("g_int"));
     ConstrainedVariableSet allVars = s_ce->getVariables();
@@ -4266,7 +4244,7 @@ public:
     }
     //have to re-create the variable because future tests depend on it
     TEST_PLAYING_XML(buildXMLNameTypeStr("var", "g_int",
-					  IntervalIntDomain::getDefaultTypeName().toString(),
+					  IntDT::NAME(),
 					  __FILE__, __LINE__));
     CPPUNIT_ASSERT(s_db->getClient()->isGlobalVariable("g_int"));
     bool found = false;
@@ -4302,7 +4280,7 @@ public:
 
     std::stringstream otherTransactions;
     otherTransactions << buildXMLNameTypeStr("var", "g_int",
-					     IntervalIntDomain::getDefaultTypeName().toString(),
+					     IntDT::NAME(),
 					     __FILE__, __LINE__);
     otherTransactions << "<breakpoint/>";
     otherTransactions << transactions.str();
@@ -4328,21 +4306,19 @@ public:
     TEST_PLAYING_XML(buildXMLNameStr("class", "TestClass1", __FILE__, __LINE__));
 
     s_db->getSchema()->addObjectType("TestClass2");
-    s_db->getSchema()->addObjectType("Locations");
     CPPUNIT_ASSERT(s_db->getSchema()->isObjectType("TestClass2"));
-    s_db->getSchema()->addMember("TestClass2", IntervalIntDomain::getDefaultTypeName().toString(), "int1");
-    s_db->getSchema()->addMember("TestClass2", IntervalDomain::getDefaultTypeName().toString(), "float2");
+    s_db->getSchema()->addMember("TestClass2", IntDT::NAME(), "int1");
+    s_db->getSchema()->addMember("TestClass2", FloatDT::NAME(), "float2");
     s_db->getSchema()->addMember("TestClass2", "Locations", "where");
     s_db->getSchema()->addPredicate("TestClass2.Sample");
-    s_db->getSchema()->addMember("TestClass2.Sample", IntervalDomain::getDefaultTypeName().toString(), "m_x");
-    s_db->getSchema()->addMember("TestClass2.Sample", IntervalDomain::getDefaultTypeName().toString(), "m_y");
+    s_db->getSchema()->addMember("TestClass2.Sample", FloatDT::NAME(), "m_x");
+    s_db->getSchema()->addMember("TestClass2.Sample", FloatDT::NAME(), "m_y");
     s_db->getSchema()->addMember("TestClass2.Sample", "Locations", "m_closest");
 
     ArgList args;
-    args.push_back(std::make_pair(IntervalIntDomain::getDefaultTypeName().toString(), std::string("int1")));
-    args.push_back(std::make_pair(IntervalDomain::getDefaultTypeName().toString(), std::string("float2")));
+    args.push_back(std::make_pair(IntDT::NAME(), std::string("int1")));
+    args.push_back(std::make_pair(FloatDT::NAME(), std::string("float2")));
     args.push_back(std::make_pair(std::string("Locations"), std::string("where")));
-    //!!BoolDomain::getDefaultTypeName()
     TEST_PLAYING_XML(buildXMLCreateClassStr("TestClass2", args, __FILE__, __LINE__));
     // Nothing to verify, since the player cannot actually create classes.
   }
@@ -4362,7 +4338,9 @@ public:
     std::vector<const AbstractDomain*> domains;
     domains.push_back(new IntervalIntDomain(1));
     domains.push_back(new IntervalDomain(1.414));
-    domains.push_back(new Locations(LabelStr("Hill"), "Locations"));
+    Locations* ld1 = new Locations(LocationsBaseDomain());
+    ld1->set(LabelStr("Hill"));
+    domains.push_back(ld1);
     //!!Other types?  Has to match class's definition in the schema.
     TEST_PLAYING_XML(buildXMLCreateObjectStr("TestClass2", "testObj2a", domains));
     cleanDomains(domains);
@@ -4388,9 +4366,12 @@ public:
       case 1:
         CPPUNIT_ASSERT(var->lastDomain() == IntervalDomain(1.414));
         break;
-      case 2:
-        CPPUNIT_ASSERT(var->lastDomain() == SymbolDomain((double)LabelStr("Hill"), "Locations"));
+      case 2: {
+          Locations* ld1 = new Locations(LocationsBaseDomain());
+          ld1->set(LabelStr("Hill"));
+        CPPUNIT_ASSERT(var->lastDomain() == *ld1);
         break;
+      }
       default:
         CPPUNIT_ASSERT_MESSAGE("erroneous variable index within obj2a", false);
       }
@@ -4399,8 +4380,10 @@ public:
     domains.push_back(new IntervalDomain(3.14159265358979));
     std::list<double> locs;
     locs.push_back(LabelStr("Rock"));
-    domains.push_back(new Locations(locs, "Locations"));
-    Locations toCompare(locs, "Locations");
+    Locations* ld2 = new Locations(LocationsBaseDomain());
+    ld2->set(LabelStr("Rock"));
+    domains.push_back(ld2);
+    Locations toCompare(*ld2);
     //!!Other types?  Has to match class's definition in the schema.
     TEST_PLAYING_XML(buildXMLCreateObjectStr("TestClass2", "testObj2b", domains));
     cleanDomains(domains);
@@ -4453,7 +4436,9 @@ public:
     std::vector<const AbstractDomain*> domains;
     domains.push_back(new IntervalIntDomain(1));
     domains.push_back(new IntervalDomain(1.414));
-    domains.push_back(new Locations(LabelStr("Hill"), "Locations"));
+    Locations* ld1 = new Locations(LocationsBaseDomain());
+    ld1->set(LabelStr("Hill"));
+    domains.push_back(ld1);
     std::string transaction = buildXMLCreateObjectStr("TestClass2", "testObj2a", domains);
     cleanDomains(domains);
 
@@ -4480,7 +4465,9 @@ public:
     std::vector<const AbstractDomain*> domains;
     domains.push_back(new IntervalIntDomain(1));
     domains.push_back(new IntervalDomain(1.414));
-    domains.push_back(new Locations(LabelStr("Hill"), "Locations"));
+    Locations* ld1 = new Locations(LocationsBaseDomain());
+    ld1->set(LabelStr("Hill"));
+    domains.push_back(ld1);
     std::string createTransaction =
       buildXMLCreateObjectStr("TestClass2", "testObj2a", domains);
     cleanDomains(domains);
@@ -4513,10 +4500,11 @@ public:
     CPPUNIT_ASSERT(sg_int->lastDomain() == IntervalIntDomain(-5));
     TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_float, IntervalDomain(-5.0)));
     CPPUNIT_ASSERT(sg_float->lastDomain() == IntervalDomain(-5.0));
-    std::list<double> locs;
-    locs.push_back(LabelStr("Lander"));
-    TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_location, Locations(locs, "Locations")));
-    CPPUNIT_ASSERT(sg_location->lastDomain() == Locations(locs, "Locations"));
+
+    Locations ld1(LocationsBaseDomain());
+    ld1.set(LabelStr("Lander"));
+    TEST_PLAYING_XML(buildXMLSpecifyVariableStr(sg_location, ld1));
+    CPPUNIT_ASSERT(sg_location->lastDomain() == Locations(ld1));
   }
 
   /** Test resetting variables. */
@@ -4525,6 +4513,7 @@ public:
     CPPUNIT_ASSERT_MESSAGE(sg_int->toString(), sg_int->lastDomain() == IntervalIntDomain());
     TEST_PLAYING_XML(buildXMLResetVariableStr(sg_float));
     CPPUNIT_ASSERT(sg_float->lastDomain() == IntervalDomain());
+
     TEST_PLAYING_XML(buildXMLResetVariableStr(sg_location));
     CPPUNIT_ASSERT(sg_location->lastDomain() == LocationsBaseDomain());
 
@@ -4551,7 +4540,6 @@ public:
   }
 
   static void testUnresetVariable() {
-    std::cout << "testUnresetVariable" << std::endl;
     std::string specify = buildXMLSpecifyVariableStr(sg_int, IntervalIntDomain(-5));
     std::stringstream transactions;
     transactions << specify;
@@ -4631,9 +4619,11 @@ public:
     CPPUNIT_ASSERT(constraints.size() == 1);
     CPPUNIT_ASSERT(constr == *(constraints.begin()));
 
+    Locations ld1(LocationsBaseDomain());
+    ld1.set(LabelStr("Hill"));
     // Specifying variables is one of the special cases.
-    TEST_PLAYING_XML(buildXMLInvokeSpecifyVariableStr(sg_location, Locations(LabelStr("Hill"), "Locations")));
-    CPPUNIT_ASSERT(sg_location->lastDomain() == Locations(LabelStr("Hill"), "Locations"));
+    TEST_PLAYING_XML(buildXMLInvokeSpecifyVariableStr(sg_location, Locations(ld1)));
+    CPPUNIT_ASSERT(sg_location->lastDomain() == Locations(ld1));
     std::list<double> locs;
     locs.push_back(LabelStr("Hill"));
     locs.push_back(LabelStr("Rock"));
@@ -4671,12 +4661,12 @@ public:
     TEST_PLAYING_XML("<invoke name=\"close\" identifier=\"TestClass2\"/>");
     CPPUNIT_ASSERT(s_db->isClosed("TestClass2"));
     std::cout << __FILE__ << ':' << __LINE__ << ": TestClass2 object domain is "
-              << ObjectDomain("TestClass2") << " (size " << ObjectDomain("TestClass2").getSize()
+              << ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")) << " (size " << ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")).getSize()
               << "); should be 2 members\n";
 
     //!!This is failing, despite the prior checks passing, because the domain is still open.
-    //!!CPPUNIT_ASSERT(ObjectDomain("TestClass2").getSize() == 2);
-    if (ObjectDomain("TestClass2").isOpen())
+    //!!CPPUNIT_ASSERT(ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")).getSize() == 2);
+    if (ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")).isOpen())
       std::cout << __FILE__ << ':' << __LINE__ << ": TestClass2 base domain is still open, despite plan database saying otherwise\n";
     //!!See if closing the entire database takes care of this as well:
 
@@ -4685,11 +4675,11 @@ public:
 
     //!!See just above
     std::cout << __FILE__ << ':' << __LINE__ << ": After closing db, TestClass2 object domain is "
-              << ObjectDomain("TestClass2") << " (size " << ObjectDomain("TestClass2").getSize()
+              << ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")) << " (size " << ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")).getSize()
               << "); should be 2 members\n";
     //!!Still fails
-    //!!CPPUNIT_ASSERT(ObjectDomain("TestClass2").getSize() == 2);
-    if (ObjectDomain("TestClass2").isOpen())
+    //!!CPPUNIT_ASSERT(ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")).getSize() == 2);
+    if (ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")).isOpen())
       std::cout << __FILE__ << ':' << __LINE__ << ": TestClass2 base domain is still open, despite plan database saying otherwise\n";
   }
 
@@ -4839,7 +4829,7 @@ public:
     std::cout << __FILE__ << ':' << __LINE__ << ": constrainedSample's derived object domain is " << constrainedToken->getObject()->derivedDomain() << '\n';
     CPPUNIT_ASSERT_MESSAGE("player did not constrain token to one object",
         constrainedToken->getObject()->derivedDomain().isSingleton());
-    ObjectDomain objDom2b(obj2b, "TestClass2");;
+    ObjectDomain objDom2b(GET_DATA_TYPE(s_db,"TestClass2"),obj2b);
     CPPUNIT_ASSERT_MESSAGE("player did not constrain token to expected object",
         constrainedToken->getObject()->derivedDomain() == objDom2b);
     /* Leave it in plan db for testFree(). */
@@ -4867,7 +4857,7 @@ public:
     CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
     CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
     CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
-    ObjectDomain objDom2a(obj2a, "TestClass2");
+    ObjectDomain objDom2a(GET_DATA_TYPE(s_db,"TestClass2"),obj2a);
     const unsigned int initialObjectTokenCount_A = obj2a->tokens().size();
 
     TokenId rejectable = createToken("rejectableConstrainedSample", false);
@@ -4926,14 +4916,14 @@ public:
     CPPUNIT_ASSERT(!obj2a.isNoId() && obj2a.isValid());
     CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
     CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
-    ObjectDomain objDom2a(obj2a, "TestClass2");
+    ObjectDomain objDom2a(GET_DATA_TYPE(s_db,"TestClass2"),obj2a);
     const unsigned int initialObjectTokenCount_A = obj2a->tokens().size();
 
     ObjectId obj2b = s_db->getObject("testObj2b");
     CPPUNIT_ASSERT(!obj2b.isNoId() && obj2b.isValid());
     CPPUNIT_ASSERT(obj2b->getType() == LabelStr("TestClass2"));
     CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b"));
-    ObjectDomain objDom2b(obj2b, "TestClass2");
+    ObjectDomain objDom2b(GET_DATA_TYPE(s_db,"TestClass2"),obj2b);
     TokenSet tokens = obj2b->tokens();
     std::cout << __FILE__ << ':' << __LINE__ << ": there are " << tokens.size() << " tokens on testObj2b; should be 2.\n";
     /*!!For debugging:
@@ -4958,19 +4948,19 @@ public:
     CPPUNIT_ASSERT(one->getObject()->derivedDomain() == objDom2b);
 
     //!!Next fails because the base domain is still open
-    //!!CPPUNIT_ASSERT(one->getObject()->derivedDomain() == ObjectDomain("TestClass2"));
+    //!!CPPUNIT_ASSERT(one->getObject()->derivedDomain() == ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")));
 
     CPPUNIT_ASSERT(!two->getObject()->derivedDomain().isSingleton());
     TEST_PLAYING_XML(buildXMLObjTokTokStr("free", "testObj2b", "constrainedSample", ""));
     CPPUNIT_ASSERT(!two->getObject()->derivedDomain().isSingleton());
 
     //!!Next fails because the base domain is still open
-    //!!CPPUNIT_ASSERT(one->getObject()->derivedDomain() == ObjectDomain("TestClass2"));
+    //!!CPPUNIT_ASSERT(one->getObject()->derivedDomain() == ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")));
 
     CPPUNIT_ASSERT(!one->getObject()->derivedDomain().isSingleton());
 
     //!!Next fails because the base domain is still open
-    //!!CPPUNIT_ASSERT(two->getObject()->derivedDomain() == ObjectDomain("TestClass2"));
+    //!!CPPUNIT_ASSERT(two->getObject()->derivedDomain() == ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")));
 
     tokens = obj2a->tokens();
     /*!!For debugging:
@@ -4996,12 +4986,10 @@ public:
         three->getObject()->derivedDomain().isSingleton());
 
     //!!Next fails because the base domain is still open
-    //!!CPPUNIT_ASSERT(three->getObject()->derivedDomain() == ObjectDomain("TestClass2"));
+    //!!CPPUNIT_ASSERT(three->getObject()->derivedDomain() == ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")));
   }
 
   static void testUnfree() {
-    std::cout << "testUnfree" << std::endl;
-
     std::stringstream transactions;
     transactions << buildXMLObjTokTokStr("constrain", "testObj2b", "constrainedSample", "");
     transactions << buildXMLObjTokTokStr("constrain", "testObj2b", "constrainedSample2",
@@ -5066,7 +5054,6 @@ public:
   }
 
   static void testUncancel() {
-    std::cout << "testUncancel" << std::endl;
     std::stringstream transactions;
     transactions << buildXMLObjTokTokStr("activate", "", "activateSample", "");
     transactions << buildXMLObjTokTokStr("merge", "", "mergeSample",
@@ -5541,7 +5528,7 @@ std::string DbTransPlayerTest::buildXMLCreateObjectStr(const std::string& classN
   str += objName;
   str += "\"";
   str += " type=\"";
-  str += StringDomain::getDefaultTypeName().toString();
+  str += StringDT::NAME();
   str += "\"/> ";
   for (unsigned int i = 0; i < domains.size(); i++, str += " ")
     str += buildXMLDomainStr(*(domains[i]));

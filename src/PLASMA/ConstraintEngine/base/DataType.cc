@@ -7,6 +7,7 @@
 
 #include "DataType.hh"
 #include "Variable.hh"
+#include "Debug.hh"
 
 namespace EUROPA {
 
@@ -38,21 +39,21 @@ bool DataType::isSymbolic() const {return !isNumeric();}
 bool DataType::getIsRestricted() const { return m_isRestricted; }
 void DataType::setIsRestricted(bool b) { m_isRestricted = b; }
 
-bool DataType::canBeCompared(const DataType& rhs)
+bool DataType::canBeCompared(const DataTypeId& rhs)
 {
-    // If either is numeric, both must be numeric.
-    if(isNumeric())
-        return(rhs.isNumeric());
-
-    // If either is string, both must be string.
-    if(isString())
-        return(rhs.isString());
-
-    // Now we know that neither is numeric. We also can infer that
-    // they must be enumerated since neither is numeric. Thus, the
-    // types must match
     // TODO: this can be more sophisticated
-    return (getName() == rhs.getName());
+    // Assumes type names don't matter for now
+
+    if (isNumeric() || rhs->isNumeric())
+      return (isNumeric() && rhs->isNumeric());
+
+    if (isString() || rhs->isString())
+      return (isString() && rhs->isString());
+
+    if (isSymbolic() || rhs->isSymbolic())
+      return (isSymbolic() && rhs->isSymbolic()); // TODO: && baseDomain().intersects(rhs->baseDomain()));
+
+    return false;
 }
 
 const AbstractDomain & DataType::baseDomain() const
@@ -92,6 +93,8 @@ DataType::createVariable(const ConstraintEngineId& constraintEngine,
 
     ConstrainedVariableId id = variable->getId();
     check_error(id.isValid());
+
+    debugMsg("DataType::createVariable", "Created Variable : " << id->toLongString());
 
     return id;
 }

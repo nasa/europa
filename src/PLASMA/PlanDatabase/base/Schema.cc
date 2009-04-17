@@ -89,7 +89,6 @@ namespace EUROPA {
     typesWithNoPredicates.clear();
 
     // Add System entities
-    addObjectType(rootObject());
 	addPrimitive("int");
 	addPrimitive("float");
 	addPrimitive("bool");
@@ -202,9 +201,8 @@ namespace EUROPA {
     const NameValueVector& members = membershipRelation_it->second;
     for(NameValueVector::const_iterator it = members.begin(); it != members.end();++it){
       const NameValuePair& pair = *it;
-      //if(pair.first == memberType && pair.second == memberName)
-      if(isA(memberType, pair.first) && pair.second == memberName)
-	return true;
+      if(pair.second == memberName && isA(memberType, pair.first))
+          return true;
     }
 
     // Call recursively for inheritance relationships on parent and member types
@@ -493,37 +491,38 @@ namespace EUROPA {
   }
 
   void Schema::declareObjectType(const LabelStr& objectType) {
-    debugMsg("Schema:declareObjectType", "[" << m_name.toString() << "] " << "Declaring object type " << objectType.toString());
-    objectTypes.insert(objectType);
+      if (!this->isObjectType(objectType)) {
+          debugMsg("Schema:declareObjectType", "[" << m_name.toString() << "] " << "Declaring object type " << objectType.toString());
+          objectTypes.insert(objectType);
+          getCESchema()->registerDataType((new ObjectDT(objectType.c_str()))->getId());
+      }
+      else {
+          debugMsg("Schema:declareObjectType", "[" << m_name.toString() << "] " << "Object type already declared, ignoring re-declaration for" << objectType.toString());
+      }
   }
 
   void Schema::addObjectType(const LabelStr& objectType) {
     // Enforce assumption of a singly rooted class hierarchy
-    if(objectType != rootObject()){
-      addObjectType(objectType, rootObject());
-      return;
-    }
-
-    check_error(objectType.countElements(getDelimiter()) == 1,
-		"ObjectType must not be delimited:" + objectType.toString());
-    objectTypes.insert(objectType);
-    membershipRelation.insert(std::pair<LabelStr, NameValueVector>(objectType, NameValueVector()));
+    addObjectType(objectType, rootObject());
   }
 
-  void Schema::addObjectType(const LabelStr& objectType,
-			     const LabelStr& parent) {
-    check_error(isObjectType(parent), parent.toString() + " is undefined.");
-    checkError(childOfRelation.find(objectType) == childOfRelation.end(),
-	       objectType.toString() << " is already defined.");
+  void Schema::addObjectType(const LabelStr& objectType, const LabelStr& parent) {
+
+    check_error(objectType.countElements(getDelimiter()) == 1,
+                "ObjectType must not be delimited:" + objectType.toString());
+
+    if (objectType != rootObject()) {
+        checkError(isObjectType(parent), objectType.toString() + " has undefined parent class : " + parent.toString());
+        checkError(childOfRelation.find(objectType) == childOfRelation.end(),objectType.toString() << " is already defined.");
+        childOfRelation.insert(std::pair<LabelStr, LabelStr>(objectType, parent));
+    }
+
     objectTypes.insert(objectType);
     membershipRelation.insert(std::pair<LabelStr, NameValueVector>(objectType, NameValueVector()));
-    childOfRelation.insert(std::pair<LabelStr, LabelStr>(objectType, parent));
 
     // Add type for constrained variables to be able to hold references to objects of the new type
-    getCESchema()->registerDataType((new ObjectDT(
-                  objectType.c_str(),
-                  ObjectDomain(objectType.c_str())
-                  ))->getId());
+    if (!getCESchema()->isDataType(objectType.c_str()))
+        getCESchema()->registerDataType((new ObjectDT(objectType.c_str()))->getId());
 
     debugMsg("Schema:addObjectType",
 	     "[" << m_name.toString() << "] " << "Added object type " << objectType.toString() << " that extends " <<
@@ -570,6 +569,27 @@ namespace EUROPA {
     check_error(!isObjectType(enumName), enumName.toString() + " is already defined as an object type.");
     debugMsg("Schema:addEnum", "[" << m_name.toString() << "] " << "Added enumeration " << enumName.toString());
     enumValues.insert(std::pair<LabelStr, ValueSet>(enumName, ValueSet()));
+  }
+
+  void Schema::registerEnum(const char* enumName, const EnumeratedDomain& domain)
+  {
+      debugMsg("Schema:enumdef","Defining enum:" << enumName);
+
+      addEnum(enumName);
+
+      const std::set<double>& values = domain.getValues();
+      for(std::set<double>::const_iterator it = values.begin();it != values.end();++it) {
+          LabelStr newValue(*it);
+          addValue(enumName, newValue);
+      }
+
+      getCESchema()->registerDataType(
+          (new RestrictedDT(enumName,SymbolDT::instance(),domain))->getId()
+      );
+
+      debugMsg("Schema:enumdef"
+              , "Created type factory " << enumName <<
+              " with base domain " << domain.toString());
   }
 
   void Schema::addValue(const LabelStr& enumName, double enumValue) {

@@ -3,32 +3,23 @@
 namespace EUROPA {
 
 
-  BoolDomain::BoolDomain()
-    : IntervalIntDomain(0, 1, getDefaultTypeName().c_str()) {}
-
-  BoolDomain::BoolDomain(const char* typeName)
-    : IntervalIntDomain(typeName) {
-    m_ub = 1;
-    m_lb = 0;
+  BoolDomain::BoolDomain(const DataTypeId& dt)
+    : IntervalIntDomain(0,1,dt)
+  {
   }
 
-  BoolDomain::BoolDomain(bool value)
-    : IntervalIntDomain(value, value, getDefaultTypeName().c_str()) {
-    check_error(check_value(value), "Invalid value");
-  }
-
-  BoolDomain::BoolDomain(bool value, const char* typeName)
-    : IntervalIntDomain(value, value, typeName) {
-    check_error(check_value(value), "Invalid value");
+  BoolDomain::BoolDomain(bool value, const DataTypeId& dt)
+    : IntervalIntDomain(value, dt)
+  {
   }
 
   BoolDomain::BoolDomain(const AbstractDomain& org)
-    : IntervalIntDomain(org) {
-    check_error(check_value(m_lb), "Invalid lower bound");
-    check_error(check_value(m_ub), "Invalid upper bound");
+    : IntervalIntDomain(org)
+  {
   }
 
-  void BoolDomain::testPrecision(const double& value) const {
+  void BoolDomain::testPrecision(const double& value) const
+  {
     check_error(value == 0 || value == 1);
   }
 
@@ -46,11 +37,6 @@ namespace EUROPA {
     return(m_ub == 1 && m_lb == 1);
   }
 
-  const LabelStr& BoolDomain::getDefaultTypeName() {
-    static const LabelStr sl_typeName("bool");
-    return(sl_typeName);
-  }
-
   BoolDomain *BoolDomain::copy() const {
     BoolDomain *ptr = new BoolDomain(*this);
     check_error(ptr != 0);
@@ -65,7 +51,7 @@ namespace EUROPA {
     checkError(value == true || value == false, value << "is not a bool value" );
     if(value == true)
       return sl_true.toString();
-    else 
+    else
       return sl_false.toString();
   }
 

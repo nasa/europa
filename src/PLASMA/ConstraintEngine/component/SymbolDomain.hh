@@ -8,8 +8,10 @@
  */
 #include "EnumeratedDomain.hh"
 #include "LabelStr.hh"
-
+#include "DataTypes.hh"
 namespace EUROPA {
+
+  // TODO! : this class seems unnecessary now that DataType has been factored out of AbstractDomain
 
   /**
    * @class SymbolDomain
@@ -17,56 +19,12 @@ namespace EUROPA {
    */
   class SymbolDomain : public EnumeratedDomain {
   public:
-
-    /**
-     * @brief Constructs an initially empty and open domain
-     */
-    SymbolDomain();
-
-    /**
-     * @brief Initially empty and open, with specialized type name
-     */
-    SymbolDomain(const char* typeName);
-
-    /**
-     * @brief Constructs an initial singleton with the given type name
-     */
-    SymbolDomain(double value, const char* typeName = getDefaultTypeName().toString().c_str());
-
-    /**
-     * @brief Constructor.
-     * @param values The initial set of values to populate the domain.
-     * @param typename The type name to use
-     * @see AbstractDomain::isDynamic()
-     */
-    SymbolDomain(const std::list<double>& values, 
-                 const char* typeName = getDefaultTypeName().toString().c_str());
-
-    /**
-     * @brief Copy constructor.
-     * @param org The source domain.
-     */
+    SymbolDomain(const DataTypeId& dt = SymbolDT::instance());
+    SymbolDomain(double value,const DataTypeId& dt = SymbolDT::instance());
+    SymbolDomain(const std::list<double>& values,const DataTypeId& dt = SymbolDT::instance());
     SymbolDomain(const AbstractDomain& org);
 
-    /**
-     * @brief Get the default name of the type of the domain.
-     * @see AbstractDomain::getTypeName
-     */
-    static const LabelStr& getDefaultTypeName();
-
-    bool isSymbolic() const {
-      return(true);
-    }
-
-    bool isString() const {
-      return(false);
-    }
-
-    /**
-     * @brief Copy the concrete C++ object into new memory and return a pointer to it.
-     */
     virtual SymbolDomain *copy() const;
-
   };
 
 } // namespace EUROPA

@@ -77,65 +77,74 @@ namespace EUROPA {
    * @param element XML element containing domain.
    * @note Incomplete, but should allow tests to pass.
    */
-  static AbstractDomain* readSet(const TiXmlElement & element) {
-    const char * tagname = element.Value();
+  static AbstractDomain* readSet(ConstraintEngineId ce, const TiXmlElement & element) {
+      const char * tagname = element.Value();
 
-    if(strcmp(tagname, "BoolDomain") == 0) {
-      BoolDomain * dom = new BoolDomain();
-      dom->empty();
-      for (const TiXmlElement * child = element.FirstChildElement() ;
-	   child != NULL ; child = child->NextSiblingElement()) {
-	check_error(strcmp(child->Value(), "element") == 0);
+      if(strcmp(tagname, "BoolDomain") == 0) {
+          BoolDomain * dom = new BoolDomain();
+          dom->empty();
+          for (const TiXmlElement * child = element.FirstChildElement() ;
+          child != NULL ; child = child->NextSiblingElement()) {
+              check_error(strcmp(child->Value(), "element") == 0);
 
-	const char * value = child->Attribute("value");
-	if(strcmp(value,"true") == 0) dom->insert(true);
-	else if(strcmp(value,"false") == 0) dom->insert(false);
-	else check_error(false);
+              const char * value = child->Attribute("value");
+              if(strcmp(value,"true") == 0) dom->insert(true);
+              else if(strcmp(value,"false") == 0) dom->insert(false);
+              else check_error(false);
+          }
+          return dom;
       }
-      return dom;
-    }
-    else if(strcmp(tagname, "NumericDomain") == 0) {
-      NumericDomain * dom = new NumericDomain();
-      dom->empty();
-      for (const TiXmlElement * child = element.FirstChildElement() ;
-	   child != NULL ; child = child->NextSiblingElement()) {
-	check_error(strcmp(child->Value(), "element") == 0);
+      else if(strcmp(tagname, "NumericDomain") == 0) {
+          NumericDomain * dom = new NumericDomain();
+          dom->empty();
+          for (const TiXmlElement * child = element.FirstChildElement() ;
+          child != NULL ; child = child->NextSiblingElement()) {
+              check_error(strcmp(child->Value(), "element") == 0);
 
-	const char * value = child->Attribute("value");
+              const char * value = child->Attribute("value");
 
-	dom->insert(atoef(value));
+              dom->insert(atoef(value));
+          }
+          dom->close();
+          return dom;
       }
-      dom->close();
-      return dom;
-    }
-    else if(strcmp(tagname, "SymbolDomain") == 0) {
-      const char * type = element.Attribute("type");
-      SymbolDomain * dom = new SymbolDomain(false,type);
-      dom->empty(); dom->open();
+      else if(strcmp(tagname, "SymbolDomain") == 0) {
+          const char * type = element.Attribute("type");
+          DataTypeId dt;
 
-      SymbolDomain * base = ConstraintTestCase::symbolDomainsMap()[std::string(type)];
-      if(!base) {
-	base = new SymbolDomain(false,type);
-	base->empty(); base->open();
-	ConstraintTestCase::symbolDomainsMap()[std::string(type)] = base;
+          if (ce->getCESchema()->isDataType(type))
+              dt = ce->getCESchema()->getDataType(type);
+          else {
+              dt = (new RestrictedDT(type,SymbolDT::instance(),SymbolDomain()))->getId();
+              ce->getCESchema()->registerDataType(dt);
+          }
+
+          SymbolDomain * dom = new SymbolDomain((double)LabelStr("foo"),dt);
+          dom->empty(); dom->open();
+
+          SymbolDomain * base = ConstraintTestCase::symbolDomainsMap()[std::string(type)];
+          if(!base) {
+              base = new SymbolDomain((double)LabelStr("foo"),dt->getId());
+              base->empty(); base->open();
+              ConstraintTestCase::symbolDomainsMap()[std::string(type)] = base;
+          }
+
+          for (const TiXmlElement * child = element.FirstChildElement() ;
+          child != NULL ; child = child->NextSiblingElement()) {
+              check_error(strcmp(child->Value(), "element") == 0);
+
+              const char * value = child->Attribute("value");
+
+              dom->insert(LabelStr(value));
+              base->insert(LabelStr(value));
+          }
+          dom->close();
+          return dom;
       }
-
-      for (const TiXmlElement * child = element.FirstChildElement() ;
-	   child != NULL ; child = child->NextSiblingElement()) {
-	check_error(strcmp(child->Value(), "element") == 0);
-
-	const char * value = child->Attribute("value");
-
-	dom->insert(LabelStr(value));
-	base->insert(LabelStr(value));
+      else {
+          check_error(false);
       }
-      dom->close();
-      return dom;
-    }
-    else {
-      check_error(false);
-    }
-    return NULL;
+      return NULL;
   }
 
   /**
@@ -179,7 +188,7 @@ namespace EUROPA {
    * @brief Read domains from an element's children, delegates to readSet or readInterval
    * @note Incomplete, but should allow tests to pass.
    */
-  static void readDomains(const TiXmlElement & element, std::list<AbstractDomain*> & domains) {
+  static void readDomains(ConstraintEngineId ce, const TiXmlElement & element, std::list<AbstractDomain*> & domains) {
     if(&element == NULL) return;
     check_error_variable(const char * name = element.Value());
     checkError(strcmp(name,"Inputs") == 0 || strcmp(name,"Outputs") == 0,
@@ -190,7 +199,7 @@ namespace EUROPA {
       const char * cname = child_el->Value();
       AbstractDomain * dom = NULL;
       if(strcmp(cname,"BoolDomain") == 0 || strcmp(cname,"NumericDomain") == 0 || strcmp(cname,"SymbolDomain") == 0)
-        dom = readSet(*child_el);
+        dom = readSet(ce, *child_el);
       else if(strcmp(cname,"IntervalDomain") == 0 || strcmp(cname,"IntervalIntDomain") == 0)
         dom = readInterval(*child_el);
       else
@@ -201,7 +210,7 @@ namespace EUROPA {
     }
   }
 
-  bool readTestCases(std::string file, std::list<ConstraintTestCase>& testCases) {
+  bool readTestCases(ConstraintEngineId ce, std::string file, std::list<ConstraintTestCase>& testCases) {
     TiXmlDocument doc(file.c_str());
 
     debugMsg("ConstraintTesting:readTestCases", "Test cases loading from " << file);
@@ -219,8 +228,8 @@ namespace EUROPA {
 
       std::list<AbstractDomain*> domains, inputDoms, outputDoms;
 
-      readDomains(*inputs, inputDoms);
-      readDomains(*outputs, outputDoms);
+      readDomains(ce,*inputs, inputDoms);
+      readDomains(ce,*outputs, outputDoms);
 
 
       // Simple checks that this test case is OK.
@@ -251,18 +260,6 @@ namespace EUROPA {
     //   keeping a count of failed test cases.
     unsigned int problemCount = 0;
     std::set<std::string> warned; /**< List of unregistered constraints seen so far. */
-
-    DataTypeId baseType = engine->getCESchema()->getDataType(SymbolDT::NAME().c_str());
-
-    // Register typefactories for all SymbolDomains.
-    for(std::map<std::string, SymbolDomain*>::iterator it = ConstraintTestCase::symbolDomainsMap().begin();
-	it != ConstraintTestCase::symbolDomainsMap().end(); ++it) {
-      debugMsg("ConstraintTesting:executeTestCases","Attempting to register a type factory for symbolic type " << it->first);
-      it->second->close();
-      engine->getCESchema()->registerDataType(
-          (new RestrictedDT(it->first.c_str(),baseType,*it->second))->getId()
-      );
-    }
 
     for ( ; !testCases.empty(); testCases.pop_front()) {
       debugMsg("ConstraintTesting:executeTestCases","Executing " << testCases.front().toString());
@@ -372,6 +369,7 @@ namespace EUROPA {
                 << problemCount << " test cases" << std::endl;
       throw Error::GeneralUnknownError();
     }
+
     return(true);
   }
 

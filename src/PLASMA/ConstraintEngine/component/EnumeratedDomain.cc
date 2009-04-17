@@ -18,53 +18,39 @@ namespace EUROPA {
     return(true);
   }
 
-  const LabelStr& EnumeratedDomain::getDefaultTypeName() {
-    static const LabelStr sl_typeName("float");
-    return(sl_typeName);
+  EnumeratedDomain::EnumeratedDomain(const DataTypeId& dt)
+    : AbstractDomain(dt,true,false)
+  {
   }
 
-  EnumeratedDomain::EnumeratedDomain(bool isNumeric,
-                                     const char* typeName)
-    : AbstractDomain(false, true, typeName), m_isNumeric(isNumeric), m_isString(false) {}
+  EnumeratedDomain::EnumeratedDomain(const DataTypeId& dt, const std::list<double>& values)
+    : AbstractDomain(dt,true,false)
+  {
+      for (std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it)
+          insert(*it);
 
-  EnumeratedDomain::EnumeratedDomain(const std::list<double>& values, bool isNumeric,
-                                     const char* typeName)
-    : AbstractDomain(false, true, typeName), m_isNumeric(isNumeric), m_isString(false) {
-    for (std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it)
-      insert(*it);
-    close();
+      close();
   }
 
-  EnumeratedDomain::EnumeratedDomain(double value,
-                                     bool isNumeric,
-                                     const char* typeName)
-    : AbstractDomain(false, true, typeName), m_isNumeric(isNumeric), m_isString(false) {
-    insert(value);
-    close();
+  EnumeratedDomain::EnumeratedDomain(const DataTypeId& dt, double value)
+    : AbstractDomain(dt,true,false)
+  {
+      insert(value);
+      close();
   }
 
   EnumeratedDomain::EnumeratedDomain(const AbstractDomain& org)
-    : AbstractDomain(org) {
+    : AbstractDomain(org)
+  {
     check_error(org.isEnumerated(),
                 "Invalid source domain " + org.getTypeName().toString() + " for enumeration");
     const EnumeratedDomain& enumOrg = static_cast<const EnumeratedDomain&>(org);
     m_values = enumOrg.m_values;
-    m_isNumeric = enumOrg.m_isNumeric;
-    m_isString = enumOrg.m_isString;
   }
 
   bool EnumeratedDomain::isFinite() const {
     return(true); // Always finite, even if bounds are infinite, since there are always a finite number of values to select.
   }
-
-  bool EnumeratedDomain::isNumeric() const {
-    return(m_isNumeric);
-  }
-
-  bool EnumeratedDomain::isString() const {
-      return m_isString;
-  }
-
 
   bool EnumeratedDomain::isSingleton() const {
     return(m_values.size() == 1);
@@ -442,7 +428,7 @@ namespace EUROPA {
     }
 
     // Allocate as an interval and delegate to existing method
-    IntervalDomain intervalDomain(lb, ub, getTypeName().c_str());
+    IntervalDomain intervalDomain(lb, ub, getDataType());
 
     return intersect(intervalDomain);
   }
@@ -541,7 +527,7 @@ namespace EUROPA {
 
   std::string EnumeratedDomain::toString() const
   {
-	  return AbstractDomain::toString();
+      return AbstractDomain::toString();
   }
 
   std::string EnumeratedDomain::toString(double valueAsDouble) const

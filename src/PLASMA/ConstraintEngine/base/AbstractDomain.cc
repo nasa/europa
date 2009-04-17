@@ -3,6 +3,7 @@
 #include "Error.hh"
 #include "Utils.hh"
 #include "Debug.hh"
+#include "DataType.hh"
 
 namespace EUROPA {
 
@@ -48,24 +49,9 @@ namespace EUROPA {
   /**
    * @brief Implements the default tests for comparison.
    */
-  bool DomainComparator::canCompare(const AbstractDomain& domx, const AbstractDomain& domy) const {
-	  // The following numeric test now replaces this test.
-    // If either is Boolean, both must be Boolean. Assumes they type names don't matter
-    //if(domx.isBool() || domy.isBool())
-    //   return(domx.isBool() && domy.isBool());
-
-    // If either is numeric, both must be numeric. Assumes they type names don't matter
-    if(domx.isNumeric() || domy.isNumeric())
-      return(domx.isNumeric() && domy.isNumeric());
-
-    // If either is string, both must be string. Assumes they type names don't matter
-    if(domx.isString() && domy.isString())
-      return(domx.isString() && domy.isString());
-
-    // Now we know that neither is numeric. We also can infer that
-    // they must be enumerated since neither is numeric. Thus, the
-    // types must match
-    return (domx.getTypeName() == domy.getTypeName());
+  bool DomainComparator::canCompare(const AbstractDomain& domx, const AbstractDomain& domy) const
+  {
+    return domx.getDataType()->canBeCompared(domy.getDataType());
   }
 
   DomainListener::DomainListener()
@@ -80,21 +66,19 @@ namespace EUROPA {
     return(m_id);
   }
 
-  AbstractDomain::AbstractDomain(bool closed, bool enumerated, const char* typeName)
-    : m_closed(closed)
+  AbstractDomain::AbstractDomain(const DataTypeId& dt, bool enumerated, bool closed)
+    : m_dataType(dt)
     , m_enumerated(enumerated)
-    , m_typeName(typeName)
+    , m_closed(closed)
     , m_minDelta(EPSILON)
-    , m_isRestricted(false)
-    {
-    }
+  {
+  }
 
   AbstractDomain::AbstractDomain(const AbstractDomain& org)
-    : m_closed(org.m_closed)
+    : m_dataType(org.m_dataType)
     , m_enumerated(org.m_enumerated)
-    , m_typeName(org.m_typeName)
+    , m_closed(org.m_closed)
     , m_minDelta(org.m_minDelta)
-    , m_isRestricted(org.m_isRestricted)
   {
   }
 
@@ -122,41 +106,11 @@ namespace EUROPA {
     notifyChange(DomainListener::OPENED);
   }
 
-  bool AbstractDomain::isClosed() const {
-    return(m_closed);
-  }
-
-  bool AbstractDomain::isOpen() const {
-    return(!m_closed);
-  }
-
-  const LabelStr& AbstractDomain::getTypeName() const {
-    return(m_typeName);
-  }
-
-  void AbstractDomain::setTypeName(const LabelStr& name) {
-    m_typeName = name;
-  }
-
-  bool AbstractDomain::getIsRestricted() const  {
-      return m_isRestricted;
-  }
-
-  void AbstractDomain::setIsRestricted(bool b) {
-      m_isRestricted = b;
-  }
-
-  bool AbstractDomain::isEnumerated() const {
-    return(m_enumerated);
-  }
-
-  bool AbstractDomain::isInterval() const {
-    return(!m_enumerated);
-  }
-
-  bool AbstractDomain::isInfinite() const {
-    return(!isFinite());
-  }
+  bool AbstractDomain::isClosed()     const { return(m_closed); }
+  bool AbstractDomain::isOpen()       const { return(!m_closed); }
+  bool AbstractDomain::isEnumerated() const { return(m_enumerated); }
+  bool AbstractDomain::isInterval()   const { return(!m_enumerated); }
+  bool AbstractDomain::isInfinite()   const { return(!isFinite()); }
 
   void AbstractDomain::setListener(const DomainListenerId& listener) {
     check_error(m_listener.isNoId()); // Only set once
@@ -248,4 +202,18 @@ namespace EUROPA {
       return LabelStr(value).toString();
     }
   }
+
+
+  const DataTypeId& AbstractDomain::getDataType() const { return m_dataType; }
+  void AbstractDomain::setDataType(const DataTypeId& dt) { m_dataType=dt; }
+
+  // TODO: all these just delegate to the data type, should be dropped eventually, preserved for now for backwards compatibility
+  const LabelStr& AbstractDomain::getTypeName() const { return getDataType()->getName(); }
+  bool AbstractDomain::isSymbolic() const { return getDataType()->isSymbolic(); }
+  bool AbstractDomain::isEntity() const { return getDataType()->isEntity(); }
+  bool AbstractDomain::isNumeric() const { return getDataType()->isNumeric(); }
+  bool AbstractDomain::isBool() const { return getDataType()->isBool(); }
+  bool AbstractDomain::isString() const { return getDataType()->isString(); }
+  bool AbstractDomain::isRestricted() const { return getDataType()->getName(); }
+
 }

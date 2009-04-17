@@ -65,6 +65,14 @@ namespace EUROPA {
   {
   }
 
+  std::string getAutoName(const char* prefix)
+  {
+      static int cnt = 0;
+      std::stringstream sstr;
+      sstr << prefix << ++cnt;
+      return sstr.str();
+  }
+
   DataRef ExprConstant::eval(EvalContext& context) const
   {
     // TODO: need to create a new variable every time this is evaluated, since propagation
@@ -73,10 +81,7 @@ namespace EUROPA {
     ConstrainedVariableId var;
 
     bool canBeSpecified = false;
-    static int nameCnt=0;
-    std::stringstream sstr;
-    sstr << "ExprConstant_PSEUDO_VARIABLE_" << nameCnt++;
-    const char* name = sstr.str().c_str();
+    std::string name = getAutoName("ExprConstant_PSEUDO_VARIABLE_");
 
     // TODO: this isn't pretty, have the different EvalContexts create the new var
     RuleInstanceEvalContext *riec = dynamic_cast<RuleInstanceEvalContext*>(&context);
@@ -88,7 +93,7 @@ namespace EUROPA {
         var = m_dbClient->createVariable(
                 m_type.c_str(),
                 *m_domain,
-                name,
+                name.c_str(),
                 true, // isTmp
                 canBeSpecified
         );
@@ -322,6 +327,18 @@ namespace EUROPA {
     return DataRef::null;
   }
 
+  std::string ExprConstraint::toString() const
+  {
+      std::stringstream os;
+
+      os << "{CONSTRAINT:" << m_name.c_str() << " (";
+
+      for (unsigned int i=0;i<m_args.size();i++)
+             os << m_args[i]->toString() << " ";
+      os << ")}";
+
+      return os.str();
+  }
 
   bool isClass(EvalContext& ctx,const LabelStr& className)
   {
@@ -1163,12 +1180,10 @@ namespace EUROPA {
     // Create a local domain based on the objects included in the valueSet
     ConstrainedVariableId setVar = evalContext.getVar(valueSet.c_str());
     check_error(!setVar.isNoId(),"Loop var can't be NULL");
-    const AbstractDomain& loopVarDomain = setVar->derivedDomain();
-    LabelStr loopVarType = loopVarDomain.getTypeName();
+    const AbstractDomain& setVarDomain = setVar->derivedDomain();
     debugMsg("Interpreter:InterpretedRule","set var for loop :" << setVar->toString());
-    debugMsg("Interpreter:InterpretedRule","set var domain for loop:" << loopVarDomain.toString());
-    debugMsg("Interpreter:InterpretedRule","loop var type:" << loopVarType.toString());
-    const ObjectDomain& loopObjectSet = dynamic_cast<const ObjectDomain&>(loopVarDomain);
+    debugMsg("Interpreter:InterpretedRule","set var domain for loop:" << setVarDomain.toString());
+    const ObjectDomain& loopObjectSet = dynamic_cast<const ObjectDomain&>(setVarDomain);
 
     if (loopObjectSet.isEmpty())
     	return; // we're done
@@ -1200,7 +1215,7 @@ namespace EUROPA {
     	// Allocate a local variable for this singleton object
     	// see loopVar(Allocation, a);
     	{
-    		ObjectDomain loopVarDomain(loopVarType.c_str());
+    		ObjectDomain loopVarDomain(setVarDomain.getDataType());
     		loopVarDomain.insert(loop_var);
     		loopVarDomain.close();
     		// This will automatically put it in the evalContext, since all RuleInstance vars are reachable there
@@ -1260,9 +1275,12 @@ namespace EUROPA {
 
       debugMsg("Interpreter:typedef","Defining type:" << name);
 
-      // TODO: this is what the code generator does for every typedef, it doesn't seem right for interval types though
       SchemaId schema = getSchema(context);
+
+      // TODO!: this was inherited from the code generator, it's a hack, but schema needs it.
+      // see for instance Schema::hasParent()
       schema->addEnum(name);
+
       DataTypeId baseType = schema->getCESchema()->getDataType(m_baseType.c_str());
       schema->getCESchema()->registerDataType(
           (new RestrictedDT(name,baseType,domain))->getId()
@@ -1297,23 +1315,23 @@ namespace EUROPA {
   DataRef ExprEnumdef::eval(EvalContext& context) const
   {
       const char* enumName = m_name.c_str();
-      debugMsg("Interpreter:enumdef","Defining enum:" << enumName);
+      // TODO: hack! drop this after Core.nddl goes away
+      if (strcmp(enumName,"TokenStates") == 0) {
+          debugMsg("Interpreter:defineEnumeration","Ignoring redefinition for TokenStates enum");
+          return DataRef::null;
+      }
 
-      SchemaId schema = getSchema(context);
-      schema->addEnum(enumName);
+      debugMsg("Interpreter:enumdef","Defining enum:" << enumName);
 
       std::list<double> values;
       for(unsigned int i=0;i<m_values.size();i++) {
           LabelStr newValue(m_values[i]);
-          schema->addValue(enumName, newValue);
           values.push_back(newValue);
       }
+      EnumeratedDomain domain(SymbolDT::instance(),values);
 
-      DataTypeId baseType = schema->getCESchema()->getDataType(SymbolDT::NAME().c_str());
-      EnumeratedDomain domain(values,false,enumName);
-      schema->getCESchema()->registerDataType(
-          (new RestrictedDT(enumName,baseType,domain))->getId()
-      );
+      SchemaId schema = getSchema(context);
+      schema->registerEnum(enumName,domain);
 
       debugMsg("Interpreter:enumdef"
               , "Created type factory " << enumName <<
@@ -1364,6 +1382,7 @@ namespace EUROPA {
               v = makeGlobalVar(context);
       }
 
+      debugMsg("Interpreter:varDeclaration","Declared variable:" << v->toLongString());
       return DataRef(v);
   }
 
@@ -1407,10 +1426,11 @@ namespace EUROPA {
 
       // This is a hack needed because TokenVariable is parametrized by the domain arg to addParameter
       ConstrainedVariableId parameter;
+      const DataTypeId& parameterDataType = token->getPlanDatabase()->getConstraintEngine()->getCESchema()->getDataType(parameterType.c_str());
 
       // same as completeObjectParam in NddlRules.hh
       if(initValue != NULL) {
-          AbstractDomain* bd = token->getPlanDatabase()->getConstraintEngine()->getCESchema()->baseDomain(parameterType.c_str()).copy();
+          AbstractDomain* bd = parameterDataType->baseDomain().copy();
           ConstrainedVariableId rhs = initValue->eval(context).getValue();
           bd->intersect(rhs->lastDomain());
           parameter = token->addParameter(
@@ -1424,14 +1444,14 @@ namespace EUROPA {
       else {
           if (context.isClass(parameterType)) {
               parameter = token->addParameter(
-                      ObjectDomain(parameterType.c_str()),
+                      ObjectDomain(parameterDataType),
                       parameterName
               );
               token->getPlanDatabase()->makeObjectVariableFromType(parameterType, parameter);
           }
           else {
               parameter = token->addParameter(
-                      token->getPlanDatabase()->getConstraintEngine()->getCESchema()->baseDomain(parameterType.c_str()),
+                      parameterDataType->baseDomain(),
                       parameterName
               );
           }
@@ -1446,13 +1466,15 @@ namespace EUROPA {
   ConstrainedVariableId ExprVarDeclaration::makeRuleVar(RuleInstanceEvalContext& context) const
   {
     ConstrainedVariableId localVar;
-    if (context.isClass(m_type))
+    if (context.isClass(m_type)) {
+      const DataTypeId& dt = context.getRuleInstance()->getPlanDatabase()->getSchema()->getCESchema()->getDataType(m_type.c_str());
       localVar = context.getRuleInstance()->addObjectVariable(
                                   m_type,
-                                  ObjectDomain(m_type.c_str()),
+                                  ObjectDomain(dt),
                                   m_canBeSpecified,
                                   m_name
                                   );
+    }
     else {
       // TODO: do we really need to pass the base domain?
       const AbstractDomain& baseDomain = context.getRuleInstance()->getPlanDatabase()->getSchema()->getCESchema()->baseDomain(m_type.c_str());

@@ -22,12 +22,18 @@
 
 namespace EUROPA{
 
-  StateDomain::StateDomain(const char*)
-    : EnumeratedDomain(false, "TokenStates") {}
+  StateDomain::StateDomain()
+    : EnumeratedDomain(SymbolDT::instance())
+  {
+      insert(Token::ACTIVE);
+      insert(Token::MERGED);
+      insert(Token::REJECTED);
+  }
 
   StateDomain::StateDomain(const AbstractDomain& org)
-    : EnumeratedDomain(org){
-    check_error(org.getTypeName().toString() == "TokenStates",
+    : EnumeratedDomain(org)
+  {
+    check_error(org.getTypeName().toString() == SymbolDT::NAME(),
 		"Attempted to construct a StateDomain with invalid type " + org.getTypeName().toString());
   }
 
@@ -54,7 +60,7 @@ namespace EUROPA{
   }
 
   /**
-   * Allocate Constants for posisble state variable values
+   * Allocate Constants for possible state variable values
    */
   const LabelStr Token::INCOMPLETE("INCOMPLETE");
   const LabelStr Token::INACTIVE("INACTIVE");
@@ -521,10 +527,8 @@ namespace EUROPA{
 
     // Allocate the state variable with initial base domain.
     StateDomain stateBaseDomain;
-    stateBaseDomain.insert(ACTIVE);
-    stateBaseDomain.insert(MERGED);
-    if (rejectable)
-      stateBaseDomain.insert(REJECTED);
+    if (!rejectable)
+      stateBaseDomain.remove(REJECTED);
 
     m_state = (new TokenVariable<StateDomain>(m_id,
 					      m_allVariables.size(),
@@ -542,10 +546,11 @@ namespace EUROPA{
 
     // Allocate an object variable with an empty domain
     m_baseObjectType = m_planDatabase->getSchema()->getObjectTypeForPredicate(m_predicateName);
+    const DataTypeId& dt = m_planDatabase->getSchema()->getCESchema()->getDataType(m_baseObjectType.c_str());
     m_object = (new TokenVariable<ObjectDomain>(m_id,
 						m_allVariables.size(),
 						m_planDatabase->getConstraintEngine(),
-						ObjectDomain(m_baseObjectType.c_str()),
+						ObjectDomain(dt),
 						false, // TODO: fixme
 						true,
 						LabelStr("object")))->getId();

@@ -58,7 +58,7 @@ namespace EUROPA {
    * cases; false only if file cannot be opened; throw an error if the
    * file can be opened but there's bad or unexpected data in the file.
    */
-  bool readTestCases(std::string file, std::list<ConstraintTestCase>& testCases);
+  bool readTestCases(ConstraintEngineId ce, std::string file, std::list<ConstraintTestCase>& testCases);
 
   /**
    * @brief Execute the tests described by the test cases.

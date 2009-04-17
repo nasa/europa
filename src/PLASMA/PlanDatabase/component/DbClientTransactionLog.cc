@@ -29,12 +29,12 @@ namespace EUROPA {
   const bool DbClientTransactionLog::isBool(const std::string& typeName)  {
     return (strcmp(typeName.c_str(),"bool") == 0 ||
             strcmp(typeName.c_str(), "BOOL" ) == 0 ||
-            strcmp(typeName.c_str(),BoolDomain::getDefaultTypeName().c_str()) == 0);
+            strcmp(typeName.c_str(),BoolDT::NAME().c_str()) == 0);
   }
 
   const bool DbClientTransactionLog::isInt(const std::string& typeName)  {
     return (strcmp(typeName.c_str(),"int") == 0 ||
-            strcmp(typeName.c_str(),BoolDomain::getDefaultTypeName().c_str()) == 0);
+            strcmp(typeName.c_str(),BoolDT::NAME().c_str()) == 0);
   }
 
   void DbClientTransactionLog::insertBreakpoint() {

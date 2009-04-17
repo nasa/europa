@@ -63,7 +63,7 @@ public:
      * enumerated domain with a numeric domain. This is useful to enforce type checking
      * in constraints in particular.
      */
-    virtual bool canBeCompared(const DataType& rhs);
+    virtual bool canBeCompared(const DataTypeId& rhs);
 
     /**
      * is the original definition for this domain restricted?, for instance : int [3 10], float {3.0,4.0}, etc

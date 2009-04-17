@@ -510,7 +510,6 @@ namespace EUROPA {
 
     // Get the field type for the resulting domain.
     const LabelStr& fieldType = fieldVar->baseDomain().getTypeName();
-    const bool isNumeric = fieldVar->baseDomain().isNumeric();
     const bool isOpen = fieldVar->baseDomain().isOpen();
     const bool isBool = fieldVar->baseDomain().isBool();
 
@@ -520,7 +519,7 @@ namespace EUROPA {
     // Iterate over each object. For each, obtain the variable using the path, and store its value
     const std::list<ObjectId> objects = objectDomain.makeObjectList();
 
-    EnumeratedDomain proxyBaseDomain(isNumeric, fieldType.c_str());
+    EnumeratedDomain proxyBaseDomain(fieldVar->baseDomain().getDataType());
 
     std::list<double> values;
     for(std::list<ObjectId>::const_iterator it = objects.begin(); it != objects.end(); ++it){
@@ -538,20 +537,20 @@ namespace EUROPA {
 
     // If it is a boolean, allocate a bool domain instead of the enumerated domain
     if(isBool){
-      BoolDomain boolDomain(fieldType.c_str());
+      BoolDomain boolDomain(fieldVar->baseDomain().getDataType());
       double lb = proxyBaseDomain.getLowerBound();
       double ub = proxyBaseDomain.getUpperBound();
 
       // If a singleton, set as such
       if(lb == ub)
-	boolDomain.set(ub);
+          boolDomain.set(ub);
 
       proxyVariable = addVariable(boolDomain, canBeSpecified, fullName);
     }
     else {
       // Close if necessary
       if(!isOpen)
-	proxyBaseDomain.close();
+          proxyBaseDomain.close();
 
       proxyVariable = addVariable(proxyBaseDomain, canBeSpecified, fullName);
     }
@@ -641,7 +640,7 @@ namespace EUROPA {
     std::stringstream ss;
 
     // What is the token
-    ss << "[" << getToken()->getKey() << "]Rule fired on master token: " << 
+    ss << "[" << getToken()->getKey() << "]Rule fired on master token: " <<
       getToken()->toString() << ". The rule instance context is given below:" << std::endl << std::endl;
 
     // What rule

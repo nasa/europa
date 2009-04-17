@@ -22,7 +22,7 @@ namespace EUROPA {
     : m_id(this), m_type(type), m_name(name), m_planDatabase(planDatabase),
       m_state(INCOMPLETE), m_lastOrderingChoiceCount(0),
       m_thisVar((new Variable< ObjectDomain>(m_planDatabase->getConstraintEngine(),
-					     ObjectDomain(m_id, type.c_str())))->getId()) {
+			    ObjectDomain(m_planDatabase->getSchema()->getCESchema()->getDataType(type.c_str()),m_id)))->getId()) {
     check_error(m_planDatabase.isValid());
     if (!open)
       close();
@@ -35,7 +35,7 @@ namespace EUROPA {
       m_planDatabase(parent->getPlanDatabase()),
       m_state(INCOMPLETE),
       m_thisVar((new Variable< ObjectDomain>(m_planDatabase->getConstraintEngine(),
-					     ObjectDomain(m_id, type.c_str())))->getId()) {
+              ObjectDomain(m_planDatabase->getSchema()->getCESchema()->getDataType(type.c_str()),m_id)))->getId()) {
     check_error(m_parent.isValid());
     check_error(m_planDatabase->getSchema()->canContain(parent->getType(), type, localName),
 		"Object " + parent->getName().toString() +
@@ -583,98 +583,6 @@ namespace EUROPA {
     return true;
   }
 
-  ObjectDomain::ObjectDomain(const char* typeName)
-  : EnumeratedDomain(false, typeName){
-    check_error(!isNumeric());
-  }
-
-  ObjectDomain::ObjectDomain(const std::list<ObjectId>& initialValues, const char* typeName)
-  : EnumeratedDomain(false, typeName){
-    check_error(!isNumeric());
-    for(std::list<ObjectId>::const_iterator it = initialValues.begin(); it != initialValues.end(); ++it){
-      ObjectId object = *it;
-      check_error(object.isValid());
-      insert(object);
-    }
-    close();
-  }
-
-  ObjectDomain::ObjectDomain(const ObjectId& initialValue, const char* typeName):
-    EnumeratedDomain(initialValue, false, typeName){check_error(!isNumeric());}
-
-  ObjectDomain::ObjectDomain(const AbstractDomain& org)
-    : EnumeratedDomain(org){
-    check_error(org.isEmpty() || ObjectId(org.getLowerBound()).isValid(),
-		"Attempted to construct an object domain with values of non-object type " +
-		org.getTypeName().toString());
-  }
-
-  const LabelStr&
-  ObjectDomain::getDefaultTypeName()
-  {
-    static const LabelStr sl_typeName("Objects");
-    return(sl_typeName);
-  }
-
-  bool ObjectDomain::convertToMemberValue(const std::string& strValue, double& dblValue) const{
-    int value = atoi(strValue.c_str());
-    EntityId entity = Entity::getEntity(value);
-
-    if(entity.isId() && isMember(entity)){
-      dblValue = entity;
-      return true;
-    }
-
-    return false;
-  }
-
-
-  std::string ObjectDomain::toString(double value) const {
-    check_error(isMember(value), "Caught an invalid attempt to display a value not in this domain");
-    std::ostringstream os;
-    if(!Entity::isPurging())
-    {
-        ObjectId object = value;
-        os << object->toString();
-    }
-    else
-    {
-    	os << "Object data unavailable while purging (might no longer exist)";
-    }
-    return  os.str();
-  }
-
-  std::string ObjectDomain::toString() const{
-     return "OBJECT-"+EnumeratedDomain::toString();
-  }
-
-
-  std::list<ObjectId> ObjectDomain::makeObjectList(const std::list<double>& inputs){
-    std::list<ObjectId> outputs;
-    for (std::list<double>::const_iterator it = inputs.begin(); it != inputs.end(); ++it)
-      outputs.push_back((ObjectId)(*it));
-    return outputs;
-  }
-
-
-  std::list<ObjectId> ObjectDomain::makeObjectList() const {
-    std::list<ObjectId> objects;
-    const std::set<double>& values = getValues();
-    for(std::set<double>::const_iterator it = values.begin(); it != values.end(); ++it){
-      ObjectId object = *it;
-      objects.push_back(object);
-    }
-
-    return objects;
-  }
-
-  ObjectDomain *ObjectDomain::copy() const {
-    ObjectDomain *ptr = new ObjectDomain(*this);
-    check_error(ptr != 0);
-    return(ptr);
-  }
-
-
   ConstrainedVariableId Object::addVariable(const AbstractDomain& baseDomain, const char* name){
       check_error(!isComplete(),
 		  "Cannot add variable " + std::string(name) +
@@ -860,7 +768,111 @@ namespace EUROPA {
       return dynamic_cast<PSObject*>(entity);
   }
 
+  ObjectDT::ObjectDT(const char* name)
+      : DataType(name)
+  {
+      m_baseDomain = new ObjectDomain(getId());
+  }
+
+  ObjectDT::~ObjectDT()
+  {
+  }
+
+  bool ObjectDT::isNumeric() const { return false; }
+  bool ObjectDT::isBool() const  { return false; }
+  bool ObjectDT::isString() const  { return false; }
+  bool ObjectDT::isEntity() const  { return true; }
+
+  double ObjectDT::createValue(const std::string& value) const
+  {
+    return LabelStr(value);
+  }
+
+  ObjectDomain::ObjectDomain(const DataTypeId& dt)
+  : EnumeratedDomain(dt)
+  {
+    check_error(!isNumeric());
+  }
+
+  ObjectDomain::ObjectDomain(const DataTypeId& dt, const std::list<ObjectId>& initialValues)
+  : EnumeratedDomain(dt)
+  {
+    check_error(!isNumeric());
+    for(std::list<ObjectId>::const_iterator it = initialValues.begin(); it != initialValues.end(); ++it){
+      ObjectId object = *it;
+      check_error(object.isValid());
+      insert(object);
+    }
+    close();
+  }
+
+  ObjectDomain::ObjectDomain(const DataTypeId& dt, const ObjectId& initialValue)
+  : EnumeratedDomain(dt, initialValue)
+  {
+      check_error(!isNumeric());
+  }
+
+  ObjectDomain::ObjectDomain(const AbstractDomain& org)
+    : EnumeratedDomain(org){
+    check_error(org.isEmpty() || ObjectId(org.getLowerBound()).isValid(),
+        "Attempted to construct an object domain with values of non-object type " +
+        org.getTypeName().toString());
+  }
+
+  bool ObjectDomain::convertToMemberValue(const std::string& strValue, double& dblValue) const{
+    int value = atoi(strValue.c_str());
+    EntityId entity = Entity::getEntity(value);
+
+    if(entity.isId() && isMember(entity)){
+      dblValue = entity;
+      return true;
+    }
+
+    return false;
+  }
+
+
+  std::string ObjectDomain::toString(double value) const {
+    check_error(isMember(value), "Caught an invalid attempt to display a value not in this domain");
+    std::ostringstream os;
+    if(!Entity::isPurging())
+    {
+        ObjectId object = value;
+        os << object->toString();
+    }
+    else
+    {
+        os << "Object data unavailable while purging (might no longer exist)";
+    }
+    return  os.str();
+  }
+
+  std::string ObjectDomain::toString() const{
+     return "OBJECT-"+AbstractDomain::toString();
+  }
+
+  std::list<ObjectId> ObjectDomain::makeObjectList(const std::list<double>& inputs){
+    std::list<ObjectId> outputs;
+    for (std::list<double>::const_iterator it = inputs.begin(); it != inputs.end(); ++it)
+      outputs.push_back((ObjectId)(*it));
+    return outputs;
+  }
+
+  std::list<ObjectId> ObjectDomain::makeObjectList() const {
+    std::list<ObjectId> objects;
+    const std::set<double>& values = getValues();
+    for(std::set<double>::const_iterator it = values.begin(); it != values.end(); ++it){
+      ObjectId object = *it;
+      objects.push_back(object);
+    }
+
+    return objects;
+  }
+
+  ObjectDomain *ObjectDomain::copy() const {
+    ObjectDomain *ptr = new ObjectDomain(*this);
+    check_error(ptr != 0);
+    return(ptr);
+  }
+
 }
-
-
-

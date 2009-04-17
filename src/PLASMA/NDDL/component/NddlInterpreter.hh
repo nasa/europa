@@ -53,8 +53,11 @@ public:
     bool isEnumValue(const char* value) const;
     Expr* makeEnumRef(const char* value) const;
 
+    void setCurrentObjectType(ObjectType* ot);
+
 protected:
     EngineId m_engine;
+    ObjectType* m_currentObjectType; // Object type being declared, needed to manage self-refenreces
     std::vector<std::string> m_errors;
 
     // Hack to keep track of enum values for the time being

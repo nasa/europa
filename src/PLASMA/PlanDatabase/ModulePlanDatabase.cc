@@ -7,6 +7,7 @@
 #include "ObjectTokenRelation.hh"
 #include "DbClientTransactionPlayer.hh"
 #include "Timeline.hh"
+#include "Token.hh"
 
 namespace EUROPA {
 
@@ -64,6 +65,7 @@ namespace EUROPA {
       REGISTER_SYSTEM_CONSTRAINT(ceSchema,ObjectTokenRelation, "ObjectTokenRelation", "Default");
 
       Schema* schema = new Schema("EngineSchema",ceSchema->getId()); // TODO: use engine name
+      schema->registerEnum("TokenStates",StateDomain());
       engine->addComponent("Schema",schema);
 
       ObjectType* ot;

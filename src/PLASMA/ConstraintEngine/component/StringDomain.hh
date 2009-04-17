@@ -9,9 +9,11 @@
 #include "EnumeratedDomain.hh"
 #include "Debug.hh"
 #include "LabelStr.hh"
+#include "DataTypes.hh"
 
 namespace EUROPA {
 
+// TODO! : this class seems unnecessary now that DataType has been factored out of AbstractDomain
   /**
    * @class StringDomain
    * @brief an enumerated domain of strings
@@ -19,50 +21,12 @@ namespace EUROPA {
   class StringDomain : public EnumeratedDomain {
   public:
 
-    /**
-     * @brief Constructs an initially empty and open domain, with a default type name
-     */
-    StringDomain();
-
-    /**
-     * @brief Initially empty but open, with special type name
-     */
-    StringDomain(const char* typeName);
-
-    /**
-     * @brief Constructs an initial singleton domain with the given type name
-     */
-    StringDomain(double value, const char* typeName = getDefaultTypeName().toString().c_str());
-
-    /**
-     * @brief Constructs an initial singleton domain with the given type name
-     */
-    StringDomain(const std::string& value, const char* typeName = getDefaultTypeName().toString().c_str());
-
-    /**
-     * @brief Constructor.
-     * @param values The initial set of values to populate the domain.
-     * @param typeName
-     * @see AbstractDomain::isDynamic()
-     */
-    StringDomain(const std::list<double>& values, 
-                 const char* typeName = getDefaultTypeName().toString().c_str());
-
-    /**
-     * @brief Copy constructor.
-     * @param org The source domain.
-     */
+    StringDomain(const DataTypeId& dt = StringDT::instance());
+    StringDomain(double value, const DataTypeId& dt = StringDT::instance());
+    StringDomain(const std::string& value, const DataTypeId& dt = StringDT::instance());
+    StringDomain(const std::list<double>& values, const DataTypeId& dt = StringDT::instance());
     StringDomain(const AbstractDomain& org);
 
-    /**
-     * @brief Get the default name of the type of the domain.
-     * @see AbstractDomain::getTypeName
-     */
-    static const LabelStr& getDefaultTypeName();
-
-    /**
-     * @brief Copy the concrete C++ object into new memory and return a pointer to it.
-     */
     virtual StringDomain *copy() const;
 
     /**
@@ -71,14 +35,13 @@ namespace EUROPA {
      */
     void set(double value);
 
-    bool isMember(double value) const;    
-    
+    bool isMember(double value) const;
+
     /** String specific bindings for user convenience **/
     void set(const std::string& value);
     bool isMember(const std::string& value) const;
     void insert(const std::string& value);
     void insert(double value);
-
   };
 
 } // namespace EUROPA

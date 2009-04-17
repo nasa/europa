@@ -10,6 +10,8 @@
 
 namespace EUROPA {
 
+  // TODO! : this class seems unnecessary now that DataType has been factored out of AbstractDomain
+
   /**
    * @class BoolDomain
    * @brief Imposes restrictions on the more generic super class.
@@ -22,31 +24,15 @@ namespace EUROPA {
   class BoolDomain : public IntervalIntDomain {
   public:
 
-    BoolDomain();
-
-    BoolDomain(const char* typeName);
-
-    BoolDomain(bool value);
-
-    BoolDomain(bool value, const char* typeName);
-
+    BoolDomain(const DataTypeId& dt = BoolDT::instance());
+    BoolDomain(bool value, const DataTypeId& dt = BoolDT::instance());
     BoolDomain(const AbstractDomain& org);
-
-    static const LabelStr& getDefaultTypeName();
 
     bool isFinite() const;
 
     bool isFalse() const;
 
     bool isTrue() const;
-
-    bool isNumeric() const {
-      return(true);
-    }
-
-    bool isBool() const {
-      return(true);
-    }
 
     /**
      * @brief Copy the concrete C++ object into new memory and return a pointer to it.

@@ -4,7 +4,7 @@
 /**
  * @file   Object.hh
  * @author Conor McGann
- * @brief  
+ * @brief
  * @ingroup PlanDatabase
  */
 
@@ -21,10 +21,10 @@
 namespace EUROPA {
 
   /**
-   * @brief Used to represent instances of entities in a plan database. For example, a Rover in a domain model will be represented 
-   * as object with type Rover in the plan database. 
+   * @brief Used to represent instances of entities in a plan database. For example, a Rover in a domain model will be represented
+   * as object with type Rover in the plan database.
    */
- 
+
 	// XXX:  CANNOT INHERIT VIRTUALLY FROM 'Entity' or pointers get messed up!
 
   class Object: public virtual PSObject, public Entity {
@@ -80,7 +80,7 @@ namespace EUROPA {
      */
     virtual const LabelStr& getName() const;
 
-  
+
 
     /**
      * @brief Obtain the key ordered set of component objects i.e. objects constructed with this
@@ -97,7 +97,7 @@ namespace EUROPA {
 
     /**
      * @brief Retrieves all active tokens whose object variable includes this object
-     */       
+     */
     const TokenSet& tokens() const;
 
     /**
@@ -112,7 +112,7 @@ namespace EUROPA {
      * @param results Will be populated with the choices for constraining this token.
      * @see constrain
      */
-    virtual void getOrderingChoices(const TokenId& token, 
+    virtual void getOrderingChoices(const TokenId& token,
 				    std::vector< std::pair< TokenId, TokenId> >& results,
 				    unsigned int limit = PLUS_INFINITY);
 
@@ -153,7 +153,7 @@ namespace EUROPA {
     virtual void constrain(const TokenId& predecessor, const TokenId& successor);
 
     /**
-     * @brief Removes the specific constraint which must have been created by calling 'constrain'. May 
+     * @brief Removes the specific constraint which must have been created by calling 'constrain'. May
      * additionally remove implied constraints to constrain tokens to an object.
      * @param token The token that is the predecessor
      * @param successor The token that is the successor
@@ -238,23 +238,23 @@ namespace EUROPA {
    */
     void setParent(const ObjectId& parent);
 
-    
+
     /**
      * @brief Retrieve verbose a String description.
      */
     static std::string toString(ObjectVarId objVar);
     std::string toString() const;
     std::string toLongString() const;
-        
+
     // Looking for pairwise precedence constraints
     ConstraintId getPrecedenceConstraint(const TokenId& predecessor, const TokenId& successor) const;
 
     void getPrecedenceConstraints(const TokenId& token,  std::vector<ConstraintId>& results) const;
-    
+
     // PS Methods:
     virtual const std::string& getEntityType() const;
 
-    virtual std::string getObjectType() const; 
+    virtual std::string getObjectType() const;
 
     virtual PSList<PSVariable*> getMemberVariables();
     virtual PSVariable* getMemberVariable(const std::string& name);
@@ -263,9 +263,9 @@ namespace EUROPA {
 
     virtual void addPrecedence(PSToken* pred,PSToken* succ);
     virtual void removePrecedence(PSToken* pred,PSToken* succ);
-    
+
     virtual PSVarValue asPSVarValue() const;
-    
+
   protected:
 
     /**
@@ -352,23 +352,27 @@ namespace EUROPA {
     Object(const Object&); /**< NO IMPL - Prevent use of copy constructor. */
   };
 
+
+  class ObjectDT : public DataType
+  {
+  public:
+      ObjectDT(const char* name);
+      virtual ~ObjectDT();
+
+      virtual bool isNumeric() const;
+      virtual bool isBool() const;
+      virtual bool isString() const;
+      virtual bool isEntity() const;
+
+      virtual double createValue(const std::string& value) const;
+  };
+
   class ObjectDomain: public EnumeratedDomain {
   public:
-    ObjectDomain(const char* typeName);
-    ObjectDomain(const std::list<ObjectId>& initialValues, const char* typeName = getDefaultTypeName().c_str());
-    ObjectDomain(const ObjectId& initialValue, const char* typeName = getDefaultTypeName().c_str());
+    ObjectDomain(const DataTypeId& dt);
+    ObjectDomain(const DataTypeId& dt, const std::list<ObjectId>& initialValues);
+    ObjectDomain(const DataTypeId& dt, const ObjectId& initialValue);
     ObjectDomain(const AbstractDomain& org);
-    /**
-     * @brief Get the default name of the type of the domain.
-     * @see AbstractDomain::getTypeName
-     */
-    static const LabelStr& getDefaultTypeName();
-
-    /**
-     * @brief Obtain the double encoded value from the string if it is a member.
-     */
-    bool convertToMemberValue(const std::string& strValue, double& dblValue) const;
-
 
     /**
      * @brief Generate a list of object id's from a list of doubles
@@ -380,13 +384,16 @@ namespace EUROPA {
      */
     std::list<ObjectId> makeObjectList() const;
 
+    /**
+     * @brief Obtain the double encoded value from the string if it is a member.
+     */
+    bool convertToMemberValue(const std::string& strValue, double& dblValue) const;
+
     virtual ObjectDomain *copy() const;
 
-    virtual bool isEntity() const {return true;}
-    
     /**
      * @brief Translate the double encoded value to a suitable output. In this case, the object name
-     * @param value must be a member of the domain. 
+     * @param value must be a member of the domain.
      */
     virtual std::string toString(double value) const;
 

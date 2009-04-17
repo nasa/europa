@@ -8,6 +8,7 @@
  */
 
 #include "AbstractDomain.hh"
+#include "DataTypes.hh"
 
 namespace EUROPA {
 
@@ -28,16 +29,9 @@ namespace EUROPA {
      */
     void operator>>(ostream& os) const;
 
-    IntervalDomain();
-
-    IntervalDomain(const char* typeName);
-
-    IntervalDomain(double lb, double ub);
-
-    IntervalDomain(double value);
-
-    IntervalDomain(double lb, double ub, const char* typeName);
-
+    IntervalDomain(const DataTypeId& dt = FloatDT::instance());
+    IntervalDomain(double lb, double ub, const DataTypeId& dt = FloatDT::instance());
+    IntervalDomain(double value, const DataTypeId& dt = FloatDT::instance());
     IntervalDomain(const AbstractDomain& org);
 
     /**
@@ -46,38 +40,6 @@ namespace EUROPA {
     virtual ~IntervalDomain();
 
     virtual bool isFinite() const;
-
-    /**
-     * @brief IntervalDomains are always numeric.
-     * @note Even if they are a BoolDomain, which presently inherits from
-     * this class via class IntervalIntDomain.
-     */
-    virtual bool isNumeric() const {
-      return(true);
-    }
-
-    /**
-     * @brief IntervalDomains are not BoolDomain unless it is instantiated
-     * as BoolDomain.
-     * @note BoolDomain presently inherits from this class via class
-     * IntervalIntDomain. 
-     */
-    virtual bool isBool() const {
-      return(false);
-    }
-
-    /**
-     * @brief IntervalDomains are not StringDomains
-     */
-    bool isString() const {
-      return(false);
-    }
-
-    /**
-     * @brief Get the default name of the type of the domain.
-     * @see AbstractDomain::getTypeName
-     */
-    static const LabelStr& getDefaultTypeName();
 
     /**
      * @brief Access upper bound.
@@ -266,7 +228,7 @@ namespace EUROPA {
     /**
      * @brief mutually constraint both domains to their respective intersections.
      * @param dom The domain to perform mutual intersection with.
-     * @return true if the intersection results in a change to either domain, otherwise false. 
+     * @return true if the intersection results in a change to either domain, otherwise false.
      * @note If the intersection is empty, only one domain is actually emptied.
      */
     bool equate(AbstractDomain& dom);

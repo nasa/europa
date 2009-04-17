@@ -16,7 +16,7 @@ namespace EUROPA {
   /**
    * @class EnumeratedDomain
    * @brief Declares an enumerated domain of doubles..
-   * 
+   *
    * The implementation uses a sorted set of doubles which hold all the values possible in the set, and then refines membership using
    * a bit vector.
    */
@@ -25,33 +25,25 @@ namespace EUROPA {
 
     /**
      * @brief Constructor.
-     * @param isNumeric Indicate if the set is to be used to store numeric or symbolic values
-     * @param typeName Indicate the type name to use as a specialization of enumeration types 
+     * @param dt Indicate the type to use as a specialization of enumeration types
      * @see AbstractDomain::isDynamic()
      */
-    EnumeratedDomain(bool isNumeric,
-		     const char* typeName);
+    EnumeratedDomain(const DataTypeId& dt);
 
     /**
      * @brief Constructor.
+     * @param dt Indicate the type to use as a specialization of enumeration types
      * @param values The initial set of values to populate the domain.
-     * @param isNumeric Indicate if the set is to be used to store numeric or symbolic values
-     * @param typeName Indicate the type name to use as a specialization of enumeration types 
      * @see AbstractDomain::isDynamic()
      */
-    EnumeratedDomain(const std::list<double>& values, 
-		     bool isNumeric,
-		     const char* typeName);
+    EnumeratedDomain(const DataTypeId& dt, const std::list<double>& values);
 
     /**
      * @brief Constructor.
+     * @param dt Indicate the type to use as a specialization of enumeration types
      * @param value Constructs a singleton domain. Closed on construction.
-     * @param isNumeric Indicate if the set is to be used to store numeric or symbolic values
-     * @param typeName Indicate the type name to use as a specialization of enumeration types 
      */
-    EnumeratedDomain(double value,
-		     bool isNumeric,
-		     const char* typeName);
+    EnumeratedDomain(const DataTypeId& dt, double value);
 
     /**
      * @brief Copy constructor.
@@ -60,33 +52,9 @@ namespace EUROPA {
     EnumeratedDomain(const AbstractDomain& org);
 
     /**
-     * @brief Get the default name of the type of the domain.
-     * @see AbstractDomain::getTypeName
-     */
-    static const LabelStr& getDefaultTypeName();
-
-    /**
      * @brief Determine if the domain is finite.
      */
     bool isFinite() const;
-
-    /**
-     * @brief Check if the domain is numeric.
-     */
-    bool isNumeric() const;
-
-    /**
-     * @brief Domains are not string domains unless they are
-     * later set that way.
-     */
-    bool isString() const;
-
-    /**
-     * @brief Check if the domain is Bool.
-     */
-    bool isBool() const {
-      return(false);
-    }
 
     /**
      * @see AbstractDomain::isSingleton()
@@ -183,7 +151,7 @@ namespace EUROPA {
 
     /**
      * @brief Fill the given list with the contents of the set.
-     * 
+     *
      * Should only be called on finite (and thus closed) domains.
      * @param results The target collection to fill with all values in the set.
      */
@@ -293,7 +261,7 @@ namespace EUROPA {
      * @brief Copy the concrete C++ object into new memory and return a pointer to it.
      */
     virtual EnumeratedDomain *copy() const;
-    
+
     /**
      * @brief Creates a verbose string for displaying the contents of the domain
      */
@@ -303,7 +271,7 @@ namespace EUROPA {
      * @brief Creates a concise string for displaying the value
      * @param value must be a member of the domain.
      */
-    virtual std::string toString(double value) const;    
+    virtual std::string toString(double value) const;
 
   protected:
 
@@ -312,8 +280,7 @@ namespace EUROPA {
      * @note Will be compiled out for fast version.
      * @note No-op for enumerations.
      */
-    virtual void testPrecision(const double& value) const {
-    }
+    virtual void testPrecision(const double& value) const {}
 
     /**
      * @brief Implements equate where both are closed enumerations
@@ -321,8 +288,6 @@ namespace EUROPA {
     bool equateClosedEnumerations(EnumeratedDomain& dom);
 
     std::set<double> m_values; /**< Holds the contents from which the set membership is then derived. */
-    bool m_isNumeric;
-    bool m_isString;
   };
 }
 #endif

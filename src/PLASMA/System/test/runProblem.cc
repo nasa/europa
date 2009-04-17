@@ -137,6 +137,14 @@ int main(int argc, const char** argv)
     const char* language = argv[LANG_INDEX];
     bool replayRequired = false;
 
+    // Init data types so that id counts don't fail
+    VoidDT::instance();
+    BoolDT::instance();
+    IntDT::instance();
+    FloatDT::instance();
+    StringDT::instance();
+    SymbolDT::instance();
+
     const char* performanceTest = getenv("EUROPA_PERFORMANCE");
 
     if (performanceTest != NULL && strcmp(performanceTest, "1") == 0) {

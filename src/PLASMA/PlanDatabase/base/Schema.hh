@@ -303,12 +303,6 @@ namespace EUROPA {
     void addPredicate(const LabelStr& predicate);
 
     /**
-     * @brief Introduces a user defined enumeration type.
-     * @param enumName The name of the enumeration.
-     */
-    void addEnum(const LabelStr& enumName);
-
-    /**
      * @brief Indicates a composition of members
      * @param parentObjectType The type for the composing object
      * @param memberType The type for the composed member
@@ -320,11 +314,19 @@ namespace EUROPA {
 				   const LabelStr& memberName);
 
     /**
+     * @brief Introduces a user defined enumeration type.
+     * @param enumName The name of the enumeration.
+     */
+    void addEnum(const LabelStr& enumName);
+
+    /**
      * @brief Add a member to a custom defined enumeration
      * @param enumName The name of the enumeration
      * @param enumValue The member to be added
      */
     void addValue(const LabelStr& enumName, double enumValue);
+
+    void registerEnum(const char* enumName, const EnumeratedDomain& domain);
 
     /**
      * @brief Obtain a list of names of enumerations

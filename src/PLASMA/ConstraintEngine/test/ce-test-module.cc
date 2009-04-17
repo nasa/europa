@@ -68,22 +68,6 @@ int DelegationTestConstraint::s_instanceCount = 0;
 
 typedef SymbolDomain Locations;
 
-/**
- * Locations enumeration's base domain, as required by class TypeFactory.
- * @note Copied from System/test/basic-model-transaction.cc
- * as created from basic-model-transaction.nddl v1.3 with the NDDL compiler.
- */
-static const Locations& LocationsBaseDomain() {
-  static Locations sl_enum("Locations");
-  if (sl_enum.isOpen()) {
-    sl_enum.insert(LabelStr("Hill"));
-    sl_enum.insert(LabelStr("Rock"));
-    sl_enum.insert(LabelStr("Lander"));
-    sl_enum.close();
-  }
-  return(sl_enum);
-}
-
 class CETestEngine : public EngineBase
 {
   public:
@@ -100,11 +84,15 @@ CETestEngine::CETestEngine()
     createModules();
     doStart();
     ConstraintEngine* ce = (ConstraintEngine*)getComponent("ConstraintEngine");
-    ce->createValue("int", std::string("5"));
 
-    DataTypeId baseType = ce->getCESchema()->getDataType(SymbolDT::NAME().c_str());
+    SymbolDomain locationsBaseDomain;
+    locationsBaseDomain.insert(LabelStr("Hill"));
+    locationsBaseDomain.insert(LabelStr("Rock"));
+    locationsBaseDomain.insert(LabelStr("Lander"));
+    locationsBaseDomain.close();
+
     ce->getCESchema()->registerDataType(
-        (new RestrictedDT("Locations",baseType,LocationsBaseDomain()))->getId()
+        (new RestrictedDT("Locations",SymbolDT::instance(),locationsBaseDomain))->getId()
     );
     REGISTER_CONSTRAINT(ce->getCESchema(),DelegationTestConstraint, "TestOnly", "Default");
 }
@@ -181,6 +169,7 @@ public:
   static bool testDomainCreation() {
       CETestEngine engine;
       CESchema* tfm = (CESchema*)engine.getComponent("CESchema");
+      const AbstractDomain& locationsBaseDomain = tfm->getDataType("Locations")->baseDomain();
 
     const IntervalIntDomain & bd0 = dynamic_cast<const IntervalIntDomain &>(tfm->baseDomain(IntervalIntDomain().getTypeName().c_str()));
     CPPUNIT_ASSERT(bd0.isMember(0));
@@ -192,10 +181,10 @@ public:
     CPPUNIT_ASSERT(bd2.isMember(false));
     CPPUNIT_ASSERT(bd2.isMember(true));
     CPPUNIT_ASSERT(bd2.isBool());
-    CPPUNIT_ASSERT(LocationsBaseDomain().isMember(LabelStr("Hill")));
-    CPPUNIT_ASSERT(LocationsBaseDomain().isMember(LabelStr("Rock")));
-    CPPUNIT_ASSERT(LocationsBaseDomain().isMember(LabelStr("Lander")));
-    CPPUNIT_ASSERT(!LocationsBaseDomain().isMember(LabelStr("true")));
+    CPPUNIT_ASSERT(locationsBaseDomain.isMember(LabelStr("Hill")));
+    CPPUNIT_ASSERT(locationsBaseDomain.isMember(LabelStr("Rock")));
+    CPPUNIT_ASSERT(locationsBaseDomain.isMember(LabelStr("Lander")));
+    CPPUNIT_ASSERT(!locationsBaseDomain.isMember(LabelStr("true")));
     //!!This (and SymbolDomain) die with complaints of a "bad cast"
     //!!const Locations & loc0 = dynamic_cast<const Locations&>(tfm->baseDomain("Locations"));
     const EnumeratedDomain & loc0 = dynamic_cast<const EnumeratedDomain &>(tfm->baseDomain("Locations"));
@@ -598,7 +587,7 @@ private:
   }
 
   static bool testVariablesWithOpenDomains() {
-    EnumeratedDomain e0(true, "Test");
+    EnumeratedDomain e0(IntDT::instance());
     e0.insert(0); e0.insert(1); e0.insert(2); e0.insert(3);
     Variable<EnumeratedDomain> v0(ENGINE, e0);
 
@@ -626,11 +615,11 @@ private:
   }
 
   static bool testRestrictionScenarios(){
-    EnumeratedDomain e0(true, "Test");
+    EnumeratedDomain e0(IntDT::instance());
     e0.insert(0); e0.insert(1); e0.insert(2); e0.insert(3);
     e0.close();
 
-    EnumeratedDomain e1(true, "Test");
+    EnumeratedDomain e1(IntDT::instance());
     e1.insert(1); e1.insert(3);
     e1.close();
 
@@ -668,7 +657,7 @@ private:
 
     // Variable with a base domain that is left open but then closed
     {
-      EnumeratedDomain e0(true, "Test");
+      EnumeratedDomain e0(IntDT::instance());
       e0.insert(0);
 
       Variable<EnumeratedDomain> v(ENGINE, e0);
@@ -685,7 +674,7 @@ private:
 
     // Variable with a base domain that is left open and we reset
     {
-      EnumeratedDomain e0(true, "Test");
+      EnumeratedDomain e0(IntDT::instance());
       e0.insert(0);
 
       Variable<EnumeratedDomain> v(ENGINE, e0);
@@ -754,7 +743,7 @@ private:
     values.push_back(4);
     values.push_back(5);
 
-    EnumeratedDomain dom(values, true, "ANY");
+    EnumeratedDomain dom(IntDT::instance(),values);
     dom.open();
 
     // All domains closed should be a no-op
@@ -2092,6 +2081,9 @@ private:
    */
   static bool testArbitraryConstraints() {
       CETestEngine testEngine;
+
+      ConstraintEngineId ce = ((ConstraintEngine*)testEngine.getComponent("ConstraintEngine"))->getId();
+
     // Input to this test: a list of constraint calls and expected output domains.
     std::list<ConstraintTestCase> tests;
 
@@ -2114,13 +2106,15 @@ private:
     //   "CLibTestCases".
     // For each file, try twice with different relative paths since we don't know what
     //   the current working directory is.
-    CPPUNIT_ASSERT(readTestCases(getTestLoadLibraryPath() + std::string("/NewTestCases.xml"), tests) ||
-               readTestCases(std::string("ConstraintEngine/test/NewTestCases.xml"), tests));
+    CPPUNIT_ASSERT(readTestCases(ce,getTestLoadLibraryPath() + std::string("/NewTestCases.xml"), tests) ||
+               readTestCases(ce,std::string("ConstraintEngine/test/NewTestCases.xml"), tests));
 
-    CPPUNIT_ASSERT(readTestCases(getTestLoadLibraryPath() + std::string("/CLibTestCases.xml"), tests) ||
-               readTestCases(std::string("ConstraintEngine/test/CLibTestCases.xml"), tests));
+    CPPUNIT_ASSERT(readTestCases(ce,getTestLoadLibraryPath() + std::string("/CLibTestCases.xml"), tests) ||
+               readTestCases(ce,std::string("ConstraintEngine/test/CLibTestCases.xml"), tests));
 
-    return(executeTestCases(testEngine.getConstraintEngine(), tests));
+    bool retval = executeTestCases(testEngine.getConstraintEngine(),tests);
+
+    return retval;
   }
 
   static bool testLockConstraint() {
@@ -2199,7 +2193,7 @@ private:
 
   static bool testTestEqConstraint() {
     {
-      EnumeratedDomain baseDomain(true, "ENUM");
+      EnumeratedDomain baseDomain(IntDT::instance());
       baseDomain.insert(1);
       baseDomain.insert(2);
       baseDomain.insert(3);

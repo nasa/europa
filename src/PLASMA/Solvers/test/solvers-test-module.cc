@@ -1186,14 +1186,14 @@ private:
     std::list<double> ints;
     ints.push_back(1);
 
-    EnumeratedDomain singletonEnumIntDom(ints, true, "INTEGER_ENUMERATION");
+    EnumeratedDomain singletonEnumIntDom(IntDT::instance(),ints);
     Variable<EnumeratedDomain> singletonEnumIntVar(ce, singletonEnumIntDom, false, true);
 
     ints.push_back(2);
     ints.push_back(3);
     ints.push_back(4);
     ints.push_back(5);
-    EnumeratedDomain enumIntDom(ints, true, "INTEGER_ENUMERATION");
+    EnumeratedDomain enumIntDom(IntDT::instance(),ints);
     Variable<EnumeratedDomain> enumIntVar(ce, enumIntDom, false, true);
 
     std::list<double> strings;
@@ -1201,11 +1201,11 @@ private:
     strings.push_back(LabelStr("bar"));
     strings.push_back(LabelStr("baz"));
     strings.push_back(LabelStr("quux"));
-    EnumeratedDomain enumStrDom(strings, false, "SYMBOL_ENUMERATION");
+    EnumeratedDomain enumStrDom(StringDT::instance(),strings);
     Variable<EnumeratedDomain> enumStrVar(ce, enumStrDom, false, true);
 
 
-    EnumeratedDomain enumObjDom(false, "A");
+    EnumeratedDomain enumObjDom(db->getSchema()->getObjectType("A")->getVarType());
     Variable<EnumeratedDomain> enumObjVar(ce, enumObjDom, false, true);
     Object o1(db, "A", "o1");
     Object o2(db, "A", "o2");

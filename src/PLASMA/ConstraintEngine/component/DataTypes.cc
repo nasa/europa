@@ -17,7 +17,7 @@
 
 #define DT_STATIC_MEMBERS(dataType,dtName) \
 const std::string& dataType::NAME() { static std::string sl_name(#dtName); return sl_name; } \
-dataType& dataType::instance() { static dataType sl_instance; return sl_instance; }
+const DataTypeId& dataType::instance() { static dataType sl_instance; return sl_instance.getId(); }
 
 
 namespace EUROPA
@@ -66,7 +66,7 @@ VoidDT::createVariable(const ConstraintEngineId& constraintEngine,
 FloatDT::FloatDT()
     : DataType(NAME().c_str())
 {
-    m_baseDomain = new IntervalDomain(NAME().c_str());
+    m_baseDomain = new IntervalDomain(getId());
 }
 
 FloatDT::~FloatDT()
@@ -92,7 +92,7 @@ double FloatDT::createValue(const std::string& value) const
 IntDT::IntDT()
     : DataType(NAME().c_str())
 {
-    m_baseDomain = new IntervalIntDomain(NAME().c_str());
+    m_baseDomain = new IntervalIntDomain(getId());
 }
 
 IntDT::~IntDT()
@@ -117,7 +117,7 @@ double IntDT::createValue(const std::string& value) const
 BoolDT::BoolDT()
     : DataType(NAME().c_str())
 {
-    m_baseDomain = new BoolDomain(NAME().c_str());
+    m_baseDomain = new BoolDomain(getId());
 }
 
 BoolDT::~BoolDT()
@@ -147,7 +147,7 @@ double BoolDT::createValue(const std::string& value) const
 StringDT::StringDT()
     : DataType(NAME().c_str())
 {
-    m_baseDomain = new StringDomain(NAME().c_str());
+    m_baseDomain = new StringDomain(getId());
 }
 
 StringDT::~StringDT()
@@ -166,7 +166,7 @@ double StringDT::createValue(const std::string& value) const
 SymbolDT::SymbolDT()
     : DataType(NAME().c_str())
 {
-    m_baseDomain = new StringDomain(NAME().c_str());
+    m_baseDomain = new SymbolDomain(getId());
 }
 
 SymbolDT::~SymbolDT()
@@ -175,29 +175,9 @@ SymbolDT::~SymbolDT()
 
 bool SymbolDT::isNumeric() const { return false; }
 bool SymbolDT::isBool() const  { return false; }
-bool SymbolDT::isString() const  { return true; }
+bool SymbolDT::isString() const  { return false; }
 
 double SymbolDT::createValue(const std::string& value) const
-{
-  return LabelStr(value);
-}
-
-ObjectDT::ObjectDT(const char* name, const AbstractDomain& baseDomain)
-    : DataType(name)
-{
-    m_baseDomain = baseDomain.copy();
-}
-
-ObjectDT::~ObjectDT()
-{
-}
-
-bool ObjectDT::isNumeric() const { return false; }
-bool ObjectDT::isBool() const  { return false; }
-bool ObjectDT::isString() const  { return false; }
-bool ObjectDT::isEntity() const  { return true; }
-
-double ObjectDT::createValue(const std::string& value) const
 {
   return LabelStr(value);
 }
@@ -207,6 +187,7 @@ RestrictedDT::RestrictedDT(const char* name, const DataTypeId& baseType, const A
     , m_baseType(baseType)
 {
     m_baseDomain = baseDomain.copy();
+    m_baseDomain->setDataType(getId());
     setIsRestricted(true);
 }
 

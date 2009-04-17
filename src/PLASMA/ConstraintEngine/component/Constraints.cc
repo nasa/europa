@@ -1090,9 +1090,10 @@ namespace EUROPA {
         if (it2 == newMembers.end())
           newMembers.push_back(*it);
       }
-      newUnion = new EnumeratedDomain(newMembers,
-                                      (*unionOfDomains)->isNumeric(),
-				      (*unionOfDomains)->getTypeName().toString().c_str());
+      newUnion = new EnumeratedDomain(
+              (*unionOfDomains)->getDataType(),
+              newMembers);
+
       // Could just add to current unionOfDomains rather than failing here, but
       //   very messy to implement using current interface to *Domain classes.
       assertFalse(newUnion == 0);

@@ -34,6 +34,29 @@ public:
      }
   }
 
+  static void checkResult(bool result, unsigned int id_count)
+  {
+      reset();
+      Entity::garbageCollect();
+
+      if (result && IdTable::size() <= id_count) {
+          debugMsg("Test"," PASSED.");
+      }
+      else {
+          if (result) {
+              std::cerr << " FAILED = DID NOT CLEAN UP ALLOCATED IDs:\n";
+              IdTable::output(std::cerr);
+              std::cerr << "\tWere " << id_count << " IDs before; " << IdTable::size() << " now";
+              std::cerr << std::endl;
+              throw Error::GeneralMemoryError();
+          }
+          else {
+              std::cerr << "      " << " FAILED TO PASS UNIT TEST." << std::endl;
+              throw Error::GeneralUnknownError();
+          }
+      }
+  }
+
 private:
   static ConstraintEngineId s_instance;
 };
@@ -42,29 +65,14 @@ private:
 
 #define EUROPA_runTest(test, args...) {			\
   try { \
-  unsigned int id_count = IdTable::size(); \
-  bool result = test(args); \
-  DefaultEngineAccessor::reset(); \
-  Entity::garbageCollect(); \
-  if (result && IdTable::size() <= id_count) { \
-    debugMsg("Test"," PASSED."); \
-  } \
-  else \
-    if (result) { \
-      std::cerr << " FAILED = DID NOT CLEAN UP ALLOCATED IDs:\n"; \
-      IdTable::output(std::cerr); \
-      std::cerr << "\tWere " << id_count << " IDs before; " << IdTable::size() << " now"; \
-      std::cerr << std::endl; \
-      throw Error::GeneralMemoryError(); \
-    } else { \
-      std::cerr << "      " << " FAILED TO PASS UNIT TEST." << std::endl; \
-      throw Error::GeneralUnknownError(); \
-    } \
+      unsigned int id_count = IdTable::size(); \
+      bool result = test(args); \
+      DefaultEngineAccessor::checkResult(result,id_count); \
   } \
   catch (Error err){ \
-   err.print(std::cout); \
+      err.print(std::cout); \
   }\
-  }
+}
 
 #endif
 

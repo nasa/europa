@@ -106,7 +106,7 @@ typeDefinition returns [Expr* result]
 		)
 		{
 		    if (dataType != NULL) {
-		        if (!dataType->getIsRestricted()) // then this is just an alias for another type
+		        if (!dataType->getDataType()->getIsRestricted()) // then this is just an alias for another type
 		            dataType = dataType->copy();
 		        
 		        const char* newName = c_str($name.text->chars);
@@ -247,11 +247,8 @@ value returns [Expr* result]
 
 valueSet returns [Expr* result]
 @init {
-    bool isNumeric = false;
     std::list<double> values;
-    std::string autoName = getAutoLabel("ENUM");
-    const char* typeName = autoName.c_str();
-    const char* elementTypeName = autoName.c_str();
+    DataTypeId elementType;
 }
         :       ^('{'
                         (element=value
@@ -259,26 +256,20 @@ valueSet returns [Expr* result]
                              DataRef elemValue = evalExpr(CTX,element);
                              const AbstractDomain& ev = elemValue.getValue()->lastDomain(); 
                              // TODO: delete element;
-                             elementTypeName = ev.getTypeName().c_str();
-                             // TODO! type checking, make sure all elements are compatible
+                             elementType = ev.getDataType();
                              double v = ev.getSingletonValue();
                              values.push_back(v);
-                             isNumeric = ev.isNumeric();
                              // TODO: make sure data types for all values are consistent
                          }
                         )*
                  )
                  {
-                   AbstractDomain* newDomain = new EnumeratedDomain(values,isNumeric,elementTypeName); 
+                   AbstractDomain* newDomain = new EnumeratedDomain(elementType,values); 
                    result = new ExprConstant(
                        CTX->SymbolTable->getPlanDatabase()->getClient(),
-                       typeName,
+                       elementType->getName().c_str(),
                        newDomain                       
                    );
-                   
-                   // TODO: this is necessary so that the Expr defined above can be evaluated, see about fixing it.
-                   ExprTypedef newTypedef(elementTypeName,typeName,newDomain->copy());
-                   evalExpr(CTX,&newTypedef);
                  }
         ;
 
@@ -295,7 +286,7 @@ stringLiteral returns [AbstractDomain* result]
                  s = s.substr(1,s.size()-2);
                  
                  LabelStr value(s); 
-                 result = new StringDomain((double)value);
+                 result = new StringDomain((double)value,StringDT::instance());
              }
         ; 
 
@@ -320,17 +311,13 @@ numericInterval returns [Expr* result]
                 {      
                     double lb = lower->getSingletonValue();
                     double ub = upper->getSingletonValue();
-                    const char* typeName;
                     AbstractDomain* baseDomain;
                     
-                    if (lower->getTypeName().toString()=="float" || upper->getTypeName().toString()=="float") {
-                        typeName = "float";
+                    if (lower->getTypeName().toString()=="float" || 
+                        upper->getTypeName().toString()=="float") 
                         baseDomain = new IntervalDomain(lb,ub);
-                    }
-                    else {
-                        typeName = "int";
+                    else 
                         baseDomain = new IntervalIntDomain((int)lb,(int)ub);
-                    }
                                   
                     result = new ExprConstant(
                         CTX->SymbolTable->getPlanDatabase()->getClient(),
@@ -403,7 +390,8 @@ ObjectType* objType = NULL;
                    {
                        objType = new ObjectType(newClass,parentClass);
                        // TODO: do this more cleanly. Needed to deal with self-reference inside class definition
-                       CTX->SymbolTable->getPlanDatabase()->getSchema()->declareObjectType(newClass);                       
+                       CTX->SymbolTable->getPlanDatabase()->getSchema()->declareObjectType(newClass);
+                       CTX->SymbolTable->setCurrentObjectType(objType);                       
                    }
                    
                    (
@@ -415,6 +403,9 @@ ObjectType* objType = NULL;
 		         }
 	           )
 		)
+		{
+		    CTX->SymbolTable->setCurrentObjectType(NULL);                       		    
+		}
   ;
 
 classBlock[ObjectType* objType]

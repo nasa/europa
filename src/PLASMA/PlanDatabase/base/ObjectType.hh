@@ -27,6 +27,8 @@ public:
 
     const ObjectTypeId& getId() const;
 
+    const DataTypeId& getVarType() const; // Data type for a variable that holds a reference to an object
+
     virtual const LabelStr& getName() const;
     virtual const LabelStr& getParent() const;
     virtual bool isNative() const;
@@ -46,6 +48,7 @@ public:
 
 protected:
     ObjectTypeId m_id;
+    DataTypeId m_varType;
     LabelStr m_name;
     LabelStr m_parent;
     bool m_isNative;

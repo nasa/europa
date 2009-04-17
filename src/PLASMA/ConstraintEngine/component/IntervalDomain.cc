@@ -4,35 +4,40 @@
 
 namespace EUROPA {
 
-  IntervalDomain::IntervalDomain()
-    : AbstractDomain(true, false, getDefaultTypeName().c_str()),
-      m_ub(PLUS_INFINITY), m_lb(MINUS_INFINITY){}
-
-  IntervalDomain::IntervalDomain(const char* typeName)
-    : AbstractDomain(true, false, typeName),
-      m_ub(PLUS_INFINITY), m_lb(MINUS_INFINITY){}
-
-  IntervalDomain::IntervalDomain(double lb, double ub, const char* typeName)
-    : AbstractDomain(true, false, typeName), m_ub(ub), m_lb(lb) {
+  IntervalDomain::IntervalDomain(const DataTypeId& dt)
+    : AbstractDomain(dt,false,true)
+    , m_ub(PLUS_INFINITY)
+    , m_lb(MINUS_INFINITY)
+  {
     commonInit();
   }
 
-  IntervalDomain::IntervalDomain(double lb, double ub)
-    : AbstractDomain(true, false, getDefaultTypeName().c_str()), m_ub(ub), m_lb(lb) {
+  IntervalDomain::IntervalDomain(double lb, double ub, const DataTypeId& dt)
+    : AbstractDomain(dt,false,true)
+    , m_ub(ub)
+    , m_lb(lb)
+  {
     commonInit();
   }
 
-  IntervalDomain::IntervalDomain(double value)
-    : AbstractDomain(true, false, getDefaultTypeName().c_str()), m_ub(value), m_lb(value) {
+  IntervalDomain::IntervalDomain(double value, const DataTypeId& dt)
+    : AbstractDomain(dt,false,true)
+    , m_ub(value)
+    , m_lb(value)
+  {
     commonInit();
   }
 
-  IntervalDomain::~IntervalDomain() {}
+  IntervalDomain::~IntervalDomain()
+  {
+  }
 
   IntervalDomain::IntervalDomain(const AbstractDomain& org)
-    : AbstractDomain(org), m_ub(org.getUpperBound()), m_lb(org.getLowerBound()){
-    check_error(org.isInterval(),
-		"Attempted to create an Interval domain from " + org.getTypeName().toString());
+    : AbstractDomain(org)
+    , m_ub(org.getUpperBound())
+    , m_lb(org.getLowerBound())
+  {
+    check_error(org.isInterval(),"Attempted to create an Interval domain from " + org.getTypeName().toString());
     commonInit();
   }
 
@@ -380,11 +385,6 @@ namespace EUROPA {
     check_error(!isOpen());
     // Real domains are only finite if they are singleton or empty.
     return((isSingleton() && areBoundsFinite()) || isEmpty());
-  }
-
-  const LabelStr& IntervalDomain::getDefaultTypeName() {
-    static const LabelStr sl_typeName("float");
-    return(sl_typeName);
   }
 
   double IntervalDomain::translateNumber(double number, bool) const {

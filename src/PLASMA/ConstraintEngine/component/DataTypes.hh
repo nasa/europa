@@ -32,7 +32,7 @@ public:
                                                  int index = ConstrainedVariable::NO_INDEX) const;
 
     static const std::string& NAME();
-    static VoidDT& instance();
+    static const DataTypeId& instance();
 };
 
 class FloatDT : public DataType
@@ -48,7 +48,7 @@ public:
     virtual double createValue(const std::string& value) const;
 
     static const std::string& NAME();
-    static FloatDT& instance();
+    static const DataTypeId& instance();
 };
 
 class IntDT : public DataType
@@ -64,7 +64,7 @@ public:
     virtual double createValue(const std::string& value) const;
 
     static const std::string& NAME();
-    static IntDT& instance();
+    static const DataTypeId& instance();
 };
 
 class BoolDT : public DataType
@@ -80,7 +80,7 @@ public:
     virtual double createValue(const std::string& value) const;
 
     static const std::string& NAME();
-    static BoolDT& instance();
+    static const DataTypeId& instance();
 };
 
 class StringDT : public DataType
@@ -96,7 +96,7 @@ public:
     virtual double createValue(const std::string& value) const;
 
     static const std::string& NAME();
-    static StringDT& instance();
+    static const DataTypeId& instance();
 };
 
 class SymbolDT : public DataType
@@ -112,22 +112,7 @@ public:
     virtual double createValue(const std::string& value) const;
 
     static const std::string& NAME();
-    static SymbolDT& instance();
-};
-
-
-class ObjectDT : public DataType
-{
-public:
-    ObjectDT(const char* name, const AbstractDomain& baseDomain);
-    virtual ~ObjectDT();
-
-    virtual bool isNumeric() const;
-    virtual bool isBool() const;
-    virtual bool isString() const;
-    virtual bool isEntity() const;
-
-    virtual double createValue(const std::string& value) const;
+    static const DataTypeId& instance();
 };
 
 class RestrictedDT : public DataType

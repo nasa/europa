@@ -1366,7 +1366,7 @@ namespace EUROPA {
     if (strcmp(tag, "new") == 0) {
       const char * type = element.Attribute("type");
       check_error(type != NULL);
-      return(new ObjectDomain(xmlAsValue(element, name), type));
+      return(new ObjectDomain(getCESchema()->getDataType(type),xmlAsValue(element, name)));
     }
     if (strcmp(tag, "id") == 0) {
       const char * name = element.Attribute("name");
@@ -1406,7 +1406,7 @@ namespace EUROPA {
     check_error(strcmp(tag, "object") == 0);
     ObjectId object = m_client->getObject(value_st);
     check_error(object.isValid());
-    return(new ObjectDomain(object, object->getType().c_str()));
+    return(new ObjectDomain(getCESchema()->getDataType(object->getType().c_str()),object));
   }
 
   IntervalDomain *
@@ -1421,10 +1421,10 @@ namespace EUROPA {
     IntervalDomain * domain = NULL;
     if(typeName != NULL) {
       if(getCESchema()->baseDomain(type_st).minDelta() == 1)
-	domain = new IntervalIntDomain(typeName);
+	domain = new IntervalIntDomain(getCESchema()->getDataType(typeName));
       else if(getCESchema()->baseDomain(type_st).minDelta() < 1 &&
 	      getCESchema()->baseDomain(type_st).minDelta() > 0)
-	domain = new IntervalDomain(typeName);
+	domain = new IntervalDomain(getCESchema()->getDataType(typeName));
       else {
 	checkError(ALWAYS_FAIL, "Having trouble trying to duplicate type " << type_st);
       }
@@ -1462,7 +1462,7 @@ namespace EUROPA {
       check_error(thisType != "", "no type for domain in XML");
       if (strcmp(thisType.c_str(), "bool") == 0 ||
           strcmp(thisType.c_str(), "BOOL") == 0 ||
-          strcmp(thisType.c_str(), BoolDomain::getDefaultTypeName().toString().c_str()) == 0) {
+          strcmp(thisType.c_str(), BoolDT::NAME().c_str()) == 0) {
         if (type == ANY) {
           type = BOOL;
           typeName = "bool";
@@ -1472,7 +1472,7 @@ namespace EUROPA {
       }
       if (strcmp(thisType.c_str(), "int") == 0 ||
           strcmp(thisType.c_str(), "INT") == 0 ||
-          strcmp(thisType.c_str(), IntervalIntDomain::getDefaultTypeName().toString().c_str()) == 0) {
+          strcmp(thisType.c_str(), IntDT::NAME().c_str()) == 0) {
         if (type == ANY) {
           type = INT;
           typeName = "int";
@@ -1482,7 +1482,7 @@ namespace EUROPA {
       }
       if (strcmp(thisType.c_str(), "float") == 0 ||
           strcmp(thisType.c_str(), "FLOAT") == 0 ||
-          strcmp(thisType.c_str(), IntervalDomain::getDefaultTypeName().toString().c_str()) == 0) {
+          strcmp(thisType.c_str(), FloatDT::NAME().c_str()) == 0) {
         if ((type == ANY) || (type == INT)) {
           type = FLOAT;
           typeName = "float";
@@ -1492,7 +1492,7 @@ namespace EUROPA {
       }
       if (strcmp(thisType.c_str(), "string") == 0 ||
           strcmp(thisType.c_str(), "STRING") == 0 ||
-          strcmp(thisType.c_str(), StringDomain::getDefaultTypeName().toString().c_str()) == 0) {
+          strcmp(thisType.c_str(), StringDT::NAME().c_str()) == 0) {
         if (type == ANY) {
           type = STRING;
           typeName = "string";
@@ -1550,13 +1550,13 @@ namespace EUROPA {
 
     switch (type) {
     case BOOL: case INT: case FLOAT:
-      return(new EnumeratedDomain(values, true, typeName.c_str()));
+      return(new EnumeratedDomain(getCESchema()->getDataType(typeName.c_str()),values));
     case STRING:
-      return(new StringDomain(values, typeName.c_str()));
+      return(new StringDomain(values, getCESchema()->getDataType(typeName.c_str())));
     case SYMBOL:
-      return(new SymbolDomain(values, typeName.c_str()));
+      return(new SymbolDomain(values,getCESchema()->getDataType(typeName.c_str())));
     case OBJECT:
-      return(new EnumeratedDomain(values, false, typeName.c_str()));
+      return(new EnumeratedDomain(getCESchema()->getDataType(typeName.c_str()),values));
     default:
       check_error(ALWAYS_FAILS);
       return(0);

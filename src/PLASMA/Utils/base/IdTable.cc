@@ -46,9 +46,9 @@ namespace EUROPA {
   pthread_mutex_t& IdTableMutex()
   {
       static pthread_mutex_t sl_mutex = PTHREAD_MUTEX_INITIALIZER;
-      return sl_mutex;      
+      return sl_mutex;
   }
-  
+
   IdTable::IdTable() {
   }
 
@@ -81,33 +81,36 @@ namespace EUROPA {
   unsigned int IdTable::insert(unsigned long int id, const char* baseType) {
     MutexGrabber mg(IdTableMutex());
     static unsigned int sl_nextId(1);
-    debugMsg("IdTable:insert", "id,key:" << id << ", " << sl_nextId << ")");
-    std::map<unsigned long int, std::pair<unsigned int,double> >::iterator it = 
+    debugMsg("IdTable:insert", "id,key:" << id << ", " << sl_nextId << ", " << baseType << ")");
+    if (sl_nextId == 101)
+        debugMsg("IdTable:insert","Found 101");
+
+    std::map<unsigned long int, std::pair<unsigned int,double> >::iterator it =
       getInstance().m_collection.find(id);
-    
+
     if (it != getInstance().m_collection.end())
       return(0); /* Already in table. */
-    
+
     getInstance().m_collection.insert(std::make_pair(id, std::make_pair(sl_nextId,LabelStr(baseType))));
-    
+
     std::map<std::string, unsigned int>::iterator tCit = getInstance().m_typeCnts.find(baseType);
     if (tCit == getInstance().m_typeCnts.end())
       getInstance().m_typeCnts.insert(std::pair<std::string, unsigned int>(baseType, 1));
     else
       tCit->second++;
-    
+
     return(sl_nextId++);
   }
 
   void IdTable::remove(unsigned long int id) {
     MutexGrabber mg(IdTableMutex());
     static unsigned int sl_key;
-    std::map<unsigned long int, std::pair<unsigned int,double> >::iterator it = getInstance().m_collection.find(id);    
+    std::map<unsigned long int, std::pair<unsigned int,double> >::iterator it = getInstance().m_collection.find(id);
     debugMsg("IdTable:remove", "<" << id << ", " << (sl_key = getEntryKey(it->second)) << "," << getEntryType(it->second).toString() << ">");
     std::string type = getEntryType(it->second).toString();
     std::map<std::string, unsigned int>::iterator tCit = getInstance().m_typeCnts.find(type);
     tCit->second--;
-    
+
     getInstance().m_collection.erase(id);
   }
 
@@ -122,7 +125,7 @@ namespace EUROPA {
   }
 
   void IdTable::output(std::ostream& os) {
-    printTypeCnts(os);  
+    printTypeCnts(os);
     MutexGrabber mg(IdTableMutex());
     os << "Id Contents:";
     for (std::map<unsigned long int, std::pair<unsigned int,double> >::iterator it = getInstance().m_collection.begin();
