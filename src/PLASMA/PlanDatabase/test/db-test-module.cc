@@ -3954,6 +3954,18 @@ public:
   typedef std::list<std::pair<std::string, std::string> > ArgList;
   typedef ArgList::const_iterator ArgIter;
 
+  static StateDomain& getMandatoryStateDom()
+  {
+	  static StateDomain s_mandatoryStateDom;
+	  return s_mandatoryStateDom;
+  }
+
+  static StateDomain& getRejectableStateDom()
+  {
+	  static StateDomain s_rejectableStateDom;
+	  return s_rejectableStateDom;
+  }
+
   /** Run all tests within this class that do not try to provoke errors. */
   static bool testImpl() {
     DEFAULT_SETUP(ce, db, false);
@@ -3969,9 +3981,9 @@ public:
     db->getSchema()->registerTokenFactory((new TestClass2::Sample::Factory())->getId());
 
     /* Initialize state-domain-at-creation of mandatory and rejectable tokens.  Const after this. */
-    s_mandatoryStateDom.remove(Token::REJECTED);
-    s_mandatoryStateDom.close();
-    s_rejectableStateDom.close();
+    getMandatoryStateDom().remove(Token::REJECTED);
+    getMandatoryStateDom().close();
+    getRejectableStateDom().close();
 
     /* Initialize the list of temporal relations.  Const after this. */
     //!!This list and their meanings should be documented (now GNATS 2697).
@@ -4154,8 +4166,8 @@ public:
 	else
 	  vars[i - 1]->restrictBaseDomain(*(arguments[i]));
       }
-      std::cout << "TestClass2 objectId " << instance->getId() << ' ' << instance->getName().toString()
-                << " has varIds " << vars[0] << ' ' << vars[1] << ' ' << vars[2] << '\n';
+      debugMsg("TestClass2:createInstance", "TestClass2 objectId " << instance->getId() << ' ' << instance->getName().toString()
+                << " has varIds " << vars[0] << ' ' << vars[1] << ' ' << vars[2] << '\n');
       return(instance);
     }
   };
@@ -4660,27 +4672,29 @@ public:
     CPPUNIT_ASSERT(!s_db->isClosed("TestClass2"));
     TEST_PLAYING_XML("<invoke name=\"close\" identifier=\"TestClass2\"/>");
     CPPUNIT_ASSERT(s_db->isClosed("TestClass2"));
-    std::cout << __FILE__ << ':' << __LINE__ << ": TestClass2 object domain is "
+    debugMsg("testInvokeconstraint", __FILE__ << ':' << __LINE__ << ": TestClass2 object domain is "
               << ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")) << " (size " << ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")).getSize()
-              << "); should be 2 members\n";
+              << "); should be 2 members");
 
     //!!This is failing, despite the prior checks passing, because the domain is still open.
     //!!CPPUNIT_ASSERT(ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")).getSize() == 2);
-    if (ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")).isOpen())
-      std::cout << __FILE__ << ':' << __LINE__ << ": TestClass2 base domain is still open, despite plan database saying otherwise\n";
+    if (ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")).isOpen()) {
+    	debugMsg("testInvokeconstraint", __FILE__ << ':' << __LINE__ << ": TestClass2 base domain is still open, despite plan database saying otherwise");
+    }
     //!!See if closing the entire database takes care of this as well:
 
     /* Closing the database is the last special case. */
     TEST_PLAYING_XML("<invoke name=\"close\"/>");
 
     //!!See just above
-    std::cout << __FILE__ << ':' << __LINE__ << ": After closing db, TestClass2 object domain is "
+    debugMsg("testInvokeconstraint", __FILE__ << ':' << __LINE__ << ": After closing db, TestClass2 object domain is "
               << ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")) << " (size " << ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")).getSize()
-              << "); should be 2 members\n";
+              << "); should be 2 members");
     //!!Still fails
     //!!CPPUNIT_ASSERT(ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")).getSize() == 2);
-    if (ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")).isOpen())
-      std::cout << __FILE__ << ':' << __LINE__ << ": TestClass2 base domain is still open, despite plan database saying otherwise\n";
+    if (ObjectDomain(GET_DATA_TYPE(s_db,"TestClass2")).isOpen()) {
+    	debugMsg("testInvokeconstraint", __FILE__ << ':' << __LINE__ << ": TestClass2 base domain is still open, despite plan database saying otherwise");
+    }
   }
 
   static void testReinvokeConstraint() {
@@ -4721,7 +4735,7 @@ public:
     CPPUNIT_ASSERT(tokens.size() == 1);
     TokenId token = *(tokens.begin());
     CPPUNIT_ASSERT(checkToken(token, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
-                          TokenId::noId(), s_mandatoryStateDom));
+                          TokenId::noId(), getMandatoryStateDom()));
 
     /* Create a rejectable token. */
     TEST_PLAYING_XML(buildXMLCreateGoalStr("TestClass2.Sample", false, "sample2"));
@@ -4735,7 +4749,7 @@ public:
     }
     CPPUNIT_ASSERT(checkToken(token2, LabelStr("TestClass2.Sample"),
 			  LabelStr("TestClass2.Sample"),
-			  TokenId::noId(), s_rejectableStateDom));
+			  TokenId::noId(), getRejectableStateDom()));
 
     //!!other predicates?
   }
@@ -4755,7 +4769,7 @@ public:
       goal = *(currentTokens.begin());
     }
     CPPUNIT_ASSERT(checkToken(goal, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
-                          TokenId::noId(), s_mandatoryStateDom));
+                          TokenId::noId(), getMandatoryStateDom()));
     oldTokens.insert(goal);
     /* Create a subgoal for each temporal relation. */
     //!!should do at least two for each temporal relation between master and slave: with and without explicit temporal bounds
@@ -4777,7 +4791,7 @@ public:
       //!!Is that a bug in the player or not?
       //!!  May mean that this is an inappropriate overloading of the '<goal>' XML tag per Tania and I (17 Nov 2004)
       CPPUNIT_ASSERT(checkToken(subgoal, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
-                            TokenId::noId(), s_mandatoryStateDom));
+                            TokenId::noId(), getMandatoryStateDom()));
       CPPUNIT_ASSERT(verifyTokenRelation(goal, subgoal, *which));
       /* Update list of old tokens. */
       oldTokens.insert(subgoal);
@@ -4819,14 +4833,14 @@ public:
 
     TokenId constrainedToken = createToken("constrainedSample", true);
     TEST_PLAYING_XML(buildXMLObjTokTokStr("activate", "", "constrainedSample", ""));
-    std::cout << __FILE__ << ':' << __LINE__ << ": constrainedToken is " << constrainedToken << '\n';
-    std::cout << __FILE__ << ':' << __LINE__ << ": constrainedSample's derived object domain is " << constrainedToken->getObject()->derivedDomain() << '\n';
+    debugMsg("testConstraint", __FILE__ << ':' << __LINE__ << ": constrainedToken is " << constrainedToken);
+    debugMsg("testConstraint", __FILE__ << ':' << __LINE__ << ": constrainedSample's derived object domain is " << constrainedToken->getObject()->derivedDomain());
     CPPUNIT_ASSERT_MESSAGE("token already constrained to one object",
         !constrainedToken->getObject()->derivedDomain().isSingleton());
     /* Create the constraint. */
     TEST_PLAYING_XML(buildXMLObjTokTokStr("constrain", "testObj2b", "constrainedSample", ""));
     /* Verify its intended effect. */
-    std::cout << __FILE__ << ':' << __LINE__ << ": constrainedSample's derived object domain is " << constrainedToken->getObject()->derivedDomain() << '\n';
+    debugMsg("testConstraint", __FILE__ << ':' << __LINE__ << ": constrainedSample's derived object domain is " << constrainedToken->getObject()->derivedDomain());
     CPPUNIT_ASSERT_MESSAGE("player did not constrain token to one object",
         constrainedToken->getObject()->derivedDomain().isSingleton());
     ObjectDomain objDom2b(GET_DATA_TYPE(s_db,"TestClass2"),obj2b);
@@ -4837,13 +4851,13 @@ public:
     /* Again, but also constrain it with the prior token. */
     TokenId constrained2 = createToken("constrainedSample2", true);
     TEST_PLAYING_XML(buildXMLObjTokTokStr("activate", "", "constrainedSample2", ""));
-    std::cout << __FILE__ << ':' << __LINE__ << ": constrained2 is " << constrained2 << '\n';
-    std::cout << __FILE__ << ':' << __LINE__ << ": constrained2's derived object domain is " << constrained2->getObject()->derivedDomain() << '\n';
-    std::cout << __FILE__ << ':' << __LINE__ << ": constrained2's derived object domain is " << constrained2->getObject()->derivedDomain() << '\n';
+    debugMsg("testConstraint", __FILE__ << ':' << __LINE__ << ": constrained2 is " << constrained2);
+    debugMsg("testConstraint", __FILE__ << ':' << __LINE__ << ": constrained2's derived object domain is " << constrained2->getObject()->derivedDomain());
+    debugMsg("testConstraint", __FILE__ << ':' << __LINE__ << ": constrained2's derived object domain is " << constrained2->getObject()->derivedDomain());
     CPPUNIT_ASSERT_MESSAGE("token already constrained to one object",
         !constrained2->getObject()->derivedDomain().isSingleton());
     TEST_PLAYING_XML(buildXMLObjTokTokStr("constrain", "testObj2b", "constrainedSample2", "constrainedSample"));
-    std::cout << __FILE__ << ':' << __LINE__ << ": constrained2's derived object domain is " << constrained2->getObject()->derivedDomain() << '\n';
+    debugMsg("testConstraint", __FILE__ << ':' << __LINE__ << ": constrained2's derived object domain is " << constrained2->getObject()->derivedDomain());
     CPPUNIT_ASSERT_MESSAGE("player did not constrain token to one object",
         constrained2->getObject()->derivedDomain().isSingleton());
     CPPUNIT_ASSERT_MESSAGE("player did not constrain token to expected object",
@@ -4861,14 +4875,14 @@ public:
     const unsigned int initialObjectTokenCount_A = obj2a->tokens().size();
 
     TokenId rejectable = createToken("rejectableConstrainedSample", false);
-    std::cout << __FILE__ << ':' << __LINE__ << ": rejectable is " << rejectable << '\n';
-    std::cout << __FILE__ << ':' << __LINE__ << ": rejectable's derived object domain is " << rejectable->getObject()->derivedDomain() << '\n';
+    debugMsg("testConstraint", __FILE__ << ':' << __LINE__ << ": rejectable is " << rejectable);
+    debugMsg("testConstraint", __FILE__ << ':' << __LINE__ << ": rejectable's derived object domain is " << rejectable->getObject()->derivedDomain());
     TEST_PLAYING_XML(buildXMLObjTokTokStr("activate", "", "rejectableConstrainedSample", ""));
-    std::cout << __FILE__ << ':' << __LINE__ << ": rejectable's derived object domain is " << rejectable->getObject()->derivedDomain() << '\n';
+    debugMsg("testConstraint", __FILE__ << ':' << __LINE__ << ": rejectable's derived object domain is " << rejectable->getObject()->derivedDomain());
     CPPUNIT_ASSERT_MESSAGE("token already constrained to one object",
         !rejectable->getObject()->derivedDomain().isSingleton());
     TEST_PLAYING_XML(buildXMLObjTokTokStr("constrain", "testObj2a", "rejectableConstrainedSample", ""));
-    std::cout << __FILE__ << ':' << __LINE__ << ": rejectable's derived object domain is " << rejectable->getObject()->derivedDomain() << '\n';
+    debugMsg("testConstraint", __FILE__ << ':' << __LINE__ << ": rejectable's derived object domain is " << rejectable->getObject()->derivedDomain());
     CPPUNIT_ASSERT_MESSAGE("player did not constrain token to one object",
         rejectable->getObject()->derivedDomain().isSingleton());
     CPPUNIT_ASSERT_MESSAGE("player did not constrain token to expected object",
@@ -4925,7 +4939,7 @@ public:
     CPPUNIT_ASSERT(obj2b->getName() == LabelStr("testObj2b"));
     ObjectDomain objDom2b(GET_DATA_TYPE(s_db,"TestClass2"),obj2b);
     TokenSet tokens = obj2b->tokens();
-    std::cout << __FILE__ << ':' << __LINE__ << ": there are " << tokens.size() << " tokens on testObj2b; should be 2.\n";
+    debugMsg("testFree", __FILE__ << ':' << __LINE__ << ": there are " << tokens.size() << " tokens on testObj2b; should be 2.");
     /*!!For debugging:
     TokenSet tokens2 = tokens;
     for (int i = 1; !tokens2.empty(); i++) {
@@ -5003,7 +5017,7 @@ public:
   /** Test activating a token. */
   static void testActivate() {
     s_activatedToken = createToken("activateSample", false);
-    std::cout << __FILE__ << ':' << __LINE__ << ": s_activatedToken is " << s_activatedToken << '\n';
+    debugMsg("testActivate", __FILE__ << ':' << __LINE__ << ": s_activatedToken is " << s_activatedToken);
     std::string transaction = buildXMLObjTokTokStr("activate", "", "activateSample", "");
     TEST_PLAYING_XML(transaction);
     CPPUNIT_ASSERT_MESSAGE("token not activated by player", s_activatedToken->isActive());
@@ -5017,7 +5031,7 @@ public:
   /** Test merging tokens. */
   static void testMerge() {
     s_mergedToken = createToken("mergeSample", true);
-    std::cout << __FILE__ << ':' << __LINE__ << ": s_mergedToken is " << s_mergedToken << '\n';
+    debugMsg("testMerge", __FILE__ << ':' << __LINE__ << ": s_mergedToken is " << s_mergedToken);
     std::string transaction = buildXMLObjTokTokStr("merge", "", "mergeSample",
 						   "activateSample");
     TEST_PLAYING_XML(transaction);
@@ -5032,7 +5046,7 @@ public:
   /** Test rejecting a token. */
   static void testReject() {
     s_rejectedToken = createToken("rejectSample", false);
-    std::cout << __FILE__ << ':' << __LINE__ << ": s_rejectedToken is " << s_rejectedToken << '\n';
+    debugMsg("testReject", __FILE__ << ':' << __LINE__ << ": s_rejectedToken is " << s_rejectedToken);
     std::string transaction = buildXMLObjTokTokStr("reject", "", "rejectSample", "");
     TEST_PLAYING_XML(transaction);
     CPPUNIT_ASSERT_MESSAGE("token not rejected by player", s_rejectedToken->isRejected());
@@ -5085,7 +5099,7 @@ public:
     }
     /* Check it. */
     CPPUNIT_ASSERT(checkToken(tok, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
-                          TokenId::noId(), mandatory ? s_mandatoryStateDom : s_rejectableStateDom));
+                          TokenId::noId(), mandatory ? getMandatoryStateDom() : getRejectableStateDom()));
     return(tok);
   }
 
@@ -5355,16 +5369,6 @@ public:
   static TokenId s_rejectedToken;
 
   /**
-   * The at-creation state domain of mandatory tokens.
-   */
-  static StateDomain s_mandatoryStateDom;
-
-  /**
-   * The at-creation state domain of rejectable tokens.
-   */
-  static StateDomain s_rejectableStateDom;
-
-  /**
    * The list of names of temporal relations.
    * @note This is const after initialization in testImpl().
    * @note Is parallels missing?
@@ -5383,8 +5387,6 @@ ConstrainedVariableId DbTransPlayerTest::sg_location;
 TokenId DbTransPlayerTest::s_activatedToken;
 TokenId DbTransPlayerTest::s_mergedToken;
 TokenId DbTransPlayerTest::s_rejectedToken;
-StateDomain DbTransPlayerTest::s_mandatoryStateDom;
-StateDomain DbTransPlayerTest::s_rejectableStateDom;
 std::set<LabelStr> DbTransPlayerTest::s_tempRels;
 
 /** Run a single test, reading the XML from the given string. */
