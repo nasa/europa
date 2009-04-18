@@ -113,6 +113,16 @@ namespace EUROPA {
     return os.str();
   }
 
+  const DataTypeId& Expr::getDataType() const
+  {
+	  return VoidDT::instance();
+  }
+
+  std::string Expr::toString() const
+  {
+	  return "Expr";
+  }
+
   ExprList::ExprList()
   {
   }

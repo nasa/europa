@@ -74,6 +74,8 @@ namespace EUROPA {
 
     const std::string& getEntityType() const;
 
+    const DataTypeId& getDataType() const;
+
     /**
      * @brief Validates the relationships of the class.
      *

@@ -20,7 +20,7 @@ namespace EUROPA {
   }
 
   ConstrainedVariableListener::~ConstrainedVariableListener() {
-	  m_var->notifyRemoved(m_id);   
+	  m_var->notifyRemoved(m_id);
 	  m_id.remove();
   }
 
@@ -31,7 +31,7 @@ namespace EUROPA {
                                            const EntityId& parent,
                                            int index)
     : Entity(), m_id(this), m_lastRelaxed(0), m_constraintEngine(constraintEngine), m_name(name),
-      m_internal(internal), m_canBeSpecified(canBeSpecified), m_specifiedFlag(false), m_specifiedValue(0),  
+      m_internal(internal), m_canBeSpecified(canBeSpecified), m_specifiedFlag(false), m_specifiedValue(0),
       m_index(index), m_parent(parent), m_deactivationRefCount(0), m_deleted(false) {
     check_error(m_constraintEngine.isValid());
     check_error(m_index >= NO_INDEX);
@@ -41,7 +41,7 @@ namespace EUROPA {
   }
 
   ConstrainedVariable::~ConstrainedVariable() {
-    debugMsg("ConstrainedVariable:~ConstrainedVariable", 
+    debugMsg("ConstrainedVariable:~ConstrainedVariable",
 	     "NAME=" << getName().toString() << " KEY=" << getKey() << " ID=" << m_id);
 
     discard(false);
@@ -49,8 +49,8 @@ namespace EUROPA {
     m_id.remove();
   }
 
-  void ConstrainedVariable::setCurrentPropagatingConstraint(ConstraintId c) { m_propagatingConstraint = c; } 
-  ConstraintId ConstrainedVariable::getCurrentPropagatingConstraint() const { return m_propagatingConstraint; }    
+  void ConstrainedVariable::setCurrentPropagatingConstraint(ConstraintId c) { m_propagatingConstraint = c; }
+  ConstraintId ConstrainedVariable::getCurrentPropagatingConstraint() const { return m_propagatingConstraint; }
 
   void ConstrainedVariable::restrictBaseDomain(const AbstractDomain& dom){
     checkError(isActive(), toString());
@@ -60,7 +60,7 @@ namespace EUROPA {
     if(baseDomain().isSubsetOf(dom) && (isClosed() || dom.isOpen()))
       return;
 
-    debugMsg("ConstrainedVariable:restrictBaseDomain", 
+    debugMsg("ConstrainedVariable:restrictBaseDomain",
 	     toString() << " restricted from " << baseDomain().toString() << " intersecting " << dom.toString());
 
     handleRestrictBaseDomain(dom);
@@ -79,7 +79,7 @@ namespace EUROPA {
       constraint->notifyBaseDomainRestricted(m_id);
     }
   }
-  
+
   void ConstrainedVariable::handleDiscard(){
 	  // TODO:  using toString OR toLongString here can break during shutdown, if our variable
 	  // points to an object (see #170)
@@ -106,8 +106,8 @@ namespace EUROPA {
     while(!m_listeners.empty())
     {
     	(*m_listeners.begin())->notifyDiscard();
-    }	
-    		  
+    }
+
     delete (DomainListener*) m_listener;
 
     Entity::handleDiscard();
@@ -119,10 +119,10 @@ namespace EUROPA {
 
   const std::string& ConstrainedVariable::getEntityType() const {
  	  static const std::string CV_STR("ConstrainedVariable");
- 	  return CV_STR; 
+ 	  return CV_STR;
    }
-  
-  
+
+
   int ConstrainedVariable::getIndex() const {
     return(m_index);
   }
@@ -139,7 +139,7 @@ namespace EUROPA {
       constraint->deactivate();
     }
 
-    debugMsg("ConstrainedVariable:deactivation", 
+    debugMsg("ConstrainedVariable:deactivation",
 	     "RefCount: [" << m_deactivationRefCount << "]" << toString());
 
     // If this is a transition, handle it
@@ -152,7 +152,7 @@ namespace EUROPA {
 
     m_deactivationRefCount--;
 
-    debugMsg("ConstrainedVariable:undoDeactivation", 
+    debugMsg("ConstrainedVariable:undoDeactivation",
 	     "RefCount: [" << m_deactivationRefCount << "]" << toString());
 
     // Iterate over all constraints and undo deactivation request
@@ -224,7 +224,7 @@ namespace EUROPA {
       (*it)->notifyConstraintRemoved(constraint, argIndex);
   }
 
-  bool ConstrainedVariable::isSpecified() const { 
+  bool ConstrainedVariable::isSpecified() const {
     return m_specifiedFlag || (baseDomain().isSingleton() && baseDomain().isClosed());
   }
 
@@ -326,35 +326,35 @@ namespace EUROPA {
   }
 
   void ConstrainedVariable::specify(double singletonValue) {
-    debugMsg("ConstrainedVariable:specify", "specifying value:" << toString());    
+    debugMsg("ConstrainedVariable:specify", "specifying value:" << toString());
     check_error(canBeSpecified());
     internalSpecify(singletonValue);
-    debugMsg("ConstrainedVariable:specify", "specified value:" << toString());    
+    debugMsg("ConstrainedVariable:specify", "specified value:" << toString());
   }
 
   void ConstrainedVariable::internalSpecify(double singletonValue) {
-    debugMsg("ConstrainedVariable:internalSpecify", "specifying value:" << toString());    
+    debugMsg("ConstrainedVariable:internalSpecify", "specifying value:" << toString());
     checkError(baseDomain().isMember(singletonValue), singletonValue << " not in " << baseDomain().toString());
     checkError(isActive(), toString());
 
-    bool violated = !getCurrentDomain().isMember(singletonValue); 
+    bool violated = !getCurrentDomain().isMember(singletonValue);
     if(violated && getConstraintEngine()->getAllowViolations()) {
-        reset();    
-        debugMsg("ConstrainedVariable:internalSpecify", "after reset():" << toString());    
+        reset();
+        debugMsg("ConstrainedVariable:internalSpecify", "after reset():" << toString());
     }
 
-    // Must set flag first so the variable has a record of being specified 
+    // Must set flag first so the variable has a record of being specified
     // as events are handled when we set the current domain
     m_specifiedFlag = true;
-    m_specifiedValue = singletonValue;      
-    
-    violated = !getCurrentDomain().isMember(singletonValue); 
+    m_specifiedValue = singletonValue;
+
+    violated = !getCurrentDomain().isMember(singletonValue);
     if (violated)
         getCurrentDomain().empty();
     else
         getCurrentDomain().set(singletonValue);
 
-    debugMsg("ConstrainedVariable:internalSpecify", "specified value:" << toString());    
+    debugMsg("ConstrainedVariable:internalSpecify", "specified value:" << toString());
     check_error(isValid());
   }
 
@@ -373,13 +373,13 @@ namespace EUROPA {
     // specified so we exit with no change
     if(baseDomain().isSingleton() && baseDomain().isClosed())
       return;
-    
+
     m_specifiedFlag = false;
     getCurrentDomain().reset(domain);
   }
 
   void ConstrainedVariable::close() {
-    checkError(internal_baseDomain().isOpen(), 
+    checkError(internal_baseDomain().isOpen(),
 	       "Attempted to close a variable but the base domain is already closed.");
 
     internal_baseDomain().close();
@@ -396,7 +396,7 @@ namespace EUROPA {
     internal_baseDomain().open();
     if(getCurrentDomain().isClosed())
       getCurrentDomain().open();
-    
+
   }
 
   void ConstrainedVariable::relax() {
@@ -448,31 +448,37 @@ namespace EUROPA {
   }
 
   bool ConstrainedVariable::specifiedFlag() const {return m_specifiedFlag;}
-  
+
   double ConstrainedVariable::getViolation() const
   {
   	  double total = 0.0;
-  	  
+
   	  for (ConstraintList::const_iterator it = m_constraints.begin() ; it != m_constraints.end(); ++it){
           ConstraintId constraint = it->first;
           total += constraint->getViolation();
-  	  }  	
-  	  
+  	  }
+
   	  return total;
-  }  
-  
+  }
+
   std::string ConstrainedVariable::getViolationExpl() const
   {
   	  std::ostringstream os;
-  	  
+
   	  for (ConstraintList::const_iterator it = m_constraints.begin() ; it != m_constraints.end(); ++it){
           ConstraintId constraint = it->first;
           if (constraint->getViolation() > 0.0)
               os << constraint->getViolationExpl() << std::endl;
-  	  }  	
-  	  
+  	  }
+
   	  return os.str();
-  }    
+  }
+
+  const DataTypeId& ConstrainedVariable::getDataType() const
+  {
+	  return baseDomain().getDataType();
+  }
+
 
   // PS-Specific stuff below here:
   PSVarType ConstrainedVariable::getType() const
@@ -510,7 +516,7 @@ namespace EUROPA {
     check_runtime_error(isValid());
     return baseDomain().isInterval();
   }
-  
+
 
   bool ConstrainedVariable::isNull() const {
     check_runtime_error(isValid());
@@ -530,7 +536,7 @@ namespace EUROPA {
     else
     	return PSVarValue(lastDomain().getSingletonValue(), getType());
   }
-  
+
 
   PSList<PSVarValue> ConstrainedVariable::getValues() const {
     check_runtime_error(isValid());
@@ -560,8 +566,8 @@ namespace EUROPA {
 	  return retval;
     }
 
-  
-  
+
+
   double ConstrainedVariable::getLowerBound() const {
     check_runtime_error(isValid());
     check_runtime_error(isInterval());
@@ -579,13 +585,13 @@ namespace EUROPA {
     check_runtime_error(getType() == v.getType());
 
     debugMsg("ConstrainedVariable:specify","Specifying var:" << toString() << " to value:" << v.toString());
-    
+
     // If specifying to the same value it already has, do nothing
     if (isSpecified() && (getSpecifiedValue() == v.asDouble())) {
         debugMsg("ConstrainedVariable:specify","Tried to specify to same value, so bailing out without doing any work");
         return;
     }
-    
+
     specify(v.asDouble());
     debugMsg("ConstrainedVariable:specify","After specify for var:" << toString() << " to value:" << v.toString());
     // TODO: move this to ConstrainedVariable::specify()
@@ -593,12 +599,12 @@ namespace EUROPA {
        getConstraintEngine()->propagate();
     debugMsg("ConstrainedVariable:specify","After propagate for var:" << toString());
   }
-  
+
   	PSEntity* ConstrainedVariable::getParent() const {
     //EntityId parent(m_parent);//getParentEntity());
     if(m_parent.isNoId())
       return NULL;
-    
+
     /* TODO: fix this
     else if(TokenId::convertable(parent))
       return new PSTokenImpl((TokenId) parent);
@@ -612,7 +618,7 @@ namespace EUROPA {
 			"object, or rule: " << m_var->getParent()->toString());
     }
     */
-    
+
     return (PSEntity *) m_parent;
   }
 
@@ -621,9 +627,9 @@ namespace EUROPA {
 
   		if (isNull())
   			os << "NULL";
-  		else if (isSingleton()) 
-  			os << getSingletonValue().toString();    	    
-  		else if (isInterval()) 
+  		else if (isSingleton())
+  			os << getSingletonValue().toString();
+  		else if (isInterval())
   			os << "[" << getLowerBound() << "," << getUpperBound() << "]";
   		else if (isEnumerated()) {
   			os << "{";
@@ -631,12 +637,12 @@ namespace EUROPA {
   			for (int i=0;i<values.size();i++) {
   				if (i > 0)
   					os << ", ";
-  				os << values.get(i).toString();    
+  				os << values.get(i).toString();
   			}
   			os << "}";
   		}
-  		else 
-  			os << "ERROR!";    
+  		else
+  			os << "ERROR!";
 
   		return os.str();
   	}
