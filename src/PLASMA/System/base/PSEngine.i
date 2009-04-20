@@ -143,7 +143,7 @@ namespace EUROPA {
       }
   }
 
-  public void executeScript(String language, java.io.Reader reader) throws PSException {
+  public String executeScript(String language, java.io.Reader reader) throws PSException {
     String txns = null;
     if(language.equalsIgnoreCase("nddl")) {
       try {
@@ -178,6 +178,8 @@ namespace EUROPA {
     else {
       throw new RuntimeException("Failed to create transactions from "+language+" source.");
     }
+    
+    return "";
   }
 
   protected NddlInterpreter nddlInterpreter_=null;
@@ -190,8 +192,10 @@ namespace EUROPA {
       return nddlInterpreter_;
   }
 
-  public void executeScript(String language, String script, boolean isFile) throws PSException
+  public String executeScript(String language, String script, boolean isFile) throws PSException
   {
+      String retval = "";
+      
       try {
         if (language.equalsIgnoreCase("nddl")) {
             if (isFile)
@@ -200,13 +204,15 @@ namespace EUROPA {
                 getNddlInterpreter().eval(script);
         }
         else {
-            executeScript_internal(language,script,isFile);
+            retval = executeScript_internal(language,script,isFile);
         }
       }
       catch(Exception e) {
           e.printStackTrace();
           throw new RuntimeException("Failed to execute "+language+" script "+script,e);
       }
+      
+      return retval;
   }
 
 %}

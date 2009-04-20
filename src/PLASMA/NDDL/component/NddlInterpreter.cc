@@ -132,6 +132,10 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
         std::ostringstream os;
         os << "The parser returned " << parser->pParser->rec->state->errorCount << " errors";
         // TODO: get error messages as well!
+        parser->free(parser);
+        tstream->free(tstream);
+        lexer->free(lexer);
+        input->close(input);
         debugMsg("NddlInterpreter:interpret",os.str());
         return os.str();
     }
@@ -273,5 +277,48 @@ Expr* NddlSymbolTable::makeEnumRef(const char* value) const
 
     return new ExprConstant(getPlanDatabase()->getClient(),enumType.c_str(),ad);
 }
+
+
+NddlToASTInterpreter::NddlToASTInterpreter(EngineId& engine)
+    : NddlInterpreter(engine)
+{
+}
+
+NddlToASTInterpreter::~NddlToASTInterpreter()
+{
+}
+
+std::string NddlToASTInterpreter::interpret(std::istream& ins, const std::string& source)
+{
+    pANTLR3_INPUT_STREAM input = getInputStream(ins,source);
+
+    pNDDL3Lexer lexer = NDDL3LexerNew(input);
+    lexer->parserObj = this;
+    pANTLR3_COMMON_TOKEN_STREAM tstream = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lexer));
+    pNDDL3Parser parser = NDDL3ParserNew(tstream);
+
+    // Build he AST
+    std::string retval;
+    NDDL3Parser_nddl_return result = parser->nddl(parser);
+    if (parser->pParser->rec->state->errorCount > 0) {
+        std::ostringstream os;
+        os << "The parser returned " << parser->pParser->rec->state->errorCount << " errors";
+        // TODO: get error messages as well!
+        debugMsg("NddlToASTInterpreter:interpret",os.str());
+        retval = os.str();
+    }
+    else {
+    	retval = (char*)(result.tree->toStringTree(result.tree)->chars);
+        debugMsg("NddlToASTInterpreter:interpret","NDDL AST:\n" << retval);
+    }
+
+    parser->free(parser);
+    tstream->free(tstream);
+    lexer->free(lexer);
+    input->close(input);
+
+    return retval;
+}
+
 
 }

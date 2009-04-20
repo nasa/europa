@@ -28,6 +28,14 @@ protected:
     std::vector<std::string> getIncludePath();
 };
 
+// An Interpreter that just returns the AST
+class NddlToASTInterpreter : public NddlInterpreter
+{
+public:
+    NddlToASTInterpreter(EngineId& engine);
+    virtual ~NddlToASTInterpreter();
+    virtual std::string interpret(std::istream& input, const std::string& source);
+};
 
 class NddlSymbolTable : public EvalContext
 {

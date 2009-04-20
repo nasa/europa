@@ -28,6 +28,8 @@ namespace EUROPA {
   {
       NddlInterpreter* interp = new NddlInterpreter(engine);
 	  engine->addLanguageInterpreter("nddl", interp);
+	  engine->addLanguageInterpreter("nddl-ast", new NddlToASTInterpreter(engine));
+
       // TODO: This is only to make it visible in java
 	  // drop this when current Java parser gets downgraded to nddl2
 	  engine->addLanguageInterpreter("nddl3", interp);
@@ -39,13 +41,20 @@ namespace EUROPA {
 
   void ModuleNddl::uninitialize(EngineId engine)
   {
-	  LanguageInterpreter *old = engine->removeLanguageInterpreter("nddl");
+	  LanguageInterpreter *old;
+
 	  engine->removeLanguageInterpreter("nddl3");
-	  if (old)
-		  delete old;
+	  old = engine->removeLanguageInterpreter("nddl");
+	  check_error(old != NULL);
+      delete old;
+
+	  old = engine->removeLanguageInterpreter("nddl-ast");
+	  check_error(old != NULL);
+	  delete old;
+
 	  old = engine->removeLanguageInterpreter("nddl-xml");
-	  if (old)
-		  delete old;
+	  check_error(old != NULL);
+	  delete old;
 	  // TODO: Finish cleanup
   }
 }
