@@ -54,16 +54,22 @@ public class PSDesktop
 	protected static String bshFile_=null;
 
 	public static void main(String[] args)
-	{		
-	    String debugMode = args[0];
-        PSUtil.loadLibraries(debugMode);	   
+	{	
+		try {
+			String debugMode = args[0];
+			PSUtil.loadLibraries(debugMode);	   
 
-	    PSEngine engine = PSEngine.makeInstance();
-	    engine.start();
-		Runtime.getRuntime().addShutdownHook(new ShutdownHook());
-		
-		PSDesktop d = PSDesktop.makeInstance(engine,args);
-		d.runUI();
+			PSEngine engine = PSEngine.makeInstance();
+			engine.start();
+			Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+
+			PSDesktop d = PSDesktop.makeInstance(engine,args);
+			d.runUI();
+		}
+    	catch (Exception e) {
+    		e.printStackTrace();
+    		Runtime.getRuntime().exit(-1);    
+    	}
 	}
 	
     static class ShutdownHook extends Thread 
@@ -188,7 +194,7 @@ public class PSDesktop
     	}
     	catch (Exception e) {
     		e.printStackTrace();
-    		System.exit(0);
+    		Runtime.getRuntime().exit(-1);
     	}
     }
 

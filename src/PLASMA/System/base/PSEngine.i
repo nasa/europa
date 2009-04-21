@@ -144,6 +144,8 @@ namespace EUROPA {
   }
 
   public String executeScript(String language, java.io.Reader reader) throws PSException {
+    String retval = "";
+    
     String txns = null;
     if(language.equalsIgnoreCase("nddl")) {
       try {
@@ -173,13 +175,13 @@ namespace EUROPA {
     }
 
     if(txns != null) {
-      executeScript_internal("nddl-xml",txns,false /*isFile*/);
+      retval = executeScript_internal("nddl-xml",txns,false /*isFile*/);
     }
     else {
       throw new RuntimeException("Failed to create transactions from "+language+" source.");
     }
     
-    return "";
+    return retval;
   }
 
   protected NddlInterpreter nddlInterpreter_=null;

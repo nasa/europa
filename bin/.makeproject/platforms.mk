@@ -86,8 +86,7 @@ CXXFLAGS += $(POSITION_INDEPENDENT_FLAG) -I$(EUROPA_HOME)/include/PLASMA -I$(EUR
 LDFLAGS += $(POSITION_INDEPENDENT_FLAG) -L$(EUROPA_HOME)/lib
 LOADLIBS += -lSystem$(BUILD_SUFFIX) \
             -ldl \
-            -lANML$(BUILD_SUFFIX) \
-            -lAntlr$(BUILD_SUFFIX) \
+            -lAntlr3$(BUILD_SUFFIX) \
             -lResource$(BUILD_SUFFIX) \
             -lNDDL$(BUILD_SUFFIX) \
             -lSolvers$(BUILD_SUFFIX) \
