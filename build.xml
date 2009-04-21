@@ -144,7 +144,7 @@
         	<equals arg1="${jam.variant}" arg2="DEV"/>
       		<then>
       			<echo message="Building debug DLL"/>
-      			<exec executable="bash" dir="${dir.dist.base}/lib">
+      			<exec executable="bash" dir="${dir.plasma}/build/lib">
       	  			<arg value="-c" />
           			<arg value="${cmd_g}" />
         		</exec>
@@ -157,7 +157,7 @@
         	<equals arg1="${jam.variant}" arg2="OPTIMIZED"/>
       		<then>
       			<echo message="Building optimized DLL"/>
-        		<exec executable="bash" dir="${dir.dist.base}/lib">
+        		<exec executable="bash" dir="${dir.plasma}/build/lib">
       	  			<arg value="-c" />
           			<arg value="${cmd_o}" />
         		</exec>
