@@ -222,22 +222,46 @@
       <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
       <then>
         <echo message="Building System dlls for Windows."/>
-        <exec executable="g++" dir="${dir.dist.base}/lib">
-          <arg line="-mno-cygwin -shared -Wl,-v -Wl,--add-stdcall-alias -Wl,--whole-archive"/>
-          <arg line="-oSystem_g.dll"/>
-          <arg line="libSystem_g.a libSolvers_g.a libResource_g.a libANML_g.a libNDDL_g.a"/>
-          <arg line="libRulesEngine_g.a libTemporalNetwork_g.a libPlanDatabase_g.a"/>
-          <arg line="libConstraintEngine_g.a libUtils_g.a libTinyXml_g.a libAntlr_g.a"/>
-          <arg line="-Wl,--no-whole-archive -lpthread"/>
-        </exec>
-        <exec executable="g++" dir="${dir.dist.base}/lib">
-          <arg line="-mno-cygwin -shared -Wl,-v -Wl,--add-stdcall-alias -Wl,--whole-archive"/>
-          <arg line="-oSystem_o.dll"/>
-          <arg line="libSystem_o.a libSolvers_o.a libResource_o.a libANML_o.a libNDDL_o.a"/>
-          <arg line="libRulesEngine_o.a libTemporalNetwork_o.a libPlanDatabase_o.a"/>
-          <arg line="libConstraintEngine_o.a libUtils_o.a libTinyXml_o.a libAntlr_o.a"/>
-          <arg line="-Wl,--no-whole-archive -lpthread"/>
-        </exec>
+      	<!-- libANML_?.a disappeared? -mno-cygwin -->
+      	<property name="cmd_g" value="g++ -shared -Wl,-v 
+      		-Wl,--add-stdcall-alias -Wl,--whole-archive -oSystem_g.dll 
+      		libSystem_g.a libSolvers_g.a libResource_g.a libNDDL_g.a 
+      		libRulesEngine_g.a libTemporalNetwork_g.a libPlanDatabase_g.a
+      		libConstraintEngine_g.a libUtils_g.a libTinyXml_g.a libAntlr3_g.a
+      		-Wl,--no-whole-archive -lpthread"/>
+      	<property name="cmd_o" value="g++ -shared -Wl,-v 
+      		-Wl,--add-stdcall-alias -Wl,--whole-archive -oSystem_o.dll
+      		libSystem_o.a libSolvers_o.a libResource_o.a libNDDL_o.a
+      		libRulesEngine_o.a libTemporalNetwork_o.a libPlanDatabase_o.a
+      		libConstraintEngine_o.a libUtils_o.a libTinyXml_o.a libAntlr3_o.a
+      		-Wl,--no-whole-archive -lpthread"/>
+      	
+      	<if>
+        	<equals arg1="${jam.variant}" arg2="DEV"/>
+      		<then>
+      			<echo message="Building debug DLL"/>
+      			<exec executable="bash" dir="${dir.dist.base}/lib">
+      	  			<arg value="-c" />
+          			<arg value="${cmd_g}" />
+        		</exec>
+   			</then>
+      		<else>
+      			<echo message="Skipping debug DLL" />
+      		</else>
+      	</if>
+      	<if>
+        	<equals arg1="${jam.variant}" arg2="OPTIMIZED"/>
+      		<then>
+      			<echo message="Building optimized DLL"/>
+        		<exec executable="bash" dir="${dir.dist.base}/lib">
+      	  			<arg value="-c" />
+          			<arg value="${cmd_o}" />
+        		</exec>
+      		</then>
+      		<else>
+      			<echo message="Skipping optimized DLL" />
+      		</else>
+      	</if>
       </then>
     </if>
 
