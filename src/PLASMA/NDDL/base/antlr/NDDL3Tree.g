@@ -70,18 +70,18 @@ nddl :
 		( {
 		     // debugMsg("NddlInterpreter:nddl","Line:" << LEXER->getLine(LEXER)); 
 		  }
-		  (	child=typeDefinition
-		  |     child=enumDefinition
-                  |     child=variableDeclarations
-                  |     child=assignment
-                  |     child=constraintInstantiation
+		  (	child=enumDefinition
+		  |	child=typeDefinition
+		  |	child=variableDeclarations
+		  |	child=assignment
+		  |	child=constraintInstantiation
 		  |	child=classDeclaration
-                  |     child=allocation[NULL]
+		  |	child=allocation[NULL]
 		  |	child=rule
 		  |	child=problemStmt
-                  |     child=relation
+		  |	child=relation
 		  |	child=methodInvocation
-		  |     child=constraintSignature
+		  |	child=constraintSignature
 		  ) 
 		  {
 		      if (child != NULL) { 
@@ -97,27 +97,6 @@ nddl :
 		)*  
 		
 	)
-	;
-
-typeDefinition returns [Expr* result]
-	:	^('typedef'
-			name=IDENT
-			dataType=type
-		)
-		{
-		    if (dataType != NULL) {
-		        if (!dataType->getDataType()->getIsRestricted()) // then this is just an alias for another type
-		            dataType = dataType->copy();
-		        
-		        const char* newName = c_str($name.text->chars);
-		        result = new ExprTypedef(dataType->getTypeName().c_str(),newName,dataType);
-		     }
-		     else {
-                         result = NULL;              
-                         reportSemanticError(CTX,
-                            "Incorrect typedef. Unknown data type for : " + std::string(c_str($name.text->chars)));
-		     }   
-		}
 	;
 
 enumDefinition returns [Expr* result]
@@ -136,24 +115,41 @@ enumValues[std::vector<std::string>& values]
         :       ^('{' (v=IDENT {values.push_back(c_str($v.text->chars));})+ )
         ;
                   
-type returns [AbstractDomain* result]
-        : (      retval=simpleType 
-          |       ^(baseType=simpleType retval=inlineType[baseType])
-          )
-          {
-              result = retval;
-          }
-        ;
+typeDefinition returns [Expr* result]
+	:	^('typedef'
+			name=IDENT
+			dataType=type
+			{
+    		    if (dataType == NULL) {		        
+                         result = NULL;              
+                         reportSemanticError(CTX,
+                            "Incorrect typedef. Unknown data type for : " + std::string(c_str($name.text->chars)));
+                }            
+			}
+			domain=baseDomain[dataType]
+		)
+		{
+		    if (dataType != NULL) {		        
+		        const char* newName = c_str($name.text->chars);
+		        result = new ExprTypedef(dataType->getId(),newName,domain);
+		     }
+		}
+	;
 
-simpleType returns [AbstractDomain* result] 
-        :       'int'         { result = CTX->SymbolTable->getVarType("int"); }
-        |       'float'       { result = CTX->SymbolTable->getVarType("float"); }
-        |       'bool'        { result = CTX->SymbolTable->getVarType("bool"); }
-        |       'string'      { result = CTX->SymbolTable->getVarType("string"); }
-        |       object=IDENT  { result = CTX->SymbolTable->getVarType(c_str($object.text->chars)); }
+type returns [const DataType* result] 
+        : (     name='int'
+        |       name='float'
+        |       name='bool'
+        |       name='string'
+        |       name=IDENT
+        )
+        {
+            const DataTypeId& dt = CTX->SymbolTable->getVarType(c_str($name.text->chars));
+            result = (DataType*)dt;
+        }
         ;
         
-inlineType[AbstractDomain* baseType] returns [AbstractDomain* result]
+baseDomain[const DataType* baseType] returns [AbstractDomain* result]
         : (      child=valueSet
           |      child=numericInterval
           )
@@ -161,6 +157,7 @@ inlineType[AbstractDomain* baseType] returns [AbstractDomain* result]
     // TODO: type checking. ensure inline domain is consistent with base
     DataRef data=evalExpr(CTX,child);    
     result = (AbstractDomain*)&(data.getValue()->lastDomain()); 
+    // TODO: delete child;?
 }        
         ;       
 
@@ -183,7 +180,7 @@ variableDeclarations returns [ExprList* result]
                  )
         ;
         
-variableInitialization[AbstractDomain* dataType] returns [Expr* result]
+variableInitialization[const DataType* dataType] returns [Expr* result]
 @init {
    const char* varName; 
 }
@@ -191,9 +188,10 @@ variableInitialization[AbstractDomain* dataType] returns [Expr* result]
           |       ^('=' name=IDENT  { varName = c_str($name.text->chars); } initExpr=initializer[varName])
           )
           {
+              // TODO: type check initExpr;
               result = new ExprVarDeclaration(
                    varName,
-                   dataType->getTypeName().c_str(),
+                   dataType->getId(),
                    initExpr,
                    true // canBeSpecified
               ); 
@@ -426,8 +424,8 @@ classVariable[ObjectType* objType]
                   dataType=type 
                   (name=IDENT
                   {
-                      // TODO!!: this won't work for inlined types
-                      objType->addMember(dataType->getTypeName().c_str(),c_str($name.text->chars)); 
+                      // TODO: modify addMember to take DataTypeId instead
+                      objType->addMember(dataType->getName().c_str(),c_str($name.text->chars)); 
                   }
                   )+
                  )
@@ -472,7 +470,7 @@ constructorArgument[std::vector<std::string>& argNames,std::vector<std::string>&
 		)
 		{
 		    argNames.push_back(std::string(c_str($argName.text->chars)));
-		    argTypes.push_back(argType->getTypeName().toString());
+		    argTypes.push_back(argType->getName().toString());
 		}
 	;
 
@@ -539,7 +537,7 @@ predicateParameter[InterpretedTokenFactory* tokenFactory] returns [Expr* result]
             const std::vector<Expr*>& vars=child->getChildren();
             for (unsigned int i=0;i<vars.size();i++) {
                 ExprVarDeclaration* vd = dynamic_cast<ExprVarDeclaration*>(vars[i]);
-                tokenFactory->addArg(vd->getType(),vd->getName());
+                tokenFactory->addArg(vd->getType()->getName(),vd->getName());
             }
             result = child;            
         }

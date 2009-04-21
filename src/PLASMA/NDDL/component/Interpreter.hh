@@ -39,21 +39,21 @@ namespace EUROPA {
   class ExprVarDeclaration : public Expr
   {
   public:
-      ExprVarDeclaration(const char* name, const char* type, Expr* initValue, bool canBeSpecified);
+      ExprVarDeclaration(const char* name, const DataTypeId& type, Expr* initValue, bool canBeSpecified);
       virtual ~ExprVarDeclaration();
 
       virtual DataRef eval(EvalContext& context) const;
       virtual std::string toString() const;
 
       const LabelStr& getName() const;
-      const LabelStr& getType() const;
+      const DataTypeId& getType() const;
 
       const Expr* getInitValue() const;
       void setInitValue(Expr* iv);
 
   protected:
       LabelStr m_name;
-      LabelStr m_type;
+      DataTypeId m_type;
       Expr* m_initValue;
       bool m_canBeSpecified;
 
@@ -114,16 +114,16 @@ namespace EUROPA {
   class ExprTypedef : public Expr
   {
   public:
-      ExprTypedef(const char* baseType, const char* name, AbstractDomain* baseDomain);
+      ExprTypedef(const DataTypeId& baseType, const char* name, AbstractDomain* baseDomain);
       virtual ~ExprTypedef();
 
       virtual DataRef eval(EvalContext& context) const;
       virtual std::string toString() const;
 
   protected:
-      LabelStr m_baseType;
+      DataTypeId m_baseType;
       LabelStr m_name;
-      AbstractDomain* m_type;
+      AbstractDomain* m_baseDomain;
   };
 
   class ExprEnumdef : public Expr

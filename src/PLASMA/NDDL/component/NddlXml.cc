@@ -244,7 +244,7 @@ namespace EUROPA {
               if(!predArg->NoChildren())
                   pInitValue = valueToExpr(predArg->FirstChildElement());
 
-              parameterDecls[pName] = new ExprVarDeclaration(pName.c_str(),pType.c_str(),pInitValue,true /*canBeSpecified*/);
+              parameterDecls[pName] = new ExprVarDeclaration(pName.c_str(),getCESchema()->getDataType(pType.c_str()),pInitValue,true /*canBeSpecified*/);
               tokenFactory->addArg(pType,pName);
               tokenFactory->addBodyExpr(parameterDecls[pName]);
           }
@@ -355,7 +355,7 @@ namespace EUROPA {
 
               ruleBody.push_back(new ExprVarDeclaration(
                       name.c_str(),
-                      type.c_str(),
+                      getCESchema()->getDataType(type.c_str()),
                       domainRestriction,
                       true // canBeSpecified
               ));
@@ -433,19 +433,20 @@ namespace EUROPA {
   void NddlXmlInterpreter::playDefineType(const TiXmlElement& element)
   {
     const char* name = element.Attribute("name");
-    const char* baseType = element.Attribute("basetype");
+    const char* baseTypeName = element.Attribute("basetype");
+    DataTypeId baseType = getCESchema()->getDataType(baseTypeName);
 
-    AbstractDomain* domain = NULL;
+    AbstractDomain* baseDomain = NULL;
 
     // Deal with restricted domain
     if (element.FirstChildElement() != NULL)
-      domain =  xmlAsAbstractDomain(*(element.FirstChildElement()),"",NULL);
+      baseDomain =  xmlAsAbstractDomain(*(element.FirstChildElement()),"",NULL);
 
     // Deal with aliases
-    if (domain == NULL)
-        domain = getCESchema()->baseDomain(baseType).copy();
+    if (baseDomain == NULL)
+        baseDomain = baseType->baseDomain().copy();
 
-    ExprTypedef td(baseType,name,domain);
+    ExprTypedef td(baseType,name,baseDomain);
     td.eval(*m_evalContext);
   }
 }

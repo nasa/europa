@@ -218,19 +218,19 @@ void NddlSymbolTable::setCurrentObjectType(ObjectType* ot)
 }
 
 
-AbstractDomain* NddlSymbolTable::getVarType(const char* name) const
+DataTypeId NddlSymbolTable::getVarType(const char* name) const
 {
     CESchemaId ces = ((CESchema*)getElement("CESchema"))->getId();
 
-    if (!ces->isDataType(name)) {
+    if (ces->isDataType(name))
+        return ces->getDataType(name);
+    else {
         if (m_currentObjectType!=NULL && m_currentObjectType->getName().toString()==name)
-            return new ObjectDomain(m_currentObjectType->getVarType());
+            return m_currentObjectType->getVarType();
 
         debugMsg("NddlInterpreter:SymbolTable","Unknown type " << name);
-        return NULL;
+        return DataTypeId::noId();
     }
-    else
-        return (AbstractDomain*)&(ces->baseDomain(name)); // TODO: deal with this ugly cast
 }
 
 AbstractDomain* NddlSymbolTable::makeNumericDomainFromLiteral(const std::string& type,

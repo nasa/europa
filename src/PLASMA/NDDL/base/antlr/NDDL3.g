@@ -9,12 +9,12 @@ ASTLabelType=pANTLR3_BASE_TREE;
 }
 
 tokens {
-        CONSTRAINT_INSTANTIATION;
+	CONSTRAINT_INSTANTIATION;
 	CONSTRUCTOR;
 	CONSTRUCTOR_INVOCATION;
 	METHOD_CALL;
 	NDDL;
-        PREDICATE_INSTANCE;     
+	PREDICATE_INSTANCE;     
 	TOKEN_RELATION;
 	VARIABLE;
 }
@@ -36,19 +36,19 @@ nddl	:	nddlStatement*
         ;
 
 nddlStatement
-        :       typeDefinition
-        |       enumDefinition
+        :	typeDefinition
+        |	enumDefinition
         |	variableDeclarations
-        |       assignment
-        |       constraintInstantiation
+        |	assignment
+        |	constraintInstantiation
         |	classDeclaration
-        |       allocationStmt
-        |       rule
-        |       problemStmt
-        |       relation
+        |	allocationStmt
+        |	rule
+        |	problemStmt
+        |	relation
         |	methodInvocation
         |	noopstatement
-        |       constraintSignature!
+        |	constraintSignature!
         ;
 
 enumDefinition
@@ -59,22 +59,13 @@ enumValues
         : '{'^ IDENT (','! IDENT)* '}'!
         ;
                 
-typeDefinition
-	:	'typedef' typeWithBaseDomain IDENT ';'
-			-> ^('typedef' IDENT typeWithBaseDomain)
-	;
-
 // MEB Language Change: domain no longer optional
-typeWithBaseDomain
-	:	(	'int'^
-		|	'float'^
-		|	'bool'^
-		|	'string'^
-		|	IDENT^) domain
+typeDefinition
+	:	'typedef' type baseDomain IDENT ';'
+			-> ^('typedef' IDENT type baseDomain)
 	;
 
-domain  :       numericLiteral
-        |       intervalNumericDomain
+baseDomain  :   intervalNumericDomain
         |       enumeratedNumericDomain
         |       enumeratedStringDomain
         |       enumeratedBoolDomain
@@ -128,7 +119,8 @@ nameWithBaseDomain
 
 anyValue:       STRING
         |       boolLiteral
-        |       domain
+        |		numericLiteral
+        |       baseDomain
         |       allocation
         |       qualified
         ;

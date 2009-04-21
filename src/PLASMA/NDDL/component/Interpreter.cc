@@ -1256,22 +1256,22 @@ namespace EUROPA {
     return foo->getId();
   }
 
-  ExprTypedef::ExprTypedef(const char* baseType, const char* name, AbstractDomain* type)
+  ExprTypedef::ExprTypedef(const DataTypeId& baseType, const char* name, AbstractDomain* baseDomain)
       : m_baseType(baseType)
       , m_name(name)
-      , m_type(type)
+      , m_baseDomain(baseDomain)
   {
   }
 
   ExprTypedef::~ExprTypedef()
   {
-      delete m_type;
+      delete m_baseDomain;
   }
 
   DataRef ExprTypedef::eval(EvalContext& context) const
   {
       const char* name = m_name.c_str();
-      const AbstractDomain& domain = *m_type;
+      const AbstractDomain& domain = *m_baseDomain;
 
       debugMsg("Interpreter:typedef","Defining type:" << name);
 
@@ -1281,9 +1281,8 @@ namespace EUROPA {
       // see for instance Schema::hasParent()
       schema->addEnum(name);
 
-      DataTypeId baseType = schema->getCESchema()->getDataType(m_baseType.c_str());
       schema->getCESchema()->registerDataType(
-          (new RestrictedDT(name,baseType,domain))->getId()
+          (new RestrictedDT(name,m_baseType,domain))->getId()
       );
 
       debugMsg("Interpreter:typedef"
@@ -1297,7 +1296,7 @@ namespace EUROPA {
   {
       std::ostringstream os;
 
-      os << "TYPEDEF:" << m_type->toString() << " -> " << m_name.toString();
+      os << "TYPEDEF:" << m_baseType->getName().toString() << " -> " << m_name.toString();
 
       return os.str();
   }
@@ -1349,7 +1348,7 @@ namespace EUROPA {
       return os.str();
   }
 
-  ExprVarDeclaration::ExprVarDeclaration(const char* name, const char* type, Expr* initValue, bool canBeSpecified)
+  ExprVarDeclaration::ExprVarDeclaration(const char* name, const DataTypeId& type, Expr* initValue, bool canBeSpecified)
       : m_name(name)
       , m_type(type)
       , m_initValue(initValue)
@@ -1362,7 +1361,7 @@ namespace EUROPA {
   }
 
   const LabelStr& ExprVarDeclaration::getName() const { return m_name; }
-  const LabelStr& ExprVarDeclaration::getType() const { return m_type; }
+  const DataTypeId& ExprVarDeclaration::getType() const { return m_type; }
   const Expr* ExprVarDeclaration::getInitValue() const { return m_initValue; }
   void ExprVarDeclaration::setInitValue(Expr* iv) { m_initValue = iv; }
 
@@ -1389,7 +1388,7 @@ namespace EUROPA {
   ConstrainedVariableId ExprVarDeclaration::makeGlobalVar(EvalContext& context) const
   {
       const LabelStr& name = getName();
-      const LabelStr& type = getType();
+      const LabelStr& type = getType()->getName();
       const Expr* initValue = getInitValue();
       const DbClientId& pdb = getPDB(context);
 
@@ -1417,7 +1416,7 @@ namespace EUROPA {
   ConstrainedVariableId ExprVarDeclaration::makeTokenVar(TokenEvalContext& context) const
   {
       const LabelStr& parameterName = getName();
-      const LabelStr& parameterType = getType();
+      const LabelStr& parameterType = getType()->getName();
       const Expr* initValue = getInitValue();
       TokenId token=context.getToken();
 
@@ -1426,7 +1425,7 @@ namespace EUROPA {
 
       // This is a hack needed because TokenVariable is parametrized by the domain arg to addParameter
       ConstrainedVariableId parameter;
-      const DataTypeId& parameterDataType = token->getPlanDatabase()->getConstraintEngine()->getCESchema()->getDataType(parameterType.c_str());
+      const DataTypeId& parameterDataType = getType();
 
       // same as completeObjectParam in NddlRules.hh
       if(initValue != NULL) {
@@ -1465,39 +1464,41 @@ namespace EUROPA {
 
   ConstrainedVariableId ExprVarDeclaration::makeRuleVar(RuleInstanceEvalContext& context) const
   {
-    ConstrainedVariableId localVar;
-    if (context.isClass(m_type)) {
-      const DataTypeId& dt = context.getRuleInstance()->getPlanDatabase()->getSchema()->getCESchema()->getDataType(m_type.c_str());
-      localVar = context.getRuleInstance()->addObjectVariable(
-                                  m_type,
-                                  ObjectDomain(dt),
-                                  m_canBeSpecified,
-                                  m_name
-                                  );
-    }
-    else {
-      // TODO: do we really need to pass the base domain?
-      const AbstractDomain& baseDomain = context.getRuleInstance()->getPlanDatabase()->getSchema()->getCESchema()->baseDomain(m_type.c_str());
-      localVar = context.getRuleInstance()->addLocalVariable(
-                                 baseDomain,
-                                 m_canBeSpecified,
-                                 m_name
-                                 );
-    }
+	  const LabelStr typeName = getType()->getName();
 
-    if (m_initValue != NULL)
-      localVar->restrictBaseDomain(m_initValue->eval(context).getValue()->derivedDomain());
+	  ConstrainedVariableId localVar;
+	  if (context.isClass(typeName)) {
+		  const DataTypeId& dt = context.getRuleInstance()->getPlanDatabase()->getSchema()->getCESchema()->getDataType(typeName.c_str());
+		  localVar = context.getRuleInstance()->addObjectVariable(
+				  getType()->getName(),
+				  ObjectDomain(dt),
+				  m_canBeSpecified,
+				  m_name
+		  );
+	  }
+	  else {
+		  // TODO: do we really need to pass the base domain?
+				  const AbstractDomain& baseDomain = context.getRuleInstance()->getPlanDatabase()->getSchema()->getCESchema()->baseDomain(typeName.c_str());
+				  localVar = context.getRuleInstance()->addLocalVariable(
+						  baseDomain,
+						  m_canBeSpecified,
+						  m_name
+				  );
+	  }
 
-    context.addVar(m_name.c_str(),localVar);
-    debugMsg("Interpreter:InterpretedRule","Added RuleInstance local var:" << localVar->toString());
-    return localVar;
+	  if (m_initValue != NULL)
+		  localVar->restrictBaseDomain(m_initValue->eval(context).getValue()->derivedDomain());
+
+	  context.addVar(m_name.c_str(),localVar);
+	  debugMsg("Interpreter:InterpretedRule","Added RuleInstance local var:" << localVar->toString());
+	  return localVar;
   }
 
   std::string ExprVarDeclaration::toString() const
   {
       std::ostringstream os;
 
-      os << m_type.c_str() << " " << m_name.toString();
+      os << m_type->getName().c_str() << " " << m_name.toString();
       if (m_initValue != NULL)
           os << " " << m_initValue->toString();
 
