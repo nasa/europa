@@ -121,6 +121,53 @@
       <!-- This is set only for Windows, but other OS don't care anyway -->
       <env key="CYG_JAVA_HOME" value="${local.env.CYG_JAVA_HOME}" />
     </exec>
+  	
+    <if>
+      <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
+      <then>
+        <echo message="Building System dlls for Windows."/>
+      	<!-- libANML_?.a disappeared? -mno-cygwin -->
+      	<property name="cmd_g" value="g++ -shared -Wl,-v 
+      		-Wl,--add-stdcall-alias -Wl,--whole-archive -oSystem_g.dll 
+      		libSystem_g.a libSolvers_g.a libResource_g.a libNDDL_g.a 
+      		libRulesEngine_g.a libTemporalNetwork_g.a libPlanDatabase_g.a
+      		libConstraintEngine_g.a libUtils_g.a libTinyXml_g.a libAntlr3_g.a
+      		-Wl,--no-whole-archive -lpthread"/>
+      	<property name="cmd_o" value="g++ -shared -Wl,-v 
+      		-Wl,--add-stdcall-alias -Wl,--whole-archive -oSystem_o.dll
+      		libSystem_o.a libSolvers_o.a libResource_o.a libNDDL_o.a
+      		libRulesEngine_o.a libTemporalNetwork_o.a libPlanDatabase_o.a
+      		libConstraintEngine_o.a libUtils_o.a libTinyXml_o.a libAntlr3_o.a
+      		-Wl,--no-whole-archive -lpthread"/>
+      	
+      	<if>
+        	<equals arg1="${jam.variant}" arg2="DEV"/>
+      		<then>
+      			<echo message="Building debug DLL"/>
+      			<exec executable="bash" dir="${dir.dist.base}/lib">
+      	  			<arg value="-c" />
+          			<arg value="${cmd_g}" />
+        		</exec>
+   			</then>
+      		<else>
+      			<echo message="Skipping debug DLL" />
+      		</else>
+      	</if>
+      	<if>
+        	<equals arg1="${jam.variant}" arg2="OPTIMIZED"/>
+      		<then>
+      			<echo message="Building optimized DLL"/>
+        		<exec executable="bash" dir="${dir.dist.base}/lib">
+      	  			<arg value="-c" />
+          			<arg value="${cmd_o}" />
+        		</exec>
+      		</then>
+      		<else>
+      			<echo message="Skipping optimized DLL" />
+      		</else>
+      	</if>
+      </then>
+    </if>  	
   </target>
 
   <target name="jam-target" depends="init">
@@ -215,53 +262,6 @@
         <copy todir="${dir.dist.base}/res">
           <fileset dir="${dir.planworks}/res"/>
         </copy>
-      </then>
-    </if>
-
-    <if>
-      <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
-      <then>
-        <echo message="Building System dlls for Windows."/>
-      	<!-- libANML_?.a disappeared? -mno-cygwin -->
-      	<property name="cmd_g" value="g++ -shared -Wl,-v 
-      		-Wl,--add-stdcall-alias -Wl,--whole-archive -oSystem_g.dll 
-      		libSystem_g.a libSolvers_g.a libResource_g.a libNDDL_g.a 
-      		libRulesEngine_g.a libTemporalNetwork_g.a libPlanDatabase_g.a
-      		libConstraintEngine_g.a libUtils_g.a libTinyXml_g.a libAntlr3_g.a
-      		-Wl,--no-whole-archive -lpthread"/>
-      	<property name="cmd_o" value="g++ -shared -Wl,-v 
-      		-Wl,--add-stdcall-alias -Wl,--whole-archive -oSystem_o.dll
-      		libSystem_o.a libSolvers_o.a libResource_o.a libNDDL_o.a
-      		libRulesEngine_o.a libTemporalNetwork_o.a libPlanDatabase_o.a
-      		libConstraintEngine_o.a libUtils_o.a libTinyXml_o.a libAntlr3_o.a
-      		-Wl,--no-whole-archive -lpthread"/>
-      	
-      	<if>
-        	<equals arg1="${jam.variant}" arg2="DEV"/>
-      		<then>
-      			<echo message="Building debug DLL"/>
-      			<exec executable="bash" dir="${dir.dist.base}/lib">
-      	  			<arg value="-c" />
-          			<arg value="${cmd_g}" />
-        		</exec>
-   			</then>
-      		<else>
-      			<echo message="Skipping debug DLL" />
-      		</else>
-      	</if>
-      	<if>
-        	<equals arg1="${jam.variant}" arg2="OPTIMIZED"/>
-      		<then>
-      			<echo message="Building optimized DLL"/>
-        		<exec executable="bash" dir="${dir.dist.base}/lib">
-      	  			<arg value="-c" />
-          			<arg value="${cmd_o}" />
-        		</exec>
-      		</then>
-      		<else>
-      			<echo message="Skipping optimized DLL" />
-      		</else>
-      	</if>
       </then>
     </if>
 
