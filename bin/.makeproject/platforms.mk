@@ -86,7 +86,6 @@ CXXFLAGS += $(POSITION_INDEPENDENT_FLAG) -I$(EUROPA_HOME)/include/PLASMA -I$(EUR
 LDFLAGS += $(POSITION_INDEPENDENT_FLAG) -L$(EUROPA_HOME)/lib
 LOADLIBS += -lSystem$(BUILD_SUFFIX) \
             -ldl \
-            -lAntlr3$(BUILD_SUFFIX) \
             -lResource$(BUILD_SUFFIX) \
             -lNDDL$(BUILD_SUFFIX) \
             -lSolvers$(BUILD_SUFFIX) \
@@ -95,7 +94,8 @@ LOADLIBS += -lSystem$(BUILD_SUFFIX) \
             -lPlanDatabase$(BUILD_SUFFIX) \
             -lConstraintEngine$(BUILD_SUFFIX) \
             -lUtils$(BUILD_SUFFIX) \
-            -lTinyXml$(BUILD_SUFFIX) 
+            -lAntlr3$(BUILD_SUFFIX) \
+            -lTinyXml$(BUILD_SUFFIX)
 
 vpath %.dylib $(EUROPA_HOME)/lib
 
