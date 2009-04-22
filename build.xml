@@ -59,6 +59,11 @@
             <!--<arg value="-absolute"/>-->
             <arg value="${basedir}"/>
           </exec>
+          <exec executable="cygpath" outputproperty="local.env.EUROPA_HOME">
+            <arg value="--unix"/>
+            <!--<arg value="-absolute"/>-->
+            <arg value="${basedir}/dist/europa"/>
+          </exec>
           <exec executable="cygpath" outputproperty="local.env.CYG_JAVA_HOME">
              <arg value="--unix"/>
              <arg value="--absolute"/>
@@ -317,7 +322,7 @@
     <echo> Running CPP example in ${basedir}/dist/europa/examples/${example.name}</echo>
     <exec executable="make" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
       <arg line="${run-example-cpp.mode}"/>
-      <env key="EUROPA_HOME" value="${basedir}/dist/europa"/>
+      <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
       <env key="${local.env.LD_LIBRARY_PATH.name}" value="${basedir}/dist/europa/lib"/>
     </exec>
   </target>
