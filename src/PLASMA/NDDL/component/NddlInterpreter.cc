@@ -12,6 +12,7 @@
 #include "NDDL3Lexer.h"
 #include "NDDL3Parser.h"
 #include "NDDL3Tree.h"
+#include "antlr3exception.h"
 
 #include "Debug.hh"
 
@@ -156,6 +157,10 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
     catch (const std::string& error) {
         debugMsg("NddlInterpreter:interpret","nddl parser halted on error:" << symbolTable.getErrors());
     }
+    catch (const Error& internalError) {
+        symbolTable.reportError(treeParser,internalError.getMsg());
+        debugMsg("NddlInterpreter:interpret","nddl parser halted on error:" << symbolTable.getErrors());
+    }
 
     // Free everything
     treeParser->free(treeParser);
@@ -276,6 +281,49 @@ Expr* NddlSymbolTable::makeEnumRef(const char* value) const
     ad->set(v);
 
     return new ExprConstant(getPlanDatabase()->getClient(),enumType.c_str(),ad);
+}
+
+std::string getErrorLocation(pNDDL3Tree treeWalker)
+{
+    std::ostringstream os;
+
+    // get location. see displayRecognitionError() in antlr3baserecognizer.c
+    pANTLR3_BASE_RECOGNIZER rec = treeWalker->pTreeParser->rec;
+    if (rec->state->exception == NULL) {
+        antlr3RecognitionExceptionNew(rec);
+        //rec->state->exception->type = ANTLR3_RECOGNITION_EXCEPTION;
+        //rec->state->exception->message = (char*)msg.c_str();
+    }
+    //rec->reportError(rec);
+
+    pANTLR3_EXCEPTION ex = rec->state->exception;
+    if  (ex->streamName == NULL) {
+        if  (((pANTLR3_COMMON_TOKEN)(ex->token))->type == ANTLR3_TOKEN_EOF)
+            os << "-end of input-(";
+        else
+            os << "-unknown source-(";
+    }
+    else {
+        pANTLR3_STRING ftext = ex->streamName->to8(ex->streamName);
+        os << ftext->chars << "(";
+    }
+
+    // Next comes the line number
+    os << "line:" << rec->state->exception->line << ")";
+
+    pANTLR3_BASE_TREE theBaseTree = (pANTLR3_BASE_TREE)(rec->state->exception->token);
+    pANTLR3_STRING ttext       = theBaseTree->toStringTree(theBaseTree);
+
+    os << ", at offset " << theBaseTree->getCharPositionInLine(theBaseTree);
+    os << ", near " <<  ttext->chars;
+
+    return os.str();
+}
+
+void NddlSymbolTable::reportError(void* tw, const std::string& msg)
+{
+    pNDDL3Tree treeWalker = (pNDDL3Tree) tw;
+    addError(getErrorLocation(treeWalker) + " " + msg);
 }
 
 

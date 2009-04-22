@@ -1,6 +1,7 @@
 
 #include "nddl-test-module.hh"
 #include "NddlUtils.hh"
+#include "NddlTestEngine.hh"
 #include "TestSupport.hh"
 #include "ModuleConstraintEngine.hh"
 #include "ModulePlanDatabase.hh"
@@ -11,41 +12,11 @@
 using namespace EUROPA;
 using namespace NDDL;
 
-class NddlTestEngine : public EngineBase
-{
-  public:
-    NddlTestEngine();
-    virtual ~NddlTestEngine();
-
-  protected:
-    virtual void createModules();
-};
-
-NddlTestEngine::NddlTestEngine()
-{
-    createModules();
-    doStart();
-}
-
-NddlTestEngine::~NddlTestEngine()
-{
-    doShutdown();
-}
-
-void NddlTestEngine::createModules()
-{
-    addModule((new ModuleConstraintEngine())->getId());
-    addModule((new ModuleConstraintLibrary())->getId());
-    addModule((new ModulePlanDatabase())->getId());
-    addModule((new ModuleRulesEngine())->getId());
-    addModule((new ModuleTemporalNetwork())->getId());
-    addModule((new ModuleNddl())->getId());
-}
-
 void NDDLModuleTests::syntaxTests()
 {
     std::string filename="parser.nddl";
     NddlTestEngine engine;
+    engine.init();
     std::string result = engine.executeScript("nddl3",filename,true /*isFile*/);
     CPPUNIT_ASSERT_MESSAGE("Nddl3 parser reported problems :\n" + result,result.size() == 0);
 }

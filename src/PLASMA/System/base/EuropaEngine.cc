@@ -29,6 +29,8 @@ namespace EUROPA {
 
     EuropaEngine::EuropaEngine()
     {
+        Error::doThrowExceptions(); // throw exceptions!
+        Error::doDisplayErrors();
     }
 
     EuropaEngine::~EuropaEngine()

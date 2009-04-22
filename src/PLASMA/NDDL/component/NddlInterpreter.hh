@@ -50,6 +50,7 @@ public:
     DataTypeId getVarType(const char* name) const;
     AbstractDomain* makeNumericDomainFromLiteral(const std::string& type,const std::string& value);
 
+    void reportError(void* treeWalker, const std::string& msg);
     void addError(const std::string& msg);
     std::string getErrors() const;
 

@@ -1,6 +1,7 @@
 
 #include "NddlTestEngine.hh"
 
+#include "Error.hh"
 #include "ConstraintEngine.hh"
 #include "PlanDatabase.hh"
 #include "PlanDatabaseWriter.hh"
@@ -50,6 +51,7 @@ void initialize(CESchema* ces)
 
 NddlTestEngine::NddlTestEngine()
 {
+    Error::doThrowExceptions(); // throw exceptions!
 }
 
 void NddlTestEngine::init()

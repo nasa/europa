@@ -33,8 +33,7 @@ static const char* c_str(pANTLR3_UINT8 chars)
 // TODO: make sure we also get ANTLR errors, see apifuncs below
 static void reportSemanticError(pNDDL3Tree treeWalker, const std::string& msg)
 {
-    // get location. see displayRecognitionError() in antlr3baserecognizer.c
-    treeWalker->SymbolTable->addError(msg);
+    treeWalker->SymbolTable->reportError(treeWalker,msg);
     // TODO: make sure cleanup is done correctly
     throw msg;
 }
@@ -123,7 +122,7 @@ typeDefinition returns [Expr* result]
     		    if (dataType == NULL) {		        
                          result = NULL;              
                          reportSemanticError(CTX,
-                            "Incorrect typedef. Unknown data type for : " + std::string(c_str($name.text->chars)));
+                            "Incorrect typedef. Unknown base data type for new type '" + std::string(c_str($name.text->chars)) + "'");
                 }            
 			}
 			domain=baseDomain[dataType]

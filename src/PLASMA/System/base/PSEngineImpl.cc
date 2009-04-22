@@ -23,8 +23,6 @@ namespace EUROPA {
 
   PSEngineImpl::PSEngineImpl()
   {
-      Error::doThrowExceptions(); // throw exceptions!
-      Error::doDisplayErrors();
   }
 
   PSEngineImpl::~PSEngineImpl()
