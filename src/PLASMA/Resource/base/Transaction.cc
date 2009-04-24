@@ -3,7 +3,7 @@
 #include "ResourceConstraint.hh"
 #include "TokenVariable.hh"
 #include "PlanDatabase.hh"
-#include "IntervalDomain.hh"
+#include "Domains.hh"
 #include "Constraint.hh"
 #include "ConstraintFactory.hh"
 #include <vector>
@@ -14,17 +14,17 @@ namespace EUROPA {
   Transaction::Transaction(const PlanDatabaseId& planDatabase,
 			   const LabelStr& predicateName,
 			   const IntervalIntDomain& timeBaseDomain,
-			   double min, 
+			   double min,
 			   double max,
-			   bool closed) 
-    : EventToken(planDatabase, 
+			   bool closed)
+    : EventToken(planDatabase,
 		 predicateName,
 		 false,
 		 false,
 		 timeBaseDomain,
 		 Token::noObject(),
 		 false)
-    
+
   {
     commonInit(closed);
     m_usage->restrictBaseDomain(IntervalDomain(min, max));
@@ -37,14 +37,14 @@ namespace EUROPA {
 			   const IntervalIntDomain& timeBaseDomain,
 			   const LabelStr& objectName,
 			   bool closed)
-    : EventToken(planDatabase, 
-		 predicateName, 
+    : EventToken(planDatabase,
+		 predicateName,
 		 false,
 		 isFact,
 		 timeBaseDomain,
 		 objectName,
 		 false) {
-    commonInit(closed);   
+    commonInit(closed);
   }
 
   Transaction::Transaction(const TokenId& parent,
@@ -53,20 +53,20 @@ namespace EUROPA {
 			   const IntervalIntDomain& timeBaseDomain,
 			   const LabelStr& objectName,
 			   bool closed)
-    : EventToken(parent, 
+    : EventToken(parent,
 		 relation,
 		 predicateName,
 		 timeBaseDomain,
 		 objectName,
 		 closed){
-    commonInit(closed); 
+    commonInit(closed);
   }
 
   void Transaction::commonInit(bool closed){
     //create the usage variable
     m_usage = (new TokenVariable<IntervalDomain>(m_id,
 						 m_allVariables.size(),
-						 m_planDatabase->getConstraintEngine(), 
+						 m_planDatabase->getConstraintEngine(),
 						 IntervalDomain(),
 						 false, // TODO: fixme
 						 true,
@@ -75,11 +75,11 @@ namespace EUROPA {
     m_allVariables.push_back(m_usage);
 
     // add the resource constraint which will act as a messenger to changes and inform the ResourcePropagator.
-    ConstraintId constraint = 
-        m_planDatabase->getConstraintEngine()->createConstraint("ResourceTransactionRelation", 
+    ConstraintId constraint =
+        m_planDatabase->getConstraintEngine()->createConstraint("ResourceTransactionRelation",
 					  makeScope(getObject(), getTime(), m_usage));
     m_standardConstraints.insert(constraint);
-   
+
     if(closed)
       close();
   }
@@ -101,12 +101,12 @@ namespace EUROPA {
       return ResourceId::noId();
   }
 
-  int Transaction::getEarliest() const 
+  int Transaction::getEarliest() const
   {
     return((int) getTime()->lastDomain().getLowerBound());
   }
 
-  int Transaction::getLatest() const 
+  int Transaction::getLatest() const
   {
     return((int) getTime()->lastDomain().getUpperBound());
   }

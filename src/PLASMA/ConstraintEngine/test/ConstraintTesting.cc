@@ -18,12 +18,7 @@
 
 #include "Error.hh"
 #include "tinyxml.h"
-#include "AbstractDomain.hh"
-#include "BoolDomain.hh"
-#include "IntervalIntDomain.hh"
-#include "IntervalDomain.hh"
-#include "NumericDomain.hh"
-#include "SymbolDomain.hh"
+#include "Domains.hh"
 #include "ConstraintFactory.hh"
 #include "Variable.hh"
 #include "Constraint.hh"

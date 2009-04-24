@@ -1,7 +1,7 @@
 #include "EventToken.hh"
 #include "TokenVariable.hh"
 #include "PlanDatabase.hh"
-#include "IntervalIntDomain.hh"
+#include "Domains.hh"
 #include "ConstraintFactory.hh"
 
 namespace EUROPA{
@@ -13,10 +13,10 @@ namespace EUROPA{
 			 const IntervalIntDomain& timeBaseDomain,
 			 const LabelStr& objectName,
 			 bool closed)
-    :Token(planDatabase, predicateName, 
+    :Token(planDatabase, predicateName,
 	   rejectable,
 	   isFact,
-	   IntervalIntDomain(0, 0), 
+	   IntervalIntDomain(0, 0),
 	   objectName,
 	   closed){
     commonInit(timeBaseDomain);
@@ -28,8 +28,8 @@ namespace EUROPA{
 			 const IntervalIntDomain& timeBaseDomain,
 			 const LabelStr& objectName,
 			 bool closed)
-    :Token(master, relation, predicateName, 
-	   IntervalIntDomain(0, 0), 
+    :Token(master, relation, predicateName,
+	   IntervalIntDomain(0, 0),
 	   objectName,
 	   closed){
     commonInit(timeBaseDomain);
@@ -42,7 +42,7 @@ namespace EUROPA{
   void EventToken::commonInit(const IntervalIntDomain& timeBaseDomain){
     m_time = (new TokenVariable<IntervalIntDomain>(m_id,
 						   m_allVariables.size(),
-						   m_planDatabase->getConstraintEngine(), 
+						   m_planDatabase->getConstraintEngine(),
 						   timeBaseDomain,
 						   false, // TODO: fixme
 						   true,

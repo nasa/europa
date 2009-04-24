@@ -1,11 +1,6 @@
 #include "TestSupport.hh"
 #include "LabelStr.hh"
-#include "IntervalIntDomain.hh"
-#include "BoolDomain.hh"
-#include "EnumeratedDomain.hh"
-#include "StringDomain.hh"
-#include "NumericDomain.hh"
-#include "SymbolDomain.hh"
+#include "Domains.hh"
 #include "DomainListener.hh"
 #include "module-tests.hh"
 #include <sstream>

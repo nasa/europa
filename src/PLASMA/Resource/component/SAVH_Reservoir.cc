@@ -4,8 +4,7 @@
 #include "SAVH_Reservoir.hh"
 #include "SAVH_Transaction.hh"
 #include "ConstraintEngine.hh"
-#include "IntervalDomain.hh"
-#include "IntervalIntDomain.hh"
+#include "Domains.hh"
 #include "PlanDatabase.hh"
 #include "Token.hh"
 #include "TokenVariable.hh"
@@ -31,7 +30,7 @@ namespace EUROPA {
         return;
       }
       ReservoirTokenId t(tok);
-      debugMsg("Reservoir:addToProfile", "Adding " << (t->isConsumer() ? "consumer " : "producer ") << "token " << 
+      debugMsg("Reservoir:addToProfile", "Adding " << (t->isConsumer() ? "consumer " : "producer ") << "token " <<
                tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
       TransactionId trans = (new Transaction(t->getTime(), t->getQuantity(), t->isConsumer()))->getId();
       m_transactionsToTokens.insert(std::pair<TransactionId, TokenId>(trans, tok));
@@ -57,7 +56,7 @@ namespace EUROPA {
     void Reservoir::getOrderingChoices(const TokenId& token,
 				       std::vector<std::pair<TokenId, TokenId> >& results,
 				       unsigned int limit) {
-      checkError(m_tokensToTransactions.find(token) != m_tokensToTransactions.end(), "Token " << token->getPredicateName().toString() << 
+      checkError(m_tokensToTransactions.find(token) != m_tokensToTransactions.end(), "Token " << token->getPredicateName().toString() <<
 		 "(" << token->getKey() << ") not in profile.");
       Resource::getOrderingChoices(token, results, limit);
     }

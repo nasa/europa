@@ -13,7 +13,7 @@
 #include "Resource.hh"
 #include "Debug.hh"
 #include "Utils.hh"
-#include "IntervalDomain.hh"
+#include "Domains.hh"
 #include "ConstraintEngine.hh"
 #include "Token.hh"
 #include "TokenVariable.hh"
@@ -36,9 +36,9 @@
  */
 
 namespace EUROPA  {
-  
-  void Resource::updateInstantBounds(InstantId& inst, const double lowerMin, 
-                                  const double lowerMax, const double upperMin, 
+
+  void Resource::updateInstantBounds(InstantId& inst, const double lowerMin,
+                                  const double lowerMax, const double upperMin,
                                   const double upperMax) {
     inst->updateBounds(lowerMin, lowerMax, upperMin, upperMax);
   }
@@ -70,14 +70,14 @@ namespace EUROPA  {
 
   Resource::Resource(const PlanDatabaseId& planDatabase,
                      const LabelStr& type,
-                     const LabelStr& name, 
+                     const LabelStr& name,
                      bool open) : Object(planDatabase, type, name, open) {
     // call to init is deferred
   }
-  
+
   Resource::Resource(const ObjectId parent,
                      const LabelStr& type,
-                     const LabelStr& name, 
+                     const LabelStr& name,
                      bool open) : Object(parent, type, name, open) {
     // call to init is deferred
   }
@@ -146,7 +146,7 @@ namespace EUROPA  {
     // Must ensure:
     // 1. All timepoints intersecting this Transaction time should be updated
     // 2. If either bound of the transaction time is not a timepoint then it should result in a time point insertion
- 
+
     // Insert the start
     int startTime = tx->getEarliest();
     std::map<int, InstantId>::iterator it = m_instants.lower_bound(startTime);
@@ -252,7 +252,7 @@ namespace EUROPA  {
     // Go over all transactions
     for ( std::set<TokenId>::iterator tx_it = m_tokens.begin();
           tx_it != m_tokens.end(); ) {
-      TransactionId tx = *tx_it; 
+      TransactionId tx = *tx_it;
       ++tx_it;
 
       // Skip consideration of this transaction if it is not definitley associated with this resource
@@ -352,7 +352,7 @@ namespace EUROPA  {
       } // of while over Transactions for this instant
 
       // Now update the instant with the results
-      instant->updateBounds( runningLowerMin, runningLowerMax, 
+      instant->updateBounds( runningLowerMin, runningLowerMax,
                              runningUpperMin, runningUpperMax );
 
       // Now we need to figure out of any constraints have been violated.
@@ -364,19 +364,19 @@ namespace EUROPA  {
     }
   }
 
-  void Resource::computeRunningTotals(const InstantId& instant, 
-				      const TransactionId& tx, 
-				      double& runningLowerMin, 
+  void Resource::computeRunningTotals(const InstantId& instant,
+				      const TransactionId& tx,
+				      double& runningLowerMin,
 				      double& runningLowerMax,
-				      double& runningUpperMin, 
+				      double& runningUpperMin,
 				      double& runningUpperMax) {
     double min = tx->getMin();
     double max = tx->getMax();
-    
-    // if the transaction just started, add producer to upper bounds and 
+
+    // if the transaction just started, add producer to upper bounds and
     // consumer to the lower bounds
     if ( tx->getEarliest() == instant->getTime() ) {
-      if ( max>0 ) 
+      if ( max>0 )
         runningUpperMax += max;
       if ( min>0 )
         runningUpperMin += min;
@@ -385,11 +385,11 @@ namespace EUROPA  {
       if ( min<0 )
         runningLowerMin += min;
     }
-    
-    // if the transaction just ended, add producer to lower bounds and 
+
+    // if the transaction just ended, add producer to lower bounds and
     // consumer to the upper bounds
     if ( tx->getLatest() == instant->getTime() ) {
-      if ( max<0 ) 
+      if ( max<0 )
         runningUpperMax += max;
       if ( min<0 )
         runningUpperMin += min;
@@ -477,9 +477,9 @@ namespace EUROPA  {
       consumptionSum += consumptionMin;
 
       // Now update the instant with the results
-      instant->updateBounds(completedMax, 
-                            completedMin, 
-                            max + completedMax, 
+      instant->updateBounds(completedMax,
+                            completedMin,
+                            max + completedMax,
                             min + completedMin,
                             productionMin,
                             consumptionMin,
@@ -563,7 +563,7 @@ namespace EUROPA  {
   void Resource::getResourceFlaws(std::list<ResourceFlawId>& results, int, int) {
     check_error(isValid());
 
-    // @todo some sort of check if the profile is fresh, so that 
+    // @todo some sort of check if the profile is fresh, so that
     // we do not recompute it like crazy
     updateTransactionProfile();
     results.clear();
@@ -580,8 +580,8 @@ namespace EUROPA  {
     }
   }
 
-  /** 
-   * This method returns TRUE iff there is a violation. 
+  /**
+   * This method returns TRUE iff there is a violation.
    * Flaws are computed and stored within the instant, but they do not
    * affect the return value.
    */
@@ -633,17 +633,17 @@ namespace EUROPA  {
   bool Resource::isValid() const {
     checkError(m_id.isValid(), m_id);
     checkError(m_limitMin <= m_limitMax, m_limitMin << " > " << m_limitMax);
-    checkError(m_initialCapacity >= m_limitMin, 
+    checkError(m_initialCapacity >= m_limitMin,
 	       m_initialCapacity << " > " << m_limitMin);
-    checkError(m_initialCapacity <= m_limitMax, 
+    checkError(m_initialCapacity <= m_limitMax,
 	       m_initialCapacity<< " > " << m_limitMax);
-    checkError(m_productionRateMax <= m_productionMax, 
+    checkError(m_productionRateMax <= m_productionMax,
 	       m_productionRateMax << " > " << m_productionMax );
-    checkError(m_productionRateMax >= 0, 
+    checkError(m_productionRateMax >= 0,
 	       m_productionRateMax << " > " << m_productionMax );
-    checkError(m_consumptionRateMax >= m_consumptionMax, 
+    checkError(m_consumptionRateMax >= m_consumptionMax,
 	       m_consumptionRateMax<< " > " << m_consumptionMax);
-    checkError(m_consumptionRateMax <= 0, 
+    checkError(m_consumptionRateMax <= 0,
 	       "Consumption rate is " << m_consumptionRateMax << " but must be negative.");
 
     for (std::map<int, InstantId>::const_iterator it = m_instants.begin(); it != m_instants.end(); ++it)
@@ -667,7 +667,7 @@ namespace EUROPA  {
    * Get the set of transactions overlapping the given interval which are definitiely
    * assigned to the resource.
    */
-  void Resource::getTransactions(std::set<TransactionId>& resultSet, 
+  void Resource::getTransactions(std::set<TransactionId>& resultSet,
                                  int lowerBound, int upperBound, bool propagate) {
     check_error(resultSet.empty());
     check_error(lowerBound <= upperBound);
@@ -697,7 +697,7 @@ namespace EUROPA  {
     check_error(m_instants.find(time) == m_instants.end());
     InstantId newInstant = (new Instant(time))->getId();
 
-    std::map<int, InstantId>::iterator result = 
+    std::map<int, InstantId>::iterator result =
       m_instants.insert(hint, std::pair<int, InstantId>(time, newInstant));
 
     // Now insert transactions from prior instant if they will span this one
@@ -792,12 +792,12 @@ namespace EUROPA  {
     result = IntervalDomain(instant->getLowerMin(), instant->getUpperMax());
 
     debugMsg("Resource:getLevelAt",
-	     "Returning " << result.toString() << " for timepoint " 
+	     "Returning " << result.toString() << " for timepoint "
 	     << timepoint << " at instant " << instant->getTime());
   }
 
   void Resource::updateInitialState(const IntervalDomain& value ) {
-    check_error( value.isSingleton(), 
+    check_error( value.isSingleton(),
                  "In the current implementation the initial value of Resource should be a singleton" );
     m_initialCapacity = value.getSingletonValue();
   }

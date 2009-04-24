@@ -5,7 +5,7 @@
 #include "Propagator.hh"
 #include "TemporalNetworkDefs.hh"
 #include "TimepointWrapper.hh"
-#include "IntervalIntDomain.hh"
+#include "Domains.hh"
 #include "Token.hh"
 
 #include <set>

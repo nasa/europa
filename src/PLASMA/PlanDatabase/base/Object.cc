@@ -6,7 +6,7 @@
 #include "Constraint.hh"
 #include "ConstraintFactory.hh"
 #include "ConstraintEngine.hh"
-#include "EnumeratedDomain.hh"
+#include "Domains.hh"
 #include "Utils.hh"
 #include "Debug.hh"
 #include "EntityIterator.hh"

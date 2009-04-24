@@ -14,8 +14,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "AbstractDomain.hh"
-#include "SymbolDomain.hh"
+#include "Domains.hh"
 #include "ConstraintEngine.hh"
 
 namespace EUROPA {

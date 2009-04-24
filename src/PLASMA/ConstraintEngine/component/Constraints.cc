@@ -2,12 +2,9 @@
 #include "ConstraintEngine.hh"
 #include "ConstraintFactory.hh"
 #include "ConstrainedVariable.hh"
-#include "IntervalIntDomain.hh"
-#include "BoolDomain.hh"
-#include "EnumeratedDomain.hh"
+#include "Domains.hh"
 #include "Utils.hh"
 #include "Debug.hh"
-#include "NumericDomain.hh"
 
 namespace EUROPA {
 

@@ -17,8 +17,7 @@
 
 #include "Debug.hh"
 #include "TestSupport.hh"
-#include "IntervalIntDomain.hh"
-#include "IntervalDomain.hh"
+#include "Domains.hh"
 #include "DefaultPropagator.hh"
 #include "Constraint.hh"
 #include "Utils.hh"

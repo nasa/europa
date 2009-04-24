@@ -14,7 +14,7 @@
 #include "ConstrainedVariable.hh"
 #include "ConstraintEngine.hh"
 #include "Debug.hh"
-#include "IntervalIntDomain.hh"
+#include "Domains.hh"
 #include "SAVH_FlowProfile.hh"
 #include "SAVH_Graph.hh"
 #include "SAVH_Instant.hh"

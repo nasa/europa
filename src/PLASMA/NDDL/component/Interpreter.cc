@@ -13,7 +13,7 @@
 #include "ConstraintFactory.hh"
 #include "DbClient.hh"
 #include "DbClientTransactionPlayer.hh"
-#include "EnumeratedDomain.hh"
+#include "Domains.hh"
 #include "Object.hh"
 #include "ObjectFactory.hh"
 #include "TokenVariable.hh"

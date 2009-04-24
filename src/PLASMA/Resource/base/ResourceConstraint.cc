@@ -2,13 +2,13 @@
 #include "Utils.hh"
 #include "Resource.hh"
 #include "ConstraintEngine.hh"
-#include "IntervalIntDomain.hh"
+#include "Domains.hh"
 #include "Utils.hh"
 #include "Debug.hh"
 
 namespace EUROPA
 {
-  
+
   ResourceConstraint::ResourceConstraint(const LabelStr& name,
 					 const LabelStr& propagatorName,
 					 const ConstraintEngineId& constraintEngine,

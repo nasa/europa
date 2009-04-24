@@ -4,7 +4,7 @@
 #include <string>
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include "SymbolDomain.hh"
+#include "Domains.hh"
 
 using namespace EUROPA;
 

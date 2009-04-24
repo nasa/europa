@@ -4,9 +4,7 @@
 #include "ConstraintEngineDefs.hh"
 #include "Constraint.hh"
 #include "Variable.hh"
-#include "IntervalDomain.hh"
-#include "IntervalIntDomain.hh"
-#include "BoolDomain.hh"
+#include "Domains.hh"
 
 namespace EUROPA {
 
@@ -19,7 +17,7 @@ namespace EUROPA {
     /**
      * @brief Specialized constructor
      */
-    UnaryConstraint(const AbstractDomain& dom, const ConstrainedVariableId& var); 
+    UnaryConstraint(const AbstractDomain& dom, const ConstrainedVariableId& var);
 
     /**
      * @brief Standard constructor
@@ -881,7 +879,7 @@ namespace EUROPA {
 
 
   /**
-   * @brief Calculate the euclidean distance in 2-d space between between 2 points 
+   * @brief Calculate the euclidean distance in 2-d space between between 2 points
    */
   class CalcDistanceConstraint : public Constraint {
   public:

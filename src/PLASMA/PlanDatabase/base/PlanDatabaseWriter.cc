@@ -3,7 +3,7 @@
 #include "PlanDatabase.hh"
 #include "Token.hh"
 #include "ConstraintEngine.hh"
-#include "IntervalIntDomain.hh"
+#include "Domains.hh"
 #include "TokenVariable.hh"
 #include "ConstrainedVariable.hh"
 #include "Utils.hh"
@@ -29,7 +29,7 @@ namespace EUROPA {
       indent()++;
       for (ObjectSet::const_iterator oit = objs.begin(); oit != objs.end() ; ++oit) {
 	ObjectId object = *oit;
-	os << indentation() << object->getType().toString() << ":" 
+	os << indentation() << object->getType().toString() << ":"
 	   << object->getName().toString() << "*************************" << std::endl;
 
 
@@ -39,7 +39,7 @@ namespace EUROPA {
 	  toks = timeline->getTokenSequence();
 	}
 	else { // Treat as any object
-	  const TokenSet& tokens = object->tokens(); 
+	  const TokenSet& tokens = object->tokens();
 	  for(TokenSet::const_iterator tokit = tokens.begin(); tokit != tokens.end(); ++tokit){
 	    TokenId t = *tokit;
 	    toks.push_back(t);
@@ -73,7 +73,7 @@ namespace EUROPA {
 	  indent()--;
 	}
 
-	os << indentation() << "End " << object->getType().toString() << ":" << object->getName().toString() 
+	os << indentation() << "End " << object->getType().toString() << ":" << object->getName().toString()
 	   << "*************************" << std::endl;
       }
       indent()--;
@@ -86,7 +86,7 @@ namespace EUROPA {
 	  ConstrainedVariableId var = *it;
           check_error(var.isValid());
 	  writeVariable(var,os);
-        } 
+        }
       }
       if (alltokens.empty())
         return;
@@ -151,7 +151,7 @@ namespace EUROPA {
       ss << "-inf";
     else if(dom.getLowerBound() == PLUS_INFINITY)
       ss << "+inf";
-    else 
+    else
       ss << dom.getLowerBound();
 
     if(!dom.isSingleton()){
@@ -214,7 +214,7 @@ namespace EUROPA {
 	if(mergedToken->master().isId()){
 	  os << " from " << simpleTokenSummary(mergedToken->master());
 	}
-	else 
+	else
 	  os << " ROOT";
 
 	os  << std::endl;

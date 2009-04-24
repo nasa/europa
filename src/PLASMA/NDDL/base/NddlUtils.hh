@@ -12,9 +12,7 @@
 #include "NddlToken.hh"
 #include "NddlRules.hh"
 
-#include "NumericDomain.hh"
-#include "SymbolDomain.hh"
-#include "StringDomain.hh"
+#include "Domains.hh"
 
 namespace NDDL {
 

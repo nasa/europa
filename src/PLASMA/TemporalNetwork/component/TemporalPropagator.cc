@@ -5,7 +5,7 @@
 #include "TemporalNetworkListener.hh"
 #include "ConstraintEngine.hh"
 #include "ConstrainedVariable.hh"
-#include "IntervalIntDomain.hh"
+#include "Domains.hh"
 #include "TokenVariable.hh"
 #include "Constraint.hh"
 #include "Utils.hh"

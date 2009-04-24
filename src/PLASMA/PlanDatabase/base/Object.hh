@@ -12,7 +12,7 @@
 #include "PlanDatabaseDefs.hh"
 #include "LabelStr.hh"
 #include "Variable.hh"
-#include "EnumeratedDomain.hh"
+#include "Domains.hh"
 #include "PSPlanDatabase.hh"
 
 #include <set>

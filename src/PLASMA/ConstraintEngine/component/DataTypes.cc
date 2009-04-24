@@ -7,12 +7,7 @@
 
 #include "DataTypes.hh"
 
-#include "BoolDomain.hh"
-#include "EnumeratedDomain.hh"
-#include "IntervalDomain.hh"
-#include "IntervalIntDomain.hh"
-#include "StringDomain.hh"
-#include "SymbolDomain.hh"
+#include "Domains.hh"
 #include "Variable.hh"
 
 #define DT_STATIC_MEMBERS(dataType,dtName) \

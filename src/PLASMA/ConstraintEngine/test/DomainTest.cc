@@ -6,9 +6,7 @@
  */
 
 #include "LabelStr.hh"
-#include "Domain.hh"
-#include "IntervalIntDomain.hh"
-#include "BoolDomain.hh"
+#include "Domains.hh"
 #include "ConstraintEngine.hh"
 #include "Constraints.hh"
 #include "DefaultPropagator.hh"

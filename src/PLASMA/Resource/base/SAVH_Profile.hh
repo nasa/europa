@@ -9,7 +9,7 @@
  * @ingroup Resource
  */
 
-#include "IntervalIntDomain.hh"
+#include "Domains.hh"
 #include "PlanDatabaseDefs.hh"
 #include "ConstraintEngineDefs.hh"
 #include "Constraint.hh"
@@ -73,7 +73,7 @@ namespace EUROPA {
        * @param dest The interval into which the computed levels are stored.
        */
       virtual void getLevel(const int time, IntervalDomain& dest);
-      
+
       /**
        * @brief Validates the data structures.  Maybe this should be private.
        */
@@ -86,7 +86,7 @@ namespace EUROPA {
 
       const PlanDatabaseId& getPlanDatabase() const {return m_planDatabase;}
 
-      
+
       virtual void getTransactionsToOrder(const InstantId& inst, std::vector<TransactionId>& results);
 
       const ResourceId& getResource() const {return m_detector->getResource();}
@@ -109,11 +109,11 @@ namespace EUROPA {
        * It is expected that the first Instant in the interval actually precede the first change
        * so that the flaw and violation detector can be initialized.
        */
-      void handleRecompute(); 
+      void handleRecompute();
       /**
        * @brief Hanlde invoked at the end of handleRecompute
-       */  
-      virtual void postHandleRecompute() {}  
+       */
+      virtual void postHandleRecompute() {}
       /**
        * @brief Initialize a recomputation with level data from the given Instant.
        */
@@ -162,10 +162,10 @@ namespace EUROPA {
        * @brief Helper method for subclasses to respond to a temporal constraint being added between two transactions.
        * @param e The transaction whose timepoint has been constrained.
        * @param argIndex The index of the timepoint in the constraint.
-       */ 
+       */
       virtual void handleTemporalConstraintAdded(const TransactionId predecessor, const int preArgIndex,
                                                  const TransactionId successor, const int sucArgIndex);
-      
+
       /**
        * @brief Helper method for subclasses to respond to a temporal constraint being removed between two transactions.
        * @param e The transaction whose timepoint has been removed from the constraint.
@@ -180,7 +180,7 @@ namespace EUROPA {
        * @param t The transaction that has been removed.
        */
       void handleTransactionVariableDeletion(const TransactionId& t);
-      
+
       bool needsRecompute() const {return m_needsRecompute;}
 
       std::string toString() const;
@@ -244,13 +244,13 @@ namespace EUROPA {
        * @return An iterator pointing to the instant.
        */
       std::map<int, InstantId>::iterator getGreatestInstant(const int time);
-      
+
       /**
        * @brief Gets the Instant with the least time not less than the given time.
        * @return An iterator pointing to the instant.
        */
       std::map<int, InstantId>::iterator getLeastInstant(const int time);
-      
+
     private:
       /**
        * @brief Conditionally adds Instants for the upper and lower bounds of the Transaction's time.
@@ -265,7 +265,7 @@ namespace EUROPA {
       void addInstant(const int time);
 
       void handleConstraintMessage(const ConstraintId c, const ConstrainedVariableId var, int argIndex, bool addition);
-      
+
       ProfileId m_id;
       unsigned int m_changeCount; /*<! The number of times that the profile has changed.  Used to detect stale iterators.*/
       bool m_needsRecompute; /*<! A flag indicating the necessity of profile recomputation*/
@@ -300,7 +300,7 @@ namespace EUROPA {
        * @param endTime The time to end iteration.  The time of the last Instant is guaranteed to be the greatest time not greater than this value.
        */
       ProfileIterator(const ProfileId prof, const int startTime = MINUS_INFINITY, const int endTime = PLUS_INFINITY);
-      
+
       ~ProfileIterator() {m_id.remove();}
 
       /**
@@ -313,7 +313,7 @@ namespace EUROPA {
        * @return The time
        */
       int getTime() const;
-      
+
       /**
        * @brief Gets the value of the lower bound of the profile at the current instant in time.
        * @return The value of the profile.
@@ -359,23 +359,23 @@ namespace EUROPA {
     {
     public:
         ProfileArgs(const PlanDatabaseId db, const FVDetectorId detector,
-                    const double initCapacityLb = 0, const double initCapacityUb = 0) 
-            : m_db(db), m_detector(detector), m_initCapacityLb(initCapacityLb), m_initCapacityUb(initCapacityUb) 
-        {            
+                    const double initCapacityLb = 0, const double initCapacityUb = 0)
+            : m_db(db), m_detector(detector), m_initCapacityLb(initCapacityLb), m_initCapacityUb(initCapacityUb)
+        {
         }
-        
+
         const PlanDatabaseId& m_db;
         const FVDetectorId& m_detector;
         const double m_initCapacityLb;
         const double m_initCapacityUb;
     };
-    
+
     template<class ProfileType>
     class ProfileFactory : public Factory {
     public:
       ProfileFactory(const LabelStr& name) : Factory(name) {}
-      
-      virtual EUROPA::FactoryObjId& createInstance(const EUROPA::FactoryArgs& fa) 
+
+      virtual EUROPA::FactoryObjId& createInstance(const EUROPA::FactoryArgs& fa)
       {
           const ProfileArgs& args = (const ProfileArgs&)fa;
           return (EUROPA::FactoryObjId&)

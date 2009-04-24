@@ -10,7 +10,6 @@
 
 #include "Constraint.hh"
 #include "Variable.hh"
-#include "IntervalDomain.hh"
 
 namespace EUROPA {
 

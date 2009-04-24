@@ -15,14 +15,8 @@
 #include "EqualityConstraintPropagator.hh"
 
 /* Include for domain management */
-#include "AbstractDomain.hh"
-#include "EnumeratedDomain.hh"
+#include "Domains.hh"
 #include "LabelStr.hh"
-#include "IntervalIntDomain.hh"
-#include "BoolDomain.hh"
-#include "StringDomain.hh"
-#include "SymbolDomain.hh"
-#include "NumericDomain.hh"
 
 #include "DataTypes.hh"
 

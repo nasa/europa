@@ -10,7 +10,7 @@
 #include "RuleInstance.hh"
 #include "Debug.hh"
 #include "ProxyVariableRelation.hh"
-#include "BoolDomain.hh"
+#include "Domains.hh"
 #include <sstream>
 
 namespace EUROPA {

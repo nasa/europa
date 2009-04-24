@@ -12,10 +12,8 @@
 #include "TestSupport.hh"
 #include "TestRule.hh"
 #include "Utils.hh"
-#include "IntervalIntDomain.hh"
+#include "Domains.hh"
 #include "DefaultPropagator.hh"
-#include "StringDomain.hh"
-#include "NumericDomain.hh"
 #include "ProxyVariableRelation.hh"
 
 #include "Constraints.hh"

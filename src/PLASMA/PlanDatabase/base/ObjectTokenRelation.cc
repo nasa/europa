@@ -2,7 +2,7 @@
 #include "Token.hh"
 #include "TokenVariable.hh"
 #include "Object.hh"
-#include "IntervalIntDomain.hh"
+#include "Domains.hh"
 
 #include "Debug.hh"
 #include <iostream>
@@ -21,7 +21,7 @@ namespace EUROPA {
       m_currentDomain(static_cast<ObjectDomain&>(getCurrentDomain(variables[OBJECT_VAR]))){
     check_error(m_token.isValid());
     check_error(variables[OBJECT_VAR]->parent() == m_token);
-    checkError(variables[OBJECT_VAR]->isClosed(), 
+    checkError(variables[OBJECT_VAR]->isClosed(),
 	       "The Object Variable must be closed to correctly maintain the object token relationship through propagation.");
   }
 
@@ -38,7 +38,7 @@ namespace EUROPA {
     Constraint::handleDiscard();
   }
 
-  void ObjectTokenRelation::handleExecute(){  
+  void ObjectTokenRelation::handleExecute(){
     check_error(m_token.isValid());
     check_error(m_currentDomain.isOpen() || !m_currentDomain.isEmpty());
 
@@ -56,8 +56,8 @@ namespace EUROPA {
     check_error(isValid());
   }
 
-  void ObjectTokenRelation::handleExecute(const ConstrainedVariableId& variable, 
-					  int argIndex, 
+  void ObjectTokenRelation::handleExecute(const ConstrainedVariableId& variable,
+					  int argIndex,
 					  const DomainListener::ChangeType& changeType){
     handleExecute();
   }
@@ -65,7 +65,7 @@ namespace EUROPA {
   /**
    * Will handle changes immediately as long as the domain is open
    */
-  bool ObjectTokenRelation::canIgnore(const ConstrainedVariableId& variable, 
+  bool ObjectTokenRelation::canIgnore(const ConstrainedVariableId& variable,
 				      int argIndex,
 				      const DomainListener::ChangeType& changeType){
     if(m_currentDomain.isOpen())
@@ -93,7 +93,7 @@ namespace EUROPA {
   }
 
   /**
-   * All members of the current domain that are not members of the current set of notified objects should 
+   * All members of the current domain that are not members of the current set of notified objects should
    * be notifed of addition of a token
    */
   void ObjectTokenRelation::notifyAdditions() {

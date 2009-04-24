@@ -1,7 +1,7 @@
 #include "NddlResource.hh"
 #include "Debug.hh"
 #include "DataTypes.hh"
-#include "IntervalDomain.hh"
+#include "Domains.hh"
 #include "Constraint.hh"
 #include "Variable.hh"
 #include "ConstrainedVariable.hh"

@@ -1,5 +1,5 @@
 #include "Schema.hh"
-#include "SymbolDomain.hh"
+#include "Domains.hh"
 #include "TokenFactory.hh"
 #include "Debug.hh"
 #include "Utils.hh"

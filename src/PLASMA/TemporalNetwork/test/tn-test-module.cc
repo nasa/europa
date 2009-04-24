@@ -11,7 +11,7 @@
 #include "IntervalToken.hh"
 #include "Timeline.hh"
 #include "Utils.hh"
-#include "IntervalIntDomain.hh"
+#include "Domains.hh"
 #include "TokenVariable.hh"
 
 #include "RulesEngine.hh"

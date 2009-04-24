@@ -12,7 +12,7 @@
 //  remain on all copies of the software.
 
 #include "TemporalNetworkDefs.hh"
-#include "IntervalIntDomain.hh"
+#include "Domains.hh"
 #include "TemporalNetwork.hh"
 #include "Debug.hh"
 

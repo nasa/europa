@@ -3,7 +3,7 @@
 #include "PlanDatabase.hh"
 #include "Object.hh"
 #include "ConstrainedVariable.hh"
-#include "IntervalDomain.hh"
+#include "Domains.hh"
 #include "Filters.hh"
 #include "Utils.hh"
 
@@ -11,8 +11,8 @@ namespace EUROPA {
   namespace SOLVERS {
 
     SingleSolverController::SingleSolverController()
-        : MasterController() 
-    {        
+        : MasterController()
+    {
     }
 
     SingleSolverController::~SingleSolverController()

@@ -8,9 +8,7 @@
 #include "ConstraintEngine.hh"
 #include "ConstraintEngineDefs.hh"
 #include "ConstrainedVariable.hh"
-#include "EnumeratedDomain.hh"
-#include "IntervalDomain.hh"
-#include "IntervalIntDomain.hh"
+#include "Domains.hh"
 #include "LabelStr.hh"
 #include "Variable.hh"
 
@@ -59,9 +57,9 @@
 #define IN_NO_SECTION 0
 #define IN_GENERAL_SECTION 1
 
-#ifdef __MINGW32__ 
-	static int mkdir(const char* path, mode_t mode) { 
-		int toRet = mkdir(path); 
+#ifdef __MINGW32__
+	static int mkdir(const char* path, mode_t mode) {
+		int toRet = mkdir(path);
 		chmod(path, mode);
 		return toRet;
 	}
@@ -82,7 +80,7 @@ namespace EUROPA {
       const std::string MEMBER_VAR("MEMBER_VAR");
       const std::string RULE_VAR("RULE_VAR");
 
-      const std::string tokenVarTypes[8] = 
+      const std::string tokenVarTypes[8] =
 	{STATE_VAR, OBJECT_VAR, DURATION_VAR, START_VAR, END_VAR, PARAMETER_VAR, MEMBER_VAR, RULE_VAR};
 
       enum varTypes {I_STATE = 0, I_OBJECT, I_DURATION, I_START, I_END, I_PARAMETER, I_MEMBER, I_RULE};
@@ -157,9 +155,9 @@ namespace EUROPA {
 #endif
 
 #ifdef __MINGW32__
- 
+
 #define NBBY 8
-			
+
   static char *realpath(const char *path, char *resolved_path) {
     char* temp;
     if (GetFullPathNameA(path, MAXPATHLEN, resolved_path, &temp) == 0)
@@ -209,7 +207,7 @@ namespace EUROPA {
 	commonInit(planDb, ceId2, reId2);
       }
 
-      PartialPlanWriter::PartialPlanWriter(const PlanDatabaseId &planDb, 
+      PartialPlanWriter::PartialPlanWriter(const PlanDatabaseId &planDb,
 	  const ConstraintEngineId &ceId2) :
 	PROPAGATION_COMMENCED("PROPAGATION_COMMENCED"),
 	PROPAGATION_COMPLETED("PROPAGATION_COMPLETED"),
@@ -263,7 +261,7 @@ namespace EUROPA {
 	  writeStep = 0;
 	  return;
 	}
-			
+
 	char *configBuf = new char[PATH_MAX + 100];
 	if (configBuf == 0)
 	  FatalErr("No memory for PPW_CONFIG");
@@ -342,8 +340,8 @@ namespace EUROPA {
 	if(stepsPerWrite) {
 	  if(mkdir(dest.c_str(), 0777) && errno != EEXIST) {
 	    /*
-	     * Failing with return code = -1, errno = 0 when dir already 
-	     * exists.  Should be returning errno = EEXIST. 
+	     * Failing with return code = -1, errno = 0 when dir already
+	     * exists.  Should be returning errno = EEXIST.
 	     * Check errno is non-zero before call to FatalErrno()
 	     */
 	    if (errno) {
@@ -369,21 +367,21 @@ namespace EUROPA {
 	    FatalErrno();
 	  }
 	  seqOut << dest << SEQ_COL_SEP << seqId << SEQ_COL_SEP;// << std::endl;
-        
+
 	  std::ofstream rulesOut(seqRules.c_str());
 	  if(!rulesOut) {
 	    std::cerr << "Failed to open " << seqRules << std::endl;
 	    FatalErrno();
 	  }
-      
+
 	  std::set<std::string> modelFiles;
-	  
+
 	  const RuleSchemaId& rs = reId->getRuleSchema();
-	  
+
 	  if (!rs.isNoId()) {
 	      char realModelPaths[PATH_MAX];
-	      bool foundModelPath = false;  	  
-	      const std::multimap<double, RuleId>& allRules = rs->getRules(); 
+	      bool foundModelPath = false;
+	      const std::multimap<double, RuleId>& allRules = rs->getRules();
 	      for(std::multimap<double, RuleId>::const_iterator it = allRules.begin(); it != allRules.end(); ++it) {
 	          std::string ruleSrc = ((*it).second)->getSource().toString();
 	          if(ruleSrc == "noSrc")
@@ -401,26 +399,26 @@ namespace EUROPA {
 	              modelPath = realModelPaths;
 	              modelFiles.insert(modelPath);
 	              foundModelPath = true;
-	              rulesOut << seqId << TAB << (*it).second->getName().toString() << TAB << modelPath << lineNumber 
+	              rulesOut << seqId << TAB << (*it).second->getName().toString() << TAB << modelPath << lineNumber
 	              << std::endl;
 	              break;
 	          }
 	          if (foundModelPath == false) {
-	              std::cerr << "Warning: PPW could not find path to model file for rule " 
+	              std::cerr << "Warning: PPW could not find path to model file for rule "
 	              << (*it).second->getName().toString() << std::endl;
 	              std::cerr << "         Check configuration of RuleConfigSection in PlanWorks.cfg " << std::endl;
 	          }
 	      }
 	  }
-	  
+
 	  {
 	    std::ostream_iterator<unsigned char> out(seqOut);
-	    for(std::set<std::string>::const_iterator it = modelFiles.begin(); 
+	    for(std::set<std::string>::const_iterator it = modelFiles.begin();
 		it != modelFiles.end(); ++it) {
 	      seqOut << "--begin " << *it << std::endl;
 	      std::ifstream modelIn((*it).c_str());
 	      modelIn.unsetf(std::ios::skipws);
-	      std::copy(std::istream_iterator<unsigned char>(modelIn), 
+	      std::copy(std::istream_iterator<unsigned char>(modelIn),
 			std::istream_iterator<unsigned char>(), out);
 	    }
 	  }
@@ -468,7 +466,7 @@ namespace EUROPA {
 	if(!destAlreadyInitialized) {
 	  /*
 	   *If stepsPerWrite is still 0 after commonInit has run
-	   *then allocateListeners() has not been called yet 
+	   *then allocateListeners() has not been called yet
 	   *Call now since Planner Control needs them
 	   */
 	  if (stepsPerWrite == 0) {
@@ -481,7 +479,7 @@ namespace EUROPA {
 	  initOutputDestination();
 	  destAlreadyInitialized = true;
 	} else {
-	  std::cerr << "Destination directory already initialized to " << dest << std::endl; 
+	  std::cerr << "Destination directory already initialized to " << dest << std::endl;
 	  std::cerr << "Failed to initialize destination directory to " << destPath << std::endl;
 	  FatalErrno();
 	}
@@ -517,7 +515,7 @@ namespace EUROPA {
 
 	char stepstr[NBBY * sizeof(nstep) * 28/93 + 4];
 	sprintf(stepstr, "%d", (int) nstep);
-    
+
 	std::string stepnum(STEP + stepstr);
 
 	std::string ppDest = dest + SLASH + stepnum;
@@ -615,7 +613,7 @@ namespace EUROPA {
 	      outputToken(token, T_INTERVAL, slotId, slotIndex, slotOrder, (ObjectId) tId, tokOut,
 			  varOut);
 	      tokens.erase(token);
-	      TokenSet::const_iterator mergedTokenIterator = 
+	      TokenSet::const_iterator mergedTokenIterator =
 		token->getMergedTokens().begin();
 	      for(;mergedTokenIterator != token->getMergedTokens().end(); ++mergedTokenIterator) {
 		slotOrder++;
@@ -643,12 +641,12 @@ namespace EUROPA {
 	    objOut << std::endl;
 	  }
 #ifndef NO_RESOURCES
-/* TODO JRB: move this to resource module	  
+/* TODO JRB: move this to resource module
 	  else if(ResourceId::convertable(objId)) {
 	    outputObject(objId, O_RESOURCE, objOut, varOut);
 
 	    ResourceId &rId = (ResourceId &) objId;
-          
+
 	    //ExtraData: resource info
 	    objOut << MINUS_INFINITY << COMMA << PLUS_INFINITY << COMMA
 		   << rId->getInitialCapacity() << COMMA << rId->getLimitMin() << COMMA
@@ -673,7 +671,7 @@ namespace EUROPA {
 	    }
 	    objOut << std::endl;
 	  }
-*/	  
+*/
 #endif
 	  else {
 	    outputObject(objId, O_OBJECT, objOut, varOut);
@@ -681,7 +679,7 @@ namespace EUROPA {
 	    objOut << SNULL << std::endl;
 	  }
 	}
-	for(TokenSet::iterator tokenIterator = tokens.begin(); 
+	for(TokenSet::iterator tokenIterator = tokens.begin();
 	    tokenIterator != tokens.end(); ++tokenIterator) {
 	  TokenId token = *tokenIterator;
 	  check_error(token.isValid());
@@ -696,7 +694,7 @@ namespace EUROPA {
 	  RuleInstanceId ri = *it;
 	  outputRuleInstance(ri, ruleInstanceOut, varOut, rismOut);
 	}
-			
+
 	collectStats(); // this call will overwrite incremental counters for tokens, variables, and constraints
 	(*statsOut) << seqId << TAB << ppId << TAB << nstep << TAB << numTokens << TAB << numVariables
 		    << TAB << numConstraints << std::endl;
@@ -717,8 +715,8 @@ namespace EUROPA {
       void PartialPlanWriter::writeStatistics(void) {
 	writeStats();
       }
-      /* writeStatsAndTransactions() is called at the end of each step 
-	 instead of write() when step data is written for only the 
+      /* writeStatsAndTransactions() is called at the end of each step
+	 instead of write() when step data is written for only the
 	 final step. this ensures that transaction and statistics info
 	 is written for all steps.
       */
@@ -736,7 +734,7 @@ namespace EUROPA {
 	ppId = timeval2Id(currTime);
 
 	collectStats();
-	debugMsg("PartialPlanWriter:writeStats", "Writing statistics numTokens: " << numTokens 
+	debugMsg("PartialPlanWriter:writeStats", "Writing statistics numTokens: " << numTokens
 		 << " numVariables: " << numVariables << " numConstraints: " << numConstraints);
 	(*statsOut) << seqId << TAB << ppId << TAB << nstep << TAB << numTokens << TAB << numVariables
 		    << TAB << numConstraints << std::endl;
@@ -782,7 +780,7 @@ namespace EUROPA {
 	  objOut << SNULL << TAB;
 	}
 	else {
-	  for(std::vector<ConstrainedVariableId>::const_iterator varIt = 
+	  for(std::vector<ConstrainedVariableId>::const_iterator varIt =
 		objId->getVariables().begin(); varIt != objId->getVariables().end(); ++varIt) {
 	    ConstrainedVariableId var = *varIt;
 	    objOut << var->getKey() << COMMA;
@@ -806,9 +804,9 @@ namespace EUROPA {
 	/*end TokenIds*/
       }
 
-      void PartialPlanWriter::outputToken(const TokenId &token, const int type, const int slotId, 
-					  const int slotIndex, const int slotOrder, 
-					  const ObjectId &tId, std::ofstream &tokOut, 
+      void PartialPlanWriter::outputToken(const TokenId &token, const int type, const int slotId,
+					  const int slotIndex, const int slotOrder,
+					  const ObjectId &tId, std::ofstream &tokOut,
 					  std::ofstream &varOut) {
 	check_error(token.isValid());
 	if(token->isIncomplete()) {
@@ -816,18 +814,18 @@ namespace EUROPA {
 	  return;
 	}
 	if(!tId.isNoId()) {
-	  tokOut << token->getKey() << TAB << type << TAB << slotId << TAB << slotIndex << TAB 
-		 << ppId << TAB << 0 << TAB << 1 << TAB << token->start()->getKey() << TAB 
-		 << token->end()->getKey() << TAB << token->duration()->getKey() << TAB 
-		 << token->getState()->getKey() << TAB << token->getPredicateName().toString() 
-		 << TAB << tId->getKey() << TAB << tId->getName().toString() << TAB 
+	  tokOut << token->getKey() << TAB << type << TAB << slotId << TAB << slotIndex << TAB
+		 << ppId << TAB << 0 << TAB << 1 << TAB << token->start()->getKey() << TAB
+		 << token->end()->getKey() << TAB << token->duration()->getKey() << TAB
+		 << token->getState()->getKey() << TAB << token->getPredicateName().toString()
+		 << TAB << tId->getKey() << TAB << tId->getName().toString() << TAB
 		 << token->getObject()->getKey() << TAB;
 	}
 	else {
-	  tokOut << token->getKey() << TAB << type << TAB << SNULL << TAB << SNULL << TAB << ppId 
-		 << TAB << 1 << TAB << 1 << TAB << token->start()->getKey() << TAB 
-		 << token->end()->getKey() << TAB << token->duration()->getKey() << TAB 
-		 << token->getState()->getKey() << TAB << token->getPredicateName().toString() 
+	  tokOut << token->getKey() << TAB << type << TAB << SNULL << TAB << SNULL << TAB << ppId
+		 << TAB << 1 << TAB << 1 << TAB << token->start()->getKey() << TAB
+		 << token->end()->getKey() << TAB << token->duration()->getKey() << TAB
+		 << token->getState()->getKey() << TAB << token->getPredicateName().toString()
 		 << TAB << SNULL << TAB << SNULL << TAB << token->getObject()->getKey() << TAB;
 	}
 	outputObjVar(token->getObject(), token->getKey(), I_OBJECT, varOut);
@@ -839,7 +837,7 @@ namespace EUROPA {
 
 	std::string paramVarIds;
 	char paramIdStr[NBBY * sizeof(int) * 28/93 + 4];
-	for(std::vector<ConstrainedVariableId>::const_iterator paramVarIterator = 
+	for(std::vector<ConstrainedVariableId>::const_iterator paramVarIterator =
 	      token->parameters().begin();
 	    paramVarIterator != token->parameters().end(); ++paramVarIterator) {
 	  ConstrainedVariableId varId = *paramVarIterator;
@@ -869,15 +867,15 @@ namespace EUROPA {
 	}
 	*/
 #endif
-      
+
 	tokOut << std::endl;
       }
-  
+
       void PartialPlanWriter::outputStateVar(const Id<TokenVariable<StateDomain> >& stateVar,
 					     const int parentId, const int type,
 					     std::ofstream &varOut) {
-	
-	varOut << stateVar->getKey() << TAB << ppId << TAB << parentId << TAB 
+
+	varOut << stateVar->getKey() << TAB << ppId << TAB << parentId << TAB
 	       << stateVar->getName().toString() << TAB;
 
 	varOut << ENUM_DOMAIN << TAB;
@@ -894,11 +892,11 @@ namespace EUROPA {
 	varOut << tokenVarTypes[type] << std::endl;
       }
 
-      void PartialPlanWriter::outputEnumVar(const Id<TokenVariable<EnumeratedDomain> >& enumVar, 
+      void PartialPlanWriter::outputEnumVar(const Id<TokenVariable<EnumeratedDomain> >& enumVar,
 					    const int parentId, const int type,
 					    std::ofstream &varOut) {
-	
-	varOut << enumVar->getKey() << TAB << ppId << TAB << parentId << TAB 
+
+	varOut << enumVar->getKey() << TAB << ppId << TAB << parentId << TAB
 	       << enumVar->getName().toString() << TAB;
 
 	varOut << ENUM_DOMAIN << TAB;
@@ -908,42 +906,42 @@ namespace EUROPA {
 
 	varOut << tokenVarTypes[type] << std::endl;
       }
-  
+
       void PartialPlanWriter::outputIntVar(const Id<TokenVariable<IntervalDomain> >& intVar,
 					   const int parentId, const int type,
 					   std::ofstream &varOut) {
-	
-	varOut << intVar->getKey() << TAB << ppId << TAB << parentId << TAB 
+
+	varOut << intVar->getKey() << TAB << ppId << TAB << parentId << TAB
 	       << intVar->getName().toString() << TAB;
 
-	varOut << INT_DOMAIN << TAB << SNULL << TAB << REAL_SORT << TAB 
+	varOut << INT_DOMAIN << TAB << SNULL << TAB << REAL_SORT << TAB
 	       << getLowerBoundStr((IntervalDomain &)intVar->lastDomain()) << TAB
 	       << getUpperBoundStr((IntervalDomain &)intVar->lastDomain()) << TAB;
 
 	varOut << tokenVarTypes[type] << std::endl;
       }
-  
+
       void PartialPlanWriter::outputIntIntVar(const Id<TokenVariable<IntervalIntDomain> >& intVar,
 					      const int parentId, const int type,
 					      std::ofstream &varOut) {
-	
 
-	varOut << intVar->getKey() << TAB << ppId << TAB << parentId << TAB 
+
+	varOut << intVar->getKey() << TAB << ppId << TAB << parentId << TAB
 	       << intVar->getName().toString() << TAB;
 
-	varOut << INT_DOMAIN << TAB << SNULL << TAB << INTEGER_SORT << TAB 
+	varOut << INT_DOMAIN << TAB << SNULL << TAB << INTEGER_SORT << TAB
 	       << getLowerBoundStr((IntervalDomain &)intVar->lastDomain()) << TAB
 	       << getUpperBoundStr((IntervalDomain &)intVar->lastDomain()) << TAB;
-    
+
 	varOut << tokenVarTypes[type] << std::endl;
       }
 
       void PartialPlanWriter::outputObjVar(const ObjectVarId& objVar,
 					   const int parentId, const int type,
 					   std::ofstream &varOut) {
-	
 
-	varOut << objVar->getKey() << TAB << ppId << TAB << parentId << TAB 
+
+	varOut << objVar->getKey() << TAB << ppId << TAB << parentId << TAB
 	       << objVar->getName().toString() << TAB;
 
 	varOut << ENUM_DOMAIN << TAB;
@@ -958,22 +956,22 @@ namespace EUROPA {
 
 	varOut << tokenVarTypes[type] << std::endl;
       }
-  
-      void PartialPlanWriter::outputConstrVar(const ConstrainedVariableId &otherVar, 
+
+      void PartialPlanWriter::outputConstrVar(const ConstrainedVariableId &otherVar,
 					      const int parentId, const int type,
 					      std::ofstream &varOut) {
-	
 
-	varOut << otherVar->getKey() << TAB << ppId << TAB << parentId << TAB 
+
+	varOut << otherVar->getKey() << TAB << ppId << TAB << parentId << TAB
 	       << otherVar->getName().toString() << TAB;
 
 	if(otherVar->lastDomain().isEnumerated()) {
-	  varOut << ENUM_DOMAIN << TAB << getEnumerationStr((EnumeratedDomain &)otherVar->lastDomain()) 
+	  varOut << ENUM_DOMAIN << TAB << getEnumerationStr((EnumeratedDomain &)otherVar->lastDomain())
 		 << TAB << SNULL << TAB << SNULL << TAB << SNULL << TAB;
 	}
 	else if(otherVar->lastDomain().isInterval()) {
-	  varOut << INT_DOMAIN << TAB << SNULL << TAB << REAL_SORT << TAB 
-		 << getLowerBoundStr((IntervalDomain &)otherVar->lastDomain()) << TAB 
+	  varOut << INT_DOMAIN << TAB << SNULL << TAB << REAL_SORT << TAB
+		 << getLowerBoundStr((IntervalDomain &)otherVar->lastDomain()) << TAB
 		 << getUpperBoundStr((IntervalDomain &)otherVar->lastDomain()) << TAB;
 	}
 	else {
@@ -983,9 +981,9 @@ namespace EUROPA {
 	varOut << tokenVarTypes[type] << std::endl;
       }
 
-      void PartialPlanWriter::outputConstraint(const ConstraintId &constrId, std::ofstream &constrOut, 
+      void PartialPlanWriter::outputConstraint(const ConstraintId &constrId, std::ofstream &constrOut,
 					       std::ofstream &cvmOut) {
-	constrOut << constrId->getKey() << TAB << ppId << TAB << constrId->getName().toString() 
+	constrOut << constrId->getKey() << TAB << ppId << TAB << constrId->getName().toString()
 		  << TAB << ATEMPORAL << std::endl;
 	std::vector<ConstrainedVariableId>::const_iterator it =
 	  constrId->getScope().begin();
@@ -1059,11 +1057,11 @@ namespace EUROPA {
       }
 
 #ifndef NO_RESOURCES
-/* TODO JRB: move this to Resource module      
-      
-      void PartialPlanWriter::outputInstant(const InstantId &instId, const int resId, 
+/* TODO JRB: move this to Resource module
+
+      void PartialPlanWriter::outputInstant(const InstantId &instId, const int resId,
 					    std::ofstream &instOut) {
-	instOut << ppId << TAB << resId << TAB << instId->getKey() << TAB << instId->getTime() 
+	instOut << ppId << TAB << resId << TAB << instId->getKey() << TAB << instId->getTime()
 		<< TAB << instId->getLevelMin() << TAB << instId->getLevelMax() << TAB;
 	const TransactionSet &transactions = instId->getTransactions();
 	for(TransactionSet::const_iterator transIt = transactions.begin();
@@ -1073,7 +1071,7 @@ namespace EUROPA {
 	}
 	instOut << std::endl;
       }
-*/      
+*/
 #endif
 
       const std::string PartialPlanWriter::getUpperBoundStr(IntervalDomain &dom) const {
@@ -1104,7 +1102,7 @@ namespace EUROPA {
       }
 
       const std::string PartialPlanWriter::getLowerBoundStr(IntervalDomain &dom) const {
-      
+
 	if(dom.isNumeric()) {
 	  if((int)dom.getLowerBound() == PLUS_INFINITY)
 	    return PINFINITY;
@@ -1128,7 +1126,7 @@ namespace EUROPA {
 	}
 	return std::string("");
       }
-  
+
       const std::string PartialPlanWriter::getEnumerationStr(EnumeratedDomain &edom) const {
 	std::stringstream stream;
 	std::list<double> enumeration;
@@ -1186,8 +1184,8 @@ namespace EUROPA {
       }
 
       void PartialPlanWriter::condWrite(const LabelStr& trans) {
-	debugMsg("PartialPlanWriter:condWrite", "Transaction " << trans.toString() << " isStep " << isStep(trans) 
-		 << " noFullWrite " << noFullWrite << " writeStep " << writeStep << " stepsPerWrite " << stepsPerWrite 
+	debugMsg("PartialPlanWriter:condWrite", "Transaction " << trans.toString() << " isStep " << isStep(trans)
+		 << " noFullWrite " << noFullWrite << " writeStep " << writeStep << " stepsPerWrite " << stepsPerWrite
 		 << " writeCounter " << writeCounter);
 	if(isStep(trans)) {
 	  writeCounter++;
@@ -1210,7 +1208,7 @@ namespace EUROPA {
       void PartialPlanWriter::notifyPropagationCompleted(void) {
 	condWrite(PROPAGATION_COMPLETED);
       }
-  
+
       void PartialPlanWriter::notifyPropagationPreempted(void) {
 	condWrite(PROPAGATION_PREEMPTED);
       }
@@ -1239,7 +1237,7 @@ namespace EUROPA {
       void PartialPlanWriter::notifyExhausted() {
 	condWrite(SEARCH_EXHAUSTED);
       }
-    
+
       void PartialPlanWriter::notifyTimedOut() {
 	condWrite(TIMEOUT_REACHED);
       }
@@ -1348,7 +1346,7 @@ namespace EUROPA {
 	if(it != stepTransactions.end())
 	  stepTransactions.erase(it);
       }
-      
+
       bool PartialPlanWriter::isStep(const LabelStr& trans) {
 	return std::find(stepTransactions.begin(), stepTransactions.end(), trans) != stepTransactions.end();
       }

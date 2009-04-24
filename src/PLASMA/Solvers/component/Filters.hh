@@ -2,7 +2,7 @@
 #define H_Filters
 
 #include "FlawFilter.hh"
-#include "IntervalIntDomain.hh"
+#include "Domains.hh"
 
 /**
  * @file Provides Declarations for useful flaw filter components
@@ -72,7 +72,7 @@ namespace EUROPA {
      * @brief Will filter a token based on the horizon.
      *
      * A number of policies are supported for applying the Horizon Test. They are:
-     * @li PossiblyContained - for the token to be in the horizon, both the start and end times must 
+     * @li PossiblyContained - for the token to be in the horizon, both the start and end times must
      * intersect the horizon.
      * @li PartiallyContained - for the token to be in the horizon, there need only be some temporal overlap
      * between the temporal extent of the token and the horizon.

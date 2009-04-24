@@ -14,8 +14,7 @@ options {
 @includes
 {
 #include "Debug.hh"
-#include "BoolDomain.hh"
-#include "StringDomain.hh"
+#include "Domains.hh"
 #include "NddlInterpreter.hh"
 
 using namespace EUROPA;

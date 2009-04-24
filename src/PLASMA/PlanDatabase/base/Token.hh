@@ -12,8 +12,7 @@
 #include "Schema.hh"
 #include "Entity.hh"
 #include "LabelStr.hh"
-#include "EnumeratedDomain.hh"
-#include "IntervalIntDomain.hh"
+#include "Domains.hh"
 #include "PlanDatabase.hh"
 
 #include <vector>
