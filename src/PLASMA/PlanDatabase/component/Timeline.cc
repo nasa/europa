@@ -13,7 +13,7 @@
 #include "TemporalAdvisor.hh"
 #include "ConstraintEngine.hh"
 #include "Constraint.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "Domains.hh"
 #include "Utils.hh"
 #include "Debug.hh"

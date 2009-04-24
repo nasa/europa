@@ -6,15 +6,16 @@ ModuleBase ConstraintEngine
 	:
 	AbstractDomain.cc
 	CESchema.cc
-	ConstrainedVariable.cc
 	Constraint.cc
 	ConstraintEngine.cc
 	ConstraintEngineListener.cc
+        ConstrainedVariable.cc
+        ConstraintType.cc
 	DataType.cc
+        Propagator.cc
 	PSConstraintEngineListener.cc
-	Propagator.cc
+        PSVarValue.cc
 	VariableChangeListener.cc
-	PSVarValue.cc
 	;
 
 } # PLASMA_READY

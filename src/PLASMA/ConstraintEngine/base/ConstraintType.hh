@@ -1,125 +1,125 @@
-#ifndef _H_ConstraintFactory
-#define _H_ConstraintFactory
+#ifndef _H_ConstraintType
+#define _H_ConstraintType
 
 #include "ConstraintEngineDefs.hh"
 #include "AbstractDomain.hh"
 #include "LabelStr.hh"
 #include "Constraint.hh"
+#include "DataType.hh"
 
 #include <string>
 #include <vector>
 #include <map>
 
 /**
- * @file ConstraintFactory.hh
+ * @file ConstraintType.hh
  */
 
 namespace EUROPA {
 
-  class ConstraintFactory;
-  typedef Id<ConstraintFactory> ConstraintFactoryId;
+  class ConstraintType;
+  typedef Id<ConstraintType> ConstraintTypeId;
 
-  class ConstraintFactory {
+  class ConstraintType {
   public:
-    virtual ~ConstraintFactory() { }
+    virtual ~ConstraintType();
 
-    const LabelStr& getName() const {
-      return m_name;
-    }
+    const ConstraintTypeId& getId() const;
 
-    bool isSystemDefined() const {
-      return m_systemDefined;
-    }
+    const LabelStr& getName() const;
 
-    const ConstraintFactoryId& getId() const {return m_id;}
+    bool isSystemDefined() const;
 
-    virtual ConstraintId createConstraint(const ConstraintEngineId constraintEngine, 
-					  const std::vector<ConstrainedVariableId>& scope) {
-      check_error(ALWAYS_FAILS);
-      return ConstraintId::noId();
-    }
+    virtual ConstraintId createConstraint(const ConstraintEngineId constraintEngine,
+					  const std::vector<ConstrainedVariableId>& scope);
+
+    virtual const std::vector<DataTypeId>& getArgTypes() const;
+
+    virtual bool checkArgTypes(const std::vector<DataTypeId>& types) const;
 
   protected:
-    ConstraintFactory(const LabelStr& name, const LabelStr& propagatorName,
-		      bool systemDefined = false)
-      : m_id(this), m_name(name), m_propagatorName(propagatorName),
-	m_systemDefined(systemDefined) { }
+    ConstraintType(const LabelStr& name,
+                   const LabelStr& propagatorName,
+		           bool systemDefined = false);
 
-    ConstraintFactoryId m_id;
+    ConstraintTypeId m_id;
     const LabelStr m_name;
     const LabelStr m_propagatorName;
     const bool m_systemDefined;
+    std::vector<DataTypeId> m_argTypes;
   };
 
   /**********************************************************/
 
-  template <class ConstraintType>
-  class ConcreteConstraintFactory : public ConstraintFactory {
+  template <class ConstraintInstance>
+  class ConcreteConstraintType : public ConstraintType {
   public:
-    ConcreteConstraintFactory(const LabelStr& name, const LabelStr& propagatorName, bool systemDefined = false)
-      : ConstraintFactory(name, propagatorName, systemDefined) { }
+    ConcreteConstraintType(const LabelStr& name, const LabelStr& propagatorName, bool systemDefined = false)
+      : ConstraintType(name, propagatorName, systemDefined) { }
 
-    ConstraintId createConstraint(const ConstraintEngineId constraintEngine, 
+    ConstraintId createConstraint(const ConstraintEngineId constraintEngine,
 				  const std::vector<ConstrainedVariableId>& scope) {
       check_error(constraintEngine.isValid());
       check_error(scope.size() >= 1);
-      Constraint* constraint = new ConstraintType(m_name, m_propagatorName, constraintEngine, scope);
+      Constraint* constraint = new ConstraintInstance(m_name, m_propagatorName, constraintEngine, scope);
       check_error(constraint != 0);
       check_error(constraint->getId().isValid());
       return(constraint->getId());
     }
   };
 
-  template <class ConstraintType>
-  class RotatedNaryConstraintFactory : public ConstraintFactory {
+  template <class ConstraintInstance>
+  class RotatedNaryConstraintType : public ConstraintType {
   public:
-    RotatedNaryConstraintFactory(const LabelStr& name, const LabelStr& propagatorName,
+    RotatedNaryConstraintType(const LabelStr& name, const LabelStr& propagatorName,
                                  const LabelStr& otherName, const int& rotateCount)
-      : ConstraintFactory(name, propagatorName),
-        m_otherName(otherName),
-        m_rotateCount(rotateCount) {
+      : ConstraintType(name, propagatorName)
+      , m_otherName(otherName)
+      , m_rotateCount(rotateCount)
+    {
       assertTrue(name != otherName);
     }
 
-    ConstraintId createConstraint(const ConstraintEngineId constraintEngine, 
-				  const std::vector<ConstrainedVariableId>& scope) {
+    ConstraintId createConstraint(const ConstraintEngineId constraintEngine,
+				  const std::vector<ConstrainedVariableId>& scope)
+    {
       check_error(constraintEngine.isValid());
       check_error(scope.size() >= 1);
-      Constraint* constraint = new ConstraintType(m_name, m_propagatorName, constraintEngine, scope,
+      Constraint* constraint = new ConstraintInstance(m_name, m_propagatorName, constraintEngine, scope,
                                                   m_otherName, m_rotateCount);
       check_error(constraint != 0);
       check_error(constraint->getId().isValid());
       return(constraint->getId());
     }
 
-  private:
+  protected:
     const LabelStr m_otherName;
     const int m_rotateCount;
   };
 
-  template <class ConstraintType>
-  class SwapTwoVarsNaryConstraintFactory : public ConstraintFactory {
+  template <class ConstraintInstance>
+  class SwapTwoVarsNaryConstraintType : public ConstraintType {
   public:
-    SwapTwoVarsNaryConstraintFactory(const LabelStr& name, const LabelStr& propagatorName,
+    SwapTwoVarsNaryConstraintType(const LabelStr& name, const LabelStr& propagatorName,
                                  const LabelStr& otherName, const int& first, const int& second)
-      : ConstraintFactory(name, propagatorName),
+      : ConstraintType(name, propagatorName),
         m_otherName(otherName), m_first(first), m_second(second) {
       assertTrue(name != otherName);
       assertTrue(first != second);
     }
 
-    ConstraintId createConstraint(const ConstraintEngineId constraintEngine, 
+    ConstraintId createConstraint(const ConstraintEngineId constraintEngine,
 				  const std::vector<ConstrainedVariableId>& scope) {
       check_error(constraintEngine.isValid());
       check_error(scope.size() >= 1);
-      Constraint* constraint = new ConstraintType(m_name, m_propagatorName, constraintEngine,
+      Constraint* constraint = new ConstraintInstance(m_name, m_propagatorName, constraintEngine,
                                                   scope, m_otherName, m_first, m_second);
       check_error(constraint != 0);
       check_error(constraint->getId().isValid());
       return(constraint->getId());
     }
 
-  private:
+  protected:
     const LabelStr m_otherName;
     const int m_first, m_second;
   };
@@ -132,8 +132,8 @@ namespace EUROPA {
    * @param ConstraintName The constraint's name as used in a model, for example.
    * @param PropagatorName The constraint's propagator's name.
    */
-#define REGISTER_SYSTEM_CONSTRAINT(ceSchema, ConstraintType, ConstraintName, PropagatorName) \
-  (ceSchema->registerConstraintFactory(new ConcreteConstraintFactory<ConstraintType>(LabelStr(ConstraintName), LabelStr(PropagatorName), true)))
+#define REGISTER_SYSTEM_CONSTRAINT(ceSchema, ConstraintInstance, ConstraintName, PropagatorName) \
+  (ceSchema->registerConstraintType((new ConcreteConstraintType<ConstraintInstance>(LabelStr(ConstraintName), LabelStr(PropagatorName), true))->getId()))
 
   /**
    * @def REGISTER_CONSTRAINT
@@ -143,8 +143,8 @@ namespace EUROPA {
    * @param ConstraintName The constraint's name as used in NDDL models.
    * @param PropagatorName The constraint's propagator's name.
    */
-#define REGISTER_CONSTRAINT(ceSchema,ConstraintType, ConstraintName, PropagatorName) \
-  (ceSchema->registerConstraintFactory(new ConcreteConstraintFactory<ConstraintType>(LabelStr(ConstraintName), LabelStr(PropagatorName))))
+#define REGISTER_CONSTRAINT(ceSchema,ConstraintInstance, ConstraintName, PropagatorName) \
+  (ceSchema->registerConstraintType((new ConcreteConstraintType<ConstraintInstance>(LabelStr(ConstraintName), LabelStr(PropagatorName)))->getId()))
 
   /**
    * @def REGISTER_ROTATED_CONSTRAINT
@@ -160,8 +160,8 @@ namespace EUROPA {
    * if -1, move the first variable to the end.
    */
 #define REGISTER_ROTATED_CONSTRAINT(ceSchema,ConstraintName, PropagatorName, RotateName, RotateCount) \
-  (ceSchema->registerConstraintFactory(new RotatedNaryConstraintFactory<RotateScopeRightConstraint>(LabelStr(ConstraintName), LabelStr(PropagatorName),\
-                                                                                                   LabelStr(RotateName), (RotateCount))))
+  (ceSchema->registerConstraintType((new RotatedNaryConstraintType<RotateScopeRightConstraint>(LabelStr(ConstraintName), LabelStr(PropagatorName),\
+                                                                                                   LabelStr(RotateName), (RotateCount)))->getId()))
 
   /**
    * @def REGISTER_SWAP_TWO_VARS_CONSTRAINT
@@ -179,8 +179,8 @@ namespace EUROPA {
    * before the last variable, etc.
    */
 #define REGISTER_SWAP_TWO_VARS_CONSTRAINT(ceSchema,ConstraintName, PropagatorName, RotateName, FirstVar, SecondVar) \
-  (ceSchema->registerConstraintFactory(new SwapTwoVarsNaryConstraintFactory<SwapTwoVarsConstraint>(LabelStr(ConstraintName), LabelStr(PropagatorName), \
-                                                                                                  LabelStr(RotateName), (FirstVar), (SecondVar))))
+  (ceSchema->registerConstraintType((new SwapTwoVarsNaryConstraintType<SwapTwoVarsConstraint>(LabelStr(ConstraintName), LabelStr(PropagatorName), \
+                                                                                                  LabelStr(RotateName), (FirstVar), (SecondVar)))->getId()))
 
 }
 #endif

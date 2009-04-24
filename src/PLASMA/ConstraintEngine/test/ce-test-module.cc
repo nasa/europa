@@ -8,7 +8,7 @@
 #include "Utils.hh"
 #include "Variable.hh"
 #include "Constraints.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "Propagators.hh"
 
 /* Include for domain management */
@@ -2515,7 +2515,7 @@ private:
 
 }; // class ConstraintTest
 
-class ConstraintFactoryTest
+class ConstraintTypeTest
 {
 public:
   static bool test() {
@@ -2756,7 +2756,7 @@ void ConstraintEngineModuleTests::constraintTests(void)
 
 void ConstraintEngineModuleTests::constraintFactoryTests(void)
 {
-    ConstraintFactoryTest::test();
+    ConstraintTypeTest::test();
 }
 
 void ConstraintEngineModuleTests::equivalenceClassTests(void)

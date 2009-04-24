@@ -1,6 +1,6 @@
 #include "Constraints.hh"
 #include "ConstraintEngine.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "ConstrainedVariable.hh"
 #include "Domains.hh"
 #include "Utils.hh"

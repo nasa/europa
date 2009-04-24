@@ -4,7 +4,7 @@
 #include "Token.hh"
 #include "TokenVariable.hh"
 #include "Constraint.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "ConstraintEngine.hh"
 #include "Domains.hh"
 #include "Utils.hh"

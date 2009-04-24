@@ -7,7 +7,7 @@
 #include "PlanDatabaseWriter.hh"
 
 // Support for registered constraints
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "Constraints.hh"
 #include "Propagators.hh"
 #include "CommonAncestorConstraint.hh"

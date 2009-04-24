@@ -9,7 +9,7 @@
 #include "Schema.hh"
 #include "Domains.hh"
 #include "Constraint.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "Utils.hh"
 #include "Debug.hh"
 #include <map>

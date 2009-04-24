@@ -14,9 +14,8 @@
 
 #include "ConstraintEngine.hh"
 #include "Domains.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "Constraint.hh"
 #include "Constraints.hh"
-#include "TestSupport.hh"
 
 #endif

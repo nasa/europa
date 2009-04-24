@@ -1,15 +1,13 @@
 #ifndef _H_CESchema
 #define _H_CESchema
 
+#include <map>
 #include "ConstraintEngineDefs.hh"
-#include "AbstractDomain.hh"
-#include "ConstrainedVariable.hh"
 #include "LabelStr.hh"
 #include "Engine.hh"
+#include "AbstractDomain.hh"
+#include "ConstraintType.hh"
 #include "DataType.hh"
-#include "ConstraintFactory.hh"
-#include <map>
-#include <string>
 
 /**
  * @file Class to manage all metadata for Constraint engine (variable data types, constraint types, etc).
@@ -30,50 +28,27 @@ namespace EUROPA {
       const CESchemaId& getId() const;
 
       // Methods to Manage Data Types
-      /**
-       * @brief Add a data type
-       */
       void registerDataType(const DataTypeId& dt);
-
-      /**
-       * @brief Obtain the data type on the type name
-       */
       DataTypeId getDataType(const char* typeName);
-
-      /**
-       * @brief Checks to see whether a data type registered for a name
-       */
       bool isDataType(const char* typeName) const;
-
-      /**
-       * @brief Return the base domain
-       */
       const AbstractDomain & baseDomain(const char* typeName);
-
       void purgeDataTypes();
 
       // Methods to Manage Constraint Factories
-      void registerConstraintFactory(ConstraintFactory* factory);
-      void registerConstraintFactory(ConstraintFactory* factory, const LabelStr& name);
-
-      const ConstraintFactoryId& getConstraintFactory(const LabelStr& name);
-
-      bool isConstraintFactoryRegistered(const LabelStr& name, const bool& warn = false);
-
-      bool isConstraintFactoryNotRegistered(const LabelStr& name);
-
-      void purgeConstraintFactories();
+      void registerConstraintType(const ConstraintTypeId& ct);
+      const ConstraintTypeId& getConstraintType(const LabelStr& name);
+      bool isConstraintType(const LabelStr& name, const bool& warn = false);
+      void purgeConstraintTypes();
 
       /**
-       * @brief Delete all factory instances stored.
+       * @brief Delete all DataTypes and ConstraintTypes stored.
        */
       void purgeAll();
-
 
     protected:
       CESchemaId m_id;
       std::map<double, DataTypeId> m_dataTypes;
-      std::map<double, ConstraintFactoryId > m_constraintFactories;
+      std::map<double, ConstraintTypeId > m_constraintTypes;
   };
 
 } // namespace EUROPA

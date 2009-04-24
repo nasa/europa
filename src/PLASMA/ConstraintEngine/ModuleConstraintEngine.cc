@@ -1,7 +1,7 @@
 #include "ModuleConstraintEngine.hh"
 #include "DataTypes.hh"
 #include "Constraints.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "Propagators.hh"
 
 
@@ -177,6 +177,6 @@ namespace EUROPA {
   {
       CESchema* ces = (CESchema*)engine->getComponent("CESchema");
       // TODO: should be more selective and only remove the constraints we added above
-      ces->purgeConstraintFactories();
+      ces->purgeConstraintTypes();
   }
 }

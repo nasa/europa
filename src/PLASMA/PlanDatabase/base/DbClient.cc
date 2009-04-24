@@ -8,7 +8,7 @@
 #include "TokenVariable.hh"
 #include "DbClientListener.hh"
 #include "ConstraintEngine.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "Debug.hh"
 
 #include <string>

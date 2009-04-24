@@ -1,7 +1,7 @@
 #include "ModulePlanDatabase.hh"
 #include "Schema.hh"
 #include "PlanDatabase.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "CommonAncestorConstraint.hh"
 #include "HasAncestorConstraint.hh"
 #include "ObjectTokenRelation.hh"

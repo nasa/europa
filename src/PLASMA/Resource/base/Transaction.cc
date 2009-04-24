@@ -5,7 +5,7 @@
 #include "PlanDatabase.hh"
 #include "Domains.hh"
 #include "Constraint.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include <vector>
 
 

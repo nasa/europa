@@ -1,5 +1,5 @@
 #include "Utils.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "UnifyMemento.hh"
 #include "Token.hh"
 #include "TokenVariable.hh"

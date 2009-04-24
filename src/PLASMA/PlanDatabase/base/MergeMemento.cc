@@ -1,7 +1,7 @@
 #include "MergeMemento.hh"
 #include "Token.hh"
 #include "PlanDatabase.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "TokenVariable.hh"
 #include "Utils.hh"
 #include <map>
@@ -19,7 +19,7 @@ namespace EUROPA{
    * The key is a double, which is the encoding of the variable Id.
    * @param var The variable to be replaced, if found. It may not be in the map, indicating it is not a variable of the
    * merged token.
-   * @return Variable Id Entry in lookup table if the given token is part of the token being merged, 
+   * @return Variable Id Entry in lookup table if the given token is part of the token being merged,
    * otherwise returns var.
    * @todo The algorithm for splitting is very sub-optimal in the non-chronological case. Consider in the future
    * an algorithm to migrate consequenecs rather than force additional splits. This is similar to deactivation
@@ -87,8 +87,8 @@ namespace EUROPA{
 
     if(m_inactiveToken->isTerminated())
       return;
- 
-    // Start by removing all the new constraints that were created. To avoid a call back 
+
+    // Start by removing all the new constraints that were created. To avoid a call back
     // into this method for synching data structures, we set a flag for undoing
     m_undoing = true;
 

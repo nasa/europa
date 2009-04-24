@@ -1075,7 +1075,7 @@ namespace EUROPA
   ConstraintId ConstraintEngine::createConstraint(const LabelStr& name,
                            const std::vector<ConstrainedVariableId>& scope)
   {
-      ConstraintFactoryId factory = getCESchema()->getConstraintFactory(name);
+      ConstraintTypeId factory = getCESchema()->getConstraintType(name);
       check_error(factory.isValid());
       ConstraintId constraint = factory->createConstraint(getId(), scope);
 

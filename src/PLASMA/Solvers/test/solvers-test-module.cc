@@ -3,7 +3,7 @@
 #include "Solver.hh"
 #include "ComponentFactory.hh"
 #include "Constraint.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "UnboundVariableManager.hh"
 #include "OpenConditionManager.hh"
 #include "ThreatManager.hh"

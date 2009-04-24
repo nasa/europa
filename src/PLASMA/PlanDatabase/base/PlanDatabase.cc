@@ -10,7 +10,7 @@
 #include "DbClient.hh"
 #include "Utils.hh"
 #include "ConstraintEngine.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "LabelStr.hh"
 #include "Entity.hh"
 #include "Debug.hh"

@@ -1,5 +1,5 @@
 #include "ModuleResource.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "Schema.hh"
 #include "FlawHandler.hh"
 #include "NddlXml.hh"

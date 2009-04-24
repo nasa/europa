@@ -19,7 +19,7 @@
 #include "Error.hh"
 #include "tinyxml.h"
 #include "Domains.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "Variable.hh"
 #include "Constraint.hh"
 #include "ConstrainedVariable.hh"
@@ -259,7 +259,7 @@ namespace EUROPA {
     for ( ; !testCases.empty(); testCases.pop_front()) {
       debugMsg("ConstraintTesting:executeTestCases","Executing " << testCases.front().toString());
       // Warn about unregistered constraint names and otherwise ignore tests using them.
-      if (!engine->getCESchema()->isConstraintFactoryRegistered(LabelStr(testCases.front().m_constraintName), false)) {
+      if (!engine->getCESchema()->isConstraintType(LabelStr(testCases.front().m_constraintName), false)) {
         if (warned.find(testCases.front().m_constraintName) == warned.end()) {
           std::cout << "\n    Warning: "
                     << testCases.front().m_fileName << ':' << testCases.front().m_case

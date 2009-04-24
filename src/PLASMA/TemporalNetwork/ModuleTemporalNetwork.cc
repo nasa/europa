@@ -1,6 +1,6 @@
 #include "ModuleTemporalNetwork.hh"
 #include "ConstraintEngine.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "Constraints.hh"
 #include "PlanDatabase.hh"
 #include "Propagators.hh"

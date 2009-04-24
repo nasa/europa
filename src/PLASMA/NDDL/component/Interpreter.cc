@@ -10,7 +10,7 @@
 #include "Debug.hh"
 #include "Error.hh"
 
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "DbClient.hh"
 #include "DbClientTransactionPlayer.hh"
 #include "Domains.hh"
