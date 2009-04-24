@@ -6,7 +6,6 @@
 #undef VOID
 #endif
 
-#include "TestSupport.hh"
 #include "ANMLParser.hpp"
 
 using namespace EUROPA;

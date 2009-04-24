@@ -1,5 +1,6 @@
 #include "db-test-module.hh"
 
+#include "Utils.hh"
 #include "PlanDatabase.hh"
 #include "Schema.hh"
 #include "Object.hh"
@@ -17,7 +18,6 @@
 #include "TokenFactory.hh"
 #include "Domains.hh"
 
-#include "TestSupport.hh"
 #include "Debug.hh"
 #include "PlanDatabaseWriter.hh"
 

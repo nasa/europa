@@ -16,7 +16,7 @@
 #include "SAVH_ClosedWorldFVDetector.hh"
 
 #include "Debug.hh"
-#include "TestSupport.hh"
+#include "Utils.hh"
 #include "Domains.hh"
 #include "DefaultPropagator.hh"
 #include "Constraint.hh"

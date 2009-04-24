@@ -10,7 +10,6 @@ ModuleComponent ConstraintEngine
 	DefaultPropagator.cc
 	EqualityConstraintPropagator.cc
 	EquivalenceClassCollection.cc
-	test-support.cc
 	;
 
 } # PLASMA_READY

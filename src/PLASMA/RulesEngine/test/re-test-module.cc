@@ -9,7 +9,7 @@
 #include "RulesEngine.hh"
 #include "Rule.hh"
 #include "RuleInstance.hh"
-#include "TestSupport.hh"
+#include "Utils.hh"
 #include "TestRule.hh"
 #include "Utils.hh"
 #include "Domains.hh"

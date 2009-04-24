@@ -5,7 +5,7 @@
  * @file   Utils.hh
  * @author Conor McGann
  * @date   Mon Dec 27 17:19:39 2004
- * @brief  
+ * @brief
  * @ingroup Utils
  */
 
@@ -51,12 +51,12 @@ namespace EUROPA {
   std::string toString(double value);
 
   /**
-   * @brief Utility function to tokenzie a std string 
+   * @brief Utility function to tokenzie a std string
    */
 
-  void tokenize(const std::string& str, 
-		std::vector<std::string>& tokens,  
-		const std::string& delimiters = " "); 
+  void tokenize(const std::string& str,
+		std::vector<std::string>& tokens,
+		const std::string& delimiters = " ");
 
   template<class TYPE>
   bool allValid(const std::set<Id<TYPE> >& objects){
@@ -213,6 +213,17 @@ namespace EUROPA {
     }
     objects.clear();
   }
-
 }
+
+#define EUROPA_runTest(test, args...) {			\
+  try { \
+      unsigned int id_count = EUROPA::IdTable::size(); \
+      bool result = test(args); \
+      EUROPA::IdTable::checkResult(result,id_count); \
+  } \
+  catch (EUROPA::Error err){ \
+      err.print(std::cout); \
+  }\
+
+
 #endif

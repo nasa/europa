@@ -41,8 +41,8 @@ namespace EUROPA {
   class IdTable {
   public:
     ~IdTable(); // deallocating statics requires public access on beos
-     
-    static unsigned int size();    
+
+    static unsigned int size();
 
     static unsigned int insert(unsigned long int id, const char* baseType);
     static void remove(unsigned long int id);
@@ -52,11 +52,14 @@ namespace EUROPA {
 
     static void printTypeCnts(std::ostream& os);
     static void output(std::ostream& os);
-    
+
+    // Test Support, checks for memory leaks
+	static void checkResult(bool result, unsigned int id_count);
+
   protected:
     IdTable();
     static IdTable& getInstance();
-    
+
     std::map<unsigned long int, std::pair<unsigned int,double> > m_collection;  /*<! Map from pointers to keys*/
     std::map<std::string, unsigned int> m_typeCnts;
   };

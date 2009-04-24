@@ -16,6 +16,7 @@
 #include "Debug.hh"
 #include "LabelStr.hh"
 #include "Mutex.hh"
+#include "Entity.hh"
 
 /**
  * @file IdTable.cc
@@ -134,4 +135,27 @@ namespace EUROPA {
       os << " (" << it->first << ", " << getEntryKey(it->second) << "," << getEntryType(it->second).toString() << ')';
     os << std::endl;
   }
+
+  void IdTable::checkResult(bool result, unsigned int id_count)
+  {
+	  Entity::garbageCollect();
+
+	  if (result && IdTable::size() <= id_count) {
+		  debugMsg("Test"," PASSED.");
+	  }
+	  else {
+		  if (result) {
+			  std::cerr << " FAILED = DID NOT CLEAN UP ALLOCATED IDs:\n";
+			  IdTable::output(std::cerr);
+			  std::cerr << "\tWere " << id_count << " IDs before; " << IdTable::size() << " now";
+			  std::cerr << std::endl;
+			  throw Error::GeneralMemoryError();
+		  }
+		  else {
+			  std::cerr << "      " << " FAILED TO PASS UNIT TEST." << std::endl;
+			  throw Error::GeneralUnknownError();
+		  }
+	  }
+  }
+
 }

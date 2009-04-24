@@ -6,7 +6,7 @@
 #include "PlanDatabase.hh"
 #include "PlanDatabaseWriter.hh"
 #include "DbClientTransactionLog.hh"
-#include "TestSupport.hh"
+#include "Utils.hh"
 #include "EuropaEngine.hh"
 
 #ifdef __BEOS__

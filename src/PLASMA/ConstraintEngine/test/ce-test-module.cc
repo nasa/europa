@@ -5,7 +5,6 @@
  * @brief Read the source for details
  */
 #include "ce-test-module.hh"
-#include "TestSupport.hh"
 #include "Utils.hh"
 #include "Variable.hh"
 #include "Constraints.hh"
