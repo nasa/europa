@@ -56,6 +56,8 @@
 #include <string>
 #include <list>
 
+using namespace EUROPA;
+
 class ResourceTestEngine  : public EngineBase
 {
   public:

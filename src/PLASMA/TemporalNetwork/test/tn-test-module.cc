@@ -4,6 +4,7 @@
 #include "TemporalPropagator.hh"
 #include "STNTemporalAdvisor.hh"
 #include "TemporalAdvisor.hh"
+#include "Constraints.hh"
 #include "Schema.hh"
 #include "PlanDatabase.hh"
 #include "PlanDatabaseDefs.hh"
@@ -26,6 +27,8 @@
 #include <iostream>
 #include <string>
 #include <list>
+
+using namespace EUROPA;
 
 class TNTestEngine : public EngineBase
 {

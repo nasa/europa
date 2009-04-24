@@ -19,6 +19,8 @@ void __assert_fail(const char *__assertion,
 }
 #endif
 
+using namespace EUROPA;
+
 class TestEngine : public EuropaEngine
 {
   public:

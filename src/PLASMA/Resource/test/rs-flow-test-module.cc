@@ -20,6 +20,7 @@
 #include "Domains.hh"
 #include "DefaultPropagator.hh"
 #include "Constraint.hh"
+#include "Constraints.hh"
 #include "Utils.hh"
 #include "PlanDatabaseDefs.hh"
 #include "PlanDatabase.hh"
@@ -37,6 +38,8 @@
 #include <iostream>
 #include <string>
 #include <list>
+
+using namespace EUROPA;
 
 class ResourceTestEngine  : public EngineBase
 {
