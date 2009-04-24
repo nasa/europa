@@ -1,7 +1,7 @@
 #ifndef _H_SAVH_ProfilePropagator
 #define _H_SAVH_ProfilePropagator
 
-#include "DefaultPropagator.hh"
+#include "Propagators.hh"
 #include "ConstraintEngineDefs.hh"
 #include "PlanDatabaseDefs.hh"
 #include "SAVH_ResourceDefs.hh"
@@ -18,7 +18,7 @@ namespace EUROPA {
     private:
       void execute();
       void execute(const ConstraintId& constraint);
-      bool updateRequired() const; 
+      bool updateRequired() const;
       void handleConstraintAdded(const ConstraintId& constraint);
       void handleConstraintRemoved(const ConstraintId& constraint);
 

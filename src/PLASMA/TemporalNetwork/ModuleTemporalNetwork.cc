@@ -3,7 +3,7 @@
 #include "ConstraintFactory.hh"
 #include "Constraints.hh"
 #include "PlanDatabase.hh"
-#include "DefaultPropagator.hh"
+#include "Propagators.hh"
 #include "TemporalPropagator.hh"
 #include "STNTemporalAdvisor.hh"
 

@@ -7,12 +7,12 @@
  * @date 2005
  */
 
-#include "DefaultPropagator.hh"
+#include "Propagators.hh"
 #include "PlanDatabaseDefs.hh"
 #include "ResourceDefs.hh"
 #include <set>
 
-namespace EUROPA {    
+namespace EUROPA {
 
   /**
    * @brief Provides a minor extension by overriding the execute method to process all constraints
@@ -26,8 +26,8 @@ namespace EUROPA {
     /**
      * @brief Standard constructor
      */
-    ResourcePropagator(const LabelStr& name, 
-		       const ConstraintEngineId& constraintEngine, 
+    ResourcePropagator(const LabelStr& name,
+		       const ConstraintEngineId& constraintEngine,
 		       const PlanDatabaseId& planDatabase);
 
   private:
@@ -51,7 +51,7 @@ namespace EUROPA {
     const std::list<ResourceId> getDirtyResources() const;
 
     const PlanDatabaseId m_planDb;
-    
+
     bool isEnabled() const;
   };
 }

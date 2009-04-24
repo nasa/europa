@@ -7,9 +7,8 @@ ModuleComponent ConstraintEngine
 	Constraints.cc
 	DataTypes.cc
 	Domains.cc
-	DefaultPropagator.cc
-	EqualityConstraintPropagator.cc
 	EquivalenceClassCollection.cc
+	Propagators.cc
 	;
 
 } # PLASMA_READY

@@ -1,25 +1,49 @@
-#ifndef _H_EqualityConstraintPropagator
-#define _H_EqualityConstraintPropagator
-
-/**
- * @file EqualityCOnstraintPropagator.hh
- * @author Conor McGann
- * @date August, 2003
+/*
+ * Propagators.hh
+ *
+ *  Created on: Apr 23, 2009
+ *      Author: javier
  */
+
+#ifndef PROPAGATORS_HH_
+#define PROPAGATORS_HH_
+
 
 #include "Propagator.hh"
 #include "EquivalenceClassCollection.hh"
-#include <map>
 #include <set>
 
-namespace EUROPA{
+namespace EUROPA {
+
+  class DefaultPropagator: public Propagator
+  {
+  public:
+    DefaultPropagator(const LabelStr& name, const ConstraintEngineId& constraintEngine);
+    virtual void execute();
+    virtual bool updateRequired() const;
+  protected:
+    virtual void handleConstraintAdded(const ConstraintId& constrain);
+    virtual void handleConstraintRemoved(const ConstraintId& constraint);
+    virtual void handleConstraintActivated(const ConstraintId& constrain);
+    virtual void handleConstraintDeactivated(const ConstraintId& constraint);
+    virtual void handleNotification(const ConstrainedVariableId& variable,
+				    int argIndex,
+				    const ConstraintId& constraint,
+				    const DomainListener::ChangeType& changeType);
+
+    ConstraintSet m_agenda;
+
+    int m_activeConstraint;
+  private:
+    bool isValid() const;
+  };
 
   /**
    * @class EqualityConstraintPropagator
    * @brief Responsible for propagation management of all EqualConstraints when registered.
    *
    * Achieves this by organizing variables constrained by an EqualConstraint into different
-   * Equivalence Classes. This is derived from the approach in Europa today, though the implementation 
+   * Equivalence Classes. This is derived from the approach in Europa today, though the implementation
    * details are a little different.
    * @par Key Points
    * @li Addition of a Constraint causes an incremental update to the equivalence class collection
@@ -49,9 +73,9 @@ namespace EUROPA{
 
     void handleConstraintDeactivated(const ConstraintId& constraint);
 
-    void handleNotification(const ConstrainedVariableId& variable, 
-			    int argIndex, 
-			    const ConstraintId& constraint, 
+    void handleNotification(const ConstrainedVariableId& variable,
+			    int argIndex,
+			    const ConstraintId& constraint,
 			    const DomainListener::ChangeType& changeType);
 
     /**
@@ -73,4 +97,6 @@ namespace EUROPA{
   };
 
 }
-#endif
+
+
+#endif /* PROPAGATORS_HH_ */

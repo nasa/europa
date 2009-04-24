@@ -19,7 +19,7 @@
 
 #include "Utils.hh"
 #include "Domains.hh"
-#include "DefaultPropagator.hh"
+#include "Propagators.hh"
 #include "Constraint.hh"
 #include "Utils.hh"
 #include "PlanDatabaseDefs.hh"

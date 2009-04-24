@@ -9,9 +9,7 @@
 #include "Variable.hh"
 #include "Constraints.hh"
 #include "ConstraintFactory.hh"
-#include "DefaultPropagator.hh"
-#include "EquivalenceClassCollection.hh"
-#include "EqualityConstraintPropagator.hh"
+#include "Propagators.hh"
 
 /* Include for domain management */
 #include "Domains.hh"

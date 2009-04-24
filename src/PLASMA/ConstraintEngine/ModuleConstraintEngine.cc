@@ -2,7 +2,7 @@
 #include "DataTypes.hh"
 #include "Constraints.hh"
 #include "ConstraintFactory.hh"
-#include "DefaultPropagator.hh"
+#include "Propagators.hh"
 
 
 namespace EUROPA {

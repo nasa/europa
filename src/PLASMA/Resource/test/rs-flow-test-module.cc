@@ -1,4 +1,5 @@
 #include "rs-flow-test-module.hh"
+
 #include "ResourceDefs.hh"
 #include "Resource.hh"
 #include "Transaction.hh"
@@ -16,12 +17,11 @@
 #include "SAVH_ClosedWorldFVDetector.hh"
 
 #include "Debug.hh"
+#include "Engine.hh"
 #include "Utils.hh"
-#include "Domains.hh"
-#include "DefaultPropagator.hh"
-#include "Constraint.hh"
 #include "Constraints.hh"
-#include "Utils.hh"
+#include "Domains.hh"
+#include "Propagators.hh"
 #include "PlanDatabaseDefs.hh"
 #include "PlanDatabase.hh"
 #include "Schema.hh"
@@ -31,9 +31,6 @@
 #include "STNTemporalAdvisor.hh"
 #include "SAVH_Reusable.hh"
 #include "SAVH_DurativeTokens.hh"
-
-#include "Debug.hh"
-#include "Engine.hh"
 
 #include <iostream>
 #include <string>

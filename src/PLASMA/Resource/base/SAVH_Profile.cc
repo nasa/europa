@@ -6,7 +6,6 @@
 #include "ConstrainedVariable.hh"
 #include "ConstraintEngine.hh"
 #include "PlanDatabase.hh"
-#include "Propagator.hh"
 #include "Debug.hh"
 
 namespace EUROPA {

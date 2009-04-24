@@ -11,9 +11,8 @@
 #include "RuleInstance.hh"
 #include "Utils.hh"
 #include "TestRule.hh"
-#include "Utils.hh"
 #include "Domains.hh"
-#include "DefaultPropagator.hh"
+#include "Propagators.hh"
 #include "ProxyVariableRelation.hh"
 
 #include "Constraints.hh"

@@ -9,10 +9,9 @@
 // Support for registered constraints
 #include "ConstraintFactory.hh"
 #include "Constraints.hh"
-#include "EqualityConstraintPropagator.hh"
+#include "Propagators.hh"
 #include "CommonAncestorConstraint.hh"
 #include "HasAncestorConstraint.hh"
-#include "DefaultPropagator.hh"
 
 // Misc
 #include "ModuleConstraintEngine.hh"
