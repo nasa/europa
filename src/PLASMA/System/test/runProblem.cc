@@ -3,10 +3,10 @@
 #include <iostream>
 #include <stdlib.h>
 #include "Debug.hh"
+#include "Utils.hh"
 #include "PlanDatabase.hh"
 #include "PlanDatabaseWriter.hh"
 #include "DbClientTransactionLog.hh"
-#include "Utils.hh"
 #include "EuropaEngine.hh"
 
 #ifdef __BEOS__

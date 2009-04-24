@@ -9,8 +9,10 @@
  * @ingroup Utils
  */
 
-#include "Id.hh"
 #include "Entity.hh"
+#include "Error.hh"
+#include "Id.hh"
+#include "IdTable.hh"
 
 #include <vector>
 #include <set>
@@ -215,15 +217,15 @@ namespace EUROPA {
   }
 }
 
-#define EUROPA_runTest(test, args...) {			\
+#define EUROPA_runTest(test, args...) { \
   try { \
       unsigned int id_count = EUROPA::IdTable::size(); \
       bool result = test(args); \
       EUROPA::IdTable::checkResult(result,id_count); \
   } \
-  catch (EUROPA::Error err){ \
+  catch (Error err){ \
       err.print(std::cout); \
-  }\
-
+  } \
+}
 
 #endif

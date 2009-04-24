@@ -9,7 +9,7 @@
 #include "Variable.hh"
 #include "Constraints.hh"
 #include "ConstraintFactory.hh"
-#include "IdTable.hh"
+#include "DefaultPropagator.hh"
 #include "EquivalenceClassCollection.hh"
 #include "EqualityConstraintPropagator.hh"
 
@@ -34,6 +34,49 @@
 
 
 using namespace EUROPA;
+
+class DefaultEngineAccessor {
+	public:
+	  static const ConstraintEngineId& instance() {
+	    if (s_instance.isNoId()) {
+	        CESchema* ces = new CESchema();
+	      s_instance = (new ConstraintEngine(ces->getId()))->getId();
+	      new DefaultPropagator(LabelStr("Default"), s_instance);
+	      new DefaultPropagator(LabelStr("Temporal"), s_instance);
+	    }
+	    return s_instance;
+	  }
+
+	  static void reset() {
+	    if (!s_instance.isNoId()) {
+	        const CESchemaId& tfm = s_instance->getCESchema();
+	      delete (ConstraintEngine*) s_instance;
+	      delete (CESchema*) tfm;
+	      s_instance = ConstraintEngineId::noId();
+	     }
+	  }
+
+	private:
+	  static ConstraintEngineId s_instance;
+};
+
+ConstraintEngineId DefaultEngineAccessor::s_instance;
+
+#define ENGINE DefaultEngineAccessor::instance()
+
+// TODO: getting rid of the ENGINE shortcut would allow us to use the macro from Utils.hh
+#define EUROPA_runCETest(test, args...) { \
+  try { \
+      DefaultEngineAccessor::instance(); \
+      unsigned int id_count = EUROPA::IdTable::size(); \
+      bool result = test(args); \
+      DefaultEngineAccessor::reset(); \
+      EUROPA::IdTable::checkResult(result,id_count); \
+  } \
+  catch (Error err){ \
+      err.print(std::cout); \
+  } \
+}
 
 class DelegationTestConstraint : public Constraint {
 public:
@@ -133,10 +176,10 @@ private:
 class TypeFactoryTests {
 public:
   static bool test() {
-    EUROPA_runTest(testValueCreation);
-    EUROPA_runTest(testDomainCreation);
-    EUROPA_runTest(testVariableCreation);
-    EUROPA_runTest(testVariableWithDomainCreation);
+    EUROPA_runCETest(testValueCreation);
+    EUROPA_runCETest(testDomainCreation);
+    EUROPA_runCETest(testVariableCreation);
+    EUROPA_runCETest(testVariableWithDomainCreation);
     return true;
   }
 
@@ -260,10 +303,10 @@ class ConstraintEngineTest
 {
 public:
   static bool test(){
-    EUROPA_runTest(testDeallocationWithPurging);
-    EUROPA_runTest(testInconsistentInitialVariableDomain);
-    EUROPA_runTest(testVariableLookupByIndex);
-    EUROPA_runTest(testGNATS_3133);
+    EUROPA_runCETest(testDeallocationWithPurging);
+    EUROPA_runCETest(testInconsistentInitialVariableDomain);
+    EUROPA_runCETest(testVariableLookupByIndex);
+    EUROPA_runCETest(testGNATS_3133);
     return true;
   }
 
@@ -389,13 +432,13 @@ class VariableTest
 {
 public:
   static bool test() {
-    EUROPA_runTest(testAllocation);
-    EUROPA_runTest(testMessaging);
-    EUROPA_runTest(testDynamicVariable);
-    EUROPA_runTest(testListener);
-    EUROPA_runTest(testVariablesWithOpenDomains);
-    EUROPA_runTest(testRestrictionScenarios);
-    EUROPA_runTest(testSpecification);
+    EUROPA_runCETest(testAllocation);
+    EUROPA_runCETest(testMessaging);
+    EUROPA_runCETest(testDynamicVariable);
+    EUROPA_runCETest(testListener);
+    EUROPA_runCETest(testVariablesWithOpenDomains);
+    EUROPA_runCETest(testRestrictionScenarios);
+    EUROPA_runCETest(testSpecification);
     return true;
   }
 
@@ -698,32 +741,32 @@ class ConstraintTest
 {
 public:
   static bool test() {
-    EUROPA_runTest(testGNATS_3181);
-    EUROPA_runTest(testUnaryConstraint);
-    EUROPA_runTest(testAddEqualConstraint);
-    EUROPA_runTest(testLessThanEqualConstraint);
-    EUROPA_runTest(testLessOrEqThanSumConstraint);
-    EUROPA_runTest(testBasicPropagation);
-    EUROPA_runTest(testDeactivation);
-    EUROPA_runTest(testForceInconsistency);
-    EUROPA_runTest(testRepropagation);
-    EUROPA_runTest(testConstraintRemoval);
-    EUROPA_runTest(testDelegation);
-    EUROPA_runTest(testNotEqual);
-    EUROPA_runTest(testMultEqualConstraint);
-    EUROPA_runTest(testAddMultEqualConstraint);
-    EUROPA_runTest(testEqualSumConstraint);
-    EUROPA_runTest(testCondAllSameConstraint);
-    EUROPA_runTest(testCondAllDiffConstraint);
-    EUROPA_runTest(testConstraintDeletion);
-    EUROPA_runTest(testArbitraryConstraints);
-    EUROPA_runTest(testLockConstraint);
-    EUROPA_runTest(testNegateConstraint);
-    EUROPA_runTest(testUnaryQuery);
-    EUROPA_runTest(testTestEqConstraint);
-    EUROPA_runTest(testTestLessThanConstraint);
-    EUROPA_runTest(testTestLEQConstraint);
-    EUROPA_runTest(testGNATS_3075);
+    EUROPA_runCETest(testGNATS_3181);
+    EUROPA_runCETest(testUnaryConstraint);
+    EUROPA_runCETest(testAddEqualConstraint);
+    EUROPA_runCETest(testLessThanEqualConstraint);
+    EUROPA_runCETest(testLessOrEqThanSumConstraint);
+    EUROPA_runCETest(testBasicPropagation);
+    EUROPA_runCETest(testDeactivation);
+    EUROPA_runCETest(testForceInconsistency);
+    EUROPA_runCETest(testRepropagation);
+    EUROPA_runCETest(testConstraintRemoval);
+    EUROPA_runCETest(testDelegation);
+    EUROPA_runCETest(testNotEqual);
+    EUROPA_runCETest(testMultEqualConstraint);
+    EUROPA_runCETest(testAddMultEqualConstraint);
+    EUROPA_runCETest(testEqualSumConstraint);
+    EUROPA_runCETest(testCondAllSameConstraint);
+    EUROPA_runCETest(testCondAllDiffConstraint);
+    EUROPA_runCETest(testConstraintDeletion);
+    EUROPA_runCETest(testArbitraryConstraints);
+    EUROPA_runCETest(testLockConstraint);
+    EUROPA_runCETest(testNegateConstraint);
+    EUROPA_runCETest(testUnaryQuery);
+    EUROPA_runCETest(testTestEqConstraint);
+    EUROPA_runCETest(testTestLessThanConstraint);
+    EUROPA_runCETest(testTestLEQConstraint);
+    EUROPA_runCETest(testGNATS_3075);
     return(true);
   }
 
@@ -2478,7 +2521,7 @@ class ConstraintFactoryTest
 {
 public:
   static bool test() {
-    EUROPA_runTest(testAllocation);
+    EUROPA_runCETest(testAllocation);
     return true;
   }
 
@@ -2504,11 +2547,11 @@ private:
 class EquivalenceClassTest{
 public:
   static bool test() {
-    EUROPA_runTest(testBasicAllocation);
-    EUROPA_runTest(testConstructionOfSingleGraph);
-    EUROPA_runTest(testSplittingOfSingleGraph);
-    EUROPA_runTest(testMultiGraphMerging);
-    EUROPA_runTest(testEqualityConstraintPropagator);
+    EUROPA_runCETest(testBasicAllocation);
+    EUROPA_runCETest(testConstructionOfSingleGraph);
+    EUROPA_runCETest(testSplittingOfSingleGraph);
+    EUROPA_runCETest(testMultiGraphMerging);
+    EUROPA_runCETest(testEqualityConstraintPropagator);
     return true;
   }
 
