@@ -131,46 +131,27 @@
       <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
       <then>
         <echo message="Building System dlls for Windows."/>
-      	<!-- libANML_?.a disappeared? -mno-cygwin -->
-      	<property name="cmd_g" value="g++ -shared -Wl,-v 
+        <if>
+          <equals arg1="${jam.variant}" arg2="OPTIMIZED"/>
+          <then>
+      	    <property name="s" value="_o"/>
+          </then>
+        </if>
+  		<property name="s" value="_g"/>
+	  	<echo message="Suffix ${s}" />
+    	
+   		<!-- libANML_?.a disappeared? -mno-cygwin -->
+    	<property name="cmd" value="g++ -shared -Wl,-v 
       		-Wl,--add-stdcall-alias -Wl,--whole-archive -oSystem_g.dll 
-      		libSystem_g.a libSolvers_g.a libResource_g.a libNDDL_g.a 
-      		libRulesEngine_g.a libTemporalNetwork_g.a libPlanDatabase_g.a
-      		libConstraintEngine_g.a libUtils_g.a libTinyXml_g.a libAntlr3_g.a
+      		libSystem${s}.a libSolvers${s}.a libResource${s}.a libNDDL${s}.a 
+      		libRulesEngine${s}.a libTemporalNetwork${s}.a libPlanDatabase${s}.a
+      		libConstraintEngine${s}.a libUtils${s}.a 
+    		libTinyXml${s}.a libAntlr3${s}.a
       		-Wl,--no-whole-archive -lpthread"/>
-      	<property name="cmd_o" value="g++ -shared -Wl,-v 
-      		-Wl,--add-stdcall-alias -Wl,--whole-archive -oSystem_o.dll
-      		libSystem_o.a libSolvers_o.a libResource_o.a libNDDL_o.a
-      		libRulesEngine_o.a libTemporalNetwork_o.a libPlanDatabase_o.a
-      		libConstraintEngine_o.a libUtils_o.a libTinyXml_o.a libAntlr3_o.a
-      		-Wl,--no-whole-archive -lpthread"/>
-      	
-      	<if>
-        	<equals arg1="${jam.variant}" arg2="DEV"/>
-      		<then>
-      			<echo message="Building debug DLL"/>
-      			<exec executable="bash" dir="${dir.plasma}/build/lib">
-      	  			<arg value="-c" />
-          			<arg value="${cmd_g}" />
-        		</exec>
-   			</then>
-      		<else>
-      			<echo message="Skipping debug DLL" />
-      		</else>
-      	</if>
-      	<if>
-        	<equals arg1="${jam.variant}" arg2="OPTIMIZED"/>
-      		<then>
-      			<echo message="Building optimized DLL"/>
-        		<exec executable="bash" dir="${dir.plasma}/build/lib">
-      	  			<arg value="-c" />
-          			<arg value="${cmd_o}" />
-        		</exec>
-      		</then>
-      		<else>
-      			<echo message="Skipping optimized DLL" />
-      		</else>
-      	</if>
+		<exec executable="bash" dir="${dir.plasma}/build/lib">
+		  <arg value="-c" />
+          <arg value="${cmd}" />
+        </exec>
       </then>
     </if>  	
   </target>
@@ -342,9 +323,22 @@
           <arg line="makeproject MakeProjectTest ${basedir}/dist/europa"/>
       	  <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
       </exec>
+  	  <if>
+        <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
+  	  	<then>
+            <exec executable="cygpath" outputproperty="testdist.europa.home.tmp">
+               <arg value="--windows"/>
+               <arg value="${local.env.EUROPA_HOME}"/>
+            </exec>
+  	  		<propertyregex property="testdist.europa.home" input="${testdist.europa.home.tmp}"
+  	  			regexp="\\" replace="/" global="true" />
+  		</then>
+  	  </if>
+	  <property name="testdist.europa.home" value="${local.env.EUROPA_HOME}"/>
       <exec executable="make" dir="${basedir}/dist/europa/MakeProjectTest" failonerror="true">
           <arg line="${run-example-cpp.mode}"/>
           <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
+          <env key="EUROPA_JHOME" value="${testdist.europa.home}"/>
           <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.EUROPA_HOME}/lib"/>
       </exec>
       <exec executable="ant" dir="${basedir}/dist/europa/MakeProjectTest" failonerror="true">

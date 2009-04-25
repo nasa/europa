@@ -404,7 +404,7 @@ INCLUDE :	'#include' WS+ file=STRING
 			// in C target runtime.
 
                         pANTLR3_STRING_FACTORY factory = antlr3StringFactoryNew();
-                        pANTLR3_STRING fName = factory->newStr(factory,(u_int8_t*)fullName.c_str());
+                        pANTLR3_STRING fName = factory->newStr(factory,(ANTLR3_UINT8 *)fullName.c_str());
                         delete factory;
                         
                         pANTLR3_INPUT_STREAM in = antlr3AsciiFileStreamNew(fName->chars);
