@@ -201,6 +201,7 @@ namespace EUROPA {
     if(!m_baseDomain->intersect(newBaseDomain))
       return;
 
+    // Apply restriction - force an event even if domain is unchanged
     m_derivedDomain->intersect(*m_baseDomain);
 
     // If a singleton, since it has changed, we have to set the value.

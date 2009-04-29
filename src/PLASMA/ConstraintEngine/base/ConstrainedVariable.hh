@@ -309,6 +309,11 @@ namespace EUROPA {
     virtual void open();
 
     /**
+     * @brief Forces a change event on the variable
+     */
+    void touch();
+
+    /**
      * @brief Tests if the variable can be specified.
      * @return true if the variable can be specified and false otherwise.
      */

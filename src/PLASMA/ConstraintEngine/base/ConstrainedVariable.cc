@@ -399,6 +399,10 @@ namespace EUROPA {
 
   }
 
+  void ConstrainedVariable::touch() {
+    getCurrentDomain().touch();
+  }
+
   void ConstrainedVariable::relax() {
     // If it has been specified, relax to the specified domain
     if(m_specifiedFlag)

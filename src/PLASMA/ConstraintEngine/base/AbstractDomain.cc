@@ -106,6 +106,10 @@ namespace EUROPA {
     notifyChange(DomainListener::OPENED);
   }
 
+  void AbstractDomain::touch() {
+    notifyChange(DomainListener::BOUNDS_RESTRICTED);
+  }
+
   bool AbstractDomain::isClosed()     const { return(m_closed); }
   bool AbstractDomain::isOpen()       const { return(!m_closed); }
   bool AbstractDomain::isEnumerated() const { return(m_enumerated); }

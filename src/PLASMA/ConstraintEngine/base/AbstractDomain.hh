@@ -215,6 +215,11 @@ namespace EUROPA {
     virtual void open();
 
     /**
+     * @brief Touch the domain. Will produce a change event that will generate necessary change evaluation
+     */
+    void touch();
+
+    /**
      * @brief Empty the domain.
      * @note Completion of this will require that (isEmpty() == true).
      */
