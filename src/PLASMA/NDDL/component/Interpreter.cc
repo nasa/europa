@@ -20,6 +20,7 @@
 #include "DataTypes.hh"
 #include "Schema.hh"
 #include "Utils.hh"
+#include "Variable.hh"
 
 #include "NddlRules.hh"
 #include "NddlUtils.hh"
@@ -566,6 +567,16 @@ namespace EUROPA {
     makeConstraint(context,LabelStr(#relationname), vars); \
   }
 
+#define makeStrictPrecedenceRelation(origin, originvar, target, targetvar) { \
+    PlanDatabase* db = (PlanDatabase*)(context.getElement("PlanDatabase"));\
+    std::vector<ConstrainedVariableId> vars;				\
+    ConstrainedVariableId var = (new Variable<IntervalIntDomain>(db->getConstraintEngine(), IntervalIntDomain(1, PLUS_INFINITY)))->getId(); \
+    vars.push_back(origin->originvar());				\
+    vars.push_back(var);						\
+    vars.push_back(target->targetvar());				\
+    makeConstraint(context, "temporalDistance", vars);			\
+  }
+
   void createRelation(EvalContext& context,
                       const char* relationName,
                       TokenId origin,
@@ -608,38 +619,38 @@ namespace EUROPA {
         makeRelation(precedes, target, end, origin, end);
       }
       else if (strcmp(relationName,"ends_after") == 0) {
-        makeRelation(precedes, target, end, origin, end);
+        makeStrictPrecedenceRelation(target, end, origin, end);
       }
       else if (strcmp(relationName,"ends_before") == 0) {
-        makeRelation(precedes, origin, end, target, end);
+        makeStrictPrecedenceRelation(origin, end, target, end);
       }
       else if (strcmp(relationName,"ends_after_start") == 0) {
-        makeRelation(precedes, target, start, origin, end);
+        makeStrictPrecedenceRelation(target, start, origin, end);
       }
       else if (strcmp(relationName,"starts_before_end") == 0) {
-        makeRelation(precedes, origin, start, target, end);
+        makeStrictPrecedenceRelation(origin, start, target, end);
       }
       else if (strcmp(relationName,"starts_during") == 0) {
         makeRelation(precedes, target, start, origin, start);
-        makeRelation(precedes, target, start, origin, end);
+        makeStrictPrecedenceRelation(origin, start, target, end);
       }
       else if (strcmp(relationName,"ends_during") == 0) {
-        makeRelation(precedes, target, end, origin, start);
-        makeRelation(precedes, target, end, origin, end);
+        makeStrictPrecedenceRelation(target, start, origin, end);
+        makeRelation(precedes, origin, end, target, end);
       }
       else if (strcmp(relationName,"contains_start") == 0) {
         makeRelation(precedes, origin, start, target, start);
-        makeRelation(precedes, origin, start, target, end);
+        makeStrictPrecedenceRelation(target, start, origin, end);
       }
       else if (strcmp(relationName,"contains_end") == 0) {
-        makeRelation(precedes, origin, end, target, start);
+        makeStrictPrecedenceRelation(origin, start, target, end);
         makeRelation(precedes, origin, end, target, end);
       }
       else if (strcmp(relationName,"starts_after") == 0) {
-        makeRelation(precedes, target, start, origin, start);
+        makeStrictPrecedenceRelation(target, start, origin, start);
       }
       else if (strcmp(relationName,"starts_before") == 0) {
-        makeRelation(precedes, origin, start, target, start);
+        makeStrictPrecedenceRelation(origin, start, target, start);
       }
       else if (strcmp(relationName,"equals") == 0) {
         makeRelation(concurrent, origin, start, target, start);
