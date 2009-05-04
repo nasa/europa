@@ -19,32 +19,6 @@ namespace NDDL {
 static const std::string PARAM_PROFILE_TYPE("profileType");
 static const std::string PARAM_DETECTOR_TYPE("detectorType");
 
-bool isValid(ConstrainedVariableId nameVar, const std::string param)
-{
-	if (!nameVar->derivedDomain().isSingleton())
-		return false;
-
-	std::string name = LabelStr(nameVar->derivedDomain().getSingletonValue()).toString();
-
-	// Two separate cases to check here:
-	if(param == PARAM_PROFILE_TYPE) {
-		if (name == "FlowProfile" ||
-				name == "IncrementalFlowProfile" ||
-				name == "TimetableProfile" ||
-				name == "GroundedProfile")
-			return true;
-	}
-	else if (param == PARAM_DETECTOR_TYPE) {
-		if (name == "OpenWorldFVDetector" || name == "ClosedWorldFVDetector" || name == "GroundedFVDetector")
-			return true;
-	}
-	else {
-		// TODO :: Add throw of some sort here...
-	}
-
-	return false;
-}
-
 bool isValidCombo(const std::string& profileName, const std::string& detectorName)
 {
 	if(profileName == "GroundedProfile" && detectorName != "GroundedFVDetector")
@@ -69,13 +43,11 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 
 	if (!pNameVar.isNoId()) {
 		debugMsg("NDDL","Using resource profile variable : " << pNameVar->toString());
-		check_error(isValid(pNameVar, PARAM_PROFILE_TYPE),"Invalid resource profile type:" + pNameVar->toString());
 		pName = LabelStr(pNameVar->derivedDomain().getSingletonValue());
 	}
 
 	if (!dNameVar.isNoId()) {
 		debugMsg("NDDL","Using resource detector variable : " << dNameVar->toString());
-		check_error(isValid(dNameVar, PARAM_DETECTOR_TYPE),"Invalid resource detector type:" + dNameVar->toString());
 		dName = LabelStr(dNameVar->derivedDomain().getSingletonValue());
 	}
 
