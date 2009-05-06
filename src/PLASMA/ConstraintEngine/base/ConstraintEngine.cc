@@ -737,7 +737,7 @@ namespace EUROPA
     check_error(variable->getCurrentDomain().isEmpty());
 
     getViolationMgr().addEmptyVariable(variable);
-    debugMsg("ConstraintEngine:emptied","Emptied var:" << variable->toString()
+    debugMsg("ConstraintEngine:emptied","Emptied var:" << variable->toLongString()
 	     << " parent:" << (variable->parent().isNoId() ? "NULL" : variable->parent()->toString()));
     check_error(m_relaxed == false);
     getViolationMgr().handleEmpty(variable);

@@ -265,6 +265,9 @@ namespace EUROPA {
     // Post constraints on object variable, predecessor only in event they are equal
     constrainToThisObjectAsNeeded(predecessor);
 
+    debugMsg("Object:constrain",
+             "Constraining " << predecessor->toString() << " to be before " << successor->toString() <<
+             (isExplicit ? " explicitly." : " implicitly."));
     int encodedKey = makeKey(predecessor, successor);
 
     condDebugMsg(m_constraintsByKeyPair.find(encodedKey) != m_constraintsByKeyPair.end(), "Object:makeKey",

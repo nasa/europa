@@ -95,14 +95,14 @@ namespace EUROPA {
   ObjectId DbClient::createObject(const char* type, const char* name){
     static const std::vector<const AbstractDomain*> noArguments;
     ObjectId object = m_planDb->createObject(type, name, noArguments);
-    debugMsg("DbClient:createObject", object->toString());
+    debugMsg("DbClient:createObject", object->toLongString());
     publish(notifyObjectCreated(object));
     return object;
   }
 
   ObjectId DbClient::createObject(const char* type, const char* name, const std::vector<const AbstractDomain*>& arguments){
     ObjectId object = m_planDb->createObject(type, name, arguments);
-    debugMsg("DbClient:createObject", object->toString());
+    debugMsg("DbClient:createObject", object->toLongString());
     publish(notifyObjectCreated(object, arguments));
     return object;
   }
@@ -234,27 +234,27 @@ namespace EUROPA {
   }
 
   void DbClient::restrict(const ConstrainedVariableId& variable, const AbstractDomain& domain){
-    debugMsg("DbClient:restrict", variable->toString() << " to " << domain.toString());
+    debugMsg("DbClient:restrict", variable->toLongString() << " to " << domain.toString());
     variable->restrictBaseDomain(domain);
     publish(notifyVariableRestricted(variable));
   }
 
   void DbClient::specify(const ConstrainedVariableId& variable, double value){
-    debugMsg("DbClient:specify", "before:" << variable->toString() << " to " << variable->toString(value));
+    debugMsg("DbClient:specify", "before:" << variable->toLongString() << " to " << variable->toString(value));
     variable->specify(value);
-    debugMsg("DbClient:specify", "after:" << variable->toString());
+    debugMsg("DbClient:specify", "after:" << variable->toLongString());
     publish(notifyVariableSpecified(variable));
   }
 
   void DbClient::close(const ConstrainedVariableId& variable){
     variable->close();
-    debugMsg("DbClient:close", variable->toString());
+    debugMsg("DbClient:close", variable->toLongString());
     publish(notifyVariableClosed(variable));
   }
   void DbClient::reset(const ConstrainedVariableId& variable){
-    debugMsg("DbClient:reset","before:" << variable->toString());
+    debugMsg("DbClient:reset","before:" << variable->toLongString());
     variable->reset();
-    debugMsg("DbClient:reset", "after:" << variable->toString());
+    debugMsg("DbClient:reset", "after:" << variable->toLongString());
     publish(notifyVariableReset(variable));
   }
 

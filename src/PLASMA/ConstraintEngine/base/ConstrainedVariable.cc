@@ -534,7 +534,7 @@ namespace EUROPA {
 
   PSVarValue ConstrainedVariable::getSingletonValue() const {
     check_runtime_error(isValid());
-    check_runtime_error(isSingleton());
+    check_runtime_error(isSingleton(), toLongString());
     if (isSpecified())
     	return PSVarValue(getSpecifiedValue(), getType());
     else

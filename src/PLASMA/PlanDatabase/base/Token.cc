@@ -948,6 +948,10 @@ std::string Token::getTokenType() const
 	return getUnqualifiedPredicateName().toString();
 }
 
+std::string Token::getFullTokenType() const {
+  return getPredicateName().toString();
+}
+
 PSObject* Token::getOwner() const {
   if(!isAssigned())
     return NULL;
@@ -1037,6 +1041,17 @@ PSList<PSVariable*> Token::getParameters() const
 	  ConstrainedVariableId id = *it;
 	  PSVariable* psVar = (PSVariable *) id;
 	  retval.push_back(psVar);
+  }
+  return retval;
+}
+
+PSList<PSVariable*> Token::getPredicateParameters() const {
+  PSList<PSVariable*> retval;
+  const std::vector<ConstrainedVariableId>& vars = parameters();
+  for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();++it) {
+    ConstrainedVariableId id = *it;
+    PSVariable* psVar = (PSVariable *) id;
+    retval.push_back(psVar);
   }
   return retval;
 }

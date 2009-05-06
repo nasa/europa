@@ -68,6 +68,7 @@ namespace EUROPA {
 
       virtual const std::string& getEntityType() const = 0;
       virtual std::string getTokenType() const = 0;
+    virtual std::string getFullTokenType() const = 0;
 
       virtual bool isFact() const = 0;
       virtual bool isIncomplete() const = 0;
@@ -89,6 +90,7 @@ namespace EUROPA {
 
       virtual PSList<PSVariable*> getParameters() const = 0;
       virtual PSVariable* getParameter(const std::string& name) const = 0;
+    virtual PSList<PSVariable*> getPredicateParameters() const = 0;
 
       virtual void activate() = 0;
       virtual void reject() = 0;

@@ -94,13 +94,25 @@ namespace EUROPA {
     m_externalEntity = externalEntity;
   }
 
+  void Entity::setExternalPSEntity(const PSEntity* externalEntity) {
+    m_externalEntity = Entity::getEntity(externalEntity->getKey());
+  }
+
   void Entity::clearExternalEntity(){
     m_externalEntity = EntityId::noId();
+  }
+  
+  void Entity::clearExternalPSEntity() {
+    clearExternalEntity();
   }
 
   const EntityId& Entity::getExternalEntity() const{
     check_error(m_externalEntity.isNoId() || m_externalEntity.isValid());
     return m_externalEntity;
+  }
+  
+  const PSEntity* Entity::getExternalPSEntity() const {
+    return (const PSEntity*) getExternalEntity();
   }
 
   std::map<int, unsigned long int>& Entity::entitiesByKey(){

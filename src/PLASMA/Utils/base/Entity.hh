@@ -67,17 +67,20 @@ namespace EUROPA{
      * @brief Set an external entity reference, indicating an external entity is shadowing this entity.
      */
     void setExternalEntity(const EntityId& externalEntity);
+    void setExternalPSEntity(const PSEntity* externalEntity);
 
     /**
      * @brief Special case to reset the external entity to a noId.
      */
     void clearExternalEntity();
+    void clearExternalPSEntity();
 
     /**
      * @brief Retrieve an external entity reference, if present.
      * @return Will return EntityId::noId() if not assigned.
      */
     const EntityId& getExternalEntity() const;
+    const PSEntity* getExternalPSEntity() const;
 
     /**
      * @brief Get the number of outstanding references

@@ -412,6 +412,7 @@ namespace EUROPA {
     // PS Methods:
     virtual const std::string& getEntityType() const;
     virtual std::string getTokenType() const;
+    virtual std::string getFullTokenType() const;
 
     virtual PSTokenState getTokenState() const;
     virtual PSVariable* getStart() const;
@@ -426,6 +427,7 @@ namespace EUROPA {
     virtual PSList<PSToken*> getMerged() const;
 
     virtual PSList<PSVariable*> getParameters() const;
+    virtual PSList<PSVariable*> getPredicateParameters() const;
     virtual PSVariable* getParameter(const std::string& name) const;
 
     virtual void merge(PSToken* activeToken);

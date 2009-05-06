@@ -95,6 +95,7 @@ namespace EUROPA {
     T& get(int idx);
     void push_back(const T& value);
     void remove(const T& value);
+    void clear();
   };
 
   %template(PSObjectList) PSList<PSObject*>;
