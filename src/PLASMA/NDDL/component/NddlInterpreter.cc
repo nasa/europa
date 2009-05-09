@@ -336,6 +336,91 @@ NddlToASTInterpreter::~NddlToASTInterpreter()
 {
 }
 
+/**
+ *  Create a verbose string for a single tree node:
+ *  "text":token-type:"file":line:offset-in-line
+ */
+static pANTLR3_STRING	    toVerboseString			(pANTLR3_BASE_TREE tree)
+{
+	if  (tree->isNilNode(tree) == ANTLR3_TRUE)
+	{
+		pANTLR3_STRING  nilNode;
+		nilNode	= tree->strFactory->newPtr(tree->strFactory, (pANTLR3_UINT8)"nil", 3);
+		return nilNode;
+	}
+
+	pANTLR3_COMMON_TOKEN ptoken = tree->getToken(tree);
+	pANTLR3_INPUT_STREAM pstream = ptoken->input;
+	pANTLR3_STRING  string = tree->strFactory->newRaw(tree->strFactory);
+
+	// "text":token-type:"file":line:offset-in-line
+	string->append8 (string, "\""); // "text"
+	string->appendS	(string, ((pANTLR3_COMMON_TREE)(tree->super))->token->
+			getText(((pANTLR3_COMMON_TREE)(tree->super))->token));
+	string->append8	(string, "\"");
+	string->append8 (string, ":");
+	string->addi (string, tree->getType(tree)); // type
+
+	// if no file (e.g., root NDDL node), last three items are dropped
+	if (pstream) {
+		string->append8 (string, ":");
+		string->append8	(string, "\""); // "file", full path
+		string->appendS(string, pstream->fileName);
+		string->append8	(string, "\"");
+		string->append8 (string, ":");
+		string->addi (string, tree->getLine(tree)); // line
+		string->append8 (string, ":");
+		string->addi (string, ptoken->charPosition); // offset in line
+	}
+
+	return string;
+}
+
+/** Create a verbose string for the whole tree */
+static pANTLR3_STRING
+toVerboseStringTree	(pANTLR3_BASE_TREE tree)
+{
+	pANTLR3_STRING  string;
+	ANTLR3_UINT32   i;
+	ANTLR3_UINT32   n;
+	pANTLR3_BASE_TREE   t;
+
+	if	(tree->children == NULL || tree->children->size(tree->children) == 0)
+		return	toVerboseString(tree);
+
+	/* Need a new string with nothing at all in it.
+	*/
+	string	= tree->strFactory->newRaw(tree->strFactory);
+
+	if	(tree->isNilNode(tree) == ANTLR3_FALSE)
+	{
+		string->append8	(string, "(");
+		string->appendS	(string, toVerboseString(tree));
+		string->append8	(string, " ");
+	}
+	if	(tree->children != NULL)
+	{
+		n = tree->children->size(tree->children);
+
+		for	(i = 0; i < n; i++)
+		{
+			t   = (pANTLR3_BASE_TREE) tree->children->get(tree->children, i);
+
+			if  (i > 0)
+			{
+				string->append8(string, " ");
+			}
+			string->appendS(string, toVerboseStringTree(t));
+		}
+	}
+	if	(tree->isNilNode(tree) == ANTLR3_FALSE)
+	{
+		string->append8(string,")");
+	}
+
+	return  string;
+}
+
 std::string NddlToASTInterpreter::interpret(std::istream& ins, const std::string& source)
 {
     pANTLR3_INPUT_STREAM input = getInputStream(ins,source);
@@ -356,7 +441,9 @@ std::string NddlToASTInterpreter::interpret(std::istream& ins, const std::string
         retval = os.str();
     }
     else {
-    	retval = (char*)(result.tree->toStringTree(result.tree)->chars);
+    	// Calling static helper functions to get a verbose version of AST.
+    	// Old non-verbose code: result.tree->toStringTree(result.tree)->chars;
+    	retval = (char*)(toVerboseStringTree(result.tree)->chars);
         debugMsg("NddlToASTInterpreter:interpret","NDDL AST:\n" << retval);
     }
 
