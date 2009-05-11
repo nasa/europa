@@ -4,29 +4,6 @@
 #include "Interpreter.hh"
 
 namespace EUROPA {
-  class ResourceObjectFactory : public NativeObjectFactory
-  {
-  	public:
-  	    ResourceObjectFactory(const ObjectTypeId& objType, const LabelStr& signature);
-  	    virtual ~ResourceObjectFactory();
-
-  	protected:
-    	virtual ObjectId makeNewObject(
-	                        const PlanDatabaseId& planDb,
-	                        const LabelStr& objectType,
-	                        const LabelStr& objectName,
-	                        const std::vector<const AbstractDomain*>& arguments) const;
-  };
-
-  class ResourceChangeTokenFactory: public NativeTokenFactory
-  {
-    public:
-	  ResourceChangeTokenFactory(const LabelStr& predicateName);
-
-	private:
-	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const;
-	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
-  };
 
   class ReusableObjectFactory : public NativeObjectFactory
   {

@@ -6,7 +6,7 @@
 #include "DomainListener.hh"
 #include "PlanDatabaseDefs.hh"
 #include "SAVH_ResourceDefs.hh"
-#include "ResourceProblem.hh"
+#include "SAVH_Resource.hh"
 #include "LabelStr.hh"
 
 #include <vector>
@@ -35,7 +35,7 @@ namespace EUROPA {
       virtual std::string getViolationExpl() const;
 
     protected:
-      virtual void notifyViolated(ResourceProblem::Type problem, const InstantId inst);
+      virtual void notifyViolated(Resource::ProblemType problem, const InstantId inst);
       virtual void notifyNoLongerViolated();
 
     private:
@@ -47,7 +47,7 @@ namespace EUROPA {
       ResourceId m_resource;
 
       int m_violationTime;
-      ResourceProblem::Type m_violationProblem;
+      Resource::ProblemType m_violationProblem;
 
       friend class Resource;
     };

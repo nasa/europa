@@ -14,7 +14,7 @@ namespace EUROPA {
                                                  const TokenId& tok)
       : Constraint(CONSTRAINT_NAME(), PROPAGATOR_NAME(), constraintEngine, scope)
       , m_token(tok)
-      , m_violationProblem(ResourceProblem::NoProblem)
+      , m_violationProblem(Resource::NoProblem)
     {
       //       debugMsg("Resource:ResourceTokenRelation", "Checking resource " << m_resource->getKey() << " against variable " << scope[0]->toString());
       //       condDebugMsg(scope[0]->lastDomain().isSingleton(), "Resource:ResourceTokenRelation",
@@ -68,7 +68,7 @@ namespace EUROPA {
       return true;
     }
 
-    void ResourceTokenRelation::notifyViolated(ResourceProblem::Type problem, const InstantId inst)
+    void ResourceTokenRelation::notifyViolated(Resource::ProblemType problem, const InstantId inst)
     {
     	m_violationProblem = problem;
     	m_violationTime = inst->getTime();
@@ -77,18 +77,18 @@ namespace EUROPA {
 
     void ResourceTokenRelation::notifyNoLongerViolated()
     {
-        m_violationProblem = ResourceProblem::NoProblem;
+        m_violationProblem = Resource::NoProblem;
         Constraint::notifyNoLongerViolated();
     }
 
     std::string ResourceTokenRelation::getViolationExpl() const
     {
-        if (m_violationProblem == ResourceProblem::NoProblem)
+        if (m_violationProblem == Resource::NoProblem)
             return "";
 
     	std::ostringstream os;
 
-    	os << ResourceProblem::getString(m_violationProblem)
+    	os << Resource::getProblemString(m_violationProblem)
     	      << " for resource " << m_resource->getName().toString()
     	      << " at instant " << m_violationTime;
 

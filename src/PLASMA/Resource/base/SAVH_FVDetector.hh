@@ -18,7 +18,7 @@ namespace EUROPA {
 
     class FVDetectorFactoryMgr;
     typedef Id<FVDetectorFactoryMgr> FVDetectoryFactoryMgrId;
-    
+
     /**
      * @class FVDetector
      * @brief The base class for detecting flaws and violations.
@@ -69,37 +69,37 @@ namespace EUROPA {
       /**
        * @brief Inform the Resource that there is a violation at an Instant.
        */
-      void notifyOfViolation(const InstantId inst, ResourceProblem::Type problem) {if(m_res.isValid()) m_res->notifyViolated(inst,problem);}
+      void notifyOfViolation(const InstantId inst, Resource::ProblemType problem) {if(m_res.isValid()) m_res->notifyViolated(inst,problem);}
 
-      void notifyNoLongerViolated(const InstantId inst) {if(m_res.isValid()) m_res->notifyNoLongerViolated(inst);}      
-      
+      void notifyNoLongerViolated(const InstantId inst) {if(m_res.isValid()) m_res->notifyNoLongerViolated(inst);}
+
       /**
        * @brief Inform the Resource that there is a flaw at an Instant.
        */
       void notifyOfFlaw(const InstantId inst) {if(m_res.isValid()) m_res->notifyFlawed(inst);}
 
       void notifyNoLongerFlawed(const InstantId inst) {if(m_res.isValid()) m_res->notifyNoLongerFlawed(inst);}
-      
+
       bool allowViolations() const;
-      
+
     private:
       FVDetectorId m_id;
       ResourceId m_res;
     };
-    
-    class FVDetectorArgs : public FactoryArgs 
+
+    class FVDetectorArgs : public FactoryArgs
     {
     public:
-        const ResourceId& resource;        
-        FVDetectorArgs(const ResourceId& r) : resource(r) {}      
+        const ResourceId& resource;
+        FVDetectorArgs(const ResourceId& r) : resource(r) {}
     };
 
     template<class FVDetectorType>
-    class FVDetectorFactory : public Factory 
+    class FVDetectorFactory : public Factory
     {
     public:
       FVDetectorFactory(const EUROPA::LabelStr& name) : Factory(name) {}
-      
+
       virtual EUROPA::FactoryObjId& createInstance(const EUROPA::FactoryArgs& fa) {
           const FVDetectorArgs& args = (const FVDetectorArgs&)fa;
           return (EUROPA::FactoryObjId&)(new FVDetectorType(args.resource))->getId();

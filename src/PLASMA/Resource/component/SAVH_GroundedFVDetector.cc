@@ -10,21 +10,21 @@ GroundedFVDetector::GroundedFVDetector(const ResourceId res) : GenericFVDetector
 
 // NOTE: This is the same as ClosedWorldFVDetector, but we don't subclass that as we're expecting a
 // reorganization where the violation and flaw detection pieces can be configured separately
-ResourceProblem::Type GroundedFVDetector::getResourceLevelViolation(const InstantId inst) const
+Resource::ProblemType GroundedFVDetector::getResourceLevelViolation(const InstantId inst) const
 {
 	if (inst->getUpperLevel() < m_lowerLimit)
 	{
 		debugMsg("GroundedFVDetector:detect",
 				"Lower limit violation.  Limit: " << m_lowerLimit << " Upper level: " << inst->getUpperLevel());
-		return ResourceProblem::LevelTooLow;
+		return Resource::LevelTooLow;
 	}
 	if (inst->getLowerLevel() > m_upperLimit)
 	{
     	debugMsg("GroundedFVDetector:detect",
     			"Upper limit violation.  Limit: " << m_upperLimit << " Lower level: " << inst->getLowerLevel());
-    	return ResourceProblem::LevelTooHigh;
+    	return Resource::LevelTooHigh;
 	}
-	return ResourceProblem::NoProblem;
+	return Resource::NoProblem;
 }
 
 // Here we handle the LowerLevelMax and UpperLevelMin which, in GroundedProfile are hacked to represent

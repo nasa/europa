@@ -250,20 +250,20 @@ namespace EUROPA {
         return retval;
     }
 
-    bool isConsumptionProblem(ResourceProblem::Type problem)
+    bool isConsumptionProblem(Resource::ProblemType problem)
     {
         return
-            problem == ResourceProblem::ConsumptionSumExceeded ||
-            problem == ResourceProblem::ConsumptionRateExceeded ||
-            problem == ResourceProblem::LevelTooLow;
+            problem == Resource::ConsumptionSumExceeded ||
+            problem == Resource::ConsumptionRateExceeded ||
+            problem == Resource::LevelTooLow;
     }
 
-    bool isProductionProblem(ResourceProblem::Type problem)
+    bool isProductionProblem(Resource::ProblemType problem)
     {
         return
-            problem == ResourceProblem::ProductionSumExceeded ||
-            problem == ResourceProblem::ProductionRateExceeded ||
-            problem == ResourceProblem::LevelTooHigh;
+            problem == Resource::ProductionSumExceeded ||
+            problem == Resource::ProductionRateExceeded ||
+            problem == Resource::LevelTooHigh;
     }
 
     /*
@@ -289,7 +289,7 @@ namespace EUROPA {
         }
     }
 
-    void Resource::notifyViolated(const InstantId inst, ResourceProblem::Type problem)
+    void Resource::notifyViolated(const InstantId inst, ProblemType problem)
     {
       check_error(inst.isValid());
       check_error(inst->isViolated());

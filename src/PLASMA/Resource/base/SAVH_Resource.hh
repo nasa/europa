@@ -13,16 +13,25 @@
 #include "Object.hh"
 #include "Constraint.hh"
 #include "PlanDatabaseDefs.hh"
-#include "ResourceProblem.hh"
 #include "PSResource.hh"
 
 namespace EUROPA {
   namespace SAVH {
 
-    /**
+  // Labels to associate with enum values:
+  const static char* problemLabels[] = { "ProductionRateExceeded",
+		  "ConsumptionRateExceeded",
+		  "ProductionSumExceeded",
+		  "ConsumptionSumExceeded",
+		  "LevelTooHigh",
+		  "LevelTooLow"
+  };
+
+
+  /**
      * @class Resource
      * @brief The base class for different Resource implementations.
-     * 
+     *
      * The Resource is provided as a base class from which a variety of implementations for similar resources or
      * a variety of resources can be derived.
      */
@@ -44,19 +53,31 @@ namespace EUROPA {
        * @param maxProduction The maximum amount of production possible on this resource.
        * @param maxConsumption The maximum amount of consumption possible on this resource.
        */
-      Resource(const PlanDatabaseId& planDatabase, 
-               const LabelStr& type, 
-               const LabelStr& name, 
-               const LabelStr& detectorName, 
+      Resource(const PlanDatabaseId& planDatabase,
+               const LabelStr& type,
+               const LabelStr& name,
+               const LabelStr& detectorName,
                const LabelStr& profileName,
-	           double initCapacityLb = 0, 
-	           double initCapacityUb = 0, 
+	           double initCapacityLb = 0,
+	           double initCapacityUb = 0,
 	           double lowerLimit = MINUS_INFINITY,
-	           double upperLimit = PLUS_INFINITY, 
-	           double maxInstProduction = PLUS_INFINITY, 
+	           double upperLimit = PLUS_INFINITY,
+	           double maxInstProduction = PLUS_INFINITY,
 	           double maxInstConsumption = PLUS_INFINITY,
-	           double maxProduction = PLUS_INFINITY, 
+	           double maxProduction = PLUS_INFINITY,
 	           double maxConsumption = PLUS_INFINITY);
+
+
+      /** Only LevelTooHigh and LevelTooLow are currently used by Flaw,
+                     Violation uses all types */
+      enum ProblemType { NoProblem = -1,
+    	  ProductionRateExceeded = 0, /**< Excessive production in an instant. */
+    	  ConsumptionRateExceeded, /**< Excessive consumption in an instant. */
+    	  ProductionSumExceeded, /**< Total production for the resource exceded. */
+    	  ConsumptionSumExceeded, /**< Total consumption fo rthe resource exceded. */
+    	  LevelTooHigh, /**< Level is outside the upper limit, taking into account remaining possible production or consumption. */
+    	  LevelTooLow /**< Level is outside the lower limit, taking into account remaining possible production or consumption. */
+      };
 
       /**
        * @brief Constructor
@@ -105,7 +126,7 @@ namespace EUROPA {
       const ProfileId getProfile() const {return m_profile;}
 
       virtual void add(const TokenId& token);
-      
+
       virtual void remove(const TokenId& token);
 
       virtual void getOrderingChoices(const TokenId& token,
@@ -125,15 +146,19 @@ namespace EUROPA {
       //subclasses will need to override getOrderingChoices, getTokensToOrder
 
       int getFlawCount(const TokenId& token) const;
-      
+
+      static const char* getProblemString(ProblemType t) { return problemLabels[t]; }
+
       // PS Methods:
       virtual PSResourceProfile* getLimits();
-      virtual PSResourceProfile* getLevels();    
-      
-      virtual PSList<PSEntityKey> getOrderingChoices(TimePoint t);    
-    
-      
-      
+      virtual PSResourceProfile* getLevels();
+
+      virtual PSList<PSEntityKey> getOrderingChoices(TimePoint t);
+
+
+
+
+
     protected:
       friend class FVDetector;
       /**
@@ -160,11 +185,11 @@ namespace EUROPA {
       virtual void notifyDeleted(const InstantId inst);
 
       /**
-       * @brief Receive notification of a violation at an instant.  The subclass should take appropriate 
+       * @brief Receive notification of a violation at an instant.  The subclass should take appropriate
        *        action to push this information to the planner (i.e. empty a variable's domain).
        * @param inst The violated instant.
        */
-      virtual void notifyViolated(const InstantId inst, ResourceProblem::Type problem);
+      virtual void notifyViolated(const InstantId inst, ProblemType problem);
 
       virtual void notifyNoLongerViolated(const InstantId inst);
 
@@ -181,9 +206,9 @@ namespace EUROPA {
        * @param inst The formerly flawed instant.
        */
       virtual void notifyNoLongerFlawed(const InstantId inst);
-      
+
       /*
-       * called by FVDetector when profile is recomputed 
+       * called by FVDetector when profile is recomputed
        */
       void resetViolations(InstantId inst);
       void resetViolations();
@@ -208,9 +233,9 @@ namespace EUROPA {
       std::map<TransactionId, TokenId> m_transactionsToTokens;
       std::map<TokenId, std::set<InstantId> > m_flawedTokens;
       std::map<int, InstantId> m_flawedInstants;
-      
+
       TokenId getTokenForTransaction(TransactionId t);
-      ResourceTokenRelationId getRTRConstraint(TokenId tok);      
+      ResourceTokenRelationId getRTRConstraint(TokenId tok);
     };
   }
 }

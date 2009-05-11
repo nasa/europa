@@ -235,7 +235,7 @@ namespace EUROPA {
         return retval;
     }
 
-    void CBReusable::notifyViolated(const InstantId inst, ResourceProblem::Type problem)
+    void CBReusable::notifyViolated(const InstantId inst, Resource::ProblemType problem)
     {
         check_error(inst.isValid());
         check_error(inst->isViolated());
@@ -389,9 +389,9 @@ namespace EUROPA {
     {
         std::ostringstream os;
 
-        std::map<InstantId,ResourceProblem::Type>::const_iterator it = m_violationProblems.begin();
+        std::map<InstantId,Resource::ProblemType>::const_iterator it = m_violationProblems.begin();
         for(;it != m_violationProblems.end();++it) {
-            os << ResourceProblem::getString(it->second)
+            os << Resource::getProblemString(it->second)
                << " for resource " << m_resource->getName().toString()
                << " at instant " << (it->first->getTime());
         }
@@ -399,7 +399,7 @@ namespace EUROPA {
         return os.str();
     }
 
-    void Uses::notifyViolated(ResourceProblem::Type problem, const InstantId inst)
+    void Uses::notifyViolated(Resource::ProblemType problem, const InstantId inst)
     {
         m_violationProblems[inst] = problem;
         if (m_violationProblems.size() == 1) {

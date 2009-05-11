@@ -8,21 +8,21 @@ namespace SAVH {
 ClosedWorldFVDetector::ClosedWorldFVDetector(const ResourceId res) : GenericFVDetector(res) {
 }
 
-ResourceProblem::Type ClosedWorldFVDetector::getResourceLevelViolation(const InstantId inst) const
+Resource::ProblemType ClosedWorldFVDetector::getResourceLevelViolation(const InstantId inst) const
 {
 	if (inst->getUpperLevel() < m_lowerLimit)
 	{
-		debugMsg("ClosedWorldFVDetector:detect", 
+		debugMsg("ClosedWorldFVDetector:detect",
 				"Lower limit violation.  Limit: " << m_lowerLimit << " Upper level: " << inst->getUpperLevel());
-		return ResourceProblem::LevelTooLow;
+		return Resource::LevelTooLow;
 	}
 	if (inst->getLowerLevel() > m_upperLimit)
 	{
-    	debugMsg("ClosedWorldFVDetector:detect", 
+    	debugMsg("ClosedWorldFVDetector:detect",
     			"Upper limit violation.  Limit: " << m_upperLimit << " Lower level: " << inst->getLowerLevel());
-    	return ResourceProblem::LevelTooHigh;
+    	return Resource::LevelTooHigh;
 	}
-	return ResourceProblem::NoProblem;
+	return Resource::NoProblem;
 }
 
 void ClosedWorldFVDetector::handleResourceLevelFlaws(const InstantId inst)
@@ -35,9 +35,9 @@ void ClosedWorldFVDetector::handleResourceLevelFlaws(const InstantId inst)
 		debugMsg("ClosedWorldFVDetector:detect", "Lower limit flaw.");
 	}
 
-	if(inst->getUpperLevel() > m_upperLimit) 
+	if(inst->getUpperLevel() > m_upperLimit)
 	{
-		inst->setFlawed(true);	
+		inst->setFlawed(true);
 		inst->setUpper(true);
 		inst->setUpperMagnitude(fabs(m_upperLimit - inst->getUpperLevel()));
 		debugMsg("ClosedWorldFVDetector:detect", "Upper limit flaw.");

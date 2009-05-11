@@ -31,13 +31,13 @@ class Target {
  }
 }
 
-class Antenna extends Resource { 
+class Antenna extends Reservoir {
   Antenna(float initCap, float llmin, float llmax) {
     super(initCap, llmin, llmax);
   }
 }
 
-class Memory extends Resource {
+class Memory extends Reservoir {
  Memory(float initCap, float llmin, float llmax) {
     super(initCap, llmin, llmax);
   }
@@ -45,9 +45,9 @@ class Memory extends Resource {
 }
 
 // Storage can only be consumed
-class Storage extends Resource {
+class Storage extends Reservoir {
   Storage(float initCap, float llmin, float llmax) {
-    super(initCap, llmin, llmax, 0.0, 0.0, -inff, -inff);
+    super(initCap, llmin, llmax, 0.0, 0.0, +inff, +inff);
   }
 }
 
@@ -104,9 +104,9 @@ class Satellite extends Timeline {
 Satellite::TakeImg {
   met_by(object.Pointing p);
   eq(p.m_target,m_target);
-  starts(object.m_memory.change tx);
+  starts(object.m_memory.consume tx);
   float qty;
-  addEq(qty,m_target.m_size,0);
+  eq(qty, m_target.m_size);
   eq(tx.quantity,qty);
   eq(duration,m_target.m_size);
   meets(object.HaveImg i);
@@ -155,21 +155,21 @@ Satellite::Transmit {
   eq(duration,m_data.m_size);
   met_by(object.HaveImg h);
   eq(m_data,h.m_target);
-  starts(object.m_antenna.change tx1);
+  starts(object.m_antenna.consume tx1);
   float qty;
-  addEq(qty,m_data.m_size,0);
+  eq(qty, m_data.m_size);
   eq(tx1.quantity, qty);
   contains(m_station.Receive r);
   eq(r.m_data,m_data);
-  eq(r.duration,duration); 
+  eq(r.duration,duration);
 }
 
 GroundStation::Receive {
   contained_by(Satellite.Transmit t);
   eq(t.m_station,object);
-  starts(object.m_disk.change tx2);
+  starts(object.m_disk.consume tx2);
   float qty;
-  addEq(qty,m_data.m_size,0);
+  eq(qty, m_data.m_size);
   eq(tx2.quantity, qty);
 }
 

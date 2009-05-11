@@ -1,10 +1,5 @@
 #include "rs-flow-test-module.hh"
 
-#include "ResourceDefs.hh"
-#include "Resource.hh"
-#include "Transaction.hh"
-#include "ResourceConstraint.hh"
-#include "ResourcePropagator.hh"
 #include "SAVH_ResourceDefs.hh"
 #include "SAVH_Profile.hh"
 #include "SAVH_FVDetector.hh"

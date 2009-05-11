@@ -4,8 +4,6 @@
 #include "FlawHandler.hh"
 #include "NddlXml.hh"
 #include "InterpreterResources.hh"
-#include "ResourceConstraint.hh"
-#include "ResourcePropagator.hh"
 #include "ResourceMatching.hh"
 #include "ResourceThreatDecisionPoint.hh"
 #include "SAVH_ProfilePropagator.hh"
@@ -45,28 +43,9 @@ namespace EUROPA {
   {
       ConstraintEngine* ce = (ConstraintEngine*)(engine->getComponent("ConstraintEngine"));
       Schema* schema = (Schema*)(engine->getComponent("Schema"));
-      PlanDatabase* pdb = (PlanDatabase*)(engine->getComponent("PlanDatabase"));
-
-      REGISTER_SYSTEM_CONSTRAINT(ce->getCESchema(),ResourceConstraint, "ResourceTransactionRelation", "Resource");
 	  new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), ce->getId());
-	  new ResourcePropagator(LabelStr("Resource"), ce->getId(), pdb->getId());
 
 	  ObjectType* ot;
-
-      ot = new ObjectType("Resource","Object",true /*isNative*/);
-      ot->addMember("float", "initialCapacity");
-      ot->addMember("float", "levelLimitMin");
-      ot->addMember("float", "levelLimitMax");
-      ot->addMember("float", "productionRateMax");
-      ot->addMember("float", "productionMax");
-      ot->addMember("float", "consumptionRateMax");
-      ot->addMember("float", "consumptionMax");
-      ot->addObjectFactory((new ResourceObjectFactory(ot->getId(),"Resource"))->getId());
-      ot->addObjectFactory((new ResourceObjectFactory(ot->getId(),"Resource:float:float:float"))->getId());
-      ot->addObjectFactory((new ResourceObjectFactory(ot->getId(),"Resource:float:float:float:float:float"))->getId());
-      ot->addObjectFactory((new ResourceObjectFactory(ot->getId(),"Resource:float:float:float:float:float:float:float"))->getId());
-      ot->addTokenFactory((new ResourceChangeTokenFactory("Resource.change"))->getId());
-      schema->registerObjectType(ot->getId());
 
       // TODO: preserve class hierarchy, all Resource types should extend Resource, not Object
       ot = new ObjectType("Reusable","Object",true /*isNative*/);

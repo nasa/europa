@@ -7,67 +7,6 @@
 #include "Core.nddl"
 #include "Constraints.nddl"
 
-// Base class for adding multi-capacity, numeric resources to the NDDL language.
-class Resource {
- // Specified resource properties
- float initialCapacity;
- float levelLimitMin;
- float levelLimitMax;
- float productionRateMax;
- float productionMax;
- float consumptionRateMax;
- float consumptionMax;
-
- // The only predicate we allow
- predicate change{
-  float quantity;
- }
-
- Resource(float ic, float ll_min, float ll_max){
-  initialCapacity = ic;
-  levelLimitMin = ll_min;
-  levelLimitMax = ll_max;
-  productionRateMax = +inff;
-  productionMax = +inff;
-  consumptionRateMax = -inff;
-  consumptionMax = -inff;
- }
-
- Resource(float ic, float ll_min, float ll_max,
-	float p_max, float c_max){
-  initialCapacity = ic;
-  levelLimitMin = ll_min;
-  levelLimitMax = ll_max;
-  productionRateMax = p_max;
-  productionMax = p_max;
-  consumptionRateMax = -16.0; // !!!!!!!! bug work around cm; // -inf;
-  consumptionMax = c_max; // -inf;
- }
-
- Resource(float ic, float ll_min, float ll_max,
-	float pr_max, float p_max, float cr_max, float c_max){
-  initialCapacity = ic;
-  levelLimitMin = ll_min;
-  levelLimitMax = ll_max;
-  productionRateMax = pr_max;
-  productionMax = p_max;
-  consumptionRateMax = cr_max;
-  consumptionMax = c_max;
- }
-
- Resource() {
-  initialCapacity = 0.0;
-  levelLimitMin = -inff;
-  levelLimitMax = +inff;
-  productionRateMax = +inff;
-  productionMax = +inff;
-  consumptionRateMax = -inff;
-  consumptionMax = -inff;
- }
-}
-
-//typedef float [0.0 +inff] posfloat;
-
 class Reservoir {
   float initialCapacity;
   float levelLimitMin;

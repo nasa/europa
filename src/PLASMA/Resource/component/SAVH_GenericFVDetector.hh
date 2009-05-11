@@ -40,8 +40,8 @@ namespace EUROPA {
     protected:
 
       // Second version requires subclassing to handle open vs. closed world assumption
-      ResourceProblem::Type getResourceViolation(const InstantId inst) const;
-      virtual ResourceProblem::Type getResourceLevelViolation(const InstantId inst) const = 0;
+      Resource::ProblemType getResourceViolation(const InstantId inst) const;
+      virtual Resource::ProblemType getResourceLevelViolation(const InstantId inst) const = 0;
 
       // Handling flaws does more than just report there is one
       // Second version requires subclassing to handle open vs. closed world assumption

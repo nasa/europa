@@ -8,26 +8,26 @@ namespace SAVH {
 OpenWorldFVDetector::OpenWorldFVDetector(const ResourceId res) : GenericFVDetector(res) {
 }
 
-ResourceProblem::Type OpenWorldFVDetector::getResourceLevelViolation(const InstantId inst) const
+Resource::ProblemType OpenWorldFVDetector::getResourceLevelViolation(const InstantId inst) const
 {
 	if (inst->getUpperLevel() + (m_maxCumulativeProduction - inst->getMinCumulativeProduction()) < m_lowerLimit)
 	{
 		debugMsg("OpenWorldFVDetector:detect", "Lower limit violation.  Limit: " << m_lowerLimit << " Upper level: " << inst->getUpperLevel() <<
 				" Maximum remaining production: " << (m_maxCumulativeProduction - inst->getMinCumulativeProduction()));
-		return ResourceProblem::LevelTooLow;
+		return Resource::LevelTooLow;
 	}
 	if (inst->getLowerLevel() - (m_maxCumulativeConsumption - inst->getMinCumulativeConsumption()) > m_upperLimit)
 	{
 		debugMsg("OpenWorldFVDetector:detect", "Upper limit violation.  Limit: " << m_upperLimit << " Lower level: " << inst->getLowerLevel() <<
 				" Maxumum remaining consumption: " << (m_maxCumulativeConsumption - inst->getMinCumulativeConsumption()));
-    	return ResourceProblem::LevelTooHigh;
+    	return Resource::LevelTooHigh;
 	}
-	return ResourceProblem::NoProblem;
+	return Resource::NoProblem;
 }
 
 void OpenWorldFVDetector::handleResourceLevelFlaws(const InstantId inst)
 {
-	if(inst->getLowerLevelMax() < m_lowerLimit) 
+	if(inst->getLowerLevelMax() < m_lowerLimit)
 	{
 		inst->setFlawed(true);
 		inst->setLower(true);
@@ -36,10 +36,10 @@ void OpenWorldFVDetector::handleResourceLevelFlaws(const InstantId inst)
 	}
 	if(inst->getUpperLevelMin() > m_upperLimit)
 	{
-		inst->setFlawed(true);	
+		inst->setFlawed(true);
 		inst->setUpper(true);
 		inst->setUpperMagnitude(fabs(m_upperLimit - inst->getUpperLevelMin()));
-		debugMsg("OpenWorldFVDetector:detect", "Upper limit flaw.");	
+		debugMsg("OpenWorldFVDetector:detect", "Upper limit flaw.");
 	}
 }
 

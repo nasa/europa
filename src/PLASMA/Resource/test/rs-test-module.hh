@@ -8,7 +8,6 @@
 class ResourceModuleTests : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(ResourceModuleTests);
   CPPUNIT_TEST(defaultSetupTests);
-  CPPUNIT_TEST(resourceTests);
   CPPUNIT_TEST(profileTests);
   CPPUNIT_TEST(SAVHResourceTests);
   CPPUNIT_TEST(ResourceSolverTests);
@@ -26,7 +25,6 @@ public:
 
   void cppSetup(void);
   void defaultSetupTests(void);
-  void resourceTests(void);
   void profileTests(void);
   void SAVHResourceTests(void);
   void ResourceSolverTests(void);

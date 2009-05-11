@@ -56,7 +56,7 @@ namespace EUROPA {
       CBReusable(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open);
       virtual ~CBReusable();
 
-      virtual void notifyViolated(const InstantId inst, ResourceProblem::Type problem);
+      virtual void notifyViolated(const InstantId inst, Resource::ProblemType problem);
       virtual void notifyNoLongerViolated(const InstantId inst);
       virtual void notifyFlawed(const InstantId inst);
       virtual void notifyNoLongerFlawed(const InstantId inst);
@@ -104,12 +104,12 @@ namespace EUROPA {
       virtual void notifyViolated();
       virtual void notifyNoLongerViolated();
 
-      virtual void notifyViolated(ResourceProblem::Type problem, const InstantId inst);
+      virtual void notifyViolated(Resource::ProblemType problem, const InstantId inst);
       virtual void notifyNoLongerViolated(const InstantId inst);
 
       CBReusableId m_resource;
       std::vector<TransactionId> m_txns;
-      std::map<InstantId,ResourceProblem::Type> m_violationProblems; // instant->problem map
+      std::map<InstantId,Resource::ProblemType> m_violationProblems; // instant->problem map
 
     private:
       virtual bool canIgnore(const ConstrainedVariableId& variable,

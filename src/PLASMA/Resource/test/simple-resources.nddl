@@ -1,13 +1,13 @@
 #include "Resources.nddl"
 
-class Battery extends Resource {
- predicate change{
+class Battery extends Reservoir {
+ predicate consume{
   float conversionRate;
   float actualQuantity;
   mulEq(quantity, conversionRate, actualQuantity);
  }
 
- 
+
  Battery(float ic, float ll_min, float ll_max){
   super(ic, ll_min, ll_max);
  }
@@ -51,7 +51,7 @@ class World extends Timeline {
 }
 
 World::initialState{
- any(Battery.change tx);
+ any(Battery.consume tx);
  eq(tx.quantity, 4.0);
  eq(tx.conversionRate, 0.7);
 }

@@ -415,49 +415,69 @@ private:
 
   static bool testObjectPredicateRelationships() {
       DEFAULT_SETUP(ce, db, true);
-    schema->addObjectType(LabelStr("Resource"));
-    schema->addObjectType(LabelStr("NddlResource"), LabelStr("Resource"));
-    schema->addPredicate(LabelStr("Resource.change"));
-    CPPUNIT_ASSERT(schema->isPredicate(LabelStr("Resource.change")));
 
-    schema->addMember(LabelStr("Resource.change"), LabelStr("float"), LabelStr("quantity"));
+    schema->addObjectType(LabelStr("Reservoir"));
+    schema->addObjectType(LabelStr("NddlReservoir"), LabelStr("Reservoir"));
+    schema->addPredicate(LabelStr("Reservoir.consume"));
+    schema->addPredicate(LabelStr("Reservoir.produce"));
+    CPPUNIT_ASSERT(schema->isPredicate(LabelStr("Reservoir.produce")));
+    CPPUNIT_ASSERT(schema->isPredicate(LabelStr("Reservoir.consume")));
 
-    schema->addObjectType(LabelStr("Battery"), LabelStr("Resource"));
-    CPPUNIT_ASSERT(schema->hasParent(LabelStr("Battery.change")));
-    CPPUNIT_ASSERT(schema->getParent(LabelStr("Battery.change")) == LabelStr("Resource.change"));
+    schema->addMember(LabelStr("Reservoir.produce"), LabelStr("float"), LabelStr("quantity"));
+    schema->addMember(LabelStr("Reservoir.consume"), LabelStr("float"), LabelStr("quantity"));
+
+    schema->addObjectType(LabelStr("Battery"), LabelStr("Reservoir"));
+    CPPUNIT_ASSERT(schema->hasParent(LabelStr("Battery.produce")));
+    CPPUNIT_ASSERT(schema->hasParent(LabelStr("Battery.consume")));
+    CPPUNIT_ASSERT(schema->getParent(LabelStr("Battery.consume")) == LabelStr("Reservoir.consume"));
+    CPPUNIT_ASSERT(schema->getParent(LabelStr("Battery.produce")) == LabelStr("Reservoir.produce"));
 
     schema->addObjectType(LabelStr("World"));
     schema->addPredicate(LabelStr("World.initialState"));
+    CPPUNIT_ASSERT(schema->isPredicate(LabelStr("Battery.produce")));
+    CPPUNIT_ASSERT(schema->isPredicate(LabelStr("Battery.consume")));
 
-    CPPUNIT_ASSERT(schema->isPredicate(LabelStr("Battery.change")));
     CPPUNIT_ASSERT(schema->isPredicate(LabelStr("World.initialState")));
     CPPUNIT_ASSERT(!schema->isPredicate(LabelStr("World.NOPREDICATE")));
-    CPPUNIT_ASSERT(schema->isObjectType(LabelStr("Resource")));
+    CPPUNIT_ASSERT(schema->isObjectType(LabelStr("Reservoir")));
     CPPUNIT_ASSERT(schema->isObjectType(LabelStr("World")));
     CPPUNIT_ASSERT(schema->isObjectType(LabelStr("Battery")));
     CPPUNIT_ASSERT(!schema->isObjectType(LabelStr("NOTYPE")));
 
-    CPPUNIT_ASSERT(schema->canContain(LabelStr("Resource.change"), LabelStr("float"), LabelStr("quantity")));
-    CPPUNIT_ASSERT(schema->canContain(LabelStr("Battery.change"), LabelStr("float"), LabelStr("quantity")));
-    CPPUNIT_ASSERT(schema->canContain(LabelStr("NddlResource.change"), LabelStr("float"), LabelStr("quantity")));
-    CPPUNIT_ASSERT(schema->hasMember(LabelStr("Resource.change"), LabelStr("quantity")));
-    CPPUNIT_ASSERT(schema->hasMember(LabelStr("NddlResource.change"), LabelStr("quantity")));
-    CPPUNIT_ASSERT(schema->hasMember(LabelStr("Battery.change"), LabelStr("quantity")));
+    CPPUNIT_ASSERT(schema->canContain(LabelStr("Reservoir.consume"), LabelStr("float"), LabelStr("quantity")));
+    CPPUNIT_ASSERT(schema->canContain(LabelStr("Reservoir.produce"), LabelStr("float"), LabelStr("quantity")));
+    CPPUNIT_ASSERT(schema->canContain(LabelStr("Battery.consume"), LabelStr("float"), LabelStr("quantity")));
+    CPPUNIT_ASSERT(schema->canContain(LabelStr("Battery.produce"), LabelStr("float"), LabelStr("quantity")));
+    CPPUNIT_ASSERT(schema->canContain(LabelStr("NddlReservoir.consume"), LabelStr("float"), LabelStr("quantity")));
+    CPPUNIT_ASSERT(schema->canContain(LabelStr("NddlReservoir.produce"), LabelStr("float"), LabelStr("quantity")));
+    CPPUNIT_ASSERT(schema->hasMember(LabelStr("Reservoir.consume"), LabelStr("quantity")));
+    CPPUNIT_ASSERT(schema->hasMember(LabelStr("Reservoir.produce"), LabelStr("quantity")));
+    CPPUNIT_ASSERT(schema->hasMember(LabelStr("NddlReservoir.consume"), LabelStr("quantity")));
+    CPPUNIT_ASSERT(schema->hasMember(LabelStr("NddlReservoir.produce"), LabelStr("quantity")));
+    CPPUNIT_ASSERT(schema->hasMember(LabelStr("Battery.consume"), LabelStr("quantity")));
+    CPPUNIT_ASSERT(schema->hasMember(LabelStr("Battery.produce"), LabelStr("quantity")));
 
     CPPUNIT_ASSERT(schema->canBeAssigned(LabelStr("World"), LabelStr("World.initialState")));
-    CPPUNIT_ASSERT(schema->canBeAssigned(LabelStr("Resource"), LabelStr("Resource.change")));
-    CPPUNIT_ASSERT(schema->canBeAssigned(LabelStr("Battery"), LabelStr("Resource.change")));
-    CPPUNIT_ASSERT(!schema->canBeAssigned(LabelStr("World"), LabelStr("Resource.change")));
-    CPPUNIT_ASSERT(!schema->canBeAssigned(LabelStr("Resource"), LabelStr("Battery.change")));
 
-    CPPUNIT_ASSERT(!schema->isA(LabelStr("Resource"), LabelStr("Battery")));
-    CPPUNIT_ASSERT(schema->isA(LabelStr("Battery"), LabelStr("Resource")));
+    CPPUNIT_ASSERT(schema->canBeAssigned(LabelStr("Reservoir"), LabelStr("Reservoir.consume")));
+    CPPUNIT_ASSERT(schema->canBeAssigned(LabelStr("Reservoir"), LabelStr("Reservoir.produce")));
+    CPPUNIT_ASSERT(schema->canBeAssigned(LabelStr("Battery"), LabelStr("Reservoir.consume")));
+    CPPUNIT_ASSERT(schema->canBeAssigned(LabelStr("Battery"), LabelStr("Reservoir.produce")));
+    CPPUNIT_ASSERT(!schema->canBeAssigned(LabelStr("World"), LabelStr("Reservoir.consume")));
+    CPPUNIT_ASSERT(!schema->canBeAssigned(LabelStr("World"), LabelStr("Reservoir.produce")));
+    CPPUNIT_ASSERT(!schema->canBeAssigned(LabelStr("Reservoir"), LabelStr("Battery.consume")));
+    CPPUNIT_ASSERT(!schema->canBeAssigned(LabelStr("Reservoir"), LabelStr("Battery.produce")));
+
+    CPPUNIT_ASSERT(!schema->isA(LabelStr("Reservoir"), LabelStr("Battery")));
+    CPPUNIT_ASSERT(schema->isA(LabelStr("Battery"), LabelStr("Reservoir")));
     CPPUNIT_ASSERT(schema->isA(LabelStr("Battery"), LabelStr("Battery")));
     CPPUNIT_ASSERT(schema->hasParent(LabelStr("Battery")));
-    CPPUNIT_ASSERT(schema->getParent(LabelStr("Battery")) == LabelStr("Resource"));
+    CPPUNIT_ASSERT(schema->getParent(LabelStr("Battery")) == LabelStr("Reservoir"));
     CPPUNIT_ASSERT(schema->getObjectTypeForPredicate(LabelStr("World.initialState")) == LabelStr("World"));
-    CPPUNIT_ASSERT(schema->getObjectTypeForPredicate(LabelStr("Battery.change")) == LabelStr("Battery"));
-    CPPUNIT_ASSERT(schema->getObjectTypeForPredicate(LabelStr("Battery.change")) != LabelStr("Resource"));
+    CPPUNIT_ASSERT(schema->getObjectTypeForPredicate(LabelStr("Battery.consume")) == LabelStr("Battery"));
+    CPPUNIT_ASSERT(schema->getObjectTypeForPredicate(LabelStr("Battery.produce")) == LabelStr("Battery"));
+    CPPUNIT_ASSERT(schema->getObjectTypeForPredicate(LabelStr("Battery.consume")) != LabelStr("Reservoir"));
+    CPPUNIT_ASSERT(schema->getObjectTypeForPredicate(LabelStr("Battery.produce")) != LabelStr("Reservoir"));
 
     schema->addObjectType("Base");
     schema->addObjectType("Derived");
@@ -465,15 +485,17 @@ private:
     schema->addMember("Derived.Predicate", "Battery", "battery");
 
 
-    CPPUNIT_ASSERT(schema->getParameterCount(LabelStr("Resource.change")) == 1);
-    CPPUNIT_ASSERT(schema->getParameterType(LabelStr("Resource.change"), 0) == LabelStr("float"));
+    CPPUNIT_ASSERT(schema->getParameterCount(LabelStr("Reservoir.produce")) == 1);
+    CPPUNIT_ASSERT(schema->getParameterCount(LabelStr("Reservoir.consume")) == 1);
+    CPPUNIT_ASSERT(schema->getParameterType(LabelStr("Reservoir.consume"), 0) == LabelStr("float"));
+    CPPUNIT_ASSERT(schema->getParameterType(LabelStr("Reservoir.produce"), 0) == LabelStr("float"));
 
     std::set<LabelStr> predicates;
     schema->getPredicates(LabelStr("Battery"), predicates);
-    CPPUNIT_ASSERT(predicates.size() == 1);
+    CPPUNIT_ASSERT(predicates.size() == 2);
     predicates.clear();
-    schema->getPredicates(LabelStr("Resource"), predicates);
-    CPPUNIT_ASSERT(predicates.size() == 1);
+    schema->getPredicates(LabelStr("Reservoir"), predicates);
+    CPPUNIT_ASSERT(predicates.size() == 2);
 
     schema->addObjectType("One");
     schema->addPredicate("One.Predicate1");
@@ -492,14 +514,19 @@ private:
 
   static bool testPredicateParameterAccessors() {
       DEFAULT_SETUP(ce, db, true);
-    schema->addObjectType(LabelStr("Resource"));
-    schema->addObjectType(LabelStr("NddlResource"), LabelStr("Resource"));
-    schema->addPredicate(LabelStr("Resource.change"));
-    schema->addObjectType(LabelStr("Battery"), LabelStr("Resource"));
-    schema->addMember(LabelStr("Resource.change"), LabelStr("float"), LabelStr("quantity"));
-    schema->addMember(LabelStr("Resource.change"), LabelStr("float"), LabelStr("quality"));
-    CPPUNIT_ASSERT(schema->getIndexFromName(LabelStr("Resource.change"), LabelStr("quality")) == 1);
-    CPPUNIT_ASSERT(schema->getNameFromIndex(LabelStr("Resource.change"), 0).getKey() == LabelStr("quantity").getKey());
+    schema->addObjectType(LabelStr("Reservoir"));
+    schema->addObjectType(LabelStr("NddlReservoir"), LabelStr("Reservoir"));
+    schema->addPredicate(LabelStr("Reservoir.consume"));
+    schema->addPredicate(LabelStr("Reservoir.produce"));
+    schema->addObjectType(LabelStr("Battery"), LabelStr("Reservoir"));
+    schema->addMember(LabelStr("Reservoir.consume"), LabelStr("float"), LabelStr("quantity"));
+    schema->addMember(LabelStr("Reservoir.produce"), LabelStr("float"), LabelStr("quantity"));
+    schema->addMember(LabelStr("Reservoir.consume"), LabelStr("float"), LabelStr("quality"));
+    schema->addMember(LabelStr("Reservoir.produce"), LabelStr("float"), LabelStr("quality"));
+    CPPUNIT_ASSERT(schema->getIndexFromName(LabelStr("Reservoir.consume"), LabelStr("quality")) == 1);
+    CPPUNIT_ASSERT(schema->getIndexFromName(LabelStr("Reservoir.produce"), LabelStr("quality")) == 1);
+    CPPUNIT_ASSERT(schema->getNameFromIndex(LabelStr("Reservoir.consume"), 0).getKey() == LabelStr("quantity").getKey());
+    CPPUNIT_ASSERT(schema->getNameFromIndex(LabelStr("Reservoir.produce"), 0).getKey() == LabelStr("quantity").getKey());
 
     schema->addObjectType(LabelStr("Foo"));
     schema->addPredicate(LabelStr("Foo.Argle"));

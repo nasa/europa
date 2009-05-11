@@ -2,11 +2,12 @@
 #define NDDL_RESOURCE_HH
 
 #include "NddlDefs.hh"
-#include "Resource.hh"
+#include "SAVH_Resource.hh"
 #include "SAVH_Reservoir.hh"
 #include "SAVH_InstantTokens.hh"
 #include "SAVH_Reusable.hh"
 #include "SAVH_DurativeTokens.hh"
+#include "SAVH_Transaction.hh"
 
 namespace NDDL {
 
@@ -229,67 +230,6 @@ namespace NDDL {
   protected:
   private:
   };
-
-  class NddlResource : public EUROPA::Resource {
-  public:
-    NddlResource(const PlanDatabaseId& planDatabase,
-		 const LabelStr& type,
-		 const LabelStr& name,
-		 bool open);
-
-    NddlResource(const ObjectId parent,
-		 const LabelStr& type,
-		 const LabelStr& name,
-		 bool open);
-
-    virtual void close();
-
-    virtual void constructor(float ic, float ll_min, float ll_max);
-
-    virtual void constructor(float ic, float ll_min, float ll_max, float p_max, float c_max);
-
-    virtual void constructor(float ic, float ll_min, float ll_max, float pr_max, float p_max, float cr_max, float c_max);
-
-    virtual void constructor();
-
-    void handleDefaults(bool autoClose = true); // default variable initialization
-
-
-    class change;
-    typedef Id<change> changeId;
-    ConstrainedVariableId initialCapacity;
-    ConstrainedVariableId levelLimitMin;
-    ConstrainedVariableId levelLimitMax;
-    ConstrainedVariableId productionRateMax;
-    ConstrainedVariableId productionMax;
-    ConstrainedVariableId consumptionRateMax;
-    ConstrainedVariableId consumptionMax;
-
-    class change: public EUROPA::Transaction {
-    public:
-      change(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool isFact, bool close);
-      change(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, bool close);
-
-      /* Access to primitives of a token as public members. */
-      StateVarId state;
-      ObjectVarId object;
-      TempVarId tStart;
-      TempVarId tEnd;
-      TempVarId tDuration;
-      TempVarId time;
-
-      ConstrainedVariableId quantity; /*!< Add member specific for a resource */
-
-      virtual void close();
-
-    protected:
-      virtual void handleDefaults(bool autoClose = true);
-
-    private:
-      void commonInit();
-    };
-  };
-
 
 } // namespace NDDL
 
