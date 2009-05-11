@@ -5,13 +5,13 @@ if ! $(PLASMA_READY) {
 ModuleBase Resource
 	:
 	PSResource.cc
-	SAVH_Resource.cc
-	SAVH_Instant.cc
-	SAVH_FVDetector.cc
-	SAVH_Profile.cc
-	SAVH_ProfilePropagator.cc
-	SAVH_ResourceTokenRelation.cc
-	SAVH_Transaction.cc
+	Resource.cc
+	Instant.cc
+	FVDetector.cc
+	Profile.cc
+	ProfilePropagator.cc
+	ResourceTokenRelation.cc
+	Transaction.cc
 	;
 
 } # PLASMA_READY

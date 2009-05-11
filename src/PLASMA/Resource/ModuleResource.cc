@@ -6,18 +6,18 @@
 #include "InterpreterResources.hh"
 #include "ResourceMatching.hh"
 #include "ResourceThreatDecisionPoint.hh"
-#include "SAVH_ProfilePropagator.hh"
-#include "SAVH_FlowProfile.hh"
-#include "SAVH_IncrementalFlowProfile.hh"
-#include "SAVH_TimetableProfile.hh"
-#include "SAVH_GroundedProfile.hh"
-#include "SAVH_OpenWorldFVDetector.hh"
-#include "SAVH_ClosedWorldFVDetector.hh"
-#include "SAVH_GroundedFVDetector.hh"
-#include "SAVH_Instant.hh"
-#include "SAVH_ThreatDecisionPoint.hh"
-#include "SAVH_ThreatManager.hh"
-#include "SAVH_Reusable.hh"
+#include "ProfilePropagator.hh"
+#include "FlowProfile.hh"
+#include "IncrementalFlowProfile.hh"
+#include "TimetableProfile.hh"
+#include "GroundedProfile.hh"
+#include "OpenWorldFVDetector.hh"
+#include "ClosedWorldFVDetector.hh"
+#include "GroundedFVDetector.hh"
+#include "Instant.hh"
+#include "ThreatDecisionPoint.hh"
+#include "ResourceThreatManager.hh"
+#include "Reusable.hh"
 
 namespace EUROPA {
 
@@ -43,7 +43,7 @@ namespace EUROPA {
   {
       ConstraintEngine* ce = (ConstraintEngine*)(engine->getComponent("ConstraintEngine"));
       Schema* schema = (Schema*)(engine->getComponent("Schema"));
-	  new SAVH::ProfilePropagator(LabelStr("SAVH_Resource"), ce->getId());
+	  new ProfilePropagator(LabelStr("Resource"), ce->getId());
 
 	  ObjectType* ot;
 
@@ -72,9 +72,9 @@ namespace EUROPA {
       schema->registerObjectType(ot->getId());
       REGISTER_CONSTRAINT(
         ce->getCESchema(),
-        SAVH::Uses,
-        SAVH::Uses::CONSTRAINT_NAME(),
-        SAVH::Uses::PROPAGATOR_NAME()
+        Uses,
+        Uses::CONSTRAINT_NAME(),
+        Uses::PROPAGATOR_NAME()
       );
 
       ot = new ObjectType("Reservoir","Object",true /*isNative*/);
@@ -102,25 +102,25 @@ namespace EUROPA {
 
       FactoryMgr* pfm = new FactoryMgr();
       engine->addComponent("ProfileFactoryMgr",pfm);
-      REGISTER_PROFILE(pfm,EUROPA::SAVH::TimetableProfile, TimetableProfile );
-      REGISTER_PROFILE(pfm,EUROPA::SAVH::FlowProfile, FlowProfile);
-      REGISTER_PROFILE(pfm,EUROPA::SAVH::IncrementalFlowProfile, IncrementalFlowProfile );
-      REGISTER_PROFILE(pfm,EUROPA::SAVH::GroundedProfile, GroundedProfile );
+      REGISTER_PROFILE(pfm,TimetableProfile, TimetableProfile );
+      REGISTER_PROFILE(pfm,FlowProfile, FlowProfile);
+      REGISTER_PROFILE(pfm,IncrementalFlowProfile, IncrementalFlowProfile );
+      REGISTER_PROFILE(pfm,GroundedProfile, GroundedProfile );
 
       // Solver
       FactoryMgr* fvdfm = new FactoryMgr();
       engine->addComponent("FVDetectorFactoryMgr",fvdfm);
-      REGISTER_FVDETECTOR(fvdfm,EUROPA::SAVH::OpenWorldFVDetector,OpenWorldFVDetector);
-      REGISTER_FVDETECTOR(fvdfm,EUROPA::SAVH::ClosedWorldFVDetector,ClosedWorldFVDetector);
-      REGISTER_FVDETECTOR(fvdfm,EUROPA::SAVH::GroundedFVDetector,GroundedFVDetector);
+      REGISTER_FVDETECTOR(fvdfm,OpenWorldFVDetector,OpenWorldFVDetector);
+      REGISTER_FVDETECTOR(fvdfm,ClosedWorldFVDetector,ClosedWorldFVDetector);
+      REGISTER_FVDETECTOR(fvdfm,GroundedFVDetector,GroundedFVDetector);
 
-      EUROPA::SOLVERS::ComponentFactoryMgr* cfm = (EUROPA::SOLVERS::ComponentFactoryMgr*)engine->getComponent("ComponentFactoryMgr");
-      REGISTER_FLAW_MANAGER(cfm,SAVH::ThreatManager, SAVHThreatManager);
-      REGISTER_FLAW_HANDLER(cfm,SAVH::ThreatDecisionPoint, SAVHThreatHandler);
-      REGISTER_FLAW_HANDLER(cfm,EUROPA::SOLVERS::ResourceThreatDecisionPoint, ResourceThreat);
+      SOLVERS::ComponentFactoryMgr* cfm = (SOLVERS::ComponentFactoryMgr*)engine->getComponent("ComponentFactoryMgr");
+      REGISTER_FLAW_MANAGER(cfm,ResourceThreatManager, ResourceThreatManager);
+      REGISTER_FLAW_HANDLER(cfm,ResourceThreatDecisionPoint, ResourceThreatHandler);
+//      REGISTER_FLAW_HANDLER(cfm,SOLVERS::ResourceThreatDecisionPoint, ResourceThreat);
 
-      EUROPA::SOLVERS::MatchFinderMgr* mfm = (EUROPA::SOLVERS::MatchFinderMgr*)engine->getComponent("MatchFinderMgr");
-      REGISTER_MATCH_FINDER(mfm,EUROPA::SOLVERS::InstantMatchFinder,SAVH::Instant::entityTypeName());
+      SOLVERS::MatchFinderMgr* mfm = (EUROPA::SOLVERS::MatchFinderMgr*)engine->getComponent("MatchFinderMgr");
+      REGISTER_MATCH_FINDER(mfm,EUROPA::SOLVERS::InstantMatchFinder,Instant::entityTypeName());
   }
 
   void ModuleResource::uninitialize(EngineId engine)

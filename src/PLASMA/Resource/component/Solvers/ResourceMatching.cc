@@ -1,15 +1,15 @@
 #include "ResourceMatching.hh"
 #include "Schema.hh"
 #include "PlanDatabase.hh"
-#include "SAVH_Instant.hh"
-#include "SAVH_Profile.hh"
-#include "SAVH_Resource.hh"
+#include "Instant.hh"
+#include "Profile.hh"
+#include "Resource.hh"
 
 namespace EUROPA {
   namespace SOLVERS {
 
     template<>
-    void MatchingEngine::getMatches(const SAVH::InstantId& inst,
+    void MatchingEngine::getMatches(const InstantId& inst,
 				    std::vector<MatchingRuleId>& results) {
       m_cycleCount++;
       results = m_unfilteredRules;
@@ -17,10 +17,10 @@ namespace EUROPA {
     }
 
     template<>
-    void MatchingEngine::getMatchesInternal(const SAVH::InstantId& inst,
-					    std::vector<MatchingRuleId>& results) 
+    void MatchingEngine::getMatchesInternal(const InstantId& inst,
+					    std::vector<MatchingRuleId>& results)
     {
-      const SAVH::ResourceId& res = inst->getProfile()->getResource();   
+      const ResourceId& res = inst->getProfile()->getResource();
       debugMsg("MatchingEngine:getMatchesInternal",
 	       "Triggering matches for object types (" <<
 	       res->getType().toString() << ")");
@@ -30,7 +30,7 @@ namespace EUROPA {
 
     void InstantMatchFinder::getMatches(const MatchingEngineId& engine, const EntityId& entity,
 					std::vector<MatchingRuleId>& results) {
-      engine->getMatches(SAVH::InstantId(entity), results);
+      engine->getMatches(InstantId(entity), results);
     }
   }
 }

@@ -2,12 +2,12 @@
 #define NDDL_RESOURCE_HH
 
 #include "NddlDefs.hh"
-#include "SAVH_Resource.hh"
-#include "SAVH_Reservoir.hh"
-#include "SAVH_InstantTokens.hh"
-#include "SAVH_Reusable.hh"
-#include "SAVH_DurativeTokens.hh"
-#include "SAVH_Transaction.hh"
+#include "Resource.hh"
+#include "Reservoir.hh"
+#include "InstantTokens.hh"
+#include "Reusable.hh"
+#include "DurativeTokens.hh"
+#include "Transaction.hh"
 
 namespace NDDL {
 
@@ -15,7 +15,7 @@ namespace NDDL {
   typedef EUROPA::ObjectDomain ResuableDomain;
   typedef EUROPA::ObjectDomain ReservoirDomain;
 
-  class NddlUnaryToken : public EUROPA::SAVH::UnaryToken {
+  class NddlUnaryToken : public EUROPA::UnaryToken {
   public:
     NddlUnaryToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, const bool& rejectable = false, const bool& isFact=false, const bool& close = false);
     NddlUnaryToken(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, const bool& close = false);
@@ -31,7 +31,7 @@ namespace NDDL {
     void commonInit(const bool& autoClose);
   };
 
-  class NddlUnary : public EUROPA::SAVH::Reusable {
+  class NddlUnary : public EUROPA::Reusable {
   public:
     NddlUnary(const PlanDatabaseId& planDatabase,
 		 const LabelStr& type,
@@ -53,7 +53,7 @@ namespace NDDL {
 
     ConstrainedVariableId consumptionMax;
 
-    class use : public EUROPA::SAVH::ReusableToken {
+    class use : public EUROPA::ReusableToken {
     public:
       use(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool isFact, bool close);
       use(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, bool close);
@@ -71,7 +71,7 @@ namespace NDDL {
     };
   };
 
-  class NddlReusable : public EUROPA::SAVH::Reusable {
+  class NddlReusable : public EUROPA::Reusable {
   public:
     NddlReusable(const PlanDatabaseId& planDatabase,
 		 const LabelStr& type,
@@ -98,7 +98,7 @@ namespace NDDL {
     ConstrainedVariableId consumptionRateMax;
     ConstrainedVariableId consumptionMax;
 
-    class uses : public EUROPA::SAVH::ReusableToken {
+    class uses : public EUROPA::ReusableToken {
     public:
       uses(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool isFact, bool close);
       uses(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, bool close);
@@ -117,7 +117,7 @@ namespace NDDL {
     };
   };
 
-  class NddlCBReusable : public EUROPA::SAVH::CBReusable {
+  class NddlCBReusable : public EUROPA::CBReusable {
   public:
     NddlCBReusable(const PlanDatabaseId& planDatabase,
          const LabelStr& type,
@@ -145,7 +145,7 @@ namespace NDDL {
     ConstrainedVariableId consumptionMax;
   };
 
-  class NddlReservoir : public EUROPA::SAVH::Reservoir {
+  class NddlReservoir : public EUROPA::Reservoir {
   public:
     NddlReservoir(const PlanDatabaseId& planDatabase,
 		  const LabelStr& type,
@@ -179,7 +179,7 @@ namespace NDDL {
     ConstrainedVariableId consumptionRateMax;
     ConstrainedVariableId consumptionMax;
 
-    class produce : public EUROPA::SAVH::ProducerToken {
+    class produce : public EUROPA::ProducerToken {
     public:
       produce(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool isFact, bool close);
       produce(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, bool close);
@@ -203,7 +203,7 @@ namespace NDDL {
       //void commonInit();
     };
 
-    class consume : public EUROPA::SAVH::ConsumerToken {
+    class consume : public EUROPA::ConsumerToken {
     public:
       consume(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, bool rejectable, bool isFact, bool close);
       consume(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, bool close);

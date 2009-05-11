@@ -1,9 +1,9 @@
 <Solver name="DefaultTestSolver">
   <FlawFilter component="HorizonFilter" policy="PartiallyContained"/>
 
-  <SAVHThreatManager order="most,earliest,lower" defaultPriority="2">
-    <FlawHandler component="SAVHThreatHandler"/>
-  </SAVHThreatManager>
+  <ResourceThreatManager order="most,earliest,lower" defaultPriority="2">
+    <FlawHandler component="ResourceThreatHandler"/>
+  </ResourceThreatManager>
 
   <ThreatManager defaultPriority="1">
     <FlawHandler component="StandardThreatHandler"/>

@@ -6,9 +6,9 @@
 #include "Variable.hh"
 #include "ConstrainedVariable.hh"
 #include "Constraints.hh"
-#include "SAVH_Transaction.hh"
-#include "SAVH_Instant.hh"
-#include "SAVH_Profile.hh"
+#include "Transaction.hh"
+#include "Instant.hh"
+#include "Profile.hh"
 
 namespace NDDL {
 
@@ -58,13 +58,13 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 // -------------------------------------------------------------------------------------------------------
 
   NddlUnaryToken::NddlUnaryToken(const PlanDatabaseId& planDatabase, const LabelStr& predicateName, const bool& rejectable, const bool& isFact, const bool& close)
-    : EUROPA::SAVH::UnaryToken(planDatabase, predicateName, rejectable, isFact, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
+    : EUROPA::UnaryToken(planDatabase, predicateName, rejectable, isFact, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
 			       EUROPA::Token::noObject(), false, false) {
     commonInit(close);
   }
 
   NddlUnaryToken::NddlUnaryToken(const TokenId& master, const LabelStr& predicateName, const LabelStr& relation, const bool& close)
-    : EUROPA::SAVH::UnaryToken(master, relation, predicateName, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
+    : EUROPA::UnaryToken(master, relation, predicateName, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
 			       EUROPA::Token::noObject(), false, false) {
     commonInit(close);
   }
@@ -85,13 +85,13 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 			     const LabelStr& type,
 			     const LabelStr& name,
 			     bool open)
-    : EUROPA::SAVH::Reusable(planDatabase, type, name, open) {}
+    : EUROPA::Reusable(planDatabase, type, name, open) {}
 
   NddlUnary::NddlUnary(const ObjectId& parent,
 			     const LabelStr& type,
 			     const LabelStr& name,
 			     bool open)
-    : EUROPA::SAVH::Reusable(parent, type, name, open) {}
+    : EUROPA::Reusable(parent, type, name, open) {}
 
 
   void NddlUnary::close() {
@@ -111,7 +111,7 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
          PLUS_INFINITY, PLUS_INFINITY, //max inst production, max inst consumption
          m_variables[CMAX]->derivedDomain().getSingletonValue(), m_variables[CMAX]->derivedDomain().getSingletonValue(), //max production, max consumption
          pd.second, pd.first);
-    EUROPA::SAVH::Resource::close();
+    EUROPA::Resource::close();
   }
 
   void NddlUnary::handleDefaults(bool autoClose) {
@@ -135,7 +135,7 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
                       bool rejectable,
                       bool isFact,
                       bool close)
-    : EUROPA::SAVH::ReusableToken(planDatabase, predicateName, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
+    : EUROPA::ReusableToken(planDatabase, predicateName, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
                                   IntervalDomain(1.0), Token::noObject(), false) {
     handleDefaults(close);
   }
@@ -144,13 +144,13 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 				const LabelStr& predicateName,
 				const LabelStr& relation,
 				bool close)
-    : EUROPA::SAVH::ReusableToken(master, relation, predicateName, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
+    : EUROPA::ReusableToken(master, relation, predicateName, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
                                   IntervalDomain(1.0), Token::noObject(), false) {
     handleDefaults(close);
   }
 
   void NddlUnary::use::close() {
-    EUROPA::SAVH::ReusableToken::close();
+    EUROPA::ReusableToken::close();
   }
 
   void NddlUnary::use::handleDefaults(bool autoClose) {
@@ -170,13 +170,13 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 			     const LabelStr& type,
 			     const LabelStr& name,
 			     bool open)
-    : EUROPA::SAVH::Reusable(planDatabase, type, name, open) {}
+    : EUROPA::Reusable(planDatabase, type, name, open) {}
 
   NddlReusable::NddlReusable(const ObjectId& parent,
 			     const LabelStr& type,
 			     const LabelStr& name,
 			     bool open)
-    : EUROPA::SAVH::Reusable(parent, type, name, open) {}
+    : EUROPA::Reusable(parent, type, name, open) {}
 
   void NddlReusable::close() {
     static const unsigned int C = 0;
@@ -211,7 +211,7 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 	 m_variables[CMAX]->derivedDomain().getSingletonValue(), m_variables[CMAX]->derivedDomain().getSingletonValue(),
 	 pd.second, pd.first);
 
-    EUROPA::SAVH::Resource::close();
+    EUROPA::Resource::close();
   }
 
   void NddlReusable::handleDefaults(bool autoClose) {
@@ -262,7 +262,7 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 				bool rejectable,
 				bool isFact,
 				bool close)
-    : EUROPA::SAVH::ReusableToken(planDatabase, predicateName, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
+    : EUROPA::ReusableToken(planDatabase, predicateName, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
 				  Token::noObject(), false) {
     handleDefaults(close);
   }
@@ -271,13 +271,13 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 				const LabelStr& predicateName,
 				const LabelStr& relation,
 				bool close)
-    : EUROPA::SAVH::ReusableToken(master, relation, predicateName, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
+    : EUROPA::ReusableToken(master, relation, predicateName, IntervalIntDomain(), IntervalIntDomain(), IntervalIntDomain(1, PLUS_INFINITY),
 				  Token::noObject(), false) {
     handleDefaults(close);
   }
 
   void NddlReusable::uses::close() {
-    EUROPA::SAVH::ReusableToken::close();
+    EUROPA::ReusableToken::close();
   }
 
   void NddlReusable::uses::handleDefaults(bool autoClose) {
@@ -298,13 +298,13 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
                  const LabelStr& type,
                  const LabelStr& name,
                  bool open)
-    : EUROPA::SAVH::CBReusable(planDatabase, type, name, open) {}
+    : EUROPA::CBReusable(planDatabase, type, name, open) {}
 
   NddlCBReusable::NddlCBReusable(const ObjectId& parent,
                  const LabelStr& type,
                  const LabelStr& name,
                  bool open)
-    : EUROPA::SAVH::CBReusable(parent, type, name, open) {}
+    : EUROPA::CBReusable(parent, type, name, open) {}
 
   void NddlCBReusable::close() {
     static const unsigned int C = 0;
@@ -339,7 +339,7 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
      m_variables[CMAX]->derivedDomain().getSingletonValue(), m_variables[CMAX]->derivedDomain().getSingletonValue(),
      pd.second, pd.first);
 
-    EUROPA::SAVH::Resource::close();
+    EUROPA::Resource::close();
   }
 
   void NddlCBReusable::handleDefaults(bool autoClose) {
@@ -396,13 +396,13 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 			       const LabelStr& type,
 			       const LabelStr& name,
 			       bool open)
-    : EUROPA::SAVH::Reservoir(planDatabase, type, name, open) {}
+    : EUROPA::Reservoir(planDatabase, type, name, open) {}
 
   NddlReservoir::NddlReservoir(const ObjectId parent,
 			       const LabelStr& type,
 			       const LabelStr& name,
 			       bool open)
-    : EUROPA::SAVH::Reservoir(parent, type, name, open) {}
+    : EUROPA::Reservoir(parent, type, name, open) {}
 
   void NddlReservoir::close() {
     static const int IC = 0;
@@ -449,7 +449,7 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 	 m_variables[PRMAX]->derivedDomain().getSingletonValue(), (m_variables[CRMAX]->derivedDomain().getSingletonValue()),
 	 m_variables[PMAX]->derivedDomain().getSingletonValue(), (m_variables[CMAX]->derivedDomain().getSingletonValue()),
 	 pd.second, pd.first);
-    EUROPA::SAVH::Resource::close();
+    EUROPA::Resource::close();
   }
 
   void NddlReservoir::handleDefaults(bool autoClose) {
@@ -525,7 +525,7 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 				    bool rejectable,
 				    bool isFact,
 				    bool close)
-    : EUROPA::SAVH::ProducerToken(planDatabase, predicateName, rejectable, isFact, IntervalIntDomain(), Token::noObject(), false) {
+    : EUROPA::ProducerToken(planDatabase, predicateName, rejectable, isFact, IntervalIntDomain(), Token::noObject(), false) {
     handleDefaults(close);
   }
 
@@ -533,12 +533,12 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 			       const LabelStr& predicateName,
 			       const LabelStr& relation,
 			       bool close)
-    : EUROPA::SAVH::ProducerToken(master, relation, predicateName, IntervalIntDomain(), Token::noObject(), false) {
+    : EUROPA::ProducerToken(master, relation, predicateName, IntervalIntDomain(), Token::noObject(), false) {
     handleDefaults(close);
   }
 
   void NddlReservoir::produce::close() {
-    EUROPA::SAVH::ProducerToken::close();
+    EUROPA::ProducerToken::close();
   }
 
   void NddlReservoir::produce::handleDefaults(bool autoClose) {
@@ -559,7 +559,7 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 				    bool rejectable,
 				    bool isFact,
 				    bool close)
-    : EUROPA::SAVH::ConsumerToken(planDatabase, predicateName, rejectable, isFact, IntervalIntDomain(), Token::noObject(), false) {
+    : EUROPA::ConsumerToken(planDatabase, predicateName, rejectable, isFact, IntervalIntDomain(), Token::noObject(), false) {
     handleDefaults(close);
   }
 
@@ -567,12 +567,12 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 			       const LabelStr& predicateName,
 			       const LabelStr& relation,
 			       bool close)
-    : EUROPA::SAVH::ConsumerToken(master, relation, predicateName, IntervalIntDomain(), Token::noObject(), false) {
+    : EUROPA::ConsumerToken(master, relation, predicateName, IntervalIntDomain(), Token::noObject(), false) {
     handleDefaults(close);
   }
 
   void NddlReservoir::consume::close() {
-    EUROPA::SAVH::ConsumerToken::close();
+    EUROPA::ConsumerToken::close();
   }
 
   void NddlReservoir::consume::handleDefaults(bool autoClose) {

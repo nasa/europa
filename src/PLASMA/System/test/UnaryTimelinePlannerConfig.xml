@@ -2,7 +2,7 @@
   <FlawFilter component="HorizonFilter" policy="PartiallyContained"/>
 
   <ThreatManager defaultPriority="0">
-    <FlawHandler component="ResourceThreat"/>
+    <FlawHandler component="ResourceThreatHandler"/>
     <FlawFilter class-match="Reservoir"/>
     <FlawFilter class-match="Reusable"/>
   </ThreatManager>
