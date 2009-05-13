@@ -43,7 +43,7 @@ maxSteps = 200;
 config = "PlannerConfig.xml";
 
 try {
-    psengine.executeScript("nddl3",bsh.cwd+"/"+project+"-initial-state.nddl",true/*isFile*/);
+    psengine.executeScript("nddl",bsh.cwd+"/"+project+"-initial-state.nddl",true/*isFile*/);
 
     PSSolver solver = psengine.createSolver(config);
     solver.configure(horizonStart,horizonEnd);
