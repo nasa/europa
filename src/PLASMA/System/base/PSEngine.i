@@ -148,7 +148,7 @@ namespace EUROPA {
     String retval = "";
     
     String txns = null;
-    if(language.equalsIgnoreCase("nddl")) {
+    if(language.equalsIgnoreCase("nddl") || language.equalsIgnoreCase("nddl2")) {
       try {
         Class nddlClass = getClassForName("nddl.Nddl");
         Class[] parameters = new Class[]{java.io.Reader.class, boolean.class};
@@ -200,7 +200,7 @@ namespace EUROPA {
       String retval = "";
       
       try {
-        if (language.equalsIgnoreCase("nddl")) {
+        if (language.equalsIgnoreCase("nddl") || language.equalsIgnoreCase("nddl2")) {
             if (isFile)
                 getNddlInterpreter().source(script);
             else
