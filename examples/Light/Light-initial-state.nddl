@@ -1,8 +1,6 @@
 #include "Light-model.nddl"
 constraint lt(a, b) { a <: numeric && b <: numeric }
 
-PlannerConfig c = new PlannerConfig(0, 100, +inf, +inf);
-
 // Problem instance : turning the light off
 LightSwitch switch1 = new LightSwitch();
 LightBulb bulb1 = new LightBulb(switch1);

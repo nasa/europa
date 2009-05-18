@@ -1,4 +1,3 @@
-#include "PlannerConfig.nddl"
 #include "Plasma.nddl"
 
 enum Location {Hill, Rock, Lander};
@@ -35,9 +34,9 @@ class Position extends Timeline {
         Path _p;
     }
 }
- 
+
 class Foo extends Timeline {
-    
+
     predicate FooPred {
 	Location loc;
     }
@@ -64,8 +63,6 @@ Position::Navigate {
     }
 }
 
-
-PlannerConfig world = new PlannerConfig(0, 10, 100);
 Path p1 = new Path(Hill, Rock);
 Path p2 = new Path(Hill, Lander);
 Path p3 = new Path(Lander, Rock);

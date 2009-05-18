@@ -1,17 +1,15 @@
 #include "Plasma.nddl"
-#include "PlannerConfig.nddl"
-
 
 // Classes for Locations (Home, SuperMarket, etc.), Products (Banana, etc.) and
 // ProductLocations (Banana can be found at SuperMarket, for example)
-class Location {  
+class Location {
   string name;
   Location(string _name){
     name = _name;
   }
 }
 
-class Product { 
+class Product {
   string name;
   Product(string _name) {
     name = _name;
@@ -21,7 +19,7 @@ class Product {
 class ProductLocation {
   Location location;
   Product product;
-  
+
   ProductLocation(Location _location, Product _product){
     location = _location;
     product = _product;
@@ -83,7 +81,7 @@ Agent::Buy {
   ProductLocation possibleStores;
 
   // limit possibleStores variables to ones that provide what we need to buy
-  eq(product, possibleStores.product); 
+  eq(product, possibleStores.product);
 
   // We must be At a location during our Buy, and that location must have the
   // product we want available:

@@ -1,4 +1,3 @@
-#include "PlannerConfig.nddl"
 #include "Plasma.nddl"
 
 class Foo extends Timeline {

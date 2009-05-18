@@ -1,5 +1,4 @@
 #include "Plasma.nddl"
-#include "PlannerConfig.nddl"
 
 /**
  * @brief Place holder class with a single predicate

@@ -4,8 +4,6 @@
 
 #include "UBO-model.nddl"
 
-PlannerConfig c = new PlannerConfig(0, 1000, +inf, +inf );
-
 ProblemInstance problem = new ProblemInstance();
 
 // Proven minimum duration for this problem is 45

@@ -1,5 +1,4 @@
 #include "Plasma.nddl"
-#include "PlannerConfig.nddl"
 
 enum Case1 {case11, case12, case13};
 
@@ -10,9 +9,9 @@ class Bottom extends Timeline
 {
     Block wholeBlock;
 
-    Bottom(Block b) 
-    { 
-        wholeBlock=b; 
+    Bottom(Block b)
+    {
+        wholeBlock=b;
     }
 
     predicate Holding      { Block theBlock;}
@@ -55,7 +54,7 @@ class Block
     Top blockTop;
     Bottom blockBottom;
 
-    Block(Goal g) 
+    Block(Goal g)
     {
         theGoal=g;
         blockBottom=new Bottom(this);
@@ -177,7 +176,7 @@ Bottom::OnTable
 
     ends(Operator.PickUp pickUp);
     eq(theBlock, pickUp.blockPickedUp);
- 
+
     met_by(Operator.PutDown putDown);
     eq(theBlock, putDown.blockPutDown);
 }
@@ -214,7 +213,7 @@ Top::Clear
     eq(theBlock, stackexe.blockStackAbove);
 }
 
-Top::NotClear 
+Top::NotClear
 {
     eq(theBlock, object.wholeBlock);
 
