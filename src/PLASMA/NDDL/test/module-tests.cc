@@ -11,8 +11,9 @@ int main( int argc, char **argv)
   CppUnit::TestFactoryRegistry &registry = CppUnit::TestFactoryRegistry::getRegistry();
   runner.addTest( registry.makeTest() );
 
-  bool setBaseline = false; // TODO: get from argv
-  runner.addTest( ErrorCheckingTests::suite("ErrorCheckingTests.txt",setBaseline) );
+  const char* baselineVar=getenv("SET_TEST_BASELINE");
+  bool setBaseline = (baselineVar!=NULL && (std::string(baselineVar)=="1"));
+  runner.addTest(new ErrorCheckingTests("ErrorCheckingTests.txt",setBaseline));
   return !runner.run("", false);
 }
 

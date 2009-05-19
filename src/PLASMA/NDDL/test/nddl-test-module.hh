@@ -39,6 +39,8 @@ public:
     void tearDown();
     void run();
 
+    std::string toString() const;
+
 protected:
     std::string m_name;
     std::string m_nddlFile;
@@ -50,10 +52,15 @@ protected:
 class ErrorCheckingTests : public CppUnit::TestSuite
 {
 public:
-    ErrorCheckingTests();
+    ErrorCheckingTests(const std::string& testFilename,bool setBaseline);
 
-    static CppUnit::Test *suite(const std::string& testFilename,bool setBaseline);
-    static std::vector<NddlTest*> readTests(const std::string& testFilename,bool setBaseline);
+    virtual void run (CppUnit::TestResult *result);
+    void readTests();
+
+protected:
+    std::string m_testFilename;
+    bool m_setBaseline;
+    std::vector<NddlTest*> m_tests;
 };
 
 #endif /* H_NDDL_MODULE_TESTS */

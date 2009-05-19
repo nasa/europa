@@ -1,5 +1,6 @@
 
 #include "nddl-test-module.hh"
+#include <fstream>
 #include "NddlUtils.hh"
 #include "NddlTestEngine.hh"
 #include "Utils.hh"
@@ -81,42 +82,128 @@ void NddlTest::run()
     std::string result = m_engine->executeScript("nddl3",m_nddlFile,true /*isFile*/);
 
     if (m_setBaseline) {
-        // TODO: where to save result?
+        m_result = result;
     }
     else {
-        // TODO: save diff
+        // TODO: save diff to file?
         CPPUNIT_ASSERT_MESSAGE(
-                "Expected:"+m_result+"\n"+
-                "Obtained:"+result+"\n",
+                "Expected:\n"+m_result+"\n"+
+                "Obtained:\n"+result+"\n",
                 m_result == result);
     }
 }
 
-CppUnit::Test* ErrorCheckingTests::suite(const std::string& testFilename,bool setBaseline)
+std::string NddlTest::toString() const
 {
-  CppUnit::TestSuite* s = new CppUnit::TestSuite( "ErrorCheckingTests" );
+    std::ostringstream os;
 
-  std::vector<NddlTest*> tests = readTests(testFilename,setBaseline);
+    os << m_name << std::endl
+       << m_nddlFile << std::endl
+       << "{{{" << std::endl
+       << m_result << std::endl
+       << "}}}" << std::endl;
 
-  for (unsigned int i=0;i<tests.size();i++)
-      s->addTest(
-          new CppUnit::TestCaller<NddlTest>(
-              tests[i]->name(),
-              &NddlTest::run,
-              tests[i]
-          )
-      );
-
-  return s;
+    return os.str();
 }
 
-std::vector<NddlTest*> ErrorCheckingTests::readTests(const std::string& testFilename,bool setBaseline)
-{
-    std::vector<NddlTest*> retval;
 
-    // TODO: read from file
-    retval.push_back(new NddlTest("Test1","parser.nddl","",setBaseline));
-    retval.push_back(new NddlTest("Test2","parser.nddl","",setBaseline));
+std::string readLine(std::ifstream& inFile)
+{
+    std::string retval;
+    while(!inFile.eof()) {
+        getline(inFile,retval);
+        if (retval.size()>0)
+            return retval;
+    }
 
     return retval;
+}
+
+void match(std::ifstream& inFile, const std::string& element)
+{
+    std::string result = readLine(inFile);
+    if (result != element)
+        throw std::string("Expected '"+element+"' read '"+result+"'");
+}
+
+std::string readTestName(std::ifstream& inFile)
+{
+    return readLine(inFile);
+}
+
+std::string readTestFilename(std::ifstream& inFile)
+{
+    std::string retval = readLine(inFile);
+
+    if (retval.size()==0)
+        throw std::string("Expected test filename");
+
+    return retval;
+}
+
+std::string readTestResult(std::ifstream& inFile)
+{
+    std::string retval;
+    match(inFile,"{{{");
+    std::string line;
+    while (!inFile.eof() && (line=readLine(inFile))!="}}}")
+        retval += line;
+
+    if (line != "}}}")
+        throw std::string("Expected }}}");
+
+    return retval;
+}
+
+ErrorCheckingTests::ErrorCheckingTests(const std::string& testFilename,bool setBaseline)
+    : CppUnit::TestSuite()
+    , m_testFilename(testFilename)
+    , m_setBaseline(setBaseline)
+{
+    readTests();
+
+    for (unsigned int i=0;i<m_tests.size();i++)
+        addTest(
+            new CppUnit::TestCaller<NddlTest>(
+                m_tests[i]->name(),
+                &NddlTest::run,
+                m_tests[i]
+            )
+        );
+}
+
+void ErrorCheckingTests::run(CppUnit::TestResult *result)
+{
+    CppUnit::TestSuite::run(result);
+
+    if (m_setBaseline) {
+        // Write results back
+        std::ofstream outFile(m_testFilename.c_str());
+        if (!outFile)
+            throw std::string("Unable to open "+m_testFilename);
+
+        for (unsigned int i=0;i<m_tests.size();i++)
+            outFile << m_tests[i]->toString() << std::endl;
+
+        outFile.close();
+    }
+}
+
+void ErrorCheckingTests::readTests()
+{
+    std::ifstream inFile(m_testFilename.c_str());
+
+    if (!inFile)
+        throw std::string("Unable to open "+m_testFilename);
+
+    std::string line;
+    while (!inFile.eof()) {
+        std::string name = readTestName(inFile);
+        if (name.size()==0)
+            break;
+        std::string filename = readTestFilename(inFile);
+        std::string result = readTestResult(inFile);
+        m_tests.push_back(new NddlTest(name,filename,result,m_setBaseline));
+    }
+    inFile.close();
 }
