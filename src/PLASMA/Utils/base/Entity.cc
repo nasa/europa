@@ -35,7 +35,7 @@ namespace EUROPA {
 
       debugMsg("Entity:discard", "Deallocating " << m_key);
 
-      condDebugMsg(!canBeDeleted(), "Entity:warning", 
+      condDebugMsg(!canBeDeleted(), "Entity:warning",
 		   "(" << getKey() << ") being deleted with " << m_refCount << " outstanding references.");
     }
     entitiesByKey().erase(m_key);
@@ -44,16 +44,16 @@ namespace EUROPA {
 
   const std::string& Entity::getEntityType() const {
 	  static const std::string ENTITY_STR("Entity");
-	  return ENTITY_STR; 
+	  return ENTITY_STR;
   }
-  
+
   std::string Entity::toString() const
   {
 	  std::stringstream sstr;
 	  sstr << getEntityName() << "(" << getKey() << ")";
 	  return sstr.str();
   }
-  
+
   // By default, same thing as toString()
   std::string Entity::toLongString() const
   {
@@ -64,12 +64,12 @@ namespace EUROPA {
   {
 	  return getName().toString();
   }
-  
+
   const LabelStr& Entity::getName() const {
 	  static const LabelStr NO_NAME("NO_NAME_Entity");
 	  return NO_NAME;
   }
-  
+
   bool Entity::canBeCompared(const EntityId&) const{ return true;}
 
   EntityId Entity::getEntity(int key){
@@ -101,7 +101,7 @@ namespace EUROPA {
   void Entity::clearExternalEntity(){
     m_externalEntity = EntityId::noId();
   }
-  
+
   void Entity::clearExternalPSEntity() {
     clearExternalEntity();
   }
@@ -110,7 +110,7 @@ namespace EUROPA {
     check_error(m_externalEntity.isNoId() || m_externalEntity.isValid());
     return m_externalEntity;
   }
-  
+
   const PSEntity* Entity::getExternalPSEntity() const {
     return (const PSEntity*) getExternalEntity();
   }
@@ -155,7 +155,7 @@ namespace EUROPA {
       discard();
       return true;
     }
-    
+
     return false;
   }
 
@@ -203,9 +203,9 @@ namespace EUROPA {
       std::set<Entity*>::iterator it = entities.begin();
       Entity* entity = *it;
       entities.erase(entity);
-      checkError(isPurging() || entity->canBeDeleted(), 
+      checkError(isPurging() || entity->canBeDeleted(),
 		 "Key:" << entity->getKey() << " RefCount:" << entity->refCount());
-      debugMsg("Entity:garbageCollect", "Garbage collecting entity " << entity->getKey() << "(" << entity << ")");
+      debugMsg("Entity:garbageCollect", "Garbage collecting entity " << entity->getEntityName() << "(" << entity->getKey() << ")");
       delete (Entity*) entity;
       count++;
     }

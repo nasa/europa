@@ -154,7 +154,7 @@ baseDomain[const DataType* baseType] returns [AbstractDomain* result]
 {
     // TODO: type checking. ensure inline domain is consistent with base
     DataRef data=evalExpr(CTX,child);    
-    result = (AbstractDomain*)&(data.getValue()->lastDomain()); 
+    result = data.getValue()->lastDomain().copy(); 
     // TODO: delete child;?
 }        
         ;       

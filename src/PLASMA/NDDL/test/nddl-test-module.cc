@@ -53,3 +53,70 @@ void NDDLModuleTests::utilitiesTests()
   UtilitiesTest::test();
 }
 
+
+NddlTest::NddlTest(const std::string& testName,
+                   const std::string& nddlFile,
+                   const std::string& result,
+                   bool setBaseline)
+    : m_name(testName)
+    , m_nddlFile(nddlFile)
+    , m_result(result)
+    , m_setBaseline(setBaseline)
+{
+}
+
+void NddlTest::setUp()
+{
+    m_engine = new NddlTestEngine();
+    m_engine->init();
+}
+
+void NddlTest::tearDown()
+{
+    delete m_engine;
+}
+
+void NddlTest::run()
+{
+    std::string result = m_engine->executeScript("nddl3",m_nddlFile,true /*isFile*/);
+
+    if (m_setBaseline) {
+        // TODO: where to save result?
+    }
+    else {
+        // TODO: save diff
+        CPPUNIT_ASSERT_MESSAGE(
+                "Expected:"+m_result+"\n"+
+                "Obtained:"+result+"\n",
+                m_result == result);
+    }
+}
+
+CppUnit::Test* ErrorCheckingTests::suite(const std::string& testFilename,bool setBaseline)
+{
+  CppUnit::TestSuite* s = new CppUnit::TestSuite( "ErrorCheckingTests" );
+
+  std::vector<NddlTest*> tests = readTests(testFilename,setBaseline);
+
+  for (unsigned int i=0;i<tests.size();i++)
+      s->addTest(
+          new CppUnit::TestCaller<NddlTest>(
+              tests[i]->name(),
+              &NddlTest::run,
+              tests[i]
+          )
+      );
+
+  return s;
+}
+
+std::vector<NddlTest*> ErrorCheckingTests::readTests(const std::string& testFilename,bool setBaseline)
+{
+    std::vector<NddlTest*> retval;
+
+    // TODO: read from file
+    retval.push_back(new NddlTest("Test1","parser.nddl","",setBaseline));
+    retval.push_back(new NddlTest("Test2","parser.nddl","",setBaseline));
+
+    return retval;
+}

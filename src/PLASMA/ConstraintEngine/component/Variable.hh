@@ -32,7 +32,7 @@ namespace EUROPA {
      * @param parent owner if appropriate.
      * @param index position in parent collection.
      */
-    Variable(const ConstraintEngineId& constraintEngine, 
+    Variable(const ConstraintEngineId& constraintEngine,
              const AbstractDomain& baseDomain,
              const bool internal = false,
              bool canBeSpecified = true,
@@ -106,14 +106,14 @@ namespace EUROPA {
   };
 
   template<class DomainType>
-  Variable<DomainType>::Variable(const ConstraintEngineId& constraintEngine, 
+  Variable<DomainType>::Variable(const ConstraintEngineId& constraintEngine,
                                  const AbstractDomain& baseDomain,
                                  const bool internal,
                                  bool canBeSpecified,
                                  const LabelStr& name,
                                  const EntityId& parent,
-                                 int index) 
-    : ConstrainedVariable(constraintEngine, internal, canBeSpecified, name, parent, index), 
+                                 int index)
+    : ConstrainedVariable(constraintEngine, internal, canBeSpecified, name, parent, index),
     m_baseDomain(static_cast<DomainType*>(baseDomain.copy())),
     m_derivedDomain(static_cast<DomainType*>(baseDomain.copy())) {
     debugMsg("Variable:Variable", "Base Domain = " << baseDomain.toString());
@@ -122,9 +122,9 @@ namespace EUROPA {
     {
     	debugMsg("Variable:Variable", "Base domain singleton; " << baseDomain.getSingletonValue());
     }
-    
-    
-    
+
+
+
     // Note that we permit the domain to be empty initially
     m_derivedDomain->setListener(m_listener);
 
@@ -132,9 +132,10 @@ namespace EUROPA {
     if (baseDomain.isOpen() || baseDomain.isEmpty())
       return;
   }
-  
+
   template<class DomainType>
   Variable<DomainType>::~Variable() {
+    debugMsg("Variable:~Variable", "Deleting " << getEntityName());
   	delete m_baseDomain;
   	delete m_derivedDomain;
   }
