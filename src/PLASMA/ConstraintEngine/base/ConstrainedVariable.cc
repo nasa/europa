@@ -447,8 +447,9 @@ namespace EUROPA {
   /**
    * @brief Default is just a pass through.
    */
-  std::string ConstrainedVariable::toString(double value) const {
-    return baseDomain().toString(value);
+  std::string ConstrainedVariable::toString(double value) const
+  {
+    return getDataType()->toString(value);
   }
 
   bool ConstrainedVariable::specifiedFlag() const {return m_specifiedFlag;}

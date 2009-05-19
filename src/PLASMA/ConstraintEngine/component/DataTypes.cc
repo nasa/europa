@@ -139,6 +139,17 @@ double BoolDT::createValue(const std::string& value) const
   return -1;
 }
 
+std::string  BoolDT::toString(double value) const
+{
+  static const LabelStr sl_true("true");
+  static const LabelStr sl_false("false");
+  checkError(value == true || value == false, value << "is not a bool value" );
+  if(value == true)
+    return sl_true.toString();
+  else
+    return sl_false.toString();
+}
+
 StringDT::StringDT()
     : DataType(NAME().c_str())
 {

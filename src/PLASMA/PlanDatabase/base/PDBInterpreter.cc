@@ -113,7 +113,7 @@ namespace EUROPA {
     return os.str();
   }
 
-  const DataTypeId& Expr::getDataType() const
+  const DataTypeId Expr::getDataType() const
   {
 	  return VoidDT::instance();
   }

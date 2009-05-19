@@ -791,6 +791,20 @@ namespace EUROPA {
     return LabelStr(value);
   }
 
+  std::string ObjectDT::toString(double value) const
+  {
+    std::ostringstream os;
+    if(!Entity::isPurging()) {
+        ObjectId object = value;
+        os << object->toString();
+    }
+    else
+        os << "Object data unavailable while purging (might no longer exist)";
+
+    return  os.str();
+  }
+
+
   ObjectDomain::ObjectDomain(const DataTypeId& dt)
   : EnumeratedDomain(dt)
   {
@@ -832,22 +846,6 @@ namespace EUROPA {
     }
 
     return false;
-  }
-
-
-  std::string ObjectDomain::toString(double value) const {
-    check_error(isMember(value), "Caught an invalid attempt to display a value not in this domain");
-    std::ostringstream os;
-    if(!Entity::isPurging())
-    {
-        ObjectId object = value;
-        os << object->toString();
-    }
-    else
-    {
-        os << "Object data unavailable while purging (might no longer exist)";
-    }
-    return  os.str();
   }
 
   std::string ObjectDomain::toString() const{

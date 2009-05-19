@@ -396,9 +396,7 @@ namespace EUROPA {
     bool isBool() const;
     bool isString() const;
     bool isRestricted() const;
-
-    // TODO: move this to DataType
-    virtual std::string toString(double value) const;
+    std::string toString(double value) const;
 
     // TODO: All these look like they should be moved to the data type
     /**

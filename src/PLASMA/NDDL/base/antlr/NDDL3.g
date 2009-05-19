@@ -65,48 +65,31 @@ typeDefinition
 			-> ^('typedef' IDENT type baseDomain)
 	;
 
-baseDomain  :   intervalNumericDomain
-        |       enumeratedNumericDomain
-        |       enumeratedStringDomain
-        |       enumeratedBoolDomain
-        |       enumeratedObjectDomain
-        ;
+baseDomain  
+    :   intervalBaseDomain
+    |   enumeratedBaseDomain
+    ;
 
-intervalNumericDomain
-        :       '['^ numericLiteral (','!)? numericLiteral ']'!
-        ;
+intervalBaseDomain
+    :   '['^ numericLiteral (','!)? numericLiteral ']'!
+    ;
 
-enumeratedNumericDomain
-        :       '{'^ numericSet '}'!
-        ;
+enumeratedBaseDomain
+    :   '{'^ baseDomainValueSet '}'!
+    ;
+       
+baseDomainValueSet
+    :   baseDomainValue (','! baseDomainValue)*
+    ;
 
-numericSet
-        :       numericLiteral (','! numericLiteral)*
-        ;
-
-enumeratedObjectDomain
-        :       '{'^ objectSet '}'!
-        ;
-
-objectSet
-        :       (constructorInvocation|qualified) (','! (constructorInvocation|qualified))*
-        ;
-
-enumeratedStringDomain
-        :       '{'^ stringSet '}'!
-        ;
-
-stringSet
-        :       STRING (','! STRING)*
-        ;
-         
-enumeratedBoolDomain
-        :       '{'^ boolSet '}'!
-        ;
-
-boolSet :       boolLiteral (','! boolLiteral)*
-        ;
-
+baseDomainValue
+    : numericLiteral
+    | STRING
+    | boolLiteral
+    | constructorInvocation
+    | qualified  
+    ;
+                
 variableDeclarations
         :       ('filter')? type nameWithBaseDomain (',' nameWithBaseDomain)* ';'
                 -> ^(VARIABLE type nameWithBaseDomain (nameWithBaseDomain)*)

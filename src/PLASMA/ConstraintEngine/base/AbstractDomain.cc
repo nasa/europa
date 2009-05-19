@@ -196,15 +196,10 @@ namespace EUROPA {
 
   }
 
-  std::string  AbstractDomain::toString(double value) const {
+  std::string  AbstractDomain::toString(double value) const
+  {
     checkError(isMember(value),  value << " not in " << toString());
-
-    if(isNumeric())
-      return EUROPA::toString(value);
-    else {
-      checkError(LabelStr::isString(value), toString());
-      return LabelStr(value).toString();
-    }
+    return getDataType()->toString(value);
   }
 
 

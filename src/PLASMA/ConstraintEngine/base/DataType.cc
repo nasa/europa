@@ -8,6 +8,7 @@
 #include "DataType.hh"
 #include "Variable.hh"
 #include "Debug.hh"
+#include "Utils.hh"
 
 namespace EUROPA {
 
@@ -39,7 +40,7 @@ bool DataType::isSymbolic() const {return !isNumeric();}
 bool DataType::getIsRestricted() const { return m_isRestricted; }
 void DataType::setIsRestricted(bool b) { m_isRestricted = b; }
 
-bool DataType::canBeCompared(const DataTypeId& rhs)
+bool DataType::canBeCompared(const DataTypeId& rhs) const
 {
     // TODO: this can be more sophisticated
     // Assumes type names don't matter for now
@@ -55,6 +56,13 @@ bool DataType::canBeCompared(const DataTypeId& rhs)
 
     return false;
 }
+
+bool DataType::isAssignableFrom(const DataTypeId& rhs) const
+{
+    // TODO: implement this differently, probably have to delegate to each type
+    return canBeCompared(rhs);
+}
+
 
 const AbstractDomain & DataType::baseDomain() const
 {
@@ -97,6 +105,17 @@ DataType::createVariable(const ConstraintEngineId& constraintEngine,
     debugMsg("DataType::createVariable", "Created Variable : " << id->toLongString());
 
     return id;
+}
+
+
+std::string DataType::toString(double value) const
+{
+    if(isNumeric())
+        return EUROPA::toString(value);
+    else {
+        checkError(LabelStr::isString(value), "expected LabelStr");
+        return LabelStr(value).toString();
+    }
 }
 
 }

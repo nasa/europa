@@ -365,6 +365,7 @@ namespace EUROPA {
       virtual bool isEntity() const;
 
       virtual double createValue(const std::string& value) const;
+      virtual std::string toString(double value) const;
   };
 
   class ObjectDomain: public EnumeratedDomain {
@@ -390,12 +391,6 @@ namespace EUROPA {
     bool convertToMemberValue(const std::string& strValue, double& dblValue) const;
 
     virtual ObjectDomain *copy() const;
-
-    /**
-     * @brief Translate the double encoded value to a suitable output. In this case, the object name
-     * @param value must be a member of the domain.
-     */
-    virtual std::string toString(double value) const;
 
     virtual std::string toString() const;
 

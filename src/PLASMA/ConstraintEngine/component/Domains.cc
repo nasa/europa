@@ -516,7 +516,7 @@ namespace EUROPA {
 	  std::string comma = "";
 	  for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
 		  double valueAsDouble = *it;
-		  std::string valueAsStr = toString(valueAsDouble);
+		  std::string valueAsStr = getDataType()->toString(valueAsDouble);
 
 		  if (isNumeric()) {
 			  os << comma << valueAsStr;
@@ -539,28 +539,6 @@ namespace EUROPA {
   std::string EnumeratedDomain::toString() const
   {
 	  return AbstractDomain::toString();
-  }
-
-  std::string EnumeratedDomain::toString(double valueAsDouble) const
-  {
-	  static const std::string sl_false("0");
-	  static const std::string sl_true("1");
-
-	  if (isNumeric()) {
-		  std::ostringstream os;
-		  os << valueAsDouble;
-		  return os.str();
-	  }
-	  else if (valueAsDouble == true)
-		  return sl_true;
-	  else if (valueAsDouble == false)
-		  return sl_false;
-	  else if (LabelStr::isString(valueAsDouble))
-		  return LabelStr(valueAsDouble).toString();
-	  else {
-		  EntityId entity(valueAsDouble);
-		  return entity->getName().toString();
-	  }
   }
 
   EnumeratedDomain *EnumeratedDomain::copy() const {
@@ -1186,18 +1164,6 @@ namespace EUROPA {
     BoolDomain *ptr = new BoolDomain(*this);
     check_error(ptr != 0);
     return(ptr);
-  }
-
-  std::string  BoolDomain::toString(double value) const{
-    check_error(isMember(value), "Caught an invalid attempt to display a value not in this domain");
-
-    static const LabelStr sl_true("true");
-    static const LabelStr sl_false("false");
-    checkError(value == true || value == false, value << "is not a bool value" );
-    if(value == true)
-      return sl_true.toString();
-    else
-      return sl_false.toString();
   }
 
   bool BoolDomain::intersect(const AbstractDomain& dom) {

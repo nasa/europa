@@ -1,0 +1,2 @@
+
+typedef Foo [1 2] NewType;

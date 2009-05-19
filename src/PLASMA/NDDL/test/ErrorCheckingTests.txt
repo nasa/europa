@@ -1,12 +1,16 @@
-Test1
-parser.nddl
+Unknown type for Typedef
+nddl/error/UnknownTypeForTypedef.nddl
 {{{
+nddl/error/UnknownTypeForTypedef.nddl(line:2), at offset 12, near ([ 1 2)
+Incorrect typedef. Unknown base data type for new type 'NewType'
 
 }}}
 
-Test2
-parser.nddl
+Incompatible Typedef Value
+nddl/error/IncompatibleTypedefValue.nddl
 {{{
+-Imaginary-(line:0), at offset 0, near UP
+Incompatible types in value set: foo(string) 1(int)
 
 }}}
 

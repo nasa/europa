@@ -147,7 +147,7 @@ std::string readTestResult(std::ifstream& inFile)
     match(inFile,"{{{");
     std::string line;
     while (!inFile.eof() && (line=readLine(inFile))!="}}}")
-        retval += line;
+        retval += line + "\n";
 
     if (line != "}}}")
         throw std::string("Expected }}}");

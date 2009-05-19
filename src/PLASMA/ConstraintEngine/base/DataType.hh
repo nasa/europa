@@ -59,11 +59,22 @@ public:
     virtual bool isSymbolic() const;
 
     /**
-     * @brief Tests if two domains can be compared. For example, one cannot compare a symbolic
-     * enumerated domain with a numeric domain. This is useful to enforce type checking
-     * in constraints in particular.
+     * @brief Tests if two data types can be compared.
+     * For example, one cannot compare a string with and int
+     * This is useful to enforce type checking, in constraints in particular.
      */
-    virtual bool canBeCompared(const DataTypeId& rhs);
+    virtual bool canBeCompared(const DataTypeId& rhs) const;
+
+    /*
+     * @brief Tests if this variables with this data type
+     * can be assigned values with data type rhs.
+     * TODO: Do we need canBeCompared and this one?
+     * It is better to perform type checking with this,
+     * for instance, floats and ints can be compared,
+     * but assignment only goes one way, in general.
+     * isAssignableFrom + a explicit cast/convert method should cover all use cases
+     */
+    virtual bool isAssignableFrom(const DataTypeId& rhs) const;
 
     /**
      * is the original definition for this domain restricted?, for instance : int [3 10], float {3.0,4.0}, etc
@@ -84,6 +95,11 @@ public:
      * @brief Create a value for a string
      */
     virtual double createValue(const std::string& value) const = 0;
+
+    /**
+     * @brief Create string for a value
+     */
+    virtual std::string toString(double value) const;
 
     /**
      * @brief Create a variable

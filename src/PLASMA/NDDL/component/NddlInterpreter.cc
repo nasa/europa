@@ -77,6 +77,7 @@ std::vector<std::string> NddlInterpreter::getIncludePath()
         includePath.push_back(std::string(plasmaHome)+"/src/PLASMA/Resource/component/NDDL");
     }
 
+    // TODO: dump includePath to log
     return includePath;
 }
 
@@ -87,23 +88,6 @@ std::string NddlInterpreter::getFilename(const std::string& f)
 
     std::vector<std::string> includePath=getIncludePath();
 
-    // Look in current dir first
-    includePath.push_back(".");
-
-    // otherwise, look in include path, starting with $EUROPA_HOME, then $PLASMA_HOME
-    const char* europaHome = std::getenv("EUROPA_HOME");
-    if (europaHome != NULL)
-        includePath.push_back(std::string(europaHome)+"/include");
-    else // TODO: this should be at least INFO, possibly WARNING
-        debugMsg("NddlInterpreter","$EUROPA_HOME is not defined, therefore not added to NddlInterpreter include path");
-
-    const char* plasmaHome = std::getenv("PLASMA_HOME");
-    if (plasmaHome != NULL) {
-        includePath.push_back(std::string(plasmaHome)+"/src/PLASMA/NDDL/base");
-        includePath.push_back(std::string(plasmaHome)+"/src/PLASMA/Resource/component/NDDL");
-    }
-
-    // TODO: dump includePath to log
     for (unsigned int i=0; i<includePath.size();i++) {
         // TODO: this may not be portable to all OSs
         std::string fullName = includePath[i]+"/"+fname;
@@ -323,7 +307,7 @@ std::string getErrorLocation(pNDDL3Tree treeWalker)
 void NddlSymbolTable::reportError(void* tw, const std::string& msg)
 {
     pNDDL3Tree treeWalker = (pNDDL3Tree) tw;
-    addError(getErrorLocation(treeWalker) + " " + msg);
+    addError(getErrorLocation(treeWalker) + "\n" + msg);
 }
 
 

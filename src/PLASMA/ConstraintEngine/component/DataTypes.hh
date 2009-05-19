@@ -78,6 +78,7 @@ public:
     virtual bool isString() const;
 
     virtual double createValue(const std::string& value) const;
+    virtual std::string toString(double value) const;
 
     static const std::string& NAME();
     static const DataTypeId& instance();

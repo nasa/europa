@@ -66,6 +66,11 @@ namespace EUROPA {
   {
   }
 
+  const DataTypeId ExprConstant::getDataType() const
+  {
+      return m_domain->getDataType();
+  }
+
   std::string getAutoName(const char* prefix)
   {
       static int cnt = 0;

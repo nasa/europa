@@ -267,12 +267,6 @@ namespace EUROPA {
 	   */
 	  virtual std::string toString() const;
 
-	  /**
-	   * @brief Creates a concise string for displaying the value
-	   * @param value must be a member of the domain.
-	   */
-	  virtual std::string toString(double value) const;
-
   protected:
 
 	  /**
@@ -704,11 +698,6 @@ namespace EUROPA {
      * @brief Copy the concrete C++ object into new memory and return a pointer to it.
      */
     virtual BoolDomain *copy() const;
-
-    /**
-     * @brief Convert to true or false as needed
-     */
-    std::string toString(double value) const;
 
     bool intersect(const AbstractDomain& dom);
 

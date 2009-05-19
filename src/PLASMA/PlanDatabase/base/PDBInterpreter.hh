@@ -54,7 +54,7 @@ namespace EUROPA {
         virtual DataRef eval(EvalContext& context) const = 0;
         virtual ~Expr(){}
 
-        virtual const DataTypeId& getDataType() const;
+        virtual const DataTypeId getDataType() const;
 
         virtual std::string toString() const;
   };

@@ -118,10 +118,10 @@ typeDefinition returns [Expr* result]
 			name=IDENT
 			dataType=type
 			{
-    		    if (dataType == NULL) {		        
-                         result = NULL;              
-                         reportSemanticError(CTX,
-                            "Incorrect typedef. Unknown base data type for new type '" + std::string(c_str($name.text->chars)) + "'");
+                if (dataType == NULL) {		        
+                    result = NULL;              
+                    reportSemanticError(CTX,
+                        "Incorrect typedef. Unknown base data type for new type '" + std::string(c_str($name.text->chars)) + "'");
                 }            
 			}
 			domain=baseDomain[dataType]
@@ -148,13 +148,19 @@ type returns [const DataType* result]
         ;
         
 baseDomain[const DataType* baseType] returns [AbstractDomain* result]
-        : (      child=valueSet
-          |      child=numericInterval
-          )
+    : ( child=numericInterval
+      | child=valueSet
+      )
 {
     // TODO: type checking. ensure inline domain is consistent with base
-    DataRef data=evalExpr(CTX,child);    
-    result = data.getValue()->lastDomain().copy(); 
+    DataRef data=evalExpr(CTX,child); 
+    ConstrainedVariableId value = data.getValue();
+    if (!baseType->isAssignableFrom(value->getDataType())) {
+        reportSemanticError(CTX,
+            "Can't assign "+value->toString()+" to "+baseType->getName().toString());
+    }
+       
+    result = value->lastDomain().copy(); 
     // TODO: delete child;?
 }        
         ;       
@@ -250,12 +256,26 @@ valueSet returns [Expr* result]
                         (element=value
                          {
                              DataRef elemValue = evalExpr(CTX,element);
-                             const AbstractDomain& ev = elemValue.getValue()->lastDomain(); 
-                             // TODO: delete element;
-                             elementType = ev.getDataType();
+                             const AbstractDomain& ev = elemValue.getValue()->lastDomain();
                              double v = ev.getSingletonValue();
+                              
+                             // TODO: delete element;
+                             
+                             if (elementType.isNoId())
+                                 elementType = ev.getDataType();
+                             else {
+                                 DataTypeId newElementType=ev.getDataType();
+                                 if (!newElementType->isAssignableFrom(elementType) &&
+                                     !elementType->isAssignableFrom(newElementType)) {
+                                     reportSemanticError(CTX,
+                                         "Incompatible types in value set: "+
+                                         elementType->toString(values.front())+"("+elementType->getName().toString()+") "+ 
+                                         newElementType->toString(v)+"("+newElementType->getName().toString()+")" 
+                                     );
+                                 }
+                             }
+                             
                              values.push_back(v);
-                             // TODO: make sure data types for all values are consistent
                          }
                         )*
                  )
