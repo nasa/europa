@@ -312,7 +312,7 @@ namespace EUROPA {
       // numeric domain
       NumericDomain numericDom(1.117);
       numericDom.set(1.117);
-      std::string d5DisplayValueStr = numericDom.toString(numericDom.getSingletonValue());
+      std::string d5DisplayValueStr = numericDom.getDataType()->toString(numericDom.getSingletonValue());
       std::string expectedD5DisplayValue("1.117");
       CPPUNIT_ASSERT(d5DisplayValueStr == expectedD5DisplayValue);
 
@@ -321,7 +321,7 @@ namespace EUROPA {
       StringDomain stringDom(theString);
       stringDom.set(theString);
       CPPUNIT_ASSERT(stringDom.isSingleton());
-      std::string d6DisplayValueStr = stringDom.toString(stringDom.getSingletonValue());
+      std::string d6DisplayValueStr = stringDom.getDataType()->toString(stringDom.getSingletonValue());
       std::string expectedD6DisplayValue("AString");
       CPPUNIT_ASSERT(d6DisplayValueStr == expectedD6DisplayValue);
 
@@ -329,7 +329,7 @@ namespace EUROPA {
       LabelStr element("ASymbol");
       SymbolDomain symbolDom(element);
       symbolDom.set(element);
-      std::string d7DisplayValueStr = symbolDom.toString(symbolDom.getSingletonValue());
+      std::string d7DisplayValueStr = symbolDom.getDataType()->toString(symbolDom.getSingletonValue());
       std::string expectedD7DisplayValue("ASymbol");
       CPPUNIT_ASSERT(d7DisplayValueStr == expectedD7DisplayValue);
 
