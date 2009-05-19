@@ -31,38 +31,39 @@ using namespace EUROPA;
 }
 
 
-nddl	:	nddlStatement*
-			-> ^(NDDL nddlStatement*)
-        ;
+nddl	
+    :   nddlStatement*
+	       -> ^(NDDL nddlStatement*)
+    ;
 
 nddlStatement
-        :	typeDefinition
-        |	enumDefinition
-        |	variableDeclarations
-        |	assignment
-        |	constraintInstantiation
-        |	classDeclaration
-        |	allocationStmt
-        |	rule
-        |	problemStmt
-        |	relation
-        |	methodInvocation
-        |	noopstatement
-        |	constraintSignature!
-        ;
+    :   typeDefinition
+    |   enumDefinition
+    |   variableDeclarations
+    |   assignment
+    |   constraintInstantiation
+    |   classDeclaration
+    |   allocationStmt
+    |   rule
+    |   problemStmt
+    |   relation
+    |   methodInvocation
+    |   noopstatement
+    |   constraintSignature!
+    ;
 
 enumDefinition
-        : 'enum'^ IDENT enumValues
-        ;
+    : 'enum'^ IDENT enumValues
+    ;
    
 enumValues
-        : '{'^ IDENT (','! IDENT)* '}'!
-        ;
+    : '{'^ IDENT (','! IDENT)* '}'!
+    ;
                 
 // MEB Language Change: domain no longer optional
 typeDefinition
 	:	'typedef' type baseDomain IDENT ';'
-			-> ^('typedef' IDENT type baseDomain)
+	       -> ^('typedef' IDENT type baseDomain)
 	;
 
 baseDomain  
@@ -83,56 +84,53 @@ baseDomainValueSet
     ;
 
 baseDomainValue
-    : numericLiteral
-    | STRING
-    | boolLiteral
+    : literalValue
     | constructorInvocation
     | qualified  
     ;
                 
 variableDeclarations
-        :       ('filter')? type nameWithBaseDomain (',' nameWithBaseDomain)* ';'
-                -> ^(VARIABLE type nameWithBaseDomain (nameWithBaseDomain)*)
-        ;
+    :   ('filter')? type nameWithBaseDomain (',' nameWithBaseDomain)* ';'
+            -> ^(VARIABLE type nameWithBaseDomain (nameWithBaseDomain)*)
+    ;
 
 nameWithBaseDomain
-        :       (       variable=IDENT ('('^ value=anyValue ')'! )?
-                |       variable=IDENT '='^ value=anyValue)
-        ;
+    :   (   variable=IDENT ('('^ value=anyValue ')'! )?
+        |   variable=IDENT '='^ value=anyValue
+        )
+    ;
 
-anyValue:       STRING
-        |       boolLiteral
-        |		numericLiteral
-        |       baseDomain
-        |       allocation
-        |       qualified
-        ;
+anyValue
+    :   literalValue
+    |   baseDomain
+    |   allocation
+    |   qualified
+    ;
 
 allocation
-        :       'new'! constructorInvocation
-        ;
+    :   'new'! constructorInvocation
+    ;
 
 constructorInvocation
-        :       IDENT variableArgumentList
-                        -> ^(CONSTRUCTOR_INVOCATION IDENT variableArgumentList)
-        ;
+    :   IDENT variableArgumentList
+            -> ^(CONSTRUCTOR_INVOCATION IDENT variableArgumentList)
+    ;
 
 qualified
-        :       ('this' | IDENT) ('.'^ IDENT)*
-        ;
+    :   ('this' | IDENT) ('.'^ IDENT)*
+    ;
 
 assignment
-        :       qualified ('in' | '=') anyValue ';'
-                -> ^('=' qualified anyValue)
-        ;
-
-
+    :   qualified ('in' | '=') anyValue ';'
+            -> ^('=' qualified anyValue)
+    ;
+    
 classDeclaration
 	:	'class' c=IDENT
 		(	(('extends' x=IDENT)? classBlock)
-		            -> ^('class' $c ^('extends' $x)? classBlock)
+		        -> ^('class' $c ^('extends' $x)? classBlock)
 		|	';'
-                            -> ^('class' $c ';')
+                -> ^('class' $c ';')
 		) 
 	;
 
@@ -191,7 +189,8 @@ predicateStatement
 	;
 
 
-rule	:	IDENT '::'^ IDENT ruleBlock
+rule
+    :	IDENT '::'^ IDENT ruleBlock
 	;
 
 ruleBlock
@@ -207,18 +206,21 @@ ruleStatement
 	|	noopstatement
 	;
 
-type	:	'int'
+type	
+    :	'int'
 	|	'float'
 	|	'bool'
 	|	'string'
 	|	IDENT
 	;
 
-relation:	(token=IDENT | token='this')? temporalRelation predicateArgumentList ';'
+relation
+    :	(token=IDENT | token='this')? temporalRelation predicateArgumentList ';'
 			-> ^(TOKEN_RELATION $token temporalRelation predicateArgumentList)
-        ;
+    ;
 
-problemStmt     :	('rejectable'^ | 'goal'^ | 'fact'^) predicateArgumentList ';'!
+problemStmt
+    :	('rejectable'^ | 'goal'^ | 'fact'^) predicateArgumentList ';'!
 	;
         
 predicateArgumentList
@@ -285,94 +287,103 @@ allocationStmt
 	;
 
 temporalRelation
-        :       'after'
-	|	'any'
-        |       'before'
-        |       'contained_by'
-        |       'contains'
-        |       'contains_end'
-        |       'contains_start'
-	|	'ends'
-        |       'ends_after'
-        |       'ends_after_start'
-        |       'ends_before'
-        |       'ends_during'
-        |       'equal'
-        |       'equals'
-	|	'meets'
-	|	'met_by'
-	|	'parallels'
-	| 	'paralleled_by'
-        |       'starts'
-        |       'starts_after'
-        |       'starts_before'
-        |       'starts_before_end'
-        |       'starts_during'
+    :   'after'
+    |   'any'
+    |   'before'
+    |   'contained_by'
+    |   'contains'
+    |   'contains_end'
+    |   'contains_start'
+    |   'ends'
+    |   'ends_after'
+    |   'ends_after_start'
+    |   'ends_before'
+    |   'ends_during'
+    |   'equal'
+    |   'equals'
+    |   'meets'
+    |   'met_by'
+    |   'parallels'
+    |   'paralleled_by'
+    |   'starts'
+    |   'starts_after'
+    |   'starts_before'
+    |   'starts_before_end'
+    |   'starts_during'
 	;
+
+literalValue
+    :   booleanLiteral
+    |   numericLiteral
+    |   stringLiteral
+    ;
+    
+booleanLiteral
+    :   'true'
+    |   'false' 
+    ;
 
 numericLiteral
 	:	INT
 	|	FLOAT
 	|	('+'!)? ('inf' | 'inff')
 	|	'-inf' 
-        |       '-inff' 
+    |   '-inff' 
 	;
 
-boolLiteral
-	:	'true'
-	|	'false' 
-	;
-
+stringLiteral
+    :   STRING
+    ;
+    
 // TODO: this is ugly and very inflexible, need to provide extensible method exporting mechanism  
 methodName
-        :       'specify'
-        |       'reset'
-        |       'constrain'
-        |       'free'
-        |       'activate'
-        |       'merge'
-        |       'reject'
-        |       'cancel'
-        |       'close'
-        ;
+    :   'specify'
+    |   'reset'
+    |   'constrain'
+    |   'free'
+    |   'activate'
+    |   'merge'
+    |   'reject'
+    |   'cancel'
+    |   'close'
+    ;
          
 methodInvocation
-        :	(qualified '.')? methodName variableArgumentList ';'
-                -> ^(METHOD_CALL methodName qualified? variableArgumentList)
+    :   (qualified '.')? methodName variableArgumentList ';'
+            -> ^(METHOD_CALL methodName qualified? variableArgumentList)
 	;
 
 tokenNameList
-	:	'('^ (tokenNames)? ')'!
+	:  '('^ (tokenNames)? ')'!
 	;
 
 tokenNames
 	:	IDENT (','! IDENT)*
-        ;
+    ;
 
 noopstatement
 	:	';'!
 	;
 
 constraintSignature
-        :       'constraint' c=IDENT args=typeArgumentList
-                ('extends' x=IDENT xargs=typeArgumentList)? 
-                (sb=signatureBlock | ';')
-                        -> ^('constraint' $c $args ^('extends' $x $xargs)? $sb?)
-        ;
+    :   'constraint' c=IDENT args=typeArgumentList
+            ('extends' x=IDENT xargs=typeArgumentList)? 
+            (sb=signatureBlock | ';')
+                -> ^('constraint' $c $args ^('extends' $x $xargs)? $sb?)
+    ;
 
 signatureBlock
-        :       '{'^ signatureExpression? '}'!
-        ;
+    :   '{'^ signatureExpression? '}'!
+    ;
 
 signatureExpression
-        :       signatureAtom (('&&'^ | '||'^) signatureAtom)*
-        ;
+    :   signatureAtom (('&&'^ | '||'^) signatureAtom)*
+    ;
 
 signatureAtom
-        :       '('^ signatureExpression ')'!
-        |       IDENT '<:'^ (type | 'numeric' )
-        ;
-
+    :   '('^ signatureExpression ')'!
+    |   IDENT '<:'^ (type | 'numeric' )
+    ;
 
 INCLUDE :	'#include' WS+ file=STRING 
                 {
