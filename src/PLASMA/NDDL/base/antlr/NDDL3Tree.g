@@ -101,22 +101,22 @@ enumDefinition returns [Expr* result]
 @init {
     std::vector<std::string> values;
 }
-        :       ^('enum' name=IDENT enumValues[values])
-                {
-                    const char* enumName = c_str($name.text->chars);
-                    CTX->SymbolTable->addEnumValues(enumName,values);
-                    result = new ExprEnumdef(enumName,values);
-                }
-        ;
+    :   ^('enum' name=IDENT enumValues[values])
+        {
+            const char* enumName = c_str($name.text->chars);
+            CTX->SymbolTable->addEnumValues(enumName,values);
+            result = new ExprEnumdef(enumName,values);
+        }
+    ;
 
 enumValues[std::vector<std::string>& values]
-        :       ^('{' (v=IDENT {values.push_back(c_str($v.text->chars));})+ )
-        ;
+    :       ^('{' (v=IDENT {values.push_back(c_str($v.text->chars));})+ )
+    ;
                   
 typeDefinition returns [Expr* result]
-	:	^('typedef'
-			name=IDENT
-			dataType=type
+    :   ^('typedef'
+            name=IDENT
+            dataType=type
 			{
                 if (dataType == NULL) {		        
                     result = NULL;              
@@ -125,8 +125,8 @@ typeDefinition returns [Expr* result]
                 }            
 			}
 			domain=baseDomain[dataType]
-		)
-		{
+        )
+        {
 		    if (dataType != NULL) {		        
 		        const char* newName = c_str($name.text->chars);
 		        result = new ExprTypedef(dataType->getId(),newName,domain);
@@ -135,216 +135,221 @@ typeDefinition returns [Expr* result]
 	;
 
 type returns [const DataType* result] 
-        : (     name='int'
-        |       name='float'
-        |       name='bool'
-        |       name='string'
-        |       name=IDENT
+    :   (   name='int'
+        |   name='float'
+        |   name='bool'
+        |   name='string'
+        |   name=IDENT
         )
         {
             const DataTypeId& dt = CTX->SymbolTable->getDataType(c_str($name.text->chars));
             result = (DataType*)dt;
         }
-        ;
+    ;
         
 baseDomain[const DataType* baseType] returns [AbstractDomain* result]
-    : ( child=numericInterval
-      | child=valueSet
-      )
-{
-    // TODO: type checking. ensure inline domain is consistent with base
-    DataRef data=evalExpr(CTX,child); 
-    ConstrainedVariableId value = data.getValue();
-    if (!baseType->isAssignableFrom(value->getDataType())) {
-        reportSemanticError(CTX,
-            "Can't assign "+value->toString()+" to "+baseType->getName().toString());
-    }
+    :   child=baseDomainValues
+    {
+        // TODO: type checking. ensure inline domain is consistent with base
+        DataRef data=evalExpr(CTX,child); 
+        ConstrainedVariableId value = data.getValue();
+        if (!baseType->isAssignableFrom(value->getDataType())) {
+            reportSemanticError(CTX,
+                "Can't assign "+value->toString()+" to "+baseType->getName().toString());
+        }
        
-    result = value->lastDomain().copy(); 
-    // TODO: delete child;?
-}        
-        ;       
+        result = value->lastDomain().copy(); 
+        // TODO: delete child;?
+    }        
+    ;       
 
+baseDomainValues returns [Expr* result]
+    :   ( child=numericInterval
+        | child=valueSet
+        )
+        {
+            result = child;
+        }
+    ;
+     
 variableDeclarations returns [ExprList* result]
-        :       ^(VARIABLE dataType=type 
-                           {
-                               if (dataType != NULL)
-                                   result = new ExprList();
-                               else { 
-                                   result = NULL;
-                                   reportSemanticError(CTX,
-                                       "Incorrect variable declaration. Unknown data type");
-                               }
-                           }
-                           (child=variableInitialization[dataType]
-                           {
-                               result->addChild(child);
-                           }
-                           )+
-                 )
-        ;
+    :   ^(VARIABLE dataType=type 
+                {
+                    if (dataType != NULL)
+                        result = new ExprList();
+                    else { 
+                        result = NULL;
+                        reportSemanticError(CTX,
+                            "Incorrect variable declaration. Unknown data type");
+                    }
+                }
+                
+                (child=variableInitialization[dataType]
+                {
+                    result->addChild(child);
+                }
+                )+
+             )
+    ;
         
 variableInitialization[const DataType* dataType] returns [Expr* result]
 @init {
    const char* varName; 
 }
-        : (      name=IDENT { varName = c_str($name.text->chars); }
-          |       ^('=' name=IDENT  { varName = c_str($name.text->chars); } initExpr=initializer[varName])
-          )
-          {
-              // TODO: type check initExpr;
-              result = new ExprVarDeclaration(
-                   varName,
-                   dataType->getId(),
-                   initExpr,
-                   true // canBeSpecified
-              ); 
-          }
+    :   (   name=IDENT { varName = c_str($name.text->chars); }
+        |   ^('=' name=IDENT  { varName = c_str($name.text->chars); } initExpr=initializer[varName])
+        )
+        {
+            // TODO: type check initExpr;
+            result = new ExprVarDeclaration(
+                 varName,
+                 dataType->getId(),
+                 initExpr,
+                 true // canBeSpecified
+            ); 
+        }
         ;       
 
 initializer[const char* varName] returns [Expr* result]
-        : (     child=anyValue 
-          |     child=allocation[varName]
-          |     child=qualified
-          )
-          {
-              result = child;
-          }
-        ;
+    :   (   child=anyValue 
+        |   child=allocation[varName]
+        )
+        {
+            result = child;
+        }
+    ;
 
 anyValue returns [Expr* result]
-        : (      child=value
-          |      child=valueSet
-          |      child=numericInterval
-          )
-          { 
-              result = child;
-          }
-        ;
+    :   (   child=literalValue
+        |   child=baseDomainValues
+        |   child=qualified
+        )
+        { 
+            result = child;
+        }
+    ;
 
-value returns [Expr* result]
-@init {
-    result = NULL;
-}
-        : (       child=booleanLiteral
-          |       child=stringLiteral
-          |       child=numericLiteral 
-          |       ^(i=IDENT type?) // TODO: what is this?, a variable ref?, an object ref?
-                   {
-                       const char* ident = c_str($i.text->chars);
-                       if (CTX->SymbolTable->isEnumValue(ident))
-                           result = CTX->SymbolTable->makeEnumRef(ident);
-                       else  
-                           result = new ExprVarRef(ident); 
-                   }
-          )
-          { 
-              if (result == NULL)
-                  result = new ExprConstant(
-                      CTX->SymbolTable->getPlanDatabase()->getClient(),
-                      child->getTypeName().c_str(),
-                      child); 
-          }
-        ;
+setElement returns [Expr* result]
+    :   (   child=literalValue
+        |   child=qualified
+        )
+        { 
+            result = child;
+        }
+    ;
 
 valueSet returns [Expr* result]
 @init {
     std::list<double> values;
     DataTypeId elementType;
 }
-        :       ^('{'
-                        (element=value
-                         {
-                             DataRef elemValue = evalExpr(CTX,element);
-                             const AbstractDomain& ev = elemValue.getValue()->lastDomain();
-                             double v = ev.getSingletonValue();
+    :   ^('{'
+            (element=setElement
+            {
+                DataRef elemValue = evalExpr(CTX,element);
+                const AbstractDomain& ev = elemValue.getValue()->lastDomain();
+                double v = ev.getSingletonValue();
                               
-                             // TODO: delete element;
+                // TODO: delete element;
                              
-                             if (elementType.isNoId())
-                                 elementType = ev.getDataType();
-                             else {
-                                 DataTypeId newElementType=ev.getDataType();
-                                 if (!newElementType->isAssignableFrom(elementType) &&
-                                     !elementType->isAssignableFrom(newElementType)) {
-                                     reportSemanticError(CTX,
-                                         "Incompatible types in value set: "+
-                                         elementType->toString(values.front())+"("+elementType->getName().toString()+") "+ 
-                                         newElementType->toString(v)+"("+newElementType->getName().toString()+")" 
-                                     );
-                                 }
-                             }
+                if (elementType.isNoId())
+                    elementType = ev.getDataType();
+                else {
+                    DataTypeId newElementType=ev.getDataType();
+                    if (!newElementType->isAssignableFrom(elementType) &&
+                        !elementType->isAssignableFrom(newElementType)) {
+                        reportSemanticError(CTX,
+                            "Incompatible types in value set: "+
+                            elementType->toString(values.front())+"("+elementType->getName().toString()+") "+ 
+                            newElementType->toString(v)+"("+newElementType->getName().toString()+")" 
+                        );
+                    }
+                }
                              
-                             values.push_back(v);
-                         }
-                        )*
-                 )
-                 {
-                   AbstractDomain* newDomain = new EnumeratedDomain(elementType,values); 
-                   result = new ExprConstant(
-                       CTX->SymbolTable->getPlanDatabase()->getClient(),
-                       elementType->getName().c_str(),
-                       newDomain                       
-                   );
-                 }
-        ;
+                values.push_back(v);
+            }
+            )*
+        )
+        {
+            AbstractDomain* newDomain = new EnumeratedDomain(elementType,values); 
+            result = new ExprConstant(
+                CTX->SymbolTable->getPlanDatabase()->getClient(),
+                elementType->getName().c_str(),
+                newDomain                       
+            );
+        }
+    ;
 
+literalValue returns [Expr* result]
+    :   (   child=booleanLiteral
+        |   child=numericLiteral
+        |   child=stringLiteral
+        )
+        {
+            result = new ExprConstant(
+                CTX->SymbolTable->getPlanDatabase()->getClient(),
+                child->getTypeName().c_str(),
+                child
+            ); 
+        }
+    ;
+    
 booleanLiteral returns [AbstractDomain* result]
-        :       'true'  { result = new BoolDomain(true); }            
-        |       'false' { result = new BoolDomain(false); }
-        ;
+    :   'true'  { result = new BoolDomain(true); }            
+    |   'false' { result = new BoolDomain(false); }
+    ;
 
 stringLiteral returns [AbstractDomain* result]
-        :    str = STRING 
-             { 
-                 // remove quotes
-                 std::string s(c_str($str.text->chars));
-                 s = s.substr(1,s.size()-2);
+    :    str = STRING 
+         { 
+             // remove quotes
+             std::string s(c_str($str.text->chars));
+             s = s.substr(1,s.size()-2);
                  
-                 LabelStr value(s); 
-                 result = new StringDomain((double)value,StringDT::instance());
-             }
-        ; 
+             LabelStr value(s); 
+             result = new StringDomain((double)value,StringDT::instance());
+         }
+    ; 
 
 numericLiteral returns [AbstractDomain* result]
-        :       floating=floatLiteral  { result = CTX->SymbolTable->makeNumericDomainFromLiteral("float",c_str($floating.text->chars)); }
-        |       integer=intLiteral  { result = CTX->SymbolTable->makeNumericDomainFromLiteral("int",c_str($integer.text->chars)); }
-        ;
+    :   floating=floatLiteral  { result = CTX->SymbolTable->makeNumericDomainFromLiteral("float",c_str($floating.text->chars)); }
+    |   integer=intLiteral  { result = CTX->SymbolTable->makeNumericDomainFromLiteral("int",c_str($integer.text->chars)); }
+    ;
 
 floatLiteral 
-        : FLOAT | 'inff' | '-inff'
-        ;        
+    :   FLOAT | 'inff' | '-inff'
+    ;        
 
 intLiteral 
-        : INT | 'inf' | '-inf'
-        ;        
+    :   INT | 'inf' | '-inf'
+    ;        
         
 numericInterval returns [Expr* result]
-        :       ^('['   
-                        lower=numericLiteral
-                        upper=numericLiteral
-                )
-                {      
-                    double lb = lower->getSingletonValue();
-                    double ub = upper->getSingletonValue();
-                    AbstractDomain* baseDomain;
+    :   ^('['   
+            lower=numericLiteral
+            upper=numericLiteral
+        )
+        {      
+            double lb = lower->getSingletonValue();
+            double ub = upper->getSingletonValue();
+            AbstractDomain* baseDomain;
                     
-                    if (lower->getTypeName().toString()=="float" || 
-                        upper->getTypeName().toString()=="float") 
-                        baseDomain = new IntervalDomain(lb,ub);
-                    else 
-                        baseDomain = new IntervalIntDomain((int)lb,(int)ub);
+            if (lower->getTypeName().toString()=="float" || 
+                upper->getTypeName().toString()=="float") 
+                baseDomain = new IntervalDomain(lb,ub);
+            else 
+                baseDomain = new IntervalIntDomain((int)lb,(int)ub);
                                   
-                    result = new ExprConstant(
+            result = new ExprConstant(
                         CTX->SymbolTable->getPlanDatabase()->getClient(),
                         lower->getTypeName().c_str(),
                         baseDomain
                     );
                     
-                    delete lower;
-                    delete upper;
-                }
-        ;
+            delete lower;
+            delete upper;
+        }
+    ;
 
 allocation[const char* name] returns [Expr* result]
 @init {
@@ -631,19 +636,12 @@ std::vector<Expr*> elseBody;
   ;
 
 // TODO: perform systematic cleanup of lhs, rhs and constant exprs throughout
-guardLhs returns [Expr* result]
-        :    (child=anyValue | child=qualified)
-             {
-                 result = child;
-             } 
-        ;
-        
 guardExpression returns [ExprIfGuard* result]
 @init
 {
     const char* relopStr = "==";
 }
-        : ( ^(relop=guardRelop {relopStr=c_str($relop.text->chars);} lhs=guardLhs rhs=anyValue )
+        : ( ^(relop=guardRelop {relopStr=c_str($relop.text->chars);} lhs=anyValue rhs=anyValue )
           | lhs=anyValue
           )
           {

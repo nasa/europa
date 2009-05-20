@@ -76,16 +76,11 @@ intervalBaseDomain
     ;
 
 enumeratedBaseDomain
-    :   '{'^ baseDomainValueSet '}'!
+    :   '{'^ baseDomainValue (','! baseDomainValue)* '}'!
     ;
        
-baseDomainValueSet
-    :   baseDomainValue (','! baseDomainValue)*
-    ;
-
 baseDomainValue
     : literalValue
-    | constructorInvocation
     | qualified  
     ;
                 
@@ -95,15 +90,14 @@ variableDeclarations
     ;
 
 nameWithBaseDomain
-    :   (   variable=IDENT ('('^ value=anyValue ')'! )?
-        |   variable=IDENT '='^ value=anyValue
+    :   (   variable=IDENT ('('^ value=initializer ')'! )?
+        |   variable=IDENT '='^ value=initializer
         )
     ;
 
 anyValue
     :   literalValue
     |   baseDomain
-    |   allocation
     |   qualified
     ;
 
@@ -121,10 +115,15 @@ qualified
     ;
 
 assignment
-    :   qualified ('in' | '=') anyValue ';'
-            -> ^('=' qualified anyValue)
+    :   qualified ('in' | '=') initializer ';'
+            -> ^('=' qualified initializer)
     ;
     
+initializer
+    :   anyValue
+    |   allocation
+    ;
+        
 classDeclaration
 	:	'class' c=IDENT
 		(	(('extends' x=IDENT)? classBlock)
@@ -254,7 +253,6 @@ variableArguments
 	:	variableArgument (','! variableArgument)*
 	;
 
-// Note: Allocation not legal here
 variableArgument
 	:	anyValue
 	;
@@ -276,8 +274,6 @@ flowControl
 	|	'foreach'^ '('! IDENT 'in'! qualified ')'! ruleBlock
 	;
 	
-
-// Note: Allocation not legal here
 guardExpression
 	:	'('! anyValue (('=='^ | '!='^) anyValue)? ')'!
 	;
@@ -421,12 +417,6 @@ IDENT	:	 ('a'..'z'|'A'..'Z'|'_'|'$') ('a'..'z'|'A'..'Z'|'_'|'0'..'9'|'$')*
 	;
 
 STRING	:	'"' (~('\\'|'"') | ESCAPE_SEQUENCE)* '"'
-		{
-			// TODO: Verify this insanity works.
-			// Terence doesn't love us anymore, this is proof.
-			//pANTLR3_STRING s = $text;
-			//LTOKEN->setText(LTOKEN, s->subString(s, 1, s->len-1));
-		}
 	;
 
 fragment ESCAPE_SEQUENCE
