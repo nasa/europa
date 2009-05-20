@@ -1377,7 +1377,7 @@ namespace EUROPA {
   }
 
   const LabelStr& ExprVarDeclaration::getName() const { return m_name; }
-  const DataTypeId& ExprVarDeclaration::getType() const { return m_type; }
+  const DataTypeId ExprVarDeclaration::getDataType() const { return m_type; }
   const Expr* ExprVarDeclaration::getInitValue() const { return m_initValue; }
   void ExprVarDeclaration::setInitValue(Expr* iv) { m_initValue = iv; }
 
@@ -1404,7 +1404,7 @@ namespace EUROPA {
   ConstrainedVariableId ExprVarDeclaration::makeGlobalVar(EvalContext& context) const
   {
       const LabelStr& name = getName();
-      const LabelStr& type = getType()->getName();
+      const LabelStr& type = getDataType()->getName();
       const Expr* initValue = getInitValue();
       const DbClientId& pdb = getPDB(context);
 
@@ -1432,7 +1432,7 @@ namespace EUROPA {
   ConstrainedVariableId ExprVarDeclaration::makeTokenVar(TokenEvalContext& context) const
   {
       const LabelStr& parameterName = getName();
-      const LabelStr& parameterType = getType()->getName();
+      const LabelStr& parameterType = getDataType()->getName();
       const Expr* initValue = getInitValue();
       TokenId token=context.getToken();
 
@@ -1441,7 +1441,7 @@ namespace EUROPA {
 
       // This is a hack needed because TokenVariable is parametrized by the domain arg to addParameter
       ConstrainedVariableId parameter;
-      const DataTypeId& parameterDataType = getType();
+      const DataTypeId& parameterDataType = getDataType();
 
       // same as completeObjectParam in NddlRules.hh
       if(initValue != NULL) {
@@ -1480,13 +1480,13 @@ namespace EUROPA {
 
   ConstrainedVariableId ExprVarDeclaration::makeRuleVar(RuleInstanceEvalContext& context) const
   {
-	  const LabelStr typeName = getType()->getName();
+	  const LabelStr typeName = getDataType()->getName();
 
 	  ConstrainedVariableId localVar;
 	  if (context.isClass(typeName)) {
 		  const DataTypeId& dt = context.getRuleInstance()->getPlanDatabase()->getSchema()->getCESchema()->getDataType(typeName.c_str());
 		  localVar = context.getRuleInstance()->addObjectVariable(
-				  getType()->getName(),
+				  getDataType()->getName(),
 				  ObjectDomain(dt),
 				  m_canBeSpecified,
 				  m_name

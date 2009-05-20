@@ -44,11 +44,10 @@ namespace EUROPA {
       virtual ~ExprVarDeclaration();
 
       virtual DataRef eval(EvalContext& context) const;
+      virtual const DataTypeId getDataType() const;
       virtual std::string toString() const;
 
       const LabelStr& getName() const;
-      const DataTypeId& getType() const;
-
       const Expr* getInitValue() const;
       void setInitValue(Expr* iv);
 

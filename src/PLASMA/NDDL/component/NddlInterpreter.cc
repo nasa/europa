@@ -159,10 +159,16 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
 }
 
 
+NddlSymbolTable::NddlSymbolTable(NddlSymbolTable* parent)
+    : EvalContext(parent)
+    , m_parentST(parent)
+{
+}
+
 NddlSymbolTable::NddlSymbolTable(const EngineId& engine)
     : EvalContext(NULL)
+    , m_parentST(NULL)
     , m_engine(engine)
-    , m_currentObjectType(NULL)
 {
 }
 
@@ -170,9 +176,17 @@ NddlSymbolTable::~NddlSymbolTable()
 {
 }
 
+NddlSymbolTable* NddlSymbolTable::getParentST() { return m_parentST; }
+
+const EngineId& NddlSymbolTable::engine() const { return (m_parentST==NULL ? m_engine : m_parentST->engine()); }
+std::vector<std::string>& NddlSymbolTable::errors() { return (m_parentST==NULL ? m_errors : m_parentST->errors()); }
+const std::vector<std::string>& NddlSymbolTable::errors() const { return (m_parentST==NULL ? m_errors : m_parentST->errors()); }
+std::map<std::string,std::string>& NddlSymbolTable::enumValues() { return (m_parentST==NULL ? m_enumValues : m_parentST->enumValues()); }
+const std::map<std::string,std::string>& NddlSymbolTable::enumValues() const { return (m_parentST==NULL ? m_enumValues : m_parentST->enumValues()); }
+
 void NddlSymbolTable::addError(const std::string& msg)
 {
-    m_errors.push_back(msg);
+    errors().push_back(msg);
     debugMsg("NddlInterpreter:SymbolTable","SEMANTIC ERROR reported : " << msg);
 }
 
@@ -180,15 +194,15 @@ std::string NddlSymbolTable::getErrors() const
 {
     std::ostringstream os;
 
-    for (unsigned int i=0; i<m_errors.size(); i++)
-        os << m_errors[i] << std::endl;
+    for (unsigned int i=0; i<errors().size(); i++)
+        os << errors()[i] << std::endl;
 
     return os.str();
 }
 
 void* NddlSymbolTable::getElement(const char* name) const
 {
-    EngineComponent* component = m_engine->getComponent(name);
+    EngineComponent* component = engine()->getComponent(name);
 
     if (component != NULL)
         return component;
@@ -201,32 +215,23 @@ const PlanDatabaseId& NddlSymbolTable::getPlanDatabase() const
     return ((PlanDatabase*)getElement("PlanDatabase"))->getId();
 }
 
-void NddlSymbolTable::setCurrentObjectType(ObjectType* ot)
-{
-    m_currentObjectType = ot;
-}
-
-
-DataTypeId NddlSymbolTable::getVarType(const char* name) const
+DataTypeId NddlSymbolTable::getDataType(const char* name) const
 {
     CESchemaId ces = ((CESchema*)getElement("CESchema"))->getId();
 
     if (ces->isDataType(name))
         return ces->getDataType(name);
-    else {
-        if (m_currentObjectType!=NULL && m_currentObjectType->getName().toString()==name)
-            return m_currentObjectType->getVarType();
 
-        debugMsg("NddlInterpreter:SymbolTable","Unknown type " << name);
-        return DataTypeId::noId();
-    }
+    debugMsg("NddlInterpreter:SymbolTable","Unknown type " << name);
+    return DataTypeId::noId();
 }
 
 AbstractDomain* NddlSymbolTable::makeNumericDomainFromLiteral(const std::string& type,
                                                               const std::string& value)
 {
     // TODO: only one copy should be kept for each literal, domains should be marked as constant
-    AbstractDomain* retval = getPlanDatabase()->getSchema()->getCESchema()->baseDomain(type.c_str()).copy();
+    CESchemaId ces = ((CESchema*)getElement("CESchema"))->getId();
+    AbstractDomain* retval = ces->baseDomain(type.c_str()).copy();
     double v = getPlanDatabase()->getClient()->createValue(type.c_str(), value);
     retval->set(v);
 
@@ -248,17 +253,17 @@ void NddlSymbolTable::addEnumValues(const char* enumName,const std::vector<std::
     std::string type(enumName);
 
     for (unsigned int i=0;i<values.size();i++)
-        m_enumValues[values[i]]=type;
+        enumValues()[values[i]]=type;
 }
 
 bool NddlSymbolTable::isEnumValue(const char* value) const
 {
-    return m_enumValues.find(value) != m_enumValues.end();
+    return enumValues().find(value) != enumValues().end();
 }
 
 Expr* NddlSymbolTable::makeEnumRef(const char* value) const
 {
-    std::string enumType = m_enumValues.find(value)->second;
+    std::string enumType = enumValues().find(value)->second;
     EnumeratedDomain* ad = dynamic_cast<EnumeratedDomain*>(
             getPlanDatabase()->getSchema()->getCESchema()->baseDomain(enumType.c_str()).copy());
     double v = LabelStr(value);
@@ -267,6 +272,80 @@ Expr* NddlSymbolTable::makeEnumRef(const char* value) const
     return new ExprConstant(getPlanDatabase()->getClient(),enumType.c_str(),ad);
 }
 
+std::string getErrorLocation(pNDDL3Tree treeWalker);
+void NddlSymbolTable::reportError(void* tw, const std::string& msg)
+{
+    pNDDL3Tree treeWalker = (pNDDL3Tree) tw;
+    addError(getErrorLocation(treeWalker) + "\n" + msg);
+}
+
+
+NddlClassSymbolTable::NddlClassSymbolTable(NddlSymbolTable* parent, ObjectType* ot)
+    : NddlSymbolTable(parent)
+    , m_objectType(ot)
+{
+}
+
+NddlClassSymbolTable::~NddlClassSymbolTable()
+{
+}
+
+DataTypeId NddlClassSymbolTable::getDataType(const char* name) const
+{
+    if (m_objectType->getName().toString()==name)
+        return m_objectType->getVarType();
+
+    return NddlSymbolTable::getDataType(name);
+}
+
+
+NddlToASTInterpreter::NddlToASTInterpreter(EngineId& engine)
+    : NddlInterpreter(engine)
+{
+}
+
+NddlToASTInterpreter::~NddlToASTInterpreter()
+{
+}
+
+pANTLR3_STRING toVerboseString(pANTLR3_BASE_TREE tree);
+pANTLR3_STRING toVerboseStringTree(pANTLR3_BASE_TREE tree);
+
+std::string NddlToASTInterpreter::interpret(std::istream& ins, const std::string& source)
+{
+    pANTLR3_INPUT_STREAM input = getInputStream(ins,source);
+
+    pNDDL3Lexer lexer = NDDL3LexerNew(input);
+    lexer->parserObj = this;
+    pANTLR3_COMMON_TOKEN_STREAM tstream = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lexer));
+    pNDDL3Parser parser = NDDL3ParserNew(tstream);
+
+    // Build he AST
+    std::string retval;
+    NDDL3Parser_nddl_return result = parser->nddl(parser);
+    if (parser->pParser->rec->state->errorCount > 0) {
+        std::ostringstream os;
+        os << "The parser returned " << parser->pParser->rec->state->errorCount << " errors";
+        // TODO: get error messages as well!
+        debugMsg("NddlToASTInterpreter:interpret",os.str());
+        retval = os.str();
+    }
+    else {
+        // Calling static helper functions to get a verbose version of AST.
+        // Old non-verbose code: result.tree->toStringTree(result.tree)->chars;
+        retval = (char*)(toVerboseStringTree(result.tree)->chars);
+        debugMsg("NddlToASTInterpreter:interpret","NDDL AST:\n" << retval);
+    }
+
+    parser->free(parser);
+    tstream->free(tstream);
+    lexer->free(lexer);
+    input->close(input);
+
+    return retval;
+}
+
+// Antlr functions
 std::string getErrorLocation(pNDDL3Tree treeWalker)
 {
     std::ostringstream os;
@@ -304,27 +383,11 @@ std::string getErrorLocation(pNDDL3Tree treeWalker)
     return os.str();
 }
 
-void NddlSymbolTable::reportError(void* tw, const std::string& msg)
-{
-    pNDDL3Tree treeWalker = (pNDDL3Tree) tw;
-    addError(getErrorLocation(treeWalker) + "\n" + msg);
-}
-
-
-NddlToASTInterpreter::NddlToASTInterpreter(EngineId& engine)
-    : NddlInterpreter(engine)
-{
-}
-
-NddlToASTInterpreter::~NddlToASTInterpreter()
-{
-}
-
 /**
  *  Create a verbose string for a single tree node:
  *  "text":token-type:"file":line:offset-in-line
  */
-static pANTLR3_STRING	    toVerboseString			(pANTLR3_BASE_TREE tree)
+pANTLR3_STRING toVerboseString(pANTLR3_BASE_TREE tree)
 {
 	if  (tree->isNilNode(tree) == ANTLR3_TRUE)
 	{
@@ -361,8 +424,7 @@ static pANTLR3_STRING	    toVerboseString			(pANTLR3_BASE_TREE tree)
 }
 
 /** Create a verbose string for the whole tree */
-static pANTLR3_STRING
-toVerboseStringTree	(pANTLR3_BASE_TREE tree)
+pANTLR3_STRING toVerboseStringTree(pANTLR3_BASE_TREE tree)
 {
 	pANTLR3_STRING  string;
 	ANTLR3_UINT32   i;
@@ -404,40 +466,5 @@ toVerboseStringTree	(pANTLR3_BASE_TREE tree)
 
 	return  string;
 }
-
-std::string NddlToASTInterpreter::interpret(std::istream& ins, const std::string& source)
-{
-    pANTLR3_INPUT_STREAM input = getInputStream(ins,source);
-
-    pNDDL3Lexer lexer = NDDL3LexerNew(input);
-    lexer->parserObj = this;
-    pANTLR3_COMMON_TOKEN_STREAM tstream = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lexer));
-    pNDDL3Parser parser = NDDL3ParserNew(tstream);
-
-    // Build he AST
-    std::string retval;
-    NDDL3Parser_nddl_return result = parser->nddl(parser);
-    if (parser->pParser->rec->state->errorCount > 0) {
-        std::ostringstream os;
-        os << "The parser returned " << parser->pParser->rec->state->errorCount << " errors";
-        // TODO: get error messages as well!
-        debugMsg("NddlToASTInterpreter:interpret",os.str());
-        retval = os.str();
-    }
-    else {
-    	// Calling static helper functions to get a verbose version of AST.
-    	// Old non-verbose code: result.tree->toStringTree(result.tree)->chars;
-    	retval = (char*)(toVerboseStringTree(result.tree)->chars);
-        debugMsg("NddlToASTInterpreter:interpret","NDDL AST:\n" << retval);
-    }
-
-    parser->free(parser);
-    tstream->free(tstream);
-    lexer->free(lexer);
-    input->close(input);
-
-    return retval;
-}
-
 
 }

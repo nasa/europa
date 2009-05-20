@@ -41,36 +41,54 @@ class NddlSymbolTable : public EvalContext
 {
 public:
     NddlSymbolTable(const EngineId& engine);
+    NddlSymbolTable(NddlSymbolTable* parent);
     virtual ~NddlSymbolTable();
 
-    virtual void* getElement(const char* name) const;
+    NddlSymbolTable* getParentST();
 
     const PlanDatabaseId& getPlanDatabase() const;
 
-    DataTypeId getVarType(const char* name) const;
+    virtual DataTypeId getDataType(const char* name) const;
     AbstractDomain* makeNumericDomainFromLiteral(const std::string& type,const std::string& value);
 
+    // Error reporting methods
     void reportError(void* treeWalker, const std::string& msg);
     void addError(const std::string& msg);
     std::string getErrors() const;
 
     // EvalContext methods
     virtual ConstrainedVariableId getVar(const char* name);
+    virtual void* getElement(const char* name) const;
 
     // Enum support methods
     void addEnumValues(const char* enumName,const std::vector<std::string>& values);
     bool isEnumValue(const char* value) const;
     Expr* makeEnumRef(const char* value) const;
 
-    void setCurrentObjectType(ObjectType* ot);
+protected:
+    NddlSymbolTable* m_parentST;
+
+    EngineId m_engine;
+    std::vector<std::string> m_errors;
+    std::map<std::string,std::string> m_enumValues; // Hack to keep track of enum values for the time being
+
+    const EngineId& engine() const;
+    std::vector<std::string>& errors();
+    const std::vector<std::string>& errors() const;
+    std::map<std::string,std::string>& enumValues();
+    const std::map<std::string,std::string>& enumValues() const;
+};
+
+class NddlClassSymbolTable : public NddlSymbolTable
+{
+public:
+    NddlClassSymbolTable(NddlSymbolTable* parent, ObjectType* ot);
+    virtual ~NddlClassSymbolTable();
+
+    virtual DataTypeId getDataType(const char* name) const;
 
 protected:
-    EngineId m_engine;
-    ObjectType* m_currentObjectType; // Object type being declared, needed to manage self-refenreces
-    std::vector<std::string> m_errors;
-
-    // Hack to keep track of enum values for the time being
-    std::map<std::string,std::string> m_enumValues;
+    ObjectType* m_objectType; // Object type being declared
 };
 
 }

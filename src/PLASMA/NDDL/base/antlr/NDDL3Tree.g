@@ -142,7 +142,7 @@ type returns [const DataType* result]
         |       name=IDENT
         )
         {
-            const DataTypeId& dt = CTX->SymbolTable->getVarType(c_str($name.text->chars));
+            const DataTypeId& dt = CTX->SymbolTable->getDataType(c_str($name.text->chars));
             result = (DataType*)dt;
         }
         ;
@@ -407,7 +407,7 @@ ObjectType* objType = NULL;
                        objType = new ObjectType(newClass,parentClass);
                        // TODO: do this more cleanly. Needed to deal with self-reference inside class definition
                        CTX->SymbolTable->getPlanDatabase()->getSchema()->declareObjectType(newClass);
-                       CTX->SymbolTable->setCurrentObjectType(objType);                       
+                       CTX->SymbolTable = new NddlClassSymbolTable(CTX->SymbolTable,objType);                       
                    }
                    
                    (
@@ -420,7 +420,9 @@ ObjectType* objType = NULL;
 	           )
 		)
 		{
-		    CTX->SymbolTable->setCurrentObjectType(NULL);                       		    
+		    NddlSymbolTable* st = CTX->SymbolTable; 
+		    CTX->SymbolTable=st->getParentST();
+		    delete st;                       		    
 		}
   ;
 
@@ -555,7 +557,7 @@ predicateParameter[InterpretedTokenFactory* tokenFactory] returns [Expr* result]
             const std::vector<Expr*>& vars=child->getChildren();
             for (unsigned int i=0;i<vars.size();i++) {
                 ExprVarDeclaration* vd = dynamic_cast<ExprVarDeclaration*>(vars[i]);
-                tokenFactory->addArg(vd->getType()->getName(),vd->getName());
+                tokenFactory->addArg(vd->getDataType()->getName(),vd->getName());
             }
             result = child;            
         }
