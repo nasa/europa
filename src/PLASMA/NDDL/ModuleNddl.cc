@@ -26,13 +26,8 @@ namespace EUROPA {
 
   void ModuleNddl::initialize(EngineId engine)
   {
-      NddlInterpreter* interp = new NddlInterpreter(engine);
-	  engine->addLanguageInterpreter("nddl", interp);
+	  engine->addLanguageInterpreter("nddl", new NddlInterpreter(engine));
 	  engine->addLanguageInterpreter("nddl-ast", new NddlToASTInterpreter(engine));
-
-      // TODO: This is only to make it visible in java
-	  // drop this when current Java parser gets downgraded to nddl2
-	  engine->addLanguageInterpreter("nddl3", interp);
 
       PlanDatabase* pdb = (PlanDatabase*)engine->getComponent("PlanDatabase");
       RuleSchema* rs = (RuleSchema*)engine->getComponent("RuleSchema");
@@ -43,7 +38,6 @@ namespace EUROPA {
   {
 	  LanguageInterpreter *old;
 
-	  engine->removeLanguageInterpreter("nddl3");
 	  old = engine->removeLanguageInterpreter("nddl");
 	  check_error(old != NULL);
       delete old;

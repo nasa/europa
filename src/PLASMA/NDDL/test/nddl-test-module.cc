@@ -18,7 +18,7 @@ void NDDLModuleTests::syntaxTests()
     std::string filename="parser.nddl";
     NddlTestEngine engine;
     engine.init();
-    std::string result = engine.executeScript("nddl3",filename,true /*isFile*/);
+    std::string result = engine.executeScript("nddl",filename,true /*isFile*/);
     CPPUNIT_ASSERT_MESSAGE("Nddl3 parser reported problems :\n" + result,result.size() == 0);
 }
 
@@ -79,7 +79,7 @@ void NddlTest::tearDown()
 
 void NddlTest::run()
 {
-    std::string result = m_engine->executeScript("nddl3",m_nddlFile,true /*isFile*/);
+    std::string result = m_engine->executeScript("nddl",m_nddlFile,true /*isFile*/);
 
     if (m_setBaseline) {
         m_result = result;
