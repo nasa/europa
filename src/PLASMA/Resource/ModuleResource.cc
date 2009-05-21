@@ -49,10 +49,10 @@ namespace EUROPA {
 
       // TODO: preserve class hierarchy, all Resource types should extend Resource, not Object
       ot = new ObjectType("Reusable","Object",true /*isNative*/);
-      ot->addMember("float", "capacity");
-      ot->addMember("float", "levelLimitMin");
-      ot->addMember("float", "consumptionMax");
-      ot->addMember("float", "consumptionRateMax");
+      ot->addMember(FloatDT::instance(), "capacity");
+      ot->addMember(FloatDT::instance(), "levelLimitMin");
+      ot->addMember(FloatDT::instance(), "consumptionMax");
+      ot->addMember(FloatDT::instance(), "consumptionRateMax");
       ot->addObjectFactory((new ReusableObjectFactory(ot->getId(),"Reusable"))->getId());
       ot->addObjectFactory((new ReusableObjectFactory(ot->getId(),"Reusable:float:float"))->getId());
       ot->addObjectFactory((new ReusableObjectFactory(ot->getId(),"Reusable:float:float:float"))->getId());
@@ -61,10 +61,10 @@ namespace EUROPA {
       schema->registerObjectType(ot->getId());
 
       ot = new ObjectType("CBReusable","Object",true /*isNative*/);
-      ot->addMember("float", "capacity");
-      ot->addMember("float", "levelLimitMin");
-      ot->addMember("float", "consumptionMax");
-      ot->addMember("float", "consumptionRateMax");
+      ot->addMember(FloatDT::instance(), "capacity");
+      ot->addMember(FloatDT::instance(), "levelLimitMin");
+      ot->addMember(FloatDT::instance(), "consumptionMax");
+      ot->addMember(FloatDT::instance(), "consumptionRateMax");
       ot->addObjectFactory((new CBReusableObjectFactory(ot->getId(),"CBReusable"))->getId());
       ot->addObjectFactory((new CBReusableObjectFactory(ot->getId(),"CBReusable:float:float"))->getId());
       ot->addObjectFactory((new CBReusableObjectFactory(ot->getId(),"CBReusable:float:float:float"))->getId());
@@ -78,13 +78,13 @@ namespace EUROPA {
       );
 
       ot = new ObjectType("Reservoir","Object",true /*isNative*/);
-      ot->addMember("float", "initialCapacity");
-      ot->addMember("float", "levelLimitMin");
-      ot->addMember("float", "levelLimitMax");
-      ot->addMember("float", "productionRateMax");
-      ot->addMember("float", "productionMax");
-      ot->addMember("float", "consumptionRateMax");
-      ot->addMember("float", "consumptionMax");
+      ot->addMember(FloatDT::instance(), "initialCapacity");
+      ot->addMember(FloatDT::instance(), "levelLimitMin");
+      ot->addMember(FloatDT::instance(), "levelLimitMax");
+      ot->addMember(FloatDT::instance(), "productionRateMax");
+      ot->addMember(FloatDT::instance(), "productionMax");
+      ot->addMember(FloatDT::instance(), "consumptionRateMax");
+      ot->addMember(FloatDT::instance(), "consumptionMax");
       ot->addObjectFactory((new ReservoirObjectFactory(ot->getId(),"Reservoir"))->getId());
       ot->addObjectFactory((new ReservoirObjectFactory(ot->getId(),"Reservoir:float:float:float"))->getId());
       ot->addObjectFactory((new ReservoirObjectFactory(ot->getId(),"Reservoir:float:float:float:float:float"))->getId());
@@ -94,7 +94,7 @@ namespace EUROPA {
       schema->registerObjectType(ot->getId());
 
       ot = new ObjectType("Unary","Object",true /*isNative*/);
-      ot->addMember("float","consumptionMax");
+      ot->addMember(FloatDT::instance(),"consumptionMax");
       ot->addObjectFactory((new UnaryObjectFactory(ot->getId(),"Unary"))->getId());
       ot->addObjectFactory((new UnaryObjectFactory(ot->getId(),"Unary:float"))->getId());
       ot->addTokenFactory((new UnaryUseTokenFactory("Unary.use"))->getId());

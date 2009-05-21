@@ -678,9 +678,9 @@ namespace EUROPA {
       }
 
       {
-          std::map<std::string,std::string>::const_iterator it = objType->getMembers().begin();
+          std::map<std::string,DataTypeId>::const_iterator it = objType->getMembers().begin();
           for(;it != objType->getMembers().end(); ++it)
-              addMember(className, it->second /*type*/, it->first/*name*/);
+              addMember(className, it->second->getName().toString() /*type*/, it->first/*name*/);
       }
 
       {

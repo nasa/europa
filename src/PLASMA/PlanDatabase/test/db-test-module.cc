@@ -147,34 +147,34 @@ void initDbTestSchema(const SchemaId& schema) {
   // Set up object types and compositions for testing - builds a recursive structure
   ObjectType* objType = new ObjectType(DEFAULT_OBJECT_TYPE,Schema::rootObject().c_str());
 
-  objType->addMember(DEFAULT_OBJECT_TYPE, "id0");
-  objType->addMember(DEFAULT_OBJECT_TYPE, "id1");
-  objType->addMember(DEFAULT_OBJECT_TYPE, "id2");
-  objType->addMember(DEFAULT_OBJECT_TYPE, "id3");
-  objType->addMember(DEFAULT_OBJECT_TYPE, "id4");
-  objType->addMember(DEFAULT_OBJECT_TYPE, "id5");
-  objType->addMember(DEFAULT_OBJECT_TYPE, "id6");
-  objType->addMember(DEFAULT_OBJECT_TYPE, "id7");
-  objType->addMember(DEFAULT_OBJECT_TYPE, "id8");
-  objType->addMember(DEFAULT_OBJECT_TYPE, "id9");
+  objType->addMember(objType->getVarType(), "id0");
+  objType->addMember(objType->getVarType(), "id1");
+  objType->addMember(objType->getVarType(), "id2");
+  objType->addMember(objType->getVarType(), "id3");
+  objType->addMember(objType->getVarType(), "id4");
+  objType->addMember(objType->getVarType(), "id5");
+  objType->addMember(objType->getVarType(), "id6");
+  objType->addMember(objType->getVarType(), "id7");
+  objType->addMember(objType->getVarType(), "id8");
+  objType->addMember(objType->getVarType(), "id9");
 
-  objType->addMember(DEFAULT_OBJECT_TYPE, "o0");
-  objType->addMember(DEFAULT_OBJECT_TYPE, "o1");
-  objType->addMember(DEFAULT_OBJECT_TYPE, "o2");
-  objType->addMember(DEFAULT_OBJECT_TYPE, "o3");
-  objType->addMember(DEFAULT_OBJECT_TYPE, "o4");
-  objType->addMember(DEFAULT_OBJECT_TYPE, "o5");
-  objType->addMember(DEFAULT_OBJECT_TYPE, "o6");
-  objType->addMember(DEFAULT_OBJECT_TYPE, "o7");
-  objType->addMember(DEFAULT_OBJECT_TYPE, "o8");
-  objType->addMember(DEFAULT_OBJECT_TYPE, "o9");
+  objType->addMember(objType->getVarType(), "o0");
+  objType->addMember(objType->getVarType(), "o1");
+  objType->addMember(objType->getVarType(), "o2");
+  objType->addMember(objType->getVarType(), "o3");
+  objType->addMember(objType->getVarType(), "o4");
+  objType->addMember(objType->getVarType(), "o5");
+  objType->addMember(objType->getVarType(), "o6");
+  objType->addMember(objType->getVarType(), "o7");
+  objType->addMember(objType->getVarType(), "o8");
+  objType->addMember(objType->getVarType(), "o9");
 
   // Set up primitive object type member variables for testing
-  objType->addMember(FloatDT::NAME().c_str(), "IntervalVar");
-  objType->addMember(IntDT::NAME().c_str(), "IntervalIntVar");
-  objType->addMember(BoolDT::NAME().c_str(), "BoolVar");
-  objType->addMember(StringDT::NAME().c_str(), "LabelSetVar");
-  objType->addMember(FloatDT::NAME().c_str(), "EnumeratedVar");
+  objType->addMember(FloatDT::instance(), "IntervalVar");
+  objType->addMember(IntDT::instance(), "IntervalIntVar");
+  objType->addMember(BoolDT::instance(), "BoolVar");
+  objType->addMember(StringDT::instance(), "LabelSetVar");
+  objType->addMember(FloatDT::instance(), "EnumeratedVar");
 
   // Set up predicates for testing
   objType->addTokenFactory((new IntervalTokenFactory())->getId());

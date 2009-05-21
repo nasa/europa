@@ -117,24 +117,15 @@ typeDefinition returns [Expr* result]
     :   ^('typedef'
             name=IDENT
             dataType=type
-			{
-                if (dataType == NULL) {		        
-                    result = NULL;              
-                    reportSemanticError(CTX,
-                        "Incorrect typedef. Unknown base data type for new type '" + std::string(c_str($name.text->chars)) + "'");
-                }            
-			}
 			domain=baseDomain[dataType]
         )
         {
-		    if (dataType != NULL) {		        
-		        const char* newName = c_str($name.text->chars);
-		        result = new ExprTypedef(dataType->getId(),newName,domain);
-		     }
+            const char* newName = c_str($name.text->chars);
+	        result = new ExprTypedef(dataType->getId(),newName,domain);
 		}
 	;
 
-type returns [const DataType* result] 
+type returns [DataType* result] 
     :   (   name='int'
         |   name='float'
         |   name='bool'
@@ -142,15 +133,19 @@ type returns [const DataType* result]
         |   name=IDENT
         )
         {
-            const DataTypeId& dt = CTX->SymbolTable->getDataType(c_str($name.text->chars));
-            result = (DataType*)dt;
+            const char* nameStr = c_str($name.text->chars);
+            DataTypeId dt = CTX->SymbolTable->getDataType(nameStr);
+            
+            if (dt.isId()) 
+                result = (DataType*)dt;
+            else 
+                reportSemanticError(CTX,"Unknown data type:"+std::string(nameStr));           
         }
     ;
         
 baseDomain[const DataType* baseType] returns [AbstractDomain* result]
     :   child=baseDomainValues
     {
-        // TODO: type checking. ensure inline domain is consistent with base
         DataRef data=evalExpr(CTX,child); 
         ConstrainedVariableId value = data.getValue();
         if (!baseType->isAssignableFrom(value->getDataType())) {
@@ -173,26 +168,20 @@ baseDomainValues returns [Expr* result]
     ;
      
 variableDeclarations returns [ExprList* result]
-    :   ^(VARIABLE dataType=type 
-                {
-                    if (dataType != NULL)
-                        result = new ExprList();
-                    else { 
-                        result = NULL;
-                        reportSemanticError(CTX,
-                            "Incorrect variable declaration. Unknown data type");
-                    }
-                }
-                
-                (child=variableInitialization[dataType]
-                {
-                    result->addChild(child);
-                }
-                )+
-             )
+@init {
+    result = new ExprList();    
+}
+    :   ^(VARIABLE 
+            dataType=type 
+            (child=variableInitialization[dataType->getId()]
+            {
+                result->addChild(child);
+            }
+            )+
+        )
     ;
         
-variableInitialization[const DataType* dataType] returns [Expr* result]
+variableInitialization[const DataTypeId& dataType] returns [Expr* result]
 @init {
    const char* varName; 
 }
@@ -203,7 +192,7 @@ variableInitialization[const DataType* dataType] returns [Expr* result]
             // TODO: type check initExpr;
             result = new ExprVarDeclaration(
                  varName,
-                 dataType->getId(),
+                 dataType,
                  initExpr,
                  true // canBeSpecified
             ); 
@@ -449,8 +438,7 @@ classVariable[ObjectType* objType]
                   dataType=type 
                   (name=IDENT
                   {
-                      // TODO: modify addMember to take DataTypeId instead
-                      objType->addMember(dataType->getName().c_str(),c_str($name.text->chars)); 
+                      objType->addMember(dataType->getId(),c_str($name.text->chars)); 
                   }
                   )+
                  )

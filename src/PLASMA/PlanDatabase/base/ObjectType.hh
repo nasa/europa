@@ -33,8 +33,8 @@ public:
     virtual const LabelStr& getParent() const;
     virtual bool isNative() const;
 
-    virtual void addMember(const char* type, const char* name); // TODO: use DataType instead
-    virtual const std::map<std::string,std::string>& getMembers() const;
+    virtual void addMember(const DataTypeId& type, const char* name); // TODO: use DataType instead
+    virtual const std::map<std::string,DataTypeId>& getMembers() const;
 
     virtual void addObjectFactory(const ObjectFactoryId& factory);
     virtual const std::map<double,ObjectFactoryId>& getObjectFactories() const;
@@ -54,7 +54,7 @@ protected:
     bool m_isNative;
     std::map<double,ObjectFactoryId> m_objectFactories;
     std::map<double,TokenFactoryId> m_tokenFactories;
-    std::map<std::string,std::string> m_members;
+    std::map<std::string,DataTypeId> m_members;
 };
 
 }

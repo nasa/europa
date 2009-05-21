@@ -145,7 +145,7 @@ namespace EUROPA {
   {
     const char* type = safeStr(element->Attribute("type"));
     const char* name = safeStr(element->Attribute("name"));
-    objType->addMember(type,name);
+    objType->addMember(getSchema()->getCESchema()->getDataType(type),name);
   }
 
   int NddlXmlInterpreter::defineConstructor(ObjectType* objType, const TiXmlElement* element)

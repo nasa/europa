@@ -222,7 +222,7 @@ RETestEngine::RETestEngine()
     sch->addPredicate("AllObjects.Predicate");
 
     ot = new ObjectType("Objects","Object");
-    ot->addMember("int","m_int");
+    ot->addMember(IntDT::instance(),"m_int");
     sch->registerObjectType(ot->getId());
 
 

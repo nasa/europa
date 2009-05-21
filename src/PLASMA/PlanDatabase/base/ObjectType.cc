@@ -59,7 +59,7 @@ const LabelStr& ObjectType::getParent() const
     return m_parent;
 }
 
-const std::map<std::string,std::string>& ObjectType::getMembers() const
+const std::map<std::string,DataTypeId>& ObjectType::getMembers() const
 {
     return m_members;
 }
@@ -79,9 +79,8 @@ bool ObjectType::isNative() const
     return m_isNative;
 }
 
-void ObjectType::addMember(const char* type, const char* name)
+void ObjectType::addMember(const DataTypeId& type, const char* name)
 {
-    // TODO: error checking
     m_members[name] = type;
 }
 
@@ -104,9 +103,12 @@ std::string ObjectType::toString() const
     os << "class " << m_name.c_str() << " extends " << m_parent.c_str() << " {" << std::endl;
 
     {
-        std::map<std::string,std::string>::const_iterator it = m_members.begin();
+        std::map<std::string,DataTypeId>::const_iterator it = m_members.begin();
         for(;it != m_members.end(); ++it)
-            os << "    " << it->second /*type*/ << " " <<  it->first/*name*/ << std::endl;
+            os << "    "
+               << it->second->getName().toString() /*type*/ << " "
+               <<  it->first/*name*/
+               << std::endl;
     }
 
     os << std::endl;
