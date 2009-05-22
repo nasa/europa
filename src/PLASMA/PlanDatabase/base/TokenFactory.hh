@@ -60,7 +60,7 @@ namespace EUROPA {
    */
   class TokenFactory {
   public:
-    TokenFactory(const LabelStr& signature);
+    TokenFactory(const ObjectTypeId& ot,const LabelStr& signature);
 
     virtual ~TokenFactory();
 
@@ -93,6 +93,7 @@ namespace EUROPA {
 
   protected:
     TokenFactoryId m_id;
+    ObjectTypeId m_objType;
     LabelStr m_signature;
     LabelStr m_predicateName;
     std::map<LabelStr,DataTypeId> m_args;

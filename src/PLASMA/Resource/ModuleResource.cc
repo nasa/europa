@@ -58,7 +58,7 @@ namespace EUROPA {
       ot->addObjectFactory((new ReusableObjectFactory(ot->getId(),"Reusable:float:float"))->getId());
       ot->addObjectFactory((new ReusableObjectFactory(ot->getId(),"Reusable:float:float:float"))->getId());
       ot->addObjectFactory((new ReusableObjectFactory(ot->getId(),"Reusable:float:float:float:float"))->getId());
-      ot->addTokenFactory((new ReusableUsesTokenFactory("Reusable.uses"))->getId());
+      ot->addTokenFactory((new ReusableUsesTokenFactory(ot->getId(),"Reusable.uses"))->getId());
       schema->registerObjectType(ot->getId());
 
       ot = new ObjectType("CBReusable",objectOT,true /*isNative*/);
@@ -90,15 +90,15 @@ namespace EUROPA {
       ot->addObjectFactory((new ReservoirObjectFactory(ot->getId(),"Reservoir:float:float:float"))->getId());
       ot->addObjectFactory((new ReservoirObjectFactory(ot->getId(),"Reservoir:float:float:float:float:float"))->getId());
       ot->addObjectFactory((new ReservoirObjectFactory(ot->getId(),"Reservoir:float:float:float:float:float:float:float"))->getId());
-      ot->addTokenFactory((new ReservoirProduceTokenFactory("Reservoir.produce"))->getId());
-      ot->addTokenFactory((new ReservoirConsumeTokenFactory("Reservoir.consume"))->getId());
+      ot->addTokenFactory((new ReservoirProduceTokenFactory(ot->getId(),"Reservoir.produce"))->getId());
+      ot->addTokenFactory((new ReservoirConsumeTokenFactory(ot->getId(),"Reservoir.consume"))->getId());
       schema->registerObjectType(ot->getId());
 
       ot = new ObjectType("Unary",objectOT,true /*isNative*/);
       ot->addMember(FloatDT::instance(),"consumptionMax");
       ot->addObjectFactory((new UnaryObjectFactory(ot->getId(),"Unary"))->getId());
       ot->addObjectFactory((new UnaryObjectFactory(ot->getId(),"Unary:float"))->getId());
-      ot->addTokenFactory((new UnaryUseTokenFactory("Unary.use"))->getId());
+      ot->addTokenFactory((new UnaryUseTokenFactory(ot->getId(),"Unary.use"))->getId());
       schema->registerObjectType(ot->getId());
 
       FactoryMgr* pfm = new FactoryMgr();

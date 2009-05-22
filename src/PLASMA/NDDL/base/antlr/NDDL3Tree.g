@@ -209,6 +209,7 @@ variableInitialization[const DataTypeId& dataType] returns [Expr* result]
                  initExpr,
                  true // canBeSpecified
             ); 
+            CTX->SymbolTable->addLocalVar(varName,dataType);
         }
         ;       
 
@@ -541,7 +542,7 @@ predicate[ObjectType* objType]
 			pred=IDENT 
 			{ 
 			    predName = objType->getName().toString() + "." + c_str($pred.text->chars);   
-			    tokenFactory = new InterpretedTokenFactory(predName,objType->getId());
+			    tokenFactory = new InterpretedTokenFactory(objType->getId(),predName);
 			    pushContext(CTX,new NddlTokenSymbolTable(CTX->SymbolTable,tokenFactory->getId(),objType->getId())); 
 			}
 			predicateStatements[tokenFactory]
@@ -683,15 +684,21 @@ guardRelop
 
 loopStatement returns [Expr* result]
 @init {
-std::vector<Expr*> loopBody;
+    std::vector<Expr*> loopBody;
+    const char* loopVarName = NULL;
 }
 	:	^('foreach'
 			name=IDENT
 			val=qualified 
+			{
+               loopVarName =  c_str($name.text->chars);
+               CTX->SymbolTable->addLocalVar(loopVarName,val->getDataType());
+			} 
 			ruleBlock[loopBody]
 		)
 		{
-		    result = new ExprLoop(c_str($name.text->chars),val->toString().c_str(),loopBody); // TODO : modify ExprLoop to pass val Expr instead
+		    // TODO : modify ExprLoop to pass val Expr instead, otherwise delete val.
+		    result = new ExprLoop(loopVarName,val->toString().c_str(),loopBody); 
 		}
 	;
 
@@ -768,10 +775,10 @@ qualified returns [Expr* result]
                 result = CTX->SymbolTable->makeEnumRef(varName.c_str());
             else {
                 std::string errorMsg;
-                DataTypeId dt; //= CTX->SymbolTable->getTypeForVar(varName.c_str(),errorMsg);  
+                DataTypeId dt = CTX->SymbolTable->getTypeForVar(varName.c_str(),errorMsg);  
                 // TODO!!: do type checking at each "."
-                //if (dt.isNoId())
-                //    reportSemanticError(CTX,errorMsg);
+                if (dt.isNoId())
+                    reportSemanticError(CTX,errorMsg);
                 result = new ExprVarRef(varName.c_str(),dt);
             }
         }
@@ -816,13 +823,13 @@ temporalRelation
 // TODO: this is ugly, need to provide extensible method exporting mechanism  
 methodInvocation returns [Expr* result]
 	:
-	(	child=variableMethod
-	|       child=objectMethod
-        |       child=tokenMethod
-        )
-        {
-            result = child;
-        }
+	(  child=variableMethod
+	|  child=objectMethod
+    |       child=tokenMethod
+    )
+    {
+        result = child;
+    }
 	;
 
 variableMethod returns [Expr* result]

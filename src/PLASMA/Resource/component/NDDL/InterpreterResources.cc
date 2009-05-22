@@ -45,10 +45,11 @@ namespace EUROPA {
     return instance;
   }
 
-  ReusableUsesTokenFactory::ReusableUsesTokenFactory(const LabelStr& predicateName)
-      : NativeTokenFactory(predicateName)
+  ReusableUsesTokenFactory::ReusableUsesTokenFactory(const ObjectTypeId& ot,const LabelStr& predicateName)
+      : NativeTokenFactory(ot,predicateName)
   {
       addArg(FloatDT::instance(),"quantity");
+      addArg(IntDT::instance(),"time");
   }
 
   TokenId ReusableUsesTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
@@ -146,10 +147,11 @@ namespace EUROPA {
     return instance;
   }
 
-  ReservoirProduceTokenFactory::ReservoirProduceTokenFactory(const LabelStr& predicateName)
-      : NativeTokenFactory(predicateName)
+  ReservoirProduceTokenFactory::ReservoirProduceTokenFactory(const ObjectTypeId& ot,const LabelStr& predicateName)
+      : NativeTokenFactory(ot,predicateName)
   {
       addArg(FloatDT::instance(),"quantity");
+      addArg(IntDT::instance(),"time");
   }
 
   TokenId ReservoirProduceTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
@@ -164,10 +166,11 @@ namespace EUROPA {
     return (new NDDL::NddlReservoir::produce(master,name,relation,true))->getId();
   }
 
-  ReservoirConsumeTokenFactory::ReservoirConsumeTokenFactory(const LabelStr& predicateName)
-      : NativeTokenFactory(predicateName)
+  ReservoirConsumeTokenFactory::ReservoirConsumeTokenFactory(const ObjectTypeId& ot,const LabelStr& predicateName)
+      : NativeTokenFactory(ot,predicateName)
   {
       addArg(FloatDT::instance(),"quantity");
+      addArg(IntDT::instance(),"time");
   }
 
   TokenId ReservoirConsumeTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const

@@ -14,3 +14,27 @@ Incompatible types in value set: foo(string) 1(int)
 
 }}}
 
+Undefined Variable
+nddl/error/UndefinedVariable.nddl
+{{{
+-Imaginary-(line:0), at offset 0, near UP
+z is not defined
+
+}}}
+
+Undefined Class Member
+nddl/error/UndefinedClassMember.nddl
+{{{
+nddl/error/UndefinedClassMember.nddl(line:9), at offset 12, near 8
+y is not defined
+
+}}}
+
+Undefined Predicate Argument
+nddl/error/UndefinedPredicateArgument.nddl
+{{{
+nddl/error/UndefinedPredicateArgument.nddl(line:10), at offset 9, near 6
+y is not defined
+
+}}}
+

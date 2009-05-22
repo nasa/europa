@@ -74,8 +74,9 @@ namespace EUROPA {
     }
 
 
-    TokenFactory::TokenFactory(const LabelStr& signature)
+    TokenFactory::TokenFactory(const ObjectTypeId& ot, const LabelStr& signature)
         : m_id(this)
+        , m_objType(ot)
         , m_signature(signature)
     {
         m_predicateName = signature.getElement(1,".");
@@ -108,6 +109,9 @@ namespace EUROPA {
 
         if (name == "state")
             return StateDT.getId();
+
+        if (name == "object")
+            return m_objType->getVarType();
 
         if (name=="start" || name=="end" || name=="duration")
             return IntDT::instance();

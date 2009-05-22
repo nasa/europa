@@ -232,7 +232,7 @@ namespace EUROPA {
           return;
       }
 
-      InterpretedTokenFactory* tokenFactory = new InterpretedTokenFactory(predName,objType->getId());
+      InterpretedTokenFactory* tokenFactory = new InterpretedTokenFactory(objType->getId(),predName);
 
       for(const TiXmlElement* predArg = element->FirstChildElement(); predArg; predArg = predArg->NextSiblingElement() ) {
           if (strcmp(predArg->Value(),"var") == 0) {

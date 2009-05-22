@@ -128,7 +128,10 @@ BClass::q {
   else {
     debug(d);
   }
-  foreach(f in somefoos) {
+
+  somefoos loopVar;
+
+  foreach(f in loopVar) {
     debug(f);
   }
   ;;

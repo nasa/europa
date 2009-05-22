@@ -1,0 +1,11 @@
+
+class foo
+{
+    int x;
+
+    foo()
+    {
+        x = 5;
+        y = 8;
+    }
+}

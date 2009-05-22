@@ -124,8 +124,8 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
 
   class IntervalTokenFactory: public TokenFactory {
   public:
-    IntervalTokenFactory()
-      : TokenFactory(LabelStr(DEFAULT_PREDICATE)) {
+    IntervalTokenFactory(const ObjectTypeId& ot)
+      : TokenFactory(ot,LabelStr(DEFAULT_PREDICATE)) {
         addArg(FloatDT::instance(), "IntervalParam");
         addArg(IntDT::instance(), "IntervalIntParam");
         addArg(BoolDT::instance(), "BoolParam");
@@ -177,7 +177,7 @@ void initDbTestSchema(const SchemaId& schema) {
   objType->addMember(FloatDT::instance(), "EnumeratedVar");
 
   // Set up predicates for testing
-  objType->addTokenFactory((new IntervalTokenFactory())->getId());
+  objType->addTokenFactory((new IntervalTokenFactory(objType->getId()))->getId());
 
   // Set up constructors for testing
   objType->addObjectFactory((new StandardDBFooFactory())->getId());
@@ -3999,11 +3999,13 @@ public:
     s_dbPlayer = new DbClientTransactionPlayer((s_db)->getClient());
     CPPUNIT_ASSERT(s_dbPlayer != 0);
 
+    ObjectType testClass2_OT("TestClass2",db->getSchema()->getObjectType(Schema::rootObject()));
+
     REGISTER_OBJECT_FACTORY(db->getSchema(),TestClass2Factory, TestClass2);
     REGISTER_OBJECT_FACTORY(db->getSchema(),TestClass2Factory, TestClass2:string:int:float:Locations);
 
     /* Token factory for predicate Sample */
-    db->getSchema()->registerTokenFactory((new TestClass2::Sample::Factory())->getId());
+    db->getSchema()->registerTokenFactory((new TestClass2::Sample::Factory(testClass2_OT.getId()))->getId());
 
     /* Initialize state-domain-at-creation of mandatory and rejectable tokens.  Const after this. */
     getMandatoryStateDom().remove(Token::REJECTED);
@@ -4142,8 +4144,8 @@ public:
       // ... but that is in NDDL/base/NddlUtils.hh, which this should not depend on, so:
       class Factory : public TokenFactory {
       public:
-        Factory()
-          : TokenFactory(LabelStr("TestClass2.Sample")) {
+        Factory(const ObjectTypeId& ot)
+          : TokenFactory(ot,LabelStr("TestClass2.Sample")) {
         }
       private:
         TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false, bool isFact = false) const {

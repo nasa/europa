@@ -335,8 +335,7 @@ namespace EUROPA {
   class InterpretedTokenFactory: public TokenFactory
   {
     public:
-	  InterpretedTokenFactory(const LabelStr& predicateName,
-	                          const ObjectTypeId& objType);
+	  InterpretedTokenFactory(const ObjectTypeId& ot,const LabelStr& predicateName);
 
       void addBodyExpr(Expr* e);
 
@@ -344,7 +343,6 @@ namespace EUROPA {
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
 
     protected:
-      ObjectTypeId m_objType;
       std::vector<Expr*> m_body;
 
       TokenFactoryId getParentFactory(const PlanDatabaseId& planDb) const;
@@ -530,7 +528,7 @@ namespace EUROPA {
   class NativeTokenFactory: public TokenFactory
   {
     public:
-	  NativeTokenFactory(const LabelStr& predicateName) : TokenFactory(predicateName) {}
+	  NativeTokenFactory(const ObjectTypeId& ot,const LabelStr& predicateName) : TokenFactory(ot,predicateName) {}
 
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const = 0;
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const = 0;

@@ -874,10 +874,9 @@ namespace EUROPA {
    * InterpretedTokenFactory
    */
     InterpretedTokenFactory::InterpretedTokenFactory(
-            const LabelStr& predicateName,
-            const ObjectTypeId& objType)
-        : TokenFactory(predicateName)
-        , m_objType(objType)
+            const ObjectTypeId& ot,
+            const LabelStr& predicateName)
+        : TokenFactory(ot,predicateName)
     {
     }
 
