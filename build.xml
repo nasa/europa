@@ -11,9 +11,11 @@
 
   <target name="init">
     <property environment="env"/>
-
-  	<exec executable="uname" outputproperty="uname.s">
+    <exec executable="uname" outputproperty="uname.s">
       <arg value="-s"/>
+    </exec>
+    <exec executable="which" outputproperty="gcc.location">
+      <arg value="gcc"/>
     </exec>
   	
     <property name="europa.version" value="2.1.2"/> 	
@@ -49,29 +51,55 @@
         </then>
       </elseif>
 
-      <!-- Windows-CYGWIN -->
       <elseif>
         <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
-        <then>
-          <property name="local.os" value="windows"/>
-          <exec executable="cygpath" outputproperty="local.env.PLASMA_HOME">
-            <arg value="--unix"/>
-            <!--<arg value="-absolute"/>-->
-            <arg value="${basedir}"/>
-          </exec>
-          <exec executable="cygpath" outputproperty="local.env.EUROPA_HOME">
-            <arg value="--unix"/>
-            <!--<arg value="-absolute"/>-->
-            <arg value="${basedir}/dist/europa"/>
-          </exec>
-          <exec executable="cygpath" outputproperty="local.env.CYG_JAVA_HOME">
-             <arg value="--unix"/>
-             <arg value="--absolute"/>
-             <arg value="${env.JAVA_HOME}"/>
-          </exec>
-          <property name="jam.libraries" value="STATIC"/>
-	  <!-- <property name="jam.misc" value="-sOS=CYGWIN -sNOCYGWIN=TRUE"/> -->
-          <property name="jam.misc" value="-sOS=CYGWIN"/>
+	<then>
+	<!-- Windows-MinGW running inside cygwin -->
+        <if>
+	  <contains string="${gcc.location}" substring="mingw" casesensitive="false"/>
+	  <then>
+	    <property name="local.os" value="windows"/>
+	    <exec executable="cygpath" outputproperty="local.env.PLASMA_HOME">
+	      <arg value="--mixed"/>
+              <!--<arg value="-absolute"/>-->
+              <arg value="${basedir}"/>
+            </exec>
+
+	    <exec executable="cygpath" outputproperty="local.env.EUROPA_HOME">
+	      <arg value="--mixed"/>
+	      <!--<arg value="-absolute"/>-->
+	      <arg value="${basedir}/dist/europa"/>
+	    </exec>
+	    <exec executable="cygpath" outputproperty="local.env.CYG_JAVA_HOME">
+              <arg value="--mixed"/>
+              <arg value="--absolute"/>
+              <arg value="${env.JAVA_HOME}"/>
+	    </exec>
+            <property name="jam.libraries" value="STATIC"/>
+	    <property name="jam.misc" value="-sOS=CYGWIN -sNOCYGWIN=TRUE"/>
+	  </then>
+	  <else>
+	    <!-- Windows-Cygwin -->
+	    <property name="local.os" value="windows"/>
+	    <exec executable="cygpath" outputproperty="local.env.PLASMA_HOME">
+              <arg value="--unix"/>
+              <!--<arg value="-absolute"/>-->
+              <arg value="${basedir}"/>
+            </exec>
+            <exec executable="cygpath" outputproperty="local.env.EUROPA_HOME">
+              <arg value="--unix"/>
+              <!--<arg value="-absolute"/>-->
+              <arg value="${basedir}/dist/europa"/>
+            </exec>
+            <exec executable="cygpath" outputproperty="local.env.CYG_JAVA_HOME">
+              <arg value="--unix"/>
+              <arg value="--absolute"/>
+              <arg value="${env.JAVA_HOME}"/>
+            </exec>
+            <property name="jam.libraries" value="STATIC"/>
+            <property name="jam.misc" value="-sOS=CYGWIN"/>
+	  </else>
+	</if>  
         </then>
       </elseif>
     	
@@ -146,7 +174,7 @@
       		libSystem${s}.a libSolvers${s}.a libResource${s}.a libNDDL${s}.a 
       		libRulesEngine${s}.a libTemporalNetwork${s}.a libPlanDatabase${s}.a
       		libConstraintEngine${s}.a libUtils${s}.a 
-    		libTinyXml${s}.a libAntlr3${s}.a
+    		libTinyXml${s}.a libAntlr3${s}.a -lws2_32
       		-Wl,--no-whole-archive -lpthread"/>
 		<exec executable="bash" dir="${dir.plasma}/build/lib">
 		  <arg value="-c" />

@@ -24,7 +24,7 @@
 #include "util-test-module.hh"
 #include "Error.hh"
 //#include "Debug.hh"
-#include "LoggerTest.hh"
+//#include "LoggerTest.hh"
 #include "LabelStr.hh"
 #include "TestData.hh"
 #include "Id.hh"
@@ -38,8 +38,8 @@
 #include <pthread.h>
 #include <typeinfo>
 
-using EUROPA::Utils::test::LoggerTest;
-using EUROPA::Utils::Logger;
+// using EUROPA::Utils::test::LoggerTest;
+// using EUROPA::Utils::Logger;
 
 #ifndef EUROPA_FAST
 #define non_fast_only_assert(T) CPPUNIT_ASSERT(T)
@@ -164,8 +164,8 @@ public:
   static bool test() {
     EUROPA_runTest(testDebugError);
 //    EUROPA_runTest(testDebugFiles);
-    EUROPA_runTest(testLog4cpp);
-    EUROPA_runTest(testLogger);
+//     EUROPA_runTest(testLog4cpp);
+//     EUROPA_runTest(testLogger);
     return true;
   }
 private:
@@ -191,24 +191,24 @@ private:
     return(true);
   }
 */
-  /** Tests that log4cpp functionality is installed and working */
-  static bool testLog4cpp() {
-    bool success = true;
-#if !defined(EUROPA_FAST) && defined(DEBUG_MESSAGE_SUPPORT)
+//   /** Tests that log4cpp functionality is installed and working */
+//   static bool testLog4cpp() {
+//     bool success = true;
+// #if !defined(EUROPA_FAST) && defined(DEBUG_MESSAGE_SUPPORT)
 
-#endif
-    return(success);
-  }
+// #endif
+//     return(success);
+//   }
 
   /** Tests that the Europa logger functionality is installed and working */
-  static bool testLogger() {
-    bool success = true;
-#if !defined(EUROPA_FAST) && defined(DEBUG_MESSAGE_SUPPORT)
-    LoggerTest *tester = new LoggerTest();
-    tester->testLogger();
-#endif
-    return(success);
-  }
+//   static bool testLogger() {
+//     bool success = true;
+// #if !defined(EUROPA_FAST) && defined(DEBUG_MESSAGE_SUPPORT)
+//     LoggerTest *tester = new LoggerTest();
+//     tester->testLogger();
+// #endif
+//     return(success);
+//   }
 
 
 /*

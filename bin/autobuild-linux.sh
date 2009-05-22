@@ -27,7 +27,7 @@ for variant in ${variants[@]}
 do
     for library in ${libraries[@]}
     do
-	ant -Djam.variant=$variant -Djam.libraries=$library clean
+	$ANT_HOME/bin/ant -Djam.variant=$variant -Djam.libraries=$library clean
     done
 done
 
@@ -41,7 +41,7 @@ do
 	rm build.$variant.$library.log
 	touch build.$variant.$library.log
 	xterm -title "Working on $variant.$library" -geometry 144x24 -e tail -f build.$variant.$library.log &
-	ant -Djam.variant=$variant -Djam.libraries=$library autobuild > build.$variant.$library.log 2>&1
+	$ANT_HOME/bin/ant -Djam.variant=$variant -Djam.libraries=$library autobuild > build.$variant.$library.log 2>&1
     done
 done
 

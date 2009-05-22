@@ -10,7 +10,7 @@ SubDirHdrs $(PLASMA) PlanDatabase test ;
 SubDirHdrs $(log4cpp.includeDir) ;
 #SubDirC++Flags -lcppunit -Wno-unknown-pragmas -Wno-format ;
 #SubDirC++Flags -I/usr/include ; #-lcppunit -Wno-unknown-pragmas -Wno-format ;
-ModuleLibraries system-module-tests : cppunit dl ;
+ModuleLibraries system-module-tests : cppunit ;
 
 if ( "Resources" in $(NO) ) {
   SubDirC++Flags -DNO_RESOURCES ;

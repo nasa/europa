@@ -210,11 +210,13 @@ if $(OS) = CYGWIN {
 
 if $(OS) = CYGWIN && $(NOCYGWIN) {
   LINKFLAGS += $(LIBRARY_PATH_SEARCH_FLAG)/usr/local/mingw/lib -mno-cygwin ;
-  PLATFORM_FLAGS += -D_NO_W32_PSEUDO_MODIFIERS -D__MINGW32__ -I/usr/local/mingw/include -mno-cygwin ;
+  LINKFLAGS += -D_WIN32 ;  #to ensure Antlr3 compiles in win32 mode (see antlr3defs.h)
+  PLATFORM_FLAGS += -D_NO_W32_PSEUDO_MODIFIERS -D__MINGW32__ -D_WIN32 -I/usr/local/mingw/include -mno-cygwin ;
+  LINKLIBS += -lwsock32 ;  #winsock library is needed for Antlr3
 }
 
 if $(OS) = MINGW {
-  PLATFORM_FLAGS += -D_NO_W32_PSEUDO_MODIFIERS ;
+  PLATFORM_FLAGS += -D_NO_W32_PSEUDO_MODIFIERS -D_WIN32 ;
 }
 
 if $(OS) = MACOSX {
