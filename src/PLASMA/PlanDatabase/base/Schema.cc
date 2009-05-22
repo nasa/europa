@@ -648,7 +648,7 @@ namespace EUROPA {
 
       // If it can't create objects, generate default super call
       if (!canCreateObjects)
-          superCallExpr = new ExprConstructorSuperCall(objType->getParent(),std::vector<Expr*>());
+          superCallExpr = new ExprConstructorSuperCall(objType->getParent()->getName(),std::vector<Expr*>());
 
       return (new InterpretedObjectFactory(
               objType,
@@ -664,12 +664,11 @@ namespace EUROPA {
   void Schema::registerObjectType(const ObjectTypeId& objType)
   {
       const char* className = objType->getName().c_str();
-      const char* parentClassName = objType->getParent().c_str();
 
       if (objType->getName() == Schema::rootObject())
           addObjectType(className);
       else
-          addObjectType(className,parentClassName);
+          addObjectType(className,objType->getParent()->getName().c_str());
 
       if (objType->getObjectFactories().size() == 0) {
           bool canCreateObjects = objType->isNative();

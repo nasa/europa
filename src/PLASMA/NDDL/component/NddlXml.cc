@@ -120,7 +120,7 @@ namespace EUROPA {
       const char* parentClassName = element.Attribute("extends");
       parentClassName = (parentClassName == NULL ? "Object" : parentClassName);
 
-      objType = new ObjectType(className,parentClassName);
+      objType = new ObjectType(className,getSchema()->getObjectType(parentClassName));
 
       for(const TiXmlElement* child = element.FirstChildElement(); child; child = child->NextSiblingElement() ) {
           const char * tagname = child->Value();
@@ -172,7 +172,7 @@ namespace EUROPA {
               for(const TiXmlElement* argChild = child->FirstChildElement(); argChild; argChild = argChild->NextSiblingElement() )
                   argExprs.push_back(valueToExpr(argChild));
 
-              superCallExpr = new ExprConstructorSuperCall(objType->getParent(),argExprs);
+              superCallExpr = new ExprConstructorSuperCall(objType->getParent()->getName(),argExprs);
           }
           else if (strcmp(child->Value(),"assign") == 0) {
               const TiXmlElement* rhsChild = child->FirstChildElement();

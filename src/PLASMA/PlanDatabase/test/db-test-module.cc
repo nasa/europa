@@ -145,7 +145,7 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
 
 void initDbTestSchema(const SchemaId& schema) {
   // Set up object types and compositions for testing - builds a recursive structure
-  ObjectType* objType = new ObjectType(DEFAULT_OBJECT_TYPE,Schema::rootObject().c_str());
+  ObjectType* objType = new ObjectType(DEFAULT_OBJECT_TYPE,schema->getObjectType(Schema::rootObject()));
 
   objType->addMember(objType->getVarType(), "id0");
   objType->addMember(objType->getVarType(), "id1");

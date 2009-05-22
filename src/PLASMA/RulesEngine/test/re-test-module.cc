@@ -215,13 +215,13 @@ RETestEngine::RETestEngine()
 
     ObjectType* ot;
 
-    ot = new ObjectType("AllObjects","Object");
+    ot = new ObjectType("AllObjects",sch->getObjectType(Schema::rootObject()));
     // TODO:
     // ot->addTokenFactory((new TokenFactory("AllObjects.Predicate"))->getId());
     sch->registerObjectType(ot->getId());
     sch->addPredicate("AllObjects.Predicate");
 
-    ot = new ObjectType("Objects","Object");
+    ot = new ObjectType("Objects",sch->getObjectType(Schema::rootObject()));
     ot->addMember(IntDT::instance(),"m_int");
     sch->registerObjectType(ot->getId());
 

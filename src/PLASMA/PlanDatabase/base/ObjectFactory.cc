@@ -225,7 +225,7 @@ namespace EUROPA {
     , m_canMakeNewObject(canMakeNewObject)
   {
       if (!m_canMakeNewObject && m_superCallExpr==NULL) {
-          m_superCallExpr = new ExprConstructorSuperCall(objType->getParent(),std::vector<Expr*>());
+          m_superCallExpr = new ExprConstructorSuperCall(objType->getParent()->getName(),std::vector<Expr*>());
           debugMsg("InterpretedObjectFactory:InterpretedObjectFactory","created default super call for object factory:" << signature.c_str());
       }
   }

@@ -22,7 +22,7 @@ typedef Id<ObjectType> ObjectTypeId;
 class ObjectType
 {
 public:
-    ObjectType(const char* name, const char* parentClass, bool isNative=false);
+    ObjectType(const char* name, const ObjectTypeId& parent, bool isNative=false);
     virtual ~ObjectType();
 
     const ObjectTypeId& getId() const;
@@ -30,7 +30,7 @@ public:
     const DataTypeId& getVarType() const; // Data type for a variable that holds a reference to an object
 
     virtual const LabelStr& getName() const;
-    virtual const LabelStr& getParent() const;
+    virtual const ObjectTypeId& getParent() const;
     virtual bool isNative() const;
 
     virtual void addMember(const DataTypeId& type, const char* name); // TODO: use DataType instead
@@ -51,7 +51,7 @@ protected:
     ObjectTypeId m_id;
     DataTypeId m_varType;
     LabelStr m_name;
-    LabelStr m_parent;
+    ObjectTypeId m_parent;
     bool m_isNative;
     std::map<double,ObjectFactoryId> m_objectFactories;
     std::map<double,TokenFactoryId> m_tokenFactories;

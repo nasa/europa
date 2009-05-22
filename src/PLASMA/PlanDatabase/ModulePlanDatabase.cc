@@ -71,10 +71,10 @@ namespace EUROPA {
       ObjectType* ot;
       const char* rootObjType = Schema::rootObject().c_str();
 
-      ot = new ObjectType(rootObjType,"",true /*isNative*/);
+      ot = new ObjectType(rootObjType,ObjectTypeId::noId(),true /*isNative*/);
       schema->registerObjectType(ot->getId());
 
-      ot = new ObjectType("Timeline",rootObjType,true /*isNative*/);
+      ot = new ObjectType("Timeline",ot->getId(),true /*isNative*/);
       ot->addObjectFactory((new TimelineObjectFactory(ot->getId()))->getId());
       schema->registerObjectType(ot->getId());
 

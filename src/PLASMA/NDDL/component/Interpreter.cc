@@ -890,7 +890,7 @@ namespace EUROPA {
     {
         // TODO: cache this?
         // TODO: drop planDb parameter, ObjectType must be able to answer this without reference to schema
-        TokenFactoryId parentFactory = planDb->getSchema()->getParentTokenFactory(getSignature(), m_objType->getParent());
+        TokenFactoryId parentFactory = planDb->getSchema()->getParentTokenFactory(getSignature(), m_objType->getParent()->getName());
         return parentFactory;
     }
 

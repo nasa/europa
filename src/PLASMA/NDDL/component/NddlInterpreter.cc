@@ -229,14 +229,14 @@ DataTypeId NddlSymbolTable::getDataType(const char* name) const
 
 ObjectTypeId NddlSymbolTable::getObjectType(const char* name) const
 {
-    SchemaId s = ((Schema*)getElement("Schema"))->getId();
+    SchemaId s = ((Schema*)(engine()->getComponent("Schema")))->getId();
 
     return s->getObjectType(name);
 }
 
 TokenFactoryId NddlSymbolTable::getTokenType(const char* name) const
 {
-    SchemaId s = ((Schema*)getElement("Schema"))->getId();
+    SchemaId s = ((Schema*)(engine()->getComponent("Schema")))->getId();
 
     return s->getTokenFactory(name);
 }

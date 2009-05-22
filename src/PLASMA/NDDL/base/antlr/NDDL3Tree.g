@@ -411,7 +411,11 @@ ObjectType* objType = NULL;
 		   (^('extends' superClass=IDENT { parentClass = c_str($superClass.text->chars); }))?
 		   
 		   {
-               objType = new ObjectType(newClass,parentClass);
+		       ObjectTypeId parent = CTX->SymbolTable->getObjectType(parentClass);
+		       if (parent.isNoId())
+		          reportSemanticError(CTX,"class "+std::string(parentClass)+" is undefined");
+		           
+               objType = new ObjectType(newClass,parent);
                // TODO: do this more cleanly. Needed to deal with self-reference inside class definition
                CTX->SymbolTable->getPlanDatabase()->getSchema()->declareObjectType(newClass);
                pushContext(CTX,new NddlClassSymbolTable(CTX->SymbolTable,objType));                       
@@ -514,7 +518,7 @@ constructorSuper[ObjectType* objType] returns [ExprConstructorSuperCall* result]
 			variableArgumentList[args]
 		)
 		{
-		    result = new ExprConstructorSuperCall(objType->getParent(),args);  
+		    result = new ExprConstructorSuperCall(objType->getParent()->getName(),args);  
 		}
 	;
   
@@ -603,17 +607,17 @@ rule returns [Expr* result]
 			predicateName=IDENT
 			{
                 predName = std::string(c_str($className.text->chars)) + "." + std::string(c_str($predicateName.text->chars));
-                //TokenFactoryId tt = CTX->SymbolTable->getTokenType(predName.c_str());
-                //if (tt.isNoId())
-                //    reportSemanticError(CTX,predName+" has not been declared");            
-                //pushContext(CTX,new NddlTokenSymbolTable(CTX->SymbolTable,tt));    
+                TokenFactoryId tt = CTX->SymbolTable->getTokenType(predName.c_str());
+                if (tt.isNoId())
+                    reportSemanticError(CTX,predName+" has not been declared");            
+                pushContext(CTX,new NddlTokenSymbolTable(CTX->SymbolTable,tt));    
 			}
 			ruleBlock[ruleBody]
 		)
 		{
 		    std::string source=""; // TODO: get this from the antlr parser
 		    result = new ExprRuleTypeDefinition((new InterpretedRuleFactory(predName,source,ruleBody))->getId());
-		    //popContext(CTX);
+		    popContext(CTX);
 		}
 	;
 

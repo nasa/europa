@@ -10,7 +10,7 @@
 
 namespace EUROPA {
 
-ObjectType::ObjectType(const char* name, const char* parent, bool isNative)
+ObjectType::ObjectType(const char* name, const ObjectTypeId& parent, bool isNative)
     : m_id(this)
     , m_varType((new ObjectDT(name))->getId())
     , m_name(name)
@@ -54,7 +54,7 @@ const LabelStr& ObjectType::getName() const
     return m_name;
 }
 
-const LabelStr& ObjectType::getParent() const
+const ObjectTypeId& ObjectType::getParent() const
 {
     return m_parent;
 }
@@ -94,14 +94,10 @@ const DataTypeId& ObjectType::getMemberType(const char* name) const
     if (std::string(name) == "this")
         return getVarType();
 
-    //if (m_name != Schema::rootObject()) {
-        // TODO:
-        //ObjectTypeId parent = this->getParent();
-        // return parent->getMemberType(name);
-    //}
+    if (m_parent.isId())
+        return m_parent->getMemberType(name);
 
     return DataTypeId::noId();
-
 }
 
 void ObjectType::addObjectFactory(const ObjectFactoryId& factory)
@@ -119,8 +115,9 @@ void ObjectType::addTokenFactory(const TokenFactoryId& factory)
 std::string ObjectType::toString() const
 {
     std::ostringstream os;
+    std::string extends = (m_parent.isId() ? std::string("extends ")+m_parent->getName().c_str() : "");
 
-    os << "class " << m_name.c_str() << " extends " << m_parent.c_str() << " {" << std::endl;
+    os << "class " << m_name.c_str() << " extends " << extends << " {" << std::endl;
 
     {
         std::map<std::string,DataTypeId>::const_iterator it = m_members.begin();

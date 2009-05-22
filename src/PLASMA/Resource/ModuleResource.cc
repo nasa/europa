@@ -45,10 +45,11 @@ namespace EUROPA {
       Schema* schema = (Schema*)(engine->getComponent("Schema"));
 	  new ProfilePropagator(LabelStr("Resource"), ce->getId());
 
+	  ObjectTypeId objectOT = schema->getObjectType(Schema::rootObject());
 	  ObjectType* ot;
 
       // TODO: preserve class hierarchy, all Resource types should extend Resource, not Object
-      ot = new ObjectType("Reusable","Object",true /*isNative*/);
+      ot = new ObjectType("Reusable",objectOT,true /*isNative*/);
       ot->addMember(FloatDT::instance(), "capacity");
       ot->addMember(FloatDT::instance(), "levelLimitMin");
       ot->addMember(FloatDT::instance(), "consumptionMax");
@@ -60,7 +61,7 @@ namespace EUROPA {
       ot->addTokenFactory((new ReusableUsesTokenFactory("Reusable.uses"))->getId());
       schema->registerObjectType(ot->getId());
 
-      ot = new ObjectType("CBReusable","Object",true /*isNative*/);
+      ot = new ObjectType("CBReusable",objectOT,true /*isNative*/);
       ot->addMember(FloatDT::instance(), "capacity");
       ot->addMember(FloatDT::instance(), "levelLimitMin");
       ot->addMember(FloatDT::instance(), "consumptionMax");
@@ -77,7 +78,7 @@ namespace EUROPA {
         Uses::PROPAGATOR_NAME()
       );
 
-      ot = new ObjectType("Reservoir","Object",true /*isNative*/);
+      ot = new ObjectType("Reservoir",objectOT,true /*isNative*/);
       ot->addMember(FloatDT::instance(), "initialCapacity");
       ot->addMember(FloatDT::instance(), "levelLimitMin");
       ot->addMember(FloatDT::instance(), "levelLimitMax");
@@ -93,7 +94,7 @@ namespace EUROPA {
       ot->addTokenFactory((new ReservoirConsumeTokenFactory("Reservoir.consume"))->getId());
       schema->registerObjectType(ot->getId());
 
-      ot = new ObjectType("Unary","Object",true /*isNative*/);
+      ot = new ObjectType("Unary",objectOT,true /*isNative*/);
       ot->addMember(FloatDT::instance(),"consumptionMax");
       ot->addObjectFactory((new UnaryObjectFactory(ot->getId(),"Unary"))->getId());
       ot->addObjectFactory((new UnaryObjectFactory(ot->getId(),"Unary:float"))->getId());
