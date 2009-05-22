@@ -35,6 +35,7 @@ public:
 
     virtual void addMember(const DataTypeId& type, const char* name); // TODO: use DataType instead
     virtual const std::map<std::string,DataTypeId>& getMembers() const;
+    virtual const DataTypeId& getMemberType(const char* name) const;
 
     virtual void addObjectFactory(const ObjectFactoryId& factory);
     virtual const std::map<double,ObjectFactoryId>& getObjectFactories() const;

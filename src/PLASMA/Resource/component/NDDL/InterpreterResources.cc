@@ -48,7 +48,7 @@ namespace EUROPA {
   ReusableUsesTokenFactory::ReusableUsesTokenFactory(const LabelStr& predicateName)
       : NativeTokenFactory(predicateName)
   {
-      addArg("float","quantity");
+      addArg(FloatDT::instance(),"quantity");
   }
 
   TokenId ReusableUsesTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
@@ -149,7 +149,7 @@ namespace EUROPA {
   ReservoirProduceTokenFactory::ReservoirProduceTokenFactory(const LabelStr& predicateName)
       : NativeTokenFactory(predicateName)
   {
-      addArg("float","quantity");
+      addArg(FloatDT::instance(),"quantity");
   }
 
   TokenId ReservoirProduceTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
@@ -167,7 +167,7 @@ namespace EUROPA {
   ReservoirConsumeTokenFactory::ReservoirConsumeTokenFactory(const LabelStr& predicateName)
       : NativeTokenFactory(predicateName)
   {
-      addArg("float","quantity");
+      addArg(FloatDT::instance(),"quantity");
   }
 
   TokenId ReservoirConsumeTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const

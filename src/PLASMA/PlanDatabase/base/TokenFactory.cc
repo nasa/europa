@@ -92,9 +92,31 @@ namespace EUROPA {
 
     const LabelStr& TokenFactory::getSignature() const {return m_signature;}
 
-    const std::map<LabelStr,LabelStr>& TokenFactory::getArgs() const { return m_args; }
+    const std::map<LabelStr,DataTypeId>& TokenFactory::getArgs() const { return m_args; }
 
-    void TokenFactory::addArg(const LabelStr& type, const LabelStr& name)
+    // TODO: this should live in one place only
+    static RestrictedDT StateDT("TokenStates",SymbolDT::instance(),StateDomain());
+
+    const DataTypeId& TokenFactory::getArgType(const char* argName) const
+    {
+        std::map<LabelStr,DataTypeId>::const_iterator it = m_args.find(argName);
+
+        if (it != m_args.end())
+            return it->second;
+
+        std::string name(argName);
+
+        if (name == "state")
+            return StateDT.getId();
+
+        if (name=="start" || name=="end" || name=="duration")
+            return IntDT::instance();
+
+        return DataTypeId::noId();
+    }
+
+
+    void TokenFactory::addArg(const DataTypeId& type, const LabelStr& name)
     {
         m_args[name] = type;
     }

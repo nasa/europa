@@ -121,8 +121,9 @@ namespace EUROPA {
   /*
    * ExprVarRef
    */
-  ExprVarRef::ExprVarRef(const char* varName)
+  ExprVarRef::ExprVarRef(const char* varName, const DataTypeId& type)
     : m_varName(varName)
+    , m_varType(type)
   {
     tokenize(m_varName,m_vars,".");
 
@@ -140,6 +141,11 @@ namespace EUROPA {
 
   ExprVarRef::~ExprVarRef()
   {
+  }
+
+  const DataTypeId ExprVarRef::getDataType() const
+  {
+      return m_varType;
   }
 
   DataRef ExprVarRef::eval(EvalContext& context) const

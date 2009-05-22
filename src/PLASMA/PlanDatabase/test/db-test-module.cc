@@ -126,11 +126,11 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
   public:
     IntervalTokenFactory()
       : TokenFactory(LabelStr(DEFAULT_PREDICATE)) {
-        addArg(FloatDT::NAME(), "IntervalParam");
-        addArg(IntDT::NAME(), "IntervalIntParam");
-        addArg(BoolDT::NAME(), "BoolParam");
-        addArg(StringDT::NAME(), "LabelSetParam");
-        addArg(FloatDT::NAME(), "EnumeratedParam");
+        addArg(FloatDT::instance(), "IntervalParam");
+        addArg(IntDT::instance(), "IntervalIntParam");
+        addArg(BoolDT::instance(), "BoolParam");
+        addArg(StringDT::instance(), "LabelSetParam");
+        addArg(FloatDT::instance(), "EnumeratedParam");
     }
   private:
     TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false, bool isFact = false) const {

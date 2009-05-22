@@ -93,7 +93,7 @@ namespace EUROPA {
     }
     else if (strcmp(element->Value(),"id") == 0) {
       const char* varName = element->Attribute("name");
-      return new ExprVarRef(varName);
+      return new ExprVarRef(varName,VoidDT::instance());
     }
     else
       check_runtime_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + element->Value() + ", expected constant(value,symbol,interval) or id element");
@@ -199,7 +199,7 @@ namespace EUROPA {
 
               debugMsg("NddlXmlInterpreter:defineConstructor",
                       "Adding an assignment to " << lhs);
-              constructorBody.push_back(new ExprAssignment(new ExprVarRef(lhs),rhs));
+              constructorBody.push_back(new ExprAssignment(new ExprVarRef(lhs,VoidDT::instance()),rhs));
           }
           else
               check_runtime_error(ALWAYS_FAILS,std::string("Unexpected xml element:") + child->Value());
@@ -244,19 +244,20 @@ namespace EUROPA {
               if(!predArg->NoChildren())
                   pInitValue = valueToExpr(predArg->FirstChildElement());
 
-              parameterDecls[pName] = new ExprVarDeclaration(pName.c_str(),getCESchema()->getDataType(pType.c_str()),pInitValue,true /*canBeSpecified*/);
-              tokenFactory->addArg(pType,pName);
+              DataTypeId parameterDT = getCESchema()->getDataType(pType.c_str());
+              parameterDecls[pName] = new ExprVarDeclaration(pName.c_str(),parameterDT,pInitValue,true /*canBeSpecified*/);
+              tokenFactory->addArg(parameterDT,pName);
               tokenFactory->addBodyExpr(parameterDecls[pName]);
           }
           else if (strcmp(predArg->Value(),"assign") == 0) {
-              //const char* type = safeStr(predArg->Attribute("type")); // TODO: use type?
+              const char* type = safeStr(predArg->Attribute("type"));
               const char* name = safeStr(predArg->Attribute("name"));
               bool inherited = (predArg->Attribute("inherited") != NULL ? true : false);
 
               if (inherited) {
                   tokenFactory->addBodyExpr(
                       new ExprAssignment(
-                          new ExprVarRef(name),
+                          new ExprVarRef(name,getCESchema()->getDataType(type)),
                           valueToExpr(predArg->FirstChildElement())
                       )
                   );

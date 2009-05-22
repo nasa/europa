@@ -51,6 +51,19 @@ static DataRef evalExpr(pNDDL3Tree treeWalker,Expr* expr)
     return expr->eval(*(treeWalker->SymbolTable));
 }
 
+static void pushContext(pNDDL3Tree treeWalker, NddlSymbolTable* st)
+{
+    treeWalker->SymbolTable = st; 
+}
+
+static void popContext(pNDDL3Tree treeWalker)
+{
+    NddlSymbolTable* st = treeWalker->SymbolTable; 
+    treeWalker->SymbolTable = st->getParentST();
+    delete st;                                  
+    check_error(treeWalker->SymbolTable != NULL);
+}
+
 }
 
 @apifuncs
@@ -393,31 +406,32 @@ const char* parentClass = "Object";
 ObjectType* objType = NULL;
 }
 	:	^('class'
-                   className=IDENT { newClass = c_str($className.text->chars); }
+           className=IDENT { newClass = c_str($className.text->chars); }
                    
 		   (^('extends' superClass=IDENT { parentClass = c_str($superClass.text->chars); }))?
 		   
-                   {
-                       objType = new ObjectType(newClass,parentClass);
-                       // TODO: do this more cleanly. Needed to deal with self-reference inside class definition
-                       CTX->SymbolTable->getPlanDatabase()->getSchema()->declareObjectType(newClass);
-                       CTX->SymbolTable = new NddlClassSymbolTable(CTX->SymbolTable,objType);                       
-                   }
+		   {
+               objType = new ObjectType(newClass,parentClass);
+               // TODO: do this more cleanly. Needed to deal with self-reference inside class definition
+               CTX->SymbolTable->getPlanDatabase()->getSchema()->declareObjectType(newClass);
+               pushContext(CTX,new NddlClassSymbolTable(CTX->SymbolTable,objType));                       
+           }
                    
-                   (
-		       classBlock[objType] { result = new ExprObjectTypeDefinition(objType->getId()); } 
+           (
+		       classBlock[objType] 
+		       { 
+		           result = new ExprObjectTypeDefinition(objType->getId()); 
+		       } 
 		       | ';' 
 		         { 
 		             result = new ExprObjectTypeDeclaration(objType->getName());
 		             delete objType; 
 		         }
-	           )
+	       )
+	       {
+               popContext(CTX);            
+	       }
 		)
-		{
-		    NddlSymbolTable* st = CTX->SymbolTable; 
-		    CTX->SymbolTable=st->getParentST();
-		    delete st;                       		    
-		}
   ;
 
 classBlock[ObjectType* objType]
@@ -449,6 +463,7 @@ constructor[ObjectType* objType]
     std::vector<std::string> argNames;
     std::vector<std::string> argTypes;
     std::vector<Expr*> body;
+    pushContext(CTX,new NddlSymbolTable(CTX->SymbolTable));                       
 }
 	:	^(CONSTRUCTOR
 			name=IDENT
@@ -473,6 +488,8 @@ constructor[ObjectType* objType]
                             body)
                         )->getId()
                     );
+                    
+            popContext(CTX);
 		}
 	;
 
@@ -482,8 +499,10 @@ constructorArgument[std::vector<std::string>& argNames,std::vector<std::string>&
 			argType=type
 		)
 		{
-		    argNames.push_back(std::string(c_str($argName.text->chars)));
+		    const char* varName = c_str($argName.text->chars);
+		    argNames.push_back(varName);
 		    argTypes.push_back(argType->getName().toString());
+		    CTX->SymbolTable->addLocalVar(varName,argType->getId());
 		}
 	;
 
@@ -518,27 +537,29 @@ predicate[ObjectType* objType]
 			pred=IDENT 
 			{ 
 			    predName = objType->getName().toString() + "." + c_str($pred.text->chars);   
-			    tokenFactory = new InterpretedTokenFactory(predName,objType->getId()); 
+			    tokenFactory = new InterpretedTokenFactory(predName,objType->getId());
+			    pushContext(CTX,new NddlTokenSymbolTable(CTX->SymbolTable,tokenFactory->getId())); 
 			}
 			predicateStatements[tokenFactory]
 		)
 		{
-                    objType->addTokenFactory(tokenFactory->getId());
+            objType->addTokenFactory(tokenFactory->getId());
+            popContext(CTX);
 		}
 	;
 
 // TODO: allow assignments to inherited parameters
 predicateStatements[InterpretedTokenFactory* tokenFactory]
 	:	^('{'
-		      (
-		        ( child=predicateParameter[tokenFactory] 
-                        | child=predicateParameterAssignment 
-			| child=standardConstraint 
-			)
-			{
-			    tokenFactory->addBodyExpr(child);
-			}
-		      )*
+            (
+                ( child=predicateParameter[tokenFactory] 
+                | child=predicateParameterAssignment
+                | child=standardConstraint 
+                )
+                {
+                    tokenFactory->addBodyExpr(child);
+                }
+		    )*
 		)
 	;
 	
@@ -550,7 +571,7 @@ predicateParameter[InterpretedTokenFactory* tokenFactory] returns [Expr* result]
             const std::vector<Expr*>& vars=child->getChildren();
             for (unsigned int i=0;i<vars.size();i++) {
                 ExprVarDeclaration* vd = dynamic_cast<ExprVarDeclaration*>(vars[i]);
-                tokenFactory->addArg(vd->getDataType()->getName(),vd->getName());
+                tokenFactory->addArg(vd->getDataType(),vd->getName());
             }
             result = child;            
         }
@@ -575,16 +596,24 @@ standardConstraint returns [Expr* result]
 rule returns [Expr* result]
 @init {
     std::vector<Expr*> ruleBody;
+    std::string predName;
 }
  	:	^('::'
 			className=IDENT
 			predicateName=IDENT
+			{
+                predName = std::string(c_str($className.text->chars)) + "." + std::string(c_str($predicateName.text->chars));
+                //TokenFactoryId tt = CTX->SymbolTable->getTokenType(predName.c_str());
+                //if (tt.isNoId())
+                //    reportSemanticError(CTX,predName+" has not been declared");            
+                //pushContext(CTX,new NddlTokenSymbolTable(CTX->SymbolTable,tt));    
+			}
 			ruleBlock[ruleBody]
 		)
 		{
-		    std::string predName = std::string(c_str($className.text->chars)) + "." + std::string(c_str($predicateName.text->chars));
 		    std::string source=""; // TODO: get this from the antlr parser
 		    result = new ExprRuleTypeDefinition((new InterpretedRuleFactory(predName,source,ruleBody))->getId());
+		    //popContext(CTX);
 		}
 	;
 
@@ -724,8 +753,13 @@ qualified returns [Expr* result]
                // TODO!!: do type checking at each "."
               if (CTX->SymbolTable->isEnumValue(varName.c_str()))
                   result = CTX->SymbolTable->makeEnumRef(varName.c_str());
-               else  
-                   result = new ExprVarRef(varName.c_str());
+               else {
+                   std::string errorMsg;
+                   DataTypeId dt; // = CTX->SymbolTable->getTypeForVar(varName.c_str(),errorMsg);  
+                   //if (dt.isNoId())
+                   //    reportSemanticError(CTX,errorMsg);
+                   result = new ExprVarRef(varName.c_str(),dt);
+               }
            }
         ;
         

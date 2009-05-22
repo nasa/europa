@@ -84,6 +84,26 @@ void ObjectType::addMember(const DataTypeId& type, const char* name)
     m_members[name] = type;
 }
 
+const DataTypeId& ObjectType::getMemberType(const char* name) const
+{
+    std::map<std::string,DataTypeId>::const_iterator it = m_members.find(name);
+
+    if (it != m_members.end())
+        return it->second;
+
+    if (std::string(name) == "this")
+        return getVarType();
+
+    //if (m_name != Schema::rootObject()) {
+        // TODO:
+        //ObjectTypeId parent = this->getParent();
+        // return parent->getMemberType(name);
+    //}
+
+    return DataTypeId::noId();
+
+}
+
 void ObjectType::addObjectFactory(const ObjectFactoryId& factory)
 {
     // TODO: allow redefinition of old one
@@ -126,9 +146,9 @@ std::string ObjectType::toString() const
         for(;it != m_tokenFactories.end(); ++it) {
             TokenFactoryId tokenFactory = it->second;
             os << "    " << tokenFactory->getSignature().c_str();
-            std::map<LabelStr,LabelStr>::const_iterator paramIt = tokenFactory->getArgs().begin();
+            std::map<LabelStr,DataTypeId>::const_iterator paramIt = tokenFactory->getArgs().begin();
             for(;paramIt != tokenFactory->getArgs().end();++paramIt)
-                os<< " " << paramIt->second.c_str() /*type*/ << "->" << paramIt->first.c_str()/*name*/;
+                os<< " " << paramIt->second->getName().c_str() /*type*/ << "->" << paramIt->first.c_str()/*name*/;
             os << std::endl;
         }
     }

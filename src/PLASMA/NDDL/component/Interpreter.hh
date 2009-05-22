@@ -65,14 +65,16 @@ namespace EUROPA {
   class ExprVarRef : public Expr
   {
   	public:
-  	    ExprVarRef(const char* name);
+  	    ExprVarRef(const char* name, const DataTypeId& type);
   	    virtual ~ExprVarRef();
 
   	    virtual DataRef eval(EvalContext& context) const;
+        virtual const DataTypeId getDataType() const;
   	    virtual std::string toString() const;
 
   	protected:
   	    std::string m_varName;
+  	    DataTypeId m_varType;
   	    std::string m_parentName;
   	    std::vector<std::string> m_vars;
   };

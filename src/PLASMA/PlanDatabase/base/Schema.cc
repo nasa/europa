@@ -696,9 +696,9 @@ namespace EUROPA {
               LabelStr predName = tokenFactory->getSignature();
 
               addPredicate(predName.c_str());
-              std::map<LabelStr,LabelStr>::const_iterator paramIt = tokenFactory->getArgs().begin();
+              std::map<LabelStr,DataTypeId>::const_iterator paramIt = tokenFactory->getArgs().begin();
               for(;paramIt != tokenFactory->getArgs().end();++paramIt)
-                  addMember(predName.c_str(), paramIt->second /*type*/, paramIt->first/*name*/);
+                  addMember(predName.c_str(), paramIt->second->getName() /*type*/, paramIt->first/*name*/);
 
               registerTokenFactory(it->second);
           }

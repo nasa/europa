@@ -64,10 +64,11 @@ namespace EUROPA {
 
     virtual ~TokenFactory();
 
-    void addArg(const LabelStr& type, const LabelStr& name);
+    void addArg(const DataTypeId& type, const LabelStr& name);
 
     const LabelStr& getPredicateName() const;
-    const std::map<LabelStr,LabelStr>& getArgs() const;
+    const std::map<LabelStr,DataTypeId>& getArgs() const;
+    const DataTypeId& getArgType(const char* argName) const;
 
     const TokenFactoryId& getId() const;
 
@@ -94,7 +95,7 @@ namespace EUROPA {
     TokenFactoryId m_id;
     LabelStr m_signature;
     LabelStr m_predicateName;
-    std::map<LabelStr,LabelStr> m_args;
+    std::map<LabelStr,DataTypeId> m_args;
   };
 }
 

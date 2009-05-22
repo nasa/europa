@@ -15,6 +15,7 @@
 #include "antlr3exception.h"
 
 #include "Debug.hh"
+#include "Utils.hh"
 
 namespace EUROPA {
 
@@ -226,6 +227,124 @@ DataTypeId NddlSymbolTable::getDataType(const char* name) const
     return DataTypeId::noId();
 }
 
+ObjectTypeId NddlSymbolTable::getObjectType(const char* name) const
+{
+    SchemaId s = ((Schema*)getElement("Schema"))->getId();
+
+    return s->getObjectType(name);
+}
+
+TokenFactoryId NddlSymbolTable::getTokenType(const char* name) const
+{
+    SchemaId s = ((Schema*)getElement("Schema"))->getId();
+
+    return s->getTokenFactory(name);
+}
+
+
+void NddlSymbolTable::addLocalVar(const char* name,const DataTypeId& type)
+{
+    m_localVars[name]=type;
+}
+
+DataTypeId NddlSymbolTable::getTypeForVar(const char* varName)
+{
+    if (m_localVars.find(varName) != m_localVars.end())
+        return m_localVars[varName];
+
+    if (getPlanDatabase()->isGlobalVariable(varName))
+        return getPlanDatabase()->getGlobalVariable(varName)->getDataType();
+
+    if (m_parentST != NULL)
+        return m_parentST->getTypeForVar(varName);
+
+    return DataTypeId::noId();
+}
+
+DataTypeId NddlSymbolTable::getTypeForVar(const char* varName,std::string& errorMsg)
+{
+    std::string parentName;
+    std::vector<std::string> vars;
+    std::string fullName(varName);
+    tokenize(fullName,vars,".");
+
+    if (vars.size() > 1) {
+      parentName = vars[0];
+      fullName = fullName.substr(parentName.length()+1);
+      vars.erase(vars.begin());
+      debugMsg("NddlSymbolTable::getTypeForVar","Split " << varName << " into " << parentName << " and " << varName);
+    }
+    else {
+      parentName = "";
+      debugMsg("NddlSymbolTable::getTypeForVar","Didn't split " << varName);
+    }
+
+    DataTypeId dt;
+
+    if (parentName == "") {
+        dt = getTypeForVar(varName);
+        if (dt.isNoId()) {
+            // We failed to find a variable, let's try to find a token
+            TokenFactoryId tf = getTypeForToken(parentName.c_str());
+
+            if (tf.isId())
+                dt =  FloatDT::instance(); // TODO : return data type for state var?
+            else
+                errorMsg = fullName + " is not defined";
+        }
+
+        return dt;
+    }
+    else {
+        TokenFactoryId tf = getTypeForToken(parentName.c_str());
+        if (tf.isNoId()) {
+            dt = getTypeForVar(parentName.c_str(),errorMsg);
+            if (dt.isNoId())
+                return dt;
+        }
+
+        std::string curVarName=vars[0];
+        unsigned int idx = 0;
+
+        if (tf.isId()) {
+            dt = tf->getArgType(curVarName.c_str());
+            if (dt.isNoId()) {
+                errorMsg = tf->getPredicateName().toString() + " doesn't have a parameter called "+curVarName;
+                return dt;
+            }
+            idx++;
+        }
+
+        for (;idx<vars.size();idx++) {
+            std::string curVarType = dt->getName().toString();
+
+            ObjectTypeId ot = getObjectType(dt->getName().c_str());
+            if (ot.isNoId()) {
+                errorMsg = curVarName+"("+curVarType+") doesn't have a member called "+vars[idx];
+                return DataTypeId::noId();
+            }
+
+            dt = ot->getMemberType(vars[idx].c_str());
+            if (ot.isNoId()) {
+                errorMsg = curVarName+"("+curVarType+") doesn't have a member called "+vars[idx];
+                return DataTypeId::noId();
+            }
+
+            curVarName = vars[idx];
+        }
+    }
+
+    return dt;
+
+}
+
+TokenFactoryId NddlSymbolTable::getTypeForToken(const char* name)
+{
+
+    return TokenFactoryId::noId();
+}
+
+
 AbstractDomain* NddlSymbolTable::makeNumericDomainFromLiteral(const std::string& type,
                                                               const std::string& value)
 {
@@ -298,6 +417,42 @@ DataTypeId NddlClassSymbolTable::getDataType(const char* name) const
     return NddlSymbolTable::getDataType(name);
 }
 
+ObjectTypeId NddlClassSymbolTable::getObjectType(const char* name) const
+{
+    if (m_objectType->getName().toString()==name)
+        return m_objectType->getId();
+
+    return NddlSymbolTable::getObjectType(name);
+}
+
+DataTypeId NddlClassSymbolTable::getTypeForVar(const char* varName)
+{
+    DataTypeId dt = m_objectType->getMemberType(varName);
+    if (dt.isId())
+        return dt;
+
+    return NddlSymbolTable::getTypeForVar(varName);
+}
+
+
+NddlTokenSymbolTable::NddlTokenSymbolTable(NddlSymbolTable* parent, const TokenFactoryId& tf)
+    : NddlSymbolTable(parent)
+    , m_tokenType(tf)
+{
+}
+
+NddlTokenSymbolTable::~NddlTokenSymbolTable()
+{
+}
+
+DataTypeId NddlTokenSymbolTable::getTypeForVar(const char* varName)
+{
+    DataTypeId dt = m_tokenType->getArgType(varName);
+    if (dt.isId())
+        return dt;
+
+    return NddlSymbolTable::getTypeForVar(varName);
+}
 
 NddlToASTInterpreter::NddlToASTInterpreter(EngineId& engine)
     : NddlInterpreter(engine)

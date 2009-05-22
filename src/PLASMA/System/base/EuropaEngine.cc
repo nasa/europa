@@ -75,9 +75,9 @@ namespace EUROPA {
       check_error(txSource != NULL, "NULL transaction source provided.");
 
       static bool isFile = true;
-      executeScript(language,txSource,isFile);
+      std::string result = executeScript(language,txSource,isFile);
 
-      return getConstraintEnginePtr()->constraintConsistent();
+      return (result.size()==0 && getConstraintEnginePtr()->constraintConsistent());
     }
 
     void EuropaEngine::write(std::ostream& os) const
