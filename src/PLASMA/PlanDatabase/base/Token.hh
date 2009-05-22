@@ -61,7 +61,7 @@ namespace EUROPA {
     const TokenId& getId() const;
 
     /**
-     * @brief Get the name (in this case is the predicate name).
+     * @brief Get the name
      */
     const LabelStr& getName() const;
 
@@ -488,6 +488,7 @@ namespace EUROPA {
     bool removeMergedToken(const TokenId& token);
 
     TokenId m_id;
+    LabelStr m_name;
     TokenId m_master;
     LabelStr m_relation;
     LabelStr m_baseObjectType;

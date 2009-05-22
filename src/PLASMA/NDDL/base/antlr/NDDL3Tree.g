@@ -542,7 +542,7 @@ predicate[ObjectType* objType]
 			{ 
 			    predName = objType->getName().toString() + "." + c_str($pred.text->chars);   
 			    tokenFactory = new InterpretedTokenFactory(predName,objType->getId());
-			    pushContext(CTX,new NddlTokenSymbolTable(CTX->SymbolTable,tokenFactory->getId())); 
+			    pushContext(CTX,new NddlTokenSymbolTable(CTX->SymbolTable,tokenFactory->getId(),objType->getId())); 
 			}
 			predicateStatements[tokenFactory]
 		)
@@ -606,11 +606,18 @@ rule returns [Expr* result]
 			className=IDENT
 			predicateName=IDENT
 			{
-                predName = std::string(c_str($className.text->chars)) + "." + std::string(c_str($predicateName.text->chars));
+		        std::string clazz = c_str($className.text->chars);
+			    ObjectTypeId ot = CTX->SymbolTable->getObjectType(clazz.c_str());
+			    if (ot.isNoId())
+			        reportSemanticError(CTX,"class "+clazz+" has not been declared");
+			        
+                predName = clazz + "." + std::string(c_str($predicateName.text->chars));
+                debugMsg("NddlInterpreter","Parsing rule for:" << predName);
                 TokenFactoryId tt = CTX->SymbolTable->getTokenType(predName.c_str());
                 if (tt.isNoId())
                     reportSemanticError(CTX,predName+" has not been declared");            
-                pushContext(CTX,new NddlTokenSymbolTable(CTX->SymbolTable,tt));    
+                
+                pushContext(CTX,new NddlTokenSymbolTable(CTX->SymbolTable,tt,ot));    
 			}
 			ruleBlock[ruleBody]
 		)
@@ -726,55 +733,60 @@ predicateInstanceList[std::vector<PredicateInstanceRef*>& instances]
 			(child=predicateInstance { instances.push_back(child); })*
 		)
 		|	i=IDENT 
-		        { instances.push_back(new PredicateInstanceRef(NULL,c_str($i.text->chars))); } // TODO: check predicate type and pass it along
+		        { instances.push_back(new PredicateInstanceRef(NULL,c_str($i.text->chars))); } 
 	;
 
 predicateInstance returns [PredicateInstanceRef* pi]
 @init {
     const char* name = NULL;
+    std::string tokenStr;
+    TokenFactoryId tokenType;
 }
-	:	^(PREDICATE_INSTANCE qt=qualifiedToken (i=IDENT { name = c_str($i.text->chars); })?)
+	:	^(PREDICATE_INSTANCE qualifiedToken[tokenStr,tokenType] (i=IDENT { name = c_str($i.text->chars); })?)
 	        {
-	            pi = new PredicateInstanceRef(qt->toString().c_str(),name);
-	            delete qt;
+	            pi = new PredicateInstanceRef(tokenStr.c_str(),name);
+	            if (name != NULL)
+	                CTX->SymbolTable->addLocalToken(name,tokenType);
 	        }
 	;
 	
+qualifiedString[std::string& result]
+    :
+    (    name=identifier { result+=c_str($name.text->chars); }                 
+    |    ^('.' prefix=qualifiedString[result] 
+               (q=IDENT { result += std::string(".") + c_str($q.text->chars); })+)
+           )
+    ;
+    	
 qualified returns [Expr* result]
 @init {
     std::string varName;
 }
-        :  (      name=identifier { varName=c_str($name.text->chars); }                 
-           |       ^('.' prefix=qualified 
-                         { 
-                             // TODO: Hack!, this is brittle
-                             varName = prefix->toString(); 
-                             delete prefix; 
-                         } 
-                         (q=IDENT { varName += std::string(".") + c_str($q.text->chars); })+)
-           )
-           {
-               // TODO!!: do type checking at each "."
-              if (CTX->SymbolTable->isEnumValue(varName.c_str()))
-                  result = CTX->SymbolTable->makeEnumRef(varName.c_str());
-               else {
-                   std::string errorMsg;
-                   DataTypeId dt; // = CTX->SymbolTable->getTypeForVar(varName.c_str(),errorMsg);  
-                   //if (dt.isNoId())
-                   //    reportSemanticError(CTX,errorMsg);
-                   result = new ExprVarRef(varName.c_str(),dt);
-               }
-           }
-        ;
+    :   qualifiedString[varName]
+        {
+            if (CTX->SymbolTable->isEnumValue(varName.c_str()))
+                result = CTX->SymbolTable->makeEnumRef(varName.c_str());
+            else {
+                std::string errorMsg;
+                DataTypeId dt; //= CTX->SymbolTable->getTypeForVar(varName.c_str(),errorMsg);  
+                // TODO!!: do type checking at each "."
+                //if (dt.isNoId())
+                //    reportSemanticError(CTX,errorMsg);
+                result = new ExprVarRef(varName.c_str(),dt);
+            }
+        }
+    ;
         
-qualifiedToken returns [Expr* result]
-        :       e=qualified
-                {
-                    // TODO: type checking !
-                    result = e;
-                }
-        ;
-        
+qualifiedToken[std::string& tokenStr, TokenFactoryId& tokenType]
+    :   qualifiedString[tokenStr]  
+        {
+            std::string errorMsg;
+            tokenType = CTX->SymbolTable->getTypeForToken(tokenStr.c_str(),errorMsg);  
+            if (tokenType.isNoId())
+               reportSemanticError(CTX,errorMsg);
+        }
+    ;
+            
 temporalRelation
         :       'after'
         |       'any'

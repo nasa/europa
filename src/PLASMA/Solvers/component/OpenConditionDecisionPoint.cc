@@ -7,14 +7,14 @@
 namespace EUROPA {
   namespace SOLVERS {
 
-    bool OpenConditionDecisionPoint::test(const EntityId& entity){ 
+    bool OpenConditionDecisionPoint::test(const EntityId& entity){
       return(TokenId::convertable(entity) || TokenId(entity)->isInactive());
     }
 
-    OpenConditionDecisionPoint::OpenConditionDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData, 
+    OpenConditionDecisionPoint::OpenConditionDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData,
                                                            const LabelStr& explanation)
       : DecisionPoint(client, flawedToken->getKey(), explanation),
-        m_flawedToken(flawedToken), 
+        m_flawedToken(flawedToken),
         m_mergeCount(0),
         m_choiceCount(0),
         m_mergeIndex(0),
@@ -85,7 +85,7 @@ namespace EUROPA {
     }
 
     void OpenConditionDecisionPoint::handleExecute() {
-      checkError(m_choiceIndex < m_choiceCount, 
+      checkError(m_choiceIndex < m_choiceCount,
                  "Tried to execute past available choices:" << m_choiceIndex << ">=" << m_choiceCount);
       if(m_choices[m_choiceIndex] == Token::ACTIVE) {
         debugMsg("SolverDecisionPoint:handleExecute", "For " << m_flawedToken->getPredicateName().toString() << "(" <<
@@ -96,12 +96,12 @@ namespace EUROPA {
         checkError(m_mergeIndex < m_mergeCount, "Tried to merge past available compatible tokens.");
         TokenId activeToken = m_compatibleTokens[m_mergeIndex];
         debugMsg("SolverDecisionPoint:handleExecute", "For " << m_flawedToken->getPredicateName().toString() << "(" <<
-                 m_flawedToken->getKey() << "), assigning MERGED onto " << activeToken->getPredicateName().toString() << 
+                 m_flawedToken->getKey() << "), assigning MERGED onto " << activeToken->getPredicateName().toString() <<
                  "(" << activeToken->getKey() << ").");
         m_client->merge(m_flawedToken, activeToken);
       }
       else {
-        checkError(m_choices[m_choiceIndex] == Token::REJECTED, 
+        checkError(m_choices[m_choiceIndex] == Token::REJECTED,
                    "Expect this choice to be REJECTED instead of " + m_choices[m_choiceIndex].toString());
         debugMsg("SolverDecisionPoint:handleExecute", "For " << m_flawedToken->getPredicateName().toString() << "(" <<
                  m_flawedToken->getKey() << "), assigning REJECTED.");
@@ -128,10 +128,10 @@ namespace EUROPA {
     }
 
     std::string OpenConditionDecisionPoint::toShortString() const{
-      // This returns the last executed choice	
+      // This returns the last executed choice
       int idx = m_choiceIndex;
       std::stringstream os;
-      
+
       if(m_choices.empty()) {
 	os << "EMPTY";
       }
@@ -147,15 +147,15 @@ namespace EUROPA {
       else {
       	check_error(ALWAYS_FAIL,"Unknown choice:"+m_choices[idx].toString());
       }
-      
-      return os.str(); 	
+
+      return os.str();
     }
-    
+
     std::string OpenConditionDecisionPoint::toString() const{
       std::stringstream strStream;
-      strStream 
+      strStream
         << "TOKEN STATE:"
-        << "    TOKEN=" << m_flawedToken->getName().toString()  << "(" << m_flawedToken->getKey() << "):" 
+        << "    TOKEN=" << m_flawedToken->getPredicateName().toString()  << "(" << m_flawedToken->getKey() << "):"
         << "    OBJECT=" << Object::toString(m_flawedToken->getObject()) << ":"
         << "    CHOICES(current=" << m_choiceIndex << ")=";
 
@@ -168,7 +168,7 @@ namespace EUROPA {
         strStream << "}";
       }
 
-      if (m_flawedToken->getState()->lastDomain().isMember(Token::ACTIVE)  && 
+      if (m_flawedToken->getState()->lastDomain().isMember(Token::ACTIVE)  &&
           (!m_flawedToken->getPlanDatabase()->getConstraintEngine()->constraintConsistent() ||
            m_flawedToken->getPlanDatabase()->hasOrderingChoice(m_flawedToken)))
         strStream << " ACTIVE ";

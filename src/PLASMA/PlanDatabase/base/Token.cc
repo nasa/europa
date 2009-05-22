@@ -82,6 +82,7 @@ namespace EUROPA{
 	       bool closed)
       :Entity(),
        m_id(this),
+       m_name(predicateName), // TODO: fix this
        m_relation("none"),
        m_predicateName(predicateName),
        m_planDatabase(planDatabase) {
@@ -97,6 +98,7 @@ namespace EUROPA{
 	       bool closed)
      :Entity(),
       m_id(this),
+      m_name(predicateName), // TODO: fix this
       m_master(master),
       m_relation(relation),
       m_predicateName(predicateName),
@@ -201,6 +203,8 @@ namespace EUROPA{
   }
 
   const LabelStr& Token::getBaseObjectType() const {return m_baseObjectType;}
+
+  const LabelStr&  Token::getName() const { return m_name; }
 
   const LabelStr& Token::getPredicateName() const {return m_predicateName;}
 
@@ -858,10 +862,6 @@ namespace EUROPA{
 
   bool Token::canBeCompared(const EntityId& entity) const{
     return TokenId::convertable(entity);
-  }
-
-  const LabelStr&  Token::getName() const{
-    return m_predicateName;
   }
 
   void Token::activateInternal(){

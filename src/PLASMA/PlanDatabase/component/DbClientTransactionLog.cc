@@ -124,8 +124,8 @@ namespace EUROPA {
                               allocateXmlElement("goal"));
     TiXmlElement * instance = allocateXmlElement("predicateinstance");
     instance->SetAttribute("name", m_tokensCreated++);
-    check_error(LabelStr::isString(token->getName()));
-    instance->SetAttribute("type", token->getName().toString());
+    check_error(LabelStr::isString(token->getPredicateName()));
+    instance->SetAttribute("type", token->getPredicateName().toString());
     instance->SetAttribute("path", m_client->getPathAsString(token));
     element->LinkEndChild(instance);
     pushTransaction(element);
@@ -134,7 +134,7 @@ namespace EUROPA {
   void DbClientTransactionLog::notifyTokenDeleted(const TokenId& token,
                                                   const std::string& name) {
     TiXmlElement* element = allocateXmlElement("deletetoken");
-    element->SetAttribute("type", token->getName().toString());
+    element->SetAttribute("type", token->getPredicateName().toString());
     element->SetAttribute("path", m_client->getPathAsString(token));
     if(!name.empty())
       element->SetAttribute("name", name);

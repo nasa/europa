@@ -346,6 +346,39 @@ namespace EUROPA{
     return (m_globalVarsByName.find(varName) != m_globalVarsByName.end());
   }
 
+  void PlanDatabase::registerGlobalToken(const TokenId& t){
+    const LabelStr& name = t->getName(); /// TODO: change old name to getPredicateName()
+    checkError(!isGlobalToken(name), name.toString() << " is not unique. Can't register global token");
+    m_globalTokens.insert(t);
+    m_globalTokensByName.insert(std::pair<double, TokenId>(name, t));
+
+    checkError(isGlobalToken(name), t->toLongString() << " is not registered after all. This cannot be!.");
+    debugMsg("PlanDatabase:registerGlobalToken", "Registered " << name.toString());
+  }
+
+  void PlanDatabase::unregisterGlobalToken(const TokenId& t) {
+    const LabelStr& name = t->getName();
+    checkError(isGlobalToken(name), name.toString() << " is not a global token.");
+    m_globalTokens.erase(t);
+    m_globalTokensByName.erase(t);
+    checkError(!isGlobalToken(name), name.toString() << " failed to un-register.");
+    debugMsg("PlanDatabase:unregisterGlobalToken",
+         "Un-registered " << name.toString());
+  }
+
+  const TokenSet& PlanDatabase::getGlobalTokens() const {
+    return m_globalTokens;
+  }
+
+  const TokenId& PlanDatabase::getGlobalToken(const LabelStr& name) const{
+    checkError(isGlobalToken(name), "No global token with name='" << name.toString() << "' is registered.");
+    return m_globalTokensByName.find(name)->second;
+  }
+
+  bool PlanDatabase::isGlobalToken(const LabelStr& name) const{
+    return (m_globalTokensByName.find(name) != m_globalTokensByName.end());
+  }
+
   bool PlanDatabase::hasCompatibleTokens(const TokenId& inactiveToken){
     if(countCompatibleTokens(inactiveToken, 1) > 0)
       return true;

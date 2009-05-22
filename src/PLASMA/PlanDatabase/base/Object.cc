@@ -531,7 +531,7 @@ namespace EUROPA {
     check_error(token.isValid());
     check_error(token->isActive());
     check_error(token->getObject()->lastDomain().isMember(m_id),
-      "Cannot assign token " + token->getName().toString() + " to  object " + getName().toString() + ", it is not part of derived domain.");
+      "Cannot assign token " + token->getPredicateName().toString() + " to  object " + getName().toString() + ", it is not part of derived domain.");
 
     // Place this token on the object. We use a constraint since token assignment is done by specifying
     // the object variable. This only needs to be done once, so test first if it has already been constrained

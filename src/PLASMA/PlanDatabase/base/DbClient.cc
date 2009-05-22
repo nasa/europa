@@ -135,6 +135,8 @@ namespace EUROPA {
     check_error(token.isValid());
     checkError(token->isInactive() || token->isFact(),
 	       "Attempted to delete active, non-fact token " << token->toString());
+    if(isGlobalToken(token->getName()))
+      m_planDb->unregisterGlobalToken(token);
     publish(notifyTokenDeleted(token, name));
 
     //the keys are only recorded if logging is enabled
@@ -306,6 +308,14 @@ namespace EUROPA {
 
   bool DbClient::isGlobalVariable(const LabelStr& varName) const {
     return m_planDb->isGlobalVariable(varName);
+  }
+
+  const TokenId DbClient::getGlobalToken(const LabelStr& name) const{
+    return m_planDb->getGlobalToken(name);
+  }
+
+  bool DbClient::isGlobalToken(const LabelStr& name) const {
+    return m_planDb->isGlobalToken(name);
   }
 
   /**

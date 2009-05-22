@@ -1478,7 +1478,7 @@ namespace EUROPA {
           }
       }
 
-      debugMsg("Interpreter:InterpretedToken","Token " << token->getName().toString() << " added Parameter "
+      debugMsg("Interpreter:InterpretedToken","Token " << token->getPredicateName().toString() << " added Parameter "
               << parameter->toString() << " " << parameterName.toString());
 
       return parameter;

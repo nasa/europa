@@ -126,6 +126,12 @@ namespace EUROPA {
      */
     bool isGlobalVariable(const LabelStr& varName) const;
 
+    void registerGlobalToken(const TokenId& t);
+    void unregisterGlobalToken(const TokenId& t);
+    const TokenSet& getGlobalTokens() const;
+    const TokenId& getGlobalToken(const LabelStr& varName) const;
+    bool isGlobalToken(const LabelStr& varName) const;
+
     /**
      * @brief Test if the given inactive token has any tokens with which it can merge.
      * @param inactiveToken
@@ -410,6 +416,7 @@ namespace EUROPA {
     State m_state;
     TokenSet m_tokens;
     ObjectSet m_objects;
+    TokenSet m_globalTokens;
     ConstrainedVariableSet m_globalVariables;
     bool m_deleted;
     std::vector<PlanDatabaseListenerId> m_listeners;
@@ -421,6 +428,7 @@ namespace EUROPA {
     std::set<double> m_closedObjectTypes; /*!< The set of explicitly closed object types.
 					     If present here, it cannot be present in m_objectVariablesByType */
     std::map<double, ConstrainedVariableId> m_globalVarsByName;
+    std::map<double, TokenId> m_globalTokensByName;
     std::map<int, std::pair<TokenId, ObjectSet> > m_tokensToOrder; /*!< All tokens to order, with the object
 								     inducing the requirement stored in the set */
 
