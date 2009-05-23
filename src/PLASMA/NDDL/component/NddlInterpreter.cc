@@ -141,12 +141,12 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
     }
     catch (const std::string& error) {
         debugMsg("NddlInterpreter:error","nddl parser halted on error:" << symbolTable.getErrors());
-        std::cerr << symbolTable.getErrors() << std::endl;
+        //std::cerr << symbolTable.getErrors() << std::endl;
     }
     catch (const Error& internalError) {
         symbolTable.reportError(treeParser,internalError.getMsg());
         debugMsg("NddlInterpreter:error","nddl parser halted on error:" << symbolTable.getErrors());
-        std::cerr << symbolTable.getErrors() << std::endl;
+        //std::cerr << symbolTable.getErrors() << std::endl;
     }
 
     // Free everything
@@ -599,6 +599,15 @@ TokenFactoryId NddlTokenSymbolTable::getTokenType(const char* name) const
 
     return tt;
 }
+
+TokenFactoryId NddlTokenSymbolTable::getTypeForToken(const char* name)
+{
+    if (std::string(name)=="this")
+        return m_tokenType;
+
+    return NddlSymbolTable::getTypeForToken(name);
+}
+
 
 
 NddlToASTInterpreter::NddlToASTInterpreter(EngineId& engine)

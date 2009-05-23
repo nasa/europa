@@ -86,21 +86,24 @@ int NddlTestEngine::run(int argc, const char** argv)
   const char* language = argv[2];
 
   init();
-  run(txSource,language);
-
-  return 0;
+  return run(txSource,language);
 }
 
-void NddlTestEngine::run(const char* txSource, const char* language)
+int NddlTestEngine::run(const char* txSource, const char* language)
 {
     PlanDatabase* planDatabase = (PlanDatabase*) getComponent("PlanDatabase");
     planDatabase->getClient()->enableTransactionLogging();
 
-    executeScript(language,txSource,true /*isFile*/);
+    std::string result = executeScript(language,txSource,true /*isFile*/);
+    if (result.size()>0) {
+        std::cerr << result;
+        return -1;
+    }
 
     ConstraintEngine* ce = (ConstraintEngine*)getComponent("ConstraintEngine");
     assert(ce->constraintConsistent());
 
     PlanDatabaseWriter::write(planDatabase->getId(), std::cout);
     std::cout << "Finished\n";
+    return 0;
 }

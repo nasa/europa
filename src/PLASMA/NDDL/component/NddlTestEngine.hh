@@ -13,7 +13,7 @@ class NddlTestEngine : public EngineBase
 
 	virtual void init();
 	int run(int argc,const char **argv);
-	void run(const char* txSource, const char* language);
+	int run(const char* txSource, const char* language);
 
   protected:
 	virtual void createModules();

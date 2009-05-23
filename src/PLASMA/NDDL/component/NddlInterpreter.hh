@@ -97,6 +97,8 @@ public:
     virtual DataTypeId getTypeForVar(const char* varName);
     virtual TokenFactoryId getTokenType(const char* name) const;
 
+    virtual TokenFactoryId getTypeForToken(const char* name);
+
 protected:
     TokenFactoryId m_tokenType;
     ObjectTypeId m_objectType;

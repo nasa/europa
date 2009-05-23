@@ -131,9 +131,6 @@ const TokenFactoryId& ObjectType::getTokenFactory(const LabelStr& signature) con
 
 const TokenFactoryId& ObjectType::getParentFactory(const TokenFactoryId& factory) const
 {
-    check_error(m_tokenFactories.find((double)factory->getSignature()) != m_tokenFactories.end(),
-            "Can't find a parent for a token factory I don't own");
-
     if (m_parent.isId()) {
         std::string parentSignature = m_parent->getName().toString()+"."+factory->getPredicateName().toString();
         return m_parent->getTokenFactory(parentSignature);
