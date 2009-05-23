@@ -7,24 +7,21 @@ ModuleMain NddlMain : NddlMain.o : NDDL ;
 LocalDepends tests : run-nddl-tests ;
 
 # TODO: enable these tests asap
-# Some of these are only failed by the nddl-xml interpreter, not by the nddl interpreter.
+# These are only failed by the nddl-xml interpreter, not by the nddl interpreter.
 local failing_tests =
   csp.1.nddl 
-  csp.2.nddl
-  guards.nddl  
-  inheritance.0.nddl 
   simple-class.nddl 
-  simple-rules.nddl 
   ;
 
 local nddl_tests =   
   class-constructor.nddl  
-  composition.0.nddl  
-  constraint-test.nddl
   classes.0.tx.nddl       
   classes.1.tx.nddl   
   classes.2.tx.nddl
+  composition.0.nddl  
+  constraint-test.nddl
   csp.0.nddl 
+  csp.2.nddl
   existential.nddl        
   foreach.nddl
   foreach-exec.nddl   
@@ -35,6 +32,8 @@ local nddl_tests =
   gnats_3140.nddl 
   gnats-3231.nddl 
   gnats-3248.nddl
+  guards.nddl  
+  inheritance.0.nddl 
   inheritance.1.nddl 
   inheritance.2.nddl
   interval-constants.nddl
@@ -47,6 +46,7 @@ local nddl_tests =
   no-world.nddl 
   plasma-base.nddl        
   simple-predicate.nddl 
+  simple-rules.nddl 
   string-domain.nddl  
   subclass.nddl
   subtype-extension.nddl 

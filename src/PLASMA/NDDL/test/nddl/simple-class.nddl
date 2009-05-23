@@ -31,7 +31,7 @@ class Foo {
   m_4 = Hill;
   m_5 = 100;  // TODO: this causes a problem in the interpreter because of typedef
   m_6 = 3.78;
-  m_8 = 'Martian City';
+  m_8 = "Martian City";
  }
 }
 

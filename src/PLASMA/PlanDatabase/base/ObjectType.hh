@@ -42,6 +42,8 @@ public:
 
     virtual void addTokenFactory(const TokenFactoryId& factory);
     virtual const std::map<double,TokenFactoryId>& getTokenFactories() const;
+    virtual const TokenFactoryId& getTokenFactory(const LabelStr& signature) const;
+    virtual const TokenFactoryId& getParentFactory(const TokenFactoryId& factory) const;
 
     virtual std::string toString() const;
 

@@ -112,6 +112,36 @@ void ObjectType::addTokenFactory(const TokenFactoryId& factory)
     m_tokenFactories[(double)(factory->getSignature())] = factory;
 }
 
+const TokenFactoryId& ObjectType::getTokenFactory(const LabelStr& signature) const
+{
+    check_error(signature.getElement(0,".")==getName(),
+            "Can't look for a token factory I don't own");
+
+    std::map<double,TokenFactoryId>::const_iterator it = m_tokenFactories.find((double)signature);
+    if (it != m_tokenFactories.end())
+        return it->second;
+
+    if (m_parent.isId()) {
+        std::string parentSignature = m_parent->getName().toString()+"."+signature.getElement(1,".").toString();
+        return m_parent->getTokenFactory(parentSignature);
+    }
+
+    return TokenFactoryId::noId();
+}
+
+const TokenFactoryId& ObjectType::getParentFactory(const TokenFactoryId& factory) const
+{
+    check_error(m_tokenFactories.find((double)factory->getSignature()) != m_tokenFactories.end(),
+            "Can't find a parent for a token factory I don't own");
+
+    if (m_parent.isId()) {
+        std::string parentSignature = m_parent->getName().toString()+"."+factory->getPredicateName().toString();
+        return m_parent->getTokenFactory(parentSignature);
+    }
+
+    return TokenFactoryId::noId();
+}
+
 std::string ObjectType::toString() const
 {
     std::ostringstream os;

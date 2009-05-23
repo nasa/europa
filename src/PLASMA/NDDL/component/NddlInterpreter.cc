@@ -140,11 +140,13 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
         treeParser->nddl(treeParser);
     }
     catch (const std::string& error) {
-        debugMsg("NddlInterpreter:interpret","nddl parser halted on error:" << symbolTable.getErrors());
+        debugMsg("NddlInterpreter:error","nddl parser halted on error:" << symbolTable.getErrors());
+        std::cerr << symbolTable.getErrors() << std::endl;
     }
     catch (const Error& internalError) {
         symbolTable.reportError(treeParser,internalError.getMsg());
-        debugMsg("NddlInterpreter:interpret","nddl parser halted on error:" << symbolTable.getErrors());
+        debugMsg("NddlInterpreter:error","nddl parser halted on error:" << symbolTable.getErrors());
+        std::cerr << symbolTable.getErrors() << std::endl;
     }
 
     // Free everything

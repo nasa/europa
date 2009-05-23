@@ -89,6 +89,9 @@ namespace EUROPA {
 
     const TokenFactoryId& TokenFactory::getId() const {return m_id;}
 
+    // TODO: should probably cache this?, maybe in the constructor?
+    const TokenFactoryId& TokenFactory::getParentFactory() const { return m_objType->getParentFactory(getId()); }
+
     const LabelStr& TokenFactory::getPredicateName() const { return m_predicateName; }
 
     const LabelStr& TokenFactory::getSignature() const {return m_signature;}
@@ -115,6 +118,10 @@ namespace EUROPA {
 
         if (name=="start" || name=="end" || name=="duration")
             return IntDT::instance();
+
+        TokenFactoryId parent = getParentFactory();
+        if (parent.isId())
+            return parent->getArgType(argName);
 
         return DataTypeId::noId();
     }

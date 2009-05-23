@@ -72,6 +72,8 @@ namespace EUROPA {
 
     const TokenFactoryId& getId() const;
 
+    const TokenFactoryId& getParentFactory() const;
+
     /**
      * @brief Return the type for which this factory is registered.
      */

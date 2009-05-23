@@ -36,29 +36,29 @@ local DEFAULT_PCONFIG = "DefaultPlannerConfig.xml" ;
 local checkin-tests ;
 checkin-tests = 
 	basic-types
-        constrain-transaction
+    constrain-transaction
 	HTX.1
 	HTX.2
 	HTX.3
-        foreach-transaction
-        force-object-distribution
+    foreach-transaction
+    force-object-distribution
 	gnats_3161
-        rejection
-        ;
+    rejection
+;
 
 if ! ( "Resources" in $(NO) ) {
 checkin-tests += 
-                 better-res
-                 better-res-reservoir #need to re-write the constraints so that they produce positive consumption values
-                 k9.backtrack.moderate-transaction
-	         k9.backtrack.moderate-transaction-reservoir
-                 resource-backtrack-test
-                 resource-backtrack-test-reservoir
-		 reusable-test-transaction
-                 Rover-transaction
-                 Rover-transaction-reservoir
-		 unary-resource-test-transaction 
-		 ;
+    better-res
+    better-res-reservoir #need to re-write the constraints so that they produce positive consumption values
+    k9.backtrack.moderate-transaction
+	k9.backtrack.moderate-transaction-reservoir
+    resource-backtrack-test
+    resource-backtrack-test-reservoir
+	reusable-test-transaction
+    Rover-transaction
+    Rover-transaction-reservoir
+	unary-resource-test-transaction 
+;
 }
 
 #RunPlannerProblem <model> : <configurationFile> : <heuristicsFile> : <target that depends> ;
