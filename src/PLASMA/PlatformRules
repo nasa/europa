@@ -109,13 +109,12 @@ DEBUG_FLAGS ?= -g3 ;
 
 if $(OS) = BEOS {
   PTHREADS_LIBRARY = condvar ;
+} else if $(OS) = MINGW {
+  PTHREADS_LIBRARY = pthreadGC2 ;
+} else if $(OS) = SOLARIS {
+  PTHREADS_LIBRARY = pthread socket ;
 } else {
-  if $(OS) = MINGW {
-    PTHREADS_LIBRARY = pthreadGC2 ;
-  }
-  else {
-    PTHREADS_LIBRARY = pthread ;
-  }
+  PTHREADS_LIBRARY = pthread ;
 }
 
 # SUFSHARE = suffix for shared libraries
@@ -224,7 +223,8 @@ if $(OS) = MACOSX {
 }
 
 if $(OS) = SOLARIS {
-  LINKFLAGS += -Wl,-L/usr/local/lib ;
+  LINKFLAGS += -Wl,-L/usr/local/lib -L/usr/lib ;
+  LINKLIBS += -lsocket -lpthread ;
 }
 
 if $(OS) = BEOS {

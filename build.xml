@@ -19,6 +19,8 @@
     </exec>
   	
     <property name="europa.version" value="2.1.2"/> 	
+    <property name="local.env.PLASMA_HOME" value="${basedir}"/>
+    <property name="local.env.EUROPA_HOME" value="${local.env.PLASMA_HOME}/dist/europa"/>
 
     <!-- load overrides -->
     <property file="${user.home}/.ant.plasma.properties"/>
@@ -35,6 +37,7 @@
     	</else>
     </if>	
   	
+
     <if>
       <or>
         <contains string="${uname.s}" substring="Linux" casesensitive="false"/>
@@ -108,14 +111,13 @@
         <contains string="${uname.s}" substring="SunOS" casesensitive="false"/>
         <then>
           <property name="local.os" value="solaris"/>
+	  <property name="local.env.LD_LIBRARY_PATH.value" value="${local.env.PLASMA_HOME}/build/lib:${env.LD_LIBRARY_PATH}"/>
       	</then>
       </elseif>
     </if>
     <echo message="Running as a ${local.os} build."/>
   	
     <property name="local.env.LD_LIBRARY_PATH.name" value="LD_LIBRARY_PATH"/>
-    <property name="local.env.PLASMA_HOME" value="${basedir}"/>
-    <property name="local.env.EUROPA_HOME" value="${local.env.PLASMA_HOME}/dist/europa"/>
     <property name="dir.plasma" value="${basedir}"/>
     <property name="dir.src" value="src/PLASMA"/>
     <condition property="dir.planworks" value="${env.PLANWORKS_HOME}">
@@ -134,6 +136,7 @@
     <property name="jam.misc" value=""/>
     <property name="jam.args" value=""/>
     <property name="jam.opts" value="${jam.args} ${jam.misc} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries}"/>
+    <property name="local.env.LD_LIBRARY_PATH.value" value="${local.env.PLASMA_HOME}/build/lib"/>
   </target>
 
   <target name="clean" depends="init">
@@ -150,7 +153,7 @@
     <exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
       <arg line="${jam.opts} build"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
-      <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.PLASMA_HOME}/build/lib"/>
+      <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
       <!-- This is set only for Windows, but other OS don't care anyway -->
       <env key="CYG_JAVA_HOME" value="${local.env.CYG_JAVA_HOME}" />
     </exec>
@@ -189,7 +192,7 @@
     <exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
       <arg line="${jam.opts} ${jam.target}"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
-      <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.PLASMA_HOME}/build/lib"/>
+      <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
       <!-- This is set only for Windows, but other OS don't care anyway -->
       <env key="CYG_JAVA_HOME" value="${local.env.CYG_JAVA_HOME}" />
     </exec>
@@ -199,7 +202,7 @@
     <exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
       <arg line="${jam.opts} run-all-tests"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
-      <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.PLASMA_HOME}/build/lib"/>
+      <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
     </exec>
   </target>
 
@@ -351,28 +354,27 @@
           <arg line="makeproject MakeProjectTest ${basedir}/dist/europa"/>
       	  <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
       </exec>
-  	  <if>
-        <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
-  	  	<then>
-            <exec executable="cygpath" outputproperty="testdist.europa.home.tmp">
-               <arg value="--windows"/>
-               <arg value="${local.env.EUROPA_HOME}"/>
-            </exec>
-  	  		<propertyregex property="testdist.europa.home" input="${testdist.europa.home.tmp}"
-  	  			regexp="\\" replace="/" global="true" />
-  		</then>
-  	  </if>
-	  <property name="testdist.europa.home" value="${local.env.EUROPA_HOME}"/>
+      <if>
+          <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
+  	  <then>
+              <exec executable="cygpath" outputproperty="testdist.europa.home.tmp">
+	          <arg value="--windows"/>
+		  <arg value="${local.env.EUROPA_HOME}"/>
+	      </exec>
+  	      <propertyregex property="testdist.europa.home" input="${testdist.europa.home.tmp}" regexp="\\" replace="/" global="true" />
+          </then>
+      </if>
+      <property name="testdist.europa.home" value="${local.env.EUROPA_HOME}"/>
       <exec executable="make" dir="${basedir}/dist/europa/MakeProjectTest" failonerror="true">
           <arg line="${run-example-cpp.mode}"/>
           <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
           <env key="EUROPA_JHOME" value="${testdist.europa.home}"/>
-          <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.EUROPA_HOME}/lib"/>
+          <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
       </exec>
       <exec executable="ant" dir="${basedir}/dist/europa/MakeProjectTest" failonerror="true">
           <arg line="-Dproject.bsh.script=Batch.bsh -Dproject.mode=${run-example-java.mode}"/>
           <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
-          <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.EUROPA_HOME}/lib"/>
+          <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
       </exec>
       <delete dir="${basedir}/dist/europa/MakeProjectTest"/>
   </target>

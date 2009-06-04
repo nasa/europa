@@ -1,6 +1,4 @@
 UNAME := $(shell uname)
-
-
 OPT_FLAGS = -O3 -DEUROPA_FAST  -fno-strict-aliasing
 LD_FLAGS = -O3  -fno-strict-aliasing
 
