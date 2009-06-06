@@ -154,11 +154,28 @@
   <target name="test-ant" depends="init,print-env" 
       description="Debug target: Tests that this build file can call 'ant' as an executable.">
     <echo message="testing ant exec"/>
-    <exec executable="ant" dir="c:\" failonerror="true">
-      <arg line="-Dproject.bsh.script=Batch.bsh -Dproject.mode=${run-example-java.mode}"/>
-      <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
-      <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.EUROPA_HOME}/lib"/>
-    </exec>
+    <if>
+      <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
+      <then>
+        <exec executable="cmd" dir="c:\" failonerror="true">
+          <arg value="/c"/>
+          <arg value="${env.ANT_HOME}/bin/ant.bat"/>
+          <arg value="-Dproject.bsh.script=Batch.bsh"/>
+          <arg value="-Dproject.mode=${run-example-java.mode}"/>
+          <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
+          <env key="PATH" value=""/>
+          <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.EUROPA_HOME}/lib"/>
+        </exec>
+      </then>
+      <else>
+        <exec executable="ant" dir="\" failonerror="true">
+          <arg line="-Dproject.bsh.script=Batch.bsh -Dproject.mode=${run-example-java.mode}"/>
+          <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
+          <env key="PATH" value=""/>
+          <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.EUROPA_HOME}/lib"/>
+        </exec>
+      </else>
+    </if>
   </target>
 
   <target name="clean" depends="init">
@@ -377,11 +394,27 @@
 	
   <target name="run-example-java">
     <echo> Running Java example in ${basedir}/dist/europa/examples/${example.name}</echo>
-      <exec executable="ant" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
-          <arg line="-Dproject.bsh.script=Batch.bsh -Dproject.mode=${run-example-java.mode}"/>
+    <if>
+      <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
+      <then>
+        <exec executable="cmd" dir="${basedir}/dist/europa/MakeProjectTest" failonerror="true">
+          <arg value="/c"/>
+          <arg value="${env.ANT_HOME}/bin/ant.bat"/>
+          <arg value="-Dproject.bsh.script=Batch.bsh"/>
+          <arg value="-Dproject.mode=${run-example-java.mode}"/>
           <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
           <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.EUROPA_HOME}/lib"/>
-      </exec>
+        </exec>
+      </then>
+      <else>
+        <exec executable="ant" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
+          <arg value="-Dproject.bsh.script=Batch.bsh"/>
+          <arg value="-Dproject.mode=${run-example-java.mode}"/>
+          <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
+          <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.EUROPA_HOME}/lib"/>
+        </exec>
+      </else>
+    </if>
   </target>
 	
   <target name="test-makeproject" depends="init"
@@ -407,11 +440,26 @@
           <env key="EUROPA_JHOME" value="${testdist.europa.home}"/>
           <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
       </exec>
-      <exec executable="ant" dir="${basedir}/dist/europa/MakeProjectTest" failonerror="true">
-          <arg line="-Dproject.bsh.script=Batch.bsh -Dproject.mode=${run-example-java.mode}"/>
-          <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
-          <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
-      </exec>
+      <if>
+        <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
+        <then>
+          <exec executable="cmd" dir="${basedir}/dist/europa/MakeProjectTest" failonerror="true">
+            <arg value="/c"/>
+            <arg value="${env.ANT_HOME}/bin/ant.bat"/>
+            <arg value="-Dproject.bsh.script=Batch.bsh"/>
+            <arg value="-Dproject.mode=${run-example-java.mode}"/>
+            <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
+            <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
+          </exec>
+        </then>
+        <else>
+          <exec executable="ant" dir="${basedir}/dist/europa/MakeProjectTest" failonerror="true">
+            <arg line="-Dproject.bsh.script=Batch.bsh -Dproject.mode=${run-example-java.mode}"/>
+            <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
+            <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
+          </exec>
+        </else>
+      </if>
       <delete dir="${basedir}/dist/europa/MakeProjectTest"/>
   </target>
 	        
