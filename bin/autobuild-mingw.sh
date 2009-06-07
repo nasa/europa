@@ -4,9 +4,9 @@
 ##runs all possible builds and places output into files based on the build name.
 ## TODO PROFILE, SHARED is not actually in the official autobuild
 
+#windows autobuild does not build SHARED libraries
 libraries=(  \
-    SHARED \
-    STATIC
+    STATIC  
 )
 
 variants=(  \

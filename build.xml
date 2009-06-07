@@ -397,11 +397,12 @@
     <if>
       <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
       <then>
-        <exec executable="cmd" dir="${basedir}/dist/europa/MakeProjectTest" failonerror="true">
+        <exec executable="cmd" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
           <arg value="/c"/>
           <arg value="${env.ANT_HOME}/bin/ant.bat"/>
           <arg value="-Dproject.bsh.script=Batch.bsh"/>
           <arg value="-Dproject.mode=${run-example-java.mode}"/>
+          <!-- <arg value="-v"/> -->
           <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
           <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.EUROPA_HOME}/lib"/>
         </exec>
