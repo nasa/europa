@@ -7,7 +7,6 @@
 #include <fstream>
 #include <vector>
 #include <set>
-
 using std::exception;
 using std::ifstream;
 using std::set;

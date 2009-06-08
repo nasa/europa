@@ -38,12 +38,12 @@ do
     for library in ${libraries[@]}
     do
 	echo Working on  $variant $library
-	rm build.$variant.$library.*
-	touch build.$variant.$library.start
-	touch build.$variant.$library.log
-	xterm -title "Working on $variant.$library" -geometry 144x24 -e tail -f build.$variant.$library.log &
-	$ANT_HOME/bin/ant -Djam.variant=$variant -Djam.libraries=$library autobuild > build.$variant.$library.log 2>&1
-	touch build.$variant.$library.end
+	rm autobuild.$variant.$library.*
+	touch autobuild.$variant.$library.start
+	touch autobuild.$variant.$library.log
+	xterm -title "Working on $variant.$library" -geometry 144x24 -e tail -f autobuild.$variant.$library.log &
+	$ANT_HOME/bin/ant -Djam.variant=$variant -Djam.libraries=$library autobuild > autobuild.$variant.$library.log 2>&1
+	touch autobuild.$variant.$library.end
     done
 done
  

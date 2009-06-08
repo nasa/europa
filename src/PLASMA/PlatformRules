@@ -212,6 +212,10 @@ if $(OS) = CYGWIN && $(NOCYGWIN) {
   LINKFLAGS += -D_WIN32 ;  #to ensure Antlr3 compiles in win32 mode (see antlr3defs.h)
   PLATFORM_FLAGS += -D_NO_W32_PSEUDO_MODIFIERS -D__MINGW32__ -D_WIN32 -I/usr/local/mingw/include -mno-cygwin ;
   LINKLIBS += -lwsock32 ;  #winsock library is needed for Antlr3
+  #The compiler optimazations for MinGW are too slow for autobuild, but they do work
+  # -0 takes at least an hour, -01 >= 240 minutes,  -02 >= 230 minutes, -03 >= 350 minutes
+  #OPTIMIZE_FLAGS = -O3 -DEUROPA_FAST ;  
+  OPTIMIZE_FLAGS = -DEUROPA_FAST ;  
 }
 
 if $(OS) = MINGW {
