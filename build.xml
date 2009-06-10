@@ -223,7 +223,7 @@
     	
         <!-- libANML_?.a disappeared? -mno-cygwin -->
     	<property name="cmd" value="g++ -shared -Wl,-v 
-      		-Wl,--add-stdcall-alias -Wl,--whole-archive -oSystem_g.dll 
+      		-Wl,--add-stdcall-alias -Wl,--whole-archive -oSystem${s}.dll 
       		libSystem${s}.a libSolvers${s}.a libResource${s}.a libNDDL${s}.a 
       		libRulesEngine${s}.a libTemporalNetwork${s}.a libPlanDatabase${s}.a
       		libConstraintEngine${s}.a libUtils${s}.a 
