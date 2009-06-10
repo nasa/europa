@@ -235,6 +235,10 @@ if $(OS) = BEOS {
   LINKLIBS += -lbe ;
 }
 
+if $(64BIT) = 1 {
+  PLATFORM_FLAGS += -DEUROPA_64_BIT_PLATFORM ;
+}
+
 # Supress the message that ar usually prints (unifies build output further)
 AR = $(AR[1]) $(AR[2])c $(AR[3-]) ;
 

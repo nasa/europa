@@ -14,6 +14,9 @@
     <exec executable="uname" outputproperty="uname.s">
       <arg value="-s"/>
     </exec>
+    <exec executable="uname" outputproperty="uname.a">
+      <arg value="-a"/>
+    </exec>
     <exec executable="which" outputproperty="gcc.location">
       <arg value="gcc"/>
     </exec>
@@ -114,6 +117,13 @@
     </if>
     <echo message="Running as a ${local.os} build."/>
   	
+    <if>
+      <contains string="${uname.a}" substring="x86_64" casesensitive="false"/>
+      <then>
+          <property name="jam.64bit" value="-s64BIT=1"/>
+     </then>
+    </if>
+
     <property name="local.env.PLASMA_HOME" value="${basedir}"/>
     <property name="local.env.EUROPA_HOME" value="${local.env.PLASMA_HOME}/dist/europa"/>
     <if>
@@ -143,7 +153,8 @@
     <property name="jam.variant" value="DEV"/>
     <property name="jam.misc" value=""/>
     <property name="jam.args" value=""/>
-    <property name="jam.opts" value="${jam.args} ${jam.misc} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries}"/>
+    <property name="jam.64bit" value=""/>
+    <property name="jam.opts" value="${jam.args} ${jam.misc} ${jam.64bit} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries}"/>
   </target>
 
   <target name="print-env" depends="init" 
@@ -207,10 +218,10 @@
       	    <property name="s" value="_o"/>
           </then>
         </if>
-  		<property name="s" value="_g"/>
-	  	<echo message="Suffix ${s}" />
+        <property name="s" value="_g"/>
+        <echo message="Suffix ${s}" />
     	
-   		<!-- libANML_?.a disappeared? -mno-cygwin -->
+        <!-- libANML_?.a disappeared? -mno-cygwin -->
     	<property name="cmd" value="g++ -shared -Wl,-v 
       		-Wl,--add-stdcall-alias -Wl,--whole-archive -oSystem_g.dll 
       		libSystem${s}.a libSolvers${s}.a libResource${s}.a libNDDL${s}.a 
