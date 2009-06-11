@@ -5,7 +5,7 @@
 /* #undef ANTLR3_NODEBUGGER */
 
 /* Define if 64 bit mode required */
-#ifndef EUROPA_64_BIT_PLATFORM
+#ifdef EUROPA_64_BIT_PLATFORM
   #define ANTLR3_USE_64BIT
 #else
   #undef ANTLR3_USE_64BIT
