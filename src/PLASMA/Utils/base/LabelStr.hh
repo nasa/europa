@@ -216,8 +216,8 @@ namespace EUROPA {
 
     /*static std::map< std::string, double>& keysFromString();*/ /**< Map strings to keys for key allocation on construction. */
     /*static std::map< double, std::string>& stringFromKeys();*/ /**< Map keys to strings for string retrieval - i.e. toString(). */
-    static __gnu_cxx::hash_map<std::string, double>& keysFromString();
-    static __gnu_cxx::hash_map<double, std::string>& stringFromKeys();
+    static std::map<std::string, double>& keysFromString();
+    static std::map<double, std::string>& stringFromKeys();
 
 #ifndef EUROPA_FAST
     const char* m_chars;
