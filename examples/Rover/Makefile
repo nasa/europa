@@ -44,7 +44,7 @@ $(PROJECT_RT): $(call findtarget,$(PROJECT)-Main$(BUILD_SUFFIX).o) \
 
 RUN_PROJECT = RUN_$(notdir $(PROJECT_RT)).$(notdir $(PROJECT_INITIAL_STATE)).PlannerConfig.xml.output
 run-project: prebuild $(RUN_PROJECT)
-$(RUN_PROJECT): $(PROJECT_RT) $(PROJECT_INITIAL_STATE) PlannerConfig.xml
+$(RUN_PROJECT): $(PROJECT_RT) $(PROJECT)-initial-state.nddl PlannerConfig.xml
 	./$+ > $@
 
 PROJECT_JAR = $(call findtarget,$(PROJECT).jar)

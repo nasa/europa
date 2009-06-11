@@ -339,7 +339,7 @@ typedef int64_t		    ANTLR3_INT64,   *pANTLR3_INT64;
 
 typedef uint8_t	    	    ANTLR3_UINT8,   *pANTLR3_UINT8;
 typedef uint16_t      	    ANTLR3_UINT16,  *pANTLR3_UINT16;
-typedef uint32_t	    ANTLR3_UINT32,  *pANTLR3_UINT32;
+// typedef uint32_t	    ANTLR3_UINT32,  *pANTLR3_UINT32;
 typedef uint64_t	    ANTLR3_UINT64,  *pANTLR3_UINT64;
 typedef uint64_t	    ANTLR3_BITWORD, *pANTLR3_BITWORD;
 
@@ -352,12 +352,14 @@ typedef FILE *	    ANTLR3_FDSC;
 typedef	struct stat ANTLR3_FSTAT_STRUCT;
 
 #ifdef	ANTLR3_USE_64BIT
+typedef uint64_t	    ANTLR3_UINT32,  *pANTLR3_UINT32;
 #define	ANTLR3_FUNC_PTR(ptr)		(void *)((ANTLR3_UINT64)(ptr))
 #define ANTLR3_UINT64_CAST(ptr)		(ANTLR3_UINT64)(ptr))
 #define	ANTLR3_UINT32_CAST(ptr)		(ANTLR3_UINT32)((ANTLR3_UINT64)(ptr))
 typedef ANTLR3_INT64				ANTLR3_MARKER;
 typedef ANTLR3_UINT64				ANTLR3_INTKEY;
 #else
+typedef uint32_t	    ANTLR3_UINT32,  *pANTLR3_UINT32;
 #define	ANTLR3_FUNC_PTR(ptr)		(void *)((ANTLR3_UINT32)(ptr))
 #define ANTLR3_UINT64_CAST(ptr)   (ANTLR3_UINT64)((ANTLR3_UINT32)(ptr))
 #define	ANTLR3_UINT32_CAST(ptr)	  (ANTLR3_UINT32)(ptr)

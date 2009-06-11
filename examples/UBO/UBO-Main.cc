@@ -49,7 +49,7 @@ bool solve(const char* plannerConfig,
     try {
         PSEngine* engine = PSEngine::makeInstance();
         engine->start();
-        engine->executeScript("nddl-xml",txSource,true/*isFile*/);
+        engine->executeScript("nddl",txSource,true/*isFile*/);
 
         PSSolver* solver = engine->createSolver(plannerConfig);
         runSolver(solver,startHorizon,endHorizon,maxSteps);

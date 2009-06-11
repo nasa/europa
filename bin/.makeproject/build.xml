@@ -63,7 +63,7 @@
     <echo message="Running ${project} project"/>
     <java classname="${project}.Main" dir="${project.dir}" fork="yes" failonerror="true">
       <jvmarg value="-Xms256m"/>
-      <jvmarg value="-Xmx2048m"/>
+      <jvmarg value="-Xmx1024m"/>
       <jvmarg value="-Djava.library.path=build/lib"/>
       <arg value="${project.mode}"/>
       <arg value="${project.bsh.script}"/>

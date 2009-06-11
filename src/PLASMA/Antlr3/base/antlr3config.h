@@ -5,7 +5,11 @@
 /* #undef ANTLR3_NODEBUGGER */
 
 /* Define if 64 bit mode required */
-/* #undef ANTLR3_USE_64BIT */
+#ifdef EUROPA_64_BIT_PLATFORM
+  #define ANTLR3_USE_64BIT
+#else
+  #undef ANTLR3_USE_64BIT
+#endif 
 
 /* Define to 1 if you have the `accept' function. */
 #define HAVE_ACCEPT 1
@@ -182,3 +186,4 @@
 /* Define to the type of an unsigned integer type wide enough to hold a
    pointer, if such a type exists, and if the system does not define it. */
 /* #undef uintptr_t */
+
