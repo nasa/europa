@@ -1,18 +1,17 @@
 /**
  * @file Main.cc
  *
- * @brief Provides an executable for your project which uses
+ * @brief Provides an main() for your project which uses
  * - a standard chronological backtracking planner
  * - a PSEngine to encapsulate EUROPA
  */
 
-#include "Nddl.hh" /*!< Includes protypes required to load a model */
 #include "PSEngine.hh"
 #include "Debug.hh"
 
 using namespace EUROPA;
 
-bool solve(bool useInterpreter, const char* plannerConfig, const char* txSource, int startHorizon, int endHorizon, int maxSteps);
+bool solve(const char* plannerConfig, const char* txSource, int startHorizon, int endHorizon, int maxSteps);
 void runSolver(PSSolver* solver, int startHorizon, int endHorizon, int maxSteps);
 void checkSolver(PSSolver* solver, int i);
 void printFlaws(int it, PSList<std::string>& flaws);
@@ -24,14 +23,12 @@ int main(int argc, const char ** argv)
     return -1;
   }
 
-  const char* txSource = argv[1];
+  const char* nddlFile = argv[1];
   const char* plannerConfig = argv[2];
-  bool useInterpreter = (argc > 3);
 
   solve(
-      useInterpreter,
       plannerConfig,
-      txSource,
+      nddlFile,
       0,   // startHorizon
       100, // endHorizon
       1000 // maxSteps
@@ -40,41 +37,31 @@ int main(int argc, const char ** argv)
   return 0;
 }
 
-bool solve(bool useInterpreter,
-           const char* plannerConfig,
-           const char* txSource,
+bool solve(const char* plannerConfig,
+           const char* nddlFile,
            int startHorizon,
            int endHorizon,
            int maxSteps)
 {
     try {
+        {
+            PSEngine* engine = PSEngine::makeInstance();
+            engine->start();
+            engine->executeScript("nddl",nddlFile,true/*isFile*/);
 
-      {
-	      PSEngine* engine = PSEngine::makeInstance();
-          engine->start();
+            PSSolver* solver = engine->createSolver(plannerConfig);
+            runSolver(solver,startHorizon,endHorizon,maxSteps);
+            delete solver;
 
-          if (!useInterpreter) {
-              SchemaId schema = ((Schema*)assembly.getComponent("Schema"))->getId();
-              RuleSchemaId ruleSchema = ((RuleSchema*)assembly.getComponent("RuleSchema"))->getId();
-              NDDL::loadSchema(schema,ruleSchema); // eventually make this called via dlopen
-              engine->executeScript("nddl-xml-txn",txSource,true/*isFile*/);
-          }
-          else
-	          engine->executeScript("nddl-xml",txSource,true/*isFile*/);
+            delete engine;
+        }
 
-	      PSSolver* solver = engine->createSolver(plannerConfig);
-	      runSolver(solver,startHorizon,endHorizon,maxSteps);
-	      delete solver;
-
-	      delete engine;
-      }
-
-	  return true;
-	}
-	catch (Error& e) {
-		std::cerr << "PSEngine failed:" << e.getMsg() << std::endl;
-		return false;
-	}
+        return true;
+    }
+    catch (Error& e) {
+        std::cerr << "PSEngine failed:" << e.getMsg() << std::endl;
+        return false;
+    }
 }
 
 void printFlaws(int it, PSList<std::string>& flaws)

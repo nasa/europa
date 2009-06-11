@@ -6,15 +6,11 @@
  * to encapsulate EUROPA
  */
 
-#include "Nddl.hh" /*!< Includes protypes required to load a model */
 #include "PSEngine.hh"
 #include "Debug.hh"
-#include "EuropaEngine.hh"
-#include "Rule.hh"
 
 #include "ModuleLight.hh"
 #include "LightCustomCode.hh"
-#include "PlanDatabase.hh"
 
 using namespace EUROPA;
 
@@ -53,7 +49,7 @@ bool solve(const char* plannerConfig,
     try {
         PSEngine* engine = PSEngine::makeInstance();
         engine->start();
-        engine->executeScript("nddl-xml",txSource,true/*isFile*/);
+        engine->executeScript("nddl",txSource,true/*isFile*/);
 
         PSSolver* solver = engine->createSolver(plannerConfig);
         runSolver(solver,startHorizon,endHorizon,maxSteps);
