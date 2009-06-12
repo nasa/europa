@@ -402,7 +402,7 @@ namespace EUROPA {
       TokenId token = *it;
       allTokens.insert(token);
       check_error(m_tokenIndex.find(token->getKey()) != m_tokenIndex.end());
-      check_error(cleaningUp || token->isActive());
+      checkError(cleaningUp || token->isActive(), token->toLongString());
 
       // Validate that earliest start times are monotonically increasing, as long as we are constraint consistent at any rate!
       // Also ensure x.end <= (x+1).start.
