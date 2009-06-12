@@ -42,9 +42,11 @@ namespace EUROPA {
     RuleVariableListener* source = (RuleVariableListener*) sourceConstraint;
     m_ruleInstance = source->m_ruleInstance;
 
+    checkError(m_ruleInstance.isNoId() || m_ruleInstance.isValid(), sourceConstraint->toString());
+
     // It is possible that this constraint is being migrated even though the master has been terminated. If that were the case then the rule
     // instance may have been cleared. So we have to check for that.
-    if(m_ruleInstance.isId())
+    if(!m_ruleInstance.isNoId())
       m_ruleInstance->addDependent(this);
   }
 
