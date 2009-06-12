@@ -829,7 +829,7 @@ namespace EUROPA {
     check_error(leq(lb, ub));
 
     // Ensure this domain is a subset of the new bounds for relaxation.
-    checkError(isEmpty() || (leq(lb, m_lb) && leq(m_ub, ub)), lb << " >=" << m_lb << " OR " << m_ub << " >= " << ub);
+    //checkError(isEmpty() || (leq(lb, m_lb) && leq(m_ub, ub)), lb << " >=" << m_lb << " OR " << m_ub << " >= " << ub);
 
     // Test if really causes a change.
     bool relaxed = (lt(m_ub, ub) || lt(lb, m_lb));
