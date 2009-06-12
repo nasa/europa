@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <?fileVersion 4.0.0?>
 
 <cproject>
@@ -22,8 +22,6 @@
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/PLASMA/src/PLASMA/NDDL}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/PLASMA/src/PLASMA/NDDL/base}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/PLASMA/src/PLASMA/NDDL/component}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PLASMA/src/PLASMA/NDDL3}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PLASMA/src/PLASMA/NDDL3/base}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/PLASMA/src/PLASMA/PlanDatabase}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/PLASMA/src/PLASMA/PlanDatabase/base}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/PLASMA/src/PLASMA/PlanDatabase/component}&quot;"/>
@@ -88,8 +86,6 @@
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/PLASMA/src/PLASMA/NDDL}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/PLASMA/src/PLASMA/NDDL/base}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/PLASMA/src/PLASMA/NDDL/component}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PLASMA/src/PLASMA/NDDL3}&quot;"/>
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PLASMA/src/PLASMA/NDDL3/base}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/PLASMA/src/PLASMA/PlanDatabase}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/PLASMA/src/PLASMA/PlanDatabase/base}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/PLASMA/src/PLASMA/PlanDatabase/component}&quot;"/>
@@ -125,7 +121,6 @@
 <sourceEntries>
 <entry excluding="**/test/**" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src/PLASMA/ConstraintEngine"/>
 <entry excluding="**/test/**" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src/PLASMA/NDDL"/>
-<entry excluding="**/test/**" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src/PLASMA/NDDL3"/>
 <entry excluding="**/test/**" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src/PLASMA/PlanDatabase"/>
 <entry excluding="**/test/**" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src/PLASMA/Resource"/>
 <entry excluding="**/test/**" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src/PLASMA/RulesEngine"/>
@@ -142,6 +137,7 @@
 <externalSetting>
 <entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/PLASMA"/>
 <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="Debug"/>
+<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/PLASMA"/>
 </externalSetting>
 </externalSettings>
 <extensions>
