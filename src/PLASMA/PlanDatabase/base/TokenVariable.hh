@@ -205,9 +205,10 @@ namespace EUROPA{
       Variable<DomainType>::reset(*(this->m_integratedBaseDomain));
     //this->m_derivedDomain->reset(*(this->m_integratedBaseDomain));
     else{
-      // Relax first to the original and the narrow for intersection of base domains
-      this->m_derivedDomain->relax(*(this->m_baseDomain));
-      this->m_derivedDomain->intersect(*(this->m_integratedBaseDomain));
+      // The integrated base domain refelxts the updated domain which includes the original base domain and this there is
+      // no reason to relax twice.
+      //this->m_derivedDomain->relax(*(this->m_baseDomain));
+      this->m_derivedDomain->relax(*(this->m_integratedBaseDomain));
     }
   }
 
@@ -225,9 +226,11 @@ namespace EUROPA{
       check_error(mergedToken->getVariables().size() == this->m_parentToken->getVariables().size());
       const Id<TokenVariable<DomainType> >& var = mergedToken->getVariables()[this->getIndex()];
 
-      // Update the base domain to include any restrictions on merged token
+      // Update the base domain to include any restrictions on merged token. Note that if the base domain is open then intersection
+      // will not restrict, However, that should be handled in the basic implementation of intersection
       this->m_integratedBaseDomain->intersect(var->baseDomain());
-     	checkError(var->baseDomain().isOpen() || !this->m_integratedBaseDomain->isEmpty(), var->toString() << " cannot merge.");
+
+      checkError(var->baseDomain().isOpen() || !this->m_integratedBaseDomain->isEmpty(), var->toString() << " cannot merge.");
 
       // if not specified, ignore it
       if(!var->isSpecified())
@@ -278,7 +281,17 @@ namespace EUROPA{
   template<class DomainType>
   void TokenVariable<DomainType>::relax() {
     Variable<DomainType>::relax();
-    this->m_derivedDomain->intersect(*m_integratedBaseDomain);
+
+    // Construct the relaxation domain based on the integrated base domain and the specified value. We do this to avoid introducing a restriction after
+    // first relaxing. There is code in the constraint engine that assumes that we do not impose restrictiosn during relaxation. Moreover, we shouldn't as
+    // we open up the possibility that restriction and relaxation are interleaved. Thus, we structure this to compute the target domain to relax to and then
+    // relax to that in one go.
+    AbstractDomain* dom = m_integratedBaseDomain->copy();
+    if(this->isSpecified())
+      dom->set(this->getSpecifiedValue());
+
+    this->m_derivedDomain->relax(*dom);
+    delete dom;
   }
 
 }
