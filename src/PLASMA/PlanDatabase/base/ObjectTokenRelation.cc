@@ -68,21 +68,27 @@ namespace EUROPA {
   bool ObjectTokenRelation::canIgnore(const ConstrainedVariableId& variable,
 				      int argIndex,
 				      const DomainListener::ChangeType& changeType){
+
     if(m_currentDomain.isOpen())
       return true;
 
     if(changeType == DomainListener::RESET || changeType == DomainListener::RELAXED){
+      debugMsg("ObjectTokenRelation::canIgnore", "Evaluating relaxation event on " << variable->toLongString());
       if (m_token->isActive()){ // Still active so must have been object variable relaxed. Notify Additions.
 	// Otherwise, handle possible notifications for new values in object domain.
+	debugMsg("ObjectTokenRelation::canIgnore", "Handling addition");
 	notifyAdditions();
       }
       else { // It is no longer active but we have outstanding objects to be notified of removal
+	debugMsg("ObjectTokenRelation::canIgnore", "Handling removal");
 	notifyRemovals();
       }
       check_error(isValid());
     }
-    else if (m_token->isActive()) // It is a restriction so handle it straight away
+    else if (m_token->isActive()){ // It is a restriction so handle it straight away
+      debugMsg("ObjectTokenRelation::canIgnore", "Processing activation event on " << m_token->toString());
       handleExecute();
+    }
 
     return true;
   }
