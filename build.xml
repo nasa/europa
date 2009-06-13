@@ -143,6 +143,8 @@
     </condition>
     <property name="dir.planworks" value="${basedir}/../PlanWorks"/>
     <available property="planworks.present" file="${dir.planworks}"/>
+    <property name="jam.num.cores" value="${env.PLASMA_NUM_CORES}"/>
+    <property name="jam.num.cores" value="1"/>
     <property name="dir.build" value="build"/>
     <property name="dir.dist" value="dist"/>
     <property name="dir.dist.base" location="${dir.dist}/europa"/>
@@ -154,7 +156,7 @@
     <property name="jam.misc" value=""/>
     <property name="jam.args" value=""/>
     <property name="jam.64bit" value=""/>
-    <property name="jam.opts" value="${jam.args} ${jam.misc} ${jam.64bit} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries}"/>
+    <property name="jam.opts" value="${jam.args} -j${jam.num.cores} ${jam.misc} ${jam.64bit} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries}"/>
   </target>
 
   <target name="print-env" depends="init" 
