@@ -515,7 +515,7 @@ Expr* NddlSymbolTable::makeEnumRef(const char* value) const
     double v = LabelStr(value);
     ad->set(v);
 
-    return new ExprConstant(getPlanDatabase()->getClient(),enumType.c_str(),ad);
+    return new ExprConstant(enumType.c_str(),ad);
 }
 
 std::string getErrorLocation(pNDDL3Tree treeWalker);

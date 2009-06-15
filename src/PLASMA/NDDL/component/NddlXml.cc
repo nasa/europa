@@ -85,11 +85,11 @@ namespace EUROPA {
     if (strcmp(element->Value(),"value") == 0 ||
         strcmp(element->Value(),"symbol") == 0 ||
         strcmp(element->Value(),"interval") == 0) {
-      return new ExprConstant(m_client,element->Attribute("type"),xmlAsAbstractDomain(*element));
+      return new ExprConstant(element->Attribute("type"),xmlAsAbstractDomain(*element));
     }
     else if (strcmp(element->Value(),"set") == 0) {
         TiXmlElement* child = element->FirstChildElement();
-        return new ExprConstant(m_client,child->Attribute("type"),xmlAsAbstractDomain(*element));
+        return new ExprConstant(child->Attribute("type"),xmlAsAbstractDomain(*element));
     }
     else if (strcmp(element->Value(),"id") == 0) {
       const char* varName = element->Attribute("name");
@@ -188,7 +188,6 @@ namespace EUROPA {
                       argExprs.push_back(valueToExpr(argChild));
 
                   rhs = new ExprNewObject(
-                          m_client,
                           objectType,
                           lhs,
                           argExprs

@@ -177,6 +177,8 @@ namespace EUROPA {
 
         virtual ConstrainedVariableId getVar(const char* name);
 
+        virtual void* getElement(const char* name) const;
+
     protected:
         ObjectId m_obj;
   };
@@ -206,6 +208,14 @@ namespace EUROPA {
       debugMsg("Interpreter:EvalContext:Object","Didn't find var in object instance:" << name);
       return EvalContext::getVar(name);
     }
+  }
+
+  void* ObjectEvalContext::getElement(const char* name) const
+  {
+      if (std::string(name)=="PlanDatabase")
+          return (PlanDatabase*)m_obj->getPlanDatabase();
+
+      return EvalContext::getElement(name);
   }
 
   InterpretedObjectFactory::InterpretedObjectFactory(
@@ -245,36 +255,57 @@ namespace EUROPA {
     ObjectFactoryEvalContext(const PlanDatabaseId& planDb,
                  const std::vector<std::string>& argNames,
                  const std::vector<std::string>& argTypes,
-                 const std::vector<const AbstractDomain*>& args)
-      : EvalContext(NULL) // TODO: should pass in eval context from outside to have access to globals
-    {
-            debugMsg("ObjectFactoryEvalContext", ">> ");
-      // Add arguments to eval context
-      for (unsigned int i=0;i<argNames.size();i++) {
-                debugMsg("ObjectFactoryEvalContext:createVariable", argTypes[i] << " " << argNames[i] << " = " << *(args[i]));
-          ConstrainedVariableId arg = planDb->getClient()->createVariable(
-                                    argTypes[i].c_str(),
-                                    *(args[i]),
-                                    argNames[i].c_str(),
-                                    true
-                                    );
-           m_tmpVars.push_back(arg);
-           addVar(argNames[i].c_str(),arg);
-      }
-            debugMsg("ObjectFactoryEvalContext", "<< ");
-    }
+                 const std::vector<const AbstractDomain*>& args);
 
-    virtual ~ObjectFactoryEvalContext()
-    {
-      for (unsigned int i=0;i<m_tmpVars.size();i++) {
-          // TODO: must release temporary vars, causing crash?
-          //m_tmpVars[i].release();
-      }
-    }
+    virtual ~ObjectFactoryEvalContext();
+
+    virtual void* getElement(const char* name) const;
 
   protected:
+    PlanDatabaseId m_planDb;
     std::vector<ConstrainedVariableId> m_tmpVars;
   };
+
+  ObjectFactoryEvalContext::ObjectFactoryEvalContext(const PlanDatabaseId& planDb,
+               const std::vector<std::string>& argNames,
+               const std::vector<std::string>& argTypes,
+               const std::vector<const AbstractDomain*>& args)
+    : EvalContext(NULL) // TODO: should pass in eval context from outside to have access to globals
+    , m_planDb(planDb)
+  {
+    debugMsg("ObjectFactoryEvalContext", ">> ");
+
+    // Add arguments to eval context
+    for (unsigned int i=0;i<argNames.size();i++) {
+              debugMsg("ObjectFactoryEvalContext:createVariable", argTypes[i] << " " << argNames[i] << " = " << *(args[i]));
+        ConstrainedVariableId arg = planDb->getClient()->createVariable(
+                                  argTypes[i].c_str(),
+                                  *(args[i]),
+                                  argNames[i].c_str(),
+                                  true
+                                  );
+         m_tmpVars.push_back(arg);
+         addVar(argNames[i].c_str(),arg);
+    }
+
+    debugMsg("ObjectFactoryEvalContext", "<< ");
+  }
+
+  ObjectFactoryEvalContext::~ObjectFactoryEvalContext()
+  {
+    for (unsigned int i=0;i<m_tmpVars.size();i++) {
+        // TODO: must release temporary vars, causing crash?
+        //m_tmpVars[i].release();
+    }
+  }
+
+  void* ObjectFactoryEvalContext::getElement(const char* name) const
+  {
+      if (std::string(name)=="PlanDatabase")
+          return (PlanDatabase*)m_planDb;
+
+      return EvalContext::getElement(name);
+  }
 
   ObjectId InterpretedObjectFactory::createInstance(
                             const PlanDatabaseId& planDb,

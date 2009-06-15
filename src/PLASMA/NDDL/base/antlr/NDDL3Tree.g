@@ -276,7 +276,6 @@ valueSet returns [Expr* result]
         {
             AbstractDomain* newDomain = new EnumeratedDomain(elementType,values); 
             result = new ExprConstant(
-                CTX->SymbolTable->getPlanDatabase()->getClient(),
                 elementType->getName().c_str(),
                 newDomain                       
             );
@@ -290,7 +289,6 @@ literalValue returns [Expr* result]
         )
         {
             result = new ExprConstant(
-                CTX->SymbolTable->getPlanDatabase()->getClient(),
                 child->getTypeName().c_str(),
                 child
             ); 
@@ -344,7 +342,6 @@ numericInterval returns [Expr* result]
                 baseDomain = new IntervalIntDomain((int)lb,(int)ub);
                                   
             result = new ExprConstant(
-                        CTX->SymbolTable->getPlanDatabase()->getClient(),
                         lower->getTypeName().c_str(),
                         baseDomain
                     );
@@ -365,7 +362,6 @@ allocation[const char* name] returns [Expr* result]
                 {
                     std::string objName = (name != NULL ? name : getAutoLabel("__Object"));
                     result = new ExprNewObject(
-                        CTX->SymbolTable->getPlanDatabase()->getClient(),
                         c_str($objType.text->chars), // objectType
                         objName.c_str(),
                         args

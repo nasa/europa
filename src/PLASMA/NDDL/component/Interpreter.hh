@@ -2,17 +2,14 @@
 #define _H_Interpreter
 
 #include "PDBInterpreter.hh"
-#include "IntervalToken.hh"
+#include "PlanDatabaseDefs.hh"
+#include "RulesEngineDefs.hh"
 #include "Object.hh"
 #include "ObjectFactory.hh"
-#include "PlanDatabaseDefs.hh"
+#include "IntervalToken.hh"
+#include "TokenFactory.hh"
 #include "Rule.hh"
 #include "RuleInstance.hh"
-#include "RulesEngineDefs.hh"
-#include "Timeline.hh"
-#include "TokenFactory.hh"
-#include "Debug.hh"
-#include <map>
 #include <vector>
 
 
@@ -21,7 +18,7 @@ namespace EUROPA {
   class ExprConstant : public Expr
   {
   	public:
-  	    ExprConstant(const DbClientId& dbClient, const char* type, const AbstractDomain* d);
+  	    ExprConstant(const char* type, const AbstractDomain* d);
   	    virtual ~ExprConstant();
 
   	    virtual DataRef eval(EvalContext& context) const;
@@ -29,7 +26,6 @@ namespace EUROPA {
         virtual std::string toString() const;
 
   	protected:
-  	    const DbClientId m_dbClient;
   	    LabelStr m_type;
   	    const AbstractDomain* m_domain;
   };
@@ -236,8 +232,7 @@ namespace EUROPA {
   class ExprNewObject : public Expr
   {
   	public:
-  	    ExprNewObject(const DbClientId& dbClient,
-	                  const LabelStr& objectType,
+  	    ExprNewObject(const LabelStr& objectType,
 	                  const LabelStr& objectName,
 	                  const std::vector<Expr*>& argExprs);
 
@@ -248,7 +243,6 @@ namespace EUROPA {
   	    virtual std::string toString() const;
 
   	protected:
-        DbClientId            m_dbClient;
 	    LabelStr              m_objectType;
 	    LabelStr              m_objectName;
 	    std::vector<Expr*>    m_argExprs;

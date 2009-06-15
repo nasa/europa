@@ -55,9 +55,8 @@ namespace EUROPA {
   /*
    * ExprConstant
    */
-  ExprConstant::ExprConstant(const DbClientId& dbClient, const char* type, const AbstractDomain* domain)
-    : m_dbClient(dbClient)
-    , m_type(type)
+  ExprConstant::ExprConstant(const char* type, const AbstractDomain* domain)
+    : m_type(type)
     , m_domain(domain)
   {
   }
@@ -95,8 +94,9 @@ namespace EUROPA {
         var = riec->getRuleInstance()->addLocalVariable(*m_domain,canBeSpecified,name);
     }
     else {
+        DbClientId pdb = getPDB(context);
         // TODO: Who destroys this variable?
-        var = m_dbClient->createVariable(
+        var = pdb->createVariable(
                 m_type.c_str(),
                 *m_domain,
                 name.c_str(),
@@ -220,12 +220,10 @@ namespace EUROPA {
   /*
    * ExprNewObject
    */
-  ExprNewObject::ExprNewObject(const DbClientId& dbClient,
-			       const LabelStr& objectType,
+  ExprNewObject::ExprNewObject(const LabelStr& objectType,
 			       const LabelStr& objectName,
 			       const std::vector<Expr*>& argExprs)
-    : m_dbClient(dbClient)
-    , m_objectType(objectType)
+    : m_objectType(objectType)
     , m_objectName(objectName)
     , m_argExprs(argExprs)
   {
@@ -256,7 +254,8 @@ namespace EUROPA {
     std::string prefix = (thisObject.isId() ? thisObject->getName().toString() + "." : "");
 
     LabelStr name(prefix+m_objectName.toString());
-    ObjectId newObject = m_dbClient->createObject(
+    DbClientId pdb = getPDB(context);
+    ObjectId newObject = pdb->createObject(
 						  m_objectType.c_str(),
 						  name.c_str(),
 						  arguments
