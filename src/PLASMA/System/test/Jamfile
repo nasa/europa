@@ -206,11 +206,4 @@ for numSatellites in 1 {
   }
 }
 
-#
-# PLANNER CONTROL TESTS
-#
-ModuleMain runPlannerControlTest : runPlannerControlTest.cc : : planner-control-tests ;
-LinkSharedLibrariesNoDeps runPlannerControlTest_g_rt : $(DLOPEN_LIBRARY) ;
-
-
 } # PLASMA_READY

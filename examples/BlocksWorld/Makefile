@@ -1,5 +1,5 @@
 .PHONY: prebuild postbuild project-model project-initial-state project-lib project-rt run-project clean all
-all: prebuild project-controller project-lib run-project postbuild
+all: prebuild project-lib run-project postbuild
 
 include platforms.mk
 include makerules.mk
@@ -17,10 +17,6 @@ prebuild:
 
 postbuild:
 	echo Build Completed Successfully!
-
-PROJECT_CONTROLLER = $(call findtarget,$(LIB_PREFIX)$(PROJECT)Controller$(BUILD_SUFFIX).$(LIB_EXT))
-project-controller: prebuild $(PROJECT_CONTROLLER)
-$(PROJECT_CONTROLLER): $(call findtarget,ControllerStub$(BUILD_SUFFIX).o)
 
 PROJECT_INITIAL_STATE = $(PROJECT)-initial-state.xml
 project-initial-state: prebuild $(PROJECT_INITIAL_STATE)
