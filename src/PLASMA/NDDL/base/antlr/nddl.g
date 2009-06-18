@@ -1033,7 +1033,7 @@ options {
     this.file = file;
     this.interp = interp;
     if(file != null)
-      setFilename(file.getName());
+      setFilename(file.getPath());
     else
       setFilename("eval");
   }
