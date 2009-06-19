@@ -19,7 +19,7 @@ namespace EUROPA {
     class ThreatDecisionPoint: public DecisionPoint {
     public:
 
-      ThreatDecisionPoint(const DbClientId& client, const TokenId& tokenToOrder, const TiXmlElement& configData, 
+      ThreatDecisionPoint(const DbClientId& client, const TokenId& tokenToOrder, const TiXmlElement& configData,
                           const LabelStr& explanation = "unknown");
 
       /**
@@ -56,6 +56,6 @@ namespace EUROPA {
   }
 }
 
-#define REGISTER_THREAT_DECISION_FACTORY(CLASS, NAME)\
-REGISTER_DECISION_FACTORY(CLASS, NAME);
+#define REGISTER_THREAT_DECISION_FACTORY(MGR,CLASS, NAME)\
+REGISTER_DECISION_FACTORY(MGR,CLASS, NAME);
 #endif

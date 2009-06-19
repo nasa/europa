@@ -29,7 +29,7 @@ namespace EUROPA {
       /**
        * @brief Constructor. Test signature for DecisionPointFactory
        */
-      OpenConditionDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData, 
+      OpenConditionDecisionPoint(const DbClientId& client, const TokenId& flawedToken, const TiXmlElement& configData,
                                  const LabelStr& explanation = "unknown");
 
       virtual ~OpenConditionDecisionPoint();
@@ -42,7 +42,7 @@ namespace EUROPA {
        * bestPriority will be updated to the priority of the new decision point.
        * @return A noId if no better decision can be found, otherwise a new decision with a better priority.
        */
-      static DecisionPointId next(const TokenSet& flawCandidates, 
+      static DecisionPointId next(const TokenSet& flawCandidates,
 				  unsigned int& bestPriority);
 
       /**
@@ -77,6 +77,6 @@ namespace EUROPA {
 }
 
 
-#define REGISTER_OPENCONDITION_DECISION_FACTORY(CLASS, NAME)\
-REGISTER_DECISION_FACTORY(CLASS, NAME);
+#define REGISTER_OPENCONDITION_DECISION_FACTORY(MGR,CLASS, NAME)\
+REGISTER_DECISION_FACTORY(MGR,CLASS, NAME);
 #endif
