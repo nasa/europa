@@ -21,7 +21,6 @@ namespace EUROPA {
     virtual void removeModule(Module* module);
     virtual void loadModule(const std::string& moduleFileName);
 
-    virtual void loadModel(const std::string& modelFileName);
     virtual std::string executeScript(const std::string& language, const std::string& script, bool isFile);
 
 	  // Constraint Engine methods

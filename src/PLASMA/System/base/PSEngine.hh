@@ -27,7 +27,6 @@ namespace EUROPA {
       virtual void removeModule(Module* module) = 0;
       virtual void loadModule(const std::string& moduleFileName) = 0;
 
-      virtual void loadModel(const std::string& modelFileName) = 0; // Loads a planning model in binary format
       virtual std::string executeScript(const std::string& language, const std::string& script, bool isFile) = 0;
 
       // Constraint Engine methods

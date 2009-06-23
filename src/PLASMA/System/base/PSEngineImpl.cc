@@ -58,25 +58,6 @@ namespace EUROPA {
 	  EuropaEngine::loadModule(moduleFileName);
   }
 
-  void PSEngineImpl::loadModel(const std::string& modelFileName)
-   {
-	   check_runtime_error(isStarted(),"PSEngine has not been started");
-
-	   void* libHandle = p_dlopen(modelFileName.c_str(), RTLD_NOW);
-	   checkRuntimeError(libHandle != NULL,
-			   "Error opening model " << modelFileName << ": " << p_dlerror());
-
-	   SchemaId (*fcn_schema)(const SchemaId&,const RuleSchemaId&);
-	   fcn_schema = (SchemaId (*)(const SchemaId&,const RuleSchemaId&)) p_dlsym(libHandle, "loadSchema");
-	   checkError(fcn_schema != NULL,
-			   "Error locating symbol 'loadSchema' in " << modelFileName << ": " <<
-			   p_dlerror());
-
-	   SchemaId schema = ((Schema*)getComponent("Schema"))->getId();
-       RuleSchemaId ruleSchema = ((RuleSchema*)getComponent("RuleSchema"))->getId();
-	   (*fcn_schema)(schema,ruleSchema);
-   }
-
   std::string PSEngineImpl::executeScript(const std::string& language, const std::string& script, bool isFile)
   {
     return EuropaEngine::executeScript(language,script,isFile);
