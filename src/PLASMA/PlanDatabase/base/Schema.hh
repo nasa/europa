@@ -358,6 +358,8 @@ namespace EUROPA {
     PSList<std::string> getMembers(const std::string& objectType) const;
     bool hasMember(const std::string& parentType, const std::string& memberName) const;
 
+    PSList<PSObjectType> getAllPSObjectTypes() const;
+
   private:
 
     static const std::set<LabelStr>& getBuiltInVariableNames();

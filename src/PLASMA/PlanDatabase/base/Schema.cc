@@ -795,9 +795,103 @@ namespace EUROPA {
 	  return hasMember(LabelStr(parentType), LabelStr(memberName));
   }
 
+  PSDataType::PSDataType(const DataTypeId& original) :
+	  m_name(original->getName().toString()) {}
 
+  PSDataType::PSDataType(const PSDataType& original) :
+	  m_name(original.getName()) {}
 
+  bool PSDataType::operator==(const PSDataType& other) const {
+	  return m_name == other.m_name;
+  }
 
+  PSTokenType::PSTokenType(const PSTokenType& original) :
+	  m_name(original.m_name), m_argNames(original.m_argNames),
+	  m_argTypes(original.m_argTypes) {}
 
+  PSTokenType::PSTokenType(const TokenFactoryId& original) :
+	  m_name(original->getPredicateName().toString()) {
+	  const std::map<LabelStr,DataTypeId>& args = original->getArgs();
+	  for (std::map<LabelStr,DataTypeId>::const_iterator it = args.begin(); it != args.end(); ++it) {
+		  m_argNames.push_back(it->first.toString());
+		  m_argTypes.push_back(PSDataType(it->second));
+	  }
+  }
+
+  PSList<std::string> PSTokenType::getParameterNames() const {
+	  PSList<std::string> retval;
+	  for (std::vector<std::string>::const_iterator it = m_argNames.begin(); it != m_argNames.end(); ++it) {
+		  retval.push_back(*it);
+	  }
+	  return retval;
+  }
+
+  PSDataType PSTokenType::getParameterType(int index) const {
+	  return m_argTypes[index];
+  }
+
+  PSDataType PSTokenType::getParameterType(const std::string& name) const {
+	  for (unsigned int i=0; i<m_argNames.size(); i++)
+		  if (m_argNames[i] == name) {
+			  return m_argTypes[i];
+		  }
+	  check_error(false, "No argument named " + name + ".");
+	  // Let it throw
+	  return m_argTypes[-1];
+  }
+
+  /** This operator does not check the object type the predicate belongs to */
+  bool PSTokenType::operator==(const PSTokenType& other) const {
+	  return m_name == other.m_name && m_argNames == other.m_argNames &&
+		  m_argTypes == other.m_argTypes;
+  }
+
+  PSObjectType::PSObjectType(const PSObjectType& original) :
+	  m_name(original.m_name), m_parentName(original.m_parentName),
+	  m_members(original.m_members), m_predicates(original.m_predicates) {}
+
+  PSObjectType::PSObjectType(const ObjectTypeId& original) :
+	  m_name(original->getName().toString()) {
+	  const ObjectTypeId& parent = original->getParent();
+	  if (parent.isNoId())
+		  m_parentName = "";
+	  else
+		  m_parentName = parent->getName().toString();
+	  const std::map<std::string,DataTypeId>& mem = original->getMembers();
+	  for (std::map<std::string,DataTypeId>::const_iterator it = mem.begin(); it != mem.end(); ++it) {
+		  m_members.insert(std::pair<std::string, PSDataType>(it->first, PSDataType(it->second)));
+	  }
+	  const std::map<double,TokenFactoryId>& tokens = original->getTokenFactories();
+	  for (std::map<double,TokenFactoryId>::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+		  m_predicates.push_back(PSTokenType(it->second));
+	  }
+  }
+
+  PSList<std::string> PSObjectType::getMemberNames() const {
+	  PSList<std::string> retval;
+	  for (std::map<std::string, PSDataType>::const_iterator it = m_members.begin(); it != m_members.end(); ++it)
+		  retval.push_back(it->first);
+	  return retval;
+  }
+
+  PSDataType PSObjectType::getMemberType(const std::string& name) const {
+	  std::map<std::string, PSDataType>::const_iterator it = m_members.find(name);
+	  check_error(it != m_members.end(), "Cannot find member " + name + ".");
+	  return it->second;
+  }
+
+  bool PSObjectType::operator==(const PSObjectType& other) const {
+	  // Assume name uniquely identifies type
+	  return m_name == other.m_name;
+  }
+
+  PSList<PSObjectType> Schema::getAllPSObjectTypes() const {
+	PSList<PSObjectType> retval;
+    for(std::map<double, ObjectTypeId>::const_iterator it = m_objTypes.begin(); it != m_objTypes.end(); ++it)
+    {
+    	retval.push_back(PSObjectType(it->second));
+    }
+    return retval;
+  }
 
 } // namespace NDDL

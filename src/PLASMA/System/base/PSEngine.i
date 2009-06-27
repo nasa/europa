@@ -82,6 +82,9 @@ namespace EUROPA {
   class PSToken;
   class PSVariable;
   class PSVarValue;
+  class PSDataType;
+  class PSTokenType;
+  class PSObjectType;
   class PSPlanDatabaseClient;
   class PSPlanDatabaseListener;
   class PSConstraintEngineListener;
@@ -102,6 +105,9 @@ namespace EUROPA {
   %template(PSTokenList) PSList<PSToken*>;
   %template(PSVariableList) PSList<PSVariable*>;
   %template(PSConstraintList) PSList<PSConstraint*>;
+  %template(PSDataTypeList) PSList<PSDataType>;
+  %template(PSTokenTypeList) PSList<PSTokenType>;
+  %template(PSObjectTypeList) PSList<PSObjectType>;
   //%template(PSValueList) PSList<PSVarValue>;
 
   // using template instantiation to get the right results.
@@ -289,6 +295,37 @@ namespace EUROPA {
     PSEntity(); //protected constructors prevent wrapper generation
   };
 
+  class PSDataType
+  {
+  public:
+	  const std::string& getName() const;
+  protected:
+  	  PSDataType(const PSDataType& original);
+  };
+  
+  class PSTokenType
+  {
+  public:
+	  const std::string& getName() const;
+	  PSList<std::string> getParameterNames() const;
+	  PSDataType getParameterType(int index) const;
+	  PSDataType getParameterType(const std::string& name) const;
+  protected:
+  	PSTokenType(const PSTokenType& original);
+  };  
+
+  class PSObjectType
+  {
+  public:
+	  const std::string& getName() const;
+	  const std::string& getParentName() const;
+	  PSList<std::string> getMemberNames() const;
+	  PSDataType getMemberType(const std::string& name) const;
+	  PSList<PSTokenType> getPredicates() const;
+  protected:
+    PSObjectType(const PSObjectType& original);
+  };
+
   class PSSchema
   {
   public:
@@ -296,6 +333,8 @@ namespace EUROPA {
 	  PSList<std::string> getAllPredicates() const;
 	  PSList<std::string> getMembers(const std::string& objectType) const;
 	  bool hasMember(const std::string& parentType, const std::string& memberName) const;
+	  
+	  PSList<PSObjectType> getAllPSObjectTypes() const;
 
   protected:
 	  PSSchema();

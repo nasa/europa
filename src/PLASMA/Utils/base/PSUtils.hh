@@ -25,6 +25,9 @@ namespace EUROPA {
       }
       void push_back(const T& value) {m_elements.push_back(value);}
     void clear() {m_elements.clear();}
+      bool operator==(const PSList<T>& other) const {
+    	  return m_elements == other.m_elements;
+      }
     protected:
       std::vector<T> m_elements;
   };
