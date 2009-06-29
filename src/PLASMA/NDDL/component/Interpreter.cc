@@ -757,7 +757,7 @@ namespace EUROPA {
                                           lhs.getValue(),
                                           rhs.getValue()->lastDomain(),
                                           !isOpEquals,
-                                          m_ifBody
+                                          m_elseBody
                                           )
                               );
       }
