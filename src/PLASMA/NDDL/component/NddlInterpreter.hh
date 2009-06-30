@@ -112,11 +112,14 @@ public:
     virtual std::string interpret(std::istream& input, const std::string& source);
 
     std::string getFilename(const std::string& f);
-
-protected:
-    EngineId m_engine;
+    bool queryIncludeGuard(const std::string& f);
+    void addInclude(const std::string &f);
 
     std::vector<std::string> getIncludePath();
+protected:
+    EngineId m_engine;
+    std::vector<std::string> m_filesread;
+
 };
 
 // An Interpreter that just returns the AST

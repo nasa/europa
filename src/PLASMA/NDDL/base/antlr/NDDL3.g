@@ -384,32 +384,44 @@ signatureAtom
 INCLUDE :	'#include' WS+ file=STRING 
                 {
                         std::string fullName = std::string((const char*)($file.text->chars));
-                        // Look for the included file in include path
-			fullName = CTX->parserObj->getFilename(fullName);
+                        fullName = CTX->parserObj->getFilename(fullName);
+                        if (!CTX->parserObj->queryIncludeGuard(fullName)) {
+                            CTX->parserObj->addInclude(fullName);
+                            // Look for the included file in include path
 
-                        if (fullName.length() == 0)
-                            throw std::string("ERROR!: couldn't find file:")+((const char*)$file.text->chars);
+                            if (fullName.length() == 0) {
+                                std::string path = "";
+                                std::vector<std::string> parserPath = CTX->parserObj->getIncludePath();
+                                for (unsigned int i=0; i<parserPath.size();i++) {
+                                    path += parserPath[i] + ":";
+                                }
+                                checkError(false, std::string("ERROR!: couldn't find file: " + std::string((const char*)$file.text->chars)
+                                                              + ", search path \"" + path + "\"").c_str());
+                            }
 
-			// Create a new input stream and take advantage of built in stream stacking
-			// in C target runtime.
+                            // Create a new input stream and take advantage of built in stream stacking
+                            // in C target runtime.
 
-                        pANTLR3_STRING_FACTORY factory = antlr3StringFactoryNew();
-                        pANTLR3_STRING fName = factory->newStr(factory,(ANTLR3_UINT8 *)fullName.c_str());
-                        delete factory;
+                            pANTLR3_STRING_FACTORY factory = antlr3StringFactoryNew();
+                            pANTLR3_STRING fName = factory->newStr(factory,(ANTLR3_UINT8 *)fullName.c_str());
+                            delete factory;
                         
-                        pANTLR3_INPUT_STREAM in = antlr3AsciiFileStreamNew(fName->chars);
-			PUSHSTREAM(in);
+                            pANTLR3_INPUT_STREAM in = antlr3AsciiFileStreamNew(fName->chars);
+                            PUSHSTREAM(in);
 
-			// Note that the input stream is not closed when it EOFs, I don't bother
-			// to do it here (hence this is leaked at the program end), 
-			// but it is up to you to track streams created like this
-			// and destroy them when the whole parse session is complete. Remember that you 
-			// don't want to do this until all tokens have been manipulated all the way through 
-			// your tree parsers etc as the token does not store the text it just refers
-			// back to the input stream and trying to get the text for it will abort if you 
-			// close the input stream too early.
-
-			$channel=HIDDEN;
+                            // Note that the input stream is not closed when it EOFs, I don't bother
+                            // to do it here (hence this is leaked at the program end), 
+                            // but it is up to you to track streams created like this
+                            // and destroy them when the whole parse session is complete. Remember that you 
+                            // don't want to do this until all tokens have been manipulated all the way through 
+                            // your tree parsers etc as the token does not store the text it just refers
+                            // back to the input stream and trying to get the text for it will abort if you 
+                            // close the input stream too early.
+                        } else {
+                            //std::cout << "Ignoring already included file " << fullName << std::endl;
+                        }
+                        
+                        $channel=HIDDEN;
 		}
 	;
 

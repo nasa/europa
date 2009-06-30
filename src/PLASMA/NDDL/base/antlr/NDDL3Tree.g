@@ -81,12 +81,12 @@ nddl :
 		( {
 		     // debugMsg("NddlInterpreter:nddl","Line:" << LEXER->getLine(LEXER)); 
 		  }
-		  (	child=enumDefinition
+		  (	child=classDeclaration
+          | child=enumDefinition
 		  |	child=typeDefinition
 		  |	child=variableDeclarations
 		  |	child=assignment
 		  |	child=constraintInstantiation
-		  |	child=classDeclaration
 		  |	child=allocation[NULL]
 		  |	child=rule
 		  |	child=problemStmt
@@ -102,8 +102,10 @@ nddl :
 		          delete child;
 		          child = NULL; 
 		          
-		          CTX->SymbolTable->getPlanDatabase()->getConstraintEngine()->propagate();
+                  CTX->SymbolTable->getPlanDatabase()->getConstraintEngine()->propagate();
 		      }
+              CTX->SymbolTable->getPlanDatabase()->getConstraintEngine()->propagate();
+              
 		  }
 		)*  
 		
@@ -767,16 +769,31 @@ qualified returns [Expr* result]
 }
     :   qualifiedString[varName]
         {
-            if (CTX->SymbolTable->isEnumValue(varName.c_str()))
+             bool isEnum = false;
+             //My guess is that there is a better way to do this. First check if it is an enum.
+             std::string secondPart = "";
+             if (varName.rfind(".") != std::string::npos) {
+                 secondPart = varName.substr(varName.rfind(".") + 1, std::string::npos);
+             }
+
+             if (CTX->SymbolTable->isEnumValue(varName.c_str())) {
                 result = CTX->SymbolTable->makeEnumRef(varName.c_str());
-            else {
+                isEnum = true;
+             } else if (secondPart.c_str() != "") {
+                if (CTX->SymbolTable->isEnumValue(secondPart.c_str())) {
+                   result = CTX->SymbolTable->makeEnumRef(secondPart.c_str());
+                   isEnum = true;
+                }
+             }
+
+             if (!isEnum) {
                 std::string errorMsg;
                 DataTypeId dt = CTX->SymbolTable->getTypeForVar(varName.c_str(),errorMsg);  
                 // TODO!!: do type checking at each "."
                 if (dt.isNoId())
                     reportSemanticError(CTX,errorMsg);
                 result = new ExprVarRef(varName.c_str(),dt);
-            }
+             }
         }
     ;
         

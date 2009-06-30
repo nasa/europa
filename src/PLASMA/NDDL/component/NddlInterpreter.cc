@@ -48,6 +48,21 @@ bool isFile(const std::string& filename)
     return (stat(filename.c_str(), &my_stat) == 0);
 }
 
+bool NddlInterpreter::queryIncludeGuard(const std::string& f)
+{
+    for (unsigned int i = 0; i < m_filesread.size(); i++) {
+      if (m_filesread[i] == f) { //Not the best. Fails if the paths differ in 'absoluteness'
+	    return true;
+        }
+    }
+    return false;
+}
+ 
+void NddlInterpreter::addInclude(const std::string &f) 
+{
+    m_filesread.push_back(f);
+}
+
 std::vector<std::string> NddlInterpreter::getIncludePath()
 {
     // TODO: cache this
@@ -87,7 +102,7 @@ std::string NddlInterpreter::getFilename(const std::string& f)
 {
     std::string fname = f.substr(1,f.size()-2); // remove quotes
 
-    std::vector<std::string> includePath=getIncludePath();
+    std::vector<std::string> includePath = getIncludePath();
 
     for (unsigned int i=0; i<includePath.size();i++) {
         // TODO: this may not be portable to all OSs
@@ -105,6 +120,13 @@ std::string NddlInterpreter::getFilename(const std::string& f)
 
 std::string NddlInterpreter::interpret(std::istream& ins, const std::string& source)
 {
+    if (queryIncludeGuard(source)) 
+    {
+      debugMsg("NddlInterpreter:error", "Ignoring root file: " << source << ". Bug?");
+        return "";
+    }
+    addInclude(source);
+
     pANTLR3_INPUT_STREAM input = getInputStream(ins,source);
 
     pNDDL3Lexer lexer = NDDL3LexerNew(input);

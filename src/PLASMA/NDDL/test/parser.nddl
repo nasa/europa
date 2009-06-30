@@ -11,6 +11,7 @@ typedef int [1 inf] positive;
 typedef float [-inf +inf] real;
 
 
+
 positive pos;
 real r = 50;
 
@@ -23,12 +24,16 @@ class foo {
     predicate p {}
 }
 
+foo fooa = new foo();
+foo foob = new foo();
+foo fooc = new foo();
+
 foo::p {
 }
 
 new foo();
 
-pos = 23;
+eq(pos, 23);
 
 pos.specify(40);
 pos.reset();
@@ -40,10 +45,6 @@ pos.specify(60);
 positive b;
 
 addEq(40, 90, b);
-
-foo fooa = new foo();
-foo foob = new foo();
-foo fooc = new foo();
 close();
 
 fact(foo.p fact1);
@@ -53,7 +54,7 @@ rejectable(foo.p somep);
 //fact1 before goal1;
 //goal1 meets somep;
 
-;;
+//;;
 
 // typeDefinition tests:
 
@@ -134,6 +135,7 @@ BClass::q {
   foreach(f in loopVar) {
     debug(f);
   }
+
   ;;
 }
 

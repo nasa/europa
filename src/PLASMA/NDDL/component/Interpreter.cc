@@ -1559,7 +1559,7 @@ namespace EUROPA {
               const DbClientId& pdb = getPDB(context);
 
               if (rhs.getValue()->lastDomain().isSingleton()) {
-                  pdb->specify(lhs.getValue(),rhs.getValue()->lastDomain().getSingletonValue());
+                  pdb->restrict(lhs.getValue(),rhs.getValue()->lastDomain());
               }
               else {
                   pdb->restrict(lhs.getValue(),rhs.getValue()->lastDomain());
