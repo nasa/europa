@@ -30,6 +30,36 @@ using namespace EUROPA;
     NddlInterpreter* parserObj;
 }
 
+@parser::includes
+{
+#include "NddlInterpreter.hh"
+
+using namespace EUROPA;
+
+//This macro creates an implicit variable. It increments a counter and returns the current interation.
+//The name is the name of a newly created c string that holds the name of the variable. Because of
+//pointers, you need DELETE_VAR after use.
+class _Deleter { 
+public: 
+    _Deleter(char** target) { 
+        t = target; 
+    } 
+    ~_Deleter() { 
+        if(*t) { 
+            delete[] *t; } 
+        } 
+private: 
+    char** t;
+};
+#define DELETE_STRING_AT_END(var) _Deleter var##_##deleter(&var);
+#define CREATE_VAR(name) char* name = CTX->parserObj->createImplicitVariable(); DELETE_STRING_AT_END(name);
+}
+
+@parser::context {
+    NddlInterpreter* parserObj;
+}
+
+
 
 nddl	
     :   nddlStatement*
@@ -101,6 +131,85 @@ anyValue
     |   qualified
     ;
 
+///
+expressionLiteralNumber[const char* var]
+    :   a=INT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $a))
+    |   b=FLOAT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $b));
+
+relationalExpression[const char* var]
+@init {
+   CREATE_VAR(implicit_var_left);
+   CREATE_VAR(implicit_var_right);
+#define SETCON(name) contraint = (char**)&(name); invert = false;
+#define IVRCON(name) contraint = (char**)&(name); invert = true;
+   char const* TEST_LT = "TestLessThan";
+   char const* TEST_LEQ = "testLEQ";
+   char const* TEST_EQ = "testEQ";
+   char const* TEST_NEQ = "testNEQ";
+   bool invert = false; //Invert is so that > and >= can work - there are no constraints for these, so feed the args to < and <= backwards.
+   char** contraint = NULL;
+}
+    :   a=expressionLiteralNumber[implicit_var_left] 
+            ('==' {SETCON(TEST_EQ);} | '!=' {SETCON(TEST_NEQ);} 
+            | '<' {SETCON(TEST_LT);} | '<=' {SETCON(TEST_LEQ);} 
+            | '>' {IVRCON(TEST_LT);} | '>=' {IVRCON(TEST_LEQ);}) 
+        b=expressionLiteralNumber[implicit_var_right]
+        -> {!invert}?
+           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
+           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
+           $a $b ^(CONSTRAINT_INSTANTIATION IDENT[{(ANTLR3_UINT8*)(*contraint)}]
+            ^('(' IDENT[var] IDENT[implicit_var_left] IDENT[implicit_var_right]))
+        -> {invert}?
+           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
+           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
+           $a $b ^(CONSTRAINT_INSTANTIATION IDENT[{(ANTLR3_UINT8*)(*contraint)}]
+            ^('(' IDENT[var] IDENT[implicit_var_right] IDENT[implicit_var_left]))
+        -> ;
+
+///
+booleanLiteralExpression[const char* var]
+    :   val=booleanLiteral -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $val ))
+    |   varname=IDENT ->  ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $varname))
+    |   re=relationalExpression[var] -> $re
+    |   '(' paren=booleanOrExpression[var] ')' -> $paren
+    ;
+
+
+booleanAndExpression[const char* var]
+@init {
+   CREATE_VAR(implicit_var_left);
+   CREATE_VAR(implicit_var_right);
+   bool isSingle = false;
+}
+    :   a=booleanLiteralExpression[implicit_var_left] ('&&' b=booleanAndExpression[implicit_var_right] | {isSingle = true;})
+        //This first one runs in the case of a single expression with no &&.
+        -> {isSingle}? ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}]) 
+           $a ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[implicit_var_left] IDENT[var])) //Need to think of a better way.
+        //This second one runs in the case of a && b.
+        -> ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
+           ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
+           $a $b ^(CONSTRAINT_INSTANTIATION IDENT["testAnd"] ^('(' IDENT[var] IDENT[implicit_var_left] IDENT[implicit_var_right])) ;
+
+
+booleanOrExpression[const char* var]
+@init {
+   CREATE_VAR(implicit_var_left);
+   CREATE_VAR(implicit_var_right);
+   bool isSingle = false;
+}
+    :   a=booleanAndExpression[implicit_var_left] ('||' b=booleanOrExpression[implicit_var_right] | {isSingle = true;})
+        //This first one runs in the case of a single expression with no ||.
+        -> {isSingle}? ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}]) 
+           $a ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[implicit_var_left] IDENT[var])) //Need to think of a better way.
+        //This second one runs in the case of a || b.
+        -> ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
+           ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
+           $a $b ^(CONSTRAINT_INSTANTIATION IDENT["testOr"] ^('(' IDENT[var] IDENT[implicit_var_left] IDENT[implicit_var_right])) ;
+
+testExpression[const char* var]
+    :  'test(' result=booleanOrExpression[var] ')' -> $result ;
+///
+
 allocation
     :   'new'! constructorInvocation
     ;
@@ -115,8 +224,16 @@ qualified
     ;
 
 assignment
-    :   qualified ('in' | '=') initializer ';'
-            -> ^('=' qualified initializer)
+@init {
+   CREATE_VAR(implicit_var_name);
+}
+    :   (   qualified ('in' | '=') initializer ';'
+                 -> ^('=' qualified initializer)
+        |   var=qualified ('in' | '=') set=testExpression[implicit_var_name] ';'
+            -> ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_name}])
+                 $set ^(CONSTRAINT_INSTANTIATION IDENT["eq"] 
+                        ^('(' $var IDENT[{(ANTLR3_UINT8*)implicit_var_name}]))
+        )
     ;
     
 initializer

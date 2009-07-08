@@ -116,9 +116,12 @@ public:
     void addInclude(const std::string &f);
 
     std::vector<std::string> getIncludePath();
+
+    char* createImplicitVariable();
 protected:
     EngineId m_engine;
     std::vector<std::string> m_filesread;
+    unsigned int m_varcount;
 
 };
 
