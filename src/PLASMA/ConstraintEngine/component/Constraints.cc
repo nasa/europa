@@ -1779,6 +1779,134 @@ namespace EUROPA {
     }
   }
 
+
+
+  TestNEQ::TestNEQ(const LabelStr& name,
+			   const LabelStr& propagatorName,
+			   const ConstraintEngineId& constraintEngine,
+			   const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_test(getCurrentDomain(variables[0])),
+      m_arg1(getCurrentDomain(variables[1])),
+      m_arg2(getCurrentDomain(variables[2])){
+    check_error(variables.size() == ARG_COUNT);
+  }
+
+  void TestNEQ::handleExecute(){
+
+    debugMsg("TestNEQ:handleExecute", "comparing " << m_arg1.toString() << " with " << m_arg2.toString());
+
+    if(m_arg1.isSingleton() &&
+       m_arg2.isSingleton()) {
+      if (m_arg1.intersects(m_arg2)) { // They are singletons and are equal, return false.
+	m_test.remove(1);
+      } else {
+	m_test.remove(0);
+      }
+    }
+
+    if(m_test.isSingleton()) {
+      if(m_test.getSingletonValue() == true) { //Enforce inequality
+	if(m_arg1.isSingleton()) {
+	  m_arg2.remove(m_arg1.getSingletonValue());
+	}
+	if(m_arg2.isSingleton()) {
+	  m_arg1.remove(m_arg2.getSingletonValue());
+	}
+      } else { //Enforce equality
+	m_arg2.intersect(m_arg1);
+	m_arg1.intersect(m_arg2);
+      }
+    }
+  }
+
+  
+  TestOr::TestOr(const LabelStr& name,
+		 const LabelStr& propagatorName,
+		 const ConstraintEngineId& constraintEngine,
+		 const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_test(getCurrentDomain(variables[0])),
+      m_arg1(getCurrentDomain(variables[1])),
+      m_arg2(getCurrentDomain(variables[2])){
+    check_error(variables.size() == ARG_COUNT);
+  }
+
+  void TestOr::handleExecute(){
+
+    debugMsg("TestOr:handleExecute", "comparing " << m_arg1.toString() << " with " << m_arg2.toString());
+
+    if(m_arg1.isSingleton() && m_arg2.isSingleton()) { //A and b are singltons, so set the value.
+      if (m_arg1.getSingletonValue() == 0 && m_arg2.getSingletonValue() == 0) {
+        m_test.remove(1);
+      } else {
+        m_test.remove(0);
+      }
+    }
+
+    if(m_test.isSingleton()){ //Test value specified, so set up the others
+      if (m_test.getSingletonValue()) { //It's true, so a or b == true
+
+	if (m_arg1.isSingleton()) {
+	  if (m_arg1.getSingletonValue() == 0) { //a == false, so b must be true
+	    m_arg2.remove(0);
+	  }
+	} else if(m_arg2.isSingleton()) {
+	  if (m_arg2.getSingletonValue() == 0) { //b == false, so a must be true
+	    m_arg1.remove(0);
+	  }
+	} //If none are singletons, nothing to be done: FIXME!
+	       
+      } else { //It's false, so both a and b are false.
+	m_arg1.remove(1);
+	m_arg2.remove(1);
+      }
+    }
+  }
+
+  TestAnd::TestAnd(const LabelStr& name,
+		   const LabelStr& propagatorName,
+		   const ConstraintEngineId& constraintEngine,
+		   const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_test(getCurrentDomain(variables[0])),
+      m_arg1(getCurrentDomain(variables[1])),
+      m_arg2(getCurrentDomain(variables[2])){
+    check_error(variables.size() == ARG_COUNT);
+  }
+
+  void TestAnd::handleExecute(){
+
+    debugMsg("TestAnd:handleExecute", "comparing " << m_arg1.toString() << " with " << m_arg2.toString() << ", test " << m_test);
+
+    if(m_arg1.isSingleton() && m_arg2.isSingleton()) { //A and b are singltons, so set the value.
+      if (m_arg1.getSingletonValue() == 0 || m_arg2.getSingletonValue() == 0) { //a == false or b == false, so set to false
+        m_test.intersect(IntervalDomain(0, 0));
+      } else { //a == b == true, set to true
+        m_test.intersect(IntervalDomain(1, 1));
+      }
+    }
+
+    if(m_test.isSingleton()){ //Test value specified, so set up the others
+      if (m_test.getSingletonValue()) { //It's true, so a and b == true
+        m_arg1.intersect(IntervalDomain(1, 1));
+        m_arg2.intersect(IntervalDomain(1, 1));
+      } else { //It's false, so one of a or b must be false
+	if (m_arg1.isSingleton()) {
+	  if (m_arg1.getSingletonValue() != 0) { //a == true, so b must be false
+	    m_arg2.intersect(IntervalDomain(0, 0));
+	  }
+	} 
+	if(m_arg2.isSingleton()) {
+	  if (m_arg2.getSingletonValue() != 0) { //b == true, so a must be false
+	    m_arg1.intersect(IntervalDomain(0, 0));
+	  }
+	} //If none are singletons, nothing to be done: FIXME!
+      }
+    }
+    
+  }
+
   TestLessThan::TestLessThan(const LabelStr& name,
 			     const LabelStr& propagatorName,
 			     const ConstraintEngineId& constraintEngine,
