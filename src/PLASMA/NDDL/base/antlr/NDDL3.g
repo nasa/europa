@@ -134,7 +134,8 @@ anyValue
 ///
 expressionLiteralNumber[const char* var]
     :   a=INT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $a))
-    |   b=FLOAT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $b));
+    |   b=FLOAT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $b))
+    |   c=IDENT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $c));
 
 relationalExpression[const char* var]
 @init {
