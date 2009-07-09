@@ -137,6 +137,58 @@ expressionLiteralNumber[const char* var]
     |   b=FLOAT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $b))
     |   c=IDENT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $c));
 
+/*multiplicationExpression[const char* var]
+@init {
+   CREATE_VAR(implicit_var_left);
+   CREATE_VAR(implicit_var_right);
+   bool isSingle = false;
+}
+    :   a=expressionLiteralNumber[implicit_var_left] ('+' b=multiplicationExpression[implicit_var_right] | {isSingle = true;}) ->;*/
+        /*-> {isSingle == false}?
+           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
+           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
+           $a $b
+           ^(CONSTRAINT_INSTANTIATION IDENT["mulEq"] ^('(' IDENT[{(ANTLR3_UINT8*)implicit_var_left}] IDENT[{(ANTLR3_UINT8*)implicit_var_right}] IDENT[var]))
+        -> ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
+           $a
+           ^(CONSTRAINT_INSTANTIATION IDENT["addEq"] ^('(' IDENT[{(ANTLR3_UINT8*)implicit_var_left}] IDENT[{(ANTLR3_UINT8*)implicit_var_right}] IDENT[var]));*/
+
+expressionNumberNeg[const char* var, bool negateRight]
+@init {
+   CREATE_VAR(implicit_var_neg);
+}
+    :   a=expressionLiteralNumber[(negateRight ? implicit_var_neg : var)]
+        -> {negateRight}?
+           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_neg}])
+           $a
+           ^(CONSTRAINT_INSTANTIATION IDENT["neg"] ^('(' IDENT[{(ANTLR3_UINT8*)var}] IDENT[{(ANTLR3_UINT8*)implicit_var_neg}]))
+        -> $a;
+           
+
+
+additionExpression[const char* var, bool negateRight]
+@init {
+   CREATE_VAR(implicit_var_left);
+   CREATE_VAR(implicit_var_right);
+   bool isPlus = true, isSingle = false;
+}
+    :   a=expressionNumberNeg[implicit_var_left, negateRight] ('+' b=additionExpression[implicit_var_right, false] | {isSingle = true;})
+        -> {isSingle == false}? 
+           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
+           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
+           $a $b
+           ^(CONSTRAINT_INSTANTIATION IDENT["addEq"] ^('(' IDENT[{(ANTLR3_UINT8*)implicit_var_left}] IDENT[{(ANTLR3_UINT8*)implicit_var_right}] IDENT[var]))
+
+        -> ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}]) $a
+           ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] IDENT[{(ANTLR3_UINT8*)implicit_var_left}]))
+
+    |   a=expressionNumberNeg[implicit_var_left, negateRight] '-' b=additionExpression[implicit_var_right, true]
+        -> ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
+           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
+           $a $b
+           ^(CONSTRAINT_INSTANTIATION IDENT["addEq"] ^('(' IDENT[{(ANTLR3_UINT8*)implicit_var_left}] IDENT[{(ANTLR3_UINT8*)implicit_var_right}] IDENT[var]));
+
+
 relationalExpression[const char* var]
 @init {
    CREATE_VAR(implicit_var_left);
@@ -150,11 +202,11 @@ relationalExpression[const char* var]
    bool invert = false; //Invert is so that > and >= can work - there are no constraints for these, so feed the args to < and <= backwards.
    char** contraint = NULL;
 }
-    :   a=expressionLiteralNumber[implicit_var_left] 
+    :   a=additionExpression[implicit_var_left, false] 
             ('==' {SETCON(TEST_EQ);} | '!=' {SETCON(TEST_NEQ);} 
             | '<' {SETCON(TEST_LT);} | '<=' {SETCON(TEST_LEQ);} 
             | '>' {IVRCON(TEST_LT);} | '>=' {IVRCON(TEST_LEQ);}) 
-        b=expressionLiteralNumber[implicit_var_right]
+        b=additionExpression[implicit_var_right, false]
         -> {!invert}?
            ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
            ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
