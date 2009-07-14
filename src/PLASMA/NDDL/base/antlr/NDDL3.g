@@ -79,6 +79,7 @@ nddlStatement
     |   relation
     |   methodInvocation
     |   noopstatement
+    |   enforceStatement
     |   constraintSignature!
     ;
 
@@ -115,8 +116,11 @@ baseDomainValue
     ;
                 
 variableDeclarations
-    :   ('filter')? type nameWithBaseDomain (',' nameWithBaseDomain)* ';'
+    :   (('filter')? type nameWithBaseDomain (',' nameWithBaseDomain)* ';'
             -> ^(VARIABLE type nameWithBaseDomain (nameWithBaseDomain)*)
+        | 'bool' var=qualified '=' set=testExpression[(const char*)($var.text->chars)] ';'
+            -> ^(VARIABLE IDENT["bool"] $var) $set
+        )
     ;
 
 nameWithBaseDomain
@@ -137,22 +141,6 @@ expressionLiteralNumber[const char* var]
     |   b=FLOAT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $b))
     |   c=IDENT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $c));
 
-/*multiplicationExpression[const char* var]
-@init {
-   CREATE_VAR(implicit_var_left);
-   CREATE_VAR(implicit_var_right);
-   bool isSingle = false;
-}
-    :   a=expressionLiteralNumber[implicit_var_left] ('+' b=multiplicationExpression[implicit_var_right] | {isSingle = true;}) ->;*/
-        /*-> {isSingle == false}?
-           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
-           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
-           $a $b
-           ^(CONSTRAINT_INSTANTIATION IDENT["mulEq"] ^('(' IDENT[{(ANTLR3_UINT8*)implicit_var_left}] IDENT[{(ANTLR3_UINT8*)implicit_var_right}] IDENT[var]))
-        -> ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
-           $a
-           ^(CONSTRAINT_INSTANTIATION IDENT["addEq"] ^('(' IDENT[{(ANTLR3_UINT8*)implicit_var_left}] IDENT[{(ANTLR3_UINT8*)implicit_var_right}] IDENT[var]));*/
-
 expressionNumberNeg[const char* var, bool negateRight]
 @init {
    CREATE_VAR(implicit_var_neg);
@@ -164,8 +152,6 @@ expressionNumberNeg[const char* var, bool negateRight]
            ^(CONSTRAINT_INSTANTIATION IDENT["neg"] ^('(' IDENT[{(ANTLR3_UINT8*)var}] IDENT[{(ANTLR3_UINT8*)implicit_var_neg}]))
         -> $a;
            
-
-
 additionExpression[const char* var, bool negateRight]
 @init {
    CREATE_VAR(implicit_var_left);
@@ -187,6 +173,7 @@ additionExpression[const char* var, bool negateRight]
            ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
            $a $b
            ^(CONSTRAINT_INSTANTIATION IDENT["addEq"] ^('(' IDENT[{(ANTLR3_UINT8*)implicit_var_left}] IDENT[{(ANTLR3_UINT8*)implicit_var_right}] IDENT[var]));
+
 
 
 relationalExpression[const char* var]
@@ -261,6 +248,14 @@ booleanOrExpression[const char* var]
 
 testExpression[const char* var]
     :  'test(' result=booleanOrExpression[var] ')' -> $result ;
+
+enforceStatement
+@init {
+   CREATE_VAR(implicit_var_return);
+}
+    :  'enforce' '(' result=booleanOrExpression[implicit_var_return] ')' ';' -> 
+        ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_return}]) 
+        $result ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[implicit_var_return] 'true'));
 ///
 
 allocation
