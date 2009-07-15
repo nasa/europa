@@ -43863,4 +43863,257 @@
 			<IntervalDomain lb="10.0" ub="10.0"/>
 		</Outputs>
 	</Constraint>
+	<Constraint name="testOr" test="3398">
+		<Inputs>
+			<BoolDomain>
+			  <element value="true"/>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="testOr" test="3399">
+		<Inputs>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="testOr" test="3400">
+		<Inputs>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="testOr" test="3401">
+		<Inputs>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			  <element value="false"/>
+			</BoolDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+		</Outputs>
+	</Constraint>
+
+	<Constraint name="testAnd" test="3402">
+		<Inputs>
+			<BoolDomain>
+			  <element value="false"/>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="testAnd" test="3403">
+		<Inputs>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			  <element value="false"/>
+			</BoolDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="testAnd" test="3404">
+		<Inputs>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			  <element value="false"/>
+			</BoolDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="testAnd" test="3405">
+		<Inputs>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+		</Outputs>
+	</Constraint>
+
+	<Constraint name="testNEQ" test="3406">
+		<Inputs>
+			<BoolDomain>
+			  <element value="true"/>
+			  <element value="false"/>
+			</BoolDomain>
+			<NumericDomain>
+			  <element value="2"/>
+			</NumericDomain>
+			<NumericDomain>
+			  <element value="2"/>
+			</NumericDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<NumericDomain>
+			  <element value="2"/>
+			</NumericDomain>
+			<NumericDomain>
+			  <element value="2"/>
+			</NumericDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="testNEQ" test="3407">
+		<Inputs>
+			<BoolDomain>
+			  <element value="true"/>
+			  <element value="false"/>
+			</BoolDomain>
+			<NumericDomain>
+			  <element value="3"/>
+			</NumericDomain>
+			<NumericDomain>
+			  <element value="2"/>
+			</NumericDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<NumericDomain>
+			  <element value="3"/>
+			</NumericDomain>
+			<NumericDomain>
+			  <element value="2"/>
+			</NumericDomain>
+		</Outputs>
+	</Constraint>
+
 </ConstraintTests>
