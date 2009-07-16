@@ -42,9 +42,7 @@ foo::p {
 
        if (foo == true) {
               enforce(fooret == true);
-	      bool tester = test(alpha == beta - gamma + delta);
-              //iftest (alpha == beta - gamma + delta) {
-              if (tester == false) {
+              iftest (alpha == beta - gamma + delta) {
                  enforce(ret == true);
               } else {
                  enforce(ret == false);
@@ -79,8 +77,8 @@ fact(foo.p fact1);
 goal(foo.p goal1);
 rejectable(foo.p somep);
 
-//fact1 before goal1;
-//goal1 meets somep;
+fact1 before goal1;
+goal1 meets somep;
 
 //;;
 
