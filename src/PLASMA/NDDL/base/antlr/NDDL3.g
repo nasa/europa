@@ -139,6 +139,7 @@ anyValue
 expressionLiteralNumber[const char* var]
     :   a=INT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $a))
     |   b=FLOAT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $b))
+    |   d=booleanLiteral -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $d))
     |   c=IDENT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $c));
 
 expressionNumberNeg[const char* var, bool negateRight]
@@ -367,6 +368,7 @@ ruleStatement
 	|	variableDeclarations
 	|	constraintInstantiation
 	|	flowControl
+    |   enforceStatement
 	|	noopstatement
 	;
 
