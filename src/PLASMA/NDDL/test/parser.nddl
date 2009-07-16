@@ -41,19 +41,19 @@ foo::p {
        bool fooret;
 
        if (foo == true) {
-              eq(fooret, true);
+              enforce(fooret == true);
 	      bool tester = test(alpha == beta - gamma + delta);
               //iftest (alpha == beta - gamma + delta) {
               if (tester == false) {
-                 eq(ret, true);
+                 enforce(ret == true);
               } else {
-                 eq(ret, false);
+                 enforce(ret == false);
               }
        } else {
-              eq(fooret, false);
+              enforce(fooret == false);
        }
-       eq(foo, true);
-       eq(fooret, true);
+       enforce(foo == true);
+       enforce(fooret == true);
 }
 
 new foo();
