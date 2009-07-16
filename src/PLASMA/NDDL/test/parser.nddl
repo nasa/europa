@@ -54,6 +54,9 @@ foo::p {
        }
        enforce(foo == true);
        enforce(fooret == true);
+
+       Location l;
+       enforce(l == Location.Hill);
 }
 
 new foo();

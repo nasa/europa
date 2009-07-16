@@ -140,7 +140,7 @@ expressionLiteralNumber[const char* var]
     :   a=INT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $a))
     |   b=FLOAT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $b))
     |   d=booleanLiteral -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $d))
-    |   c=IDENT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $c));
+    |   c=qualified -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $c));
 
 expressionNumberNeg[const char* var, bool negateRight]
 @init {
@@ -210,7 +210,7 @@ relationalExpression[const char* var]
 ///
 booleanLiteralExpression[const char* var]
     :   val=booleanLiteral -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $val ))
-    |   varname=IDENT ->  ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $varname))
+    |   varname=qualified ->  ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $varname))
     |   re=relationalExpression[var] -> $re
     |   '(' paren=booleanOrExpression[var] ')' -> $paren
     ;
