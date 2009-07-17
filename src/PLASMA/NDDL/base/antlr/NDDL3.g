@@ -571,19 +571,12 @@ INCLUDE :	'#include' WS+ file=STRING
 
                             pANTLR3_STRING_FACTORY factory = antlr3StringFactoryNew();
                             pANTLR3_STRING fName = factory->newStr(factory,(ANTLR3_UINT8 *)fullName.c_str());
-                            delete factory;
+                            //factory->close(factory);
                         
                             pANTLR3_INPUT_STREAM in = antlr3AsciiFileStreamNew(fName->chars);
+                            //fName->free(fName);
                             PUSHSTREAM(in);
-
-                            // Note that the input stream is not closed when it EOFs, I don't bother
-                            // to do it here (hence this is leaked at the program end), 
-                            // but it is up to you to track streams created like this
-                            // and destroy them when the whole parse session is complete. Remember that you 
-                            // don't want to do this until all tokens have been manipulated all the way through 
-                            // your tree parsers etc as the token does not store the text it just refers
-                            // back to the input stream and trying to get the text for it will abort if you 
-                            // close the input stream too early.
+                            CTX->parserObj->addInputStream(in);
                         } else {
                             //std::cout << "Ignoring already included file " << fullName << std::endl;
                         }

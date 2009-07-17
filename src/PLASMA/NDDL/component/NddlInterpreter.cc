@@ -63,6 +63,11 @@ void NddlInterpreter::addInclude(const std::string &f)
     m_filesread.push_back(f);
 }
 
+void NddlInterpreter::addInputStream(pANTLR3_INPUT_STREAM in) 
+{
+    m_inputstreams.push_back(in);
+}
+
 std::vector<std::string> NddlInterpreter::getIncludePath()
 {
     // TODO: cache this
@@ -184,11 +189,15 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
     treeParser->free(treeParser);
     nodeStream->free(nodeStream);
 
+    while(!m_inputstreams.empty()) {
+      m_inputstreams[0]->close(m_inputstreams[0]);
+      m_inputstreams.erase(m_inputstreams.begin());
+    }
+
     parser->free(parser);
     tstream->free(tstream);
     lexer->free(lexer);
     input->close(input);
-
     return symbolTable.getErrors();
 }
 
