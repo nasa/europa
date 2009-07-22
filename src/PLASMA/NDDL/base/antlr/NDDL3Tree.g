@@ -670,6 +670,7 @@ guardExpression returns [ExprIfGuard* result]
 }
         : ( ^(relop=guardRelop {relopStr=c_str($relop.text->chars);} lhs=anyValue rhs=anyValue )
           | lhs=anyValue
+          | ^('test' lhs=anyValue { rhs = new ExprConstant((new BoolDomain(true))->getTypeName().c_str(), new BoolDomain(true)); } )
           )
           {
               result = new ExprIfGuard(relopStr,lhs,rhs);

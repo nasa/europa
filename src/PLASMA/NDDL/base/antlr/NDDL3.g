@@ -437,7 +437,17 @@ typeArgument
 	;
 
 flowControl
-	:	'if'^ guardExpression ruleBlock (options {k=1;}:'else'! ruleBlock)?
+@init {
+   CREATE_VAR(implicit_var_return);
+   bool hasElse = false;
+}
+
+    :	'if'^ guardExpression ruleBlock (options {k=1;}:'else'! ruleBlock)?
+    |   'if' 'test' '(' result=booleanOrExpression[implicit_var_return] ')' a=ruleBlock ('else' b=ruleBlock {hasElse = true;}|) 
+        -> {hasElse == false}? ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_return}])
+           $result ^('if' ^('test' IDENT[implicit_var_return]) $a)
+        -> ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_return}])
+           $result ^('if' ^('test' IDENT[implicit_var_return]) $a $b)
 	|	'foreach'^ '('! IDENT 'in'! qualified ')'! ruleBlock
 	;
 	
