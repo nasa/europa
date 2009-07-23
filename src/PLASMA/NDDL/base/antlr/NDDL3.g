@@ -438,18 +438,19 @@ typeArgument
 
 flowControl
 @init {
-   CREATE_VAR(implicit_var_name);
-   bool hasElse = true;
+   CREATE_VAR(implicit_var_return);
+   bool hasElse = false;
 }
-	:   'iftest' '(' result=booleanOrExpression[implicit_var_name] ')' a=ruleBlock ('else' b=ruleBlock | {hasElse = false;})
-            -> {hasElse}?
-               ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_name}]) $result
-               ^('if' ^('==' IDENT[{(ANTLR3_UINT8*)implicit_var_name}] 'true') $a $b) 
-            -> ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_name}]) $result
-               ^('if' ^('==' IDENT[{(ANTLR3_UINT8*)implicit_var_name}] 'true') $a) 
-    |	'if'^ guardExpression ruleBlock (options {k=1;}:'else'! ruleBlock)?
-	|	'foreach'^ '('! IDENT 'in'! qualified ')'! ruleBlock;
 
+    :	'if'^ guardExpression ruleBlock (options {k=1;}:'else'! ruleBlock)?
+    |   'if' 'test' '(' result=booleanOrExpression[implicit_var_return] ')' a=ruleBlock ('else' b=ruleBlock {hasElse = true;}|) 
+        -> {hasElse == false}? ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_return}])
+           $result ^('if' ^('test' IDENT[implicit_var_return]) $a)
+        -> ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_return}])
+           $result ^('if' ^('test' IDENT[implicit_var_return]) $a $b)
+	|	'foreach'^ '('! IDENT 'in'! qualified ')'! ruleBlock
+	;
+	
 guardExpression
 	:	'('! anyValue (('=='^ | '!='^) anyValue)? ')'!
 	;
@@ -580,19 +581,12 @@ INCLUDE :	'#include' WS+ file=STRING
 
                             pANTLR3_STRING_FACTORY factory = antlr3StringFactoryNew();
                             pANTLR3_STRING fName = factory->newStr(factory,(ANTLR3_UINT8 *)fullName.c_str());
-                            delete factory;
+                            //factory->close(factory);
                         
                             pANTLR3_INPUT_STREAM in = antlr3AsciiFileStreamNew(fName->chars);
+                            //fName->free(fName);
                             PUSHSTREAM(in);
-
-                            // Note that the input stream is not closed when it EOFs, I don't bother
-                            // to do it here (hence this is leaked at the program end), 
-                            // but it is up to you to track streams created like this
-                            // and destroy them when the whole parse session is complete. Remember that you 
-                            // don't want to do this until all tokens have been manipulated all the way through 
-                            // your tree parsers etc as the token does not store the text it just refers
-                            // back to the input stream and trying to get the text for it will abort if you 
-                            // close the input stream too early.
+                            CTX->parserObj->addInputStream(in);
                         } else {
                             //std::cout << "Ignoring already included file " << fullName << std::endl;
                         }

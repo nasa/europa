@@ -479,14 +479,24 @@ namespace EUROPA {
   // master. However, MatchingEngine matches on that, so keeping it for now.
   TokenId PredicateInstanceRef::getToken(EvalContext& context, const char* relationName, bool isFact, bool isRejectable)
   {
+      TokenId result;
       if (m_predicateInstance.length() == 0)
-          return context.getToken(m_predicateName.c_str());
+      {
+          result = context.getToken(m_predicateName.c_str());
+      }
+      else 
+      {
+	  InterpretedRuleInstance* rule = (InterpretedRuleInstance*)(context.getElement("RuleInstance"));
+	  if (rule != NULL)
+	     result = createSubgoal(context,rule,relationName);
+	  else
+	     result = createGlobalToken(context, isFact, isRejectable);
+      }
 
-      InterpretedRuleInstance* rule = (InterpretedRuleInstance*)(context.getElement("RuleInstance"));
-      if (rule != NULL)
-          return createSubgoal(context,rule,relationName);
-      else
-          return createGlobalToken(context, isFact, isRejectable);
+      //TODO: In the future, this might be a hook into the NDDL error reporting system.
+      checkError(result != TokenId() && result.isId(), "Error, no token " << m_predicateInstance << " "
+		 << m_predicateName << " in relation: " << relationName << ".");
+      return result;
   }
 
   TokenId PredicateInstanceRef::createGlobalToken(EvalContext& context, bool isFact, bool isRejectable)

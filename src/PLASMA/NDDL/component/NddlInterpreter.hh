@@ -9,6 +9,7 @@
 #define NDDLINTERPRETER_H_
 
 #include "Interpreter.hh"
+#include <antlr3interfaces.h>
 
 namespace EUROPA {
 
@@ -116,12 +117,13 @@ public:
     void addInclude(const std::string &f);
 
     std::vector<std::string> getIncludePath();
-
+    void addInputStream(pANTLR3_INPUT_STREAM in);
     char* createImplicitVariable();
 protected:
     EngineId m_engine;
     std::vector<std::string> m_filesread;
     unsigned int m_varcount;
+    std::vector<pANTLR3_INPUT_STREAM> m_inputstreams;
 
 };
 
