@@ -667,10 +667,14 @@ guardExpression returns [ExprIfGuard* result]
 @init
 {
     const char* relopStr = "==";
+    BoolDomain *dom = NULL;
 }
         : ( ^(relop=guardRelop {relopStr=c_str($relop.text->chars);} lhs=anyValue rhs=anyValue )
           | lhs=anyValue
-          | ^('test' lhs=anyValue { rhs = new ExprConstant((new BoolDomain(true))->getTypeName().c_str(), new BoolDomain(true)); } )
+          | ^('test' lhs=anyValue
+                { dom = new BoolDomain(true); 
+                  rhs = new ExprConstant(dom->getTypeName().c_str(), dom); 
+                } )
           )
           {
               result = new ExprIfGuard(relopStr,lhs,rhs);
