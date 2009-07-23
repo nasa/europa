@@ -118,13 +118,10 @@ public:
 
     std::vector<std::string> getIncludePath();
     void addInputStream(pANTLR3_INPUT_STREAM in);
-    char* createImplicitVariable();
 protected:
     EngineId m_engine;
     std::vector<std::string> m_filesread;
-    unsigned int m_varcount;
     std::vector<pANTLR3_INPUT_STREAM> m_inputstreams;
-
 };
 
 // An Interpreter that just returns the AST

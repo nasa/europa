@@ -30,36 +30,6 @@ using namespace EUROPA;
     NddlInterpreter* parserObj;
 }
 
-@parser::includes
-{
-#include "NddlInterpreter.hh"
-
-using namespace EUROPA;
-
-//This macro creates an implicit variable. It increments a counter and returns the current interation.
-//The name is the name of a newly created c string that holds the name of the variable. Because of
-//pointers, you need DELETE_VAR after use.
-class _Deleter { 
-public: 
-    _Deleter(char** target) { 
-        t = target; 
-    } 
-    ~_Deleter() { 
-        if(*t) { 
-            delete[] *t; } 
-        } 
-private: 
-    char** t;
-};
-#define DELETE_STRING_AT_END(var) _Deleter var##_##deleter(&var);
-#define CREATE_VAR(name) char* name = CTX->parserObj->createImplicitVariable(); DELETE_STRING_AT_END(name);
-}
-
-@parser::context {
-    NddlInterpreter* parserObj;
-}
-
-
 
 nddl	
     :   nddlStatement*
@@ -79,7 +49,6 @@ nddlStatement
     |   relation
     |   methodInvocation
     |   noopstatement
-    |   enforceStatement
     |   constraintSignature!
     ;
 
@@ -116,11 +85,8 @@ baseDomainValue
     ;
                 
 variableDeclarations
-    :   (('filter')? type nameWithBaseDomain (',' nameWithBaseDomain)* ';'
+    :   ('filter')? type nameWithBaseDomain (',' nameWithBaseDomain)* ';'
             -> ^(VARIABLE type nameWithBaseDomain (nameWithBaseDomain)*)
-        | 'bool' var=qualified '=' set=testExpression[(const char*)($var.text->chars)] ';'
-            -> ^(VARIABLE IDENT["bool"] $var) $set
-        )
     ;
 
 nameWithBaseDomain
@@ -134,130 +100,6 @@ anyValue
     |   baseDomain
     |   qualified
     ;
-
-///
-expressionLiteralNumber[const char* var]
-    :   a=INT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $a))
-    |   b=FLOAT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $b))
-    |   d=booleanLiteral -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $d))
-    |   c=qualified -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $c));
-
-expressionNumberNeg[const char* var, bool negateRight]
-@init {
-   CREATE_VAR(implicit_var_neg);
-}
-    :   a=expressionLiteralNumber[(negateRight ? implicit_var_neg : var)]
-        -> {negateRight}?
-           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_neg}])
-           $a
-           ^(CONSTRAINT_INSTANTIATION IDENT["neg"] ^('(' IDENT[{(ANTLR3_UINT8*)var}] IDENT[{(ANTLR3_UINT8*)implicit_var_neg}]))
-        -> $a;
-           
-additionExpression[const char* var, bool negateRight]
-@init {
-   CREATE_VAR(implicit_var_left);
-   CREATE_VAR(implicit_var_right);
-   bool isPlus = true, isSingle = false;
-}
-    :   a=expressionNumberNeg[implicit_var_left, negateRight] ('+' b=additionExpression[implicit_var_right, false] | {isSingle = true;})
-        -> {isSingle == false}? 
-           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
-           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
-           $a $b
-           ^(CONSTRAINT_INSTANTIATION IDENT["addEq"] ^('(' IDENT[{(ANTLR3_UINT8*)implicit_var_left}] IDENT[{(ANTLR3_UINT8*)implicit_var_right}] IDENT[var]))
-
-        -> ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}]) $a
-           ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] IDENT[{(ANTLR3_UINT8*)implicit_var_left}]))
-
-    |   a=expressionNumberNeg[implicit_var_left, negateRight] '-' b=additionExpression[implicit_var_right, true]
-        -> ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
-           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
-           $a $b
-           ^(CONSTRAINT_INSTANTIATION IDENT["addEq"] ^('(' IDENT[{(ANTLR3_UINT8*)implicit_var_left}] IDENT[{(ANTLR3_UINT8*)implicit_var_right}] IDENT[var]));
-
-
-
-relationalExpression[const char* var]
-@init {
-   CREATE_VAR(implicit_var_left);
-   CREATE_VAR(implicit_var_right);
-#define SETCON(name) contraint = (char**)&(name); invert = false;
-#define IVRCON(name) contraint = (char**)&(name); invert = true;
-   char const* TEST_LT = "TestLessThan";
-   char const* TEST_LEQ = "testLEQ";
-   char const* TEST_EQ = "testEQ";
-   char const* TEST_NEQ = "testNEQ";
-   bool invert = false; //Invert is so that > and >= can work - there are no constraints for these, so feed the args to < and <= backwards.
-   char** contraint = NULL;
-}
-    :   a=additionExpression[implicit_var_left, false] 
-            ('==' {SETCON(TEST_EQ);} | '!=' {SETCON(TEST_NEQ);} 
-            | '<' {SETCON(TEST_LT);} | '<=' {SETCON(TEST_LEQ);} 
-            | '>' {IVRCON(TEST_LT);} | '>=' {IVRCON(TEST_LEQ);}) 
-        b=additionExpression[implicit_var_right, false]
-        -> {!invert}?
-           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
-           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
-           $a $b ^(CONSTRAINT_INSTANTIATION IDENT[{(ANTLR3_UINT8*)(*contraint)}]
-            ^('(' IDENT[var] IDENT[implicit_var_left] IDENT[implicit_var_right]))
-        -> {invert}?
-           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
-           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
-           $a $b ^(CONSTRAINT_INSTANTIATION IDENT[{(ANTLR3_UINT8*)(*contraint)}]
-            ^('(' IDENT[var] IDENT[implicit_var_right] IDENT[implicit_var_left]))
-        -> ;
-
-///
-booleanLiteralExpression[const char* var]
-    :   val=booleanLiteral -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $val ))
-    |   varname=qualified ->  ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $varname))
-    |   re=relationalExpression[var] -> $re
-    |   '(' paren=booleanOrExpression[var] ')' -> $paren
-    ;
-
-
-booleanAndExpression[const char* var]
-@init {
-   CREATE_VAR(implicit_var_left);
-   CREATE_VAR(implicit_var_right);
-   bool isSingle = false;
-}
-    :   a=booleanLiteralExpression[implicit_var_left] ('&&' b=booleanAndExpression[implicit_var_right] | {isSingle = true;})
-        //This first one runs in the case of a single expression with no &&.
-        -> {isSingle}? ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}]) 
-           $a ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[implicit_var_left] IDENT[var])) //Need to think of a better way.
-        //This second one runs in the case of a && b.
-        -> ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
-           ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
-           $a $b ^(CONSTRAINT_INSTANTIATION IDENT["testAnd"] ^('(' IDENT[var] IDENT[implicit_var_left] IDENT[implicit_var_right])) ;
-
-
-booleanOrExpression[const char* var]
-@init {
-   CREATE_VAR(implicit_var_left);
-   CREATE_VAR(implicit_var_right);
-   bool isSingle = false;
-}
-    :   a=booleanAndExpression[implicit_var_left] ('||' b=booleanOrExpression[implicit_var_right] | {isSingle = true;})
-        //This first one runs in the case of a single expression with no ||.
-        -> {isSingle}? ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}]) 
-           $a ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[implicit_var_left] IDENT[var])) //Need to think of a better way.
-        //This second one runs in the case of a || b.
-        -> ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
-           ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
-           $a $b ^(CONSTRAINT_INSTANTIATION IDENT["testOr"] ^('(' IDENT[var] IDENT[implicit_var_left] IDENT[implicit_var_right])) ;
-
-testExpression[const char* var]
-    :  'test(' result=booleanOrExpression[var] ')' -> $result ;
-
-enforceStatement
-@init {
-   CREATE_VAR(implicit_var_return);
-}
-    :  'enforce' '(' result=booleanOrExpression[implicit_var_return] ')' ';' -> 
-        ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_return}]) 
-        $result ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[implicit_var_return] 'true'));
-///
 
 allocation
     :   'new'! constructorInvocation
@@ -273,16 +115,8 @@ qualified
     ;
 
 assignment
-@init {
-   CREATE_VAR(implicit_var_name);
-}
-    :   (   qualified ('in' | '=') initializer ';'
-                 -> ^('=' qualified initializer)
-        |   var=qualified ('in' | '=') set=testExpression[implicit_var_name] ';'
-            -> ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_name}])
-                 $set ^(CONSTRAINT_INSTANTIATION IDENT["eq"] 
-                        ^('(' $var IDENT[{(ANTLR3_UINT8*)implicit_var_name}]))
-        )
+    :   qualified ('in' | '=') initializer ';'
+            -> ^('=' qualified initializer)
     ;
     
 initializer
@@ -368,7 +202,6 @@ ruleStatement
 	|	variableDeclarations
 	|	constraintInstantiation
 	|	flowControl
-    |   enforceStatement
 	|	noopstatement
 	;
 
@@ -437,17 +270,7 @@ typeArgument
 	;
 
 flowControl
-@init {
-   CREATE_VAR(implicit_var_return);
-   bool hasElse = false;
-}
-
-    :	'if'^ guardExpression ruleBlock (options {k=1;}:'else'! ruleBlock)?
-    |   'if' 'test' '(' result=booleanOrExpression[implicit_var_return] ')' a=ruleBlock ('else' b=ruleBlock {hasElse = true;}|) 
-        -> {hasElse == false}? ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_return}])
-           $result ^('if' ^('test' IDENT[implicit_var_return]) $a)
-        -> ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_return}])
-           $result ^('if' ^('test' IDENT[implicit_var_return]) $a $b)
+	:	'if'^ guardExpression ruleBlock (options {k=1;}:'else'! ruleBlock)?
 	|	'foreach'^ '('! IDENT 'in'! qualified ')'! ruleBlock
 	;
 	
@@ -581,12 +404,13 @@ INCLUDE :	'#include' WS+ file=STRING
 
                             pANTLR3_STRING_FACTORY factory = antlr3StringFactoryNew();
                             pANTLR3_STRING fName = factory->newStr(factory,(ANTLR3_UINT8 *)fullName.c_str());
-                            //factory->close(factory);
+                            delete factory;
                         
                             pANTLR3_INPUT_STREAM in = antlr3AsciiFileStreamNew(fName->chars);
-                            //fName->free(fName);
                             PUSHSTREAM(in);
                             CTX->parserObj->addInputStream(in);
+
+                            // TODO: the string may be leaked here?
                         } else {
                             //std::cout << "Ignoring already included file " << fullName << std::endl;
                         }

@@ -20,7 +20,7 @@
 namespace EUROPA {
 
 NddlInterpreter::NddlInterpreter(EngineId& engine)
-  : m_engine(engine), m_varcount(1)
+  : m_engine(engine)
 {
 }
 
@@ -123,13 +123,6 @@ std::string NddlInterpreter::getFilename(const std::string& f)
     return "";
 }
 
-char* NddlInterpreter::createImplicitVariable() {
-    char *buff = new char[255];
-    sprintf(buff, "implicit_var_%u", m_varcount++);
-    check_error(m_varcount != 0, "Somehow we got zero vars or we rolled over the number of implicit variables. This is very bad.");
-    return buff;
-}
-
 
 std::string NddlInterpreter::interpret(std::istream& ins, const std::string& source)
 {
@@ -146,7 +139,6 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
     lexer->parserObj = this;
     pANTLR3_COMMON_TOKEN_STREAM tstream = antlr3CommonTokenStreamSourceNew(ANTLR3_SIZE_HINT, TOKENSOURCE(lexer));
     pNDDL3Parser parser = NDDL3ParserNew(tstream);
-    parser->parserObj = this;
 
     // Build he AST
     NDDL3Parser_nddl_return result = parser->nddl(parser);

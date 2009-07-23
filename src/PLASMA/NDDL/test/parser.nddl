@@ -29,34 +29,6 @@ foo foob = new foo();
 foo fooc = new foo();
 
 foo::p {
-       int alpha = 3;
-       int beta = 2;
-       int gamma = 3;
-       int delta = 4;
-
-
-       bool foo = test(alpha == gamma);
-
-       bool ret;
-       bool fooret;
-
-       if (foo == true) {
-              enforce(fooret == true);
-	      bool tester = test(alpha == beta - gamma + delta);
-              //iftest (alpha == beta - gamma + delta) {
-              if test ( tester == false ) {
-                 enforce(ret == true);
-              } else {
-                 enforce(ret == false);
-              }
-       } else {
-              enforce(fooret == false);
-       }
-       enforce(foo == true);
-       enforce(fooret == true);
-
-       Location l;
-       enforce(l == Location.Hill);
 }
 
 new foo();

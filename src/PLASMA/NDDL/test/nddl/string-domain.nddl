@@ -5,7 +5,7 @@ class TestData extends StringData {
 
 class Foo extends Timeline {
   predicate Bar {
-    TestData testr;
+    TestData test;
   }
 }
 
@@ -14,5 +14,5 @@ Foo foo = new Foo();
 TestData data1 = new TestData("foo!");
 
 goal(Foo.Bar testGoal);
-testGoal.testr.specify(data1);
+testGoal.test.specify(data1);
 
