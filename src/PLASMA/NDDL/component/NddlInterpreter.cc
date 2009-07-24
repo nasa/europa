@@ -190,6 +190,24 @@ bool isEqConstraint(ANTLR3_BASE_TREE_struct* child, ANTLR3_BASE_TREE_struct* &le
 }
 
 
+//Tests if child is a three argument constraint, if it is then the arguments are set to arg1, arg2, arg3. The constriant name is set to "con".
+bool isThreeArgConstraint(ANTLR3_BASE_TREE_struct* child, ANTLR3_BASE_TREE_struct* &con, 
+			  ANTLR3_BASE_TREE_struct* &arg1, ANTLR3_BASE_TREE_struct* &arg2, ANTLR3_BASE_TREE_struct* &arg3) {
+  if (std::string((char*)child->getText(child)->chars) == "CONSTRAINT_INSTANTIATION") {
+    if (child->getChildCount(child) >= 2) {
+      con = (ANTLR3_BASE_TREE_struct*)child->getChild(child, 0);
+      ANTLR3_BASE_TREE_struct* vars = (ANTLR3_BASE_TREE_struct*)child->getChild(child, 1);
+      if (vars->getChildCount(vars) == 3) {
+	arg1 = (ANTLR3_BASE_TREE_struct*)vars->getChild(vars, 0);
+	arg2 = (ANTLR3_BASE_TREE_struct*)vars->getChild(vars, 1);
+	arg3 = (ANTLR3_BASE_TREE_struct*)vars->getChild(vars, 2);
+	return true;
+      }
+    }
+  }
+  return false;
+}
+
 
 /*
  * This optimizer recursivley goes through the AST and removes slowdowns of various types. It removes:
@@ -203,7 +221,7 @@ bool isEqConstraint(ANTLR3_BASE_TREE_struct* child, ANTLR3_BASE_TREE_struct* &le
  * because a variety of strange situations could get created. As iterates over the variables, the system removes
  * as many tautologies and tests with fixed outcomes as possible.
  */
-void NddlInterpreter::optimizeTree(ANTLR3_BASE_TREE_struct* tree, unsigned int tabs) {
+void NddlInterpreter::optimizeTree(ANTLR3_BASE_TREE_struct* tree, unsigned int tabs, void* ctx) {
   //#define TABS for (unsigned int tabi = 0; tabi < tabs; tabi++) { putchar('\t'); }
   //unsigned int me = counter++;
   //TABS; printf("%s (%u)\n", (char*)(tree->getText(tree)->chars), me);
@@ -295,21 +313,51 @@ void NddlInterpreter::optimizeTree(ANTLR3_BASE_TREE_struct* tree, unsigned int t
       ANTLR3_BASE_TREE_struct* child = (ANTLR3_BASE_TREE_struct*)tree->getChild(tree, i);
 
       //Remove tautologies
-      ANTLR3_BASE_TREE_struct *first, *second;
+      ANTLR3_BASE_TREE_struct *first, *second, *third, *con;
       if (isEqConstraint(child, first, second)) {
 	if (std::string((char*)first->getText(first)->chars) == std::string((char*)second->getText(second)->chars)) {
 	  tree->deleteChild(tree, i);
 	  i--;
 	}
       }
-    }
-    
 
-    optimizeTree(tree, tabs);
+
+      if (isThreeArgConstraint(child, con, first, second, third)) {
+	std::string con_name = (char*)con->getText(con)->chars;
+	std::string input = (char*)first->getText(first)->chars;
+	//printf("Three arg: %s : %s\n", (char*)con->getText(con)->chars, input.c_str());
+
+	bool removeArg = false;
+	std::string rename = "";
+
+	if (con_name == "testEQ") {
+	  if (input == "true") {
+	    removeArg = true;
+	    rename = "eq";
+	  } else if (input == "false") {
+	  }
+	}
+
+	if (removeArg) {
+	  ANTLR3_BASE_TREE_struct* vars = (ANTLR3_BASE_TREE_struct*)child->getChild(child, 1);
+	  vars->deleteChild(vars, 0); //Remove it.
+	}
+	if (rename != "") {
+	  ANTLR3_BASE_TREE_struct* target = (ANTLR3_BASE_TREE_struct*)((NDDL3Parser*)ctx)->adaptor->createTypeText(((NDDL3Parser*)ctx)->adaptor, IDENT, (pANTLR3_UINT8)rename.c_str());
+	  child->replaceChildren(child, 0, 0, target);  
+	}
+	
+      }
+
+    }
+
+
+
+    optimizeTree(tree, tabs, ctx);
   } else {
     for (unsigned int i = 0; i < tree->getChildCount(tree); i++) {
       ANTLR3_BASE_TREE_struct* child = (ANTLR3_BASE_TREE_struct*)tree->getChild(tree, i);
-      optimizeTree(child, tabs + 1);
+      optimizeTree(child, tabs + 1, ctx);
     }
   }
 }
@@ -351,7 +399,7 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
 
 
     //printf("\nTREE:\n");
-    optimizeTree(result.tree, 0);
+    optimizeTree(result.tree, 0, parser);
 
     debugMsg("NddlInterpreter:interpret","NDDL AST Post-optimization:\n" << result.tree->toStringTree(result.tree)->chars);
 
