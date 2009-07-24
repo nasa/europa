@@ -9,7 +9,7 @@ static ANTLR3_UINT32		getChildCount		(pANTLR3_BASE_TREE tree);
 static ANTLR3_UINT32		getCharPositionInLine
 (pANTLR3_BASE_TREE tree);
 static ANTLR3_UINT32		getLine				(pANTLR3_BASE_TREE tree);
-static pANTLR3_BASE_TREE    
+static pANTLR3_BASE_TREE
 getFirstChildWithType
 (pANTLR3_BASE_TREE tree, ANTLR3_UINT32 type);
 static void					addChild			(pANTLR3_BASE_TREE tree, pANTLR3_BASE_TREE child);
@@ -52,13 +52,13 @@ antlr3BaseTreeNew(pANTLR3_BASE_TREE  tree)
 	return  tree;
 }
 
-static ANTLR3_UINT32	
+static ANTLR3_UINT32
 getCharPositionInLine	(pANTLR3_BASE_TREE tree)
 {
 	return  0;
 }
 
-static ANTLR3_UINT32	
+static ANTLR3_UINT32
 getLine	(pANTLR3_BASE_TREE tree)
 {
 	return  0;
@@ -112,7 +112,7 @@ getChildCount	(pANTLR3_BASE_TREE tree)
 	}
 }
 
-void	    
+void
 addChild (pANTLR3_BASE_TREE tree, pANTLR3_BASE_TREE child)
 {
 	ANTLR3_UINT32   n;
@@ -143,7 +143,7 @@ addChild (pANTLR3_BASE_TREE tree, pANTLR3_BASE_TREE child)
 				tree->createChildrenList(tree);
 			}
 
-			// Need to copy the children 
+			// Need to copy the children
 			//
 			n = child->children->size(child->children);
 
@@ -156,7 +156,7 @@ addChild (pANTLR3_BASE_TREE tree, pANTLR3_BASE_TREE child)
 				//
 				if  (entry != NULL)
 				{
-					tree->children->add(tree->children, entry->dupTree(entry), (void (ANTLR3_CDECL *)(void *))child->free);
+					tree->children->add(tree->children, entry, (void (ANTLR3_CDECL *)(void *))child->free);
 				}
 			}
 		}
@@ -172,9 +172,8 @@ addChild (pANTLR3_BASE_TREE tree, pANTLR3_BASE_TREE child)
 			//
 			tree->createChildrenList(tree);
 		}
-		newChild = child->dupTree(child);
-		tree->children->add(tree->children, newChild, (void (ANTLR3_CDECL *)(void *))child->free);
-		
+		tree->children->add(tree->children, child, (void (ANTLR3_CDECL *)(void *))child->free);
+
 	}
 }
 
@@ -274,7 +273,7 @@ toStringTree	(pANTLR3_BASE_TREE tree)
 		n = tree->children->size(tree->children);
 
 		for	(i = 0; i < n; i++)
-		{   
+		{
 			t   = (pANTLR3_BASE_TREE) tree->children->get(tree->children, i);
 
 			if  (i > 0)
@@ -297,7 +296,7 @@ toStringTree	(pANTLR3_BASE_TREE tree)
 /// For huge child lists, inserting children can force walking rest of
 /// children to set their child index; could be slow.
 ///
-static void					
+static void
 replaceChildren		(pANTLR3_BASE_TREE parent, ANTLR3_INT32 startChildIndex, ANTLR3_INT32 stopChildIndex, pANTLR3_BASE_TREE newTree)
 {
 	ANTLR3_INT32	replacingHowMany;		// How many nodes will go away
@@ -434,7 +433,7 @@ freshenPACIndexes	(pANTLR3_BASE_TREE tree, ANTLR3_UINT32 offset)
 	ANTLR3_UINT32	count;
 	ANTLR3_UINT32	c;
 
-	count	= tree->getChildCount(tree);		// How many children do we have 
+	count	= tree->getChildCount(tree);		// How many children do we have
 
 	// Loop from the supplied index and set the indexes and parent
 	//
