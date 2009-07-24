@@ -270,7 +270,7 @@ typeArgument
 	;
 
 flowControl
-	:	'if'^ guardExpression ruleBlock (options {k=1;}:'else'! ruleBlock)?
+	:	'if'^ guardExpression ruleBlock (('else')=>'else'! ruleBlock)?
 	|	'foreach'^ '('! IDENT 'in'! qualified ')'! ruleBlock
 	;
 	
