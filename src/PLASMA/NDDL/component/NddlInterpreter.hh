@@ -119,6 +119,8 @@ public:
     std::vector<std::string> getIncludePath();
     void addInputStream(pANTLR3_INPUT_STREAM in);
     char* createImplicitVariable();
+    void optimizeTree(ANTLR3_BASE_TREE_struct* tree, unsigned int tabs);
+    bool isImplicitVar(std::string name);
 protected:
     EngineId m_engine;
     std::vector<std::string> m_filesread;

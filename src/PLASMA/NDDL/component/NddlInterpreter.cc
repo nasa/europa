@@ -131,6 +131,191 @@ char* NddlInterpreter::createImplicitVariable() {
 }
 
 
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+bool NddlInterpreter::isImplicitVar(std::string name) {
+  if (name.substr(0, strlen("implicit_var_")) == "implicit_var_") {
+    return true;
+  }
+  return false;
+}
+
+struct varNaming {
+  std::string name;
+  ANTLR3_BASE_TREE_struct* renameOf;
+  bool renamesImplicit;
+};
+
+
+//Returns "" if the tree is not a declaration, or the name 
+std::string isDeclaration(ANTLR3_BASE_TREE_struct* child) {
+  if (std::string((char*)child->getText(child)->chars) == "VARIABLE") {
+    if (child->getChildCount(child) == 2) {
+      ANTLR3_BASE_TREE_struct* name = (ANTLR3_BASE_TREE_struct*)child->getChild(child, 1);
+      return (char*)name->getText(name)->chars;
+    }
+  }
+  return "";
+}
+
+
+void searchAndReplace(ANTLR3_BASE_TREE_struct* tree, std::string replace, ANTLR3_BASE_TREE_struct* replaceWith) {
+  for (unsigned int i = 0; i < tree->getChildCount(tree); i++) {
+    ANTLR3_BASE_TREE_struct* child = (ANTLR3_BASE_TREE_struct*)tree->getChild(tree, i);
+    if ((char*)(child->getText(child)->chars) == replace) {
+      tree->replaceChildren(tree, i, i, replaceWith);
+      //printf("Replace!\n");
+    } else {
+      searchAndReplace(child, replace, replaceWith);
+    }
+  }
+}
+
+//Tests if child is an eq constraint, if it is then the arguments are set to left and right.
+bool isEqConstraint(ANTLR3_BASE_TREE_struct* child, ANTLR3_BASE_TREE_struct* &left, ANTLR3_BASE_TREE_struct* &right) {
+  if (std::string((char*)child->getText(child)->chars) == "CONSTRAINT_INSTANTIATION") {
+    if (child->getChildCount(child) >= 2) {
+      ANTLR3_BASE_TREE_struct* name = (ANTLR3_BASE_TREE_struct*)child->getChild(child, 0);
+      ANTLR3_BASE_TREE_struct* vars = (ANTLR3_BASE_TREE_struct*)child->getChild(child, 1);
+      if (std::string((char*)name->getText(name)->chars) == "eq" && vars->getChildCount(vars) == 2) {
+	left = (ANTLR3_BASE_TREE_struct*)vars->getChild(vars, 0);
+	right = (ANTLR3_BASE_TREE_struct*)vars->getChild(vars, 1);
+	return true;
+      }
+    }
+  }
+  return false;
+}
+
+
+
+/*
+ * This optimizer recursivley goes through the AST and removes slowdowns of various types. It removes:
+ *      * Needless implicit variables
+ *      * Tautologies (such as eq(true, true))
+ *      * Tests with fixed outcomes (such as testEq(a, b, true) becomes eq(a, b)) (it current does not do this one)
+ *
+ * It iterates over the same node multiple times. First, the optimizer tries to remove as many implicit
+ * variables that "rename" non-implicit variables and constants. After removing as many a possible, it
+ * then moves on to implicit variables that equal other implict variables. These must not be removed first,
+ * because a variety of strange situations could get created. As iterates over the variables, the system removes
+ * as many tautologies and tests with fixed outcomes as possible.
+ */
+void NddlInterpreter::optimizeTree(ANTLR3_BASE_TREE_struct* tree, unsigned int tabs) {
+  //#define TABS for (unsigned int tabi = 0; tabi < tabs; tabi++) { putchar('\t'); }
+  //unsigned int me = counter++;
+  //TABS; printf("%s (%u)\n", (char*)(tree->getText(tree)->chars), me);
+
+
+  std::vector<varNaming*> implicit_vars;
+  bool changeMade = false; //This is true if a change is found the needs to be made.
+  bool renameImplicitImplicits = true; //This is true if we remove implicit variables that are a new name for other implicit variables
+  bool variableRenamed = false; //This does not allow variables to be added to the rename list if it is true.
+
+  for (unsigned int i = 0; i < tree->getChildCount(tree); i++) {
+    ANTLR3_BASE_TREE_struct* child = (ANTLR3_BASE_TREE_struct*)tree->getChild(tree, i);
+
+    //Detect the creation of implicit variables 
+    std::string varName = isDeclaration(child);
+    if (isImplicitVar(varName)) {
+      varNaming *re = new varNaming;
+      re->name = varName;
+      re->renameOf = NULL;
+      re->renamesImplicit = false;
+      implicit_vars.push_back(re);
+      //printf("This is an implicit variable sub %u! Name: %s\n", me, varName.c_str());
+    }
+
+    //Detect the re-naming of implicit variables
+    ANTLR3_BASE_TREE_struct *first, *second;
+    if (isEqConstraint(child, first, second) && !variableRenamed) {
+      bool firstImp = isImplicitVar((char*)first->getText(first)->chars);
+      bool secondImp = isImplicitVar((char*)second->getText(second)->chars);
+      if (firstImp || secondImp) { //If one of the variables is implicit, this is a renaming statement here.
+	//printf("This is an equality constraint that is a renaming\n");
+	ANTLR3_BASE_TREE_struct* oldName = NULL;
+	std::string newName = "NULL";
+	if (firstImp) {
+	  //printf("%s is a new name for %s\n", (char*)first->getText(first)->chars, (char*)second->getText(second)->chars);
+	  oldName = second;
+	  newName = (char*)first->getText(first)->chars;
+	} else if(secondImp) {
+	  //printf("%s is a new name for %s\n", (char*)second->getText(second)->chars, (char*)first->getText(first)->chars);
+	  oldName = first;
+	  newName = (char*)second->getText(second)->chars;
+	} else {
+	  checkError(false, "Error in the parser (how in the world did it get here?)");
+	}
+	checkError(oldName && newName != "NULL", "Did not set the names here.");
+	changeMade = true;
+	bool variableFound = false;
+	for (unsigned int t = 0; t < implicit_vars.size(); t++) {
+	  if (implicit_vars[t]->name == newName && !implicit_vars[t]->renameOf) {
+	    variableFound = true;
+	    implicit_vars[t]->renameOf = oldName;
+	    if (firstImp && secondImp) {
+	      if (renameImplicitImplicits) { variableRenamed = true; }
+	      implicit_vars[t]->renamesImplicit = true;
+	      //if (renameImplicitImplicits) { printf("This is implicit-implicit renaming\n"); }
+	    } else {
+	      renameImplicitImplicits = false; //We don't want to remove implicit-implicit renaming situations until all others are removed.
+	      //printf("Implicit-implicit renaming disabled\n");
+	    }
+	  }
+	}
+	checkError(variableFound == true, "An undeclared implicit variable was found in the code.");
+      }
+    }
+
+  }
+
+
+  //Now do the optimizations if a change needs to be made, otherwise optimize the children
+  if (changeMade) {
+    for (unsigned int t = 0; t < implicit_vars.size(); t++) {
+      if (implicit_vars[t]->renameOf && (!implicit_vars[t]->renamesImplicit || renameImplicitImplicits)) {
+	//printf("Removing implict var: %s, replacing it with %s.\n", implicit_vars[t]->name.c_str(), 
+	//       (char*)implicit_vars[t]->renameOf->getText(implicit_vars[t]->renameOf)->chars);
+	for (unsigned int i = 0; i < tree->getChildCount(tree); i++) {
+	  ANTLR3_BASE_TREE_struct* child = (ANTLR3_BASE_TREE_struct*)tree->getChild(tree, i);
+	  std::string name = isDeclaration(child);
+	  if (name == implicit_vars[t]->name) {
+	    tree->deleteChild(tree, i);
+	    i--;
+	  }
+	}
+	searchAndReplace(tree, implicit_vars[t]->name, implicit_vars[t]->renameOf);
+      }
+    }
+
+    //Some final optimizations here.
+    for (unsigned int i = 0; i < tree->getChildCount(tree); i++) {
+      ANTLR3_BASE_TREE_struct* child = (ANTLR3_BASE_TREE_struct*)tree->getChild(tree, i);
+
+      //Remove tautologies
+      ANTLR3_BASE_TREE_struct *first, *second;
+      if (isEqConstraint(child, first, second)) {
+	if (std::string((char*)first->getText(first)->chars) == std::string((char*)second->getText(second)->chars)) {
+	  tree->deleteChild(tree, i);
+	  i--;
+	}
+      }
+    }
+    
+
+    optimizeTree(tree, tabs);
+  } else {
+    for (unsigned int i = 0; i < tree->getChildCount(tree); i++) {
+      ANTLR3_BASE_TREE_struct* child = (ANTLR3_BASE_TREE_struct*)tree->getChild(tree, i);
+      optimizeTree(child, tabs + 1);
+    }
+  }
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 std::string NddlInterpreter::interpret(std::istream& ins, const std::string& source)
 {
     if (queryIncludeGuard(source)) 
@@ -161,9 +346,14 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
         debugMsg("NddlInterpreter:interpret",os.str());
         return os.str();
     }
-    else {
-        debugMsg("NddlInterpreter:interpret","NDDL AST:\n" << result.tree->toStringTree(result.tree)->chars);
-    }
+
+    debugMsg("NddlInterpreter:interpret","NDDL AST Pre-optimization:\n" << result.tree->toStringTree(result.tree)->chars);
+
+
+    //printf("\nTREE:\n");
+    optimizeTree(result.tree, 0);
+
+    debugMsg("NddlInterpreter:interpret","NDDL AST Post-optimization:\n" << result.tree->toStringTree(result.tree)->chars);
 
     // Walk the AST to create nddl expr to evaluate
     pANTLR3_COMMON_TREE_NODE_STREAM nodeStream = antlr3CommonTreeNodeStreamNewTree(result.tree, ANTLR3_SIZE_HINT);
