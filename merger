@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "This script merges the normal branch with this one. It uses https, so if you're not a dev, it probably won't work for you."
+svn merge https://europa-pso.googlecode.com/svn/PLASMA/branches/willow-trex https://europa-pso.googlecode.com/svn/PLASMA/trunk
