@@ -9,6 +9,7 @@ options {
 
 @context {
     NddlSymbolTable* SymbolTable;
+    bool allowEval;
 }
 
 @includes
@@ -76,28 +77,36 @@ static void popContext(pNDDL3Tree treeWalker)
     // use the meat from displayRecognitionError() in antlr3baserecognizer.c
 }
 
-nddl :               
-	^(NDDL
+nddl  
+@init {
+    bool forceEval = false;
+}             
+	: ^(NDDL
 		( {
 		     // debugMsg("NddlInterpreter:nddl","Line:" << LEXER->getLine(LEXER)); 
 		  }
-		  (	child=classDeclaration
-          | child=enumDefinition
-		  |	child=typeDefinition
-		  |	child=variableDeclarations
-		  |	child=assignment
-		  |	child=constraintInstantiation
-		  |	child=allocation[NULL]
-		  |	child=rule
-		  |	child=problemStmt
-		  |	child=relation
-		  |	child=methodInvocation
-		  |	child=constraintSignature
+		  (	child=classDeclaration { forceEval = true; }
+          | child=enumDefinition { forceEval = true; }
+		  |	child=typeDefinition { forceEval = true; }
+		  |	child=variableDeclarations { forceEval = false; }
+		  |	child=assignment { forceEval = false; }
+		  |	child=constraintInstantiation { forceEval = false; }
+		  |	child=allocation[NULL] { forceEval = false; }
+		  |	child=rule { forceEval = false; }
+		  |	child=problemStmt { forceEval = false; }
+		  |	child=relation { forceEval = false; }
+		  |	child=methodInvocation { forceEval = false; }
+		  |	child=constraintSignature { forceEval = false; }
 		  ) 
 		  {
 		      if (child != NULL) { 
 		          debugMsg("NddlInterpreter:nddl","Evaluating:" << child->toString());
-		          evalExpr(CTX,child);
+                  if (CTX->allowEval || forceEval) {
+                      if (forceEval && !CTX->allowEval) {
+                          debugMsg("NddlInterpreter:nddl","Evaluation Forced!");
+                      }
+                      evalExpr(CTX,child);
+                  }
 		          // TODO!!: systematically deal with memory mgmt for all Exprs.
 		          delete child;
 		          child = NULL; 

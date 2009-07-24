@@ -409,6 +409,9 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
 
     NddlSymbolTable symbolTable(m_engine);
     treeParser->SymbolTable = &symbolTable;
+    treeParser->allowEval = (getEngine()->getConfig()->getProperty("nddl.eval") != "false");
+
+    debugMsg("NddlInterpreter", "Allow Eval: " << treeParser->allowEval);
 
     try {
         treeParser->nddl(treeParser);
