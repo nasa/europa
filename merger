@@ -1,3 +1,15 @@
 #!/bin/bash
 echo "This script merges the normal branch with this one. It uses https, so if you're not a dev, it probably won't work for you."
-svn merge https://europa-pso.googlecode.com/svn/PLASMA/branches/willow-trex https://europa-pso.googlecode.com/svn/PLASMA/trunk
+echo "Back everything up BEFORE YOU RUN THIS OR YOU WILL LOSE WORK!!!"
+echo "This script is not really working, so please don't use."
+exit 0
+echo "Making diffs."
+svn diff > PATCH_SCRIPT
+svn diff > PATCH_SCRIPT_BACKUP
+echo "Switching to trunk"
+svn switch https://europa-pso.googlecode.com/svn/PLASMA/trunk
+echo "Merging"
+svn merge https://europa-pso.googlecode.com/svn/PLASMA/trunk https://europa-pso.googlecode.com/svn/PLASMA/branches/willow-trex
+#echo "Switching to branch."
+#rm merger
+#svn switch https://europa-pso.googlecode.com/svn/PLASMA/branches/willow-trex
