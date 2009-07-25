@@ -142,10 +142,23 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
 
     // Build he AST
     NDDL3Parser_nddl_return result = parser->nddl(parser);
-    if (parser->pParser->rec->state->errorCount > 0) {
+    int errorCount = parser->pParser->rec->state->errorCount + lexer->pLexer->rec->state->errorCount;
+    if (errorCount > 0) {
         std::ostringstream os;
-        os << "The parser returned " << parser->pParser->rec->state->errorCount << " errors";
-        // TODO: get error messages as well!
+        os << "The parser returned " << errorCount << " errors" << std::endl;
+
+        // Since errors are no longer printed during parsing, print them here
+        // to stderr and to the return stream
+        std::vector<NddlParserException> *lerrors = lexer->lexerErrors;
+        std::vector<NddlParserException> *perrors = parser->parserErrors;
+        for (std::vector<NddlParserException>::const_iterator it = lerrors->begin(); it != lerrors->end(); ++it) {
+        	std::cerr << *it << std::endl;
+        	os << *it << std::endl;
+        }
+        for (std::vector<NddlParserException>::const_iterator it = perrors->begin(); it != perrors->end(); ++it) {
+        	std::cerr << *it << std::endl;
+        	os << *it << std::endl;
+        }
         parser->free(parser);
         tstream->free(tstream);
         lexer->free(lexer);
@@ -664,28 +677,33 @@ std::string NddlToASTInterpreter::interpret(std::istream& ins, const std::string
     pNDDL3Parser parser = NDDL3ParserNew(tstream);
 
     // Build he AST
-    std::string retval;
     NDDL3Parser_nddl_return result = parser->nddl(parser);
-    if (parser->pParser->rec->state->errorCount > 0) {
-        std::ostringstream os;
-        os << "The parser returned " << parser->pParser->rec->state->errorCount << " errors";
-        // TODO: get error messages as well!
-        debugMsg("NddlToASTInterpreter:interpret",os.str());
-        retval = os.str();
-    }
-    else {
-        // Calling static helper functions to get a verbose version of AST.
-        // Old non-verbose code: result.tree->toStringTree(result.tree)->chars;
-        retval = (char*)(toVerboseStringTree(result.tree)->chars);
-        debugMsg("NddlToASTInterpreter:interpret","NDDL AST:\n" << retval);
-    }
+
+    // The result
+    std::ostringstream os;
+
+    // Add errors, if any
+    std::vector<NddlParserException> *lerrors = lexer->lexerErrors;
+    std::vector<NddlParserException> *perrors = parser->parserErrors;
+
+    for (int i=0; i<lerrors->size(); i++)
+    	os << "L" << (*lerrors)[i] << "$\n";
+    for (int i=0; i<perrors->size(); i++)
+    	os << "P" << (*perrors)[i] << "$\n";
+    // Warnings, if any, should go here
+
+    // Calling static helper functions to get a verbose version of AST
+    const char* ast = (char*)(toVerboseStringTree(result.tree)->chars);
+    os << "AST " << ast;
+
+    debugMsg("NddlToASTInterpreter:interpret",os.str());
 
     parser->free(parser);
     tstream->free(tstream);
     lexer->free(lexer);
     input->close(input);
 
-    return retval;
+    return os.str();
 }
 
 // Antlr functions
@@ -810,4 +828,83 @@ pANTLR3_STRING toVerboseStringTree(pANTLR3_BASE_TREE tree)
 	return  string;
 }
 
+NddlParserException::NddlParserException(const char *fileName, int line,
+		int offset, int length, const char *message) :
+  m_line(line), m_offset(offset), m_length(length), m_message(message) {
+  if (fileName) m_fileName = fileName;
+  else fileName = "No_File";
+}
+
+ostream &operator<<(ostream &os, const NddlParserException &ex) {
+	os << "\"" << ex.m_fileName << "\":" <<ex.m_line << ":" << ex.m_offset << ":"
+		<< ex.m_length << " " << ex.m_message;
+}
+
+std::string NddlParserException::asString() const {
+	std::ostringstream os;
+	os << *this;
+	return os.str();
+}
+
+
+void reportParserError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 *tokenNames) {
+	pANTLR3_EXCEPTION ex = recognizer->state->exception;
+
+	const char *fileName = NULL;
+	if (ex->streamName)
+		fileName = (const char *)(ex->streamName->to8(ex->streamName)->chars);
+
+	int line = recognizer->state->exception->line;
+	const char* message = static_cast<const char *>(recognizer->state->exception->message);
+
+	int offset = -1; // to signal something is wrong (like recognizer type)
+	int length = 0; // in case there is no token
+	if (recognizer->type == ANTLR3_TYPE_PARSER) {
+		offset = recognizer->state->exception->charPositionInLine;
+
+		// Look for a token
+		pANTLR3_COMMON_TOKEN token = (pANTLR3_COMMON_TOKEN)(recognizer->state->exception->token);
+		line = token->getLine(token);
+		pANTLR3_STRING text = token->getText(token);
+		if (text != NULL) {
+			// It looks like when an extra token is present, message is
+			// empty and the token points to the actual thing. When a token
+			// is missing, the token text contains the message and the length
+			// is irrelevant
+			if (message == NULL || !message[0])
+				length = text->len;
+			message = (const char *)(text->chars);
+		}
+	}
+
+	NddlParserException exception(fileName, line, offset, length, message);
+
+	pANTLR3_PARSER parser = (pANTLR3_PARSER) recognizer->super;
+	pNDDL3Parser ctx = (pNDDL3Parser) parser->super;
+	std::vector<NddlParserException> *errors = ctx->parserErrors;
+	errors->push_back(exception);
+
+	// std::cout << errors->size() << "; " << (*errors)[errors->size()-1];
+}
+
+void reportLexerError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 *tokenNames) {
+    pANTLR3_LEXER lexer = (pANTLR3_LEXER)(recognizer->super);
+    pANTLR3_EXCEPTION ex = lexer->rec->state->exception;
+
+	const char *fileName = NULL;
+	if (ex->streamName)
+		fileName = (const char *)(ex->streamName->to8(ex->streamName)->chars);
+
+	int line = recognizer->state->exception->line;
+	const char* message = static_cast<const char *>(recognizer->state->exception->message);
+	int offset = ex->charPositionInLine+1;
+
+	NddlParserException exception(fileName, line, offset, 1, message);
+
+	pNDDL3Lexer ctx = (pNDDL3Lexer) lexer->ctx;
+	std::vector<NddlParserException> *errors = ctx->lexerErrors;
+	errors->push_back(exception);
+
+	// std::cout << errors->size() << "; " << (*errors)[errors->size()-1];
+}
 }
