@@ -143,7 +143,7 @@ namespace EUROPA {
 	return false;
     }
 
-    return !test(m_guards);
+    return m_guards.empty() || !test(m_guards);
   }
 
   /**
@@ -509,7 +509,6 @@ namespace EUROPA {
     path.push_back(fieldVar->getIndex());
 
     // Get the field type for the resulting domain.
-    const LabelStr& fieldType = fieldVar->baseDomain().getTypeName();
     const bool isOpen = fieldVar->baseDomain().isOpen();
     const bool isBool = fieldVar->baseDomain().isBool();
 
@@ -526,7 +525,6 @@ namespace EUROPA {
       ObjectId object = *it;
       ConstrainedVariableId fieldVar = object->getVariable(path);
       checkError(fieldVar->lastDomain().isSingleton(), fieldVar->toString());
-      checkError(fieldVar->baseDomain().getTypeName() == fieldType, fieldVar->toString());
       double value = fieldVar->lastDomain().getSingletonValue();
       proxyBaseDomain.insert(value);
       debugMsg("RuleInstance:varFromObject", "Adding value from " << fieldVar->toString());
@@ -604,6 +602,7 @@ namespace EUROPA {
     // Is it the guard listener
     if(m_guardListener.isId() && entity->getKey() == m_guardListener->getKey()){
       m_guardListener = ConstraintId::noId();
+      m_guards.clear();
       return;
     }
 
