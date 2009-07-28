@@ -37,6 +37,8 @@ foo::p {
 
        bool functionTest = test(equalTestFunction(4, 1));
 
+       bool singletonCheck = test(isSingleton(1));
+
        bool foo = test(alpha == gamma);
 
        bool ret;

@@ -480,6 +480,7 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
     // Walk the AST to create nddl expr to evaluate
     pANTLR3_COMMON_TREE_NODE_STREAM nodeStream = antlr3CommonTreeNodeStreamNewTree(result.tree, ANTLR3_SIZE_HINT);
     pNDDL3Tree treeParser = NDDL3TreeNew(nodeStream);
+    treeParser->parserObj = this;
 
     NddlSymbolTable symbolTable(m_engine);
     treeParser->SymbolTable = &symbolTable;
@@ -529,6 +530,7 @@ NddlSymbolTable::NddlSymbolTable(const EngineId& engine)
     , m_engine(engine)
 {
     m_functions.push_back(new NddlFunction("equalTestFunction", "testEQ", "bool", 2));
+    m_functions.push_back(new NddlFunction("isSingleton", "testSingleton", "bool", 1));
 }
 
 NddlSymbolTable::~NddlSymbolTable()

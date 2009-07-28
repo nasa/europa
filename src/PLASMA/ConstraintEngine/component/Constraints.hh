@@ -801,6 +801,21 @@ namespace EUROPA {
     static const unsigned int ARG_COUNT = 3;
   };
 
+  class TestSingleton : public Constraint {
+  public:
+    TestSingleton(const LabelStr& name,
+	   const LabelStr& propagatorName,
+	   const ConstraintEngineId& constraintEngine,
+	   const std::vector<ConstrainedVariableId>& variables);
+
+    void handleExecute();
+
+  private:
+    AbstractDomain& m_test;
+    AbstractDomain& m_arg1;
+    static const unsigned int ARG_COUNT = 2;
+  };
+
   class TestNEQ : public Constraint {
   public:
     TestNEQ(const LabelStr& name,

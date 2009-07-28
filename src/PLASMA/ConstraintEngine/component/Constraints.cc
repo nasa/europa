@@ -1781,6 +1781,29 @@ namespace EUROPA {
 
 
 
+  TestSingleton::TestSingleton(const LabelStr& name,
+			   const LabelStr& propagatorName,
+			   const ConstraintEngineId& constraintEngine,
+			   const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_test(getCurrentDomain(variables[0])),
+      m_arg1(getCurrentDomain(variables[1])){
+    check_error(variables.size() == ARG_COUNT);
+  }
+
+  void TestSingleton::handleExecute(){
+
+    debugMsg("TestSingleton:handleExecute", "comparing " << m_arg1.toString() << " setting " << m_test.toString());
+
+    if(m_arg1.isSingleton()) // it is a singleton
+       m_test.remove(0); // set the test to be true
+    //TODO: what about:
+    //m_test is a singleton, m_arg1 is not.
+    //what is test if m_arg1 is not a singleton.
+  }
+
+
+
   TestNEQ::TestNEQ(const LabelStr& name,
 			   const LabelStr& propagatorName,
 			   const ConstraintEngineId& constraintEngine,

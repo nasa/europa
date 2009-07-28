@@ -9,6 +9,7 @@ options {
 
 @context {
     NddlSymbolTable* SymbolTable;
+    NddlInterpreter* parserObj;
     bool allowEval;
 }
 
@@ -219,7 +220,7 @@ variableInitialization[const DataTypeId& dataType] returns [Expr* result]
                  varName,
                  dataType,
                  initExpr,
-                 true // canBeSpecified
+                 !CTX->parserObj->isImplicitVar(varName) // canBeSpecified == false for implicit vars.
             ); 
             CTX->SymbolTable->addLocalVar(varName,dataType);
         }

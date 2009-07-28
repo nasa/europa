@@ -44115,5 +44115,46 @@
 			</NumericDomain>
 		</Outputs>
 	</Constraint>
+	<Constraint name="testSingleton" test="3408">
+		<Inputs>
+			<BoolDomain>
+			  <element value="true"/>
+			  <element value="false"/>
+			</BoolDomain>
+			<NumericDomain>
+			  <element value="2"/>
+			</NumericDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<NumericDomain>
+			  <element value="2"/>
+			</NumericDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="testSingleton" test="3409">
+		<Inputs>
+			<BoolDomain>
+			  <element value="true"/>
+			  <element value="false"/>
+			</BoolDomain>
+			<NumericDomain>
+			  <element value="2"/>
+			  <element value="3"/>
+			</NumericDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="true"/>
+			  <element value="false"/>
+			</BoolDomain>
+			<NumericDomain>
+			  <element value="2"/>
+			  <element value="3"/>
+			</NumericDomain>
+		</Outputs>
+	</Constraint>
 
 </ConstraintTests>

@@ -114,6 +114,7 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(ces,TestAnd, "testAnd", "Default");
       REGISTER_CONSTRAINT(ces,TestLEQ, "testLEQ", "Default");
       REGISTER_CONSTRAINT(ces,TestNEQ, "testNEQ", "Default");
+      REGISTER_CONSTRAINT(ces,TestSingleton, "testSingleton", "Default");
 
       // Europa (NewPlan/ConstraintNetwork) names for the same constraints:
       REGISTER_CONSTRAINT(ces,AddEqualConstraint, "addeq", "Default");
