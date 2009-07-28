@@ -324,7 +324,7 @@ enforceStatement
 }
     :  'enforce' '(' result=booleanOrExpression[implicit_var_return] ')' ';' -> 
         ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_return}]) 
-        $result ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[implicit_var_return] IDENT["true"]));
+        $result ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[implicit_var_return] 'true'));
 ///
 
 allocation

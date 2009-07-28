@@ -307,20 +307,23 @@ void NddlInterpreter::optimizeTree(ANTLR3_BASE_TREE_struct* tree, unsigned int t
 	changeMade = true;
 	bool variableFound = false;
 	for (unsigned int t = 0; t < implicit_vars.size(); t++) {
-	  if (implicit_vars[t]->name == newName && !implicit_vars[t]->renameOf) {
+	  if (implicit_vars[t]->name == newName) {
 	    variableFound = true;
-	    implicit_vars[t]->renameOf = oldName;
-	    if (firstImp && secondImp) {
-	      if (renameImplicitImplicits) { variableRenamed = true; }
-	      implicit_vars[t]->renamesImplicit = true;
-	      //if (renameImplicitImplicits) { printf("This is implicit-implicit renaming\n"); }
-	    } else {
-	      renameImplicitImplicits = false; //We don't want to remove implicit-implicit renaming situations until all others are removed.
-	      //printf("Implicit-implicit renaming disabled\n");
+	    if (!implicit_vars[t]->renameOf) {
+	      implicit_vars[t]->renameOf = oldName;
+	      if (firstImp && secondImp) {
+		if (renameImplicitImplicits) { variableRenamed = true; }
+		implicit_vars[t]->renamesImplicit = true;
+		//if (renameImplicitImplicits) { printf("This is implicit-implicit renaming\n"); }
+	      } else {
+		renameImplicitImplicits = false; //We don't want to remove implicit-implicit renaming situations until all others are removed.
+		//printf("Implicit-implicit renaming disabled\n");
+	      }
 	    }
 	  }
 	}
-	checkError(variableFound == true, "An undeclared implicit variable was found in the code.");
+	checkError(variableFound == true, "An undeclared implicit variable was found in the code: \""
+		   << (char*)oldName->getText(oldName)->chars << "\" -> \"" << newName << "\".");
       }
     }
 

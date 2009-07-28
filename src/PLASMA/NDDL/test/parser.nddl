@@ -10,7 +10,33 @@
 typedef int [1 inf] positive;
 typedef float [-inf +inf] real;
 
+///Suite of expression tests.
 
+//Test functions
+enforce(isSingleton(1));
+
+int alpha; //test arithmetic operations.
+enforce(alpha == 2 + 3 + 4 - 10);
+eq(alpha, -1);
+
+bool testTestFunction = test(1 == 1); //Conor wants to remove this.
+eq(testTestFunction, true);
+
+//test all relations.
+enforce(1 < 2);
+enforce(1 > 0);
+enforce(0 == 0);
+enforce(0 != 1);
+enforce(1 <= 1);
+enforce(1 <= 3);
+enforce(0 >= 0);
+enforce(1 >= 0);
+
+//test ands and ors
+enforce(true || false);
+enforce(true && true);
+
+///End
 
 positive pos;
 real r = 50;
@@ -34,33 +60,26 @@ foo::p {
        int gamma = 3;
        int delta = 4;
 
-
-       bool functionTest = test(equalTestFunction(4, 1));
-
-       bool singletonCheck = test(isSingleton(1));
-
        bool foo = test(alpha == gamma);
 
+       enforce(foo);
+
        bool ret;
-       bool fooret;
 
-       if (foo == true) {
-              enforce(fooret == true);
-	      bool tester = test(alpha == beta - gamma + delta);
-              //iftest (alpha == beta - gamma + delta) {
-              if test ( tester == false ) {
-                 enforce(ret == true);
-              } else {
-                 enforce(ret == false);
-              }
+       if test (alpha == beta - gamma + delta) {
+          enforce(ret);
        } else {
-              enforce(fooret == false);
+          enforce(ret == false);
        }
-       enforce(foo == true);
-       enforce(fooret == true);
 
-       Location l;
-       enforce(l == Location.Hill);
+       if test (isSingleton(ret)) {
+          enforce(ret);
+       } else {
+          enforce(false);
+       }
+	
+       Location location_enum;
+       enforce(location_enum == Location.Hill);
 }
 
 
@@ -68,9 +87,9 @@ new foo();
 
 eq(pos, 23);
 
-pos.specify(40);
-pos.reset();
-pos.specify(60);
+//pos.specify(40);
+//pos.reset();
+//pos.specify(60);
 
 //pos.close();
 //foo.close();
@@ -82,10 +101,11 @@ close();
 
 fact(foo.p fact1);
 goal(foo.p goal1);
+goal1.activate();
 rejectable(foo.p somep);
 
-//fact1 before goal1;
-//goal1 meets somep;
+fact1 before goal1;
+goal1 meets somep;
 
 //;;
 
