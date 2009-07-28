@@ -16,25 +16,25 @@ typedef float [-inf +inf] real;
 enforce(isSingleton(1));
 
 int alpha; //test arithmetic operations.
-enforce(alpha == 2 + 3 + 4 - 10);
+alpha == 2 + 3 + 4 - 10;
 eq(alpha, -1);
 
 bool testTestFunction = test(1 == 1); //Conor wants to remove this.
 eq(testTestFunction, true);
 
 //test all relations.
-enforce(1 < 2);
-enforce(1 > 0);
-enforce(0 == 0);
-enforce(0 != 1);
-enforce(1 <= 1);
-enforce(1 <= 3);
-enforce(0 >= 0);
-enforce(1 >= 0);
+1 < 2;
+1 > 0;
+0 == 0;
+0 != 1;
+1 <= 1;
+1 <= 3;
+0 >= 0;
+1 >= 0;
 
 //test ands and ors
-enforce(true || false);
-enforce(true && true);
+true || false;
+true && true;
 
 ///End
 
@@ -62,24 +62,24 @@ foo::p {
 
        bool foo = test(alpha == gamma);
 
-       enforce(foo);
+       foo;
 
        bool ret;
 
        if test (alpha == beta - gamma + delta) {
-          enforce(ret);
+          ret;
        } else {
-          enforce(ret == false);
+          ret == false;
        }
 
        if test (isSingleton(ret)) {
-          enforce(ret);
+          ret;
        } else {
-          enforce(false);
+          false;
        }
 	
        Location location_enum;
-       enforce(location_enum == Location.Hill);
+       location_enum == Location.Hill;
 }
 
 
