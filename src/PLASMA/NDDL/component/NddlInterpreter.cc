@@ -19,6 +19,43 @@
 
 namespace EUROPA {
 
+
+
+NddlFunction::NddlFunction(const char* name, const char* constraint, const char* returnType, unsigned int argumentCount)
+{
+    m_name = name;
+    m_constraint = constraint;
+    m_returnType = returnType;
+    m_argumentCount = argumentCount;
+}
+  
+NddlFunction::~NddlFunction()
+{
+}
+
+const char* NddlFunction::getName()
+{
+    return m_name.c_str();
+}
+
+const char* NddlFunction::getConstraint()
+{
+    return m_constraint.c_str();
+}
+const char* NddlFunction::getReturnType()
+{
+    return m_returnType.c_str();
+}
+unsigned int NddlFunction::getArgumentCount()
+{
+    return m_argumentCount;
+}
+
+
+
+
+
+
 NddlInterpreter::NddlInterpreter(EngineId& engine)
   : m_engine(engine), m_varcount(1)
 {
@@ -290,6 +327,43 @@ void NddlInterpreter::optimizeTree(ANTLR3_BASE_TREE_struct* tree, unsigned int t
   }
 
 
+  //Fix function calls FIXME TODO: can we do this in antlr rewrite? If not, we should walk the tree for this outside of the optimizer.
+  //This just goes trough and replaces the comma delimited list with a list of IDs.
+  for (unsigned int i = 0; i < tree->getChildCount(tree); i++) {
+    ANTLR3_BASE_TREE_struct* child = (ANTLR3_BASE_TREE_struct*)tree->getChild(tree, i);
+    if (std::string((char*)child->getText(child)->chars) == "FUNCTION_CALL"
+	&& child->getChildCount(child) == 2) { //Is a function call
+      ANTLR3_BASE_TREE_struct* argumentsList = (ANTLR3_BASE_TREE_struct*)child->getChild(child, 1);
+      if (argumentsList->getChildCount(argumentsList) == 2) {
+	ANTLR3_BASE_TREE_struct* arguments = (ANTLR3_BASE_TREE_struct*)argumentsList->getChild(argumentsList, 1);
+	std::string argumentsText = (char*)arguments->getText(arguments)->chars;
+	if (argumentsText.find(",") != std::string::npos) { //Is a comma-delimited list
+	  //printf("Function splitting start: %s.\n", argumentsText.c_str());
+	  std::vector<std::string> argumentNames;
+	  unsigned int limit = 0;
+	  while(argumentsText != "") {
+	    unsigned int end = argumentsText.find(",");
+	    argumentNames.push_back(argumentsText.substr(0, end));
+	    argumentsText = argumentsText.substr(end + 1, std::string::npos);
+	    //printf("Function splitting: %s.\n", argumentsText.c_str());
+	    checkError(limit < 1000, "Insane number of arguments to a function (limit: 1000).");
+	  }
+	  argumentsList->deleteChild(argumentsList, 1);//Remove the string comma delimited list of arguments
+	  
+	  
+	  for (unsigned int a = 0; a < argumentNames.size(); a++) {
+	    //printf("Function argument: %s\n", argumentNames[a].c_str());
+	    ANTLR3_BASE_TREE_struct* newVar = (ANTLR3_BASE_TREE_struct*)((NDDL3Parser*)ctx)->adaptor
+	      ->createTypeText(((NDDL3Parser*)ctx)->adaptor, IDENT, (pANTLR3_UINT8)(argumentNames[a].c_str()));
+	    argumentsList->addChild(argumentsList, newVar);
+	  }
+	  
+	}
+      }
+    }
+  }
+
+
   //Now do the optimizations if a change needs to be made, otherwise optimize the children
   if (changeMade) {
     for (unsigned int t = 0; t < implicit_vars.size(); t++) {
@@ -321,7 +395,7 @@ void NddlInterpreter::optimizeTree(ANTLR3_BASE_TREE_struct* tree, unsigned int t
 	}
       }
 
-
+      //Remove test contraints with singleton outcomes
       if (isThreeArgConstraint(child, con, first, second, third)) {
 	std::string con_name = (char*)con->getText(con)->chars;
 	std::string input = (char*)first->getText(first)->chars;
@@ -454,10 +528,16 @@ NddlSymbolTable::NddlSymbolTable(const EngineId& engine)
     , m_parentST(NULL)
     , m_engine(engine)
 {
+    m_functions.push_back(new NddlFunction("equalTestFunction", "testEQ", "bool", 2));
 }
 
 NddlSymbolTable::~NddlSymbolTable()
 {
+    while(!m_functions.empty()) 
+    {
+	delete m_functions[0];
+	m_functions.erase(m_functions.begin());
+    }
 }
 
 NddlSymbolTable* NddlSymbolTable::getParentST() { return m_parentST; }
@@ -482,6 +562,21 @@ std::string NddlSymbolTable::getErrors() const
         os << errors()[i] << std::endl;
 
     return os.str();
+}
+
+NddlFunction* NddlSymbolTable::getFunction(const char* name) const
+{
+    for (unsigned int i = 0; i < m_functions.size(); i++)
+    {
+	if (!strcmp(m_functions[i]->getName(), name)) {
+            return m_functions[i];
+	}
+    }
+    if (m_parentST) 
+    {
+        return m_parentST->getFunction(name);
+    }
+    return NULL;
 }
 
 void* NddlSymbolTable::getElement(const char* name) const

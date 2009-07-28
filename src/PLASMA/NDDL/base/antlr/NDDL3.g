@@ -13,6 +13,7 @@ tokens {
 	CONSTRUCTOR;
 	CONSTRUCTOR_INVOCATION;
 	METHOD_CALL;
+    FUNCTION_CALL;
 	NDDL;
 	PREDICATE_INSTANCE;     
 	TOKEN_RELATION;
@@ -136,10 +137,35 @@ anyValue
     ;
 
 ///
+expressionSingleton[std::vector<std::string> &argumentlist]
+@init {
+    CREATE_VAR(variable);
+    argumentlist.push_back(variable);
+}
+    : a=anyValue -> ^(VARIABLE IDENT["bool"] IDENT[variable]) 
+        ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[variable] $a));
+
+
+expressionArgList[std::vector<std::string> &argumentlist]
+@init {
+}
+    : a=expressionSingleton[argumentlist] (',' b=expressionSingleton[argumentlist])* -> $a $b;
+
+functionCall[const char* var]
+@init {
+    std::vector<std::string> argumentlist;
+    std::string stringargs = "";
+}
+    : functionName=IDENT '(' args=expressionArgList[argumentlist] ')'
+        { for (unsigned int i = 0; i < argumentlist.size(); i++) { stringargs += argumentlist[i] + ","; } }
+        -> $args ^(FUNCTION_CALL $functionName ^('(' IDENT[var] IDENT[{(ANTLR3_UINT8*)stringargs.c_str()}]));
+
+
 expressionLiteralNumber[const char* var]
     :   a=INT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $a))
     |   b=FLOAT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $b))
     |   d=booleanLiteral -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $d))
+    |   e=functionCall[var] -> $e
     |   c=qualified -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $c));
 
 expressionNumberNeg[const char* var, bool negateRight]
@@ -212,6 +238,7 @@ booleanLiteralExpression[const char* var]
     :   val=booleanLiteral -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $val ))
     |   varname=qualified ->  ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $varname))
     |   re=relationalExpression[var] -> $re
+    |   fn=functionCall[var] -> $fn
     |   '(' paren=booleanOrExpression[var] ')' -> $paren
     ;
 

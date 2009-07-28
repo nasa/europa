@@ -35,6 +35,8 @@ foo::p {
        int delta = 4;
 
 
+       bool functionTest = test(equalTestFunction(4, 1));
+
        bool foo = test(alpha == gamma);
 
        bool ret;
@@ -58,6 +60,7 @@ foo::p {
        Location l;
        enforce(l == Location.Hill);
 }
+
 
 new foo();
 

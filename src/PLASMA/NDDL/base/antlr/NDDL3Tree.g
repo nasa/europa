@@ -91,6 +91,7 @@ nddl
 		  |	child=variableDeclarations { forceEval = false; }
 		  |	child=assignment { forceEval = false; }
 		  |	child=constraintInstantiation { forceEval = false; }
+          | child=functionCall { forceEval = false; }
 		  |	child=allocation[NULL] { forceEval = false; }
 		  |	child=rule { forceEval = false; }
 		  |	child=problemStmt { forceEval = false; }
@@ -407,6 +408,23 @@ constraintInstantiation returns [ExprConstraint* result]
                 
         ;
 
+functionCall returns [ExprConstraint* result]
+@init {
+    std::vector<Expr*> args;
+}
+        :       
+              ^(FUNCTION_CALL
+                        name=IDENT
+                        variableArgumentList[args]
+                )
+                {
+                    NddlFunction* func = CTX->SymbolTable->getFunction(c_str($name.text->chars));
+                    checkError(func, "No function " << (c_str($name.text->chars)));
+                    result = new ExprConstraint(func->getConstraint(), args);
+                }
+                
+        ;
+
 classDeclaration returns [Expr* result]
 @init {
 const char* newClass = NULL;
@@ -644,6 +662,7 @@ ruleBlock[std::vector<Expr*>& ruleBody]
 
 ruleStatement returns [Expr* result]
 	: (	child=constraintInstantiation
+      |	child=functionCall
 	  |	child=assignment
 	  |	child=variableDeclarations
 	  |	child=ifStatement
