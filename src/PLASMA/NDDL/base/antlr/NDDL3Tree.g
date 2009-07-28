@@ -420,8 +420,11 @@ functionCall returns [ExprConstraint* result]
                 )
                 {
                     NddlFunction* func = CTX->SymbolTable->getFunction(c_str($name.text->chars));
-                    checkError(func, "No function " << (c_str($name.text->chars)));
-                    result = new ExprConstraint(func->getConstraint(), args);
+                    if (!func) {
+                        reportSemanticError(CTX, std::string("No function: \"") + std::string(c_str($name.text->chars)) + std::string("\"."));
+                    } else {
+                        result = new ExprConstraint(func->getConstraint(), args);
+                    }
                 }
                 
         ;

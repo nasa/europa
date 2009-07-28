@@ -640,21 +640,29 @@ INCLUDE :	'#include' WS+ file=STRING
                                 for (unsigned int i=0; i<parserPath.size();i++) {
                                     path += parserPath[i] + ":";
                                 }
-                                checkError(false, std::string("ERROR!: couldn't find file: " + std::string((const char*)$file.text->chars)
-                                                              + ", search path \"" + path + "\"").c_str());
+
+                                //Error message here.
+                                CONSTRUCTEX();
+                                FAILEDFLAG = ANTLR3_TRUE;
+                                RECOGNIZER->state->errorCount++;
+                                std::string message = ("ERROR!: couldn't find file: " + std::string((const char*)$file.text->chars)
+                                                              + ", search path \"" + path + "\"");
+                                RECOGNIZER->state->exception->message = strdup(message.c_str());
+                                reportLexerError(RECOGNIZER, NULL); //Note: the second argument does not appear to be used for anything.
+                            } else {
+                                
+                                // Create a new input stream and take advantage of built in stream stacking
+                                // in C target runtime.
+                                
+                                pANTLR3_STRING_FACTORY factory = antlr3StringFactoryNew();
+                                pANTLR3_STRING fName = factory->newStr(factory,(ANTLR3_UINT8 *)fullName.c_str());
+                                //factory->close(factory);
+                                
+                                pANTLR3_INPUT_STREAM in = antlr3AsciiFileStreamNew(fName->chars);
+                                //fName->free(fName);
+                                PUSHSTREAM(in);
+                                CTX->parserObj->addInputStream(in);
                             }
-
-                            // Create a new input stream and take advantage of built in stream stacking
-                            // in C target runtime.
-
-                            pANTLR3_STRING_FACTORY factory = antlr3StringFactoryNew();
-                            pANTLR3_STRING fName = factory->newStr(factory,(ANTLR3_UINT8 *)fullName.c_str());
-                            //factory->close(factory);
-                        
-                            pANTLR3_INPUT_STREAM in = antlr3AsciiFileStreamNew(fName->chars);
-                            //fName->free(fName);
-                            PUSHSTREAM(in);
-                            CTX->parserObj->addInputStream(in);
                         } else {
                             //std::cout << "Ignoring already included file " << fullName << std::endl;
                         }
