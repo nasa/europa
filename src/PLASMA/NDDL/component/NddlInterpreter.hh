@@ -9,6 +9,7 @@
 #define NDDLINTERPRETER_H_
 
 #include "Interpreter.hh"
+#include <antlr3.h>
 #include <antlr3interfaces.h>
 
 namespace EUROPA {
@@ -156,6 +157,24 @@ public:
     virtual std::string interpret(std::istream& input, const std::string& source);
 };
 
+class NddlParserException
+{
+public:
+	NddlParserException(const char *fileName, int line, int offset, int length,
+			const char *message);
+	friend ostream &operator<<(ostream &, const NddlParserException &);
+	/** Prepare this exception for shipping with AST */
+	std::string asString() const;
+protected:
+	std::string m_fileName;
+	int m_line;
+	int m_offset;
+	int m_length;
+	std::string m_message;
+};
+
+void reportParserError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 *tokenNames);
+void reportLexerError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 * tokenNames);
 }
 
 

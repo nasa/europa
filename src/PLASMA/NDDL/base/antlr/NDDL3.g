@@ -25,17 +25,39 @@ tokens {
 #include "NddlInterpreter.hh"
 
 using namespace EUROPA;
+
+// Forward declaration so that we can use this function in apifuncs
+typedef struct NDDL3Lexer_Ctx_struct NDDL3Lexer, * pNDDL3Lexer;
+static void newNDDL3LexerFree(pNDDL3Lexer ctx);
 }
 
 @lexer::context {
     NddlInterpreter* parserObj;
+    std::vector<NddlParserException>* lexerErrors;
+}
+
+@lexer::apifuncs
+{
+    RECOGNIZER->displayRecognitionError = reportLexerError;
+    ctx->lexerErrors = new std::vector<NddlParserException>;
+    ctx->free = newNDDL3LexerFree;
+}
+
+@lexer::members {
+static void newNDDL3LexerFree(pNDDL3Lexer ctx) {
+    delete ctx->lexerErrors;
+    NDDL3LexerFree(ctx);
+}
 }
 
 @parser::includes
 {
 #include "NddlInterpreter.hh"
-
 using namespace EUROPA;
+
+// Forward declaration so that we can use this function in apifuncs
+typedef struct NDDL3Parser_Ctx_struct NDDL3Parser, * pNDDL3Parser;
+static void newNDDL3ParserFree(pNDDL3Parser ctx);
 
 //This macro creates an implicit variable. It increments a counter and returns the current interation.
 //The name is the name of a newly created c string that holds the name of the variable. Because of
@@ -58,8 +80,27 @@ private:
 
 @parser::context {
     NddlInterpreter* parserObj;
+    std::vector<NddlParserException>* parserErrors;
 }
 
+@parser::apifuncs
+{
+    RECOGNIZER->displayRecognitionError = reportParserError;
+    ctx->parserErrors = new std::vector<NddlParserException>;
+    ctx->free = newNDDL3ParserFree;
+    // This is needed so that we can get to the CTX from reportParseError
+    // Thanks to http://www.antlr.org/pipermail/antlr-interest/2009-May/034567.html
+    // for the tip
+    PARSER->super = (void *)ctx;
+}
+
+@parser::members {
+// Declare it in members, so that we can refer to the original Free
+static void newNDDL3ParserFree(pNDDL3Parser ctx) {
+   delete ctx->parserErrors;
+   NDDL3ParserFree(ctx);
+}
+}
 
 
 nddl	
