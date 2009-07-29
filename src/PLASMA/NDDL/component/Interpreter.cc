@@ -63,6 +63,7 @@ namespace EUROPA {
 
   ExprConstant::~ExprConstant()
   {
+      delete m_domain;
   }
 
   const DataTypeId ExprConstant::getDataType() const
@@ -231,6 +232,9 @@ namespace EUROPA {
 
   ExprNewObject::~ExprNewObject()
   {
+      for (unsigned int i=0;i<m_argExprs.size();i++)
+          delete m_argExprs[i];
+      m_argExprs.clear();
   }
 
   DataRef ExprNewObject::eval(EvalContext& context) const
@@ -291,6 +295,9 @@ namespace EUROPA {
 
   ExprConstraint::~ExprConstraint()
   {
+      for (unsigned int i=0; i < m_args.size(); i++)
+          delete m_args[i];
+      m_args.clear();
   }
 
   std::string varsToString(const std::vector<ConstrainedVariableId>& vars)
@@ -484,7 +491,7 @@ namespace EUROPA {
       {
           result = context.getToken(m_predicateName.c_str());
       }
-      else 
+      else
       {
 	  InterpretedRuleInstance* rule = (InterpretedRuleInstance*)(context.getElement("RuleInstance"));
 	  if (rule != NULL)
@@ -704,6 +711,8 @@ namespace EUROPA {
 
   ExprIfGuard::~ExprIfGuard()
   {
+      delete m_lhs;
+      delete m_rhs;
   }
 
   const std::string& ExprIfGuard::getOperator() { return m_op; }
@@ -737,6 +746,15 @@ namespace EUROPA {
 
   ExprIf::~ExprIf()
   {
+      delete m_guard;
+
+      for (unsigned int i=0;i<m_ifBody.size();i++)
+          delete m_ifBody[i];
+      m_ifBody.clear();
+
+      for (unsigned int i=0;i<m_elseBody.size();i++)
+          delete m_elseBody[i];
+      m_elseBody.clear();
   }
 
   DataRef ExprIf::doEval(RuleInstanceEvalContext& context) const
@@ -809,6 +827,9 @@ namespace EUROPA {
 
   ExprLoop::~ExprLoop()
   {
+      for (unsigned int i=0;i<m_loopBody.size();i++)
+          delete m_loopBody[i];
+      m_loopBody.clear();
   }
 
   DataRef ExprLoop::doEval(RuleInstanceEvalContext& context) const
@@ -892,6 +913,14 @@ namespace EUROPA {
     void InterpretedTokenFactory::addBodyExpr(Expr* e)
     {
         m_body.push_back(e);
+    }
+
+    InterpretedTokenFactory::~InterpretedTokenFactory()
+    {
+        for (unsigned int i=0;i<m_body.size();i++)
+            delete m_body[i];
+
+        m_body.clear();
     }
 
     TokenFactoryId InterpretedTokenFactory::getParentFactory(const PlanDatabaseId& planDb) const
@@ -1274,6 +1303,9 @@ namespace EUROPA {
 
   InterpretedRuleFactory::~InterpretedRuleFactory()
   {
+      for (unsigned int i=0;i<m_body.size();i++)
+          delete m_body[i];
+      m_body.clear();
   }
 
   RuleInstanceId InterpretedRuleFactory::createInstance(
@@ -1388,6 +1420,7 @@ namespace EUROPA {
 
   ExprVarDeclaration::~ExprVarDeclaration()
   {
+      delete m_initValue;
   }
 
   const LabelStr& ExprVarDeclaration::getName() const { return m_name; }
@@ -1543,6 +1576,8 @@ namespace EUROPA {
 
   ExprAssignment::~ExprAssignment()
   {
+      delete m_lhs;
+      delete m_rhs;
   }
 
   DataRef ExprAssignment::eval(EvalContext& context) const
@@ -1703,6 +1738,12 @@ namespace EUROPA {
 
   ExprVariableMethod::~ExprVariableMethod()
   {
+      if (m_varExpr != NULL)
+          delete m_varExpr;
+
+      for (unsigned int i=0;i<m_argExprs.size();i++)
+          delete m_argExprs[i];
+      m_argExprs.clear();
   }
 
   DataRef ExprVariableMethod::eval(EvalContext& context) const
@@ -1765,6 +1806,9 @@ namespace EUROPA {
 
   ExprObjectMethod::~ExprObjectMethod()
   {
+      for (unsigned int i=0;i<m_argExprs.size();i++)
+          delete m_argExprs[i];
+      m_argExprs.clear();
   }
 
   DataRef ExprObjectMethod::eval(EvalContext& context) const
@@ -1821,6 +1865,9 @@ namespace EUROPA {
 
   ExprTokenMethod::~ExprTokenMethod()
   {
+      for (unsigned int i=0;i<m_argExprs.size();i++)
+          delete m_argExprs[i];
+      m_argExprs.clear();
   }
 
   DataRef ExprTokenMethod::eval(EvalContext& context) const
@@ -1875,6 +1922,9 @@ namespace EUROPA {
 
   ExprProblemStmt::~ExprProblemStmt()
   {
+      for (unsigned int i=0;i<m_tokens.size();i++)
+          delete m_tokens[i];
+      m_tokens.clear();
   }
 
   DataRef ExprProblemStmt::eval(EvalContext& context) const

@@ -330,6 +330,7 @@ namespace EUROPA {
   {
     public:
 	  InterpretedTokenFactory(const ObjectTypeId& ot,const LabelStr& predicateName);
+      ~InterpretedTokenFactory();
 
       void addBodyExpr(Expr* e);
 
@@ -501,8 +502,8 @@ namespace EUROPA {
 
     protected:
         ExprIfGuard* m_guard;
-        const std::vector<Expr*> m_ifBody;
-        const std::vector<Expr*> m_elseBody;
+        std::vector<Expr*> m_ifBody;
+        std::vector<Expr*> m_elseBody;
   };
 
   class ExprLoop : public RuleExpr
@@ -516,7 +517,7 @@ namespace EUROPA {
     protected:
         LabelStr m_varName;
         LabelStr m_varValue;
-        const std::vector<Expr*> m_loopBody;
+        std::vector<Expr*> m_loopBody;
   };
 
   class NativeTokenFactory: public TokenFactory

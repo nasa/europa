@@ -57,7 +57,7 @@ static void newNDDL3ParserFree(pNDDL3Parser ctx) {
 
 @lexer::includes
 {
-#include "NddlInterpreter.hh"
+#include "NddlInterpreter.hh" 
 
 using namespace EUROPA;
 
@@ -458,13 +458,12 @@ INCLUDE :	'#include' WS+ file=STRING
 
                             pANTLR3_STRING_FACTORY factory = antlr3StringFactoryNew();
                             pANTLR3_STRING fName = factory->newStr(factory,(ANTLR3_UINT8 *)fullName.c_str());
-                            delete factory;
+                            ANTLR3_FREE(factory);
                         
                             pANTLR3_INPUT_STREAM in = antlr3AsciiFileStreamNew(fName->chars);
                             PUSHSTREAM(in);
                             CTX->parserObj->addInputStream(in);
-
-                            // TODO: the string may be leaked here?
+                            ANTLR3_FREE(fName);
                         } else {
                             //std::cout << "Ignoring already included file " << fullName << std::endl;
                         }

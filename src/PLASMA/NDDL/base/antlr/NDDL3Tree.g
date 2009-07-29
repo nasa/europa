@@ -695,8 +695,9 @@ loopStatement returns [Expr* result]
 			ruleBlock[loopBody]
 		)
 		{
-		    // TODO : modify ExprLoop to pass val Expr instead, otherwise delete val.
+		    // TODO : modify ExprLoop to take val Expr instead, otherwise delete val.
 		    result = new ExprLoop(loopVarName,val->toString().c_str(),loopBody); 
+		    delete val;
 		}
 	;
 

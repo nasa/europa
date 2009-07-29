@@ -428,6 +428,9 @@ namespace EUROPA {
 
     ExprConstructorSuperCall::~ExprConstructorSuperCall()
     {
+        for (unsigned int i=0; i < m_argExprs.size(); i++)
+            delete m_argExprs[i];
+        m_argExprs.clear();
     }
 
     DataRef ExprConstructorSuperCall::eval(EvalContext& context) const

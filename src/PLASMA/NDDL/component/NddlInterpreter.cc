@@ -57,13 +57,13 @@ bool NddlInterpreter::queryIncludeGuard(const std::string& f)
     }
     return false;
 }
- 
-void NddlInterpreter::addInclude(const std::string &f) 
+
+void NddlInterpreter::addInclude(const std::string &f)
 {
     m_filesread.push_back(f);
 }
 
-void NddlInterpreter::addInputStream(pANTLR3_INPUT_STREAM in) 
+void NddlInterpreter::addInputStream(pANTLR3_INPUT_STREAM in)
 {
     m_inputstreams.push_back(in);
 }
@@ -126,7 +126,7 @@ std::string NddlInterpreter::getFilename(const std::string& f)
 
 std::string NddlInterpreter::interpret(std::istream& ins, const std::string& source)
 {
-    if (queryIncludeGuard(source)) 
+    if (queryIncludeGuard(source))
     {
       debugMsg("NddlInterpreter:error", "Ignoring root file: " << source << ". Bug?");
         return "";
@@ -686,9 +686,9 @@ std::string NddlToASTInterpreter::interpret(std::istream& ins, const std::string
     std::vector<NddlParserException> *lerrors = lexer->lexerErrors;
     std::vector<NddlParserException> *perrors = parser->parserErrors;
 
-    for (int i=0; i<lerrors->size(); i++)
+    for (unsigned int i=0; i<lerrors->size(); i++)
     	os << "L" << (*lerrors)[i] << "$\n";
-    for (int i=0; i<perrors->size(); i++)
+    for (unsigned int i=0; i<perrors->size(); i++)
     	os << "P" << (*perrors)[i] << "$\n";
     // Warnings, if any, should go here
 
@@ -835,9 +835,12 @@ NddlParserException::NddlParserException(const char *fileName, int line,
   else fileName = "No_File";
 }
 
-ostream &operator<<(ostream &os, const NddlParserException &ex) {
+ostream &operator<<(ostream &os, const NddlParserException &ex)
+{
 	os << "\"" << ex.m_fileName << "\":" <<ex.m_line << ":" << ex.m_offset << ":"
 		<< ex.m_length << " " << ex.m_message;
+
+	return os;
 }
 
 std::string NddlParserException::asString() const {

@@ -23,7 +23,7 @@ ObjectType::~ObjectType()
 {
     // TODO: enable this when Schema API is cleaned up to reflect the fact that object factories and token factories are owned by the object type
     // purgeAll();
-    m_varType.remove();
+    delete (ObjectDT*)m_varType;
     m_id.remove();
 }
 
