@@ -56,7 +56,7 @@ namespace EUROPA {
 	     getRuleInstance()->getRule()->getName() << " from source " << getRuleInstance()->getRule()->getName());
     // If a Reset has occurred, and the rule has been fired, we may have to do something right now
     if(getRuleInstance()->isExecuted() &&
-       changeType == DomainListener::RESET &&
+       (changeType == DomainListener::RESET || changeType == DomainListener::RELAXED) &&
        !getRuleInstance()->test(getScope())){
       getRuleInstance()->undo();
       return true;
