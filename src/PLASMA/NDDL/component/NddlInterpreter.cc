@@ -547,6 +547,7 @@ NddlSymbolTable::NddlSymbolTable(const EngineId& engine)
 {
     m_functions.push_back(new NddlFunction("equalTestFunction", "testEQ", "bool", 2));
     m_functions.push_back(new NddlFunction("isSingleton", "testSingleton", "bool", 1));
+    m_functions.push_back(new NddlFunction("isSpecified", "testSpecified", "bool", 1));
 }
 
 NddlSymbolTable::~NddlSymbolTable()
