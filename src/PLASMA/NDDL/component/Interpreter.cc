@@ -882,76 +882,81 @@ namespace EUROPA {
   /*
    * InterpretedTokenFactory
    */
-    InterpretedTokenFactory::InterpretedTokenFactory(
-            const ObjectTypeId& ot,
-            const LabelStr& predicateName)
-        : TokenFactory(ot,predicateName)
-    {
-    }
-
-    void InterpretedTokenFactory::addBodyExpr(Expr* e)
-    {
-        m_body.push_back(e);
-    }
-
-    TokenFactoryId InterpretedTokenFactory::getParentFactory(const PlanDatabaseId& planDb) const
-    {
-        // TODO: cache this?
-        // TODO: drop planDb parameter, ObjectType must be able to answer this without reference to schema
-        TokenFactoryId parentFactory = planDb->getSchema()->getParentTokenFactory(getSignature(), m_objType->getParent()->getName());
-        return parentFactory;
-    }
-
-	TokenId InterpretedTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
-	{
-	    TokenFactoryId parentFactory = getParentFactory(planDb);
-
-        TokenId token;
-	    if (parentFactory.isNoId()) {
-	        token = (new InterpretedToken(
-	                planDb,
-	                name,
-	                m_body,
-	                rejectable,
-	                isFact,
-	                false))->getId();
-	    }
-	    else {
-	        token = parentFactory->createInstance(planDb,name,rejectable,isFact);
-	        // TODO: Hack! this makes it impossible to extend native tokens
-	        // class hierarchy needs to be fixed to avoid this cast
-            InterpretedToken* it = dynamic_cast<InterpretedToken*>((Token*)token);
-            it->commonInit(m_body,false);
-	    }
-
-	    return token;
-	}
-
-  TokenId InterpretedTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
+  InterpretedTokenFactory::InterpretedTokenFactory(
+						   const ObjectTypeId& ot,
+						   const LabelStr& predicateName)
+    : TokenFactory(ot,predicateName)
   {
-      TokenFactoryId parentFactory = getParentFactory(master->getPlanDatabase());
-
-      TokenId token;
-      if (parentFactory.isNoId()) {
-          token = (new InterpretedToken(
-                  master,
-                  name,
-                  relation,
-                  m_body,
-                  false))->getId();
-      }
-      else {
-          token = parentFactory->createInstance(master,name,relation);
-          // TODO: Hack! this makes it impossible to extend native tokens
-          // class hierarchy needs to be fixed to avoid this cast
-          InterpretedToken* it = dynamic_cast<InterpretedToken*>((Token*)token);
-          it->commonInit(m_body,false);
-      }
-
-      return token;
   }
 
 
+  InterpretedTokenFactory::~InterpretedTokenFactory()
+  {
+  }
+  
+  void InterpretedTokenFactory::addBodyExpr(Expr* e)
+  {
+    m_body.push_back(e);
+  }
+  
+  TokenFactoryId InterpretedTokenFactory::getParentFactory(const PlanDatabaseId& planDb) const
+  {
+    // TODO: cache this?
+    // TODO: drop planDb parameter, ObjectType must be able to answer this without reference to schema
+    TokenFactoryId parentFactory = planDb->getSchema()->getParentTokenFactory(getSignature(), m_objType->getParent()->getName());
+    return parentFactory;
+  }
+  
+  TokenId InterpretedTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
+	{
+	  TokenFactoryId parentFactory = getParentFactory(planDb);
+	  
+	  TokenId token;
+	  if (parentFactory.isNoId()) {
+	    token = (new InterpretedToken(
+					  planDb,
+					  name,
+					  m_body,
+					  rejectable,
+					  isFact,
+					  false))->getId();
+	  }
+	  else {
+	    token = parentFactory->createInstance(planDb,name,rejectable,isFact);
+	    // TODO: Hack! this makes it impossible to extend native tokens
+	    // class hierarchy needs to be fixed to avoid this cast
+            InterpretedToken* it = dynamic_cast<InterpretedToken*>((Token*)token);
+            it->commonInit(m_body,false);
+	  }
+	  
+	  return token;
+	}
+  
+  TokenId InterpretedTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
+  {
+    TokenFactoryId parentFactory = getParentFactory(master->getPlanDatabase());
+    
+    TokenId token;
+    if (parentFactory.isNoId()) {
+      token = (new InterpretedToken(
+				    master,
+				    name,
+				    relation,
+				    m_body,
+				    false))->getId();
+    }
+    else {
+      token = parentFactory->createInstance(master,name,relation);
+      // TODO: Hack! this makes it impossible to extend native tokens
+      // class hierarchy needs to be fixed to avoid this cast
+      InterpretedToken* it = dynamic_cast<InterpretedToken*>((Token*)token);
+      it->commonInit(m_body,false);
+    }
+    
+    return token;
+  }
+  
+  
   /*
    * RuleInstanceEvalContext
    * Puts RuleInstance variables like duration, start, end, in context
