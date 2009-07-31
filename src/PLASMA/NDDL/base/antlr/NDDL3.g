@@ -439,19 +439,20 @@ INCLUDE :	'#include' WS+ file=STRING
                 {
                         std::string fullName = std::string((const char*)($file.text->chars));
                         fullName = CTX->parserObj->getFilename(fullName);
+
+                        if (fullName.length() == 0) {
+                            std::string path = "";
+                            std::vector<std::string> parserPath = CTX->parserObj->getIncludePath();
+                            for (unsigned int i=0; i<parserPath.size();i++) {
+                                path += parserPath[i] + ":";
+                            }
+                            check_runtime_error(false, std::string("ERROR!: couldn't find file: " + std::string((const char*)$file.text->chars)
+                                                              + ", search path \"" + path + "\"").c_str());
+                        }
+
                         if (!CTX->parserObj->queryIncludeGuard(fullName)) {
                             CTX->parserObj->addInclude(fullName);
                             // Look for the included file in include path
-
-                            if (fullName.length() == 0) {
-                                std::string path = "";
-                                std::vector<std::string> parserPath = CTX->parserObj->getIncludePath();
-                                for (unsigned int i=0; i<parserPath.size();i++) {
-                                    path += parserPath[i] + ":";
-                                }
-                                checkError(false, std::string("ERROR!: couldn't find file: " + std::string((const char*)$file.text->chars)
-                                                              + ", search path \"" + path + "\"").c_str());
-                            }
 
                             // Create a new input stream and take advantage of built in stream stacking
                             // in C target runtime.
