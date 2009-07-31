@@ -68,11 +68,21 @@ rule RunPlannerProblem {
   local deptarget = $(3) ;
   local exe = $(model:S=_$(PLANNER)) ;
   local executable = $(model:S=) ;
+  local xml = $(model:S=.xml) ;
   local nddl = $(model) ;
+
+  # create .xml for a .nddl
+  NddlParser $(xml) : $(nddl) ;
+
+  #run with interpreted model
+  RunModuleMain run-xml-interp-$(exe) : runProblem_$(PLANNER) : $(xml) $(configurationFile) nddl-xml ;
+  Depends $(deptarget) : $(xml) run-xml-interp-$(exe) ;
+  Depends run-system-tests : $(deptarget) ;
+  Clean clean-generated-xml : $(xml) ;
 
   #run with fully interpreted model
   RunModuleMain run-nddl-interp-$(exe) : runProblem_$(PLANNER) : $(nddl) $(configurationFile) nddl ;
-  Depends $(deptarget) : run-nddl-interp-$(exe) ;
+  Depends $(deptarget) : [ FGristFiles $(nddl) ] run-nddl-interp-$(exe) ;
   Depends run-system-tests : run-nddl-interp-$(exe) ;
 
   if $(executable) in $(checkin-tests) {
