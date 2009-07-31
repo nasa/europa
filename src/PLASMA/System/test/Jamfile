@@ -42,12 +42,8 @@ checkin-tests =
 	HTX.3
     force-object-distribution
     rejection
+    gnats_3161
 ;
-
-#BROKEN TESTS
-# gnats_3161
-# foreach-transaction
-# gnats_3161.nddl 
 
 if ! ( "Resources" in $(NO) ) {
 checkin-tests += 
