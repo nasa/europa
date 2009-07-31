@@ -122,12 +122,38 @@ namespace EUROPA {
    * Otherwise, process the difference between the current domain, and prior notified objects
    */
   void ObjectTokenRelation::notifyRemovals() {
-    std::set<ObjectId>::iterator it = m_notifiedObjects.begin();
+    static unsigned int sl_counter(0);
+    sl_counter++;
+
+    checkError(getId().isValid(), getId());
+
     // Remove token from objects where the domain has been restricted, and was previously notifed,
     // or where the Token is now inactive
     bool isActive = m_token->isActive();
 
-    while(it!=m_notifiedObjects.end()){
+    unsigned int startIndex = 0;
+
+    debugMsg("ConstraintEngine", "[" << getKey() << "]");
+
+    while (m_notifiedObjects.size() > startIndex) {
+      std::set<ObjectId>::iterator it = m_notifiedObjects.begin();
+      for (unsigned int i = 0; i < startIndex; i++) {
+	it++;
+      }
+
+      ObjectId object = *it;
+
+      if(!isActive || !m_currentDomain.isMember(object)){
+	object->remove(m_token);
+	m_notifiedObjects.erase(object);
+      } else {
+	startIndex++;
+      }
+      
+    }
+    
+
+    /*while(it!=m_notifiedObjects.end()){
       ObjectId object = *it;
       if(!isActive || !m_currentDomain.isMember(object)){
 	object->remove(m_token);
@@ -135,6 +161,6 @@ namespace EUROPA {
       }
       else
 	++it;
-    }
+	}*/
   }
 }
