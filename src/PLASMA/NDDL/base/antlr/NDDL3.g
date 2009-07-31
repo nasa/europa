@@ -206,6 +206,7 @@ expressionLiteralNumber[const char* var]
     :   a=INT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $a))
     |   b=FLOAT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $b))
     |   d=booleanLiteral -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $d))
+    |   f=baseDomain -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $f))
     |   e=functionCall[var] -> $e
     |   c=qualified -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $c));
 
@@ -513,7 +514,12 @@ flowControl
    bool hasElse = false;
 }
 
-    :	'if'^ guardExpression ruleBlock (options {k=1;}:'else'! ruleBlock)?
+    :	'if' '(' result=booleanOrExpression[implicit_var_return] ')' a=ruleBlock ('else' b=ruleBlock {hasElse = true;}|) 
+        -> {hasElse == false}? ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_return}])
+           $result ^('if' ^('test' IDENT[implicit_var_return]) $a)
+        -> ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_return}])
+           $result ^('if' ^('test' IDENT[implicit_var_return]) $a $b)
+
     |   'if' 'test' '(' result=booleanOrExpression[implicit_var_return] ')' a=ruleBlock ('else' b=ruleBlock {hasElse = true;}|) 
         -> {hasElse == false}? ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_return}])
            $result ^('if' ^('test' IDENT[implicit_var_return]) $a)

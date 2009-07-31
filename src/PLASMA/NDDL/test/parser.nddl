@@ -66,13 +66,13 @@ foo::p {
 
        bool ret;
 
-       if test (alpha == beta - gamma + delta) {
+       if (alpha == beta - gamma + delta) {
           ret;
        } else {
-          ret == false;
+          false;
        }
 
-       if test (isSingleton(ret)) {
+       if (isSingleton(ret)) {
           ret;
        } else {
           false;
