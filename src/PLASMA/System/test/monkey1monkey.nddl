@@ -107,11 +107,11 @@ Monkey_Class___Altitude_SV::HIGH {
 
 Monkey_Class___Altitude_SV::CLIMBING {
   met_by(Monkey_Class___Altitude_SV.LOW s0);
-  if (_0_anon_OR_tag_1==1) {
+  if (_0_anon_OR_tag_1 == 1) {
     contained_by(Monkey_Class___Location_SV.At s0);
       eq(s0.Loc_Label, Rock);
   }
-  if (_0_anon_OR_tag_1==2) {
+  if (_0_anon_OR_tag_1 == 2) {
     contained_by(Monkey_Class___Location_SV.At s0);
       eq(s0.Loc_Label, Tree);
   }

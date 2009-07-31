@@ -66,7 +66,9 @@ Rover::Navigate{
  eq(trackable.path, p);
 
  // Guard so iteration set is not going to be restricted
- if(path){
+ // Since this is an imparative operation, we need to check
+ // specification.
+ if(isSpecified(path)){
  	foreach (t in trackable) {
                 Trackable t_local_0;
 		contains(Target.Tracking target);

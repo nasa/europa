@@ -52,7 +52,7 @@ Foo::impliedObjectGuard{
  eq(object.arg2, bar); // 4: Guarded by first, second ungaurded. Order changed.
 
  // Guards implied when used on slaves as shown below
- if(object){
+ if(isSingleton(object)){
   any(object.arg2.pred t0); // 5: Guarded by object
  }
  //if(object.arg1 == allFoo.arg1){ // 6: Guarded by object, allFoo, and the test for equality
@@ -70,9 +70,9 @@ Foo::impliedLocalVariableGuard{
 // Singleton guard. Can be variables of tokens too
 // TODO: reference to object isn't working
 Foo::singletonGuard{
- if(object){
+ if(isSingleton(object)){
   meets(basicToken g1);
-  if(g1.object){
+  if(isSingleton(g1.object)){
    met_by(basicToken g2);
    eq(g1.duration, g2.duration); // Should be able to reference the parent scope
   }
@@ -109,7 +109,7 @@ Foo::tokenWithParameters{
 
 // TODO: Generating a singleton test instead of a value guarded test with default value of true
 Foo::tokenWithParameters{
- if(this.bool_arg){
+ if(isSingleton(this.bool_arg)){
   meets(basicToken t1);
  }
 }
@@ -118,7 +118,7 @@ Foo::tokenWithParameters{
 Foo::mixGuardedWithUnguarded{
  meets(tokenWithParameters t1);
  eq(t1.int_arg, 20);
- if(t1.bool_arg){ // TODO: Generating a singleton test instead of a value guarded test with default value of true
+ if(isSingleton(t1.bool_arg)){ // TODO: Generating a singleton test instead of a value guarded test with default value of true
   meets(basicToken t2);
  }
 }
@@ -127,7 +127,7 @@ Foo::mixGuardedWithUnguarded{
 Foo::localVariableGuard{
  bool b;
  // Test improved guard behavior (GNATS 3248).  Generates code eqivalent to previous test.
- if(b) meets(basicToken t);
+ if(isSingleton(b)) meets(basicToken t);
  if(b != false) meets(basicToken t);
  else meets(basicToken t);
 
@@ -137,7 +137,7 @@ Foo::localVariableGuard{
  }
 
  Foo f; // Set of objects
- if(f){ // When a singleton
+ if(isSingleton(f)){ // When a singleton
   eq(f.arg1, 20); // Constrain its field
  }
 }
