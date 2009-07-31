@@ -330,9 +330,9 @@ namespace EUROPA {
   {
     public:
 	  InterpretedTokenFactory(const ObjectTypeId& ot,const LabelStr& predicateName);
-      ~InterpretedTokenFactory();
+          virtual ~InterpretedTokenFactory();
 
-      void addBodyExpr(Expr* e);
+          void addBodyExpr(Expr* e);
 
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const;
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
