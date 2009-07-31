@@ -199,15 +199,32 @@ namespace EUROPA
       return;
 
     m_relaxing = true;
-    ConstrainedVariableSet::const_iterator it = m_emptyVariables.begin();
-    for(;it != m_emptyVariables.end();++it) {
+
+    //Relax of a variable can lead to the rules engine retracting variables. This in turn can
+    //result in a call to clear the empty variables. Thus, the commented code will fail because
+    //the underlying collection has been modified. Variable removal begins by discarding variables
+    //and leaving them in a discarded state. The underlying memory will not be deallocated until
+    //garbage collection occurs. The loop below is robust to variable removal.
+    while(!m_emptyVariables.empty()) {
+      ConstrainedVariableId v = *(m_emptyVariables.begin());
+      if (!v->isDiscarded()) {
+	check_error(!v.isNoId(),"Tried to relax ConstrainedVariableId::noId()");
+	v->relax();
+	debugMsg("ConstraintEngine:ViolationMgr", "Relaxed empty variable : " << v->toLongString());
+      }
+      m_emptyVariables.erase(v);
+    }
+
+    //Commented because of above issue.
+    /*for(ConstrainedVariableSet::const_iterator it = m_emptyVariables.begin();
+	it != m_emptyVariables.end();++it) {
       ConstrainedVariableId v = *it;
       check_error(!v.isNoId(),"Tried to relax ConstrainedVariableId::noId()");
       v->relax();
       debugMsg("ConstraintEngine:ViolationMgr", "Relaxed empty variable : " << v->toLongString());
     }
+    m_emptyVariables.clear();*/
 
-    m_emptyVariables.clear();
     m_relaxing = false;
   }
 
