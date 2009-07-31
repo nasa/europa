@@ -169,7 +169,7 @@ baseDomain[const DataType* baseType] returns [AbstractDomain* result]
         }
        
         result = value->lastDomain().copy(); 
-        // TODO: delete child;?
+        delete child;
     }        
     ;       
 
@@ -255,7 +255,7 @@ valueSet returns [Expr* result]
                 const AbstractDomain& ev = elemValue.getValue()->lastDomain();
                 double v = ev.getSingletonValue();
                               
-                // TODO: delete element;
+                delete element;
                              
                 if (elementType.isNoId())
                     elementType = ev.getDataType();

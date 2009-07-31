@@ -1420,7 +1420,8 @@ namespace EUROPA {
 
   ExprVarDeclaration::~ExprVarDeclaration()
   {
-      delete m_initValue;
+      if (m_initValue != NULL)
+          delete m_initValue;
   }
 
   const LabelStr& ExprVarDeclaration::getName() const { return m_name; }
