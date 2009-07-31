@@ -93,7 +93,10 @@ namespace EUROPA {
   }
 
   void AbstractDomain::close() {
-    check_error(isOpen(), "Attempted to close a domain that is already closed");
+    // Benign if already closed
+    if(m_closed == true) 
+      return;
+
     m_closed = true;
     notifyChange(DomainListener::CLOSED);
     if (isEmpty()) // Empty initially, want to generate the event

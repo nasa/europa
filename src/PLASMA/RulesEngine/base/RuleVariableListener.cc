@@ -53,7 +53,7 @@ namespace EUROPA {
       return true;
 
     debugMsg("RuleVariableListener:canIgnore", "Checking canIgnore for guard listener for rule " <<
-	     getRuleInstance()->getRule()->getName() << " from source " << getRuleInstance()->getRule()->getName());
+	     getRuleInstance()->getRule()->getName().toString() << " from source " << getRuleInstance()->getRule()->getName().toString());
     // If a Reset has occurred, and the rule has been fired, we may have to do something right now
     if(getRuleInstance()->isExecuted() &&
        (changeType == DomainListener::RESET || changeType == DomainListener::RELAXED) &&

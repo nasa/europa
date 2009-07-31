@@ -330,6 +330,7 @@ namespace EUROPA {
   {
     public:
 	  InterpretedTokenFactory(const ObjectTypeId& ot,const LabelStr& predicateName);
+    virtual ~InterpretedTokenFactory();
 
       void addBodyExpr(Expr* e);
 

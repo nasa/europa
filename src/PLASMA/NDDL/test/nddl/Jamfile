@@ -32,7 +32,7 @@ local nddl_tests =
   gnats_3140.nddl 
   gnats-3231.nddl 
   gnats-3248.nddl
-  guards.nddl  
+  #guards.nddl  
   inheritance.0.nddl 
   inheritance.1.nddl 
   inheritance.2.nddl

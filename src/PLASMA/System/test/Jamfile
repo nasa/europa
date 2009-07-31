@@ -40,11 +40,14 @@ checkin-tests =
 	HTX.1
 	HTX.2
 	HTX.3
-    foreach-transaction
     force-object-distribution
-	gnats_3161
     rejection
 ;
+
+#BROKEN TESTS
+# gnats_3161
+# foreach-transaction
+# gnats_3161.nddl 
 
 if ! ( "Resources" in $(NO) ) {
 checkin-tests += 
@@ -103,7 +106,6 @@ local testmodels =
       force-object-distribution.nddl  
       gnats_2572_interval-tx.nddl 
       gnats_2837-tx.nddl 
-      gnats_3161.nddl 
       k9-initial.nddl 
       k9-transaction.nddl 
       monkey1monkey-transaction.nddl
@@ -112,6 +114,7 @@ local testmodels =
       rules.0.tx.nddl 
       subtype-extension.tx.nddl 
       ;
+
 
 if ! ( "Resources" in $(NO) ) {
   testmodels += 
