@@ -52,7 +52,7 @@ Foo::pred{
 /*
  // There should be exactly
  bool b;
- if(isSignleton(b)){
+ if(b){
   foreach (baz in baz1) {
    contains(pred);
   }
