@@ -207,6 +207,7 @@ expressionLiteralNumber[const char* var]
     |   b=FLOAT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $b))
     |   d=booleanLiteral -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $d))
     |   f=baseDomain -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $f))
+    |   g=stringLiteral -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $g))
     |   e=functionCall[var] -> $e
     |   c=qualified -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $c));
 

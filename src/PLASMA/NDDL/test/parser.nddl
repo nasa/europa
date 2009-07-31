@@ -15,6 +15,9 @@ typedef float [-inf +inf] real;
 //Test functions
 enforce(isSingleton(1));
 
+string str;
+str == "hi, i'm cool!";
+
 int alpha; //test arithmetic operations.
 alpha == 2 + 3 + 4 - 10;
 eq(alpha, -1);
