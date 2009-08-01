@@ -839,7 +839,7 @@ methodInvocation returns [Expr* result]
 	:
 	(  child=variableMethod
 	|  child=objectMethod
-    |       child=tokenMethod
+    |  child=tokenMethod
     )
     {
         result = child;

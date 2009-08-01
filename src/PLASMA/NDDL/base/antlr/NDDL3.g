@@ -438,8 +438,12 @@ signatureAtom
 INCLUDE :	'#include' WS+ file=STRING 
                 {
                         std::string fullName = std::string((const char*)($file.text->chars));
+                        
+                        // Look for the included file in include path
                         fullName = CTX->parserObj->getFilename(fullName);
 
+                        // TODO: if we couldn't find it, look in the same dir as the current file
+                         
                         if (fullName.length() == 0) {
                             std::string path = "";
                             std::vector<std::string> parserPath = CTX->parserObj->getIncludePath();
@@ -452,7 +456,6 @@ INCLUDE :	'#include' WS+ file=STRING
 
                         if (!CTX->parserObj->queryIncludeGuard(fullName)) {
                             CTX->parserObj->addInclude(fullName);
-                            // Look for the included file in include path
 
                             // Create a new input stream and take advantage of built in stream stacking
                             // in C target runtime.

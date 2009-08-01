@@ -17,6 +17,7 @@ ModuleBase PlanDatabase
 	DefaultTemporalAdvisor.cc
 	HasAncestorConstraint.cc
 	MergeMemento.cc
+	Method.cc
 	Object.cc
 	ObjectFactory.cc
 	ObjectTokenRelation.cc
@@ -25,7 +26,7 @@ ModuleBase PlanDatabase
 	PlanDatabase.cc
 	PlanDatabaseListener.cc
 	PSPlanDatabaseListener.cc
-        PlanDatabaseWriter.cc
+	PlanDatabaseWriter.cc
  	StackMemento.cc
 	Token.cc
 	TokenFactory.cc
