@@ -15,12 +15,17 @@ typedef float [-inf +inf] real;
 //Test functions
 enforce(isSingleton(1));
 
+//Test using functions with expressions as arguments
+enforce(isSingleton(1 + 1));
+
 string str;
 str == "hi, i'm cool!";
 
-int alpha; //test arithmetic operations.
-alpha == 2 + 3 + 4 - 10;
-eq(alpha, -1);
+int alphaalpha; //test arithmetic operations.
+alphaalpha == 2 + 3 + 4 - 10;
+eq(alphaalpha, -1);
+
+12 == 3 * 4;
 
 bool testTestFunction = test(1 == 1); //Conor wants to remove this.
 eq(testTestFunction, true);
