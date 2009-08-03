@@ -586,6 +586,7 @@ namespace EUROPA {
     vars.push_back(target->targetvar());    \
     makeConstraint(context,LabelStr(#relationname), vars); \
   }
+    
 
 #define makeStrictPrecedenceRelation(origin, originvar, target, targetvar) { \
     PlanDatabase* db = (PlanDatabase*)(context.getElement("PlanDatabase"));\
@@ -613,10 +614,12 @@ namespace EUROPA {
       else if (strcmp(relationName,"contains") == 0) {
         makeRelation(precedes, origin, start, target, start);
         makeRelation(precedes, target, end, origin, end);
+        makeRelation(leq, target, duration, origin, duration);
       }
       else if (strcmp(relationName,"contained_by") == 0) {
         makeRelation(precedes, target, start, origin, start);
         makeRelation(precedes, origin, end, target, end);
+        makeRelation(leq, origin, duration, target, duration);
       }
       else if (strcmp(relationName,"before") == 0) {
         makeRelation(precedes, origin, end, target, start);
@@ -675,6 +678,7 @@ namespace EUROPA {
       else if (strcmp(relationName,"equals") == 0) {
         makeRelation(concurrent, origin, start, target, start);
         makeRelation(concurrent, target, end, origin, end);
+        makeRelation(eq, origin, duration, target, duration);
       }
       else {
         check_runtime_error(strcmp(relationName,"any") == 0,std::string("Unrecognized relation:")+relationName);
