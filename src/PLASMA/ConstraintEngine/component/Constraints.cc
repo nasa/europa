@@ -281,6 +281,10 @@ namespace EUROPA {
   }
 
   void LessThanEqualConstraint::handleExecute() {
+    propagate(m_x, m_y);
+  }
+
+  void LessThanEqualConstraint::propagate(AbstractDomain& m_x, AbstractDomain& m_y){
     check_error(AbstractDomain::canBeCompared(m_x, m_y));
 
     // Discontinue if either domain is open.
@@ -408,7 +412,13 @@ namespace EUROPA {
   void LessThanConstraint::handleExecute() {
     IntervalDomain& domx = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
     IntervalDomain& domy = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
+    propagate(domx, domy);
+  }
 
+  /**
+   * @brief factored out propagation algorithm to allow re-use
+   */
+  void LessThanConstraint::propagate(IntervalDomain& domx, IntervalDomain& domy){
     check_error(AbstractDomain::canBeCompared(domx, domy), "Cannot compare " + domx.toString() + " and " + domy.toString() + ".");
 
     // Discontinue if either domain is open.
@@ -1958,6 +1968,8 @@ namespace EUROPA {
       m_arg1(getCurrentDomain(variables[1])),
       m_arg2(getCurrentDomain(variables[2])){
     check_error(variables.size() == ARG_COUNT);
+    checkError(m_arg1.isNumeric(), variables[1]);
+    checkError(m_arg2.isNumeric(), variables[2]);
   }
 
   void TestLessThan::handleExecute(){
@@ -1965,6 +1977,20 @@ namespace EUROPA {
       m_test.remove(0);
     else if(m_arg1.getLowerBound() >= m_arg2.getUpperBound())
       m_test.remove(1);
+
+    // If true, apply the constraint (arg1 < arg2)
+    if(m_test.isSingleton() && m_test.getSingletonValue() == 1){
+      IntervalDomain& domx = static_cast<IntervalDomain&>(m_arg1);
+      IntervalDomain& domy = static_cast<IntervalDomain&>(m_arg2);
+      LessThanConstraint::propagate(domx, domy);
+    }
+
+    // If false, apply the converse (arg1 >= arg2);
+    if(m_test.isSingleton() && m_test.getSingletonValue() == 0){
+      IntervalDomain& domx = static_cast<IntervalDomain&>(m_arg1);
+      IntervalDomain& domy = static_cast<IntervalDomain&>(m_arg2);
+      LessThanEqualConstraint::propagate(domy, domx);
+    }
   }
 
   TestLEQ::TestLEQ(const LabelStr& name,
@@ -1985,6 +2011,20 @@ namespace EUROPA {
 	m_test.remove(0);
     else if(m_arg1.getLowerBound() > m_arg2.getUpperBound())
 	m_test.remove(1);
+
+    // If true, apply the constraint (arg1 <= arg2)
+    if(m_test.isSingleton() && m_test.getSingletonValue() == 1){
+      IntervalDomain& domx = static_cast<IntervalDomain&>(m_arg1);
+      IntervalDomain& domy = static_cast<IntervalDomain&>(m_arg2);
+      LessThanEqualConstraint::propagate(domx, domy);
+    }
+
+    // If false, apply the converse (arg1 > arg2);
+    if(m_test.isSingleton() && m_test.getSingletonValue() == 0){
+      IntervalDomain& domx = static_cast<IntervalDomain&>(m_arg1);
+      IntervalDomain& domy = static_cast<IntervalDomain&>(m_arg2);
+      LessThanConstraint::propagate(domy, domx);
+    }
 
     debugMsg("TestLEQ:handleExecute", "AFTER:" << toString());
   }

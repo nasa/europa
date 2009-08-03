@@ -136,6 +136,8 @@ namespace EUROPA {
 		   int argIndex,
 		   const DomainListener::ChangeType& changeType);
 
+    static void propagate(AbstractDomain& domx, AbstractDomain& domy);
+
   private:
     bool testIsRedundant(const ConstrainedVariableId& var = ConstrainedVariableId::noId()) const;
 
@@ -186,6 +188,8 @@ namespace EUROPA {
     bool canIgnore(const ConstrainedVariableId& variable,
 		   int argIndex,
 		   const DomainListener::ChangeType& changeType);
+
+    static void propagate(IntervalDomain& domx, IntervalDomain& domy);
 
   private:
     static const int X = 0;
