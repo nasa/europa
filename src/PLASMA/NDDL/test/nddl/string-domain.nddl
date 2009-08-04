@@ -1,6 +1,8 @@
 #include "Plasma.nddl"
 
 class TestData extends StringData {
+  TestData(string _data) { super(_data); }
+  TestData() { super(""); }
 }
 
 class Foo extends Timeline {
@@ -8,6 +10,8 @@ class Foo extends Timeline {
     TestData testr;
   }
 }
+
+
 
 Foo foo = new Foo();
 

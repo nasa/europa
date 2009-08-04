@@ -106,38 +106,41 @@ namespace EUROPA {
     for(it = m_factories.begin(); it != m_factories.end(); ++it){
       ObjectFactoryId factory = it->second;
       const std::vector<LabelStr>& signatureTypes = factory->getSignatureTypes();
-
+      
       // if there is no hit for the object type, move on immediately
       if(!schema->isA(objectType, signatureTypes[0]))
-    continue;
+	continue;
+      
+      if (signatureTypes[0].c_str() != objectType.c_str())
+	continue;
 
       // If the argument length does not match the signature, which includes the extra for the class
       if(signatureTypes.size() - arguments.size() != 1)
-    continue;
-
+	continue;
+      
       // Now do a type by type comparison
       bool found = true;
       for (unsigned int j=1;j<signatureTypes.size();j++){
-    if(schema->isType(arguments[j-1]->getTypeName()) &&
-       schema->isType(signatureTypes[j])){
-      if(!schema->isA(arguments[j-1]->getTypeName(), signatureTypes[j])){
-        found = false;
-        break;
+	if(schema->isType(arguments[j-1]->getTypeName()) &&
+	   schema->isType(signatureTypes[j])){
+	  if(!schema->isA(arguments[j-1]->getTypeName(), signatureTypes[j])){
+	    found = false;
+	    break;
+	  }
+	}
+	else if(arguments[j-1]->getTypeName() != signatureTypes[j]){
+	  found = false;
+	  break;
+	}
       }
-    }
-    else if(arguments[j-1]->getTypeName() != signatureTypes[j]){
-      found = false;
-      break;
-    }
-      }
-
+      
       if(found){
-    // Cache for next time and return
-    m_factories.insert(std::pair<double, ObjectFactoryId>(factoryName, factory));
-    return factory;
+	// Cache for next time and return
+	m_factories.insert(std::pair<double, ObjectFactoryId>(factoryName, factory));
+	return factory;
       }
     }
-
+    
     // At this point, we should have a hit
     check_error(ALWAYS_FAILS, "Factory '" + factoryName.toString() + "' is not registered.");
     return ObjectFactoryId::noId();
@@ -428,6 +431,9 @@ namespace EUROPA {
 
     ExprConstructorSuperCall::~ExprConstructorSuperCall()
     {
+        for (unsigned int i=0; i < m_argExprs.size(); i++)
+            delete m_argExprs[i];
+        m_argExprs.clear();
     }
 
     DataRef ExprConstructorSuperCall::eval(EvalContext& context) const
