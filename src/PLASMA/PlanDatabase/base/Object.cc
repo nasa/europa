@@ -587,20 +587,43 @@ namespace EUROPA {
   }
 
   ConstrainedVariableId Object::addVariable(const AbstractDomain& baseDomain, const char* name){
+      std::string varTypeName = "";
+      Schema::NameValueVector members = m_planDatabase->getSchema()->getMembers(m_type);
+      for (unsigned int i = 0; i < members.size(); i++) {
+	if (members[i].second.c_str() == std::string(name)) {
+	  varTypeName = members[i].first.c_str();
+	}
+      }
+
+      if (varTypeName == "") {
+           varTypeName = baseDomain.getTypeName().c_str();
+      }
+
+      const AbstractDomain& typeDomain = m_planDatabase->getConstraintEngine()->getCESchema()->baseDomain(varTypeName.c_str());
+      check_error(baseDomain.isSubsetOf(typeDomain), "Variable " + std::string(name) + " of type " +
+		  varTypeName.c_str() +" can not be set to " + baseDomain.toString());
+
+
       check_error(!isComplete(),
 		  "Cannot add variable " + std::string(name) +
 		  " after completing object construction for " + m_name.toString());
 
-      check_error(m_planDatabase->getSchema()->canContain(m_type, baseDomain.getTypeName(), name),
+      check_error(m_planDatabase->getSchema()->canContain(m_type, varTypeName.c_str(), name),
 		  "Cannot add a variable " + std::string(name) + " of type " +
 		  baseDomain.getTypeName().toString() +
 		  " to objects of type " + m_type.toString());
+
+
+      if (!baseDomain.isSubsetOf(typeDomain)) {
+	return ConstrainedVariableId::noId();
+      }
+
 
       std::string fullVariableName(m_name.toString() + "." + name);
 
       ConstrainedVariableId id =
           m_planDatabase->getConstraintEngine()->createVariable(
-	                baseDomain.getTypeName().c_str(),
+	                            varTypeName.c_str(),
 				    baseDomain,
 				    false, // TODO: Should this be considered internal, I think so?
 				    true,

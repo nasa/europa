@@ -55,7 +55,11 @@ Location l = Hill;
 
 class foo {
     int x,y;
+    positive posit;
     predicate p {}
+    foo() {
+        posit = 1.0;
+    }
 }
 
 foo fooa = new foo();
@@ -67,6 +71,7 @@ foo::p {
        int beta = 2;
        int gamma = 3;
        int delta = 4;
+
 
        bool foo = test(alpha == gamma);
 
