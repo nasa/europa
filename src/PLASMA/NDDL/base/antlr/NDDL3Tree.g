@@ -652,7 +652,17 @@ rule returns [Expr* result]
 			ruleBlock[ruleBody]
 		)
 		{
-		    std::string source=""; // TODO: get this from the antlr parser
+            char buff[10];
+            sprintf(buff, "\%u", className->getLine(className));
+            std::string filename = "UNKNOWN";
+            if (className->getToken(className)) {
+                if (className->getToken(className)->input) {
+                    if (className->getToken(className)->input->fileName) {
+                        filename = c_str(className->getToken(className)->input->fileName->chars);
+                    }
+                }
+            }
+		    std::string source="\"" + filename + "," + std::string(buff) + "\"";
 		    result = new ExprRuleTypeDefinition((new InterpretedRuleFactory(predName,source,ruleBody))->getId());
 		    popContext(CTX);
 		}
