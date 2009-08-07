@@ -28,7 +28,15 @@ NddlFunction::NddlFunction(const char* name, const char* constraint, const char*
     m_returnType = returnType;
     m_argumentCount = argumentCount;
 }
-  
+
+NddlFunction::NddlFunction(NddlFunction &copy)
+{
+    m_name = copy.getName();
+    m_constraint = copy.getConstraint();
+    m_returnType = copy.getReturnType();
+    m_argumentCount = copy.getArgumentCount();
+}
+
 NddlFunction::~NddlFunction()
 {
 }
@@ -581,6 +589,11 @@ std::string NddlSymbolTable::getErrors() const
         os << errors()[i] << std::endl;
 
     return os.str();
+}
+
+void NddlSymbolTable::addFunction(NddlFunction* func)
+{
+    m_functions.push_back(func);
 }
 
 NddlFunction* NddlSymbolTable::getFunction(const char* name) const

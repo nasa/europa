@@ -92,7 +92,7 @@ nddl
 		  |	child=variableDeclarations { forceEval = false; }
 		  |	child=assignment { forceEval = false; }
 		  |	child=constraintInstantiation { forceEval = false; }
-          | child=functionCall { forceEval = false; }
+		  |	child=enforceExpression { forceEval = false; }
 		  |	child=allocation[NULL] { forceEval = false; }
 		  |	child=rule { forceEval = false; }
 		  |	child=problemStmt { forceEval = false; }
@@ -409,28 +409,6 @@ constraintInstantiation returns [ExprConstraint* result]
                 
         ;
 
-functionCall returns [ExprConstraint* result]
-@init {
-    std::vector<Expr*> args;
-}
-        :       
-              ^(FUNCTION_CALL
-                        name=IDENT
-                        variableArgumentList[args]
-                )
-                {
-                    NddlFunction* func = CTX->SymbolTable->getFunction(c_str($name.text->chars));
-                    if (!func) {
-                        //TODO: hacking for conor to have functions as constraints.
-                        //reportSemanticError(CTX, std::string("No function: \"") + std::string(c_str($name.text->chars)) + std::string("\"."));
-                        result = new ExprConstraint(c_str($name.text->chars), args);
-                    } else {
-                        result = new ExprConstraint(func->getConstraint(), args);
-                    }
-                }
-                
-        ;
-
 classDeclaration returns [Expr* result]
 @init {
 const char* newClass = NULL;
@@ -678,7 +656,7 @@ ruleBlock[std::vector<Expr*>& ruleBody]
 
 ruleStatement returns [Expr* result]
 	: (	child=constraintInstantiation
-      |	child=functionCall
+      | child=enforceExpression
 	  |	child=assignment
 	  |	child=variableDeclarations
 	  |	child=ifStatement
@@ -715,7 +693,7 @@ guardExpression returns [ExprIfGuard* result]
 }
         : ( ^(relop=guardRelop {relopStr=c_str($relop.text->chars);} lhs=anyValue rhs=anyValue )
           | lhs=anyValue
-          | ^('test' lhs=anyValue
+          | ^(EXPRESSION_RETURN lhs=expressionCleanReturn
                 { dom = new BoolDomain(true); 
                   rhs = new ExprConstant(dom->getTypeName().c_str(), dom); 
                 } )
@@ -973,3 +951,60 @@ signatureAtom
         :       ^('<:' IDENT  (type | 'numeric'))
         |       ^('(' signatureExpression)
         ;
+
+expressionList [std::vector<ExprExpression*> &args]
+@init { ExprExpression *value = NULL; }
+        :  expression[value] { args.push_back(value); } ;
+
+expression [ExprExpression* &returnValue]
+@init { int sel = 0; ExprExpression *leftValue = NULL, *rightValue = NULL; std::vector<ExprExpression*> args; }
+        :       ^(('==' {sel=0;} | '!=' {sel=1;} | '<' {sel=2;} | '>' {sel=3;} | '<=' {sel=4;} | '>=' {sel=5;} | 
+                   '||' {sel=6;} | '&&' {sel=7;} | '+' {sel=8;} | '-' {sel=9;} | '*' {sel=10;}) 
+                   left=expression[leftValue] right=expression[rightValue])
+        {
+           std::string op = "NULL";
+           if (sel == 0) { op = "=="; }
+           if (sel == 1) { op = "!="; }
+           if (sel == 2) { op = "<"; }
+           if (sel == 3) { op = ">"; }
+           if (sel == 4) { op = "<="; }
+           if (sel == 5) { op = ">="; }
+           if (sel == 6) { op = "||"; }
+           if (sel == 7) { op = "&&"; }
+           if (sel == 8) { op = "+"; }
+           if (sel == 9) { op = "-"; }
+           if (sel == 10) { op = "*"; }
+           returnValue = new ExprExpression(op, leftValue, rightValue);
+        }
+        |       r=anyValue
+        {
+           returnValue = new ExprExpression(r);
+        }
+        |       ^(FUNCTION_CALL name=IDENT ^('(' expressionList[args]*))
+        {
+            NddlFunction* func = CTX->SymbolTable->getFunction(c_str($name.text->chars));
+
+            if (!func) {
+                //reportSemanticError(CTX, "Bad function: " + c_str($name.text->chars));
+                //Hack here for Conor to have anything he wants be function
+                func = new NddlFunction(c_str($name.text->chars), 
+                                        c_str($name.text->chars), "bool", 0); //Not args == 0 -> args check does not do anything.
+                CTX->SymbolTable->addFunction(func);
+            }
+            returnValue = new ExprExpression(new NddlFunction(*func), args, CTX->SymbolTable->getDataType(func->getReturnType()));
+        }
+        ;
+
+enforceExpression returns [Expr* result]
+@init { ExprExpression *value = NULL; BoolDomain* dom = NULL; ExprConstant* con = NULL; std::vector<Expr*> args; }
+        : ^(EXPRESSION_ENFORCE a=expression[value]) { 
+            dom = new BoolDomain(true); 
+            con = new ExprConstant(dom->getTypeName().c_str(), dom); 
+            args.push_back(value);
+            args.push_back(con);
+            result = new ExprConstraint("eq", args);
+        } ;
+
+expressionCleanReturn returns [Expr* result]
+@init { ExprExpression* returnValue = NULL; } : expression[returnValue] { result = returnValue; } ;
+

@@ -13,11 +13,13 @@ tokens {
 	CONSTRUCTOR;
 	CONSTRUCTOR_INVOCATION;
 	METHOD_CALL;
-    FUNCTION_CALL;
 	NDDL;
 	PREDICATE_INSTANCE;     
 	TOKEN_RELATION;
 	VARIABLE;
+    EXPRESSION_ENFORCE;
+    EXPRESSION_RETURN;
+    FUNCTION_CALL;
 }
 
 @lexer::includes
@@ -178,161 +180,38 @@ anyValue
     ;
 
 ///
-expressionSingleton[std::vector<std::string> &argumentlist]
-@init {
-    CREATE_VAR(variable);
-    argumentlist.push_back(variable);
-}
-    : a=additionExpression[variable] -> ^(VARIABLE IDENT["float"] IDENT[variable]) $a;
+expressionList : booleanOrExpression (','! booleanOrExpression )* ;
 
+expressionLiteral : anyValue | name=IDENT '(' ex=expressionList ')' -> ^(FUNCTION_CALL $name ^('(' expressionList));
 
-expressionArgList[std::vector<std::string> &argumentlist]
-@init {
-}
-    : a=expressionSingleton[argumentlist] (',' b=expressionSingleton[argumentlist])* -> $a $b;
+multiplicitiveExpression @init {int i = 0;} : a=expressionLiteral ('*' b=multiplicitiveExpression {i=1;})?
+        -> {i==1}? ^('*' $a $b) -> $a;
 
-functionCall[const char* var]
-@init {
-    std::vector<std::string> argumentlist;
-    std::string stringargs = "";
-}
-    : functionName=IDENT '(' args=expressionArgList[argumentlist] ')'
-        { for (unsigned int i = 0; i < argumentlist.size(); i++) { stringargs += argumentlist[i] + ","; } }
-        -> $args ^(FUNCTION_CALL $functionName ^('(' IDENT[var] IDENT[{(ANTLR3_UINT8*)stringargs.c_str()}]));
+additionExpression @init {int i = 0;} : a=multiplicitiveExpression (('+' {i=1;} | '-' {i=2;}) b=additionExpression)?
+        -> {i==1}? ^('+' $a $b) -> {i==2}? ^('-' $a $b) -> $a ;
 
+relationalExpression @init {int i = 0;} :
+        a=additionExpression (('==' {i=1;} | '!=' {i=2;} | '<' {i=3;} | '>' {i=4;} | '>=' {i=5;} | '<=' {i=6;}) b=additionExpression)?
+        -> {i==1}? ^('==' $a $b) -> {i==2}? ^('!=' $a $b) -> {i==3}? ^('<' $a $b) 
+        -> {i==4}? ^('>' $a $b) -> {i==5}? ^('>=' $a $b) -> {i==6}? ^('<=' $a $b) -> $a ;
 
-expressionLiteralNumber[const char* var]
-    :   a=INT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $a))
-    |   b=FLOAT -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $b))
-    |   d=booleanLiteral -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $d))
-    |   f=baseDomain -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $f))
-    |   g=stringLiteral -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $g))
-    |   e=functionCall[var] -> $e
-    |   c=qualified -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $c));
+booleanAndExpression @init {int i = 0;} : a=relationalExpression ('||' b=booleanAndExpression {i=1;})?
+        -> {i==1}? ^('||' $a $b) -> $a;
 
-multiplExpression[const char* var]
-@init {
-   CREATE_VAR(implicit_var_left);
-   CREATE_VAR(implicit_var_right);
-   bool isSingle = true;
-}
-    :   a=expressionLiteralNumber[implicit_var_left] (('*')=>'*' b=multiplExpression[implicit_var_right] {isSingle = false;})?
-        //This first one runs in the case of a single expression with no &&.
-        -> {isSingle}? ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}]) 
-           $a ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[implicit_var_left] IDENT[var])) //Need to think of a better way.
-        //This second one runs in the case of a && b.
-        -> ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
-           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
-           $a $b ^(CONSTRAINT_INSTANTIATION IDENT["mulEq"] ^('(' IDENT[implicit_var_left] IDENT[implicit_var_right] IDENT[var])) ;
-
-additionExpression[const char* var]
-@init {
-   CREATE_VAR(implicit_var_left);
-   CREATE_VAR(implicit_var_right);
-   bool isPlus = true, isSingle = true;
-}
-    :   a=multiplExpression[implicit_var_left] (('+'|'-' {isPlus = false;}) b=additionExpression[implicit_var_right] {isSingle = false;})?
-        -> {isSingle == false && isPlus}? 
-           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
-           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
-           $a $b
-           ^(CONSTRAINT_INSTANTIATION IDENT["addEq"] ^('(' IDENT[{(ANTLR3_UINT8*)implicit_var_left}] IDENT[{(ANTLR3_UINT8*)implicit_var_right}] IDENT[var]))
-
-        -> {isSingle == false}? 
-           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
-           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
-           $a $b
-           ^(CONSTRAINT_INSTANTIATION IDENT["addEq"] ^('(' IDENT[var] IDENT[{(ANTLR3_UINT8*)implicit_var_right}] IDENT[{(ANTLR3_UINT8*)implicit_var_left}]))
-
-        -> ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}]) $a
-           ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] IDENT[{(ANTLR3_UINT8*)implicit_var_left}]));
-
-relationalExpression[const char* var]
-@init {
-   CREATE_VAR(implicit_var_left);
-   CREATE_VAR(implicit_var_right);
-#define SETCON(name) contraint = (char**)&(name); invert = false;
-#define IVRCON(name) contraint = (char**)&(name); invert = true;
-   char const* TEST_LT = "TestLessThan";
-   char const* TEST_LEQ = "testLEQ";
-   char const* TEST_EQ = "testEQ";
-   char const* TEST_NEQ = "testNEQ";
-   bool invert = false; //Invert is so that > and >= can work - there are no constraints for these, so feed the args to < and <= backwards.
-   char** contraint = NULL;
-}
-    :   (additionExpression["DO_NOT_USE"] ('==' | '!=' | '<'| '<=' | '>' | '>=') additionExpression["DO_NOT_USE"])=>
-        a=additionExpression[implicit_var_left] 
-            ('==' {SETCON(TEST_EQ);} | '!=' {SETCON(TEST_NEQ);} 
-            | '<' {SETCON(TEST_LT);} | '<=' {SETCON(TEST_LEQ);} 
-            | '>' {IVRCON(TEST_LT);} | '>=' {IVRCON(TEST_LEQ);}) 
-        b=additionExpression[implicit_var_right]
-        -> {!invert}?
-           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
-           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
-           $a $b ^(CONSTRAINT_INSTANTIATION IDENT[{(ANTLR3_UINT8*)(*contraint)}]
-            ^('(' IDENT[var] IDENT[implicit_var_left] IDENT[implicit_var_right]))
-        -> {invert}?
-           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
-           ^(VARIABLE IDENT["float"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
-           $a $b ^(CONSTRAINT_INSTANTIATION IDENT[{(ANTLR3_UINT8*)(*contraint)}]
-            ^('(' IDENT[var] IDENT[implicit_var_right] IDENT[implicit_var_left]))
-        -> 
-    |   fn=functionCall[var] -> $fn;
-
-///
-booleanLiteralExpression[const char* var]
-    :   val=anyValue -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $val ))
-   // |   varname=qualified ->  ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] $varname))
-//    |   fn=functionCall[var] -> $fn
-    |   re=relationalExpression[var] -> $re
-    |   '(' paren=booleanOrExpression[var] ')' -> $paren
-    ;
-
-
-booleanAndExpression[const char* var]
-@init {
-   CREATE_VAR(implicit_var_left);
-   CREATE_VAR(implicit_var_right);
-   bool isSingle = false;
-}
-    :   a=booleanLiteralExpression[implicit_var_left] ('&&' b=booleanAndExpression[implicit_var_right] | {isSingle = true;})
-        //This first one runs in the case of a single expression with no &&.
-        -> {isSingle}? ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}]) 
-           $a ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[implicit_var_left] IDENT[var])) //Need to think of a better way.
-        //This second one runs in the case of a && b.
-        -> ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
-           ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
-           $a $b ^(CONSTRAINT_INSTANTIATION IDENT["testAnd"] ^('(' IDENT[var] IDENT[implicit_var_left] IDENT[implicit_var_right])) ;
-
-
-booleanOrExpression[const char* var]
-@init {
-   CREATE_VAR(implicit_var_left);
-   CREATE_VAR(implicit_var_right);
-   bool isSingle = false;
-}
-    :   a=booleanAndExpression[implicit_var_left] ('||' b=booleanOrExpression[implicit_var_right] | {isSingle = true;})
-        //This first one runs in the case of a single expression with no ||.
-        -> {isSingle}? ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}]) 
-           $a ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[implicit_var_left] IDENT[var])) //Need to think of a better way.
-        //This second one runs in the case of a || b.
-        -> ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_left}])
-           ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_right}])
-           $a $b ^(CONSTRAINT_INSTANTIATION IDENT["testOr"] ^('(' IDENT[var] IDENT[implicit_var_left] IDENT[implicit_var_right])) ;
+booleanOrExpression @init {int i = 0;} : a=booleanAndExpression ('&&' b=booleanOrExpression {i=1;})?
+        -> {i==1}? ^('&&' $a $b) -> $a;
 
 testExpression[const char* var]
-    :  'test(' result=booleanOrExpression[var] ')' -> $result ;
+    :  'test(' result=booleanOrExpression ')' -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] ^(EXPRESSION_RETURN $result)));
 
 enforceStatement
 @init {
    CREATE_VAR(implicit_var_return);
 }
-    :  'enforce' '(' result=booleanOrExpression[implicit_var_return] ')' ';' -> 
-        ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_return}]) 
-        $result ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[implicit_var_return] 'true'))
-    |   result=booleanOrExpression[implicit_var_return] ';' ->
-        ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_return}]) 
-        $result ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[implicit_var_return] 'true'));
+    :  'enforce' '(' result=booleanOrExpression ')' ';' -> 
+        ^(EXPRESSION_ENFORCE $result)
+    |   result=booleanOrExpression ';' ->
+        ^(EXPRESSION_ENFORCE $result);
 ///
 
 allocation
@@ -518,17 +397,14 @@ flowControl
    bool hasElse = false;
 }
 
-    :	'if' '(' result=booleanOrExpression[implicit_var_return] ')' a=ruleBlock ('else' b=ruleBlock {hasElse = true;}|) 
-        -> {hasElse == false}? ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_return}])
-           $result ^('if' ^('test' IDENT[implicit_var_return]) $a)
-        -> ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_return}])
-           $result ^('if' ^('test' IDENT[implicit_var_return]) $a $b)
+    :	'if' '(' result=booleanOrExpression ')' a=ruleBlock ('else' b=ruleBlock {hasElse = true;}|) 
+        -> {hasElse == false}? ^('if' ^(EXPRESSION_RETURN $result) $a)
+        -> ^('if' ^(EXPRESSION_RETURN $result) $a $b)
 
-    |   'if' 'test' '(' result=booleanOrExpression[implicit_var_return] ')' a=ruleBlock ('else' b=ruleBlock {hasElse = true;}|) 
-        -> {hasElse == false}? ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_return}])
-           $result ^('if' ^('test' IDENT[implicit_var_return]) $a)
-        -> ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_return}])
-           $result ^('if' ^('test' IDENT[implicit_var_return]) $a $b)
+    |   'if' 'test' '(' result=booleanOrExpression ')' a=ruleBlock ('else' b=ruleBlock {hasElse = true;}|) 
+        -> {hasElse == false}? ^('if' ^(EXPRESSION_RETURN $result) $a)
+        -> ^('if' ^(EXPRESSION_RETURN $result) $a $b)
+        
 	|	'foreach'^ '('! IDENT 'in'! qualified ')'! ruleBlock
 	;
 	

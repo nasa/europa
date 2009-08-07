@@ -14,20 +14,6 @@
 
 namespace EUROPA {
 
-class NddlFunction 
-{
-public:
-    NddlFunction(const char* name, const char* constraint, const char* returnType, unsigned int argumentCount);
-    ~NddlFunction();
-    const char* getName();
-    const char* getConstraint();
-    const char* getReturnType();
-    unsigned int getArgumentCount();
-private:
-    std::string m_name, m_constraint, m_returnType;
-    unsigned int m_argumentCount;
-};
-
 
 class NddlSymbolTable : public EvalContext
 {
@@ -53,6 +39,7 @@ public:
     virtual TokenFactoryId getTypeForToken(const char* name);
     virtual TokenFactoryId getTypeForToken(const char* qualifiedName,std::string& errorMsg);
 
+    virtual void addFunction(NddlFunction* func);
     virtual NddlFunction* getFunction(const char* name) const;
 
     AbstractDomain* makeNumericDomainFromLiteral(const std::string& type,const std::string& value);
