@@ -27,9 +27,6 @@ eq(alphaalpha, -1);
 
 12 == 3 * 4;
 
-bool testTestFunction = test(1 == 1); //Conor wants to remove this.
-eq(testTestFunction, true);
-
 //test all relations.
 1 < 2;
 1 > 0;
@@ -53,29 +50,27 @@ enum Location {Hill,Lander,Rock}
 
 Location l = Hill;
 
-class foo {
+class superfoo {
+    bool superleet;
+    superfoo() {
+    }
+}
+
+class foo extends superfoo {
     int x,y;
     positive posit;
     predicate p {}
     foo() {
+    	super();
         posit = 1.0;
     }
 }
-
-foo fooa = new foo();
-foo foob = new foo();
-foo fooc = new foo();
 
 foo::p {
        int alpha = 3;
        int beta = 2;
        int gamma = 3;
        int delta = 4;
-
-
-       bool foo = test(alpha == gamma);
-
-       foo;
 
        bool ret;
 
@@ -95,6 +90,10 @@ foo::p {
        location_enum == Location.Hill;
 }
 
+
+foo fooa = new foo();
+foo foob = new foo();
+foo fooc = new foo();
 
 new foo();
 
