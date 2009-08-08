@@ -220,7 +220,7 @@ variableInitialization[const DataTypeId& dataType] returns [Expr* result]
                  varName,
                  dataType,
                  initExpr,
-                 !CTX->parserObj->isImplicitVar(varName) // canBeSpecified == false for implicit vars.
+                 true // canBeSpecified
             ); 
             CTX->SymbolTable->addLocalVar(varName,dataType);
         }

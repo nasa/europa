@@ -60,24 +60,6 @@ using namespace EUROPA;
 // Forward declaration so that we can use this function in apifuncs
 typedef struct NDDL3Parser_Ctx_struct NDDL3Parser, * pNDDL3Parser;
 static void newNDDL3ParserFree(pNDDL3Parser ctx);
-
-//This macro creates an implicit variable. It increments a counter and returns the current interation.
-//The name is the name of a newly created c string that holds the name of the variable. Because of
-//pointers, you need DELETE_VAR after use.
-class _Deleter { 
-public: 
-    _Deleter(char** target) { 
-        t = target; 
-    } 
-    ~_Deleter() { 
-        if(*t) { 
-            delete[] *t; } 
-        } 
-private: 
-    char** t;
-};
-#define DELETE_STRING_AT_END(var) _Deleter var##_##deleter(&var);
-#define CREATE_VAR(name) char* name = CTX->parserObj->createImplicitVariable(); DELETE_STRING_AT_END(name);
 }
 
 @parser::context {
@@ -160,11 +142,8 @@ baseDomainValue
     ;
                 
 variableDeclarations
-    :   (('filter')? type nameWithBaseDomain (',' nameWithBaseDomain)* ';'
+    :   ('filter')? type nameWithBaseDomain (',' nameWithBaseDomain)* ';'
             -> ^(VARIABLE type nameWithBaseDomain (nameWithBaseDomain)*)
-        | 'bool' var=qualified '=' set=testExpression[(const char*)($var.text->chars)] ';'
-            -> ^(VARIABLE IDENT["bool"] $var) $set
-        )
     ;
 
 nameWithBaseDomain
@@ -201,13 +180,7 @@ booleanAndExpression @init {int i = 0;} : a=relationalExpression ('||' b=boolean
 booleanOrExpression @init {int i = 0;} : a=booleanAndExpression ('&&' b=booleanOrExpression {i=1;})?
         -> {i==1}? ^('&&' $a $b) -> $a;
 
-testExpression[const char* var]
-    :  'test(' result=booleanOrExpression ')' -> ^(CONSTRAINT_INSTANTIATION IDENT["eq"] ^('(' IDENT[var] ^(EXPRESSION_RETURN $result)));
-
 enforceStatement
-@init {
-   CREATE_VAR(implicit_var_return);
-}
     :  'enforce' '(' result=booleanOrExpression ')' ';' -> 
         ^(EXPRESSION_ENFORCE $result)
     |   result=booleanOrExpression ';' ->
@@ -228,16 +201,7 @@ qualified
     ;
 
 assignment
-@init {
-   CREATE_VAR(implicit_var_name);
-}
-    :   (   qualified ('in' | '=') initializer ';'
-                 -> ^('=' qualified initializer)
-        |   var=qualified ('in' | '=') set=testExpression[implicit_var_name] ';'
-            -> ^(VARIABLE IDENT["bool"] IDENT[{(ANTLR3_UINT8*)implicit_var_name}])
-                 $set ^(CONSTRAINT_INSTANTIATION IDENT["eq"] 
-                        ^('(' $var IDENT[{(ANTLR3_UINT8*)implicit_var_name}]))
-        )
+    :   qualified ('in' | '=') initializer ';' -> ^('=' qualified initializer)
     ;
     
 initializer
@@ -393,7 +357,6 @@ typeArgument
 
 flowControl
 @init {
-   CREATE_VAR(implicit_var_return);
    bool hasElse = false;
 }
 
