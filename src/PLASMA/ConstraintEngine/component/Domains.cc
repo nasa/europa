@@ -671,7 +671,7 @@ namespace EUROPA {
     }
 
     // Logic error above: the conditions should cover all possibilities.
-    check_error( ALWAYS_FAILS, "Attempted to remove an element from within the interval. Wuuld require splitting.");
+    check_error( ALWAYS_FAILS, "Attempted to remove an element from within the interval. W0uld require splitting.");
   }
 
   bool IntervalDomain::operator==(const AbstractDomain& dom) const {

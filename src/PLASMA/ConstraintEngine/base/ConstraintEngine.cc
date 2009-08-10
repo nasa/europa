@@ -729,6 +729,7 @@ namespace EUROPA
     // In all cases, notify the propagators as well, unless over-ruled by by an empty variable or a decision to ignore it
     for(ConstraintList::const_iterator it = source->m_constraints.begin(); it != source->m_constraints.end(); ++it){
       const ConstraintId& constraint = it->first;
+      checkError(constraint.isValid(), "Constraint is invalid on " << source->toLongString());
       unsigned int argIndex = it->second;
       if(constraint->isActive() && !constraint->isDiscarded() &&
 	 changeType != DomainListener::EMPTIED && !constraint->canIgnore(source, argIndex, changeType))
