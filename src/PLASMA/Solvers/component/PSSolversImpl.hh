@@ -13,23 +13,23 @@ namespace EUROPA
   {
     public:
       PSSolverManagerImpl(ConstraintEngineId ce,PlanDatabaseId pdb,RulesEngineId re);
-      virtual ~PSSolverManagerImpl();
-      
-      virtual PSSolver* createSolver(const std::string& configurationFile); 
-      
+
+      virtual PSSolver* createSolver(const std::string& configurationFile);
+
     protected:
-      PlanDatabaseId m_planDatabase;	
-      SOLVERS::PlanWriter::PartialPlanWriter* m_ppw;          
+      PlanDatabaseId m_pdb;
+      ConstraintEngineId m_ce;
+      RulesEngineId m_re;
   };
 
   class PSSolverImpl : public PSSolver
   {
     public:
-      PSSolverImpl(const SOLVERS::SolverId& solver, 
-    		       const std::string& configFilename, 
+      PSSolverImpl(const SOLVERS::SolverId& solver,
+    		       const std::string& configFilename,
     		       SOLVERS::PlanWriter::PartialPlanWriter* ppw);
       virtual ~PSSolverImpl();
-  
+
       virtual void step();
       virtual void solve(int maxSteps,int maxDepth);
       virtual bool backjump(unsigned int stepCount);
@@ -39,17 +39,17 @@ namespace EUROPA
 
       virtual int getStepCount();
       virtual int getDepth();
-      virtual int getOpenDecisionCnt();	
+      virtual int getOpenDecisionCnt();
 
       virtual bool isExhausted();
-      virtual bool isTimedOut();	
+      virtual bool isTimedOut();
       virtual bool isConstraintConsistent();
 
-      virtual bool hasFlaws();	
-      virtual PSList<std::string> getFlaws();	
-      virtual std::string getLastExecutedDecision();	
+      virtual bool hasFlaws();
+      virtual PSList<std::string> getFlaws();
+      virtual std::string getLastExecutedDecision();
 
-      virtual const std::string& getConfigFilename();	
+      virtual const std::string& getConfigFilename();
       virtual int getHorizonStart();
       virtual int getHorizonEnd();
 

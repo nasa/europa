@@ -4,32 +4,29 @@
 #include "Solver.hh"
 #include "SolverPartialPlanWriter.hh"
 
-namespace EUROPA 
+namespace EUROPA
 {
   PSSolverManagerImpl::PSSolverManagerImpl(ConstraintEngineId ce,PlanDatabaseId pdb,RulesEngineId re)
-    : m_planDatabase(pdb)
+    : m_pdb(pdb),
+      m_ce(ce),
+      m_re(re)
   {
-    m_ppw = new SOLVERS::PlanWriter::PartialPlanWriter(pdb,ce,re);	  
   }
-  
-  PSSolverManagerImpl::~PSSolverManagerImpl()
-  {
-	delete m_ppw;	  
-  }
-  
-  PSSolver* PSSolverManagerImpl::createSolver(const std::string& configurationFile) 
+
+  PSSolver* PSSolverManagerImpl::createSolver(const std::string& configurationFile)
   {
     TiXmlDocument* doc = new TiXmlDocument(configurationFile.c_str());
     doc->LoadFile();
 
     SOLVERS::SolverId solver =
-    	(new SOLVERS::Solver(m_planDatabase, *(doc->RootElement())))->getId();
-    return new PSSolverImpl(solver,configurationFile, m_ppw);
+    	(new SOLVERS::Solver(m_pdb, *(doc->RootElement())))->getId();
+    return new PSSolverImpl(solver,configurationFile,
+							new SOLVERS::PlanWriter::PartialPlanWriter(m_pdb,m_ce,m_re));
   }
 
   PSSolverImpl::PSSolverImpl(const SOLVERS::SolverId& solver, const std::string& configFilename,
-		     SOLVERS::PlanWriter::PartialPlanWriter* ppw) 
-      : m_solver(solver) 
+		     SOLVERS::PlanWriter::PartialPlanWriter* ppw)
+      : m_solver(solver)
       , m_configFile(configFilename),
 	m_ppw(ppw)
   {
@@ -39,6 +36,7 @@ namespace EUROPA
   PSSolverImpl::~PSSolverImpl() {
     if(m_solver.isValid())
       destroy();
+    delete m_ppw;
   }
 
   void PSSolverImpl::step() {
@@ -52,7 +50,7 @@ namespace EUROPA
   bool PSSolverImpl::backjump(unsigned int stepCount) {
 	return m_solver->backjump(stepCount);
   }
-  
+
   void PSSolverImpl::reset() {
     m_solver->reset();
   }
@@ -105,7 +103,7 @@ namespace EUROPA
   PSList<std::string> PSSolverImpl::getFlaws() {
     PSList<std::string> retval;
 
-    /*    
+    /*
     IteratorId flawIt = m_solver->createIterator();
     while(!flawIt->done()) {
       EntityId entity = flawIt->next();
@@ -113,15 +111,15 @@ namespace EUROPA
       retval.push_back(flaw);
     }
     delete (Iterator*) flawIt;
-    */  
+    */
 
     std::multimap<SOLVERS::Priority, std::string> priorityQueue = m_solver->getOpenDecisions();
     for(std::multimap<SOLVERS::Priority, std::string>::const_iterator it=priorityQueue.begin();it!=priorityQueue.end(); ++it) {
-        std::stringstream os;      
-        os << it->second << " PRIORITY==" << it->first; 
+        std::stringstream os;
+        os << it->second << " PRIORITY==" << it->first;
         retval.push_back(os.str());
     }
-    
+
     return retval;
   }
 

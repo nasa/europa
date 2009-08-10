@@ -29,7 +29,7 @@
  *   or consumption at any point within the domain.  Because flaw reporting assumes every transaction occurs as early as possible,
  *   ONLY the 'early-start plan' is necessarily feasible.
  * - Note that LowerLevelMax and UpperLevelMin variables are hijacked and used in an unintended way.  This code doesn't make sense
- *   if you think:
+ *   unless you think:
  *   LowerLevelMax => GroundedMin
  *   UpperLevelMin => GroundedMax
  *   (this only works because you are forced to used this in conjunction with GroundedFVDetector, which understands the
