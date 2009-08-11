@@ -124,7 +124,9 @@ public:
 
     std::vector<std::string> getIncludePath();
     void addInputStream(pANTLR3_INPUT_STREAM in);
+    static void setErrorPrint(bool value);
 protected:
+    static bool s_printErrors;
     EngineId m_engine;
     std::vector<std::string> m_filesread;
     unsigned int m_varcount;

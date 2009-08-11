@@ -19,7 +19,13 @@
 
 namespace EUROPA {
 
+bool NddlInterpreter::s_printErrors(true);
 
+//This is to prevent the tests from spamming.
+void NddlInterpreter::setErrorPrint(bool value) 
+{
+    s_printErrors = false;
+}
 
 NddlFunction::NddlFunction(const char* name, const char* constraint, const char* returnType, unsigned int argumentCount)
 {
@@ -198,11 +204,11 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
         std::vector<NddlParserException> *lerrors = lexer->lexerErrors;
         std::vector<NddlParserException> *perrors = parser->parserErrors;
         for (std::vector<NddlParserException>::const_iterator it = lerrors->begin(); it != lerrors->end(); ++it) {
-        	std::cerr << *it << std::endl;
+	        if (s_printErrors) { std::cerr << *it << std::endl; }
         	os << *it << std::endl;
         }
         for (std::vector<NddlParserException>::const_iterator it = perrors->begin(); it != perrors->end(); ++it) {
-        	std::cerr << *it << std::endl;
+                if (s_printErrors) {  std::cerr << *it << std::endl; }
         	os << *it << std::endl;
         }
         parser->free(parser);
@@ -231,13 +237,16 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
     }
     catch (const std::string& error) {
         debugMsg("NddlInterpreter:error","nddl parser halted on error:" << symbolTable.getErrors());
-        //std::cerr << symbolTable.getErrors() << std::endl;
+        if (s_printErrors) { std::cerr << symbolTable.getErrors() << std::endl; }
+	return symbolTable.getErrors();
     }
     catch (const Error& internalError) {
         symbolTable.reportError(treeParser,internalError.getMsg());
         debugMsg("NddlInterpreter:error","nddl parser halted on error:" << symbolTable.getErrors());
-        //std::cerr << symbolTable.getErrors() << std::endl;
+        if (s_printErrors) { std::cerr << symbolTable.getErrors() << std::endl; }
+	return symbolTable.getErrors();
     }
+
 
     // Free everything
     treeParser->free(treeParser);
