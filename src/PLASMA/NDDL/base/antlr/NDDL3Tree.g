@@ -569,6 +569,7 @@ predicateStatements[InterpretedTokenFactory* tokenFactory]
                 ( child=predicateParameter[tokenFactory] 
                 | child=predicateParameterAssignment
                 | child=standardConstraint 
+                | child=enforceExpression
                 )
                 {
                     tokenFactory->addBodyExpr(child);

@@ -269,6 +269,7 @@ predicateBlock
 predicateStatement
 	:	variableDeclarations
 	|	constraintInstantiation
+    |   enforceStatement
 	|	assignment
 	;
 
