@@ -124,16 +124,16 @@ BClass::q {
   int d = [40 100];
   eq(d, 50);
   if(d == 50) {
-    debug(d);
+    eq(d,d);
   }
   else {
-    debug(d);
+    eq(d,d);
   }
 
   somefoos loopVar;
 
   foreach(f in loopVar) {
-    debug(f);
+    eq(f,f);
   }
 
   ;;
