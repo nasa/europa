@@ -393,7 +393,14 @@ constraintInstantiation returns [ExprConstraint* result]
                         variableArgumentList[args]
                 )
                 {
-                    result = new ExprConstraint(c_str($name.text->chars),args);
+                    const char* cname = c_str($name.text->chars);
+                    try {
+                        CTX->SymbolTable->checkConstraint(cname,args);
+                    }
+                    catch (const std::string& errorMsg) {
+                        reportSemanticError(CTX,errorMsg);
+                    }
+                    result = new ExprConstraint(cname,args);
                 }
                 
         ;

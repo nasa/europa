@@ -570,6 +570,19 @@ void NddlSymbolTable::reportError(void* tw, const std::string& msg)
     addError(getErrorLocation(treeWalker) + "\n" + msg);
 }
 
+void NddlSymbolTable::checkConstraint(const char* name,const std::vector<Expr*>& args)
+{
+    CESchemaId ceSchema = getPlanDatabase()->getSchema()->getCESchema();
+    if (!ceSchema->isConstraintType(name))
+        throw std::string("Unknown constraint type:")+name;
+
+    ConstraintTypeId ctype = ceSchema->getConstraintType(name);
+    std::vector<DataTypeId> argTypes;
+    for (unsigned int i=0;i<args.size();i++)
+        argTypes.push_back(args[i]->getDataType());
+
+    ctype->checkArgTypes(argTypes);
+}
 
 NddlClassSymbolTable::NddlClassSymbolTable(NddlSymbolTable* parent, ObjectType* ot)
     : NddlSymbolTable(parent)

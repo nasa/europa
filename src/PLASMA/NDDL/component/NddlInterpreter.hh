@@ -40,6 +40,8 @@ public:
 
     AbstractDomain* makeNumericDomainFromLiteral(const std::string& type,const std::string& value);
 
+    void checkConstraint(const char* name,const std::vector<Expr*>& args);
+
     // Error reporting methods
     void reportError(void* treeWalker, const std::string& msg);
     void addError(const std::string& msg);

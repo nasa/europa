@@ -23,11 +23,11 @@ class Sample extends Timeline {
 
 Sample::sample{
  Sample s;
- exists(s); // A Unary constraint.
+// TODO: exists(s); // A Unary constraint.
  eq(p1, p2); // A Binary constraint
  subsetOf(p2, p3); // A binary constraint using 2 variables
  subsetOf(p2, [10 20]); // A binary constraint, but one is locked - meaning a constant
- veryLongConstraint(p1, p2, p3, p4);
+// TODO:  veryLongConstraint(p1, p2, p3, p4);
  int lv1;
  int lv2;
  eq(lv1, lv2);

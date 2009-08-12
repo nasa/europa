@@ -88,7 +88,7 @@ class BClass extends AClass {
     ;;
   }
   predicate q{
-    geq(a, 50);
+    eq(a, 50);
     int c = [40 100];
     c = 60;
   }

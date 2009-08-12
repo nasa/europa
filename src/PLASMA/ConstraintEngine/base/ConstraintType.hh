@@ -35,9 +35,12 @@ namespace EUROPA {
 
     virtual const std::vector<DataTypeId>& getArgTypes() const;
 
-    virtual bool checkArgTypes(const std::vector<DataTypeId>& types) const;
+    // throws an std::string error message if the specified arg types can't be used
+    // to create the constraint this type represents
+    virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) const;
 
   protected:
+    // TODO: argTypes should be specified as well
     ConstraintType(const LabelStr& name,
                    const LabelStr& propagatorName,
 		           bool systemDefined = false);
@@ -45,8 +48,8 @@ namespace EUROPA {
     ConstraintTypeId m_id;
     const LabelStr m_name;
     const LabelStr m_propagatorName;
-    const bool m_systemDefined;
     std::vector<DataTypeId> m_argTypes;
+    const bool m_systemDefined;
   };
 
   /**********************************************************/
@@ -54,7 +57,9 @@ namespace EUROPA {
   template <class ConstraintInstance>
   class ConcreteConstraintType : public ConstraintType {
   public:
-    ConcreteConstraintType(const LabelStr& name, const LabelStr& propagatorName, bool systemDefined = false)
+    ConcreteConstraintType(const LabelStr& name,
+                           const LabelStr& propagatorName,
+                           bool systemDefined = false)
       : ConstraintType(name, propagatorName, systemDefined) { }
 
     ConstraintId createConstraint(const ConstraintEngineId constraintEngine,
@@ -71,8 +76,10 @@ namespace EUROPA {
   template <class ConstraintInstance>
   class RotatedNaryConstraintType : public ConstraintType {
   public:
-    RotatedNaryConstraintType(const LabelStr& name, const LabelStr& propagatorName,
-                                 const LabelStr& otherName, const int& rotateCount)
+    RotatedNaryConstraintType(const LabelStr& name,
+                              const LabelStr& propagatorName,
+                              const LabelStr& otherName,
+                              const int& rotateCount)
       : ConstraintType(name, propagatorName)
       , m_otherName(otherName)
       , m_rotateCount(rotateCount)
