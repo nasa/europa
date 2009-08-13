@@ -22,6 +22,7 @@ local nddl_tests =
   constraint-test.nddl
   csp.0.nddl 
   csp.2.nddl
+  deep-nesting.nddl
   existential.nddl        
   foreach.nddl
   foreach-exec.nddl   

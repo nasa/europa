@@ -18,7 +18,6 @@ Module plasma : all System ;
 # Order of SubIncludes is important, it implies dependencies in many cases
 
 # 3rd party
-SubInclude PLASMA Antlr3 ;
 SubInclude PLASMA TinyXml ;
 
 # kernel. 

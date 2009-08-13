@@ -2,8 +2,8 @@ SubDir PLASMA NDDL ;
 
 if ! $(PLASMA_READY) {
 
-Module NDDL : Antlr3 RulesEngine TemporalNetwork ;
-
+Module NDDL : RulesEngine TemporalNetwork ;
+ModuleLibraries NDDL : antlr3c ;
 ANTLR3FLAGS ?= -o [ FDirName $(SUBDIR) base ] ;
 
 SubInclude PLASMA NDDL base ;
