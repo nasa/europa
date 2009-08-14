@@ -12,22 +12,19 @@ namespace EUROPA
   class PSSolverManagerImpl : public PSSolverManager
   {
     public:
-      PSSolverManagerImpl(ConstraintEngineId ce,PlanDatabaseId pdb,RulesEngineId re);
+      PSSolverManagerImpl(PlanDatabaseId pdb);
 
       virtual PSSolver* createSolver(const std::string& configurationFile);
 
     protected:
       PlanDatabaseId m_pdb;
-      ConstraintEngineId m_ce;
-      RulesEngineId m_re;
   };
 
   class PSSolverImpl : public PSSolver
   {
     public:
       PSSolverImpl(const SOLVERS::SolverId& solver,
-    		       const std::string& configFilename,
-    		       SOLVERS::PlanWriter::PartialPlanWriter* ppw);
+    		       const std::string& configFilename);
       virtual ~PSSolverImpl();
 
       virtual void step();
@@ -58,7 +55,6 @@ namespace EUROPA
     protected:
     	SOLVERS::SolverId m_solver;
     	std::string m_configFile;
-    	SOLVERS::PlanWriter::PartialPlanWriter* m_ppw;
   };
 
 }

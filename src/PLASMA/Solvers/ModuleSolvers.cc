@@ -46,8 +46,7 @@ namespace EUROPA {
   {
       ConstraintEngine* ce = (ConstraintEngine*)engine->getComponent("ConstraintEngine");
       PlanDatabase* pdb = (PlanDatabase*)engine->getComponent("PlanDatabase");
-      RulesEngine* re = (RulesEngine*)engine->getComponent("RulesEngine");
-      PSSolverManager* sm = new PSSolverManagerImpl(ce->getId(),pdb->getId(),re->getId());
+      PSSolverManager* sm = new PSSolverManagerImpl(pdb->getId());
       engine->addComponent("PSSolverManager",sm);
 
       REGISTER_SYSTEM_CONSTRAINT(ce->getCESchema(),SOLVERS::FlawHandler::VariableListener,SOLVERS::FlawHandler::VariableListener::CONSTRAINT_NAME(),SOLVERS::FlawHandler::VariableListener::PROPAGATOR_NAME());

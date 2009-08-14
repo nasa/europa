@@ -17,7 +17,6 @@
 
 // Solver Support
 #include "Solver.hh"
-#include "SolverPartialPlanWriter.hh"
 #include "Filters.hh"
 #include "PlanDatabaseWriter.hh"
 
@@ -97,9 +96,6 @@ namespace EUROPA {
 
       SOLVERS::SolverId solver = (new SOLVERS::Solver(getPlanDatabase(), config))->getId();
 
-      SOLVERS::PlanWriter::PartialPlanWriter* ppw =
-        new SOLVERS::PlanWriter::PartialPlanWriter(getPlanDatabase(), getConstraintEngine(), getRulesEngine(), solver);
-
       // Now process the transactions
       if(!playTransactions(txSource, language))
         return false;
@@ -141,7 +137,6 @@ namespace EUROPA {
       m_totalNodes = solver->getStepCount();
       m_finalDepth = solver->getDepth();
 
-      delete ppw;
       delete (SOLVERS::Solver*) solver;
 
       return retval;

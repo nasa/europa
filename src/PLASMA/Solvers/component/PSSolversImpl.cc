@@ -2,14 +2,11 @@
 #include "PSSolversImpl.hh"
 #include "Filters.hh"
 #include "Solver.hh"
-#include "SolverPartialPlanWriter.hh"
 
 namespace EUROPA
 {
-  PSSolverManagerImpl::PSSolverManagerImpl(ConstraintEngineId ce,PlanDatabaseId pdb,RulesEngineId re)
-    : m_pdb(pdb),
-      m_ce(ce),
-      m_re(re)
+  PSSolverManagerImpl::PSSolverManagerImpl(PlanDatabaseId pdb)
+    : m_pdb(pdb)
   {
   }
 
@@ -20,23 +17,18 @@ namespace EUROPA
 
     SOLVERS::SolverId solver =
     	(new SOLVERS::Solver(m_pdb, *(doc->RootElement())))->getId();
-    return new PSSolverImpl(solver,configurationFile,
-							new SOLVERS::PlanWriter::PartialPlanWriter(m_pdb,m_ce,m_re));
+    return new PSSolverImpl(solver,configurationFile);
   }
 
-  PSSolverImpl::PSSolverImpl(const SOLVERS::SolverId& solver, const std::string& configFilename,
-		     SOLVERS::PlanWriter::PartialPlanWriter* ppw)
+  PSSolverImpl::PSSolverImpl(const SOLVERS::SolverId& solver, const std::string& configFilename)
       : m_solver(solver)
-      , m_configFile(configFilename),
-	m_ppw(ppw)
+      , m_configFile(configFilename)
   {
-    m_ppw->setSolver(m_solver);
   }
 
   PSSolverImpl::~PSSolverImpl() {
     if(m_solver.isValid())
       destroy();
-    delete m_ppw;
   }
 
   void PSSolverImpl::step() {
@@ -60,7 +52,6 @@ namespace EUROPA
    }
 
   void PSSolverImpl::destroy() {
-    m_ppw->clearSolver();
     delete (SOLVERS::Solver*) m_solver;
     m_solver = SOLVERS::SolverId::noId();
   }
