@@ -60,7 +60,8 @@ bool NddlInterpreter::queryIncludeGuard(const std::string& f)
 
 void NddlInterpreter::addInclude(const std::string &f)
 {
-    m_filesread.push_back(f);
+    if (f != "<eval>")
+        m_filesread.push_back(f);
 }
 
 void NddlInterpreter::addInputStream(pANTLR3_INPUT_STREAM in)
