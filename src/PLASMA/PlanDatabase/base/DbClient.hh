@@ -100,7 +100,10 @@ namespace EUROPA {
      * schema.
      * @return The Id of the token created. Will error out rather than return a noId.
      */
-    TokenId createToken(const char* predicateName, bool rejectable = false, bool isFact = false);
+    TokenId createToken(const char* tokenType,
+                        const char* tokenName = NULL,
+                        bool rejectable = false,
+                        bool isFact = false);
 
     /**
      * @brief Deletes a token instance.  By way of symmetry with createToken().
@@ -348,7 +351,10 @@ namespace EUROPA {
     DbClient(const DbClient&); /* NO IMPL */
 
     /*!< Helper methods */
-    TokenId allocateToken(const LabelStr& predicateName, bool rejectable, bool isFact=false);
+    TokenId allocateToken(const char* tokenType,
+                          const char* tokenName,
+                          bool rejectable,
+                          bool isFact=false);
 
     DbClientId m_id;
     PlanDatabaseId m_planDb;

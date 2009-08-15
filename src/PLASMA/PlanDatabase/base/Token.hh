@@ -66,6 +66,11 @@ namespace EUROPA {
     const LabelStr& getName() const;
 
     /**
+     * @brief Set the name
+     */
+    void setName(const LabelStr& name);
+
+    /**
      * @brief Accessor for the master token for this token.
      * @return TokenId::noId() if this is a Master Token, otherwise returns the Token from
      * which this token was sub-goaled.

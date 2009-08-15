@@ -206,6 +206,8 @@ namespace EUROPA{
 
   const LabelStr&  Token::getName() const { return m_name; }
 
+  void Token::setName(const LabelStr& name) { m_name = name; }
+
   const LabelStr& Token::getPredicateName() const {return m_predicateName;}
 
   const LabelStr& Token::getUnqualifiedPredicateName() const {return m_unqualifiedPredicateName;}

@@ -514,19 +514,18 @@ namespace EUROPA {
       // object and specify it. We will also have to generate the appropriate type designation
       // by extracting the class from the object
       ObjectId object;
-      const char* predicateType = DbClientTransactionPlayer::getObjectAndType(getSchema(context),getPDB(context),m_predicateInstance.c_str(),object);
+      const char* tokenType = DbClientTransactionPlayer::getObjectAndType(getSchema(context),getPDB(context),m_predicateInstance.c_str(),object);
+      const char* tokenName = (m_predicateName.length()>0 ? m_predicateName.c_str() : NULL);
 
-      TokenId token = getPDB(context)->createToken(predicateType,isRejectable,isFact);
+      TokenId token = getPDB(context)->createToken(tokenType,tokenName,isRejectable,isFact);
 
       if (object.isId()) {
           // We restrict the base domain permanently since the name is specifically mentioned on creation
           token->getObject()->restrictBaseDomain(object->getThis()->baseDomain());
       }
 
-      LabelStr predicateName(m_predicateName); // TODO: auto-generate name if not provided?
-      context.addToken(predicateName.c_str(),token); // TODO!!: plan database must keep track of global token names
-      debugMsg("Interpreter:createToken", "created Token:" << predicateName.c_str()
-                  << " of type " << predicateType
+      debugMsg("Interpreter:createToken", "created Token:" << tokenName
+                  << " of type " << tokenType
                   << " isFact:" << isFact
                   << " isRejectable:" << isRejectable
       );
@@ -1883,6 +1882,7 @@ namespace EUROPA {
 
   DataRef ExprTokenMethod::eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const
   {
+      checkError(tok.isId(),"Can't evaluate method on null token");
       std::string method(m_methodName.toString());
       DbClientId pdb = getPDB(context); // TODO: keep using db client?
 
@@ -1902,6 +1902,7 @@ namespace EUROPA {
       else
           check_runtime_error(ALWAYS_FAILS,"Unknown token method:" + method);
 
+      debugMsg("Interpreter:ExprTokenMethod","Evaluated token method " << method << " on " << tok->toString());
       return DataRef::null;
   }
 
@@ -1934,8 +1935,10 @@ namespace EUROPA {
       bool isFact=(name=="fact");
       bool isRejectable=(name=="rejectable");
 
-      for (unsigned int i=0;i<m_tokens.size();i++)
-          m_tokens[i]->getToken(context,"",isFact,isRejectable);
+      for (unsigned int i=0;i<m_tokens.size();i++) {
+          TokenId tok = m_tokens[i]->getToken(context,"",isFact,isRejectable);
+          debugMsg("Interpreter:ExprProblemStmt","Evaluated " << name << " on " << tok->toString());
+      }
 
       return DataRef::null;
   }

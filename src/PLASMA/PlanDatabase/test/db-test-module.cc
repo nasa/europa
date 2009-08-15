@@ -2199,11 +2199,11 @@ private:
       ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
 
-      TokenId master = db->createToken(LabelStr(DEFAULT_PREDICATE), true);
+      TokenId master = db->createToken(DEFAULT_PREDICATE, NULL, true);
     master->activate();
     TokenId slave = db->createSlaveToken(master, LabelStr(DEFAULT_PREDICATE), LabelStr("any"));
     CPPUNIT_ASSERT(slave->master() == master);
-    TokenId rejectable = db->createToken(LabelStr(DEFAULT_PREDICATE), false);
+    TokenId rejectable = db->createToken(DEFAULT_PREDICATE, NULL, false);
     rejectable->activate();
     //!!Should try rejecting master and verify inconsistency
     //!!Should try rejecting rejectable and verify consistency
@@ -4692,7 +4692,8 @@ public:
     TEST_PLAYING_XML(buildXMLInvokeActivateTokenStr("invokeActivateTestToken"));
     CPPUNIT_ASSERT(tok->isActive());
     // Now, destroy it so it doesn't affect later tests.
-    delete (Token*) tok;
+    s_db->getClient()->cancel(tok);
+    s_db->getClient()->deleteToken(tok);
     tok = TokenId::noId();
 
     // Special case #1: close an class object domain
@@ -4745,7 +4746,7 @@ public:
                          const TokenId& master, const StateDomain& stateDom) {
     if (token.isNoId() || !token.isValid())
       return(false);
-    if (token->getName() != name)
+    if ((name.toString() != "_auto_") && (token->getName() != name))
       return(false);
     if (token->getPredicateName() != predName)
       return(false);
@@ -4761,7 +4762,7 @@ public:
     TokenSet tokens = s_db->getTokens();
     CPPUNIT_ASSERT(tokens.size() == 1);
     TokenId token = *(tokens.begin());
-    CPPUNIT_ASSERT(checkToken(token, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
+    CPPUNIT_ASSERT(checkToken(token, LabelStr("sample1"), LabelStr("TestClass2.Sample"),
                           TokenId::noId(), getMandatoryStateDom()));
 
     /* Create a rejectable token. */
@@ -4774,7 +4775,7 @@ public:
       tokens.erase(tokens.begin());
       token2 = *(tokens.begin());
     }
-    CPPUNIT_ASSERT(checkToken(token2, LabelStr("TestClass2.Sample"),
+    CPPUNIT_ASSERT(checkToken(token2, LabelStr("sample2"),
 			  LabelStr("TestClass2.Sample"),
 			  TokenId::noId(), getRejectableStateDom()));
 
@@ -4795,7 +4796,7 @@ public:
       currentTokens.erase(currentTokens.begin());
       goal = *(currentTokens.begin());
     }
-    CPPUNIT_ASSERT(checkToken(goal, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
+    CPPUNIT_ASSERT(checkToken(goal, LabelStr("sample3"), LabelStr("TestClass2.Sample"),
                           TokenId::noId(), getMandatoryStateDom()));
     oldTokens.insert(goal);
     /* Create a subgoal for each temporal relation. */
@@ -4817,7 +4818,7 @@ public:
       //!!Should use the master token's Id rather than TokenId::noId() here, but the player doesn't behave that way.
       //!!Is that a bug in the player or not?
       //!!  May mean that this is an inappropriate overloading of the '<goal>' XML tag per Tania and I (17 Nov 2004)
-      CPPUNIT_ASSERT(checkToken(subgoal, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
+      CPPUNIT_ASSERT(checkToken(subgoal, LabelStr("_auto_"), LabelStr("TestClass2.Sample"),
                             TokenId::noId(), getMandatoryStateDom()));
       CPPUNIT_ASSERT(verifyTokenRelation(goal, subgoal, *which));
       /* Update list of old tokens. */
@@ -5125,7 +5126,7 @@ public:
       tok = *(currentTokens.begin());
     }
     /* Check it. */
-    CPPUNIT_ASSERT(checkToken(tok, LabelStr("TestClass2.Sample"), LabelStr("TestClass2.Sample"),
+    CPPUNIT_ASSERT(checkToken(tok, name, LabelStr("TestClass2.Sample"),
                           TokenId::noId(), mandatory ? getMandatoryStateDom() : getRejectableStateDom()));
     return(tok);
   }

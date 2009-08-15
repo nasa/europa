@@ -221,6 +221,20 @@ private:
   }
 };
 
+void nukeToken(const DbClientId& dbClient,const TokenId& token)
+{
+    if (token->isCommitted()) {
+        token->discard();
+        return;
+    }
+
+    if (!token->isInactive())
+        dbClient->cancel(token);
+
+    checkError(token->isInactive(),"Couldn't make inactive:" << token->toLongString());
+    dbClient->deleteToken(token);
+}
+
 class FilterTests {
 public:
   static bool test(){
@@ -301,7 +315,7 @@ private:
       me.getMatches(token, rules);
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()), rules.size() == 2);
       CPPUNIT_ASSERT_MESSAGE(rules[1]->toString(), rules[1]->toString() == "[R3]*.predicateF.*.*.*.*");
-      token->discard();
+      nukeToken(db->getClient(),token);
     }
 
     // test R4
@@ -311,7 +325,7 @@ private:
       me.getMatches(token->getVariable("arg6"), rules);
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()), rules.size() == 2);
       CPPUNIT_ASSERT_MESSAGE(rules[1]->toString(), rules[1]->toString() == "[R4]*.predicateC.arg6.*.*.*");
-      token->discard();
+      nukeToken(db->getClient(),token);
     }
 
     // test R5 & R6
@@ -322,7 +336,7 @@ private:
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getUnqualifiedPredicateName().toString(), rules.size() == 3);
       CPPUNIT_ASSERT_MESSAGE(rules[1]->toString(), rules[1]->toString() == "[R5]C.predicateC.*.*.*.*");
       CPPUNIT_ASSERT_MESSAGE(rules[2]->toString(), rules[2]->toString() == "[R6]C.*.*.*.*.*");
-      token->discard();
+      nukeToken(db->getClient(),token);
     }
 
     // test R6
@@ -332,7 +346,7 @@ private:
       me.getMatches(token, rules);
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getUnqualifiedPredicateName().toString(), rules.size() == 2);
       CPPUNIT_ASSERT_MESSAGE(rules[1]->toString(), rules[1]->toString() == "[R6]C.*.*.*.*.*");
-      token->discard();
+      nukeToken(db->getClient(),token);
     }
 
     // test R7
@@ -344,7 +358,7 @@ private:
       me.getMatches(ConstrainedVariableId(E_predicateC->duration()), rules);
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getUnqualifiedPredicateName().toString(), rules.size() == 2);
       CPPUNIT_ASSERT_MESSAGE(rules[1]->toString(), rules[1]->toString() == "[R7]*.*.duration.*.Object.*");
-      token->discard();
+      nukeToken(db->getClient(),token);
     }
 
     // test R7a
@@ -354,7 +368,7 @@ private:
       me.getMatches(ConstrainedVariableId(token->duration()), rules);
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getPredicateName().toString(), rules.size() == 2);
       CPPUNIT_ASSERT_MESSAGE(rules[1]->toString(), rules[1]->toString() == "[R7a]*.*.duration.none.*.*");
-      token->discard();
+      nukeToken(db->getClient(),token);
     }
 
     // test R8
@@ -367,7 +381,7 @@ private:
       CPPUNIT_ASSERT_MESSAGE(toString(rules.size()) + " for " + token->getPredicateName().toString(), rules.size() == 3);
       CPPUNIT_ASSERT_MESSAGE(rules[1]->toString(), rules[1]->toString() == "[R8]*.*.*.*.B.*");
       CPPUNIT_ASSERT_MESSAGE(rules[2]->toString(), rules[2]->toString() == "[R7]*.*.duration.*.Object.*");
-      token->discard();
+      nukeToken(db->getClient(),token);
     }
 
     // test R*, R9 and R10
@@ -387,7 +401,7 @@ private:
       for(int i=0;i>4; i++)
         CPPUNIT_ASSERT_MESSAGE(rules[i]->toString(), expectedRules.find(LabelStr(rules[i]->toString())) != expectedRules.end());
 
-      token->discard();
+      nukeToken(db->getClient(),token);
     }
 
     return true;
@@ -569,7 +583,7 @@ private:
       FlawHandlerId flawHandler = rules[2];
       CPPUNIT_ASSERT_MESSAGE(toString(flawHandler->getPriority()), flawHandler->getPriority() == 1);
       CPPUNIT_ASSERT_MESSAGE(toString(flawHandler->getWeight()), flawHandler->getWeight() == 399999);
-      token->discard();
+      nukeToken(db->getClient(),token);
     }
 
     return true;
@@ -604,7 +618,7 @@ private:
       CPPUNIT_ASSERT(!flawHandler->test(guards));
       token->getObject()->specify(o2.getId());
       CPPUNIT_ASSERT(flawHandler->test(guards));
-      token->discard();
+      nukeToken(db->getClient(),token);
     }
 
     // test H1
@@ -616,7 +630,7 @@ private:
       FlawHandlerId flawHandler = rules[0];
       std::vector<ConstrainedVariableId> guards;
       CPPUNIT_ASSERT(!flawHandler->makeConstraintScope(token, guards));
-      token->discard();
+      nukeToken(db->getClient(),token);
     }
 
     // test H2
@@ -643,7 +657,7 @@ private:
       // Specify the master guard variable
       token->start()->specify(30);
       CPPUNIT_ASSERT(flawHandler->test(guards));
-      token->discard();
+      nukeToken(db->getClient(),token);
     }
 
     // test H3
@@ -724,7 +738,7 @@ private:
       CPPUNIT_ASSERT(solver.getFlawHandler(token->start()).isNoId());
 
       solver.reset();
-      token->discard();
+      nukeToken(db->getClient(),token);
     }
 
     // Now handle a case with increasingly restrictive filters
@@ -764,7 +778,7 @@ private:
       db->getConstraintEngine()->propagate();
       CPPUNIT_ASSERT(solver.getFlawHandler(slave)->getPriority() == 99999);
 
-      master->discard();
+      nukeToken(db->getClient(),master);
     }
 
     return true;
@@ -1787,7 +1801,7 @@ private:
     CPPUNIT_ASSERT(!solver.solve(1));
     solver.clear();
     TokenId onlyToken = *(testEngine.getPlanDatabase()->getTokens().begin());
-    onlyToken->discard();
+    nukeToken(testEngine.getPlanDatabase()->getClient(),onlyToken);
     CPPUNIT_ASSERT(solver.solve(1));
     return true;
   }
@@ -1826,18 +1840,13 @@ private:
     Solver solver(testEngine.getPlanDatabase(), *(root->FirstChildElement()));
     solver.step(); //decide first 'a'
     solver.reset();
-    t1->discard();
-    t2->discard();
+    nukeToken(db->getClient(),t1);
+    nukeToken(db->getClient(),t2);
     solver.step();
     solver.step();
     solver.step();
     solver.reset();
-    t3->discard();
-    //t2->discard();
-    //t1->discard();
-//     solver.backjump(1);
-//     solver.step();
-    //t1->discard();
+    nukeToken(db->getClient(),t3);
     return true;
   }
 
@@ -1855,7 +1864,7 @@ private:
     {
       IntervalIntDomain& horizon = HorizonFilter::getHorizon();
       horizon = IntervalIntDomain(0, 40);
-      TokenId first = db->getClient()->createToken("CommitTest.chaina", false);
+      TokenId first = db->getClient()->createToken("CommitTest.chaina", "first", false);
       first->start()->specify(0);
       solver.solve(100,100);
 
@@ -1878,13 +1887,13 @@ private:
       solver.reset();
 
       if(i & (16 << 0))
-				first->discard();
+          nukeToken(db->getClient(),first);
       if(i & (16 << 1))
-				second->discard();
+          nukeToken(db->getClient(),second);
       if(i & (16 << 2))
-				third->discard();
+          nukeToken(db->getClient(),third);
       if(i & (16 << 3))
-				fourth->discard();
+          nukeToken(db->getClient(),fourth);
 
       CPPUNIT_ASSERT_MESSAGE("Solver must be valid after discards.", solver.isValid());
 
@@ -1899,7 +1908,7 @@ private:
       TokenSet tokens = testEngine.getPlanDatabase()->getTokens();
       for(TokenSet::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
           if(!(*it)->isDiscarded()) {
-              (*it)->discard();
+              nukeToken(db->getClient(),*it);
           }
       }
     }

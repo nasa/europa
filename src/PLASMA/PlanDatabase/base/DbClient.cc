@@ -124,8 +124,11 @@ namespace EUROPA {
     publish(notifyClosed(objectType));
   }
 
-  TokenId DbClient::createToken(const char* predicateName, bool rejectable, bool isFact) {
-    TokenId token = allocateToken(predicateName, rejectable, isFact);
+  TokenId DbClient::createToken(const char* tokenType,
+                                const char* tokenName,
+                                bool rejectable,
+                                bool isFact) {
+    TokenId token = allocateToken(tokenType, tokenName, rejectable, isFact);
     debugMsg("DbClient:createToken", token->toString());
     publish(notifyTokenCreated(token));
     return(token);
@@ -134,7 +137,7 @@ namespace EUROPA {
   void DbClient::deleteToken(const TokenId& token, const std::string& name) {
     check_error(token.isValid());
     checkError(token->isInactive() || token->isFact(),
-	       "Attempted to delete active, non-fact token " << token->toString());
+	       "Attempted to delete active, non-fact token " << token->toLongString());
     if(isGlobalToken(token->getName()))
       m_planDb->unregisterGlobalToken(token);
     publish(notifyTokenDeleted(token, name));
@@ -410,9 +413,12 @@ namespace EUROPA {
     return m_planDb->hasTokenFactories();
   }
 
-  TokenId DbClient::allocateToken(const LabelStr& predicateName, bool rejectable, bool isFact) {
+  TokenId DbClient::allocateToken(const char* tokenType,
+                                  const char* tokenName,
+                                  bool rejectable,
+                                  bool isFact) {
     checkError(supportsAutomaticAllocation(), "Cannot allocate tokens from the schema.");
-    TokenId token = m_planDb->createToken(predicateName, rejectable, isFact);
+    TokenId token = m_planDb->createToken(tokenType, tokenName, rejectable, isFact);
 
     if (isTransactionLoggingEnabled()) {
       debugMsg("DbClient:allocateToken",
@@ -420,7 +426,7 @@ namespace EUROPA {
       m_keysOfTokensCreated.push_back(token->getKey());
     }
 
-    checkError(token.isValid(), "Failed to allocate token for " << predicateName.toString());
+    checkError(token.isValid(), "Failed to allocate token for " << tokenType);
     return token;
   }
 
@@ -472,7 +478,7 @@ namespace EUROPA {
 
   PSToken* PSPlanDatabaseClientImpl::createToken(const std::string& predicateName, bool rejectable, bool isFact)
   {
-      TokenId tok = m_client->createToken(predicateName.c_str(),rejectable,isFact);
+      TokenId tok = m_client->createToken(predicateName.c_str(),NULL, rejectable,isFact);
       return dynamic_cast<PSToken*>((Token*)tok);
   }
 

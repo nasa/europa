@@ -490,7 +490,7 @@ namespace EUROPA {
     ObjectId object;
     const char* predicateType = getObjectAndType(getSchema(),m_client,type,object);
 
-    TokenId token = m_client->createToken(predicateType,rejectable,isFact);
+    TokenId token = m_client->createToken(predicateType,name,rejectable,isFact);
 
     if (!object.isNoId()) {
         // We restrict the base domain permanently since the name is specifically mentioned on creation
