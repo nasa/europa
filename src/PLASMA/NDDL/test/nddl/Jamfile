@@ -7,9 +7,7 @@ ModuleMain NddlMain : NddlMain.o : NDDL ;
 LocalDepends tests : run-nddl-tests ;
 
 # TODO: enable these tests asap
-# These are only failed by the nddl-xml interpreter, not by the nddl interpreter.
 local failing_tests =
-  csp.1.nddl 
   simple-class.nddl 
   ;
 
@@ -21,6 +19,7 @@ local nddl_tests =
   composition.0.nddl  
   constraint-test.nddl
   csp.0.nddl 
+  csp.1.nddl 
   csp.2.nddl
   existential.nddl        
   foreach.nddl
@@ -56,17 +55,9 @@ local model ;
 for model in $(nddl_tests)
 {
   local exe = $(model:S=) ;
-  local xml = $(model:S=.xml) ;
-  
-  NddlParser $(xml) : $(model) ;
-  
-  RunModuleMain NddlMain-xml-$(exe) : NddlMain : $(xml) nddl-xml ;
-  Depends run-$(exe) : $(xml) NddlMain-xml-$(exe) ;
-  Depends run-nddl-tests : run-$(exe) ;  
-  Clean clean-generated-xml : $(xml) ;
   
   RunModuleMain NddlMain-$(exe) : NddlMain : $(model) nddl ;
-  Depends run-$(exe) : [ FGristFiles $(model) ] NddlMain-$(exe) ;
+  Depends run-$(exe) : NddlMain-$(exe) ;
   Depends run-nddl-tests : run-$(exe) ;  
 }
 

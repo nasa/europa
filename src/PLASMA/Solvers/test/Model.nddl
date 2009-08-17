@@ -70,8 +70,15 @@ D::predicateG{
 }
 
 class Container extends Timeline {
- int objectVar1 = 10;
- int objectVar2 = 20;
+ int objectVar1;
+ int objectVar2;
+
+ Container()
+ {
+     objectVar1 = 10;
+     objectVar2 = 20;
+ }
+
  predicate pred1 {
   int arg1;
   int arg2;

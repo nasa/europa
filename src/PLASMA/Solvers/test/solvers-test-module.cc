@@ -75,7 +75,7 @@ SolversTestEngine::SolversTestEngine()
 {
     createModules();
     doStart();
-    executeScript("nddl-xml","Model.xml",true/*isFile*/);
+    executeScript("nddl","Model.nddl",true/*isFile*/);
     registerTestElements(getId());
 }
 

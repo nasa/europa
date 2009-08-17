@@ -22,17 +22,9 @@ local nddl_tests =
 for model in $(nddl_tests)
 {
   local exe = $(model:S=) ;
-  local xml = $(model:S=.xml) ;
-  
-  NddlParser $(xml) : $(model) ;
-  
-  RunModuleMain rsNddlMain-xml-$(exe) : rsNddlMain : $(xml) nddl-xml ;
-  Depends run-$(exe) : $(xml) rsNddlMain-xml-$(exe) ;
-  Depends run-rs-tests : run-$(exe) ;  
-  Clean clean-generated-xml : $(xml) ;
   
   RunModuleMain rsNddlMain-$(exe) : rsNddlMain : $(model) nddl ;
-  Depends run-$(exe) : [ FGristFiles $(model) ] rsNddlMain-$(exe) ;
+  Depends run-$(exe) : rsNddlMain-$(exe) ;
   Depends run-rs-tests : run-$(exe) ;  
 }
 
