@@ -2,7 +2,6 @@
 #include "ConstraintType.hh"
 #include "Schema.hh"
 #include "FlawHandler.hh"
-#include "NddlXml.hh"
 #include "InterpreterResources.hh"
 #include "ResourceMatching.hh"
 #include "ResourceThreatDecisionPoint.hh"
