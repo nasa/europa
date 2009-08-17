@@ -75,7 +75,6 @@ SolversTestEngine::SolversTestEngine()
 {
     createModules();
     doStart();
-    executeScript("nddl","Model.nddl",true/*isFile*/);
     registerTestElements(getId());
 }
 
@@ -99,25 +98,17 @@ void SolversTestEngine::createModules()
 class TestEngine : public SolversTestEngine
 {
 public:
-  TestEngine()
+  TestEngine(bool loadModel=false)
   {
+      if (loadModel)
+          executeScript("nddl","Model.nddl",true/*isFile*/);
   }
 
   bool playTransactions(const char* txSource)
   {
     check_error(txSource != NULL, "NULL transaction source provided.");
 
-    // Obtain the client to play transactions on.
-    DbClientId client = getPlanDatabase()->getClient();
-
-    // Construct player
-    DbClientTransactionPlayer player(client);
-
-    // Open transaction source and play transactions
-    std::ifstream in(txSource);
-
-    check_error(in, "Invalid transaction source '" + std::string(txSource) + "'.");
-    player.play(in);
+    executeScript("nddl",txSource,true/*isFile*/);
 
     return getConstraintEngine()->constraintConsistent();
   }
@@ -200,7 +191,7 @@ public:
 
 private:
   static bool testBasicAllocation(){
-    TestEngine testEngine;
+    TestEngine testEngine(true);
 
     TiXmlElement* configXml = initXml((getTestLoadLibraryPath() + "/ComponentFactoryTest.xml").c_str());
 
@@ -247,7 +238,7 @@ public:
 
 private:
   static bool testRuleMatching() {
-    TestEngine testEngine;
+    TestEngine testEngine(true);
 
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/RuleMatchingTests.xml").c_str(), "MatchingEngine");
     MatchingEngine me(testEngine.getId(),*root);
@@ -412,7 +403,7 @@ private:
 
     TestEngine testEngine;
     UnboundVariableManager fm(*root);
-    CPPUNIT_ASSERT(testEngine.playTransactions( (getTestLoadLibraryPath() + "/UnboundVariableFiltering.xml").c_str() ));
+    CPPUNIT_ASSERT(testEngine.playTransactions( (getTestLoadLibraryPath() + "/UnboundVariableFiltering.nddl").c_str() ));
 
     // Initialize after filling the database since we are not connected to an event source
     fm.initialize(*root,testEngine.getPlanDatabase());
@@ -465,7 +456,7 @@ private:
     OpenConditionManager fm(*root);
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
-    CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/OpenConditionFiltering.xml").c_str() ));
+    CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/OpenConditionFiltering.nddl").c_str() ));
 
     // Initialize with data in the database
     fm.initialize(*root,testEngine.getPlanDatabase());
@@ -492,7 +483,7 @@ private:
     ThreatManager fm(*root);
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
-    CPPUNIT_ASSERT(testEngine.playTransactions(( getTestLoadLibraryPath() + "/ThreatFiltering.xml").c_str()));
+    CPPUNIT_ASSERT(testEngine.playTransactions(( getTestLoadLibraryPath() + "/ThreatFiltering.nddl").c_str()));
 
     // Initialize with data in the database
     fm.initialize(*root,testEngine.getPlanDatabase());
@@ -529,7 +520,7 @@ public:
 
 private:
   static bool testPriorities(){
-    TestEngine testEngine;
+    TestEngine testEngine(true);
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestPriorities");
     MatchingEngine me(testEngine.getId(),*root, "FlawHandler");
     PlanDatabaseId db = testEngine.getPlanDatabase();
@@ -590,7 +581,7 @@ private:
   }
 
   static bool testGuards(){
-    TestEngine testEngine;
+    TestEngine testEngine(true);
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestGuards");
     MatchingEngine me(testEngine.getId(),*root, "FlawHandler");
     PlanDatabaseId db = testEngine.getPlanDatabase();
@@ -675,7 +666,7 @@ private:
   }
 
   static bool testDynamicFlawManagement(){
-    TestEngine testEngine;
+    TestEngine testEngine(true);
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestDynamicFlaws");
     TiXmlElement* child = root->FirstChildElement();
     PlanDatabaseId db = testEngine.getPlanDatabase();
@@ -789,7 +780,7 @@ private:
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "DefaultVariableOrdering");
     TiXmlElement* child = root->FirstChildElement();
     {
-      CPPUNIT_ASSERT(testEngine.playTransactions( (getTestLoadLibraryPath() + "/StaticCSP.xml").c_str()));
+      CPPUNIT_ASSERT(testEngine.playTransactions( (getTestLoadLibraryPath() + "/StaticCSP.nddl").c_str()));
       Solver solver(testEngine.getPlanDatabase(), *child);
       CPPUNIT_ASSERT(solver.solve());
       CPPUNIT_ASSERT(solver.getStepCount() == solver.getDepth());
@@ -808,7 +799,7 @@ private:
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "HeuristicVariableOrdering");
     TiXmlElement* child = root->FirstChildElement();
     {
-      CPPUNIT_ASSERT(testEngine.playTransactions( (getTestLoadLibraryPath() + "/StaticCSP.xml").c_str()));
+      CPPUNIT_ASSERT(testEngine.playTransactions( (getTestLoadLibraryPath() + "/StaticCSP.nddl").c_str()));
       Solver solver(testEngine.getPlanDatabase(), *child);
       CPPUNIT_ASSERT(solver.solve());
       CPPUNIT_ASSERT(solver.getStepCount() == solver.getDepth());
@@ -823,7 +814,7 @@ private:
   }
 
   static bool testTokenComparators() {
-    TestEngine testEngine;
+    TestEngine testEngine(true);
     testEngine.getSchema()->addPredicate("A.Foo");
     PlanDatabaseId db = testEngine.getPlanDatabase();
 
@@ -1189,7 +1180,7 @@ private:
   }
 
   static bool testValueEnum() {
-    TestEngine testEngine;
+    TestEngine testEngine(true);
     PlanDatabaseId db = testEngine.getPlanDatabase();
     ConstraintEngineId ce = testEngine.getConstraintEngine();
 
@@ -1340,7 +1331,7 @@ private:
     return true;
   }
   static bool testHSTSOpenConditionDecisionPoint() {
-    TestEngine testEngine;
+    TestEngine testEngine(true);
     testEngine.getSchema()->addPredicate("A.Foo");
     PlanDatabaseId db = testEngine.getPlanDatabase();
     DbClientId client = db->getClient();
@@ -1460,7 +1451,7 @@ private:
     return true;
   }
   static bool testHSTSThreatDecisionPoint() {
-    TestEngine testEngine;
+    TestEngine testEngine(true);
     testEngine.getSchema()->addPredicate("A.Foo");
     PlanDatabaseId db = testEngine.getPlanDatabase();
     DbClientId client = db->getClient();
@@ -1564,7 +1555,7 @@ private:
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SingletonLoop");
     TiXmlElement* child = root->FirstChildElement();
     {
-      CPPUNIT_ASSERT(testEngine.playTransactions( (getTestLoadLibraryPath() + "/SingletonGuardLoopTest.xml").c_str()));
+      CPPUNIT_ASSERT(testEngine.playTransactions( (getTestLoadLibraryPath() + "/SingletonGuardLoopTest.nddl").c_str()));
       Solver solver(testEngine.getPlanDatabase(), *child);
       CPPUNIT_ASSERT(solver.solve(50, 50));
       CPPUNIT_ASSERT(solver.getStepCount() == solver.getDepth());
@@ -1580,7 +1571,7 @@ private:
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
-      CPPUNIT_ASSERT(testEngine.playTransactions( (getTestLoadLibraryPath() + "/StaticCSP.xml").c_str()));
+      CPPUNIT_ASSERT(testEngine.playTransactions( (getTestLoadLibraryPath() + "/StaticCSP.nddl").c_str()));
       Solver solver(testEngine.getPlanDatabase(), *child);
       CPPUNIT_ASSERT(solver.solve());
       CPPUNIT_ASSERT(solver.getStepCount() == solver.getDepth());
@@ -1624,7 +1615,7 @@ private:
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
-      CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/SuccessfulSearch.xml").c_str()));
+      CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/SuccessfulSearch.nddl").c_str()));
       Solver solver(testEngine.getPlanDatabase(), *child);
       CPPUNIT_ASSERT(solver.solve());
     }
@@ -1636,7 +1627,7 @@ private:
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
-      CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/ExhaustiveSearch.xml").c_str()));
+      CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/ExhaustiveSearch.nddl").c_str()));
       Solver solver(testEngine.getPlanDatabase(), *child);
       CPPUNIT_ASSERT(!solver.solve());
 
@@ -1663,7 +1654,7 @@ private:
     {
       IntervalIntDomain& horizon = HorizonFilter::getHorizon();
       horizon = IntervalIntDomain(0, 1000);
-      CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/SimpleActivation.xml").c_str()));
+      CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/SimpleActivation.nddl").c_str()));
       Solver solver(testEngine.getPlanDatabase(), *child);
       CPPUNIT_ASSERT(solver.solve());
     }
@@ -1679,7 +1670,7 @@ private:
       IntervalIntDomain& horizon = HorizonFilter::getHorizon();
       horizon = IntervalIntDomain(0, 1000);
 
-      CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/SimpleRejection.xml").c_str()));
+      CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/SimpleRejection.nddl").c_str()));
       Solver solver(testEngine.getPlanDatabase(), *child);
 
       CPPUNIT_ASSERT(solver.solve(100, 100));
@@ -1700,7 +1691,7 @@ private:
     CPPUNIT_ASSERT(solver.solve());
 
     // Now modify the database and invoke the solver again. Ensure that it does work
-    CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/SuccessfulSearch.xml").c_str()));
+    CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/SuccessfulSearch.nddl").c_str()));
     CPPUNIT_ASSERT(solver.solve());
     CPPUNIT_ASSERT(solver.getDepth() > 0);
 
@@ -1713,7 +1704,7 @@ private:
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
 
-    CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() +"/SuccessfulSearch.xml").c_str()));
+    CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() +"/SuccessfulSearch.nddl").c_str()));
     Solver solver(testEngine.getPlanDatabase(), *child);
     solver.setMaxSteps(5); //arbitrary number of maximum steps
     CPPUNIT_ASSERT(solver.solve(20)); //arbitrary number of steps < max
@@ -1725,7 +1716,7 @@ private:
     TestEngine testEngine;
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "BacktrackSolver");
     TiXmlElement* child = root->FirstChildElement();
-    CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() +"/BacktrackFirstDecision.xml").c_str()));
+    CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() +"/BacktrackFirstDecision.nddl").c_str()));
     Solver solver(testEngine.getPlanDatabase(), *child);
     solver.setMaxSteps(5); //arbitrary number of maximum steps
     CPPUNIT_ASSERT(solver.solve(20)); //arbitrary number of steps < max
@@ -1747,7 +1738,7 @@ private:
     TestEngine testEngine;
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleCSPSolver");
     TiXmlElement* child = root->FirstChildElement();
-    CPPUNIT_ASSERT(testEngine.playTransactions( (getTestLoadLibraryPath() + "/StaticCSP.xml").c_str()));
+    CPPUNIT_ASSERT(testEngine.playTransactions( (getTestLoadLibraryPath() + "/StaticCSP.nddl").c_str()));
     Solver solver(testEngine.getPlanDatabase(), *child);
     CPPUNIT_ASSERT(solver.solve(10));
     CPPUNIT_ASSERT(solver.getStepCount() == solver.getDepth());
@@ -1796,7 +1787,7 @@ private:
     TestEngine testEngine;
     TiXmlElement* root = initXml( (getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "GNATS_3196");
     TiXmlElement* child = root->FirstChildElement();
-    CPPUNIT_ASSERT(testEngine.playTransactions( (getTestLoadLibraryPath() + "/GNATS_3196.xml").c_str()));
+    CPPUNIT_ASSERT(testEngine.playTransactions( (getTestLoadLibraryPath() + "/GNATS_3196.nddl").c_str()));
     Solver solver(testEngine.getPlanDatabase(), *child);
     CPPUNIT_ASSERT(!solver.solve(1));
     solver.clear();
@@ -1807,7 +1798,7 @@ private:
   }
 
   static bool testContext() {
-    TestEngine testEngine;
+    TestEngine testEngine(true);
     std::stringstream data;
     data << "<Solver name=\"TestSolver\">" << std::endl;
     data << "</Solver>" << std::endl;
@@ -1825,7 +1816,7 @@ private:
 
   static bool testDeletedFlaw() {
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestDynamicFlaws");
-    TestEngine testEngine;
+    TestEngine testEngine(true);
     PlanDatabaseId db = testEngine.getPlanDatabase();
     Object o1(db, "GuardTest", "o1");
     db->close();
@@ -1853,7 +1844,7 @@ private:
   static bool testDeleteAfterCommit() {
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/FlawHandlerTests.xml").c_str(), "TestCommit");
     TiXmlElement* child = root->FirstChildElement();
-    TestEngine testEngine;
+    TestEngine testEngine(true);
     PlanDatabaseId db = testEngine.getPlanDatabase();
     Object o1(db, "CommitTest", "o1");
     db->close();
@@ -1933,7 +1924,7 @@ private:
     TestEngine testEngine;
     UnboundVariableManager fm(*root);
     fm.initialize(*root,testEngine.getPlanDatabase());
-    CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/UnboundVariableFiltering.xml").c_str()));
+    CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/UnboundVariableFiltering.nddl").c_str()));
 
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
@@ -1967,7 +1958,7 @@ private:
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
     fm.initialize(*root,testEngine.getPlanDatabase());
-    CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/OpenConditionFiltering.xml").c_str()));
+    CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/OpenConditionFiltering.nddl").c_str()));
 
     TokenSet tokens = testEngine.getPlanDatabase()->getTokens();
     IteratorId flawIterator = fm.createIterator();
@@ -2000,7 +1991,7 @@ private:
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
     fm.initialize(*root,testEngine.getPlanDatabase());
-    CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/ThreatFiltering.xml").c_str()));
+    CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/ThreatFiltering.nddl").c_str()));
 
     TokenSet tokens = testEngine.getPlanDatabase()->getTokens();
     IteratorId flawIterator = fm.createIterator();
@@ -2035,7 +2026,7 @@ private:
     IntervalIntDomain& horizon = HorizonFilter::getHorizon();
     horizon = IntervalIntDomain(0, 1000);
 
-    CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/ThreatFiltering.xml").c_str()));
+    CPPUNIT_ASSERT(testEngine.playTransactions((getTestLoadLibraryPath() + "/ThreatFiltering.nddl").c_str()));
 
     tm.initialize(*(root->FirstChildElement("ThreatManager")),testEngine.getPlanDatabase());
     ocm.initialize(*(root->FirstChildElement("OpenConditionManager")),testEngine.getPlanDatabase());

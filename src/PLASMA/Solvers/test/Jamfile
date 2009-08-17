@@ -19,16 +19,7 @@ local solverInputFiles = 	[ FGristFiles UnboundVariableFiltering.nddl
 				GNATS_3196.nddl 
 				SingletonGuardLoopTest.nddl ] ;
  
- # Create dependency for initial state files to be parsed
- local solversInputFile ;
- for solversInputFile in $(solverInputFiles) {
-  NddlParser $(solversInputFile:S=.xml) : $(solversInputFile) ;
-  LocalDepends run-solvers-module-tests : $(solversInputFile:S=.xml) ;
- }
-
- NddlParser Model.xml : Model.nddl ;
  ModuleMain solvers-module-tests : module-tests.cc solvers-test-module.cc : Solvers NDDL  : solvers-tests ;
- Depends run-solvers-module-tests : Model.xml ; 
  RunModuleMain run-solvers-module-tests : solvers-module-tests ;
  LocalDepends tests : run-solvers-module-tests ;
 } # PLASMA_READY
