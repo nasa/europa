@@ -9,6 +9,8 @@ options {
 
 @context {
     NddlSymbolTable* SymbolTable;
+    NddlInterpreter* parserObj;
+    bool allowEval;
 }
 
 @includes
@@ -76,28 +78,37 @@ static void popContext(pNDDL3Tree treeWalker)
     // use the meat from displayRecognitionError() in antlr3baserecognizer.c
 }
 
-nddl :               
-	^(NDDL
+nddl  
+@init {
+    bool forceEval = false;
+}             
+	: ^(NDDL
 		( {
 		     // debugMsg("NddlInterpreter:nddl","Line:" << LEXER->getLine(LEXER)); 
 		  }
-		  (	child=classDeclaration
-          | child=enumDefinition
-		  |	child=typeDefinition
-		  |	child=variableDeclarations
-		  |	child=assignment
-		  |	child=constraintInstantiation
-		  |	child=allocation[NULL]
-		  |	child=rule
-		  |	child=problemStmt
-		  |	child=relation
-		  |	child=methodInvocation
-		  |	child=constraintSignature
+		  (	child=classDeclaration { forceEval = true; }
+          | child=enumDefinition { forceEval = true; }
+		  |	child=typeDefinition { forceEval = true; }
+		  |	child=variableDeclarations { forceEval = false; }
+		  |	child=assignment { forceEval = false; }
+		  |	child=constraintInstantiation { forceEval = false; }
+		  |	child=enforceExpression { forceEval = false; }
+		  |	child=allocation[NULL] { forceEval = false; }
+		  |	child=rule { forceEval = false; }
+		  |	child=problemStmt { forceEval = false; }
+		  |	child=relation { forceEval = false; }
+		  |	child=methodInvocation { forceEval = false; }
+		  |	child=constraintSignature { forceEval = false; }
 		  ) 
 		  {
 		      if (child != NULL) { 
 		          debugMsg("NddlInterpreter:nddl","Evaluating:" << child->toString());
-		          evalExpr(CTX,child);
+                  if (CTX->allowEval || forceEval) {
+                      if (forceEval && !CTX->allowEval) {
+                          debugMsg("NddlInterpreter:nddl","Evaluation Forced!");
+                      }
+                      evalExpr(CTX,child);
+                  }
 		          // TODO!!: systematically deal with memory mgmt for all Exprs.
 		          delete child;
 		          child = NULL; 
@@ -565,6 +576,7 @@ predicateStatements[InterpretedTokenFactory* tokenFactory]
                 ( child=predicateParameter[tokenFactory] 
                 | child=predicateParameterAssignment
                 | child=standardConstraint 
+                | child=enforceExpression
                 )
                 {
                     tokenFactory->addBodyExpr(child);
@@ -628,7 +640,17 @@ rule returns [Expr* result]
 			ruleBlock[ruleBody]
 		)
 		{
-		    std::string source=""; // TODO: get this from the antlr parser
+            char buff[10];
+            sprintf(buff, "\%u", className->getLine(className));
+            std::string filename = "UNKNOWN";
+            if (className->getToken(className)) {
+                if (className->getToken(className)->input) {
+                    if (className->getToken(className)->input->fileName) {
+                        filename = c_str(className->getToken(className)->input->fileName->chars);
+                    }
+                }
+            }
+		    std::string source="\"" + filename + "," + std::string(buff) + "\"";
 		    result = new ExprRuleTypeDefinition((new InterpretedRuleFactory(predName,source,ruleBody))->getId());
 		    popContext(CTX);
 		}
@@ -642,6 +664,7 @@ ruleBlock[std::vector<Expr*>& ruleBody]
 
 ruleStatement returns [Expr* result]
 	: (	child=constraintInstantiation
+      | child=enforceExpression
 	  |	child=assignment
 	  |	child=variableDeclarations
 	  |	child=ifStatement
@@ -674,9 +697,14 @@ guardExpression returns [ExprIfGuard* result]
 @init
 {
     const char* relopStr = "==";
+    BoolDomain *dom = NULL;
 }
         : ( ^(relop=guardRelop {relopStr=c_str($relop.text->chars);} lhs=anyValue rhs=anyValue )
           | lhs=anyValue
+          | ^(EXPRESSION_RETURN lhs=expressionCleanReturn
+                { dom = new BoolDomain(true); 
+                  rhs = new ExprConstant(dom->getTypeName().c_str(), dom); 
+                } )
           )
           {
               result = new ExprIfGuard(relopStr,lhs,rhs);
@@ -777,31 +805,32 @@ qualified returns [Expr* result]
 }
     :   qualifiedString[varName]
         {
-             bool isEnum = false;
-             //My guess is that there is a better way to do this. First check if it is an enum.
-             std::string secondPart = "";
-             if (varName.rfind(".") != std::string::npos) {
-                 secondPart = varName.substr(varName.rfind(".") + 1, std::string::npos);
-             }
-
-             if (CTX->SymbolTable->isEnumValue(varName.c_str())) {
-                result = CTX->SymbolTable->makeEnumRef(varName.c_str());
-                isEnum = true;
-             } else if (secondPart.c_str() != "") {
-                if (CTX->SymbolTable->isEnumValue(secondPart.c_str())) {
-                   result = CTX->SymbolTable->makeEnumRef(secondPart.c_str());
-                   isEnum = true;
+                checkError((varName != "true" && varName != "false"), "true/false in qualified. It should not be here, only in the boolLiteral\n");
+                 bool isEnum = false;
+                //My guess is that there is a better way to do this. First check if it is an enum.
+                std::string secondPart = "";
+                if (varName.rfind(".") != std::string::npos) {
+                   secondPart = varName.substr(varName.rfind(".") + 1, std::string::npos);
                 }
-             }
 
-             if (!isEnum) {
-                std::string errorMsg;
-                DataTypeId dt = CTX->SymbolTable->getTypeForVar(varName.c_str(),errorMsg);  
-                // TODO!!: do type checking at each "."
-                if (dt.isNoId())
-                    reportSemanticError(CTX,errorMsg);
-                result = new ExprVarRef(varName.c_str(),dt);
-             }
+                if (CTX->SymbolTable->isEnumValue(varName.c_str())) {
+                   result = CTX->SymbolTable->makeEnumRef(varName.c_str());
+                   isEnum = true;
+                } else if (secondPart.c_str() != "") {
+                   if (CTX->SymbolTable->isEnumValue(secondPart.c_str())) {
+                      result = CTX->SymbolTable->makeEnumRef(secondPart.c_str());
+                      isEnum = true;
+                   }
+                }
+  
+                if (!isEnum) {
+                   std::string errorMsg;
+                   DataTypeId dt = CTX->SymbolTable->getTypeForVar(varName.c_str(),errorMsg);  
+                   // TODO!!: do type checking at each "."
+                   if (dt.isNoId())
+                       reportSemanticError(CTX,errorMsg);
+                   result = new ExprVarRef(varName.c_str(),dt);
+                }
         }
     ;
         
@@ -931,3 +960,60 @@ signatureAtom
         :       ^('<:' IDENT  (type | 'numeric'))
         |       ^('(' signatureExpression)
         ;
+
+expressionList [std::vector<ExprExpression*> &args]
+@init { ExprExpression *value = NULL; }
+        :  expression[value] { args.push_back(value); } ;
+
+expression [ExprExpression* &returnValue]
+@init { int sel = 0; ExprExpression *leftValue = NULL, *rightValue = NULL; std::vector<ExprExpression*> args; }
+        :       ^(('==' {sel=0;} | '!=' {sel=1;} | '<' {sel=2;} | '>' {sel=3;} | '<=' {sel=4;} | '>=' {sel=5;} | 
+                   '||' {sel=6;} | '&&' {sel=7;} | '+' {sel=8;} | '-' {sel=9;} | '*' {sel=10;}) 
+                   left=expression[leftValue] right=expression[rightValue])
+        {
+           std::string op = "NULL";
+           if (sel == 0) { op = "=="; }
+           if (sel == 1) { op = "!="; }
+           if (sel == 2) { op = "<"; }
+           if (sel == 3) { op = ">"; }
+           if (sel == 4) { op = "<="; }
+           if (sel == 5) { op = ">="; }
+           if (sel == 6) { op = "||"; }
+           if (sel == 7) { op = "&&"; }
+           if (sel == 8) { op = "+"; }
+           if (sel == 9) { op = "-"; }
+           if (sel == 10) { op = "*"; }
+           returnValue = new ExprExpression(op, leftValue, rightValue);
+        }
+        |       r=anyValue
+        {
+           returnValue = new ExprExpression(r);
+        }
+        |       ^(FUNCTION_CALL name=IDENT ^('(' expressionList[args]*))
+        {
+            NddlFunction* func = CTX->SymbolTable->getFunction(c_str($name.text->chars));
+
+            if (!func) {
+                //reportSemanticError(CTX, "Bad function: " + c_str($name.text->chars));
+                //Hack here for Conor to have anything he wants be function
+                func = new NddlFunction(c_str($name.text->chars), 
+                                        c_str($name.text->chars), "bool", 0); //Not args == 0 -> args check does not do anything.
+                CTX->SymbolTable->addFunction(func);
+            }
+            returnValue = new ExprExpression(new NddlFunction(*func), args, CTX->SymbolTable->getDataType(func->getReturnType()));
+        }
+        ;
+
+enforceExpression returns [Expr* result]
+@init { ExprExpression *value = NULL; BoolDomain* dom = NULL; ExprConstant* con = NULL; std::vector<Expr*> args; }
+        : ^(EXPRESSION_ENFORCE a=expression[value]) { 
+            dom = new BoolDomain(true); 
+            con = new ExprConstant(dom->getTypeName().c_str(), dom); 
+            args.push_back(value);
+            args.push_back(con);
+            result = new ExprConstraint("eq", args);
+        } ;
+
+expressionCleanReturn returns [Expr* result]
+@init { ExprExpression* returnValue = NULL; } : expression[returnValue] { result = returnValue; } ;
+

@@ -28,6 +28,46 @@
 #include <string.h>
 
 namespace EUROPA {
+  void makeConstraint(EvalContext& context, const LabelStr& name, const std::vector<ConstrainedVariableId>& vars);
+
+  NddlFunction::NddlFunction(const char* name, const char* constraint, const char* returnType, unsigned int argumentCount)
+  {
+     m_name = name;
+     m_constraint = constraint;
+     m_returnType = returnType;
+     m_argumentCount = argumentCount;
+  }
+ 
+  NddlFunction::NddlFunction(NddlFunction &copy)
+  {
+     m_name = copy.getName();
+     m_constraint = copy.getConstraint();
+     m_returnType = copy.getReturnType();
+     m_argumentCount = copy.getArgumentCount();
+  }
+ 
+  NddlFunction::~NddlFunction()
+  {
+  }
+ 
+  const char* NddlFunction::getName()
+  {
+     return m_name.c_str();
+  }
+ 
+  const char* NddlFunction::getConstraint()
+  {
+     return m_constraint.c_str();
+  }
+  const char* NddlFunction::getReturnType()
+  {
+     return m_returnType.c_str();
+  }
+  unsigned int NddlFunction::getArgumentCount()
+  {
+     return m_argumentCount;
+  }
+ 
 
   // TODO: keep using pdbClient?
   const DbClientId& getPDB(EvalContext& context)
@@ -115,6 +155,18 @@ namespace EUROPA {
 
       os << "{CONSTANT " << m_type.c_str() << " " << m_domain->toString() << "}";
       return os.str();
+  }
+
+  std::string ExprConstant::getConstantValue() const
+  {
+      std::ostringstream os;
+
+      if (m_domain->isSingleton() && (std::string(m_type.c_str()) == "int" || std::string(m_type.c_str()) == "float")) {
+	unsigned int start = m_domain->toString().find("[") + 1;
+	unsigned int end = m_domain->toString().find(",");
+	return m_domain->toString().substr(start, end - start);
+      }
+      return "CONST_" + std::string(m_type.c_str());
   }
 
 
@@ -285,6 +337,196 @@ namespace EUROPA {
       os << " }";
 
       return os.str();
+  }
+
+  unsigned int ExprExpression::s_counter(1);
+  ExprExpression::ExprExpression(std::string name, ExprExpression* lhs, ExprExpression* rhs)
+    : m_count(s_counter++), m_name(name), m_lhs(lhs),  m_rhs(rhs), m_target(NULL), m_func(NULL), m_args(), m_data()
+  {
+  }
+
+  ExprExpression::ExprExpression(Expr* target)
+    : m_count(s_counter++), m_name("PASS"), m_lhs(NULL),  m_rhs(NULL), m_target(target), m_func(NULL), m_args(), m_data()
+  {
+  }
+
+  ExprExpression::ExprExpression(NddlFunction* func, std::vector<ExprExpression*> args, DataTypeId data) 
+    : m_count(s_counter++), m_name("FUNC"), m_lhs(NULL),  m_rhs(NULL), m_target(NULL), m_func(func), m_args(args), m_data(data)
+  {
+  }
+
+  ExprExpression::~ExprExpression()
+  {
+  }
+
+  DataRef ExprExpression::eval(EvalContext& context) const {
+    if (m_name == "PASS" && m_target) {
+      return m_target->eval(context);
+    } else if (m_name == "FUNC") {
+      //Create the variable name
+
+      ////////////////////////////////////
+      char buff[15];
+      sprintf(buff, "%u", m_count);
+      std::string variable = std::string("implicit_var_" + std::string(buff) + "_" + toString()).c_str();
+      
+      //Detect if the variable contains illegal characters and rewrite it if it does.
+      for (unsigned int i = 0; i < variable.size(); i++) {
+	if ((variable[i] > '9' || variable[i] < '0') && (variable[i] < 'A' || variable[i] > 'Z')
+	    && (variable[i] < 'a' || variable[i] > 'z') && (variable[i] != '_')) {
+	  debugMsg("Interpreter","Bad var name generated : " << variable);
+	  debugMsg("NddlInterpreter","Bad var name generated : " << variable);
+	  variable = "implicit_var_" + std::string(buff) + "_generation_failure";
+	  break;
+	}
+      }
+      ////////////////////////////////////
+      
+      ExprVarDeclaration* var = new ExprVarDeclaration(variable.c_str(), m_data, NULL, false);
+      DataRef output = var->eval(context);
+
+      Expr* varRef = new ExprVarRef(variable.c_str(), m_data);
+      std::vector<Expr*> args;
+      args.push_back(varRef);
+      for (unsigned int i = 0; i < m_args.size(); i++) {
+	args.push_back(m_args[i]);
+      }
+      Expr* con = new ExprConstraint(m_func->getConstraint(), args);
+
+      con->eval(context);
+      return output;
+    }
+    /*if (m_decl) {
+      m_decl->eval(context);
+      Expr* varRef = new ExprVarRef(m_varname, m_data);
+      std::vector<Expr*> args = m_args;
+      args[0] = varRef;
+      Expr* con = new ExprConstraint(m_functionname.c_str(), args);
+      return con->eval(context);
+      }*/
+
+    DataRef left = m_lhs->eval(context), right = m_rhs->eval(context);
+
+    //Figure out constriant type.
+    std::string constraint = "", returnType = "";
+    bool flipArguments = false;
+    if (m_name == "==") { constraint = "testEQ"; returnType = "bool"; }
+    if (m_name == "<=") { constraint = "testLEQ"; returnType = "bool"; }
+    if (m_name == ">=") { constraint = "testLEQ"; returnType = "bool"; flipArguments = true; }
+    if (m_name == "!=") { constraint = "testNEQ"; returnType = "bool"; }
+    if (m_name == ">") { constraint = "TestLessThan"; returnType = "bool"; flipArguments = true; }
+    if (m_name == "<") { constraint = "TestLessThan"; returnType = "bool"; }
+    if (m_name == "+") { constraint = "addEq"; }
+    if (m_name == "-") { constraint = "addEq"; }
+    if (m_name == "*") { constraint = "mulEq"; }
+    if (m_name == "||") { constraint = "testOr"; returnType = "bool"; }
+    if (m_name == "&&") { constraint = "testAnd"; returnType = "bool"; }
+    check_runtime_error(constraint != "", "Illegal expression: " + m_name);
+    
+    //Get the data type.
+    DataTypeId data;
+
+    if (returnType == "") {
+      returnType = left.getValue()->getDataType()->getName().c_str();
+      data = left.getValue()->getDataType();
+      check_runtime_error(returnType == right.getValue()->getDataType()->getName().c_str(), "We don't support expressions with different types going in to one var (e.g. float + int)");
+    } else if (returnType == "bool") {
+      data = BoolDT::instance();
+    } else {
+      check_runtime_error(ALWAYS_FAIL, "Illegal data type: " + returnType);
+    }
+
+    //Create the variable name
+    ////////////////////////////////////
+    char buff[15];
+    sprintf(buff, "%u", m_count);
+
+    std::string variable = std::string("implicit_var_" + std::string(buff) + "_" + toString()).c_str();
+    
+    //Detect if the variable contains illegal characters and rewrite it if it does.
+    for (unsigned int i = 0; i < variable.size(); i++) {
+      if ((variable[i] > '9' || variable[i] < '0') && (variable[i] < 'A' || variable[i] > 'Z')
+	  && (variable[i] < 'a' || variable[i] > 'z') && (variable[i] != '_')) {
+	debugMsg("Interpreter","Bad var name generated : " << variable);
+	debugMsg("NddlInterpreter","Bad var name generated : " << variable);
+	variable = "implicit_var_" + std::string(buff) + "_generation_failure";
+	break;
+      }
+    }
+    ////////////////////////////////////
+
+    //Declare the implicit return variable
+    ExprVarDeclaration* var = new ExprVarDeclaration(variable.c_str(), data, NULL, false);
+    DataRef output = var->eval(context);
+
+    delete var;
+
+    //Make the constraint
+    std::vector<ConstrainedVariableId> args;
+    if (m_name == "-") {
+      args.push_back(output.getValue());
+      args.push_back(right.getValue());
+      args.push_back(left.getValue());
+    } else if (m_name == "+") {
+      args.push_back(left.getValue());
+      args.push_back(right.getValue());
+      args.push_back(output.getValue());
+    } else if (m_name == "*") {
+      args.push_back(left.getValue());
+      args.push_back(right.getValue());
+      args.push_back(output.getValue());
+    } else {
+      args.push_back(output.getValue());
+      if (flipArguments) {
+	args.push_back(right.getValue());
+	args.push_back(left.getValue());
+      } else if (!flipArguments) {
+	args.push_back(left.getValue());
+	args.push_back(right.getValue());
+      }
+    }
+
+    makeConstraint(context, constraint.c_str(), args);
+
+
+    return output;
+  }
+  
+
+  std::string ExprExpression::toString() const {
+    if (m_rhs && m_lhs) {
+      std::string op = "BadOp";
+      if (m_name == "==") { op = "eq"; }
+      if (m_name == "<=") { op = "leq"; }
+      if (m_name == ">=") { op = "geq"; }
+      if (m_name == "!=") { op = "neq"; }
+      if (m_name == ">") { op = "gt"; }
+      if (m_name == "<") { op = "lt"; }
+      if (m_name == "+") { op = "plus"; }
+      if (m_name == "-") { op = "minus"; }
+      if (m_name == "*") { op = "times"; }
+      if (m_name == "||") { op = "or"; }
+      if (m_name == "&&") { op = "and"; }
+      return m_lhs->toString() + "_" + op + "_" + m_rhs->toString();
+    } else if (m_target) {
+      ExprConstant* constTarg = dynamic_cast<ExprConstant*>(m_target); 
+
+      if (constTarg) {
+	return constTarg->getConstantValue();
+      }
+      
+      if (m_target->getDataType().isId() && m_target->getDataType().isValid()) {
+	return m_target->getDataType()->getName().c_str();
+      }
+      return "BadConst";
+    } else if (m_func) {
+      std::string args = "";
+      for (unsigned int i = 0; i < m_args.size(); i++) {
+	args += m_args[i]->toString() + std::string("_");
+      }
+      return std::string(m_func->getName()) + "__" + args + "_";
+    }
+    return "BadExpression";
   }
 
   ExprConstraint::ExprConstraint(const char* name,const std::vector<Expr*>& args)
@@ -592,6 +834,7 @@ namespace EUROPA {
     vars.push_back(target->targetvar());    \
     makeConstraint(context,LabelStr(#relationname), vars); \
   }
+    
 
 #define makeStrictPrecedenceRelation(origin, originvar, target, targetvar) { \
     PlanDatabase* db = (PlanDatabase*)(context.getElement("PlanDatabase"));\
@@ -619,10 +862,12 @@ namespace EUROPA {
       else if (strcmp(relationName,"contains") == 0) {
         makeRelation(precedes, origin, start, target, start);
         makeRelation(precedes, target, end, origin, end);
+        makeRelation(leq, target, duration, origin, duration);
       }
       else if (strcmp(relationName,"contained_by") == 0) {
         makeRelation(precedes, target, start, origin, start);
         makeRelation(precedes, origin, end, target, end);
+        makeRelation(leq, origin, duration, target, duration);
       }
       else if (strcmp(relationName,"before") == 0) {
         makeRelation(precedes, origin, end, target, start);
@@ -681,6 +926,7 @@ namespace EUROPA {
       else if (strcmp(relationName,"equals") == 0) {
         makeRelation(concurrent, origin, start, target, start);
         makeRelation(concurrent, target, end, origin, end);
+        makeRelation(eq, origin, duration, target, duration);
       }
       else {
         check_runtime_error(strcmp(relationName,"any") == 0,std::string("Unrecognized relation:")+relationName);

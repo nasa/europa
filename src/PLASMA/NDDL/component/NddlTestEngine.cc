@@ -13,6 +13,8 @@
 #include "CommonAncestorConstraint.hh"
 #include "HasAncestorConstraint.hh"
 
+#include "NddlInterpreter.hh"
+
 // Misc
 #include "ModuleConstraintEngine.hh"
 #include "ModulePlanDatabase.hh"
@@ -46,6 +48,8 @@ void initialize(CESchema* ces)
   REGISTER_CONSTRAINT(ces,TestEQ, "testEQ", "Default");
   REGISTER_CONSTRAINT(ces,TestLEQ, "testLEQ", "Default");
   REGISTER_CONSTRAINT(ces,EqualSumConstraint, "sum", "Default");
+
+  NddlInterpreter::setErrorReporting(false); //Prevent tests from spamming
 }
 
 NddlTestEngine::NddlTestEngine()

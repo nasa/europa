@@ -11,7 +11,6 @@ class Bar extends Timeline {
 class Foo extends Timeline{
  int arg1;
  Bar arg2;
-
  Foo(){
   arg1 = 20;
   arg2 = new Bar();
@@ -52,7 +51,7 @@ Foo::impliedObjectGuard{
  eq(object.arg2, bar); // 4: Guarded by first, second ungaurded. Order changed.
 
  // Guards implied when used on slaves as shown below
- if(object){
+ if(isSingleton(object)){
   any(object.arg2.pred t0); // 5: Guarded by object
  }
  //if(object.arg1 == allFoo.arg1){ // 6: Guarded by object, allFoo, and the test for equality
@@ -70,9 +69,9 @@ Foo::impliedLocalVariableGuard{
 // Singleton guard. Can be variables of tokens too
 // TODO: reference to object isn't working
 Foo::singletonGuard{
- if(object){
+  if(isSingleton(object)){
   meets(basicToken g1);
-  if(g1.object){
+  if(isSingleton(g1.object)){
    met_by(basicToken g2);
    eq(g1.duration, g2.duration); // Should be able to reference the parent scope
   }
@@ -137,7 +136,7 @@ Foo::localVariableGuard{
  }
 
  Foo f; // Set of objects
- if(f){ // When a singleton
+ if(isSingleton(f)){ // When a singleton
   eq(f.arg1, 20); // Constrain its field
  }
 }
@@ -168,6 +167,7 @@ g1.object.specify(foo1);
 
 goal(Foo.singletonGuard g2);
 g2.object.specify(foo2);
+g2.activate();
 
 goal(Foo.mixGuardedWithUnguarded g3);
 

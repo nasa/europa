@@ -38,6 +38,9 @@ public:
     virtual TokenFactoryId getTypeForToken(const char* name);
     virtual TokenFactoryId getTypeForToken(const char* qualifiedName,std::string& errorMsg);
 
+    virtual void addFunction(NddlFunction* func);
+    virtual NddlFunction* getFunction(const char* name) const;
+
     AbstractDomain* makeNumericDomainFromLiteral(const std::string& type,const std::string& value);
 
     void checkConstraint(const char* name,const std::vector<Expr*>& args);
@@ -62,6 +65,7 @@ protected:
 
     EngineId m_engine;
     std::vector<std::string> m_errors;
+    std::vector<NddlFunction*> m_functions;
     std::map<std::string,DataTypeId> m_localVars;
     std::map<std::string,TokenFactoryId> m_localTokens;
 
@@ -121,10 +125,12 @@ public:
 
     std::vector<std::string> getIncludePath();
     void addInputStream(pANTLR3_INPUT_STREAM in);
+    static void setErrorReporting(bool in);
 protected:
     EngineId m_engine;
     std::vector<std::string> m_filesread;
     std::vector<pANTLR3_INPUT_STREAM> m_inputstreams;
+    static bool s_report_errors;
 };
 
 // An Interpreter that just returns the AST

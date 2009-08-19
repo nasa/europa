@@ -10,6 +10,9 @@
 
 class Location {
  string description;
+ Location() { 
+  description = "Nowhere"; 
+ }
  Location(string _description){
   description = _description;
  }
@@ -18,6 +21,7 @@ class Location {
 class Path {
  Location from;
  Location to;
+ Path() { }
  Path(Location _from, Location _to){
   from = _from;
   to = _to;
@@ -31,6 +35,7 @@ class Target extends Timeline {
 // This class provides the many-many relation required between
 // Path and target
 class Trackable {
+ Trackable() { }
  Path path;
  Target target;
  Trackable(Path _path, Target _target){
@@ -48,6 +53,7 @@ class NotTrackable extends Trackable {
 }
 
 class Rover extends Timeline {
+ Rover() {}
  predicate Navigate{
   Path path;
   Location from;
@@ -63,10 +69,12 @@ Rover::Navigate{
  eq(to, p.to);
 
  Trackable trackable;
- eq(trackable.path, p);
+ if(isSingleton(trackable)){
+  eq(trackable.path, p);
+ }
 
  // Guard so iteration set is not going to be restricted
- if(path){
+ if(isSpecified(path)){
  	foreach (t in trackable) {
                 Trackable t_local_0;
 		contains(Target.Tracking target);

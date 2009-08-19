@@ -17,6 +17,9 @@ tokens {
 	PREDICATE_INSTANCE;     
 	TOKEN_RELATION;
 	VARIABLE;
+    EXPRESSION_ENFORCE;
+    EXPRESSION_RETURN;
+    FUNCTION_CALL;
 }
 
 @parser::includes
@@ -103,6 +106,7 @@ nddlStatement
     |   relation
     |   methodInvocation
     |   noopstatement
+    |   enforceStatement
     |   constraintSignature!
     ;
 
@@ -155,6 +159,35 @@ anyValue
     |   qualified
     ;
 
+///
+expressionList : booleanOrExpression (','! booleanOrExpression )* ;
+
+expressionLiteral : anyValue | name=IDENT '(' ex=expressionList ')' -> ^(FUNCTION_CALL $name ^('(' expressionList));
+
+multiplicitiveExpression @init {int i = 0;} : a=expressionLiteral ('*' b=multiplicitiveExpression {i=1;})?
+        -> {i==1}? ^('*' $a $b) -> $a;
+
+additionExpression @init {int i = 0;} : a=multiplicitiveExpression (('+' {i=1;} | '-' {i=2;}) b=additionExpression)?
+        -> {i==1}? ^('+' $a $b) -> {i==2}? ^('-' $a $b) -> $a ;
+
+relationalExpression @init {int i = 0;} :
+        a=additionExpression (('==' {i=1;} | '!=' {i=2;} | '<' {i=3;} | '>' {i=4;} | '>=' {i=5;} | '<=' {i=6;}) b=additionExpression)?
+        -> {i==1}? ^('==' $a $b) -> {i==2}? ^('!=' $a $b) -> {i==3}? ^('<' $a $b) 
+        -> {i==4}? ^('>' $a $b) -> {i==5}? ^('>=' $a $b) -> {i==6}? ^('<=' $a $b) -> $a ;
+
+booleanAndExpression @init {int i = 0;} : a=relationalExpression ('||' b=booleanAndExpression {i=1;})?
+        -> {i==1}? ^('||' $a $b) -> $a;
+
+booleanOrExpression @init {int i = 0;} : a=booleanAndExpression ('&&' b=booleanOrExpression {i=1;})?
+        -> {i==1}? ^('&&' $a $b) -> $a;
+
+enforceStatement
+    :  'enforce' '(' result=booleanOrExpression ')' ';' -> 
+        ^(EXPRESSION_ENFORCE $result)
+    |   result=booleanOrExpression ';' ->
+        ^(EXPRESSION_ENFORCE $result);
+///
+
 allocation
     :   'new'! constructorInvocation
     ;
@@ -169,8 +202,7 @@ qualified
     ;
 
 assignment
-    :   qualified ('in' | '=') initializer ';'
-            -> ^('=' qualified initializer)
+    :   qualified ('in' | '=') initializer ';' -> ^('=' qualified initializer)
     ;
     
 initializer
@@ -238,6 +270,7 @@ predicateBlock
 predicateStatement
 	:	variableDeclarations
 	|	constraintInstantiation
+    |   enforceStatement
 	|	assignment
 	;
 
@@ -256,6 +289,7 @@ ruleStatement
 	|	variableDeclarations
 	|	constraintInstantiation
 	|	flowControl
+    |   enforceStatement
 	|	noopstatement
 	;
 
@@ -324,7 +358,15 @@ typeArgument
 	;
 
 flowControl
-	:	'if'^ guardExpression ruleBlock (('else')=>'else'! ruleBlock)?
+@init {
+   bool hasElse = false;
+} 
+    :	'if' '(' result=booleanOrExpression ')' a=ruleBlock ('else' b=ruleBlock {hasElse = true;}|) 
+         -> {hasElse == false}? ^('if' ^(EXPRESSION_RETURN $result) $a)
+         -> ^('if' ^(EXPRESSION_RETURN $result) $a $b)
+    |   'if' 'test' '(' result=booleanOrExpression ')' a=ruleBlock ('else' b=ruleBlock {hasElse = true;}|) 
+         -> {hasElse == false}? ^('if' ^(EXPRESSION_RETURN $result) $a)
+         -> ^('if' ^(EXPRESSION_RETURN $result) $a $b)
 	|	'foreach'^ '('! IDENT 'in'! qualified ')'! ruleBlock
 	;
 	
@@ -450,8 +492,16 @@ INCLUDE :	'#include' WS+ file=STRING
                             for (unsigned int i=0; i<parserPath.size();i++) {
                                 path += parserPath[i] + ":";
                             }
+                            //Error message here.
+                            CONSTRUCTEX();
+                            FAILEDFLAG = ANTLR3_TRUE;
+                            RECOGNIZER->state->errorCount++;
+                            std::string message = ("ERROR!: couldn't find file: " + std::string((const char*)$file.text->chars)
+                                                   + ", search path \"" + path + "\"");
+                            RECOGNIZER->state->exception->message = strdup(message.c_str());
+                            reportLexerError(RECOGNIZER, NULL); //Note: the second argument does not appear to be used for anything.
                             check_runtime_error(false, std::string("ERROR!: couldn't find file: " + std::string((const char*)$file.text->chars)
-                                                              + ", search path \"" + path + "\"").c_str());
+                                                                   + ", search path \"" + path + "\"").c_str());
                         }
 
                         if (!CTX->parserObj->queryIncludeGuard(fullName)) {

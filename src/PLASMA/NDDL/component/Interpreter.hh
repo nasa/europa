@@ -15,6 +15,24 @@
 
 namespace EUROPA {
 
+  //TODO: Rename
+  class NddlFunction;
+  class NddlFunction 
+  {
+  public:
+    NddlFunction(const char* name, const char* constraint, const char* returnType, unsigned int argumentCount);
+    NddlFunction(NddlFunction& copy);
+    ~NddlFunction();
+    const char* getName();
+    const char* getConstraint();
+    const char* getReturnType();
+    unsigned int getArgumentCount();
+  private:
+    std::string m_name, m_constraint, m_returnType;
+    unsigned int m_argumentCount;
+  };
+  
+
   class ExprConstant : public Expr
   {
   	public:
@@ -24,6 +42,7 @@ namespace EUROPA {
   	    virtual DataRef eval(EvalContext& context) const;
         virtual const DataTypeId getDataType() const;
         virtual std::string toString() const;
+        std::string getConstantValue() const;
 
   	protected:
   	    LabelStr m_type;
@@ -103,7 +122,6 @@ namespace EUROPA {
         const LabelStr getName() const { return m_name; }
         const std::vector<Expr*>& getArgs() const { return m_args; }
         virtual std::string toString() const;
-
     protected:
         LabelStr m_name;
         std::vector<Expr*> m_args;
@@ -296,6 +314,29 @@ namespace EUROPA {
         LabelStr m_relation;
         PredicateInstanceRef* m_origin;
         std::vector<PredicateInstanceRef*> m_targets;
+  };
+
+  class ExprExpression;
+  class ExprExpression : public Expr
+  {
+    public:
+        ExprExpression(std::string name, ExprExpression* left, ExprExpression* right);
+        ExprExpression(Expr* target);
+        ExprExpression(NddlFunction* func, std::vector<ExprExpression*> args, DataTypeId data);
+        virtual ~ExprExpression();
+
+        virtual DataRef eval(EvalContext& context) const;
+
+        virtual std::string toString() const;
+    protected:
+        static unsigned int s_counter;
+        unsigned int m_count;
+        std::string m_name;
+        ExprExpression *m_lhs, *m_rhs;
+        Expr *m_target;
+        NddlFunction* m_func;
+        std::vector<ExprExpression*> m_args;
+        DataTypeId m_data;
   };
 
   // InterpretedToken is the interpreted version of NddlToken

@@ -10,7 +10,38 @@
 typedef int [1 inf] positive;
 typedef float [-inf +inf] real;
 
+///Suite of expression tests.
 
+//Test functions
+enforce(isSingleton(1));
+
+//Test using functions with expressions as arguments
+enforce(isSingleton(1 + 1));
+
+string str;
+str == "hi, i'm cool!";
+
+int alphaalpha; //test arithmetic operations.
+alphaalpha == 2 + 3 + 4 - 10;
+eq(alphaalpha, -1);
+
+12 == 3 * 4;
+
+//test all relations.
+1 < 2;
+1 > 0;
+0 == 0;
+0 != 1;
+1 <= 1;
+1 <= 3;
+0 >= 0;
+1 >= 0;
+
+//test ands and ors
+true || false;
+true && true;
+
+///End
 
 positive pos;
 real r = 50;
@@ -19,25 +50,59 @@ enum Location {Hill,Lander,Rock}
 
 Location l = Hill;
 
-class foo {
-    int x,y;
-    predicate p {}
+class superfoo {
+    bool superleet;
+    superfoo() {
+    }
 }
+
+class foo extends superfoo {
+    int x,y;
+    positive posit;
+    predicate p {}
+    foo() {
+    	super();
+        posit = 1.0;
+    }
+}
+
+foo::p {
+       int alpha = 3;
+       int beta = 2;
+       int gamma = 3;
+       int delta = 4;
+
+       bool ret;
+
+       if (alpha == beta - gamma + delta) {
+          ret;
+       } else {
+          false;
+       }
+
+       if (isSingleton(ret)) {
+          ret;
+       } else {
+          false;
+       }
+	
+       Location location_enum;
+       location_enum == Location.Hill;
+}
+
 
 foo fooa = new foo();
 foo foob = new foo();
 foo fooc = new foo();
 
-foo::p {
-}
-
 new foo();
 
 eq(pos, 23);
 
-pos.specify(40);
-pos.reset();
-pos.specify(60);
+
+//pos.specify(40);
+//pos.reset();
+//pos.specify(60);
 
 //pos.close();
 //foo.close();
@@ -49,10 +114,11 @@ close();
 
 fact(foo.p fact1);
 goal(foo.p goal1);
+goal1.activate();
 rejectable(foo.p somep);
 
-//fact1 before goal1;
-//goal1 meets somep;
+fact1 before goal1;
+goal1 meets somep;
 
 //;;
 
@@ -130,11 +196,11 @@ BClass::q {
     eq(d,d);
   }
 
-  somefoos loopVar;
+  //somefoos loopVar;
 
-  foreach(f in loopVar) {
-    eq(f,f);
-  }
+  //foreach(f in loopVar) {
+  //  eq(f,f);
+  //}
 
   ;;
 }
