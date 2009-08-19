@@ -5,4 +5,5 @@
 class StringData {
   string data;
   StringData(string _data) { data = _data;}
+  StringData() { data = ""; }
 }

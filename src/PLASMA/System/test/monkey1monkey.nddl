@@ -1,5 +1,6 @@
 // From Rover.nddl
 #include "Plasma.nddl"
+#include "PlannerConfig.nddl"
 
 // From NewPlan/ModuleTests/Parser/monkey1/monkey.ddl v1.3
 // Last change to a file that it included was Sept. 2003.
@@ -135,3 +136,5 @@ Monkey_Class___Banana_SV::GRABBING_BANANA {
   contained_by(Monkey_Class___Altitude_SV.HIGH s2);
 }
 
+
+PlannerConfig world = new PlannerConfig(0, 200, 500);

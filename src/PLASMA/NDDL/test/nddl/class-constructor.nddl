@@ -16,6 +16,8 @@ class Foo { //class World predefined for line 15
  float m_6;
  World m_7;
 
+ Foo() { }
+
  Foo(World w){
   m_0 = 100;
   m_1 = 200;
@@ -94,6 +96,7 @@ class Baluga{
 class StringBase{
 	string arg0;
 	StringBase(string _arg0){arg0 = _arg0;}
+        StringBase() { arg0 = ""; }
 }
 
 class StringDerived extends StringBase {
