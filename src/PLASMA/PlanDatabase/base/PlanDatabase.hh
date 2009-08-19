@@ -446,7 +446,7 @@ namespace EUROPA {
   template<class ID>
   void PlanDatabase::getObjectsByType(const LabelStr& type, std::list<ID>& results) {
     check_error(results.empty());
-    checkError(m_schema->isObjectType(type), type.toString());
+    checkError(m_schema->isObjectType(type), "Is not an object type in the plan database: " + type.toString());
 
     for (std::multimap<double, ObjectId>::const_iterator it = m_objectsByType.find(type.getKey());
 	 it != m_objectsByType.end() && it->first == type.getKey();
