@@ -108,8 +108,9 @@ namespace EUROPA {
       std::list<ObjectId> configObjects;
       getPlanDatabase()->getObjectsByType("PlannerConfig", configObjects); // Standard configuration class
 
+      std::ostringstream db; db << configObjects.size();
       check_error(configObjects.size() == 1,
-          "Expect exactly one instance of the class 'PlannerConfig'");
+		  "Expect exactly one instance of the class 'PlannerConfig', got: " + db.str());
 
       ObjectId configSource = configObjects.front();
       check_error(configSource.isValid());
