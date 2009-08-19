@@ -641,6 +641,7 @@ private:
     CPPUNIT_ASSERT(v0.baseDomain().isOpen());
     CPPUNIT_ASSERT(!v0.derivedDomain().isOpen());
 
+    CPPUNIT_ASSERT(e0.isClosed());
     v0.restrictBaseDomain(e0);
     CPPUNIT_ASSERT(v0.baseDomain().isClosed());
     CPPUNIT_ASSERT(v0.isClosed());
