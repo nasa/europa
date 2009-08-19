@@ -364,9 +364,6 @@ flowControl
     :	'if' '(' result=booleanOrExpression ')' a=ruleBlock ('else' b=ruleBlock {hasElse = true;}|) 
          -> {hasElse == false}? ^('if' ^(EXPRESSION_RETURN $result) $a)
          -> ^('if' ^(EXPRESSION_RETURN $result) $a $b)
-    |   'if' 'test' '(' result=booleanOrExpression ')' a=ruleBlock ('else' b=ruleBlock {hasElse = true;}|) 
-         -> {hasElse == false}? ^('if' ^(EXPRESSION_RETURN $result) $a)
-         -> ^('if' ^(EXPRESSION_RETURN $result) $a $b)
 	|	'foreach'^ '('! IDENT 'in'! qualified ')'! ruleBlock
 	;
 	
