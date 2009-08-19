@@ -136,6 +136,8 @@ namespace EUROPA {
 		   int argIndex,
 		   const DomainListener::ChangeType& changeType);
 
+    static void propagate(AbstractDomain& domx, AbstractDomain& domy);
+
   private:
     bool testIsRedundant(const ConstrainedVariableId& var = ConstrainedVariableId::noId()) const;
 
@@ -186,6 +188,8 @@ namespace EUROPA {
     bool canIgnore(const ConstrainedVariableId& variable,
 		   int argIndex,
 		   const DomainListener::ChangeType& changeType);
+
+    static void propagate(IntervalDomain& domx, IntervalDomain& domy);
 
   private:
     static const int X = 0;
@@ -799,6 +803,36 @@ namespace EUROPA {
     AbstractDomain& m_arg1;
     AbstractDomain& m_arg2;
     static const unsigned int ARG_COUNT = 3;
+  };
+
+  class TestSingleton : public Constraint {
+  public:
+    TestSingleton(const LabelStr& name,
+	   const LabelStr& propagatorName,
+	   const ConstraintEngineId& constraintEngine,
+	   const std::vector<ConstrainedVariableId>& variables);
+
+    void handleExecute();
+
+  private:
+    AbstractDomain& m_test;
+    AbstractDomain& m_arg1;
+    static const unsigned int ARG_COUNT = 2;
+  };
+
+  class TestSpecified : public Constraint {
+  public:
+    TestSpecified(const LabelStr& name,
+	   const LabelStr& propagatorName,
+	   const ConstraintEngineId& constraintEngine,
+	   const std::vector<ConstrainedVariableId>& variables);
+
+    void handleExecute();
+
+  private:
+    AbstractDomain& m_test;
+    AbstractDomain& m_arg1;
+    static const unsigned int ARG_COUNT = 2;
   };
 
   class TestNEQ : public Constraint {
