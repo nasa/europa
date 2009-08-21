@@ -130,7 +130,6 @@ protected:
     EngineId m_engine;
     std::vector<std::string> m_filesread;
     std::vector<pANTLR3_INPUT_STREAM> m_inputstreams;
-    static bool s_report_errors;
 };
 
 // An Interpreter that just returns the AST
