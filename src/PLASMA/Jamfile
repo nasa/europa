@@ -39,7 +39,7 @@ SubInclude PLASMA Resource ;
 SubInclude PLASMA System ;
 
 RemoveBinaries clean-all ;
-Depends clean-all : clean clean-generated-xml ;
+Depends clean-all : clean ;
 
 Depends build : build-modules ;
 
