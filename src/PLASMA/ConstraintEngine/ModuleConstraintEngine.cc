@@ -76,10 +76,10 @@ namespace EUROPA {
       CESchema* ces = (CESchema*)engine->getComponent("CESchema");
 
       // Register constraint Factories
-      REGISTER_CONSTRAINT(ces,AbsoluteValue, "absVal", "Default");
-      REGISTER_CONSTRAINT(ces,AddEqualConstraint, "AddEqual", "Default");
-      REGISTER_CONSTRAINT(ces,AddEqualConstraint, "addeq", "Default");
-      REGISTER_CONSTRAINT(ces,AddEqualConstraint, "addEq", "Default");
+      REGISTER_CONSTRAINT_TYPE(ces,AbsoluteValueCT, "absVal", "Default");
+      REGISTER_CONSTRAINT_TYPE(ces,AddEqualCT, "AddEqual", "Default");
+      REGISTER_CONSTRAINT_TYPE(ces,AddEqualCT, "addeq", "Default");
+      REGISTER_CONSTRAINT_TYPE(ces,AddEqualCT, "addEq", "Default");
       REGISTER_CONSTRAINT(ces,AddMultEqualConstraint, "AddMultEqual", "Default");
       REGISTER_CONSTRAINT(ces,AddMultEqualConstraint, "addMulEq", "Default");
       REGISTER_CONSTRAINT(ces,AddMultEqualConstraint, "addmuleq", "Default");
@@ -132,6 +132,10 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(ces,NotEqualConstraint, "neq", "Default");
       REGISTER_CONSTRAINT(ces,NotEqualConstraint, "NotEqual", "Default");
       REGISTER_CONSTRAINT(ces,OrConstraint, "Or", "Default");
+      REGISTER_CONSTRAINT(ces,OrConstraint, "for", "Default"); // flexible or
+      REGISTER_CONSTRAINT(ces,OrConstraint, "or", "Default");
+      REGISTER_CONSTRAINT(ces,SineFunction, "sin", "Default");
+      REGISTER_CONSTRAINT(ces,SquareOfDifferenceConstraint, "diffSquare", "Default");
       REGISTER_CONSTRAINT(ces,SubsetOfConstraint, "SubsetOf", "Default");
       REGISTER_CONSTRAINT(ces,SubsetOfConstraint, "subsetOf", "Default");
       REGISTER_CONSTRAINT(ces,SubsetOfConstraint, "Singleton", "Default");
@@ -144,10 +148,6 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(ces,TestLEQ, "testLEQ", "Default");
       REGISTER_CONSTRAINT(ces,TestNEQ, "testNEQ", "Default");
       REGISTER_CONSTRAINT(ces,TestOr, "testOr", "Default");
-      REGISTER_CONSTRAINT(ces,OrConstraint, "for", "Default"); // flexible or
-      REGISTER_CONSTRAINT(ces,OrConstraint, "or", "Default");
-      REGISTER_CONSTRAINT(ces,SineFunction, "sin", "Default");
-      REGISTER_CONSTRAINT(ces,SquareOfDifferenceConstraint, "diffSquare", "Default");
       REGISTER_CONSTRAINT(ces,TestSingleton, "testSingleton", "Default");
       REGISTER_CONSTRAINT(ces,TestSpecified, "testSpecified", "Default");
       REGISTER_CONSTRAINT(ces,UnaryConstraint, "UNARY", "Default");

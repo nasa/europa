@@ -213,8 +213,8 @@ namespace EUROPA {
 #define REGISTER_CONSTRAINT(ceSchema,ConstraintInstance, ConstraintName, PropagatorName) \
   (ceSchema->registerConstraintType((new ConcreteConstraintType<ConstraintInstance>(LabelStr(ConstraintName), LabelStr(PropagatorName)))->getId()))
 
-#define REGISTER_CONSTRAINT_TYPE(ceSchema,constraintType,propagatorName) \
-  (ceSchema->registerConstraintType((new constraintType(LabelStr(propagatorName)))->getId()))
+#define REGISTER_CONSTRAINT_TYPE(ceSchema,constraintType,constraintName,propagatorName) \
+  (ceSchema->registerConstraintType((new constraintType(LabelStr(constraintName),LabelStr(propagatorName)))->getId()))
 
 #define REGISTER_CONSTRAINT_TYPE_WITH_SIGNATURE(ceSchema,ConstraintInstance, ConstraintName, PropagatorName, ArgTypes) \
 {\

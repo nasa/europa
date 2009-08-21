@@ -64,6 +64,32 @@ namespace EUROPA {
 
   /****************************************************************/
 
+  void AddEqualCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      if (argTypes.size() != 3) {
+          std::ostringstream msg; msg << "Constraint AddEqual takes 3 args, not " << argTypes.size();
+          throw msg.str();
+      }
+
+      for (unsigned int i=0; i< argTypes.size(); i++) {
+          if (!argTypes[i]->isNumeric()) {
+              std::ostringstream msg;
+              msg << "Parameter " << i << " for Constraint AddEqual is not numeric : "
+                  << argTypes[i]->getName().toString();
+              throw msg.str();
+          }
+      }
+
+      if (!argTypes[0]->isAssignableFrom(argTypes[1]) ||
+          !argTypes[0]->isAssignableFrom(argTypes[2])) {
+          std::ostringstream msg;
+          msg << argTypes[0]->getName().toString() << " can't hold the result of : "
+              << argTypes[1]->getName().toString() << "+"
+              << argTypes[2]->getName().toString();
+          throw msg.str();
+      }
+  }
+
   AddEqualConstraint::AddEqualConstraint(const LabelStr& name,
 					 const LabelStr& propagatorName,
 					 const ConstraintEngineId& constraintEngine,
@@ -1871,7 +1897,7 @@ namespace EUROPA {
     }
   }
 
-  
+
   TestOr::TestOr(const LabelStr& name,
 		 const LabelStr& propagatorName,
 		 const ConstraintEngineId& constraintEngine,
@@ -1907,7 +1933,7 @@ namespace EUROPA {
 	    m_arg1.remove(0);
 	  }
 	} //If none are singletons, nothing to be done: FIXME!
-	       
+
       } else { //It's false, so both a and b are false.
 	m_arg1.remove(1);
 	m_arg2.remove(1);
@@ -1947,7 +1973,7 @@ namespace EUROPA {
 	  if (m_arg1.getSingletonValue() != 0) { //a == true, so b must be false
 	    m_arg2.intersect(IntervalDomain(0, 0));
 	  }
-	} 
+	}
 	if(m_arg2.isSingleton()) {
 	  if (m_arg2.getSingletonValue() != 0) { //b == true, so a must be false
 	    m_arg1.intersect(IntervalDomain(0, 0));
@@ -1955,7 +1981,7 @@ namespace EUROPA {
 	} //If none are singletons, nothing to be done: FIXME!
       }
     }
-    
+
   }
 
   TestLessThan::TestLessThan(const LabelStr& name,
@@ -2047,6 +2073,30 @@ namespace EUROPA {
   void WithinBounds::handleExecute(){
     // Process x - let the composed constraint look after y <= z
     m_x.intersect(m_y.getLowerBound(), m_z.getUpperBound());
+  }
+
+  void AbsoluteValueCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      if (argTypes.size() != 2) {
+          std::ostringstream msg; msg << "Constraint AbsoluteValue takes 2 args, not " << argTypes.size();
+          throw msg.str();
+      }
+
+      for (unsigned int i=0; i< argTypes.size(); i++) {
+          if (!argTypes[i]->isNumeric()) {
+              std::ostringstream msg;
+              msg << "Parameter " << i << " for Constraint AbsoluteValue is not numeric : "
+                  << argTypes[i]->getName().toString();
+              throw msg.str();
+          }
+      }
+
+      if (!argTypes[0]->isAssignableFrom(argTypes[1])) {
+          std::ostringstream msg;
+          msg << argTypes[0]->getName().toString() << " can't hold AbsoluteValue for : "
+              << argTypes[1]->getName().toString();
+          throw msg.str();
+      }
   }
 
   AbsoluteValue::AbsoluteValue(const LabelStr& name,
