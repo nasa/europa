@@ -328,7 +328,14 @@ namespace EUROPA {
         virtual DataRef eval(EvalContext& context) const;
 
         virtual std::string toString() const;
+
+        bool hasReturnValue() const;
+
+        void setEnforceContext();
+
     protected:
+        std::string createVariableName() const;
+
         static unsigned int s_counter;
         unsigned int m_count;
         std::string m_name;
@@ -337,6 +344,7 @@ namespace EUROPA {
         NddlFunction* m_func;
         std::vector<ExprExpression*> m_args;
         DataTypeId m_data;
+        bool m_enforceContext;
   };
 
   // InterpretedToken is the interpreted version of NddlToken

@@ -499,7 +499,7 @@ constructor[ObjectType* objType]
 		    for (unsigned int i=0;i<argTypes.size();i++)
 		        signature << ":" << argTypes[i];
 		        
-                    objType->addObjectFactory(
+            objType->addObjectFactory(
                         (new InterpretedObjectFactory(
                             objType->getId(),
                             signature.str(),
@@ -509,7 +509,7 @@ constructor[ObjectType* objType]
                             body)
                         )->getId()
                     );
-                    
+            
             popContext(CTX);
 		}
 	;
@@ -1007,11 +1007,16 @@ expression [ExprExpression* &returnValue]
 enforceExpression returns [Expr* result]
 @init { ExprExpression *value = NULL; BoolDomain* dom = NULL; ExprConstant* con = NULL; std::vector<Expr*> args; }
         : ^(EXPRESSION_ENFORCE a=expression[value]) { 
-            dom = new BoolDomain(true); 
-            con = new ExprConstant(dom->getTypeName().c_str(), dom); 
-            args.push_back(value);
-            args.push_back(con);
-            result = new ExprConstraint("eq", args);
+            value->setEnforceContext();
+            if (value->hasReturnValue()) {
+                dom = new BoolDomain(true); 
+                con = new ExprConstant(dom->getTypeName().c_str(), dom); 
+                args.push_back(value);
+                args.push_back(con);    
+                result = new ExprConstraint("eq", args);
+            } else {
+                result = value;
+            }
         } ;
 
 expressionCleanReturn returns [Expr* result]
