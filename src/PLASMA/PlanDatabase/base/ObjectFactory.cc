@@ -427,9 +427,6 @@ namespace EUROPA {
       : m_superClassName(superClassName)
       , m_argExprs(argExprs)
     {
-        for (unsigned int i=0; i < m_argExprs.size(); i++)
-            delete m_argExprs[i];
-        m_argExprs.clear();
     }
 
     ExprConstructorSuperCall::~ExprConstructorSuperCall()
