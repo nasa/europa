@@ -396,13 +396,8 @@ namespace EUROPA {
     bool isBool() const;
     bool isString() const;
     bool isRestricted() const;
+    double minDelta() const;
     std::string toString(double value) const;
-
-    // TODO: All these look like they should be moved to the data type
-    /**
-     * @brief Returns the minimum allowed delta in values between elements of the set.
-     */
-    virtual double minDelta() const {return m_minDelta;}
 
     /**
      * @brief Returns a value for number based on the semantics of the domain.
@@ -484,9 +479,6 @@ namespace EUROPA {
     bool m_enumerated; /**< True is domain is enumerated (as opposed to interval) */
     bool m_closed; /**< False if the domain is dynamic (can be added to), otherwise true. */
     DomainListenerId m_listener; /**< Holds reference to attached listener.  May be noId. */
-
-    // TODO: looks like this belongs in the data type
-    double m_minDelta; /**< The minimum amount by which elements of this domain may vary.  Once this is set, DO NOT CHANGE IT.*/
   };
 }
 #endif

@@ -70,7 +70,6 @@ namespace EUROPA {
     : m_dataType(dt)
     , m_enumerated(enumerated)
     , m_closed(closed)
-    , m_minDelta(EPSILON)
   {
   }
 
@@ -78,7 +77,6 @@ namespace EUROPA {
     : m_dataType(org.m_dataType)
     , m_enumerated(org.m_enumerated)
     , m_closed(org.m_closed)
-    , m_minDelta(org.m_minDelta)
   {
   }
 
@@ -94,7 +92,7 @@ namespace EUROPA {
 
   void AbstractDomain::close() {
     // Benign if already closed
-    if(m_closed == true) 
+    if(m_closed == true)
       return;
 
     m_closed = true;
@@ -217,5 +215,5 @@ namespace EUROPA {
   bool AbstractDomain::isBool() const { return getDataType()->isBool(); }
   bool AbstractDomain::isString() const { return getDataType()->isString(); }
   bool AbstractDomain::isRestricted() const { return getDataType()->getName(); }
-
+  double AbstractDomain::minDelta() const {return getDataType()->minDelta();}
 }

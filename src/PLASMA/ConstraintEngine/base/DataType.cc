@@ -17,6 +17,7 @@ DataType::DataType(const char* name)
     , m_name(name)
     , m_isRestricted(false)
     , m_baseDomain(NULL)
+    , m_minDelta(EPSILON)
 {
 }
 
@@ -40,9 +41,9 @@ bool DataType::isSymbolic() const {return !isNumeric();}
 bool DataType::getIsRestricted() const { return m_isRestricted; }
 void DataType::setIsRestricted(bool b) { m_isRestricted = b; }
 
+// TODO: this can be more sophisticated
 bool DataType::canBeCompared(const DataTypeId& rhs) const
 {
-    // TODO: this can be more sophisticated
     // Assumes type names don't matter for now
 
     if (isNumeric() || rhs->isNumeric())
@@ -52,14 +53,23 @@ bool DataType::canBeCompared(const DataTypeId& rhs) const
       return (isString() && rhs->isString());
 
     if (isSymbolic() || rhs->isSymbolic())
-      return (isSymbolic() && rhs->isSymbolic()); // TODO: && baseDomain().intersects(rhs->baseDomain()));
+      return (isSymbolic() && rhs->isSymbolic()); // TODO?: && baseDomain().intersects(rhs->baseDomain()));
 
     return false;
 }
 
+// TODO: make this more sophisticated, may have to delegate to each type
 bool DataType::isAssignableFrom(const DataTypeId& rhs) const
 {
-    // TODO: implement this differently, probably have to delegate to each type
+
+    if (isNumeric()) {
+        // Can only assign from types with less resolution,
+        // for instance  "float <- int" is ok, but not the other way around
+        return rhs->isNumeric() && (minDelta() <= rhs->minDelta());
+    }
+
+    // TODO?: check baseDomain().intersects(rhs->baseDomain()));
+
     return canBeCompared(rhs);
 }
 
@@ -70,6 +80,10 @@ const AbstractDomain & DataType::baseDomain() const
     return *m_baseDomain;
 }
 
+double DataType::minDelta() const
+{
+    return m_minDelta;
+}
 
 ConstrainedVariableId
 DataType::createVariable(const ConstraintEngineId& constraintEngine,

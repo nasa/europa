@@ -87,6 +87,7 @@ double FloatDT::createValue(const std::string& value) const
 IntDT::IntDT()
     : DataType(NAME().c_str())
 {
+    m_minDelta = 1.0;
     m_baseDomain = new IntervalIntDomain(getId());
 }
 
@@ -112,6 +113,7 @@ double IntDT::createValue(const std::string& value) const
 BoolDT::BoolDT()
     : DataType(NAME().c_str())
 {
+    m_minDelta = 1.0; // since we're saying that bool is numeric
     m_baseDomain = new BoolDomain(getId());
 }
 
@@ -205,6 +207,7 @@ bool RestrictedDT::isNumeric() const { return m_baseType->isNumeric(); }
 bool RestrictedDT::isBool() const  { return m_baseType->isBool(); }
 bool RestrictedDT::isString() const  { return m_baseType->isString(); }
 bool RestrictedDT::isEntity() const  { return m_baseType->isEntity(); }
+double RestrictedDT::minDelta() const  { return m_baseType->minDelta(); }
 
 double RestrictedDT::createValue(const std::string& value) const
 {

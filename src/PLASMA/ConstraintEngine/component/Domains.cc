@@ -1034,10 +1034,10 @@ namespace EUROPA {
     return ptr;
   }
 
-  IntervalIntDomain::IntervalIntDomain(const DataTypeId& dt) : IntervalDomain(dt)  { m_minDelta = 1.0; }
-  IntervalIntDomain::IntervalIntDomain(int lb, int ub, const DataTypeId& dt) : IntervalDomain(lb,ub,dt) { m_minDelta = 1.0; }
-  IntervalIntDomain::IntervalIntDomain(int value, const DataTypeId& dt) : IntervalDomain(value,dt) { m_minDelta = 1.0; }
-  IntervalIntDomain::IntervalIntDomain(const AbstractDomain& org) : IntervalDomain(org) { m_minDelta = 1.0; }
+  IntervalIntDomain::IntervalIntDomain(const DataTypeId& dt) : IntervalDomain(dt)  {}
+  IntervalIntDomain::IntervalIntDomain(int lb, int ub, const DataTypeId& dt) : IntervalDomain(lb,ub,dt) {}
+  IntervalIntDomain::IntervalIntDomain(int value, const DataTypeId& dt) : IntervalDomain(value,dt) {}
+  IntervalIntDomain::IntervalIntDomain(const AbstractDomain& org) : IntervalDomain(org) {}
 
   IntervalIntDomain::~IntervalIntDomain()
   {

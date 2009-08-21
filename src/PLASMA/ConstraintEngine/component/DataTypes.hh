@@ -126,6 +126,7 @@ public:
     virtual bool isBool() const;
     virtual bool isString() const;
     virtual bool isEntity() const;
+    virtual double minDelta() const;
 
     virtual double createValue(const std::string& value) const;
 
