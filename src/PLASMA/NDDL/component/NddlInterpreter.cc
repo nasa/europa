@@ -19,8 +19,6 @@
 
 namespace EUROPA {
 
-bool NddlInterpreter::s_report_errors(true);
-
 NddlInterpreter::NddlInterpreter(EngineId& engine)
   : m_engine(engine)
 {
@@ -29,11 +27,6 @@ NddlInterpreter::NddlInterpreter(EngineId& engine)
 NddlInterpreter::~NddlInterpreter()
 {
 }
-
-void NddlInterpreter::setErrorReporting(bool in) {
-    s_report_errors = in;
-}
-
 
 pANTLR3_INPUT_STREAM getInputStream(std::istream& input, const std::string& source)
 {
@@ -71,7 +64,7 @@ void NddlInterpreter::addInclude(const std::string &f)
         m_filesread.push_back(f);
 }
 
-void NddlInterpreter::addInputStream(pANTLR3_INPUT_STREAM in) 
+void NddlInterpreter::addInputStream(pANTLR3_INPUT_STREAM in)
 {
     m_inputstreams.push_back(in);
 }
@@ -192,16 +185,12 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
     }
     catch (const std::string& error) {
         debugMsg("NddlInterpreter:error","nddl parser halted on error:" << symbolTable.getErrors());
-	if (s_report_errors) 
-	  std::cerr << symbolTable.getErrors() << std::endl;
-	return symbolTable.getErrors();
+        return symbolTable.getErrors();
     }
     catch (const Error& internalError) {
         symbolTable.reportError(treeParser,internalError.getMsg());
         debugMsg("NddlInterpreter:error","nddl parser halted on error:" << symbolTable.getErrors());
-	if (s_report_errors) 
-	  std::cerr << symbolTable.getErrors() << std::endl;
-	return symbolTable.getErrors();
+        return symbolTable.getErrors();
     }
 
     // Free everything
@@ -239,7 +228,7 @@ NddlSymbolTable::NddlSymbolTable(const EngineId& engine)
 
 NddlSymbolTable::~NddlSymbolTable()
 {
-    while(!m_functions.empty()) 
+    while(!m_functions.empty())
     {
 	delete m_functions[0];
 	m_functions.erase(m_functions.begin());
@@ -283,7 +272,7 @@ NddlFunction* NddlSymbolTable::getFunction(const char* name) const
             return m_functions[i];
 	}
     }
-    if (m_parentST) 
+    if (m_parentST)
     {
         return m_parentST->getFunction(name);
     }

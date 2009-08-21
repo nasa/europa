@@ -13,6 +13,7 @@ protected:
 
 void NddlResourceTestEngine::createModules()
 {
+    NddlTestEngine::createModules();
     addModule((new ModuleSolvers())->getId());
     addModule((new ModuleResource())->getId());
 }
@@ -22,7 +23,7 @@ void NddlResourceTestEngine::createModules()
  */
 int main(int argc, const char** argv)
 {
-    NddlTestEngine engine;
+    NddlResourceTestEngine engine;
     return engine.run(argc,argv);
 }
 

@@ -125,7 +125,7 @@ public:
 
     std::vector<std::string> getIncludePath();
     void addInputStream(pANTLR3_INPUT_STREAM in);
-    static void setErrorReporting(bool in);
+
 protected:
     EngineId m_engine;
     std::vector<std::string> m_filesread;
