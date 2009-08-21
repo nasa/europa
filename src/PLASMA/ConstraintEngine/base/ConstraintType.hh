@@ -30,17 +30,15 @@ namespace EUROPA {
 
     bool isSystemDefined() const;
 
-    virtual ConstraintId createConstraint(const ConstraintEngineId constraintEngine,
-					  const std::vector<ConstrainedVariableId>& scope);
-
-    virtual const std::vector<DataTypeId>& getArgTypes() const;
+    virtual ConstraintId createConstraint(
+                             const ConstraintEngineId constraintEngine,
+					         const std::vector<ConstrainedVariableId>& scope) = 0;
 
     // throws an std::string error message if the specified arg types can't be used
     // to create the constraint this type represents
-    virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) const;
+    virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) const = 0;
 
   protected:
-    // TODO: argTypes should be specified as well
     ConstraintType(const LabelStr& name,
                    const LabelStr& propagatorName,
 		           bool systemDefined = false);
@@ -48,29 +46,81 @@ namespace EUROPA {
     ConstraintTypeId m_id;
     const LabelStr m_name;
     const LabelStr m_propagatorName;
-    std::vector<DataTypeId> m_argTypes;
     const bool m_systemDefined;
   };
 
   /**********************************************************/
 
   template <class ConstraintInstance>
-  class ConcreteConstraintType : public ConstraintType {
-  public:
-    ConcreteConstraintType(const LabelStr& name,
-                           const LabelStr& propagatorName,
-                           bool systemDefined = false)
-      : ConstraintType(name, propagatorName, systemDefined) { }
-
-    ConstraintId createConstraint(const ConstraintEngineId constraintEngine,
-				  const std::vector<ConstrainedVariableId>& scope) {
+  ConstraintId makeConstraintInstance(
+                  const LabelStr& name,
+                  const LabelStr& propagatorName,
+                  const ConstraintEngineId constraintEngine,
+                  const std::vector<ConstrainedVariableId>& scope)
+  {
       check_error(constraintEngine.isValid());
       check_error(scope.size() >= 1);
-      Constraint* constraint = new ConstraintInstance(m_name, m_propagatorName, constraintEngine, scope);
+      Constraint* constraint = new ConstraintInstance(name, propagatorName, constraintEngine, scope);
       check_error(constraint != 0);
       check_error(constraint->getId().isValid());
       return(constraint->getId());
+  }
+
+  template <class ConstraintInstance>
+  class ConcreteConstraintType : public ConstraintType {
+  public:
+    // TODO: remove this constructor after all constraint types have been updated to check arg types
+    ConcreteConstraintType(const LabelStr& name,
+                           const LabelStr& propagatorName,
+                           bool systemDefined = false)
+      : ConstraintType(name, propagatorName, systemDefined)
+    {
     }
+
+    ConcreteConstraintType(const LabelStr& name,
+                           const LabelStr& propagatorName,
+                           const std::vector<DataTypeId>& argTypes,
+                           bool systemDefined = false)
+      : ConstraintType(name, propagatorName, systemDefined)
+      , m_argTypes(argTypes)
+    {
+    }
+
+    virtual ConstraintId createConstraint(const ConstraintEngineId constraintEngine,
+				  const std::vector<ConstrainedVariableId>& scope)
+    {
+      return makeConstraintInstance<ConstraintInstance>(m_name, m_propagatorName, constraintEngine, scope);
+    }
+
+    virtual void checkArgTypes(const std::vector<DataTypeId>& types) const
+    {
+        // TODO: remove this after all constraint types have been updated to check arg types
+        if (m_argTypes.size() == 0)
+            return;
+
+        if (m_argTypes.size() != types.size()) {
+            std::ostringstream os;
+            os << "Constraint "<< m_name.toString()
+               << " can't take " << types.size() << " parameters."
+               << " It expects " << m_argTypes.size() << ".";
+            throw os.str();
+        }
+
+        for (unsigned int i=0;i<m_argTypes.size();i++) {
+            // TODO: need some convention or a data type to represent "any"
+            if (!m_argTypes[i]->isAssignableFrom(types[i])) {
+                std::ostringstream os;
+                os << "Constraint "<< m_name.toString()
+                   << " can't take a " << types[i]->getName().toString()
+                   << " as parameter number " << i << "."
+                   << " It expects " << m_argTypes[i]->getName().toString() << ".";
+                throw os.str();
+            }
+        }
+    }
+
+  protected:
+    std::vector<DataTypeId> m_argTypes;
   };
 
   template <class ConstraintInstance>
@@ -97,6 +147,11 @@ namespace EUROPA {
       check_error(constraint != 0);
       check_error(constraint->getId().isValid());
       return(constraint->getId());
+    }
+
+    virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+    {
+        // TODO: implement this
     }
 
   protected:
@@ -126,6 +181,11 @@ namespace EUROPA {
       return(constraint->getId());
     }
 
+    virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+    {
+        // TODO: implement this
+    }
+
   protected:
     const LabelStr m_otherName;
     const int m_first, m_second;
@@ -152,6 +212,22 @@ namespace EUROPA {
    */
 #define REGISTER_CONSTRAINT(ceSchema,ConstraintInstance, ConstraintName, PropagatorName) \
   (ceSchema->registerConstraintType((new ConcreteConstraintType<ConstraintInstance>(LabelStr(ConstraintName), LabelStr(PropagatorName)))->getId()))
+
+#define REGISTER_CONSTRAINT_TYPE(ceSchema,constraintType,propagatorName) \
+  (ceSchema->registerConstraintType((new constraintType(LabelStr(propagatorName)))->getId()))
+
+#define REGISTER_CONSTRAINT_TYPE_WITH_SIGNATURE(ceSchema,ConstraintInstance, ConstraintName, PropagatorName, ArgTypes) \
+{\
+    std::vector<DataTypeId> argTypes;\
+    LabelStr types(ArgTypes);\
+    for (int i=0;i<types.countElements(":");i++) {\
+        DataTypeId argType = ceSchema->getDataType(types.getElement(i,":").c_str());\
+        argTypes.push_back(argType);\
+    }\
+    (ceSchema->registerConstraintType((new ConcreteConstraintType<ConstraintInstance>(LabelStr(ConstraintName), LabelStr(PropagatorName), argTypes))->getId()));\
+}
+
+
 
   /**
    * @def REGISTER_ROTATED_CONSTRAINT
