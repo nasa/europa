@@ -796,7 +796,7 @@ namespace EUROPA
     m_relaxing = true;
 
     std::list<ConstrainedVariableId> relaxationAgenda;
-    std::set<ConstrainedVariableId> visitedVariables;
+    ConstrainedVariableSet visitedVariables;
 
     addLinkedVarsForRelaxation(variable, relaxationAgenda, relaxationAgenda.end(),
 			       visitedVariables);
@@ -811,7 +811,8 @@ namespace EUROPA
     for(std::list<ConstrainedVariableId>::iterator it = relaxationAgenda.begin();
 	it != relaxationAgenda.end(); ++it) {
       const ConstrainedVariableId& id(*it);
-      if(id.isValid() && getVariables().find(id) != getVariables().end() &&
+      checkError(id.isValid(), "Invalid ID in relax");
+      if(getVariables().find(id) != getVariables().end() &&
 	 id->lastRelaxed() < m_cycleCount) {
 	debugMsg("ConstraintEngine:relaxed",
 		 "Relaxing " << id->toString());
@@ -1034,7 +1035,7 @@ namespace EUROPA
   int ConstraintEngine::addLinkedVarsForRelaxation(const ConstrainedVariableId& var,
 						   std::list<ConstrainedVariableId>& dest,
 						   std::list<ConstrainedVariableId>::iterator pos,
-						   std::set<ConstrainedVariableId>& visitedVars) {
+						   ConstrainedVariableSet& visitedVars) {
     int count = 0;
     for(ConstraintList::const_iterator cIt = var->m_constraints.begin();
 	cIt != var->m_constraints.end(); ++cIt) {

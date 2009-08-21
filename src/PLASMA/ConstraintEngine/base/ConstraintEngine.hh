@@ -521,7 +521,7 @@ namespace EUROPA {
     int addLinkedVarsForRelaxation(const ConstrainedVariableId& var,
 				   std::list<ConstrainedVariableId>& dest,
 				   std::list<ConstrainedVariableId>::iterator pos,
-				   std::set<ConstrainedVariableId>& visitedVars);
+				   ConstrainedVariableSet& visitedVars);
 
 
     ConstraintEngineId m_id;

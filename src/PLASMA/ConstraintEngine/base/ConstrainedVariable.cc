@@ -46,6 +46,8 @@ namespace EUROPA {
 
     discard(false);
 
+    delete (DomainListener*) m_listener;
+
     m_id.remove();
   }
 
@@ -107,8 +109,6 @@ namespace EUROPA {
     {
     	(*m_listeners.begin())->notifyDiscard();
     }
-
-    delete (DomainListener*) m_listener;
 
     Entity::handleDiscard();
   }
