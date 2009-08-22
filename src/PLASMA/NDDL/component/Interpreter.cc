@@ -496,6 +496,16 @@ namespace EUROPA {
 	}
       }
     } else { //No return value
+      //Detect temporal variables
+      ConstrainedVariable *leftVarPtr = left.getValue(), *rightVarPtr = right.getValue();
+      if (dynamic_cast< TokenVariable<IntervalIntDomain>* >(leftVarPtr) != NULL
+	  && dynamic_cast< TokenVariable<IntervalIntDomain>* >(rightVarPtr) != NULL) {
+	if (constraint == "eq") {
+	  constraint = "concurrent";
+	} else if (constraint == "lt") {
+	  constraint = "precedes";
+	}
+      }
       if (flipArguments) {
 	args.push_back(right.getValue());
 	args.push_back(left.getValue());

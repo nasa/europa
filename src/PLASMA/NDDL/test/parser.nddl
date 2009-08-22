@@ -120,6 +120,8 @@ rejectable(foo.p somep);
 fact1 before goal1;
 goal1 meets somep;
 
+goal1.end == somep.start;
+
 //;;
 
 // typeDefinition tests:
