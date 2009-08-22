@@ -551,49 +551,49 @@ assignment returns [ExprAssignment* result]
 
 predicate[ObjectType* objType]
 @init {
-    InterpretedTokenFactory* tokenFactory;
+    InterpretedTokenType* tokenType;
     std::string predName;
 }
 	:	^('predicate'
 			pred=IDENT 
 			{ 
 			    predName = objType->getName().toString() + "." + c_str($pred.text->chars);   
-			    tokenFactory = new InterpretedTokenFactory(objType->getId(),predName);
-			    pushContext(CTX,new NddlTokenSymbolTable(CTX->SymbolTable,tokenFactory->getId(),objType->getId())); 
+			    tokenType = new InterpretedTokenType(objType->getId(),predName);
+			    pushContext(CTX,new NddlTokenSymbolTable(CTX->SymbolTable,tokenType->getId(),objType->getId())); 
 			}
-			predicateStatements[tokenFactory]
+			predicateStatements[tokenType]
 		)
 		{
-            objType->addTokenFactory(tokenFactory->getId());
+            objType->addTokenType(tokenType->getId());
             popContext(CTX);
 		}
 	;
 
 // TODO: allow assignments to inherited parameters
-predicateStatements[InterpretedTokenFactory* tokenFactory]
+predicateStatements[InterpretedTokenType* tokenType]
 	:	^('{'
             (
-                ( child=predicateParameter[tokenFactory] 
+                ( child=predicateParameter[tokenType] 
                 | child=predicateParameterAssignment
                 | child=standardConstraint 
                 | child=enforceExpression
                 )
                 {
-                    tokenFactory->addBodyExpr(child);
+                    tokenType->addBodyExpr(child);
                 }
 		    )*
 		)
 	;
 	
 // Note: Allocations are not legal here.        
-predicateParameter[InterpretedTokenFactory* tokenFactory] returns [Expr* result]
+predicateParameter[InterpretedTokenType* tokenType] returns [Expr* result]
         :
         child=variableDeclarations 
         { 
             const std::vector<Expr*>& vars=child->getChildren();
             for (unsigned int i=0;i<vars.size();i++) {
                 ExprVarDeclaration* vd = dynamic_cast<ExprVarDeclaration*>(vars[i]);
-                tokenFactory->addArg(vd->getDataType(),vd->getName());
+                tokenType->addArg(vd->getDataType(),vd->getName());
             }
             result = child;            
         }
@@ -631,7 +631,7 @@ rule returns [Expr* result]
 			        
                 predName = clazz + "." + std::string(c_str($predicateName.text->chars));
                 debugMsg("NddlInterpreter","Parsing rule for:" << predName);
-                TokenFactoryId tt = CTX->SymbolTable->getTokenType(predName.c_str());
+                TokenTypeId tt = CTX->SymbolTable->getTokenType(predName.c_str());
                 if (tt.isNoId())
                     reportSemanticError(CTX,predName+" has not been declared");            
                 
@@ -781,7 +781,7 @@ predicateInstance returns [PredicateInstanceRef* pi]
 @init {
     const char* name = NULL;
     std::string tokenStr;
-    TokenFactoryId tokenType;
+    TokenTypeId tokenType;
 }
 	:	^(PREDICATE_INSTANCE qualifiedToken[tokenStr,tokenType] (i=IDENT { name = c_str($i.text->chars); })?)
 	        {
@@ -834,7 +834,7 @@ qualified returns [Expr* result]
         }
     ;
         
-qualifiedToken[std::string& tokenStr, TokenFactoryId& tokenType]
+qualifiedToken[std::string& tokenStr, TokenTypeId& tokenType]
     :   qualifiedString[tokenStr]  
         {
             std::string errorMsg;

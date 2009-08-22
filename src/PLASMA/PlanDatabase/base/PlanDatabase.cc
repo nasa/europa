@@ -3,7 +3,7 @@
 #include "Object.hh"
 #include "Schema.hh"
 #include "Token.hh"
-#include "TokenFactory.hh"
+#include "TokenType.hh"
 #include "TokenVariable.hh"
 #include "DefaultTemporalAdvisor.hh"
 #include "Constraints.hh"
@@ -1084,7 +1084,7 @@ namespace EUROPA{
 
       debugMsg("PlanDatabase:createToken", ttype.toString() << " " << tname.toString());
 
-      TokenFactoryId factory = getSchema()->getTokenFactory(ttype);
+      TokenTypeId factory = getSchema()->getTokenType(ttype);
       check_error(factory.isValid());
 
       TokenId token = factory->createInstance(
@@ -1113,7 +1113,7 @@ namespace EUROPA{
   {
       check_error(master.isValid());
 
-      TokenFactoryId factory = getSchema()->getTokenFactory(tokenType);
+      TokenTypeId factory = getSchema()->getTokenType(tokenType);
       check_error(factory.isValid());
 
       TokenId token = factory->createInstance(master, tokenType, relation);
@@ -1131,9 +1131,9 @@ namespace EUROPA{
       return PlanDatabaseWriter::toString(getId());
   }
 
-  bool PlanDatabase::hasTokenFactories() const
+  bool PlanDatabase::hasTokenTypes() const
   {
-      return getSchema()->hasTokenFactories() > 0;
+      return getSchema()->hasTokenTypes() > 0;
   }
 
   PSPlanDatabaseClient* PlanDatabase::getPDBClient()

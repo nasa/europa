@@ -319,7 +319,7 @@ ObjectTypeId NddlSymbolTable::getObjectType(const char* name) const
     return ObjectTypeId::noId();
 }
 
-TokenFactoryId NddlSymbolTable::getTokenType(const char* name) const
+TokenTypeId NddlSymbolTable::getTokenType(const char* name) const
 {
     if (m_parentST != NULL)
         return m_parentST->getTokenType(name);
@@ -327,10 +327,10 @@ TokenFactoryId NddlSymbolTable::getTokenType(const char* name) const
         SchemaId s = ((Schema*)(engine()->getComponent("Schema")))->getId();
 
         if (s->isPredicate(name))
-            return s->getTokenFactory(name);
+            return s->getTokenType(name);
     }
 
-    return TokenFactoryId::noId();
+    return TokenTypeId::noId();
 }
 
 
@@ -340,7 +340,7 @@ void NddlSymbolTable::addLocalVar(const char* name,const DataTypeId& type)
     debugMsg("NddlSymbolTable:addLocalVar","Added local var "+std::string(name));
 }
 
-void NddlSymbolTable::addLocalToken(const char* name,const TokenFactoryId& type)
+void NddlSymbolTable::addLocalToken(const char* name,const TokenTypeId& type)
 {
     m_localTokens[name]=type;
     debugMsg("NddlSymbolTable:addLocalToken","Added local token "+std::string(name));
@@ -383,7 +383,7 @@ DataTypeId NddlSymbolTable::getTypeForVar(const char* qualifiedName,std::string&
         dt = getTypeForVar(qualifiedName);
         if (dt.isNoId()) {
             // We failed to find a variable, let's try to find a token
-            TokenFactoryId tt = getTypeForToken(qualifiedName);
+            TokenTypeId tt = getTypeForToken(qualifiedName);
 
             if (tt.isId())
                 dt =  FloatDT::instance(); // TODO : return data type for state var?
@@ -398,7 +398,7 @@ DataTypeId NddlSymbolTable::getTypeForVar(const char* qualifiedName,std::string&
         std::string curVarName=parentName;
         std::string curVarType;
 
-        TokenFactoryId tt = getTypeForToken(parentName.c_str());
+        TokenTypeId tt = getTypeForToken(parentName.c_str());
         if (tt.isNoId()) {
             dt = getTypeForVar(parentName.c_str(),errorMsg);
             if (dt.isNoId())
@@ -437,7 +437,7 @@ DataTypeId NddlSymbolTable::getTypeForVar(const char* qualifiedName,std::string&
 
 }
 
-TokenFactoryId NddlSymbolTable::getTypeForToken(const char* name)
+TokenTypeId NddlSymbolTable::getTypeForToken(const char* name)
 {
     if (m_localTokens.find(name) != m_localTokens.end())
         return m_localTokens[name];
@@ -450,11 +450,11 @@ TokenFactoryId NddlSymbolTable::getTypeForToken(const char* name)
         return getTokenType(t->getPredicateName().c_str());
     }
 
-    return TokenFactoryId::noId();
+    return TokenTypeId::noId();
 }
 
 
-TokenFactoryId NddlSymbolTable::getTypeForToken(const char* qualifiedName,std::string& errorMsg)
+TokenTypeId NddlSymbolTable::getTypeForToken(const char* qualifiedName,std::string& errorMsg)
 {
     std::string parentName;
     std::string tokenType;
@@ -481,7 +481,7 @@ TokenFactoryId NddlSymbolTable::getTypeForToken(const char* qualifiedName,std::s
       debugMsg("NddlSymbolTable:getTypeForToken","Didn't split " << qualifiedName);
     }
 
-    TokenFactoryId tt;
+    TokenTypeId tt;
 
     if (parentName == "") {
         tt = getTokenType(qualifiedName);
@@ -520,13 +520,13 @@ TokenFactoryId NddlSymbolTable::getTypeForToken(const char* qualifiedName,std::s
             dt = ot->getMemberType(vars[idx].c_str());
             if (dt.isNoId()) {
                 errorMsg = curVarName+"("+curVarType+") doesn't have a member called "+vars[idx];
-                return TokenFactoryId::noId();
+                return TokenTypeId::noId();
             }
 
             ot = getObjectType(dt->getName().c_str());
             if (ot.isNoId()) {
                 errorMsg = curVarName+"("+curVarType+") is not a reference to an object";
-                return TokenFactoryId::noId();
+                return TokenTypeId::noId();
             }
 
             curVarName = vars[idx];
@@ -652,7 +652,7 @@ DataTypeId NddlClassSymbolTable::getTypeForVar(const char* varName)
 
 
 NddlTokenSymbolTable::NddlTokenSymbolTable(NddlSymbolTable* parent,
-                                           const TokenFactoryId& tt,
+                                           const TokenTypeId& tt,
                                            const ObjectTypeId& ot)
     : NddlSymbolTable(parent)
     , m_tokenType(tt)
@@ -676,9 +676,9 @@ DataTypeId NddlTokenSymbolTable::getTypeForVar(const char* varName)
     return NddlSymbolTable::getTypeForVar(varName);
 }
 
-TokenFactoryId NddlTokenSymbolTable::getTokenType(const char* name) const
+TokenTypeId NddlTokenSymbolTable::getTokenType(const char* name) const
 {
-    TokenFactoryId tt= NddlSymbolTable::getTokenType(name);
+    TokenTypeId tt= NddlSymbolTable::getTokenType(name);
 
     if (tt.isNoId()) {
         // Try implicit qualification
@@ -689,7 +689,7 @@ TokenFactoryId NddlTokenSymbolTable::getTokenType(const char* name) const
     return tt;
 }
 
-TokenFactoryId NddlTokenSymbolTable::getTypeForToken(const char* name)
+TokenTypeId NddlTokenSymbolTable::getTypeForToken(const char* name)
 {
     if (std::string(name)=="this")
         return m_tokenType;

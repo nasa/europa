@@ -1175,21 +1175,21 @@ namespace EUROPA {
   }
 
   /*
-   * InterpretedTokenFactory
+   * InterpretedTokenType
    */
-    InterpretedTokenFactory::InterpretedTokenFactory(
+    InterpretedTokenType::InterpretedTokenType(
             const ObjectTypeId& ot,
             const LabelStr& predicateName)
-        : TokenFactory(ot,predicateName)
+        : TokenType(ot,predicateName)
     {
     }
 
-    void InterpretedTokenFactory::addBodyExpr(Expr* e)
+    void InterpretedTokenType::addBodyExpr(Expr* e)
     {
         m_body.push_back(e);
     }
 
-    InterpretedTokenFactory::~InterpretedTokenFactory()
+    InterpretedTokenType::~InterpretedTokenType()
     {
         for (unsigned int i=0;i<m_body.size();i++)
             delete m_body[i];
@@ -1197,20 +1197,20 @@ namespace EUROPA {
         m_body.clear();
     }
 
-    TokenFactoryId InterpretedTokenFactory::getParentFactory(const PlanDatabaseId& planDb) const
+    TokenTypeId InterpretedTokenType::getParentType(const PlanDatabaseId& planDb) const
     {
         // TODO: cache this?
         // TODO: drop planDb parameter, ObjectType must be able to answer this without reference to schema
-        TokenFactoryId parentFactory = planDb->getSchema()->getParentTokenFactory(getSignature(), m_objType->getParent()->getName());
-        return parentFactory;
+        TokenTypeId parentType = planDb->getSchema()->getParentTokenType(getSignature(), m_objType->getParent()->getName());
+        return parentType;
     }
 
-	TokenId InterpretedTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
+	TokenId InterpretedTokenType::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
 	{
-	    TokenFactoryId parentFactory = getParentFactory(planDb);
+	    TokenTypeId parentType = getParentType(planDb);
 
         TokenId token;
-	    if (parentFactory.isNoId()) {
+	    if (parentType.isNoId()) {
 	        token = (new InterpretedToken(
 	                planDb,
 	                name,
@@ -1220,7 +1220,7 @@ namespace EUROPA {
 	                false))->getId();
 	    }
 	    else {
-	        token = parentFactory->createInstance(planDb,name,rejectable,isFact);
+	        token = parentType->createInstance(planDb,name,rejectable,isFact);
 	        // TODO: Hack! this makes it impossible to extend native tokens
 	        // class hierarchy needs to be fixed to avoid this cast
             InterpretedToken* it = dynamic_cast<InterpretedToken*>((Token*)token);
@@ -1230,12 +1230,12 @@ namespace EUROPA {
 	    return token;
 	}
 
-  TokenId InterpretedTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
+  TokenId InterpretedTokenType::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
   {
-      TokenFactoryId parentFactory = getParentFactory(master->getPlanDatabase());
+      TokenTypeId parentType = getParentType(master->getPlanDatabase());
 
       TokenId token;
-      if (parentFactory.isNoId()) {
+      if (parentType.isNoId()) {
           token = (new InterpretedToken(
                   master,
                   name,
@@ -1244,7 +1244,7 @@ namespace EUROPA {
                   false))->getId();
       }
       else {
-          token = parentFactory->createInstance(master,name,relation);
+          token = parentType->createInstance(master,name,relation);
           // TODO: Hack! this makes it impossible to extend native tokens
           // class hierarchy needs to be fixed to avoid this cast
           InterpretedToken* it = dynamic_cast<InterpretedToken*>((Token*)token);

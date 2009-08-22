@@ -410,7 +410,7 @@ namespace EUROPA {
   }
 
   bool DbClient::supportsAutomaticAllocation() const{
-    return m_planDb->hasTokenFactories();
+    return m_planDb->hasTokenTypes();
   }
 
   TokenId DbClient::allocateToken(const char* tokenType,

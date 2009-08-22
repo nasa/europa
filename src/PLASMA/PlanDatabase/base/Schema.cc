@@ -1,6 +1,5 @@
 #include "Schema.hh"
 #include "Domains.hh"
-#include "TokenFactory.hh"
 #include "Debug.hh"
 #include "Utils.hh"
 #include "Object.hh"
@@ -676,6 +675,8 @@ namespace EUROPA {
           debugMsg("Schema:registerObjectType","Generated default factory for object type:" << objType->getName().c_str());
       }
 
+
+//all this should go
       {
           std::map<std::string,DataTypeId>::const_iterator it = objType->getMembers().begin();
           for(;it != objType->getMembers().end(); ++it)
@@ -689,17 +690,17 @@ namespace EUROPA {
       }
 
       {
-          std::map<double,TokenFactoryId>::const_iterator it = objType->getTokenFactories().begin();
-          for(;it != objType->getTokenFactories().end(); ++it) {
-              const TokenFactoryId& tokenFactory = it->second;
-              LabelStr predName = tokenFactory->getSignature();
+          std::map<double,TokenTypeId>::const_iterator it = objType->getTokenTypes().begin();
+          for(;it != objType->getTokenTypes().end(); ++it) {
+              const TokenTypeId& tokenType = it->second;
+              LabelStr predName = tokenType->getSignature();
 
               addPredicate(predName.c_str());
-              std::map<LabelStr,DataTypeId>::const_iterator paramIt = tokenFactory->getArgs().begin();
-              for(;paramIt != tokenFactory->getArgs().end();++paramIt)
+              std::map<LabelStr,DataTypeId>::const_iterator paramIt = tokenType->getArgs().begin();
+              for(;paramIt != tokenType->getArgs().end();++paramIt)
                   addMember(predName.c_str(), paramIt->second->getName() /*type*/, paramIt->first/*name*/);
 
-              registerTokenFactory(it->second);
+              registerTokenType(it->second);
           }
       }
 
@@ -729,17 +730,17 @@ namespace EUROPA {
       return m_objectTypeMgr->getFactory(getId(),objectType,arguments);
   }
 
-  void Schema::registerTokenFactory(const TokenFactoryId& f)
+  void Schema::registerTokenType(const TokenTypeId& f)
   {
-      m_tokenTypeMgr->registerFactory(f);
+      m_tokenTypeMgr->registerType(f);
   }
 
-  TokenFactoryId Schema::getTokenFactory(const LabelStr& type)
+  TokenTypeId Schema::getTokenType(const LabelStr& type)
   {
-      return m_tokenTypeMgr->getFactory(getId(),type);
+      return m_tokenTypeMgr->getType(getId(),type);
   }
 
-  TokenFactoryId Schema::getParentTokenFactory(const LabelStr& tokenType, const LabelStr& parentObjType)
+  TokenTypeId Schema::getParentTokenType(const LabelStr& tokenType, const LabelStr& parentObjType)
   {
       LabelStr objType = parentObjType;
       std::string tokenName = tokenType.getElement(1, getDelimiter()).toString();
@@ -747,19 +748,19 @@ namespace EUROPA {
       for(;;) {
           std::string parentName = objType.toString()+getDelimiter()+tokenName;
           if (isPredicate(parentName))
-              return getTokenFactory(parentName);
+              return getTokenType(parentName);
           if (hasParent(objType))
               objType = getParent(objType);
           else
               break;
       }
 
-      return TokenFactoryId::noId();
+      return TokenTypeId::noId();
   }
 
-  bool Schema::hasTokenFactories() const
+  bool Schema::hasTokenTypes() const
   {
-      return m_tokenTypeMgr->hasFactory();
+      return m_tokenTypeMgr->hasType();
   }
 
   // PSSchema methods:
@@ -809,7 +810,7 @@ namespace EUROPA {
 	  m_name(original.m_name), m_argNames(original.m_argNames),
 	  m_argTypes(original.m_argTypes) {}
 
-  PSTokenType::PSTokenType(const TokenFactoryId& original) :
+  PSTokenType::PSTokenType(const TokenTypeId& original) :
 	  m_name(original->getPredicateName().toString()) {
 	  const std::map<LabelStr,DataTypeId>& args = original->getArgs();
 	  for (std::map<LabelStr,DataTypeId>::const_iterator it = args.begin(); it != args.end(); ++it) {
@@ -861,8 +862,8 @@ namespace EUROPA {
 	  for (std::map<std::string,DataTypeId>::const_iterator it = mem.begin(); it != mem.end(); ++it) {
 		  m_members.insert(std::pair<std::string, PSDataType>(it->first, PSDataType(it->second)));
 	  }
-	  const std::map<double,TokenFactoryId>& tokens = original->getTokenFactories();
-	  for (std::map<double,TokenFactoryId>::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+	  const std::map<double,TokenTypeId>& tokens = original->getTokenTypes();
+	  for (std::map<double,TokenTypeId>::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
 		  m_predicates.push_back(PSTokenType(it->second));
 	  }
   }

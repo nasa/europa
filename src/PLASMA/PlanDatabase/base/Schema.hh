@@ -14,7 +14,7 @@
 #include "AbstractDomain.hh"
 #include "ObjectType.hh"
 #include "ObjectFactory.hh"
-#include "TokenFactory.hh"
+#include "TokenTypeMgr.hh"
 
 #include <vector>
 
@@ -348,10 +348,10 @@ namespace EUROPA {
     void registerObjectFactory(const ObjectFactoryId& obj_fact);
     ObjectFactoryId getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments);
 
-    void registerTokenFactory(const TokenFactoryId& obj_fact);
-    TokenFactoryId getTokenFactory(const LabelStr& tokenType);
-    TokenFactoryId getParentTokenFactory(const LabelStr& tokenType, const LabelStr& parentObjType);
-    bool hasTokenFactories() const;
+    void registerTokenType(const TokenTypeId& obj_fact);
+    TokenTypeId getTokenType(const LabelStr& tokenType);
+    TokenTypeId getParentTokenType( const LabelStr& tokenType, const LabelStr& parentObjType);
+    bool hasTokenTypes() const;
 
     //PSSchema methods:
     PSList<std::string> getAllPredicates() const;
@@ -366,22 +366,23 @@ namespace EUROPA {
 
     SchemaId m_id;
     const CESchemaId& m_ceSchema;
-    std::map<double, ObjectTypeId> m_objTypes; // TODO: this must be subsumed by ObjectTypeMgr
+    std::map<double, ObjectTypeId> m_objTypes; // TODO: this must be subsumed by ObjectTypeMgr, get rid of
     const ObjectTypeMgrId m_objectTypeMgr;
     const TokenTypeMgrId m_tokenTypeMgr;
 
     const LabelStr m_name;
     LabelStr_ValueSet_Map enumValues;
-    LabelStrSet objectTypes;
+    LabelStrSet objectTypes;  //get rid of 
     LabelStrSet predicates;
     LabelStrSet primitives;
 
     std::map<double, NameValueVector> membershipRelation; /*! All type compositions */
-    std::map<double, LabelStr> childOfRelation; /*! Required to answer the getParent query */
+    std::map<double, LabelStr> childOfRelation; /*! Required to answer the getParent query */  // get rid of
     LabelStr_LabelStrSet_Map objectPredicates; /*! All predicates by object type */
     LabelStrSet typesWithNoPredicates; /*! Cache for lookup efficiently */
     std::map<double, std::vector<LabelStr> > allObjectTypes; /*! Cache to retrieve allObjectTypes by sub-class */
     Schema(const Schema&); /**< NO IMPL */
+
   };
 
 }

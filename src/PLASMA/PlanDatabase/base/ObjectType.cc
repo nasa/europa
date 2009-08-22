@@ -38,9 +38,9 @@ void ObjectType::purgeAll()
         delete (ObjectFactory*) it->second;
     m_objectFactories.clear();
 
-    for(std::map<double, TokenFactoryId>::const_iterator it = m_tokenFactories.begin(); it != m_tokenFactories.end(); ++it)
-        delete (TokenFactory*) it->second;
-    m_tokenFactories.clear();
+    for(std::map<double, TokenTypeId>::const_iterator it = m_tokenTypes.begin(); it != m_tokenTypes.end(); ++it)
+        delete (TokenType*) it->second;
+    m_tokenTypes.clear();
 }
 
 
@@ -69,9 +69,9 @@ const std::map<double,ObjectFactoryId>& ObjectType::getObjectFactories() const
     return m_objectFactories;
 }
 
-const std::map<double,TokenFactoryId>& ObjectType::getTokenFactories() const
+const std::map<double,TokenTypeId>& ObjectType::getTokenTypes() const
 {
-    return m_tokenFactories;
+    return m_tokenTypes;
 }
 
 bool ObjectType::isNative() const
@@ -106,37 +106,37 @@ void ObjectType::addObjectFactory(const ObjectFactoryId& factory)
     m_objectFactories[(double)(factory->getSignature())] = factory;
 }
 
-void ObjectType::addTokenFactory(const TokenFactoryId& factory)
+void ObjectType::addTokenType(const TokenTypeId& factory)
 {
     // TODO: allow redefinition of old one
-    m_tokenFactories[(double)(factory->getSignature())] = factory;
+    m_tokenTypes[(double)(factory->getSignature())] = factory;
 }
 
-const TokenFactoryId& ObjectType::getTokenFactory(const LabelStr& signature) const
+const TokenTypeId& ObjectType::getTokenType(const LabelStr& signature) const
 {
     check_error(signature.getElement(0,".")==getName(),
             "Can't look for a token factory I don't own");
 
-    std::map<double,TokenFactoryId>::const_iterator it = m_tokenFactories.find((double)signature);
-    if (it != m_tokenFactories.end())
+    std::map<double,TokenTypeId>::const_iterator it = m_tokenTypes.find((double)signature);
+    if (it != m_tokenTypes.end())
         return it->second;
 
     if (m_parent.isId()) {
         std::string parentSignature = m_parent->getName().toString()+"."+signature.getElement(1,".").toString();
-        return m_parent->getTokenFactory(parentSignature);
+        return m_parent->getTokenType(parentSignature);
     }
 
-    return TokenFactoryId::noId();
+    return TokenTypeId::noId();
 }
 
-const TokenFactoryId& ObjectType::getParentFactory(const TokenFactoryId& factory) const
+const TokenTypeId& ObjectType::getParentType(const TokenTypeId& type) const
 {
     if (m_parent.isId()) {
-        std::string parentSignature = m_parent->getName().toString()+"."+factory->getPredicateName().toString();
-        return m_parent->getTokenFactory(parentSignature);
+        std::string parentSignature = m_parent->getName().toString()+"."+type->getPredicateName().toString();
+        return m_parent->getTokenType(parentSignature);
     }
 
-    return TokenFactoryId::noId();
+    return TokenTypeId::noId();
 }
 
 std::string ObjectType::toString() const
@@ -166,12 +166,12 @@ std::string ObjectType::toString() const
     os << std::endl;
 
     {
-        std::map<double,TokenFactoryId>::const_iterator it = m_tokenFactories.begin();
-        for(;it != m_tokenFactories.end(); ++it) {
-            TokenFactoryId tokenFactory = it->second;
-            os << "    " << tokenFactory->getSignature().c_str();
-            std::map<LabelStr,DataTypeId>::const_iterator paramIt = tokenFactory->getArgs().begin();
-            for(;paramIt != tokenFactory->getArgs().end();++paramIt)
+        std::map<double,TokenTypeId>::const_iterator it = m_tokenTypes.begin();
+        for(;it != m_tokenTypes.end(); ++it) {
+            TokenTypeId tokenType = it->second;
+            os << "    " << tokenType->getSignature().c_str();
+            std::map<LabelStr,DataTypeId>::const_iterator paramIt = tokenType->getArgs().begin();
+            for(;paramIt != tokenType->getArgs().end();++paramIt)
                 os<< " " << paramIt->second->getName().c_str() /*type*/ << "->" << paramIt->first.c_str()/*name*/;
             os << std::endl;
         }

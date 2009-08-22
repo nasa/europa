@@ -29,7 +29,8 @@ ModuleBase PlanDatabase
 	PlanDatabaseWriter.cc
  	StackMemento.cc
 	Token.cc
-	TokenFactory.cc
+	TokenType.cc
+	TokenTypeMgr.cc
 	UnifyMemento.cc
 	;
 

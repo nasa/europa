@@ -317,7 +317,7 @@ namespace EUROPA {
                              const LabelStr& tokenType,
                              const LabelStr& relation);
 
-    bool hasTokenFactories() const;
+    bool hasTokenTypes() const;
 
     PSPlanDatabaseClient* getPDBClient();
 

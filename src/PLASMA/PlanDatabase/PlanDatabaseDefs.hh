@@ -17,6 +17,12 @@ namespace EUROPA {
   class Timeline;
   typedef Id<Timeline> TimelineId;
 
+  class TokenType;
+  typedef Id<TokenType> TokenTypeId;
+
+  class TokenTypeMgr;
+  typedef Id<TokenTypeMgr> TokenTypeMgrId;
+
   class Token;
   typedef Id<Token> TokenId;
   typedef std::set<TokenId, EntityComparator<TokenId> > TokenSet;

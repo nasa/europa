@@ -26,17 +26,17 @@ public:
     const PlanDatabaseId& getPlanDatabase() const;
 
     virtual void addLocalVar(const char* name,const DataTypeId& type);
-    virtual void addLocalToken(const char* name,const TokenFactoryId& type);
+    virtual void addLocalToken(const char* name,const TokenTypeId& type);
 
     virtual DataTypeId getDataType(const char* name) const;
     virtual ObjectTypeId getObjectType(const char* name) const;
-    virtual TokenFactoryId getTokenType(const char* name) const;
+    virtual TokenTypeId getTokenType(const char* name) const;
 
     virtual DataTypeId getTypeForVar(const char* name);
     virtual DataTypeId getTypeForVar(const char* qualifiedName,std::string& errorMsg);
 
-    virtual TokenFactoryId getTypeForToken(const char* name);
-    virtual TokenFactoryId getTypeForToken(const char* qualifiedName,std::string& errorMsg);
+    virtual TokenTypeId getTypeForToken(const char* name);
+    virtual TokenTypeId getTypeForToken(const char* qualifiedName,std::string& errorMsg);
 
     virtual void addFunction(NddlFunction* func);
     virtual NddlFunction* getFunction(const char* name) const;
@@ -67,7 +67,7 @@ protected:
     std::vector<std::string> m_errors;
     std::vector<NddlFunction*> m_functions;
     std::map<std::string,DataTypeId> m_localVars;
-    std::map<std::string,TokenFactoryId> m_localTokens;
+    std::map<std::string,TokenTypeId> m_localTokens;
 
     // Hack to keep track of enum values for the time being
     // TODO!: drop this as it won't work over multiple invocations of the interpreter
@@ -99,16 +99,16 @@ protected:
 class NddlTokenSymbolTable : public NddlSymbolTable
 {
 public:
-    NddlTokenSymbolTable(NddlSymbolTable* parent, const TokenFactoryId& tt, const ObjectTypeId& ot);
+    NddlTokenSymbolTable(NddlSymbolTable* parent, const TokenTypeId& tt, const ObjectTypeId& ot);
     virtual ~NddlTokenSymbolTable();
 
     virtual DataTypeId getTypeForVar(const char* varName);
-    virtual TokenFactoryId getTokenType(const char* name) const;
+    virtual TokenTypeId getTokenType(const char* name) const;
 
-    virtual TokenFactoryId getTypeForToken(const char* name);
+    virtual TokenTypeId getTypeForToken(const char* name);
 
 protected:
-    TokenFactoryId m_tokenType;
+    TokenTypeId m_tokenType;
     ObjectTypeId m_objectType;
 };
 

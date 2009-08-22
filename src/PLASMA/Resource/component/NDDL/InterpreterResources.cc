@@ -45,20 +45,20 @@ namespace EUROPA {
     return instance;
   }
 
-  ReusableUsesTokenFactory::ReusableUsesTokenFactory(const ObjectTypeId& ot,const LabelStr& predicateName)
-      : NativeTokenFactory(ot,predicateName)
+  ReusableUsesTokenType::ReusableUsesTokenType(const ObjectTypeId& ot,const LabelStr& predicateName)
+      : NativeTokenType(ot,predicateName)
   {
       addArg(FloatDT::instance(),"quantity");
       addArg(IntDT::instance(),"time");
   }
 
-  TokenId ReusableUsesTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
+  TokenId ReusableUsesTokenType::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reusable.uses");
     return (new NDDL::NddlReusable::uses(planDb,name,rejectable,isFact,true))->getId();
   }
 
-  TokenId ReusableUsesTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
+  TokenId ReusableUsesTokenType::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reusable.uses");
     return (new NDDL::NddlReusable::uses(master,name,relation,true))->getId();
@@ -147,39 +147,39 @@ namespace EUROPA {
     return instance;
   }
 
-  ReservoirProduceTokenFactory::ReservoirProduceTokenFactory(const ObjectTypeId& ot,const LabelStr& predicateName)
-      : NativeTokenFactory(ot,predicateName)
+  ReservoirProduceTokenType::ReservoirProduceTokenType(const ObjectTypeId& ot,const LabelStr& predicateName)
+      : NativeTokenType(ot,predicateName)
   {
       addArg(FloatDT::instance(),"quantity");
       addArg(IntDT::instance(),"time");
   }
 
-  TokenId ReservoirProduceTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
+  TokenId ReservoirProduceTokenType::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reservoir.produce");
     return (new NDDL::NddlReservoir::produce(planDb,name,rejectable,isFact,true))->getId();
   }
 
-  TokenId ReservoirProduceTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
+  TokenId ReservoirProduceTokenType::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reservoir.produce");
     return (new NDDL::NddlReservoir::produce(master,name,relation,true))->getId();
   }
 
-  ReservoirConsumeTokenFactory::ReservoirConsumeTokenFactory(const ObjectTypeId& ot,const LabelStr& predicateName)
-      : NativeTokenFactory(ot,predicateName)
+  ReservoirConsumeTokenType::ReservoirConsumeTokenType(const ObjectTypeId& ot,const LabelStr& predicateName)
+      : NativeTokenType(ot,predicateName)
   {
       addArg(FloatDT::instance(),"quantity");
       addArg(IntDT::instance(),"time");
   }
 
-  TokenId ReservoirConsumeTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
+  TokenId ReservoirConsumeTokenType::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reservoir.consume");
     return (new NDDL::NddlReservoir::consume(planDb,name,rejectable,isFact,true))->getId();
   }
 
-  TokenId ReservoirConsumeTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
+  TokenId ReservoirConsumeTokenType::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Reservoir.consume");
     return (new NDDL::NddlReservoir::consume(master,name,relation,true))->getId();
@@ -223,13 +223,13 @@ namespace EUROPA {
     return instance;
   }
 
-  TokenId UnaryUseTokenFactory::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
+  TokenId UnaryUseTokenType::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Unary.Use");
     return (new NDDL::NddlUnary::use(planDb,name,rejectable,isFact,true))->getId();
   }
 
-  TokenId UnaryUseTokenFactory::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
+  TokenId UnaryUseTokenType::createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const
   {
     debugMsg("XMLInterpreter:NativeObjectFactory","Created Native Unary.Use");
     return (new NDDL::NddlUnary::use(master,name,relation,true))->getId();

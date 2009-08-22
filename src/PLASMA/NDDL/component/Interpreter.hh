@@ -7,7 +7,7 @@
 #include "Object.hh"
 #include "ObjectFactory.hh"
 #include "IntervalToken.hh"
-#include "TokenFactory.hh"
+#include "TokenType.hh"
 #include "Rule.hh"
 #include "RuleInstance.hh"
 #include <vector>
@@ -372,14 +372,14 @@ namespace EUROPA {
         void commonInit(const std::vector<Expr*>& body,
                         const bool& autoClose);
 
-        friend class InterpretedTokenFactory;
+        friend class InterpretedTokenType;
   };
 
-  class InterpretedTokenFactory: public TokenFactory
+  class InterpretedTokenType: public TokenType
   {
     public:
-	  InterpretedTokenFactory(const ObjectTypeId& ot,const LabelStr& predicateName);
-          virtual ~InterpretedTokenFactory();
+	  InterpretedTokenType(const ObjectTypeId& ot,const LabelStr& predicateName);
+          virtual ~InterpretedTokenType();
 
           void addBodyExpr(Expr* e);
 
@@ -389,7 +389,7 @@ namespace EUROPA {
     protected:
       std::vector<Expr*> m_body;
 
-      TokenFactoryId getParentFactory(const PlanDatabaseId& planDb) const;
+      TokenTypeId getParentType(const PlanDatabaseId& planDb) const;
   };
 
   class TokenEvalContext : public EvalContext
@@ -569,10 +569,10 @@ namespace EUROPA {
         std::vector<Expr*> m_loopBody;
   };
 
-  class NativeTokenFactory: public TokenFactory
+  class NativeTokenType: public TokenType
   {
     public:
-	  NativeTokenFactory(const ObjectTypeId& ot,const LabelStr& predicateName) : TokenFactory(ot,predicateName) {}
+	  NativeTokenType(const ObjectTypeId& ot,const LabelStr& predicateName) : TokenType(ot,predicateName) {}
 
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const = 0;
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const = 0;

@@ -3,7 +3,7 @@
 
 #include "PSConstraintEngine.hh"
 #include "ConstraintEngineDefs.hh"
-#include "TokenFactory.hh"
+#include "TokenType.hh"
 
 namespace EUROPA {
 	enum PSTokenState { INACTIVE,ACTIVE,MERGED,REJECTED };
@@ -27,11 +27,11 @@ namespace EUROPA {
 	  std::string m_name;
   };
 
-  /** Version of TokenFactory for communication with other languages */
+  /** Version of TokenType for communication with other languages */
   class PSTokenType {
   public:
 	  PSTokenType(const PSTokenType& original);
-	  PSTokenType(const TokenFactoryId& original);
+	  PSTokenType(const TokenTypeId &original);
 	  // Default destructor will do?
 	  const std::string& getName() const {
 		  return m_name;

@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "ObjectFactory.hh"
-#include "TokenFactory.hh"
+#include "TokenType.hh"
 
 namespace EUROPA {
 
@@ -40,10 +40,10 @@ public:
     virtual void addObjectFactory(const ObjectFactoryId& factory);
     virtual const std::map<double,ObjectFactoryId>& getObjectFactories() const;
 
-    virtual void addTokenFactory(const TokenFactoryId& factory);
-    virtual const std::map<double,TokenFactoryId>& getTokenFactories() const;
-    virtual const TokenFactoryId& getTokenFactory(const LabelStr& signature) const;
-    virtual const TokenFactoryId& getParentFactory(const TokenFactoryId& factory) const;
+    virtual void addTokenType(const TokenTypeId& factory);
+    virtual const std::map<double,TokenTypeId>& getTokenTypes() const;
+    virtual const TokenTypeId& getTokenType(const LabelStr& signature) const;
+    virtual const TokenTypeId& getParentType(const TokenTypeId& factory) const;
 
     virtual std::string toString() const;
 
@@ -56,7 +56,7 @@ protected:
     ObjectTypeId m_parent;
     bool m_isNative;
     std::map<double,ObjectFactoryId> m_objectFactories;
-    std::map<double,TokenFactoryId> m_tokenFactories;
+    std::map<double,TokenTypeId> m_tokenTypes;
     std::map<std::string,DataTypeId> m_members;
 };
 

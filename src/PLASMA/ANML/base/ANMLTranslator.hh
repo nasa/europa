@@ -426,7 +426,7 @@ class Action : public ANMLContext, public ANMLElementList
     Action(ObjType& objType,const std::string& name,const std::vector<Variable*>& params);
     virtual ~Action();
 
-    const std::string& getName() const { return m_name; }
+//    const std::string& getName() const { return m_name; }
     
     virtual std::string getContextDesc() const { return m_objType.getName() + "::" + m_elementName; }
     

@@ -15,7 +15,7 @@
 
 #include "DbClient.hh"
 #include "ObjectFactory.hh"
-#include "TokenFactory.hh"
+#include "TokenType.hh"
 #include "Domains.hh"
 
 #include "Debug.hh"
@@ -122,10 +122,10 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
     }
   };
 
-  class IntervalTokenFactory: public TokenFactory {
+  class IntervalTokenType: public TokenType {
   public:
-    IntervalTokenFactory(const ObjectTypeId& ot)
-      : TokenFactory(ot,LabelStr(DEFAULT_PREDICATE)) {
+    IntervalTokenType(const ObjectTypeId& ot)
+      : TokenType(ot,LabelStr(DEFAULT_PREDICATE)) {
         addArg(FloatDT::instance(), "IntervalParam");
         addArg(IntDT::instance(), "IntervalIntParam");
         addArg(BoolDT::instance(), "BoolParam");
@@ -177,7 +177,7 @@ void initDbTestSchema(const SchemaId& schema) {
   objType->addMember(FloatDT::instance(), "EnumeratedVar");
 
   // Set up predicates for testing
-  objType->addTokenFactory((new IntervalTokenFactory(objType->getId()))->getId());
+  objType->addTokenType((new IntervalTokenType(objType->getId()))->getId());
 
   // Set up constructors for testing
   objType->addObjectFactory((new StandardDBFooFactory())->getId());
@@ -1102,7 +1102,7 @@ public:
     EUROPA_runTest(testMergingPerformance);
     EUROPA_runTest(testTokenCompatibility);
     EUROPA_runTest(testPredicateInheritance);
-    EUROPA_runTest(testTokenFactory);
+    EUROPA_runTest(testTokenType);
     EUROPA_runTest(testCorrectSplit_Gnats2450);
     EUROPA_runTest(testOpenMerge);
     EUROPA_runTest(testGNATS_3086);
@@ -2194,7 +2194,7 @@ private:
     return true;
   }
 
-  static bool testTokenFactory(){
+  static bool testTokenType(){
       DEFAULT_SETUP(ce, db, false);
       ObjectId timeline = (new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
       db->close();
@@ -4005,7 +4005,7 @@ public:
     REGISTER_OBJECT_FACTORY(db->getSchema(),TestClass2Factory, TestClass2:string:int:float:Locations);
 
     /* Token factory for predicate Sample */
-    db->getSchema()->registerTokenFactory((new TestClass2::Sample::Factory(testClass2_OT.getId()))->getId());
+    db->getSchema()->registerTokenType((new TestClass2::Sample::Factory(testClass2_OT.getId()))->getId());
 
     /* Initialize state-domain-at-creation of mandatory and rejectable tokens.  Const after this. */
     getMandatoryStateDom().remove(Token::REJECTED);
@@ -4142,10 +4142,10 @@ public:
       // Would do:
       // DECLARE_TOKEN_FACTORY(TestClass2::Sample, TestClass2.Sample);
       // ... but that is in NDDL/base/NddlUtils.hh, which this should not depend on, so:
-      class Factory : public TokenFactory {
+      class Factory : public TokenType {
       public:
         Factory(const ObjectTypeId& ot)
-          : TokenFactory(ot,LabelStr("TestClass2.Sample")) {
+          : TokenType(ot,LabelStr("TestClass2.Sample")) {
         }
       private:
         TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable = false, bool isFact = false) const {
