@@ -106,6 +106,12 @@ namespace EUROPA {
     bool isEnumValue(const LabelStr& enumName, double value) const;
 
     /**
+     * @brief Test if the given value is a member of any enum
+     * @param value The value to be tested.
+     */
+    bool isEnumValue(double value) const;
+
+    /**
      * @brief Determine of a given predicate is part of the schema
      */
     bool isPredicate(const LabelStr& type) const;
@@ -199,6 +205,12 @@ namespace EUROPA {
      * @error !isEnum(enumName).
      */
     const std::set<double>& getEnumValues(const LabelStr& enumName) const;
+
+    /**
+     * @brief Obtains the enum name for an enum value
+     * @param value enum value to be looked up
+     */
+    const LabelStr& getEnumForValue(double value) const;
 
     /**
      * @brief Obtain the set of predicates for a given object type.
@@ -372,7 +384,9 @@ namespace EUROPA {
 
     const LabelStr m_name;
     LabelStr_ValueSet_Map enumValues;
-    LabelStrSet objectTypes;  //get rid of 
+    std::map<double, LabelStr> enumValuesToEnums;
+
+    LabelStrSet objectTypes;  //get rid of
     LabelStrSet predicates;
     LabelStrSet primitives;
 

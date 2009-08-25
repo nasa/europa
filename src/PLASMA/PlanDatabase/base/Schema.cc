@@ -146,6 +146,10 @@ namespace EUROPA {
     return(members.find(value) != members.end());
   }
 
+  bool Schema::isEnumValue(double value) const {
+    return(enumValuesToEnums.find(value) != enumValuesToEnums.end());
+  }
+
   bool Schema::canBeAssigned(const LabelStr& objectType,
 			     const LabelStr& predicate) const {
     check_error(isObjectType(objectType), objectType.toString() + " is not defined as an ObjectType");
@@ -593,11 +597,21 @@ namespace EUROPA {
 
   void Schema::addValue(const LabelStr& enumName, double enumValue) {
     check_error(isEnum(enumName), enumName.toString() + " is undefined.");
+    check_error(enumValuesToEnums.find(enumValue) == enumValuesToEnums.end(),
+            LabelStr(enumValue).toString() + " is already an enum value for " + (enumValuesToEnums[enumValue]).toString());
+
     debugMsg("Schema:addValue", "[" << m_name.toString() << "] " << "Added " <<
 	     (LabelStr::isString(enumValue) ? LabelStr(enumValue).toString() : toString(enumValue)) << " to " <<
 	     enumName.toString());
     ValueSet& members = enumValues.find(enumName)->second;
     members.insert(enumValue);
+    enumValuesToEnums[enumValue] = enumName;
+  }
+
+  const LabelStr& Schema::getEnumForValue(double value) const
+  {
+    check_error(enumValuesToEnums.find(value) != enumValuesToEnums.end());
+    return enumValuesToEnums.find(value)->second;
   }
 
   void Schema::write(ostream& os) const{

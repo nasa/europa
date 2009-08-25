@@ -1,10 +1,9 @@
 ///////////////////////////////////////////////////////////
 // Defines a framework in Nddl for integration with EUROPA
-// Resources. Requires Core.nddl
+// Resources.
 // Author: Conor McGann
 // Date: January, 2005
 ///////////////////////////////////////////////////////////
-#include "Core.nddl"
 
 class Reservoir {
   float initialCapacity;

@@ -130,7 +130,6 @@ enumDefinition returns [Expr* result]
     :   ^('enum' name=IDENT enumValues[values])
         {
             const char* enumName = c_str($name.text->chars);
-            CTX->SymbolTable->addEnumValues(enumName,values);
             result = new ExprEnumdef(enumName,values);
         }
     ;

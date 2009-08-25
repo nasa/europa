@@ -5,8 +5,8 @@ typedef float {1.2, 2.3, 3.4, 67.9} Floats; // Enumeration of floats - decimal p
 typedef string {"s1", "s2", "s3"} Strings; // Enumeration of strings... test altered for consistancy
 enum Symbol {s4, s5, s6}; // Enumeration of symbols
 enum Fruit {Apple, Orange, Banana}; // Enumeration of symbols
+enum Color {Red, OrangeColor, Yellow, Green, Blue};
 enum Speed {Slow, Medium, Fast}; // Enumeration of symbols
-enum Color {Red, Orange, Yellow, Green, Blue};
 
 // Allocate Variables of primitive type and eneumerated version of same type
 int a;
@@ -25,5 +25,4 @@ eq(c, d);
 eq(e, f);
 eq(g, s4);
 
-// TODO: this is not supported by interpreter
-eq(color, Orange);
+eq(color, OrangeColor);

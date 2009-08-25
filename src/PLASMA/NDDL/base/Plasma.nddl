@@ -4,5 +4,4 @@
 // Date: April, 2004
 ///////////////////////////////////////////////////////////
 
-#include "Core.nddl"
 #include "StringData.nddl"

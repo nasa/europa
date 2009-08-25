@@ -240,8 +240,6 @@ NddlSymbolTable* NddlSymbolTable::getParentST() { return m_parentST; }
 const EngineId& NddlSymbolTable::engine() const { return (m_parentST==NULL ? m_engine : m_parentST->engine()); }
 std::vector<std::string>& NddlSymbolTable::errors() { return (m_parentST==NULL ? m_errors : m_parentST->errors()); }
 const std::vector<std::string>& NddlSymbolTable::errors() const { return (m_parentST==NULL ? m_errors : m_parentST->errors()); }
-std::map<std::string,std::string>& NddlSymbolTable::enumValues() { return (m_parentST==NULL ? m_enumValues : m_parentST->enumValues()); }
-const std::map<std::string,std::string>& NddlSymbolTable::enumValues() const { return (m_parentST==NULL ? m_enumValues : m_parentST->enumValues()); }
 
 void NddlSymbolTable::addError(const std::string& msg)
 {
@@ -570,22 +568,25 @@ TokenId NddlSymbolTable::getToken(const char* name)
         return EvalContext::getToken(name);
 }
 
-void NddlSymbolTable::addEnumValues(const char* enumName,const std::vector<std::string>& values)
+const LabelStr& NddlSymbolTable::getEnumForValue(const char* value) const
 {
-    std::string type(enumName);
+    if (m_parentST == NULL)
+        return getPlanDatabase()->getSchema()->getEnumForValue(LabelStr(value));
 
-    for (unsigned int i=0;i<values.size();i++)
-        enumValues()[values[i]]=type;
+    return m_parentST->getEnumForValue(value);
 }
 
 bool NddlSymbolTable::isEnumValue(const char* value) const
 {
-    return enumValues().find(value) != enumValues().end();
+    if (m_parentST == NULL)
+        return getPlanDatabase()->getSchema()->isEnumValue(LabelStr(value));
+
+    return m_parentST->isEnumValue(value);
 }
 
 Expr* NddlSymbolTable::makeEnumRef(const char* value) const
 {
-    std::string enumType = enumValues().find(value)->second;
+    const LabelStr& enumType = getEnumForValue(value);
     EnumeratedDomain* ad = dynamic_cast<EnumeratedDomain*>(
             getPlanDatabase()->getSchema()->getCESchema()->baseDomain(enumType.c_str()).copy());
     double v = LabelStr(value);

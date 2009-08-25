@@ -56,8 +56,8 @@ public:
     virtual void* getElement(const char* name) const;
 
     // Enum support methods
-    void addEnumValues(const char* enumName,const std::vector<std::string>& values);
     bool isEnumValue(const char* value) const;
+    const LabelStr& getEnumForValue(const char* value) const;
     Expr* makeEnumRef(const char* value) const;
 
 protected:
@@ -69,16 +69,9 @@ protected:
     std::map<std::string,DataTypeId> m_localVars;
     std::map<std::string,TokenTypeId> m_localTokens;
 
-    // Hack to keep track of enum values for the time being
-    // TODO!: drop this as it won't work over multiple invocations of the interpreter
-    // which will use different Symbol Tables. This must come from the Schema
-    std::map<std::string,std::string> m_enumValues;
-
     const EngineId& engine() const;
     std::vector<std::string>& errors();
     const std::vector<std::string>& errors() const;
-    std::map<std::string,std::string>& enumValues();
-    const std::map<std::string,std::string>& enumValues() const;
 };
 
 class NddlClassSymbolTable : public NddlSymbolTable
