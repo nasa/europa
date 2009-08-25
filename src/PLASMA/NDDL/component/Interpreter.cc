@@ -492,6 +492,15 @@ namespace EUROPA {
 
       if (m_returnArgument) {
 	output = m_returnArgument->eval(context);
+	//Make addEq a temporal constraint.
+	ConstrainedVariable *leftVarPtr = left.getValue(), *rightVarPtr = right.getValue(), *outputVarPtr = output.getValue();
+	if (dynamic_cast< TokenVariable<IntervalIntDomain>* >(leftVarPtr) != NULL
+	    || dynamic_cast< TokenVariable<IntervalIntDomain>* >(rightVarPtr) != NULL
+	    || dynamic_cast< TokenVariable<IntervalIntDomain>* >(outputVarPtr) != NULL) {	  
+	  if (constraint == "addEq") {
+	    constraint = "temporalDistance";
+	  }
+	}
       } else {
 	//Create the variable name
 	std::string variable = this->createVariableName();
@@ -530,7 +539,7 @@ namespace EUROPA {
       //Detect temporal variables
       ConstrainedVariable *leftVarPtr = left.getValue(), *rightVarPtr = right.getValue();
       if (dynamic_cast< TokenVariable<IntervalIntDomain>* >(leftVarPtr) != NULL
-	  && dynamic_cast< TokenVariable<IntervalIntDomain>* >(rightVarPtr) != NULL) {
+	  || dynamic_cast< TokenVariable<IntervalIntDomain>* >(rightVarPtr) != NULL) {
 	if (constraint == "eq") {
 	  constraint = "concurrent";
 	} else if (constraint == "lt") {

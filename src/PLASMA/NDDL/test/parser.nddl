@@ -122,6 +122,8 @@ goal1 meets somep;
 
 goal1.end == somep.start;
 
+goal1.end + 0 == somep.start;
+
 //;;
 
 // typeDefinition tests:
