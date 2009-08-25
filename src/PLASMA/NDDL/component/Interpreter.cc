@@ -341,17 +341,17 @@ namespace EUROPA {
 
   unsigned int ExprExpression::s_counter(1);
   ExprExpression::ExprExpression(std::string name, ExprExpression* lhs, ExprExpression* rhs)
-    : m_count(s_counter++), m_name(name), m_lhs(lhs),  m_rhs(rhs), m_target(NULL), m_func(NULL), m_args(), m_data(), m_enforceContext(false)
+    : m_count(s_counter++), m_name(name), m_lhs(lhs),  m_rhs(rhs), m_target(NULL), m_func(NULL), m_args(), m_data(), m_enforceContext(false), m_returnArgument(NULL)
   {
   }
 
   ExprExpression::ExprExpression(Expr* target)
-    : m_count(s_counter++), m_name("PASS"), m_lhs(NULL),  m_rhs(NULL), m_target(target), m_func(NULL), m_args(), m_data(), m_enforceContext(false)
+    : m_count(s_counter++), m_name("PASS"), m_lhs(NULL),  m_rhs(NULL), m_target(target), m_func(NULL), m_args(), m_data(), m_enforceContext(false), m_returnArgument(NULL)
   {
   }
 
   ExprExpression::ExprExpression(NddlFunction* func, std::vector<ExprExpression*> args, DataTypeId data) 
-    : m_count(s_counter++), m_name("FUNC"), m_lhs(NULL),  m_rhs(NULL), m_target(NULL), m_func(func), m_args(args), m_data(data), m_enforceContext(false)
+    : m_count(s_counter++), m_name("FUNC"), m_lhs(NULL),  m_rhs(NULL), m_target(NULL), m_func(func), m_args(args), m_data(data), m_enforceContext(false), m_returnArgument(NULL)
   {
   }
 
@@ -388,6 +388,18 @@ namespace EUROPA {
     return variable;
   }
 
+  bool ExprExpression::isSingleton() {
+    return m_name == "PASS";
+  }
+
+  bool ExprExpression::isSingletonOptimizable() {
+    return (m_name == "+" || m_name == "-" || m_name == "*");
+  }
+  
+  void ExprExpression::setReturnArgument(ExprExpression *arg) {
+    m_returnArgument = arg;
+  }
+
   DataRef ExprExpression::eval(EvalContext& context) const {
     if (m_name == "PASS" && m_target) {
       return m_target->eval(context);
@@ -418,7 +430,6 @@ namespace EUROPA {
       return con->eval(context);
       }*/
 
-    DataRef left = m_lhs->eval(context), right = m_rhs->eval(context);
 
     //Figure out constriant type.
     std::string constraint = "", returnType = "";
@@ -435,7 +446,7 @@ namespace EUROPA {
       if (m_name == "*") { constraint = "mulEq"; }
       if (m_name == "||") { constraint = "testOr"; returnType = "bool"; }
       if (m_name == "&&") { constraint = "testAnd"; returnType = "bool"; }
-    } else {
+    } else { //Special for return type non-existant
       returnType = "VOID";
       if (m_name == "==") { constraint = "eq"; }
       if (m_name == "<=") { constraint = "leq"; }
@@ -445,7 +456,23 @@ namespace EUROPA {
       if (m_name == "<") { constraint = "lt"; }
     }
     check_runtime_error(constraint != "", "Illegal expression: " + m_name);
+
+    //If one side is a singleton and the other can be optimized, do a special case.
+    if (returnType == "VOID" && m_name == "==") {
+      std::cout << "Opto\n";
+      if (m_lhs->isSingleton() && m_rhs->isSingletonOptimizable()) {
+	m_rhs->setReturnArgument(m_lhs);
+	return m_rhs->eval(context);
+      }
+      if (m_rhs->isSingleton() && m_lhs->isSingletonOptimizable()) {
+	m_lhs->setReturnArgument(m_rhs);
+	return m_lhs->eval(context);
+      }
+    }
     
+    DataRef left = m_lhs->eval(context), right = m_rhs->eval(context);
+
+
     std::vector<ConstrainedVariableId> args;
     DataRef output;
 
@@ -463,14 +490,18 @@ namespace EUROPA {
 	check_runtime_error(ALWAYS_FAIL, "Illegal data type: " + returnType);
       }
 
-      //Create the variable name
-      std::string variable = this->createVariableName();
-      
-      //Declare the implicit return variable
-      ExprVarDeclaration* var = new ExprVarDeclaration(variable.c_str(), data, NULL, false);
-      output = var->eval(context);
-      
-      delete var;
+      if (m_returnArgument) {
+	output = m_returnArgument->eval(context);
+      } else {
+	//Create the variable name
+	std::string variable = this->createVariableName();
+	
+	//Declare the implicit return variable
+	ExprVarDeclaration* var = new ExprVarDeclaration(variable.c_str(), data, NULL, false);
+	output = var->eval(context);
+	
+	delete var;
+      }
       
       //Make the constraint's arguments when return type present
       if (m_name == "-") {

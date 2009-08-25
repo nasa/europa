@@ -333,6 +333,11 @@ namespace EUROPA {
 
         void setEnforceContext();
 
+        bool isSingleton(); 
+
+        bool isSingletonOptimizable();
+
+        void setReturnArgument(ExprExpression *arg);
     protected:
         std::string createVariableName() const;
 
@@ -345,6 +350,7 @@ namespace EUROPA {
         std::vector<ExprExpression*> m_args;
         DataTypeId m_data;
         bool m_enforceContext;
+        ExprExpression *m_returnArgument;
   };
 
   // InterpretedToken is the interpreted version of NddlToken
