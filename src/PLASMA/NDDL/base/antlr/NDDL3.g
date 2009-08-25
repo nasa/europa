@@ -107,7 +107,6 @@ nddlStatement
     |   methodInvocation
     |   noopstatement
     |   enforceStatement
-    |   constraintSignature!
     ;
 
 enumDefinition
@@ -453,26 +452,6 @@ tokenNames
 noopstatement
 	:	';'!
 	;
-
-constraintSignature
-    :   'constraint' c=IDENT args=typeArgumentList
-            ('extends' x=IDENT xargs=typeArgumentList)? 
-            (sb=signatureBlock | ';')
-                -> ^('constraint' $c $args ^('extends' $x $xargs)? $sb?)
-    ;
-
-signatureBlock
-    :   '{'^ signatureExpression? '}'!
-    ;
-
-signatureExpression
-    :   signatureAtom (('&&'^ | '||'^) signatureAtom)*
-    ;
-
-signatureAtom
-    :   '('^ signatureExpression ')'!
-    |   IDENT '<:'^ (type | 'numeric' )
-    ;
 
 INCLUDE :	'#include' WS+ file=STRING 
                 {

@@ -1,4 +1,3 @@
-#include "Constraints.nddl"
 
 // Declare the most trivial class.
 class Foo {};

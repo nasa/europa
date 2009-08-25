@@ -85,7 +85,7 @@ foo::p {
        } else {
           false;
        }
-	
+
        Location location_enum;
        location_enum == Location.Hill;
 }
@@ -208,25 +208,4 @@ BClass::q {
 
   ;;
 }
-
-// constraintSignature tests:
-// TODO: do we still want to keep this in the language?, it's not necessary anymore
-/*
-constraint addEq(a, b, c) {
-  a <: numeric &&
-  b <: numeric &&
-  a <: c &&
-  b <: c
-}
-
-constraint complex(a, b, c, d, e, f) {
-  (b <: a || a <: b) &&
-  (c <: d || d <: c) &&
-  a <: int &&
-  b <: float &&
-  c <: boolean &&
-  e <: string &&
-  f <: foo
-}
-*/
 

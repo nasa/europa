@@ -1,6 +1,3 @@
-#include "Constraints.nddl"
-
-constraint lazyAllDiff(a, b, c) extends allDiff(a, b, c);
 
 int v0 = [0 10];
 int v1 = [0 10];

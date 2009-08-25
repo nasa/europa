@@ -5,7 +5,6 @@
 // Date: January, 2005
 ///////////////////////////////////////////////////////////
 #include "Core.nddl"
-#include "Constraints.nddl"
 
 class Reservoir {
   float initialCapacity;

@@ -1,5 +1,4 @@
 #include "Plasma.nddl"
-constraint lessThan(a, b) extends eq(a, b);
 
 enum Letters {X, Y, Z};
 

@@ -4,6 +4,5 @@
 // Date: April, 2004
 ///////////////////////////////////////////////////////////
 
-#include "Constraints.nddl"
 #include "Core.nddl"
 #include "StringData.nddl"
