@@ -205,7 +205,6 @@ public class PSDesktop
         // BeanShell scripting
         JInternalFrame consoleFrame = makeNewFrame("Console");
         consoleFrame.getContentPane().add(bshConsole_);
-        new Thread(bshInterpreter_).start();
 
         registerBshVariables();
 
@@ -217,6 +216,8 @@ public class PSDesktop
                 throw new RuntimeException(e);
             }
         }
+
+        new Thread(bshInterpreter_).start();
         //consoleFrame.setIcon(true);
     }
 
