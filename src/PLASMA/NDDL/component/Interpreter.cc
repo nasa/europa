@@ -459,7 +459,6 @@ namespace EUROPA {
 
     //If one side is a singleton and the other can be optimized, do a special case.
     if (returnType == "VOID" && m_name == "==") {
-      std::cout << "Opto\n";
       if (m_lhs->isSingleton() && m_rhs->isSingletonOptimizable()) {
 	m_rhs->setReturnArgument(m_lhs);
 	return m_rhs->eval(context);
@@ -498,7 +497,7 @@ namespace EUROPA {
 	    || dynamic_cast< TokenVariable<IntervalIntDomain>* >(rightVarPtr) != NULL
 	    || dynamic_cast< TokenVariable<IntervalIntDomain>* >(outputVarPtr) != NULL) {	  
 	  if (constraint == "addEq") {
-	    constraint = "temporalDistance";
+	    //constraint = "temporalDistance";
 	  }
 	}
       } else {
