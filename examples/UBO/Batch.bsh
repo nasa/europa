@@ -12,7 +12,9 @@ IFlatIRelaxSolver runIFIR(long timeout,int bound, boolean usePSResources)
 }
 
 try {
-    psengine.executeScript("nddl",bsh.cwd+"/UBO-initial-state.nddl",true/*isFile*/);
+    errors = psengine.executeScript("nddl",bsh.cwd+"/UBO-initial-state.nddl",true/*isFile*/);
+    if (!errors.equals(""))
+        throw new RuntimeException("Failed loading model:"+errors);
     solver = psengine.createSolver("PlannerConfig.xml");
     solver.configure(0,1000);
     // Only works for problem with 11 activities
