@@ -1,5 +1,4 @@
 #include "Light-model.nddl"
-constraint lt(a, b) { a <: numeric && b <: numeric }
 
 // Problem instance : turning the light off
 LightSwitch switch1 = new LightSwitch();
