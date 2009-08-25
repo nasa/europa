@@ -370,6 +370,12 @@ namespace EUROPA {
     m_enforceContext = true;
   }
 
+  bool isTimepoint(DataRef var) {
+    ConstrainedVariable *cvar = var.getValue();
+    return dynamic_cast< TokenVariable<IntervalIntDomain>* >(cvar) != NULL
+      && (cvar->getName().toString() == "end" || cvar->getName().toString() == "start");
+  }
+
   std::string ExprExpression::createVariableName() const {
     char buff[15];
     sprintf(buff, "%u", m_count);
@@ -492,12 +498,11 @@ namespace EUROPA {
       if (m_returnArgument) {
 	output = m_returnArgument->eval(context);
 	//Make addEq a temporal constraint.
-	ConstrainedVariable *leftVarPtr = left.getValue(), *rightVarPtr = right.getValue(), *outputVarPtr = output.getValue();
-	if (dynamic_cast< TokenVariable<IntervalIntDomain>* >(leftVarPtr) != NULL
-	    || dynamic_cast< TokenVariable<IntervalIntDomain>* >(rightVarPtr) != NULL
-	    || dynamic_cast< TokenVariable<IntervalIntDomain>* >(outputVarPtr) != NULL) {	  
+	if (isTimepoint(left) || isTimepoint(right) || isTimepoint(output)) {	  
 	  if (constraint == "addEq") {
-	    //constraint = "temporalDistance";
+	    check_runtime_error(!isTimepoint(left) || !isTimepoint(right) || !isTimepoint(output), "You can't add two timepoints up to make a third time point.");
+	    
+	    constraint = "temporalDistance";
 	  }
 	}
       } else {
@@ -536,12 +541,10 @@ namespace EUROPA {
       }
     } else { //No return value
       //Detect temporal variables
-      ConstrainedVariable *leftVarPtr = left.getValue(), *rightVarPtr = right.getValue();
-      if (dynamic_cast< TokenVariable<IntervalIntDomain>* >(leftVarPtr) != NULL
-	  || dynamic_cast< TokenVariable<IntervalIntDomain>* >(rightVarPtr) != NULL) {
+      if (isTimepoint(left) || isTimepoint(right)) {
 	if (constraint == "eq") {
 	  constraint = "concurrent";
-	} else if (constraint == "lt") {
+	} else if (constraint == "leq") {
 	  constraint = "precedes";
 	}
       }

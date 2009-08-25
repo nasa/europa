@@ -120,9 +120,42 @@ rejectable(foo.p somep);
 fact1 before goal1;
 goal1 meets somep;
 
-goal1.end == somep.start;
-
+//Test eight cases of temporalDistance
+goal1.end + 0 == [0,inf];
+goal1.end + somep.start == 0;
 goal1.end + 0 == somep.start;
+//Three timepoints here will cause error
+//Ignore all const
+0 + goal1.end == [0,inf];
+[0,inf] + 0 == somep.start;
+0 + goal1.end == somep.start;
+
+//Test eight cases of temporalDistance with subtraction
+goal1.end - 0 == [0,inf];
+goal1.end - somep.start == 0;
+goal1.end - 0 == somep.start;
+//Three timepoints here will cause error
+//Ignore all const
+[0,inf] - goal1.end == [0,inf];
+[0,inf] - 0 == somep.start;
+[0,inf] - goal1.end == somep.start;
+
+//Three cases of precedes this way
+[0,inf] <= somep.start;
+goal1.end <= somep.start;
+goal1.start <= [0,inf];
+
+//Three cases of precedes the other way
+[0,inf] >= somep.start;
+somep.start >= 0;
+somep.start >= goal1.end;
+
+//Three cases of concurrent
+goal1.end == somep.start;
+goal1.end == [0,inf];
+[0,inf] == somep.start;
+
+
 
 //;;
 
