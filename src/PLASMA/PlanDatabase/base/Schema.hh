@@ -358,7 +358,7 @@ namespace EUROPA {
     const ObjectTypeId& getObjectType(const LabelStr& objType);
 
     void registerObjectFactory(const ObjectFactoryId& obj_fact);
-    ObjectFactoryId getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments);
+    ObjectFactoryId getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments, const bool doCheckError = true);
 
     void registerTokenType(const TokenTypeId& obj_fact);
     TokenTypeId getTokenType(const LabelStr& tokenType);

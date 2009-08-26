@@ -739,9 +739,9 @@ namespace EUROPA {
       m_objectTypeMgr->registerFactory(of);
   }
 
-  ObjectFactoryId Schema::getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments)
+  ObjectFactoryId Schema::getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments, const bool doCheckError)
   {
-      return m_objectTypeMgr->getFactory(getId(),objectType,arguments);
+    return m_objectTypeMgr->getFactory(getId(),objectType,arguments,doCheckError);
   }
 
   void Schema::registerTokenType(const TokenTypeId& f)

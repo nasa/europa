@@ -99,7 +99,7 @@ namespace EUROPA {
     /**
      * @brief Obtain the factory based on the type of object to create and the types of the arguments to the constructor
      */
-    ObjectFactoryId getFactory(const SchemaId& schema, const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments);
+    ObjectFactoryId getFactory(const SchemaId& schema, const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments, const bool doCheckError = true);
 
     /**
      * @brief Add a factory to provide instantiation of particular concrete types based on a label.

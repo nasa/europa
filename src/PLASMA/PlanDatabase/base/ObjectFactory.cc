@@ -86,7 +86,8 @@ namespace EUROPA {
    */
   ObjectFactoryId ObjectTypeMgr::getFactory(const SchemaId& schema,
                                             const LabelStr& objectType,
-                                            const std::vector<const AbstractDomain*>& arguments)
+                                            const std::vector<const AbstractDomain*>& arguments,
+					    const bool doCheckError)
   {
     // Build the full signature for the factory
     LabelStr factoryName = makeFactoryName(objectType,arguments);
@@ -142,7 +143,8 @@ namespace EUROPA {
     }
     
     // At this point, we should have a hit
-    check_error(ALWAYS_FAILS, "Factory '" + factoryName.toString() + "' is not registered.");
+    if (doCheckError)
+	check_error(ALWAYS_FAILS, "Factory '" + factoryName.toString() + "' is not registered.");
     return ObjectFactoryId::noId();
   }
 
