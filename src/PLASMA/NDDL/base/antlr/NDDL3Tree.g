@@ -373,6 +373,12 @@ allocation[const char* name] returns [Expr* result]
                 )
                 {
                     std::string objName = (name != NULL ? name : getAutoLabel("__Object"));
+                    /*try {
+                        CTX->SymbolTable->checkObjectFactory(c_str($objType.text->chars),args);
+                    }
+                    catch (const std::string& errorMsg) {
+                        reportSemanticError(CTX,errorMsg);
+                    }*/
                     result = new ExprNewObject(
                         c_str($objType.text->chars), // objectType
                         objName.c_str(),
@@ -535,6 +541,12 @@ constructorSuper[ObjectType* objType] returns [ExprConstructorSuperCall* result]
 		)
 		{
 		    result = new ExprConstructorSuperCall(objType->getParent()->getName(),args);  
+            /*try {
+                CTX->SymbolTable->checkObjectFactory(objType->getParent()->getName().c_str(),args);
+            }
+            catch (const std::string& errorMsg) {
+                reportSemanticError(CTX,errorMsg);
+            }*/
 		}
 	;
   

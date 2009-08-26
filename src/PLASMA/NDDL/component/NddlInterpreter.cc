@@ -616,6 +616,25 @@ void NddlSymbolTable::checkConstraint(const char* name,const std::vector<Expr*>&
     ctype->checkArgTypes(argTypes);
 }
 
+void NddlSymbolTable::checkObjectFactory(const char* name, const std::vector<Expr*>& args)
+{
+    if (!getPlanDatabase()->getSchema()->isObjectType(name)) {
+      throw std::string(name + std::string(" is not a valid object type."));
+    }
+
+    std::vector<const AbstractDomain*> argTypes;
+    for (unsigned int i=0;i<args.size();i++)
+      argTypes.push_back(&args[i]->getDataType()->baseDomain());
+    
+    ObjectFactoryId factory = getPlanDatabase()->getSchema()->getObjectFactory(name, argTypes, false);
+    if (factory.isNoId()) {
+      std::string argsig = "";
+      for (unsigned int i=0;i<args.size();i++)
+	argsig += std::string(std::string(":") + std::string(args[i]->getDataType()->getName().c_str()));
+      throw std::string(std::string("Invalid object constructor: ") + name + argsig);
+    }
+}
+
 NddlClassSymbolTable::NddlClassSymbolTable(NddlSymbolTable* parent, ObjectType* ot)
     : NddlSymbolTable(parent)
     , m_objectType(ot)
