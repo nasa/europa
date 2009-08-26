@@ -106,7 +106,6 @@ nddlStatement
     |   relation
     |   methodInvocation
     |   noopstatement
-    |   enforceStatement
     ;
 
 enumDefinition
@@ -157,35 +156,6 @@ anyValue
     |   baseDomain
     |   qualified
     ;
-
-///
-expressionList : booleanOrExpression (','! booleanOrExpression )* ;
-
-expressionLiteral : anyValue | name=IDENT '(' ex=expressionList ')' -> ^(FUNCTION_CALL $name ^('(' expressionList));
-
-multiplicitiveExpression @init {int i = 0;} : a=expressionLiteral ('*' b=multiplicitiveExpression {i=1;})?
-        -> {i==1}? ^('*' $a $b) -> $a;
-
-additionExpression @init {int i = 0;} : a=multiplicitiveExpression (('+' {i=1;} | '-' {i=2;}) b=additionExpression)?
-        -> {i==1}? ^('+' $a $b) -> {i==2}? ^('-' $a $b) -> $a ;
-
-relationalExpression @init {int i = 0;} :
-        a=additionExpression (('==' {i=1;} | '!=' {i=2;} | '<' {i=3;} | '>' {i=4;} | '>=' {i=5;} | '<=' {i=6;}) b=additionExpression)?
-        -> {i==1}? ^('==' $a $b) -> {i==2}? ^('!=' $a $b) -> {i==3}? ^('<' $a $b) 
-        -> {i==4}? ^('>' $a $b) -> {i==5}? ^('>=' $a $b) -> {i==6}? ^('<=' $a $b) -> $a ;
-
-booleanAndExpression @init {int i = 0;} : a=relationalExpression ('||' b=booleanAndExpression {i=1;})?
-        -> {i==1}? ^('||' $a $b) -> $a;
-
-booleanOrExpression @init {int i = 0;} : a=booleanAndExpression ('&&' b=booleanOrExpression {i=1;})?
-        -> {i==1}? ^('&&' $a $b) -> $a;
-
-enforceStatement
-    :  'enforce' '(' result=booleanOrExpression ')' ';' -> 
-        ^(EXPRESSION_ENFORCE $result)
-    |   result=booleanOrExpression ';' ->
-        ^(EXPRESSION_ENFORCE $result);
-///
 
 allocation
     :   'new'! constructorInvocation
@@ -269,7 +239,6 @@ predicateBlock
 predicateStatement
 	:	variableDeclarations
 	|	constraintInstantiation
-    |   enforceStatement
 	|	assignment
 	;
 
@@ -288,7 +257,6 @@ ruleStatement
 	|	variableDeclarations
 	|	constraintInstantiation
 	|	flowControl
-    |   enforceStatement
 	|	noopstatement
 	;
 
@@ -326,6 +294,46 @@ predicateArgument
 constraintInstantiation
 	:	IDENT variableArgumentList ';'
 			-> ^(CONSTRAINT_INSTANTIATION IDENT variableArgumentList)
+		| enforceStatement	
+	;
+
+enforceStatement
+    :	'enforce'? result=cexpression ';' 
+    	-> ^(EXPRESSION_ENFORCE $result)
+	;
+
+cexpression 
+	:	cbooleanOrExpression
+	;
+	
+cbooleanOrExpression
+	:	cbooleanAndExpression ('||'^ cbooleanAndExpression)*
+	;
+
+cbooleanAndExpression 
+	:	a=crelationalExpression ('&&'^ b=crelationalExpression)*
+	;
+        
+crelationalExpression 
+	:	a=cadditiveExpression (('==' | '!=' | '<' | '>' | '>=' | '<=')^ cadditiveExpression)*
+	;
+	        
+cadditiveExpression 
+	:	cmultiplicativeExpression (('+' | '-')^ cmultiplicativeExpression)*
+    ;
+
+cmultiplicativeExpression 
+	:	cprimary ('*'^ cprimary)*
+	;
+
+cprimary 
+	: anyValue 
+	| name=IDENT '(' ex=cexpressionList ')' -> ^(FUNCTION_CALL $name ^('(' cexpressionList))
+	| '('! cbooleanOrExpression ')'!
+	;
+
+cexpressionList 
+	: cexpression (','! cexpression )* 
 	;
 
 superInvocation
@@ -360,7 +368,7 @@ flowControl
 @init {
    bool hasElse = false;
 } 
-    :	'if' '(' result=booleanOrExpression ')' a=ruleBlock ('else' b=ruleBlock {hasElse = true;}|) 
+    :	'if' '(' result=cexpression ')' a=ruleBlock ('else' b=ruleBlock {hasElse = true;}|) 
          -> {hasElse == false}? ^('if' ^(EXPRESSION_RETURN $result) $a)
          -> ^('if' ^(EXPRESSION_RETURN $result) $a $b)
 	|	'foreach'^ '('! IDENT 'in'! qualified ')'! ruleBlock

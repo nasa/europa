@@ -37,7 +37,7 @@ namespace EUROPA {
      m_returnType = returnType;
      m_argumentCount = argumentCount;
   }
- 
+
   NddlFunction::NddlFunction(NddlFunction &copy)
   {
      m_name = copy.getName();
@@ -45,16 +45,16 @@ namespace EUROPA {
      m_returnType = copy.getReturnType();
      m_argumentCount = copy.getArgumentCount();
   }
- 
+
   NddlFunction::~NddlFunction()
   {
   }
- 
+
   const char* NddlFunction::getName()
   {
      return m_name.c_str();
   }
- 
+
   const char* NddlFunction::getConstraint()
   {
      return m_constraint.c_str();
@@ -67,7 +67,7 @@ namespace EUROPA {
   {
      return m_argumentCount;
   }
- 
+
 
   // TODO: keep using pdbClient?
   const DbClientId& getPDB(EvalContext& context)
@@ -350,7 +350,7 @@ namespace EUROPA {
   {
   }
 
-  ExprExpression::ExprExpression(NddlFunction* func, std::vector<ExprExpression*> args, DataTypeId data) 
+  ExprExpression::ExprExpression(NddlFunction* func, std::vector<ExprExpression*> args, DataTypeId data)
     : m_count(s_counter++), m_name("FUNC"), m_lhs(NULL),  m_rhs(NULL), m_target(NULL), m_func(func), m_args(args), m_data(data), m_enforceContext(false), m_returnArgument(NULL)
   {
   }
@@ -371,16 +371,20 @@ namespace EUROPA {
   }
 
   bool isTimepoint(DataRef var) {
+      // TODO JRB: this optimization is tripping an assert for me. disabling until grammar is clean
+      return false;
+      /*
     ConstrainedVariable *cvar = var.getValue();
     return dynamic_cast< TokenVariable<IntervalIntDomain>* >(cvar) != NULL
       && (cvar->getName().toString() == "end" || cvar->getName().toString() == "start");
+      */
   }
 
   std::string ExprExpression::createVariableName() const {
     char buff[15];
     sprintf(buff, "%u", m_count);
     std::string variable = std::string("implicit_var_" + std::string(buff) + "_" + toString()).c_str();
-    
+
     //Detect if the variable contains illegal characters and rewrite it if it does.
     for (unsigned int i = 0; i < variable.size(); i++) {
       if ((variable[i] > '9' || variable[i] < '0') && (variable[i] < 'A' || variable[i] > 'Z')
@@ -401,7 +405,7 @@ namespace EUROPA {
   bool ExprExpression::isSingletonOptimizable() {
     return (m_name == "+" || m_name == "-" || m_name == "*");
   }
-  
+
   void ExprExpression::setReturnArgument(ExprExpression *arg) {
     m_returnArgument = arg;
   }
@@ -412,7 +416,7 @@ namespace EUROPA {
     } else if (m_name == "FUNC") {
       //Create the variable name
       std::string variable = this->createVariableName();
-      
+
       ExprVarDeclaration* var = new ExprVarDeclaration(variable.c_str(), m_data, NULL, false);
       DataRef output = var->eval(context);
 
@@ -474,7 +478,7 @@ namespace EUROPA {
 	return m_lhs->eval(context);
       }
     }
-    
+
     DataRef left = m_lhs->eval(context), right = m_rhs->eval(context);
 
 
@@ -498,24 +502,24 @@ namespace EUROPA {
       if (m_returnArgument) {
 	output = m_returnArgument->eval(context);
 	//Make addEq a temporal constraint.
-	if (isTimepoint(left) || isTimepoint(right) || isTimepoint(output)) {	  
+	if (isTimepoint(left) || isTimepoint(right) || isTimepoint(output)) {
 	  if (constraint == "addEq") {
 	    check_runtime_error(!isTimepoint(left) || !isTimepoint(right) || !isTimepoint(output), "You can't add two timepoints up to make a third time point.");
-	    
+
 	    constraint = "temporalDistance";
 	  }
 	}
       } else {
 	//Create the variable name
 	std::string variable = this->createVariableName();
-	
+
 	//Declare the implicit return variable
 	ExprVarDeclaration* var = new ExprVarDeclaration(variable.c_str(), data, NULL, false);
 	output = var->eval(context);
-	
+
 	delete var;
       }
-      
+
       //Make the constraint's arguments when return type present
       if (m_name == "-") {
 	args.push_back(output.getValue());
@@ -561,7 +565,7 @@ namespace EUROPA {
 
     return output;
   }
-  
+
 
   std::string ExprExpression::toString() const {
     if (m_rhs && m_lhs) {
@@ -580,12 +584,12 @@ namespace EUROPA {
       if (m_enforceContext) { op += "_enf"; }
       return m_lhs->toString() + "_" + op + "_" + m_rhs->toString();
     } else if (m_target) {
-      ExprConstant* constTarg = dynamic_cast<ExprConstant*>(m_target); 
+      ExprConstant* constTarg = dynamic_cast<ExprConstant*>(m_target);
 
       if (constTarg) {
 	return constTarg->getConstantValue();
       }
-      
+
       if (m_target->getDataType().isId() && m_target->getDataType().isValid()) {
 	return m_target->getDataType()->getName().c_str();
       }
@@ -905,7 +909,7 @@ namespace EUROPA {
     vars.push_back(target->targetvar());    \
     makeConstraint(context,LabelStr(#relationname), vars); \
   }
-    
+
 
 #define makeStrictPrecedenceRelation(origin, originvar, target, targetvar) { \
     PlanDatabase* db = (PlanDatabase*)(context.getElement("PlanDatabase"));\
