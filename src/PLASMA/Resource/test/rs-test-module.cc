@@ -1113,6 +1113,7 @@ public:
   static bool test() {
     EUROPA_runTest(testReservoir);
     EUROPA_runTest(testReusable);
+    EUROPA_runTest(testReservoirRemove);
     return true;
   }
 private:
@@ -1153,6 +1154,37 @@ private:
     throwaway.discard(false);
 
     //test flaws and violations once we have a decent profile and detector
+    RESOURCE_DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  static bool testReservoirRemove() {
+    RESOURCE_DEFAULT_SETUP(ce, db, false);
+    //setup two reservoirs
+    Reservoir res1(db.getId(), LabelStr("Reservoir"), LabelStr("Battery1"), LabelStr("OpenWorldFVDetector"), LabelStr("TimetableProfile"),
+                   10, 10, 0, 1000, 0, 5);
+    Reservoir res2(db.getId(), LabelStr("Reservoir"), LabelStr("Battery2"), LabelStr("OpenWorldFVDetector"), LabelStr("TimetableProfile"),
+			 10, 10, 0, 1000);
+
+    //create a flaw
+    ConsumerToken c1(db.getId(), LabelStr("Reservoir.consume"), IntervalIntDomain(0, 10), IntervalDomain(3, 5));
+    ConsumerToken c2(db.getId(), LabelStr("Reservoir.consume"), IntervalIntDomain(0, 10), IntervalDomain(3, 5));
+
+    c1.getObject()->specify(res1.getId());
+    c2.getObject()->specify(res1.getId());
+
+    CPPUNIT_ASSERT(ce.propagate());
+    CPPUNIT_ASSERT(res1.hasTokensToOrder());
+
+    //in the 
+    c1.getObject()->reset();
+
+    CPPUNIT_ASSERT(ce.propagate());
+
+    c1.getObject()->specify(res1.getId());
+
+    CPPUNIT_ASSERT(ce.propagate());
+
     RESOURCE_DEFAULT_TEARDOWN();
     return true;
   }

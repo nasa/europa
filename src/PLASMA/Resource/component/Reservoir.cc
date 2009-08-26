@@ -42,14 +42,14 @@ namespace EUROPA {
 // 		 "Token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ") isn't in the profile.");
       if(m_tokensToTransactions.find(tok) == m_tokensToTransactions.end())
 	return;
-      debugMsg("Reservoir:removeFromProfile", "Removing token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
-      ReservoirTokenId t(tok); //just for error checking
+      debugMsg("Reservoir:removeFromProfile", toString() << " Removing token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
+
       TransactionId trans = m_tokensToTransactions.find(tok)->second;
       m_profile->removeTransaction(trans);
       m_tokensToTransactions.erase(tok);
       m_transactionsToTokens.erase(trans);
-      m_flawedTokens.erase(tok);
       delete (Transaction*) trans;
+      Resource::removeFromProfile(tok);
     }
 
     void Reservoir::getOrderingChoices(const TokenId& token,

@@ -70,7 +70,8 @@ namespace EUROPA {
 				      const DomainListener::ChangeType& changeType){
     if(m_currentDomain.isOpen())
       return true;
-
+    debugMsg("ObjectTokenRelation:canIgnore", m_token->toString() << " Received notification of change type " << changeType << " on variable " <<
+             variable->toString());
     if(changeType == DomainListener::RESET || changeType == DomainListener::RELAXED){
       if (m_token->isActive()){ // Still active so must have been object variable relaxed. Notify Additions.
 	// Otherwise, handle possible notifications for new values in object domain.
@@ -106,6 +107,7 @@ namespace EUROPA {
       check_error(object.isValid());
       if(m_notifiedObjects.find(object) == m_notifiedObjects.end()){
 	m_notifiedObjects.insert(object);
+        debugMsg("ObjectTokenRelation:notifyAdditions", "Adding " << m_token->toString() << " to " << object->toString());
 	object->add(m_token);
       }
     }
@@ -124,6 +126,7 @@ namespace EUROPA {
     while(it!=m_notifiedObjects.end()){
       ObjectId object = *it;
       if(!isActive || !m_currentDomain.isMember(object)){
+        debugMsg("ObjectTokenRelation:notifyRemovals", "Removing " << m_token->toString() << " from " << object->toString());
 	object->remove(m_token);
 	m_notifiedObjects.erase(it++);
       }
