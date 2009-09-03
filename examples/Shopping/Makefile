@@ -18,10 +18,6 @@ prebuild:
 postbuild:
 	echo Build Completed Successfully!
 
-PROJECT_INITIAL_STATE = $(PROJECT)-initial-state.xml
-project-initial-state: prebuild $(PROJECT_INITIAL_STATE)
-$(PROJECT_INITIAL_STATE): $(PROJECT)-initial-state.nddl $(PROJECT)-model.nddl
-
 PROJECT_SWIG = $(call findtarget,$(PROJECT)_wrap$(BUILD_SUFFIX).o)
 project-swig: prebuild $(PROJECT_SWIG)
 $(PROJECT_SWIG): $(PROJECT).i
@@ -38,7 +34,7 @@ $(PROJECT_RT): $(call findtarget,$(PROJECT)-Main$(BUILD_SUFFIX).o) \
                $(call findtarget,$(PROJECT)CustomCode$(BUILD_SUFFIX).o) \
                $(call findtarget,Module$(PROJECT)$(BUILD_SUFFIX).o)
 
-RUN_PROJECT = RUN_$(notdir $(PROJECT_RT)).$(notdir $(PROJECT_INITIAL_STATE)).PlannerConfig.xml.output
+RUN_PROJECT = RUN_$(notdir $(PROJECT_RT)).$(notdir $(PROJECT)-initial-state.nddl).PlannerConfig.xml.output
 run-project: prebuild $(RUN_PROJECT)
 $(RUN_PROJECT): $(PROJECT_RT) $(PROJECT)-initial-state.nddl PlannerConfig.xml
 	./$+ > $@
@@ -49,4 +45,4 @@ $(PROJECT_JAR): $(PROJECT_SWIG)
 	$(ANT) $(PROJECT) 
 
 clean:
-	$(RM) build $(RUN_PROJECT) $(PROJECT)-model.hh $(PROJECT_INITIAL_STATE) $(PROJECT)-model.cc $(PROJECT)_wrap.cc
+	$(RM) build $(RUN_PROJECT) $(PROJECT)-model.hh $(PROJECT)-model.cc $(PROJECT)_wrap.cc
