@@ -1,4 +1,5 @@
 /* vim: set ts=8 ft=antlr3: */
+//Add numbers here to force rebuild until bug fixed: 1
 tree grammar NDDL3Tree;
 
 options {
@@ -1019,6 +1020,12 @@ enforceExpression returns [Expr* result]
 @init { ExprExpression *value = NULL; BoolDomain* dom = NULL; ExprConstant* con = NULL; std::vector<Expr*> args; }
         : ^(EXPRESSION_ENFORCE a=expression[value]) { 
             value->setEnforceContext();
+            /*try {
+                value->checkType();
+            } catch(std::string msg) {
+                reportSemanticError(CTX, msg);
+            }*/
+            
             if (value->hasReturnValue()) {
                 dom = new BoolDomain(true); 
                 con = new ExprConstant(dom->getTypeName().c_str(), dom); 

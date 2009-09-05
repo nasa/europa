@@ -26,6 +26,7 @@ tokens {
 {
 #include "NddlInterpreter.hh"
 
+
 using namespace EUROPA;
 
 // Forward declaration so that we can use this function in apifuncs
@@ -292,7 +293,7 @@ predicateArgument
 	;
 
 constraintInstantiation
-	:	IDENT variableArgumentList ';'
+	:	((IDENT variableArgumentList ';')=>IDENT variableArgumentList ';')
 			-> ^(CONSTRAINT_INSTANTIATION IDENT variableArgumentList)
 		| enforceStatement	
 	;
@@ -368,7 +369,7 @@ flowControl
 @init {
    bool hasElse = false;
 } 
-    :	'if' '(' result=cexpression ')' a=ruleBlock ('else' b=ruleBlock {hasElse = true;}|) 
+    :	'if' '(' result=cexpression ')' a=ruleBlock (('else')=> 'else' b=ruleBlock {hasElse = true;}|) 
          -> {hasElse == false}? ^('if' ^(EXPRESSION_RETURN $result) $a)
          -> ^('if' ^(EXPRESSION_RETURN $result) $a $b)
 	|	'foreach'^ '('! IDENT 'in'! qualified ')'! ruleBlock
