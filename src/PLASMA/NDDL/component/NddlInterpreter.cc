@@ -146,27 +146,31 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
     NDDL3Parser_nddl_return result = parser->nddl(parser);
     int errorCount = parser->pParser->rec->state->errorCount + lexer->pLexer->rec->state->errorCount;
     if (errorCount > 0) {
-        std::ostringstream os;
-        os << "The parser returned " << errorCount << " errors" << std::endl;
-
         // Since errors are no longer printed during parsing, print them here
-        // to stderr and to the return stream
-        std::vector<NddlParserException> *lerrors = lexer->lexerErrors;
-        std::vector<NddlParserException> *perrors = parser->parserErrors;
-        for (std::vector<NddlParserException>::const_iterator it = lerrors->begin(); it != lerrors->end(); ++it) {
-        	std::cerr << *it << std::endl;
-        	os << *it << std::endl;
+        // to debugMsg
+        std::vector<PSLanguageException> *lerrors = lexer->lexerErrors;
+        std::vector<PSLanguageException> *perrors = parser->parserErrors;
+        for (std::vector<PSLanguageException>::const_iterator it = lerrors->begin(); it != lerrors->end(); ++it) {
+        	debugMsg("NddlInterpreter:interpret", it->asString());
         }
-        for (std::vector<NddlParserException>::const_iterator it = perrors->begin(); it != perrors->end(); ++it) {
-        	std::cerr << *it << std::endl;
-        	os << *it << std::endl;
+        for (std::vector<PSLanguageException>::const_iterator it = perrors->begin(); it != perrors->end(); ++it) {
+        	debugMsg("NddlInterpreter:interpret", it->asString());
         }
+        // Copy errors over
+        std::vector<PSLanguageException> all(*lerrors);
+        for (std::vector<PSLanguageException>::const_iterator it = perrors->begin(); it != perrors->end(); ++it)
+        	all.push_back(*it);
+
+        // Close everything nicely
         parser->free(parser);
         tstream->free(tstream);
         lexer->free(lexer);
         input->close(input);
-        debugMsg("NddlInterpreter:interpret",os.str());
-        return os.str();
+
+        debugMsg("NddlInterpreter:interpret", "Interpreter returned errors");
+
+        // Now throw the whole thing
+        throw PSLanguageExceptionList(all);
     }
     else {
         debugMsg("NddlInterpreter:interpret","NDDL AST:\n" << result.tree->toStringTree(result.tree)->chars);
@@ -625,7 +629,7 @@ void NddlSymbolTable::checkObjectFactory(const char* name, const std::vector<Exp
     std::vector<const AbstractDomain*> argTypes;
     for (unsigned int i=0;i<args.size();i++)
       argTypes.push_back(&args[i]->getDataType()->baseDomain());
-    
+
     ObjectFactoryId factory = getPlanDatabase()->getSchema()->getObjectFactory(name, argTypes, false);
     if (factory.isNoId()) {
       std::string argsig = "";
@@ -747,8 +751,8 @@ std::string NddlToASTInterpreter::interpret(std::istream& ins, const std::string
     std::ostringstream os;
 
     // Add errors, if any
-    std::vector<NddlParserException> *lerrors = lexer->lexerErrors;
-    std::vector<NddlParserException> *perrors = parser->parserErrors;
+    std::vector<PSLanguageException> *lerrors = lexer->lexerErrors;
+    std::vector<PSLanguageException> *perrors = parser->parserErrors;
 
     for (unsigned int i=0; i<lerrors->size(); i++)
     	os << "L" << (*lerrors)[i] << "$\n";
@@ -892,14 +896,14 @@ pANTLR3_STRING toVerboseStringTree(pANTLR3_BASE_TREE tree)
 	return  string;
 }
 
-NddlParserException::NddlParserException(const char *fileName, int line,
+PSLanguageException::PSLanguageException(const char *fileName, int line,
 		int offset, int length, const char *message) :
   m_line(line), m_offset(offset), m_length(length), m_message(message) {
   if (fileName) m_fileName = fileName;
   else fileName = "No_File";
 }
 
-ostream &operator<<(ostream &os, const NddlParserException &ex)
+ostream &operator<<(ostream &os, const PSLanguageException &ex)
 {
 	os << "\"" << ex.m_fileName << "\":" <<ex.m_line << ":" << ex.m_offset << ":"
 		<< ex.m_length << " " << ex.m_message;
@@ -907,10 +911,21 @@ ostream &operator<<(ostream &os, const NddlParserException &ex)
 	return os;
 }
 
-std::string NddlParserException::asString() const {
+std::string PSLanguageException::asString() const {
 	std::ostringstream os;
 	os << *this;
 	return os.str();
+}
+
+PSLanguageExceptionList::PSLanguageExceptionList(const std::vector<PSLanguageException>& exceptions) :
+  m_exceptions(exceptions) {}
+
+ostream &operator<<(ostream &os, const PSLanguageExceptionList &ex) {
+	os << "Got " << ex.m_exceptions.size() << " exceptions: " << std::endl;
+	for (std::vector<EUROPA::PSLanguageException>::const_iterator it = ex.m_exceptions.begin();
+		it != ex.m_exceptions.end(); ++it)
+		os << *it << std::endl;
+	return os;
 }
 
 
@@ -944,11 +959,11 @@ void reportParserError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 *tokenN
 		}
 	}
 
-	NddlParserException exception(fileName, line, offset, length, message);
+	PSLanguageException exception(fileName, line, offset, length, message);
 
 	pANTLR3_PARSER parser = (pANTLR3_PARSER) recognizer->super;
 	pNDDL3Parser ctx = (pNDDL3Parser) parser->super;
-	std::vector<NddlParserException> *errors = ctx->parserErrors;
+	std::vector<PSLanguageException> *errors = ctx->parserErrors;
 	errors->push_back(exception);
 
 	// std::cout << errors->size() << "; " << (*errors)[errors->size()-1];
@@ -966,10 +981,10 @@ void reportLexerError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 *tokenNa
 	const char* message = static_cast<const char *>(recognizer->state->exception->message);
 	int offset = ex->charPositionInLine+1;
 
-	NddlParserException exception(fileName, line, offset, 1, message);
+	PSLanguageException exception(fileName, line, offset, 1, message);
 
 	pNDDL3Lexer ctx = (pNDDL3Lexer) lexer->ctx;
-	std::vector<NddlParserException> *errors = ctx->lexerErrors;
+	std::vector<PSLanguageException> *errors = ctx->lexerErrors;
 	errors->push_back(exception);
 
 	// std::cout << errors->size() << "; " << (*errors)[errors->size()-1];

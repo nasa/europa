@@ -8,6 +8,7 @@
 #include "Error.hh"
 #include "PSPlanDatabaseListener.hh"
 #include "PSConstraintEngineListener.hh"
+#include "NddlInterpreter.hh"
 %}
 
 %rename(PSException) Error;  // Our Error C++ class is wrapped instead as PSException
@@ -17,6 +18,38 @@
     return getMsg();
   }
 %}
+
+%typemap(javabase) EUROPA::PSLanguageExceptionList "java.lang.RuntimeException";  // extends RuntimeException
+%typemap(javacode) EUROPA::PSLanguageExceptionList %{  // copied verbatim into the java code
+  public String getMessage() {
+    return "Got " + getExceptionCount() + " errors";
+  }
+%}
+
+
+// Specific exception handlers should be defined before the catch-all version
+%exception executeScript {
+  try {
+     $action
+  } catch (const EUROPA::PSLanguageExceptionList &e) {
+		jclass excepClass = jenv->FindClass("psengine/PSLanguageExceptionList");
+		if (excepClass == NULL)
+			return $null;
+
+		jmethodID excepConstructor = jenv->GetMethodID(excepClass, "<init>", "(JZ)V");
+		if(excepConstructor == NULL)
+			return $null;
+
+		jthrowable excep = static_cast<jthrowable> (jenv->NewObject(excepClass, excepConstructor, new EUROPA::PSLanguageExceptionList(e), true));
+		if(excep == NULL)
+			return $null;
+		else
+			jenv->Throw(excep);
+
+		return $null;
+   }
+}
+
 
 // Generic exception handling will wrap all functions with the following try/catch block:
 // copied from http://www.swig.org/Doc1.3/Java.html#exception_handling
@@ -72,6 +105,29 @@ private:
 };
 
 namespace EUROPA {
+
+  class PSLanguageException {
+  public:
+	const std::string& getFileName() const;
+	int getLine() const;
+	int getOffset() const;
+	int getLength() const;
+	const std::string& getMessage() const;
+  protected:
+    // Prevent auto-generation
+  	PSLanguageException(const char *fileName, int line, int offset, int length,
+			const char *message);  
+  };
+  
+  class PSLanguageExceptionList {
+  public:
+    int getExceptionCount() const;
+    const PSLanguageException& getException(int index) const;
+  protected:
+    // Prevent auto-generation
+	PSLanguageExceptionList(const std::vector<PSLanguageException>& exceptions);
+  };
+
 
   typedef int TimePoint;
   typedef int PSEntityKey;
@@ -150,7 +206,7 @@ namespace EUROPA {
       }
   }
 
-  public String executeScript(String language, java.io.Reader reader) throws PSException {
+  public String executeScript(String language, java.io.Reader reader) throws PSLanguageExceptionList {
     String retval = "";
     
     String txns = null;
@@ -201,7 +257,7 @@ namespace EUROPA {
       return nddlInterpreter_;
   }
 
-  public String executeScript(String language, String script, boolean isFile) throws PSException
+  public String executeScript(String language, String script, boolean isFile) throws PSLanguageExceptionList
   {
       String retval = "";
       
@@ -216,7 +272,10 @@ namespace EUROPA {
             retval = executeScript_internal(language,script,isFile);
         }
       }
-      catch(Exception e) {
+      catch (PSLanguageExceptionList e) {
+        // This exception derives from RuntimeException and needs not be declared
+        throw e;
+      } catch(Exception e) {
           e.printStackTrace();
           throw new RuntimeException("Failed to execute "+language+" script "+script,e);
       }

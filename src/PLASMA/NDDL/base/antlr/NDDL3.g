@@ -36,13 +36,13 @@ static void newNDDL3ParserFree(pNDDL3Parser ctx);
 
 @parser::context 
 {
-    std::vector<NddlParserException>* parserErrors;
+    std::vector<PSLanguageException>* parserErrors;
 }
 
 @parser::apifuncs
 {
     RECOGNIZER->displayRecognitionError = reportParserError;
-    ctx->parserErrors = new std::vector<NddlParserException>;
+    ctx->parserErrors = new std::vector<PSLanguageException>;
     ctx->free = newNDDL3ParserFree;
     // This is needed so that we can get to the CTX from reportParseError
     // Thanks to http://www.antlr.org/pipermail/antlr-interest/2009-May/034567.html
@@ -72,13 +72,13 @@ static void newNDDL3LexerFree(pNDDL3Lexer ctx);
 
 @lexer::context {
     NddlInterpreter* parserObj;
-    std::vector<NddlParserException>* lexerErrors;
+    std::vector<PSLanguageException>* lexerErrors;
 }
 
 @lexer::apifuncs
 {
     RECOGNIZER->displayRecognitionError = reportLexerError;
-    ctx->lexerErrors = new std::vector<NddlParserException>;
+    ctx->lexerErrors = new std::vector<PSLanguageException>;
     ctx->free = newNDDL3LexerFree;
 }
 

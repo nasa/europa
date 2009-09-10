@@ -135,20 +135,39 @@ public:
     virtual std::string interpret(std::istream& input, const std::string& source);
 };
 
-class NddlParserException
+class PSLanguageException
 {
 public:
-	NddlParserException(const char *fileName, int line, int offset, int length,
+	PSLanguageException(const char *fileName, int line, int offset, int length,
 			const char *message);
-	friend ostream &operator<<(ostream &, const NddlParserException &);
+	friend ostream &operator<<(ostream &, const PSLanguageException &);
 	/** Prepare this exception for shipping with AST */
 	std::string asString() const;
+
+	const std::string& getFileName() const { return m_fileName; }
+	int getLine() const { return m_line; }
+	int getOffset() const { return m_offset; }
+	int getLength() const { return m_length; }
+	const std::string& getMessage() const { return m_message; }
 protected:
 	std::string m_fileName;
 	int m_line;
 	int m_offset;
 	int m_length;
 	std::string m_message;
+};
+
+class PSLanguageExceptionList
+{
+public:
+	PSLanguageExceptionList(const std::vector<PSLanguageException>& exceptions);
+	friend std::ostream &operator<<(std::ostream &, const PSLanguageExceptionList &);
+    int getExceptionCount() const { return m_exceptions.size(); }
+    const PSLanguageException& getException(int index) const {
+    	return m_exceptions[index];
+    }
+protected:
+	std::vector<PSLanguageException> m_exceptions;
 };
 
 void reportParserError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 *tokenNames);
