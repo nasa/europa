@@ -24,7 +24,7 @@ class Bar extends Foo {
 // Declare a derived class which adds another argument to an inherited predicate
 class Baz extends Foo {
  predicate pred1{
-  float arg2; // Add an additional parameter
+  int arg2; // Add an additional parameter
  }
 }
 
@@ -47,6 +47,6 @@ goal(baz.pred1 t3);
 
 // Constraint values to ensure access to derived class and base class predicate parameters
 t3.arg1 = 1;
-t3.arg2 = 2.0;
+t3.arg2 = 2;
 lt(t3.arg1, t3.arg2);
 t3.start=0;

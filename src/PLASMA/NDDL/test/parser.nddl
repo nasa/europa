@@ -41,6 +41,8 @@ eq(alphaalpha, -1);
 true || false;
 true && true;
 
+eq(1, 1.0);
+
 ///End
 
 positive pos;

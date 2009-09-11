@@ -60,7 +60,7 @@ World::initialState{
  leq(a.end, b.start);
 
  any(Battery.consume tx);
- eq(tx.quantity, 4);
+ eq(tx.quantity, 4.0);
 }
 
 World world = new World();

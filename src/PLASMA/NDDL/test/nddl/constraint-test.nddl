@@ -14,7 +14,7 @@ class Sample extends Timeline {
   subsetOf(p2, p3); // A binary constraint using 2 variables
   subsetOf(p2, [10 20]); // A binary constraint, but one is locked - meaning a constant
   eq(p4, [1.0 2.0]);
-  eq(p2, [11.0 18.0]);
+  eq(p2, [11 18]);
  }
 }
 
