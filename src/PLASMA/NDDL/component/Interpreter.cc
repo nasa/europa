@@ -370,6 +370,59 @@ namespace EUROPA {
     m_enforceContext = true;
   }
 
+  const DataTypeId ExprExpression::getDataType() const {
+    if (!hasReturnValue()) { 
+      return VoidDT::instance(); //In an optimizable enforce statement, there is a void return
+    } else if (m_name == "==" || m_name == "<=" || m_name == ">=" || m_name == "!=" || m_name == ">" || m_name == "<" || m_name == "||" || m_name == "&&") {
+      return BoolDT::instance(); //Boolean return from relationals and boolean ops.
+    } else if (m_name == "PASS") {
+      check_error(m_target, "Pass-through expressions should have a target.");
+      return m_target->getDataType();
+    } else if (m_name == "FUNC") {
+      return m_data; //For function returns.
+    } else if (m_name == "+" || m_name == "*" || m_name == "-") {
+      check_error(m_lhs && m_rhs, "No arguments to arithmetic expression.");
+      return m_lhs->getDataType();
+    }
+    return VoidDT::instance();
+  }
+
+  void ExprExpression::checkType() {
+    DataTypeId myType = getDataType();
+    if (m_lhs) {
+      m_lhs->checkType();
+    }
+    if (m_rhs) {
+      m_rhs->checkType();
+    }
+    for (std::vector<ExprExpression*>::iterator it = m_args.begin(); it != m_args.end(); it++) {
+      (*it)->checkType();
+    }
+
+    if (m_name == "PASS") {
+      return; //Don't care
+    } else if (m_name == "||" || m_name == "&&") {
+      if (!m_lhs->getDataType()->isAssignableFrom(BoolDT::instance()) || !BoolDT::instance()->isAssignableFrom(m_lhs->getDataType())) {
+	throw std::string("In a " + m_name + " expression, both arguments must be of type boolean. In this case, " 
+			  + m_lhs->getDataType()->getName().c_str() + " from \"" + m_lhs->toString() + "\" is not a boolean.");
+      }
+      if (!m_rhs->getDataType()->isAssignableFrom(BoolDT::instance()) || !BoolDT::instance()->isAssignableFrom(m_rhs->getDataType())) {
+	throw std::string("In a " + m_name + " expression, both arguments must be of type boolean. In this case, " 
+			  + m_rhs->getDataType()->getName().c_str() + " from \"" + m_rhs->toString() + "\" is not a boolean.");
+      }
+    } else if (m_name == "+" || m_name == "-" || m_name == "*" || m_name == "==" 
+	       || m_name == "<=" || m_name == ">=" || m_name == "!=" || m_name == ">" || m_name == "<") {
+      if (!m_rhs->getDataType()->isAssignableFrom(m_lhs->getDataType()) || !m_lhs->getDataType()->isAssignableFrom(m_rhs->getDataType())) {
+	throw std::string("Cannot use types " + std::string(m_lhs->getDataType()->getName().c_str()) + " and " 
+			  + std::string(m_rhs->getDataType()->getName().c_str()) + "in expression: " + toString());
+      }
+    } else if (m_name == "FUNC") {
+      return; //TODO
+    } else {
+      check_runtime_error(ALWAYS_FAIL, "Warning no type check for expression: " + toString() + "\n");
+    }
+  }
+
   bool isTimepoint(DataRef var) {
       // TODO JRB: this optimization is tripping an assert for me. disabling until grammar is clean
       return false;

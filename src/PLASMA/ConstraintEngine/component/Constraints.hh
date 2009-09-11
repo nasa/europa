@@ -8,6 +8,55 @@
 
 namespace EUROPA {
 
+#define CREATE_CONSTRAINT_BASE(basename)				\
+  class basename : public ConstraintType {				\
+  public:								\
+    basename(const LabelStr& name,					\
+	     const LabelStr& propagatorName,				\
+	     bool systemDefined = false)				\
+      : ConstraintType(name,propagatorName,systemDefined) { m_name = name.c_str(); } \
+    									\
+    virtual ~basename() {}						\
+    									\
+    virtual ConstraintId createConstraint(const ConstraintEngineId constraintEngine, \
+					  const std::vector<ConstrainedVariableId>& scope) = 0; \
+    									\
+    virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) const; \
+  protected:								\
+    std::string m_name;							\
+  };
+
+  CREATE_CONSTRAINT_BASE(TwoSameArgumentsCT);
+  CREATE_CONSTRAINT_BASE(TwoSameNumericArgumentsCT);
+  CREATE_CONSTRAINT_BASE(TestTwoSameArgumentsCT);
+  CREATE_CONSTRAINT_BASE(TestTwoSameNumericArgumentsCT);
+  CREATE_CONSTRAINT_BASE(TwoBooleanArgumentsCT);
+  CREATE_CONSTRAINT_BASE(ThreeBooleanArgumentsCT);
+  CREATE_CONSTRAINT_BASE(AllSameArgumentsCT);
+  CREATE_CONSTRAINT_BASE(AllSameNumericArgumentsCT);
+  CREATE_CONSTRAINT_BASE(TestOneArgumentCT);
+
+
+#define CREATE_CONSTRAINT_TYPE(base, name, constraint) \
+  class name : public base {			       \
+  public:					       \
+  name(const LabelStr& name,			       \
+       const LabelStr& propagatorName,		       \
+       bool systemDefined = false)					\
+    : base(name,propagatorName,systemDefined) {}			\
+  ~name() {}							\
+  virtual ConstraintId createConstraint(const ConstraintEngineId constraintEngine, \
+					const std::vector<ConstrainedVariableId>& scope) \
+    {									\
+      return makeConstraintInstance<constraint>(m_name, m_propagatorName, constraintEngine, scope); \
+    } \
+  };
+
+
+
+
+
+
   /**
    * @brief AbsoluteValue(x, y) maintains the relation:
    * @li x.lb >= 0
@@ -216,6 +265,7 @@ class LessThanEqualConstraint : public Constraint {
     static const int Y = 1;
     static const int ARG_COUNT = 2;
   };
+  CREATE_CONSTRAINT_TYPE(TwoSameNumericArgumentsCT, LessThanEqualCT, LessThanEqualConstraint);
 
 class CardinalityConstraint : public Constraint {
   public:
@@ -366,7 +416,7 @@ class CountZerosConstraint : public Constraint {
     static const int ARG_COUNT = 3;
   };
 
-class EqualConstraint : public Constraint {
+  class EqualConstraint : public Constraint {
   public:
     EqualConstraint(const LabelStr& name,
 		    const LabelStr& propagatorName,
@@ -384,6 +434,7 @@ class EqualConstraint : public Constraint {
     bool equate(const ConstrainedVariableId& v1, const ConstrainedVariableId& v2, bool& isEmpty);
     const unsigned int m_argCount;
   };
+  CREATE_CONSTRAINT_TYPE(TwoSameArgumentsCT, EqualCT, EqualConstraint);
 
       class EqualMaximumConstraint : public Constraint {
   public:
@@ -501,6 +552,7 @@ class LessThanConstraint : public Constraint {
     static const int Y = 1;
     static const int ARG_COUNT = 2;
   };
+  CREATE_CONSTRAINT_TYPE(TwoSameNumericArgumentsCT, LessThanCT, LessThanConstraint);
 
 class GreaterThanSumConstraint : public Constraint {
   public:
@@ -906,8 +958,9 @@ class SwapTwoVarsConstraint : public Constraint {
     AbstractDomain& m_arg2;
     static const unsigned int ARG_COUNT = 3;
   };
+  CREATE_CONSTRAINT_TYPE(ThreeBooleanArgumentsCT, TestAndCT, TestAnd);
 
-class TestEQ : public Constraint {
+  class TestEQ : public Constraint {
   public:
     TestEQ(const LabelStr& name,
 	   const LabelStr& propagatorName,
@@ -922,8 +975,9 @@ class TestEQ : public Constraint {
     AbstractDomain& m_arg2;
     static const unsigned int ARG_COUNT = 3;
   };
+  CREATE_CONSTRAINT_TYPE(TestTwoSameArgumentsCT, TestEQCT, TestEQ);
 
-            class TestLessThan : public Constraint {
+  class TestLessThan : public Constraint {
   public:
     TestLessThan(const LabelStr& name,
 		 const LabelStr& propagatorName,
@@ -938,6 +992,7 @@ class TestEQ : public Constraint {
     AbstractDomain& m_arg2;
     static const unsigned int ARG_COUNT = 3;
   };
+  CREATE_CONSTRAINT_TYPE(TestTwoSameNumericArgumentsCT, TestLessThanCT, TestLessThan);
 
   class TestLEQ : public Constraint {
   public:
@@ -954,6 +1009,7 @@ class TestEQ : public Constraint {
     AbstractDomain& m_arg2;
     static const unsigned int ARG_COUNT = 3;
   };
+  CREATE_CONSTRAINT_TYPE(TestTwoSameNumericArgumentsCT, TestLEQCT, TestLEQ);
 
 
   /**
@@ -992,6 +1048,7 @@ class TestEQ : public Constraint {
     AbstractDomain& m_arg2;
     static const unsigned int ARG_COUNT = 3;
   };
+  CREATE_CONSTRAINT_TYPE(TestTwoSameArgumentsCT, TestNEQCT, TestNEQ);
 
 class TestOr : public Constraint {
   public:
@@ -1008,6 +1065,7 @@ class TestOr : public Constraint {
     AbstractDomain& m_arg2;
     static const unsigned int ARG_COUNT = 3;
   };
+  CREATE_CONSTRAINT_TYPE(ThreeBooleanArgumentsCT, TestOrCT, TestOr);
 
 
 class TestSingleton : public Constraint {
@@ -1025,6 +1083,8 @@ class TestSingleton : public Constraint {
     static const unsigned int ARG_COUNT = 2;
   };
 
+  CREATE_CONSTRAINT_TYPE(TestOneArgumentCT, TestSingletonCT, TestSingleton);
+
 class TestSpecified : public Constraint {
   public:
     TestSpecified(const LabelStr& name,
@@ -1039,6 +1099,7 @@ class TestSpecified : public Constraint {
     AbstractDomain& m_arg1;
     static const unsigned int ARG_COUNT = 2;
   };
+  CREATE_CONSTRAINT_TYPE(TestOneArgumentCT, TestSpecifiedCT, TestSpecified);
 
 class UnaryConstraint : public Constraint {
   public:

@@ -100,27 +100,33 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(ces,CountNonZerosConstraint, "cardeq", "Default"); // cardinality equals
       REGISTER_CONSTRAINT(ces,CountZerosConstraint, "CountZeros", "Default");
       REGISTER_CONSTRAINT(ces,DistanceFromSquaresConstraint, "distanceSquares", "Default");
-      REGISTER_CONSTRAINT(ces,EqualConstraint, "asame", "Default"); // all same
-      REGISTER_CONSTRAINT(ces,EqualConstraint, "eq", "Default");
-      REGISTER_CONSTRAINT(ces,EqualConstraint, "fasame", "Default"); // flexible all same
-      REGISTER_CONSTRAINT(ces,EqualConstraint, "Equal", "Default");
+
+      REGISTER_CONSTRAINT_TYPE(ces,EqualCT, "asame", "Default"); // all same
+      REGISTER_CONSTRAINT_TYPE(ces,EqualCT, "eq", "Default");
+      REGISTER_CONSTRAINT_TYPE(ces,EqualCT, "fasame", "Default"); // flexible all same
+      REGISTER_CONSTRAINT_TYPE(ces,EqualCT, "Equal", "Default");
+
       REGISTER_CONSTRAINT(ces,EqualMaximumConstraint, "EqualMaximum", "Default");
       REGISTER_CONSTRAINT(ces,EqualMaximumConstraint, "fallmax", "Default"); // flexible all max
       REGISTER_CONSTRAINT(ces,EqualMinimumConstraint, "fallmin", "Default"); // flexible all min
       REGISTER_CONSTRAINT(ces,EqualMinimumConstraint, "EqualMinimum", "Default");
       REGISTER_CONSTRAINT(ces,EqualProductConstraint, "product", "Default");
       REGISTER_CONSTRAINT(ces,EqualProductConstraint, "EqualProduct", "Default");
+
       REGISTER_CONSTRAINT(ces,EqualSumConstraint, "EqualSum", "Default");
       REGISTER_CONSTRAINT(ces,EqualSumConstraint, "sum", "Default");
+
       REGISTER_CONSTRAINT(ces,GreaterThanSumConstraint, "GreaterThanSum", "Default");
       REGISTER_CONSTRAINT(ces,GreaterOrEqThanSumConstraint, "GreaterOrEqThanSum", "Default");
       REGISTER_CONSTRAINT(ces,LessOrEqThanSumConstraint, "leqsum", "Default");
       REGISTER_CONSTRAINT(ces,LessOrEqThanSumConstraint, "LessOrEqThanSum", "Default");
-      REGISTER_CONSTRAINT(ces,LessThanConstraint, "lt", "Default");
-      REGISTER_CONSTRAINT(ces,LessThanConstraint, "lessThan", "Default");
-      REGISTER_CONSTRAINT(ces,LessThanConstraint, "LessThan", "Default");
-      REGISTER_CONSTRAINT(ces,LessThanEqualConstraint, "leq", "Default");
-      REGISTER_CONSTRAINT(ces,LessThanEqualConstraint, "LessThanEqual", "Default");
+
+      REGISTER_CONSTRAINT_TYPE(ces,LessThanCT, "lt", "Default");
+      REGISTER_CONSTRAINT_TYPE(ces,LessThanCT, "lessThan", "Default");
+      REGISTER_CONSTRAINT_TYPE(ces,LessThanCT, "LessThan", "Default");
+      REGISTER_CONSTRAINT_TYPE(ces,LessThanEqualCT, "leq", "Default");
+      REGISTER_CONSTRAINT_TYPE(ces,LessThanEqualCT, "LessThanEqual", "Default");
+
       REGISTER_CONSTRAINT(ces,LessThanSumConstraint, "LessThanSum", "Default");
       REGISTER_CONSTRAINT(ces,LockConstraint, "Lock", "Default");
       REGISTER_CONSTRAINT(ces,MemberImplyConstraint, "MemberImply", "Default");
@@ -139,18 +145,21 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(ces,SubsetOfConstraint, "SubsetOf", "Default");
       REGISTER_CONSTRAINT(ces,SubsetOfConstraint, "subsetOf", "Default");
       REGISTER_CONSTRAINT(ces,SubsetOfConstraint, "Singleton", "Default");
-      REGISTER_CONSTRAINT(ces,TestAnd, "testAnd", "Default");
-      REGISTER_CONSTRAINT(ces,TestEQ, "TestEqual", "Default");
-      REGISTER_CONSTRAINT(ces,TestEQ, "testEQ", "Default");
-      REGISTER_CONSTRAINT(ces,TestLessThan, "TestLessThan", "Default");
-      REGISTER_CONSTRAINT(ces,TestLessThan, "condlt", "Default");
-      REGISTER_CONSTRAINT(ces,TestLEQ, "condleq", "Default");
-      REGISTER_CONSTRAINT(ces,TestLEQ, "testLEQ", "Default");
-      REGISTER_CONSTRAINT(ces,TestNEQ, "testNEQ", "Default");
-      REGISTER_CONSTRAINT(ces,TestOr, "testOr", "Default");
-      REGISTER_CONSTRAINT(ces,TestSingleton, "testSingleton", "Default");
-      REGISTER_CONSTRAINT(ces,TestSpecified, "testSpecified", "Default");
+
+      REGISTER_CONSTRAINT_TYPE(ces,TestAndCT, "testAnd", "Default");
+      REGISTER_CONSTRAINT_TYPE(ces,TestEQCT, "TestEqual", "Default");
+      REGISTER_CONSTRAINT_TYPE(ces,TestEQCT, "testEQ", "Default");
+      REGISTER_CONSTRAINT_TYPE(ces,TestLessThanCT, "TestLessThan", "Default");
+      REGISTER_CONSTRAINT_TYPE(ces,TestLessThanCT, "condlt", "Default");
+      REGISTER_CONSTRAINT_TYPE(ces,TestLEQCT, "condleq", "Default");
+      REGISTER_CONSTRAINT_TYPE(ces,TestLEQCT, "testLEQ", "Default");
+      REGISTER_CONSTRAINT_TYPE(ces,TestNEQCT, "testNEQ", "Default");
+      REGISTER_CONSTRAINT_TYPE(ces,TestOrCT, "testOr", "Default");
+      REGISTER_CONSTRAINT_TYPE(ces,TestSingletonCT, "testSingleton", "Default");
+      REGISTER_CONSTRAINT_TYPE(ces,TestSpecifiedCT, "testSpecified", "Default");
+
       REGISTER_CONSTRAINT(ces,UnaryConstraint, "UNARY", "Default");
+
       REGISTER_CONSTRAINT(ces,WithinBounds, "WithinBounds", "Default");
       REGISTER_CONSTRAINT(ces,WithinBounds, "withinBounds", "Default");
 

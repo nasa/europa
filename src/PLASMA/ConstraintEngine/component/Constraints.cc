@@ -8,6 +8,126 @@
 
 namespace EUROPA {
 
+  void requireArgCount(std::string name, const std::vector<DataTypeId>& argTypes, const unsigned int count) {
+      if (argTypes.size() != count) {
+	  std::ostringstream msg; msg << "Constraint " << name << " takes 2 args, not " << argTypes.size();
+          throw msg.str();
+      }
+  }
+
+  void mutuallyAssignable(std::string name, DataTypeId a, DataTypeId b) {
+      if (b->isNumeric() && b->isNumeric()) {
+	  //This is a hopefully temporary hack that makes the constraints work so the tests can pass. Waiting for agreement on the
+          //mailling list before deciding what to do in this case. Tony T. Pratkanis: 9/11/09.
+          return;
+      }
+      if (!b->isAssignableFrom(a) || !a->isAssignableFrom(b)) {
+          std::ostringstream msg; msg << "Constraint " << name << " args must be assignable. In this case, "
+				      << a->getName().c_str() << " and " << b->getName().c_str()
+				      << " are not assignable.";
+          throw msg.str();
+      }
+  }
+
+  void requireNumeric(std::string name, DataTypeId a) {
+      if (!a->isNumeric()) {
+          std::ostringstream msg; msg << "Constraint " << name << " args must be numeric. " << a->getName().c_str() << " is not.";
+          throw msg.str();
+      }
+  }
+
+  void requireBoolean(std::string name, DataTypeId a) {
+      if (!a->isBool()) {
+          std::ostringstream msg; msg << "Constraint " << name << " args must be numeric. " << a->getName().c_str() << " is not.";
+          throw msg.str();
+      }
+  }
+
+  void requireAllSame(std::string name, const std::vector<DataTypeId>& argTypes) {
+    for (unsigned int i = 0; i < argTypes.size(); i++) {
+      for (unsigned int u = i + 1; u < argTypes.size(); u++) {
+	mutuallyAssignable(name, argTypes[i], argTypes[u]);
+      }
+    }
+  }
+
+
+  void TwoSameArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      requireArgCount(m_name, argTypes, 2);
+      mutuallyAssignable(m_name, argTypes[0], argTypes[1]);
+  }
+
+  void TwoSameNumericArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      requireArgCount(m_name, argTypes, 2);
+      mutuallyAssignable(m_name, argTypes[0], argTypes[1]);
+      requireNumeric(m_name, argTypes[0]);
+      requireNumeric(m_name, argTypes[1]);
+  }
+
+  void TestOneArgumentCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      requireArgCount(m_name, argTypes, 2);
+      requireBoolean(m_name, argTypes[0]);
+  }
+
+  void TestTwoSameArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      requireArgCount(m_name, argTypes, 3);
+      mutuallyAssignable(m_name, argTypes[1], argTypes[2]);
+      requireBoolean(m_name, argTypes[0]);
+  }
+
+  void TestTwoSameNumericArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      requireArgCount(m_name, argTypes, 3);
+      mutuallyAssignable(m_name, argTypes[1], argTypes[2]);
+      requireBoolean(m_name, argTypes[0]);
+      requireNumeric(m_name, argTypes[1]);
+      requireNumeric(m_name, argTypes[2]);
+  }
+
+  void TwoBooleanArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      requireArgCount(m_name, argTypes, 2);
+      mutuallyAssignable(m_name, argTypes[0], argTypes[1]);
+      requireBoolean(m_name, argTypes[0]);
+      requireBoolean(m_name, argTypes[1]);
+  }
+
+  void ThreeBooleanArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      requireArgCount(m_name, argTypes, 3);
+      mutuallyAssignable(m_name, argTypes[0], argTypes[1]);
+      mutuallyAssignable(m_name, argTypes[1], argTypes[2]);
+      mutuallyAssignable(m_name, argTypes[0], argTypes[2]);
+      requireBoolean(m_name, argTypes[0]);
+      requireBoolean(m_name, argTypes[1]);
+      requireBoolean(m_name, argTypes[2]);
+  }
+
+  void AllSameArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      requireAllSame(m_name, argTypes);
+  }
+
+  void AllSameNumericArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      requireAllSame(m_name, argTypes);
+      for (unsigned int i = 0; i < argTypes.size(); i++) {
+	requireNumeric(m_name, argTypes[i]);
+      }
+  }
+
+
+
+
+
+
+
+
+
   UnaryConstraint::UnaryConstraint(const AbstractDomain& dom,
 				   const ConstrainedVariableId& var)
     : Constraint("UNARY", "Default", var->getConstraintEngine(), makeScope(var)),

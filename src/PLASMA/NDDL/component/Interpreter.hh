@@ -338,6 +338,10 @@ namespace EUROPA {
         bool isSingletonOptimizable();
 
         void setReturnArgument(ExprExpression *arg);
+
+        void checkType();
+
+        virtual const DataTypeId getDataType() const;
     protected:
         std::string createVariableName() const;
 
