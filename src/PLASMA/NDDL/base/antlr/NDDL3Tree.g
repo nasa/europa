@@ -11,7 +11,6 @@ options {
 @context {
     NddlSymbolTable* SymbolTable;
     NddlInterpreter* parserObj;
-    bool allowEval;
 }
 
 @includes
@@ -79,37 +78,30 @@ static void popContext(pNDDL3Tree treeWalker)
     // use the meat from displayRecognitionError() in antlr3baserecognizer.c
 }
 
-nddl  
-@init {
-    bool forceEval = false;
-}             
+nddl      
 	: ^(NDDL
 		( {
 		     // debugMsg("NddlInterpreter:nddl","Line:" << LEXER->getLine(LEXER)); 
 		  }
-		  (	child=classDeclaration { forceEval = true; }
-          | child=enumDefinition { forceEval = true; }
-		  |	child=typeDefinition { forceEval = true; }
-		  |	child=variableDeclarations { forceEval = false; }
-		  |	child=assignment { forceEval = false; }
-		  |	child=constraintInstantiation { forceEval = false; }
-		  |	child=enforceExpression { forceEval = false; }
-		  |	child=allocation[NULL] { forceEval = false; }
-		  |	child=rule { forceEval = false; }
-		  |	child=problemStmt { forceEval = false; }
-		  |	child=relation { forceEval = false; }
-		  |	child=methodInvocation { forceEval = false; }
-		  |	child=constraintSignature { forceEval = false; }
+		  (	child=classDeclaration
+          | child=enumDefinition
+		  |	child=typeDefinition
+		  |	child=variableDeclarations
+		  |	child=assignment
+		  |	child=constraintInstantiation
+		  |	child=enforceExpression
+		  |	child=allocation[NULL]
+		  |	child=rule
+		  |	child=problemStmt
+		  |	child=relation
+		  |	child=methodInvocation
+		  |	child=constraintSignature
 		  ) 
 		  {
 		      if (child != NULL) { 
 		          debugMsg("NddlInterpreter:nddl","Evaluating:" << child->toString());
-                  if (CTX->allowEval || forceEval) {
-                      if (forceEval && !CTX->allowEval) {
-                          debugMsg("NddlInterpreter:nddl","Evaluation Forced!");
-                      }
-                      evalExpr(CTX,child);
-                  }
+                  evalExpr(CTX,child);
+
 		          // TODO!!: systematically deal with memory mgmt for all Exprs.
 		          delete child;
 		          child = NULL; 
@@ -1003,16 +995,12 @@ expression [ExprExpression* &returnValue]
         }
         |       ^(FUNCTION_CALL name=IDENT ^('(' expressionList[args]*))
         {
-            NddlFunction* func = CTX->SymbolTable->getFunction(c_str($name.text->chars));
+            FunctionType* func = getFunction(c_str($name.text->chars));
 
             if (!func) {
-                //reportSemanticError(CTX, "Bad function: " + c_str($name.text->chars));
-                //Hack here for Conor to have anything he wants be function
-                func = new NddlFunction(c_str($name.text->chars), 
-                                        c_str($name.text->chars), "bool", 0); //Not args == 0 -> args check does not do anything.
-                CTX->SymbolTable->addFunction(func);
+                reportSemanticError(CTX, "Function does not exist: " + std::string(c_str($name.text->chars)));
             }
-            returnValue = new ExprExpression(new NddlFunction(*func), args, CTX->SymbolTable->getDataType(func->getReturnType()));
+            returnValue = new ExprExpression(new FunctionType(*func), args, CTX->SymbolTable->getDataType(func->getReturnType()));
         }
         ;
 

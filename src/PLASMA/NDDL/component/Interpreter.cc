@@ -30,15 +30,34 @@
 namespace EUROPA {
   void makeConstraint(EvalContext& context, const LabelStr& name, const std::vector<ConstrainedVariableId>& vars);
 
-  NddlFunction::NddlFunction(const char* name, const char* constraint, const char* returnType, unsigned int argumentCount)
+  std::vector<FunctionType*> g_functionTypes;
+  
+  DECLARE_FUNCTION_TYPE(isSingleton, "testSingleton", "bool", 1);
+  DECLARE_FUNCTION_TYPE(isSpecified, "testSpecified", "bool", 1);
+  
+
+  FunctionType* getFunction(std::string name) {
+    for (unsigned int i = 0; i < g_functionTypes.size(); i++) {
+      if (g_functionTypes[i]->getName() == name) {
+	return g_functionTypes[i];
+      }
+    }
+    return NULL;
+  }
+
+
+  FunctionType::FunctionType(const char* name, const char* constraint, const char* returnType, unsigned int argumentCount, bool addToList)
   {
+     if (addToList) {
+        g_functionTypes.push_back(this);
+     }
      m_name = name;
      m_constraint = constraint;
      m_returnType = returnType;
      m_argumentCount = argumentCount;
   }
 
-  NddlFunction::NddlFunction(NddlFunction &copy)
+  FunctionType::FunctionType(FunctionType &copy)
   {
      m_name = copy.getName();
      m_constraint = copy.getConstraint();
@@ -46,24 +65,24 @@ namespace EUROPA {
      m_argumentCount = copy.getArgumentCount();
   }
 
-  NddlFunction::~NddlFunction()
+  FunctionType::~FunctionType()
   {
   }
 
-  const char* NddlFunction::getName()
+  const char* FunctionType::getName()
   {
      return m_name.c_str();
   }
 
-  const char* NddlFunction::getConstraint()
+  const char* FunctionType::getConstraint()
   {
      return m_constraint.c_str();
   }
-  const char* NddlFunction::getReturnType()
+  const char* FunctionType::getReturnType()
   {
      return m_returnType.c_str();
   }
-  unsigned int NddlFunction::getArgumentCount()
+  unsigned int FunctionType::getArgumentCount()
   {
      return m_argumentCount;
   }
@@ -350,7 +369,7 @@ namespace EUROPA {
   {
   }
 
-  ExprExpression::ExprExpression(NddlFunction* func, std::vector<ExprExpression*> args, DataTypeId data)
+  ExprExpression::ExprExpression(FunctionType* func, std::vector<ExprExpression*> args, DataTypeId data)
     : m_count(s_counter++), m_name("FUNC"), m_lhs(NULL),  m_rhs(NULL), m_target(NULL), m_func(func), m_args(args), m_data(data), m_enforceContext(false), m_returnArgument(NULL)
   {
   }

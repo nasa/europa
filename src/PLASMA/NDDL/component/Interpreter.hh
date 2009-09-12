@@ -16,13 +16,13 @@
 namespace EUROPA {
 
   //TODO: Rename
-  class NddlFunction;
-  class NddlFunction 
+  class FunctionType;
+  class FunctionType 
   {
   public:
-    NddlFunction(const char* name, const char* constraint, const char* returnType, unsigned int argumentCount);
-    NddlFunction(NddlFunction& copy);
-    ~NddlFunction();
+    FunctionType(const char* name, const char* constraint, const char* returnType, unsigned int argumentCount, bool addToList = false);
+    FunctionType(FunctionType& copy);
+    ~FunctionType();
     const char* getName();
     const char* getConstraint();
     const char* getReturnType();
@@ -31,6 +31,10 @@ namespace EUROPA {
     std::string m_name, m_constraint, m_returnType;
     unsigned int m_argumentCount;
   };
+
+  extern std::vector<FunctionType*> g_functionTypes;
+#define DECLARE_FUNCTION_TYPE(name, constraint, returnType, argumentCount) FunctionType g_function_##name(#name, constraint, returnType, argumentCount, true);
+  FunctionType* getFunction(std::string name);
   
 
   class ExprConstant : public Expr
@@ -322,7 +326,7 @@ namespace EUROPA {
     public:
         ExprExpression(std::string name, ExprExpression* left, ExprExpression* right);
         ExprExpression(Expr* target);
-        ExprExpression(NddlFunction* func, std::vector<ExprExpression*> args, DataTypeId data);
+        ExprExpression(FunctionType* func, std::vector<ExprExpression*> args, DataTypeId data);
         virtual ~ExprExpression();
 
         virtual DataRef eval(EvalContext& context) const;
@@ -350,7 +354,7 @@ namespace EUROPA {
         std::string m_name;
         ExprExpression *m_lhs, *m_rhs;
         Expr *m_target;
-        NddlFunction* m_func;
+        FunctionType* m_func;
         std::vector<ExprExpression*> m_args;
         DataTypeId m_data;
         bool m_enforceContext;
@@ -358,8 +362,7 @@ namespace EUROPA {
   };
 
   // InterpretedToken is the interpreted version of NddlToken
-  class InterpretedToken : public IntervalToken
-  {
+  class InterpretedToken : public IntervalToken  {
   	public:
   	    // Same Constructor signatures as NddlToken, TODO: see if both are needed
   	    InterpretedToken(const PlanDatabaseId& planDatabase,

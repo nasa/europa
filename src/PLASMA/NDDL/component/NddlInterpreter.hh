@@ -38,9 +38,6 @@ public:
     virtual TokenTypeId getTypeForToken(const char* name);
     virtual TokenTypeId getTypeForToken(const char* qualifiedName,std::string& errorMsg);
 
-    virtual void addFunction(NddlFunction* func);
-    virtual NddlFunction* getFunction(const char* name) const;
-
     AbstractDomain* makeNumericDomainFromLiteral(const std::string& type,const std::string& value);
 
     void checkConstraint(const char* name,const std::vector<Expr*>& args);
@@ -66,7 +63,6 @@ protected:
 
     EngineId m_engine;
     std::vector<std::string> m_errors;
-    std::vector<NddlFunction*> m_functions;
     std::map<std::string,DataTypeId> m_localVars;
     std::map<std::string,TokenTypeId> m_localTokens;
 

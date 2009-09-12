@@ -182,7 +182,6 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
 
     NddlSymbolTable symbolTable(m_engine);
     treeParser->SymbolTable = &symbolTable;
-    treeParser->allowEval = true;
 
     try {
         treeParser->nddl(treeParser);
@@ -225,18 +224,10 @@ NddlSymbolTable::NddlSymbolTable(const EngineId& engine)
     , m_parentST(NULL)
     , m_engine(engine)
 {
-    m_functions.push_back(new NddlFunction("equalTestFunction", "testEQ", "bool", 2));
-    m_functions.push_back(new NddlFunction("isSingleton", "testSingleton", "bool", 1));
-    m_functions.push_back(new NddlFunction("isSpecified", "testSpecified", "bool", 1));
 }
 
 NddlSymbolTable::~NddlSymbolTable()
 {
-    while(!m_functions.empty())
-    {
-	delete m_functions[0];
-	m_functions.erase(m_functions.begin());
-    }
 }
 
 NddlSymbolTable* NddlSymbolTable::getParentST() { return m_parentST; }
@@ -259,26 +250,6 @@ std::string NddlSymbolTable::getErrors() const
         os << errors()[i] << std::endl;
 
     return os.str();
-}
-
-void NddlSymbolTable::addFunction(NddlFunction* func)
-{
-    m_functions.push_back(func);
-}
-
-NddlFunction* NddlSymbolTable::getFunction(const char* name) const
-{
-    for (unsigned int i = 0; i < m_functions.size(); i++)
-    {
-	if (!strcmp(m_functions[i]->getName(), name)) {
-            return m_functions[i];
-	}
-    }
-    if (m_parentST)
-    {
-        return m_parentST->getFunction(name);
-    }
-    return NULL;
 }
 
 void* NddlSymbolTable::getElement(const char* name) const
