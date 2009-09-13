@@ -163,7 +163,7 @@ class DebugTest {
 public:
   static bool test() {
     EUROPA_runTest(testDebugError);
-//    EUROPA_runTest(testDebugFiles);
+    EUROPA_runTest(testDebugFiles);
 //     EUROPA_runTest(testLog4cpp);
 //     EUROPA_runTest(testLogger);
     return true;
@@ -184,13 +184,11 @@ private:
     return(success);
   }
 
-/*
   static bool testDebugFiles() {
     for (int i = 1; i < 7; i++)
       runDebugTest(i);
     return(true);
   }
-*/
 //   /** Tests that log4cpp functionality is installed and working */
 //   static bool testLog4cpp() {
 //     bool success = true;
@@ -211,8 +209,9 @@ private:
 //   }
 
 
-/*
   static void runDebugTest(int cfgNum) {
+    std::cout << "Running runDebugTest(" << cfgNum << ")" << std::endl;
+
 #if !defined(EUROPA_FAST) && defined(DEBUG_MESSAGE_SUPPORT)
     std::stringstream cfgName;
     cfgName << "../../Utils/test/debug" << cfgNum << ".cfg";
@@ -221,7 +220,7 @@ private:
     std::string cfgOut(cfgName.str());
 
     Error::doNotThrowExceptions();
-    Error::doNotDisplayErrors();
+//     Error::doNotDisplayErrors();
     std::ofstream debugOutput(cfgOut.c_str());
     CPPUNIT_ASSERT_MESSAGE("could not open debug output file", debugOutput.good());
     DebugMessage::setStream(debugOutput);
@@ -241,7 +240,6 @@ private:
     DebugMessage::setStream(std::cerr);
 #endif
   }
-*/
 
 
 };

@@ -122,12 +122,13 @@ if $(OS) = BEOS {
 if $(OS) = CYGWIN || $(OS) = MINGW {
   SUFSHARE ?= .dll ;
 } else {
-	if $(OS) = MACOSX {
-	   SUFSHARE ?= .dylib ;
-	}
-	else {
-     SUFSHARE ?= .so ;
-	}
+  if $(OS) = MACOSX {
+    SUFSHARE ?= .dylib ;
+  }
+  else 
+  {
+    SUFSHARE ?= .so ;
+  }
 }
 
 # JAVA_HOME = java root directory

@@ -6,17 +6,12 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <set>
 
-#include "log4cpp/Portability.hh"
-#include "log4cpp/Category.hh"
-#include "log4cpp/CategoryStream.hh"
-#include "log4cpp/FileAppender.hh"
-#include "log4cpp/BasicLayout.hh"
-
-using std::string;
 using std::exception;
 using std::ifstream;
 using std::set;
+using std::string;
 
 namespace EUROPA {
 	namespace Utils {
@@ -80,14 +75,14 @@ public:
 	    //process config file here
 	    //while (!file.eof()) file.get();
 	} catch (ifstream::failure e) {
-	    log4cpp::Category::getRoot().log( log4cpp::Priority::WARN,
-			   "EUROPA::Utils::LoggerConfig",
-			      "Exception opening/reading Logger configuration file" );
+// 	    log4cpp::Category::getRoot().log( log4cpp::Priority::WARN,
+// 			   "EUROPA::Utils::LoggerConfig",
+// 			      "Exception opening/reading Logger configuration file" );
 	    //+ configFilename); // + ":" + e.what());
 	} catch( LoggerConfigException e ) {
-	    log4cpp::Category::getRoot().log( log4cpp::Priority::WARN,
-			   "EUROPA::Utils::LoggerConfig",
-			      "Exception parsing Logger configuration file");
+// 	    log4cpp::Category::getRoot().log( log4cpp::Priority::WARN,
+// 			   "EUROPA::Utils::LoggerConfig",
+// 			      "Exception parsing Logger configuration file");
 	    //	      + configFilename );// + ":" + e.what());
 	}
 
@@ -132,24 +127,36 @@ public:
     // note that there are even TRACE debug levels allowed by log4j:
     //    CONFIG < FINE < FINER < FINEST
     // we provide these as an experimental extension (they might get unexpectedly removed)
-    enum Level {
- 	OFF = log4cpp::Priority::EMERG - 1,       //log4cpp    NA   ( -1)
-	//EMERG = log4cpp::Priority::EMERG,       //log4cpp =   0
-	FATAL = log4cpp::Priority::FATAL,         //log4cpp =   0
-	//ALERT = log4cpp::Priority::ALERT,       //log4cpp = 100
-	//CRIT = log4cpp::Priority::CRIT,         //log4cpp = 200
-	ERROR = log4cpp::Priority::ERROR,         //log4cpp = 300
-	WARN =  log4cpp::Priority::WARN,          //log4cpp = 400
-	//NOTICE = log4cpp::Priority::NOTICE,     //log4cpp = 500
-	INFO =  log4cpp::Priority::INFO,          //log4cpp = 600
-	DEBUG  = log4cpp::Priority::DEBUG,        //log4cpp = 700
-	CONFIG = log4cpp::Priority::DEBUG + 20,   //log4cpp    NA   (720)
-	FINE   = log4cpp::Priority::DEBUG + 40,   //log4cpp    NA   (740)
-	FINER  = log4cpp::Priority::DEBUG + 60,   //log4cpp    NA   (760)
-	FINEST = log4cpp::Priority::DEBUG + 80,   //log4cpp    NA   (780)
-	ALL  = log4cpp::Priority::NOTSET          //log4cpp = 800
-    };
+//     enum Level {
+//  	OFF = log4cpp::Priority::EMERG - 1,       //log4cpp    NA   ( -1)
+// 	//EMERG = log4cpp::Priority::EMERG,       //log4cpp =   0
+// 	FATAL = log4cpp::Priority::FATAL,         //log4cpp =   0
+// 	//ALERT = log4cpp::Priority::ALERT,       //log4cpp = 100
+// 	//CRIT = log4cpp::Priority::CRIT,         //log4cpp = 200
+// 	ERROR = log4cpp::Priority::ERROR,         //log4cpp = 300
+// 	WARN =  log4cpp::Priority::WARN,          //log4cpp = 400
+// 	//NOTICE = log4cpp::Priority::NOTICE,     //log4cpp = 500
+// 	INFO =  log4cpp::Priority::INFO,          //log4cpp = 600
+// 	DEBUG  = log4cpp::Priority::DEBUG,        //log4cpp = 700
+// 	CONFIG = log4cpp::Priority::DEBUG + 20,   //log4cpp    NA   (720)
+// 	FINE   = log4cpp::Priority::DEBUG + 40,   //log4cpp    NA   (740)
+// 	FINER  = log4cpp::Priority::DEBUG + 60,   //log4cpp    NA   (760)
+// 	FINEST = log4cpp::Priority::DEBUG + 80,   //log4cpp    NA   (780)
+// 	ALL  = log4cpp::Priority::NOTSET          //log4cpp = 800
+//     };
 
+
+    enum Level {
+      OFF   = log4cxx::Level::OFF_INT,     //log4cxx = MAX_INT
+      FATAL = log4cxx::Level::FATAL_INT,   //log4cxx = 50000
+      ERROR = log4cxx::Level::ERROR_INT,   //log4cxx = 40000
+      WARN  = log4cxx::Level::WARN_INT,    //log4cxx = 30000
+      INFO  = log4cxx::Level::INFO_INT,    //log4cxx = 20000
+      DEBUG = log4cxx::Level::DEBUG_INT,   //log4cxx = 10000
+      TRACE = log4cxx::Level::TRACE_INT,   //log4cxx =  5000
+      ALL   = log4cxx::Level::ALL_INT      //log4cxx = INT_MIN
+    };
+  
 
     Level intToLevel( int value ) {
 	return Level( value );
@@ -173,7 +180,7 @@ public:
      */
     Logger( string catName ) {
 	categoryName = catName;
-	currentCategory = &(log4cpp::Category::getInstance( categoryName ));
+// 	currentCategory = &(log4cpp::Category::getInstance( categoryName ));
     }
 
     ~Logger() { }
@@ -184,12 +191,13 @@ public:
     /** Changes the debug level for the current category.
      */
     void setLevel( Level level ) {
- 	currentCategory->setPriority( level );
+//  	currentCategory->setPriority( level );
     }
     /** Returns the debug level for the current category.
      */
     Level getLevel() {
-	return intToLevel( currentCategory->getPriority());
+// 	return intToLevel( currentCategory->getPriority());
+	  return ALL;
     }
 
     /** Logs a message at the default level for this category.  This
@@ -205,8 +213,8 @@ public:
      * message will always be visible, regardless of the level.
      */
     void log( string msg ) {
-	unsigned int level = currentCategory->getPriority();
-	currentCategory->log( level, msg );
+// 	unsigned int level = currentCategory->getPriority();
+// 	currentCategory->log( level, msg );
     }
 
     /** Logs a trace message at the specified level.  This message may
@@ -214,7 +222,7 @@ public:
      * than or equal to the current level.
      */
     void log( Level level, string msg ) {
-	currentCategory->log( level, msg );
+// 	currentCategory->log( level, msg );
     }
 
 //      /** Breaks encapsulation of the Log4cpp class in case the client
@@ -223,37 +231,37 @@ public:
 //       *  For example, one could use the returned category to get the
 //       *  root category.  Or one could use the stream passing methods.
 //       */
-      log4cpp::Category *getCategory() {
-   	return currentCategory;
-      }
+//       log4cpp::Category *getCategory() {
+//    	return currentCategory;
+//       }
 
-    log4cpp::CategoryStream getStream() {
-//	return log4cpp::CategoryStream( *currentCategory, getLevel() );
-	return currentCategory->critStream();
-    }
+//     log4cpp::CategoryStream getStream() {
+// //	return log4cpp::CategoryStream( *currentCategory, getLevel() );
+// 	return currentCategory->critStream();
+//     }
 
-    log4cpp::CategoryStream operator<<( Level level ) {
- 		return log4cpp::CategoryStream( *currentCategory,  (int) level );
- //	return (*currentCategory) << (int) level;
-     }
+//     log4cpp::CategoryStream operator<<( Level level ) {
+//  	return log4cpp::CategoryStream( *currentCategory,  (int) level );
+//  //	return (*currentCategory) << (int) level;
+//      }
 
-    log4cpp::CategoryStream &operator<<( string msg ) {
-		return (*currentCategory) << getLevel() << msg;
-     }
+//     log4cpp::CategoryStream &operator<<( string msg ) {
+// 	return (*currentCategory) << getLevel() << msg;
+//      }
 
 
-    static log4cpp::CategoryStream& eol (log4cpp::CategoryStream& os) {
-	return log4cpp::eol( os );
-    }
+//     static log4cpp::CategoryStream& eol (log4cpp::CategoryStream& os) {
+// 	return log4cpp::eol( os );
+//     }
 
 //     log4cpp::CategoryStream operator<<( CategoryStream stream ) {
 // 	return log4cpp::CategoryStream( *currentCategory, getLevel() );
 //     }
-//     ostream friend log4cpp::CategoryStream& operator<<( Level level );
-//     ostream friend log4cpp::CategoryStream& operator<<( log4cpp::CategoryStream &cs, string msg );
+//   ostream friend ostream& operator<<( ostream &os, Level level );
+//   ostream friend ostream& operator<<( ostream &os, string msg );
 
 private:
-    log4cpp::Category *currentCategory;
+//     log4cpp::Category *currentCategory;
     string categoryName;
 
 }; //class Logger
@@ -310,18 +318,20 @@ private:
     EUROPA::Utils::Logger &className::LOGGER = EUROPA::Utils::Logger::getInstance( category, EUROPA::Utils::Logger::level ); 
 
   #define LOGGER_CLASS_DEBUG_MSG( className, level, msg ) LOGGER_CLASS_COND_DEBUG_MSG(className, true, level, msg)
-  #define LOGGER_CLASS_COND_DEBUG_MSG( className, cond, level, msg ) {	\
-  if( cond ) {								\
-      className::LOGGER << EUROPA::Utils::Logger::level << msg;		\
-  }									\
-  }
+  #define LOGGER_CLASS_COND_DEBUG_MSG( className, cond, level, msg ) 	{}
+/*   #define LOGGER_CLASS_COND_DEBUG_MSG( className, cond, level, msg ) { \
+	 if( cond ) {														\
+	 className::LOGGER << EUROPA::Utils::Logger::level << msg;			\
+	 }																	\
+	 }*/
   
   #define LOGGER_DEBUG_MSG( level, msg ) LOGGER_COND_DEBUG_MSG(true, level, msg)
-  #define LOGGER_COND_DEBUG_MSG( cond, level, msg )  {	  \
-    if( cond ) {					  \
-      LOGGER << EUROPA::Utils::Logger::level << msg;	  \
-    }                                                     \
-  }
+  #define LOGGER_COND_DEBUG_MSG( cond, level, msg )  {}
+/*  #define LOGGER_COND_DEBUG_MSG( cond, level, msg )  {				\
+	if( cond ) {														\
+	LOGGER << EUROPA::Utils::Logger::level << msg;						\
+	}																	\
+	}*/
 
   #define LOGGER_DEBUG_STMT( stmt ) LOGGER_COND_DEBUG_STMT(true, stmt)
   #define LOGGER_COND_DEBUG_STMT(cond, stmt) {            \

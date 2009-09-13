@@ -29,13 +29,20 @@ rule FVariantC++Flags
 {
   local variant = $(1) ;
 
+  local logType ;
+  if $(LOGGER_TYPE) = USE_EUROPA_LOGGER {
+    logType += -DUSE_EUROPA_LOGGER ;  
+  } else if $(LOGGER_TYPE) = ALL_LOGGING_DISABLED {
+    logType += -DALL_LOGGING_DISABLED ;
+  }
+
   switch $(variant) {
   case DEV :
-    return $(PLATFORM_FLAGS) $(DEBUG_FLAGS) -DDEBUG_MESSAGE_SUPPORT $(WARNING_FLAGS) $(EXTRA_DEFS) ;
+    return $(PLATFORM_FLAGS) $(DEBUG_FLAGS) $(logType) $(WARNING_FLAGS) $(EXTRA_DEFS) ;
   case OPTIMIZED :
-    return $(PLATFORM_FLAGS) $(OPTIMIZE_FLAGS) $(WARNING_FLAGS) $(EXTRA_DEFS) ;
+    return $(PLATFORM_FLAGS) $(OPTIMIZE_FLAGS) $(logType) $(WARNING_FLAGS) $(EXTRA_DEFS) ;
   case PROFILE :
-    return $(PLATFORM_FLAGS) $(OPTIMIZE_FLAGS) $(PROFILE_FLAGS) $(WARNING_FLAGS) $(EXTRA_DEFS) ;
+    return $(PLATFORM_FLAGS) $(OPTIMIZE_FLAGS) $(PROFILE_FLAGS) $(logType) $(WARNING_FLAGS) $(EXTRA_DEFS) ;
   case COVERAGE :
     return $(PLATFORM_FLAGS) $(COVERAGE_FLAGS) $(WARNING_FLAGS) $(EXTRA_DEFS) ;
   case CUSTOM :
@@ -56,6 +63,7 @@ rule FVariantC++Flags
     if $(EUROPA_COVERAGE) {
       flags += $(COVERAGE_FLAGS) ;
     }
+    flags += $(logType) ;
     if $(EUROPA_WARN) {
       flags += $(WARNING_FLAGS) ;
     }

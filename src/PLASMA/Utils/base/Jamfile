@@ -2,9 +2,16 @@ SubDir PLASMA Utils base ;
 
 if ! $(PLASMA_READY) {
 
+local loggerFiles ;
+loggerFiles += Debug.cc ;
+if $(USE_EUROPA_LOGGER)  {
+    loggerFiles += LoggerMgr.cc ;
+}
+
+
 ModuleBase Utils
 	:
-	Debug.cc
+	$(loggerFiles)
 	Factory.cc
 	Engine.cc
 	Entity.cc

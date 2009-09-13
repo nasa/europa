@@ -62,7 +62,7 @@ bool runPlanner(const char* modelFile,
                 const char* language,
                 bool replayRequired)
 {
-  check_error(DebugMessage::isGood());
+  CHECK_DEBUG_STREAM
 
   TestEngine engine;
 

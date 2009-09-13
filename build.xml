@@ -153,10 +153,12 @@
     <property name="jam.exec" value="jam"/>
     <property name="jam.libraries" value="SHARED"/>
     <property name="jam.variant" value="DEV"/>
+    <property name="jam.log.type" value=""/>  <!-- choices are USE_EUROPA_LOGGER, ALL_LOGGING_DISABLED, "" -->
+    <!-- <property name="jam.log.type" value=""/> -->
     <property name="jam.misc" value=""/>
     <property name="jam.args" value=""/>
     <property name="jam.64bit" value=""/>
-    <property name="jam.opts" value="${jam.args} ${jam.misc} ${jam.64bit} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries}"/>
+    <property name="jam.opts" value="${jam.args} ${jam.misc} ${jam.64bit} -sLOGGER_TYPE=${jam.log.type} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries}"/>
   </target>
 
   <target name="print-env" depends="init" 
@@ -201,7 +203,7 @@
   </target>
 
   <target name="build" depends="init">
-    <echo message="jam ${jam.opts}"/>
+    <echo message="jam ${jam.opts} -j${jam.num.cores} build"/>
     <exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
       <arg line="${jam.opts} -j${jam.num.cores} build"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
