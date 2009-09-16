@@ -2,19 +2,19 @@
 #define LOGGER_INTERFACE_H_
 
 #include <iostream>
- 
+
 namespace EUROPA 
 {
 	
 	enum EuropaDebugInt { //copied from log4cxx
-		OFF_INT = INT_MAX,
+		OFF_INT = 1000000,
 		FATAL_INT = 50000,
 		ERROR_INT = 40000,
 		WARN_INT = 30000,
 		INFO_INT = 20000,
 		DEBUG_INT = 10000,
 		TRACE_INT = 5000,
-		ALL_INT = INT_MIN
+		ALL_INT = 0
 	};
 
 	/**
