@@ -22,7 +22,7 @@ EuropaLogger::loggerLevelToString( LoggerLevel level ) {
 		case WARN:
 			return "WARN";	
 			break;
-		case ERROR:
+		case ERROR_LVL:
 			return "ERROR";	
 			break;
 		case FATAL:
@@ -54,7 +54,7 @@ EuropaLogger::stringToLoggerLevel( std::string in ) {
 		return WARN;
 	}
 	if( in.compare( "ERROR" ) == 0 ) {
-		return ERROR;
+	        return ERROR_LVL;
 	}
 	if( in.compare( "FATAL" ) == 0 ) {
 		return FATAL;

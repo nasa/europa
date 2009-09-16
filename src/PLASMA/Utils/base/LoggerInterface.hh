@@ -27,7 +27,7 @@ namespace EUROPA
 		DEBUG = DEBUG_INT,
 		INFO = INFO_INT,
 		WARN = WARN_INT,
-		ERROR = ERROR_INT,
+		ERROR_LVL = ERROR_INT,  //ERROR is a windows macro, so we added "_LVL" to work around this problem
 		FATAL = FATAL_INT, 
 		UNDEFINED = FATAL_INT + 10000
 	};
