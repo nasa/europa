@@ -4,9 +4,10 @@ if ! $(PLASMA_READY) {
 
 local loggerFiles ;
 loggerFiles += Debug.cc ;
-if $(USE_EUROPA_LOGGER)  {
+if $(LOGGER_TYPE) = USE_EUROPA_LOGGER  {
     loggerFiles += LoggerMgr.cc ;
 }
+echo "loggerFiles = " $(loggerFiles) ;
 
 
 ModuleBase Utils
