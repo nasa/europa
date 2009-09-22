@@ -318,6 +318,28 @@
       </fileset>
     </copy> -->
 
+    <if>
+      <isset property="antlr.include"/>
+      <then>
+        <copy todir="${dir.dist.base}/include" flatten="false">
+          <fileset dir="${antlr.include}">
+            <include name="antlr3*.h"/>
+          </fileset>
+        </copy>
+      </then>
+    </if>
+
+    <if>
+      <isset property="antlr.lib"/>
+      <then>
+        <copy todir="${dir.dist.base}/lib" flatten="false">
+          <fileset dir="${antlr.lib}">
+            <include name="libantlr3c.*"/>
+          </fileset>
+        </copy>
+      </then>
+    </if>
+
     <copy todir="${dir.dist.base}/config">
       <fileset dir="${dir.plasma}/config"/>
     </copy>

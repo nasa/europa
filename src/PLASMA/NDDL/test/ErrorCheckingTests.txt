@@ -9,7 +9,7 @@ Unknown data type:Foo
 Incompatible Typedef Value
 nddl/error/IncompatibleTypedefValue.nddl
 {{{
--Imaginary-(line:0), at offset 0, near UP
+-unknown source-(line:0), at offset 0, near UP
 Incompatible types in value set: foo(string) 1(int)
 
 }}}
@@ -17,7 +17,7 @@ Incompatible types in value set: foo(string) 1(int)
 Undefined Variable
 nddl/error/UndefinedVariable.nddl
 {{{
--Imaginary-(line:0), at offset 0, near UP
+-unknown source-(line:0), at offset 0, near UP
 z is not defined
 
 }}}

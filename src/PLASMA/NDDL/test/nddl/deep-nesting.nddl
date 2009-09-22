@@ -1,0 +1,53 @@
+#include "Plasma.nddl"
+
+class Foo extends Timeline {
+  predicate Bar {}
+  Foo() {}
+}
+
+Foo::Bar {
+  int a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20;
+  if(a1 == 1) {
+    if(a2 == 2) {
+      if(a3 == 3) {
+        if(a4 == 4) {
+          if(a5 == 5) {
+            if(a6 == 6) {
+              if(a7 == 7) {
+                if(a8 == 8) {
+                  if(a9 == 9) {
+                    if(a10 == 10) {
+                      if(a11 == 11) {
+                        if(a12 == 12) {
+                          if(a13 == 13) {
+                            if(a14 == 14) {
+                              if(a15 == 15) {
+                                if(a16 == 16) {
+                                  if(a17 == 17) {
+                                    if(a18 == 18) {
+                                      if(a19 == 19) {
+                                        eq(a20, 20);
+                                      }
+                                    }
+                                  }
+                                }                               
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }           
+          }
+        }
+      }
+    }
+  }
+}
+
+Foo foo = new Foo();
+close();
+goal(Foo.Bar b);

@@ -39,6 +39,7 @@ LIB_PREFIX := lib
 SHARED_LINK_FLAG := -shared
 POSITION_INDEPENDENT_FLAG := -fPIC
 DL_LIBRARY := -ldl
+ANTLR_LIBRARY := -lantlr3c
 PLATFORM_LIBS := 
 
 ifneq (,$(findstring Linux,$(UNAME)))
@@ -96,9 +97,9 @@ LOADLIBS += -lSystem$(BUILD_SUFFIX) \
             -lPlanDatabase$(BUILD_SUFFIX) \
             -lConstraintEngine$(BUILD_SUFFIX) \
             -lUtils$(BUILD_SUFFIX) \
-            -lAntlr3$(BUILD_SUFFIX) \
             -lTinyXml$(BUILD_SUFFIX) \
             $(DL_LIBRARY) \
+            $(ANTLR_LIBRARY) \
 	    $(PLATFORM_LIBS) 
 
 vpath %.dylib $(EUROPA_HOME)/lib

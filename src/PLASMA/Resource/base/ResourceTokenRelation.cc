@@ -33,7 +33,7 @@ namespace EUROPA {
 
     bool ResourceTokenRelation::canIgnore(const ConstrainedVariableId& variable,
                                           int argIndex, const DomainListener::ChangeType& changeType) {
-      debugMsg("ResourceTokenRelation:canIgnore", "Received notification of change type " << changeType << " on variable " << variable->toString());
+      debugMsg("ResourceTokenRelation:canIgnore", m_token->toString() << " Received notification of change type " << changeType << " on variable " << variable->toString());
       if(m_token->isDeleted())
         return true;
       ConstrainedVariableId state = m_variables[STATE_VAR];

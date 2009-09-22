@@ -73,14 +73,9 @@ namespace EUROPA {
       m_tokensToTransactions.erase(tok);
       m_transactionsToTokens.erase(trans.first);
       m_transactionsToTokens.erase(trans.second);
-      std::map<TokenId, std::set<InstantId> >::iterator it = m_flawedTokens.find(tok);
-      if(it != m_flawedTokens.end()) {
-        m_flawedTokens.erase(it);
-        notifyOrderingNoLongerRequired(tok);
-      }
       delete (Transaction*) trans.first;
       delete (Transaction*) trans.second;
-
+      Resource::removeFromProfile(tok);
     }
 
     UnaryTimeline::UnaryTimeline(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)

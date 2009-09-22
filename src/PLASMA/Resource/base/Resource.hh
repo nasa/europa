@@ -212,13 +212,14 @@ namespace EUROPA {
       void resetViolations(InstantId inst);
       void resetViolations();
 
+      virtual void addToProfile(const TokenId& tok) = 0;
+      virtual void removeFromProfile(const TokenId& tok);
+
     private:
       friend class ResourceTokenRelation;
 
 
       virtual bool transConstrainedToPrecede(const TransactionId& predecessor, const TransactionId& successor);
-      virtual void addToProfile(const TokenId& tok) = 0;
-      virtual void removeFromProfile(const TokenId& tok) = 0;
 
       bool noFlawedTokensForInst(const InstantId& inst) const;
       //ResourceId m_id;

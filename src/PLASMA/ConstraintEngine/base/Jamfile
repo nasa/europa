@@ -12,6 +12,7 @@ ModuleBase ConstraintEngine
         ConstrainedVariable.cc
         ConstraintType.cc
 	DataType.cc
+        DomainListener.cc
         Propagator.cc
 	PSConstraintEngineListener.cc
         PSVarValue.cc

@@ -166,7 +166,7 @@ namespace EUROPA {
   void Object::remove(const TokenId& token) {
     check_error(token.isValid());
 
-    debugMsg("Object:remove:token", "Removing token " << token->getPredicateName().toString() << "(" << token->getKey() << ")");
+    debugMsg("Object:remove:token", "Removing token " << token->getPredicateName().toString() << "(" << token->getKey() << ")  from " << toString());
     check_error(isValid());
     check_error(!Entity::isPurging());
 
