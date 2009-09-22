@@ -15,7 +15,7 @@
 namespace EUROPA {
 
 // TODO: keep using pdbClient?
-const DbClientId& getPDB(EvalContext& context)
+const DbClientId& getCtxPDB(EvalContext& context)
 {
     // TODO: Add this behavior to EvalContext instead?
     DbClient* dbClient = (DbClient*)context.getElement("DbClient");
@@ -40,7 +40,7 @@ ObjectId varToObject(const ConstrainedVariableId& v)
 
 DataRef PDBClose::eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const
 {
-    getPDB(context)->close();
+    getCtxPDB(context)->close();
     return DataRef::null;
 }
 
@@ -77,22 +77,22 @@ DataRef SpecifyVariable::eval(EvalContext& context, ConstrainedVariableId& var, 
 {
     const AbstractDomain& ad = args[1]->lastDomain();
     if (ad.isSingleton())
-        getPDB(context)->specify(var,ad.getSingletonValue());
+        getCtxPDB(context)->specify(var,ad.getSingletonValue());
     else
-        getPDB(context)->restrict(var,ad);
+        getCtxPDB(context)->restrict(var,ad);
 
     return DataRef::null;
 }
 
 DataRef ResetVariable::eval(EvalContext& context, ConstrainedVariableId& var, const std::vector<ConstrainedVariableId>& args) const
 {
-    getPDB(context)->reset(var);
+    getCtxPDB(context)->reset(var);
     return DataRef::null;
 }
 
 DataRef CloseVariable::eval(EvalContext& context, ConstrainedVariableId& var, const std::vector<ConstrainedVariableId>& args) const
 {
-    getPDB(context)->close(var);
+    getCtxPDB(context)->close(var);
     return DataRef::null;
 }
 
@@ -118,7 +118,7 @@ DataRef ConstrainToken::eval(EvalContext& context, ObjectId& obj, const std::vec
 {
     TokenId pred = varToToken(args[1]);
     TokenId succ = (args.size()==3 ? varToToken(args[2]) : pred);
-    getPDB(context)->constrain(obj,pred,succ);
+    getCtxPDB(context)->constrain(obj,pred,succ);
 
     return DataRef::null;
 }
@@ -127,7 +127,7 @@ DataRef FreeToken::eval(EvalContext& context, ObjectId& obj, const std::vector<C
 {
     TokenId pred = varToToken(args[1]);
     TokenId succ = (args.size()==3 ? varToToken(args[2]) : pred);
-    getPDB(context)->free(obj,pred,succ);
+    getCtxPDB(context)->free(obj,pred,succ);
 
     return DataRef::null;
 }
@@ -153,7 +153,7 @@ const DataTypeId& TokenMethod::getReturnType()
 DataRef ActivateToken::eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const
 {
     if(!tok->isActive()) //Temporary.  Pull out when we scrub test input files. DbClientTransactionPlayer is doing the same
-        getPDB(context)->activate(tok);
+        getCtxPDB(context)->activate(tok);
 
     return DataRef::null;
 }
@@ -161,19 +161,19 @@ DataRef ActivateToken::eval(EvalContext& context, TokenId& tok, const std::vecto
 DataRef MergeToken::eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const
 {
     TokenId activeToken = varToToken(args[1]);
-    getPDB(context)->merge(tok,activeToken);
+    getCtxPDB(context)->merge(tok,activeToken);
     return DataRef::null;
 }
 
 DataRef RejectToken::eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const
 {
-    getPDB(context)->reject(tok);
+    getCtxPDB(context)->reject(tok);
     return DataRef::null;
 }
 
 DataRef CancelToken::eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const
 {
-    getPDB(context)->cancel(tok);
+    getCtxPDB(context)->cancel(tok);
     return DataRef::null;
 }
 
