@@ -135,6 +135,12 @@
         <property name="local.env.LD_LIBRARY_PATH.value" value="${local.env.PLASMA_HOME}/build/lib"/>
       </else>
     </if>
+    <if>
+      <isset property="antlr.include"/>
+      <then>
+        <property name="jam.antlr.include" value="-sPLATFORM_FLAGS=-I${antlr.include}"/>
+      </then>
+    </if>
     <property name="local.env.LD_LIBRARY_PATH.name" value="LD_LIBRARY_PATH"/>
     <property name="dir.plasma" value="${basedir}"/>
     <property name="dir.src" value="src/PLASMA"/>
@@ -157,7 +163,7 @@
     <property name="jam.misc" value=""/>
     <property name="jam.args" value=""/>
     <property name="jam.64bit" value=""/>
-    <property name="jam.opts" value="${jam.args} ${jam.misc} ${jam.64bit} -sLOGGER_TYPE=${jam.log.type} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries}"/>
+    <property name="jam.opts" value="${jam.args} ${jam.misc} ${jam.64bit} -sLOGGER_TYPE=${jam.log.type} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries} ${jam.antlr.include}"/>
     <if>
       <equals arg1="${jam.log.type}" arg2=""/>
       <then>
