@@ -15,15 +15,20 @@
 
 namespace EUROPA {
 
+class Method;
+typedef Id<Method> MethodId;
+
 class Method
 {
 public:
     Method(const char* name);
     virtual ~Method();
 
+    const MethodId& getId() const;
+
     const LabelStr& getName() const;
 
-    virtual DataRef eval(const std::vector<ConstrainedVariableId>& args) const = 0;
+    virtual DataRef eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const = 0;
 
     virtual const std::vector<DataTypeId>& getSignature() = 0;
     virtual const DataTypeId& getReturnType() = 0;
@@ -31,6 +36,7 @@ public:
     virtual std::string toString() const;
 
 protected:
+    MethodId m_id;
     LabelStr m_name;
 };
 

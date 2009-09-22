@@ -10,12 +10,19 @@
 namespace EUROPA {
 
 Method::Method(const char* name)
-    : m_name(name)
+    : m_id(this)
+    , m_name(name)
 {
 }
 
 Method::~Method()
 {
+    m_id.remove();
+}
+
+const MethodId& Method::getId() const
+{
+    return m_id;
 }
 
 const LabelStr& Method::getName() const

@@ -514,6 +514,18 @@ TokenTypeId NddlSymbolTable::getTypeForToken(const char* qualifiedName,std::stri
     return tt;
 }
 
+MethodId NddlSymbolTable::getMethod(const char* methodName,Expr* target,const std::vector<Expr*>& args)
+{
+    if (m_parentST != NULL)
+        return m_parentST->getMethod(methodName,target,args);
+
+    std::vector<DataTypeId> argTypes;
+    for (unsigned int i=0;i<args.size();i++)
+        argTypes.push_back(args[i]->getDataType());
+
+    DataTypeId targetDataType = (target != NULL ? target->getDataType() : DataTypeId::noId());
+    return getPlanDatabase()->getSchema()->getMethod(LabelStr(methodName),targetDataType,argTypes);
+}
 
 AbstractDomain* NddlSymbolTable::makeNumericDomainFromLiteral(const std::string& type,
                                                               const std::string& value)

@@ -6,6 +6,7 @@
 #include "RulesEngineDefs.hh"
 #include "Object.hh"
 #include "ObjectFactory.hh"
+#include "Method.hh"
 #include "IntervalToken.hh"
 #include "TokenType.hh"
 #include "Rule.hh"
@@ -17,7 +18,7 @@ namespace EUROPA {
 
   //TODO: Rename
   class FunctionType;
-  class FunctionType 
+  class FunctionType
   {
   public:
     FunctionType(const char* name, const char* constraint, const char* returnType, unsigned int argumentCount, bool addToList = false);
@@ -35,7 +36,7 @@ namespace EUROPA {
   extern std::vector<FunctionType*> g_functionTypes;
 #define DECLARE_FUNCTION_TYPE(name, constraint, returnType, argumentCount) FunctionType g_function_##name(#name, constraint, returnType, argumentCount, true);
   FunctionType* getFunction(std::string name);
-  
+
 
   class ExprConstant : public Expr
   {
@@ -200,6 +201,21 @@ namespace EUROPA {
       const RuleId m_ruleFactory;
   };
 
+  class ExprMethodCall : public Expr
+  {
+  public:
+      ExprMethodCall(const MethodId& method, Expr* varExpr, const std::vector<Expr*>& argExprs);
+      virtual ~ExprMethodCall();
+
+      virtual DataRef eval(EvalContext& context) const;
+      virtual std::string toString() const;
+
+  protected:
+      MethodId m_method;
+      Expr* m_varExpr;
+      std::vector<Expr*> m_argExprs;
+  };
+
   class ExprVariableMethod : public Expr
   {
   public:
@@ -337,7 +353,7 @@ namespace EUROPA {
 
         void setEnforceContext();
 
-        bool isSingleton(); 
+        bool isSingleton();
 
         bool isSingletonOptimizable();
 

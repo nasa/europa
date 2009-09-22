@@ -38,6 +38,8 @@ public:
     virtual TokenTypeId getTypeForToken(const char* name);
     virtual TokenTypeId getTypeForToken(const char* qualifiedName,std::string& errorMsg);
 
+    virtual MethodId getMethod(const char* methodName,Expr* target,const std::vector<Expr*>& args);
+
     AbstractDomain* makeNumericDomainFromLiteral(const std::string& type,const std::string& value);
 
     void checkConstraint(const char* name,const std::vector<Expr*>& args);

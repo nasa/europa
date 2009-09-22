@@ -15,6 +15,7 @@
 #include "ObjectType.hh"
 #include "ObjectFactory.hh"
 #include "TokenTypeMgr.hh"
+#include "Method.hh"
 
 #include <vector>
 
@@ -360,10 +361,13 @@ namespace EUROPA {
     void registerObjectFactory(const ObjectFactoryId& obj_fact);
     ObjectFactoryId getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments, const bool doCheckError = true);
 
-    void registerTokenType(const TokenTypeId& obj_fact);
+    void registerTokenType(const TokenTypeId& tokenType);
     TokenTypeId getTokenType(const LabelStr& tokenType);
     TokenTypeId getParentTokenType( const LabelStr& tokenType, const LabelStr& parentObjType);
     bool hasTokenTypes() const;
+
+    void registerMethod(const MethodId& m);
+    MethodId getMethod(const LabelStr& methodName, const DataTypeId& targetType, const std::vector<DataTypeId>& argTypes);
 
     //PSSchema methods:
     PSList<std::string> getAllPredicates() const;
@@ -381,6 +385,7 @@ namespace EUROPA {
     std::map<double, ObjectTypeId> m_objTypes; // TODO: this must be subsumed by ObjectTypeMgr, get rid of
     const ObjectTypeMgrId m_objectTypeMgr;
     const TokenTypeMgrId m_tokenTypeMgr;
+    std::map<double, MethodId> m_methods; // TODO: define methodMgr instead of keeping a map here
 
     const LabelStr m_name;
     LabelStr_ValueSet_Map enumValues;

@@ -8,6 +8,7 @@
 #include "DbClientTransactionPlayer.hh"
 #include "Timeline.hh"
 #include "Token.hh"
+#include "Methods.hh"
 
 namespace EUROPA {
 
@@ -77,6 +78,18 @@ namespace EUROPA {
       ot = new ObjectType("Timeline",ot->getId(),true /*isNative*/);
       ot->addObjectFactory((new TimelineObjectFactory(ot->getId()))->getId());
       schema->registerObjectType(ot->getId());
+
+      // Exported Methods
+      schema->registerMethod((new PDBClose())->getId());
+      schema->registerMethod((new SpecifyVariable())->getId());
+      schema->registerMethod((new ResetVariable())->getId());
+      schema->registerMethod((new CloseVariable())->getId());
+      schema->registerMethod((new ConstrainToken())->getId());
+      schema->registerMethod((new FreeToken())->getId());
+      schema->registerMethod((new ActivateToken())->getId());
+      schema->registerMethod((new MergeToken())->getId());
+      schema->registerMethod((new RejectToken())->getId());
+      schema->registerMethod((new CancelToken())->getId());
 
       PlanDatabase* pdb = new PlanDatabase(ce->getId(), schema->getId());
       engine->addComponent("PlanDatabase",pdb);

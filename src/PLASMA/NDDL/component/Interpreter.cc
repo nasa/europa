@@ -31,10 +31,10 @@ namespace EUROPA {
   void makeConstraint(EvalContext& context, const LabelStr& name, const std::vector<ConstrainedVariableId>& vars);
 
   std::vector<FunctionType*> g_functionTypes;
-  
+
   DECLARE_FUNCTION_TYPE(isSingleton, "testSingleton", "bool", 1);
   DECLARE_FUNCTION_TYPE(isSpecified, "testSpecified", "bool", 1);
-  
+
 
   FunctionType* getFunction(std::string name) {
     for (unsigned int i = 0; i < g_functionTypes.size(); i++) {
@@ -390,7 +390,7 @@ namespace EUROPA {
   }
 
   const DataTypeId ExprExpression::getDataType() const {
-    if (!hasReturnValue()) { 
+    if (!hasReturnValue()) {
       return VoidDT::instance(); //In an optimizable enforce statement, there is a void return
     } else if (m_name == "==" || m_name == "<=" || m_name == ">=" || m_name == "!=" || m_name == ">" || m_name == "<" || m_name == "||" || m_name == "&&") {
       return BoolDT::instance(); //Boolean return from relationals and boolean ops.
@@ -422,17 +422,17 @@ namespace EUROPA {
       return; //Don't care
     } else if (m_name == "||" || m_name == "&&") {
       if (!m_lhs->getDataType()->isAssignableFrom(BoolDT::instance()) || !BoolDT::instance()->isAssignableFrom(m_lhs->getDataType())) {
-	throw std::string("In a " + m_name + " expression, both arguments must be of type boolean. In this case, " 
+	throw std::string("In a " + m_name + " expression, both arguments must be of type boolean. In this case, "
 			  + m_lhs->getDataType()->getName().c_str() + " from \"" + m_lhs->toString() + "\" is not a boolean.");
       }
       if (!m_rhs->getDataType()->isAssignableFrom(BoolDT::instance()) || !BoolDT::instance()->isAssignableFrom(m_rhs->getDataType())) {
-	throw std::string("In a " + m_name + " expression, both arguments must be of type boolean. In this case, " 
+	throw std::string("In a " + m_name + " expression, both arguments must be of type boolean. In this case, "
 			  + m_rhs->getDataType()->getName().c_str() + " from \"" + m_rhs->toString() + "\" is not a boolean.");
       }
-    } else if (m_name == "+" || m_name == "-" || m_name == "*" || m_name == "==" 
+    } else if (m_name == "+" || m_name == "-" || m_name == "*" || m_name == "=="
 	       || m_name == "<=" || m_name == ">=" || m_name == "!=" || m_name == ">" || m_name == "<") {
       if (!m_rhs->getDataType()->isAssignableFrom(m_lhs->getDataType()) || !m_lhs->getDataType()->isAssignableFrom(m_rhs->getDataType())) {
-	throw std::string("Cannot use types " + std::string(m_lhs->getDataType()->getName().c_str()) + " and " 
+	throw std::string("Cannot use types " + std::string(m_lhs->getDataType()->getName().c_str()) + " and "
 			  + std::string(m_rhs->getDataType()->getName().c_str()) + "in expression: " + toString());
       }
     } else if (m_name == "FUNC") {
@@ -2120,6 +2120,49 @@ namespace EUROPA {
   {
       for (unsigned int i=0;i<argExprs.size();i++)
           args.push_back(argExprs[i]->eval(context).getValue());
+  }
+
+  ExprMethodCall::ExprMethodCall(const MethodId& m, Expr* varExpr, const std::vector<Expr*>& argExprs)
+      : m_method(m)
+      , m_varExpr(varExpr)
+      , m_argExprs(argExprs)
+  {
+  }
+
+  ExprMethodCall::~ExprMethodCall()
+  {
+      if (m_varExpr != NULL)
+          delete m_varExpr;
+
+      for (unsigned int i=0;i<m_argExprs.size();i++)
+          delete m_argExprs[i];
+      m_argExprs.clear();
+  }
+
+  DataRef ExprMethodCall::eval(EvalContext& context) const
+  {
+      ConstrainedVariableId var;
+
+      if (m_varExpr != NULL) {
+          DataRef v = m_varExpr->eval(context);
+          var = v.getValue();
+      }
+
+      // TODO: make sure any temp vars are disposed of correctly
+      std::vector<ConstrainedVariableId> args;
+      args.push_back(var);
+      evalArgs(context,args,m_argExprs);
+      return m_method->eval(context,args);
+  }
+
+  std::string ExprMethodCall::toString() const
+  {
+      std::ostringstream os;
+
+      // TODO: implement this
+      os << "METHOD CALL:" << m_method->getName().c_str();
+
+      return os.str();
   }
 
   ExprVariableMethod::ExprVariableMethod(const char* name, Expr* varExpr, const std::vector<Expr*>& argExprs)

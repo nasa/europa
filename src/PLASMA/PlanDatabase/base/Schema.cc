@@ -60,6 +60,11 @@ namespace EUROPA {
           delete (ObjectType*)it->second;
       m_objTypes.clear();
 
+      std::map<double,MethodId>::iterator mit = m_methods.begin();
+      for(;mit != m_methods.end();++mit)
+          delete (Method*)mit->second;
+      m_methods.clear();
+
       m_id.remove();
   }
 
@@ -775,6 +780,21 @@ namespace EUROPA {
   bool Schema::hasTokenTypes() const
   {
       return m_tokenTypeMgr->hasType();
+  }
+
+
+  void Schema::registerMethod(const MethodId& m)
+  {
+      // TODO: allow method overloading
+      check_runtime_error(m_methods.find(m->getName()) == m_methods.end(), std::string("Method ")+m->getName().toString()+" already exists");
+      m_methods[m->getName()] = m;
+  }
+
+  MethodId Schema::getMethod(const LabelStr& methodName, const DataTypeId& targetType, const std::vector<DataTypeId>& argTypes)
+  {
+      // TODO: use target type and arg types to resolve
+      std::map<double,MethodId>::iterator it = m_methods.find(methodName);
+      return (it != m_methods.end() ? it->second : MethodId::noId());
   }
 
   // PSSchema methods:

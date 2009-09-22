@@ -416,9 +416,9 @@ constraintInstantiation returns [ExprConstraint* result]
 
 classDeclaration returns [Expr* result]
 @init {
-const char* newClass = NULL;
-const char* parentClass = "Object";
-ObjectType* objType = NULL;
+	const char* newClass = NULL;
+	const char* parentClass = "Object";
+	ObjectType* objType = NULL;
 }
 	:	^('class'
            className=IDENT { newClass = c_str($className.text->chars); }
@@ -451,13 +451,11 @@ ObjectType* objType = NULL;
                popContext(CTX);            
 	       }
 		)
-  ;
+	;
 
 classBlock[ObjectType* objType]
 	:	'{'
-	        | ^('{'
-			componentTypeEntry[objType]*
-		)
+	|	^('{' componentTypeEntry[objType]* )
 	;
 
 componentTypeEntry[ObjectType* objType]
@@ -609,7 +607,7 @@ predicateParameterAssignment returns [Expr* result]
         { 
             result = child; 
         }
-        ;       
+	;       
 
 standardConstraint returns [Expr* result]
         :
@@ -874,66 +872,27 @@ temporalRelation
         |       'starts_during'
         ;
  
-// TODO: this is ugly, need to provide extensible method exporting mechanism  
 methodInvocation returns [Expr* result]
-	:
-	(  child=variableMethod
-	|  child=objectMethod
-    |  child=tokenMethod
-    )
+@init {
+    std::vector<Expr*> args;
+}
+	:	^(METHOD_CALL v=qualified op=IDENT variableArgumentList[args]?)
     {
-        result = child;
+        const char* methodName = c_str($op.text->chars);
+        MethodId method = CTX->SymbolTable->getMethod(methodName,v,args);
+        if (method.isNoId())
+            reportSemanticError(CTX,"Method "+std::string(methodName)+" is not defined");
+        result = new ExprMethodCall(method,v,args);
+    }
+    |	^(CLOSE CLOSE)
+    {
+        // TODO: hack!
+        Expr* varExpr = NULL;
+        MethodId method = CTX->SymbolTable->getMethod("pdb_close",varExpr,args);
+        result = new ExprMethodCall(method,varExpr,args);
     }
 	;
 
-variableMethod returns [Expr* result]
-@init {
-    std::vector<Expr*> args;
-}
-        :       ^(METHOD_CALL op=variableOp v=qualified? variableArgumentList[args]?)
-                {
-                    result = new ExprVariableMethod(c_str($op.text->chars),v,args);
-                }
-        ;
-   
-variableOp
-        :       'specify'
-        |       'reset'
-        |       'close'
-        ;
-                
-objectMethod returns [Expr* result]
-@init {
-    std::vector<Expr*> args;
-}
-        :       ^(METHOD_CALL op=objectOp obj=qualified? variableArgumentList[args]?)
-                {
-                    result = new ExprObjectMethod(c_str($op.text->chars),obj,args);
-                }
-        ;
-   
-objectOp
-        :       'constrain'
-        |       'free'
-        ;
-                
-tokenMethod returns [Expr* result]    
-@init {
-    std::vector<Expr*> args;
-}
-        :       ^(METHOD_CALL op=tokenOp tok=IDENT variableArgumentList[args]?)
-                {
-                    result = new ExprTokenMethod(c_str($op.text->chars),c_str($tok.text->chars),args); 
-                }
-        ;
-
-tokenOp
-        :       'activate'
-        |       'merge'
-        |       'reject'
-        |       'cancel'
-        ;        
-        
 // This is here only for backwards compatibility, must be dropped eventually        
 constraintSignature returns [Expr* result]
         :       ^('constraint' name=IDENT typeArgumentList constraintExtendsClause? signatureBlock?)

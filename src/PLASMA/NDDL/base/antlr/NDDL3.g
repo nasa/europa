@@ -20,6 +20,7 @@ tokens {
     EXPRESSION_ENFORCE;
     EXPRESSION_RETURN;
     FUNCTION_CALL;
+    CLOSE;
 }
 
 @parser::includes
@@ -117,7 +118,6 @@ enumValues
     : '{'^ IDENT (','! IDENT)* '}'!
     ;
                 
-// MEB Language Change: domain no longer optional
 typeDefinition
 	:	'typedef' type baseDomain IDENT ';'
 	       -> ^('typedef' IDENT type baseDomain)
@@ -242,7 +242,6 @@ predicateStatement
 	|	constraintInstantiation
 	|	assignment
 	;
-
 
 rule
     :	IDENT '::'^ IDENT ruleBlock
@@ -432,32 +431,17 @@ stringLiteral
     :   STRING
     ;
     
-// TODO: this is ugly and very inflexible, need to provide extensible method exporting mechanism  
-methodName
-    :   'specify'
-    |   'reset'
-    |   'constrain'
-    |   'free'
-    |   'activate'
-    |   'merge'
-    |   'reject'
-    |   'cancel'
-    |   'close'
-    ;
-         
 methodInvocation
-    :   (qualified '.')? methodName variableArgumentList ';'
-            -> ^(METHOD_CALL methodName qualified? variableArgumentList)
+    :   qualified '.' methodName variableArgumentList ';'
+            -> ^(METHOD_CALL qualified methodName variableArgumentList)
+	|	'close' variableArgumentList ';' // TODO: hack!
+			-> ^(CLOSE CLOSE)
 	;
 
-tokenNameList
-	:  '('^ (tokenNames)? ')'!
+methodName
+	:	IDENT
 	;
-
-tokenNames
-	:	IDENT (','! IDENT)*
-    ;
-
+	
 noopstatement
 	:	';'!
 	;
