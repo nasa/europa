@@ -157,6 +157,7 @@
         </if>
       </else>
     </if>
+    <property name="jam.antlr.args" value=""/>
       
     <property name="local.env.LD_LIBRARY_PATH.name" value="LD_LIBRARY_PATH"/>
     <property name="dir.plasma" value="${basedir}"/>
@@ -166,7 +167,9 @@
     </condition>
     <property name="dir.planworks" value="${basedir}/../PlanWorks"/>
     <available property="planworks.present" file="${dir.planworks}"/>
-    <property name="jam.num.cores" value="${env.PLASMA_NUM_CORES}"/>
+    <condition property="jam.num.cores" value="${env.PLASMA_NUM_CORES}">
+      <isset property="${env.PLASMA_NUM_CORES}"/>
+    </condition>
     <property name="jam.num.cores" value="1"/>
     <property name="dir.build" value="build"/>
     <property name="dir.dist" value="dist"/>
