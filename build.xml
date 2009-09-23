@@ -124,24 +124,39 @@
      </then>
     </if>
 
-    <property name="antlr.lib" value=""/> <!-- expected to be set on the command line if people want it-->
-    
 
     <property name="local.env.PLASMA_HOME" value="${basedir}"/>
     <property name="local.env.EUROPA_HOME" value="${local.env.PLASMA_HOME}/dist/europa"/>
     <if>
       <contains string="${uname.s}" substring="SunOS" casesensitive="false"/>
       <then>
-        <property name="local.env.LD_LIBRARY_PATH.value" value="${antlr.lib}:${local.env.PLASMA_HOME}/build/lib:${env.LD_LIBRARY_PATH}"/>
+        <property name="local.env.LD_LIBRARY_PATH.value" value="${local.env.PLASMA_HOME}/build/lib:${env.LD_LIBRARY_PATH}"/>
       </then>
       <else>
-        <property name="local.env.LD_LIBRARY_PATH.value" value="${antlr.lib}:${local.env.PLASMA_HOME}/build/lib"/>
+        <property name="local.env.LD_LIBRARY_PATH.value" value="${local.env.PLASMA_HOME}/build/lib"/>
       </else>
     </if>
 
-    <condition property="jam.antlr.args" value="-sPLATFORM_FLAGS=-I${antlr.include}">
+    <if>
       <isset property="antlr.include"/>
-    </condition>
+      <then>
+        <if>
+          <isset property="antlr.lib"/>
+          <then>
+            <property name="jam.antlr.args" value="-sPLATFORM_FLAGS=-I${antlr.include} -sLINKLIBS=-Wl,-L${antlr.lib}"/>
+          </then>
+          <else>
+            <property name="jam.antlr.args" value="-sPLATFORM_FLAGS=-I${antlr.include}"/>
+          </else>
+        </if>
+      </then>
+      <elseif>
+          <isset property="antlr.lib"/>
+          <then>
+            <property name="jam.antlr.args" value="-sLINKLIBS=-Wl,-L${antlr.lib}"/>
+          </then>
+      </elseif>
+    </if>
     <property name="jam.antlr.args" value=""/>
       
     <property name="local.env.LD_LIBRARY_PATH.name" value="LD_LIBRARY_PATH"/>
@@ -168,6 +183,7 @@
     <property name="jam.misc" value=""/>
     <property name="jam.args" value=""/>
     <property name="jam.64bit" value=""/>
+
     <property name="jam.opts" value="${jam.args} ${jam.misc} ${jam.64bit} -sLOGGER_TYPE=${jam.log.type} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries} ${jam.antlr.args}"/>
     <if>
       <equals arg1="${jam.log.type}" arg2=""/>
@@ -222,6 +238,7 @@
   </target>
 
   <target name="build" depends="init">
+    <echo message="Foo: ${local.env.LD_LIBRARY_PATH.value}"/>
     <echo message="jam ${jam.opts} -j${jam.num.cores} build"/>
     <exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
       <arg line="${jam.opts} -j${jam.num.cores} build"/>
