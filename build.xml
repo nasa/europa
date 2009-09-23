@@ -135,13 +135,14 @@
         <property name="local.env.LD_LIBRARY_PATH.value" value="${local.env.PLASMA_HOME}/build/lib"/>
       </else>
     </if>
+
     <if>
       <isset property="antlr.include"/>
       <then>
         <if>
           <isset property="antlr.lib"/>
           <then>
-            <property name="jam.antlr.args" value="-sPLATFORM_FLAGS=&quot;-I${antlr.include} -L${antlr.lib}&quot;"/>
+            <property name="jam.antlr.args" value="-sPLATFORM_FLAGS=-I${antlr.include} -sLINKFLAGS=-Wl,-L${antlr.lib}"/>
           </then>
           <else>
             <property name="jam.antlr.args" value="-sPLATFORM_FLAGS=-I${antlr.include}"/>
@@ -152,7 +153,7 @@
         <if>
           <isset property="antlr.lib"/>
           <then>
-            <property name="jam.antlr.args" value="-sPLATFORM_FLAGS=-L${antlr.lib}"/>
+            <property name="jam.antlr.args" value="-sLINKFLAGS=Wl,-L${antlr.lib}"/>
           </then>
         </if>
       </else>
