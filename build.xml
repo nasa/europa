@@ -246,7 +246,6 @@
   </target>
 
   <target name="build" depends="init">
-    <echo message="Foo: ${local.env.LD_LIBRARY_PATH.value}"/>
     <echo message="jam ${jam.opts} -j${jam.num.cores} build"/>
     <exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
       <arg line="${jam.opts} -j${jam.num.cores} build"/>
