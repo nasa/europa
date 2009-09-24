@@ -58,7 +58,7 @@ namespace EUROPA
 
 		//for stream-based logging
 		virtual std::ostream &getStream() = 0;
-		virtual std::ostream &getAppendedStream( char *file, char *line ) = 0;
+		virtual std::ostream &getAppendedStream( std::string ,int line ) = 0;
 		//virtual std::ostream &operator<<( LoggerLevel level ) = 0;
 		virtual std::ostream &operator<<( const std::string msg ) = 0;
 		virtual std::ostream &operator<<( const char *data ) = 0;

@@ -295,7 +295,7 @@
     </exec>
   </target>
 
-  <target name="test" depends="build">
+  <target name="test" depends="build, print-env">
     <exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
       <arg line="${jam.opts} run-all-tests"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>

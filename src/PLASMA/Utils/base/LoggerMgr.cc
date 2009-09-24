@@ -5,8 +5,8 @@
 namespace EUROPA
 {
 
-
 LoggerMgr *LoggerMgr::m_instance = NULL;
+LoggerInterface *LoggerMgr::LOGGER = NULL;
 
 LoggerMgr::LoggerMgr()
  	: m_stream( std::cout ),
@@ -18,13 +18,13 @@ LoggerMgr::LoggerMgr()
 
 LoggerMgr::~LoggerMgr()
 {
-	m_instance->getRootLogger()->getStream() << "EUROPA::LoggerMgr::~LoggerMgr() - cleaning up" << std::endl;
+	LOGGER->getAppendedStream( __FILE__, __LINE__ ) <<  "~LoggerMgr() - cleaning up" << std::endl;
 	if( m_fstream != NULL )
 	{
 		m_fstream->close();
 		delete m_fstream;
 	}
-	m_instance->getRootLogger()->getStream() << "EUROPA::LoggerMgr::~LoggerMgr() - destroyed LoggerMgr" << std::endl;
+	LOGGER->getAppendedStream( __FILE__, __LINE__ ) << "EUROPA::LoggerMgr::~LoggerMgr() - destroyed LoggerMgr" << std::endl;
 }
 
 LoggerMgr * 
@@ -34,10 +34,11 @@ LoggerMgr::instance()
 	{
 		m_instance = new LoggerMgr();	
 		m_instance->getRootLogger( );
-		m_instance->getRootLogger()->getStream() << "EUROPA::LoggerMgr::instance() - instantiated LoggerMgr" << std::endl;
+		LOGGER = m_instance->getLogger( "EUROPA::Utils::EuropaLogger" );
+		LOGGER->getAppendedStream( __FILE__, __LINE__ ) << "EUROPA::LoggerMgr::instance() - instantiated LoggerMgr" << std::endl;
 		m_instance->readOldStyleConfigurationFile( std::string( "Debug.cfg" ));
 		m_instance->readConfigurationFile( std::string( "EuropaLogger.cfg" ));
-		m_instance->getRootLogger()->getStream() << "EUROPA::LoggerMgr::instance() - finished reading configuration files" << std::endl;
+		LOGGER->getAppendedStream( __FILE__, __LINE__ ) << "EUROPA::LoggerMgr::instance() - finished reading configuration files" << std::endl;
 	}	
 	return m_instance;
 }
@@ -92,6 +93,7 @@ LoggerMgr::readOldStyleConfigurationFile( std::string filename )
     	}
     	//enableMatchingMsgs(input, pattern);
     	m_instance->getLogger( pattern );
+		LOGGER->getAppendedStream( __FILE__, __LINE__ ) << "\t Constructed logger for pattern: '" << pattern << "'" << std::endl;	
   	}
   	if( ! is.eof() )
   	{
@@ -106,7 +108,7 @@ LoggerMgr::readConfigurationFile( std::string filename )
 	std::ifstream is( filename.c_str() );
 	if( !is.good() )
 	{ 
-		m_instance->getRootLogger()->getStream() <<  "WARNING: readConfigurationFile() - cannot read EuropaLogger.cfg" << std::endl;
+		LOGGER->getAppendedStream( __FILE__, __LINE__ )  <<  "WARNING: readConfigurationFile() - cannot read EuropaLogger.cfg" << std::endl;
 	}
     std::string input;
 	StringList loggingLines;
@@ -121,7 +123,7 @@ LoggerMgr::readConfigurationFile( std::string filename )
 	}
 	is.close();
 
-	m_instance->getRootLogger()->getStream() << "Relevant logging and appender lines from file:" << filename << std::endl;	
+	LOGGER->getAppendedStream( __FILE__, __LINE__ ) << "Relevant logging and appender lines from file:" << filename << std::endl;	
 	for( StringList::iterator iter = loggingLines.begin();
 		 iter != loggingLines.end();
 		 ++iter )
@@ -131,7 +133,7 @@ LoggerMgr::readConfigurationFile( std::string filename )
 	
 	processAppenders( loggingLines );
 
-	m_instance->getRootLogger()->getStream() << "Remaining logging lines from file:" << filename << std::endl;	
+	LOGGER->getAppendedStream( __FILE__, __LINE__ ) << "Remaining logging lines from file:" << filename << std::endl;	
 	for( StringList::iterator iter = loggingLines.begin();
 		 iter != loggingLines.end();
 		 ++iter )
@@ -141,12 +143,12 @@ LoggerMgr::readConfigurationFile( std::string filename )
 	
 	processLoggers( loggingLines );
 
-	m_instance->getRootLogger()->getStream() << "Remaining unused lines from file:" << filename << std::endl;	
+	LOGGER->getAppendedStream( __FILE__, __LINE__ ) << "Remaining unused lines from file:" << filename << std::endl;	
 	for( StringList::iterator iter = loggingLines.begin();
 		 iter != loggingLines.end();
 		 ++iter )
 	{
-		m_instance->getRootLogger()->getStream() << "\t" << (*iter) << std::endl;	
+		LOGGER->getAppendedStream( __FILE__, __LINE__ ) << "\t" << (*iter) << std::endl;	
 	}
 	return true;
 }
@@ -154,12 +156,12 @@ LoggerMgr::readConfigurationFile( std::string filename )
 void
 LoggerMgr::processAppenders( StringList &loggingLines )
 {
-	m_instance->getRootLogger()->getStream() << "Processing appenders" << std::endl;	
+	LOGGER->getAppendedStream( __FILE__, __LINE__ ) << "Processing appenders" << std::endl;	
 	for( StringList::iterator iter = loggingLines.begin();  iter != loggingLines.end(); )
 	{
 		if( (*iter).find( "appender" ) != std::string::npos )
 		{
-			m_instance->getRootLogger()->getStream() << "\t IGNORED appender line: " << (*iter) << std::endl;	
+			LOGGER->getAppendedStream( __FILE__, __LINE__ ) << "\t IGNORED appender line: " << (*iter) << std::endl;	
 			iter = loggingLines.erase( iter );	
 		}
 		else 
@@ -172,21 +174,23 @@ LoggerMgr::processAppenders( StringList &loggingLines )
 void
 LoggerMgr::parseLoggerLine( const std::string &line )
 {
-	*(m_instance->getRootLogger()) << "\t Processing logger line: " << line << std::endl;	
+	LOGGER->getAppendedStream( __FILE__, __LINE__ ) << "\t Processing logger line: " << line << std::endl;	
 	size_t found = line.find_first_of( "=" );
 	std::string category("");
 	std::string level(""); 
 	if( found != std::string::npos )
-	{	
-		category = line.substr(0, found);
+	{
+		category = line.substr(13, found);
 		level = line.substr(found+1, line.length());
 	} 
 	else 
 	{
-		category = line;
+		category = line.substr(13, line.length() );
 	}
 	//create a new Logger for this category
-	LoggerInterface *logger = new EuropaLogger( *this, category ); //TODO this should use LoggerFactory!!
+	//LoggerInterface *logger = new EuropaLogger( *this, category ); //TODO this should use LoggerFactory!!
+	LoggerInterface *logger = m_instance->getLogger( category );
+	LOGGER->getAppendedStream( __FILE__, __LINE__ ) << "\t Constructed logger for category: '" << category << "'" << std::endl;	
 	if( level.compare("") != 0 ) {
 		logger->setLevel( logger->stringToLoggerLevel( level ) );
 	} 	
@@ -200,7 +204,7 @@ LoggerMgr::parseRootLoggerLine( const std::string &line )
 void
 LoggerMgr::processLoggers( StringList &loggingLines )
 {
-	m_instance->getRootLogger()->getStream() << "Processing loggers" << std::endl;	
+	LOGGER->getAppendedStream( __FILE__, __LINE__ ) << "Processing loggers" << std::endl;	
 	for( StringList::iterator iter = loggingLines.begin(); iter != loggingLines.end(); )
 	{
 		if( (*iter).find( "logger" ) != std::string::npos )
@@ -286,13 +290,13 @@ LoggerMgr::getEmptyStream()
 }
 
 std::ostream &
-LoggerMgr::getAppendedStream( std::string categoryName, char *file, char *line )
+LoggerMgr::getAppendedStream( std::string categoryName, std::string file, int line )
 {
 	return printHeader( m_stream, categoryName, file, line );		
 }
 
 std::ostream &
-LoggerMgr::printHeader( std::ostream &stream, std::string catName, char *file, char *line )
+LoggerMgr::printHeader( std::ostream &stream, std::string catName, std::string file, int line )
 {
 	stream << file << " " << line << " " << catName << " ";
 	return stream;		

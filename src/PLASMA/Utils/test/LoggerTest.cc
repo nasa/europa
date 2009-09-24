@@ -12,7 +12,7 @@ namespace EUROPA {
 
 //using EUROPA::Utils::Logger; 
 //namespace System { //TODO mcr
-Logger  &LoggerTest::LOGGER = Logger::getInstance( "EUROPA::Utils::test::LoggerTest", Logger::INFO );
+Logger &LoggerTest::LOGGER = Logger::getInstance( "EUROPA::Utils::test::LoggerTest", Logger::INFO );
 
 LoggerTest::LoggerTest() 
 {

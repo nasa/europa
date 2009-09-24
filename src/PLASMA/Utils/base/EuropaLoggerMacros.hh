@@ -140,3 +140,41 @@ using EUROPA::LoggerMgr;
 
 //#define CHECK_DEBUG_STREAM	LoggerMgr *mgr = LoggerMgr.instance(); check_error( mgr != NULL ); check_error( (mgr->getStream()).good() ); 
 #define CHECK_DEBUG_STREAM	
+
+
+#define LOGGER_CLASS_DECL static LoggerInstance *LOGGER;
+
+#define LOGGER_CLASS_DEF( className, marker, defaultLevel ) { \
+	LoggerInterface *className::LOGGER = (LoggerMgr::instance())->getLogger( marker ); \
+} 
+
+#define LOGGER_CLASS_LOG( className, marker, level, msg ) { \
+	LOGGER_CLASS_LOG( className, true, marker, level, msg ) \
+}
+
+#define LOGGER_CLASS_COND_LOG( className, cond, marker, level, msg ) { \
+	if( cond ) { \
+		if( className::LOGGER->levelEnabled( level ) ) { \
+			className::LOGGER->getStream() << msg; \
+		} \
+	} \
+}
+
+#define LOGGER_LOCAL_DEF( marker, defaultLevel ) { \
+	LoggerMgr *mgr = LoggerMgr::instance(); \
+	LoggerInterface *LOGGER = mgr->getLogger( marker ); \
+}
+
+#define LOGGER_LOCAL_LOG( marker, level, msg ) { \
+	LOGGER_LOCAL_COND_LOG( true, marker, level, msg ) \
+}
+	 
+#define LOGGER_LOCAL_COND_LOG( cond, marker, level, msg ) { \
+	if( cond ) { \
+		if( LOGGER->levelEnabled( level ) ) { \
+			LOGGER->getStream() << msg; \
+		} \
+	} \
+}
+
+

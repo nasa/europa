@@ -3,6 +3,7 @@
 
 namespace EUROPA
 {
+
 std::string 
 EuropaLogger::loggerLevelToString( LoggerLevel level ) {
 	switch( level )
@@ -64,7 +65,7 @@ EuropaLogger::stringToLoggerLevel( std::string in ) {
 	}
 	return UNDEFINED;
 }				
-				
+
 EuropaLogger::EuropaLogger( LoggerMgr &manager, std::string catName )
 	: m_manager( manager ), 
 	  m_categoryName( catName ),	  
@@ -110,7 +111,6 @@ bool EuropaLogger::operator<( const LoggerInterface &right ) const
 	return this->getCategory() < right.getCategory();
 }
 
-
 std::ostream &EuropaLogger::log( LoggerLevel level, std::string msg )
 {
 	if( level <= m_defaultLevel )
@@ -133,7 +133,7 @@ EuropaLogger::getStream()
 
 
 std::ostream &
-EuropaLogger::getAppendedStream( char *file, char *line )
+EuropaLogger::getAppendedStream( std::string file, int line )
 {
 	return m_manager.getAppendedStream( m_categoryName, file, line );
 }

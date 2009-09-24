@@ -34,7 +34,6 @@ namespace EUROPA
 	public:
 		static LoggerMgr *instance();
 		virtual ~LoggerMgr();
-		void init( std::string filename );
 
 		bool loggerExists( std::string categoryName );
 		LoggerInterface *getLogger( std::string categoryName );
@@ -42,7 +41,7 @@ namespace EUROPA
 
 		std::ostream &getStream();
 		std::ostream &getEmptyStream();
-		std::ostream &getAppendedStream( std::string categoryName, char *file, char *line );
+		std::ostream &getAppendedStream( std::string categoryName, std::string file, int line );
 		
 	private:
 		LoggerMgr();
@@ -57,13 +56,14 @@ namespace EUROPA
 		void parseRootLoggerLine( const std::string &string );
 
 		static LoggerMgr *m_instance;
+		static LoggerInterface *LOGGER;
 		std::ostream &m_stream;
 		std::ofstream *m_fstream;
 		std::ostream *m_emptyStream;
 		LoggerNameMap m_loggerNameMap;
 		
 		//formatting helpers
-		std::ostream &printHeader( std::ostream &stream, std::string catName, char *file, char *line ); 	
+		std::ostream &printHeader( std::ostream &stream, std::string catName, std::string file, int line ); 	
 	};
 	
 } //namespace EUROPA

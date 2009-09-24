@@ -31,7 +31,7 @@ namespace EUROPA
 		std::ostream &operator<<( const char *msg );
 		std::ostream &operator<<( const std::string msg );
 		std::ostream &getStream();
-		std::ostream &getAppendedStream( char *file, char *line );
+		std::ostream &getAppendedStream( std::string file, int line );
 		
 	
 	private:
