@@ -694,6 +694,7 @@ std::vector<Expr*> elseBody;
   ;
 
 // TODO: perform systematic cleanup of lhs, rhs and constant exprs throughout
+// TODO: this doesn't seem to be correct
 guardExpression returns [ExprIfGuard* result]
 @init
 {
@@ -909,7 +910,7 @@ cexpression returns [ExprExpression* result]
         {
            result = new ExprExpression(r);
         }
-	|	^(FUNCTION_CALL name=IDENT ^('(' expressionList[args]))
+	|	^(FUNCTION_CALL name=IDENT ^('(' cexpressionList[args]))
         {
             FunctionType* func = getFunction(c_str($name.text->chars));
 
@@ -960,10 +961,7 @@ enforceExpression returns [Expr* result]
             }
         } ;
 
+// TODO: this needs more behavior?
 expressionCleanReturn returns [Expr* result]
-@init 
-{ 
-	ExprExpression* returnValue = NULL; 
-} 
-	: result = expression
+	: e = cexpression { result = e; }
 	;
