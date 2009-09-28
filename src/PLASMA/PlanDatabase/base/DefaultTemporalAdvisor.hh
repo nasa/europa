@@ -26,6 +26,15 @@ namespace EUROPA{
 							      const TimeVarId& second,
 							      const bool exact);
 
+    virtual void getTemporalDistanceDomains(const ConstrainedVariableId& first,
+                                            const std::vector<ConstrainedVariableId>&
+                                            seconds,
+                                            std::vector<IntervalIntDomain>& domains);
+    virtual void getTemporalDistanceSigns(const ConstrainedVariableId& first,
+                                          const std::vector<ConstrainedVariableId>&
+                                          seconds,
+                                          std::vector<int>& lbs,
+                                          std::vector<int>& ubs);
     virtual unsigned int mostRecentRepropagation() const;
 
     const TemporalAdvisorId& getId() const;

@@ -96,6 +96,29 @@ namespace EUROPA {
     return(IntervalIntDomain(-g_infiniteTime(), g_infiniteTime()));
   }
 
+  void DefaultTemporalAdvisor::getTemporalDistanceDomains(const ConstrainedVariableId& first,
+                                                          const std::vector<ConstrainedVariableId>&
+                                                          seconds,
+                                                          std::vector<IntervalIntDomain>& domains){
+    for (unsigned int i=0; i < seconds.size(); i++) {
+      domains.push_back(getTemporalDistanceDomain(first, seconds[i], true));
+    }
+  }
+
+  void DefaultTemporalAdvisor::getTemporalDistanceSigns(const ConstrainedVariableId& first,
+                                                        const std::vector<ConstrainedVariableId>&
+                                                        seconds,
+                                                        std::vector<int>& lbs,
+                                                        std::vector<int>& ubs){
+    std::vector<IntervalIntDomain> domains;
+    getTemporalDistanceDomains(first, seconds, domains);
+    for (unsigned int i=0; i < seconds.size(); i++) {
+      lbs.push_back((int)domains[i].getLowerBound());
+      ubs.push_back((int)domains[i].getUpperBound());
+    }
+  }
+
+
   unsigned int DefaultTemporalAdvisor::mostRecentRepropagation() const {
     return m_ce->mostRecentRepropagation();
   }

@@ -79,6 +79,32 @@ namespace EUROPA {
     return (m_propagator->getTemporalDistanceDomain(first, second, exact));
   }
 
+  /**
+   * @brief Gets the temporal distances from one to several other variables. 
+   * More efficient to compute several simultaneously.  Always exact.
+   */
+  void STNTemporalAdvisor::getTemporalDistanceDomains(const ConstrainedVariableId& first,
+                                                      const std::vector<ConstrainedVariableId>&
+                                                      seconds,
+                                                      std::vector<IntervalIntDomain>& domains) {
+    return (m_propagator->getTemporalDistanceDomains(first, seconds, domains));
+  }
+
+  /**
+   * @brief Similar to getTemporalDistanceDomains, but propagates only far enough
+   * so that the signs (but not values) of lbs/ubs are accurate.  Can be used to
+   * to accurately and more quickly answer <= 0 and >= 0 questions for lb and ub.
+   */
+  void STNTemporalAdvisor::getTemporalDistanceSigns(const ConstrainedVariableId& first,
+                                                    const std::vector<ConstrainedVariableId>&
+                                                    seconds,
+                                                    std::vector<Time>& lbs,
+                                                    std::vector<Time>& ubs) {
+    return (m_propagator->getTemporalDistanceSigns(first, seconds, lbs, ubs));
+  }
+
+
+
   unsigned int STNTemporalAdvisor::mostRecentRepropagation() const{
     return m_propagator->mostRecentRepropagation();
   }

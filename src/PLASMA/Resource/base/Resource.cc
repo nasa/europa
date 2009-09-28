@@ -475,78 +475,104 @@ namespace EUROPA {
   void Resource::getOrderingChoices(const InstantId& inst,
                                     std::vector<std::pair<TransactionId, TransactionId> >& results,
                                     unsigned int limit) {
-    check_error(results.empty());
-    check_error(inst.isValid());
-    check_error(limit > 0);
-    check_error(m_flawedInstants.find(inst->getTime()) != m_flawedInstants.end());
-    check_error(m_flawedInstants.find(inst->getTime())->second == inst);
+      check_error(results.empty());
+      check_error(inst.isValid());
+      check_error(limit > 0);
+      check_error(m_flawedInstants.find(inst->getTime()) != m_flawedInstants.end());
+      check_error(m_flawedInstants.find(inst->getTime())->second == inst);
 
-    debugMsg("Resource:getOrderingChoices", "Getting " << limit << " ordering choices for " << inst->getTime() << "(" << inst->getKey() << ") on " << toString());
+      debugMsg("Resource:getOrderingChoices", "Getting " << limit << " ordering choices for " << inst->getTime() << "(" << inst->getKey() << ") on " << toString());
 
-    if(!getPlanDatabase()->getConstraintEngine()->propagate()) {
-      debugMsg("Resource:getOrderingChoices", "No ordering choices: the constraint network is inconsistent.");
-      return;
-    }
+      if(!getPlanDatabase()->getConstraintEngine()->propagate()) {
+        debugMsg("Resource:getOrderingChoices", "No ordering choices: the constraint network is inconsistent.");
+        return;
+      }
 
-    const std::set<TransactionId>& transactions = inst->getTransactions();
-    unsigned int count = 0;
-    TemporalAdvisorId temporalAdvisor = getPlanDatabase()->getTemporalAdvisor();
-    std::set<std::pair<TransactionId, TransactionId> > uniquePairs;
+      const std::set<TransactionId>& transactions = inst->getTransactions();
+      unsigned int count = 0;
+      TemporalAdvisorId temporalAdvisor = getPlanDatabase()->getTemporalAdvisor();
+      std::set<std::pair<TransactionId, TransactionId> > uniquePairs;
 
-    for(std::set<TransactionId>::const_iterator preIt = transactions.begin(); preIt != transactions.end() && count < limit; ++preIt) {
-      TransactionId predecessor = *preIt;
-      check_error(predecessor.isValid());
-      //for(std::set<TransactionId>::const_iterator sucIt = transactions.begin(); sucIt != transactions.end() && count < limit; ++sucIt) {
-      for(std::map<TransactionId, TokenId>::const_iterator sucIt = m_transactionsToTokens.begin(); sucIt != m_transactionsToTokens.end() && count < limit; ++sucIt) {
-        TransactionId successor = sucIt->first;
-        check_error(successor.isValid());
-
-        debugMsg("Resource:getOrderingChoices", "Considering pair <" << predecessor->toString() << ", " << successor->toString());
-        if(predecessor == successor || !predecessor->time()->lastDomain().intersects(successor->time()->lastDomain())) {
-          condDebugMsg(predecessor == successor, "Resource:getOrderingChoices", "Rejected pair because they are the same transaction.");
-          condDebugMsg(!predecessor->time()->lastDomain().intersects(successor->time()->lastDomain()), "Resource:getOrderingChoices",
-                       "Rejected pair because successor does not overlap predecessor.");
-          continue;
+      for(std::set<TransactionId>::const_iterator preIt = transactions.begin(); preIt != transactions.end() && count < limit; ++preIt) {
+        TransactionId predecessor = *preIt;
+        check_error(predecessor.isValid());
+        //for(std::set<TransactionId>::const_iterator sucIt = transactions.begin(); sucIt != transactions.end() && count < limit; ++sucIt) {
+        std::vector<ConstrainedVariableId> sucTimevars;
+        for(std::map<TransactionId, TokenId>::const_iterator sucIt = m_transactionsToTokens.begin(); sucIt != m_transactionsToTokens.end() && count < limit; ++sucIt) {
+          TransactionId successor = sucIt->first;
+          check_error(successor.isValid());
+          sucTimevars.push_back(TimeVarId(successor->time()));
         }
-        if(temporalAdvisor->canPrecede(TimeVarId(predecessor->time()), TimeVarId(successor->time())) &&
-           !transConstrainedToPrecede(predecessor, successor)) {
-          //results.push_back(std::make_pair(predecessor, successor));
-          bool added = uniquePairs.insert(std::make_pair(predecessor, successor)).second;
-          if(added) {
-            debugMsg("Resource:getOrderingChoices", "Added pair <" << predecessor->toString() << ", " << successor->toString());
-            count++;
+        std::vector<int> presucLbs;
+        std::vector<int> presucUbs;
+        temporalAdvisor->getTemporalDistanceSigns(TimeVarId(predecessor->time()),
+                                        sucTimevars, presucLbs, presucUbs);
+        int i = 0;
+
+        for(std::map<TransactionId, TokenId>::const_iterator sucIt = m_transactionsToTokens.begin(); sucIt != m_transactionsToTokens.end() && count < limit; ++sucIt) {
+          TransactionId successor = sucIt->first;
+          check_error(successor.isValid());
+
+          bool canPrecede = (presucUbs[i] >= 0);
+          bool mustPrecede = (presucLbs[i] >= 0);
+          bool canFollow = (presucLbs[i] <= 0);
+          bool mustFollow = (presucUbs[i] <= 0);
+          i++;
+
+          debugMsg("Resource:getOrderingChoices", "Considering pair <" << predecessor->toString() << ", " << successor->toString());
+          if(predecessor == successor || !predecessor->time()->lastDomain().intersects(successor->time()->lastDomain())) {
+            condDebugMsg(predecessor == successor, "Resource:getOrderingChoices", "Rejected pair because they are the same transaction.");
+            condDebugMsg(!predecessor->time()->lastDomain().intersects(successor->time()->lastDomain()), "Resource:getOrderingChoices",
+                         "Rejected pair because successor does not overlap predecessor.");
+            continue;
+          }
+          //if(temporalAdvisor->canPrecede(TimeVarId(predecessor->time()), TimeVarId(successor->time())) &&
+             //!transConstrainedToPrecede(predecessor, successor)) {
+            // //results.push_back(std::make_pair(predecessor, successor));
+          if (canPrecede && !mustPrecede) {
+            bool added = uniquePairs.insert(std::make_pair(predecessor, successor)).second;
+            if(added) {
+              debugMsg("Resource:getOrderingChoices", "Added pair <" << predecessor->toString() << ", " << successor->toString());
+              count++;
+            }
+            else {
+              debugMsg("Resource:getOrderingChoices", "Pair is redundant.");
+            }
           }
           else {
-            debugMsg("Resource:getOrderingChoices", "Pair is redundant.");
+            //condDebugMsg(transConstrainedToPrecede(predecessor, successor), "Resource:getOrderingChoices", "Rejected pair because predecessor already constrained to precede successor.");
+            //condDebugMsg(!temporalAdvisor->canPrecede(TimeVarId(predecessor->time()), TimeVarId(successor->time())), "Resource:getOrderingChoices",
+                         //"Rejected pair because predecessor cannot precede successor.");
+            condDebugMsg(mustPrecede, "Resource:getOrderingChoices", "Rejected pair because predecessor already constrained to precede successor.");
+            condDebugMsg(!canPrecede, "Resource:getOrderingChoices",
+                         "Rejected pair because predecessor cannot precede successor.");
           }
-        }
-        else {
-          condDebugMsg(transConstrainedToPrecede(predecessor, successor), "Resource:getOrderingChoices", "Rejected pair because predecessor already constrained to precede successor.");
-          condDebugMsg(!temporalAdvisor->canPrecede(TimeVarId(predecessor->time()), TimeVarId(successor->time())), "Resource:getOrderingChoices",
-                       "Rejected pair because predecessor cannot precede successor.");
-        }
-        debugMsg("Resource:getOrderingChoices", "Considering pair <" << successor->toString() << ", " << predecessor->toString());
-        if(temporalAdvisor->canPrecede(TimeVarId(successor->time()), TimeVarId(predecessor->time())) &&
-           !transConstrainedToPrecede(successor, predecessor)) {
-          //results.push_back(std::make_pair(successor, predecessor));
-          bool added = uniquePairs.insert(std::make_pair(successor, predecessor)).second;
-          if(added) {
-            debugMsg("Resource:getOrderingChoices", "Added pair <" << successor->toString() << ", " << predecessor->toString());
-            count++;
+          debugMsg("Resource:getOrderingChoices", "Considering pair <" << successor->toString() << ", " << predecessor->toString());
+          //if(temporalAdvisor->canPrecede(TimeVarId(successor->time()), TimeVarId(predecessor->time())) &&
+             //!transConstrainedToPrecede(successor, predecessor)) {
+            // //results.push_back(std::make_pair(successor, predecessor));
+          if (canFollow && !mustFollow) {
+            bool added = uniquePairs.insert(std::make_pair(successor, predecessor)).second;
+            if(added) {
+              debugMsg("Resource:getOrderingChoices", "Added pair <" << successor->toString() << ", " << predecessor->toString());
+              count++;
+            }
+            else {
+              debugMsg("Resource:getOrderingChoices", "Pair is redundant.");
+            }
           }
           else {
-            debugMsg("Resource:getOrderingChoices", "Pair is redundant.");
+            //condDebugMsg(transConstrainedToPrecede(successor, predecessor), "Resource:getOrderingChoices", "Rejected pair because predecessor already constrained to precede successor.");
+            //condDebugMsg(!temporalAdvisor->canPrecede(TimeVarId(successor->time()), TimeVarId(predecessor->time())), "Resource:getOrderingChoices",
+                         //"Rejected pair because predecessor cannot precede successor.");
+            condDebugMsg(mustFollow, "Resource:getOrderingChoices", "Rejected pair because predecessor already constrained to precede successor.");
+            condDebugMsg(!canFollow, "Resource:getOrderingChoices",
+                         "Rejected pair because predecessor cannot precede successor.");
           }
-        }
-        else {
-          condDebugMsg(transConstrainedToPrecede(successor, predecessor), "Resource:getOrderingChoices", "Rejected pair because predecessor already constrained to precede successor.");
-          condDebugMsg(!temporalAdvisor->canPrecede(TimeVarId(successor->time()), TimeVarId(predecessor->time())), "Resource:getOrderingChoices",
-                       "Rejected pair because predecessor cannot precede successor.");
         }
       }
-    }
-    results.insert(results.end(), uniquePairs.begin(), uniquePairs.end());
-    debugMsg("Resource:getOrderingChoices", "Ultimately found " << results.size() << " orderings.");
+      results.insert(results.end(), uniquePairs.begin(), uniquePairs.end());
+      debugMsg("Resource:getOrderingChoices", "Ultimately found " << results.size() << " orderings.");
   }
 
   bool Resource::transConstrainedToPrecede(const TransactionId& predecessor, const TransactionId& successor) {

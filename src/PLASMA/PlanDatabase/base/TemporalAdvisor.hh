@@ -58,6 +58,31 @@ namespace EUROPA{
 							      const TimeVarId& second,
 							      const bool exact) = 0;
 
+     /**
+     * @brief Obtains exact min/max temporal distance between one and several timepoints.
+     * @param first The first time point
+     * @param seconds The other time points
+     * @param domains The returned calculated domains.
+     */
+    virtual void getTemporalDistanceDomains(const ConstrainedVariableId& first,
+                                            const std::vector<ConstrainedVariableId>&
+                                            seconds,
+                                            std::vector<IntervalIntDomain>& domains) = 0;
+
+    /**
+     * @brief Obtains min/max temporal distance signs between one and several timepoints.  Only the signs (-,+,0)
+     * are guaranteed accurate; the values may be arbitrary.  Utility for determining precedence relations.
+     * @param first The first time point
+     * @param seconds The other time points
+     * @param lbs The returned lower-bound signs as numbers with correct signs but arbitrary values.
+     * @param ubs The returned upper-bound signs as numbers with correct signs but arbitrary values.
+     */
+    virtual void getTemporalDistanceSigns(const ConstrainedVariableId& first,
+                                          const std::vector<ConstrainedVariableId>&
+                                          seconds,
+                                          std::vector<int>& lbs,
+                                          std::vector<int>& ubs) = 0;
+
     /**
      * @brief Obtains the most recent repropagation of relevant information w.r.t. time
      */

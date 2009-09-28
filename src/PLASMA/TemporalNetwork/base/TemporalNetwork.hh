@@ -174,6 +174,16 @@ namespace EUROPA {
                             const std::vector<TimepointId>& targs,
                             std::vector<Time>& lbs, std::vector<Time>& ubs);
 
+     /**
+     * @brief Similar to many-targ version of calcDistanceBounds
+     * but only the signs of the "bounds" (that indicate precedences)
+     * are meaningful.
+     */
+    Void calcDistanceSigns(const TimepointId& src,
+                           const std::vector<TimepointId>& targs,
+                           std::vector<Time>& lbs, std::vector<Time>& ubs);
+
+
     /**
      * @brief Identify the timepoints that mark the head and foot of a temporal constraint.
      * @param id temporal constraint of interest.

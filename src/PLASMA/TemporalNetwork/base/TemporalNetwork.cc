@@ -292,6 +292,52 @@ namespace EUROPA {
     return;
   }
 
+  Void TemporalNetwork::calcDistanceSigns(const TimepointId& src,
+                                           const std::vector<TimepointId>&
+                                           targs,
+					   std::vector<Time>& lbs,
+                                           std::vector<Time>& ubs)
+  {
+    // Method: Calculate lower/upper bounds as if src was the origin.
+    // Don't disturb the existing bounds.  Requires only two dijkstras
+    // instead of 2*n dijkstras.  Use special bounded-distance
+    // dijkstra computations that only determine precedences.
+
+    propagate();
+
+    checkError(this->consistent,
+               "TemporalNetwork: calcDistanceSigns from inconsistent network");
+
+    lbs.clear();
+    ubs.clear();
+
+    if (targs.empty())
+      return;
+
+    Time minPotential = POS_INFINITY;
+    Time maxPotential = NEG_INFINITY;
+
+    for (unsigned i=0; i<targs.size(); i++) {
+      if (targs[i]->potential < minPotential)
+        minPotential = targs[i]->potential;
+      if (targs[i]->potential > maxPotential)
+        maxPotential = targs[i]->potential;
+      ubs.push_back (1);
+      lbs.push_back (-1);
+    }
+
+    boundedDijkstraForward(src, 1, minPotential);
+    for (unsigned i=0; i<targs.size(); i++)
+      ubs[i] = (targs[i]->distance);
+
+    boundedDijkstraBackward(src, 1, maxPotential);
+    for (unsigned i=0; i<targs.size(); i++)
+      lbs[i] = (- targs[i]->distance);
+
+    return;
+  }
+
+
   std::list<TimepointId>
   TemporalNetwork::getConstraintScope(const TemporalConstraintId& id) {
     std::list<TimepointId> result;

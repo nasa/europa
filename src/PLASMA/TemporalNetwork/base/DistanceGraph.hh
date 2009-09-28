@@ -198,6 +198,29 @@ public:
    */
   Void incDijkstra(Int generation, DnodeId destination);
  
+  /***
+   * @brief Bounded propagation bidirectional version of Dijkstra's
+   * algorithm. Propagation limited to reach nodes within a bound
+   * distance from source with given min/max potential.
+   */
+  Void DistanceGraph::boundedDijkstraForward (const DnodeId& source,
+                                              Time bound,
+                                              Time minPotential) {
+    boundedDijkstra (source, bound, minPotential, +1);
+  }
+
+  Void DistanceGraph::boundedDijkstraBackward (const DnodeId& source,
+                                              Time bound,
+                                              Time maxPotential) {
+    boundedDijkstra (source, bound, maxPotential, -1);
+  }
+private:
+  Void DistanceGraph::boundedDijkstra (const DnodeId& source,
+                                       Time bound,
+                                       Time destPotential,
+                                       int direction);
+public:
+
    /**
    * @brief compute distance from node to all other nodes in network
    * @param node start node.

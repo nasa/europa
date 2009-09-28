@@ -30,6 +30,7 @@ namespace EUROPA {
      * @see TemporalAdvisor::canPrecede
      */
     bool canPrecede(const ConstrainedVariableId& first, const ConstrainedVariableId& second);
+    bool mustPrecede(const ConstrainedVariableId& first, const ConstrainedVariableId& second);
 
     /**
      * @see TemporalAdvisor::canFitBetween
@@ -47,10 +48,22 @@ namespace EUROPA {
      */
     const IntervalIntDomain getTemporalDistanceDomain(const ConstrainedVariableId& first,
 						      const ConstrainedVariableId& second, const bool exact);
+    /**
+     * @see STNTemporalAdvisor::getTemporalDistanceDomains
+     */
     void getTemporalDistanceDomains(const ConstrainedVariableId& first,
                                     const std::vector<ConstrainedVariableId>&
                                     seconds,
                                     std::vector<IntervalIntDomain>& domains);
+
+     /**
+     * @see STNTemporalAdvisor::getTemporalDistanceSigns
+     */
+    void getTemporalDistanceSigns(const ConstrainedVariableId& first,
+                                  const std::vector<ConstrainedVariableId>&
+                                  seconds,
+                                  std::vector<Time>& lbs,
+                                  std::vector<Time>& ubs);
 
     /**
      * @see TemporalAdvisor::mostRecentReprogation
