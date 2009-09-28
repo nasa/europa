@@ -95,7 +95,6 @@ nddl
 		  |	child=problemStmt
 		  |	child=relation
 		  |	child=methodInvocation
-		  |	child=constraintSignature
 		  ) 
 		  {
 		      if (child != NULL) { 
@@ -892,37 +891,6 @@ methodInvocation returns [Expr* result]
         result = new ExprMethodCall(method,varExpr,args);
     }
 	;
-
-// This is here only for backwards compatibility, must be dropped eventually        
-constraintSignature returns [Expr* result]
-        :       ^('constraint' name=IDENT typeArgumentList constraintExtendsClause? signatureBlock?)
-        {
-            debugMsg("NddlInterpreter","Ignored constraint declaration for " << c_str($name.text->chars) 
-                                        << ". Constraint Signatures are ignored in nddl3.");
-            result = NULL;
-        }
-        ;
-        
-constraintExtendsClause
-        :       ^('extends' IDENT typeArgumentList)
-        ;        
-        
-typeArgumentList
-        :       ^('(' IDENT*)
-        ;
-
-signatureBlock
-        :       ^('{' signatureExpression*)
-        ;
-
-signatureExpression
-        :       ^(('&&' | '||') signatureAtom signatureAtom)
-        ;
-
-signatureAtom
-        :       ^('<:' IDENT  (type | 'numeric'))
-        |       ^('(' signatureExpression)
-        ;
 
 expressionList [std::vector<ExprExpression*> &args]
 @init { ExprExpression *value = NULL; }
