@@ -893,34 +893,26 @@ methodInvocation returns [Expr* result]
 	;
 
 expressionList [std::vector<ExprExpression*> &args]
-@init { ExprExpression *value = NULL; }
+@init { 
+	ExprExpression *value = NULL; 
+}
         :  expression[value] { args.push_back(value); } ;
 
 expression [ExprExpression* &returnValue]
-@init { int sel = 0; ExprExpression *leftValue = NULL, *rightValue = NULL; std::vector<ExprExpression*> args; }
-        :       ^(('==' {sel=0;} | '!=' {sel=1;} | '<' {sel=2;} | '>' {sel=3;} | '<=' {sel=4;} | '>=' {sel=5;} | 
-                   '||' {sel=6;} | '&&' {sel=7;} | '+' {sel=8;} | '-' {sel=9;} | '*' {sel=10;}) 
-                   left=expression[leftValue] right=expression[rightValue])
+@init { 
+    ExprExpression *leftValue = NULL, *rightValue = NULL; 
+    std::vector<ExprExpression*> args; 
+}
+	:	^(cop=cexprOp left=expression[leftValue] right=expression[rightValue])
         {
-           std::string op = "NULL";
-           if (sel == 0) { op = "=="; }
-           if (sel == 1) { op = "!="; }
-           if (sel == 2) { op = "<"; }
-           if (sel == 3) { op = ">"; }
-           if (sel == 4) { op = "<="; }
-           if (sel == 5) { op = ">="; }
-           if (sel == 6) { op = "||"; }
-           if (sel == 7) { op = "&&"; }
-           if (sel == 8) { op = "+"; }
-           if (sel == 9) { op = "-"; }
-           if (sel == 10) { op = "*"; }
+           std::string op = c_str($cop.text->chars);
            returnValue = new ExprExpression(op, leftValue, rightValue);
         }
-        |       r=anyValue
+	|	r=anyValue
         {
            returnValue = new ExprExpression(r);
         }
-        |       ^(FUNCTION_CALL name=IDENT ^('(' expressionList[args]*))
+	|	^(FUNCTION_CALL name=IDENT ^('(' expressionList[args]*))
         {
             FunctionType* func = getFunction(c_str($name.text->chars));
 
@@ -929,8 +921,22 @@ expression [ExprExpression* &returnValue]
             }
             returnValue = new ExprExpression(new FunctionType(*func), args, CTX->SymbolTable->getDataType(func->getReturnType()));
         }
-        ;
+	;
 
+cexprOp
+	:	'=='
+	|	'!='
+	|	'<'
+	|	'<='
+	|	'>'
+	|	'>='
+	|	'||'
+	|	'&&'
+	|	'+'
+	|	'-'
+	|	'*'
+;
+	
 enforceExpression returns [Expr* result]
 @init { ExprExpression *value = NULL; BoolDomain* dom = NULL; ExprConstant* con = NULL; std::vector<Expr*> args; }
         : ^(EXPRESSION_ENFORCE a=expression[value]) { 
