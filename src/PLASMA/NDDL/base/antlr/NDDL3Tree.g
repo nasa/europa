@@ -892,34 +892,31 @@ methodInvocation returns [Expr* result]
     }
 	;
 
-expressionList [std::vector<ExprExpression*> &args]
-@init { 
-	ExprExpression *value = NULL; 
-}
-        :  expression[value] { args.push_back(value); } ;
+cexpressionList [std::vector<ExprExpression*> &args]
+	:  (expr=cexpression { args.push_back(expr); })* 
+	;
 
-expression [ExprExpression* &returnValue]
+cexpression returns [ExprExpression* result]
 @init { 
-    ExprExpression *leftValue = NULL, *rightValue = NULL; 
     std::vector<ExprExpression*> args; 
 }
-	:	^(cop=cexprOp left=expression[leftValue] right=expression[rightValue])
+	:	^(cop=cexprOp leftValue=cexpression rightValue=cexpression)
         {
            std::string op = c_str($cop.text->chars);
-           returnValue = new ExprExpression(op, leftValue, rightValue);
+           result = new ExprExpression(op, leftValue, rightValue);
         }
 	|	r=anyValue
         {
-           returnValue = new ExprExpression(r);
+           result = new ExprExpression(r);
         }
-	|	^(FUNCTION_CALL name=IDENT ^('(' expressionList[args]*))
+	|	^(FUNCTION_CALL name=IDENT ^('(' expressionList[args]))
         {
             FunctionType* func = getFunction(c_str($name.text->chars));
 
             if (!func) {
                 reportSemanticError(CTX, "Function does not exist: " + std::string(c_str($name.text->chars)));
             }
-            returnValue = new ExprExpression(new FunctionType(*func), args, CTX->SymbolTable->getDataType(func->getReturnType()));
+            result = new ExprExpression(new FunctionType(*func), args, CTX->SymbolTable->getDataType(func->getReturnType()));
         }
 	;
 
@@ -938,8 +935,13 @@ cexprOp
 ;
 	
 enforceExpression returns [Expr* result]
-@init { ExprExpression *value = NULL; BoolDomain* dom = NULL; ExprConstant* con = NULL; std::vector<Expr*> args; }
-        : ^(EXPRESSION_ENFORCE a=expression[value]) { 
+@init { 
+	BoolDomain* dom = NULL; 
+	ExprConstant* con = NULL; 
+	std::vector<Expr*> args; 
+}
+	: ^(EXPRESSION_ENFORCE value=cexpression) 
+	  { 
             value->setEnforceContext();
             /*try {
                 value->checkType();
@@ -959,5 +961,9 @@ enforceExpression returns [Expr* result]
         } ;
 
 expressionCleanReturn returns [Expr* result]
-@init { ExprExpression* returnValue = NULL; } : expression[returnValue] { result = returnValue; } ;
-
+@init 
+{ 
+	ExprExpression* returnValue = NULL; 
+} 
+	: result = expression
+	;
