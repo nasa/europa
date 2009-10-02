@@ -40,6 +40,8 @@ public:
 
     virtual MethodId getMethod(const char* methodName,Expr* target,const std::vector<Expr*>& args);
 
+    virtual CFunctionId getCFunction(const char* name, const std::vector<CExpr*>& args);
+
     AbstractDomain* makeNumericDomainFromLiteral(const std::string& type,const std::string& value);
 
     void checkConstraint(const char* name,const std::vector<Expr*>& args);

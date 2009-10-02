@@ -3,7 +3,7 @@
 #include "Constraints.hh"
 #include "ConstraintType.hh"
 #include "Propagators.hh"
-
+#include "CFunctions.hh"
 
 namespace EUROPA {
 
@@ -35,6 +35,9 @@ namespace EUROPA {
       ces->registerDataType((new StringDT())->getId());
       ces->registerDataType((new SymbolDT())->getId());
       engine->addComponent("CESchema",ces);
+
+      ces->registerCFunction((new IsSingleton())->getId());
+      ces->registerCFunction((new IsSpecified())->getId());
 
       ConstraintEngine* ce = new ConstraintEngine(ces->getId());
 	  new DefaultPropagator(LabelStr("Default"), ce->getId());

@@ -6,6 +6,7 @@
 #include "RulesEngineDefs.hh"
 #include "Object.hh"
 #include "ObjectFactory.hh"
+#include "CFunction.hh"
 #include "Method.hh"
 #include "IntervalToken.hh"
 #include "TokenType.hh"
@@ -15,29 +16,6 @@
 
 
 namespace EUROPA {
-
-  //TODO: Rename
-  class FunctionType;
-  class FunctionType
-  {
-  public:
-    FunctionType(const char* name, const char* constraint, const char* returnType, unsigned int argumentCount, bool addToList = false);
-    FunctionType(FunctionType& copy);
-    ~FunctionType();
-    const char* getName();
-    const char* getConstraint();
-    const char* getReturnType();
-    unsigned int getArgumentCount();
-  private:
-    std::string m_name, m_constraint, m_returnType;
-    unsigned int m_argumentCount;
-  };
-
-  // TODO: EUROPA doesn't have any static data, this needs to be moved to CESchema
-  extern std::vector<FunctionType*> g_functionTypes;
-#define DECLARE_FUNCTION_TYPE(name, constraint, returnType, argumentCount) FunctionType g_function_##name(#name, constraint, returnType, argumentCount, true);
-  FunctionType* getFunction(std::string name);
-
 
   class ExprConstant : public Expr
   {
@@ -363,13 +341,13 @@ namespace EUROPA {
   class CExprFunction : public CExpr
   {
     public:
-        CExprFunction(FunctionType* func, std::vector<CExpr*> args, DataTypeId data);
+        CExprFunction(const CFunctionId& func, const std::vector<CExpr*>& args);
         virtual ~CExprFunction() { /* TODO: release memory */ }
 
         // Expr methods
         virtual DataRef eval(EvalContext& context) const;
 
-        virtual const DataTypeId getDataType() const { return m_dataType; }
+        virtual const DataTypeId getDataType() const { return m_func->getReturnType(); }
 
         virtual std::string toString() const;
 
@@ -381,9 +359,8 @@ namespace EUROPA {
         virtual void checkType();
 
     protected:
-        FunctionType* m_func;
+        CFunctionId m_func;
         std::vector<CExpr*> m_args;
-        DataTypeId m_dataType;
   };
 
   class CExprValue : public CExpr
@@ -411,11 +388,11 @@ namespace EUROPA {
   };
 
   // TODO: this still needs to be broken down more into cleaner pieces
-  class ExprExpression : public CExpr
+  class CExprBinary : public CExpr
   {
     public:
-        ExprExpression(std::string name, CExpr* left, CExpr* right);
-        virtual ~ExprExpression();
+        CExprBinary(std::string op, CExpr* left, CExpr* right);
+        virtual ~CExprBinary();
 
         // Expr methods
         virtual DataRef eval(EvalContext& context) const;
@@ -434,7 +411,7 @@ namespace EUROPA {
         virtual void checkType();
 
     protected:
-        std::string m_name;
+        std::string m_operator;
         CExpr *m_lhs, *m_rhs;
   };
 

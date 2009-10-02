@@ -904,7 +904,7 @@ cexpression returns [CExpr* result]
 	:	^(cop=cexprOp leftValue=cexpression rightValue=cexpression)
         {
            std::string op = c_str($cop.text->chars);
-           result = new ExprExpression(op, leftValue, rightValue);
+           result = new CExprBinary(op, leftValue, rightValue);
         }
 	|	r=anyValue
         {
@@ -912,12 +912,13 @@ cexpression returns [CExpr* result]
         }
 	|	^(FUNCTION_CALL name=IDENT ^('(' cexpressionList[args]))
         {
-            FunctionType* func = getFunction(c_str($name.text->chars));
+            std::string fName = c_str($name.text->chars);
+            CFunctionId func = CTX->SymbolTable->getCFunction(fName.c_str(),args);
 
-            if (!func) {
-                reportSemanticError(CTX, "Function does not exist: " + std::string(c_str($name.text->chars)));
-            }
-            result = new CExprFunction(func, args, CTX->SymbolTable->getDataType(func->getReturnType()));
+            if (func.isNoId()) 
+                reportSemanticError(CTX, "CFunction does not exist: " + fName);
+                        
+            result = new CExprFunction(func, args);
         }
 	;
 

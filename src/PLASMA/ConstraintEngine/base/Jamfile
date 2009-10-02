@@ -6,16 +6,17 @@ ModuleBase ConstraintEngine
 	:
 	AbstractDomain.cc
 	CESchema.cc
+	CFunction.cc
 	Constraint.cc
 	ConstraintEngine.cc
 	ConstraintEngineListener.cc
-        ConstrainedVariable.cc
-        ConstraintType.cc
+	ConstrainedVariable.cc
+	ConstraintType.cc
 	DataType.cc
-        DomainListener.cc
-        Propagator.cc
+	DomainListener.cc
+	Propagator.cc
 	PSConstraintEngineListener.cc
-        PSVarValue.cc
+	PSVarValue.cc
 	VariableChangeListener.cc
 	;
 

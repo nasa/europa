@@ -30,64 +30,6 @@
 namespace EUROPA {
   void makeConstraint(EvalContext& context, const LabelStr& name, const std::vector<ConstrainedVariableId>& vars);
 
-  // TODO: EUROPA doesn't have any static data, this needs to be moved to CESchema
-  std::vector<FunctionType*> g_functionTypes;
-
-  DECLARE_FUNCTION_TYPE(isSingleton, "testSingleton", "bool", 1);
-  DECLARE_FUNCTION_TYPE(isSpecified, "testSpecified", "bool", 1);
-
-
-  FunctionType* getFunction(std::string name) {
-    for (unsigned int i = 0; i < g_functionTypes.size(); i++) {
-      if (g_functionTypes[i]->getName() == name) {
-	return g_functionTypes[i];
-      }
-    }
-    return NULL;
-  }
-
-
-  FunctionType::FunctionType(const char* name, const char* constraint, const char* returnType, unsigned int argumentCount, bool addToList)
-  {
-     if (addToList) {
-        g_functionTypes.push_back(this);
-     }
-     m_name = name;
-     m_constraint = constraint;
-     m_returnType = returnType;
-     m_argumentCount = argumentCount;
-  }
-
-  FunctionType::FunctionType(FunctionType &copy)
-  {
-     m_name = copy.getName();
-     m_constraint = copy.getConstraint();
-     m_returnType = copy.getReturnType();
-     m_argumentCount = copy.getArgumentCount();
-  }
-
-  FunctionType::~FunctionType()
-  {
-  }
-
-  const char* FunctionType::getName()
-  {
-     return m_name.c_str();
-  }
-
-  const char* FunctionType::getConstraint()
-  {
-     return m_constraint.c_str();
-  }
-  const char* FunctionType::getReturnType()
-  {
-     return m_returnType.c_str();
-  }
-  unsigned int FunctionType::getArgumentCount()
-  {
-     return m_argumentCount;
-  }
-
 
   // TODO: keep using pdbClient?
   const DbClientId& getPDB(EvalContext& context)
@@ -395,14 +337,15 @@ namespace EUROPA {
       return m_value->eval(context);
   }
 
-  CExprFunction::CExprFunction(FunctionType* func, std::vector<CExpr*> args, DataTypeId dt)
-    : m_func(func), m_args(args), m_dataType(dt)
+  CExprFunction::CExprFunction(const CFunctionId& func, const std::vector<CExpr*>& args)
+    : m_func(func)
+    , m_args(args)
   {
   }
 
   void CExprFunction::checkType()
   {
-      // TODO: Have function type check arg types
+      // TODO: Have function type check arg types?, it's already done by the parser
   }
 
   DataRef CExprFunction::eval(EvalContext& context) const
@@ -410,11 +353,11 @@ namespace EUROPA {
       //Create the variable name
       std::string variable = createVariableName();
 
-      // TODO: Function type should know how to eval itself
-      ExprVarDeclaration* var = new ExprVarDeclaration(variable.c_str(), m_dataType, NULL, false);
+      // TODO: CFunction should know how to eval itself
+      ExprVarDeclaration* var = new ExprVarDeclaration(variable.c_str(), getDataType(), NULL, false);
       DataRef output = var->eval(context);
 
-      Expr* varRef = new ExprVarRef(variable.c_str(), m_dataType);
+      Expr* varRef = new ExprVarRef(variable.c_str(), getDataType());
       std::vector<Expr*> args;
       args.push_back(varRef);
       for (unsigned int i = 0; i < m_args.size(); i++)
@@ -432,56 +375,55 @@ namespace EUROPA {
       for (unsigned int i = 0; i < m_args.size(); i++)
           args += m_args[i]->toString() + std::string("_");
 
-      return std::string(m_func->getName()) + "__" + args + "_";
+      return m_func->getName().toString() + "__" + args + "_";
   }
 
-  ExprExpression::ExprExpression(std::string name, CExpr* lhs, CExpr* rhs)
-    : m_name(name), m_lhs(lhs),  m_rhs(rhs)
+  CExprBinary::CExprBinary(std::string op, CExpr* lhs, CExpr* rhs)
+    : m_operator(op), m_lhs(lhs),  m_rhs(rhs)
   {
   }
 
-  ExprExpression::~ExprExpression()
+  CExprBinary::~CExprBinary()
   {
+	  delete m_lhs;
+	  delete m_rhs;
   }
 
-  bool ExprExpression::hasReturnValue() const {
-    if ((m_name == "==" || m_name == "<=" || m_name == ">=" || m_name == "!=" || m_name == ">" || m_name == "<") && m_enforceContext) {
+  bool CExprBinary::hasReturnValue() const {
+    if ((m_operator == "==" || m_operator == "<=" || m_operator == ">=" || m_operator == "!=" || m_operator == ">" || m_operator == "<") && m_enforceContext) {
       return false;
     }
     return true;
   }
 
-  const DataTypeId ExprExpression::getDataType() const {
+  const DataTypeId CExprBinary::getDataType() const {
     if (!hasReturnValue()) {
       return VoidDT::instance(); //In an optimizable enforce statement, there is a void return
-    } else if (m_name == "==" || m_name == "<=" || m_name == ">=" || m_name == "!=" || m_name == ">" || m_name == "<" || m_name == "||" || m_name == "&&") {
+    } else if (m_operator == "==" || m_operator == "<=" || m_operator == ">=" || m_operator == "!=" || m_operator == ">" || m_operator == "<" || m_operator == "||" || m_operator == "&&") {
       return BoolDT::instance(); //Boolean return from relationals and boolean ops.
-    } else if (m_name == "+" || m_name == "*" || m_name == "-") {
+    } else if (m_operator == "+" || m_operator == "*" || m_operator == "-") {
       check_error(m_lhs && m_rhs, "No arguments to arithmetic expression.");
       return m_lhs->getDataType();
     }
     return VoidDT::instance();
   }
 
-  void ExprExpression::checkType() {
-      DataTypeId myType = getDataType();
-      if (m_lhs)
-          m_lhs->checkType();
+  void CExprBinary::checkType()
+  {
+      m_lhs->checkType();
+      m_rhs->checkType();
 
-      if (m_rhs)
-          m_rhs->checkType();
-
-      if (m_name == "||" || m_name == "&&") {
+      if (m_operator == "||" || m_operator == "&&") {
           if (!m_lhs->getDataType()->isAssignableFrom(BoolDT::instance()) || !BoolDT::instance()->isAssignableFrom(m_lhs->getDataType())) {
-              throw std::string("In a " + m_name + " expression, both arguments must be of type boolean. In this case, "
+              throw std::string("In a " + m_operator + " expression, both arguments must be of type boolean. In this case, "
                       + m_lhs->getDataType()->getName().c_str() + " from \"" + m_lhs->toString() + "\" is not a boolean.");
           }
           if (!m_rhs->getDataType()->isAssignableFrom(BoolDT::instance()) || !BoolDT::instance()->isAssignableFrom(m_rhs->getDataType())) {
-              throw std::string("In a " + m_name + " expression, both arguments must be of type boolean. In this case, "
+              throw std::string("In a " + m_operator + " expression, both arguments must be of type boolean. In this case, "
                       + m_rhs->getDataType()->getName().c_str() + " from \"" + m_rhs->toString() + "\" is not a boolean.");
           }
-      } else if (m_name == "+" || m_name == "-" || m_name == "*" || m_name == "=="
-          || m_name == "<=" || m_name == ">=" || m_name == "!=" || m_name == ">" || m_name == "<") {
+      } else if (m_operator == "+" || m_operator == "-" || m_operator == "*" || m_operator == "=="
+          || m_operator == "<=" || m_operator == ">=" || m_operator == "!=" || m_operator == ">" || m_operator == "<") {
           if (!m_rhs->getDataType()->isAssignableFrom(m_lhs->getDataType()) || !m_lhs->getDataType()->isAssignableFrom(m_rhs->getDataType())) {
               throw std::string("Cannot use types " + std::string(m_lhs->getDataType()->getName().c_str()) + " and "
                       + std::string(m_rhs->getDataType()->getName().c_str()) + "in expression: " + toString());
@@ -497,43 +439,43 @@ namespace EUROPA {
       && (cvar->getName().toString() == "end" || cvar->getName().toString() == "start");
   }
 
-  bool ExprExpression::isSingleton() {
+  bool CExprBinary::isSingleton() {
     return false;
   }
 
-  bool ExprExpression::isSingletonOptimizable() {
-    return (m_name == "+" || m_name == "-" || m_name == "*");
+  bool CExprBinary::isSingletonOptimizable() {
+    return (m_operator == "+" || m_operator == "-" || m_operator == "*");
   }
 
-  DataRef ExprExpression::eval(EvalContext& context) const {
+  DataRef CExprBinary::eval(EvalContext& context) const {
       //Figure out constraint type.
       std::string constraint = "", returnType = "";
       bool flipArguments = false;
       if (hasReturnValue()) {
-          if (m_name == "==") { constraint = "testEQ"; returnType = "bool"; }
-          if (m_name == "<=") { constraint = "testLEQ"; returnType = "bool"; }
-          if (m_name == ">=") { constraint = "testLEQ"; returnType = "bool"; flipArguments = true; }
-          if (m_name == "!=") { constraint = "testNEQ"; returnType = "bool"; }
-          if (m_name == ">") { constraint = "TestLessThan"; returnType = "bool"; flipArguments = true; }
-          if (m_name == "<") { constraint = "TestLessThan"; returnType = "bool"; }
-          if (m_name == "+") { constraint = "addEq"; }
-          if (m_name == "-") { constraint = "addEq"; }
-          if (m_name == "*") { constraint = "mulEq"; }
-          if (m_name == "||") { constraint = "testOr"; returnType = "bool"; }
-          if (m_name == "&&") { constraint = "testAnd"; returnType = "bool"; }
+          if (m_operator == "==") { constraint = "testEQ"; returnType = "bool"; }
+          if (m_operator == "<=") { constraint = "testLEQ"; returnType = "bool"; }
+          if (m_operator == ">=") { constraint = "testLEQ"; returnType = "bool"; flipArguments = true; }
+          if (m_operator == "!=") { constraint = "testNEQ"; returnType = "bool"; }
+          if (m_operator == ">") { constraint = "TestLessThan"; returnType = "bool"; flipArguments = true; }
+          if (m_operator == "<") { constraint = "TestLessThan"; returnType = "bool"; }
+          if (m_operator == "+") { constraint = "addEq"; }
+          if (m_operator == "-") { constraint = "addEq"; }
+          if (m_operator == "*") { constraint = "mulEq"; }
+          if (m_operator == "||") { constraint = "testOr"; returnType = "bool"; }
+          if (m_operator == "&&") { constraint = "testAnd"; returnType = "bool"; }
       } else { //Special for return type non-existant
           returnType = "VOID";
-          if (m_name == "==") { constraint = "eq"; }
-          if (m_name == "<=") { constraint = "leq"; }
-          if (m_name == ">=") { constraint = "leq"; flipArguments = true; }
-          if (m_name == "!=") { constraint = "neq"; }
-          if (m_name == ">") { constraint = "lt"; flipArguments = true; }
-          if (m_name == "<") { constraint = "lt"; }
+          if (m_operator == "==") { constraint = "eq"; }
+          if (m_operator == "<=") { constraint = "leq"; }
+          if (m_operator == ">=") { constraint = "leq"; flipArguments = true; }
+          if (m_operator == "!=") { constraint = "neq"; }
+          if (m_operator == ">") { constraint = "lt"; flipArguments = true; }
+          if (m_operator == "<") { constraint = "lt"; }
       }
-      check_runtime_error(constraint != "", "Illegal expression: " + m_name);
+      check_runtime_error(constraint != "", "Illegal expression: " + m_operator);
 
       //If one side is a singleton and the other can be optimized, do a special case.
-      if (returnType == "VOID" && m_name == "==") {
+      if (returnType == "VOID" && m_operator == "==") {
           if (m_lhs->isSingleton() && m_rhs->isSingletonOptimizable()) {
               m_rhs->setReturnArgument(m_lhs);
               return m_rhs->eval(context);
@@ -585,15 +527,15 @@ namespace EUROPA {
           }
 
           //Make the constraint's arguments when return type present
-          if (m_name == "-") {
+          if (m_operator == "-") {
               args.push_back(output.getValue());
               args.push_back(right.getValue());
               args.push_back(left.getValue());
-          } else if (m_name == "+") {
+          } else if (m_operator == "+") {
               args.push_back(left.getValue());
               args.push_back(right.getValue());
               args.push_back(output.getValue());
-          } else if (m_name == "*") {
+          } else if (m_operator == "*") {
               args.push_back(left.getValue());
               args.push_back(right.getValue());
               args.push_back(output.getValue());
@@ -630,20 +572,20 @@ namespace EUROPA {
       return output;
   }
 
-  std::string ExprExpression::toString() const {
+  std::string CExprBinary::toString() const {
     if (m_rhs && m_lhs) {
       std::string op = "BadOp";
-      if (m_name == "==") { op = "eq"; }
-      if (m_name == "<=") { op = "leq"; }
-      if (m_name == ">=") { op = "geq"; }
-      if (m_name == "!=") { op = "neq"; }
-      if (m_name == ">") { op = "gt"; }
-      if (m_name == "<") { op = "lt"; }
-      if (m_name == "+") { op = "plus"; }
-      if (m_name == "-") { op = "minus"; }
-      if (m_name == "*") { op = "times"; }
-      if (m_name == "||") { op = "or"; }
-      if (m_name == "&&") { op = "and"; }
+      if (m_operator == "==") { op = "eq"; }
+      if (m_operator == "<=") { op = "leq"; }
+      if (m_operator == ">=") { op = "geq"; }
+      if (m_operator == "!=") { op = "neq"; }
+      if (m_operator == ">") { op = "gt"; }
+      if (m_operator == "<") { op = "lt"; }
+      if (m_operator == "+") { op = "plus"; }
+      if (m_operator == "-") { op = "minus"; }
+      if (m_operator == "*") { op = "times"; }
+      if (m_operator == "||") { op = "or"; }
+      if (m_operator == "&&") { op = "and"; }
       if (m_enforceContext) { op += "_enf"; }
       return m_lhs->toString() + "_" + op + "_" + m_rhs->toString();
     }

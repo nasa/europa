@@ -16,6 +16,7 @@ namespace EUROPA
 
   void CESchema::purgeAll()
   {
+	  purgeCFunctions();
       purgeConstraintTypes();
       purgeDataTypes();
   }
@@ -120,4 +121,45 @@ namespace EUROPA
         factory.release();
       }
   }
+
+  void CESchema::registerCFunction(const CFunctionId& cf)
+  {
+    check_error(cf.isValid());
+
+    if(m_cfunctions.find(cf->getName().getKey()) != m_cfunctions.end()){
+      debugMsg("CESchema::registerCFunction", "Over-writing prior registration for " << cf->getName().toString());
+      CFunctionId old = m_cfunctions.find(cf->getName().getKey())->second;
+      m_cfunctions.erase(cf->getName().getKey());
+      delete (CFunction*) old;
+    }
+
+    checkError(m_cfunctions.find(cf->getName().getKey()) == m_cfunctions.end(), "Already have '" + cf->getName().toString() + "' registered.");
+
+    m_cfunctions.insert(std::pair<double, CFunctionId>(cf->getName().getKey(), cf));
+    debugMsg("CESchema::registerCFunction", "Registered CFunction " << cf->getName().toString());
+  }
+
+  CFunctionId CESchema::getCFunction(const LabelStr& name)
+  {
+    std::map<double, CFunctionId>::const_iterator it =  m_cfunctions.find(name.getKey());
+
+    if (it != m_cfunctions.end())
+    	return it->second;
+    else
+    	return CFunctionId::noId();
+  }
+
+  // TODO: write generic method to clean up maps instead
+  void CESchema::purgeCFunctions()
+  {
+      std::map<double, CFunctionId >::iterator it = m_cfunctions.begin();
+      while (it != m_cfunctions.end()) {
+        CFunctionId cf = (it++)->second;
+        debugMsg("CESchema:purgeAll",
+             "Removing CFunction " << cf->getName().toString());
+        delete (CFunction *) cf;
+      }
+      m_cfunctions.clear();
+  }
+
 } // namespace EUROPA

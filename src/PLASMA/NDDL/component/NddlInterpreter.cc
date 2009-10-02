@@ -527,6 +527,23 @@ MethodId NddlSymbolTable::getMethod(const char* methodName,Expr* target,const st
     return getPlanDatabase()->getSchema()->getMethod(LabelStr(methodName),targetDataType,argTypes);
 }
 
+CFunctionId NddlSymbolTable::getCFunction(const char* name,const std::vector<CExpr*>& args)
+{
+    if (m_parentST != NULL)
+        return m_parentST->getCFunction(name,args);
+
+    CFunctionId f = getPlanDatabase()->getSchema()->getCESchema()->getCFunction(LabelStr(name));
+
+    if (f.isId()) {
+    	std::vector<DataTypeId> argTypes;
+    	for (unsigned int i=0;i<args.size();i++)
+    		argTypes.push_back(args[i]->getDataType());
+    	f->checkArgTypes(argTypes);
+    }
+
+    return f;
+}
+
 AbstractDomain* NddlSymbolTable::makeNumericDomainFromLiteral(const std::string& type,
                                                               const std::string& value)
 {

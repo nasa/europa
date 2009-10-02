@@ -8,6 +8,7 @@
 #include "AbstractDomain.hh"
 #include "ConstraintType.hh"
 #include "DataType.hh"
+#include "CFunction.hh"
 
 /**
  * @file Class to manage all metadata for Constraint engine (variable data types, constraint types, etc).
@@ -40,8 +41,13 @@ namespace EUROPA {
       bool isConstraintType(const LabelStr& name, const bool& warn = false);
       void purgeConstraintTypes();
 
+      // Methods to manage CFunctions
+      void registerCFunction(const CFunctionId& cf);
+      CFunctionId getCFunction(const LabelStr& name);
+      void purgeCFunctions();
+
       /**
-       * @brief Delete all DataTypes and ConstraintTypes stored.
+       * @brief Delete all meta data stored.
        */
       void purgeAll();
 
@@ -49,6 +55,7 @@ namespace EUROPA {
       CESchemaId m_id;
       std::map<double, DataTypeId> m_dataTypes;
       std::map<double, ConstraintTypeId > m_constraintTypes;
+      std::map<double, CFunctionId> m_cfunctions;
   };
 
 } // namespace EUROPA
