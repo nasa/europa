@@ -492,13 +492,9 @@ namespace EUROPA {
   }
 
   bool isTimepoint(DataRef var) {
-      // TODO JRB: this optimization is tripping an assert for me. disabling until grammar is clean
-      return false;
-      /*
     ConstrainedVariable *cvar = var.getValue();
     return dynamic_cast< TokenVariable<IntervalIntDomain>* >(cvar) != NULL
       && (cvar->getName().toString() == "end" || cvar->getName().toString() == "start");
-      */
   }
 
   bool ExprExpression::isSingleton() {

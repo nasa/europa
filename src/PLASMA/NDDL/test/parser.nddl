@@ -124,7 +124,7 @@ goal1 meets somep;
 
 //Test eight cases of temporalDistance
 goal1.end + 0 == [0,inf];
-goal1.end + somep.start == 0;
+goal1.end + somep.start == [0,inf];
 goal1.end + 0 == somep.start;
 //Three timepoints here will cause error
 //Ignore all const
