@@ -893,13 +893,13 @@ methodInvocation returns [Expr* result]
     }
 	;
 
-cexpressionList [std::vector<ExprExpression*> &args]
+cexpressionList [std::vector<CExpr*> &args]
 	:  (expr=cexpression { args.push_back(expr); })* 
 	;
 
-cexpression returns [ExprExpression* result]
+cexpression returns [CExpr* result]
 @init { 
-    std::vector<ExprExpression*> args; 
+    std::vector<CExpr*> args; 
 }
 	:	^(cop=cexprOp leftValue=cexpression rightValue=cexpression)
         {
@@ -908,7 +908,7 @@ cexpression returns [ExprExpression* result]
         }
 	|	r=anyValue
         {
-           result = new ExprExpression(r);
+           result = new CExprValue(r);
         }
 	|	^(FUNCTION_CALL name=IDENT ^('(' cexpressionList[args]))
         {
@@ -917,7 +917,7 @@ cexpression returns [ExprExpression* result]
             if (!func) {
                 reportSemanticError(CTX, "Function does not exist: " + std::string(c_str($name.text->chars)));
             }
-            result = new ExprExpression(new FunctionType(*func), args, CTX->SymbolTable->getDataType(func->getReturnType()));
+            result = new CExprFunction(func, args, CTX->SymbolTable->getDataType(func->getReturnType()));
         }
 	;
 

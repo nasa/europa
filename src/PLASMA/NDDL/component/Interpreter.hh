@@ -33,6 +33,7 @@ namespace EUROPA {
     unsigned int m_argumentCount;
   };
 
+  // TODO: EUROPA doesn't have any static data, this needs to be moved to CESchema
   extern std::vector<FunctionType*> g_functionTypes;
 #define DECLARE_FUNCTION_TYPE(name, constraint, returnType, argumentCount) FunctionType g_function_##name(#name, constraint, returnType, argumentCount, true);
   FunctionType* getFunction(std::string name);
@@ -336,45 +337,105 @@ namespace EUROPA {
         std::vector<PredicateInstanceRef*> m_targets;
   };
 
-  class ExprExpression;
-  class ExprExpression : public Expr
+  // Constraint Expressions
+  class CExpr : public Expr
+  {
+  public:
+      CExpr() : m_count(s_counter++), m_enforceContext(false), m_returnArgument(NULL) {}
+      virtual ~CExpr() {}
+
+      virtual bool hasReturnValue() const = 0;
+      virtual void setEnforceContext() { m_enforceContext = true; }
+      virtual bool isSingleton() = 0;
+      virtual bool isSingletonOptimizable() = 0; // TODO: use output node method instead? (ask JRB)
+      virtual void checkType() = 0;
+      void setReturnArgument(CExpr *arg) { m_returnArgument = arg; }
+
+  protected:
+      std::string createVariableName() const;
+
+      static unsigned int s_counter;
+      unsigned int m_count;
+      bool m_enforceContext;
+      CExpr *m_returnArgument; // TODO: generalize this to output node (ask JRB)
+  };
+
+  class CExprFunction : public CExpr
   {
     public:
-        ExprExpression(std::string name, ExprExpression* left, ExprExpression* right);
-        ExprExpression(Expr* target);
-        ExprExpression(FunctionType* func, std::vector<ExprExpression*> args, DataTypeId data);
-        virtual ~ExprExpression();
+        CExprFunction(FunctionType* func, std::vector<CExpr*> args, DataTypeId data);
+        virtual ~CExprFunction() { /* TODO: release memory */ }
 
+        // Expr methods
         virtual DataRef eval(EvalContext& context) const;
+
+        virtual const DataTypeId getDataType() const { return m_dataType; }
 
         virtual std::string toString() const;
 
-        bool hasReturnValue() const;
+        // CExpr methods
+        virtual bool hasReturnValue() const { return true; }
+        virtual bool isSingleton() { return false; }
+        virtual bool isSingletonOptimizable() { return false; }
 
-        void setEnforceContext();
+        virtual void checkType();
 
-        bool isSingleton();
+    protected:
+        FunctionType* m_func;
+        std::vector<CExpr*> m_args;
+        DataTypeId m_dataType;
+  };
 
-        bool isSingletonOptimizable();
+  class CExprValue : public CExpr
+  {
+    public:
+        CExprValue(Expr* value);
+        virtual ~CExprValue() { /* TODO: release memory */ }
 
-        void setReturnArgument(ExprExpression *arg);
+        // Expr methods
+        virtual DataRef eval(EvalContext& context) const;
 
-        void checkType();
+        virtual const DataTypeId getDataType() const { return m_value->getDataType(); }
+
+        virtual std::string toString() const { return m_value->toString(); }
+
+        // CExpr methods
+        virtual bool hasReturnValue() const { return true; }
+        virtual bool isSingleton() { return true; /*TODO:not accurate?*/}
+        virtual bool isSingletonOptimizable() { return false; }
+
+        virtual void checkType();
+
+    protected:
+        Expr* m_value;
+  };
+
+  // TODO: this still needs to be broken down more into cleaner pieces
+  class ExprExpression : public CExpr
+  {
+    public:
+        ExprExpression(std::string name, CExpr* left, CExpr* right);
+        virtual ~ExprExpression();
+
+        // Expr methods
+        virtual DataRef eval(EvalContext& context) const;
 
         virtual const DataTypeId getDataType() const;
-    protected:
-        std::string createVariableName() const;
 
-        static unsigned int s_counter;
-        unsigned int m_count;
+        virtual std::string toString() const;
+
+        // CExpr methods
+        virtual bool hasReturnValue() const;
+
+        virtual bool isSingleton();
+
+        virtual bool isSingletonOptimizable();
+
+        virtual void checkType();
+
+    protected:
         std::string m_name;
-        ExprExpression *m_lhs, *m_rhs;
-        Expr *m_target;
-        FunctionType* m_func;
-        std::vector<ExprExpression*> m_args;
-        DataTypeId m_data;
-        bool m_enforceContext;
-        ExprExpression *m_returnArgument;
+        CExpr *m_lhs, *m_rhs;
   };
 
   // InterpretedToken is the interpreted version of NddlToken

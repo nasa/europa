@@ -30,6 +30,7 @@
 namespace EUROPA {
   void makeConstraint(EvalContext& context, const LabelStr& name, const std::vector<ConstrainedVariableId>& vars);
 
+  // TODO: EUROPA doesn't have any static data, this needs to be moved to CESchema
   std::vector<FunctionType*> g_functionTypes;
 
   DECLARE_FUNCTION_TYPE(isSingleton, "testSingleton", "bool", 1);
@@ -358,19 +359,84 @@ namespace EUROPA {
       return os.str();
   }
 
-  unsigned int ExprExpression::s_counter(1);
-  ExprExpression::ExprExpression(std::string name, ExprExpression* lhs, ExprExpression* rhs)
-    : m_count(s_counter++), m_name(name), m_lhs(lhs),  m_rhs(rhs), m_target(NULL), m_func(NULL), m_args(), m_data(), m_enforceContext(false), m_returnArgument(NULL)
+  unsigned int CExpr::s_counter(1);
+
+  std::string CExpr::createVariableName() const
+  {
+      char buff[15];
+      sprintf(buff, "%u", m_count);
+      std::string variable = std::string("implicit_var_" + std::string(buff) + "_" + toString()).c_str();
+
+      //Detect if the variable contains illegal characters and rewrite it if it does.
+      for (unsigned int i = 0; i < variable.size(); i++) {
+          if ((variable[i] > '9' || variable[i] < '0') && (variable[i] < 'A' || variable[i] > 'Z')
+                  && (variable[i] < 'a' || variable[i] > 'z') && (variable[i] != '_')) {
+              debugMsg("Interpreter","Bad var name generated : " << variable);
+              debugMsg("NddlInterpreter","Bad var name generated : " << variable);
+              variable = "implicit_var_" + std::string(buff) + "_generation_failure";
+              break;
+          }
+      }
+      return variable;
+  }
+
+  CExprValue::CExprValue(Expr* value)
+      : m_value(value)
   {
   }
 
-  ExprExpression::ExprExpression(Expr* target)
-    : m_count(s_counter++), m_name("PASS"), m_lhs(NULL),  m_rhs(NULL), m_target(target), m_func(NULL), m_args(), m_data(), m_enforceContext(false), m_returnArgument(NULL)
+  void CExprValue::checkType()
+  {
+      // Nothing to check
+  }
+
+  DataRef CExprValue::eval(EvalContext& context) const
+  {
+      return m_value->eval(context);
+  }
+
+  CExprFunction::CExprFunction(FunctionType* func, std::vector<CExpr*> args, DataTypeId dt)
+    : m_func(func), m_args(args), m_dataType(dt)
   {
   }
 
-  ExprExpression::ExprExpression(FunctionType* func, std::vector<ExprExpression*> args, DataTypeId data)
-    : m_count(s_counter++), m_name("FUNC"), m_lhs(NULL),  m_rhs(NULL), m_target(NULL), m_func(func), m_args(args), m_data(data), m_enforceContext(false), m_returnArgument(NULL)
+  void CExprFunction::checkType()
+  {
+      // TODO: Have function type check arg types
+  }
+
+  DataRef CExprFunction::eval(EvalContext& context) const
+  {
+      //Create the variable name
+      std::string variable = createVariableName();
+
+      // TODO: Function type should know how to eval itself
+      ExprVarDeclaration* var = new ExprVarDeclaration(variable.c_str(), m_dataType, NULL, false);
+      DataRef output = var->eval(context);
+
+      Expr* varRef = new ExprVarRef(variable.c_str(), m_dataType);
+      std::vector<Expr*> args;
+      args.push_back(varRef);
+      for (unsigned int i = 0; i < m_args.size(); i++)
+          args.push_back(m_args[i]);
+
+      Expr* con = new ExprConstraint(m_func->getConstraint(), args);
+
+      con->eval(context);
+      return output;
+  }
+
+  std::string CExprFunction::toString() const
+  {
+      std::string args = "";
+      for (unsigned int i = 0; i < m_args.size(); i++)
+          args += m_args[i]->toString() + std::string("_");
+
+      return std::string(m_func->getName()) + "__" + args + "_";
+  }
+
+  ExprExpression::ExprExpression(std::string name, CExpr* lhs, CExpr* rhs)
+    : m_name(name), m_lhs(lhs),  m_rhs(rhs)
   {
   }
 
@@ -385,20 +451,11 @@ namespace EUROPA {
     return true;
   }
 
-  void ExprExpression::setEnforceContext() {
-    m_enforceContext = true;
-  }
-
   const DataTypeId ExprExpression::getDataType() const {
     if (!hasReturnValue()) {
       return VoidDT::instance(); //In an optimizable enforce statement, there is a void return
     } else if (m_name == "==" || m_name == "<=" || m_name == ">=" || m_name == "!=" || m_name == ">" || m_name == "<" || m_name == "||" || m_name == "&&") {
       return BoolDT::instance(); //Boolean return from relationals and boolean ops.
-    } else if (m_name == "PASS") {
-      check_error(m_target, "Pass-through expressions should have a target.");
-      return m_target->getDataType();
-    } else if (m_name == "FUNC") {
-      return m_data; //For function returns.
     } else if (m_name == "+" || m_name == "*" || m_name == "-") {
       check_error(m_lhs && m_rhs, "No arguments to arithmetic expression.");
       return m_lhs->getDataType();
@@ -407,39 +464,31 @@ namespace EUROPA {
   }
 
   void ExprExpression::checkType() {
-    DataTypeId myType = getDataType();
-    if (m_lhs) {
-      m_lhs->checkType();
-    }
-    if (m_rhs) {
-      m_rhs->checkType();
-    }
-    for (std::vector<ExprExpression*>::iterator it = m_args.begin(); it != m_args.end(); it++) {
-      (*it)->checkType();
-    }
+      DataTypeId myType = getDataType();
+      if (m_lhs)
+          m_lhs->checkType();
 
-    if (m_name == "PASS") {
-      return; //Don't care
-    } else if (m_name == "||" || m_name == "&&") {
-      if (!m_lhs->getDataType()->isAssignableFrom(BoolDT::instance()) || !BoolDT::instance()->isAssignableFrom(m_lhs->getDataType())) {
-	throw std::string("In a " + m_name + " expression, both arguments must be of type boolean. In this case, "
-			  + m_lhs->getDataType()->getName().c_str() + " from \"" + m_lhs->toString() + "\" is not a boolean.");
+      if (m_rhs)
+          m_rhs->checkType();
+
+      if (m_name == "||" || m_name == "&&") {
+          if (!m_lhs->getDataType()->isAssignableFrom(BoolDT::instance()) || !BoolDT::instance()->isAssignableFrom(m_lhs->getDataType())) {
+              throw std::string("In a " + m_name + " expression, both arguments must be of type boolean. In this case, "
+                      + m_lhs->getDataType()->getName().c_str() + " from \"" + m_lhs->toString() + "\" is not a boolean.");
+          }
+          if (!m_rhs->getDataType()->isAssignableFrom(BoolDT::instance()) || !BoolDT::instance()->isAssignableFrom(m_rhs->getDataType())) {
+              throw std::string("In a " + m_name + " expression, both arguments must be of type boolean. In this case, "
+                      + m_rhs->getDataType()->getName().c_str() + " from \"" + m_rhs->toString() + "\" is not a boolean.");
+          }
+      } else if (m_name == "+" || m_name == "-" || m_name == "*" || m_name == "=="
+          || m_name == "<=" || m_name == ">=" || m_name == "!=" || m_name == ">" || m_name == "<") {
+          if (!m_rhs->getDataType()->isAssignableFrom(m_lhs->getDataType()) || !m_lhs->getDataType()->isAssignableFrom(m_rhs->getDataType())) {
+              throw std::string("Cannot use types " + std::string(m_lhs->getDataType()->getName().c_str()) + " and "
+                      + std::string(m_rhs->getDataType()->getName().c_str()) + "in expression: " + toString());
+          }
+      } else {
+          check_runtime_error(ALWAYS_FAIL, "Warning no type check for expression: " + toString() + "\n");
       }
-      if (!m_rhs->getDataType()->isAssignableFrom(BoolDT::instance()) || !BoolDT::instance()->isAssignableFrom(m_rhs->getDataType())) {
-	throw std::string("In a " + m_name + " expression, both arguments must be of type boolean. In this case, "
-			  + m_rhs->getDataType()->getName().c_str() + " from \"" + m_rhs->toString() + "\" is not a boolean.");
-      }
-    } else if (m_name == "+" || m_name == "-" || m_name == "*" || m_name == "=="
-	       || m_name == "<=" || m_name == ">=" || m_name == "!=" || m_name == ">" || m_name == "<") {
-      if (!m_rhs->getDataType()->isAssignableFrom(m_lhs->getDataType()) || !m_lhs->getDataType()->isAssignableFrom(m_rhs->getDataType())) {
-	throw std::string("Cannot use types " + std::string(m_lhs->getDataType()->getName().c_str()) + " and "
-			  + std::string(m_rhs->getDataType()->getName().c_str()) + "in expression: " + toString());
-      }
-    } else if (m_name == "FUNC") {
-      return; //TODO
-    } else {
-      check_runtime_error(ALWAYS_FAIL, "Warning no type check for expression: " + toString() + "\n");
-    }
   }
 
   bool isTimepoint(DataRef var) {
@@ -452,192 +501,138 @@ namespace EUROPA {
       */
   }
 
-  std::string ExprExpression::createVariableName() const {
-    char buff[15];
-    sprintf(buff, "%u", m_count);
-    std::string variable = std::string("implicit_var_" + std::string(buff) + "_" + toString()).c_str();
-
-    //Detect if the variable contains illegal characters and rewrite it if it does.
-    for (unsigned int i = 0; i < variable.size(); i++) {
-      if ((variable[i] > '9' || variable[i] < '0') && (variable[i] < 'A' || variable[i] > 'Z')
-	  && (variable[i] < 'a' || variable[i] > 'z') && (variable[i] != '_')) {
-	debugMsg("Interpreter","Bad var name generated : " << variable);
-	debugMsg("NddlInterpreter","Bad var name generated : " << variable);
-	variable = "implicit_var_" + std::string(buff) + "_generation_failure";
-	break;
-      }
-    }
-    return variable;
-  }
-
   bool ExprExpression::isSingleton() {
-    return m_name == "PASS";
+    return false;
   }
 
   bool ExprExpression::isSingletonOptimizable() {
     return (m_name == "+" || m_name == "-" || m_name == "*");
   }
 
-  void ExprExpression::setReturnArgument(ExprExpression *arg) {
-    m_returnArgument = arg;
-  }
-
   DataRef ExprExpression::eval(EvalContext& context) const {
-    if (m_name == "PASS" && m_target) {
-      return m_target->eval(context);
-    } else if (m_name == "FUNC") {
-      //Create the variable name
-      std::string variable = this->createVariableName();
-
-      ExprVarDeclaration* var = new ExprVarDeclaration(variable.c_str(), m_data, NULL, false);
-      DataRef output = var->eval(context);
-
-      Expr* varRef = new ExprVarRef(variable.c_str(), m_data);
-      std::vector<Expr*> args;
-      args.push_back(varRef);
-      for (unsigned int i = 0; i < m_args.size(); i++) {
-	args.push_back(m_args[i]);
+      //Figure out constraint type.
+      std::string constraint = "", returnType = "";
+      bool flipArguments = false;
+      if (hasReturnValue()) {
+          if (m_name == "==") { constraint = "testEQ"; returnType = "bool"; }
+          if (m_name == "<=") { constraint = "testLEQ"; returnType = "bool"; }
+          if (m_name == ">=") { constraint = "testLEQ"; returnType = "bool"; flipArguments = true; }
+          if (m_name == "!=") { constraint = "testNEQ"; returnType = "bool"; }
+          if (m_name == ">") { constraint = "TestLessThan"; returnType = "bool"; flipArguments = true; }
+          if (m_name == "<") { constraint = "TestLessThan"; returnType = "bool"; }
+          if (m_name == "+") { constraint = "addEq"; }
+          if (m_name == "-") { constraint = "addEq"; }
+          if (m_name == "*") { constraint = "mulEq"; }
+          if (m_name == "||") { constraint = "testOr"; returnType = "bool"; }
+          if (m_name == "&&") { constraint = "testAnd"; returnType = "bool"; }
+      } else { //Special for return type non-existant
+          returnType = "VOID";
+          if (m_name == "==") { constraint = "eq"; }
+          if (m_name == "<=") { constraint = "leq"; }
+          if (m_name == ">=") { constraint = "leq"; flipArguments = true; }
+          if (m_name == "!=") { constraint = "neq"; }
+          if (m_name == ">") { constraint = "lt"; flipArguments = true; }
+          if (m_name == "<") { constraint = "lt"; }
       }
-      Expr* con = new ExprConstraint(m_func->getConstraint(), args);
+      check_runtime_error(constraint != "", "Illegal expression: " + m_name);
 
-      con->eval(context);
+      //If one side is a singleton and the other can be optimized, do a special case.
+      if (returnType == "VOID" && m_name == "==") {
+          if (m_lhs->isSingleton() && m_rhs->isSingletonOptimizable()) {
+              m_rhs->setReturnArgument(m_lhs);
+              return m_rhs->eval(context);
+          }
+          if (m_rhs->isSingleton() && m_lhs->isSingletonOptimizable()) {
+              m_lhs->setReturnArgument(m_rhs);
+              return m_lhs->eval(context);
+          }
+      }
+
+      DataRef left = m_lhs->eval(context), right = m_rhs->eval(context);
+
+      std::vector<ConstrainedVariableId> args;
+      DataRef output;
+
+      if (hasReturnValue()) {
+          ///First create the implicit return variable
+          //Get the data type.
+          DataTypeId data;
+          if (returnType == "") {
+              returnType = left.getValue()->getDataType()->getName().c_str();
+              data = left.getValue()->getDataType();
+              check_runtime_error(returnType == right.getValue()->getDataType()->getName().c_str(), "We don't support expressions with different types going in to one var (e.g. float + int)");
+          } else if (returnType == "bool") {
+              data = BoolDT::instance();
+          } else {
+              check_runtime_error(ALWAYS_FAIL, "Illegal data type: " + returnType);
+          }
+
+          if (m_returnArgument) {
+              output = m_returnArgument->eval(context);
+              //Make addEq a temporal constraint.
+              if (isTimepoint(left) || isTimepoint(right) || isTimepoint(output)) {
+                  if (constraint == "addEq") {
+                      check_runtime_error(!isTimepoint(left) || !isTimepoint(right) || !isTimepoint(output), "You can't add two timepoints up to make a third time point.");
+
+                      constraint = "temporalDistance";
+                  }
+              }
+          } else {
+              //Create the variable name
+              std::string variable = this->createVariableName();
+
+              //Declare the implicit return variable
+              ExprVarDeclaration* var = new ExprVarDeclaration(variable.c_str(), data, NULL, false);
+              output = var->eval(context);
+
+              delete var;
+          }
+
+          //Make the constraint's arguments when return type present
+          if (m_name == "-") {
+              args.push_back(output.getValue());
+              args.push_back(right.getValue());
+              args.push_back(left.getValue());
+          } else if (m_name == "+") {
+              args.push_back(left.getValue());
+              args.push_back(right.getValue());
+              args.push_back(output.getValue());
+          } else if (m_name == "*") {
+              args.push_back(left.getValue());
+              args.push_back(right.getValue());
+              args.push_back(output.getValue());
+          } else { //relationals and booleans
+              args.push_back(output.getValue());
+              if (flipArguments) { //>= and >
+                  args.push_back(right.getValue());
+                  args.push_back(left.getValue());
+              } else if (!flipArguments) { //all others
+                  args.push_back(left.getValue());
+                  args.push_back(right.getValue());
+              }
+          }
+      } else { //No return value
+          //Detect temporal variables
+          if (isTimepoint(left) || isTimepoint(right)) {
+              if (constraint == "eq") {
+                  constraint = "concurrent";
+              } else if (constraint == "leq") {
+                  constraint = "precedes";
+              }
+          }
+          if (flipArguments) {
+              args.push_back(right.getValue());
+              args.push_back(left.getValue());
+          } else {
+              args.push_back(left.getValue());
+              args.push_back(right.getValue());
+          }
+      }
+
+      makeConstraint(context, constraint.c_str(), args);
+
       return output;
-    }
-    /*if (m_decl) {
-      m_decl->eval(context);
-      Expr* varRef = new ExprVarRef(m_varname, m_data);
-      std::vector<Expr*> args = m_args;
-      args[0] = varRef;
-      Expr* con = new ExprConstraint(m_functionname.c_str(), args);
-      return con->eval(context);
-      }*/
-
-
-    //Figure out constriant type.
-    std::string constraint = "", returnType = "";
-    bool flipArguments = false;
-    if (hasReturnValue()) {
-      if (m_name == "==") { constraint = "testEQ"; returnType = "bool"; }
-      if (m_name == "<=") { constraint = "testLEQ"; returnType = "bool"; }
-      if (m_name == ">=") { constraint = "testLEQ"; returnType = "bool"; flipArguments = true; }
-      if (m_name == "!=") { constraint = "testNEQ"; returnType = "bool"; }
-      if (m_name == ">") { constraint = "TestLessThan"; returnType = "bool"; flipArguments = true; }
-      if (m_name == "<") { constraint = "TestLessThan"; returnType = "bool"; }
-      if (m_name == "+") { constraint = "addEq"; }
-      if (m_name == "-") { constraint = "addEq"; }
-      if (m_name == "*") { constraint = "mulEq"; }
-      if (m_name == "||") { constraint = "testOr"; returnType = "bool"; }
-      if (m_name == "&&") { constraint = "testAnd"; returnType = "bool"; }
-    } else { //Special for return type non-existant
-      returnType = "VOID";
-      if (m_name == "==") { constraint = "eq"; }
-      if (m_name == "<=") { constraint = "leq"; }
-      if (m_name == ">=") { constraint = "leq"; flipArguments = true; }
-      if (m_name == "!=") { constraint = "neq"; }
-      if (m_name == ">") { constraint = "lt"; flipArguments = true; }
-      if (m_name == "<") { constraint = "lt"; }
-    }
-    check_runtime_error(constraint != "", "Illegal expression: " + m_name);
-
-    //If one side is a singleton and the other can be optimized, do a special case.
-    if (returnType == "VOID" && m_name == "==") {
-      if (m_lhs->isSingleton() && m_rhs->isSingletonOptimizable()) {
-	m_rhs->setReturnArgument(m_lhs);
-	return m_rhs->eval(context);
-      }
-      if (m_rhs->isSingleton() && m_lhs->isSingletonOptimizable()) {
-	m_lhs->setReturnArgument(m_rhs);
-	return m_lhs->eval(context);
-      }
-    }
-
-    DataRef left = m_lhs->eval(context), right = m_rhs->eval(context);
-
-
-    std::vector<ConstrainedVariableId> args;
-    DataRef output;
-
-    if (hasReturnValue()) {
-      ///First create the implicit return variable
-      //Get the data type.
-      DataTypeId data;
-      if (returnType == "") {
-	returnType = left.getValue()->getDataType()->getName().c_str();
-	data = left.getValue()->getDataType();
-	check_runtime_error(returnType == right.getValue()->getDataType()->getName().c_str(), "We don't support expressions with different types going in to one var (e.g. float + int)");
-      } else if (returnType == "bool") {
-	data = BoolDT::instance();
-      } else {
-	check_runtime_error(ALWAYS_FAIL, "Illegal data type: " + returnType);
-      }
-
-      if (m_returnArgument) {
-	output = m_returnArgument->eval(context);
-	//Make addEq a temporal constraint.
-	if (isTimepoint(left) || isTimepoint(right) || isTimepoint(output)) {
-	  if (constraint == "addEq") {
-	    check_runtime_error(!isTimepoint(left) || !isTimepoint(right) || !isTimepoint(output), "You can't add two timepoints up to make a third time point.");
-
-	    constraint = "temporalDistance";
-	  }
-	}
-      } else {
-	//Create the variable name
-	std::string variable = this->createVariableName();
-
-	//Declare the implicit return variable
-	ExprVarDeclaration* var = new ExprVarDeclaration(variable.c_str(), data, NULL, false);
-	output = var->eval(context);
-
-	delete var;
-      }
-
-      //Make the constraint's arguments when return type present
-      if (m_name == "-") {
-	args.push_back(output.getValue());
-	args.push_back(right.getValue());
-	args.push_back(left.getValue());
-      } else if (m_name == "+") {
-	args.push_back(left.getValue());
-	args.push_back(right.getValue());
-	args.push_back(output.getValue());
-      } else if (m_name == "*") {
-	args.push_back(left.getValue());
-	args.push_back(right.getValue());
-	args.push_back(output.getValue());
-      } else { //relationals and booleans
-	args.push_back(output.getValue());
-	if (flipArguments) { //>= and >
-	  args.push_back(right.getValue());
-	  args.push_back(left.getValue());
-	} else if (!flipArguments) { //all others
-	  args.push_back(left.getValue());
-	  args.push_back(right.getValue());
-	}
-      }
-    } else { //No return value
-      //Detect temporal variables
-      if (isTimepoint(left) || isTimepoint(right)) {
-	if (constraint == "eq") {
-	  constraint = "concurrent";
-	} else if (constraint == "leq") {
-	  constraint = "precedes";
-	}
-      }
-      if (flipArguments) {
-	args.push_back(right.getValue());
-	args.push_back(left.getValue());
-      } else {
-	args.push_back(left.getValue());
-	args.push_back(right.getValue());
-      }
-    }
-
-    makeConstraint(context, constraint.c_str(), args);
-
-    return output;
   }
-
 
   std::string ExprExpression::toString() const {
     if (m_rhs && m_lhs) {
@@ -655,24 +650,8 @@ namespace EUROPA {
       if (m_name == "&&") { op = "and"; }
       if (m_enforceContext) { op += "_enf"; }
       return m_lhs->toString() + "_" + op + "_" + m_rhs->toString();
-    } else if (m_target) {
-      ExprConstant* constTarg = dynamic_cast<ExprConstant*>(m_target);
-
-      if (constTarg) {
-	return constTarg->getConstantValue();
-      }
-
-      if (m_target->getDataType().isId() && m_target->getDataType().isValid()) {
-	return m_target->getDataType()->getName().c_str();
-      }
-      return "BadConst";
-    } else if (m_func) {
-      std::string args = "";
-      for (unsigned int i = 0; i < m_args.size(); i++) {
-	args += m_args[i]->toString() + std::string("_");
-      }
-      return std::string(m_func->getName()) + "__" + args + "_";
     }
+
     return "BadExpression";
   }
 
