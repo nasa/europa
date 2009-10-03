@@ -5,6 +5,7 @@
 #include "Domains.hh"
 #include "Utils.hh"
 #include "Debug.hh"
+#include <algorithm>
 
 namespace EUROPA {
 
@@ -2413,5 +2414,36 @@ namespace EUROPA {
       m_target.intersect(dom.getLowerBound(), dom.getUpperBound());
     }
   }
+
+
+
+  /**************************************************************************************/
+
+  RandConstraint::RandConstraint(const LabelStr& name,
+			     const LabelStr& propagatorName,
+			     const ConstraintEngineId& constraintEngine,
+			     const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables), m_rvalue(rand() % 32768) {}
+
+  void RandConstraint::handleExecute() {
+    getCurrentDomain(m_variables[0]).intersect(m_rvalue, m_rvalue);
+  }
+  
+
+  int mod(int a, int b) { return a % b; }
+
+  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Max, std::max, double);
+  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Min, std::min, double);
+  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Abs, fabs, double);
+  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Pow, pow, double);
+  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Sqrt, sqrt, double);
+  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Mod, mod, int);
+
+
+
+  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Floor, floor, double);
+  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Ceil, ceil, double);
+
+
 
 } // end namespace EUROPA

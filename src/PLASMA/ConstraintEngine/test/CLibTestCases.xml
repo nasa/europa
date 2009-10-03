@@ -44156,4 +44156,140 @@
  			</NumericDomain>
 		</Outputs>
  	</Constraint>
+ 	<Constraint name="maxf" test="3410">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<NumericDomain>
+ 			  <element value="3"/>
+ 			</NumericDomain>
+			<NumericDomain>
+ 			  <element value="5"/>
+ 			</NumericDomain>
+ 		</Inputs>
+		<Outputs>
+		        <IntervalDomain lb="5" ub="5"/>
+			<NumericDomain>
+ 			  <element value="3"/>
+ 			</NumericDomain>
+			<NumericDomain>
+ 			  <element value="5"/>
+ 			</NumericDomain>
+		</Outputs>
+ 	</Constraint>
+ 	<Constraint name="minf" test="3411">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<NumericDomain>
+ 			  <element value="3"/>
+ 			</NumericDomain>
+			<NumericDomain>
+ 			  <element value="5"/>
+ 			</NumericDomain>
+ 		</Inputs>
+		<Outputs>
+		        <IntervalDomain lb="3" ub="3"/>
+			<NumericDomain>
+ 			  <element value="3"/>
+ 			</NumericDomain>
+			<NumericDomain>
+ 			  <element value="5"/>
+ 			</NumericDomain>
+		</Outputs>
+ 	</Constraint>
+ 	<Constraint name="abs" test="3412">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<NumericDomain>
+ 			  <element value="-3"/>
+ 			</NumericDomain>
+ 		</Inputs>
+		<Outputs>
+		        <IntervalDomain lb="3" ub="3"/>
+			<NumericDomain>
+ 			  <element value="-3"/>
+ 			</NumericDomain>
+		</Outputs>
+ 	</Constraint>
+ 	<Constraint name="pow" test="3413">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<NumericDomain>
+ 			  <element value="2"/>
+ 			</NumericDomain>
+			<NumericDomain>
+ 			  <element value="3"/>
+ 			</NumericDomain>
+ 		</Inputs>
+		<Outputs>
+		        <IntervalDomain lb="8" ub="8"/>
+			<NumericDomain>
+ 			  <element value="2"/>
+ 			</NumericDomain>
+			<NumericDomain>
+ 			  <element value="3"/>
+ 			</NumericDomain>
+		</Outputs>
+ 	</Constraint>
+ 	<Constraint name="sqrt" test="3414">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<NumericDomain>
+ 			  <element value="4"/>
+ 			</NumericDomain>
+ 		</Inputs>
+		<Outputs>
+		        <IntervalDomain lb="2" ub="2"/>
+			<NumericDomain>
+ 			  <element value="4"/>
+ 			</NumericDomain>
+		</Outputs>
+ 	</Constraint>
+ 	<Constraint name="mod" test="3415">
+		<Inputs>
+			<IntervalIntDomain lb="-inf" ub="+inf"/>
+			<NumericDomain>
+ 			  <element value="5"/>
+ 			</NumericDomain>
+			<NumericDomain>
+ 			  <element value="3"/>
+ 			</NumericDomain>
+ 		</Inputs>
+		<Outputs>
+		        <IntervalIntDomain lb="2" ub="2"/>
+			<NumericDomain>
+ 			  <element value="5"/>
+ 			</NumericDomain>
+			<NumericDomain>
+ 			  <element value="3"/>
+ 			</NumericDomain>
+		</Outputs>
+ 	</Constraint>
+ 	<Constraint name="floor" test="3416">
+		<Inputs>
+			<IntervalIntDomain lb="-inf" ub="+inf"/>
+			<NumericDomain>
+ 			  <element value="5.4"/>
+ 			</NumericDomain>
+ 		</Inputs>
+		<Outputs>
+		        <IntervalIntDomain lb="5" ub="5"/>
+			<NumericDomain>
+ 			  <element value="5.4"/>
+ 			</NumericDomain>
+		</Outputs>
+ 	</Constraint>
+ 	<Constraint name="ceil" test="3416">
+		<Inputs>
+			<IntervalIntDomain lb="-inf" ub="+inf"/>
+			<NumericDomain>
+ 			  <element value="5.4"/>
+ 			</NumericDomain>
+ 		</Inputs>
+		<Outputs>
+		        <IntervalIntDomain lb="6" ub="6"/>
+			<NumericDomain>
+ 			  <element value="5.4"/>
+ 			</NumericDomain>
+		</Outputs>
+ 	</Constraint>
 </ConstraintTests>

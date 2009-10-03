@@ -38,6 +38,15 @@ namespace EUROPA {
 
       ces->registerCFunction((new IsSingleton())->getId());
       ces->registerCFunction((new IsSpecified())->getId());
+      ces->registerCFunction((new MaxFunction())->getId());
+      ces->registerCFunction((new MinFunction())->getId());
+      ces->registerCFunction((new AbsFunction())->getId());
+      ces->registerCFunction((new PowFunction())->getId());
+      ces->registerCFunction((new SqrtFunction())->getId());
+      ces->registerCFunction((new ModFunction())->getId());
+      ces->registerCFunction((new RandFunction())->getId());
+      ces->registerCFunction((new FloorFunction())->getId());
+      ces->registerCFunction((new CeilFunction())->getId());
 
       ConstraintEngine* ce = new ConstraintEngine(ces->getId());
 	  new DefaultPropagator(LabelStr("Default"), ce->getId());
@@ -165,6 +174,19 @@ namespace EUROPA {
 
       REGISTER_CONSTRAINT(ces,WithinBounds, "WithinBounds", "Default");
       REGISTER_CONSTRAINT(ces,WithinBounds, "withinBounds", "Default");
+
+      REGISTER_CONSTRAINT(ces,MaxConstraint, "maxf", "Default");
+      REGISTER_CONSTRAINT(ces,MinConstraint, "minf", "Default");
+      REGISTER_CONSTRAINT(ces,AbsConstraint, "abs", "Default");
+      REGISTER_CONSTRAINT(ces,PowConstraint, "pow", "Default");
+      REGISTER_CONSTRAINT(ces,SqrtConstraint, "sqrt", "Default");
+      REGISTER_CONSTRAINT(ces,ModConstraint, "mod", "Default");
+      REGISTER_CONSTRAINT(ces,FloorConstraint, "floor", "Default");
+      REGISTER_CONSTRAINT(ces,CeilConstraint, "ceil", "Default");
+      REGISTER_CONSTRAINT(ces,RandConstraint, "rand", "Default");
+
+
+
 
       // Rotate scope right one (last var moves to front) to ...
       // ... change addleq constraint to GreaterOrEqThan constraint:

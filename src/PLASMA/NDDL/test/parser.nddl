@@ -41,6 +41,16 @@ eq(alphaalpha, -1);
 true || false;
 true && true;
 
+//Functions tests
+max(1, 2) == 2;
+min(1, 2) == 1;
+abs(-2) == 2;
+sqrt(4) == 2;
+mod(5, 3) == 2;
+floor(5.4) == 5;
+ceil(5.4) == 6;
+
+
 eq(1, 1.0);
 
 ///End

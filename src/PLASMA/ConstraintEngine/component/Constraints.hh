@@ -53,7 +53,57 @@ namespace EUROPA {
   };
 
 
+#define CREATE_FUNCTION_CONSTRAINT(cname)				\
+  class cname##Constraint : public Constraint {				\
+  public:								\
+  cname##Constraint(const LabelStr& name,				\
+		const LabelStr& propagatorName,				\
+		const ConstraintEngineId& constraintEngine,		\
+		const std::vector<ConstrainedVariableId>& variables);	\
+  void handleExecute();							\
+  private:								\
+  };
 
+#define CREATE_FUNCTION_CONSTRAINT_ONE_ARG(cname, function, rt)		\
+  cname##Constraint::cname##Constraint(const LabelStr& name,		\
+				       const LabelStr& propagatorName,	\
+				       const ConstraintEngineId& constraintEngine, \
+				       const std::vector<ConstrainedVariableId>& variables) \
+  : Constraint(name, propagatorName, constraintEngine, variables) {}	\
+  void cname##Constraint::handleExecute() {				\
+    check_error(isActive());						\
+    if (getCurrentDomain(m_variables[1]).isSingleton()) {		\
+      rt value = function(getCurrentDomain(m_variables[1]).getSingletonValue()); \
+      getCurrentDomain(m_variables[0]).intersect(value, value);		\
+    }									\
+  }
+
+#define CREATE_FUNCTION_CONSTRAINT_TWO_ARG(cname, function, rt)		\
+  cname##Constraint::cname##Constraint(const LabelStr& name,		\
+				       const LabelStr& propagatorName,	\
+				       const ConstraintEngineId& constraintEngine, \
+				       const std::vector<ConstrainedVariableId>& variables) \
+  : Constraint(name, propagatorName, constraintEngine, variables) {}	\
+  void cname##Constraint::handleExecute() {				\
+    check_error(isActive());						\
+    if (getCurrentDomain(m_variables[1]).isSingleton()			\
+	&& getCurrentDomain(m_variables[2]).isSingleton()) {		\
+      rt value = function(getCurrentDomain(m_variables[1]).getSingletonValue(), \
+			  getCurrentDomain(m_variables[2]).getSingletonValue()); \
+      getCurrentDomain(m_variables[0]).intersect(value, value);		\
+    }									\
+  }
+
+  
+
+  CREATE_FUNCTION_CONSTRAINT(Max);
+  CREATE_FUNCTION_CONSTRAINT(Min);
+  CREATE_FUNCTION_CONSTRAINT(Abs);
+  CREATE_FUNCTION_CONSTRAINT(Pow);
+  CREATE_FUNCTION_CONSTRAINT(Sqrt);
+  CREATE_FUNCTION_CONSTRAINT(Mod);
+  CREATE_FUNCTION_CONSTRAINT(Floor);
+  CREATE_FUNCTION_CONSTRAINT(Ceil);
 
 
 
@@ -793,6 +843,17 @@ class NotEqualConstraint : public Constraint {
     Variable<IntervalIntDomain> m_superset;
     ConstraintId m_subsetConstraint;
     ConstraintId m_countNonZerosConstraint;
+  };
+
+  class RandConstraint : public Constraint {
+  public:
+    RandConstraint(const LabelStr& name,
+          const LabelStr& propagatorName,
+          const ConstraintEngineId& constraintEngine,
+          const std::vector<ConstrainedVariableId>& variables);
+    void handleExecute();
+  private:
+    unsigned int m_rvalue;
   };
 
   /**
