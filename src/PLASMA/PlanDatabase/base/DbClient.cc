@@ -222,11 +222,12 @@ namespace EUROPA {
   }
 
   ConstraintId DbClient::createConstraint(const char* name,
-				 const std::vector<ConstrainedVariableId>& scope){
+				 const std::vector<ConstrainedVariableId>& scope,
+				 const char* violationExpl)
+  {
 
     // Use the constraint library factories to create the constraint
-    ConstraintId constraint = m_planDb->getConstraintEngine()->createConstraint(name,
-								  scope);
+    ConstraintId constraint = m_planDb->getConstraintEngine()->createConstraint(name,scope,violationExpl);
     debugMsg("DbClient:createConstraint", constraint->toString());
     publish(notifyConstraintCreated(constraint));
     return constraint;

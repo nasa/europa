@@ -165,6 +165,8 @@ namespace EUROPA {
      */
     virtual std::string getViolationExpl() const;
 
+    virtual void setViolationExpl(const std::string& msg);
+
     // PS-Specific Methods:
     virtual PSList<PSVariable*> getVariables() const;
 
@@ -275,6 +277,7 @@ namespace EUROPA {
     const LabelStr m_name; /**< Name used on stratup to bind to the correct factory and then present as a debugging aid. */
     const ConstraintEngineId m_constraintEngine; /**< The owner ConstraintEngine */
     std::vector<ConstrainedVariableId> m_variables; /**< The variable scope of the Constraint. */
+    LabelStr m_violationExpl; /**< optional explanation string, typically coming from the model */
 
   private:
     /**

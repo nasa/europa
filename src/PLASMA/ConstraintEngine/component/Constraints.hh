@@ -18,8 +18,10 @@ namespace EUROPA {
     									\
     virtual ~basename() {}						\
     									\
-    virtual ConstraintId createConstraint(const ConstraintEngineId constraintEngine, \
-					  const std::vector<ConstrainedVariableId>& scope) = 0; \
+    virtual ConstraintId createConstraint( \
+                      const ConstraintEngineId constraintEngine, \
+					  const std::vector<ConstrainedVariableId>& scope, \
+					  const char* violationExpl) = 0; \
     									\
     virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) const; \
   protected:								\
@@ -46,9 +48,10 @@ namespace EUROPA {
     : base(name,propagatorName,systemDefined) {}			\
   ~name() {}							\
   virtual ConstraintId createConstraint(const ConstraintEngineId constraintEngine, \
-					const std::vector<ConstrainedVariableId>& scope) \
+					const std::vector<ConstrainedVariableId>& scope,\
+					const char* violationMsg) \
     {									\
-      return makeConstraintInstance<constraint>(m_name, m_propagatorName, constraintEngine, scope); \
+      return makeConstraintInstance<constraint>(m_name, m_propagatorName, constraintEngine, scope, violationMsg); \
     } \
   };
 
@@ -94,7 +97,7 @@ namespace EUROPA {
     }									\
   }
 
-  
+
 
   CREATE_FUNCTION_CONSTRAINT(Max);
   CREATE_FUNCTION_CONSTRAINT(Min);
@@ -136,10 +139,12 @@ namespace EUROPA {
 
       virtual ~AbsoluteValueCT() {}
 
-      virtual ConstraintId createConstraint(const ConstraintEngineId constraintEngine,
-              const std::vector<ConstrainedVariableId>& scope)
+      virtual ConstraintId createConstraint(
+              const ConstraintEngineId constraintEngine,
+              const std::vector<ConstrainedVariableId>& scope,
+              const char* violationExpl)
       {
-          return makeConstraintInstance<AbsoluteValue>(m_name, m_propagatorName, constraintEngine, scope);
+          return makeConstraintInstance<AbsoluteValue>(m_name, m_propagatorName, constraintEngine, scope, violationExpl);
       }
 
       virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) const;
@@ -176,9 +181,10 @@ namespace EUROPA {
       virtual ~AddEqualCT() {}
 
       virtual ConstraintId createConstraint(const ConstraintEngineId constraintEngine,
-              const std::vector<ConstrainedVariableId>& scope)
+              const std::vector<ConstrainedVariableId>& scope,
+              const char* violationExpl)
       {
-          return makeConstraintInstance<AddEqualConstraint>(m_name, m_propagatorName, constraintEngine, scope);
+          return makeConstraintInstance<AddEqualConstraint>(m_name, m_propagatorName, constraintEngine, scope, violationExpl);
       }
 
       virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) const;

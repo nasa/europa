@@ -98,7 +98,7 @@ namespace EUROPA {
   class ExprConstraint : public Expr
   {
     public:
-        ExprConstraint(const char* name,const std::vector<Expr*>& args);
+        ExprConstraint(const char* name,const std::vector<Expr*>& args, const char* violationExpl);
         virtual ~ExprConstraint();
 
         virtual DataRef eval(EvalContext& context) const;
@@ -106,9 +106,11 @@ namespace EUROPA {
         const LabelStr getName() const { return m_name; }
         const std::vector<Expr*>& getArgs() const { return m_args; }
         virtual std::string toString() const;
+
     protected:
         LabelStr m_name;
         std::vector<Expr*> m_args;
+        std::string m_violationExpl;
   };
 
   class ExprTypedef : public Expr
@@ -324,6 +326,7 @@ namespace EUROPA {
 
       virtual bool hasReturnValue() const = 0;
       virtual void setEnforceContext() { m_enforceContext = true; }
+      virtual void setViolationMsg(const std::string& msg) { m_violationMsg = msg; }
       virtual bool isSingleton() = 0;
       virtual bool isSingletonOptimizable() = 0; // TODO: use output node method instead? (ask JRB)
       virtual void checkType() = 0;
@@ -335,6 +338,7 @@ namespace EUROPA {
       static unsigned int s_counter;
       unsigned int m_count;
       bool m_enforceContext;
+      std::string m_violationMsg;
       CExpr *m_returnArgument; // TODO: generalize this to output node (ask JRB)
   };
 

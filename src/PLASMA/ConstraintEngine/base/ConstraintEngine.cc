@@ -1092,11 +1092,12 @@ namespace EUROPA
   }
 
   ConstraintId ConstraintEngine::createConstraint(const LabelStr& name,
-                           const std::vector<ConstrainedVariableId>& scope)
+                           const std::vector<ConstrainedVariableId>& scope,
+                           const char* violationExpl)
   {
       ConstraintTypeId factory = getCESchema()->getConstraintType(name);
       check_error(factory.isValid());
-      ConstraintId constraint = factory->createConstraint(getId(), scope);
+      ConstraintId constraint = factory->createConstraint(getId(), scope, violationExpl);
 
       if (shouldAutoPropagate())
           propagate();

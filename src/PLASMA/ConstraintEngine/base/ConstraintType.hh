@@ -32,7 +32,8 @@ namespace EUROPA {
 
     virtual ConstraintId createConstraint(
                              const ConstraintEngineId constraintEngine,
-					         const std::vector<ConstrainedVariableId>& scope) = 0;
+					         const std::vector<ConstrainedVariableId>& scope,
+					         const char* violationExpl) = 0;
 
     // throws an std::string error message if the specified arg types can't be used
     // to create the constraint this type represents
@@ -56,13 +57,17 @@ namespace EUROPA {
                   const LabelStr& name,
                   const LabelStr& propagatorName,
                   const ConstraintEngineId constraintEngine,
-                  const std::vector<ConstrainedVariableId>& scope)
+                  const std::vector<ConstrainedVariableId>& scope,
+                  const char* violationExpl)
   {
       check_error(constraintEngine.isValid());
       check_error(scope.size() >= 1);
       Constraint* constraint = new ConstraintInstance(name, propagatorName, constraintEngine, scope);
       check_error(constraint != 0);
       check_error(constraint->getId().isValid());
+      if (violationExpl != NULL)
+          constraint->setViolationExpl(violationExpl);
+
       return(constraint->getId());
   }
 
@@ -86,10 +91,12 @@ namespace EUROPA {
     {
     }
 
-    virtual ConstraintId createConstraint(const ConstraintEngineId constraintEngine,
-				  const std::vector<ConstrainedVariableId>& scope)
+    virtual ConstraintId createConstraint(
+                  const ConstraintEngineId constraintEngine,
+				  const std::vector<ConstrainedVariableId>& scope,
+				  const char* violationExpl)
     {
-      return makeConstraintInstance<ConstraintInstance>(m_name, m_propagatorName, constraintEngine, scope);
+      return makeConstraintInstance<ConstraintInstance>(m_name, m_propagatorName, constraintEngine, scope, violationExpl);
     }
 
     virtual void checkArgTypes(const std::vector<DataTypeId>& types) const
@@ -137,8 +144,10 @@ namespace EUROPA {
       assertTrue(name != otherName);
     }
 
-    ConstraintId createConstraint(const ConstraintEngineId constraintEngine,
-				  const std::vector<ConstrainedVariableId>& scope)
+    ConstraintId createConstraint(
+                  const ConstraintEngineId constraintEngine,
+				  const std::vector<ConstrainedVariableId>& scope,
+				  const char* violationExpl)
     {
       check_error(constraintEngine.isValid());
       check_error(scope.size() >= 1);
@@ -146,6 +155,10 @@ namespace EUROPA {
                                                   m_otherName, m_rotateCount);
       check_error(constraint != 0);
       check_error(constraint->getId().isValid());
+
+      if (violationExpl != NULL)
+          constraint->setViolationExpl(violationExpl);
+
       return(constraint->getId());
     }
 
@@ -170,14 +183,20 @@ namespace EUROPA {
       assertTrue(first != second);
     }
 
-    ConstraintId createConstraint(const ConstraintEngineId constraintEngine,
-				  const std::vector<ConstrainedVariableId>& scope) {
+    ConstraintId createConstraint(
+                  const ConstraintEngineId constraintEngine,
+				  const std::vector<ConstrainedVariableId>& scope,
+				  const char* violationExpl) {
       check_error(constraintEngine.isValid());
       check_error(scope.size() >= 1);
       Constraint* constraint = new ConstraintInstance(m_name, m_propagatorName, constraintEngine,
                                                   scope, m_otherName, m_first, m_second);
       check_error(constraint != 0);
       check_error(constraint->getId().isValid());
+
+      if (violationExpl != NULL)
+          constraint->setViolationExpl(violationExpl);
+
       return(constraint->getId());
     }
 

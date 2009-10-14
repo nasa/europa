@@ -14,53 +14,62 @@ namespace EUROPA {
 			 const LabelStr& propagatorName,
 			 const ConstraintEngineId& constraintEngine,
 			 const std::vector<ConstrainedVariableId>& variables)
-    : Entity(), m_name(name), m_constraintEngine(constraintEngine),
-      m_variables(variables), m_id(this), m_isUnary(true),
-      m_createdBy("UNKNOWN"),
-      m_deactivationRefCount(0),
-      m_isRedundant(false)
+    : Entity()
+    , m_name(name)
+    , m_constraintEngine(constraintEngine)
+    , m_variables(variables)
+    , m_violationExpl("")
+    , m_id(this)
+    , m_isUnary(true)
+    , m_createdBy("UNKNOWN")
+    , m_deactivationRefCount(0)
+    , m_isRedundant(false)
    {
-    check_error(m_constraintEngine.isValid());
-    check_error(!m_variables.empty());
-    m_constraintEngine->add(m_id, propagatorName);
-    //m_entityId = m_id;
+      check_error(m_constraintEngine.isValid());
+      check_error(!m_variables.empty());
 
-    debugMsg("Constraint:Constraint",
-	     "Creating constraint " << getKey() << ":" << name.toString() <<
-	     " registered with propagator " << propagatorName.toString() << " with arity " << variables.size());
+      m_constraintEngine->add(m_id, propagatorName);
+      //m_entityId = m_id;
 
-    check_error(isValid());
+      debugMsg("Constraint:Constraint",
+              "Creating constraint " << getKey() << ":" << name.toString()
+              << " propagator: " << propagatorName.toString()
+              << " arity: " << variables.size()
+              << " violationExpl: " << m_violationExpl.toString()
+      );
 
-    int variableCount = 0;
-    for (unsigned int i = 0; i < m_variables.size(); i++) {
+      check_error(isValid());
 
-      // To support determining if it is in fact a Unary, we test for the possible
-      // volatility of a variable. Extend this when locking comes on stream!
-      if(!m_variables[i]->baseDomain().isSingleton())
-	variableCount++;
+      int variableCount = 0;
+      for (unsigned int i = 0; i < m_variables.size(); i++) {
 
-      if(!m_variables[i]->isActive())
-	m_deactivationRefCount++;
+          // To support determining if it is in fact a Unary, we test for the possible
+          // volatility of a variable. Extend this when locking comes on stream!
+          if(!m_variables[i]->baseDomain().isSingleton())
+              variableCount++;
 
-      checkError(m_variables[i].isValid(),
-		 "The argIndex " << i << " is not a valid variable for constraint " << name.toString());
+          if(!m_variables[i]->isActive())
+              m_deactivationRefCount++;
 
-      // It is important that the call to add the constraint is only made after the deactivation reference
-      // count has been adjusted since the former effects the active status of the constraint and that may be used by
-      // a handler in figuring how to treat the constraint
-      m_variables[i]->addConstraint(m_id, i);
-    }
+          checkError(m_variables[i].isValid(),
+                  "The argIndex " << i << " is not a valid variable for constraint " << name.toString());
 
-    if(variableCount > 1)
-      m_isUnary = false;
+          // It is important that the call to add the constraint is only made after the deactivation reference
+          // count has been adjusted since the former effects the active status of the constraint and that may be used by
+          // a handler in figuring how to treat the constraint
+          m_variables[i]->addConstraint(m_id, i);
+      }
 
-    // Update if redundant immediately
-    notifyBaseDomainRestricted(m_variables[0]);
+      if(variableCount > 1)
+          m_isUnary = false;
 
-    if(!isActive()){
-      m_constraintEngine->notifyDeactivated(m_id);
-      handleDeactivate();
-    }
+      // Update if redundant immediately
+      notifyBaseDomainRestricted(m_variables[0]);
+
+      if(!isActive()){
+          m_constraintEngine->notifyDeactivated(m_id);
+          handleDeactivate();
+      }
   }
 
   Constraint::~Constraint(){
@@ -100,22 +109,29 @@ namespace EUROPA {
 
   std::string Constraint::getViolationExpl() const
   {
-  	// TODO: this must eventually come from the model
-  	std::ostringstream os;
+      if (m_violationExpl.getSize() > 0)
+          return m_violationExpl.toString();
 
-    os << getName().toString() << "(";
-    for(unsigned int i=0;i<m_variables.size();i++) {
-    	if (i > 0)
-    	  os << ",";
-    	std::string name = m_variables[i]->getName().toString();
-    	if (name.substr(0,4) != "$VAR")
-	        os << name << "(" << m_variables[i]->getKey() << ")";
-    	else
-    		os << m_variables[i]->lastDomain().toString();
-    }
-    os << ")";
+      std::ostringstream os;
 
-  	return os.str();
+      os << getName().toString() << "(";
+      for(unsigned int i=0;i<m_variables.size();i++) {
+          if (i > 0)
+              os << ",";
+          std::string name = m_variables[i]->getName().toString();
+          if (name.substr(0,4) != "$VAR")
+              os << name << "(" << m_variables[i]->getKey() << ")";
+          else
+              os << m_variables[i]->lastDomain().toString();
+      }
+      os << ")";
+
+      return os.str();
+  }
+
+  void Constraint::setViolationExpl(const std::string& msg)
+  {
+      m_violationExpl = msg;
   }
 
   PSList<PSVariable*> Constraint::getVariables() const
@@ -418,6 +434,7 @@ namespace EUROPA {
   std::string Constraint::toString() const{
     std::stringstream sstr;
     sstr << Entity::toString() << std::endl;
+
     unsigned int i = 0;
     for(std::vector<ConstrainedVariableId>::const_iterator it = getScope().begin();
 	it != getScope().end(); ++it){
@@ -425,6 +442,9 @@ namespace EUROPA {
       check_error(var.isValid(), "Invalid argument in constraint");
       sstr << " ARG[" << i++ << "]:" << var->toLongString() << std::endl;
     }
+
+    if (m_violationExpl.getSize()>0)
+        sstr << "{ViolationExpl:" << m_violationExpl.toString() << "}";
 
     return sstr.str();
   }

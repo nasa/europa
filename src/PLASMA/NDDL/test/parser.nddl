@@ -58,6 +58,15 @@ eq(1, 1.0);
 positive pos;
 real r = 50;
 
+// Constraint Violation explanations
+
+float x1,x2;
+eq(x1,x2) : "x1 must equal x2";
+
+int orderRelease,orderDuration,orderDueDate;
+enforce orderRelease+orderDuration <= orderDueDate : "Order is late";
+orderRelease+orderDuration <= orderDueDate : "Order is late";
+
 enum Location {Hill,Lander,Rock}
 
 Location l = Hill;

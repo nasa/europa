@@ -394,11 +394,13 @@ identifier
 constraintInstantiation returns [ExprConstraint* result]
 @init {
     std::vector<Expr*> args;
+    std::string vmsg;
 }
         :       
               ^(CONSTRAINT_INSTANTIATION
                         name=IDENT
                         variableArgumentList[args]
+                        (violationMsg[vmsg])?
                 )
                 {
                     const char* cname = c_str($name.text->chars);
@@ -408,11 +410,20 @@ constraintInstantiation returns [ExprConstraint* result]
                     catch (const std::string& errorMsg) {
                         reportSemanticError(CTX,errorMsg);
                     }
-                    result = new ExprConstraint(cname,args);
+                    result = new ExprConstraint(cname,args,vmsg.c_str());
                 }
                 
         ;
 
+violationMsg [std::string& result]
+    :    str = STRING 
+         { 
+             // remove quotes
+             std::string s(c_str($str.text->chars));
+             result = s.substr(1,s.size()-2);
+         } 
+	;
+	
 classDeclaration returns [Expr* result]
 @init {
 	const char* newClass = NULL;
@@ -941,10 +952,13 @@ enforceExpression returns [Expr* result]
 	BoolDomain* dom = NULL; 
 	ExprConstant* con = NULL; 
 	std::vector<Expr*> args; 
+	std::string vmsg;
 }
-	: ^(EXPRESSION_ENFORCE value=cexpression) 
+	: ^(EXPRESSION_ENFORCE value=cexpression violationMsg[vmsg]?) 
 	  { 
             value->setEnforceContext();
+            value->setViolationMsg(vmsg);
+            
             /*try {
                 value->checkType();
             } catch(std::string msg) {
@@ -956,13 +970,13 @@ enforceExpression returns [Expr* result]
                 con = new ExprConstant(dom->getTypeName().c_str(), dom); 
                 args.push_back(value);
                 args.push_back(con);    
-                result = new ExprConstraint("eq", args);
+                result = new ExprConstraint("eq", args, NULL);
             } else {
                 result = value;
             }
         } ;
 
-// TODO: this needs more behavior?
+// TODO: this needs more behavior??
 expressionCleanReturn returns [Expr* result]
 	: e = cexpression { result = e; }
 	;

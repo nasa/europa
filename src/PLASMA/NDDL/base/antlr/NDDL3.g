@@ -292,16 +292,20 @@ predicateArgument
 	;
 
 constraintInstantiation
-	:	((IDENT variableArgumentList ';')=>IDENT variableArgumentList ';')
-			-> ^(CONSTRAINT_INSTANTIATION IDENT variableArgumentList)
+	:	((IDENT variableArgumentList (':' violationMsg)? ';')=>IDENT variableArgumentList (':' violationMsg)? ';')
+			-> ^(CONSTRAINT_INSTANTIATION IDENT variableArgumentList violationMsg?)
 		| enforceStatement	
 	;
 
 enforceStatement
-    :	'enforce'? result=cexpression ';' 
-    	-> ^(EXPRESSION_ENFORCE $result)
+    :	'enforce'? result=cexpression (':' vm=violationMsg)? ';' 
+    	-> ^(EXPRESSION_ENFORCE $result $vm?)
 	;
 
+violationMsg
+	:	stringLiteral
+	;
+	
 cexpression 
 	:	cbooleanOrExpression
 	;
