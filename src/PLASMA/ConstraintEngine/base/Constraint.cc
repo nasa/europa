@@ -109,7 +109,7 @@ namespace EUROPA {
 
   std::string Constraint::getViolationExpl() const
   {
-      if (m_violationExpl.getSize() > 0)
+      if (m_violationExpl.toString().length() > 0)
           return m_violationExpl.toString();
 
       std::ostringstream os;
@@ -443,7 +443,7 @@ namespace EUROPA {
       sstr << " ARG[" << i++ << "]:" << var->toLongString() << std::endl;
     }
 
-    if (m_violationExpl.getSize()>0)
+    if (m_violationExpl.toString().length()>0)
         sstr << "{ViolationExpl:" << m_violationExpl.toString() << "}";
 
     return sstr.str();
