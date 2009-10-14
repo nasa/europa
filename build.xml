@@ -202,7 +202,7 @@
 	<property name="make.log.type" value="LOGGER_TYPE=-D${jam.log.type}"/> 
       </else>
     </if>
-  </target>
+  </target> <!-- init -->
 
   <target name="print-env" depends="init" 
       description="Debug target: Prints the initialized environment" >
@@ -251,7 +251,7 @@
       <arg line="${jam.opts} -j${jam.num.cores} build"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
       <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
-      <!-- This is set only for Windows, but other OS don't care anyway -->
+      <!-- This is set only for Windows, but other OSs don't care anyway -->
       <env key="CYG_JAVA_HOME" value="${local.env.CYG_JAVA_HOME}" />
     </exec>
   	
@@ -268,14 +268,18 @@
         <property name="s" value="_g"/>
         <echo message="Suffix ${s}" />
     	
-        <!-- libANML_?.a disappeared? -mno-cygwin -->
-    	<property name="cmd" value="g++ -shared -Wl,-v 
-      		-Wl,--add-stdcall-alias -Wl,--whole-archive -oSystem${s}.dll 
-      		libSystem${s}.a libSolvers${s}.a libResource${s}.a libNDDL${s}.a 
-      		libRulesEngine${s}.a libTemporalNetwork${s}.a libPlanDatabase${s}.a
-      		libConstraintEngine${s}.a libUtils${s}.a 
-    		libTinyXml${s}.a libAntlr3${s}.a -lws2_32
-      		-Wl,--no-whole-archive -lpthread"/>
+        <!-- libANML_?.a disappeared? -mno-cygwin libAntlr3${s}.a -->
+    	<property name="cmd" value="g++ -shared 
+	        -Wl,-v
+		-oSystem${s}.dll 
+      		-Wl,--add-stdcall-alias 
+		-Wl,--output-def=System${s}.dll.def
+		-Wl,--out-implib=System${s}.a
+		-Wl,--whole-archive libSystem${s}.a libSolvers${s}.a libResource${s}.a libNDDL${s}.a 
+		      	            libRulesEngine${s}.a libTemporalNetwork${s}.a libPlanDatabase${s}.a 
+      		                    libConstraintEngine${s}.a libUtils${s}.a libTinyXml${s}.a  -lws2_32
+      		-Wl,--no-whole-archive -lpthread -lantlr3c
+		"/>
 		<exec executable="bash" dir="${dir.plasma}/build/lib">
 		  <arg value="-c" />
           <arg value="${cmd}" />
@@ -542,9 +546,16 @@
 	
   <target name="release-dist" depends="init"
   	description="Creates a binary distribution that includes all the variants">
-    <antcall target="build"><param name="jam.opts" value="-sVARIANTS=DEV -sLIBRARIES=SHARED"/></antcall>
+    <if>
+      <not>
+        <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
+      </not>	   
+      <then>
+        <antcall target="build"><param name="jam.opts" value="-sVARIANTS=DEV -sLIBRARIES=SHARED"/></antcall>
+	<antcall target="build"><param name="jam.opts" value="-sVARIANTS=OPTIMIZED -sLIBRARIES=SHARED"/></antcall>
+      </then>
+    </if>	
     <antcall target="build"><param name="jam.opts" value="-sVARIANTS=DEV -sLIBRARIES=STATIC"/></antcall>
-    <antcall target="build"><param name="jam.opts" value="-sVARIANTS=OPTIMIZED -sLIBRARIES=SHARED"/></antcall>
     <antcall target="build"><param name="jam.opts" value="-sVARIANTS=OPTIMIZED -sLIBRARIES=STATIC"/></antcall>
     <antcall target="build"><param name="jam.opts" value="-sVARIANTS=PROFILE -sLIBRARIES=STATIC"/></antcall>
     <antcall target="zip-dist"/>
