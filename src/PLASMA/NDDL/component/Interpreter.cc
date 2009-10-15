@@ -26,6 +26,7 @@
 #include "NddlUtils.hh"
 
 #include <string.h>
+#include <stdio.h>
 
 namespace EUROPA {
 
