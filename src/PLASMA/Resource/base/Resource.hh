@@ -126,6 +126,16 @@ namespace EUROPA {
 
       virtual void add(const TokenId& token);
 
+      /** 
+       * @brief Remove a token from the resource.
+       * Invokes Object::remove, followed by removeFromProfile, followed by removeTransactions.
+       * Due to the fact that add/remove and addToProfile/removeFromProfile are invoked by constraints and that those constraints
+       * almost always execute in a single order, so will these functions not be called in a nice symmetrical order.
+       * With things as they are today, they will be called in the following order: add, addToProfile, remove, removeFromProfile.
+       * Extensions need to be careful about what they do in those functions, particularly remove and removeFromProfile.
+       * 
+       * @param token The token to remove.
+       */      
       virtual void remove(const TokenId& token);
 
       virtual void getOrderingChoices(const TokenId& token,
@@ -214,6 +224,8 @@ namespace EUROPA {
 
       virtual void addToProfile(const TokenId& tok) = 0;
       virtual void removeFromProfile(const TokenId& tok);
+      virtual void createTransactions(const TokenId& tok) = 0;
+      virtual void removeTransactions(const TokenId& tok) = 0;
 
     private:
       friend class ResourceTokenRelation;

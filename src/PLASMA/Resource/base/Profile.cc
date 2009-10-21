@@ -79,7 +79,9 @@ namespace EUROPA {
     }
 
     void Profile::removeTransaction(const TransactionId t) {
-      checkError(m_transactions.find(t) != m_transactions.end(), "Attempted to remove a transaction that isn't present!");
+      if(m_transactions.find(t) == m_transactions.end())
+        return;
+//       checkError(m_transactions.find(t) != m_transactions.end(), "Attempted to remove a transaction that isn't present!");
 
       debugMsg("Profile:removeTransaction", "Removing transaction " << t << " for time " << t->time()->toString() << " with quantity " << t->quantity()->toString());
 

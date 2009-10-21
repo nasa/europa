@@ -45,6 +45,7 @@
 #include "ModuleRulesEngine.hh"
 #include "ModuleSolvers.hh"
 #include "ModuleResource.hh"
+#include "ModuleNddl.hh"
 
 #include <iostream>
 #include <string>
@@ -84,6 +85,7 @@ void ResourceTestEngine::createModules()
     addModule((new ModuleTemporalNetwork())->getId());
     addModule((new ModuleSolvers())->getId());
     addModule((new ModuleResource())->getId());
+    addModule((new ModuleNddl())->getId());
 }
 
 // Useful constants when doing constraint vio9lation tests
@@ -186,6 +188,8 @@ public:
   }
   void addToProfile(const TokenId& token) {}
   void removeFromProfile(const TokenId& token) {}
+  void createTransactions(const TokenId& token) {}
+  void removeTransactions(const TokenId& token) {}
 private:
   void notifyViolated(const InstantId inst) {
     TransactionId trans = *(inst->getTransactions().begin());
@@ -1114,6 +1118,7 @@ public:
     EUROPA_runTest(testReservoir);
     EUROPA_runTest(testReusable);
     EUROPA_runTest(testReservoirRemove);
+    EUROPA_runTest(testDanglingTransaction);
     return true;
   }
 private:
@@ -1234,6 +1239,71 @@ private:
     RESOURCE_DEFAULT_TEARDOWN();
     return true;
   }
+
+  static bool testDanglingTransaction() {
+    RESOURCE_DEFAULT_SETUP(ce, db, false);
+    rte.getConfig()->setProperty("nddl.includePath", ".:../component/NDDL");
+    rte.executeScript("nddl", "missing-transaction.nddl", true);
+
+    DbClientId client = db.getClient();
+
+    TokenId master = client->getGlobalToken("master");
+    CPPUNIT_ASSERT(master.isValid());
+
+    //activate the master
+    client->activate(master);
+    CPPUNIT_ASSERT(client->propagate());
+
+    //object variable should be singleton here
+    CPPUNIT_ASSERT(!master->getObject()->isSingleton());
+
+    //get the main objects
+    ObjectId main1 = client->getObject("m1");
+    CPPUNIT_ASSERT(main1.isValid());
+    ObjectId main2 = client->getObject("m2");
+    CPPUNIT_ASSERT(main2.isValid());
+        
+    //get the foo objects and a battery
+    ObjectId foo1 = client->getObject("m1.m_foo");
+    CPPUNIT_ASSERT(foo1.isValid());
+    ObjectId foo2 = client->getObject("m1.m_foo");
+    CPPUNIT_ASSERT(foo2.isValid());
+    ObjectId battery = client->getObject("m1.m_battery");
+    CPPUNIT_ASSERT(battery.isValid());
+
+    //get the slave that can go on Foo instances
+    TokenId fooSlave = master->getSlave(1);
+    CPPUNIT_ASSERT(fooSlave.isValid());
+    CPPUNIT_ASSERT(fooSlave->getName().toString() == "Foo.foo");
+    
+    //get the slave that can go on Battery instances
+    TokenId battSlave = master->getSlave(0);
+    
+    //activate the Foo slave
+    client->activate(fooSlave);
+    //constrain it to the first foo instance
+    client->constrain(foo1, fooSlave, fooSlave);
+    CPPUNIT_ASSERT(client->propagate());
+
+    //via ProxyVariableRelation, other object variables should propagate to singleton
+    CPPUNIT_ASSERT(master->getObject()->isSingleton());
+    CPPUNIT_ASSERT(battSlave->getObject()->isSingleton());
+
+    ResourceId res(battery);
+    CPPUNIT_ASSERT(res.isValid());
+    
+    const std::map<int, InstantId>& insts(res->getProfile()->getInstants());
+    CPPUNIT_ASSERT(!insts.empty());
+
+    TransactionId trans = *(insts.begin()->second->getTransactions().begin());
+    CPPUNIT_ASSERT(trans.isValid());
+
+    client->free(foo1, fooSlave, fooSlave);
+    CPPUNIT_ASSERT(client->propagate());
+    CPPUNIT_ASSERT(trans.isValid());
+
+    return true;
+  }
 };
 
 class ConstraintNameListener : public ConstrainedVariableListener {
@@ -1299,7 +1369,6 @@ private:
 		dp3.initialize();
 
 		RESOURCE_DEFAULT_TEARDOWN();
-
 		return true;
 	}
 

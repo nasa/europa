@@ -236,7 +236,7 @@ namespace EUROPA {
           : var(_var), index(_index), addition(_addition) {}
       };
 
-    protected:
+    public:
       /**
        * @brief Gets the Instant with the greatest time that is not greater than the given time.
        * @return An iterator pointing to the instant.
@@ -249,6 +249,7 @@ namespace EUROPA {
        */
       std::map<int, InstantId>::iterator getLeastInstant(const int time);
 
+      const std::map<int, InstantId>& getInstants() {return m_instants;}
     private:
       /**
        * @brief Conditionally adds Instants for the upper and lower bounds of the Transaction's time.

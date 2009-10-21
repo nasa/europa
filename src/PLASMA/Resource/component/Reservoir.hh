@@ -58,6 +58,8 @@ namespace EUROPA {
       //void notifyDeleted(const InstantId inst);
       void addToProfile(const TokenId& tok);
       void removeFromProfile(const TokenId& tok);
+      void createTransactions(const TokenId& tok);
+      void removeTransactions(const TokenId& tok);
 
       std::map<TokenId, TransactionId> m_tokensToTransactions;
     };

@@ -23,6 +23,8 @@ namespace EUROPA {
 				      unsigned int limit = PLUS_INFINITY);
 
     protected:
+      void createTransactions(const TokenId& tok);
+      void removeTransactions(const TokenId& tok);
       void addToProfile(const TokenId& tok);
       void removeFromProfile(const TokenId& tok);
 
@@ -71,6 +73,8 @@ namespace EUROPA {
       // TODO: only needed for backwards compatibility with Resource API, rework hierarchy to fix this.
       void addToProfile(const TokenId& tok);
       void removeFromProfile(const TokenId& tok);
+      void createTransactions(const TokenId& tok) {}
+      void removeTransactions(const TokenId& tok) {}
 
       std::map<UsesId, std::pair<TransactionId, TransactionId> > m_constraintsToTransactions;
 
