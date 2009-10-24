@@ -4,7 +4,7 @@
 #include "ConstraintEngine.hh"
 #include "PlanDatabase.hh"
 #include "Object.hh"
-#include "ObjectFactory.hh"
+#include "ObjectType.hh"
 #include "UnifyMemento.hh"
 #include "Token.hh"
 #include "TokenVariable.hh"

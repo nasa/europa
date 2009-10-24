@@ -1,18 +1,22 @@
+
 #include "DbClient.hh"
-#include "PlanDatabase.hh"
-#include "Entity.hh"
-#include "Utils.hh"
-#include "ObjectFactory.hh"
-#include "Object.hh"
-#include "Token.hh"
-#include "TokenVariable.hh"
-#include "DbClientListener.hh"
-#include "ConstraintEngine.hh"
-#include "ConstraintType.hh"
-#include "Debug.hh"
 
 #include <string>
 #include <iostream>
+
+#include "Debug.hh"
+#include "Entity.hh"
+#include "Utils.hh"
+
+#include "ConstraintEngine.hh"
+#include "ConstraintType.hh"
+
+#include "PlanDatabase.hh"
+#include "Object.hh"
+#include "ObjectType.hh"
+#include "Token.hh"
+#include "TokenVariable.hh"
+#include "DbClientListener.hh"
 
 #define publish(message) { \
    for (std::set<DbClientListenerId>::const_iterator it = m_listeners.begin(); it != m_listeners.end(); ++it) { \

@@ -1,32 +1,32 @@
 /**
  * @file Interpreter.cc
- * @brief Core classes to interpret XML statements
+ * @brief Core classes to support an interpreter on top of the EUROPA runtime
  * @author Javier Barreiro
  * @date December, 2006
  */
 
 #include "Interpreter.hh"
 
+#include <string.h>
+#include <stdio.h>
+
 #include "Debug.hh"
 #include "Error.hh"
+#include "Utils.hh"
 
 #include "ConstraintType.hh"
+#include "DataTypes.hh"
+#include "Domains.hh"
+
 #include "DbClient.hh"
 #include "DbClientTransactionPlayer.hh"
-#include "Domains.hh"
 #include "Object.hh"
-#include "ObjectFactory.hh"
-#include "TokenVariable.hh"
-#include "DataTypes.hh"
+#include "ObjectType.hh"
 #include "Schema.hh"
-#include "Utils.hh"
-#include "Variable.hh"
+#include "TokenVariable.hh"
 
 #include "NddlRules.hh"
 #include "NddlUtils.hh"
-
-#include <string.h>
-#include <stdio.h>
 
 namespace EUROPA {
 

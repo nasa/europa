@@ -1,6 +1,6 @@
 /**
  * @file Schema.hh
- * @brief Introduces the interface for a Schema, which identifes the types and
+ * @brief Introduces the interface for a Schema, which identifies the types and
  * rules of a plan database,
  * @author Conor McGann, Andrew Bachmann
  */
@@ -13,7 +13,6 @@
 #include "LabelStr.hh"
 #include "AbstractDomain.hh"
 #include "ObjectType.hh"
-#include "ObjectFactory.hh"
 #include "TokenTypeMgr.hh"
 #include "Method.hh"
 
@@ -357,8 +356,6 @@ namespace EUROPA {
     // TODO: ObjectType is replacing ObjectFactory
     void registerObjectType(const ObjectTypeId& objType);
     const ObjectTypeId& getObjectType(const LabelStr& objType);
-
-    void registerObjectFactory(const ObjectFactoryId& obj_fact);
     ObjectFactoryId getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments, const bool doCheckError = true);
 
     void registerTokenType(const TokenTypeId& tokenType);
@@ -376,22 +373,21 @@ namespace EUROPA {
 
     PSList<PSObjectType> getAllPSObjectTypes() const;
 
-  private:
-
-    static const std::set<LabelStr>& getBuiltInVariableNames();
-
+  protected:
     SchemaId m_id;
+    const LabelStr m_name;
     const CESchemaId& m_ceSchema;
-    std::map<double, ObjectTypeId> m_objTypes; // TODO: this must be subsumed by ObjectTypeMgr, get rid of
     const ObjectTypeMgrId m_objectTypeMgr;
     const TokenTypeMgrId m_tokenTypeMgr;
     std::map<double, MethodId> m_methods; // TODO: define methodMgr instead of keeping a map here
 
-    const LabelStr m_name;
+    // TODO: Drop these. Enums have been deprecated
     LabelStr_ValueSet_Map enumValues;
     std::map<double, LabelStr> enumValuesToEnums;
 
-    LabelStrSet objectTypes;  //get rid of
+    // TODO: get rid of all data members from this point on. There are object-oriented abstractions in place now
+    // that hold the same information
+    LabelStrSet objectTypes;
     LabelStrSet predicates;
     LabelStrSet primitives;
 
@@ -400,7 +396,9 @@ namespace EUROPA {
     LabelStr_LabelStrSet_Map objectPredicates; /*! All predicates by object type */
     LabelStrSet typesWithNoPredicates; /*! Cache for lookup efficiently */
     std::map<double, std::vector<LabelStr> > allObjectTypes; /*! Cache to retrieve allObjectTypes by sub-class */
+
     Schema(const Schema&); /**< NO IMPL */
+    static const std::set<LabelStr>& getBuiltInVariableNames();
 
   };
 
