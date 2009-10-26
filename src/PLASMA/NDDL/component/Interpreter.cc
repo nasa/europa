@@ -284,14 +284,7 @@ namespace EUROPA {
       arguments.push_back(&(arg.getValue()->derivedDomain()));
     }
 
-    // when this is the rhs of an assignment in a constructor, an object var must be created to specify
-    // the enclosing object (for which the constructor is being executed) as the parent.
-    // TODO: The way it is now, when using code generation objects are created :
-    // - directly in C++ through new (in the generated code) if the stmt is inside a NDDL constructor
-    // - through the factories if the stmt is in the initial state
-    // This is a problem, everybody should go through the factory
-    // faking it for now, but this is a hack
-
+    // TODO: using ObjectEvalContext may be cleaner?
     ConstrainedVariableId thisVar = context.getVar("this");
     ObjectId thisObject = (thisVar.isId() ? ObjectId(thisVar->derivedDomain().getSingletonValue()) : ObjectId::noId());
     std::string prefix = (thisObject.isId() ? thisObject->getName().toString() + "." : "");

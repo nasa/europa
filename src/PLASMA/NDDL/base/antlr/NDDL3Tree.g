@@ -887,12 +887,12 @@ methodInvocation returns [Expr* result]
 @init {
     std::vector<Expr*> args;
 }
-	:	^(METHOD_CALL v=qualified op=IDENT variableArgumentList[args]?)
+	:	^(METHOD_CALL v=qualified op=methodName variableArgumentList[args]?)
     {
-        const char* methodName = c_str($op.text->chars);
-        MethodId method = CTX->SymbolTable->getMethod(methodName,v,args);
+        const char* mName = c_str($op.text->chars);
+        MethodId method = CTX->SymbolTable->getMethod(mName,v,args);
         if (method.isNoId())
-            reportSemanticError(CTX,"Method "+std::string(methodName)+" is not defined");
+            reportSemanticError(CTX,"Method "+std::string(mName)+" is not defined");
         result = new ExprMethodCall(method,v,args);
     }
     |	^(CLOSE CLOSE)
@@ -902,6 +902,11 @@ methodInvocation returns [Expr* result]
         MethodId method = CTX->SymbolTable->getMethod("pdb_close",varExpr,args);
         result = new ExprMethodCall(method,varExpr,args);
     }
+	;
+
+methodName
+	:	IDENT
+	|	'close'
 	;
 
 cexpressionList [std::vector<CExpr*> &args]
