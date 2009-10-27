@@ -164,6 +164,18 @@ protected:
     virtual DataRef eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const;
 };
 
+class CloseClass : public Method
+{
+public:
+    CloseClass() : Method("class__close") {}
+    virtual ~CloseClass() {}
+
+    virtual DataRef eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const;
+
+    virtual const std::vector<DataTypeId>& getSignature();
+    virtual const DataTypeId& getReturnType();
+};
+
 }
 
 #endif /* METHODS_HH_ */

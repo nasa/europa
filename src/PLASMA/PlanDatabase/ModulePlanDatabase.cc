@@ -90,6 +90,7 @@ namespace EUROPA {
       schema->registerMethod((new MergeToken())->getId());
       schema->registerMethod((new RejectToken())->getId());
       schema->registerMethod((new CancelToken())->getId());
+      schema->registerMethod((new CloseClass())->getId());
 
       PlanDatabase* pdb = new PlanDatabase(ce->getId(), schema->getId());
       engine->addComponent("PlanDatabase",pdb);

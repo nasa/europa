@@ -123,8 +123,9 @@ namespace EUROPA {
   }
 
   void DbClient::close(const char* objectType) {
+	debugMsg("DbClient:close", "Closing:"+std::string(objectType));
     m_planDb->close(objectType);
-    debugMsg("DbClient:close", objectType);
+	debugMsg("DbClient:close", "Closed:"+std::string(objectType));
     publish(notifyClosed(objectType));
   }
 
@@ -257,8 +258,9 @@ namespace EUROPA {
   }
 
   void DbClient::close(const ConstrainedVariableId& variable){
+    debugMsg("DbClient:close", "Closing:"+variable->toLongString());
     variable->close();
-    debugMsg("DbClient:close", variable->toLongString());
+    debugMsg("DbClient:close", "Closed:"+variable->toLongString());
     publish(notifyVariableClosed(variable));
   }
   void DbClient::reset(const ConstrainedVariableId& variable){

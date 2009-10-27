@@ -818,8 +818,8 @@ qualified returns [Expr* result]
 }
     :   qualifiedString[varName]
         {
-                checkError((varName != "true" && varName != "false"), "true/false in qualified. It should not be here, only in the boolLiteral\n");
-                 bool isEnum = false;
+                bool isEnum = false;
+  
                 //My guess is that there is a better way to do this. First check if it is an enum.
                 std::string secondPart = "";
                 if (varName.rfind(".") != std::string::npos) {
@@ -836,13 +836,19 @@ qualified returns [Expr* result]
                    }
                 }
   
-                if (!isEnum) {
-                   std::string errorMsg;
-                   DataTypeId dt = CTX->SymbolTable->getTypeForVar(varName.c_str(),errorMsg);  
-                   // TODO!!: do type checking at each "."
-                   if (dt.isNoId())
-                       reportSemanticError(CTX,errorMsg);
-                   result = new ExprVarRef(varName.c_str(),dt);
+  				// TODO: should check for classes last, since this won't be common
+		        ObjectTypeId ot = CTX->SymbolTable->getObjectType(varName.c_str()); // Hack!
+        		if (ot.isId())  { // is a class reference
+            		LabelStr value(varName);
+            		result = new ExprConstant("string",new StringDomain((double)value,StringDT::instance()));
+        		}        		
+                else if (!isEnum) {
+                	std::string errorMsg;
+                	DataTypeId dt = CTX->SymbolTable->getTypeForVar(varName.c_str(),errorMsg);  
+                	// TODO!!: do type checking at each "."
+                	if (dt.isNoId())
+                    	reportSemanticError(CTX,errorMsg);
+                   	result = new ExprVarRef(varName.c_str(),dt);
                 }
         }
     ;
@@ -889,10 +895,23 @@ methodInvocation returns [Expr* result]
 }
 	:	^(METHOD_CALL v=qualified op=methodName variableArgumentList[args]?)
     {
-        const char* mName = c_str($op.text->chars);
-        MethodId method = CTX->SymbolTable->getMethod(mName,v,args);
+        std::string mName = c_str($op.text->chars);
+
+        // Hack! data type for v should tell us whether we're dealing with a class
+        ExprConstant* classNameExpr = dynamic_cast<ExprConstant*>(v);
+        if (classNameExpr != NULL) {
+            std::string className = classNameExpr->getConstantValue();
+            debugMsg("NddlInterpreter:method","Trying class:"+className);
+            ObjectTypeId ot = CTX->SymbolTable->getObjectType(className.c_str()); 
+            if (ot.isId())  { // is a class method
+                LabelStr value(mName);
+                mName = "class__"+mName;    
+            }
+        }
+            
+        MethodId method = CTX->SymbolTable->getMethod(mName.c_str(),v,args);
         if (method.isNoId())
-            reportSemanticError(CTX,"Method "+std::string(mName)+" is not defined");
+            reportSemanticError(CTX,"Method "+mName+" is not defined");
         result = new ExprMethodCall(method,v,args);
     }
     |	^(CLOSE CLOSE)

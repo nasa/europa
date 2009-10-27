@@ -147,13 +147,23 @@ namespace EUROPA {
   std::string ExprConstant::getConstantValue() const
   {
       std::ostringstream os;
+      std::string typeName(m_type.c_str());
 
-      if (m_domain->isSingleton() && (std::string(m_type.c_str()) == "int" || std::string(m_type.c_str()) == "float")) {
-	unsigned int start = m_domain->toString().find("[") + 1;
-	unsigned int end = m_domain->toString().find(",");
-	return m_domain->toString().substr(start, end - start);
+      // TODO: this is a hack, where is this being used?
+      if (m_domain->isSingleton()) {
+    	  if (typeName == IntDT::NAME())
+    	      os << (int)(m_domain->getSingletonValue());
+    	  else if (typeName == FloatDT::NAME())
+    	      os << m_domain->getSingletonValue();
+    	  else if (typeName == StringDT::NAME())
+			  os << LabelStr(m_domain->getSingletonValue()).toString();
+          else
+        	  os << "CONST_" << typeName << " " << m_domain->toString();
       }
-      return "CONST_" + std::string(m_type.c_str());
+      else
+    	  os << "CONST_" << typeName << " " << m_domain->toString();
+
+      return os.str();
   }
 
 
