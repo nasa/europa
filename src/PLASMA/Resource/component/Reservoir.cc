@@ -42,6 +42,7 @@ namespace EUROPA {
     checkError(m_tokensToTransactions.find(tok) != m_tokensToTransactions.end(),
                "No transaction for " << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
     TransactionId trans = m_tokensToTransactions.find(tok)->second;
+    debugMsg("Reservoir:addToProfile", "For " << tok->toString() << " adding transaction " << trans->toString() << " to profile.");
     m_profile->addTransaction(trans);
   }
 
@@ -49,6 +50,7 @@ namespace EUROPA {
     if(m_tokensToTransactions.find(tok) == m_tokensToTransactions.end())
       return;
     TransactionId trans = m_tokensToTransactions.find(tok)->second;
+    debugMsg("Reservoir:removeTransactions", "For " << tok->toString() << " deleting transaction " << trans->toString());
     m_tokensToTransactions.erase(tok);
     m_transactionsToTokens.erase(trans);
     delete (Transaction*) trans;

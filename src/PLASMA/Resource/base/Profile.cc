@@ -8,6 +8,9 @@
 #include "PlanDatabase.hh"
 #include "Debug.hh"
 
+#include <algorithm>
+#include <functional>
+
 namespace EUROPA {
 
     Profile::Profile(const PlanDatabaseId db, const FVDetectorId flawDetector, const double initLevelLb, const double initLevelUb)
@@ -279,6 +282,13 @@ namespace EUROPA {
       //if we've already got a notification for this constraint...
       if((it = m_constraintsForNotification.find(c)) != m_constraintsForNotification.end()) {
         //ConstrainedVariableId existingVar = it->second.var;
+        checkError(it->second.var.isValid(), 
+                   "Weird.  Invalid variable (" << it->second.var << ") in prior message for " << c->toString() << ".  Old index: "
+                   << it->second.index << " Old addition: " << it->second.addition << " Id info: <" << c << ", " <<
+                   (Constraint*) c << ">");
+        debugMsg("Profile:handleConstraintMessage",
+                 "Have prior message: <" << it->second.var->toLongString() << ", " << it->second.index << ", " << 
+                 it->second.addition << ">");
         int existingIndex = it->second.index;
         bool existingAddition = it->second.addition;
 
@@ -330,8 +340,10 @@ namespace EUROPA {
         else
           m_constraintsForNotification.erase(c);
       }
-      else
+      else {
+        debugMsg("Profile:handleConstraintMessage", "Adding constraint (" << c << ", " << (Constraint*) c << ") for notification.");
         m_constraintsForNotification.insert(std::make_pair(c, ConstraintMessage(var, argIndex, addition)));
+      }
 
       if(m_needsRecompute)
         ((ProfilePropagator*)m_planDatabase->getConstraintEngine()->getPropagatorByName(VariableListener::PROPAGATOR_NAME()))->setUpdateRequired(true);
@@ -368,6 +380,17 @@ namespace EUROPA {
                     "Attempted to remove variable listener for transaction at time " << t->time()->toString() << " with quantity " << t->quantity()->toString() << ".");
          delete (ConstraintAdditionListener*) listIt->second;
          m_otherListeners.erase(t);
+
+         debugMsg("Profile:handleTransactionVariableDeletion",
+                  "Removing outstanding messages for constraint addition/removal from " << t->time()->toLongString());
+         //there are better ways to do this...
+         std::vector<std::map<ConstraintId, ConstraintMessage>::iterator> temp;
+         for(std::map<ConstraintId, ConstraintMessage>::iterator it = m_constraintsForNotification.begin(); 
+             it != m_constraintsForNotification.end(); ++it)
+           if(it->second.var == t->time())
+             temp.push_back(it);
+         for(std::vector<std::map<ConstraintId, ConstraintMessage>::iterator>::iterator it = temp.begin(); it != temp.end(); ++it)
+           m_constraintsForNotification.erase(*it);
      }
 
     void Profile::getLevel(const int time, IntervalDomain& dest) {
@@ -571,7 +594,7 @@ namespace EUROPA {
       if(constr->getPropagator()->getName() == temporal) {
         debugMsg("Profile:ConstraintAdditionListener",
                  "Notifying profile " << m_profile << " of addition of constraint " << constr->toString() <<
-                 " to variable " << m_var->toString() << " at index " << argIndex);
+                 " to variable " << m_var->toLongString() << " at index " << argIndex);
         m_profile->temporalConstraintAdded(constr, m_var, argIndex);
       }
     }
@@ -581,7 +604,7 @@ namespace EUROPA {
       if(constr->getPropagator()->getName() == temporal) {
         debugMsg("Profile:ConstraintAdditionListener",
                  "Notifying profile " << m_profile << " of removal of constraint " << constr->toString() <<
-                 " from variable " << m_var->toString() << " at index " << argIndex);
+                 " from variable " << m_var->toLongString() << " at index " << argIndex);
         m_profile->temporalConstraintRemoved(constr, m_var, argIndex);
       }
     }

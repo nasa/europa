@@ -263,6 +263,17 @@ namespace EUROPA {
        */
       void addInstant(const int time);
 
+
+      /** 
+       * @brief Handle an addition or removal message on a temporal constraint.
+       * Waits for two consecutive addition or removal messages in order to ensure that both variables in the scope of the 
+       * constraint are resource-temporal variables.  
+       * 
+       * @param c The constraint.
+       * @param var The resource-related temporal variable the constraint is on.
+       * @param argIndex The index of the resource-related temporal variable in the scope of the constraint.
+       * @param addition True if the message is an addition, false otherwise.
+       */      
       void handleConstraintMessage(const ConstraintId c, const ConstrainedVariableId var, int argIndex, bool addition);
 
       ProfileId m_id;
