@@ -15,10 +15,13 @@ namespace EUROPA {
 
     Profile::Profile(const PlanDatabaseId db, const FVDetectorId flawDetector, const double initLevelLb, const double initLevelUb)
       : m_id(this), m_changeCount(0), m_needsRecompute(false), m_initLevelLb(initLevelLb), m_initLevelUb(initLevelUb),
-        m_planDatabase(db), m_detector(flawDetector) {}
+        m_planDatabase(db), m_detector(flawDetector) {
+      m_removalListener = (new ConstraintRemovalListener(db->getConstraintEngine(), m_id))->getId();
+    }
 
     Profile::~Profile() {
       debugMsg("Profile:~Profile", "In profile destructor for " << getId());
+      delete (ConstraintEngineListener*) m_removalListener;
       debugMsg("Profile:~Profile", "Cleaning up instants...");
       for(std::map<int, InstantId>::iterator it = m_instants.begin(); it != m_instants.end(); ++it)
         delete (Instant*) it->second;
@@ -103,6 +106,19 @@ namespace EUROPA {
         }
         profIt.next();
       }
+
+      //remove any constraints on the transaction from the profile.
+      std::vector<std::pair<ConstraintId, int> > removals;
+      for(ConstraintSet::const_iterator it = m_temporalConstraints.begin(); it != m_temporalConstraints.end(); ++it) {
+        if((*it)->isVariableOf(t->time())) {
+          removals.push_back(std::make_pair(*it, 
+                                            (int) std::distance((*it)->getScope().begin(), 
+                                                                std::find((*it)->getScope().begin(), (*it)->getScope().end(),
+                                                                          t->time()))));
+        }
+      }
+      for(std::vector<std::pair<ConstraintId, int> >::const_iterator it = removals.begin(); it != removals.end(); ++it)
+        handleConstraintMessage(it->first, t->time(), it->second, false);
 
       m_transactions.erase(t);
       m_transactionsByTime.erase(t->time());
@@ -269,6 +285,24 @@ namespace EUROPA {
       m_recomputeInterval = (new ProfileIterator(getId()))->getId();
     }
 
+  bool Profile::checkMessageConsistency() {
+    for(ConstraintSet::const_iterator it = m_temporalConstraints.begin(); it != m_temporalConstraints.end(); ++it) {
+      ConstraintId constr(*it);
+      checkError(constr.isValid(), "Id " << constr << " is invalid.");
+      checkError(constr->getScope().size() == 2 || constr->getScope().size() == 3,
+                 "Unexpected scope size in " << constr->toLongString());
+//       checkError(m_transactionsByTime.find(constr->getScope()[0]) != m_transactionsByTime.end(),
+//                  "First argument to temporal constraint isn't a known time-point: " << std::endl << constr->toLongString());
+//       checkError(constr->getScope().size() == 3 ||
+//                  m_transactionsByTime.find(constr->getScope()[1]) != m_transactionsByTime.end(),
+//                  "Second argument to temporal constraint isn't a known time-point: " << std::endl << constr->toLongString());
+//       checkError(constr->getScope().size() == 2 ||
+//                  m_transactionsByTime.find(constr->getScope()[2]) != m_transactionsByTime.end(),
+//                  "Third argument to temporal constraint isn't a known time-point: " << std::endl << constr->toLongString());
+    }
+    return true;
+  }
+
     void Profile::handleConstraintMessage(const ConstraintId c, const ConstrainedVariableId var, int argIndex, bool addition) {
       check_error(c->getScope().size() == 2 || c->getScope().size() == 3);
       //do nothing if this variable is the distance argument in a temporalDistance constraint
@@ -276,73 +310,70 @@ namespace EUROPA {
         return;
       checkError((c->getScope().size() == 2 && (argIndex == 0 || argIndex == 1)) ||
                  (c->getScope().size() == 3 && (argIndex == 0 || argIndex == 2)), "Invalid argument index: " << argIndex);
+      checkError(checkMessageConsistency(), "m_constraintsForNotification is inconsistent.");
 
-      std::map<ConstraintId, ConstraintMessage>::const_iterator it;
-
-      //if we've already got a notification for this constraint...
-      if((it = m_constraintsForNotification.find(c)) != m_constraintsForNotification.end()) {
-        //ConstrainedVariableId existingVar = it->second.var;
-        checkError(it->second.var.isValid(), 
-                   "Weird.  Invalid variable (" << it->second.var << ") in prior message for " << c->toString() << ".  Old index: "
-                   << it->second.index << " Old addition: " << it->second.addition << " Id info: <" << c << ", " <<
-                   (Constraint*) c << ">");
-        debugMsg("Profile:handleConstraintMessage",
-                 "Have prior message: <" << it->second.var->toLongString() << ", " << it->second.index << ", " << 
-                 it->second.addition << ">");
-        int existingIndex = it->second.index;
-        bool existingAddition = it->second.addition;
-
-        //it's an error for us to receive a removal message and then an addition message
-        checkError(!(existingAddition == false && addition == true),
-                   "Got a removal message before an addition message for constraint " << c->toString());
-
-
-        //if we receive two additions or two removals
-        if(existingAddition == addition) {
-          checkError(existingIndex != argIndex,
-                     "Got two " << (addition ? "addition" : "removal") << " notifications for index " << argIndex << " of constraint " << c->toString());
-          checkError(m_transactionsByTime.find(c->getScope()[existingIndex]) != m_transactionsByTime.end(),
-                     "No transaction stored for time " << c->getScope()[existingIndex]->toString());
-          checkError(m_transactionsByTime.find(c->getScope()[argIndex]) != m_transactionsByTime.end(),
-                     "No transaction stored for time " << c->getScope()[argIndex]->toString());
-
-          std::map<ConstrainedVariableId, TransactionId>::iterator transIt = m_transactionsByTime.find(c->getScope()[existingIndex]);
-          checkError(transIt != m_transactionsByTime.end(),
-                     "No transaction stored for time " << c->getScope()[existingIndex]->toString());
-          TransactionId trans1 = transIt->second;
-          transIt = m_transactionsByTime.find(c->getScope()[argIndex]);
-          checkError(transIt != m_transactionsByTime.end(),
-                     "No transaction stored for time " << c->getScope()[argIndex]->toString());
-          TransactionId trans2 = transIt->second;
-
-          m_constraintsForNotification.erase(c);
-          m_changeCount++;
-          m_needsRecompute = true;
-          //notify
-          if(existingIndex < argIndex) {
-            if(addition) {
-              handleTemporalConstraintAdded(trans1, existingIndex, trans2, argIndex);
-            }
-            else {
-              handleTemporalConstraintRemoved(trans1, existingIndex, trans2, argIndex);
-            }
-          }
-          else {
-            if(addition) {
-              handleTemporalConstraintAdded(trans2, argIndex, trans1, existingIndex);
-            }
-            else {
-              handleTemporalConstraintRemoved(trans2, argIndex, trans1, existingIndex);
-            }
-          }
-        }
-        //if we receive an addition followed by a removal (i.e. the constraint is only on one transaction timepoint)
+      debugMsg("Profile:handleConstraintMessage", 
+               "Received a " << (addition ? "addition" : "removal") << " message on " << std::endl << c->toLongString());
+      //hoisted this common code out of the ifs.  could be put back in for efficiency's sake.
+      int otherIndex = -1;
+      if(c->getScope().size() == 2) {
+        if(argIndex == 0)
+          otherIndex = 1;
         else
-          m_constraintsForNotification.erase(c);
+          otherIndex = 0;
+      }
+      else if(c->getScope().size() == 3) {
+        if(argIndex == 0)
+          otherIndex = 2;
+        else
+            otherIndex = 0;
+      }
+      
+      std::map<ConstrainedVariableId, TransactionId>::iterator transIt = m_transactionsByTime.find(c->getScope()[otherIndex]);
+      if(transIt == m_transactionsByTime.end()) {
+        debugMsg("Profile:handleConstraintMessage", 
+                 "Variable at index " << otherIndex << " doesn't have a transaction in the profile.");
+        return;
+      }
+      TransactionId trans1 = transIt->second;
+
+      transIt = m_transactionsByTime.find(c->getScope()[argIndex]);
+      if(transIt == m_transactionsByTime.end()) {
+        debugMsg("Profile:handleConstraintMessage", 
+                 "Variable at index " << argIndex << " doesn't have a transaction in the profile.");
+        return;
+      }
+      TransactionId trans2 = transIt->second;
+
+
+      if(addition) {
+        if(m_temporalConstraints.find(c) != m_temporalConstraints.end()) {
+          debugMsg("Profile:handleConstraintMessage",
+                   "Already added constraint " << std::endl << c->toLongString());
+          return;
+        }
+        m_temporalConstraints.insert(c);
+        m_changeCount++;
+        m_needsRecompute = true;
+        if(otherIndex < argIndex)
+          handleTemporalConstraintAdded(trans1, otherIndex, trans2, argIndex);
+        else
+          handleTemporalConstraintAdded(trans2, argIndex, trans1, otherIndex);
       }
       else {
-        debugMsg("Profile:handleConstraintMessage", "Adding constraint (" << c << ", " << (Constraint*) c << ") for notification.");
-        m_constraintsForNotification.insert(std::make_pair(c, ConstraintMessage(var, argIndex, addition)));
+        if(m_temporalConstraints.find(c) == m_temporalConstraints.end()) {
+          debugMsg("Profile:handleConstraintMessage",
+                   "Already removed constraint " << std::endl << c->toLongString());
+          return;
+        }
+        if(m_temporalConstraints.erase(c) > 0) {
+          m_changeCount++;
+          m_needsRecompute = true;
+          if(otherIndex < argIndex)
+            handleTemporalConstraintRemoved(trans1, otherIndex, trans2, argIndex);
+          else
+            handleTemporalConstraintRemoved(trans2, argIndex, trans1, otherIndex);
+        }
       }
 
       if(m_needsRecompute)
@@ -380,17 +411,6 @@ namespace EUROPA {
                     "Attempted to remove variable listener for transaction at time " << t->time()->toString() << " with quantity " << t->quantity()->toString() << ".");
          delete (ConstraintAdditionListener*) listIt->second;
          m_otherListeners.erase(t);
-
-         debugMsg("Profile:handleTransactionVariableDeletion",
-                  "Removing outstanding messages for constraint addition/removal from " << t->time()->toLongString());
-         //there are better ways to do this...
-         std::vector<std::map<ConstraintId, ConstraintMessage>::iterator> temp;
-         for(std::map<ConstraintId, ConstraintMessage>::iterator it = m_constraintsForNotification.begin(); 
-             it != m_constraintsForNotification.end(); ++it)
-           if(it->second.var == t->time())
-             temp.push_back(it);
-         for(std::vector<std::map<ConstraintId, ConstraintMessage>::iterator>::iterator it = temp.begin(); it != temp.end(); ++it)
-           m_constraintsForNotification.erase(*it);
      }
 
     void Profile::getLevel(const int time, IntervalDomain& dest) {
@@ -593,7 +613,7 @@ namespace EUROPA {
       static const LabelStr temporal("Temporal");
       if(constr->getPropagator()->getName() == temporal) {
         debugMsg("Profile:ConstraintAdditionListener",
-                 "Notifying profile " << m_profile << " of addition of constraint " << constr->toString() <<
+                 getId() << " Notifying profile " << m_profile << " of addition of constraint " << constr->toString() <<
                  " to variable " << m_var->toLongString() << " at index " << argIndex);
         m_profile->temporalConstraintAdded(constr, m_var, argIndex);
       }
@@ -603,7 +623,7 @@ namespace EUROPA {
       static const LabelStr temporal("Temporal");
       if(constr->getPropagator()->getName() == temporal) {
         debugMsg("Profile:ConstraintAdditionListener",
-                 "Notifying profile " << m_profile << " of removal of constraint " << constr->toString() <<
+                 getId() << " Notifying profile " << m_profile << " of removal of constraint " << constr->toString() <<
                  " from variable " << m_var->toLongString() << " at index " << argIndex);
         m_profile->temporalConstraintRemoved(constr, m_var, argIndex);
       }
@@ -689,4 +709,20 @@ namespace EUROPA {
       debugMsg("ProfileIterator:next", "... to " << (m_start == m_realEnd ? (2 * PLUS_INFINITY) : m_start->second->getTime()));
       return !done();
     }
+
+  bool Profile::hasConstraint(const ConstraintId& constr) const {
+    return m_temporalConstraints.find(constr) != m_temporalConstraints.end();
+  }
+
+  Profile::ConstraintRemovalListener::ConstraintRemovalListener(const ConstraintEngineId& ce, ProfileId profile)
+    : ConstraintEngineListener(ce), m_profile(profile) {}
+  
+  void Profile::ConstraintRemovalListener::notifyRemoved(const ConstraintId& constr) {
+    if(m_profile->hasConstraint(constr)) {
+      int index = 0;
+      for(std::vector<ConstrainedVariableId>::const_iterator it = constr->getScope().begin(); it != constr->getScope().end();
+          ++it, ++index)
+        m_profile->handleConstraintMessage(constr, *it, index, false);
+    }
+  }
 }

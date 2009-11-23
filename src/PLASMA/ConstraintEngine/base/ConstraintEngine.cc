@@ -467,7 +467,8 @@ namespace EUROPA
 
     // If the constraint is inactive, there is no need to relax. So just worry if it is actually active
     if(constraint->isActive()){
-      debugMsg("ConstraintEngine:remove:Constraint", "Propagating relaxations for " << constraint->toString());
+      debugMsg("ConstraintEngine:remove:Constraint",
+               "Propagating relaxations for " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
       const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
       for(std::vector<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it){
 	ConstrainedVariableId id(*it);

@@ -903,7 +903,7 @@ namespace EUROPA {
   PSList<PSObjectType> Schema::getAllPSObjectTypes() const {
 	PSList<PSObjectType> retval;
 	std::vector<ObjectTypeId> ots = m_objectTypeMgr->getAllObjectTypes();
-    for(unsigned int i;i<ots.size();i++)
+    for(unsigned int i = 0;i<ots.size();i++)
     	retval.push_back(PSObjectType(ots[i]));
 
     return retval;

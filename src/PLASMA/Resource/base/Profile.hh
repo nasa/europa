@@ -236,6 +236,24 @@ namespace EUROPA {
           : var(_var), index(_index), addition(_addition) {}
       };
 
+      /**
+       * @class ConstraintRemovalListener
+       * @brief Listens for removal messages on constraints.
+       * 
+       * Because it's possible for the ConstraintAdditionListener to get removed before a constraint it's listening for,
+       * this class has been added to catch any final messages about removal.
+       */
+
+      class ConstraintRemovalListener : public ConstraintEngineListener {
+      public:
+        ConstraintRemovalListener(const ConstraintEngineId& ce, ProfileId profile);
+        void notifyRemoved(const ConstraintId& constr);
+      private:
+        ProfileId m_profile;
+      };
+
+      bool hasConstraint(const ConstraintId& constr) const;
+
     public:
       /**
        * @brief Gets the Instant with the greatest time that is not greater than the given time.
@@ -276,6 +294,14 @@ namespace EUROPA {
        */      
       void handleConstraintMessage(const ConstraintId c, const ConstrainedVariableId var, int argIndex, bool addition);
 
+      /** 
+       * @brief Checks the m_constraintsForNotification map for internal consistency.
+       * 
+       * 
+       * @return true if the map is consistent.  False otherwise.
+       */
+      bool checkMessageConsistency();
+
       ProfileId m_id;
       unsigned int m_changeCount; /*<! The number of times that the profile has changed.  Used to detect stale iterators.*/
       bool m_needsRecompute; /*<! A flag indicating the necessity of profile recomputation*/
@@ -289,7 +315,8 @@ namespace EUROPA {
       std::multimap<TransactionId, ConstraintId> m_variableListeners; /*<! The listeners on the Transactions. */
       std::map<TransactionId, ConstrainedVariableListenerId> m_otherListeners;
       std::map<ConstrainedVariableId, TransactionId> m_transactionsByTime;
-      std::map<ConstraintId, ConstraintMessage> m_constraintsForNotification;
+      ConstraintSet m_temporalConstraints; 
+      ConstraintEngineListenerId m_removalListener;
     protected:
       std::map<int, InstantId> m_instants; /*<! A map from times to Instants. */
       ProfileIteratorId m_recomputeInterval; /*<! The stored interval of recomputation.*/
