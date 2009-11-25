@@ -251,7 +251,7 @@ namespace EUROPA {
 #endif
 
   //it feels a bit dirty doing this this way.  I don't want to make this code un-readable because of all the macros, but I also
-  //don't want to make it un-readiable because of all the repetition
+  //don't want to make it un-readable because of all the repetition
 #define GEN_COMPARISONS(type)                                   \
   inline bool operator<(const type o) {return m_v < o;}         \
   inline bool operator<=(const type o) {return m_v <= o;}       \

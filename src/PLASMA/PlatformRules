@@ -86,7 +86,7 @@ PROFILE_FLAGS ?= -pg ;
 
 # OPTIMIZE_FLAGS = flags for optimization
 
-OPTIMIZE_FLAGS ?= -O3 -DEUROPA_FAST ;
+OPTIMIZE_FLAGS ?= -O3 -DEUROPA_FAST -DNDEBUG ;
 OPTIM = ; # suppress built-in optimization
 
 # COVERAGE_FLAGS = flags for code coverage (e.g., gcov)

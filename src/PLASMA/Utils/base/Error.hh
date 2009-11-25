@@ -104,8 +104,7 @@
  * @note When EUROPA_FAST is defined, these are ignored.
  */
 #define check_error(cond, optarg...)
-#define checkError(cond, msg)
-#define checkError(cond, msg, type)
+#define checkError(cond, msg, optarg...)
 
 /**
  * @def warn
