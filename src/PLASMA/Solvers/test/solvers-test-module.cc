@@ -76,7 +76,6 @@ SolversTestEngine::SolversTestEngine()
     createModules();
     doStart();
     registerTestElements(getId());
-    executeScript("nddl-xml", getTestLoadLibraryPath() + "/Model.xml", true);
 }
 
 SolversTestEngine::~SolversTestEngine()
@@ -422,12 +421,10 @@ private:
       static const LabelStr excludedVariables(":start:end:duration:arg1:arg3:arg4:arg6:arg7:arg8:filterVar:");
       static const LabelStr includedVariables(":arg2:arg5:keepVar:");
       std::string s = ":" + var->getName().toString() + ":";
-      if(excludedVariables.contains(s)) {
-        CPPUNIT_ASSERT_MESSAGE(var->toLongString(), !fm.inScope(var));
-      }
-      else if(includedVariables.contains(s)) {
-        CPPUNIT_ASSERT_MESSAGE(var->toLongString(), fm.inScope(var));
-      }
+      if(excludedVariables.contains(s))
+        CPPUNIT_ASSERT_MESSAGE(var->toString(), !fm.inScope(var));
+      else if(includedVariables.contains(s))
+        CPPUNIT_ASSERT_MESSAGE(var->toString(), fm.inScope(var));
     }
 
     // Confirm that a global variable is first a flaw, but when bound is no longer a flaw, and when bound again,
@@ -1667,8 +1664,6 @@ private:
 
   static bool testSimpleRejection() {
     TestEngine testEngine;
-    DebugMessage::enableMatchingMsgs("Solver", "step");
-    DebugMessage::enableMatchingMsgs("ConstraintEngine", "");
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleRejectionSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
@@ -2055,6 +2050,7 @@ private:
         const ConstrainedVariableId var = (const ConstrainedVariableId) entity;
         CPPUNIT_ASSERT(uvm.inScope(var));
         CPPUNIT_ASSERT(vars.find(var) != vars.end());
+        std::cerr << var->toString() << std::endl;
         vars.erase(var);
       }
       else
@@ -2065,6 +2061,7 @@ private:
       CPPUNIT_ASSERT(!tm.inScope(*it) && !ocm.inScope(*it));
 
     for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
+      std::cerr << (*it)->toString() << std::endl;
       CPPUNIT_ASSERT(!uvm.inScope(*it));
     }
 
