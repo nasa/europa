@@ -40,7 +40,7 @@ namespace EUROPA {
     EnumeratedDomain remainingValues(m_proxyDomain.getDataType());
 
     const std::set<edouble>& objects = m_objectDomain.getValues();
-    ObjectDomain remainingObjects(m_objectDomain.getTypeName().c_str());
+    ObjectDomain remainingObjects(m_objectDomain.getDataType());
     for(std::set<edouble>::const_iterator it = objects.begin(); it != objects.end(); ++it){
       ObjectId object = Entity::getTypedEntity<Object>(*it);
       ConstrainedVariableId var = object->getVariable(m_path);

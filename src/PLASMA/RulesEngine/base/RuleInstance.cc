@@ -399,7 +399,8 @@ namespace EUROPA {
       return m_parent->getVariable(name);
     else if(getPlanDatabase()->isGlobalVariable(name))
       return getPlanDatabase()->getGlobalVariable(name);
-    return ConstrainedVariableId::noId();
+    else
+      return ConstrainedVariableId::noId();
   }
 
   TokenId RuleInstance::getSlave(const LabelStr& name) const{
@@ -413,7 +414,8 @@ namespace EUROPA {
       return it->second;
     else if (!m_parent.isNoId())
       return m_parent->getSlave(name);
-    return TokenId::noId();
+    else
+      return TokenId::noId();
   }
 
 
@@ -423,7 +425,8 @@ namespace EUROPA {
       return it->second;
     else if (!m_parent.isNoId())
       return m_parent->getConstraint(name);
-    return ConstraintId::noId();
+    else
+      return ConstraintId::noId();
   }
 
   ConstraintId RuleInstance::constraint(const std::string& name) const{
@@ -495,7 +498,7 @@ namespace EUROPA {
     for (; varindex < names.size()-1; ++varindex) {
       ConstrainedVariableId iVar = iObj->getVariable(LabelStr(iObj->getName().toString() + "." + names[varindex]));
       path.push_back(iVar->getIndex());
-          checkError(iVar->lastDomain().isSingleton(), iVar->toString() << ", " << iObj->getName().toString() << "." << names[varindex]););
+      checkError(iVar->lastDomain().isSingleton(), iVar->toString() + ", " + iObj->getName().toString() + "." + names[varindex]);
       iObj = Entity::getTypedEntity<Object>(iVar->lastDomain().getSingletonValue());
     }
 
@@ -517,12 +520,11 @@ namespace EUROPA {
 
     EnumeratedDomain proxyBaseDomain(fieldVar->baseDomain().getDataType());
 
-    std::list<double> values;
+    std::list<edouble> values;
     for(std::list<ObjectId>::const_iterator it = objects.begin(); it != objects.end(); ++it){
       ObjectId object = *it;
       ConstrainedVariableId fieldVar = object->getVariable(path);
-          checkError(fieldVar->lastDomain().isSingleton(), fieldVar->toString() << " : " << fieldVar->lastDomain().toString() << " is not a singleton."););
-      checkError(fieldVar->baseDomain().getTypeName() == fieldType, fieldVar->toString());
+      checkError(fieldVar->lastDomain().isSingleton(), fieldVar->toString() + " : " + fieldVar->lastDomain().toString() + " is not a singleton.");
       edouble value = fieldVar->lastDomain().getSingletonValue();
       proxyBaseDomain.insert(value);
       debugMsg("RuleInstance:varFromObject", "Adding value from " << fieldVar->toString());
@@ -533,7 +535,7 @@ namespace EUROPA {
 
     // If it is a boolean, allocate a bool domain instead of the enumerated domain
     if(isBool){
-      BoolDomain boolDomain(fieldType.c_str());
+      BoolDomain boolDomain(fieldVar->baseDomain().getDataType());
       edouble lb = proxyBaseDomain.getLowerBound();
       edouble ub = proxyBaseDomain.getUpperBound();
 
@@ -662,7 +664,7 @@ namespace EUROPA {
       ss << "No Slaves" << std::endl;
     else {
       ss << "Slaves: " << std::endl;
-      for(std::map<double, TokenId>::const_iterator it = m_slavesByName.begin(); it != m_slavesByName.end(); ++it){
+      for(std::map<edouble, TokenId>::const_iterator it = m_slavesByName.begin(); it != m_slavesByName.end(); ++it){
 	LabelStr name = (LabelStr) it->first;
 	TokenId token = it->second;
 	ss << TAB_DELIMITER << name.toString() << "==" << token->toString() << std::endl;
