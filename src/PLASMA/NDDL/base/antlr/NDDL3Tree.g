@@ -247,7 +247,7 @@ setElement returns [Expr* result]
 
 valueSet returns [Expr* result]
 @init {
-    std::list<double> values;
+    std::list<edouble> values;
     DataTypeId elementType;
 }
     :   ^('{'
@@ -255,7 +255,7 @@ valueSet returns [Expr* result]
             {
                 DataRef elemValue = evalExpr(CTX,element);
                 const AbstractDomain& ev = elemValue.getValue()->lastDomain();
-                double v = ev.getSingletonValue();
+                edouble v = ev.getSingletonValue();
                               
                 delete element;
                              
@@ -312,7 +312,7 @@ stringLiteral returns [AbstractDomain* result]
              s = s.substr(1,s.size()-2);
                  
              LabelStr value(s); 
-             result = new StringDomain((double)value,StringDT::instance());
+             result = new StringDomain(value,StringDT::instance());
          }
     ; 
 
@@ -335,15 +335,15 @@ numericInterval returns [Expr* result]
             upper=numericLiteral
         )
         {      
-            double lb = lower->getSingletonValue();
-            double ub = upper->getSingletonValue();
+            edouble lb = lower->getSingletonValue();
+            edouble ub = upper->getSingletonValue();
             AbstractDomain* baseDomain;
                     
             if (lower->getTypeName().toString()=="float" || 
                 upper->getTypeName().toString()=="float") 
                 baseDomain = new IntervalDomain(lb,ub);
             else 
-                baseDomain = new IntervalIntDomain((int)lb,(int)ub);
+                baseDomain = new IntervalIntDomain((eint)lb,(eint)ub);
                                   
             result = new ExprConstant(
                         lower->getTypeName().c_str(),
@@ -829,7 +829,7 @@ qualified returns [Expr* result]
                 if (CTX->SymbolTable->isEnumValue(varName.c_str())) {
                    result = CTX->SymbolTable->makeEnumRef(varName.c_str());
                    isEnum = true;
-                } else if (secondPart.c_str() != "") {
+                } else if (secondPart != "") {
                    if (CTX->SymbolTable->isEnumValue(secondPart.c_str())) {
                       result = CTX->SymbolTable->makeEnumRef(secondPart.c_str());
                       isEnum = true;

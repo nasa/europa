@@ -550,7 +550,7 @@ AbstractDomain* NddlSymbolTable::makeNumericDomainFromLiteral(const std::string&
     // TODO: only one copy should be kept for each literal, domains should be marked as constant
     CESchemaId ces = ((CESchema*)getElement("CESchema"))->getId();
     AbstractDomain* retval = ces->baseDomain(type.c_str()).copy();
-    double v = getPlanDatabase()->getClient()->createValue(type.c_str(), value);
+    edouble v = getPlanDatabase()->getClient()->createValue(type.c_str(), value);
     retval->set(v);
 
     return retval;
@@ -593,7 +593,7 @@ Expr* NddlSymbolTable::makeEnumRef(const char* value) const
     const LabelStr& enumType = getEnumForValue(value);
     EnumeratedDomain* ad = dynamic_cast<EnumeratedDomain*>(
             getPlanDatabase()->getSchema()->getCESchema()->baseDomain(enumType.c_str()).copy());
-    double v = LabelStr(value);
+    edouble v = LabelStr(value);
     ad->set(v);
 
     return new ExprConstant(enumType.c_str(),ad);

@@ -68,7 +68,7 @@ namespace EUROPA {
 
       void setCutoff(unsigned int maxChoices) {m_maxChoices = maxChoices;}
 
-      const unsigned int getFlawedEntityKey() {return m_entityKey;}
+      const eint getFlawedEntityKey() {return m_entityKey;}
     protected:
       DecisionPoint(const DbClientId& client, eint entityKey, const LabelStr& explanation);
 
@@ -91,8 +91,6 @@ namespace EUROPA {
        * @note To support this properly, the key of the flawed entity must be retained.
        */
       virtual bool canUndo() const;
-
-      const eint getFlawedEntityKey() {return m_entityKey;}
 
       /**
        * @brief Main accessor for the Solver to execute current choice.
