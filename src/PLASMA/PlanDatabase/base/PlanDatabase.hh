@@ -163,10 +163,10 @@ namespace EUROPA {
 			     std::vector<TokenId>& results,
 			     unsigned int limit,
 			     bool useExactTest);
-    void getCompatibleTokens(const TokenId& inactiveToken,
-			     std::vector<TokenId>& results,
-			     eint limit,
-			     bool useExactTest);
+//     void getCompatibleTokens(const TokenId& inactiveToken,
+// 			     std::vector<TokenId>& results,
+// 			     eint limit,
+// 			     bool useExactTest);
 
     /**
      * @brief Returns a count of compatible tokens up to the given limit
@@ -294,7 +294,7 @@ namespace EUROPA {
      * @note We can extend this to pass in a functor or some other object to allow it to handle archival details.
      * @see Object::archive
      */
-    unsigned int archive(unsigned int tick = cast_int(PLUS_INFINITY));
+    unsigned int archive(eint tick = PLUS_INFINITY);
 
 
     // PSPlanDatabase methods

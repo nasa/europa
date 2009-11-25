@@ -22,12 +22,12 @@ namespace EUROPA {
       /**
        * @brief Accessor for total number of values available
        */
-      virtual unsigned int getCount() const;
+      virtual AbstractDomain::size_type getCount() const;
 
       /**
        * @brief Accessor for the value at position given by index.
        */
-      virtual edouble getValue(unsigned int index) const = 0;
+      virtual edouble getValue(AbstractDomain::size_type index) const = 0;
 
       /**
        * @brief Required to allow correct cleanup
@@ -35,15 +35,15 @@ namespace EUROPA {
       virtual ~ValueSource();
 
     protected:
-      ValueSource(unsigned int count);
+      ValueSource(AbstractDomain::size_type count);
 
-      unsigned int m_count;
+      AbstractDomain::size_type m_count;
     };
 
     class EnumValueSource : public ValueSource {
     public:
       EnumValueSource(const SchemaId& schema, const AbstractDomain& dom);
-      edouble getValue(unsigned int index) const;
+      edouble getValue(AbstractDomain::size_type index) const;
     private:
       std::vector<edouble> m_values;
     };
@@ -51,7 +51,7 @@ namespace EUROPA {
     class OrderedValueSource : public ValueSource {
     public:
       OrderedValueSource(const AbstractDomain& dom);
-      edouble getValue(unsigned int index) const;
+      edouble getValue(AbstractDomain::size_type index) const;
       void addValue(const edouble value);
     private:
       std::vector<edouble> m_values;
@@ -61,8 +61,8 @@ namespace EUROPA {
     class IntervalValueSource : public ValueSource {
     public:
       IntervalValueSource(const AbstractDomain& dom);
-      edouble getValue(unsigned int index) const;
-      static unsigned int calculateSize(const AbstractDomain & dom);
+      edouble getValue(AbstractDomain::size_type index) const;
+      static AbstractDomain::size_type calculateSize(const AbstractDomain & dom);
     private:
       edouble m_lb;
       edouble m_ub;

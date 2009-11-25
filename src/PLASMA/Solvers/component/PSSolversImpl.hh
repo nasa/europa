@@ -47,10 +47,10 @@ namespace EUROPA
       virtual std::string getLastExecutedDecision();
 
       virtual const std::string& getConfigFilename();
-      virtual int getHorizonStart();
-      virtual int getHorizonEnd();
+    virtual eint::basis_type getHorizonStart();
+    virtual eint::basis_type getHorizonEnd();
 
-      virtual void configure(int horizonStart, int horizonEnd);
+    virtual void configure(eint::basis_type horizonStart, eint::basis_type horizonEnd);
 
     protected:
     	SOLVERS::SolverId m_solver;

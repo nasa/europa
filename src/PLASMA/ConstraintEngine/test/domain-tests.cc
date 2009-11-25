@@ -62,7 +62,7 @@ namespace EUROPA {
       IntervalDomain realDomain(10.2 ,20.4);
       CPPUNIT_ASSERT(!realDomain.isEmpty());
       CPPUNIT_ASSERT(!realDomain.isFinite());
-      CPPUNIT_ASSERT_EQUAL((unsigned int) cast_int(PLUS_INFINITY), realDomain.getSize());
+      CPPUNIT_ASSERT_EQUAL((AbstractDomain::size_type) cast_int(PLUS_INFINITY), realDomain.getSize());
 
       IntervalIntDomain intDomain(10, 20);
       CPPUNIT_ASSERT(intDomain.isFinite());

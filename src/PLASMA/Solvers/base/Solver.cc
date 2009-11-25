@@ -34,7 +34,8 @@ namespace EUROPA {
       : m_id(this), m_db(db),
         m_stepCountFloor(0), m_depthFloor(0), m_stepCount(0),
         m_noFlawsFound(false), m_exhausted(false), m_timedOut(false),
-        m_maxSteps(cast_int(PLUS_INFINITY)), m_maxDepth(cast_int(PLUS_INFINITY)),
+        m_maxSteps(std::numeric_limits<unsigned int>::max()),
+        m_maxDepth(std::numeric_limits<unsigned int>::max()),
         m_masterFlawFilter(configData), m_ceListener(db->getConstraintEngine(), *this),
         m_dbListener(db, *this) {
       checkError(strcmp(configData.Value(), "Solver") == 0,

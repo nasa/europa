@@ -704,7 +704,7 @@ namespace EUROPA{
    * @brief Tests if a token can be terminated.
    * @see terminate
    */
-  bool Token::canBeTerminated(unsigned int tick) const{
+  bool Token::canBeTerminated(eint tick) const{
     if(isTerminated())
       return false;
 

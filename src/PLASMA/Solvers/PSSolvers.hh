@@ -42,10 +42,10 @@ namespace EUROPA
 
 	  // TODO: should horizon start and end be part of configuration?
 	  virtual const std::string& getConfigFilename() = 0;	
-	  virtual int getHorizonStart() = 0;
-	  virtual int getHorizonEnd() = 0;
+    virtual eint::basis_type getHorizonStart() = 0;
+    virtual eint::basis_type getHorizonEnd() = 0;
 
-	  virtual void configure(int horizonStart, int horizonEnd) = 0;
+    virtual void configure(eint::basis_type horizonStart, eint::basis_type horizonEnd) = 0;
   };
 
 }

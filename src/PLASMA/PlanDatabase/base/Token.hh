@@ -284,7 +284,7 @@ namespace EUROPA {
      * @brief Test if the token can be terminated. Must not have active constraints.
      * @param tick The current clock value
      */
-    bool canBeTerminated(unsigned int tick) const;
+    bool canBeTerminated(eint tick) const;
 
     /**
      * @brief Terminate a token, disconnects it from propagation.

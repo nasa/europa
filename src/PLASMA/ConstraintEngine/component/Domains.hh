@@ -89,7 +89,7 @@ namespace EUROPA {
 	   * @return isEmpty() <=> 0, isSingleton() <=> 1
 	   * @see AbstractDomain::getSize()
 	   */
-	  unsigned int getSize() const;
+	  size_type getSize() const;
 
 	  /**
 	   * @brief Add an element to the set.
@@ -476,7 +476,7 @@ namespace EUROPA {
      * @brief Return the number of elements in the domain.
      * @note Can only be called on finite domains.
      */
-    unsigned int getSize() const;
+    size_type getSize() const;
 
     /**
      * @brief Test for equality.

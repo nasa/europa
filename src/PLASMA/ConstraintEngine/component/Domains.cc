@@ -89,7 +89,7 @@ namespace EUROPA {
     //check_error(isEmpty() || isAscending(m_values));
   }
 
-  unsigned int EnumeratedDomain::getSize() const {
+  AbstractDomain::size_type EnumeratedDomain::getSize() const {
 	  return(m_values.size());
   }
 
@@ -888,7 +888,7 @@ namespace EUROPA {
     notifyChange(DomainListener::EMPTIED);
   }
 
-  unsigned int IntervalDomain::getSize() const {
+  AbstractDomain::size_type IntervalDomain::getSize() const {
     checkError(!isOpen(), "Cannot test for the size of an open domain.");
 
     if (isEmpty())
@@ -1072,8 +1072,8 @@ namespace EUROPA {
 
   void IntervalIntDomain::testPrecision(const edouble& value) const {
 #ifndef EUROPA_FAST
-    int intValue = cast_int(value);
-    double dblValue = (double) intValue;
+    eint::basis_type intValue = cast_int(value);
+    edouble::basis_type dblValue = (edouble::basis_type) intValue;
     checkError(dblValue == value,
 	       value << " must be an integer."); // confirms no loss in precision
 #endif

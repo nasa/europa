@@ -135,7 +135,8 @@ namespace EUROPA {
         if((m_action == mergeFirst || m_action == mergeOnly || m_action == activateFirst)) {
 
 	  if(stateDomain.isMember(Token::MERGED)) {
-	    m_flawedToken->getPlanDatabase()->getCompatibleTokens(m_flawedToken, m_compatibleTokens, PLUS_INFINITY, true);
+	    m_flawedToken->getPlanDatabase()->getCompatibleTokens(m_flawedToken, m_compatibleTokens, 
+                                                                  std::numeric_limits<unsigned int>::max(), true);
 	    m_mergeCount = m_compatibleTokens.size();
 	    
 	    if(m_mergeCount > 0) {
@@ -265,11 +266,11 @@ namespace EUROPA {
         return new NearTokenComparator(m_flawedTok);
       }
 
-      int NearTokenComparator::absoluteDistance(const TokenId& a, const TokenId& b) {
-        return abs(midpoint(a) - midpoint(b));
+      eint NearTokenComparator::absoluteDistance(const TokenId& a, const TokenId& b) {
+        return std::abs(midpoint(a) - midpoint(b));
       }
 
-      int NearTokenComparator::midpoint(const TokenId& token) {
+      eint NearTokenComparator::midpoint(const TokenId& token) {
         edouble maxTemporalExtent = (token->end()->lastDomain().getUpperBound() -
                                      token->start()->lastDomain().getLowerBound());
         return cast_int(token->start()->lastDomain().getLowerBound() + maxTemporalExtent / 2);

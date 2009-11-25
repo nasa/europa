@@ -492,12 +492,12 @@ namespace EUROPA{
     }
   }
   
-  void PlanDatabase::getCompatibleTokens(const TokenId& inactiveToken,
-                                         std::vector<TokenId>& results,
-                                         eint limit,
-                                         bool useExactTest) {
-    getCompatibleTokens(inactiveToken, results, cast_int(limit), useExactTest);
-  }
+//   void PlanDatabase::getCompatibleTokens(const TokenId& inactiveToken,
+//                                          std::vector<TokenId>& results,
+//                                          eint limit,
+//                                          bool useExactTest) {
+//     getCompatibleTokens(inactiveToken, results, cast_int(limit), useExactTest);
+//   }
 
   void PlanDatabase::getCompatibleTokens(const TokenId& inactiveToken,
                                          std::vector<TokenId>& results) {
@@ -884,7 +884,7 @@ namespace EUROPA{
     return Entity::getEntity(key);
   }
 
-  unsigned int PlanDatabase::archive(unsigned int tick){
+  unsigned int PlanDatabase::archive(eint tick){
     checkError(getConstraintEngine()->constraintConsistent(),
 	       "Must be propagated to a consistent state before archiving.");
 
@@ -904,7 +904,7 @@ namespace EUROPA{
 	if(token->isMerged())
 	  continue;
 
-	unsigned int latestEndTime = (unsigned int) cast_int(token->end()->lastDomain().getUpperBound());
+	eint latestEndTime = cast_int(token->end()->lastDomain().getUpperBound());
 
 	if(latestEndTime <= tick && token->canBeTerminated(tick)){
 	  debugMsg("PlanDatabase:archive:remove",

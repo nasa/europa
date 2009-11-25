@@ -24,13 +24,13 @@ namespace EUROPA {
 	return new IntervalValueSource(var->lastDomain());
     }
 
-    ValueSource::ValueSource(unsigned int count) : m_count(count) {
+    ValueSource::ValueSource(AbstractDomain::size_type count) : m_count(count) {
       debugMsg("ValueSource:ValueSource", "Allocating for " << m_count << " choices.");
     }
 
     ValueSource::~ValueSource(){}
 
-    unsigned int ValueSource::getCount() const { return m_count;}
+    AbstractDomain::size_type ValueSource::getCount() const { return m_count;}
 
     EnumValueSource::EnumValueSource(const SchemaId& schema, const AbstractDomain& dom)
       : ValueSource(dom.getSize()) {
@@ -46,7 +46,7 @@ namespace EUROPA {
         m_values.push_back(*it);
     }
 
-    edouble EnumValueSource::getValue(unsigned int index) const { return m_values[index];}
+    edouble EnumValueSource::getValue(AbstractDomain::size_type index) const { return m_values[index];}
 
     OrderedValueSource::OrderedValueSource(const AbstractDomain& dom) : ValueSource(0), m_dom(dom) {
       checkError(!m_dom.isEmpty(), "Cannot create a value ordering for empty domain " << m_dom);
@@ -61,7 +61,7 @@ namespace EUROPA {
       condDebugMsg(!m_dom.isMember(value), "OrderedValueSource:addValue", "Value " << value << " not in " << m_dom);
     }
 
-    edouble OrderedValueSource::getValue(unsigned int index) const {
+    edouble OrderedValueSource::getValue(AbstractDomain::size_type index) const {
       checkError(!m_values.empty(), "Cannot get an ordered value from an empty set!");
       return m_values[index];
     }
@@ -71,10 +71,10 @@ namespace EUROPA {
 	m_lb(dom.getLowerBound()), m_ub(dom.getUpperBound()), m_step(dom.minDelta()){
     }
 
-    edouble IntervalValueSource::getValue(unsigned int index) const {return m_lb + (m_step * index);}
+    edouble IntervalValueSource::getValue(AbstractDomain::size_type index) const {return m_lb + (m_step * index);}
 
-    unsigned int IntervalValueSource::calculateSize(const AbstractDomain& dom){
-      return (unsigned int) cast_int(((dom.getUpperBound() - dom.getLowerBound())/dom.minDelta()) + 1);
+    AbstractDomain::size_type IntervalValueSource::calculateSize(const AbstractDomain& dom){
+      return cast_int(((dom.getUpperBound() - dom.getLowerBound())/dom.minDelta()) + 1);
     }
   }
 }

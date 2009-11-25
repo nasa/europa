@@ -107,6 +107,11 @@ namespace EUROPA {
    */
   class AbstractDomain {
   public:
+#ifdef E2_LONG_INT
+    typedef unsigned long int size_type;
+#else
+    typedef unsigned int size_type;
+#endif
 
     /**
      * Destructor.
@@ -166,7 +171,7 @@ namespace EUROPA {
      * @note Can only be called if (!isDynamic() && isFinite()).
      * @return the number of values in the domain.
      */
-    virtual unsigned int getSize() const = 0;
+    virtual size_type getSize() const = 0;
 
     /**
      * @brief Access upper bound

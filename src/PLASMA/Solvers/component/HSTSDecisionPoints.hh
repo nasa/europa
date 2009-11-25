@@ -125,8 +125,8 @@ namespace EUROPA {
         NearTokenComparator(TokenId tok) : TokenComparator(tok) {}
         virtual bool compare(const TokenId x, const TokenId y);
         virtual TokenComparator* copy();
-        static int absoluteDistance(const TokenId& a, const TokenId& b);
-        static int midpoint(const TokenId& token);
+        static eint absoluteDistance(const TokenId& a, const TokenId& b);
+        static eint midpoint(const TokenId& token);
       };
 
       class FarTokenComparator : public NearTokenComparator {

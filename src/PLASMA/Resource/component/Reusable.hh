@@ -20,7 +20,7 @@ namespace EUROPA {
 
       virtual void getOrderingChoices(const TokenId& token,
 				      std::vector<std::pair<TokenId, TokenId> >& results,
-				      unsigned int limit = cast_int(PLUS_INFINITY));
+				      unsigned int limit = std::numeric_limits<unsigned int>::max());
 
     protected:
       void createTransactions(const TokenId& tok);

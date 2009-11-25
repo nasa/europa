@@ -415,7 +415,7 @@ namespace EUROPA {
     inline bool operator!=(const double o) const;
     inline bool operator!=(const edouble o) const;
 
-    friend int cast_int(const eint e);
+    friend eint::basis_type cast_int(const eint e);
     friend long cast_long(const eint e);
     friend double cast_double(const eint e);
     friend long long int cast_llong(const eint e);
@@ -518,7 +518,7 @@ namespace EUROPA {
 
     inline operator eint() const {return eint((long)m_v);} //is this a good idea?
 
-    friend int cast_int(const edouble e);
+    friend eint::basis_type cast_int(const edouble e);
     friend long cast_long(const edouble e);
     friend double cast_double(const edouble e);
     friend long long int cast_llong(const edouble e);
@@ -590,8 +590,8 @@ namespace EUROPA {
   GEN_FRIEND_COMPARISONS(long long int, edouble);
   GEN_FRIEND_COMPARISONS(long double, edouble);
 
-  inline int cast_int(const eint e) {return static_cast<int>(e.m_v);}
-  inline int cast_int(const edouble e) {return static_cast<int>(e.m_v);}
+  inline eint::basis_type cast_int(const eint e) {return static_cast<eint::basis_type>(e.m_v);}
+  inline eint::basis_type cast_int(const edouble e) {return static_cast<eint::basis_type>(e.m_v);}
   inline long cast_long(const eint e) {return static_cast<long>(e.m_v);}
   inline long cast_long(const edouble e) {return static_cast<long>(e.m_v);}
   inline double cast_double(const eint e) {return static_cast<double>(e.m_v);}

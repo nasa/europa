@@ -2487,14 +2487,14 @@ private:
     ce->propagate(); //propagate the change
 
     //shouldn't be able to merge with anything
-    CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), cast_int(PLUS_INFINITY), true) == 0);
+    CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), std::numeric_limits<unsigned int>::max(), true) == 0);
 
     delete (Constraint *) eq; //remove the constraint
 
     ce->propagate();
 
     // Should now be able to merge
-    CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), cast_int(PLUS_INFINITY), true) > 0);
+    CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), std::numeric_limits<unsigned int>::max(), true) > 0);
 
     DEFAULT_TEARDOWN();
     return true;
