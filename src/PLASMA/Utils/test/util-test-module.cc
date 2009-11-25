@@ -736,7 +736,9 @@ class NumberTest {
 public:
   static bool test() {
     EUROPA_runTest(testEint);
+    EUROPA_runTest(testEintInfinity);
     EUROPA_runTest(testEdouble);
+    EUROPA_runTest(testEdoubleInfinity);
     return true;
   }
 private:
@@ -751,7 +753,6 @@ private:
     CPPUNIT_ASSERT(e == i);
     CPPUNIT_ASSERT((+e) == (+i));
     CPPUNIT_ASSERT((-e) == (-i));
-    CPPUNIT_ASSERT((~e) == (~i));
     CPPUNIT_ASSERT((!e) == (!i));
     CPPUNIT_ASSERT((++e) == (++i));
     CPPUNIT_ASSERT((e++) == (i++));
@@ -764,11 +765,6 @@ private:
     CPPUNIT_ASSERT((e * 2) == (i * 2));
     CPPUNIT_ASSERT((e / 2) == (i / 2));
     CPPUNIT_ASSERT((e % 2) == (i % 2));
-    CPPUNIT_ASSERT((e ^ 2) == (i ^ 2));
-    CPPUNIT_ASSERT((e & 2) == (i & 2));
-    CPPUNIT_ASSERT((e | 2) == (i | 2));
-    CPPUNIT_ASSERT((e << 2) == (i << 2));
-    CPPUNIT_ASSERT((e >> 2) == (i >> 2));
     CPPUNIT_ASSERT((e += 3) == (i += 3));
     CPPUNIT_ASSERT(e == i);
     CPPUNIT_ASSERT((e -= 2) == (i -= 2));
@@ -778,16 +774,6 @@ private:
     CPPUNIT_ASSERT((e /= 2) == (i /= 2));
     CPPUNIT_ASSERT(e == i);
     CPPUNIT_ASSERT((e %= 3) == (i %= 3));
-    CPPUNIT_ASSERT(e == i);
-    CPPUNIT_ASSERT((e ^= 2) == (i ^= 2));
-    CPPUNIT_ASSERT(e == i);
-    CPPUNIT_ASSERT((e &= 2) == (i &= 2));
-    CPPUNIT_ASSERT(e == i);
-    CPPUNIT_ASSERT((e |= 2) == (i |= 2));
-    CPPUNIT_ASSERT(e == i);
-    CPPUNIT_ASSERT((e <<= 2) == (i <<= 2));
-    CPPUNIT_ASSERT(e == i);
-    CPPUNIT_ASSERT((e >>= 2) == (i >>= 2));
     CPPUNIT_ASSERT(e == i);
     e = 50;
     i = 50;
@@ -858,6 +844,39 @@ private:
     CPPUNIT_ASSERT((e > 10.) && (d > 10.));
     CPPUNIT_ASSERT(e != 10.);
 
+    return true;
+  }
+  
+  static bool testEintInfinity() {
+    eint pinf(std::numeric_limits<eint>::infinity());
+    eint minf(std::numeric_limits<eint>::minus_infinity());
+
+    CPPUNIT_ASSERT((minf) == minf);
+    CPPUNIT_ASSERT((minf - 1) == minf);
+    CPPUNIT_ASSERT((minf + 1) == minf + 1);
+    CPPUNIT_ASSERT((pinf + 1) == pinf);
+    CPPUNIT_ASSERT((pinf - 1) == pinf);
+    CPPUNIT_ASSERT((pinf - 1) == pinf - 1);
+    CPPUNIT_ASSERT((pinf + pinf) == pinf);
+    CPPUNIT_ASSERT((pinf - pinf) == 0);
+    CPPUNIT_ASSERT((minf + minf) == minf);
+    CPPUNIT_ASSERT((minf + pinf) == 0);
+    return true;
+  }
+
+  static bool testEdoubleInfinity() {
+    edouble pinf(std::numeric_limits<edouble>::infinity());
+    edouble minf(std::numeric_limits<edouble>::minus_infinity());
+
+    CPPUNIT_ASSERT((minf) == minf);
+    CPPUNIT_ASSERT((minf - 1) == minf);
+    CPPUNIT_ASSERT((minf + 1) == minf + 1);
+    CPPUNIT_ASSERT((pinf + 1) == pinf);
+    CPPUNIT_ASSERT((pinf - 1) == pinf - 1);
+    CPPUNIT_ASSERT((pinf + pinf) == pinf);
+    CPPUNIT_ASSERT((pinf - pinf) == 0);
+    CPPUNIT_ASSERT((minf + minf) == minf);
+    CPPUNIT_ASSERT((minf + pinf) == 0);
     return true;
   }
 };

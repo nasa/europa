@@ -60,6 +60,10 @@ namespace EUROPA {
 
   private:
     static bool testAllocation() {
+      IntervalDomain infTest;
+      CPPUNIT_ASSERT(!infTest.isEmpty());
+
+
       IntervalDomain realDomain(10.2,20.4);
       CPPUNIT_ASSERT(!realDomain.isEmpty());
       CPPUNIT_ASSERT(!realDomain.isFinite());
@@ -96,6 +100,7 @@ namespace EUROPA {
     static bool testRelaxation() {
       ChangeListener l_listener;
       IntervalIntDomain dom0; // Will have very large default range
+      CPPUNIT_ASSERT(!dom0.isEmpty());
       IntervalIntDomain dom1(-100, 100);
       dom1.setListener(l_listener.getId());
       dom1.relax(dom0);
@@ -443,6 +448,9 @@ namespace EUROPA {
       IntervalIntDomain dom1;
       CPPUNIT_ASSERT(dom1.translateNumber(2.8, false) == 2);
       CPPUNIT_ASSERT(dom1.translateNumber(2.8, true) == 3);
+      CPPUNIT_ASSERT(dom1.translateNumber(PLUS_INFINITY - 0.2, false) == PLUS_INFINITY);
+      CPPUNIT_ASSERT(dom1.translateNumber(PLUS_INFINITY - 0.2, true) == PLUS_INFINITY);
+      CPPUNIT_ASSERT(dom1.translateNumber(PLUS_INFINITY - 0.2, false) == (PLUS_INFINITY - 1));
       CPPUNIT_ASSERT(dom1.translateNumber(PLUS_INFINITY - 0.2, false) == PLUS_INFINITY - 1);
       return(true);
     }
@@ -1241,7 +1249,9 @@ namespace EUROPA {
       CPPUNIT_ASSERT(!dom0.areBoundsFinite());
       IntervalDomain dom1(0, PLUS_INFINITY);
       CPPUNIT_ASSERT(!dom1.areBoundsFinite());
-      IntervalDomain dom2(0, PLUS_INFINITY-1);
+      //have to change this test, because the definition of infinity has changed
+//       IntervalDomain dom2(0, PLUS_INFINITY-1);
+      IntervalDomain dom2(0, MAX_INT);
       CPPUNIT_ASSERT(dom2.areBoundsFinite());
       NumericDomain dom3;
       CPPUNIT_ASSERT(!dom3.areBoundsFinite());
@@ -1702,7 +1712,9 @@ namespace EUROPA {
       copy = iiDom.copy();
       CPPUNIT_ASSERT(copy != 0);
       CPPUNIT_ASSERT(*copy == iiDom && copy != &iiDom);
-      iiDom = IntervalIntDomain(-2, PLUS_INFINITY-1);
+      //have to change the definition of this test because PLUS_INFINITY has changed
+//       iiDom = IntervalIntDomain(-2, PLUS_INFINITY-1);
+      iiDom = IntervalIntDomain(-2, MAX_INT);
       CPPUNIT_ASSERT(*copy != iiDom);
       delete copy;
 

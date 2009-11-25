@@ -42,5 +42,5 @@ namespace EUROPA {
   DEFINE_GLOBAL_CONST(eint, g_maxInt, std::numeric_limits<eint>::max());
   DEFINE_GLOBAL_CONST(eint, g_infiniteTime, std::numeric_limits<eint>::infinity());
   DEFINE_GLOBAL_CONST(eint, g_noTime, 0);
-  DEFINE_GLOBAL_CONST(double, g_epsilon, std::numeric_limits<edouble>::epsilon());
+  DEFINE_GLOBAL_CONST(double, g_epsilon, cast_double(std::numeric_limits<edouble>::epsilon()));
 }

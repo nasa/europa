@@ -1,5 +1,6 @@
 #ifndef _H_Number
 #define _H_Number
+#include <iomanip>
 
 #include <cmath>
 #include <ostream>
@@ -65,14 +66,15 @@ namespace std {
     static const bool tinyness_before = false;
     static const float_round_style round_style = round_toward_zero;
 
-    static EUROPA::eint min() throw();
-    static EUROPA::eint max() throw();
-    static EUROPA::eint epsilon() throw();
-    static EUROPA::eint round_error() throw();
-    static EUROPA::eint infinity() throw();
-    static EUROPA::eint quiet_NaN() throw();
-    static EUROPA::eint signaling_NaN() throw();
-    static EUROPA::eint denorm_min() throw();
+    inline static EUROPA::eint min() throw();
+    inline static EUROPA::eint max() throw();
+    inline static EUROPA::eint epsilon() throw();
+    inline static EUROPA::eint round_error() throw();
+    inline static EUROPA::eint infinity() throw();
+    inline static EUROPA::eint minus_infinity() throw();
+    inline static EUROPA::eint quiet_NaN() throw();
+    inline static EUROPA::eint signaling_NaN() throw();
+    inline static EUROPA::eint denorm_min() throw();
   };
 
   template<>
@@ -108,14 +110,15 @@ namespace std {
     static const bool tinyness_before = numeric_limits<double>::tinyness_before;
     static const float_round_style round_style = round_to_nearest;
 
-    static EUROPA::edouble min() throw();
-    static EUROPA::edouble max() throw();
-    static EUROPA::edouble epsilon() throw();
-    static EUROPA::edouble round_error() throw();
-    static EUROPA::edouble infinity() throw();
-    static EUROPA::edouble quiet_NaN() throw();
-    static EUROPA::edouble signaling_NaN() throw();
-    static EUROPA::edouble denorm_min() throw();
+    inline static EUROPA::edouble min() throw();
+    inline static EUROPA::edouble max() throw();
+    inline static EUROPA::edouble epsilon() throw();
+    inline static EUROPA::edouble round_error() throw();
+    inline static EUROPA::edouble infinity() throw();
+    inline static EUROPA::edouble minus_infinity() throw();
+    inline static EUROPA::edouble quiet_NaN() throw();
+    inline static EUROPA::edouble signaling_NaN() throw();
+    inline static EUROPA::edouble denorm_min() throw();
   };
 
   inline EUROPA::edouble abs(const EUROPA::edouble d);
@@ -124,20 +127,154 @@ namespace std {
   inline EUROPA::edouble sin(const EUROPA::edouble d);
   inline EUROPA::edouble ceil(const EUROPA::edouble d);
   inline EUROPA::edouble floor(const EUROPA::edouble d);
+
 }
 
 
 
 namespace EUROPA {
 
-#ifdef OVERFLOW_CHECK
-  template<typename T>
-  bool add_over(const T x, const T y) {return (std::numeric_limits<T>::infinity() - x < y;}
-#else
-#endif
-
   class edouble;
 
+#define handle_inf_unary(type, v) {                             \
+  if(v >= std::numeric_limits<type>::infinity())                \
+    return std::numeric_limits<type>::infinity();               \
+  else if(v <= std::numeric_limits<type>::minus_infinity())     \
+    return std::numeric_limits<type>::minus_infinity();         \
+}
+
+#define handle_inf_add(type, v1, v2) {                          \
+  if(((type::basis_type) v1) >= std::numeric_limits<type>::infinity()) {             \
+    if(((type::basis_type) v2) > std::numeric_limits<type>::minus_infinity())        \
+      return std::numeric_limits<type>::infinity();             \
+        }                                                       \
+  else if(((type::basis_type) v1) <= std::numeric_limits<type>::minus_infinity()) {  \
+    if(((type::basis_type) v2) < std::numeric_limits<type>::infinity())              \
+      return std::numeric_limits<type>::minus_infinity();       \
+  }                                                             \
+  if(((type::basis_type) v2) >= std::numeric_limits<type>::infinity()) {             \
+    if(((type::basis_type) v1) > std::numeric_limits<type>::minus_infinity())        \
+      return std::numeric_limits<type>::infinity();             \
+  }                                                             \
+  else if(((type::basis_type) v2) <= std::numeric_limits<type>::minus_infinity()) {  \
+    if(((type::basis_type) v1) < std::numeric_limits<type>::infinity())              \
+      return std::numeric_limits<type>::minus_infinity();       \
+  }                                                             \
+}
+
+#define handle_inf_sub(type, v1, v2) {                          \
+  if(((type::basis_type) v1) >= std::numeric_limits<type>::infinity()) {             \
+    if(((type::basis_type) v2) < std::numeric_limits<type>::infinity())              \
+      return std::numeric_limits<type>::infinity();             \
+  }                                                             \
+  else if(((type::basis_type) v1) <= std::numeric_limits<type>::minus_infinity()) {  \
+    if(((type::basis_type) v2) > std::numeric_limits<type>::minus_infinity())        \
+      return std::numeric_limits<type>::minus_infinity();       \
+  }                                                             \
+  if(((type::basis_type) v2) >= std::numeric_limits<type>::infinity()) {             \
+    if(((type::basis_type) v1) < std::numeric_limits<type>::infinity())              \
+      return std::numeric_limits<type>::minus_infinity();       \
+  }                                                             \
+  else if(((type::basis_type) v2) <= std::numeric_limits<type>::minus_infinity()) {  \
+    if(((type::basis_type) v1) > std::numeric_limits<type>::minus_infinity())        \
+      return std::numeric_limits<type>::infinity();             \
+  }                                                             \
+}
+
+#define handle_inf_mul(type, v1, v2) {                          \
+  if(((type::basis_type) v1) >= std::numeric_limits<type>::infinity()) {             \
+    if(((type::basis_type) v2) > 0)                                                  \
+      return std::numeric_limits<type>::infinity();             \
+    else if(((type::basis_type) v2) < 0)                                             \
+      return std::numeric_limits<type>::minus_infinity();       \
+  }                                                             \
+  else if(((type::basis_type) v1) <= std::numeric_limits<type>::minus_infinity()) {  \
+    if(((type::basis_type) v2) > 0)                                                  \
+      return std::numeric_limits<type>::minus_infinity();       \
+    else if(((type::basis_type) v2) < 0)                                             \
+      return std::numeric_limits<type>::infinity();             \
+  }                                                             \
+  if(((type::basis_type) v2) >= std::numeric_limits<type>::infinity()) {             \
+    if(((type::basis_type) v1) > 0)                                                  \
+      return std::numeric_limits<type>::infinity();             \
+    else if(((type::basis_type) v1) < 0)                                             \
+      return std::numeric_limits<type>::minus_infinity();       \
+  }                                                             \
+  else if(((type::basis_type) v2) <= std::numeric_limits<type>::minus_infinity()) {  \
+    if(((type::basis_type) v1) > 0)                                                  \
+      return std::numeric_limits<type>::minus_infinity();       \
+    else if(((type::basis_type) v1) < 0)                                             \
+      return std::numeric_limits<type>::infinity();             \
+  }                                                             \
+}
+
+#define handle_inf_div(type, v1, v2) {                                  \
+  if(((type::basis_type) v1) >= std::numeric_limits<type>::infinity()) {                     \
+    if(((type::basis_type) v2) > 0 && ((type::basis_type) v2) < std::numeric_limits<type>::infinity())            \
+      return std::numeric_limits<type>::infinity();                     \
+    else if(((type::basis_type) v2) < 0 && ((type::basis_type) v2) > std::numeric_limits<type>::minus_infinity()) \
+      return std::numeric_limits<type>::minus_infinity();               \
+  }                                                                     \
+  else if(((type::basis_type) v1) <= std::numeric_limits<type>::minus_infinity()) {          \
+    if(((type::basis_type) v2) > 0 && ((type::basis_type) v2) < std::numeric_limits<type>::infinity())            \
+      return std::numeric_limits<type>::minus_infinity();               \
+    else if(((type::basis_type) v2) < 0 && ((type::basis_type) v2) > std::numeric_limits<type>::minus_infinity()) \
+      return std::numeric_limits<type>::infinity();                     \
+  }                                                                     \
+  else if(((type::basis_type) v2) >= std::numeric_limits<type>::infinity() || ((type::basis_type) v2) <= std::numeric_limits<type>::minus_infinity()) { \
+    if(((type::basis_type) v1) < std::numeric_limits<type>::infinity() && ((type::basis_type) v1) > std::numeric_limits<type>::minus_infinity()) \
+      return type(0, true);                                             \
+  }                                                                     \
+}
+
+#define handle_inf_mod(type, v1, v2) {                                  \
+  if(((type::basis_type) v1) >= std::numeric_limits<type>::infinity() || ((type::basis_type) v1) <= std::numeric_limits<type>::minus_infinity()) \
+    return type(0, true);                                               \
+  else if(((type::basis_type) v2) == std::numeric_limits<type>::infinity())                  \
+    return type(((type::basis_type) v1), true);                                              \
+  else if(((type::basis_type) v2) == std::numeric_limits<type>::minus_infinity())            \
+    return type(-((type::basis_type) v1), true);                                             \
+}
+
+  /**
+   * For the moment, doing overflow checking by up-promoting.  There are other ways to achieve this that might be more performant.
+   */
+#ifndef NO_OVERFLOW_CHECKING
+#define op(type, a, x, b) {                     \
+    double temp = ((double)(a)) x (b);    \
+  handle_inf_unary(type, temp);                 \
+  return type((type::basis_type)temp, true);         \
+}
+#else
+#define op(type, a, x, b) return (a) x (b)
+#endif
+
+  //it feels a bit dirty doing this this way.  I don't want to make this code un-readable because of all the macros, but I also
+  //don't want to make it un-readiable because of all the repetition
+#define GEN_COMPARISONS(type)                                   \
+  inline bool operator<(const type o) {return m_v < o;}         \
+  inline bool operator<=(const type o) {return m_v <= o;}       \
+  inline bool operator==(const type o) {return m_v == o;}       \
+  inline bool operator>=(const type o) {return m_v >= o;}       \
+  inline bool operator>(const type o) {return m_v > o;}       \
+  inline bool operator!=(const type o) {return m_v != o;}
+
+#define DECL_FRIEND_COMPARISONS(type1, type2)           \
+  friend bool operator<(const type1 o, const type2 e);  \
+  friend bool operator<=(const type1 o, const type2 e); \
+  friend bool operator==(const type1 o, const type2 e); \
+  friend bool operator>=(const type1 o, const type2 e); \
+  friend bool operator>(const type1 o, const type2 e); \
+  friend bool operator!=(const type1 o, const type2 e);
+
+#define GEN_FRIEND_COMPARISONS(type1, type2)                            \
+  inline bool operator<(const type1 o, const type2 e) {return o < e.m_v;} \
+  inline bool operator<=(const type1 o, const type2 e) {return o <= e.m_v;} \
+  inline bool operator==(const type1 o, const type2 e) {return o == e.m_v;} \
+  inline bool operator>=(const type1 o, const type2 e) {return o >= e.m_v;} \
+  inline bool operator>(const type1 o, const type2 e) {return o > e.m_v;} \
+  inline bool operator!=(const type1 o, const type2 e) {return o != e.m_v;}
+  
   /**
    * Rationale:
    *
@@ -165,80 +302,86 @@ namespace EUROPA {
 
   class eint {
   public:
-    eint(const int v) : m_v(v) {}
-    eint(const long v) : m_v(v) {}
-    eint(const unsigned int v) : m_v((long)v) {}
-    eint(const unsigned long v) : m_v((long)v) {}
+    typedef long basis_type;
+
+    eint(const int v) : m_v(v) {
+      if(m_v > std::numeric_limits<eint>::infinity())
+        m_v = cast_int(std::numeric_limits<eint>::infinity());
+      else if(m_v < std::numeric_limits<eint>::minus_infinity())
+        m_v = cast_int(std::numeric_limits<eint>::minus_infinity());
+    }
+    eint(const long v) : m_v(v) { //this should maybe warn of loss of precision on 64-bit platforms?
+      if(m_v > std::numeric_limits<eint>::infinity())
+        m_v = cast_int(std::numeric_limits<eint>::infinity());
+      else if(m_v < std::numeric_limits<eint>::minus_infinity())
+        m_v = cast_int(std::numeric_limits<eint>::minus_infinity());
+
+    } 
+    eint(const unsigned int v) : m_v((long)v) {
+      if(m_v > std::numeric_limits<eint>::infinity())
+        m_v = cast_int(std::numeric_limits<eint>::infinity());
+      else if(m_v < std::numeric_limits<eint>::minus_infinity())
+        m_v = cast_int(std::numeric_limits<eint>::minus_infinity());
+    }
+    eint(const unsigned long v) : m_v((long)v) {
+      if(m_v > std::numeric_limits<eint>::infinity())
+        m_v = cast_int(std::numeric_limits<eint>::infinity());
+      else if(m_v < std::numeric_limits<eint>::minus_infinity())
+        m_v = cast_int(std::numeric_limits<eint>::minus_infinity());
+    }
 
     eint() : m_v(0) {}
-    inline eint operator+() const {return eint(+m_v);}
-    inline eint operator-() const {return eint(-m_v);}
-    inline eint operator~() const {return eint(~m_v);}
+    inline eint operator+() const {return eint(+m_v, true);}
+    inline eint operator-() const {return eint(-m_v, true);}
     inline bool operator!() const {return !m_v;}
-    inline eint operator++() {return eint(++m_v);}
-    inline eint operator++(int) {return eint(m_v++);}
-    inline eint operator--() {return eint(--m_v);}
-    inline eint operator--(int) {return eint(m_v--);}
-    inline eint operator+(const int o) const {return eint(m_v + o);}
-    inline eint operator+(const eint o) const {return eint(m_v + o.m_v);}
-    inline eint operator-(const int o) const {return eint(m_v - o);}
-    inline eint operator-(const eint o) const {return eint(m_v - o.m_v);}
-    inline eint operator*(const int o) const {return eint(m_v * o);}
-    inline eint operator*(const eint o) const {return eint(m_v * o.m_v);}
-    inline eint operator/(const int o) const {return eint(m_v / o);}
-    inline eint operator/(const eint o) const {return eint(m_v / o.m_v);}
-    inline eint operator%(const int o) const {return eint(m_v % o);}
-    inline eint operator%(const eint o) const {return eint(m_v % o.m_v);}
-    inline eint operator^(const int o) const {return eint(m_v ^ o);}
-    inline eint operator^(const eint o) const {return eint(m_v ^ o.m_v);}
-    inline eint operator&(const int o) const {return eint(m_v & o);}
-    inline eint operator&(const eint o) const {return eint(m_v & o.m_v);}
-    inline eint operator|(const int o) const {return eint(m_v | o);}
-    inline eint operator|(const eint o) const {return eint(m_v | o.m_v);}
-    inline eint operator<<(const int o) const {return eint(m_v << o);}
-    inline eint operator<<(const eint o) const {return eint(m_v << o.m_v);}
-    inline eint operator>>(const int o) const {return eint(m_v >> o);}
-    inline eint operator>>(const eint o) const {return eint(m_v >> o.m_v);}
-    inline eint operator+=(const int o) {return eint(m_v += o);}
-    inline eint operator+=(const eint o) {return eint(m_v += o.m_v);}
-    inline eint operator-=(const int o) {return eint(m_v -= o);}
-    inline eint operator-=(const eint o) {return eint(m_v -= o.m_v);}
-    inline eint operator*=(const int o) {return eint(m_v *= o);}
-    inline eint operator*=(const eint o) {return eint(m_v *= o.m_v);}
-    inline eint operator/=(const int o) {return eint(m_v /= o);}
-    inline eint operator/=(const eint o) {return eint(m_v /= o.m_v);}
-    inline eint operator%=(const eint o) {return eint(m_v %= o.m_v);}
-    inline eint operator%=(const int o) {return eint(m_v %= o);}
-    inline eint operator^=(const eint o) {return eint(m_v ^= o.m_v);}
-    inline eint operator^=(const int o) {return eint(m_v ^= o);}
-    inline eint operator&=(const int o) {return eint(m_v &= o);}
-    inline eint operator&=(const eint o) {return eint(m_v &= o.m_v);}
-    inline eint operator|=(const int o) {return eint(m_v |= o);}
-    inline eint operator|=(const eint o) {return eint(m_v |= o.m_v);}
-    inline eint operator<<=(const int o) {return eint(m_v <<= o);}
-    inline eint operator<<=(const eint o) {return eint(m_v <<= o.m_v);}
-    inline eint operator>>=(const int o) {return eint(m_v >>= o);}
-    inline eint operator>>=(const eint o) {return eint(m_v >>= o.m_v);}
-    inline bool operator<(const int o) const {return m_v < o;}
+    inline eint operator++() {handle_inf_unary(eint, m_v); return eint(++m_v, true);}
+    inline eint operator++(int) {handle_inf_unary(eint, m_v); return eint(m_v++, true);}
+    inline eint operator--() {handle_inf_unary(eint, m_v); return eint(--m_v, true);}
+    inline eint operator--(int) {handle_inf_unary(eint, m_v); return eint(m_v--, true);}
+    inline eint operator+(const basis_type o) const {handle_inf_add(eint, m_v, o); op(eint, m_v, +, o);}
+    inline eint operator+(const eint o) const {return operator+(o.m_v);}
+    inline eint operator-(const basis_type o) const {handle_inf_sub(eint, m_v, o); op(eint, m_v, -, o);}
+    inline eint operator-(const eint o) const {return operator-(o.m_v);}
+    inline eint operator*(const basis_type o) const {handle_inf_mul(eint, m_v, o); op(eint, m_v, *, o);}
+    inline eint operator*(const eint o) const {return operator*(o.m_v);}
+    inline eint operator/(const basis_type o) const {handle_inf_div(eint, m_v, o); op(eint, m_v, /, o);}
+    inline eint operator/(const eint o) const {return operator/(o.m_v);}
+
+    //have to special-case this, since % isn't defined on doubles
+    inline eint operator%(const basis_type o) const {
+      handle_inf_mod(eint, m_v, o);
+      return eint(m_v % o, true);
+    }
+    inline eint operator%(const eint o) const {return operator%(o.m_v);}
+
+    //these could be optimized, unless the g++ optimizer is pretty smart
+    inline eint operator+=(const basis_type o) {(*this) = operator+(o); return eint(m_v, true);}
+    inline eint operator+=(const eint o) {(*this) = operator+(o); return eint(m_v, true);}
+    inline eint operator-=(const basis_type o) {(*this) = operator-(o); return eint(m_v, true);}
+    inline eint operator-=(const eint o) {(*this) = operator-(o); return eint(m_v, true);}
+    inline eint operator*=(const basis_type o) {(*this) = operator*(o); return eint(m_v, true);}
+    inline eint operator*=(const eint o) {(*this) = operator*(o); return eint(m_v, true);}
+    inline eint operator/=(const basis_type o) {(*this) = operator/(o); return eint(m_v, true);}
+    inline eint operator/=(const eint o) {(*this) = operator/(o); return eint(m_v, true);}
+    inline eint operator%=(const eint o) {(*this) = operator%(o); return eint(m_v, true);}
+    inline eint operator%=(const basis_type o) {(*this) = operator%(o); return eint(m_v, true);}
+
+    GEN_COMPARISONS(int);
+    GEN_COMPARISONS(long);
+    GEN_COMPARISONS(long long int);
+    GEN_COMPARISONS(double);
+    GEN_COMPARISONS(long double);
+
     inline bool operator<(const eint o) const {return m_v < o.m_v;}
-    inline bool operator<=(const int o) const {return m_v <= o;}
     inline bool operator<=(const eint o) const {return m_v <= o.m_v;}
-    inline bool operator==(const int o) const {return m_v == o;}
     inline bool operator==(const eint o) const {return m_v == o.m_v;}
-    inline bool operator>=(const int o) const {return m_v >= o;}
     inline bool operator>=(const eint o) const {return m_v >= o.m_v;}
-    inline bool operator>(const int o) const {return m_v > o;}
     inline bool operator>(const eint o) const {return m_v > o.m_v;}
-    inline bool operator!=(const int o) const {return m_v != o;}
     inline bool operator!=(const eint o) const {return m_v != o.m_v;}
 
-    inline edouble operator+(const double o) const;
     inline edouble operator+(const edouble o) const;
-    inline edouble operator-(const double o) const;
     inline edouble operator-(const edouble o) const;
-    inline edouble operator*(const double o) const;
     inline edouble operator*(const edouble o) const;
-    inline edouble operator/(const double o) const;
     inline edouble operator/(const edouble o) const;
     inline bool operator<(const double o) const;
     inline bool operator<(const edouble o) const;
@@ -253,39 +396,35 @@ namespace EUROPA {
     inline bool operator!=(const double o) const;
     inline bool operator!=(const edouble o) const;
 
-    friend double cast_double(const eint e);
     friend int cast_int(const eint e);
     friend long cast_long(const eint e);
-  private:
+    friend double cast_double(const eint e);
+    friend long long int cast_llong(const eint e);
+    friend long double cast_ldouble(const eint e);
 
+  private:
+    
     friend class edouble;
+    friend class std::numeric_limits<eint>;
   
+    /**
+     * Private constructors that don't do infinity checking
+     */
+    eint(const int v, bool) : m_v(v) {}
+    eint(const unsigned int v, bool) : m_v(v) {}
+    eint(const long v, bool) : m_v(v) {}
+    eint(const unsigned long v, bool) : m_v(v) {}
+
     friend eint operator+(const long o, const eint e);
     friend eint operator-(const long o, const eint e);
     friend eint operator*(const long o, const eint e);
     friend eint operator/(const long o, const eint e);
     friend eint operator%(const long o, const eint e);
-    friend eint operator^(const long o, const eint e);
-    friend eint operator&(const long o, const eint e);
-    friend eint operator|(const long o, const eint e);
-    friend eint operator<<(const long o, const eint e);
-    friend eint operator>>(const long o, const eint e);
-//     friend eint operator+=(const long o, const eint e);
-//     friend eint operator-=(const long o, const eint e);
-//     friend eint operator*=(const long o, const eint e);
-//     friend eint operator/=(const long o, const eint e);
-//     friend eint operator%=(const long o, const eint e);
-//     friend eint operator^=(const long o, const eint e);
-//     friend eint operator&=(const long o, const eint e);
-//     friend eint operator|=(const long o, const eint e);
-//     friend eint operator<<=(const long o, const eint e);
-//     friend eint operator>>=(const long o, const eint e);
-    friend bool operator<(const long o, const eint e);
-    friend bool operator<=(const long o, const eint e);
-    friend bool operator==(const long o, const eint e);
-    friend bool operator>=(const long o, const eint e);
-    friend bool operator>(const long o, const eint e);
-    friend bool operator!=(const long o, const eint e);
+    DECL_FRIEND_COMPARISONS(int, eint);
+    DECL_FRIEND_COMPARISONS(long, eint);
+    DECL_FRIEND_COMPARISONS(long long int, eint);
+    DECL_FRIEND_COMPARISONS(double, eint);
+    DECL_FRIEND_COMPARISONS(long double, eint);
     friend std::ostream& operator<<(std::ostream& o, const eint e);
 
     friend edouble std::pow(const EUROPA::edouble d, const eint i);
@@ -293,58 +432,89 @@ namespace EUROPA {
     long m_v;
   };
 
-  inline eint operator+(const long o, const eint e) {return eint(o + e.m_v);}
-  inline eint operator-(const long o, const eint e) {return eint(o - e.m_v);}
-  inline eint operator*(const long o, const eint e) {return eint(o * e.m_v);}
-  inline eint operator/(const long o, const eint e) {return eint(o / e.m_v);}
-  inline eint operator%(const long o, const eint e) {return eint(o % e.m_v);}
-  inline eint operator^(const long o, const eint e) {return eint(o ^ e.m_v);}
-  inline eint operator&(const long o, const eint e) {return eint(o & e.m_v);}
-  inline eint operator|(const long o, const eint e) {return eint(o | e.m_v);}
-  inline eint operator<<(const long o, const eint e) {return eint(o << e.m_v);}
-  inline eint operator>>(const long o, const eint e) {return eint(o >> e.m_v);}
-  inline bool operator<(const long o, const eint e) {return o < e.m_v;}
-  inline bool operator<=(const long o, const eint e) {return o <= e.m_v;}
-  inline bool operator==(const long o, const eint e) {return o == e.m_v;}
-  inline bool operator>=(const long o, const eint e) {return o >= e.m_v;}
-  inline bool operator>(const long o, const eint e) {return o > e.m_v;}
-  inline bool operator!=(const long o, const eint e) {return o != e.m_v;}
+  inline eint operator+(const long o, const eint e) {handle_inf_add(eint, o, e.m_v); op(eint, o, +, e.m_v);}
+  inline eint operator-(const long o, const eint e) {handle_inf_sub(eint, o, e.m_v); op(eint, o, -, e.m_v);}
+  inline eint operator*(const long o, const eint e) {handle_inf_mul(eint, o, e.m_v); op(eint, o, *, e.m_v);}
+  inline eint operator/(const long o, const eint e) {handle_inf_div(eint, o, e.m_v); op(eint, o, /, e.m_v);}
+  inline eint operator%(const long o, const eint e) {
+    handle_inf_mod(eint, o, e.m_v);
+    return eint(o % e.m_v, true);
+  }
+  GEN_FRIEND_COMPARISONS(int, eint);
+  GEN_FRIEND_COMPARISONS(long, eint);
+  GEN_FRIEND_COMPARISONS(long long int, eint);
+  GEN_FRIEND_COMPARISONS(double, eint);
+  GEN_FRIEND_COMPARISONS(long double, eint);
   inline std::ostream& operator<<(std::ostream& o, const eint e) {return(o << e.m_v);}
 
   class edouble {
   public:
-    edouble(const eint v) : m_v(v.m_v) {}
-    edouble(const double v) : m_v(v) {}
+    typedef double basis_type;
+
+    edouble(const eint v) : m_v(v.m_v) {} //don't have to check infinities with eints
+    edouble(const double v) : m_v(v) {
+      if(m_v > std::numeric_limits<edouble>::infinity())
+        m_v = cast_double(std::numeric_limits<edouble>::infinity());
+      else if(m_v < std::numeric_limits<edouble>::minus_infinity())
+        m_v = cast_double(std::numeric_limits<edouble>::minus_infinity());
+    }
     edouble() : m_v(0.0) {}
-    inline edouble operator+() const {return edouble(+m_v);}
-    inline edouble operator-() const {return edouble(-m_v);}
+    inline edouble operator+() const {return edouble(+m_v, true);}
+    inline edouble operator-() const {return edouble(-m_v, true);}
     inline bool operator!() const {return !m_v;}
-    inline edouble operator++() {return edouble(++m_v);}
-    inline edouble operator++(int) {return edouble(m_v++);}
-    inline edouble operator--() {return edouble(--m_v);}
-    inline edouble operator--(int) {return edouble(m_v--);}
-    inline edouble operator+(const edouble o) const {return edouble(m_v + o.m_v);}
-    inline edouble operator-(const edouble o) const {return edouble(m_v - o.m_v);}
-    inline edouble operator*(const edouble o) const {return edouble(m_v * o.m_v);}
-    inline edouble operator/(const edouble o) const {return edouble(m_v / o.m_v);}
-    inline edouble operator+=(const edouble o) {return edouble(m_v += o.m_v);}
-    inline edouble operator-=(const edouble o) {return edouble(m_v -= o.m_v);}
-    inline edouble operator*=(const edouble o) {return edouble(m_v *= o.m_v);}
-    inline edouble operator/=(const edouble o) {return edouble(m_v /= o.m_v);}
+    inline edouble operator++() {handle_inf_unary(edouble, m_v); return edouble(++m_v, true);}
+    inline edouble operator++(int) {handle_inf_unary(edouble, m_v); return edouble(m_v++, true);}
+    inline edouble operator--() {handle_inf_unary(edouble, m_v); return edouble(--m_v, true);}
+    inline edouble operator--(int) {handle_inf_unary(edouble, m_v); return edouble(m_v--, true);}
+    inline edouble operator+(const edouble o) const {handle_inf_add(edouble, m_v, o.m_v); op(edouble, m_v, +, o.m_v);}
+    inline edouble operator-(const edouble o) const {handle_inf_sub(edouble, m_v, o.m_v); op(edouble, m_v, -, o.m_v);}
+    inline edouble operator*(const edouble o) const {handle_inf_mul(edouble, m_v, o.m_v); op(edouble, m_v, *, o.m_v);}
+    inline edouble operator/(const edouble o) const {handle_inf_div(edouble, m_v, o.m_v); op(edouble, m_v, /, o.m_v);}
+    inline edouble operator+=(const edouble o) {(*this) = operator+(o); return edouble(m_v, true);}
+    inline edouble operator-=(const edouble o) {(*this) = operator-(o); return edouble(m_v, true);}
+    inline edouble operator*=(const edouble o) {(*this) = operator*(o); return edouble(m_v, true);}
+    inline edouble operator/=(const edouble o) {(*this) = operator/(o); return edouble(m_v, true);}
+
     inline bool operator<(const edouble o) const {return m_v < o.m_v;}
     inline bool operator<=(const edouble o) const {return m_v <= o.m_v;}
     inline bool operator==(const edouble o) const {return m_v == o.m_v;}
     inline bool operator>=(const edouble o) const {return m_v >= o.m_v;}
     inline bool operator>(const edouble o) const {return m_v > o.m_v;}
     inline bool operator!=(const edouble o) const {return m_v != o.m_v;}
-    inline operator eint() const {return eint((long)m_v);}
+    
+    GEN_COMPARISONS(double);
+    GEN_COMPARISONS(long);
+    GEN_COMPARISONS(int);
+    GEN_COMPARISONS(unsigned int);
+    GEN_COMPARISONS(long long int);
+    GEN_COMPARISONS(long double);
+
+    inline operator eint() const {return eint((long)m_v);} //is this a good idea?
 
     friend int cast_int(const edouble e);
     friend long cast_long(const edouble e);
     friend double cast_double(const edouble e);
+    friend long long int cast_llong(const edouble e);
+    friend long double cast_ldouble(const edouble e);
   private:
     friend class eint;
     friend class __gnu_cxx::hash<edouble>;
+    friend class std::numeric_limits<edouble>;
+
+    //private version that doesn't do infinity checking
+    edouble(const double v, bool) : m_v(v) {}
+
+
+    friend edouble operator+(const double o, const edouble e);
+    friend edouble operator-(const double o, const edouble e);
+    friend edouble operator*(const double o, const edouble e);
+    friend edouble operator/(const double o, const edouble e);
+    friend edouble operator%(const double o, const edouble e);
+
+    DECL_FRIEND_COMPARISONS(double, edouble);
+    DECL_FRIEND_COMPARISONS(unsigned int, edouble);
+    DECL_FRIEND_COMPARISONS(long long int, edouble);
+    DECL_FRIEND_COMPARISONS(long double, edouble);
 
     friend edouble std::abs(const edouble d);
     friend edouble std::sqrt(const edouble d);
@@ -359,10 +529,10 @@ namespace EUROPA {
     double m_v;
   };
 
-  edouble eint::operator+(const edouble o) const {return edouble(((double)m_v) + o.m_v);}
-  edouble eint::operator-(const edouble o) const {return edouble(((double)m_v) - o.m_v);}
-  edouble eint::operator*(const edouble o) const {return edouble(((double)m_v) * o.m_v);}
-  edouble eint::operator/(const edouble o) const {return edouble(((double)m_v) / o.m_v);}
+  edouble eint::operator+(const edouble o) const {handle_inf_add(edouble, m_v, o.m_v); op(edouble, (double)m_v, +, o.m_v);}
+  edouble eint::operator-(const edouble o) const {handle_inf_sub(edouble, m_v, o.m_v); op(edouble, (double)m_v, -, o.m_v);}
+  edouble eint::operator*(const edouble o) const {handle_inf_mul(edouble, m_v, o.m_v); op(edouble, (double)m_v, *, o.m_v);}
+  edouble eint::operator/(const edouble o) const {handle_inf_div(edouble, m_v, o.m_v); op(edouble, (double)m_v, /, o.m_v);}
   bool eint::operator<(const edouble o) const {return m_v < o.m_v;}
   bool eint::operator<=(const edouble o) const {return m_v <= o.m_v;}
   bool eint::operator==(const edouble o) const {return m_v == o.m_v;}
@@ -370,10 +540,6 @@ namespace EUROPA {
   bool eint::operator>(const edouble o) const {return m_v > o.m_v;}
   bool eint::operator!=(const edouble o) const {return m_v != o.m_v;}
 
-  edouble eint::operator+(const double o) const {return edouble(((double)m_v) + o);}
-  edouble eint::operator-(const double o) const {return edouble(((double)m_v) - o);}
-  edouble eint::operator*(const double o) const {return edouble(((double)m_v) * o);}
-  edouble eint::operator/(const double o) const {return edouble(((double)m_v) / o);}
   bool eint::operator<(const double o) const {return m_v < o;}
   bool eint::operator<=(const double o) const {return m_v <= o;}
   bool eint::operator==(const double o) const {return m_v == o;}
@@ -381,43 +547,74 @@ namespace EUROPA {
   bool eint::operator>(const double o) const {return m_v > o;}
   bool eint::operator!=(const double o) const {return m_v != o;}
 
+  inline edouble operator+(const double o, const edouble e) {handle_inf_add(edouble, o, e.m_v); op(edouble, o, +, e.m_v);}
+  inline edouble operator-(const double o, const edouble e) {handle_inf_sub(edouble, o, e.m_v); op(edouble, o, -, e.m_v);}
+  inline edouble operator*(const double o, const edouble e) {handle_inf_mul(edouble, o, e.m_v); op(edouble, o, *, e.m_v);}
+  inline edouble operator/(const double o, const edouble e) {handle_inf_div(edouble, o, e.m_v); op(edouble, o, /, e.m_v);}
+  GEN_FRIEND_COMPARISONS(double, edouble);
+  GEN_FRIEND_COMPARISONS(unsigned int, edouble);
+  GEN_FRIEND_COMPARISONS(long long int, edouble);
+  GEN_FRIEND_COMPARISONS(long double, edouble);
+
   inline int cast_int(const eint e) {return static_cast<int>(e.m_v);}
   inline int cast_int(const edouble e) {return static_cast<int>(e.m_v);}
   inline long cast_long(const eint e) {return static_cast<long>(e.m_v);}
   inline long cast_long(const edouble e) {return static_cast<long>(e.m_v);}
   inline double cast_double(const eint e) {return static_cast<double>(e.m_v);}
   inline double cast_double(const edouble e) {return e.m_v;}
+  inline long long int cast_llong(const eint e) {return static_cast<long long int>(e.m_v);}
+  inline long long int cast_llong(const edouble e) {return static_cast<long long int>(e.m_v);}
+  inline long double cast_ldouble(const eint e) {return static_cast<long double>(e.m_v);}
+  inline long double cast_ldouble(const edouble e) {return static_cast<long double>(e.m_v);}
 
   inline std::ostream& operator<<(std::ostream& o, const edouble e) {return(o << e.m_v);}
+
 }
 
 namespace std {
-  EUROPA::eint numeric_limits<EUROPA::eint>::infinity() throw()
-  {return std::min((long) pow((double)2, 51) - 1 + pow((double)2, 51), numeric_limits<long>::max());}
-  EUROPA::eint numeric_limits<EUROPA::eint>::max() throw() {return infinity() - 1;}
-  EUROPA::eint numeric_limits<EUROPA::eint>::min() throw() {return -max();}
-  EUROPA::eint numeric_limits<EUROPA::eint>::epsilon() throw() {return 0;}
-  EUROPA::eint numeric_limits<EUROPA::eint>::round_error() throw() {return 0;}
-  EUROPA::eint numeric_limits<EUROPA::eint>::quiet_NaN() throw() {return 0;}
-  EUROPA::eint numeric_limits<EUROPA::eint>::signaling_NaN() throw() {return 0;}
-  EUROPA::eint numeric_limits<EUROPA::eint>::denorm_min() throw() {return 0;}
+  //would defining infinity differently speed things up?
+#ifdef E2_LONG_INT
+  inline EUROPA::eint numeric_limits<EUROPA::eint>::infinity() throw()
+  {return EUROPA::eint((long) (pow((double)2, 51) - 1.0 + pow((double)2, 51)), true);}
+#else
+  inline EUROPA::eint numeric_limits<EUROPA::eint>::infinity() throw()
+  {return EUROPA::eint(numeric_limits<long>::max(), true);}
+#endif
+  inline EUROPA::eint numeric_limits<EUROPA::eint>::minus_infinity() throw() {return -infinity();}
+  inline EUROPA::eint numeric_limits<EUROPA::eint>::max() throw() {return cast_long(infinity()) - (long)1;}
+  inline EUROPA::eint numeric_limits<EUROPA::eint>::min() throw() {return -max();}
+  inline EUROPA::eint numeric_limits<EUROPA::eint>::epsilon() throw() {return 0;}
+  inline EUROPA::eint numeric_limits<EUROPA::eint>::round_error() throw() {return 0;}
+  inline EUROPA::eint numeric_limits<EUROPA::eint>::quiet_NaN() throw() {return 0;}
+  inline EUROPA::eint numeric_limits<EUROPA::eint>::signaling_NaN() throw() {return 0;}
+  inline EUROPA::eint numeric_limits<EUROPA::eint>::denorm_min() throw() {return 0;}
 
-  EUROPA::edouble numeric_limits<EUROPA::edouble>::infinity() throw()
-  {return std::min(pow((double)2, 51) - 1.0 + pow((double)2, 51), (double) numeric_limits<long>::max());}
-  EUROPA::edouble numeric_limits<EUROPA::edouble>::max() throw() {return infinity() - 1.0;}
-  EUROPA::edouble numeric_limits<EUROPA::edouble>::min() throw() {return -max();}
-  EUROPA::edouble numeric_limits<EUROPA::edouble>::epsilon() throw() {return 0.00001;}
-  EUROPA::edouble numeric_limits<EUROPA::edouble>::round_error() throw() {return 0.5;}
-  EUROPA::edouble numeric_limits<EUROPA::edouble>::quiet_NaN() throw() {return __builtin_nan("");}
-  EUROPA::edouble numeric_limits<EUROPA::edouble>::signaling_NaN() throw() {return __builtin_nans("");}
-  EUROPA::edouble numeric_limits<EUROPA::edouble>::denorm_min() throw() {return __DBL_DENORM_MIN__;}
+#ifdef E2_LONG_INT
+  inline EUROPA::edouble numeric_limits<EUROPA::edouble>::infinity() throw()
+  {return EUROPA::edouble(pow((double)2, 51) - 1.0 + pow((double)2, 51), true);}
+#else
+  inline EUROPA::edouble numeric_limits<EUROPA::edouble>::infinity() throw()
+  {return EUROPA::edouble((double) numeric_limits<long>::max(), true);}
+#endif
+  inline EUROPA::edouble numeric_limits<EUROPA::edouble>::minus_infinity() throw() {return -infinity();}
+  inline EUROPA::edouble numeric_limits<EUROPA::edouble>::max() throw() {return cast_double(infinity()) - 1.0;}
+  inline EUROPA::edouble numeric_limits<EUROPA::edouble>::min() throw() {return -max();}
+  inline EUROPA::edouble numeric_limits<EUROPA::edouble>::epsilon() throw() {return 0.00001;}
+  inline EUROPA::edouble numeric_limits<EUROPA::edouble>::round_error() throw() {return 0.5;}
+  inline EUROPA::edouble numeric_limits<EUROPA::edouble>::quiet_NaN() throw() {return __builtin_nan("");}
+  inline EUROPA::edouble numeric_limits<EUROPA::edouble>::signaling_NaN() throw() {return __builtin_nans("");}
+  inline EUROPA::edouble numeric_limits<EUROPA::edouble>::denorm_min() throw() {return __DBL_DENORM_MIN__;}
 
-  inline EUROPA::edouble abs(const EUROPA::edouble d) { return EUROPA::edouble(abs(d.m_v));}
-  inline EUROPA::edouble sqrt(const EUROPA::edouble d) { return EUROPA::edouble(sqrt(d.m_v));}
+  inline EUROPA::edouble abs(const EUROPA::edouble d) { return EUROPA::edouble(abs(d.m_v), true);}
+  inline EUROPA::edouble sqrt(const EUROPA::edouble d) { handle_inf_unary(EUROPA::edouble, d); return EUROPA::edouble(sqrt(d.m_v), true);}
   inline EUROPA::edouble pow(const EUROPA::edouble d, const EUROPA::eint i) {return EUROPA::edouble(std::pow(d.m_v, (int)i.m_v));}
-  inline EUROPA::edouble sin(const EUROPA::edouble d) {return EUROPA::edouble(std::sin(d.m_v));}
-  inline EUROPA::edouble ceil(const EUROPA::edouble d) {return EUROPA::edouble(std::ceil(d.m_v));}
-  inline EUROPA::edouble floor(const EUROPA::edouble d) {return EUROPA::edouble(std::floor(d.m_v));}
+  inline EUROPA::edouble sin(const EUROPA::edouble d) {return EUROPA::edouble(std::sin(d.m_v), true);}
+  inline EUROPA::edouble ceil(const EUROPA::edouble d) {return EUROPA::edouble(std::ceil(d.m_v), true);}
+  inline EUROPA::edouble floor(const EUROPA::edouble d) {return EUROPA::edouble(std::floor(d.m_v), true);}
+
+#undef handle_inf_unary
+#undef op
+
 
 }
 

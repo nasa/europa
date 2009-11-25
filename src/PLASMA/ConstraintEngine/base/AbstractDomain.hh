@@ -423,14 +423,14 @@ namespace EUROPA {
      * Tests if 2 values are the same with respect to the minimum difference for the target domain.
      */
     inline virtual bool compareEqual(edouble a, edouble b) const {
-      return(a < b ? b - a < minDelta() : a - b < minDelta());
+      return (a == b) || (a < b ? b - a < minDelta() : a - b < minDelta());
     }
 
     /**
      * @brief Tests if one value is less than another to within minDelta
      */
     inline bool lt(edouble a, edouble b) const {
-      return (a + minDelta() <= b);
+      return (a != b) && (a + minDelta() <= b);
     }
 
     /**
@@ -444,7 +444,7 @@ namespace EUROPA {
      * @brief Tests if one value is less than or equal to another to within minDelta
      */
     inline bool leq(edouble a, edouble b) const {
-      return (a - minDelta() < b);
+      return (a == b) || (a - minDelta() < b);
     }
 
     /**
