@@ -9,7 +9,10 @@ namespace EUROPA {
   typedef bool Bool;
   typedef int Int;
   typedef void Void;
-  typedef eint Time;//typedef long Time;
+
+  typedef eint Time;//typedef long Time;  
+  //Since Time is the storage type within the temporal network, it may be beneficial to leave eint at the module interface
+  //door and let the tnet only deal with longs/ints internally
 
   class Dnode;
   typedef Id<Dnode> DnodeId;

@@ -475,7 +475,7 @@ namespace EUROPA {
       // Process variables that have changed
       // Process all relaxations first, so that we don't stump on tnet propagation later
       debugMsg("TemporalPropagator:updateTnet", "Processing changed variables... ");
-      for(std::map<int,ConstrainedVariableId>::const_iterator it = m_changedVariables.begin(); it != m_changedVariables.end(); ++it){
+      for(std::map<eint,ConstrainedVariableId>::const_iterator it = m_changedVariables.begin(); it != m_changedVariables.end(); ++it){
           ConstrainedVariableId var = it->second;
           if(!var->isActive())
               continue;
@@ -485,7 +485,7 @@ namespace EUROPA {
       debugMsg("TemporalPropagator:updateTnet", "DONE Processing relaxed variables... ");
 
       // Now take care of other changes
-      for(std::map<int,ConstrainedVariableId>::const_iterator it = m_changedVariables.begin(); it != m_changedVariables.end(); ++it){
+      for(std::map<eint,ConstrainedVariableId>::const_iterator it = m_changedVariables.begin(); it != m_changedVariables.end(); ++it){
           ConstrainedVariableId var = it->second;
           if(!var->isActive())
               continue;
