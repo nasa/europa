@@ -26,10 +26,9 @@
 #include "NddlUtils.hh"
 
 #include <string.h>
+#include <stdio.h>
 
 namespace EUROPA {
-  void makeConstraint(EvalContext& context, const LabelStr& name, const std::vector<ConstrainedVariableId>& vars);
-
 
   // TODO: keep using pdbClient?
   const DbClientId& getPDB(EvalContext& context)
@@ -53,6 +52,32 @@ namespace EUROPA {
       */
       return getPDB(context)->getSchema();
   }
+
+  // TODO: move this to the eval contexts to make it cleaner
+  void makeConstraint(EvalContext& context,
+                      const LabelStr& name,
+                      const std::vector<ConstrainedVariableId>& vars,
+                      const char* violationExpl)
+  {
+      PlanDatabase* pdb = (PlanDatabase*)(context.getElement("PlanDatabase"));
+      ConstraintId c = pdb->getClient()->createConstraint(name.c_str(), vars, violationExpl);
+      debugMsg("Interpreter","Added Constraint : " << c->toString());
+
+      InterpretedRuleInstance* rule = (InterpretedRuleInstance*)(context.getElement("RuleInstance"));
+      if (rule != NULL) {
+          rule->addConstraint(c);
+          debugMsg("Interpreter:InterpretedRule","Added Constraint : " << c->toString());
+          return;
+      }
+
+      Token* t = (Token*)(context.getElement("Token"));
+      if (t != NULL) {
+          t->addStandardConstraint(c);
+          debugMsg("Interpreter:InterpretedToken","Added Constraint : " << c->toString());
+          return;
+      }
+  }
+
 
   /*
    * ExprConstant
@@ -363,7 +388,7 @@ namespace EUROPA {
       for (unsigned int i = 0; i < m_args.size(); i++)
           args.push_back(m_args[i]);
 
-      Expr* con = new ExprConstraint(m_func->getConstraint(), args);
+      Expr* con = new ExprConstraint(m_func->getConstraint(), args, m_violationMsg.c_str());
 
       con->eval(context);
       return output;
@@ -567,7 +592,7 @@ namespace EUROPA {
           }
       }
 
-      makeConstraint(context, constraint.c_str(), args);
+      makeConstraint(context, constraint.c_str(), args, m_violationMsg.c_str());
 
       return output;
   }
@@ -593,10 +618,13 @@ namespace EUROPA {
     return "BadExpression";
   }
 
-  ExprConstraint::ExprConstraint(const char* name,const std::vector<Expr*>& args)
+  ExprConstraint::ExprConstraint(const char* name,const std::vector<Expr*>& args, const char* violationExpl)
     : m_name(name)
     , m_args(args)
+    , m_violationExpl("")
   {
+      if (violationExpl != NULL)
+          m_violationExpl = violationExpl;
   }
 
   ExprConstraint::~ExprConstraint()
@@ -617,27 +645,6 @@ namespace EUROPA {
     return os.str();
   }
 
-  void makeConstraint(EvalContext& context, const LabelStr& name, const std::vector<ConstrainedVariableId>& vars)
-  {
-      PlanDatabase* pdb = (PlanDatabase*)(context.getElement("PlanDatabase"));
-      ConstraintId c = pdb->getClient()->createConstraint(name.c_str(), vars);
-      debugMsg("Interpreter","Added Constraint : " << c->toString());
-
-      InterpretedRuleInstance* rule = (InterpretedRuleInstance*)(context.getElement("RuleInstance"));
-      if (rule != NULL) {
-          rule->addConstraint(c);
-          debugMsg("Interpreter:InterpretedRule","Added Constraint : " << c->toString());
-          return;
-      }
-
-      Token* t = (Token*)(context.getElement("Token"));
-      if (t != NULL) {
-          t->addStandardConstraint(c);
-          debugMsg("Interpreter:InterpretedToken","Added Constraint : " << c->toString());
-          return;
-      }
-  }
-
   DataRef ExprConstraint::eval(EvalContext& context) const
   {
     std::vector<ConstrainedVariableId> vars;
@@ -646,7 +653,7 @@ namespace EUROPA {
       vars.push_back(arg.getValue());
     }
 
-    makeConstraint(context,m_name,vars);
+    makeConstraint(context,m_name,vars,m_violationExpl.c_str());
 
     return DataRef::null;
   }
@@ -659,7 +666,7 @@ namespace EUROPA {
 
       for (unsigned int i=0;i<m_args.size();i++)
              os << m_args[i]->toString() << " ";
-      os << ")}";
+      os << ") " << m_violationExpl << "}";
 
       return os.str();
   }
@@ -788,7 +795,7 @@ namespace EUROPA {
   {
   }
 
-  // TODO: passing relation doesn't seem like a good ideal, since a token may have more than one relation to its
+  // TODO: passing relation doesn't seem like a good idea, since a token may have more than one relation to its
   // master. However, MatchingEngine matches on that, so keeping it for now.
   TokenId PredicateInstanceRef::getToken(EvalContext& context, const char* relationName, bool isFact, bool isRejectable)
   {
@@ -896,7 +903,7 @@ namespace EUROPA {
     std::vector<ConstrainedVariableId> vars;\
     vars.push_back(origin->originvar());    \
     vars.push_back(target->targetvar());    \
-    makeConstraint(context,LabelStr(#relationname), vars); \
+    makeConstraint(context,LabelStr(#relationname), vars, NULL); \
   }
 
 
@@ -907,7 +914,7 @@ namespace EUROPA {
     vars.push_back(origin->originvar());				\
     vars.push_back(var);						\
     vars.push_back(target->targetvar());				\
-    makeConstraint(context, "temporalDistance", vars);			\
+    makeConstraint(context, "temporalDistance", vars, NULL);			\
   }
 
   void createRelation(EvalContext& context,

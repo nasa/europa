@@ -2427,9 +2427,9 @@ namespace EUROPA {
   void RandConstraint::handleExecute() {
     getCurrentDomain(m_variables[0]).intersect(m_rvalue, m_rvalue);
   }
-  
 
   eint mod(eint a, eint b) { return a % b; }
+  eint mod(edouble a, edouble b) {return cast_int(a) % cast_int(b);}
 
   CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Max, std::max, edouble);
   CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Min, std::min, edouble);

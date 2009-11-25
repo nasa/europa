@@ -161,7 +161,8 @@ namespace EUROPA {
      * @param scope The variables to provide the scope of the constraint.
      */
     ConstraintId createConstraint(const char* name,
-				  const std::vector<ConstrainedVariableId>& scope);
+				  const std::vector<ConstrainedVariableId>& scope,
+				  const char* violationExpl=NULL);
 
     /**
      * @brief Construction of a unary constraint.

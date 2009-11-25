@@ -98,15 +98,26 @@ namespace EUROPA {
   }
 
   void Resource::add(const TokenId& token) {
+    if(tokens().find(token) != tokens().end())
+      return;
+    debugMsg("Resource:add", "Adding " << token->toString());
     Object::add(token);
+    createTransactions(token);
   }
 
+  //Due to the fact that add/remove and addToProfile/removeFromProfile are invoked by two different constraints and
+  //that those constraints almost always execute in a single order, this needs to be done carefully
   void Resource::remove(const TokenId& token) {
+    if(tokens().find(token) == tokens().end())
+      return;
+    debugMsg("Resource:remove", "Removing " << token->toString());
     Object::remove(token);
     removeFromProfile(token);
+    removeTransactions(token);
   }
 
   void Resource::removeFromProfile(const TokenId& tok) {
+    debugMsg("Resource:removeFromProfile", "Removing " << tok->toString());
     std::map<TokenId, std::set<InstantId> >::iterator it = m_flawedTokens.find(tok);
     if(it != m_flawedTokens.end()) {
       m_flawedTokens.erase(it);
