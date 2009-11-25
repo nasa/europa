@@ -20,7 +20,7 @@ namespace EUROPA
       /**
        * @brief
        */
-      IncrementalFlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const double initLevelLb = 0, const double initLevelUb = 0 );
+      IncrementalFlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const edouble initLevelLb = 0, const edouble initLevelUb = 0 );
       /**
        * @brief
        */
@@ -42,7 +42,7 @@ namespace EUROPA
        */
       bool enableOrderings(  const InstantId& inst  );
     private:
-      void recomputeLevels( InstantId inst, double lowerLevel, double upperLevel );
+      void recomputeLevels( InstantId inst, edouble lowerLevel, edouble upperLevel );
 
 
     };

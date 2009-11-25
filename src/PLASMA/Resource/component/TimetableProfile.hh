@@ -10,7 +10,7 @@ namespace EUROPA {
     class TimetableProfile : public Profile {
     public:
       TimetableProfile(const PlanDatabaseId db, const FVDetectorId flawDetector,
-		       const double initCapacityLb = 0, const double initCapacityUb = 0);
+		       const edouble initCapacityLb = 0, const edouble initCapacityUb = 0);
 
       void getTransactionsToOrder(const InstantId& inst, std::vector<TransactionId>& results);
     protected:
@@ -18,17 +18,17 @@ namespace EUROPA {
     	/**
     	 * @brief Compute level changes when transaction starts at the current instant.
     	 */
-    	virtual void handleTransactionStart(bool isConsumer, const double & lb, const double & ub);
+    	virtual void handleTransactionStart(bool isConsumer, const edouble & lb, const edouble & ub);
 
     	/**
     	 * @brief Compute level changes when transaction ends at the current instant.
     	 */
-    	virtual void handleTransactionEnd(bool isConsumer, const double & lb, const double & ub);
+    	virtual void handleTransactionEnd(bool isConsumer, const edouble & lb, const edouble & ub);
 
 
-      double m_lowerLevelMin, m_lowerLevelMax, m_upperLevelMin, m_upperLevelMax;
-      double m_minPrevConsumption, m_maxPrevConsumption;
-      double m_minPrevProduction, m_maxPrevProduction;
+      edouble m_lowerLevelMin, m_lowerLevelMax, m_upperLevelMin, m_upperLevelMax;
+      edouble m_minPrevConsumption, m_maxPrevConsumption;
+      edouble m_minPrevProduction, m_maxPrevProduction;
 
     private:
       void initRecompute(InstantId inst);

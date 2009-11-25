@@ -261,9 +261,9 @@ namespace EUROPA {
     public:
       LeastImpactComparator() : ChoiceComparator() {}
       bool operator()(const std::pair<TransactionId, TransactionId>& p1, const std::pair<TransactionId, TransactionId>& p2) const {
-        double score1 = std::max(pseudoAbs(p1.first->time()->lastDomain().getLowerBound() - p1.second->time()->lastDomain().getLowerBound()),
+        edouble score1 = std::max(pseudoAbs(p1.first->time()->lastDomain().getLowerBound() - p1.second->time()->lastDomain().getLowerBound()),
                                  pseudoAbs(p1.first->time()->lastDomain().getUpperBound() - p1.second->time()->lastDomain().getUpperBound()));
-        double score2 = std::max(pseudoAbs(p2.first->time()->lastDomain().getLowerBound() - p2.second->time()->lastDomain().getLowerBound()),
+        edouble score2 = std::max(pseudoAbs(p2.first->time()->lastDomain().getLowerBound() - p2.second->time()->lastDomain().getLowerBound()),
                                  pseudoAbs(p2.first->time()->lastDomain().getUpperBound() - p2.second->time()->lastDomain().getUpperBound()));
 
         debugMsg("ResourceThreatDecisionPoint:filter:leastImpact", std::endl <<
@@ -278,7 +278,7 @@ namespace EUROPA {
         return (new LeastImpactComparator());
       }
     private:
-      inline double pseudoAbs(double value) const {
+      inline edouble pseudoAbs(edouble value) const {
         return (value < 0 ? 0 : value);
       }
     };

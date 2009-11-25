@@ -48,8 +48,8 @@ namespace EUROPA {
       virtual void handleResourceLevelFlaws(const InstantId inst) = 0;
 
     protected:
-      double m_lowerLimit, m_upperLimit, m_maxInstConsumption, m_maxInstProduction;
-      double m_maxCumulativeConsumption, m_maxCumulativeProduction;
+      edouble m_lowerLimit, m_upperLimit, m_maxInstConsumption, m_maxInstProduction;
+      edouble m_maxCumulativeConsumption, m_maxCumulativeProduction;
     };
 }
 

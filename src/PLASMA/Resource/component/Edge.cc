@@ -16,7 +16,7 @@
 
 namespace EUROPA
 {
-    Edge::Edge( Node* source, Node* target, double capacity, bool enabled ):
+    Edge::Edge( Node* source, Node* target, edouble capacity, bool enabled ):
       m_Capacity( capacity ),
       m_Enabled( enabled ),
       m_Source( source ),
@@ -36,9 +36,9 @@ namespace EUROPA
     {
     }
 
-    double Edge::getMaxCapacity()
+    edouble Edge::getMaxCapacity()
     {
-      return DBL_MAX;
+      return PLUS_INFINITY;
     }
 
     EdgeIdentity Edge::getIdentity() const

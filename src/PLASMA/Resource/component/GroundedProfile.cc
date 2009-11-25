@@ -7,11 +7,11 @@
 
 
 namespace EUROPA {
-GroundedProfile::GroundedProfile(const PlanDatabaseId db, const FVDetectorId flawDetector, const double initCapacityLb, const double initCapacityUb)
+GroundedProfile::GroundedProfile(const PlanDatabaseId db, const FVDetectorId flawDetector, const edouble initCapacityLb, const edouble initCapacityUb)
 : TimetableProfile(db, flawDetector, initCapacityLb, initCapacityUb) {}
 
 
-void GroundedProfile::handleTransactionStart(bool isConsumer, const double & lb, const double & ub)
+void GroundedProfile::handleTransactionStart(bool isConsumer, const edouble & lb, const edouble & ub)
 {
 	if(isConsumer) {
 		m_lowerLevelMin -= ub;
@@ -29,7 +29,7 @@ void GroundedProfile::handleTransactionStart(bool isConsumer, const double & lb,
 	}
 }
 
-void GroundedProfile::handleTransactionEnd(bool isConsumer, const double & lb, const double & ub)
+void GroundedProfile::handleTransactionEnd(bool isConsumer, const edouble & lb, const edouble & ub)
 {
 	if(isConsumer) {
 		m_upperLevelMax -= lb;

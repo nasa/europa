@@ -23,7 +23,7 @@ namespace EUROPA {
                  "Require both state and object variables, in that order.");
       if(scope[STATE_VAR]->isSpecified() && scope[STATE_VAR]->getSpecifiedValue() == Token::ACTIVE &&
          scope[OBJECT_VAR]->lastDomain().isSingleton()) {
-          m_resource = ResourceId(scope[OBJECT_VAR]->lastDomain().getSingletonValue());
+        m_resource = Entity::getTypedEntity<Resource>(scope[OBJECT_VAR]->lastDomain().getSingletonValue());
           check_error(m_resource.isValid());
           debugMsg("ResourceTokenRelation:ResourceTokenRelation", "Adding token " << m_token->toString() << " to resource-profile of resource " << m_resource->toString() );
 
@@ -49,7 +49,7 @@ namespace EUROPA {
         //if the object is singleton and the state has the singleton value ACTIVE
         if(object->lastDomain().isSingleton() &&
            state->isSpecified() && state->getSpecifiedValue() == Token::ACTIVE) {
-          m_resource = ResourceId(object->lastDomain().getSingletonValue());
+          m_resource = Entity::getTypedEntity<Resource>(object->lastDomain().getSingletonValue());
           check_error(m_resource.isValid());
           debugMsg("ResourceTokenRelation:canIgnore", "Adding " << m_token->toString() << " to profile for resource " << m_resource->toString());
           m_resource->addToProfile(m_token);

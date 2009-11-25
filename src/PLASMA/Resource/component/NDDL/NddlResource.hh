@@ -46,7 +46,7 @@ namespace NDDL {
 
     virtual void close();
 
-    virtual void constructor(double c_max);
+    virtual void constructor(edouble c_max);
     virtual void constructor();
 
     void handleDefaults(bool autoClose = true);
@@ -86,9 +86,9 @@ namespace NDDL {
 
     virtual void close();
 
-    virtual void constructor(double c, double ll_min);
-    virtual void constructor(double c, double ll_min, double cr_max);
-    virtual void constructor(double c, double ll_min, double c_max, double cr_max);
+    virtual void constructor(edouble c, edouble ll_min);
+    virtual void constructor(edouble c, edouble ll_min, edouble cr_max);
+    virtual void constructor(edouble c, edouble ll_min, edouble c_max, edouble cr_max);
     virtual void constructor();
 
     void handleDefaults(bool autoClose = true);
@@ -132,9 +132,9 @@ namespace NDDL {
 
     virtual void close();
 
-    virtual void constructor(float c, float ll_min);
-    virtual void constructor(float c, float ll_min, float cr_max);
-    virtual void constructor(float c, float ll_min, float c_max, float cr_max);
+    virtual void constructor(edouble c, edouble ll_min);
+    virtual void constructor(edouble c, edouble ll_min, edouble cr_max);
+    virtual void constructor(edouble c, edouble ll_min, edouble c_max, edouble cr_max);
     virtual void constructor();
 
     void handleDefaults(bool autoClose = true);
@@ -160,13 +160,13 @@ namespace NDDL {
     virtual ~NddlReservoir(){}
 
     virtual void close();
-    
-    virtual void constructor(double ic, double ll_min, double ll_max);
-    
-    virtual void constructor(double ic, double ll_min, double ll_max, double p_max, double c_max);
-    
-    virtual void constructor(double ic, double ll_min, double ll_max, double pr_max, double p_max, double cr_max, double c_max);
-    
+
+    virtual void constructor(edouble ic, edouble ll_min, edouble ll_max);
+
+    virtual void constructor(edouble ic, edouble ll_min, edouble ll_max, edouble p_max, edouble c_max);
+
+    virtual void constructor(edouble ic, edouble ll_min, edouble ll_max, edouble pr_max, edouble p_max, edouble cr_max, edouble c_max);
+
     virtual void constructor();
 
     void handleDefaults(bool autoClose = true); // default variable initialization

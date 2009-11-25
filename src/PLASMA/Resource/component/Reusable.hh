@@ -11,16 +11,16 @@ namespace EUROPA {
     public:
       //initial capacity is the upper limit, maxInstConsumption == maxInstProduction, maxConsumption == maxProduction
       Reusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName, const LabelStr& profileName,
-	       double initCapacityLb = 0, double initCapacityUb = 0, double lowerLimit = MINUS_INFINITY,
-	       double maxInstConsumption = PLUS_INFINITY,
-	       double maxConsumption = PLUS_INFINITY);
+	       edouble initCapacityLb = 0, edouble initCapacityUb = 0, edouble lowerLimit = MINUS_INFINITY,
+	       edouble maxInstConsumption = PLUS_INFINITY,
+	       edouble maxConsumption = PLUS_INFINITY);
       Reusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open);
       Reusable(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open);
       virtual ~Reusable();
 
       virtual void getOrderingChoices(const TokenId& token,
 				      std::vector<std::pair<TokenId, TokenId> >& results,
-				      unsigned int limit = PLUS_INFINITY);
+				      unsigned int limit = cast_int(PLUS_INFINITY));
 
     protected:
       void createTransactions(const TokenId& tok);
@@ -50,9 +50,9 @@ namespace EUROPA {
     public:
       //initial capacity is the upper limit, maxInstConsumption == maxInstProduction, maxConsumption == maxProduction
       CBReusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName, const LabelStr& profileName,
-           double initCapacityLb = 0, double initCapacityUb = 0, double lowerLimit = MINUS_INFINITY,
-           double maxInstConsumption = PLUS_INFINITY,
-           double maxConsumption = PLUS_INFINITY);
+           edouble initCapacityLb = 0, edouble initCapacityUb = 0, edouble lowerLimit = MINUS_INFINITY,
+           edouble maxInstConsumption = PLUS_INFINITY,
+           edouble maxConsumption = PLUS_INFINITY);
       CBReusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open);
       CBReusable(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open);
       virtual ~CBReusable();

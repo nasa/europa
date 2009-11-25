@@ -28,7 +28,7 @@
 
 namespace EUROPA
 {
-    IncrementalFlowProfile::IncrementalFlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const double initLevelLb, const double initLevelUb ):
+    IncrementalFlowProfile::IncrementalFlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const edouble initLevelLb, const edouble initLevelUb ):
       FlowProfile( db, flawDetector, initLevelLb, initLevelUb )
     {
       debugMsg("IncrementalFlowProfile:IncrementalFlowProfile","Initial level [" << initLevelLb << "," << initLevelUb << "]");
@@ -42,7 +42,7 @@ namespace EUROPA
     {
       debugMsg("IncrementalFlowProfile::initRecompute","For instant (" << inst->getId() << ")");
 
-      std::map<int, InstantId>::iterator it = getGreatestInstant( inst->getTime() - 1 );
+      std::map<eint, InstantId>::iterator it = getGreatestInstant( inst->getTime() - 1 );
 
       if( m_instants.end() != it  )
         {
@@ -341,13 +341,13 @@ namespace EUROPA
                << prev << ") and current instant ("
                << inst << ")");
 
-      double lowerLevel = prev == InstantId::noId() ? m_lowerClosedLevel : prev->getLowerLevel();
-      double upperLevel = prev == InstantId::noId() ? m_upperClosedLevel : prev->getUpperLevel();
+      edouble lowerLevel = prev == InstantId::noId() ? m_lowerClosedLevel : prev->getLowerLevel();
+      edouble upperLevel = prev == InstantId::noId() ? m_upperClosedLevel : prev->getUpperLevel();
 
       recomputeLevels( inst, lowerLevel, upperLevel );
     }
 
-    void IncrementalFlowProfile::recomputeLevels( InstantId inst, double lowerLevel, double upperLevel )
+    void IncrementalFlowProfile::recomputeLevels( InstantId inst, edouble lowerLevel, edouble upperLevel )
     {
       //        static int counter = 0;
       //        counter++;
@@ -367,7 +367,7 @@ namespace EUROPA
           {
             if( m_recalculateLowerLevel )
               {
-                double delta = m_lowerLevelGraph->disableReachableResidualGraph( m_lowerLevelContribution, inst );
+                edouble delta = m_lowerLevelGraph->disableReachableResidualGraph( m_lowerLevelContribution, inst );
 
                 debugMsg("IncrementalFlowProfile::recomputeLevels","Expansion leads to delta lower level of "
                          << delta );
@@ -377,7 +377,7 @@ namespace EUROPA
 
             if( m_recalculateUpperLevel )
               {
-                double delta = m_upperLevelGraph->disableReachableResidualGraph( m_upperLevelContribution, inst );
+                edouble delta = m_upperLevelGraph->disableReachableResidualGraph( m_upperLevelContribution, inst );
 
                 debugMsg("IncrementalFlowProfile::recomputeLevels","Expansion leads to delta upper level of "
                          << delta );
@@ -513,7 +513,7 @@ namespace EUROPA
               {
                 m_lowerLevelGraph->restoreFlow();
 
-                double delta = m_lowerLevelGraph->disableReachableResidualGraph( m_lowerLevelContribution, inst );
+                edouble delta = m_lowerLevelGraph->disableReachableResidualGraph( m_lowerLevelContribution, inst );
 
                 debugMsg("IncrementalFlowProfile::recomputeLevels","Contraction leads to delta lower level of "
                          << delta );
@@ -525,7 +525,7 @@ namespace EUROPA
               {
                 m_upperLevelGraph->restoreFlow();
 
-                double delta = m_upperLevelGraph->disableReachableResidualGraph( m_upperLevelContribution, inst );
+                edouble delta = m_upperLevelGraph->disableReachableResidualGraph( m_upperLevelContribution, inst );
 
                 debugMsg("IncrementalFlowProfile::recomputeLevels","Contraction leads to delta upper level of "
                          << delta );

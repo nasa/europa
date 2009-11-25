@@ -26,7 +26,7 @@ namespace EUROPA {
         check_error(m_time.isValid());
         check_error(m_quantity.isValid());
         EntityId parent = m_time->parent();
-        int parentKey = (parent.isId() ? parent->getKey() : -1);
+        eint parentKey = (parent.isId() ? parent->getKey() : -1);
         std::stringstream os;
         os << "{"
            << "(token=" << parentKey << ")"

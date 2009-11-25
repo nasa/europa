@@ -92,11 +92,11 @@ namespace EUROPA
     };
 
     typedef hash_map< Node*, bool, NodeHash > Node2Bool;
-    typedef hash_map< Node*, int, NodeHash > Node2Int;
-    typedef hash_map< Node*, long, NodeHash > Node2Long;
-    typedef hash_map< Node*, double, NodeHash > Node2Double;
+    typedef hash_map< Node*, eint, NodeHash > Node2Int;
+    typedef hash_map< Node*, eint, NodeHash > Node2Long;
+    typedef hash_map< Node*, edouble, NodeHash > Node2Double;
 
-    typedef hash_map< Edge*, double, EdgeHash > Edge2DoubleMap;
+    typedef hash_map< Edge*, edouble, EdgeHash > Edge2DoubleMap;
     typedef hash_map< TransactionId, InstantId, TransactionIdHash > TransactionId2InstantId;
 
 

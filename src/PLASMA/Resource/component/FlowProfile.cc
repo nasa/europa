@@ -111,7 +111,7 @@ namespace EUROPA
       TransactionId source = TransactionId::noId();
       TransactionId target = TransactionId::noId();
 
-      double edgeCapacity = 0;
+      edouble edgeCapacity = 0;
 
       if( ( m_lowerLevel && t->isConsumer() )
 	  ||
@@ -175,9 +175,9 @@ namespace EUROPA
     }
 
 
-    double FlowProfileGraph::getResidualFromSource()
+    edouble FlowProfileGraph::getResidualFromSource()
     {
-      double residual = 0.0;
+      edouble residual = 0.0;
 
       if( m_recalculate )
 	{
@@ -246,7 +246,7 @@ namespace EUROPA
 
     //-------------------------------
 
-    FlowProfile::FlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const double initLevelLb, const double initLevelUb):
+    FlowProfile::FlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const edouble initLevelLb, const edouble initLevelUb):
       Profile( db, flawDetector, initLevelLb, initLevelUb),
       m_lowerLevelGraph( 0 ),
       m_upperLevelGraph( 0 ),
@@ -459,12 +459,12 @@ namespace EUROPA
 	}
 
 
-      double lowerLevel = inst->getLowerLevel();
+      edouble lowerLevel = inst->getLowerLevel();
 
       if( m_recalculateLowerLevel )
 	lowerLevel = m_lowerClosedLevel - m_lowerLevelGraph->getResidualFromSource();
 
-      double upperLevel = inst->getUpperLevel();
+      edouble upperLevel = inst->getUpperLevel();
 
       if( m_recalculateUpperLevel )
 	upperLevel = m_upperClosedLevel + m_upperLevelGraph->getResidualFromSource();
@@ -691,8 +691,8 @@ namespace EUROPA
       m_recalculateLowerLevel = true;
       m_recalculateUpperLevel = true;
 
-      int startRecalculation = PLUS_INFINITY;
-      int endRecalculation = MINUS_INFINITY;
+      eint startRecalculation = PLUS_INFINITY;
+      eint endRecalculation = MINUS_INFINITY;
 
       switch( type) {
       case DomainListener::UPPER_BOUND_DECREASED:
@@ -706,13 +706,13 @@ namespace EUROPA
 	  // we should have the previous value!
 	  check_error( ite != m_previousTimeBounds.end() );
 
-	  int previousStart =  (*ite).second.first;
-	  int previousEnd =  (*ite).second.second;
+	  eint previousStart =  (*ite).second.first;
+	  eint previousEnd =  (*ite).second.second;
 
 	  if( ProfileIteratorId::noId() != m_recomputeInterval )
 	    {
-	      startRecalculation = std::min( m_recomputeInterval->getStartTime(), (int) previousStart );
-	      endRecalculation = std::max( m_recomputeInterval->getEndTime(), (int) previousEnd );
+	      startRecalculation = std::min( m_recomputeInterval->getStartTime(), previousStart );
+	      endRecalculation = std::max( m_recomputeInterval->getEndTime(), previousEnd );
 	    }
 	  else
 	    {

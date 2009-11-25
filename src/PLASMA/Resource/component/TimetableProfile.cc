@@ -5,7 +5,7 @@
 #include "Debug.hh"
 
 namespace EUROPA {
-    TimetableProfile::TimetableProfile(const PlanDatabaseId db, const FVDetectorId flawDetector, const double initCapacityLb, const double initCapacityUb)
+    TimetableProfile::TimetableProfile(const PlanDatabaseId db, const FVDetectorId flawDetector, const edouble initCapacityLb, const edouble initCapacityUb)
       : Profile(db, flawDetector, initCapacityLb, initCapacityUb), m_lowerLevelMin(0), m_lowerLevelMax(0), m_upperLevelMin(0), m_upperLevelMax(0),
 	m_minPrevConsumption(0), m_maxPrevConsumption(0), m_minPrevProduction(0), m_maxPrevProduction(0) {}
 
@@ -35,15 +35,15 @@ namespace EUROPA {
     void TimetableProfile::recomputeLevels( InstantId prev, InstantId inst) {
       check_error(inst.isValid());
 
-      double maxInstantProduction(0), minInstantProduction(0), maxInstantConsumption(0), minInstantConsumption(0);
-      double maxCumulativeProduction(m_maxPrevProduction), minCumulativeProduction(m_minPrevProduction);
-      double maxCumulativeConsumption(m_maxPrevConsumption), minCumulativeConsumption(m_minPrevConsumption);
+      edouble maxInstantProduction(0), minInstantProduction(0), maxInstantConsumption(0), minInstantConsumption(0);
+      edouble maxCumulativeProduction(m_maxPrevProduction), minCumulativeProduction(m_minPrevProduction);
+      edouble maxCumulativeConsumption(m_maxPrevConsumption), minCumulativeConsumption(m_minPrevConsumption);
 
       const std::set<TransactionId>& transactions(inst->getTransactions());
       debugMsg("TimetableProfile:recomputeLevels", "Transactions at " << inst->getTime() << ":");
       for(std::set<TransactionId>::const_iterator it = transactions.begin(); it != transactions.end(); ++it) {
 	TransactionId trans = *it;
-	double lb, ub;
+	edouble lb, ub;
 	trans->quantity()->lastDomain().getBounds(lb, ub);
 	bool isConsumer = trans->isConsumer();
 	debugMsg("TimetableProfile:recomputeLevels", "Time: [" << trans->time()->lastDomain().getLowerBound() << " " <<
@@ -98,7 +98,7 @@ namespace EUROPA {
       for(std::set<TransactionId>::const_iterator it = inst->getEndingTransactions().begin(); it != inst->getEndingTransactions().end(); ++it) {
 	TransactionId trans = *it;
 	check_error(trans.isValid());
-	double lb, ub;
+	edouble lb, ub;
 	trans->quantity()->lastDomain().getBounds(lb, ub);
 	if(trans->isConsumer()) {
 	  m_maxPrevConsumption += ub;
@@ -118,7 +118,7 @@ namespace EUROPA {
     }
 
 
-	void TimetableProfile::handleTransactionStart(bool isConsumer, const double & lb, const double & ub)
+	void TimetableProfile::handleTransactionStart(bool isConsumer, const edouble & lb, const edouble & ub)
 	{
 		if(isConsumer) {
 			m_lowerLevelMin -= ub;
@@ -130,7 +130,7 @@ namespace EUROPA {
 		}
 	}
 
-	void TimetableProfile::handleTransactionEnd(bool isConsumer, const double & lb, const double & ub)
+	void TimetableProfile::handleTransactionEnd(bool isConsumer, const edouble & lb, const edouble & ub)
 	{
 		if(isConsumer) {
 			m_upperLevelMax -= lb;

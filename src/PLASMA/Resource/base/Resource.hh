@@ -57,14 +57,14 @@ namespace EUROPA {
                const LabelStr& name,
                const LabelStr& detectorName,
                const LabelStr& profileName,
-	           double initCapacityLb = 0,
-	           double initCapacityUb = 0,
-	           double lowerLimit = MINUS_INFINITY,
-	           double upperLimit = PLUS_INFINITY,
-	           double maxInstProduction = PLUS_INFINITY,
-	           double maxInstConsumption = PLUS_INFINITY,
-	           double maxProduction = PLUS_INFINITY,
-	           double maxConsumption = PLUS_INFINITY);
+	           edouble initCapacityLb = 0,
+	           edouble initCapacityUb = 0,
+	           edouble lowerLimit = MINUS_INFINITY,
+	           edouble upperLimit = PLUS_INFINITY,
+	           edouble maxInstProduction = PLUS_INFINITY,
+	           edouble maxInstConsumption = PLUS_INFINITY,
+	           edouble maxProduction = PLUS_INFINITY,
+	           edouble maxConsumption = PLUS_INFINITY);
 
 
       /** Only LevelTooHigh and LevelTooLow are currently used by Flaw,
@@ -95,32 +95,32 @@ namespace EUROPA {
       /**
        * @brief Accessor for the lower limit on capacity.
        */
-      double getLowerLimit() const {return m_lowerLimit;}
+      edouble getLowerLimit() const {return m_lowerLimit;}
 
       /**
        * @brief Accessor for the upper limit on capacity.
        */
-      double getUpperLimit() const {return m_upperLimit;}
+      edouble getUpperLimit() const {return m_upperLimit;}
 
       /**
        * @brief Accessor for the maximum consumption possible at an instant.
        */
-      double getMaxInstConsumption() const {return m_maxInstConsumption;}
+      edouble getMaxInstConsumption() const {return m_maxInstConsumption;}
 
       /**
        * @brief Accessor for the maximum production possible at an instant.
        */
-      double getMaxInstProduction() const {return m_maxInstProduction;}
+      edouble getMaxInstProduction() const {return m_maxInstProduction;}
 
       /**
        * @brief Accessor for the maximum consumption possible over the lifetime of the resource.
        */
-      double getMaxConsumption() const {return m_maxConsumption;}
+      edouble getMaxConsumption() const {return m_maxConsumption;}
 
       /**
        * @brief Accessor for the maximum production possible over the lifetime of the resource.
        */
-      double getMaxProduction() const {return m_maxProduction;}
+      edouble getMaxProduction() const {return m_maxProduction;}
 
       const ProfileId getProfile() const {return m_profile;}
 
@@ -140,11 +140,11 @@ namespace EUROPA {
 
       virtual void getOrderingChoices(const TokenId& token,
 				      std::vector<std::pair<TokenId, TokenId> >& results,
-				      unsigned int limit = PLUS_INFINITY);
+				      unsigned int limit = cast_int(PLUS_INFINITY));
 
       virtual void getOrderingChoices(const InstantId& inst,
                                       std::vector<std::pair<TransactionId, TransactionId> >& results,
-                                      unsigned int limit = PLUS_INFINITY);
+                                      unsigned int limit = cast_int(PLUS_INFINITY));
 
       virtual void getTokensToOrder(std::vector<TokenId>& results);
 
@@ -183,9 +183,9 @@ namespace EUROPA {
        * @param maxProduction The maximum amount of production possible on this resource.
        * @param maxConsumption The maximum amount of consumption possible on this resource.
        */
-      void init(const double initCapacityLb, const double initCapacityUb, const double lowerLimit,
-                const double upperLimit, const double maxInstProduction, const double maxInstConsumption,
-                const double maxProduction, const double maxConsumption, const LabelStr& detectorName, const LabelStr& profileName);
+      void init(const edouble initCapacityLb, const edouble initCapacityUb, const edouble lowerLimit,
+                const edouble upperLimit, const edouble maxInstProduction, const edouble maxInstConsumption,
+                const edouble maxProduction, const edouble maxConsumption, const LabelStr& detectorName, const LabelStr& profileName);
 
       /**
        * @brief Receive notification that an Instant has been removed from the profile.
@@ -235,16 +235,16 @@ namespace EUROPA {
 
       bool noFlawedTokensForInst(const InstantId& inst) const;
       //ResourceId m_id;
-      double m_initCapacityLb, m_initCapacityUb; /*<! The bounds of the initial capacity*/
-      double  m_lowerLimit, m_upperLimit; /*<! The bounds on the capacity*/
-      double m_maxInstProduction, m_maxInstConsumption; /*<! The maximum production and consumption allowed at an instant */
-      double m_maxProduction, m_maxConsumption; /*<! The maximum production and consumption allowed over the lifetime of the resource */
+      edouble m_initCapacityLb, m_initCapacityUb; /*<! The bounds of the initial capacity*/
+      edouble  m_lowerLimit, m_upperLimit; /*<! The bounds on the capacity*/
+      edouble m_maxInstProduction, m_maxInstConsumption; /*<! The maximum production and consumption allowed at an instant */
+      edouble m_maxProduction, m_maxConsumption; /*<! The maximum production and consumption allowed over the lifetime of the resource */
     protected:
       FVDetectorId m_detector; /*<! The flaw and violation detector for this resource. */
       ProfileId m_profile; /*<! The profile calculator for this resource. */
       std::map<TransactionId, TokenId> m_transactionsToTokens;
       std::map<TokenId, std::set<InstantId> > m_flawedTokens;
-      std::map<int, InstantId> m_flawedInstants;
+      std::map<eint, InstantId> m_flawedInstants;
 
       TokenId getTokenForTransaction(TransactionId t);
       ResourceTokenRelationId getRTRConstraint(TokenId tok);

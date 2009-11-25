@@ -57,11 +57,11 @@ namespace EUROPA
         /**
          * @brief
          */
-        inline double getMaxFlow() const;
+        inline edouble getMaxFlow() const;
         /**
          * @brief
          */
-        inline double getFlow( Edge* edge ) const;
+        inline edouble getFlow( Edge* edge ) const;
         /**
          * @brief
          */
@@ -69,7 +69,7 @@ namespace EUROPA
         /**
          * @brief
          */
-        inline double getResidual( Edge* edge ) const;
+        inline edouble getResidual( Edge* edge ) const;
       private:
         /**
          * @brief
@@ -117,7 +117,7 @@ namespace EUROPA
         NodeList::iterator m_NodeListIterator;
     };
 
-    double MaximumFlowAlgorithm::getMaxFlow() const
+    edouble MaximumFlowAlgorithm::getMaxFlow() const
     {
       if( m_ExcessOnNode.find(  m_Sink ) == m_ExcessOnNode.end() )
         return 0.0;
@@ -125,12 +125,12 @@ namespace EUROPA
       return m_ExcessOnNode.find(  m_Sink )->second;
     }
 
-    double MaximumFlowAlgorithm::getFlow( Edge* edge  ) const
+    edouble MaximumFlowAlgorithm::getFlow( Edge* edge  ) const
     {
       return m_OnEdge.find( edge )->second;
     }
 
-    double MaximumFlowAlgorithm::getResidual( Edge* edge ) const
+    edouble MaximumFlowAlgorithm::getResidual( Edge* edge ) const
     {
       return edge->getCapacity() - getFlow( edge );
     }
@@ -186,7 +186,7 @@ namespace EUROPA
 
       while( n != 0 )
       {
-        long oldDistance = m_DistanceOnNode[ n ];
+        eint oldDistance = m_DistanceOnNode[ n ];
 
         disCharge( n );
 
@@ -293,8 +293,8 @@ namespace EUROPA
 
         // check edge is enabled
 
-        double flow = m_OnEdge[ edge ];
-        double residual = edge->getCapacity() - flow;
+        edouble flow = m_OnEdge[ edge ];
+        edouble residual = edge->getCapacity() - flow;
 
         graphDebug("Initializing flow from source "
             << *m_Source << " for edge "
@@ -310,7 +310,7 @@ namespace EUROPA
 
           Node* target = edge->getTarget();
 
-          double excess = m_ExcessOnNode[ target ];
+          edouble excess = m_ExcessOnNode[ target ];
 
           m_ExcessOnNode[ target ] = excess + residual;
 
@@ -392,7 +392,7 @@ namespace EUROPA
 
         Node* source = edge->getSource();
 
-        double flow_pushed_back = getFlow( edge );
+        edouble flow_pushed_back = getFlow( edge );
 
         if( flow_pushed_back > 0 && edge->getCapacity() != 0 )
         {
@@ -408,14 +408,14 @@ namespace EUROPA
       Node* source = edge->getSource();
       Node* target = edge->getTarget();
 
-      double excess = m_ExcessOnNode[ source ];
-      double residual = edge->getCapacity() - m_OnEdge[ edge ];
+      edouble excess = m_ExcessOnNode[ source ];
+      edouble residual = edge->getCapacity() - m_OnEdge[ edge ];
 
       assert( residual >= 0 );
 
-      double delta = (excess > residual ) ? residual : excess;
+      edouble delta = (excess > residual ) ? residual : excess;
 
-      double newFlow = m_OnEdge[ edge ] + delta;
+      edouble newFlow = m_OnEdge[ edge ] + delta;
       m_OnEdge[ edge ] = newFlow;
       m_OnEdge[ m_Graph->getEdge( edge->getTarget(), edge->getSource() ) ] = - newFlow;
 
@@ -438,13 +438,7 @@ namespace EUROPA
       graphDebug("Relabel node "
           << *n );
 
-      // Would be better to use std::numeric_limits<> all the time but
-      // maybe not all compilers support it.
-#ifndef LONG_MAX
-      long minLabel = std::numeric_limits<long>::max();
-#else
-      long minLabel = LONG_MAX;
-#endif
+      eint minLabel = std::numeric_limits<eint>::max();
 
       EdgeOutIterator edgeOutIte( *n );
 
@@ -461,7 +455,7 @@ namespace EUROPA
         //m_OnEdge[ edge ] < edge->getCapacity()
         if( getResidual( edge ) > 0  )
         {
-          long label = m_DistanceOnNode[ target ];
+          eint label = m_DistanceOnNode[ target ];
 
           if( minLabel >= label )
           {

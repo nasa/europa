@@ -11,9 +11,9 @@
 
 namespace EUROPA {
   Reservoir::Reservoir(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName,
-                       const LabelStr& profileName, double initCapacityLb, double initCapacityUb, double lowerLimit,
-                       double upperLimit, double maxInstProduction, double maxInstConsumption, double maxProduction,
-                       double maxConsumption) :
+                       const LabelStr& profileName, edouble initCapacityLb, edouble initCapacityUb, edouble lowerLimit,
+                       edouble upperLimit, edouble maxInstProduction, edouble maxInstConsumption, edouble maxProduction,
+                       edouble maxConsumption) :
     Resource(planDatabase, type, name, detectorName, profileName, initCapacityLb, initCapacityUb, lowerLimit, upperLimit,
              maxInstProduction, maxInstConsumption, maxProduction, maxConsumption) {}
 

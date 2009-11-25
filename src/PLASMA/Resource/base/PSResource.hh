@@ -6,7 +6,8 @@
 
 namespace EUROPA {
 
-  typedef int TimePoint;
+  typedef eint::basis_type TimePoint;
+
 
   class PSResourceProfile;
 

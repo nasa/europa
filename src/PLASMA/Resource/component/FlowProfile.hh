@@ -94,7 +94,7 @@ namespace EUROPA
        * Iterates over all outgoing edges from the source and sums the residual capicity of each
        * edge. Might trigger a maximum flow (re) calculation if required.
        */
-      double getResidualFromSource();
+      edouble getResidualFromSource();
       /**
        * @brief Disables every node reachable from the source in the residual network. Returns the sum
        * of the contribution of each disabled node. The contribution is determined as following:
@@ -111,7 +111,7 @@ namespace EUROPA
        * contributions, which maps a TransactionId to a InstantId is maps every transaction associated with a disabled
        * node to \a instant.
        */
-      inline double disableReachableResidualGraph( TransactionId2InstantId& contributions, const InstantId& instant  );
+      inline edouble disableReachableResidualGraph( TransactionId2InstantId& contributions, const InstantId& instant  );
       /**
        * @brief Returns true if the invoking instance calculates the lower level, otherwise returns false which indicates
        * the invoking instance is calculating the upper level.
@@ -141,7 +141,7 @@ namespace EUROPA
       /**
        * @brief Helper function for disableReachableResidualGraph
        */
-      inline void visitNeighbors( const Node* node, double& residual, Node2Bool& visited, TransactionId2InstantId& contributions, const InstantId& instant  );
+      inline void visitNeighbors( const Node* node, edouble& residual, Node2Bool& visited, TransactionId2InstantId& contributions, const InstantId& instant  );
       /*!
        * @brief Boolean indicating if the instance is intended to calculate the lower level
        */
@@ -168,12 +168,12 @@ namespace EUROPA
       Node* m_sink;
     };
 
-    double FlowProfileGraph::disableReachableResidualGraph( TransactionId2InstantId& contributions, const InstantId& instant )
+    edouble FlowProfileGraph::disableReachableResidualGraph( TransactionId2InstantId& contributions, const InstantId& instant )
     {
       debugMsg("FlowProfileGraph:disableReachableResidualGraph","Lower level: "
 	       << std::boolalpha << m_lowerLevel );
 
-      double residual = 0.0;
+      edouble residual = 0.0;
 
       if( m_recalculate )
 	{
@@ -192,7 +192,7 @@ namespace EUROPA
       return residual;
     }
 
-    void FlowProfileGraph::visitNeighbors( const Node* node, double& residual, Node2Bool& visited, TransactionId2InstantId& contributions, const InstantId& instant  )
+    void FlowProfileGraph::visitNeighbors( const Node* node, edouble& residual, Node2Bool& visited, TransactionId2InstantId& contributions, const InstantId& instant  )
     {
       EdgeOutIterator ite( *node );
 
@@ -296,7 +296,7 @@ namespace EUROPA
       /**
        * @brief Constructor
        */
-      FlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const double initLevelLb = 0, const double initLevelUb = 0 );
+      FlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const edouble initLevelLb = 0, const edouble initLevelUb = 0 );
       /**
        * @brief Destructor
        */
@@ -416,8 +416,8 @@ namespace EUROPA
       FlowProfileGraph* m_lowerLevelGraph;
       FlowProfileGraph* m_upperLevelGraph;
 
-      double m_lowerClosedLevel;
-      double m_upperClosedLevel;
+      edouble m_lowerClosedLevel;
+      edouble m_upperClosedLevel;
 
       bool m_recalculateLowerLevel;
       bool m_recalculateUpperLevel;

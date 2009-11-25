@@ -125,7 +125,7 @@ public:
     return true;
   }
 private:
-  static bool verifyProfile( Profile& profile, int instances, int times[], double lowerLevel[], double upperLevel[] ) {
+  static bool verifyProfile( Profile& profile, int instances, eint times[], edouble lowerLevel[], edouble upperLevel[] ) {
     int counter = 0;
 
     ProfileIterator ite( profile.getId() );
@@ -177,7 +177,7 @@ private:
     profile.recompute();
   }
 
-  static void executeScenario1( Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[] ) {
+  static void executeScenario1( Profile& profile, ConstraintEngine& ce, int nrInstances, eint itimes[], edouble lowerLevels[], edouble upperLevels[] ) {
 
     /*!
      * No explicit ordering between transactions
@@ -220,7 +220,7 @@ private:
     CPPUNIT_ASSERT( profileMatches );
   }
 
-  static void executeScenario2( Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
+  static void executeScenario2( Profile& profile, ConstraintEngine& ce, int nrInstances, eint itimes[], edouble lowerLevels[], edouble upperLevels[]  ) {
 
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 10), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 0, 10), true, "t2" );
@@ -241,7 +241,7 @@ private:
     CPPUNIT_ASSERT( profileMatches );
   }
 
-  static void executeScenario3( Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
+  static void executeScenario3( Profile& profile, ConstraintEngine& ce, int nrInstances, eint itimes[], edouble lowerLevels[], edouble upperLevels[]  ) {
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain(  0, 10), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 10, 10), true, "t2" );
     Variable<IntervalIntDomain> t3( ce.getId(), IntervalIntDomain( 10, 20), true, "t3" );
@@ -265,7 +265,7 @@ private:
     CPPUNIT_ASSERT( profileMatches );
   }
 
-  static void executeScenario4( Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
+  static void executeScenario4( Profile& profile, ConstraintEngine& ce, int nrInstances, eint itimes[], edouble lowerLevels[], edouble upperLevels[]  ) {
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain(  0, 5), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 10, 15), true, "t2" );
     Variable<IntervalIntDomain> t3( ce.getId(), IntervalIntDomain( 20, 25), true, "t3" );
@@ -289,7 +289,7 @@ private:
     CPPUNIT_ASSERT( profileMatches );
   }
 
-  static void executeScenario5( Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
+  static void executeScenario5( Profile& profile, ConstraintEngine& ce, int nrInstances, eint itimes[], edouble lowerLevels[], edouble upperLevels[]  ) {
 
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 10), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 0, 10), true, "t2" );
@@ -333,9 +333,9 @@ private:
 
     const int nrInstances = 2;
 
-    int itimes[nrInstances] = {0,100};
-    double lowerLevels[nrInstances] = {-4,-2};
-    double upperLevels[nrInstances] = {4,2};
+    eint itimes[nrInstances] = {0,100};
+    edouble lowerLevels[nrInstances] = {-4,-2};
+    edouble upperLevels[nrInstances] = {4,2};
 
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 100), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 0, 100), true, "t2" );
@@ -383,7 +383,7 @@ private:
      */
     debugMsg("ResourceTest","    Case 2");
 
-    double postq2eq1LowerLevels[nrInstances] = {-3,-1};
+    edouble postq2eq1LowerLevels[nrInstances] = {-3,-1};
 
     q2.restrictBaseDomain( IntervalDomain(1,1) );
 
@@ -414,9 +414,9 @@ private:
 
     const int postt2to10NrInstances = 3;
 
-    int postt2to10Itimes[postt2to10NrInstances] = {0,10,100};
-    double postt2to10LowerLevels[postt2to10NrInstances] = {-2,-3,-1};
-    double postt2to10UpperLevels[postt2to10NrInstances] = {4,4,2};
+    eint postt2to10Itimes[postt2to10NrInstances] = {0,10,100};
+    edouble postt2to10LowerLevels[postt2to10NrInstances] = {-2,-3,-1};
+    edouble postt2to10UpperLevels[postt2to10NrInstances] = {4,4,2};
 
     {
       bool profileMatches = verifyProfile( profile, postt2to10NrInstances, postt2to10Itimes, postt2to10LowerLevels, postt2to10UpperLevels );
@@ -446,9 +446,9 @@ private:
 
     const int postt2to11NrInstances = 3;
 
-    int postt2to11Itimes[postt2to11NrInstances] = {0,11,100};
-    double postt2to11LowerLevels[postt2to11NrInstances] = {-2,-3,-1};
-    double postt2to11UpperLevels[postt2to11NrInstances] = {4,4,2};
+    eint postt2to11Itimes[postt2to11NrInstances] = {0,11,100};
+    edouble postt2to11LowerLevels[postt2to11NrInstances] = {-2,-3,-1};
+    edouble postt2to11UpperLevels[postt2to11NrInstances] = {4,4,2};
 
     {
       bool profileMatches = verifyProfile( profile, postt2to11NrInstances, postt2to11Itimes, postt2to11LowerLevels, postt2to11UpperLevels );
@@ -481,9 +481,9 @@ private:
 
     const int postt3eqt4NrInstances = 3;
 
-    int postt3eqt4Itimes[postt3eqt4NrInstances] = {0,11,100};
-    double postt3eqt4LowerLevels[postt3eqt4NrInstances] = {-1,-2,-1};
-    double postt3eqt4UpperLevels[postt3eqt4NrInstances] = {3,3,2};
+    eint postt3eqt4Itimes[postt3eqt4NrInstances] = {0,11,100};
+    edouble postt3eqt4LowerLevels[postt3eqt4NrInstances] = {-1,-2,-1};
+    edouble postt3eqt4UpperLevels[postt3eqt4NrInstances] = {3,3,2};
 
     {
       bool profileMatches = verifyProfile( profile, postt3eqt4NrInstances, postt3eqt4Itimes, postt3eqt4LowerLevels, postt3eqt4UpperLevels );
@@ -492,7 +492,7 @@ private:
     }
   }
 
-  static void executeScenario7( Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
+  static void executeScenario7( Profile& profile, ConstraintEngine& ce, int nrInstances, eint itimes[], edouble lowerLevels[], edouble upperLevels[]  ) {
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 10), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 0, 10), true, "t2" );
 
@@ -516,7 +516,7 @@ private:
     CPPUNIT_ASSERT( profileMatches );
   }
 
-  static void executeScenario8( Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
+  static void executeScenario8( Profile& profile, ConstraintEngine& ce, int nrInstances, eint itimes[], edouble lowerLevels[], edouble upperLevels[]  ) {
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 10), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain( 0, 10), true, "t2" );
 
@@ -540,7 +540,7 @@ private:
     CPPUNIT_ASSERT( profileMatches );
   }
 
-  static void executeScenario9( Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
+  static void executeScenario9( Profile& profile, ConstraintEngine& ce, int nrInstances, eint itimes[], edouble lowerLevels[], edouble upperLevels[]  ) {
 
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 1, 3), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain(10, 12), true, "t2" );
@@ -569,7 +569,7 @@ private:
     CPPUNIT_ASSERT( profileMatches );
   }
 
-  static void executeScenario10( Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
+  static void executeScenario10( Profile& profile, ConstraintEngine& ce, int nrInstances, eint itimes[], edouble lowerLevels[], edouble upperLevels[]  ) {
 
     /*!
      * Transaction1 constrained to be at Transaction2
@@ -636,7 +636,7 @@ private:
     CPPUNIT_ASSERT( profileMatches );
   }
 
-  static void executeScenario11( Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
+  static void executeScenario11( Profile& profile, ConstraintEngine& ce, int nrInstances, eint itimes[], edouble lowerLevels[], edouble upperLevels[]  ) {
     /*!
      * Transaction1 constrained to be before or at Transaction2
      *
@@ -712,9 +712,9 @@ private:
     {
       const int nrInstances = 2;
 
-      int itimes[nrInstances] = {MINUS_INFINITY,PLUS_INFINITY};
-      double lowerLevels[nrInstances] = {MINUS_INFINITY,MINUS_INFINITY};
-      double upperLevels[nrInstances] = {PLUS_INFINITY,PLUS_INFINITY};
+      eint itimes[nrInstances] = {MINUS_INFINITY,PLUS_INFINITY};
+      edouble lowerLevels[nrInstances] = {MINUS_INFINITY,MINUS_INFINITY};
+      edouble upperLevels[nrInstances] = {PLUS_INFINITY,PLUS_INFINITY};
 
       bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
@@ -732,9 +732,9 @@ private:
     {
       const int nrInstances = 3;
 
-      int itimes[nrInstances] = {0,1,PLUS_INFINITY};
-      double lowerLevels[nrInstances] = {MINUS_INFINITY,MINUS_INFINITY,MINUS_INFINITY};
-      double upperLevels[nrInstances] = {0,PLUS_INFINITY,PLUS_INFINITY};
+      eint itimes[nrInstances] = {0,1,PLUS_INFINITY};
+      edouble lowerLevels[nrInstances] = {MINUS_INFINITY,MINUS_INFINITY,MINUS_INFINITY};
+      edouble upperLevels[nrInstances] = {0,PLUS_INFINITY,PLUS_INFINITY};
 
       bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
@@ -743,7 +743,7 @@ private:
 
   }
 
-  static void executeScenario13( Profile& profile, ConstraintEngine& ce, int nrInstances, int itimes[], double lowerLevels[], double upperLevels[]  ) {
+  static void executeScenario13( Profile& profile, ConstraintEngine& ce, int nrInstances, eint itimes[], edouble lowerLevels[], edouble upperLevels[]  ) {
     /*!
      * Transaction1 constrained to be [1,inf) before Transaction2
      *
@@ -810,9 +810,9 @@ private:
 
     {
       const int nrInstances = 2;
-      int itimes[nrInstances] = {0,10};
-      double lowerLevels[nrInstances] = { -3, -3};
-      double upperLevels[nrInstances] = {  0, -3};
+      eint itimes[nrInstances] = {0,10};
+      edouble lowerLevels[nrInstances] = { -3, -3};
+      edouble upperLevels[nrInstances] = {  0, -3};
 
       bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
@@ -842,9 +842,9 @@ private:
 
     {
       const int nrInstances = 4;
-      int itimes[nrInstances] = { 0,5,10,15 };
-      double lowerLevels[nrInstances] = { -3, -6,-6,-6 };
-      double upperLevels[nrInstances] = {  0,  0,-3,-6 };
+      eint itimes[nrInstances] = { 0,5,10,15 };
+      edouble lowerLevels[nrInstances] = { -3, -6,-6,-6 };
+      edouble upperLevels[nrInstances] = {  0,  0,-3,-6 };
 
       bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
@@ -877,9 +877,9 @@ private:
 
     {
       const int nrInstances = 6;
-      int itimes[nrInstances] = { 0,5,10,15,20,25 };
-      double lowerLevels[nrInstances] = { -3,-6,-6,-6,-9,-9 };
-      double upperLevels[nrInstances] = {  0, 0,-3,-6,-6,-9 };
+      eint itimes[nrInstances] = { 0,5,10,15,20,25 };
+      edouble lowerLevels[nrInstances] = { -3,-6,-6,-6,-9,-9 };
+      edouble upperLevels[nrInstances] = {  0, 0,-3,-6,-6,-9 };
 
       bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
@@ -912,9 +912,9 @@ private:
 
     {
       const int nrInstances = 7;
-      int itimes[nrInstances] = { -10,0,5,10,15,20,25 };
-      double lowerLevels[nrInstances] = { -3, -6,-9,-9,-9,-12,-12 };
-      double upperLevels[nrInstances] = {  0, -3,-3,-6,-9,-9,-12  };
+      eint itimes[nrInstances] = { -10,0,5,10,15,20,25 };
+      edouble lowerLevels[nrInstances] = { -3, -6,-9,-9,-9,-12,-12 };
+      edouble upperLevels[nrInstances] = {  0, -3,-3,-6,-9,-9,-12  };
 
       bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
 
@@ -964,7 +964,7 @@ private:
     profile.addTransaction( trans3.getId() );
     profile.addTransaction( trans4.getId() );
 
-    trans1.quantity()->restrictBaseDomain( IntervalIntDomain( (int) trans1.quantity()->lastDomain().getLowerBound(), 1 ) );
+    trans1.quantity()->restrictBaseDomain( IntervalIntDomain( cast_int(trans1.quantity()->lastDomain().getLowerBound()), 1 ) );
 
     profile.removeTransaction( trans1.getId() );
     profile.removeTransaction( trans2.getId() );
@@ -1017,9 +1017,9 @@ private:
 
     const int nrInstances = 4;
 
-    int itimes[nrInstances] = {0,5,10,15};
-    double lowerLevels[nrInstances] = {0,-1,-1,0};
-    double upperLevels[nrInstances] = {1,2,2,0};
+    eint itimes[nrInstances] = {0,5,10,15};
+    edouble lowerLevels[nrInstances] = {0,-1,-1,0};
+    edouble upperLevels[nrInstances] = {1,2,2,0};
 
     executeScenario1( profile, ce, nrInstances, itimes, lowerLevels, upperLevels );
 
@@ -1048,9 +1048,9 @@ private:
 
     const int nrInstances = 2;
 
-    int itimes[nrInstances] = {0,10};
-    double lowerLevels[nrInstances] = {-1,0};
-    double upperLevels[nrInstances] = {1,0};
+    eint itimes[nrInstances] = {0,10};
+    edouble lowerLevels[nrInstances] = {-1,0};
+    edouble upperLevels[nrInstances] = {1,0};
 
     executeScenario2( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
     return true;
@@ -1079,9 +1079,9 @@ private:
 
     const int nrInstances = 3;
 
-    int itimes[nrInstances] = {0,10,20};
-    double lowerLevels[nrInstances] = {0,-1,0};
-    double upperLevels[nrInstances] = {2,3,3};
+    eint itimes[nrInstances] = {0,10,20};
+    edouble lowerLevels[nrInstances] = {0,-1,0};
+    edouble upperLevels[nrInstances] = {2,3,3};
 
 
     executeScenario3( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
@@ -1110,9 +1110,9 @@ private:
 
     const int nrInstances = 6;
 
-    int itimes[nrInstances] = {0,5,10,15,20,25};
-    double lowerLevels[nrInstances] = {0,1,-1,-1,-1,0};
-    double upperLevels[nrInstances] = {2,2,2,1,3,3};
+    eint itimes[nrInstances] = {0,5,10,15,20,25};
+    edouble lowerLevels[nrInstances] = {0,1,-1,-1,-1,0};
+    edouble upperLevels[nrInstances] = {2,2,2,1,3,3};
 
     executeScenario4( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
     return true;
@@ -1139,9 +1139,9 @@ private:
 
     const int nrInstances = 2;
 
-    int itimes[nrInstances] = {0,10};
-    double lowerLevels[nrInstances] = {0, 0};
-    double upperLevels[nrInstances] = {0, 0};
+    eint itimes[nrInstances] = {0,10};
+    edouble lowerLevels[nrInstances] = {0, 0};
+    edouble upperLevels[nrInstances] = {0, 0};
 
     executeScenario5( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
     return true;
@@ -1178,9 +1178,9 @@ private:
 
     const int nrInstances = 2;
 
-    int itimes[nrInstances] = {0,10};
-    double lowerLevels[nrInstances] = {0, 0};
-    double upperLevels[nrInstances] = {1, 1};
+    eint itimes[nrInstances] = {0,10};
+    edouble lowerLevels[nrInstances] = {0, 0};
+    edouble upperLevels[nrInstances] = {1, 1};
 
 
     executeScenario7( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
@@ -1207,9 +1207,9 @@ private:
 
     const int nrInstances = 2;
 
-    int itimes[nrInstances] = {0,10};
-    double lowerLevels[nrInstances] = {-1, -1};
-    double upperLevels[nrInstances] = {0, 0};
+    eint itimes[nrInstances] = {0,10};
+    edouble lowerLevels[nrInstances] = {-1, -1};
+    edouble upperLevels[nrInstances] = {0, 0};
 
     executeScenario8( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
     return true;
@@ -1240,9 +1240,9 @@ private:
 
     const int nrInstances = 6;
 
-    int itimes[nrInstances] =         { 1, 3, 9,10,11,12};
-    double lowerLevels[nrInstances] = {-1 + initialLowerLevel,-1 + initialLowerLevel,-2 + initialLowerLevel,-2 + initialLowerLevel,-1 + initialLowerLevel, 0 + initialLowerLevel };
-    double upperLevels[nrInstances] = { 0 + initialUpperLevel,-1 + initialUpperLevel,-2 + initialUpperLevel,-1 + initialUpperLevel, 0 + initialUpperLevel, 0 + initialUpperLevel };
+    eint itimes[nrInstances] =         { 1, 3, 9,10,11,12};
+    edouble lowerLevels[nrInstances] = {-1 + initialLowerLevel,-1 + initialLowerLevel,-2 + initialLowerLevel,-2 + initialLowerLevel,-1 + initialLowerLevel, 0 + initialLowerLevel };
+    edouble upperLevels[nrInstances] = { 0 + initialUpperLevel,-1 + initialUpperLevel,-2 + initialUpperLevel,-1 + initialUpperLevel, 0 + initialUpperLevel, 0 + initialUpperLevel };
 
     executeScenario9( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
 
@@ -1275,9 +1275,9 @@ private:
 
     const int nrInstances = 5;
 
-    int itimes[nrInstances] = {0,10,11,12,100};
-    double lowerLevels[nrInstances] = {2,3,0,0,5};
-    double upperLevels[nrInstances] = {2,3,3,3,5};
+    eint itimes[nrInstances] = {0,10,11,12,100};
+    edouble lowerLevels[nrInstances] = {2,3,0,0,5};
+    edouble upperLevels[nrInstances] = {2,3,3,3,5};
 
     executeScenario10( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
 
@@ -1307,9 +1307,9 @@ private:
     const int nrInstances = 2;
 
 
-    int itimes[nrInstances] = {MINUS_INFINITY,PLUS_INFINITY};
-    double lowerLevels[nrInstances] = {MINUS_INFINITY,MINUS_INFINITY};
-    double upperLevels[nrInstances] = {PLUS_INFINITY,PLUS_INFINITY};
+    eint itimes[nrInstances] = {MINUS_INFINITY,PLUS_INFINITY};
+    edouble lowerLevels[nrInstances] = {MINUS_INFINITY,MINUS_INFINITY};
+    edouble upperLevels[nrInstances] = {PLUS_INFINITY,PLUS_INFINITY};
 
     executeScenario11( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
 
@@ -1348,9 +1348,9 @@ private:
     const int nrInstances = 4;
 
 
-    int itimes[nrInstances] = {0,1,9,10};
-    double lowerLevels[nrInstances] = {-6,-6,-6,-3};
-    double upperLevels[nrInstances] = {-3,-3,-3,-3};
+    eint itimes[nrInstances] = {0,1,9,10};
+    edouble lowerLevels[nrInstances] = {-6,-6,-6,-3};
+    edouble upperLevels[nrInstances] = {-3,-3,-3,-3};
 
     executeScenario13( profile, ce, nrInstances, itimes, lowerLevels, upperLevels  );
 

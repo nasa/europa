@@ -10,7 +10,7 @@
 
 namespace EUROPA {
 
-    Profile::Profile(const PlanDatabaseId db, const FVDetectorId flawDetector, const double initLevelLb, const double initLevelUb)
+    Profile::Profile(const PlanDatabaseId db, const FVDetectorId flawDetector, const edouble initLevelLb, const edouble initLevelUb)
       : m_id(this), m_changeCount(0), m_needsRecompute(false), m_initLevelLb(initLevelLb), m_initLevelUb(initLevelUb),
         m_planDatabase(db), m_detector(flawDetector) {}
 
@@ -116,8 +116,8 @@ namespace EUROPA {
       m_variableListeners.erase(t);
       handleTransactionVariableDeletion(t);
 
-      for(std::vector<int>::const_iterator it = emptyInstants.begin(); it != emptyInstants.end(); ++it) {
-        std::map<int, InstantId>::iterator instIt = m_instants.find(*it);
+      for(std::vector<eint>::const_iterator it = emptyInstants.begin(); it != emptyInstants.end(); ++it) {
+        std::map<eint, InstantId>::iterator instIt = m_instants.find(*it);
         //this can't be an error because the discard above constitues a relaxation of the variable, which will get handled in-situ
         //and may remove instants in the emptyInstants vector.
         //checkError(instIt != m_instants.end(), "Computed empty instant at " << *it << " but there is no such instant in the profile.");
@@ -373,7 +373,7 @@ namespace EUROPA {
     void Profile::getLevel(const eint time, IntervalDomain& dest) {
       if(needsRecompute())
         handleRecompute();
-      std::map<int, InstantId>::iterator it = getGreatestInstant(time);
+      std::map<eint, InstantId>::iterator it = getGreatestInstant(time);
       IntervalDomain result;
 
       if(it == m_instants.end())
@@ -392,7 +392,7 @@ namespace EUROPA {
       if(m_instants.empty())
         return m_instants.end();
 
-      std::map<int, InstantId>::iterator retval = m_instants.lower_bound(time);
+      std::map<eint, InstantId>::iterator retval = m_instants.lower_bound(time);
 
       //checkError(retval != m_instants.end(), "No instant with time not greater than " << time);
       if(retval == m_instants.end() || retval->second->getTime() > time)
@@ -589,12 +589,12 @@ namespace EUROPA {
     std::string Profile::toString() const {
       std::stringstream sstr;
       sstr << "Profile " << m_id << std::endl;
-      for(std::map<int, InstantId>::const_iterator it = m_instants.begin(); it != m_instants.end(); ++it)
+      for(std::map<eint, InstantId>::const_iterator it = m_instants.begin(); it != m_instants.end(); ++it)
         sstr << it->second->toString() << std::endl;
       return sstr.str();
     }
 
-    ProfileIterator::ProfileIterator(const ProfileId prof, const int startTime, const int endTime)
+    ProfileIterator::ProfileIterator(const ProfileId prof, const eint startTime, const eint endTime)
       : m_id(this), m_profile(prof), m_changeCount(prof->m_changeCount) {
       //if(m_profile->m_needsRecompute)
       //m_profile->handleRecompute();
@@ -623,28 +623,28 @@ namespace EUROPA {
       return m_start == m_end;
     }
 
-    int ProfileIterator::getStartTime() const {
+    eint ProfileIterator::getStartTime() const {
       return m_startTime;
     }
 
-    int ProfileIterator::getTime() const {
+    eint ProfileIterator::getTime() const {
       checkError(!isStale(), "Stale profile iterator.");
       checkError(!done(), "Attempted to get time of a done iterator.");
       return m_start->second->getTime();
     }
 
-    int ProfileIterator::getEndTime() const {
+    eint ProfileIterator::getEndTime() const {
       return m_endTime;
     }
 
-    double ProfileIterator::getLowerBound() const {
+    edouble ProfileIterator::getLowerBound() const {
       checkError(!isStale(), "Stale profile iterator.");
       checkError(!done(), "Attempted to get bound of a done iterator.");
       m_profile->recompute();
       return m_start->second->getLowerLevel();
     }
 
-    double ProfileIterator::getUpperBound() const {
+    edouble ProfileIterator::getUpperBound() const {
       checkError(!isStale(), "Stale profile iterator.");
       checkError(!done(), "Attempted to get bound of a done iterator.");
       m_profile->recompute();

@@ -425,6 +425,7 @@ namespace EUROPA {
     friend double cast_double(const eint e);
     friend long long int cast_llong(const eint e);
     friend long double cast_ldouble(const eint e);
+    friend eint::basis_type cast_basis(const eint e);
 
   private:
     
@@ -527,6 +528,7 @@ namespace EUROPA {
     friend double cast_double(const edouble e);
     friend long long int cast_llong(const edouble e);
     friend long double cast_ldouble(const edouble e);
+    friend edouble::basis_type cast_basis(const edouble e);
   private:
     friend class eint;
     friend class __gnu_cxx::hash<edouble>;
@@ -603,6 +605,8 @@ namespace EUROPA {
   inline long long int cast_llong(const edouble e) {return static_cast<long long int>(e.m_v);}
   inline long double cast_ldouble(const eint e) {return static_cast<long double>(e.m_v);}
   inline long double cast_ldouble(const edouble e) {return static_cast<long double>(e.m_v);}
+  inline eint::basis_type cast_basis(const eint e) {return static_cast<eint::basis_type>(e.m_v);}
+  inline edouble::basis_type cast_basis(const edouble e) {return static_cast<edouble::basis_type>(e.m_v);}
 
   inline std::ostream& operator<<(std::ostream& o, const edouble e) {return(o << e.m_v);}
   inline std::istream& operator>>(std::istream& o, edouble& e) {
