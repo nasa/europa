@@ -1053,8 +1053,8 @@ namespace EUROPA {
   IntervalIntDomain::IntervalIntDomain(const DataTypeId& dt) : IntervalDomain(dt)  {}
   IntervalIntDomain::IntervalIntDomain(eint lb, eint ub, const DataTypeId& dt) : IntervalDomain(lb,ub,dt) {}
   IntervalIntDomain::IntervalIntDomain(eint value, const DataTypeId& dt) : IntervalDomain(value,dt) {}
-  IntervalIntDomain::IntervalIntDomain(int lb, int ub, const DataTypeId& dt) : IntervalDomain(lb,ub,dt) {}
-  IntervalIntDomain::IntervalIntDomain(int value, const DataTypeId& dt) : IntervalDomain(value,dt) {}
+  IntervalIntDomain::IntervalIntDomain(eint::basis_type lb, eint::basis_type ub, const DataTypeId& dt) : IntervalDomain(lb,ub,dt) {}
+  IntervalIntDomain::IntervalIntDomain(eint::basis_type value, const DataTypeId& dt) : IntervalDomain(value,dt) {}
   IntervalIntDomain::IntervalIntDomain(const Domain& org) : IntervalDomain(org) {}
 
   IntervalIntDomain::~IntervalIntDomain()

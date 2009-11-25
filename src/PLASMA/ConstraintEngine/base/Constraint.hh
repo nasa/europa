@@ -141,7 +141,7 @@ namespace EUROPA {
     /**
      * @brief Utility to capture the state of the constraint.
      */
-    virtual std::string toString() const;
+    virtual std::string toLongString() const;
 
     /**
      * @brief Notification from a variable that its base domain has been retricted. May cause the constraint to be

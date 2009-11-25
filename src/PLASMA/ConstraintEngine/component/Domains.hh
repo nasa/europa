@@ -634,9 +634,9 @@ namespace EUROPA {
 
     IntervalIntDomain(const DataTypeId& dt = IntDT::instance());
     IntervalIntDomain(eint lb, eint ub, const DataTypeId& dt = IntDT::instance());
-    IntervalIntDomain(int lb, int ub, const DataTypeId& dt = IntDT::instance());
+    IntervalIntDomain(eint::basis_type lb, eint::basis_type ub, const DataTypeId& dt = IntDT::instance());
     IntervalIntDomain(eint value, const DataTypeId& dt = IntDT::instance());
-    IntervalIntDomain(int value, const DataTypeId& dt = IntDT::instance());
+    IntervalIntDomain(eint::basis_type value, const DataTypeId& dt = IntDT::instance());
     IntervalIntDomain(const Domain& org);
 
     virtual ~IntervalIntDomain();

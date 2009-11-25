@@ -431,7 +431,7 @@ namespace EUROPA {
 
 
 
-  std::string Constraint::toString() const{
+  std::string Constraint::toLongString() const{
     std::stringstream sstr;
     sstr << Entity::toString() << std::endl;
 
