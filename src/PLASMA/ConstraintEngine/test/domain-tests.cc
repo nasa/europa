@@ -59,7 +59,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(!infTest.isEmpty());
 
 
-      IntervalDomain realDomain(10.2,20.4);
+      IntervalDomain realDomain(10.2 ,20.4);
       CPPUNIT_ASSERT(!realDomain.isEmpty());
       CPPUNIT_ASSERT(!realDomain.isFinite());
       CPPUNIT_ASSERT_EQUAL((unsigned int) cast_int(PLUS_INFINITY), realDomain.getSize());
@@ -177,15 +177,15 @@ namespace EUROPA {
 
       IntervalDomain dom8;
       IntervalDomain dom9;
-      dom8.intersect(IntervalDomain(0.1, 0.10));
-      dom9.intersect(IntervalDomain(0.10, 0.10));
+      dom8.intersect(make_int(0.1, 0.10));
+      dom9.intersect(make_int(0.10, 0.10));
       CPPUNIT_ASSERT(dom8.intersects(dom9));
 
       // Case added to recreate failure case for GNATS 3045
       IntervalDomain dom8a;
       IntervalDomain dom9a;
-      dom8a.intersect(IntervalDomain(0.1, 0.1));
-      dom9a.intersect(IntervalDomain(0.1, 0.1));
+      dom8a.intersect(make_int(0.1, 0.1));
+      dom9a.intersect(make_int(0.1, 0.1));
       CPPUNIT_ASSERT(dom8a.intersects(dom9a));
       CPPUNIT_ASSERT(dom8a.getUpperBound() == 0.1);
       CPPUNIT_ASSERT(dom8a.getLowerBound() == 0.1);
@@ -1050,7 +1050,7 @@ namespace EUROPA {
 
       id3.equate(ed6);
       CPPUNIT_ASSERT(ed6.getSize() == 2);
-      CPPUNIT_ASSERT(id3 == IntervalDomain(1.5, 2.5));
+      CPPUNIT_ASSERT(id3 == make_int(1.5, 2.5));
 
       IntervalDomain id4(1.0, 1.25);
 
@@ -1453,7 +1453,7 @@ namespace EUROPA {
       fourDom.insert(3.1);
       values.push_back(4.2);
       NumericDomain fiveDom(values); // Closed
-      NumericDomain oneDom(2.7); // Singleton
+      NumericDomain oneDom(2.7); // Singletn
 
       copyPtr = emptyOpen.copy();
       CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
@@ -1521,7 +1521,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(copyPtr->getSize() == 0);
       CPPUNIT_ASSERT(*copyPtr == empty);
       CPPUNIT_ASSERT(!(*copyPtr == one2ten));
-      copyPtr->relax(IntervalDomain(-3.1, 11.0));
+      copyPtr->relax(make_int(-3.1, 11.0));
       CPPUNIT_ASSERT(copyPtr->isMember(0.0));
       CPPUNIT_ASSERT(!copyPtr->isSingleton());
       CPPUNIT_ASSERT(!copyPtr->isEmpty());
@@ -1541,7 +1541,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(!copyPtr->isEmpty());
       CPPUNIT_ASSERT(!(*copyPtr == empty));
       CPPUNIT_ASSERT(*copyPtr == one2ten);
-      copyPtr->relax(IntervalDomain(-3.1, 11.0));
+      copyPtr->relax(make_int(-3.1, 11.0));
       CPPUNIT_ASSERT(copyPtr->isMember(0.0));
       CPPUNIT_ASSERT(!copyPtr->isSingleton());
       CPPUNIT_ASSERT(!copyPtr->isEmpty());
@@ -1562,7 +1562,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(!(*copyPtr == empty));
       CPPUNIT_ASSERT(*copyPtr == four);
       CPPUNIT_ASSERT(!(*copyPtr == one2ten));
-      copyPtr->relax(IntervalDomain(-3, 11));
+      copyPtr->relax(make_int(-3, 11));
       CPPUNIT_ASSERT(copyPtr->isMember(0.0));
       CPPUNIT_ASSERT(!copyPtr->isSingleton());
       CPPUNIT_ASSERT(!copyPtr->isEmpty());
@@ -1595,7 +1595,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(copyPtr->getSize() == 0);
       CPPUNIT_ASSERT(*copyPtr == empty);
       CPPUNIT_ASSERT(!(*copyPtr == one2ten));
-      copyPtr->relax(IntervalDomain(-3, 11));
+      copyPtr->relax(make_int(-3, 11));
       CPPUNIT_ASSERT(copyPtr->isMember(0));
       CPPUNIT_ASSERT(!copyPtr->isSingleton());
       CPPUNIT_ASSERT(!copyPtr->isEmpty());
@@ -1616,7 +1616,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(copyPtr->getSize() == 10);
       CPPUNIT_ASSERT(!(*copyPtr == empty));
       CPPUNIT_ASSERT(*copyPtr == one2ten);
-      copyPtr->relax(IntervalIntDomain(-3, 11));
+      copyPtr->relax(make_int_int(-3, 11));
       CPPUNIT_ASSERT(copyPtr->getSize() == 15);
       CPPUNIT_ASSERT(copyPtr->isMember(0));
       CPPUNIT_ASSERT(!copyPtr->isSingleton());
@@ -1638,7 +1638,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(!(*copyPtr == empty));
       CPPUNIT_ASSERT(*copyPtr == four);
       CPPUNIT_ASSERT(!(*copyPtr == one2ten));
-      copyPtr->relax(IntervalIntDomain(-3, 11));
+      copyPtr->relax(make_int_int(-3, 11));
       CPPUNIT_ASSERT(copyPtr->getSize() == 15);
       CPPUNIT_ASSERT(copyPtr->isMember(0));
       CPPUNIT_ASSERT(!copyPtr->isSingleton());

@@ -53,9 +53,9 @@ namespace EUROPA {
 
     protected:
       CESchemaId m_id;
-      std::map<double, DataTypeId> m_dataTypes;
-      std::map<double, ConstraintTypeId > m_constraintTypes;
-      std::map<double, CFunctionId> m_cfunctions;
+      std::map<edouble, DataTypeId> m_dataTypes;
+      std::map<edouble, ConstraintTypeId > m_constraintTypes;
+      std::map<edouble, CFunctionId> m_cfunctions;
   };
 
 } // namespace EUROPA

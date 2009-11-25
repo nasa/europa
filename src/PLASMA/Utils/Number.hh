@@ -2,6 +2,7 @@
 #define _H_Number
 #include <iomanip>
 
+#include <cassert>
 #include <cmath>
 #include <istream>
 #include <ostream>
@@ -607,6 +608,10 @@ namespace EUROPA {
   inline std::istream& operator>>(std::istream& o, edouble& e) {
     return(o >> e.m_v);}
 
+  template<typename T>
+  inline bool finite(const T& v) {
+    return (v != std::numeric_limits<eint>::infinity() && v != std::numeric_limits<eint>::minus_infinity());
+  }
 }
 
 namespace std {

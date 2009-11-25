@@ -915,7 +915,7 @@ private:
     {
       Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(10, PLUS_INFINITY));
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, PLUS_INFINITY));
-      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(MINUS_INFINITY, 100));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(MINUS_INFINITY, eint(100)));
       AddEqualConstraint c0(LabelStr("AddEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       bool res = ENGINE->propagate();
       CPPUNIT_ASSERT(res);
@@ -1405,7 +1405,7 @@ private:
     {
       Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(0, PLUS_INFINITY));
       Variable<IntervalDomain> v1(ENGINE, IntervalDomain(1, PLUS_INFINITY));
-      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(MINUS_INFINITY, 6));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(MINUS_INFINITY, eint(6)));
       MultEqualConstraint c0(LabelStr("MultEqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId(), v2.getId()));
       ENGINE->propagate();
       CPPUNIT_ASSERT(ENGINE->constraintConsistent());
@@ -1504,7 +1504,7 @@ private:
     {
       Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain(1, 1));
       Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(1, 1));
-      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(MINUS_INFINITY, 0));
+      Variable<IntervalIntDomain> v2(ENGINE, IntervalIntDomain(MINUS_INFINITY, eint(0)));
       Variable<IntervalIntDomain> v3(ENGINE, IntervalIntDomain(1, 1));
       AddMultEqualConstraint c0(LabelStr("AddMultEqualConstraint"),
 				LabelStr("Default"),
@@ -2195,12 +2195,12 @@ private:
 
   static bool testNegateConstraint() {
     Variable<IntervalIntDomain> v0(ENGINE, IntervalIntDomain());
-    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(MINUS_INFINITY, 0));
+    Variable<IntervalIntDomain> v1(ENGINE, IntervalIntDomain(MINUS_INFINITY, eint(0)));
     NegateConstraint c0(LabelStr("NegateConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
     ENGINE->propagate();
     CPPUNIT_ASSERT(ENGINE->constraintConsistent());
     CPPUNIT_ASSERT(v0.getDerivedDomain() == IntervalIntDomain(0, PLUS_INFINITY));
-    CPPUNIT_ASSERT(v1.getDerivedDomain() == IntervalIntDomain(MINUS_INFINITY, 0));
+    CPPUNIT_ASSERT(v1.getDerivedDomain() == IntervalIntDomain(MINUS_INFINITY, eint(0)));
 
     v0.restrictBaseDomain(IntervalIntDomain(20, 30));
     CPPUNIT_ASSERT(v1.getDerivedDomain() == IntervalIntDomain(-30, -20));

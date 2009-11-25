@@ -171,12 +171,12 @@ namespace EUROPA {
     /**
      * @brief Access upper bound
      */
-    virtual double getUpperBound() const = 0;
+    virtual edouble getUpperBound() const = 0;
 
     /**
      * @brief Access lower bound
      */
-    virtual double getLowerBound() const = 0;
+    virtual edouble getLowerBound() const = 0;
 
     /**
      * @brief Access both bounds in a convenience method, and indicates if the domain is infinite
@@ -184,19 +184,19 @@ namespace EUROPA {
      * @param ub update this value with the upper bound
      * @return true if !isFinite()
      */
-    virtual bool getBounds(double& lb, double& ub) const = 0;
+    virtual bool getBounds(edouble& lb, edouble& ub) const = 0;
 
     /**
      * @brief Fill the given list with the contents of the set.
      * @note Should only be called on finite (and thus closed) domains.
      * @param results The target collection to fill with all values in the set.
      */
-    virtual void getValues(std::list<double>& results) const = 0;
+    virtual void getValues(std::list<edouble>& results) const = 0;
 
     /**
      * @brief Access singleton value. Must be a singleton or this will fail.
      */
-    virtual double getSingletonValue() const = 0;
+    virtual edouble getSingletonValue() const = 0;
 
     /**
      * @brief Close the domain.
@@ -397,13 +397,13 @@ namespace EUROPA {
     bool isBool() const;
     bool isString() const;
     bool isRestricted() const;
-    double minDelta() const;
-    std::string toString(double value) const;
+    edouble minDelta() const;
+    std::string toString(edouble value) const;
 
     /**
      * @brief Returns a value for number based on the semantics of the domain.
      */
-    virtual double translateNumber(double number, bool asMin) const;
+    virtual edouble translateNumber(edouble number, bool asMin = true) const;
 
     /**
      * @brief Converts the string to its double representation as a value, if it is present in the domain.
@@ -411,27 +411,28 @@ namespace EUROPA {
      * @param dblValue The value returned, if available. Only relevant if a member of the domain.
      * @return true if the value was present, otherwise false.
      */
-    virtual bool convertToMemberValue(const std::string& strValue, double& dblValue) const = 0;
+    virtual bool convertToMemberValue(const std::string& strValue, edouble& dblValue) const = 0;
 
     /**
      * Tests if 2 values are the same with respect to the minimum difference for the target domain.
      */
-    inline virtual bool compareEqual(double a, double b) const { return(a < b ? b - a < minDelta() : a - b < minDelta()); }
+    inline virtual bool compareEqual(edouble a, edouble b) const 
+    { return(a < b ? b - a < minDelta() : a - b < minDelta()); }
 
     /**
      * @brief Tests if one value is less than another to within minDelta
      */
-    inline bool lt(double a, double b) const { return (a + minDelta() <= b); }
+    inline bool lt(edouble a, edouble b) const { return a != PLUS_INFINITY && b != MINUS_INFINITY && (a + minDelta() <= b); }
 
     /**
      * @brief Tests if one value equals another to within minDelta
      */
-    inline bool eq(double a, double b) const { return compareEqual(a, b); }
+    inline bool eq(edouble a, edouble b) const { return compareEqual(a, b); }
 
     /**
      * @brief Tests if one value is less than or equal to another to within minDelta
      */
-    inline bool leq(double a, double b) const { return (a - minDelta() < b); }
+    inline bool leq(edouble a, edouble b) const { return a == b || (a - minDelta() < b); }
 
   protected:
     /**

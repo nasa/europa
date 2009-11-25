@@ -228,7 +228,7 @@ namespace EUROPA
     LanguageInterpreter *EngineBase::addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter)
     {
       LanguageInterpreter *old = NULL;
-      std::map<double, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
+      std::map<edouble, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
       if(it == getLanguageInterpreters().end())
         getLanguageInterpreters().insert(std::make_pair(LabelStr(language), interpreter));
       else {
@@ -242,7 +242,7 @@ namespace EUROPA
     LanguageInterpreter* EngineBase::removeLanguageInterpreter(const std::string& language)
     {
       LanguageInterpreter *old = NULL;
-      std::map<double, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
+      std::map<edouble, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
       if(it != getLanguageInterpreters().end()) {
     	old = it->second;
         getLanguageInterpreters().erase(it);

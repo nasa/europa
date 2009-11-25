@@ -22,7 +22,7 @@ public:
     virtual bool isBool() const;
     virtual bool isString() const;
 
-    virtual double createValue(const std::string& value) const;
+    virtual edouble createValue(const std::string& value) const;
     virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine,
                                                  const AbstractDomain& baseDomain,
                                                  const bool internal = false,
@@ -45,7 +45,7 @@ public:
     virtual bool isBool() const;
     virtual bool isString() const;
 
-    virtual double createValue(const std::string& value) const;
+    virtual edouble createValue(const std::string& value) const;
 
     static const std::string& NAME();
     static const DataTypeId& instance();
@@ -61,7 +61,7 @@ public:
     virtual bool isBool() const;
     virtual bool isString() const;
 
-    virtual double createValue(const std::string& value) const;
+    virtual edouble createValue(const std::string& value) const;
 
     static const std::string& NAME();
     static const DataTypeId& instance();
@@ -77,8 +77,8 @@ public:
     virtual bool isBool() const;
     virtual bool isString() const;
 
-    virtual double createValue(const std::string& value) const;
-    virtual std::string toString(double value) const;
+    virtual edouble createValue(const std::string& value) const;
+    virtual std::string toString(edouble value) const;
 
     static const std::string& NAME();
     static const DataTypeId& instance();
@@ -94,7 +94,7 @@ public:
     virtual bool isBool() const;
     virtual bool isString() const;
 
-    virtual double createValue(const std::string& value) const;
+    virtual edouble createValue(const std::string& value) const;
 
     static const std::string& NAME();
     static const DataTypeId& instance();
@@ -110,7 +110,7 @@ public:
     virtual bool isBool() const;
     virtual bool isString() const;
 
-    virtual double createValue(const std::string& value) const;
+    virtual edouble createValue(const std::string& value) const;
 
     static const std::string& NAME();
     static const DataTypeId& instance();
@@ -126,9 +126,9 @@ public:
     virtual bool isBool() const;
     virtual bool isString() const;
     virtual bool isEntity() const;
-    virtual double minDelta() const;
+    virtual edouble minDelta() const;
 
-    virtual double createValue(const std::string& value) const;
+    virtual edouble createValue(const std::string& value) const;
 
 protected:
     DataTypeId m_baseType;

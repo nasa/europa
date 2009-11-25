@@ -325,14 +325,14 @@ namespace EUROPA {
     return(m_name);
   }
 
-  void ConstrainedVariable::specify(double singletonValue) {
+  void ConstrainedVariable::specify(edouble singletonValue) {
     debugMsg("ConstrainedVariable:specify", "specifying value:" << toString());
     check_error(canBeSpecified());
     internalSpecify(singletonValue);
     debugMsg("ConstrainedVariable:specify", "specified value:" << toString());
   }
 
-  void ConstrainedVariable::internalSpecify(double singletonValue) {
+  void ConstrainedVariable::internalSpecify(edouble singletonValue) {
     debugMsg("ConstrainedVariable:internalSpecify", "specifying value:" << toString());
     checkError(baseDomain().isMember(singletonValue), singletonValue << " not in " << baseDomain().toString());
     checkError(isActive(), toString());
@@ -447,7 +447,7 @@ namespace EUROPA {
   /**
    * @brief Default is just a pass through.
    */
-  std::string ConstrainedVariable::toString(double value) const
+  std::string ConstrainedVariable::toString(edouble value) const
   {
     return getDataType()->toString(value);
   }

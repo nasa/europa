@@ -36,7 +36,14 @@ namespace EUROPA {
 	   * @param values The initial set of values to populate the domain.
 	   * @see AbstractDomain::isDynamic()
 	   */
-	  EnumeratedDomain(const DataTypeId& dt, const std::list<double>& values);
+	  EnumeratedDomain(const DataTypeId& dt, const std::list<edouble>& values);
+
+	  /**
+	   * @brief Constructor.
+	   * @param dt Indicate the type to use as a specialization of enumeration types
+	   * @param value Constructs a singleton domain. Closed on construction.
+	   */
+	  EnumeratedDomain(const DataTypeId& dt, edouble value);
 
 	  /**
 	   * @brief Constructor.
@@ -92,16 +99,16 @@ namespace EUROPA {
 	   * @see DomainListener::DOMAIN_RELAXED
 	   * @todo Consider if it makes sense to error out if isMember(value)
 	   */
-	  virtual void insert(double value);
+	  virtual void insert(edouble value);
 
-	  virtual void insert(const std::list<double>& values);
+	  virtual void insert(const std::list<edouble>& values);
 
 	  /**
 	   * @brief Remove the given element form the domain.
 	   * @param value. The value to be removed. If present, removal will generate a value removal event
 	   * @see DomainListener::VALUE_REMOVED
 	   */
-	  void remove(double value);
+	  void remove(edouble value);
 
 	  /**
 	   * @brief Attempt to set the domain to a singleton.
@@ -111,7 +118,7 @@ namespace EUROPA {
 	   * @param value The target singleton value.
 	   * @see DomainListener::EMPTIED, DomainListener::SET_TO_SINGLETON
 	   */
-	  virtual void set(double value);
+	  virtual void set(edouble value);
 
 	  /**
 	   * @brief Reset the domain to the target value.
@@ -129,7 +136,7 @@ namespace EUROPA {
 	   * @brief Indicates relaxation to a singleton value. Occurs when domain has been emptied previously
 	   * @param The value to relax to
 	   */
-	  void relax(double value);
+	  void relax(edouble value);
 
 	  /**
 	   * @brief Construct a mutual restriction of the 2 domains to the intersection between them.
@@ -147,7 +154,7 @@ namespace EUROPA {
 	   * @note Only callable when it is in fact a singleton.
 	   * @return A copy of the stored (and encoded) singleton value.
 	   */
-	  double getSingletonValue() const;
+	  edouble getSingletonValue() const;
 
 	  /**
 	   * @brief Fill the given list with the contents of the set.
@@ -155,23 +162,23 @@ namespace EUROPA {
 	   * Should only be called on finite (and thus closed) domains.
 	   * @param results The target collection to fill with all values in the set.
 	   */
-	  void getValues(std::list<double>& results) const;
+	  void getValues(std::list<edouble>& results) const;
 
 
 	  /**
 	   * @brief Retrieve the contents as a set
 	   */
-	  const std::set<double>& getValues() const;
+	  const std::set<edouble>& getValues() const;
 
 	  /**
 	   * @brief Access upper bound.
 	   */
-	  double getUpperBound() const;
+	  edouble getUpperBound() const;
 
 	  /**
 	   * @brief Access lower bound.
 	   */
-	  double getLowerBound() const;
+	  edouble getLowerBound() const;
 
 	  /**
 	   * @brief Access both bounds in a convenience method, and indicate if the domain is infinite.
@@ -179,7 +186,7 @@ namespace EUROPA {
 	   * @param ub update this value with the upper bound.
 	   * @return true if !isFinite()
 	   */
-	  bool getBounds(double& lb, double& ub) const;
+	  bool getBounds(edouble& lb, edouble& ub) const;
 
 	  /**
 	   * @brief Test if the given value is a member of the set.
@@ -187,12 +194,12 @@ namespace EUROPA {
 	   * @return true if present, otherwise false.
 	   * @note Not allowed to call this if the domain is empty
 	   */
-	  bool isMember(double value) const;
+	  bool isMember(edouble value) const;
 
 	  /**
 	   * @brief Obtain the double encoded value from the string if it is a member.
 	   */
-	  virtual bool convertToMemberValue(const std::string& strValue, double& dblValue) const;
+	  virtual bool convertToMemberValue(const std::string& strValue, edouble& dblValue) const;
 
 	  /**
 	   * @brief Test that the domains are exactly equal.
@@ -224,7 +231,7 @@ namespace EUROPA {
 	   * @return true if the intersection results in a change to this domain, otherwise false.
 	   * @note ub must be >= lb.
 	   */
-	  bool intersect(double lb, double ub);
+	  bool intersect(edouble lb, edouble ub);
 
 	  /**
 	   * @brief restricts this domain to the difference of its values with the given domain.
@@ -274,14 +281,14 @@ namespace EUROPA {
 	   * @note Will be compiled out for fast version.
 	   * @note No-op for enumerations.
 	   */
-	  virtual void testPrecision(const double& value) const {}
+	  virtual void testPrecision(const edouble& value) const {}
 
 	  /**
 	   * @brief Implements equate where both are closed enumerations
 	   */
 	  bool equateClosedEnumerations(EnumeratedDomain& dom);
 
-	  std::set<double> m_values; /**< Holds the contents from which the set membership is then derived. */
+	  std::set<edouble> m_values; /**< Holds the contents from which the set membership is then derived. */
   };
 
 
@@ -303,7 +310,9 @@ namespace EUROPA {
     void operator>>(ostream& os) const;
 
     IntervalDomain(const DataTypeId& dt = FloatDT::instance());
+    IntervalDomain(edouble lb, edouble ub, const DataTypeId& dt = FloatDT::instance());
     IntervalDomain(double lb, double ub, const DataTypeId& dt = FloatDT::instance());
+    IntervalDomain(edouble value, const DataTypeId& dt = FloatDT::instance());
     IntervalDomain(double value, const DataTypeId& dt = FloatDT::instance());
     IntervalDomain(const AbstractDomain& org);
 
@@ -317,18 +326,18 @@ namespace EUROPA {
     /**
      * @brief Access upper bound.
      */
-    double getUpperBound() const;
+    edouble getUpperBound() const;
 
     /**
      * @brief Access lower bound.
      */
-    double getLowerBound() const;
+    edouble getLowerBound() const;
 
     /**
      * @brief Access singleton value.
      * @note Must be a singleton or this will fail.
      */
-    double getSingletonValue() const;
+    edouble getSingletonValue() const;
 
     /**
      * @brief Access both bounds in a convenience method, and indicate if the domain is infinite.
@@ -336,7 +345,7 @@ namespace EUROPA {
      * @param ub update this value with the upper bound.
      * @return true if !isFinite()
      */
-    inline bool getBounds(double& lb, double& ub) const {
+    inline bool getBounds(edouble& lb, edouble& ub) const {
       lb = m_lb;
       ub = m_ub;
       return(m_ub == PLUS_INFINITY || m_lb == MINUS_INFINITY);
@@ -347,7 +356,7 @@ namespace EUROPA {
      * @note May empty the domain if value is not a member of the current domain.
      * @param value the target singleton value.
      */
-    void set(double value);
+    void set(edouble value);
 
     /**
      * @brief Indicates assigment to the target domain as a relaxation triggered externally.
@@ -383,7 +392,7 @@ namespace EUROPA {
      * @return true if the intersection results in a change to this domain, otherwise false.
      * @note ub must be >= lb.
      */
-    virtual bool intersect(double lb, double ub);
+    virtual bool intersect(edouble lb, edouble ub);
 
     /**
      * @brief Force the domain to empty.
@@ -401,7 +410,7 @@ namespace EUROPA {
     /**
      * @brief Relax to a singleton value
      */
-    void relax(double value);
+    void relax(edouble value);
 
     /**
      * @brief Convenience method for relaxing a domain.
@@ -410,7 +419,7 @@ namespace EUROPA {
      * @return true if relaxation causes a change to this domain.
      * @see operator=(const AbstractDomain& dom)
      */
-    bool relax(double lb, double ub);
+    bool relax(edouble lb, edouble ub);
 
     /**
      * @brief Add an element to the set.
@@ -422,9 +431,9 @@ namespace EUROPA {
      * @note An error for real intervals unless already in the set or
      * was empty and now singleton.
      */
-    void insert(double value);
+    void insert(edouble value);
 
-    void insert(const std::list<double>& values);
+    void insert(const std::list<edouble>& values);
 
     /**
      * @brief Remove the given element form the domain.
@@ -435,7 +444,7 @@ namespace EUROPA {
      * singleton and is now empty.
      * @see DomainListener::VALUE_REMOVED
      */
-    virtual void remove(double value);
+    virtual void remove(edouble value);
 
     /**
      * @brief test for membership.
@@ -443,12 +452,14 @@ namespace EUROPA {
      * @return true if a member of the domain, otherwise false.
      * @note Ought to be called 'hasMember()': 'domain.hasMember(value)'.
      */
-    bool isMember(double value) const;
+    bool isMember(edouble value) const;
+
+    virtual edouble translateNumber(edouble number, bool asMin = true) const {return AbstractDomain::translateNumber(number, asMin);}
 
     /**
      * @brief Convert to member value from string encoding.
      */
-    bool convertToMemberValue(const std::string& strValue, double& dblValue) const;
+    bool convertToMemberValue(const std::string& strValue, edouble& dblValue) const;
 
     /**
      * @brief Test for single valued domain.
@@ -496,7 +507,7 @@ namespace EUROPA {
      * @note Should only be called on singleton domains.
      * @param results The target collection to fill with the value in the set.
      */
-    void getValues(std::list<double>& results) const;
+    void getValues(std::list<edouble>& results) const;
 
     /**
      * @brief mutually constraint both domains to their respective intersections.
@@ -505,11 +516,6 @@ namespace EUROPA {
      * @note If the intersection is empty, only one domain is actually emptied.
      */
     bool equate(AbstractDomain& dom);
-
-    /**
-     * @brief Enforces semantics of PLUS or MINUS infinity.
-     */
-    virtual double translateNumber(double number, bool asMin = true) const;
 
     /**
      * @brief Copy the concrete C++ object into new memory and return a pointer to it.
@@ -523,7 +529,7 @@ namespace EUROPA {
      * @note Used in derived class.
      * @see testPrecision
      */
-    double check(const double& value) const;
+    edouble check(const edouble& value) const;
 
     /**
      * @brief Tests if the given value is of the correct type for the domain type.
@@ -531,7 +537,7 @@ namespace EUROPA {
      * we could restrict it in other ways perhaps.
      * @note No-op for real domains.
      */
-    virtual void testPrecision(const double& value) const;
+    virtual void testPrecision(const edouble& value) const;
 
 
     /**
@@ -539,16 +545,19 @@ namespace EUROPA {
      * @param value The value to be converetd
      * @return The value subject to any rounding required for th sub-type (e.g. int)
      */
-    virtual double convert(const double& value) const;
+    virtual edouble convert(const edouble& value) const;
 
     /**
      * @brief Conduct common initialization across constructors.
      */
     void commonInit();
 
-    double m_ub; /**< The upper bound of the domain */
-    double m_lb; /**< The lower bound o fthe domain */
+    edouble m_ub; /**< The upper bound of the domain */
+    edouble m_lb; /**< The lower bound o fthe domain */
   };
+
+  inline IntervalDomain make_int(const edouble v) {return IntervalDomain(v);}
+  inline IntervalDomain make_int(const edouble v1, const edouble v2) {return IntervalDomain(v1, v2);}
 
   // TODO! : All the classes below seem unnecessary now that DataType has been factored out of AbstractDomain
 
@@ -560,9 +569,10 @@ namespace EUROPA {
   public:
 
     StringDomain(const DataTypeId& dt = StringDT::instance());
+    StringDomain(edouble value, const DataTypeId& dt = StringDT::instance());
     StringDomain(double value, const DataTypeId& dt = StringDT::instance());
     StringDomain(const std::string& value, const DataTypeId& dt = StringDT::instance());
-    StringDomain(const std::list<double>& values, const DataTypeId& dt = StringDT::instance());
+    StringDomain(const std::list<edouble>& values, const DataTypeId& dt = StringDT::instance());
     StringDomain(const AbstractDomain& org);
 
     virtual StringDomain *copy() const;
@@ -571,15 +581,15 @@ namespace EUROPA {
      * @brief Sets a singleton value.
      * @param value The value to set. Must be a LabelStr.
      */
-    void set(double value);
+    void set(edouble value);
 
-    bool isMember(double value) const;
+    bool isMember(edouble value) const;
 
     /** String specific bindings for user convenience **/
     void set(const std::string& value);
     bool isMember(const std::string& value) const;
     void insert(const std::string& value);
-    void insert(double value);
+    void insert(edouble value);
   };
 
   /**
@@ -589,8 +599,9 @@ namespace EUROPA {
   class SymbolDomain : public EnumeratedDomain {
   public:
     SymbolDomain(const DataTypeId& dt = SymbolDT::instance());
+    SymbolDomain(edouble value,const DataTypeId& dt = SymbolDT::instance());
     SymbolDomain(double value,const DataTypeId& dt = SymbolDT::instance());
-    SymbolDomain(const std::list<double>& values,const DataTypeId& dt = SymbolDT::instance());
+    SymbolDomain(const std::list<edouble>& values,const DataTypeId& dt = SymbolDT::instance());
     SymbolDomain(const AbstractDomain& org);
 
     virtual SymbolDomain *copy() const;
@@ -600,12 +611,15 @@ namespace EUROPA {
   public:
 
     NumericDomain(const DataTypeId& dt = FloatDT::instance());
+    NumericDomain(edouble value, const DataTypeId& dt = FloatDT::instance());
     NumericDomain(double value, const DataTypeId& dt = FloatDT::instance());
-    NumericDomain(const std::list<double>& values, const DataTypeId& dt = FloatDT::instance());
+    NumericDomain(const std::list<edouble>& values, const DataTypeId& dt = FloatDT::instance());
     NumericDomain(const AbstractDomain& org);
 
     virtual NumericDomain *copy() const;
   };
+
+  inline NumericDomain make_num(const edouble v) { return NumericDomain(v);}
 
   /**
    * @class IntervalIntDomain
@@ -619,7 +633,9 @@ namespace EUROPA {
   public:
 
     IntervalIntDomain(const DataTypeId& dt = IntDT::instance());
+    IntervalIntDomain(eint lb, eint ub, const DataTypeId& dt = IntDT::instance());
     IntervalIntDomain(int lb, int ub, const DataTypeId& dt = IntDT::instance());
+    IntervalIntDomain(eint value, const DataTypeId& dt = IntDT::instance());
     IntervalIntDomain(int value, const DataTypeId& dt = IntDT::instance());
     IntervalIntDomain(const AbstractDomain& org);
 
@@ -638,23 +654,23 @@ namespace EUROPA {
      * @note This implementation might also work in IntervalDomain
      * since it uses minDelta().
      */
-    virtual void insert(double value);
+    virtual void insert(edouble value);
 
     /**
      * @brief Fill the given list with the contents of the set.
      * @note Should only be called on finite (and thus closed) domains.
      * @param results The target collection to fill with all values in the set.
      */
-    virtual void getValues(std::list<double>& results) const;
+    virtual void getValues(std::list<edouble>& results) const;
 
-    virtual double translateNumber(double number, bool asMin = true) const;
+    virtual edouble translateNumber(edouble number, bool asMin = true) const;
 
     /**
      * @brief Copy the concrete C++ object into new memory and return a pointer to it.
      */
     virtual IntervalIntDomain *copy() const;
 
-    virtual bool intersect(double lb, double ub);
+    virtual bool intersect(edouble lb, edouble ub);
 
     virtual bool intersect(const AbstractDomain& dom);
 
@@ -664,13 +680,16 @@ namespace EUROPA {
      * @brief Enforce integer semantics.
      * @note Will be compiled out for fast version.
      */
-    virtual void testPrecision(const double& value) const;
+    virtual void testPrecision(const edouble& value) const;
 
     /**
      * @brief Enforce integer semantics.
      */
-    double convert(const double& value) const;
+    edouble convert(const edouble& value) const;
   };
+
+  inline IntervalDomain make_int_int(const eint v) {return IntervalIntDomain(v);}
+  inline IntervalDomain make_int_int(const eint v1, const eint v2) {return IntervalIntDomain(v1, v2);}
 
   /**
    * @class BoolDomain
@@ -701,10 +720,10 @@ namespace EUROPA {
 
     bool intersect(const AbstractDomain& dom);
 
-    bool intersect(double lb, double ub);
+    bool intersect(edouble lb, edouble ub);
 
   private:
-    virtual void testPrecision(const double& value) const;
+    virtual void testPrecision(const edouble& value) const;
   };
 
 }

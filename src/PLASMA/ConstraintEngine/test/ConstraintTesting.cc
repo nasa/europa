@@ -114,12 +114,12 @@ namespace EUROPA {
               ce->getCESchema()->registerDataType(dt);
           }
 
-          SymbolDomain * dom = new SymbolDomain((double)LabelStr("foo"),dt);
+          SymbolDomain * dom = new SymbolDomain((edouble)LabelStr("foo"),dt);
           dom->empty(); dom->open();
 
           SymbolDomain * base = ConstraintTestCase::symbolDomainsMap()[std::string(type)];
           if(!base) {
-              base = new SymbolDomain((double)LabelStr("foo"),dt->getId());
+              base = new SymbolDomain((edouble)LabelStr("foo"),dt->getId());
               base->empty(); base->open();
               ConstraintTestCase::symbolDomainsMap()[std::string(type)] = base;
           }
@@ -172,6 +172,7 @@ namespace EUROPA {
 	}
       check_error(lba != NULL && uba != NULL);
 
+      //return new IntervalIntDomain(cast_int(atoef(lba)), cast_int(atoef(uba)));
       return new IntervalIntDomain(cast_int(atoef(lba)), cast_int(atoef(uba)));
     }
     else

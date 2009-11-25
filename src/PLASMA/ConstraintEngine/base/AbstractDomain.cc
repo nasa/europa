@@ -197,7 +197,7 @@ namespace EUROPA {
 
   }
 
-  std::string  AbstractDomain::toString(double value) const
+  std::string  AbstractDomain::toString(edouble value) const
   {
     checkError(isMember(value),  value << " not in " << toString());
     return getDataType()->toString(value);
@@ -214,6 +214,6 @@ namespace EUROPA {
   bool AbstractDomain::isNumeric() const { return getDataType()->isNumeric(); }
   bool AbstractDomain::isBool() const { return getDataType()->isBool(); }
   bool AbstractDomain::isString() const { return getDataType()->isString(); }
-  bool AbstractDomain::isRestricted() const { return getDataType()->getName(); }
-  double AbstractDomain::minDelta() const {return getDataType()->minDelta();}
+  bool AbstractDomain::isRestricted() const { return getDataType()->getIsRestricted(); }
+  edouble AbstractDomain::minDelta() const {return getDataType()->minDelta();}
 }

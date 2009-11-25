@@ -1527,7 +1527,7 @@ namespace EUROPA {
           if (other.isEnumerated())
             other.remove(0.0);
           else {
-              const IntervalDomain zeroDom(0.0);
+            const IntervalDomain zeroDom(0.0);
               if (zeroDom.isMember(other.getLowerBound()) ||
                   zeroDom.isMember(other.getUpperBound()))
                 other.remove(0.0);
@@ -1539,7 +1539,7 @@ namespace EUROPA {
     // If the counts seen restrict the count variable, do so.
     if (minZeros > countDom.getLowerBound() ||
         countDom.getUpperBound() > maxZeros)
-      countDom.intersect(IntervalIntDomain(minZeros, maxZeros));
+      countDom.intersect(make_int_int(minZeros, maxZeros));
   }
 
   CountNonZerosConstraint::CountNonZerosConstraint(const LabelStr& name,
@@ -1549,7 +1549,7 @@ namespace EUROPA {
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_zeros(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalCountNonZerosVar"), getId()),
       m_otherVars(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalCountNonZerosOtherVars"), getId()),
-      m_superset(constraintEngine, IntervalDomain((double)(variables.size() - 1)), true, false, LabelStr("InternalCountNonZerosSuperset"), getId()),
+      m_superset(constraintEngine, IntervalDomain((edouble)(variables.size() - 1)), true, false, LabelStr("InternalCountNonZerosSuperset"), getId()),
       m_addEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine,
                            makeScope(m_zeros.getId(), m_variables[0], m_otherVars.getId()))
   {
@@ -1584,7 +1584,7 @@ namespace EUROPA {
                              const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_nonZeros(constraintEngine, IntervalIntDomain(1, PLUS_INFINITY), true, false, LabelStr("InternalVar:Or:nonZeros"), getId()),
-      m_superset(constraintEngine, IntervalIntDomain(1, variables.size()), true, false, LabelStr("InternalVar:Or:superset"), getId())
+      m_superset(constraintEngine, IntervalIntDomain(1, eint(variables.size())), true, false, LabelStr("InternalVar:Or:superset"), getId())
   {
     m_subsetConstraint = (new SubsetOfConstraint(LabelStr("SubsetOf"), propagatorName, constraintEngine,
                                                  makeScope(m_nonZeros.getId(), m_superset.getId())))->getId();
@@ -1770,7 +1770,7 @@ namespace EUROPA {
                                                  const ConstraintEngineId& constraintEngine,
                                                  const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_sumVar(constraintEngine, constraintEngine->getCESchema()->baseDomain(m_variables[1]->baseDomain().getTypeName().toString()),
+      m_sumVar(constraintEngine, constraintEngine->getCESchema()->baseDomain(m_variables[1]->baseDomain().getTypeName().c_str()),
 	       true, false, LabelStr("InternalConstraintVariable"), getId()),
       m_condAllSameConstraint(LabelStr("CondAllSame"), propagatorName, constraintEngine,
                               makeScope(m_variables[0], m_variables[1], m_sumVar.getId()))
@@ -2043,7 +2043,7 @@ namespace EUROPA {
     }
 
     if(m_test.isSingleton()){ //Test value specified, so set up the others
-      if (m_test.getSingletonValue()) { //It's true, so a or b == true
+      if (m_test.getSingletonValue() != 0) { //It's true, so a or b == true
 
 	if (m_arg1.isSingleton()) {
 	  if (m_arg1.getSingletonValue() == 0) { //a == false, so b must be true
@@ -2079,25 +2079,25 @@ namespace EUROPA {
 
     if(m_arg1.isSingleton() && m_arg2.isSingleton()) { //A and b are singltons, so set the value.
       if (m_arg1.getSingletonValue() == 0 || m_arg2.getSingletonValue() == 0) { //a == false or b == false, so set to false
-        m_test.intersect(IntervalDomain(0, 0));
+        m_test.intersect(make_int(0, 0));
       } else { //a == b == true, set to true
-        m_test.intersect(IntervalDomain(1, 1));
+        m_test.intersect(make_int(1, 1));
       }
     }
 
     if(m_test.isSingleton()){ //Test value specified, so set up the others
-      if (m_test.getSingletonValue()) { //It's true, so a and b == true
-        m_arg1.intersect(IntervalDomain(1, 1));
-        m_arg2.intersect(IntervalDomain(1, 1));
+      if (m_test.getSingletonValue() != 0) { //It's true, so a and b == true
+        m_arg1.intersect(make_int(1, 1));
+        m_arg2.intersect(make_int(1, 1));
       } else { //It's false, so one of a or b must be false
 	if (m_arg1.isSingleton()) {
 	  if (m_arg1.getSingletonValue() != 0) { //a == true, so b must be false
-	    m_arg2.intersect(IntervalDomain(0, 0));
+	    m_arg2.intersect(make_int(0, 0));
 	  }
 	}
 	if(m_arg2.isSingleton()) {
 	  if (m_arg2.getSingletonValue() != 0) { //b == true, so a must be false
-	    m_arg1.intersect(IntervalDomain(0, 0));
+	    m_arg1.intersect(make_int(0, 0));
 	  }
 	} //If none are singletons, nothing to be done: FIXME!
       }
@@ -2231,7 +2231,7 @@ namespace EUROPA {
   }
 
   void AbsoluteValue::handleExecute() {
-    double lb, ub;
+    edouble lb, ub;
 
     if(m_y.getLowerBound() >= 0) {
       lb = m_y.getLowerBound();
@@ -2415,7 +2415,6 @@ namespace EUROPA {
     }
   }
 
-o
 
   /**************************************************************************************/
 
@@ -2430,19 +2429,19 @@ o
   }
   
 
-  int mod(int a, int b) { return a % b; }
+  eint mod(eint a, eint b) { return a % b; }
 
-  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Max, std::max, double);
-  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Min, std::min, double);
-  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Abs, fabs, double);
-  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Pow, pow, double);
-  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Sqrt, sqrt, double);
-  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Mod, mod, int);
+  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Max, std::max, edouble);
+  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Min, std::min, edouble);
+  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Abs, std::abs, edouble);
+  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Pow, std::pow, edouble);
+  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Sqrt, std::sqrt, edouble);
+  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Mod, mod, eint);
 
 
 
-  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Floor, floor, double);
-  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Ceil, ceil, double);
+  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Floor, std::floor, edouble);
+  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Ceil, std::ceil, edouble);
 
 
 

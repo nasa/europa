@@ -115,7 +115,7 @@ namespace EUROPA {
         /** Returns the removed interpreter, if any */
         virtual LanguageInterpreter* removeLanguageInterpreter(const std::string& language);
         virtual LanguageInterpreter* getLanguageInterpreter(const std::string& language);
-        virtual std::map<double, LanguageInterpreter*>& getLanguageInterpreters();
+        virtual std::map<edouble, LanguageInterpreter*>& getLanguageInterpreters();
 
         virtual EngineConfig* getConfig() { return m_config; }
 

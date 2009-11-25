@@ -80,7 +80,7 @@ const AbstractDomain & DataType::baseDomain() const
     return *m_baseDomain;
 }
 
-double DataType::minDelta() const
+edouble DataType::minDelta() const
 {
     return m_minDelta;
 }
@@ -122,7 +122,7 @@ DataType::createVariable(const ConstraintEngineId& constraintEngine,
 }
 
 
-std::string DataType::toString(double value) const
+std::string DataType::toString(edouble value) const
 {
     if(isNumeric())
         return EUROPA::toString(value);

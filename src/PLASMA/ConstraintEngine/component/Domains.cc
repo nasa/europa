@@ -16,30 +16,37 @@
 
 namespace EUROPA {
 
-
-  bool isAscending(const std::set<double>& values) {
-    double greatest = *(values.begin());
-    for (std::set<double>::const_iterator it = values.begin(); it != values.end(); ++it) {
-    	double current = *it;
-    	if (current < greatest)
-    		return(false);
-    	else
-    		greatest = current;
-    }
-    return(true);
-  }
+  // commenting this out because it checks an invariant of the set type
+//   bool isAscending(const std::set<double>& values) {
+//     double greatest = *(values.begin());
+//     for (std::set<double>::const_iterator it = values.begin(); it != values.end(); ++it) {
+//     	double current = *it;
+//     	if (current < greatest)
+//     		return(false);
+//     	else
+//     		greatest = current;
+//     }
+//     return(true);
+//   }
 
   EnumeratedDomain::EnumeratedDomain(const DataTypeId& dt)
   : AbstractDomain(dt,true,false)
   {
   }
 
-  EnumeratedDomain::EnumeratedDomain(const DataTypeId& dt, const std::list<double>& values)
+  EnumeratedDomain::EnumeratedDomain(const DataTypeId& dt, const std::list<edouble>& values)
   : AbstractDomain(dt,true,false)
   {
-	  for (std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it)
+	  for (std::list<edouble>::const_iterator it = values.begin(); it != values.end(); ++it)
 		  insert(*it);
 
+	  close();
+  }
+
+  EnumeratedDomain::EnumeratedDomain(const DataTypeId& dt, edouble value)
+  : AbstractDomain(dt,true,false)
+  {
+	  insert(value);
 	  close();
   }
 
@@ -77,18 +84,19 @@ namespace EUROPA {
   }
 
   void EnumeratedDomain::close() {
-	  AbstractDomain::close();
-	  check_error(isEmpty() || isAscending(m_values));
+    AbstractDomain::close();
+    //commenting this out because ascending is a requirement of the std::set type, and the empty check by itself is nonsensical
+    //check_error(isEmpty() || isAscending(m_values));
   }
 
   unsigned int EnumeratedDomain::getSize() const {
 	  return(m_values.size());
   }
 
-  void EnumeratedDomain::insert(double value) {
+  void EnumeratedDomain::insert(edouble value) {
 	  check_error(check_value(value));
 	  checkError(isOpen(), "Cannot insert into a closed domain." << toString());
-	  std::set<double>::iterator it = m_values.begin();
+	  std::set<edouble>::iterator it = m_values.begin();
 	  for ( ; it != m_values.end(); it++) {
 		  if (compareEqual(value, *it))
 			  return; // Already a member.
@@ -102,14 +110,14 @@ namespace EUROPA {
 	  // notifyChange(DomainListener::RELAXED);
   }
 
-  void EnumeratedDomain::insert(const std::list<double>& values){
-	  for(std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it)
+  void EnumeratedDomain::insert(const std::list<edouble>& values){
+	  for(std::list<edouble>::const_iterator it = values.begin(); it != values.end(); ++it)
 		  insert(*it);
   }
 
-  void EnumeratedDomain::remove(double value) {
+  void EnumeratedDomain::remove(edouble value) {
 	  check_error(check_value(value));
-	  std::set<double>::iterator it = m_values.begin();
+	  std::set<edouble>::iterator it = m_values.begin();
 	  for ( ; it != m_values.end(); it++)
 		  if (compareEqual(value, *it))
 			  break;
@@ -122,7 +130,7 @@ namespace EUROPA {
 		  notifyChange(DomainListener::EMPTIED);
   }
 
-  void EnumeratedDomain::set(double value) {
+  void EnumeratedDomain::set(edouble value) {
 	  if(isOpen())
 		  close();
 
@@ -168,25 +176,25 @@ namespace EUROPA {
 	  bool changed_b = false;
 	  EnumeratedDomain& l_dom = static_cast<EnumeratedDomain&>(dom);
 
-	  std::set<double>::iterator it_a = m_values.begin();
-	  std::set<double>::iterator it_b = l_dom.m_values.begin();
+	  std::set<edouble>::iterator it_a = m_values.begin();
+	  std::set<edouble>::iterator it_b = l_dom.m_values.begin();
 
 	  while (it_a != m_values.end() && it_b != l_dom.m_values.end()) {
-		  double val_a = *it_a;
-		  double val_b = *it_b;
+		  edouble val_a = *it_a;
+		  edouble val_b = *it_b;
 
 		  if (compareEqual(val_a, val_b)) {
 			  ++it_a;
 			  ++it_b;
 		  } else
 			  if (val_a < val_b) {
-				  std::set<double>::iterator target = m_values.lower_bound(val_b);
+				  std::set<edouble>::iterator target = m_values.lower_bound(val_b);
 				  m_values.erase(it_a, target);
 				  it_a = target;
 				  changed_a = true;
 				  check_error(!isMember(val_a));
 			  } else {
-				  std::set<double>::iterator target = l_dom.m_values.lower_bound(val_a);
+				  std::set<edouble>::iterator target = l_dom.m_values.lower_bound(val_a);
 				  l_dom.m_values.erase(it_b, target);
 				  it_b = target;
 				  changed_b = true;
@@ -230,13 +238,13 @@ namespace EUROPA {
 	  return(changed_a || changed_b);
   }
 
-  bool EnumeratedDomain::isMember(double value) const {
+  bool EnumeratedDomain::isMember(edouble value) const {
 	  if (m_values.empty())
 		  return false;
-	  std::set<double>::const_iterator it = m_values.lower_bound(value);
+	  std::set<edouble>::const_iterator it = m_values.lower_bound(value);
 	  // If we get a hit - the entry >= value
 	  if (it != m_values.end()) {
-		  double elem = *it;
+		  edouble elem = *it;
 		  // Try fast compare first, then epsilon safe version
 		  if (value == elem || compareEqual(value, elem))
 			  return true;
@@ -248,8 +256,8 @@ namespace EUROPA {
   }
 
 
-  bool EnumeratedDomain::convertToMemberValue(const std::string& strValue, double& dblValue) const {
-	  double value = dblValue;
+  bool EnumeratedDomain::convertToMemberValue(const std::string& strValue, edouble& dblValue) const {
+	  edouble value = dblValue;
 
 	  if(isNumeric())
 		  value = atof(strValue.c_str());
@@ -275,7 +283,7 @@ namespace EUROPA {
 	  // If any member of either is not a member of the other, they're not equal.
 	  // Since membership is not simple (due to minDelta()), this has to be done
 	  // via a scan of both memberships, one member at a time.
-	  std::set<double>::iterator it = m_values.begin();
+	  std::set<edouble>::iterator it = m_values.begin();
 	  for ( ; it != m_values.end(); it++)
 		  if (!l_dom.isMember(*it))
 			  return(false);
@@ -306,7 +314,7 @@ namespace EUROPA {
 	  }
   }
 
-  void EnumeratedDomain::relax(double value) {
+  void EnumeratedDomain::relax(edouble value) {
 	  checkError(isEmpty() || (isSingleton() && (getSingletonValue() == value)), toString());
 
 	  if (isEmpty()){
@@ -315,36 +323,36 @@ namespace EUROPA {
 	  }
   }
 
-  double EnumeratedDomain::getSingletonValue() const {
+  edouble EnumeratedDomain::getSingletonValue() const {
 	  checkError(isSingleton(), toString());
 	  return(*m_values.begin());
   }
 
-  void EnumeratedDomain::getValues(std::list<double>& results) const {
+  void EnumeratedDomain::getValues(std::list<edouble>& results) const {
 	  check_error(results.empty());
 	  check_error(isFinite());
 
-	  for (std::set<double>::iterator it = m_values.begin(); it != m_values.end(); ++it)
+	  for (std::set<edouble>::iterator it = m_values.begin(); it != m_values.end(); ++it)
 		  results.push_back(*it);
   }
 
-  const std::set<double>& EnumeratedDomain::getValues() const{
+  const std::set<edouble>& EnumeratedDomain::getValues() const{
 	  return m_values;
   }
 
-  double EnumeratedDomain::getUpperBound() const {
-	  double lb, ub;
+  edouble EnumeratedDomain::getUpperBound() const {
+	  edouble lb, ub;
 	  getBounds(lb, ub);
 	  return(ub);
   }
 
-  double EnumeratedDomain::getLowerBound() const {
-	  double lb, ub;
+  edouble EnumeratedDomain::getLowerBound() const {
+	  edouble lb, ub;
 	  getBounds(lb, ub);
 	  return(lb);
   }
 
-  bool EnumeratedDomain::getBounds(double& lb, double& ub) const {
+  bool EnumeratedDomain::getBounds(edouble& lb, edouble& ub) const {
 	  check_error(!isEmpty());
 	  lb = *m_values.begin();
 	  ub = *(--m_values.end());
@@ -374,9 +382,9 @@ namespace EUROPA {
 	  bool changed = false;
 
 	  if (dom.isInterval()) {
-		  std::set<double>::iterator it = m_values.begin();
+		  std::set<edouble>::iterator it = m_values.begin();
 		  while (it != m_values.end()) {
-			  double value = *it;
+			  edouble value = *it;
 			  if (!dom.isMember(value)) {
 				  changed = true;
 				  if (value > dom.getUpperBound()) {
@@ -392,12 +400,12 @@ namespace EUROPA {
 		  return false;
 	  else {
 		  const EnumeratedDomain& l_dom = static_cast<const EnumeratedDomain&>(dom);
-		  std::set<double>::iterator it_a = m_values.begin();
-		  std::set<double>::const_iterator it_b = l_dom.m_values.begin();
+		  std::set<edouble>::iterator it_a = m_values.begin();
+		  std::set<edouble>::const_iterator it_b = l_dom.m_values.begin();
 
 		  while (it_a != m_values.end() && it_b != l_dom.m_values.end()) {
-			  double val_a = *it_a;
-			  double val_b = *it_b;
+			  edouble val_a = *it_a;
+			  edouble val_b = *it_b;
 
 			  if (compareEqual(val_a, val_b)) { // If they are equal, advance both
 				  ++it_a;
@@ -431,7 +439,7 @@ namespace EUROPA {
 	  return(true);
   }
 
-  bool EnumeratedDomain::intersect(double lb, double ub){
+  bool EnumeratedDomain::intersect(edouble lb, edouble ub){
 	  checkError(!isSymbolic(), "Cannot do bounds based intersection on symbolic domain " << toString());
 	  if(lb > ub){
 		  empty();
@@ -451,8 +459,8 @@ namespace EUROPA {
 	  // are present in dom, remove them.
 	  bool value_removed = false;
 
-	  for (std::set<double>::iterator it = m_values.begin(); it != m_values.end();) {
-		  double value = *it;
+	  for (std::set<edouble>::iterator it = m_values.begin(); it != m_values.end();) {
+		  edouble value = *it;
 		  if (dom.isMember(value)) {
 			  m_values.erase(it++);
 			  value_removed = true;
@@ -487,7 +495,7 @@ namespace EUROPA {
 	  else if(isOpen())
 		  return false;
 
-	  for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it)
+	  for (std::set<edouble>::const_iterator it = m_values.begin(); it != m_values.end(); ++it)
 		  if (!dom.isMember(*it))
 			  return(false);
 
@@ -499,7 +507,7 @@ namespace EUROPA {
 		  return true;
 
 	  safeComparison(*this, dom);
-	  for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it)
+	  for (std::set<edouble>::const_iterator it = m_values.begin(); it != m_values.end(); ++it)
 		  if (dom.isMember(*it))
 			  return(true);
 	  return(false);
@@ -514,8 +522,8 @@ namespace EUROPA {
 	  std::set<std::string> orderedSet;
 
 	  std::string comma = "";
-	  for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
-		  double valueAsDouble = *it;
+	  for (std::set<edouble>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
+		  edouble valueAsDouble = *it;
 		  std::string valueAsStr = getDataType()->toString(valueAsDouble);
 
 		  if (isNumeric()) {
@@ -555,6 +563,22 @@ namespace EUROPA {
     commonInit();
   }
 
+  IntervalDomain::IntervalDomain(edouble lb, edouble ub, const DataTypeId& dt)
+    : AbstractDomain(dt,false,true)
+    , m_ub(ub)
+    , m_lb(lb)
+  {
+    commonInit();
+  }
+
+  IntervalDomain::IntervalDomain(edouble value, const DataTypeId& dt)
+    : AbstractDomain(dt,false,true)
+    , m_ub(value)
+    , m_lb(value)
+  {
+    commonInit();
+  }
+
   IntervalDomain::IntervalDomain(double lb, double ub, const DataTypeId& dt)
     : AbstractDomain(dt,false,true)
     , m_ub(ub)
@@ -588,7 +612,7 @@ namespace EUROPA {
     safeComparison(*this, dom);
     check_error(dom.isOpen() || !dom.isEmpty(), dom.toString());
     checkError(isOpen() || !isEmpty(), toString());
-    double lb, ub;
+    edouble lb, ub;
     dom.getBounds(lb, ub);
     return(intersect(lb, ub));
   }
@@ -641,15 +665,15 @@ namespace EUROPA {
     relax(dom.getLowerBound(), dom.getUpperBound());
   }
 
-  void IntervalDomain::insert(double value) {
+  void IntervalDomain::insert(edouble value) {
     check_error(ALWAYS_FAILS, "Cannot insert to an interval domain");
   }
 
-  void IntervalDomain::insert(const std::list<double>& values){
+  void IntervalDomain::insert(const std::list<edouble>& values){
     check_error(ALWAYS_FAILS, "Cannot insert to an interval domain");
   }
 
-  void IntervalDomain::remove(double value) {
+  void IntervalDomain::remove(edouble value) {
     check_error(check_value(value));
     if (!isMember(value))
       return; // Outside the interval.
@@ -701,12 +725,12 @@ namespace EUROPA {
     check_error(!isOpen());
     check_error(!dom.isEmpty());
 
-    double ub = dom.getUpperBound();
+    edouble ub = dom.getUpperBound();
 
     if( lt(ub, m_lb) )
       return false;
 
-    double lb = dom.getLowerBound();
+    edouble lb = dom.getLowerBound();
 
     if( lt(m_ub, lb))
       return false;
@@ -730,20 +754,20 @@ namespace EUROPA {
     return(result);
   }
 
-  double IntervalDomain::getUpperBound() const {
+  edouble IntervalDomain::getUpperBound() const {
     return(m_ub);
   }
 
-  double IntervalDomain::getLowerBound() const {
+  edouble IntervalDomain::getLowerBound() const {
     return(m_lb);
   }
 
-  double IntervalDomain::getSingletonValue() const {
+  edouble IntervalDomain::getSingletonValue() const {
     check_error(isSingleton());
     return(m_ub);
   }
 
-  void IntervalDomain::set(double value) {
+  void IntervalDomain::set(edouble value) {
     if(!isMember(value))
       empty();
     else {
@@ -757,8 +781,8 @@ namespace EUROPA {
     }
   }
 
-  bool IntervalDomain::convertToMemberValue(const std::string& strValue, double& dblValue) const {
-    double value = atof(strValue.c_str());
+  bool IntervalDomain::convertToMemberValue(const std::string& strValue, edouble& dblValue) const {
+    edouble value = atof(strValue.c_str());
     if(isMember(value)){
       dblValue = value;
       return true;
@@ -775,7 +799,7 @@ namespace EUROPA {
     }
   }
 
-  bool IntervalDomain::intersect(double lb, double ub) {
+  bool IntervalDomain::intersect(edouble lb, edouble ub) {
     // Test for empty intersection while accounting for precision/rounding errors.
     if (lt(ub, lb) || lt(ub, m_lb) || lt(m_ub, lb)){
       empty();
@@ -815,7 +839,7 @@ namespace EUROPA {
 
   }
 
-  void IntervalDomain::relax(double value) {
+  void IntervalDomain::relax(edouble value) {
     bool wasEmpty = isEmpty();
     m_ub = value;
     m_lb = value;
@@ -824,7 +848,7 @@ namespace EUROPA {
     }
   }
 
-  bool IntervalDomain::relax(double lb, double ub) {
+  bool IntervalDomain::relax(edouble lb, edouble ub) {
     // Ensure given bounds are not empty
     check_error(leq(lb, ub));
 
@@ -843,8 +867,8 @@ namespace EUROPA {
     return(relaxed);
   }
 
-  bool IntervalDomain::isMember(double value) const {
-    double converted = convert(value);
+  bool IntervalDomain::isMember(edouble value) const {
+    edouble converted = convert(value);
     return(converted == value && leq(m_lb, converted) && leq(converted, m_ub));
   }
 
@@ -872,25 +896,25 @@ namespace EUROPA {
     else if (isSingleton()) // Need to test separately in case of rounding errors
         return(1);
     else if(isFinite())
-      return((int)(m_ub - m_lb + 1));
+      return(cast_int(m_ub - m_lb + 1));
     else
-      return PLUS_INFINITY;
+      return cast_int(PLUS_INFINITY);
   }
 
-  void IntervalDomain::getValues(std::list<double>& results) const {
+  void IntervalDomain::getValues(std::list<edouble>& results) const {
     check_error(isSingleton());
     if (!isEmpty()) {
       results.push_back(m_lb); // consider averaging m_lb and m_ub
     }
   }
 
-  double IntervalDomain::check(const double& value) const {
+  edouble IntervalDomain::check(const edouble& value) const {
     testPrecision(value);
     return(value);
   }
 
 
-  void IntervalDomain::testPrecision(const double& value) const {}
+  void IntervalDomain::testPrecision(const edouble& value) const {}
 
   void IntervalDomain::operator>>(ostream& os) const {
     AbstractDomain::operator>>(os);
@@ -922,23 +946,12 @@ namespace EUROPA {
    * @brief Convert the value appropriately for the particular Domain class.
    * @note A no-op for reals.
    */
-  double IntervalDomain::convert(const double& value) const {return value;}
+  edouble IntervalDomain::convert(const edouble& value) const {return value;}
 
   bool IntervalDomain::isFinite() const {
     check_error(!isOpen());
     // Real domains are only finite if they are singleton or empty.
     return((isSingleton() && areBoundsFinite()) || isEmpty());
-  }
-
-  double IntervalDomain::translateNumber(double number, bool) const {
-    if (number < 0.0)
-      return(number < MINUS_INFINITY ? MINUS_INFINITY : number);
-    if (number > 0.0)
-      return(number > PLUS_INFINITY ? PLUS_INFINITY : number);
-    // This has to be explicitly 0.0 for hardware/OS/compiler
-    // combinations that have a '-0.0' (negative zero) that
-    // equals 0.0 but is also negative.
-    return(0.0);
   }
 
   IntervalDomain *IntervalDomain::copy() const {
@@ -956,9 +969,10 @@ namespace EUROPA {
   }
 
   StringDomain::StringDomain(const DataTypeId& dt) : EnumeratedDomain(dt) {}
+  StringDomain::StringDomain(edouble value, const DataTypeId& dt) : EnumeratedDomain(dt,value) {}
   StringDomain::StringDomain(double value, const DataTypeId& dt) : EnumeratedDomain(dt,value) {}
   StringDomain::StringDomain(const std::string& value, const DataTypeId& dt) : EnumeratedDomain(dt,LabelStr(value)) {}
-  StringDomain::StringDomain(const std::list<double>& values, const DataTypeId& dt) : EnumeratedDomain(dt,values) {}
+  StringDomain::StringDomain(const std::list<edouble>& values, const DataTypeId& dt) : EnumeratedDomain(dt,values) {}
 
   StringDomain::StringDomain(const AbstractDomain& org) : EnumeratedDomain(org) {}
 
@@ -969,7 +983,7 @@ namespace EUROPA {
     return ptr;
   }
 
-  void StringDomain::set(double value) {
+  void StringDomain::set(edouble value) {
     check_error(LabelStr::isString(value));
     checkError(isEmpty() || isMember(value), value << " is not a member of the domain :" << toString());
 
@@ -978,7 +992,7 @@ namespace EUROPA {
     EnumeratedDomain::set(value);
   }
 
-  bool StringDomain::isMember(double value) const {
+  bool StringDomain::isMember(edouble value) const {
       // This is a hack so that specify() will work
       // string domain needs to be able to handle all situations that involve literal string gracefully
       // for example :
@@ -991,26 +1005,27 @@ namespace EUROPA {
 
   void StringDomain::set(const std::string& value){
     LabelStr lbl(value);
-    set((double) lbl);
+    set((edouble) lbl);
   }
 
   bool StringDomain::isMember(const std::string& value) const{
     LabelStr lbl(value);
-    return isMember((double) lbl);
+    return isMember((edouble) lbl);
   }
 
   void StringDomain::insert(const std::string& value){
     LabelStr lbl(value);
-    EnumeratedDomain::insert((double) lbl);
+    EnumeratedDomain::insert((edouble) lbl);
   }
 
-  void StringDomain::insert(double value){
+  void StringDomain::insert(edouble value){
     EnumeratedDomain::insert(value);
   }
 
   SymbolDomain::SymbolDomain(const DataTypeId& dt) : EnumeratedDomain(dt) {}
+  SymbolDomain::SymbolDomain(edouble value, const DataTypeId& dt) : EnumeratedDomain(dt,value) {}
   SymbolDomain::SymbolDomain(double value, const DataTypeId& dt) : EnumeratedDomain(dt,value) {}
-  SymbolDomain::SymbolDomain(const std::list<double>& values, const DataTypeId& dt) : EnumeratedDomain(dt,values) {}
+  SymbolDomain::SymbolDomain(const std::list<edouble>& values, const DataTypeId& dt) : EnumeratedDomain(dt,values) {}
 
   SymbolDomain::SymbolDomain(const AbstractDomain& org) : EnumeratedDomain(org) {}
 
@@ -1022,8 +1037,9 @@ namespace EUROPA {
   }
 
   NumericDomain::NumericDomain(const DataTypeId& dt) : EnumeratedDomain(dt) {}
+  NumericDomain::NumericDomain(edouble value, const DataTypeId& dt) : EnumeratedDomain(dt,value) {}
   NumericDomain::NumericDomain(double value, const DataTypeId& dt) : EnumeratedDomain(dt,value) {}
-  NumericDomain::NumericDomain(const std::list<double>& values, const DataTypeId& dt) : EnumeratedDomain(dt,values) {}
+  NumericDomain::NumericDomain(const std::list<edouble>& values, const DataTypeId& dt) : EnumeratedDomain(dt,values) {}
 
   NumericDomain::NumericDomain(const AbstractDomain& org) : EnumeratedDomain(org) {}
 
@@ -1035,6 +1051,8 @@ namespace EUROPA {
   }
 
   IntervalIntDomain::IntervalIntDomain(const DataTypeId& dt) : IntervalDomain(dt)  {}
+  IntervalIntDomain::IntervalIntDomain(eint lb, eint ub, const DataTypeId& dt) : IntervalDomain(lb,ub,dt) {}
+  IntervalIntDomain::IntervalIntDomain(eint value, const DataTypeId& dt) : IntervalDomain(value,dt) {}
   IntervalIntDomain::IntervalIntDomain(int lb, int ub, const DataTypeId& dt) : IntervalDomain(lb,ub,dt) {}
   IntervalIntDomain::IntervalIntDomain(int value, const DataTypeId& dt) : IntervalDomain(value,dt) {}
   IntervalIntDomain::IntervalIntDomain(const AbstractDomain& org) : IntervalDomain(org) {}
@@ -1052,20 +1070,20 @@ namespace EUROPA {
     return(m_lb == m_ub);
   }
 
-  void IntervalIntDomain::testPrecision(const double& value) const {
+  void IntervalIntDomain::testPrecision(const edouble& value) const {
 #ifndef EUROPA_FAST
-    int intValue = (int) value;
+    int intValue = cast_int(value);
     double dblValue = (double) intValue;
     checkError(dblValue == value,
 	       value << " must be an integer."); // confirms no loss in precision
 #endif
   }
 
-  double IntervalIntDomain::convert(const double& value) const {
-    return((int) value);
+  edouble IntervalIntDomain::convert(const edouble& value) const {
+    return(cast_int(value));
   }
 
-  void IntervalIntDomain::insert(double value) {
+  void IntervalIntDomain::insert(edouble value) {
     check_error(check_value(value));
     if (isMember(value))
       return; // Already in the interval.
@@ -1094,20 +1112,20 @@ namespace EUROPA {
     check_error(ALWAYS_FAILS);
   }
 
-  void IntervalIntDomain::getValues(std::list<double>& results) const {
+  void IntervalIntDomain::getValues(std::list<edouble>& results) const {
     check_error(isFinite());
-    int lb = (int) check(m_lb);
-    int ub = (int) check(m_ub);
-    for (int i = lb; i <= ub; i++)
+    eint lb = cast_int(check(m_lb));
+    eint ub = cast_int(check(m_ub));
+    for (eint i = lb; i <= ub; i++)
       results.push_back(i);
   }
 
-  double IntervalIntDomain::translateNumber(double number, bool asMin) const {
-    double result = IntervalDomain::translateNumber(int(number), asMin);
+  edouble IntervalIntDomain::translateNumber(edouble number, bool asMin) const {
+    edouble result = IntervalDomain::translateNumber(eint(number), asMin);
 
     // Incrementing result will round up.
     // Why the condition that number is positive? It breaks symmetry if nothing else. --wedgingt 2004 Mar 4
-    if ((fabs(result - number) >= EPSILON) && asMin && number > 0)
+    if ((std::abs(result - number) >= EPSILON) && asMin && number > 0)
       result = result + 1;
     return(result);
   }
@@ -1118,8 +1136,8 @@ namespace EUROPA {
     return(ptr);
   }
 
-  bool IntervalIntDomain::intersect(double lb, double ub) {
-    return IntervalDomain::intersect(ceil(lb), floor(ub));
+  bool IntervalIntDomain::intersect(edouble lb, edouble ub) {
+    return IntervalDomain::intersect(std::ceil(lb), std::floor(ub));
   }
 
   bool IntervalIntDomain::intersect(const AbstractDomain& dom) {
@@ -1141,7 +1159,7 @@ namespace EUROPA {
   {
   }
 
-  void BoolDomain::testPrecision(const double& value) const
+  void BoolDomain::testPrecision(const edouble& value) const
   {
     check_error(value == 0 || value == 1);
   }
@@ -1170,9 +1188,9 @@ namespace EUROPA {
     return intersect(dom.getLowerBound(), dom.getUpperBound());
   }
 
-  bool BoolDomain::intersect(double lb, double ub) {
-    double boolLb = lb;
-    double boolUb = ub;
+  bool BoolDomain::intersect(edouble lb, edouble ub) {
+    edouble boolLb = lb;
+    edouble boolUb = ub;
     if(boolLb > boolUb) {
       boolLb = boolUb;
       boolUb = lb;

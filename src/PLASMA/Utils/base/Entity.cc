@@ -95,7 +95,7 @@ namespace EUROPA {
   }
 
   void Entity::setExternalPSEntity(const PSEntity* externalEntity) {
-    m_externalEntity = Entity::getEntity(externalEntity->getKey());
+    m_externalEntity = Entity::getEntity(externalEntity->getEntityKey());
   }
 
   void Entity::clearExternalEntity(){
@@ -113,12 +113,11 @@ namespace EUROPA {
 
   std::map<eint, unsigned long int>& Entity::entitiesByKey(){
     static std::map<eint, unsigned long int> sl_entitiesByKey;
+    return sl_entitiesByKey;
+  }
 
   const PSEntity* Entity::getExternalPSEntity() const {
     return (const PSEntity*) getExternalEntity();
-  }
-
-    return sl_entitiesByKey;
   }
 
   void Entity::purgeStarted(){

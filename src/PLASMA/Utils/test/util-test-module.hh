@@ -17,7 +17,7 @@ class UtilModuleTests : public CppUnit::TestFixture {
   CPPUNIT_TEST(entityTests);
   CPPUNIT_TEST(xmlTests);
   CPPUNIT_TEST(numberTests);
-  CPPUNIT_TEST(loggerTests);
+//   CPPUNIT_TEST(loggerTests);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -33,7 +33,7 @@ public:
   void entityTests();
   void xmlTests();
   void numberTests();
-  void loggerTests();
+//   void loggerTests();
 };
 
 

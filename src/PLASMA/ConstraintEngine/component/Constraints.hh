@@ -198,8 +198,8 @@ namespace EUROPA {
      * @return True if the target domain was modified.
      */
     static bool updateMinAndMax(IntervalDomain& targetDomain,
-				double denomMin, double denomMax,
-				double numMin, double numMax);
+				edouble denomMin, edouble denomMax,
+				edouble numMin, edouble numMax);
   private:
     static const int X = 0;
     static const int Y = 1;
@@ -267,12 +267,12 @@ class CalcDistanceConstraint : public Constraint {
     /**
      * Calculates the actual distance
      */
-    static double compute(double x1, double y1, double x2, double y2);
+    static edouble compute(edouble x1, edouble y1, edouble x2, edouble y2);
 
     /**
      * Calculates the hypotenuse w. pythagaras
      */
-    static double compute(double a, double b);
+    static edouble compute(edouble a, edouble b);
 
   private:
 
