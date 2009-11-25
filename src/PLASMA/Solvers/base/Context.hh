@@ -20,7 +20,7 @@ namespace EUROPA {
     private:
       ContextId m_id;
       const LabelStr m_name;
-      std::map<double, double> m_map;
+      std::map<edouble, double> m_map;
     };
   }
 }

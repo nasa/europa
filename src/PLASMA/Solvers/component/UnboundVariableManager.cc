@@ -52,10 +52,10 @@ namespace EUROPA {
           it != m_singletonFlawCandidates.end(); ++it){
         ConstrainedVariableId var = *it;
         checkError(var.isValid(), var);
-        checkError(var->lastDomain().isSingleton(), "Buffer management error:" << var->toString());
+        checkError(var->lastDomain().isSingleton(), "Buffer management error:" << var->toLongString());
         
         if(!dynamicMatch(var)){
-          debugMsg("UnboundVariableManager:nextZeroCommitmentDecision", "Allocating for " << var->toString());
+          debugMsg("UnboundVariableManager:nextZeroCommitmentDecision", "Allocating for " << var->toLongString());
           return allocateDecisionPoint(var, "unit");
         }
       }
@@ -88,12 +88,12 @@ namespace EUROPA {
      * We may filter based on static information only.
      */
     void UnboundVariableManager::updateFlaw(const ConstrainedVariableId& var){
-      debugMsg("UnboundVariableManager:updateFlaw", var->toString());
+      debugMsg("UnboundVariableManager:updateFlaw", var->toLongString());
       m_flawCandidates.erase(var);
       m_singletonFlawCandidates.erase(var);
 
       if(variableOfNonActiveToken(var) || !var->canBeSpecified() || var->isSpecified() || staticMatch(var)){
-        debugMsg("UnboundVariableManager:updateFlaw", "Excluding: " << var->toString());
+        debugMsg("UnboundVariableManager:updateFlaw", "Excluding: " << var->toLongString());
         condDebugMsg(variableOfNonActiveToken(var), "UnboundVariableManager:updateFlaw", "Parent is not active.");
         condDebugMsg(!var->canBeSpecified(), "UnboundVariableManager:updateFlaw", "Variable can't be specified.");
         condDebugMsg(var->isSpecified(), "UnboundVariableManager:updateFlaw", "Variable is already specified.");
@@ -101,7 +101,7 @@ namespace EUROPA {
       }
 
       debugMsg("UnboundVariableManager:addFlaw",
-	       "Adding " << var->toString() << " as a candidate flaw.");
+	       "Adding " << var->toLongString() << " as a candidate flaw.");
 
       m_flawCandidates.insert(var);
 
@@ -111,7 +111,7 @@ namespace EUROPA {
 
     void UnboundVariableManager::removeFlaw(const ConstrainedVariableId& var){
       condDebugMsg(m_flawCandidates.find(var) != m_flawCandidates.end(), 
-		   "UnboundVariableManager:removeFlaw", "Removing " << var->toString() << " as a flaw.");
+		   "UnboundVariableManager:removeFlaw", "Removing " << var->toLongString() << " as a flaw.");
 
       m_flawCandidates.erase(var);
       m_singletonFlawCandidates.erase(var);
@@ -130,7 +130,7 @@ namespace EUROPA {
 	m_guardCache.insert(std::pair<ConstrainedVariableId, unsigned int>(var, 1));
 
       debugMsg("UnboundVariableManager:addGuard", 
-	       "GUARDS=" << refCount << " for " << var->getName().toString() << "(" << var->getKey() << ")");
+	       "GUARDS=" << refCount << " for " << var->toLongString() << "(" << var->getKey() << ")");
       updateFlaw(var);
     }
 
@@ -147,7 +147,7 @@ namespace EUROPA {
       }
 
       debugMsg("UnboundVariableManager:removeGuard", 
-	       "GUARDS=" << refCount << " for " << var->getName().toString() << "(" << var->getKey() << ")");
+	       "GUARDS=" << refCount << " for " << var->toLongString() << "(" << var->getKey() << ")");
 
       updateFlaw(var);
     }
@@ -284,7 +284,7 @@ namespace EUROPA {
       std::string compatStr = (isCompatGuard(var) ? " GUARD" : "");
       std::string unitStr = (var->lastDomain().isSingleton() ? " UNIT" : "");
       std::stringstream os;
-      os << "VAR:   " << var->toString() << unitStr << compatStr;
+      os << "VAR:   " << var->toLongString() << unitStr << compatStr;
       return os.str();
     }
 

@@ -380,7 +380,7 @@ namespace EUROPA
     publish(notifyAdded(variable));
 
     debugMsg("ConstraintEngine:add:ConstrainedVariable",
-	     variable->getName().toString() << "(" << variable->getKey() <<  ")");
+	     variable->getName().toString() << "(" << variable->getKey() << ")");
   }
 
   void ConstraintEngine::remove(const ConstrainedVariableId& variable){

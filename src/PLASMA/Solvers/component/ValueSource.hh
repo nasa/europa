@@ -27,7 +27,7 @@ namespace EUROPA {
       /**
        * @brief Accessor for the value at position given by index.
        */
-      virtual double getValue(unsigned int index) const = 0;
+      virtual edouble getValue(unsigned int index) const = 0;
 
       /**
        * @brief Required to allow correct cleanup
@@ -43,30 +43,30 @@ namespace EUROPA {
     class EnumValueSource : public ValueSource {
     public:
       EnumValueSource(const SchemaId& schema, const AbstractDomain& dom);
-      double getValue(unsigned int index) const;
+      edouble getValue(unsigned int index) const;
     private:
-      std::vector<double> m_values;
+      std::vector<edouble> m_values;
     };
 
     class OrderedValueSource : public ValueSource {
     public:
       OrderedValueSource(const AbstractDomain& dom);
-      double getValue(unsigned int index) const;
-      void addValue(const double value);
+      edouble getValue(unsigned int index) const;
+      void addValue(const edouble value);
     private:
-      std::vector<double> m_values;
+      std::vector<edouble> m_values;
       const AbstractDomain& m_dom;
     };
 
     class IntervalValueSource : public ValueSource {
     public:
       IntervalValueSource(const AbstractDomain& dom);
-      double getValue(unsigned int index) const;
+      edouble getValue(unsigned int index) const;
       static unsigned int calculateSize(const AbstractDomain & dom);
     private:
-      double m_lb;
-      double m_ub;
-      double m_step;
+      edouble m_lb;
+      edouble m_ub;
+      edouble m_step;
     };
   }
 }

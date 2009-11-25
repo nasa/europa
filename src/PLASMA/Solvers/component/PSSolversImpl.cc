@@ -132,11 +132,11 @@ namespace EUROPA
   const std::string& PSSolverImpl::getConfigFilename() {return m_configFile;}
 
   int PSSolverImpl::getHorizonStart() {
-    return (int) SOLVERS::HorizonFilter::getHorizon().getLowerBound();
+    return cast_int(SOLVERS::HorizonFilter::getHorizon().getLowerBound());
   }
 
   int PSSolverImpl::getHorizonEnd() {
-    return (int) SOLVERS::HorizonFilter::getHorizon().getUpperBound();
+    return cast_int(SOLVERS::HorizonFilter::getHorizon().getUpperBound());
   }
 
   void PSSolverImpl::configure(int horizonStart, int horizonEnd) {

@@ -386,8 +386,8 @@ namespace EUROPA {
 	  if (!rs.isNoId()) {
 	      char realModelPaths[PATH_MAX];
 	      bool foundModelPath = false;  	  
-	      const std::multimap<double, RuleId>& allRules = rs->getRules(); 
-	      for(std::multimap<double, RuleId>::const_iterator it = allRules.begin(); it != allRules.end(); ++it) {
+	      const std::multimap<edouble, RuleId>& allRules = rs->getRules(); 
+	      for(std::multimap<edouble, RuleId>::const_iterator it = allRules.begin(); it != allRules.end(); ++it) {
 	          std::string ruleSrc = ((*it).second)->getSource().toString();
 	          if(ruleSrc == "noSrc")
 	              continue;
@@ -762,7 +762,7 @@ namespace EUROPA {
 
       void PartialPlanWriter::outputObject(const ObjectId &objId, const int type,
 					   std::ofstream &objOut, std::ofstream &varOut) {
-	int parentKey = -1;
+	eint parentKey = -1;
 	if(!objId->getParent().isNoId())
 	  parentKey = objId->getParent()->getKey();
 	objOut << objId->getKey() << TAB << type << TAB << parentKey << TAB
@@ -840,23 +840,20 @@ namespace EUROPA {
 	//outputEnumVar(token->getState(), token->getKey(), I_STATE, varOut);
 	outputStateVar(token->getState(), token->getKey(), I_STATE, varOut);
 
-	std::string paramVarIds;
-	char paramIdStr[NBBY * sizeof(int) * 28/93 + 4];
+	std::stringstream paramVarIds;
 	for(std::vector<ConstrainedVariableId>::const_iterator paramVarIterator = 
 	      token->parameters().begin();
 	    paramVarIterator != token->parameters().end(); ++paramVarIterator) {
 	  ConstrainedVariableId varId = *paramVarIterator;
 	  check_error(varId.isValid());
 	  outputConstrVar(varId, token->getKey(), I_PARAMETER, varOut);
-	  memset(paramIdStr, '\0', NBBY * sizeof(int) * 28/93 + 4);
-	  sprintf(paramIdStr, "%d", varId->getKey());
-	  paramVarIds += std::string(paramIdStr) + COLON;
+          paramVarIds << varId->getKey() << COLON;
 	}
-	if(paramVarIds == "") {
+	if(paramVarIds.str() == "") {
 	  tokOut << SNULL << TAB;
 	}
 	else {
-	  tokOut << paramVarIds << TAB;
+	  tokOut << paramVarIds.str() << TAB;
 	}
 
 	/*ExtraInfo: SlotOrder*/
@@ -877,7 +874,7 @@ namespace EUROPA {
       }
   
       void PartialPlanWriter::outputStateVar(const Id<TokenVariable<StateDomain> >& stateVar,
-					     const int parentId, const int type,
+					     const eint parentId, const int type,
 					     std::ofstream &varOut) {
 	
 	varOut << stateVar->getKey() << TAB << ppId << TAB << parentId << TAB 
@@ -885,9 +882,9 @@ namespace EUROPA {
 
 	varOut << ENUM_DOMAIN << TAB;
 	StateDomain &dom = (StateDomain &) stateVar->lastDomain();
-	std::list<double> vals;
+	std::list<edouble> vals;
 	dom.getValues(vals);
-	for(std::list<double>::const_iterator it = vals.begin(); it != vals.end(); ++it){
+	for(std::list<edouble>::const_iterator it = vals.begin(); it != vals.end(); ++it){
 	  LabelStr strVal(*it);
 	  varOut << strVal.toString() << " ";
 	}
@@ -898,7 +895,7 @@ namespace EUROPA {
       }
 
       void PartialPlanWriter::outputEnumVar(const Id<TokenVariable<EnumeratedDomain> >& enumVar, 
-					    const int parentId, const int type,
+					    const eint parentId, const int type,
 					    std::ofstream &varOut) {
 	
 	varOut << enumVar->getKey() << TAB << ppId << TAB << parentId << TAB 
@@ -913,7 +910,7 @@ namespace EUROPA {
       }
   
       void PartialPlanWriter::outputIntVar(const Id<TokenVariable<IntervalDomain> >& intVar,
-					   const int parentId, const int type,
+					   const eint parentId, const int type,
 					   std::ofstream &varOut) {
 	
 	varOut << intVar->getKey() << TAB << ppId << TAB << parentId << TAB 
@@ -927,7 +924,7 @@ namespace EUROPA {
       }
   
       void PartialPlanWriter::outputIntIntVar(const Id<TokenVariable<IntervalIntDomain> >& intVar,
-					      const int parentId, const int type,
+					      const eint parentId, const int type,
 					      std::ofstream &varOut) {
 	
 
@@ -942,7 +939,7 @@ namespace EUROPA {
       }
 
       void PartialPlanWriter::outputObjVar(const ObjectVarId& objVar,
-					   const int parentId, const int type,
+					   const eint parentId, const int type,
 					   std::ofstream &varOut) {
 	
 
@@ -951,10 +948,11 @@ namespace EUROPA {
 
 	varOut << ENUM_DOMAIN << TAB;
 
-	std::list<double> objects;
+	std::list<edouble> objects;
 	((ObjectDomain &)objVar->lastDomain()).getValues(objects);
-	for(std::list<double>::iterator it = objects.begin(); it != objects.end(); ++it) {
-	  varOut << ((ObjectId)(*it))->getName().toString() << " ";
+	for(std::list<edouble>::iterator it = objects.begin(); it != objects.end(); ++it) {
+          ObjectId obj = Entity::getTypedEntity<Object>(*it);
+	  varOut << obj->getName().toString() << " ";
 	}
 
 	varOut << TAB << SNULL << TAB << SNULL << TAB << SNULL << TAB;
@@ -963,7 +961,7 @@ namespace EUROPA {
       }
   
       void PartialPlanWriter::outputConstrVar(const ConstrainedVariableId &otherVar, 
-					      const int parentId, const int type,
+					      const eint parentId, const int type,
 					      std::ofstream &varOut) {
 	
 
@@ -1081,9 +1079,9 @@ namespace EUROPA {
 
       const std::string PartialPlanWriter::getUpperBoundStr(IntervalDomain &dom) const {
 	if(dom.isNumeric()) {
-	  if((int) dom.getUpperBound() == PLUS_INFINITY)
+	  if(dom.getUpperBound() == PLUS_INFINITY)
 	    return PINFINITY;
-	  else if((int) dom.getUpperBound() == MINUS_INFINITY)
+	  else if(dom.getUpperBound() == MINUS_INFINITY)
 	    return NINFINITY;
 	  else {
 	    std::stringstream stream;
@@ -1091,8 +1089,8 @@ namespace EUROPA {
 	    return std::string(stream.str());
 	  }
 	}
-	else if(LabelStr::isString((int)dom.getUpperBound())) {
-	  LabelStr label((int)dom.getUpperBound());
+	else if(LabelStr::isString(dom.getUpperBound())) {
+	  LabelStr label(dom.getUpperBound());
 	  return label.toString();
 	}
 	else if(dom.isBool()) {
@@ -1101,7 +1099,7 @@ namespace EUROPA {
 	  return std::string("true");
 	}
 	else {
-	  return ObjectId(dom.getUpperBound())->getName().toString();
+	  return Entity::getTypedEntity<Object>(dom.getUpperBound())->getName().toString();
 	}
 	return std::string("");
       }
@@ -1109,16 +1107,16 @@ namespace EUROPA {
       const std::string PartialPlanWriter::getLowerBoundStr(IntervalDomain &dom) const {
       
 	if(dom.isNumeric()) {
-	  if((int)dom.getLowerBound() == PLUS_INFINITY)
+	  if(dom.getLowerBound() == PLUS_INFINITY)
 	    return PINFINITY;
-	  else if((int) dom.getLowerBound() == MINUS_INFINITY)
+	  else if(dom.getLowerBound() == MINUS_INFINITY)
 	    return NINFINITY;
 	  std::stringstream stream;
 	  stream << dom.getLowerBound();
 	  return std::string(stream.str());
 	}
-	else if(LabelStr::isString((int)dom.getLowerBound())) {
-	  LabelStr label((int)dom.getLowerBound());
+	else if(LabelStr::isString(dom.getLowerBound())) {
+	  LabelStr label(dom.getLowerBound());
 	  return label.toString();
 	}
 	else if(dom.isBool()) {
@@ -1127,14 +1125,14 @@ namespace EUROPA {
 	  return std::string("true");
 	}
 	else {
-	  return ObjectId(dom.getLowerBound())->getName().toString();
+	  return Entity::getTypedEntity<Object>(dom.getLowerBound())->getName().toString();
 	}
 	return std::string("");
       }
   
       const std::string PartialPlanWriter::getEnumerationStr(EnumeratedDomain &edom) const {
 	std::stringstream stream;
-	std::list<double> enumeration;
+	std::list<edouble> enumeration;
 	EnumeratedDomain dom(edom);
 	if(dom.isOpen()) {
 	  dom.close();
@@ -1148,14 +1146,14 @@ namespace EUROPA {
 	else {
 	  dom.getValues(enumeration);
 	}
-	for(std::list<double>::iterator it = enumeration.begin(); it != enumeration.end(); ++it) {
+	for(std::list<edouble>::iterator it = enumeration.begin(); it != enumeration.end(); ++it) {
 	  if(dom.isNumeric()) {
-	    if((int) (*it) == PLUS_INFINITY)
+	    if((*it) == PLUS_INFINITY)
 	      stream << PINFINITY;
-	    else if((int) (*it) == MINUS_INFINITY)
+	    else if((*it) == MINUS_INFINITY)
 	      stream << NINFINITY;
 	    else
-	      stream << (int)(*it) << " ";
+	      stream << cast_int(*it) << " ";
 	  }
 	  else if(LabelStr::isString(*it)) {
 	    LabelStr label(*it);
@@ -1167,7 +1165,7 @@ namespace EUROPA {
 	    stream << "true" << " ";
 	  }
 	  else {
-	    stream << ObjectId(*it)->getName().toString() << " ";
+	    stream << Entity::getTypedEntity<Object>(*it)->getName().toString() << " ";
 	  }
 	}
 

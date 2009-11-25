@@ -116,8 +116,8 @@ namespace EUROPA {
     : ConstrainedVariable(constraintEngine, internal, canBeSpecified, name, parent, index), 
     m_baseDomain(static_cast<DomainType*>(baseDomain.copy())),
     m_derivedDomain(static_cast<DomainType*>(baseDomain.copy())) {
+    debugMsg("Variable:Variable", "Name " << name.toString());
     debugMsg("Variable:Variable", "Base Domain = " << baseDomain.toString());
-    debugMsg("Variable:Variable", "Name " << name);
     if(baseDomain.isSingleton())
     {
     	debugMsg("Variable:Variable", "Base domain singleton; " << baseDomain.getSingletonValue());

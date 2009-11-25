@@ -23,10 +23,10 @@ namespace EUROPA {
       class ValueEnum : public UnboundVariableDecisionPoint {
       public:
         ValueEnum(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
-        double getNext();
+        edouble getNext();
         bool hasNext() const;
       private:
-        double readValue(const TiXmlElement& value) const;
+        edouble readValue(const TiXmlElement& value) const;
         unsigned int m_choiceIndex;
       };
 

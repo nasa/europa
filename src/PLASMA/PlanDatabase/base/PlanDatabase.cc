@@ -454,6 +454,13 @@ namespace EUROPA{
         return;
     }
   }
+  
+  void PlanDatabase::getCompatibleTokens(const TokenId& inactiveToken,
+                                         std::vector<TokenId>& results,
+                                         eint limit,
+                                         bool useExactTest) {
+    getCompatibleTokens(inactiveToken, results, cast_int(limit), useExactTest);
+  }
 
   void PlanDatabase::getCompatibleTokens(const TokenId& inactiveToken,
                                          std::vector<TokenId>& results) {

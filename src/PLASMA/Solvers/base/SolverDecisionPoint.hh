@@ -69,7 +69,7 @@ namespace EUROPA {
       void setCutoff(unsigned int maxChoices) {m_maxChoices = maxChoices;}
 
     protected:
-      DecisionPoint(const DbClientId& client, unsigned int entityKey, const LabelStr& explanation);
+      DecisionPoint(const DbClientId& client, eint entityKey, const LabelStr& explanation);
 
       friend class Solver; /*!< grants special access to execute and undo methods */
 
@@ -91,7 +91,7 @@ namespace EUROPA {
        */
       virtual bool canUndo() const;
 
-      const unsigned int getFlawedEntityKey() {return m_entityKey;}
+      const eint getFlawedEntityKey() {return m_entityKey;}
 
       /**
        * @brief Main accessor for the Solver to execute current choice.
@@ -138,7 +138,7 @@ namespace EUROPA {
       virtual void handleUndo() = 0;
 
       const DbClientId m_client;
-      const unsigned int m_entityKey; /*!< The Key of underlying flawed entity. Store instead of ID so we can test it. */
+      const eint m_entityKey; /*!< The Key of underlying flawed entity. Store instead of ID so we can test it. */
 
       /**
        * @brief Get the justification behind the selection of this decision point

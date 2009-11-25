@@ -154,7 +154,8 @@ namespace EUROPA {
 
   DataRef ExprConstructorSuperCall::eval(EvalContext& context) const
   {
-    ObjectId object = context.getVar("this")->derivedDomain().getSingletonValue();
+    ObjectId object = 
+      Entity::getTypedEntity<Object>(context.getVar("this")->derivedDomain().getSingletonValue());
 
     std::vector<const AbstractDomain*> arguments;
 
@@ -189,7 +190,8 @@ namespace EUROPA {
 
   DataRef ExprConstructorAssignment::eval(EvalContext& context) const
   {
-    ObjectId object = context.getVar("this")->derivedDomain().getSingletonValue();
+    ObjectId object = 
+      Entity::getTypedEntity<Object>(context.getVar("this")->derivedDomain().getSingletonValue());
     check_error(object->getVariable(m_lhs) == ConstrainedVariableId::noId());
     ConstrainedVariableId rhsValue = m_rhs->eval(context).getValue();
     const AbstractDomain& domain = rhsValue->derivedDomain();
@@ -259,7 +261,7 @@ namespace EUROPA {
     for (unsigned int idx = 1;idx<vars.size();idx++) {
       check_error(m_schema->isObjectType(rhs->baseDomain().getTypeName()), std::string("Can't apply dot operator to:")+rhs->baseDomain().getTypeName().toString());
       check_runtime_error(rhs->derivedDomain().isSingleton(),varName+" must be singleton to be able to get to "+vars[idx]);
-      ObjectId object = rhs->derivedDomain().getSingletonValue();
+      ObjectId object = Entity::getTypedEntity<Object>(rhs->derivedDomain().getSingletonValue());
       rhs = object->getVariable(object->getName().toString()+"."+vars[idx]);
       varName += "." + vars[idx];
 
@@ -306,7 +308,8 @@ namespace EUROPA {
     // faking it for now, but this is a hack
 
     // This assumes for now this is only called inside a constructor, not as part of an initial-state
-    ObjectId thisObject = context.getVar("this")->derivedDomain().getSingletonValue();
+    ObjectId thisObject = 
+      Entity::getTypedEntity<Object>(context.getVar("this")->derivedDomain().getSingletonValue());
     LabelStr name(std::string(thisObject->getName().toString() + "." + m_objectName.toString()));
     ObjectId newObject = m_dbClient->createObject(
 						  m_objectType.c_str(),
@@ -1295,15 +1298,16 @@ namespace EUROPA {
     	rule_constraint(Lock, loop_vars);
     }
 
-    std::list<double> loopObjectSet_values;
+    //this could be done more efficiently, I think...
+    std::list<edouble> loopObjectSet_values;
     loopObjectSet.getValues(loopObjectSet_values);
 
     // Translate into a set ordered by key to ensure reliable ordering across runs
     ObjectSet loopObjectSet_valuesByKey;
-    for(std::list<double>::iterator it=loopObjectSet_values.begin();
-    it!=loopObjectSet_values.end(); ++it) {
-    	ObjectId t = *it;
-    	loopObjectSet_valuesByKey.insert(t);
+    for(std::list<edouble>::iterator it=loopObjectSet_values.begin();
+        it!=loopObjectSet_values.end(); ++it) {
+      ObjectId t = Entity::getTypedEntity<Object>(*it);
+      loopObjectSet_valuesByKey.insert(t);
     }
 
     // iterate over loop collection
@@ -1316,7 +1320,7 @@ namespace EUROPA {
     	// see loopVar(Allocation, a);
     	{
     		ObjectDomain loopVarDomain(loopVarType.c_str());
-    		loopVarDomain.insert(loop_var);
+    		loopVarDomain.insert(loop_var->getKey());
     		loopVarDomain.close();
     		// This will automatically put it in the evalContext, since all RuleInstance vars are reachable there
     		addVariable(loopVarDomain, false, loopVarName);

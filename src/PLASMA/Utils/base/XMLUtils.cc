@@ -1,5 +1,6 @@
 #include "XMLUtils.hh"
 #include "Debug.hh"
+#include "Utils.hh"
 
 /**
  * @author Conor McGann
@@ -60,10 +61,6 @@ namespace EUROPA {
   }
 
   bool isNumber(const char* data, double& value){
-    char * pEnd;
-    value = strtod (data, &pEnd);
-
-		// if there's a number the pointer has advanced.
-    return pEnd != data;
+    return toValue<double>(data, value);
   }
 }

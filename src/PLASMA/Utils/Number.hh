@@ -3,6 +3,7 @@
 #include <iomanip>
 
 #include <cmath>
+#include <istream>
 #include <ostream>
 #include <limits>
 
@@ -31,6 +32,10 @@ namespace EUROPA {
 namespace __gnu_cxx {
   template<> struct hash<EUROPA::edouble> {
     inline size_t operator()(EUROPA::edouble __x) const;
+  };
+
+  template<> struct hash<EUROPA::eint> {
+    inline size_t operator()(EUROPA::eint __x) const;
   };
 }
 
@@ -297,6 +302,7 @@ namespace EUROPA {
    *  foo(0);
    *
    *  It is, type-wise, exactly as expensive to convert 0 to an eint as to a reference, so you have to explicitly disambiguate:
+   *
    *  foo(eint(0));
    */
 
@@ -422,6 +428,7 @@ namespace EUROPA {
   private:
     
     friend class edouble;
+      friend class __gnu_cxx::hash<eint>;
     friend class std::numeric_limits<eint>;
   
     /**
@@ -443,6 +450,7 @@ namespace EUROPA {
     DECL_FRIEND_COMPARISONS(double, eint);
     DECL_FRIEND_COMPARISONS(long double, eint);
     friend std::ostream& operator<<(std::ostream& o, const eint e);
+    friend std::istream& operator>>(std::istream& i, eint& e);
 
     friend edouble std::pow(const EUROPA::edouble d, const eint i);
 
@@ -463,6 +471,7 @@ namespace EUROPA {
   GEN_FRIEND_COMPARISONS(double, eint);
   GEN_FRIEND_COMPARISONS(long double, eint);
   inline std::ostream& operator<<(std::ostream& o, const eint e) {return(o << e.m_v);}
+  inline std::istream& operator>>(std::istream& o, eint& e) {return(o >> e.m_v);}
 
   class edouble {
   public:
@@ -548,6 +557,7 @@ namespace EUROPA {
 
 
     friend std::ostream& operator<<(std::ostream& o, const edouble e);
+    friend std::istream& operator>>(std::istream& o, edouble& e);
 
     double m_v;
   };
@@ -594,6 +604,8 @@ namespace EUROPA {
   inline long double cast_ldouble(const edouble e) {return static_cast<long double>(e.m_v);}
 
   inline std::ostream& operator<<(std::ostream& o, const edouble e) {return(o << e.m_v);}
+  inline std::istream& operator>>(std::istream& o, edouble& e) {
+    return(o >> e.m_v);}
 
 }
 
@@ -648,7 +660,7 @@ namespace __gnu_cxx {
   //I'm not entirely sure this is safe, but it's worked so far.  Maybe this should be changed to
   //*((size_t*)&(__x.m_v))
   size_t hash<EUROPA::edouble>::operator()(EUROPA::edouble __x) const {return (size_t) (__x.m_v);}
-
+  size_t hash<EUROPA::eint>::operator()(EUROPA::eint __x) const {return (size_t) (__x.m_v);}
 }
 
 

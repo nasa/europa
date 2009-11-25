@@ -98,17 +98,17 @@ namespace EUROPA {
 	void outputObject(const ObjectId &, const int, std::ofstream &, std::ofstream &);
 	void outputToken(const TokenId &, const int, const int, const int, const int, 
 			 const ObjectId &, std::ofstream &, std::ofstream &);
-	void outputStateVar(const Id<TokenVariable<StateDomain> >&, const int, const int,
+	void outputStateVar(const Id<TokenVariable<StateDomain> >&, const eint, const int,
 			    std::ofstream &varOut);
-	void outputEnumVar(const Id< TokenVariable<EnumeratedDomain> > &, const int,
+	void outputEnumVar(const Id< TokenVariable<EnumeratedDomain> > &, const eint,
 			   const int, std::ofstream &);
-	void outputIntVar(const Id< TokenVariable<IntervalDomain> > &, const int,
+	void outputIntVar(const Id< TokenVariable<IntervalDomain> > &, const eint,
 			  const int, std::ofstream &);
-	void outputIntIntVar(const Id< TokenVariable<IntervalIntDomain> >&, const int,
+	void outputIntIntVar(const Id< TokenVariable<IntervalIntDomain> >&, const eint,
 			     const int, std::ofstream &);
-	void outputObjVar(const ObjectVarId &, const int, const int,
+	void outputObjVar(const ObjectVarId &, const eint, const int,
 			  std::ofstream &);
-	void outputConstrVar(const ConstrainedVariableId &, const int, const int, 
+	void outputConstrVar(const ConstrainedVariableId &, const eint, const int, 
 			     std::ofstream &);
 	void outputConstraint(const ConstraintId &, std::ofstream &, std::ofstream &);
 #ifndef NO_RESOURCES

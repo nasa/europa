@@ -1584,7 +1584,7 @@ namespace EUROPA {
       	AbstractDomain* tmp = (AbstractDomain*)(*it);
         delete tmp;
       }
-      return (edouble)object;
+      return (edouble)object->getKey();
     }
     if (strcmp(tag, "value") == 0) {
       // New style XML for simple types.

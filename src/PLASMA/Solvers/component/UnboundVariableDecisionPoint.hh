@@ -73,7 +73,7 @@ namespace EUROPA {
        * @brief Retrieves the next choice to be executed. Implementation will depend
        * on the representation of choices in the derived class.
        */
-      virtual double getNext() = 0;
+      virtual edouble getNext() = 0;
     };
 
     /**
@@ -83,7 +83,7 @@ namespace EUROPA {
     public:
       MinValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
       bool hasNext() const;
-      double getNext();
+      edouble getNext();
 
     private:
 
@@ -97,7 +97,7 @@ namespace EUROPA {
     public:
       MaxValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
       bool hasNext() const;
-      double getNext();
+      edouble getNext();
 
     private:
 
@@ -114,7 +114,7 @@ namespace EUROPA {
     public:
       RandomValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
       bool hasNext() const;
-      double getNext();
+      edouble getNext();
 
     protected:
       enum Distribution {UNIFORM, NORMAL};

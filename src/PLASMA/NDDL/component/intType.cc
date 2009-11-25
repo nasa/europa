@@ -1,5 +1,6 @@
 #include "intType.hh"
 #include "Variable.hh"
+#include "Utils.hh"
 
 namespace EUROPA {
   
@@ -8,9 +9,11 @@ namespace EUROPA {
   //
 
   intTypeFactory::intTypeFactory()
-    : IntervalIntTypeFactory(getDefaultTypeName().c_str(), getDefaultTypeName().c_str()){}
+  //how did this compile in the first place?
+//     : IntervalIntTypeFactory(getDefaultTypeName().c_str(), getDefaultTypeName().c_str()){}
+    : IntervalIntTypeFactory(getDefaultTypeName().toString()){}
 
-  double intTypeFactory::createValue(const std::string& value) const
+  edouble intTypeFactory::createValue(const std::string& value) const
   {
     if (value == "-inf") {
       return MINUS_INFINITY;
@@ -18,7 +21,7 @@ namespace EUROPA {
     if (value == "+inf") {
       return PLUS_INFINITY;
     }
-    return atoi(value.c_str());
+    return toValue<eint>(value);
   }
 
   const LabelStr& intTypeFactory::getDefaultTypeName() {

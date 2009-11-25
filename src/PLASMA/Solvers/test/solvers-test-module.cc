@@ -79,8 +79,9 @@ SolversTestEngine::SolversTestEngine()
     createModules();
     doStart();
 
-    EUROPA::NDDL::loadSchema(getSchema(),((RuleSchema*)getComponent("RuleSchema"))->getId());
+//     EUROPA::NDDL::loadSchema(getSchema(),((RuleSchema*)getComponent("RuleSchema"))->getId());
     registerTestElements(getId());
+    executeScript("nddl-xml", getTestLoadLibraryPath() + "/Model.xml", true);
 }
 
 SolversTestEngine::~SolversTestEngine()
@@ -142,7 +143,7 @@ public:
   }
 
   void handleExecute() {
-    std::set<double> singletonValues;
+    std::set<edouble> singletonValues;
     std::vector<ConstrainedVariableId>::const_iterator it_end = getScope().end();
     for(std::vector<ConstrainedVariableId>::const_iterator it = getScope().begin(); it != it_end; ++it){
       ConstrainedVariableId var = *it;
@@ -420,10 +421,12 @@ private:
       static const LabelStr excludedVariables(":start:end:duration:arg1:arg3:arg4:arg6:arg7:arg8:filterVar:");
       static const LabelStr includedVariables(":arg2:arg5:keepVar:");
       std::string s = ":" + var->getName().toString() + ":";
-      if(excludedVariables.contains(s))
-        CPPUNIT_ASSERT_MESSAGE(var->toString(), !fm.inScope(var));
-      else if(includedVariables.contains(s))
-        CPPUNIT_ASSERT_MESSAGE(var->toString(), fm.inScope(var));
+      if(excludedVariables.contains(s)) {
+        CPPUNIT_ASSERT_MESSAGE(var->toLongString(), !fm.inScope(var));
+      }
+      else if(includedVariables.contains(s)) {
+        CPPUNIT_ASSERT_MESSAGE(var->toLongString(), fm.inScope(var));
+      }
     }
 
     // Confirm that a global variable is first a flaw, but when bound is no longer a flaw, and when bound again,
@@ -606,7 +609,7 @@ private:
       CPPUNIT_ASSERT(!flawHandler->test(guards));
       token->start()->specify(30);
       CPPUNIT_ASSERT(!flawHandler->test(guards));
-      token->getObject()->specify(o2.getId());
+      token->getObject()->specify(o2.getKey());
       CPPUNIT_ASSERT(flawHandler->test(guards));
       token->discard();
     }
@@ -751,7 +754,7 @@ private:
       db->getConstraintEngine()->propagate();
       CPPUNIT_ASSERT(solver.getFlawHandler(slave)->getPriority() == 2);
 
-      slave->getObject()->specify(o5.getId());
+      slave->getObject()->specify(o5.getKey());
       db->getConstraintEngine()->propagate();
       CPPUNIT_ASSERT(solver.getFlawHandler(slave)->getPriority() == 3);
 
@@ -1185,7 +1188,7 @@ private:
 
     Variable<IntervalIntDomain> intIntVar(ce, IntervalIntDomain(1, 5), false, true);
 
-    std::list<double> ints;
+    std::list<edouble> ints;
     ints.push_back(1);
 
     EnumeratedDomain singletonEnumIntDom(ints, true, "INTEGER_ENUMERATION");
@@ -1198,7 +1201,7 @@ private:
     EnumeratedDomain enumIntDom(ints, true, "INTEGER_ENUMERATION");
     Variable<EnumeratedDomain> enumIntVar(ce, enumIntDom, false, true);
 
-    std::list<double> strings;
+    std::list<edouble> strings;
     strings.push_back(LabelStr("foo"));
     strings.push_back(LabelStr("bar"));
     strings.push_back(LabelStr("baz"));
@@ -1304,16 +1307,16 @@ private:
 
     ValueEnum enumObjDP(db->getClient(), enumObjVar.getId(), *objHeurXml);
 
-    CPPUNIT_ASSERT(enumObjDP.getNext() == o3.getId());
-    CPPUNIT_ASSERT(enumObjDP.getNext() == o2.getId());
-    CPPUNIT_ASSERT(enumObjDP.getNext() == o4.getId());
-    CPPUNIT_ASSERT(enumObjDP.getNext() == o1.getId());
+    CPPUNIT_ASSERT(enumObjDP.getNext() == o3.getKey());
+    CPPUNIT_ASSERT(enumObjDP.getNext() == o2.getKey());
+    CPPUNIT_ASSERT(enumObjDP.getNext() == o4.getKey());
+    CPPUNIT_ASSERT(enumObjDP.getNext() == o1.getKey());
 
     ValueEnum trimEnumObjDP(db->getClient(), enumObjVar.getId(), *objTrimHeurXml);
 
-    CPPUNIT_ASSERT(trimEnumObjDP.getNext() == o1.getId());
-    CPPUNIT_ASSERT(trimEnumObjDP.getNext() == o4.getId());
-    CPPUNIT_ASSERT(trimEnumObjDP.getNext() == o2.getId());
+    CPPUNIT_ASSERT(trimEnumObjDP.getNext() == o1.getKey());
+    CPPUNIT_ASSERT(trimEnumObjDP.getNext() == o4.getKey());
+    CPPUNIT_ASSERT(trimEnumObjDP.getNext() == o2.getKey());
 
     //the value enumeration should be ignored if the domain is a singleton
     ValueEnum ignoreHeurDP(db->getClient(), singletonEnumIntVar.getId(), *intTrimHeurXml);
@@ -1645,6 +1648,8 @@ private:
 
   static bool testSimpleRejection() {
     TestEngine testEngine;
+    DebugMessage::enableMatchingMsgs("Solver", "step");
+    DebugMessage::enableMatchingMsgs("ConstraintEngine", "");
     TiXmlElement* root = initXml((getTestLoadLibraryPath() + "/SolverTests.xml").c_str(), "SimpleRejectionSolver");
     TiXmlElement* child = root->FirstChildElement();
     {
@@ -2034,7 +2039,6 @@ private:
         const ConstrainedVariableId var = (const ConstrainedVariableId) entity;
         CPPUNIT_ASSERT(uvm.inScope(var));
         CPPUNIT_ASSERT(vars.find(var) != vars.end());
-        std::cerr << var->toString() << std::endl;
         vars.erase(var);
       }
       else
@@ -2045,7 +2049,6 @@ private:
       CPPUNIT_ASSERT(!tm.inScope(*it) && !ocm.inScope(*it));
 
     for(ConstrainedVariableSet::const_iterator it = vars.begin(); it != vars.end(); ++it) {
-      std::cerr << (*it)->toString() << std::endl;
       CPPUNIT_ASSERT(!uvm.inScope(*it));
     }
 

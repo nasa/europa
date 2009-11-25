@@ -62,8 +62,8 @@ namespace EUROPA {
 	return candidate;
       }
 
-      std::map<int, std::pair<TokenId, ObjectSet> >::const_iterator m_it;
-      std::map<int, std::pair<TokenId, ObjectSet> >::const_iterator m_end;
+      std::map<eint, std::pair<TokenId, ObjectSet> >::const_iterator m_it;
+      std::map<eint, std::pair<TokenId, ObjectSet> >::const_iterator m_end;
     };
 
     IteratorId ThreatManager::createIterator() {

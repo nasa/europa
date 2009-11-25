@@ -1,5 +1,6 @@
 #include "floatType.hh"
 #include "Variable.hh"
+#include "Utils.hh"
 
 namespace EUROPA {
   
@@ -8,9 +9,11 @@ namespace EUROPA {
   //
 
   floatTypeFactory::floatTypeFactory()
-    : IntervalTypeFactory(getDefaultTypeName().c_str(), getDefaultTypeName().c_str()){}
+    //how did this compile in the first place??
+//     : IntervalTypeFactory(getDefaultTypeName().c_str(), getDefaultTypeName().c_str()){}
+    : IntervalTypeFactory(getDefaultTypeName().toString()) {}
 
-  double floatTypeFactory::createValue(const std::string& value) const
+  edouble floatTypeFactory::createValue(const std::string& value) const
   {
     if (value == "-inf") {
       return MINUS_INFINITY;
@@ -18,7 +21,7 @@ namespace EUROPA {
     if (value == "+inf") {
       return PLUS_INFINITY;
     }
-    return atof(value.c_str());
+    return toValue<edouble>(value);
   }
 
   const LabelStr& floatTypeFactory::getDefaultTypeName() {

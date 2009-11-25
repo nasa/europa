@@ -49,7 +49,8 @@ namespace EUROPA {
        * @return true if all flaws resolved within maxSteps and maxDepth, otherwise false.
        * @see reset, clear.
        */
-      bool solve(unsigned int maxSteps = PLUS_INFINITY, unsigned int maxDepth = PLUS_INFINITY);
+      bool solve(unsigned int maxSteps = std::numeric_limits<unsigned int>::max(),
+                 unsigned int maxDepth = std::numeric_limits<unsigned int>::max());
 
       /**
        * @brief Invocation for a single step of flaw resolution.

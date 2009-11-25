@@ -18,7 +18,7 @@ namespace EUROPA {
     /**
      * @brief Create a value for a string
      */
-    virtual double createValue(const std::string& value) const;
+    virtual edouble createValue(const std::string& value) const;
 
   private:
     static const LabelStr& getDefaultTypeName();

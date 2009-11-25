@@ -157,6 +157,10 @@ namespace EUROPA {
 			     std::vector<TokenId>& results,
 			     unsigned int limit,
 			     bool useExactTest);
+    void getCompatibleTokens(const TokenId& inactiveToken,
+			     std::vector<TokenId>& results,
+			     eint limit,
+			     bool useExactTest);
 
     /**
      * @brief Returns a count of compatible tokens up to the given limit
@@ -188,13 +192,13 @@ namespace EUROPA {
      */
     void getOrderingChoices(const TokenId& tokenToOrder,
 			    std::vector< OrderingChoice >& results,
-			    unsigned int limit = PLUS_INFINITY);
+			    unsigned int limit = std::numeric_limits<unsigned int>::max());
     /**
      * @brief Returns a count or all ordering choices for a token up to the given limit
      * @see Object::getOrderingChoices
      */
     unsigned int countOrderingChoices(const TokenId& token,
-				      unsigned int limit = PLUS_INFINITY);
+				      unsigned int limit = std::numeric_limits<unsigned int>::max());
 
     /**
      * @brief Returns the previous count of ordering choices

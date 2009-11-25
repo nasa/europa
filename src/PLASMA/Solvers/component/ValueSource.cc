@@ -34,24 +34,25 @@ namespace EUROPA {
 
     EnumValueSource::EnumValueSource(const SchemaId& schema, const AbstractDomain& dom)
       : ValueSource(dom.getSize()) {
-      std::list<double> values;
+      std::list<edouble> values;
       dom.getValues(values);
-      if(schema->isObjectType(dom.getTypeName())) {
-	EntityComparator<EntityId> foo;
-	values.sort<EntityComparator<EntityId> >(foo);
-      }
+      //this isn't necessary anymore (I think), since object domains are now entity keys
+//       if(schema->isObjectType(dom.getTypeName())) {
+// 	EntityComparator<EntityId> foo;
+// 	values.sort<EntityComparator<EntityId> >(foo);
+//       }
 
-      for(std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it)
+      for(std::list<edouble>::const_iterator it = values.begin(); it != values.end(); ++it)
         m_values.push_back(*it);
     }
 
-    double EnumValueSource::getValue(unsigned int index) const { return m_values[index];}
+    edouble EnumValueSource::getValue(unsigned int index) const { return m_values[index];}
 
     OrderedValueSource::OrderedValueSource(const AbstractDomain& dom) : ValueSource(0), m_dom(dom) {
       checkError(!m_dom.isEmpty(), "Cannot create a value ordering for empty domain " << m_dom);
     }
     
-    void OrderedValueSource::addValue(const double value) {
+    void OrderedValueSource::addValue(const edouble value) {
       if(m_dom.isMember(value)) {
 	debugMsg("OrderedValueSource:addValue", "Adding value " << value << " from domain " << m_dom);
 	m_values.push_back(value);
@@ -60,7 +61,7 @@ namespace EUROPA {
       condDebugMsg(!m_dom.isMember(value), "OrderedValueSource:addValue", "Value " << value << " not in " << m_dom);
     }
 
-    double OrderedValueSource::getValue(unsigned int index) const {
+    edouble OrderedValueSource::getValue(unsigned int index) const {
       checkError(!m_values.empty(), "Cannot get an ordered value from an empty set!");
       return m_values[index];
     }
@@ -70,10 +71,10 @@ namespace EUROPA {
 	m_lb(dom.getLowerBound()), m_ub(dom.getUpperBound()), m_step(dom.minDelta()){
     }
 
-    double IntervalValueSource::getValue(unsigned int index) const {return m_lb + (m_step * index);}
+    edouble IntervalValueSource::getValue(unsigned int index) const {return m_lb + (m_step * index);}
 
     unsigned int IntervalValueSource::calculateSize(const AbstractDomain& dom){
-      return (unsigned int) ((dom.getUpperBound() - dom.getLowerBound())/dom.minDelta()) + 1;
+      return (unsigned int) cast_int(((dom.getUpperBound() - dom.getLowerBound())/dom.minDelta()) + 1);
     }
   }
 }

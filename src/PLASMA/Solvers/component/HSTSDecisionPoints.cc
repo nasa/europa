@@ -7,6 +7,7 @@
 #include "Object.hh"
 #include "TokenVariable.hh"
 #include "ValueSource.hh"
+#include "Utils.hh"
 
 #include <algorithm>
 #include <sstream>
@@ -37,13 +38,13 @@ namespace EUROPA {
 	  
           while(value != NULL) {
             if(strcmp(value->Value(), "Value") == 0) {
-              double v = readValue(*value);
+              edouble v = readValue(*value);
               debugMsg("Solver:ValueEnum", "Read value " << v << " from " << *value << " convertToObject " << convertToObject);
               if(convertToObject) {
                 ObjectId obj = client->getObject((LabelStr(v)).c_str());
                 checkError(obj.isValid(), "No object named '" << LabelStr(v) << "' exists, which is listed in choice ordering for " 
                            << flawedVariable->toString());
-                v = obj;
+                v = obj->getKey();
               }
               ((OrderedValueSource*)m_choices)->addValue(v);
             }
@@ -52,13 +53,13 @@ namespace EUROPA {
         }
       }
     
-      double ValueEnum::readValue(const TiXmlElement& element) const {
+      edouble ValueEnum::readValue(const TiXmlElement& element) const {
         const char* data = element.Attribute("val");
         checkError(data != NULL && strcmp(data, "") != 0, "Value element with missing or empty val attribute.");
       
-        double retval;
+        edouble retval;
 
-        if(!isNumber(data, retval)) {
+        if(!toValue(data, retval)) {
           if(strcmp(data, "true") == 0 || strcmp(data, "TRUE") == 0 || strcmp(data, "True") == 0)
             retval = 1;
           else if(strcmp(data, "false") == 0 || strcmp(data, "FALSE") == 0 || strcmp(data, "False") == 0)
@@ -70,7 +71,7 @@ namespace EUROPA {
         return retval;
       }
 
-      double ValueEnum::getNext(){
+      edouble ValueEnum::getNext(){
         debugMsg("Solver:ValueEnum:getNext", "Getting value " << m_choices->getValue(m_choiceIndex) << " for variable " << 
                  getFlawedVariable()->toString() << " (index " << m_choiceIndex << ")");
         return m_choices->getValue(m_choiceIndex++);
@@ -269,9 +270,9 @@ namespace EUROPA {
       }
 
       int NearTokenComparator::midpoint(const TokenId& token) {
-        int maxTemporalExtent = (int) (token->end()->lastDomain().getUpperBound() -
-                                       token->start()->lastDomain().getLowerBound());
-        return (int)(token->start()->lastDomain().getLowerBound() + maxTemporalExtent / 2);
+        edouble maxTemporalExtent = (token->end()->lastDomain().getUpperBound() -
+                                     token->start()->lastDomain().getLowerBound());
+        return cast_int(token->start()->lastDomain().getLowerBound() + maxTemporalExtent / 2);
       }
 
       bool FarTokenComparator::compare(const TokenId x, const TokenId y) {

@@ -20,12 +20,12 @@
  * @todo Generate notifications for Solver to publish (i.e. for the SearchListener).
  */
 
-#define publish(m,dp) { \
+#define publish(m,dp) {                                                 \
     debugMsg("Solver:publish", "Publishing message " << #m);		\
-  for(std::list<SearchListenerId>::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it) { \
-    (*it)->m(dp); \
-  } \
-}
+    for(std::list<SearchListenerId>::iterator it = m_listeners.begin(); it != m_listeners.end(); ++it) { \
+      (*it)->m(dp);                                                     \
+    }                                                                   \
+  }
 
 namespace EUROPA {
   namespace SOLVERS {
@@ -34,7 +34,7 @@ namespace EUROPA {
       : m_id(this), m_db(db),
         m_stepCountFloor(0), m_depthFloor(0), m_stepCount(0),
         m_noFlawsFound(false), m_exhausted(false), m_timedOut(false),
-        m_maxSteps(PLUS_INFINITY), m_maxDepth(PLUS_INFINITY),
+        m_maxSteps(cast_int(PLUS_INFINITY)), m_maxDepth(cast_int(PLUS_INFINITY)),
         m_masterFlawFilter(configData), m_ceListener(db->getConstraintEngine(), *this),
         m_dbListener(db, *this) {
       checkError(strcmp(configData.Value(), "Solver") == 0,
@@ -128,15 +128,15 @@ namespace EUROPA {
 
     std::string Solver::getDecisionStackAsString() const
     {
-    	std::ostringstream os;
+      std::ostringstream os;
 
-    	for (unsigned int i=0; i<m_decisionStack.size(); i++) {
-    		if (i>0)
-    		    os << ",";
-    	    os << m_decisionStack[i]->toShortString();
-    	}
+      for (unsigned int i=0; i<m_decisionStack.size(); i++) {
+        if (i>0)
+          os << ",";
+        os << m_decisionStack[i]->toShortString();
+      }
 
-    	return os.str();
+      return os.str();
     }
 
     void Solver::setMaxSteps(const unsigned int steps) {m_maxSteps = steps;}
@@ -230,16 +230,16 @@ namespace EUROPA {
     }
 
     void Solver::step(){
-        ConstraintEngineId ce = m_db->getConstraintEngine();
-        bool autoPropagation = ce->getAutoPropagation();
-        ce->setAutoPropagation(false);
-        doStep();
-        ce->setAutoPropagation(autoPropagation);
+      ConstraintEngineId ce = m_db->getConstraintEngine();
+      bool autoPropagation = ce->getAutoPropagation();
+      ce->setAutoPropagation(false);
+      doStep();
+      ce->setAutoPropagation(autoPropagation);
     }
 
     bool Solver::conflictLevelOk()
     {
-        return m_db->getConstraintEngine()->getViolation() == m_baseConflictLevel;
+      return m_db->getConstraintEngine()->getViolation() == m_baseConflictLevel;
     }
 
     /**
@@ -251,8 +251,10 @@ namespace EUROPA {
 
       checkError(!m_exhausted, "Cannot be exhausted when about to commence a step." << sl_counter);
 
+      debugMsg("Solver:step", "Conflict level prior to propagation: " << m_baseConflictLevel);
       m_baseConflictLevel = m_db->getConstraintEngine()->getViolation();
       m_db->getClient()->propagate();
+      debugMsg("Solver:step", "Conflict level after propagation: " << m_db->getConstraintEngine()->getViolation());
 
       // If inconsistent, before doing anything, there is no solution.
       if(!conflictLevelOk()){
@@ -295,7 +297,7 @@ namespace EUROPA {
       if(!m_activeDecision->cut() && m_activeDecision->hasNext()){
         m_lastExecutedDecision = m_activeDecision->toString();
         m_activeDecision->execute();
-	    m_db->getClient()->propagate();
+        m_db->getClient()->propagate();
         m_stepCount++;
 
         if(conflictLevelOk()){
@@ -491,11 +493,11 @@ namespace EUROPA {
 
       // move it to the first real one, so that done() will allways work consistently
       while (m_it != m_iterators.end()) {
-          IteratorId it = (*m_it);
-          if (it->done())
-      	      ++m_it;
-      	  else
-      	      break;
+        IteratorId it = (*m_it);
+        if (it->done())
+          ++m_it;
+        else
+          break;
       }
     }
 
@@ -506,7 +508,7 @@ namespace EUROPA {
 
     bool Solver::FlawIterator::done() const
     {
-    	return m_it == m_iterators.end();
+      return m_it == m_iterators.end();
     }
 
     const EntityId Solver::FlawIterator::next() {
@@ -534,17 +536,17 @@ namespace EUROPA {
       return retval;
     }
 
-#define notify(m) { \
-  m_masterFlawFilter.m;				\
-  for(FlawManagers::const_iterator it = m_flawManagers.begin(); it != m_flawManagers.end(); ++it) { \
-    debugMsg("Solver:notify", "Sending notification to " << (*it)); \
-    (*it)->m; \
-  } \
-}
+#define notify(m) {                                                     \
+      m_masterFlawFilter.m;                                             \
+      for(FlawManagers::const_iterator it = m_flawManagers.begin(); it != m_flawManagers.end(); ++it) { \
+        debugMsg("Solver:notify", "Sending notification to " << (*it)); \
+        (*it)->m;                                                       \
+      }                                                                 \
+    }
 
     bool Solver::isDecided(const EntityId& entity) {
       for(DecisionStack::const_iterator it = m_decisionStack.begin(); it != m_decisionStack.end(); ++it) {
-        if((*it)->getFlawedEntityKey() == static_cast<unsigned int>(entity->getKey()))
+        if((*it)->getFlawedEntityKey() == entity->getKey())
           return true;
       }
       return false;
@@ -630,6 +632,7 @@ namespace EUROPA {
     {
       checkError(m_db->getConstraintEngine()->constraintConsistent(),
                  "Can only call this if variable changes have been propagated first.");
+//       checkError(conflictLevelOk(), "Can only call this if the current conflict level is acceptable.");
 
       std::multimap<Priority, std::string> priorityQueue; // Used to make output in priority order
       unsigned int multiplier = 1;
@@ -669,34 +672,34 @@ namespace EUROPA {
       return os.str();
     }
 
-  bool Solver::isValid() const {
-    // validate constraints.
-    debugMsg("Solver:isValid","Entering Solver.isValid");
-    ConstraintSet l_constraints = m_db->getConstraintEngine()->getConstraints();
-    for(std::set<ConstraintId>::const_iterator it = l_constraints.begin(); it != l_constraints.end(); ++it) {
-      // all guards on flaws must be present in a FlawManager
-      if( Id<FlawHandler::VariableListener>::convertable(*it)) {
-        bool l_present = false;
-        for(FlawManagers::const_iterator fmit = m_flawManagers.begin(); fmit != m_flawManagers.end(); ++fmit) {
-					std::multimap<unsigned int, ConstraintId> fhg = (*fmit)->getFlawHandlerGuards();
-          for(std::multimap<unsigned int, ConstraintId>::const_iterator fhgit = fhg.begin();
-              fhgit != fhg.end(); ++fhgit) {
-            if(fhgit->second == (*it)) {
-              l_present = true;
-              break;
+    bool Solver::isValid() const {
+      // validate constraints.
+      debugMsg("Solver:isValid","Entering Solver.isValid");
+      ConstraintSet l_constraints = m_db->getConstraintEngine()->getConstraints();
+      for(std::set<ConstraintId>::const_iterator it = l_constraints.begin(); it != l_constraints.end(); ++it) {
+        // all guards on flaws must be present in a FlawManager
+        if( Id<FlawHandler::VariableListener>::convertable(*it)) {
+          bool l_present = false;
+          for(FlawManagers::const_iterator fmit = m_flawManagers.begin(); fmit != m_flawManagers.end(); ++fmit) {
+            std::multimap<eint, ConstraintId> fhg = (*fmit)->getFlawHandlerGuards();
+            for(std::multimap<eint, ConstraintId>::const_iterator fhgit = fhg.begin();
+                fhgit != fhg.end(); ++fhgit) {
+              if(fhgit->second == (*it)) {
+                l_present = true;
+                break;
+              }
             }
+            if(l_present)
+              break;
           }
-          if(l_present)
-            break;
+          condDebugMsg(!l_present,"Solver:isValid",(*it)->toString() << " was not found in a FlawManager.");
+          if(!l_present)
+            return false;
         }
-        condDebugMsg(!l_present,"Solver:isValid",(*it)->toString() << " was not found in a FlawManager.");
-				if(!l_present)
-        	return false;
       }
+      debugMsg("Solver:isValid","Returning true");
+      return true;
     }
-    debugMsg("Solver:isValid","Returning true");
-    return true;
-  }
 
     Solver::CeListener::CeListener(const ConstraintEngineId& ce, Solver& solver)
       : ConstraintEngineListener(ce), m_solver(solver) {}
