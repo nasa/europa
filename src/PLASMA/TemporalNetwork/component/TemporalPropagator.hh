@@ -164,9 +164,9 @@ namespace EUROPA {
     TemporalNetworkId m_tnet; /*!< Temporal Network does all the propagation */
 
     /*!< Synchronization data structures */
-    std::map<int, ConstrainedVariableId> m_activeVariables; /**< Maintain the set of active start and end variables. 
+    std::map<eint, ConstrainedVariableId> m_activeVariables; /**< Maintain the set of active start and end variables. 
 							     Duration handled in constraints */
-    std::map<int, ConstrainedVariableId> m_changedVariables; /*!< Manage the set of changed variables to be synchronized */
+    std::map<eint, ConstrainedVariableId> m_changedVariables; /*!< Manage the set of changed variables to be synchronized */
     std::set<ConstraintId, EntityComparator<EntityId> > m_changedConstraints; /*!< Constraint Agenda */
     std::set<TemporalConstraintId, EntityComparator<EntityId> > m_constraintsForDeletion; /*!< Buffer deletions till you have to propagate. */
     std::set<TimepointId> m_variablesForDeletion; /*!< Buffer timepoints for deletion till we propagate. */

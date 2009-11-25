@@ -54,8 +54,8 @@ namespace EUROPA {
 
 #define POS_INFINITY PLUS_INFINITY
 #define NEG_INFINITY MINUS_INFINITY
-#define MAX_DISTANCE POS_INFINITY-1   // Largest propagated distance for node
-#define MIN_DISTANCE NEG_INFINITY+1   // Smallest propagated distance for node
+#define MAX_DISTANCE MAX_INT   // Largest propagated distance for node
+#define MIN_DISTANCE -MAX_INT   // Smallest propagated distance for node
 
 #ifndef nullptr
 #define nullptr 0       // Use for null pointers.
@@ -449,7 +449,7 @@ public:
    * @param node node to insert
    * @param key key attached to node
    */
-  Void insertInQueue(DnodeId node, long key);
+  Void insertInQueue(DnodeId node, eint key);
 
   /**
    * @brief insert node into queue. Use (distance - potential) as key

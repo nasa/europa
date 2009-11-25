@@ -56,7 +56,7 @@ namespace EUROPA{
      * @param key
      * @param constraint constraint deleted 
      */
-    inline virtual void notifyConstraintDeleted(int key, const TemporalConstraintId& constraint) {} ;
+    inline virtual void notifyConstraintDeleted(eint key, const TemporalConstraintId& constraint) {} ;
 
     /**
      * @brief Inform listeners that bounds have been restricted

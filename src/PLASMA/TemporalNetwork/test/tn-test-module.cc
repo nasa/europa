@@ -859,7 +859,7 @@ private:
     bool consistent = ce.propagate();
     std::vector<ConstrainedVariableId> fromvars;
     std::vector<ConstrainedVariableId> tovars;
-    std::vector<int> lengths;//std::vector<long> lengths;
+    std::vector<eint> lengths;//std::vector<long> lengths;
     ConstrainedVariableId origin;
     tp->getTemporalNogood(origin,fromvars,tovars,lengths);
 

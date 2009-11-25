@@ -55,19 +55,19 @@ namespace EUROPA {
 	||
 	second->getExternalEntity().isNoId() )
       {
-	int f_lb = (int) first->getLastDomain().getLowerBound();
-	int f_ub = (int) first->getLastDomain().getUpperBound();
+	eint f_lb = (eint) first->getLastDomain().getLowerBound();
+	eint f_ub = (eint) first->getLastDomain().getUpperBound();
 	
-	int s_lb = (int) second->getLastDomain().getLowerBound();
-	int s_ub = (int) second->getLastDomain().getUpperBound();
+	eint s_lb = (eint) second->getLastDomain().getLowerBound();
+	eint s_ub = (eint) second->getLastDomain().getUpperBound();
 	
-	int min_distance = -g_infiniteTime();
+	eint min_distance = -g_infiniteTime();
 
 	if( s_lb > -g_infiniteTime() && f_ub < g_infiniteTime() ) {
 	    min_distance = std::max( min_distance, s_lb - f_ub );
 	  }
 	  
-	int max_distance = g_infiniteTime();
+	eint max_distance = g_infiniteTime();
 	
 	if( f_lb > -g_infiniteTime() && s_ub < g_infiniteTime() ) {
 	  max_distance = std::min( max_distance, s_ub - f_lb );

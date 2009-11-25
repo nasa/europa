@@ -532,6 +532,8 @@ namespace EUROPA {
     friend edouble operator/(const double o, const edouble e);
     friend edouble operator%(const double o, const edouble e);
 
+    DECL_FRIEND_COMPARISONS(int, edouble);
+    DECL_FRIEND_COMPARISONS(long, edouble);
     DECL_FRIEND_COMPARISONS(double, edouble);
     DECL_FRIEND_COMPARISONS(unsigned int, edouble);
     DECL_FRIEND_COMPARISONS(long long int, edouble);
@@ -572,6 +574,9 @@ namespace EUROPA {
   inline edouble operator-(const double o, const edouble e) {handle_inf_sub(edouble, o, e.m_v); op(edouble, o, -, e.m_v);}
   inline edouble operator*(const double o, const edouble e) {handle_inf_mul(edouble, o, e.m_v); op(edouble, o, *, e.m_v);}
   inline edouble operator/(const double o, const edouble e) {handle_inf_div(edouble, o, e.m_v); op(edouble, o, /, e.m_v);}
+
+  GEN_FRIEND_COMPARISONS(int, edouble);
+  GEN_FRIEND_COMPARISONS(long, edouble);
   GEN_FRIEND_COMPARISONS(double, edouble);
   GEN_FRIEND_COMPARISONS(unsigned int, edouble);
   GEN_FRIEND_COMPARISONS(long long int, edouble);
