@@ -203,7 +203,7 @@ public:
   static bool testDomainCreation() {
       CETestEngine engine;
       CESchema* tfm = (CESchema*)engine.getComponent("CESchema");
-      const AbstractDomain& locationsBaseDomain = tfm->getDataType("Locations")->baseDomain();
+      const Domain& locationsBaseDomain = tfm->getDataType("Locations")->baseDomain();
 
     const IntervalIntDomain & bd0 = dynamic_cast<const IntervalIntDomain &>(tfm->baseDomain(IntervalIntDomain().getTypeName().c_str()));
     CPPUNIT_ASSERT(bd0.isMember(0));
@@ -2124,12 +2124,12 @@ private:
 
     // This kind of information can also be read from a file, as below.
     std::string constraintName("Equal");
-    std::list<AbstractDomain*> domains;
+    std::list<Domain*> domains;
     domains.push_back(new IntervalIntDomain(1, 10)); // first input domain
     domains.push_back(new IntervalIntDomain(2, 10)); // expected value of first output domain
     domains.push_back(new IntervalIntDomain(2, 11)); // second input domain
     domains.push_back(new IntervalIntDomain(2, 10)); // expected value of second output domain
-    tests.push_back(ConstraintTestCase(constraintName, __FILE__, "1", std::list<AbstractDomain*>(domains)));
+    tests.push_back(ConstraintTestCase(constraintName, __FILE__, "1", std::list<Domain*>(domains)));
 
     // Try reading "test cases" file of NewPlan/ModuleTests/ConstraintLibrary/testCLib,
     //   committed here as CLibTestCases after some minor editing to use '[]' for all

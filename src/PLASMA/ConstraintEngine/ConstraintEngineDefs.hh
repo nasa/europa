@@ -16,7 +16,7 @@ namespace EUROPA {
   class DataType;
   typedef Id<DataType> DataTypeId;
 
-  class AbstractDomain;
+  class Domain;
   class IntervalDomain;
   class IntervalIntDomain;
   class BoolDomain;

@@ -70,7 +70,7 @@ namespace EUROPA {
    * @li Define and enforce the boundaries for extension and customization
    *
    * The ConstraintEngine plays the role of
-   * mediator between Constraint, ConstrainedVariable, AbstractDomain, VariableChangeListener, and Propagator. As such, it is
+   * mediator between Constraint, ConstrainedVariable, Domain, VariableChangeListener, and Propagator. As such, it is
    * the central controller for the state of the constraint network and the sle delegator of responsibility for managing
    * state changes. This allows the ConstraintEngine to enforce many relationships and policies that are hard to enforce otherwise.
    * See subsequent sections for further details.
@@ -105,7 +105,7 @@ namespace EUROPA {
    * by ConstraintEngine as it process events on the domains.
    * @li Implement custom event handling for constraints to propagate messages i.e. Constraint::canIgnore()
    * @li Construct different ConstraintEngine configurations w.r.t Propagators.
-   * @see Constraint, ConstrainedVariable, AbstractDomain, VariableChangeListener, Propagator
+   * @see Constraint, ConstrainedVariable, Domain, VariableChangeListener, Propagator
    * @see "Propagator: A Family of Patterns, Peter H. Feiler, Walter F. Tichy"
    */
   class ConstraintEngine : public PSConstraintEngine {
@@ -322,7 +322,7 @@ namespace EUROPA {
      * @brief Create a variable
      */
     ConstrainedVariableId createVariable(const char* typeName,
-                                                const AbstractDomain& baseDomain,
+                                                const Domain& baseDomain,
                                                 const bool internal = false,
                                                 bool canBeSpecified = true,
                                                 const char* name = NO_VAR_NAME,

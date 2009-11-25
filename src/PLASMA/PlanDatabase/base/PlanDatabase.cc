@@ -441,10 +441,10 @@ namespace EUROPA{
                   "We expect the first var to be the state var, which we must skip.");
 
       for(int i=1;i<variableCount;i++){
-	const AbstractDomain& domA = inactiveTokenVariables[i]->lastDomain();
-	const AbstractDomain& domB = candidateTokenVariables[i]->lastDomain();
+	const Domain& domA = inactiveTokenVariables[i]->lastDomain();
+	const Domain& domB = candidateTokenVariables[i]->lastDomain();
 
-	checkError(AbstractDomain::canBeCompared(domA, domB),
+	checkError(Domain::canBeCompared(domA, domB),
 		   domA.toString() << " cannot be compared to " << domB.toString() << ".");
 
 	if(domA.getSize() == 0 && domB.getSize() == 0)
@@ -1058,7 +1058,7 @@ namespace EUROPA{
 
   ObjectId PlanDatabase::createObject(const LabelStr& objectType,
                                       const LabelStr& objectName,
-                                      const std::vector<const AbstractDomain*>& arguments)
+                                      const std::vector<const Domain*>& arguments)
   {
       debugMsg("PlanDatabase:createObject", "objectType " << objectType.toString() << " objectName " << objectName.toString());
 

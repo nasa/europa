@@ -160,7 +160,7 @@ type returns [DataType* result]
         }
     ;
         
-baseDomain[const DataType* baseType] returns [AbstractDomain* result]
+baseDomain[const DataType* baseType] returns [Domain* result]
     :   child=baseDomainValues
     {
         DataRef data=evalExpr(CTX,child); 
@@ -254,7 +254,7 @@ valueSet returns [Expr* result]
             (element=setElement
             {
                 DataRef elemValue = evalExpr(CTX,element);
-                const AbstractDomain& ev = elemValue.getValue()->lastDomain();
+                const Domain& ev = elemValue.getValue()->lastDomain();
                 edouble v = ev.getSingletonValue();
                               
                 delete element;
@@ -278,7 +278,7 @@ valueSet returns [Expr* result]
             )*
         )
         {
-            AbstractDomain* newDomain = new EnumeratedDomain(elementType,values); 
+            Domain* newDomain = new EnumeratedDomain(elementType,values); 
             result = new ExprConstant(
                 elementType->getName().c_str(),
                 newDomain                       
@@ -299,12 +299,12 @@ literalValue returns [Expr* result]
         }
     ;
     
-booleanLiteral returns [AbstractDomain* result]
+booleanLiteral returns [Domain* result]
     :   'true'  { result = new BoolDomain(true); }            
     |   'false' { result = new BoolDomain(false); }
     ;
 
-stringLiteral returns [AbstractDomain* result]
+stringLiteral returns [Domain* result]
     :    str = STRING 
          { 
              // remove quotes
@@ -316,7 +316,7 @@ stringLiteral returns [AbstractDomain* result]
          }
     ; 
 
-numericLiteral returns [AbstractDomain* result]
+numericLiteral returns [Domain* result]
     :   floating=floatLiteral  { result = CTX->SymbolTable->makeNumericDomainFromLiteral("float",c_str($floating.text->chars)); }
     |   integer=intLiteral  { result = CTX->SymbolTable->makeNumericDomainFromLiteral("int",c_str($integer.text->chars)); }
     ;
@@ -337,7 +337,7 @@ numericInterval returns [Expr* result]
         {      
             edouble lb = lower->getSingletonValue();
             edouble ub = upper->getSingletonValue();
-            AbstractDomain* baseDomain;
+            Domain* baseDomain;
                     
             if (lower->getTypeName().toString()=="float" || 
                 upper->getTypeName().toString()=="float") 

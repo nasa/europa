@@ -8,7 +8,7 @@
 #ifndef DOMAINS_HH_
 #define DOMAINS_HH_
 
-#include "AbstractDomain.hh"
+#include "Domain.hh"
 #include "DataTypes.hh"
 
 namespace EUROPA {
@@ -20,13 +20,13 @@ namespace EUROPA {
    * The implementation uses a sorted set of doubles which hold all the values possible in the set, and then refines membership using
    * a bit vector.
    */
-  class EnumeratedDomain : public AbstractDomain {
+  class EnumeratedDomain : public Domain {
   public:
 
 	  /**
 	   * @brief Constructor.
 	   * @param dt Indicate the type to use as a specialization of enumeration types
-	   * @see AbstractDomain::isDynamic()
+	   * @see Domain::isDynamic()
 	   */
 	  EnumeratedDomain(const DataTypeId& dt);
 
@@ -34,7 +34,7 @@ namespace EUROPA {
 	   * @brief Constructor.
 	   * @param dt Indicate the type to use as a specialization of enumeration types
 	   * @param values The initial set of values to populate the domain.
-	   * @see AbstractDomain::isDynamic()
+	   * @see Domain::isDynamic()
 	   */
 	  EnumeratedDomain(const DataTypeId& dt, const std::list<edouble>& values);
 
@@ -56,7 +56,7 @@ namespace EUROPA {
 	   * @brief Copy constructor.
 	   * @param org The source domain.
 	   */
-	  EnumeratedDomain(const AbstractDomain& org);
+	  EnumeratedDomain(const Domain& org);
 
 	  /**
 	   * @brief Determine if the domain is finite.
@@ -64,30 +64,30 @@ namespace EUROPA {
 	  bool isFinite() const;
 
 	  /**
-	   * @see AbstractDomain::isSingleton()
+	   * @see Domain::isSingleton()
 	   */
 	  bool isSingleton() const;
 
 	  /**
-	   * @see AbstractDomain::isEmpty()
+	   * @see Domain::isEmpty()
 	   */
 	  bool isEmpty() const;
 
 	  /**
-	   * @see AbstractDomain::empty()
+	   * @see Domain::empty()
 	   */
 	  void empty();
 
 	  /**
 	   * @brief Over-ride to ensure that the doain becomes finite once closed.
-	   * @see AbstractDomain::close()
+	   * @see Domain::close()
 	   */
 	  void close();
 
 	  /**
 	   * @brief Return the number of elements in the set.
 	   * @return isEmpty() <=> 0, isSingleton() <=> 1
-	   * @see AbstractDomain::getSize()
+	   * @see Domain::getSize()
 	   */
 	  size_type getSize() const;
 
@@ -123,14 +123,14 @@ namespace EUROPA {
 	  /**
 	   * @brief Reset the domain to the target value.
 	   */
-	  void reset(const AbstractDomain& dom);
+	  void reset(const Domain& dom);
 
 	  /**
 	   * @brief Indicates assigment to the target domain as a relaxation triggered internally.
 	   * @param value the target singleton value.
 	   * @see relax
 	   */
-	  void relax(const AbstractDomain& dom);
+	  void relax(const Domain& dom);
 
 	  /**
 	   * @brief Indicates relaxation to a singleton value. Occurs when domain has been emptied previously
@@ -147,7 +147,7 @@ namespace EUROPA {
 	   * @return true if a change to either domain has occurred.
 	   * @see DomainListener::EMPTIED, DomainListener::SET_TO_SINGLETON, DomainListener::VALUE_REMOVED
 	   */
-	  bool equate(AbstractDomain& dom);
+	  bool equate(Domain& dom);
 
 	  /**
 	   * @brief Return the singleton value.
@@ -205,24 +205,24 @@ namespace EUROPA {
 	   * @brief Test that the domains are exactly equal.
 	   * @param dom The domain to test against
 	   * @return true if the values in each are the same and they are equal according to the base class.
-	   * @see AbstractDomain::operator==()
+	   * @see Domain::operator==()
 	   */
-	  bool operator==(const AbstractDomain& dom) const;
+	  bool operator==(const Domain& dom) const;
 
 	  /**
 	   * @brief Test that the domains are not equal.
 	   * @param dom The domain to test against
 	   * @return true if the values in each are not the same.
-	   * @see AbstractDomain::operator!=()
+	   * @see Domain::operator!=()
 	   */
-	  bool operator!=(const AbstractDomain& dom) const;
+	  bool operator!=(const Domain& dom) const;
 
 	  /**
 	   * @brief Computes the intersection of this object and the given object and assigns that intersection to this object.
 	   * @param dom the domain to be intersected with
 	   * @return true if a change occurs, otherwise false.
 	   */
-	  bool intersect(const AbstractDomain& dom);
+	  bool intersect(const Domain& dom);
 
 	  /**
 	   * @brief Convenience version of intersect.
@@ -238,7 +238,7 @@ namespace EUROPA {
 	   * @param dom the domain to differ with. Must not be empty.
 	   * @return true if the operation results in a change to this domain, otherwise false.
 	   */
-	  bool difference(const AbstractDomain& dom);
+	  bool difference(const Domain& dom);
 
 	  /**
 	   * @brief Assign the values from the given domain, to this domain.
@@ -246,21 +246,21 @@ namespace EUROPA {
 	   * attached, since it will not cause propagation. It is more of a
 	   * utility.
 	   */
-	  AbstractDomain& operator=(const AbstractDomain& dom);
+	  Domain& operator=(const Domain& dom);
 
 	  /**
 	   * @brief Tests if this object is a subset of the given domain.
 	   * @param dom the domain to be compared against
 	   * @return true if all elements in this domain are present in dom, otherwise false.
 	   */
-	  bool isSubsetOf(const AbstractDomain& dom) const;
+	  bool isSubsetOf(const Domain& dom) const;
 
 	  /**
 	   * @brief test if the intersection between this domain and the given domain is empty
 	   * @param dom the domain tested against.
 	   * @param true if any elements of this domain are in dom. Otherwise false.
 	   */
-	  bool intersects(const AbstractDomain& dom) const;
+	  bool intersects(const Domain& dom) const;
 
 	  void operator>>(ostream& os) const;
 
@@ -301,7 +301,7 @@ namespace EUROPA {
    * preferably as new classes rather than impacting the performance of this class.
    * --wedgingt@email.arc.nasa.gov 2004 Feb 26
    */
-  class IntervalDomain : public AbstractDomain {
+  class IntervalDomain : public Domain {
   public:
 
     /**
@@ -314,7 +314,7 @@ namespace EUROPA {
     IntervalDomain(double lb, double ub, const DataTypeId& dt = FloatDT::instance());
     IntervalDomain(edouble value, const DataTypeId& dt = FloatDT::instance());
     IntervalDomain(double value, const DataTypeId& dt = FloatDT::instance());
-    IntervalDomain(const AbstractDomain& org);
+    IntervalDomain(const Domain& org);
 
     /**
      * @brief Destructor.
@@ -363,27 +363,27 @@ namespace EUROPA {
      * @param value the target singleton value.
      * @see relax
      */
-    void reset(const AbstractDomain& dom);
+    void reset(const Domain& dom);
     /**
      * @brief Restricts this domain to the intersection of its values with the given domain.
      * @param dom the domain to intersect with, which cannot be empty.
      * @return true if the intersection results in a change to this domain, otherwise false.
      */
-    virtual bool intersect(const AbstractDomain& dom);
+    virtual bool intersect(const Domain& dom);
 
     /**
      * @brief Restricts this domain to the difference of its values with the given domain.
      * @param dom the domain to differ with, which cannot be empty.
      * @return true if the operation results in a change to this domain, otherwise false.
      */
-    bool difference(const AbstractDomain& dom);
+    bool difference(const Domain& dom);
 
     /**
      * @brief Assign the values from the given domain, to this domain.
      * @note Can only be called on domains that have no listeners
      * attached, since it will not cause propagation.
      */
-    AbstractDomain& operator=(const AbstractDomain& dom);
+    Domain& operator=(const Domain& dom);
 
     /**
      * @brief Convenience version of intersect.
@@ -405,7 +405,7 @@ namespace EUROPA {
      * @param dom The domain to relax it to, which cannot be empty and
      * must be a superset of this domain.
      */
-    void relax(const AbstractDomain& dom);
+    void relax(const Domain& dom);
 
     /**
      * @brief Relax to a singleton value
@@ -417,7 +417,7 @@ namespace EUROPA {
      * @param lb the lower bound of domain to relax to, which must be <= m_lb.
      * @param ub the upper bound of domain to relax to, which must be >= m_ub.
      * @return true if relaxation causes a change to this domain.
-     * @see operator=(const AbstractDomain& dom)
+     * @see operator=(const Domain& dom)
      */
     bool relax(edouble lb, edouble ub);
 
@@ -454,7 +454,7 @@ namespace EUROPA {
      */
     bool isMember(edouble value) const;
 
-    virtual edouble translateNumber(edouble number, bool asMin = true) const {return AbstractDomain::translateNumber(number, asMin);}
+    virtual edouble translateNumber(edouble number, bool asMin = true) const {return Domain::translateNumber(number, asMin);}
 
     /**
      * @brief Convert to member value from string encoding.
@@ -481,26 +481,26 @@ namespace EUROPA {
     /**
      * @brief Test for equality.
      */
-    bool operator==(const AbstractDomain& dom) const;
+    bool operator==(const Domain& dom) const;
 
     /**
      * @brief Test for inequality.
      */
-    bool operator!=(const AbstractDomain& dom) const;
+    bool operator!=(const Domain& dom) const;
 
     /**
      * @brief Test if this domain is a subset of dom.
      * @param dom the domain tested against.
      * @param true if all elements of this domain are in dom, otherwise false.
      */
-    bool isSubsetOf(const AbstractDomain& dom) const;
+    bool isSubsetOf(const Domain& dom) const;
 
     /**
      * @brief Test if the intersection between this domain and the given domain is empty.
      * @param dom the domain tested against.
      * @param true if any elements of this domain are in dom, otherwise false.
      */
-    bool intersects(const AbstractDomain& dom) const;
+    bool intersects(const Domain& dom) const;
 
     /**
      * @brief Fill the given list with the contents of the set.
@@ -515,7 +515,7 @@ namespace EUROPA {
      * @return true if the intersection results in a change to either domain, otherwise false.
      * @note If the intersection is empty, only one domain is actually emptied.
      */
-    bool equate(AbstractDomain& dom);
+    bool equate(Domain& dom);
 
     /**
      * @brief Copy the concrete C++ object into new memory and return a pointer to it.
@@ -559,7 +559,7 @@ namespace EUROPA {
   inline IntervalDomain make_int(const edouble v) {return IntervalDomain(v);}
   inline IntervalDomain make_int(const edouble v1, const edouble v2) {return IntervalDomain(v1, v2);}
 
-  // TODO! : All the classes below seem unnecessary now that DataType has been factored out of AbstractDomain
+  // TODO! : All the classes below seem unnecessary now that DataType has been factored out of Domain
 
   /**
    * @class StringDomain
@@ -573,7 +573,7 @@ namespace EUROPA {
     StringDomain(double value, const DataTypeId& dt = StringDT::instance());
     StringDomain(const std::string& value, const DataTypeId& dt = StringDT::instance());
     StringDomain(const std::list<edouble>& values, const DataTypeId& dt = StringDT::instance());
-    StringDomain(const AbstractDomain& org);
+    StringDomain(const Domain& org);
 
     virtual StringDomain *copy() const;
 
@@ -602,7 +602,7 @@ namespace EUROPA {
     SymbolDomain(edouble value,const DataTypeId& dt = SymbolDT::instance());
     SymbolDomain(double value,const DataTypeId& dt = SymbolDT::instance());
     SymbolDomain(const std::list<edouble>& values,const DataTypeId& dt = SymbolDT::instance());
-    SymbolDomain(const AbstractDomain& org);
+    SymbolDomain(const Domain& org);
 
     virtual SymbolDomain *copy() const;
   };
@@ -614,7 +614,7 @@ namespace EUROPA {
     NumericDomain(edouble value, const DataTypeId& dt = FloatDT::instance());
     NumericDomain(double value, const DataTypeId& dt = FloatDT::instance());
     NumericDomain(const std::list<edouble>& values, const DataTypeId& dt = FloatDT::instance());
-    NumericDomain(const AbstractDomain& org);
+    NumericDomain(const Domain& org);
 
     virtual NumericDomain *copy() const;
   };
@@ -637,7 +637,7 @@ namespace EUROPA {
     IntervalIntDomain(int lb, int ub, const DataTypeId& dt = IntDT::instance());
     IntervalIntDomain(eint value, const DataTypeId& dt = IntDT::instance());
     IntervalIntDomain(int value, const DataTypeId& dt = IntDT::instance());
-    IntervalIntDomain(const AbstractDomain& org);
+    IntervalIntDomain(const Domain& org);
 
     virtual ~IntervalIntDomain();
 
@@ -650,7 +650,7 @@ namespace EUROPA {
      * @param value The value to insert.
      * @note Will generate a domain relaxation if value is not already in the domain.
      * @note Will generate an error if value not within or "next to" the existing interval.
-     * @see DomainListener::DOMAIN_RELAXED, AbstractDomain::insert
+     * @see DomainListener::DOMAIN_RELAXED, Domain::insert
      * @note This implementation might also work in IntervalDomain
      * since it uses minDelta().
      */
@@ -672,7 +672,7 @@ namespace EUROPA {
 
     virtual bool intersect(edouble lb, edouble ub);
 
-    virtual bool intersect(const AbstractDomain& dom);
+    virtual bool intersect(const Domain& dom);
 
   protected:
 
@@ -705,7 +705,7 @@ namespace EUROPA {
 
     BoolDomain(const DataTypeId& dt = BoolDT::instance());
     BoolDomain(bool value, const DataTypeId& dt = BoolDT::instance());
-    BoolDomain(const AbstractDomain& org);
+    BoolDomain(const Domain& org);
 
     bool isFinite() const;
 
@@ -718,7 +718,7 @@ namespace EUROPA {
      */
     virtual BoolDomain *copy() const;
 
-    bool intersect(const AbstractDomain& dom);
+    bool intersect(const Domain& dom);
 
     bool intersect(edouble lb, edouble ub);
 

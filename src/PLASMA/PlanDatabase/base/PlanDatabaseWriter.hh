@@ -15,7 +15,7 @@ namespace EUROPA {
     static void write(PlanDatabaseId db, std::ostream& os);
 
     // [lb, ub] or {singleton}
-    static std::string timeDomain(const AbstractDomain& dom);
+    static std::string timeDomain(const Domain& dom);
 
     static std::string simpleTokenSummary(const TokenId& token);
 

@@ -4,7 +4,6 @@ if ! $(PLASMA_READY) {
 
 ModuleBase ConstraintEngine
 	:
-	AbstractDomain.cc
 	CESchema.cc
 	CFunction.cc
 	Constraint.cc
@@ -13,6 +12,7 @@ ModuleBase ConstraintEngine
 	ConstrainedVariable.cc
 	ConstraintType.cc
 	DataType.cc
+	Domain.cc
 	DomainListener.cc
 	Propagator.cc
 	PSConstraintEngineListener.cc

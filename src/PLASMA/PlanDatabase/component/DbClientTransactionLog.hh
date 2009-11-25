@@ -24,7 +24,7 @@ namespace EUROPA {
 
     /* Declare DbClient event handlers we will over-ride */
     void notifyObjectCreated(const ObjectId& object);
-    void notifyObjectCreated(const ObjectId& object, const std::vector<const AbstractDomain*>& arguments);
+    void notifyObjectCreated(const ObjectId& object, const std::vector<const Domain*>& arguments);
     void notifyObjectDeleted(const ObjectId& object);
     void notifyClosed();
     void notifyClosed(const LabelStr& objectType);
@@ -73,19 +73,19 @@ namespace EUROPA {
     /** 
      * @brief create a string to describe a value, given its domain
      */
-    std::string domainValueAsString(const AbstractDomain * domain, edouble value);
+    std::string domainValueAsString(const Domain * domain, edouble value);
 
   //! XML output functions
 
     /** 
      * @brief create an xml element to represent a value, given its domain
      */
-    TiXmlElement * domainValueAsXml(const AbstractDomain * domain, edouble value);
+    TiXmlElement * domainValueAsXml(const Domain * domain, edouble value);
 
     /** 
      * @brief create an xml element to represent a domain
      */
-    TiXmlElement * abstractDomainAsXml(const AbstractDomain * domain);
+    TiXmlElement * abstractDomainAsXml(const Domain * domain);
 
     /** 
      * @brief create an xml element to represent a token

@@ -571,11 +571,11 @@ namespace EUROPA {
     // 1. The domains are not empty
     // 2. The duration will necessarily be restricted.
     // 3. The start and end bounds are current
-    const AbstractDomain& start = token->start()->lastDomain();
+    const Domain& start = token->start()->lastDomain();
     if(!start.areBoundsFinite())
       return;
 
-    const AbstractDomain& end = token->end()->lastDomain();
+    const Domain& end = token->end()->lastDomain();
     if(!end.areBoundsFinite())
       return;
 

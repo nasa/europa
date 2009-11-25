@@ -30,7 +30,7 @@ namespace EUROPA{
       insert(Token::REJECTED);
   }
 
-  StateDomain::StateDomain(const AbstractDomain& org)
+  StateDomain::StateDomain(const Domain& org)
     : EnumeratedDomain(org)
   {
     check_error(org.getTypeName().toString() == SymbolDT::NAME(),
@@ -39,7 +39,7 @@ namespace EUROPA{
 
   void StateDomain::operator>>(ostream&os) const {
     // Now commence output
-    AbstractDomain::operator>>(os);
+    Domain::operator>>(os);
     os << "{";
 
     // First construct a lexicographic ordering for the set of values.
@@ -741,8 +741,8 @@ namespace EUROPA{
       const std::vector<ConstrainedVariableId>& activeVariables = activeToken->getVariables();
       // All variables except state variable
       for(unsigned int i = 1; i < varCount; i++){
-	const AbstractDomain& activeBaseDomain = activeVariables[i]->baseDomain();
-	const AbstractDomain& inactiveDerivedDomain = m_allVariables[i]->lastDomain();
+	const Domain& activeBaseDomain = activeVariables[i]->baseDomain();
+	const Domain& inactiveDerivedDomain = m_allVariables[i]->lastDomain();
 	if(!activeBaseDomain.isSubsetOf(inactiveDerivedDomain)){
 	  debugMsg("Token:canBeTerminated",
 		   "Cannot terminate " << this->toString() << activeBaseDomain.toString() << " can be further restricted by " << inactiveDerivedDomain.toString() << std::endl <<

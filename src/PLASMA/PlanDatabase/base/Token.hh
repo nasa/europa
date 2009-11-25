@@ -556,7 +556,7 @@ namespace EUROPA {
   class StateDomain : public EnumeratedDomain {
   public:
     StateDomain();
-    StateDomain(const AbstractDomain& org);
+    StateDomain(const Domain& org);
     virtual void operator>>(ostream& os) const;
   };
 }

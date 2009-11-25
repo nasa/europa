@@ -193,7 +193,7 @@ public:
 private:
   void notifyViolated(const InstantId inst) {
     TransactionId trans = *(inst->getTransactions().begin());
-    const_cast<AbstractDomain&>(trans->time()->lastDomain()).empty();
+    const_cast<Domain&>(trans->time()->lastDomain()).empty();
   }
 
   //no implementation.  no tests for flaw detection
@@ -402,7 +402,7 @@ private:
     //should remove the instant at 3 and add an instant at 2.  the instant at 2 should have two transactions (t3 and t4).
     times.erase(3);
     times.insert(2);
-    const_cast<AbstractDomain&>(t3.lastDomain()).intersect(0, 2);
+    const_cast<Domain&>(t3.lastDomain()).intersect(0, 2);
     ProfileIterator prof1(profile.getId());
     CPPUNIT_ASSERT(checkTimes(times, prof1));
     ProfileIterator oCheck1(profile.getId(), 2, 2);
@@ -1139,14 +1139,14 @@ private:
     ProfileIterator it2(res2.getProfile());
     CPPUNIT_ASSERT(it2.done());
 
-    const_cast<AbstractDomain&>(consumer.getObject()->lastDomain()).remove(res2.getKey());
+    const_cast<Domain&>(consumer.getObject()->lastDomain()).remove(res2.getKey());
     ce.propagate();
     ProfileIterator it3(res1.getProfile());
     CPPUNIT_ASSERT(!it3.done());
     ProfileIterator it4(res2.getProfile());
     CPPUNIT_ASSERT(it4.done());
 
-    const_cast<AbstractDomain&>(consumer.getObject()->lastDomain()).relax(consumer.getObject()->baseDomain());
+    const_cast<Domain&>(consumer.getObject()->lastDomain()).relax(consumer.getObject()->baseDomain());
     ProfileIterator it5(res1.getProfile());
     CPPUNIT_ASSERT(it5.done());
     ProfileIterator it6(res2.getProfile());

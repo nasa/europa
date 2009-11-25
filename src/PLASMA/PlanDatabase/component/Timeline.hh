@@ -118,7 +118,7 @@ namespace EUROPA {
                             const PlanDatabaseId& planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
-                            const std::vector<const AbstractDomain*>& arguments) const;
+                            const std::vector<const Domain*>& arguments) const;
   };
 }
 

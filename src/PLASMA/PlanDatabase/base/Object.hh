@@ -41,7 +41,7 @@ namespace EUROPA {
 
     virtual ~Object();
 
-    virtual void constructor(const std::vector<const AbstractDomain*>& arguments) {}
+    virtual void constructor(const std::vector<const Domain*>& arguments) {}
 
     /**
      * @brief Add a variable as a member to the object. This is used when building the object
@@ -51,7 +51,7 @@ namespace EUROPA {
      * @error If a variable of the given type with the given name cannot be added
      * @see Scheme::hasMember, Schema::canContain, Object::close()
      */
-    virtual ConstrainedVariableId addVariable(const AbstractDomain& baseDomain, const char* name);
+    virtual ConstrainedVariableId addVariable(const Domain& baseDomain, const char* name);
 
     const ObjectId& getId() const;
 
@@ -373,7 +373,7 @@ namespace EUROPA {
     ObjectDomain(const DataTypeId& dt);
     ObjectDomain(const DataTypeId& dt, const std::list<ObjectId>& initialValues);
     ObjectDomain(const DataTypeId& dt, const ObjectId& initialValue);
-    ObjectDomain(const AbstractDomain& org);
+    ObjectDomain(const Domain& org);
 
     /**
      * @brief Generate a list of object id's from a list of doubles

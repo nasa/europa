@@ -22,12 +22,12 @@ namespace EUROPA {
       /**
        * @brief Accessor for total number of values available
        */
-      virtual AbstractDomain::size_type getCount() const;
+      virtual Domain::size_type getCount() const;
 
       /**
        * @brief Accessor for the value at position given by index.
        */
-      virtual edouble getValue(AbstractDomain::size_type index) const = 0;
+      virtual edouble getValue(Domain::size_type index) const = 0;
 
       /**
        * @brief Required to allow correct cleanup
@@ -35,34 +35,34 @@ namespace EUROPA {
       virtual ~ValueSource();
 
     protected:
-      ValueSource(AbstractDomain::size_type count);
+      ValueSource(Domain::size_type count);
 
-      AbstractDomain::size_type m_count;
+      Domain::size_type m_count;
     };
 
     class EnumValueSource : public ValueSource {
     public:
-      EnumValueSource(const SchemaId& schema, const AbstractDomain& dom);
-      edouble getValue(AbstractDomain::size_type index) const;
+      EnumValueSource(const SchemaId& schema, const Domain& dom);
+      edouble getValue(Domain::size_type index) const;
     private:
       std::vector<edouble> m_values;
     };
 
     class OrderedValueSource : public ValueSource {
     public:
-      OrderedValueSource(const AbstractDomain& dom);
-      edouble getValue(AbstractDomain::size_type index) const;
+      OrderedValueSource(const Domain& dom);
+      edouble getValue(Domain::size_type index) const;
       void addValue(const edouble value);
     private:
       std::vector<edouble> m_values;
-      const AbstractDomain& m_dom;
+      const Domain& m_dom;
     };
 
     class IntervalValueSource : public ValueSource {
     public:
-      IntervalValueSource(const AbstractDomain& dom);
-      edouble getValue(AbstractDomain::size_type index) const;
-      static AbstractDomain::size_type calculateSize(const AbstractDomain & dom);
+      IntervalValueSource(const Domain& dom);
+      edouble getValue(Domain::size_type index) const;
+      static Domain::size_type calculateSize(const Domain & dom);
     private:
       edouble m_lb;
       edouble m_ub;

@@ -5,7 +5,7 @@
  * @file VariableChangeListener.hh
  * @author Conor McGann
  * @date August, 2003
- * @brief Provides base class for customizing event propagation to the ConstraintEngine from a variables AbstractDomain
+ * @brief Provides base class for customizing event propagation to the ConstraintEngine from a variables Domain
  * @see ConstraintEngine, ConstrainedVariable
  */
 #include "ConstraintEngineDefs.hh"

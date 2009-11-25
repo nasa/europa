@@ -1,7 +1,7 @@
 #include "UnboundVariableDecisionPoint.hh"
 #include "ConstrainedVariable.hh"
 #include "DbClient.hh"
-#include "AbstractDomain.hh"
+#include "Domain.hh"
 #include "Debug.hh"
 #include "ValueSource.hh"
 

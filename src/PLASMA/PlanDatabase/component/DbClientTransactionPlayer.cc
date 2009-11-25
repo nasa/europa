@@ -1053,7 +1053,7 @@ namespace EUROPA {
     debugMsg("DbClientTransactionPlayer:playVariableAssigned", "found variable " << variable->getKey());
     TiXmlElement * value_el = element.FirstChildElement();
     check_error(value_el != NULL);
-    const AbstractDomain * value = xmlAsAbstractDomain(*value_el);
+    const Domain * value = xmlAsDomain(*value_el);
     debugMsg("DbClientTransactionPlayer:playVariableAssigned", "specifying to " << (*value));
     variable->restrictBaseDomain(*value);
   }
@@ -1080,7 +1080,7 @@ namespace EUROPA {
     check_error(var.isValid());
     check_error(value_el != NULL);
 
-    const AbstractDomain * value = xmlAsAbstractDomain(*value_el);
+    const Domain * value = xmlAsDomain(*value_el);
     if (value->isSingleton()) {
       edouble v = value->getSingletonValue();
       m_client->specify(var, v);
@@ -1097,7 +1097,7 @@ namespace EUROPA {
 
     TiXmlElement * value_el = var_el->NextSiblingElement();
     check_error(value_el != NULL);
-    const AbstractDomain * value = xmlAsAbstractDomain(*value_el);
+    const Domain * value = xmlAsDomain(*value_el);
     m_client->restrict(variable, *value);
   }
 
@@ -1351,8 +1351,8 @@ namespace EUROPA {
 
   //! XML input functions
 
-  AbstractDomain *
-  DbClientTransactionPlayer::xmlAsAbstractDomain(const TiXmlElement & element,
+  Domain *
+  DbClientTransactionPlayer::xmlAsDomain(const TiXmlElement & element,
 						 const char * name,
 						 const char* typeName) {
     static unsigned int sl_counter(0);
@@ -1382,7 +1382,7 @@ namespace EUROPA {
       const char * name = element.Attribute("name");
       check_error(name != NULL, "missing name for domain in transaction XML");
 
-      AbstractDomain * domain = getCESchema()->baseDomain(type).copy();
+      Domain * domain = getCESchema()->baseDomain(type).copy();
       check_error(domain != 0, "unknown type, lack of memory, or other problem with domain in transaction XML");
       edouble value = m_client->createValue(type, name);
       if(domain->isOpen() && !domain->isMember(value))
@@ -1395,7 +1395,7 @@ namespace EUROPA {
     if (strcmp(tag, "symbol") == 0) {
       const char * type = element.Attribute("type");
       check_error(type != NULL);
-      AbstractDomain * domain = getCESchema()->baseDomain(type).copy();
+      Domain * domain = getCESchema()->baseDomain(type).copy();
       domain->set(m_client->createValue(tag, value_st));
       return(domain);
     }
@@ -1572,18 +1572,18 @@ namespace EUROPA {
       }
       const char * type = value.Attribute("type");
       check_error(type != NULL);
-      std::vector<const AbstractDomain*> arguments;
+      std::vector<const Domain*> arguments;
       for (TiXmlElement * child_el = value.FirstChildElement() ;
            child_el != NULL ; child_el = child_el->NextSiblingElement()) {
-        const AbstractDomain * domain = xmlAsAbstractDomain(*child_el);
+        const Domain * domain = xmlAsDomain(*child_el);
         arguments.push_back(domain);
       }
       ObjectId object = m_client->createObject(type, name, arguments);
       check_error(object.isValid());
 
       // Now deallocate domains created for arguments
-      for (std::vector<const AbstractDomain*>::const_iterator it = arguments.begin(); it != arguments.end(); ++it) {
-      	AbstractDomain* tmp = (AbstractDomain*)(*it);
+      for (std::vector<const Domain*>::const_iterator it = arguments.begin(); it != arguments.end(); ++it) {
+      	Domain* tmp = (Domain*)(*it);
         delete tmp;
       }
       return (edouble)object->getKey();
@@ -1701,9 +1701,9 @@ namespace EUROPA {
       name = gen_name.c_str();
     }
 
-    const AbstractDomain * baseDomain = NULL;
+    const Domain * baseDomain = NULL;
     if (value != NULL) {
-      baseDomain = xmlAsAbstractDomain(*value, name);
+      baseDomain = xmlAsDomain(*value, name);
 
       if (type == NULL) {
         type = value->Value();

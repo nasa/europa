@@ -87,7 +87,7 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
-                            const std::vector<const AbstractDomain*>& arguments) const {
+                            const std::vector<const Domain*>& arguments) const {
       CPPUNIT_ASSERT(arguments.empty());
       DBFooId foo = (new DBFoo(planDb, objectType, objectName))->getId();
       foo->constructor();
@@ -107,7 +107,7 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
-                            const std::vector<const AbstractDomain*>& arguments) const {
+                            const std::vector<const Domain*>& arguments) const {
       DBFooId foo = (new DBFoo(planDb, objectType, objectName))->getId();
       // Type check the arguments
       CPPUNIT_ASSERT(arguments.size() == 2);
@@ -3785,7 +3785,7 @@ public:
   }
 private:
   static bool testFactoryMethods(){
-    std::vector<const AbstractDomain*> arguments;
+    std::vector<const Domain*> arguments;
     IntervalIntDomain arg0(10, 10);
     LabelSet arg1(LabelStr("Label"));
     arguments.push_back(&arg0);
@@ -3805,7 +3805,7 @@ private:
     DBFooId foo1 = client->createObject(LabelStr(DEFAULT_OBJECT_TYPE).c_str(), "foo1");
     CPPUNIT_ASSERT(foo1.isValid());
 
-    std::vector<const AbstractDomain*> arguments;
+    std::vector<const Domain*> arguments;
     IntervalIntDomain arg0(10);
     LabelSet arg1(LabelStr("Label"));
     arguments.push_back(&arg0);
@@ -3973,7 +3973,7 @@ public:
 
   /*
    * For lists of arguments, by type and name (or type and string (even if "1") value).
-   * @note This has a different use and purpose than a list or vector of AbstractDomain*.
+   * @note This has a different use and purpose than a list or vector of Domain*.
    * That is for a type name and abstract domain; this is for a type name and a variable name.
    */
   typedef std::list<std::pair<std::string, std::string> > ArgList;
@@ -4174,7 +4174,7 @@ public:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
-                            const std::vector<const AbstractDomain*>& arguments) const {
+                            const std::vector<const Domain*>& arguments) const {
       CPPUNIT_ASSERT(arguments.size() == 0 || arguments.size() == 4);
       if (arguments.size() == 4) {
         //!!I'm not sure why this first one is passed in; it appears to be the object's type info.
@@ -4363,7 +4363,7 @@ public:
   }
 
   /** Helper function to clean up after otherwise memory leaking calls to new. */
-  inline static void cleanDomains(std::vector<const AbstractDomain*>& doms) {
+  inline static void cleanDomains(std::vector<const Domain*>& doms) {
     for (unsigned i = 0; i < doms.size(); i++)
       delete doms[i];
     doms.clear();
@@ -4374,7 +4374,7 @@ public:
    * @note Side-effect: leaves two objects, "testObj2a" and "testObj2b", in plan db.
    */
   static void testCreateObject() {
-    std::vector<const AbstractDomain*> domains;
+    std::vector<const Domain*> domains;
     domains.push_back(new IntervalIntDomain(1));
     domains.push_back(new IntervalDomain(1.414));
     Locations* ld1 = new Locations(LocationsBaseDomain());
@@ -4472,7 +4472,7 @@ public:
     CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
     CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
 
-    std::vector<const AbstractDomain*> domains;
+    std::vector<const Domain*> domains;
     domains.push_back(new IntervalIntDomain(1));
     domains.push_back(new IntervalDomain(1.414));
     Locations* ld1 = new Locations(LocationsBaseDomain());
@@ -4501,7 +4501,7 @@ public:
     CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
     CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
 
-    std::vector<const AbstractDomain*> domains;
+    std::vector<const Domain*> domains;
     domains.push_back(new IntervalIntDomain(1));
     domains.push_back(new IntervalDomain(1.414));
     Locations* ld1 = new Locations(LocationsBaseDomain());
@@ -5150,7 +5150,7 @@ public:
   static void getConstraintsFromRelations(const TokenId& master, const TokenId& slave, const LabelStr& relation,
                                           std::list<ConstrainedVariableId>& firsts,
                                           std::list<ConstrainedVariableId>& seconds,
-                                          std::list<AbstractDomain*>& intervals) {
+                                          std::list<Domain*>& intervals) {
     CPPUNIT_ASSERT_MESSAGE("unknown temporal relation name given",
         s_tempRels.find(relation) != s_tempRels.end());
     if (relation == LabelStr("after")) {
@@ -5255,7 +5255,7 @@ public:
   static bool verifyTokenRelation(const TokenId& master, const TokenId& slave, const LabelStr& relation) {
     std::list<ConstrainedVariableId> firstVars;
     std::list<ConstrainedVariableId> secondVars;
-    std::list<AbstractDomain*> intervals;
+    std::list<Domain*> intervals;
     // Get the appropriate list of timepoint pairs and bounds from the relation name.
     getConstraintsFromRelations(master, slave, relation, firstVars, secondVars, intervals);
     CPPUNIT_ASSERT(firstVars.size() == secondVars.size());
@@ -5263,7 +5263,7 @@ public:
     while (!firstVars.empty()) {
       ConstrainedVariableId one = *(firstVars.begin());
       ConstrainedVariableId two = *(secondVars.begin());
-      AbstractDomain *dom = *(intervals.begin());
+      Domain *dom = *(intervals.begin());
       firstVars.erase(firstVars.begin());
       secondVars.erase(secondVars.begin());
       intervals.erase(intervals.begin());
@@ -5305,10 +5305,10 @@ public:
 
   /** Create an XML string that creates a model object. */
   static std::string buildXMLCreateObjectStr(const std::string& className, const std::string& objName,
-                                             const std::vector<const AbstractDomain*>& args);
+                                             const std::vector<const Domain*>& args);
 
   /** Create an XML string that specifies a variable's domain. */
-  static std::string buildXMLSpecifyVariableStr(const ConstrainedVariableId& var, const AbstractDomain& dom);
+  static std::string buildXMLSpecifyVariableStr(const ConstrainedVariableId& var, const Domain& dom);
 
   /**
    * Create an XML string that resets a variable's specified domain.
@@ -5324,7 +5324,7 @@ public:
   /**
    * Create an XML string that specifies the variable's domain via '<invoke>'.
    */
-  static std::string buildXMLInvokeSpecifyVariableStr(const ConstrainedVariableId& var, const AbstractDomain& dom);
+  static std::string buildXMLInvokeSpecifyVariableStr(const ConstrainedVariableId& var, const Domain& dom);
 
   /**
    * Create an XML string that creates a goal token.
@@ -5352,7 +5352,7 @@ public:
   static std::string buildXMLVariableStr(const ConstrainedVariableId& var);
 
   /** Create an XML string describing the domain. */
-  static std::string buildXMLDomainStr(const AbstractDomain& dom);
+  static std::string buildXMLDomainStr(const Domain& dom);
 
   /** Saves the constraint engine to avoid creating one for each test. */
   static ConstraintEngineId s_ce;
@@ -5547,7 +5547,7 @@ CPPUNIT_ASSERT(line == l_line);
 }
 
 std::string DbTransPlayerTest::buildXMLCreateObjectStr(const std::string& className, const std::string& objName,
-                                                       const std::vector<const AbstractDomain*>& domains) {
+                                                       const std::vector<const Domain*>& domains) {
   CPPUNIT_ASSERT(!domains.empty());
   std::string str("<new type=\"");
   str += className;
@@ -5566,7 +5566,7 @@ std::string DbTransPlayerTest::buildXMLCreateObjectStr(const std::string& classN
   return(str);
 }
 
-std::string DbTransPlayerTest::buildXMLSpecifyVariableStr(const ConstrainedVariableId& var, const AbstractDomain& dom) {
+std::string DbTransPlayerTest::buildXMLSpecifyVariableStr(const ConstrainedVariableId& var, const Domain& dom) {
   std::string str("<specify>");
   str += buildXMLVariableStr(var);
   str += " ";
@@ -5595,7 +5595,7 @@ std::string DbTransPlayerTest::buildXMLInvokeConstrainVarsStr(const std::string&
 }
 
 std::string DbTransPlayerTest::buildXMLInvokeSpecifyVariableStr(const ConstrainedVariableId& var,
-                                                                const AbstractDomain& dom) {
+                                                                const Domain& dom) {
   std::string str("<invoke name=\"specify\" identifier=\"");
   //!!Would like to re-use buildXMLVariableStr() here, but this wants a different syntax(!)
   if (var->parent().isNoId())
@@ -5723,7 +5723,7 @@ std::string DbTransPlayerTest::buildXMLVariableStr(const ConstrainedVariableId& 
   return(str);
 }
 
-std::string DbTransPlayerTest::buildXMLDomainStr(const AbstractDomain& dom) {
+std::string DbTransPlayerTest::buildXMLDomainStr(const Domain& dom) {
   std::string str("<");
   if (dom.isSingleton() && dom.isNumeric()) {
     str += "value";

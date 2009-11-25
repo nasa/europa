@@ -48,7 +48,7 @@ namespace EUROPA
     handleConstraintRemoved(constraint);
   }
 
-  AbstractDomain& Propagator::getCurrentDomain(const ConstrainedVariableId& var) {
+  Domain& Propagator::getCurrentDomain(const ConstrainedVariableId& var) {
     check_error(var.isValid());
     return var->getCurrentDomain();
   }

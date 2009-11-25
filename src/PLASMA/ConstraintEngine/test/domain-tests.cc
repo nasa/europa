@@ -62,7 +62,7 @@ namespace EUROPA {
       IntervalDomain realDomain(10.2 ,20.4);
       CPPUNIT_ASSERT(!realDomain.isEmpty());
       CPPUNIT_ASSERT(!realDomain.isFinite());
-      CPPUNIT_ASSERT_EQUAL((AbstractDomain::size_type) cast_int(PLUS_INFINITY), realDomain.getSize());
+      CPPUNIT_ASSERT_EQUAL((Domain::size_type) cast_int(PLUS_INFINITY), realDomain.getSize());
 
       IntervalIntDomain intDomain(10, 20);
       CPPUNIT_ASSERT(intDomain.isFinite());
@@ -76,7 +76,7 @@ namespace EUROPA {
       d1.empty();
       CPPUNIT_ASSERT(d1.isEmpty());
 
-      AbstractDomain& d2 = static_cast<AbstractDomain&>(intDomain);
+      Domain& d2 = static_cast<Domain&>(intDomain);
       CPPUNIT_ASSERT(!d2.isEmpty());
 
       IntervalIntDomain d3(static_cast<IntervalIntDomain&>(intDomain));
@@ -569,11 +569,11 @@ namespace EUROPA {
       CPPUNIT_ASSERT(d0 != d1);
       CPPUNIT_ASSERT(d0 != d2);
 
-      CPPUNIT_ASSERT(AbstractDomain::canBeCompared(d0, d2));
+      CPPUNIT_ASSERT(Domain::canBeCompared(d0, d2));
 
       NumericDomain d3(d2);
       d2.empty();
-      CPPUNIT_ASSERT(AbstractDomain::canBeCompared(d2, d3));
+      CPPUNIT_ASSERT(Domain::canBeCompared(d2, d3));
       CPPUNIT_ASSERT(d3 != d2);
 
       return true;
@@ -1391,7 +1391,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(!dom2.isOpen());
       CPPUNIT_ASSERT(dom2.isSingleton());
 
-      CPPUNIT_ASSERT(AbstractDomain::canBeCompared(dom0, dom2));
+      CPPUNIT_ASSERT(Domain::canBeCompared(dom0, dom2));
       CPPUNIT_ASSERT(dom0 != dom2);
 
       CPPUNIT_ASSERT(!dom0.isSubsetOf(dom2));
@@ -1403,7 +1403,7 @@ namespace EUROPA {
     }
 
     static void testCopyingBoolDomains() {
-      AbstractDomain *copyPtr;
+      Domain *copyPtr;
       BoolDomain falseDom(false);
       BoolDomain trueDom(true);
       BoolDomain both;
@@ -1439,7 +1439,7 @@ namespace EUROPA {
     }
 
     static void testCopyingEnumeratedDomains() {
-      AbstractDomain *copyPtr;
+      Domain *copyPtr;
       NumericDomain emptyOpen;
       NumericDomain fourDom;
       std::list<edouble> values;
@@ -1501,7 +1501,7 @@ namespace EUROPA {
     }
 
     static void testCopyingIntervalDomains() {
-      AbstractDomain *copyPtr;
+      Domain *copyPtr;
       IntervalDomain one2ten(1.0, 10.9);
       IntervalIntDomain four(4,4);
       IntervalDomain empty;
@@ -1576,7 +1576,7 @@ namespace EUROPA {
     }
 
     static void testCopyingIntervalIntDomains() {
-      AbstractDomain *copyPtr;
+      Domain *copyPtr;
       IntervalIntDomain one2ten(1, 10);
       IntervalIntDomain four(4,4);
       IntervalIntDomain empty;
@@ -1656,7 +1656,7 @@ namespace EUROPA {
     public:
       BogusComparator(): DomainComparator(){}
 
-      bool canCompare(const AbstractDomain& domx, const AbstractDomain& domy) const {
+      bool canCompare(const Domain& domx, const Domain& domy) const {
 	return false;
       }
 
@@ -1667,23 +1667,23 @@ namespace EUROPA {
       IntervalIntDomain dom1;
 
       // Using the default comparator - they should be comparable
-      CPPUNIT_ASSERT(AbstractDomain::canBeCompared(dom0, dom1));
+      CPPUNIT_ASSERT(Domain::canBeCompared(dom0, dom1));
 
       // Switch for the bogus one - and make sure it fails as expected
       BogusComparator bogus;
-      CPPUNIT_ASSERT(!AbstractDomain::canBeCompared(dom0, dom1));
+      CPPUNIT_ASSERT(!Domain::canBeCompared(dom0, dom1));
 
       // Allocate the standard comparator, and ensure it compares once again
       DomainComparator standard;
-      CPPUNIT_ASSERT(AbstractDomain::canBeCompared(dom0, dom1));
+      CPPUNIT_ASSERT(Domain::canBeCompared(dom0, dom1));
 
       // Now allocate a new one again
       DomainComparator* dc = new BogusComparator();
-      CPPUNIT_ASSERT(!AbstractDomain::canBeCompared(dom0, dom1));
+      CPPUNIT_ASSERT(!Domain::canBeCompared(dom0, dom1));
 
       // Deallocate and thus cause revert to standard comparator
       delete dc;
-      CPPUNIT_ASSERT(AbstractDomain::canBeCompared(dom0, dom1));
+      CPPUNIT_ASSERT(Domain::canBeCompared(dom0, dom1));
 
       // 2 numeric enumerations should be comparable, even if type names differ
       {
@@ -1692,8 +1692,8 @@ namespace EUROPA {
     RestrictedDT dt1("NumberDomain1",FloatDT::instance(),IntervalDomain());
 	NumericDomain d1(dt1.getId());
 	IntervalIntDomain d2;
-	CPPUNIT_ASSERT(AbstractDomain::canBeCompared(d0, d1));
-	CPPUNIT_ASSERT(AbstractDomain::canBeCompared(d0, d2));
+	CPPUNIT_ASSERT(Domain::canBeCompared(d0, d1));
+	CPPUNIT_ASSERT(Domain::canBeCompared(d0, d2));
       }
 
       // 2 non numeric enumerations can only be compared if their base domains intersect
@@ -1704,8 +1704,8 @@ namespace EUROPA {
 	StringDomain d1(dt1.getId());
     RestrictedDT dt2("OtherDomainType",SymbolDT::instance(),SymbolDomain());
 	SymbolDomain d2(dt2.getId());
-	CPPUNIT_ASSERT(!AbstractDomain::canBeCompared(d0, d1));
-	CPPUNIT_ASSERT(AbstractDomain::canBeCompared(d0, d2));
+	CPPUNIT_ASSERT(!Domain::canBeCompared(d0, d1));
+	CPPUNIT_ASSERT(Domain::canBeCompared(d0, d2));
       }
       return true;
     }
@@ -1714,14 +1714,14 @@ namespace EUROPA {
 
       // These five functions were mistakenly put in DomainTest.cc originally.
       // They also test the new getTypeName() member functions a little and
-      // those member functions' effects on AbstractDomain::canBeCompared().
+      // those member functions' effects on Domain::canBeCompared().
       testCopyingBoolDomains();
       testCopyingEnumeratedDomains();
       testCopyingIntervalDomains();
       testCopyingIntervalIntDomains();
 
       BoolDomain boolDom;
-      AbstractDomain *copy = boolDom.copy();
+      Domain *copy = boolDom.copy();
       CPPUNIT_ASSERT(copy != 0);
       CPPUNIT_ASSERT(*copy == boolDom && copy != &boolDom);
       boolDom.set(false);

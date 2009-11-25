@@ -587,7 +587,7 @@ namespace EUROPA {
     return true;
   }
 
-  ConstrainedVariableId Object::addVariable(const AbstractDomain& baseDomain, const char* name){
+  ConstrainedVariableId Object::addVariable(const Domain& baseDomain, const char* name){
       std::string varTypeName = "";
       Schema::NameValueVector members = m_planDatabase->getSchema()->getMembers(m_type);
       for (unsigned int i = 0; i < members.size(); i++) {
@@ -600,7 +600,7 @@ namespace EUROPA {
            varTypeName = baseDomain.getTypeName().c_str();
       }
 
-      const AbstractDomain& typeDomain = m_planDatabase->getConstraintEngine()->getCESchema()->baseDomain(varTypeName.c_str());
+      const Domain& typeDomain = m_planDatabase->getConstraintEngine()->getCESchema()->baseDomain(varTypeName.c_str());
       check_error(baseDomain.isSubsetOf(typeDomain), "Variable " + std::string(name) + " of type " +
 		  varTypeName.c_str() +" can not be set to " + baseDomain.toString());
 
@@ -853,7 +853,7 @@ namespace EUROPA {
       check_error(!isNumeric());
   }
 
-  ObjectDomain::ObjectDomain(const AbstractDomain& org)
+  ObjectDomain::ObjectDomain(const Domain& org)
     : EnumeratedDomain(org){
     check_error(org.isEmpty() || Entity::getTypedEntity<Object>(org.getLowerBound()).isValid(),
         "Attempted to construct an object domain with values of non-object type " +
@@ -873,7 +873,7 @@ namespace EUROPA {
   }
 
   std::string ObjectDomain::toString() const{
-     return "OBJECT-"+AbstractDomain::toString();
+     return "OBJECT-"+Domain::toString();
   }
 
   std::list<ObjectId> ObjectDomain::makeObjectList(const std::list<edouble>& inputs){

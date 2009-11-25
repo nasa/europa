@@ -5,7 +5,7 @@
 #include "Propagator.hh"
 #include "ConstrainedVariable.hh"
 #include "Constraint.hh"
-#include "AbstractDomain.hh"
+#include "Domain.hh"
 #include "Utils.hh"
 #include "Debug.hh"
 #include "DomainListener.hh"
@@ -1077,7 +1077,7 @@ namespace EUROPA
 
   ConstrainedVariableId
   ConstraintEngine::createVariable(const char* typeName,
-                              const AbstractDomain& baseDomain,
+                              const Domain& baseDomain,
                               const bool internal,
                               bool canBeSpecified,
                               const char* name,

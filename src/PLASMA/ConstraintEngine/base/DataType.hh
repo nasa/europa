@@ -89,7 +89,7 @@ public:
     /**
      * @brief Return the base domain
      */
-    virtual const AbstractDomain& baseDomain() const;
+    virtual const Domain& baseDomain() const;
 
     /**
      * @brief Create a value for a string
@@ -110,7 +110,7 @@ public:
      * @brief Create a variable
      */
     virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine,
-                                                 const AbstractDomain& baseDomain,
+                                                 const Domain& baseDomain,
                                                  const bool internal = false,
                                                  bool canBeSpecified = true,
                                                  const char* name = NO_VAR_NAME,
@@ -121,7 +121,7 @@ protected:
     DataTypeId m_id;
     LabelStr m_name;
     bool m_isRestricted;
-    AbstractDomain* m_baseDomain;
+    Domain* m_baseDomain;
     edouble m_minDelta; /**< The minimum amount by which elements of this data type may vary.  Once this is set, DO NOT CHANGE IT.*/
 };
 

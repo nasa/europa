@@ -40,7 +40,7 @@ namespace EUROPA {
 
       os << m_fileName << " " << m_case << " " << m_constraintName << "(";
 
-      std::list<AbstractDomain*>::const_iterator it = m_domains.begin();
+      std::list<Domain*>::const_iterator it = m_domains.begin();
       for(int i=0;it != m_domains.end();++it) {
           if (i > 0)
               os << ",";
@@ -72,7 +72,7 @@ namespace EUROPA {
    * @param element XML element containing domain.
    * @note Incomplete, but should allow tests to pass.
    */
-  static AbstractDomain* readSet(ConstraintEngineId ce, const TiXmlElement & element) {
+  static Domain* readSet(ConstraintEngineId ce, const TiXmlElement & element) {
       const char * tagname = element.Value();
 
       if(strcmp(tagname, "BoolDomain") == 0) {
@@ -146,7 +146,7 @@ namespace EUROPA {
    * @brief Create a new IntervalDomain from data read from the stream.
    * @note Incomplete, but should allow tests to pass.
    */
-  static AbstractDomain* readInterval(const TiXmlElement & element) {
+  static Domain* readInterval(const TiXmlElement & element) {
     const char * tagname = element.Value();
 
     const char * lba = element.Attribute("lb");
@@ -184,7 +184,7 @@ namespace EUROPA {
    * @brief Read domains from an element's children, delegates to readSet or readInterval
    * @note Incomplete, but should allow tests to pass.
    */
-  static void readDomains(ConstraintEngineId ce, const TiXmlElement & element, std::list<AbstractDomain*> & domains) {
+  static void readDomains(ConstraintEngineId ce, const TiXmlElement & element, std::list<Domain*> & domains) {
     if(&element == NULL) return;
     check_error_variable(const char * name = element.Value());
     checkError(strcmp(name,"Inputs") == 0 || strcmp(name,"Outputs") == 0,
@@ -193,7 +193,7 @@ namespace EUROPA {
     for (const TiXmlElement * child_el = element.FirstChildElement() ;
          child_el; child_el = child_el->NextSiblingElement()) {
       const char * cname = child_el->Value();
-      AbstractDomain * dom = NULL;
+      Domain * dom = NULL;
       if(strcmp(cname,"BoolDomain") == 0 || strcmp(cname,"NumericDomain") == 0 || strcmp(cname,"SymbolDomain") == 0)
         dom = readSet(ce, *child_el);
       else if(strcmp(cname,"IntervalDomain") == 0 || strcmp(cname,"IntervalIntDomain") == 0)
@@ -222,7 +222,7 @@ namespace EUROPA {
       TiXmlElement * inputs = constraint->FirstChildElement("Inputs");
       TiXmlElement * outputs = constraint->FirstChildElement("Outputs");
 
-      std::list<AbstractDomain*> domains, inputDoms, outputDoms;
+      std::list<Domain*> domains, inputDoms, outputDoms;
 
       readDomains(ce,*inputs, inputDoms);
       readDomains(ce,*outputs, outputDoms);
@@ -271,16 +271,16 @@ namespace EUROPA {
         continue;
       }
 
-      std::list<AbstractDomain*> testDomains(testCases.front().m_domains);
+      std::list<Domain*> testDomains(testCases.front().m_domains);
       // Each input domain must have a matching output domain.
       CPPUNIT_ASSERT(testDomains.size() % 2 == 0);
 
       // Build the scope and the list of expected output domains.
       std::vector<ConstrainedVariableId> scope;
-      std::list<AbstractDomain*> outputDoms;
+      std::list<Domain*> outputDoms;
       ConstrainedVariableId cVarId;
       while (!testDomains.empty()) {
-        AbstractDomain *domPtr = testDomains.front();
+        Domain *domPtr = testDomains.front();
         CPPUNIT_ASSERT(domPtr != 0 && (domPtr->isOpen() || !domPtr->isEmpty()));
         testDomains.pop_front();
 
@@ -313,7 +313,7 @@ namespace EUROPA {
       unsigned int i = 1;
       bool problem = false;
       for ( ; scopeIter != scope.end() && !outputDoms.empty(); scopeIter++, i++) {
-        AbstractDomain *domPtr = outputDoms.front();
+        Domain *domPtr = outputDoms.front();
         outputDoms.pop_front();
         if (domPtr->isEmpty()) {
           if (!(*scopeIter)->derivedDomain().isEmpty()) {

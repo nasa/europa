@@ -62,12 +62,12 @@ namespace EUROPA {
     m_factories.clear();
   }
 
-  LabelStr ObjectTypeMgr::makeFactoryName(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments){
+  LabelStr ObjectTypeMgr::makeFactoryName(const LabelStr& objectType, const std::vector<const Domain*>& arguments){
     std::string signature = objectType.toString();
 
     debugMsg("ObjectFactory:makeFactoryName", "Making factory name " << signature);
     // Iterate over the argument types and compose full signature
-    for(std::vector<const AbstractDomain*>::const_iterator it = arguments.begin(); it != arguments.end(); ++it){
+    for(std::vector<const Domain*>::const_iterator it = arguments.begin(); it != arguments.end(); ++it){
       signature = signature + TYPE_DELIMITER + (*it)->getTypeName().toString();
     }
 
@@ -86,7 +86,7 @@ namespace EUROPA {
    */
   ObjectFactoryId ObjectTypeMgr::getFactory(const SchemaId& schema,
                                             const LabelStr& objectType,
-                                            const std::vector<const AbstractDomain*>& arguments,
+                                            const std::vector<const Domain*>& arguments,
 					    const bool doCheckError)
   {
     // Build the full signature for the factory
@@ -260,7 +260,7 @@ namespace EUROPA {
     ObjectFactoryEvalContext(const PlanDatabaseId& planDb,
                  const std::vector<std::string>& argNames,
                  const std::vector<std::string>& argTypes,
-                 const std::vector<const AbstractDomain*>& args);
+                 const std::vector<const Domain*>& args);
 
     virtual ~ObjectFactoryEvalContext();
 
@@ -274,7 +274,7 @@ namespace EUROPA {
   ObjectFactoryEvalContext::ObjectFactoryEvalContext(const PlanDatabaseId& planDb,
                const std::vector<std::string>& argNames,
                const std::vector<std::string>& argTypes,
-               const std::vector<const AbstractDomain*>& args)
+               const std::vector<const Domain*>& args)
     : EvalContext(NULL) // TODO: should pass in eval context from outside to have access to globals
     , m_planDb(planDb)
   {
@@ -316,7 +316,7 @@ namespace EUROPA {
                             const PlanDatabaseId& planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
-                            const std::vector<const AbstractDomain*>& arguments) const
+                            const std::vector<const Domain*>& arguments) const
   {
     check_runtime_error(checkArgs(arguments));
 
@@ -331,7 +331,7 @@ namespace EUROPA {
     return instance;
   }
 
-  bool InterpretedObjectFactory::checkArgs(const std::vector<const AbstractDomain*>& arguments) const
+  bool InterpretedObjectFactory::checkArgs(const std::vector<const Domain*>& arguments) const
   {
     // TODO: implement this. is this even necessary?, parser should take care of it
     return true;
@@ -348,7 +348,7 @@ namespace EUROPA {
                            const PlanDatabaseId& planDb,
                            const LabelStr& objectType,
                            const LabelStr& objectName,
-                           const std::vector<const AbstractDomain*>& arguments) const
+                           const std::vector<const Domain*>& arguments) const
   {
     // go up the hierarchy and give the parents a chance to create the object, this allows native classes to be exported
     // TODO: some effort can be saved by keeping track of whether a class has a native ancestor different from Object.
@@ -369,7 +369,7 @@ namespace EUROPA {
 
       // TODO: argumentsForSuper are eval'd twice, once here and once when m_superCallExpr->eval(evalContext) is called
       //  figure out how to do it only once
-      std::vector<const AbstractDomain*> argumentsForSuper;
+      std::vector<const Domain*> argumentsForSuper;
       m_superCallExpr->evalArgs(evalContext,argumentsForSuper);
 
       ObjectFactoryId objFactory = planDb->getSchema()->getObjectFactory(m_superCallExpr->getSuperClassName(),argumentsForSuper);
@@ -386,7 +386,7 @@ namespace EUROPA {
 
     void InterpretedObjectFactory::evalConstructorBody(
                                                ObjectId& instance,
-                                               const std::vector<const AbstractDomain*>& arguments) const
+                                               const std::vector<const Domain*>& arguments) const
     {
         // TODO: should pass in eval context from outside to have access to globals
         ObjectFactoryEvalContext factoryEvalContext(
@@ -408,7 +408,7 @@ namespace EUROPA {
         for (unsigned int i=0; i < members.size(); i++) {
             std::string varName = instance->getName().toString() + "." + members[i].second.toString();
             if (instance->getVariable(varName) == ConstrainedVariableId::noId()) {
-                const AbstractDomain& baseDomain =
+                const Domain& baseDomain =
                     instance->getPlanDatabase()->getConstraintEngine()->getCESchema()->baseDomain(members[i].first.c_str());
                 instance->addVariable(
                   baseDomain,
@@ -442,7 +442,7 @@ namespace EUROPA {
     {
       ObjectId object = Entity::getTypedEntity<Object>(context.getVar("this")->derivedDomain().getSingletonValue());
 
-      std::vector<const AbstractDomain*> arguments;
+      std::vector<const Domain*> arguments;
 
       evalArgs(context,arguments);
       ObjectFactoryId objFactory = object->getPlanDatabase()->getSchema()->getObjectFactory(m_superClassName,arguments);
@@ -451,7 +451,7 @@ namespace EUROPA {
       return DataRef::null;
     }
 
-    void ExprConstructorSuperCall::evalArgs(EvalContext& context, std::vector<const AbstractDomain*>& arguments) const
+    void ExprConstructorSuperCall::evalArgs(EvalContext& context, std::vector<const Domain*>& arguments) const
     {
       for (unsigned int i=0; i < m_argExprs.size(); i++) {
         DataRef arg = m_argExprs[i]->eval(context);

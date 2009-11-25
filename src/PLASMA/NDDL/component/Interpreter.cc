@@ -82,7 +82,7 @@ namespace EUROPA {
   /*
    * ExprConstant
    */
-  ExprConstant::ExprConstant(const char* type, const AbstractDomain* domain)
+  ExprConstant::ExprConstant(const char* type, const Domain* domain)
     : m_type(type)
     , m_domain(domain)
   {
@@ -278,7 +278,7 @@ namespace EUROPA {
 
   DataRef ExprNewObject::eval(EvalContext& context) const
   {
-    std::vector<const AbstractDomain*> arguments;
+    std::vector<const Domain*> arguments;
     for (unsigned int i=0; i < m_argExprs.size(); i++) {
       DataRef arg = m_argExprs[i]->eval(context);
       arguments.push_back(&(arg.getValue()->derivedDomain()));
@@ -1433,7 +1433,7 @@ namespace EUROPA {
   InterpretedRuleInstance::InterpretedRuleInstance(
 						   const RuleInstanceId& parent,
 						   const ConstrainedVariableId& var,
-						   const AbstractDomain& domain,
+						   const Domain& domain,
 						   const bool positive,
 						   const std::vector<Expr*>& body)
     : RuleInstance(parent,var,domain,positive)
@@ -1529,7 +1529,7 @@ namespace EUROPA {
   }
 
   ConstrainedVariableId InterpretedRuleInstance::addLocalVariable(
-								  const AbstractDomain& baseDomain,
+								  const Domain& baseDomain,
 								  bool canBeSpecified,
 								  const LabelStr& name)
   {
@@ -1556,7 +1556,7 @@ namespace EUROPA {
     // Create a local domain based on the objects included in the valueSet
     ConstrainedVariableId setVar = evalContext.getVar(valueSet.c_str());
     check_error(!setVar.isNoId(),"Loop var can't be NULL");
-    const AbstractDomain& setVarDomain = setVar->derivedDomain();
+    const Domain& setVarDomain = setVar->derivedDomain();
     debugMsg("Interpreter:InterpretedRule","set var for loop :" << setVar->toString());
     debugMsg("Interpreter:InterpretedRule","set var domain for loop:" << setVarDomain.toString());
     const ObjectDomain& loopObjectSet = dynamic_cast<const ObjectDomain&>(setVarDomain);
@@ -1635,7 +1635,7 @@ namespace EUROPA {
     return foo->getId();
   }
 
-  ExprTypedef::ExprTypedef(const DataTypeId& baseType, const char* name, AbstractDomain* baseDomain)
+  ExprTypedef::ExprTypedef(const DataTypeId& baseType, const char* name, Domain* baseDomain)
       : m_baseType(baseType)
       , m_name(name)
       , m_baseDomain(baseDomain)
@@ -1650,7 +1650,7 @@ namespace EUROPA {
   DataRef ExprTypedef::eval(EvalContext& context) const
   {
       const char* name = m_name.c_str();
-      const AbstractDomain& domain = *m_baseDomain;
+      const Domain& domain = *m_baseDomain;
 
       debugMsg("Interpreter:typedef","Defining type:" << name);
 
@@ -1810,7 +1810,7 @@ namespace EUROPA {
 
       // same as completeObjectParam in NddlRules.hh
       if(initValue != NULL) {
-          AbstractDomain* bd = parameterDataType->baseDomain().copy();
+          Domain* bd = parameterDataType->baseDomain().copy();
           ConstrainedVariableId rhs = initValue->eval(context).getValue();
           bd->intersect(rhs->lastDomain());
           parameter = token->addParameter(
@@ -1859,7 +1859,7 @@ namespace EUROPA {
 	  }
 	  else {
 		  // TODO: do we really need to pass the base domain?
-				  const AbstractDomain& baseDomain = context.getRuleInstance()->getPlanDatabase()->getSchema()->getCESchema()->baseDomain(typeName.c_str());
+				  const Domain& baseDomain = context.getRuleInstance()->getPlanDatabase()->getSchema()->getCESchema()->baseDomain(typeName.c_str());
 				  localVar = context.getRuleInstance()->addLocalVariable(
 						  baseDomain,
 						  m_canBeSpecified,
@@ -1909,7 +1909,7 @@ namespace EUROPA {
           const char* varName = m_lhs->toString().c_str(); // TODO: this is a hack!
           check_error(object->getVariable(varName) == ConstrainedVariableId::noId());
           ConstrainedVariableId rhsValue = m_rhs->eval(context).getValue();
-          const AbstractDomain& domain = rhsValue->derivedDomain();
+          const Domain& domain = rhsValue->derivedDomain();
           ConstrainedVariableId v = object->addVariable(domain,varName);
           lhs = DataRef(v);
           debugMsg("Interpreter:InterpretedObject","Initialized variable:" << object->getName().toString() << "." << varName << " to " << rhsValue->derivedDomain().toString() << " in constructor");
@@ -2128,7 +2128,7 @@ namespace EUROPA {
       DbClientId pdb = getPDB(context); // TODO: keep using db client?
 
       if (method=="specify") {
-          const AbstractDomain& ad = args[0]->lastDomain();
+          const Domain& ad = args[0]->lastDomain();
           if (ad.isSingleton())
               pdb->specify(var,ad.getSingletonValue());
           else

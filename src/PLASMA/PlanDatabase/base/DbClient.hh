@@ -39,7 +39,7 @@ namespace EUROPA {
      * @param name The name for the variable. Must be unique.
      * @return The Id of the variable created. Will error out rather than return a noId.
      */
-    ConstrainedVariableId createVariable(const char* typeName, const AbstractDomain& baseDomain, const char* name, bool isTmpVar = false, bool canBeSpecified=true);
+    ConstrainedVariableId createVariable(const char* typeName, const Domain& baseDomain, const char* name, bool isTmpVar = false, bool canBeSpecified=true);
 
     /**
      * @brief Create a variable
@@ -75,7 +75,7 @@ namespace EUROPA {
      * @param arguments A vector of name/value pairs used to invoke a particular constructor.
      * @return The Id of the object created. Will error out rather than return a noId.
      */
-    ObjectId createObject(const char* type, const char* name, const std::vector<const AbstractDomain*>& arguments);
+    ObjectId createObject(const char* type, const char* name, const std::vector<const Domain*>& arguments);
 
     /**
      * @brief Delete an object.  By way of symmetry with createObject().
@@ -172,7 +172,7 @@ namespace EUROPA {
      */
     ConstraintId createConstraint(const char* name,
 				  const ConstrainedVariableId& variable,
-				  const AbstractDomain& domain);
+				  const Domain& domain);
 
     /**
      * @brief Delete a constraint.  By way of symmetry with createConstraint().
@@ -185,7 +185,7 @@ namespace EUROPA {
      * @param value The new base domain of the variable.
      * @see getEntityByKey
      */
-    void restrict(const ConstrainedVariableId& variable, const AbstractDomain& domain);
+    void restrict(const ConstrainedVariableId& variable, const Domain& domain);
 
     /**
      * @brief Binds the value of a variable

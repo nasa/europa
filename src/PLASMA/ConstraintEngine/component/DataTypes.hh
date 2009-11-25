@@ -24,7 +24,7 @@ public:
 
     virtual edouble createValue(const std::string& value) const;
     virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine,
-                                                 const AbstractDomain& baseDomain,
+                                                 const Domain& baseDomain,
                                                  const bool internal = false,
                                                  bool canBeSpecified = true,
                                                  const char* name = NO_VAR_NAME,
@@ -119,7 +119,7 @@ public:
 class RestrictedDT : public DataType
 {
 public:
-    RestrictedDT(const char* name, const DataTypeId& baseType, const AbstractDomain& baseDomain);
+    RestrictedDT(const char* name, const DataTypeId& baseType, const Domain& baseDomain);
     virtual ~RestrictedDT();
 
     virtual bool isNumeric() const;

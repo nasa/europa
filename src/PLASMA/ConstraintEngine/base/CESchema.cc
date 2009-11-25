@@ -59,7 +59,7 @@ namespace EUROPA
     debugMsg("CESchema::registerDataType", "Registered data type " << dt->getName().toString());
   }
 
-  const AbstractDomain & CESchema::baseDomain(const char* typeName)
+  const Domain & CESchema::baseDomain(const char* typeName)
   {
     DataTypeId factory = getDataType(typeName);
     check_error(factory.isValid(), "no DataType found for type '" + std::string(typeName) + "'");

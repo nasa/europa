@@ -31,7 +31,7 @@ namespace EUROPA {
   }
 
   RuleInstance::RuleInstance(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb,
-			     const ConstrainedVariableId& guard, const AbstractDomain& domain)
+			     const ConstrainedVariableId& guard, const Domain& domain)
     : m_id(this), m_rule(rule), m_token(token), m_planDb(planDb), m_rulesEngine(), m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
     check_error(isValid());
     setGuard(guard, domain);
@@ -61,7 +61,7 @@ namespace EUROPA {
   /**
    * @brief Constructor refers to parent for tokens, and variables that are accessible in its scope.
    */
-  RuleInstance::RuleInstance(const RuleInstanceId& parent, const ConstrainedVariableId& guard, const AbstractDomain& domain)
+  RuleInstance::RuleInstance(const RuleInstanceId& parent, const ConstrainedVariableId& guard, const Domain& domain)
     : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
     m_planDb(parent->getPlanDatabase()), m_rulesEngine(), m_parent(parent), m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
     check_error(isValid());
@@ -71,7 +71,7 @@ namespace EUROPA {
   /**
    * @brief Constructor refers to parent for tokens, and variables that are accessible in its scope.
    */
-  RuleInstance::RuleInstance(const RuleInstanceId& parent, const ConstrainedVariableId& guard, const AbstractDomain& domain, const bool positive)
+  RuleInstance::RuleInstance(const RuleInstanceId& parent, const ConstrainedVariableId& guard, const Domain& domain, const bool positive)
     : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
     m_planDb(parent->getPlanDatabase()), m_rulesEngine(), m_parent(parent), m_guardDomain(0), m_isExecuted(false), m_isPositive(positive){
     check_error(isValid());
@@ -300,11 +300,11 @@ namespace EUROPA {
     m_guardListener->addDependent(this);
   }
 
-  void RuleInstance::setGuard(const ConstrainedVariableId& guard, const AbstractDomain& domain){
+  void RuleInstance::setGuard(const ConstrainedVariableId& guard, const Domain& domain){
     check_error(m_guards.empty());
     check_error(guard.isValid());
     m_guards.push_back(guard);
-    check_error(AbstractDomain::canBeCompared(guard->baseDomain(), domain),
+    check_error(Domain::canBeCompared(guard->baseDomain(), domain),
 					      "Failed attempt to compare " + guard->baseDomain().getTypeName().toString() +
 					      " with " + domain.getTypeName().toString());
     m_guardDomain = domain.copy();

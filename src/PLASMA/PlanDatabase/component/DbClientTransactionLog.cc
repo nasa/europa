@@ -49,7 +49,7 @@ namespace EUROPA {
   void DbClientTransactionLog::notifyVariableCreated(const ConstrainedVariableId& variable) {
     if(!variable->isInternal()) {
       TiXmlElement * element = allocateXmlElement("var");
-      const AbstractDomain& baseDomain = variable->baseDomain();
+      const Domain& baseDomain = variable->baseDomain();
       std::string type = baseDomain.getTypeName().toString();
       if (m_client->getSchema()->isObjectType(type)) {
         ObjectId object = Entity::getTypedEntity<Object>(baseDomain.getLowerBound());
@@ -83,17 +83,17 @@ namespace EUROPA {
   }
 
   void DbClientTransactionLog::notifyObjectCreated(const ObjectId& object){
-    const std::vector<const AbstractDomain*> noArguments;
+    const std::vector<const Domain*> noArguments;
     notifyObjectCreated(object, noArguments);
   }
 
-  void DbClientTransactionLog::notifyObjectCreated(const ObjectId& object, const std::vector<const AbstractDomain*>& arguments){
+  void DbClientTransactionLog::notifyObjectCreated(const ObjectId& object, const std::vector<const Domain*>& arguments){
     TiXmlElement * element = allocateXmlElement("new");
     if (LabelStr::isString(object->getName())) {
       element->SetAttribute("name", object->getName().toString());
     }
     element->SetAttribute("type", object->getType().toString());
-    std::vector<const AbstractDomain*>::const_iterator iter;
+    std::vector<const Domain*>::const_iterator iter;
     for (iter = arguments.begin() ; iter != arguments.end() ; iter++) {
       element->LinkEndChild(abstractDomainAsXml(*iter));
     }
@@ -275,7 +275,7 @@ namespace EUROPA {
   }
 
   std::string
-  DbClientTransactionLog::domainValueAsString(const AbstractDomain * domain, edouble value)
+  DbClientTransactionLog::domainValueAsString(const Domain * domain, edouble value)
   {
     if (isBool(domain->getTypeName().toString())) {
       return (value == 1 ? "true" : "false");
@@ -301,7 +301,7 @@ namespace EUROPA {
   }
 
   TiXmlElement *
-  DbClientTransactionLog::domainValueAsXml(const AbstractDomain * domain, edouble value)
+  DbClientTransactionLog::domainValueAsXml(const Domain * domain, edouble value)
   {
     LabelStr typeName = domain->getTypeName();
     if (m_client->getSchema()->isObjectType(typeName)) {
@@ -336,7 +336,7 @@ namespace EUROPA {
   }
 
   TiXmlElement *
-  DbClientTransactionLog::abstractDomainAsXml(const AbstractDomain * domain)
+  DbClientTransactionLog::abstractDomainAsXml(const Domain * domain)
   {
     check_error(!domain->isEmpty());
     if (domain->isSingleton()) {

@@ -1,5 +1,5 @@
 #include "ConstrainedVariable.hh"
-#include "AbstractDomain.hh"
+#include "Domain.hh"
 #include "ConstraintEngine.hh"
 #include "Constraint.hh"
 #include "Utils.hh"
@@ -54,7 +54,7 @@ namespace EUROPA {
   void ConstrainedVariable::setCurrentPropagatingConstraint(ConstraintId c) { m_propagatingConstraint = c; }
   ConstraintId ConstrainedVariable::getCurrentPropagatingConstraint() const { return m_propagatingConstraint; }
 
-  void ConstrainedVariable::restrictBaseDomain(const AbstractDomain& dom){
+  void ConstrainedVariable::restrictBaseDomain(const Domain& dom){
     checkError(isActive(), toString());
     checkError(dom.intersects(baseDomain()), dom.toString() << " not intersecting " << baseDomain().toString());
 
@@ -365,7 +365,7 @@ namespace EUROPA {
 //       getConstraintEngine()->propagate();
   }
 
-  void ConstrainedVariable::reset(const AbstractDomain& domain){
+  void ConstrainedVariable::reset(const Domain& domain){
     checkError(domain.isSubsetOf(internal_baseDomain()),
 				 domain.toString() << " not in " << internal_baseDomain().toString());
 

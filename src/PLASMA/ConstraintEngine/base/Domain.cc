@@ -1,4 +1,4 @@
-#include "AbstractDomain.hh"
+#include "Domain.hh"
 #include "Entity.hh"
 #include "Error.hh"
 #include "Utils.hh"
@@ -7,7 +7,7 @@
 
 namespace EUROPA {
 
-  ostream& operator<<(ostream& os, const AbstractDomain& dom) {
+  ostream& operator<<(ostream& os, const Domain& dom) {
     dom >> os;
     return(os);
   }
@@ -49,7 +49,7 @@ namespace EUROPA {
   /**
    * @brief Implements the default tests for comparison.
    */
-  bool DomainComparator::canCompare(const AbstractDomain& domx, const AbstractDomain& domy) const
+  bool DomainComparator::canCompare(const Domain& domx, const Domain& domy) const
   {
     return domx.getDataType()->canBeCompared(domy.getDataType());
   }
@@ -66,31 +66,31 @@ namespace EUROPA {
     return(m_id);
   }
 
-  AbstractDomain::AbstractDomain(const DataTypeId& dt, bool enumerated, bool closed)
+  Domain::Domain(const DataTypeId& dt, bool enumerated, bool closed)
     : m_dataType(dt)
     , m_enumerated(enumerated)
     , m_closed(closed)
   {
   }
 
-  AbstractDomain::AbstractDomain(const AbstractDomain& org)
+  Domain::Domain(const Domain& org)
     : m_dataType(org.m_dataType)
     , m_enumerated(org.m_enumerated)
     , m_closed(org.m_closed)
   {
   }
 
-  AbstractDomain::~AbstractDomain() {}
+  Domain::~Domain() {}
 
-  bool AbstractDomain::operator==(const AbstractDomain& dom) const {
+  bool Domain::operator==(const Domain& dom) const {
     return(m_closed == dom.m_closed && isFinite() == dom.isFinite());
   }
 
-  bool AbstractDomain::operator!=(const AbstractDomain& dom) const {
+  bool Domain::operator!=(const Domain& dom) const {
     return(!operator==(dom));
   }
 
-  void AbstractDomain::close() {
+  void Domain::close() {
     // Benign if already closed
     if(m_closed == true)
       return;
@@ -101,23 +101,23 @@ namespace EUROPA {
       empty();
   }
 
-  void AbstractDomain::open() {
+  void Domain::open() {
     check_error(isClosed(), "Attempted to re-open a domain that is already open.");
     m_closed = false;
     notifyChange(DomainListener::OPENED);
   }
 
-  void AbstractDomain::touch() {
+  void Domain::touch() {
     notifyChange(DomainListener::BOUNDS_RESTRICTED);
   }
 
-  bool AbstractDomain::isClosed()     const { return(m_closed); }
-  bool AbstractDomain::isOpen()       const { return(!m_closed); }
-  bool AbstractDomain::isEnumerated() const { return(m_enumerated); }
-  bool AbstractDomain::isInterval()   const { return(!m_enumerated); }
-  bool AbstractDomain::isInfinite()   const { return(!isFinite()); }
+  bool Domain::isClosed()     const { return(m_closed); }
+  bool Domain::isOpen()       const { return(!m_closed); }
+  bool Domain::isEnumerated() const { return(m_enumerated); }
+  bool Domain::isInterval()   const { return(!m_enumerated); }
+  bool Domain::isInfinite()   const { return(!isFinite()); }
 
-  void AbstractDomain::setListener(const DomainListenerId& listener) {
+  void Domain::setListener(const DomainListenerId& listener) {
     check_error(m_listener.isNoId()); // Only set once
     m_listener = listener;
 
@@ -129,11 +129,11 @@ namespace EUROPA {
     }
   }
 
-  const DomainListenerId& AbstractDomain::getListener() const {
+  const DomainListenerId& Domain::getListener() const {
     return(m_listener);
   }
 
-  void AbstractDomain::notifyChange(const DomainListener::ChangeType& changeType) {
+  void Domain::notifyChange(const DomainListener::ChangeType& changeType) {
     checkError(m_listener.isNoId() || m_listener.isValid(), m_listener);
 
     if (m_listener.isNoId())
@@ -146,15 +146,15 @@ namespace EUROPA {
       m_listener->notifyChange(changeType);
   }
 
-  void AbstractDomain::operator>>(ostream& os) const {
+  void Domain::operator>>(ostream& os) const {
     os << getTypeName().toString() << (m_closed ? ":CLOSED" : ":OPEN");
   }
 
-  edouble AbstractDomain::translateNumber(edouble number, bool) const {
+  edouble Domain::translateNumber(edouble number, bool) const {
     return(number);
   }
 
-  bool AbstractDomain::check_value(edouble value) const {
+  bool Domain::check_value(edouble value) const {
     checkPrecision(value);
     return(!isNumeric() || (value >= MINUS_INFINITY && value <= PLUS_INFINITY));
   }
@@ -162,25 +162,25 @@ namespace EUROPA {
   /**
    * @see DomainComparator::comparator
    */
-  bool AbstractDomain::canBeCompared(const AbstractDomain& domx, const AbstractDomain& domy) {
-    debugMsg("AbstractDomain:canBeCompared", "domx.isBool " << domx.isBool() << " domx.isNumeric " << domx.isNumeric() << " domx.isString " << domx.isString() << " domx.isSymbolic " << domx.isSymbolic());
-    debugMsg("AbstractDomain:canBeCompared", "domy.isBool " << domy.isBool() << " domy.isNumeric " << domy.isNumeric() << " domy.isString " << domy.isString() << " domy.isSymbolic " << domy.isSymbolic());
-    debugMsg("AbstractDomain:canBeCompared", "type of domx " << domx.getTypeName().toString() << " type of domy " << domy.getTypeName().toString());
-    debugMsg("AbstractDomain:canBeCompared", domx.toString());
-    debugMsg("AbstractDomain:canBeCompared", domy.toString());
+  bool Domain::canBeCompared(const Domain& domx, const Domain& domy) {
+    debugMsg("Domain:canBeCompared", "domx.isBool " << domx.isBool() << " domx.isNumeric " << domx.isNumeric() << " domx.isString " << domx.isString() << " domx.isSymbolic " << domx.isSymbolic());
+    debugMsg("Domain:canBeCompared", "domy.isBool " << domy.isBool() << " domy.isNumeric " << domy.isNumeric() << " domy.isString " << domy.isString() << " domy.isSymbolic " << domy.isSymbolic());
+    debugMsg("Domain:canBeCompared", "type of domx " << domx.getTypeName().toString() << " type of domy " << domy.getTypeName().toString());
+    debugMsg("Domain:canBeCompared", domx.toString());
+    debugMsg("Domain:canBeCompared", domy.toString());
     bool result = DomainComparator::getComparator().canCompare(domx, domy);
-    debugMsg("AbstractDomain:canBeCompared", "returning " << result);
+    debugMsg("Domain:canBeCompared", "returning " << result);
     return result;
   }
 
 
-  bool AbstractDomain::areBoundsFinite() const {
+  bool Domain::areBoundsFinite() const {
     return (!isNumeric() ||
 	    (!isEmpty() && isClosed() &&
 	     getUpperBound() < PLUS_INFINITY && getLowerBound() > MINUS_INFINITY));
   }
 
-  std::string AbstractDomain::toString() const {
+  std::string Domain::toString() const {
     std::stringstream s_stream;
 
     // Use fixed position notation on output for reals
@@ -191,29 +191,29 @@ namespace EUROPA {
     return s_stream.str();
   }
 
-  void AbstractDomain::assertSafeComparison(const AbstractDomain& domA, const AbstractDomain& domB){
+  void Domain::assertSafeComparison(const Domain& domA, const Domain& domB){
     check_error(canBeCompared(domA, domB),
 		domA.getTypeName().toString() + " cannot be compared with " + domB.getTypeName().toString());
 
   }
 
-  std::string  AbstractDomain::toString(edouble value) const
+  std::string  Domain::toString(edouble value) const
   {
     checkError(isMember(value),  value << " not in " << toString());
     return getDataType()->toString(value);
   }
 
 
-  const DataTypeId& AbstractDomain::getDataType() const { return m_dataType; }
-  void AbstractDomain::setDataType(const DataTypeId& dt) { m_dataType=dt; }
+  const DataTypeId& Domain::getDataType() const { return m_dataType; }
+  void Domain::setDataType(const DataTypeId& dt) { m_dataType=dt; }
 
   // TODO: all these just delegate to the data type, should be dropped eventually, preserved for now for backwards compatibility
-  const LabelStr& AbstractDomain::getTypeName() const { return getDataType()->getName(); }
-  bool AbstractDomain::isSymbolic() const { return getDataType()->isSymbolic(); }
-  bool AbstractDomain::isEntity() const { return getDataType()->isEntity(); }
-  bool AbstractDomain::isNumeric() const { return getDataType()->isNumeric(); }
-  bool AbstractDomain::isBool() const { return getDataType()->isBool(); }
-  bool AbstractDomain::isString() const { return getDataType()->isString(); }
-  bool AbstractDomain::isRestricted() const { return getDataType()->getIsRestricted(); }
-  edouble AbstractDomain::minDelta() const {return getDataType()->minDelta();}
+  const LabelStr& Domain::getTypeName() const { return getDataType()->getName(); }
+  bool Domain::isSymbolic() const { return getDataType()->isSymbolic(); }
+  bool Domain::isEntity() const { return getDataType()->isEntity(); }
+  bool Domain::isNumeric() const { return getDataType()->isNumeric(); }
+  bool Domain::isBool() const { return getDataType()->isBool(); }
+  bool Domain::isString() const { return getDataType()->isString(); }
+  bool Domain::isRestricted() const { return getDataType()->getIsRestricted(); }
+  edouble Domain::minDelta() const {return getDataType()->minDelta();}
 }

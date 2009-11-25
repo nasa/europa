@@ -1415,8 +1415,8 @@ private:
 
     //test near
     //tok1 has midpoint at 11, tok2 has midpoint at 13, so put flawedToken's midpoint at 10
-    const_cast<AbstractDomain&>(flawedToken.start()->lastDomain()).intersect(4, 10);
-    const_cast<AbstractDomain&>(flawedToken.end()->lastDomain()).intersect(5, 12);
+    const_cast<Domain&>(flawedToken.start()->lastDomain()).intersect(4, 10);
+    const_cast<Domain&>(flawedToken.end()->lastDomain()).intersect(5, 12);
     CPPUNIT_ASSERT(testEngine.getConstraintEngine()->propagate());
     std::string mNearHeur("<FlawHandler component=\"HSTSOpenConditionDecisionPoint\" choice=\"mergeOnly\" order=\"near\"/>");
     TiXmlElement* mNearHeurXml = initXml(mNearHeur);

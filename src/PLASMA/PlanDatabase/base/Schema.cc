@@ -72,7 +72,7 @@ namespace EUROPA {
 
   const LabelStr& Schema::getName() const {return m_name;}
 
-  bool Schema::canCompare(const AbstractDomain& domx, const AbstractDomain& domy) const {
+  bool Schema::canCompare(const Domain& domx, const Domain& domy) const {
 
     // If either is an object type, both must be. All objects types are comaparable with
     // each other, even though the domain types may differ. ObjectId's are unambiguous.
@@ -744,7 +744,7 @@ namespace EUROPA {
       m_objectTypeMgr->registerFactory(of);
   }
 
-  ObjectFactoryId Schema::getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments, const bool doCheckError)
+  ObjectFactoryId Schema::getObjectFactory(const LabelStr& objectType, const std::vector<const Domain*>& arguments, const bool doCheckError)
   {
     return m_objectTypeMgr->getFactory(getId(),objectType,arguments,doCheckError);
   }

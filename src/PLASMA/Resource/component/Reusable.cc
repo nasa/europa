@@ -270,7 +270,7 @@ namespace EUROPA {
       }
     }
     else {
-      const_cast<AbstractDomain&>(txn->quantity()->lastDomain()).empty();
+      const_cast<Domain&>(txn->quantity()->lastDomain()).empty();
     }
   }
 

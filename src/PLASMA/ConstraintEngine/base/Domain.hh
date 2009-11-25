@@ -1,14 +1,14 @@
-#ifndef _H_AbstractDomain
-#define _H_AbstractDomain
+#ifndef _H_Domain
+#define _H_Domain
 
 /**
- * @file AbstractDomain.hh
+ * @file Domain.hh
  * @author Conor McGann
  * @date August, 2003
  * @brief Declares new domain management object model.
  *
  * A new approach for domains is presented which allows for more customized domain implementations to assess possible
- * speed improvements. AbstractDomain is the base class for all other domains. It is the only domain reference
+ * speed improvements. Domain is the base class for all other domains. It is the only domain reference
  * available in the  core of the framework.
  *
  * The semantics of a domain are described in terms of:
@@ -29,7 +29,7 @@
  * between types.
  *
  * A central design element is the use of a DomainListener to optionally observe changes on the domain. This is
- * an Observer pattern where the AbstractDomain is the subject and the DomainListener is the observer. This mechamism
+ * an Observer pattern where the Domain is the subject and the DomainListener is the observer. This mechamism
  * is the basis for propagation.
  *
  *
@@ -62,7 +62,7 @@ namespace EUROPA {
    * @class DomainComparator
    * @brief Class for testng if 2 domains can be compared. Exetend this class to customize how this is
    * done.
-   * @see AbstractDomain::canBeCompared, AbstractDomain::comparator
+   * @see Domain::canBeCompared, Domain::comparator
    */
   class DomainComparator{
   public:
@@ -77,7 +77,7 @@ namespace EUROPA {
     /**
      * @brief Tests if domains can be compared.
      */
-    virtual bool canCompare(const AbstractDomain& domx, const AbstractDomain& domy) const;
+    virtual bool canCompare(const Domain& domx, const Domain& domy) const;
 
     /**
      * @brief Set the comparator to be used. Can only be set if it is currently null.
@@ -94,10 +94,10 @@ namespace EUROPA {
     static DomainComparator* s_instance; /*!< Access pointer location. Enforces singleton pattern */
   };
 
-  ostream& operator<<(ostream& os, const AbstractDomain& dom);
+  ostream& operator<<(ostream& os, const Domain& dom);
 
   /**
-   * @class AbstractDomain
+   * @class Domain
    * @brief The base class for all domains used in the ConstraintEngine.
    *
    * This base class provides the core mechanisms to integrate a domain into the ConstraintEngine framework without
@@ -105,7 +105,7 @@ namespace EUROPA {
    * provide specializations as necessary in a very extendible way.
    * @see DomainListener
    */
-  class AbstractDomain {
+  class Domain {
   public:
 #ifdef E2_LONG_INT
     typedef unsigned long int size_type;
@@ -116,7 +116,7 @@ namespace EUROPA {
     /**
      * Destructor.
      */
-    virtual ~AbstractDomain();
+    virtual ~Domain();
 
     /**
      * @brief Check if the domain is an enumerated set.
@@ -243,14 +243,14 @@ namespace EUROPA {
      * rather than through algorithm for relaxation.
      * @see relax
      */
-    virtual void reset(const AbstractDomain& dom) = 0;
+    virtual void reset(const Domain& dom) = 0;
 
     /**
      * @brief Indicates assigment to the target domain as a relaxation triggered internally i.e. via relaxation algorithm.
      * @param dom the target domain to relax it to.
      * @see reset
      */
-    virtual void relax(const AbstractDomain& dom) = 0;
+    virtual void relax(const Domain& dom) = 0;
 
     /**
      * @brief Indicates relaxation to a singleton value. Occurs when domain has been emptied previously
@@ -286,7 +286,7 @@ namespace EUROPA {
      * @param dom the domain to intersect with. Must not be empty.
      * @return true if the intersection results in a change to this domain, otherwise false.
      */
-    virtual bool intersect(const AbstractDomain& dom) = 0;
+    virtual bool intersect(const Domain& dom) = 0;
 
     /**
      * @brief Convenience version of intersect.
@@ -303,14 +303,14 @@ namespace EUROPA {
      * @param dom the domain to differ with. Must not be empty.
      * @return true if the operation results in a change to this domain, otherwise false.
      */
-    virtual bool difference(const AbstractDomain& dom) = 0;
+    virtual bool difference(const Domain& dom) = 0;
 
     /**
      * @brief Assign the values from the given domain, to this domain.
      * @note Can only be called on domains that have no listeners attached,
      * since it will not cause propagation. It is more of a utility.
      */
-    virtual AbstractDomain& operator=(const AbstractDomain& dom) {
+    virtual Domain& operator=(const Domain& dom) {
       return(*this);
     }
 
@@ -322,7 +322,7 @@ namespace EUROPA {
      * @return true if the intersection results in a change to either
      * domain, otherwise false.
      */
-    virtual bool equate(AbstractDomain& dom) = 0;
+    virtual bool equate(Domain& dom) = 0;
 
     /**
      * @brief Test for membership.
@@ -336,24 +336,24 @@ namespace EUROPA {
      * @param dom the domain tested against.
      * @param true if all elements of this domain are in dom. Otherwise false.
      */
-    virtual bool isSubsetOf(const AbstractDomain& dom) const = 0;
+    virtual bool isSubsetOf(const Domain& dom) const = 0;
 
     /**
      * @brief Test if the intersection between this domain and the given domain is empty.
      * @param dom the domain tested against.
      * @param true if any elements of this domain are in dom. Otherwise false.
      */
-    virtual bool intersects(const AbstractDomain& dom) const = 0;
+    virtual bool intersects(const Domain& dom) const = 0;
 
     /**
      * @brief Test for equality.
      */
-    virtual bool operator==(const AbstractDomain& dom) const;
+    virtual bool operator==(const Domain& dom) const;
 
     /**
      * @brief Test for inequality.
      */
-    virtual bool operator!=(const AbstractDomain& dom) const;
+    virtual bool operator!=(const Domain& dom) const;
 
     /**
      * @brief Attach a DomainListener.
@@ -372,7 +372,7 @@ namespace EUROPA {
     /**
      * "Deeply" copy the concrete C++ object into new memory and return a pointer to it.
      */
-    virtual AbstractDomain *copy() const = 0;
+    virtual Domain *copy() const = 0;
 
     /**
      * @brief Creates a verbose string for displaying the contents of the domain
@@ -390,7 +390,7 @@ namespace EUROPA {
      * in constraints in particular.
      * @see DomainComparator::canCompare
      */
-    static bool canBeCompared(const AbstractDomain& domx, const AbstractDomain& domy);
+    static bool canBeCompared(const Domain& domx, const Domain& domy);
 
     const DataTypeId& getDataType() const;
 
@@ -448,13 +448,13 @@ namespace EUROPA {
      * @param typeName indicates the type name to use
      * @todo Review how semantics of closed can be enforced in operations.
      */
-    AbstractDomain(const DataTypeId& dataType, bool enumerated, bool closed);
+    Domain(const DataTypeId& dataType, bool enumerated, bool closed);
 
     /**
      * @brief Copy Constructor
      * @param org Original domain
      */
-    AbstractDomain(const AbstractDomain& org);
+    Domain(const Domain& org);
 
     /**
      * @brief Helper method to push messages to the listener.
@@ -477,7 +477,7 @@ namespace EUROPA {
     /**
      * @brief Utility function for internal use
      */
-    static void assertSafeComparison(const AbstractDomain& domA, const AbstractDomain& domB);
+    static void assertSafeComparison(const Domain& domA, const Domain& domB);
 
     void setDataType(const DataTypeId& dt);
     friend class RestrictedDT;
@@ -487,5 +487,9 @@ namespace EUROPA {
     bool m_closed; /**< False if the domain is dynamic (can be added to), otherwise true. */
     DomainListenerId m_listener; /**< Holds reference to attached listener.  May be noId. */
   };
+
+  //BACKWARD COMPATIBILITY
+  //typedef Domain AbstractDomain
+
 }
 #endif

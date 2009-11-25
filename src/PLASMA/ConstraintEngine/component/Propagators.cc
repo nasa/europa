@@ -176,7 +176,7 @@ namespace EUROPA {
   }
 
   void processScope(const std::set<ConstrainedVariableId>& scope) {
-    AbstractDomain& domain(EqualConstraint::getCurrentDomain(* (scope.begin())));
+    Domain& domain(EqualConstraint::getCurrentDomain(* (scope.begin())));
 
     if (domain.isOpen())
       return;
@@ -188,7 +188,7 @@ namespace EUROPA {
 
     // Iterate over, restricting domain as we go.
     for (std::set<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it) {
-      AbstractDomain& currentDomain = EqualConstraint::getCurrentDomain(*it);
+      Domain& currentDomain = EqualConstraint::getCurrentDomain(*it);
 
       // This next check is incorrect: could be false when they can be
       // compared (real enumerations and integer intervals, e.g.) and
@@ -198,7 +198,7 @@ namespace EUROPA {
       // --wedgingt@ptolemy.arc.nasa.gov 2004 Apr 21
       // check_error(currentDomain.getType() == domainType);
 
-      check_error(AbstractDomain::canBeCompared(domain, currentDomain));
+      check_error(Domain::canBeCompared(domain, currentDomain));
 
       // This will preclude possible propagation to the point of allowing
       // an arbitrary amount of useless search during planning, including
@@ -222,7 +222,7 @@ namespace EUROPA {
     // emptied (this could be optimized by recording the last change
     // to domain).
     for (std::set<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it) {
-      AbstractDomain& currentDomain = EqualConstraint::getCurrentDomain(*it);
+      Domain& currentDomain = EqualConstraint::getCurrentDomain(*it);
       currentDomain.intersect(domain);
     }
   }

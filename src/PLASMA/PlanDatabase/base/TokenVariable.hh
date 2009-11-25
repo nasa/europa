@@ -28,7 +28,7 @@ namespace EUROPA{
     TokenVariable(const TokenId& parent,
 		  int index,
 		  const ConstraintEngineId& constraintEngine,
-		  const AbstractDomain& baseDomain,
+		  const Domain& baseDomain,
 		  const bool internal = false,
 		  bool canBeSpecified = true,
 		  const LabelStr& name = ConstrainedVariable::NO_NAME());
@@ -47,9 +47,9 @@ namespace EUROPA{
 
     void reset();
 
-    void handleRestrictBaseDomain(const AbstractDomain& baseDomain);
+    void handleRestrictBaseDomain(const Domain& baseDomain);
 
-    void handleBase(const AbstractDomain& domain);
+    void handleBase(const Domain& domain);
 
     void handleSpecified(edouble value);
 
@@ -84,7 +84,7 @@ namespace EUROPA{
   TokenVariable<DomainType>::TokenVariable(const TokenId& parent,
 					   int index,
 					   const ConstraintEngineId& constraintEngine,
-					   const AbstractDomain& baseDomain,
+					   const Domain& baseDomain,
 					   const bool internal,
 					   bool canBeSpecified,
 					   const LabelStr& name)
@@ -133,7 +133,7 @@ namespace EUROPA{
   }
 
   template <class DomainType>
-  void TokenVariable<DomainType>::handleRestrictBaseDomain(const AbstractDomain& domain){
+  void TokenVariable<DomainType>::handleRestrictBaseDomain(const Domain& domain){
     Variable<DomainType>::handleRestrictBaseDomain(domain);
 
     if(this->m_integratedBaseDomain->isOpen() && domain.isClosed())
@@ -175,7 +175,7 @@ namespace EUROPA{
   }
 
   template <class DomainType>
-  void TokenVariable<DomainType>::handleBase(const AbstractDomain& domain){
+  void TokenVariable<DomainType>::handleBase(const Domain& domain){
     this->m_integratedBaseDomain->intersect(domain);
     this->m_derivedDomain->intersect(domain);
   }
@@ -286,7 +286,7 @@ namespace EUROPA{
     // first relaxing. There is code in the constraint engine that assumes that we do not impose restrictiosn during relaxation. Moreover, we shouldn't as
     // we open up the possibility that restriction and relaxation are interleaved. Thus, we structure this to compute the target domain to relax to and then
     // relax to that in one go.
-    AbstractDomain* dom = m_integratedBaseDomain->copy();
+    Domain* dom = m_integratedBaseDomain->copy();
     if(this->isSpecified())
       dom->set(this->getSpecifiedValue());
 

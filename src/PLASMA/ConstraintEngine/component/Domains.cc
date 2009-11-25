@@ -30,12 +30,12 @@ namespace EUROPA {
 //   }
 
   EnumeratedDomain::EnumeratedDomain(const DataTypeId& dt)
-  : AbstractDomain(dt,true,false)
+  : Domain(dt,true,false)
   {
   }
 
   EnumeratedDomain::EnumeratedDomain(const DataTypeId& dt, const std::list<edouble>& values)
-  : AbstractDomain(dt,true,false)
+  : Domain(dt,true,false)
   {
 	  for (std::list<edouble>::const_iterator it = values.begin(); it != values.end(); ++it)
 		  insert(*it);
@@ -44,21 +44,21 @@ namespace EUROPA {
   }
 
   EnumeratedDomain::EnumeratedDomain(const DataTypeId& dt, edouble value)
-  : AbstractDomain(dt,true,false)
+  : Domain(dt,true,false)
   {
 	  insert(value);
 	  close();
   }
 
   EnumeratedDomain::EnumeratedDomain(const DataTypeId& dt, double value)
-  : AbstractDomain(dt,true,false)
+  : Domain(dt,true,false)
   {
 	  insert(value);
 	  close();
   }
 
-  EnumeratedDomain::EnumeratedDomain(const AbstractDomain& org)
-  : AbstractDomain(org)
+  EnumeratedDomain::EnumeratedDomain(const Domain& org)
+  : Domain(org)
   {
 	  check_error(org.isEnumerated(),
 			  "Invalid source domain " + org.getTypeName().toString() + " for enumeration");
@@ -84,12 +84,12 @@ namespace EUROPA {
   }
 
   void EnumeratedDomain::close() {
-    AbstractDomain::close();
+    Domain::close();
     //commenting this out because ascending is a requirement of the std::set type, and the empty check by itself is nonsensical
     //check_error(isEmpty() || isAscending(m_values));
   }
 
-  AbstractDomain::size_type EnumeratedDomain::getSize() const {
+  Domain::size_type EnumeratedDomain::getSize() const {
 	  return(m_values.size());
   }
 
@@ -145,14 +145,14 @@ namespace EUROPA {
 		  empty();
   }
 
-  void EnumeratedDomain::reset(const AbstractDomain& dom) {
+  void EnumeratedDomain::reset(const Domain& dom) {
 	  if (*this != dom) {
 		  relax(dom);
 		  notifyChange(DomainListener::RESET);
 	  }
   }
 
-  bool EnumeratedDomain::equate(AbstractDomain& dom) {
+  bool EnumeratedDomain::equate(Domain& dom) {
 	  safeComparison(*this, dom);
 
 	  // If both domains are closed enumerations we can use optimized method
@@ -271,14 +271,14 @@ namespace EUROPA {
 	  return false;
   }
 
-  bool EnumeratedDomain::operator==(const AbstractDomain& dom) const {
+  bool EnumeratedDomain::operator==(const Domain& dom) const {
 	  safeComparison(*this, dom);
 	  if (!dom.isEnumerated())
 		  return(dom.isFinite() &&
 				  getSize() == dom.getSize() &&
 				  isSubsetOf(dom));
 	  const EnumeratedDomain& l_dom = static_cast<const EnumeratedDomain&>(dom);
-	  if (!AbstractDomain::operator==(dom))
+	  if (!Domain::operator==(dom))
 		  return(false);
 	  // If any member of either is not a member of the other, they're not equal.
 	  // Since membership is not simple (due to minDelta()), this has to be done
@@ -293,11 +293,11 @@ namespace EUROPA {
 	  return(true);
   }
 
-  bool EnumeratedDomain::operator!=(const AbstractDomain& dom) const {
+  bool EnumeratedDomain::operator!=(const Domain& dom) const {
 	  return(!operator==(dom));
   }
 
-  void EnumeratedDomain::relax(const AbstractDomain& dom) {
+  void EnumeratedDomain::relax(const Domain& dom) {
 	  check_error(dom.isEnumerated());
 
 	  if(dom.isEmpty() && dom.isClosed())
@@ -360,7 +360,7 @@ namespace EUROPA {
 	  return(!isNumeric() || lb == MINUS_INFINITY || ub == PLUS_INFINITY);
   }
 
-  bool EnumeratedDomain::intersect(const AbstractDomain& dom) {
+  bool EnumeratedDomain::intersect(const Domain& dom) {
 	  safeComparison(*this, dom);
 
 	  // If this domain is open, and the new domain is closed, then assign all
@@ -452,7 +452,7 @@ namespace EUROPA {
 	  return intersect(intervalDomain);
   }
 
-  bool EnumeratedDomain::difference(const AbstractDomain& dom) {
+  bool EnumeratedDomain::difference(const Domain& dom) {
 	  safeComparison(*this, dom);
 
 	  // Trivial implementation, for all members of this domain that
@@ -477,7 +477,7 @@ namespace EUROPA {
 	  return(value_removed);
   }
 
-  AbstractDomain& EnumeratedDomain::operator=(const AbstractDomain& dom) {
+  Domain& EnumeratedDomain::operator=(const Domain& dom) {
 	  safeComparison(*this, dom);
 	  check_error(m_listener.isNoId(), "Can only do direct assigment if not registered with a listener");
 	  const EnumeratedDomain& e_dom = static_cast<const EnumeratedDomain&>(dom);
@@ -485,7 +485,7 @@ namespace EUROPA {
 	  return(*this);
   }
 
-  bool EnumeratedDomain::isSubsetOf(const AbstractDomain& dom) const {
+  bool EnumeratedDomain::isSubsetOf(const Domain& dom) const {
 	  safeComparison(*this, dom);
 
 	  // Always true if the given domain is open. Also never true if the given domain is closed
@@ -502,7 +502,7 @@ namespace EUROPA {
 	  return(true);
   }
 
-  bool EnumeratedDomain::intersects(const AbstractDomain& dom) const {
+  bool EnumeratedDomain::intersects(const Domain& dom) const {
 	  if(dom.isOpen() || this->isOpen())
 		  return true;
 
@@ -515,7 +515,7 @@ namespace EUROPA {
 
   void EnumeratedDomain::operator>>(ostream&os) const {
 	  // Now commence output
-	  AbstractDomain::operator>>(os);
+	  Domain::operator>>(os);
 	  os << "{";
 
 	  // First construct a lexicographic ordering for the set of values.
@@ -546,7 +546,7 @@ namespace EUROPA {
 
   std::string EnumeratedDomain::toString() const
   {
-	  return AbstractDomain::toString();
+	  return Domain::toString();
   }
 
   EnumeratedDomain *EnumeratedDomain::copy() const {
@@ -556,7 +556,7 @@ namespace EUROPA {
   }
 
   IntervalDomain::IntervalDomain(const DataTypeId& dt)
-    : AbstractDomain(dt,false,true)
+    : Domain(dt,false,true)
     , m_ub(PLUS_INFINITY)
     , m_lb(MINUS_INFINITY)
   {
@@ -564,7 +564,7 @@ namespace EUROPA {
   }
 
   IntervalDomain::IntervalDomain(edouble lb, edouble ub, const DataTypeId& dt)
-    : AbstractDomain(dt,false,true)
+    : Domain(dt,false,true)
     , m_ub(ub)
     , m_lb(lb)
   {
@@ -572,7 +572,7 @@ namespace EUROPA {
   }
 
   IntervalDomain::IntervalDomain(edouble value, const DataTypeId& dt)
-    : AbstractDomain(dt,false,true)
+    : Domain(dt,false,true)
     , m_ub(value)
     , m_lb(value)
   {
@@ -580,7 +580,7 @@ namespace EUROPA {
   }
 
   IntervalDomain::IntervalDomain(double lb, double ub, const DataTypeId& dt)
-    : AbstractDomain(dt,false,true)
+    : Domain(dt,false,true)
     , m_ub(ub)
     , m_lb(lb)
   {
@@ -588,7 +588,7 @@ namespace EUROPA {
   }
 
   IntervalDomain::IntervalDomain(double value, const DataTypeId& dt)
-    : AbstractDomain(dt,false,true)
+    : Domain(dt,false,true)
     , m_ub(value)
     , m_lb(value)
   {
@@ -599,8 +599,8 @@ namespace EUROPA {
   {
   }
 
-  IntervalDomain::IntervalDomain(const AbstractDomain& org)
-    : AbstractDomain(org)
+  IntervalDomain::IntervalDomain(const Domain& org)
+    : Domain(org)
     , m_ub(org.getUpperBound())
     , m_lb(org.getLowerBound())
   {
@@ -608,7 +608,7 @@ namespace EUROPA {
     commonInit();
   }
 
-  bool IntervalDomain::intersect(const AbstractDomain& dom) {
+  bool IntervalDomain::intersect(const Domain& dom) {
     safeComparison(*this, dom);
     check_error(dom.isOpen() || !dom.isEmpty(), dom.toString());
     checkError(isOpen() || !isEmpty(), toString());
@@ -617,7 +617,7 @@ namespace EUROPA {
     return(intersect(lb, ub));
   }
 
-  bool IntervalDomain::difference(const AbstractDomain& dom) {
+  bool IntervalDomain::difference(const Domain& dom) {
     safeComparison(*this, dom);
     check_error(dom.isOpen() || !dom.isEmpty());
     check_error(isOpen() || !isEmpty());
@@ -651,7 +651,7 @@ namespace EUROPA {
     return(true);
   }
 
-  AbstractDomain& IntervalDomain::operator=(const AbstractDomain& dom) {
+  Domain& IntervalDomain::operator=(const Domain& dom) {
     safeComparison(*this, dom);
     check_error(m_listener.isNoId());
     m_lb = dom.getUpperBound();
@@ -660,7 +660,7 @@ namespace EUROPA {
     return(*this);
   }
 
-  void IntervalDomain::relax(const AbstractDomain& dom) {
+  void IntervalDomain::relax(const Domain& dom) {
     safeComparison(*this, dom);
     relax(dom.getLowerBound(), dom.getUpperBound());
   }
@@ -698,19 +698,19 @@ namespace EUROPA {
     check_error( ALWAYS_FAILS, "Attempted to remove an element from within the interval. Would require splitting.");
   }
 
-  bool IntervalDomain::operator==(const AbstractDomain& dom) const {
+  bool IntervalDomain::operator==(const Domain& dom) const {
     safeComparison(*this, dom);
 
     return(eq(m_lb, dom.getLowerBound()) &&
            eq(m_ub, dom.getUpperBound()) &&
-	   AbstractDomain::operator==(dom));
+	   Domain::operator==(dom));
   }
 
-  bool IntervalDomain::operator!=(const AbstractDomain& dom) const {
+  bool IntervalDomain::operator!=(const Domain& dom) const {
     return(! operator==(dom));
   }
 
-  bool IntervalDomain::isSubsetOf(const AbstractDomain& dom) const {
+  bool IntervalDomain::isSubsetOf(const Domain& dom) const {
     safeComparison(*this, dom);
     check_error(!isOpen());
     check_error(!dom.isEmpty());
@@ -720,7 +720,7 @@ namespace EUROPA {
     return result;
   }
 
-  bool IntervalDomain::intersects(const AbstractDomain& dom) const {
+  bool IntervalDomain::intersects(const Domain& dom) const {
     safeComparison(*this, dom);
     check_error(!isOpen());
     check_error(!dom.isEmpty());
@@ -738,7 +738,7 @@ namespace EUROPA {
     return true;
   }
 
-  bool IntervalDomain::equate(AbstractDomain& dom) {
+  bool IntervalDomain::equate(Domain& dom) {
     safeComparison(*this, dom);
 
     // Avoid duplicating part of EnumeratedDomain::equate().  Needed for
@@ -791,7 +791,7 @@ namespace EUROPA {
     return false;
   }
 
-  void IntervalDomain::reset(const AbstractDomain& dom) {
+  void IntervalDomain::reset(const Domain& dom) {
     safeComparison(*this, dom);
     if (*this != dom) {
       relax(dom);
@@ -888,7 +888,7 @@ namespace EUROPA {
     notifyChange(DomainListener::EMPTIED);
   }
 
-  AbstractDomain::size_type IntervalDomain::getSize() const {
+  Domain::size_type IntervalDomain::getSize() const {
     checkError(!isOpen(), "Cannot test for the size of an open domain.");
 
     if (isEmpty())
@@ -917,7 +917,7 @@ namespace EUROPA {
   void IntervalDomain::testPrecision(const edouble& value) const {}
 
   void IntervalDomain::operator>>(ostream& os) const {
-    AbstractDomain::operator>>(os);
+    Domain::operator>>(os);
     os << "[";
 
     std::streamsize prec = os.precision();
@@ -974,7 +974,7 @@ namespace EUROPA {
   StringDomain::StringDomain(const std::string& value, const DataTypeId& dt) : EnumeratedDomain(dt,LabelStr(value)) {}
   StringDomain::StringDomain(const std::list<edouble>& values, const DataTypeId& dt) : EnumeratedDomain(dt,values) {}
 
-  StringDomain::StringDomain(const AbstractDomain& org) : EnumeratedDomain(org) {}
+  StringDomain::StringDomain(const Domain& org) : EnumeratedDomain(org) {}
 
   StringDomain* StringDomain::copy() const
   {
@@ -1027,7 +1027,7 @@ namespace EUROPA {
   SymbolDomain::SymbolDomain(double value, const DataTypeId& dt) : EnumeratedDomain(dt,value) {}
   SymbolDomain::SymbolDomain(const std::list<edouble>& values, const DataTypeId& dt) : EnumeratedDomain(dt,values) {}
 
-  SymbolDomain::SymbolDomain(const AbstractDomain& org) : EnumeratedDomain(org) {}
+  SymbolDomain::SymbolDomain(const Domain& org) : EnumeratedDomain(org) {}
 
   SymbolDomain* SymbolDomain::copy() const
   {
@@ -1041,7 +1041,7 @@ namespace EUROPA {
   NumericDomain::NumericDomain(double value, const DataTypeId& dt) : EnumeratedDomain(dt,value) {}
   NumericDomain::NumericDomain(const std::list<edouble>& values, const DataTypeId& dt) : EnumeratedDomain(dt,values) {}
 
-  NumericDomain::NumericDomain(const AbstractDomain& org) : EnumeratedDomain(org) {}
+  NumericDomain::NumericDomain(const Domain& org) : EnumeratedDomain(org) {}
 
   NumericDomain* NumericDomain::copy() const
   {
@@ -1055,7 +1055,7 @@ namespace EUROPA {
   IntervalIntDomain::IntervalIntDomain(eint value, const DataTypeId& dt) : IntervalDomain(value,dt) {}
   IntervalIntDomain::IntervalIntDomain(int lb, int ub, const DataTypeId& dt) : IntervalDomain(lb,ub,dt) {}
   IntervalIntDomain::IntervalIntDomain(int value, const DataTypeId& dt) : IntervalDomain(value,dt) {}
-  IntervalIntDomain::IntervalIntDomain(const AbstractDomain& org) : IntervalDomain(org) {}
+  IntervalIntDomain::IntervalIntDomain(const Domain& org) : IntervalDomain(org) {}
 
   IntervalIntDomain::~IntervalIntDomain()
   {
@@ -1140,7 +1140,7 @@ namespace EUROPA {
     return IntervalDomain::intersect(std::ceil(lb), std::floor(ub));
   }
 
-  bool IntervalIntDomain::intersect(const AbstractDomain& dom) {
+  bool IntervalIntDomain::intersect(const Domain& dom) {
     return intersect(dom.getLowerBound(), dom.getUpperBound());
   }
 
@@ -1154,7 +1154,7 @@ namespace EUROPA {
   {
   }
 
-  BoolDomain::BoolDomain(const AbstractDomain& org)
+  BoolDomain::BoolDomain(const Domain& org)
     : IntervalIntDomain(org)
   {
   }
@@ -1184,7 +1184,7 @@ namespace EUROPA {
     return(ptr);
   }
 
-  bool BoolDomain::intersect(const AbstractDomain& dom) {
+  bool BoolDomain::intersect(const Domain& dom) {
     return intersect(dom.getLowerBound(), dom.getUpperBound());
   }
 

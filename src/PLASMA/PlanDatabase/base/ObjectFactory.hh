@@ -49,7 +49,7 @@ namespace EUROPA {
     virtual ObjectId createInstance(const PlanDatabaseId& planDb,
                     const LabelStr& objectType,
                     const LabelStr& objectName,
-                    const std::vector<const AbstractDomain*>& arguments) const = 0;
+                    const std::vector<const Domain*>& arguments) const = 0;
 
 
    // TODO: when code generation goes away, InterpretedObjectFactory will be the base implementation
@@ -63,13 +63,13 @@ namespace EUROPA {
                             const PlanDatabaseId& planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
-                            const std::vector<const AbstractDomain*>& arguments) const { return ObjectId::noId(); };
+                            const std::vector<const Domain*>& arguments) const { return ObjectId::noId(); };
     /**
      * @brief The body of the constructor after the object is created
      * any operations done by createInstance to the object after it is created must be done by this method
      * so that calls to "super()" in subclasses can be supported correctly
      */
-    virtual void evalConstructorBody(ObjectId& instance, const std::vector<const AbstractDomain*>& arguments) const {};
+    virtual void evalConstructorBody(ObjectId& instance, const std::vector<const Domain*>& arguments) const {};
 
   private:
     ObjectFactoryId m_id;
@@ -94,12 +94,12 @@ namespace EUROPA {
      * @param arguments The sequence of name/value pairs to be passed as arguments for construction of the object
      * @return A ':' deliimited string of <objectType>:<arg0.type>:..:<argn.type>
      */
-    static LabelStr makeFactoryName(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments);
+    static LabelStr makeFactoryName(const LabelStr& objectType, const std::vector<const Domain*>& arguments);
 
     /**
      * @brief Obtain the factory based on the type of object to create and the types of the arguments to the constructor
      */
-    ObjectFactoryId getFactory(const SchemaId& schema, const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments, const bool doCheckError = true);
+    ObjectFactoryId getFactory(const SchemaId& schema, const LabelStr& objectType, const std::vector<const Domain*>& arguments, const bool doCheckError = true);
 
     /**
      * @brief Add a factory to provide instantiation of particular concrete types based on a label.
@@ -129,7 +129,7 @@ namespace EUROPA {
 
         const LabelStr& getSuperClassName() const { return m_superClassName; }
 
-        void evalArgs(EvalContext& context, std::vector<const AbstractDomain*>& arguments) const;
+        void evalArgs(EvalContext& context, std::vector<const Domain*>& arguments) const;
 
     protected:
         LabelStr m_superClassName;
@@ -160,7 +160,7 @@ namespace EUROPA {
                                 const PlanDatabaseId& planDb,
                                 const LabelStr& objectType,
                                 const LabelStr& objectName,
-                                const std::vector<const AbstractDomain*>& arguments) const;
+                                const std::vector<const Domain*>& arguments) const;
 
         // Any exported C++ classes must register a factory for each C++ constructor
         // and override this method to call the C++ constructor
@@ -168,13 +168,13 @@ namespace EUROPA {
                             const PlanDatabaseId& planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
-                            const std::vector<const AbstractDomain*>& arguments) const;
+                            const std::vector<const Domain*>& arguments) const;
 
         virtual void evalConstructorBody(
                            ObjectId& instance,
-                           const std::vector<const AbstractDomain*>& arguments) const;
+                           const std::vector<const Domain*>& arguments) const;
 
-        bool checkArgs(const std::vector<const AbstractDomain*>& arguments) const;
+        bool checkArgs(const std::vector<const Domain*>& arguments) const;
 
         LabelStr                  m_className;
         std::vector<std::string>  m_constructorArgNames;
@@ -208,7 +208,7 @@ namespace EUROPA {
                             const PlanDatabaseId& planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
-                            const std::vector<const AbstractDomain*>& arguments) const = 0;
+                            const std::vector<const Domain*>& arguments) const = 0;
   };
 
   /**

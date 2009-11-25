@@ -17,7 +17,7 @@ namespace EUROPA {
 						const PlanDatabaseId& planDb,
 						const LabelStr& objectType,
 						const LabelStr& objectName,
-						const std::vector<const AbstractDomain*>& arguments) const
+						const std::vector<const Domain*>& arguments) const
   {
     Id<NDDL::NddlReusable>  instance = (new NDDL::NddlReusable(planDb, objectType, objectName,true))->getId();
 
@@ -78,7 +78,7 @@ namespace EUROPA {
                         const PlanDatabaseId& planDb,
                         const LabelStr& objectType,
                         const LabelStr& objectName,
-                        const std::vector<const AbstractDomain*>& arguments) const
+                        const std::vector<const Domain*>& arguments) const
   {
     Id<NDDL::NddlCBReusable>  instance = (new NDDL::NddlCBReusable(planDb, objectType, objectName,true))->getId();
 
@@ -119,7 +119,7 @@ namespace EUROPA {
 						const PlanDatabaseId& planDb,
 						const LabelStr& objectType,
 						const LabelStr& objectName,
-						const std::vector<const AbstractDomain*>& arguments) const
+						const std::vector<const Domain*>& arguments) const
   {
     Id<NDDL::NddlReservoir>  instance = (new NDDL::NddlReservoir(planDb, objectType, objectName,true))->getId();
 
@@ -199,7 +199,7 @@ namespace EUROPA {
                         const PlanDatabaseId& planDb,
                         const LabelStr& objectType,
                         const LabelStr& objectName,
-                        const std::vector<const AbstractDomain*>& arguments) const
+                        const std::vector<const Domain*>& arguments) const
   {
     Id<NDDL::NddlUnary>  instance = (new NDDL::NddlUnary(planDb, objectType, objectName,true))->getId();
 

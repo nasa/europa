@@ -310,7 +310,7 @@ namespace EUROPA {
 
     ObjectId createObject(const LabelStr& objectType,
                             const LabelStr& objectName,
-                            const std::vector<const AbstractDomain*>& arguments);
+                            const std::vector<const Domain*>& arguments);
 
     TokenId createToken(const char* tokenType,
                         const char* tokenName,

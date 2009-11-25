@@ -74,7 +74,7 @@ public:
 
 class NestedGuards_0_0: public RuleInstance{
 public:
-  NestedGuards_0_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, const AbstractDomain& domain);
+  NestedGuards_0_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, const Domain& domain);
   void handleExecute();
   TokenId m_onlySlave;
 };
@@ -109,7 +109,7 @@ void NestedGuards_0_Root::handleExecute(){
   addChildRule(new NestedGuards_0_1(m_id, makeScope(m_onlySlave->getObject()))); /*!< Add child context with guards - object set to singleton */
 }
 
-NestedGuards_0_0::NestedGuards_0_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, const AbstractDomain& domain)
+NestedGuards_0_0::NestedGuards_0_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, const Domain& domain)
   : RuleInstance(parentInstance, guard, domain){}
 
 void NestedGuards_0_0::handleExecute(){
@@ -142,7 +142,7 @@ public:
 
 class LocalVariableGuard_0_0: public RuleInstance{
 public:
-  LocalVariableGuard_0_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, const AbstractDomain& domain)
+  LocalVariableGuard_0_0(const RuleInstanceId& parentInstance, const ConstrainedVariableId& guard, const Domain& domain)
     : RuleInstance(parentInstance, guard, domain){}
   void handleExecute();
 };

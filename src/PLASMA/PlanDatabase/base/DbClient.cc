@@ -50,7 +50,7 @@ namespace EUROPA {
 
 
   ConstrainedVariableId
-  DbClient::createVariable(const char* typeName, const AbstractDomain& baseDomain, const char* name, bool isTmpVar, bool canBeSpecified)
+  DbClient::createVariable(const char* typeName, const Domain& baseDomain, const char* name, bool isTmpVar, bool canBeSpecified)
   {
     ConstrainedVariableId variable = m_planDb->getConstraintEngine()->createVariable(typeName, baseDomain, isTmpVar, canBeSpecified, name);
     if (m_planDb->getSchema()->isObjectType(typeName) && !variable->isClosed()) {
@@ -93,14 +93,14 @@ namespace EUROPA {
   }
 
   ObjectId DbClient::createObject(const char* type, const char* name){
-    static const std::vector<const AbstractDomain*> noArguments;
+    static const std::vector<const Domain*> noArguments;
     ObjectId object = m_planDb->createObject(type, name, noArguments);
     debugMsg("DbClient:createObject", object->toLongString());
     publish(notifyObjectCreated(object));
     return object;
   }
 
-  ObjectId DbClient::createObject(const char* type, const char* name, const std::vector<const AbstractDomain*>& arguments){
+  ObjectId DbClient::createObject(const char* type, const char* name, const std::vector<const Domain*>& arguments){
     ObjectId object = m_planDb->createObject(type, name, arguments);
     debugMsg("DbClient:createObject", object->toLongString());
     publish(notifyObjectCreated(object, arguments));
@@ -239,7 +239,7 @@ namespace EUROPA {
     m_planDb->getConstraintEngine()->deleteConstraint(c);
   }
 
-  void DbClient::restrict(const ConstrainedVariableId& variable, const AbstractDomain& domain){
+  void DbClient::restrict(const ConstrainedVariableId& variable, const Domain& domain){
     debugMsg("DbClient:restrict", variable->toLongString() << " to " << domain.toString());
     variable->restrictBaseDomain(domain);
     publish(notifyVariableRestricted(variable));

@@ -531,7 +531,7 @@ namespace EUROPA {
                         const PlanDatabaseId& planDb,
                         const LabelStr& objectType,
                         const LabelStr& objectName,
-                        const std::vector<const AbstractDomain*>& arguments) const
+                        const std::vector<const Domain*>& arguments) const
   {
     ObjectId instance =  (new Timeline(planDb, objectType, objectName,true))->getId();
     debugMsg("Interpreter:NativeObjectFactory","Created Native " << m_className.toString() << ":" << objectName.toString() << " type:" << objectType.toString());

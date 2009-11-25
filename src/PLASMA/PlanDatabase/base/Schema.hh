@@ -11,7 +11,7 @@
 #include "PlanDatabaseDefs.hh"
 #include "PSPlanDatabase.hh"
 #include "LabelStr.hh"
-#include "AbstractDomain.hh"
+#include "Domain.hh"
 #include "ObjectType.hh"
 #include "ObjectFactory.hh"
 #include "TokenTypeMgr.hh"
@@ -75,7 +75,7 @@ namespace EUROPA {
      * to over-ride the base type relationships to include the use
      * of classes and inheritance.
      */
-    bool canCompare(const AbstractDomain& domx, const AbstractDomain& domy) const;
+    bool canCompare(const Domain& domx, const Domain& domy) const;
 
     /**
      * @brief Utility method to remove all schema details, excluding the model name
@@ -359,7 +359,7 @@ namespace EUROPA {
     const ObjectTypeId& getObjectType(const LabelStr& objType);
 
     void registerObjectFactory(const ObjectFactoryId& obj_fact);
-    ObjectFactoryId getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments, const bool doCheckError = true);
+    ObjectFactoryId getObjectFactory(const LabelStr& objectType, const std::vector<const Domain*>& arguments, const bool doCheckError = true);
 
     void registerTokenType(const TokenTypeId& tokenType);
     TokenTypeId getTokenType(const LabelStr& tokenType);

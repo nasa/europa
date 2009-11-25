@@ -161,9 +161,9 @@ namespace EUROPA {
 
   private:
 
-    AbstractDomain& m_x;
-    AbstractDomain& m_y;
-    AbstractDomain& m_z;
+    Domain& m_x;
+    Domain& m_y;
+    Domain& m_z;
 
     static const int X = 0;
     static const int Y = 1;
@@ -289,11 +289,11 @@ class CalcDistanceConstraint : public Constraint {
     static const unsigned int X2 = 3;
     static const unsigned int Y2 = 4;
 
-    AbstractDomain& m_distance;
-    AbstractDomain& m_x1;
-    AbstractDomain& m_y1;
-    AbstractDomain& m_x2;
-    AbstractDomain& m_y2;
+    Domain& m_distance;
+    Domain& m_x1;
+    Domain& m_y1;
+    Domain& m_x2;
+    Domain& m_y2;
   };
 
 
@@ -310,13 +310,13 @@ class LessThanEqualConstraint : public Constraint {
 		   int argIndex,
 		   const DomainListener::ChangeType& changeType);
 
-    static void propagate(AbstractDomain& domx, AbstractDomain& domy);
+    static void propagate(Domain& domx, Domain& domy);
 
   private:
     bool testIsRedundant(const ConstrainedVariableId& var = ConstrainedVariableId::noId()) const;
 
-    AbstractDomain& m_x;
-    AbstractDomain& m_y;
+    Domain& m_x;
+    Domain& m_y;
     static const int X = 0;
     static const int Y = 1;
     static const int ARG_COUNT = 2;
@@ -484,7 +484,7 @@ class CountZerosConstraint : public Constraint {
     /**
      * @brief Accessor required for EqualityConstraintPropagator.
      */
-    static AbstractDomain& getCurrentDomain(const ConstrainedVariableId& var);
+    static Domain& getCurrentDomain(const ConstrainedVariableId& var);
 
   private:
     bool equate(const ConstrainedVariableId& v1, const ConstrainedVariableId& v2, bool& isEmpty);
@@ -693,11 +693,11 @@ class LockConstraint : public Constraint {
 
     void handleExecute();
 
-    const AbstractDomain& getDomain() const;
+    const Domain& getDomain() const;
 
   private:
-    AbstractDomain& m_currentDomain;
-    AbstractDomain& m_lockDomain;
+    Domain& m_currentDomain;
+    Domain& m_lockDomain;
   };
 
 class NegateConstraint : public Constraint {
@@ -728,7 +728,7 @@ class NotEqualConstraint : public Constraint {
     /**
      * @brief Helper method to do domain comparisons, and process removals if necessary
      */
-    static bool checkAndRemove(const AbstractDomain& domx, AbstractDomain& domy);
+    static bool checkAndRemove(const Domain& domx, Domain& domy);
 
   private:
     static const int X = 0;
@@ -934,8 +934,8 @@ class NotEqualConstraint : public Constraint {
 
   private:
     static const unsigned int ARG_COUNT = 2;
-    AbstractDomain& m_target;
-    AbstractDomain& m_source;
+    Domain& m_target;
+    Domain& m_source;
   };
 
 class SquareOfDifferenceConstraint : public Constraint {
@@ -970,8 +970,8 @@ class SubsetOfConstraint : public Constraint {
 		   const DomainListener::ChangeType& changeType);
 
   private:
-    AbstractDomain& m_currentDomain;
-    AbstractDomain& m_superSetDomain;
+    Domain& m_currentDomain;
+    Domain& m_superSetDomain;
   };
 
 class SwapTwoVarsConstraint : public Constraint {
@@ -1020,9 +1020,9 @@ class SwapTwoVarsConstraint : public Constraint {
     void handleExecute();
 
   private:
-    AbstractDomain& m_test;
-    AbstractDomain& m_arg1;
-    AbstractDomain& m_arg2;
+    Domain& m_test;
+    Domain& m_arg1;
+    Domain& m_arg2;
     static const unsigned int ARG_COUNT = 3;
   };
   CREATE_CONSTRAINT_TYPE(ThreeBooleanArgumentsCT, TestAndCT, TestAnd);
@@ -1037,9 +1037,9 @@ class SwapTwoVarsConstraint : public Constraint {
     void handleExecute();
 
   private:
-    AbstractDomain& m_test;
-    AbstractDomain& m_arg1;
-    AbstractDomain& m_arg2;
+    Domain& m_test;
+    Domain& m_arg1;
+    Domain& m_arg2;
     static const unsigned int ARG_COUNT = 3;
   };
   CREATE_CONSTRAINT_TYPE(TestTwoSameArgumentsCT, TestEQCT, TestEQ);
@@ -1054,9 +1054,9 @@ class SwapTwoVarsConstraint : public Constraint {
     void handleExecute();
 
   private:
-    AbstractDomain& m_test;
-    AbstractDomain& m_arg1;
-    AbstractDomain& m_arg2;
+    Domain& m_test;
+    Domain& m_arg1;
+    Domain& m_arg2;
     static const unsigned int ARG_COUNT = 3;
   };
   CREATE_CONSTRAINT_TYPE(TestTwoSameNumericArgumentsCT, TestLessThanCT, TestLessThan);
@@ -1071,9 +1071,9 @@ class SwapTwoVarsConstraint : public Constraint {
     void handleExecute();
 
   private:
-    AbstractDomain& m_test;
-    AbstractDomain& m_arg1;
-    AbstractDomain& m_arg2;
+    Domain& m_test;
+    Domain& m_arg1;
+    Domain& m_arg2;
     static const unsigned int ARG_COUNT = 3;
   };
   CREATE_CONSTRAINT_TYPE(TestTwoSameNumericArgumentsCT, TestLEQCT, TestLEQ);
@@ -1110,9 +1110,9 @@ class SwapTwoVarsConstraint : public Constraint {
     void handleExecute();
 
   private:
-    AbstractDomain& m_test;
-    AbstractDomain& m_arg1;
-    AbstractDomain& m_arg2;
+    Domain& m_test;
+    Domain& m_arg1;
+    Domain& m_arg2;
     static const unsigned int ARG_COUNT = 3;
   };
   CREATE_CONSTRAINT_TYPE(TestTwoSameArgumentsCT, TestNEQCT, TestNEQ);
@@ -1127,9 +1127,9 @@ class TestOr : public Constraint {
     void handleExecute();
 
   private:
-    AbstractDomain& m_test;
-    AbstractDomain& m_arg1;
-    AbstractDomain& m_arg2;
+    Domain& m_test;
+    Domain& m_arg1;
+    Domain& m_arg2;
     static const unsigned int ARG_COUNT = 3;
   };
   CREATE_CONSTRAINT_TYPE(ThreeBooleanArgumentsCT, TestOrCT, TestOr);
@@ -1145,8 +1145,8 @@ class TestSingleton : public Constraint {
     void handleExecute();
 
   private:
-    AbstractDomain& m_test;
-    AbstractDomain& m_arg1;
+    Domain& m_test;
+    Domain& m_arg1;
     static const unsigned int ARG_COUNT = 2;
   };
 
@@ -1162,8 +1162,8 @@ class TestSpecified : public Constraint {
     void handleExecute();
 
   private:
-    AbstractDomain& m_test;
-    AbstractDomain& m_arg1;
+    Domain& m_test;
+    Domain& m_arg1;
     static const unsigned int ARG_COUNT = 2;
   };
   CREATE_CONSTRAINT_TYPE(TestOneArgumentCT, TestSpecifiedCT, TestSpecified);
@@ -1173,7 +1173,7 @@ class UnaryConstraint : public Constraint {
     /**
      * @brief Specialized constructor
      */
-    UnaryConstraint(const AbstractDomain& dom, const ConstrainedVariableId& var);
+    UnaryConstraint(const Domain& dom, const ConstrainedVariableId& var);
 
     /**
      * @brief Standard constructor
@@ -1197,8 +1197,8 @@ class UnaryConstraint : public Constraint {
 
     void setSource(const ConstraintId& sourceConstraint);
 
-    AbstractDomain* m_x;
-    AbstractDomain* m_y;
+    Domain* m_x;
+    Domain* m_y;
   };
 
   /**

@@ -60,7 +60,7 @@ private:\
   ObjectId createInstance(const PlanDatabaseId& planDb,\
 			  const LabelStr& objectType, \
 			  const LabelStr& objectName,\
-			  const std::vector<const AbstractDomain*>& arguments) const {\
+			  const std::vector<const Domain*>& arguments) const {\
     check_error(arguments.empty());\
     Id<Klass> instance = (new Klass(planDb, objectType, objectName))->getId();\
     instance->handleDefaults();\
