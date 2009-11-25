@@ -130,6 +130,8 @@ namespace std {
   inline EUROPA::edouble ceil(const EUROPA::edouble d);
   inline EUROPA::edouble floor(const EUROPA::edouble d);
 
+  inline EUROPA::edouble max(const EUROPA::edouble a, const EUROPA::edouble b);
+  inline EUROPA::edouble min(const EUROPA::edouble a, const EUROPA::edouble b);
 }
 
 
@@ -245,10 +247,10 @@ namespace EUROPA {
 #define op(type, a, x, b) {                                             \
   double temp = ((double)(a)) x (b);                                    \
   if(temp > std::numeric_limits<type>::infinity()) {                    \
-    throw std::overflow_error("greater-than-infinity error");           \
+    throw std::overflow_error("greater-than-infinity error"); \
   }                                                                     \
   else if(temp < std::numeric_limits<type>::minus_infinity()) {         \
-    throw std::underflow_error("less-than-minus-infinity error");       \
+    throw std::underflow_error("less-than-minus-infinity error"); \
   }                                                                     \
   return type((type::basis_type)temp, true);                            \
 }
@@ -558,7 +560,8 @@ namespace EUROPA {
     friend edouble std::sin(const edouble d);
     friend edouble std::ceil(const edouble d);
     friend edouble std::floor(const edouble d);
-
+    friend edouble std::max(const edouble a, const edouble b);
+    friend edouble std::min(const edouble a, const edouble b);
 
     friend std::ostream& operator<<(std::ostream& o, const edouble e);
     friend std::istream& operator>>(std::istream& o, edouble& e);
@@ -659,6 +662,8 @@ namespace std {
   inline EUROPA::edouble sin(const EUROPA::edouble d) {return EUROPA::edouble(std::sin(d.m_v), true);}
   inline EUROPA::edouble ceil(const EUROPA::edouble d) {return EUROPA::edouble(std::ceil(d.m_v), true);}
   inline EUROPA::edouble floor(const EUROPA::edouble d) {return EUROPA::edouble(std::floor(d.m_v), true);}
+  inline EUROPA::edouble max(const EUROPA::edouble a, const EUROPA::edouble b) {return EUROPA::edouble(std::max(a.m_v, b.m_v), true);}
+  inline EUROPA::edouble min(const EUROPA::edouble a, const EUROPA::edouble b) {return EUROPA::edouble(std::min(a.m_v, b.m_v), true);}
 
 #undef handle_inf_unary
 #undef op

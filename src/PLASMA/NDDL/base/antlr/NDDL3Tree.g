@@ -840,7 +840,7 @@ qualified returns [Expr* result]
 		        ObjectTypeId ot = CTX->SymbolTable->getObjectType(varName.c_str()); // Hack!
         		if (ot.isId())  { // is a class reference
             		LabelStr value(varName);
-            		result = new ExprConstant("string",new StringDomain((double)value,StringDT::instance()));
+            		result = new ExprConstant("string",new StringDomain((edouble)value,StringDT::instance()));
         		}        		
                 else if (!isEnum) {
                 	std::string errorMsg;

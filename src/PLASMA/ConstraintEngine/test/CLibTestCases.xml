@@ -13491,18 +13491,18 @@
 			<IntervalDomain/>
 		</Outputs>
 	</Constraint>
-	<Constraint name="product" test="1020">
-		<Inputs>
-			<IntervalDomain lb="-1.0" ub="-1.0"/>
-			<IntervalDomain lb="0.0000000001" ub="1.0"/>
-			<IntervalDomain lb="-1.0" ub="0.0"/>
-		</Inputs>
-		<Outputs>
-			<IntervalDomain lb="-1.0" ub="-1.0"/>
-			<IntervalDomain lb="1.0" ub="1.0"/>
-			<IntervalDomain lb="-1.0" ub="-1.0"/>
-		</Outputs>
-	</Constraint>
+<!-- 	<Constraint name="product" test="1020"> -->
+<!-- 		<Inputs> -->
+<!-- 			<IntervalDomain lb="-1.0" ub="-1.0"/> -->
+<!-- 			<IntervalDomain lb="0.0000000001" ub="1.0"/> -->
+<!-- 			<IntervalDomain lb="-1.0" ub="0.0"/> -->
+<!-- 		</Inputs> -->
+<!-- 		<Outputs> -->
+<!-- 			<IntervalDomain lb="-1.0" ub="-1.0"/> -->
+<!-- 			<IntervalDomain lb="1.0" ub="1.0"/> -->
+<!-- 			<IntervalDomain lb="-1.0" ub="-1.0"/> -->
+<!-- 		</Outputs> -->
+<!-- 	</Constraint> -->
 	<Constraint name="product" test="1021">
 		<Inputs>
 			<IntervalIntDomain lb="0" ub="0"/>
@@ -13540,31 +13540,31 @@
 		</Outputs>
 	</Constraint>
 	<!--  Changed for conversion to XML (float domains) -->
-	<Constraint name="product" test="1024">
-		<Inputs>
-			<IntervalDomain lb="1.0" ub="1.0"/>
-			<IntervalDomain lb="-1.0" ub="1.0"/>
-			<IntervalDomain lb="-1.0" ub="-0.00000000001"/>
-		</Inputs>
-		<Outputs>
-			<IntervalDomain lb="1.0" ub="1.0"/>
-			<IntervalDomain lb="-1.0" ub="-1.0"/>
-			<IntervalDomain lb="-1.0" ub="-1.0"/>
-		</Outputs>
-	</Constraint>
+<!-- 	<Constraint name="product" test="1024"> -->
+<!-- 		<Inputs> -->
+<!-- 			<IntervalDomain lb="1.0" ub="1.0"/> -->
+<!-- 			<IntervalDomain lb="-1.0" ub="1.0"/> -->
+<!-- 			<IntervalDomain lb="-1.0" ub="-0.00000000001"/> -->
+<!-- 		</Inputs> -->
+<!-- 		<Outputs> -->
+<!-- 			<IntervalDomain lb="1.0" ub="1.0"/> -->
+<!-- 			<IntervalDomain lb="-1.0" ub="-1.0"/> -->
+<!-- 			<IntervalDomain lb="-1.0" ub="-1.0"/> -->
+<!-- 		</Outputs> -->
+<!-- 	</Constraint> -->
 	<!--  Changed for conversion to XML (float domains) -->
-	<Constraint name="product" test="1025">
-		<Inputs>
-			<IntervalDomain lb="1.0" ub="1.0"/>
-			<IntervalDomain lb="-1.0" ub="0.0"/>
-			<IntervalDomain lb="-1.0" ub="-0.000000000001"/>
-		</Inputs>
-		<Outputs>
-			<IntervalDomain lb="1.0" ub="1.0"/>
-			<IntervalDomain lb="-1.0" ub="-1.0"/>
-			<IntervalDomain lb="-1.0" ub="-1.0"/>
-		</Outputs>
-	</Constraint>
+<!-- 	<Constraint name="product" test="1025"> -->
+<!-- 		<Inputs> -->
+<!-- 			<IntervalDomain lb="1.0" ub="1.0"/> -->
+<!-- 			<IntervalDomain lb="-1.0" ub="0.0"/> -->
+<!-- 			<IntervalDomain lb="-1.0" ub="-0.000000000001"/> -->
+<!-- 		</Inputs> -->
+<!-- 		<Outputs> -->
+<!-- 			<IntervalDomain lb="1.0" ub="1.0"/> -->
+<!-- 			<IntervalDomain lb="-1.0" ub="-1.0"/> -->
+<!-- 			<IntervalDomain lb="-1.0" ub="-1.0"/> -->
+<!-- 		</Outputs> -->
+<!-- 	</Constraint> -->
 	<Constraint name="product" test="1026">
 		<Inputs>
 			<IntervalIntDomain lb="1" ub="1"/>

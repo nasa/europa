@@ -110,8 +110,8 @@ private:
   static bool testBasicAllocation(){
     TemporalNetwork tn;
     TimepointId origin = tn.getOrigin();
-    Time delta = g_noTime();
-    Time epsilon = g_noTime();
+    Time delta = cast_basis(g_noTime());
+    Time epsilon = cast_basis(g_noTime());
     tn.getTimepointBounds(origin, delta, epsilon);
     CPPUNIT_ASSERT(delta == 0 && epsilon == 0);
 
@@ -126,8 +126,8 @@ private:
     TimepointId b_start = tn.addTimepoint();
     TimepointId b_end = tn.addTimepoint();
     TimepointId c_start = tn.addTimepoint();
-    TemporalConstraintId a_before_b = tn.addTemporalConstraint(a_end, b_start, 0, g_infiniteTime());
-    TemporalConstraintId start_before_end = tn.addTemporalConstraint(b_start, b_end, 1, g_infiniteTime());
+    TemporalConstraintId a_before_b = tn.addTemporalConstraint(a_end, b_start, 0, cast_basis(g_infiniteTime()));
+    TemporalConstraintId start_before_end = tn.addTemporalConstraint(b_start, b_end, 1, cast_basis(g_infiniteTime()));
     TemporalConstraintId a_meets_c = tn.addTemporalConstraint(a_end, c_start, 0, 0);
     bool res = tn.propagate();
     CPPUNIT_ASSERT(res);
@@ -161,7 +161,7 @@ private:
     TimepointId y = tn.addTimepoint();
     TimepointId z = tn.addTimepoint();
 
-    TemporalConstraintId fromage = tn.addTemporalConstraint(x, y, (Time)0, g_infiniteTime());
+    TemporalConstraintId fromage = tn.addTemporalConstraint(x, y, (Time)0, cast_basis(g_infiniteTime()));
     TemporalConstraintId tango = tn.addTemporalConstraint(y, x, 200, 200);
 
     bool res = tn.propagate();
@@ -173,10 +173,10 @@ private:
     res = tn.propagate();
     CPPUNIT_ASSERT(res); // Consistency restored
 
-    TemporalConstraintId c0 = tn.addTemporalConstraint(y, x, -200, g_infiniteTime());
-    TemporalConstraintId c1 = tn.addTemporalConstraint(x, z, 0, g_infiniteTime());
-    TemporalConstraintId c2 = tn.addTemporalConstraint(z, y, (Time)0, g_infiniteTime());
-    TemporalConstraintId c3 = tn.addTemporalConstraint(x, y, 200, g_infiniteTime());
+    TemporalConstraintId c0 = tn.addTemporalConstraint(y, x, -200, cast_basis(g_infiniteTime()));
+    TemporalConstraintId c1 = tn.addTemporalConstraint(x, z, 0, cast_basis(g_infiniteTime()));
+    TemporalConstraintId c2 = tn.addTemporalConstraint(z, y, (Time)0, cast_basis(g_infiniteTime()));
+    TemporalConstraintId c3 = tn.addTemporalConstraint(x, y, 200, cast_basis(g_infiniteTime()));
 
     res = tn.propagate();
     CPPUNIT_ASSERT(res);
@@ -201,8 +201,8 @@ private:
 	TimepointId y = tn.addTimepoint();
 	tn.addTemporalConstraint(origin, x, (Time)j, j+1);
 	tn.addTemporalConstraint(x, y, (Time)j, j+1);
-	Time delta = g_noTime();
-	Time epsilon = g_noTime();
+	Time delta = cast_basis(g_noTime());
+	Time epsilon = cast_basis(g_noTime());
 	tn.calcDistanceBounds(x, y, delta, epsilon);
       }
     }
@@ -862,7 +862,7 @@ private:
     bool consistent = ce.propagate();
     std::vector<ConstrainedVariableId> fromvars;
     std::vector<ConstrainedVariableId> tovars;
-    std::vector<eint> lengths;//std::vector<long> lengths;
+    std::vector<long> lengths;
     ConstrainedVariableId origin;
     tp->getTemporalNogood(origin,fromvars,tovars,lengths);
 

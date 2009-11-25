@@ -152,7 +152,7 @@ namespace EUROPA {
       // TODO: this is a hack, where is this being used?
       if (m_domain->isSingleton()) {
     	  if (typeName == IntDT::NAME())
-    	      os << (int)(m_domain->getSingletonValue());
+            os << eint(cast_int((m_domain->getSingletonValue())));
     	  else if (typeName == FloatDT::NAME())
     	      os << m_domain->getSingletonValue();
     	  else if (typeName == StringDT::NAME())

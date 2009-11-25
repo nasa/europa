@@ -55,7 +55,7 @@ namespace EUROPA {
       delete (TokenTypeMgr*)m_tokenTypeMgr;
       delete (ObjectTypeMgr*)m_objectTypeMgr;
 
-      std::map<double,MethodId>::iterator mit = m_methods.begin();
+      std::map<edouble,MethodId>::iterator mit = m_methods.begin();
       for(;mit != m_methods.end();++mit)
           delete (Method*)mit->second;
       m_methods.clear();
@@ -103,12 +103,11 @@ namespace EUROPA {
   }
 
   bool Schema::isPredicate(const LabelStr& predicateName) const {
-    static std::set<edouble> sl_trueCache, sl_falseCache;
 
-    if(sl_trueCache.find(predicateName) != sl_trueCache.end())
+    if(m_predTrueCache.find(predicateName) != m_predTrueCache.end())
       return true;
 
-    if(sl_falseCache.find(predicateName) != sl_falseCache.end())
+    if(m_predFalseCache.find(predicateName) != m_predFalseCache.end())
       return false;
 
     bool result = false;
@@ -125,9 +124,9 @@ namespace EUROPA {
     }
 
     if(result)
-      sl_trueCache.insert(predicateName);
+      m_predTrueCache.insert(predicateName);
     else
-      sl_falseCache.insert(predicateName);
+      m_predFalseCache.insert(predicateName);
 
     return result;
   }
@@ -283,9 +282,8 @@ namespace EUROPA {
   }
 
   bool Schema::hasParent(const LabelStr& type) const {
-    static std::set<edouble> sl_trueCache;
 
-    if(sl_trueCache.find(type) != sl_trueCache.end())
+    if(m_hasParentCache.find(type) != m_hasParentCache.end())
       return true;
 
     bool result = false;
@@ -302,7 +300,7 @@ namespace EUROPA {
 
     // If we get a true result, store it in the cache
     if(result)
-      sl_trueCache.insert(type);
+      m_hasParentCache.insert(type);
 
     return result;
   }
@@ -703,7 +701,7 @@ namespace EUROPA {
       }
 
       {
-          std::map<double,TokenTypeId>::const_iterator it = objType->getTokenTypes().begin();
+          std::map<edouble,TokenTypeId>::const_iterator it = objType->getTokenTypes().begin();
           for(;it != objType->getTokenTypes().end(); ++it) {
               const TokenTypeId& tokenType = it->second;
               LabelStr predName = tokenType->getSignature();
@@ -725,7 +723,7 @@ namespace EUROPA {
 	  return m_objectTypeMgr->getObjectType(objType);
   }
 
-  ObjectFactoryId Schema::getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments, const bool doCheckError)
+  ObjectFactoryId Schema::getObjectFactory(const LabelStr& objectType, const std::vector<const Domain*>& arguments, const bool doCheckError)
   {
     return m_objectTypeMgr->getFactory(getId(),objectType,arguments,doCheckError);
   }

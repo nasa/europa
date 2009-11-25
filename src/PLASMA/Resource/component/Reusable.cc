@@ -65,7 +65,7 @@ namespace EUROPA {
     checkError(tok->isActive(), "Token " << tok->toString() << " is not active.");
     checkError(tok->getObject()->lastDomain().isSingleton(),
                "Token " << tok->toString() << " has a non-singleton object variable " << tok->getObject()->toLongString());
-    checkError(tok->getObject()->lastDomain().isMember(getId()),
+    checkError(tok->getObject()->lastDomain().isMember(getKey()),
                toString() << " isn't in the object variable of " << tok->toString() << ": " << tok->getObject()->toLongString());
     checkError(m_tokensToTransactions.find(tok) != m_tokensToTransactions.end(),
                "No transaction for "  << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");

@@ -48,27 +48,28 @@ namespace EUROPA {
 
   bool ResourceTokenRelation::canIgnore(const ConstrainedVariableId& variable,
                                         int argIndex, const DomainListener::ChangeType& changeType) {
-    debugMsg("ResourceTokenRelation:canIgnore", m_token->toString() << " Received notification of change type " << changeType << " on variable " << variable->toString());
+    debugMsg("ResourceTokenRelation:canIgnore",
+             m_token->toString() << " Received notification of change type " << changeType << " on variable " <<
+             variable->toString());
     if(m_token->isDeleted())
       return true;
     ConstrainedVariableId state = m_variables[STATE_VAR];
     ConstrainedVariableId object = m_variables[OBJECT_VAR];
-
-      debugMsg("ResourceTokenRelation:canIgnore", "Current state: " << std::endl <<
-               "  " << object->toString() << std::endl <<
-               "  " << state->toString());
-      //if this is a singleton message
-      if(changeType == DomainListener::RESTRICT_TO_SINGLETON ||
-         changeType == DomainListener::SET_TO_SINGLETON ||
-         variable->lastDomain().isSingleton()) {
-        //if the object is singleton and the state has the singleton value ACTIVE
-        if(object->lastDomain().isSingleton() &&
-           state->isSpecified() && state->getSpecifiedValue() == Token::ACTIVE) {
-          m_resource = Entity::getTypedEntity<Resource>(object->lastDomain().getSingletonValue());
-          check_error(m_resource.isValid());
-          debugMsg("ResourceTokenRelation:canIgnore", "Adding " << m_token->toString() << " to profile for resource " << m_resource->toString());
-          m_resource->addToProfile(m_token);
-        }
+    
+    debugMsg("ResourceTokenRelation:canIgnore", "Current state: " << std::endl <<
+             "  " << object->toString() << std::endl <<
+             "  " << state->toString());
+    //if this is a singleton message
+    if(changeType == DomainListener::RESTRICT_TO_SINGLETON ||
+       changeType == DomainListener::SET_TO_SINGLETON ||
+       variable->lastDomain().isSingleton()) {
+      //if the object is singleton and the state has the singleton value ACTIVE
+      if(object->lastDomain().isSingleton() &&
+         state->isSpecified() && state->getSpecifiedValue() == Token::ACTIVE) {
+        m_resource = Entity::getTypedEntity<Resource>(object->lastDomain().getSingletonValue());
+        check_error(m_resource.isValid());
+        debugMsg("ResourceTokenRelation:canIgnore", "Adding " << m_token->toString() << " to profile for resource " << m_resource->toString());
+        m_resource->addToProfile(m_token);
       }
     }
     else if((changeType == DomainListener::RESET ||

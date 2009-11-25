@@ -356,7 +356,7 @@ namespace EUROPA {
     // TODO: ObjectType is replacing ObjectFactory
     void registerObjectType(const ObjectTypeId& objType);
     const ObjectTypeId& getObjectType(const LabelStr& objType);
-    ObjectFactoryId getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments, const bool doCheckError = true);
+    ObjectFactoryId getObjectFactory(const LabelStr& objectType, const std::vector<const Domain*>& arguments, const bool doCheckError = true);
 
     void registerTokenType(const TokenTypeId& tokenType);
     TokenTypeId getTokenType(const LabelStr& tokenType);
@@ -395,7 +395,10 @@ namespace EUROPA {
     std::map<edouble, LabelStr> childOfRelation; /*! Required to answer the getParent query */
     LabelStr_LabelStrSet_Map objectPredicates; /*! All predicates by object type */
     LabelStrSet typesWithNoPredicates; /*! Cache for lookup efficiently */
-    std::map<double, std::vector<LabelStr> > allObjectTypes; /*! Cache to retrieve allObjectTypes by sub-class */
+    std::map<edouble, std::vector<LabelStr> > allObjectTypes; /*! Cache to retrieve allObjectTypes by sub-class */
+
+    mutable std::set<edouble> m_predTrueCache, m_predFalseCache; /**< Caches from isPredicate, now useful and not static . */
+    mutable std::set<edouble> m_hasParentCache; /**< Cache from hasParent, now useful and not static */
 
     Schema(const Schema&); /**< NO IMPL */
     static const std::set<LabelStr>& getBuiltInVariableNames();

@@ -587,22 +587,22 @@
       </fileset>
     </apply>
 
-<!--     <apply executable="ebrowse" dir="${dir.src}" parallel="true" failonerror="true" > -->
-<!--       <fileset dir="${dir.src}"> -->
-<!--         <include name="*/*.hh"/> -->
-<!--         <include name="*/*/*.hh"/> -->
-<!--         <include name="*/*/*/*.hh"/> -->
-<!--         <include name="*/*.h"/> -->
-<!--         <include name="*/*/*.h"/> -->
-<!--         <include name="*/*/*/*.h"/> -->
-<!--         <include name="*/*.cc"/> -->
-<!--         <include name="*/*/*.cc"/> -->
-<!--         <include name="*/*/*/*.cc"/> -->
-<!--         <include name="*/*.cpp"/> -->
-<!--         <include name="*/*/*.cpp"/> -->
-<!--         <include name="*/*/*/*.cpp"/> -->
-<!--       </fileset> -->
-<!--     </apply> -->
+    <apply executable="ebrowse" dir="${dir.src}" parallel="true" failonerror="true" >
+      <fileset dir="${dir.src}">
+        <include name="*/*.hh"/>
+        <include name="*/*/*.hh"/>
+        <include name="*/*/*/*.hh"/>
+        <include name="*/*.h"/>
+        <include name="*/*/*.h"/>
+        <include name="*/*/*/*.h"/>
+        <include name="*/*.cc"/>
+        <include name="*/*/*.cc"/>
+        <include name="*/*/*/*.cc"/>
+        <include name="*/*.cpp"/>
+        <include name="*/*/*.cpp"/>
+        <include name="*/*/*/*.cpp"/>
+      </fileset>
+    </apply>
   </target>
     
   <!-- This will run the DEV variant by default, 

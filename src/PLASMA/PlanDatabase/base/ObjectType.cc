@@ -231,16 +231,16 @@ std::string ObjectType::toString() const
     debugMsg("ObjectFactory:purgeAll", "Purging all");
 
     // TODO: this should be done by the object types
-    std::set<double> alreadyDeleted;
-    for(std::map<double, ObjectFactoryId>::const_iterator it = m_factories.begin(); it != m_factories.end(); ++it) {
+    std::set<ObjectFactory*> alreadyDeleted;
+    for(std::map<edouble, ObjectFactoryId>::const_iterator it = m_factories.begin(); it != m_factories.end(); ++it) {
       if(alreadyDeleted.find(it->second) == alreadyDeleted.end()) {
-          alreadyDeleted.insert(it->second);
-          delete (ObjectFactory*) it->second;
+        alreadyDeleted.insert((ObjectFactory*)it->second);
+        delete (ObjectFactory*) it->second;
       }
     }
     m_factories.clear();
 
-    std::map<double,ObjectTypeId>::iterator it = m_objTypes.begin();
+    std::map<edouble,ObjectTypeId>::iterator it = m_objTypes.begin();
     for(;it != m_objTypes.end();++it)
         delete (ObjectType*)it->second;
     m_objTypes.clear();
@@ -251,19 +251,19 @@ std::string ObjectType::toString() const
   {
 	  // TODO: instead of keeping separate map, we should probably just delegate to the ObjectType
       {
-          std::map<double,ObjectFactoryId>::const_iterator it = objType->getObjectFactories().begin();
+          std::map<edouble,ObjectFactoryId>::const_iterator it = objType->getObjectFactories().begin();
           for(;it != objType->getObjectFactories().end(); ++it)
               registerFactory(it->second);
       }
 
-      m_objTypes[objType->getName()] = objType;
+      m_objTypes[objType->getName().getKey()] = objType;
 
       debugMsg("Schema:registerObjectType","Registered object type:" << std::endl << objType->toString());
   }
 
   const ObjectTypeId& ObjectTypeMgr::getObjectType(const LabelStr& objType) const
   {
-      std::map<double,ObjectTypeId>::const_iterator it = m_objTypes.find((double)objType);
+      std::map<edouble,ObjectTypeId>::const_iterator it = m_objTypes.find((edouble)objType);
 
       if (it == m_objTypes.end())
           return ObjectTypeId::noId();
@@ -274,19 +274,19 @@ std::string ObjectType::toString() const
   std::vector<ObjectTypeId> ObjectTypeMgr::getAllObjectTypes() const
   {
 	  std::vector<ObjectTypeId> retval;
-	  for(std::map<double, ObjectTypeId>::const_iterator it = m_objTypes.begin(); it != m_objTypes.end(); ++it) {
+	  for(std::map<edouble, ObjectTypeId>::const_iterator it = m_objTypes.begin(); it != m_objTypes.end(); ++it) {
 		  retval.push_back(it->second);
 	  }
 
 	  return retval;
   }
 
-  LabelStr ObjectTypeMgr::makeFactoryName(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments){
+  LabelStr ObjectTypeMgr::makeFactoryName(const LabelStr& objectType, const std::vector<const Domain*>& arguments){
     std::string signature = objectType.toString();
 
     debugMsg("ObjectFactory:makeFactoryName", "Making factory name " << signature);
     // Iterate over the argument types and compose full signature
-    for(std::vector<const AbstractDomain*>::const_iterator it = arguments.begin(); it != arguments.end(); ++it){
+    for(std::vector<const Domain*>::const_iterator it = arguments.begin(); it != arguments.end(); ++it){
       signature = signature + TYPE_DELIMITER + (*it)->getTypeName().toString();
     }
 
@@ -305,7 +305,7 @@ std::string ObjectType::toString() const
    */
   ObjectFactoryId ObjectTypeMgr::getFactory(const SchemaId& schema,
                                             const LabelStr& objectType,
-                                            const std::vector<const AbstractDomain*>& arguments,
+                                            const std::vector<const Domain*>& arguments,
 					    const bool doCheckError)
   {
     // Build the full signature for the factory
@@ -316,7 +316,7 @@ std::string ObjectType::toString() const
 
 
     // Try to find a hit straight off
-    std::map<double, ObjectFactoryId>::const_iterator it = m_factories.find(factoryName.getKey());
+    std::map<edouble, ObjectFactoryId>::const_iterator it = m_factories.find(factoryName.getKey());
 
     // If we have a hit, return it
     if(it != m_factories.end())
@@ -356,7 +356,7 @@ std::string ObjectType::toString() const
 
       if(found){
 	// Cache for next time and return
-	m_factories.insert(std::pair<double, ObjectFactoryId>(factoryName, factory));
+	m_factories.insert(std::pair<edouble, ObjectFactoryId>(factoryName, factory));
 	return factory;
       }
     }
@@ -381,7 +381,7 @@ std::string ObjectType::toString() const
 
     // Ensure it is not present already
     check_error(m_factories.find(factory->getSignature().getKey()) == m_factories.end());
-    m_factories.insert(std::pair<double, ObjectFactoryId>(factory->getSignature().getKey(), factory));
+    m_factories.insert(std::make_pair(factory->getSignature().getKey(), factory));
   }
 
 
@@ -479,7 +479,7 @@ std::string ObjectType::toString() const
     ObjectFactoryEvalContext(const PlanDatabaseId& planDb,
                  const std::vector<std::string>& argNames,
                  const std::vector<std::string>& argTypes,
-                 const std::vector<const AbstractDomain*>& args);
+                 const std::vector<const Domain*>& args);
 
     virtual ~ObjectFactoryEvalContext();
 
@@ -493,7 +493,7 @@ std::string ObjectType::toString() const
   ObjectFactoryEvalContext::ObjectFactoryEvalContext(const PlanDatabaseId& planDb,
                const std::vector<std::string>& argNames,
                const std::vector<std::string>& argTypes,
-               const std::vector<const AbstractDomain*>& args)
+               const std::vector<const Domain*>& args)
     : EvalContext(NULL) // TODO: should pass in eval context from outside to have access to globals
     , m_planDb(planDb)
   {
@@ -535,7 +535,7 @@ std::string ObjectType::toString() const
                             const PlanDatabaseId& planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
-                            const std::vector<const AbstractDomain*>& arguments) const
+                            const std::vector<const Domain*>& arguments) const
   {
     check_runtime_error(checkArgs(arguments));
 
@@ -550,7 +550,7 @@ std::string ObjectType::toString() const
     return instance;
   }
 
-  bool InterpretedObjectFactory::checkArgs(const std::vector<const AbstractDomain*>& arguments) const
+  bool InterpretedObjectFactory::checkArgs(const std::vector<const Domain*>& arguments) const
   {
     // TODO: implement this. is this even necessary?, parser should take care of it
     return true;
@@ -567,7 +567,7 @@ std::string ObjectType::toString() const
                            const PlanDatabaseId& planDb,
                            const LabelStr& objectType,
                            const LabelStr& objectName,
-                           const std::vector<const AbstractDomain*>& arguments) const
+                           const std::vector<const Domain*>& arguments) const
   {
     // go up the hierarchy and give the parents a chance to create the object, this allows native classes to be exported
     // TODO: some effort can be saved by keeping track of whether a class has a native ancestor different from Object.
@@ -588,7 +588,7 @@ std::string ObjectType::toString() const
 
       // TODO: argumentsForSuper are eval'd twice, once here and once when m_superCallExpr->eval(evalContext) is called
       //  figure out how to do it only once
-      std::vector<const AbstractDomain*> argumentsForSuper;
+      std::vector<const Domain*> argumentsForSuper;
       m_superCallExpr->evalArgs(evalContext,argumentsForSuper);
 
       ObjectFactoryId objFactory = planDb->getSchema()->getObjectFactory(m_superCallExpr->getSuperClassName(),argumentsForSuper);
@@ -605,7 +605,7 @@ std::string ObjectType::toString() const
 
     void InterpretedObjectFactory::evalConstructorBody(
                                                ObjectId& instance,
-                                               const std::vector<const AbstractDomain*>& arguments) const
+                                               const std::vector<const Domain*>& arguments) const
     {
         // TODO: should pass in eval context from outside to have access to globals
         ObjectFactoryEvalContext factoryEvalContext(
@@ -627,7 +627,7 @@ std::string ObjectType::toString() const
         for (unsigned int i=0; i < members.size(); i++) {
             std::string varName = instance->getName().toString() + "." + members[i].second.toString();
             if (instance->getVariable(varName) == ConstrainedVariableId::noId()) {
-                const AbstractDomain& baseDomain =
+                const Domain& baseDomain =
                     instance->getPlanDatabase()->getConstraintEngine()->getCESchema()->baseDomain(members[i].first.c_str());
                 instance->addVariable(
                   baseDomain,
@@ -659,9 +659,9 @@ std::string ObjectType::toString() const
 
     DataRef ExprConstructorSuperCall::eval(EvalContext& context) const
     {
-      ObjectId object = context.getVar("this")->derivedDomain().getSingletonValue();
+      ObjectId object = Entity::getTypedEntity<Object>(context.getVar("this")->derivedDomain().getSingletonValue());
 
-      std::vector<const AbstractDomain*> arguments;
+      std::vector<const Domain*> arguments;
 
       evalArgs(context,arguments);
       ObjectFactoryId objFactory = object->getPlanDatabase()->getSchema()->getObjectFactory(m_superClassName,arguments);
@@ -670,7 +670,7 @@ std::string ObjectType::toString() const
       return DataRef::null;
     }
 
-    void ExprConstructorSuperCall::evalArgs(EvalContext& context, std::vector<const AbstractDomain*>& arguments) const
+    void ExprConstructorSuperCall::evalArgs(EvalContext& context, std::vector<const Domain*>& arguments) const
     {
       for (unsigned int i=0; i < m_argExprs.size(); i++) {
         DataRef arg = m_argExprs[i]->eval(context);

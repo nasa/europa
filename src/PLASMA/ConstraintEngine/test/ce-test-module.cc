@@ -74,6 +74,9 @@ ConstraintEngineId DefaultEngineAccessor::s_instance;
   catch (Error err){ \
       err.print(std::cout); \
   } \
+  catch(std::exception e) {                     \
+    std::cout << e.what() << std::endl;         \
+ } \
 }
 
 class DelegationTestConstraint : public Constraint {
@@ -2147,7 +2150,14 @@ private:
     CPPUNIT_ASSERT(readTestCases(ce,getTestLoadLibraryPath() + std::string("/CLibTestCases.xml"), tests) ||
                readTestCases(ce,std::string("ConstraintEngine/test/CLibTestCases.xml"), tests));
 
-    bool retval = executeTestCases(testEngine.getConstraintEngine(),tests);
+    bool retval = false;
+    try {
+      retval = executeTestCases(testEngine.getConstraintEngine(),tests);
+    }
+    catch(std::exception e) {
+      retval = false;
+      std::cout << e.what() << std::endl;
+    }
 
     return retval;
   }
