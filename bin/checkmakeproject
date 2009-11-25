@@ -1,17 +1,14 @@
 #!/bin/sh
 #
 # checkmakeproject: sh script for checking makeproject is working 
-#   Argument: relative location of PLASMA root
+# (builds and then removes a project in the local directory)
 #
 
 TEST_PROJECT_NAME="CheckMakeProjectTestProject"
-RELDIR=`dirname "$0"`
 
 echo "Testing makeproject."
 
 # Ensure test project directory does not already exist.
-cd "$RELDIR"
-cd ..
 if [ -d $TEST_PROJECT_NAME ]  
 then
   # Directory exists. Print warning and exit.
@@ -20,15 +17,13 @@ then
 fi
 
 echo "Creating test project - $TEST_PROJECT_NAME"
+
 # Run makeproject.
-cd "$RELDIR"
-cd $PLASMA_HOME/../../bin 
-./makeproject "$TEST_PROJECT_NAME"
-cd ../..
+$PLASMA_HOME/bin/makeproject "$TEST_PROJECT_NAME" ./
 cd "$TEST_PROJECT_NAME"
 
 # Execute project.
- jam "$TEST_PROJECT_NAME"
+ make
 
 # Remove project.
 echo "Cleaning up - removing directory $TEST_PROJECT_NAME"

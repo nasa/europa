@@ -2,19 +2,27 @@ SubDir PLASMA Utils base ;
 
 if ! $(PLASMA_READY) {
 
+local loggerFiles ;
+loggerFiles += Debug.cc ;
+if $(LOGGER_TYPE) = USE_EUROPA_LOGGER  {
+    loggerFiles += LoggerMgr.cc ;
+}
+echo "loggerFiles = " $(loggerFiles) ;
+
+
 ModuleBase Utils
 	:
-	Debug.cc
+	$(loggerFiles)
 	Factory.cc
 	Engine.cc
 	Entity.cc
 	Error.cc
 	IdTable.cc
-        LabelStr.cc
-        Mutex.cc
-        Pdlfcn.cc
-        TestData.cc
-        Utils.cc
+  	LabelStr.cc
+	Mutex.cc
+  	Pdlfcn.cc
+  	TestData.cc
+  	Utils.cc
 	XMLUtils.cc
 	;
 

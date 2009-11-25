@@ -15,7 +15,6 @@ ModuleComponent Solvers
 	Filters.cc
 	ThreatDecisionPoint.cc
 	ThreatManager.cc
-        SolverPartialPlanWriter.cc
 	HSTSDecisionPoints.cc
 	;
 	

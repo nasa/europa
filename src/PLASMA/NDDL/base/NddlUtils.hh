@@ -12,32 +12,23 @@
 #include "NddlToken.hh"
 #include "NddlRules.hh"
 
-#include "NumericDomain.hh"
-#include "SymbolDomain.hh"
-#include "StringDomain.hh"
-
-#include "TypeFactory.hh"
-#include "EnumeratedTypeFactory.hh"
-#include "StringTypeFactory.hh"
-#include "SymbolTypeFactory.hh"
-#include "intType.hh"
-#include "floatType.hh"
+#include "Domains.hh"
 
 namespace NDDL {
 
   /**
-   * @brief Helper method to construct a singleton variable, and place it on a vector. 
+   * @brief Helper method to construct a singleton variable, and place it on a vector.
    * Used in rule firing and generating pseudo variables on tokens. They cannot be specified.
-   */ 
+   */
   template<class ELEMENT_TYPE>
-  ConstrainedVariableId allocateVariable(const ConstraintEngineId& ce, 
+  ConstrainedVariableId allocateVariable(const ConstraintEngineId& ce,
 						  std::vector<ConstrainedVariableId>& vars,
 						  const ELEMENT_TYPE& domain,
 						  const EntityId& parent){
 
     std::stringstream sstr;
     sstr << "PSEDUO_VARIABLE_" << vars.size();
-    ConstrainedVariableId var = (new Variable< ELEMENT_TYPE >(ce, 
+    ConstrainedVariableId var = (new Variable< ELEMENT_TYPE >(ce,
 							      domain,
 							      false,
 							      false,
@@ -102,7 +93,7 @@ public: \
 
 #define REGISTER_TYPE_FACTORY(typeFactoryMgr, klass, domain) \
   typeFactoryMgr->registerFactory((new EnumeratedTypeFactory(#klass, #klass, domain))->getId())
-	
+
 #define REGISTER_ITYPE_FACTORY(typeFactoryMgr, klass, domain) \
   typeFactoryMgr->registerFactory((new IntervalTypeFactory(#klass, domain))->getId())
 

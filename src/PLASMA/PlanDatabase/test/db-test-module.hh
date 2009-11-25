@@ -4,6 +4,9 @@
 #include <string>
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include "Domains.hh"
+
+using namespace EUROPA;
 
 class PlanDatabaseModuleTests : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(PlanDatabaseModuleTests);
@@ -33,5 +36,10 @@ class PlanDatabaseModuleTests : public CppUnit::TestFixture {
   void DBClientTest(void);
   void DBTransPlayerTest(void);
 };
+
+typedef SymbolDomain Locations;
+
+const Locations& LocationsBaseDomain();
+
 
 #endif /* H_PLAN_DATABAE_MODULE_TESTS */

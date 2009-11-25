@@ -1,39 +1,43 @@
 #ifndef _H_ResourceDefs
 #define _H_ResourceDefs
 
-#include "Id.hh"
 #include "ConstraintEngineDefs.hh"
+#include "PlanDatabaseDefs.hh"
+#include <map>
+#include <set>
 
-namespace EUROPA
-{
-  class ResourceViolation;
-  typedef Id<ResourceViolation> ResourceViolationId;
+namespace EUROPA {
+    class Transaction;
+    typedef Id<Transaction> TransactionId;
 
-  class ResourceFlaw;
-  typedef Id<ResourceFlaw> ResourceFlawId;
+    class Profile;
+    typedef Id<Profile> ProfileId;
 
-  class Instant;
-  typedef Id<Instant> InstantId;
+    class ProfileIterator;
+    typedef Id<ProfileIterator> ProfileIteratorId;
 
-  class Transaction;
-  typedef Id<Transaction> TransactionId;
+    class Instant;
+    typedef Id<Instant> InstantId;
 
-  class Resource;
-  typedef Id<Resource> ResourceId;
+    class FVDetector;
+    typedef Id<FVDetector> FVDetectorId;
 
-  class ResourceConstraint;
-  typedef Id<ResourceConstraint> ResourceConstraintId;
+    class Resource;
+    typedef Id<Resource> ResourceId;
 
-  class ResourcePropagator;
-  typedef Id<ResourcePropagator> ResourcePropagatorId;
+    class Reservoir;
+    typedef Id<Reservoir> ReservoirId;
 
-  //template<class DomainType> class TokenVariable;
-  //typedef Id< TokenVariable<IntervalDomain> > ResVarId;
+    class ReservoirToken;
+    typedef Id<ReservoirToken> ReservoirTokenId;
 
-  typedef ConstrainedVariableId ResVarId;
+    class ReusableToken;
+    typedef Id<ReusableToken> ReusableTokenId;
 
-  class ResourceListener;
-  typedef Id<ResourceListener> ResourceListenerId;
-  
+    class ResourceTokenRelation;
+    typedef Id<ResourceTokenRelation> ResourceTokenRelationId;
+
+    typedef std::map<TokenId, std::set<InstantId> > ResourceFlaws;
 }
+
 #endif

@@ -35,7 +35,7 @@ namespace EUROPA{
      * whenever the guard variable is set to a singleton.
      * @param guard The variable which will be evaluated. trigger rule when set to any singleton value.
      */
-    RuleInstance(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb, 
+    RuleInstance(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb,
                  const std::vector<ConstrainedVariableId>& guards);
 
     /**
@@ -44,7 +44,7 @@ namespace EUROPA{
      * @param guard The variable which will be evaluated
      * @param domain Fired when domain.isMember(guard.singletonValue)
      */
-    RuleInstance(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb, 
+    RuleInstance(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb,
                  const ConstrainedVariableId& guard, const AbstractDomain& domain);
 
     /**
@@ -63,7 +63,7 @@ namespace EUROPA{
      * @param guard The variable which will be evaluated
      * @param domain Fired when domain.isMember(guard.singletonValue)
      */
-    RuleInstance(const RuleInstanceId& parent, 
+    RuleInstance(const RuleInstanceId& parent,
 		 const ConstrainedVariableId& guard, const AbstractDomain& domain);
 
     /**
@@ -73,7 +73,7 @@ namespace EUROPA{
      * @param domain Fired when domain.isMember(guard.singletonValue) ^ !positive
 		 * @param positive Flag to indicate whether the test is positive or not.
      */
-    RuleInstance(const RuleInstanceId& parent, 
+    RuleInstance(const RuleInstanceId& parent,
 		 const ConstrainedVariableId& guard, const AbstractDomain& domain, const bool positive);
 
     /**
@@ -117,7 +117,7 @@ namespace EUROPA{
     ConstrainedVariableId getVariable(const LabelStr& name) const;
     TokenId getSlave(const LabelStr& name) const;
     ConstraintId getConstraint(const LabelStr& name) const;
-        
+
     /************** Call-backs from the rule variable listener **************/
 
     /**
@@ -166,6 +166,8 @@ namespace EUROPA{
 
     const std::vector<RuleInstanceId> &getChildRules(void) const {return m_childRules;}
 
+    void addConstraint(const ConstraintId& constraint);
+
   protected:
 
     /**
@@ -188,9 +190,9 @@ namespace EUROPA{
      * from local scope or allocate anew if retrieved for the first time.
      * @param objectString The name of the object variable in the local scope.
      * @param varString The moniker for a field variable.
-     * @param canBeSpecified Indicate if an allocated variable should be specifiable. 
+     * @param canBeSpecified Indicate if an allocated variable should be specifiable.
      */
-    ConstrainedVariableId varFromObject(const std::string& objectString, 
+    ConstrainedVariableId varFromObject(const std::string& objectString,
 					const std::string& varString,
 					bool canBeSpecified = false);
 
@@ -200,9 +202,9 @@ namespace EUROPA{
      * @param object The object variable to synchronize.
      * @param varString The moniker for a field variable.
      * @param fullName The full name used for resolution. Should always contain varString.
-     * @param canBeSpecified Indicate if the allocated variable should be specifiable. 
+     * @param canBeSpecified Indicate if the allocated variable should be specifiable.
      */
-    ConstrainedVariableId varFromObject(const ConstrainedVariableId& object, 
+    ConstrainedVariableId varFromObject(const ConstrainedVariableId& object,
 					const std::string& varString,
 					const std::string& fullName,
 					bool canBeSpecified = false);
@@ -215,7 +217,7 @@ namespace EUROPA{
      */
     void addVariable(const ConstrainedVariableId& var, const LabelStr& name);
 
-    template<class DomainType> 
+    template<class DomainType>
     ConstrainedVariableId addVariable( const DomainType& baseDomain,
 				       bool canBeSpecified,
 				       const LabelStr& name){
@@ -242,8 +244,7 @@ namespace EUROPA{
       return localVariable;
     }
 
-    void addConstraint(const LabelStr& name, std::vector<ConstrainedVariableId>& scope);
-    void addConstraint(const ConstraintId& constraint);
+    void addConstraint(const LabelStr& name, const std::vector<ConstrainedVariableId>& scope);
     void addChildRule(RuleInstance* instance);
     void clearLoopVar(const LabelStr& loopVarName);
     std::string makeImplicitVariableName();
@@ -266,7 +267,7 @@ namespace EUROPA{
 
     /**
      * @brief Invoked by derived classes to set the guard variable where the test criteria will be that
-     * the specified domain of the guard is a singleton, and equals the given value. Private since should 
+     * the specified domain of the guard is a singleton, and equals the given value. Private since should
      * only be called from constructor.
      */
     void setGuard(const ConstrainedVariableId& guard, const AbstractDomain& domain);
@@ -286,11 +287,14 @@ namespace EUROPA{
      */
     bool connectedToToken(const ConstraintId& constraint, const TokenId& token) const;
 
+    /** ANALYSIS ROUTINES FOR DEBUGGING **/
+    std::string ruleExecutionContext() const;
+
     std::vector<ConstrainedVariableId> m_guards; /*!< Guard variables for implicit and explcit guards */
     AbstractDomain* m_guardDomain; /*!< If an explicit equality test, will ahve this be non-null */
     ConstraintId m_guardListener; /*!< If guarded, listener is a constraint */
 
-  protected:    
+  protected:
     bool m_isExecuted; /*!< Indicates if the rule has been fired */
     bool m_isPositive; /*!< If this is false, the rule's guard is on a negative test. */
     std::vector<ConstraintId> m_constraints; /*!< Constraints introduced through rule execution */

@@ -52,14 +52,14 @@ namespace EUROPA
     check_error(var.isValid());
     return var->getCurrentDomain();
   }
-  
+
   void Propagator::notifyConstraintViolated(ConstraintId c)
   {
-      getConstraintEngine()->getViolationMgr().addViolatedConstraint(c);	  
+      c->notifyViolated();
   }
-  
+
   void Propagator::notifyVariableEmptied(ConstrainedVariableId v)
   {
-      getConstraintEngine()->getViolationMgr().addEmptyVariable(v);	  
+      getConstraintEngine()->getViolationMgr().addEmptyVariable(v);
   }
 }

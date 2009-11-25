@@ -4,9 +4,8 @@ if ! $(PLASMA_READY) {
   Module Resource : Solvers RulesEngine ;
   ModuleComponent Resource
   		  :
+		  ResourceThreatManager.cc
 		  ResourceThreatDecisionPoint.cc
-		  SAVH_ThreatManager.cc
-		  SAVH_ThreatDecisionPoint.cc
 		  ResourceMatching.cc
 		  ;
 

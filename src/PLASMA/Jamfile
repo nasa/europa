@@ -19,8 +19,6 @@ Module plasma : all System ;
 
 # 3rd party
 SubInclude PLASMA TinyXml ;
-SubInclude PLASMA Antlr ;
-SubInclude PLASMA Antlr3 ;
 
 # kernel. 
 SubInclude PLASMA Utils ;
@@ -29,19 +27,18 @@ SubInclude PLASMA PlanDatabase ;
 SubInclude PLASMA RulesEngine ;
 SubInclude PLASMA TemporalNetwork ;
 SubInclude PLASMA NDDL ;
-SubInclude PLASMA NDDL3 ;
 SubInclude PLASMA Solvers ;
 
 # extensions. 
 # TODO: dependencies need to be fixed so that NDDL and TemporalNetwork can be moved down here
 SubInclude PLASMA Resource ;
-SubInclude PLASMA ANML ;
+#SubInclude PLASMA ANML ;
 
 # engine-level modules
 SubInclude PLASMA System ;
 
 RemoveBinaries clean-all ;
-Depends clean-all : clean clean-nddl-xml clean-system-xml ;
+Depends clean-all : clean ;
 
 Depends build : build-modules ;
 

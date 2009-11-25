@@ -1,8 +1,6 @@
 #include "Rover-model.nddl"
 
 // Create a planner configuration instance in PLASMA.
-PlannerConfig world = new PlannerConfig(0, 100, 600);
-
 Location lander = new Location("LANDER", 0, 0);
 Location rock1 = new Location("ROCK1", 9, 9);
 Location rock2 = new Location("ROCK2", 1, 6);
@@ -23,7 +21,7 @@ close();
 
 // Establish the initial position for spirit
 fact(Navigator.At initialPosition);
-eq(initialPosition.start, world.m_horizonStart);  // What time - the start of this planning horizon
+eq(initialPosition.start, 0);  // What time - the start of this planning horizon
 eq(initialPosition.location, lander); // What position - the lander
 
 // Establish the goal - to take a sample at a position
@@ -33,6 +31,6 @@ sample.rock.specify(rock4);  // Want to get to rock4
 
 // Establish the initial instrument state
 rejectable(Instrument.Stowed stowed);
-eq(stowed.start, world.m_horizonStart);
+eq(stowed.start, 0);
 
 // The planner should take it form here!

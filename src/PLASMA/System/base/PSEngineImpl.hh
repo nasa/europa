@@ -12,17 +12,15 @@ namespace EUROPA {
     PSEngineImpl();
     virtual ~PSEngineImpl();
 
-    static void initialize();
-    static void terminate();
-
     virtual void start();
     virtual void shutdown();
+
+    virtual EngineConfig* getConfig();
 
     virtual void addModule(Module* module);
     virtual void removeModule(Module* module);
     virtual void loadModule(const std::string& moduleFileName);
 
-    virtual void loadModel(const std::string& modelFileName);
     virtual std::string executeScript(const std::string& language, const std::string& script, bool isFile);
 
 	  // Constraint Engine methods
@@ -40,6 +38,7 @@ namespace EUROPA {
     virtual PSList<PSConstraint*> getAllViolations() const;
 
     // Plan Database methods
+    virtual PSList<PSObject*> getObjects();
     virtual PSList<PSObject*> getObjectsByType(const std::string& objectType);
     virtual PSObject* getObjectByKey(PSEntityKey id);
     virtual PSObject* getObjectByName(const std::string& name);
@@ -55,6 +54,8 @@ namespace EUROPA {
     virtual PSPlanDatabaseClient* getPlanDatabaseClient();
 
     virtual std::string planDatabaseToString();
+    virtual PSSchema* getPSSchema();
+
 
     // Solver methods
     virtual PSSolver* createSolver(const std::string& configurationFile);

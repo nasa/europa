@@ -10,6 +10,7 @@ ModuleComponent PlanDatabase
 	DbClientTransactionPlayer.cc
 	EventToken.cc
 	IntervalToken.cc
+	Methods.cc
 	Timeline.cc
 	;
 

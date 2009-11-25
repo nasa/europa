@@ -2,7 +2,7 @@
 #define _H_ResourceMatching
 
 #include "MatchingEngine.hh"
-#include "SAVH_ResourceDefs.hh"
+#include "ResourceDefs.hh"
 
 namespace EUROPA {
   namespace SOLVERS {
@@ -10,11 +10,11 @@ namespace EUROPA {
      * @brief Retrieves all relevant matching rules for the given instant.
      */
     template<>
-    void MatchingEngine::getMatches(const SAVH::InstantId& inst,
+    void MatchingEngine::getMatches(const InstantId& inst,
 				    std::vector<MatchingRuleId>& results);
 
     template<>
-    void MatchingEngine::getMatchesInternal(const SAVH::InstantId& inst,
+    void MatchingEngine::getMatchesInternal(const InstantId& inst,
 					    std::vector<MatchingRuleId>& results);
 
     class InstantMatchFinder : public MatchFinder {

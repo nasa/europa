@@ -13,6 +13,10 @@
 #include <string>
 #include <iterator>
 
+#ifndef INT_MAX
+static int const INT_MAX(std::numeric_limits<int>::max());
+#endif
+
 namespace EUROPA
 {
 
@@ -121,7 +125,7 @@ namespace EUROPA
 
   void ViolationMgrImpl::addViolatedConstraint(ConstraintId c)
   {
-    debugMsg("ConstraintEngine:ViolationMgr", "Marking constraint as violated : " << c->toString());
+    debugMsg("ConstraintEngine:ViolationMgr", "Marking constraint as violated : " << c->toLongString());
     m_violatedConstraints.insert(c);
     c->deactivate(); // Deactivate will cause propagators to ignore constraint, including removing from current agendas
     m_ce.notifyViolationAdded(c); // tell constraint engine to publish
@@ -129,8 +133,8 @@ namespace EUROPA
 
   void ViolationMgrImpl::removeViolatedConstraint(ConstraintId c)
   {
-    check_error(isViolated(c),"Tried to remove constraint that is not violated "+c->toString());
-    debugMsg("ConstraintEngine:ViolationMgr", "Removing constraint from violated set : " << c->toString());
+    check_error(isViolated(c),"Tried to remove constraint that is not violated "+c->toLongString());
+    debugMsg("ConstraintEngine:ViolationMgr", "Removing constraint from violated set : " << c->toLongString());
     c->undoDeactivation(); // This will put the constraint back on the Propagators' agendas
     m_violatedConstraints.erase(c);
     m_ce.notifyViolationRemoved(c); // tell constraint engine to publish
@@ -145,7 +149,7 @@ namespace EUROPA
 
     // if c is noId, this was caused directly by an specify, just relax the var and the next time around we'll catch the constraint
     if (c != ConstraintId::noId())
-      addViolatedConstraint(c);
+      c->notifyViolated();
 
     return true;
   }
@@ -162,7 +166,7 @@ namespace EUROPA
     for (std::set<ConstraintId>::iterator it = constraints.begin(); it != constraints.end(); ++it) {
       ConstraintId c = *it;
       if (isViolated(c))
-	removeViolatedConstraint(c);
+        c->notifyNoLongerViolated();
     }
 
     return true;
@@ -175,7 +179,7 @@ namespace EUROPA
 
   void ViolationMgrImpl::addEmptyVariable(ConstrainedVariableId c)
   {
-    debugMsg("ConstraintEngine:ViolationMgr", "Marking ConstrainedVariable as empty : " << c->toString());
+    debugMsg("ConstraintEngine:ViolationMgr", "Marking ConstrainedVariable as empty : " << c->toLongString());
     m_emptyVariables.insert(c); // TODO: make sure set is avoiding duplicates correctly
   }
 
@@ -195,14 +199,32 @@ namespace EUROPA
       return;
 
     m_relaxing = true;
-    ConstrainedVariableSet::const_iterator it = m_emptyVariables.begin();
-    for(;it != m_emptyVariables.end();++it) {
+
+    //Relax of a variable can lead to the rules engine retracting variables. This in turn can
+    //result in a call to clear the empty variables. Thus, the commented code will fail because
+    //the underlying collection has been modified. Variable removal begins by discarding variables
+    //and leaving them in a discarded state. The underlying memory will not be deallocated until
+    //garbage collection occurs. The loop below is robust to variable removal.
+    while(!m_emptyVariables.empty()) {
+      ConstrainedVariableId v = *(m_emptyVariables.begin());
+      if (!v->isDiscarded()) {
+	check_error(!v.isNoId(),"Tried to relax ConstrainedVariableId::noId()");
+	v->relax();
+	debugMsg("ConstraintEngine:ViolationMgr", "Relaxed empty variable : " << v->toLongString());
+      }
+      m_emptyVariables.erase(v);
+    }
+
+    //Commented because of above issue.
+    /*for(ConstrainedVariableSet::const_iterator it = m_emptyVariables.begin();
+	it != m_emptyVariables.end();++it) {
       ConstrainedVariableId v = *it;
       check_error(!v.isNoId(),"Tried to relax ConstrainedVariableId::noId()");
       v->relax();
+      debugMsg("ConstraintEngine:ViolationMgr", "Relaxed empty variable : " << v->toLongString());
     }
+    m_emptyVariables.clear();*/
 
-    m_emptyVariables.clear();
     m_relaxing = false;
   }
 
@@ -300,6 +322,13 @@ namespace EUROPA
     delete m_violationMgr;
   }
 
+  /**
+   * Even if propagation is enabled automatically, we don't want to do it if already going on.
+   */
+  bool ConstraintEngine::shouldAutoPropagate() const {
+    return m_autoPropagate && ! m_propInProgress;
+  }
+
   bool ConstraintEngine::getAutoPropagation() const
   {
       return m_autoPropagate;
@@ -309,7 +338,7 @@ namespace EUROPA
   {
      if (v != m_autoPropagate) {
          m_autoPropagate = v;
-         if (m_autoPropagate)
+         if (shouldAutoPropagate())
              propagate();
      }
   }
@@ -454,7 +483,13 @@ namespace EUROPA
 
   void ConstraintEngine::add(const PropagatorId& propagator){
     check_error(propagator.isValid());
-    check_error(m_propagatorsByName.find(propagator->getName().getKey()) == m_propagatorsByName.end());
+    std::map<double, PropagatorId>::iterator it = m_propagatorsByName.find(propagator->getName().getKey());
+    if(it != m_propagatorsByName.end()) {
+      europaWarn("Overwriting propagator named " + propagator->getName().toString());
+      m_propagators.erase(std::find(m_propagators.begin(), m_propagators.end(), it->second));
+      it->second->discard();
+      m_propagatorsByName.erase(it);
+    }
     m_propagators.push_back(propagator);
     m_propagatorsByName.insert(std::make_pair(propagator->getName().getKey(), propagator));
 
@@ -694,6 +729,7 @@ namespace EUROPA
     // In all cases, notify the propagators as well, unless over-ruled by by an empty variable or a decision to ignore it
     for(ConstraintList::const_iterator it = source->m_constraints.begin(); it != source->m_constraints.end(); ++it){
       const ConstraintId& constraint = it->first;
+      checkError(constraint.isValid(), "Constraint is invalid on " << source->toLongString());
       unsigned int argIndex = it->second;
       if(constraint->isActive() && !constraint->isDiscarded() &&
 	 changeType != DomainListener::EMPTIED && !constraint->canIgnore(source, argIndex, changeType))
@@ -719,7 +755,7 @@ namespace EUROPA
     check_error(variable->getCurrentDomain().isEmpty());
 
     getViolationMgr().addEmptyVariable(variable);
-    debugMsg("ConstraintEngine:emptied","Emptied var:" << variable->toString()
+    debugMsg("ConstraintEngine:emptied","Emptied var:" << variable->toLongString()
 	     << " parent:" << (variable->parent().isNoId() ? "NULL" : variable->parent()->toString()));
     check_error(m_relaxed == false);
     getViolationMgr().handleEmpty(variable);
@@ -760,7 +796,7 @@ namespace EUROPA
     m_relaxing = true;
 
     std::list<ConstrainedVariableId> relaxationAgenda;
-    std::set<ConstrainedVariableId> visitedVariables;
+    ConstrainedVariableSet visitedVariables;
 
     addLinkedVarsForRelaxation(variable, relaxationAgenda, relaxationAgenda.end(),
 			       visitedVariables);
@@ -775,7 +811,8 @@ namespace EUROPA
     for(std::list<ConstrainedVariableId>::iterator it = relaxationAgenda.begin();
 	it != relaxationAgenda.end(); ++it) {
       const ConstrainedVariableId& id(*it);
-      if(id.isValid() && getVariables().find(id) != getVariables().end() &&
+      checkError(id.isValid(), "Invalid ID in relax");
+      if(getVariables().find(id) != getVariables().end() &&
 	 id->lastRelaxed() < m_cycleCount) {
 	debugMsg("ConstraintEngine:relaxed",
 		 "Relaxing " << id->toString());
@@ -998,7 +1035,7 @@ namespace EUROPA
   int ConstraintEngine::addLinkedVarsForRelaxation(const ConstrainedVariableId& var,
 						   std::list<ConstrainedVariableId>& dest,
 						   std::list<ConstrainedVariableId>::iterator pos,
-						   std::set<ConstrainedVariableId>& visitedVars) {
+						   ConstrainedVariableSet& visitedVars) {
     int count = 0;
     for(ConstraintList::const_iterator cIt = var->m_constraints.begin();
 	cIt != var->m_constraints.end(); ++cIt) {
@@ -1033,9 +1070,9 @@ namespace EUROPA
                               const EntityId& parent,
                               int index)
   {
-    TypeFactoryId factory = getCESchema()->getFactory(typeName);
-    check_error(factory.isValid(), "no TypeFactory found for type '" + std::string(typeName) + "'");
-    return createVariable(typeName, factory->baseDomain(), internal, canBeSpecified, name, parent, index);
+    DataTypeId dt = getCESchema()->getDataType(typeName);
+    check_error(dt.isValid(), "no DataType found for type '" + std::string(typeName) + "'");
+    return createVariable(typeName, dt->baseDomain(), internal, canBeSpecified, name, parent, index);
   }
 
   ConstrainedVariableId
@@ -1047,9 +1084,9 @@ namespace EUROPA
                               const EntityId& parent,
                               int index)
   {
-    TypeFactoryId factory = getCESchema()->getFactory(typeName);
-    check_error(factory.isValid(), "no TypeFactory found for type '" + std::string(typeName) + "'");
-    ConstrainedVariableId variable = factory->createVariable(getId(), baseDomain, internal, canBeSpecified, name, parent, index);
+    DataTypeId dt = getCESchema()->getDataType(typeName);
+    check_error(dt.isValid(), "no DataType found for type '" + std::string(typeName) + "'");
+    ConstrainedVariableId variable = dt->createVariable(getId(), baseDomain, internal, canBeSpecified, name, parent, index);
     check_error(variable.isValid());
     return variable;
   }
@@ -1057,11 +1094,11 @@ namespace EUROPA
   ConstraintId ConstraintEngine::createConstraint(const LabelStr& name,
                            const std::vector<ConstrainedVariableId>& scope)
   {
-      ConstraintFactoryId factory = getCESchema()->getConstraintFactory(name);
+      ConstraintTypeId factory = getCESchema()->getConstraintType(name);
       check_error(factory.isValid());
       ConstraintId constraint = factory->createConstraint(getId(), scope);
 
-      if (getAutoPropagation())
+      if (shouldAutoPropagate())
           propagate();
 
       return(constraint);
@@ -1072,16 +1109,16 @@ namespace EUROPA
       check_error(c.isValid());
       delete (Constraint*)c;
 
-      if (getAutoPropagation())
+      if (shouldAutoPropagate())
           propagate();
   }
 
 
   edouble ConstraintEngine::createValue(const char* typeName, const std::string& value)
   {
-    TypeFactoryId factory = getCESchema()->getFactory(typeName);
-    check_error(factory.isValid(), "no TypeFactory found for type '" + std::string(typeName) + "'");
-    return factory->createValue(value);
+    DataTypeId dt = getCESchema()->getDataType(typeName);
+    check_error(dt.isValid(), "no DataType found for type '" + std::string(typeName) + "'");
+    return dt->createValue(value);
   }
 
 

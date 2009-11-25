@@ -109,13 +109,12 @@ DEBUG_FLAGS ?= -g3 ;
 
 if $(OS) = BEOS {
   PTHREADS_LIBRARY = condvar ;
+} else if $(OS) = MINGW {
+  PTHREADS_LIBRARY = pthreadGC2 ;
+} else if $(OS) = SOLARIS {
+  PTHREADS_LIBRARY = pthread socket ;
 } else {
-  if $(OS) = MINGW {
-    PTHREADS_LIBRARY = pthreadGC2 ;
-  }
-  else {
-    PTHREADS_LIBRARY = pthread ;
-  }
+  PTHREADS_LIBRARY = pthread ;
 }
 
 # SUFSHARE = suffix for shared libraries
@@ -123,12 +122,13 @@ if $(OS) = BEOS {
 if $(OS) = CYGWIN || $(OS) = MINGW {
   SUFSHARE ?= .dll ;
 } else {
-	if $(OS) = MACOSX {
-	   SUFSHARE ?= .dylib ;
-	}
-	else {
-     SUFSHARE ?= .so ;
-	}
+  if $(OS) = MACOSX {
+    SUFSHARE ?= .dylib ;
+  }
+  else 
+  {
+    SUFSHARE ?= .so ;
+  }
 }
 
 # JAVA_HOME = java root directory
@@ -210,19 +210,34 @@ if $(OS) = CYGWIN {
 
 if $(OS) = CYGWIN && $(NOCYGWIN) {
   LINKFLAGS += $(LIBRARY_PATH_SEARCH_FLAG)/usr/local/mingw/lib -mno-cygwin ;
-  PLATFORM_FLAGS += -D_NO_W32_PSEUDO_MODIFIERS -D__MINGW32__ -I/usr/local/mingw/include -mno-cygwin ;
+  LINKFLAGS += -D_WIN32 ;  #to ensure Antlr3 compiles in win32 mode (see antlr3defs.h)
+  PLATFORM_FLAGS += -D_NO_W32_PSEUDO_MODIFIERS -D__MINGW32__ -D_WIN32 -I/usr/local/mingw/include -mno-cygwin ;
+  LINKLIBS += -lwsock32 ;  #winsock library is needed for Antlr3
+  #The compiler optimazations for MinGW are too slow for autobuild, but they do work
+  # -0 takes at least an hour, -01 >= 240 minutes,  -02 >= 230 minutes, -03 >= 350 minutes
+  #OPTIMIZE_FLAGS = -O3 -DEUROPA_FAST ;  
+  OPTIMIZE_FLAGS = -DEUROPA_FAST ;  
 }
 
 if $(OS) = MINGW {
-  PLATFORM_FLAGS += -D_NO_W32_PSEUDO_MODIFIERS ;
+  PLATFORM_FLAGS += -D_NO_W32_PSEUDO_MODIFIERS -D_WIN32 ;
+}
+
+if $(OS) = MACOSX {
+  PLATFORM_FLAGS += -I/opt/local/include ;
 }
 
 if $(OS) = SOLARIS {
-  LINKFLAGS += -Wl,-L/usr/local/lib ;
+  LINKFLAGS += -Wl,-L/usr/local/lib -L/usr/lib ;
+  LINKLIBS += -lsocket -lpthread ;
 }
 
 if $(OS) = BEOS {
   LINKLIBS += -lbe ;
+}
+
+if $(64BIT) = 1 {
+  PLATFORM_FLAGS += -DEUROPA_64_BIT_PLATFORM ;
 }
 
 # Supress the message that ar usually prints (unifies build output further)

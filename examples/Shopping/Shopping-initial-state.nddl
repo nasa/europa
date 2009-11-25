@@ -1,9 +1,6 @@
 #include "Shopping-model.nddl"
 
-
-// Create a planner configuration instance in PLASMA.
-// Horizon Start, Horizon End, MaxPlannerSteps, MaxPlannerDepth
-PlannerConfig plannerConfiguration = new PlannerConfig(0, 100, 500, +inf);
+int horizonEnd = 100;
 
 // Allocate instances
 Location Home = new Location("Home");
@@ -52,7 +49,7 @@ buy2 before finish;
 buy3 before finish;
 
 // Force things to happen within our horizon:
-leq(plannerConfiguration.m_horizonStart, start.start);
-leq(finish.end, plannerConfiguration.m_horizonEnd);
+leq(0, start.start);
+leq(finish.end, horizonEnd);
 
 // The planner should take it form here!

@@ -32,7 +32,7 @@ namespace EUROPA {
      * @param parent owner if appropriate.
      * @param index position in parent collection.
      */
-    Variable(const ConstraintEngineId& constraintEngine, 
+    Variable(const ConstraintEngineId& constraintEngine,
              const AbstractDomain& baseDomain,
              const bool internal = false,
              bool canBeSpecified = true,
@@ -106,14 +106,14 @@ namespace EUROPA {
   };
 
   template<class DomainType>
-  Variable<DomainType>::Variable(const ConstraintEngineId& constraintEngine, 
+  Variable<DomainType>::Variable(const ConstraintEngineId& constraintEngine,
                                  const AbstractDomain& baseDomain,
                                  const bool internal,
                                  bool canBeSpecified,
                                  const LabelStr& name,
                                  const EntityId& parent,
-                                 int index) 
-    : ConstrainedVariable(constraintEngine, internal, canBeSpecified, name, parent, index), 
+                                 int index)
+    : ConstrainedVariable(constraintEngine, internal, canBeSpecified, name, parent, index),
     m_baseDomain(static_cast<DomainType*>(baseDomain.copy())),
     m_derivedDomain(static_cast<DomainType*>(baseDomain.copy())) {
     debugMsg("Variable:Variable", "Name " << name.toString());
@@ -122,9 +122,9 @@ namespace EUROPA {
     {
     	debugMsg("Variable:Variable", "Base domain singleton; " << baseDomain.getSingletonValue());
     }
-    
-    
-    
+
+
+
     // Note that we permit the domain to be empty initially
     m_derivedDomain->setListener(m_listener);
 
@@ -132,9 +132,10 @@ namespace EUROPA {
     if (baseDomain.isOpen() || baseDomain.isEmpty())
       return;
   }
-  
+
   template<class DomainType>
   Variable<DomainType>::~Variable() {
+    debugMsg("Variable:~Variable", "Deleting " << getEntityName());
   	delete m_baseDomain;
   	delete m_derivedDomain;
   }
@@ -197,13 +198,18 @@ namespace EUROPA {
   void Variable<DomainType>::handleRestrictBaseDomain(const AbstractDomain& newBaseDomain) {
     check_error(validate());
 
-    if(newBaseDomain.isClosed() && m_baseDomain->isOpen())
-      m_baseDomain->close();
-
-    // Restrict the base domain - no change will quit
-    if(!m_baseDomain->intersect(newBaseDomain))
+    // For thh case of the open domain, we will assign values. Also will assign closure. For the case
+    // of a closed domain, just do intersection. In the event there is no restriction, we do nothing further.
+    if(m_baseDomain->isOpen()){
+      (*m_baseDomain) = newBaseDomain;
+      if(newBaseDomain.isClosed())
+	m_baseDomain->close();
+      return;
+    }
+    else if(!m_baseDomain->intersect(newBaseDomain))
       return;
 
+    // Apply restriction - force an event even if domain is unchanged
     m_derivedDomain->intersect(*m_baseDomain);
 
     // If a singleton, since it has changed, we have to set the value.

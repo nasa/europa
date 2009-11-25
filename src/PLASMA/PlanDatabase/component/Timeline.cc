@@ -13,8 +13,8 @@
 #include "TemporalAdvisor.hh"
 #include "ConstraintEngine.hh"
 #include "Constraint.hh"
-#include "ConstraintFactory.hh"
-#include "IntervalIntDomain.hh"
+#include "ConstraintType.hh"
+#include "Domains.hh"
 #include "Utils.hh"
 #include "Debug.hh"
 
@@ -44,14 +44,14 @@ namespace EUROPA {
     return m_tokenIndex.find(token->getKey()) != m_tokenIndex.end();
   }
 
-  void Timeline::getOrderingChoices(const TokenId& token, 
+  void Timeline::getOrderingChoices(const TokenId& token,
 				    std::vector< std::pair<TokenId, TokenId> >& results,
 				    unsigned int limit){
     check_error(results.empty());
     check_error(token.isValid());
     check_error(limit > 0, "Cannot set limit to less than 1.");
 
-    debugMsg("Timeline:getOrderingChoices", 
+    debugMsg("Timeline:getOrderingChoices",
 	     "Getting ordering choices for token (" << token->getKey() << ") " << token->getName().c_str());
 
     // Force propagation and return if inconsistent - leads to no ordering choices.
@@ -64,7 +64,7 @@ namespace EUROPA {
     // we trap that as an error. We could just return indicating no choices but that might lead caller to conclude
     // there is simply an inconsistency rather than force them to write code to ensure this does not happen.
     check_error(m_tokenIndex.find(token->getKey()) == m_tokenIndex.end(),
-                "Attempted to query for choices to constrain token " + token->getPredicateName().toString() + 
+                "Attempted to query for choices to constrain token " + token->getPredicateName().toString() +
                 " which has already been constrained.");
 
     // If the sequence is empty, add the case where both elements of the pair are the given token.
@@ -130,7 +130,7 @@ namespace EUROPA {
       else {
 	if (temporalAdvisor->canFitBetween(token, predecessor, successor)){
 	  debugMsg("Timeline:getOrderingChoices:canPrecede",
-		   token->toString() << "can be inserted between " << predecessor->toString() << " and " << successor->toString()); 
+		   token->toString() << "can be inserted between " << predecessor->toString() << " and " << successor->toString());
 	  results.push_back(std::make_pair(token, successor));
 	  choiceCount++;
 	}
@@ -213,7 +213,7 @@ namespace EUROPA {
     if(predecessor != successor && orderingRequired(successor))
       notifyOrderingNoLongerRequired(successor);
 
-    checkError(m_tokenSequence.empty() || 
+    checkError(m_tokenSequence.empty() ||
 	       m_tokenIndex.find(predecessor->getKey()) != m_tokenIndex.end() ||
 	       m_tokenIndex.find(successor->getKey()) != m_tokenIndex.end(),
 	       "At least one of predecessor or successor should be already sequenced in a non empty sequence." <<
@@ -256,8 +256,8 @@ namespace EUROPA {
         TokenId oldPredecessor = *sequencePos;
         Object::constrain(oldPredecessor, predecessor, false);
       }
-    } 
-    // CASE 2: Predecessor already sequenced, so insert successor after it. Thus is a given if we get here. 
+    }
+    // CASE 2: Predecessor already sequenced, so insert successor after it. Thus is a given if we get here.
     else if(successorIndexPos == m_tokenIndex.end()){
       std::list<TokenId>::iterator sequencePos = predecessorIndexPos->second;
 
@@ -315,7 +315,7 @@ namespace EUROPA {
 
     // May have to post a constraint between earlier and later if none exists already in the case
     // where the token is surrounded
-    if (!earlier.isNoId() && !later.isNoId() && 
+    if (!earlier.isNoId() && !later.isNoId() &&
 	getPrecedenceConstraint(earlier, later).isNoId())
       constrain(earlier, later);
 
@@ -380,7 +380,7 @@ namespace EUROPA {
     // If valid start and end tokens, currently unconstrained, and adjacemt
     if (adjacent(startTok, endTok) && !isConstrainedToPrecede(startTok, endTok))
       Object::constrain(startTok, endTok, false); // Add an implied constraint
- 
+
     check_error(isValid());
   }
 
@@ -389,7 +389,7 @@ namespace EUROPA {
     assertTrue(ALWAYS_FAIL, "Timeline::isValid() should never be called when compiling #define EUROPA_FAST");
 #else
     check_error(Object::isValid());
-    checkError(m_tokenIndex.size() == m_tokenSequence.size(), 
+    checkError(m_tokenIndex.size() == m_tokenSequence.size(),
 	       m_tokenIndex.size() << " != " << m_tokenSequence.size());
 
     eint prior_earliest_start = MINUS_INFINITY - 1;
@@ -402,7 +402,7 @@ namespace EUROPA {
       TokenId token = *it;
       allTokens.insert(token);
       check_error(m_tokenIndex.find(token->getKey()) != m_tokenIndex.end());
-      check_error(cleaningUp || token->isActive());
+      checkError(cleaningUp || token->isActive(), token->toLongString());
 
       // Validate that earliest start times are monotonically increasing, as long as we are constraint consistent at any rate!
       // Also ensure x.end <= (x+1).start.
@@ -517,4 +517,26 @@ namespace EUROPA {
   void Timeline::notifyDeleted(const TokenId& token){
     remove(token);
   }
+
+  TimelineObjectFactory::TimelineObjectFactory(const ObjectTypeId& objType)
+    : NativeObjectFactory(objType,objType->getName())
+  {
+  }
+
+  TimelineObjectFactory::~TimelineObjectFactory()
+  {
+  }
+
+  ObjectId TimelineObjectFactory::makeNewObject(
+                        const PlanDatabaseId& planDb,
+                        const LabelStr& objectType,
+                        const LabelStr& objectName,
+                        const std::vector<const AbstractDomain*>& arguments) const
+  {
+    ObjectId instance =  (new Timeline(planDb, objectType, objectName,true))->getId();
+    debugMsg("Interpreter:NativeObjectFactory","Created Native " << m_className.toString() << ":" << objectName.toString() << " type:" << objectType.toString());
+
+    return instance;
+  }
+
 }

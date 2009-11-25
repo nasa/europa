@@ -1,104 +1,122 @@
-#include "Utils.hh"
-#include "Debug.hh"
 #include "Instant.hh"
-
-#include <sstream>
+#include "Transaction.hh"
+#include "Profile.hh"
+#include "ConstrainedVariable.hh"
 
 namespace EUROPA {
+    Instant::Instant(const int time, const ProfileId prof)
+      : Entity(), m_id(this), m_time(time), m_profile(prof), m_lowerLevel(0), m_lowerLevelMax(0), m_upperLevelMin(0), m_upperLevel(0),
+        m_maxInstProduction(0), m_maxInstConsumption(0), m_minInstProduction(0), m_minInstConsumption(0),
+        m_maxCumulativeProduction(0), m_maxCumulativeConsumption(0), m_minCumulativeProduction(0), m_minCumulativeConsumption(0),
+        m_maxPrevProduction(0), m_maxPrevConsumption(0), m_minPrevProduction(0), m_minPrevConsumption(0),
+        m_upperFlawMagnitude(0), m_lowerFlawMagnitude(0),
+        m_violated(false), m_flawed(false), m_upperFlaw(false), m_lowerFlaw(false) {}
 
-  Instant::Instant(int time)
-  : Entity(),
-    m_id(this),
-    m_time(time),
-
-	m_lowerMin(0),
-	m_lowerMax(0),
-	m_upperMin(0),
-	m_upperMax(0)
-  {
-    check_error(isValid());
-  }
-
-  Instant::~Instant() {
-    cleanup(m_violations);
-	cleanup(m_flaws);
-    m_id.remove();
-  }
-
-  void Instant::insert(const TransactionId& tx) {
-    m_transactions.insert(tx);
-  }
-
-  bool Instant::remove(const TransactionId& tx) {
-    unsigned int old_size = m_transactions.size();
-    m_transactions.erase(tx);
-    reset();
-    return(m_transactions.size() < old_size);
-  }
-
-  void Instant::addResourceViolation(ResourceProblem::Type type) {
-    ResourceViolation* violation = new ResourceViolation(type, m_id);
-    m_violations.push_back(violation->getId());
-  }
-
-  void Instant::addResourceFlaw(ResourceProblem::Type type) {
-    ResourceFlaw* flaw = new ResourceFlaw(type, m_id);
-    m_flaws.push_back(flaw->getId());
-  }
-
-  // Resets the violations and flaws
-  void Instant::reset(){
-    cleanup(m_violations);
-    cleanup(m_flaws);
-  }
-
-  std::string Instant::toString() const {
-    std::stringstream sstr;
-    print(sstr);
-    return sstr.str();
-  }
-
-  void Instant::print(std::ostream& os) const {
-    if (m_violations.size() > 0)
-      os << "XX ";
-    if (m_flaws.size() > 0)
-      os << "FF ";
-
-    if(m_time == PLUS_INFINITY)
-      os << "+inf";
-    else if (m_time == MINUS_INFINITY)
-      os << "-inf";
-    else
-      os << m_time;
-    os <<  ":["  << m_lowerMin << ", " << m_lowerMax << ", "  << m_upperMin << ", " << m_upperMax << "] ";
-	for ( std::list<ResourceViolationId>::const_iterator it=m_violations.begin(); 
-		  it!=m_violations.end(); ++it ) {
-	  os << "v" << (*it)->getString() <<" ";
-	}
-	for ( std::list<ResourceFlawId>::const_iterator it=m_flaws.begin(); 
-		  it!=m_flaws.end(); ++it ) {
-	  os << "f" << (*it)->getString() <<" ";
-	}
-  }
-
-  void Instant::updateBounds( double lowerMin, double lowerMax, double upperMin, double upperMax ) {
-	m_lowerMin = lowerMin;
-	m_lowerMax = lowerMax;
-	m_upperMin = upperMin;
-	m_upperMax = upperMax;
-	debugMsg("Instant:updateBounds", toString());
-  }
-
-  bool Instant::isValid() const {
-    for (TransactionSet::const_iterator it = m_transactions.begin();
-         it != m_transactions.end(); ++it) {
-      TransactionId tx = *it;
-      check_error(tx.isValid());
-      check_error(tx->getTime()->lastDomain().isMember(m_time));
-      check_error(tx->getResource().isNoId() || tx->getResource().isValid());
+    Instant::~Instant() {
+      m_id.remove();
     }
 
-    return(true);
-  }
+    int Instant::getTime() const {return m_time;}
 
+    const std::set<TransactionId>& Instant::getTransactions() const {return m_transactions;}
+    const std::set<TransactionId>& Instant::getEndingTransactions() const {return m_endingTransactions;}
+    const std::set<TransactionId>& Instant::getStartingTransactions() const {return m_startingTransactions;}
+
+    void Instant::addTransaction(const TransactionId t) {
+      checkError(m_transactions.find(t) == m_transactions.end(), "Instant for time " << m_time << " already has transaction " << t);
+      checkError(t->time()->lastDomain().isMember(m_time), "Attempted to add a transaction spanning time " <<
+                 t->time()->toString() << " to instant for " << m_time);
+
+      debugMsg("Instant:addTransaction", "Adding transaction to instant (" << getId() << ") for time " << t->time()->toString() << " with quantity " << t->quantity()->toString());
+      m_transactions.insert(t);
+
+      if(t->time()->lastDomain().getLowerBound() == m_time )
+        m_startingTransactions.insert(t);
+
+      if(t->time()->lastDomain().getUpperBound() == m_time)
+        m_endingTransactions.insert(t);
+    }
+
+    void Instant::updateTransaction(const TransactionId t) {
+      checkError(t->time()->lastDomain().isMember(m_time), "Attempted to update a transaction spanning time " <<
+                 t->time()->toString() << " to instant for " << m_time);
+
+      debugMsg("Instant:updateTransaction", "Updating transaction to instant (" << getId() << ") for time " << t->time()->toString() << " with quantity " << t->quantity()->toString());
+
+      if(t->time()->lastDomain().getLowerBound() == m_time )
+        m_startingTransactions.insert(t);
+      else
+        m_startingTransactions.erase(t);
+
+      if(t->time()->lastDomain().getUpperBound() == m_time)
+          m_endingTransactions.insert(t);
+      else
+          m_endingTransactions.erase(t);
+    }
+
+    void Instant::removeTransaction(const TransactionId t) {
+      checkError(m_transactions.find(t) != m_transactions.end(), "Instant for time " << m_time << " has no transaction " << t);
+      m_transactions.erase(t);
+      m_endingTransactions.erase(t);
+      m_startingTransactions.erase(t);
+    }
+
+    double Instant::getLowerLevel() {return m_lowerLevel;}
+    double Instant::getLowerLevelMax() {return m_lowerLevelMax;}
+    double Instant::getUpperLevelMin() {return m_upperLevelMin;}
+    double Instant::getUpperLevel() {return m_upperLevel;}
+    double Instant::getMaxInstantProduction() {return m_maxInstProduction;}
+    double Instant::getMinInstantProduction() {return m_minInstProduction;}
+    double Instant::getMaxInstantConsumption() {return m_maxInstConsumption;}
+    double Instant::getMinInstantConsumption() {return m_minInstConsumption;}
+    double Instant::getMaxCumulativeConsumption() {return m_maxCumulativeConsumption;}
+    double Instant::getMaxCumulativeProduction() {return m_maxCumulativeProduction;}
+    double Instant::getMinCumulativeConsumption() {return m_minCumulativeConsumption;}
+    double Instant::getMinCumulativeProduction() {return m_minCumulativeProduction;}
+    double Instant::getMaxPrevConsumption() {return m_maxPrevConsumption;}
+    double Instant::getMaxPrevProduction() {return m_maxPrevProduction;}
+    double Instant::getMinPrevConsumption() {return m_minPrevConsumption;}
+    double Instant::getMinPrevProduction() {return m_minPrevProduction;}
+
+    void Instant::update(double lowerLevelMin, double lowerLevelMax, double upperLevelMin, double upperLevelMax,
+                         double minInstConsumption, double maxInstConsumption, double minInstProduction, double maxInstProduction,
+                         double minCumulativeConsumption, double maxCumulativeConsumption, double minCumulativeProduction, double maxCumulativeProduction,
+                         double minPrevConsumption, double maxPrevConsumption, double minPrevProduction, double maxPrevProduction) {
+      m_lowerLevel = lowerLevelMin;
+      m_lowerLevelMax = lowerLevelMax;
+      m_upperLevelMin = upperLevelMin;
+      m_upperLevel = upperLevelMax;
+      m_minInstConsumption = minInstConsumption;
+      m_maxInstConsumption = maxInstConsumption;
+      m_minInstProduction = minInstProduction;
+      m_maxInstProduction = maxInstProduction;
+      m_minCumulativeConsumption = minCumulativeConsumption;
+      m_maxCumulativeConsumption = maxCumulativeConsumption;
+      m_minCumulativeProduction = minCumulativeProduction;
+      m_maxCumulativeProduction = maxCumulativeProduction;
+      m_minPrevConsumption = minPrevConsumption;
+      m_maxPrevConsumption = maxPrevConsumption;
+      m_minPrevProduction = minPrevProduction;
+      m_maxPrevProduction = maxPrevProduction;
+    }
+
+    bool Instant::containsStartOrEnd() {
+      bool retval = false;
+      for(std::set<TransactionId>::const_iterator it = m_transactions.begin(); it != m_transactions.end(); ++it) {
+        TransactionId trans = *it;
+        if(trans->time()->lastDomain().getLowerBound() == m_time || trans->time()->lastDomain().getUpperBound() == m_time) {
+          retval = true;
+          break;
+        }
+      }
+      return retval;
+    }
+
+    std::string Instant::toString() const {
+      std::stringstream sstr;
+      for(std::set<TransactionId>::const_iterator it = m_transactions.begin(); it != m_transactions.end(); ++it)
+        sstr << " " << m_time << ": " << (*it) << " " << (*it)->time()->toString() << " " << (*it)->quantity()->toString() <<
+          ((*it)->isConsumer() ? " (C)" : " (P)") << std::endl;
+      return sstr.str();
+    }
 }

@@ -114,7 +114,7 @@
  * @note When EUROPA_FAST is defined, these are ignored
  */
 #ifndef warn
-#define warn(msg)
+#define europaWarn(msg)
 #endif
 
 /**
@@ -170,7 +170,7 @@
 
 
 #ifndef warn
-#define warn(msg) (Error::printWarning((msg), __FILE__, __LINE__))
+#define europaWarn(msg) (Error::printWarning((msg), __FILE__, __LINE__))
 #endif
 
 #define condWarning(cond, msg) { \

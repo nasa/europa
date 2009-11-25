@@ -33,7 +33,7 @@ namespace EUROPA {
        * bestPriority will be updated to the priority of the new decision point.
        * @return A noId if no better decision can be found, otherwise a new decision with a better priority.
        */
-      static DecisionPointId next(const ConstrainedVariableSet& flawCandidates, 
+      static DecisionPointId next(const ConstrainedVariableSet& flawCandidates,
 				  const std::map< ConstrainedVariableId, unsigned int>& guardCache,
 				  unsigned int& bestPriority);
 
@@ -129,6 +129,6 @@ namespace EUROPA {
   }
 }
 
-#define REGISTER_VARIABLE_DECISION_FACTORY(CLASS, NAME) REGISTER_FLAW_HANDLER(CLASS, NAME)
+#define REGISTER_VARIABLE_DECISION_FACTORY(MGR,CLASS, NAME) REGISTER_FLAW_HANDLER(MGR,CLASS, NAME)
 
 #endif

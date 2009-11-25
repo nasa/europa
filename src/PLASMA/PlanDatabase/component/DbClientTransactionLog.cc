@@ -1,9 +1,6 @@
 #include "Debug.hh"
 #include "Utils.hh"
-#include "EnumeratedDomain.hh"
-#include "BoolDomain.hh"
-#include "StringDomain.hh"
-#include "SymbolDomain.hh"
+#include "Domains.hh"
 #include "tinyxml.h"
 #include "Object.hh"
 #include "UnifyMemento.hh"
@@ -27,15 +24,14 @@ namespace EUROPA {
   const std::list<TiXmlElement*>& DbClientTransactionLog::getBufferedTransactions() const {return m_bufferedTransactions;}
 
   const bool DbClientTransactionLog::isBool(const std::string& typeName)  {
-    return (strcmp(typeName.c_str(),"bool") == 0 || 
-            strcmp(typeName.c_str(), "BOOL" ) == 0 || 
-            strcmp(typeName.c_str(),BoolDomain::getDefaultTypeName().c_str()) == 0);
+    return (strcmp(typeName.c_str(),"bool") == 0 ||
+            strcmp(typeName.c_str(), "BOOL" ) == 0 ||
+            strcmp(typeName.c_str(),BoolDT::NAME().c_str()) == 0);
   }
 
   const bool DbClientTransactionLog::isInt(const std::string& typeName)  {
-    return (strcmp(typeName.c_str(),"int") == 0 || 
-            strcmp(typeName.c_str(), "INT_INTERVAL" ) == 0 || 
-            strcmp(typeName.c_str(),BoolDomain::getDefaultTypeName().c_str()) == 0);
+    return (strcmp(typeName.c_str(),"int") == 0 ||
+            strcmp(typeName.c_str(),BoolDT::NAME().c_str()) == 0);
   }
 
   void DbClientTransactionLog::insertBreakpoint() {
@@ -124,12 +120,12 @@ namespace EUROPA {
   }
 
   void DbClientTransactionLog::notifyTokenCreated(const TokenId& token){
-    TiXmlElement * element = (token->isFact() ? allocateXmlElement("fact") : 
+    TiXmlElement * element = (token->isFact() ? allocateXmlElement("fact") :
                               allocateXmlElement("goal"));
     TiXmlElement * instance = allocateXmlElement("predicateinstance");
     instance->SetAttribute("name", m_tokensCreated++);
-    check_error(LabelStr::isString(token->getName()));
-    instance->SetAttribute("type", token->getName().toString());
+    check_error(LabelStr::isString(token->getPredicateName()));
+    instance->SetAttribute("type", token->getPredicateName().toString());
     instance->SetAttribute("path", m_client->getPathAsString(token));
     element->LinkEndChild(instance);
     pushTransaction(element);
@@ -138,7 +134,7 @@ namespace EUROPA {
   void DbClientTransactionLog::notifyTokenDeleted(const TokenId& token,
                                                   const std::string& name) {
     TiXmlElement* element = allocateXmlElement("deletetoken");
-    element->SetAttribute("type", token->getName().toString());
+    element->SetAttribute("type", token->getPredicateName().toString());
     element->SetAttribute("path", m_client->getPathAsString(token));
     if(!name.empty())
       element->SetAttribute("name", name);
@@ -213,7 +209,7 @@ namespace EUROPA {
 
   void DbClientTransactionLog::notifyConstraintCreated(const ConstraintId& constraint){
     TiXmlElement * element = allocateXmlElement("invoke");
-    element->SetAttribute("name", constraint->getName().toString());    
+    element->SetAttribute("name", constraint->getName().toString());
     element->SetAttribute("index", m_client->getIndexByConstraint(constraint));
     const std::vector<ConstrainedVariableId>& variables = constraint->getScope();
     std::vector<ConstrainedVariableId>::const_iterator iter;
@@ -284,7 +280,7 @@ namespace EUROPA {
     if (isBool(domain->getTypeName().toString())) {
       return (value == 1 ? "true" : "false");
     }
-    else 
+    else
       if (domain->isNumeric()) {
         // CMG: Do not use snprintf. Not supported on DEC
         std::stringstream ss;
@@ -392,7 +388,7 @@ namespace EUROPA {
       } else {
         var_el->SetAttribute("index", m_client->getIndexByVariable(variable));
         return var_el;
-      } 
+      }
     } else {
       var_el->SetAttribute("index", m_client->getIndexByVariable(variable));
       return var_el;

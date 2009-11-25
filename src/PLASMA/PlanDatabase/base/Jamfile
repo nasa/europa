@@ -17,16 +17,20 @@ ModuleBase PlanDatabase
 	DefaultTemporalAdvisor.cc
 	HasAncestorConstraint.cc
 	MergeMemento.cc
+	Method.cc
 	Object.cc
 	ObjectFactory.cc
 	ObjectTokenRelation.cc
+	ObjectType.cc
+	PDBInterpreter.cc
 	PlanDatabase.cc
 	PlanDatabaseListener.cc
 	PSPlanDatabaseListener.cc
-    PlanDatabaseWriter.cc
+	PlanDatabaseWriter.cc
  	StackMemento.cc
 	Token.cc
-	TokenFactory.cc
+	TokenType.cc
+	TokenTypeMgr.cc
 	UnifyMemento.cc
 	;
 

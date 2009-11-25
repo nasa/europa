@@ -2,13 +2,13 @@
 #include "PlannerConfig.nddl"
 
 /**
- * Test that we can sub-class a timeline and correctly inherit the rule so that it 
+ * Test that we can sub-class a timeline and correctly inherit the rule so that it
  * will allocate a token of the sub-type instead of the base type.
  */
 
 
 class Base extends Timeline {
- predicate P{}
+ predicate P{int x;}
 }
 
 Base::P{
@@ -28,3 +28,4 @@ close();
 
 goal(Derived.P g0);
 g0.start = 0;
+g0.x=8;

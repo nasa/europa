@@ -8,7 +8,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 class UtilModuleTests : public CppUnit::TestFixture {
-
+  
   CPPUNIT_TEST_SUITE(UtilModuleTests);
   CPPUNIT_TEST(errorTests);
   CPPUNIT_TEST(debugTests);
@@ -17,6 +17,7 @@ class UtilModuleTests : public CppUnit::TestFixture {
   CPPUNIT_TEST(entityTests);
   CPPUNIT_TEST(xmlTests);
   CPPUNIT_TEST(numberTests);
+  CPPUNIT_TEST(loggerTests);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -24,7 +25,7 @@ public:
   {
     EUROPA::setTestLoadLibraryPath(".");
   }
-
+  
   void errorTests();
   void debugTests();
   void idTests();
@@ -32,6 +33,7 @@ public:
   void entityTests();
   void xmlTests();
   void numberTests();
+  void loggerTests();
 };
 
 

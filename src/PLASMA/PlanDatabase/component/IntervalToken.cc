@@ -1,12 +1,12 @@
 #include "IntervalToken.hh"
 #include "TokenVariable.hh"
 #include "PlanDatabase.hh"
-#include "IntervalIntDomain.hh"
-#include "ConstraintFactory.hh"
+#include "Domains.hh"
+#include "ConstraintType.hh"
 
 namespace EUROPA{
 
-  IntervalToken::IntervalToken(const PlanDatabaseId& planDatabase, 
+  IntervalToken::IntervalToken(const PlanDatabaseId& planDatabase,
 			       const LabelStr& predicateName,
 			       bool rejectable,
 			       bool isFact,
@@ -15,8 +15,8 @@ namespace EUROPA{
 			       const IntervalIntDomain& durationBaseDomain,
 			       const LabelStr& objectName,
 			       bool closed)
-    :Token(planDatabase, 
-	   predicateName, 
+    :Token(planDatabase,
+	   predicateName,
 	   rejectable,
 	   isFact,
 	   durationBaseDomain,
@@ -25,7 +25,7 @@ namespace EUROPA{
     commonInit(startBaseDomain, endBaseDomain, closed);
   }
 
-  IntervalToken::IntervalToken(const TokenId& m_master, 
+  IntervalToken::IntervalToken(const TokenId& m_master,
 			       const LabelStr& m_relation,
 			       const LabelStr& predicateName,
 			       const IntervalIntDomain& startBaseDomain,
@@ -33,9 +33,9 @@ namespace EUROPA{
 			       const IntervalIntDomain& durationBaseDomain,
 			       const LabelStr& objectName,
 			       bool closed)
-    :Token(m_master, 
+    :Token(m_master,
 	   m_relation,
-	   predicateName, 
+	   predicateName,
 	   durationBaseDomain,
 	   objectName,
 	   false){
@@ -61,7 +61,7 @@ namespace EUROPA{
 
     m_start = (new TokenVariable<IntervalIntDomain>(m_id,
 						    m_allVariables.size(),
-						    m_planDatabase->getConstraintEngine(), 
+						    m_planDatabase->getConstraintEngine(),
 						    startBaseDomain,
 						    false, // TODO: fixme
 						    true,
@@ -70,7 +70,7 @@ namespace EUROPA{
 
     m_end = (new TokenVariable<IntervalIntDomain>(m_id,
 						  m_allVariables.size(),
-						  m_planDatabase->getConstraintEngine(), 
+						  m_planDatabase->getConstraintEngine(),
 						  endBaseDomain,
 						  false, // TODO: fixme
 						  true,
@@ -82,7 +82,7 @@ namespace EUROPA{
     temp.push_back(m_duration);
     temp.push_back(m_end);
 
-    ConstraintId temporalRelation = 
+    ConstraintId temporalRelation =
         m_planDatabase->getConstraintEngine()->createConstraint(LabelStr("temporalDistance"),temp);
 
     m_standardConstraints.insert(temporalRelation);

@@ -6,12 +6,22 @@
 #include "Variable.hh"
 
 namespace EUROPA {
+
+  class ObjectType;
+  typedef Id<ObjectType> ObjectTypeId;
+
   class Object;
   typedef Id<Object> ObjectId;
   typedef std::set<ObjectId, EntityComparator<ObjectId> > ObjectSet;
 
   class Timeline;
   typedef Id<Timeline> TimelineId;
+
+  class TokenType;
+  typedef Id<TokenType> TokenTypeId;
+
+  class TokenTypeMgr;
+  typedef Id<TokenTypeMgr> TokenTypeMgrId;
 
   class Token;
   typedef Id<Token> TokenId;
@@ -32,7 +42,7 @@ namespace EUROPA {
   template<class DomainType> class TokenVariable;
   class StateDomain;
   typedef Id< TokenVariable<StateDomain> > StateVarId;
-  
+
   typedef Id< Variable<IntervalIntDomain> > TimeVarId;
   typedef Id< TokenVariable<IntervalIntDomain> > TempVarId;
 

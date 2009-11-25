@@ -1,0 +1,10 @@
+#include "Model.nddl"
+
+SingletonGuardLoopTest test = new SingletonGuardLoopTest();
+
+close();
+
+goal(SingletonGuardLoopTest.pred foo);
+foo.activate();
+test.constrain(foo);
+foo.start.specify(0);

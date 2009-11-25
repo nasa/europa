@@ -77,9 +77,9 @@
 			<NumericDomain><element value="1"/></NumericDomain>
 		</Inputs>
 		<Outputs>
-			<SymbolDomain type="int"/>
-			<SymbolDomain type="int"/>
-			<SymbolDomain type="int"/>
+			<SymbolDomain type="integer"/>
+			<SymbolDomain type="integer"/>
+			<SymbolDomain type="integer"/>
 		</Outputs>
 	</Constraint>
 	<Constraint name="addeq" test="7">
@@ -101,9 +101,9 @@
 			<NumericDomain><element value="-1"/></NumericDomain>
 		</Inputs>
 		<Outputs>
-			<SymbolDomain type="int"/>
-			<SymbolDomain type="int"/>
-			<SymbolDomain type="int"/>
+			<SymbolDomain type="integer"/>
+			<SymbolDomain type="integer"/>
+			<SymbolDomain type="integer"/>
 		</Outputs>
 	</Constraint>
 	<Constraint name="addmuleq" test="9">
@@ -43863,4 +43863,433 @@
 			<IntervalDomain lb="10.0" ub="10.0"/>
 		</Outputs>
 	</Constraint>
+	<Constraint name="testOr" test="3398">
+		<Inputs>
+			<BoolDomain>
+			  <element value="true"/>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="testOr" test="3399">
+		<Inputs>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="testOr" test="3400">
+		<Inputs>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="testOr" test="3401">
+		<Inputs>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			  <element value="false"/>
+			</BoolDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+		</Outputs>
+	</Constraint>
+
+	<Constraint name="testAnd" test="3402">
+		<Inputs>
+			<BoolDomain>
+			  <element value="false"/>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="testAnd" test="3403">
+		<Inputs>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			  <element value="false"/>
+			</BoolDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="testAnd" test="3404">
+		<Inputs>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			  <element value="false"/>
+			</BoolDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="testAnd" test="3405">
+		<Inputs>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+		</Outputs>
+	</Constraint>
+
+	<Constraint name="testNEQ" test="3406">
+		<Inputs>
+			<BoolDomain>
+			  <element value="true"/>
+			  <element value="false"/>
+			</BoolDomain>
+			<NumericDomain>
+			  <element value="2"/>
+			</NumericDomain>
+			<NumericDomain>
+			  <element value="2"/>
+			</NumericDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="false"/>
+			</BoolDomain>
+			<NumericDomain>
+			  <element value="2"/>
+			</NumericDomain>
+			<NumericDomain>
+			  <element value="2"/>
+			</NumericDomain>
+		</Outputs>
+	</Constraint>
+	<Constraint name="testNEQ" test="3407">
+		<Inputs>
+			<BoolDomain>
+			  <element value="true"/>
+			  <element value="false"/>
+			</BoolDomain>
+			<NumericDomain>
+			  <element value="3"/>
+			</NumericDomain>
+			<NumericDomain>
+			  <element value="2"/>
+			</NumericDomain>
+		</Inputs>
+		<Outputs>
+			<BoolDomain>
+			  <element value="true"/>
+			</BoolDomain>
+			<NumericDomain>
+			  <element value="3"/>
+			</NumericDomain>
+			<NumericDomain>
+			  <element value="2"/>
+			</NumericDomain>
+		</Outputs>
+	</Constraint>
+ 	<Constraint name="testSingleton" test="3408">
+ 		<Inputs>
+ 			<BoolDomain>
+ 			  <element value="true"/>
+ 			  <element value="false"/>
+ 			</BoolDomain>
+ 			<NumericDomain>
+ 			  <element value="2"/>
+ 			</NumericDomain>
+ 		</Inputs>
+ 		<Outputs>
+ 			<BoolDomain>
+ 			  <element value="true"/>
+ 			</BoolDomain>
+ 			<NumericDomain>
+ 			  <element value="2"/>
+ 			</NumericDomain>
+ 		</Outputs>
+	</Constraint>
+ 	<Constraint name="testSingleton" test="3409">
+		<Inputs>
+ 			<BoolDomain>
+ 			  <element value="true"/>
+			  <element value="false"/>
+ 			</BoolDomain>
+			<NumericDomain>
+ 			  <element value="2"/>
+ 			  <element value="3"/>
+ 			</NumericDomain>
+ 		</Inputs>
+		<Outputs>
+ 			<BoolDomain>
+ 			  <element value="true"/>
+ 			  <element value="false"/>
+ 			</BoolDomain>
+			<NumericDomain>
+ 			  <element value="2"/>
+ 			  <element value="3"/>
+ 			</NumericDomain>
+		</Outputs>
+ 	</Constraint>
+ 	<Constraint name="maxf" test="3410">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<NumericDomain>
+ 			  <element value="3"/>
+ 			</NumericDomain>
+			<NumericDomain>
+ 			  <element value="5"/>
+ 			</NumericDomain>
+ 		</Inputs>
+		<Outputs>
+		        <IntervalDomain lb="5" ub="5"/>
+			<NumericDomain>
+ 			  <element value="3"/>
+ 			</NumericDomain>
+			<NumericDomain>
+ 			  <element value="5"/>
+ 			</NumericDomain>
+		</Outputs>
+ 	</Constraint>
+ 	<Constraint name="minf" test="3411">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<NumericDomain>
+ 			  <element value="3"/>
+ 			</NumericDomain>
+			<NumericDomain>
+ 			  <element value="5"/>
+ 			</NumericDomain>
+ 		</Inputs>
+		<Outputs>
+		        <IntervalDomain lb="3" ub="3"/>
+			<NumericDomain>
+ 			  <element value="3"/>
+ 			</NumericDomain>
+			<NumericDomain>
+ 			  <element value="5"/>
+ 			</NumericDomain>
+		</Outputs>
+ 	</Constraint>
+ 	<Constraint name="abs" test="3412">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<NumericDomain>
+ 			  <element value="-3"/>
+ 			</NumericDomain>
+ 		</Inputs>
+		<Outputs>
+		        <IntervalDomain lb="3" ub="3"/>
+			<NumericDomain>
+ 			  <element value="-3"/>
+ 			</NumericDomain>
+		</Outputs>
+ 	</Constraint>
+ 	<Constraint name="pow" test="3413">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<NumericDomain>
+ 			  <element value="2"/>
+ 			</NumericDomain>
+			<NumericDomain>
+ 			  <element value="3"/>
+ 			</NumericDomain>
+ 		</Inputs>
+		<Outputs>
+		        <IntervalDomain lb="8" ub="8"/>
+			<NumericDomain>
+ 			  <element value="2"/>
+ 			</NumericDomain>
+			<NumericDomain>
+ 			  <element value="3"/>
+ 			</NumericDomain>
+		</Outputs>
+ 	</Constraint>
+ 	<Constraint name="sqrt" test="3414">
+		<Inputs>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+			<NumericDomain>
+ 			  <element value="4"/>
+ 			</NumericDomain>
+ 		</Inputs>
+		<Outputs>
+		        <IntervalDomain lb="2" ub="2"/>
+			<NumericDomain>
+ 			  <element value="4"/>
+ 			</NumericDomain>
+		</Outputs>
+ 	</Constraint>
+ 	<Constraint name="mod" test="3415">
+		<Inputs>
+			<IntervalIntDomain lb="-inf" ub="+inf"/>
+			<NumericDomain>
+ 			  <element value="5"/>
+ 			</NumericDomain>
+			<NumericDomain>
+ 			  <element value="3"/>
+ 			</NumericDomain>
+ 		</Inputs>
+		<Outputs>
+		        <IntervalIntDomain lb="2" ub="2"/>
+			<NumericDomain>
+ 			  <element value="5"/>
+ 			</NumericDomain>
+			<NumericDomain>
+ 			  <element value="3"/>
+ 			</NumericDomain>
+		</Outputs>
+ 	</Constraint>
+ 	<Constraint name="floor" test="3416">
+		<Inputs>
+			<IntervalIntDomain lb="-inf" ub="+inf"/>
+			<NumericDomain>
+ 			  <element value="5.4"/>
+ 			</NumericDomain>
+ 		</Inputs>
+		<Outputs>
+		        <IntervalIntDomain lb="5" ub="5"/>
+			<NumericDomain>
+ 			  <element value="5.4"/>
+ 			</NumericDomain>
+		</Outputs>
+ 	</Constraint>
+ 	<Constraint name="ceil" test="3416">
+		<Inputs>
+			<IntervalIntDomain lb="-inf" ub="+inf"/>
+			<NumericDomain>
+ 			  <element value="5.4"/>
+ 			</NumericDomain>
+ 		</Inputs>
+		<Outputs>
+		        <IntervalIntDomain lb="6" ub="6"/>
+			<NumericDomain>
+ 			  <element value="5.4"/>
+ 			</NumericDomain>
+		</Outputs>
+ 	</Constraint>
 </ConstraintTests>

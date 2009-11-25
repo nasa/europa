@@ -1,22 +1,13 @@
-#include "Nddl.hh"
-#include "PlanDatabase.hh"
-#include "DbClientTransactionLog.hh"
-#include "TestSupport.hh"
-#include "Debug.hh"
-#include "Pdlfcn.hh"
-#include "PlanDatabaseWriter.hh"
-#include "ObjectFactory.hh"
-#include "TypeFactory.hh"
+
 #include <fstream>
 #include <iostream>
 #include <stdlib.h>
-
+#include "Debug.hh"
+#include "Utils.hh"
+#include "PlanDatabase.hh"
+#include "PlanDatabaseWriter.hh"
+#include "DbClientTransactionLog.hh"
 #include "EuropaEngine.hh"
-#include "Rule.hh"
-
-#ifdef CBPLANNER
-#error "CBPlanner is now deprecated."
-#endif
 
 #ifdef __BEOS__
 void __assert_fail(const char *__assertion,
@@ -28,39 +19,30 @@ void __assert_fail(const char *__assertion,
 }
 #endif
 
-
-bool isInterpreted()
-{
-#ifdef INTERPRETED
-    return true;
-#else
-    return false;
-#endif
-}
-
-const char* initialTransactions = NULL;
-const char* plannerConfig = NULL;
-bool replayRequired = false;
-
-void initSchema(const SchemaId& schema, const RuleSchemaId& ruleSchema);
+using namespace EUROPA;
 
 class TestEngine : public EuropaEngine
 {
   public:
-    TestEngine() { doStart(); }
-    ~TestEngine() { doShutdown(); }
+    TestEngine()
+    {
+        m_config->setProperty("nddl.includePath","../../NDDL/test/nddl");
+        doStart();
+    }
+
+    ~TestEngine()
+    {
+        doShutdown();
+    }
 };
 
 /**
-   REPLAY IS BROKEN WITH THE INTERPRETER AND NEEDS TO BE FIXED!!!!
+   TODO: REPLAY IS BROKEN WITH THE INTERPRETER AND NEEDS TO BE FIXED!!!!
  */
-void replay(const std::string& s1,const DbClientTransactionLogId& txLog) 
+void replay(const std::string& s1,const DbClientTransactionLogId& txLog, const char* language)
 {
-  TestEngine replayed;   
-  initSchema(((Schema*)replayed.getComponent("Schema"))->getId(),
-             ((RuleSchema*)replayed.getComponent("RuleSchema"))->getId());
-  
-  replayed.playTransactions(TestEngine::TX_LOG());
+  TestEngine replayed;
+  replayed.playTransactions(TestEngine::TX_LOG(),language);
   std::string s2 = PlanDatabaseWriter::toString(replayed.getPlanDatabase(), false);
   condDebugMsg(s1 != s2, "Main", "S1" << std::endl << s1 << std::endl << "S2" << std::endl << s2);
   // TO FIX: assertTrue(s1 == s2);
@@ -69,33 +51,30 @@ void replay(const std::string& s1,const DbClientTransactionLogId& txLog)
 std::string dumpIdTable(const char* title)
 {
   std::ostringstream os;
-  os << "before:" << IdTable::size() << std::endl;
+  os << title << ":" << IdTable::size() << std::endl;
   IdTable::printTypeCnts(os);
-  
+
   return os.str();
 }
 
-bool runPlanner()
+bool runPlanner(const char* modelFile,
+                const char* plannerConfig,
+                const char* language,
+                bool replayRequired)
 {
-  check_error(DebugMessage::isGood());
+  CHECK_DEBUG_STREAM
 
-  TestEngine engine; 
-  initSchema(((Schema*)engine.getComponent("Schema"))->getId(),
-             ((RuleSchema*)engine.getComponent("RuleSchema"))->getId());
+  TestEngine engine;
 
-  debugMsg("IdTypeCounts", dumpIdTable("before"));  
-    
+  debugMsg("IdTypeCounts", dumpIdTable("before"));
+
   DbClientTransactionLogId txLog;
   if(replayRequired)
     txLog = (new DbClientTransactionLog(engine.getPlanDatabase()->getClient()))->getId();
 
-  check_error(plannerConfig != NULL, "Must have a planner config argument.");
-  TiXmlDocument doc(plannerConfig);
-  doc.LoadFile();
+  assert(engine.plan(modelFile,plannerConfig,language));
 
-  assert(engine.plan(initialTransactions,*(doc.RootElement()), isInterpreted()));
-
-  debugMsg("Main:runPlanner", "Found a plan at depth " 
+  debugMsg("Main:runPlanner", "Found a plan at depth "
 	   << engine.getDepthReached() << " after " << engine.getTotalNodesSearched());
 
   if(replayRequired) {
@@ -104,32 +83,30 @@ bool runPlanner()
       std::ofstream out(TestEngine::TX_LOG());
       txLog->flush(out);
       out.close();
-      engine.doShutdown(); // TODO: remove this when all static data structures are gone
-      
-      replay(s1, txLog);
+      replay(s1, txLog,language);
   }
 
-  debugMsg("IdTypeCounts", dumpIdTable("after"));  
+  debugMsg("IdTypeCounts", dumpIdTable("after"));
 
   return true;
 }
 
 
-bool copyFromFile(){
+bool copyFromFile(const char* language){
   // Populate plan database from transaction log
   std::string s1;
   {
-    TestEngine engine; 
-    engine.playTransactions(TestEngine::TX_LOG());
+    TestEngine engine;
+    engine.playTransactions(TestEngine::TX_LOG(),language);
     s1 = PlanDatabaseWriter::toString(engine.getPlanDatabase(), false);
     engine.getPlanDatabase()->archive();
   }
 
   std::string s2;
   {
-    TestEngine engine; 
-    
-    engine.playTransactions(TestEngine::TX_LOG());
+    TestEngine engine;
+
+    engine.playTransactions(TestEngine::TX_LOG(),language);
     s2 = PlanDatabaseWriter::toString(engine.getPlanDatabase(), false);
     engine.getPlanDatabase()->archive();
   }
@@ -139,123 +116,49 @@ bool copyFromFile(){
   return true;
 }
 
-#ifdef STANDALONE
-
-#define MODEL_INDEX 1
-#define TRANS_INDEX 2
-#define PCONF_INDEX 3
+// Args to main()
 #define ARGC 4
-
-#elif INTERPRETED
-
-#define TRANS_INDEX 1
+#define MODEL_INDEX 1
 #define PCONF_INDEX 2
-#define ARGC 3
+#define LANG_INDEX 3
 
-#else 
-
-#define TRANS_INDEX 1
-#define PCONF_INDEX 2
-#define ARGC 3
-
-#endif
-
-const char* error_msg;
-void* libHandle;
-SchemaId (*fcn_schema)(const SchemaId&,const RuleSchemaId&);
-
-
-void loadLibrary(const char* libPath)
-{    
-    std::cout << "runProblem: p_dlopen() file: " << libPath << std::endl;
-    std::cout.flush();
-    
-    libHandle = p_dlopen(libPath, RTLD_NOW);
-    
-    std::cout << "runProblem: returned from p_dlopen() file: " << libPath << std::endl;
-    std::cout.flush();
-
-    if(!libHandle) {
-      error_msg = p_dlerror();
-      std::cout << "Error during p_dlopen() of " << libPath << ":" << std::endl;
-      check_error(!error_msg, error_msg);
-    }
-    std::cout << "runProblem: p_dlsym() symbol: loadSchema" << std::endl;
-    std::cout.flush();
-    
-    fcn_schema = (SchemaId (*)(const SchemaId&,const RuleSchemaId&))p_dlsym(libHandle, "loadSchema");
-    if(!fcn_schema) {
-      error_msg = p_dlerror();
-      std::cout << "p_dlsym: Error locating NDDL::schema:" << std::endl;
-      check_error(!error_msg, error_msg);
-    }    
-}
-
-void unloadLibrary()
-{
-    if(p_dlclose(libHandle)) {
-      error_msg = p_dlerror();
-      std::cout << "Error during p_dlclose():" << std::endl;
-      check_error(!error_msg, error_msg);
-    }
-    
-    std::cout << "Model Library Unloaded" << std::endl;
-    std::cout.flush();    
-}
-
-void setup(const char** argv)
-{
-    initialTransactions = argv[TRANS_INDEX];
-    plannerConfig = argv[PCONF_INDEX];
-    
-#ifdef STANDALONE
-    loadLibrary(argv[MODEL_INDEX]);
-#endif 
-}
-
-void cleanup()
-{
-#ifdef STANDALONE
-    unloadLibrary();
-#endif    
-}
-
-void initSchema(const SchemaId& schema, const RuleSchemaId& ruleSchema)
-{
-#ifdef STANDALONE
-    (*fcn_schema)(schema,ruleSchema);
-#elif INTERPRETED
-    std::string modelName(initialTransactions);
-    modelName = modelName.substr(0, modelName.find(".xml"));
-#else 
-    NDDL::loadSchema(schema,ruleSchema);
-#endif     
-}
-
-int main(int argc, const char** argv) 
+int main(int argc, const char** argv)
 {
     if(argc != ARGC) {
-      std::cout << "usage: runProblem <model shared library path>" <<
-        " <initial transaction file> <planner config file>" << std::endl;
+      std::cout << "usage: "
+                << "runProblem "
+                << "<model file> "
+                << "<planner config file> "
+                << "<language to interpret> "
+                << std::endl;
       return 1;
     }
-        
-    setup(argv);
+
+    const char* modelFile = argv[MODEL_INDEX];
+    const char* plannerConfig = argv[PCONF_INDEX];
+    const char* language = argv[LANG_INDEX];
+    bool replayRequired = false;
+
+    // Init data types so that id counts don't fail
+    VoidDT::instance();
+    BoolDT::instance();
+    IntDT::instance();
+    FloatDT::instance();
+    StringDT::instance();
+    SymbolDT::instance();
 
     const char* performanceTest = getenv("EUROPA_PERFORMANCE");
 
     if (performanceTest != NULL && strcmp(performanceTest, "1") == 0) {
         replayRequired = false;
-        EUROPA_runTest(runPlanner);
+        EUROPA_runTest(runPlanner,modelFile,plannerConfig,language,replayRequired);
     }
     else {
         replayRequired = false; //= true;
-        EUROPA_runTest(runPlanner);
-        //EUROPA_runTest(copyFromFile);
+        EUROPA_runTest(runPlanner,modelFile,plannerConfig,language,replayRequired);
+        //EUROPA_runTest(copyFromFile,language);
     }
 
-    cleanup();
-  
     std::cout << "Finished" << std::endl;
     return 0;
 }

@@ -20,13 +20,13 @@ namespace EUROPA {
 //     return(sl_stringFromKeys);
 //   }
 
-  __gnu_cxx::hash_map<std::string, edouble>& LabelStr::keysFromString() {
-    static __gnu_cxx::hash_map<std::string, edouble> sl_keysFromString;
+  std::map<std::string, edouble>& LabelStr::keysFromString() {
+    static std::map<std::string, edouble> sl_keysFromString;
     return sl_keysFromString;
   }
 
-  __gnu_cxx::hash_map< edouble, std::string>& LabelStr::stringFromKeys() {
-    static __gnu_cxx::hash_map<edouble, std::string> sl_stringFromKeys;
+  std::map< edouble, std::string>& LabelStr::stringFromKeys() {
+    static std::map<edouble, std::string> sl_stringFromKeys;
     return(sl_stringFromKeys);
   }
 
@@ -124,7 +124,7 @@ namespace EUROPA {
     
     static edouble sl_counter = EPSILON;
 
-    __gnu_cxx::hash_map<std::string, edouble>::iterator it = 
+    std::map<std::string, edouble>::iterator it = 
       keysFromString().find(label);
 
     if (it != keysFromString().end()) {
@@ -150,7 +150,7 @@ namespace EUROPA {
 
   const std::string& LabelStr::getString(edouble key){
     MutexGrabber mg(LabelStrMutex());
-    __gnu_cxx::hash_map< edouble, std::string >::const_iterator it = stringFromKeys().find(key);
+    std::map< edouble, std::string >::const_iterator it = stringFromKeys().find(key);
     check_error(it != stringFromKeys().end());
     const std::string& toRet = it->second;
     return toRet;

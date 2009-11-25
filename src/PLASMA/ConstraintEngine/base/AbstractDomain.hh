@@ -8,7 +8,7 @@
  * @brief Declares new domain management object model.
  *
  * A new approach for domains is presented which allows for more customized domain implementations to assess possible
- * speed improvements. AbstractDomain is the base class for all other domains. It is the only domain reference 
+ * speed improvements. AbstractDomain is the base class for all other domains. It is the only domain reference
  * available in the  core of the framework.
  *
  * The semantics of a domain are described in terms of:
@@ -17,22 +17,22 @@
  * all initial values and close it upon construction implicitly. An 'open' domain is equivalently described as
  * 'dynamic'. Some operations require a domain to be closed before use.
  * @li Finite vs Infinite - A domain is finite if it has a finite number of elements in its domain.
- * @li Enumerated vs. Interval - A domain may be represented as an explicit enumeration of values or as an 
+ * @li Enumerated vs. Interval - A domain may be represented as an explicit enumeration of values or as an
  * upper and lower bound only, as a shorthand. A domain may not alter between enumerated and interval.
  * @li Symbolic vs Numeric - If the elements in the domain are numbers or symbols (including strings).
  * @li Empty vs. not Empty - If there are no elements in the domain.
  * @li Types - A domain may be further typed to restrict its semantics by constructing it with a given type
- * descriptor. 
+ * descriptor.
  *
  * Operations among domains are type checked according the compatibility rules enforced by a DomainComparator.
- * A default DomainComparator is provided. It may be extended to support additional semantic relationships 
+ * A default DomainComparator is provided. It may be extended to support additional semantic relationships
  * between types.
  *
  * A central design element is the use of a DomainListener to optionally observe changes on the domain. This is
  * an Observer pattern where the AbstractDomain is the subject and the DomainListener is the observer. This mechamism
  * is the basis for propagation.
  *
- * 
+ *
  * @see Variable, Constraint
  */
 #include "ConstraintEngineDefs.hh"
@@ -57,6 +57,7 @@
 namespace EUROPA {
   using std::ostream;
 
+  // TODO!: drop this?
   /**
    * @class DomainComparator
    * @brief Class for testng if 2 domains can be compared. Exetend this class to customize how this is
@@ -77,12 +78,12 @@ namespace EUROPA {
      * @brief Tests if domains can be compared.
      */
     virtual bool canCompare(const AbstractDomain& domx, const AbstractDomain& domy) const;
- 
+
     /**
      * @brief Set the comparator to be used. Can only be set if it is currently null.
      */
     static void setComparator(DomainComparator* comparator);
-   
+
     /**
      * @brief return true iff comparator is null. False otherwise.
      */
@@ -100,7 +101,7 @@ namespace EUROPA {
    * @brief The base class for all domains used in the ConstraintEngine.
    *
    * This base class provides the core mechanisms to integrate a domain into the ConstraintEngine framework without
-   * committing to a concrete type for the domain. This allows us to pass around and use domains in the core but still 
+   * committing to a concrete type for the domain. This allows us to pass around and use domains in the core but still
    * provide specializations as necessary in a very extendible way.
    * @see DomainListener
    */
@@ -113,33 +114,31 @@ namespace EUROPA {
     virtual ~AbstractDomain();
 
     /**
-     * @brief Close the domain.
-     *
-     * @note When completed, we require (isClosed() == true).
-     * @see isClosed()
+     * @brief Check if the domain is an enumerated set.
      */
-    virtual void close();
+    bool isEnumerated() const;
 
     /**
-     * @brief Re-open the domain.
-     * 
-     * @note When completed, we require (isOpen() == true).
-     * @see isOpen()
+     * @brief Check if the domain is an interval.
      */
-
-    virtual void open();
+    bool isInterval() const;
 
     /**
      * @brief Test if the domain is closed (i.e. can be used yet)
      * @see close
      */
-    virtual bool isClosed() const;
+    bool isClosed() const;
 
     /**
      * @brief Test if the domain is closed
      * @note negation of isClosed
      */
-    virtual bool isOpen() const;
+    bool isOpen() const;
+
+    /**
+     * @brief Check if the domain is empty.
+     */
+    virtual bool isEmpty() const = 0;
 
     /**
      * @brief Check if there are a finite number of values in the domain.
@@ -153,74 +152,14 @@ namespace EUROPA {
     bool isInfinite() const;
 
     /**
-     * @brief Check if the domain is symbolic.
+     * @brief Tests if both bounds are finite. Trivially true for symbolic domains.
      */
-    virtual bool isSymbolic() const {return !isNumeric();}
-
-    /**
-      * @brief Check if the domain contains entities
-      */
-    virtual bool isEntity() const {return false;}
-
-    /**
-     * @brief Check if the domain is numeric.
-     */
-    virtual bool isNumeric() const = 0;
-
-    /**
-     * @brief Check if the domain is Boolean.
-     */
-    virtual bool isBool() const = 0;
-
-    /**
-     * @brief Check if the domain is String.
-     */
-    virtual bool isString() const = 0;
-
-    /**
-     * @brief Attach a DomainListener.
-     * @note Requires that no domain listener is currently attached.
-     * Will error out if that is not the case.
-     * @param listener the listener to attach.
-     */
-    virtual void setListener(const DomainListenerId& listener);
-
-    /**
-     * @brief Accessor for the listener.
-     * @return the listener. May be noId() if no listener attached
-     */
-    virtual const DomainListenerId& getListener() const;
-
-    /**
-     * @brief Get the domain's type's name.
-     */
-    virtual const LabelStr& getTypeName() const;
-
-    /**
-     * @brief Check if the domain is an enumerated set.
-     */
-    virtual bool isEnumerated() const;
-
-    /**
-     * @brief Check if the domain is an interval.
-     */
-    virtual bool isInterval() const;
+    virtual bool areBoundsFinite() const;
 
     /**
      * @brief Check if the domain is a singleton.
      */
     virtual bool isSingleton() const = 0;
-
-    /**
-     * @brief Check if the domain is empty.
-     */
-    virtual bool isEmpty() const = 0;
-
-    /**
-     * @brief Empty the domain.
-     * @note Completion of this will require that (isEmpty() == true).
-     */
-    virtual void empty() = 0;
 
     /**
      * @brief Return the number of elements in the domain.
@@ -230,24 +169,14 @@ namespace EUROPA {
     virtual unsigned int getSize() const = 0;
 
     /**
-     * @brief Print this on the output stream.
-     */
-    virtual void operator>>(ostream& os) const;
-
-    /**
      * @brief Access upper bound
      */
-    virtual edouble getUpperBound() const = 0;
+    virtual double getUpperBound() const = 0;
 
     /**
      * @brief Access lower bound
      */
-    virtual edouble getLowerBound() const = 0;
-
-    /**
-     * @brief Access singleton value. Must be a singleton or this will fail.
-     */
-    virtual edouble getSingletonValue() const = 0;
+    virtual double getLowerBound() const = 0;
 
     /**
      * @brief Access both bounds in a convenience method, and indicates if the domain is infinite
@@ -255,7 +184,47 @@ namespace EUROPA {
      * @param ub update this value with the upper bound
      * @return true if !isFinite()
      */
-    virtual bool getBounds(edouble& lb, edouble& ub) const = 0;
+    virtual bool getBounds(double& lb, double& ub) const = 0;
+
+    /**
+     * @brief Fill the given list with the contents of the set.
+     * @note Should only be called on finite (and thus closed) domains.
+     * @param results The target collection to fill with all values in the set.
+     */
+    virtual void getValues(std::list<double>& results) const = 0;
+
+    /**
+     * @brief Access singleton value. Must be a singleton or this will fail.
+     */
+    virtual double getSingletonValue() const = 0;
+
+    /**
+     * @brief Close the domain.
+     *
+     * @note When completed, we require (isClosed() == true).
+     * @see isClosed()
+     */
+    virtual void close();
+
+    /**
+     * @brief Re-open the domain.
+     *
+     * @note When completed, we require (isOpen() == true).
+     * @see isOpen()
+     */
+
+    virtual void open();
+
+    /**
+     * @brief Touch the domain. Will produce a change event that will generate necessary change evaluation
+     */
+    void touch();
+
+    /**
+     * @brief Empty the domain.
+     * @note Completion of this will require that (isEmpty() == true).
+     */
+    virtual void empty() = 0;
 
     /**
      * @brief Set to a singleton.
@@ -265,7 +234,7 @@ namespace EUROPA {
     virtual void set(edouble value) = 0;
 
     /**
-     * @brief Indicates assigment to the target domain as a relaxation triggered explicitly 
+     * @brief Indicates assigment to the target domain as a relaxation triggered explicitly
      * rather than through algorithm for relaxation.
      * @see relax
      */
@@ -341,21 +310,21 @@ namespace EUROPA {
     }
 
     /**
+     * @brief Mutually constrain both domains to their respective intersections.
+     * @note The implementation must ensure that at most one domain is
+     * emptied in the process.
+     * @param dom The domain to perform mutual intersection with.
+     * @return true if the intersection results in a change to either
+     * domain, otherwise false.
+     */
+    virtual bool equate(AbstractDomain& dom) = 0;
+
+    /**
      * @brief Test for membership.
      * @param value to test for membership.
      * @return true if a member of the domain, otherwise false.
      */
     virtual bool isMember(edouble value) const = 0;
-
-    /**
-     * @brief Test for equality.
-     */
-    virtual bool operator==(const AbstractDomain& dom) const;
-
-    /**
-     * @brief Test for inequality.
-     */
-    virtual bool operator!=(const AbstractDomain& dom) const;
 
     /**
      * @brief Test if this domain is a subset of dom.
@@ -372,80 +341,28 @@ namespace EUROPA {
     virtual bool intersects(const AbstractDomain& dom) const = 0;
 
     /**
-     * @brief Mutually constrain both domains to their respective intersections.
-     * @note The implementation must ensure that at most one domain is
-     * emptied in the process.
-     * @param dom The domain to perform mutual intersection with.
-     * @return true if the intersection results in a change to either
-     * domain, otherwise false.
+     * @brief Test for equality.
      */
-    virtual bool equate(AbstractDomain& dom) = 0;
+    virtual bool operator==(const AbstractDomain& dom) const;
 
     /**
-     * @brief Fill the given list with the contents of the set.
-     * @note Should only be called on finite (and thus closed) domains.
-     * @param results The target collection to fill with all values in the set.
+     * @brief Test for inequality.
      */
-    virtual void getValues(std::list<edouble>& results) const = 0;
+    virtual bool operator!=(const AbstractDomain& dom) const;
 
     /**
-     * @brief Returns the minimum allowed delta in values between elements of the set.
+     * @brief Attach a DomainListener.
+     * @note Requires that no domain listener is currently attached.
+     * Will error out if that is not the case.
+     * @param listener the listener to attach.
      */
-    virtual edouble minDelta() const {return m_minDelta;}
+    virtual void setListener(const DomainListenerId& listener);
 
     /**
-     * @brief Returns a value for number based on the semantics of the domain.
+     * @brief Accessor for the listener.
+     * @return the listener. May be noId() if no listener attached
      */
-    virtual edouble translateNumber(edouble number, bool asMin) const;
-
-    /**
-     * @brief Converts the string to its edouble representation as a value, if it is present in the domain.
-     * @param strValue The value as a string
-     * @param dblValue The value returned, if available. Only relevant if a member of the domain.
-     * @return true if the value was present, otherwise false.
-     */
-    virtual bool convertToMemberValue(const std::string& strValue, edouble& dblValue) const = 0;
-
-    /**
-     * @brief Tests if both bounds are finite. Trivially true for symbolic domains.
-     */
-    virtual bool areBoundsFinite() const;
-
-    /**
-     * @brief Tests if two domains can be compared. For example, one cannot compare a symbolic
-     * enumerated domain with a numeric domain. This is useful to enforce type checking
-     * in constraints in particular.
-     * @see DomainComparator::canCompare
-     */
-    static bool canBeCompared(const AbstractDomain& domx, const AbstractDomain& domy);
-
-    /**
-     * Tests if 2 values are the same with respect to the minimum difference for the target domain.
-     */
-    inline virtual bool compareEqual(edouble a, edouble b) const {
-      return (a == b) || (a < b ? b - a < minDelta() : a - b < minDelta());
-    }
-
-    /**
-     * @brief Tests if one value is less than another to within minDelta
-     */
-    inline bool lt(edouble a, edouble b) const {
-      return (a != b) && (a + minDelta() <= b);
-    }
-
-    /**
-     * @brief Tests if one value equals another to within minDelta
-     */
-    inline bool eq(edouble a, edouble b) const {
-      return compareEqual(a, b);
-    }
-
-    /**
-     * @brief Tests if one value is less than or equal to another to within minDelta
-     */
-    inline bool leq(edouble a, edouble b) const {
-      return (a == b) || (a - minDelta() < b);
-    }
+    virtual const DomainListenerId& getListener() const;
 
     /**
      * "Deeply" copy the concrete C++ object into new memory and return a pointer to it.
@@ -458,10 +375,63 @@ namespace EUROPA {
     virtual std::string toString() const;
 
     /**
-     * @brief Creates a concise string for displaying the value
-     * @param value must be a member of the domain.
+     * @brief Print this on the output stream.
      */
-    virtual std::string toString(edouble value) const;
+    virtual void operator>>(ostream& os) const;
+
+    /**
+     * @brief Tests if two domains can be compared. For example, one cannot compare a symbolic
+     * enumerated domain with a numeric domain. This is useful to enforce type checking
+     * in constraints in particular.
+     * @see DomainComparator::canCompare
+     */
+    static bool canBeCompared(const AbstractDomain& domx, const AbstractDomain& domy);
+
+    const DataTypeId& getDataType() const;
+
+    // TODO: all these just delegate to the data type, should be dropped eventually, preserved for now for backwards compatibility
+    const LabelStr& getTypeName() const;
+    bool isSymbolic() const;
+    bool isEntity() const;
+    bool isNumeric() const;
+    bool isBool() const;
+    bool isString() const;
+    bool isRestricted() const;
+    double minDelta() const;
+    std::string toString(double value) const;
+
+    /**
+     * @brief Returns a value for number based on the semantics of the domain.
+     */
+    virtual double translateNumber(double number, bool asMin) const;
+
+    /**
+     * @brief Converts the string to its double representation as a value, if it is present in the domain.
+     * @param strValue The value as a string
+     * @param dblValue The value returned, if available. Only relevant if a member of the domain.
+     * @return true if the value was present, otherwise false.
+     */
+    virtual bool convertToMemberValue(const std::string& strValue, double& dblValue) const = 0;
+
+    /**
+     * Tests if 2 values are the same with respect to the minimum difference for the target domain.
+     */
+    inline virtual bool compareEqual(double a, double b) const { return(a < b ? b - a < minDelta() : a - b < minDelta()); }
+
+    /**
+     * @brief Tests if one value is less than another to within minDelta
+     */
+    inline bool lt(double a, double b) const { return (a + minDelta() <= b); }
+
+    /**
+     * @brief Tests if one value equals another to within minDelta
+     */
+    inline bool eq(double a, double b) const { return compareEqual(a, b); }
+
+    /**
+     * @brief Tests if one value is less than or equal to another to within minDelta
+     */
+    inline bool leq(double a, double b) const { return (a - minDelta() < b); }
 
   protected:
     /**
@@ -472,7 +442,7 @@ namespace EUROPA {
      * @param typeName indicates the type name to use
      * @todo Review how semantics of closed can be enforced in operations.
      */
-    AbstractDomain(bool closed, bool enumerated, const std::string& typeName);
+    AbstractDomain(const DataTypeId& dataType, bool enumerated, bool closed);
 
     /**
      * @brief Copy Constructor
@@ -503,12 +473,13 @@ namespace EUROPA {
      */
     static void assertSafeComparison(const AbstractDomain& domA, const AbstractDomain& domB);
 
-    bool m_closed; /**< False if the domain is dynamic (can be added to), otherwise true. */
-    bool m_enumerated; /**< False if the domain is an interval, otherwise true. */
-    DomainListenerId m_listener; /**< Holds reference to attached listener.  May be noId. */
-    LabelStr m_typeName; /**< The name of the type of this domain. */
-    edouble m_minDelta; /**< The minimum amount by which elements of this domain may vary.  Once this is set, DO NOT CHANGE IT.*/
+    void setDataType(const DataTypeId& dt);
+    friend class RestrictedDT;
 
+    DataTypeId m_dataType;
+    bool m_enumerated; /**< True is domain is enumerated (as opposed to interval) */
+    bool m_closed; /**< False if the domain is dynamic (can be added to), otherwise true. */
+    DomainListenerId m_listener; /**< Holds reference to attached listener.  May be noId. */
   };
 }
 #endif

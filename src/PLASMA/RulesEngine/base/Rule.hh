@@ -27,12 +27,12 @@ namespace EUROPA {
     public:
       RuleSchema();
       ~RuleSchema();
-      
+
       /**
        * @brief Accessor
        */
       const RuleSchemaId& getId() const;
-      
+
       void registerRule(const RuleId& rule);
 
       /**
@@ -44,7 +44,7 @@ namespace EUROPA {
       const std::multimap<edouble, RuleId>& getRules();
 
       /**
-       * @brief Delete all rules stored. 
+       * @brief Delete all rules stored.
        */
       void purgeAll();
 
@@ -52,17 +52,17 @@ namespace EUROPA {
       RuleSchemaId m_id; /*!< Id for reference */
       std::multimap<edouble, RuleId> m_rulesByName;
   };
-  
+
   /**
    * @class Rule
    * @brief Defines an abstract base class that is implemented by a provider of rules.
    * @see RuleContext, RulesEngine
    */
-  class Rule 
+  class Rule
   {
     public:
       virtual ~Rule();
-      
+
       /**
        * @brief Accessor
        */
@@ -76,9 +76,11 @@ namespace EUROPA {
 
       const LabelStr& getSource() const;
 
-      virtual RuleInstanceId createInstance(const TokenId& token, 
-                                            const PlanDatabaseId& planDb, 
+      virtual RuleInstanceId createInstance(const TokenId& token,
+                                            const PlanDatabaseId& planDb,
                                             const RulesEngineId &rulesEngine) const = 0;
+
+      virtual std::string toString() const;
 
     protected:
       /**
@@ -91,7 +93,7 @@ namespace EUROPA {
       RuleId m_id; /*!< Id for reference */
       const LabelStr m_name; /*! Unique name for the rule */
       const LabelStr m_source;
-  };  
+  };
 }
 
 #endif

@@ -28,7 +28,16 @@ namespace EUROPA {
     }
 
     ComponentId& Component::getId() {return m_id;}
+
     const ComponentId& Component::getId() const {return m_id;}
+
+    const LabelStr& Component::getName() const {
+      return m_name;
+    }
+
+    void Component::setName(const LabelStr& name){
+      m_name = name;
+    }
 
     ComponentId ComponentFactoryMgr::createInstance(const TiXmlElement& configData)
     {

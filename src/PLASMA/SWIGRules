@@ -14,7 +14,13 @@ rule Swig {
   SEARCH on $(swigfile) = $(SUBDIR) ;
   LOCATE on $(cfile) = $(SUBDIR) ;
 
-  local arguments = -$(language) -o [ FDirName $(SUBDIR) $(cfile:G=) ] -Wall ;
+  local arguments = -$(language) -o ;
+  if $(OS) = CYGWIN {
+    arguments += $(cfile:G=) ;
+  } else {
+    arguments += [ FDirName $(SUBDIR) $(cfile:G=) ] ;
+  }
+  arguments += -Wall ;
 
   if $(cpp) {
     arguments += "-c++" ;
@@ -28,7 +34,14 @@ rule Swig {
       Depends $(cfile) : $(actualdestdir) ;
     }
   }
-  arguments += -outdir $(actualdestdir) ;
+  
+  if $(OS) = CYGWIN {
+    arguments += -outdir $(destdir) ;
+    INDIR on $(cfile) = $(SUBDIR) ;
+    TARGETFILE on $(cfile) = $(swigfile) ;
+  } else {
+    arguments += -outdir $(actualdestdir) ;
+  }
 
   NOCARE $(swigfile) ;
   Depends $(cfile) : $(swigfile) ;
@@ -37,9 +50,16 @@ rule Swig {
   RmDir clean : $(destdir) ;
 }
 
+if $(OS) = CYGWIN {
+  actions Swig {
+     cd $(INDIR)
+     "$(SWIG)" $(ARGUMENTS) $(TARGETFILE) 
+  }
+} else {
 actions Swig {
   echo $(SWIG) $(ARGUMENTS) $(2) ;
   $(SWIG) $(ARGUMENTS) $(2)
+}
 }
 
 rule SwigJava {
@@ -59,7 +79,8 @@ rule SwigJava {
 		SubDirC++Flags -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux ;
 	}
 	else if $(OS) = MINGW || $(OS) = CYGWIN {
-		SubDirC++Flags -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/win32 ;
+		# Including variable in the command line gets around spaces in names
+		SubDirC++Flags -I\"$CYG_JAVA_HOME\"/include -I\"$CYG_JAVA_HOME\"/include/win32 ;
 	}
 	else {
 		SubDirC++Flags -I$(JAVA_HOME)/include ;

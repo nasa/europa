@@ -2,10 +2,7 @@
 #include "LightCustomCode.hh"
 
 // Pieces necessary for various customizations:
-#include "ConstraintFactory.hh"
 #include "PSPlanDatabase.hh"
-#include "Schema.hh"
-#include "FlawHandler.hh"
 
 
 namespace EUROPA {

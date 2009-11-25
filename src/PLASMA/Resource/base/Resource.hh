@@ -3,335 +3,239 @@
 
 /**
  * @file Resource.hh
- * @author Conor McGann
- * @brief Defines the public interface for the resource object model.
- * @date   May, 2003
+ * @author Michael Iatauro
+ * @brief Defines the base class for the Resource object model.
+ * @date   March, 2006
  * @ingroup Resource
 */
 
 #include "ResourceDefs.hh"
-#include "Instant.hh"
 #include "Object.hh"
-#include "Transaction.hh"
-#include "Entity.hh"
-#include "ResourceProblem.hh"
-#include <string>
-#include <map>
-#include <iostream>
-#include <set>
-#include <list>
+#include "Constraint.hh"
+#include "PlanDatabaseDefs.hh"
+#include "PSResource.hh"
 
 namespace EUROPA {
 
-  /**
-   * @class Resource
-   * @brief The base class for different resource implementations
-   * 
-   * The Resource is provided as a base class from which a variety of implementations for similar resources, or
-   * a variety of resources, can be derived. The goal is to capture the collaboration model between Transactions
-   * and Instants, to compute the transaction profiles, and to enforce the formal model defined in the
-   * ICAPS paper i.e.:
-   * @li specified properties
-   * @li derived properties
-   * @li transactions
-   * @li queries
-   * 
-   * @todo Current implementation and interface limit property specification to constants independent of time. This needs
-   * to be thought through to be more extendible.
-   * @todo Current API will not permit derived classes to be usefully employed. Change things around so that current implementation
-   * is just a particular derived class and make th Resource class an abstract base class.
-   */
-  class Resource :public Object
-  {
-  public:
-    Resource(const PlanDatabaseId& planDatabase,
-             const LabelStr& type,
-             const LabelStr& name,
-             double initialCapacity = 0,
-             double limitMin = MINUS_INFINITY,
-             double limitMax = PLUS_INFINITY,
-             double productionRateMax = PLUS_INFINITY,
-             double productionMax = PLUS_INFINITY,
-             double consumptionRateMax = MINUS_INFINITY,
-             double consumptionMax = MINUS_INFINITY);
-
-    Resource(const PlanDatabaseId& planDatabase,
-             const LabelStr& type,
-             const LabelStr& name,
-             bool open);
-    
-    Resource(const ObjectId parent,
-             const LabelStr& type,
-             const LabelStr& name,
-             bool open);
-
-    /**
-     * @brief Destructor
-     */
-    virtual ~Resource();
-
-    /**
-     * @brief Retrieve all transactions in a given time interval
-     *
-     * @arg resultSet The target list to append resulting transactions.
-     * @arg lowerBound Exclude Transactions whose latest time < lowerBound.
-     * @arg upperBound Exclude Transactions whose earliest time > upperBound
-     * @arg propagate Require constraint propagation before returning transactions
-     * @par Errors:
-     * @li resultSet.isEmpty()
-     * @li lowerBound > upperBound
-     */
-    void getTransactions(std::set<TransactionId>& resultSet, 
-                         int lowerBound = MINUS_INFINITY, int upperBound = PLUS_INFINITY, bool propagate = true);
-
-    /**
-     * @brief Retrieve all Instants in a given time interval
-     *
-     * @arg resultSet The target list to append resulting Instants.
-     * @arg lowerBound Exclude Instants whose time < lowerBound.
-     * @arg upperBound Exclude Instant whose time > upperBound
-     * @par Errors:
-     * @li !resultSet.isEmpty()
-     * @li lowerBound > upperBound
-     */
-    void getInstants(std::list<InstantId>& resultSet, int lowerBound = MINUS_INFINITY, int upperBound = PLUS_INFINITY);
-
-
-    const std::map<int, InstantId>& getInstants() const;
-
-    /**
-     * @brief Output the Transaction Profile with indications where Violations occur.
-     * @arg os - output stream to write to
-     */
-    void print(std::ostream& os);
-
-    /**
-     * @brief Output the Transaction Profile to a string with indications where Violations occur
-     */
-    std::string toString();
-
-    /**
-     * @brief Check if the Resource is violated.
-     * 
-     * This call may cuase computation to determine the Transaction Profile and deetct Violations.
-     * @return true if and only if there is no way to make the resource comply with its speciifed properties without
-     * removing a transaction or relaxing a temporal or quanitty variable. Otherwise return false.
-     * @see Violation
-     */
-    bool isViolated();
-
-    /**
-     * @brief Check if the resource is flawed.
-     * @return true if any derived properties MAY be outside the specified limits.
-     * @todo deprecate in favour of isFlawed.
-     */
-    bool isFlawed();
-
-    /** @see isFlawed **/
-
-    bool hasFlaws();
-
-    /**
-     * @brief Check if the resource is dirty
-     */
-    bool isDirty() const;
-
-    /**
-     * @brief Retrieves the set of Violations within the given time interval
-     *
-     * If !isViolated() there will be no Violations returned.
-     * @arg resultSet The target list to append resulting Violations.
-     * @arg lowerBound Exclude Violations occuring at an Instant whose time <= lowerBound.
-     * @arg upperBound Exclude Violations occuring at an Instant whose time >= upperBound
-     * @par Errors:
-     * @li !resultSet.isEmpty()
-     * @li lowerBound > upperBound
-     * @see isViolated()
-     */
-    void getResourceViolations( std::list<ResourceViolationId>& results, 
-				int lowerBound = MINUS_INFINITY, 
-				int upperBound = PLUS_INFINITY);
-
-    void getResourceFlaws( std::list<ResourceFlawId>& results, 
-			   int lowerBound = MINUS_INFINITY, 
-			   int upperBound = PLUS_INFINITY);
-
-    /**< Accessors for specified resource properties */
-    double getLimitMax(int = MINUS_INFINITY) const {return m_limitMax;}
-    double getLimitMin(int = MINUS_INFINITY) const {return m_limitMin;}
-    double getInitialCapacity(void) const {return m_initialCapacity;}
-    double getProductionRateMax(int  = MINUS_INFINITY) const {return m_productionRateMax;}
-    double getProductionMax(int = MINUS_INFINITY) const {return m_productionMax;}
-    double getConsumptionRateMax(int = MINUS_INFINITY) const {return m_consumptionRateMax;}
-    double getConsumptionMax(int = MINUS_INFINITY) const {return m_consumptionMax;}
-
-    /**< The following methods are here in case the planner needs to update
-       resource parameters */
-    void setProductionMax( const double& value );
-    void setProductionRateMax( const double& value );
-    void setConsumptionMax( const double& value );
-    void setConsumptionRateMax( const double& value );
-
-    /**
-     * @brief Retrieve the level as an interval at the given timepoint.
-     * @param timepoint The time at which we want to query the level
-     * @param result The resulting interval to populate. Values for the result are interpolated based on
-     * the internal representation within the resource.
-     */
-    void getLevelAt(int timepoint, IntervalDomain& result );
-
-    void updateInitialState(const IntervalDomain& value );
-
-  protected:
-    friend class ResourceConstraint;
-
-    void handleDiscard();
-
-    void markDirty();
-
-    /**
-     * @brief Helper method for construction
-     */
-    void init(double initialCapacity = 0,
-              double limitMin = MINUS_INFINITY,
-              double limitMax = PLUS_INFINITY,
-              double productionRateMax = PLUS_INFINITY,
-              double productionMax = PLUS_INFINITY,
-              double consumptionRateMax = MINUS_INFINITY,
-              double consumptionMax = MINUS_INFINITY);
-
-
-    /**
-     * @brief Compute actual profile
-     * @see updateTransactionProfile
-     */
-    virtual void computeTransactionProfile();
-
-    /**
-     * @brief Compute running totals for an instant
-     * @see computeTransactionProfile
-     */
-    virtual void computeRunningTotals(const InstantId& instant, 
-				      const TransactionId& tx, 
-				      double& runningLowerMin, 
-				      double& runningLowerMax,                                      
-				      double& runningUpperMin, 
-				      double& runningUpperMax);
-
-    /**
-     * @brief Compute actual profile
-     * @see updateTransactionProfile
-     */
-    static void updateInstantBounds(InstantId& inst, 
-				    const double lowerMin, 
-                                    const double lowerMax, 
-				    const double upperMin, 
-                                    const double upperMax);
-  private:
- 
-    /**
-     * @brief This is the core algorithm for computing the Transaction Profile
-     * @todo Update to work incrementally
-     */
-    void updateTransactionProfile();
-
-    /**
-     * @brief insert Transaction on the Resource.
-     *
-     * If the Transaction has been successfully inserted, the resource of the transaction will be set, and the
-     * Transaction will be notified using a call back on tx. If the Transaction insertion failed, the Transaction
-     * resource will not be changed from its initial value. Insertion of a Transaction impacts the Transaction 
-     * Profile
-     *
-     * @arg tx - the transaction to be inserted
-     * @return false iff any of the following are true:
-     * @li tx.isNoId()
-     * @li !tx->getResource().isNoId()
-     * @li there is no possibility that the transaction requirements can ever be met.
-     */
-    bool insert(const TransactionId& tx);
-
-    /**
-     * @brief Handles addition of a Token since the token should be active and this resource has been
-     * added to the object variable. Records that the resource has changed. Will delegate to the parent.
-     */
-    void add(const TokenId& token);
-
-    /**
-     * @brief Handles removal of token which may occur due to a deletion or through a restriction of the
-     * domain of the object variable. Records that the resource has changed. Will delegate to the parent.
-     */
-    void remove(const TokenId& token);
-
-    /**< Global violations encapsulate violation types that are global to the resource */
-    void addGlobalResourceViolation(ResourceProblem::Type type);
-    const std::set<ResourceViolationId>& getGlobalResourceViolations() const { return m_globalViolations; }
-
-    /**
-     * @brief Prevent copy constructor
-     */
-    Resource(const Resource&);
-
-    /**
-     * @brief Helper method to clean up internal data structures when removing a token
-     * @see free, remove
-     */
-    void cleanup(const TransactionId& tx);
-
-    /**
-     * @brief Helper method to see if there are any transactions that start or end on the given instant
-     * @return true if the instant contains a transaction whose earliest or latest time coincides with 
-     * the time of the instant. Otherwise false.
-     */
-    bool hasStartOrEndTransaction(const InstantId& instant) const;
-
-    /**
-     * @brief Algorithm to detect Flaws and Violations given the derived and specified proprties at an Instant
-     */
-    bool applyConstraints(const InstantId& instant);
-
-    /**
-     * @brief Check integrity of data structures
-     */
-    bool isValid() const;
-
-    void resetProfile();
-
-    void rebuildProfile();
-
-    /** 
-     * @brief Recompute m_totalUsedConsumption and m_totalUsedProduction 
-     */
-    void recomputeTotals();
-
-    /**
-     * Helper method for Instant allocation
-     */
-    std::map<int, InstantId>::iterator createInstant(int time, const std::map<int, InstantId>::iterator& pos);
-
-    /*
-      Begin specified property values - see ICAPS paper for details. Note that the approach here of using constants
-      is the simplest form and more sophisticated implementations are desireable.
-    */
-
-    double m_initialCapacity; /*!< The seed from which the Transaction Profile is calculated */
-    double m_limitMin; /*!< The lower limit on the level in the Transaction Profile for the resource to be consistent */
-    double m_limitMax; /*!< The upper limit on the level in the Transaction Profile for the resource to be consistent */
-    double m_productionRateMax; /*!< The maximum rate of production allowed at any instant */
-    double m_productionMax; /*!< The maximum cumulative production possible for the resource in the given time horizon */
-    double m_consumptionRateMax; /*!< The maximum rate of consumption that can occur at any instant. */
-    double m_consumptionMax; /*!< The maximum cumulative consumption that can occur on the resource 
-			       in the given time horizon.*/
-
-    double m_totalUsedConsumption; /*!< The optimistic sum (min consumption=max value) over all transactions */
-    double m_totalUsedProduction;  /*!< The optimistic sum (min production=min value) over all transactions */
-
-    /*< General implementation helper data */
-    bool m_dirty;
-
-    std::map<int, InstantId>  m_instants; /*!< Time ordered sequence of Instants */
-    /*!< Set of ResourceListeners to be notified about existence (and later degree) of flaws */
-    std::set<ResourceViolationId> m_globalViolations; /*!< All violations on the resource */
+// Labels to associate with enum values:
+  const static char* problemLabels[] = { "ProductionRateExceeded",
+		  "ConsumptionRateExceeded",
+		  "ProductionSumExceeded",
+		  "ConsumptionSumExceeded",
+		  "LevelTooHigh",
+		  "LevelTooLow"
   };
+
+
+  /**
+     * @class Resource
+     * @brief The base class for different Resource implementations.
+     *
+     * The Resource is provided as a base class from which a variety of implementations for similar resources or
+     * a variety of resources can be derived.
+     */
+    class Resource : public Object, public virtual PSResource {
+    public:
+
+      /**
+       * @brief Constructor.  This is primarily a convenience constructor for resource interactions outside of a model.
+       * @param planDatabase @see Object
+       * @param type @see Object
+       * @param name @see Object
+       * @param initCapacityLb The lower bound of the Resource's initial level. (For example, a battery may be only half charged initially.)
+       * @param initCapacityUb The upper bound of the Resource's initial level. (For example, a battery may be only half charged initially.)
+       * @param lowerLimit The lower capacity limit. (For example, a battery can't have less than no energy stored, or it might be considered unsafe to allow
+       * the capacity to get below 25%.)
+       * @param upperLimit The upper capacity limit. (For example, a battery has a maximum charge, or it might be unsafe to fill a beaker more than three-quarters full.)
+       * @param maxInstProduction The maximum amount of production possible at an instant. (For example, a power bus might only allow 2.5A to be drawn at one instant.)
+       * @param maxInstConsumption The maximum amount of consumption possible at an instant. (For example, a power bus might only allow 2.5A to be drawn at one instant.)
+       * @param maxProduction The maximum amount of production possible on this resource.
+       * @param maxConsumption The maximum amount of consumption possible on this resource.
+       */
+      Resource(const PlanDatabaseId& planDatabase,
+               const LabelStr& type,
+               const LabelStr& name,
+               const LabelStr& detectorName,
+               const LabelStr& profileName,
+	           double initCapacityLb = 0,
+	           double initCapacityUb = 0,
+	           double lowerLimit = MINUS_INFINITY,
+	           double upperLimit = PLUS_INFINITY,
+	           double maxInstProduction = PLUS_INFINITY,
+	           double maxInstConsumption = PLUS_INFINITY,
+	           double maxProduction = PLUS_INFINITY,
+	           double maxConsumption = PLUS_INFINITY);
+
+
+      /** Only LevelTooHigh and LevelTooLow are currently used by Flaw,
+                     Violation uses all types */
+      enum ProblemType { NoProblem = -1,
+    	  ProductionRateExceeded = 0, /**< Excessive production in an instant. */
+    	  ConsumptionRateExceeded, /**< Excessive consumption in an instant. */
+    	  ProductionSumExceeded, /**< Total production for the resource exceded. */
+    	  ConsumptionSumExceeded, /**< Total consumption fo rthe resource exceded. */
+    	  LevelTooHigh, /**< Level is outside the upper limit, taking into account remaining possible production or consumption. */
+    	  LevelTooLow /**< Level is outside the lower limit, taking into account remaining possible production or consumption. */
+      };
+
+      /**
+       * @brief Constructor
+       * @see Object
+       */
+      Resource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open);
+
+      /**
+       * @brief Constructor
+       * @see Object
+       */
+      Resource(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open);
+
+      virtual ~Resource();
+
+      /**
+       * @brief Accessor for the lower limit on capacity.
+       */
+      double getLowerLimit() const {return m_lowerLimit;}
+
+      /**
+       * @brief Accessor for the upper limit on capacity.
+       */
+      double getUpperLimit() const {return m_upperLimit;}
+
+      /**
+       * @brief Accessor for the maximum consumption possible at an instant.
+       */
+      double getMaxInstConsumption() const {return m_maxInstConsumption;}
+
+      /**
+       * @brief Accessor for the maximum production possible at an instant.
+       */
+      double getMaxInstProduction() const {return m_maxInstProduction;}
+
+      /**
+       * @brief Accessor for the maximum consumption possible over the lifetime of the resource.
+       */
+      double getMaxConsumption() const {return m_maxConsumption;}
+
+      /**
+       * @brief Accessor for the maximum production possible over the lifetime of the resource.
+       */
+      double getMaxProduction() const {return m_maxProduction;}
+
+      const ProfileId getProfile() const {return m_profile;}
+
+      virtual void add(const TokenId& token);
+
+      virtual void remove(const TokenId& token);
+
+      virtual void getOrderingChoices(const TokenId& token,
+				      std::vector<std::pair<TokenId, TokenId> >& results,
+				      unsigned int limit = PLUS_INFINITY);
+
+      virtual void getOrderingChoices(const InstantId& inst,
+                                      std::vector<std::pair<TransactionId, TransactionId> >& results,
+                                      unsigned int limit = PLUS_INFINITY);
+
+      virtual void getTokensToOrder(std::vector<TokenId>& results);
+
+      virtual void getFlawedInstants(std::vector<InstantId>& results);
+
+      bool hasTokensToOrder() const;
+      //ResourceId getId() {return m_id;}
+      //subclasses will need to override getOrderingChoices, getTokensToOrder
+
+      int getFlawCount(const TokenId& token) const;
+
+      static const char* getProblemString(ProblemType t) { return problemLabels[t]; }
+
+      // PS Methods:
+      virtual PSResourceProfile* getLimits();
+      virtual PSResourceProfile* getLevels();
+
+      virtual PSList<PSEntityKey> getOrderingChoices(TimePoint t);
+
+
+
+
+
+    protected:
+      friend class FVDetector;
+      /**
+       * @brief Initialize the Resource.  This exists because when the Resource is instantiated from a model, the levels are available from member variables,
+       * not at construction time.
+       * @param initCapacityLb The lower bound of the Resource's initial level. (For example, a battery may be only half charged initially.)
+       * @param initCapacityUb The upper bound of the Resource's initial level. (For example, a battery may be only half charged initially.)
+       * @param lowerLimit The lower capacity limit. (For example, a battery can't have less than no energy stored, or it might be considered unsafe to allow
+       *                   the capacity to get below 25%.)
+       * @param upperLimit The upper capacity limit. (For example, a battery has a maximum charge, or it might be unsafe to fill a beaker more than three-quarters full.)
+       * @param maxInstProduction The maximum amount of production possible at an instant. (For example, a power bus might only allow 2.5A to be drawn at one instant.)
+       * @param maxInstConsumption The maximum amount of consumption possible at an instant. (For example, a power bus might only allow 2.5A to be drawn at one instant.)
+       * @param maxProduction The maximum amount of production possible on this resource.
+       * @param maxConsumption The maximum amount of consumption possible on this resource.
+       */
+      void init(const double initCapacityLb, const double initCapacityUb, const double lowerLimit,
+                const double upperLimit, const double maxInstProduction, const double maxInstConsumption,
+                const double maxProduction, const double maxConsumption, const LabelStr& detectorName, const LabelStr& profileName);
+
+      /**
+       * @brief Receive notification that an Instant has been removed from the profile.
+       * @param inst The deleted Instant.
+       */
+      virtual void notifyDeleted(const InstantId inst);
+
+      /**
+       * @brief Receive notification of a violation at an instant.  The subclass should take appropriate
+       *        action to push this information to the planner (i.e. empty a variable's domain).
+       * @param inst The violated instant.
+       */
+      virtual void notifyViolated(const InstantId inst, ProblemType problem);
+
+      virtual void notifyNoLongerViolated(const InstantId inst);
+
+      /**
+       * @brief Receive notification of a flaw at an instant.  The subclass should take appropriate action
+       *        to push this information to the planner (i.e. call notifyOrderingRequired)
+       * @param inst The flawed instant.
+       */
+      virtual void notifyFlawed(const InstantId inst);
+
+      /**
+       * @brief Receive notification that an instant that had previously been flawed is no longer.  The subclass should take appropriate action
+       *        to push this information to the planner (i.e. call notifyOrderingNoLongerRequired)
+       * @param inst The formerly flawed instant.
+       */
+      virtual void notifyNoLongerFlawed(const InstantId inst);
+
+      /*
+       * called by FVDetector when profile is recomputed
+       */
+      void resetViolations(InstantId inst);
+      void resetViolations();
+
+      virtual void addToProfile(const TokenId& tok) = 0;
+      virtual void removeFromProfile(const TokenId& tok);
+
+    private:
+      friend class ResourceTokenRelation;
+
+
+      virtual bool transConstrainedToPrecede(const TransactionId& predecessor, const TransactionId& successor);
+
+      bool noFlawedTokensForInst(const InstantId& inst) const;
+      //ResourceId m_id;
+      double m_initCapacityLb, m_initCapacityUb; /*<! The bounds of the initial capacity*/
+      double  m_lowerLimit, m_upperLimit; /*<! The bounds on the capacity*/
+      double m_maxInstProduction, m_maxInstConsumption; /*<! The maximum production and consumption allowed at an instant */
+      double m_maxProduction, m_maxConsumption; /*<! The maximum production and consumption allowed over the lifetime of the resource */
+    protected:
+      FVDetectorId m_detector; /*<! The flaw and violation detector for this resource. */
+      ProfileId m_profile; /*<! The profile calculator for this resource. */
+      std::map<TransactionId, TokenId> m_transactionsToTokens;
+      std::map<TokenId, std::set<InstantId> > m_flawedTokens;
+      std::map<int, InstantId> m_flawedInstants;
+
+      TokenId getTokenForTransaction(TransactionId t);
+      ResourceTokenRelationId getRTRConstraint(TokenId tok);
+    };
 }
 #endif

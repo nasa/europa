@@ -313,7 +313,7 @@ namespace EUROPA {
           flawToResolve = candidate;
           bestP = priority;
           explanation = "priority";
-          debugMsg("FlawManager:next", "Updating flaw to resolve " << candidate->toString());          
+          debugMsg("FlawManager:next", "Updating flaw to resolve " << candidate->getKey() << ") " << candidate->toString());          
           if(bestP == getBestCasePriority())
             break;
         }
@@ -323,7 +323,7 @@ namespace EUROPA {
           flawToResolve = candidate;
           bestP = priority;
           //explanation = "preference";
-          debugMsg("FlawManager:next", "Updating flaw to resolve " << candidate->toString());          
+          debugMsg("FlawManager:next", "Updating flaw to resolve (" << candidate->getKey() << ") " << candidate->toString());          
           if(bestP == getBestCasePriority())
             break;
         }
@@ -377,6 +377,7 @@ namespace EUROPA {
       // If there is a parent flaw manager ten it may already have excluded the given entity. Filters are inherited in this way.
       if(m_parent.isId() && m_parent->staticMatch(entity)) {
         debugMsg("FlawManager:staticMatch", "Excluding " << entity->getKey() << " based on parent flaw manager.");
+
         return true;
       }
 
@@ -406,7 +407,8 @@ namespace EUROPA {
           debugMsg("FlawManager:staticMatch", getId() << " Sticking " << entity->getKey() << " into static filters.");
           m_staticFiltersByKey.insert(std::make_pair(entity->getKey(), true));
           debugMsg("FlawManager:staticMatch", 
-                   "Excluding " << entity->getKey() << ".  Matched " << flawFilter->toString() << ".");
+		   flawFilter->getName().toString() <<" excluding " << entity->getKey() << ".  Matched " << flawFilter->toString() << ".");
+
           return true;
         }
       }
@@ -435,9 +437,11 @@ namespace EUROPA {
     }
 
     bool FlawManager::dynamicMatch(const EntityId& entity) {
-      checkError(!staticallyExcluded(entity), "Canot call dynamic match if statically excluded");
-      if(m_parent.isId() && m_parent->dynamicMatch(entity))
+      checkError(!staticallyExcluded(entity), "Cannot call dynamic match if statically excluded");
+      if(m_parent.isId() && m_parent->dynamicMatch(entity)){
+	debugMsg("FlawManager:dynamicMatch",  "Excluding " << entity->getKey() << " because of parent.");
         return true;
+      }
 
       condDebugMsg(!isValid(), "FlawManager:isValid", "Invalid datastructures in flaw manger.");
       __gnu_cxx::hash_map<eint, std::vector<FlawFilterId> >::const_iterator it = 
@@ -448,14 +452,20 @@ namespace EUROPA {
         for(std::vector<FlawFilterId>::const_iterator it_a = dynamicFilters.begin(); it_a != dynamicFilters.end(); ++it_a){
           FlawFilterId dynamicFilter = *it_a;
           checkError(dynamicFilter->isDynamic(), "Must be a bug in construction code.");
+	  debugMsg("FlawManager:dynamicMatch",  "Evaluating " << entity->getKey() << ". "  <<                   
+		     dynamicFilter->getName().toString() << " excluding " << entity->toString() << " with " << dynamicFilter->toString());
+
           if(dynamicFilter->test(entity)){
-            debugMsg("FlawManager:dynamicMatch",
-                     "Excluding " << entity->toString() << " with " << dynamicFilter->toString());
+            debugMsg("FlawManager:dynamicMatch",  "Excluding " << entity->getKey() << ". "  <<                   
+		     dynamicFilter->getName().toString() << " excluding " << entity->toString() << " with " << dynamicFilter->toString());
+
             condDebugMsg(!isValid(), "FlawManager:isValid", "Invalid datastructures in flaw manger.");
             return true;
           }
         }
       }
+
+      debugMsg("FlawManager:dynamicMatch",  "Including " << entity->getKey());
       return false;
     }
 
@@ -505,14 +515,21 @@ namespace EUROPA {
         std::vector<MatchingRuleId> candidates;
 	m_flawHandlers->getMatches(entity, candidates);
 
+        debugMsg("FlawManager:getFlawHandler", "There are " << candidates.size() << " flaw handlers to consider.");
         FlawHandlerEntry entry;
         bool requiresPropagation = false;
         for(std::vector<MatchingRuleId>::const_iterator it = candidates.begin(); it!= candidates.end(); ++it){
           FlawHandlerId candidate = *it;
+	  debugMsg("FlawManager:getFlawHandler", "Evaluating flaw handler " << candidate->toString() << " for (" << entity->getKey() << ")");
+
+	  // If it does not pass a custom static match then ignore it
+	  if(!candidate->customStaticMatch(entity))
+	    continue;
+
           if(candidate->hasGuards()){
             std::vector<ConstrainedVariableId> guards;
             // Make the scope. If cant match up, then ignore this handler
-            if(!candidate->makeConstraintScope(entity, guards) || !candidate->customStaticMatch(entity))
+            if(!candidate->makeConstraintScope(entity, guards))
               continue;
 
             ConstraintId guardListener = (new FlawHandler::VariableListener(m_db->getConstraintEngine(),
@@ -527,7 +544,9 @@ namespace EUROPA {
             // If we are not yet ready to move on.
             if(!candidate->test(guards))
               continue;
-          }    
+          }
+
+	  // Now insert in the list according to the weight. This will give the highest weight as the last entry
           entry.insert(std::pair<double, FlawHandlerId>(candidate->getWeight(), candidate));
           debugMsg("FlawManager:getFlawHandler", "Added active FlawHandler " << candidate->toString() << std::endl << " for entity " << entity->getKey());
         }

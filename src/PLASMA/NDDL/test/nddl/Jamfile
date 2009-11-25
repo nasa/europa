@@ -1,0 +1,65 @@
+SubDir PLASMA NDDL test nddl ;
+
+if ! $(PLASMA_READY) {
+
+ModuleNamedObjects NddlMain : NddlMain.cc : NDDL ;
+ModuleMain NddlMain : NddlMain.o : NDDL ;
+LocalDepends tests : run-nddl-tests ;
+
+# TODO: enable these tests asap
+local failing_tests =
+  simple-class.nddl 
+  ;
+
+local nddl_tests =   
+  class-constructor.nddl  
+  classes.0.tx.nddl       
+  classes.1.tx.nddl   
+  classes.2.tx.nddl
+  composition.0.nddl  
+  constraint-test.nddl
+  csp.0.nddl 
+  csp.1.nddl 
+  csp.2.nddl
+  deep-nesting.nddl
+  existential.nddl        
+  foreach.nddl
+  foreach-exec.nddl   
+  globals.nddl            
+  gnats-2537.nddl 
+  gnats_2830.nddl 
+  gnats-3100.nddl 
+  gnats_3140.nddl 
+  gnats-3231.nddl 
+  gnats-3248.nddl
+  guards.nddl  
+  inheritance.0.nddl 
+  inheritance.1.nddl 
+  inheritance.2.nddl
+  interval-constants.nddl
+  less-basic-model.nddl   
+  multidot.nddl       
+  nddl.tx.nddl 
+  nddl.tx.0.nddl 
+  nddl.tx.1.nddl 
+  nddl.tx.2.nddl
+  no-world.nddl 
+  plasma-base.nddl        
+  simple-predicate.nddl 
+  simple-rules.nddl 
+  string-domain.nddl  
+  subclass.nddl
+  subtype-extension.nddl 
+  ;
+
+local model ;
+for model in $(nddl_tests)
+{
+  local exe = $(model:S=) ;
+  
+  RunModuleMain NddlMain-$(exe) : NddlMain : $(model) nddl ;
+  Depends run-$(exe) : NddlMain-$(exe) ;
+  Depends run-nddl-tests : run-$(exe) ;  
+}
+
+} # PLASMA_READY

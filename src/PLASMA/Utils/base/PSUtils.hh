@@ -24,7 +24,10 @@ namespace EUROPA {
 	    m_elements.erase(it);
       }
       void push_back(const T& value) {m_elements.push_back(value);}
-
+    void clear() {m_elements.clear();}
+      bool operator==(const PSList<T>& other) const {
+    	  return m_elements == other.m_elements;
+      }
     protected:
       std::vector<T> m_elements;
   };
@@ -41,6 +44,9 @@ namespace EUROPA {
       virtual const std::string& getEntityType() const = 0;
       virtual std::string toString() const = 0;
       virtual std::string toLongString() const = 0;
+    virtual void setExternalPSEntity(const PSEntity* externalEntity) = 0;
+    virtual void clearExternalPSEntity() = 0;
+    virtual const PSEntity* getExternalPSEntity() const = 0;
   };
 
 }

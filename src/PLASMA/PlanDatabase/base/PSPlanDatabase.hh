@@ -2,18 +2,79 @@
 #define _H_PSPlanDatabase
 
 #include "PSConstraintEngine.hh"
+#include "ConstraintEngineDefs.hh"
+#include "TokenType.hh"
 
 namespace EUROPA {
+	enum PSTokenState { INACTIVE,ACTIVE,MERGED,REJECTED };
 
   class PSObject;
   class PSToken;
   class PSPlanDatabaseClient;
+
+  /** Version of DataType for communication with other languages */
+  class PSDataType {
+  public:
+	  PSDataType(const PSDataType& original);
+	  PSDataType(const DataTypeId& original);
+	  virtual ~PSDataType() {}
+	  const std::string& getName() const {
+		  return m_name;
+	  }
+	  virtual bool operator==(const PSDataType& other) const;
+	  // Add stuff for isX() and getBaseDomain() later?
+  protected:
+	  std::string m_name;
+  };
+
+  /** Version of TokenType for communication with other languages */
+  class PSTokenType {
+  public:
+	  PSTokenType(const PSTokenType& original);
+	  PSTokenType(const TokenTypeId &original);
+	  // Default destructor will do?
+	  const std::string& getName() const {
+		  return m_name;
+	  }
+	  PSList<std::string> getParameterNames() const;
+	  PSDataType getParameterType(int index) const;
+	  PSDataType getParameterType(const std::string& name) const;
+	  bool operator==(const PSTokenType& other) const;
+  protected:
+	  std::string m_name;
+	  std::vector<std::string> m_argNames;
+	  std::vector<PSDataType> m_argTypes;
+  };
+
+  /** Version of ObjectType for communication with other languages */
+  class PSObjectType {
+  public:
+	  PSObjectType(const PSObjectType& original);
+	  PSObjectType(const ObjectTypeId& original);
+	  // Default destructor will do?
+	  const std::string& getName() const { return m_name; }
+	  const std::string& getParentName() const { return m_parentName; }
+	  PSList<std::string> getMemberNames() const;
+	  PSDataType getMemberType(const std::string& name) const;
+	  PSList<PSTokenType> getPredicates() const { return m_predicates; }
+	  bool operator==(const PSObjectType& other) const;
+  protected:
+	  std::string m_name;
+	  std::string m_parentName; // "" means no parent
+	  std::map<std::string, PSDataType> m_members;
+	  PSList<PSTokenType> m_predicates;
+  };
 
   class PSSchema : public EngineComponent
   {
     public:
         // TODO: flesh this interface out
       virtual ~PSSchema() {}
+      virtual PSList<std::string> getAllPredicates() const = 0;
+      virtual PSList<std::string> getMembers(const std::string& objectType) const = 0;
+      virtual bool hasMember(const std::string& parentType, const std::string& memberName) const = 0;
+
+      virtual PSList<PSObjectType> getAllPSObjectTypes() const = 0;
   };
 
   class PSPlanDatabase : public EngineComponent
@@ -21,6 +82,7 @@ namespace EUROPA {
     public:
       virtual ~PSPlanDatabase() {}
 
+    virtual PSList<PSObject*> getAllObjects() const = 0;
       virtual PSList<PSObject*> getObjectsByType(const std::string& objectType) const = 0;
       virtual PSObject* getObjectByKey(PSEntityKey id) const = 0;
       virtual PSObject* getObjectByName(const std::string& name) const = 0;
@@ -57,13 +119,13 @@ namespace EUROPA {
   class PSToken : public virtual PSEntity
   {
   public:
-	  enum PSTokenState { INACTIVE,ACTIVE,MERGED,REJECTED };
 
       PSToken() {}
       virtual ~PSToken() {}
 
       virtual const std::string& getEntityType() const = 0;
       virtual std::string getTokenType() const = 0;
+    virtual std::string getFullTokenType() const = 0;
 
       virtual bool isFact() const = 0;
       virtual bool isIncomplete() const = 0;
@@ -85,6 +147,7 @@ namespace EUROPA {
 
       virtual PSList<PSVariable*> getParameters() const = 0;
       virtual PSVariable* getParameter(const std::string& name) const = 0;
+    virtual PSList<PSVariable*> getPredicateParameters() const = 0;
 
       virtual void activate() = 0;
       virtual void reject() = 0;

@@ -28,18 +28,12 @@ namespace EUROPA {
     private:
       friend class UnboundVariableIterator;
 
-      void notifyAdded(const ConstraintId& constraint);
-      void notifyRemoved(const ConstraintId& constraint);
       void notifyRemoved(const ConstrainedVariableId& var);
       void notifyChanged(const ConstrainedVariableId& variable, const DomainListener::ChangeType& changeType);
       void handleInitialize();
       void addFlaw(const ConstrainedVariableId& var);
       void removeFlaw(const ConstrainedVariableId& var);
       void updateFlaw(const ConstrainedVariableId& var);
-      void addGuard(const ConstrainedVariableId& var);
-      void removeGuard(const ConstrainedVariableId& var);
-      void handleConstraintAddition(const ConstraintId& constraint);
-      void handleConstraintRemoval(const ConstraintId& constraint);
       bool betterThan(const EntityId& a, const EntityId& b, LabelStr& explanation);
 
       /**
@@ -47,12 +41,8 @@ namespace EUROPA {
        */
       static bool variableOfNonActiveToken(const ConstrainedVariableId& var);
 
-      bool isCompatGuard(const ConstrainedVariableId& var) const;
 
       ConstrainedVariableSet m_flawCandidates; /*!< All variables that have passed the static filter */
-      ConstrainedVariableSet m_singletonFlawCandidates; /*!< All singleton variables that have passed the static filter */
-      std::map<ConstrainedVariableId, unsigned int> m_guardCache; /*!< Cache of variables that are
-								    guarded. Includes reference counts. */
     };
   }
 }

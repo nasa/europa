@@ -1,13 +1,13 @@
 #include "PlannerConfig.nddl"
 #include "Resources.nddl"
 
-class Battery extends Resource {
+class Battery extends Reservoir {
  Battery(float ic, float ll_min, float ll_max) {
-  super(ic, ll_min, ll_max, 0.0, 0.0, -inff, -inff);
+  super(ic, ll_min, ll_max, 0.0, 0.0, +inff, +inff);
  }
 }
 
-class Disk extends Resource {
+class Disk extends Reservoir {
  Disk(){
   super();
  }
@@ -24,15 +24,15 @@ class DriveSubsystem extends Timeline {
 }
 
 DriveSubsystem::Drive{
- any(Battery.change tx);
+ any(Battery.consume tx);
  eq(start, tx.time);
- eq(tx.quantity, -50);
+ eq(tx.quantity, 50);
 }
 
 DriveSubsystem::Stroll{
- any(Battery.change tx);
+ any(Battery.consume tx);
  eq(start, tx.time);
- eq(tx.quantity, -25);
+ eq(tx.quantity, 25);
 }
 
 class Rover extends Timeline {

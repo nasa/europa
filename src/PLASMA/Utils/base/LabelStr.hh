@@ -13,10 +13,16 @@
 #include <map>
 #include <string>
 #include <ext/hash_map>
+
+// Come on you GCC guys...
 #if (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4))
-#include <ext/hash_fun.h>
+# if (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)
+#  include <backward/hash_fun.h>
+# else
+#  include <ext/hash_fun.h>
+# endif
 #else
-#include <ext/stl_hash_fun.h>
+# include <ext/stl_hash_fun.h>
 #endif
 
 namespace __gnu_cxx {
@@ -213,8 +219,8 @@ namespace EUROPA {
 
     /*static std::map< std::string, double>& keysFromString();*/ /**< Map strings to keys for key allocation on construction. */
     /*static std::map< double, std::string>& stringFromKeys();*/ /**< Map keys to strings for string retrieval - i.e. toString(). */
-    static __gnu_cxx::hash_map<std::string, edouble>& keysFromString();
-    static __gnu_cxx::hash_map<edouble, std::string>& stringFromKeys();
+    static std::map<std::string, edouble>& keysFromString();
+    static std::map<edouble, std::string>& stringFromKeys();
 
 #ifndef EUROPA_FAST
     const char* m_chars;

@@ -8,6 +8,7 @@
 #include "Error.hh"
 #include "PSPlanDatabaseListener.hh"
 #include "PSConstraintEngineListener.hh"
+#include "NddlInterpreter.hh"
 %}
 
 %rename(PSException) Error;  // Our Error C++ class is wrapped instead as PSException
@@ -17,6 +18,38 @@
     return getMsg();
   }
 %}
+
+%typemap(javabase) EUROPA::PSLanguageExceptionList "java.lang.RuntimeException";  // extends RuntimeException
+%typemap(javacode) EUROPA::PSLanguageExceptionList %{  // copied verbatim into the java code
+  public String getMessage() {
+    return "Got " + getExceptionCount() + " errors";
+  }
+%}
+
+
+// Specific exception handlers should be defined before the catch-all version
+%exception executeScript {
+  try {
+     $action
+  } catch (const EUROPA::PSLanguageExceptionList &e) {
+		jclass excepClass = jenv->FindClass("psengine/PSLanguageExceptionList");
+		if (excepClass == NULL)
+			return $null;
+
+		jmethodID excepConstructor = jenv->GetMethodID(excepClass, "<init>", "(JZ)V");
+		if(excepConstructor == NULL)
+			return $null;
+
+		jthrowable excep = static_cast<jthrowable> (jenv->NewObject(excepClass, excepConstructor, new EUROPA::PSLanguageExceptionList(e), true));
+		if(excep == NULL)
+			return $null;
+		else
+			jenv->Throw(excep);
+
+		return $null;
+   }
+}
+
 
 // Generic exception handling will wrap all functions with the following try/catch block:
 // copied from http://www.swig.org/Doc1.3/Java.html#exception_handling
@@ -73,6 +106,29 @@ private:
 
 namespace EUROPA {
 
+  class PSLanguageException {
+  public:
+	const std::string& getFileName() const;
+	int getLine() const;
+	int getOffset() const;
+	int getLength() const;
+	const std::string& getMessage() const;
+  protected:
+    // Prevent auto-generation
+  	PSLanguageException(const char *fileName, int line, int offset, int length,
+			const char *message);  
+  };
+  
+  class PSLanguageExceptionList {
+  public:
+    int getExceptionCount() const;
+    const PSLanguageException& getException(int index) const;
+  protected:
+    // Prevent auto-generation
+	PSLanguageExceptionList(const std::vector<PSLanguageException>& exceptions);
+  };
+
+
   typedef int TimePoint;
   typedef int PSEntityKey;
 
@@ -82,9 +138,13 @@ namespace EUROPA {
   class PSToken;
   class PSVariable;
   class PSVarValue;
+  class PSDataType;
+  class PSTokenType;
+  class PSObjectType;
   class PSPlanDatabaseClient;
   class PSPlanDatabaseListener;
   class PSConstraintEngineListener;
+  class PSSchema;
 
   template<class T>
   class PSList {
@@ -92,14 +152,18 @@ namespace EUROPA {
     PSList();
     int size() const;
     T& get(int idx);
-    void push_back(const T& value);        
-    void remove(const T& value); 
+    void push_back(const T& value);
+    void remove(const T& value);
+    void clear();
   };
 
   %template(PSObjectList) PSList<PSObject*>;
   %template(PSTokenList) PSList<PSToken*>;
   %template(PSVariableList) PSList<PSVariable*>;
   %template(PSConstraintList) PSList<PSConstraint*>;
+  %template(PSDataTypeList) PSList<PSDataType>;
+  %template(PSTokenTypeList) PSList<PSTokenType>;
+  %template(PSObjectTypeList) PSList<PSObjectType>;
   //%template(PSValueList) PSList<PSVarValue>;
 
   // using template instantiation to get the right results.
@@ -120,7 +184,7 @@ namespace EUROPA {
   %rename(PSValueList) PSList<EUROPA::PSVarValue>;
   class PSList<EUROPA::PSVarValue> {
   public:
-    int size() const; 
+    int size() const;
     PSVarValue get(int idx);
   };
 
@@ -142,9 +206,11 @@ namespace EUROPA {
       }
   }
 
-  public void executeScript(String language, java.io.Reader reader) throws PSException {
+  public String executeScript(String language, java.io.Reader reader) throws PSLanguageExceptionList {
+    String retval = "";
+    
     String txns = null;
-    if(language.equalsIgnoreCase("nddl")) {
+    if(language.equalsIgnoreCase("nddl2")) {
       try {
         Class nddlClass = getClassForName("nddl.Nddl");
         Class[] parameters = new Class[]{java.io.Reader.class, boolean.class};
@@ -172,60 +238,76 @@ namespace EUROPA {
     }
 
     if(txns != null) {
-      executeScript_internal("nddl-xml",txns,false /*isFile*/);
+      retval = executeScript_internal("nddl-xml",txns,false /*isFile*/);
     }
     else {
       throw new RuntimeException("Failed to create transactions from "+language+" source.");
     }
+    
+    return retval;
   }
 
-  protected NddlInterpreter nddlInterpreter_=null; 
-  
+  protected NddlInterpreter nddlInterpreter_=null;
+
   public NddlInterpreter getNddlInterpreter()
   {
-      if (nddlInterpreter_ == null) 
+      if (nddlInterpreter_ == null)
           nddlInterpreter_ = new NddlInterpreter(this);
-          
+
       return nddlInterpreter_;
   }
-   
-  public void executeScript(String language, String script, boolean isFile) throws PSException 
+
+  public String executeScript(String language, String script, boolean isFile) throws PSLanguageExceptionList
   {
+      String retval = "";
+      
       try {
-        if (language.equalsIgnoreCase("nddl")) {                
+        if (language.equalsIgnoreCase("nddl2")) {
             if (isFile)
                 getNddlInterpreter().source(script);
-            else 
+            else
                 getNddlInterpreter().eval(script);
         }
         else {
-            executeScript_internal(language,script,isFile);
+            retval = executeScript_internal(language,script,isFile);
         }
-      } 
-      catch(Exception e) {
+      }
+      catch (PSLanguageExceptionList e) {
+        // This exception derives from RuntimeException and needs not be declared
+        throw e;
+      } catch(Exception e) {
           e.printStackTrace();
           throw new RuntimeException("Failed to execute "+language+" script "+script,e);
       }
+      
+      return retval;
   }
-  
+
 %}
 
-%nodefaultctor PSEngine;   
+  class EngineConfig
+  {
+    public:
+      const std::string& getProperty(const std::string& name) const;
+      void setProperty(const std::string& name,const std::string& value);
+  };
+
+
+%nodefaultctor PSEngine;
 
   class PSEngine {
   public:
     static PSEngine* makeInstance();
 
-    static void initialize();
-    static void terminate();
-
     void start();
     void shutdown();
 
+    EngineConfig* getConfig();
+
     void loadModule(const std::string& moduleFileName);
-    void loadModel(const std::string& modelFileName);
     std::string executeScript(const std::string& language, const std::string& script, bool isFile);
 
+    PSList<PSObject*> getObjects();
     PSList<PSObject*> getObjectsByType(const std::string& objectType);
     PSObject* getObjectByKey(PSEntityKey id);
     PSObject* getObjectByName(const std::string& name);
@@ -233,8 +315,10 @@ namespace EUROPA {
     PSPlanDatabaseClient* getPlanDatabaseClient();
     void addPlanDatabaseListener(PSPlanDatabaseListener& listener);
     void addConstraintEngineListener(PSConstraintEngineListener& listener);
-    std::string planDatabaseToString();    
-      
+    std::string planDatabaseToString();
+
+    PSSchema* getPSSchema();
+
     PSList<PSVariable*> getGlobalVariables();
     PSVariable* getVariableByKey(PSEntityKey id);
     PSVariable* getVariableByName(const std::string& name);
@@ -243,17 +327,17 @@ namespace EUROPA {
     PSToken* getTokenByKey(PSEntityKey id);
 
     bool getAutoPropagation() const;
-    void setAutoPropagation(bool v);        
-    bool propagate(); 
+    void setAutoPropagation(bool v);
+    bool propagate();
 
     bool getAllowViolations() const;
     void setAllowViolations(bool v);
 
-    double getViolation() const;    
+    double getViolation() const;
     PSList<std::string> getViolationExpl() const;
 	PSList<PSConstraint*> getAllViolations() const;
 
-    PSSolver* createSolver(const std::string& configurationFile); 
+    PSSolver* createSolver(const std::string& configurationFile);
   };
 
   class PSEntity
@@ -262,14 +346,58 @@ namespace EUROPA {
     PSEntityKey getKey() const;
     const std::string& getEntityName() const;
     const std::string& getEntityType() const;
-    
+
     std::string toString() const;
     std::string toLongString() const;
-        
+
   protected:
     PSEntity(); //protected constructors prevent wrapper generation
   };
 
+  class PSDataType
+  {
+  public:
+	  const std::string& getName() const;
+  protected:
+  	  PSDataType(const PSDataType& original);
+  };
+  
+  class PSTokenType
+  {
+  public:
+	  const std::string& getName() const;
+	  PSList<std::string> getParameterNames() const;
+	  PSDataType getParameterType(int index) const;
+	  PSDataType getParameterType(const std::string& name) const;
+  protected:
+  	PSTokenType(const PSTokenType& original);
+  };  
+
+  class PSObjectType
+  {
+  public:
+	  const std::string& getName() const;
+	  const std::string& getParentName() const;
+	  PSList<std::string> getMemberNames() const;
+	  PSDataType getMemberType(const std::string& name) const;
+	  PSList<PSTokenType> getPredicates() const;
+  protected:
+    PSObjectType(const PSObjectType& original);
+  };
+
+  class PSSchema
+  {
+  public:
+	  ~PSSchema();
+	  PSList<std::string> getAllPredicates() const;
+	  PSList<std::string> getMembers(const std::string& objectType) const;
+	  bool hasMember(const std::string& parentType, const std::string& memberName) const;
+	  
+	  PSList<PSObjectType> getAllPSObjectTypes() const;
+
+  protected:
+	  PSSchema();
+  };
 
   class PSObject : public PSEntity
   {
@@ -281,9 +409,9 @@ namespace EUROPA {
     void addPrecedence(PSToken* pred,PSToken* succ);
     void removePrecedence(PSToken* pred,PSToken* succ);
     PSVarValue asPSVarValue() const;
-    
+
     static PSObject* asPSObject(PSEntity* entity);
-    
+
     ~PSObject();
   protected:
     PSObject();
@@ -320,24 +448,24 @@ namespace EUROPA {
     PSSolver();
   };
 
-  
+  enum PSTokenState { INACTIVE,ACTIVE,MERGED,REJECTED };
+
   class PSToken : public PSEntity
   {
   public:
-	enum PSTokenState { INACTIVE,ACTIVE,MERGED,REJECTED };
     std::string getTokenType() const;
-    
+
     bool isFact();
     bool isIncomplete();
-    
+
     PSObject* getOwner();
 
     PSToken* getMaster();
     PSList<PSToken*> getSlaves();
- 
+
     PSToken* getActive() const;
     PSList<PSToken*> getMerged() const;
-    
+
     PSTokenState getTokenState() const;
     PSVariable* getStart();
     PSVariable* getEnd();
@@ -348,22 +476,21 @@ namespace EUROPA {
 
     PSList<PSVariable*> getParameters();
     PSVariable* getParameter(const std::string& name);
-    
-    void activate();      
-    void reject();      
-    void merge(PSToken* activeToken);            
-    void cancel(); 
-    
+
+    void activate();
+    void reject();
+    void merge(PSToken* activeToken);
+    void cancel();
+
     PSList<PSToken*> getCompatibleTokens(unsigned int limit, bool useExactTest);
-    
+
     std::string toString();
-    
+
   protected:
     PSToken();
   };
 
-  	enum PSVarType {INTEGER,DOUBLE,BOOLEAN,STRING,OBJECT};
-	enum PSTokenState { INACTIVE,ACTIVE,MERGED,REJECTED };
+  enum PSVarType {INTEGER,DOUBLE,BOOLEAN,STRING,OBJECT};
 
   class PSVariable : public PSEntity
   {
@@ -382,14 +509,14 @@ namespace EUROPA {
     bool isEnumerated();
     PSList<PSVarValue> getValues();  // if isSingleton()==false && isEnumerated() == true
     PSList<PSConstraint*> getConstraints();
-    
-    
+
+
     void specifyValue(PSVarValue& v);
     void reset();
-    
+
     double getViolation() const;
     std::string getViolationExpl() const;
-        
+
     std::string toString();
   protected:
     PSVariable();
@@ -412,9 +539,9 @@ namespace EUROPA {
     double              asDouble() const;
     bool                asBoolean() const;
     const std::string&  asString() const;
-    
+
     std::string toString() const;
-    
+
   protected:
     PSVarValue();
   };
@@ -425,21 +552,21 @@ namespace EUROPA {
       bool isActive() const;
       void deactivate();
       void undoDeactivation();
-      
+
       double getViolation() const;
-      std::string getViolationExpl() const;     
-      
+      std::string getViolationExpl() const;
+
       std::string toString() const;
       PSList<PSVariable*> getVariables() const;
-      
+
     protected:
-      PSConstraint();                    
+      PSConstraint();
   };
 
   // TODO: move this to a separate file?
   class PSResource;
   class PSResourceProfile;
-  
+
   class PSResource : public PSObject
   {
   public:
@@ -449,7 +576,7 @@ namespace EUROPA {
     PSList<PSEntityKey> getOrderingChoices(TimePoint t);
 
     static PSResource* asPSResource(PSObject* obj);
-            
+
   protected:
     PSResource();
   };
@@ -464,16 +591,16 @@ namespace EUROPA {
   protected:
     PSResourceProfile();
   };
-  
-  class PSPlanDatabaseClient  
+
+  class PSPlanDatabaseClient
   {
-    public:    
+    public:
       PSVariable* createVariable(const std::string& typeName, const std::string& name, bool isTmpVar) = 0;
       void deleteVariable(PSVariable* var) = 0;
-      
+
       PSObject* createObject(const std::string& type, const std::string& name) = 0;
       void deleteObject(PSObject* obj) = 0;
-      
+
       PSToken* createToken(const std::string& predicateName, bool rejectable, bool isFact) = 0;
       void deleteToken(PSToken* token) = 0;
 
@@ -483,22 +610,22 @@ namespace EUROPA {
       void merge(PSToken* token, PSToken* activeToken) = 0;
       void reject(PSToken* token) = 0;
       void cancel(PSToken* token) = 0;
-      
+
       PSConstraint* createConstraint(const std::string& name, PSList<PSVariable*>& scope) = 0;
       void deleteConstraint(PSConstraint* constr) = 0;
 
       void specify(PSVariable* variable, double value) = 0;
-      void reset(PSVariable* variable) = 0;      
-      
+      void reset(PSVariable* variable) = 0;
+
       void close(PSVariable* variable) = 0;
       void close(const std::string& objectType) = 0;
-      void close() = 0;      
+      void close() = 0;
   };
-  
+
 // generate directors for all virtual methods in class Foo
 // (enables calls from C++ to inherited java code)
-  %feature("director") PSPlanDatabaseListener;        
-  
+  %feature("director") PSPlanDatabaseListener;
+
   class PSPlanDatabaseListener
   {
   public:
@@ -516,18 +643,18 @@ namespace EUROPA {
 
 // generate directors for all virtual methods in class Foo
 // (enables calls from C++ to inherited java code)
-  %feature("director") PSConstraintEngineListener;        
+  %feature("director") PSConstraintEngineListener;
 
 
- 
-  
+
+
   class PSConstraintEngineListener
   {
   public:
-	enum PSChangeType { UPPER_BOUND_DECREASED, LOWER_BOUND_INCREASED,  BOUNDS_RESTRICTED,  
+	enum PSChangeType { UPPER_BOUND_DECREASED, LOWER_BOUND_INCREASED,  BOUNDS_RESTRICTED,
                                      VALUE_REMOVED, RESTRICT_TO_SINGLETON,  SET_TO_SINGLETON,  RESET,
                       	 			 RELAXED, CLOSED, OPENED,  EMPTIED,  LAST_CHANGE_TYPE};
-    
+
     virtual ~PSConstraintEngineListener();
 	virtual void notifyViolationAdded(PSConstraint* constraint);
 	virtual void notifyViolationRemoved(PSConstraint* constraint);

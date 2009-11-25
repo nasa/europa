@@ -5,13 +5,15 @@
  * @file   Utils.hh
  * @author Conor McGann
  * @date   Mon Dec 27 17:19:39 2004
- * @brief  
+ * @brief
  * @ingroup Utils
  */
 
-#include "Id.hh"
 #include "Entity.hh"
 #include "Number.hh"
+#include "Error.hh"
+#include "Id.hh"
+#include "IdTable.hh"
 
 #include <vector>
 #include <set>
@@ -50,20 +52,15 @@ namespace EUROPA {
   /**
    * @brief Utility to produce a string from a double
    */
-  std::string toString(double value);
-
-  /**
-   * @brief Utility to produce a string from a double
-   */
   std::string toString(edouble value);
 
   /**
    * @brief Utility function to tokenzie a std string 
    */
 
-  void tokenize(const std::string& str, 
-		std::vector<std::string>& tokens,  
-		const std::string& delimiters = " "); 
+  void tokenize(const std::string& str,
+		std::vector<std::string>& tokens,
+		const std::string& delimiters = " ");
 
   /**
    * @brief Utility function to convert a string to a value type using the >> operator and an istringstream.  Does not error-check.
@@ -239,6 +236,17 @@ namespace EUROPA {
     }
     objects.clear();
   }
-
 }
+
+#define EUROPA_runTest(test, args...) { \
+  try { \
+      unsigned int id_count = EUROPA::IdTable::size(); \
+      bool result = test(args); \
+      EUROPA::IdTable::checkResult(result,id_count); \
+  } \
+  catch (Error err){ \
+      err.print(std::cout); \
+  } \
+}
+
 #endif

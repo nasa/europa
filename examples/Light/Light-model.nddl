@@ -1,22 +1,21 @@
 #include "Plasma.nddl"
-#include "PlannerConfig.nddl"
 
 class LightSwitch extends Timeline
 {
-    predicate turnOn  { duration=1; } 
-    predicate turnOff { duration=1; }    
+    predicate turnOn  { duration=1; }
+    predicate turnOff { duration=1; }
 }
 
-class LightBulb extends Timeline 
+class LightBulb extends Timeline
 {
     LightSwitch mySwitch_;
-    
+
     LightBulb(LightSwitch b)
     {
         mySwitch_ = b;
     }
 
-    predicate On  {} 
+    predicate On  {}
     predicate Off {}
 }
 

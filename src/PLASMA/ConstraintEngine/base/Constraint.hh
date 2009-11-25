@@ -168,6 +168,17 @@ namespace EUROPA {
     // PS-Specific Methods:
     virtual PSList<PSVariable*> getVariables() const;
 
+    /*
+     * @brief called when the constraint's propagator, or the violation mgr realizes the constraint has been violated
+     */
+    virtual void notifyViolated();
+
+    /*
+     * @brief called when the constraint's propagator, or the violation mgr realizes the constraint is no longer being violated
+     */
+    virtual void notifyNoLongerViolated();
+
+
   protected:
     /**
      * @brief Base implementation will require all variables in scope have the base domains as singletons. Over-ride
@@ -264,9 +275,6 @@ namespace EUROPA {
     const LabelStr m_name; /**< Name used on stratup to bind to the correct factory and then present as a debugging aid. */
     const ConstraintEngineId m_constraintEngine; /**< The owner ConstraintEngine */
     std::vector<ConstrainedVariableId> m_variables; /**< The variable scope of the Constraint. */
-
-    void notifyViolated();
-    void notifyNoLongerViolated();
 
   private:
     /**

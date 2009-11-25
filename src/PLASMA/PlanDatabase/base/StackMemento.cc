@@ -2,7 +2,7 @@
 #include "PlanDatabase.hh"
 #include "StackMemento.hh"
 #include "Constraint.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include <map>
 #include <list>
 #include <set>

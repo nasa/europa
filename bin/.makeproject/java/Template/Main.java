@@ -11,17 +11,22 @@ class Main
     
     public static void main(String args[]) 
     {
-	    String debugMode = args[0];
-        PSUtil.loadLibraries(debugMode);	   
-	    PSEngine.initialize();
+    	try {
+    		String debugMode = args[0];
+    		PSUtil.loadLibraries(debugMode);	   
 
-	    psEngine_ = PSEngine.makeInstance();
-	    psEngine_.start();
-		Runtime.getRuntime().addShutdownHook(new ShutdownHook());
-		loadCustomCode(debugMode);
-		
-		PSDesktop d = PSDesktop.makeInstance(psEngine_,args);
-		d.runUI();
+    		psEngine_ = PSEngine.makeInstance();
+    		psEngine_.start();
+    		Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+    		loadCustomCode(debugMode);
+
+    		PSDesktop d = PSDesktop.makeInstance(psEngine_,args);
+    		d.runUI();
+    	}
+    	catch (Exception e) {
+    		e.printStackTrace();
+    		Runtime.getRuntime().exit(-1);    
+    	}
     }
 
     protected static void loadCustomCode(String debugMode)
@@ -48,8 +53,7 @@ class Main
 	    
 	    public void run() 
 	    {
-            	psEngine_.shutdown();
-	        PSEngine.terminate();
+	        psEngine_.shutdown();
 	    }
     }	  
 }

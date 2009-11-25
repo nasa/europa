@@ -1,9 +1,10 @@
 #include "tn-test-module.hh"
-#include "TestSupport.hh"
+#include "Utils.hh"
 #include "TemporalNetwork.hh"
 #include "TemporalPropagator.hh"
 #include "STNTemporalAdvisor.hh"
 #include "TemporalAdvisor.hh"
+#include "Constraints.hh"
 #include "Schema.hh"
 #include "PlanDatabase.hh"
 #include "PlanDatabaseDefs.hh"
@@ -11,7 +12,7 @@
 #include "IntervalToken.hh"
 #include "Timeline.hh"
 #include "Utils.hh"
-#include "IntervalIntDomain.hh"
+#include "Domains.hh"
 #include "TokenVariable.hh"
 
 #include "RulesEngine.hh"
@@ -26,6 +27,8 @@
 #include <iostream>
 #include <string>
 #include <list>
+
+using namespace EUROPA;
 
 class TNTestEngine : public EngineBase
 {

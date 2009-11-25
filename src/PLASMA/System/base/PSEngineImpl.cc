@@ -16,16 +16,6 @@
 
 namespace EUROPA {
 
-  void PSEngine::initialize()
-  {
-	PSEngineImpl::initialize();
-  }
-
-  void PSEngine::terminate()
-  {
-	PSEngineImpl::terminate();
-  }
-
   PSEngine* PSEngine::makeInstance()
   {
 	  return new PSEngineImpl();
@@ -40,17 +30,6 @@ namespace EUROPA {
 	  shutdown();
   }
 
-  void PSEngineImpl::initialize()
-  {
-    Error::doThrowExceptions(); // throw exceptions!
-    Error::doDisplayErrors();
-  }
-
-  void PSEngineImpl::terminate()
-  {
-  }
-
-
   void PSEngineImpl::start()
   {
 	  doStart();
@@ -59,6 +38,11 @@ namespace EUROPA {
   void PSEngineImpl::shutdown()
   {
 	  doShutdown();
+  }
+
+  EngineConfig* PSEngineImpl::getConfig()
+  {
+      return EuropaEngine::getConfig();
   }
 
   void PSEngineImpl::addModule(Module* module)
@@ -74,31 +58,17 @@ namespace EUROPA {
 	  EuropaEngine::loadModule(moduleFileName);
   }
 
-  void PSEngineImpl::loadModel(const std::string& modelFileName)
-   {
-	   check_runtime_error(isStarted(),"PSEngine has not been started");
-
-	   void* libHandle = p_dlopen(modelFileName.c_str(), RTLD_NOW);
-	   checkRuntimeError(libHandle != NULL,
-			   "Error opening model " << modelFileName << ": " << p_dlerror());
-
-	   SchemaId (*fcn_schema)(const SchemaId&,const RuleSchemaId&);
-	   fcn_schema = (SchemaId (*)(const SchemaId&,const RuleSchemaId&)) p_dlsym(libHandle, "loadSchema");
-	   checkError(fcn_schema != NULL,
-			   "Error locating symbol 'loadSchema' in " << modelFileName << ": " <<
-			   p_dlerror());
-
-	   SchemaId schema = ((Schema*)getComponent("Schema"))->getId();
-       RuleSchemaId ruleSchema = ((RuleSchema*)getComponent("RuleSchema"))->getId();
-	   (*fcn_schema)(schema,ruleSchema);
-   }
-
   std::string PSEngineImpl::executeScript(const std::string& language, const std::string& script, bool isFile)
   {
     return EuropaEngine::executeScript(language,script,isFile);
   }
 
   // Plan Database methods
+  PSList<PSObject*> PSEngineImpl::getObjects() {
+    check_runtime_error(isStarted(), "PSEngine has not been started");
+    return getPlanDatabase()->getAllObjects();
+  }
+
   PSList<PSObject*> PSEngineImpl::getObjectsByType(const std::string& objectType)
   {
     check_runtime_error(isStarted(),"PSEngine has not been started");
@@ -140,6 +110,12 @@ namespace EUROPA {
     check_runtime_error(isStarted(),"PSEngine has not been started");
     return getPlanDatabase()->toString();
   }
+
+  PSSchema* PSEngineImpl::getPSSchema()
+  {
+	  return getPlanDatabase()->getSchema();
+  }
+
 
   PSPlanDatabaseClient* PSEngineImpl::getPlanDatabaseClient()
   {

@@ -25,7 +25,7 @@ namespace EUROPA {
   }
 
   void ProxyVariableRelation::handleExecute(){
-    // Update path rfom source constraint if necessary. Lazy evaluation pattern
+    // Update path from source constraint if necessary. Lazy evaluation pattern
     updatePathFromSource();
 
     // Handle case of closure from the object
@@ -37,7 +37,7 @@ namespace EUROPA {
       m_objectDomain.close();
 
     // First prune the objects againts the proxy values
-    EnumeratedDomain remainingValues(m_proxyDomain.isNumeric(), m_proxyDomain.getTypeName().c_str());
+    EnumeratedDomain remainingValues(m_proxyDomain.getDataType());
 
     const std::set<edouble>& objects = m_objectDomain.getValues();
     ObjectDomain remainingObjects(m_objectDomain.getTypeName().c_str());
@@ -65,12 +65,12 @@ namespace EUROPA {
   }
 
 
-  bool ProxyVariableRelation::canIgnore(const ConstrainedVariableId& variable, 
-					int argIndex, 
+  bool ProxyVariableRelation::canIgnore(const ConstrainedVariableId& variable,
+					int argIndex,
 					const DomainListener::ChangeType& changeType){
     // If the object variable is specified to a singleton, and the proxy variable can be specified, then
     // we will force the proxy to be set to the field value of the given object
-    if(argIndex == 0 && changeType == DomainListener::SET_TO_SINGLETON && 
+    if(argIndex == 0 && changeType == DomainListener::SET_TO_SINGLETON &&
        getScope()[1]->canBeSpecified() &&
        !getScope()[1]->isSpecified()){
       ObjectId object = Entity::getTypedEntity<Object>(variable->getSpecifiedValue());

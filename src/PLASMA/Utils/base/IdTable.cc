@@ -16,6 +16,7 @@
 #include "Debug.hh"
 #include "LabelStr.hh"
 #include "Mutex.hh"
+#include "Entity.hh"
 
 /**
  * @file IdTable.cc
@@ -46,9 +47,9 @@ namespace EUROPA {
   pthread_mutex_t& IdTableMutex()
   {
       static pthread_mutex_t sl_mutex = PTHREAD_MUTEX_INITIALIZER;
-      return sl_mutex;      
+      return sl_mutex;
   }
-  
+
   IdTable::IdTable() {
   }
 
@@ -83,20 +84,21 @@ namespace EUROPA {
     MutexGrabber mg(IdTableMutex());
     static unsigned int sl_nextId(1);
     debugMsg("IdTable:insert", "id,key:" << std::hex << id << std::dec << ", " << sl_nextId << ")");
-    std::map<unsigned long int, std::pair<unsigned int,edouble> >::iterator it = 
+
+    std::map<unsigned long int, std::pair<unsigned int,edouble> >::iterator it =
       getInstance().m_collection.find(id);
-    
+
     if (it != getInstance().m_collection.end())
       return(0); /* Already in table. */
-    
+
     getInstance().m_collection.insert(std::make_pair(id, std::make_pair(sl_nextId,LabelStr(baseType))));
-    
+
     std::map<std::string, unsigned int>::iterator tCit = getInstance().m_typeCnts.find(baseType);
     if (tCit == getInstance().m_typeCnts.end())
       getInstance().m_typeCnts.insert(std::pair<std::string, unsigned int>(baseType, 1));
     else
       tCit->second++;
-    
+
     return(sl_nextId++);
   }
 
@@ -110,7 +112,7 @@ namespace EUROPA {
     std::string type = getEntryType(it->second).toString();
     std::map<std::string, unsigned int>::iterator tCit = getInstance().m_typeCnts.find(type);
     tCit->second--;
-    
+
     getInstance().m_collection.erase(id);
   }
 
@@ -125,7 +127,7 @@ namespace EUROPA {
   }
 
   void IdTable::output(std::ostream& os) {
-    printTypeCnts(os);  
+    printTypeCnts(os);
     MutexGrabber mg(IdTableMutex());
     os << "Id Contents:";
     for (std::map<unsigned long int, std::pair<unsigned int,edouble> >::iterator it = getInstance().m_collection.begin();
@@ -135,4 +137,27 @@ namespace EUROPA {
         getEntryType(it->second).toString() << ')';
     os << std::endl;
   }
+
+  void IdTable::checkResult(bool result, unsigned int id_count)
+  {
+	  Entity::garbageCollect();
+
+	  if (result && IdTable::size() <= id_count) {
+		  debugMsg("Test"," PASSED.");
+	  }
+	  else {
+		  if (result) {
+			  std::cerr << " FAILED = DID NOT CLEAN UP ALLOCATED IDs:\n";
+			  IdTable::output(std::cerr);
+			  std::cerr << "\tWere " << id_count << " IDs before; " << IdTable::size() << " now";
+			  std::cerr << std::endl;
+			  throw Error::GeneralMemoryError();
+		  }
+		  else {
+			  std::cerr << "      " << " FAILED TO PASS UNIT TEST." << std::endl;
+			  throw Error::GeneralUnknownError();
+		  }
+	  }
+  }
+
 }

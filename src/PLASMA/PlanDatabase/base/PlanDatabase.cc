@@ -3,14 +3,14 @@
 #include "Object.hh"
 #include "Schema.hh"
 #include "Token.hh"
-#include "TokenFactory.hh"
+#include "TokenType.hh"
 #include "TokenVariable.hh"
 #include "DefaultTemporalAdvisor.hh"
 #include "Constraints.hh"
 #include "DbClient.hh"
 #include "Utils.hh"
 #include "ConstraintEngine.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "LabelStr.hh"
 #include "Entity.hh"
 #include "Debug.hh"
@@ -230,6 +230,10 @@ namespace EUROPA{
   void PlanDatabase::notifyRemoved(const TokenId& token){
     check_error(!Entity::isPurging());
     check_error(m_tokens.find(token) != m_tokens.end());
+
+    if (isGlobalToken(token->getName()))
+        unregisterGlobalToken(token);
+
     m_tokens.erase(token);
     m_tokensToOrder.erase(token->getKey());
     publish(notifyRemoved(token));
@@ -344,6 +348,39 @@ namespace EUROPA{
 
   bool PlanDatabase::isGlobalVariable(const LabelStr& varName) const{
     return (m_globalVarsByName.find(varName) != m_globalVarsByName.end());
+  }
+
+  void PlanDatabase::registerGlobalToken(const TokenId& t){
+    const LabelStr& name = t->getName();
+    checkError(!isGlobalToken(name), name.toString() << " is not unique. Can't register global token");
+    m_globalTokens.insert(t);
+    m_globalTokensByName.insert(std::pair<double, TokenId>(name, t));
+
+    checkError(isGlobalToken(name), t->toLongString() << " is not registered after all. This cannot be!.");
+    debugMsg("PlanDatabase:registerGlobalToken", "Registered " << name.toString());
+  }
+
+  void PlanDatabase::unregisterGlobalToken(const TokenId& t) {
+    const LabelStr& name = t->getName();
+    checkError(isGlobalToken(name), name.toString() << " is not a global token.");
+    m_globalTokens.erase(t);
+    m_globalTokensByName.erase(name);
+    checkError(!isGlobalToken(name), name.toString() << " failed to un-register.");
+    debugMsg("PlanDatabase:unregisterGlobalToken",
+         "Un-registered " << name.toString());
+  }
+
+  const TokenSet& PlanDatabase::getGlobalTokens() const {
+    return m_globalTokens;
+  }
+
+  const TokenId& PlanDatabase::getGlobalToken(const LabelStr& name) const{
+    checkError(isGlobalToken(name), "No global token with name='" << name.toString() << "' is registered.");
+    return m_globalTokensByName.find(name)->second;
+  }
+
+  bool PlanDatabase::isGlobalToken(const LabelStr& name) const{
+    return (m_globalTokensByName.find(name) != m_globalTokensByName.end());
   }
 
   bool PlanDatabase::hasCompatibleTokens(const TokenId& inactiveToken){
@@ -953,6 +990,14 @@ namespace EUROPA{
   }
 
   // PSPlanDatabase methods
+  PSList<PSObject*> PlanDatabase::getAllObjects() const {
+    PSList<PSObject*> retval;
+    const ObjectSet& objects = getObjects();
+    for(ObjectSet::const_iterator it = objects.begin(); it != objects.end(); ++it)
+      retval.push_back((PSObject*) *it);
+    return retval;
+  }
+
   PSList<PSObject*> PlanDatabase::getObjectsByType(const std::string& objectType) const
   {
     PSList<PSObject*> retval;
@@ -1024,33 +1069,65 @@ namespace EUROPA{
       return object;
   }
 
-  TokenId PlanDatabase::createToken(const LabelStr& predicateName,
+  std::string autoLabel(const char* prefix)
+  {
+      static int cnt = 0;
+      std::ostringstream os;
+
+      os << prefix << "_" << cnt++;
+      return os.str();
+  }
+
+  TokenId PlanDatabase::createToken(const char* tokenType,
+                                    const char* tokenName,
                                     bool rejectable,
                                     bool isFact)
   {
-      debugMsg("PlanDatabase:createToken", "type " << predicateName.toString());
+      LabelStr ttype(tokenType);
+      std::string nameStr = (tokenName != NULL ? tokenName : autoLabel("globalToken"));
+      LabelStr tname(nameStr);
 
-      TokenFactoryId factory = getSchema()->getTokenFactory(predicateName);
+      debugMsg("PlanDatabase:createToken", ttype.toString() << " " << tname.toString());
+
+      TokenTypeId factory = getSchema()->getTokenType(ttype);
       check_error(factory.isValid());
 
-      TokenId token = factory->createInstance(getId(), predicateName, rejectable, isFact);
+      TokenId token = factory->createInstance(
+              getId(),
+              ttype,
+              rejectable,
+              isFact);
+
       check_error(token.isValid());
+
+      token->setName(tname);
+
+      if (!token->isClosed())
+          token->close();
+
+      registerGlobalToken(token);
+
+      debugMsg("PlanDatabase:createToken","Created Token:" << tname.toString() << std::endl << token->toLongString());
 
       return token;
   }
 
   TokenId PlanDatabase::createSlaveToken(const TokenId& master,
-                const LabelStr& predicateName,
+                const LabelStr& tokenType,
                 const LabelStr& relation)
   {
       check_error(master.isValid());
 
-      TokenFactoryId factory = getSchema()->getTokenFactory(predicateName);
+      TokenTypeId factory = getSchema()->getTokenType(tokenType);
       check_error(factory.isValid());
 
-      TokenId token = factory->createInstance(master, predicateName, relation);
-
+      TokenId token = factory->createInstance(master, tokenType, relation);
       check_error(token.isValid());
+      if (!token->isClosed())
+          token->close();
+
+      debugMsg("PlanDatabase:createSlaveToken","Created Slave Token:" << std::endl << token->toLongString());
+
       return token;
   }
 
@@ -1059,9 +1136,9 @@ namespace EUROPA{
       return PlanDatabaseWriter::toString(getId());
   }
 
-  bool PlanDatabase::hasTokenFactories() const
+  bool PlanDatabase::hasTokenTypes() const
   {
-      return getSchema()->hasTokenFactories() > 0;
+      return getSchema()->hasTokenTypes() > 0;
   }
 
   PSPlanDatabaseClient* PlanDatabase::getPDBClient()

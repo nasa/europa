@@ -114,6 +114,7 @@ then
   echo "  Found gcc version $GCCVER"
 fi
 
+
 #Check for minimum Java version
 JAVAVER=`java -version 2>&1 | egrep 'java version .[0-9]\.[0-9]+\.[0-9]+' | cut -d"\"" -f2`
 if [ -n "$JAVAVER" ]

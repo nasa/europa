@@ -22,7 +22,6 @@ class Main
 		{
 		    String debugMode = args[0];
 	        PSUtil.loadLibraries(debugMode);	   
-		    PSEngine.initialize();
 
 		    psEngine_ = PSEngine.makeInstance();
 		    psEngine_.start();
@@ -64,8 +63,7 @@ class Main
 	    
 	    public void run() 
 	    {
-            	psEngine_.shutdown();
-	        PSEngine.terminate();
+           	psEngine_.shutdown();
 	    }
     }	  
 	
@@ -80,7 +78,6 @@ class Main
 	        String solver = args[5];
 
 	        LibraryLoader.loadLibrary("System_"+debugMode);        
-	        PSEngine.initialize();	    
 	        PSEngine engine = PSEngine.makeInstance();
 	        engine.start();
 	        String nddlModel = "UBO-gen-initial-state.nddl";
@@ -96,7 +93,6 @@ class Main
 	            throw new RuntimeException("Unknown solver:"+solver);
 
 	        //engine.shutdown();  TODO: this is causing problems      
-	        PSEngine.terminate();
 	    }
 	    catch (Exception e) {
             throw new RuntimeException(e);	        

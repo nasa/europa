@@ -10,6 +10,9 @@
 
 #include "Id.hh"
 
+#include <iosfwd>
+
+
 namespace EUROPA{
 
   class DomainListener;
@@ -90,5 +93,7 @@ namespace EUROPA{
   private:
     DomainListenerId m_id; /**< Reference to self. */
   };
+
+  std::ostream& operator<<(std::ostream& str, const DomainListener::ChangeType ct);
 }
 #endif

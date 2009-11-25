@@ -4,34 +4,11 @@
 #include "Interpreter.hh"
 
 namespace EUROPA {
-  class ResourceObjectFactory : public NativeObjectFactory
-  {
-  	public:
-  	    ResourceObjectFactory(const LabelStr& signature);
-  	    virtual ~ResourceObjectFactory();
-
-  	protected:
-    	virtual ObjectId makeNewObject(
-	                        const PlanDatabaseId& planDb,
-	                        const LabelStr& objectType,
-	                        const LabelStr& objectName,
-	                        const std::vector<const AbstractDomain*>& arguments) const;
-  };
-
-  class ResourceChangeTokenFactory: public NativeTokenFactory
-  {
-    public:
-	  ResourceChangeTokenFactory(const LabelStr& predicateName) : NativeTokenFactory(predicateName) {}
-
-	private:
-	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const;
-	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
-  };
 
   class ReusableObjectFactory : public NativeObjectFactory
   {
   	public:
-  	    ReusableObjectFactory(const LabelStr& signature);
+  	    ReusableObjectFactory(const ObjectTypeId& objType, const LabelStr& signature);
   	    virtual ~ReusableObjectFactory();
 
   	protected:
@@ -42,20 +19,34 @@ namespace EUROPA {
 	                        const std::vector<const AbstractDomain*>& arguments) const;
   };
 
-  class ReusableUsesTokenFactory: public NativeTokenFactory
+  class ReusableUsesTokenType: public NativeTokenType
   {
     public:
-	  ReusableUsesTokenFactory(const LabelStr& predicateName) : NativeTokenFactory(predicateName) {}
+	  ReusableUsesTokenType(const ObjectTypeId& ot,const LabelStr& predicateName);
 
 	private:
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable , bool isFact) const;
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
   };
 
+  class CBReusableObjectFactory : public NativeObjectFactory
+  {
+    public:
+        CBReusableObjectFactory(const ObjectTypeId& objType, const LabelStr& signature);
+        virtual ~CBReusableObjectFactory();
+
+    protected:
+        virtual ObjectId makeNewObject(
+                            const PlanDatabaseId& planDb,
+                            const LabelStr& objectType,
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const;
+  };
+
   class ReservoirObjectFactory : public NativeObjectFactory
   {
   	public:
-  	    ReservoirObjectFactory(const LabelStr& signature);
+  	    ReservoirObjectFactory(const ObjectTypeId& objType, const LabelStr& signature);
   	    virtual ~ReservoirObjectFactory();
 
   	protected:
@@ -66,20 +57,20 @@ namespace EUROPA {
 	                        const std::vector<const AbstractDomain*>& arguments) const;
   };
 
-  class ReservoirProduceTokenFactory: public NativeTokenFactory
+  class ReservoirProduceTokenType: public NativeTokenType
   {
     public:
-	  ReservoirProduceTokenFactory(const LabelStr& predicateName) : NativeTokenFactory(predicateName) {}
+	  ReservoirProduceTokenType(const ObjectTypeId& ot,const LabelStr& predicateName);
 
 	private:
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable , bool isFact) const;
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
   };
 
-  class ReservoirConsumeTokenFactory: public NativeTokenFactory
+  class ReservoirConsumeTokenType: public NativeTokenType
   {
     public:
-	  ReservoirConsumeTokenFactory(const LabelStr& predicateName) : NativeTokenFactory(predicateName) {}
+	  ReservoirConsumeTokenType(const ObjectTypeId& ot,const LabelStr& predicateName);
 
 	private:
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable , bool isFact) const;
@@ -89,7 +80,7 @@ namespace EUROPA {
   class UnaryObjectFactory : public NativeObjectFactory
   {
     public:
-        UnaryObjectFactory(const LabelStr& signature);
+        UnaryObjectFactory(const ObjectTypeId& objType, const LabelStr& signature);
         virtual ~UnaryObjectFactory();
 
     protected:
@@ -100,10 +91,10 @@ namespace EUROPA {
                             const std::vector<const AbstractDomain*>& arguments) const;
   };
 
-  class UnaryUseTokenFactory: public NativeTokenFactory
+  class UnaryUseTokenType: public NativeTokenType
   {
     public:
-        UnaryUseTokenFactory(const LabelStr& predicateName) : NativeTokenFactory(predicateName) {}
+        UnaryUseTokenType(const ObjectTypeId& ot,const LabelStr& predicateName) : NativeTokenType(ot,predicateName) {}
 
     private:
       virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable , bool isFact) const;

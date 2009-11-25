@@ -1,10 +1,9 @@
 #include "Schema.hh"
-#include "SymbolDomain.hh"
-#include "TokenFactory.hh"
+#include "Domains.hh"
 #include "Debug.hh"
 #include "Utils.hh"
-#include "EnumeratedTypeFactory.hh"
 #include "Object.hh"
+#include "DataTypes.hh"
 
 namespace EUROPA {
 
@@ -34,7 +33,7 @@ namespace EUROPA {
     return sl_instance;
   }
 
-  const LabelStr Schema::makeQualifiedName(const LabelStr& objectType, 
+  const LabelStr Schema::makeQualifiedName(const LabelStr& objectType,
 					   const LabelStr& unqualifiedPredicateName){
     std::string fullName = objectType.toString() + getDelimiter() + unqualifiedPredicateName.toString();
     return LabelStr(fullName.c_str());
@@ -55,6 +54,17 @@ namespace EUROPA {
   {
       delete (TokenTypeMgr*)m_tokenTypeMgr;
       delete (ObjectTypeMgr*)m_objectTypeMgr;
+
+      std::map<double,ObjectTypeId>::iterator it = m_objTypes.begin();
+      for(;it != m_objTypes.end();++it)
+          delete (ObjectType*)it->second;
+      m_objTypes.clear();
+
+      std::map<double,MethodId>::iterator mit = m_methods.begin();
+      for(;mit != m_methods.end();++mit)
+          delete (Method*)mit->second;
+      m_methods.clear();
+
       m_id.remove();
   }
 
@@ -82,12 +92,11 @@ namespace EUROPA {
     objectPredicates.clear();
     typesWithNoPredicates.clear();
 
-    // Add System entities    
-    addObjectType(rootObject());    
+    // Add System entities
 	addPrimitive("int");
 	addPrimitive("float");
 	addPrimitive("bool");
-	addPrimitive("string");	
+	addPrimitive("string");
   }
 
   bool Schema::isType(const LabelStr& type) const{
@@ -142,11 +151,15 @@ namespace EUROPA {
     return(members.find(value) != members.end());
   }
 
-  bool Schema::canBeAssigned(const LabelStr& objectType, 
+  bool Schema::isEnumValue(double value) const {
+    return(enumValuesToEnums.find(value) != enumValuesToEnums.end());
+  }
+
+  bool Schema::canBeAssigned(const LabelStr& objectType,
 			     const LabelStr& predicate) const {
     check_error(isObjectType(objectType), objectType.toString() + " is not defined as an ObjectType");
     check_error(isPredicate(predicate), predicate.toString() + " is not defined as a Predicate");
-    return isA(objectType, getObjectType(predicate));
+    return isA(objectType, getObjectTypeForPredicate(predicate));
   }
 
   /**
@@ -159,13 +172,13 @@ namespace EUROPA {
     debugMsg("Schema:isA", "Checking if " << descendant.toString() << " is a " << ancestor.toString());
 
     // Special case if the 2 are the same, in which case we suspend any requirement that
-    // they be predefined types - class, predicate, enum, primitive. 
+    // they be predefined types - class, predicate, enum, primitive.
     if(descendant == ancestor)
       return true;
 
-    checkError(isType(descendant), 
+    checkError(isType(descendant),
 	       descendant.toString() << " is not defined.");
-    checkError(isType(ancestor), 
+    checkError(isType(ancestor),
 	       "Ancestor of '" << descendant.toString() << "' is '" << ancestor.toString() << "' which is not defined.");
 
     if(hasParent(descendant))
@@ -177,8 +190,8 @@ namespace EUROPA {
 
     return false;
   }
-  
-  bool Schema::canContain(const LabelStr& parentType, 
+
+  bool Schema::canContain(const LabelStr& parentType,
 			  const LabelStr& memberType,
 			  const LabelStr& memberName) const {
     check_error(isType(parentType), parentType.toString() + " is not defined.");
@@ -187,7 +200,7 @@ namespace EUROPA {
     std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(parentType);
 
-    // If no hit, then try for the parent. There must be one since it is a valid 
+    // If no hit, then try for the parent. There must be one since it is a valid
     // type but no hit yet
     if(membershipRelation_it == membershipRelation.end())
       return canContain(getParent(parentType), memberType, memberName);
@@ -196,9 +209,8 @@ namespace EUROPA {
     const NameValueVector& members = membershipRelation_it->second;
     for(NameValueVector::const_iterator it = members.begin(); it != members.end();++it){
       const NameValuePair& pair = *it;
-      //if(pair.first == memberType && pair.second == memberName)
-      if(isA(memberType, pair.first) && pair.second == memberName)
-	return true;
+      if(pair.second == memberName && isA(memberType, pair.first))
+          return true;
     }
 
     // Call recursively for inheritance relationships on parent and member types
@@ -206,8 +218,8 @@ namespace EUROPA {
       return true;
 
     // Allow fo rpossibility that it is declared as base type of the member type
-    if(isObjectType(memberType) && 
-       hasParent(memberType) && 
+    if(isObjectType(memberType) &&
+       hasParent(memberType) &&
        canContain(parentType,getParent(memberType), memberName))
       return true;
 
@@ -229,7 +241,7 @@ namespace EUROPA {
     std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(parentType);
 
-    // If no hit, then try for the parent. There must be one since it is a valid 
+    // If no hit, then try for the parent. There must be one since it is a valid
     // type but no hit yet
     if(membershipRelation_it == membershipRelation.end())
       return hasMember(getParent(parentType), memberName);
@@ -249,8 +261,8 @@ namespace EUROPA {
     return isPredicate(parentType) && getBuiltInVariableNames().find(memberName) != getBuiltInVariableNames().end();
   }
 
-  const LabelStr Schema::getObjectType(const LabelStr& predicate) const {
-    check_error(isPredicate(predicate), 
+  const LabelStr Schema::getObjectTypeForPredicate(const LabelStr& predicate) const {
+    check_error(isPredicate(predicate),
 		"Predicate "+predicate.toString() +
 		" is not defined, but we expect all predicates to be defined. See 'isPredicate'");
     return predicate.getElement(0, getDelimiter());
@@ -317,11 +329,11 @@ namespace EUROPA {
   const LabelStrSet& Schema::getAllObjectTypes() const {
     return objectTypes;
   }
-  
+
 
   const std::set<edouble>& Schema::getEnumValues(const LabelStr& enumName) const {
     check_error(isEnum(enumName), enumName.toString() + " is not a defined enumeration.");
-    
+
     return enumValues.find(enumName)->second;
 
   }
@@ -385,7 +397,7 @@ namespace EUROPA {
     // If we get to here, we should pursue the parent type (and it will have to have one).
     return getMemberType(getParent(parentType), memberName);
   }
-  
+
   unsigned int Schema::getIndexFromName(const LabelStr& parentType, const LabelStr& memberName) const {
     check_error(hasMember(parentType, memberName),
 		memberName.toString() + " is not a member of " + parentType.toString());
@@ -433,12 +445,12 @@ namespace EUROPA {
     }
 
     // If we get to here, we should pursue the parent type (and it will have to have one).
-    checkError(hasParent(parentType), 
+    checkError(hasParent(parentType),
 	       parentType.toString() << " has no member with index " << index);
 
     return getNameFromIndex(getParent(parentType), index);
   }
-  
+
   /**
    * @todo This may not be valid since a member name could in theory be duplicated
    * across enumerations. Look into this when we address enum scoping in a language
@@ -462,21 +474,25 @@ namespace EUROPA {
 
     check_error(membershipRelation_it != membershipRelation.end(), predicate.toString() + " not found in the membership relation");
     const NameValueVector& members = membershipRelation_it->second;
-    
+
     return(members.size());
   }
 
   const LabelStr Schema::getParameterType(const LabelStr& predicate, unsigned int paramIndex) const {
     check_error(isPredicate(predicate), predicate.toString() + " is not defined as a Predicate");
-    check_error(paramIndex < getParameterCount(predicate), paramIndex + " is not a valid index"); 
+    check_error(paramIndex < getParameterCount(predicate), paramIndex + " is not a valid index");
 
     // First see if we get a hit for the parentType
+<<<<<<< HEAD:src/PLASMA/PlanDatabase/base/Schema.cc
     std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
+=======
+    std::map<double, NameValueVector>::const_iterator membershipRelation_it =
+>>>>>>> trunk:src/PLASMA/PlanDatabase/base/Schema.cc
       membershipRelation.find(predicate);
 
     check_error(membershipRelation_it != membershipRelation.end());
     const NameValueVector& members = membershipRelation_it->second;
-    
+
     return(members[paramIndex].first);
   }
 
@@ -487,50 +503,50 @@ namespace EUROPA {
   }
 
   void Schema::declareObjectType(const LabelStr& objectType) {
-    debugMsg("Schema:declareObjectType", "[" << m_name.toString() << "] " << "Declaring object type " << objectType.toString());
-    objectTypes.insert(objectType);			                 	
+      if (!this->isObjectType(objectType)) {
+          debugMsg("Schema:declareObjectType", "[" << m_name.toString() << "] " << "Declaring object type " << objectType.toString());
+          objectTypes.insert(objectType);
+          getCESchema()->registerDataType((new ObjectDT(objectType.c_str()))->getId());
+      }
+      else {
+          debugMsg("Schema:declareObjectType", "[" << m_name.toString() << "] " << "Object type already declared, ignoring re-declaration for" << objectType.toString());
+      }
   }
-  
+
   void Schema::addObjectType(const LabelStr& objectType) {
     // Enforce assumption of a singly rooted class hierarchy
-    if(objectType != rootObject()){
-      addObjectType(objectType, rootObject());
-      return;
-    }
-
-    check_error(objectType.countElements(getDelimiter()) == 1, 
-		"ObjectType must not be delimited:" + objectType.toString());
-    objectTypes.insert(objectType);
-    membershipRelation.insert(std::pair<LabelStr, NameValueVector>(objectType, NameValueVector()));
+    addObjectType(objectType, rootObject());
   }
 
-  void Schema::addObjectType(const LabelStr& objectType,
-			     const LabelStr& parent) {
-    check_error(isObjectType(parent), parent.toString() + " is undefined.");
-    checkError(childOfRelation.find(objectType) == childOfRelation.end(), 
-	       objectType.toString() << " is already defined.");
+  void Schema::addObjectType(const LabelStr& objectType, const LabelStr& parent) {
+
+    check_error(objectType.countElements(getDelimiter()) == 1,
+                "ObjectType must not be delimited:" + objectType.toString());
+
+    if (objectType != rootObject()) {
+        checkError(isObjectType(parent), objectType.toString() + " has undefined parent class : " + parent.toString());
+        checkError(childOfRelation.find(objectType) == childOfRelation.end(),objectType.toString() << " is already defined.");
+        childOfRelation.insert(std::pair<LabelStr, LabelStr>(objectType, parent));
+    }
+
     objectTypes.insert(objectType);
     membershipRelation.insert(std::pair<LabelStr, NameValueVector>(objectType, NameValueVector()));
-    childOfRelation.insert(std::pair<LabelStr, LabelStr>(objectType, parent));
-    
-    // Add type for constrained variables to be able to hold references to objects of the new type 
-    getCESchema()->registerFactory((new EnumeratedTypeFactory(
-                  objectType.c_str(),
-                  objectType.c_str(),
-                  ObjectDomain(objectType.c_str())
-                  ))->getId());             
-    
+
+    // Add type for constrained variables to be able to hold references to objects of the new type
+    if (!getCESchema()->isDataType(objectType.c_str()))
+        getCESchema()->registerDataType((new ObjectDT(objectType.c_str()))->getId());
+
     debugMsg("Schema:addObjectType",
 	     "[" << m_name.toString() << "] " << "Added object type " << objectType.toString() << " that extends " <<
 	     parent.toString());
   }
 
   void Schema::addPredicate(const LabelStr& predicate) {
-    check_error(predicate.countElements(getDelimiter()) == 2, 
-		"Expect predicate names to be structured as <objectType>.<predicate>. Not found in "+ 
+    check_error(predicate.countElements(getDelimiter()) == 2,
+		"Expect predicate names to be structured as <objectType>.<predicate>. Not found in "+
 		predicate.toString());
 
-    check_error(isObjectType(predicate.getElement(0, getDelimiter())), 
+    check_error(isObjectType(predicate.getElement(0, getDelimiter())),
 		"Object Type not defined for " + predicate.toString() + ".");
 
     check_error(predicates.find(predicate) == predicates.end(), predicate.toString() + " already defined.");
@@ -558,7 +574,7 @@ namespace EUROPA {
     NameValueVector& members = membershipRelation.find(parentType)->second;
     members.push_back(NameValuePair(memberType, memberName));
     return (members.size()-1);
-  } 
+  }
 
   void Schema::addEnum(const LabelStr& enumName) {
     check_error(!isEnum(enumName), enumName.toString() + " is already defined as an enumeration.");
@@ -567,18 +583,49 @@ namespace EUROPA {
     enumValues.insert(std::pair<LabelStr, ValueSet>(enumName, ValueSet()));
   }
 
-  void Schema::addValue(const LabelStr& enumName, edouble enumValue) {
+  void Schema::registerEnum(const char* enumName, const EnumeratedDomain& domain)
+  {
+      debugMsg("Schema:enumdef","Defining enum:" << enumName);
+
+      addEnum(enumName);
+
+      const std::set<double>& values = domain.getValues();
+      for(std::set<double>::const_iterator it = values.begin();it != values.end();++it) {
+          LabelStr newValue(*it);
+          addValue(enumName, newValue);
+      }
+
+      getCESchema()->registerDataType(
+          (new RestrictedDT(enumName,SymbolDT::instance(),domain))->getId()
+      );
+
+      debugMsg("Schema:enumdef"
+              , "Created type factory " << enumName <<
+              " with base domain " << domain.toString());
+  }
+
+  void Schema::addValue(const LabelStr& enumName, double enumValue) {
     check_error(isEnum(enumName), enumName.toString() + " is undefined.");
+    check_error(enumValuesToEnums.find(enumValue) == enumValuesToEnums.end(),
+            LabelStr(enumValue).toString() + " is already an enum value for " + (enumValuesToEnums[enumValue]).toString());
+
     debugMsg("Schema:addValue", "[" << m_name.toString() << "] " << "Added " <<
 	     (LabelStr::isString(enumValue) ? LabelStr(enumValue).toString() : toString(enumValue)) << " to " <<
 	     enumName.toString());
     ValueSet& members = enumValues.find(enumName)->second;
     members.insert(enumValue);
+    enumValuesToEnums[enumValue] = enumName;
+  }
+
+  const LabelStr& Schema::getEnumForValue(double value) const
+  {
+    check_error(enumValuesToEnums.find(value) != enumValuesToEnums.end());
+    return enumValuesToEnums.find(value)->second;
   }
 
   void Schema::write(ostream& os) const{
     os << "SCHEMA RULES:\n";
-    for(LabelStr_LabelStrSet_Map::const_iterator it = objectPredicates.begin(); 
+    for(LabelStr_LabelStrSet_Map::const_iterator it = objectPredicates.begin();
 	it != objectPredicates.end(); ++it){
       LabelStr objectName = it->first;
       os << objectName.toString() << ":{";
@@ -611,31 +658,279 @@ namespace EUROPA {
         it != enumValues.end(); ++it)
       results.push_back(it->first);
   }
-  
+
+  const Id<ObjectFactory>& createDefaultObjectFactory(
+          const ObjectTypeId& objType,
+          bool canCreateObjects)
+  {
+      std::vector<std::string> constructorArgNames;
+      std::vector<std::string> constructorArgTypes;
+      std::vector<Expr*> constructorBody;
+      ExprConstructorSuperCall* superCallExpr = NULL;
+
+      // If it can't create objects, generate default super call
+      if (!canCreateObjects)
+          superCallExpr = new ExprConstructorSuperCall(objType->getParent()->getName(),std::vector<Expr*>());
+
+      return (new InterpretedObjectFactory(
+              objType,
+              objType->getName(),
+              constructorArgNames,
+              constructorArgTypes,
+              superCallExpr,
+              constructorBody,
+              canCreateObjects)
+             )->getId();
+  }
+
+  void Schema::registerObjectType(const ObjectTypeId& objType)
+  {
+      const char* className = objType->getName().c_str();
+
+      if (objType->getName() == Schema::rootObject())
+          addObjectType(className);
+      else
+          addObjectType(className,objType->getParent()->getName().c_str());
+
+      if (objType->getObjectFactories().size() == 0) {
+          bool canCreateObjects = objType->isNative();
+          objType->addObjectFactory(createDefaultObjectFactory(objType,canCreateObjects));
+          debugMsg("Schema:registerObjectType","Generated default factory for object type:" << objType->getName().c_str());
+      }
+
+
+//all this should go
+      {
+          std::map<std::string,DataTypeId>::const_iterator it = objType->getMembers().begin();
+          for(;it != objType->getMembers().end(); ++it)
+              addMember(className, it->second->getName().toString() /*type*/, it->first/*name*/);
+      }
+
+      {
+          std::map<double,ObjectFactoryId>::const_iterator it = objType->getObjectFactories().begin();
+          for(;it != objType->getObjectFactories().end(); ++it)
+              registerObjectFactory(it->second);
+      }
+
+      {
+          std::map<double,TokenTypeId>::const_iterator it = objType->getTokenTypes().begin();
+          for(;it != objType->getTokenTypes().end(); ++it) {
+              const TokenTypeId& tokenType = it->second;
+              LabelStr predName = tokenType->getSignature();
+
+              addPredicate(predName.c_str());
+              std::map<LabelStr,DataTypeId>::const_iterator paramIt = tokenType->getArgs().begin();
+              for(;paramIt != tokenType->getArgs().end();++paramIt)
+                  addMember(predName.c_str(), paramIt->second->getName() /*type*/, paramIt->first/*name*/);
+
+              registerTokenType(it->second);
+          }
+      }
+
+      m_objTypes[objType->getName()] = objType;
+
+      debugMsg("Schema:registerObjectType","Registered object type:" << std::endl << objType->toString());
+  }
+
+  const ObjectTypeId& Schema::getObjectType(const LabelStr& objType)
+  {
+      std::map<double,ObjectTypeId>::const_iterator it = m_objTypes.find((double)objType);
+
+      if (it == m_objTypes.end())
+          return ObjectTypeId::noId();
+      else
+          return it->second;
+  }
+
+
   void Schema::registerObjectFactory(const ObjectFactoryId& of)
   {
       m_objectTypeMgr->registerFactory(of);
   }
-  
-  ObjectFactoryId Schema::getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments)
+
+  ObjectFactoryId Schema::getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments, const bool doCheckError)
   {
-      return m_objectTypeMgr->getFactory(getId(),objectType,arguments);
+    return m_objectTypeMgr->getFactory(getId(),objectType,arguments,doCheckError);
   }
-  
-  void Schema::registerTokenFactory(const TokenFactoryId& f)
+
+  void Schema::registerTokenType(const TokenTypeId& f)
   {
-      m_tokenTypeMgr->registerFactory(f);
+      m_tokenTypeMgr->registerType(f);
   }
-  
-  TokenFactoryId Schema::getTokenFactory(const LabelStr& type)
+
+  TokenTypeId Schema::getTokenType(const LabelStr& type)
   {
-      return m_tokenTypeMgr->getFactory(getId(),type);
+      return m_tokenTypeMgr->getType(getId(),type);
   }
-  
-  bool Schema::hasTokenFactories() const
+
+  TokenTypeId Schema::getParentTokenType(const LabelStr& tokenType, const LabelStr& parentObjType)
   {
-      return m_tokenTypeMgr->hasFactory();
+      LabelStr objType = parentObjType;
+      std::string tokenName = tokenType.getElement(1, getDelimiter()).toString();
+
+      for(;;) {
+          std::string parentName = objType.toString()+getDelimiter()+tokenName;
+          if (isPredicate(parentName))
+              return getTokenType(parentName);
+          if (hasParent(objType))
+              objType = getParent(objType);
+          else
+              break;
+      }
+
+      return TokenTypeId::noId();
   }
-  
-  
+
+  bool Schema::hasTokenTypes() const
+  {
+      return m_tokenTypeMgr->hasType();
+  }
+
+
+  void Schema::registerMethod(const MethodId& m)
+  {
+      // TODO: allow method overloading
+      check_runtime_error(m_methods.find(m->getName()) == m_methods.end(), std::string("Method ")+m->getName().toString()+" already exists");
+      m_methods[m->getName()] = m;
+  }
+
+  MethodId Schema::getMethod(const LabelStr& methodName, const DataTypeId& targetType, const std::vector<DataTypeId>& argTypes)
+  {
+      // TODO: use target type and arg types to resolve
+      std::map<double,MethodId>::iterator it = m_methods.find(methodName);
+      return (it != m_methods.end() ? it->second : MethodId::noId());
+  }
+
+  // PSSchema methods:
+  PSList<std::string> Schema::getAllPredicates() const
+   {
+     PSList<std::string> retval;
+     std::set<LabelStr> predicates;
+     getPredicates(predicates);
+     for(std::set<LabelStr>::const_iterator it = predicates.begin(); it != predicates.end(); ++it)
+     {
+    	 retval.push_back((*it).toString());
+     }
+     return retval;
+   }
+
+
+  // For now just return the member names, not their types:
+  // TODO:  Is it better to use an iterator in this loop?
+  PSList<std::string> Schema::getMembers(const std::string& objectType) const
+  {
+	  PSList<std::string> retval;
+	  const NameValueVector& members = getMembers(LabelStr(objectType));
+	  for(std::vector< std::pair<LabelStr, LabelStr> >::const_iterator it = members.begin();
+		  it != members.end(); ++it)
+	  {
+		  retval.push_back((*it).second.toString());
+	  }
+	  return retval;
+  }
+
+  bool Schema::hasMember(const std::string& parentType, const std::string& memberName) const
+  {
+	  return hasMember(LabelStr(parentType), LabelStr(memberName));
+  }
+
+  PSDataType::PSDataType(const DataTypeId& original) :
+	  m_name(original->getName().toString()) {}
+
+  PSDataType::PSDataType(const PSDataType& original) :
+	  m_name(original.getName()) {}
+
+  bool PSDataType::operator==(const PSDataType& other) const {
+	  return m_name == other.m_name;
+  }
+
+  PSTokenType::PSTokenType(const PSTokenType& original) :
+	  m_name(original.m_name), m_argNames(original.m_argNames),
+	  m_argTypes(original.m_argTypes) {}
+
+  PSTokenType::PSTokenType(const TokenTypeId& original) :
+	  m_name(original->getPredicateName().toString()) {
+	  const std::map<LabelStr,DataTypeId>& args = original->getArgs();
+	  for (std::map<LabelStr,DataTypeId>::const_iterator it = args.begin(); it != args.end(); ++it) {
+		  m_argNames.push_back(it->first.toString());
+		  m_argTypes.push_back(PSDataType(it->second));
+	  }
+  }
+
+  PSList<std::string> PSTokenType::getParameterNames() const {
+	  PSList<std::string> retval;
+	  for (std::vector<std::string>::const_iterator it = m_argNames.begin(); it != m_argNames.end(); ++it) {
+		  retval.push_back(*it);
+	  }
+	  return retval;
+  }
+
+  PSDataType PSTokenType::getParameterType(int index) const {
+	  return m_argTypes[index];
+  }
+
+  PSDataType PSTokenType::getParameterType(const std::string& name) const {
+	  for (unsigned int i=0; i<m_argNames.size(); i++)
+		  if (m_argNames[i] == name) {
+			  return m_argTypes[i];
+		  }
+	  check_error(false, "No argument named " + name + ".");
+	  // Let it throw
+	  return m_argTypes[-1];
+  }
+
+  /** This operator does not check the object type the predicate belongs to */
+  bool PSTokenType::operator==(const PSTokenType& other) const {
+	  return m_name == other.m_name && m_argNames == other.m_argNames &&
+		  m_argTypes == other.m_argTypes;
+  }
+
+  PSObjectType::PSObjectType(const PSObjectType& original) :
+	  m_name(original.m_name), m_parentName(original.m_parentName),
+	  m_members(original.m_members), m_predicates(original.m_predicates) {}
+
+  PSObjectType::PSObjectType(const ObjectTypeId& original) :
+	  m_name(original->getName().toString()) {
+	  const ObjectTypeId& parent = original->getParent();
+	  if (parent.isNoId())
+		  m_parentName = "";
+	  else
+		  m_parentName = parent->getName().toString();
+	  const std::map<std::string,DataTypeId>& mem = original->getMembers();
+	  for (std::map<std::string,DataTypeId>::const_iterator it = mem.begin(); it != mem.end(); ++it) {
+		  m_members.insert(std::pair<std::string, PSDataType>(it->first, PSDataType(it->second)));
+	  }
+	  const std::map<double,TokenTypeId>& tokens = original->getTokenTypes();
+	  for (std::map<double,TokenTypeId>::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+		  m_predicates.push_back(PSTokenType(it->second));
+	  }
+  }
+
+  PSList<std::string> PSObjectType::getMemberNames() const {
+	  PSList<std::string> retval;
+	  for (std::map<std::string, PSDataType>::const_iterator it = m_members.begin(); it != m_members.end(); ++it)
+		  retval.push_back(it->first);
+	  return retval;
+  }
+
+  PSDataType PSObjectType::getMemberType(const std::string& name) const {
+	  std::map<std::string, PSDataType>::const_iterator it = m_members.find(name);
+	  check_error(it != m_members.end(), "Cannot find member " + name + ".");
+	  return it->second;
+  }
+
+  bool PSObjectType::operator==(const PSObjectType& other) const {
+	  // Assume name uniquely identifies type
+	  return m_name == other.m_name;
+  }
+
+  PSList<PSObjectType> Schema::getAllPSObjectTypes() const {
+	PSList<PSObjectType> retval;
+    for(std::map<double, ObjectTypeId>::const_iterator it = m_objTypes.begin(); it != m_objTypes.end(); ++it)
+    {
+    	retval.push_back(PSObjectType(it->second));
+    }
+    return retval;
+  }
+
 } // namespace NDDL

@@ -5,8 +5,8 @@
 #include "Object.hh"
 #include "IntervalToken.hh"
 #include "PlanDatabase.hh"
-#include "ConstraintFactory.hh"
-#include "IntervalIntDomain.hh"
+#include "ConstraintType.hh"
+#include "Domains.hh"
 #include "Variable.hh"
 #include "Utils.hh"
 
@@ -16,7 +16,7 @@ namespace EUROPA {
    */
   class TestRule_Root: public RuleInstance{
   public:
-    TestRule_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb) 
+    TestRule_Root(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
       : RuleInstance(rule, token, planDb, makeScope(token->getObject())){}
     void handleExecute();
   };

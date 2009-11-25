@@ -1,805 +1,651 @@
-//  Copyright Notices
-
-//  This software was developed for use by the U.S. Government as
-//  represented by the Administrator of the National Aeronautics and
-//  Space Administration. No copyright is claimed in the United States
-//  under 17 U.S.C. 105.
-
-//  This software may be used, copied, and provided to others only as
-//  permitted under the terms of the contract or other agreement under
-//  which it was acquired from the U.S. Government.  Neither title to nor
-//  ownership of the software is hereby transferred.  This notice shall
-//  remain on all copies of the software
 #include "Resource.hh"
-#include "Debug.hh"
-#include "Utils.hh"
-#include "IntervalDomain.hh"
-#include "ConstraintEngine.hh"
+#include "Profile.hh"
+#include "FVDetector.hh"
+#include "Transaction.hh"
+#include "Instant.hh"
+#include "ResourceTokenRelation.hh"
+#include "PlanDatabase.hh"
+#include "Variable.hh"
+#include "Domains.hh"
 #include "Token.hh"
 #include "TokenVariable.hh"
-#include "PlanDatabase.hh"
-#include "ResourceViolation.hh"
-#include "ResourceFlaw.hh"
+#include "TemporalAdvisor.hh"
+#include "PlanDatabaseDefs.hh"
 
-#include <vector>
-#include <string>
-#include <sstream>
+#include <cmath>
+#include <ext/functional>
 
-/**
- * @file Resource.cc
- * @author Conor McGann
- * @brief Implements the core components and collaborations of Resource, Transaction, Instant and Violation.
- * @todo Reinstate incremental computation
- * @todo Consider changing initial capacity to be a bound.
- * @note Had to prefix call to cleanup in Utils with namespace qualifier for g++ 2.96. Bizarre!
- * @date 2005
- */
-
-namespace EUROPA  {
-  
-  void Resource::updateInstantBounds(InstantId& inst, const double lowerMin, 
-                                  const double lowerMax, const double upperMin, 
-                                  const double upperMax) {
-    inst->updateBounds(lowerMin, lowerMax, upperMin, upperMax);
-  }
-
-  std::string toString(const ResourceId& res){
-    std::stringstream sstr;
-    res->print(sstr);
-    return sstr.str();
-  }
+namespace EUROPA {
 
   Resource::Resource(const PlanDatabaseId& planDatabase,
-                     const LabelStr& type,
-                     const LabelStr& name,
-                     double initialCapacity,
-                     double limitMin,
-                     double limitMax,
-                     double productionRateMax,
-                     double productionMax,
-                     double consumptionRateMax,
-                     double consumptionMax) : Object(planDatabase, type, name) {
-    init(initialCapacity,
-         limitMin,
-         limitMax,
-         productionRateMax,
-         productionMax,
-         consumptionRateMax,
-         consumptionMax);
-  }
-
-  Resource::Resource(const PlanDatabaseId& planDatabase,
-                     const LabelStr& type,
-                     const LabelStr& name, 
-                     bool open) : Object(planDatabase, type, name, open) {
-    // call to init is deferred
-  }
-  
-  Resource::Resource(const ObjectId parent,
-                     const LabelStr& type,
-                     const LabelStr& name, 
-                     bool open) : Object(parent, type, name, open) {
-    // call to init is deferred
-  }
-
-  void Resource::init(double initialCapacity,
-                      double limitMin,
-                      double limitMax,
-                      double productionRateMax,
-                      double productionMax,
-                      double consumptionRateMax,
-                      double consumptionMax) {
-    m_initialCapacity = initialCapacity;
-    m_limitMin = limitMin;
-    m_limitMax = limitMax;
-
-    if(productionRateMax == PLUS_INFINITY)
-      m_productionRateMax = productionMax;
-    else
-      m_productionRateMax = productionRateMax;
-
-    m_productionMax = productionMax;
-
-    if(consumptionRateMax == MINUS_INFINITY)
-      m_consumptionRateMax = consumptionMax;
-    else
-      m_consumptionRateMax = consumptionRateMax;
-
-    m_consumptionMax = consumptionMax;
-    markDirty();
-    check_error(isValid());
-  }
-
-  Resource::~Resource() {
-    discard(false);
-  }
-
-  void Resource::handleDiscard(){
-    resetProfile();
-    Object::handleDiscard();
-  }
-
-  void Resource::add(const TokenId& token){
-    Object::add(token);
-    markDirty();
-    debugMsg("Resource:add",getName().toString() << " added " << token->toString());
-  }
-
-  void Resource::remove(const TokenId& token){
-    Object::remove(token);
-    markDirty();
-    debugMsg("Resource:remove",getName().toString() << " removed " << token->toString());
-  }
-
-  bool Resource::isDirty() const {return m_dirty;}
-
-  void Resource::markDirty()
+                     const LabelStr& type, const LabelStr& name,
+                     const LabelStr& detectorName,
+                     const LabelStr& profileName,
+                     double initCapacityLb, double initCapacityUb,
+                     double lowerLimit, double upperLimit,
+                     double maxInstProduction, double maxInstConsumption,
+                     double maxProduction, double maxConsumption)
+    : Object(planDatabase, type, name, false)
   {
-    m_dirty = true;
-    debugMsg("Resource:markDirty",getName().toString() << " marked Dirty");
+    init(initCapacityLb, initCapacityUb,
+         lowerLimit, upperLimit,
+         maxInstProduction, maxInstConsumption,
+         maxProduction, maxConsumption,
+         detectorName,
+         profileName
+         );
   }
 
-  bool Resource::insert(const TransactionId& tx) {
-    check_error(isValid());
-    check_error(tx.isValid());
+  Resource::Resource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
+    : Object(planDatabase, type, name, open) {}
 
-    // Must ensure:
-    // 1. All timepoints intersecting this Transaction time should be updated
-    // 2. If either bound of the transaction time is not a timepoint then it should result in a time point insertion
- 
-    // Insert the start
-    int startTime = tx->getEarliest();
-    std::map<int, InstantId>::iterator it = m_instants.lower_bound(startTime);
-    InstantId instant;
+  Resource::Resource(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open)
+    : Object(parent, type, localName, open) {}
 
-    // If we are at the end, the list is empty, so we have to insert
-    if(it == m_instants.end())
-      it = createInstant(startTime, it);
-
-    // Now assign the instant accordingly in either case
-    instant = it->second;
-
-    if(instant->getTime() != startTime){
-      it = createInstant(startTime, --it);
-      instant = it->second;
+  Resource::~Resource()
+  {
+    for(std::map<TransactionId, TokenId>::const_iterator it = m_transactionsToTokens.begin(); it != m_transactionsToTokens.end();
+        ++it) {
+      if ((it->first->getOwner()).isNoId())
+        delete (Transaction*) it->first;
     }
-
-    // Now insert the transaction to the instant.
-    instant->insert(tx);
-
-    // iterate forward until u hit the end, or you hit a point with a time later than the latest time
-    int endTime = tx->getLatest();
-    bool endInserted = (instant->getTime() == endTime);
-    ++it;
-    while(it!=m_instants.end() && !endInserted){
-      instant = it->second;
-      check_error(instant.isValid());
-      if(instant->getTime() > endTime){ // Indicate we are done and exit
-        break;
-      }
-      else{
-        instant->insert(tx);
-        ++it;
-      }
-
-      endInserted = (instant->getTime() == endTime);
-    }
-
-    if(!endInserted){ // Insert a new instant
-      it = createInstant(endTime, it);
-      it->second->insert(tx);
-    }
-
-    check_error(isValid());
-
-    return(true);
+    delete (FVDetector*) m_detector;
+    delete (Profile*) m_profile;
   }
 
-  void Resource::cleanup(const TransactionId& tx) {
-    check_error(tx.isValid());
-    check_error(ALWAYS_FAILS); // Until we get into incremental algorithm
+  void Resource::init(const double initCapacityLb, const double initCapacityUb,
+                      const double lowerLimit, const double upperLimit,
+                      const double maxInstProduction, const double maxInstConsumption,
+                      const double maxProduction, const double maxConsumption,
+                      const LabelStr& detectorName,
+                      const LabelStr& profileName) {
+    debugMsg("Resource:init", "In base init function.");
+    m_initCapacityLb = initCapacityLb;
+    m_initCapacityUb = initCapacityUb;
+    m_lowerLimit = lowerLimit;
+    m_upperLimit = upperLimit;
 
-    // Obtain the starting instant
-    std::map<int, InstantId>::iterator it = m_instants.lower_bound(tx->getEarliest());
+    m_maxInstProduction = (maxInstProduction == PLUS_INFINITY ? maxProduction : maxInstProduction);
+    m_maxProduction = maxProduction;
+    m_maxInstConsumption = (maxInstConsumption == PLUS_INFINITY ? maxConsumption : maxInstConsumption);
+    m_maxConsumption = maxConsumption;
 
-    while(it != m_instants.end()){
-      InstantId instant = it->second;
-      if(instant->getTime() > tx->getLatest())
-        break;
-      instant->remove(tx);
-      if (!hasStartOrEndTransaction(instant)){
-        m_instants.erase(it++);
-        delete (Instant*) instant;
-      }
-      else
-        ++it;
-    }
 
-    check_error(isValid());
+    // TODO: make profile this  more robust?
+    EngineId& engine = this->getPlanDatabase()->getEngine();
+
+    FactoryMgr* fvdfm = (FactoryMgr*)engine->getComponent("FVDetectorFactoryMgr");
+    m_detector = fvdfm->createInstance(detectorName, FVDetectorArgs(getId()));
+
+    FactoryMgr* pfm = (FactoryMgr*)engine->getComponent("ProfileFactoryMgr");
+    m_profile = pfm->createInstance(
+                                    profileName,
+                                    ProfileArgs(
+                                                getPlanDatabase(),
+                                                m_detector,
+                                                m_initCapacityLb,
+                                                m_initCapacityUb
+                                                )
+                                    );
+
+    debugMsg("Resource:init", "Initialized Resource " << getName().toString() << "{"
+             << "initCapacity=[" << m_initCapacityLb << "," << m_initCapacityUb << "],"
+             << "usageLimits=[" << m_lowerLimit << "," << m_upperLimit << "],"
+             << "productionLimits=[max=" << m_maxProduction << ",maxInst=" << m_maxInstProduction << "],"
+             << "consumptionLimits=[max=" << m_maxConsumption << ",maxInst=" << m_maxInstConsumption << "],"
+             << "}"
+             );
   }
 
-  void Resource::getInstants(std::list<InstantId>& resultSet, int lowerBound, int upperBound) {
-    check_error(resultSet.empty());
-    check_error(resultSet.empty());
-    check_error(lowerBound <= upperBound);
+  void Resource::add(const TokenId& token) {
+    Object::add(token);
+  }
 
-    // Propagate token-object relationshiop and any constraints
-    getPlanDatabase()->getConstraintEngine()->propagate();
+  void Resource::remove(const TokenId& token) {
+    Object::remove(token);
+    removeFromProfile(token);
+  }
 
-    std::map<int, InstantId>::const_iterator it = m_instants.upper_bound(lowerBound);
-    while(it != m_instants.end()){
-      InstantId instant = it->second;
-      check_error(instant.isValid());
-      check_error(lowerBound <= instant->getTime());
-
-      if(instant->getTime() > upperBound)
-        break;
-      else {
-        resultSet.push_back(instant);
-        ++it;
-      }
+  void Resource::removeFromProfile(const TokenId& tok) {
+    std::map<TokenId, std::set<InstantId> >::iterator it = m_flawedTokens.find(tok);
+    if(it != m_flawedTokens.end()) {
+      m_flawedTokens.erase(it);
+      notifyOrderingNoLongerRequired(tok);
     }
   }
 
-  const std::map<int, InstantId>& Resource::getInstants() const {return m_instants;}
 
-  /** Recompute optimistically m_totalUsedConsumption and m_totalUsedProduction */
-  void Resource::recomputeTotals() {
-    // Reset
-    m_totalUsedConsumption = 0;
-    m_totalUsedProduction = 0;
-
-    // Go over all transactions
-    for ( std::set<TokenId>::iterator tx_it = m_tokens.begin();
-          tx_it != m_tokens.end(); ) {
-      TransactionId tx = *tx_it; 
-      ++tx_it;
-
-      // Skip consideration of this transaction if it is not definitley associated with this resource
-      if(!tx->getObject()->lastDomain().isSingleton())
-	continue;
-
-      checkError(tx->getObject()->lastDomain().getSingletonValue() == getId(),
-		 "If a singleton, and we have synched correctly, then it must be assigned to this resource.");
-
-      double min = tx->getMin();
-      double max = tx->getMax();
-
-      // Be optimistic: assume we use as little as possible
-      // The minimum possible consumption
-      if ( max<0 ) {
-        m_totalUsedConsumption += max;
-      }
-      // The minimum possible production
-      if ( min>0 ) {
-        m_totalUsedProduction += min;
-      }
-    }
-
-    // Check and create global violations
-    if ( m_totalUsedConsumption < m_consumptionMax ) {
-      addGlobalResourceViolation( ResourceViolation::ConsumptionSumExceeded );
-    }
-    if ( m_totalUsedProduction > m_productionMax ) {
-      addGlobalResourceViolation( ResourceViolation::ProductionSumExceeded );
-    }
+  bool Resource::hasTokensToOrder() const {
+    return !m_flawedTokens.empty();
   }
 
-  void Resource::updateTransactionProfile() {
-    static bool calledWithin = false; //MJI
+  //can cache these results or perhaps compute the all-pairs incrementally in the instant
+  void Resource::getOrderingChoices(const TokenId& token,
+                                    std::vector<std::pair<TokenId, TokenId> >& results,
+                                    unsigned int limit) {
+    check_error(results.empty());
+    check_error(token.isValid());
+    check_error(limit > 0);
+    debugMsg("Resource:getOrderingChoices", "Getting " << limit << " ordering choices for " << token->getPredicateName().toString() << "(" << token->getKey() << ")");
 
-    if(calledWithin) //MJI
-      return; //MJI
-
-    if(!m_dirty)
+    if(!getPlanDatabase()->getConstraintEngine()->propagate()) {
+      debugMsg("Resource:getOrderingChoices", "No ordering choices: the constraint network is inconsistent.");
       return;
+    }
 
-    // Clear prior data
-    resetProfile();
-
-    recomputeTotals();
-
-    // Reset changed flag since updates have been calculated.
-    m_dirty = false;
-
-    // If have global violations, don't even bother with instants
-    if ( !m_globalViolations.empty() ) return;
-
-    rebuildProfile();
-
-    if(m_instants.empty())
+    std::multimap<TokenId, TokenId> pairs;
+    std::map<int, InstantId>::iterator first = m_flawedInstants.lower_bound((int)token->start()->lastDomain().getLowerBound());
+    if(first == m_flawedInstants.end()) {
+      debugMsg("Resource:getOrderingChoices", "No ordering choices:  no flawed instants after token start: " << token->start()->lastDomain().getLowerBound());
       return;
-
-    // If have global violations, don't even bother with instants
-    if ( !m_globalViolations.empty() ) return;
-
-    check_error(isValid());
-
-    computeTransactionProfile();
-
-    debugMsg("Resource:updateTransactionProfile", EUROPA::toString(ResourceId(m_id)));
-
-    check_error(isValid());
-  }
-
-  /**
-   * @brief We should be running this incremenatlly if we track and the algorithm for doing
-   * so is implemented in Resources under NewPlan. Main issue is tracking where you have to start from.
-   */
-  void Resource::computeTransactionProfile() {
-    // Get the seed for completion since it is iteratively defined
-
-    // Since we have upper and lower bounds now, we can support also uncertainty
-    // in the initial value!
-    double runningLowerMin = m_initialCapacity;
-    double runningLowerMax = m_initialCapacity;
-    double runningUpperMin = m_initialCapacity;
-    double runningUpperMax = m_initialCapacity;
-
-    std::map<int, InstantId>::const_iterator it = m_instants.begin();
-
-    // Now we should be set up to iteratively compute the revised transaction profile
-    while(it != m_instants.end()){
-      InstantId instant = it->second;
-      const TransactionSet& transactions = instant->getTransactions();
-      TransactionSet::iterator tx_it = transactions.begin();
-      while (tx_it != transactions.end()) {
-        TransactionId tx = *tx_it;
-        computeRunningTotals(instant, tx, runningLowerMin, runningLowerMax, runningUpperMin,
-                             runningUpperMax);
-
-        ++tx_it;
-      } // of while over Transactions for this instant
-
-      // Now update the instant with the results
-      instant->updateBounds( runningLowerMin, runningLowerMax, 
-                             runningUpperMin, runningUpperMax );
-
-      // Now we need to figure out of any constraints have been violated.
-      // Allow this to be a point of extension by inheritance or with a strategy pattern.
-      applyConstraints(instant);
-
-      // Move on to the next instant
-      ++it;
     }
-  }
+    //       checkError(first != m_flawedInstants.end(),
+    // 		 "No flawed instants within token " << token->getPredicateName().toString() << "(" << token->getKey() << ")");
+    std::map<int, InstantId>::iterator last = m_flawedInstants.lower_bound((int)token->end()->lastDomain().getUpperBound());
 
-  void Resource::computeRunningTotals(const InstantId& instant, 
-				      const TransactionId& tx, 
-				      double& runningLowerMin, 
-				      double& runningLowerMax,
-				      double& runningUpperMin, 
-				      double& runningUpperMax) {
-    double min = tx->getMin();
-    double max = tx->getMax();
-    
-    // if the transaction just started, add producer to upper bounds and 
-    // consumer to the lower bounds
-    if ( tx->getEarliest() == instant->getTime() ) {
-      if ( max>0 ) 
-        runningUpperMax += max;
-      if ( min>0 )
-        runningUpperMin += min;
-      if ( max<0 )
-        runningLowerMax += max;
-      if ( min<0 )
-        runningLowerMin += min;
-    }
-    
-    // if the transaction just ended, add producer to lower bounds and 
-    // consumer to the upper bounds
-    if ( tx->getLatest() == instant->getTime() ) {
-      if ( max<0 ) 
-        runningUpperMax += max;
-      if ( min<0 )
-        runningUpperMin += min;
-      if ( max>0 )
-        runningLowerMax += max;
-      if ( min>0 )
-        runningLowerMin += min;
-    }
-  }
+    debugMsg("Resource:getOrderingChoices", "Looking at flawed instants in interval [" << first->second->getTime() << " " <<
+             (last == m_flawedInstants.end() ? PLUS_INFINITY : last->second->getTime()) << "]");
+    if(last != m_flawedInstants.end() && last->second->getTime() == token->end()->lastDomain().getUpperBound())
+      ++last;
 
-#ifdef OLD_TRANSACTION_PROFILE
-  void Resource::computeTransactionProfile() {
-    // CompletedMax(i) = CompletedMax(i-1) + Sum(new completions (max))
-    // CompletedMin(i) = CompletedMin(i-1) + Sum(new completions (min))
-    // Max(i) = Completed(i) + Sum(max of Producers)
-    // Min(i) = Completed(i) + Sum(min of Consumers)
+    unsigned int count = 0;
 
-    // Get the seed for completion since it is iteratively defined
-    double completedMax = m_initialCapacity;
-    double completedMin = m_initialCapacity;
-    double productionSum = 0;
-    double consumptionSum = 0;
+    TemporalAdvisorId temporalAdvisor = getPlanDatabase()->getTemporalAdvisor();
 
-    std::map<int, InstantId>::const_iterator it = m_instants.lower_bound(m_horizonStart);
-    check_error(it != m_instants.end()); // Should always get a hit
+    for(; first != last && count < limit; ++first) {
+      debugMsg("Resource:getOrderingChoices", "Generating orderings for time " << first->second->getTime());
 
-    // If we are not starting out at the beginning
-    if(it != m_instants.begin()){
-      // Back up to the previous position to obtain values
-      it--;
+      const std::set<TransactionId>& transactions = first->second->getTransactions();
+      for(std::set<TransactionId>::const_iterator it = transactions.begin(); it != transactions.end() && count < limit; ++it) {
+        TransactionId predecessor = *it;
+        check_error(predecessor.isValid());
+        check_error(m_transactionsToTokens.find(predecessor) != m_transactionsToTokens.end());
 
-      // Obtain values from an instant that is the predecessor
-      if(it  != m_instants.begin()){
-        InstantId instant = it->second;
-        completedMax = instant->getCompletedMax();
-        completedMin = instant->getCompletedMin();
-        productionSum = instant->getProductionSum();
-        consumptionSum = instant->getConsumptionSum();
-      }
+        debugMsg("Resource:getOrderingChoices", "Looking at predecessor transaction <" << predecessor->time()->toString() << ", " <<
+                 (predecessor->isConsumer() ? "(c)" : "(p)") << predecessor->quantity()->toString() << ">");
+        TokenId predecessorToken = m_transactionsToTokens.find(predecessor)->second;
+        check_error(predecessorToken.isValid());
 
-      // Now advance it forward again
-      ++it;
-    }
+        for(std::set<TransactionId>::const_iterator subIt = transactions.begin(); subIt != transactions.end() && count < limit; ++subIt) {
+          if(subIt == it)
+            continue;
 
-    // Now we should be set up to iteratively compute the revised transaction profile
-    while(it != m_instants.end()){
-      InstantId instant = it->second;
-      double newCompletionsMin = 0;
-      double newCompletionsMax = 0;
-      double max = 0;
-      double min = 0;
-      double productionMin = 0;
-      double consumptionMin = 0;
+          TransactionId successor = *subIt;
+          check_error(successor.isValid());
+          check_error(m_transactionsToTokens.find(successor) != m_transactionsToTokens.end());
 
-      const TransactionSet& transactions = instant->getTransactions();
-      TransactionSet::iterator tx_it = transactions.begin();
-      while (tx_it != transactions.end()) {
-        TransactionId tx = *tx_it;
-        if (tx->getLatest() == instant->getTime()) {
-          // It has just completed
-          newCompletionsMax += tx->getMax();
-          newCompletionsMin += tx->getMin();
+          debugMsg("Resource:getOrderingChoices", "Looking at successor transaction <" << successor->time()->toString() << ", " <<
+                   (successor->isConsumer() ? "(c)" : "(p)") << successor->quantity()->toString() << ">");
 
-          // If it is strictly a producer then incorporate the minimum into
-          // the running total for this instant
-          if (tx->canProduce() && !tx->canConsume())
-            productionMin += tx->getMin();
-          else
-            if (tx->canConsume() && !tx->canProduce())
-              // If it is strictly a consumer, the max will be the least consumption
-              consumptionMin += tx->getMax();
-        } else {
-          // Note that some transactions might be candidates for consumption and production
-          if (tx->canProduce())
-            max += tx->getMax();
-          if (tx->canConsume())
-            min += tx->getMin();
+          TokenId successorToken = m_transactionsToTokens.find(successor)->second;
+          check_error(successorToken.isValid());
+
+          debugMsg("Resource:getOrderingChoices",
+                   "Found predecessor token " << predecessorToken->getKey() << " and successorToken " << successorToken->getKey() <<
+                   " " << (predecessorToken == successorToken));
+          if(successorToken == predecessorToken || isConstrainedToPrecede(predecessorToken, successorToken) || !temporalAdvisor->canPrecede(predecessorToken, successorToken))
+            continue;
+
+          debugMsg("Resource:getOrderingChoices",
+                   "Considering order <" << predecessorToken->getPredicateName().toString() << "(" << predecessorToken->getKey() << "), " <<
+                   successorToken->getPredicateName().toString() << "(" << successorToken->getKey() << ")>");
+
+          std::multimap<TokenId, TokenId>::iterator checkFirst = pairs.lower_bound(predecessorToken);
+          //if we have an entry for the predecessor
+          if(checkFirst != pairs.end() && checkFirst->first == predecessorToken) {
+            bool foundPair = false;
+            //look for the successor
+            while(checkFirst != pairs.end() && checkFirst->first == predecessorToken) {
+              if(checkFirst->second == successorToken) {
+                debugMsg("Resource:getOrderingChoices", "Order already exists.");
+                foundPair = true;
+                break;
+              }
+              ++checkFirst;
+            }
+            //if we haven't found one
+            if(!foundPair) {
+              debugMsg("Resource:getOrderingChoices", "Adding order.");
+              pairs.insert(std::pair<TokenId, TokenId>(predecessorToken, successorToken));
+              ++count;
+            }
+          }
+          else {
+            debugMsg("Resource:getOrderingChoices", "Adding order.");
+            pairs.insert(std::make_pair(predecessorToken, successorToken));
+            ++count;
+          }
         }
-        ++tx_it;
       }
-
-      completedMax += newCompletionsMax;
-      completedMin += newCompletionsMin;
-      productionSum += productionMin;
-      consumptionSum += consumptionMin;
-
-      // Now update the instant with the results
-      instant->updateBounds(completedMax, 
-                            completedMin, 
-                            max + completedMax, 
-                            min + completedMin,
-                            productionMin,
-                            consumptionMin,
-                            productionSum,
-                            consumptionSum);
-
-
-      // Now we need to figure out of any constraints have been violated.
-      // Allow this to be a point of extension by inheritance or with a strategy pattern.
-      applyConstraints(instant);
-
-      // Move on to the next instant
-      ++it;
     }
-  }
-#endif // OLD_TRANSACTION_PROFILE
-
-  void Resource::print(ostream& os) {
-    updateTransactionProfile();
-
-    //    os << "Time:[levelMin, levelMax, productionSum, consumptionSum] ";
-    os << "Time:[lowerMin, lowerMax, upperMin, upperMax] ";
-    for(std::map<int, InstantId>::const_iterator it = m_instants.begin(); it != m_instants.end(); ++it){
-      InstantId current = it->second;
-      check_error(current.isValid());
-      current->print(os);
-      os << " ";
-    }
-
-    os << std::endl;
-  };
-
-
-  std::string Resource::toString(){
-    std::ostringstream sstr;
-    print(sstr);
-    return sstr.str();
-  }
-
-  bool Resource::isViolated() {
-    std::list<ResourceViolationId> violations;
-    getResourceViolations(violations);
-    return(violations.size() > 0);
-  }
-
-  void Resource::getResourceViolations(std::list<ResourceViolationId>& results, int, int) {
-    check_error(isValid());
-    updateTransactionProfile();
-    results.clear();
-
-    // First, add global violations
-    for ( std::set<ResourceViolationId>::iterator it = m_globalViolations.begin();
-          it!=m_globalViolations.end(); ++it ) {
+    for(std::multimap<TokenId, TokenId>::iterator it = pairs.begin(); it != pairs.end(); ++it)
       results.push_back(*it);
+    debugMsg("Resource:getOrderingChoices", "Ultimately found " << results.size() << " orderings.");
+  }
+
+  void Resource::getTokensToOrder(std::vector<TokenId>& results) {
+    check_error(results.empty());
+    getPlanDatabase()->getConstraintEngine()->propagate();
+    checkError(getPlanDatabase()->getConstraintEngine()->constraintConsistent(),
+               "Should be consistent to continue here. Should have checked before you called the method in the first place.");
+    for(ResourceFlaws::const_iterator it = m_flawedTokens.begin(); it != m_flawedTokens.end(); ++it)
+      results.push_back(it->first);
+  }
+
+  TokenId Resource::getTokenForTransaction(TransactionId t)
+  {
+    std::map<TransactionId, TokenId>::iterator transIt = m_transactionsToTokens.find(t);
+    check_error(transIt != m_transactionsToTokens.end());
+    TokenId tok = transIt->second;
+    check_error(tok.isValid());
+
+    return tok;
+  }
+
+  ResourceTokenRelationId Resource::getRTRConstraint(TokenId tok)
+  {
+    ResourceTokenRelationId retval = ResourceTokenRelationId::noId();
+
+    const std::set<ConstraintId>& constraints = tok->getStandardConstraints();
+    std::set<ConstraintId>::const_iterator constIt = constraints.begin();
+    for(;constIt != constraints.end();++constIt) {
+      ConstraintId c = *constIt;
+      if (c->getName() == ResourceTokenRelation::CONSTRAINT_NAME())
+        return ResourceTokenRelationId(c);
     }
 
-    // Start at the point of the first violation and aggregate from there
-    std::map<int, InstantId>::const_iterator it = m_instants.begin();
-    while(it != m_instants.end()){
-      InstantId current = it->second;
-      ++it;
-
-      std::list<ResourceViolationId> violations = current->getResourceViolations();
-      for (std::list<ResourceViolationId>::iterator it_1 = violations.begin(); it_1 != violations.end(); ++it_1)
-        results.push_back(*it_1);
-    }
-
-    debugMsg("Resource:getResourceViolations", toString());
+    check_error(ALWAYS_FAIL,"Could not find ResourceTokenRelation for Transaction");
+    return retval;
   }
 
-  bool Resource::isFlawed() {
-    std::list<ResourceFlawId> flaws;
-    getResourceFlaws(flaws, 0, 0); // the last two ints are not being used for now
-    return(flaws.size() > 0);
+  bool isConsumptionProblem(Resource::ProblemType problem)
+  {
+    return
+      problem == Resource::ConsumptionSumExceeded ||
+      problem == Resource::ConsumptionRateExceeded ||
+      problem == Resource::LevelTooLow;
   }
 
-  bool Resource::hasFlaws() {
-    return isFlawed();
+  bool isProductionProblem(Resource::ProblemType problem)
+  {
+    return
+      problem == Resource::ProductionSumExceeded ||
+      problem == Resource::ProductionRateExceeded ||
+      problem == Resource::LevelTooHigh;
   }
 
-  void Resource::getResourceFlaws(std::list<ResourceFlawId>& results, int, int) {
-    check_error(isValid());
-
-    // @todo some sort of check if the profile is fresh, so that 
-    // we do not recompute it like crazy
-    updateTransactionProfile();
-    results.clear();
-
-    // Start at the point of the first violation and aggregate from there
-    std::map<int, InstantId>::const_iterator it = m_instants.begin();
-    while(it != m_instants.end()){
-      InstantId current = it->second;
-      ++it;
-
-      std::list<ResourceFlawId> flaws = current->getResourceFlaws();
-      for (std::list<ResourceFlawId>::iterator it_1 = flaws.begin(); it_1 != flaws.end(); ++it_1)
-        results.push_back(*it_1);
-    }
-  }
-
-  /** 
-   * This method returns TRUE iff there is a violation. 
-   * Flaws are computed and stored within the instant, but they do not
-   * affect the return value.
+  /*
+   * reset violations from instant inst
    */
-  bool Resource::applyConstraints(const InstantId& instant) {
-    bool result = false;
-    instant->reset();
-    /*
-    // Test if the minimum production at this instant exceeds the rate limit
-    if (instant->getUpperMax() > m_productionRateMax){
-      instant->addResourceViolation(ResourceViolation::ProductionRateExceeded);
-      result = true;
-    }
-
-    // Test if the minimum consumption at this instant exceeds the rate limit
-    if (instant->getConsumptionMin() < m_consumptionRateMax) {
-      instant->addResourceViolation(ResourceViolation::ConsumptionRateExceeded);
-      result = true;
-    }
-    */
-    // Check optimistic bounds for violations
-    if ( instant->getUpperMax() + m_productionMax - m_totalUsedProduction < m_limitMin ) {
-      // definitely violating lower limit
-      instant->addResourceViolation( ResourceViolation::LevelTooLow );
-      result = true;
-    }
-    // Consumptions are all negative
-    if ( instant->getLowerMin() + m_consumptionMax - m_totalUsedConsumption > m_limitMax ) {
-      // definitely violating upper limit
-      instant->addResourceViolation( ResourceViolation::LevelTooHigh );
-      result = true;
-    }
-
-    //-----------------------------
-    // Check optimistic bounds for flaws
-    if ( instant->getLowerMax()  < m_limitMin ) {
-      // definitely have a flaw on lower limit
-      instant->addResourceFlaw( ResourceFlaw::LevelTooLow );
-      result = true;
-    }
-    if ( instant->getUpperMin()  > m_limitMax ) {
-      // definitely have a flaw on upper limit
-      instant->addResourceFlaw( ResourceFlaw::LevelTooHigh );
-      result = true;
-    }
-
-    return(result);
+  void Resource::resetViolations(InstantId inst)
+  {
+    // TODO: for now reset all violations, see if this can be made more efficient
+    resetViolations();
   }
 
-  bool Resource::isValid() const {
-    checkError(m_id.isValid(), m_id);
-    checkError(m_limitMin <= m_limitMax, m_limitMin << " > " << m_limitMax);
-    checkError(m_initialCapacity >= m_limitMin, 
-	       m_initialCapacity << " > " << m_limitMin);
-    checkError(m_initialCapacity <= m_limitMax, 
-	       m_initialCapacity<< " > " << m_limitMax);
-    checkError(m_productionRateMax <= m_productionMax, 
-	       m_productionRateMax << " > " << m_productionMax );
-    checkError(m_productionRateMax >= 0, 
-	       m_productionRateMax << " > " << m_productionMax );
-    checkError(m_consumptionRateMax >= m_consumptionMax, 
-	       m_consumptionRateMax<< " > " << m_consumptionMax);
-    checkError(m_consumptionRateMax <= 0, 
-	       "Consumption rate is " << m_consumptionRateMax << " but must be negative.");
+  /*
+   * reset all violations
+   */
+  void Resource::resetViolations()
+  {
+    if (getPlanDatabase()->getConstraintEngine()->getAllowViolations()) { // TODO: move this test to FVDetector?
+      ProfileIterator it(m_profile);
+      while(!it.done()) {
+        notifyNoLongerViolated(it.getInstant());
+        it.next();
+      }
+    }
+  }
 
-    for (std::map<int, InstantId>::const_iterator it = m_instants.begin(); it != m_instants.end(); ++it)
-      check_error(it->second.isValid());
+  void Resource::notifyViolated(const InstantId inst, ProblemType problem)
+  {
+    check_error(inst.isValid());
+    check_error(inst->isViolated());
+    check_error(!inst->getTransactions().empty());
 
+    const std::set<TransactionId>& txns = inst->getTransactions();
+    TransactionId txn = *(txns.begin());
+    ConstraintEngineId ce = txn->quantity()->getConstraintEngine();
+
+    debugMsg("Resource:notifyViolated", "Received notification of violation at time " << inst->getTime());
+
+    if (ce->getAllowViolations()) { // TODO: move this test to the constraint?
+      std::set<TransactionId>::const_iterator it = txns.begin();
+      for(;it != txns.end(); ++it) {
+        txn = *it;
+        TokenId tok = getTokenForTransaction(txn);
+        ResourceTokenRelationId c = getRTRConstraint(tok);
+
+        if (isConsumptionProblem(problem) && txn->isConsumer()) {
+          c->notifyViolated(problem,inst);
+          debugMsg("Resource:notifyViolated", "Marked constraint as violated : Token(" << tok->getKey() << ") Constraint " << c->toString());
+        }
+        else if (isProductionProblem(problem) && !(txn->isConsumer())) {
+          c->notifyViolated(problem,inst);
+          debugMsg("Resource:notifyViolated", "Marked constraint as Violated : Token(" << tok->getKey() << ") Constraint " << c->toString());
+        }
+      }
+    }
+    else {
+      const_cast<AbstractDomain&>(txn->quantity()->lastDomain()).empty();
+    }
+  }
+
+  void Resource::notifyNoLongerViolated(const InstantId inst)
+  {
+    // remove all constraints associated with the instant from violated list
+    const std::set<TransactionId>& txns = inst->getTransactions();
+    std::set<TransactionId>::const_iterator it = txns.begin();
+    for(;it != txns.end(); ++it) {
+      TransactionId txn = *it;
+      TokenId tok = getTokenForTransaction(txn);
+      ResourceTokenRelationId c = getRTRConstraint(tok);
+      if (c->getViolation() > 0) {
+        c->notifyNoLongerViolated();
+        debugMsg("Resource:notifyNoLongerViolated", "Marked constraint as NoLongerViolated : Token(" << tok->getKey() << ") Constraint " << c->toString());
+      }
+    }
+  }
+
+  //all ordering choices apply to all tokens in all flaws
+  void Resource::notifyFlawed(const InstantId inst) {
+    check_error(inst.isValid());
+    check_error(inst->isFlawed());
+    check_error(!inst->getTransactions().empty());
+
+    debugMsg("Resource:notifyFlawed", toString() << " Received notification of flaw at time " << inst->getTime());
+
+    std::vector<TransactionId> transactions;
+    m_profile->getTransactionsToOrder(inst, transactions);
+
+    //even if we've already recorded a flaw for this instant, there may be new transactions
+    for(std::vector<TransactionId>::const_iterator it = transactions.begin();
+        it != transactions.end(); ++it) {
+      TransactionId trans = *it;
+      check_error(trans.isValid());
+      std::map<TransactionId, TokenId>::iterator transIt = m_transactionsToTokens.find(trans);
+      check_error(transIt != m_transactionsToTokens.end());
+      TokenId tok = transIt->second;
+
+      check_error(tok.isValid());
+
+      //if there are no recorded flaws for this token
+      //  notify of the flaw
+      //  record the flaw at the instant
+      //else if this instant hasn't been recorded
+      //  notify of the flaw
+      // record the flaw at the instant
+
+      ResourceFlaws::iterator flawIt = m_flawedTokens.find(tok);
+      if(flawIt == m_flawedTokens.end()) {
+        debugMsg("Resource:notifyFlawed", 
+                 toString() << " Token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ") is flawed at instant " << inst->getTime() <<
+                 ".  Notifying that an ordering is required.");
+        m_flawedTokens.insert(std::pair<TokenId, std::set<InstantId> >(tok, std::set<InstantId>()));
+        flawIt = m_flawedTokens.find(tok);
+        flawIt->second.insert(inst);
+        notifyOrderingRequired(tok);
+      }
+      else {
+        debugMsg("Resource:notifyFlawed",
+                 toString() << " Received a redundant notification of a flaw for token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ") at instant " <<
+                 inst->getTime() << ".  Adding it to the set but not notifying.");
+        flawIt->second.insert(inst);
+      }
+    }
+    if(m_flawedInstants.find(inst->getTime()) == m_flawedInstants.end())
+      m_flawedInstants.insert(std::pair<int, InstantId>(inst->getTime(), inst));
+  }
+
+  void Resource::notifyNoLongerFlawed(const InstantId inst) {
+    check_error(inst.isValid());
+    debugMsg("Resource:notifyNoLongerFlawed", toString() << " Received notification that instant " << inst->getTime() << " is no longer flawed.");
+
+    if(m_flawedInstants.find(inst->getTime()) == m_flawedInstants.end()) {
+      checkError(!inst->isFlawed(), "Instant at time " << inst->getTime() << " claims to be flawed, but resource didn't know it.");
+      checkError(noFlawedTokensForInst(inst),
+                 "Error: Instant " << inst->getTime() << " not in the list of flawed instants, but there are tokens that have a recorded flaw at that time.");
+      debugMsg("Resource:notifyNoLongerFlawed", toString() << " Instant wasn't flawed in the first place.  Returning.");
+      return;
+    }
+
+    //checkError(inst->isFlawed(), "Instant at time " << inst->getTime() << " isn't flawed, but is in the flawed instant list.");
+    debugMsg("Resource:notifyNoLongerFlawed", toString() << " Removing instant " << inst->getTime() << " from the set of flawed instants.");
+    m_flawedInstants.erase(inst->getTime());
+
+    std::set<TokenId> flawlessTokens;
+
+    for(ResourceFlaws::iterator tokIt = m_flawedTokens.begin(); tokIt != m_flawedTokens.end(); ++tokIt) {
+      TokenId tok = tokIt->first;
+      check_error(tok.isValid());
+      check_error(!tokIt->second.empty());
+
+      std::size_t size = tokIt->second.size();
+      tokIt->second.erase(inst);
+      condDebugMsg(size > tokIt->second.size(),
+                   "Resource:notifyNoLongerFlawed", toString() << " Removed the flaw at time " << inst->getTime() << " for token " << tok->getPredicateName().toString() <<
+                   "(" << tok->getKey() << ")");
+      if(size > tokIt->second.size() && !tokIt->second.empty()) {
+        std::stringstream str;
+        for(std::set<InstantId>::const_iterator it = tokIt->second.begin(); it != tokIt->second.end(); ++it)
+          str << (*it)->getTime() << " ";
+        debugMsg("Resource:notifyNoLongerFlawed", toString() << " Remaining flaws for token " << tok->getPredicateName().toString() <<
+                 "(" << tok->getKey() << "): " << str.str());
+      }
+      if(tokIt->second.empty())
+        flawlessTokens.insert(tokIt->first);
+    }
+
+    for(std::set<TokenId>::const_iterator it = flawlessTokens.begin(); it != flawlessTokens.end(); ++it) {
+      TokenId tok = *it;
+      check_error(tok.isValid());
+      debugMsg("Resource:notifyNoLongerFlawed", toString() << " Notifying that the token " << tok->getPredicateName().toString() << "(" <<
+               tok->getKey() << ") no longer requires an ordering.");
+      notifyOrderingNoLongerRequired(tok);
+      m_flawedTokens.erase(tok);
+    }
+    debugMsg("Resource:notifyNoLongerFlawed", toString() << " Have " << m_flawedTokens.size() << " remaining flawed tokens.");
+  }
+
+  void Resource::notifyDeleted(const InstantId inst) {
+    notifyNoLongerFlawed(inst);
+    notifyNoLongerViolated(inst);
+    debugMsg("Resource:notifyDeleted", "Removing (possibly) flawed instant at time " << inst->getTime());
+    m_flawedInstants.erase(inst->getTime());
+    for(ResourceFlaws::iterator it = m_flawedTokens.begin(); it != m_flawedTokens.end(); ++it)
+      it->second.erase(inst);
+  }
+
+  bool Resource::noFlawedTokensForInst(const InstantId& inst) const {
+    for(ResourceFlaws::const_iterator it = m_flawedTokens.begin(); it != m_flawedTokens.end(); ++it) {
+      if(it->second.find(inst) != it->second.end()) {
+        debugMsg("Resource:noFlawedTokensForInst",
+                 "Found a flaw for instant " << inst->getTime() << " in token " << it->first->getPredicateName().toString() << "(" << it->first->getKey() << ")");
+        return false;
+      }
+    }
     return true;
   }
 
-  bool Resource::hasStartOrEndTransaction(const InstantId& instant) const {
-    check_error(instant.isValid());
-    TransactionSet transactions = instant->getTransactions();
-    for (TransactionSet::const_iterator it = transactions.begin(); it != transactions.end(); ++it) {
-      TransactionId t = *it;
-      if (t->getEarliest() == instant->getTime() || t->getLatest() == instant->getTime())
-        return(true);
-    }
-    return(false);
+  void Resource::getFlawedInstants(std::vector<InstantId>& results) {
+    std::transform(m_flawedInstants.begin(), m_flawedInstants.end(), std::back_inserter(results), __gnu_cxx::select2nd<std::map<int, InstantId>::value_type>());
+    debugMsg("Resource:getFlawedInstants", "Have " << m_flawedInstants.size() << " flawed instants.  Returning " << results.size() << ".");
   }
 
-  /**
-   * Get the set of transactions overlapping the given interval which are definitiely
-   * assigned to the resource.
-   */
-  void Resource::getTransactions(std::set<TransactionId>& resultSet, 
-                                 int lowerBound, int upperBound, bool propagate) {
-    check_error(resultSet.empty());
-    check_error(lowerBound <= upperBound);
+  void Resource::getOrderingChoices(const InstantId& inst,
+                                    std::vector<std::pair<TransactionId, TransactionId> >& results,
+                                    unsigned int limit) {
+      check_error(results.empty());
+      check_error(inst.isValid());
+      check_error(limit > 0);
+      check_error(m_flawedInstants.find(inst->getTime()) != m_flawedInstants.end());
+      check_error(m_flawedInstants.find(inst->getTime())->second == inst);
 
-    // Propagate token-object relationshiop and any constraints
-    if(propagate)
-      getPlanDatabase()->getConstraintEngine()->propagate();
+      debugMsg("Resource:getOrderingChoices", "Getting " << limit << " ordering choices for " << inst->getTime() << "(" << inst->getKey() << ") on " << toString());
 
-    for(std::set<TokenId>::const_iterator it = m_tokens.begin(); it != m_tokens.end(); ++it){
-      TransactionId tx = *it;
-
-      // Skip consideration of this transaction if it is not definitley associated with this resource
-      if(!tx->getObject()->lastDomain().isSingleton())
-	continue;
-
-      checkError(tx->getObject()->lastDomain().getSingletonValue() == getId(),
-		 "If a singleton, and we have synched correctly, then it must be assigned to this resource.");
-
-      IntervalIntDomain bounds(lowerBound, upperBound);
-      bounds.intersect(tx->getTime()->lastDomain());
-      if(!bounds.isEmpty())
-        resultSet.insert(tx);
-    }
-  }
-
-  std::map<int, InstantId>::iterator Resource::createInstant(int time, const std::map<int, InstantId>::iterator& hint){
-    check_error(m_instants.find(time) == m_instants.end());
-    InstantId newInstant = (new Instant(time))->getId();
-
-    std::map<int, InstantId>::iterator result = 
-      m_instants.insert(hint, std::pair<int, InstantId>(time, newInstant));
-
-    // Now insert transactions from prior instant if they will span this one
-    if(result == m_instants.begin())
-      return result;
-
-    --result;
-    InstantId previous = result->second;
-    check_error(previous.isValid());
-
-    // If we were able to move backwards
-    if(previous != newInstant){
-      check_error(previous->getTime() < time);
-      const TransactionSet& transactions = previous->getTransactions();
-      for(TransactionSet::const_iterator it = transactions.begin(); it != transactions.end(); ++it){
-        TransactionId tx = *it;
-        if(tx->getLatest() > time)
-          newInstant->insert(tx);
+      if(!getPlanDatabase()->getConstraintEngine()->propagate()) {
+        debugMsg("Resource:getOrderingChoices", "No ordering choices: the constraint network is inconsistent.");
+        return;
       }
+
+      const std::set<TransactionId>& transactions = inst->getTransactions();
+      unsigned int count = 0;
+      TemporalAdvisorId temporalAdvisor = getPlanDatabase()->getTemporalAdvisor();
+      std::set<std::pair<TransactionId, TransactionId> > uniquePairs;
+
+      for(std::set<TransactionId>::const_iterator preIt = transactions.begin(); preIt != transactions.end() && count < limit; ++preIt) {
+        TransactionId predecessor = *preIt;
+        check_error(predecessor.isValid());
+        //for(std::set<TransactionId>::const_iterator sucIt = transactions.begin(); sucIt != transactions.end() && count < limit; ++sucIt) {
+        std::vector<ConstrainedVariableId> sucTimevars;
+        for(std::map<TransactionId, TokenId>::const_iterator sucIt = m_transactionsToTokens.begin(); sucIt != m_transactionsToTokens.end() && count < limit; ++sucIt) {
+          TransactionId successor = sucIt->first;
+          check_error(successor.isValid());
+          sucTimevars.push_back(TimeVarId(successor->time()));
+        }
+        std::vector<int> presucLbs;
+        std::vector<int> presucUbs;
+        temporalAdvisor->getTemporalDistanceSigns(TimeVarId(predecessor->time()),
+                                        sucTimevars, presucLbs, presucUbs);
+        int i = 0;
+
+        for(std::map<TransactionId, TokenId>::const_iterator sucIt = m_transactionsToTokens.begin(); sucIt != m_transactionsToTokens.end() && count < limit; ++sucIt) {
+          TransactionId successor = sucIt->first;
+          check_error(successor.isValid());
+
+          bool canPrecede = (presucUbs[i] >= 0);
+          bool mustPrecede = (presucLbs[i] >= 0);
+          bool canFollow = (presucLbs[i] <= 0);
+          bool mustFollow = (presucUbs[i] <= 0);
+          i++;
+
+          debugMsg("Resource:getOrderingChoices", "Considering pair <" << predecessor->toString() << ", " << successor->toString());
+          if(predecessor == successor || !predecessor->time()->lastDomain().intersects(successor->time()->lastDomain())) {
+            condDebugMsg(predecessor == successor, "Resource:getOrderingChoices", "Rejected pair because they are the same transaction.");
+            condDebugMsg(!predecessor->time()->lastDomain().intersects(successor->time()->lastDomain()), "Resource:getOrderingChoices",
+                         "Rejected pair because successor does not overlap predecessor.");
+            continue;
+          }
+          //if(temporalAdvisor->canPrecede(TimeVarId(predecessor->time()), TimeVarId(successor->time())) &&
+             //!transConstrainedToPrecede(predecessor, successor)) {
+            // //results.push_back(std::make_pair(predecessor, successor));
+          if (canPrecede && !mustPrecede) {
+            bool added = uniquePairs.insert(std::make_pair(predecessor, successor)).second;
+            if(added) {
+              debugMsg("Resource:getOrderingChoices", "Added pair <" << predecessor->toString() << ", " << successor->toString());
+              count++;
+            }
+            else {
+              debugMsg("Resource:getOrderingChoices", "Pair is redundant.");
+            }
+          }
+          else {
+            //condDebugMsg(transConstrainedToPrecede(predecessor, successor), "Resource:getOrderingChoices", "Rejected pair because predecessor already constrained to precede successor.");
+            //condDebugMsg(!temporalAdvisor->canPrecede(TimeVarId(predecessor->time()), TimeVarId(successor->time())), "Resource:getOrderingChoices",
+                         //"Rejected pair because predecessor cannot precede successor.");
+            condDebugMsg(mustPrecede, "Resource:getOrderingChoices", "Rejected pair because predecessor already constrained to precede successor.");
+            condDebugMsg(!canPrecede, "Resource:getOrderingChoices",
+                         "Rejected pair because predecessor cannot precede successor.");
+          }
+          debugMsg("Resource:getOrderingChoices", "Considering pair <" << successor->toString() << ", " << predecessor->toString());
+          //if(temporalAdvisor->canPrecede(TimeVarId(successor->time()), TimeVarId(predecessor->time())) &&
+             //!transConstrainedToPrecede(successor, predecessor)) {
+            // //results.push_back(std::make_pair(successor, predecessor));
+          if (canFollow && !mustFollow) {
+            bool added = uniquePairs.insert(std::make_pair(successor, predecessor)).second;
+            if(added) {
+              debugMsg("Resource:getOrderingChoices", "Added pair <" << successor->toString() << ", " << predecessor->toString());
+              count++;
+            }
+            else {
+              debugMsg("Resource:getOrderingChoices", "Pair is redundant.");
+            }
+          }
+          else {
+            //condDebugMsg(transConstrainedToPrecede(successor, predecessor), "Resource:getOrderingChoices", "Rejected pair because predecessor already constrained to precede successor.");
+            //condDebugMsg(!temporalAdvisor->canPrecede(TimeVarId(successor->time()), TimeVarId(predecessor->time())), "Resource:getOrderingChoices",
+                         //"Rejected pair because predecessor cannot precede successor.");
+            condDebugMsg(mustFollow, "Resource:getOrderingChoices", "Rejected pair because predecessor already constrained to precede successor.");
+            condDebugMsg(!canFollow, "Resource:getOrderingChoices",
+                         "Rejected pair because predecessor cannot precede successor.");
+          }
+        }
+      }
+      results.insert(results.end(), uniquePairs.begin(), uniquePairs.end());
+      debugMsg("Resource:getOrderingChoices", "Ultimately found " << results.size() << " orderings.");
+  }
+
+  bool Resource::transConstrainedToPrecede(const TransactionId& predecessor, const TransactionId& successor) {
+    IntervalIntDomain dom = getPlanDatabase()->getTemporalAdvisor()->getTemporalDistanceDomain(TimeVarId(predecessor->time()), TimeVarId(successor->time()), true);
+    return dom.getLowerBound() >= 0;
+    //       ConstrainedVariableId pre = predecessor->time();
+    //       ConstrainedVariableId suc = successor->time();
+
+    //       std::set<ConstraintId> preConstrs, sucConstrs, intersection;
+    //       pre->constraints(preConstrs);
+    //       suc->constraints(sucConstrs);
+
+    //       std::set_intersection(preConstrs.begin(), preConstrs.end(),
+    //                             sucConstrs.begin(), sucConstrs.end(),
+    //                             inserter(intersection, intersection.begin()));
+
+    //       for(std::set<ConstraintId>::const_iterator it = intersection.begin(); it != intersection.end(); ++it) {
+    //         ConstraintId constr = *it;
+    //         check_error(constr.isValid());
+    //         const std::vector<ConstrainedVariableId>& scope = constr->getScope();
+    //         if(scope.size() == 2 && scope[0] == pre) {
+    //           std::string name = constr->getName().toString();
+    //           if(name == "precedes" || name == "concurrent" || name == "eq" || name == "lt" || name == "leq")
+    //             return true;
+    //         }
+    //         else if(scope.size() == 3 && ((scope[0] == pre && scope[2] == suc) || (scope[2] == pre && scope[0] == suc && scope[1]->lastDomain().getUpperBound() <= 0))) {
+    //           std::string name = constr->getName().toString();
+    //           if(name == "addeq" || name == "addEq" || name == "temporaldistance" || name == "temporalDistance")
+    //             return true;
+    //         }
+    //       }
+    //       return false;
+  }
+
+  // PS Methods:
+  PSResourceProfile* Resource::getLimits() {
+    return new PSResourceProfile(getLowerLimit(), getUpperLimit());
+  }
+
+  PSResourceProfile* Resource::getLevels() {
+    return new PSResourceProfile(getProfile());
+  }
+
+  PSList<PSEntityKey> Resource::getOrderingChoices(TimePoint t)
+  {
+    PSList<PSEntityKey> retval;
+
+    InstantId instant;
+
+    ProfileIterator it(getProfile());
+    while(!it.done()) {
+      TimePoint inst = (TimePoint) it.getTime();
+      if (inst == t) {
+        instant = it.getInstant();
+        break;
+      }
+      it.next();
     }
 
-    ++result;
-    return result;
-  }
-
-  void Resource::resetProfile(){
-    //EUROPA::cleanup(m_instants);
-    std::map<int, InstantId>::const_iterator it = m_instants.begin();
-    while(it != m_instants.end()){
-      InstantId item = (it++)->second;
-      check_error(item.isValid());
-      delete (Instant*) item;
-    }
-    m_instants.clear();
-
-    EUROPA::cleanup(m_globalViolations);
-  }
-
-  void Resource::rebuildProfile(){
-    // Go over all transactions
-    for(std::set<TokenId>::const_iterator it = m_tokens.begin(); it!= m_tokens.end(); ++it){
-      TransactionId tx = *it;
-
-      // Skip consideration of this transaction if it is not definitley associated with this resource
-      if(!tx->getObject()->lastDomain().isSingleton())
-	continue;
-
-      checkError(tx->getObject()->lastDomain().getSingletonValue() == getId(),
-		 "If a singleton, and we have synched correctly, then it must be assigned to this resource.");
-
-      // Create/modify instants
-      check_error(tx.isValid());
-      insert(tx);
-    }
-  }
-
-  void Resource::addGlobalResourceViolation( ResourceViolation::Type type ) {
-    m_globalViolations.insert( (new ResourceViolation(type))->getId() );
-  }
-
-  void Resource::setProductionMax( const double& value ) { m_productionMax = value; }
-  void Resource::setProductionRateMax( const double& value ) { m_productionRateMax = value; }
-  void Resource::setConsumptionMax( const double& value ) { m_consumptionMax = value; }
-  void Resource::setConsumptionRateMax( const double& value ) { m_consumptionRateMax = value; }
-
-  void Resource::getLevelAt( int timepoint, IntervalDomain& result ) {
-    updateTransactionProfile();
-
-    // Find the instant for the timepoint. If it does not exist, take the last one
-    std::map<int, InstantId>::iterator current = m_instants.lower_bound(timepoint);
-
-    // If there are no instants, then the level is a singleton for the initial capacity.
-    if(m_instants.empty()){
-      result.set(m_initialCapacity);
-      return;
+    if (instant.isNoId()) {
+      // TODO: log error
+      return retval;
     }
 
-    // If it is not a direct hit, and we are at the beginning, return the initial capacity also.
-    if(current == m_instants.begin() && current->first > timepoint){
-      result.set(m_initialCapacity);
-      return;
+    std::vector<std::pair<TransactionId, TransactionId> > results;
+    getOrderingChoices(instant,results);
+    for (unsigned int i = 0;i<results.size(); i++) {
+      TransactionId predecessor = results[i].first;
+      TransactionId successor = results[i].second;
+      retval.push_back(predecessor->time()->parent()->getKey());
+      retval.push_back(successor->time()->parent()->getKey());
     }
 
-    // If we are at the end or we have not had a direct hit, move backwards
-    if(current == m_instants.end() || current->first > timepoint)
-      current--;
-
-    checkError(current->second.isValid(), "Invalid instant retrieved. Indicates a synchronization bug.");
-
-    InstantId instant = current->second;
-
-    result = IntervalDomain(instant->getLowerMin(), instant->getUpperMax());
-
-    debugMsg("Resource:getLevelAt",
-	     "Returning " << result.toString() << " for timepoint " 
-	     << timepoint << " at instant " << instant->getTime());
+    return retval;
   }
-
-  void Resource::updateInitialState(const IntervalDomain& value ) {
-    check_error( value.isSingleton(), 
-                 "In the current implementation the initial value of Resource should be a singleton" );
-    m_initialCapacity = value.getSingletonValue();
-  }
-
-} // namespace
+}

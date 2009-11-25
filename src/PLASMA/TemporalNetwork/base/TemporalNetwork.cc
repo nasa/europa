@@ -12,7 +12,7 @@
 //  remain on all copies of the software.
 
 #include "TemporalNetworkDefs.hh"
-#include "IntervalIntDomain.hh"
+#include "Domains.hh"
 #include "TemporalNetwork.hh"
 #include "Debug.hh"
 
@@ -180,17 +180,23 @@ namespace EUROPA {
   //return this->consistent;
   //}
 
+  Bool TemporalNetwork::updateRequired()
+  {
+      // We propagate additions eagerly so only deletions need a new
+      // propagation here, and then only if network was inconsistent.
+      // (Deletions from a consistent network cannot cause inconsistency.)
+      // (Yes, but this overlooks deletions followed by additions, so..)
+
+      // More efficient test: (hasDeletions && (!consistent || hasAdditions))
+      // but need to set up hasAdditions cache.  For now, just propagate...
+      bool fullyPropagated = !this->hasDeletions;
+
+      return !fullyPropagated;
+  }
+
   Bool TemporalNetwork::propagate()
   {
-    // We propagate additions eagerly so only deletions need a new
-    // propagation here, and then only if network was inconsistent.
-    // (Deletions from a consistent network cannot cause inconsistency.)
-    // (Yes, but this overlooks deletions followed by additions, so..)
-
-    // More efficient test: (hasDeletions && (!consistent || hasAdditions))
-    // but need to set up hasAdditions cache.  For now, just propagate...
-
-    if (this->hasDeletions)
+    if (updateRequired())
       fullPropagate(); // Otherwise changes have been incrementally propagated
 
     return this->consistent;
@@ -266,11 +272,11 @@ namespace EUROPA {
     // Method: Calculate lower/upper bounds as if src was the origin.
     // Afterwards restore the proper bounds.  Requires only four
     // dijkstras instead of 2*n dijkstras.
-   
+
     propagate();
 
     checkError(this->consistent, "TemporalNetwork: calcDistanceBounds from inconsistent network");
-    
+
     propagateBoundsFrom(src);
 
     lbs.clear();
@@ -286,15 +292,61 @@ namespace EUROPA {
     return;
   }
 
+  Void TemporalNetwork::calcDistanceSigns(const TimepointId& src,
+                                           const std::vector<TimepointId>&
+                                           targs,
+					   std::vector<Time>& lbs,
+                                           std::vector<Time>& ubs)
+  {
+    // Method: Calculate lower/upper bounds as if src was the origin.
+    // Don't disturb the existing bounds.  Requires only two dijkstras
+    // instead of 2*n dijkstras.  Use special bounded-distance
+    // dijkstra computations that only determine precedences.
+
+    propagate();
+
+    checkError(this->consistent,
+               "TemporalNetwork: calcDistanceSigns from inconsistent network");
+
+    lbs.clear();
+    ubs.clear();
+
+    if (targs.empty())
+      return;
+
+    Time minPotential = POS_INFINITY;
+    Time maxPotential = NEG_INFINITY;
+
+    for (unsigned i=0; i<targs.size(); i++) {
+      if (targs[i]->potential < minPotential)
+        minPotential = targs[i]->potential;
+      if (targs[i]->potential > maxPotential)
+        maxPotential = targs[i]->potential;
+      ubs.push_back (1);
+      lbs.push_back (-1);
+    }
+
+    boundedDijkstraForward(src, 1, minPotential);
+    for (unsigned i=0; i<targs.size(); i++)
+      ubs[i] = (targs[i]->distance);
+
+    boundedDijkstraBackward(src, 1, maxPotential);
+    for (unsigned i=0; i<targs.size(); i++)
+      lbs[i] = (- targs[i]->distance);
+
+    return;
+  }
+
+
   std::list<TimepointId>
   TemporalNetwork::getConstraintScope(const TemporalConstraintId& id) {
     std::list<TimepointId> result;
-    
+
     if(id.isInvalid())
-      handle_error(is.isInvalid(), 
+      handle_error(is.isInvalid(),
                    "Cannot get scope of invalid constraint.",
                    TempNetErr::TempNetInvalidConstraintError());
-    
+
     Tspec* spec = id.operator->();
     result.push_back(spec->head->getId());
     result.push_back(spec->foot->getId());
@@ -308,10 +360,10 @@ namespace EUROPA {
     target = spec->foot->getId();
   }
 
-  Time 
+  Time
   TemporalNetwork::getConstraintUpperBound(const TemporalConstraintId& id) {
     if(id.isInvalid())
-      handle_error(id.isInvalid(), 
+      handle_error(id.isInvalid(),
                    "Cannot get scope of invalid constraint.",
                    TempNetErr::TempNetInvalidConstraintError());
 
@@ -320,7 +372,7 @@ namespace EUROPA {
   }
 
 
-  Time 
+  Time
   TemporalNetwork::getConstraintLowerBound(const TemporalConstraintId& id) {
     if(id.isInvalid())
       handle_error(id.isInvalid(),
@@ -334,7 +386,7 @@ namespace EUROPA {
 # define checkBoundsValidity(lo, hi) (true)
 #else
   static Bool checkBoundsValidity(const Time lb, const Time ub) {
-    check_error(!(lb > ub), 
+    check_error(!(lb > ub),
                 "addTemporalConstraint: (LB, UB) interval was empty",
                 TempNetErr::TempNetEmptyConstraintError());
     check_error( !((ub > MAX_LENGTH && ub < POS_INFINITY) || ub > POS_INFINITY),
@@ -505,7 +557,7 @@ namespace EUROPA {
                 "Network is not inconsistent",
                 TempNetErr::TempNetNoInconsistencyError());
     std::list<TimepointId> ans;
-    for (std::list<DedgeId>::const_iterator it=edgeNogoodList.begin(); 
+    for (std::list<DedgeId>::const_iterator it=edgeNogoodList.begin();
 	 it != edgeNogoodList.end(); ++it) {
       DedgeId edge = *it;
       TimepointId node = (TimepointId) edge->to;
@@ -527,6 +579,7 @@ namespace EUROPA {
 
   Void TemporalNetwork::fullPropagate()
   {
+    debugMsg("TemporalNetwork:fullPropagate", "fullPropagate started");
     m_updatedTimepoints.clear();
     this->incrementalSource = TimepointId::noId();   // Not applicable to a full prop.
     setConsistency(bellmanFord());
@@ -553,7 +606,8 @@ namespace EUROPA {
     incDijkstraForward();
     queue->insertInQueue(origin);
     incDijkstraBackward();
-  }
+    debugMsg("TemporalNetwork:fullPropagate", "fullPropagate done");
+ }
 
   Void TemporalNetwork::incPropagate(TimepointId src, TimepointId targ)
   {
@@ -635,7 +689,7 @@ namespace EUROPA {
       foot->depth = 1;
       return foot;  // Continue propagation from foot
     }
-    
+
     // Else Propagation, if any, is in the other direction.
     DedgeId revEdge = findEdge(forwards ? foot : head,
                                forwards ? head : foot);
@@ -692,7 +746,7 @@ namespace EUROPA {
 
   Void TemporalNetwork::incDijkstraBackward()
   {
- 
+
     BucketQueue* queue = this->bqueue;
 #ifndef EUROPA_FAST
     int BFbound = this->nodes.size();
@@ -727,7 +781,7 @@ namespace EUROPA {
       }
     }
   }
-  
+
 
   TimepointId TemporalNetwork::getRingLeader(TimepointId tpId)
   {
@@ -858,7 +912,7 @@ namespace EUROPA {
       m_updatedTimepoints.insert(tnode);
   }
 
-  void TemporalNetwork::resetUpdatedTimepoints() { 
+  void TemporalNetwork::resetUpdatedTimepoints() {
     m_updatedTimepoints.clear();
   }
 
@@ -878,7 +932,7 @@ namespace EUROPA {
 
   void Tnode::handleDiscard(){
     // Should always be cleared by now if we have synchronized correctly
-    check_error(Entity::isPurging() || getExternalEntity().isNoId()); 
+    check_error(Entity::isPurging() || getExternalEntity().isNoId());
 
     Dnode::handleDiscard();
   }
@@ -898,7 +952,7 @@ namespace EUROPA {
 
   void Tspec::handleDiscard(){
     // Should always be cleared by now if we have synchronized correctly
-    check_error(Entity::isPurging() || getExternalEntity().isNoId()); 
+    check_error(Entity::isPurging() || getExternalEntity().isNoId());
     Entity::handleDiscard();
   }
 } /* namespace Europa */

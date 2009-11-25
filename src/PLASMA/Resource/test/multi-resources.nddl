@@ -1,12 +1,12 @@
 #include "Resources.nddl"
 
-class Battery extends Resource {
+class Battery extends Reservoir {
  Battery(float ic, float ll_min, float ll_max){
   super(ic, ll_min, ll_max);
  }
 }
 
-class SolarPanel extends Resource {
+class SolarPanel extends Reservoir {
  SolarPanel(float ic, float ll_min, float ll_max){
   super(ic, ll_min, ll_max);
  }
@@ -23,7 +23,7 @@ class Rover extends Timeline {
 
 Rover::Drive{
  neq(from, to);
- meets(Battery.change battery);
+ meets(Battery.consume battery);
 
  // Compiler BUG not to trap error on name usage
  eq(battery.quantity, expected_energy_used);
@@ -59,8 +59,8 @@ World::initialState{
  // First drive first!
  leq(a.end, b.start);
 
- any(Battery.change tx);
- eq(tx.quantity, 4);
+ any(Battery.consume tx);
+ eq(tx.quantity, 4.0);
 }
 
 World world = new World();

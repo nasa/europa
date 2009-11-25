@@ -6,22 +6,20 @@ if ( "Resources" in $(NO) ) {
   SubDirC++Flags -DNO_RESOURCES ;
 }
 
-ModuleComponent System	: MasterController.cc SingleSolverController.cc ;
-
 PSUI_HOME ?= [ FDirName $(PLASMA_HOME) src PLASMA System component PSUI ] ;
 
 Depends PSUI.jar : PSEngine.jar ;
 ApacheAnt PSUI.jar :
 	[ FGristFiles PSUI/build.xml ]
 	[ GLOB [ FDirName $(SUBDIR) PSUI src org ops ui ]
-         [ FDirName $(SUBDIR) PSUI src org ops ui anml ]
-         [ FDirName $(SUBDIR) PSUI src org ops ui ash ]
-         [ FDirName $(SUBDIR) PSUI src org ops ui chart ]
-         [ FDirName $(SUBDIR) PSUI src org ops ui gantt ]
-         [ FDirName $(SUBDIR) PSUI src org ops ui mouse ]
-         [ FDirName $(SUBDIR) PSUI src org ops ui nddl ]
-         [ FDirName $(SUBDIR) PSUI src org ops ui solver ]
-         [ FDirName $(SUBDIR) PSUI src org ops ui util ] :
+        [ FDirName $(SUBDIR) PSUI src org ops ui anml ]
+        [ FDirName $(SUBDIR) PSUI src org ops ui ash ]
+        [ FDirName $(SUBDIR) PSUI src org ops ui chart ]
+        [ FDirName $(SUBDIR) PSUI src org ops ui gantt ]
+        [ FDirName $(SUBDIR) PSUI src org ops ui mouse ]
+        [ FDirName $(SUBDIR) PSUI src org ops ui nddl ]
+        [ FDirName $(SUBDIR) PSUI src org ops ui solver ]
+        [ FDirName $(SUBDIR) PSUI src org ops ui util ] :
 				 *.java ] : dist ;
 LOCATE on PSUI.jar = [ FDirName $(PLASMA_BUILD) lib ] ;
 

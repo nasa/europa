@@ -19,7 +19,7 @@
  * @li We are not allowing construction of composed objects. It is expected that all compositions are defined via
  * the constructors of root objects.
  * @li The interfaces are key based, reflecting the expectation that the primary (i.e. only) intent is to play these
- * operations from a file of logged operations from a prior planning run. Retrieval of objects by key is supported 
+ * operations from a file of logged operations from a prior planning run. Retrieval of objects by key is supported
  * via Entity::getEntity().
  * @author Conor McGann, March, 2004.
  */
@@ -58,7 +58,7 @@ namespace EUROPA {
      * @brief Create an object instance in the dabatase.
      * @param key The expected key value for the object. This is used as a check to ensure we are creating values
      * in the order we expect.
-     * @param type The type of instance to create. Must match a name in the Schema. The daatabase must be open for 
+     * @param type The type of instance to create. Must match a name in the Schema. The daatabase must be open for
      * creation of instances of this type.
      * @param name The name for the instance. Must be unique.
      * @return The Id of the object created. Will error out rather than return a noId.
@@ -69,7 +69,7 @@ namespace EUROPA {
      * @brief Create an object instance in the dabatase, with a call to a specialized constructor
      * @param key The expected key value for the object. This is used as a check to ensure we are creating values
      * in the order we expect.
-     * @param type The type of instance to create. Must match a name in the Schema. The database must be open for 
+     * @param type The type of instance to create. Must match a name in the Schema. The database must be open for
      * creation of instances of this type.
      * @param name The name for the instance. Must be unique.
      * @param arguments A vector of name/value pairs used to invoke a particular constructor.
@@ -100,7 +100,10 @@ namespace EUROPA {
      * schema.
      * @return The Id of the token created. Will error out rather than return a noId.
      */
-    TokenId createToken(const char* predicateName, bool rejectable = false, bool isFact = false);
+    TokenId createToken(const char* tokenType,
+                        const char* tokenName = NULL,
+                        bool rejectable = false,
+                        bool isFact = false);
 
     /**
      * @brief Deletes a token instance.  By way of symmetry with createToken().
@@ -157,7 +160,7 @@ namespace EUROPA {
      * @param name The name of the constraint to be created
      * @param scope The variables to provide the scope of the constraint.
      */
-    ConstraintId createConstraint(const char* name, 
+    ConstraintId createConstraint(const char* name,
 				  const std::vector<ConstrainedVariableId>& scope);
 
     /**
@@ -166,7 +169,7 @@ namespace EUROPA {
      * &param var the target variable.
      * @param domain The domain to restrict against.
      */
-    ConstraintId createConstraint(const char* name, 
+    ConstraintId createConstraint(const char* name,
 				  const ConstrainedVariableId& variable,
 				  const AbstractDomain& domain);
 
@@ -233,6 +236,18 @@ namespace EUROPA {
     bool isGlobalVariable(const LabelStr& varName) const;
 
     /**
+     * @brief Lookup a global token by name. It is an error if not present
+     * @retrun The requested token.
+     */
+    const TokenId getGlobalToken(const LabelStr& name) const;
+
+    /**
+     * @brief Test if a global exists for a given name
+     * @return true if present, otherwise false
+     */
+    bool isGlobalToken(const LabelStr& name) const;
+
+    /**
      * @brief Retrieve token defined by a particular path from a root token. Transaction Logging must be enabled.
      * For example: [1265,2,3,1,0,9] will return (Token 1265).slave(2).slave(3).slave(1).slave(0).slave(9)
      * @param relativePath The relative path to find the target token where each vector position reflects the position in the ordered
@@ -254,7 +269,7 @@ namespace EUROPA {
     std::vector<int> getPathByToken(const TokenId& targetToken) const;
 
     /**
-     * @brief Retrieve the relative path for obtaining the target token from a given root token. 
+     * @brief Retrieve the relative path for obtaining the target token from a given root token.
      * Transaction Logging must be enabled.
      * @param targetToken The token to find a path to from its root in the ancestor tree
      * @return A string of the vector giving its relative path. The first element is the root token key
@@ -275,7 +290,7 @@ namespace EUROPA {
     unsigned int getIndexByVariable(const ConstrainedVariableId& var);
 
     ConstraintId getConstraintByIndex(unsigned int index);
-    
+
     unsigned int getIndexByConstraint(const ConstraintId& constr);
 
     /**
@@ -317,7 +332,7 @@ namespace EUROPA {
      * @see enableTransactionLoggng
      */
     bool isTransactionLoggingEnabled() const;
-    
+
     /**
      * @brief Create a value for a string
      */
@@ -326,7 +341,7 @@ namespace EUROPA {
     // Temporarily exposing these to remove singletons, need to review DbClient concept in general
     const CESchemaId& getCESchema() const;
     const SchemaId& getSchema() const;
-    
+
   private:
     friend class PlanDatabase;
 
@@ -336,7 +351,10 @@ namespace EUROPA {
     DbClient(const DbClient&); /* NO IMPL */
 
     /*!< Helper methods */
-    TokenId allocateToken(const LabelStr& predicateName, bool rejectable, bool isFact=false);
+    TokenId allocateToken(const char* tokenType,
+                          const char* tokenName,
+                          bool rejectable,
+                          bool isFact=false);
 
     DbClientId m_id;
     PlanDatabaseId m_planDb;
@@ -345,19 +363,19 @@ namespace EUROPA {
     bool m_deleted; /*!< Used to indicate a deletion and this ignore synchronization of listeners on removal */
     bool m_transactionLoggingEnabled; /*!< Used to configure transaction loggng services required for Key Matching */
   };
-  
+
   class PSPlanDatabaseClientImpl : public PSPlanDatabaseClient
   {
-    public:   
+    public:
       PSPlanDatabaseClientImpl(const DbClientId& c);
-        
+
       virtual PSVariable* createVariable(const std::string& typeName, const std::string& name, bool isTmpVar);
       virtual void deleteVariable( PSVariable* var);
-      
+
       virtual PSObject* createObject(const std::string& type, const std::string& name);
       //virtual PSObject* createObject(const std::string& type, const std::string& name, PSList<PSVariable*>& arguments);
       virtual void deleteObject(PSObject* obj);
-      
+
       virtual PSToken* createToken(const std::string& predicateName, bool rejectable, bool isFact);
       virtual void deleteToken(PSToken* token);
 
@@ -367,26 +385,26 @@ namespace EUROPA {
       virtual void merge(PSToken* token, PSToken* activeToken);
       virtual void reject(PSToken* token);
       virtual void cancel(PSToken* token);
-      
+
       virtual PSConstraint* createConstraint(const std::string& name, PSList<PSVariable*>& scope);
       virtual void deleteConstraint(PSConstraint* constr);
 
       virtual void specify(PSVariable* variable, double value);
-      virtual void reset(PSVariable* variable);      
-      
+      virtual void reset(PSVariable* variable);
+
       virtual void close(PSVariable* variable);
       virtual void close(const std::string& objectType);
-      virtual void close();      
-      
+      virtual void close();
+
     protected:
-      DbClientId m_client;  
-      
+      DbClientId m_client;
+
       ConstrainedVariableId toId(PSVariable* v);
       ConstraintId          toId(PSConstraint* c);
       ObjectId              toId(PSObject* o);
-      TokenId               toId(PSToken* t);      
+      TokenId               toId(PSToken* t);
   };
-  
+
 }
 
 #endif

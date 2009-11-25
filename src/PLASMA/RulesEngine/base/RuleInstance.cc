@@ -1,5 +1,5 @@
 #include "Utils.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "UnifyMemento.hh"
 #include "Token.hh"
 #include "TokenVariable.hh"
@@ -10,7 +10,7 @@
 #include "RuleInstance.hh"
 #include "Debug.hh"
 #include "ProxyVariableRelation.hh"
-#include "BoolDomain.hh"
+#include "Domains.hh"
 #include <sstream>
 
 namespace EUROPA {
@@ -22,7 +22,7 @@ namespace EUROPA {
     commonInit();
   }
 
-  RuleInstance::RuleInstance(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb, 
+  RuleInstance::RuleInstance(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb,
 			     const std::vector<ConstrainedVariableId>& guards)
     : m_id(this), m_rule(rule), m_token(token), m_planDb(planDb), m_rulesEngine(), m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
     check_error(isValid());
@@ -30,7 +30,7 @@ namespace EUROPA {
     commonInit();
   }
 
-  RuleInstance::RuleInstance(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb, 
+  RuleInstance::RuleInstance(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb,
 			     const ConstrainedVariableId& guard, const AbstractDomain& domain)
     : m_id(this), m_rule(rule), m_token(token), m_planDb(planDb), m_rulesEngine(), m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
     check_error(isValid());
@@ -42,7 +42,7 @@ namespace EUROPA {
    * @brief Constructor refers to parent for tokens, and variables that are accessible in its scope.
    */
   RuleInstance::RuleInstance(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& guards)
-    : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()), 
+    : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
     m_planDb(parent->getPlanDatabase()),m_rulesEngine() , m_parent(parent), m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
     check_error(isValid());
     setGuard(guards);
@@ -52,7 +52,7 @@ namespace EUROPA {
    * @brief Constructor refers to parent for tokens, and variables that are accessible in its scope.
    */
   RuleInstance::RuleInstance(const RuleInstanceId& parent, const std::vector<ConstrainedVariableId>& guards, const bool positive)
-    : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()), 
+    : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
     m_planDb(parent->getPlanDatabase()),m_rulesEngine() , m_parent(parent), m_guardDomain(0), m_isExecuted(false), m_isPositive(positive){
     check_error(isValid());
     setGuard(guards);
@@ -62,7 +62,7 @@ namespace EUROPA {
    * @brief Constructor refers to parent for tokens, and variables that are accessible in its scope.
    */
   RuleInstance::RuleInstance(const RuleInstanceId& parent, const ConstrainedVariableId& guard, const AbstractDomain& domain)
-    : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()), 
+    : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
     m_planDb(parent->getPlanDatabase()), m_rulesEngine(), m_parent(parent), m_guardDomain(0), m_isExecuted(false), m_isPositive(true){
     check_error(isValid());
     setGuard(guard, domain);
@@ -72,7 +72,7 @@ namespace EUROPA {
    * @brief Constructor refers to parent for tokens, and variables that are accessible in its scope.
    */
   RuleInstance::RuleInstance(const RuleInstanceId& parent, const ConstrainedVariableId& guard, const AbstractDomain& domain, const bool positive)
-    : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()), 
+    : m_id(this), m_rule(parent->getRule()), m_token(parent->getToken()),
     m_planDb(parent->getPlanDatabase()), m_rulesEngine(), m_parent(parent), m_guardDomain(0), m_isExecuted(false), m_isPositive(positive){
     check_error(isValid());
     setGuard(guard, domain);
@@ -120,7 +120,7 @@ namespace EUROPA {
 
   const TokenId& RuleInstance::getToken() const {return m_token;}
 
-  const std::vector<TokenId> RuleInstance::getSlaves() const 
+  const std::vector<TokenId> RuleInstance::getSlaves() const
   {return std::vector<TokenId>(m_slaves);}
 
   bool RuleInstance::isExecuted() const {
@@ -132,18 +132,18 @@ namespace EUROPA {
   void RuleInstance::setRulesEngine(const RulesEngineId &rulesEngine) {
     check_error(m_rulesEngine.isNoId());
     m_rulesEngine = rulesEngine;
-    if(test(m_guards))
+    if(m_guards.empty())// && test(m_guards))
       execute();
   }
 
   bool RuleInstance::willNotFire() const{
     for(std::vector<ConstrainedVariableId>::const_iterator it = m_guards.begin(); it != m_guards.end(); ++it){
       ConstrainedVariableId guard = *it;
-      if(!guard->isSpecified())
+      if(!guard->lastDomain().isSingleton())
 	return false;
     }
 
-    return !test(m_guards);
+    return m_guards.empty() || !test(m_guards);
   }
 
   /**
@@ -158,19 +158,19 @@ namespace EUROPA {
     if(m_guardDomain != 0) { // Case of explicit guard on a single variable
       debugMsg("RuleInstance:test", "Case of explicit guard on a single variable");
       checkError(guards.size() == 1, "Explicit guard on one variable only");
-      bool result = guards[0]->isSpecified() &&
-      (m_guardDomain->isMember(guards[0]->getSpecifiedValue()) ^ !m_isPositive);
-      
+      bool result = guards[0]->lastDomain().isSingleton() &&
+      (m_guardDomain->isMember(guards[0]->lastDomain().getSingletonValue()) ^ !m_isPositive);
+
       debugMsg("RuleInstance:test", "variable " << guards[0]->getId()
 	       << " name " << guards[0]->toString()
-	       << " specified " << guards[0]->isSpecified()
+	       << " specified " << guards[0]->lastDomain().isSingleton()
 	       << " guard domain " << *m_guardDomain
 	       << (result ? " passed" : " failed"));
-      condDebugMsg(!guards[0]->isSpecified(), "RuleInstance:test", 
+      condDebugMsg(!guards[0]->lastDomain().isSingleton(), "RuleInstance:test",
 		   "Guard " << guards[0]->toString() << " not specified.");
-      condDebugMsg(guards[0]->isSpecified() && !m_guardDomain->isMember(guards[0]->getSpecifiedValue()), "RuleInstance:test", 
-		   "Specified value '" << guards[0]->getSpecifiedValue() << "' of guard " << guards[0]->toString() << " not in guard domain " << *m_guardDomain);
-      
+      condDebugMsg(guards[0]->lastDomain().isSingleton() && !m_guardDomain->isMember(guards[0]->lastDomain().getSingletonValue()), "RuleInstance:test",
+		   "Specified value '" << guards[0]->lastDomain().getSingletonValue() << "' of guard " << guards[0]->toString() << " not in guard domain " << *m_guardDomain);
+
       return result;
     }
 
@@ -184,7 +184,7 @@ namespace EUROPA {
 
       debugMsg("RuleInstance:test", "checking  " << counter << " argument:" << guard->toString());
 
-      if(!guard->isSpecified()){
+      if(!guard->lastDomain().isSingleton()){
         debugMsg("RuleInstance:test", "argument " << counter << " is not specified " << guard->baseDomain().toString());
 	return false;
       }
@@ -202,9 +202,12 @@ namespace EUROPA {
 
   void RuleInstance::execute() {
     check_error(!isExecuted(), "Cannot execute a rule if already executed.");
+    debugMsg("RuleInstance:execute", "Executing:" << m_rule->getName().toString());
     m_isExecuted = true;
     handleExecute();
     m_rulesEngine->notifyExecuted(getId());
+    debugMsg("europa:model", ruleExecutionContext());
+    debugMsg("RuleInstance:execute", "Executed:" << m_rule->getName().toString());
   }
 
   /**
@@ -238,7 +241,7 @@ namespace EUROPA {
 	// Only discard constraints that are connected to the master since the master may persist after the rule has cleaned up
 	// but the constraints should not. If it is not connected to the master then it applies to local variables or slave variables.
 	// if a full roll-back of the rule occurs, slaves and local variables will be deleted, causing a delete of the attendant constraints.
-	// In the event that a slave persists, as cann occur when the master is removed through termination, then the constraints among 
+	// In the event that a slave persists, as cann occur when the master is removed through termination, then the constraints among
 	// remaining slaves should also be retained
 	if(connectedToToken(constraint, m_token)){
 	  debugMsg("RuleInstance:undo", "Removing connected constraint " << constraint->toString());
@@ -357,8 +360,8 @@ namespace EUROPA {
     return addSlave(slave);
   }
 
-  void RuleInstance::addConstraint(const LabelStr& name, std::vector<ConstrainedVariableId>& scope){
-    ConstraintId constraint =  getPlanDatabase()->getConstraintEngine()->createConstraint(name,								   
+  void RuleInstance::addConstraint(const LabelStr& name, const std::vector<ConstrainedVariableId>& scope){
+    ConstraintId constraint =  getPlanDatabase()->getConstraintEngine()->createConstraint(name,
 								   scope);
     addConstraint(constraint);
   }
@@ -369,7 +372,7 @@ namespace EUROPA {
     m_constraintsByName.erase(name.getKey());
     m_constraintsByName.insert(std::make_pair(name.getKey(), constraint));
     constraint->addDependent((Entity*) this);
-    debugMsg("RuleInstance:addConstraint", "added constraint:" << constraint->toString());    
+    debugMsg("RuleInstance:addConstraint", "added constraint:" << constraint->toString());
   }
 
   void RuleInstance::addChildRule(RuleInstance* instance){
@@ -380,10 +383,10 @@ namespace EUROPA {
   bool RuleInstance::isValid() const{
     check_error(m_rule.isValid());
     check_error(m_token.isValid());
-    check_error(m_token->isActive(), 
+    check_error(m_token->isActive(),
 		m_token->getPredicateName().toString() + " is not active");
     check_error(m_planDb->getSchema()->isA(m_token->getPredicateName(), m_rule->getName()),
-		"Cannot have rule " + m_rule->getName().toString() + 
+		"Cannot have rule " + m_rule->getName().toString() +
 		" on predicate " + m_token->getPredicateName().toString());
     return true;
   }
@@ -462,7 +465,7 @@ namespace EUROPA {
     return scope;
   }
 
-  ConstrainedVariableId RuleInstance::varFromObject(const std::string& objectString, 
+  ConstrainedVariableId RuleInstance::varFromObject(const std::string& objectString,
 						    const std::string& varString,
 						    bool canBeSpecified){
     std::string fullName = objectString + "." + varString;
@@ -473,7 +476,7 @@ namespace EUROPA {
     return retVar;
   }
 
-  ConstrainedVariableId RuleInstance::varFromObject(const ConstrainedVariableId& obj, 
+  ConstrainedVariableId RuleInstance::varFromObject(const ConstrainedVariableId& obj,
 						    const std::string& varString,
 						    const std::string& fullName,
 						    bool canBeSpecified){
@@ -483,7 +486,7 @@ namespace EUROPA {
 
     // First we compute the position index, and get the type of the last variable. This will then
     // be used to populate the base domain of the proxy variable by iteration over the base domain.
-    
+
     // Initialize with any object in the domain
     ObjectId iObj = Entity::getTypedEntity<Object>(obj->lastDomain().getLowerBound());
     std::vector<unsigned int> path; /*!< Push indexes as they are found */
@@ -492,17 +495,17 @@ namespace EUROPA {
     for (; varindex < names.size()-1; ++varindex) {
       ConstrainedVariableId iVar = iObj->getVariable(LabelStr(iObj->getName().toString() + "." + names[varindex]));
       path.push_back(iVar->getIndex());
-      checkError(iVar->lastDomain().isSingleton(), iVar->toString());
+          checkError(iVar->lastDomain().isSingleton(), iVar->toString() << ", " << iObj->getName().toString() << "." << names[varindex]););
       iObj = Entity::getTypedEntity<Object>(iVar->lastDomain().getSingletonValue());
     }
 
     // Finally, handle the terminal point - the field variable itself
-    ConstrainedVariableId fieldVar = iObj->getVariable(LabelStr(iObj->getName().toString() + "." + names[varindex]));
+    std::string field_name = iObj->getName().toString() + "." + names[varindex];
+    ConstrainedVariableId fieldVar = iObj->getVariable(LabelStr(field_name));
+    checkError(fieldVar.isValid(), "No variable named '" << field_name << "' in " << iObj->getName().toString());
     path.push_back(fieldVar->getIndex());
 
     // Get the field type for the resulting domain.
-    const LabelStr& fieldType = fieldVar->baseDomain().getTypeName();
-    const bool isNumeric = fieldVar->baseDomain().isNumeric();
     const bool isOpen = fieldVar->baseDomain().isOpen();
     const bool isBool = fieldVar->baseDomain().isBool();
 
@@ -512,13 +515,13 @@ namespace EUROPA {
     // Iterate over each object. For each, obtain the variable using the path, and store its value
     const std::list<ObjectId> objects = objectDomain.makeObjectList();
 
-    EnumeratedDomain proxyBaseDomain(isNumeric, fieldType.c_str());
+    EnumeratedDomain proxyBaseDomain(fieldVar->baseDomain().getDataType());
 
     std::list<double> values;
     for(std::list<ObjectId>::const_iterator it = objects.begin(); it != objects.end(); ++it){
       ObjectId object = *it;
       ConstrainedVariableId fieldVar = object->getVariable(path);
-      checkError(fieldVar->lastDomain().isSingleton(), fieldVar->toString());
+          checkError(fieldVar->lastDomain().isSingleton(), fieldVar->toString() << " : " << fieldVar->lastDomain().toString() << " is not a singleton."););
       checkError(fieldVar->baseDomain().getTypeName() == fieldType, fieldVar->toString());
       edouble value = fieldVar->lastDomain().getSingletonValue();
       proxyBaseDomain.insert(value);
@@ -536,14 +539,14 @@ namespace EUROPA {
 
       // If a singleton, set as such
       if(lb == ub)
-	boolDomain.set(ub);
+          boolDomain.set(ub);
 
       proxyVariable = addVariable(boolDomain, canBeSpecified, fullName);
     }
     else {
       // Close if necessary
       if(!isOpen)
-	proxyBaseDomain.close();
+          proxyBaseDomain.close();
 
       proxyVariable = addVariable(proxyBaseDomain, canBeSpecified, fullName);
     }
@@ -558,7 +561,7 @@ namespace EUROPA {
 
   ConstrainedVariableId RuleInstance::varfromtok(const TokenId& token, const std::string varstring) {
     std::string local_name = varstring.substr(0, varstring.find(Schema::getDelimiter()));
-    checkError(token.isValid(), "Cannot get variable : " << varstring << " from token with id " << token); 
+    checkError(token.isValid(), "Cannot get variable : " << varstring << " from token with id " << token);
     ConstrainedVariableId retVar;
     if (varstring.find(Schema::getDelimiter()) == std::string::npos) {
       retVar = token->getVariable(local_name);
@@ -579,7 +582,7 @@ namespace EUROPA {
 
     checkError(dynamic_cast<const Token*>(entity) != 0 || dynamic_cast<const Constraint*>(entity),
 	       "Must be a constraint or a token: " << entity->getKey());
- 
+
     // Is it a slave? If so, reference to it
     if(dynamic_cast<const Constraint*>(entity) == 0){
       for(std::vector<TokenId>::iterator it = m_slaves.begin(); it != m_slaves.end(); ++it){
@@ -597,9 +600,10 @@ namespace EUROPA {
     // Is it the guard listener
     if(m_guardListener.isId() && entity->getKey() == m_guardListener->getKey()){
       m_guardListener = ConstraintId::noId();
+      m_guards.clear();
       return;
     }
-    
+
     // If neither of the above, it must be a regular constraint
     for(std::vector<ConstraintId>::iterator it = m_constraints.begin(); it != m_constraints.end(); ++it){
       ConstraintId constraint = *it;
@@ -626,5 +630,46 @@ namespace EUROPA {
     }
 
     return false;
+  }
+
+  std::string RuleInstance::ruleExecutionContext() const {
+    static const std::string TAB_DELIMITER("    ");
+    std::stringstream ss;
+
+    // What is the token
+    ss << "[" << getToken()->getKey() << "]Rule fired on master token: " <<
+      getToken()->toString() << ". The rule instance context is given below:" << std::endl << std::endl;
+
+    // What rule
+    ss << "Rule: " << getRule()->toString() << std::endl << std::endl;
+
+    // What guards are involved
+    if(m_guards.empty())
+      ss << "No Guards" << std::endl;
+    else {
+      ss << "Guards:" << std::endl;
+
+      for(std::vector<ConstrainedVariableId>::const_iterator it = m_guards.begin(); it != m_guards.end(); ++it){
+	ConstrainedVariableId guard = *it;
+	ss << TAB_DELIMITER << guard->getName().toString() << " == " << guard->lastDomain().toString() << std::endl;
+      }
+    }
+
+    ss << std::endl;
+
+    // What slaves are created
+    if(m_slaves.empty())
+      ss << "No Slaves" << std::endl;
+    else {
+      ss << "Slaves: " << std::endl;
+      for(std::map<double, TokenId>::const_iterator it = m_slavesByName.begin(); it != m_slavesByName.end(); ++it){
+	LabelStr name = (LabelStr) it->first;
+	TokenId token = it->second;
+	ss << TAB_DELIMITER << name.toString() << "==" << token->toString() << std::endl;
+      }
+    }
+
+    ss << "++++++++++++++++++x+++++++";
+    return ss.str();
   }
 }

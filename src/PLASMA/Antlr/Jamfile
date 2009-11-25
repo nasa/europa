@@ -1,9 +1,0 @@
-SubDir PLASMA Antlr ;
-
-if ! $(PLASMA_READY)  && ! ( "Antlr" in $(NO) ) {
-
-Module Antlr ;
-
-SubInclude PLASMA Antlr base ;
-
-} # PLASMA_READY

@@ -3,7 +3,6 @@
 
 #include "PSConstraintEngine.hh"
 #include "PSPlanDatabase.hh"
-//#include "PlanDatabaseDefs.hh"
 #include "PSResource.hh"
 #include "PSSolvers.hh"
 #include "Module.hh"
@@ -15,9 +14,6 @@ namespace EUROPA {
   class PSEngine
   {
     public:
-      static void initialize();
-      static void terminate();
-
       static PSEngine* makeInstance();
 
       virtual ~PSEngine() {}
@@ -25,11 +21,12 @@ namespace EUROPA {
       virtual void start() = 0;
       virtual void shutdown() = 0;
 
+      virtual EngineConfig* getConfig() = 0;
+
       virtual void addModule(Module* module) = 0;
       virtual void removeModule(Module* module) = 0;
       virtual void loadModule(const std::string& moduleFileName) = 0;
 
-      virtual void loadModel(const std::string& modelFileName) = 0; // Loads a planning model in binary format
       virtual std::string executeScript(const std::string& language, const std::string& script, bool isFile) = 0;
 
       // Constraint Engine methods
@@ -47,6 +44,7 @@ namespace EUROPA {
       virtual PSList<PSConstraint*> getAllViolations() const = 0;
 
       // Plan Database methods
+    virtual PSList<PSObject*> getObjects() = 0;
       virtual PSList<PSObject*> getObjectsByType(const std::string& objectType) = 0;
       virtual PSObject* getObjectByKey(PSEntityKey id) = 0;
       virtual PSObject* getObjectByName(const std::string& name) = 0;
@@ -62,6 +60,8 @@ namespace EUROPA {
       virtual PSPlanDatabaseClient* getPlanDatabaseClient() = 0;
 
       virtual std::string planDatabaseToString() = 0;
+
+      virtual PSSchema* getPSSchema() = 0;
 
       // Solver methods
       virtual PSSolver* createSolver(const std::string& configurationFile) = 0;

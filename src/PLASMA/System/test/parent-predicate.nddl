@@ -6,9 +6,9 @@
  * GNATS 2529
  */
 
-class Battery extends Resource {
+class Battery extends Reservoir {
  Battery(float ic, float ll_min, float ll_max) {
-  super(ic, ll_min, ll_max, 0.0, 0.0, -inff, -inff);
+  super(ic, ll_min, ll_max, 0.0, 0.0, +inff, +inff);
  }
 }
 
@@ -23,7 +23,7 @@ class Rover extends Timeline {
 }
 
 Rover::Move{
-  contains( Battery.change change1 );
+  contains( Battery.consume change1 );
 }
 
 // Allocation of objects
@@ -32,6 +32,6 @@ Battery mainBattery = new Battery(30.0, 0.0, 50.0);
 Rover rover = new Rover(mainBattery);
 close();
 
-rejectable(Rover.Move indirectChange);   
-rejectable(Battery.change directChange); directChange.activate();
+rejectable(Rover.Move indirectChange);
+rejectable(Battery.consume directChange); directChange.activate();
 mainBattery.constrain(directChange);

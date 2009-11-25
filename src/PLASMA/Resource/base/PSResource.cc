@@ -1,26 +1,26 @@
 
 #include "PSResource.hh"
-#include "SAVH_Resource.hh"
-#include "SAVH_Profile.hh"
-#include "SAVH_Transaction.hh"
+#include "Resource.hh"
+#include "Profile.hh"
+#include "Transaction.hh"
 
-namespace EUROPA 
+namespace EUROPA
 {
 	// TODO:  Do we still need this?
   PSResource* PSResource::asPSResource(PSObject* obj)
   {
 	  return dynamic_cast<PSResource*>(obj);
   }
-  
+
   PSResourceProfile::PSResourceProfile(const double lb, const double ub)
     : m_isConst(true), m_lb(lb), m_ub(ub) {
     TimePoint inst = (TimePoint) MINUS_INFINITY;
     m_times.push_back(inst);
   }
 
-  PSResourceProfile::PSResourceProfile(const SAVH::ProfileId& profile)
+  PSResourceProfile::PSResourceProfile(const ProfileId& profile)
     : m_isConst(false), m_profile(profile) {
-    SAVH::ProfileIterator it(m_profile);
+    ProfileIterator it(m_profile);
     while(!it.done()) {
       TimePoint inst = (TimePoint) it.getTime();
       m_times.push_back(inst);

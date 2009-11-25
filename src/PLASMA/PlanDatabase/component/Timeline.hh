@@ -9,6 +9,7 @@
 */
 
 #include "Object.hh"
+#include "ObjectFactory.hh"
 #include <list>
 #include <map>
 #include <vector>
@@ -104,6 +105,20 @@ namespace EUROPA {
     std::map<eint, std::list<TokenId>::iterator > m_tokenIndex;
 
     static const bool CLEANING_UP = true;
+  };
+
+  class TimelineObjectFactory : public NativeObjectFactory
+  {
+    public:
+        TimelineObjectFactory(const ObjectTypeId& objType);
+        virtual ~TimelineObjectFactory();
+
+    protected:
+        virtual ObjectId makeNewObject(
+                            const PlanDatabaseId& planDb,
+                            const LabelStr& objectType,
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const;
   };
 }
 

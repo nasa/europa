@@ -126,6 +126,12 @@ namespace EUROPA {
      */
     bool isGlobalVariable(const LabelStr& varName) const;
 
+    void registerGlobalToken(const TokenId& t);
+    void unregisterGlobalToken(const TokenId& t);
+    const TokenSet& getGlobalTokens() const;
+    const TokenId& getGlobalToken(const LabelStr& varName) const;
+    bool isGlobalToken(const LabelStr& varName) const;
+
     /**
      * @brief Test if the given inactive token has any tokens with which it can merge.
      * @param inactiveToken
@@ -292,6 +298,7 @@ namespace EUROPA {
 
 
     // PSPlanDatabase methods
+    virtual PSList<PSObject*> getAllObjects() const;
     virtual PSList<PSObject*> getObjectsByType(const std::string& objectType) const;
     virtual PSObject* getObjectByKey(PSEntityKey id) const;
     virtual PSObject* getObjectByName(const std::string& name) const;
@@ -305,15 +312,16 @@ namespace EUROPA {
                             const LabelStr& objectName,
                             const std::vector<const AbstractDomain*>& arguments);
 
-    TokenId createToken(const LabelStr& predicateName,
+    TokenId createToken(const char* tokenType,
+                        const char* tokenName,
                         bool rejectable=false,
                         bool isFact=false);
 
     TokenId createSlaveToken(const TokenId& master,
-                             const LabelStr& predicateName,
+                             const LabelStr& tokenType,
                              const LabelStr& relation);
 
-    bool hasTokenFactories() const;
+    bool hasTokenTypes() const;
 
     PSPlanDatabaseClient* getPDBClient();
 
@@ -413,6 +421,7 @@ namespace EUROPA {
     State m_state;
     TokenSet m_tokens;
     ObjectSet m_objects;
+    TokenSet m_globalTokens;
     ConstrainedVariableSet m_globalVariables;
     bool m_deleted;
     std::vector<PlanDatabaseListenerId> m_listeners;
@@ -424,6 +433,7 @@ namespace EUROPA {
     std::set<edouble> m_closedObjectTypes; /*!< The set of explicitly closed object types.
 					     If present here, it cannot be present in m_objectVariablesByType */
     std::map<edouble, ConstrainedVariableId> m_globalVarsByName;
+    std::map<edouble, TokenId> m_globalTokensByName;
     std::map<eint, std::pair<TokenId, ObjectSet> > m_tokensToOrder; /*!< All tokens to order, with the object
 								     inducing the requirement stored in the set */
 
@@ -440,7 +450,7 @@ namespace EUROPA {
   template<class ID>
   void PlanDatabase::getObjectsByType(const LabelStr& type, std::list<ID>& results) {
     check_error(results.empty());
-    checkError(m_schema->isObjectType(type), type.toString());
+    checkError(m_schema->isObjectType(type), "Is not an object type in the plan database: " + type.toString());
 
     for (std::multimap<edouble, ObjectId>::const_iterator it = m_objectsByType.find(type.getKey());
 	 it != m_objectsByType.end() && it->first == type.getKey();

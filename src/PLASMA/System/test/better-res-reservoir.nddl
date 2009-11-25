@@ -1,15 +1,12 @@
 #include "PlannerConfig.nddl"
 #include "Resources.nddl"
-constraint diffSquare(a, b, c) { a <: numeric && b <: numeric && c <: numeric }
-constraint distanceSquares(a, b, c) { a <: numeric && b <: numeric && c <: numeric }
-constraint neg(a, b) { a <: numeric && b <: numeric }
 
 //*****************************************************************
 class Battery extends Reservoir {
       Battery(float ic, float ll_min, float ll_max,
 	float prod_max, float cm) {
         super(ic, ll_min, ll_max, prod_max, cm );
-      } 
+      }
 }
 
 //*****************************************************************
@@ -18,7 +15,7 @@ class Rover extends Timeline {
 
  Rover( float bat_start, float bat_low, float bat_high,
 	float bat_prod, float mc ) {
-  m_battery = new Battery(bat_start, bat_low, bat_high, 
+  m_battery = new Battery(bat_start, bat_low, bat_high,
 	bat_prod, mc);
  }
  // Do the work
@@ -30,7 +27,7 @@ class Rover extends Timeline {
   int m_from_x, m_from_y, m_to_x, m_to_y;
  }
 
- // Doing nothing, waiting for external forces to charge 
+ // Doing nothing, waiting for external forces to charge
  // our battery
  predicate Standby{
   int m_x, m_y;
@@ -79,7 +76,7 @@ Rover::Sample{
   any(Battery.consume bc);
   // These should all be equivalent and all supported
   temporalDistance(start, [1 2], bc.time);
-  
+
   // battery consumption and duration depend on work
   // should we pass coordinates here?
   //sampleBattery( bc.quantity, m_x, m_y ); //this ignores x and y, just intersecting quantity with -10
@@ -112,7 +109,7 @@ Rover::Drive{
   // to begin with, the charge is always negative
   // it is also never more than the battery's level (TBD as an argument)
   eq(bc.quantity, [0 50]);
-  
+
 
   // Ensure that the end points are different
 

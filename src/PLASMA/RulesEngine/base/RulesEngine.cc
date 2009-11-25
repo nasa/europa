@@ -6,17 +6,17 @@
 #include "RuleInstance.hh"
 #include "Token.hh"
 #include "ConstraintEngine.hh"
-#include "DefaultPropagator.hh"
+#include "Propagators.hh"
 #include "Utils.hh"
 #include "RuleVariableListener.hh"
 #include "ProxyVariableRelation.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include <list>
 
 namespace EUROPA{
 
   class DbRuleEngineConnector: public PlanDatabaseListener {
-   
+
   private:
     friend class RulesEngine;
 
@@ -27,18 +27,18 @@ namespace EUROPA{
     void notifyTerminated(const TokenId& token){m_rulesEngine->notifyDeactivated(token);}
     const RulesEngineId m_rulesEngine;
   };
- 
+
   RulesEngine::RulesEngine(const RuleSchemaId& schema, const PlanDatabaseId& planDatabase)
     : m_id(this)
     , m_schema(schema)
     , m_planDb(planDatabase)
-    , m_deleted(false) 
+    , m_deleted(false)
   {
     m_planDbListener = (new DbRuleEngineConnector(m_planDb, m_id))->getId();
 
-    // Allocate an instance of Default Propagator to handle the rule variable listener. 
+    // Allocate an instance of Default Propagator to handle the rule related  contraint propagation.
     // Will be cleaned up automatically by the ConstraintEngine
-    new DefaultPropagator(RuleVariableListener::PROPAGATOR_NAME(), m_planDb->getConstraintEngine());
+    new DefaultPropagator("RulesEngine", m_planDb->getConstraintEngine());
 
     check_error(m_planDb->getTokens().empty());
   }
@@ -65,7 +65,7 @@ namespace EUROPA{
   const RulesEngineId& RulesEngine::getId() const{return m_id;}
 
   const PlanDatabaseId& RulesEngine::getPlanDatabase() const {return m_planDb;}
-  
+
   const RuleSchemaId& RulesEngine::getRuleSchema() const { return m_schema; }
 
 
@@ -87,7 +87,7 @@ namespace EUROPA{
 
   void RulesEngine::notifyExecuted(const RuleInstanceId &rule) {
     check_error(rule.isValid());
-    for(std::set<RulesEngineListenerId>::iterator it = m_listeners.begin(); 
+    for(std::set<RulesEngineListenerId>::iterator it = m_listeners.begin();
         it != m_listeners.end(); ++it) {
       RulesEngineListenerId listener = *it;
       listener->notifyExecuted(rule);
@@ -180,7 +180,7 @@ namespace EUROPA{
 
   void RulesEngine::remove(const RulesEngineListenerId &listener) {
     check_error(m_listeners.count(listener) == 1);
-    if(!m_deleted) 
+    if(!m_deleted)
       m_listeners.erase(listener);
   }
 }

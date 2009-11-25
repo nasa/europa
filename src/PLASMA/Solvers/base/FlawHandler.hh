@@ -43,6 +43,12 @@ namespace EUROPA {
       double getWeight() const;
 
       /**
+       * @brief Also provide a function to refresh the weight. This permits sub class methods to be used. Call this if custom static filters
+       * are used.
+       */
+      void refreshWeight();
+
+      /**
        * @brief Accessor for th emax number of choices to permit.
        */
       unsigned int getMaxChoices() const;
@@ -51,6 +57,11 @@ namespace EUROPA {
        * @brief Tests for a match between this factory and the entity
        */
       virtual bool customStaticMatch(const EntityId& entity) const {return true;}
+
+      /**
+       * @brief Tests how many costm static filters should be applied. Factors into comparative weights
+       */
+      virtual unsigned int customStaticFilterCount() const {return 0;}
 
       /**
        * @brief True if there are any guards posted on this heuristic.
@@ -74,7 +85,7 @@ namespace EUROPA {
       virtual std::string toString() const;
  
       /**
-       * @brief Handly default vector for no guards
+       * @brief Handy default vector for no guards
        */
       static const std::vector< GuardEntry >& noGuards();
 
@@ -222,10 +233,10 @@ namespace EUROPA {
 
       /**
        * @brief Extends static filter count to permit a weight to be applied if custom filtering
-       * is used. A future feature place holder!
+       * is used. 
        */
-      unsigned int staticFilterCount() const {
-        return CLASS::customStaticFilterCount() + FlawHandler::staticFilterCount();
+      unsigned int customStaticFilterCount() const {
+        return CLASS::customStaticFilterCount();
       }
     };
   }

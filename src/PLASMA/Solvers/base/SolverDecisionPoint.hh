@@ -68,6 +68,7 @@ namespace EUROPA {
 
       void setCutoff(unsigned int maxChoices) {m_maxChoices = maxChoices;}
 
+      const unsigned int getFlawedEntityKey() {return m_entityKey;}
     protected:
       DecisionPoint(const DbClientId& client, eint entityKey, const LabelStr& explanation);
 

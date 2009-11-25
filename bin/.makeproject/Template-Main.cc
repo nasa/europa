@@ -1,16 +1,13 @@
 /**
  * @file Main.cc
  *
- * @brief Provides an executable for your project which uses
+ * @brief Provides a main() for your project which uses
  * - a standard chronological backtracking planner
  * - a PSEngine to encapsulate EUROPA
  */
 
-#include "PSEngine.hh"
 #include "Debug.hh"
-#include "PlanDatabase.hh"
-#include "EuropaEngine.hh"
-#include "Rule.hh"
+#include "PSEngine.hh"
 
 #include "Module%%Project%%.hh"
 #include "%%Project%%CustomCode.hh"
@@ -25,16 +22,16 @@ void printFlaws(int it, PSList<std::string>& flaws);
 int main(int argc, const char ** argv)
 {
   if (argc < 3) {
-    std::cerr << "Must provide initial transactions file." << std::endl;
+    std::cerr << "Must provide nddl file." << std::endl;
     return -1;
   }
 
-  const char* txSource = argv[1];
+  const char* nddlFile = argv[1];
   const char* plannerConfig = argv[2];
 
   solve(
       plannerConfig,
-      txSource,
+      nddlFile,
       0,   // startHorizon
       100, // endHorizon
       1000 // maxSteps
@@ -44,31 +41,25 @@ int main(int argc, const char ** argv)
 }
 
 bool solve(const char* plannerConfig,
-           const char* txSource,
+           const char* nddlFile,
            int startHorizon,
            int endHorizon,
            int maxSteps)
 {
     try {
 
-      PSEngine::initialize();
+        PSEngine* engine = PSEngine::makeInstance();
+        engine->start();
+        engine->addModule((new Module%%Project%%()));
+        engine->executeScript("nddl",nddlFile,true/*isFile*/);
 
-      {
-          PSEngine* engine = PSEngine::makeInstance();
-          engine->start();
-          engine->addModule((new Module%%Project%%()));
-          engine->executeScript("nddl-xml",txSource,true/*isFile*/);
+        PSSolver* solver = engine->createSolver(plannerConfig);
+        runSolver(solver,startHorizon,endHorizon,maxSteps);
+        delete solver;
 
-          PSSolver* solver = engine->createSolver(plannerConfig);
-          runSolver(solver,startHorizon,endHorizon,maxSteps);
-          delete solver;
+        delete engine;
 
-          delete engine;
-      }
-
-      PSEngine::terminate();
-
-      return true;
+        return true;
     }
     catch (Error& e) {
         std::cerr << "PSEngine failed:" << e.getMsg() << std::endl;

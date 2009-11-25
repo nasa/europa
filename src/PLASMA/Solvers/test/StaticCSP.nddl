@@ -1,4 +1,3 @@
-#include "Constraints.nddl"
 
 int v0 = [1 100];
 int v1 = [0 10];

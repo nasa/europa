@@ -13,7 +13,6 @@ class Main
     {
 	    String debugMode = args[0];
         PSUtil.loadLibraries(debugMode);	   
-	    PSEngine.initialize();
 
 	    psEngine_ = PSEngine.makeInstance();
 	    psEngine_.start();
@@ -49,8 +48,7 @@ class Main
 	    
 	    public void run() 
 	    {
-            	psEngine_.shutdown();
-	        PSEngine.terminate();
+           	psEngine_.shutdown();
 	    }
     }	  
 }

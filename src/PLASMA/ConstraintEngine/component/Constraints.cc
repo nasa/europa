@@ -1,18 +1,135 @@
 #include "Constraints.hh"
 #include "ConstraintEngine.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "ConstrainedVariable.hh"
-#include "IntervalIntDomain.hh"
-#include "BoolDomain.hh"
-#include "EnumeratedDomain.hh"
+#include "Domains.hh"
 #include "Utils.hh"
 #include "Debug.hh"
-#include "TypeFactory.hh"
-#include "NumericDomain.hh"
+#include <algorithm>
 
 namespace EUROPA {
 
-  UnaryConstraint::UnaryConstraint(const AbstractDomain& dom, 
+  void requireArgCount(std::string name, const std::vector<DataTypeId>& argTypes, const unsigned int count) {
+      if (argTypes.size() != count) {
+	  std::ostringstream msg; msg << "Constraint " << name << " takes 2 args, not " << argTypes.size();
+          throw msg.str();
+      }
+  }
+
+  void mutuallyAssignable(std::string name, DataTypeId a, DataTypeId b) {
+      if (b->isNumeric() && b->isNumeric()) {
+	  //This is a hopefully temporary hack that makes the constraints work so the tests can pass. Waiting for agreement on the
+          //mailling list before deciding what to do in this case. Tony T. Pratkanis: 9/11/09.
+          return;
+      }
+      if (!b->isAssignableFrom(a) || !a->isAssignableFrom(b)) {
+          std::ostringstream msg; msg << "Constraint " << name << " args must be assignable. In this case, "
+				      << a->getName().c_str() << " and " << b->getName().c_str()
+				      << " are not assignable.";
+          throw msg.str();
+      }
+  }
+
+  void requireNumeric(std::string name, DataTypeId a) {
+      if (!a->isNumeric()) {
+          std::ostringstream msg; msg << "Constraint " << name << " args must be numeric. " << a->getName().c_str() << " is not.";
+          throw msg.str();
+      }
+  }
+
+  void requireBoolean(std::string name, DataTypeId a) {
+      if (!a->isBool()) {
+          std::ostringstream msg; msg << "Constraint " << name << " args must be numeric. " << a->getName().c_str() << " is not.";
+          throw msg.str();
+      }
+  }
+
+  void requireAllSame(std::string name, const std::vector<DataTypeId>& argTypes) {
+    for (unsigned int i = 0; i < argTypes.size(); i++) {
+      for (unsigned int u = i + 1; u < argTypes.size(); u++) {
+	mutuallyAssignable(name, argTypes[i], argTypes[u]);
+      }
+    }
+  }
+
+
+  void TwoSameArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      requireArgCount(m_name, argTypes, 2);
+      mutuallyAssignable(m_name, argTypes[0], argTypes[1]);
+  }
+
+  void TwoSameNumericArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      requireArgCount(m_name, argTypes, 2);
+      mutuallyAssignable(m_name, argTypes[0], argTypes[1]);
+      requireNumeric(m_name, argTypes[0]);
+      requireNumeric(m_name, argTypes[1]);
+  }
+
+  void TestOneArgumentCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      requireArgCount(m_name, argTypes, 2);
+      requireBoolean(m_name, argTypes[0]);
+  }
+
+  void TestTwoSameArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      requireArgCount(m_name, argTypes, 3);
+      mutuallyAssignable(m_name, argTypes[1], argTypes[2]);
+      requireBoolean(m_name, argTypes[0]);
+  }
+
+  void TestTwoSameNumericArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      requireArgCount(m_name, argTypes, 3);
+      mutuallyAssignable(m_name, argTypes[1], argTypes[2]);
+      requireBoolean(m_name, argTypes[0]);
+      requireNumeric(m_name, argTypes[1]);
+      requireNumeric(m_name, argTypes[2]);
+  }
+
+  void TwoBooleanArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      requireArgCount(m_name, argTypes, 2);
+      mutuallyAssignable(m_name, argTypes[0], argTypes[1]);
+      requireBoolean(m_name, argTypes[0]);
+      requireBoolean(m_name, argTypes[1]);
+  }
+
+  void ThreeBooleanArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      requireArgCount(m_name, argTypes, 3);
+      mutuallyAssignable(m_name, argTypes[0], argTypes[1]);
+      mutuallyAssignable(m_name, argTypes[1], argTypes[2]);
+      mutuallyAssignable(m_name, argTypes[0], argTypes[2]);
+      requireBoolean(m_name, argTypes[0]);
+      requireBoolean(m_name, argTypes[1]);
+      requireBoolean(m_name, argTypes[2]);
+  }
+
+  void AllSameArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      requireAllSame(m_name, argTypes);
+  }
+
+  void AllSameNumericArgumentsCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      requireAllSame(m_name, argTypes);
+      for (unsigned int i = 0; i < argTypes.size(); i++) {
+	requireNumeric(m_name, argTypes[i]);
+      }
+  }
+
+
+
+
+
+
+
+
+
+  UnaryConstraint::UnaryConstraint(const AbstractDomain& dom,
 				   const ConstrainedVariableId& var)
     : Constraint("UNARY", "Default", var->getConstraintEngine(), makeScope(var)),
       m_x(dom.copy()),
@@ -52,7 +169,7 @@ namespace EUROPA {
 				  const DomainListener::ChangeType& changeType){
     checkError(argIndex == 0, "Cannot have more than one variable in scope.");
 
-    // Can ignore if this is a restriction of the variable which we can assume has already been 
+    // Can ignore if this is a restriction of the variable which we can assume has already been
     // restricted by the constraint by initial execution of the constraint
     if(changeType == DomainListener::RESET || changeType == DomainListener::RELAXED)
       return false;
@@ -64,6 +181,34 @@ namespace EUROPA {
     checkError(m_x == 0, "Already set domain for " << toString() << " and not using " << sourceConstraint->toString());
     UnaryConstraint* source = (UnaryConstraint*) sourceConstraint;
     m_x = source->m_x->copy();
+  }
+
+  /****************************************************************/
+
+  void AddEqualCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      if (argTypes.size() != 3) {
+          std::ostringstream msg; msg << "Constraint AddEqual takes 3 args, not " << argTypes.size();
+          throw msg.str();
+      }
+
+      for (unsigned int i=0; i< argTypes.size(); i++) {
+          if (!argTypes[i]->isNumeric()) {
+              std::ostringstream msg;
+              msg << "Parameter " << i << " for Constraint AddEqual is not numeric : "
+                  << argTypes[i]->getName().toString();
+              throw msg.str();
+          }
+      }
+
+      if (!argTypes[0]->isAssignableFrom(argTypes[1]) ||
+          !argTypes[0]->isAssignableFrom(argTypes[2])) {
+          std::ostringstream msg;
+          msg << argTypes[0]->getName().toString() << " can't hold the result of : "
+              << argTypes[1]->getName().toString() << "+"
+              << argTypes[2]->getName().toString();
+          throw msg.str();
+      }
   }
 
   AddEqualConstraint::AddEqualConstraint(const LabelStr& name,
@@ -139,7 +284,7 @@ namespace EUROPA {
      * is not satisfied. The motivating case for this: A:Int[-10,10] +
      * B:Int[-10,10] == C:Real[0.01, 0.99].
      */
-    if (m_z.isInterval() && 
+    if (m_z.isInterval() &&
 	(!m_z.isMember(Infinity::plus(yMax, xMin, zMin)) ||
 	 !m_z.isMember(Infinity::plus(yMin, xMax, zMin))))
       m_z.empty();
@@ -171,7 +316,7 @@ namespace EUROPA {
 
     //if the previous process changed the domains, we need to make sure that
     //the change occurs everywhere.  fortunately, since the n-1st variable
-    //is now equal to the intersection of all of the variables, 
+    //is now equal to the intersection of all of the variables,
     //we can just equate backwards and they should all be equal
     if(changed && m_argCount > 2) {
       for(unsigned int i = m_argCount - 2; i >= 1; i--) {
@@ -191,11 +336,11 @@ namespace EUROPA {
     AbstractDomain& d2 = getCurrentDomain(v2);
 
     bool changed = false;
-    if(d1.isClosed() && d2.isClosed()){
-	  debugMsg("EqualConstraint:equate","before equate " << v1->toString() << " --- " << v2->toString());
+    if((d1.isClosed() && d2.isClosed()) || (d1.isEnumerated() && d2.isEnumerated())){
+      debugMsg("EqualConstraint:equate","before equate " << v1->toString() << " --- " << v2->toString());
       changed = d1.equate(d2);
       if(changed && (d1.isEmpty() || d2.isEmpty())) {
-	      debugMsg("EqualConstraint:equate","emptied variable " << v1->toString() << " --- " << v2->toString());
+	debugMsg("EqualConstraint:equate","emptied variable " << v1->toString() << " --- " << v2->toString());
 	      isEmpty = true;
       }
     }
@@ -283,6 +428,10 @@ namespace EUROPA {
   }
 
   void LessThanEqualConstraint::handleExecute() {
+    propagate(m_x, m_y);
+  }
+
+  void LessThanEqualConstraint::propagate(AbstractDomain& m_x, AbstractDomain& m_y){
     check_error(AbstractDomain::canBeCompared(m_x, m_y));
 
     // Discontinue if either domain is open.
@@ -292,8 +441,8 @@ namespace EUROPA {
     check_error(!m_x.isEmpty() && !m_y.isEmpty());
 
     // Restrict X to be no larger than Y's max
-    debugMsg("LessThanEqualConstraint:handleExecute", 
-	     "Intersecting " << m_x.toString() << " with [" << 
+    debugMsg("LessThanEqualConstraint:handleExecute",
+	     "Intersecting " << m_x.toString() << " with [" <<
 	     m_x.getLowerBound() << " " << m_y.getUpperBound() << "]");
 
     if (m_x.intersect(m_x.getLowerBound(), m_y.getUpperBound()) && m_x.isEmpty())
@@ -410,7 +559,13 @@ namespace EUROPA {
   void LessThanConstraint::handleExecute() {
     IntervalDomain& domx = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
     IntervalDomain& domy = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
+    propagate(domx, domy);
+  }
 
+  /**
+   * @brief factored out propagation algorithm to allow re-use
+   */
+  void LessThanConstraint::propagate(IntervalDomain& domx, IntervalDomain& domy){
     check_error(AbstractDomain::canBeCompared(domx, domy), "Cannot compare " + domx.toString() + " and " + domy.toString() + ".");
 
     // Discontinue if either domain is open.
@@ -419,9 +574,9 @@ namespace EUROPA {
 
     debugMsg("LessThanConstraint:handleExecute", "Computing " << domx.toString() << " < " << domy.toString() << " x.minDelta = " <<
 	     domx.minDelta() << " y.minDelta = " << domy.minDelta());
-    if(domx.getUpperBound() >= domy.getUpperBound() && 
+    if(domx.getUpperBound() >= domy.getUpperBound() &&
        domy.getUpperBound() < PLUS_INFINITY &&
-       domx.intersect(domx.getLowerBound(), domy.getUpperBound() - domx.minDelta()) && 
+       domx.intersect(domx.getLowerBound(), domy.getUpperBound() - domx.minDelta()) &&
        domx.isEmpty())
       return;
 
@@ -875,8 +1030,7 @@ namespace EUROPA {
                                                      const ConstraintEngineId& constraintEngine,
                                                      const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
-      m_interimVariable(constraintEngine,
-                        constraintEngine->getCESchema()->baseDomain(m_variables[0]->baseDomain().getTypeName().toString()), 
+      m_interimVariable(constraintEngine, constraintEngine->getCESchema()->baseDomain(m_variables[0]->baseDomain().getTypeName().c_str()),
 			true, false, LabelStr("InternalConstraintVariable"), getId()),
       m_lessThanConstraint(LabelStr("LessThan"), propagatorName, constraintEngine,
                            makeScope(m_interimVariable.getId(), m_variables[0]))
@@ -954,7 +1108,7 @@ namespace EUROPA {
       // Before it goes out of scope:
       if (common != 0)
         delete common;
-    } //if !boolDom.isSingleton 
+    } //if !boolDom.isSingleton
 
     // Whether the condition was singleton on entry to this function
     // or became singleton just above, propagate the effects of that
@@ -1090,9 +1244,10 @@ namespace EUROPA {
         if (it2 == newMembers.end())
           newMembers.push_back(*it);
       }
-      newUnion = new EnumeratedDomain(newMembers,
-                                      (*unionOfDomains)->isNumeric(),
-				      (*unionOfDomains)->getTypeName().toString());
+      newUnion = new EnumeratedDomain(
+              (*unionOfDomains)->getDataType(),
+              newMembers);
+
       // Could just add to current unionOfDomains rather than failing here, but
       //   very messy to implement using current interface to *Domain classes.
       assertFalse(newUnion == 0);
@@ -1303,7 +1458,7 @@ namespace EUROPA {
     AbstractDomain& domD(getCurrentDomain(m_variables[3]));
 
     assertFalse(domA.isEmpty() || domB.isEmpty() || domC.isEmpty() || domD.isEmpty());
-    
+
     if (domA.isOpen() || domB.isOpen() || domD.isOpen())
       return;
     if (domB.isSubsetOf(domC))
@@ -1702,15 +1857,15 @@ namespace EUROPA {
     if(m_lockDomain == m_currentDomain)
       return;
 
-    // If the current domain is a superset, then restrict it. 
+    // If the current domain is a superset, then restrict it.
     if(m_lockDomain.isSubsetOf(m_currentDomain))
        m_currentDomain.intersect(m_lockDomain);
     else {
-       debugMsg("LockConstraint","current domain:" << m_currentDomain.toString() 
+       debugMsg("LockConstraint","current domain:" << m_currentDomain.toString()
     		                     << " is not a superset of lock domain :" << m_lockDomain.toString()
-    		                     << " emptying current domain" 
+    		                     << " emptying current domain"
        );
-    		                     
+
        m_currentDomain.empty(); // Otherwise, the lock is enforced by forcing a relaxation
     }
   }
@@ -1749,7 +1904,82 @@ namespace EUROPA {
     domy.intersect(-xMax, -xMin);
   }
 
+
   TestEQ::TestEQ(const LabelStr& name,
+                           const LabelStr& propagatorName,
+                           const ConstraintEngineId& constraintEngine,
+                           const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_test(getCurrentDomain(variables[0])),
+      m_arg1(getCurrentDomain(variables[1])),
+      m_arg2(getCurrentDomain(variables[2])){
+    check_error(variables.size() == ARG_COUNT);
+  }
+
+  void TestEQ::handleExecute(){
+
+    debugMsg("TestEQ:handleExecute", "comparing " << m_arg1.toString() << " with " << m_arg2.toString());
+
+    if(m_arg1.isSingleton() &&
+       m_arg2.isSingleton() &&
+       m_arg1.intersects(m_arg2)) // Exactly equal with no flexibility
+       m_test.remove(0);
+    else if(!m_arg1.intersects(m_arg2)) // No intersection so they cannot be equal
+      m_test.remove(1);
+
+    if(m_test.isSingleton()){
+      if(m_test.getSingletonValue() == true){
+        if(m_arg1.intersect(m_arg2) && m_arg1.isEmpty())
+          return;
+
+        m_arg2.intersect(m_arg1);
+      }
+    }
+  }
+
+  TestSingleton::TestSingleton(const LabelStr& name,
+			   const LabelStr& propagatorName,
+			   const ConstraintEngineId& constraintEngine,
+			   const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_test(getCurrentDomain(variables[0])),
+      m_arg1(getCurrentDomain(variables[1])){
+    check_error(variables.size() == ARG_COUNT);
+  }
+
+  void TestSingleton::handleExecute(){
+
+    debugMsg("TestSingleton:handleExecute", "comparing " << m_arg1.toString() << " setting " << m_test.toString());
+
+    if(m_arg1.isSingleton()) // it is a singleton
+       m_test.remove(0); // set the test to be true
+    //TODO: what about:
+    //m_test is a singleton, m_arg1 is not.
+    //what is test if m_arg1 is not a singleton.
+  }
+
+  TestSpecified::TestSpecified(const LabelStr& name,
+			   const LabelStr& propagatorName,
+			   const ConstraintEngineId& constraintEngine,
+			   const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_test(getCurrentDomain(variables[0])),
+      m_arg1(getCurrentDomain(variables[1])){
+    check_error(variables.size() == ARG_COUNT);
+  }
+
+  void TestSpecified::handleExecute(){
+
+    debugMsg("TestSingleton:handleExecute", "comparing " << m_arg1.toString() << " setting " << m_test.toString());
+
+    if(m_arg1.isSingleton() && getScope()[1]->isSpecified())// it is a singleton
+       m_test.remove(0); // set the test to be true
+    //TODO: what about:
+    //m_test is a singleton, m_arg1 is not.
+    //what is test if m_arg1 is not a singleton.
+  }
+
+  TestNEQ::TestNEQ(const LabelStr& name,
 			   const LabelStr& propagatorName,
 			   const ConstraintEngineId& constraintEngine,
 			   const std::vector<ConstrainedVariableId>& variables)
@@ -1760,25 +1990,119 @@ namespace EUROPA {
     check_error(variables.size() == ARG_COUNT);
   }
 
-  void TestEQ::handleExecute(){  
-     
-    debugMsg("TestEQ:handleExecute", "comparing " << m_arg1.toString() << " with " << m_arg2.toString());
+  void TestNEQ::handleExecute(){
 
-    if(m_arg1.isSingleton() && 
-       m_arg2.isSingleton() && 
-       m_arg1.intersects(m_arg2)) // Exactly equal with no flexibility 
-       m_test.remove(0);
-    else if(!m_arg1.intersects(m_arg2)) // No intersection so they cannot be equal
-      m_test.remove(1);
+    debugMsg("TestNEQ:handleExecute", "comparing " << m_arg1.toString() << " with " << m_arg2.toString());
 
-    if(m_test.isSingleton()){
-      if(m_test.getSingletonValue() == true){
-	if(m_arg1.intersect(m_arg2) && m_arg1.isEmpty())
-	  return;
-
-	m_arg2.intersect(m_arg1);
+    if(m_arg1.isSingleton() &&
+       m_arg2.isSingleton()) {
+      if (m_arg1.intersects(m_arg2)) { // They are singletons and are equal, return false.
+	m_test.remove(1);
+      } else {
+	m_test.remove(0);
       }
     }
+
+    if(m_test.isSingleton()) {
+      if(m_test.getSingletonValue() == true) { //Enforce inequality
+	if(m_arg1.isSingleton()) {
+	  m_arg2.remove(m_arg1.getSingletonValue());
+	}
+	if(m_arg2.isSingleton()) {
+	  m_arg1.remove(m_arg2.getSingletonValue());
+	}
+      } else { //Enforce equality
+	m_arg2.intersect(m_arg1);
+	m_arg1.intersect(m_arg2);
+      }
+    }
+  }
+
+
+  TestOr::TestOr(const LabelStr& name,
+		 const LabelStr& propagatorName,
+		 const ConstraintEngineId& constraintEngine,
+		 const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_test(getCurrentDomain(variables[0])),
+      m_arg1(getCurrentDomain(variables[1])),
+      m_arg2(getCurrentDomain(variables[2])){
+    check_error(variables.size() == ARG_COUNT);
+  }
+
+  void TestOr::handleExecute(){
+
+    debugMsg("TestOr:handleExecute", "comparing " << m_arg1.toString() << " with " << m_arg2.toString());
+
+    if(m_arg1.isSingleton() && m_arg2.isSingleton()) { //A and b are singltons, so set the value.
+      if (m_arg1.getSingletonValue() == 0 && m_arg2.getSingletonValue() == 0) {
+        m_test.remove(1);
+      } else {
+        m_test.remove(0);
+      }
+    }
+
+    if(m_test.isSingleton()){ //Test value specified, so set up the others
+      if (m_test.getSingletonValue()) { //It's true, so a or b == true
+
+	if (m_arg1.isSingleton()) {
+	  if (m_arg1.getSingletonValue() == 0) { //a == false, so b must be true
+	    m_arg2.remove(0);
+	  }
+	} else if(m_arg2.isSingleton()) {
+	  if (m_arg2.getSingletonValue() == 0) { //b == false, so a must be true
+	    m_arg1.remove(0);
+	  }
+	} //If none are singletons, nothing to be done: FIXME!
+
+      } else { //It's false, so both a and b are false.
+	m_arg1.remove(1);
+	m_arg2.remove(1);
+      }
+    }
+  }
+
+  TestAnd::TestAnd(const LabelStr& name,
+		   const LabelStr& propagatorName,
+		   const ConstraintEngineId& constraintEngine,
+		   const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables),
+      m_test(getCurrentDomain(variables[0])),
+      m_arg1(getCurrentDomain(variables[1])),
+      m_arg2(getCurrentDomain(variables[2])){
+    check_error(variables.size() == ARG_COUNT);
+  }
+
+  void TestAnd::handleExecute(){
+
+    debugMsg("TestAnd:handleExecute", "comparing " << m_arg1.toString() << " with " << m_arg2.toString() << ", test " << m_test);
+
+    if(m_arg1.isSingleton() && m_arg2.isSingleton()) { //A and b are singltons, so set the value.
+      if (m_arg1.getSingletonValue() == 0 || m_arg2.getSingletonValue() == 0) { //a == false or b == false, so set to false
+        m_test.intersect(IntervalDomain(0, 0));
+      } else { //a == b == true, set to true
+        m_test.intersect(IntervalDomain(1, 1));
+      }
+    }
+
+    if(m_test.isSingleton()){ //Test value specified, so set up the others
+      if (m_test.getSingletonValue()) { //It's true, so a and b == true
+        m_arg1.intersect(IntervalDomain(1, 1));
+        m_arg2.intersect(IntervalDomain(1, 1));
+      } else { //It's false, so one of a or b must be false
+	if (m_arg1.isSingleton()) {
+	  if (m_arg1.getSingletonValue() != 0) { //a == true, so b must be false
+	    m_arg2.intersect(IntervalDomain(0, 0));
+	  }
+	}
+	if(m_arg2.isSingleton()) {
+	  if (m_arg2.getSingletonValue() != 0) { //b == true, so a must be false
+	    m_arg1.intersect(IntervalDomain(0, 0));
+	  }
+	} //If none are singletons, nothing to be done: FIXME!
+      }
+    }
+
   }
 
   TestLessThan::TestLessThan(const LabelStr& name,
@@ -1790,6 +2114,8 @@ namespace EUROPA {
       m_arg1(getCurrentDomain(variables[1])),
       m_arg2(getCurrentDomain(variables[2])){
     check_error(variables.size() == ARG_COUNT);
+    checkError(m_arg1.isNumeric(), variables[1]);
+    checkError(m_arg2.isNumeric(), variables[2]);
   }
 
   void TestLessThan::handleExecute(){
@@ -1797,6 +2123,20 @@ namespace EUROPA {
       m_test.remove(0);
     else if(m_arg1.getLowerBound() >= m_arg2.getUpperBound())
       m_test.remove(1);
+
+    // If true, apply the constraint (arg1 < arg2)
+    if(m_test.isSingleton() && m_test.getSingletonValue() == 1){
+      IntervalDomain& domx = static_cast<IntervalDomain&>(m_arg1);
+      IntervalDomain& domy = static_cast<IntervalDomain&>(m_arg2);
+      LessThanConstraint::propagate(domx, domy);
+    }
+
+    // If false, apply the converse (arg1 >= arg2);
+    if(m_test.isSingleton() && m_test.getSingletonValue() == 0){
+      IntervalDomain& domx = static_cast<IntervalDomain&>(m_arg1);
+      IntervalDomain& domy = static_cast<IntervalDomain&>(m_arg2);
+      LessThanEqualConstraint::propagate(domy, domx);
+    }
   }
 
   TestLEQ::TestLEQ(const LabelStr& name,
@@ -1817,6 +2157,20 @@ namespace EUROPA {
 	m_test.remove(0);
     else if(m_arg1.getLowerBound() > m_arg2.getUpperBound())
 	m_test.remove(1);
+
+    // If true, apply the constraint (arg1 <= arg2)
+    if(m_test.isSingleton() && m_test.getSingletonValue() == 1){
+      IntervalDomain& domx = static_cast<IntervalDomain&>(m_arg1);
+      IntervalDomain& domy = static_cast<IntervalDomain&>(m_arg2);
+      LessThanEqualConstraint::propagate(domx, domy);
+    }
+
+    // If false, apply the converse (arg1 > arg2);
+    if(m_test.isSingleton() && m_test.getSingletonValue() == 0){
+      IntervalDomain& domx = static_cast<IntervalDomain&>(m_arg1);
+      IntervalDomain& domy = static_cast<IntervalDomain&>(m_arg2);
+      LessThanConstraint::propagate(domy, domx);
+    }
 
     debugMsg("TestLEQ:handleExecute", "AFTER:" << toString());
   }
@@ -1842,6 +2196,30 @@ namespace EUROPA {
     m_x.intersect(m_y.getLowerBound(), m_z.getUpperBound());
   }
 
+  void AbsoluteValueCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
+  {
+      if (argTypes.size() != 2) {
+          std::ostringstream msg; msg << "Constraint AbsoluteValue takes 2 args, not " << argTypes.size();
+          throw msg.str();
+      }
+
+      for (unsigned int i=0; i< argTypes.size(); i++) {
+          if (!argTypes[i]->isNumeric()) {
+              std::ostringstream msg;
+              msg << "Parameter " << i << " for Constraint AbsoluteValue is not numeric : "
+                  << argTypes[i]->getName().toString();
+              throw msg.str();
+          }
+      }
+
+      if (!argTypes[0]->isAssignableFrom(argTypes[1])) {
+          std::ostringstream msg;
+          msg << argTypes[0]->getName().toString() << " can't hold AbsoluteValue for : "
+              << argTypes[1]->getName().toString();
+          throw msg.str();
+      }
+  }
+
   AbsoluteValue::AbsoluteValue(const LabelStr& name,
 			       const LabelStr& propagatorName,
 			       const ConstraintEngineId& constraintEngine,
@@ -1851,10 +2229,10 @@ namespace EUROPA {
       m_y(static_cast<IntervalDomain&>(getCurrentDomain(variables[1]))) {
     check_error(variables.size() == ARG_COUNT);
   }
-  
+
   void AbsoluteValue::handleExecute() {
-    edouble lb, ub;
-   
+    double lb, ub;
+
     if(m_y.getLowerBound() >= 0) {
       lb = m_y.getLowerBound();
       ub = m_y.getUpperBound();
@@ -1880,7 +2258,7 @@ namespace EUROPA {
 
     if((m_y.isMember(lb) || m_y.isMember(ub)) && (m_y.isMember(-lb) || m_y.isMember(-ub)))
       return;
-    
+
     if(m_y.isMember(lb) || m_y.isMember(ub))
       m_y.intersect(IntervalDomain(lb, ub));
     else if(m_y.isMember(-lb) || m_y.isMember(-ub))
@@ -1894,7 +2272,7 @@ namespace EUROPA {
     : Constraint(name, propagatorName, constraintEngine, variables) {
     check_error(variables.size() == (unsigned int) ARG_COUNT);
   }
-  
+
   /**
      Propagate only forward.
      Moreover, the way it is used, either the points are completely
@@ -1904,10 +2282,10 @@ namespace EUROPA {
     AbstractDomain& domx = getCurrentDomain(m_variables[V1]);
     AbstractDomain& domy = getCurrentDomain(m_variables[V2]);
     AbstractDomain& doma = getCurrentDomain(m_variables[RES]);
-    
+
     // domains should be closed
-    if ( domx.isOpen() || domy.isOpen() || 
-	 !domx.isSingleton() || !domy.isSingleton() ) 
+    if ( domx.isOpen() || domy.isOpen() ||
+	 !domx.isSingleton() || !domy.isSingleton() )
       return;
 
     // get the boundaries
@@ -1939,8 +2317,8 @@ namespace EUROPA {
     AbstractDomain& doma = getCurrentDomain(m_variables[RES]);
 
     // domains should be closed
-    if ( domx.isOpen() || domy.isOpen() || 
-	 !domx.isSingleton() || !domy.isSingleton() ) 
+    if ( domx.isOpen() || domy.isOpen() ||
+	 !domx.isSingleton() || !domy.isSingleton() )
       return;
 
     // get the boundaries
@@ -1969,7 +2347,7 @@ namespace EUROPA {
 
   void CalcDistanceConstraint::handleExecute(){
     if(!m_x1.areBoundsFinite() ||
-       !m_y1.areBoundsFinite()  || 
+       !m_y1.areBoundsFinite()  ||
        !m_x2.areBoundsFinite() ||
        !m_y2.areBoundsFinite())
       return;
@@ -2037,4 +2415,35 @@ namespace EUROPA {
     }
   }
 
-} //end namespace EUROPA
+o
+
+  /**************************************************************************************/
+
+  RandConstraint::RandConstraint(const LabelStr& name,
+			     const LabelStr& propagatorName,
+			     const ConstraintEngineId& constraintEngine,
+			     const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables), m_rvalue(rand() % 32768) {}
+
+  void RandConstraint::handleExecute() {
+    getCurrentDomain(m_variables[0]).intersect(m_rvalue, m_rvalue);
+  }
+  
+
+  int mod(int a, int b) { return a % b; }
+
+  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Max, std::max, double);
+  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Min, std::min, double);
+  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Abs, fabs, double);
+  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Pow, pow, double);
+  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Sqrt, sqrt, double);
+  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Mod, mod, int);
+
+
+
+  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Floor, floor, double);
+  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Ceil, ceil, double);
+
+
+
+} // end namespace EUROPA

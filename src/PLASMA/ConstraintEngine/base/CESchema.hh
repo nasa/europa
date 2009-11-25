@@ -1,15 +1,14 @@
 #ifndef _H_CESchema
 #define _H_CESchema
 
+#include <map>
 #include "ConstraintEngineDefs.hh"
-#include "AbstractDomain.hh"
-#include "ConstrainedVariable.hh"
 #include "LabelStr.hh"
 #include "Engine.hh"
-#include "TypeFactory.hh"
-#include "ConstraintFactory.hh"
-#include <map>
-#include <string>
+#include "AbstractDomain.hh"
+#include "ConstraintType.hh"
+#include "DataType.hh"
+#include "CFunction.hh"
 
 /**
  * @file Class to manage all metadata for Constraint engine (variable data types, constraint types, etc).
@@ -26,53 +25,39 @@ namespace EUROPA {
     public:
       CESchema();
       virtual ~CESchema();
-  
+
       const CESchemaId& getId() const;
-      
-      // Methods to Manage Type Factories
-      /**
-       * @brief Add a factory to provide instantiation of particular concrete types based on a label.
-       */
-      void registerFactory(const TypeFactoryId& factory);
 
-      /**
-       * @brief Obtain the factory based on the type name
-       */ 
-      TypeFactoryId getFactory(const char* typeName);
-    TypeFactoryId getFactory(const std::string& typeName);
-
-      /**
-       * @brief Return the base domain
-       */
+      // Methods to Manage Data Types
+      void registerDataType(const DataTypeId& dt);
+      DataTypeId getDataType(const char* typeName);
+      bool isDataType(const char* typeName) const;
       const AbstractDomain & baseDomain(const char* typeName);
-    const AbstractDomain& baseDomain(const std::string& typeName);
-
-      void purgeTypeFactories();
+      void purgeDataTypes();
 
       // Methods to Manage Constraint Factories
-      void registerConstraintFactory(ConstraintFactory* factory);
-      void registerConstraintFactory(ConstraintFactory* factory, const LabelStr& name);
+      void registerConstraintType(const ConstraintTypeId& ct);
+      const ConstraintTypeId& getConstraintType(const LabelStr& name);
+      bool isConstraintType(const LabelStr& name, const bool& warn = false);
+      void purgeConstraintTypes();
 
-      const ConstraintFactoryId& getConstraintFactory(const LabelStr& name);
+      // Methods to manage CFunctions
+      void registerCFunction(const CFunctionId& cf);
+      CFunctionId getCFunction(const LabelStr& name);
+      void purgeCFunctions();
 
-      bool isConstraintFactoryRegistered(const LabelStr& name, const bool& warn = false);
-
-      bool isConstraintFactoryNotRegistered(const LabelStr& name);      
-
-      void purgeConstraintFactories();
-      
       /**
-       * @brief Delete all factory instances stored. 
+       * @brief Delete all meta data stored.
        */
       void purgeAll();
-      
 
     protected:
       CESchemaId m_id;
-      std::map<edouble, TypeFactoryId> m_typeFactories;   
-      std::map<edouble, ConstraintFactoryId > m_constraintFactories;      
+      std::map<double, DataTypeId> m_dataTypes;
+      std::map<double, ConstraintTypeId > m_constraintTypes;
+      std::map<double, CFunctionId> m_cfunctions;
   };
-  
+
 } // namespace EUROPA
 
 #endif // _H_CESchema

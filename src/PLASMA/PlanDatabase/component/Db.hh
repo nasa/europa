@@ -13,11 +13,9 @@
 #include "ObjectTokenRelation.hh"
 
 #include "ConstraintEngine.hh"
-#include "IntervalIntDomain.hh"
-#include "BoolDomain.hh"
-#include "ConstraintFactory.hh"
+#include "Domains.hh"
+#include "ConstraintType.hh"
 #include "Constraint.hh"
 #include "Constraints.hh"
-#include "TestSupport.hh"
 
 #endif

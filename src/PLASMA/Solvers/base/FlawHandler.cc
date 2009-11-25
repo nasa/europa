@@ -44,9 +44,13 @@ namespace EUROPA {
       // It also multiplies by a minimum of 1 to ensure that 0 guards are handled as low weights.
       // Note also that we make it 2 so that defaul t compatibility heuristics 
       // can discount the weight without getting into the zero territory
-      m_weight = std::abs(m_priority - (2+staticFilterCount() + m_guards.size() + m_masterGuards.size()) * WEIGHT_BASE());
+      refreshWeight();
     }
     
+    void FlawHandler::refreshWeight() {
+      m_weight = std::abs(m_priority - (2+staticFilterCount() + customStaticFilterCount() + m_guards.size() + m_masterGuards.size()) * WEIGHT_BASE());
+    }
+
     /**
      * @brief Process the input element to pull defaults from the parent
      */

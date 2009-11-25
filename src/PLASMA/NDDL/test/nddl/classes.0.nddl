@@ -1,0 +1,37 @@
+#include "Plasma.nddl"
+
+// Declare Location as a class to allow allocation of instances
+// at run-time rather than compile time.
+class Location {
+ string name;
+ Location(string _name){
+  name = _name;
+ }
+}
+
+// Declare Path as a triple of locations and cost
+class Path {
+ Location from; // Declare member variable 'from' of type 'Location'
+ Location to; // Declare member variable 'to' of type 'Location'
+ float cost; // Declare member variable 'cost' of type 'float'
+
+ // Specify a constructor to initialize members
+ Path(Location _from, Location _to){
+  from = _from;
+  to = _to;
+  cost = 0.0;
+ }
+
+ // Another constructor with only one Location - trivial path
+ Path(Location loc){
+  from = loc;
+  to = loc;
+ }
+
+ // Another constructor which over-rides default cost
+ Path(Location _from, Location _to, float _cost){
+  from = _from;
+  to = _to;
+  cost = _cost;
+ }
+}

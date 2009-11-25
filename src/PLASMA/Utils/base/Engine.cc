@@ -16,20 +16,47 @@ namespace EUROPA
     {
         m_engine = engine;
     }
-    
+
     EngineId& EngineComponent::getEngine()
     {
-        return m_engine;    
+        return m_engine;
+    }
+
+    EngineConfig::EngineConfig()
+    {
+    }
+
+    EngineConfig::~EngineConfig()
+    {
+    }
+
+    const std::string& EngineConfig::getProperty(const std::string& name) const
+    {
+        static std::string noValue="";
+        const std::map<std::string,std::string>::const_iterator it = m_properties.find(name);
+
+        if (it != m_properties.end())
+            return it->second;
+
+        return noValue;
+    }
+
+    void EngineConfig::setProperty(const std::string& name,const std::string& value)
+    {
+        m_properties[name] = value;
     }
 
     EngineBase::EngineBase()
     {
     	m_started = false;
+    	// TODO: make this data-driven so XML/database configs can be instanciated.
+    	m_config = new EngineConfig();
     }
 
     EngineBase::~EngineBase()
-    {  
+    {
         releaseModules();
+        delete m_config;
     }
 
     void EngineBase::releaseModules()
@@ -42,16 +69,16 @@ namespace EUROPA
         m_modules.clear();
     }
 
-    
+
     ModuleId& EngineBase::getModule(const std::string& name)
     {
         static ModuleId noId=ModuleId::noId();
-        
+
 	    for (unsigned int i=0;i<m_modules.size();i++) {
 	    	if (m_modules[i]->getName() == name)
 	    		return m_modules[i];
 	    }
-	    
+
 	    return noId;
     }
 
@@ -102,6 +129,7 @@ namespace EUROPA
     		uninitializeByModules();
             uninitializeModules();
             Entity::purgeEnded();
+            Entity::garbageCollect();
     		m_started = false;
     	}
     }
@@ -125,7 +153,7 @@ namespace EUROPA
 			uninitializeByModule(module);
 			uninitializeModule(module);
 		}
-		
+
 		m_modules.erase(it);
 	}
 
@@ -197,24 +225,29 @@ namespace EUROPA
       return retval;
     }
 
-    void EngineBase::addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter)
+    LanguageInterpreter *EngineBase::addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter)
     {
-      std::map<edouble, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
+      LanguageInterpreter *old = NULL;
+      std::map<double, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
       if(it == getLanguageInterpreters().end())
         getLanguageInterpreters().insert(std::make_pair(LabelStr(language), interpreter));
       else {
-        delete it->second;
+    	old = it->second;
         it->second = interpreter;
       }
+      interpreter->setEngine(getId());
+      return old;
     }
 
-    void EngineBase::removeLanguageInterpreter(const std::string& language)
+    LanguageInterpreter* EngineBase::removeLanguageInterpreter(const std::string& language)
     {
-      std::map<edouble, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
+      LanguageInterpreter *old = NULL;
+      std::map<double, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
       if(it != getLanguageInterpreters().end()) {
-        delete it->second;
+    	old = it->second;
         getLanguageInterpreters().erase(it);
       }
+      return old;
     }
 
     LanguageInterpreter* EngineBase::getLanguageInterpreter(const std::string& language)
@@ -222,7 +255,7 @@ namespace EUROPA
         std::map<edouble, LanguageInterpreter*>::iterator it = getLanguageInterpreters().find(LabelStr(language));
         if(it != getLanguageInterpreters().end()) 
             return it->second;
-        
+
         return NULL;
     }
 
@@ -239,32 +272,32 @@ namespace EUROPA
         else {
           delete it->second;
           it->second = component;
-        }     
+        }
         component->setEngine(getId());
     }
-    
+
     EngineComponent* EngineBase::getComponent(const std::string& name)
     {
       std::map<edouble, EngineComponent*>::iterator it = getComponents().find(LabelStr(name));
       if(it != getComponents().end()) 
           return it->second;
-      
+
   	  return NULL;
     }
-    
+
     const EngineComponent* EngineBase::getComponent(const std::string& name) const
     {
       std::map<edouble, EngineComponent*>::const_iterator it = m_components.find(LabelStr(name));
       if(it != m_components.end()) 
           return it->second;
-      
+
       return NULL;
     }
-    
+
     EngineComponent* EngineBase::removeComponent(const std::string& name)
     {
         EngineComponent* c = getComponent(name);
-        
+
         if (c != NULL)
             getComponents().erase(LabelStr(name));
 
@@ -276,6 +309,16 @@ namespace EUROPA
     std::map<edouble, EngineComponent*>& EngineBase::getComponents()
     {
         return m_components;
-    }        
+    }
+
+    void LanguageInterpreter::setEngine(EngineId& engine)
+    {
+        m_engine = engine;
+    }
+
+    EngineId& LanguageInterpreter::getEngine()
+    {
+        return m_engine;
+    }
 }
 

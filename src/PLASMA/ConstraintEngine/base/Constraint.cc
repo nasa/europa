@@ -12,10 +12,10 @@ namespace EUROPA {
 
   Constraint::Constraint(const LabelStr& name,
 			 const LabelStr& propagatorName,
-			 const ConstraintEngineId& constraintEngine, 
+			 const ConstraintEngineId& constraintEngine,
 			 const std::vector<ConstrainedVariableId>& variables)
     : Entity(), m_name(name), m_constraintEngine(constraintEngine),
-      m_variables(variables), m_id(this), m_isUnary(true), 
+      m_variables(variables), m_id(this), m_isUnary(true),
       m_createdBy("UNKNOWN"),
       m_deactivationRefCount(0),
       m_isRedundant(false)
@@ -25,7 +25,7 @@ namespace EUROPA {
     m_constraintEngine->add(m_id, propagatorName);
     //m_entityId = m_id;
 
-    debugMsg("Constraint:Constraint", 
+    debugMsg("Constraint:Constraint",
 	     "Creating constraint " << getKey() << ":" << name.toString() <<
 	     " registered with propagator " << propagatorName.toString() << " with arity " << variables.size());
 
@@ -42,7 +42,7 @@ namespace EUROPA {
       if(!m_variables[i]->isActive())
 	m_deactivationRefCount++;
 
-      checkError(m_variables[i].isValid(), 
+      checkError(m_variables[i].isValid(),
 		 "The argIndex " << i << " is not a valid variable for constraint " << name.toString());
 
       // It is important that the call to add the constraint is only made after the deactivation reference
@@ -90,7 +90,7 @@ namespace EUROPA {
   }
 
   double Constraint::getViolation() const {
-    // TODO: each constraint must eventually know whether it is being violated and it must know how to compute its 
+    // TODO: each constraint must eventually know whether it is being violated and it must know how to compute its
     // penalty value
     if (m_constraintEngine->isViolated(getId()))
         return 1.0;
@@ -103,7 +103,7 @@ namespace EUROPA {
   	// TODO: this must eventually come from the model
   	std::ostringstream os;
 
-    os << getName().toString() << "(";  	
+    os << getName().toString() << "(";
     for(unsigned int i=0;i<m_variables.size();i++) {
     	if (i > 0)
     	  os << ",";
@@ -114,7 +114,7 @@ namespace EUROPA {
     		os << m_variables[i]->lastDomain().toString();
     }
     os << ")";
-    
+
   	return os.str();
   }
 
@@ -128,7 +128,7 @@ namespace EUROPA {
 	  }
 	  return retval;
   }
-  
+
   const ConstraintId& Constraint::getId() const {
     return m_id;
   }
@@ -162,34 +162,34 @@ namespace EUROPA {
   {
    for(unsigned int i=0;i<m_variables.size();i++)
     	m_variables[i]->setCurrentPropagatingConstraint(m_id);
-				 	
+
     handleExecute();
-    
+
     for(unsigned int i=0;i<m_variables.size();i++)
-    	m_variables[i]->setCurrentPropagatingConstraint(ConstraintId::noId());   
+    	m_variables[i]->setCurrentPropagatingConstraint(ConstraintId::noId());
   }
-  
-  void Constraint::execute(const ConstrainedVariableId& variable, 
-				 int argIndex, 
-				 const DomainListener::ChangeType& changeType) {   
+
+  void Constraint::execute(const ConstrainedVariableId& variable,
+				 int argIndex,
+				 const DomainListener::ChangeType& changeType) {
 
    for(unsigned int i=0;i<m_variables.size();i++)
     	m_variables[i]->setCurrentPropagatingConstraint(m_id);
-				 	
+
     handleExecute(variable,argIndex,changeType);
 
     for(unsigned int i=0;i<m_variables.size();i++)
-    	m_variables[i]->setCurrentPropagatingConstraint(ConstraintId::noId());   
+    	m_variables[i]->setCurrentPropagatingConstraint(ConstraintId::noId());
   }
-  
-  void Constraint::handleExecute(const ConstrainedVariableId& variable, 
-				 int argIndex, 
-				 const DomainListener::ChangeType& changeType) {   
+
+  void Constraint::handleExecute(const ConstrainedVariableId& variable,
+				 int argIndex,
+				 const DomainListener::ChangeType& changeType) {
     handleExecute();
   }
 
-  bool Constraint::canIgnore(const ConstrainedVariableId& variable, 
-			     int argIndex, 
+  bool Constraint::canIgnore(const ConstrainedVariableId& variable,
+			     int argIndex,
 			     const DomainListener::ChangeType& changeType) {
     return false;
   }
@@ -234,7 +234,7 @@ namespace EUROPA {
       }
     }
 
-    // If we still think it is redundant, now we invoke execute. 
+    // If we still think it is redundant, now we invoke execute.
     debugMsg("Constraint:testIsRedundant",
 	     " constraint " << this->toString() << " is redundant");
     return true;
@@ -261,7 +261,7 @@ namespace EUROPA {
     check_error(!Entity::isPurging());
     m_deactivationRefCount++;
 
-    debugMsg("Constraint:deactivation", 
+    debugMsg("Constraint:deactivation",
 	     "RefCount: [" << m_deactivationRefCount << "]" << toString());
 
     // If this is a transition, handle it
@@ -280,7 +280,7 @@ namespace EUROPA {
 
     m_deactivationRefCount--;
 
-    debugMsg("Constraint:undoDeactivation", 
+    debugMsg("Constraint:undoDeactivation",
 	     "RefCount: [" << m_deactivationRefCount << "]" << toString());
 
     // If this is a transition, handle it
@@ -296,12 +296,12 @@ namespace EUROPA {
   {
 	  m_propagator->getConstraintEngine()->getViolationMgr().addViolatedConstraint(m_id);
   }
-  
+
   void Constraint::notifyNoLongerViolated()
   {
 	  m_propagator->getConstraintEngine()->getViolationMgr().removeViolatedConstraint(m_id);
-  }  
-  
+  }
+
   std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1){
     static std::vector<ConstrainedVariableId> sl_scope;
     check_error(arg1.isValid());
@@ -413,8 +413,8 @@ namespace EUROPA {
       return scope;
     }
 
-  
-  
+
+
   std::string Constraint::toString() const{
     std::stringstream sstr;
     sstr << Entity::toString() << std::endl;
@@ -423,7 +423,7 @@ namespace EUROPA {
 	it != getScope().end(); ++it){
       ConstrainedVariableId var = *it;
       check_error(var.isValid(), "Invalid argument in constraint");
-      sstr << " ARG[" << i++ << "]:" << var->toString() << std::endl;
+      sstr << " ARG[" << i++ << "]:" << var->toLongString() << std::endl;
     }
 
     return sstr.str();

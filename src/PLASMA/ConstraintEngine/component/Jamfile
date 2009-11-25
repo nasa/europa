@@ -4,24 +4,11 @@ if ! $(PLASMA_READY) {
 
 ModuleComponent ConstraintEngine
 	:
-	BoolDomain.cc
-	BoolTypeFactory.cc
 	Constraints.cc
-	DefaultPropagator.cc
-	EnumeratedDomain.cc
-	EnumeratedTypeFactory.cc
-	EqualityConstraintPropagator.cc
+	DataTypes.cc
+	Domains.cc
 	EquivalenceClassCollection.cc
-	IntervalDomain.cc
-	IntervalIntDomain.cc
-	IntervalIntTypeFactory.cc
-	IntervalTypeFactory.cc
-	StringDomain.cc
-	StringTypeFactory.cc
-	SymbolDomain.cc
-	NumericDomain.cc
-	SymbolTypeFactory.cc
-	test-support.cc
+	Propagators.cc
 	;
 
 } # PLASMA_READY

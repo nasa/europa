@@ -1,7 +1,7 @@
 #include "MergeMemento.hh"
 #include "Token.hh"
 #include "PlanDatabase.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "TokenVariable.hh"
 #include "Utils.hh"
 #include <map>
@@ -19,7 +19,7 @@ namespace EUROPA{
    * The key is a double, which is the encoding of the variable Id.
    * @param var The variable to be replaced, if found. It may not be in the map, indicating it is not a variable of the
    * merged token.
-   * @return Variable Id Entry in lookup table if the given token is part of the token being merged, 
+   * @return Variable Id Entry in lookup table if the given token is part of the token being merged,
    * otherwise returns var.
    * @todo The algorithm for splitting is very sub-optimal in the non-chronological case. Consider in the future
    * an algorithm to migrate consequenecs rather than force additional splits. This is similar to deactivation
@@ -87,8 +87,8 @@ namespace EUROPA{
 
     if(m_inactiveToken->isTerminated())
       return;
- 
-    // Start by removing all the new constraints that were created. To avoid a call back 
+
+    // Start by removing all the new constraints that were created. To avoid a call back
     // into this method for synching data structures, we set a flag for undoing
     m_undoing = true;
 
@@ -118,6 +118,7 @@ namespace EUROPA{
   }
 
   void MergeMemento::handleAdditionOfInactiveConstraint(const ConstraintId& constraint){
+    debugMsg("europa:merging:handleAdditionOfInactiveConstraint", constraint->toString());
     migrateConstraint(constraint);
   }
 
@@ -161,42 +162,46 @@ namespace EUROPA{
     checkError(m_activeToken.isValid(), m_activeToken);
     checkError(m_activeToken->isActive(), m_activeToken->toString());
 
-    const std::vector<ConstrainedVariableId>& variables = constraint->getScope();
-    std::vector<ConstrainedVariableId> newScope;
-
-    for(unsigned int i=0;i<variables.size();i++){
-      ConstrainedVariableId var = variables[i];
-
-      // If not a variable of the source token, add directly
-      if(var->parent() != m_inactiveToken)
-	newScope.push_back(var);
-      else if(var == m_inactiveToken->getState())
-	return;
-      else {
-	ConstrainedVariableId newVar = m_activeToken->getVariables()[var->getIndex()];
-
-	checkError(newVar.isValid(), newVar << " is invalid for index " << var->getIndex() << " in " << m_activeToken->toString() <<
-		   " from parent " << var->parent()->toString() << " and constraint " << constraint->toString());
-
-	newScope.push_back(newVar);
-      }
-    }
-
-    // Create the new constraint if it is not a standard constraint - different for unary vs. nary
-    ConstraintId newConstraint;
 
     // If it is not a standard constraint, then we need to create a surrogate as the target active token
     // may not have it already.
     if(!m_inactiveToken->isStandardConstraint(constraint)){
-      newConstraint = m_activeToken->getPlanDatabase()->getConstraintEngine()->createConstraint(
-                              constraint->getName(),
-							  newScope);
+      debugMsg("europa:merging:migrateConstraint", "Replacing scope for " << constraint->toString());
+
+      // Begin by constructing the scope
+      const std::vector<ConstrainedVariableId>& variables = constraint->getScope();
+      std::vector<ConstrainedVariableId> newScope;
+      for(unsigned int i=0;i<variables.size();i++){
+	ConstrainedVariableId var = variables[i];
+
+	// If not a variable of the source token, add directly. Note that we now include the state variable, wheras
+	// we used to ignore constraints that included a reference to the state variable of an active token. This is because
+	// the state variable is a very useful point from which events can be triggered and to prohibit such constraints
+	// cuts off alot of functionality. However, this also means that constraints expresed to pin the state variable (e.g. state == MERGED)
+	// should not be permitted since they will now be applied to the active token also. This is reasonable since constraining a token
+	// to be merged is a bogus hack, which encodes a search control rule in the model.
+	if(var->parent() != m_inactiveToken)
+	  newScope.push_back(var);
+	else {
+	  ConstrainedVariableId newVar = m_activeToken->getVariables()[var->getIndex()];
+
+	  checkError(newVar.isValid(), newVar << " is invalid for index " << var->getIndex() << " in " << m_activeToken->toString() <<
+		     " from parent " << var->parent()->toString() << " and constraint " << constraint->toString());
+
+	  newScope.push_back(newVar);
+	}
+      }
+
+
+      debugMsg("europa:merging:migrateConstraint", "Creating replacement for " << constraint->toString());
+      ConstraintId newConstraint;
+      newConstraint = m_activeToken->getPlanDatabase()->getConstraintEngine()->createConstraint(constraint->getName(),newScope);
 
       // Now set the source on the new constraint to give opportunity to pass data
       newConstraint->setSource(constraint);
+      m_newConstraints.push_back(newConstraint);
     }
 
     m_deactivatedConstraints.push_back(constraint);
-    m_newConstraints.push_back(newConstraint); // Note that it might be a noId()
   }
 }

@@ -2,9 +2,8 @@
 #include "%%Project%%CustomCode.hh"
 
 // Pieces necessary for various customizations:
-#include "ConstraintFactory.hh"
 #include "PSPlanDatabase.hh"
-#include "Schema.hh"
+#include "ConstraintType.hh"
 #include "FlawHandler.hh"
 
 

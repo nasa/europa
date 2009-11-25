@@ -1,9 +1,15 @@
 // Batch.bsh
 
-source("Common.bsh");
+try {
+    source("Common.bsh");
 
-loadModel();
-initQueens();
-solve(10);
-System.out.println(queensToString());
-Runtime.getRuntime().exit(0);
+    loadModel();
+    initQueens();
+    solve(10);
+    System.out.println(queensToString());
+    Runtime.getRuntime().exit(0);
+}
+catch (Exception e) {
+    e.printStackTrace();
+    Runtime.getRuntime().exit(-1);    
+}

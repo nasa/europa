@@ -7,9 +7,9 @@
 #include "PlanDatabase.hh"
 #include "Object.hh"
 #include "Schema.hh"
-#include "IntervalIntDomain.hh"
+#include "Domains.hh"
 #include "Constraint.hh"
-#include "ConstraintFactory.hh"
+#include "ConstraintType.hh"
 #include "Utils.hh"
 #include "Debug.hh"
 #include <map>
@@ -22,12 +22,18 @@
 
 namespace EUROPA{
 
-  StateDomain::StateDomain(const std::string&)
-    : EnumeratedDomain(false, "TokenStates") {}
+  StateDomain::StateDomain()
+    : EnumeratedDomain(SymbolDT::instance())
+  {
+      insert(Token::ACTIVE);
+      insert(Token::MERGED);
+      insert(Token::REJECTED);
+  }
 
   StateDomain::StateDomain(const AbstractDomain& org)
-    : EnumeratedDomain(org){
-    check_error(org.getTypeName().toString() == "TokenStates",
+    : EnumeratedDomain(org)
+  {
+    check_error(org.getTypeName().toString() == SymbolDT::NAME(),
 		"Attempted to construct a StateDomain with invalid type " + org.getTypeName().toString());
   }
 
@@ -54,7 +60,7 @@ namespace EUROPA{
   }
 
   /**
-   * Allocate Constants for posisble state variable values
+   * Allocate Constants for possible state variable values
    */
   const LabelStr Token::INCOMPLETE("INCOMPLETE");
   const LabelStr Token::INACTIVE("INACTIVE");
@@ -76,6 +82,7 @@ namespace EUROPA{
 	       bool closed)
       :Entity(),
        m_id(this),
+       m_name(predicateName), // TODO: fix this
        m_relation("none"),
        m_predicateName(predicateName),
        m_planDatabase(planDatabase) {
@@ -91,6 +98,7 @@ namespace EUROPA{
 	       bool closed)
      :Entity(),
       m_id(this),
+      m_name(predicateName), // TODO: fix this
       m_master(master),
       m_relation(relation),
       m_predicateName(predicateName),
@@ -108,7 +116,7 @@ namespace EUROPA{
   }
 
   void Token::handleDiscard(){
-    debugMsg("Token:handleDiscard", "Discarding (" << getKey() << ")");
+    debugMsg("Token:handleDiscard", "Discarding (" << getKey() << ") id==" << getId());
 
     m_deleted = true;
 
@@ -196,6 +204,10 @@ namespace EUROPA{
 
   const LabelStr& Token::getBaseObjectType() const {return m_baseObjectType;}
 
+  const LabelStr&  Token::getName() const { return m_name; }
+
+  void Token::setName(const LabelStr& name) { m_name = name; }
+
   const LabelStr& Token::getPredicateName() const {return m_predicateName;}
 
   const LabelStr& Token::getUnqualifiedPredicateName() const {return m_unqualifiedPredicateName;}
@@ -231,10 +243,10 @@ namespace EUROPA{
       if(var->getName() == name)
         return var;
     }
-    
+
     if (checkGlobalContext && getPlanDatabase()->isGlobalVariable(name))
         return getPlanDatabase()->getGlobalVariable(name);
-    
+
     return ConstrainedVariableId::noId();
   }
 
@@ -281,9 +293,15 @@ namespace EUROPA{
     m_planDatabase->notifyAdded(m_id);
   }
 
+  bool Token::isClosed() const
+  {
+      return m_state->isClosed();
+  }
+
   void Token::cancel(){
     checkError(!isIncomplete() && !isInactive(), getState()->toString());
     check_error(!Entity::isPurging());
+
     LabelStr state = m_state->getSpecifiedValue();
 
     if(state == ACTIVE)
@@ -378,7 +396,7 @@ namespace EUROPA{
 
   void Token::activate(){
     checkError(isInactive(),
-	       "Token " << Entity::toString() <<
+	       "Token " << Entity::toString() << " with state:" << m_state->toString() <<
 		" is not INACTIVE. Only inactive tokens may be activated.");
     check_error(isValid());
     m_state->setSpecified(ACTIVE);
@@ -388,6 +406,10 @@ namespace EUROPA{
   void Token::deactivate(){
     check_error(isActive());
     check_error(isValid());
+
+    // Will be a no-op in the case that the token is committed and we are not cleaning it up
+    if(isCommitted() && !isDeleted())
+      return;
 
     while(!m_mergedTokens.empty()){
       TokenId tokenToSplit = *(m_mergedTokens.begin());
@@ -412,6 +434,10 @@ namespace EUROPA{
     m_planDatabase->notifyDeactivated(m_id);
   }
 
+  void Token::addStandardConstraint(const ConstraintId& constraint)
+  {
+      m_standardConstraints.insert(constraint);
+  }
 
   bool Token::isStandardConstraint(const ConstraintId& constraint) const{
     return(m_standardConstraints.find(constraint) != m_standardConstraints.end());
@@ -507,10 +533,8 @@ namespace EUROPA{
 
     // Allocate the state variable with initial base domain.
     StateDomain stateBaseDomain;
-    stateBaseDomain.insert(ACTIVE);
-    stateBaseDomain.insert(MERGED);
-    if (rejectable)
-      stateBaseDomain.insert(REJECTED);
+    if (!rejectable)
+      stateBaseDomain.remove(REJECTED);
 
     m_state = (new TokenVariable<StateDomain>(m_id,
 					      m_allVariables.size(),
@@ -527,11 +551,12 @@ namespace EUROPA{
 		"Invalid predicate: " + predicateName.toString());
 
     // Allocate an object variable with an empty domain
-    m_baseObjectType = m_planDatabase->getSchema()->getObjectType(m_predicateName);
+    m_baseObjectType = m_planDatabase->getSchema()->getObjectTypeForPredicate(m_predicateName);
+    const DataTypeId& dt = m_planDatabase->getSchema()->getCESchema()->getDataType(m_baseObjectType.c_str());
     m_object = (new TokenVariable<ObjectDomain>(m_id,
 						m_allVariables.size(),
 						m_planDatabase->getConstraintEngine(),
-						ObjectDomain(m_baseObjectType.c_str()),
+						ObjectDomain(dt),
 						false, // TODO: fixme
 						true,
 						LabelStr("object")))->getId();
@@ -842,10 +867,6 @@ namespace EUROPA{
     return TokenId::convertable(entity);
   }
 
-  const LabelStr&  Token::getName() const{
-    return m_predicateName;
-  }
-
   void Token::activateInternal(){
     m_state->setSpecified(ACTIVE);
     m_planDatabase->notifyActivated(m_id);
@@ -930,6 +951,10 @@ std::string Token::getTokenType() const
 	return getUnqualifiedPredicateName().toString();
 }
 
+std::string Token::getFullTokenType() const {
+  return getPredicateName().toString();
+}
+
 PSObject* Token::getOwner() const {
   if(!isAssigned())
     return NULL;
@@ -978,22 +1003,22 @@ PSList<PSToken*> Token::getMerged() const
 }
 
 
-PSToken::PSTokenState Token::getTokenState() const
+PSTokenState Token::getTokenState() const
 {
     if (isActive())
-        return PSToken::ACTIVE;
+        return EUROPA::ACTIVE;
 
     if (isInactive())
-        return PSToken::INACTIVE;
+        return EUROPA::INACTIVE;
 
     if (isMerged())
-        return PSToken::MERGED;
+        return EUROPA::MERGED;
 
     if (isRejected())
-        return PSToken::REJECTED;
+        return EUROPA::REJECTED;
 
     check_error(ALWAYS_FAIL,"Unknown token state");
-    return PSToken::INACTIVE;
+    return EUROPA::INACTIVE;
 }
 
 PSVariable* Token::getStart() const
@@ -1019,6 +1044,17 @@ PSList<PSVariable*> Token::getParameters() const
 	  ConstrainedVariableId id = *it;
 	  PSVariable* psVar = (PSVariable *) id;
 	  retval.push_back(psVar);
+  }
+  return retval;
+}
+
+PSList<PSVariable*> Token::getPredicateParameters() const {
+  PSList<PSVariable*> retval;
+  const std::vector<ConstrainedVariableId>& vars = parameters();
+  for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end();++it) {
+    ConstrainedVariableId id = *it;
+    PSVariable* psVar = (PSVariable *) id;
+    retval.push_back(psVar);
   }
   return retval;
 }

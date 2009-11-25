@@ -1,11 +1,6 @@
-#include "TestSupport.hh"
+#include "Utils.hh"
 #include "LabelStr.hh"
-#include "IntervalIntDomain.hh"
-#include "BoolDomain.hh"
-#include "EnumeratedDomain.hh"
-#include "StringDomain.hh"
-#include "NumericDomain.hh"
-#include "SymbolDomain.hh"
+#include "Domains.hh"
 #include "DomainListener.hh"
 #include "module-tests.hh"
 #include <sstream>
@@ -287,22 +282,10 @@ namespace EUROPA {
       std::stringstream ss1;
       d1 >> ss1;
       std::string actualString = ss1.str();
-      std::string expectedString("INT_INTERVAL:CLOSED[1, 100]");
+      std::string expectedString("int:CLOSED[1, 100]");
       CPPUNIT_ASSERT(actualString == expectedString);
       std::string anotherActualString = d1.toString();
       CPPUNIT_ASSERT(anotherActualString == expectedString);
-
-      std::string integerType = "integer";
-      IntervalIntDomain d2(1, 100, integerType.c_str());
-      std::stringstream ss2;
-      d2 >> ss2;
-      std::string actualString2 = ss2.str();
-      std::string expectedString2("integer:CLOSED[1, 100]");
-      CPPUNIT_ASSERT(actualString2 == expectedString2);
-      std::string anotherActualString2 = d2.toString();
-      CPPUNIT_ASSERT(anotherActualString2 == expectedString2);
-
-      // test toString(value).
 
       //intervalInt domain
       IntervalIntDomain intervalInt (1,100);
@@ -334,7 +317,7 @@ namespace EUROPA {
       // numeric domain
       NumericDomain numericDom(1.117);
       numericDom.set(1.117);
-      std::string d5DisplayValueStr = numericDom.toString(numericDom.getSingletonValue());
+      std::string d5DisplayValueStr = numericDom.getDataType()->toString(numericDom.getSingletonValue());
       std::string expectedD5DisplayValue("1.117");
       CPPUNIT_ASSERT(d5DisplayValueStr == expectedD5DisplayValue);
 
@@ -343,7 +326,7 @@ namespace EUROPA {
       StringDomain stringDom(theString);
       stringDom.set(theString);
       CPPUNIT_ASSERT(stringDom.isSingleton());
-      std::string d6DisplayValueStr = stringDom.toString(stringDom.getSingletonValue());
+      std::string d6DisplayValueStr = stringDom.getDataType()->toString(stringDom.getSingletonValue());
       std::string expectedD6DisplayValue("AString");
       CPPUNIT_ASSERT(d6DisplayValueStr == expectedD6DisplayValue);
 
@@ -351,7 +334,7 @@ namespace EUROPA {
       LabelStr element("ASymbol");
       SymbolDomain symbolDom(element);
       symbolDom.set(element);
-      std::string d7DisplayValueStr = symbolDom.toString(symbolDom.getSingletonValue());
+      std::string d7DisplayValueStr = symbolDom.getDataType()->toString(symbolDom.getSingletonValue());
       std::string expectedD7DisplayValue("ASymbol");
       CPPUNIT_ASSERT(d7DisplayValueStr == expectedD7DisplayValue);
 
@@ -457,7 +440,7 @@ namespace EUROPA {
 
     static bool testEnumSet(){
 
-      EnumeratedDomain dom0(true, "Enum");
+      EnumeratedDomain dom0(FloatDT::instance());
       CPPUNIT_ASSERT(dom0.isOpen());
       dom0.insert(1); // required for isMember precondition of set.
       dom0.set(1);
@@ -671,6 +654,7 @@ namespace EUROPA {
   public:
 
     static bool test() {
+      EUROPA_runTest(testStrings);
       EUROPA_runTest(testEnumerationOnly);
       EUROPA_runTest(testBasicLabelOperations);
       EUROPA_runTest(testLabelSetAllocations);
@@ -681,13 +665,48 @@ namespace EUROPA {
       EUROPA_runTest(testOperatorEquals);
       EUROPA_runTest(testEmptyOnClosure);
       EUROPA_runTest(testOpenEnumerations);
-      return(true);
+      return true;
     }
 
   private:
 
+    static bool testStrings() {
+      StringDomain s1;
+      StringDomain s2;
+
+      // Open domains always intersect
+      CPPUNIT_ASSERT(s1.intersects(s2));
+
+      // Should be able to call an intersection operation and they will continue to intersect
+      s1.intersect(s2);
+      CPPUNIT_ASSERT(s1.intersects(s2));
+      CPPUNIT_ASSERT(s1.isOpen());
+      CPPUNIT_ASSERT(s2.isOpen());
+
+      // If we add a value to s2, and interesect there should be no impact to s1
+      s2.insert("string_1");
+      CPPUNIT_ASSERT(s1.intersects(s2));
+      CPPUNIT_ASSERT(s2.intersects(s1));
+      s1.intersect(s2);
+
+      // Now if we close s2, we should reduce to the singleton, and intersection applies that restriction to s1
+      s2.close();
+      CPPUNIT_ASSERT(!s2.isEmpty());
+      CPPUNIT_ASSERT(s2.isMember("string_1"));
+
+      CPPUNIT_ASSERT(s1.intersects(s2));
+      s1.intersect(s2);
+      CPPUNIT_ASSERT(!s1.isOpen());
+
+      StringDomain s3;
+      s1.reset(s3);
+      CPPUNIT_ASSERT(s1.isOpen());
+
+      return true;
+    }
+
     static bool testOpenEnumerations() {
-      EnumeratedDomain e1(true, "Test");
+      EnumeratedDomain e1(FloatDT::instance());
       ChangeListener l1;
       DomainListener::ChangeType change;
       e1.setListener(l1.getId());
@@ -720,7 +739,7 @@ namespace EUROPA {
       std::list<edouble> vals;
       vals.push_back(2.0);
       vals.push_back(3.0);
-      EnumeratedDomain e2(vals, true, "Test");
+      EnumeratedDomain e2(FloatDT::instance(),vals);
 
       CPPUNIT_ASSERT(e2.isClosed());
 
@@ -733,14 +752,15 @@ namespace EUROPA {
       e1.insert(3.0);
 
       e1.intersect(e2);
-      CPPUNIT_ASSERT(!e1.isClosed());
+      CPPUNIT_ASSERT(e1.isClosed());
 
       e2.open();
-      e1.intersect(e2);
-      CPPUNIT_ASSERT(e1.isOpen());
       CPPUNIT_ASSERT(e2.isOpen());
-      e2.close();
+      e1.intersect(e2);
+      CPPUNIT_ASSERT(e1.isClosed());
 
+      e2.close();
+      e1.open();
       e1.insert(4.0);
       e2.reset(e1);
       CPPUNIT_ASSERT(e2.isOpen());
@@ -763,7 +783,7 @@ namespace EUROPA {
       e2.open();
       CPPUNIT_ASSERT(e1.isSubsetOf(e2));
       e2.close();
-      CPPUNIT_ASSERT(e1.isSubsetOf(e2));
+      CPPUNIT_ASSERT(!e1.isSubsetOf(e2));
       e1.close();
       CPPUNIT_ASSERT(e1.isSubsetOf(e2));
 
@@ -774,10 +794,10 @@ namespace EUROPA {
       CPPUNIT_ASSERT(e1.isOpen() && e2.isOpen());
       e2.close();
       e1.equate(e2);
-      CPPUNIT_ASSERT(e1.isOpen() && e2.isClosed());
+      CPPUNIT_ASSERT(e1.isClosed() && e2.isClosed());
       e2.open();
       e1.equate(e2);
-      CPPUNIT_ASSERT(e1.isOpen() && e2.isOpen());
+      CPPUNIT_ASSERT(e1.isClosed() && e2.isClosed());
       return true;
     }
 
@@ -1231,6 +1251,7 @@ namespace EUROPA {
   public:
 
     static bool test() {
+      EUROPA_runTest(testOpenAndClosed);
       EUROPA_runTest(testInfinityBounds);
       EUROPA_runTest(testEquality);
       EUROPA_runTest(testIntersection);
@@ -1243,6 +1264,21 @@ namespace EUROPA {
     }
 
   private:
+    static bool testOpenAndClosed(){
+      NumericDomain a, b;
+      ChangeListener l_listener;
+      b.setListener(l_listener.getId());
+      a.insert(1.0);
+      a.insert(2.0);
+      a.close();
+
+      b.intersect(a);
+      DomainListener::ChangeType change;
+      l_listener.checkAndClearChange(change);
+      CPPUNIT_ASSERT(!b.isEmpty());
+      CPPUNIT_ASSERT(change != DomainListener::EMPTIED);
+      return true;
+    }
 
     static bool testInfinityBounds(){
       IntervalDomain dom0;
@@ -1371,32 +1407,29 @@ namespace EUROPA {
       BoolDomain falseDom(false);
       BoolDomain trueDom(true);
       BoolDomain both;
-      BoolDomain customDom(true, "boolean");
+      BoolDomain customDom(true);
 
       copyPtr = falseDom.copy();
       CPPUNIT_ASSERT(copyPtr->isBool());
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("bool"));
       CPPUNIT_ASSERT((dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
       CPPUNIT_ASSERT(!(dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
       delete copyPtr;
 
       copyPtr = trueDom.copy();
       CPPUNIT_ASSERT(copyPtr->isBool());
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("bool"));
       CPPUNIT_ASSERT((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
       CPPUNIT_ASSERT(!(dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
       delete copyPtr;
 
       copyPtr = both.copy();
       CPPUNIT_ASSERT(copyPtr->isBool());
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("bool"));
       CPPUNIT_ASSERT(!(dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
       CPPUNIT_ASSERT(!(dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
       delete copyPtr;
 
       copyPtr = customDom.copy();
       CPPUNIT_ASSERT(copyPtr->isBool());
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("boolean"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName().toString() == BoolDT::NAME());
       CPPUNIT_ASSERT((dynamic_cast<BoolDomain*>(copyPtr))->isTrue());
       CPPUNIT_ASSERT(!(dynamic_cast<BoolDomain*>(copyPtr))->isFalse());
       delete copyPtr;
@@ -1423,7 +1456,7 @@ namespace EUROPA {
       NumericDomain oneDom(2.7); // Singleton
 
       copyPtr = emptyOpen.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
       CPPUNIT_ASSERT(copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isNumeric());
       CPPUNIT_ASSERT(copyPtr->isEnumerated());
@@ -1435,7 +1468,7 @@ namespace EUROPA {
       delete copyPtr;
 
       copyPtr = fourDom.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
       CPPUNIT_ASSERT(copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isEnumerated());
       copyPtr->close();
@@ -1444,15 +1477,15 @@ namespace EUROPA {
       delete copyPtr;
 
       copyPtr = fiveDom.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isEnumerated());
       CPPUNIT_ASSERT(copyPtr->getSize() == 5);
-      CPPUNIT_ASSERT(fourDom.isSubsetOf(*copyPtr));
+      CPPUNIT_ASSERT(!fourDom.isSubsetOf(*copyPtr));
       delete copyPtr;
 
       copyPtr = oneDom.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("REAL_ENUMERATION"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isEnumerated());
       CPPUNIT_ASSERT(copyPtr->isSingleton());
@@ -1470,14 +1503,14 @@ namespace EUROPA {
     static void testCopyingIntervalDomains() {
       AbstractDomain *copyPtr;
       IntervalDomain one2ten(1.0, 10.9);
-      IntervalDomain four(4.0, 4.0, "fourType");
+      IntervalIntDomain four(4,4);
       IntervalDomain empty;
       empty.empty();
 
       // Domains containing infinities should also be tested.
 
       copyPtr = empty.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("REAL_INTERVAL"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isNumeric());
       CPPUNIT_ASSERT(!copyPtr->isEnumerated());
@@ -1498,7 +1531,7 @@ namespace EUROPA {
       delete copyPtr;
 
       copyPtr = one2ten.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("REAL_INTERVAL"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isNumeric());
       CPPUNIT_ASSERT(!copyPtr->isEnumerated());
@@ -1517,7 +1550,7 @@ namespace EUROPA {
       delete copyPtr;
 
       copyPtr = four.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("fourType"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName().toString() == IntDT::NAME());
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isNumeric());
       CPPUNIT_ASSERT(!copyPtr->isEnumerated());
@@ -1529,7 +1562,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(!(*copyPtr == empty));
       CPPUNIT_ASSERT(*copyPtr == four);
       CPPUNIT_ASSERT(!(*copyPtr == one2ten));
-      copyPtr->relax(IntervalDomain(-3.1, 11.0));
+      copyPtr->relax(IntervalDomain(-3, 11));
       CPPUNIT_ASSERT(copyPtr->isMember(0.0));
       CPPUNIT_ASSERT(!copyPtr->isSingleton());
       CPPUNIT_ASSERT(!copyPtr->isEmpty());
@@ -1545,13 +1578,13 @@ namespace EUROPA {
     static void testCopyingIntervalIntDomains() {
       AbstractDomain *copyPtr;
       IntervalIntDomain one2ten(1, 10);
-      IntervalIntDomain four(4, 4, "fourType");
+      IntervalIntDomain four(4,4);
       IntervalIntDomain empty;
       empty.empty();
       // domains containing infinities should also be tested
 
       copyPtr = empty.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("INT_INTERVAL"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("int"));
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isNumeric());
       CPPUNIT_ASSERT(!copyPtr->isEnumerated());
@@ -1572,7 +1605,7 @@ namespace EUROPA {
       delete copyPtr;
 
       copyPtr = one2ten.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("INT_INTERVAL"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("int"));
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isNumeric());
       CPPUNIT_ASSERT(!copyPtr->isEnumerated());
@@ -1593,7 +1626,7 @@ namespace EUROPA {
       delete copyPtr;
 
       copyPtr = four.copy();
-      CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("fourType"));
+      CPPUNIT_ASSERT(copyPtr->getTypeName().toString() == IntDT::NAME());
       CPPUNIT_ASSERT(!copyPtr->isOpen());
       CPPUNIT_ASSERT(copyPtr->isNumeric());
       CPPUNIT_ASSERT(!copyPtr->isEnumerated());
@@ -1654,20 +1687,25 @@ namespace EUROPA {
 
       // 2 numeric enumerations should be comparable, even if type names differ
       {
-	NumericDomain d0("NumberDomain0");
-	NumericDomain d1("NumberDomain1");
+    RestrictedDT dt0("NumberDomain0",FloatDT::instance(),IntervalDomain());
+	NumericDomain d0(dt0.getId());
+    RestrictedDT dt1("NumberDomain1",FloatDT::instance(),IntervalDomain());
+	NumericDomain d1(dt1.getId());
 	IntervalIntDomain d2;
 	CPPUNIT_ASSERT(AbstractDomain::canBeCompared(d0, d1));
 	CPPUNIT_ASSERT(AbstractDomain::canBeCompared(d0, d2));
       }
 
-      // 2 non numeric enumerations can only be compared if they are of the same type
+      // 2 non numeric enumerations can only be compared if their base domains intersect
       {
-	SymbolDomain d0("SymbolicDomain");
-	StringDomain d1("SymbolicDomain");
-	SymbolDomain d2("OtherDomainType");
-	CPPUNIT_ASSERT(AbstractDomain::canBeCompared(d0, d1));
-	CPPUNIT_ASSERT(!AbstractDomain::canBeCompared(d0, d2));
+    RestrictedDT dt0("SymbolicType",SymbolDT::instance(),SymbolDomain());
+	SymbolDomain d0(dt0.getId());
+    RestrictedDT dt1("SymbolicType",StringDT::instance(),StringDomain());
+	StringDomain d1(dt1.getId());
+    RestrictedDT dt2("OtherDomainType",SymbolDT::instance(),SymbolDomain());
+	SymbolDomain d2(dt2.getId());
+	CPPUNIT_ASSERT(!AbstractDomain::canBeCompared(d0, d1));
+	CPPUNIT_ASSERT(AbstractDomain::canBeCompared(d0, d2));
       }
       return true;
     }
@@ -1748,12 +1786,12 @@ namespace EUROPA {
       IntervalIntDomain iiDom(-2, PLUS_INFINITY);
       IntervalDomain iDom(MINUS_INFINITY);
       NumericDomain nDom(2.7);
-      EnumeratedDomain eDom(false, "MyEnum"); // non numeric enum
+      EnumeratedDomain eDom(StringDT::instance()); // non numeric enum
       eDom.insert(LabelStr("myEnumMember"));
       eDom.set(LabelStr("myEnumMember").getKey());
-      EnumeratedDomain enDom(true, "MyEnum"); // numeric enum
-      SymbolDomain sDom("mySymbol");
-      StringDomain stDom("myName");
+      EnumeratedDomain enDom(FloatDT::instance()); // numeric enum
+      SymbolDomain sDom;
+      StringDomain stDom;
 
 			// change for gnats 3242
       CPPUNIT_ASSERT(bDom.isNumeric());

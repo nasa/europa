@@ -1,25 +1,27 @@
-
-#include "PlannerConfig.nddl"
 #include "Resources.nddl"
 
-class CapacityResource extends Reusable 
+class CapacityResource
+    extends Reusable
+    //extends CBReusable
 {
     string profileType;
-     
-    CapacityResource( string pt, float mincapacity, float maxcapacity ) 
-    {    
+    string detectorType;
+
+    CapacityResource( string pt, string dt, float mincapacity, float maxcapacity )
+    {
         super( maxcapacity, mincapacity );
         profileType = pt;
-    } 
+        detectorType = dt;
+    }
 }
 
-class Allocation 
+class Allocation
 {
     int m_identifier;
     float m_quantity;
     CapacityResource m_resource;
 
-    Allocation( CapacityResource resource, int activityId, float quantity ) 
+    Allocation( CapacityResource resource, int activityId, float quantity )
     {
         m_identifier = activityId;
         m_resource = resource;
@@ -30,12 +32,12 @@ class Allocation
 class ActivityTimeline extends Timeline
 {
    int id_;
-   
+
    ActivityTimeline(int i)
    {
        id_ = i;
    }
-   
+
    predicate act {};
 }
 
@@ -43,7 +45,7 @@ ActivityTimeline::act
 {
 }
 
-class ProblemInstance extends Object 
+class ProblemInstance extends Object
 {
     predicate Activity {
 	int m_identifier;
@@ -55,15 +57,19 @@ ProblemInstance::Activity
 {
     //eq(start, [ 0 +inf ]);
     equals(timeline.act act);
+    eq(duration,act.duration);
     eq(act.state,ACTIVE);
-  
+
     Allocation allocations;
     eq( allocations.m_identifier, m_identifier );
 
     foreach( a in allocations ) {
+        //uses(a.m_resource,a.m_quantity,start,end);
+        /**/
         equals( a.m_resource.uses u );
         eq( duration, u.duration); // Duration is known, so force propagation
         eq( u.quantity, a.m_quantity );
+        /**/
     }
 }
 

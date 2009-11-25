@@ -1,5 +1,5 @@
 .PHONY: prebuild postbuild project-model project-initial-state project-lib project-rt run-project clean all
-all: prebuild project-controller project-lib run-project postbuild
+all: prebuild project-lib run-project postbuild
 
 include platforms.mk
 include makerules.mk
@@ -18,14 +18,6 @@ prebuild:
 postbuild:
 	echo Build Completed Successfully!
 
-PROJECT_CONTROLLER = $(call findtarget,$(LIB_PREFIX)$(PROJECT)Controller$(BUILD_SUFFIX).$(LIB_EXT))
-project-controller: prebuild $(PROJECT_CONTROLLER)
-$(PROJECT_CONTROLLER): $(call findtarget,ControllerStub$(BUILD_SUFFIX).o)
-
-PROJECT_INITIAL_STATE = $(PROJECT)-initial-state.xml
-project-initial-state: prebuild $(PROJECT_INITIAL_STATE)
-$(PROJECT_INITIAL_STATE): $(PROJECT)-initial-state.nddl $(PROJECT)-model.nddl
-
 PROJECT_SWIG = $(call findtarget,$(PROJECT)_wrap$(BUILD_SUFFIX).o)
 project-swig: prebuild $(PROJECT_SWIG)
 $(PROJECT_SWIG): $(PROJECT).i
@@ -42,9 +34,9 @@ $(PROJECT_RT): $(call findtarget,$(PROJECT)-Main$(BUILD_SUFFIX).o) \
                $(call findtarget,$(PROJECT)CustomCode$(BUILD_SUFFIX).o) \
                $(call findtarget,Module$(PROJECT)$(BUILD_SUFFIX).o)
 
-RUN_PROJECT = RUN_$(notdir $(PROJECT_RT)).$(notdir $(PROJECT_INITIAL_STATE)).PlannerConfig.xml.output
+RUN_PROJECT = RUN_$(notdir $(PROJECT_RT)).$(notdir $(PROJECT)-initial-state.nddl).PlannerConfig.xml.output
 run-project: prebuild $(RUN_PROJECT)
-$(RUN_PROJECT): $(PROJECT_RT) $(PROJECT_INITIAL_STATE) PlannerConfig.xml
+$(RUN_PROJECT): $(PROJECT_RT) $(PROJECT)-initial-state.nddl PlannerConfig.xml
 	./$+ > $@
 
 PROJECT_JAR = $(call findtarget,$(PROJECT).jar)
@@ -53,4 +45,4 @@ $(PROJECT_JAR): $(PROJECT_SWIG)
 	$(ANT) $(PROJECT) 
 
 clean:
-	$(RM) build $(RUN_PROJECT) $(PROJECT)-model.hh $(PROJECT_INITIAL_STATE) $(PROJECT)-model.cc $(PROJECT)_wrap.cc
+	$(RM) build $(RUN_PROJECT) $(PROJECT)-model.hh $(PROJECT)-model.cc $(PROJECT)_wrap.cc

@@ -629,4 +629,55 @@ std::string DistanceGraph::toString() const {
  return sstr.str();
 }
 
+Void DistanceGraph::boundedDijkstra (const DnodeId& source,
+                                     Time bound,
+                                     Time destPotential,
+                                     int direction)
+{
+  source->distance = 0;
+  source->depth=0;
+  preventGenerationOverflow();
+  Int generation = ++(this->dijkstraGeneration);
+  source->generation = generation;
+  BucketQueue* queue = initializeBqueue();
+  queue->insertInQueue (source);
+  Int BFbound = this->nodes.size();
+  while (true) {
+    DnodeId node = queue->popMinFromQueue();
+    if (node.isNoId())
+      return;
+    Int nodeCount = (direction == -1) ? node->inCount : node->outCount;
+    if (nodeCount > 0) {
+      DedgeId* nodeArray = (direction == -1) ? node->inArray : node->outArray;
+      Time nodeDistance = node->distance;
+      for (Int i=0; i< nodeCount; i++) {
+        DedgeId edge = nodeArray[i];
+        DnodeId next = (direction == -1) ? edge->from : edge->to;
+        Time newDistance = nodeDistance + edge->length;
+
+        // Admissible estimate of remaining distance to go
+        Time toGo = direction * (destPotential - next->potential);
+
+        if (newDistance + toGo >= bound)
+          continue;
+
+        if (next->generation < generation || newDistance < next->distance) {
+          next->generation = generation;
+          check_error(!(newDistance > MAX_DISTANCE ||
+                        newDistance < MIN_DISTANCE),
+                      "Out of bounds during distance propagation",
+                      TempNetErr::TimeOutOfBoundsError());
+          // Next check is a failsafe to prevent infinite propagation.
+          check_error(!((next->depth = node->depth + 1) > BFbound),
+                      "Dijkstra propagation in inconsistent network",
+                      TempNetErr::TempNetInternalError());
+          next->distance = newDistance;
+          queue->insertInQueue (next, newDistance + toGo);
+        }
+      }
+    }
+  }
+}
+
+
 } /* namespace Europa */

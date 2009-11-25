@@ -5,27 +5,17 @@
  * @brief Read the source for details
  */
 #include "ce-test-module.hh"
-#include "TestSupport.hh"
 #include "Utils.hh"
 #include "Variable.hh"
 #include "Constraints.hh"
-#include "ConstraintFactory.hh"
-#include "IdTable.hh"
-#include "EquivalenceClassCollection.hh"
-#include "EqualityConstraintPropagator.hh"
+#include "ConstraintType.hh"
+#include "Propagators.hh"
 
 /* Include for domain management */
-#include "AbstractDomain.hh"
-#include "EnumeratedDomain.hh"
+#include "Domains.hh"
 #include "LabelStr.hh"
-#include "IntervalIntDomain.hh"
-#include "BoolDomain.hh"
-#include "StringDomain.hh"
-#include "SymbolDomain.hh"
-#include "NumericDomain.hh"
 
-#include "TypeFactory.hh"
-#include "EnumeratedTypeFactory.hh"
+#include "DataTypes.hh"
 
 #include "ConstraintTesting.hh"
 
@@ -42,6 +32,49 @@
 
 
 using namespace EUROPA;
+
+class DefaultEngineAccessor {
+	public:
+	  static const ConstraintEngineId& instance() {
+	    if (s_instance.isNoId()) {
+	        CESchema* ces = new CESchema();
+	      s_instance = (new ConstraintEngine(ces->getId()))->getId();
+	      new DefaultPropagator(LabelStr("Default"), s_instance);
+	      new DefaultPropagator(LabelStr("Temporal"), s_instance);
+	    }
+	    return s_instance;
+	  }
+
+	  static void reset() {
+	    if (!s_instance.isNoId()) {
+	        const CESchemaId& tfm = s_instance->getCESchema();
+	      delete (ConstraintEngine*) s_instance;
+	      delete (CESchema*) tfm;
+	      s_instance = ConstraintEngineId::noId();
+	     }
+	  }
+
+	private:
+	  static ConstraintEngineId s_instance;
+};
+
+ConstraintEngineId DefaultEngineAccessor::s_instance;
+
+#define ENGINE DefaultEngineAccessor::instance()
+
+// TODO: getting rid of the ENGINE shortcut would allow us to use the macro from Utils.hh
+#define EUROPA_runCETest(test, args...) { \
+  try { \
+      DefaultEngineAccessor::instance(); \
+      unsigned int id_count = EUROPA::IdTable::size(); \
+      bool result = test(args); \
+      DefaultEngineAccessor::reset(); \
+      EUROPA::IdTable::checkResult(result,id_count); \
+  } \
+  catch (Error err){ \
+      err.print(std::cout); \
+  } \
+}
 
 class DelegationTestConstraint : public Constraint {
 public:
@@ -69,22 +102,6 @@ int DelegationTestConstraint::s_instanceCount = 0;
 
 typedef SymbolDomain Locations;
 
-/**
- * Locations enumeration's base domain, as required by class TypeFactory.
- * @note Copied from System/test/basic-model-transaction.cc
- * as created from basic-model-transaction.nddl v1.3 with the NDDL compiler.
- */
-static const Locations& LocationsBaseDomain() {
-  static Locations sl_enum("Locations");
-  if (sl_enum.isOpen()) {
-    sl_enum.insert(LabelStr("Hill"));
-    sl_enum.insert(LabelStr("Rock"));
-    sl_enum.insert(LabelStr("Lander"));
-    sl_enum.close();
-  }
-  return(sl_enum);
-}
-
 class CETestEngine : public EngineBase
 {
   public:
@@ -101,9 +118,15 @@ CETestEngine::CETestEngine()
     createModules();
     doStart();
     ConstraintEngine* ce = (ConstraintEngine*)getComponent("ConstraintEngine");
-    ce->createValue("INT_INTERVAL", std::string("5"));
-    ce->getCESchema()->registerFactory(
-       (new EnumeratedTypeFactory("Locations", "Locations", LocationsBaseDomain()))->getId()
+
+    SymbolDomain locationsBaseDomain;
+    locationsBaseDomain.insert(LabelStr("Hill"));
+    locationsBaseDomain.insert(LabelStr("Rock"));
+    locationsBaseDomain.insert(LabelStr("Lander"));
+    locationsBaseDomain.close();
+
+    ce->getCESchema()->registerDataType(
+        (new RestrictedDT("Locations",SymbolDT::instance(),locationsBaseDomain))->getId()
     );
     REGISTER_CONSTRAINT(ce->getCESchema(),DelegationTestConstraint, "TestOnly", "Default");
 }
@@ -151,10 +174,10 @@ private:
 class TypeFactoryTests {
 public:
   static bool test() {
-    EUROPA_runTest(testValueCreation);
-    EUROPA_runTest(testDomainCreation);
-    EUROPA_runTest(testVariableCreation);
-    EUROPA_runTest(testVariableWithDomainCreation);
+    EUROPA_runCETest(testValueCreation);
+    EUROPA_runCETest(testDomainCreation);
+    EUROPA_runCETest(testVariableCreation);
+    EUROPA_runCETest(testVariableWithDomainCreation);
     return true;
   }
 
@@ -180,6 +203,7 @@ public:
   static bool testDomainCreation() {
       CETestEngine engine;
       CESchema* tfm = (CESchema*)engine.getComponent("CESchema");
+      const AbstractDomain& locationsBaseDomain = tfm->getDataType("Locations")->baseDomain();
 
     const IntervalIntDomain & bd0 = dynamic_cast<const IntervalIntDomain &>(tfm->baseDomain(IntervalIntDomain().getTypeName().c_str()));
     CPPUNIT_ASSERT(bd0.isMember(0));
@@ -191,10 +215,10 @@ public:
     CPPUNIT_ASSERT(bd2.isMember(false));
     CPPUNIT_ASSERT(bd2.isMember(true));
     CPPUNIT_ASSERT(bd2.isBool());
-    CPPUNIT_ASSERT(LocationsBaseDomain().isMember(LabelStr("Hill")));
-    CPPUNIT_ASSERT(LocationsBaseDomain().isMember(LabelStr("Rock")));
-    CPPUNIT_ASSERT(LocationsBaseDomain().isMember(LabelStr("Lander")));
-    CPPUNIT_ASSERT(!LocationsBaseDomain().isMember(LabelStr("true")));
+    CPPUNIT_ASSERT(locationsBaseDomain.isMember(LabelStr("Hill")));
+    CPPUNIT_ASSERT(locationsBaseDomain.isMember(LabelStr("Rock")));
+    CPPUNIT_ASSERT(locationsBaseDomain.isMember(LabelStr("Lander")));
+    CPPUNIT_ASSERT(!locationsBaseDomain.isMember(LabelStr("true")));
     //!!This (and SymbolDomain) die with complaints of a "bad cast"
     //!!const Locations & loc0 = dynamic_cast<const Locations&>(tfm->baseDomain("Locations"));
     const EnumeratedDomain & loc0 = dynamic_cast<const EnumeratedDomain &>(tfm->baseDomain("Locations"));
@@ -277,10 +301,10 @@ class ConstraintEngineTest
 {
 public:
   static bool test(){
-    EUROPA_runTest(testDeallocationWithPurging);
-    EUROPA_runTest(testInconsistentInitialVariableDomain);
-    EUROPA_runTest(testVariableLookupByIndex);
-    EUROPA_runTest(testGNATS_3133);
+    EUROPA_runCETest(testDeallocationWithPurging);
+    EUROPA_runCETest(testInconsistentInitialVariableDomain);
+    EUROPA_runCETest(testVariableLookupByIndex);
+    EUROPA_runCETest(testGNATS_3133);
     return true;
   }
 
@@ -406,13 +430,13 @@ class VariableTest
 {
 public:
   static bool test() {
-    EUROPA_runTest(testAllocation);
-    EUROPA_runTest(testMessaging);
-    EUROPA_runTest(testDynamicVariable);
-    EUROPA_runTest(testListener);
-    EUROPA_runTest(testVariablesWithOpenDomains);
-    EUROPA_runTest(testRestrictionScenarios);
-    EUROPA_runTest(testSpecification);
+    EUROPA_runCETest(testAllocation);
+    EUROPA_runCETest(testMessaging);
+    EUROPA_runCETest(testDynamicVariable);
+    EUROPA_runCETest(testListener);
+    EUROPA_runCETest(testVariablesWithOpenDomains);
+    EUROPA_runCETest(testRestrictionScenarios);
+    EUROPA_runCETest(testSpecification);
     return true;
   }
 
@@ -481,7 +505,8 @@ private:
       v0.insert(3);
       v0.insert(5);
       v0.insert(10);
-      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::RELAXED) == 4);
+      // We should expect no relaxation events when inserting into an open domain
+      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::RELAXED) == 0);
       v0.close();
       CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::CLOSED) == 1);
 
@@ -503,7 +528,7 @@ private:
       ENGINE->propagate(); // Expect to see exactly one domain emptied
       CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::EMPTIED) == 1);
       v1.reset(); // Should now see 2 domains relaxed.
-      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::RELAXED) == 6);
+      CPPUNIT_ASSERT(listener.getCount(ConstraintEngine::RELAXED) == 2);
     }
 
     return true;
@@ -530,12 +555,28 @@ private:
       v1.insert(3);
       v1.close();
 
-      // Post equality constraint between v0 and v1. It should not cause any restriction yet
-      // since v0 has not been closed
+      // Post equality constraint between v0 and v1.
       EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
-      CPPUNIT_ASSERT(ENGINE->propagate());
-      CPPUNIT_ASSERT(v1.getDerivedDomain().getSize() == 3);
 
+      // When we propagate, the derived domain of v0 will now be closed and bound to the same domain as v1
+      CPPUNIT_ASSERT(ENGINE->propagate());
+      CPPUNIT_ASSERT(v0.getDerivedDomain().getSize() == 3);
+      CPPUNIT_ASSERT(v1.getDerivedDomain().getSize() == 3);
+    }
+
+    // Test that we correctly propagate  insertions and relaxations
+    {
+      Variable<NumericDomain> v0(ENGINE, NumericDomain()); // The empty one.
+      Variable<NumericDomain> v1(ENGINE, NumericDomain()); // The full one
+      v0.insert(1); // The only value, leave it open.
+
+      // Fill up v1 and close it.
+      v1.insert(1);
+      v1.insert(2);
+      v1.insert(3);
+
+      // Post equality constraint between v0 and v1.
+      EqualConstraint c0(LabelStr("EqualConstraint"), LabelStr("Default"), ENGINE, makeScope(v0.getId(), v1.getId()));
       // Now close v0, and we should see a restriction on v1
       v0.close();
       CPPUNIT_ASSERT(v1.getDerivedDomain().isSingleton());
@@ -580,7 +621,7 @@ private:
   }
 
   static bool testVariablesWithOpenDomains() {
-    EnumeratedDomain e0(true, "Test");
+    EnumeratedDomain e0(IntDT::instance());
     e0.insert(0); e0.insert(1); e0.insert(2); e0.insert(3);
     Variable<EnumeratedDomain> v0(ENGINE, e0);
 
@@ -600,6 +641,7 @@ private:
     CPPUNIT_ASSERT(v0.baseDomain().isOpen());
     CPPUNIT_ASSERT(!v0.derivedDomain().isOpen());
 
+    CPPUNIT_ASSERT(e0.isClosed());
     v0.restrictBaseDomain(e0);
     CPPUNIT_ASSERT(v0.baseDomain().isClosed());
     CPPUNIT_ASSERT(v0.isClosed());
@@ -608,11 +650,11 @@ private:
   }
 
   static bool testRestrictionScenarios(){
-    EnumeratedDomain e0(true, "Test");
+    EnumeratedDomain e0(IntDT::instance());
     e0.insert(0); e0.insert(1); e0.insert(2); e0.insert(3);
     e0.close();
 
-    EnumeratedDomain e1(true, "Test");
+    EnumeratedDomain e1(IntDT::instance());
     e1.insert(1); e1.insert(3);
     e1.close();
 
@@ -650,7 +692,7 @@ private:
 
     // Variable with a base domain that is left open but then closed
     {
-      EnumeratedDomain e0(true, "Test");
+      EnumeratedDomain e0(IntDT::instance());
       e0.insert(0);
 
       Variable<EnumeratedDomain> v(ENGINE, e0);
@@ -667,7 +709,7 @@ private:
 
     // Variable with a base domain that is left open and we reset
     {
-      EnumeratedDomain e0(true, "Test");
+      EnumeratedDomain e0(IntDT::instance());
       e0.insert(0);
 
       Variable<EnumeratedDomain> v(ENGINE, e0);
@@ -698,32 +740,32 @@ class ConstraintTest
 {
 public:
   static bool test() {
-    EUROPA_runTest(testGNATS_3181);
-    EUROPA_runTest(testUnaryConstraint);
-    EUROPA_runTest(testAddEqualConstraint);
-    EUROPA_runTest(testLessThanEqualConstraint);
-    EUROPA_runTest(testLessOrEqThanSumConstraint);
-    EUROPA_runTest(testBasicPropagation);
-    EUROPA_runTest(testDeactivation);
-    EUROPA_runTest(testForceInconsistency);
-    EUROPA_runTest(testRepropagation);
-    EUROPA_runTest(testConstraintRemoval);
-    EUROPA_runTest(testDelegation);
-    EUROPA_runTest(testNotEqual);
-    EUROPA_runTest(testMultEqualConstraint);
-    EUROPA_runTest(testAddMultEqualConstraint);
-    EUROPA_runTest(testEqualSumConstraint);
-    EUROPA_runTest(testCondAllSameConstraint);
-    EUROPA_runTest(testCondAllDiffConstraint);
-    EUROPA_runTest(testConstraintDeletion);
-    EUROPA_runTest(testArbitraryConstraints);
-    EUROPA_runTest(testLockConstraint);
-    EUROPA_runTest(testNegateConstraint);
-    EUROPA_runTest(testUnaryQuery);
-    EUROPA_runTest(testTestEqConstraint);
-    EUROPA_runTest(testTestLessThanConstraint);
-    EUROPA_runTest(testTestLEQConstraint);
-    EUROPA_runTest(testGNATS_3075);
+    EUROPA_runCETest(testGNATS_3181);
+    EUROPA_runCETest(testUnaryConstraint);
+    EUROPA_runCETest(testAddEqualConstraint);
+    EUROPA_runCETest(testLessThanEqualConstraint);
+    EUROPA_runCETest(testLessOrEqThanSumConstraint);
+    EUROPA_runCETest(testBasicPropagation);
+    EUROPA_runCETest(testDeactivation);
+    EUROPA_runCETest(testForceInconsistency);
+    EUROPA_runCETest(testRepropagation);
+    EUROPA_runCETest(testConstraintRemoval);
+    EUROPA_runCETest(testDelegation);
+    EUROPA_runCETest(testNotEqual);
+    EUROPA_runCETest(testMultEqualConstraint);
+    EUROPA_runCETest(testAddMultEqualConstraint);
+    EUROPA_runCETest(testEqualSumConstraint);
+    EUROPA_runCETest(testCondAllSameConstraint);
+    EUROPA_runCETest(testCondAllDiffConstraint);
+    EUROPA_runCETest(testConstraintDeletion);
+    EUROPA_runCETest(testArbitraryConstraints);
+    EUROPA_runCETest(testLockConstraint);
+    EUROPA_runCETest(testNegateConstraint);
+    EUROPA_runCETest(testUnaryQuery);
+    EUROPA_runCETest(testTestEqConstraint);
+    EUROPA_runCETest(testTestLessThanConstraint);
+    EUROPA_runCETest(testTestLEQConstraint);
+    EUROPA_runCETest(testGNATS_3075);
     return(true);
   }
 
@@ -736,7 +778,7 @@ private:
     values.push_back(4);
     values.push_back(5);
 
-    EnumeratedDomain dom(values, true, "ANY");
+    EnumeratedDomain dom(IntDT::instance(),values);
     dom.open();
 
     // All domains closed should be a no-op
@@ -756,19 +798,20 @@ private:
     CPPUNIT_ASSERT_MESSAGE(v1.toString(), !v1.isClosed());
     CPPUNIT_ASSERT(!(v0.lastDomain() == v1.lastDomain()));
 
-    // Close 1 variable. It should prune values, but not propagate closure
+    // Close 1 variable. It should prune values, but not propagate closure to the base domain of the variable
     v1.close();
     CPPUNIT_ASSERT(ENGINE->propagate());
+    CPPUNIT_ASSERT(v0.lastDomain().isClosed());
+    CPPUNIT_ASSERT(!v0.isClosed());
     CPPUNIT_ASSERT_MESSAGE(v0.toString(), !v0.isClosed());
     CPPUNIT_ASSERT_MESSAGE(v1.toString(), v1.isClosed());
-    CPPUNIT_ASSERT_MESSAGE(v0.toString() + " == " + v1.toString(), !(v0.lastDomain() == v1.lastDomain()) );
+    CPPUNIT_ASSERT_MESSAGE(v0.toString() + " != " + v1.toString(), v0.lastDomain() == v1.lastDomain() );
 
     // Value test to ensure the restriction has occurred and that we have retained the inequality also.
     // Basically one way propagation.
     CPPUNIT_ASSERT_MESSAGE(v0.lastDomain().toString(), !v0.lastDomain().isMember(1) );
     CPPUNIT_ASSERT_MESSAGE(v1.toString(), v1.lastDomain().isMember(6));
 
-    // Re-open the variable, it should no longer propagate the equality
     return true;
   }
 
@@ -2073,6 +2116,9 @@ private:
    */
   static bool testArbitraryConstraints() {
       CETestEngine testEngine;
+
+      ConstraintEngineId ce = ((ConstraintEngine*)testEngine.getComponent("ConstraintEngine"))->getId();
+
     // Input to this test: a list of constraint calls and expected output domains.
     std::list<ConstraintTestCase> tests;
 
@@ -2095,29 +2141,31 @@ private:
     //   "CLibTestCases".
     // For each file, try twice with different relative paths since we don't know what
     //   the current working directory is.
-    CPPUNIT_ASSERT(readTestCases(getTestLoadLibraryPath() + std::string("/NewTestCases.xml"), tests) ||
-               readTestCases(std::string("ConstraintEngine/test/NewTestCases.xml"), tests));
+    CPPUNIT_ASSERT(readTestCases(ce,getTestLoadLibraryPath() + std::string("/NewTestCases.xml"), tests) ||
+               readTestCases(ce,std::string("ConstraintEngine/test/NewTestCases.xml"), tests));
 
-    CPPUNIT_ASSERT(readTestCases(getTestLoadLibraryPath() + std::string("/CLibTestCases.xml"), tests) ||
-               readTestCases(std::string("ConstraintEngine/test/CLibTestCases.xml"), tests));
+    CPPUNIT_ASSERT(readTestCases(ce,getTestLoadLibraryPath() + std::string("/CLibTestCases.xml"), tests) ||
+               readTestCases(ce,std::string("ConstraintEngine/test/CLibTestCases.xml"), tests));
 
-    return(executeTestCases(testEngine.getConstraintEngine(), tests));
+    bool retval = executeTestCases(testEngine.getConstraintEngine(),tests);
+
+    return retval;
   }
 
   static bool testLockConstraint() {
     LabelSet lockDomain;
-    lockDomain.insert(EUROPA::LabelStr("A"));
-    lockDomain.insert(EUROPA::LabelStr("B"));
-    lockDomain.insert(EUROPA::LabelStr("C"));
-    lockDomain.insert(EUROPA::LabelStr("D"));
+    lockDomain.insert("A");
+    lockDomain.insert("B");
+    lockDomain.insert("C");
+    lockDomain.insert("D");
     lockDomain.close();
 
     LabelSet baseDomain;
-    baseDomain.insert(EUROPA::LabelStr("A"));
-    baseDomain.insert(EUROPA::LabelStr("B"));
-    baseDomain.insert(EUROPA::LabelStr("C"));
-    baseDomain.insert(EUROPA::LabelStr("D"));
-    baseDomain.insert(EUROPA::LabelStr("E"));
+    baseDomain.insert("A");
+    baseDomain.insert("B");
+    baseDomain.insert("C");
+    baseDomain.insert("D");
+    baseDomain.insert("E");
     baseDomain.close();
 
     // Set up variable with base domain - will exceed lock domain
@@ -2180,7 +2228,7 @@ private:
 
   static bool testTestEqConstraint() {
     {
-      EnumeratedDomain baseDomain(true, "ENUM");
+      EnumeratedDomain baseDomain(IntDT::instance());
       baseDomain.insert(1);
       baseDomain.insert(2);
       baseDomain.insert(3);
@@ -2468,11 +2516,11 @@ private:
 
 }; // class ConstraintTest
 
-class ConstraintFactoryTest
+class ConstraintTypeTest
 {
 public:
   static bool test() {
-    EUROPA_runTest(testAllocation);
+    EUROPA_runCETest(testAllocation);
     return true;
   }
 
@@ -2498,11 +2546,11 @@ private:
 class EquivalenceClassTest{
 public:
   static bool test() {
-    EUROPA_runTest(testBasicAllocation);
-    EUROPA_runTest(testConstructionOfSingleGraph);
-    EUROPA_runTest(testSplittingOfSingleGraph);
-    EUROPA_runTest(testMultiGraphMerging);
-    EUROPA_runTest(testEqualityConstraintPropagator);
+    EUROPA_runCETest(testBasicAllocation);
+    EUROPA_runCETest(testConstructionOfSingleGraph);
+    EUROPA_runCETest(testSplittingOfSingleGraph);
+    EUROPA_runCETest(testMultiGraphMerging);
+    EUROPA_runCETest(testEqualityConstraintPropagator);
     return true;
   }
 
@@ -2709,7 +2757,7 @@ void ConstraintEngineModuleTests::constraintTests(void)
 
 void ConstraintEngineModuleTests::constraintFactoryTests(void)
 {
-    ConstraintFactoryTest::test();
+    ConstraintTypeTest::test();
 }
 
 void ConstraintEngineModuleTests::equivalenceClassTests(void)
