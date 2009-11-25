@@ -14,7 +14,7 @@
 #include "DomainListener.hh"
 #include "MatchingEngine.hh"
 #include "FlawHandler.hh"
-#include <ext/hash_map>
+#include "hash_map.hh"
 
 namespace EUROPA {
   namespace SOLVERS {

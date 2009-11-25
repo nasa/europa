@@ -9,7 +9,7 @@
  * @ingroup Resource
  */
 
-#include <ext/hash_map>
+#include "hash_map.hh"
 using namespace __gnu_cxx;
 
 #include <algorithm>

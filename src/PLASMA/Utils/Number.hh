@@ -7,12 +7,7 @@
 #include <istream>
 #include <ostream>
 #include <limits>
-
-#if (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4))
-#include <ext/hash_fun.h>
-#else
-#include <ext/stl_hash_fun.h>
-#endif
+#include "hash_map.hh"
 
 #if (__LONG_MAX__ > __INT_MAX__)
 #define E2_LONG_INT
