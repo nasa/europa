@@ -16,6 +16,12 @@
 #undef E2_LONG_INT
 #endif
 
+#if (__DBL_MANT_DIG__ >= 64)
+#define E2_LONG_DOUBLE
+#else
+#undef E2_LONG_DOUBLE
+#endif
+
 /**
  * Pre-declarations.
  */
@@ -624,10 +630,15 @@ namespace EUROPA {
 
 namespace std {
 
-#ifdef E2_LONG_INT
+#ifdef E2_LONG_INT //if we're using 64-bit integers
+#ifdef E2_LONG_DOUBLE //if we've got doubles with at least 64-bit significands, use max long
+  inline EUROPA::eint numeric_limits<EUROPA::eint>::infinity() throw()
+  {return EUROPA::eint(numeric_limits<long>::max(), true);}
+#else //if we've got doubles with the regular 52-bit significands, use 2^52 - 1
   inline EUROPA::eint numeric_limits<EUROPA::eint>::infinity() throw()
   {return eint(4503599627370495L, true);}
-#else
+#endif
+#else //if we're using 32-bit integers, use max long
   inline EUROPA::eint numeric_limits<EUROPA::eint>::infinity() throw()
   {return EUROPA::eint(numeric_limits<long>::max(), true);}
 #endif
@@ -640,10 +651,15 @@ namespace std {
   inline EUROPA::eint numeric_limits<EUROPA::eint>::signaling_NaN() throw() {return 0;}
   inline EUROPA::eint numeric_limits<EUROPA::eint>::denorm_min() throw() {return 0;}
 
-#ifdef E2_LONG_INT
+#ifdef E2_LONG_INT //if we're using 64-bit integers
+#ifdef E2_LONG_DOUBLE //if we've got doubles with at least 64-bit significands, use max long
+  inline EUROPA::edouble numeric_limits<EUROPA::edouble>::infinity() throw()
+  {return EUROPA::edouble((double) numeric_limits<long>::max(), true);}
+#else //if we've got doubles with the regular 52-bit significands, use 2^52 - 1
   inline EUROPA::edouble numeric_limits<EUROPA::edouble>::infinity() throw()
   {return EUROPA::edouble(4503599627370495.0, true);}
-#else
+#endif
+#else //if we're using 32-big integers, use max long
   inline EUROPA::edouble numeric_limits<EUROPA::edouble>::infinity() throw()
   {return EUROPA::edouble((double) numeric_limits<long>::max(), true);}
 #endif
