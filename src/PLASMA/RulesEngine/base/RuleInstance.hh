@@ -297,9 +297,9 @@ namespace EUROPA{
     std::vector<RuleInstanceId> m_childRules; /*!< Child rules introduced through rule execution */
     std::vector<ConstrainedVariableId> m_variables; /*< Local variables introduced through rule execution */
     std::vector<TokenId> m_slaves; /*< Slaves introduced through rule execution */
-    std::map<double, ConstrainedVariableId> m_variablesByName; /*!< Context lookup */
-    std::map<double, TokenId> m_slavesByName; /*!< Context lookup */
-    std::map<double, ConstraintId> m_constraintsByName; /*!< Context lookup */
+    std::map<edouble, ConstrainedVariableId> m_variablesByName; /*!< Context lookup */
+    std::map<edouble, TokenId> m_slavesByName; /*!< Context lookup */
+    std::map<edouble, ConstraintId> m_constraintsByName; /*!< Context lookup */
   };
 }
 #endif

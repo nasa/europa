@@ -1,5 +1,6 @@
 #include "PSVarValue.hh"
 #include "Debug.hh"
+#include "Entity.hh"
 
 #include <iomanip>
 
@@ -52,11 +53,12 @@ namespace EUROPA {
     return LabelStr(m_val).toString();
   }
 
-  PSEntity* PSVarValue::asObject() const 
-  {
+  PSEntity* PSVarValue::asObject() const {
     check_runtime_error(m_type == OBJECT);
-    Id<PSEntity> id(m_val);  // only works if PSEntity remains pure virtual
-    return (PSEntity *) id;
+    // only works if PSEntity remains pure virtual
+    //Id<PSEntity> id(Entity::getEntity(edouble(m_val)));
+    EntityId entity = Entity::getEntity(edouble(m_val));
+    return (PSEntity *) entity;
   }
 
 

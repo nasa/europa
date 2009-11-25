@@ -23,14 +23,14 @@ namespace EUROPA {
     
     void RuleSchema::registerRule(const RuleId& rule)
     {
-        m_rulesByName.insert(std::pair<double, RuleId>(rule->getName().getKey(), rule->getId()));      
+        m_rulesByName.insert(std::make_pair(rule->getName().getKey(), rule->getId()));      
     }
 
     void RuleSchema::getRules(const PlanDatabaseId& pdb, const LabelStr& name, std::vector<RuleId>& results)
     {
         const SchemaId& schema = pdb->getSchema();
 
-        std::multimap<double, RuleId>::const_iterator it = m_rulesByName.find(name.getKey());
+        std::multimap<edouble, RuleId>::const_iterator it = m_rulesByName.find(name.getKey());
         while(it != m_rulesByName.end()){
             RuleId rule = it->second;
             check_error(rule.isValid());
@@ -48,15 +48,15 @@ namespace EUROPA {
             getRules(pdb,schema->getParent(name), results);
     }
 
-    const std::multimap<double, RuleId>& RuleSchema::getRules()
+    const std::multimap<edouble, RuleId>& RuleSchema::getRules()
     {
         return m_rulesByName;
     }
 
     void RuleSchema::purgeAll()
     {
-        std::multimap<double, RuleId>& rules = m_rulesByName;
-        for(std::multimap<double, RuleId>::const_iterator it = rules.begin(); it != rules.end(); ++it){
+        std::multimap<edouble, RuleId>& rules = m_rulesByName;
+        for(std::multimap<edouble, RuleId>::const_iterator it = rules.begin(); it != rules.end(); ++it){
             RuleId rule = it->second;
             delete (Rule*) rule;
         }

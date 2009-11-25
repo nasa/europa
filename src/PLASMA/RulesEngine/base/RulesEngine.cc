@@ -51,7 +51,7 @@ namespace EUROPA{
 
     m_deleted = true;
     // Thus, only if we are in purge mode will we directly remove rule instances
-    for(std::multimap<int, RuleInstanceId>::const_iterator it=m_ruleInstancesByToken.begin();it!=m_ruleInstancesByToken.end();++it){
+    for(std::multimap<eint, RuleInstanceId>::const_iterator it=m_ruleInstancesByToken.begin();it!=m_ruleInstancesByToken.end();++it){
       RuleInstanceId ruleInstance = it->second;
       check_error(ruleInstance.isValid());
       ruleInstance->discard();
@@ -71,14 +71,14 @@ namespace EUROPA{
 
   std::set<RuleInstanceId> RulesEngine::getRuleInstances() const{
     std::set<RuleInstanceId> ruleInstances;
-    for(std::multimap<int, RuleInstanceId>::const_iterator it=m_ruleInstancesByToken.begin();it!=m_ruleInstancesByToken.end();++it)
+    for(std::multimap<eint, RuleInstanceId>::const_iterator it=m_ruleInstancesByToken.begin();it!=m_ruleInstancesByToken.end();++it)
       ruleInstances.insert(it->second);
     return ruleInstances;
   }
 
   void RulesEngine::getRuleInstances(const TokenId& token,std::set<RuleInstanceId>& results) const{
     check_error(token.isValid());
-    std::multimap<int, RuleInstanceId>::const_iterator it = m_ruleInstancesByToken.find(token->getKey());
+    std::multimap<eint, RuleInstanceId>::const_iterator it = m_ruleInstancesByToken.find(token->getKey());
     while(it!=m_ruleInstancesByToken.end() && it->first == token->getKey()){
       results.insert(it->second);
       ++it;
@@ -115,7 +115,7 @@ namespace EUROPA{
       RuleId rule = *it;
       check_error(rule.isValid());
       RuleInstanceId ruleInstance = rule->createInstance(token, getPlanDatabase(), getId());
-      m_ruleInstancesByToken.insert(std::pair<int, RuleInstanceId>(token->getKey(), ruleInstance));
+      m_ruleInstancesByToken.insert(std::make_pair(token->getKey(), ruleInstance));
     }
   }
 
@@ -131,7 +131,7 @@ namespace EUROPA{
   void RulesEngine::cleanupRuleInstances(const TokenId& token){
     check_error(token.isValid());
 
-    std::multimap<int, RuleInstanceId>::iterator it = m_ruleInstancesByToken.find(token->getKey());
+    std::multimap<eint, RuleInstanceId>::iterator it = m_ruleInstancesByToken.find(token->getKey());
     while(it!=m_ruleInstancesByToken.end() && it->first == token->getKey()){
       RuleInstanceId ruleInstance = it->second;
       check_error(ruleInstance.isValid());
@@ -143,7 +143,7 @@ namespace EUROPA{
 
   bool RulesEngine::hasPendingRuleInstances(const TokenId& token) const {
     check_error(token.isValid());
-    std::multimap<int, RuleInstanceId>::const_iterator it = m_ruleInstancesByToken.find(token->getKey());
+    std::multimap<eint, RuleInstanceId>::const_iterator it = m_ruleInstancesByToken.find(token->getKey());
     while(it!=m_ruleInstancesByToken.end() && it->first == token->getKey()){
       RuleInstanceId r = it->second;
       if(isPending(r))

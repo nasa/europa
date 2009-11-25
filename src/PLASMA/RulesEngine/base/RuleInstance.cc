@@ -225,7 +225,7 @@ namespace EUROPA {
       for(std::vector<ConstrainedVariableId>::const_iterator it = m_variables.begin(); it != m_variables.end(); ++it){
 	ConstrainedVariableId var = *it;
 	checkError(var.isValid(), var);
-	double key = var->getName().getKey();
+	edouble key = var->getName().getKey();
 	m_variablesByName.erase(key);
       }
 
@@ -326,7 +326,7 @@ namespace EUROPA {
    * if this seems a problem.
    */
   void RuleInstance::clearLoopVar(const LabelStr& loopVarName){
-    std::map<double, ConstrainedVariableId>::iterator it = m_variablesByName.begin();
+    std::map<edouble, ConstrainedVariableId>::iterator it = m_variablesByName.begin();
     while (it != m_variablesByName.end()){
       const LabelStr& name = it->first;
       const ConstrainedVariableId& var = it->second;
@@ -353,7 +353,7 @@ namespace EUROPA {
     // loop of 'foreach'
     m_slavesByName.erase(name.getKey());
 
-    m_slavesByName.insert(std::pair<double, TokenId>(name.getKey(), slave->getId()));
+    m_slavesByName.insert(std::make_pair(name.getKey(), slave->getId()));
     return addSlave(slave);
   }
 
@@ -367,7 +367,7 @@ namespace EUROPA {
     m_constraints.push_back(constraint);
     const LabelStr& name = constraint->getName();
     m_constraintsByName.erase(name.getKey());
-    m_constraintsByName.insert(std::pair<double, ConstraintId>(name.getKey(), constraint));
+    m_constraintsByName.insert(std::make_pair(name.getKey(), constraint));
     constraint->addDependent((Entity*) this);
     debugMsg("RuleInstance:addConstraint", "added constraint:" << constraint->toString());    
   }
@@ -389,15 +389,14 @@ namespace EUROPA {
   }
 
   ConstrainedVariableId RuleInstance::getVariable(const LabelStr& name) const{
-    std::map<double, ConstrainedVariableId>::const_iterator it = m_variablesByName.find(name.getKey());
+    std::map<edouble, ConstrainedVariableId>::const_iterator it = m_variablesByName.find(name.getKey());
     if(it != m_variablesByName.end())
       return it->second;
     else if (!m_parent.isNoId())
       return m_parent->getVariable(name);
     else if(getPlanDatabase()->isGlobalVariable(name))
       return getPlanDatabase()->getGlobalVariable(name);
-    else
-      return ConstrainedVariableId::noId();
+    return ConstrainedVariableId::noId();
   }
 
   TokenId RuleInstance::getSlave(const LabelStr& name) const{
@@ -406,24 +405,22 @@ namespace EUROPA {
     if(name == sl_this)
       return m_token;
 
-    std::map<double, TokenId>::const_iterator it = m_slavesByName.find(name.getKey());
+    std::map<edouble, TokenId>::const_iterator it = m_slavesByName.find(name.getKey());
     if(it != m_slavesByName.end())
       return it->second;
     else if (!m_parent.isNoId())
       return m_parent->getSlave(name);
-    else
-      return TokenId::noId();
+    return TokenId::noId();
   }
 
 
   ConstraintId RuleInstance::getConstraint(const LabelStr& name) const{
-    std::map<double, ConstraintId>::const_iterator it = m_constraintsByName.find(name.getKey());
+    std::map<edouble, ConstraintId>::const_iterator it = m_constraintsByName.find(name.getKey());
     if(it != m_constraintsByName.end())
       return it->second;
     else if (!m_parent.isNoId())
       return m_parent->getConstraint(name);
-    else
-      return ConstraintId::noId();
+    return ConstraintId::noId();
   }
 
   ConstraintId RuleInstance::constraint(const std::string& name) const{
@@ -435,7 +432,7 @@ namespace EUROPA {
     const std::vector<ConstrainedVariableId>& vars = m_token->getVariables();
     for(std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end(); ++it){
       ConstrainedVariableId var = *it;
-      m_variablesByName.insert(std::pair<double, ConstrainedVariableId>(var->getName().getKey(), var));
+      m_variablesByName.insert(std::make_pair(var->getName().getKey(), var));
     }
   }
 
@@ -488,7 +485,7 @@ namespace EUROPA {
     // be used to populate the base domain of the proxy variable by iteration over the base domain.
     
     // Initialize with any object in the domain
-    ObjectId iObj = obj->lastDomain().getLowerBound();
+    ObjectId iObj = Entity::getTypedEntity<Object>(obj->lastDomain().getLowerBound());
     std::vector<unsigned int> path; /*!< Push indexes as they are found */
 
     // Traverse the object structure using the names in each case. Store indexes as we go to build a path
@@ -496,7 +493,7 @@ namespace EUROPA {
       ConstrainedVariableId iVar = iObj->getVariable(LabelStr(iObj->getName().toString() + "." + names[varindex]));
       path.push_back(iVar->getIndex());
       checkError(iVar->lastDomain().isSingleton(), iVar->toString());
-      iObj = iVar->lastDomain().getSingletonValue();
+      iObj = Entity::getTypedEntity<Object>(iVar->lastDomain().getSingletonValue());
     }
 
     // Finally, handle the terminal point - the field variable itself
@@ -523,7 +520,7 @@ namespace EUROPA {
       ConstrainedVariableId fieldVar = object->getVariable(path);
       checkError(fieldVar->lastDomain().isSingleton(), fieldVar->toString());
       checkError(fieldVar->baseDomain().getTypeName() == fieldType, fieldVar->toString());
-      double value = fieldVar->lastDomain().getSingletonValue();
+      edouble value = fieldVar->lastDomain().getSingletonValue();
       proxyBaseDomain.insert(value);
       debugMsg("RuleInstance:varFromObject", "Adding value from " << fieldVar->toString());
     }
@@ -534,8 +531,8 @@ namespace EUROPA {
     // If it is a boolean, allocate a bool domain instead of the enumerated domain
     if(isBool){
       BoolDomain boolDomain(fieldType.c_str());
-      double lb = proxyBaseDomain.getLowerBound();
-      double ub = proxyBaseDomain.getUpperBound();
+      edouble lb = proxyBaseDomain.getLowerBound();
+      edouble ub = proxyBaseDomain.getUpperBound();
 
       // If a singleton, set as such
       if(lb == ub)

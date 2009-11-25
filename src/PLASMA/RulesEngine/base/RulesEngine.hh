@@ -55,7 +55,7 @@ namespace EUROPA {
     RuleSchemaId m_schema;
     const PlanDatabaseId m_planDb;
     PlanDatabaseListenerId m_planDbListener;
-    std::multimap<int, RuleInstanceId> m_ruleInstancesByToken;
+    std::multimap<eint, RuleInstanceId> m_ruleInstancesByToken;
     std::set<RulesEngineListenerId> m_listeners;
     bool m_deleted;
   };

@@ -342,7 +342,7 @@ private:
     CPPUNIT_ASSERT(t0.slaves().empty());
     t0.activate();
     CPPUNIT_ASSERT(db->getTokens().size() == 1);
-    t0.getObject()->specify(o1.getId());
+    t0.getObject()->specify(o1.getKey());
     ce->propagate();
     CPPUNIT_ASSERT(t0.slaves().size() == 1);
     CPPUNIT_ASSERT(db->getTokens().size() == 2);
@@ -355,7 +355,7 @@ private:
     CPPUNIT_ASSERT(t0.slaves().size() == 2);
 
     // Now set the object variable of the slaveToken to trigger additional guard
-    slaveToken->getObject()->specify(o2.getId());
+    slaveToken->getObject()->specify(o2.getKey());
     ce->propagate();
     CPPUNIT_ASSERT(t0.slaves().size() == 3);
 
@@ -553,7 +553,7 @@ private:
     proxyVar.specify(1);
     CPPUNIT_ASSERT(ce->propagate());
     CPPUNIT_ASSERT(objVar.lastDomain().isSingleton());
-    CPPUNIT_ASSERT(objVar.lastDomain().getSingletonValue() == obj1.getId());
+    CPPUNIT_ASSERT(objVar.lastDomain().getSingletonValue() == obj1.getKey());
 
     // Reset and ensure things go back to normal
     proxyVar.reset();
@@ -561,7 +561,7 @@ private:
     CPPUNIT_ASSERT_MESSAGE(objVar.toString(), objVar.lastDomain().getSize() == 3);
 
     // Specify the object var and ensure the proxy var also becomes specified
-    objVar.specify(obj2.getId());
+    objVar.specify(obj2.getKey());
     CPPUNIT_ASSERT(ce->propagate());
     CPPUNIT_ASSERT(proxyVar.isSpecified());
 
@@ -572,7 +572,7 @@ private:
 
     // First set the proxy, then set the object. Retract the proxy but ensure it is not reset
     proxyVar.specify(1);
-    objVar.specify(obj1.getId());
+    objVar.specify(obj1.getKey());
     proxyVar.reset();
     CPPUNIT_ASSERT(proxyVar.isSpecified());
 
@@ -582,7 +582,7 @@ private:
 
     // specify both such that there is an inconsistency
     proxyVar.specify(2);
-    objVar.specify(obj1.getId());
+    objVar.specify(obj1.getKey());
     CPPUNIT_ASSERT(!ce->propagate());
 
     // Back off an fix it

@@ -39,15 +39,15 @@ namespace EUROPA {
     // First prune the objects againts the proxy values
     EnumeratedDomain remainingValues(m_proxyDomain.isNumeric(), m_proxyDomain.getTypeName().c_str());
 
-    const std::set<double>& objects = m_objectDomain.getValues();
+    const std::set<edouble>& objects = m_objectDomain.getValues();
     ObjectDomain remainingObjects(m_objectDomain.getTypeName().c_str());
-    for(std::set<double>::const_iterator it = objects.begin(); it != objects.end(); ++it){
-      ObjectId object = *it;
+    for(std::set<edouble>::const_iterator it = objects.begin(); it != objects.end(); ++it){
+      ObjectId object = Entity::getTypedEntity<Object>(*it);
       ConstrainedVariableId var = object->getVariable(m_path);
-      double value = var->lastDomain().getSingletonValue();
+      edouble value = var->lastDomain().getSingletonValue();
       if(m_proxyDomain.isMember(value)){
 	remainingValues.insert(value);
-	remainingObjects.insert(object);
+	remainingObjects.insert(*it);
       }
     }
 
@@ -73,7 +73,7 @@ namespace EUROPA {
     if(argIndex == 0 && changeType == DomainListener::SET_TO_SINGLETON && 
        getScope()[1]->canBeSpecified() &&
        !getScope()[1]->isSpecified()){
-      ObjectId object = variable->getSpecifiedValue();
+      ObjectId object = Entity::getTypedEntity<Object>(variable->getSpecifiedValue());
       ConstrainedVariableId fieldVar = object->getVariable(m_path);
       checkError(fieldVar->isSpecified(), fieldVar->toString());
       m_autoSpecified = true;
@@ -90,7 +90,7 @@ namespace EUROPA {
 
     // If the proxy variable is RESET, but the object variable remains specified, re-specify the proxy
     if(argIndex == 1 && changeType == DomainListener::RESET && getScope()[0]->isSpecified()){
-      ObjectId object = getScope()[0]->getSpecifiedValue();
+      ObjectId object = Entity::getTypedEntity<Object>(getScope()[0]->getSpecifiedValue());
       ConstrainedVariableId fieldVar = object->getVariable(m_path);
       checkError(fieldVar->isSpecified(), fieldVar->toString());
       m_autoSpecified = true;
@@ -116,7 +116,7 @@ namespace EUROPA {
    * @see Constraint::handleAddition
    */
   void ProxyVariableRelation::updatePathFromSource(){
-    if(m_sourceConstraint.isId() && m_sourceConstraintKey != (signed int) m_sourceConstraint->getKey()){
+    if(m_sourceConstraint.isId() && m_sourceConstraintKey != m_sourceConstraint->getKey()){
       ProxyVariableRelation* proxyConstraint = (ProxyVariableRelation*) m_sourceConstraint;
       m_path = proxyConstraint->m_path;
       m_sourceConstraint = ConstraintId::noId();
