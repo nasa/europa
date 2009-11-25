@@ -36,7 +36,7 @@ public class ActionDetailsPanel
 	{
 		StringBuffer buf = new StringBuffer();
 
-        buf.append("ID     : ").append(t.getKey()).append("\n")
+        buf.append("ID     : ").append(t.getEntityKey()).append("\n")
            .append("Name   : ").append(t.getEntityName()).append("\n")
            .append("isFact  : ").append(t.isFact()).append("\n")
         ;

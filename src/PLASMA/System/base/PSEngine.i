@@ -343,7 +343,7 @@ namespace EUROPA {
   class PSEntity
   {
   public:
-    PSEntityKey getKey() const;
+    PSEntityKey getEntityKey() const;
     const std::string& getEntityName() const;
     const std::string& getEntityType() const;
 
