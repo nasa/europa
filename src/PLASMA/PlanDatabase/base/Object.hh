@@ -357,6 +357,7 @@ namespace EUROPA {
     ObjectDomain(const std::string& typeName);
     ObjectDomain(const std::list<ObjectId>& initialValues, const std::string& typeName = getDefaultTypeName().toString());
     ObjectDomain(const ObjectId& initialValue, const std::string& typeName = getDefaultTypeName().toString());
+    ObjectDomain(const edouble& initialValue, const std::string& typeName = getDefaultTypeName().toString());
     ObjectDomain(const AbstractDomain& org);
     /**
      * @brief Get the default name of the type of the domain.
@@ -379,6 +380,17 @@ namespace EUROPA {
      * @brief Generate a list of object id's internal member data
      */
     std::list<ObjectId> makeObjectList() const;
+
+    ObjectId getObject(const eint key) const;
+
+    ObjectId getObject(const edouble key) const {return getObject(eint(key));}
+
+    void remove(edouble value);
+    void remove(const ObjectId& obj);
+
+    bool isMember(const ObjectId& obj) const;
+
+    bool isMember(edouble value) const;
 
     virtual ObjectDomain *copy() const;
 

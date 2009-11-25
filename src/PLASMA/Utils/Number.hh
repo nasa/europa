@@ -305,29 +305,46 @@ namespace EUROPA {
     typedef long basis_type;
 
     eint(const int v) : m_v(v) {
-      if(m_v > std::numeric_limits<eint>::infinity())
+      if(m_v > std::numeric_limits<eint>::infinity()) {
+        assert(m_v <= std::numeric_limits<eint>::infinity());
         m_v = cast_int(std::numeric_limits<eint>::infinity());
-      else if(m_v < std::numeric_limits<eint>::minus_infinity())
+      }
+      else if(m_v < std::numeric_limits<eint>::minus_infinity()) {
+        assert(m_v >= std::numeric_limits<eint>::minus_infinity());
         m_v = cast_int(std::numeric_limits<eint>::minus_infinity());
+      }
     }
     eint(const long v) : m_v(v) { //this should maybe warn of loss of precision on 64-bit platforms?
-      if(m_v > std::numeric_limits<eint>::infinity())
+      if(m_v > std::numeric_limits<eint>::infinity()) {
+        assert(m_v <= std::numeric_limits<eint>::infinity());
         m_v = cast_int(std::numeric_limits<eint>::infinity());
-      else if(m_v < std::numeric_limits<eint>::minus_infinity())
+      }
+      else if(m_v < std::numeric_limits<eint>::minus_infinity()) {
+        assert(m_v >= std::numeric_limits<eint>::minus_infinity());
         m_v = cast_int(std::numeric_limits<eint>::minus_infinity());
+      }
 
     } 
     eint(const unsigned int v) : m_v((long)v) {
-      if(m_v > std::numeric_limits<eint>::infinity())
+      if(m_v > std::numeric_limits<eint>::infinity()) {
+        assert(m_v <= std::numeric_limits<eint>::infinity());
         m_v = cast_int(std::numeric_limits<eint>::infinity());
-      else if(m_v < std::numeric_limits<eint>::minus_infinity())
+      }
+      else if(m_v < std::numeric_limits<eint>::minus_infinity()) {
+        assert(m_v >= std::numeric_limits<eint>::minus_infinity());
         m_v = cast_int(std::numeric_limits<eint>::minus_infinity());
+      }
     }
     eint(const unsigned long v) : m_v((long)v) {
-      if(m_v > std::numeric_limits<eint>::infinity())
+      if(m_v > std::numeric_limits<eint>::infinity()) {
+        assert(m_v <= std::numeric_limits<eint>::infinity());
+        assert(m_v >= std::numeric_limits<eint>::minus_infinity());
         m_v = cast_int(std::numeric_limits<eint>::infinity());
-      else if(m_v < std::numeric_limits<eint>::minus_infinity())
+      }
+      else if(m_v < std::numeric_limits<eint>::minus_infinity()) {
+        assert(m_v >= std::numeric_limits<eint>::minus_infinity());
         m_v = cast_int(std::numeric_limits<eint>::minus_infinity());
+      }
     }
 
     eint() : m_v(0) {}
@@ -453,10 +470,14 @@ namespace EUROPA {
 
     edouble(const eint v) : m_v(v.m_v) {} //don't have to check infinities with eints
     edouble(const double v) : m_v(v) {
-      if(m_v > std::numeric_limits<edouble>::infinity())
+      if(m_v > std::numeric_limits<edouble>::infinity()) {
+        assert(m_v <= std::numeric_limits<edouble>::infinity());
         m_v = cast_double(std::numeric_limits<edouble>::infinity());
-      else if(m_v < std::numeric_limits<edouble>::minus_infinity())
+      }
+      else if(m_v < std::numeric_limits<edouble>::minus_infinity()) {
+        assert(m_v >= std::numeric_limits<eint>::minus_infinity());
         m_v = cast_double(std::numeric_limits<edouble>::minus_infinity());
+      }
     }
     edouble() : m_v(0.0) {}
     inline edouble operator+() const {return edouble(+m_v, true);}

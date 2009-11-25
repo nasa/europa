@@ -126,8 +126,10 @@ namespace EUROPA{
      * @brief Retrieve an Entity by key.
      * @return The Id of the requested Entity if present, otherwise a noId;
      */
-    static EntityId getEntity(eint key);
+    static EntityId getEntity(const eint key);
 
+    template<typename T>
+    static Id<T> getTypedEntity(const eint key) {return Id<T>(getEntity(key));}
     /**
      * @brief Get all entities
      */

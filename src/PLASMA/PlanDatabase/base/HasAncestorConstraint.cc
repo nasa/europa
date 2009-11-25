@@ -49,7 +49,7 @@ namespace EUROPA{
     std::list<ObjectId> allAncestors;
     for(std::list<edouble>::const_iterator it = firstValues.begin(); it != firstValues.end(); ++it){
       std::list<ObjectId> candidatesAncestors;
-      ObjectId candidate = *it;
+      ObjectId candidate = m_first.getObject(*it);
       candidate->getAncestors(candidatesAncestors);
       allAncestors.merge(candidatesAncestors);
     }
@@ -65,7 +65,7 @@ namespace EUROPA{
     m_first.getValues(candidateValues);
     for(std::list<edouble>::const_iterator it = candidateValues.begin(); it != candidateValues.end(); ++it){
       std::list<ObjectId> candidatesAncestors;
-      ObjectId candidate = *it;
+      ObjectId candidate = m_first.getObject(*it);
       candidate->getAncestors(candidatesAncestors);
       bool removeCandidate = true;
       for(std::list<ObjectId>::const_iterator it1 = candidatesAncestors.begin(); it1 != candidatesAncestors.end(); ++it1){

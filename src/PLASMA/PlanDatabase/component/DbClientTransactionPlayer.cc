@@ -1332,7 +1332,7 @@ namespace EUROPA {
     }
     ConstrainedVariableId var = m_variables[ident];
     checkError(var.isValid(), "Invalid id for " << ident);
-    ObjectId object = var->lastDomain().getSingletonValue();
+    ObjectId object = Entity::getTypedEntity<Object>(var->lastDomain().getSingletonValue());
     checkError(object.isValid(), "Invalid object for " << ident);
     var = object->getVariable(LabelStr(varString));
     checkError(var.isValid(), varString << " not found on " << object->toString());
@@ -1532,7 +1532,7 @@ namespace EUROPA {
          values.push_back(m_client->createValue(typeName.c_str(), value_st));
          break;
        case OBJECT:
-         values.push_back(m_client->getObject(value_st));
+         values.push_back(m_client->getObject(value_st)->getKey());
          break;
        default:
          check_error(ALWAYS_FAILS);
@@ -1604,11 +1604,11 @@ namespace EUROPA {
     if (strcmp(tag, "object") == 0) {
       ObjectId object = m_client->getObject(value_st);
       check_error(object.isValid());
-      return((edouble)object);
+      return(object->getKey());
     }
     ObjectId object = m_client->getObject(value_st);
     if (object != ObjectId::noId())
-      return((edouble)object);
+      return(object->getKey());
     check_error(ALWAYS_FAILS);
     return(0);
   }

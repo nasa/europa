@@ -607,7 +607,7 @@ private:
       str << o2.getKey();
       edouble value(0);
       CPPUNIT_ASSERT(os1.convertToMemberValue(str.str(), value));
-      CPPUNIT_ASSERT(value == o2.getId());
+      CPPUNIT_ASSERT(value == o2.getKey());
     }
 
     {
@@ -687,7 +687,7 @@ private:
 
     // 4. Specify tokens object variable to a ingletone
 
-    eventToken.getObject()->specify(object1);
+    eventToken.getObject()->specify(object1->getKey());
 
     // Confirm added to the object
     CPPUNIT_ASSERT(eventToken.getObject()->getDerivedDomain().isSingleton());
@@ -717,13 +717,13 @@ private:
     Object o7(o3.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o7");
 
     ObjectDomain allObjects(LabelStr(DEFAULT_OBJECT_TYPE).c_str());
-    allObjects.insert(o1.getId());
-    allObjects.insert(o2.getId());
-    allObjects.insert(o3.getId());
-    allObjects.insert(o4.getId());
-    allObjects.insert(o5.getId());
-    allObjects.insert(o6.getId());
-    allObjects.insert(o7.getId());
+    allObjects.insert(o1.getKey());
+    allObjects.insert(o2.getKey());
+    allObjects.insert(o3.getKey());
+    allObjects.insert(o4.getKey());
+    allObjects.insert(o5.getKey());
+    allObjects.insert(o6.getKey());
+    allObjects.insert(o7.getKey());
     allObjects.close();
 
     // Ensure there they agree on a common root.
@@ -777,14 +777,14 @@ private:
 
       CPPUNIT_ASSERT(ENGINE->propagate()); // All ok so far
 
-      restrictions.specify(o2.getId());
+      restrictions.specify(o2.getKey());
       CPPUNIT_ASSERT(ENGINE->propagate()); // Nothing happens yet.
 
-      first.specify(o6.getId()); // Now we should propagate to failure
+      first.specify(o6.getKey()); // Now we should propagate to failure
       CPPUNIT_ASSERT(!ENGINE->propagate());
       first.reset();
 
-      first.specify(o4.getId());
+      first.specify(o4.getKey());
       CPPUNIT_ASSERT(ENGINE->propagate());
     }
     DEFAULT_TEARDOWN();
@@ -805,8 +805,8 @@ private:
 
     // Positive test immediate ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o3.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o3.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       HasAncestorConstraint constraint("hasAncestor",
                                        "Default",
                                        ENGINE,
@@ -817,8 +817,8 @@ private:
 
     // negative test immediate ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       HasAncestorConstraint constraint("hasAncestor",
                                        "Default",
                                        ENGINE,
@@ -828,8 +828,8 @@ private:
     }
     // Positive test higher up  ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       HasAncestorConstraint constraint("hasAncestor",
                                        "Default",
                                        ENGINE,
@@ -839,8 +839,8 @@ private:
     }
     // negative test higherup ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o8.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o8.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       HasAncestorConstraint constraint("hasAncestor",
                                        "Default",
                                        ENGINE,
@@ -852,12 +852,12 @@ private:
     //positive restriction of the set.
     {
       ObjectDomain obs(LabelStr(DEFAULT_OBJECT_TYPE).c_str());
-      obs.insert(o7.getId());
-      obs.insert(o4.getId());
+      obs.insert(o7.getKey());
+      obs.insert(o4.getKey());
       obs.close();
 
       Variable<ObjectDomain> first(ENGINE, obs);
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       HasAncestorConstraint constraint("hasAncestor",
                                        "Default",
                                        ENGINE,
@@ -870,12 +870,12 @@ private:
     //no restriction of the set.
     {
       ObjectDomain obs1(LabelStr(DEFAULT_OBJECT_TYPE).c_str());
-      obs1.insert(o7.getId());
-      obs1.insert(o4.getId());
+      obs1.insert(o7.getKey());
+      obs1.insert(o4.getKey());
       obs1.close();
 
       Variable<ObjectDomain> first(ENGINE, obs1);
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getId(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
       HasAncestorConstraint constraint("hasAncestor",
                                        "Default",
                                        ENGINE,
@@ -904,7 +904,7 @@ private:
     Object o1(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
     CPPUNIT_ASSERT(ENGINE->propagate());
     CPPUNIT_ASSERT(!db->isClosed(LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-    CPPUNIT_ASSERT(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getId());
+    CPPUNIT_ASSERT(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getKey());
 
     // Now delete the variable. This should remove the listener
     delete (ConstrainedVariable*) v0;
@@ -929,7 +929,7 @@ private:
     CPPUNIT_ASSERT(!v0->isClosed());
     CPPUNIT_ASSERT(ENGINE->propagate());
     CPPUNIT_ASSERT(!db->isClosed(LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-    CPPUNIT_ASSERT(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getId());
+    CPPUNIT_ASSERT(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getKey());
 
     // Now create another object and verify it is part of the initial domain of the next variable
     Object o2(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
@@ -945,8 +945,8 @@ private:
     CPPUNIT_ASSERT(!v1->isClosed());
     CPPUNIT_ASSERT_MESSAGE(v1->lastDomain().toString(),
                v0->lastDomain() == v1->lastDomain() &&
-	       v1->lastDomain().isMember(o1.getId())  &&
-	       v1->lastDomain().isMember(o2.getId()));
+	       v1->lastDomain().isMember(o1.getKey())  &&
+	       v1->lastDomain().isMember(o2.getKey()));
 
     // Now delete the variables.
     delete (ConstrainedVariable*) v0;
@@ -972,7 +972,7 @@ private:
     CPPUNIT_ASSERT(ENGINE->propagate());
 
     // Make sure the object var of the token contains o1.
-    CPPUNIT_ASSERT(eventToken.getObject()->lastDomain().isMember(o1));
+    CPPUNIT_ASSERT(eventToken.getObject()->lastDomain().isMember(o1->getKey()));
 
     // Since the object type should be closed automatically, the object variable will propagate changes,
     // so the object token relation will link up the Token and the object.
@@ -981,7 +981,7 @@ private:
     // Insertion of a new object should not affect the given event token
     ObjectId o2 = (new Object(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
     CPPUNIT_ASSERT(ENGINE->constraintConsistent());
-    CPPUNIT_ASSERT(!eventToken.getObject()->baseDomain().isMember(o2));
+    CPPUNIT_ASSERT(!eventToken.getObject()->baseDomain().isMember(o2->getKey()));
 
     DEFAULT_TEARDOWN();
     return true;
@@ -2499,7 +2499,7 @@ private:
     CPPUNIT_ASSERT(!o1.hasToken(t0.getId()));
 
     // Now specify the object value. Expect it to be assigned.
-    t0.getObject()->specify(o1.getId());
+    t0.getObject()->specify(o1.getKey());
     ce->propagate();
 
     CPPUNIT_ASSERT(t0.isAssigned());
@@ -2931,7 +2931,7 @@ private:
     CPPUNIT_ASSERT(tokensToOrder.empty());
 
     // Specify the object variable of one - but still should return no tokens since they are all inactive
-    tokenA.getObject()->specify(timeline.getId());
+    tokenA.getObject()->specify(timeline.getKey());
     timeline.getTokensToOrder(tokensToOrder);
     CPPUNIT_ASSERT(tokensToOrder.empty());
 
@@ -2943,8 +2943,8 @@ private:
     CPPUNIT_ASSERT(tokensToOrder.size() == 3);
 
     // Set remainders so they are singeltons and get all back
-    tokenB.getObject()->specify(timeline.getId());
-    tokenC.getObject()->specify(timeline.getId());
+    tokenB.getObject()->specify(timeline.getKey());
+    tokenC.getObject()->specify(timeline.getKey());
     tokensToOrder.clear();
     timeline.getTokensToOrder(tokensToOrder);
     CPPUNIT_ASSERT(tokensToOrder.size() == 3);
@@ -3000,7 +3000,7 @@ private:
                                          IntervalIntDomain(start+DURATION, start+DURATION),
                                          IntervalIntDomain(DURATION, DURATION)))->getId();
       CPPUNIT_ASSERT(token->getObject()->getBaseDomain().isSingleton());
-      token->getObject()->specify(timeline->getId());
+      token->getObject()->specify(timeline->getKey());
       token->activate();
     }
 
@@ -3047,7 +3047,7 @@ private:
                                        IntervalIntDomain(),
                                        IntervalIntDomain(),
                                        IntervalIntDomain(DURATION, DURATION)))->getId();
-    token->getObject()->specify(timeline->getId());
+    token->getObject()->specify(timeline->getKey());
     token->start()->specify(0);
     token->activate();
     std::vector<std::pair<TokenId, TokenId> > choices;
@@ -3117,7 +3117,7 @@ private:
                       IntervalIntDomain(0, 1000),
                       IntervalIntDomain(1, 1000));
 
-    it1.getObject()->specify(timeline.getId());
+    it1.getObject()->specify(timeline.getKey());
     it1.activate();
     timeline.constrain(it1.getId(), it1.getId());
 
@@ -3129,7 +3129,7 @@ private:
                    IntervalIntDomain(0, 100),
                    Token::noObject());
 
-    et1.getObject()->specify(timeline.getId());
+    et1.getObject()->specify(timeline.getKey());
     et1.activate();
     timeline.constrain(it1.getId(), et1.getId());
     CPPUNIT_ASSERT(it1.end()->getDerivedDomain().getUpperBound() == 100);
@@ -3142,7 +3142,7 @@ private:
                    IntervalIntDomain(0, 100),
                    Token::noObject());
 
-    et2.getObject()->specify(timeline.getId());
+    et2.getObject()->specify(timeline.getKey());
     et2.activate();
     timeline.constrain(et2.getId(), et1.getId());
     CPPUNIT_ASSERT(it1.end()->getDerivedDomain().getUpperBound() == 100);
@@ -3155,7 +3155,7 @@ private:
                    IntervalIntDomain(10, 100),
                    Token::noObject());
 
-    et3.getObject()->specify(timeline.getId());
+    et3.getObject()->specify(timeline.getKey());
     et3.activate();
     timeline.constrain(et3.getId(), it1.getId());
     CPPUNIT_ASSERT(it1.start()->getDerivedDomain().getLowerBound() == 10);
@@ -3168,7 +3168,7 @@ private:
                    IntervalIntDomain(0, 100),
                    Token::noObject());
 
-    et4.getObject()->specify(timeline.getId());
+    et4.getObject()->specify(timeline.getKey());
     et4.activate();
     timeline.constrain(et4.getId(), et1.getId());
     bool res = ce->propagate();
@@ -3303,7 +3303,7 @@ private:
     CPPUNIT_ASSERT(!o1.hasToken(t0.getId()));
 
     // Now specify the object value.
-    t0.getObject()->specify(o1.getId());
+    t0.getObject()->specify(o1.getKey());
     ce->propagate();
 
     // It should still not be assigned
@@ -3531,8 +3531,8 @@ private:
 	lastToken = tokenA;
 
       timeline.constrain(lastToken, tokenA); // Place at the end
-      slaveB->getObject()->specify(timeline.getId());
-      slaveC->getObject()->specify(timeline.getId());
+      slaveB->getObject()->specify(timeline.getKey());
+      slaveC->getObject()->specify(timeline.getKey());
       ce->propagate();
       tokenA->restrictBaseDomains();
       slaveB->restrictBaseDomains();

@@ -171,7 +171,7 @@ namespace EUROPA{
       ConstrainedVariableId connectedObjectVariable = it->second.first;
       check_error(connectedObjectVariable.isValid());
       if(!connectedObjectVariable->isClosed())
-        connectedObjectVariable->insert(object);
+        connectedObjectVariable->insert(object->getKey());
       ++it;
     }
 
@@ -209,7 +209,7 @@ namespace EUROPA{
     while (it != m_objectVariablesByObjectType.end() && it->first == object->getType()){
       ConstrainedVariableId connectedObjectVariable = it->second.first;
       check_error(connectedObjectVariable.isValid());
-      connectedObjectVariable->remove(object);
+      connectedObjectVariable->remove(object->getKey());
       ++it;
     }
 
@@ -515,7 +515,7 @@ namespace EUROPA{
     token->getObject()->lastDomain().getValues(objects);
     unsigned int choiceCount = 0;
     for(std::list<edouble>::const_iterator it = objects.begin(); it != objects.end(); ++it){
-      ObjectId object = *it;
+      ObjectId object = Entity::getTypedEntity<Object>(*it);
       choiceCount = choiceCount + object->countOrderingChoices(token, limit-choiceCount);
       if(choiceCount >= limit)
         break;
@@ -531,7 +531,7 @@ namespace EUROPA{
     unsigned int choiceCount = 0;
     token->getObject()->lastDomain().getValues(objects);
     for(std::list<edouble>::const_iterator it = objects.begin(); it != objects.end(); ++it){
-      ObjectId object = *it;
+      ObjectId object = Entity::getTypedEntity<Object>(*it);
       choiceCount = choiceCount + object->lastOrderingChoiceCount(token);
     }
 
@@ -799,7 +799,7 @@ namespace EUROPA{
     for(std::list<ObjectId>::const_iterator it = objects.begin(); it != objects.end(); ++it){
       ObjectId object = *it;
       check_error(object.isValid());
-      objectVar->insert(object);
+      objectVar->insert(object->getKey());
       debugMsg("PlanDatabase:makeObjectVariable",
                "Inserting object " << object->getName().toString() << " of type "
                << object->getType().toString() << " for base type " << objectType.toString());

@@ -52,7 +52,7 @@ namespace EUROPA{
     static int counter(0);
     counter++;
     check_error(singleton.isSingleton());
-    ObjectId singletonObject = singleton.getSingletonValue();
+    ObjectId singletonObject = singleton.getObject(singleton.getSingletonValue());
     //std::cout << counter << ":" << std::endl << singleton << ", " << other;
 
     // Get all singleton ancestors into a set we can use
@@ -78,7 +78,7 @@ namespace EUROPA{
     other.getValues(candidateValues);
     for(std::list<edouble>::const_iterator it = candidateValues.begin(); it != candidateValues.end(); ++it){
       std::list<ObjectId> candidatesAncestors;
-      ObjectId candidate = *it;
+      ObjectId candidate = other.getObject(*it);
       check_error(candidate.isValid());
       candidate->getAncestors(candidatesAncestors);
       candidatesAncestors.push_back(candidate);

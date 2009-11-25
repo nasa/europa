@@ -532,7 +532,7 @@ namespace EUROPA {
       else if (LabelStr::isString(valueAsDouble))
           return LabelStr(valueAsDouble).toString();
       else {
-          EntityId entity(valueAsDouble);
+        EntityId entity = Entity::getEntity(valueAsDouble);
           return entity->getName().toString();
       }	  
   }

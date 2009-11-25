@@ -19,6 +19,7 @@
 #include <string>
 #include <cmath>
 #include <limits>
+#include <sstream>
 
 namespace EUROPA {
 
@@ -63,6 +64,25 @@ namespace EUROPA {
   void tokenize(const std::string& str, 
 		std::vector<std::string>& tokens,  
 		const std::string& delimiters = " "); 
+
+  /**
+   * @brief Utility function to convert a string to a value type using the >> operator and an istringstream.  Does not error-check.
+   */
+  template<typename T>
+  T toValue(const std::string& str) {
+    T retval;
+    std::istringstream sst(str);
+    sst >> retval;
+    return retval;
+  }
+
+  template<typename T>
+  bool toValue(const std::string& str, T& value) {
+    std::istringstream sst(str);
+    if(!(sst >> value))
+      return false;
+    return true;
+  }
 
   template<class TYPE>
   bool allValid(const std::set<Id<TYPE> >& objects){

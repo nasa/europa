@@ -129,7 +129,7 @@ namespace EUROPA{
       // Notify objects that the token is being deleted. Allows synchronization
       const std::set<edouble>& objects = getObject()->getBaseDomain().getValues();
       for(std::set<edouble>::const_iterator it = objects.begin(); it!= objects.end(); ++it){
-	ObjectId object = *it;
+	ObjectId object = Entity::getTypedEntity<Object>(*it);
 	object->notifyDeleted(m_id);
       }
 
@@ -314,7 +314,7 @@ namespace EUROPA{
     /** Send a message to all objects that it has been rejected **/
     const std::set<edouble>& objects = getObject()->getBaseDomain().getValues();
     for(std::set<edouble>::const_iterator it = objects.begin(); it!= objects.end(); ++it){
-      ObjectId object = *it;
+      ObjectId object = Entity::getTypedEntity<Object>(*it);
       object->notifyMerged(m_id);
     }
 
@@ -362,7 +362,7 @@ namespace EUROPA{
     /** Send a message to all objects that it has been rejected **/
     const std::set<edouble>& objects = getObject()->getBaseDomain().getValues();
     for(std::set<edouble>::const_iterator it = objects.begin(); it!= objects.end(); ++it){
-      ObjectId object = *it;
+      ObjectId object = Entity::getTypedEntity<Object>(*it);
       object->notifyRejected(m_id);
     }
 
@@ -545,8 +545,8 @@ namespace EUROPA{
     if (objectName != noObject()) {
       ObjectId object = m_planDatabase->getObject(objectName);
       check_error(object.isValid());
-      check_error(m_object->baseDomain().isMember(object));
-      m_object->specify(object);
+      check_error(m_object->baseDomain().isMember(object->getKey()));
+      m_object->specify(object->getKey());
     }
 
     m_allVariables.push_back(m_object);
@@ -609,7 +609,8 @@ namespace EUROPA{
     if (!isActive() || !getObject()->lastDomain().isSingleton())
       return false;
 
-    ObjectId object = getObject()->lastDomain().getSingletonValue();
+    ObjectId object =
+      Entity::getTypedEntity<Object>(getObject()->lastDomain().getSingletonValue());
     return object->hasToken(m_id);
   }
 
@@ -934,7 +935,7 @@ PSObject* Token::getOwner() const {
     return NULL;
 
   ObjectVarId objVar = getObject();
-  ObjectId id = ObjectId(objVar->lastDomain().getSingletonValue());
+  ObjectId id = Entity::getTypedEntity<Object>(objVar->lastDomain().getSingletonValue());
   return (PSObject *) id;
   //  return new PSObject(ObjectId(objVar->lastDomain().getSingletonValue()));
 }

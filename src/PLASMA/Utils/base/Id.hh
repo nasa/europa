@@ -158,19 +158,19 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      * @param val An eint value encoding of the address of the instance to be pointed to.
      * Must be 0, or an address for which an Id has already been allocated.
      */
-    inline Id(edouble val) {
+    inline Id(double val) {
 #ifndef EUROPA_FAST
       if (val == 0)
         m_key = 0;
       else {
-        m_key = IdTable::getKey((unsigned long int) cast_long(val));
+        m_key = IdTable::getKey((unsigned long int) val);
         checkError(m_key != 0,
                    "Cannot instantiate an Id<" << typeid(T).name() << "> for this address: "  <<
-                   std::hex << (unsigned long int) cast_long(val) << ". No instance present.",
+                   std::hex << (unsigned long int) val << ". No instance present.",
                    IdErr::IdMgrInvalidItemPtrError());
       }
 #endif
-      m_ptr = (T*) (unsigned long int) cast_long(val);
+      m_ptr = (T*) (unsigned long int) val;
     }
 
 
@@ -201,8 +201,8 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      * @brief Cast the pointer to an int.
      */
 
-    inline operator edouble() const {
-      return edouble((unsigned long int) m_ptr);
+    inline operator double() const {
+      return (double)((unsigned long int) m_ptr);
     }
 
     /**

@@ -383,7 +383,7 @@ bool IdTests::testCollectionSupport()
 bool IdTests::testDoubleConversion()
 {
   Id<Foo> fId(new Foo());
-  edouble fooAsDouble = (edouble) fId;
+  double fooAsDouble = (double) fId;
   Id<Foo> idFromDbl(fooAsDouble);
   CPPUNIT_ASSERT(idFromDbl == fId);
   fId.release();
@@ -407,7 +407,7 @@ bool IdTests::testCastingSupport()
   bId.release();
 
   bId = Id<Bar>(new Bar());
-  edouble ptrAsDouble = bId; // Cast to double
+  double ptrAsDouble = bId; // Cast to double
 
   const Id<Bar>& cbId(ptrAsDouble);
   CPPUNIT_ASSERT(cbId.isValid());

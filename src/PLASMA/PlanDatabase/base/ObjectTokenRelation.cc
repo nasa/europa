@@ -102,7 +102,7 @@ namespace EUROPA {
     check_error(!values.empty());
 
     for(std::list<edouble>::const_iterator it = values.begin(); it != values.end(); ++it){
-      ObjectId object = *it;
+      ObjectId object = Entity::getTypedEntity<Object>(*it);
       check_error(object.isValid());
       if(m_notifiedObjects.find(object) == m_notifiedObjects.end()){
 	m_notifiedObjects.insert(object);

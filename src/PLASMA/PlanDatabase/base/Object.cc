@@ -381,7 +381,7 @@ namespace EUROPA {
 
     ConstrainedVariableId var = m_variables[index];
     if(path.size() > 1){
-      ObjectId object = var->lastDomain().getSingletonValue();
+      ObjectId object = Entity::getTypedEntity<Object>(var->lastDomain().getSingletonValue());
       std::vector<unsigned int>::const_iterator it = path.begin();
       std::vector<unsigned int> newPath(++it, path.end());
 
@@ -529,7 +529,7 @@ namespace EUROPA {
   void Object::constrainToThisObjectAsNeeded(const TokenId& token) {
     check_error(token.isValid());
     check_error(token->isActive());
-    check_error(token->getObject()->lastDomain().isMember(m_id),
+    check_error(token->getObject()->lastDomain().isMember(m_id->getKey()),
       "Cannot assign token " + token->getName().toString() + " to  object " + getName().toString() + ", it is not part of derived domain.");
 
     // Place this token on the object. We use a constraint since token assignment is done by specifying
@@ -596,17 +596,23 @@ namespace EUROPA {
     for(std::list<ObjectId>::const_iterator it = initialValues.begin(); it != initialValues.end(); ++it){
       ObjectId object = *it;
       check_error(object.isValid());
-      insert(object);
+      insert(object->getKey());
     }
     close();
   }
 
   ObjectDomain::ObjectDomain(const ObjectId& initialValue, const std::string& typeName): 
-    EnumeratedDomain(initialValue, false, typeName){check_error(!isNumeric());}
+    EnumeratedDomain(initialValue->getKey(), false, typeName){check_error(!isNumeric());}
+
+  ObjectDomain::ObjectDomain(const edouble& initialValue, const std::string& typeName): 
+    EnumeratedDomain(initialValue, false, typeName){
+    check_error(!isNumeric()); 
+    check_error(Entity::getTypedEntity<Object>(initialValue).isValid());
+  }
 
   ObjectDomain::ObjectDomain(const AbstractDomain& org)
     : EnumeratedDomain(org){
-    check_error(org.isEmpty() || ObjectId(org.getLowerBound()).isValid(),
+    check_error(org.isEmpty() || ObjectId(Entity::getTypedEntity<Object>(org.getLowerBound())).isValid(),
 		"Attempted to construct an object domain with values of non-object type " + 
 		org.getTypeName().toString());
   }
@@ -619,11 +625,11 @@ namespace EUROPA {
   }
 
   bool ObjectDomain::convertToMemberValue(const std::string& strValue, edouble& dblValue) const{
-    int value = atoi(strValue.c_str());
-    EntityId entity = Entity::getEntity(value);
+    int value = toValue<int>(strValue);
+    ObjectId entity = Entity::getTypedEntity<Object>(value);
 
-    if(entity.isId() && isMember(entity)){
-      dblValue = entity;
+    if(entity.isId() && isMember(entity)) {
+      dblValue = entity->getKey();
       return true;
     }
 
@@ -634,14 +640,12 @@ namespace EUROPA {
   std::string ObjectDomain::toString(edouble value) const {
     check_error(isMember(value), "Caught an invalid attempt to display a value not in this domain");
     std::ostringstream os;
-    if(!Entity::isPurging())
-    {
-        ObjectId object = value;
-        os << object->toString();
+    if(!Entity::isPurging()) {
+      ObjectId object = getObject(value);
+      os << object->toString();
     }
-    else
-    {
-    	os << "Object data unavailable while purging (might no longer exist)";
+    else {
+      os << "Object data unavailable while purging (might no longer exist)";
     }
     return  os.str();
   }
@@ -651,10 +655,14 @@ namespace EUROPA {
   }
 
   
+  ObjectId ObjectDomain::getObject(const eint key) const {
+    return ObjectId(Entity::getEntity(key));
+  }
+
   std::list<ObjectId> ObjectDomain::makeObjectList(const std::list<edouble>& inputs){
     std::list<ObjectId> outputs;
     for (std::list<edouble>::const_iterator it = inputs.begin(); it != inputs.end(); ++it)
-      outputs.push_back((ObjectId)(*it));
+      outputs.push_back(Entity::getTypedEntity<Object>(*it));
     return outputs;
   }
 
@@ -663,13 +671,29 @@ namespace EUROPA {
     std::list<ObjectId> objects;
     const std::set<edouble>& values = getValues();
     for(std::set<edouble>::const_iterator it = values.begin(); it != values.end(); ++it){
-      ObjectId object = *it;
+      ObjectId object = Entity::getTypedEntity<Object>(*it);
       objects.push_back(object);
     }
 
     return objects;
   }
   
+  void ObjectDomain::remove(edouble value) {
+    EnumeratedDomain::remove(value);
+  }
+
+  void ObjectDomain::remove(const ObjectId& obj) {
+    remove(obj->getKey());
+  }
+
+  bool ObjectDomain::isMember(const ObjectId& obj) const {
+    return isMember(obj->getKey());
+  }
+
+  bool ObjectDomain::isMember(edouble value) const {
+    return EnumeratedDomain::isMember(value);
+  }
+
   ObjectDomain *ObjectDomain::copy() const {
     ObjectDomain *ptr = new ObjectDomain(*this);
     check_error(ptr != 0);
@@ -731,7 +755,7 @@ namespace EUROPA {
   {
   	std::ostringstream os;
   	if (objVar->lastDomain().isSingleton()) {
-  		ObjectId obj = objVar->lastDomain().getSingletonValue(); 
+          ObjectId obj = Entity::getTypedEntity<Object>(objVar->lastDomain().getSingletonValue()); 
   	    os << obj->toString();
   	}
   	else {

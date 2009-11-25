@@ -51,7 +51,7 @@ namespace EUROPA {
     
   void ObjectTypeMgr::purgeAll(){
     debugMsg("ObjectFactory:purgeAll", "Purging all");
-    std::set<edouble> alreadyDeleted;
+    std::set<long> alreadyDeleted;
     for(std::map<edouble, ObjectFactoryId>::const_iterator it = m_factories.begin(); it != m_factories.end(); ++it) {
       if(alreadyDeleted.find(it->second) == alreadyDeleted.end()) {
           alreadyDeleted.insert(it->second);

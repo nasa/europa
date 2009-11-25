@@ -50,30 +50,30 @@ namespace EUROPA {
     popTransaction();
   }
 
-  void DbClientTransactionLog::notifyVariableCreated(const ConstrainedVariableId& variable){
-		if(!variable->isInternal()) {
-			TiXmlElement * element = allocateXmlElement("var");
-			const AbstractDomain& baseDomain = variable->baseDomain();
-			std::string type = baseDomain.getTypeName().toString();
-			if (m_client->getSchema()->isObjectType(type)) {
-				ObjectId object = baseDomain.getLowerBound();
-				check_error(object.isValid());
-				type = object->getType().toString();
-			}
-			element->SetAttribute("type", type);
-			if (LabelStr::isString(variable->getName())) {
-				element->SetAttribute("name", variable->getName().toString());
-			}
-			debugMsg("notifyVariableCreated"," variable name = " << variable->getName().c_str() << " typeName = " << type << " type = " << baseDomain.getTypeName().c_str());
-
-			element->SetAttribute("index", m_client->getIndexByVariable(variable));
-
-			if (!baseDomain.isEmpty()) {
-				TiXmlElement * value = abstractDomainAsXml(&baseDomain);
-				element->LinkEndChild(value);
-			}
-			pushTransaction(element);
-		}
+  void DbClientTransactionLog::notifyVariableCreated(const ConstrainedVariableId& variable) {
+    if(!variable->isInternal()) {
+      TiXmlElement * element = allocateXmlElement("var");
+      const AbstractDomain& baseDomain = variable->baseDomain();
+      std::string type = baseDomain.getTypeName().toString();
+      if (m_client->getSchema()->isObjectType(type)) {
+        ObjectId object = Entity::getTypedEntity<Object>(baseDomain.getLowerBound());
+        check_error(object.isValid());
+        type = object->getType().toString();
+      }
+      element->SetAttribute("type", type);
+      if (LabelStr::isString(variable->getName())) {
+        element->SetAttribute("name", variable->getName().toString());
+      }
+      debugMsg("notifyVariableCreated"," variable name = " << variable->getName().c_str() << " typeName = " << type << " type = " << baseDomain.getTypeName().c_str());
+      
+      element->SetAttribute("index", m_client->getIndexByVariable(variable));
+      
+      if (!baseDomain.isEmpty()) {
+        TiXmlElement * value = abstractDomainAsXml(&baseDomain);
+        element->LinkEndChild(value);
+      }
+      pushTransaction(element);
+    }
   }
 
   void DbClientTransactionLog::notifyVariableDeleted(const ConstrainedVariableId& variable) {
@@ -298,7 +298,7 @@ namespace EUROPA {
         const LabelStr& label = value;
         return label.toString();
       } else {
-        ObjectId object = value;
+        ObjectId object = Entity::getTypedEntity<Object>(value);
         check_error(object.isValid());
         return object->getName().toString();
       }
