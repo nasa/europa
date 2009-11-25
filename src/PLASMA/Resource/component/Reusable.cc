@@ -44,13 +44,13 @@ namespace EUROPA {
   void Reusable::createTransactions(const TokenId& tok) {
     if(m_tokensToTransactions.find(tok) != m_tokensToTransactions.end()) {
       debugMsg("Reusable:createTransactions",
-               "Token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ") already has transactions.");
+               toString() << " Token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ") already has transactions.");
       return;
     }
    
     ReusableTokenId t(tok);
     debugMsg("Reusable:createTransactions",
-             "Creating transactions for " << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
+             toString() << " Creating transactions for " << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
     //here's the major difference between Reusable and Reservoir:  always consume the quantity at the start
     //and produce it again at the end
     TransactionId t1 = (new Transaction(t->start(), t->getQuantity(), true))->getId();
@@ -62,12 +62,17 @@ namespace EUROPA {
 
   
   void Reusable::addToProfile(const TokenId& tok) {
+    checkError(tok->isActive(), "Token " << tok->toString() << " is not active.");
+    checkError(tok->getObject()->lastDomain().isSingleton(),
+               "Token " << tok->toString() << " has a non-singleton object variable " << tok->getObject()->toLongString());
+    checkError(tok->getObject()->lastDomain().isMember(getId()),
+               toString() << " isn't in the object variable of " << tok->toString() << ": " << tok->getObject()->toLongString());
     checkError(m_tokensToTransactions.find(tok) != m_tokensToTransactions.end(),
                "No transaction for "  << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
     
     std::map<TokenId, std::pair<TransactionId, TransactionId> >::const_iterator it = m_tokensToTransactions.find(tok);
     debugMsg("Reusable:addToProfile",
-             "Adding transactions for " << tok->getPredicateName().toString() << "(" << tok->getKey() << ") to the profile.");
+             toString() << " Adding transactions for " << tok->getPredicateName().toString() << "(" << tok->getKey() << ") to the profile.");
     m_profile->addTransaction(it->second.first);
     m_profile->addTransaction(it->second.second);
   }
@@ -75,7 +80,7 @@ namespace EUROPA {
   void Reusable::removeTransactions(const TokenId& tok) {
     if(m_tokensToTransactions.find(tok) == m_tokensToTransactions.end())
       return;
-    debugMsg("Reusable:removeTransactions", "Removing transactions for " << tok->toString());
+    debugMsg("Reusable:removeTransactions", toString() << " Removing transactions for " << tok->toString());
     std::pair<TransactionId, TransactionId> trans = m_tokensToTransactions.find(tok)->second;
     m_tokensToTransactions.erase(tok);
     m_transactionsToTokens.erase(trans.first);
@@ -87,15 +92,20 @@ namespace EUROPA {
   void Reusable::removeFromProfile(const TokenId& tok) {
     if(m_tokensToTransactions.find(tok) == m_tokensToTransactions.end()) {
       debugMsg("Reusable:removeFromProfile", 
-               "Failed to find transactions for " << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
+               toString() << "Failed to find transactions for " << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
       return;
     }
 
-    debugMsg("Reusable:removeFromProfile", "Removing token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
+    debugMsg("Reusable:removeFromProfile", 
+             toString() << " Removing token " << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
     std::pair<TransactionId, TransactionId> trans = m_tokensToTransactions.find(tok)->second;
-    debugMsg("Reusable:removeFromProfile", "Removing transaction for time " << trans.first->time()->toString() << " with quantity " << trans.first->quantity()->toString());
+    debugMsg("Reusable:removeFromProfile", 
+             toString() << " Removing transaction for time " << trans.first->time()->toString() << " with quantity " << 
+             trans.first->quantity()->toString());
     m_profile->removeTransaction(trans.first);
-    debugMsg("Reusable:removeFromProfile", "Removing transaction for time " << trans.second->time()->toString() << " with quantity " << trans.second->quantity()->toString());
+    debugMsg("Reusable:removeFromProfile", 
+             toString() << " Removing transaction for time " << trans.second->time()->toString() << " with quantity " << 
+             trans.second->quantity()->toString());
     m_profile->removeTransaction(trans.second);
     Resource::removeFromProfile(tok);
   }

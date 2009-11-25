@@ -1,19 +1,19 @@
 #ifndef _H_Interpreter
 #define _H_Interpreter
 
+#include <vector>
+
 #include "PDBInterpreter.hh"
 #include "PlanDatabaseDefs.hh"
 #include "RulesEngineDefs.hh"
 #include "Object.hh"
-#include "ObjectFactory.hh"
+#include "ObjectType.hh"
 #include "CFunction.hh"
 #include "Method.hh"
 #include "IntervalToken.hh"
 #include "TokenType.hh"
 #include "Rule.hh"
 #include "RuleInstance.hh"
-#include <vector>
-
 
 namespace EUROPA {
 

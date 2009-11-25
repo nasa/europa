@@ -20,6 +20,7 @@ namespace EUROPA {
       ResourceTokenRelation(const ConstraintEngineId& constraintEngine,
 			    const std::vector<ConstrainedVariableId>& scope,
 			    const TokenId& tok);
+      ~ResourceTokenRelation();
       static const LabelStr& CONSTRAINT_NAME() {
 	static const LabelStr sl_const("ResourceObjectRelation");
 	return sl_const;
@@ -38,6 +39,7 @@ namespace EUROPA {
       virtual void notifyNoLongerViolated();
 
     private:
+      void handleDiscard();
       bool canIgnore(const ConstrainedVariableId& variable,
 		     int argIndex,
 		     const DomainListener::ChangeType& changeType);

@@ -9,7 +9,7 @@
 */
 
 #include "Object.hh"
-#include "ObjectFactory.hh"
+#include "ObjectType.hh"
 #include <list>
 #include <map>
 #include <vector>

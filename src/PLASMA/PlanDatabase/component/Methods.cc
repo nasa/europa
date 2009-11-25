@@ -177,4 +177,23 @@ DataRef CancelToken::eval(EvalContext& context, TokenId& tok, const std::vector<
     return DataRef::null;
 }
 
+DataRef CloseClass::eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const
+{
+    LabelStr className(args[0]->derivedDomain().getSingletonValue());
+    getCtxPDB(context)->close(className.c_str());
+    return DataRef::null;
+}
+
+const std::vector<DataTypeId>& CloseClass::getSignature()
+{
+    // TODO : implement this
+    static std::vector<DataTypeId> signature;
+    return signature;
+}
+
+const DataTypeId& CloseClass::getReturnType()
+{
+    return VoidDT::instance();
+}
+
 }

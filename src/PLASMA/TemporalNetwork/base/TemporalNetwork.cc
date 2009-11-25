@@ -328,12 +328,19 @@ namespace EUROPA {
 
     boundedDijkstraForward(src, 1, minPotential);
     for (unsigned i=0; i<targs.size(); i++)
-      ubs[i] = (targs[i]->distance);
+      ubs[i] = getDistance(targs[i]);//(targs[i]->distance);
 
     boundedDijkstraBackward(src, 1, maxPotential);
     for (unsigned i=0; i<targs.size(); i++)
-      lbs[i] = (- targs[i]->distance);
-
+      lbs[i] = (- getDistance(targs[i]));//(- targs[i]->distance);
+    
+    //sanity check
+    for(unsigned int i = 0; i < targs.size(); i++) {
+      checkError((lbs[i] < 0 || ubs[i] >= 0),
+                 "TemporalNetwork: calcDistanceSigns ub anomaly.");
+      checkError((ubs[i] > 0 || lbs[i] <= 0),
+                 "TemporalNetwork: calcDistanceSigns lb anomaly.");
+    }
     return;
   }
 

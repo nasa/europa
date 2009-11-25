@@ -525,7 +525,7 @@ namespace EUROPA {
           TransactionId successor = sucIt->first;
           check_error(successor.isValid());
 
-          bool canPrecede = (presucUbs[i] >= 0);
+          bool canPrecede = (presucUbs[i] >= 0);//temporalAdvisor->canPrecede(TimeVarId(predecessor->time()), TimeVarId(successor->time()));
           bool mustPrecede = (presucLbs[i] >= 0);
           bool canFollow = (presucLbs[i] <= 0);
           bool mustFollow = (presucUbs[i] <= 0);

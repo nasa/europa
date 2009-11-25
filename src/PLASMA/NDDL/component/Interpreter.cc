@@ -1,32 +1,32 @@
 /**
  * @file Interpreter.cc
- * @brief Core classes to interpret XML statements
+ * @brief Core classes to support an interpreter on top of the EUROPA runtime
  * @author Javier Barreiro
  * @date December, 2006
  */
 
 #include "Interpreter.hh"
 
+#include <string.h>
+#include <stdio.h>
+
 #include "Debug.hh"
 #include "Error.hh"
+#include "Utils.hh"
 
 #include "ConstraintType.hh"
+#include "DataTypes.hh"
+#include "Domains.hh"
+
 #include "DbClient.hh"
 #include "DbClientTransactionPlayer.hh"
-#include "Domains.hh"
 #include "Object.hh"
-#include "ObjectFactory.hh"
-#include "TokenVariable.hh"
-#include "DataTypes.hh"
+#include "ObjectType.hh"
 #include "Schema.hh"
-#include "Utils.hh"
-#include "Variable.hh"
+#include "TokenVariable.hh"
 
 #include "NddlRules.hh"
 #include "NddlUtils.hh"
-
-#include <string.h>
-#include <stdio.h>
 
 namespace EUROPA {
 
@@ -147,13 +147,23 @@ namespace EUROPA {
   std::string ExprConstant::getConstantValue() const
   {
       std::ostringstream os;
+      std::string typeName(m_type.c_str());
 
-      if (m_domain->isSingleton() && (std::string(m_type.c_str()) == "int" || std::string(m_type.c_str()) == "float")) {
-	unsigned int start = m_domain->toString().find("[") + 1;
-	unsigned int end = m_domain->toString().find(",");
-	return m_domain->toString().substr(start, end - start);
+      // TODO: this is a hack, where is this being used?
+      if (m_domain->isSingleton()) {
+    	  if (typeName == IntDT::NAME())
+    	      os << (int)(m_domain->getSingletonValue());
+    	  else if (typeName == FloatDT::NAME())
+    	      os << m_domain->getSingletonValue();
+    	  else if (typeName == StringDT::NAME())
+			  os << LabelStr(m_domain->getSingletonValue()).toString();
+          else
+        	  os << "CONST_" << typeName << " " << m_domain->toString();
       }
-      return "CONST_" + std::string(m_type.c_str());
+      else
+    	  os << "CONST_" << typeName << " " << m_domain->toString();
+
+      return os.str();
   }
 
 
@@ -284,14 +294,7 @@ namespace EUROPA {
       arguments.push_back(&(arg.getValue()->derivedDomain()));
     }
 
-    // when this is the rhs of an assignment in a constructor, an object var must be created to specify
-    // the enclosing object (for which the constructor is being executed) as the parent.
-    // TODO: The way it is now, when using code generation objects are created :
-    // - directly in C++ through new (in the generated code) if the stmt is inside a NDDL constructor
-    // - through the factories if the stmt is in the initial state
-    // This is a problem, everybody should go through the factory
-    // faking it for now, but this is a hack
-
+    // TODO: using ObjectEvalContext may be cleaner?
     ConstrainedVariableId thisVar = context.getVar("this");
     ObjectId thisObject = 
       (thisVar.isId() ? Entity::getTypedEntity<Object>(thisVar->derivedDomain().getSingletonValue()) : ObjectId::noId());

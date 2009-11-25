@@ -50,7 +50,7 @@ namespace NDDL {
 //------------------------------------------------------------------------------------------------------------------------------
 
 
-#include "ObjectFactory.hh"
+#include "ObjectType.hh"
 
 #define DECLARE_DEFAULT_OBJECT_FACTORY(Factory, Klass)\
 class Factory: public ObjectFactory{\

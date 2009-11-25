@@ -19,7 +19,6 @@ ModuleBase PlanDatabase
 	MergeMemento.cc
 	Method.cc
 	Object.cc
-	ObjectFactory.cc
 	ObjectTokenRelation.cc
 	ObjectType.cc
 	PDBInterpreter.cc

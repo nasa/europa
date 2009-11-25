@@ -444,6 +444,7 @@ methodInvocation
 
 methodName
 	:	IDENT
+	|	'close' // TODO: hack!, see above
 	;
 	
 noopstatement

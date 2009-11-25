@@ -106,10 +106,15 @@ namespace EUROPA {
     MutexGrabber mg(IdTableMutex());
     static unsigned int sl_key;
     std::map<unsigned long int, std::pair<unsigned int,edouble> >::iterator it = getInstance().m_collection.find(id);    
-    debugMsg("IdTable:remove",
-             "<" << std::hex << id << std::dec << ", " << (sl_key = getEntryKey(it->second)) << "," <<
-             getEntryType(it->second).toString() << ">");
+
+    sl_key = getEntryKey(it->second);
     std::string type = getEntryType(it->second).toString();
+    debugMsg("IdTable:remove",
+             "<" << std::hex << id << std::dec << ", " << sl_key << "," <<
+             type << ">");
+
+
+    debugMsg("IdTable:remove", "<" << id << ", " << sl_key << "," << type << ">");
     std::map<std::string, unsigned int>::iterator tCit = getInstance().m_typeCnts.find(type);
     tCit->second--;
 

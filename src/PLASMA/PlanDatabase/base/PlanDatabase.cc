@@ -671,17 +671,24 @@ namespace EUROPA{
     check_error(m_state == OPEN);
     check_error(!isClosed(objectType));
 
+    debugMsg("PlanDatabase:close","Closing "+objectType.toString());
+
     // Now we must close all the object variables associated with this type
     ObjVarsByObjType_I it = m_objectVariablesByObjectType.find(objectType);
     while (it != m_objectVariablesByObjectType.end() && it->first == objectType){
       ConstrainedVariableId connectedObjectVariable = it->second.first;
       check_error(connectedObjectVariable.isValid());
-      if(!connectedObjectVariable->isClosed())
-        connectedObjectVariable->close();
+      if(!connectedObjectVariable->isClosed()) {
+    	  debugMsg("PlanDatabase:close","Closing "+objectType.toString()+" closing "+connectedObjectVariable->toString());
+    	  connectedObjectVariable->close();
+    	  debugMsg("PlanDatabase:close","Closing "+objectType.toString()+" closed "+connectedObjectVariable->toString());
+      }
       delete (ObjectVariableListener*) it->second.second;
       m_objectVariablesByObjectType.erase(it++);
     }
     m_closedObjectTypes.insert(objectType);
+
+    debugMsg("PlanDatabase:close","Closed "+objectType.toString());
   }
 
   PlanDatabase::State PlanDatabase::getState() const {

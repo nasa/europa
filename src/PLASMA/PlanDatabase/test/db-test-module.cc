@@ -14,7 +14,7 @@
 #include "DbClientTransactionPlayer.hh"
 
 #include "DbClient.hh"
-#include "ObjectFactory.hh"
+#include "ObjectType.hh"
 #include "TokenType.hh"
 #include "Domains.hh"
 
@@ -3999,13 +3999,14 @@ public:
     s_dbPlayer = new DbClientTransactionPlayer((s_db)->getClient());
     CPPUNIT_ASSERT(s_dbPlayer != 0);
 
-    ObjectType testClass2_OT("TestClass2",db->getSchema()->getObjectType(Schema::rootObject()));
-
-    REGISTER_OBJECT_FACTORY(db->getSchema(),TestClass2Factory, TestClass2);
-    REGISTER_OBJECT_FACTORY(db->getSchema(),TestClass2Factory, TestClass2:string:int:float:Locations);
+    ObjectTypeId testClass2_OT = (new ObjectType("TestClass2",db->getSchema()->getObjectType(Schema::rootObject())))->getId();
+    testClass2_OT->addObjectFactory((new TestClass2Factory(LabelStr("TestClass2")))->getId());
+    testClass2_OT->addObjectFactory((new TestClass2Factory(LabelStr("TestClass2:string:int:float:Locations")))->getId());
 
     /* Token factory for predicate Sample */
-    db->getSchema()->registerTokenType((new TestClass2::Sample::Factory(testClass2_OT.getId()))->getId());
+    testClass2_OT->addTokenType((new TestClass2::Sample::Factory(testClass2_OT->getId()))->getId());
+
+    db->getSchema()->registerObjectType(testClass2_OT->getId());
 
     /* Initialize state-domain-at-creation of mandatory and rejectable tokens.  Const after this. */
     getMandatoryStateDom().remove(Token::REJECTED);
@@ -4139,9 +4140,6 @@ public:
           m_closest = addParameter(LocationsBaseDomain(), "m_closest");
         close();
       }
-      // Would do:
-      // DECLARE_TOKEN_FACTORY(TestClass2::Sample, TestClass2.Sample);
-      // ... but that is in NDDL/base/NddlUtils.hh, which this should not depend on, so:
       class Factory : public TokenType {
       public:
         Factory(const ObjectTypeId& ot)
@@ -4344,22 +4342,13 @@ public:
 
     TEST_PLAYING_XML(buildXMLNameStr("class", "TestClass1", __FILE__, __LINE__));
 
-    s_db->getSchema()->addObjectType("TestClass2");
     CPPUNIT_ASSERT(s_db->getSchema()->isObjectType("TestClass2"));
     s_db->getSchema()->addMember("TestClass2", IntDT::NAME(), "int1");
     s_db->getSchema()->addMember("TestClass2", FloatDT::NAME(), "float2");
     s_db->getSchema()->addMember("TestClass2", "Locations", "where");
-    s_db->getSchema()->addPredicate("TestClass2.Sample");
     s_db->getSchema()->addMember("TestClass2.Sample", FloatDT::NAME(), "m_x");
     s_db->getSchema()->addMember("TestClass2.Sample", FloatDT::NAME(), "m_y");
     s_db->getSchema()->addMember("TestClass2.Sample", "Locations", "m_closest");
-
-    ArgList args;
-    args.push_back(std::make_pair(IntDT::NAME(), std::string("int1")));
-    args.push_back(std::make_pair(FloatDT::NAME(), std::string("float2")));
-    args.push_back(std::make_pair(std::string("Locations"), std::string("where")));
-    TEST_PLAYING_XML(buildXMLCreateClassStr("TestClass2", args, __FILE__, __LINE__));
-    // Nothing to verify, since the player cannot actually create classes.
   }
 
   /** Helper function to clean up after otherwise memory leaking calls to new. */

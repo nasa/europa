@@ -41,10 +41,10 @@ namespace EUROPA {
 
   Schema::Schema(const LabelStr& name, const CESchemaId& ces)
       : m_id(this)
+      , m_name(name)
       , m_ceSchema(ces)
       , m_objectTypeMgr((new ObjectTypeMgr())->getId())
       , m_tokenTypeMgr((new TokenTypeMgr())->getId())
-      , m_name(name)
   {
       reset();
       debugMsg("Schema:constructor", "created Schema:" << name.toString());
@@ -55,12 +55,7 @@ namespace EUROPA {
       delete (TokenTypeMgr*)m_tokenTypeMgr;
       delete (ObjectTypeMgr*)m_objectTypeMgr;
 
-      std::map<edouble,ObjectTypeId>::iterator it = m_objTypes.begin();
-      for(;it != m_objTypes.end();++it)
-          delete (ObjectType*)it->second;
-      m_objTypes.clear();
-
-      std::map<edouble,MethodId>::iterator mit = m_methods.begin();
+      std::map<double,MethodId>::iterator mit = m_methods.begin();
       for(;mit != m_methods.end();++mit)
           delete (Method*)mit->second;
       m_methods.clear();
@@ -694,8 +689,13 @@ namespace EUROPA {
           debugMsg("Schema:registerObjectType","Generated default factory for object type:" << objType->getName().c_str());
       }
 
+      m_objectTypeMgr->registerObjectType(objType);
 
-//all this should go
+      // Add type for constrained variables to be able to hold references to objects of the new type
+      if (!getCESchema()->isDataType(className))
+          getCESchema()->registerDataType((new ObjectDT(className))->getId());
+
+      // TODO: all these need to go eventually (except for the registerTokenType call)
       {
           std::map<std::string,DataTypeId>::const_iterator it = objType->getMembers().begin();
           for(;it != objType->getMembers().end(); ++it)
@@ -703,13 +703,7 @@ namespace EUROPA {
       }
 
       {
-          std::map<edouble,ObjectFactoryId>::const_iterator it = objType->getObjectFactories().begin();
-          for(;it != objType->getObjectFactories().end(); ++it)
-              registerObjectFactory(it->second);
-      }
-
-      {
-          std::map<edouble,TokenTypeId>::const_iterator it = objType->getTokenTypes().begin();
+          std::map<double,TokenTypeId>::const_iterator it = objType->getTokenTypes().begin();
           for(;it != objType->getTokenTypes().end(); ++it) {
               const TokenTypeId& tokenType = it->second;
               LabelStr predName = tokenType->getSignature();
@@ -723,28 +717,15 @@ namespace EUROPA {
           }
       }
 
-      m_objTypes[objType->getName()] = objType;
-
       debugMsg("Schema:registerObjectType","Registered object type:" << std::endl << objType->toString());
   }
 
   const ObjectTypeId& Schema::getObjectType(const LabelStr& objType)
   {
-      std::map<edouble,ObjectTypeId>::const_iterator it = m_objTypes.find((edouble)objType);
-
-      if (it == m_objTypes.end())
-          return ObjectTypeId::noId();
-      else
-          return it->second;
+	  return m_objectTypeMgr->getObjectType(objType);
   }
 
-
-  void Schema::registerObjectFactory(const ObjectFactoryId& of)
-  {
-      m_objectTypeMgr->registerFactory(of);
-  }
-
-  ObjectFactoryId Schema::getObjectFactory(const LabelStr& objectType, const std::vector<const Domain*>& arguments, const bool doCheckError)
+  ObjectFactoryId Schema::getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments, const bool doCheckError)
   {
     return m_objectTypeMgr->getFactory(getId(),objectType,arguments,doCheckError);
   }
@@ -871,8 +852,7 @@ namespace EUROPA {
 			  return m_argTypes[i];
 		  }
 	  check_error(false, "No argument named " + name + ".");
-	  // Let it throw
-	  return m_argTypes[-1];
+	  throw std::string("No argument named " + name + ".");
   }
 
   /** This operator does not check the object type the predicate belongs to */
@@ -922,10 +902,10 @@ namespace EUROPA {
 
   PSList<PSObjectType> Schema::getAllPSObjectTypes() const {
 	PSList<PSObjectType> retval;
-    for(std::map<edouble, ObjectTypeId>::const_iterator it = m_objTypes.begin(); it != m_objTypes.end(); ++it)
-    {
-    	retval.push_back(PSObjectType(it->second));
-    }
+	std::vector<ObjectTypeId> ots = m_objectTypeMgr->getAllObjectTypes();
+    for(unsigned int i = 0;i<ots.size();i++)
+    	retval.push_back(PSObjectType(ots[i]));
+
     return retval;
   }
 
