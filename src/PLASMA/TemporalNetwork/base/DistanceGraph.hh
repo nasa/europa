@@ -31,8 +31,8 @@ namespace EUROPA {
 // This is so that the legal values will be closed under negation.
 // The following achieves that without provoking over or under flow.
 
-#define TIME_MAX MAX_FINITE_TIME
-#define TIME_MIN MIN_FINITE_TIME
+#define TIME_MAX cast_basis(MAX_FINITE_TIME)
+#define TIME_MIN cast_basis(MIN_FINITE_TIME)
 
 // Following gives granularity (min separation) of Time type.
 // Note that x <= y is equivalent to x < (y + TIME_TICK).
@@ -52,8 +52,8 @@ namespace EUROPA {
 //#define POS_INFINITY (TIME_MAX - MAX_LENGTH)
 //#define NEG_INFINITY (TIME_MIN - MIN_LENGTH)
 
-#define POS_INFINITY PLUS_INFINITY
-#define NEG_INFINITY MINUS_INFINITY
+#define POS_INFINITY cast_basis(PLUS_INFINITY)
+#define NEG_INFINITY cast_basis(MINUS_INFINITY)
 #define MAX_DISTANCE MAX_INT   // Largest propagated distance for node
 #define MIN_DISTANCE -MAX_INT   // Smallest propagated distance for node
 
@@ -472,7 +472,7 @@ public:
    * @param node node to insert
    * @param key key attached to node
    */
-  Void insertInQueue(DnodeId node, eint key);
+  Void insertInQueue(DnodeId node, eint::basis_type key);
 
   /**
    * @brief insert node into queue. Use (distance - potential) as key

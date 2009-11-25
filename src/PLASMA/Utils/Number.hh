@@ -7,6 +7,7 @@
 #include <istream>
 #include <ostream>
 #include <limits>
+#include <stdexcept>
 #include "hash_map.hh"
 
 #if (__LONG_MAX__ > __INT_MAX__)
@@ -241,10 +242,15 @@ namespace EUROPA {
    * For the moment, doing overflow checking by up-promoting.  There are other ways to achieve this that might be more performant.
    */
 #ifndef NO_OVERFLOW_CHECKING
-#define op(type, a, x, b) {                     \
-    double temp = ((double)(a)) x (b);    \
-  handle_inf_unary(type, temp);                 \
-  return type((type::basis_type)temp, true);         \
+#define op(type, a, x, b) {                                             \
+  double temp = ((double)(a)) x (b);                                    \
+  if(temp > std::numeric_limits<type>::infinity()) {                    \
+    throw std::overflow_error("greater-than-infinity error");           \
+  }                                                                     \
+  else if(temp < std::numeric_limits<type>::minus_infinity()) {         \
+    throw std::underflow_error("less-than-minus-infinity error");       \
+  }                                                                     \
+  return type((type::basis_type)temp, true);                            \
 }
 #else
 #define op(type, a, x, b) return (a) x (b)
@@ -614,16 +620,16 @@ namespace EUROPA {
 }
 
 namespace std {
-  //would defining infinity differently speed things up?
+
 #ifdef E2_LONG_INT
   inline EUROPA::eint numeric_limits<EUROPA::eint>::infinity() throw()
-  {return EUROPA::eint((long) (pow((double)2, 51) - 1.0 + pow((double)2, 51)), true);}
+  {return eint(4503599627370495L, true);}
 #else
   inline EUROPA::eint numeric_limits<EUROPA::eint>::infinity() throw()
   {return EUROPA::eint(numeric_limits<long>::max(), true);}
 #endif
   inline EUROPA::eint numeric_limits<EUROPA::eint>::minus_infinity() throw() {return -infinity();}
-  inline EUROPA::eint numeric_limits<EUROPA::eint>::max() throw() {return cast_long(infinity()) - (long)1;}
+  inline EUROPA::eint numeric_limits<EUROPA::eint>::max() throw() {return cast_basis(infinity()) - (long)1;}
   inline EUROPA::eint numeric_limits<EUROPA::eint>::min() throw() {return -max();}
   inline EUROPA::eint numeric_limits<EUROPA::eint>::epsilon() throw() {return 0;}
   inline EUROPA::eint numeric_limits<EUROPA::eint>::round_error() throw() {return 0;}
@@ -633,7 +639,7 @@ namespace std {
 
 #ifdef E2_LONG_INT
   inline EUROPA::edouble numeric_limits<EUROPA::edouble>::infinity() throw()
-  {return EUROPA::edouble(pow((double)2, 51) - 1.0 + pow((double)2, 51), true);}
+  {return EUROPA::edouble(4503599627370495.0, true);}
 #else
   inline EUROPA::edouble numeric_limits<EUROPA::edouble>::infinity() throw()
   {return EUROPA::edouble((double) numeric_limits<long>::max(), true);}

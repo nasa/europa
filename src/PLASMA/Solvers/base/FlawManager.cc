@@ -282,7 +282,7 @@ namespace EUROPA {
         return DecisionPointId::noId();
 
       // Initialize the prority to beat
-      Priority bestP =  bestPriority - (2 * EPSILON);
+      Priority bestP =  bestPriority - (2 * cast_double(EPSILON));
       IteratorId it = createIterator();
 
       LabelStr explanation = "unknown";

@@ -641,7 +641,7 @@ namespace EUROPA {
           it != m_flawManagers.end(); ++it){
         FlawManagerId fm = *it;
         IteratorId flawIterator = fm->createIterator();
-        double adjustment = EPSILON * multiplier++;
+        double adjustment = cast_double(EPSILON) * multiplier++;
         while(!flawIterator->done()){
           std::stringstream os;
           EntityId flaw = flawIterator->next();

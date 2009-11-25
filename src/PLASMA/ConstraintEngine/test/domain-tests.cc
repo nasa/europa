@@ -118,7 +118,7 @@ namespace EUROPA {
     }
 
     static bool testPrecision() {
-      IntervalDomain dom0(-EPSILON, 0);
+      IntervalDomain dom0(-EPSILON, edouble(0));
       CPPUNIT_ASSERT(dom0.isMember(-EPSILON));
       CPPUNIT_ASSERT(dom0.isMember(-EPSILON -EPSILON/10));
       CPPUNIT_ASSERT(!dom0.isMember(-EPSILON -EPSILON));

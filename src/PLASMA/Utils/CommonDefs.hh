@@ -71,22 +71,22 @@ namespace EUROPA {
   std::string getTestLoadLibraryPath();
 }
 
-#define MAX_INT (EUROPA::g_maxInt())
+#define MAX_INT (std::numeric_limits<EUROPA::eint>::max())
 
 #define MAX_FINITE_TIME (MAX_INT)
 
-#define MIN_FINITE_TIME (-MAX_INT)
+#define MIN_FINITE_TIME (std::numeric_limits<EUROPA::eint>::min())
 
-#define PLUS_INFINITY (EUROPA::g_infiniteTime())
+#define PLUS_INFINITY (std::numeric_limits<EUROPA::eint>::infinity())
 
-#define MINUS_INFINITY (-EUROPA::g_infiniteTime())
+#define MINUS_INFINITY (std::numeric_limits<EUROPA::eint>::minus_infinity())
 
 /**
  * @def EPSILON
  * Used when computing differences and comparing real numbers:
  * smallest recognized increment.
  */
-#define EPSILON (EUROPA::g_epsilon())
+#define EPSILON (std::numeric_limits<EUROPA::edouble>::epsilon())
 
 #include <cmath>
 
@@ -94,6 +94,6 @@ namespace EUROPA {
  * @def MAX_PRECISION
  * The maximum number of digits of precision possible in a EUROPA floaing-point number.
  */
-#define MAX_PRECISION (static_cast<int>(std::log10(cast_double(MAX_INT) + EPSILON) + 1.0))
+#define MAX_PRECISION (static_cast<int>(std::log10(cast_double(MAX_INT) + cast_double(EPSILON)) + 1.0))
 
 #endif

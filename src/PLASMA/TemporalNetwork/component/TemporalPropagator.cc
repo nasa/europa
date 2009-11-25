@@ -360,8 +360,8 @@ namespace EUROPA {
     // Key domain restriction constrain off derived domain values
     TemporalConstraintId c = m_tnet->addTemporalConstraint(m_tnet->getOrigin(),
                                                            timepoint,
-                                                           (Time) var->lastDomain().getLowerBound(),
-                                                           (Time) var->lastDomain().getUpperBound());
+                                                           (Time) cast_basis(var->lastDomain().getLowerBound()),
+                                                           (Time) cast_basis(var->lastDomain().getUpperBound()));
     check_error(c.isValid());
 
     timepoint->setBaseDomainConstraint(c);
@@ -369,8 +369,8 @@ namespace EUROPA {
     // Note, this is misleading. It is actually a constraint on the derived domain.
     publish(notifyBaseDomainConstraintAdded(var,
                                             c,
-                                            (Time) var->lastDomain().getLowerBound(),
-                                            (Time) var->lastDomain().getUpperBound()));
+                                            (Time) cast_basis(var->lastDomain().getLowerBound()),
+                                            (Time) cast_basis(var->lastDomain().getUpperBound())));
 
     debugMsg("TemporalPropagator:addTimepoint",
              "Constraint ADDED for Variable " << var->getKey() <<  "(" <<  c << ") "
@@ -409,11 +409,11 @@ namespace EUROPA {
     if(constraint->getScope().size() == 3){
       ConstrainedVariableId distance = end;
       end = constraint->getScope()[2];
-      lb = (Time) distance->lastDomain().getLowerBound();
-      ub = (Time) distance->lastDomain().getUpperBound();
+      lb = (Time) cast_basis(distance->lastDomain().getLowerBound());
+      ub = (Time) cast_basis(distance->lastDomain().getUpperBound());
     }
     else if (constraint->getName() != sl_concurrent)
-      ub = g_infiniteTime();
+      ub = cast_basis(g_infiniteTime());
 
     checkError(start->isActive(), start->toString());
     checkError(end->isActive(), end->toString());
@@ -705,8 +705,8 @@ namespace EUROPA {
       tnetConstraint->getBounds(lbt, ubt);
 
       const IntervalIntDomain& timeBounds = static_cast<const IntervalIntDomain&>(var->lastDomain());
-      Time lb = (Time) timeBounds.getLowerBound();
-      Time ub = (Time) timeBounds.getUpperBound();
+      Time lb = (Time) cast_basis(timeBounds.getLowerBound());
+      Time ub = (Time) cast_basis(timeBounds.getUpperBound());
 
       //if(lb < lbt || ub > ubt) {
       if(lb ==MINUS_INFINITY && ub==PLUS_INFINITY) {
@@ -737,8 +737,8 @@ namespace EUROPA {
     check_error(tp.isValid());
 
     const IntervalIntDomain& timeBounds = static_cast<const IntervalIntDomain&>(var->lastDomain());
-    Time lb = (Time) timeBounds.getLowerBound();
-    Time ub = (Time) timeBounds.getUpperBound();
+    Time lb = (Time) cast_basis(timeBounds.getLowerBound());
+    Time ub = (Time) cast_basis(timeBounds.getUpperBound());
     const TemporalConstraintId& baseDomainConstraint = tp->getBaseDomainConstraint();
     TemporalConstraintId newConstraint = updateConstraint(var, baseDomainConstraint, lb, ub);
 
@@ -779,8 +779,8 @@ namespace EUROPA {
           // Checks for finiteness are to avoid overflow or underflow.
           if(sourceDom.isFinite() && targetDom.isFinite()){
               IntervalIntDomain& distanceDom = static_cast<IntervalIntDomain&>(Propagator::getCurrentDomain(distance));
-              Time minDistance = (Time) (targetDom.getLowerBound() - sourceDom.getUpperBound());
-              Time maxDistance = (Time) (targetDom.getUpperBound() - sourceDom.getLowerBound());
+              Time minDistance = (Time) cast_basis(targetDom.getLowerBound() - sourceDom.getUpperBound());
+              Time maxDistance = (Time) cast_basis(targetDom.getUpperBound() - sourceDom.getLowerBound());
 
               // if this intersect() call causes a violation
               // we need to have the constraint network know the culprit (constraint)
@@ -795,8 +795,8 @@ namespace EUROPA {
       checkError(distance->lastDomain().isInterval(), constraint->getKey() << " is invalid");
       const TemporalConstraintId& tnetConstraint = constraint->getExternalEntity();
       const IntervalIntDomain& dom = static_cast<const IntervalIntDomain&>(distance->lastDomain());
-      Time lb= (Time) dom.getLowerBound();
-      Time ub= (Time) dom.getUpperBound();
+      Time lb= (Time) cast_basis(dom.getLowerBound());
+      Time ub= (Time) cast_basis(dom.getUpperBound());
       debugMsg("TemporalPropagator:updateTemporalConstraint", "Calling updateConstraint");
       updateConstraint(distance, tnetConstraint, lb, ub);
     }
