@@ -114,7 +114,7 @@ namespace EUROPA {
 
   protected:
     ObjectTypeMgrId m_id;
-    std::map<double, ObjectFactoryId> m_factories;
+    std::map<edouble, ObjectFactoryId> m_factories;
   };
 
   // Call to super inside a constructor

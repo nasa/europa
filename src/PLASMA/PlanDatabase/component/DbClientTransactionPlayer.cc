@@ -1363,7 +1363,7 @@ namespace EUROPA {
     if (strcmp(tag, "new") == 0) {
       const char * type = element.Attribute("type");
       check_error(type != NULL);
-      return(new ObjectDomain(getCESchema()->getDataType(type),xmlAsValue(element, name)));
+      return(new ObjectDomain(getCESchema()->getDataType(type), Entity::getTypedEntity<Object>(xmlAsValue(element, name))));
     }
     if (strcmp(tag, "id") == 0) {
       const char * name = element.Attribute("name");

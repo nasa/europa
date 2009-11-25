@@ -397,12 +397,11 @@ namespace EUROPA {
     virtual std::string toString() const;
     std::string toString(edouble value) const;
 
-    void remove(edouble value);
     void remove(const ObjectId& obj);
+    void remove(edouble value);
 
     bool isMember(const ObjectId& obj) const;
-    bool isMember(edouble value) const;
-
+    bool isMember(edouble value) const; //because of the reference-casting rules...
   };
 }
 

@@ -354,7 +354,7 @@ namespace EUROPA{
     const LabelStr& name = t->getName();
     checkError(!isGlobalToken(name), name.toString() << " is not unique. Can't register global token");
     m_globalTokens.insert(t);
-    m_globalTokensByName.insert(std::pair<double, TokenId>(name, t));
+    m_globalTokensByName.insert(std::make_pair(name, t));
 
     checkError(isGlobalToken(name), t->toLongString() << " is not registered after all. This cannot be!.");
     debugMsg("PlanDatabase:registerGlobalToken", "Registered " << name.toString());

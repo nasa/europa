@@ -31,7 +31,7 @@ void TokenTypeMgr::registerType(const TokenTypeId& type) {
 	check_error(m_types.find(type) == m_types.end()) ;
 
 	m_types.insert(type);
-	m_typesByPredicate.insert(std::pair<double, TokenTypeId>(type->getSignature().getKey(), type));
+	m_typesByPredicate.insert(std::make_pair(type->getSignature().getKey(), type));
 }
 
 /**
@@ -42,7 +42,7 @@ TokenTypeId TokenTypeMgr::getType(const SchemaId& schema, const LabelStr& predic
 	check_error(schema->isPredicate(predicateName), predicateName.toString() + " is undefined.");
 
 	// Confirm it is present
-	const std::map<double, TokenTypeId>::const_iterator pos = m_typesByPredicate.find(predicateName.getKey());
+	const std::map<edouble, TokenTypeId>::const_iterator pos = m_typesByPredicate.find(predicateName.getKey());
 
 	if (pos != m_typesByPredicate.end()) // We have found what we are looking for
 		return(pos->second);
@@ -57,7 +57,7 @@ TokenTypeId TokenTypeMgr::getType(const SchemaId& schema, const LabelStr& predic
 		check_error(type.isValid(), "No type found for " + predicateName.toString());
 
 		// Log the mapping in this case, from the original predicate, to make it faster the next time around
-		m_typesByPredicate.insert(std::pair<double, TokenTypeId>(predicateName, type));
+		m_typesByPredicate.insert(std::make_pair(predicateName, type));
 		return(type);
 	}
 

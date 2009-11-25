@@ -22,7 +22,8 @@ namespace EUROPA {
     : m_id(this), m_type(type), m_name(name), m_planDatabase(planDatabase),
       m_state(INCOMPLETE), m_lastOrderingChoiceCount(0),
       m_thisVar((new Variable< ObjectDomain>(m_planDatabase->getConstraintEngine(),
-			    ObjectDomain(m_planDatabase->getSchema()->getCESchema()->getDataType(type.c_str()),m_id)))->getId()) {
+                                             ObjectDomain(m_planDatabase->getSchema()->getCESchema()->getDataType(type.c_str()),
+                                                          m_id)))->getId()) {
     check_error(m_planDatabase.isValid());
     if (!open)
       close();
@@ -176,7 +177,7 @@ namespace EUROPA {
     std::set<ConstraintId> constraints;
 
     // Gather all the constraints and remove various index entries
-    std::multimap<int, ConstraintId>::iterator it = m_constraintsByTokenKey.find(token->getKey());
+    std::multimap<eint, ConstraintId>::iterator it = m_constraintsByTokenKey.find(token->getKey());
     while(it != m_constraintsByTokenKey.end()){
 
       if(it->first != token->getKey())
@@ -191,7 +192,7 @@ namespace EUROPA {
       debugMsg("Object:remove:token", "Also removing " << constraint->toString());
 
       // If the constraint is a precedence constraint, the additional cleanup required
-      std::map<int, int>::iterator pos = m_keyPairsByConstraintKey.find(constraint->getKey());
+      std::map<eint, int>::iterator pos = m_keyPairsByConstraintKey.find(constraint->getKey());
       if(pos != m_keyPairsByConstraintKey.end())
 	removePrecedenceConstraint(constraint);
     }
@@ -293,8 +294,8 @@ namespace EUROPA {
       m_keyPairsByConstraintKey.insert(std::make_pair(constraint->getKey(), encodedKey));
 
       // Store for access by token
-      m_constraintsByTokenKey.insert(std::pair<int, ConstraintId>(predecessor->getKey(), constraint));
-      m_constraintsByTokenKey.insert(std::pair<int, ConstraintId>(successor->getKey(), constraint));
+      m_constraintsByTokenKey.insert(std::make_pair(predecessor->getKey(), constraint));
+      m_constraintsByTokenKey.insert(std::make_pair(successor->getKey(), constraint));
     }
 
     if(isExplicit)
@@ -382,7 +383,7 @@ namespace EUROPA {
 
     ConstrainedVariableId var = m_variables[index];
     if(path.size() > 1){
-      ObjectId object = var->lastDomain().getSingletonValue();
+      ObjectId object = Entity::getTypedEntity<Object>(var->lastDomain().getSingletonValue());
       std::vector<unsigned int>::const_iterator it = path.begin();
       std::vector<unsigned int> newPath(++it, path.end());
 
@@ -410,7 +411,7 @@ namespace EUROPA {
     check_error(token.isValid());
 
     // Find the first constraint on this token
-    std::multimap<int, ConstraintId>::iterator it = m_constraintsByTokenKey.find(token->getKey());
+    std::multimap<eint, ConstraintId>::iterator it = m_constraintsByTokenKey.find(token->getKey());
 
     check_error(it != m_constraintsByTokenKey.end(), "Should be at least one constraint on clean");
 
@@ -465,14 +466,14 @@ namespace EUROPA {
     check_error(results.empty());
 
     // Find the first constraint for this token.
-    std::multimap<int, ConstraintId>::const_iterator it = m_constraintsByTokenKey.find(token->getKey());
+    std::multimap<eint, ConstraintId>::const_iterator it = m_constraintsByTokenKey.find(token->getKey());
 
     // Record if we find the singleton constraint, as we should only get one. That constraint does not have
     // a key pair.
     bool singletonFound = false;
     while(it != m_constraintsByTokenKey.end() && it->first == token->getKey()){
       ConstraintId constraint = it->second;
-      std::map<int, int>::const_iterator pos = m_keyPairsByConstraintKey.find(constraint->getKey());
+      std::map<eint, int>::const_iterator pos = m_keyPairsByConstraintKey.find(constraint->getKey());
       if(pos == m_keyPairsByConstraintKey.end()){
 	check_error(singletonFound == false,
 		    "Can only find one singleton constraint per token.");
@@ -518,9 +519,9 @@ namespace EUROPA {
     }
   }
 
-  void Object::clean(const ConstraintId& constraint, int tokenKey) {
+  void Object::clean(const ConstraintId& constraint, eint tokenKey) {
     // Remove the entry in the predecessor list if necessary
-    std::multimap<int, ConstraintId>::iterator it = m_constraintsByTokenKey.find(tokenKey);
+    std::multimap<eint, ConstraintId>::iterator it = m_constraintsByTokenKey.find(tokenKey);
     while(it != m_constraintsByTokenKey.end() && it->first == tokenKey && it->second != constraint)
       ++it;
     if(it != m_constraintsByTokenKey.end() && it->second == constraint)
@@ -530,7 +531,7 @@ namespace EUROPA {
   void Object::constrainToThisObjectAsNeeded(const TokenId& token) {
     check_error(token.isValid());
     check_error(token->isActive());
-    check_error(token->getObject()->lastDomain().isMember(m_id),
+    check_error(token->getObject()->lastDomain().isMember(getKey()),
       "Cannot assign token " + token->getPredicateName().toString() + " to  object " + getName().toString() + ", it is not part of derived domain.");
 
     // Place this token on the object. We use a constraint since token assignment is done by specifying
@@ -539,7 +540,7 @@ namespace EUROPA {
       ConstraintId thisObject =
           getPlanDatabase()->getConstraintEngine()->createConstraint(LabelStr("eq"),
 					    makeScope(token->getObject(), m_thisVar));
-      m_constraintsByTokenKey.insert(std::pair<int, ConstraintId>(token->getKey(), thisObject));
+      m_constraintsByTokenKey.insert(std::make_pair(token->getKey(), thisObject));
     }
   }
 
@@ -568,7 +569,7 @@ namespace EUROPA {
 		"Lookup tables should have identical sizes. Must be out of synch.");
 
     // Validate tokens and constraints
-    for(std::multimap<int, ConstraintId>::const_iterator it = m_constraintsByTokenKey.begin();
+    for(std::multimap<eint, ConstraintId>::const_iterator it = m_constraintsByTokenKey.begin();
 	it != m_constraintsByTokenKey.end();
 	++it){
       checkError(it->second.isValid(), it->second);
@@ -663,7 +664,7 @@ namespace EUROPA {
   {
   	std::ostringstream os;
   	if (objVar->lastDomain().isSingleton()) {
-  		ObjectId obj = objVar->lastDomain().getSingletonValue();
+          ObjectId obj = Entity::getTypedEntity<Object>(objVar->lastDomain().getSingletonValue());
   	    os << obj->toString();
   	}
   	else {
@@ -687,7 +688,7 @@ namespace EUROPA {
 
 
   int Object::makeKey(const TokenId& a, const TokenId& b){
-    return (a->getKey() << 16) ^ b->getKey();
+    return (cast_int(a->getKey()) << 16) ^ cast_int(b->getKey());
   }
 
   void Object::removePrecedenceConstraint(const ConstraintId& constraint){
@@ -770,15 +771,15 @@ namespace EUROPA {
 
   void Object::addPrecedence(PSToken* pred,PSToken* succ)
   {
-	  TokenId p = getPlanDatabase()->getEntityByKey(pred->getKey());
-	  TokenId s = getPlanDatabase()->getEntityByKey(succ->getKey());
+	  TokenId p = getPlanDatabase()->getEntityByKey(pred->getEntityKey());
+	  TokenId s = getPlanDatabase()->getEntityByKey(succ->getEntityKey());
 	  constrain(p,s);
   }
 
   void Object::removePrecedence(PSToken* pred,PSToken* succ)
   {
-	  TokenId p = getPlanDatabase()->getEntityByKey(pred->getKey());
-	  TokenId s = getPlanDatabase()->getEntityByKey(succ->getKey());
+	  TokenId p = getPlanDatabase()->getEntityByKey(pred->getEntityKey());
+	  TokenId s = getPlanDatabase()->getEntityByKey(succ->getEntityKey());
 	  free(p,s);
   }
 
@@ -809,16 +810,16 @@ namespace EUROPA {
   bool ObjectDT::isString() const  { return false; }
   bool ObjectDT::isEntity() const  { return true; }
 
-  double ObjectDT::createValue(const std::string& value) const
+  edouble ObjectDT::createValue(const std::string& value) const
   {
     return LabelStr(value);
   }
 
-  std::string ObjectDT::toString(double value) const
+  std::string ObjectDT::toString(edouble value) const
   {
     std::ostringstream os;
     if(!Entity::isPurging()) {
-        ObjectId object = value;
+      ObjectId object = Entity::getTypedEntity<Object>(value);
         os << object->toString();
     }
     else
@@ -841,30 +842,30 @@ namespace EUROPA {
     for(std::list<ObjectId>::const_iterator it = initialValues.begin(); it != initialValues.end(); ++it){
       ObjectId object = *it;
       check_error(object.isValid());
-      insert(object);
+      insert(object->getKey());
     }
     close();
   }
 
   ObjectDomain::ObjectDomain(const DataTypeId& dt, const ObjectId& initialValue)
-  : EnumeratedDomain(dt, initialValue)
+    : EnumeratedDomain(dt, initialValue->getKey())
   {
       check_error(!isNumeric());
   }
 
   ObjectDomain::ObjectDomain(const AbstractDomain& org)
     : EnumeratedDomain(org){
-    check_error(org.isEmpty() || ObjectId(org.getLowerBound()).isValid(),
+    check_error(org.isEmpty() || Entity::getTypedEntity<Object>(org.getLowerBound()).isValid(),
         "Attempted to construct an object domain with values of non-object type " +
         org.getTypeName().toString());
   }
 
-  bool ObjectDomain::convertToMemberValue(const std::string& strValue, double& dblValue) const{
+  bool ObjectDomain::convertToMemberValue(const std::string& strValue, edouble& dblValue) const{
     int value = atoi(strValue.c_str());
     EntityId entity = Entity::getEntity(value);
 
     if(entity.isId() && isMember(entity)){
-      dblValue = entity;
+      dblValue = entity->getKey();
       return true;
     }
 
@@ -875,18 +876,18 @@ namespace EUROPA {
      return "OBJECT-"+AbstractDomain::toString();
   }
 
-  std::list<ObjectId> ObjectDomain::makeObjectList(const std::list<double>& inputs){
+  std::list<ObjectId> ObjectDomain::makeObjectList(const std::list<edouble>& inputs){
     std::list<ObjectId> outputs;
-    for (std::list<double>::const_iterator it = inputs.begin(); it != inputs.end(); ++it)
-      outputs.push_back((ObjectId)(*it));
+    for (std::list<edouble>::const_iterator it = inputs.begin(); it != inputs.end(); ++it)
+      outputs.push_back(Entity::getTypedEntity<Object>(*it));
     return outputs;
   }
 
   std::list<ObjectId> ObjectDomain::makeObjectList() const {
     std::list<ObjectId> objects;
-    const std::set<double>& values = getValues();
-    for(std::set<double>::const_iterator it = values.begin(); it != values.end(); ++it){
-      ObjectId object = *it;
+    const std::set<edouble>& values = getValues();
+    for(std::set<edouble>::const_iterator it = values.begin(); it != values.end(); ++it){
+      ObjectId object = Entity::getTypedEntity<Object>(*it);
       objects.push_back(object);
     }
 
@@ -897,6 +898,27 @@ namespace EUROPA {
     ObjectDomain *ptr = new ObjectDomain(*this);
     check_error(ptr != 0);
     return(ptr);
+  }
+
+  bool ObjectDomain::isMember(const ObjectId& obj) const {
+    return isMember(obj->getKey());
+  }
+  bool ObjectDomain::isMember(edouble value) const {
+    return EnumeratedDomain::isMember(value);
+  }
+  
+
+  void ObjectDomain::remove(const ObjectId& obj) {
+    remove(obj->getKey());
+  }
+  void ObjectDomain::remove(edouble value) {
+    EnumeratedDomain::remove(value);
+  }
+
+  ObjectId ObjectDomain::getObject(const eint key) const {
+    if(EnumeratedDomain::isMember(key))
+      return Entity::getTypedEntity<Object>(key);
+    return ObjectId::noId();
   }
 
 }

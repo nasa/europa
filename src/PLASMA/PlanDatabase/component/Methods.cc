@@ -35,7 +35,7 @@ TokenId varToToken(const ConstrainedVariableId& v)
 
 ObjectId varToObject(const ConstrainedVariableId& v)
 {
-    return ObjectId(v->derivedDomain().getSingletonValue());
+  return Entity::getTypedEntity<Object>(v->derivedDomain().getSingletonValue());
 }
 
 DataRef PDBClose::eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const

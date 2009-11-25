@@ -77,11 +77,12 @@ namespace EUROPA{
      * @param lbs The returned lower-bound signs as numbers with correct signs but arbitrary values.
      * @param ubs The returned upper-bound signs as numbers with correct signs but arbitrary values.
      */
+    //it's posible that these numbers don't need to be eints
     virtual void getTemporalDistanceSigns(const ConstrainedVariableId& first,
                                           const std::vector<ConstrainedVariableId>&
                                           seconds,
-                                          std::vector<int>& lbs,
-                                          std::vector<int>& ubs) = 0;
+                                          std::vector<eint>& lbs,
+                                          std::vector<eint>& ubs) = 0;
 
     /**
      * @brief Obtains the most recent repropagation of relevant information w.r.t. time

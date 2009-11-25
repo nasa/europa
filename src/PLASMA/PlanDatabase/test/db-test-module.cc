@@ -49,8 +49,8 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
     // test/simple-predicate.nddl:4 DBFoo
     void constructor();
     void constructor(eint arg0, LabelStr& arg1);
-    Id< Variable< IntervalIntDomain > > m_0;
-    Id< Variable< LabelSet > > m_1;
+    ConstrainedVariableId m_0;
+    ConstrainedVariableId m_1;
   };
 
   DBFoo::DBFoo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
@@ -114,7 +114,7 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
       CPPUNIT_ASSERT(arguments[0]->getTypeName().toString() == IntDT::NAME());
       CPPUNIT_ASSERT(arguments[1]->getTypeName().toString() == StringDT::NAME());
 
-      eint arg0(cast_int(arguments[0]->getSingletonValue()));
+      eint arg0(arguments[0]->getSingletonValue());
       LabelStr arg1(arguments[1]->getSingletonValue());
       foo->constructor(arg0, arg1);
       foo->handleDefaults();
@@ -747,7 +747,7 @@ private:
     Object o6(o3.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o6");
     Object o7(o3.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o7");
 
-    ObjectDomain allObjects(LabelStr(DEFAULT_OBJECT_TYPE).c_str());
+    ObjectDomain allObjects(GET_DEFAULT_OBJECT_TYPE(ce));
     allObjects.insert(o1.getKey());
     allObjects.insert(o2.getKey());
     allObjects.insert(o3.getKey());
@@ -809,14 +809,14 @@ private:
       CPPUNIT_ASSERT(ce->propagate()); // All ok so far
 
       restrictions.specify(o2.getKey());
-      CPPUNIT_ASSERT(ENGINE->propagate()); // Nothing happens yet.
+      CPPUNIT_ASSERT(ce->propagate()); // Nothing happens yet.
 
       first.specify(o6.getKey()); // Now we should propagate to failure
-      CPPUNIT_ASSERT(!ENGINE->propagate());
+      CPPUNIT_ASSERT(!ce->propagate());
       first.reset();
 
       first.specify(o4.getKey());
-      CPPUNIT_ASSERT(ENGINE->propagate());
+      CPPUNIT_ASSERT(ce->propagate());
     }
     DEFAULT_TEARDOWN();
     return true;
@@ -836,8 +836,8 @@ private:
 
     // Positive test immediate ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o3.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> first(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o7.getId()));
+      Variable<ObjectDomain> restrictions(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o3.getId()));
       HasAncestorConstraint constraint("hasAncestor",
                                        "Default",
                                        ce,
@@ -848,8 +848,8 @@ private:
 
     // negative test immediate ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> first(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o7.getId()));
+      Variable<ObjectDomain> restrictions(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o2.getId()));
       HasAncestorConstraint constraint("hasAncestor",
                                        "Default",
                                        ce,
@@ -859,8 +859,8 @@ private:
     }
     // Positive test higher up  ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> first(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o7.getId()));
+      Variable<ObjectDomain> restrictions(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o1.getId()));
       HasAncestorConstraint constraint("hasAncestor",
                                        "Default",
                                        ce,
@@ -870,8 +870,8 @@ private:
     }
     // negative test higherup ancestor
     {
-      Variable<ObjectDomain> first(ENGINE, ObjectDomain(o7.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o8.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> first(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o7.getId()));
+      Variable<ObjectDomain> restrictions(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o8.getId()));
       HasAncestorConstraint constraint("hasAncestor",
                                        "Default",
                                        ce,
@@ -882,13 +882,13 @@ private:
 
     //positive restriction of the set.
     {
-      ObjectDomain obs(LabelStr(DEFAULT_OBJECT_TYPE).c_str());
+      ObjectDomain obs(GET_DEFAULT_OBJECT_TYPE(ce));
       obs.insert(o7.getKey());
       obs.insert(o4.getKey());
       obs.close();
 
-      Variable<ObjectDomain> first(ENGINE, obs);
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o2.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> first(ce, obs);
+      Variable<ObjectDomain> restrictions(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o2.getId()));
       HasAncestorConstraint constraint("hasAncestor",
                                        "Default",
                                        ce,
@@ -900,13 +900,13 @@ private:
 
     //no restriction of the set.
     {
-      ObjectDomain obs1(LabelStr(DEFAULT_OBJECT_TYPE).c_str());
+      ObjectDomain obs1(GET_DEFAULT_OBJECT_TYPE(ce));
       obs1.insert(o7.getKey());
       obs1.insert(o4.getKey());
       obs1.close();
 
-      Variable<ObjectDomain> first(ENGINE, obs1);
-      Variable<ObjectDomain> restrictions(ENGINE, ObjectDomain(o1.getKey(), LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
+      Variable<ObjectDomain> first(ce, obs1);
+      Variable<ObjectDomain> restrictions(ce, ObjectDomain(GET_DEFAULT_OBJECT_TYPE(ce),o1.getId()));
       HasAncestorConstraint constraint("hasAncestor",
                                        "Default",
                                        ce,
@@ -1011,7 +1011,7 @@ private:
 
     // Insertion of a new object should not affect the given event token
     ObjectId o2 = (new Object(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
-    CPPUNIT_ASSERT(ENGINE->constraintConsistent());
+    CPPUNIT_ASSERT(ce->constraintConsistent());
     CPPUNIT_ASSERT(!eventToken.getObject()->baseDomain().isMember(o2->getKey()));
 
     DEFAULT_TEARDOWN();
@@ -2487,14 +2487,14 @@ private:
     ce->propagate(); //propagate the change
 
     //shouldn't be able to merge with anything
-    CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), std::numeric_limits<unsigned int>::max(), true) == 0);
+    CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), cast_int(PLUS_INFINITY), true) == 0);
 
     delete (Constraint *) eq; //remove the constraint
 
     ce->propagate();
 
     // Should now be able to merge
-    CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), std::numeric_limits<unsigned int>::max(), true) > 0);
+    CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), cast_int(PLUS_INFINITY), true) > 0);
 
     DEFAULT_TEARDOWN();
     return true;
@@ -4663,7 +4663,7 @@ public:
     // Specifying variables is one of the special cases.
     TEST_PLAYING_XML(buildXMLInvokeSpecifyVariableStr(sg_location, Locations(ld1)));
     CPPUNIT_ASSERT(sg_location->lastDomain() == Locations(ld1));
-    std::list<double> locs;
+    std::list<edouble> locs;
     locs.push_back(LabelStr("Hill"));
     locs.push_back(LabelStr("Rock"));
 

@@ -440,7 +440,7 @@ namespace EUROPA {
 
     DataRef ExprConstructorSuperCall::eval(EvalContext& context) const
     {
-      ObjectId object = context.getVar("this")->derivedDomain().getSingletonValue();
+      ObjectId object = Entity::getTypedEntity<Object>(context.getVar("this")->derivedDomain().getSingletonValue());
 
       std::vector<const AbstractDomain*> arguments;
 
