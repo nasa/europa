@@ -586,43 +586,11 @@ namespace EUROPA {
     return true;
   }
 
-  ObjectDomain::ObjectDomain(const std::string& typeName)
-  : EnumeratedDomain(false, typeName){
-    check_error(!isNumeric());
-  }
-
-  ObjectDomain::ObjectDomain(const std::list<ObjectId>& initialValues, const std::string& typeName)
-  : EnumeratedDomain(false, typeName){
-    check_error(!isNumeric());
-    for(std::list<ObjectId>::const_iterator it = initialValues.begin(); it != initialValues.end(); ++it){
-      ObjectId object = *it;
-      check_error(object.isValid());
-      insert(object->getKey());
-    }
-    close();
-  }
-
-  ObjectDomain::ObjectDomain(const ObjectId& initialValue, const std::string& typeName): 
-    EnumeratedDomain(initialValue->getKey(), false, typeName){check_error(!isNumeric());}
-
-  ObjectDomain::ObjectDomain(const edouble& initialValue, const std::string& typeName): 
-    EnumeratedDomain(initialValue, false, typeName){
-    check_error(!isNumeric()); 
-    check_error(Entity::getTypedEntity<Object>(initialValue).isValid());
-  }
-
   ObjectDomain::ObjectDomain(const AbstractDomain& org)
     : EnumeratedDomain(org){
     check_error(org.isEmpty() || ObjectId(Entity::getTypedEntity<Object>(org.getLowerBound())).isValid(),
 		"Attempted to construct an object domain with values of non-object type " + 
 		org.getTypeName().toString());
-  }
-
-  const LabelStr&
-  ObjectDomain::getDefaultTypeName()
-  {
-    static const LabelStr sl_typeName("Objects");
-    return(sl_typeName);
   }
 
   bool ObjectDomain::convertToMemberValue(const std::string& strValue, edouble& dblValue) const{
@@ -666,10 +634,6 @@ namespace EUROPA {
       outputs.push_back(Entity::getTypedEntity<Object>(*it));
     return outputs;
   }
-
-      const AbstractDomain& typeDomain = m_planDatabase->getConstraintEngine()->getCESchema()->baseDomain(varTypeName.c_str());
-      check_error(baseDomain.isSubsetOf(typeDomain), "Variable " + std::string(name) + " of type " +
-		  varTypeName.c_str() +" can not be set to " + baseDomain.toString());
 
   std::list<ObjectId> ObjectDomain::makeObjectList() const {
     std::list<ObjectId> objects;
@@ -961,17 +925,6 @@ namespace EUROPA {
         org.getTypeName().toString());
   }
 
-  bool ObjectDomain::convertToMemberValue(const std::string& strValue, double& dblValue) const{
-    int value = atoi(strValue.c_str());
-    EntityId entity = Entity::getEntity(value);
-
-    if(entity.isId() && isMember(entity)){
-      dblValue = entity;
-      return true;
-    }
-
-    return false;
-  }
 
   std::string ObjectDomain::toString() const{
      return "OBJECT-"+AbstractDomain::toString();

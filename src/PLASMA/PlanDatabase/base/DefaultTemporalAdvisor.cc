@@ -108,13 +108,13 @@ namespace EUROPA {
   void DefaultTemporalAdvisor::getTemporalDistanceSigns(const ConstrainedVariableId& first,
                                                         const std::vector<ConstrainedVariableId>&
                                                         seconds,
-                                                        std::vector<int>& lbs,
-                                                        std::vector<int>& ubs){
+                                                        std::vector<eint>& lbs,
+                                                        std::vector<eint>& ubs){
     std::vector<IntervalIntDomain> domains;
     getTemporalDistanceDomains(first, seconds, domains);
     for (unsigned int i=0; i < seconds.size(); i++) {
-      lbs.push_back((int)domains[i].getLowerBound());
-      ubs.push_back((int)domains[i].getUpperBound());
+      lbs.push_back(domains[i].getLowerBound());
+      ubs.push_back(domains[i].getUpperBound());
     }
   }
 

@@ -34,11 +34,11 @@ const DataTypeId& ObjectType::getVarType() const
 
 void ObjectType::purgeAll()
 {
-    for(std::map<double, ObjectFactoryId>::const_iterator it = m_objectFactories.begin(); it != m_objectFactories.end(); ++it)
+    for(std::map<edouble, ObjectFactoryId>::const_iterator it = m_objectFactories.begin(); it != m_objectFactories.end(); ++it)
         delete (ObjectFactory*) it->second;
     m_objectFactories.clear();
 
-    for(std::map<double, TokenTypeId>::const_iterator it = m_tokenTypes.begin(); it != m_tokenTypes.end(); ++it)
+    for(std::map<edouble, TokenTypeId>::const_iterator it = m_tokenTypes.begin(); it != m_tokenTypes.end(); ++it)
         delete (TokenType*) it->second;
     m_tokenTypes.clear();
 }
@@ -64,12 +64,12 @@ const std::map<std::string,DataTypeId>& ObjectType::getMembers() const
     return m_members;
 }
 
-const std::map<double,ObjectFactoryId>& ObjectType::getObjectFactories() const
+const std::map<edouble,ObjectFactoryId>& ObjectType::getObjectFactories() const
 {
     return m_objectFactories;
 }
 
-const std::map<double,TokenTypeId>& ObjectType::getTokenTypes() const
+const std::map<edouble,TokenTypeId>& ObjectType::getTokenTypes() const
 {
     return m_tokenTypes;
 }
@@ -103,13 +103,13 @@ const DataTypeId& ObjectType::getMemberType(const char* name) const
 void ObjectType::addObjectFactory(const ObjectFactoryId& factory)
 {
     // TODO: allow redefinition of old one
-    m_objectFactories[(double)(factory->getSignature())] = factory;
+    m_objectFactories[(edouble)(factory->getSignature())] = factory;
 }
 
 void ObjectType::addTokenType(const TokenTypeId& factory)
 {
     // TODO: allow redefinition of old one
-    m_tokenTypes[(double)(factory->getSignature())] = factory;
+    m_tokenTypes[(edouble)(factory->getSignature())] = factory;
 }
 
 const TokenTypeId& ObjectType::getTokenType(const LabelStr& signature) const
@@ -117,7 +117,7 @@ const TokenTypeId& ObjectType::getTokenType(const LabelStr& signature) const
     check_error(signature.getElement(0,".")==getName(),
             "Can't look for a token factory I don't own");
 
-    std::map<double,TokenTypeId>::const_iterator it = m_tokenTypes.find((double)signature);
+    std::map<edouble,TokenTypeId>::const_iterator it = m_tokenTypes.find((edouble)signature);
     if (it != m_tokenTypes.end())
         return it->second;
 
@@ -158,7 +158,7 @@ std::string ObjectType::toString() const
     os << std::endl;
 
     {
-        std::map<double,ObjectFactoryId>::const_iterator it = m_objectFactories.begin();
+        std::map<edouble,ObjectFactoryId>::const_iterator it = m_objectFactories.begin();
         for(;it != m_objectFactories.end(); ++it)
             os << "    " << it->second->getSignature().c_str() << std::endl;
     }
@@ -166,7 +166,7 @@ std::string ObjectType::toString() const
     os << std::endl;
 
     {
-        std::map<double,TokenTypeId>::const_iterator it = m_tokenTypes.begin();
+        std::map<edouble,TokenTypeId>::const_iterator it = m_tokenTypes.begin();
         for(;it != m_tokenTypes.end(); ++it) {
             TokenTypeId tokenType = it->second;
             os << "    " << tokenType->getSignature().c_str();

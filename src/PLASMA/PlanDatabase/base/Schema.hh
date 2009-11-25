@@ -110,7 +110,7 @@ namespace EUROPA {
      * @brief Test if the given value is a member of any enum
      * @param value The value to be tested.
      */
-    bool isEnumValue(double value) const;
+    bool isEnumValue(edouble value) const;
 
     /**
      * @brief Determine of a given predicate is part of the schema
@@ -211,7 +211,7 @@ namespace EUROPA {
      * @brief Obtains the enum name for an enum value
      * @param value enum value to be looked up
      */
-    const LabelStr& getEnumForValue(double value) const;
+    const LabelStr& getEnumForValue(edouble value) const;
 
     /**
      * @brief Obtain the set of predicates for a given object type.
@@ -382,14 +382,14 @@ namespace EUROPA {
 
     SchemaId m_id;
     const CESchemaId& m_ceSchema;
-    std::map<double, ObjectTypeId> m_objTypes; // TODO: this must be subsumed by ObjectTypeMgr, get rid of
+    std::map<edouble, ObjectTypeId> m_objTypes; // TODO: this must be subsumed by ObjectTypeMgr, get rid of
     const ObjectTypeMgrId m_objectTypeMgr;
     const TokenTypeMgrId m_tokenTypeMgr;
-    std::map<double, MethodId> m_methods; // TODO: define methodMgr instead of keeping a map here
+    std::map<edouble, MethodId> m_methods; // TODO: define methodMgr instead of keeping a map here
 
     const LabelStr m_name;
     LabelStr_ValueSet_Map enumValues;
-    std::map<double, LabelStr> enumValuesToEnums;
+    std::map<edouble, LabelStr> enumValuesToEnums;
 
     LabelStrSet objectTypes;  //get rid of
     LabelStrSet predicates;

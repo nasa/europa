@@ -244,7 +244,7 @@ namespace EUROPA {
     publish(notifyVariableRestricted(variable));
   }
 
-  void DbClient::specify(const ConstrainedVariableId& variable, double value){
+  void DbClient::specify(const ConstrainedVariableId& variable, edouble value){
     debugMsg("DbClient:specify", "before:" << variable->toLongString() << " to " << variable->toString(value));
     variable->specify(value);
     debugMsg("DbClient:specify", "after:" << variable->toLongString());
@@ -442,7 +442,7 @@ namespace EUROPA {
 
   bool DbClient::isTransactionLoggingEnabled() const { return m_transactionLoggingEnabled; }
 
-  double DbClient::createValue(const char* typeName, const std::string& value)
+  edouble DbClient::createValue(const char* typeName, const std::string& value)
   {
     return m_planDb->getConstraintEngine()->createValue(typeName,value);
   }

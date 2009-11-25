@@ -38,10 +38,10 @@ public:
     virtual const DataTypeId& getMemberType(const char* name) const;
 
     virtual void addObjectFactory(const ObjectFactoryId& factory);
-    virtual const std::map<double,ObjectFactoryId>& getObjectFactories() const;
+    virtual const std::map<edouble,ObjectFactoryId>& getObjectFactories() const;
 
     virtual void addTokenType(const TokenTypeId& factory);
-    virtual const std::map<double,TokenTypeId>& getTokenTypes() const;
+    virtual const std::map<edouble,TokenTypeId>& getTokenTypes() const;
     virtual const TokenTypeId& getTokenType(const LabelStr& signature) const;
     virtual const TokenTypeId& getParentType(const TokenTypeId& factory) const;
 
@@ -55,8 +55,8 @@ protected:
     LabelStr m_name;
     ObjectTypeId m_parent;
     bool m_isNative;
-    std::map<double,ObjectFactoryId> m_objectFactories;
-    std::map<double,TokenTypeId> m_tokenTypes;
+    std::map<edouble,ObjectFactoryId> m_objectFactories;
+    std::map<edouble,TokenTypeId> m_tokenTypes;
     std::map<std::string,DataTypeId> m_members;
 };
 

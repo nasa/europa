@@ -114,7 +114,7 @@ namespace EUROPA {
      */
     virtual void getOrderingChoices(const TokenId& token,
 				    std::vector< std::pair< TokenId, TokenId> >& results,
-				    unsigned int limit = PLUS_INFINITY);
+				    unsigned int limit = cast_int(PLUS_INFINITY));
 
     /**
      * @brief Count the number of ordering choices for a token. Cut off if we hit the given limit
@@ -364,8 +364,8 @@ namespace EUROPA {
       virtual bool isString() const;
       virtual bool isEntity() const;
 
-      virtual double createValue(const std::string& value) const;
-      virtual std::string toString(double value) const;
+      virtual edouble createValue(const std::string& value) const;
+      virtual std::string toString(edouble value) const;
   };
 
   class ObjectDomain: public EnumeratedDomain {
@@ -385,14 +385,23 @@ namespace EUROPA {
      */
     std::list<ObjectId> makeObjectList() const;
 
+    ObjectId getObject(const eint key) const;
+
     /**
      * @brief Obtain the double encoded value from the string if it is a member.
      */
-    bool convertToMemberValue(const std::string& strValue, edouble dblValue) const;
+    bool convertToMemberValue(const std::string& strValue, edouble& dblValue) const;
 
     virtual ObjectDomain *copy() const;
 
     virtual std::string toString() const;
+    std::string toString(edouble value) const;
+
+    void remove(edouble value);
+    void remove(const ObjectId& obj);
+
+    bool isMember(const ObjectId& obj) const;
+    bool isMember(edouble value) const;
 
   };
 }

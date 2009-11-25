@@ -55,12 +55,12 @@ namespace EUROPA {
       delete (TokenTypeMgr*)m_tokenTypeMgr;
       delete (ObjectTypeMgr*)m_objectTypeMgr;
 
-      std::map<double,ObjectTypeId>::iterator it = m_objTypes.begin();
+      std::map<edouble,ObjectTypeId>::iterator it = m_objTypes.begin();
       for(;it != m_objTypes.end();++it)
           delete (ObjectType*)it->second;
       m_objTypes.clear();
 
-      std::map<double,MethodId>::iterator mit = m_methods.begin();
+      std::map<edouble,MethodId>::iterator mit = m_methods.begin();
       for(;mit != m_methods.end();++mit)
           delete (Method*)mit->second;
       m_methods.clear();
@@ -151,7 +151,7 @@ namespace EUROPA {
     return(members.find(value) != members.end());
   }
 
-  bool Schema::isEnumValue(double value) const {
+  bool Schema::isEnumValue(edouble value) const {
     return(enumValuesToEnums.find(value) != enumValuesToEnums.end());
   }
 
@@ -483,11 +483,7 @@ namespace EUROPA {
     check_error(paramIndex < getParameterCount(predicate), paramIndex + " is not a valid index");
 
     // First see if we get a hit for the parentType
-<<<<<<< HEAD:src/PLASMA/PlanDatabase/base/Schema.cc
     std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
-=======
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it =
->>>>>>> trunk:src/PLASMA/PlanDatabase/base/Schema.cc
       membershipRelation.find(predicate);
 
     check_error(membershipRelation_it != membershipRelation.end());
@@ -589,8 +585,8 @@ namespace EUROPA {
 
       addEnum(enumName);
 
-      const std::set<double>& values = domain.getValues();
-      for(std::set<double>::const_iterator it = values.begin();it != values.end();++it) {
+      const std::set<edouble>& values = domain.getValues();
+      for(std::set<edouble>::const_iterator it = values.begin();it != values.end();++it) {
           LabelStr newValue(*it);
           addValue(enumName, newValue);
       }
@@ -604,7 +600,7 @@ namespace EUROPA {
               " with base domain " << domain.toString());
   }
 
-  void Schema::addValue(const LabelStr& enumName, double enumValue) {
+  void Schema::addValue(const LabelStr& enumName, edouble enumValue) {
     check_error(isEnum(enumName), enumName.toString() + " is undefined.");
     check_error(enumValuesToEnums.find(enumValue) == enumValuesToEnums.end(),
             LabelStr(enumValue).toString() + " is already an enum value for " + (enumValuesToEnums[enumValue]).toString());
@@ -617,7 +613,7 @@ namespace EUROPA {
     enumValuesToEnums[enumValue] = enumName;
   }
 
-  const LabelStr& Schema::getEnumForValue(double value) const
+  const LabelStr& Schema::getEnumForValue(edouble value) const
   {
     check_error(enumValuesToEnums.find(value) != enumValuesToEnums.end());
     return enumValuesToEnums.find(value)->second;
@@ -707,13 +703,13 @@ namespace EUROPA {
       }
 
       {
-          std::map<double,ObjectFactoryId>::const_iterator it = objType->getObjectFactories().begin();
+          std::map<edouble,ObjectFactoryId>::const_iterator it = objType->getObjectFactories().begin();
           for(;it != objType->getObjectFactories().end(); ++it)
               registerObjectFactory(it->second);
       }
 
       {
-          std::map<double,TokenTypeId>::const_iterator it = objType->getTokenTypes().begin();
+          std::map<edouble,TokenTypeId>::const_iterator it = objType->getTokenTypes().begin();
           for(;it != objType->getTokenTypes().end(); ++it) {
               const TokenTypeId& tokenType = it->second;
               LabelStr predName = tokenType->getSignature();
@@ -734,7 +730,7 @@ namespace EUROPA {
 
   const ObjectTypeId& Schema::getObjectType(const LabelStr& objType)
   {
-      std::map<double,ObjectTypeId>::const_iterator it = m_objTypes.find((double)objType);
+      std::map<edouble,ObjectTypeId>::const_iterator it = m_objTypes.find((edouble)objType);
 
       if (it == m_objTypes.end())
           return ObjectTypeId::noId();
@@ -797,7 +793,7 @@ namespace EUROPA {
   MethodId Schema::getMethod(const LabelStr& methodName, const DataTypeId& targetType, const std::vector<DataTypeId>& argTypes)
   {
       // TODO: use target type and arg types to resolve
-      std::map<double,MethodId>::iterator it = m_methods.find(methodName);
+      std::map<edouble,MethodId>::iterator it = m_methods.find(methodName);
       return (it != m_methods.end() ? it->second : MethodId::noId());
   }
 
@@ -900,8 +896,8 @@ namespace EUROPA {
 	  for (std::map<std::string,DataTypeId>::const_iterator it = mem.begin(); it != mem.end(); ++it) {
 		  m_members.insert(std::pair<std::string, PSDataType>(it->first, PSDataType(it->second)));
 	  }
-	  const std::map<double,TokenTypeId>& tokens = original->getTokenTypes();
-	  for (std::map<double,TokenTypeId>::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+	  const std::map<edouble,TokenTypeId>& tokens = original->getTokenTypes();
+	  for (std::map<edouble,TokenTypeId>::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
 		  m_predicates.push_back(PSTokenType(it->second));
 	  }
   }
@@ -926,7 +922,7 @@ namespace EUROPA {
 
   PSList<PSObjectType> Schema::getAllPSObjectTypes() const {
 	PSList<PSObjectType> retval;
-    for(std::map<double, ObjectTypeId>::const_iterator it = m_objTypes.begin(); it != m_objTypes.end(); ++it)
+    for(std::map<edouble, ObjectTypeId>::const_iterator it = m_objTypes.begin(); it != m_objTypes.end(); ++it)
     {
     	retval.push_back(PSObjectType(it->second));
     }
