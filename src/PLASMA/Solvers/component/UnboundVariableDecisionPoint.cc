@@ -1,7 +1,7 @@
 #include "UnboundVariableDecisionPoint.hh"
 #include "ConstrainedVariable.hh"
 #include "DbClient.hh"
-#include "AbstractDomain.hh"
+#include "Domain.hh"
 #include "Debug.hh"
 #include "ValueSource.hh"
 
@@ -45,7 +45,7 @@ namespace EUROPA {
     void UnboundVariableDecisionPoint::handleInitialize(){}
 
     void UnboundVariableDecisionPoint::handleExecute(){
-      double nextValue = getNext();
+      edouble nextValue = getNext();
       debugMsg("SolverDecisionPoint:handleExecute", "For " << m_flawedVariable->toLongString() << 
                ", assigning value " << nextValue << ".");
       m_client->specify(m_flawedVariable, nextValue);
@@ -75,7 +75,7 @@ namespace EUROPA {
 
     bool MinValue::hasNext() const {return m_choiceIndex < m_choices->getCount();}
 
-    double MinValue::getNext(){return m_choices->getValue(m_choiceIndex++);}
+    edouble MinValue::getNext(){return m_choices->getValue(m_choiceIndex++);}
 
     /** MAX VALUE **/
     MaxValue::MaxValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData, const LabelStr& explanation)
@@ -83,7 +83,7 @@ namespace EUROPA {
 
     bool MaxValue::hasNext() const { return m_choiceIndex > 0; }
 
-    double MaxValue::getNext(){return m_choices->getValue(--m_choiceIndex);}
+    edouble MaxValue::getNext(){return m_choices->getValue(--m_choiceIndex);}
 
     /** RANDOM VALUE **/
     RandomValue::RandomValue(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData, const LabelStr& explanation)
@@ -126,7 +126,7 @@ namespace EUROPA {
 
     bool RandomValue::hasNext() const{ return m_choices->getCount() > m_usedIndeces.size(); }
 
-    double RandomValue::getNext(){
+    edouble RandomValue::getNext(){
       unsigned int tryCount = 1; /*!< Number of attempts to get a new selection */
       unsigned int index = rand() % m_choices->getCount();
 
@@ -139,7 +139,7 @@ namespace EUROPA {
       m_usedIndeces.insert(index);
 
       // Now we should have a selection that indexes into the vector of choices.
-      double value = m_choices->getValue(index);
+      edouble value = m_choices->getValue(index);
 
       debugMsg("RandomValue:getNext", 
 	       "Selecting value " << value << " at position " << index << " after " << tryCount << " attempts.");

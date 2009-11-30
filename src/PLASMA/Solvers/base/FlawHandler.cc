@@ -48,7 +48,7 @@ namespace EUROPA {
     }
     
     void FlawHandler::refreshWeight() {
-      m_weight = fabs(m_priority - (2+staticFilterCount() + customStaticFilterCount() + m_guards.size() + m_masterGuards.size()) * WEIGHT_BASE());
+      m_weight = std::abs(m_priority - (2+staticFilterCount() + customStaticFilterCount() + m_guards.size() + m_masterGuards.size()) * WEIGHT_BASE());
     }
 
     /**
@@ -132,13 +132,13 @@ namespace EUROPA {
       return sstr.str();
     }
 
-    double FlawHandler::convertValueIfNecessary(const PlanDatabaseId& db,
+    edouble FlawHandler::convertValueIfNecessary(const PlanDatabaseId& db,
                                                 const ConstrainedVariableId& guardVar,
-                                                const double& testValue){
+                                                const edouble& testValue){
       // Convert if an object variable. Make it the object id.
       if(db->getSchema()->isObjectType(guardVar->baseDomain().getTypeName())){
         checkError(LabelStr::isString(testValue), "Should be a declared string since it must be the object name.");
-        return db->getObject(LabelStr(testValue));
+        return db->getObject(LabelStr(testValue))->getKey();
       }
 
       return testValue;
@@ -171,10 +171,10 @@ namespace EUROPA {
     /**
      * @note Treating bools as numbers
      */
-    double FlawHandler::readValue(const char* data) {
-      double value;
+    edouble FlawHandler::readValue(const char* data) {
+      edouble value;
 
-      if(!isNumber(data, value)){
+      if(!toValue(data, value)){
         if(strcmp(data, "true") == 0 || strcmp(data, "TRUE") == 0 || strcmp(data, "True") == 0)
           value = 1;
         else if(strcmp(data, "false") == 0 || strcmp(data, "FALSE") == 0 || strcmp(data, "False") == 0)
@@ -182,7 +182,7 @@ namespace EUROPA {
         else {
           LabelStr lblStr(data);
           // Cast to a double
-          value = (double) lblStr;
+          value = (edouble) lblStr;
         }
       }
 
@@ -267,12 +267,12 @@ namespace EUROPA {
     }
 
     /* Have to convert if it is an object variable */
-    bool FlawHandler::matches(const ConstrainedVariableId& guardVar, const double& testValue){
+    bool FlawHandler::matches(const ConstrainedVariableId& guardVar, const edouble& testValue){
       if(!guardVar->lastDomain().isSingleton())
         return false;
 
       const PlanDatabaseId& pdb = getPlanDatabase(guardVar);
-      double convertedValue = convertValueIfNecessary(pdb, guardVar, testValue);
+      edouble convertedValue = convertValueIfNecessary(pdb, guardVar, testValue);
 
       condDebugMsg(pdb->getSchema()->isObjectType(guardVar->baseDomain().getTypeName()),"FlawHandler:matches",
                    "Comparing " << guardVar->lastDomain() << " with " << LabelStr(testValue).toString());

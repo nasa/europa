@@ -30,7 +30,7 @@ namespace EUROPA {
      * @brief Primary constructor, requiring all of the info.
      */
     ConstraintTestCase(std::string cN, std::string fN, std::string l,
-                       std::list<AbstractDomain*> doms)
+                       std::list<Domain*> doms)
       : m_constraintName(cN), m_fileName(fN), m_case(l),
         m_domains(doms) {
     }
@@ -42,7 +42,7 @@ namespace EUROPA {
     const std::string m_constraintName; /**< Equal, AddEqual, etc. */
     const std::string m_fileName; /**< File containing the "source" of the test case.  Printed when test fails. */
     const std::string m_case; /**< Name of test case.  Printed when test fails. */
-    const std::list<AbstractDomain*> m_domains; /**< Input and (expected) output domains, interleaved.
+    const std::list<Domain*> m_domains; /**< Input and (expected) output domains, interleaved.
                                                  * That is, first is first input domain, second is first output domain,
                                                  * third is second input domain, fourth is second output domain, etc.
                                                  */

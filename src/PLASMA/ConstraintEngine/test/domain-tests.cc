@@ -55,15 +55,19 @@ namespace EUROPA {
 
   private:
     static bool testAllocation() {
-      IntervalDomain realDomain(10.2,20.4);
+      IntervalDomain infTest;
+      CPPUNIT_ASSERT(!infTest.isEmpty());
+
+
+      IntervalDomain realDomain(10.2 ,20.4);
       CPPUNIT_ASSERT(!realDomain.isEmpty());
       CPPUNIT_ASSERT(!realDomain.isFinite());
-      CPPUNIT_ASSERT_EQUAL((unsigned int) PLUS_INFINITY, realDomain.getSize());
+      CPPUNIT_ASSERT_EQUAL((Domain::size_type) cast_int(PLUS_INFINITY), realDomain.getSize());
 
       IntervalIntDomain intDomain(10, 20);
       CPPUNIT_ASSERT(intDomain.isFinite());
 
-      double lb, ub;
+      edouble lb, ub;
       intDomain.getBounds(lb,ub);
       CPPUNIT_ASSERT(!realDomain.isFinite());
       CPPUNIT_ASSERT(!realDomain.isFinite());
@@ -72,7 +76,7 @@ namespace EUROPA {
       d1.empty();
       CPPUNIT_ASSERT(d1.isEmpty());
 
-      AbstractDomain& d2 = static_cast<AbstractDomain&>(intDomain);
+      Domain& d2 = static_cast<Domain&>(intDomain);
       CPPUNIT_ASSERT(!d2.isEmpty());
 
       IntervalIntDomain d3(static_cast<IntervalIntDomain&>(intDomain));
@@ -91,6 +95,7 @@ namespace EUROPA {
     static bool testRelaxation() {
       ChangeListener l_listener;
       IntervalIntDomain dom0; // Will have very large default range
+      CPPUNIT_ASSERT(!dom0.isEmpty());
       IntervalIntDomain dom1(-100, 100);
       dom1.setListener(l_listener.getId());
       dom1.relax(dom0);
@@ -113,7 +118,7 @@ namespace EUROPA {
     }
 
     static bool testPrecision() {
-      IntervalDomain dom0(-EPSILON, 0);
+      IntervalDomain dom0(-EPSILON, edouble(0));
       CPPUNIT_ASSERT(dom0.isMember(-EPSILON));
       CPPUNIT_ASSERT(dom0.isMember(-EPSILON -EPSILON/10));
       CPPUNIT_ASSERT(!dom0.isMember(-EPSILON -EPSILON));
@@ -172,15 +177,15 @@ namespace EUROPA {
 
       IntervalDomain dom8;
       IntervalDomain dom9;
-      dom8.intersect(IntervalDomain(0.1, 0.10));
-      dom9.intersect(IntervalDomain(0.10, 0.10));
+      dom8.intersect(make_int(0.1, 0.10));
+      dom9.intersect(make_int(0.10, 0.10));
       CPPUNIT_ASSERT(dom8.intersects(dom9));
 
       // Case added to recreate failure case for GNATS 3045
       IntervalDomain dom8a;
       IntervalDomain dom9a;
-      dom8a.intersect(IntervalDomain(0.1, 0.1));
-      dom9a.intersect(IntervalDomain(0.1, 0.1));
+      dom8a.intersect(make_int(0.1, 0.1));
+      dom9a.intersect(make_int(0.1, 0.1));
       CPPUNIT_ASSERT(dom8a.intersects(dom9a));
       CPPUNIT_ASSERT(dom8a.getUpperBound() == 0.1);
       CPPUNIT_ASSERT(dom8a.getLowerBound() == 0.1);
@@ -376,13 +381,13 @@ namespace EUROPA {
       IntervalDomain dom4(0, 20);
       res = dom4.difference(dom1);
       CPPUNIT_ASSERT(res);
-      double newValue = (dom1.getLowerBound() - dom4.minDelta());
+      edouble newValue = (dom1.getLowerBound() - dom4.minDelta());
       CPPUNIT_ASSERT(dom4.getUpperBound() == newValue);
 
       NumericDomain dom5(3.14159265);
       CPPUNIT_ASSERT(dom5.getSize() == 1);
 
-      std::list<double> vals;
+      std::list<edouble> vals;
       vals.push_back(dom5.getSingletonValue());
       vals.push_back(1.2);
       vals.push_back(2.1);
@@ -392,7 +397,7 @@ namespace EUROPA {
       NumericDomain dom6(vals);
 
       CPPUNIT_ASSERT(dom6.getSize() == 6);
-      CPPUNIT_ASSERT(fabs(dom5.minDelta() - dom6.minDelta()) < EPSILON); // Should be ==, but allow some leeway.
+      CPPUNIT_ASSERT(std::abs(dom5.minDelta() - dom6.minDelta()) < EPSILON); // Should be ==, but allow some leeway.
       CPPUNIT_ASSERT(dom6.intersects(dom5));
 
       dom6.difference(dom5);
@@ -426,6 +431,9 @@ namespace EUROPA {
       IntervalIntDomain dom1;
       CPPUNIT_ASSERT(dom1.translateNumber(2.8, false) == 2);
       CPPUNIT_ASSERT(dom1.translateNumber(2.8, true) == 3);
+      CPPUNIT_ASSERT(dom1.translateNumber(PLUS_INFINITY - 0.2, false) == PLUS_INFINITY);
+      CPPUNIT_ASSERT(dom1.translateNumber(PLUS_INFINITY - 0.2, true) == PLUS_INFINITY);
+      CPPUNIT_ASSERT(dom1.translateNumber(PLUS_INFINITY - 0.2, false) == (PLUS_INFINITY - 1));
       CPPUNIT_ASSERT(dom1.translateNumber(PLUS_INFINITY - 0.2, false) == PLUS_INFINITY - 1);
       return(true);
     }
@@ -457,10 +465,10 @@ namespace EUROPA {
       CPPUNIT_ASSERT(enumDom1.isSingleton());
       CPPUNIT_ASSERT(enumDom1.isFinite());
 
-      double minDiff = enumDom1.minDelta();
+      edouble minDiff = enumDom1.minDelta();
       CPPUNIT_ASSERT(minDiff >= EPSILON && EPSILON > 0.0);
 
-      const double onePlus = 1.0 + 2.0*EPSILON;
+      const edouble onePlus = 1.0 + 2.0*EPSILON;
 
       enumDom1.remove(3.14159265 - onePlus*minDiff);
       CPPUNIT_ASSERT(enumDom1.isMember(3.14159265));
@@ -482,7 +490,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(enumDom1.isMember(3.14159265));
       CPPUNIT_ASSERT(enumDom1.isSingleton());
 
-      std::list<double> vals;
+      std::list<edouble> vals;
       vals.push_back(enumDom1.getSingletonValue());
       vals.push_back(1.2);
       vals.push_back(2.1);
@@ -496,8 +504,8 @@ namespace EUROPA {
       CPPUNIT_ASSERT(enumDom2.isFinite());
       CPPUNIT_ASSERT(enumDom2.getSize() == 6);
 
-      double minDiff2 = enumDom2.minDelta();
-      CPPUNIT_ASSERT(fabs(minDiff - minDiff2) < EPSILON);
+      edouble minDiff2 = enumDom2.minDelta();
+      CPPUNIT_ASSERT(std::abs(minDiff - minDiff2) < EPSILON);
 
       enumDom2.remove(1.2 - minDiff2/onePlus);
       CPPUNIT_ASSERT(enumDom2.getSize() == 5);
@@ -543,113 +551,6 @@ namespace EUROPA {
 
       return(true);
     }
-    /* NO LONGER SUPPORT INSERT AND REMOVE ON INTERVAL DOMAINS
-    static bool testIntervalDomInsertAndRemove() {
-      CPPUNIT_ASSERT(EPSILON > 0.0); // Otherwise, loop will be infinite.
-
-      // Making this any closer to 1.0 fails first iDom.isEmpty() assert,
-      //   at least on SunOS 5.8 with g++ 2.95.2.
-      const double onePlus = 1.001;
-
-      // For IntervalDomains, insert() and remove() have very
-      // restricted usefulness, since only singleton and empty domains
-      // work with insert and remove unless the value given is already
-      // in (for insert) or already outside (for remove) the domain,
-      // so the tests can be fairly extensive yet "automated".
-
-      // Note, however, that broadening the extent of this loop to
-      // values for which the hardware will not be able to distinguish
-      // between x and x + minDelta will not work and the current
-      // implementation of IntervalDomain does not support such
-      // (member) values.  However, the values used for infinity by
-      // the temporal network implementation is much narrower than
-      // that (presently, at least): 268435455 (CommonDefs.hh).
-
-      for (double val = -2.6e8; val <= 2.6e8; ) {
-        IntervalDomain iDom(val);
-        double minDiff = iDom.minDelta();
-
-        iDom.remove(val + onePlus*minDiff);
-        CPPUNIT_ASSERT(iDom.isSingleton());
-        CPPUNIT_ASSERT(iDom.isMember(val));
-        CPPUNIT_ASSERT(iDom.isMember(val + minDiff/onePlus));
-        CPPUNIT_ASSERT(iDom.isMember(val - minDiff/onePlus));
-
-        iDom.remove(val + minDiff/onePlus);
-        CPPUNIT_ASSERT(iDom.isEmpty());
-        CPPUNIT_ASSERT(!(iDom.isMember(val)));
-
-        iDom.insert(val);
-        CPPUNIT_ASSERT(iDom.isSingleton());
-        CPPUNIT_ASSERT(iDom.isMember(val));
-        CPPUNIT_ASSERT(iDom.isMember(val + minDiff/onePlus));
-        CPPUNIT_ASSERT(iDom.isMember(val - minDiff/onePlus));
-
-        iDom.remove(val - onePlus*minDiff);
-        CPPUNIT_ASSERT(iDom.isSingleton());
-        CPPUNIT_ASSERT(iDom.isMember(val));
-        CPPUNIT_ASSERT(iDom.isMember(val + minDiff/onePlus));
-        CPPUNIT_ASSERT(iDom.isMember(val - minDiff/onePlus));
-
-        iDom.remove(val - minDiff/onePlus);
-        CPPUNIT_ASSERT(iDom.isEmpty());
-        CPPUNIT_ASSERT(!(iDom.isMember(val)));
-
-        if (val < 0.0)
-          if (val > -EPSILON)
-            val = 0.0;
-          else
-            val /= 3.14159265;
-        else
-          if (val > 0.0)
-            val *= 2.7182818;
-          else
-            val = onePlus*EPSILON;
-      }
-
-      return(true);
-    }
-
-    static bool testIntervalIntDomInsertAndRemove() {
-      IntervalIntDomain iiDom(-5, 10);
-      CPPUNIT_ASSERT(iiDom.getSize() == 16);
-
-      iiDom.remove(-6);
-      CPPUNIT_ASSERT(iiDom.getSize() == 16);
-
-      iiDom.remove(11);
-      CPPUNIT_ASSERT(iiDom.getSize() == 16);
-
-      iiDom.remove(PLUS_INFINITY);
-      CPPUNIT_ASSERT(iiDom.getSize() == 16);
-
-      iiDom.insert(-5);
-      CPPUNIT_ASSERT(iiDom.getSize() == 16);
-
-      iiDom.insert(-1);
-      CPPUNIT_ASSERT(iiDom.getSize() == 16);
-
-      iiDom.insert(10);
-      CPPUNIT_ASSERT(iiDom.getSize() == 16);
-
-      iiDom.insert(11);
-      CPPUNIT_ASSERT(iiDom.getSize() == 17);
-
-      iiDom.insert(-6);
-      CPPUNIT_ASSERT(iiDom.getSize() == 18);
-
-      iiDom.remove(PLUS_INFINITY);
-      CPPUNIT_ASSERT(iiDom.getSize() == 18);
-
-      iiDom.remove(-7);
-      CPPUNIT_ASSERT(iiDom.getSize() == 18);
-
-      iiDom.remove(11);
-      CPPUNIT_ASSERT(iiDom.getSize() == 17);
-
-      return(true);
-    }
-    */
 
     static bool testInsertAndRemove() {
       return(true);//testEnumDomInsertAndRemove());
@@ -668,11 +569,11 @@ namespace EUROPA {
       CPPUNIT_ASSERT(d0 != d1);
       CPPUNIT_ASSERT(d0 != d2);
 
-      CPPUNIT_ASSERT(AbstractDomain::canBeCompared(d0, d2));
+      CPPUNIT_ASSERT(Domain::canBeCompared(d0, d2));
 
       NumericDomain d3(d2);
       d2.empty();
-      CPPUNIT_ASSERT(AbstractDomain::canBeCompared(d2, d3));
+      CPPUNIT_ASSERT(Domain::canBeCompared(d2, d3));
       CPPUNIT_ASSERT(d3 != d2);
 
       return true;
@@ -681,20 +582,20 @@ namespace EUROPA {
     static bool testIntervalSingletonValues() {
       for (double value = -2.0 ; value <= 1.5 ; value += 0.1) {
         IntervalDomain id(value, value);
-        std::list<double> values;
+        std::list<edouble> values;
         id.getValues(values);
         CPPUNIT_ASSERT(values.size() == 1);
         CPPUNIT_ASSERT(values.front() == value);
       }
-      for (double value = 2.0 ; value >= 1.5 ; value -= 0.1) {
+      for (edouble value = 2.0 ; value >= 1.5 ; value -= 0.1) {
         IntervalDomain id(value, value);
-        std::list<double> values;
+        std::list<edouble> values;
         id.getValues(values);
         CPPUNIT_ASSERT(values.size() == 1);
         CPPUNIT_ASSERT(values.front() == value);
       }
       IntervalDomain id(0, 0);
-      std::list<double> values;
+      std::list<edouble> values;
       id.getValues(values);
       CPPUNIT_ASSERT(values.size() == 1);
       CPPUNIT_ASSERT(values.front() == 0);
@@ -702,7 +603,7 @@ namespace EUROPA {
     }
 
     static bool testIntervalIntValues() {
-      std::list<double> values;
+      std::list<edouble> values;
 
       IntervalIntDomain i0(10, 20);
       i0.getValues(values);
@@ -835,7 +736,7 @@ namespace EUROPA {
       e1.insert(3.0);
       e1.insert(4.0);
 
-      std::list<double> vals;
+      std::list<edouble> vals;
       vals.push_back(2.0);
       vals.push_back(3.0);
       EnumeratedDomain e2(FloatDT::instance(),vals);
@@ -901,7 +802,7 @@ namespace EUROPA {
     }
 
     static bool testEnumerationOnly() {
-      std::list<double> values;
+      std::list<edouble> values;
       values.push_back(-98.67);
       values.push_back(-0.01);
       values.push_back(1);
@@ -915,7 +816,7 @@ namespace EUROPA {
 
 
       {
-	double value(0);
+	edouble value(0);
 	std::stringstream sstr;
 	sstr << -0.01;
 	CPPUNIT_ASSERT(d0.convertToMemberValue(sstr.str(), value));
@@ -923,7 +824,7 @@ namespace EUROPA {
       }
 
       {
-	double value(0);
+	edouble value(0);
 	std::stringstream sstr;
 	sstr << 88.46;
 	CPPUNIT_ASSERT(!d0.convertToMemberValue(sstr.str(), value));
@@ -966,7 +867,7 @@ namespace EUROPA {
     }
 
     static bool testLabelSetAllocations() {
-      std::list<double> values;
+      std::list<edouble> values;
       values.push_back(EUROPA::LabelStr("DT_L1"));
       values.push_back(EUROPA::LabelStr("L4"));
       values.push_back(EUROPA::LabelStr("DT_L2"));
@@ -1000,7 +901,7 @@ namespace EUROPA {
     }
 
     static bool testEquate() {
-      std::list<double> baseValues;
+      std::list<edouble> baseValues;
       baseValues.push_back(EUROPA::LabelStr("A"));
       baseValues.push_back(EUROPA::LabelStr("B"));
       baseValues.push_back(EUROPA::LabelStr("C"));
@@ -1069,7 +970,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(ls4.isEmpty() || ls5.isEmpty());
       CPPUNIT_ASSERT(!(ls4.isEmpty() && ls5.isEmpty()));
 
-      std::list<double> enumVals;
+      std::list<edouble> enumVals;
       enumVals.push_back(1.0);
       enumVals.push_back(2.5);
       enumVals.push_back(-0.25);
@@ -1149,7 +1050,7 @@ namespace EUROPA {
 
       id3.equate(ed6);
       CPPUNIT_ASSERT(ed6.getSize() == 2);
-      CPPUNIT_ASSERT(id3 == IntervalDomain(1.5, 2.5));
+      CPPUNIT_ASSERT(id3 == make_int(1.5, 2.5));
 
       IntervalDomain id4(1.0, 1.25);
 
@@ -1168,7 +1069,7 @@ namespace EUROPA {
     }
 
     static bool testValueRetrieval() {
-      std::list<double> values;
+      std::list<edouble> values;
       values.push_back(EUROPA::LabelStr("A"));
       values.push_back(EUROPA::LabelStr("B"));
       values.push_back(EUROPA::LabelStr("C"));
@@ -1176,7 +1077,7 @@ namespace EUROPA {
       values.push_back(EUROPA::LabelStr("E"));
 
       LabelSet dt_l1(values);
-      std::list<double> results;
+      std::list<edouble> results;
       dt_l1.getValues(results);
 
       LabelSet dt_l2(results);
@@ -1189,7 +1090,7 @@ namespace EUROPA {
     }
 
     static bool testIntersection() {
-      std::list<double> values;
+      std::list<edouble> values;
       values.push_back(EUROPA::LabelStr("A"));
       values.push_back(EUROPA::LabelStr("B"));
       values.push_back(EUROPA::LabelStr("C"));
@@ -1201,7 +1102,7 @@ namespace EUROPA {
       values.push_back(EUROPA::LabelStr("I"));
       LabelSet ls1(values);
 
-      double value(0);
+      edouble value(0);
       CPPUNIT_ASSERT(ls1.convertToMemberValue(std::string("H"), value));
       CPPUNIT_ASSERT(value == LabelStr("H"));
       CPPUNIT_ASSERT(!ls1.convertToMemberValue(std::string("LMN"), value));
@@ -1318,7 +1219,7 @@ namespace EUROPA {
     }
 
     static bool testEmptyOnClosure(){
-      std::list<double> values;
+      std::list<edouble> values;
       {
 	ChangeListener l_listener;
 	LabelSet ls0(values);
@@ -1384,7 +1285,9 @@ namespace EUROPA {
       CPPUNIT_ASSERT(!dom0.areBoundsFinite());
       IntervalDomain dom1(0, PLUS_INFINITY);
       CPPUNIT_ASSERT(!dom1.areBoundsFinite());
-      IntervalDomain dom2(0, PLUS_INFINITY-1);
+      //have to change this test, because the definition of infinity has changed
+//       IntervalDomain dom2(0, PLUS_INFINITY-1);
+      IntervalDomain dom2(0, MAX_INT);
       CPPUNIT_ASSERT(dom2.areBoundsFinite());
       NumericDomain dom3;
       CPPUNIT_ASSERT(!dom3.areBoundsFinite());
@@ -1488,7 +1391,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(!dom2.isOpen());
       CPPUNIT_ASSERT(dom2.isSingleton());
 
-      CPPUNIT_ASSERT(AbstractDomain::canBeCompared(dom0, dom2));
+      CPPUNIT_ASSERT(Domain::canBeCompared(dom0, dom2));
       CPPUNIT_ASSERT(dom0 != dom2);
 
       CPPUNIT_ASSERT(!dom0.isSubsetOf(dom2));
@@ -1500,7 +1403,7 @@ namespace EUROPA {
     }
 
     static void testCopyingBoolDomains() {
-      AbstractDomain *copyPtr;
+      Domain *copyPtr;
       BoolDomain falseDom(false);
       BoolDomain trueDom(true);
       BoolDomain both;
@@ -1536,10 +1439,10 @@ namespace EUROPA {
     }
 
     static void testCopyingEnumeratedDomains() {
-      AbstractDomain *copyPtr;
+      Domain *copyPtr;
       NumericDomain emptyOpen;
       NumericDomain fourDom;
-      std::list<double> values;
+      std::list<edouble> values;
       values.push_back(0.0);
       fourDom.insert(0.0);
       values.push_back(1.1);
@@ -1550,7 +1453,7 @@ namespace EUROPA {
       fourDom.insert(3.1);
       values.push_back(4.2);
       NumericDomain fiveDom(values); // Closed
-      NumericDomain oneDom(2.7); // Singleton
+      NumericDomain oneDom(2.7); // Singletn
 
       copyPtr = emptyOpen.copy();
       CPPUNIT_ASSERT(copyPtr->getTypeName() == LabelStr("float"));
@@ -1598,7 +1501,7 @@ namespace EUROPA {
     }
 
     static void testCopyingIntervalDomains() {
-      AbstractDomain *copyPtr;
+      Domain *copyPtr;
       IntervalDomain one2ten(1.0, 10.9);
       IntervalIntDomain four(4,4);
       IntervalDomain empty;
@@ -1618,7 +1521,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(copyPtr->getSize() == 0);
       CPPUNIT_ASSERT(*copyPtr == empty);
       CPPUNIT_ASSERT(!(*copyPtr == one2ten));
-      copyPtr->relax(IntervalDomain(-3.1, 11.0));
+      copyPtr->relax(make_int(-3.1, 11.0));
       CPPUNIT_ASSERT(copyPtr->isMember(0.0));
       CPPUNIT_ASSERT(!copyPtr->isSingleton());
       CPPUNIT_ASSERT(!copyPtr->isEmpty());
@@ -1638,7 +1541,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(!copyPtr->isEmpty());
       CPPUNIT_ASSERT(!(*copyPtr == empty));
       CPPUNIT_ASSERT(*copyPtr == one2ten);
-      copyPtr->relax(IntervalDomain(-3.1, 11.0));
+      copyPtr->relax(make_int(-3.1, 11.0));
       CPPUNIT_ASSERT(copyPtr->isMember(0.0));
       CPPUNIT_ASSERT(!copyPtr->isSingleton());
       CPPUNIT_ASSERT(!copyPtr->isEmpty());
@@ -1659,7 +1562,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(!(*copyPtr == empty));
       CPPUNIT_ASSERT(*copyPtr == four);
       CPPUNIT_ASSERT(!(*copyPtr == one2ten));
-      copyPtr->relax(IntervalDomain(-3, 11));
+      copyPtr->relax(make_int(-3, 11));
       CPPUNIT_ASSERT(copyPtr->isMember(0.0));
       CPPUNIT_ASSERT(!copyPtr->isSingleton());
       CPPUNIT_ASSERT(!copyPtr->isEmpty());
@@ -1673,7 +1576,7 @@ namespace EUROPA {
     }
 
     static void testCopyingIntervalIntDomains() {
-      AbstractDomain *copyPtr;
+      Domain *copyPtr;
       IntervalIntDomain one2ten(1, 10);
       IntervalIntDomain four(4,4);
       IntervalIntDomain empty;
@@ -1692,7 +1595,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(copyPtr->getSize() == 0);
       CPPUNIT_ASSERT(*copyPtr == empty);
       CPPUNIT_ASSERT(!(*copyPtr == one2ten));
-      copyPtr->relax(IntervalDomain(-3, 11));
+      copyPtr->relax(make_int(-3, 11));
       CPPUNIT_ASSERT(copyPtr->isMember(0));
       CPPUNIT_ASSERT(!copyPtr->isSingleton());
       CPPUNIT_ASSERT(!copyPtr->isEmpty());
@@ -1713,7 +1616,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(copyPtr->getSize() == 10);
       CPPUNIT_ASSERT(!(*copyPtr == empty));
       CPPUNIT_ASSERT(*copyPtr == one2ten);
-      copyPtr->relax(IntervalIntDomain(-3, 11));
+      copyPtr->relax(make_int_int(-3, 11));
       CPPUNIT_ASSERT(copyPtr->getSize() == 15);
       CPPUNIT_ASSERT(copyPtr->isMember(0));
       CPPUNIT_ASSERT(!copyPtr->isSingleton());
@@ -1735,7 +1638,7 @@ namespace EUROPA {
       CPPUNIT_ASSERT(!(*copyPtr == empty));
       CPPUNIT_ASSERT(*copyPtr == four);
       CPPUNIT_ASSERT(!(*copyPtr == one2ten));
-      copyPtr->relax(IntervalIntDomain(-3, 11));
+      copyPtr->relax(make_int_int(-3, 11));
       CPPUNIT_ASSERT(copyPtr->getSize() == 15);
       CPPUNIT_ASSERT(copyPtr->isMember(0));
       CPPUNIT_ASSERT(!copyPtr->isSingleton());
@@ -1753,7 +1656,7 @@ namespace EUROPA {
     public:
       BogusComparator(): DomainComparator(){}
 
-      bool canCompare(const AbstractDomain& domx, const AbstractDomain& domy) const {
+      bool canCompare(const Domain& domx, const Domain& domy) const {
 	return false;
       }
 
@@ -1764,23 +1667,23 @@ namespace EUROPA {
       IntervalIntDomain dom1;
 
       // Using the default comparator - they should be comparable
-      CPPUNIT_ASSERT(AbstractDomain::canBeCompared(dom0, dom1));
+      CPPUNIT_ASSERT(Domain::canBeCompared(dom0, dom1));
 
       // Switch for the bogus one - and make sure it fails as expected
       BogusComparator bogus;
-      CPPUNIT_ASSERT(!AbstractDomain::canBeCompared(dom0, dom1));
+      CPPUNIT_ASSERT(!Domain::canBeCompared(dom0, dom1));
 
       // Allocate the standard comparator, and ensure it compares once again
       DomainComparator standard;
-      CPPUNIT_ASSERT(AbstractDomain::canBeCompared(dom0, dom1));
+      CPPUNIT_ASSERT(Domain::canBeCompared(dom0, dom1));
 
       // Now allocate a new one again
       DomainComparator* dc = new BogusComparator();
-      CPPUNIT_ASSERT(!AbstractDomain::canBeCompared(dom0, dom1));
+      CPPUNIT_ASSERT(!Domain::canBeCompared(dom0, dom1));
 
       // Deallocate and thus cause revert to standard comparator
       delete dc;
-      CPPUNIT_ASSERT(AbstractDomain::canBeCompared(dom0, dom1));
+      CPPUNIT_ASSERT(Domain::canBeCompared(dom0, dom1));
 
       // 2 numeric enumerations should be comparable, even if type names differ
       {
@@ -1789,8 +1692,8 @@ namespace EUROPA {
     RestrictedDT dt1("NumberDomain1",FloatDT::instance(),IntervalDomain());
 	NumericDomain d1(dt1.getId());
 	IntervalIntDomain d2;
-	CPPUNIT_ASSERT(AbstractDomain::canBeCompared(d0, d1));
-	CPPUNIT_ASSERT(AbstractDomain::canBeCompared(d0, d2));
+	CPPUNIT_ASSERT(Domain::canBeCompared(d0, d1));
+	CPPUNIT_ASSERT(Domain::canBeCompared(d0, d2));
       }
 
       // 2 non numeric enumerations can only be compared if their base domains intersect
@@ -1801,8 +1704,8 @@ namespace EUROPA {
 	StringDomain d1(dt1.getId());
     RestrictedDT dt2("OtherDomainType",SymbolDT::instance(),SymbolDomain());
 	SymbolDomain d2(dt2.getId());
-	CPPUNIT_ASSERT(!AbstractDomain::canBeCompared(d0, d1));
-	CPPUNIT_ASSERT(AbstractDomain::canBeCompared(d0, d2));
+	CPPUNIT_ASSERT(!Domain::canBeCompared(d0, d1));
+	CPPUNIT_ASSERT(Domain::canBeCompared(d0, d2));
       }
       return true;
     }
@@ -1811,14 +1714,14 @@ namespace EUROPA {
 
       // These five functions were mistakenly put in DomainTest.cc originally.
       // They also test the new getTypeName() member functions a little and
-      // those member functions' effects on AbstractDomain::canBeCompared().
+      // those member functions' effects on Domain::canBeCompared().
       testCopyingBoolDomains();
       testCopyingEnumeratedDomains();
       testCopyingIntervalDomains();
       testCopyingIntervalIntDomains();
 
       BoolDomain boolDom;
-      AbstractDomain *copy = boolDom.copy();
+      Domain *copy = boolDom.copy();
       CPPUNIT_ASSERT(copy != 0);
       CPPUNIT_ASSERT(*copy == boolDom && copy != &boolDom);
       boolDom.set(false);
@@ -1847,7 +1750,9 @@ namespace EUROPA {
       copy = iiDom.copy();
       CPPUNIT_ASSERT(copy != 0);
       CPPUNIT_ASSERT(*copy == iiDom && copy != &iiDom);
-      iiDom = IntervalIntDomain(-2, PLUS_INFINITY-1);
+      //have to change the definition of this test because PLUS_INFINITY has changed
+//       iiDom = IntervalIntDomain(-2, PLUS_INFINITY-1);
+      iiDom = IntervalIntDomain(-2, MAX_INT);
       CPPUNIT_ASSERT(*copy != iiDom);
       delete copy;
 

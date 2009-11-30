@@ -89,28 +89,28 @@ public:
     /**
      * @brief Return the base domain
      */
-    virtual const AbstractDomain& baseDomain() const;
+    virtual const Domain& baseDomain() const;
 
     /**
      * @brief Create a value for a string
      */
-    virtual double createValue(const std::string& value) const = 0;
+    virtual edouble createValue(const std::string& value) const = 0;
 
     /**
      * @brief Returns the minimum allowed delta in values between elements data type
      */
-    virtual double minDelta() const;
+    virtual edouble minDelta() const;
 
     /**
      * @brief Create string for a value
      */
-    virtual std::string toString(double value) const;
+    virtual std::string toString(edouble value) const;
 
     /**
      * @brief Create a variable
      */
     virtual ConstrainedVariableId createVariable(const ConstraintEngineId& constraintEngine,
-                                                 const AbstractDomain& baseDomain,
+                                                 const Domain& baseDomain,
                                                  const bool internal = false,
                                                  bool canBeSpecified = true,
                                                  const char* name = NO_VAR_NAME,
@@ -121,8 +121,8 @@ protected:
     DataTypeId m_id;
     LabelStr m_name;
     bool m_isRestricted;
-    AbstractDomain* m_baseDomain;
-    double m_minDelta; /**< The minimum amount by which elements of this data type may vary.  Once this is set, DO NOT CHANGE IT.*/
+    Domain* m_baseDomain;
+    edouble m_minDelta; /**< The minimum amount by which elements of this data type may vary.  Once this is set, DO NOT CHANGE IT.*/
 };
 
 }

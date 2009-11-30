@@ -17,6 +17,8 @@
 #include <map>
 #include <iostream>
 #include <string>
+#include "Number.hh"
+
 
 /**
  * @file IdTable.hh
@@ -59,8 +61,8 @@ namespace EUROPA {
   protected:
     IdTable();
     static IdTable& getInstance();
-
-    std::map<unsigned long int, std::pair<unsigned int,double> > m_collection;  /*<! Map from pointers to keys*/
+    
+    std::map<unsigned long int, std::pair<unsigned int,edouble> > m_collection;  /*<! Map from pointers to keys*/
     std::map<std::string, unsigned int> m_typeCnts;
   };
 }

@@ -42,7 +42,7 @@ public:
 
     virtual CFunctionId getCFunction(const char* name, const std::vector<CExpr*>& args);
 
-    AbstractDomain* makeNumericDomainFromLiteral(const std::string& type,const std::string& value);
+    Domain* makeNumericDomainFromLiteral(const std::string& type,const std::string& value);
 
     void checkConstraint(const char* name,const std::vector<Expr*>& args);
     void checkObjectFactory(const char* name,const std::vector<Expr*>& args);

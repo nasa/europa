@@ -30,7 +30,7 @@ namespace EUROPA{
       insert(Token::REJECTED);
   }
 
-  StateDomain::StateDomain(const AbstractDomain& org)
+  StateDomain::StateDomain(const Domain& org)
     : EnumeratedDomain(org)
   {
     check_error(org.getTypeName().toString() == SymbolDT::NAME(),
@@ -39,13 +39,13 @@ namespace EUROPA{
 
   void StateDomain::operator>>(ostream&os) const {
     // Now commence output
-    AbstractDomain::operator>>(os);
+    Domain::operator>>(os);
     os << "{";
 
     // First construct a lexicographic ordering for the set of values.
     std::set<std::string> orderedSet;
 
-    for (std::set<double>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
+    for (std::set<edouble>::const_iterator it = m_values.begin(); it != m_values.end(); ++it) {
       LabelStr value = *it;
       orderedSet.insert(value.toString());
     }
@@ -135,9 +135,9 @@ namespace EUROPA{
 	cancel();
 
       // Notify objects that the token is being deleted. Allows synchronization
-      const std::set<double>& objects = getObject()->getBaseDomain().getValues();
-      for(std::set<double>::const_iterator it = objects.begin(); it!= objects.end(); ++it){
-	ObjectId object = *it;
+      const std::set<edouble>& objects = getObject()->getBaseDomain().getValues();
+      for(std::set<edouble>::const_iterator it = objects.begin(); it!= objects.end(); ++it){
+	ObjectId object = Entity::getTypedEntity<Object>(*it);
 	object->notifyDeleted(m_id);
       }
 
@@ -330,9 +330,9 @@ namespace EUROPA{
     m_activeToken->addMergedToken(m_id);
 
     /** Send a message to all objects that it has been rejected **/
-    const std::set<double>& objects = getObject()->getBaseDomain().getValues();
-    for(std::set<double>::const_iterator it = objects.begin(); it!= objects.end(); ++it){
-      ObjectId object = *it;
+    const std::set<edouble>& objects = getObject()->getBaseDomain().getValues();
+    for(std::set<edouble>::const_iterator it = objects.begin(); it!= objects.end(); ++it){
+      ObjectId object = Entity::getTypedEntity<Object>(*it);
       object->notifyMerged(m_id);
     }
 
@@ -378,9 +378,9 @@ namespace EUROPA{
     m_state->setSpecified(REJECTED);
 
     /** Send a message to all objects that it has been rejected **/
-    const std::set<double>& objects = getObject()->getBaseDomain().getValues();
-    for(std::set<double>::const_iterator it = objects.begin(); it!= objects.end(); ++it){
-      ObjectId object = *it;
+    const std::set<edouble>& objects = getObject()->getBaseDomain().getValues();
+    for(std::set<edouble>::const_iterator it = objects.begin(); it!= objects.end(); ++it){
+      ObjectId object = Entity::getTypedEntity<Object>(*it);
       object->notifyRejected(m_id);
     }
 
@@ -570,8 +570,8 @@ namespace EUROPA{
     if (objectName != noObject()) {
       ObjectId object = m_planDatabase->getObject(objectName);
       check_error(object.isValid());
-      check_error(m_object->baseDomain().isMember(object));
-      m_object->specify(object);
+      check_error(m_object->baseDomain().isMember(object->getKey()));
+      m_object->specify(object->getKey());
     }
 
     m_allVariables.push_back(m_object);
@@ -634,7 +634,8 @@ namespace EUROPA{
     if (!isActive() || !getObject()->lastDomain().isSingleton())
       return false;
 
-    ObjectId object = getObject()->lastDomain().getSingletonValue();
+    ObjectId object =
+      Entity::getTypedEntity<Object>(getObject()->lastDomain().getSingletonValue());
     return object->hasToken(m_id);
   }
 
@@ -703,7 +704,7 @@ namespace EUROPA{
    * @brief Tests if a token can be terminated.
    * @see terminate
    */
-  bool Token::canBeTerminated(unsigned int tick) const{
+  bool Token::canBeTerminated(eint tick) const{
     if(isTerminated())
       return false;
 
@@ -740,8 +741,8 @@ namespace EUROPA{
       const std::vector<ConstrainedVariableId>& activeVariables = activeToken->getVariables();
       // All variables except state variable
       for(unsigned int i = 1; i < varCount; i++){
-	const AbstractDomain& activeBaseDomain = activeVariables[i]->baseDomain();
-	const AbstractDomain& inactiveDerivedDomain = m_allVariables[i]->lastDomain();
+	const Domain& activeBaseDomain = activeVariables[i]->baseDomain();
+	const Domain& inactiveDerivedDomain = m_allVariables[i]->lastDomain();
 	if(!activeBaseDomain.isSubsetOf(inactiveDerivedDomain)){
 	  debugMsg("Token:canBeTerminated",
 		   "Cannot terminate " << this->toString() << activeBaseDomain.toString() << " can be further restricted by " << inactiveDerivedDomain.toString() << std::endl <<
@@ -757,7 +758,7 @@ namespace EUROPA{
     //
     // Declare a set to pull together all variables in the scope of a token into a single easy to check collection.
     // Could manage this incrementally on the token also for greater efficiency
-    std::set<int> allVars;
+    std::set<eint> allVars;
 
     // Construct the set of constraints on variables of this token. Use a constraint set to avoid memory dependent order.
     ConstraintSet constraints;
@@ -959,7 +960,7 @@ PSObject* Token::getOwner() const {
     return NULL;
 
   ObjectVarId objVar = getObject();
-  ObjectId id = ObjectId(objVar->lastDomain().getSingletonValue());
+  ObjectId id = Entity::getTypedEntity<Object>(objVar->lastDomain().getSingletonValue());
   return (PSObject *) id;
   //  return new PSObject(ObjectId(objVar->lastDomain().getSingletonValue()));
 }
@@ -1077,7 +1078,7 @@ PSVariable* Token::getParameter(const std::string& name) const
 void Token::merge(PSToken* activeToken)
 {
     check_error(activeToken != NULL, "Can't merge on NULL token");
-    TokenId tok = getPlanDatabase()->getEntityByKey(activeToken->getKey());
+    TokenId tok = getPlanDatabase()->getEntityByKey(activeToken->getEntityKey());
     doMerge(tok);
 }
 

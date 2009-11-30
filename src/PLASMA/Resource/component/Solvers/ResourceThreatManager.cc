@@ -131,7 +131,7 @@ namespace EUROPA {
             return false;
         }
         else {
-          double flawA = 0, flawB = 0;
+          edouble flawA = 0, flawB = 0;
           if(a->hasUpperLevelFlaw())
             flawA = a->getUpperFlawMagnitude();
           if(a->hasLowerLevelFlaw())
@@ -177,7 +177,7 @@ namespace EUROPA {
             return false;
         }
         else {
-          double flawA = PLUS_INFINITY, flawB = PLUS_INFINITY;
+          edouble flawA = PLUS_INFINITY, flawB = PLUS_INFINITY;
           if(a->hasUpperLevelFlaw())
             flawA = a->getUpperFlawMagnitude();
           if(a->hasLowerLevelFlaw())

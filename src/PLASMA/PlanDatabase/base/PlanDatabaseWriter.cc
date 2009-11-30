@@ -139,7 +139,7 @@ namespace EUROPA {
       }
     }
 
-  std::string PlanDatabaseWriter::timeDomain(const AbstractDomain& dom){
+  std::string PlanDatabaseWriter::timeDomain(const Domain& dom){
     std::stringstream ss;
 
     if(dom.isSingleton())
@@ -188,7 +188,7 @@ namespace EUROPA {
       for (std::vector<ConstrainedVariableId>::const_iterator varit = vars.begin(); varit != vars.end(); ++varit) {
 	ConstrainedVariableId v = (*varit);
 	checkError(v.isValid(), v);
-	const AbstractDomain& dom = v->lastDomain();
+	const Domain& dom = v->lastDomain();
 
 	if(dom.isNumeric() && dom.minDelta() < 1)
 	  os.setf(std::ios::fixed);

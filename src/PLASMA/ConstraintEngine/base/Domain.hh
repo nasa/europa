@@ -1,14 +1,14 @@
-#ifndef _H_AbstractDomain
-#define _H_AbstractDomain
+#ifndef _H_Domain
+#define _H_Domain
 
 /**
- * @file AbstractDomain.hh
+ * @file Domain.hh
  * @author Conor McGann
  * @date August, 2003
  * @brief Declares new domain management object model.
  *
  * A new approach for domains is presented which allows for more customized domain implementations to assess possible
- * speed improvements. AbstractDomain is the base class for all other domains. It is the only domain reference
+ * speed improvements. Domain is the base class for all other domains. It is the only domain reference
  * available in the  core of the framework.
  *
  * The semantics of a domain are described in terms of:
@@ -29,7 +29,7 @@
  * between types.
  *
  * A central design element is the use of a DomainListener to optionally observe changes on the domain. This is
- * an Observer pattern where the AbstractDomain is the subject and the DomainListener is the observer. This mechamism
+ * an Observer pattern where the Domain is the subject and the DomainListener is the observer. This mechamism
  * is the basis for propagation.
  *
  *
@@ -38,6 +38,7 @@
 #include "ConstraintEngineDefs.hh"
 #include "LabelStr.hh"
 #include "DomainListener.hh"
+#include "Number.hh"
 #include <list>
 #include <map>
 #include <string>
@@ -61,7 +62,7 @@ namespace EUROPA {
    * @class DomainComparator
    * @brief Class for testng if 2 domains can be compared. Exetend this class to customize how this is
    * done.
-   * @see AbstractDomain::canBeCompared, AbstractDomain::comparator
+   * @see Domain::canBeCompared, Domain::comparator
    */
   class DomainComparator{
   public:
@@ -76,7 +77,7 @@ namespace EUROPA {
     /**
      * @brief Tests if domains can be compared.
      */
-    virtual bool canCompare(const AbstractDomain& domx, const AbstractDomain& domy) const;
+    virtual bool canCompare(const Domain& domx, const Domain& domy) const;
 
     /**
      * @brief Set the comparator to be used. Can only be set if it is currently null.
@@ -93,10 +94,10 @@ namespace EUROPA {
     static DomainComparator* s_instance; /*!< Access pointer location. Enforces singleton pattern */
   };
 
-  ostream& operator<<(ostream& os, const AbstractDomain& dom);
+  ostream& operator<<(ostream& os, const Domain& dom);
 
   /**
-   * @class AbstractDomain
+   * @class Domain
    * @brief The base class for all domains used in the ConstraintEngine.
    *
    * This base class provides the core mechanisms to integrate a domain into the ConstraintEngine framework without
@@ -104,13 +105,18 @@ namespace EUROPA {
    * provide specializations as necessary in a very extendible way.
    * @see DomainListener
    */
-  class AbstractDomain {
+  class Domain {
   public:
+#ifdef E2_LONG_INT
+    typedef unsigned long int size_type;
+#else
+    typedef unsigned int size_type;
+#endif
 
     /**
      * Destructor.
      */
-    virtual ~AbstractDomain();
+    virtual ~Domain();
 
     /**
      * @brief Check if the domain is an enumerated set.
@@ -165,17 +171,17 @@ namespace EUROPA {
      * @note Can only be called if (!isDynamic() && isFinite()).
      * @return the number of values in the domain.
      */
-    virtual unsigned int getSize() const = 0;
+    virtual size_type getSize() const = 0;
 
     /**
      * @brief Access upper bound
      */
-    virtual double getUpperBound() const = 0;
+    virtual edouble getUpperBound() const = 0;
 
     /**
      * @brief Access lower bound
      */
-    virtual double getLowerBound() const = 0;
+    virtual edouble getLowerBound() const = 0;
 
     /**
      * @brief Access both bounds in a convenience method, and indicates if the domain is infinite
@@ -183,19 +189,19 @@ namespace EUROPA {
      * @param ub update this value with the upper bound
      * @return true if !isFinite()
      */
-    virtual bool getBounds(double& lb, double& ub) const = 0;
+    virtual bool getBounds(edouble& lb, edouble& ub) const = 0;
 
     /**
      * @brief Fill the given list with the contents of the set.
      * @note Should only be called on finite (and thus closed) domains.
      * @param results The target collection to fill with all values in the set.
      */
-    virtual void getValues(std::list<double>& results) const = 0;
+    virtual void getValues(std::list<edouble>& results) const = 0;
 
     /**
      * @brief Access singleton value. Must be a singleton or this will fail.
      */
-    virtual double getSingletonValue() const = 0;
+    virtual edouble getSingletonValue() const = 0;
 
     /**
      * @brief Close the domain.
@@ -230,26 +236,26 @@ namespace EUROPA {
      * @note May empty the domain if value is not a member of the current domain.
      * @param value the target singleton value.
      */
-    virtual void set(double value) = 0;
+    virtual void set(edouble value) = 0;
 
     /**
      * @brief Indicates assigment to the target domain as a relaxation triggered explicitly
      * rather than through algorithm for relaxation.
      * @see relax
      */
-    virtual void reset(const AbstractDomain& dom) = 0;
+    virtual void reset(const Domain& dom) = 0;
 
     /**
      * @brief Indicates assigment to the target domain as a relaxation triggered internally i.e. via relaxation algorithm.
      * @param dom the target domain to relax it to.
      * @see reset
      */
-    virtual void relax(const AbstractDomain& dom) = 0;
+    virtual void relax(const Domain& dom) = 0;
 
     /**
      * @brief Indicates relaxation to a singleton value. Occurs when domain has been emptied previously
      */
-    virtual void relax(double value) = 0;
+    virtual void relax(edouble value) = 0;
 
     /**
      * @brief Add an element to the set. This is only permitted on dynamic domains.
@@ -260,12 +266,12 @@ namespace EUROPA {
      * @see DomainListener::DOMAIN_RELAXED
      * @todo Consider if it makes sense to error out if isMember(value).
      */
-    virtual void insert(double value) = 0;
+    virtual void insert(edouble value) = 0;
 
     /**
      * @brief Add a list of elements to the set. Only permotted on dynamic and enumerated domains
      */
-    virtual void insert(const std::list<double>& values) = 0;
+    virtual void insert(const std::list<edouble>& values) = 0;
 
     /**
      * @brief Remove the given element form the domain.
@@ -273,14 +279,14 @@ namespace EUROPA {
      * @note If the value was in the domain, this call will generate a value removal event.
      * @see DomainListener::VALUE_REMOVED
      */
-    virtual void remove(double value) = 0;
+    virtual void remove(edouble value) = 0;
 
     /**
      * @brief Restricts this domain to the intersection of its values with the given domain.
      * @param dom the domain to intersect with. Must not be empty.
      * @return true if the intersection results in a change to this domain, otherwise false.
      */
-    virtual bool intersect(const AbstractDomain& dom) = 0;
+    virtual bool intersect(const Domain& dom) = 0;
 
     /**
      * @brief Convenience version of intersect.
@@ -290,21 +296,21 @@ namespace EUROPA {
      * @note ub must be >= lb.
      * @note The domain must be numeric
      */
-    virtual bool intersect(double lb, double ub) = 0;
+    virtual bool intersect(edouble lb, edouble ub) = 0;
 
     /**
      * @brief Restricts this domain to the difference of its values with the given domain.
      * @param dom the domain to differ with. Must not be empty.
      * @return true if the operation results in a change to this domain, otherwise false.
      */
-    virtual bool difference(const AbstractDomain& dom) = 0;
+    virtual bool difference(const Domain& dom) = 0;
 
     /**
      * @brief Assign the values from the given domain, to this domain.
      * @note Can only be called on domains that have no listeners attached,
      * since it will not cause propagation. It is more of a utility.
      */
-    virtual AbstractDomain& operator=(const AbstractDomain& dom) {
+    virtual Domain& operator=(const Domain& dom) {
       return(*this);
     }
 
@@ -316,38 +322,38 @@ namespace EUROPA {
      * @return true if the intersection results in a change to either
      * domain, otherwise false.
      */
-    virtual bool equate(AbstractDomain& dom) = 0;
+    virtual bool equate(Domain& dom) = 0;
 
     /**
      * @brief Test for membership.
      * @param value to test for membership.
      * @return true if a member of the domain, otherwise false.
      */
-    virtual bool isMember(double value) const = 0;
+    virtual bool isMember(edouble value) const = 0;
 
     /**
      * @brief Test if this domain is a subset of dom.
      * @param dom the domain tested against.
      * @param true if all elements of this domain are in dom. Otherwise false.
      */
-    virtual bool isSubsetOf(const AbstractDomain& dom) const = 0;
+    virtual bool isSubsetOf(const Domain& dom) const = 0;
 
     /**
      * @brief Test if the intersection between this domain and the given domain is empty.
      * @param dom the domain tested against.
      * @param true if any elements of this domain are in dom. Otherwise false.
      */
-    virtual bool intersects(const AbstractDomain& dom) const = 0;
+    virtual bool intersects(const Domain& dom) const = 0;
 
     /**
      * @brief Test for equality.
      */
-    virtual bool operator==(const AbstractDomain& dom) const;
+    virtual bool operator==(const Domain& dom) const;
 
     /**
      * @brief Test for inequality.
      */
-    virtual bool operator!=(const AbstractDomain& dom) const;
+    virtual bool operator!=(const Domain& dom) const;
 
     /**
      * @brief Attach a DomainListener.
@@ -366,7 +372,7 @@ namespace EUROPA {
     /**
      * "Deeply" copy the concrete C++ object into new memory and return a pointer to it.
      */
-    virtual AbstractDomain *copy() const = 0;
+    virtual Domain *copy() const = 0;
 
     /**
      * @brief Creates a verbose string for displaying the contents of the domain
@@ -384,7 +390,7 @@ namespace EUROPA {
      * in constraints in particular.
      * @see DomainComparator::canCompare
      */
-    static bool canBeCompared(const AbstractDomain& domx, const AbstractDomain& domy);
+    static bool canBeCompared(const Domain& domx, const Domain& domy);
 
     const DataTypeId& getDataType() const;
 
@@ -396,13 +402,13 @@ namespace EUROPA {
     bool isBool() const;
     bool isString() const;
     bool isRestricted() const;
-    double minDelta() const;
-    std::string toString(double value) const;
+    edouble minDelta() const;
+    std::string toString(edouble value) const;
 
     /**
      * @brief Returns a value for number based on the semantics of the domain.
      */
-    virtual double translateNumber(double number, bool asMin) const;
+    virtual edouble translateNumber(edouble number, bool asMin = true) const;
 
     /**
      * @brief Converts the string to its double representation as a value, if it is present in the domain.
@@ -410,27 +416,28 @@ namespace EUROPA {
      * @param dblValue The value returned, if available. Only relevant if a member of the domain.
      * @return true if the value was present, otherwise false.
      */
-    virtual bool convertToMemberValue(const std::string& strValue, double& dblValue) const = 0;
+    virtual bool convertToMemberValue(const std::string& strValue, edouble& dblValue) const = 0;
 
     /**
      * Tests if 2 values are the same with respect to the minimum difference for the target domain.
      */
-    inline virtual bool compareEqual(double a, double b) const { return(a < b ? b - a < minDelta() : a - b < minDelta()); }
+    inline virtual bool compareEqual(edouble a, edouble b) const 
+    { return(a < b ? b - a < minDelta() : a - b < minDelta()); }
 
     /**
      * @brief Tests if one value is less than another to within minDelta
      */
-    inline bool lt(double a, double b) const { return (a + minDelta() <= b); }
+    inline bool lt(edouble a, edouble b) const { return a != PLUS_INFINITY && b != MINUS_INFINITY && (a + minDelta() <= b); }
 
     /**
      * @brief Tests if one value equals another to within minDelta
      */
-    inline bool eq(double a, double b) const { return compareEqual(a, b); }
+    inline bool eq(edouble a, edouble b) const { return compareEqual(a, b); }
 
     /**
      * @brief Tests if one value is less than or equal to another to within minDelta
      */
-    inline bool leq(double a, double b) const { return (a - minDelta() < b); }
+    inline bool leq(edouble a, edouble b) const { return a == b || (a - minDelta() < b); }
 
   protected:
     /**
@@ -441,13 +448,13 @@ namespace EUROPA {
      * @param typeName indicates the type name to use
      * @todo Review how semantics of closed can be enforced in operations.
      */
-    AbstractDomain(const DataTypeId& dataType, bool enumerated, bool closed);
+    Domain(const DataTypeId& dataType, bool enumerated, bool closed);
 
     /**
      * @brief Copy Constructor
      * @param org Original domain
      */
-    AbstractDomain(const AbstractDomain& org);
+    Domain(const Domain& org);
 
     /**
      * @brief Helper method to push messages to the listener.
@@ -458,19 +465,19 @@ namespace EUROPA {
     /**
      * @brief Check that the value is correct w.r.t. the semantics of the domain. Infinite safe if numeric.
      */
-    virtual bool check_value(double value) const;
+    virtual bool check_value(edouble value) const;
 
     /**
      * @brief Check the precision of a value in terms of a particular Domain class.
      * @note 'Hook' to permit subclasses to be more restrictive; called by check_value()
      * unless compiled EUROPA_FAST.
      */
-    virtual void testPrecision(const double& value) const = 0;
+    virtual void testPrecision(const edouble& value) const = 0;
 
     /**
      * @brief Utility function for internal use
      */
-    static void assertSafeComparison(const AbstractDomain& domA, const AbstractDomain& domB);
+    static void assertSafeComparison(const Domain& domA, const Domain& domB);
 
     void setDataType(const DataTypeId& dt);
     friend class RestrictedDT;
@@ -480,5 +487,9 @@ namespace EUROPA {
     bool m_closed; /**< False if the domain is dynamic (can be added to), otherwise true. */
     DomainListenerId m_listener; /**< Holds reference to attached listener.  May be noId. */
   };
+
+  //BACKWARD COMPATIBILITY
+  //typedef Domain AbstractDomain
+
 }
 #endif

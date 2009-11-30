@@ -69,7 +69,7 @@ namespace EUROPA {
       virtual EngineComponent* removeComponent(const std::string& name) = 0;
       virtual EngineComponent* getComponent(const std::string& name) = 0;
       virtual const EngineComponent* getComponent(const std::string& name) const = 0;
-      virtual const std::map<double, EngineComponent*>& getComponents() = 0;
+      virtual const std::map<edouble, EngineComponent*>& getComponents() = 0;
 
       /** Returns an old interpreter, if any */
       virtual LanguageInterpreter* addLanguageInterpreter(const std::string& language, LanguageInterpreter* interpreter) = 0;
@@ -107,7 +107,7 @@ namespace EUROPA {
         virtual EngineComponent* removeComponent(const std::string& name);
         virtual EngineComponent* getComponent(const std::string& name);
         virtual const EngineComponent* getComponent(const std::string& name) const;
-        virtual std::map<double, EngineComponent*>& getComponents();
+        virtual std::map<edouble, EngineComponent*>& getComponents();
 
         virtual std::string executeScript(const std::string& language, const std::string& script, bool isFile);
         /** Returns an old interpreter, if any */
@@ -115,7 +115,7 @@ namespace EUROPA {
         /** Returns the removed interpreter, if any */
         virtual LanguageInterpreter* removeLanguageInterpreter(const std::string& language);
         virtual LanguageInterpreter* getLanguageInterpreter(const std::string& language);
-        virtual std::map<double, LanguageInterpreter*>& getLanguageInterpreters();
+        virtual std::map<edouble, LanguageInterpreter*>& getLanguageInterpreters();
 
         virtual EngineConfig* getConfig() { return m_config; }
 
@@ -136,9 +136,9 @@ namespace EUROPA {
         // TODO: use Ids for languages and components
         EngineConfig* m_config;
         std::vector<ModuleId> m_modules;
-        std::map<double, LanguageInterpreter*> m_languageInterpreters;
-        std::map<double, EngineComponent*> m_components;
-
+        std::map<edouble, LanguageInterpreter*> m_languageInterpreters;          
+        std::map<edouble, EngineComponent*> m_components;          
+        
     private:
         bool m_started;
   };

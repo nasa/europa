@@ -27,7 +27,7 @@ namespace EUROPA
        * @arg enabled
        *
        */
-      Edge( Node* source, Node* target, double capacity, bool enabled = true );
+      Edge( Node* source, Node* target, edouble capacity, bool enabled = true );
       /**
        * @brief Destructor
        *
@@ -36,18 +36,18 @@ namespace EUROPA
       /*!
        * @brief Returns the maximum capacity of an Edge (infinity)
        */
-      static double getMaxCapacity();
+      static edouble getMaxCapacity();
       /**
        * @brief Returns the capacity of the invoking edge
        *
        */
-      inline double getCapacity() const;
+      inline edouble getCapacity() const;
       /**
        * @brief Sets the capacity of the invoking edge
        * @arg cap The new capacity of the invoking edge
        *
        */
-      inline void setCapacity( double cap );
+      inline void setCapacity( edouble cap );
       /**
        * @brief Returns the source of the invoking edge
        *
@@ -88,7 +88,7 @@ namespace EUROPA
       static EdgeIdentity getIdentity( Node* source, Node* target );
     private:
 
-      double m_Capacity;
+      edouble m_Capacity;
       bool m_Enabled;
 
       Node* m_Source;
@@ -100,12 +100,12 @@ namespace EUROPA
      */
     std::ostream& operator<<( std::ostream& os, const Edge& fe );
 
-    double Edge::getCapacity() const
+    edouble Edge::getCapacity() const
     {
       return m_Capacity;
     }
 
-    void Edge::setCapacity( double  cap )
+    void Edge::setCapacity( edouble  cap )
     {
       m_Capacity = cap;
     }

@@ -23,10 +23,10 @@ namespace EUROPA {
       class ValueEnum : public UnboundVariableDecisionPoint {
       public:
         ValueEnum(const DbClientId& client, const ConstrainedVariableId& flawedVariable, const TiXmlElement& configData, const LabelStr& explanation = "unknown");
-        double getNext();
+        edouble getNext();
         bool hasNext() const;
       private:
-        double readValue(const TiXmlElement& value) const;
+        edouble readValue(const TiXmlElement& value) const;
         unsigned int m_choiceIndex;
       };
 
@@ -125,8 +125,8 @@ namespace EUROPA {
         NearTokenComparator(TokenId tok) : TokenComparator(tok) {}
         virtual bool compare(const TokenId x, const TokenId y);
         virtual TokenComparator* copy();
-        static int absoluteDistance(const TokenId& a, const TokenId& b);
-        static int midpoint(const TokenId& token);
+        static eint absoluteDistance(const TokenId& a, const TokenId& b);
+        static eint midpoint(const TokenId& token);
       };
 
       class FarTokenComparator : public NearTokenComparator {

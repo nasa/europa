@@ -26,9 +26,9 @@ namespace EUROPA {
        * @param maxConsumption The maximum amount of consumption possible on this resource.
        */
       Reservoir(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName, const LabelStr& profileName,
-	       double initCapacityLb = 0, double initCapacityUb = 0, double lowerLimit = MINUS_INFINITY,
-	       double upperLimit = PLUS_INFINITY, double maxInstProduction = PLUS_INFINITY, double maxInstConsumption = PLUS_INFINITY,
-	       double maxProduction = PLUS_INFINITY, double maxConsumption = PLUS_INFINITY);
+	       edouble initCapacityLb = 0, edouble initCapacityUb = 0, edouble lowerLimit = MINUS_INFINITY,
+	       edouble upperLimit = PLUS_INFINITY, edouble maxInstProduction = PLUS_INFINITY, edouble maxInstConsumption = PLUS_INFINITY,
+	       edouble maxProduction = PLUS_INFINITY, edouble maxConsumption = PLUS_INFINITY);
 
       /**
        * @brief Constructor
@@ -46,7 +46,7 @@ namespace EUROPA {
 
       void getOrderingChoices(const TokenId& token,
 			      std::vector<std::pair<TokenId, TokenId> >& results,
-			      unsigned int limit = PLUS_INFINITY);
+			      unsigned int limit = std::numeric_limits<unsigned int>::max());
 
 //       void getTokensToOrder(std::vector<TokenId>& results);
 

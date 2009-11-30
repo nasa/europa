@@ -21,10 +21,10 @@ namespace EUROPA {
                      const LabelStr& type, const LabelStr& name,
                      const LabelStr& detectorName,
                      const LabelStr& profileName,
-                     double initCapacityLb, double initCapacityUb,
-                     double lowerLimit, double upperLimit,
-                     double maxInstProduction, double maxInstConsumption,
-                     double maxProduction, double maxConsumption)
+                     edouble initCapacityLb, edouble initCapacityUb,
+                     edouble lowerLimit, edouble upperLimit,
+                     edouble maxInstProduction, edouble maxInstConsumption,
+                     edouble maxProduction, edouble maxConsumption)
     : Object(planDatabase, type, name, false)
   {
     init(initCapacityLb, initCapacityUb,
@@ -53,10 +53,10 @@ namespace EUROPA {
     delete (Profile*) m_profile;
   }
 
-  void Resource::init(const double initCapacityLb, const double initCapacityUb,
-                      const double lowerLimit, const double upperLimit,
-                      const double maxInstProduction, const double maxInstConsumption,
-                      const double maxProduction, const double maxConsumption,
+  void Resource::init(const edouble initCapacityLb, const edouble initCapacityUb,
+                      const edouble lowerLimit, const edouble upperLimit,
+                      const edouble maxInstProduction, const edouble maxInstConsumption,
+                      const edouble maxProduction, const edouble maxConsumption,
                       const LabelStr& detectorName,
                       const LabelStr& profileName) {
     debugMsg("Resource:init", "In base init function.");
@@ -145,14 +145,14 @@ namespace EUROPA {
     }
 
     std::multimap<TokenId, TokenId> pairs;
-    std::map<int, InstantId>::iterator first = m_flawedInstants.lower_bound((int)token->start()->lastDomain().getLowerBound());
+    std::map<eint, InstantId>::iterator first = m_flawedInstants.lower_bound(token->start()->lastDomain().getLowerBound());
     if(first == m_flawedInstants.end()) {
       debugMsg("Resource:getOrderingChoices", "No ordering choices:  no flawed instants after token start: " << token->start()->lastDomain().getLowerBound());
       return;
     }
     //       checkError(first != m_flawedInstants.end(),
     // 		 "No flawed instants within token " << token->getPredicateName().toString() << "(" << token->getKey() << ")");
-    std::map<int, InstantId>::iterator last = m_flawedInstants.lower_bound((int)token->end()->lastDomain().getUpperBound());
+    std::map<eint, InstantId>::iterator last = m_flawedInstants.lower_bound(token->end()->lastDomain().getUpperBound());
 
     debugMsg("Resource:getOrderingChoices", "Looking at flawed instants in interval [" << first->second->getTime() << " " <<
              (last == m_flawedInstants.end() ? PLUS_INFINITY : last->second->getTime()) << "]");
@@ -338,7 +338,7 @@ namespace EUROPA {
       }
     }
     else {
-      const_cast<AbstractDomain&>(txn->quantity()->lastDomain()).empty();
+      const_cast<Domain&>(txn->quantity()->lastDomain()).empty();
     }
   }
 
@@ -405,7 +405,7 @@ namespace EUROPA {
       }
     }
     if(m_flawedInstants.find(inst->getTime()) == m_flawedInstants.end())
-      m_flawedInstants.insert(std::pair<int, InstantId>(inst->getTime(), inst));
+      m_flawedInstants.insert(std::make_pair(inst->getTime(), inst));
   }
 
   void Resource::notifyNoLongerFlawed(const InstantId inst) {
@@ -479,7 +479,8 @@ namespace EUROPA {
   }
 
   void Resource::getFlawedInstants(std::vector<InstantId>& results) {
-    std::transform(m_flawedInstants.begin(), m_flawedInstants.end(), std::back_inserter(results), __gnu_cxx::select2nd<std::map<int, InstantId>::value_type>());
+    std::transform(m_flawedInstants.begin(), m_flawedInstants.end(), std::back_inserter(results), 
+                   __gnu_cxx::select2nd<std::map<eint, InstantId>::value_type>());
     debugMsg("Resource:getFlawedInstants", "Have " << m_flawedInstants.size() << " flawed instants.  Returning " << results.size() << ".");
   }
 
@@ -514,10 +515,10 @@ namespace EUROPA {
           check_error(successor.isValid());
           sucTimevars.push_back(TimeVarId(successor->time()));
         }
-        std::vector<int> presucLbs;
-        std::vector<int> presucUbs;
+        std::vector<eint> presucLbs;
+        std::vector<eint> presucUbs;
         temporalAdvisor->getTemporalDistanceSigns(TimeVarId(predecessor->time()),
-                                        sucTimevars, presucLbs, presucUbs);
+                                                  sucTimevars, presucLbs, presucUbs);
         int i = 0;
 
         for(std::map<TransactionId, TokenId>::const_iterator sucIt = m_transactionsToTokens.begin(); sucIt != m_transactionsToTokens.end() && count < limit; ++sucIt) {
@@ -620,7 +621,7 @@ namespace EUROPA {
 
   // PS Methods:
   PSResourceProfile* Resource::getLimits() {
-    return new PSResourceProfile(getLowerLimit(), getUpperLimit());
+    return new PSResourceProfile(cast_double(getLowerLimit()), cast_double(getUpperLimit()));
   }
 
   PSResourceProfile* Resource::getLevels() {
@@ -635,7 +636,7 @@ namespace EUROPA {
 
     ProfileIterator it(getProfile());
     while(!it.done()) {
-      TimePoint inst = (TimePoint) it.getTime();
+      TimePoint inst = (TimePoint) cast_basis(it.getTime());
       if (inst == t) {
         instant = it.getInstant();
         break;
@@ -653,8 +654,8 @@ namespace EUROPA {
     for (unsigned int i = 0;i<results.size(); i++) {
       TransactionId predecessor = results[i].first;
       TransactionId successor = results[i].second;
-      retval.push_back(predecessor->time()->parent()->getKey());
-      retval.push_back(successor->time()->parent()->getKey());
+      retval.push_back(cast_int(predecessor->time()->parent()->getKey()));
+      retval.push_back(cast_int(successor->time()->parent()->getKey()));
     }
 
     return retval;

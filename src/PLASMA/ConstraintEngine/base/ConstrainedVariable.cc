@@ -1,5 +1,5 @@
 #include "ConstrainedVariable.hh"
-#include "AbstractDomain.hh"
+#include "Domain.hh"
 #include "ConstraintEngine.hh"
 #include "Constraint.hh"
 #include "Utils.hh"
@@ -54,7 +54,7 @@ namespace EUROPA {
   void ConstrainedVariable::setCurrentPropagatingConstraint(ConstraintId c) { m_propagatingConstraint = c; }
   ConstraintId ConstrainedVariable::getCurrentPropagatingConstraint() const { return m_propagatingConstraint; }
 
-  void ConstrainedVariable::restrictBaseDomain(const AbstractDomain& dom){
+  void ConstrainedVariable::restrictBaseDomain(const Domain& dom){
     checkError(isActive(), toString());
     checkError(dom.intersects(baseDomain()), dom.toString() << " not intersecting " << baseDomain().toString());
 
@@ -228,7 +228,7 @@ namespace EUROPA {
     return m_specifiedFlag || (baseDomain().isSingleton() && baseDomain().isClosed());
   }
 
-  double ConstrainedVariable::getSpecifiedValue() const {
+  edouble ConstrainedVariable::getSpecifiedValue() const {
     checkError(isSpecified(), toString());
     if(m_specifiedFlag)
     {
@@ -325,14 +325,14 @@ namespace EUROPA {
     return(m_name);
   }
 
-  void ConstrainedVariable::specify(double singletonValue) {
+  void ConstrainedVariable::specify(edouble singletonValue) {
     debugMsg("ConstrainedVariable:specify", "specifying value:" << toString());
     check_error(canBeSpecified());
     internalSpecify(singletonValue);
     debugMsg("ConstrainedVariable:specify", "specified value:" << toString());
   }
 
-  void ConstrainedVariable::internalSpecify(double singletonValue) {
+  void ConstrainedVariable::internalSpecify(edouble singletonValue) {
     debugMsg("ConstrainedVariable:internalSpecify", "specifying value:" << toString());
     checkError(baseDomain().isMember(singletonValue), singletonValue << " not in " << baseDomain().toString());
     checkError(isActive(), toString());
@@ -365,7 +365,7 @@ namespace EUROPA {
 //       getConstraintEngine()->propagate();
   }
 
-  void ConstrainedVariable::reset(const AbstractDomain& domain){
+  void ConstrainedVariable::reset(const Domain& domain){
     checkError(domain.isSubsetOf(internal_baseDomain()),
 				 domain.toString() << " not in " << internal_baseDomain().toString());
 
@@ -411,7 +411,7 @@ namespace EUROPA {
       getCurrentDomain().relax(baseDomain());
   }
 
-  void ConstrainedVariable::insert(double value) {
+  void ConstrainedVariable::insert(edouble value) {
     // the base domain has to be open in order for insertion to occur
     check_error(internal_baseDomain().isOpen(), "Can't insert a member into a variable with a closed base domain.");
     internal_baseDomain().insert(value);
@@ -421,7 +421,7 @@ namespace EUROPA {
         getCurrentDomain().insert(value);
   }
 
-  void ConstrainedVariable::remove(double value) {
+  void ConstrainedVariable::remove(edouble value) {
     // Always remove from base domain
     internal_baseDomain().remove(value);
 
@@ -447,7 +447,7 @@ namespace EUROPA {
   /**
    * @brief Default is just a pass through.
    */
-  std::string ConstrainedVariable::toString(double value) const
+  std::string ConstrainedVariable::toString(edouble value) const
   {
     return getDataType()->toString(value);
   }
@@ -547,11 +547,11 @@ namespace EUROPA {
     check_runtime_error(isValid());
     check_runtime_error(!isSingleton() && isEnumerated());
     PSList<PSVarValue> retval;
-    std::list<double> values;
+    std::list<edouble> values;
     lastDomain().getValues(values);
     PSVarType type = getType();
 
-    for(std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it) {
+    for(std::list<edouble>::const_iterator it = values.begin(); it != values.end(); ++it) {
       PSVarValue value(*it, type);
       retval.push_back(value);
     }
@@ -576,13 +576,13 @@ namespace EUROPA {
   double ConstrainedVariable::getLowerBound() const {
     check_runtime_error(isValid());
     check_runtime_error(isInterval());
-    return lastDomain().getLowerBound();
+    return cast_double(lastDomain().getLowerBound());
   }
 
   double ConstrainedVariable::getUpperBound() const {
     check_runtime_error(isValid());
     check_runtime_error(isInterval());
-    return lastDomain().getUpperBound();
+    return cast_double(lastDomain().getUpperBound());
   }
 
   void ConstrainedVariable::specifyValue(PSVarValue& v) {

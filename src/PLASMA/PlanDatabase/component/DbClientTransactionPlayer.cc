@@ -1053,7 +1053,7 @@ namespace EUROPA {
     debugMsg("DbClientTransactionPlayer:playVariableAssigned", "found variable " << variable->getKey());
     TiXmlElement * value_el = element.FirstChildElement();
     check_error(value_el != NULL);
-    const AbstractDomain * value = xmlAsAbstractDomain(*value_el);
+    const Domain * value = xmlAsDomain(*value_el);
     debugMsg("DbClientTransactionPlayer:playVariableAssigned", "specifying to " << (*value));
     variable->restrictBaseDomain(*value);
   }
@@ -1080,9 +1080,9 @@ namespace EUROPA {
     check_error(var.isValid());
     check_error(value_el != NULL);
 
-    const AbstractDomain * value = xmlAsAbstractDomain(*value_el);
+    const Domain * value = xmlAsDomain(*value_el);
     if (value->isSingleton()) {
-      double v = value->getSingletonValue();
+      edouble v = value->getSingletonValue();
       m_client->specify(var, v);
     }
     else
@@ -1097,7 +1097,7 @@ namespace EUROPA {
 
     TiXmlElement * value_el = var_el->NextSiblingElement();
     check_error(value_el != NULL);
-    const AbstractDomain * value = xmlAsAbstractDomain(*value_el);
+    const Domain * value = xmlAsDomain(*value_el);
     m_client->restrict(variable, *value);
   }
 
@@ -1334,7 +1334,7 @@ namespace EUROPA {
     }
     ConstrainedVariableId var = m_variables[ident];
     checkError(var.isValid(), "Invalid id for " << ident);
-    ObjectId object = var->lastDomain().getSingletonValue();
+    ObjectId object = Entity::getTypedEntity<Object>(var->lastDomain().getSingletonValue());
     checkError(object.isValid(), "Invalid object for " << ident);
     var = object->getVariable(LabelStr(varString));
     checkError(var.isValid(), varString << " not found on " << object->toString());
@@ -1351,8 +1351,8 @@ namespace EUROPA {
 
   //! XML input functions
 
-  AbstractDomain *
-  DbClientTransactionPlayer::xmlAsAbstractDomain(const TiXmlElement & element,
+  Domain *
+  DbClientTransactionPlayer::xmlAsDomain(const TiXmlElement & element,
 						 const char * name,
 						 const char* typeName) {
     static unsigned int sl_counter(0);
@@ -1363,7 +1363,7 @@ namespace EUROPA {
     if (strcmp(tag, "new") == 0) {
       const char * type = element.Attribute("type");
       check_error(type != NULL);
-      return(new ObjectDomain(getCESchema()->getDataType(type),xmlAsValue(element, name)));
+      return(new ObjectDomain(getCESchema()->getDataType(type), Entity::getTypedEntity<Object>(xmlAsValue(element, name))));
     }
     if (strcmp(tag, "id") == 0) {
       const char * name = element.Attribute("name");
@@ -1382,9 +1382,9 @@ namespace EUROPA {
       const char * name = element.Attribute("name");
       check_error(name != NULL, "missing name for domain in transaction XML");
 
-      AbstractDomain * domain = getCESchema()->baseDomain(type).copy();
+      Domain * domain = getCESchema()->baseDomain(type).copy();
       check_error(domain != 0, "unknown type, lack of memory, or other problem with domain in transaction XML");
-      double value = m_client->createValue(type, name);
+      edouble value = m_client->createValue(type, name);
       if(domain->isOpen() && !domain->isMember(value))
 	domain->insert(value);
       domain->set(value);
@@ -1395,7 +1395,7 @@ namespace EUROPA {
     if (strcmp(tag, "symbol") == 0) {
       const char * type = element.Attribute("type");
       check_error(type != NULL);
-      AbstractDomain * domain = getCESchema()->baseDomain(type).copy();
+      Domain * domain = getCESchema()->baseDomain(type).copy();
       domain->set(m_client->createValue(tag, value_st));
       return(domain);
     }
@@ -1430,8 +1430,8 @@ namespace EUROPA {
       domain = dynamic_cast<IntervalDomain*>(getCESchema()->baseDomain(type_st).copy());
     check_error(domain != NULL,
 		"type '" + std::string(type_st) + "' should indicate an interval domain type");
-    double min = m_client->createValue(type_st, min_st);
-    double max = m_client->createValue(type_st, max_st);
+    edouble min = m_client->createValue(type_st, min_st);
+    edouble max = m_client->createValue(type_st, max_st);
     domain->intersect(min, max);
     debugMsg("DbClientTransactionPlayer:xmlAsIntervalDomain",
 	     "For " << element << ", created domain " << (*domain).toString());
@@ -1522,7 +1522,7 @@ namespace EUROPA {
     }
     check_error(type != ANY);
     // gather the values
-    std::list<double> values;
+    std::list<edouble> values;
     for (TiXmlElement * child_el = element.FirstChildElement() ;
          child_el != NULL ; child_el = child_el->NextSiblingElement()) {
       const char * value_st = child_el->Attribute("value");
@@ -1534,7 +1534,7 @@ namespace EUROPA {
          values.push_back(m_client->createValue(typeName.c_str(), value_st));
          break;
        case OBJECT:
-         values.push_back(m_client->getObject(value_st));
+         values.push_back(m_client->getObject(value_st)->getKey());
          break;
        default:
          check_error(ALWAYS_FAILS);
@@ -1560,7 +1560,7 @@ namespace EUROPA {
     }
   }
 
-  double DbClientTransactionPlayer::xmlAsValue(const TiXmlElement & value, const char * name) {
+  edouble DbClientTransactionPlayer::xmlAsValue(const TiXmlElement & value, const char * name) {
     const char * tag = value.Value();
     if (strcmp(tag, "new") == 0) {
       std::string gen_name;
@@ -1572,21 +1572,21 @@ namespace EUROPA {
       }
       const char * type = value.Attribute("type");
       check_error(type != NULL);
-      std::vector<const AbstractDomain*> arguments;
+      std::vector<const Domain*> arguments;
       for (TiXmlElement * child_el = value.FirstChildElement() ;
            child_el != NULL ; child_el = child_el->NextSiblingElement()) {
-        const AbstractDomain * domain = xmlAsAbstractDomain(*child_el);
+        const Domain * domain = xmlAsDomain(*child_el);
         arguments.push_back(domain);
       }
       ObjectId object = m_client->createObject(type, name, arguments);
       check_error(object.isValid());
 
       // Now deallocate domains created for arguments
-      for (std::vector<const AbstractDomain*>::const_iterator it = arguments.begin(); it != arguments.end(); ++it) {
-      	AbstractDomain* tmp = (AbstractDomain*)(*it);
+      for (std::vector<const Domain*>::const_iterator it = arguments.begin(); it != arguments.end(); ++it) {
+      	Domain* tmp = (Domain*)(*it);
         delete tmp;
       }
-      return (double)object;
+      return (edouble)object->getKey();
     }
     if (strcmp(tag, "value") == 0) {
       // New style XML for simple types.
@@ -1606,11 +1606,11 @@ namespace EUROPA {
     if (strcmp(tag, "object") == 0) {
       ObjectId object = m_client->getObject(value_st);
       check_error(object.isValid());
-      return((double)object);
+      return(object->getKey());
     }
     ObjectId object = m_client->getObject(value_st);
     if (object != ObjectId::noId())
-      return((double)object);
+      return(object->getKey());
     check_error(ALWAYS_FAILS);
     return(0);
   }
@@ -1701,9 +1701,9 @@ namespace EUROPA {
       name = gen_name.c_str();
     }
 
-    const AbstractDomain * baseDomain = NULL;
+    const Domain * baseDomain = NULL;
     if (value != NULL) {
-      baseDomain = xmlAsAbstractDomain(*value, name);
+      baseDomain = xmlAsDomain(*value, name);
 
       if (type == NULL) {
         type = value->Value();

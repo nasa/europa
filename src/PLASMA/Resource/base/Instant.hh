@@ -36,7 +36,7 @@ namespace EUROPA {
        * @brief Get the time of the Instant.
        * @return the time
        */
-      int getTime() const;
+      eint getTime() const;
 
       /**
        * @brief Get the complete set of transactions that overlap this Instant.
@@ -66,78 +66,78 @@ namespace EUROPA {
        * @brief Gets the lower level of the profile at this instant.  May cause profile recalculation.
        * @return the lower level of the profile
        */
-      double getLowerLevel();
+      edouble getLowerLevel();
 
       /**
        * @brief Gets the upper bound of the lower level at this instant.  May cause profile recalculation.
        * @return The upper bound of the lower level of the profile
        */
-      double getLowerLevelMax();
+      edouble getLowerLevelMax();
 
       /**
        * @brief Gets the upper level of the profile at this instant.  May cause profile recalculation.
        * @return the upper level of the profile
        */
-      double getUpperLevel();
+      edouble getUpperLevel();
 
       /**
        * @brief Gets the lower bound of the upper level at this instant.  May cause profile recalculation.
        * @return The lower bound of the upper level of the profile
        */
-      double getUpperLevelMin();
+      edouble getUpperLevelMin();
 
       /**
        * @brief Get the upper bound of the amount of production possible at this instant.  May cause profile recalculation.
        * @return the maximum amount of production at this instant.
        */
-      double getMaxInstantProduction();
+      edouble getMaxInstantProduction();
 
       /**
        * @brief Get the upper bound of the amount of consumption possible at this instant.  May cause profile recalculation.
        * @return the maximum amount of consumption at this instant.
        */
-      double getMaxInstantConsumption();
+      edouble getMaxInstantConsumption();
 
       /**
        * @brief Get the lower bound of the amount of production possible at this instant.  May cause profile recalculation.
        * @return the maximum amount of production at this instant.
        */
-      double getMinInstantProduction();
+      edouble getMinInstantProduction();
 
       /**
        * @brief Get the lower bound of the amount of consumption possible at this instant.  May cause profile recalculation.
        * @return the maximum amount of consumption at this instant.
        */
-      double getMinInstantConsumption();
+      edouble getMinInstantConsumption();
 
       /**
        * @brief Get the maximum amount of consumption that can have happened by this instant.
        * @return the maximum amount of consumption that has happened by now
        */
-      double getMaxCumulativeConsumption();
+      edouble getMaxCumulativeConsumption();
 
       /**
        * @brief Get the maximum amount of production that can have happened by this instant.
        * @return the maximum amount of production that has happened by now
        */
-      double getMaxCumulativeProduction();
+      edouble getMaxCumulativeProduction();
 
       /**
        * @brief Get the minimum amount of consumption that can have happened by this instant.
        * @return the minimum amount of consumption that has happened by now
        */
-      double getMinCumulativeConsumption();
+      edouble getMinCumulativeConsumption();
 
       /**
        * @brief Get the minimum amount of production that can have happened by this instant.
        * @return the minimum amount of production that has happened by now
        */
-      double getMinCumulativeProduction();
+      edouble getMinCumulativeProduction();
 
-      double getMinPrevConsumption();
-      double getMaxPrevConsumption();
-      double getMinPrevProduction();
-      double getMaxPrevProduction();
+      edouble getMinPrevConsumption();
+      edouble getMaxPrevConsumption();
+      edouble getMinPrevProduction();
+      edouble getMaxPrevProduction();
 
 
       /**
@@ -159,10 +159,10 @@ namespace EUROPA {
        * @param minPrevProduction
        * @param maxPrevProduction
        */
-      void update(double lowerLevelMin, double lowerLevelMax, double upperLevelMin, double upperLevelMax,
-		  double minInstConsumption, double maxInstConsumption, double minInstProduction, double maxInstProduction,
-		  double minCumulativeConsumption, double maxCumulativeConsumption, double minCumulativeProduction, double maxCumulativeProduction,
-		  double minPrevConsumption, double maxPrevConsumption, double minPrevProduction, double maxPrevProduction);
+      void update(edouble lowerLevelMin, edouble lowerLevelMax, edouble upperLevelMin, edouble upperLevelMax,
+		  edouble minInstConsumption, edouble maxInstConsumption, edouble minInstProduction, edouble maxInstProduction,
+		  edouble minCumulativeConsumption, edouble maxCumulativeConsumption, edouble minCumulativeProduction, edouble maxCumulativeProduction,
+		  edouble minPrevConsumption, edouble maxPrevConsumption, edouble minPrevProduction, edouble maxPrevProduction);
 
       /**
        * @brief Determines whether this instant contains a flaw.
@@ -186,17 +186,17 @@ namespace EUROPA {
 
       void setLower(const bool lowerFlaw) {m_lowerFlaw = lowerFlaw;}
 
-      void setUpperMagnitude(const double m) {check_error(m_upperFlaw); m_upperFlawMagnitude = m;}
+      void setUpperMagnitude(const edouble m) {check_error(m_upperFlaw); m_upperFlawMagnitude = m;}
 
-      void setLowerMagnitude(const double m) {check_error(m_lowerFlaw); m_lowerFlawMagnitude = m;}
+      void setLowerMagnitude(const edouble m) {check_error(m_lowerFlaw); m_lowerFlawMagnitude = m;}
 
       bool hasUpperLevelFlaw() const {return m_upperFlaw;}
 
       bool hasLowerLevelFlaw() const {return m_lowerFlaw;}
 
-      double getUpperFlawMagnitude() const {return m_upperFlawMagnitude;}
+      edouble getUpperFlawMagnitude() const {return m_upperFlawMagnitude;}
 
-      double getLowerFlawMagnitude() const {return m_lowerFlawMagnitude;}
+      edouble getLowerFlawMagnitude() const {return m_lowerFlawMagnitude;}
 
       /**
        * @brief Set the violation status of this instant.
@@ -215,7 +215,7 @@ namespace EUROPA {
        * @param time The time this Instant represents.
        * @param prof The profile this Instant is on.  Used to determine if queries should cause recalculation.
        */
-      Instant(const int time, const ProfileId prof);
+      Instant(const eint time, const ProfileId prof);
 
       /**
        * @brief Adds a transaction to the set overlapping this time.
@@ -241,13 +241,13 @@ namespace EUROPA {
       bool containsStartOrEnd();
 
       InstantId m_id;
-      int m_time; /*<! The time of the Instant */
+      eint m_time; /*<! The time of the Instant */
       ProfileId m_profile; /*<! The Profile the Instant is on */
-      double m_lowerLevel, m_lowerLevelMax, m_upperLevelMin, m_upperLevel; /*<! The four bounds of the level. */
-      double m_maxInstProduction, m_maxInstConsumption, m_minInstProduction, m_minInstConsumption; /*<! The bounds around instantaneous consumption and production */
-      double m_maxCumulativeProduction, m_maxCumulativeConsumption, m_minCumulativeProduction, m_minCumulativeConsumption; /*<! The bounds around cumulative consumption and production */
-      double m_maxPrevProduction, m_maxPrevConsumption, m_minPrevProduction, m_minPrevConsumption; /*<! The bounds on consumption and production necessarily before this instant*/
-      double m_upperFlawMagnitude, m_lowerFlawMagnitude; /*<! The magnitude of the differences between the levels and the limits */
+      edouble m_lowerLevel, m_lowerLevelMax, m_upperLevelMin, m_upperLevel; /*<! The four bounds of the level. */
+      edouble m_maxInstProduction, m_maxInstConsumption, m_minInstProduction, m_minInstConsumption; /*<! The bounds around instantaneous consumption and production */
+      edouble m_maxCumulativeProduction, m_maxCumulativeConsumption, m_minCumulativeProduction, m_minCumulativeConsumption; /*<! The bounds around cumulative consumption and production */
+      edouble m_maxPrevProduction, m_maxPrevConsumption, m_minPrevProduction, m_minPrevConsumption; /*<! The bounds on consumption and production necessarily before this instant*/
+      edouble m_upperFlawMagnitude, m_lowerFlawMagnitude; /*<! The magnitude of the differences between the levels and the limits */
       bool m_violated, m_flawed, m_upperFlaw, m_lowerFlaw; /*<! Flaw and violation flags */
       std::set<TransactionId> m_transactions; /*<! The complete set of transactions */
       std::set<TransactionId> m_endingTransactions; /*<! The set of transactions whose upper bound is equal to the current time. */

@@ -5,7 +5,7 @@
 #include "Propagator.hh"
 #include "ConstrainedVariable.hh"
 #include "Constraint.hh"
-#include "AbstractDomain.hh"
+#include "Domain.hh"
 #include "Utils.hh"
 #include "Debug.hh"
 #include "DomainListener.hh"
@@ -409,7 +409,7 @@ namespace EUROPA
     publish(notifyAdded(variable));
 
     debugMsg("ConstraintEngine:add:ConstrainedVariable",
-	     variable->getName().toString() << "(" << variable->getKey() <<  ")");
+	     variable->getName().toString() << "(" << variable->getKey() << ")");
   }
 
   void ConstraintEngine::remove(const ConstrainedVariableId& variable){
@@ -484,7 +484,7 @@ namespace EUROPA
 
   void ConstraintEngine::add(const PropagatorId& propagator){
     check_error(propagator.isValid());
-    std::map<double, PropagatorId>::iterator it = m_propagatorsByName.find(propagator->getName().getKey());
+    std::map<edouble, PropagatorId>::iterator it = m_propagatorsByName.find(propagator->getName().getKey());
     if(it != m_propagatorsByName.end()) {
       europaWarn("Overwriting propagator named " + propagator->getName().toString());
       m_propagators.erase(std::find(m_propagators.begin(), m_propagators.end(), it->second));
@@ -1078,7 +1078,7 @@ namespace EUROPA
 
   ConstrainedVariableId
   ConstraintEngine::createVariable(const char* typeName,
-                              const AbstractDomain& baseDomain,
+                              const Domain& baseDomain,
                               const bool internal,
                               bool canBeSpecified,
                               const char* name,
@@ -1116,7 +1116,7 @@ namespace EUROPA
   }
 
 
-  double ConstraintEngine::createValue(const char* typeName, const std::string& value)
+  edouble ConstraintEngine::createValue(const char* typeName, const std::string& value)
   {
     DataTypeId dt = getCESchema()->getDataType(typeName);
     check_error(dt.isValid(), "no DataType found for type '" + std::string(typeName) + "'");

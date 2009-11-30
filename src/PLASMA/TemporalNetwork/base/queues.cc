@@ -108,7 +108,7 @@ DnodeId BucketQueue::popMinFromQueue()
   return DnodeId::noId();
 }
 
-void BucketQueue::insertInQueue(DnodeId node, long key)
+  void BucketQueue::insertInQueue(DnodeId node, eint::basis_type key)
 {
   if(node.isNoId())
     return;

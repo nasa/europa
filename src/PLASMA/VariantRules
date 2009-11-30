@@ -38,7 +38,8 @@ rule FVariantC++Flags
 
   switch $(variant) {
   case DEV :
-    return $(PLATFORM_FLAGS) $(DEBUG_FLAGS) $(logType) $(WARNING_FLAGS) $(EXTRA_DEFS) ;
+#    return $(PLATFORM_FLAGS) $(DEBUG_FLAGS) $(logType) $(WARNING_FLAGS) $(EXTRA_DEFS) ;
+    return $(PLATFORM_FLAGS) -finline-functions $(DEBUG_FLAGS) $(logType) $(WARNING_FLAGS) $(EXTRA_DEFS) ;
   case OPTIMIZED :
     return $(PLATFORM_FLAGS) $(OPTIMIZE_FLAGS) $(logType) $(WARNING_FLAGS) $(EXTRA_DEFS) ;
   case PROFILE :

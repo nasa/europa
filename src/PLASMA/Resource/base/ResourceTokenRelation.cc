@@ -8,24 +8,24 @@
 
 namespace EUROPA {
 
-  ResourceTokenRelation::ResourceTokenRelation(const ConstraintEngineId& constraintEngine,
-                                               const std::vector<ConstrainedVariableId>& scope,
-                                               const TokenId& tok)
-    : Constraint(CONSTRAINT_NAME(), PROPAGATOR_NAME(), constraintEngine, scope)
-    , m_token(tok)
-    , m_violationProblem(Resource::NoProblem)
-  {
-    //       debugMsg("Resource:ResourceTokenRelation", "Checking resource " << m_resource->getKey() << " against variable " << scope[0]->toString());
-    //       condDebugMsg(scope[0]->lastDomain().isSingleton(), "Resource:ResourceTokenRelation",
-    // 		   "Value of variable: " << scope[0]->lastDomain().getSingletonValue());
-    checkError(scope.size() == 2, "Require both state and object variables, in that order.");
-    checkError(scope[0] == tok->getState() && scope[1] == tok->getObject(),
-               "Require both state and object variables, in that order.");
-    if(scope[STATE_VAR]->isSpecified() && scope[STATE_VAR]->getSpecifiedValue() == Token::ACTIVE &&
-       scope[OBJECT_VAR]->lastDomain().isSingleton()) {
-      m_resource = ResourceId(scope[OBJECT_VAR]->lastDomain().getSingletonValue());
-      check_error(m_resource.isValid());
-      debugMsg("ResourceTokenRelation:ResourceTokenRelation", "Adding token " << m_token->toString() << " to resource-profile of resource " << m_resource->toString() );
+   ResourceTokenRelation::ResourceTokenRelation(const ConstraintEngineId& constraintEngine,
+                                                 const std::vector<ConstrainedVariableId>& scope,
+                                                 const TokenId& tok)
+      : Constraint(CONSTRAINT_NAME(), PROPAGATOR_NAME(), constraintEngine, scope)
+      , m_token(tok)
+      , m_violationProblem(Resource::NoProblem)
+    {
+      //       debugMsg("Resource:ResourceTokenRelation", "Checking resource " << m_resource->getKey() << " against variable " << scope[0]->toString());
+      //       condDebugMsg(scope[0]->lastDomain().isSingleton(), "Resource:ResourceTokenRelation",
+      // 		   "Value of variable: " << scope[0]->lastDomain().getSingletonValue());
+      checkError(scope.size() == 2, "Require both state and object variables, in that order.");
+      checkError(scope[0] == tok->getState() && scope[1] == tok->getObject(),
+                 "Require both state and object variables, in that order.");
+      if(scope[STATE_VAR]->isSpecified() && scope[STATE_VAR]->getSpecifiedValue() == Token::ACTIVE &&
+         scope[OBJECT_VAR]->lastDomain().isSingleton()) {
+        m_resource = Entity::getTypedEntity<Resource>(scope[OBJECT_VAR]->lastDomain().getSingletonValue());
+          check_error(m_resource.isValid());
+          debugMsg("ResourceTokenRelation:ResourceTokenRelation", "Adding token " << m_token->toString() << " to resource-profile of resource " << m_resource->toString() );
 
       m_resource->addToProfile(m_token);
     }
@@ -48,12 +48,14 @@ namespace EUROPA {
 
   bool ResourceTokenRelation::canIgnore(const ConstrainedVariableId& variable,
                                         int argIndex, const DomainListener::ChangeType& changeType) {
-    debugMsg("ResourceTokenRelation:canIgnore", m_token->toString() << " Received notification of change type " << changeType << " on variable " << variable->toString());
+    debugMsg("ResourceTokenRelation:canIgnore",
+             m_token->toString() << " Received notification of change type " << changeType << " on variable " <<
+             variable->toString());
     if(m_token->isDeleted())
       return true;
     ConstrainedVariableId state = m_variables[STATE_VAR];
     ConstrainedVariableId object = m_variables[OBJECT_VAR];
-
+    
     debugMsg("ResourceTokenRelation:canIgnore", "Current state: " << std::endl <<
              "  " << object->toString() << std::endl <<
              "  " << state->toString());
@@ -64,7 +66,7 @@ namespace EUROPA {
       //if the object is singleton and the state has the singleton value ACTIVE
       if(object->lastDomain().isSingleton() &&
          state->isSpecified() && state->getSpecifiedValue() == Token::ACTIVE) {
-        m_resource = ResourceId(object->lastDomain().getSingletonValue());
+        m_resource = Entity::getTypedEntity<Resource>(object->lastDomain().getSingletonValue());
         check_error(m_resource.isValid());
         debugMsg("ResourceTokenRelation:canIgnore", "Adding " << m_token->toString() << " to profile for resource " << m_resource->toString());
         m_resource->addToProfile(m_token);

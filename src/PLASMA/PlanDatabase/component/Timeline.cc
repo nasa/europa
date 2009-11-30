@@ -237,9 +237,9 @@ namespace EUROPA {
     }
 
     // Obtain the successor and predecessor index positions
-    std::map<int, std::list<TokenId>::iterator >::const_iterator predecessorIndexPos =
+    std::map<eint, std::list<TokenId>::iterator >::const_iterator predecessorIndexPos = 
       m_tokenIndex.find(predecessor->getKey());
-    std::map<int, std::list<TokenId>::iterator >::const_iterator successorIndexPos =
+    std::map<eint, std::list<TokenId>::iterator >::const_iterator successorIndexPos = 
       m_tokenIndex.find(successor->getKey());
 
     // CASE 1: Only successor so so insert predecessor before it
@@ -286,7 +286,7 @@ namespace EUROPA {
       notifyOrderingNoLongerRequired(token);
 
     // CASE 0: It is not sequenced, so can ignore it
-    std::map<int, std::list<TokenId>::iterator >::iterator token_it = m_tokenIndex.find(token->getKey());
+    std::map<eint, std::list<TokenId>::iterator >::iterator token_it = m_tokenIndex.find(token->getKey());
     if (token_it == m_tokenIndex.end()) {
       Object::remove(token);
       return;
@@ -392,9 +392,9 @@ namespace EUROPA {
     checkError(m_tokenIndex.size() == m_tokenSequence.size(),
 	       m_tokenIndex.size() << " != " << m_tokenSequence.size());
 
-    int prior_earliest_start = MINUS_INFINITY - 1;
-    int prior_earliest_end = MINUS_INFINITY - 1;
-    int prior_latest_end = MINUS_INFINITY;
+    eint prior_earliest_start = MINUS_INFINITY - 1;
+    eint prior_earliest_end = MINUS_INFINITY - 1;
+    eint prior_latest_end = MINUS_INFINITY;
     TokenId predecessor;
 
     std::set<TokenId> allTokens;
@@ -408,13 +408,13 @@ namespace EUROPA {
       // Also ensure x.end <= (x+1).start.
       if (!cleaningUp && getPlanDatabase()->getConstraintEngine()->constraintConsistent()) {
         check_error(predecessor.isNoId() || isConstrainedToPrecede(predecessor, token));
-        int earliest_start = (int) token->start()->lastDomain().getLowerBound();
-        int latest_start = (int) token->start()->lastDomain().getUpperBound();
+        eint earliest_start = (eint) token->start()->lastDomain().getLowerBound();
+        eint latest_start = (eint) token->start()->lastDomain().getUpperBound();
         check_error(earliest_start == MINUS_INFINITY || earliest_start == PLUS_INFINITY || earliest_start > prior_earliest_start);
         check_error(prior_earliest_end <= earliest_start);
         check_error(prior_latest_end <= latest_start);
-        prior_earliest_end = (int) token->end()->lastDomain().getLowerBound();
-        prior_latest_end = (int) token->end()->lastDomain().getLowerBound();
+        prior_earliest_end = (eint) token->end()->lastDomain().getLowerBound();
+        prior_latest_end = (eint) token->end()->lastDomain().getLowerBound();
         prior_earliest_start = earliest_start;
       }
       predecessor = token;
@@ -500,7 +500,7 @@ namespace EUROPA {
 
   void Timeline::insertToIndex(const TokenId& token, const std::list<TokenId>::iterator& position){
     // Remove the cache entry for this token as it is now inserted
-    m_tokenIndex.insert(std::pair<int, std::list<TokenId>::iterator>(token->getKey(), position));
+    m_tokenIndex.insert(std::make_pair(token->getKey(), position));
   }
 
   void Timeline::removeFromIndex(const TokenId& token){
@@ -531,7 +531,7 @@ namespace EUROPA {
                         const PlanDatabaseId& planDb,
                         const LabelStr& objectType,
                         const LabelStr& objectName,
-                        const std::vector<const AbstractDomain*>& arguments) const
+                        const std::vector<const Domain*>& arguments) const
   {
     ObjectId instance =  (new Timeline(planDb, objectType, objectName,true))->getId();
     debugMsg("Interpreter:NativeObjectFactory","Created Native " << m_className.toString() << ":" << objectName.toString() << " type:" << objectType.toString());

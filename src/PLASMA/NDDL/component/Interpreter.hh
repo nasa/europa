@@ -20,7 +20,7 @@ namespace EUROPA {
   class ExprConstant : public Expr
   {
   	public:
-  	    ExprConstant(const char* type, const AbstractDomain* d);
+  	    ExprConstant(const char* type, const Domain* d);
   	    virtual ~ExprConstant();
 
   	    virtual DataRef eval(EvalContext& context) const;
@@ -30,7 +30,7 @@ namespace EUROPA {
 
   	protected:
   	    LabelStr m_type;
-  	    const AbstractDomain* m_domain;
+  	    const Domain* m_domain;
   };
 
   class TokenEvalContext;
@@ -116,7 +116,7 @@ namespace EUROPA {
   class ExprTypedef : public Expr
   {
   public:
-      ExprTypedef(const DataTypeId& baseType, const char* name, AbstractDomain* baseDomain);
+      ExprTypedef(const DataTypeId& baseType, const char* name, Domain* baseDomain);
       virtual ~ExprTypedef();
 
       virtual DataRef eval(EvalContext& context) const;
@@ -125,7 +125,7 @@ namespace EUROPA {
   protected:
       DataTypeId m_baseType;
       LabelStr m_name;
-      AbstractDomain* m_baseDomain;
+      Domain* m_baseDomain;
   };
 
   class ExprEnumdef : public Expr
@@ -491,7 +491,7 @@ namespace EUROPA {
 
         InterpretedRuleInstance(const RuleInstanceId& parent,
                                 const ConstrainedVariableId& var,
-                                const AbstractDomain& domain,
+                                const Domain& domain,
                                 const bool positive,
                                 const std::vector<Expr*>& body);
 
@@ -511,7 +511,7 @@ namespace EUROPA {
                    ConstrainedVariableId& owner);
 
         ConstrainedVariableId addLocalVariable(
-                       const AbstractDomain& baseDomain,
+                       const Domain& baseDomain,
 				       bool canBeSpecified,
 				       const LabelStr& name);
 

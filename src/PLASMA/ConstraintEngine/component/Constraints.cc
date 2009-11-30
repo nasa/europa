@@ -129,11 +129,11 @@ namespace EUROPA {
 
 
 
-  UnaryConstraint::UnaryConstraint(const AbstractDomain& dom,
+  UnaryConstraint::UnaryConstraint(const Domain& dom,
 				   const ConstrainedVariableId& var)
     : Constraint("UNARY", "Default", var->getConstraintEngine(), makeScope(var)),
       m_x(dom.copy()),
-      m_y(static_cast<AbstractDomain*>(& (getCurrentDomain(var)))) {
+      m_y(static_cast<Domain*>(& (getCurrentDomain(var)))) {
   }
 
   UnaryConstraint::UnaryConstraint(const LabelStr& name,
@@ -142,7 +142,7 @@ namespace EUROPA {
 				   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_x(0),
-      m_y(static_cast<AbstractDomain*>(& (getCurrentDomain(variables[0])))) {
+      m_y(static_cast<Domain*>(& (getCurrentDomain(variables[0])))) {
     checkError(variables.size() == 1, "Invalid arg count. " << toString());
   }
 
@@ -226,9 +226,9 @@ namespace EUROPA {
     static unsigned int sl_counter(0);
     sl_counter++;
     debugMsg("AddEqualConstraint:handleExecute", toString() << " counter == " << sl_counter);
-    check_error(AbstractDomain::canBeCompared(m_x, m_y));
-    check_error(AbstractDomain::canBeCompared(m_x, m_z));
-    check_error(AbstractDomain::canBeCompared(m_z, m_y));
+    check_error(Domain::canBeCompared(m_x, m_y));
+    check_error(Domain::canBeCompared(m_x, m_z));
+    check_error(Domain::canBeCompared(m_z, m_y));
 
     // Test preconditions for continued execution.
     if (m_x.isOpen() ||
@@ -236,17 +236,17 @@ namespace EUROPA {
         m_z.isOpen())
       return;
 
-    double xMin, xMax, yMin, yMax, zMin, zMax;
+    edouble xMin, xMax, yMin, yMax, zMin, zMax;
     m_x.getBounds(xMin, xMax);
     m_y.getBounds(yMin, yMax);
     m_z.getBounds(zMin, zMax);
 
     // Process Z
-    double xMax_plus_yMax = Infinity::plus(xMax, yMax, zMax);
+    edouble xMax_plus_yMax = Infinity::plus(xMax, yMax, zMax);
     if (zMax > xMax_plus_yMax)
       zMax = m_z.translateNumber(xMax_plus_yMax, false);
 
-    double xMin_plus_yMin = Infinity::plus(xMin, yMin, zMin);
+    edouble xMin_plus_yMin = Infinity::plus(xMin, yMin, zMin);
     if (zMin < xMin_plus_yMin)
       zMin = m_z.translateNumber(xMin_plus_yMin, true);
 
@@ -254,11 +254,11 @@ namespace EUROPA {
       return;
 
     // Process X
-    double zMax_minus_yMin = Infinity::minus(zMax, yMin, xMax);
+    edouble zMax_minus_yMin = Infinity::minus(zMax, yMin, xMax);
     if (xMax > zMax_minus_yMin)
       xMax = m_x.translateNumber(zMax_minus_yMin, false);
 
-    double zMin_minus_yMax = Infinity::minus(zMin, yMax, xMin);
+    edouble zMin_minus_yMax = Infinity::minus(zMin, yMax, xMin);
     if (xMin < zMin_minus_yMax)
       xMin = m_x.translateNumber(zMin_minus_yMax, true);
 
@@ -266,11 +266,11 @@ namespace EUROPA {
       return;
 
     // Process Y
-    double yMaxCandidate = Infinity::minus(zMax, xMin, yMax);
+    edouble yMaxCandidate = Infinity::minus(zMax, xMin, yMax);
     if (yMax > yMaxCandidate)
       yMax = m_y.translateNumber(yMaxCandidate, false);
 
-    double yMinCandidate = Infinity::minus(zMin, xMax, yMin);
+    edouble yMinCandidate = Infinity::minus(zMin, xMax, yMin);
     if (yMin < yMinCandidate)
       yMin = m_y.translateNumber(yMinCandidate, true);
 
@@ -332,8 +332,8 @@ namespace EUROPA {
 
   bool EqualConstraint::equate(const ConstrainedVariableId& v1, const ConstrainedVariableId& v2, bool& isEmpty){
     checkError(isEmpty == false, "Should be initially false.");
-    AbstractDomain& d1 = getCurrentDomain(v1);
-    AbstractDomain& d2 = getCurrentDomain(v2);
+    Domain& d1 = getCurrentDomain(v1);
+    Domain& d2 = getCurrentDomain(v2);
 
     bool changed = false;
     if((d1.isClosed() && d2.isClosed()) || (d1.isEnumerated() && d2.isEnumerated())){
@@ -348,12 +348,12 @@ namespace EUROPA {
       checkError(!d1.isInterval() && !d2.isInterval(),
 		 v1->toString() << " should not be equated with " << v2->toString());
 
-      std::list<double> d1_values;
+      std::list<edouble> d1_values;
       d1.getValues(d1_values);
-      const AbstractDomain& d2_base = v2->baseDomain();
+      const Domain& d2_base = v2->baseDomain();
       while(!isEmpty && !d1_values.empty()){
 	// if it not a member of d2 BUT a member of the base domain of v2, then we should exclude from d1.
-	double value = d1_values.front();
+	edouble value = d1_values.front();
 	if(!d2.isMember(value) && (d2_base.isMember(value) || d2.isClosed())){
 	  d1.remove(value);
 	  changed = true;
@@ -363,12 +363,12 @@ namespace EUROPA {
       }
 
       if(!isEmpty){
-	std::list<double> d2_values;
+	std::list<edouble> d2_values;
 	d2.getValues(d2_values);
-	const AbstractDomain& d1_base = v1->baseDomain();
+	const Domain& d1_base = v1->baseDomain();
 	while(!isEmpty && !d2_values.empty()){
 	  // if it not a member of d2 BUT a member of the base domain of v2, then we should exclude from d1.
-	  double value = d2_values.front();
+	  edouble value = d2_values.front();
 	  if(!d1.isMember(value) && (d1_base.isMember(value) || d1.isClosed())){
 	    d2.remove(value);
 	    changed = true;
@@ -382,7 +382,7 @@ namespace EUROPA {
     return changed;
   }
 
-  AbstractDomain& EqualConstraint::getCurrentDomain(const ConstrainedVariableId& var) {
+  Domain& EqualConstraint::getCurrentDomain(const ConstrainedVariableId& var) {
     return(Constraint::getCurrentDomain(var));
   }
 
@@ -394,7 +394,7 @@ namespace EUROPA {
       m_currentDomain(getCurrentDomain(variables[0])),
       m_superSetDomain(getCurrentDomain(variables[1])){
     check_error(variables.size() == 2);
-    check_error(AbstractDomain::canBeCompared(m_currentDomain, m_superSetDomain));
+    check_error(Domain::canBeCompared(m_currentDomain, m_superSetDomain));
   }
 
   SubsetOfConstraint::~SubsetOfConstraint() {}
@@ -431,8 +431,8 @@ namespace EUROPA {
     propagate(m_x, m_y);
   }
 
-  void LessThanEqualConstraint::propagate(AbstractDomain& m_x, AbstractDomain& m_y){
-    check_error(AbstractDomain::canBeCompared(m_x, m_y));
+  void LessThanEqualConstraint::propagate(Domain& m_x, Domain& m_y){
+    check_error(Domain::canBeCompared(m_x, m_y));
 
     // Discontinue if either domain is open.
     if (m_x.isOpen() || m_y.isOpen())
@@ -482,9 +482,9 @@ namespace EUROPA {
   }
 
   void NotEqualConstraint::handleExecute() {
-    AbstractDomain& domx = getCurrentDomain(m_variables[X]);
-    AbstractDomain& domy = getCurrentDomain(m_variables[Y]);
-    check_error(AbstractDomain::canBeCompared(domx, domy), "Cannot compare " + domx.toString() + " and " + domy.toString() + ".");
+    Domain& domx = getCurrentDomain(m_variables[X]);
+    Domain& domy = getCurrentDomain(m_variables[Y]);
+    check_error(Domain::canBeCompared(domx, domy), "Cannot compare " + domx.toString() + " and " + domy.toString() + ".");
     // Discontinue if either domain is open.
     //if (domx.isOpen() || domy.isOpen())
     //  return;
@@ -494,10 +494,10 @@ namespace EUROPA {
       checkAndRemove(domy, domx);
   }
 
-  bool NotEqualConstraint::checkAndRemove(const AbstractDomain& domx, AbstractDomain& domy) {
+  bool NotEqualConstraint::checkAndRemove(const Domain& domx, Domain& domy) {
     if (!domx.isSingleton())
       return(false);
-    double value = domx.getSingletonValue();
+    edouble value = domx.getSingletonValue();
     // Not present, so nothing to remove.
     if (!domy.isMember(value))
       return(false);
@@ -518,12 +518,12 @@ namespace EUROPA {
     }
 
     if (domx.compareEqual(domx.getSingletonValue(), domy.getLowerBound())) {
-      double low = domx.getSingletonValue() + domx.minDelta();
+      edouble low = domx.getSingletonValue() + domx.minDelta();
       domy.intersect(IntervalDomain(low, domy.getUpperBound()));
       return(true);
     }
     if (domx.compareEqual(domx.getSingletonValue(), domy.getUpperBound())) {
-      double hi = domx.getSingletonValue() - domx.minDelta();
+      edouble hi = domx.getSingletonValue() - domx.minDelta();
       domy.intersect(IntervalDomain(domy.getLowerBound(), hi));
       return(true);
     }
@@ -538,7 +538,7 @@ namespace EUROPA {
     if(changeType==DomainListener::RESET || changeType == DomainListener::RELAXED)
       return false;
 
-    const AbstractDomain& domain = variable->lastDomain();
+    const Domain& domain = variable->lastDomain();
 
     if(domain.isSingleton() ||
        (domain.isInterval() && domain.isFinite() && domain.getSize() <=2 )) // Since this transition is key for propagation
@@ -566,7 +566,7 @@ namespace EUROPA {
    * @brief factored out propagation algorithm to allow re-use
    */
   void LessThanConstraint::propagate(IntervalDomain& domx, IntervalDomain& domy){
-    check_error(AbstractDomain::canBeCompared(domx, domy), "Cannot compare " + domx.toString() + " and " + domy.toString() + ".");
+    check_error(Domain::canBeCompared(domx, domy), "Cannot compare " + domx.toString() + " and " + domy.toString() + ".");
 
     // Discontinue if either domain is open.
     if (domx.isOpen() || domy.isOpen())
@@ -613,12 +613,12 @@ namespace EUROPA {
   }
 
   bool MultEqualConstraint::updateMinAndMax(IntervalDomain& targetDomain,
-					    double denomMin, double denomMax,
-					    double numMin, double numMax) {
-    double xMax = targetDomain.getUpperBound();
-    double xMin = targetDomain.getLowerBound();
-    double newMin = xMin;
-    double newMax = xMax;
+					    edouble denomMin, edouble denomMax,
+					    edouble numMin, edouble numMax) {
+    edouble xMax = targetDomain.getUpperBound();
+    edouble xMin = targetDomain.getLowerBound();
+    edouble newMin = xMin;
+    edouble newMax = xMax;
 
     // If the denominator could be zero, the result could be anything
     //   except for some sign related restrictions.
@@ -657,9 +657,9 @@ namespace EUROPA {
     IntervalDomain& domy = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
     IntervalDomain& domz = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Z]));
 
-    check_error(AbstractDomain::canBeCompared(domx, domy));
-    check_error(AbstractDomain::canBeCompared(domx, domz));
-    check_error(AbstractDomain::canBeCompared(domz, domy));
+    check_error(Domain::canBeCompared(domx, domy));
+    check_error(Domain::canBeCompared(domx, domz));
+    check_error(Domain::canBeCompared(domz, domy));
 
     /* Test preconditions for continued execution. */
     /* Could support one open domain, but only very messily due to REAL_ENUMERATED case. */
@@ -670,7 +670,7 @@ namespace EUROPA {
 
     check_error(!domx.isEmpty() && !domy.isEmpty() && !domz.isEmpty());
 
-    double xMin, xMax, yMin, yMax, zMin, zMax;
+    edouble xMin, xMax, yMin, yMax, zMin, zMax;
     for (bool done = false; !done; ) {
       done = true;
       domx.getBounds(xMin, xMax);
@@ -678,11 +678,11 @@ namespace EUROPA {
       domz.getBounds(zMin, zMax);
 
       // Process Z
-      double max_z = std::max(std::max(xMax * yMax, xMin * yMin), std::max(xMin * yMax, xMax * yMin));
+      edouble max_z = std::max(std::max(xMax * yMax, xMin * yMin), std::max(xMin * yMax, xMax * yMin));
       if (zMax > max_z)
         zMax = domz.translateNumber(max_z, false);
 
-      double min_z = std::min(std::min(xMax * yMax, xMin * yMin), std::min(xMin * yMax, xMax * yMin));
+      edouble min_z = std::min(std::min(xMax * yMax, xMin * yMin), std::min(xMin * yMax, xMax * yMin));
       if (zMin < min_z)
         zMin = domz.translateNumber(min_z, true);
 
@@ -1026,9 +1026,9 @@ namespace EUROPA {
   }
 
   GreaterThanSumConstraint::GreaterThanSumConstraint(const LabelStr& name,
-                                               const LabelStr& propagatorName,
-                                               const ConstraintEngineId& constraintEngine,
-                                               const std::vector<ConstrainedVariableId>& variables)
+                                                     const LabelStr& propagatorName,
+                                                     const ConstraintEngineId& constraintEngine,
+                                                     const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_interimVariable(constraintEngine, constraintEngine->getCESchema()->baseDomain(m_variables[0]->baseDomain().getTypeName().c_str()),
 			true, false, LabelStr("InternalConstraintVariable"), getId()),
@@ -1051,7 +1051,7 @@ namespace EUROPA {
     check_error(ARG_COUNT > 2);
     check_error(getCurrentDomain(m_variables[0]).isBool());
     for (unsigned int i = 2; i < ARG_COUNT; i++) {
-      check_error(AbstractDomain::canBeCompared(getCurrentDomain(m_variables[1]),
+      check_error(Domain::canBeCompared(getCurrentDomain(m_variables[1]),
                                                 getCurrentDomain(m_variables[i])));
     }
   }
@@ -1066,10 +1066,10 @@ namespace EUROPA {
       // B. If the others have an empty intersection, the condition is false.
       // As with singleton false case, we can do nothing if any are open.
       bool canProveTrue = true;
-      AbstractDomain* common = 0;
-      double single = 0.0;
+      Domain* common = 0;
+      edouble single = 0.0;
       for (unsigned int i = 1; !boolDom.isSingleton() && i < ARG_COUNT; i++) {
-        AbstractDomain& current(getCurrentDomain(m_variables[i]));
+        Domain& current(getCurrentDomain(m_variables[i]));
         if (current.isOpen()) {
           canProveTrue = false;
           continue;
@@ -1096,7 +1096,7 @@ namespace EUROPA {
           if (i == 1)
             single = current.getSingletonValue();
           else
-            if (fabs(single - current.getSingletonValue()) >= getCurrentDomain(m_variables[1]).minDelta()) {
+            if (std::abs(single - current.getSingletonValue()) >= getCurrentDomain(m_variables[1]).minDelta()) {
               // Two singletons with different values: can't be all same, so:
               canProveTrue = false;
               boolDom.remove(true);
@@ -1123,15 +1123,15 @@ namespace EUROPA {
         while (j < ARG_COUNT - 1 && !getCurrentDomain(m_variables[j]).isOpen()
                && !getCurrentDomain(m_variables[j]).isSingleton())
           ++j;
-        AbstractDomain& domj = getCurrentDomain(m_variables[j]);
+        Domain& domj = getCurrentDomain(m_variables[j]);
         if (domj.isOpen() || !domj.isSingleton())
           return; // Can ignore relax events until condition var is relaxed.
-        double single = domj.getSingletonValue();
+        edouble single = domj.getSingletonValue();
         unsigned int foundOneToTrim = 0;
         for (unsigned int i = 1; i < ARG_COUNT; i++) {
           if (i == j)
             continue;
-          AbstractDomain& domi = getCurrentDomain(m_variables[i]);
+          Domain& domi = getCurrentDomain(m_variables[i]);
           if (domi.isOpen())
             return; // Can ignore relax events until condition var is relaxed.
           if (domi.isSingleton() && domi.getSingletonValue() != single)
@@ -1156,7 +1156,7 @@ namespace EUROPA {
         // Exactly one other var is not singleton with lone member single and
         // even that one var's domain contains single as a member, so remove
         // single to enforce the constraint.
-        AbstractDomain& domToTrim = getCurrentDomain(m_variables[foundOneToTrim]);
+        Domain& domToTrim = getCurrentDomain(m_variables[foundOneToTrim]);
         // But it can only be trimmed if it is enumerated (including boolean) or
         // if it is an integer interval with one of the end points equal to
         // single, which is painful to check.
@@ -1177,7 +1177,7 @@ namespace EUROPA {
             break;
         if (i == ARG_COUNT) // All of them are open; can't reduce any.
           return; // Can ignore relax events until condition var is relaxed.
-        AbstractDomain& dom1 = getCurrentDomain(m_variables[1]);
+        Domain& dom1 = getCurrentDomain(m_variables[1]);
         for (bool changedOne = true; changedOne; ) {
           changedOne = false;
           for (i = 2; i < ARG_COUNT; i++) {
@@ -1199,7 +1199,7 @@ namespace EUROPA {
     check_error(ARG_COUNT > 2);
     check_error(getCurrentDomain(m_variables[0]).isBool());
     for (unsigned int i = 2; i < ARG_COUNT; i++)
-      check_error(AbstractDomain::canBeCompared(getCurrentDomain(m_variables[1]),
+      check_error(Domain::canBeCompared(getCurrentDomain(m_variables[1]),
                                                 getCurrentDomain(m_variables[i])));
   }
 
@@ -1207,7 +1207,7 @@ namespace EUROPA {
    * @brief Helper function: add domToAdd to unionOfDomains "usefully".
    * Adds all of the members of domToAdd and, if needed and useful,
    * more values to unionOfDomains.
-   * @param unionOfDomains Pointer to new'd AbstractDomain, which may
+   * @param unionOfDomains Pointer to new'd Domain, which may
    * be delete'd and new'd with a different concrete class by this
    * function.
    * @param domToAdd Set of values to add to unionOfDomains' concrete
@@ -1217,14 +1217,14 @@ namespace EUROPA {
    * simply returning a single larger interval that 'covers' both
    * original intervals.
    */
-  static void addToUnion(AbstractDomain **unionOfDomains,
-                         const AbstractDomain& domToAdd) {
+  static void addToUnion(Domain **unionOfDomains,
+                         const Domain& domToAdd) {
     check_error(unionOfDomains != 0 && *unionOfDomains != 0);
     check_error(!(*unionOfDomains)->isEmpty() && !(*unionOfDomains)->isOpen());
     check_error(!domToAdd.isEmpty() && !domToAdd.isOpen());
-    AbstractDomain *newUnion = 0;
-    std::list<double> membersToAdd;
-    std::list<double> newMembers;
+    Domain *newUnion = 0;
+    std::list<edouble> membersToAdd;
+    std::list<edouble> newMembers;
     if (((*unionOfDomains)->isEnumerated() || (*unionOfDomains)->isSingleton())
         && (domToAdd.isEnumerated() || domToAdd.isSingleton())) {
       if (domToAdd.isEnumerated())
@@ -1235,9 +1235,9 @@ namespace EUROPA {
         (*unionOfDomains)->getValues(newMembers);
       else
         newMembers.push_back((*unionOfDomains)->getSingletonValue());
-      for (std::list<double>::const_iterator it = membersToAdd.begin();
+      for (std::list<edouble>::const_iterator it = membersToAdd.begin();
            it != membersToAdd.end(); it++) {
-        std::list<double>::const_iterator it2 = newMembers.begin();
+        std::list<edouble>::const_iterator it2 = newMembers.begin();
         for ( ; it2 != newMembers.end(); it2++)
           if (*it == *it2)
             break;
@@ -1257,7 +1257,7 @@ namespace EUROPA {
     }
     // At least one is a non-singleton interval, so the result will be
     //   also be one.
-    double toAddMin, toAddMax, newMin, newMax;
+    edouble toAddMin, toAddMax, newMin, newMax;
     domToAdd.getBounds(toAddMin, toAddMax);
     (*unionOfDomains)->getBounds(newMin, newMax);
     bool changing = false;
@@ -1273,7 +1273,7 @@ namespace EUROPA {
       if((*unionOfDomains)->minDelta() < 1.0)
         newUnion = new IntervalDomain(newMin, newMax);
       else
-        newUnion = new IntervalIntDomain((int)newMin, (int)newMax);
+        newUnion = new IntervalIntDomain((eint)newMin, (eint)newMax);
 
       /* BOOL should be not get to here since both are non-singleton
        *   but then unionOfDomains "covers" domToAdd and changing
@@ -1305,9 +1305,9 @@ namespace EUROPA {
     unsigned int firstNonDynamic = 0;
     unsigned int firstDynamic = 0;
     unsigned int i = 1;
-    AbstractDomain* unionOfOthers = 0;
+    Domain* unionOfOthers = 0;
     for ( ; i < ARG_COUNT; i++) {
-      AbstractDomain& current(getCurrentDomain(m_variables[i]));
+      Domain& current(getCurrentDomain(m_variables[i]));
       if (current.isOpen()) {
         canProveTrue = false;
         if (firstDynamic == 0)
@@ -1364,7 +1364,7 @@ namespace EUROPA {
       if (firstDynamic > 0)
         return;
       for (i = 1; i < ARG_COUNT - 1; i++) {
-        AbstractDomain& iDom = getCurrentDomain(m_variables[i]);
+        Domain& iDom = getCurrentDomain(m_variables[i]);
         for (unsigned int j = i; ++j < ARG_COUNT; ) {
           if (iDom.intersects(getCurrentDomain(m_variables[j])))
             // The two vars have overlapping domains, so constraint is satisfied.
@@ -1394,12 +1394,12 @@ namespace EUROPA {
         if (getCurrentDomain(m_variables[i]).isOpen() ||
             !getCurrentDomain(m_variables[i]).isSingleton())
           continue;
-        AbstractDomain& singletonDom = getCurrentDomain(m_variables[i]);
+        Domain& singletonDom = getCurrentDomain(m_variables[i]);
         // ... go thru the other vars ...
         for (unsigned int j = firstNonDynamic; j < ARG_COUNT; j++) {
           if (j == i)
             continue;
-          AbstractDomain& jDom = getCurrentDomain(m_variables[j]);
+          Domain& jDom = getCurrentDomain(m_variables[j]);
           // ... that have non-dynamic and finite domains ...
           if (!jDom.isOpen() && jDom.isFinite() &&
               // ... looking for one that contains singletonDom's value.
@@ -1443,19 +1443,19 @@ namespace EUROPA {
     : Constraint(name, propagatorName, constraintEngine, variables),
       ARG_COUNT(variables.size()) {
     check_error(ARG_COUNT == 4);
-    check_error(AbstractDomain::canBeCompared(getCurrentDomain(m_variables[0]),
+    check_error(Domain::canBeCompared(getCurrentDomain(m_variables[0]),
                                               getCurrentDomain(m_variables[1])));
-    check_error(AbstractDomain::canBeCompared(getCurrentDomain(m_variables[2]),
+    check_error(Domain::canBeCompared(getCurrentDomain(m_variables[2]),
                                               getCurrentDomain(m_variables[3])));
   }
   /**
    * @brief if B in C then restrict A to D:
    */
   void MemberImplyConstraint::handleExecute() {
-    AbstractDomain& domA(getCurrentDomain(m_variables[0]));
-    AbstractDomain& domB(getCurrentDomain(m_variables[1]));
-    AbstractDomain& domC(getCurrentDomain(m_variables[2]));
-    AbstractDomain& domD(getCurrentDomain(m_variables[3]));
+    Domain& domA(getCurrentDomain(m_variables[0]));
+    Domain& domB(getCurrentDomain(m_variables[1]));
+    Domain& domC(getCurrentDomain(m_variables[2]));
+    Domain& domD(getCurrentDomain(m_variables[3]));
 
     assertFalse(domA.isEmpty() || domB.isEmpty() || domC.isEmpty() || domD.isEmpty());
 
@@ -1482,7 +1482,7 @@ namespace EUROPA {
     // ... and that could be zero.
     unsigned int maxZeros = 0;
     for ( ; i < m_variables.size(); i++) {
-      AbstractDomain& other = getCurrentDomain(m_variables[i]);
+      Domain& other = getCurrentDomain(m_variables[i]);
       if (other.isMember(0.0)) {
         ++maxZeros;
         if (other.isSingleton())
@@ -1491,7 +1491,7 @@ namespace EUROPA {
     }
 
     // The count of zeros is the first variable.
-    AbstractDomain& countDom = getCurrentDomain(m_variables[0]);
+    Domain& countDom = getCurrentDomain(m_variables[0]);
 
     // If all that could be zero must be zero to get the count high
     // enough, set all that could be zero to zero.
@@ -1500,9 +1500,9 @@ namespace EUROPA {
       // Find those that could be zero but might not be
       // and restrict them to 0.
       for (i = 1; i < m_variables.size(); i++) {
-        AbstractDomain& other = getCurrentDomain(m_variables[i]);
+        Domain& other = getCurrentDomain(m_variables[i]);
         if (other.isMember(0.0) && !other.isSingleton()) {
-          AbstractDomain* zero = other.copy();
+          Domain* zero = other.copy();
           zero->set(0.0);
           other.intersect(*zero);
           delete zero;
@@ -1518,7 +1518,7 @@ namespace EUROPA {
       // Find those that could be zero but might not be and restrict
       // them to not be 0.
       for (i = 1; i < m_variables.size(); i++) {
-        AbstractDomain& other = getCurrentDomain(m_variables[i]);
+        Domain& other = getCurrentDomain(m_variables[i]);
         if (other.isMember(0.0) && !other.isSingleton()) {
           // Can only remove 0.0 from integer interval domains if it
           // is an endpoint and can only remove 0.0 from real interval
@@ -1527,7 +1527,7 @@ namespace EUROPA {
           if (other.isEnumerated())
             other.remove(0.0);
           else {
-              const IntervalDomain zeroDom(0.0);
+            const IntervalDomain zeroDom(0.0);
               if (zeroDom.isMember(other.getLowerBound()) ||
                   zeroDom.isMember(other.getUpperBound()))
                 other.remove(0.0);
@@ -1539,7 +1539,7 @@ namespace EUROPA {
     // If the counts seen restrict the count variable, do so.
     if (minZeros > countDom.getLowerBound() ||
         countDom.getUpperBound() > maxZeros)
-      countDom.intersect(IntervalIntDomain(minZeros, maxZeros));
+      countDom.intersect(make_int_int(minZeros, maxZeros));
   }
 
   CountNonZerosConstraint::CountNonZerosConstraint(const LabelStr& name,
@@ -1549,7 +1549,7 @@ namespace EUROPA {
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_zeros(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalCountNonZerosVar"), getId()),
       m_otherVars(constraintEngine, IntervalDomain(), true, false, LabelStr("InternalCountNonZerosOtherVars"), getId()),
-      m_superset(constraintEngine, IntervalDomain((double)(variables.size() - 1)), true, false, LabelStr("InternalCountNonZerosSuperset"), getId()),
+      m_superset(constraintEngine, IntervalDomain((edouble)(variables.size() - 1)), true, false, LabelStr("InternalCountNonZerosSuperset"), getId()),
       m_addEqualConstraint(LabelStr("AddEqual"), propagatorName, constraintEngine,
                            makeScope(m_zeros.getId(), m_variables[0], m_otherVars.getId()))
   {
@@ -1584,7 +1584,7 @@ namespace EUROPA {
                              const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_nonZeros(constraintEngine, IntervalIntDomain(1, PLUS_INFINITY), true, false, LabelStr("InternalVar:Or:nonZeros"), getId()),
-      m_superset(constraintEngine, IntervalIntDomain(1, variables.size()), true, false, LabelStr("InternalVar:Or:superset"), getId())
+      m_superset(constraintEngine, IntervalIntDomain(1, eint(variables.size())), true, false, LabelStr("InternalVar:Or:superset"), getId())
   {
     m_subsetConstraint = (new SubsetOfConstraint(LabelStr("SubsetOf"), propagatorName, constraintEngine,
                                                  makeScope(m_nonZeros.getId(), m_superset.getId())))->getId();
@@ -1605,7 +1605,7 @@ namespace EUROPA {
     check_error(m_variables.size() > 1);
     for (unsigned int i = 0; i < m_variables.size(); i++)
       check_error(getCurrentDomain(m_variables[i]).isNumeric());
-    // Should probably call AbstractDomain::canBeCompared() and check
+    // Should probably call Domain::canBeCompared() and check
     // minDelta() as well.
   }
 
@@ -1616,16 +1616,16 @@ namespace EUROPA {
   // vars.
 
   void EqualMinimumConstraint::handleExecute() {
-    AbstractDomain& minDom = getCurrentDomain(m_variables[0]);
-    AbstractDomain& firstDom = getCurrentDomain(m_variables[1]);
-    double minSoFar = firstDom.getLowerBound();
-    double maxSoFar = firstDom.getUpperBound();
+    Domain& minDom = getCurrentDomain(m_variables[0]);
+    Domain& firstDom = getCurrentDomain(m_variables[1]);
+    edouble minSoFar = firstDom.getLowerBound();
+    edouble maxSoFar = firstDom.getUpperBound();
     std::set<unsigned int> contributors; // Set of var indices that "affect" minimum, or are affected by minDom's minimum.
     contributors.insert(1);
     std::vector<ConstrainedVariableId>::iterator it = m_variables.begin();
     unsigned int i = 2;
     for (it++, it++; it != m_variables.end(); it++, i++) {
-      AbstractDomain& curDom = getCurrentDomain(*it);
+      Domain& curDom = getCurrentDomain(*it);
       if (maxSoFar < curDom.getLowerBound()) {
         // This variable doesn't "contribute" ...
         // ... but it might need to be trimmed by minDom; check:
@@ -1657,13 +1657,13 @@ namespace EUROPA {
     }
     if (minDom.intersect(IntervalDomain(minSoFar, maxSoFar)) && minDom.isEmpty())
       return;
-    double minimum = minDom.getLowerBound();
+    edouble minimum = minDom.getLowerBound();
     if (contributors.size() == 1) {
       // If there is only one other var that has a value in minDom,
       // it needs to be restricted to minDom to satisfy the constraint.
       i = *(contributors.begin());
       check_error(i > 0);
-      AbstractDomain& curDom = getCurrentDomain(m_variables[i]);
+      Domain& curDom = getCurrentDomain(m_variables[i]);
       IntervalDomain restriction(minimum, minDom.getUpperBound());
       curDom.intersect(restriction);
       return; // No other contributors, so cannot be more to do.
@@ -1672,7 +1672,7 @@ namespace EUROPA {
       i = *(contributors.begin());
       check_error(i > 0);
       contributors.erase(contributors.begin());
-      AbstractDomain& curDom = getCurrentDomain(m_variables[i]);
+      Domain& curDom = getCurrentDomain(m_variables[i]);
       if (minimum < curDom.getLowerBound())
         continue;
       IntervalDomain restriction(minimum, curDom.getUpperBound());
@@ -1689,7 +1689,7 @@ namespace EUROPA {
     check_error(m_variables.size() > 1);
     for (unsigned int i = 0; i < m_variables.size(); i++)
       check_error(getCurrentDomain(m_variables[i]).isNumeric());
-    // Should probably call AbstractDomain::canBeCompared() and check
+    // Should probably call Domain::canBeCompared() and check
     // minDelta() as well.
   }
 
@@ -1700,16 +1700,16 @@ namespace EUROPA {
   // vars.
 
   void EqualMaximumConstraint::handleExecute() {
-    AbstractDomain& maxDom = getCurrentDomain(m_variables[0]);
-    AbstractDomain& firstDom = getCurrentDomain(m_variables[1]);
-    double minSoFar = firstDom.getLowerBound();
-    double maxSoFar = firstDom.getUpperBound();
+    Domain& maxDom = getCurrentDomain(m_variables[0]);
+    Domain& firstDom = getCurrentDomain(m_variables[1]);
+    edouble minSoFar = firstDom.getLowerBound();
+    edouble maxSoFar = firstDom.getUpperBound();
     std::set<unsigned int> contributors; // Set of var indices that "affect" maximum, or are affected by maxDom's maximum.
     contributors.insert(1);
     std::vector<ConstrainedVariableId>::iterator it = m_variables.begin();
     unsigned int i = 2;
     for (it++, it++; it != m_variables.end(); it++, i++) {
-      AbstractDomain& curDom = getCurrentDomain(*it);
+      Domain& curDom = getCurrentDomain(*it);
       if (minSoFar > curDom.getUpperBound()) {
         // This variable doesn't "contribute" ...
         // ... but it might need to be trimmed by maxDom; check:
@@ -1741,13 +1741,13 @@ namespace EUROPA {
     }
     if (maxDom.intersect(IntervalDomain(minSoFar, maxSoFar)) && maxDom.isEmpty())
       return;
-    double maximum = maxDom.getUpperBound();
+    edouble maximum = maxDom.getUpperBound();
     if (contributors.size() == 1) {
       // If there is only one other var that has a value in maxDom,
       // it needs to be restricted to maxDom to satisfy the constraint.
       i = *(contributors.begin());
       check_error(i > 0);
-      AbstractDomain& curDom = getCurrentDomain(m_variables[i]);
+      Domain& curDom = getCurrentDomain(m_variables[i]);
       IntervalDomain restriction(maxDom.getLowerBound(), maximum);
       curDom.intersect(restriction);
       return; // No other contributors, so cannot be more to do.
@@ -1756,7 +1756,7 @@ namespace EUROPA {
       i = *(contributors.begin());
       check_error(i > 0);
       contributors.erase(contributors.begin());
-      AbstractDomain& curDom = getCurrentDomain(m_variables[i]);
+      Domain& curDom = getCurrentDomain(m_variables[i]);
       if (maximum > curDom.getUpperBound())
         continue;
       IntervalDomain restriction(curDom.getLowerBound(), maximum);
@@ -1885,10 +1885,10 @@ namespace EUROPA {
     IntervalDomain& domx = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
     IntervalDomain& domy = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
 
-    check_error(AbstractDomain::canBeCompared(domx, domy));
+    check_error(Domain::canBeCompared(domx, domy));
     check_error(!domx.isEmpty() && !domy.isEmpty());
 
-    double xMin, xMax, yMin, yMax;
+    edouble xMin, xMax, yMin, yMax;
     domx.getBounds(xMin, xMax);
     domy.getBounds(yMin, yMax);
 
@@ -2043,7 +2043,7 @@ namespace EUROPA {
     }
 
     if(m_test.isSingleton()){ //Test value specified, so set up the others
-      if (m_test.getSingletonValue()) { //It's true, so a or b == true
+      if (m_test.getSingletonValue() != 0) { //It's true, so a or b == true
 
 	if (m_arg1.isSingleton()) {
 	  if (m_arg1.getSingletonValue() == 0) { //a == false, so b must be true
@@ -2079,25 +2079,25 @@ namespace EUROPA {
 
     if(m_arg1.isSingleton() && m_arg2.isSingleton()) { //A and b are singltons, so set the value.
       if (m_arg1.getSingletonValue() == 0 || m_arg2.getSingletonValue() == 0) { //a == false or b == false, so set to false
-        m_test.intersect(IntervalDomain(0, 0));
+        m_test.intersect(make_int(0, 0));
       } else { //a == b == true, set to true
-        m_test.intersect(IntervalDomain(1, 1));
+        m_test.intersect(make_int(1, 1));
       }
     }
 
     if(m_test.isSingleton()){ //Test value specified, so set up the others
-      if (m_test.getSingletonValue()) { //It's true, so a and b == true
-        m_arg1.intersect(IntervalDomain(1, 1));
-        m_arg2.intersect(IntervalDomain(1, 1));
+      if (m_test.getSingletonValue() != 0) { //It's true, so a and b == true
+        m_arg1.intersect(make_int(1, 1));
+        m_arg2.intersect(make_int(1, 1));
       } else { //It's false, so one of a or b must be false
 	if (m_arg1.isSingleton()) {
 	  if (m_arg1.getSingletonValue() != 0) { //a == true, so b must be false
-	    m_arg2.intersect(IntervalDomain(0, 0));
+	    m_arg2.intersect(make_int(0, 0));
 	  }
 	}
 	if(m_arg2.isSingleton()) {
 	  if (m_arg2.getSingletonValue() != 0) { //b == true, so a must be false
-	    m_arg1.intersect(IntervalDomain(0, 0));
+	    m_arg1.intersect(make_int(0, 0));
 	  }
 	} //If none are singletons, nothing to be done: FIXME!
       }
@@ -2231,7 +2231,7 @@ namespace EUROPA {
   }
 
   void AbsoluteValue::handleExecute() {
-    double lb, ub;
+    edouble lb, ub;
 
     if(m_y.getLowerBound() >= 0) {
       lb = m_y.getLowerBound();
@@ -2241,8 +2241,8 @@ namespace EUROPA {
       if(m_y.getUpperBound() >= 0)
 	lb = 0.0;
       else
-	lb = std::min(fabs(m_y.getLowerBound()), fabs(m_y.getUpperBound()));
-      ub = std::max(fabs(m_y.getLowerBound()), m_y.getUpperBound());
+	lb = std::min(std::abs(m_y.getLowerBound()), std::abs(m_y.getUpperBound()));
+      ub = std::max(std::abs(m_y.getLowerBound()), m_y.getUpperBound());
     }
 
     m_x.intersect(IntervalDomain(lb, ub));
@@ -2279,9 +2279,9 @@ namespace EUROPA {
      specified (singletons), or they are INF
   */
   void SquareOfDifferenceConstraint::handleExecute() {
-    AbstractDomain& domx = getCurrentDomain(m_variables[V1]);
-    AbstractDomain& domy = getCurrentDomain(m_variables[V2]);
-    AbstractDomain& doma = getCurrentDomain(m_variables[RES]);
+    Domain& domx = getCurrentDomain(m_variables[V1]);
+    Domain& domy = getCurrentDomain(m_variables[V2]);
+    Domain& doma = getCurrentDomain(m_variables[RES]);
 
     // domains should be closed
     if ( domx.isOpen() || domy.isOpen() ||
@@ -2289,10 +2289,10 @@ namespace EUROPA {
       return;
 
     // get the boundaries
-    double x, y;
+    edouble x, y;
     x = domx.getSingletonValue();
     y = domy.getSingletonValue();
-    double square = (x-y)*(x-y);
+    edouble square = (x-y)*(x-y);
 
     doma.intersect( IntervalDomain(square) );
 
@@ -2312,9 +2312,9 @@ namespace EUROPA {
      specified (singletons), or they are INF
    */
   void DistanceFromSquaresConstraint::handleExecute() {
-    AbstractDomain& domx = getCurrentDomain(m_variables[V1]);
-    AbstractDomain& domy = getCurrentDomain(m_variables[V2]);
-    AbstractDomain& doma = getCurrentDomain(m_variables[RES]);
+    Domain& domx = getCurrentDomain(m_variables[V1]);
+    Domain& domy = getCurrentDomain(m_variables[V2]);
+    Domain& doma = getCurrentDomain(m_variables[RES]);
 
     // domains should be closed
     if ( domx.isOpen() || domy.isOpen() ||
@@ -2322,10 +2322,10 @@ namespace EUROPA {
       return;
 
     // get the boundaries
-    double x, y;
+    edouble x, y;
     x = domx.getSingletonValue();
     y = domy.getSingletonValue();
-    double distance = sqrt(x+y);
+    edouble distance = std::sqrt(x+y);
 
     doma.intersect( IntervalDomain(distance) );
 
@@ -2356,20 +2356,20 @@ namespace EUROPA {
 
     // Compute bounds for dx
     NumericDomain dx;
-    dx.insert(fabs(m_x1.getLowerBound() - m_x2.getLowerBound()));
-    dx.insert(fabs(m_x1.getLowerBound() - m_x2.getUpperBound()));
-    dx.insert(fabs(m_x1.getUpperBound() - m_x2.getLowerBound()));
-    dx.insert(fabs(m_x1.getUpperBound() - m_x2.getUpperBound()));
+    dx.insert(std::abs(m_x1.getLowerBound() - m_x2.getLowerBound()));
+    dx.insert(std::abs(m_x1.getLowerBound() - m_x2.getUpperBound()));
+    dx.insert(std::abs(m_x1.getUpperBound() - m_x2.getLowerBound()));
+    dx.insert(std::abs(m_x1.getUpperBound() - m_x2.getUpperBound()));
     if(m_x1.intersects(m_x2))
       dx.insert(0.0);
     dx.close();
 
     // Compute bounds for dy
     NumericDomain dy;
-    dy.insert(fabs(m_y1.getLowerBound() - m_y2.getLowerBound()));
-    dy.insert(fabs(m_y1.getLowerBound() - m_y2.getUpperBound()));
-    dy.insert(fabs(m_y1.getUpperBound() - m_y2.getLowerBound()));
-    dy.insert(fabs(m_y1.getUpperBound() - m_y2.getUpperBound()));
+    dy.insert(std::abs(m_y1.getLowerBound() - m_y2.getLowerBound()));
+    dy.insert(std::abs(m_y1.getLowerBound() - m_y2.getUpperBound()));
+    dy.insert(std::abs(m_y1.getUpperBound() - m_y2.getLowerBound()));
+    dy.insert(std::abs(m_y1.getUpperBound() - m_y2.getUpperBound()));
     if(m_y1.intersects(m_y2))
       dy.insert(0.0);
     dy.close();
@@ -2379,13 +2379,13 @@ namespace EUROPA {
     debugMsg("CalcDistanceConstraint:handleExecute", "AFTER:" << toString());
   }
 
-  double CalcDistanceConstraint::compute(double x1, double y1, double x2, double y2){
-    double result = pow(pow(x2-x1, 2)+ pow(y2-y1, 2), 0.5);
+  edouble CalcDistanceConstraint::compute(edouble x1, edouble y1, edouble x2, edouble y2){
+    edouble result = std::sqrt(std::pow(x2-x1, 2)+ std::pow(y2-y1, 2));
     return result;
   }
 
-  double CalcDistanceConstraint::compute(double a, double b){
-    double result = pow(pow(a, 2)+ pow(b, 2), 0.5);
+  edouble CalcDistanceConstraint::compute(edouble a, edouble b){
+    edouble result = std::sqrt(std::pow(a, 2)+ std::pow(b, 2));
     return result;
   }
 
@@ -2405,16 +2405,15 @@ namespace EUROPA {
     // Requires the angle to be defined on a right angled triangle
     m_source.intersect(-90, 90);
 
-    static const double PIE = 3.141592;
+    static const edouble PIE = 3.141592;
 
     if(!m_source.isEmpty()){
       NumericDomain dom;
-      dom.insert(sin(m_source.getLowerBound() * PIE / 180));
-      dom.insert(sin(m_source.getUpperBound() * PIE / 180));
+      dom.insert(std::sin(m_source.getLowerBound() * PIE / 180));
+      dom.insert(std::sin(m_source.getUpperBound() * PIE / 180));
       m_target.intersect(dom.getLowerBound(), dom.getUpperBound());
     }
   }
-
 
 
   /**************************************************************************************/
@@ -2429,20 +2428,20 @@ namespace EUROPA {
     getCurrentDomain(m_variables[0]).intersect(m_rvalue, m_rvalue);
   }
 
+  eint mod(eint a, eint b) { return a % b; }
+  eint mod(edouble a, edouble b) {return cast_int(a) % cast_int(b);}
 
-  int mod(double a, double b) { return ( ((int)a) % ((int)b) ); }
-
-  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Max, std::max, double);
-  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Min, std::min, double);
-  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Abs, fabs, double);
-  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Pow, pow, double);
-  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Sqrt, sqrt, double);
-  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Mod, mod, int);
+  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Max, std::max, edouble);
+  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Min, std::min, edouble);
+  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Abs, std::abs, edouble);
+  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Pow, std::pow, edouble);
+  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Sqrt, std::sqrt, edouble);
+  CREATE_FUNCTION_CONSTRAINT_TWO_ARG(Mod, mod, eint);
 
 
 
-  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Floor, floor, double);
-  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Ceil, ceil, double);
+  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Floor, std::floor, edouble);
+  CREATE_FUNCTION_CONSTRAINT_ONE_ARG(Ceil, std::ceil, edouble);
 
 
 

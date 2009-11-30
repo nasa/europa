@@ -10,6 +10,7 @@
  */
 
 #include "Entity.hh"
+#include "Number.hh"
 #include "Error.hh"
 #include "Id.hh"
 #include "IdTable.hh"
@@ -20,6 +21,7 @@
 #include <string>
 #include <cmath>
 #include <limits>
+#include <sstream>
 
 namespace EUROPA {
 
@@ -28,20 +30,20 @@ namespace EUROPA {
    */
   class Infinity {
   public:
-    static double plus(double n1, double n2, double defaultValue) {
-      if (fabs(n1) >= PLUS_INFINITY || fabs(n2) >= PLUS_INFINITY)
+    static edouble plus(edouble n1, edouble n2, edouble defaultValue) {
+      if (std::abs(n1) >= PLUS_INFINITY || std::abs(n2) >= PLUS_INFINITY)
 	return(defaultValue);
-      double retval = n1 + n2;
-      if(fabs(retval) >= PLUS_INFINITY)
+      edouble retval = n1 + n2;
+      if(std::abs(retval) >= PLUS_INFINITY)
 	return defaultValue;
       return retval;
     }
 
-    static double minus(double n1, double n2, double defaultValue) {
-      if (fabs(n1) >= PLUS_INFINITY || fabs(n2) >= PLUS_INFINITY)
+    static edouble minus(edouble n1, edouble n2, edouble defaultValue) {
+      if (std::abs(n1) >= PLUS_INFINITY || std::abs(n2) >= PLUS_INFINITY)
 	return(defaultValue);
-      double retval = n1 - n2;
-      if(fabs(retval) >= PLUS_INFINITY)
+      edouble retval = n1 - n2;
+      if(std::abs(retval) >= PLUS_INFINITY)
 	return defaultValue;
       return retval;
     }
@@ -50,15 +52,34 @@ namespace EUROPA {
   /**
    * @brief Utility to produce a string from a double
    */
-  std::string toString(double value);
+  std::string toString(edouble value);
 
   /**
-   * @brief Utility function to tokenzie a std string
+   * @brief Utility function to tokenzie a std string 
    */
 
   void tokenize(const std::string& str,
 		std::vector<std::string>& tokens,
 		const std::string& delimiters = " ");
+
+  /**
+   * @brief Utility function to convert a string to a value type using the >> operator and an istringstream.  Does not error-check.
+   */
+  template<typename T>
+  T toValue(const std::string& str) {
+    T retval;
+    std::istringstream sst(str);
+    sst >> retval;
+    return retval;
+  }
+
+  template<typename T>
+  bool toValue(const std::string& str, T& value) {
+    std::istringstream sst(str);
+    if(!(sst >> value))
+      return false;
+    return true;
+  }
 
   template<class TYPE>
   bool allValid(const std::set<Id<TYPE> >& objects){

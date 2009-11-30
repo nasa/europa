@@ -22,12 +22,12 @@ namespace EUROPA {
       /**
        * @brief Accessor for total number of values available
        */
-      virtual unsigned int getCount() const;
+      virtual Domain::size_type getCount() const;
 
       /**
        * @brief Accessor for the value at position given by index.
        */
-      virtual double getValue(unsigned int index) const = 0;
+      virtual edouble getValue(Domain::size_type index) const = 0;
 
       /**
        * @brief Required to allow correct cleanup
@@ -35,38 +35,38 @@ namespace EUROPA {
       virtual ~ValueSource();
 
     protected:
-      ValueSource(unsigned int count);
+      ValueSource(Domain::size_type count);
 
-      unsigned int m_count;
+      Domain::size_type m_count;
     };
 
     class EnumValueSource : public ValueSource {
     public:
-      EnumValueSource(const SchemaId& schema, const AbstractDomain& dom);
-      double getValue(unsigned int index) const;
+      EnumValueSource(const SchemaId& schema, const Domain& dom);
+      edouble getValue(Domain::size_type index) const;
     private:
-      std::vector<double> m_values;
+      std::vector<edouble> m_values;
     };
 
     class OrderedValueSource : public ValueSource {
     public:
-      OrderedValueSource(const AbstractDomain& dom);
-      double getValue(unsigned int index) const;
-      void addValue(const double value);
+      OrderedValueSource(const Domain& dom);
+      edouble getValue(Domain::size_type index) const;
+      void addValue(const edouble value);
     private:
-      std::vector<double> m_values;
-      const AbstractDomain& m_dom;
+      std::vector<edouble> m_values;
+      const Domain& m_dom;
     };
 
     class IntervalValueSource : public ValueSource {
     public:
-      IntervalValueSource(const AbstractDomain& dom);
-      double getValue(unsigned int index) const;
-      static unsigned int calculateSize(const AbstractDomain & dom);
+      IntervalValueSource(const Domain& dom);
+      edouble getValue(Domain::size_type index) const;
+      static Domain::size_type calculateSize(const Domain & dom);
     private:
-      double m_lb;
-      double m_ub;
-      double m_step;
+      edouble m_lb;
+      edouble m_ub;
+      edouble m_step;
     };
   }
 }

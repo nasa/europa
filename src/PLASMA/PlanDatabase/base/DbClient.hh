@@ -39,7 +39,7 @@ namespace EUROPA {
      * @param name The name for the variable. Must be unique.
      * @return The Id of the variable created. Will error out rather than return a noId.
      */
-    ConstrainedVariableId createVariable(const char* typeName, const AbstractDomain& baseDomain, const char* name, bool isTmpVar = false, bool canBeSpecified=true);
+    ConstrainedVariableId createVariable(const char* typeName, const Domain& baseDomain, const char* name, bool isTmpVar = false, bool canBeSpecified=true);
 
     /**
      * @brief Create a variable
@@ -75,7 +75,7 @@ namespace EUROPA {
      * @param arguments A vector of name/value pairs used to invoke a particular constructor.
      * @return The Id of the object created. Will error out rather than return a noId.
      */
-    ObjectId createObject(const char* type, const char* name, const std::vector<const AbstractDomain*>& arguments);
+    ObjectId createObject(const char* type, const char* name, const std::vector<const Domain*>& arguments);
 
     /**
      * @brief Delete an object.  By way of symmetry with createObject().
@@ -172,7 +172,7 @@ namespace EUROPA {
      */
     ConstraintId createConstraint(const char* name,
 				  const ConstrainedVariableId& variable,
-				  const AbstractDomain& domain);
+				  const Domain& domain);
 
     /**
      * @brief Delete a constraint.  By way of symmetry with createConstraint().
@@ -185,7 +185,7 @@ namespace EUROPA {
      * @param value The new base domain of the variable.
      * @see getEntityByKey
      */
-    void restrict(const ConstrainedVariableId& variable, const AbstractDomain& domain);
+    void restrict(const ConstrainedVariableId& variable, const Domain& domain);
 
     /**
      * @brief Binds the value of a variable
@@ -195,7 +195,7 @@ namespace EUROPA {
      * value to specify.
      * @see getEntityByKey
      */
-    void specify(const ConstrainedVariableId& variable, double value);
+    void specify(const ConstrainedVariableId& variable, edouble value);
 
     /**
      * @brief Close the domains of a dynamic variable.
@@ -337,8 +337,8 @@ namespace EUROPA {
     /**
      * @brief Create a value for a string
      */
-    double createValue(const char* typeName, const std::string& value);
-
+    edouble createValue(const char* typeName, const std::string& value);
+        
     // Temporarily exposing these to remove singletons, need to review DbClient concept in general
     const CESchemaId& getCESchema() const;
     const SchemaId& getSchema() const;
@@ -359,7 +359,7 @@ namespace EUROPA {
 
     DbClientId m_id;
     PlanDatabaseId m_planDb;
-    std::vector<int> m_keysOfTokensCreated; /*!< Used for managing instance independent paths */
+    std::vector<eint> m_keysOfTokensCreated; /*!< Used for managing instance independent paths */
     std::set<DbClientListenerId> m_listeners; /*! Stores current DbClientListeners */
     bool m_deleted; /*!< Used to indicate a deletion and this ignore synchronization of listeners on removal */
     bool m_transactionLoggingEnabled; /*!< Used to configure transaction loggng services required for Key Matching */

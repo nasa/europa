@@ -125,13 +125,13 @@ namespace EUROPA {
       ConstrainedVariableId plannerSteps = variables[2];
       ConstrainedVariableId maxDepth = variables[3];
 
-      int start = (int) horizonStart->baseDomain().getSingletonValue();
-      int end = (int) horizonEnd->baseDomain().getSingletonValue();
+      eint start = horizonStart->baseDomain().getSingletonValue();
+      eint end = horizonEnd->baseDomain().getSingletonValue();
       SOLVERS::HorizonFilter::getHorizon() = IntervalDomain(start, end);
 
       // Now get planner step max
-      int steps = (int) plannerSteps->baseDomain().getSingletonValue();
-      int depth = (int) maxDepth->baseDomain().getSingletonValue();
+      int steps = cast_int(plannerSteps->baseDomain().getSingletonValue());
+      int depth = cast_int(maxDepth->baseDomain().getSingletonValue());
 
       bool retval = solver->solve(steps, depth);
 

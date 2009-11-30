@@ -74,20 +74,20 @@ bool DataType::isAssignableFrom(const DataTypeId& rhs) const
 }
 
 
-const AbstractDomain & DataType::baseDomain() const
+const Domain & DataType::baseDomain() const
 {
     check_error(m_baseDomain != NULL);
     return *m_baseDomain;
 }
 
-double DataType::minDelta() const
+edouble DataType::minDelta() const
 {
     return m_minDelta;
 }
 
 ConstrainedVariableId
 DataType::createVariable(const ConstraintEngineId& constraintEngine,
-                                  const AbstractDomain& baseDomain,
+                                  const Domain& baseDomain,
                                   const bool internal,
                                   bool canBeSpecified,
                                   const char* name,
@@ -95,12 +95,12 @@ DataType::createVariable(const ConstraintEngineId& constraintEngine,
                                   int index) const
 {
     // TODO: perform stronger checks here
-    check_error(AbstractDomain::canBeCompared(*m_baseDomain,baseDomain),
+    check_error(Domain::canBeCompared(*m_baseDomain,baseDomain),
             std::string("Tried to create a ") + getName().c_str()
             + " variable with a different kind of base domain:"
             + baseDomain.getTypeName().c_str());
 
-    Variable<AbstractDomain>* variable = new Variable<AbstractDomain>(
+    Variable<Domain>* variable = new Variable<Domain>(
             constraintEngine,
             baseDomain,
             internal,
@@ -122,7 +122,7 @@ DataType::createVariable(const ConstraintEngineId& constraintEngine,
 }
 
 
-std::string DataType::toString(double value) const
+std::string DataType::toString(edouble value) const
 {
     if(isNumeric())
         return EUROPA::toString(value);

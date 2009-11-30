@@ -544,13 +544,13 @@ CFunctionId NddlSymbolTable::getCFunction(const char* name,const std::vector<CEx
     return f;
 }
 
-AbstractDomain* NddlSymbolTable::makeNumericDomainFromLiteral(const std::string& type,
+Domain* NddlSymbolTable::makeNumericDomainFromLiteral(const std::string& type,
                                                               const std::string& value)
 {
     // TODO: only one copy should be kept for each literal, domains should be marked as constant
     CESchemaId ces = ((CESchema*)getElement("CESchema"))->getId();
-    AbstractDomain* retval = ces->baseDomain(type.c_str()).copy();
-    double v = getPlanDatabase()->getClient()->createValue(type.c_str(), value);
+    Domain* retval = ces->baseDomain(type.c_str()).copy();
+    edouble v = getPlanDatabase()->getClient()->createValue(type.c_str(), value);
     retval->set(v);
 
     return retval;
@@ -593,7 +593,7 @@ Expr* NddlSymbolTable::makeEnumRef(const char* value) const
     const LabelStr& enumType = getEnumForValue(value);
     EnumeratedDomain* ad = dynamic_cast<EnumeratedDomain*>(
             getPlanDatabase()->getSchema()->getCESchema()->baseDomain(enumType.c_str()).copy());
-    double v = LabelStr(value);
+    edouble v = LabelStr(value);
     ad->set(v);
 
     return new ExprConstant(enumType.c_str(),ad);
@@ -626,7 +626,7 @@ void NddlSymbolTable::checkObjectFactory(const char* name, const std::vector<Exp
       throw std::string(name + std::string(" is not a valid object type."));
     }
 
-    std::vector<const AbstractDomain*> argTypes;
+    std::vector<const Domain*> argTypes;
     for (unsigned int i=0;i<args.size();i++)
       argTypes.push_back(&args[i]->getDataType()->baseDomain());
 

@@ -41,7 +41,7 @@ namespace EUROPA {
 
     virtual ~Object();
 
-    virtual void constructor(const std::vector<const AbstractDomain*>& arguments) {}
+    virtual void constructor(const std::vector<const Domain*>& arguments) {}
 
     /**
      * @brief Add a variable as a member to the object. This is used when building the object
@@ -51,7 +51,7 @@ namespace EUROPA {
      * @error If a variable of the given type with the given name cannot be added
      * @see Scheme::hasMember, Schema::canContain, Object::close()
      */
-    virtual ConstrainedVariableId addVariable(const AbstractDomain& baseDomain, const char* name);
+    virtual ConstrainedVariableId addVariable(const Domain& baseDomain, const char* name);
 
     const ObjectId& getId() const;
 
@@ -114,7 +114,7 @@ namespace EUROPA {
      */
     virtual void getOrderingChoices(const TokenId& token,
 				    std::vector< std::pair< TokenId, TokenId> >& results,
-				    unsigned int limit = PLUS_INFINITY);
+				    unsigned int limit = std::numeric_limits<unsigned int>::max());
 
     /**
      * @brief Count the number of ordering choices for a token. Cut off if we hit the given limit
@@ -335,18 +335,18 @@ namespace EUROPA {
     ObjectSet m_components;
     TokenSet m_tokens;
     std::vector<ConstrainedVariableId> m_variables;
-    std::set<int> m_explicitConstraints; /*!< Stores list of explicitly posted constraints to order tokens. Either the key of the constraint
+    std::set<eint> m_explicitConstraints; /*!< Stores list of explicitly posted constraints to order tokens. Either the key of the constraint
 					   is stored, or in cases where it is a straight assignment of a token, the key of the token is stored. */
     unsigned int m_lastOrderingChoiceCount; /*!< The last computed count of ordering choices */
-    std::multimap<int, ConstraintId> m_constraintsByTokenKey; /**< All Precedence Constraints by Token Key */
+    std::multimap<eint, ConstraintId> m_constraintsByTokenKey; /**< All Precedence Constraints by Token Key */
     std::multimap<int, ConstraintId> m_constraintsByKeyPair; /**< Precedence Constraints by  encoded key pair */
-    std::map<int, int> m_keyPairsByConstraintKey; /**< Reverse lookup to obtain the key pair */
+    std::map<eint, int> m_keyPairsByConstraintKey; /**< Reverse lookup to obtain the key pair */
     ConstrainedVariableId m_thisVar; /**< Used to constrain against */
 
   private:
 
     void clean(const TokenId& token);
-    void clean(const ConstraintId& constraint, int tokenKey);
+    void clean(const ConstraintId& constraint, eint tokenKey);
     void constrainToThisObjectAsNeeded(const TokenId& token);
 
     Object(const Object&); /**< NO IMPL - Prevent use of copy constructor. */
@@ -364,8 +364,8 @@ namespace EUROPA {
       virtual bool isString() const;
       virtual bool isEntity() const;
 
-      virtual double createValue(const std::string& value) const;
-      virtual std::string toString(double value) const;
+      virtual edouble createValue(const std::string& value) const;
+      virtual std::string toString(edouble value) const;
   };
 
   class ObjectDomain: public EnumeratedDomain {
@@ -373,27 +373,35 @@ namespace EUROPA {
     ObjectDomain(const DataTypeId& dt);
     ObjectDomain(const DataTypeId& dt, const std::list<ObjectId>& initialValues);
     ObjectDomain(const DataTypeId& dt, const ObjectId& initialValue);
-    ObjectDomain(const AbstractDomain& org);
+    ObjectDomain(const Domain& org);
 
     /**
      * @brief Generate a list of object id's from a list of doubles
      */
-    static std::list<ObjectId> makeObjectList(const std::list<double>& inputs);
+    static std::list<ObjectId> makeObjectList(const std::list<edouble>& inputs);
 
     /**
      * @brief Generate a list of object id's internal member data
      */
     std::list<ObjectId> makeObjectList() const;
 
+    ObjectId getObject(const eint key) const;
+
     /**
      * @brief Obtain the double encoded value from the string if it is a member.
      */
-    bool convertToMemberValue(const std::string& strValue, double& dblValue) const;
+    bool convertToMemberValue(const std::string& strValue, edouble& dblValue) const;
 
     virtual ObjectDomain *copy() const;
 
     virtual std::string toString() const;
+    std::string toString(edouble value) const;
 
+    void remove(const ObjectId& obj);
+    void remove(edouble value);
+
+    bool isMember(const ObjectId& obj) const;
+    bool isMember(edouble value) const; //because of the reference-casting rules...
   };
 }
 

@@ -272,7 +272,7 @@ class ClassWriter {
       if(argType.equals(NddlXmlStrings.x_int))
 	writer.write("int "+argName);
       else if(argType.equals(NddlXmlStrings.x_float))
-	writer.write("float "+argName);
+	writer.write("double "+argName);
       else if(argType.equals(NddlXmlStrings.x_boolean))
 	writer.write("bool "+argName);
       else if(argType.equals(NddlXmlStrings.x_string) || argType.equals(NddlXmlStrings.x_symbol)

@@ -35,7 +35,7 @@ TokenId varToToken(const ConstrainedVariableId& v)
 
 ObjectId varToObject(const ConstrainedVariableId& v)
 {
-    return ObjectId(v->derivedDomain().getSingletonValue());
+  return Entity::getTypedEntity<Object>(v->derivedDomain().getSingletonValue());
 }
 
 DataRef PDBClose::eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const
@@ -75,7 +75,7 @@ const DataTypeId& VariableMethod::getReturnType()
 
 DataRef SpecifyVariable::eval(EvalContext& context, ConstrainedVariableId& var, const std::vector<ConstrainedVariableId>& args) const
 {
-    const AbstractDomain& ad = args[1]->lastDomain();
+    const Domain& ad = args[1]->lastDomain();
     if (ad.isSingleton())
         getCtxPDB(context)->specify(var,ad.getSingletonValue());
     else

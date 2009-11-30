@@ -45,7 +45,7 @@ namespace EUROPA {
        * @brief Constructor.
        * @param flawDetector The object responsible for detecting flaws and violations during level calculation.
        */
-      Profile(const PlanDatabaseId ce, const FVDetectorId flawDetector, const double initLevelLb = 0, const double initLevelUb = 0);
+      Profile(const PlanDatabaseId ce, const FVDetectorId flawDetector, const edouble initLevelLb = 0, const edouble initLevelUb = 0);
       virtual ~Profile();
       ProfileId& getId() {return m_id;}
 
@@ -70,8 +70,8 @@ namespace EUROPA {
        * @param time The time at which to get the level.
        * @param dest The interval into which the computed levels are stored.
        */
-      virtual void getLevel(const int time, IntervalDomain& dest);
-
+      virtual void getLevel(const eint time, IntervalDomain& dest);
+      
       /**
        * @brief Validates the data structures.  Maybe this should be private.
        */
@@ -259,15 +259,15 @@ namespace EUROPA {
        * @brief Gets the Instant with the greatest time that is not greater than the given time.
        * @return An iterator pointing to the instant.
        */
-      std::map<int, InstantId>::iterator getGreatestInstant(const int time);
-
+      std::map<eint, InstantId>::iterator getGreatestInstant(const eint time);
+      
       /**
        * @brief Gets the Instant with the least time not less than the given time.
        * @return An iterator pointing to the instant.
        */
-      std::map<int, InstantId>::iterator getLeastInstant(const int time);
+      std::map<eint, InstantId>::iterator getLeastInstant(const eint time);
 
-      const std::map<int, InstantId>& getInstants() {return m_instants;}
+      const std::map<eint, InstantId>& getInstants() {return m_instants;}
     private:
       /**
        * @brief Conditionally adds Instants for the upper and lower bounds of the Transaction's time.
@@ -279,7 +279,7 @@ namespace EUROPA {
        * @brief Create an instant for a time.
        * @param time The time
        */
-      void addInstant(const int time);
+      void addInstant(const eint time);
 
 
       /** 
@@ -307,7 +307,7 @@ namespace EUROPA {
       bool m_needsRecompute; /*<! A flag indicating the necessity of profile recomputation*/
       unsigned int m_constraintKeyLb; /*<! The lower bound on the constraint key when searching for new constraints. */
     protected:
-      const double m_initLevelLb, m_initLevelUb;
+      const edouble m_initLevelLb, m_initLevelUb;
       PlanDatabaseId m_planDatabase; /*<! The plan database.  Used for creating the variable listeners. */
     private:
       FVDetectorId m_detector; /*<! The flaw and violation detector. */
@@ -318,7 +318,7 @@ namespace EUROPA {
       ConstraintSet m_temporalConstraints; 
       ConstraintEngineListenerId m_removalListener;
     protected:
-      std::map<int, InstantId> m_instants; /*<! A map from times to Instants. */
+      std::map<eint, InstantId> m_instants; /*<! A map from times to Instants. */
       ProfileIteratorId m_recomputeInterval; /*<! The stored interval of recomputation.*/
     };
 
@@ -336,8 +336,8 @@ namespace EUROPA {
        * @param startTime The time to begin iteration.  The time of the first Instant is guaranteed to be the greatest time not greater than this value.
        * @param endTime The time to end iteration.  The time of the last Instant is guaranteed to be the greatest time not greater than this value.
        */
-      ProfileIterator(const ProfileId prof, const int startTime = MINUS_INFINITY, const int endTime = PLUS_INFINITY);
-
+      ProfileIterator(const ProfileId prof, const eint startTime = MINUS_INFINITY, const eint endTime = PLUS_INFINITY);
+      
       ~ProfileIterator() {m_id.remove();}
 
       /**
@@ -349,19 +349,19 @@ namespace EUROPA {
        * @brief Gets the time of the current position of this ProfileIterator
        * @return The time
        */
-      int getTime() const;
-
+      eint getTime() const;
+      
       /**
        * @brief Gets the value of the lower bound of the profile at the current instant in time.
        * @return The value of the profile.
        */
-      double getLowerBound() const;
+      edouble getLowerBound() const;
 
       /**
        * @brief Gets the value of the upper bound of the profile at the current instant in time.
        * @return The value of the profile.
        */
-      double getUpperBound() const;
+      edouble getUpperBound() const;
 
       /**
        * @brief Gets the current instant.
@@ -381,30 +381,30 @@ namespace EUROPA {
        */
       bool isStale() const;
 
-      int getStartTime() const;
-      int getEndTime() const;
+      eint getStartTime() const;
+      eint getEndTime() const;
     protected:
     private:
       ProfileIteratorId m_id;
       ProfileId m_profile;
       unsigned int m_changeCount; /*<! A copy of the similar variable in Profile when this iterator was instantiated.  Used to detect staleness. */
-      int m_startTime, m_endTime;
-      std::map<int, InstantId>::const_iterator m_start, m_end, m_realEnd; /*<! The start and end times over which this iterator goes*/
+      eint m_startTime, m_endTime;
+      std::map<eint, InstantId>::const_iterator m_start, m_end, m_realEnd; /*<! The start and end times over which this iterator goes*/
     };
 
     class ProfileArgs : public FactoryArgs
     {
     public:
         ProfileArgs(const PlanDatabaseId db, const FVDetectorId detector,
-                    const double initCapacityLb = 0, const double initCapacityUb = 0)
+                    const edouble initCapacityLb = 0, const edouble initCapacityUb = 0)
             : m_db(db), m_detector(detector), m_initCapacityLb(initCapacityLb), m_initCapacityUb(initCapacityUb)
         {
         }
 
         const PlanDatabaseId& m_db;
         const FVDetectorId& m_detector;
-        const double m_initCapacityLb;
-        const double m_initCapacityUb;
+        const edouble m_initCapacityLb;
+        const edouble m_initCapacityUb;
     };
 
     template<class ProfileType>

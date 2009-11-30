@@ -55,7 +55,7 @@ namespace EUROPA {
       delete (TokenTypeMgr*)m_tokenTypeMgr;
       delete (ObjectTypeMgr*)m_objectTypeMgr;
 
-      std::map<double,MethodId>::iterator mit = m_methods.begin();
+      std::map<edouble,MethodId>::iterator mit = m_methods.begin();
       for(;mit != m_methods.end();++mit)
           delete (Method*)mit->second;
       m_methods.clear();
@@ -67,7 +67,7 @@ namespace EUROPA {
 
   const LabelStr& Schema::getName() const {return m_name;}
 
-  bool Schema::canCompare(const AbstractDomain& domx, const AbstractDomain& domy) const {
+  bool Schema::canCompare(const Domain& domx, const Domain& domy) const {
 
     // If either is an object type, both must be. All objects types are comaparable with
     // each other, even though the domain types may differ. ObjectId's are unambiguous.
@@ -103,12 +103,11 @@ namespace EUROPA {
   }
 
   bool Schema::isPredicate(const LabelStr& predicateName) const {
-    std::set<double> sl_trueCache, sl_falseCache;
 
-    if(sl_trueCache.find(predicateName) != sl_trueCache.end())
+    if(m_predTrueCache.find(predicateName) != m_predTrueCache.end())
       return true;
 
-    if(sl_falseCache.find(predicateName) != sl_falseCache.end())
+    if(m_predFalseCache.find(predicateName) != m_predFalseCache.end())
       return false;
 
     bool result = false;
@@ -125,9 +124,9 @@ namespace EUROPA {
     }
 
     if(result)
-      sl_trueCache.insert(predicateName);
+      m_predTrueCache.insert(predicateName);
     else
-      sl_falseCache.insert(predicateName);
+      m_predFalseCache.insert(predicateName);
 
     return result;
   }
@@ -140,13 +139,13 @@ namespace EUROPA {
     return (enumValues.find(str) != enumValues.end());
   }
 
-  bool Schema::isEnumValue(const LabelStr& enumName, double value) const {
+  bool Schema::isEnumValue(const LabelStr& enumName, edouble value) const {
     check_error(isEnum(enumName), enumName.toString() + " is not defined.");
-    const std::set<double>& members = enumValues.find(enumName)->second;
+    const std::set<edouble>& members = enumValues.find(enumName)->second;
     return(members.find(value) != members.end());
   }
 
-  bool Schema::isEnumValue(double value) const {
+  bool Schema::isEnumValue(edouble value) const {
     return(enumValuesToEnums.find(value) != enumValuesToEnums.end());
   }
 
@@ -192,7 +191,7 @@ namespace EUROPA {
     check_error(isType(parentType), parentType.toString() + " is not defined.");
 
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it =
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(parentType);
 
     // If no hit, then try for the parent. There must be one since it is a valid
@@ -223,8 +222,8 @@ namespace EUROPA {
 
   const Schema::NameValueVector& Schema::getMembers(const LabelStr& objectType) const
   {
-    std::map<double, NameValueVector>::const_iterator it = membershipRelation.find(objectType);
-
+    std::map<edouble, NameValueVector>::const_iterator it = membershipRelation.find(objectType);
+      
     check_error(it != membershipRelation.end(), "Unable to find members for object type:" + objectType.toString() );
     return it->second;
   }
@@ -233,7 +232,7 @@ namespace EUROPA {
     check_error(isType(parentType), parentType.toString() + " is undefined.");
 
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it =
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(parentType);
 
     // If no hit, then try for the parent. There must be one since it is a valid
@@ -264,7 +263,7 @@ namespace EUROPA {
   }
 
   const std::vector<LabelStr>& Schema::getAllObjectTypes(const LabelStr& objectType) {
-    std::map<double, std::vector<LabelStr> >::iterator it = allObjectTypes.find(objectType);
+    std::map<edouble, std::vector<LabelStr> >::iterator it = allObjectTypes.find(objectType);
     if(it != allObjectTypes.end())
       return it->second;
 
@@ -283,9 +282,8 @@ namespace EUROPA {
   }
 
   bool Schema::hasParent(const LabelStr& type) const {
-    static std::set<double> sl_trueCache;
 
-    if(sl_trueCache.find(type) != sl_trueCache.end())
+    if(m_hasParentCache.find(type) != m_hasParentCache.end())
       return true;
 
     bool result = false;
@@ -302,7 +300,7 @@ namespace EUROPA {
 
     // If we get a true result, store it in the cache
     if(result)
-      sl_trueCache.insert(type);
+      m_hasParentCache.insert(type);
 
     return result;
   }
@@ -326,7 +324,7 @@ namespace EUROPA {
   }
 
 
-  const std::set<double>& Schema::getEnumValues(const LabelStr& enumName) const {
+  const std::set<edouble>& Schema::getEnumValues(const LabelStr& enumName) const {
     check_error(isEnum(enumName), enumName.toString() + " is not a defined enumeration.");
 
     return enumValues.find(enumName)->second;
@@ -374,7 +372,7 @@ namespace EUROPA {
 		memberName.toString() + " is not a member of " + parentType.toString());
 
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it =
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
@@ -398,7 +396,7 @@ namespace EUROPA {
 		memberName.toString() + " is not a member of " + parentType.toString());
 
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it =
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
@@ -422,7 +420,7 @@ namespace EUROPA {
 
   const LabelStr Schema::getNameFromIndex(const LabelStr& parentType, unsigned int index) const {
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it =
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
@@ -464,7 +462,7 @@ namespace EUROPA {
   unsigned int Schema::getParameterCount(const LabelStr& predicate) const {
     check_error(isPredicate(predicate), predicate.toString() + " is not defined as a Predicate");
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it =
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(predicate);
 
     check_error(membershipRelation_it != membershipRelation.end(), predicate.toString() + " not found in the membership relation");
@@ -478,7 +476,7 @@ namespace EUROPA {
     check_error(paramIndex < getParameterCount(predicate), paramIndex + " is not a valid index");
 
     // First see if we get a hit for the parentType
-    std::map<double, NameValueVector>::const_iterator membershipRelation_it =
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(predicate);
 
     check_error(membershipRelation_it != membershipRelation.end());
@@ -580,8 +578,8 @@ namespace EUROPA {
 
       addEnum(enumName);
 
-      const std::set<double>& values = domain.getValues();
-      for(std::set<double>::const_iterator it = values.begin();it != values.end();++it) {
+      const std::set<edouble>& values = domain.getValues();
+      for(std::set<edouble>::const_iterator it = values.begin();it != values.end();++it) {
           LabelStr newValue(*it);
           addValue(enumName, newValue);
       }
@@ -595,7 +593,7 @@ namespace EUROPA {
               " with base domain " << domain.toString());
   }
 
-  void Schema::addValue(const LabelStr& enumName, double enumValue) {
+  void Schema::addValue(const LabelStr& enumName, edouble enumValue) {
     check_error(isEnum(enumName), enumName.toString() + " is undefined.");
     check_error(enumValuesToEnums.find(enumValue) == enumValuesToEnums.end(),
             LabelStr(enumValue).toString() + " is already an enum value for " + (enumValuesToEnums[enumValue]).toString());
@@ -608,7 +606,7 @@ namespace EUROPA {
     enumValuesToEnums[enumValue] = enumName;
   }
 
-  const LabelStr& Schema::getEnumForValue(double value) const
+  const LabelStr& Schema::getEnumForValue(edouble value) const
   {
     check_error(enumValuesToEnums.find(value) != enumValuesToEnums.end());
     return enumValuesToEnums.find(value)->second;
@@ -703,7 +701,7 @@ namespace EUROPA {
       }
 
       {
-          std::map<double,TokenTypeId>::const_iterator it = objType->getTokenTypes().begin();
+          std::map<edouble,TokenTypeId>::const_iterator it = objType->getTokenTypes().begin();
           for(;it != objType->getTokenTypes().end(); ++it) {
               const TokenTypeId& tokenType = it->second;
               LabelStr predName = tokenType->getSignature();
@@ -725,7 +723,7 @@ namespace EUROPA {
 	  return m_objectTypeMgr->getObjectType(objType);
   }
 
-  ObjectFactoryId Schema::getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments, const bool doCheckError)
+  ObjectFactoryId Schema::getObjectFactory(const LabelStr& objectType, const std::vector<const Domain*>& arguments, const bool doCheckError)
   {
     return m_objectTypeMgr->getFactory(getId(),objectType,arguments,doCheckError);
   }
@@ -774,7 +772,7 @@ namespace EUROPA {
   MethodId Schema::getMethod(const LabelStr& methodName, const DataTypeId& targetType, const std::vector<DataTypeId>& argTypes)
   {
       // TODO: use target type and arg types to resolve
-      std::map<double,MethodId>::iterator it = m_methods.find(methodName);
+      std::map<edouble,MethodId>::iterator it = m_methods.find(methodName);
       return (it != m_methods.end() ? it->second : MethodId::noId());
   }
 
@@ -876,8 +874,8 @@ namespace EUROPA {
 	  for (std::map<std::string,DataTypeId>::const_iterator it = mem.begin(); it != mem.end(); ++it) {
 		  m_members.insert(std::pair<std::string, PSDataType>(it->first, PSDataType(it->second)));
 	  }
-	  const std::map<double,TokenTypeId>& tokens = original->getTokenTypes();
-	  for (std::map<double,TokenTypeId>::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+	  const std::map<edouble,TokenTypeId>& tokens = original->getTokenTypes();
+	  for (std::map<edouble,TokenTypeId>::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
 		  m_predicates.push_back(PSTokenType(it->second));
 	  }
   }

@@ -48,7 +48,7 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
 
     // test/simple-predicate.nddl:4 DBFoo
     void constructor();
-    void constructor(int arg0, LabelStr& arg1);
+    void constructor(eint arg0, LabelStr& arg1);
     ConstrainedVariableId m_0;
     ConstrainedVariableId m_1;
   };
@@ -74,7 +74,7 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
     m_1 = addVariable(LabelSet(LabelStr("Hello World")), "LabelSetVar");
   }
 
-  void DBFoo::constructor(int arg0, LabelStr& arg1) {
+  void DBFoo::constructor(eint arg0, LabelStr& arg1) {
     m_0 = addVariable(IntervalIntDomain(arg0), "IntervalIntVar");
     m_1 = addVariable(LabelSet(LabelStr("Hello World")), "LabelSetVar");
   }
@@ -87,7 +87,7 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
-                            const std::vector<const AbstractDomain*>& arguments) const {
+                            const std::vector<const Domain*>& arguments) const {
       CPPUNIT_ASSERT(arguments.empty());
       DBFooId foo = (new DBFoo(planDb, objectType, objectName))->getId();
       foo->constructor();
@@ -107,14 +107,14 @@ const char* DEFAULT_PREDICATE = "TestObject.DEFAULT_PREDICATE";
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
-                            const std::vector<const AbstractDomain*>& arguments) const {
+                            const std::vector<const Domain*>& arguments) const {
       DBFooId foo = (new DBFoo(planDb, objectType, objectName))->getId();
       // Type check the arguments
       CPPUNIT_ASSERT(arguments.size() == 2);
       CPPUNIT_ASSERT(arguments[0]->getTypeName().toString() == IntDT::NAME());
       CPPUNIT_ASSERT(arguments[1]->getTypeName().toString() == StringDT::NAME());
 
-      int arg0((int) arguments[0]->getSingletonValue());
+      eint arg0(arguments[0]->getSingletonValue());
       LabelStr arg1(arguments[1]->getSingletonValue());
       foo->constructor(arg0, arg1);
       foo->handleDefaults();
@@ -343,18 +343,18 @@ private:
 
     // test getEnumValues.
     LabelStr enumDomainName = "TestEnum";
-    std::set<double> testEnumDomain;
+    std::set<edouble> testEnumDomain;
     testEnumDomain.insert( 1 );
     testEnumDomain.insert( 2 );
     testEnumDomain.insert( 3 );
 
     schema->addEnum( enumDomainName );
-    std::set<double>::iterator i;
+    std::set<edouble>::iterator i;
     for ( i = testEnumDomain.begin(); i != testEnumDomain.end(); ++i ) {
       schema->addValue( enumDomainName, *i );
     }
 
-    std::set<double> enumDomainReturned;
+    std::set<edouble> enumDomainReturned;
     enumDomainReturned = schema->getEnumValues( enumDomainName );
     CPPUNIT_ASSERT( enumDomainReturned == testEnumDomain );
 
@@ -636,15 +636,15 @@ private:
     {
       std::stringstream str;
       str << o2.getKey();
-      double value(0);
+      edouble value(0);
       CPPUNIT_ASSERT(os1.convertToMemberValue(str.str(), value));
-      CPPUNIT_ASSERT(value == o2.getId());
+      CPPUNIT_ASSERT(value == o2.getKey());
     }
 
     {
       std::stringstream str;
       str << o1.getKey();
-      double value(0);
+      edouble value(0);
       CPPUNIT_ASSERT(!os1.convertToMemberValue(str.str(), value));
       CPPUNIT_ASSERT(value == 0);
     }
@@ -718,7 +718,7 @@ private:
 
     // 4. Specify tokens object variable to a ingletone
 
-    eventToken.getObject()->specify(object1);
+    eventToken.getObject()->specify(object1->getKey());
 
     // Confirm added to the object
     CPPUNIT_ASSERT(eventToken.getObject()->getDerivedDomain().isSingleton());
@@ -748,13 +748,13 @@ private:
     Object o7(o3.getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o7");
 
     ObjectDomain allObjects(GET_DEFAULT_OBJECT_TYPE(ce));
-    allObjects.insert(o1.getId());
-    allObjects.insert(o2.getId());
-    allObjects.insert(o3.getId());
-    allObjects.insert(o4.getId());
-    allObjects.insert(o5.getId());
-    allObjects.insert(o6.getId());
-    allObjects.insert(o7.getId());
+    allObjects.insert(o1.getKey());
+    allObjects.insert(o2.getKey());
+    allObjects.insert(o3.getKey());
+    allObjects.insert(o4.getKey());
+    allObjects.insert(o5.getKey());
+    allObjects.insert(o6.getKey());
+    allObjects.insert(o7.getKey());
     allObjects.close();
 
     // Ensure there they agree on a common root.
@@ -808,14 +808,14 @@ private:
 
       CPPUNIT_ASSERT(ce->propagate()); // All ok so far
 
-      restrictions.specify(o2.getId());
+      restrictions.specify(o2.getKey());
       CPPUNIT_ASSERT(ce->propagate()); // Nothing happens yet.
 
-      first.specify(o6.getId()); // Now we should propagate to failure
+      first.specify(o6.getKey()); // Now we should propagate to failure
       CPPUNIT_ASSERT(!ce->propagate());
       first.reset();
 
-      first.specify(o4.getId());
+      first.specify(o4.getKey());
       CPPUNIT_ASSERT(ce->propagate());
     }
     DEFAULT_TEARDOWN();
@@ -883,8 +883,8 @@ private:
     //positive restriction of the set.
     {
       ObjectDomain obs(GET_DEFAULT_OBJECT_TYPE(ce));
-      obs.insert(o7.getId());
-      obs.insert(o4.getId());
+      obs.insert(o7.getKey());
+      obs.insert(o4.getKey());
       obs.close();
 
       Variable<ObjectDomain> first(ce, obs);
@@ -901,8 +901,8 @@ private:
     //no restriction of the set.
     {
       ObjectDomain obs1(GET_DEFAULT_OBJECT_TYPE(ce));
-      obs1.insert(o7.getId());
-      obs1.insert(o4.getId());
+      obs1.insert(o7.getKey());
+      obs1.insert(o4.getKey());
       obs1.close();
 
       Variable<ObjectDomain> first(ce, obs1);
@@ -935,7 +935,7 @@ private:
     Object o1(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o1");
     CPPUNIT_ASSERT(ce->propagate());
     CPPUNIT_ASSERT(!db->isClosed(LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-    CPPUNIT_ASSERT(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getId());
+    CPPUNIT_ASSERT(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getKey());
 
     // Now delete the variable. This should remove the listener
     delete (ConstrainedVariable*) v0;
@@ -960,7 +960,7 @@ private:
     CPPUNIT_ASSERT(!v0->isClosed());
     CPPUNIT_ASSERT(ce->propagate());
     CPPUNIT_ASSERT(!db->isClosed(LabelStr(DEFAULT_OBJECT_TYPE).c_str()));
-    CPPUNIT_ASSERT(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getId());
+    CPPUNIT_ASSERT(v0->lastDomain().isSingleton() && v0->lastDomain().getSingletonValue() == o1.getKey());
 
     // Now create another object and verify it is part of the initial domain of the next variable
     Object o2(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2");
@@ -976,8 +976,8 @@ private:
     CPPUNIT_ASSERT(!v1->isClosed());
     CPPUNIT_ASSERT_MESSAGE(v1->lastDomain().toString(),
                v0->lastDomain() == v1->lastDomain() &&
-	       v1->lastDomain().isMember(o1.getId())  &&
-	       v1->lastDomain().isMember(o2.getId()));
+	       v1->lastDomain().isMember(o1.getKey())  &&
+	       v1->lastDomain().isMember(o2.getKey()));
 
     // Now delete the variables.
     delete (ConstrainedVariable*) v0;
@@ -1003,7 +1003,7 @@ private:
     CPPUNIT_ASSERT(ce->propagate());
 
     // Make sure the object var of the token contains o1.
-    CPPUNIT_ASSERT(eventToken.getObject()->lastDomain().isMember(o1));
+    CPPUNIT_ASSERT(eventToken.getObject()->lastDomain().isMember(o1->getKey()));
 
     // Since the object type should be closed automatically, the object variable will propagate changes,
     // so the object token relation will link up the Token and the object.
@@ -1012,7 +1012,7 @@ private:
     // Insertion of a new object should not affect the given event token
     ObjectId o2 = (new Object(db->getId(), LabelStr(DEFAULT_OBJECT_TYPE), "o2"))->getId();
     CPPUNIT_ASSERT(ce->constraintConsistent());
-    CPPUNIT_ASSERT(!eventToken.getObject()->baseDomain().isMember(o2));
+    CPPUNIT_ASSERT(!eventToken.getObject()->baseDomain().isMember(o2->getKey()));
 
     DEFAULT_TEARDOWN();
     return true;
@@ -1140,7 +1140,7 @@ private:
                                 IntervalIntDomain(2, 10),
                                 Token::noObject(), false);
 
-    std::list<double> values;
+    std::list<edouble> values;
     values.push_back(EUROPA::LabelStr("L1"));
     values.push_back(EUROPA::LabelStr("L4"));
     values.push_back(EUROPA::LabelStr("L2"));
@@ -1686,7 +1686,7 @@ private:
     new Timeline(db, LabelStr(DEFAULT_OBJECT_TYPE), "timeline1");
     db->close();
 
-    std::list<double> values;
+    std::list<edouble> values;
     values.push_back(LabelStr("L1"));
     values.push_back(LabelStr("L4"));
     values.push_back(LabelStr("L2"));
@@ -1723,7 +1723,7 @@ private:
 			 IntervalIntDomain(0, 200),
 			 IntervalIntDomain(1, 1000),
 			 Token::noObject(), false);
-    std::list<double> values2;
+    std::list<edouble> values2;
     values2.push_back(LabelStr("L2"));
     token2.addParameter(LabelSet(values2), "LabelSetParam");
     token2.close();
@@ -2487,14 +2487,14 @@ private:
     ce->propagate(); //propagate the change
 
     //shouldn't be able to merge with anything
-    CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), PLUS_INFINITY, true) == 0);
+    CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), std::numeric_limits<unsigned int>::max(), true) == 0);
 
     delete (Constraint *) eq; //remove the constraint
 
     ce->propagate();
 
     // Should now be able to merge
-    CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), PLUS_INFINITY, true) > 0);
+    CPPUNIT_ASSERT(db->countCompatibleTokens(t2.getId(), std::numeric_limits<unsigned int>::max(), true) > 0);
 
     DEFAULT_TEARDOWN();
     return true;
@@ -2533,7 +2533,7 @@ private:
     CPPUNIT_ASSERT(!o1.hasToken(t0.getId()));
 
     // Now specify the object value. Expect it to be assigned.
-    t0.getObject()->specify(o1.getId());
+    t0.getObject()->specify(o1.getKey());
     ce->propagate();
 
     CPPUNIT_ASSERT(t0.isAssigned());
@@ -2998,7 +2998,7 @@ private:
     CPPUNIT_ASSERT(tokensToOrder.empty());
 
     // Specify the object variable of one - but still should return no tokens since they are all inactive
-    tokenA.getObject()->specify(timeline.getId());
+    tokenA.getObject()->specify(timeline.getKey());
     timeline.getTokensToOrder(tokensToOrder);
     CPPUNIT_ASSERT(tokensToOrder.empty());
 
@@ -3010,8 +3010,8 @@ private:
     CPPUNIT_ASSERT(tokensToOrder.size() == 3);
 
     // Set remainders so they are singeltons and get all back
-    tokenB.getObject()->specify(timeline.getId());
-    tokenC.getObject()->specify(timeline.getId());
+    tokenB.getObject()->specify(timeline.getKey());
+    tokenC.getObject()->specify(timeline.getKey());
     tokensToOrder.clear();
     timeline.getTokensToOrder(tokensToOrder);
     CPPUNIT_ASSERT(tokensToOrder.size() == 3);
@@ -3067,7 +3067,7 @@ private:
                                          IntervalIntDomain(start+DURATION, start+DURATION),
                                          IntervalIntDomain(DURATION, DURATION)))->getId();
       CPPUNIT_ASSERT(token->getObject()->getBaseDomain().isSingleton());
-      token->getObject()->specify(timeline->getId());
+      token->getObject()->specify(timeline->getKey());
       token->activate();
     }
 
@@ -3114,7 +3114,7 @@ private:
                                        IntervalIntDomain(),
                                        IntervalIntDomain(),
                                        IntervalIntDomain(DURATION, DURATION)))->getId();
-    token->getObject()->specify(timeline->getId());
+    token->getObject()->specify(timeline->getKey());
     token->start()->specify(0);
     token->activate();
     std::vector<std::pair<TokenId, TokenId> > choices;
@@ -3184,7 +3184,7 @@ private:
                       IntervalIntDomain(0, 1000),
                       IntervalIntDomain(1, 1000));
 
-    it1.getObject()->specify(timeline.getId());
+    it1.getObject()->specify(timeline.getKey());
     it1.activate();
     timeline.constrain(it1.getId(), it1.getId());
 
@@ -3196,7 +3196,7 @@ private:
                    IntervalIntDomain(0, 100),
                    Token::noObject());
 
-    et1.getObject()->specify(timeline.getId());
+    et1.getObject()->specify(timeline.getKey());
     et1.activate();
     timeline.constrain(it1.getId(), et1.getId());
     CPPUNIT_ASSERT(it1.end()->getDerivedDomain().getUpperBound() == 100);
@@ -3209,7 +3209,7 @@ private:
                    IntervalIntDomain(0, 100),
                    Token::noObject());
 
-    et2.getObject()->specify(timeline.getId());
+    et2.getObject()->specify(timeline.getKey());
     et2.activate();
     timeline.constrain(et2.getId(), et1.getId());
     CPPUNIT_ASSERT(it1.end()->getDerivedDomain().getUpperBound() == 100);
@@ -3222,7 +3222,7 @@ private:
                    IntervalIntDomain(10, 100),
                    Token::noObject());
 
-    et3.getObject()->specify(timeline.getId());
+    et3.getObject()->specify(timeline.getKey());
     et3.activate();
     timeline.constrain(et3.getId(), it1.getId());
     CPPUNIT_ASSERT(it1.start()->getDerivedDomain().getLowerBound() == 10);
@@ -3235,7 +3235,7 @@ private:
                    IntervalIntDomain(0, 100),
                    Token::noObject());
 
-    et4.getObject()->specify(timeline.getId());
+    et4.getObject()->specify(timeline.getKey());
     et4.activate();
     timeline.constrain(et4.getId(), et1.getId());
     bool res = ce->propagate();
@@ -3370,7 +3370,7 @@ private:
     CPPUNIT_ASSERT(!o1.hasToken(t0.getId()));
 
     // Now specify the object value.
-    t0.getObject()->specify(o1.getId());
+    t0.getObject()->specify(o1.getKey());
     ce->propagate();
 
     // It should still not be assigned
@@ -3598,8 +3598,8 @@ private:
 	lastToken = tokenA;
 
       timeline.constrain(lastToken, tokenA); // Place at the end
-      slaveB->getObject()->specify(timeline.getId());
-      slaveC->getObject()->specify(timeline.getId());
+      slaveB->getObject()->specify(timeline.getKey());
+      slaveC->getObject()->specify(timeline.getKey());
       ce->propagate();
       tokenA->restrictBaseDomains();
       slaveB->restrictBaseDomains();
@@ -3785,7 +3785,7 @@ public:
   }
 private:
   static bool testFactoryMethods(){
-    std::vector<const AbstractDomain*> arguments;
+    std::vector<const Domain*> arguments;
     IntervalIntDomain arg0(10, 10);
     LabelSet arg1(LabelStr("Label"));
     arguments.push_back(&arg0);
@@ -3805,7 +3805,7 @@ private:
     DBFooId foo1 = client->createObject(LabelStr(DEFAULT_OBJECT_TYPE).c_str(), "foo1");
     CPPUNIT_ASSERT(foo1.isValid());
 
-    std::vector<const AbstractDomain*> arguments;
+    std::vector<const Domain*> arguments;
     IntervalIntDomain arg0(10);
     LabelSet arg1(LabelStr("Label"));
     arguments.push_back(&arg0);
@@ -3973,7 +3973,7 @@ public:
 
   /*
    * For lists of arguments, by type and name (or type and string (even if "1") value).
-   * @note This has a different use and purpose than a list or vector of AbstractDomain*.
+   * @note This has a different use and purpose than a list or vector of Domain*.
    * That is for a type name and abstract domain; this is for a type name and a variable name.
    */
   typedef std::list<std::pair<std::string, std::string> > ArgList;
@@ -4172,7 +4172,7 @@ public:
     ObjectId createInstance(const PlanDatabaseId& planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
-                            const std::vector<const AbstractDomain*>& arguments) const {
+                            const std::vector<const Domain*>& arguments) const {
       CPPUNIT_ASSERT(arguments.size() == 0 || arguments.size() == 4);
       if (arguments.size() == 4) {
         //!!I'm not sure why this first one is passed in; it appears to be the object's type info.
@@ -4352,7 +4352,7 @@ public:
   }
 
   /** Helper function to clean up after otherwise memory leaking calls to new. */
-  inline static void cleanDomains(std::vector<const AbstractDomain*>& doms) {
+  inline static void cleanDomains(std::vector<const Domain*>& doms) {
     for (unsigned i = 0; i < doms.size(); i++)
       delete doms[i];
     doms.clear();
@@ -4363,7 +4363,7 @@ public:
    * @note Side-effect: leaves two objects, "testObj2a" and "testObj2b", in plan db.
    */
   static void testCreateObject() {
-    std::vector<const AbstractDomain*> domains;
+    std::vector<const Domain*> domains;
     domains.push_back(new IntervalIntDomain(1));
     domains.push_back(new IntervalDomain(1.414));
     Locations* ld1 = new Locations(LocationsBaseDomain());
@@ -4406,7 +4406,7 @@ public:
     }
     domains.push_back(new IntervalIntDomain(2));
     domains.push_back(new IntervalDomain(3.14159265358979));
-    std::list<double> locs;
+    std::list<edouble> locs;
     locs.push_back(LabelStr("Rock"));
     Locations* ld2 = new Locations(LocationsBaseDomain());
     ld2->set(LabelStr("Rock"));
@@ -4461,7 +4461,7 @@ public:
     CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
     CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
 
-    std::vector<const AbstractDomain*> domains;
+    std::vector<const Domain*> domains;
     domains.push_back(new IntervalIntDomain(1));
     domains.push_back(new IntervalDomain(1.414));
     Locations* ld1 = new Locations(LocationsBaseDomain());
@@ -4490,7 +4490,7 @@ public:
     CPPUNIT_ASSERT(obj2a->getType() == LabelStr("TestClass2"));
     CPPUNIT_ASSERT(obj2a->getName() == LabelStr("testObj2a"));
 
-    std::vector<const AbstractDomain*> domains;
+    std::vector<const Domain*> domains;
     domains.push_back(new IntervalIntDomain(1));
     domains.push_back(new IntervalDomain(1.414));
     Locations* ld1 = new Locations(LocationsBaseDomain());
@@ -4652,7 +4652,7 @@ public:
     // Specifying variables is one of the special cases.
     TEST_PLAYING_XML(buildXMLInvokeSpecifyVariableStr(sg_location, Locations(ld1)));
     CPPUNIT_ASSERT(sg_location->lastDomain() == Locations(ld1));
-    std::list<double> locs;
+    std::list<edouble> locs;
     locs.push_back(LabelStr("Hill"));
     locs.push_back(LabelStr("Rock"));
 
@@ -5139,7 +5139,7 @@ public:
   static void getConstraintsFromRelations(const TokenId& master, const TokenId& slave, const LabelStr& relation,
                                           std::list<ConstrainedVariableId>& firsts,
                                           std::list<ConstrainedVariableId>& seconds,
-                                          std::list<AbstractDomain*>& intervals) {
+                                          std::list<Domain*>& intervals) {
     CPPUNIT_ASSERT_MESSAGE("unknown temporal relation name given",
         s_tempRels.find(relation) != s_tempRels.end());
     if (relation == LabelStr("after")) {
@@ -5244,7 +5244,7 @@ public:
   static bool verifyTokenRelation(const TokenId& master, const TokenId& slave, const LabelStr& relation) {
     std::list<ConstrainedVariableId> firstVars;
     std::list<ConstrainedVariableId> secondVars;
-    std::list<AbstractDomain*> intervals;
+    std::list<Domain*> intervals;
     // Get the appropriate list of timepoint pairs and bounds from the relation name.
     getConstraintsFromRelations(master, slave, relation, firstVars, secondVars, intervals);
     CPPUNIT_ASSERT(firstVars.size() == secondVars.size());
@@ -5252,7 +5252,7 @@ public:
     while (!firstVars.empty()) {
       ConstrainedVariableId one = *(firstVars.begin());
       ConstrainedVariableId two = *(secondVars.begin());
-      AbstractDomain *dom = *(intervals.begin());
+      Domain *dom = *(intervals.begin());
       firstVars.erase(firstVars.begin());
       secondVars.erase(secondVars.begin());
       intervals.erase(intervals.begin());
@@ -5294,10 +5294,10 @@ public:
 
   /** Create an XML string that creates a model object. */
   static std::string buildXMLCreateObjectStr(const std::string& className, const std::string& objName,
-                                             const std::vector<const AbstractDomain*>& args);
+                                             const std::vector<const Domain*>& args);
 
   /** Create an XML string that specifies a variable's domain. */
-  static std::string buildXMLSpecifyVariableStr(const ConstrainedVariableId& var, const AbstractDomain& dom);
+  static std::string buildXMLSpecifyVariableStr(const ConstrainedVariableId& var, const Domain& dom);
 
   /**
    * Create an XML string that resets a variable's specified domain.
@@ -5313,7 +5313,7 @@ public:
   /**
    * Create an XML string that specifies the variable's domain via '<invoke>'.
    */
-  static std::string buildXMLInvokeSpecifyVariableStr(const ConstrainedVariableId& var, const AbstractDomain& dom);
+  static std::string buildXMLInvokeSpecifyVariableStr(const ConstrainedVariableId& var, const Domain& dom);
 
   /**
    * Create an XML string that creates a goal token.
@@ -5341,7 +5341,7 @@ public:
   static std::string buildXMLVariableStr(const ConstrainedVariableId& var);
 
   /** Create an XML string describing the domain. */
-  static std::string buildXMLDomainStr(const AbstractDomain& dom);
+  static std::string buildXMLDomainStr(const Domain& dom);
 
   /** Saves the constraint engine to avoid creating one for each test. */
   static ConstraintEngineId s_ce;
@@ -5536,7 +5536,7 @@ CPPUNIT_ASSERT(line == l_line);
 }
 
 std::string DbTransPlayerTest::buildXMLCreateObjectStr(const std::string& className, const std::string& objName,
-                                                       const std::vector<const AbstractDomain*>& domains) {
+                                                       const std::vector<const Domain*>& domains) {
   CPPUNIT_ASSERT(!domains.empty());
   std::string str("<new type=\"");
   str += className;
@@ -5555,7 +5555,7 @@ std::string DbTransPlayerTest::buildXMLCreateObjectStr(const std::string& classN
   return(str);
 }
 
-std::string DbTransPlayerTest::buildXMLSpecifyVariableStr(const ConstrainedVariableId& var, const AbstractDomain& dom) {
+std::string DbTransPlayerTest::buildXMLSpecifyVariableStr(const ConstrainedVariableId& var, const Domain& dom) {
   std::string str("<specify>");
   str += buildXMLVariableStr(var);
   str += " ";
@@ -5584,7 +5584,7 @@ std::string DbTransPlayerTest::buildXMLInvokeConstrainVarsStr(const std::string&
 }
 
 std::string DbTransPlayerTest::buildXMLInvokeSpecifyVariableStr(const ConstrainedVariableId& var,
-                                                                const AbstractDomain& dom) {
+                                                                const Domain& dom) {
   std::string str("<invoke name=\"specify\" identifier=\"");
   //!!Would like to re-use buildXMLVariableStr() here, but this wants a different syntax(!)
   if (var->parent().isNoId())
@@ -5598,9 +5598,9 @@ std::string DbTransPlayerTest::buildXMLInvokeSpecifyVariableStr(const Constraine
     CPPUNIT_ASSERT_MESSAGE("var's parent is neither token nor object", ObjectId::convertable(var->parent()));
     //!!I don't understand the details in DbClientTransactionPlayer.cc:parseVariable() well enough to figure this out yet
     //!!But here's a guess:
-    str += var->parent()->getName();
+    str += var->parent()->getName().toString();
     str += ".";
-    str += var->getName();
+    str += var->getName().toString();
   }
   str += "\"> ";
   str += buildXMLDomainStr(dom);
@@ -5712,7 +5712,7 @@ std::string DbTransPlayerTest::buildXMLVariableStr(const ConstrainedVariableId& 
   return(str);
 }
 
-std::string DbTransPlayerTest::buildXMLDomainStr(const AbstractDomain& dom) {
+std::string DbTransPlayerTest::buildXMLDomainStr(const Domain& dom) {
   std::string str("<");
   if (dom.isSingleton() && dom.isNumeric()) {
     str += "value";
@@ -5739,7 +5739,7 @@ std::string DbTransPlayerTest::buildXMLDomainStr(const AbstractDomain& dom) {
   }
   CPPUNIT_ASSERT_MESSAGE("domain is not singleton, interval, nor enumerated", dom.isEnumerated());
   str += "set> ";
-  std::list<double> vals;
+  std::list<edouble> vals;
   for (dom.getValues(vals); !vals.empty(); vals.pop_front()) {
     str += "<";
     if (dom.isSymbolic()) {

@@ -33,7 +33,7 @@ namespace EUROPA
 
   DataTypeId CESchema::getDataType(const char* typeName)
   {
-    std::map<double, DataTypeId>::const_iterator it =  m_dataTypes.find(LabelStr(typeName).getKey());
+    std::map<edouble, DataTypeId>::const_iterator it =  m_dataTypes.find(LabelStr(typeName).getKey());
     condDebugMsg(it == m_dataTypes.end(), "europa:error", "no DataType found for type '" << std::string(typeName) << "'");
     check_error(it != m_dataTypes.end(), "no DataType found for type '" + std::string(typeName) + "'");
 
@@ -55,20 +55,20 @@ namespace EUROPA
 
     checkError(m_dataTypes.find(dt->getName().getKey()) == m_dataTypes.end(), "Already have '" + dt->getName().toString() + "' registered.");
 
-    m_dataTypes.insert(std::pair<double, DataTypeId>(dt->getName().getKey(), dt));
+    m_dataTypes.insert(std::pair<edouble, DataTypeId>(dt->getName().getKey(), dt));
     debugMsg("CESchema::registerDataType", "Registered data type " << dt->getName().toString());
   }
 
-  const AbstractDomain & CESchema::baseDomain(const char* typeName)
+  const Domain & CESchema::baseDomain(const char* typeName)
   {
     DataTypeId factory = getDataType(typeName);
     check_error(factory.isValid(), "no DataType found for type '" + std::string(typeName) + "'");
     return factory->baseDomain();
   }
-
+  
   void CESchema::purgeDataTypes()
   {
-      std::map<double, DataTypeId >::iterator it = m_dataTypes.begin();
+      std::map<edouble, DataTypeId >::iterator it = m_dataTypes.begin();
       while (it != m_dataTypes.end()) {
         DataTypeId dt = (it++)->second;
         debugMsg("DataType:purgeAll",
@@ -83,25 +83,25 @@ namespace EUROPA
     if(isConstraintType(name)){
       debugMsg("CESchema:registerConstraintType", "Over-riding prior registration for " << name.c_str());
       ConstraintTypeId oldFactory = getConstraintType(name);
-      std::map<double, ConstraintTypeId>& factories = m_constraintTypes;
+      std::map<edouble, ConstraintTypeId>& factories = m_constraintTypes;
       factories.erase(name.getKey());
       oldFactory.release();
     }
 
     check_error(!isConstraintType(name), "Constraint Type '" + name.toString() + "' should not be registered, and yet it is....");
-    m_constraintTypes.insert(std::pair<double, ConstraintTypeId>(name.getKey(),factory));
+    m_constraintTypes.insert(std::pair<edouble, ConstraintTypeId>(name.getKey(),factory));
     debugMsg("CESchema:registerConstraintType", "Registered Constraint Type " << factory->getName().toString());
   }
 
   const ConstraintTypeId& CESchema::getConstraintType(const LabelStr& name) {
-    std::map< double, ConstraintTypeId >::const_iterator it = m_constraintTypes.find(name.getKey());
+    std::map< edouble, ConstraintTypeId >::const_iterator it = m_constraintTypes.find(name.getKey());
     condDebugMsg(it ==  m_constraintTypes.end(), "europa:error", "Factory for constraint '" << name.toString() << "' is not registered.");
     check_error(it != m_constraintTypes.end(), "Factory for constraint '" + name.toString() + "' is not registered.");
     return(it->second);
   }
 
   bool CESchema::isConstraintType(const LabelStr& name, const bool& warn) {
-    std::map<double, ConstraintTypeId >::const_iterator it = m_constraintTypes.find(name.getKey());
+    std::map<edouble, ConstraintTypeId >::const_iterator it = m_constraintTypes.find(name.getKey());
     if (it == m_constraintTypes.end()) {
       if (warn)
         std::cerr << "\nConstraint Type <" << name.toString() << "> has not been registered\n";
@@ -112,7 +112,7 @@ namespace EUROPA
 
   void CESchema::purgeConstraintTypes()
   {
-      std::map<double, ConstraintTypeId >::iterator it = m_constraintTypes.begin();
+      std::map<edouble, ConstraintTypeId >::iterator it = m_constraintTypes.begin();
       while (it != m_constraintTypes.end()){
         ConstraintTypeId factory = it->second;
         check_error(factory.isValid());
@@ -135,13 +135,13 @@ namespace EUROPA
 
     checkError(m_cfunctions.find(cf->getName().getKey()) == m_cfunctions.end(), "Already have '" + cf->getName().toString() + "' registered.");
 
-    m_cfunctions.insert(std::pair<double, CFunctionId>(cf->getName().getKey(), cf));
+    m_cfunctions.insert(std::pair<edouble, CFunctionId>(cf->getName().getKey(), cf));
     debugMsg("CESchema::registerCFunction", "Registered CFunction " << cf->getName().toString());
   }
 
   CFunctionId CESchema::getCFunction(const LabelStr& name)
   {
-    std::map<double, CFunctionId>::const_iterator it =  m_cfunctions.find(name.getKey());
+    std::map<edouble, CFunctionId>::const_iterator it =  m_cfunctions.find(name.getKey());
 
     if (it != m_cfunctions.end())
     	return it->second;
@@ -152,7 +152,7 @@ namespace EUROPA
   // TODO: write generic method to clean up maps instead
   void CESchema::purgeCFunctions()
   {
-      std::map<double, CFunctionId >::iterator it = m_cfunctions.begin();
+      std::map<edouble, CFunctionId >::iterator it = m_cfunctions.begin();
       while (it != m_cfunctions.end()) {
         CFunctionId cf = (it++)->second;
         debugMsg("CESchema:purgeAll",

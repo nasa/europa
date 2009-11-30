@@ -91,7 +91,7 @@ namespace EUROPA
     }
 
 
-    void Graph::createEdge( const NodeIdentity& source, const NodeIdentity& target, double capacity, bool enabled )
+    void Graph::createEdge( const NodeIdentity& source, const NodeIdentity& target, edouble capacity, bool enabled )
     {
       Node* sourceNode = createNode( source );
       Node* targetNode = createNode( target );
@@ -102,7 +102,7 @@ namespace EUROPA
 	}
     }
 
-    Edge* Graph::createEdge( Node* source, Node* target, double capacity, bool enabled )
+    Edge* Graph::createEdge( Node* source, Node* target, edouble capacity, bool enabled )
     {
       checkError( 0 != source, "Null not allowed as input for source");
       checkError( 0 != target, "Null not allowed as input for target" );

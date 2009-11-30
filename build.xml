@@ -561,6 +561,49 @@
     <antcall target="zip-dist"/>
     <antcall target="zip-static-libs"/>
   </target>
+
+  <target name="tags" depends="init"
+          description="create tags and ebrowse files">
+    <delete file="${dir.src}/TAGS"/>
+    <delete file="${dir.src}/BROWSE"/>
+
+    <apply executable="etags" dir="${dir.src}" parallel="true" failonerror="true" >
+      <arg value="--declarations"/>
+      <arg value="-I"/>
+      <arg value="--members"/>
+      <fileset dir="${dir.src}">
+        <include name="*/*.hh"/>
+        <include name="*/*/*.hh"/>
+        <include name="*/*/*/*.hh"/>
+        <include name="*/*.h"/>
+        <include name="*/*/*.h"/>
+        <include name="*/*/*/*.h"/>
+        <include name="*/*.cc"/>
+        <include name="*/*/*.cc"/>
+        <include name="*/*/*/*.cc"/>
+        <include name="*/*.cpp"/>
+        <include name="*/*/*.cpp"/>
+        <include name="*/*/*/*.cpp"/>
+      </fileset>
+    </apply>
+
+    <apply executable="ebrowse" dir="${dir.src}" parallel="true" failonerror="true" >
+      <fileset dir="${dir.src}">
+        <include name="*/*.hh"/>
+        <include name="*/*/*.hh"/>
+        <include name="*/*/*/*.hh"/>
+        <include name="*/*.h"/>
+        <include name="*/*/*.h"/>
+        <include name="*/*/*/*.h"/>
+        <include name="*/*.cc"/>
+        <include name="*/*/*.cc"/>
+        <include name="*/*/*/*.cc"/>
+        <include name="*/*.cpp"/>
+        <include name="*/*/*.cpp"/>
+        <include name="*/*/*/*.cpp"/>
+      </fileset>
+    </apply>
+  </target>
     
   <!-- This will run the DEV variant by default, 
        if you want other variant, you can do it specifying jam.variant on the command line,

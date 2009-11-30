@@ -35,7 +35,7 @@ void GroundedFVDetector::handleResourceLevelFlaws(const InstantId inst)
 	{
 		inst->setFlawed(true);
 		inst->setLower(true);
-		inst->setLowerMagnitude(fabs(m_lowerLimit - inst->getLowerLevelMax()));
+		inst->setLowerMagnitude(std::abs(m_lowerLimit - inst->getLowerLevelMax()));
 		debugMsg("GroundedFVDetector:detect", "Lower limit flaw.");
 	}
 
@@ -44,7 +44,7 @@ void GroundedFVDetector::handleResourceLevelFlaws(const InstantId inst)
 	{
 		inst->setFlawed(true);
 		inst->setUpper(true);
-		inst->setUpperMagnitude(fabs(m_upperLimit - inst->getUpperLevelMin()));
+		inst->setUpperMagnitude(std::abs(m_upperLimit - inst->getUpperLevelMin()));
 		debugMsg("GroundedFVDetector:detect", "Upper limit flaw.");
 	}
 }

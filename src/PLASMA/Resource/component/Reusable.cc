@@ -12,8 +12,8 @@
 namespace EUROPA {
 
   Reusable::Reusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName, const LabelStr& profileName,
-                     double initCapacityLb, double initCapacityUb, double lowerLimit, double maxInstConsumption,
-                     double maxConsumption) :
+                     edouble initCapacityLb, edouble initCapacityUb, edouble lowerLimit, edouble maxInstConsumption,
+                     edouble maxConsumption) :
     Resource(planDatabase, type, name, detectorName, profileName, initCapacityLb, initCapacityUb, lowerLimit, initCapacityUb, maxInstConsumption,
              maxInstConsumption, maxConsumption, maxConsumption)
   {
@@ -65,7 +65,7 @@ namespace EUROPA {
     checkError(tok->isActive(), "Token " << tok->toString() << " is not active.");
     checkError(tok->getObject()->lastDomain().isSingleton(),
                "Token " << tok->toString() << " has a non-singleton object variable " << tok->getObject()->toLongString());
-    checkError(tok->getObject()->lastDomain().isMember(getId()),
+    checkError(tok->getObject()->lastDomain().isMember(getKey()),
                toString() << " isn't in the object variable of " << tok->toString() << ": " << tok->getObject()->toLongString());
     checkError(m_tokensToTransactions.find(tok) != m_tokensToTransactions.end(),
                "No transaction for "  << tok->getPredicateName().toString() << "(" << tok->getKey() << ")");
@@ -126,11 +126,11 @@ namespace EUROPA {
                          const LabelStr& name,
                          const LabelStr& detectorName,
                          const LabelStr& profileName,
-                         double initCapacityLb,
-                         double initCapacityUb,
-                         double lowerLimit,
-                         double maxInstConsumption,
-                         double maxConsumption)
+                         edouble initCapacityLb,
+                         edouble initCapacityUb,
+                         edouble lowerLimit,
+                         edouble maxInstConsumption,
+                         edouble maxConsumption)
     : Resource(planDatabase,
                type,
                name,
@@ -226,7 +226,7 @@ namespace EUROPA {
     debugMsg("CBReusable","Ignored removeFromProfile for Token:" << tok->toString());
   }
 
-  double getLb(ConstrainedVariableId v)
+  edouble getLb(ConstrainedVariableId v)
   {
     if (v->lastDomain().isSingleton())
       return v->lastDomain().getSingletonValue();
@@ -234,7 +234,7 @@ namespace EUROPA {
     return v->lastDomain().getLowerBound();
   }
 
-  double getUb(ConstrainedVariableId v)
+  edouble getUb(ConstrainedVariableId v)
   {
     if (v->lastDomain().isSingleton())
       return v->lastDomain().getSingletonValue();
@@ -251,9 +251,9 @@ namespace EUROPA {
 
     for (;it != m_constraintsToTransactions.end(); ++it) {
       UsesId c = it->first;
-      double lb = getLb(c->getScope()[Uses::START_VAR]);
-      double ub = getUb(c->getScope()[Uses::END_VAR]);
-      int t = instant->getTime();
+      edouble lb = getLb(c->getScope()[Uses::START_VAR]);
+      edouble ub = getUb(c->getScope()[Uses::END_VAR]);
+      eint t = instant->getTime();
       if ((lb <= t) && (t <= ub))
         retval.insert(c->getId());
     }
@@ -280,7 +280,7 @@ namespace EUROPA {
       }
     }
     else {
-      const_cast<AbstractDomain&>(txn->quantity()->lastDomain()).empty();
+      const_cast<Domain&>(txn->quantity()->lastDomain()).empty();
     }
   }
 
@@ -304,7 +304,7 @@ namespace EUROPA {
 
 
     if(m_flawedInstants.find(inst->getTime()) == m_flawedInstants.end()) {
-      m_flawedInstants.insert(std::pair<int, InstantId>(inst->getTime(), inst));
+      m_flawedInstants.insert(std::make_pair(inst->getTime(), inst));
       debugMsg("CBReusable:flaws", "Received notification of flaw at time " << inst->getTime());
     }
     else {
@@ -337,7 +337,7 @@ namespace EUROPA {
     m_txns.push_back((new Transaction(scope[Uses::END_VAR],   scope[Uses::QTY_VAR], false, getId()))->getId());
 
     if(scope[RESOURCE_VAR]->lastDomain().isSingleton()) {
-      m_resource = CBReusableId(scope[RESOURCE_VAR]->lastDomain().getSingletonValue());
+      m_resource = Entity::getTypedEntity<CBReusable>(scope[RESOURCE_VAR]->lastDomain().getSingletonValue());
       check_error(m_resource.isValid());
       debugMsg("Uses:Uses", "Adding constraint " << toString() << " to resource-profile of resource " << m_resource->toString() );
       m_resource->addToProfile(getId());
@@ -385,7 +385,7 @@ namespace EUROPA {
        variable->lastDomain().isSingleton()) {
 
       if(m_resource.isNoId() && res->lastDomain().isSingleton()) {
-        m_resource = CBReusableId(res->lastDomain().getSingletonValue());
+        m_resource = Entity::getTypedEntity<CBReusable>(res->lastDomain().getSingletonValue());
         check_error(m_resource.isValid());
         m_resource->addToProfile(getId());
         debugMsg("Uses:Uses", "Added " << toString() << " to profile for resource " << m_resource->toString());

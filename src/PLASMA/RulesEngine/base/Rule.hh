@@ -41,7 +41,7 @@ namespace EUROPA {
        */
       void getRules(const PlanDatabaseId& pdb, const LabelStr& predicate, std::vector<RuleId>& results);
 
-      const std::multimap<double, RuleId>& getRules();
+      const std::multimap<edouble, RuleId>& getRules();
 
       /**
        * @brief Delete all rules stored.
@@ -50,7 +50,7 @@ namespace EUROPA {
 
     protected:
       RuleSchemaId m_id; /*!< Id for reference */
-      std::multimap<double, RuleId> m_rulesByName;
+      std::multimap<edouble, RuleId> m_rulesByName;
   };
 
   /**

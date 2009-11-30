@@ -1,6 +1,6 @@
 #include "ValueSource.hh"
 #include "ConstrainedVariable.hh"
-#include "AbstractDomain.hh"
+#include "Domain.hh"
 #include "Debug.hh"
 #include "Schema.hh"
 #include "Entity.hh"
@@ -24,34 +24,35 @@ namespace EUROPA {
 	return new IntervalValueSource(var->lastDomain());
     }
 
-    ValueSource::ValueSource(unsigned int count) : m_count(count) {
+    ValueSource::ValueSource(Domain::size_type count) : m_count(count) {
       debugMsg("ValueSource:ValueSource", "Allocating for " << m_count << " choices.");
     }
 
     ValueSource::~ValueSource(){}
 
-    unsigned int ValueSource::getCount() const { return m_count;}
+    Domain::size_type ValueSource::getCount() const { return m_count;}
 
-    EnumValueSource::EnumValueSource(const SchemaId& schema, const AbstractDomain& dom)
+    EnumValueSource::EnumValueSource(const SchemaId& schema, const Domain& dom)
       : ValueSource(dom.getSize()) {
-      std::list<double> values;
+      std::list<edouble> values;
       dom.getValues(values);
-      if(schema->isObjectType(dom.getTypeName())) {
-	EntityComparator<EntityId> foo;
-	values.sort<EntityComparator<EntityId> >(foo);
-      }
+      //this isn't necessary anymore (I think), since object domains are now entity keys
+//       if(schema->isObjectType(dom.getTypeName())) {
+// 	EntityComparator<EntityId> foo;
+// 	values.sort<EntityComparator<EntityId> >(foo);
+//       }
 
-      for(std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it)
+      for(std::list<edouble>::const_iterator it = values.begin(); it != values.end(); ++it)
         m_values.push_back(*it);
     }
 
-    double EnumValueSource::getValue(unsigned int index) const { return m_values[index];}
+    edouble EnumValueSource::getValue(Domain::size_type index) const { return m_values[index];}
 
-    OrderedValueSource::OrderedValueSource(const AbstractDomain& dom) : ValueSource(0), m_dom(dom) {
+    OrderedValueSource::OrderedValueSource(const Domain& dom) : ValueSource(0), m_dom(dom) {
       checkError(!m_dom.isEmpty(), "Cannot create a value ordering for empty domain " << m_dom);
     }
     
-    void OrderedValueSource::addValue(const double value) {
+    void OrderedValueSource::addValue(const edouble value) {
       if(m_dom.isMember(value)) {
 	debugMsg("OrderedValueSource:addValue", "Adding value " << value << " from domain " << m_dom);
 	m_values.push_back(value);
@@ -60,20 +61,20 @@ namespace EUROPA {
       condDebugMsg(!m_dom.isMember(value), "OrderedValueSource:addValue", "Value " << value << " not in " << m_dom);
     }
 
-    double OrderedValueSource::getValue(unsigned int index) const {
+    edouble OrderedValueSource::getValue(Domain::size_type index) const {
       checkError(!m_values.empty(), "Cannot get an ordered value from an empty set!");
       return m_values[index];
     }
 
-    IntervalValueSource::IntervalValueSource(const AbstractDomain& dom)
+    IntervalValueSource::IntervalValueSource(const Domain& dom)
       : ValueSource(calculateSize(dom)),
 	m_lb(dom.getLowerBound()), m_ub(dom.getUpperBound()), m_step(dom.minDelta()){
     }
 
-    double IntervalValueSource::getValue(unsigned int index) const {return m_lb + (m_step * index);}
+    edouble IntervalValueSource::getValue(Domain::size_type index) const {return m_lb + (m_step * index);}
 
-    unsigned int IntervalValueSource::calculateSize(const AbstractDomain& dom){
-      return (unsigned int) ((dom.getUpperBound() - dom.getLowerBound())/dom.minDelta()) + 1;
+    Domain::size_type IntervalValueSource::calculateSize(const Domain& dom){
+      return cast_int(((dom.getUpperBound() - dom.getLowerBound())/dom.minDelta()) + 1);
     }
   }
 }

@@ -129,7 +129,7 @@ public:
   }
 
   void handleExecute() {
-    std::set<double> singletonValues;
+    std::set<edouble> singletonValues;
     std::vector<ConstrainedVariableId>::const_iterator it_end = getScope().end();
     for(std::vector<ConstrainedVariableId>::const_iterator it = getScope().begin(); it != it_end; ++it){
       ConstrainedVariableId var = *it;
@@ -607,7 +607,7 @@ private:
       CPPUNIT_ASSERT(!flawHandler->test(guards));
       token->start()->specify(30);
       CPPUNIT_ASSERT(!flawHandler->test(guards));
-      token->getObject()->specify(o2.getId());
+      token->getObject()->specify(o2.getKey());
       CPPUNIT_ASSERT(flawHandler->test(guards));
       nukeToken(db->getClient(),token);
     }
@@ -752,7 +752,7 @@ private:
       db->getConstraintEngine()->propagate();
       CPPUNIT_ASSERT(solver.getFlawHandler(slave)->getPriority() == 2);
 
-      slave->getObject()->specify(o5.getId());
+      slave->getObject()->specify(o5.getKey());
       db->getConstraintEngine()->propagate();
       CPPUNIT_ASSERT(solver.getFlawHandler(slave)->getPriority() == 3);
 
@@ -1186,7 +1186,7 @@ private:
 
     Variable<IntervalIntDomain> intIntVar(ce, IntervalIntDomain(1, 5), false, true);
 
-    std::list<double> ints;
+    std::list<edouble> ints;
     ints.push_back(1);
 
     EnumeratedDomain singletonEnumIntDom(IntDT::instance(),ints);
@@ -1199,7 +1199,7 @@ private:
     EnumeratedDomain enumIntDom(IntDT::instance(),ints);
     Variable<EnumeratedDomain> enumIntVar(ce, enumIntDom, false, true);
 
-    std::list<double> strings;
+    std::list<edouble> strings;
     strings.push_back(LabelStr("foo"));
     strings.push_back(LabelStr("bar"));
     strings.push_back(LabelStr("baz"));
@@ -1305,16 +1305,16 @@ private:
 
     ValueEnum enumObjDP(db->getClient(), enumObjVar.getId(), *objHeurXml);
 
-    CPPUNIT_ASSERT(enumObjDP.getNext() == o3.getId());
-    CPPUNIT_ASSERT(enumObjDP.getNext() == o2.getId());
-    CPPUNIT_ASSERT(enumObjDP.getNext() == o4.getId());
-    CPPUNIT_ASSERT(enumObjDP.getNext() == o1.getId());
+    CPPUNIT_ASSERT(enumObjDP.getNext() == o3.getKey());
+    CPPUNIT_ASSERT(enumObjDP.getNext() == o2.getKey());
+    CPPUNIT_ASSERT(enumObjDP.getNext() == o4.getKey());
+    CPPUNIT_ASSERT(enumObjDP.getNext() == o1.getKey());
 
     ValueEnum trimEnumObjDP(db->getClient(), enumObjVar.getId(), *objTrimHeurXml);
 
-    CPPUNIT_ASSERT(trimEnumObjDP.getNext() == o1.getId());
-    CPPUNIT_ASSERT(trimEnumObjDP.getNext() == o4.getId());
-    CPPUNIT_ASSERT(trimEnumObjDP.getNext() == o2.getId());
+    CPPUNIT_ASSERT(trimEnumObjDP.getNext() == o1.getKey());
+    CPPUNIT_ASSERT(trimEnumObjDP.getNext() == o4.getKey());
+    CPPUNIT_ASSERT(trimEnumObjDP.getNext() == o2.getKey());
 
     //the value enumeration should be ignored if the domain is a singleton
     ValueEnum ignoreHeurDP(db->getClient(), singletonEnumIntVar.getId(), *intTrimHeurXml);
@@ -1415,8 +1415,8 @@ private:
 
     //test near
     //tok1 has midpoint at 11, tok2 has midpoint at 13, so put flawedToken's midpoint at 10
-    const_cast<AbstractDomain&>(flawedToken.start()->lastDomain()).intersect(4, 10);
-    const_cast<AbstractDomain&>(flawedToken.end()->lastDomain()).intersect(5, 12);
+    const_cast<Domain&>(flawedToken.start()->lastDomain()).intersect(4, 10);
+    const_cast<Domain&>(flawedToken.end()->lastDomain()).intersect(5, 12);
     CPPUNIT_ASSERT(testEngine.getConstraintEngine()->propagate());
     std::string mNearHeur("<FlawHandler component=\"HSTSOpenConditionDecisionPoint\" choice=\"mergeOnly\" order=\"near\"/>");
     TiXmlElement* mNearHeurXml = initXml(mNearHeur);

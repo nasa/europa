@@ -49,7 +49,7 @@ namespace EUROPA
       /**
        * @brief
        */
-      void createEdge( const NodeIdentity& source, const NodeIdentity& target, double capacity, bool enabled = true );
+      void createEdge( const NodeIdentity& source, const NodeIdentity& target, edouble capacity, bool enabled = true );
       /**
        * @brief
        */
@@ -62,7 +62,7 @@ namespace EUROPA
       /**
        * @brief
        */
-      Edge* createEdge( Node* source, Node* target, double capacity, bool enabled = true );
+      Edge* createEdge( Node* source, Node* target, edouble capacity, bool enabled = true );
 
       NodeIdentity2Node m_Nodes;
     };

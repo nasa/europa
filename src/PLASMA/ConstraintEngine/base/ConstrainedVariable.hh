@@ -13,7 +13,7 @@
 #include "PSConstraintEngine.hh"
 #include "Entity.hh"
 #include "LabelStr.hh"
-#include "AbstractDomain.hh"
+#include "Domain.hh"
 #include <set>
 
 namespace EUROPA {
@@ -51,7 +51,7 @@ namespace EUROPA {
    * from the ConstraintEngine to the domain of the variable. Thus, user changes on a variable will
    * trigger activity in the ConstraintEngine behind the scenes. The connection is guaranteed by the base class, or
    * a failure will occur - see isValid().
-   * @see AbstractDomain, Constraint, ConstraintEngine, DomainListener, isValid
+   * @see Domain, Constraint, ConstraintEngine, DomainListener, isValid
    */
   class ConstrainedVariable : public virtual PSVariable, public Entity {
   public:
@@ -196,7 +196,7 @@ namespace EUROPA {
     /**
      * @brief Accessor for the specified value. Will fail if the variable is not specified.
      */
-    double getSpecifiedValue() const;
+    edouble getSpecifiedValue() const;
 
     /**
      * @brief Accessor for variable name.
@@ -237,7 +237,7 @@ namespace EUROPA {
      * @return The last computed domain of the variable.
      * @see derivedDomain
      */
-    virtual const AbstractDomain& lastDomain() const = 0;
+    virtual const Domain& lastDomain() const = 0;
 
     /**
      * @brief Returns an up-to-date version of the derived domain.
@@ -245,18 +245,18 @@ namespace EUROPA {
      * @return The (completely propagated) derived domain.
      * @see lastDomain
      */
-    virtual const AbstractDomain& derivedDomain() = 0;
+    virtual const Domain& derivedDomain() = 0;
 
     /**
      * @brief Retrieve the base domain.
      */
-    virtual const AbstractDomain& baseDomain() const = 0;
+    virtual const Domain& baseDomain() const = 0;
 
     /**
      * @brief Restrict the base domain.
      * @param baseDomain The target restricted domain. It must be a subset of the current base domain.
      */
-    void restrictBaseDomain(const AbstractDomain& baseDomain);
+    void restrictBaseDomain(const Domain& baseDomain);
 
     /**
      * @brief Retract previously specified domain restriction.
@@ -283,18 +283,18 @@ namespace EUROPA {
     /**
      * @brief Insert the value into its domain. Variable must be dynamic.
      */
-    virtual void insert(double value);
+    virtual void insert(edouble value);
 
     /**
      * @brief Remove a value from its domain. Variable must be dynamic.
      */
-    virtual void remove(double value);
+    virtual void remove(edouble value);
 
     /**
      * @brief Restricts the domain to a singleton value.
      * @param singletonValue to specify it to.
      */
-    virtual void specify(double singletonValue);
+    virtual void specify(edouble singletonValue);
 
     /**
      * @brief Allows a client to close a variables domain.
@@ -322,12 +322,12 @@ namespace EUROPA {
     /**
      * @brief Supports the merging of variables by propagating messages on restriction of a base domain of a variable
      */
-    virtual void handleBase(const AbstractDomain&) {}
+    virtual void handleBase(const Domain&) {}
 
     /**
      * @brief Supports the merging of variables by propagating messages on specification of a variable
      */
-    virtual void handleSpecified(double value) {}
+    virtual void handleSpecified(edouble value) {}
 
     /**
      * @brief Supports the merging of variables by propagating message on reset of a specified domain
@@ -346,7 +346,7 @@ namespace EUROPA {
     /**
      * @brief Utility to obtain a display version of a double encoded value.
      */
-    virtual std::string toString(double value) const;
+    virtual std::string toString(edouble value) const;
 
     /**
      * @brief Accessor
@@ -406,7 +406,7 @@ namespace EUROPA {
     /**
      * @brief Allows subclass to add specific extra-work without over-riding core behavior.
      */
-    virtual void handleRestrictBaseDomain(const AbstractDomain& baseDomain) = 0;
+    virtual void handleRestrictBaseDomain(const Domain& baseDomain) = 0;
 
     /**
      * @brief Handle De-allocation
@@ -422,9 +422,9 @@ namespace EUROPA {
     /**
      * @brief Retrieve a modifiable version of the base domain.
      */
-    virtual AbstractDomain& internal_baseDomain() = 0;
+    virtual Domain& internal_baseDomain() = 0;
 
-    void internalSpecify(double singletonValue);
+    void internalSpecify(edouble singletonValue);
 
     friend class Constraint; /**< Grant access so that the relationships between Constraint and Variable can be constructed and validated
 			       without exposiing such methods publically. @see Constraint::Constraint(), Constraint::~Constraint() */
@@ -441,9 +441,9 @@ namespace EUROPA {
      * the current domain has a listener attached to connect the Constraint Engine. Use is intended strictly for Constraints
      * and ConstraintEngine, as well as for access in derived classes.
      * @return A reference to the domain under management of the ConstraintEngine.
-     * @see lastDomain(), AbstractDomain
+     * @see lastDomain(), Domain
      */
-    virtual AbstractDomain& getCurrentDomain() = 0;
+    virtual Domain& getCurrentDomain() = 0;
 
     ConstrainedVariableId m_id; /**< Id of this. */
 
@@ -480,7 +480,7 @@ namespace EUROPA {
     /**
      * @brief Helper method to reset to a specific domain
      */
-    void reset(const AbstractDomain& domain);
+    void reset(const Domain& domain);
 
     // keeps track of who's the current propagating constraint, in case there is a violation
     ConstraintId m_propagatingConstraint;
@@ -518,7 +518,7 @@ namespace EUROPA {
     const bool m_canBeSpecified;
     bool m_specifiedFlag; /**< True of internalSpecify is called.
 			   It is possible that !canBeSpecified() && m_hasBeenSpecified */
-    double m_specifiedValue; /**< Only meaningful if specifiedFlag set */
+    edouble m_specifiedValue; /**< Only meaningful if specifiedFlag set */
     const int m_index; /**< Locator for variable if constained by some entity. Default is NO_INDEX */
     const EntityId m_parent;
     unsigned int m_deactivationRefCount;/*!< The number of outstanding deactivation requests. */

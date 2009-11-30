@@ -5,6 +5,7 @@
  *      Author: javier
  */
 
+#include "Number.hh"
 #include "DataTypes.hh"
 
 #include "Domains.hh"
@@ -39,7 +40,7 @@ bool VoidDT::isNumeric() const { return false; }
 bool VoidDT::isBool() const  { return false; }
 bool VoidDT::isString() const  { return false; }
 
-double VoidDT::createValue(const std::string& value) const
+edouble VoidDT::createValue(const std::string& value) const
 {
   check_error(ALWAYS_FAILS, "can't create void value");
   return -1;
@@ -47,7 +48,7 @@ double VoidDT::createValue(const std::string& value) const
 
 ConstrainedVariableId
 VoidDT::createVariable(const ConstraintEngineId& constraintEngine,
-                                const AbstractDomain& baseDomain,
+                                const Domain& baseDomain,
                                 const bool internal,
                                 bool canBeSpecified,
                                 const char* name,
@@ -72,7 +73,7 @@ bool FloatDT::isNumeric() const { return true; }
 bool FloatDT::isBool() const  { return false; }
 bool FloatDT::isString() const  { return false; }
 
-double FloatDT::createValue(const std::string& value) const
+edouble FloatDT::createValue(const std::string& value) const
 {
   // TODO: simplify this
   if (value == "-inf" || value=="-inff") {
@@ -99,7 +100,7 @@ bool IntDT::isNumeric() const { return true; }
 bool IntDT::isBool() const  { return false; }
 bool IntDT::isString() const  { return false; }
 
-double IntDT::createValue(const std::string& value) const
+edouble IntDT::createValue(const std::string& value) const
 {
   if (value == "-inf") {
     return MINUS_INFINITY;
@@ -129,7 +130,7 @@ bool BoolDT::isNumeric() const { return true; }
 bool BoolDT::isBool() const  { return true; }
 bool BoolDT::isString() const  { return false; }
 
-double BoolDT::createValue(const std::string& value) const
+edouble BoolDT::createValue(const std::string& value) const
 {
   if (value == "true") {
     return true;
@@ -141,7 +142,7 @@ double BoolDT::createValue(const std::string& value) const
   return -1;
 }
 
-std::string  BoolDT::toString(double value) const
+std::string  BoolDT::toString(edouble value) const
 {
   static const LabelStr sl_true("true");
   static const LabelStr sl_false("false");
@@ -166,7 +167,7 @@ bool StringDT::isNumeric() const { return false; }
 bool StringDT::isBool() const  { return false; }
 bool StringDT::isString() const  { return true; }
 
-double StringDT::createValue(const std::string& value) const
+edouble StringDT::createValue(const std::string& value) const
 {
   return LabelStr(value);
 }
@@ -185,12 +186,12 @@ bool SymbolDT::isNumeric() const { return false; }
 bool SymbolDT::isBool() const  { return false; }
 bool SymbolDT::isString() const  { return false; }
 
-double SymbolDT::createValue(const std::string& value) const
+edouble SymbolDT::createValue(const std::string& value) const
 {
   return LabelStr(value);
 }
 
-RestrictedDT::RestrictedDT(const char* name, const DataTypeId& baseType, const AbstractDomain& baseDomain)
+RestrictedDT::RestrictedDT(const char* name, const DataTypeId& baseType, const Domain& baseDomain)
     : DataType(name)
     , m_baseType(baseType)
 {
@@ -207,9 +208,9 @@ bool RestrictedDT::isNumeric() const { return m_baseType->isNumeric(); }
 bool RestrictedDT::isBool() const  { return m_baseType->isBool(); }
 bool RestrictedDT::isString() const  { return m_baseType->isString(); }
 bool RestrictedDT::isEntity() const  { return m_baseType->isEntity(); }
-double RestrictedDT::minDelta() const  { return m_baseType->minDelta(); }
+edouble RestrictedDT::minDelta() const  { return m_baseType->minDelta(); }
 
-double RestrictedDT::createValue(const std::string& value) const
+edouble RestrictedDT::createValue(const std::string& value) const
 {
     if (isNumeric())
         return(atof(value.c_str()));

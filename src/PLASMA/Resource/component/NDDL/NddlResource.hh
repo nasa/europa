@@ -46,7 +46,7 @@ namespace NDDL {
 
     virtual void close();
 
-    virtual void constructor(float c_max);
+    virtual void constructor(edouble c_max);
     virtual void constructor();
 
     void handleDefaults(bool autoClose = true);
@@ -86,9 +86,9 @@ namespace NDDL {
 
     virtual void close();
 
-    virtual void constructor(float c, float ll_min);
-    virtual void constructor(float c, float ll_min, float cr_max);
-    virtual void constructor(float c, float ll_min, float c_max, float cr_max);
+    virtual void constructor(edouble c, edouble ll_min);
+    virtual void constructor(edouble c, edouble ll_min, edouble cr_max);
+    virtual void constructor(edouble c, edouble ll_min, edouble c_max, edouble cr_max);
     virtual void constructor();
 
     void handleDefaults(bool autoClose = true);
@@ -132,9 +132,9 @@ namespace NDDL {
 
     virtual void close();
 
-    virtual void constructor(float c, float ll_min);
-    virtual void constructor(float c, float ll_min, float cr_max);
-    virtual void constructor(float c, float ll_min, float c_max, float cr_max);
+    virtual void constructor(edouble c, edouble ll_min);
+    virtual void constructor(edouble c, edouble ll_min, edouble cr_max);
+    virtual void constructor(edouble c, edouble ll_min, edouble c_max, edouble cr_max);
     virtual void constructor();
 
     void handleDefaults(bool autoClose = true);
@@ -161,11 +161,11 @@ namespace NDDL {
 
     virtual void close();
 
-    virtual void constructor(float ic, float ll_min, float ll_max);
+    virtual void constructor(edouble ic, edouble ll_min, edouble ll_max);
 
-    virtual void constructor(float ic, float ll_min, float ll_max, float p_max, float c_max);
+    virtual void constructor(edouble ic, edouble ll_min, edouble ll_max, edouble p_max, edouble c_max);
 
-    virtual void constructor(float ic, float ll_min, float ll_max, float pr_max, float p_max, float cr_max, float c_max);
+    virtual void constructor(edouble ic, edouble ll_min, edouble ll_max, edouble pr_max, edouble p_max, edouble cr_max, edouble c_max);
 
     virtual void constructor();
 

@@ -163,13 +163,17 @@ namespace EUROPA {
 			     std::vector<TokenId>& results,
 			     unsigned int limit,
 			     bool useExactTest);
+//     void getCompatibleTokens(const TokenId& inactiveToken,
+// 			     std::vector<TokenId>& results,
+// 			     eint limit,
+// 			     bool useExactTest);
 
     /**
      * @brief Returns a count of compatible tokens up to the given limit
      * @see getCompatibleTokens
      */
     unsigned int countCompatibleTokens(const TokenId& inactiveToken,
-				       unsigned int limit = PLUS_INFINITY,
+				       unsigned int limit = std::numeric_limits<unsigned int>::max(),
 				       bool useExactTest = false);
 
     /**
@@ -183,7 +187,7 @@ namespace EUROPA {
      * @brief Retrieves the map relating token keys and the set of objects that induce an ordering requirement on the token.
      * @see notifyOrderingRequired, notifyOrderingNoLongerRequired
      */
-    const std::map< int, std::pair<TokenId, ObjectSet> >& getTokensToOrder();
+    const std::map< eint, std::pair<TokenId, ObjectSet> >& getTokensToOrder();
 
     /**
      * @brief Retrieves the set of ordering choices for resolving a token which requires ordering
@@ -194,13 +198,13 @@ namespace EUROPA {
      */
     void getOrderingChoices(const TokenId& tokenToOrder,
 			    std::vector< OrderingChoice >& results,
-			    unsigned int limit = PLUS_INFINITY);
+			    unsigned int limit = std::numeric_limits<unsigned int>::max());
     /**
      * @brief Returns a count or all ordering choices for a token up to the given limit
      * @see Object::getOrderingChoices
      */
     unsigned int countOrderingChoices(const TokenId& token,
-				      unsigned int limit = PLUS_INFINITY);
+				      unsigned int limit = std::numeric_limits<unsigned int>::max());
 
     /**
      * @brief Returns the previous count of ordering choices
@@ -290,7 +294,7 @@ namespace EUROPA {
      * @note We can extend this to pass in a functor or some other object to allow it to handle archival details.
      * @see Object::archive
      */
-    unsigned int archive(unsigned int tick = PLUS_INFINITY);
+    unsigned int archive(eint tick = PLUS_INFINITY);
 
 
     // PSPlanDatabase methods
@@ -306,7 +310,7 @@ namespace EUROPA {
 
     ObjectId createObject(const LabelStr& objectType,
                             const LabelStr& objectName,
-                            const std::vector<const AbstractDomain*>& arguments);
+                            const std::vector<const Domain*>& arguments);
 
     TokenId createToken(const char* tokenType,
                         const char* tokenName,
@@ -423,20 +427,20 @@ namespace EUROPA {
     std::vector<PlanDatabaseListenerId> m_listeners;
 
     /* In the data structures below, the key is a LabelStr representation of a name */
-    std::map<double, ObjectId> m_objectsByName; /*!< Object names are unique. Holds all objects m_objectsByName.size() == m_objects.size(). */
-    std::multimap<double, ObjectId> m_objectsByPredicate; /*!< May be updated every time we add a Token, or remove an object. */
-    std::multimap<double, ObjectId> m_objectsByType; /*!< May be updated every time we add a Token, or remove an object. */
-    std::set<double> m_closedObjectTypes; /*!< The set of explicitly closed object types.
+    std::map<edouble, ObjectId> m_objectsByName; /*!< Object names are unique. Holds all objects m_objectsByName.size() == m_objects.size(). */
+    std::multimap<edouble, ObjectId> m_objectsByPredicate; /*!< May be updated every time we add a Token, or remove an object. */
+    std::multimap<edouble, ObjectId> m_objectsByType; /*!< May be updated every time we add a Token, or remove an object. */
+    std::set<edouble> m_closedObjectTypes; /*!< The set of explicitly closed object types.
 					     If present here, it cannot be present in m_objectVariablesByType */
-    std::map<double, ConstrainedVariableId> m_globalVarsByName;
-    std::map<double, TokenId> m_globalTokensByName;
-    std::map<int, std::pair<TokenId, ObjectSet> > m_tokensToOrder; /*!< All tokens to order, with the object
+    std::map<edouble, ConstrainedVariableId> m_globalVarsByName;
+    std::map<edouble, TokenId> m_globalTokensByName;
+    std::map<eint, std::pair<TokenId, ObjectSet> > m_tokensToOrder; /*!< All tokens to order, with the object
 								     inducing the requirement stored in the set */
 
-    std::map<double, TokenSet > m_activeTokensByPredicate; /*!< All active tokens sorted by predicate */
+    std::map<edouble, TokenSet > m_activeTokensByPredicate; /*!< All active tokens sorted by predicate */
 
     // All this to store variables (and their listeners) for Open Object Types
-    typedef std::multimap<double, std::pair<ConstrainedVariableId, ConstrainedVariableListenerId> > ObjVarsByObjType;
+    typedef std::multimap<edouble, std::pair<ConstrainedVariableId, ConstrainedVariableListenerId> > ObjVarsByObjType;
     typedef ObjVarsByObjType::iterator ObjVarsByObjType_I;
     typedef ObjVarsByObjType::const_iterator ObjVarsByObjType_CI;
     ObjVarsByObjType m_objectVariablesByObjectType;
@@ -448,7 +452,7 @@ namespace EUROPA {
     check_error(results.empty());
     checkError(m_schema->isObjectType(type), "Is not an object type in the plan database: " + type.toString());
 
-    for (std::multimap<double, ObjectId>::const_iterator it = m_objectsByType.find(type.getKey());
+    for (std::multimap<edouble, ObjectId>::const_iterator it = m_objectsByType.find(type.getKey());
 	 it != m_objectsByType.end() && it->first == type.getKey();
 	 ++it) {
       debugMsg("PlanDatabase:getObjectsByType", "Adding object '" << it->second->getName().toString() << "' of type '" <<

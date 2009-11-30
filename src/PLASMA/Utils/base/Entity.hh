@@ -49,7 +49,8 @@ namespace EUROPA{
 
     virtual ~Entity();
 
-    inline int getKey() const {return m_key;}
+    inline eint getKey() const {return m_key;}
+    inline PSEntityKey getEntityKey() const {return cast_int(m_key);}
 
     
     virtual const std::string& getEntityName() const;
@@ -128,8 +129,10 @@ namespace EUROPA{
      * @brief Retrieve an Entity by key.
      * @return The Id of the requested Entity if present, otherwise a noId;
      */
-    static EntityId getEntity(int key);
+    static EntityId getEntity(const eint key);
 
+    template<typename T>
+    static Id<T> getTypedEntity(const eint key) {return Id<T>(getEntity(key));}
     /**
      * @brief Get all entities
      */
@@ -180,7 +183,7 @@ namespace EUROPA{
   private:
 
 	  
-	  static PSEntityKey allocateKey();
+    static eint allocateKey();
 
 	  
     /**
@@ -193,12 +196,12 @@ namespace EUROPA{
      */
     virtual void notifyDiscarded(const Entity* entity);
 
-	const PSEntityKey m_key;
+    const eint m_key;
     
     unsigned int m_refCount;
     bool m_discarded;
     std::set<Entity*> m_dependents;
-    static std::map<int, unsigned long int>& entitiesByKey();
+    static std::map<eint, unsigned long int>& entitiesByKey();
     static std::set<Entity*>& discardedEntities();
     static bool& getPurgeStatus();
   };

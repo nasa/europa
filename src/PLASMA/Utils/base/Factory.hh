@@ -61,7 +61,7 @@ public:
     
 protected:
     FactoryMgrId m_id;     
-    std::map<double,FactoryId> m_factoryMap;   
+    std::map<edouble,FactoryId> m_factoryMap;   
     
     FactoryId& getFactory(const LabelStr& name);    
 };

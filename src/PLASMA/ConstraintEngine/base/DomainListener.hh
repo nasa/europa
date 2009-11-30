@@ -20,12 +20,12 @@ namespace EUROPA{
 
   /**
    * @class DomainListener
-   * @brief Declares an abstract class for listeners to domain change events on an AbstractDomain
+   * @brief Declares an abstract class for listeners to domain change events on an Domain
    *
    * This listener interface is the means to connect propagation events to the ConstraintEngine. It allows
    * a more fine-grain event model to handle changes in variable domains. Most events are restrictions to a
    * domain. Other key changes that may have special significance are also specified.
-   * @see ChangeType, AbstractDomain, VariableChangeListener
+   * @see ChangeType, Domain, VariableChangeListener
    */
   class DomainListener {
   public:

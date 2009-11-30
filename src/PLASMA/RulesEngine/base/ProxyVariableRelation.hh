@@ -54,7 +54,7 @@ namespace EUROPA {
     std::vector<unsigned int> m_path; /*!< The index based path from the root object to the field value */
     bool m_autoSpecified; /*!< Tracks if we have propagated a specification from the source object 
 			    variable to the proxy */
-    unsigned int m_sourceConstraintKey;
+    eint m_sourceConstraintKey;
     ConstraintId m_sourceConstraint;
     static const unsigned int ARG_COUNT = 2;
   };

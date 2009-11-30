@@ -82,7 +82,7 @@ namespace EUROPA {
   /*
    * ExprConstant
    */
-  ExprConstant::ExprConstant(const char* type, const AbstractDomain* domain)
+  ExprConstant::ExprConstant(const char* type, const Domain* domain)
     : m_type(type)
     , m_domain(domain)
   {
@@ -152,7 +152,7 @@ namespace EUROPA {
       // TODO: this is a hack, where is this being used?
       if (m_domain->isSingleton()) {
     	  if (typeName == IntDT::NAME())
-    	      os << (int)(m_domain->getSingletonValue());
+            os << eint(cast_int((m_domain->getSingletonValue())));
     	  else if (typeName == FloatDT::NAME())
     	      os << m_domain->getSingletonValue();
     	  else if (typeName == StringDT::NAME())
@@ -244,7 +244,7 @@ namespace EUROPA {
 
             for (;idx<m_vars.size();idx++) {
               check_runtime_error(var->derivedDomain().isSingleton(),varName+" must be singleton to be able to get to "+m_vars[idx]);
-              ObjectId object = var->derivedDomain().getSingletonValue();
+              ObjectId object = Entity::getTypedEntity<Object>(var->derivedDomain().getSingletonValue());
               var = object->getVariable(object->getName().toString()+"."+m_vars[idx]);
               varName += "." + m_vars[idx];
 
@@ -288,7 +288,7 @@ namespace EUROPA {
 
   DataRef ExprNewObject::eval(EvalContext& context) const
   {
-    std::vector<const AbstractDomain*> arguments;
+    std::vector<const Domain*> arguments;
     for (unsigned int i=0; i < m_argExprs.size(); i++) {
       DataRef arg = m_argExprs[i]->eval(context);
       arguments.push_back(&(arg.getValue()->derivedDomain()));
@@ -296,7 +296,8 @@ namespace EUROPA {
 
     // TODO: using ObjectEvalContext may be cleaner?
     ConstrainedVariableId thisVar = context.getVar("this");
-    ObjectId thisObject = (thisVar.isId() ? ObjectId(thisVar->derivedDomain().getSingletonValue()) : ObjectId::noId());
+    ObjectId thisObject = 
+      (thisVar.isId() ? Entity::getTypedEntity<Object>(thisVar->derivedDomain().getSingletonValue()) : ObjectId::noId());
     std::string prefix = (thisObject.isId() ? thisObject->getName().toString() + "." : "");
 
     LabelStr name(prefix+m_objectName.toString());
@@ -1435,7 +1436,7 @@ namespace EUROPA {
   InterpretedRuleInstance::InterpretedRuleInstance(
 						   const RuleInstanceId& parent,
 						   const ConstrainedVariableId& var,
-						   const AbstractDomain& domain,
+						   const Domain& domain,
 						   const bool positive,
 						   const std::vector<Expr*>& body)
     : RuleInstance(parent,var,domain,positive)
@@ -1531,7 +1532,7 @@ namespace EUROPA {
   }
 
   ConstrainedVariableId InterpretedRuleInstance::addLocalVariable(
-								  const AbstractDomain& baseDomain,
+								  const Domain& baseDomain,
 								  bool canBeSpecified,
 								  const LabelStr& name)
   {
@@ -1558,7 +1559,7 @@ namespace EUROPA {
     // Create a local domain based on the objects included in the valueSet
     ConstrainedVariableId setVar = evalContext.getVar(valueSet.c_str());
     check_error(!setVar.isNoId(),"Loop var can't be NULL");
-    const AbstractDomain& setVarDomain = setVar->derivedDomain();
+    const Domain& setVarDomain = setVar->derivedDomain();
     debugMsg("Interpreter:InterpretedRule","set var for loop :" << setVar->toString());
     debugMsg("Interpreter:InterpretedRule","set var domain for loop:" << setVarDomain.toString());
     const ObjectDomain& loopObjectSet = dynamic_cast<const ObjectDomain&>(setVarDomain);
@@ -1573,15 +1574,15 @@ namespace EUROPA {
     	loop_vars.push_back(ruleVariable(loopObjectSet));
     	rule_constraint(filterLock, loop_vars);
     }
-    std::list<double> loopObjectSet_values;
+    std::list<edouble> loopObjectSet_values;
     loopObjectSet.getValues(loopObjectSet_values);
 
     // Translate into a set ordered by key to ensure reliable ordering across runs
     ObjectSet loopObjectSet_valuesByKey;
-    for(std::list<double>::iterator it=loopObjectSet_values.begin();
-    it!=loopObjectSet_values.end(); ++it) {
-    	ObjectId t = *it;
-    	loopObjectSet_valuesByKey.insert(t);
+    for(std::list<edouble>::iterator it=loopObjectSet_values.begin();
+        it!=loopObjectSet_values.end(); ++it) {
+      ObjectId t = Entity::getTypedEntity<Object>(*it);
+      loopObjectSet_valuesByKey.insert(t);
     }
 
     // iterate over loop collection
@@ -1594,7 +1595,7 @@ namespace EUROPA {
     	// see loopVar(Allocation, a);
     	{
     		ObjectDomain loopVarDomain(setVarDomain.getDataType());
-    		loopVarDomain.insert(loop_var);
+    		loopVarDomain.insert(loop_var->getKey());
     		loopVarDomain.close();
     		// This will automatically put it in the evalContext, since all RuleInstance vars are reachable there
     		addVariable(loopVarDomain, false, loopVarName);
@@ -1637,7 +1638,7 @@ namespace EUROPA {
     return foo->getId();
   }
 
-  ExprTypedef::ExprTypedef(const DataTypeId& baseType, const char* name, AbstractDomain* baseDomain)
+  ExprTypedef::ExprTypedef(const DataTypeId& baseType, const char* name, Domain* baseDomain)
       : m_baseType(baseType)
       , m_name(name)
       , m_baseDomain(baseDomain)
@@ -1652,7 +1653,7 @@ namespace EUROPA {
   DataRef ExprTypedef::eval(EvalContext& context) const
   {
       const char* name = m_name.c_str();
-      const AbstractDomain& domain = *m_baseDomain;
+      const Domain& domain = *m_baseDomain;
 
       debugMsg("Interpreter:typedef","Defining type:" << name);
 
@@ -1703,7 +1704,7 @@ namespace EUROPA {
 
       debugMsg("Interpreter:enumdef","Defining enum:" << enumName);
 
-      std::list<double> values;
+      std::list<edouble> values;
       for(unsigned int i=0;i<m_values.size();i++) {
           LabelStr newValue(m_values[i]);
           values.push_back(newValue);
@@ -1812,7 +1813,7 @@ namespace EUROPA {
 
       // same as completeObjectParam in NddlRules.hh
       if(initValue != NULL) {
-          AbstractDomain* bd = parameterDataType->baseDomain().copy();
+          Domain* bd = parameterDataType->baseDomain().copy();
           ConstrainedVariableId rhs = initValue->eval(context).getValue();
           bd->intersect(rhs->lastDomain());
           parameter = token->addParameter(
@@ -1861,7 +1862,7 @@ namespace EUROPA {
 	  }
 	  else {
 		  // TODO: do we really need to pass the base domain?
-				  const AbstractDomain& baseDomain = context.getRuleInstance()->getPlanDatabase()->getSchema()->getCESchema()->baseDomain(typeName.c_str());
+				  const Domain& baseDomain = context.getRuleInstance()->getPlanDatabase()->getSchema()->getCESchema()->baseDomain(typeName.c_str());
 				  localVar = context.getRuleInstance()->addLocalVariable(
 						  baseDomain,
 						  m_canBeSpecified,
@@ -1907,11 +1908,11 @@ namespace EUROPA {
       ConstrainedVariableId thisVar = context.getVar("this");
       // TODO: modify interpreted object constructor to add vars upfront so that this if stmt isn't necessary
       if (thisVar.isId()) {
-          ObjectId object = thisVar->derivedDomain().getSingletonValue();
+        ObjectId object = Entity::getTypedEntity<Object>(thisVar->derivedDomain().getSingletonValue());
           const char* varName = m_lhs->toString().c_str(); // TODO: this is a hack!
           check_error(object->getVariable(varName) == ConstrainedVariableId::noId());
           ConstrainedVariableId rhsValue = m_rhs->eval(context).getValue();
-          const AbstractDomain& domain = rhsValue->derivedDomain();
+          const Domain& domain = rhsValue->derivedDomain();
           ConstrainedVariableId v = object->addVariable(domain,varName);
           lhs = DataRef(v);
           debugMsg("Interpreter:InterpretedObject","Initialized variable:" << object->getName().toString() << "." << varName << " to " << rhsValue->derivedDomain().toString() << " in constructor");
@@ -2130,7 +2131,7 @@ namespace EUROPA {
       DbClientId pdb = getPDB(context); // TODO: keep using db client?
 
       if (method=="specify") {
-          const AbstractDomain& ad = args[0]->lastDomain();
+          const Domain& ad = args[0]->lastDomain();
           if (ad.isSingleton())
               pdb->specify(var,ad.getSingletonValue());
           else
@@ -2180,7 +2181,7 @@ namespace EUROPA {
 
       if (m_objExpr != NULL) {
           DataRef v = m_objExpr->eval(context);
-          obj = ObjectId(v.getValue()->derivedDomain().getSingletonValue());
+          obj = Entity::getTypedEntity<Object>(v.getValue()->derivedDomain().getSingletonValue());
       }
 
       // TODO: make sure any temp vars are disposed of correctly

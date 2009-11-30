@@ -45,7 +45,7 @@ namespace EUROPA{
      * @param domain Fired when domain.isMember(guard.singletonValue)
      */
     RuleInstance(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb,
-                 const ConstrainedVariableId& guard, const AbstractDomain& domain);
+                 const ConstrainedVariableId& guard, const Domain& domain);
 
     /**
      * @brief Constructor to construct a rule instance from a parent. Must have a guard!
@@ -64,7 +64,7 @@ namespace EUROPA{
      * @param domain Fired when domain.isMember(guard.singletonValue)
      */
     RuleInstance(const RuleInstanceId& parent,
-		 const ConstrainedVariableId& guard, const AbstractDomain& domain);
+		 const ConstrainedVariableId& guard, const Domain& domain);
 
     /**
      * @brief Constructor to construct a rule instance from a parent. Must have a guard!
@@ -74,7 +74,7 @@ namespace EUROPA{
 		 * @param positive Flag to indicate whether the test is positive or not.
      */
     RuleInstance(const RuleInstanceId& parent,
-		 const ConstrainedVariableId& guard, const AbstractDomain& domain, const bool positive);
+		 const ConstrainedVariableId& guard, const Domain& domain, const bool positive);
 
     /**
      * Destructor
@@ -270,7 +270,7 @@ namespace EUROPA{
      * the specified domain of the guard is a singleton, and equals the given value. Private since should
      * only be called from constructor.
      */
-    void setGuard(const ConstrainedVariableId& guard, const AbstractDomain& domain);
+    void setGuard(const ConstrainedVariableId& guard, const Domain& domain);
 
 
     /**
@@ -291,7 +291,7 @@ namespace EUROPA{
     std::string ruleExecutionContext() const;
 
     std::vector<ConstrainedVariableId> m_guards; /*!< Guard variables for implicit and explcit guards */
-    AbstractDomain* m_guardDomain; /*!< If an explicit equality test, will ahve this be non-null */
+    Domain* m_guardDomain; /*!< If an explicit equality test, will ahve this be non-null */
     ConstraintId m_guardListener; /*!< If guarded, listener is a constraint */
 
   protected:
@@ -301,9 +301,9 @@ namespace EUROPA{
     std::vector<RuleInstanceId> m_childRules; /*!< Child rules introduced through rule execution */
     std::vector<ConstrainedVariableId> m_variables; /*< Local variables introduced through rule execution */
     std::vector<TokenId> m_slaves; /*< Slaves introduced through rule execution */
-    std::map<double, ConstrainedVariableId> m_variablesByName; /*!< Context lookup */
-    std::map<double, TokenId> m_slavesByName; /*!< Context lookup */
-    std::map<double, ConstraintId> m_constraintsByName; /*!< Context lookup */
+    std::map<edouble, ConstrainedVariableId> m_variablesByName; /*!< Context lookup */
+    std::map<edouble, TokenId> m_slavesByName; /*!< Context lookup */
+    std::map<edouble, ConstraintId> m_constraintsByName; /*!< Context lookup */
   };
 }
 #endif

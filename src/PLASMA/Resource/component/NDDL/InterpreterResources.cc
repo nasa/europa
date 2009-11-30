@@ -17,13 +17,13 @@ namespace EUROPA {
 						const PlanDatabaseId& planDb,
 						const LabelStr& objectType,
 						const LabelStr& objectName,
-						const std::vector<const AbstractDomain*>& arguments) const
+						const std::vector<const Domain*>& arguments) const
   {
     Id<NDDL::NddlReusable>  instance = (new NDDL::NddlReusable(planDb, objectType, objectName,true))->getId();
 
-    std::vector<float> argValues;
+    std::vector<edouble> argValues;
     for (unsigned int i=0;i<arguments.size();i++)
-      argValues.push_back((float)(arguments[i]->getSingletonValue()));
+      argValues.push_back(arguments[i]->getSingletonValue());
 
     if (argValues.size() == 0)
       instance->constructor();
@@ -78,13 +78,13 @@ namespace EUROPA {
                         const PlanDatabaseId& planDb,
                         const LabelStr& objectType,
                         const LabelStr& objectName,
-                        const std::vector<const AbstractDomain*>& arguments) const
+                        const std::vector<const Domain*>& arguments) const
   {
     Id<NDDL::NddlCBReusable>  instance = (new NDDL::NddlCBReusable(planDb, objectType, objectName,true))->getId();
 
-    std::vector<float> argValues;
+    std::vector<edouble> argValues;
     for (unsigned int i=0;i<arguments.size();i++)
-      argValues.push_back((float)(arguments[i]->getSingletonValue()));
+      argValues.push_back(arguments[i]->getSingletonValue());
 
     if (argValues.size() == 0)
       instance->constructor();
@@ -119,13 +119,13 @@ namespace EUROPA {
 						const PlanDatabaseId& planDb,
 						const LabelStr& objectType,
 						const LabelStr& objectName,
-						const std::vector<const AbstractDomain*>& arguments) const
+						const std::vector<const Domain*>& arguments) const
   {
     Id<NDDL::NddlReservoir>  instance = (new NDDL::NddlReservoir(planDb, objectType, objectName,true))->getId();
 
-    std::vector<float> argValues;
+    std::vector<edouble> argValues;
     for (unsigned int i=0;i<arguments.size();i++)
-      argValues.push_back((float)(arguments[i]->getSingletonValue()));
+      argValues.push_back(arguments[i]->getSingletonValue());
 
     if (argValues.size() == 0)
       instance->constructor();
@@ -199,13 +199,13 @@ namespace EUROPA {
                         const PlanDatabaseId& planDb,
                         const LabelStr& objectType,
                         const LabelStr& objectName,
-                        const std::vector<const AbstractDomain*>& arguments) const
+                        const std::vector<const Domain*>& arguments) const
   {
     Id<NDDL::NddlUnary>  instance = (new NDDL::NddlUnary(planDb, objectType, objectName,true))->getId();
 
-    std::vector<float> argValues;
+    std::vector<edouble> argValues;
     for (unsigned int i=0;i<arguments.size();i++)
-      argValues.push_back((float)(arguments[i]->getSingletonValue()));
+      argValues.push_back(arguments[i]->getSingletonValue());
 
     if (argValues.size() == 0)
       instance->constructor();

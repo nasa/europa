@@ -53,13 +53,13 @@ namespace EUROPA {
 class GroundedProfile : public TimetableProfile {
 public:
 	GroundedProfile(const PlanDatabaseId db, const FVDetectorId flawDetector,
-			const double initCapacityLb = 0, const double initCapacityUb = 0);
+			const edouble initCapacityLb = 0, const edouble initCapacityUb = 0);
 
 protected:
 
 	// Slight variants on what is done in TimetableProfile:
-	void handleTransactionStart(bool isConsumer, const double & lb, const double & ub);
-	void handleTransactionEnd(bool isConsumer, const double & lb, const double & ub);
+	void handleTransactionStart(bool isConsumer, const edouble & lb, const edouble & ub);
+	void handleTransactionEnd(bool isConsumer, const edouble & lb, const edouble & ub);
 };
 }
 

@@ -160,7 +160,7 @@ type returns [DataType* result]
         }
     ;
         
-baseDomain[const DataType* baseType] returns [AbstractDomain* result]
+baseDomain[const DataType* baseType] returns [Domain* result]
     :   child=baseDomainValues
     {
         DataRef data=evalExpr(CTX,child); 
@@ -247,15 +247,15 @@ setElement returns [Expr* result]
 
 valueSet returns [Expr* result]
 @init {
-    std::list<double> values;
+    std::list<edouble> values;
     DataTypeId elementType;
 }
     :   ^('{'
             (element=setElement
             {
                 DataRef elemValue = evalExpr(CTX,element);
-                const AbstractDomain& ev = elemValue.getValue()->lastDomain();
-                double v = ev.getSingletonValue();
+                const Domain& ev = elemValue.getValue()->lastDomain();
+                edouble v = ev.getSingletonValue();
                               
                 delete element;
                              
@@ -278,7 +278,7 @@ valueSet returns [Expr* result]
             )*
         )
         {
-            AbstractDomain* newDomain = new EnumeratedDomain(elementType,values); 
+            Domain* newDomain = new EnumeratedDomain(elementType,values); 
             result = new ExprConstant(
                 elementType->getName().c_str(),
                 newDomain                       
@@ -299,12 +299,12 @@ literalValue returns [Expr* result]
         }
     ;
     
-booleanLiteral returns [AbstractDomain* result]
+booleanLiteral returns [Domain* result]
     :   'true'  { result = new BoolDomain(true); }            
     |   'false' { result = new BoolDomain(false); }
     ;
 
-stringLiteral returns [AbstractDomain* result]
+stringLiteral returns [Domain* result]
     :    str = STRING 
          { 
              // remove quotes
@@ -312,11 +312,11 @@ stringLiteral returns [AbstractDomain* result]
              s = s.substr(1,s.size()-2);
                  
              LabelStr value(s); 
-             result = new StringDomain((double)value,StringDT::instance());
+             result = new StringDomain(value,StringDT::instance());
          }
     ; 
 
-numericLiteral returns [AbstractDomain* result]
+numericLiteral returns [Domain* result]
     :   floating=floatLiteral  { result = CTX->SymbolTable->makeNumericDomainFromLiteral("float",c_str($floating.text->chars)); }
     |   integer=intLiteral  { result = CTX->SymbolTable->makeNumericDomainFromLiteral("int",c_str($integer.text->chars)); }
     ;
@@ -335,15 +335,15 @@ numericInterval returns [Expr* result]
             upper=numericLiteral
         )
         {      
-            double lb = lower->getSingletonValue();
-            double ub = upper->getSingletonValue();
-            AbstractDomain* baseDomain;
+            edouble lb = lower->getSingletonValue();
+            edouble ub = upper->getSingletonValue();
+            Domain* baseDomain;
                     
             if (lower->getTypeName().toString()=="float" || 
                 upper->getTypeName().toString()=="float") 
                 baseDomain = new IntervalDomain(lb,ub);
             else 
-                baseDomain = new IntervalIntDomain((int)lb,(int)ub);
+                baseDomain = new IntervalIntDomain((eint)lb,(eint)ub);
                                   
             result = new ExprConstant(
                         lower->getTypeName().c_str(),
@@ -829,7 +829,7 @@ qualified returns [Expr* result]
                 if (CTX->SymbolTable->isEnumValue(varName.c_str())) {
                    result = CTX->SymbolTable->makeEnumRef(varName.c_str());
                    isEnum = true;
-                } else if (secondPart.c_str() != "") {
+                } else if (secondPart != "") {
                    if (CTX->SymbolTable->isEnumValue(secondPart.c_str())) {
                       result = CTX->SymbolTable->makeEnumRef(secondPart.c_str());
                       isEnum = true;
@@ -840,7 +840,7 @@ qualified returns [Expr* result]
 		        ObjectTypeId ot = CTX->SymbolTable->getObjectType(varName.c_str()); // Hack!
         		if (ot.isId())  { // is a class reference
             		LabelStr value(varName);
-            		result = new ExprConstant("string",new StringDomain((double)value,StringDT::instance()));
+            		result = new ExprConstant("string",new StringDomain((edouble)value,StringDT::instance()));
         		}        		
                 else if (!isEnum) {
                 	std::string errorMsg;

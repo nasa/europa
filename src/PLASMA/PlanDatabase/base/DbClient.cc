@@ -54,7 +54,7 @@ namespace EUROPA {
 
 
   ConstrainedVariableId
-  DbClient::createVariable(const char* typeName, const AbstractDomain& baseDomain, const char* name, bool isTmpVar, bool canBeSpecified)
+  DbClient::createVariable(const char* typeName, const Domain& baseDomain, const char* name, bool isTmpVar, bool canBeSpecified)
   {
     ConstrainedVariableId variable = m_planDb->getConstraintEngine()->createVariable(typeName, baseDomain, isTmpVar, canBeSpecified, name);
     if (m_planDb->getSchema()->isObjectType(typeName) && !variable->isClosed()) {
@@ -97,14 +97,14 @@ namespace EUROPA {
   }
 
   ObjectId DbClient::createObject(const char* type, const char* name){
-    static const std::vector<const AbstractDomain*> noArguments;
+    static const std::vector<const Domain*> noArguments;
     ObjectId object = m_planDb->createObject(type, name, noArguments);
     debugMsg("DbClient:createObject", object->toLongString());
     publish(notifyObjectCreated(object));
     return object;
   }
 
-  ObjectId DbClient::createObject(const char* type, const char* name, const std::vector<const AbstractDomain*>& arguments){
+  ObjectId DbClient::createObject(const char* type, const char* name, const std::vector<const Domain*>& arguments){
     ObjectId object = m_planDb->createObject(type, name, arguments);
     debugMsg("DbClient:createObject", object->toLongString());
     publish(notifyObjectCreated(object, arguments));
@@ -244,13 +244,13 @@ namespace EUROPA {
     m_planDb->getConstraintEngine()->deleteConstraint(c);
   }
 
-  void DbClient::restrict(const ConstrainedVariableId& variable, const AbstractDomain& domain){
+  void DbClient::restrict(const ConstrainedVariableId& variable, const Domain& domain){
     debugMsg("DbClient:restrict", variable->toLongString() << " to " << domain.toString());
     variable->restrictBaseDomain(domain);
     publish(notifyVariableRestricted(variable));
   }
 
-  void DbClient::specify(const ConstrainedVariableId& variable, double value){
+  void DbClient::specify(const ConstrainedVariableId& variable, edouble value){
     debugMsg("DbClient:specify", "before:" << variable->toLongString() << " to " << variable->toString(value));
     variable->specify(value);
     debugMsg("DbClient:specify", "after:" << variable->toLongString());
@@ -294,7 +294,7 @@ namespace EUROPA {
       return TokenId::noId();
 
     // Obtain the root token key using the first element in the path to index the tokenKeys.
-    int rootTokenKey = m_keysOfTokensCreated[relativePath[0]];
+    eint rootTokenKey = m_keysOfTokensCreated[relativePath[0]];
 
     // Now source the token as an enityt lookup by key. This works because we have a shared pool
     // of entities per process
@@ -348,7 +348,7 @@ namespace EUROPA {
     }
 
     // Loop terminates where slave is the root, so get the masters key from the slave pointer.
-    int keyOfMaster = slave->getKey();
+    eint keyOfMaster = slave->getKey();
 
     // Now we must obtain a key value based on relative position in the sequence of created master
     // tokens. This is done so that we can use the path to replay transactions, but resulting in different
@@ -449,7 +449,7 @@ namespace EUROPA {
 
   bool DbClient::isTransactionLoggingEnabled() const { return m_transactionLoggingEnabled; }
 
-  double DbClient::createValue(const char* typeName, const std::string& value)
+  edouble DbClient::createValue(const char* typeName, const std::string& value)
   {
     return m_planDb->getConstraintEngine()->createValue(typeName,value);
   }

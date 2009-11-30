@@ -141,7 +141,7 @@ namespace EUROPA {
     /**
      * @brief Utility to capture the state of the constraint.
      */
-    virtual std::string toString() const;
+    virtual std::string toLongString() const;
 
     /**
      * @brief Notification from a variable that its base domain has been retricted. May cause the constraint to be
@@ -198,7 +198,7 @@ namespace EUROPA {
      * @param var The variable whose domain is requested.
      * @return A mutable reference to the domain.
      */
-    static AbstractDomain& getCurrentDomain(const ConstrainedVariableId& var);
+    static Domain& getCurrentDomain(const ConstrainedVariableId& var);
 
     /**
      * @brief Wrapper for handleExecute calls, will set propagation context for all the variables in this constraint

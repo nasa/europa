@@ -46,30 +46,30 @@ namespace EUROPA {
     popTransaction();
   }
 
-  void DbClientTransactionLog::notifyVariableCreated(const ConstrainedVariableId& variable){
-		if(!variable->isInternal()) {
-			TiXmlElement * element = allocateXmlElement("var");
-			const AbstractDomain& baseDomain = variable->baseDomain();
-			std::string type = baseDomain.getTypeName().toString();
-			if (m_client->getSchema()->isObjectType(type)) {
-				ObjectId object = baseDomain.getLowerBound();
-				check_error(object.isValid());
-				type = object->getType().toString();
-			}
-			element->SetAttribute("type", type);
-			if (LabelStr::isString(variable->getName())) {
-				element->SetAttribute("name", variable->getName().toString());
-			}
-			debugMsg("notifyVariableCreated"," variable name = " << variable->getName().c_str() << " typeName = " << type << " type = " << baseDomain.getTypeName().c_str());
-
-			element->SetAttribute("index", m_client->getIndexByVariable(variable));
-
-			if (!baseDomain.isEmpty()) {
-				TiXmlElement * value = abstractDomainAsXml(&baseDomain);
-				element->LinkEndChild(value);
-			}
-			pushTransaction(element);
-		}
+  void DbClientTransactionLog::notifyVariableCreated(const ConstrainedVariableId& variable) {
+    if(!variable->isInternal()) {
+      TiXmlElement * element = allocateXmlElement("var");
+      const Domain& baseDomain = variable->baseDomain();
+      std::string type = baseDomain.getTypeName().toString();
+      if (m_client->getSchema()->isObjectType(type)) {
+        ObjectId object = Entity::getTypedEntity<Object>(baseDomain.getLowerBound());
+        check_error(object.isValid());
+        type = object->getType().toString();
+      }
+      element->SetAttribute("type", type);
+      if (LabelStr::isString(variable->getName())) {
+        element->SetAttribute("name", variable->getName().toString());
+      }
+      debugMsg("notifyVariableCreated"," variable name = " << variable->getName().c_str() << " typeName = " << type << " type = " << baseDomain.getTypeName().c_str());
+      
+      element->SetAttribute("index", m_client->getIndexByVariable(variable));
+      
+      if (!baseDomain.isEmpty()) {
+        TiXmlElement * value = abstractDomainAsXml(&baseDomain);
+        element->LinkEndChild(value);
+      }
+      pushTransaction(element);
+    }
   }
 
   void DbClientTransactionLog::notifyVariableDeleted(const ConstrainedVariableId& variable) {
@@ -83,17 +83,17 @@ namespace EUROPA {
   }
 
   void DbClientTransactionLog::notifyObjectCreated(const ObjectId& object){
-    const std::vector<const AbstractDomain*> noArguments;
+    const std::vector<const Domain*> noArguments;
     notifyObjectCreated(object, noArguments);
   }
 
-  void DbClientTransactionLog::notifyObjectCreated(const ObjectId& object, const std::vector<const AbstractDomain*>& arguments){
+  void DbClientTransactionLog::notifyObjectCreated(const ObjectId& object, const std::vector<const Domain*>& arguments){
     TiXmlElement * element = allocateXmlElement("new");
     if (LabelStr::isString(object->getName())) {
       element->SetAttribute("name", object->getName().toString());
     }
     element->SetAttribute("type", object->getType().toString());
-    std::vector<const AbstractDomain*>::const_iterator iter;
+    std::vector<const Domain*>::const_iterator iter;
     for (iter = arguments.begin() ; iter != arguments.end() ; iter++) {
       element->LinkEndChild(abstractDomainAsXml(*iter));
     }
@@ -275,17 +275,17 @@ namespace EUROPA {
   }
 
   std::string
-  DbClientTransactionLog::domainValueAsString(const AbstractDomain * domain, double value)
+  DbClientTransactionLog::domainValueAsString(const Domain * domain, edouble value)
   {
     if (isBool(domain->getTypeName().toString())) {
-      return (value ? "true" : "false");
+      return (value == 1 ? "true" : "false");
     }
     else
       if (domain->isNumeric()) {
         // CMG: Do not use snprintf. Not supported on DEC
         std::stringstream ss;
         if (isInt(domain->getTypeName().toString())) {
-          ss << (int) value;
+          ss << cast_int(value);
         } else {
           ss << value;
         }
@@ -294,14 +294,14 @@ namespace EUROPA {
         const LabelStr& label = value;
         return label.toString();
       } else {
-        ObjectId object = value;
+        ObjectId object = Entity::getTypedEntity<Object>(value);
         check_error(object.isValid());
         return object->getName().toString();
       }
   }
 
   TiXmlElement *
-  DbClientTransactionLog::domainValueAsXml(const AbstractDomain * domain, double value)
+  DbClientTransactionLog::domainValueAsXml(const Domain * domain, edouble value)
   {
     LabelStr typeName = domain->getTypeName();
     if (m_client->getSchema()->isObjectType(typeName)) {
@@ -336,7 +336,7 @@ namespace EUROPA {
   }
 
   TiXmlElement *
-  DbClientTransactionLog::abstractDomainAsXml(const AbstractDomain * domain)
+  DbClientTransactionLog::abstractDomainAsXml(const Domain * domain)
   {
     check_error(!domain->isEmpty());
     if (domain->isSingleton()) {
@@ -344,9 +344,9 @@ namespace EUROPA {
     } else if (domain->isEnumerated()) {
       TiXmlElement * element = allocateXmlElement("set");
       element->SetAttribute("type", domain->getTypeName().toString());
-      std::list<double> values;
+      std::list<edouble> values;
       domain->getValues(values);
-      std::list<double>::const_iterator iter;
+      std::list<edouble>::const_iterator iter;
       for (iter = values.begin() ; iter != values.end() ; iter++) {
         element->LinkEndChild(domainValueAsXml(domain, *iter));
       }

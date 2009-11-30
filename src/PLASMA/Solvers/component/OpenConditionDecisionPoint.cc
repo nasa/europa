@@ -37,7 +37,8 @@ namespace EUROPA {
       // Next merge choices if there are any.
       if(stateDomain.isMember(Token::MERGED)){
         // Use exact test in this case
-        m_flawedToken->getPlanDatabase()->getCompatibleTokens(m_flawedToken, m_compatibleTokens, PLUS_INFINITY, true);
+        m_flawedToken->getPlanDatabase()->getCompatibleTokens(m_flawedToken, m_compatibleTokens, 
+                                                              std::numeric_limits<unsigned int>::max(), true);
         m_mergeCount = m_compatibleTokens.size();
         if(m_mergeCount > 0) {
           m_choices.push_back(Token::MERGED);

@@ -5,7 +5,7 @@
 #include "ConstraintEngineDefs.hh"
 #include "LabelStr.hh"
 #include "Engine.hh"
-#include "AbstractDomain.hh"
+#include "Domain.hh"
 #include "ConstraintType.hh"
 #include "DataType.hh"
 #include "CFunction.hh"
@@ -32,7 +32,7 @@ namespace EUROPA {
       void registerDataType(const DataTypeId& dt);
       DataTypeId getDataType(const char* typeName);
       bool isDataType(const char* typeName) const;
-      const AbstractDomain & baseDomain(const char* typeName);
+      const Domain & baseDomain(const char* typeName);
       void purgeDataTypes();
 
       // Methods to Manage Constraint Factories
@@ -53,9 +53,9 @@ namespace EUROPA {
 
     protected:
       CESchemaId m_id;
-      std::map<double, DataTypeId> m_dataTypes;
-      std::map<double, ConstraintTypeId > m_constraintTypes;
-      std::map<double, CFunctionId> m_cfunctions;
+      std::map<edouble, DataTypeId> m_dataTypes;
+      std::map<edouble, ConstraintTypeId > m_constraintTypes;
+      std::map<edouble, CFunctionId> m_cfunctions;
   };
 
 } // namespace EUROPA

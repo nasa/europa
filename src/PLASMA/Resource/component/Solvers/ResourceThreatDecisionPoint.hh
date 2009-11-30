@@ -39,7 +39,7 @@ namespace EUROPA {
       unsigned int m_choiceCount;
       unsigned int m_index;
       ConstraintId m_constr;
-      int m_instTime;
+      eint m_instTime;
       LabelStr m_resName;
       std::string m_order;
       std::string m_filter;

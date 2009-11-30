@@ -33,7 +33,7 @@ namespace EUROPA {
 
     ConstraintSet m_agenda;
 
-    int m_activeConstraint;
+    eint m_activeConstraint;
   private:
     bool isValid() const;
   };

@@ -156,7 +156,7 @@ namespace EUROPA {
     /**
      * @brief create an abstract domain as represented by an xml element
      */
-    AbstractDomain * xmlAsAbstractDomain(const TiXmlElement & element,
+    Domain * xmlAsDomain(const TiXmlElement & element,
 					       const char * name = NULL,
 					       const char* typeName = NULL);
 
@@ -175,7 +175,7 @@ namespace EUROPA {
     /**
      * @brief return a value as represented by an xml element
      */
-    double xmlAsValue(const TiXmlElement & value, const char * name = NULL);
+    edouble xmlAsValue(const TiXmlElement & value, const char * name = NULL);
 
     /**
      * @brief return a variable as represented by an xml element

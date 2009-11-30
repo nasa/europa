@@ -13,7 +13,7 @@
 
 namespace EUROPA {
 
-    Profile::Profile(const PlanDatabaseId db, const FVDetectorId flawDetector, const double initLevelLb, const double initLevelUb)
+    Profile::Profile(const PlanDatabaseId db, const FVDetectorId flawDetector, const edouble initLevelLb, const edouble initLevelUb)
       : m_id(this), m_changeCount(0), m_needsRecompute(false), m_initLevelLb(initLevelLb), m_initLevelUb(initLevelUb),
         m_planDatabase(db), m_detector(flawDetector) {
       m_removalListener = (new ConstraintRemovalListener(db->getConstraintEngine(), m_id))->getId();
@@ -23,7 +23,7 @@ namespace EUROPA {
       debugMsg("Profile:~Profile", "In profile destructor for " << getId());
       delete (ConstraintEngineListener*) m_removalListener;
       debugMsg("Profile:~Profile", "Cleaning up instants...");
-      for(std::map<int, InstantId>::iterator it = m_instants.begin(); it != m_instants.end(); ++it)
+      for(std::map<eint, InstantId>::iterator it = m_instants.begin(); it != m_instants.end(); ++it)
         delete (Instant*) it->second;
       debugMsg("Profile:~Profile", "Cleaning up variable listeners...");
       for(std::multimap<TransactionId, ConstraintId>::iterator it = m_variableListeners.begin();
@@ -48,8 +48,8 @@ namespace EUROPA {
       debugMsg("Profile:addTransaction", "Adding " << (t->isConsumer() ? "consumer " : "producer ") << "transaction " << t << " for time " <<
                t->time()->toString() << " with quantity " << t->quantity()->toString());
 
-      int startTime = (int) t->time()->lastDomain().getLowerBound();
-      int endTime = (int) t->time()->lastDomain().getUpperBound();
+      eint startTime = (eint) t->time()->lastDomain().getLowerBound();
+      eint endTime = (eint) t->time()->lastDomain().getUpperBound();
 
       //if instants for the start and end time don't already exist, add them
       addInstantsForBounds(t);
@@ -91,10 +91,10 @@ namespace EUROPA {
 
       debugMsg("Profile:removeTransaction", "Removing transaction " << t << " for time " << t->time()->toString() << " with quantity " << t->quantity()->toString());
 
-      int startTime = (int) t->time()->lastDomain().getLowerBound();
-      int endTime = (int) t->time()->lastDomain().getUpperBound();
+      eint startTime = (eint) t->time()->lastDomain().getLowerBound();
+      eint endTime = (eint) t->time()->lastDomain().getUpperBound();
       ProfileIterator profIt(m_id, startTime, endTime);
-      std::vector<int> emptyInstants;
+      std::vector<eint> emptyInstants;
       //remove the transaction from its instants
       while(!profIt.done()) {
         debugMsg("Profile:removeTransaction", "Removing transaction " << t << " from instant for time " << profIt.getInstant()->getTime());
@@ -135,8 +135,8 @@ namespace EUROPA {
       m_variableListeners.erase(t);
       handleTransactionVariableDeletion(t);
 
-      for(std::vector<int>::const_iterator it = emptyInstants.begin(); it != emptyInstants.end(); ++it) {
-        std::map<int, InstantId>::iterator instIt = m_instants.find(*it);
+      for(std::vector<eint>::const_iterator it = emptyInstants.begin(); it != emptyInstants.end(); ++it) {
+        std::map<eint, InstantId>::iterator instIt = m_instants.find(*it);
         //this can't be an error because the discard above constitues a relaxation of the variable, which will get handled in-situ
         //and may remove instants in the emptyInstants vector.
         //checkError(instIt != m_instants.end(), "Computed empty instant at " << *it << " but there is no such instant in the profile.");
@@ -169,8 +169,8 @@ namespace EUROPA {
       checkError(e.isValid(), "Invalid transaction.");
       checkError(m_transactions.find(e) != m_transactions.end(), "Unknown transaction " << e->time()->toString() << " " << e->quantity()->toString());
 
-      int startTime = (int) e->time()->lastDomain().getLowerBound();
-      int endTime = (int) e->time()->lastDomain().getUpperBound();
+      eint startTime = (eint) e->time()->lastDomain().getLowerBound();
+      eint endTime = (eint) e->time()->lastDomain().getUpperBound();
       switch(change) {
       case DomainListener::UPPER_BOUND_DECREASED:
       case DomainListener::LOWER_BOUND_INCREASED:
@@ -178,8 +178,8 @@ namespace EUROPA {
       case DomainListener::RESTRICT_TO_SINGLETON:
       case DomainListener::SET_TO_SINGLETON: {
         debugMsg("Profile:handleTimeChanged", "Handling restriction of transaction " << e << " at time " << e->time()->toString() << " with quantity " << e->quantity()->toString());
-        int first, last;
-        std::map<int, InstantId>::iterator it;
+        eint first, last;
+        std::map<eint, InstantId>::iterator it;
         for(it = m_instants.begin(); it != m_instants.end(); ++it)
           if(it->second->getTransactions().find(e) != it->second->getTransactions().end())
             break;
@@ -194,7 +194,7 @@ namespace EUROPA {
         last = it->second->getTime();
         debugMsg("Profile:handleTimeChanged", "Possibly removing transaction " << e << " from Instants in range [" << first << " " << last << "]");
         ProfileIterator profIt(m_id, first, last);
-        std::vector<int> emptyInstants;
+        std::vector<eint> emptyInstants;
         while(!profIt.done()) {
           InstantId inst = profIt.getInstant();
           if(!e->time()->lastDomain().isMember(inst->getTime())) {
@@ -211,8 +211,8 @@ namespace EUROPA {
         //add instants for start and end and add overlapping transactions to them
         addInstantsForBounds(e);
 
-        for(std::vector<int>::iterator it = emptyInstants.begin(); it != emptyInstants.end(); ++it) {
-          std::map<int, InstantId>::iterator instIt = m_instants.find(*it);
+        for(std::vector<eint>::iterator it = emptyInstants.begin(); it != emptyInstants.end(); ++it) {
+          std::map<eint, InstantId>::iterator instIt = m_instants.find(*it);
           checkError(instIt != m_instants.end(), "Computed empty instant at time " << *it << " but no such instant exists.");
           InstantId inst = instIt->second;
           debugMsg("Profile:handleTimeChanged", "Removing instant at time " << inst->getTime());
@@ -229,7 +229,7 @@ namespace EUROPA {
         debugMsg("Profile:handleTimeChanged", "Handling relaxation of transaction " << e << " at time " << e->time()->toString() << " with quantity " << e->quantity()->toString());
         ProfileIterator it(m_id, startTime, endTime);
         addInstantsForBounds(e);
-        std::vector<int> emptyInstants;
+        std::vector<eint> emptyInstants;
         while(!it.done()) {
           InstantId inst = it.getInstant();
           if(!inst->containsStartOrEnd())
@@ -240,8 +240,8 @@ namespace EUROPA {
             inst->updateTransaction(e);
           it.next();
         }
-        for(std::vector<int>::iterator it = emptyInstants.begin(); it != emptyInstants.end(); ++it) {
-          std::map<int, InstantId>::iterator instIt = m_instants.find(*it);
+        for(std::vector<eint>::iterator it = emptyInstants.begin(); it != emptyInstants.end(); ++it) {
+          std::map<eint, InstantId>::iterator instIt = m_instants.find(*it);
           checkError(instIt != m_instants.end(), "Computed empty instant at time " << *it << " but no such instant exists.");
           InstantId inst = instIt->second;
           debugMsg("Profile:handleTimeChanged", "Removing instant at time " << inst->getTime());
@@ -413,10 +413,10 @@ namespace EUROPA {
          m_otherListeners.erase(t);
      }
 
-    void Profile::getLevel(const int time, IntervalDomain& dest) {
+    void Profile::getLevel(const eint time, IntervalDomain& dest) {
       if(needsRecompute())
         handleRecompute();
-      std::map<int, InstantId>::iterator it = getGreatestInstant(time);
+      std::map<eint, InstantId>::iterator it = getGreatestInstant(time);
       IntervalDomain result;
 
       if(it == m_instants.end())
@@ -429,13 +429,13 @@ namespace EUROPA {
     }
 
     //i should really re-name these.
-    std::map<int, InstantId>::iterator Profile::getGreatestInstant(const int time) {
+    std::map<eint, InstantId>::iterator Profile::getGreatestInstant(const eint time) {
       debugMsg("Profile:getGreatestInstant", "Greatest Instant not greater than " << time);
 
       if(m_instants.empty())
         return m_instants.end();
 
-      std::map<int, InstantId>::iterator retval = m_instants.lower_bound(time);
+      std::map<eint, InstantId>::iterator retval = m_instants.lower_bound(time);
 
       //checkError(retval != m_instants.end(), "No instant with time not greater than " << time);
       if(retval == m_instants.end() || retval->second->getTime() > time)
@@ -449,14 +449,14 @@ namespace EUROPA {
       debugMsg("Profile:getGreatestInstant", "Got instant at time " << retval->second->getTime());
       return retval;
     }
-
-    std::map<int, InstantId>::iterator Profile::getLeastInstant(const int time) {
+    
+    std::map<eint, InstantId>::iterator Profile::getLeastInstant(const eint time) {
       debugMsg("Profile:getLeastInstant", "Least Instant not less than " << time);
       if(m_instants.empty())
         return m_instants.end();
 
-      std::map<int, InstantId>::iterator retval = m_instants.lower_bound(time);
-
+      std::map<eint, InstantId>::iterator retval = m_instants.lower_bound(time);
+      
       if(retval == m_instants.end())
         --retval;
       //checkError(retval != m_instants.end(), "No instant with time not less than " << time);
@@ -522,12 +522,12 @@ namespace EUROPA {
     }
 
     void Profile::addInstantsForBounds(const TransactionId t) {
-      int first = (int) t->time()->lastDomain().getLowerBound();
-      int last =  (int) t->time()->lastDomain().getUpperBound();
+      eint first = (eint) t->time()->lastDomain().getLowerBound();
+      eint last =  (eint) t->time()->lastDomain().getUpperBound();
 
       {
-        std::map<int, InstantId>::iterator ite = m_instants.find( first );
-
+        std::map<eint, InstantId>::iterator ite = m_instants.find( first );
+	
         if( ite == m_instants.end() ) {
           addInstant(first);
         }
@@ -538,7 +538,7 @@ namespace EUROPA {
       }
 
       {
-        std::map<int, InstantId>::iterator ite = m_instants.find( last );
+        std::map<eint, InstantId>::iterator ite = m_instants.find( last );
         if( ite == m_instants.end() ) {
           addInstant(last);
         }
@@ -549,11 +549,11 @@ namespace EUROPA {
       }
     }
 
-    void Profile::addInstant(const int time) {
+    void Profile::addInstant(const eint time) {
       checkError(m_instants.find(time) == m_instants.end(), "Attempted to add a redundant instant for time " << time);
       debugMsg("Profile:addInstant", "Adding instant for time " << time);
       InstantId inst = (new Instant(time, m_id))->getId();
-      m_instants.insert(std::pair<int, InstantId>(time, inst));
+      m_instants.insert(std::pair<eint, InstantId>(time, inst));
 
       for(std::set<TransactionId>::const_iterator it = m_transactions.begin(); it != m_transactions.end(); ++it) {
         TransactionId trans = *it;
@@ -632,12 +632,12 @@ namespace EUROPA {
     std::string Profile::toString() const {
       std::stringstream sstr;
       sstr << "Profile " << m_id << std::endl;
-      for(std::map<int, InstantId>::const_iterator it = m_instants.begin(); it != m_instants.end(); ++it)
+      for(std::map<eint, InstantId>::const_iterator it = m_instants.begin(); it != m_instants.end(); ++it)
         sstr << it->second->toString() << std::endl;
       return sstr.str();
     }
 
-    ProfileIterator::ProfileIterator(const ProfileId prof, const int startTime, const int endTime)
+    ProfileIterator::ProfileIterator(const ProfileId prof, const eint startTime, const eint endTime)
       : m_id(this), m_profile(prof), m_changeCount(prof->m_changeCount) {
       //if(m_profile->m_needsRecompute)
       //m_profile->handleRecompute();
@@ -666,28 +666,28 @@ namespace EUROPA {
       return m_start == m_end;
     }
 
-    int ProfileIterator::getStartTime() const {
+    eint ProfileIterator::getStartTime() const {
       return m_startTime;
     }
 
-    int ProfileIterator::getTime() const {
+    eint ProfileIterator::getTime() const {
       checkError(!isStale(), "Stale profile iterator.");
       checkError(!done(), "Attempted to get time of a done iterator.");
       return m_start->second->getTime();
     }
 
-    int ProfileIterator::getEndTime() const {
+    eint ProfileIterator::getEndTime() const {
       return m_endTime;
     }
 
-    double ProfileIterator::getLowerBound() const {
+    edouble ProfileIterator::getLowerBound() const {
       checkError(!isStale(), "Stale profile iterator.");
       checkError(!done(), "Attempted to get bound of a done iterator.");
       m_profile->recompute();
       return m_start->second->getLowerLevel();
     }
 
-    double ProfileIterator::getUpperBound() const {
+    edouble ProfileIterator::getUpperBound() const {
       checkError(!isStale(), "Stale profile iterator.");
       checkError(!done(), "Attempted to get bound of a done iterator.");
       m_profile->recompute();

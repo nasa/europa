@@ -1,7 +1,7 @@
 #ifndef _H_AbstractVar
 #define _H_AbstractVar
 
-#include "AbstractDomain.hh"
+#include "Domain.hh"
 #include "ConstrainedVariable.hh"
 #include "ConstraintEngine.hh"
 #include "Debug.hh"
@@ -33,7 +33,7 @@ namespace EUROPA {
      * @param index position in parent collection.
      */
     Variable(const ConstraintEngineId& constraintEngine,
-             const AbstractDomain& baseDomain,
+             const Domain& baseDomain,
              const bool internal = false,
              bool canBeSpecified = true,
              const LabelStr& name = ConstrainedVariable::NO_NAME(),
@@ -70,23 +70,23 @@ namespace EUROPA {
      * @brief Return the last computed derived domain.
      * @see ConstrainedVariable::lastDomain()
      */
-    const AbstractDomain& lastDomain() const;
+    const Domain& lastDomain() const;
 
     /**
      * @brief Returns the derived domain.
      * @note Causes any needed propagation.
      * @see ConstrainedVariable::derivedDomain()
      */
-    const AbstractDomain& derivedDomain();
+    const Domain& derivedDomain();
 
     /**
      * @brief Retrieve the specified domain.
      */
-    const AbstractDomain& baseDomain() const;
+    const Domain& baseDomain() const;
 
   protected:
-    AbstractDomain& internal_baseDomain();
-    virtual void handleRestrictBaseDomain(const AbstractDomain& baseDomain);
+    Domain& internal_baseDomain();
+    virtual void handleRestrictBaseDomain(const Domain& baseDomain);
 
   private:
     Variable(const Variable&); // Prohibit compiler from generating copy constructor
@@ -97,7 +97,7 @@ namespace EUROPA {
      * propagation.
      * @see lastDomain(), Constraint
      */
-    AbstractDomain& getCurrentDomain();
+    Domain& getCurrentDomain();
 
   protected:
     DomainType* m_baseDomain; /**< The initial (and maximal, unless dynamic) set for the domain of this variable. */
@@ -107,7 +107,7 @@ namespace EUROPA {
 
   template<class DomainType>
   Variable<DomainType>::Variable(const ConstraintEngineId& constraintEngine,
-                                 const AbstractDomain& baseDomain,
+                                 const Domain& baseDomain,
                                  const bool internal,
                                  bool canBeSpecified,
                                  const LabelStr& name,
@@ -116,8 +116,8 @@ namespace EUROPA {
     : ConstrainedVariable(constraintEngine, internal, canBeSpecified, name, parent, index),
     m_baseDomain(static_cast<DomainType*>(baseDomain.copy())),
     m_derivedDomain(static_cast<DomainType*>(baseDomain.copy())) {
+    debugMsg("Variable:Variable", "Name " << name.toString());
     debugMsg("Variable:Variable", "Base Domain = " << baseDomain.toString());
-    debugMsg("Variable:Variable", "Name " << name);
     if(baseDomain.isSingleton())
     {
     	debugMsg("Variable:Variable", "Base domain singleton; " << baseDomain.getSingletonValue());
@@ -166,7 +166,7 @@ namespace EUROPA {
   }
 
   template<class DomainType>
-  AbstractDomain& Variable<DomainType>::getCurrentDomain() {
+  Domain& Variable<DomainType>::getCurrentDomain() {
     check_error(validate());
     return(*m_derivedDomain);
   }
@@ -178,24 +178,24 @@ namespace EUROPA {
   }
 
   template<class DomainType>
-  const AbstractDomain& Variable<DomainType>::lastDomain() const {
+  const Domain& Variable<DomainType>::lastDomain() const {
     check_error(validate());
     return(*m_derivedDomain);
   }
   template<class DomainType>
-  const AbstractDomain& Variable<DomainType>::derivedDomain() {
+  const Domain& Variable<DomainType>::derivedDomain() {
     check_error(validate());
     return(getDerivedDomain());
   }
 
   template<class DomainType>
-  const AbstractDomain& Variable<DomainType>::baseDomain() const {
+  const Domain& Variable<DomainType>::baseDomain() const {
     check_error(validate());
     return(*m_baseDomain);
   }
 
   template<class DomainType>
-  void Variable<DomainType>::handleRestrictBaseDomain(const AbstractDomain& newBaseDomain) {
+  void Variable<DomainType>::handleRestrictBaseDomain(const Domain& newBaseDomain) {
     check_error(validate());
 
     // For thh case of the open domain, we will assign values. Also will assign closure. For the case
@@ -218,7 +218,7 @@ namespace EUROPA {
   }
 
   template<class DomainType>
-  AbstractDomain& Variable<DomainType>::internal_baseDomain() {
+  Domain& Variable<DomainType>::internal_baseDomain() {
     return(*m_baseDomain);
   }
 }

@@ -171,9 +171,9 @@ public:
 class DummyResource : public Resource {
 public:
   DummyResource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name,
-		double initCapacityLb = 0, double initCapacityUb = 0, double lowerLimit = MINUS_INFINITY,
-		double upperLimit = PLUS_INFINITY, double maxInstProduction = PLUS_INFINITY, double maxInstConsumption = PLUS_INFINITY,
-		double maxProduction = PLUS_INFINITY, double maxConsumption = PLUS_INFINITY)
+		edouble initCapacityLb = 0, edouble initCapacityUb = 0, edouble lowerLimit = MINUS_INFINITY,
+		edouble upperLimit = PLUS_INFINITY, edouble maxInstProduction = PLUS_INFINITY, edouble maxInstConsumption = PLUS_INFINITY,
+		edouble maxProduction = PLUS_INFINITY, edouble maxConsumption = PLUS_INFINITY)
     : Resource(planDatabase, type, name, LabelStr("OpenWorldFVDetector"), LabelStr("TimetableProfile"), initCapacityLb, initCapacityUb,
 		     lowerLimit, upperLimit, maxInstProduction, maxInstConsumption,
 		     maxProduction, maxConsumption) {}
@@ -193,7 +193,7 @@ public:
 private:
   void notifyViolated(const InstantId inst) {
     TransactionId trans = *(inst->getTransactions().begin());
-    const_cast<AbstractDomain&>(trans->time()->lastDomain()).empty();
+    const_cast<Domain&>(trans->time()->lastDomain()).empty();
   }
 
   //no implementation.  no tests for flaw detection
@@ -247,9 +247,9 @@ private:
     return true;
   }
 
-  static double checkLevelArea(ProfileId prof) {
+  static edouble checkLevelArea(ProfileId prof) {
     prof->recompute();
-    double area = 0;
+    edouble area = 0;
     ProfileIterator it(prof);
     if(it.done()) {
       debugMsg("ResourceTest:checkLevelArea", "No Instants.  Returning 0.");
@@ -269,10 +269,10 @@ private:
     return area;
   }
 
-  static int checkSum(ProfileId prof) {
+  static eint checkSum(ProfileId prof) {
     prof->recompute();
-    int sum = 0;
-    int count = 1;
+    eint sum = 0;
+    eint count = 1;
     debugMsg("ResourceTest:checkSum", "        Transactions");
     ProfileIterator it(prof);
     while(!it.done()) {
@@ -402,7 +402,7 @@ private:
     //should remove the instant at 3 and add an instant at 2.  the instant at 2 should have two transactions (t3 and t4).
     times.erase(3);
     times.insert(2);
-    const_cast<AbstractDomain&>(t3.lastDomain()).intersect(0, 2);
+    const_cast<Domain&>(t3.lastDomain()).intersect(0, 2);
     ProfileIterator prof1(profile.getId());
     CPPUNIT_ASSERT(checkTimes(times, prof1));
     ProfileIterator oCheck1(profile.getId(), 2, 2);
@@ -478,12 +478,12 @@ private:
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*3));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*45 + 1*80 + 998*100));
 
-    trans2.time()->restrictBaseDomain(IntervalIntDomain(1, (int)trans2.time()->lastDomain().getUpperBound()));
+    trans2.time()->restrictBaseDomain(IntervalIntDomain(1, trans2.time()->lastDomain().getUpperBound()));
     CPPUNIT_ASSERT(ce.propagate());
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*2 + 3*3 + 4*3));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (1*45 + 1*80 + 998*100));
 
-    trans2.time()->restrictBaseDomain(IntervalIntDomain(2, (int)trans2.time()->lastDomain().getUpperBound()));
+    trans2.time()->restrictBaseDomain(IntervalIntDomain(2, trans2.time()->lastDomain().getUpperBound()));
     CPPUNIT_ASSERT(ce.propagate());
     CPPUNIT_ASSERT(checkSum(r.getId()) == (1*1 + 2*3 + 3*3));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == (2*45 + 998*100));
@@ -648,13 +648,13 @@ private:
     ce.propagate();
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*10);
 
-    trans1.time()->restrictBaseDomain(IntervalIntDomain(1, (int)trans1.time()->lastDomain().getUpperBound()));
+    trans1.time()->restrictBaseDomain(IntervalIntDomain(1, trans1.time()->lastDomain().getUpperBound()));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*9);
 
-    trans1.time()->restrictBaseDomain(IntervalIntDomain((int)trans1.time()->lastDomain().getLowerBound(), 8));
+    trans1.time()->restrictBaseDomain(IntervalIntDomain(trans1.time()->lastDomain().getLowerBound(), eint(8)));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*7);
 
-    trans1.time()->restrictBaseDomain(IntervalIntDomain((int)trans1.time()->lastDomain().getLowerBound(), 6));
+    trans1.time()->restrictBaseDomain(IntervalIntDomain(trans1.time()->lastDomain().getLowerBound(), eint(6)));
     CPPUNIT_ASSERT(checkLevelArea(r.getId()) == 10*5);
 
     RESOURCE_DEFAULT_TEARDOWN();
@@ -713,8 +713,8 @@ private:
     // no violation because of temporal flexibility
     CPPUNIT_ASSERT(ce.propagate());
 
-    trans1.time()->restrictBaseDomain(IntervalIntDomain(1, (int)trans1.time()->lastDomain().getUpperBound()));
-    trans3.time()->restrictBaseDomain(IntervalIntDomain(1, (int)trans3.time()->lastDomain().getUpperBound()));
+    trans1.time()->restrictBaseDomain(IntervalIntDomain(1, trans1.time()->lastDomain().getUpperBound()));
+    trans3.time()->restrictBaseDomain(IntervalIntDomain(1, trans3.time()->lastDomain().getUpperBound()));
     CPPUNIT_ASSERT(!ce.propagate());
 
     //r->getResourceViolations(violations);
@@ -737,8 +737,8 @@ private:
     r.addTransaction(trans4.getId());
     // no violation because of temporal flexibility
     CPPUNIT_ASSERT(ce.propagate());
-    trans2.time()->restrictBaseDomain(IntervalIntDomain(1, (int)trans2.time()->lastDomain().getUpperBound()));
-    trans4.time()->restrictBaseDomain(IntervalIntDomain(1, (int)trans4.time()->lastDomain().getUpperBound()));
+    trans2.time()->restrictBaseDomain(IntervalIntDomain(1, trans2.time()->lastDomain().getUpperBound()));
+    trans4.time()->restrictBaseDomain(IntervalIntDomain(1, trans4.time()->lastDomain().getUpperBound()));
     CPPUNIT_ASSERT(!ce.propagate());
 
     //violations.clear();
@@ -1139,14 +1139,14 @@ private:
     ProfileIterator it2(res2.getProfile());
     CPPUNIT_ASSERT(it2.done());
 
-    const_cast<AbstractDomain&>(consumer.getObject()->lastDomain()).remove(res2.getId());
+    const_cast<Domain&>(consumer.getObject()->lastDomain()).remove(res2.getKey());
     ce.propagate();
     ProfileIterator it3(res1.getProfile());
     CPPUNIT_ASSERT(!it3.done());
     ProfileIterator it4(res2.getProfile());
     CPPUNIT_ASSERT(it4.done());
 
-    const_cast<AbstractDomain&>(consumer.getObject()->lastDomain()).relax(consumer.getObject()->baseDomain());
+    const_cast<Domain&>(consumer.getObject()->lastDomain()).relax(consumer.getObject()->baseDomain());
     ProfileIterator it5(res1.getProfile());
     CPPUNIT_ASSERT(it5.done());
     ProfileIterator it6(res2.getProfile());
@@ -1175,8 +1175,8 @@ private:
     ConsumerToken c1(db.getId(), LabelStr("Reservoir.consume"), IntervalIntDomain(0, 10), IntervalDomain(3, 5));
     ConsumerToken c2(db.getId(), LabelStr("Reservoir.consume"), IntervalIntDomain(0, 10), IntervalDomain(3, 5));
 
-    c1.getObject()->specify(res1.getId());
-    c2.getObject()->specify(res1.getId());
+    c1.getObject()->specify(res1.getKey());
+    c2.getObject()->specify(res1.getKey());
 
     CPPUNIT_ASSERT(ce.propagate());
     CPPUNIT_ASSERT(res1.hasTokensToOrder());
@@ -1186,7 +1186,7 @@ private:
 
     CPPUNIT_ASSERT(ce.propagate());
 
-    c1.getObject()->specify(res1.getId());
+    c1.getObject()->specify(res1.getKey());
 
     CPPUNIT_ASSERT(ce.propagate());
 
@@ -1292,7 +1292,7 @@ private:
     ResourceId res(battery);
     CPPUNIT_ASSERT(res.isValid());
     
-    const std::map<int, InstantId>& insts(res->getProfile()->getInstants());
+    const std::map<eint, InstantId>& insts(res->getProfile()->getInstants());
     CPPUNIT_ASSERT(!insts.empty());
 
     TransactionId trans = *(insts.begin()->second->getTransactions().begin());

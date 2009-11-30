@@ -16,7 +16,7 @@ namespace EUROPA {
 	                        const PlanDatabaseId& planDb,
 	                        const LabelStr& objectType,
 	                        const LabelStr& objectName,
-	                        const std::vector<const AbstractDomain*>& arguments) const;
+	                        const std::vector<const Domain*>& arguments) const;
   };
 
   class ReusableUsesTokenType: public NativeTokenType
@@ -40,7 +40,7 @@ namespace EUROPA {
                             const PlanDatabaseId& planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
-                            const std::vector<const AbstractDomain*>& arguments) const;
+                            const std::vector<const Domain*>& arguments) const;
   };
 
   class ReservoirObjectFactory : public NativeObjectFactory
@@ -54,7 +54,7 @@ namespace EUROPA {
 	                        const PlanDatabaseId& planDb,
 	                        const LabelStr& objectType,
 	                        const LabelStr& objectName,
-	                        const std::vector<const AbstractDomain*>& arguments) const;
+	                        const std::vector<const Domain*>& arguments) const;
   };
 
   class ReservoirProduceTokenType: public NativeTokenType
@@ -88,7 +88,7 @@ namespace EUROPA {
                             const PlanDatabaseId& planDb,
                             const LabelStr& objectType,
                             const LabelStr& objectName,
-                            const std::vector<const AbstractDomain*>& arguments) const;
+                            const std::vector<const Domain*>& arguments) const;
   };
 
   class UnaryUseTokenType: public NativeTokenType

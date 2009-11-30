@@ -92,9 +92,9 @@ namespace EUROPA {
       /**
        * @brief Helper method to do value conversions for object domains. This one does the work.
        */
-      static double convertValueIfNecessary(const PlanDatabaseId& db,
-                                            const ConstrainedVariableId& guardVar,
-                                            const double& testValue);
+      static edouble convertValueIfNecessary(const PlanDatabaseId& db,
+                                             const ConstrainedVariableId& guardVar,
+                                             const edouble& testValue);
 
       static const unsigned int WEIGHT_BASE() {return 100000;} /*!< Used to weight active instances. 
                                                                  Establishes upper limit on priority values.*/
@@ -181,7 +181,7 @@ namespace EUROPA {
       /**
        * @brief Helper method to get a double encoded value
        */
-      static double readValue(const char* data);
+      static edouble readValue(const char* data);
 
       /**
        * @brief Helper method to stringify a guard
@@ -191,7 +191,7 @@ namespace EUROPA {
       /**
        * @brief Helper method to test a guard value
        */
-      bool matches(const ConstrainedVariableId& guardVar, const double& testValue);
+      bool matches(const ConstrainedVariableId& guardVar, const edouble& testValue);
 
       /**
        * @brief Helper to get a token, if possible, from an entity (token, or variable)

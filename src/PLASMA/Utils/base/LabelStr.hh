@@ -12,18 +12,7 @@
 #include "Error.hh"
 #include <map>
 #include <string>
-#include <ext/hash_map>
-
-// Come on you GCC guys...
-#if (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4))
-# if (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)
-#  include <backward/hash_fun.h>
-# else
-#  include <ext/hash_fun.h>
-# endif
-#else
-# include <ext/stl_hash_fun.h>
-#endif
+#include "hash_map.hh"
 
 namespace __gnu_cxx {
   template<> struct hash<double> {
@@ -76,7 +65,7 @@ namespace EUROPA {
      * @param key the key value for a previously created LabelStr instance.
      * @see m_key, getString()
      */
-    LabelStr(double key);
+    LabelStr(edouble key);
 
 #ifdef EUROPA_FAST
 
@@ -84,7 +73,7 @@ namespace EUROPA {
       : m_key(org.m_key) {
     }
 
-    inline operator double () const {
+    inline operator edouble () const {
       return(m_key);
     }
 
@@ -98,7 +87,7 @@ namespace EUROPA {
      */
     LabelStr(const LabelStr& org);
 
-    operator double () const;
+    operator edouble () const;
 
 #endif
 
@@ -111,6 +100,9 @@ namespace EUROPA {
      * @brief Lexical ordering test - greater than
      */
     bool operator >(const LabelStr& lbl) const;
+
+    bool operator==(const LabelStr& lbl) const;
+    bool operator!=(const LabelStr& lbl) const;
 
     /**
      * @brief Return the represented string.
@@ -126,7 +118,7 @@ namespace EUROPA {
      * @brief Obtain the encoded key value for the string.
      * @return The key for accessing the store of strings.
      */
-    inline double getKey() const {
+    inline edouble getKey() const {
       return(m_key);
     }
 
@@ -175,12 +167,12 @@ namespace EUROPA {
      * @param label The string to be added or found in the store of all strings in use.
      * @return The key value, either created or retrieved.
      */
-    static double getKey(const std::string& label);
+    static edouble getKey(const std::string& label);
 
     /**
      * @brief Test if the given double valued key is actually a string.
      */
-    static bool isString(double key);
+    static bool isString(edouble key);
 
     /**
      * @brief Tests if the given candidate is actually stored already as a LabelStr
@@ -193,7 +185,7 @@ namespace EUROPA {
      * @note The only instance data.
      * @see handleInsertion.
      */
-    double m_key;
+    edouble m_key;
 
     /**
      * @brief Constructs an entry in stringFromKeys to allow lookup of strings from a key.
@@ -204,7 +196,7 @@ namespace EUROPA {
      * @param label the string for which the key has been encoded.
      * @see s_stringFromKeys, getString()
      */
-    static void handleInsertion(double key, const std::string& label);
+    static void handleInsertion(edouble key, const std::string& label);
 
     /**
      * @brief Obtain the string from the key.
@@ -212,12 +204,12 @@ namespace EUROPA {
      * @return a reference to the original string held in the string store.
      * @see s_stringFromKeys
      */
-    static const std::string& getString(double key);
+    static const std::string& getString(edouble key);
 
     /*static std::map< std::string, double>& keysFromString();*/ /**< Map strings to keys for key allocation on construction. */
     /*static std::map< double, std::string>& stringFromKeys();*/ /**< Map keys to strings for string retrieval - i.e. toString(). */
-    static std::map<std::string, double>& keysFromString();
-    static std::map<double, std::string>& stringFromKeys();
+    static std::map<std::string, edouble>& keysFromString();
+    static std::map<edouble, std::string>& stringFromKeys();
 
 #ifndef EUROPA_FAST
     const char* m_chars;

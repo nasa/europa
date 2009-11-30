@@ -14,7 +14,7 @@
 #include "DomainListener.hh"
 #include "MatchingEngine.hh"
 #include "FlawHandler.hh"
-#include <ext/hash_map>
+#include "hash_map.hh"
 
 namespace EUROPA {
   namespace SOLVERS {
@@ -34,7 +34,7 @@ namespace EUROPA {
 
       virtual ~FlawManager();
 
-			const std::multimap<unsigned int, ConstraintId> getFlawHandlerGuards() const {return m_flawHandlerGuards;}
+      const std::multimap<eint, ConstraintId> getFlawHandlerGuards() const {return m_flawHandlerGuards;}
 
       const PlanDatabaseId& getPlanDatabase() const {return m_db;}
       /**
@@ -156,11 +156,11 @@ namespace EUROPA {
       FlawManagerId m_parent;
       MatchingEngineId m_flawFilters;
       MatchingEngineId m_flawHandlers;
-      std::map<unsigned int, bool> m_staticFiltersByKey; /*!< Summary of static filter outcome for the entity */
+      std::map<eint, bool> m_staticFiltersByKey; /*!< Summary of static filter outcome for the entity */
       /*std::map<unsigned int, std::vector<FlawFilterId> > m_dynamicFiltersByKey;*/ /*!< Dynamic conditions for the entity */
-      __gnu_cxx::hash_map<unsigned int, std::vector<FlawFilterId> > m_dynamicFiltersByKey;
-      std::multimap<unsigned int, ConstraintId> m_flawHandlerGuards; /*!< Flaw Handler Guard constraints by Entity Key */
-      std::map<unsigned int, FlawHandlerEntry> m_activeFlawHandlersByKey; /*!< Applicable Flaw Handlers for each entity */
+      __gnu_cxx::hash_map<eint, std::vector<FlawFilterId> > m_dynamicFiltersByKey;
+      std::multimap<eint, ConstraintId> m_flawHandlerGuards; /*!< Flaw Handler Guard constraints by Entity Key */
+      std::map<eint, FlawHandlerEntry> m_activeFlawHandlersByKey; /*!< Applicable Flaw Handlers for each entity */
       unsigned int m_timestamp; /*!< Used for testing for stale iterators */
       ContextId m_context;
       //static const Priority BEST_CASE_PRIORITY = 0;

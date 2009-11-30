@@ -104,12 +104,12 @@ namespace EUROPA {
    * be notifed of addition of a token
    */
   void ObjectTokenRelation::notifyAdditions() {
-    std::list<double> values;
+    std::list<edouble> values;
     m_currentDomain.getValues(values);
     check_error(!values.empty());
 
-    for(std::list<double>::const_iterator it = values.begin(); it != values.end(); ++it){
-      ObjectId object = *it;
+    for(std::list<edouble>::const_iterator it = values.begin(); it != values.end(); ++it){
+      ObjectId object = Entity::getTypedEntity<Object>(*it);
       check_error(object.isValid());
       if(m_notifiedObjects.find(object) == m_notifiedObjects.end()){
 	m_notifiedObjects.insert(object);

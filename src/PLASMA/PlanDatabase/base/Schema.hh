@@ -11,7 +11,7 @@
 #include "PlanDatabaseDefs.hh"
 #include "PSPlanDatabase.hh"
 #include "LabelStr.hh"
-#include "AbstractDomain.hh"
+#include "Domain.hh"
 #include "ObjectType.hh"
 #include "TokenTypeMgr.hh"
 #include "Method.hh"
@@ -20,7 +20,7 @@
 
 namespace EUROPA {
 
-  typedef std::set<double> LabelStrSet;
+  typedef std::set<edouble> LabelStrSet;
 
   /**
    * @class Schema
@@ -38,11 +38,11 @@ namespace EUROPA {
 
     typedef std::pair<LabelStr, LabelStr> NameValuePair;
     typedef std::vector<NameValuePair> NameValueVector;
-    typedef std::set<double> ValueSet;
-    typedef std::map<double, LabelStr> LabelStr_LabelStr_Map;
-    typedef std::map<double, LabelStrSet > LabelStr_LabelStrSet_Map;
-    typedef std::map<double, ValueSet > LabelStr_ValueSet_Map;
-    typedef std::map<double,LabelStr_LabelStr_Map> LabelStr_LabelStrLabelStrMap_Map;
+    typedef std::set<edouble> ValueSet;
+    typedef std::map<edouble, LabelStr> LabelStr_LabelStr_Map;
+    typedef std::map<edouble, LabelStrSet > LabelStr_LabelStrSet_Map;
+    typedef std::map<edouble, ValueSet > LabelStr_ValueSet_Map;
+    typedef std::map<edouble,LabelStr_LabelStr_Map> LabelStr_LabelStrLabelStrMap_Map;
 
     Schema(const LabelStr& name, const CESchemaId& cesch);
     ~Schema();
@@ -74,7 +74,7 @@ namespace EUROPA {
      * to over-ride the base type relationships to include the use
      * of classes and inheritance.
      */
-    bool canCompare(const AbstractDomain& domx, const AbstractDomain& domy) const;
+    bool canCompare(const Domain& domx, const Domain& domy) const;
 
     /**
      * @brief Utility method to remove all schema details, excluding the model name
@@ -103,13 +103,13 @@ namespace EUROPA {
      * @param value The value to be tested.
      * @error !isEnum(enum)
      */
-    bool isEnumValue(const LabelStr& enumName, double value) const;
+    bool isEnumValue(const LabelStr& enumName, edouble value) const;
 
     /**
      * @brief Test if the given value is a member of any enum
      * @param value The value to be tested.
      */
-    bool isEnumValue(double value) const;
+    bool isEnumValue(edouble value) const;
 
     /**
      * @brief Determine of a given predicate is part of the schema
@@ -204,13 +204,13 @@ namespace EUROPA {
      * @return a const ref to the set of values for enumName.
      * @error !isEnum(enumName).
      */
-    const std::set<double>& getEnumValues(const LabelStr& enumName) const;
+    const std::set<edouble>& getEnumValues(const LabelStr& enumName) const;
 
     /**
      * @brief Obtains the enum name for an enum value
      * @param value enum value to be looked up
      */
-    const LabelStr& getEnumForValue(double value) const;
+    const LabelStr& getEnumForValue(edouble value) const;
 
     /**
      * @brief Obtain the set of predicates for a given object type.
@@ -336,7 +336,7 @@ namespace EUROPA {
      * @param enumName The name of the enumeration
      * @param enumValue The member to be added
      */
-    void addValue(const LabelStr& enumName, double enumValue);
+    void addValue(const LabelStr& enumName, edouble enumValue);
 
     void registerEnum(const char* enumName, const EnumeratedDomain& domain);
 
@@ -356,7 +356,7 @@ namespace EUROPA {
     // TODO: ObjectType is replacing ObjectFactory
     void registerObjectType(const ObjectTypeId& objType);
     const ObjectTypeId& getObjectType(const LabelStr& objType);
-    ObjectFactoryId getObjectFactory(const LabelStr& objectType, const std::vector<const AbstractDomain*>& arguments, const bool doCheckError = true);
+    ObjectFactoryId getObjectFactory(const LabelStr& objectType, const std::vector<const Domain*>& arguments, const bool doCheckError = true);
 
     void registerTokenType(const TokenTypeId& tokenType);
     TokenTypeId getTokenType(const LabelStr& tokenType);
@@ -379,11 +379,11 @@ namespace EUROPA {
     const CESchemaId& m_ceSchema;
     const ObjectTypeMgrId m_objectTypeMgr;
     const TokenTypeMgrId m_tokenTypeMgr;
-    std::map<double, MethodId> m_methods; // TODO: define methodMgr instead of keeping a map here
+    std::map<edouble, MethodId> m_methods; // TODO: define methodMgr instead of keeping a map here
 
     // TODO: Drop these. Enums have been deprecated
     LabelStr_ValueSet_Map enumValues;
-    std::map<double, LabelStr> enumValuesToEnums;
+    std::map<edouble, LabelStr> enumValuesToEnums;
 
     // TODO: get rid of all data members from this point on. There are object-oriented abstractions in place now
     // that hold the same information
@@ -391,11 +391,14 @@ namespace EUROPA {
     LabelStrSet predicates;
     LabelStrSet primitives;
 
-    std::map<double, NameValueVector> membershipRelation; /*! All type compositions */
-    std::map<double, LabelStr> childOfRelation; /*! Required to answer the getParent query */  // get rid of
+    std::map<edouble, NameValueVector> membershipRelation; /*! All type compositions */
+    std::map<edouble, LabelStr> childOfRelation; /*! Required to answer the getParent query */
     LabelStr_LabelStrSet_Map objectPredicates; /*! All predicates by object type */
     LabelStrSet typesWithNoPredicates; /*! Cache for lookup efficiently */
-    std::map<double, std::vector<LabelStr> > allObjectTypes; /*! Cache to retrieve allObjectTypes by sub-class */
+    std::map<edouble, std::vector<LabelStr> > allObjectTypes; /*! Cache to retrieve allObjectTypes by sub-class */
+
+    mutable std::set<edouble> m_predTrueCache, m_predFalseCache; /**< Caches from isPredicate, now useful and not static . */
+    mutable std::set<edouble> m_hasParentCache; /**< Cache from hasParent, now useful and not static */
 
     Schema(const Schema&); /**< NO IMPL */
     static const std::set<LabelStr>& getBuiltInVariableNames();

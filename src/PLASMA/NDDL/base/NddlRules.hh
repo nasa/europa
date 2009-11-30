@@ -30,7 +30,7 @@ namespace NDDL {
    * @brief Function to detokenize a delimited list into a list. List is an internal static
    * and is reset each time.
    */
-  const std::list<double>& listFromString(const std::string& str, bool isNumeric);
+  const std::list<edouble>& listFromString(const std::string& str, bool isNumeric);
 
   /**
    * @brief Function to allocate a token on the same object as the master

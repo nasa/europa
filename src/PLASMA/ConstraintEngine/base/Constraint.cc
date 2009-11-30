@@ -2,7 +2,7 @@
 #include "ConstraintEngine.hh"
 #include "ConstrainedVariable.hh"
 #include "Propagator.hh"
-#include "AbstractDomain.hh"
+#include "Domain.hh"
 #include "Debug.hh"
 #include "Error.hh"
 
@@ -256,7 +256,7 @@ namespace EUROPA {
     return true;
   }
 
-  AbstractDomain& Constraint::getCurrentDomain(const ConstrainedVariableId& var) {
+  Domain& Constraint::getCurrentDomain(const ConstrainedVariableId& var) {
     check_error(var.isValid());
 
     return var->getCurrentDomain();
@@ -431,7 +431,7 @@ namespace EUROPA {
 
 
 
-  std::string Constraint::toString() const{
+  std::string Constraint::toLongString() const{
     std::stringstream sstr;
     sstr << Entity::toString() << std::endl;
 
