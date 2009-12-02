@@ -830,8 +830,8 @@ private:
     return true;
   }
   static bool testEdouble() {
-    edouble e(3.14);
-    double d(3.14);
+    edouble e(3.12);
+    double d(3.12);
 
     CPPUNIT_ASSERT(e == d);
     CPPUNIT_ASSERT((+e) == (+d));

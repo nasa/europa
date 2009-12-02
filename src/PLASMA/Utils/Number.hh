@@ -636,7 +636,7 @@ namespace std {
   {return EUROPA::eint(numeric_limits<long>::max(), true);}
 #else //if we've got doubles with the regular 52-bit significands, use 2^52 - 1
   inline EUROPA::eint numeric_limits<EUROPA::eint>::infinity() throw()
-  {return eint(4503599627370495L, true);}
+  {return EUROPA::eint(4503599627370495L, true);}
 #endif
 #else //if we're using 32-bit integers, use max long
   inline EUROPA::eint numeric_limits<EUROPA::eint>::infinity() throw()
