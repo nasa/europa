@@ -21,7 +21,7 @@
       <arg value="gcc"/>
     </exec>
   	
-    <property name="europa.version" value="2.3"/> 	
+    <property name="europa.version" value="2.4"/> 	
 
     <!-- load overrides -->
     <property file="${user.home}/.ant.plasma.properties"/>
