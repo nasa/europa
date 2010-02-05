@@ -551,13 +551,13 @@
         <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
       </not>	   
       <then>
-        <antcall target="build"><param name="jam.opts" value="-sVARIANTS=DEV -sLIBRARIES=SHARED"/></antcall>
-	<antcall target="build"><param name="jam.opts" value="-sVARIANTS=OPTIMIZED -sLIBRARIES=SHARED"/></antcall>
+      	<antcall target="build"><param name="jam.variant" value="DEV"/><param name="jam.libraries" value="SHARED"/></antcall>
+      	<antcall target="build"><param name="jam.variant" value="OPTIMIZED"/><param name="jam.libraries" value="SHARED"/></antcall>
       </then>
     </if>	
-    <antcall target="build"><param name="jam.opts" value="-sVARIANTS=DEV -sLIBRARIES=STATIC"/></antcall>
-    <antcall target="build"><param name="jam.opts" value="-sVARIANTS=OPTIMIZED -sLIBRARIES=STATIC"/></antcall>
-    <antcall target="build"><param name="jam.opts" value="-sVARIANTS=PROFILE -sLIBRARIES=STATIC"/></antcall>
+    <antcall target="build"><param name="jam.variant" value="DEV"/><param name="jam.libraries" value="STATIC"/></antcall>
+    <antcall target="build"><param name="jam.variant" value="OPTIMIZED"/><param name="jam.libraries" value="STATIC"/></antcall>
+    <antcall target="build"><param name="jam.variant" value="PROFILE"/><param name="jam.libraries" value="STATIC"/></antcall>
     <antcall target="zip-dist"/>
     <antcall target="zip-static-libs"/>
   </target>
