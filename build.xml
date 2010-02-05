@@ -3,6 +3,11 @@
 
   <description>PLASMA</description>
 
+  <property name="europa.version" value="2.4"/> 	
+
+  <!-- load local overrides -->
+  <property file="${user.home}/.ant.plasma.properties"/>
+
   <taskdef resource="net/sf/antcontrib/antcontrib.properties">
     <classpath>
       <pathelement location="ext/ant/lib/ant-contrib-1.0b3.jar"/>
@@ -21,11 +26,6 @@
       <arg value="gcc"/>
     </exec>
   	
-    <property name="europa.version" value="2.4"/> 	
-
-    <!-- load overrides -->
-    <property file="${user.home}/.ant.plasma.properties"/>
-
     <if>
     	<equals arg1="${jam.variant}" arg2="OPTIMIZED"/>
     	<then>
