@@ -57,14 +57,32 @@ const LabelStr& ObjectType::getName() const
     return m_name;
 }
 
+const std::string ObjectType::getNameString() const {
+	return m_name.toString();
+}
+
 const ObjectTypeId& ObjectType::getParent() const
 {
     return m_parent;
 }
 
+const std::string ObjectType::getParentName() const {
+	if (m_parent.isNoId())
+		  return "";
+	return m_parent->getNameString();
+}
+
 const std::map<std::string,DataTypeId>& ObjectType::getMembers() const
 {
     return m_members;
+}
+
+
+PSList<std::string> ObjectType::getMemberNames() const {
+	  PSList<std::string> retval;
+	  for (std::map<std::string,DataTypeId>::const_iterator it = m_members.begin(); it != m_members.end(); ++it)
+		  retval.push_back(it->first);
+	  return retval;
 }
 
 const std::map<edouble,ObjectFactoryId>& ObjectType::getObjectFactories() const
@@ -103,6 +121,10 @@ const DataTypeId& ObjectType::getMemberType(const char* name) const
     return DataTypeId::noId();
 }
 
+PSDataType* ObjectType::getMemberTypeRef(const std::string& name) const {
+	return getMemberType(name.c_str());
+}
+
 void ObjectType::addObjectFactory(const ObjectFactoryId& factory)
 {
     // TODO: allow redefinition of old one
@@ -130,6 +152,14 @@ const TokenTypeId& ObjectType::getTokenType(const LabelStr& signature) const
     }
 
     return TokenTypeId::noId();
+}
+
+PSList<PSTokenType*> ObjectType::getPredicates() const {
+	  PSList<PSTokenType*> retval;
+	  for (std::map<edouble,TokenTypeId>::const_iterator it = m_tokenTypes.begin(); it != m_tokenTypes.end(); ++it) {
+		  retval.push_back(it->second);
+	  }
+	  return retval;
 }
 
 const TokenTypeId& ObjectType::getParentType(const TokenTypeId& type) const

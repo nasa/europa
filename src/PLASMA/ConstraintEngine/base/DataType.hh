@@ -14,7 +14,15 @@
 
 namespace EUROPA {
 
-class DataType {
+/** Version of DataType for communication with other languages */
+class PSDataType {
+public:
+	  virtual ~PSDataType() {}
+	  virtual const std::string& getNameString() const = 0;
+	  // Add stuff for isX() and getBaseDomain() later?
+};
+
+class DataType: public PSDataType {
 
 public:
     DataType(const char* name);
@@ -27,6 +35,9 @@ public:
      * @brief Get the data type's name.
      */
     virtual const LabelStr& getName() const;
+
+    // From PSDataType
+    const std::string& getNameString() const { return getName().toString(); }
 
     /**
      * @brief Set the data ype's name.

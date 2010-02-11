@@ -15,10 +15,20 @@
  */
 namespace EUROPA {
 
+  /** Version of TokenType for communication with other languages */
+  class PSTokenType {
+  public:
+	  virtual ~PSTokenType() {}
+	  virtual const std::string& getName() const = 0;
+	  virtual PSList<std::string> getParameterNames() const = 0;
+	  virtual PSDataType* getParameterType(int index) const = 0;
+	  virtual PSDataType* getParameterType(const std::string& name) const = 0;
+  };
+
   /**
    * @brief Each concrete class must provide an implementation for this.
    */
-  class TokenType {
+  class TokenType: public PSTokenType {
   public:
     TokenType(const ObjectTypeId& ot,const LabelStr& signature);
 
@@ -27,6 +37,9 @@ namespace EUROPA {
     void addArg(const DataTypeId& type, const LabelStr& name);
 
     const LabelStr& getPredicateName() const;
+
+    // From PSTokenType
+    const std::string& getName() const { return getPredicateName().toString(); }
     const std::map<LabelStr,DataTypeId>& getArgs() const;
     const DataTypeId& getArgType(const char* argName) const;
 
@@ -52,6 +65,12 @@ namespace EUROPA {
      * @brief Create a slave token
      */
     virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const = 0;
+
+
+    // From PSTokenType
+	virtual PSList<std::string> getParameterNames() const;
+	virtual PSDataType* getParameterType(int index) const;
+	virtual PSDataType* getParameterType(const std::string& name) const;
 
   protected:
     TokenTypeId m_id;

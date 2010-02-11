@@ -161,9 +161,9 @@ namespace EUROPA {
   %template(PSTokenList) PSList<PSToken*>;
   %template(PSVariableList) PSList<PSVariable*>;
   %template(PSConstraintList) PSList<PSConstraint*>;
-  %template(PSDataTypeList) PSList<PSDataType>;
-  %template(PSTokenTypeList) PSList<PSTokenType>;
-  %template(PSObjectTypeList) PSList<PSObjectType>;
+  %template(PSDataTypeList) PSList<PSDataType*>;
+  %template(PSTokenTypeList) PSList<PSTokenType*>;
+  %template(PSObjectTypeList) PSList<PSObjectType*>;
   //%template(PSValueList) PSList<PSVarValue>;
 
   // using template instantiation to get the right results.
@@ -357,9 +357,9 @@ namespace EUROPA {
   class PSDataType
   {
   public:
-	  const std::string& getName() const;
+	  const std::string& getNameString() const;
   protected:
-  	  PSDataType(const PSDataType& original);
+      PSDataType();
   };
   
   class PSTokenType
@@ -367,22 +367,22 @@ namespace EUROPA {
   public:
 	  const std::string& getName() const;
 	  PSList<std::string> getParameterNames() const;
-	  PSDataType getParameterType(int index) const;
-	  PSDataType getParameterType(const std::string& name) const;
+	  PSDataType* getParameterType(int index) const;
+	  PSDataType* getParameterType(const std::string& name) const;
   protected:
-  	PSTokenType(const PSTokenType& original);
+      PSTokenType();
   };  
 
   class PSObjectType
   {
   public:
-	  const std::string& getName() const;
+	  const std::string& getNameString() const;
 	  const std::string& getParentName() const;
 	  PSList<std::string> getMemberNames() const;
-	  PSDataType getMemberType(const std::string& name) const;
-	  PSList<PSTokenType> getPredicates() const;
+	  PSDataType* getMemberTypeRef(const std::string& name) const;
+	  PSList<PSTokenType*> getPredicates() const;
   protected:
-    PSObjectType(const PSObjectType& original);
+      PSObjectType();
   };
 
   class PSSchema
@@ -393,7 +393,7 @@ namespace EUROPA {
 	  PSList<std::string> getMembers(const std::string& objectType) const;
 	  bool hasMember(const std::string& parentType, const std::string& memberName) const;
 	  
-	  PSList<PSObjectType> getAllPSObjectTypes() const;
+	  PSList<PSObjectType*> getAllPSObjectTypes() const;
 
   protected:
 	  PSSchema();

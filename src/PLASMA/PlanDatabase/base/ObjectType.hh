@@ -27,7 +27,18 @@ typedef Id<ObjectTypeMgr> ObjectTypeMgrId;
 class ObjectFactory;
 typedef Id<ObjectFactory> ObjectFactoryId;
 
-class ObjectType
+/** Version of ObjectType for communication with other languages */
+class PSObjectType {
+public:
+	  virtual ~PSObjectType() {}
+	  virtual const std::string getNameString() const = 0;
+	  virtual const std::string getParentName() const = 0;
+	  virtual PSList<std::string> getMemberNames() const = 0;
+	  virtual PSDataType* getMemberTypeRef(const std::string& name) const = 0;
+	  virtual PSList<PSTokenType*> getPredicates() const = 0;
+};
+
+class ObjectType: public PSObjectType
 {
 public:
     ObjectType(const char* name, const ObjectTypeId& parent, bool isNative=false);
@@ -56,6 +67,13 @@ public:
     virtual std::string toString() const;
 
     void purgeAll(); // TODO: make protected after Schema API is fixed
+
+    // From PSObjectType
+	virtual const std::string getNameString() const;
+	virtual const std::string getParentName() const;
+	virtual PSList<std::string> getMemberNames() const;
+	virtual PSDataType* getMemberTypeRef(const std::string& name) const;
+	virtual PSList<PSTokenType*> getPredicates() const;
 
 protected:
     ObjectTypeId m_id;

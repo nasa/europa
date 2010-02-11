@@ -371,7 +371,7 @@ namespace EUROPA {
     PSList<std::string> getMembers(const std::string& objectType) const;
     bool hasMember(const std::string& parentType, const std::string& memberName) const;
 
-    PSList<PSObjectType> getAllPSObjectTypes() const;
+    PSList<PSObjectType*> getAllPSObjectTypes() const;
 
   protected:
     SchemaId m_id;

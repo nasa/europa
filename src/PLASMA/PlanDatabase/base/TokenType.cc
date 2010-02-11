@@ -62,4 +62,24 @@ namespace EUROPA {
     {
         m_args[name] = type;
     }
+
+    PSList<std::string> TokenType::getParameterNames() const {
+   	  PSList<std::string> retval;
+   	  for (std::map<LabelStr,DataTypeId>::const_iterator it = m_args.begin(); it != m_args.end(); ++it) {
+   		  retval.push_back(it->first.toString());
+   	  }
+   	  return retval;
+    }
+
+    PSDataType* TokenType::getParameterType(int index) const {
+   	  check_error(index < m_args.size(), "Index out of bounds");
+   	  std::map<LabelStr,DataTypeId>::const_iterator it = m_args.begin();
+   	  while (index-- > 0) ++it;
+   	  return it->second;
+    }
+
+    PSDataType* TokenType::getParameterType(const std::string& name) const {
+      return getArgType(name.c_str());
+    }
+
 }
