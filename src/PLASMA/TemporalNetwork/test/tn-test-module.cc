@@ -24,6 +24,7 @@
 #include "ModuleRulesEngine.hh"
 #include "ModuleTemporalNetwork.hh"
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <list>
@@ -757,6 +758,7 @@ public:
     EUROPA_runTest(testBasicAllocation);
     EUROPA_runTest(testTemporalPropagation);
     EUROPA_runTest(testTemporalNogood);
+    EUROPA_runTest(testMinPerturbTimes);
     return true;
   }
 private:
@@ -888,6 +890,44 @@ private:
     delete (ConstrainedVariable*) v1;
     delete (ConstrainedVariable*) v2;
     delete (ConstrainedVariable*) v3;
+    return true;
+  }
+
+  static bool testMinPerturbTimes() {
+    DEFAULT_SETUP_CE_ONLY(ce);
+    TemporalPropagator* tp = (TemporalPropagator*) (Propagator*) ce.getPropagatorByName(LabelStr("Temporal"));
+
+    std::vector<ConstrainedVariableId> scope;
+    std::vector<ConstrainedVariableId> timeVars;
+
+    //test with infinities
+    ConstrainedVariableId infVar1 = 
+      (new Variable<IntervalIntDomain>(ce.getId(), IntervalDomain(20, PLUS_INFINITY), false, true, "infVar1"))->getId(); 
+    ConstrainedVariableId infVar2 = 
+      (new Variable<IntervalIntDomain>(ce.getId(), IntervalDomain(20, PLUS_INFINITY), false, true, "infVar2"))->getId(); 
+    ConstrainedVariableId infDur = 
+      (new Variable<IntervalIntDomain>(ce.getId(), IntervalDomain(1, PLUS_INFINITY), false, true, "infVar2"))->getId(); 
+
+    timeVars.push_back(infVar1);
+    timeVars.push_back(infVar2);
+
+    scope.clear();
+    scope.push_back(infVar1);
+    scope.push_back(infDur);
+    scope.push_back(infVar2);
+    ConstraintId infConstr1 = ce.createConstraint(LabelStr("temporalDistance"), scope);
+    ce.propagate();
+
+    std::vector<Time> oldRefTimes(2);
+    oldRefTimes[0] = 5;
+    oldRefTimes[1] = 10;
+    std::vector<Time> newRefTimes;
+
+    tp->getMinPerturbTimes(timeVars, oldRefTimes, newRefTimes);
+    CPPUNIT_ASSERT(newRefTimes[0] == 20);
+    CPPUNIT_ASSERT(newRefTimes[1] == 21);
+
+    DEFAULT_TEARDOWN_CE_ONLY();
     return true;
   }
 };

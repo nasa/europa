@@ -545,7 +545,7 @@ namespace EUROPA {
                   "Updated bounds [" << lb << " " << ub << "] from timepoint " << tp << " are outside of "
                   << dom.toString() << " for " << var->toString());
 
-          dom.intersect(lb, ub);
+          dom.intersect(mapToExternalInfinity(lb), mapToExternalInfinity(ub));
 
           if(TokenId::convertable(var->parent())){
               TokenId token = var->parent();
@@ -1046,12 +1046,14 @@ namespace EUROPA {
       for (unsigned j=0; j<i; j++) {
         TimepointId tp1 = getTimepoint(timevars[j]);
         Time distance = m_tnet->getDistance(tp1);
+        if(distance == POS_INFINITY)
+          continue;
         Time lb1 = newreftimes[j] - distance;
         if (lb1 > lb) lb = lb1;
       }
       // The ub props for j<i have already been pushed to uppers[i].
       Time ub = uppers[i];
-      checkError(lb <= ub, "lb>ub in TemporalPropagator::getMinPerturbTimes");
+      checkError(lb <= ub, "lb>ub in TemporalPropagator::getMinPerturbTimes: " << lb << " " << ub);
 
       // Calculate the new reftime
       if (oldreftimes[i] < lb)
@@ -1069,7 +1071,9 @@ namespace EUROPA {
       for (unsigned j=i+1; j<timevars.size(); j++) {
         TimepointId tp1 = getTimepoint(timevars[j]);
         Time distance = m_tnet->getDistance(tp1);
-        Time ub1 = newreftimes[i] + distance;
+        if(distance == POS_INFINITY)
+          continue;
+        Time ub1 = newreftimes[i] + distance;        
         if (ub1 < uppers[j]) uppers[j] = ub1;
       }
     }

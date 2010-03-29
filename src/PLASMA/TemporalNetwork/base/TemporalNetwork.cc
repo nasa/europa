@@ -393,20 +393,20 @@ namespace EUROPA {
 # define checkBoundsValidity(lo, hi) (true)
 #else
   static Bool checkBoundsValidity(const Time lb, const Time ub) {
-    check_error(!(lb > ub),
+    checkError(!(lb > ub),
                 "addTemporalConstraint: (LB, UB) interval was empty",
                 TempNetErr::TempNetEmptyConstraintError());
-    check_error( !((ub > MAX_LENGTH && ub < POS_INFINITY) || ub > POS_INFINITY),
-                 "addTemporalConstraint:  UB is in forbidden range",
+    checkError( !((ub > MAX_LENGTH && ub < POS_INFINITY) || ub > POS_INFINITY),
+                "addTemporalConstraint:  UB is in forbidden range: " << ub,
                  TempNetErr::TempNetEmptyConstraintError());
-    check_error( !((ub < MIN_LENGTH)),
-                 "addTemporalConstraint:  UB is too small",
+    checkError( !((ub < MIN_LENGTH)),
+                "addTemporalConstraint:  UB is too small: " << ub,
                  TempNetErr::TempNetEmptyConstraintError());
-    check_error( !((-lb > MAX_LENGTH && -lb < POS_INFINITY) || -lb > POS_INFINITY),
-                 "addTemporalConstraint:  LB is in forbidden range",
+    checkError( !((-lb > MAX_LENGTH && -lb < POS_INFINITY) || -lb > POS_INFINITY),
+                "addTemporalConstraint:  LB is in forbidden range: " << lb,
                  TempNetErr::TempNetEmptyConstraintError());
-    check_error( !((-lb < MIN_LENGTH)),
-                 "addTemporalConstraint:  LB is too large",
+    checkError( !((-lb < MIN_LENGTH)),
+                "addTemporalConstraint:  LB is too large: " << lb,
                  TempNetErr::TempNetEmptyConstraintError());
     return(true);
   }
@@ -414,9 +414,11 @@ namespace EUROPA {
 
   TemporalConstraintId TemporalNetwork::addTemporalConstraint(const TimepointId& src,
 							      const TimepointId& targ,
-							      const Time lb,
-							      const Time ub,
+							      const Time _lb,
+							      const Time _ub,
 							      bool propagate) {
+    const Time lb = mapToInternalInfinity(_lb);
+    const Time ub = mapToInternalInfinity(_ub);
     if (!checkBoundsValidity(lb, ub))
       return(TemporalConstraintId::noId());
 
@@ -962,6 +964,24 @@ namespace EUROPA {
     check_error(Entity::isPurging() || getExternalEntity().isNoId());
     Entity::handleDiscard();
   }
+
+  Time mapToInternalInfinity(const Time t) {
+    if(t >= POS_INFINITY)
+      return POS_INFINITY;
+    if(t <= NEG_INFINITY)
+      return NEG_INFINITY;
+    return t;
+  }
+
+  Time mapToExternalInfinity(const Time t) {
+    if(t >= POS_INFINITY)
+      return cast_basis(PLUS_INFINITY);
+    if(t <= NEG_INFINITY)
+      return cast_basis(MINUS_INFINITY);
+    return t;
+    
+  }
+
 } /* namespace Europa */
 
 

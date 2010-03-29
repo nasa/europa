@@ -573,6 +573,24 @@ namespace EUROPA {
     inline bool isComplete() const {return m_edgeCount == 2;}
   };
 
+  /** 
+   * @brief Maps from external Europa infinity to the more limited temporal network infinity
+   * 
+   * @param t A time value from Europa.
+   * 
+   * @return POS_INFINITY or NEG_INFINITY if t is PLUS_INFINITY or MINUS_INFINITY, otherwise the value is unchanged.
+   */
+  Time mapToInternalInfinity(const Time t);
+
+  /** 
+   * @brief Maps from internal temporal network infinity to Europa infinity
+   * 
+   * @param t A time value from the temporal network.
+   * 
+   * @return PLUS_INFINITY or MINUS_INFINITY if t is POS_INFINITY or NEG_INFINITY, otherwise the value is unchanged.
+   */
+  Time mapToExternalInfinity(const Time t);
+
 } /* namespace Europa */
 
 #endif

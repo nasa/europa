@@ -46,16 +46,17 @@ namespace EUROPA {
 // values that get stored in nodes rather than all distance values
 // that arise in propagation (most of which are discarded).
 
-#define MAX_LENGTH (TIME_MAX/8)       // Largest length allowed for edge
-#define MIN_LENGTH (TIME_MIN/8)       // Smallest length allowed for edge
+#define MAX_LENGTH (TIME_MAX/2)       // Largest length allowed for edge
+#define MIN_LENGTH (TIME_MIN/2)       // Smallest length allowed for edge
 
 //#define POS_INFINITY (TIME_MAX - MAX_LENGTH)
 //#define NEG_INFINITY (TIME_MIN - MIN_LENGTH)
 
-#define POS_INFINITY cast_basis(PLUS_INFINITY)
-#define NEG_INFINITY cast_basis(MINUS_INFINITY)
-#define MAX_DISTANCE MAX_INT   // Largest propagated distance for node
-#define MIN_DISTANCE -MAX_INT   // Smallest propagated distance for node
+#define MAX_DISTANCE (TIME_MAX/2)   // Largest propagated distance for node
+#define MIN_DISTANCE (TIME_MIN/2)   // Smallest propagated distance for node
+
+#define POS_INFINITY ((TIME_MAX/2) + 1)
+#define NEG_INFINITY ((TIME_MIN/2) - 1)
 
 #ifndef nullptr
 #define nullptr 0       // Use for null pointers.
