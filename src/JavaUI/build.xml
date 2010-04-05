@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="EuropaJavaUI" default="build.swing" basedir=".">
+
+	<property environment="env" />
+	<!-- 
+	Assume that PLASMA_HOME points to the project root and 
+	EUROPA_HOME to PLASMA_HOME/dist/europa. This matches build target of 
+	Europa's build.xml 
+	-->
+	<property name="europa.dir" value="${env.PLASMA_HOME}" />
+	<echo message="PLASMA_HOME = ${europa.dir}" />
+
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+		<classpath>
+			<pathelement location="${europa.dir}/ext/ant/lib/ant-contrib-1.0b3.jar" />
+		</classpath>
+	</taskdef>
+
+	<property file="${basedir}/build.properties" />
+	<property file="${basedir}/plugin.properties" />
+	<property name="srcdir" value="${basedir}/source" />
+	<!-- Output directory for the distribution, also works as update site -->
+	<property name="distdir" value="${europa.dir}/dist/javaui" />
+	<property name="tempdir" value="${basedir}/build.temp" />
+	<property name="test.temp" value="${basedir}/test.temp" />
+	<property name="test.report" value="${basedir}/test.report" />
+	<property name="site.source" value="${basedir}/site.source" />
+	<property name="basename" value="org.ops.ui.europaplugin" />
+	<property name="swingname" value="org.ops.ui.europaswing" />
+
+	<!-- Local Jar files. Used for compilation and tests -->
+	<fileset id="local.jars" dir="lib">
+		<include name="*.jar" />
+	</fileset>
+
+	<target name="build.site" depends="clean.all, build.update.jar, build.swing, build.feature" description="Prepare exportable update site">
+		<delete dir="${tempdir}" />
+		<copy todir="${distdir}">
+			<fileset dir="${site.source}">
+				<include name="index.html" />
+				<include name="site.xml" />
+				<include name="web/*" />
+			</fileset>
+		</copy>
+		<replaceregexp file="${distdir}/site.xml" match="VERSION" replace="${bundle.version}" byline="true" />
+	</target>
+
+	<target name="init" description="Get proper slash and Eclipse location for the platform. Needed to get to Eclipse jars">
+		<if>
+			<equals arg1="${file.separator}" arg2="/" />
+			<then>
+				<property name="safe.slash" value="/" />
+			</then>
+		</if>
+		<property name="safe.slash" value="\\" />
+		<!-- For some reason, ant.core.lib is set even when eclipse.home is not -->
+		<propertyregex property="eclipse.home" input="${ant.core.lib}" regexp="(.*)${safe.slash}plugins${safe.slash}.*" replace="\1" />
+	</target>
+
+	<target name="clean.temp" description="Delete temp build directory">
+		<delete dir="${tempdir}" />
+		<delete dir="${test.temp}" />
+	</target>
+
+	<target name="clean.all" description="Delete dist and temp directories" depends="clean.temp">
+		<delete dir="${distdir}" />
+		<delete dir="${test.report}" />
+	</target>
+
+	<target name="build.update.jar" depends="compile.swt, copy.support" description="Build the plug-in jar for an update site.">
+		<mkdir dir="${distdir}/plugins" />
+		<replaceregexp file="${tempdir}/META-INF/MANIFEST.SWT" match="0\.0\.0\.0" replace="${bundle.version}" byline="true" />
+		<jar destfile="${distdir}/plugins/${basename}_${bundle.version}.jar" basedir="${tempdir}" manifest="${tempdir}/META-INF/MANIFEST.SWT">
+			<exclude name="**/swing/*" />
+			<exclude name="**/swing" />
+			<exclude name="**/unittesting/*" />
+		</jar>
+	</target>
+
+	<target name="compile.model" depends="init" description="Compile model files">
+		<path id="compile.classpath">
+			<fileset refid="local.jars" />
+		</path>
+		<!-- compile the source code -->
+		<mkdir dir="${tempdir}" />
+		<javac destdir="${tempdir}" srcdir="${srcdir}" includeAntRuntime="no">
+			<classpath refid="compile.classpath" />
+			<include name="**/model/**" />
+		</javac>
+		<!-- Copy necessary resources -->
+		<copy todir="${tempdir}" failonerror="true" overwrite="false">
+			<fileset dir="${srcdir}">
+				<include name="**/model/**" />
+				<exclude name="**/*.java" />
+				<exclude name="**/package.htm*" />
+				<exclude name="**/unittesting/*" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="compile.swing" depends="compile.model" description="Compile Swing half">
+		<path id="compile.classpath">
+			<fileset refid="local.jars" />
+			<pathelement location="${tempdir}" />
+		</path>
+		<!-- compile the source code -->
+		<javac destdir="${tempdir}" srcdir="${srcdir}" includeAntRuntime="no">
+			<classpath refid="compile.classpath" />
+			<include name="**/swing/**" />
+		</javac>
+		<!-- Copy necessary resources -->
+		<copy todir="${tempdir}" failonerror="true" overwrite="false">
+			<fileset dir="${srcdir}">
+				<include name="**/swing/**" />
+				<exclude name="**/*.java" />
+				<exclude name="**/package.htm*" />
+				<exclude name="**/unittesting/*" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="compile.swt" depends="compile.model" description="Compile all source code into temp directory">
+		<fileset id="eclipse.plugins" dir="${eclipse.home}/plugins">
+			<include name="*.jar" />
+		</fileset>
+		<echo message="Eclipse HOME = ${eclipse.home}" />
+		<path id="compile.classpath">
+			<fileset refid="eclipse.plugins" />
+			<fileset refid="local.jars" />
+			<pathelement location="${tempdir}" />
+		</path>
+		<!-- compile the source code -->
+		<javac destdir="${tempdir}" srcdir="${srcdir}" includeAntRuntime="no">
+			<classpath refid="compile.classpath" />
+			<include name="**/swt/**" />
+		</javac>
+		<!-- Copy necessary resources -->
+		<copy todir="${tempdir}" failonerror="true" overwrite="false">
+			<fileset dir="${srcdir}">
+				<include name="**/swt/**" />
+				<exclude name="**/*.java" />
+				<exclude name="**/package.htm*" />
+				<exclude name="**/unittesting/*" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="copy.support" description="Copy supporting files into temp dir">
+		<copy todir="${tempdir}" failonerror="true" overwrite="false">
+			<fileset dir="${basedir}">
+				<include name="plugin.xml" />
+				<include name="plugin.properties" />
+				<include name="META-INF/MANIFEST.SWT" />
+				<include name="icons/" />
+				<include name="lib/*.jar" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="build.feature" description="Create jar for the Eclipse feature">
+		<copy todir="${tempdir}">
+			<fileset dir="${site.source}">
+				<include name="feature.xml" />
+			</fileset>
+		</copy>
+		<replaceregexp file="${tempdir}/feature.xml" match="VERSION" replace="${bundle.version}" byline="true" />
+		<mkdir dir="${distdir}/features" />
+		<jar destfile="${distdir}/features/${basename}_${bundle.version}.jar" basedir="${tempdir}">
+			<include name="feature.xml" />
+		</jar>
+	</target>
+
+	<target name="build.swing" depends="compile.swing" description="Create Swing JAR">
+		<mkdir dir="${distdir}/swing" />
+		<jar destfile="${distdir}/swing/${swingname}_${bundle.version}.jar" basedir="${tempdir}" manifest="${basedir}/META-INF/MANIFEST.SWING">
+			<include name="**/model/*" />
+			<include name="**/swing/*" />
+			<exclude name="**/unittesting/*" />
+		</jar>
+		<copy todir="${distdir}/swing">
+			<fileset dir="${basedir}/lib">
+				<include name="jfreechart-1.0.13.jar" />
+				<include name="jcommon-1.0.16.jar" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="test" description="Run model unittests" depends="init,clean.temp,compile.model">
+		<!-- Copy test files to the target dir -->
+		<copy todir="${tempdir}">
+			<fileset dir="${srcdir}">
+				<include name="**/*.nddl" />
+			</fileset>
+		</copy>
+
+		<mkdir dir="${test.temp}" />
+		<junit failureproperty="testfailed" fork="true" maxmemory="500M" dir="${test.temp}">
+			<jvmarg value="-ea" />
+			<classpath>
+				<fileset refid="local.jars" />
+				<pathelement location="${tempdir}" />
+			</classpath>
+			<formatter type="xml" />
+			<batchtest todir="${test.temp}">
+				<fileset dir="${srcdir}">
+					<include name="**/unittesting/*Test.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+
+		<delete dir="${test.report}" />
+		<mkdir dir="${test.report}" />
+		<junitreport todir="${test.report}">
+			<fileset dir="${test.temp}">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${test.report}" />
+		</junitreport>
+
+		<echo message="HTML test report generated in: ${test.report}" level="info" />
+
+		<fail if="testfailed" />
+	</target>
+</project>

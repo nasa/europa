@@ -1,0 +1,13 @@
+// Make a good start
+#include "Plasma.nddl"
+
+enum Case1 {case11, case12, case13};
+
+// then break something
+clazz Broken
+
+class SomeClass extends Timeline
+{
+    predicate aPredicate  { duration=1; }
+}
+

@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Europa Plug-in
+Bundle-SymbolicName: org.ops.ui.europaplugin;singleton:=true
+Bundle-Version: 0.0.0.0
+Bundle-Activator: org.ops.ui.main.swt.EuropaPlugin
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.jface.text,
+ org.eclipse.ui.editors,
+ org.eclipse.ui.views;bundle-version="3.3.0",
+ org.eclipse.debug.ui,
+ org.eclipse.ui.console
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.core.resources,
+ org.eclipse.jdt.internal.ui.text,
+ org.eclipse.ui
+Bundle-ClassPath: .,
+ lib/PSEngine.jar,
+ lib/jfreechart-1.0.13-swt.jar,
+ lib/jcommon-1.0.16.jar,
+ lib/jfreechart-1.0.13.jar,
+ lib/org.eclipse.nebula.widgets.ganttchart_1.0.0.jar
+Bundle-Localization: plugin
+Export-Package: .,
+ org.ops.ui.main.swt
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

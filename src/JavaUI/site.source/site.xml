@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+	<description>
+		Europa plugin update site
+	</description>
+	<feature url="features/org.ops.ui.europaplugin_VERSION.jar" id="org.ops.ui.europaplugin.feature" 
+		version="VERSION" label="Europa plugin">
+		<category name="Europa"/>
+	</feature>
+	<category-def name="Europa" label="Europa plugin">
+		<description>
+			Europa plugin
+		</description>
+	</category-def>
+</site>
