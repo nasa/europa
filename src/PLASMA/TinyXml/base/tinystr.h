@@ -30,8 +30,6 @@ distribution.
 #ifndef TIXML_STRING_INCLUDED
 #define TIXML_STRING_INCLUDED
 
-#pragma warning( disable : 4514 )
-
 #include <assert.h>
 
 namespace EUROPA {

@@ -125,6 +125,16 @@
      </then>
     </if>
 
+    <if>
+      <equals arg1="${jam.64bit}" arg2="-s64BIT=1"/>
+      <then>
+        <property name="jam.march" value="-m64"/>
+      </then>
+      <else>
+        <property name="jam.march" value="-m32"/>
+      </else>
+    </if>
+
 
     <property name="local.env.PLASMA_HOME" value="${basedir}"/>
     <property name="local.env.EUROPA_HOME" value="${local.env.PLASMA_HOME}/dist/europa"/>
@@ -149,24 +159,15 @@
     <if>
       <isset property="antlr.include"/>
       <then>
-        <if>
-          <isset property="antlr.lib"/>
-          <then>
-            <property name="jam.antlr.args" value="-sPLATFORM_FLAGS=-I${antlr.include} -sLINKLIBS=-Wl,-L${antlr.lib}"/>
-          </then>
-          <else>
-            <property name="jam.antlr.args" value="-sPLATFORM_FLAGS=-I${antlr.include}"/>
-          </else>
-        </if>
+        <property name="jam.antlr.include" value="-I${antlr.include}"/>
       </then>
-      <elseif>
-          <isset property="antlr.lib"/>
-          <then>
-            <property name="jam.antlr.args" value="-sLINKLIBS=-Wl,-L${antlr.lib}"/>
-          </then>
-      </elseif>
     </if>
-    <property name="jam.antlr.args" value=""/>
+    <if>
+      <isset property="antlr.lib"/>
+      <then>
+        <property name="jam.antlr.lib" value="-Wl,-L${antlr.lib}"/>
+      </then>
+    </if>
       
     <property name="local.env.LD_LIBRARY_PATH.name" value="LD_LIBRARY_PATH"/>
     <property name="dir.plasma" value="${basedir}"/>
@@ -192,8 +193,12 @@
     <property name="jam.misc" value=""/>
     <property name="jam.args" value=""/>
     <property name="jam.64bit" value=""/>
+    <property name="jam.antlr.include" value=""/>
+    <property name="jam.antlr.lib" value=""/>
+    <property name="jam.platform-flags" value="${jam.antlr.include} ${jam.march}"/>
+    <property name="jam.link-libs" value="${jam.antlr.lib}"/>
 
-    <property name="jam.opts" value="${jam.args} ${jam.misc} ${jam.64bit} -sLOGGER_TYPE=${jam.log.type} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries} ${jam.antlr.args}"/>
+    <property name="jam.opts" value="${jam.args} ${jam.misc} ${jam.64bit} -sLOGGER_TYPE=${jam.log.type} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries} -sPLATFORM_FLAGS=&quot;${jam.platform-flags}&quot; -sLINKLIBS=&quot;${jam.link-libs}&quot;"/>
     <if>
       <equals arg1="${jam.log.type}" arg2=""/>
       <then>

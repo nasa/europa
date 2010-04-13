@@ -64,7 +64,7 @@ int NddlTestEngine::run(const char* txSource, const char* language)
         return -1;
     }
 
-    ConstraintEngine* ce = (ConstraintEngine*)getComponent("ConstraintEngine");
+    ConstraintEngine* ce __attribute__ ((__unused__)) = (ConstraintEngine*)getComponent("ConstraintEngine");
     assert(ce->constraintConsistent());
 
     PlanDatabaseWriter::write(planDatabase->getId(), std::cout);

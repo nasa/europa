@@ -72,7 +72,7 @@ namespace EUROPA {
     }
 
     PSDataType* TokenType::getParameterType(int index) const {
-   	  check_error(index < m_args.size(), "Index out of bounds");
+      check_error((unsigned int) index < m_args.size(), "Index out of bounds");
    	  std::map<LabelStr,DataTypeId>::const_iterator it = m_args.begin();
    	  while (index-- > 0) ++it;
    	  return it->second;
