@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="source"/>
+	<classpathentry kind="lib" path="/Europa/dist/europa/lib/PSEngine.jar" sourcepath="/Europa/src/PLASMA/System/base/swig"/>
+	<classpathentry kind="lib" path="lib/jfreechart-1.0.13.jar" sourcepath="/home/tatiana/Desktop/jfreechart-1.0.13/source"/>
+	<classpathentry kind="lib" path="lib/jcommon-1.0.16.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart-1.0.13-swt.jar" sourcepath="/home/tatiana/Desktop/jfreechart-1.0.13/swt"/>
+	<classpathentry kind="lib" path="lib/junit-4.1.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.nebula.widgets.ganttchart_1.0.0.jar"/>
+	<classpathentry kind="output" path="classes"/>
+</classpath>
