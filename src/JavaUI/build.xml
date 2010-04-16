@@ -19,8 +19,10 @@
 	<property file="${basedir}/build.properties" />
 	<property file="${basedir}/plugin.properties" />
 	<property name="srcdir" value="${basedir}/source" />
-	<!-- Output directory for the distribution, also works as update site -->
-	<property name="distdir" value="${europa.dir}/dist/javaui" />
+	<!-- Build directory to place swing jars into -->
+	<property name="swing.out.dir" value="${europa.dir}/build/lib" />
+	<!-- Output directory for the  update site -->
+	<property name="eclipse.out.dir" value="${europa.dir}/dist/eclipse" />
 	<property name="tempdir" value="${basedir}/build.temp" />
 	<property name="test.temp" value="${basedir}/test.temp" />
 	<property name="test.report" value="${basedir}/test.report" />
@@ -35,14 +37,14 @@
 
 	<target name="build.site" depends="clean.all, build.update.jar, build.swing, build.feature" description="Prepare exportable update site">
 		<delete dir="${tempdir}" />
-		<copy todir="${distdir}">
+		<copy todir="${eclipse.out.dir}}">
 			<fileset dir="${site.source}">
 				<include name="index.html" />
 				<include name="site.xml" />
 				<include name="web/*" />
 			</fileset>
 		</copy>
-		<replaceregexp file="${distdir}/site.xml" match="VERSION" replace="${bundle.version}" byline="true" />
+		<replaceregexp file="${eclipse.out.dir}/site.xml" match="VERSION" replace="${bundle.version}" byline="true" />
 	</target>
 
 	<target name="init" description="Get proper slash and Eclipse location for the platform. Needed to get to Eclipse jars">
@@ -63,14 +65,14 @@
 	</target>
 
 	<target name="clean.all" description="Delete dist and temp directories" depends="clean.temp">
-		<delete dir="${distdir}" />
+		<delete dir="${eclipse.out.dir}" />
 		<delete dir="${test.report}" />
 	</target>
 
 	<target name="build.update.jar" depends="compile.swt, copy.support" description="Build the plug-in jar for an update site.">
-		<mkdir dir="${distdir}/plugins" />
-		<replaceregexp file="${tempdir}/META-INF/MANIFEST.SWT" match="0\.0\.0\.0" replace="${bundle.version}" byline="true" />
-		<jar destfile="${distdir}/plugins/${basename}_${bundle.version}.jar" basedir="${tempdir}" manifest="${tempdir}/META-INF/MANIFEST.SWT">
+		<mkdir dir="${eclipse.out.dir}/plugins" />
+		<replaceregexp file="${tempdir}/META-INF/MANIFEST.MF" match="0\.0\.0\.0" replace="${bundle.version}" byline="true" />
+		<jar destfile="${eclipse.out.dir}/plugins/${basename}_${bundle.version}.jar" basedir="${tempdir}" manifest="${tempdir}/META-INF/MANIFEST.MF">
 			<exclude name="**/swing/*" />
 			<exclude name="**/swing" />
 			<exclude name="**/unittesting/*" />
@@ -80,6 +82,7 @@
 	<target name="compile.model" depends="init" description="Compile model files">
 		<path id="compile.classpath">
 			<fileset refid="local.jars" />
+			<pathelement location="${psengine.jar.path}/PSEngine.jar" />
 		</path>
 		<!-- compile the source code -->
 		<mkdir dir="${tempdir}" />
@@ -102,6 +105,7 @@
 		<path id="compile.classpath">
 			<fileset refid="local.jars" />
 			<pathelement location="${tempdir}" />
+			<pathelement location="${psengine.jar.path}/PSEngine.jar" />
 		</path>
 		<!-- compile the source code -->
 		<javac destdir="${tempdir}" srcdir="${srcdir}" includeAntRuntime="no">
@@ -150,7 +154,7 @@
 			<fileset dir="${basedir}">
 				<include name="plugin.xml" />
 				<include name="plugin.properties" />
-				<include name="META-INF/MANIFEST.SWT" />
+				<include name="META-INF/MANIFEST.MF" />
 				<include name="icons/" />
 				<include name="lib/*.jar" />
 			</fileset>
@@ -164,20 +168,20 @@
 			</fileset>
 		</copy>
 		<replaceregexp file="${tempdir}/feature.xml" match="VERSION" replace="${bundle.version}" byline="true" />
-		<mkdir dir="${distdir}/features" />
-		<jar destfile="${distdir}/features/${basename}_${bundle.version}.jar" basedir="${tempdir}">
+		<mkdir dir="${eclipse.out.dir}/features" />
+		<jar destfile="${eclipse.out.dir}/features/${basename}_${bundle.version}.jar" basedir="${tempdir}">
 			<include name="feature.xml" />
 		</jar>
 	</target>
 
 	<target name="build.swing" depends="compile.swing" description="Create Swing JAR">
-		<mkdir dir="${distdir}/swing" />
-		<jar destfile="${distdir}/swing/${swingname}_${bundle.version}.jar" basedir="${tempdir}" manifest="${basedir}/META-INF/MANIFEST.SWING">
+		<mkdir dir="${swing.out.dir}" />
+		<jar destfile="${swing.out.dir}/${swingname}_${bundle.version}.jar" basedir="${tempdir}" manifest="${basedir}/META-INF/MANIFEST.SWING">
 			<include name="**/model/*" />
 			<include name="**/swing/*" />
 			<exclude name="**/unittesting/*" />
 		</jar>
-		<copy todir="${distdir}/swing">
+		<copy todir="${swing.out.dir}">
 			<fileset dir="${basedir}/lib">
 				<include name="jfreechart-1.0.13.jar" />
 				<include name="jcommon-1.0.16.jar" />
@@ -195,10 +199,14 @@
 
 		<mkdir dir="${test.temp}" />
 		<junit failureproperty="testfailed" fork="true" maxmemory="500M" dir="${test.temp}">
+			<env key="PLASMA_HOME" value="${europa.dir}" />
+			<env key="EUROPA_HOME" value="${europa.home}" />
+			<env key="${ld.path.key}" value="${ld.path.value}" />
 			<jvmarg value="-ea" />
 			<classpath>
 				<fileset refid="local.jars" />
 				<pathelement location="${tempdir}" />
+				<pathelement location="${psengine.jar.path}/PSEngine.jar" />
 			</classpath>
 			<formatter type="xml" />
 			<batchtest todir="${test.temp}">
