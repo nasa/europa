@@ -37,7 +37,7 @@
 
 	<target name="build.site" depends="clean.all, build.update.jar, build.swing, build.feature" description="Prepare exportable update site">
 		<delete dir="${tempdir}" />
-		<copy todir="${eclipse.out.dir}}">
+		<copy todir="${eclipse.out.dir}">
 			<fileset dir="${site.source}">
 				<include name="index.html" />
 				<include name="site.xml" />
