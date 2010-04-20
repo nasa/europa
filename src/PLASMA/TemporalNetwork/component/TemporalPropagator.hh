@@ -186,8 +186,13 @@ namespace EUROPA {
     std::map<eint, ConstrainedVariableId> m_activeVariables; /**< Maintain the set of active start and end variables. 
 							     Duration handled in constraints */
     std::map<eint, ConstrainedVariableId> m_changedVariables; /*!< Manage the set of changed variables to be synchronized */
-    std::set<ConstraintId, EntityComparator<EntityId> > m_changedConstraints; /*!< Constraint Agenda */
-    std::set<TemporalConstraintId, EntityComparator<EntityId> > m_constraintsForDeletion; /*!< Buffer deletions till you have to propagate. */
+
+    typedef std::set<ConstraintId, EntityComparator<EntityId> > ConstraintsSet;
+    ConstraintsSet m_changedConstraints; /*!< Constraint Agenda */
+
+    typedef  std::set<TemporalConstraintId, EntityComparator<EntityId> > TemporalConstraintsSet;
+    TemporalConstraintsSet m_constraintsForDeletion; /*!< Buffer deletions till you have to propagate. */
+
     std::set<TimepointId> m_variablesForDeletion; /*!< Buffer timepoints for deletion till we propagate. */
     std::set<EntityId> m_wrappedTimepoints;
     std::set<TemporalNetworkListenerId> m_listeners;
