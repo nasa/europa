@@ -138,7 +138,7 @@ namespace EUROPA {
   }
 
   void DbClientTransactionPlayer::rewind(std::istream& is, bool breakpoint) {
-    check_error(is, "Invalid input sream for playing transactions.");
+    check_error(is, "Invalid input stream for playing transactions.");
     std::list<TiXmlElement*> transactions;
     while(!is.eof()) {
       if (is.peek() != '<') {

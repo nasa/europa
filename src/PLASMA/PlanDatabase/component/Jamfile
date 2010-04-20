@@ -2,7 +2,9 @@ SubDir PLASMA PlanDatabase component ;
 
 if ! $(PLASMA_READY) {
 
-SubDirC++Flags -Wno-unknown-pragmas ;
+if $(OS) != WinVS90 {
+  SubDirC++Flags -Wno-unknown-pragmas ;
+}
 
 ModuleComponent PlanDatabase
 	:
