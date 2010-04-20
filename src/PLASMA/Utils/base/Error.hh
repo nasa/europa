@@ -58,8 +58,8 @@
  * @param optarg Optional arguments passed on to the appropriate
  * class Error constructor.
  */
-#define handle_error(cond, optarg...) { \
-  new Error(#cond, ##optarg, __FILE__, __LINE__); \
+#define handle_error(cond, ...) { \
+  new Error(#cond, __VA_ARGS__, __FILE__, __LINE__); \
 }
 
 /**
@@ -73,15 +73,15 @@
     return(sl_lblStr); \
   }
 
-#define assertTrue(cond, optarg...) { \
+#define assertTrue(cond, ...) { \
   if (!(cond)) { \
-    (new Error(#cond, ##optarg, __FILE__, __LINE__))->handleAssert(); \
+    (new Error(#cond, __VA_ARGS__, __FILE__, __LINE__))->handleAssert(); \
   } \
 }
 
-#define assertFalse(cond, optarg...) { \
+#define assertFalse(cond, ...) { \
   if (cond) { \
-    (new Error(#cond, ##optarg, __FILE__, __LINE__))->handleAssert(); \
+    (new Error(#cond, __VA_ARGS__, __FILE__, __LINE__))->handleAssert(); \
   } \
 }
 
@@ -103,8 +103,8 @@
  * @param optarg Other values to pass to the class Error constructor when creating the error instance.
  * @note When EUROPA_FAST is defined, these are ignored.
  */
-#define check_error(cond, optarg...)
-#define checkError(cond, msg, optarg...)
+#define check_error(cond, ...)
+#define checkError(cond, msg)
 
 /**
  * @def warn
@@ -153,20 +153,28 @@
  * @see assertTrue, assertFalse, ALWAYS_FAIL
 */
 
-#define check_error(cond, optarg...) { \
+#define check_error(cond, ...) { \
   if (!(cond)) { \
-    (new Error(#cond, ##optarg, __FILE__, __LINE__))->handleAssert(); \
+    (new Error(#cond, __VA_ARGS__, __FILE__, __LINE__))->handleAssert(); \
   } \
 }
 
-#define checkError(cond, msg, optarg...) {                \
+//TODO: mcr - some calls to this are ambiguous .. do you want an error or a msg?
+#define checkError(cond, msg) { \
   if (!(cond)) { \
     std::stringstream sstr; \
     sstr << msg; \
-    (new Error(#cond, sstr.str(), ##optarg, __FILE__, __LINE__))->handleAssert(); \
+    (new Error(#cond, sstr.str(), __FILE__, __LINE__))->handleAssert(); \
   } \
 }
 
+#define check_Error(cond, msg, errorType) { \
+    if (!(cond)) { \
+    std::stringstream sstr; \
+    sstr << msg; \
+    (new Error(#cond, sstr.str(), __FILE__, __LINE__))->handleAssert(); \
+    } \
+}
 
 #ifndef warn
 #define europaWarn(msg) (Error::printWarning((msg), __FILE__, __LINE__))
@@ -194,9 +202,9 @@
  * removing check_error has to do with debug levels.
  * removing check_runtime_error doesn't have to do with debugging, but with leaving behavior out for speed sake.
  */
-#define check_runtime_error(cond, optarg...) { \
+#define check_runtime_error(cond, ...) { \
   if (!(cond)) { \
-    (new Error(#cond, ##optarg, __FILE__, __LINE__))->handleAssert(); \
+    (new Error(#cond, __VA_ARGS__, __FILE__, __LINE__))->handleAssert(); \
   } \
 }
 
@@ -225,11 +233,6 @@ public:
      @brief Build an Error object from the information given, including an extra message.
   */
   Error(const std::string& condition, const std::string& msg, const std::string& file, const int& line);
-
-  /**
-     @brief Build an Error object from the information given, including an extra message.
-  */
-  Error(const std::string& condition, const std::string& msg, const Error& exception, const std::string& file, const int& line);
 
   /**
      @brief Build an Error object from the information given, including another Error object's info.

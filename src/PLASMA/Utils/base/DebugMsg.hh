@@ -1,3 +1,5 @@
+#ifndef _PLASMA_DEBUG_MSG
+#define _PLASMA_DEBUG_MSG
 #include <iostream>
 #include <string>
 #include <list>
@@ -58,7 +60,7 @@
   if (dmPtr->isEnabled() && (cond)) { \
     try { \
       DebugMessage::getStream().exceptions(std::ios_base::badbit); \
-      DebugMessage::getStream() << /*dmPtr[0] << */ "[" << marker << "]" << data << std::endl; \
+      DebugMessage::getStream() << /*dmPtr[0] << */ "[" << marker << "] " << data << std::endl; \
     } \
     catch(std::ios_base::failure& exc) { \
       checkError(ALWAYS_FAIL, exc.what()); \
@@ -602,3 +604,4 @@ inline std::ostream& operator<<(std::ostream& os, const DebugMessage& dm) {
   dm.print(&os);
   return(os);
 }
+#endif // _PLASMA_DEBUG_MSG

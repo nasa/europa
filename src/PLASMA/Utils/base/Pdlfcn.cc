@@ -15,11 +15,16 @@
 
 #if defined(__APPLE__) && (__GNUC__ < 4)   
 #include <mach-o/dyld.h>
-#elif defined(__MINGW32__)
-#include <windows.h>
+#elif defined(__MINGW32__ )
+#  include <windows.h>
+#  define _WINDOWS_BUILD
+#elif defined( _MSC_VER ) 
+#  include <windows.h>
+#  define _WINDOWS_BUILD
 #else
 #include <dlfcn.h>
 #endif
+
 #include<iostream>
 #include<stdlib.h>
 
@@ -27,7 +32,7 @@
 
 namespace EUROPA {
 
-#if defined(__APPLE__) && (__GNUC__ < 4)    
+#if defined(__APPLE__) && (__GNUC__ < 4)
 
   /*
    * Provide portable dl functions using Apple's API for gcc prior to v4
@@ -105,7 +110,7 @@ namespace EUROPA {
     }
     return 0;
   }
-#elif defined(__MINGW32__)
+#elif defined( _WINDOWS_BUILD )
 
   static DWORD dlerror_last = ERROR_SUCCESS;
 
@@ -141,8 +146,11 @@ namespace EUROPA {
     if(dlerror_last != ERROR_SUCCESS) {
       static char buffer[256];
       if(!FormatMessage(FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM, NULL, dlerror_last, 0, buffer, sizeof(buffer), NULL))
+#ifdef _MSC_VER
+        _snprintf_c(buffer, sizeof(buffer), "Failed to format error message");
+#else
         snprintf(buffer, sizeof(buffer), "Failed to format error message");
-
+#endif //_MSC_VER
       dlerror_last = ERROR_SUCCESS;
 
       return buffer;

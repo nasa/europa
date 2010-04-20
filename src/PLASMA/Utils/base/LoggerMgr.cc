@@ -1,3 +1,4 @@
+#  ifdef USE_EUROPA_LOGGER
 
 #include "Debug.hh"
 #include "LoggerMgr.hh"
@@ -304,3 +305,4 @@ LoggerMgr::printHeader( std::ostream &stream, std::string catName, std::string f
 
 
 } //namespace EUROPA
+#endif // USE_EUROPA_LOGGER
