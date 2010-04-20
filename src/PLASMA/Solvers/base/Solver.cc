@@ -34,8 +34,13 @@ namespace EUROPA {
       : m_id(this), m_db(db),
         m_stepCountFloor(0), m_depthFloor(0), m_stepCount(0),
         m_noFlawsFound(false), m_exhausted(false), m_timedOut(false),
+#ifdef _MSC_VER
+        m_maxSteps( UINT_MAX ),
+        m_maxDepth( UINT_MAX ),
+#else
         m_maxSteps(std::numeric_limits<unsigned int>::max()),
         m_maxDepth(std::numeric_limits<unsigned int>::max()),
+#endif //_MSC_VER
         m_masterFlawFilter(configData), m_ceListener(db->getConstraintEngine(), *this),
         m_dbListener(db, *this) {
       checkError(strcmp(configData.Value(), "Solver") == 0,
@@ -677,7 +682,7 @@ namespace EUROPA {
       // validate constraints.
       debugMsg("Solver:isValid","Entering Solver.isValid");
       ConstraintSet l_constraints = m_db->getConstraintEngine()->getConstraints();
-      for(std::set<ConstraintId>::const_iterator it = l_constraints.begin(); it != l_constraints.end(); ++it) {
+      for( ConstraintSet::const_iterator it = l_constraints.begin(); it != l_constraints.end(); ++it) {
         // all guards on flaws must be present in a FlawManager
         if( Id<FlawHandler::VariableListener>::convertable(*it)) {
           bool l_present = false;
