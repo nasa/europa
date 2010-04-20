@@ -3,7 +3,7 @@ SubDir PLASMA NDDL test nddl ;
 if ! $(PLASMA_READY) {
 
 ModuleNamedObjects NddlMain : NddlMain.cc : NDDL ;
-ModuleMain NddlMain : NddlMain.o : NDDL ;
+ModuleMain NddlMain : NddlMain.cc : NDDL ;
 LocalDepends tests : run-nddl-tests ;
 
 # TODO: enable these tests asap
