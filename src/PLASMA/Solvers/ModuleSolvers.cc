@@ -69,6 +69,10 @@ namespace EUROPA {
       REGISTER_FLAW_HANDLER(cfm,SOLVERS::ThreatDecisionPoint, StandardThreatHandler);
       REGISTER_FLAW_HANDLER(cfm,SOLVERS::HSTS::ThreatDecisionPoint, HSTSThreatDecisionPoint);
 
+      REGISTER_FLAW_FILTER(cfm,SOLVERS::GuardFilter, GuardFilter);
+      REGISTER_FLAW_FILTER(cfm,SOLVERS::NotGuardFilter, NotGuardFilter);
+      REGISTER_FLAW_FILTER(cfm,SOLVERS::ParameterFilter, ParameterFilter);
+      REGISTER_FLAW_FILTER(cfm,SOLVERS::LocalVariableFilter, LocalVariableFilter);
       REGISTER_FLAW_FILTER(cfm,SOLVERS::SingletonFilter, Singleton);
       REGISTER_FLAW_FILTER(cfm,SOLVERS::InfiniteDynamicFilter, InfiniteDynamicFilter);
       REGISTER_FLAW_FILTER(cfm,SOLVERS::HorizonFilter, HorizonFilter);

@@ -4,11 +4,40 @@
 #include "PlanDatabase.hh"
 #include "RuleVariableListener.hh"
 #include "TokenVariable.hh"
+#include "RuleInstance.hh"
 
 #include <set>
 
 namespace EUROPA {
   namespace SOLVERS {
+
+    ParameterFilter::ParameterFilter(const TiXmlElement& configData) : FlawFilter(configData, true) {
+      setExpression(toString() + ":param");
+      debugMsg("ParameterFilter:constructor", "Constructing a parameter filter.");
+    }
+
+    bool ParameterFilter::test(const EntityId& entity) {
+      if(!ConstrainedVariableId::convertable(entity))
+        return false;
+      ConstrainedVariableId var = entity;
+      if(var->parent().isValid() && TokenId::convertable(var->parent()))
+        return true;
+      return false;
+    }
+
+    LocalVariableFilter::LocalVariableFilter(const TiXmlElement& configData) : FlawFilter(configData, true) {
+      setExpression(toString() + ":local");
+      debugMsg("LocalVariableFilter:constructor", "Constructing a local variable filter.");
+    }
+
+    bool LocalVariableFilter::test(const EntityId& entity) {
+      if(!ConstrainedVariableId::convertable(entity))
+        return false;
+      ConstrainedVariableId var = entity;
+      if(var->parent().isValid() && RuleInstanceId::convertable(var->parent()))
+        return true;
+      return false;
+    };
 
     GuardFilter::GuardFilter(const TiXmlElement& configData) : FlawFilter(configData, true) {
       setExpression(toString() + ":guard");
@@ -19,14 +48,21 @@ namespace EUROPA {
       if(!ConstrainedVariableId::convertable(entity))
         return false;
       ConstrainedVariableId var = entity;
+      debugMsg("GuardFilter:test", "Testing " << entity->toLongString() << " for guard-ness.");
       std::set<ConstraintId> constraints;
       var->constraints(constraints);
+      debugMsg("GuardFilter:test",
+               "Testing for " << RuleVariableListener::CONSTRAINT_NAME().toString() << " constraints.");
       for(std::set<ConstraintId>::iterator it = constraints.begin(); it != constraints.end(); ++it) {
         ConstraintId constr = *it;
+        debugMsg("GuardFilter:test", "Variable has a " << constr->getName().toString() << " constraint.");
         //indicate a match if this variable is a guard (will be filtered out)
-        if(constr->getName() == RuleVariableListener::CONSTRAINT_NAME())
+        if(constr->getName() == RuleVariableListener::CONSTRAINT_NAME()) {
+          debugMsg("GuardFilter:test", "Variable has a " << constr->toString() << ".");
           return true;
+        }
       }
+      debugMsg("GuardFilter:test", "Variable is not a guard.");
       return false;
     }
 
@@ -38,6 +74,7 @@ namespace EUROPA {
     bool NotGuardFilter::test(const EntityId& entity) {
       if(!ConstrainedVariableId::convertable(entity))
         return false;
+      debugMsg("NotGuardFilter:test", "Testing " << entity->toLongString() << " for not-guard-ness.");
       return !GuardFilter::test(entity);
     }
 

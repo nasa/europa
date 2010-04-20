@@ -13,6 +13,24 @@ namespace EUROPA {
   namespace SOLVERS {
 
     /**
+     * @brief Filters out parameters
+     */
+    class ParameterFilter : public FlawFilter {
+    public:
+      ParameterFilter(const TiXmlElement& configData);
+      virtual bool test(const EntityId& entity);
+    };
+
+    /**
+     * @brief Filters out "local variables" (non-parameters)
+     */
+    class LocalVariableFilter : public FlawFilter{
+    public:
+      LocalVariableFilter(const TiXmlElement& configData);
+      bool test(const EntityId& entity);
+    };
+
+    /**
      * @brief Filters out guards
      */
     class GuardFilter : public FlawFilter {
