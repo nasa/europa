@@ -13,7 +13,13 @@
 #include "PlanDatabaseDefs.hh"
 
 #include <cmath>
-#include <ext/functional>
+#ifdef _MSC_VER
+#  include <functional>
+   using std::select2nd;
+#else
+#  include <ext/functional>
+   using __gnu_cxx::select2nd;
+#endif //_MSC_VER
 
 namespace EUROPA {
 
@@ -479,8 +485,10 @@ namespace EUROPA {
   }
 
   void Resource::getFlawedInstants(std::vector<InstantId>& results) {
-    std::transform(m_flawedInstants.begin(), m_flawedInstants.end(), std::back_inserter(results), 
-                   __gnu_cxx::select2nd<std::map<eint, InstantId>::value_type>());
+    std::transform(m_flawedInstants.begin(), 
+		   m_flawedInstants.end(), 
+		   std::back_inserter(results), 
+                   select2nd< std::map<eint, InstantId>::value_type >() );
     debugMsg("Resource:getFlawedInstants", "Have " << m_flawedInstants.size() << " flawed instants.  Returning " << results.size() << ".");
   }
 

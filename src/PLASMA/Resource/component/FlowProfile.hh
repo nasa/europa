@@ -15,6 +15,9 @@
 #include "ResourceDefs.hh"
 #include "Types.hh"
 #include "TemporalPropagator.hh"
+#ifdef _MSC_VER
+#  include <map>
+#endif
 
 namespace EUROPA
 {
@@ -406,7 +409,11 @@ namespace EUROPA
       void recomputeLevels(InstantId prev, InstantId inst);
 
       typedef std::pair< eint, eint > IntIntPair;
+#ifdef _MSC_VER
+      typedef std::map< TransactionId, IntIntPair > TransactionId2IntIntPair;
+#else
       typedef hash_map< TransactionId, IntIntPair, TransactionIdHash > TransactionId2IntIntPair;
+#endif //_MSC_VER
 
       TransactionId2IntIntPair m_previousTimeBounds;
 
