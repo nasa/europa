@@ -1,0 +1,43 @@
+Objects *************************
+	LightSwitch:switch1*************************
+		Tokens *************************
+				[0, 8]
+				LightSwitch.turnOff()
+				Key=130  Master=37 goal1(37)[1, 9] --> [2, +inf]
+				[1, 9]
+		End Tokens *********************
+	End LightSwitch:switch1*************************
+	LightBulb:bulb1*************************
+		Tokens *************************
+				{0}
+				LightBulb.On()
+				Key=15  Master=NONE
+					Merged Key=114 from goal1(37)[1, 9] --> [2, +inf]
+				[1, 9]
+				[1, 9]
+				LightBulb.Off()
+				Key=37  Master=NONE
+				[2, +inf]
+		End Tokens *********************
+		Variables *************************
+			bulb1.mySwitch_=LightSwitch:CLOSED{switch1(6)}
+		End Variables *********************
+	End LightBulb:bulb1*************************
+Global Variables*************************
+	switch1=LightSwitch:CLOSED{switch1(6)}
+	bulb1=LightBulb:CLOSED{bulb1(10)}
+Merged Tokens: *************************
+		[-inf, 8]
+		LightBulb.On()
+		Key=114  Master=37 goal1(37)[1, 9] --> [2, +inf]
+		[1, 9]
+Inactive Tokens: *************************
+		[-inf, -1]
+		LightBulb.Off()
+		Key=65  Master=15 initialCondition(15){0} --> [1, 9]
+		{0}
+		{-1}
+		LightSwitch.turnOn()
+		Key=81  Master=15 initialCondition(15){0} --> [1, 9]
+		{0}
+

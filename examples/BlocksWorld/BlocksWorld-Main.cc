@@ -56,7 +56,7 @@ bool solve(const char* plannerConfig,
           PSSolver* solver = engine->createSolver(plannerConfig);
           runSolver(solver,startHorizon,endHorizon,maxSteps);
           delete solver;
-
+          std::cout << engine->planDatabaseToString();
           delete engine;
       }
 
@@ -114,4 +114,3 @@ void checkSolver(PSSolver* solver, int i)
   	  debugMsg("Main","Solver finished after " << i << " steps");
     }
 }
-

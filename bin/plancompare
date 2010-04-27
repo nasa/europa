@@ -1,0 +1,185 @@
+#!/usr/bin/env python
+"""Designed to provide diff of plan output given simple arguments
+default usage targeted for running diff of example plans
+USAGE: ./plancompare <project name in $EUROPA_HOME/examples>
+USAGE2: ./plancompare <plan data to> <plan data file to>
+USAGE3: ./plancompare <project name in $EUROPA_HOME/examples> build
+POST if output is blank then there is no difference between plans
+"""
+import sys
+import re
+import os
+import tempfile
+import difflib
+
+def checkOS(arguments):
+  """
+  Defines project name and its source
+  PRE requires a example project name
+  POST returns project name and its source"""
+  if os.environ.has_key("EUROPA_HOME"):
+    europaHome = os.environ["EUROPA_HOME"]
+  else:
+    print "Error: EUROPA_HOME is not defined"
+    sys.exit(1)
+
+  if len(arguments) < 2:
+    print "Assumes project located in " + europaHome + "examples"
+    print "Expected use: " + arguments[0] + " <projectName>"  
+    sys.exit(1)
+  
+  projectName = arguments[1]
+  projectSource = os.path.join(europaHome, "examples", arguments[1])
+
+  if os.path.exists(projectSource):
+    pass
+  else:
+    print "Error: " + projectSource + " does not exist!"
+    sys.exit(1)
+  return projectSource, projectName    
+
+def checkPath(filename, projectSource):
+  """
+  Validates file is within projectSource
+  PRE file is valid
+  POST returns path of verified file within project example"""
+  filePath = os.path.join(projectSource, filename)
+  if os.path.exists(filePath):
+    pass
+  else:
+    print "Error: " + filePath + " not found"
+    sys.exit(1)
+  return filePath
+
+def compareFiles(baseFile_path, testTempFile):
+  """
+  compares two files using python diff library
+  PRE assumes both baseline and test file exist
+  POST nothing"""
+  baseFile = open(baseFile_path, "r")
+  testTempFile.seek(0)    
+## only lines that have changed
+  testoutput = []
+  for line in difflib.context_diff(baseFile.readlines(), testTempFile.readlines()):
+    testoutput += [line]
+  print ''.join(testoutput)
+  
+##  all lines diff  
+#  diff = difflib.ndiff(baseFile.readlines(), testTempFile.readlines())
+#  print ''.join(diff)
+  baseFile.close()
+
+def parsePlanOutput(outputFile, testTempFile):
+  """
+  reads plan output from debug file and copies to temp file
+  PRE assumes output file is readable and contains plan output.
+  assumes temp file is generated
+  POST temp file contains plan output"""
+  status = False
+  outputFileRead = open(outputFile, "r")          
+  for line in outputFileRead.readlines():
+    if re.search("Objects \*{25}", line) != None:
+      status = True
+    if status:
+      testTempFile.write(line)
+  if status == False:
+    print "Warning: Expected Output file content not found"
+  outputFileRead.close()  
+
+def findBaseline(filename, projectSource):  
+  """
+  prepares baseline plan output to be compared
+  PRE assumes filename of project source exists and source
+  path is correct
+  POST returns File object"""
+  status = False  
+  filePath = checkPath(filename, projectSource)
+  baseFileRead = open(filePath, "r")    
+  for line in baseFileRead.readlines():
+    if re.search("Objects \*{25}", line) != None:
+      status = True
+  if status == False:
+    print "Warning: Expected Base file content not found"
+  baseFileRead.close()
+  return filePath
+
+def search_file(file_name, search_path):
+  """
+  searches for file name given search path
+  PRE assumes search path is valid
+  POST returns location of first file matching name"""
+  if os.path.exists(search_path):
+    filenames = os.listdir(search_path)
+    for filename in filenames:
+      if file_name in filenames:
+        return os.path.join(search_path, file_name)
+  return None
+
+def createBaseLine(arguments):
+  """
+  creates base plan
+  PRE assumes list contains project name"""  
+  projectSource, projectName = "", ""
+  projectSource, projectName = checkOS(arguments)
+  testTempFile = tempfile.TemporaryFile()
+  outputFile_name = "RUN_" + projectName + "-planner_g_rt." + projectName + "-initial-state.nddl.PlannerConfig.xml.output"
+  outputFile_path = search_file(outputFile_name, projectSource)
+  if outputFile_path == None:
+    print "Error: file does not exist try running make in " + projectSource
+    sys.exit(1)
+  filePath = checkPath(outputFile_path, projectSource)  
+  parsePlanOutput(filePath, testTempFile)
+  baseFile_name = os.path.join(projectSource, projectName + "_Base.output")
+  baseFile = open(baseFile_name, "w")
+  testTempFile.seek(0)
+  for line in testTempFile.readlines():
+    baseFile.write(line)
+  baseFile.close()
+
+def compareExample(arguments):
+  """
+  compares test plan to baseline plan
+  PRE assumes list contains project name"""  
+  projectSource, projectName = "", ""
+  projectSource, projectName = checkOS(arguments)
+  testTempFile = tempfile.TemporaryFile()
+  outputFile_name = "RUN_" + projectName + "-planner_g_rt." + projectName + "-initial-state.nddl.PlannerConfig.xml.output"
+  outputFile_path = search_file(outputFile_name, projectSource)
+  if outputFile_path == None:
+    print "Error: file does not exist try running make in " + projectSource
+    sys.exit(1)
+  filePath = checkPath(outputFile_path, projectSource)  
+  parsePlanOutput(filePath, testTempFile)
+  baseFile_name = projectName + "_Base.output"
+  compareFiles(findBaseline(baseFile_name, projectSource), testTempFile)
+
+def comparePlans(arguments):
+  """
+  compares test plan to user defined plan
+  PRE assumes list contains two plans and plans have valid paths"""
+  if os.path.exists(arguments[1]) and os.path.exists(arguments[2]):
+    planFrom = os.path.basename(arguments[1]), os.path.dirname(arguments[1])
+    planTo =  os.path.basename(arguments[2]), os.path.dirname(arguments[2])
+    fileTo = open(arguments[2], "r")
+    compareFiles(findBaseline(planFrom[0], planFrom[1]), fileTo)
+    fileTo.close()
+  elif not os.path.exists(arguments[1]):
+    print 'Error: cannot find ' + arguments[1]
+  else:  
+    print 'Error: cannot find ' + arguments[2]  
+
+def main():
+  if len(sys.argv) == 2:
+    compareExample(sys.argv)
+  elif len(sys.argv) == 3:
+    #creates baseline output file from debug file
+    if sys.argv[2] == 'build':
+      createBaseLine(sys.argv)
+    else:
+      comparePlans(sys.argv)
+  else:
+    print 'Error: invalid number of arguments.'
+    print 'Usage: ' + sys.argv[0] + ' PROJECT_NAME'
+    print 'OR     ' + sys.argv[0] + ' SOURCE_PLAN TEST_PLAN'
+if __name__ == '__main__':
+  main()
