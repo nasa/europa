@@ -436,6 +436,14 @@
         <zipfileset dir="${dir.dist.base}/lib" includes="*.a" prefix="lib" dirmode="775" filemode="664"/>
     </zip>
   </target>
+  
+  <target name="run-diff" if="diff.allow">
+    <echo> Running Diff example in ${basedir}/dist/europa/examples/${example.name}</echo>
+    <exec executable="plancompare" dir="${basedir}/dist/europa/examples/${example.name}"
+    	output="${basedir}/dist/europa/examples/${example.name}/${example.name}.diff" failonerror="true">
+      <arg line="${example.name}"/>
+    </exec>
+  </target>
 	                
   <target name="run-example-cpp">
     <echo> Running CPP example in ${basedir}/dist/europa/examples/${example.name}</echo>
@@ -459,6 +467,10 @@
       <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
       <env key="${local.env.LD_LIBRARY_PATH.name}" value="${basedir}/dist/europa/lib"/>
     </exec>
+    <condition property="diff.allow">
+        <available file="${basedir}/dist/europa/examples/${example.name}/RUN_${example.name}-planner_g_rt.${example.name}-initial-state.nddl.PlannerConfig.xml.output"/>
+    </condition>
+    <antcall target="run-diff"></antcall>    
   </target>
 	
   <target name="run-example-java">
@@ -549,7 +561,7 @@
     <antcall target="run-example-java"><param name="example.name" value="Shopping"/></antcall>        
     <antcall target="run-example-java"><param name="example.name" value="UBO"/></antcall>        
   </target>
-	
+  
   <target name="release-dist" depends="init"
   	description="Creates a binary distribution that includes all the variants">
     <if>

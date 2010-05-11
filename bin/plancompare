@@ -20,12 +20,12 @@ def checkOS(arguments):
   if os.environ.has_key("EUROPA_HOME"):
     europaHome = os.environ["EUROPA_HOME"]
   else:
-    print "Error: EUROPA_HOME is not defined"
+    sys.stderr.write("Error: EUROPA_HOME is not defined")
     sys.exit(1)
 
   if len(arguments) < 2:
-    print "Assumes project located in " + europaHome + "examples"
-    print "Expected use: " + arguments[0] + " <projectName>"  
+    sys.stderr.write("Assumes project located in " + europaHome + "examples")
+    sys.stderr.write("Expected use: " + arguments[0] + " <projectName>")
     sys.exit(1)
   
   projectName = arguments[1]
@@ -34,7 +34,7 @@ def checkOS(arguments):
   if os.path.exists(projectSource):
     pass
   else:
-    print "Error: " + projectSource + " does not exist!"
+    sys.stderr.write("Error: " + projectSource + " does not exist!")
     sys.exit(1)
   return projectSource, projectName    
 
@@ -47,7 +47,7 @@ def checkPath(filename, projectSource):
   if os.path.exists(filePath):
     pass
   else:
-    print "Error: " + filePath + " not found"
+    sys.stderr.write("Error: " + filePath + " not found")
     sys.exit(1)
   return filePath
 
@@ -83,7 +83,7 @@ def parsePlanOutput(outputFile, testTempFile):
     if status:
       testTempFile.write(line)
   if status == False:
-    print "Warning: Expected Output file content not found"
+    sys.stderr.write("Warning: Expected Output file content not found")
   outputFileRead.close()  
 
 def findBaseline(filename, projectSource):  
@@ -99,7 +99,7 @@ def findBaseline(filename, projectSource):
     if re.search("Objects \*{25}", line) != None:
       status = True
   if status == False:
-    print "Warning: Expected Base file content not found"
+    sys.stderr.write("Warning: Expected Base file content not found")
   baseFileRead.close()
   return filePath
 
@@ -125,7 +125,7 @@ def createBaseLine(arguments):
   outputFile_name = "RUN_" + projectName + "-planner_g_rt." + projectName + "-initial-state.nddl.PlannerConfig.xml.output"
   outputFile_path = search_file(outputFile_name, projectSource)
   if outputFile_path == None:
-    print "Error: file does not exist try running make in " + projectSource
+    sys.stderr.write("Error: file does not exist try running make in " + projectSource)
     sys.exit(1)
   filePath = checkPath(outputFile_path, projectSource)  
   parsePlanOutput(filePath, testTempFile)
@@ -146,7 +146,7 @@ def compareExample(arguments):
   outputFile_name = "RUN_" + projectName + "-planner_g_rt." + projectName + "-initial-state.nddl.PlannerConfig.xml.output"
   outputFile_path = search_file(outputFile_name, projectSource)
   if outputFile_path == None:
-    print "Error: file does not exist try running make in " + projectSource
+    sys.stderr.write("Error: file does not exist try running make in " + projectSource)
     sys.exit(1)
   filePath = checkPath(outputFile_path, projectSource)  
   parsePlanOutput(filePath, testTempFile)
@@ -164,9 +164,9 @@ def comparePlans(arguments):
     compareFiles(findBaseline(planFrom[0], planFrom[1]), fileTo)
     fileTo.close()
   elif not os.path.exists(arguments[1]):
-    print 'Error: cannot find ' + arguments[1]
+    sys.stderr.write('Error: cannot find ' + arguments[1])
   else:  
-    print 'Error: cannot find ' + arguments[2]  
+    sys.stderr.write('Error: cannot find ' + arguments[2])  
 
 def main():
   if len(sys.argv) == 2:
@@ -178,8 +178,8 @@ def main():
     else:
       comparePlans(sys.argv)
   else:
-    print 'Error: invalid number of arguments.'
-    print 'Usage: ' + sys.argv[0] + ' PROJECT_NAME'
-    print 'OR     ' + sys.argv[0] + ' SOURCE_PLAN TEST_PLAN'
+    sys.stderr.write('Error: invalid number of arguments.')
+    sys.stderr.write('Usage: ' + sys.argv[0] + ' PROJECT_NAME')
+    sys.stderr.write('OR     ' + sys.argv[0] + ' SOURCE_PLAN TEST_PLAN')
 if __name__ == '__main__':
   main()

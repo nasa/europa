@@ -76,4 +76,26 @@
        </classpath>
     </java>
   </target>
+      
+  <target name="diff" depends="init" description="Requirements for diff">
+    <exec executable="make" dir="${project.dir}" failonerror="true">
+      <arg line="clean"/>
+    </exec>
+    <exec executable="make" dir="${project.dir}" failonerror="true">
+      <env key="EUROPA_HOME" value="${env.EUROPA_HOME}"/>
+      <env key="${env.LD_LIBRARY_PATH.name}" value="${europa.dir}/lib"/>
+    </exec>
+    <condition property="diff.allow">
+        <available file="${project.dir}/RUN_${project}-planner_g_rt.${project}-initial-state.nddl.PlannerConfig.xml.output"/>
+    </condition>
+    <antcall target="run-diff"></antcall>
+  </target>
+  
+  <target name="run-diff" if="diff.allow">
+    <echo message="Running Diff example in ${project}"/>
+    <exec executable="plancompare" dir="${project.dir}"
+    	output="${project.dir}/${project}.diff" failonerror="true">
+      <arg line="${project}"/>
+    </exec>
+  </target>  
 </project>
