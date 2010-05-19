@@ -17,6 +17,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 // Old version import org.ops.ui.gantt.swing.EGanttView;
@@ -125,10 +126,13 @@ public class PSDesktop extends JFrame {
 	 * Pops up a file chooser dialog to open .nddl file. @return full path to
 	 * the chosen file, or null
 	 */
-	private static File askForNddlFile() {
+	private static File askForNddlFile(File baseDir) {
 		JFileChooser chooser = new JFileChooser();
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter(
-				"NDDL files", "nddl"));
+		FileFilter filter = new FileNameExtensionFilter("NDDL files", "nddl");
+		chooser.setCurrentDirectory(baseDir);
+		chooser.addChoosableFileFilter(filter);
+		chooser.setFileFilter(filter);
+		chooser.setDialogTitle("Choose NDDL initial state file");
 		int res = chooser.showOpenDialog(null);
 		if (res != JFileChooser.APPROVE_OPTION)
 			return null;
@@ -140,10 +144,13 @@ public class PSDesktop extends JFrame {
 	 * Pops up a file chooser dialog to open .xml file. @return full path to the
 	 * chosen file, or null
 	 */
-	private static File askForXmlFile(String title) {
-		JFileChooser chooser = new JFileChooser(title);
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("XML files",
-				"xml"));
+	private static File askForXmlFile(File baseDir) {
+		JFileChooser chooser = new JFileChooser();
+		FileFilter filter = new FileNameExtensionFilter("XML files", "xml");
+		chooser.addChoosableFileFilter(filter);
+		chooser.setFileFilter(filter);
+		chooser.setDialogTitle("Choose PlannerConfig.xml file");
+		chooser.setCurrentDirectory(baseDir);
 		int res = chooser.showOpenDialog(null);
 		if (res != JFileChooser.APPROVE_OPTION)
 			return null;
@@ -217,16 +224,18 @@ public class PSDesktop extends JFrame {
 		}
 
 		// Pop up dialogs if needed
+		File baseDir = new File(".");
 		if (dataFile == null) {
-			dataFile = askForNddlFile();
+			dataFile = askForNddlFile(baseDir);
 			if (dataFile == null) {
 				JOptionPane.showMessageDialog(null,
 						"No NDDL file chosen. Exiting");
 				return;
 			}
+			baseDir = dataFile.getParentFile();
 		}
 		if (solverConfig == null) {
-			solverConfig = askForXmlFile("blah");
+			solverConfig = askForXmlFile(baseDir);
 			if (solverConfig == null) {
 				JOptionPane.showMessageDialog(null,
 						"No solver config chosen. Exiting");
