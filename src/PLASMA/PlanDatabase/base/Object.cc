@@ -12,6 +12,7 @@
 #include "EntityIterator.hh"
 
 #include <sstream>
+#include <string.h>
 
 /**
  * @todo Add type checking for objects, and compositions.
