@@ -17,6 +17,16 @@ public class StepStatisticsRecord {
 	private long durationMs;
 	private int depth;
 
+	private StepStatisticsRecord() {
+		flaws = new ArrayList<String>();
+	}
+
+	private static final StepStatisticsRecord emptyRecord = new StepStatisticsRecord();
+
+	public static StepStatisticsRecord getEmpty() {
+		return emptyRecord;
+	}
+
 	/**
 	 * Create a record for the current state of the solver.
 	 * 

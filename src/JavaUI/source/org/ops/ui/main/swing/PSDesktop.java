@@ -21,6 +21,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 // Old version import org.ops.ui.gantt.swing.EGanttView;
+import org.ops.ui.beanshell.swing.BeanShellView;
 import org.ops.ui.gantt.swing.GanttView;
 import org.ops.ui.schemabrowser.swing.SchemaView;
 import org.ops.ui.solver.model.SolverModel;
@@ -31,6 +32,7 @@ import psengine.PSUtil;
 
 public class PSDesktop extends JFrame {
 
+	protected File workingDir;
 	private JDesktopPane desktop;
 	private Logger log = Logger.getLogger(getClass().getName());
 
@@ -43,8 +45,13 @@ public class PSDesktop extends JFrame {
 	private OpenDecisionsView openDecisions;
 	// private EGanttView ganttView;
 	private GanttView ganttView;
+	private BeanShellView bshView;
 
-	private PSDesktop(File dataFile, File solverConfig) {
+	private JMenu userMenu = null;
+
+	private PSDesktop(File dataFile, File solverConfig, File workingDir) {
+		assert (workingDir != null);
+		this.workingDir = workingDir;
 		this.desktop = new JDesktopPane();
 		this.add(this.desktop);
 
@@ -80,7 +87,10 @@ public class PSDesktop extends JFrame {
 		// this.ganttView = new EGanttView(this.solverModel);
 		this.ganttView = new GanttView(this.solverModel);
 		this.desktop.add(this.ganttView);
-		
+
+		this.bshView = new BeanShellView(solverModel, this);
+		this.desktop.add(this.bshView);
+
 		// Finish up
 		buildMenu();
 		updateTitle(dataFile);
@@ -101,7 +111,18 @@ public class PSDesktop extends JFrame {
 
 		menu = new JMenu("File");
 		bar.add(menu);
-		JMenuItem item = new JMenuItem("Exit");
+		JMenuItem item = new JMenuItem("Load BSH file");
+		menu.add(item);
+		item.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				File fl = askForFile(workingDir, "Bean Shell files", "bsh",
+						"Choose BSH file to interpret");
+				if (fl != null)
+					bshView.loadFile(fl);
+			}
+		});
+		menu.addSeparator();
+		item = new JMenuItem("Exit");
 		menu.add(item);
 		item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -115,6 +136,7 @@ public class PSDesktop extends JFrame {
 		menu.add(this.solverDialog.getToggleMenuItem());
 		menu.add(this.openDecisions.getToggleMenuItem());
 		menu.add(this.ganttView.getToggleMenuItem());
+		menu.add(this.bshView.getToggleMenuItem());
 	}
 
 	private void updateTitle(File dataFile) {
@@ -123,34 +145,18 @@ public class PSDesktop extends JFrame {
 	}
 
 	/**
-	 * Pops up a file chooser dialog to open .nddl file. @return full path to
-	 * the chosen file, or null
-	 */
-	private static File askForNddlFile(File baseDir) {
-		JFileChooser chooser = new JFileChooser();
-		FileFilter filter = new FileNameExtensionFilter("NDDL files", "nddl");
-		chooser.setCurrentDirectory(baseDir);
-		chooser.addChoosableFileFilter(filter);
-		chooser.setFileFilter(filter);
-		chooser.setDialogTitle("Choose NDDL initial state file");
-		int res = chooser.showOpenDialog(null);
-		if (res != JFileChooser.APPROVE_OPTION)
-			return null;
-		File file = chooser.getSelectedFile();
-		return file;
-	}
-
-	/**
-	 * Pops up a file chooser dialog to open .xml file. @return full path to the
+	 * Pops up a file chooser dialog to open file. @return full path to the
 	 * chosen file, or null
 	 */
-	private static File askForXmlFile(File baseDir) {
+	private static File askForFile(File baseDir, String typeTitle,
+			String typeExtension, String dialogTitle) {
 		JFileChooser chooser = new JFileChooser();
-		FileFilter filter = new FileNameExtensionFilter("XML files", "xml");
+		FileFilter filter = new FileNameExtensionFilter(typeTitle,
+				typeExtension);
+		chooser.setCurrentDirectory(baseDir);
 		chooser.addChoosableFileFilter(filter);
 		chooser.setFileFilter(filter);
-		chooser.setDialogTitle("Choose PlannerConfig.xml file");
-		chooser.setCurrentDirectory(baseDir);
+		chooser.setDialogTitle(dialogTitle);
 		int res = chooser.showOpenDialog(null);
 		if (res != JFileChooser.APPROVE_OPTION)
 			return null;
@@ -176,7 +182,8 @@ public class PSDesktop extends JFrame {
 		// loadFile(dataFile);
 
 		solverModel = new SolverModel();
-		solverModel.configure(data, solverConfig, 0, 100);
+		if (data != null && solverConfig != null)
+			solverModel.configure(data, solverConfig, 0, 100);
 
 		log.log(Level.INFO, "Engine started");
 	}
@@ -198,6 +205,18 @@ public class PSDesktop extends JFrame {
 		return old;
 	}
 
+	public EuropaInternalFrame makeNewFrame(String title) {
+		EuropaInternalFrame res = new EuropaInternalFrame(title);
+		this.desktop.add(res);
+		// Hook up to menu
+		if (userMenu == null) {
+			userMenu = new JMenu("User");
+			this.getJMenuBar().add(userMenu);
+		}
+		userMenu.add(res.getToggleMenuItem());
+		return res;
+	}
+
 	/**
 	 * @param args
 	 */
@@ -209,24 +228,35 @@ public class PSDesktop extends JFrame {
 		}
 
 		// Parse command line parameters to get data file and configs
-		File dataFile = null, solverConfig = null;
+		File dataFile = null, solverConfig = null, bshFile = null;
 		for (int i = 0; i < args.length; i++) {
 			if ("-config".equals(args[i])) {
 				solverConfig = tryToSetFile("Config", args[++i], solverConfig);
 			} else if ("-nddl".equals(args[i])) {
 				dataFile = tryToSetFile("NDDL", args[++i], dataFile);
+			} else if ("-bsh".equals(args[i])) {
+				bshFile = tryToSetFile("BSH", args[++i], bshFile);
 			} else {
 				if (dataFile == null)
 					dataFile = tryToSetFile("NDDL", args[i], dataFile);
-				else
+				else if (solverConfig == null)
 					solverConfig = tryToSetFile("Config", args[i], solverConfig);
+				else
+					bshFile = tryToSetFile("BSH", args[i], bshFile);
 			}
 		}
 
 		// Pop up dialogs if needed
-		File baseDir = new File(".");
-		if (dataFile == null) {
-			dataFile = askForNddlFile(baseDir);
+		File baseDir;
+		if (dataFile != null)
+			baseDir = dataFile.getParentFile();
+		else if (solverConfig != null)
+			baseDir = solverConfig.getParentFile();
+		else
+			baseDir = new File(".");
+		if (dataFile == null && bshFile == null) {
+			dataFile = askForFile(baseDir, "NDDL files", "nddl",
+					"Choose NDDL initial state file");
 			if (dataFile == null) {
 				JOptionPane.showMessageDialog(null,
 						"No NDDL file chosen. Exiting");
@@ -234,8 +264,9 @@ public class PSDesktop extends JFrame {
 			}
 			baseDir = dataFile.getParentFile();
 		}
-		if (solverConfig == null) {
-			solverConfig = askForXmlFile(baseDir);
+		if (solverConfig == null && bshFile == null) {
+			solverConfig = askForFile(baseDir, "XML files", "xml",
+					"Choose PlannerConfig.xml file");
 			if (solverConfig == null) {
 				JOptionPane.showMessageDialog(null,
 						"No solver config chosen. Exiting");
@@ -243,7 +274,9 @@ public class PSDesktop extends JFrame {
 			}
 		}
 
-		PSDesktop me = new PSDesktop(dataFile, solverConfig);
+		PSDesktop me = new PSDesktop(dataFile, solverConfig, baseDir);
+		if (bshFile != null)
+			me.bshView.loadFile(bshFile);
 		me.setVisible(true);
 	}
 

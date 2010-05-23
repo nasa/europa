@@ -19,13 +19,16 @@ public class SolverModel {
 
 	private ArrayList<StepStatisticsRecord> stepStatistics = new ArrayList<StepStatisticsRecord>();
 
-	public synchronized void configure(File file, File configFile,
-			int horizonStart, int horizonEnd) {
+	public SolverModel() {
 		if (engine != null)
 			throw new IllegalStateException("Reinitializing solver model");
 
 		this.engine = PSEngine.makeInstance();
 		this.engine.start();
+	}
+
+	public synchronized void configure(File file, File configFile,
+			int horizonStart, int horizonEnd) {
 		// NDDL files should be loaded before solver is created
 		loadNddlFile(file);
 
@@ -44,7 +47,8 @@ public class SolverModel {
 		if (engine == null)
 			throw new IllegalStateException(
 					"Cannot shutdown - nothing initialized");
-		solver.delete();
+		if (solver != null)
+			solver.delete();
 		engine.shutdown();
 		engine.delete();
 		solver = null;
@@ -81,6 +85,9 @@ public class SolverModel {
 	/** @return two numbers: horizon start and horizon end */
 	public int[] getHorizon() {
 		int[] res = new int[2];
+		// In case model is build from BSH file, not NDDL
+		if (solver == null)
+			return res;
 		res[0] = solver.getHorizonStart();
 		res[1] = solver.getHorizonEnd();
 		return res;
@@ -151,6 +158,8 @@ public class SolverModel {
 	}
 
 	public StepStatisticsRecord getStepStatistics(int step) {
+		if (step >= this.stepStatistics.size())
+			return StepStatisticsRecord.getEmpty();
 		return this.stepStatistics.get(step);
 	}
 }
