@@ -39,27 +39,27 @@ distribution.
 
 // Help out windows:
 #if defined( _DEBUG ) && !defined( DEBUG )
-#  define DEBUG
+#define DEBUG
 #endif
 
 #if defined( DEBUG ) && defined( _MSC_VER )
-#  include <windows.h>
-#  define TIXML_LOG OutputDebugString
+#include <windows.h>
+#define TIXML_LOG OutputDebugString
 #else
-#  define TIXML_LOG printf
+#define TIXML_LOG printf
 #endif
 
 #ifdef TIXML_USE_STL
-#  include <string>
-#  include <iostream>
-//#include <ostream>
-#  define TIXML_STRING	std::string
-#  define TIXML_ISTREAM	std::istream
-#  define TIXML_OSTREAM	std::ostream
+	#include <string>
+ 	#include <iostream>
+    //#include <ostream>
+	#define TIXML_STRING	std::string
+	#define TIXML_ISTREAM	std::istream
+	#define TIXML_OSTREAM	std::ostream
 #else
-#  include "tinystr.h"
-#  define TIXML_STRING	TiXmlString
-#  define TIXML_OSTREAM	TiXmlOutStream
+	#include "tinystr.h"
+	#define TIXML_STRING	TiXmlString
+	#define TIXML_OSTREAM	TiXmlOutStream
 #endif
 
 namespace EUROPA {

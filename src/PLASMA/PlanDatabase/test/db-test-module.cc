@@ -1341,7 +1341,9 @@ private:
       CPPUNIT_ASSERT(ce->propagate());
     }
     // The delation of the above tokens should imply we have something to propagate
-    CPPUNIT_ASSERT(ce->pending());
+    //This really isn't the case--the tokens are self-contained.  Once they're gone, there
+    //shouldn't be anything for the CE to do. ~MJI
+    //CPPUNIT_ASSERT(ce->pending());
 
     // Now try again, but make sure that if we terminate them, the deletion causes no problems
     {

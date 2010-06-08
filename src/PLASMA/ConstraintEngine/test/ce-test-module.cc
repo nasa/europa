@@ -300,6 +300,27 @@ public:
   }
 };
 
+class TwicePropagator : public PostPropagationCallback {
+public:
+  TwicePropagator(int& counter) : PostPropagationCallback(), m_counter(counter) {counter = 0;}
+  TwicePropagator(const ConstraintEngineId& ce, int& counter) : PostPropagationCallback(ce), m_counter(counter) {counter = 0;}
+  bool operator()() {
+    ++m_counter;
+    return m_counter < 2;
+  }
+private:
+  int& m_counter;
+};
+
+class PropagationCounter : public ConstraintEngineListener {
+public:
+  PropagationCounter(const ConstraintEngineId& ce) : ConstraintEngineListener(ce), m_counter(0) {}
+  void notifyPropagationCompleted() {++m_counter;}
+  int counter() const {return m_counter;}
+private:
+  int m_counter;
+};
+
 class ConstraintEngineTest
 {
 public:
@@ -308,6 +329,38 @@ public:
     EUROPA_runCETest(testInconsistentInitialVariableDomain);
     EUROPA_runCETest(testVariableLookupByIndex);
     EUROPA_runCETest(testGNATS_3133);
+    EUROPA_runCETest(testPostPropagation);
+    return true;
+  }
+
+  static bool testPostPropagation() {
+    CETestEngine engine;
+    ConstraintEngineId ce = ((ConstraintEngine*)engine.getComponent("ConstraintEngine"))->getId();
+
+    int postProp = 0;
+    PropagationCounter* counter = new PropagationCounter(ce);
+    TwicePropagator* callback = new TwicePropagator(postProp);
+    ce->addCallback(callback->getId());
+    
+    // Set up a base domain
+    NumericDomain intBaseDomain;
+    intBaseDomain.insert(1);
+    intBaseDomain.insert(2);
+    intBaseDomain.insert(3);
+    intBaseDomain.insert(4);
+    intBaseDomain.insert(5);
+    intBaseDomain.close();
+
+    for(int i=0;i<100;i++){
+      Id<Variable<NumericDomain > > v0 = (new Variable<NumericDomain> (ce, intBaseDomain))->getId();
+      Id<Variable<NumericDomain > > v1 = (new Variable<NumericDomain>(ce, intBaseDomain))->getId();
+      new EqualConstraint(LabelStr("EqualConstraint"), LabelStr("Default"), ce, makeScope(v0, v1));
+    }
+
+    CPPUNIT_ASSERT(ce->propagate());
+    CPPUNIT_ASSERT(counter->counter() == 1);
+    CPPUNIT_ASSERT(postProp == 2);
+
     return true;
   }
 

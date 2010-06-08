@@ -154,20 +154,17 @@ namespace EUROPA {
    */
   bool RuleInstance::test(const std::vector<ConstrainedVariableId>& guards) const {
     checkError(m_rule.isValid(), m_rule);
-    debugMsg("RuleInstance:test", "Testing rule " << m_id << " for " << m_rule->getName().toString() << " from " << m_rule->getSource().toString());
+    debugMsg("RuleInstance:test", "Testing rule " << toString() << " for " << m_rule->getName().toString() << " from " << m_rule->getSource().toString());
     if(m_guardDomain != 0) { // Case of explicit guard on a single variable
       debugMsg("RuleInstance:test", "Case of explicit guard on a single variable");
       checkError(guards.size() == 1, "Explicit guard on one variable only");
-      bool result = guards[0]->lastDomain().isSingleton() &&
-      (m_guardDomain->isMember(guards[0]->lastDomain().getSingletonValue()) ^ !m_isPositive);
+      bool result = (guards[0]->lastDomain().isSubsetOf(*m_guardDomain) ^ !m_isPositive);
+      //guards[0]->lastDomain().isSingleton() &&
+      //(m_guardDomain->isMember(guards[0]->lastDomain().getSingletonValue()) ^ !m_isPositive);
 
-      debugMsg("RuleInstance:test", "variable " << guards[0]->getId()
-	       << " name " << guards[0]->toString()
-	       << " specified " << guards[0]->lastDomain().isSingleton()
+      debugMsg("RuleInstance:test", "variable " << guards[0]->toLongString()
 	       << " guard domain " << *m_guardDomain
 	       << (result ? " passed" : " failed"));
-      condDebugMsg(!guards[0]->lastDomain().isSingleton(), "RuleInstance:test",
-		   "Guard " << guards[0]->toString() << " not specified.");
       condDebugMsg(guards[0]->lastDomain().isSingleton() && !m_guardDomain->isMember(guards[0]->lastDomain().getSingletonValue()), "RuleInstance:test",
 		   "Specified value '" << guards[0]->lastDomain().getSingletonValue() << "' of guard " << guards[0]->toString() << " not in guard domain " << *m_guardDomain);
 
@@ -192,12 +189,19 @@ namespace EUROPA {
       ++counter;
     }
 
-    debugMsg("RuleInstance:test", "Rule passed");
+    debugMsg("RuleInstance:test", "Rule " << toString() << " passed");
     return true; // All passed
   }
 
   bool RuleInstance::test() const {
     return test(m_guards);
+  }
+
+  void RuleInstance::prepare() {
+    if(!isExecuted())
+      m_rulesEngine->scheduleForExecution(getId());
+    else
+      m_rulesEngine->scheduleForUndoing(getId());
   }
 
   void RuleInstance::execute() {
@@ -298,6 +302,7 @@ namespace EUROPA {
     m_guards = guards;
     m_guardListener = (new RuleVariableListener(m_planDb->getConstraintEngine(), m_id, m_guards))->getId();
     m_guardListener->addDependent(this);
+    debugMsg("RuleInstance:setGuard", "Added guard: " << m_guardListener->toLongString());
   }
 
   void RuleInstance::setGuard(const ConstrainedVariableId& guard, const Domain& domain){
@@ -310,6 +315,7 @@ namespace EUROPA {
     m_guardDomain = domain.copy();
     m_guardListener = (new RuleVariableListener(m_planDb->getConstraintEngine(), m_id, m_guards))->getId();
     m_guardListener->addDependent(this);
+    debugMsg("RuleInstance:setGuard", "Added guard: " << m_guardListener->toLongString());
   }
 
   TokenId RuleInstance::addSlave(Token* slave){
@@ -673,5 +679,15 @@ namespace EUROPA {
 
     ss << "++++++++++++++++++x+++++++";
     return ss.str();
+  }
+
+  bool RuleInstance::hasEmptyGuard() const {
+    if(m_guards.empty())
+      return false;
+    for(std::vector<ConstrainedVariableId>::const_iterator it = m_guards.begin(); 
+        it != m_guards.end(); ++it)
+      if((*it)->lastDomain().isEmpty())
+        return true;
+    return false;
   }
 }

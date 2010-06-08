@@ -2,9 +2,7 @@ SubDir PLASMA Solvers component ;
 
 if ! $(PLASMA_READY) {
 
-if $(OS) != WinVS90 {
-  SubDirC++Flags -Wno-unknown-pragmas ;
-}
+SubDirC++Flags -Wno-unknown-pragmas ;
 
 ModuleComponent Solvers
 	:

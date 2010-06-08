@@ -27,7 +27,7 @@ LocalDepends tests : run-system-module-tests ;
 #
 EXTRA_DEFS = -D$(PLANNER) ;
 ModuleNamedObjects runProblem_$(PLANNER) : runProblem.cc : System ;
-ModuleMain runProblem_$(PLANNER) : runProblem.cc : System ;
+ModuleMain runProblem_$(PLANNER) : runProblem_$(PLANNER).o : System ;
 
 local DEFAULT_PCONFIG = "DefaultPlannerConfig.xml" ;
 
@@ -186,7 +186,7 @@ for numSatellites in 1 {
 	  if $(PLANNER) = SOLVER {
 	    plannerModule = Solvers ;
 	  }
-          NddlMain $(exe) :  : $(model) : System $(plannerModule) : performance-tests ;
+          NddlMain $(exe) : runProblem_link_$(PLANNER).o : $(model) : System $(plannerModule) : performance-tests ;
           RunModuleMain run-$(exe) : $(exe) : $(xml) $(DEFAULT_PCONFIG) : time ;
           LocalDepends run-performance-tests : run-$(exe) ;
         }

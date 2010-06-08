@@ -173,11 +173,7 @@ namespace EUROPA {
      * @see getCompatibleTokens
      */
     unsigned int countCompatibleTokens(const TokenId& inactiveToken,
-#ifdef _MSC_VER
-				       unsigned int limit = UINT_MAX,  //std::numeric_limits<unsigned int>::max(),
-#else
-                                       unsigned int limit = std::numeric_limits<unsigned int>::max(),
-#endif //_MSC_VER
+				       unsigned int limit = std::numeric_limits<unsigned int>::max(),
 				       bool useExactTest = false);
 
     /**
@@ -202,23 +198,14 @@ namespace EUROPA {
      */
     void getOrderingChoices(const TokenId& tokenToOrder,
 			    std::vector< OrderingChoice >& results,
-#ifdef _MSC_VER
-			    unsigned int limit = UINT_MAX  //std::numeric_limits<unsigned int>::max(),
-#else
-			    unsigned int limit = std::numeric_limits<unsigned int>::max()
-#endif //_MSC_VER
-			    );
+			    unsigned int limit = std::numeric_limits<unsigned int>::max());
     /**
      * @brief Returns a count or all ordering choices for a token up to the given limit
      * @see Object::getOrderingChoices
      */
     unsigned int countOrderingChoices(const TokenId& token,
-#ifdef _MSC_VER
-				      unsigned int limit = UINT_MAX  //std::numeric_limits<unsigned int>::max(),
-#else
-				      unsigned int limit = std::numeric_limits<unsigned int>::max()
-#endif //_MSC_VER
-				      );
+				      unsigned int limit = std::numeric_limits<unsigned int>::max());
+
     /**
      * @brief Returns the previous count of ordering choices
      * @param token The token for which we want ordering choices. Cannot be rejected.
@@ -466,10 +453,10 @@ namespace EUROPA {
     checkError(m_schema->isObjectType(type), "Is not an object type in the plan database: " + type.toString());
 
     for (std::multimap<edouble, ObjectId>::const_iterator it = m_objectsByType.find(type.getKey());
-        it != m_objectsByType.end() && it->first == type.getKey();
-        ++it) {
+	 it != m_objectsByType.end() && it->first == type.getKey();
+	 ++it) {
       debugMsg("PlanDatabase:getObjectsByType", "Adding object '" << it->second->getName().toString() << "' of type '" <<
-          it->second->getType().toString() << "' for type '" << type.toString() << "'");
+	       it->second->getType().toString() << "' for type '" << type.toString() << "'");
       debugMsg("PlanDatabase:getObjectsByType", "Typeid for object: " << typeid((*(it->second))).name());
       results.push_back(ID(it->second));
     }

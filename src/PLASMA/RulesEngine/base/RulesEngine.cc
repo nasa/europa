@@ -13,6 +13,8 @@
 #include "ConstraintType.hh"
 #include <list>
 
+#include <algorithm>
+
 namespace EUROPA{
 
   class DbRuleEngineConnector: public PlanDatabaseListener {
@@ -28,6 +30,21 @@ namespace EUROPA{
     const RulesEngineId m_rulesEngine;
   };
 
+  class RulesEngineCallback : public PostPropagationCallback {
+  public:
+    RulesEngineCallback(const ConstraintEngineId& ce, const RulesEngineId& re) : PostPropagationCallback(ce), m_re(re) {}
+
+    bool operator()() {
+      if(m_re->hasWork()) {
+        debugMsg("RulesEngineCallback", "Rules engine has work to do.");
+        return m_re->doRules();
+      }
+      return false;
+    }
+  private:
+    RulesEngineId m_re;
+  };
+
   RulesEngine::RulesEngine(const RuleSchemaId& schema, const PlanDatabaseId& planDatabase)
     : m_id(this)
     , m_schema(schema)
@@ -35,7 +52,7 @@ namespace EUROPA{
     , m_deleted(false)
   {
     m_planDbListener = (new DbRuleEngineConnector(m_planDb, m_id))->getId();
-
+    m_callback = (new RulesEngineCallback(m_planDb->getConstraintEngine(), m_id))->getId();
     // Allocate an instance of Default Propagator to handle the rule related  contraint propagation.
     // Will be cleaned up automatically by the ConstraintEngine
     new DefaultPropagator("RulesEngine", m_planDb->getConstraintEngine());
@@ -58,7 +75,7 @@ namespace EUROPA{
     }
 
     delete (PlanDatabaseListener*) m_planDbListener;  // removes itself from the plan database set of listeners
-
+    delete (PostPropagationCallback*) m_callback;
     m_id.remove();
   }
 
@@ -182,5 +199,47 @@ namespace EUROPA{
     check_error(m_listeners.count(listener) == 1);
     if(!m_deleted)
       m_listeners.erase(listener);
+  }
+
+  void RulesEngine::scheduleForExecution(const RuleInstanceId& r) {
+    debugMsg("RulesEngine:scheduleForExecution", "Scheduling rule " << r->toString());
+    m_ruleInstancesToExecute.push_back(r);
+  }
+
+  void RulesEngine::scheduleForUndoing(const RuleInstanceId& r) {
+    debugMsg("RulesEngine:scheduleForUndoing", "Scheduling rule " << r->toString());
+    m_ruleInstancesToUndo.push_back(r);
+  }
+
+  bool RulesEngine::doRules() {
+    std::sort(m_ruleInstancesToExecute.begin(), m_ruleInstancesToExecute.end(), EntityComparator<RuleInstanceId>());
+    std::sort(m_ruleInstancesToUndo.begin(), m_ruleInstancesToUndo.end(), EntityComparator<RuleInstanceId>());
+    std::vector<RuleInstanceId>::iterator execEnd = std::unique(m_ruleInstancesToExecute.begin(),
+                                                                m_ruleInstancesToExecute.end(),
+                                                                EntityComparator<RuleInstanceId>());
+    std::vector<RuleInstanceId>::iterator undoEnd = std::unique(m_ruleInstancesToUndo.begin(),
+                                                                m_ruleInstancesToUndo.end(),
+                                                                EntityComparator<RuleInstanceId>());
+    bool retval = false;
+
+    for(std::vector<RuleInstanceId>::iterator it = m_ruleInstancesToExecute.begin(); it != execEnd; ++it)
+      if(!(*it)->isExecuted() && (*it)->test()) {
+        debugMsg("RulesEngine:doRules", "Executing rule " << (*it)->toString());
+        (*it)->execute();
+        retval = true;
+      }
+    for(std::vector<RuleInstanceId>::iterator it = m_ruleInstancesToUndo.begin(); it != undoEnd; ++it)
+      if((*it)->isExecuted() && !(*it)->test() && !(*it)->hasEmptyGuard()) {
+        debugMsg("RulesEngine:doRules", "Undoing rule " << (*it)->toString());
+        (*it)->undo();
+        retval = true;
+      }
+    m_ruleInstancesToExecute.clear();
+    m_ruleInstancesToUndo.clear();
+    return retval;
+  }
+
+  bool RulesEngine::hasWork() const {
+    return !m_ruleInstancesToExecute.empty() || !m_ruleInstancesToUndo.empty();
   }
 }

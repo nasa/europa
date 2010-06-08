@@ -10,7 +10,6 @@
 #include <fstream>
 #include <algorithm>
 #include <functional>
-#include "DebugMsg.hh"
 
 /**
  * @class DebugConfig

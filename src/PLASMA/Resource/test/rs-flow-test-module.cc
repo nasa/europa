@@ -86,21 +86,26 @@ class FlowProfileTest
 public:
 
   static bool test(){
-//     debugMsg("ResourceTest"," FlowProfile ");
+    debugMsg("ResourceTest"," FlowProfile ");
 
-//     testAddAndRemove< EUROPA::FlowProfile> ();
-//     testScenario0< EUROPA::FlowProfile>();
-//     testScenario1< EUROPA::FlowProfile>();
-//     testScenario2< EUROPA::FlowProfile>();
-//     testScenario3< EUROPA::FlowProfile>();
-//     testScenario4< EUROPA::FlowProfile>();
-//     testScenario5< EUROPA::FlowProfile>();
-//     testScenario6< EUROPA::FlowProfile>();
-//     testScenario7< EUROPA::FlowProfile>();
-//     testScenario8< EUROPA::FlowProfile>();
-//     testScenario9< EUROPA::FlowProfile>( 0, 0 );
-//     testScenario9< EUROPA::FlowProfile>( 1, 1 );
+    testAddAndRemove< EUROPA::FlowProfile> ();
+    testScenario0< EUROPA::FlowProfile>();
+    testScenario1< EUROPA::FlowProfile>();
+    testScenario2< EUROPA::FlowProfile>();
+    testScenario3< EUROPA::FlowProfile>();
+    testScenario4< EUROPA::FlowProfile>();
+    testScenario5< EUROPA::FlowProfile>();
+    testScenario6< EUROPA::FlowProfile>();
+    testScenario7< EUROPA::FlowProfile>();
+    testScenario8< EUROPA::FlowProfile>();
+    testScenario9< EUROPA::FlowProfile>( 0, 0 );
+    testScenario9< EUROPA::FlowProfile>( 1, 1 );
     //testScenario10< EUROPA::FlowProfile>();
+    testScenario11< EUROPA::FlowProfile>();
+    testScenario12< EUROPA::FlowProfile>();
+    //testScenario13< EUROPA::FlowProfile>();
+    //testScenario14< EUROPA::FlowProfile>();
+    //testPaulBug<EUROPA::FlowProfile>();
 
      debugMsg("ResourceTest"," IncrementalFlowProfile ");
 
@@ -121,6 +126,7 @@ public:
      testScenario12< EUROPA::IncrementalFlowProfile>();
      testScenario13< EUROPA::IncrementalFlowProfile>();
      testScenario14< EUROPA::IncrementalFlowProfile>();
+     //testPaulBug<EUROPA::IncrementalFlowProfile>();
 
     return true;
   }
@@ -175,6 +181,40 @@ private:
   static void executeScenario0( Profile& profile, ConstraintEngine& ce ) {
     // no transactions
     profile.recompute();
+  }
+
+  static void executePaulBug(Profile& profile, ConstraintEngine& ce, int nrInstances, eint itimes[], edouble lowerLevels[], edouble upperLevels[] ) {
+    Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(10, PLUS_INFINITY), true, "T+");
+    Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(120010, PLUS_INFINITY), true, "T-");
+    Variable<IntervalIntDomain> t3(ce.getId(), IntervalIntDomain(960000, PLUS_INFINITY), true, "t-");
+    Variable<IntervalIntDomain> t4(ce.getId(), IntervalIntDomain(961200, PLUS_INFINITY), true, "t+");
+    
+    Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(1000), true, "qT+");
+    Variable<IntervalDomain> q2(ce.getId(), IntervalDomain(-1000), true, "qT-");
+    Variable<IntervalDomain> q3(ce.getId(), IntervalDomain(-1), true, "qt-");    
+    Variable<IntervalDomain> q4(ce.getId(), IntervalDomain(1), true, "qt-");
+
+    LessThanEqualConstraint c0(LabelStr("precedes"), LabelStr("Temporal"), ce.getId() , makeScope(t1.getId(), t2.getId()));
+    LessThanEqualConstraint c1(LabelStr("precedes"), LabelStr("Temporal"), ce.getId() , makeScope(t3.getId(), t4.getId()));
+
+    ce.propagate();
+
+    Transaction trans1(t1.getId(), q1.getId(), false);
+    Transaction trans2(t2.getId(), q2.getId(), true);
+    Transaction trans3(t3.getId(), q3.getId(), true);
+    Transaction trans4(t4.getId(), q4.getId(), false);
+
+    profile.addTransaction( trans1.getId() );
+    profile.addTransaction( trans2.getId() );
+    profile.addTransaction( trans3.getId() );
+    profile.addTransaction( trans4.getId() );
+
+    profile.recompute();
+
+    bool profileMatches = verifyProfile( profile, nrInstances, itimes, lowerLevels, upperLevels );
+
+    CPPUNIT_ASSERT( profileMatches );
+
   }
 
   static void executeScenario1( Profile& profile, ConstraintEngine& ce, int nrInstances, eint itimes[], edouble lowerLevels[], edouble upperLevels[] ) {
@@ -989,6 +1029,22 @@ private:
     Profile profile( db.getId(), detector.getId());
 
     executeScenario0( profile, ce );
+    return true;
+  }
+
+  template<typename Profile>
+  static bool testPaulBug() {
+    debugMsg("ResourceTest", "  Paul bug");
+    RESOURCE_DEFAULT_SETUP(ce, db, true);
+    DummyDetector detector(ResourceId::noId());
+    
+    Profile profile(db.getId(), detector.getId());
+
+    const int nrInstances = 5;
+    eint itimes[nrInstances] = {10, 120010, 960000, 961200, PLUS_INFINITY};
+    edouble lowerLevels[nrInstances] = {0, 0, -1, -1, 0};
+    edouble upperLevels[nrInstances] = {1000, 1000, 1000, 1000, 0};
+    executePaulBug(profile, ce, nrInstances, itimes, lowerLevels, upperLevels);
     return true;
   }
 

@@ -33,6 +33,7 @@ namespace EUROPA {
 
       REGISTER_SYSTEM_CONSTRAINT(ces,EqualConstraint, "concurrent", "Temporal");
       REGISTER_SYSTEM_CONSTRAINT(ces,LessThanEqualConstraint, "precedes", "Temporal");
+      REGISTER_SYSTEM_CONSTRAINT(ces, LessThanConstraint, "strictlyPrecedes", "Temporal");
       REGISTER_SYSTEM_CONSTRAINT(ces,AddEqualConstraint, "temporalDistance", "Temporal");
 
       PlanDatabase* pdb = (PlanDatabase*)engine->getComponent("PlanDatabase");

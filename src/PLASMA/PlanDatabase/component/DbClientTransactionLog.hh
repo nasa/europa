@@ -15,7 +15,6 @@
 
 namespace EUROPA {
 
-
 	class TiXmlElement;
 
   class DbClientTransactionLog: public DbClientListener {

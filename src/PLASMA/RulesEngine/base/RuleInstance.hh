@@ -152,6 +152,8 @@ namespace EUROPA{
      */
     void undo();
 
+    void prepare();
+
     const std::vector<ConstrainedVariableId> &getGuards(void) const { return m_guards;}
 
     const std::vector<ConstrainedVariableId> &getVariables(void) const { return m_variables;}
@@ -167,6 +169,8 @@ namespace EUROPA{
     const std::vector<RuleInstanceId> &getChildRules(void) const {return m_childRules;}
 
     void addConstraint(const ConstraintId& constraint);
+
+    bool hasEmptyGuard() const;
 
   protected:
 

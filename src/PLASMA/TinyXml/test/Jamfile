@@ -2,9 +2,7 @@ SubDir PLASMA TinyXml test ;
 
 if ! $(PLASMA_READY) {
 
-if $(OS) != WinVS90 {
-  SubDirC++Flags -Wno-unknown-pragmas -Wno-format ;
-}
+SubDirC++Flags -Wno-unknown-pragmas -Wno-format ;
 
 ModuleMain xmltest : xmltest.cpp : TinyXml ;
 RunModuleMain run-xmltest : xmltest ;

@@ -7,7 +7,7 @@ PlatformRules_INCLUDED = TRUE ;
 
 # POSITION_INDEPENDENT_CODE_FLAG = Flag to generate position-independent code
 
-if $(OS) = CYGWIN || $(OS) = MINGW || $(OS) = WinVS90 {
+if $(OS) = CYGWIN || $(OS) = MINGW {
   POSITION_INDEPENDENT_CODE_FLAG ?= ;
 } else {
   POSITION_INDEPENDENT_CODE_FLAG ?= -fPIC ;
@@ -15,18 +15,12 @@ if $(OS) = CYGWIN || $(OS) = MINGW || $(OS) = WinVS90 {
 
 # LINKER_PASSTHROUGH_FLAG = Flag to pass an argument through to the linker
 
-if $(OS) = WinVS90 {
-  LINKER_PASSTHROUGH_FLAG ?= ;
-} else {
-  LINKER_PASSTHROUGH_FLAG ?= -Wl, ;
-}
+LINKER_PASSTHROUGH_FLAG ?= -Wl, ;
 
 # SHARED_FLAG = Flag to generate shared library
 
 if $(OS) = MACOSX {
   SHARED_FLAG ?= -fno-common -dynamiclib ;
-} else if $(OS) = WinVS90 {
-  SHARED_FLAG ?= /DLL ;
 } else {
   SHARED_FLAG ?= -shared ;
 }
@@ -80,11 +74,6 @@ if $(GCC_ROOTDIR) {
                 $(LINKER_PASSTHROUGH_FLAG)$(GCC_ROOTDIR)/lib
                 $(LINKER_PASSTHROUGH_FLAG)$(STATIC_LIBRARY_PATH_FLAG)
                 $(LINKER_PASSTHROUGH_FLAG)$(GCC_ROOTDIR)/lib ;
-} else if $(OS) = WinVS90 {
-  CC = cl /nologo ;
-  C++ = cl /nologo /MDd ;
-  LINK = link /nologo ;
-  AR = lib /nologo ;
 } else {
   CC = $(GCC_PREFIX) gcc ;
   C++ = $(GCC_PREFIX) g++ ;
@@ -96,13 +85,9 @@ if $(GCC_ROOTDIR) {
 PROFILE_FLAGS ?= -pg ;
 
 # OPTIMIZE_FLAGS = flags for optimization
-if $(OS) = WinVS90 {
-  OPTIMIZE_FLAGS ?= /Ot /Ox -DEUROPA_FAST -DNDEBUG ;
-  OPTIM = ; # suppress built-in optimization
-} else {
-  OPTIMIZE_FLAGS ?= -O3 -DEUROPA_FAST -DNDEBUG ;
-  OPTIM = ; # suppress built-in optimization
-}
+
+OPTIMIZE_FLAGS ?= -O3 -DEUROPA_FAST -DNDEBUG ;
+OPTIM = ; # suppress built-in optimization
 
 # COVERAGE_FLAGS = flags for code coverage (e.g., gcov)
 
@@ -112,25 +97,19 @@ COVERAGE_FLAGS ?= -fprofile-arcs -ftest-coverage ;
 
 if $(OS) = BEOS {
   WARNING_FLAGS ?= -Wall -Wno-unused -Wno-sign-promo -Wno-multichar ;
-} else if $(OS) = WinVS90 {
-#  WARNING_FLAGS ?= /Wall /wd 4820 ;
-  WARNING_FLAGS ?= /W0 ;
 } else {
   WARNING_FLAGS ?= -Wall ;
 }
 
 # DEBUG_FLAGS = flags to enable debugging
-if $(OS) = WinVS90 {
-  DEBUG_FLAGS ?= ;
-} else {
-  DEBUG_FLAGS ?= -g3 ;
-}
+
+DEBUG_FLAGS ?= -g3 ;
 
 # PTHREADS_LIBRARY = library with pthread related functions
 
 if $(OS) = BEOS {
   PTHREADS_LIBRARY = condvar ;
-} else if $(OS) = MINGW || $(OS) = WinVS90 {
+} else if $(OS) = MINGW {
   PTHREADS_LIBRARY = pthreadGC2 ;
 } else if $(OS) = SOLARIS {
   PTHREADS_LIBRARY = pthread socket ;
@@ -139,8 +118,9 @@ if $(OS) = BEOS {
 }
 
 # SUFSHARE = suffix for shared libraries
-if $(OS) = CYGWIN || $(OS) = MINGW || $(OS) = WinVS90 {
-  SUFSHARE ?= .lib ;
+
+if $(OS) = CYGWIN || $(OS) = MINGW {
+  SUFSHARE ?= .dll ;
 } else {
   if $(OS) = MACOSX {
     SUFSHARE ?= .dylib ;
@@ -245,17 +225,6 @@ if $(OS) = MINGW {
 
 if $(OS) = MACOSX {
   PLATFORM_FLAGS += -I/opt/local/include ;
-}
-
-if $(OS) = WinVS90 {
-  PLATFORM_FLAGS += /EHsc ;
-  PLATFORM_FLAGS += /D _HAS_TRADITIONAL_STL ;
-  PLATFORM_FLAGS += /Iz:/files/ingenium.dev/workspace/ThirdParty/europa/plasma.ThirdParty/pthreads-w32-2-8-0-release ;
-  PLATFORM_FLAGS += /Iz:/files/ingenium.dev/workspace/ThirdParty/europa/plasma.ThirdParty/dlfcn-win32-r11 ;
-  PLATFORM_FLAGS += /Iz:/files/ingenium.dev/workspace/ThirdParty/europa/plasma.ThirdParty/cppunit-1.12.1/include ;
-  PLATFORM_FLAGS += /Iz:/files/ingenium.dev/workspace/ThirdParty/europa/plasma.ThirdParty/libantlr3c-3.1.3/include ;
-  PLATFORM_FLAGS += /I$(JAVA_HOME)/include ;
-  PLATFORM_FLAGS += /I$(JAVA_HOME)/include/win32 ;
 }
 
 if $(OS) = SOLARIS {

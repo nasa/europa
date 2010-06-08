@@ -55,12 +55,12 @@ namespace EUROPA {
     debugMsg("RuleVariableListener:canIgnore", "Checking canIgnore for guard listener for rule " <<
 	     getRuleInstance()->getRule()->getName() << " from source " << getRuleInstance()->getRule()->getName());
     // If a Reset has occurred, and the rule has been fired, we may have to do something right now
-    if(getRuleInstance()->isExecuted() &&
-       (changeType == DomainListener::RESET || changeType == DomainListener::RELAXED) &&
-       !getRuleInstance()->test(getScope())){
-      getRuleInstance()->undo();
-      return true;
-    }
+//     if(getRuleInstance()->isExecuted() &&
+//        (changeType == DomainListener::RESET || changeType == DomainListener::RELAXED) &&
+//        !getRuleInstance()->test(getScope())){
+//       getRuleInstance()->undo();
+//       return true;
+//     }
 
     return false;
   }
@@ -89,13 +89,15 @@ namespace EUROPA {
    */
   void RuleVariableListener::handleExecute() {
     // Only apply when all guards are singeltons
-    for(unsigned int i = 0; i < getScope().size(); i++)
-      if(!getScope()[i]->lastDomain().isSingleton())
-	return;
+//     for(unsigned int i = 0; i < getScope().size(); i++)
+//       if(!getScope()[i]->lastDomain().isSingleton())
+// 	return;
 
-    // Fire if appropriate
-    if(!getRuleInstance()->isExecuted() &&  getRuleInstance()->test(getScope()))
-      getRuleInstance()->execute();
+//     // Fire if appropriate
+//     if(!getRuleInstance()->isExecuted() &&  getRuleInstance()->test(getScope()))
+//       getRuleInstance()->prepareExecute();
+//     else if(getRuleInstance()->isExecuted() && 
+    getRuleInstance()->prepare();
   }
 
   void RuleVariableListener::notifyDiscarded(const Entity*){

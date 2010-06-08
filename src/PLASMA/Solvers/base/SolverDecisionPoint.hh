@@ -12,6 +12,8 @@
 namespace EUROPA {
   namespace SOLVERS {
 
+    class DecisionPoint;
+
     /**
      * @brief Primary data element used by the solver for making and retracting decisions.
      *

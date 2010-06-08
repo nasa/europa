@@ -341,6 +341,9 @@ namespace EUROPA {
      */
     edouble createValue(const char* typeName, const std::string& value);
 
+    void addCallback(const PostPropagationCallbackId& callback);
+    void removeCallback(const PostPropagationCallbackId& callback);
+
   protected:
 
     /**
@@ -397,10 +400,18 @@ namespace EUROPA {
 
     /**
      * @brief Update appropriately when a variable has been relaxed.
-     * @param the variable that has been emptied.
+     * @param the variable that has been relaxed.
      * @see notify(const ConstrainedVariableId& source, const DomainListener::ChangeType& changeType)
      */
     void handleRelax(const ConstrainedVariableId& variable);
+
+    
+    /**
+     * @brief Update appropriately when a variable has been restricted but not emptied.
+     * @param the variable that has been restricted.
+     * @see notify(const ConstrainedVariableId& source, const DomainListener::ChangeType& changeType)
+     */
+    void handleRestrict(const ConstrainedVariableId& variable);
 
     /**
      * @brief Propagator constructor will call this method to register the Propagator with the ConstraintEngine.
@@ -535,7 +546,8 @@ namespace EUROPA {
 
     bool m_relaxing;
     bool m_relaxingViolation; /*!< Flag to record if relax events should be ignored by the ViolationMgr */
-    bool m_relaxed;           /*!< Set when a domain is RELAXED. Implies PENDING. */
+    //bool m_relaxed;           /*!< Set when a domain is RELAXED. Implies PENDING. */
+    std::set<ConstrainedVariableId> m_relaxed;
     bool m_propInProgress;    /*!< Set true when doing propagation, otherwise false. */
     bool m_deleted;           /*!< Used to control cleanup, preventing cycles. */
     bool m_purged;            /*!< Indicates if the engine has been purged of its data */
@@ -553,6 +565,50 @@ namespace EUROPA {
     bool m_autoPropagate;
 
     const CESchemaId& m_schema;
+    std::list<PostPropagationCallbackId> m_callbacks; /*!< Post-propagation callbacks */
+  };
+
+  /**
+   * @class PostPropagationCallback
+   * @brief Interface for executing code when propagation quiesces but before propagation formally terminates.
+   * 
+   */
+  class PostPropagationCallback {
+  public:
+    /** 
+     * @brief Constructor that does nothing.
+     * 
+     */
+    PostPropagationCallback() : m_id(this) {}
+    /** 
+     * @brief Constructor with initial constraint engine.
+     * 
+     * @param ce 
+     */
+    PostPropagationCallback(const ConstraintEngineId& ce) : m_id(this), m_ce(ce) {ce->addCallback(m_id);}
+
+    virtual ~PostPropagationCallback() {
+      if(m_ce.isId())
+        m_ce->removeCallback(m_id);
+      m_id.remove();
+    }
+    
+    /** 
+     * @brief Does the work of the callback.
+     * 
+     * 
+     * @return True if further propagation is necessary after the execution of the callback, false otherwise.
+     */
+    virtual bool operator()() {return false;}
+
+    const PostPropagationCallbackId& getId() const {return m_id;}
+  protected:
+    friend class ConstraintEngine;
+    void setConstraintEngine(const ConstraintEngineId& ce) {m_ce = ce;}
+
+    PostPropagationCallbackId m_id;
+    ConstraintEngineId m_ce;
   };
 }
+
 #endif

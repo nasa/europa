@@ -26,7 +26,7 @@ class TestEngine : public EuropaEngine
   public:
     TestEngine()
     {
-        m_config->setProperty("nddl.includePath","../../NDDL/test/nddl");
+        m_config->setProperty("nddl.includePath","../../NDDL/test/nddl:../../NDDL/base:../../Resource/component/NDDL");
         doStart();
     }
 

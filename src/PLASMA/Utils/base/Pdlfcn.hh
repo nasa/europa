@@ -11,9 +11,9 @@
  * @ingroup Utils
  */
 #ifndef __MINGW32__
-#  include <dlfcn.h>
+#include <dlfcn.h>
 #else
-#  define RTLD_NOW 0
+#define RTLD_NOW 0
 #endif
 
 namespace EUROPA {

@@ -283,7 +283,7 @@ namespace EUROPA {
 	  // If any member of either is not a member of the other, they're not equal.
 	  // Since membership is not simple (due to minDelta()), this has to be done
 	  // via a scan of both memberships, one member at a time.
-	  std::set<edouble>::const_iterator it = m_values.begin();
+	  std::set<edouble>::iterator it = m_values.begin();
 	  for ( ; it != m_values.end(); it++)
 		  if (!l_dom.isMember(*it))
 			  return(false);
@@ -332,7 +332,7 @@ namespace EUROPA {
 	  check_error(results.empty());
 	  check_error(isFinite());
 
-	  for (std::set<edouble>::const_iterator it = m_values.begin(); it != m_values.end(); ++it)
+	  for (std::set<edouble>::iterator it = m_values.begin(); it != m_values.end(); ++it)
 		  results.push_back(*it);
   }
 

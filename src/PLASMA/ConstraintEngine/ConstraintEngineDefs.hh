@@ -46,6 +46,9 @@ namespace EUROPA {
   typedef std::pair<ConstraintId, int> ConstraintEntry;
   typedef std::list<ConstraintEntry> ConstraintList;
 
+  class PostPropagationCallback;
+  typedef Id<PostPropagationCallback> PostPropagationCallbackId;
+
   /**
    * @brief Helper method to cast singleton values
    */

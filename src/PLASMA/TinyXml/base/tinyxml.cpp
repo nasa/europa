@@ -1106,7 +1106,7 @@ TiXmlAttribute*	TiXmlAttributeSet::Find( const char * name ) const
 
 
 #ifdef TIXML_USE_STL	
-TIXML_ISTREAM & operator>> (TIXML_ISTREAM & in, TiXmlNode & base)
+TIXML_ISTREAM & operator >> (TIXML_ISTREAM & in, TiXmlNode & base)
 {
 	TIXML_STRING tag;
 	tag.reserve( 8 * 1000 );

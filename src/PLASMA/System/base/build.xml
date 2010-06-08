@@ -2,53 +2,25 @@
 
 <project name="PSEngine" default="PSEngine" basedir=".">
   
-  <taskdef resource="net/sf/antcontrib/antcontrib.properties">
-    <classpath>
-      <pathelement location="ext/ant/lib/ant-contrib-1.0b3.jar"/>
-    </classpath>
-  </taskdef>
-
   <target name="init">
     <tstamp/>
-    <property environment="env"/>
-
-    <property name="local.env.vcInstallDir"  value="${env.VCINSTALLDIR}" />
-    <echo message="vcInstallDir: ${local.env.vcInstallDir}"/>
-    <condition property="os.isMSVC">
-      <contains string="${local.env.vcInstallDir}" substring="9.0" casesensitive="false"/>
+    <exec executable="uname" outputproperty="uname.o">
+      <arg value="-o"/>
+    </exec>
+    <condition property="os.isCygwin">
+      <equals arg1="${uname.o}" arg2="Cygwin"/>
     </condition>
-
-    <echo message="ANT_HOME: ${env.ANT_HOME}"/>
-    <echo message="JAVA_HOME: ${env.JAVA_HOME}"/>
-
-    <if>
-      <equals arg1="${local.env.vcInstallDir}" arg2=""/>
-      <then>
-        <exec executable="uname" outputproperty="uname.o">
-	  <arg value="-o"/>
-	</exec>
-        <condition property="os.isCygwin">
-          <equals arg1="${uname.o}" arg2="Cygwin"/>
-        </condition>
-      </then>
-    </if>
+    <property environment="env"/>
   </target>
 
   <target name="cygwin-init" depends="init" if="os.isCygwin">
-    <property name="local.os" value="Cygwin"/>
     <exec executable="cygpath" outputproperty="plasma.dir">
       <arg value="--windows"/>
       <arg value="${env.PLASMA_HOME}"/>
     </exec>
   </target>
 
-  <target name="msvc-init" depends="init" if="os.isMSVC">
-    <property name="local.os" value="WinVS90"/>
-    <echo message="OS is WinVS90"/>
-  </target>
-
-  <target name="init-final" depends="init,cygwin-init,msvc-init">
-    <echo message="Running as a ${local.os} build."/>
+  <target name="init-final" depends="init,cygwin-init">
     <property name="plasma.dir" value="${env.PLASMA_HOME}"/>
     <property name="build.dir" value="${src.dir}/classes"/>
     <property name="cache" value="${src.dir}/.cache"/>

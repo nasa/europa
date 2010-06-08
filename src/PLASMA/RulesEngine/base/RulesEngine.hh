@@ -12,6 +12,7 @@
 #include "RulesEngineDefs.hh"
 #include <map>
 #include <set>
+#include <vector>
 #include"Engine.hh"
 
 namespace EUROPA {
@@ -43,6 +44,7 @@ namespace EUROPA {
   private:
     friend class RulesEngineListener;
     friend class RuleInstance;
+    friend class RulesEngineCallback;
 
     void add(const RulesEngineListenerId &listener);
     void remove(const RulesEngineListenerId &listener);
@@ -50,13 +52,20 @@ namespace EUROPA {
     void notifyUndone(const RuleInstanceId &rule);
     void cleanupRuleInstances(const TokenId& token);
     bool isPending(const RuleInstanceId& r) const;
+    void scheduleForExecution(const RuleInstanceId& r);
+    void scheduleForUndoing(const RuleInstanceId& r);
+    bool doRules();
+    bool hasWork() const;
     
     RulesEngineId m_id;
     RuleSchemaId m_schema;
     const PlanDatabaseId m_planDb;
     PlanDatabaseListenerId m_planDbListener;
+    PostPropagationCallbackId m_callback;
     std::multimap<eint, RuleInstanceId> m_ruleInstancesByToken;
     std::set<RulesEngineListenerId> m_listeners;
+    std::vector<RuleInstanceId> m_ruleInstancesToExecute;
+    std::vector<RuleInstanceId> m_ruleInstancesToUndo;
     bool m_deleted;
   };
 }

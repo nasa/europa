@@ -386,6 +386,7 @@ namespace EUROPA {
     static const LabelStr sl_temporalDistance("temporalDistance");
     static const LabelStr sl_concurrent("concurrent");
     static const LabelStr sl_precedes("precedes");
+    static const LabelStr sl_strictlyPrecedes("strictlyPrecedes");
     static const LabelStr sl_before("before");
 
     checkError(constraint->isActive(), constraint->toString());
@@ -398,6 +399,7 @@ namespace EUROPA {
                constraint->getName() == sl_temporalDistance ||
                constraint->getName() == sl_concurrent ||
                constraint->getName() == sl_precedes ||
+               constraint->getName() == sl_strictlyPrecedes ||
                constraint->getName() == sl_before,
                "Invalid constraint name " << constraint->getName().toString() << " for temporal propagation.");
 
@@ -412,8 +414,11 @@ namespace EUROPA {
       lb = (Time) cast_basis(distance->lastDomain().getLowerBound());
       ub = (Time) cast_basis(distance->lastDomain().getUpperBound());
     }
-    else if (constraint->getName() != sl_concurrent)
+    else if (constraint->getName() != sl_concurrent) {
       ub = cast_basis(g_infiniteTime());
+      if(constraint->getName() == sl_strictlyPrecedes)
+        lb = 1;
+    }
 
     checkError(start->isActive(), start->toString());
     checkError(end->isActive(), end->toString());
@@ -444,9 +449,7 @@ namespace EUROPA {
 
       // Process constraints for deletion
       debugMsg("TemporalPropagator:updateTnet", "Processing constraints for deletion... ");
-      for( TemporalConstraintsSet::const_iterator it = m_constraintsForDeletion.begin(); 
-	   it != m_constraintsForDeletion.end(); 
-	   ++it) {
+      for(std::set<TemporalConstraintId>::const_iterator it = m_constraintsForDeletion.begin(); it != m_constraintsForDeletion.end(); ++it) {
           TemporalConstraintId constraint = *it;
           publish(notifyConstraintDeleted(constraint->getKey(), constraint));
           debugMsg("TemporalPropagator:updateTnet",	"DELETED-Constraint " << constraint->getKey());
@@ -499,7 +502,7 @@ namespace EUROPA {
 
       // Process constraints that have changed, or been added
       debugMsg("TemporalPropagator:updateTnet", "Processing changed constraints... ");
-      for( ConstraintsSet::const_iterator it = m_changedConstraints.begin(); it != m_changedConstraints.end(); ++it){
+      for(std::set<ConstraintId>::const_iterator it = m_changedConstraints.begin(); it != m_changedConstraints.end(); ++it){
           ConstraintId constraint = *it;
           if(!constraint->isActive())
               continue;
@@ -911,7 +914,7 @@ namespace EUROPA {
 
     // For all buffered timepoints for deletion, none should have any dangling external entities. This is because
     // we will have already deleteed the Constraint for which this Constraint shadows it.
-    for(TemporalConstraintsSet::const_iterator it = m_constraintsForDeletion.begin(); it != m_constraintsForDeletion.end(); ++it){
+    for(std::set<TemporalConstraintId>::const_iterator it = m_constraintsForDeletion.begin(); it != m_constraintsForDeletion.end(); ++it){
       TemporalConstraintId shadow = *it;
       if(!shadow->getExternalEntity().isNoId()) {
         debugMsg("TemporalPropagator:isValidForPropagation", "Shadow is noid for deleted constraints");
@@ -947,7 +950,7 @@ namespace EUROPA {
 
     // For all bufferec constraints for change, it should have no shadow, or a good shadow. Also, if it has a shadow,
     // we should ensure that it is linked correctly
-    for( ConstraintsSet::const_iterator it = m_changedConstraints.begin(); it != m_changedConstraints.end(); ++it){
+    for(std::set<ConstraintId>::const_iterator it = m_changedConstraints.begin(); it != m_changedConstraints.end(); ++it){
       ConstraintId constraint = *it;
       if(!constraint->getExternalEntity().isNoId()){
         EntityId shadow = constraint->getExternalEntity();

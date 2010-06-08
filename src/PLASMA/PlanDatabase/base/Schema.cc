@@ -5,19 +5,6 @@
 #include "Object.hh"
 #include "DataTypes.hh"
 
-
-#ifdef _MANAGED
-  using namespace System;
-
-  void MarshalString ( String ^ s, std::string& os ) {
-    using namespace Runtime::InteropServices;
-    const char* chars = (const char*)(Marshal::StringToHGlobalAnsi(s)).ToPointer();
-    os = chars;
-    Marshal::FreeHGlobal(IntPtr((void*)chars));
-  }
-#endif 
-
-
 namespace EUROPA {
 
   const char* Schema::getDelimiter(){
@@ -212,7 +199,7 @@ namespace EUROPA {
     if(membershipRelation_it == membershipRelation.end())
       return canContain(getParent(parentType), memberType, memberName);
 
-    // Otherwise, we have a parentType with members defined, so search there
+    // Othwerwise, we have a parentType with members defined, so search there
     const NameValueVector& members = membershipRelation_it->second;
     for(NameValueVector::const_iterator it = members.begin(); it != members.end();++it){
       const NameValuePair& pair = *it;
@@ -224,7 +211,7 @@ namespace EUROPA {
     if(hasParent(parentType) && canContain(getParent(parentType), memberType, memberName))
       return true;
 
-    // Allow for the possibility that it is declared as base type of the member type
+    // Allow fo rpossibility that it is declared as base type of the member type
     if(isObjectType(memberType) &&
        hasParent(memberType) &&
        canContain(parentType,getParent(memberType), memberName))
@@ -239,25 +226,6 @@ namespace EUROPA {
       
     check_error(it != membershipRelation.end(), "Unable to find members for object type:" + objectType.toString() );
     return it->second;
-  }
-
-  // For now just return the member names, not their types:
-  // TODO:  Is it better to use an iterator in this loop?
-  PSList<std::string> Schema::getMembers(const std::string& objectType) const
-  {
-      PSList<std::string> retval;
-      const NameValueVector& members = getMembers(LabelStr(objectType));
-      for(std::vector< std::pair<LabelStr, LabelStr> >::const_iterator it = members.begin();
-          it != members.end(); ++it)
-      {
-          retval.push_back((*it).second.toString());
-      }
-      return retval;
-  }
-
-  bool Schema::hasMember(const std::string& parentType, const std::string& memberName) const
-  {
-	  return hasMember(LabelStr(parentType), LabelStr(memberName));
   }
 
   bool Schema::hasMember(const LabelStr& parentType, const LabelStr& memberName) const{
@@ -505,14 +473,8 @@ namespace EUROPA {
 
   const LabelStr Schema::getParameterType(const LabelStr& predicate, unsigned int paramIndex) const {
     check_error(isPredicate(predicate), predicate.toString() + " is not defined as a Predicate");
-#ifdef _MANAGED
-    std::string tmp;
-    System::String ^ tmpStr = paramIndex + " is not a valid index";
-    MarshalString( tmpStr, tmp );
-    check_error(paramIndex < getParameterCount(predicate), tmp);
-#else
     check_error(paramIndex < getParameterCount(predicate), paramIndex + " is not a valid index");
-#endif
+
     // First see if we get a hit for the parentType
     std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
       membershipRelation.find(predicate);
@@ -826,6 +788,26 @@ namespace EUROPA {
      }
      return retval;
    }
+
+
+  // For now just return the member names, not their types:
+  // TODO:  Is it better to use an iterator in this loop?
+  PSList<std::string> Schema::getMembers(const std::string& objectType) const
+  {
+	  PSList<std::string> retval;
+	  const NameValueVector& members = getMembers(LabelStr(objectType));
+	  for(std::vector< std::pair<LabelStr, LabelStr> >::const_iterator it = members.begin();
+		  it != members.end(); ++it)
+	  {
+		  retval.push_back((*it).second.toString());
+	  }
+	  return retval;
+  }
+
+  bool Schema::hasMember(const std::string& parentType, const std::string& memberName) const
+  {
+	  return hasMember(LabelStr(parentType), LabelStr(memberName));
+  }
 
   PSList<PSObjectType*> Schema::getAllPSObjectTypes() const {
 	PSList<PSObjectType*> retval;

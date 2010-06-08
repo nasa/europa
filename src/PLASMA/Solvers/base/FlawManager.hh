@@ -16,31 +16,8 @@
 #include "FlawHandler.hh"
 #include "hash_map.hh"
 
-#ifdef _MSC_VER
-  using namespace stdext;
-#else
-  using namespace __gnu_cxx;
-#endif //_MSC_VER
-
 namespace EUROPA {
   namespace SOLVERS {
-
-//     class EintHash:
-//       public std::unary_function< EUROPA::eint, size_t>
-// #ifdef _MSC_VER
-//       , public hash_compare< EUROPA::eint >
-// #endif //_MSC_VER
-//     {
-//     public:
-//       size_t operator()( EUROPA::eint n ) const
-//       {
-// 	hash<long> H;
-// 	return H( n.asLong() );
-//       }
-//     };
-
-//   typedef hash_map<eint, std::vector<FlawFilterId>, EintHash > Eint2FlawFilterVectorMap; 
-    typedef std::map<eint, std::vector<FlawFilterId> > Eint2FlawFilterVectorMap; 
 
     /**
      * @brief Provides access to a set of flaws in priority order.
@@ -181,7 +158,7 @@ namespace EUROPA {
       MatchingEngineId m_flawHandlers;
       std::map<eint, bool> m_staticFiltersByKey; /*!< Summary of static filter outcome for the entity */
       /*std::map<unsigned int, std::vector<FlawFilterId> > m_dynamicFiltersByKey;*/ /*!< Dynamic conditions for the entity */
-      Eint2FlawFilterVectorMap m_dynamicFiltersByKey;
+      __gnu_cxx::hash_map<eint, std::vector<FlawFilterId> > m_dynamicFiltersByKey;
       std::multimap<eint, ConstraintId> m_flawHandlerGuards; /*!< Flaw Handler Guard constraints by Entity Key */
       std::map<eint, FlawHandlerEntry> m_activeFlawHandlersByKey; /*!< Applicable Flaw Handlers for each entity */
       unsigned int m_timestamp; /*!< Used for testing for stale iterators */

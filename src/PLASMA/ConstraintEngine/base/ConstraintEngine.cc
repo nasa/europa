@@ -228,9 +228,7 @@ namespace EUROPA
     m_relaxing = false;
   }
 
-#ifndef _MSC_VER 
   static bool allActiveVariables(const std::vector<ConstrainedVariableId>& vars) check_error_function;
-#endif
   static bool allActiveVariables(const std::vector<ConstrainedVariableId>& vars) {
     for (std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end(); ++it) {
       ConstrainedVariableId var = *it;
@@ -300,7 +298,8 @@ namespace EUROPA
     : m_id(this)
     , m_relaxing(false)
     , m_relaxingViolation(false)
-    , m_relaxed(false)
+      //, m_relaxed(false)
+    , m_relaxed()
     , m_propInProgress(false)
     , m_deleted(false)
     , m_purged(false)
@@ -381,6 +380,12 @@ namespace EUROPA
       check_error(prop.isValid());
       prop->decRefCount();
     }
+
+    for(std::list<PostPropagationCallbackId>::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it) {
+      PostPropagationCallbackId callback = *it;
+      check_error(callback.isValid());
+      delete (PostPropagationCallback*) callback;
+    }
   }
 
   bool ConstraintEngine::provenInconsistent() const {
@@ -398,7 +403,13 @@ namespace EUROPA
     if(m_dirty == false)
       return false;
 
-    return (m_relaxed || (!provenInconsistent() && !constraintConsistent()));
+    condDebugMsg(!m_relaxed.empty(), "ConstraintEngine:pending", "Relaxed.");
+    for(std::set<ConstrainedVariableId>::const_iterator it = m_relaxed.begin(); it != m_relaxed.end(); ++it) {
+      debugMsg("ConstraintEngine:pending", "Relaxed var: " << (*it)->toLongString());
+    }
+    condDebugMsg(provenInconsistent(), "ConstraintEngine:pending", "Proven inconsistent.");
+    condDebugMsg(constraintConsistent(), "ConstraintEngine:pending", "Constraint consistent.");
+    return (!m_relaxed.empty() || (!provenInconsistent() && !constraintConsistent()));
   }
 
   bool ConstraintEngine::isPropagating() const {
@@ -418,7 +429,7 @@ namespace EUROPA
     check_error(!m_propInProgress); /*!< Prohibit relaxations during propagation */
     check_error(m_variables.find(variable) != m_variables.end());
     m_variables.erase(variable);
-
+    m_relaxed.erase(variable);
     if(Entity::isPurging())
       return;
 
@@ -616,8 +627,10 @@ namespace EUROPA
 
   bool ConstraintEngine::doPropagate()
   {
-    check_error(!Entity::isPurging(), "Cannot propagate the network when purging. Messages are not sent or processed.");
-    check_error(!m_propInProgress, "Attempted to propagate while in propagation. Not allowed to call this cyclically.");
+    check_error(!Entity::isPurging(), 
+                "Cannot propagate the network when purging. Messages are not sent or processed.");
+    check_error(!m_propInProgress, 
+                "Attempted to propagate while in propagation. Not allowed to call this cyclically.");
 
     // Allow for a quick escape if no work to be done
     if(!m_dirty) {
@@ -637,32 +650,43 @@ namespace EUROPA
       return false;
     }
 
-    m_relaxed = false; // Reset by default
-    m_propInProgress = true;
+    //m_relaxed = false; // Reset by default
+    m_relaxed.clear();
     bool started = false;
-    incrementCycle();
 
-    // Now we have the main propagation loop.
-    PropagatorId activePropagator = getNextPropagator();
-    while(!activePropagator.isNoId() && !provenInconsistent()){
-      // Publish this event first time around only
-      if (!started){
-        started = true;
-	publish(notifyPropagationCommenced());
-	debugMsg("ConstraintEngine:propagate", "Commenced");
+    bool continueProp = true;
+    while(continueProp) {
+      incrementCycle();
+      debugMsg("ConstraintEngine:propagate", "Starting cycle " << m_cycleCount);
+      m_propInProgress = true;
+
+      // Now we have the main propagation loop.
+      PropagatorId activePropagator = getNextPropagator();
+      while(!activePropagator.isNoId() && !provenInconsistent()){
+        // Publish this event first time around only
+        if (!started){
+          started = true;
+          publish(notifyPropagationCommenced());
+          debugMsg("ConstraintEngine:propagate", "Commenced");
+        }
+        
+        debugMsg("ConstraintEngine:propagate",
+                 "Executing " << activePropagator->getName().toString() << " propagator.");
+        activePropagator->execute();
+        activePropagator = getNextPropagator();
       }
 
-      debugMsg("ConstraintEngine:propagate",
-	       "Executing " << activePropagator->getName().toString() << " propagator.");
+      check_error(!pending());
+      continueProp = false;
+      m_propInProgress = false;
+      incrementCycle();
+      debugMsg("ConstraintEngine:propagate", "Executing callbacks.");
+      for(std::list<PostPropagationCallbackId>::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
+        continueProp = ((**it)() || continueProp);
 
-      activePropagator->execute();
-      activePropagator = getNextPropagator();
     }
 
-    incrementCycle();
-    check_error(!pending());
-
-    m_propInProgress = false;
+    //m_propInProgress = false;
 
     bool result = constraintConsistent();
     if (result && started){
@@ -685,7 +709,7 @@ namespace EUROPA
     else {
       debugMsg("ConstraintEngine:propagate", "Completed without doing any work");
     }
-
+    m_relaxed.clear();
     return (result);
   }
 
@@ -728,6 +752,9 @@ namespace EUROPA
     else if (changeType == DomainListener::RELAXED ||
 	     changeType == DomainListener::OPENED)
       handleRelax(source);
+    else
+      handleRestrict(source);
+
 
     // In all cases, notify the propagators as well, unless over-ruled by by an empty variable or a decision to ignore it
     for(ConstraintList::const_iterator it = source->m_constraints.begin(); it != source->m_constraints.end(); ++it){
@@ -760,7 +787,8 @@ namespace EUROPA
     getViolationMgr().addEmptyVariable(variable);
     debugMsg("ConstraintEngine:emptied","Emptied var:" << variable->toLongString()
 	     << " parent:" << (variable->parent().isNoId() ? "NULL" : variable->parent()->toString()));
-    check_error(m_relaxed == false);
+    //check_error(m_relaxed == false);
+    check_error(m_relaxed.empty());
     getViolationMgr().handleEmpty(variable);
   }
 
@@ -778,14 +806,14 @@ namespace EUROPA
 
     // If we are not currently in a relaxed state then this is the initiating
     // variable - must have come from a user! Note that it cannot be the emptied variable.
-    if(!m_relaxed){
-      m_relaxed = true;
+    if(m_relaxed.empty()){
+      //m_relaxed = true;
       incrementCycle();
       variable->updateLastRelaxed(m_cycleCount);
     }
     else if(variable->lastRelaxed() < m_cycleCount)
       variable->updateLastRelaxed(m_cycleCount);
-
+    m_relaxed.insert(variable);
     // Now this should be true for all
     check_error(variable->lastRelaxed() == m_cycleCount);
 
@@ -828,6 +856,11 @@ namespace EUROPA
     m_relaxing = false;
   }
 
+  void ConstraintEngine::handleRestrict(const ConstrainedVariableId& var) {
+    check_error(var.isValid());
+    m_relaxed.erase(var);
+  }
+
   void ConstraintEngine::execute(const ConstraintId& constraint){
     check_error(!provenInconsistent() && constraint.isValid());
     check_error(constraint->isActive());
@@ -861,7 +894,8 @@ namespace EUROPA
   void ConstraintEngine::incrementCycle(){
     m_cycleCount++;
 
-    if(m_relaxed){
+    //if(m_relaxed){
+    if(!m_relaxed.empty()) {
       checkError(!m_propInProgress, "Cannot imagine how we could be propagating while relaxed!.");
       m_mostRecentRepropagation = m_cycleCount;
     }
@@ -1009,7 +1043,7 @@ namespace EUROPA
     return m_violationMgr->isViolated(c);
   }
 
-  bool ConstraintEngine::isRelaxed() const {return m_relaxed;}
+  bool ConstraintEngine::isRelaxed() const {return !m_relaxed.empty();}
 
   PSVariable* ConstraintEngine::getVariableByKey(PSEntityKey id)
   {
@@ -1125,5 +1159,12 @@ namespace EUROPA
     return dt->createValue(value);
   }
 
+  void ConstraintEngine::addCallback(const PostPropagationCallbackId& callback) {
+    m_callbacks.push_back(callback);
+  }
 
+  void ConstraintEngine::removeCallback(const PostPropagationCallbackId& callback) {
+    m_callbacks.remove(callback);
+    callback->setConstraintEngine(ConstraintEngineId::noId());
+  }
 }

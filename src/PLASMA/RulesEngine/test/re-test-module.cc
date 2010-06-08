@@ -14,6 +14,7 @@
 #include "Domains.hh"
 #include "Propagators.hh"
 #include "ProxyVariableRelation.hh"
+#include "Constraint.hh"
 
 #include "Constraints.hh"
 #include "ModuleConstraintEngine.hh"
@@ -57,6 +58,21 @@ private:
     TokenId m_onlySlave;
   };
 };
+
+/*
+  AllObjects::Predicate {
+    met_by(AllObjects.Predicate slave1);
+    eq(end, slave1.start);
+    if(start == [8 12]) {
+      met_by(AllObjects.Predicate slave2);
+      eq(start, slave2.end);
+    }
+    if(isSingleton(slave1.object)) {
+      met_by(AllObjects.Predicate slave3);
+      eq(start, slave3.end);
+    }
+  }
+ */
 
 class NestedGuards_0: public Rule {
 public:
@@ -292,6 +308,7 @@ public:
   static bool test(){
     EUROPA_runTest(testSimpleSubGoal);
     EUROPA_runTest(testNestedGuards);
+    EUROPA_runTest(testNestedGuardsConstraint);
     EUROPA_runTest(testLocalVariable);
     EUROPA_runTest(testTestRule);
     EUROPA_runTest(testPurge);
@@ -367,6 +384,75 @@ private:
 
     // Now retract a decision and confirm the slave is removed
     t0.start()->reset();
+    ce->propagate();
+    CPPUNIT_ASSERT(t0.slaves().size() == 2);
+
+    // Now deactivate the master token and confirm all salves are gone
+    t0.cancel();
+    ce->propagate();
+    CPPUNIT_ASSERT(t0.slaves().empty());
+    RE_DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  static bool testNestedGuardsConstraint(){
+    RE_DEFAULT_SETUP(ce, db, false);
+    Object o1(db, LabelStr("AllObjects"), LabelStr("o1"));
+    Object o2(db, LabelStr("AllObjects"), LabelStr("o2"));
+    db->close();
+
+    re->getRuleSchema()->registerRule((new NestedGuards_0())->getId());
+    // Create a token of an expected type
+
+    IntervalToken t0(db,
+		     LabelStr("AllObjects.Predicate"),
+		     true,
+		     false,
+		     IntervalIntDomain(0, 10),
+		     IntervalIntDomain(0, 20),
+		     IntervalIntDomain(1, 1000));
+    // Activate it and confirm we are getting a subgoal and that the expected constraint holds.
+    CPPUNIT_ASSERT(t0.slaves().empty());
+    t0.activate();
+    CPPUNIT_ASSERT(db->getTokens().size() == 1);
+
+
+    t0.getObject()->specify(o1.getKey());
+
+    ce->propagate();
+    CPPUNIT_ASSERT(t0.slaves().size() == 1);
+    CPPUNIT_ASSERT(db->getTokens().size() == 2);
+
+    TokenId slaveToken = *(t0.slaves().begin());
+
+
+    // Set start time to 10 will trigger another guard
+    ConstrainedVariableId cVar = db->getClient()->createVariable("int", IntervalIntDomain(8, 12), "cVar");
+    ConstraintId decision = db->getClient()->createConstraint("eq", makeScope(cVar, t0.start()));
+    cVar->specify(10);
+    //t0.start()->specify(10); // Will trigger nested guard
+    ce->propagate();
+    CPPUNIT_ASSERT(t0.slaves().size() == 2);
+
+    //the slave should remain valid since the call to reset should have no effect on the truth of the guard
+    TokenId secondSlave = *(++(t0.slaves().begin()));
+    CPPUNIT_ASSERT(secondSlave != slaveToken);
+    cVar->reset();
+    CPPUNIT_ASSERT(t0.slaves().size() == 2);
+    CPPUNIT_ASSERT(secondSlave.isValid());
+
+    ce->propagate();
+    CPPUNIT_ASSERT(t0.slaves().size() == 2);
+    CPPUNIT_ASSERT(secondSlave.isValid());
+
+    // Now set the object variable of the slaveToken to trigger additional guard
+    slaveToken->getObject()->specify(o2.getKey());
+    ce->propagate();
+    CPPUNIT_ASSERT(t0.slaves().size() == 3);
+
+    // Now retract a decision and confirm the slave is removed
+    //t0.start()->reset();
+    db->getClient()->deleteConstraint(decision);
     ce->propagate();
     CPPUNIT_ASSERT(t0.slaves().size() == 2);
 

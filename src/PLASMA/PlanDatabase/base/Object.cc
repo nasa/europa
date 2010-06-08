@@ -229,14 +229,9 @@ namespace EUROPA {
     return m_tokens.find(token) != m_tokens.end() && token->getObject()->lastDomain().isSingleton();
   }
 
-  void Object::getOrderingChoices( const TokenId& token,
-				   std::vector< std::pair<TokenId, TokenId> >& results,
-#ifdef _MSC_VER
-				   unsigned int limit
-#else
-				   unsigned int limit
-#endif
-				   ) {
+  void Object::getOrderingChoices(const TokenId& token,
+				  std::vector< std::pair<TokenId, TokenId> >& results,
+				  unsigned int limit) {
     check_error(limit > 0, "Cannot set limit to less than 1.");
     results.push_back(std::make_pair(token, token));
   }
@@ -582,7 +577,7 @@ namespace EUROPA {
       check_error(Entity::getEntity(it->first));
     }
 
-    for(std::multimap<int, ConstraintId>::const_iterator it = m_constraintsByKeyPair.begin();
+    for(std::map<int, ConstraintId>::const_iterator it = m_constraintsByKeyPair.begin();
 	it != m_constraintsByKeyPair.end();
 	++it){
       checkError(it->second.isValid(), "Invalid constraint for key pair " << LabelStr(it->first).toString());
@@ -597,10 +592,9 @@ namespace EUROPA {
       std::string varTypeName = "";
       Schema::NameValueVector members = m_planDatabase->getSchema()->getMembers(m_type);
       for (unsigned int i = 0; i < members.size(); i++) {
-          std::cout << "member [" << members[i].first.c_str() << ", " << members[i].second.c_str() << "]" << std::endl;
-          if (strcmp( members[i].second.c_str(), name) == 0 ) {
-              varTypeName = members[i].first.c_str();
-          }
+	if (members[i].second.c_str() == std::string(name)) {
+	  varTypeName = members[i].first.c_str();
+	}
       }
 
       if (varTypeName == "") {
@@ -623,7 +617,7 @@ namespace EUROPA {
 
 
       if (!baseDomain.isSubsetOf(typeDomain)) {
-          return ConstrainedVariableId::noId();
+	return ConstrainedVariableId::noId();
       }
 
 
@@ -631,7 +625,7 @@ namespace EUROPA {
 
       ConstrainedVariableId id =
           m_planDatabase->getConstraintEngine()->createVariable(
-                    varTypeName.c_str(),
+	                            varTypeName.c_str(),
 				    baseDomain,
 				    false, // TODO: Should this be considered internal, I think so?
 				    true,
