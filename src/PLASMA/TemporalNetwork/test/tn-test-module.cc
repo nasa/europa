@@ -222,6 +222,7 @@ public:
     EUROPA_runTest(testTemporalDistance);
     EUROPA_runTest(testTokenStateChangeSynchronization);
     EUROPA_runTest(testInconsistencySynchronization);
+    EUROPA_runTest(testSpecification);
     return true;
   }
 
@@ -283,6 +284,41 @@ private:
     CPPUNIT_ASSERT(t2.end()->getDerivedDomain().getUpperBound() == 20);
 
     delete (Constraint*) beforeConstraint;
+    TN_DEFAULT_TEARDOWN();
+    return true;
+  }
+
+  //from Google ticket #77
+  static bool testSpecification() {
+    CD_DEFAULT_SETUP(ce,db,false);
+
+    ObjectId timeline = (new Timeline(db.getId(), "Objects", "o2"))->getId();
+    CPPUNIT_ASSERT(!timeline.isNoId());
+
+    db.close();
+
+    IntervalToken t1(db.getId(),
+    		     "Objects.Predicate",
+    		     true,
+    		     false,
+    		     IntervalIntDomain(0, 10),
+    		     IntervalIntDomain(0, 20),
+    		     IntervalIntDomain(1, 1000));
+
+    t1.duration()->restrictBaseDomain(IntervalIntDomain(5, 7));
+    CPPUNIT_ASSERT(t1.end()->getDerivedDomain().getLowerBound() == 5);
+    CPPUNIT_ASSERT(t1.end()->getDerivedDomain().getUpperBound() == 17);
+
+    DbClientId client = db.getClient();
+    
+    client->reset(t1.start());
+    client->specify(t1.start(), 0);
+    ce.propagate();
+
+    client->reset(t1.start());
+    client->specify(t1.start(), 5);
+    ce.propagate();
+
     TN_DEFAULT_TEARDOWN();
     return true;
   }

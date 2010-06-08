@@ -8,7 +8,6 @@
 #include "DbClientTransactionLog.hh"
 
 namespace EUROPA {
-
   DbClientTransactionLog::DbClientTransactionLog(const DbClientId& client, bool chronologicalBacktracking)
     : DbClientListener(client)
     , m_client(client)
@@ -56,9 +55,9 @@ namespace EUROPA {
         check_error(object.isValid());
         type = object->getType().toString();
       }
-      element->SetAttribute("type", type);
+      element->SetAttribute( "type", type );
       if (LabelStr::isString(variable->getName())) {
-        element->SetAttribute("name", variable->getName().toString());
+          element->SetAttribute( "name", variable->getName().toString() );
       }
       debugMsg("notifyVariableCreated"," variable name = " << variable->getName().c_str() << " typeName = " << type << " type = " << baseDomain.getTypeName().c_str());
       
@@ -76,8 +75,8 @@ namespace EUROPA {
 		if(!variable->isInternal()) {
 			TiXmlElement* element = allocateXmlElement("deletevar");
 			element->SetAttribute("index", m_client->getIndexByVariable(variable));
-			element->SetAttribute("name", variable->getName().toString());
-			element->SetAttribute("type", variable->baseDomain().getTypeName().toString());
+			element->SetAttribute("name", variable->getName().toString() );
+			element->SetAttribute("type", variable->baseDomain().getTypeName().toString() );
 			pushTransaction(element);
 		}
   }

@@ -14,6 +14,7 @@
 #include <string>
 #include "hash_map.hh"
 
+#ifndef _MSC_VER
 namespace __gnu_cxx {
   template<> struct hash<double> {
     size_t operator()(double __x) const {return (size_t) (__x);}
@@ -23,6 +24,7 @@ namespace __gnu_cxx {
     size_t operator()(const std::string& __x) const {return hash<const char*>()(__x.c_str());}
   };
 }
+#endif //_MSC_VER
 
 namespace EUROPA {
 
@@ -110,7 +112,7 @@ namespace EUROPA {
     const std::string& toString() const;
 
     /**
-     * @brief Return the represent char*
+     * @brief Return the represented char*
      */
     const char* c_str() const;
 

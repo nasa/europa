@@ -136,7 +136,12 @@ namespace EUROPA {
 
 	  if(stateDomain.isMember(Token::MERGED)) {
 	    m_flawedToken->getPlanDatabase()->getCompatibleTokens(m_flawedToken, m_compatibleTokens, 
-                                                                  std::numeric_limits<unsigned int>::max(), true);
+#ifdef _MSC_VER
+								  UINT_MAX,
+#else
+                                                                  std::numeric_limits<unsigned int>::max(),
+#endif //_MSC_VER
+								  true);
 	    m_mergeCount = m_compatibleTokens.size();
 	    
 	    if(m_mergeCount > 0) {

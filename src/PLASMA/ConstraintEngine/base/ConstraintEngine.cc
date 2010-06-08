@@ -228,7 +228,9 @@ namespace EUROPA
     m_relaxing = false;
   }
 
+#ifndef _MSC_VER 
   static bool allActiveVariables(const std::vector<ConstrainedVariableId>& vars) check_error_function;
+#endif
   static bool allActiveVariables(const std::vector<ConstrainedVariableId>& vars) {
     for (std::vector<ConstrainedVariableId>::const_iterator it = vars.begin(); it != vars.end(); ++it) {
       ConstrainedVariableId var = *it;

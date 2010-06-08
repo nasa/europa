@@ -2,7 +2,9 @@ SubDir PLASMA System base ;
 
 if ! $(PLASMA_READY) {
 
-SubDirC++Flags -Wno-unknown-pragmas ;
+if $(OS) != WinVS90 {
+  SubDirC++Flags -Wno-unknown-pragmas ;
+}
 
 if "Resources" in $(NO) {
   SubDirC++Flags -DNO_RESOURCES ;

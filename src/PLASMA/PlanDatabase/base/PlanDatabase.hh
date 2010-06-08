@@ -173,7 +173,11 @@ namespace EUROPA {
      * @see getCompatibleTokens
      */
     unsigned int countCompatibleTokens(const TokenId& inactiveToken,
-				       unsigned int limit = std::numeric_limits<unsigned int>::max(),
+#ifdef _MSC_VER
+				       unsigned int limit = UINT_MAX,  //std::numeric_limits<unsigned int>::max(),
+#else
+                                       unsigned int limit = std::numeric_limits<unsigned int>::max(),
+#endif //_MSC_VER
 				       bool useExactTest = false);
 
     /**
@@ -198,14 +202,23 @@ namespace EUROPA {
      */
     void getOrderingChoices(const TokenId& tokenToOrder,
 			    std::vector< OrderingChoice >& results,
-			    unsigned int limit = std::numeric_limits<unsigned int>::max());
+#ifdef _MSC_VER
+			    unsigned int limit = UINT_MAX  //std::numeric_limits<unsigned int>::max(),
+#else
+			    unsigned int limit = std::numeric_limits<unsigned int>::max()
+#endif //_MSC_VER
+			    );
     /**
      * @brief Returns a count or all ordering choices for a token up to the given limit
      * @see Object::getOrderingChoices
      */
     unsigned int countOrderingChoices(const TokenId& token,
-				      unsigned int limit = std::numeric_limits<unsigned int>::max());
-
+#ifdef _MSC_VER
+				      unsigned int limit = UINT_MAX  //std::numeric_limits<unsigned int>::max(),
+#else
+				      unsigned int limit = std::numeric_limits<unsigned int>::max()
+#endif //_MSC_VER
+				      );
     /**
      * @brief Returns the previous count of ordering choices
      * @param token The token for which we want ordering choices. Cannot be rejected.

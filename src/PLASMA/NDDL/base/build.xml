@@ -11,19 +11,25 @@
 	</taskdef>
 
 	<target name="init">
-		<exec executable="uname" outputproperty="uname.o">
-			<arg value="-o"/>
-		</exec>
-
 		<property environment="env"/>
+		<property name="local.env.vcInstallDir"  value="${env.VCINSTALLDIR}" />
+		<echo message="vcInstallDir: ${local.env.vcInstallDir}"/>
 		<if>
-			<equals arg1="${uname.o}" arg2="Cygwin"/>
+			<equals arg1="${local.env.vcInstallDir}" arg2=""/>
+		<then>
+			<exec executable="uname" outputproperty="uname.o">
+				<arg value="-o"/>
+			</exec>
+			<if>
+				<equals arg1="${uname.o}" arg2="Cygwin"/>
 			<then>
 				<exec executable="cygpath" outputproperty="plasma.dir">
 					<arg value="--windows"/>
 					<arg value="${env.PLASMA_HOME}"/>
 				</exec>
 			</then>
+			</if>
+		</then>
 		</if>
 
 		<property name="plasma.dir" value="${env.PLASMA_HOME}"/>

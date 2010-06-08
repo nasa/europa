@@ -112,10 +112,14 @@ namespace EUROPA {
      * @param results Will be populated with the choices for constraining this token.
      * @see constrain
      */
-    virtual void getOrderingChoices(const TokenId& token,
-				    std::vector< std::pair< TokenId, TokenId> >& results,
-				    unsigned int limit = std::numeric_limits<unsigned int>::max());
-
+    virtual void getOrderingChoices( const TokenId& token,
+				     std::vector< std::pair< TokenId, TokenId > >& results,
+#ifdef _MSC_VER
+				     unsigned int limit = UINT_MAX //std::numeric_limits<unsigned int>::max()
+#else
+    				     unsigned int limit = std::numeric_limits<unsigned int>::max()
+#endif
+				     );
     /**
      * @brief Count the number of ordering choices for a token. Cut off if we hit the given limit
      * @param token The Token for which we want to count possible choices

@@ -12,6 +12,11 @@
  * @date April, 2005
  * @brief Provides implementation for FlawManager
  */
+#ifdef _MSC_VER
+  using stdext::hash_map;
+#else
+  using __gnu_cxx::hash_map;
+#endif //_MSC_VER
 
 namespace EUROPA {
   namespace SOLVERS {
@@ -36,8 +41,9 @@ namespace EUROPA {
         EntityId entity = Entity::getEntity(key);
         condDebugMsg(!entity.isValid(), "FlawManager:isValid", getId() << " Invalid id in m_staticFiltersByKey. Entity key: " << it->first);        
       }
-      for(__gnu_cxx::hash_map<eint, std::vector<FlawFilterId> >::const_iterator it = m_dynamicFiltersByKey.begin();
-          it != m_dynamicFiltersByKey.end(); ++it) {
+      for( Eint2FlawFilterVectorMap::const_iterator it = m_dynamicFiltersByKey.begin(); 
+	   it != m_dynamicFiltersByKey.end(); 
+	   ++it) {
         EntityId entity = Entity::getEntity(it->first);
         condDebugMsg(!entity.isValid(), "FlawManager:isValid", getId() << " Invalid id in m_dynamicFiltersByKey. Entity key: " << it->first);
         const std::vector<FlawFilterId>& filters(it->second);
@@ -88,12 +94,12 @@ namespace EUROPA {
       m_flawFilters = (new MatchingEngine(engine,configData,"FlawFilter"))->getId();
       m_flawHandlers = (new MatchingEngine(engine,configData,"FlawHandler"))->getId();
       
-      for(std::set<MatchingRuleId>::iterator it = m_flawFilters->getRules().begin(); it != m_flawFilters->getRules().end(); ++it) {
+      for(std::set<MatchingRuleId>::const_iterator it = m_flawFilters->getRules().begin(); it != m_flawFilters->getRules().end(); ++it) {
         MatchingRuleId rule = *it;
         check_error(rule.isValid());
         rule->setContext(m_context);
       }
-      for(std::set<MatchingRuleId>::iterator it = m_flawHandlers->getRules().begin(); it != m_flawHandlers->getRules().end(); ++it) {
+      for(std::set<MatchingRuleId>::const_iterator it = m_flawHandlers->getRules().begin(); it != m_flawHandlers->getRules().end(); ++it) {
         MatchingRuleId rule = *it;
         check_error(rule.isValid());
         rule->setContext(m_context);
@@ -444,8 +450,7 @@ namespace EUROPA {
       }
 
       condDebugMsg(!isValid(), "FlawManager:isValid", "Invalid datastructures in flaw manger.");
-      __gnu_cxx::hash_map<eint, std::vector<FlawFilterId> >::const_iterator it = 
-        m_dynamicFiltersByKey.find(entity->getKey());
+      Eint2FlawFilterVectorMap::const_iterator it = m_dynamicFiltersByKey.find( entity->getKey() );
 
       if(it != m_dynamicFiltersByKey.end()){
         const std::vector<FlawFilterId>& dynamicFilters = it->second;

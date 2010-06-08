@@ -10,29 +10,51 @@
 #include <stdexcept>
 #include "hash_map.hh"
 
-#if (__LONG_MAX__ > __INT_MAX__)
-#define E2_LONG_INT
+#ifdef _MSC_VER
+#  if ( LONG_MAX > INT_MAX)
+#    define E2_LONG_INT
+#  else
+#    undef E2_LONG_INT
+#  endif
 #else
-#undef E2_LONG_INT
-#endif
+#  if (__LONG_MAX__ > __INT_MAX__)
+#    define E2_LONG_INT
+#  else
+#    undef E2_LONG_INT
+#  endif
+#endif //_MSC_VER
 
-#if (__DBL_MANT_DIG__ >= 64)
-#define E2_LONG_DOUBLE
+#ifdef _MSC_VER
+#  if ( DBL_MANT_DIG >= 64 )
+#    define E2_LONG_DOUBLE
+#  else
+#    undef E2_LONG_DOUBLE
+#  endif
 #else
-#undef E2_LONG_DOUBLE
-#endif
+#  if (__DBL_MANT_DIG__ >= 64)
+#    define E2_LONG_DOUBLE
+#  else
+#    undef E2_LONG_DOUBLE
+#  endif
+#endif //_MSC_VER
 
 /**
  * Pre-declarations.
  */
+
+#define MAX_COPY max
+#define MIN_COPY min
+#undef min
+#undef max
 
 namespace EUROPA {
   class eint;
   class edouble;
 }
 
-
-namespace __gnu_cxx {
+#ifndef _MSC_VER
+namespace __gnu_cxx
+{
   template<> struct hash<EUROPA::edouble> {
     inline size_t operator()(EUROPA::edouble __x) const;
   };
@@ -41,6 +63,7 @@ namespace __gnu_cxx {
     inline size_t operator()(EUROPA::eint __x) const;
   };
 }
+#endif // _MSC_VER
 
 namespace std {
   template<>
@@ -48,12 +71,17 @@ namespace std {
     static const bool is_specialized = true;
     //I'm not sure if these numbers are correct, so be careful
 #ifdef E2_LONG_INT
+#  ifdef _MSC_VER
+    static const int digits = DBL_MANT_DIG;
+    static const int digits10 = DBL_DIG;
+#  else
     static const int digits = __DBL_MANT_DIG__;
     static const int digits10 = __DBL_DIG__;
+#  endif //_MSC_VER
 #else
     static const int digits = numeric_limits<long>::digits;
     static const int digits10 = numeric_limits<long>::digits10;
-#endif
+#endif // E2_LONG_INT
     static const bool is_signed = true;
     static const bool is_integer = true;
     static const bool is_exact = true;
@@ -70,7 +98,11 @@ namespace std {
     static const bool is_iec559 = false;
     static const bool is_bounded = true;
     static const bool is_modulo = false;
+#ifdef _MSC_VER
+    static const bool traps = numeric_limits<long>::traps;
+#else
     static const bool traps = __glibcxx_integral_traps;
+#endif //_MSC_VER
     static const bool tinyness_before = false;
     static const float_round_style round_style = round_toward_zero;
 
@@ -90,8 +122,13 @@ namespace std {
     static const bool is_specialized = true;
     //I'm not sure if these numbers are correct, so be careful
 #ifdef E2_LONG_INT
+#  ifdef _MSC_VER
+    static const int digits = DBL_MANT_DIG;
+    static const int digits10 = DBL_DIG;
+#  else
     static const int digits = __DBL_MANT_DIG__;
     static const int digits10 = __DBL_DIG__;
+#  endif //_MSC_VER
 #else
     static const int digits = numeric_limits<long>::digits;
     static const int digits10 = numeric_limits<long>::digits10;
@@ -99,7 +136,11 @@ namespace std {
     static const bool is_signed = true;
     static const bool is_integer = false;
     static const bool is_exact = false;
+#ifdef _MSC_VER
+    static const int radix = numeric_limits<float>::radix;
+#else
     static const int radix = __FLT_RADIX__;
+#endif //_MSC_VER
     //Not sure what these numbers should be
     static const int min_exponent = 0;
     static const int min_exponent10 = 0;
@@ -107,14 +148,22 @@ namespace std {
     static const int max_exponent10 = 0;
 
     static const bool has_infinity = true;
+#ifdef _MSC_VER
+    static const bool has_quiet_NaN = numeric_limits<float>::has_quiet_NaN;
+#else
     static const bool has_quiet_NaN = __DBL_HAS_QUIET_NAN__;
+#endif //_MSC_VER
     static const bool has_signaling_NaN = has_quiet_NaN;
     static const float_denorm_style has_denorm = denorm_absent;
     static const bool has_denorm_loss = false;
     static const bool is_iec559 = has_infinity && has_quiet_NaN && has_denorm == denorm_present;
     static const bool is_bounded = true;
     static const bool is_modulo = false;
+#ifdef _MSC_VER
+    static const bool traps = numeric_limits<float>::traps;
+#else
     static const bool traps = __glibcxx_integral_traps;
+#endif //_MSC_VER
     static const bool tinyness_before = numeric_limits<double>::tinyness_before;
     static const float_round_style round_style = round_to_nearest;
 
@@ -363,6 +412,33 @@ namespace EUROPA {
       }
     }
 
+#ifdef _MSC_VER 
+#  ifdef E2_LONG_INT 
+    eint(const __int64 v) : m_v( (__int64) v ) {
+        if(m_v > std::numeric_limits<eint>::infinity()) {
+            assert(m_v <= std::numeric_limits<eint>::infinity());
+            assert(m_v >= std::numeric_limits<eint>::minus_infinity());
+            m_v = cast_int(std::numeric_limits<eint>::infinity());
+        }
+        else if(m_v < std::numeric_limits<eint>::minus_infinity()) {
+            assert(m_v >= std::numeric_limits<eint>::minus_infinity());
+            m_v = cast_int(std::numeric_limits<eint>::minus_infinity());
+        }
+    }
+    eint(const unsigned __int64 v) : m_v( (unsigned __int64) v ) {
+        if(m_v > std::numeric_limits<eint>::infinity()) {
+            assert(m_v <= std::numeric_limits<eint>::infinity());
+            assert(m_v >= std::numeric_limits<eint>::minus_infinity());
+            m_v = cast_int(std::numeric_limits<eint>::infinity());
+        }
+        else if(m_v < std::numeric_limits<eint>::minus_infinity()) {
+            assert(m_v >= std::numeric_limits<eint>::minus_infinity());
+            m_v = cast_int(std::numeric_limits<eint>::minus_infinity());
+        }
+    }
+#  endif //#ifdef E2_LONG_INT
+#endif //#ifdef _MSC_VER
+
     eint() : m_v(0) {}
     inline eint operator+() const {return eint(+m_v, true);}
     inline eint operator-() const {return eint(-m_v, true);}
@@ -466,7 +542,7 @@ namespace EUROPA {
     friend edouble std::pow(const EUROPA::edouble d, const eint i);
 
     long m_v;
-  };
+  };  //class eint
 
   inline eint operator+(const long o, const eint e) {handle_inf_add(eint, o, e.m_v); op(eint, o, +, e.m_v);}
   inline eint operator-(const long o, const eint e) {handle_inf_sub(eint, o, e.m_v); op(eint, o, -, e.m_v);}
@@ -547,8 +623,12 @@ namespace EUROPA {
     friend edouble::basis_type cast_basis(const edouble e);
   private:
     friend class eint;
+#ifdef _MSC_VER
+    friend struct std::numeric_limits<edouble>;
+#else
     friend class __gnu_cxx::hash<edouble>;
     friend class std::numeric_limits<edouble>;
+#endif //_MSC_VER
 
     //private version that doesn't do infinity checking
     edouble(const double v, bool) : m_v(v) {}
@@ -681,9 +761,16 @@ namespace std {
   inline EUROPA::edouble numeric_limits<EUROPA::edouble>::min() throw() {return -max();}
   inline EUROPA::edouble numeric_limits<EUROPA::edouble>::epsilon() throw() {return 0.00001;}
   inline EUROPA::edouble numeric_limits<EUROPA::edouble>::round_error() throw() {return 0.5;}
+#ifdef _MSC_VER
+  inline EUROPA::edouble numeric_limits<EUROPA::edouble>::quiet_NaN() throw() {return numeric_limits<double>::quiet_NaN();}
+  inline EUROPA::edouble numeric_limits<EUROPA::edouble>::signaling_NaN() throw() {return numeric_limits<double>::signaling_NaN();}
+  inline EUROPA::edouble numeric_limits<EUROPA::edouble>::denorm_min() throw() {return numeric_limits<double>::denorm_min();}
+#else
   inline EUROPA::edouble numeric_limits<EUROPA::edouble>::quiet_NaN() throw() {return __builtin_nan("");}
   inline EUROPA::edouble numeric_limits<EUROPA::edouble>::signaling_NaN() throw() {return __builtin_nans("");}
   inline EUROPA::edouble numeric_limits<EUROPA::edouble>::denorm_min() throw() {return __DBL_DENORM_MIN__;}
+#endif //_MSC_VER
+
 
   inline EUROPA::edouble abs(const EUROPA::edouble d) { return EUROPA::edouble(abs(d.m_v), true);}
   inline EUROPA::edouble sqrt(const EUROPA::edouble d) { handle_inf_unary(EUROPA::edouble, d); return EUROPA::edouble(sqrt(d.m_v), true);}
@@ -700,13 +787,17 @@ namespace std {
 
 }
 
-namespace __gnu_cxx {
+#ifndef _MSC_VER
+namespace __gnu_cxx
+{
   //I'm not entirely sure this is safe, but it's worked so far.  Maybe this should be changed to
   //*((size_t*)&(__x.m_v))
   size_t hash<EUROPA::edouble>::operator()(EUROPA::edouble __x) const {return (size_t) (__x.m_v);}
-  size_t hash<EUROPA::eint>::operator()(EUROPA::eint __x) const {return (size_t) (__x.m_v);}
+  size_t hash<EUROPA::eint>::operator()(EUROPA::eint __x) const {return (size_t) (long) (__x.m_v);}
 }
+#endif //_MSC_VER
 
-
+#define min MIN_COPY
+#define max MAX_COPY
 
 #endif /* _H_Number */

@@ -94,7 +94,7 @@ namespace EUROPA {
   }
 
   bool DefaultPropagator::isValid() const{
-    for(ConstraintSet::iterator it = m_agenda.begin(); it != m_agenda.end(); ++it){
+    for(ConstraintSet::const_iterator it = m_agenda.begin(); it != m_agenda.end(); ++it){
       ConstraintId constraint = *it;
       checkError(constraint.isValid(), constraint);
       checkError(!constraint->isDiscarded(),

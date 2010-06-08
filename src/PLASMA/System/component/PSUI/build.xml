@@ -10,20 +10,32 @@
 
   <target name="init">
     <tstamp/>
-    <exec executable="uname" outputproperty="uname.o">
-      <arg value="-o"/>
-    </exec>
     <property environment="env"/>
+
+    <property name="local.env.vcInstallDir"  value="${env.VCINSTALLDIR}" />
+    <echo message="vcInstallDir: ${local.env.vcInstallDir}"/>
+    <condition property="os.isMSVC">
+      <contains string="${local.env.vcInstallDir}" substring="9.0" casesensitive="false"/>
+    </condition>
+
     <if>
-      <equals arg1="${uname.o}" arg2="Cygwin"/>
+      <equals arg1="${local.env.vcInstallDir}" arg2=""/>
       <then>
-        <exec executable="cygpath" outputproperty="plasma.dir">
-          <arg value="--windows"/>
-          <arg value="${env.PLASMA_HOME}"/>
-        </exec>
+        <exec executable="uname" outputproperty="uname.o">
+	  <arg value="-o"/>
+	</exec>
+	<if>
+          <equals arg1="${uname.o}" arg2="Cygwin"/>
+          <then>
+            <exec executable="cygpath" outputproperty="plasma.dir">
+              <arg value="--windows"/>
+              <arg value="${env.PLASMA_HOME}"/>
+            </exec>
+          </then>
+        </if>
       </then>
     </if>
-
+    
     <property name="plasma.dir" value="${env.PLASMA_HOME}"/>
     <property file="${user.home}/.ant.psui.properties"/>
 

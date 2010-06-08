@@ -140,11 +140,21 @@ namespace EUROPA {
 
       virtual void getOrderingChoices(const TokenId& token,
 				      std::vector<std::pair<TokenId, TokenId> >& results,
-				      unsigned int limit = std::numeric_limits<unsigned int>::max());
+#ifdef _MSC_VER
+				      unsigned int limit = UINT_MAX
+#else
+                                      unsigned int limit = std::numeric_limits<unsigned int>::max()
+#endif //_MSC_VER
+				      );
 
       virtual void getOrderingChoices(const InstantId& inst,
                                       std::vector<std::pair<TransactionId, TransactionId> >& results,
-                                      unsigned int limit = std::numeric_limits<unsigned int>::max());
+#ifdef _MSC_VER
+				      unsigned int limit = UINT_MAX
+#else
+                                      unsigned int limit = std::numeric_limits<unsigned int>::max()
+#endif //_MSC_VER
+				      );
 
       virtual void getTokensToOrder(std::vector<TokenId>& results);
 
