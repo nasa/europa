@@ -28,12 +28,12 @@ namespace EUROPA {
       virtual void handleExecute();
       virtual void handleUndo();
       static bool test(const EntityId& entity);
-    protected:
+
     private:
       std::string toString(const std::pair<TransactionId, TransactionId>& choice) const;
       void createFilter(ChoiceFilters& filters, const std::string& filter, ProfileId& profile);
       void createOrder(ChoiceOrder& order);
-
+    protected:
       InstantId m_flawedInstant;
       std::vector<std::pair<TransactionId, TransactionId> > m_choices;
       unsigned int m_choiceCount;
