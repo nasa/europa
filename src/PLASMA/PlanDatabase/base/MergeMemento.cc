@@ -46,14 +46,14 @@ namespace EUROPA{
 
     check_error(inactiveVariables.size() == activeVariables.size());
 
-    std::map<edouble, ConstrainedVariableId> varMap;
+    std::map<eint, ConstrainedVariableId> varMap;
     std::set<ConstraintId> deactivatedConstraints;
 
     //Exclude this for the state variable, which will necessarily conflict with the target active token
     for(unsigned int i=1; i<inactiveVariables.size(); i++){
-      check_error(varMap.find((edouble) inactiveVariables[i]) == varMap.end());
+      check_error(varMap.find((eint) inactiveVariables[i]->getKey()) == varMap.end());
       // Add to the map to support lookup and store all constraints on any variables
-      varMap.insert(std::make_pair((edouble) inactiveVariables[i], activeVariables[i]));
+      varMap.insert(std::make_pair((eint) inactiveVariables[i]->getKey(), activeVariables[i]));
       inactiveVariables[i]->constraints(deactivatedConstraints);
       // i.e. not a state variable
 

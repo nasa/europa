@@ -578,7 +578,7 @@ namespace EUROPA {
         m_v = cast_double(std::numeric_limits<edouble>::infinity());
       }
       else if(m_v < std::numeric_limits<edouble>::minus_infinity()) {
-        assert(m_v >= std::numeric_limits<eint>::minus_infinity());
+        assert(m_v >= std::numeric_limits<edouble>::minus_infinity());
         m_v = cast_double(std::numeric_limits<edouble>::minus_infinity());
       }
     }
