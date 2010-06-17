@@ -2,15 +2,16 @@
 
 <project name="PSEngine" default="PSEngine" basedir=".">
   
+  <property environment="env"/>
+    	
   <taskdef resource="net/sf/antcontrib/antcontrib.properties">
     <classpath>
-      <pathelement location="ext/ant/lib/ant-contrib-1.0b3.jar"/>
+      <pathelement location="${env.PLASMA_HOME}/ext/ant/lib/ant-contrib-1.0b3.jar"/>
     </classpath>
   </taskdef>
 
   <target name="init">
     <tstamp/>
-    <property environment="env"/>
 
     <property name="local.env.vcInstallDir"  value="${env.VCINSTALLDIR}" />
     <echo message="vcInstallDir: ${local.env.vcInstallDir}"/>
