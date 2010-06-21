@@ -61,7 +61,7 @@ DnodeId DistanceGraph::makeNode()
 DnodeId DistanceGraph::createNode()
 {
   DnodeId node = makeNode();
-  check_error(node, "Memory allocation failed for TemporalNetwork node",
+  check_error(node.isValid(), "Memory allocation failed for TemporalNetwork node",
               TempNetErr::TempNetMemoryError());
 
   node->potential = 0;
@@ -159,7 +159,7 @@ DedgeId DistanceGraph::createEdge(DnodeId from, DnodeId to, Time length)
 
 
   DedgeId edge = (new Dedge())->getId();
-  check_error(edge, "Memory allocation failed for TemporalNetwork edge",
+  check_error(edge.isValid(), "Memory allocation failed for TemporalNetwork edge",
               TempNetErr::TempNetMemoryError());
 
   edge->from = from;

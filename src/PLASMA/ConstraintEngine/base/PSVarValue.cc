@@ -57,7 +57,8 @@ namespace EUROPA {
     check_runtime_error(m_type == OBJECT);
     // only works if PSEntity remains pure virtual
     //Id<PSEntity> id(Entity::getEntity(edouble(m_val)));
-    EntityId entity = Entity::getEntity(edouble(m_val));
+    //EntityId entity = Entity::getEntity(edouble(m_val));
+    EntityId entity = Entity::getEntity((edouble) m_val);
     return (PSEntity *) entity;
   }
 

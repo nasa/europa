@@ -25,13 +25,13 @@ namespace EUROPA{
    * an algorithm to migrate consequenecs rather than force additional splits. This is similar to deactivation
    * of a token in its simple, robust, and potentially inefficient treatment of such non-chronological retractions.
    */
-  ConstrainedVariableId checkForReplacement(const std::map<edouble, ConstrainedVariableId>& lookup, const ConstrainedVariableId& var){
-    std::map<edouble, ConstrainedVariableId>::const_iterator it = lookup.find((edouble) var);
-    if(it == lookup.end())
-      return var;
-    else
-      return (it->second);
-  }
+//   ConstrainedVariableId checkForReplacement(const std::map<edouble, ConstrainedVariableId>& lookup, const ConstrainedVariableId& var){
+//     std::map<edouble, ConstrainedVariableId>::const_iterator it = lookup.find((edouble) var);
+//     if(it == lookup.end())
+//       return var;
+//     else
+//       return (it->second);
+//   }
 
   MergeMemento::MergeMemento(const TokenId& inactiveToken, const TokenId& activeToken)
     :m_inactiveToken(inactiveToken), m_activeToken(activeToken), m_undoing(false){

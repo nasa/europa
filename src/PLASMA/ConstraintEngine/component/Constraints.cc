@@ -1958,6 +1958,10 @@ namespace EUROPA {
     //what is test if m_arg1 is not a singleton.
   }
 
+  const std::vector<ConstrainedVariableId>& TestSingleton::getModifiedVariables() const {
+    return makeScope(getScope()[0]);
+  }
+
   TestSpecified::TestSpecified(const LabelStr& name,
 			   const LabelStr& propagatorName,
 			   const ConstraintEngineId& constraintEngine,

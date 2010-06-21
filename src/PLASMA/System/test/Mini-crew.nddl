@@ -1,0 +1,30 @@
+
+
+class CrewMember_Claim extends Timeline {
+  predicate Busy {}
+}
+
+
+class CrewMember {
+  CrewMember_Claim m_claim;
+
+  predicate Activity {bool solved;}
+
+  CrewMember() {
+    m_claim = new CrewMember_Claim();
+  }
+}
+
+CrewMember::Activity {
+  if(solved == true) {
+    if(isSingleton(object)) {
+      equals(object.m_claim.Busy b);
+      eq(b.state, ACTIVE);
+    }
+  }
+}
+
+CrewMember_Claim::Busy {
+  before(object.Busy busy);
+  eq(busy.state, MERGED);
+}

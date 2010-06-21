@@ -129,6 +129,8 @@ if ! ( "Resources" in $(NO) ) {
 if $(PLANNER) = SOLVER {
   RunPlannerProblem HTX.1.solver.nddl : HTX.1.solverConfig.xml : solver-tests ;
   RunPlannerProblem HTX.3.solver.nddl : HTX.3.solverConfig.xml : solver-tests ;
+  #RunPlannerProblem MultiCrew-initial-state.nddl : MultiCrew-SolverConfig.xml : solver-tests ;
+  RunPlannerProblem Mini-crew-init.nddl : MiniCrewSolverConfig.xml : solver-tests ;
 
   Depends solver-tests : common-tests ;
   Depends run-nddl-planner-tests : solver-tests ;
@@ -137,6 +139,7 @@ if $(PLANNER) = SOLVER {
     Depends run-model-tests : run-solver-tests-model-tests ;
     Depends run-all-tests : run-model-tests ;
   }  
+
 }
 
 Depends run-all-tests : run-nddl-planner-tests ;

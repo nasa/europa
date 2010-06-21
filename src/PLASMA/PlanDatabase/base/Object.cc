@@ -49,7 +49,7 @@ namespace EUROPA {
   }
 
   Object::~Object() {
-    check_error(m_id);
+    check_error(m_id.isValid());
 
     discard(false);
 
@@ -579,7 +579,7 @@ namespace EUROPA {
 	it != m_constraintsByTokenKey.end();
 	++it){
       checkError(it->second.isValid(), it->second);
-      check_error(Entity::getEntity(it->first));
+      check_error(Entity::getEntity(it->first).isValid());
     }
 
     for(std::multimap<int, ConstraintId>::const_iterator it = m_constraintsByKeyPair.begin();
@@ -792,7 +792,7 @@ namespace EUROPA {
 
   PSVarValue Object::asPSVarValue() const
   {
-      PSVarValue retval((double)getId(),OBJECT);
+    PSVarValue retval(getKey(),OBJECT);
 
       return retval;
   }

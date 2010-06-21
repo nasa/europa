@@ -26,7 +26,7 @@ namespace EUROPA {
     static PSVarValue getInstance(double val) {return PSVarValue(val, DOUBLE);}
     static PSVarValue getInstance(edouble val) {return PSVarValue(val, DOUBLE);}
     static PSVarValue getInstance(bool val) {return PSVarValue((double)val, BOOLEAN);}
-    static PSVarValue getObjectInstance(double obj) {return PSVarValue(obj, OBJECT);} // cast an EntityId to double to call this
+    static PSVarValue getObjectInstance(double obj) {return PSVarValue(obj, OBJECT);} 
 
   private:
     double m_val;

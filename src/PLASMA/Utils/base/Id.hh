@@ -201,9 +201,9 @@ Baz* baz = (Baz*) fooId; // Will not compile.@endverbatim
      * @brief Cast the pointer to an int.
      */
 
-    inline operator double() const {
-      return (double)((unsigned long int) m_ptr);
-    }
+//     inline operator double() const {
+//       return (double)((unsigned long int) m_ptr);
+//     }
 
     /**
      * @brief Assignment operator.

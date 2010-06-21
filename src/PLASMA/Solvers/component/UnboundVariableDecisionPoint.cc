@@ -54,7 +54,8 @@ namespace EUROPA {
     }
 
     void UnboundVariableDecisionPoint::handleUndo(){
-      debugMsg("SolverDecisionPoint:handleUndo", "Retracting assignment decision on " << m_flawedVariable->toString());
+      debugMsg("SolverDecisionPoint:handleUndo", 
+               "Retracting assignment decision on " << m_flawedVariable->toLongString());
       debugMsg("UnboundDecisionPoint:handleUndo", m_choices->getCount() << " possible values left");
       m_client->reset(m_flawedVariable);
     }

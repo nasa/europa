@@ -258,6 +258,17 @@ namespace EUROPA {
      */
     virtual const std::vector<ConstrainedVariableId>& getModifiedVariables(const ConstrainedVariableId& variable) const;
 
+    
+    /**
+     * @brief Get the varibles in scope that might be modified by executing this constraint.
+     *
+     * Primarily used during network relaxation to determine which variables need to be relaxed
+     * in response to a particular relaxation.
+     * @return the vector of all variables that this constraint might modify.  Defaults to the entire scope.
+     * @see ConstraintEngine::getScope(), ConstraintEngine::handleRelax()
+     */
+    virtual const std::vector<ConstrainedVariableId>& getModifiedVariables() const;
+
     /**
      * @brief Allow implementation class to take action in the event of activation
      */

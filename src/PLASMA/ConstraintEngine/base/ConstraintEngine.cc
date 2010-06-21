@@ -484,7 +484,8 @@ namespace EUROPA
     if(constraint->isActive()){
       debugMsg("ConstraintEngine:remove:Constraint",
                "Propagating relaxations for " << constraint->getName().toString() << "(" << constraint->getKey() << ")");
-      const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
+      //const std::vector<ConstrainedVariableId>& scope = constraint->getScope();
+      const std::vector<ConstrainedVariableId>& scope = constraint->getModifiedVariables();
       for(std::vector<ConstrainedVariableId>::const_iterator it = scope.begin(); it != scope.end(); ++it){
 	ConstrainedVariableId id(*it);
 	if(!id->isDiscarded() && id->lastRelaxed() < m_cycleCount)
@@ -801,7 +802,7 @@ namespace EUROPA
     if(m_relaxing)
       return;
     debugMsg("ConstraintEngine:relaxed",
-	     "Handling relaxation of " << variable->toString());
+	     "Handling relaxation of " << variable->toLongString());
 
     if (!m_relaxingViolation)
       m_violationMgr->handleRelax(variable);
@@ -848,7 +849,7 @@ namespace EUROPA
       if(getVariables().find(id) != getVariables().end() &&
 	 id->lastRelaxed() < m_cycleCount) {
 	debugMsg("ConstraintEngine:relaxed",
-		 "Relaxing " << id->toString());
+		 "Relaxing " << id->toLongString());
 	id->updateLastRelaxed(m_cycleCount);
 	id->relax();
 	if(!m_relaxingViolation)

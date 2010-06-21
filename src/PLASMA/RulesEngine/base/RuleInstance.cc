@@ -284,7 +284,7 @@ namespace EUROPA {
 	  ++it){
 	ConstrainedVariableId var = *it;
 	checkError(var.isValid(), var);
-	debugMsg("RuleInstance:undo", "Removing " << var->toString());
+	debugMsg("RuleInstance:undo", "Removing " << var->toLongString());
 	getToken()->removeLocalVariable(var);
 
 	if(var->parent() == m_id)

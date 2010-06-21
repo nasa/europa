@@ -1143,8 +1143,9 @@ class TestSingleton : public Constraint {
 	   const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
+  const std::vector<ConstrainedVariableId>& getModifiedVariables() const;
 
-  private:
+private:
     Domain& m_test;
     Domain& m_arg1;
     static const unsigned int ARG_COUNT = 2;
