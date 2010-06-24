@@ -412,8 +412,8 @@ namespace EUROPA {
       }
     }
 
-#ifdef _MSC_VER 
-#  ifdef E2_LONG_INT 
+#ifdef _MSC_VER
+#  ifdef E2_LONG_INT
     eint(const __int64 v) : m_v( (__int64) v ) {
         if(m_v > std::numeric_limits<eint>::infinity()) {
             assert(m_v <= std::numeric_limits<eint>::infinity());
@@ -436,7 +436,7 @@ namespace EUROPA {
             m_v = cast_int(std::numeric_limits<eint>::minus_infinity());
         }
     }
-#  endif //#ifdef E2_LONG_INT
+#endif // E2_LONG_INT
 #endif //#ifdef _MSC_VER
 
     eint() : m_v(0) {}
@@ -488,6 +488,8 @@ namespace EUROPA {
     inline bool operator>(const eint o) const {return m_v > o.m_v;}
     inline bool operator!=(const eint o) const {return m_v != o.m_v;}
 
+    inline long asLong() const {return m_v;}
+
     inline edouble operator+(const edouble o) const;
     inline edouble operator-(const edouble o) const;
     inline edouble operator*(const edouble o) const;
@@ -515,8 +517,13 @@ namespace EUROPA {
   private:
     
     friend class edouble;
-      friend class __gnu_cxx::hash<eint>;
+
+#ifdef _MSC_VER
+    friend struct std::numeric_limits<eint>;
+#else
+    friend class __gnu_cxx::hash<eint>;
     friend class std::numeric_limits<eint>;
+#endif //_MSC_VER
   
     /**
      * Private constructors that don't do infinity checking
@@ -557,14 +564,7 @@ namespace EUROPA {
   GEN_FRIEND_COMPARISONS(long long int, eint);
   GEN_FRIEND_COMPARISONS(double, eint);
   GEN_FRIEND_COMPARISONS(long double, eint);
-  inline std::ostream& operator<<(std::ostream& o, const eint e) {
-    if(e.m_v == std::numeric_limits<eint>::infinity().m_v)
-      return (o << "+inf");
-    else if(e.m_v == std::numeric_limits<eint>::minus_infinity().m_v)
-      return(o << "-inf");
-    return (o << e.m_v);
-  }
-  //TODO: make this parse +inf and -inf
+  inline std::ostream& operator<<(std::ostream& o, const eint e) {return(o << e.m_v);}
   inline std::istream& operator>>(std::istream& o, eint& e) {return(o >> e.m_v);}
 
   class edouble {
@@ -705,13 +705,7 @@ namespace EUROPA {
   inline eint::basis_type cast_basis(const eint e) {return static_cast<eint::basis_type>(e.m_v);}
   inline edouble::basis_type cast_basis(const edouble e) {return static_cast<edouble::basis_type>(e.m_v);}
 
-  inline std::ostream& operator<<(std::ostream& o, const edouble e) {
-    if(e.m_v == std::numeric_limits<edouble>::infinity().m_v)
-      return (o << "+inff");
-    else if(e.m_v == std::numeric_limits<edouble>::minus_infinity().m_v)
-      return(o << "-inff");
-    return (o << e.m_v);
-  }
+  inline std::ostream& operator<<(std::ostream& o, const edouble e) {return(o << e.m_v);}
   inline std::istream& operator>>(std::istream& o, edouble& e) {
     return(o >> e.m_v);}
 

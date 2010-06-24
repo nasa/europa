@@ -96,4 +96,9 @@ namespace EUROPA {
  */
 #define MAX_PRECISION (static_cast<int>(std::log10(cast_double(MAX_INT) + cast_double(EPSILON)) + 1.0))
 
+#ifdef _MSC_VER
+#  define EUROPA_ATTRIBUTE_UNUSED
+#else
+#  define EUROPA_ATTRIBUTE_UNUSED __attribute__ ((__unused__))
+#endif 
 #endif

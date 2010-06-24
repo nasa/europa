@@ -23,7 +23,7 @@
 			OutputDirectory="$(PLASMA_HOME)\build\lib"
 			IntermediateDirectory="$(PLASMA_HOME)\build\objects\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\..\..\vc\UtilsProperties.vsprops;..\..\..\vc\TinyXMLProperties.vsprops;..\..\..\vc\DlfcnProperties.vsprops;..\..\..\vc\PthreadProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_DlfcnProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PthreadProperties.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -149,7 +149,7 @@
 			OutputDirectory="$(PLASMA_HOME)\build\lib"
 			IntermediateDirectory="$(PLASMA_HOME)\build\objects\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\..\..\vc\UtilsProperties.vsprops;..\..\..\vc\TinyXMLProperties.vsprops;..\..\..\vc\DlfcnProperties.vsprops;..\..\..\vc\PthreadProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_DlfcnProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PthreadProperties.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="1"
 			>
@@ -215,7 +215,7 @@
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\..\..\vc\UtilsProperties.vsprops;..\..\..\vc\TinyXMLProperties.vsprops;..\..\..\vc\DlfcnProperties.vsprops;..\..\..\vc\PthreadProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_DlfcnProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PthreadProperties.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -352,7 +352,7 @@
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\..\..\vc\UtilsProperties.vsprops;..\..\..\vc\TinyXMLProperties.vsprops;..\..\..\vc\PthreadProperties.vsprops;..\..\..\vc\DlfcnProperties_x64.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PthreadProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_DlfcnProperties_x64.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="1"
 			>

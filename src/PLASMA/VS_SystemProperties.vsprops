@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="SystemProperties"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		AdditionalIncludeDirectories="$(PLASMA_HOME)\src\PLASMA\System;$(PLASMA_HOME)\src\PLASMA\System\base;$(PLASMA_HOME)\src\PLASMA\System\component"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		OutputFile="$(PLASMA_HOME)\build\lib\$(ConfigurationName)\$(ProjectName).lib"
+	/>
+</VisualStudioPropertySheet>

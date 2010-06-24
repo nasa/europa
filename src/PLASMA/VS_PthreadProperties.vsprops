@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="PthreadProperties"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		AdditionalIncludeDirectories="&quot;$(PLASMA_THIRD_PARTY)\visualStudio\pthreads-w32-2-8-0-release&quot;"
+	/>
+	<Tool
+		Name="VCLinkerTool"
+		AdditionalDependencies="pthreadVC2d.lib"
+		AdditionalLibraryDirectories="&quot;$(PLASMA_THIRD_PARTY)\visualStudio\pthreads-w32-2-8-0-release\&quot;"
+		IgnoreAllDefaultLibraries="false"
+	/>
+</VisualStudioPropertySheet>

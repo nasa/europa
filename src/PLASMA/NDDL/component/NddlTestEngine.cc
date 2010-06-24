@@ -64,7 +64,7 @@ int NddlTestEngine::run(const char* txSource, const char* language)
         return -1;
     }
 
-    ConstraintEngine* ce __attribute__ ((__unused__)) = (ConstraintEngine*)getComponent("ConstraintEngine");
+    ConstraintEngine* ce EUROPA_ATTRIBUTE_UNUSED = (ConstraintEngine*)getComponent("ConstraintEngine");
     assert(ce->constraintConsistent());
 
     PlanDatabaseWriter::write(planDatabase->getId(), std::cout);

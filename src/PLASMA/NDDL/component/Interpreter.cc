@@ -335,7 +335,7 @@ namespace EUROPA {
   std::string CExpr::createVariableName() const
   {
       char buff[15];
-      sprintf(buff, "%u", m_count);
+      sprintf_s(buff, "%u", m_count);
       std::string variable = std::string("implicit_var_" + std::string(buff) + "_" + toString()).c_str();
 
       //Detect if the variable contains illegal characters and rewrite it if it does.

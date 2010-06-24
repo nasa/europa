@@ -23,7 +23,7 @@
 			OutputDirectory="$(PLASMA_HOME)\build\lib"
 			IntermediateDirectory="$(PLASMA_HOME)\build\objects\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\..\..\vc\NddlProperties.vsprops;..\..\..\vc\UtilsProperties.vsprops;..\..\..\vc\PlanDatabaseProperties.vsprops;..\..\..\vc\RulesEngineProperties.vsprops;..\..\..\vc\ConstraintEngineProperties.vsprops;..\..\..\vc\TemporalNetworkProperties.vsprops;..\..\..\vc\AntlrProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_AntlrProperties.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -31,6 +31,7 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+				Description="Running Custom Build Step"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -87,7 +88,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="..\..\..\vc\NddlProperties.vsprops;..\..\..\vc\UtilsProperties.vsprops;..\..\..\vc\PlanDatabaseProperties.vsprops;..\..\..\vc\RulesEngineProperties.vsprops;..\..\..\vc\ConstraintEngineProperties.vsprops;..\..\..\vc\TemporalNetworkProperties.vsprops;..\..\..\vc\AntlrProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_AntlrProperties.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -158,7 +159,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\..\..\vc\NddlProperties.vsprops;..\..\..\vc\UtilsProperties.vsprops;..\..\..\vc\PlanDatabaseProperties.vsprops;..\..\..\vc\RulesEngineProperties.vsprops;..\..\..\vc\ConstraintEngineProperties.vsprops;..\..\..\vc\TemporalNetworkProperties.vsprops;..\..\..\vc\AntlrProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_AntlrProperties.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="1"
 			>
@@ -223,7 +224,7 @@
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\..\..\vc\NddlProperties.vsprops;..\..\..\vc\UtilsProperties.vsprops;..\..\..\vc\PlanDatabaseProperties.vsprops;..\..\..\vc\RulesEngineProperties.vsprops;..\..\..\vc\ConstraintEngineProperties.vsprops;..\..\..\vc\TemporalNetworkProperties.vsprops;..\..\..\vc\AntlrProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_AntlrProperties.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -288,7 +289,7 @@
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="..\..\..\vc\NddlProperties.vsprops;..\..\..\vc\UtilsProperties.vsprops;..\..\..\vc\PlanDatabaseProperties.vsprops;..\..\..\vc\RulesEngineProperties.vsprops;..\..\..\vc\ConstraintEngineProperties.vsprops;..\..\..\vc\TemporalNetworkProperties.vsprops;..\..\..\vc\AntlrProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_AntlrProperties.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -360,7 +361,7 @@
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(PLASMA_HOME)\vc\NddlProperties.vsprops;..\..\..\vc\UtilsProperties.vsprops;..\..\..\vc\PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\vc\RulesEngineProperties.vsprops;..\..\..\vc\ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\vc\TemporalNetworkProperties.vsprops;..\..\..\vc\AntlrPropertiesCLR_x64.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\vc\NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\vc\RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\vc\TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_AntlrPropertiesCLR_x64.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="1"
 			>
@@ -439,18 +440,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\base\NDDL3Lexer.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\base\NDDL3Parser.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\base\NDDL3Tree.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\component\NddlInterpreter.cc"
 				>
 			</File>
@@ -486,18 +475,6 @@
 			</File>
 			<File
 				RelativePath=".\base\Nddl.hh"
-				>
-			</File>
-			<File
-				RelativePath=".\base\NDDL3Lexer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\base\NDDL3Parser.h"
-				>
-			</File>
-			<File
-				RelativePath=".\base\NDDL3Tree.h"
 				>
 			</File>
 			<File
@@ -539,16 +516,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\base\antlr\nddl.g"
-				>
-			</File>
-			<File
-				RelativePath=".\base\antlr\nddl.tree.g"
-				>
-			</File>
-			<File
 				RelativePath=".\base\antlr\NDDL3.g"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Generating NDDL3 grammer"
+						CommandLine="&quot;$(JAVA_HOME)&quot;\bin\java -cp $(PLASMA_HOME)\ext\lib\antlr-3.jar org.antlr.Tool -fo .\base -traceParser $(InputPath)&#x0D;&#x0A;move .\base\NDDL3Lexer.c .\base\\NDDL3Lexer.cpp&#x0D;&#x0A;move .\base\NDDL3Parser.c .\base\NDDL3Parser.cpp&#x0D;&#x0A;"
+						AdditionalDependencies=".\base\antlr\NDDL3.tokens"
+						Outputs=".\base\NDDL3Lexer.cpp;.\base\NDDL3Lexer.h;.\base\NDDL3Parser.cpp;.\base\NDDL3Parser.h;.\base\NDDL3.tokens"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\base\NDDL3.tokens"
@@ -557,6 +537,16 @@
 			<File
 				RelativePath=".\base\antlr\NDDL3Tree.g"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="&quot;$(JAVA_HOME)&quot;\bin\java -cp $(PLASMA_HOME)\ext\lib\antlr-3.jar org.antlr.Tool -fo .\base -traceParser $(InputPath)&#x0D;&#x0A;move .\base\NDDL3Tree.c .\base\\NDDL3Tree.cpp&#x0D;&#x0A;"
+						AdditionalDependencies=".\base\antlr\NDDL3Tree.tokens"
+						Outputs=".\base\NDDL3Tree.h;.\base\NDDL3Tree.cpp; .\base\NDDL3Tree.tokens"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\base\NDDL3Tree.tokens"
@@ -576,6 +566,34 @@
 			</File>
 			<File
 				RelativePath=".\base\StringData.nddl"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="GeneratedFiles"
+			>
+			<File
+				RelativePath=".\base\NDDL3Lexer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\base\NDDL3Lexer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\base\NDDL3Parser.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\base\NDDL3Parser.h"
+				>
+			</File>
+			<File
+				RelativePath=".\base\NDDL3Tree.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\base\NDDL3Tree.h"
 				>
 			</File>
 		</Filter>

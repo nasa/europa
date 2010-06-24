@@ -23,7 +23,7 @@
 			OutputDirectory="$(PLASMA_HOME)\build\lib"
 			IntermediateDirectory="$(PLASMA_HOME)\build\objects\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\..\..\vc\PlanDatabaseProperties.vsprops;..\..\..\vc\UtilsProperties.vsprops;..\..\..\vc\ConstraintEngineProperties.vsprops;..\..\..\vc\TinyXMLProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -87,7 +87,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="..\..\..\vc\PlanDatabaseProperties.vsprops;..\..\..\vc\UtilsProperties.vsprops;..\..\..\vc\ConstraintEngineProperties.vsprops;..\..\..\vc\TinyXMLProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -158,7 +158,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\..\..\vc\PlanDatabaseProperties.vsprops;..\..\..\vc\UtilsProperties.vsprops;..\..\..\vc\ConstraintEngineProperties.vsprops;..\..\..\vc\TinyXMLProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="1"
 			>
@@ -223,7 +223,7 @@
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\..\..\vc\PlanDatabaseProperties.vsprops;..\..\..\vc\UtilsProperties.vsprops;..\..\..\vc\ConstraintEngineProperties.vsprops;..\..\..\vc\TinyXMLProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -288,7 +288,7 @@
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="..\..\..\vc\PlanDatabaseProperties.vsprops;..\..\..\vc\UtilsProperties.vsprops;..\..\..\vc\ConstraintEngineProperties.vsprops;..\..\..\vc\TinyXMLProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -360,7 +360,7 @@
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\..\..\vc\PlanDatabaseProperties.vsprops;..\..\..\vc\UtilsProperties.vsprops;..\..\..\vc\ConstraintEngineProperties.vsprops;..\..\..\vc\TinyXMLProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="1"
 			>

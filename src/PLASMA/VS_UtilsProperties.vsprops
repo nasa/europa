@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="UtilsProperties"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		AdditionalIncludeDirectories="&quot;$(PLASMA_HOME)\src\PLASMA\Utils&quot;;&quot;$(PLASMA_HOME)\src\PLASMA\Utils\base&quot;;&quot;$(PLASMA_HOME)\src\PLASMA\Utils\component&quot;"
+		DisableSpecificWarnings="4250;4355;4003;4002"
+	/>
+</VisualStudioPropertySheet>

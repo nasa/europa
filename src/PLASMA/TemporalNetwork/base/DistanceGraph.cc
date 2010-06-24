@@ -641,7 +641,8 @@ Void DistanceGraph::boundedDijkstra (const DnodeId& source,
   source->generation = generation;
   BucketQueue* queue = initializeBqueue();
   queue->insertInQueue (source);
-  Int BFbound __attribute__ ((__unused__)) = this->nodes.size();
+
+  Int BFbound EUROPA_ATTRIBUTE_UNUSED = this->nodes.size();
   while (true) {
     DnodeId node = queue->popMinFromQueue();
     if (node.isNoId())
