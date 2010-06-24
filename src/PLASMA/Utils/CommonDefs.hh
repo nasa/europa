@@ -101,4 +101,10 @@ namespace EUROPA {
 #else
 #  define EUROPA_ATTRIBUTE_UNUSED __attribute__ ((__unused__))
 #endif 
+
+#ifdef _MSC_VER
+#  define SPRINTF_FUNC sprintf_s
+#else
+#  define SPRINTF_FUNC sprintf
+#endif
 #endif
