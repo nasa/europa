@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="EuropaFullSystemStatic"
-	ProjectGUID="{51590919-F315-4D9D-8111-1822CA9B7CC5}"
-	RootNamespace="EuropaFullSystem"
+	Name="RulesEngine"
+	ProjectGUID="{B898C070-E039-4BFB-AD37-69F077872A19}"
+	RootNamespace="RulesEngine"
 	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
@@ -23,7 +23,7 @@
 			OutputDirectory="$(PLASMA_HOME)\build\lib"
 			IntermediateDirectory="$(PLASMA_HOME)\build\objects\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\..\..\vc\PthreadProperties.vsprops;..\..\..\vc\DlfcnProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -64,7 +64,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				LinkLibraryDependencies="true"
 				OutputFile="$(PLASMA_HOME)\build\lib\$(ConfigurationName)\$(ProjectName).lib"
 			/>
 			<Tool
@@ -88,7 +87,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="..\..\..\vc\DlfcnProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -156,10 +155,10 @@
 		</Configuration>
 		<Configuration
 			Name="Debug CLR|Win32"
-			OutputDirectory="$(PLASMA_HOME)\build\lib"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\..\..\vc\PthreadProperties.vsprops;..\..\..\vc\DlfcnProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="1"
 			>
@@ -201,7 +200,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				LinkLibraryDependencies="true"
 				OutputFile="$(PLASMA_HOME)\build\lib\$(ConfigurationName)\$(ProjectName).lib"
 			/>
 			<Tool
@@ -225,7 +223,7 @@
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\..\..\vc\PthreadProperties.vsprops;..\..\..\vc\DlfcnProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -252,7 +250,7 @@
 				RuntimeLibrary="3"
 				TreatWChar_tAsBuiltInType="false"
 				ObjectFile="$(PLASMA_HOME)\build\objects\$(ProjectName)\$(ConfigurationName)\"
-				ProgramDataBaseFileName="$(PLASMA_HOME)\build\lib\$(ProjectName)$(ConfigurationName).pdb"
+				ProgramDataBaseFileName="$(PLASMA_HOME)\build\lib\$(ConfigurationName)\$(ProjectName).pdb"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -267,8 +265,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				LinkLibraryDependencies="true"
-				OutputFile="$(PLASMA_HOME)\build\lib\$(ProjectName)$(ConfigurationName).lib"
+				OutputFile="$(PLASMA_HOME)\build\lib\$(ConfigurationName)\$(ProjectName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -291,7 +288,7 @@
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="..\..\..\vc\DlfcnProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -363,7 +360,7 @@
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="..\..\..\vc\PthreadProperties.vsprops;..\..\..\vc\DlfcnProperties_x64.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="1"
 			>
@@ -406,7 +403,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				LinkLibraryDependencies="true"
 				OutputFile="$(PLASMA_HOME)\build\lib\$(ConfigurationName)\$(ProjectName).lib"
 			/>
 			<Tool
@@ -435,7 +431,31 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\Dummy.cpp"
+				RelativePath=".\ModuleRulesEngine.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\base\ProxyVariableRelation.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\base\Rule.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\base\RuleInstance.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\base\RulesEngine.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\base\RulesEngineListener.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\base\RuleVariableListener.cc"
 				>
 			</File>
 		</Filter>
@@ -444,6 +464,34 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\ModuleRulesEngine.hh"
+				>
+			</File>
+			<File
+				RelativePath=".\base\ProxyVariableRelation.hh"
+				>
+			</File>
+			<File
+				RelativePath=".\base\Rule.hh"
+				>
+			</File>
+			<File
+				RelativePath=".\base\RuleInstance.hh"
+				>
+			</File>
+			<File
+				RelativePath=".\base\RulesEngine.hh"
+				>
+			</File>
+			<File
+				RelativePath=".\base\RulesEngineListener.hh"
+				>
+			</File>
+			<File
+				RelativePath=".\base\RuleVariableListener.hh"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
