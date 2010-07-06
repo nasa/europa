@@ -248,6 +248,7 @@
       <arg line="clean-all"/>
       <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
     </exec>
+	<ant dir="src/JavaUI" description="Clean up Java part" target="clean.all" />
     <delete dir="${dir.build}"/>
   </target>
 
@@ -292,6 +293,11 @@
         </exec>
       </then>
     </if>  	
+  	
+	<ant dir="src/JavaUI" description="Build Swing version of Java UI" target="build.swing">
+  		<property name="europa.dir" value="${local.env.PLASMA_HOME}" />
+		<property name="psengine.jar.path" value="${local.env.PLASMA_HOME}/build/lib" />
+	</ant>
   </target>
 
   <target name="jam-target" depends="init">
@@ -561,6 +567,15 @@
     <antcall target="run-example-java"><param name="example.name" value="Rover"/></antcall> 
     <antcall target="run-example-java"><param name="example.name" value="Shopping"/></antcall>        
     <antcall target="run-example-java"><param name="example.name" value="UBO"/></antcall>        
+
+	<ant dir="src/JavaUI" description="Run model tests for Java UI" target="test">
+	  	<property name="europa.dir" value="${local.env.PLASMA_HOME}" />
+	  	<property name="europa.home" value="${local.env.EUROPA_HOME}" />
+		<property name="ld.path.key" value="${local.env.LD_LIBRARY_PATH.name}" />
+		<property name="ld.path.value" value="${local.env.LD_LIBRARY_PATH.value}"/>
+		<property name="psengine.jar.path" value="${local.env.PLASMA_HOME}/build/lib" />
+	</ant>		
+
   </target>
   
   <target name="release-dist" depends="init"
