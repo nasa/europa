@@ -13,7 +13,6 @@
 	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
 		<classpath>
 			<pathelement location="${europa.dir}/ext/ant/lib/ant-contrib-1.0b3.jar" />
-			<pathelement location="${europa.dir}/ext/ant/lib/ant-junit.jar"/>
 		</classpath>
 	</taskdef>
 
