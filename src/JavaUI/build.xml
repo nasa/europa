@@ -193,6 +193,8 @@
 
 	<target name="test" description="Run model unittests" depends="init,clean.temp,compile.model">
 		<!-- Copy test files to the target dir -->
+		<echo message="ANT_HOME=${ant.home} version=${ant.version} lib=${ant.library.dir}"/>
+		
 		<copy todir="${tempdir}">
 			<fileset dir="${srcdir}">
 				<include name="**/*.nddl" />
