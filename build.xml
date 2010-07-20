@@ -11,9 +11,9 @@
 	<taskdef name="junit"
 		classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask">
 		<classpath>
-			<pathelement location="${europa.dir}/ext/junit/junit-4.1.jar" />
-			<pathelement location="${europa.dir}/ext/ant/lib/ant-junit.jar" />
-			<pathelement location="${europa.dir}/ext/ant/lib/ant-trax.jar" />
+			<pathelement location="ext/junit/junit-4.1.jar" />
+			<pathelement location="ext/ant/lib/ant-junit.jar" />
+			<pathelement location="ext/ant/lib/ant-trax.jar" />
 		</classpath>
 	</taskdef>
   <target name="init">
