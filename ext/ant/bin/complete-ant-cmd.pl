@@ -1,10 +1,11 @@
 #!/usr/bin/perl
 #
-# Copyright 2001,2004 The Apache Software Foundation
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
+#  Licensed to the Apache Software Foundation (ASF) under one or more
+#  contributor license agreements.  See the NOTICE file distributed with
+#  this work for additional information regarding copyright ownership.
+#  The ASF licenses this file to You under the Apache License, Version 2.0
+#  (the "License"); you may not use this file except in compliance with
+#  the License.  You may obtain a copy of the License at
 #
 #      http://www.apache.org/licenses/LICENSE-2.0
 #
@@ -82,7 +83,7 @@ sub getTargets {
     # cache-file.
     my $cacheFile = $buildFile;
     $cacheFile =~ s|(.*/)?(.*)|${1}.ant-targets-${2}|;
-    if ((!-e $cacheFile) || (-M $buildFile) < (-M $cacheFile)) {
+    if ((!-e $cacheFile) || (-z $cacheFile) || (-M $buildFile) < (-M $cacheFile)) {
         open( CACHE, '>'.$cacheFile ) || die "can\'t write $cacheFile: $!\n";
         open( HELP, "$antCmd -projecthelp -f '$buildFile'|" ) || return(); 
         my %targets;

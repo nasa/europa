@@ -1,15 +1,17 @@
+<?xml version="1.0"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
-	xmlns:lxslt="http://xml.apache.org/xslt"
-	xmlns:stringutils="xalan://org.apache.tools.ant.util.StringUtils">
+        xmlns:lxslt="http://xml.apache.org/xslt"
+        xmlns:stringutils="xalan://org.apache.tools.ant.util.StringUtils">
 <xsl:output method="html" indent="yes" encoding="US-ASCII"
   doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN" />
 <xsl:decimal-format decimal-separator="." grouping-separator="," />
 <!--
-   Copyright 2001-2004 The Apache Software Foundation
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
 
        http://www.apache.org/licenses/LICENSE-2.0
 
@@ -19,22 +21,21 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  -->
- 
+
+<xsl:param name="TITLE">Unit Test Results.</xsl:param>
+
 <!--
- 
+
  Sample stylesheet to be used with Ant JUnitReport output.
- 
+
  It creates a non-framed report that can be useful to send via
  e-mail or such.
- 
- @author Stephane Bailliez <a href="mailto:sbailliez@apache.org"/>
- @author Erik Hatcher <a href="mailto:ehatcher@apache.org"/>
- 
+
 -->
 <xsl:template match="testsuites">
     <html>
         <head>
-            <title>Unit Test Results</title>
+            <title><xsl:value-of select="$TITLE"/></title>
     <style type="text/css">
       body {
         font:normal 68% verdana,arial,helvetica;
@@ -51,7 +52,7 @@
       table.details tr td{
         background:#eeeee0;
       }
-      
+
       p {
         line-height:1.5em;
         margin-top:0.5em; margin-bottom:1.0em;
@@ -87,7 +88,7 @@
       <script type="text/javascript" language="JavaScript">
         var TestCases = new Array();
         var cur;
-        <xsl:for-each select="./testsuite">      
+        <xsl:for-each select="./testsuite">
             <xsl:apply-templates select="properties"/>
         </xsl:for-each>
 
@@ -95,7 +96,8 @@
        <script type="text/javascript" language="JavaScript"><![CDATA[
         function displayProperties (name) {
           var win = window.open('','JUnitSystemProperties','scrollbars=1,resizable=1');
-          var doc = win.document.open();
+          var doc = win.document;
+          doc.open();
           doc.write("<html><head><title>Properties of " + name + "</title>");
           doc.write("<style>")
           doc.write("body {font:normal 68% verdana,arial,helvetica; color:#000000; }");
@@ -118,39 +120,39 @@
           doc.close();
           win.focus();
         }
-      ]]>  
+      ]]>
       </script>
         </head>
         <body>
             <a name="top"></a>
-            <xsl:call-template name="pageHeader"/>  
-            
+            <xsl:call-template name="pageHeader"/>
+
             <!-- Summary part -->
             <xsl:call-template name="summary"/>
             <hr size="1" width="95%" align="left"/>
-            
+
             <!-- Package List part -->
             <xsl:call-template name="packagelist"/>
             <hr size="1" width="95%" align="left"/>
-            
+
             <!-- For each package create its part -->
             <xsl:call-template name="packages"/>
             <hr size="1" width="95%" align="left"/>
-            
+
             <!-- For each class create the  part -->
             <xsl:call-template name="classes"/>
-            
+
         </body>
     </html>
 </xsl:template>
-    
-    
-    
+
+
+
     <!-- ================================================================== -->
     <!-- Write a list of all packages with an hyperlink to the anchor of    -->
     <!-- of the package name.                                               -->
     <!-- ================================================================== -->
-    <xsl:template name="packagelist">   
+    <xsl:template name="packagelist">
         <h2>Packages</h2>
         Note: package statistics are not computed recursively, they only sum up all of its testsuites numbers.
         <table class="details" border="0" cellpadding="5" cellspacing="2" width="95%">
@@ -163,7 +165,7 @@
                 <xsl:variable name="errorCount" select="sum($testsuites-in-package/@errors)"/>
                 <xsl:variable name="failureCount" select="sum($testsuites-in-package/@failures)"/>
                 <xsl:variable name="timeCount" select="sum($testsuites-in-package/@time)"/>
-                
+
                 <!-- write a summary for the package -->
                 <tr valign="top">
                     <!-- set a nice color depending if there is an error/failure -->
@@ -182,12 +184,14 @@
                         <xsl:with-param name="value" select="$timeCount"/>
                     </xsl:call-template>
                     </td>
+                    <td><xsl:value-of select="$testsuites-in-package/@timestamp"/></td>
+                    <td><xsl:value-of select="$testsuites-in-package/@hostname"/></td>
                 </tr>
             </xsl:for-each>
-        </table>        
+        </table>
     </xsl:template>
-    
-    
+
+
     <!-- ================================================================== -->
     <!-- Write a package level report                                       -->
     <!-- It creates a table with values from the document:                  -->
@@ -199,10 +203,10 @@
             <xsl:sort select="@package"/>
                 <a name="{@package}"></a>
                 <h3>Package <xsl:value-of select="@package"/></h3>
-                
+
                 <table class="details" border="0" cellpadding="5" cellspacing="2" width="95%">
                     <xsl:call-template name="testsuite.test.header"/>
-            
+
                     <!-- match the testsuites of this package -->
                     <xsl:apply-templates select="/testsuites/testsuite[./@package = current()/@package]" mode="print.test"/>
                 </table>
@@ -211,14 +215,14 @@
                 <p/>
         </xsl:for-each>
     </xsl:template>
-    
+
     <xsl:template name="classes">
         <xsl:for-each select="testsuite">
             <xsl:sort select="@name"/>
             <!-- create an anchor to this class name -->
             <a name="{@name}"></a>
             <h3>TestCase <xsl:value-of select="@name"/></h3>
-            
+
             <table class="details" border="0" cellpadding="5" cellspacing="2" width="95%">
               <xsl:call-template name="testcase.test.header"/>
               <!--
@@ -239,11 +243,11 @@
                 </a>
             </div>
             <p/>
-            
+
             <a href="#top">Back to top</a>
         </xsl:for-each>
     </xsl:template>
-    
+
     <xsl:template name="summary">
         <h2>Summary</h2>
         <xsl:variable name="testCount" select="sum(testsuite/@tests)"/>
@@ -290,7 +294,7 @@
         </tr>
         </table>
     </xsl:template>
-    
+
   <!--
    Write properties into a JavaScript data structure.
    This is based on the original idea by Erik Hatcher (ehatcher@apache.org)
@@ -302,14 +306,14 @@
         cur['<xsl:value-of select="@name"/>'] = '<xsl:call-template name="JS-escape"><xsl:with-param name="string" select="@value"/></xsl:call-template>';
     </xsl:for-each>
   </xsl:template>
-    
+
 <!-- Page HEADER -->
 <xsl:template name="pageHeader">
-    <h1>Unit Test Results</h1>
+    <h1><xsl:value-of select="$TITLE"/></h1>
     <table width="100%">
     <tr>
         <td align="left"></td>
-        <td align="right">Designed for use with <a href='http://www.junit.org'>JUnit</a> and <a href='http://jakarta.apache.org/ant'>Ant</a>.</td>
+        <td align="right">Designed for use with <a href='http://www.junit.org'>JUnit</a> and <a href='http://ant.apache.org/ant'>Ant</a>.</td>
     </tr>
     </table>
     <hr size="1"/>
@@ -333,6 +337,8 @@
         <th>Errors</th>
         <th>Failures</th>
         <th nowrap="nowrap">Time(s)</th>
+        <th nowrap="nowrap">Time Stamp</th>
+        <th>Host</th>
     </tr>
 </xsl:template>
 
@@ -357,7 +363,7 @@
                 <xsl:when test="@errors[.&gt; 0]">Error</xsl:when>
             </xsl:choose>
         </xsl:attribute>
-    
+
         <!-- print testsuite information -->
         <td><a href="#{@name}"><xsl:value-of select="@name"/></a></td>
         <td><xsl:value-of select="@tests"/></td>
@@ -368,6 +374,8 @@
                 <xsl:with-param name="value" select="@time"/>
             </xsl:call-template>
         </td>
+        <td><xsl:apply-templates select="@timestamp"/></td>
+        <td><xsl:apply-templates select="@hostname"/></td>
     </tr>
 </xsl:template>
 
@@ -443,8 +451,18 @@
 -->
 <xsl:template name="br-replace">
     <xsl:param name="word"/>
-    <xsl:param name="br"><br/></xsl:param>
-    <xsl:value-of select='stringutils:replace(string($word),"&#xA;",$br)'/>
+    <xsl:choose>
+      <xsl:when test="contains($word, '&#xa;')">
+        <xsl:value-of select="substring-before($word, '&#xa;')"/>
+        <br/>
+        <xsl:call-template name="br-replace">
+          <xsl:with-param name="word" select="substring-after($word, '&#xa;')"/>
+        </xsl:call-template>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:value-of select="$word"/>
+      </xsl:otherwise>
+    </xsl:choose>
 </xsl:template>
 
 <xsl:template name="display-time">
@@ -458,4 +476,3 @@
 </xsl:template>
 
 </xsl:stylesheet>
-
