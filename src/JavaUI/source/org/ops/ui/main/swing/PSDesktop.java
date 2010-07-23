@@ -18,7 +18,6 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 // Old version import org.ops.ui.gantt.swing.EGanttView;
 import org.ops.ui.beanshell.swing.BeanShellView;
