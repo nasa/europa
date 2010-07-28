@@ -2,8 +2,8 @@ package org.ops.ui.gantt.swing;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 
 import org.ops.ui.gantt.model.GanttResource;
 
@@ -26,7 +26,7 @@ public class ResourcePanel extends LinePanel {
 
 		// TODO Compute pixel per point
 
-		this.addMouseMotionListener(new MouseAdapter() {
+		this.addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
 			public void mouseMoved(MouseEvent event) {
 				updateTooltip(event.getX(), event.getY());
