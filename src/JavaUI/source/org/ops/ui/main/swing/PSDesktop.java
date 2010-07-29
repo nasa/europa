@@ -165,9 +165,8 @@ public class PSDesktop extends JFrame {
 
 	/** Create and connect PSEngine */
 	protected void hookupEngine(File data, File solverConfig) {
-		String debugMode = "g";
 		try {
-			PSUtil.loadLibraries(debugMode);
+			PSUtil.loadLibraries();
 		} catch (UnsatisfiedLinkError e) {
 			log
 					.log(

@@ -46,5 +46,17 @@ public class PSUtil
     {
         LibraryLoader.loadLibrary("System_"+debugMode);	
     }
+    
+    /** 
+     * Try various modifiers to pick the libraries. If all fail, throws 
+     * UnsatisfiedLinkError 
+     */
+    public static void loadLibraries() {
+    	try { loadLibraries("g"); return; }
+    	catch (UnsatisfiedLinkError e) {}
+    	try { loadLibraries("o"); return; }
+    	catch (UnsatisfiedLinkError e) {}
+    	loadLibraries("p"); // do not catch if this throws
+    }
 }
 

@@ -30,9 +30,8 @@ public class FileModelTest extends TestCase {
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		String debugMode = "g";
 		try {
-			PSUtil.loadLibraries(debugMode);
+			PSUtil.loadLibraries();
 		} catch (UnsatisfiedLinkError e) {
 			fail("Cannot load Europa libraries. Please make the "
 					+ "dynamic libraries are included in LD_LIBRARY_PATH "

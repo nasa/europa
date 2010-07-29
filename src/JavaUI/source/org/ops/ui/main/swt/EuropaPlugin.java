@@ -87,9 +87,8 @@ public class EuropaPlugin extends AbstractUIPlugin {
 
 	/** Create and connect PSEngine */
 	protected void hookupEngine() {
-		String debugMode = "g";
 		try {
-			PSUtil.loadLibraries(debugMode);
+			PSUtil.loadLibraries();
 		} catch (UnsatisfiedLinkError e) {
 			logError("Cannot load Europa libraries. Please make the "
 					+ "dynamic libraries are included in LD_LIBRARY_PATH "
