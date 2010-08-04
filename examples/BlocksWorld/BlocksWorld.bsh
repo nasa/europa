@@ -65,7 +65,7 @@ BlockWorldHistoryPanel bwhp;
 
 try {
     initPSEngine();
-    PSSolver solver = psengine.createSolver(config);
+    PSSolver solver = psengine.createSolver(config);    
     solver.configure(horizonStart,horizonEnd);
     solverDialog = desktop.makeSolverDialog(solver);
 

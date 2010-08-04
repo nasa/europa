@@ -46,6 +46,130 @@ namespace EUROPA
         m_properties[name] = value;
     }
 
+	int EngineConfig::readFromXML(const char* file_name, bool isFile){
+
+		bool loadStat = false;
+		int status = 0;
+		TiXmlElement * xml = 0;
+		TiXmlDocument * m_doc = 0;
+		if(isFile)
+		{
+			m_doc = new TiXmlDocument(file_name);
+			loadStat = m_doc->LoadFile();
+			checkError(!m_doc->Error(), "Invalid or malformed XML file '" << file_name << "' " << m_doc->ErrorDesc());
+		}
+		else
+		{
+			m_doc = new TiXmlDocument();
+			m_doc->Parse(file_name);
+			if(!m_doc->NoChildren())
+				loadStat = true;
+		}
+
+		if(loadStat)
+		{
+			xml = m_doc->RootElement();
+			if (xml == NULL) return 0;
+			if(strcmp((const char *)xml->Value(),"EuropaConfig") == 0)
+			{
+				parseXML(xml);
+				status = 1;
+			}
+			else
+				debugMsg("EngineConfig","Expected <EuropaConfig>, Found: " << (const char *)xml->Value());
+		}
+		else
+		{
+			assert("LOAD FAIL");
+		}
+		delete m_doc;
+		return status;
+
+	}
+
+	void EngineConfig::parseXML(TiXmlNode * pParent){
+		TiXmlNode * pChild = 0;
+		TiXmlNode * pChildEle = 0;
+		const char * comp_name = "";
+		const char * prop_name = "";
+		const char * prop_value = "";
+		while(( pChild = pParent->IterateChildren( pChild ) ))
+		{
+			if( pParent->Type() == TiXmlNode::ELEMENT )
+			{
+				if(strcmp((const char *)pChild->ToElement()->Value(),"Component") == 0
+										&& pChild->ToElement())
+				{
+					comp_name = (const char *)pChild->ToElement()->FirstAttribute()->Value();
+				}
+
+				while((pChildEle = pChild->IterateChildren(pChildEle))
+						&& strcmp((const char *)pChild->ToElement()->FirstChildElement()->Value(),"Property") == 0)
+				{
+					if(pChildEle->FirstChild())
+					{
+						prop_name = (const char *)pChildEle->ToElement()->FirstAttribute()->Value();
+						prop_value = (const char *)pChildEle->FirstChild()->ToText()->Value();
+						if(std::string(prop_name).compare("") != 0)
+						{
+							setProperty(std::string(comp_name).append(".").append(prop_name), std::string(prop_value));
+						}
+					}
+				}
+			}
+
+		}
+	}
+
+	void EngineConfig::writeFromXML(const char* file_name){
+		TiXmlDocument * m_doc = new TiXmlDocument(file_name);
+		TiXmlDeclaration * m_decl;
+		m_decl = new TiXmlDeclaration("1.0", "", "" );
+		m_doc->LinkEndChild(m_decl);
+		TiXmlElement * root = new TiXmlElement("EuropaConfig");
+		m_doc->LinkEndChild(root);
+		TiXmlElement * elePtr = 0;
+		TiXmlElement * propPtr = 0;
+		TiXmlText * textPtr = 0;
+		char * COMPONENT = "Component";
+		std::string  component_nm = "";
+		std::string  property_attrib = "";
+		char *  PROPERTY = "Property";
+		char *  NAME = "name";
+		std::string  value = "";
+		std::map<std::string,std::string>::iterator it;
+		std::map<std::string,std::string>::iterator next;
+		for (it=m_properties.begin() ; it != m_properties.end(); it++ )
+		{
+			if(!component_nm.compare((*it).first.substr(0,(*it).first.find(".")))==0 && (*it).first.length()>0)
+			{
+				component_nm = (*it).first.substr(0,(*it).first.find("."));
+				elePtr = new TiXmlElement(COMPONENT);
+				elePtr->SetAttribute(NAME,component_nm.c_str());
+				root->LinkEndChild(elePtr);
+				propPtr = new TiXmlElement(PROPERTY);
+				elePtr->LinkEndChild(propPtr);
+				property_attrib = (*it).first.substr((*it).first.find(".")+1);
+				propPtr->SetAttribute(NAME,property_attrib.c_str());
+				value = (*it).second;
+				textPtr = new TiXmlText(value.c_str());
+				propPtr->LinkEndChild(textPtr);
+			}else if(component_nm.compare((*it).first.substr(0,(*it).first.find(".")))==0 && (*it).first.length()>0)
+			{
+				propPtr = new TiXmlElement(PROPERTY);
+				elePtr->LinkEndChild(propPtr);
+				property_attrib = (*it).first.substr((*it).first.find(".")+1);
+				propPtr->SetAttribute(NAME,property_attrib.c_str());
+				value = (*it).second;
+				textPtr = new TiXmlText(value.c_str());
+				propPtr->LinkEndChild(textPtr);
+			}
+		}
+		m_doc->SaveFile(file_name);
+		delete m_doc;
+		return;
+	}
+
     EngineBase::EngineBase()
     {
     	m_started = false;

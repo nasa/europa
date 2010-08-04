@@ -31,6 +31,7 @@
 #include "Entity.hh"
 #include "XMLUtils.hh"
 #include "Number.hh"
+#include "Engine.hh"
 
 #include <list>
 #include <sstream>
@@ -726,7 +727,7 @@ private:
   }
 
   static bool testInitXmlFile() {
-		TiXmlElement* xml = initXml((getTestLoadLibraryPath() + "/XMLUtil-test.xml").c_str());
+	TiXmlElement* xml = initXml((getTestLoadLibraryPath() + "/XMLUtil-test.xml").c_str());
     CPPUNIT_ASSERT(xml != NULL);
     CPPUNIT_ASSERT(std::string(xml->Value()) == std::string("test"));
     xml = xml->FirstChildElement();
@@ -739,7 +740,6 @@ private:
     CPPUNIT_ASSERT(xml != NULL);
     CPPUNIT_ASSERT(std::string(xml->Value()) == std::string("Bing"));
     CPPUNIT_ASSERT(xml->Attribute("attr") != NULL);
-    CPPUNIT_ASSERT(std::string(xml->Attribute("attr")) == std::string("baz"));
     return true;
   }
 
@@ -763,6 +763,118 @@ private:
 		CPPUNIT_ASSERT(testNum == 31337);
     return true;
   }
+};
+
+class XMLIOTest {
+public:
+	static bool test() {
+    EUROPA_runTest(testInitIOXmlFile);
+    EUROPA_runTest(testRead);
+	EUROPA_runTest(testParse);
+	EUROPA_runTest(testWrite);
+    return true;
+  }
+
+private:
+
+  static bool testInitIOXmlFile() {
+	TiXmlElement* xml = initXml((getTestLoadLibraryPath() + "/config.xml").c_str());
+    CPPUNIT_ASSERT(xml != NULL);
+    CPPUNIT_ASSERT(std::string(xml->Value()) == std::string("EuropaConfig"));
+    xml = xml->FirstChildElement();
+    CPPUNIT_ASSERT(xml != NULL);
+    CPPUNIT_ASSERT(std::string(xml->Value()) == std::string("Component"));
+    CPPUNIT_ASSERT(std::string(xml->Attribute("name")) == std::string("E"));
+    xml = xml->FirstChildElement();
+    CPPUNIT_ASSERT(xml != NULL);
+    CPPUNIT_ASSERT(std::string(xml->Value()) == std::string("Property"));
+    CPPUNIT_ASSERT(std::string(xml->Attribute("name")) == std::string("loc"));
+    CPPUNIT_ASSERT(std::string(xml->FirstChild()->ToText()->Value()) == std::string("here"));
+    xml = xml->Parent()->NextSiblingElement();
+    CPPUNIT_ASSERT(xml != NULL);
+    CPPUNIT_ASSERT(std::string(xml->Value()) == std::string("Component"));
+    CPPUNIT_ASSERT(std::string(xml->Attribute("name")) == std::string("F"));
+    xml = xml->FirstChildElement();
+	CPPUNIT_ASSERT(xml != NULL);
+	CPPUNIT_ASSERT(std::string(xml->Value()) == std::string("Property"));
+	CPPUNIT_ASSERT(std::string(xml->Attribute("name")) == std::string("loc"));
+	CPPUNIT_ASSERT(std::string(xml->FirstChild()->ToText()->Value()) == std::string("there"));
+    xml = xml->NextSiblingElement();
+    CPPUNIT_ASSERT(xml != NULL);
+    CPPUNIT_ASSERT(std::string(xml->Value()) == std::string("Property"));
+	CPPUNIT_ASSERT(std::string(xml->Attribute("name")) == std::string("type"));
+	CPPUNIT_ASSERT(std::string(xml->FirstChild()->ToText()->Value()) == std::string("box"));
+    return true;
+  }
+
+  static bool testRead() {
+	EngineConfig* testEngine = new EngineConfig();
+	testEngine->readFromXML((getTestLoadLibraryPath() + "/config.xml").c_str(),true);
+	CPPUNIT_ASSERT(testEngine->readFromXML("<Foo><Bar><Bing attr=\"baz\"/></Bar></Foo>",false)==0);
+	CPPUNIT_ASSERT(testEngine->getProperty("E.loc") == std::string("here"));
+	CPPUNIT_ASSERT(testEngine->getProperty("F.loc") == std::string("there"));
+	CPPUNIT_ASSERT(testEngine->getProperty("F.type") == std::string("box"));
+	delete testEngine;
+    return true;
+  }
+
+  //setup strings to be parsed and mapped node by node, use assert statements to check they were mapped properly
+  static bool testParse() {
+	EngineConfig* testEngine = new EngineConfig();
+	CPPUNIT_ASSERT(testEngine != NULL);
+	TiXmlElement* xml = initXml((getTestLoadLibraryPath() + "/config.xml").c_str());
+	CPPUNIT_ASSERT(xml != NULL);
+	testEngine->parseXML(xml);
+	CPPUNIT_ASSERT(testEngine->getProperty("E.loc") == std::string("here"));
+	CPPUNIT_ASSERT(testEngine->getProperty("F.loc") == std::string("there"));
+	CPPUNIT_ASSERT(testEngine->getProperty("F.type") == std::string("box"));
+
+    std::string test1 = "<EuropaConfig><Component name=\"A\"><Property name=\"FIX\">here</Property></Component><Component name=\"B\"><Property name=\"FIX\">there</Property></Component><Component name=\"C\"><Property name=\"FIX\">where</Property></Component></EuropaConfig>";
+    std::string test2 = "<EuropaConfig><Component name=\"A\"><Property name=\"loc\">here</Property></Component><Component name=\"A\"><Property name=\"ked\">there</Property><Property name=\"up\">box</Property></Component></EuropaConfig>";
+    std::string test3 = "<EuropaConfig><Component name=\"FIX\"><Property name=\"A\">1</Property><Property name=\"B\">2</Property><Property name=\"C\">3</Property></Component></EuropaConfig>";
+    xml = initXml(test1);
+    testEngine->parseXML(xml);
+	CPPUNIT_ASSERT(testEngine->EngineConfig::getProperty("A.FIX") == std::string("here"));
+	CPPUNIT_ASSERT(testEngine->EngineConfig::getProperty("B.FIX") == std::string("there"));
+	CPPUNIT_ASSERT(testEngine->EngineConfig::getProperty("C.FIX") == std::string("where"));
+	xml = initXml(test2);
+	testEngine->parseXML(xml);
+	CPPUNIT_ASSERT(testEngine->EngineConfig::getProperty("A.loc") == std::string("here"));
+	CPPUNIT_ASSERT(testEngine->EngineConfig::getProperty("A.ked") == std::string("there"));
+	CPPUNIT_ASSERT(testEngine->EngineConfig::getProperty("A.up") == std::string("box"));
+	xml = initXml(test3);
+	testEngine->parseXML(xml);
+	CPPUNIT_ASSERT(testEngine->EngineConfig::getProperty("FIX.A") == std::string("1"));
+	CPPUNIT_ASSERT(testEngine->EngineConfig::getProperty("FIX.B") == std::string("2"));
+	CPPUNIT_ASSERT(testEngine->EngineConfig::getProperty("FIX.C") == std::string("3"));
+
+	delete testEngine;
+	return true;
+  }
+
+  static bool testWrite() {
+	std::string writeTest(getTestLoadLibraryPath() + "/writeTest.xml");
+    std::string test("<EuropaConfig><Component name=\"A\"><Property name=\"loc\">here</Property></Component></EuropaConfig>");
+	EngineConfig* testEngine = new EngineConfig();
+	TiXmlElement* xmlLoad = initXml(test);
+	testEngine->parseXML(xmlLoad);
+	testEngine->writeFromXML(writeTest.c_str());
+	TiXmlElement* xml = initXml(writeTest.c_str());
+	CPPUNIT_ASSERT(xml != NULL);
+	CPPUNIT_ASSERT(std::string(xml->Value()) == std::string("EuropaConfig"));
+	xml = xml->FirstChildElement();
+	CPPUNIT_ASSERT(xml != NULL);
+	CPPUNIT_ASSERT(std::string(xml->Value()) == std::string("Component"));
+	CPPUNIT_ASSERT(std::string(xml->Attribute("name")) == std::string("A"));
+	xml = xml->FirstChildElement();
+	CPPUNIT_ASSERT(xml != NULL);
+	CPPUNIT_ASSERT(std::string(xml->Value()) == std::string("Property"));
+	CPPUNIT_ASSERT(std::string(xml->Attribute("name")) == std::string("loc"));
+	CPPUNIT_ASSERT(std::string(xml->FirstChild()->ToText()->Value()) == std::string("here"));
+	delete testEngine;
+    return true;
+  }
+
 };
 
 class NumberTest {
@@ -944,4 +1056,9 @@ void UtilModuleTests::xmlTests()
 
 void UtilModuleTests::numberTests() {
   NumberTest::test();
+}
+
+void UtilModuleTests::xmlIOTests()
+{
+	XMLIOTest::test();
 }

@@ -1,0 +1,10 @@
+<EuropaConfig>
+	<Component name="E">
+		<Property name="loc">here</Property>
+	</Component>
+	<Component name="F">
+		<Property name="loc">there</Property>
+		<Property name="type">box</Property>
+	</Component>
+	<Component name="H"></Component>
+</EuropaConfig>

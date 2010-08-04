@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include "Id.hh"
+#include "tinyxml.h"
 
 namespace EUROPA {
 
@@ -53,6 +54,9 @@ namespace EUROPA {
 
       const std::string& getProperty(const std::string& name) const;
       void setProperty(const std::string& name,const std::string& value);
+      int readFromXML(const char* file_name, bool isFile);
+	  void writeFromXML(const char* file_name);
+	  void parseXML(TiXmlNode * pParent);
 
     protected:
       std::map<std::string,std::string> m_properties;

@@ -290,6 +290,8 @@ namespace EUROPA {
     public:
       const std::string& getProperty(const std::string& name) const;
       void setProperty(const std::string& name,const std::string& value);
+      void readFromXML(const char* file_name, bool isFile);
+      void writeFromXML(const char* file_name);
   };
 
 

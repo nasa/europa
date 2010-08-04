@@ -47,18 +47,15 @@ bool solve(const char* plannerConfig,
            int maxSteps)
 {
     try {
-
-      {
+      
           PSEngine* engine = PSEngine::makeInstance();
           engine->start();
           engine->executeScript("nddl",txSource,true/*isFile*/);
-
           PSSolver* solver = engine->createSolver(plannerConfig);
           runSolver(solver,startHorizon,endHorizon,maxSteps);
-          delete solver;
-          std::cout << engine->planDatabaseToString();
-          delete engine;
-      }
+	  std::cout << engine->planDatabaseToString() << std::endl;
+          delete solver;          
+          delete engine;      
 
       return true;
     }
