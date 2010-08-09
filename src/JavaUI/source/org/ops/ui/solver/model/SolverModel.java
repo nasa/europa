@@ -19,16 +19,15 @@ public class SolverModel {
 
 	private ArrayList<StepStatisticsRecord> stepStatistics = new ArrayList<StepStatisticsRecord>();
 
-	public SolverModel() {
+	public synchronized void configure(File file, File configFile,
+			int horizonStart, int horizonEnd) {
 		if (engine != null)
 			throw new IllegalStateException("Reinitializing solver model");
 
 		this.engine = PSEngine.makeInstance();
 		this.engine.start();
-	}
 
-	public synchronized void configure(File file, File configFile,
-			int horizonStart, int horizonEnd) {
+		
 		// NDDL files should be loaded before solver is created
 		loadNddlFile(file);
 
@@ -59,7 +58,7 @@ public class SolverModel {
 
 	/** @return true if the engine is up and running */
 	public boolean isConfigured() {
-		return engine != null;
+		return solver != null;
 	}
 
 	public PSEngine getEngine() {
