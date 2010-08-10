@@ -60,14 +60,30 @@ def compareFiles(baseFile_path, testTempFile):
   testTempFile.seek(0)    
 ## only lines that have changed
   testoutput = []
-  for line in difflib.context_diff(baseFile.readlines(), testTempFile.readlines()):
-    testoutput += [line]
-  print ''.join(testoutput)
+  testTempFile.seek(0)    
+  baseFile.seek(0)
+  m_base = baseFile.readlines()
+  clean_base = []
+  m_temp = testTempFile.readlines()  
+  clean_temp = []
+  ignore_chars = '\n\t '
+  for line in m_base:
+    if not line == '\n':
+      clean_base += [line.strip(ignore_chars)]
+  for line in m_temp:  
+    if not line == '\n':
+      clean_temp += [line.strip(ignore_chars)]      	
+  for line in difflib.context_diff(clean_base, clean_temp):
+    testoutput += [line]   
   
 ##  all lines diff  
 #  diff = difflib.ndiff(baseFile.readlines(), testTempFile.readlines())
 #  print ''.join(diff)
   baseFile.close()
+  if len(testoutput) > 1:
+    for line in difflib.context_diff(m_base, m_temp):
+      print line
+    assert ( len(testoutput) == 1 )
 
 def parsePlanOutput(outputFile, testTempFile):
   """
