@@ -8,24 +8,14 @@
       <pathelement location="ext/ant/lib/ant-contrib-1.0b3.jar"/>
     </classpath>
   </taskdef>
-  <target name="init">
+  <target name="init" depends="findSystem">
     <property environment="env"/>
 
     <property name="europa.version" value="2.4"/> 	
 
     <!-- load local overrides -->
     <property file="${user.home}/.ant.plasma.properties"/>
-	
-  	<exec executable="uname" outputproperty="uname.s">
-      <arg value="-s"/>
-    </exec>
-    <exec executable="uname" outputproperty="uname.a">
-      <arg value="-a"/>
-    </exec>
-    <exec executable="which" outputproperty="gcc.location">
-      <arg value="gcc"/>
-    </exec>
-  	
+		
     <if>
     	<equals arg1="${jam.variant}" arg2="OPTIMIZED"/>
     	<then>
@@ -38,6 +28,12 @@
     	</else>
     </if>	
   	
+	<if>
+	  <contains string="${ver}" substring="Windows" casesensitive="false"/>
+	    <then>
+	    <property name="local.os" value="WindowsVS"/>
+		</then>
+	</if>
 
     <if>
       <or>
@@ -80,7 +76,7 @@
               <arg value="${env.JAVA_HOME}"/>
 	    </exec>
             <property name="jam.libraries" value="STATIC"/>
-	    <property name="jam.misc" value="-sOS=CYGWIN -sNOCYGWIN=TRUE"/>
+	    <property name="jam.misc" value="-sOS=CYGWIN" />
 	  </then>
 	  <else>
 	    <!-- Windows-Cygwin -->
@@ -184,7 +180,17 @@
     <property name="dir.dist" value="dist"/>
     <property name="dir.dist.base" location="${dir.dist}/europa"/>
     <property name="file.europa-dist" value="europa-${europa.version}-${local.os}.zip"/>
-    <property name="file.europa-static-libs" value="europa-${europa.version}-${local.os}-static-libs.zip"/>
+    <property name="file.europa-static-libs" value="europa-${europa.version}-${local.os}-static-libs.zip"/>	
+	<if>      
+      <contains string="${ver}" substring="Windows" casesensitive="false"/>
+      <then>
+        <condition property="msbuild.dir"
+                   value="${msbuild.dir}"
+                   else="C:\\Windows\\Microsoft.NET\\Framework\\v3.5\\">
+          <isset property="msbuild.dir"/>
+        </condition>
+      </then>
+    </if>	
     <property name="jam.exec" value="jam"/>
     <property name="jam.libraries" value="SHARED"/>
     <property name="jam.variant" value="DEV"/>
@@ -209,16 +215,50 @@
     </if>
   </target> <!-- init -->
 
+	<target name="findSystem">
+		<if>		
+		  <contains string="${os.name}" substring="Windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
+          <then>
+		    <property name="local.os" value="WindowsVS"/>
+			<property name="ver" value="WindowsVS"/>
+      	  </then>
+		<else>
+			<exec executable="uname" outputproperty="uname.s">
+			  <arg value="-s"/>
+			</exec>
+			<exec executable="uname" outputproperty="uname.a">
+			  <arg value="-a"/>
+			</exec>	
+			<exec executable="which" outputproperty="gcc.location">
+			  <arg value="gcc"/>
+			</exec>
+		</else>
+		</if>
+	</target>  
+  
   <target name="print-env" depends="init" 
       description="Debug target: Prints the initialized environment" >
-    <exec executable="env"/> 
+	  <if>
+		<contains string="${ver}" substring="Windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
+		<then>
+			<exec executable="cmd"> 
+				<arg line="/c set"/>
+			</exec>
+		</then>
+		<else>
+		<exec executable="env"/> 
+		</else>
+		</if>
   </target>
 
   <target name="test-ant" depends="init,print-env" 
       description="Debug target: Tests that this build file can call 'ant' as an executable.">
     <echo message="testing ant exec"/>
     <if>
-      <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
+	  <or>
+      <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>	  
+	  <contains string="${ver}" substring="Windows" casesensitive="false"/>
+	  </or>
       <then>
         <exec executable="cmd" dir="c:\" failonerror="true">
           <arg value="/c"/>
@@ -242,61 +282,80 @@
   </target>
 
   <target name="clean" depends="init">
-    <delete dir="${dir.dist}"/>
-    <exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
-      <arg line="clean-all"/>
-      <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
-    </exec>
+	<delete dir="${dir.dist}"/>
+	<if>		
+		<contains string="${ver}" substring="Windows" casesensitive="false"/>
+		<then>
+			<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
+			  <arg line="/target:clean /p:Platform=Win32 /p:Configuration=Debug"/>
+			</exec>
+		</then>
+		<else>			  
+			<exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
+			  <arg line="clean-all"/>
+			  <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
+			</exec>				
+		</else>
+	</if>
 	<ant dir="src/JavaUI" description="Clean up Java part" target="clean.all" />
-    <delete dir="${dir.build}"/>
+	<delete dir="${dir.build}"/>
   </target>
 
   <target name="build" depends="init">
-    <echo message="jam ${jam.opts} -j${jam.num.cores} build"/>
-    <exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
-      <arg line="${jam.opts} -j${jam.num.cores} build"/>
-      <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
-      <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
-      <!-- This is set only for Windows, but other OSs don't care anyway -->
-      <env key="CYG_JAVA_HOME" value="${local.env.CYG_JAVA_HOME}" />
-    </exec>
-  	
-    <if>
-      <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
-      <then>
-        <echo message="Building System dlls for Windows."/>
-        <if>
-          <equals arg1="${jam.variant}" arg2="OPTIMIZED"/>
-          <then>
-      	    <property name="s" value="_o"/>
-          </then>
-        </if>
-        <property name="s" value="_g"/>
-        <echo message="Suffix ${s}" />
-    	
-        <!-- libANML_?.a disappeared? -mno-cygwin libAntlr3${s}.a -->
-    	<property name="cmd" value="g++ -shared 
-	        -Wl,-v
-		-oSystem${s}.dll 
-      		-Wl,--add-stdcall-alias 
-		-Wl,--output-def=System${s}.dll.def
-		-Wl,--out-implib=System${s}.a
-		-Wl,--whole-archive libSystem${s}.a libSolvers${s}.a libResource${s}.a libNDDL${s}.a 
-		      	            libRulesEngine${s}.a libTemporalNetwork${s}.a libPlanDatabase${s}.a 
-      		                    libConstraintEngine${s}.a libUtils${s}.a libTinyXml${s}.a  -lws2_32
-      		-Wl,--no-whole-archive -lpthread -lantlr3c
-		"/>
-		<exec executable="bash" dir="${dir.plasma}/build/lib">
-		  <arg value="-c" />
-          <arg value="${cmd}" />
-        </exec>
-      </then>
-    </if>  	
-  	
-	<ant dir="src/JavaUI" description="Build Swing version of Java UI" target="build.swing">
-  		<property name="europa.dir" value="${local.env.PLASMA_HOME}" />
-		<property name="psengine.jar.path" value="${local.env.PLASMA_HOME}/build/lib" />
-	</ant>
+  <if>		
+		<contains string="${ver}" substring="WindowsVS" casesensitive="false"/>
+		<then>
+			<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
+			  <arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug"/>
+			</exec>
+		</then>
+		<else>
+				<echo message="jam ${jam.opts} -j${jam.num.cores} build"/>
+				<exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
+				  <arg line="${jam.opts} -j${jam.num.cores} build"/>
+				  <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
+				  <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
+				  <!-- This is set only for Windows, but other OSs don't care anyway -->
+				  <env key="CYG_JAVA_HOME" value="${local.env.CYG_JAVA_HOME}" />
+				</exec>
+				
+				<if>
+				  <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
+				  <then>
+					<echo message="Building System dlls for Windows."/>
+					<if>
+					  <equals arg1="${jam.variant}" arg2="OPTIMIZED"/>
+					  <then>
+						<property name="s" value="_o"/>
+					  </then>
+					</if>
+					<property name="s" value="_g"/>
+					<echo message="Suffix ${s}" />
+					
+					<!-- libANML_?.a disappeared? -mno-cygwin libAntlr3${s}.a -->
+					<property name="cmd" value="g++ -shared 
+						-Wl,-v
+					-oSystem${s}.dll 
+						-Wl,--add-stdcall-alias 
+					-Wl,--output-def=System${s}.dll.def
+					-Wl,--out-implib=System${s}.a
+					-Wl,--whole-archive libSystem${s}.a libSolvers${s}.a libResource${s}.a libNDDL${s}.a 
+										libRulesEngine${s}.a libTemporalNetwork${s}.a libPlanDatabase${s}.a 
+											libConstraintEngine${s}.a libUtils${s}.a libTinyXml${s}.a  -lws2_32
+						-Wl,--no-whole-archive -lpthread -lantlr3c
+					"/>
+					<exec executable="bash" dir="${dir.plasma}/build/lib">
+					  <arg value="-c" />
+					  <arg value="${cmd}" />
+					</exec>
+				  </then>
+				</if>
+				<ant dir="src/JavaUI" description="Build Swing version of Java UI" target="build.swing">
+					<property name="europa.dir" value="${local.env.PLASMA_HOME}" />
+					<property name="psengine.jar.path" value="${local.env.PLASMA_HOME}/build/lib" />
+				</ant>			
+		</else>
+	</if>									
   </target>
 
   <target name="jam-target" depends="init">
@@ -311,11 +370,21 @@
   </target>
 
   <target name="test" depends="build, print-env">
-    <exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
-      <arg line="${jam.opts} run-all-tests"/>
-      <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
-      <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
-    </exec>
+	<if>
+		<contains string="${ver}" substring="Windows" casesensitive="false"/>
+		<then>
+			<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
+			  <arg line="/target:test /p:Platform=Win32 /p:Configuration=Debug"/>
+			</exec>
+		</then>
+		<else>
+			<exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
+			  <arg line="${jam.opts} run-all-tests"/>
+			  <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
+			  <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
+			</exec>
+		</else>
+	</if>
   </target>
 
   <!-- This target assumes that PLASMA and PlanWorks have already been built so that all the products are in place -->
