@@ -6,7 +6,6 @@
 #include "PSEngineImpl.hh"
 
 #include "LabelStr.hh"
-#include "Pdlfcn.hh"
 #include "Schema.hh"
 #include "Rule.hh"
 

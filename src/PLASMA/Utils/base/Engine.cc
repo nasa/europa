@@ -4,11 +4,12 @@
 #include "LabelStr.hh"
 #include "Entity.hh"
 #include "Module.hh"
-#include "Pdlfcn.hh"
 
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+
+#include <dlfcn.h>
 
 namespace EUROPA
 {
@@ -131,11 +132,11 @@ namespace EUROPA
 		TiXmlElement * elePtr = 0;
 		TiXmlElement * propPtr = 0;
 		TiXmlText * textPtr = 0;
-		char * COMPONENT = "Component";
+		const char * COMPONENT = "Component";
 		std::string  component_nm = "";
 		std::string  property_attrib = "";
-		char *  PROPERTY = "Property";
-		char *  NAME = "name";
+		const char *  PROPERTY = "Property";
+		const char *  NAME = "name";
 		std::string  value = "";
 		std::map<std::string,std::string>::iterator it;
 		std::map<std::string,std::string>::iterator next;
@@ -286,15 +287,15 @@ namespace EUROPA
 	{
 		check_runtime_error(m_started,"Engine has not been started");
 
-		void* libHandle = p_dlopen(moduleFileName.c_str(), RTLD_NOW);
+		void* libHandle = dlopen(moduleFileName.c_str(), RTLD_NOW);
 		checkRuntimeError(libHandle != NULL,
-				"Error opening module " << moduleFileName << ": " << p_dlerror());
+				"Error opening module " << moduleFileName << ": " << dlerror());
 
 		ModuleId (*fcn_module)();
-		fcn_module = (ModuleId (*)()) p_dlsym(libHandle, "initializeModule");
+		fcn_module = (ModuleId (*)()) dlsym(libHandle, "initializeModule");
 		checkError(fcn_module != NULL,
 				"Error locating symbol 'initializeModule' in " << moduleFileName << ": " <<
-				p_dlerror());
+				dlerror());
 
 		ModuleId module = (*fcn_module)();
 		addModule(module);
