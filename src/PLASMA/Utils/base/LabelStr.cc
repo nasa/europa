@@ -1,6 +1,7 @@
 #include "Debug.hh"
 #include "LabelStr.hh"
 #include "Error.hh"
+#include "Mutex.hh"
 #include "Utils.hh"
 #include <string.h>
 
@@ -119,6 +120,7 @@ namespace EUROPA {
   }
 
   edouble LabelStr::getKey(const std::string& label) {
+    MutexGrabber mg(LabelStrMutex());
     
     static edouble sl_counter = EPSILON;
 
@@ -147,6 +149,7 @@ namespace EUROPA {
   }
 
   const std::string& LabelStr::getString(edouble key){
+    MutexGrabber mg(LabelStrMutex());
     std::map< edouble, std::string >::const_iterator it = stringFromKeys().find(key);
     check_error(it != stringFromKeys().end());
     const std::string& toRet = it->second;
@@ -154,11 +157,13 @@ namespace EUROPA {
   }
 
   bool LabelStr::isString(edouble key) {
+    MutexGrabber mg(LabelStrMutex());
     bool toRet = (stringFromKeys().find(key) != stringFromKeys().end());
     return toRet;
   }
 
   bool LabelStr::isString(const std::string& candidate){
+    MutexGrabber mg(LabelStrMutex());
     bool toRet = (keysFromString().find(candidate) != keysFromString().end());
     return toRet;
   }

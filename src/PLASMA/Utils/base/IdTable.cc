@@ -15,6 +15,7 @@
 #include "CommonDefs.hh"
 #include "Debug.hh"
 #include "LabelStr.hh"
+#include "Mutex.hh"
 #include "Entity.hh"
 
 /**
@@ -43,6 +44,12 @@ namespace EUROPA {
     return LabelStr(entry.second);
   }
 
+  pthread_mutex_t& IdTableMutex()
+  {
+      static pthread_mutex_t sl_mutex = PTHREAD_MUTEX_INITIALIZER;
+      return sl_mutex;
+  }
+
   IdTable::IdTable() {
   }
 
@@ -54,14 +61,17 @@ namespace EUROPA {
     return(sl_instance);
   }
   unsigned int IdTable::size() {
+    MutexGrabber mg(IdTableMutex());
     return(getInstance().m_collection.size());
   }
 
   bool IdTable::allocated(unsigned long int id) {
+    MutexGrabber mg(IdTableMutex());
     return(getInstance().m_collection.find(id) != getInstance().m_collection.end());
   }
 
   unsigned int IdTable::getKey(unsigned long int id) {
+    MutexGrabber mg(IdTableMutex());
     debugMsg("IdTable:getKey", "Searching for key for " << std::hex << id << std::dec);
     std::map<unsigned long int, std::pair<unsigned int,edouble> >::iterator it = getInstance().m_collection.find(id);
     if (it != getInstance().m_collection.end())
@@ -71,6 +81,7 @@ namespace EUROPA {
   }
 
   unsigned int IdTable::insert(unsigned long int id, const char* baseType) {
+    MutexGrabber mg(IdTableMutex());
     static unsigned int sl_nextId(1);
     debugMsg("IdTable:insert", "id,key:" << std::hex << id << std::dec << ", " << sl_nextId << ")");
 
@@ -92,6 +103,7 @@ namespace EUROPA {
   }
 
   void IdTable::remove(unsigned long int id) {
+    MutexGrabber mg(IdTableMutex());
     static unsigned int sl_key;
     std::map<unsigned long int, std::pair<unsigned int,edouble> >::iterator it = getInstance().m_collection.find(id);    
 
@@ -110,6 +122,7 @@ namespace EUROPA {
   }
 
   void IdTable::printTypeCnts(std::ostream& os) {
+    MutexGrabber mg(IdTableMutex());
     os << "Id instances by type:\n";
     for (std::map<std::string, unsigned int>::iterator it = getInstance().m_typeCnts.begin();
          it != getInstance().m_typeCnts.end();
@@ -120,6 +133,7 @@ namespace EUROPA {
 
   void IdTable::output(std::ostream& os) {
     printTypeCnts(os);
+    MutexGrabber mg(IdTableMutex());
     os << "Id Contents:";
     for (std::map<unsigned long int, std::pair<unsigned int,edouble> >::iterator it = getInstance().m_collection.begin();
          it != getInstance().m_collection.end();
