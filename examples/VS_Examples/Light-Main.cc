@@ -21,15 +21,15 @@ void printFlaws(int it, PSList<std::string>& flaws);
 
 int main(int argc, const char ** argv)
 {
-  //if (argc < 3) {
-  //  std::cerr << "Must provide initial transactions file." << std::endl;
-  //  return -1;
-  //}
+  if (argc < 3) {
+    std::cerr << "Must provide initial transactions file." << std::endl;
+    return -1;
+  }
 
-  //const char* txSource = argv[1];
-  //const char* plannerConfig = argv[2];
-  const char* txSource = "Light-initial-state.nddl";
-  const char* plannerConfig = "PlannerConfig.xml";
+  const char* txSource = argv[1];
+  const char* plannerConfig = argv[2];
+  //const char* txSource = "Light-initial-state.nddl";
+  //const char* plannerConfig = "PlannerConfig.xml";
 
   solve(
       plannerConfig,

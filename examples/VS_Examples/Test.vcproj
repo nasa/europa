@@ -65,11 +65,16 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="$(TargetDir)\ConstraintEngine.lib $(TargetDir)\NDDL.lib $(TargetDir)\PlanDatabase.lib $(TargetDir)\Resource.lib $(TargetDir)\RulesEngine.lib $(TargetDir)\Solvers.lib $(TargetDir)\System.lib $(TargetDir)\TemporalNetwork.lib $(TargetDir)\TinyXml.lib $(TargetDir)\Utils.lib"
 				OutputFile="$(PLASMA_HOME)\build\lib\$(ConfigurationName)\$(ProjectName).exe"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
 				SubSystem="1"
+				TurnOffAssemblyGeneration="false"
+				ImportLibrary=""
 				TargetMachine="1"
+				CLRImageType="0"
 			/>
 			<Tool
 				Name="VCALinkTool"

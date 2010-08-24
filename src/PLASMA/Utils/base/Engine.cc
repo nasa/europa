@@ -4,12 +4,17 @@
 #include "LabelStr.hh"
 #include "Entity.hh"
 #include "Module.hh"
+#ifdef _MSC_VER
+#include "Pdlfcn.hh"
+#else
+#include <dlfcn.h>
+#endif
 
 #include <fstream>
 #include <sstream>
 #include <algorithm>
 
-#include <dlfcn.h>
+
 
 namespace EUROPA
 {
@@ -287,6 +292,17 @@ namespace EUROPA
 	{
 		check_runtime_error(m_started,"Engine has not been started");
 
+	#ifdef _MSC_VER
+		void* libHandle = p_dlopen(moduleFileName.c_str(), RTLD_NOW);
+		checkRuntimeError(libHandle != NULL,
+				"Error opening module " << moduleFileName << ": " << p_dlerror());
+
+		ModuleId (*fcn_module)();
+		fcn_module = (ModuleId (*)()) p_dlsym(libHandle, "initializeModule");
+		checkError(fcn_module != NULL,
+				"Error locating symbol 'initializeModule' in " << moduleFileName << ": " <<
+				p_dlerror());
+	#else
 		void* libHandle = dlopen(moduleFileName.c_str(), RTLD_NOW);
 		checkRuntimeError(libHandle != NULL,
 				"Error opening module " << moduleFileName << ": " << dlerror());
@@ -296,6 +312,7 @@ namespace EUROPA
 		checkError(fcn_module != NULL,
 				"Error locating symbol 'initializeModule' in " << moduleFileName << ": " <<
 				dlerror());
+	#endif
 
 		ModuleId module = (*fcn_module)();
 		addModule(module);

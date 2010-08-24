@@ -6,6 +6,10 @@
 #include "PSEngineImpl.hh"
 
 #include "LabelStr.hh"
+#ifdef _MSC_VER
+#include "Pdlfcn.hh"
+#endif
+
 #include "Schema.hh"
 #include "Rule.hh"
 

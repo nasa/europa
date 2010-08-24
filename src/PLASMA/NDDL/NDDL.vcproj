@@ -361,7 +361,7 @@
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(PLASMA_HOME)\vc\NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\vc\RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\vc\TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_AntlrPropertiesCLR_x64.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_AntlrPropertiesCLR_x64.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="1"
 			>
