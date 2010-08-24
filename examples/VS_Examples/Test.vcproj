@@ -24,7 +24,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ResourceProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_SolversProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_DlfcnProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_SystemProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PthreadProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_AntlrProperties.vsprops"
+			InheritedPropertySheets="..\..\src\PLASMA\VS_UtilsProperties.vsprops;..\..\src\PLASMA\VS_ConstraintEngineProperties.vsprops;..\..\src\PLASMA\VS_PlanDatabaseProperties.vsprops;..\..\src\PLASMA\VS_RulesEngineProperties.vsprops;..\..\src\PLASMA\VS_TinyXMLProperties.vsprops;..\..\src\PLASMA\VS_ResourceProperties.vsprops;..\..\src\PLASMA\VS_TemporalNetworkProperties.vsprops;..\..\src\PLASMA\VS_SolversProperties.vsprops;..\..\src\PLASMA\VS_NddlProperties.vsprops;..\..\src\PLASMA\VS_DlfcnProperties.vsprops;..\..\src\PLASMA\VS_SystemProperties.vsprops;..\..\src\PLASMA\VS_PthreadProperties.vsprops;..\..\src\PLASMA\VS_AntlrProperties.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
