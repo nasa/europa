@@ -523,21 +523,41 @@
   <target name="zip-dist" depends="dist"
         description="Puts distribution in a single zip file, excludes static libs">
     <delete file="${dir.dist}/${file.europa-dist}"/>
-    <zip destfile="${dir.dist}/${file.europa-dist}">
-		<zipfileset dir="${dir.dist.base}/bin" prefix="bin" dirmode="775" filemode="775"/>
-        <zipfileset dir="${dir.dist.base}/config" prefix="config" dirmode="775" filemode="664"/>
-        <zipfileset dir="${dir.dist.base}/examples" prefix="examples" dirmode="775" filemode="664"/>
-        <zipfileset dir="${dir.dist.base}/include" prefix="include" dirmode="775" filemode="664"/>
-        <zipfileset dir="${dir.dist.base}/lib"  excludes="*.a" prefix="lib" dirmode="775" filemode="664"/>
-    </zip>
+	<if>      
+      <contains string="${ver}" substring="Windows" casesensitive="false"/>
+      <then>
+		<echo>Dynamic libraries called here</echo>
+	</then>
+	<else>
+		<zip destfile="${dir.dist}/${file.europa-dist}">
+			<zipfileset dir="${dir.dist.base}/bin" prefix="bin" dirmode="775" filemode="775"/>
+			<zipfileset dir="${dir.dist.base}/config" prefix="config" dirmode="775" filemode="664"/>
+			<zipfileset dir="${dir.dist.base}/examples" prefix="examples" dirmode="775" filemode="664"/>
+			<zipfileset dir="${dir.dist.base}/include" prefix="include" dirmode="775" filemode="664"/>
+			<zipfileset dir="${dir.dist.base}/lib"  excludes="*.a" prefix="lib" dirmode="775" filemode="664"/>
+		</zip>
+	</else>
+	</if>
   </target>
 		
   <target name="zip-static-libs" depends="dist"
   	description="create a zip file for static libs only">
     <delete file="${dir.dist}/${file.europa-static-libs}"/>
-    <zip destfile="${dir.dist}/${file.europa-static-libs}">
-        <zipfileset dir="${dir.dist.base}/lib" includes="*.a" prefix="lib" dirmode="775" filemode="664"/>
-    </zip>
+	<if>      
+		<contains string="${ver}" substring="Windows" casesensitive="false"/>
+		<then>
+			<echo>${dir.dist.base}\lib</echo>
+			<zip destfile="${dir.dist}/${file.europa-static-libs}">
+				<zipfileset dir="${dir.dist.base}/lib" includes="*.lib" dirmode="775" filemode="664"/>
+				<zipfileset dir="${dir.dist.base}/lib/Debug" includes="*.lib" dirmode="775" filemode="664"/>
+			</zip>
+		</then>
+		<else>
+			<zip destfile="${dir.dist}/${file.europa-static-libs}">
+				<zipfileset dir="${dir.dist.base}/lib" includes="*.a" prefix="lib" dirmode="775" filemode="664"/>
+			</zip>
+		</else>
+	</if>
   </target>
   
   <target name="run-diff" if="diff.allow">
