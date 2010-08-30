@@ -136,8 +136,6 @@ namespace EUROPA {
     edouble key = sl_counter;
     sl_counter = sl_counter + 2*EPSILON;
 
-    check_error(key < 1.0, "More strings allocated than permitted");
-    
     handleInsertion(key, label);
     return(key);
   }
