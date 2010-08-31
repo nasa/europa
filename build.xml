@@ -31,8 +31,13 @@
 	<if>
 	  <contains string="${ver}" substring="Windows" casesensitive="false"/>
 	    <then>
-	    <property name="local.os" value="WindowsVS"/>
-
+			<property name="local.os" value="WindowsVS"/>
+			<exec executable="cmd"> 
+				<arg line="/c setX PLASMA_HOME ${basedir}"/>
+			</exec>
+			<exec executable="cmd"> 
+				<arg line="/c setX EUROPA_HOME ${basedir}\dist\europa"/>
+			</exec>			
 		</then>
 	</if>
 
@@ -409,7 +414,7 @@
 				<available file="${env.PLASMA_THIRD_PARTY}\visualStudio\pthreads-w32-2-8-0-release\lib" filepath="${env.PLASMA_THIRD_PARTY}\visualStudio\pthreads-w32-2-8-0-release\lib"/>
 			</condition>	
 			<property name="local.env.PATH.name" value="Path"/>
-			<property name="local.env.PATH.value" value="${basedir}\build\lib\Debug;${env.PLASMA_THIRD_PARTY}\visualStudio\pthreads-w32-2-8-0-release\lib;${basedir}\dist\europa\lib\Debug"/>			
+			<property name="local.env.PATH.value" value="${basedir}\build\lib\Debug;${basedir}\dist\europa\build\lib\Debug;${env.PLASMA_THIRD_PARTY}\visualStudio\pthreads-w32-2-8-0-release\lib;${basedir}\dist\europa\lib\Debug;"/>			
 			<echo>test found: ${test.exists}</echo>
 			<echo>pthreads found: ${pthreads.exists}</echo>
 			<echo>Path=${env.Path}</echo>
@@ -417,11 +422,10 @@
 			<echo>PLASMA_HOME=${local.env.PLASMA_HOME}</echo>
 			<echo>PLASMA_THIRD_PARTY=${env.PLASMA_THIRD_PARTY}</echo>
 			<echo>Local.Path=${local.env.PATH.value}</echo>
-			<property name="test.dir" value="${env.PLASMA_HOME}\\build\\lib\\Debug"/>	
-				<!-- <exec executable="${basedir}\\build\\lib\\Debug\\Test.exe" dir="examples\\VS_Examples" failonerror="true" searchpath="true"> -->
-				<exec executable="${basedir}\\build\\lib\\Debug\\Test.exe" dir="examples\\VS_Examples" failonerror="true" searchpath="true">
+			<property name="test.dir" value="${env.PLASMA_HOME}\\build\\lib\\Debug"/>								
+				<exec executable="${basedir}\\build\\lib\\Debug\\Test" dir="examples\\VS_Examples" failonerror="true" searchpath="true">					
 					<arg line="Light-initial-state.nddl PlannerConfig.xml"/>				
-					<env key="${local.env.PATH.name}" value="${local.env.PATH.value}"/>
+					<env key="PATH" path="${env.path}:${env.Path}:${local.env.PATH.value}"/>
 				</exec>
 		</then>
 		<else>
