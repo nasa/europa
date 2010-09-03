@@ -405,13 +405,18 @@ namespace EUROPA
     if(m_dirty == false)
       return false;
 
-    condDebugMsg(!m_relaxed.empty(), "ConstraintEngine:pending", "Relaxed.");
+    bool relaxed = false;
+    for(std::set<ConstrainedVariableId>::const_iterator it = m_relaxed.begin(); 
+	it != m_relaxed.end() && !relaxed; ++it) {
+      relaxed = (*it)->hasActiveConstraint();
+    }
+    condDebugMsg(relaxed, "ConstraintEngine:pending", "Relaxed.");
     for(std::set<ConstrainedVariableId>::const_iterator it = m_relaxed.begin(); it != m_relaxed.end(); ++it) {
       debugMsg("ConstraintEngine:pending", "Relaxed var: " << (*it)->toLongString());
     }
     condDebugMsg(provenInconsistent(), "ConstraintEngine:pending", "Proven inconsistent.");
     condDebugMsg(constraintConsistent(), "ConstraintEngine:pending", "Constraint consistent.");
-    return (!m_relaxed.empty() || (!provenInconsistent() && !constraintConsistent()));
+    return (relaxed || (!provenInconsistent() && !constraintConsistent()));
   }
 
   bool ConstraintEngine::isPropagating() const {
