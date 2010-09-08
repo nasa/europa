@@ -324,7 +324,7 @@
 			  </then>
 			  <else>
 				<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
-					<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug src\PLASMA\EuropaFullSystemDll.sln"/>
+					<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug EuropaDll.sln"/>
 					<env key="PLASMA_HOME" value="${basedir}"/>
 					<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>
 				</exec>
@@ -418,13 +418,15 @@
 			</condition>	
 			<property name="local.env.PATH.name" value="Path"/>
 			<property name="local.env.PATH.value" value="${basedir}\build\lib\Debug;${basedir}\dist\europa\build\lib\Debug;${env.PLASMA_THIRD_PARTY}\visualStudio\pthreads-w32-2-8-0-release\lib;${basedir}\dist\europa\lib\Debug;"/>			
+			<!--
 			<echo>test found: ${test.exists}</echo>
 			<echo>pthreads found: ${pthreads.exists}</echo>
 			<echo>Path=${env.Path}</echo>
 			<echo>${local.env.PATH.name}=${local.env.PATH.value}</echo>
 			<echo>PLASMA_HOME=${local.env.PLASMA_HOME}</echo>
-			<echo>PLASMA_THIRD_PARTY=${env.PLASMA_THIRD_PARTY}</echo>
+			<echo>PLASMA_THIRD_PARTY=${env.PLASMA_THIRD_PARTY}</echo>			
 			<echo>Local.Path=${local.env.PATH.value}</echo>
+			-->
 			<property name="test.dir" value="${env.PLASMA_HOME}\\build\\lib\\Debug"/>								
 				<exec executable="${basedir}\\build\\lib\\Debug\\Test" dir="examples\\VS_Examples" failonerror="true" searchpath="true">					
 					<arg line="Light-initial-state.nddl PlannerConfig.xml"/>				
@@ -761,6 +763,7 @@
 	<if>		
 		  <contains string="${os.name}" substring="Windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
           <then>
+		  <antcall target="build" inheritAll="false"></antcall>
 		  <antcall target="build" inheritAll="false"><param name="build.libraries" value="STATIC"/></antcall>
 		  </then>
 		  <else>

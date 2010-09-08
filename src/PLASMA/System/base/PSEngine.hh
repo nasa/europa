@@ -9,9 +9,23 @@
 #include "PSPlanDatabaseListener.hh"
 #include "PSConstraintEngineListener.hh"
 
+#ifdef _MSC_VER
+	#if defined BUILD_DLL
+		#if defined DLL_EXPORT
+			#define EUROPA_WINDOWS_DLL __declspec(dllexport)
+		#else
+			#define EUROPA_WINDOWS_DLL __declspec(dllimport)
+		#endif
+	#else
+		#define EUROPA_WINDOWS_DLL
+	#endif
+#else
+	#define EUROPA_WINDOWS_DLL 
+#endif
+
 namespace EUROPA {
 
-  class PSEngine
+  class EUROPA_WINDOWS_DLL PSEngine
   {
     public:
       static PSEngine* makeInstance();
