@@ -307,21 +307,25 @@
 		<contains string="${ver}" substring="WindowsVS" casesensitive="false"/>
 		<then>
 			<echo message="Building System dlls for Windows."/>	
-				<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
-					<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug EuropaBaseSystem.sln"/>
-					<env key="PLASMA_HOME" value="${basedir}"/>
-					<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>					
-				</exec>				
-				
-			<if>
-			  <equals arg1="${build.libraries}" arg2="STATIC"/>
-			  <then>
-				<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
-					<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug src\PLASMA\EuropaFullSystemStatic.sln"/>
-					<env key="PLASMA_HOME" value="${basedir}"/>
-					<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>
-				</exec>
-			  </then>
+			
+				<if>
+				  <or>
+					  <equals arg1="${jam.libraries}" arg2="STATIC"/>
+					  <equals arg1="${build.libraries}" arg2="STATIC"/>
+				  </or>
+				  <then>
+					<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
+						<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug EuropaBaseSystem.sln"/>
+						<env key="PLASMA_HOME" value="${basedir}"/>
+						<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>					
+					</exec>				
+								
+					<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
+						<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug src\PLASMA\EuropaFullSystemStatic.sln"/>
+						<env key="PLASMA_HOME" value="${basedir}"/>
+						<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>
+					</exec>
+				  </then>
 			  <else>
 				<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
 					<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug EuropaDll.sln"/>
