@@ -19,7 +19,7 @@
 
 namespace EUROPA {
 
-  PSEngine* PSEngine::makeInstance()
+  EUROPA_WINDOWS_DLL PSEngine* PSEngine::makeInstance()
   {
 	  return new PSEngineImpl();
   }

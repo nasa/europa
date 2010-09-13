@@ -39,8 +39,8 @@ int main(int argc, const char ** argv)
       1000 // maxSteps
   );
 
-  char c;
-  std::cin >> c;
+  //char c;
+  //std::cin >> c;
   return 0;
 }
 
@@ -58,6 +58,7 @@ bool solve(const char* plannerConfig,
         PSSolver* solver = engine->createSolver(plannerConfig);
         runSolver(solver,startHorizon,endHorizon,maxSteps);
         delete solver;
+		std::cout << engine->planDatabaseToString() << std::endl;
 
         delete engine;
         return true;

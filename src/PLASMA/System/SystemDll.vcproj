@@ -464,6 +464,10 @@
 				RelativePath=".\base\PSEngineImpl.hh"
 				>
 			</File>
+			<File
+				RelativePath=".\stdafx.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

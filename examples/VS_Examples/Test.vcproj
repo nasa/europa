@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE; _HAS_TRADITIONAL_STL; "
+				PreprocessorDefinitions="BUILD_DLL;WIN32;_DEBUG;_CONSOLE;_HAS_TRADITIONAL_STL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -65,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(TargetDir)\ConstraintEngine.lib $(TargetDir)\NDDL.lib $(TargetDir)\PlanDatabase.lib $(TargetDir)\Resource.lib $(TargetDir)\RulesEngine.lib $(TargetDir)\Solvers.lib $(TargetDir)\System.lib $(TargetDir)\TemporalNetwork.lib $(TargetDir)\TinyXml.lib $(TargetDir)\Utils.lib"
+				AdditionalDependencies="$(TargetDir)\ConstraintEngine.lib $(TargetDir)\NDDL.lib $(TargetDir)\PlanDatabase.lib $(TargetDir)\Resource.lib $(TargetDir)\RulesEngine.lib $(TargetDir)\Solvers.lib $(TargetDir)\TemporalNetwork.lib $(TargetDir)\TinyXml.lib $(TargetDir)\Utils.lib"
 				OutputFile="$(PLASMA_HOME)\build\lib\$(ConfigurationName)\$(ProjectName).exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
@@ -476,6 +476,10 @@
 		</Configuration>
 	</Configurations>
 	<References>
+		<ProjectReference
+			ReferencedProjectIdentifier="{1DB2A409-8FEA-4786-9AB9-3917818FEE71}"
+			RelativePathToProject=".\src\PLASMA\System\SystemDll.vcproj"
+		/>
 	</References>
 	<Files>
 		<Filter
@@ -507,6 +511,10 @@
 			</File>
 			<File
 				RelativePath=".\ModuleLight.hh"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\PLASMA\System\base\PSEngine.hh"
 				>
 			</File>
 		</Filter>
