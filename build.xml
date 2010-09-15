@@ -596,8 +596,10 @@
   
   <target name="run-diff" if="diff.allow">
     <echo> Running Diff example in ${basedir}/dist/europa/examples/${example.name}</echo>
-    <exec executable="python" dir="${basedir}/dist/europa/bin"
-    	output="${basedir}/dist/europa/examples/${example.name}/${example.name}.diff" failonerror="true">
+    <exec executable="make" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
+    	<arg line="clean all"/>
+    </exec>
+    <exec executable="python" dir="${basedir}/dist/europa/bin" failonerror="true">
       <arg line="plancompare ${example.name}"/>
       <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
     </exec>

@@ -84,6 +84,7 @@ bool runPlanner(const char* modelFile,
       txLog->flush(out);
       out.close();
       replay(s1, txLog,language);
+      std::cout << engine.getPlanDatabase()->toString();///
   }
 
   debugMsg("IdTypeCounts", dumpIdTable("after"));

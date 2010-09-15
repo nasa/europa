@@ -79,10 +79,15 @@ def compareFiles(baseFile_path, testTempFile):
 ##  all lines diff  
 #  diff = difflib.ndiff(baseFile.readlines(), testTempFile.readlines())
 #  print ''.join(diff)
-  baseFile.close()
+  baseFile.close()  
+  diffFile_name = baseFile_path.replace("_Base.output",".diff")
+  diffFile = open(diffFile_name, "w")
+  
   if len(testoutput) > 1:
     for line in difflib.context_diff(m_base, m_temp):
       print line
+      diffFile.write(line)
+    diffFile.close()  
     assert ( len(testoutput) == 1 )
 
 def parsePlanOutput(outputFile, testTempFile):
