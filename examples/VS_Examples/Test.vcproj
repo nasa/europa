@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="BUILD_DLL;WIN32;_DEBUG;_CONSOLE;_HAS_TRADITIONAL_STL"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_HAS_TRADITIONAL_STL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -478,7 +478,6 @@
 	<References>
 		<ProjectReference
 			ReferencedProjectIdentifier="{1DB2A409-8FEA-4786-9AB9-3917818FEE71}"
-			RelativePathToProject=".\src\PLASMA\System\SystemDll.vcproj"
 		/>
 	</References>
 	<Files>

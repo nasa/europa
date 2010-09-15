@@ -305,33 +305,25 @@
   <echo>${ver}</echo>
   <if>		
 		<contains string="${ver}" substring="WindowsVS" casesensitive="false"/>
-		<then>
-			<echo message="Building System dlls for Windows."/>	
-			
-				<if>
-				  <or>
-					  <equals arg1="${jam.libraries}" arg2="STATIC"/>
-					  <equals arg1="${build.libraries}" arg2="STATIC"/>
-				  </or>
-				  <then>
+		<then>				
+				<if>											  
+					  <equals arg1="${build.libraries}" arg2="DYNAMIC"/>
+				  <then>				  
+				  <echo message="Building System dlls for Windows."/>	
 					<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
-						<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug EuropaBaseSystem.sln"/>
+						<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug EuropaDll.sln"/>
+						<env key="PLASMA_HOME" value="${basedir}"/>
+						<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>
+					</exec>					
+				  </then>
+			  <else>
+				<echo message="Building Static libs for Windows."/>	
+			    <exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
+						<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug Europa.sln"/>
 						<env key="PLASMA_HOME" value="${basedir}"/>
 						<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>					
 					</exec>				
 								
-					<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
-						<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug src\PLASMA\EuropaFullSystemStatic.sln"/>
-						<env key="PLASMA_HOME" value="${basedir}"/>
-						<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>
-					</exec>
-				  </then>
-			  <else>
-				<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
-					<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug EuropaDll.sln"/>
-					<env key="PLASMA_HOME" value="${basedir}"/>
-					<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>
-				</exec>
 			  </else>
 			</if>			
 <!--			
@@ -767,8 +759,8 @@
 	<if>		
 		  <contains string="${os.name}" substring="Windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
           <then>
-		  <antcall target="build" inheritAll="false"></antcall>
-		  <antcall target="build" inheritAll="false"><param name="build.libraries" value="STATIC"/></antcall>
+		  <antcall target="build" inheritAll="false"><param name="build.libraries" value="DYNAMIC"/></antcall>
+		  <antcall target="build" inheritAll="false"></antcall>		  
 		  </then>
 		  <else>
 			<antcall target="build" inheritAll="false"><param name="jam.variant" value="DEV"/><param name="jam.libraries" value="STATIC"/></antcall>

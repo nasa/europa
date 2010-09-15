@@ -2,9 +2,10 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="System"
-	ProjectGUID="{1DB2A409-8FEA-4786-9AB9-3917818FEE71}"
-	RootNamespace="System"
+	Name="DllTest"
+	ProjectGUID="{4CC21857-4D58-4780-8CFD-8035A69D2EB8}"
+	RootNamespace="Test"
+	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
@@ -20,10 +21,10 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(PLASMA_HOME)\build\lib"
-			IntermediateDirectory="$(PLASMA_HOME)\build\objects\$(ProjectName)\$(ConfigurationName)"
-			ConfigurationType="2"
-			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ResourceProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_SolversProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_DlfcnProperties.vsprops"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="..\..\src\PLASMA\VS_UtilsProperties.vsprops;..\..\src\PLASMA\VS_ConstraintEngineProperties.vsprops;..\..\src\PLASMA\VS_PlanDatabaseProperties.vsprops;..\..\src\PLASMA\VS_RulesEngineProperties.vsprops;..\..\src\PLASMA\VS_TinyXMLProperties.vsprops;..\..\src\PLASMA\VS_ResourceProperties.vsprops;..\..\src\PLASMA\VS_TemporalNetworkProperties.vsprops;..\..\src\PLASMA\VS_SolversProperties.vsprops;..\..\src\PLASMA\VS_NddlProperties.vsprops;..\..\src\PLASMA\VS_DlfcnProperties.vsprops;..\..\src\PLASMA\VS_SystemProperties.vsprops;..\..\src\PLASMA\VS_PthreadProperties.vsprops;..\..\src\PLASMA\VS_AntlrProperties.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -44,13 +45,12 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="DLL_EXPORT;EUROPA_WINDOWS_DLL;BUILD_DLL"
+				PreprocessorDefinitions="BUILD_DLL;WIN32;_DEBUG;_CONSOLE;_HAS_TRADITIONAL_STL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				TreatWChar_tAsBuiltInType="false"
-				ObjectFile="$(PLASMA_HOME)\build\objects\$(ProjectName)\$(ConfigurationName)\"
-				ProgramDataBaseFileName="$(PLASMA_HOME)\build\lib\$(ConfigurationName)\$(ProjectName).pdb"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
@@ -65,8 +65,16 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="antlr3cd.lib pthreadVC2d.lib"
-				AdditionalLibraryDirectories="&quot;$(PLASMA_THIRD_PARTY)\visualStudio\libantlr3c-3.1.3\Debug&quot;;&quot;$(PLASMA_THIRD_PARTY)\visualStudio\pthreads-w32-2-8-0-release\lib&quot;"
+				AdditionalDependencies="$(TargetDir)\ConstraintEngine.lib $(TargetDir)\NDDL.lib $(TargetDir)\PlanDatabase.lib $(TargetDir)\Resource.lib $(TargetDir)\RulesEngine.lib $(TargetDir)\Solvers.lib $(TargetDir)\TemporalNetwork.lib $(TargetDir)\TinyXml.lib $(TargetDir)\Utils.lib"
+				OutputFile="$(PLASMA_HOME)\build\lib\$(ConfigurationName)\$(ProjectName).exe"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="&quot;$(PLASMA_HOME)\build\lib&quot;"
+				GenerateDebugInformation="true"
+				SubSystem="1"
+				TurnOffAssemblyGeneration="false"
+				ImportLibrary=""
+				TargetMachine="1"
+				CLRImageType="0"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -95,7 +103,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ResourceProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_SolversProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_DlfcnProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ResourceProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_SolversProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_DlfcnProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_SystemProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PthreadProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_AntlrProperties.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -118,8 +126,10 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -134,7 +144,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				LinkIncremental="1"
 				GenerateDebugInformation="true"
+				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
@@ -165,8 +177,8 @@
 			Name="Debug CLR|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ResourceProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_SolversProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_DlfcnProperties.vsprops"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ResourceProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_SolversProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_DlfcnProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_SystemProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PthreadProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_AntlrPropertiesCLR.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="1"
 			>
@@ -188,12 +200,12 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE; _HAS_TRADITIONAL_STL; "
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="3"
 				TreatWChar_tAsBuiltInType="false"
-				ObjectFile="$(PLASMA_HOME)\build\objects\$(ProjectName)\$(ConfigurationName)\"
-				ProgramDataBaseFileName="$(PLASMA_HOME)\build\lib\$(ConfigurationName)\$(ProjectName).pdb"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -207,11 +219,18 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(PLASMA_HOME)\build\lib\$(ConfigurationName)\$(ProjectName).lib"
+				Name="VCLinkerTool"
+				LinkIncremental="2"
+				GenerateDebugInformation="true"
+				AssemblyDebug="1"
+				SubSystem="1"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -223,6 +242,9 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -230,8 +252,8 @@
 			Name="Debug|x64"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ResourceProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_SolversProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_DlfcnProperties.vsprops"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ResourceProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_SolversProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_DlfcnProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_SystemProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PthreadProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_AntlrProperties.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -253,12 +275,12 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE; _HAS_TRADITIONAL_STL; "
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				TreatWChar_tAsBuiltInType="false"
-				ObjectFile="$(PLASMA_HOME)\build\objects\$(ProjectName)\$(ConfigurationName)\"
-				ProgramDataBaseFileName="$(PLASMA_HOME)\build\lib\$(ConfigurationName)\$(ProjectName).pdb"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -272,11 +294,17 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(PLASMA_HOME)\build\lib\$(ConfigurationName)\$(ProjectName).lib"
+				Name="VCLinkerTool"
+				LinkIncremental="2"
+				GenerateDebugInformation="true"
+				SubSystem="1"
+				TargetMachine="17"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -288,6 +316,9 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -296,7 +327,7 @@
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ResourceProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_SolversProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_DlfcnProperties.vsprops"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ResourceProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_SolversProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_DlfcnProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_SystemProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PthreadProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_AntlrProperties.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -320,8 +351,10 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -336,7 +369,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				LinkIncremental="1"
 				GenerateDebugInformation="true"
+				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="17"
@@ -367,8 +402,8 @@
 			Name="Debug CLR|x64"
 			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ResourceProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_SolversProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_DlfcnProperties_x64.vsprops"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(PLASMA_HOME)\src\PLASMA\VS_UtilsProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ConstraintEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PlanDatabaseProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_RulesEngineProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TinyXMLProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_ResourceProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_TemporalNetworkProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_SolversProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_NddlProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_DlfcnProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_SystemProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_PthreadProperties.vsprops;$(PLASMA_HOME)\src\PLASMA\VS_AntlrPropertiesCLR_x64.vsprops"
 			CharacterSet="2"
 			ManagedExtensions="1"
 			>
@@ -391,12 +426,12 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE; _HAS_TRADITIONAL_STL; "
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="3"
 				TreatWChar_tAsBuiltInType="false"
-				ObjectFile="$(PLASMA_HOME)\build\objects\$(ProjectName)\$(ConfigurationName)\"
-				ProgramDataBaseFileName="$(PLASMA_HOME)\build\lib\$(ConfigurationName)\$(ProjectName).pdb"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -410,11 +445,18 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(PLASMA_HOME)\build\lib\$(ConfigurationName)\$(ProjectName).lib"
+				Name="VCLinkerTool"
+				LinkIncremental="2"
+				GenerateDebugInformation="true"
+				AssemblyDebug="1"
+				SubSystem="1"
+				TargetMachine="17"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -426,11 +468,18 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 	</Configurations>
 	<References>
+		<ProjectReference
+			ReferencedProjectIdentifier="{1DB2A409-8FEA-4786-9AB9-3917818FEE71}"
+			RelativePathToProject=".\src\PLASMA\System\SystemDll.vcproj"
+		/>
 	</References>
 	<Files>
 		<Filter
@@ -439,11 +488,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\base\EuropaEngine.cc"
+				RelativePath=".\Light-Main.cc"
 				>
 			</File>
 			<File
-				RelativePath=".\base\PSEngineImpl.cc"
+				RelativePath=".\LightCustomCode.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\ModuleLight.cc"
 				>
 			</File>
 		</Filter>
@@ -453,15 +506,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\base\EuropaEngine.hh"
+				RelativePath=".\LightCustomCode.hh"
 				>
 			</File>
 			<File
-				RelativePath=".\base\PSEngine.hh"
+				RelativePath=".\ModuleLight.hh"
 				>
 			</File>
 			<File
-				RelativePath=".\base\PSEngineImpl.hh"
+				RelativePath="..\..\src\PLASMA\System\base\PSEngine.hh"
 				>
 			</File>
 		</Filter>
@@ -470,40 +523,36 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+		</Filter>
+		<Filter
+			Name="NDDL Files"
+			>
 			<File
-				RelativePath="..\..\..\build\lib\Debug\ConstraintEngine.lib"
+				RelativePath=".\Light-initial-state.nddl"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\build\lib\Debug\NDDL.lib"
+				RelativePath=".\Light-model.nddl"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Config Files"
+			>
+			<File
+				RelativePath=".\Debug.cfg"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\build\lib\Debug\PlanDatabase.lib"
+				RelativePath=".\EuropaLogger.cfg"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\build\lib\Debug\Resource.lib"
+				RelativePath=".\NDDL.cfg"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\build\lib\Debug\RulesEngine.lib"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\build\lib\Debug\Solvers.lib"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\build\lib\Debug\TemporalNetwork.lib"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\build\lib\Debug\TinyXml.lib"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\build\lib\Debug\Utils.lib"
+				RelativePath=".\PlannerConfig.xml"
 				>
 			</File>
 		</Filter>

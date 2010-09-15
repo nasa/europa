@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+# Visual C++ Express 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Utils", "src\PLASMA\Utils\Utils.vcproj", "{2CE3C494-FBCD-4A43-A01C-A41AD174122F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TinyXml", "src\PLASMA\TinyXml\TinyXml.vcproj", "{2F943FFF-8040-4D62-8958-5AF72F786C33}"
@@ -38,11 +38,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EuropaFullSystemStatic", "s
 		{C52614AE-3CA4-45E7-8E3E-F5DB4CF54633} = {C52614AE-3CA4-45E7-8E3E-F5DB4CF54633}
 		{DB16FBED-3587-41EE-B385-B1E6EB1E0AA2} = {DB16FBED-3587-41EE-B385-B1E6EB1E0AA2}
 		{2F943FFF-8040-4D62-8958-5AF72F786C33} = {2F943FFF-8040-4D62-8958-5AF72F786C33}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EuropaFullSystemDll", "src\PLASMA\EuropaFullSystemDll.vcproj", "{FEC37688-413D-4745-920A-1A5F80ACC762}"
-	ProjectSection(ProjectDependencies) = postProject
-		{51590919-F315-4D9D-8111-1822CA9B7CC5} = {51590919-F315-4D9D-8111-1822CA9B7CC5}
 	EndProjectSection
 EndProject
 Global
@@ -306,24 +301,6 @@ Global
 		{51590919-F315-4D9D-8111-1822CA9B7CC5}.Release|Win32.ActiveCfg = Release|Win32
 		{51590919-F315-4D9D-8111-1822CA9B7CC5}.Release|Win32.Build.0 = Release|Win32
 		{51590919-F315-4D9D-8111-1822CA9B7CC5}.Release|x64.ActiveCfg = Release|Win32
-		{FEC37688-413D-4745-920A-1A5F80ACC762}.Debug CLR|Any CPU.ActiveCfg = Debug|Win32
-		{FEC37688-413D-4745-920A-1A5F80ACC762}.Debug CLR|Mixed Platforms.ActiveCfg = Debug|Win32
-		{FEC37688-413D-4745-920A-1A5F80ACC762}.Debug CLR|Mixed Platforms.Build.0 = Debug|Win32
-		{FEC37688-413D-4745-920A-1A5F80ACC762}.Debug CLR|Win32.ActiveCfg = Debug|Win32
-		{FEC37688-413D-4745-920A-1A5F80ACC762}.Debug CLR|Win32.Build.0 = Debug|Win32
-		{FEC37688-413D-4745-920A-1A5F80ACC762}.Debug CLR|x64.ActiveCfg = Debug|Win32
-		{FEC37688-413D-4745-920A-1A5F80ACC762}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{FEC37688-413D-4745-920A-1A5F80ACC762}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-		{FEC37688-413D-4745-920A-1A5F80ACC762}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-		{FEC37688-413D-4745-920A-1A5F80ACC762}.Debug|Win32.ActiveCfg = Debug|Win32
-		{FEC37688-413D-4745-920A-1A5F80ACC762}.Debug|Win32.Build.0 = Debug|Win32
-		{FEC37688-413D-4745-920A-1A5F80ACC762}.Debug|x64.ActiveCfg = Debug|Win32
-		{FEC37688-413D-4745-920A-1A5F80ACC762}.Release|Any CPU.ActiveCfg = Release|Win32
-		{FEC37688-413D-4745-920A-1A5F80ACC762}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-		{FEC37688-413D-4745-920A-1A5F80ACC762}.Release|Mixed Platforms.Build.0 = Release|Win32
-		{FEC37688-413D-4745-920A-1A5F80ACC762}.Release|Win32.ActiveCfg = Release|Win32
-		{FEC37688-413D-4745-920A-1A5F80ACC762}.Release|Win32.Build.0 = Release|Win32
-		{FEC37688-413D-4745-920A-1A5F80ACC762}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
