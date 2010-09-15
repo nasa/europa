@@ -50,6 +50,7 @@ namespace EUROPA{
     , m_schema(schema)
     , m_planDb(planDatabase)
     , m_deleted(false)
+    , m_executing(false)
   {
     m_planDbListener = (new DbRuleEngineConnector(m_planDb, m_id))->getId();
     m_callback = (new RulesEngineCallback(m_planDb->getConstraintEngine(), m_id))->getId();
@@ -212,16 +213,34 @@ namespace EUROPA{
   }
 
   bool RulesEngine::doRules() {
-    std::sort(m_ruleInstancesToExecute.begin(), m_ruleInstancesToExecute.end(), EntityComparator<RuleInstanceId>());
-    std::sort(m_ruleInstancesToUndo.begin(), m_ruleInstancesToUndo.end(), EntityComparator<RuleInstanceId>());
-    std::vector<RuleInstanceId>::iterator execEnd = std::unique(m_ruleInstancesToExecute.begin(),
-                                                                m_ruleInstancesToExecute.end(),
-                                                                EntityComparator<RuleInstanceId>());
-    std::vector<RuleInstanceId>::iterator undoEnd = std::unique(m_ruleInstancesToUndo.begin(),
-                                                                m_ruleInstancesToUndo.end(),
-                                                                EntityComparator<RuleInstanceId>());
+    check_error(!m_executing);
+    m_executing = true;
+    debugMsg("RulesEngine:doRules", "Executing rules.");
+    
+    // std::sort(m_ruleInstancesToExecute.begin(), m_ruleInstancesToExecute.end(), EntityComparator<RuleInstanceId>());
+    // std::sort(m_ruleInstancesToUndo.begin(), m_ruleInstancesToUndo.end(), EntityComparator<RuleInstanceId>());
+    // std::vector<RuleInstanceId>::iterator execEnd = std::unique(m_ruleInstancesToExecute.begin(),
+    //                                                             m_ruleInstancesToExecute.end(),
+    //                                                             EntityComparator<RuleInstanceId>());
+    // std::vector<RuleInstanceId>::iterator undoEnd = std::unique(m_ruleInstancesToUndo.begin(),
+    //                                                             m_ruleInstancesToUndo.end(),
+    //                                                             EntityComparator<RuleInstanceId>());
+    std::vector<RuleInstanceId>::iterator execEnd = m_ruleInstancesToExecute.end();
+    std::vector<RuleInstanceId>::iterator undoEnd = m_ruleInstancesToUndo.end();
+    
     bool retval = false;
 
+    debugMsg("RulesEngine:doRules", "Have " << m_ruleInstancesToExecute.size() << 
+	     " total rules in execution list, executing " << 
+	     std::distance(m_ruleInstancesToExecute.begin(), execEnd));
+    
+    for(std::vector<RuleInstanceId>::const_iterator it = m_ruleInstancesToExecute.begin(); it != execEnd; ++it) {
+      debugMsg("RulesEngine:doRules", 
+	       "In vector: " << (*it)->toString() << " : " <<
+	       ((*it)->isExecuted() ? "E" : "*") <<
+	       ((*it)->test() ? "T" : "*") <<
+	       ((*it)->hasEmptyGuard() ? "G" : "*"));
+    }
     for(std::vector<RuleInstanceId>::iterator it = m_ruleInstancesToExecute.begin(); it != execEnd; ++it)
       if(!(*it)->isExecuted() && (*it)->test()) {
         debugMsg("RulesEngine:doRules", "Executing rule " << (*it)->toString());
@@ -236,6 +255,8 @@ namespace EUROPA{
       }
     m_ruleInstancesToExecute.clear();
     m_ruleInstancesToUndo.clear();
+    debugMsg("RulesEngine:doRules", "Done executing rules " << m_executing << " returning " << (retval ? " true" : " false"));
+    m_executing = false;
     return retval;
   }
 

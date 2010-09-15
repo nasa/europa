@@ -1465,10 +1465,22 @@ namespace EUROPA {
     // TODO: should pass in eval context from outside
     RuleInstanceEvalContext evalContext(NULL,getId());
 
-    debugMsg("Interpreter:InterpretedRule","Executing interpreted rule:" << getRule()->getName().toString() << " token:" << m_token->toString());
-    for (unsigned int i=0; i < m_body.size(); i++)
+    debugMsg("Interpreter:InterpretedRule",
+	     "Executing interpreted rule: " << getRule()->getName().toString() << ":" <<  getRule()->getSource().toString() <<
+	     "token: " << m_token->toString());
+
+    for(std::vector<Expr*>::const_iterator it = m_body.begin(); it != m_body.end(); ++it) {
+      debugMsg("Interpreter:InterpretedRule",
+	       "Body: " << (*it)->toString());
+    }
+
+    for (unsigned int i=0; i < m_body.size(); i++) {
       m_body[i]->eval(evalContext);
-    debugMsg("Interpreter:InterpretedRule","Executed  interpreted rule:" << getRule()->getName().toString() << " token:" << m_token->toString());
+    }
+
+    debugMsg("Interpreter:InterpretedRule",
+	     "Executed interpreted rule: " << getRule()->getName().toString() << ":" <<  getRule()->getSource().toString() <<
+	     "token: " << m_token->toString());
   }
 
   TokenId InterpretedRuleInstance::createSubgoal(
@@ -1619,6 +1631,12 @@ namespace EUROPA {
     : Rule(predicate,source)
     , m_body(body)
   {
+    debugMsg("InterpretedRuleFactory:InterpretedRuleFactory",
+	     "Instantiating rule for " << source.toString());
+    for(std::vector<Expr*>::const_iterator it = body.begin(); it != body.end(); ++it) {
+      debugMsg("InterpretedRuleFactory:InterpretedRuleFactory",
+	       (*it)->toString());
+    }
   }
 
   InterpretedRuleFactory::~InterpretedRuleFactory()
@@ -1874,7 +1892,7 @@ namespace EUROPA {
 		  localVar->restrictBaseDomain(m_initValue->eval(context).getValue()->derivedDomain());
 
 	  context.addVar(m_name.c_str(),localVar);
-	  debugMsg("Interpreter:InterpretedRule","Added RuleInstance local var:" << localVar->toString());
+	  debugMsg("Interpreter:InterpretedRule","Added RuleInstance local var:" << localVar->toLongString());
 	  return localVar;
   }
 

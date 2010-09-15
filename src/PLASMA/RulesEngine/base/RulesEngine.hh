@@ -67,6 +67,7 @@ namespace EUROPA {
     std::vector<RuleInstanceId> m_ruleInstancesToExecute;
     std::vector<RuleInstanceId> m_ruleInstancesToUndo;
     bool m_deleted;
+    bool m_executing;
   };
 }
 #endif

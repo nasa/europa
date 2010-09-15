@@ -467,7 +467,8 @@ namespace EUROPA
 
     publish(notifyAdded(constraint));
     debugMsg("ConstraintEngine:add:constraint:Propagator",
-	     constraint->getName().toString() << "(" << constraint->getKey() <<  ") added to " << propagatorName.toString());
+	     constraint->toLongString() << std::endl << " added to " << propagatorName.toString());
+	     //constraint->getName().toString() << "(" << constraint->getKey() <<  ") added to " << propagatorName.toString());
   }
 
   /**
@@ -663,6 +664,7 @@ namespace EUROPA
     bool started = false;
 
     bool continueProp = true;
+
     while(continueProp) {
       incrementCycle();
       debugMsg("ConstraintEngine:propagate", "Starting cycle " << m_cycleCount);
@@ -689,9 +691,13 @@ namespace EUROPA
       m_propInProgress = false;
       incrementCycle();
       debugMsg("ConstraintEngine:propagate", "Executing callbacks.");
+      //set auto-propagation to false so propagation can't call itself, potentially blowing the stack or causing other unintended
+      //effects
+      bool oldProp = m_autoPropagate;
+      m_autoPropagate = false; 
       for(std::list<PostPropagationCallbackId>::iterator it = m_callbacks.begin(); it != m_callbacks.end(); ++it)
         continueProp = ((**it)() || continueProp);
-
+      m_autoPropagate = oldProp;
     }
 
     //m_propInProgress = false;
@@ -880,9 +886,9 @@ namespace EUROPA
 
     publish(notifyExecuted(constraint));
 
-    debugMsg("ConstraintEngine:execute", "BEFORE " << constraint->toString());
+    debugMsg("ConstraintEngine:execute", "BEFORE " << constraint->toLongString());
     constraint->execute();
-    debugMsg("ConstraintEngine:execute", "AFTER " << constraint->toString());
+    debugMsg("ConstraintEngine:execute", "AFTER " << constraint->toLongString());
   }
 
   void ConstraintEngine::execute(const ConstraintId& constraint,
