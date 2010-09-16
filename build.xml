@@ -598,6 +598,8 @@
     <echo> Running Diff example in ${basedir}/dist/europa/examples/${example.name}</echo>
     <exec executable="make" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
     	<arg line="clean all"/>
+      <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
+      <env key="${local.env.LD_LIBRARY_PATH.name}" value="${basedir}/dist/europa/lib"/>
     </exec>
     <exec executable="python" dir="${basedir}/dist/europa/bin" failonerror="true">
       <arg line="plancompare ${example.name}"/>
