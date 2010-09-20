@@ -413,6 +413,12 @@ namespace EUROPA
     condDebugMsg(relaxed, "ConstraintEngine:pending", "Relaxed.");
     for(std::set<ConstrainedVariableId>::const_iterator it = m_relaxed.begin(); it != m_relaxed.end(); ++it) {
       debugMsg("ConstraintEngine:pending", "Relaxed var: " << (*it)->toLongString());
+      std::set<ConstraintId> constrs;
+      (*it)->constraints(constrs);
+      for(std::set<ConstraintId>::const_iterator temp = constrs.begin(); temp != constrs.end(); ++temp) {
+	condDebugMsg((*temp)->isActive(), "ConstraintEngine:pending", 
+		     "   " << (*temp)->getName().toString() << "(" << (*temp)->getKey() << ")");
+      }
     }
     condDebugMsg(provenInconsistent(), "ConstraintEngine:pending", "Proven inconsistent.");
     condDebugMsg(constraintConsistent(), "ConstraintEngine:pending", "Constraint consistent.");
@@ -686,7 +692,7 @@ namespace EUROPA
         activePropagator = getNextPropagator();
       }
 
-      check_error(!pending());
+      //check_error(!pending());
       continueProp = false;
       m_propInProgress = false;
       incrementCycle();
