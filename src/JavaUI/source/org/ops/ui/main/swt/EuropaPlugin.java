@@ -1,9 +1,13 @@
 package org.ops.ui.main.swt;
 
+import java.util.HashMap;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.ops.ui.solver.model.SolverModel;
 import org.osgi.framework.BundleContext;
@@ -29,6 +33,8 @@ public class EuropaPlugin extends AbstractUIPlugin {
 	 */
 	private SolverModel solverModel;
 
+	private HashMap<RGB, Color> colorMap;
+
 	/**
 	 * The constructor
 	 */
@@ -47,6 +53,7 @@ public class EuropaPlugin extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 
+		colorMap = new HashMap<RGB, Color>();
 		hookupEngine();
 	}
 
@@ -61,6 +68,9 @@ public class EuropaPlugin extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		releaseEngine();
+		for (Color c : colorMap.values())
+			c.dispose();
+		colorMap = null;
 		super.stop(context);
 	}
 
@@ -128,5 +138,14 @@ public class EuropaPlugin extends AbstractUIPlugin {
 		if (solverModel == null)
 			solverModel = new SolverModel();
 		return solverModel;
+	}
+
+	public Color getColor(RGB rgb) {
+		Color r = colorMap.get(rgb);
+		if (r == null) {
+			r = new Color(null, rgb);
+			colorMap.put(rgb, r);
+		}
+		return r;
 	}
 }

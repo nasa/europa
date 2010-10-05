@@ -86,8 +86,9 @@ public class OutlineNode {
 				res = new OutlineNode(OutlineNodeType.CLASS_DEF, c0.getText(),
 						ast);
 			// Finally there should be { with fields and predicates
-			assert (c1.getType() == AstNodeTypes.LBRACE);
-			addChildren(res, c1);
+			if (c1.getType() == AstNodeTypes.LBRACE)
+				addChildren(res, c1);
+			// else System.out.println("Remaining child type " + c1); // ";"
 			break;
 		case AstNodeTypes.VARIABLE:
 			// Variable definition. 1st child is type, second name
