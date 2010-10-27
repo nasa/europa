@@ -66,6 +66,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="antlr3cd.lib pthreadVC2d.lib"
+				OutputFile="$(OutDir)\$(ProjectName)_g.dll"
 				AdditionalLibraryDirectories="&quot;$(PLASMA_THIRD_PARTY)\visualStudio\libantlr3c-3.1.3\Debug&quot;;&quot;$(PLASMA_THIRD_PARTY)\visualStudio\pthreads-w32-2-8-0-release\lib&quot;"
 			/>
 			<Tool
@@ -443,6 +444,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\base\PSEngine_wrap.cc"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories="&quot;$(JAVA_HOME)\include&quot;;&quot;$(JAVA_HOME)\include\win32&quot;;&quot;$(PLASMA_THIRD_PARTY)\visualStudio\libantlr3c-3.1.3\include&quot;"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\base\PSEngineImpl.cc"
 				>
 			</File>
@@ -458,6 +471,10 @@
 			</File>
 			<File
 				RelativePath=".\base\PSEngine.hh"
+				>
+			</File>
+			<File
+				RelativePath=".\base\PSEngine_wrap.h"
 				>
 			</File>
 			<File
@@ -505,6 +522,23 @@
 			<File
 				RelativePath="..\..\..\build\lib\Debug\Utils.lib"
 				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Swig Files"
+			>
+			<File
+				RelativePath=".\base\PSEngine.i"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="swig -java -package psengine -o $(ProjectDir)Base\PSEngine_wrap.cc -Wall -c++ -outdir $(ProjectDir)Base\swig\psengine $(ProjectDir)base\PSEngine.i"
+						Outputs="$(SolutionDir)build\objects\System\Base\swig\psengine;Base\PSEngine_wrap.cc;Base\PSEngine_wrap.h"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>

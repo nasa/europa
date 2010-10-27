@@ -305,7 +305,9 @@
   <echo>${ver}</echo>
   <if>		
 		<contains string="${ver}" substring="WindowsVS" casesensitive="false"/>
-		<then>				
+		<then>		
+				<mkdir dir="src\\PLASMA\\System\\base\\swig"/>
+				<mkdir dir="src\\PLASMA\\System\\base\\swig\\psengine"/>
 				<if>											  
 					  <equals arg1="${build.libraries}" arg2="DYNAMIC"/>
 				  <then>				  
@@ -325,8 +327,14 @@
 					</exec>				
 								
 			  </else>
-			</if>			
-<!--			
+			</if>				
+				<ant dir="src\\PLASMA\\NDDL\\base" description="Build Nddl.jar" target="nddl">					
+				</ant>
+				<ant dir="src\\PLASMA\\System\\base" description="Build PSEngine.jar" target="PSEngine">
+					<property name="src.dir" value="swig" />
+				</ant>
+				<ant dir="src\\PLASMA\\System\\component\\PSUI" description="Build PSEngine.jar" target="dist"/>
+				<!--			
 				<delete file="src\\JavaUI\\lib\\PSEngine.jar"/>				
 				<exec executable="mklink" dir="src\\JavaUI\\lib" failonerror="true">
 					<arg line="PSEngine.jar ..\..\Europa\build\lib\PSEngine.jar"/>
@@ -763,7 +771,7 @@
 	<if>		
 		  <contains string="${os.name}" substring="Windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
           <then>
-		  <antcall target="build" inheritAll="false"><param name="build.libraries" value="DYNAMIC"/></antcall>
+		  <!--<antcall target="build" inheritAll="false"><param name="build.libraries" value="DYNAMIC"/></antcall>-->
 		  <antcall target="build" inheritAll="false"></antcall>		  
 		  </then>
 		  <else>
