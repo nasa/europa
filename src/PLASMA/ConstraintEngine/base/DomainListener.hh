@@ -37,6 +37,7 @@ namespace EUROPA{
      */
     enum ChangeType { UPPER_BOUND_DECREASED = 0, /**< The upper bound of an interval domain is reduced. @note Must be 0. @see EVENT_COUNT. */
                       LOWER_BOUND_INCREASED, /**< The lower bound of an interval domain is increased. */
+                      REFTIME_CHANGED, /**< PHM Support for reftime calculations. */
                       BOUNDS_RESTRICTED, /**< Upper and lower bound are decreased and increased respectively. */
                       VALUE_REMOVED, /**< A restriction to an enumerated domain. */
                       RESTRICT_TO_SINGLETON, /**< A restriction of the domain to a singleton value through inference. */

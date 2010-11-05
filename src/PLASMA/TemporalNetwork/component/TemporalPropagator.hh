@@ -66,6 +66,23 @@ namespace EUROPA {
                                   std::vector<Time>& ubs);
 
     /**
+     * @brief When refpoint is set up, getReferenceTime(var) values
+     * will be a minperturb solution, where preferred times of
+     * timevars are given as constraints from the refpoint var.(PHM
+     * Support for reftime calculations.)
+     */
+
+    Time getReferenceTime(const ConstrainedVariableId& var);
+
+    /**
+     * @brief Designate the refpoint var.  The noId() default removes
+     * a previous designation. (PHM Support for reftime calculations.)
+     */
+
+    void setRefpointVar(const ConstrainedVariableId&
+			var = ConstrainedVariableId::noId());
+
+    /**
      * @see TemporalAdvisor::mostRecentReprogation
      */
     unsigned int mostRecentRepropagation() const;

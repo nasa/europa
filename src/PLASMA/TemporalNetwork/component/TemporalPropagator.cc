@@ -554,6 +554,15 @@ namespace EUROPA {
 
           dom.intersect(mapToExternalInfinity(lb), mapToExternalInfinity(ub));
 
+	  // PHM Support for reftime calculations
+	  if (m_tnet->getReferenceTimepoint().isId()) {
+	    bool changed = tp->updatePrevReftime();
+	    if (changed) {
+	      DomainListenerId listener = dom.getListener();
+	      listener->notifyChange(DomainListener::REFTIME_CHANGED);
+	    }
+	  }
+
           if(TokenId::convertable(var->parent())){
               TokenId token = var->parent();
               // If we get a hit, then buffer the token for later update to duration (so we only do it once with updated bounds
@@ -1020,6 +1029,37 @@ namespace EUROPA {
     return;
   }
 
+  /* PHM Support for reftime calculations.  Reftimes provide a tnet
+   * solution that is close to a given preferred set of times for the
+   * timevars. They are like a third "bound" in addition to the
+   * lower/upper ones.  The .preferred times are given as bounds on
+   * constraints from a designated "origin" var, called the refpoint,
+   * to the other timevars.  The bounds may be all lower or upper (but
+   * not mixed); this influences which timevar is moved to satisfy a
+   * constraint.  The tnet then calculates and returns the reftimes.
+   */
+
+  void TemporalPropagator::setRefpointVar(const ConstrainedVariableId& var)
+  {
+    // PHM Support for reftime calculations.  Designates the refpoint.
+    if (var.isId())
+      m_tnet->setReferenceTimepoint(getTimepoint(var));
+    else
+      m_tnet->setReferenceTimepoint();
+  }
+
+  Time TemporalPropagator::getReferenceTime(const ConstrainedVariableId& var) {
+    // PHM Support for reftime calculations.  Returns the reftime
+    // value after the refpoint and Preferred time constraints are set
+    // up. Returns lb before that.
+    check_error(var.isId());
+    TimepointId tp = getTimepoint(var);
+    if (tp.isId() && m_tnet->getReferenceTimepoint().isId()) {
+      return tp->getReftime();
+    }
+    // Otherwise var is not (yet) ref timepoint, just return lb for now
+    return (Time) var->getLowerBound();
+  }
 
   void TemporalPropagator::getMinPerturbTimes(const std::vector<ConstrainedVariableId>& timevars,
                                               const std::vector<Time>& oldreftimes,

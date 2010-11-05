@@ -268,18 +268,44 @@ namespace EUROPA {
       std::map<eint, InstantId>::iterator getLeastInstant(const eint time);
 
       const std::map<eint, InstantId>& getInstants() {return m_instants;}
-    private:
+
+      // PHM Some refactoring needed so that customized subclass can
+      // support reftimes.  Does not change this class functionality.
+    protected:
       /**
-       * @brief Conditionally adds Instants for the upper and lower bounds of the Transaction's time.
+       * @brief Determines whether an instant contains a "significant"
+       * transaction (i.e., at its upper/lower bound) that changes the
+       * profile at that instant.
+       *
+       * @param instant The instant
+       */
+      virtual bool containsChange(const InstantId instant);
+      /**
+       * @brief Conditionally adds Instants for the upper and lower
+       * bounds of the Transaction's time.
+       *
        * @param t The transaction
        */
-      void addInstantsForBounds(const TransactionId t);
+      virtual void addInstantsForBounds(const TransactionId t);
 
       /**
        * @brief Create an instant for a time.
        * @param time The time
        */
       void addInstant(const eint time);
+      /**
+       * @brief Eliminate an instant for a time.
+       * @param time The time
+       */
+      void removeInstant(const eint time);
+    public:
+      /**
+       * @brief Get all the transactions in the profile.
+       */
+      const std::set<TransactionId>& getAllTransactions() const {return m_transactions;}
+
+
+    private:
 
 
       /** 

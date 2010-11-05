@@ -34,7 +34,8 @@ namespace EUROPA {
       void initRecompute(InstantId inst);
       void initRecompute();
 
-      void recomputeLevels( InstantId prev, InstantId inst);
+    protected:
+      virtual void recomputeLevels( InstantId prev, InstantId inst);
     };
 }
 

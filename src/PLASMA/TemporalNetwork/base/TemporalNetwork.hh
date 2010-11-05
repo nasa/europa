@@ -366,6 +366,14 @@ namespace EUROPA {
      */
     virtual  ~TemporalNetwork();
 
+    /**
+     * @brief May be used to identify source for propagating reftimes
+     * used for preferred time calculations. Use noId() to turn off
+     * such calculations. (PHM: Support for reftime calculations)
+     */
+    void setReferenceTimepoint (TimepointId refpoint = TimepointId::noId());
+    TimepointId getReferenceTimepoint () { return m_refpoint; }
+ 
   private:
     /**
      * @brief Get the origin of the STN
@@ -422,6 +430,14 @@ namespace EUROPA {
     Void incDijkstraBackward();
 
     /**
+     * @brief Similar to the DistanceGraph Dijkstra, but propagates
+     * the reftime, and is incremental. Forward/Backward versions
+     * (PHM: Support for reftime calculations)
+     */
+    Void incDijkstraReftime();
+    Void incDijkstraRefBack();
+
+    /**
      * @brief Propagates lower/upper distance bounds from src
      * using backward and forward Dijkstra propagations.
      */
@@ -463,6 +479,14 @@ namespace EUROPA {
      */
     TemporalNetworkId m_id;
 
+    /**
+     * @brief If non-null, designates the source for preferred time
+     * calculations.  If null, turns off preferred time calculations.
+     * Set by setReferenceTimepoint function. Initially null
+     * (i.e. noId()).  (PHM: Support for reftime calculations.)
+     */
+    TimepointId m_refpoint;
+
    protected:                          // Overridden virtual functions
 
    /**
@@ -495,8 +519,13 @@ namespace EUROPA {
   class Tnode : public Dnode {
     friend class TemporalNetwork;
     friend Void keepEdge (DispatchNode* x, DispatchNode* y, Time d);
+    // PHM Support for reftime calculations
+  protected:
     Time lowerBound;
     Time upperBound;
+    Time reftime;
+    Time prev_reftime;
+  private:
     Int ordinal;
     TemporalConstraintId m_baseDomainConstraint; /*!< Constraint used to enforce timepoint bounds input.*/
     bool m_deletionMarker;
@@ -517,6 +546,20 @@ namespace EUROPA {
     inline const Time& getUpperBound() const {return upperBound;}
     inline void getBounds(Time& lb, Time& ub) const {lb = lowerBound; ub = upperBound;}
 
+    // PHM Support for reftime calculations
+    inline const Time& getReftime() const {
+      // Return legal value closest to propagated reftime.
+      if (reftime < lowerBound) return lowerBound;
+      if (reftime > upperBound) return upperBound;
+      return reftime;
+    }
+    inline bool updatePrevReftime() {
+      if (reftime != prev_reftime) {
+	prev_reftime = reftime;
+	return true;
+      }
+      return false;
+    }
   };
 
   /**

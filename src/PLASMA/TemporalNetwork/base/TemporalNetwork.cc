@@ -57,6 +57,13 @@ namespace EUROPA {
   {
     // Overrides the definition in DistanceGraph class.
     TimepointId node = (new Tnode(this))->getId();
+    // PHM Support for reftime calculations
+    if (m_refpoint.isId()) {
+      if (m_refpoint->inCount == 0)
+	node->reftime = POS_INFINITY;
+      else
+	node->reftime = NEG_INFINITY;
+    }
     return node;
   }
 
@@ -582,6 +589,13 @@ namespace EUROPA {
     return edgeNogoodList;
   }
 
+  // PHM Support for reftime calculations
+  void TemporalNetwork::setReferenceTimepoint (TimepointId refpoint)
+  {
+    m_refpoint = refpoint;
+    fullPropagate();
+  }
+
   TimepointId TemporalNetwork::getOriginNode() const {
     return this->nodes.front();
   }
@@ -615,6 +629,30 @@ namespace EUROPA {
     incDijkstraForward();
     queue->insertInQueue(origin);
     incDijkstraBackward();
+
+    // PHM 6/29/2010 Changes to support reftime calculations
+    if (m_refpoint.isId()) {
+
+      // We may use either all lower bounds or all upper bounds for
+      // preferred time constraints.  Code adjusts to either case.
+
+       Time initref =
+	(m_refpoint->inCount == 0) ? POS_INFINITY : NEG_INFINITY;
+
+      for (unsigned i=0; i < nodes.size(); i++) {
+	TimepointId node = (TimepointId) nodes[i];
+	node->reftime = initref;
+      }
+      m_refpoint->reftime = 0;
+      m_refpoint->depth = 0;
+      queue->insertInQueue(m_refpoint);
+
+      if (m_refpoint->inCount == 0)
+	incDijkstraReftime();
+      else
+	incDijkstraRefBack(); // Backwards propagation
+    }
+
     debugMsg("TemporalNetwork:fullPropagate", "fullPropagate done");
  }
 
@@ -676,6 +714,29 @@ namespace EUROPA {
       queue1->insertInQueue(next);
       handleNodeUpdate(next);
       incDijkstraBackward();
+    }
+
+    // PHM Support for reftime calculations
+    // Adjust to either case of all lb or all ub constraints.
+    if (m_refpoint.isId()) {
+      if (m_refpoint->inCount == 0) { // all ub constraints
+	next = startNode(src, src->reftime, targ, targ->reftime);
+	if (!next.isNoId()) {
+	  queue1->insertInQueue(next);
+	  incDijkstraReftime();
+	}
+      }
+      else { // all lb constraints
+	headDistance = -(src->reftime);
+	footDistance = -(targ->reftime);
+	next = startNode(src, headDistance, targ, footDistance, false);
+	if (!next.isNoId()) {
+	  src->reftime = -(headDistance);
+	  targ->reftime = -(footDistance);
+	  queue1->insertInQueue(next);
+	  incDijkstraRefBack(); // Backwards propagation
+	}
+      }
     }
   }
 
@@ -782,6 +843,76 @@ namespace EUROPA {
 	  next->lowerBound = -newDistance;
 	  // 12/13/2002 Fix queue key computation.  Correct formula for
 	  // backward prop is key = (distance + potential).
+	  queue->insertInQueue (next, newDistance + next->potential);
+
+	  // Store in set of updated timepoints
+	  handleNodeUpdate(next);
+	}
+      }
+    }
+  }
+
+  Void TemporalNetwork::incDijkstraReftime()
+  {
+    // PHM New function to support reftime calculations
+    BucketQueue* queue = this->bqueue;
+#ifndef EUROPA_FAST
+    int BFbound = this->nodes.size();
+#endif
+    while (true) {
+      DnodeId dnode = queue->popMinFromQueue();
+      if (dnode.isNoId())
+	return;
+      TimepointId node(dnode);
+      for (int i=0; i< node->outCount; i++) {
+	DedgeId edge = node->outArray[i];
+	TimepointId next = (TimepointId) edge->to;
+	Time newDistance = node->reftime + edge->length;
+	if (newDistance < next->reftime) {
+	  check_error(!(newDistance > MAX_DISTANCE || newDistance < MIN_DISTANCE),
+		      "Potential over(under)flow during upper bound propagation",
+		      TempNetErr::TimeOutOfBoundsError());
+	  // Next check is a failsafe to prevent infinite propagation.
+	  check_error(!((next->depth = node->depth + 1) > BFbound),
+		      "Dijkstra propagation in inconsistent network",
+		      TempNetErr::TempNetInternalError());
+	  next->reftime = newDistance;
+	  // Appropriate priority key as derived from Johnson's algorithm
+	  queue->insertInQueue (next, newDistance - next->potential);
+
+	  // Store in set of updated timepoints
+	  handleNodeUpdate(next);
+	}
+      }
+    }
+  }
+
+  Void TemporalNetwork::incDijkstraRefBack()
+  {
+    // PHM New function to support reftime calculations
+    BucketQueue* queue = this->bqueue;
+#ifndef EUROPA_FAST
+    int BFbound = this->nodes.size();
+#endif
+    while (true) {
+      DnodeId dnode =  queue->popMinFromQueue();
+      if(dnode.isNoId())
+	return;
+      TimepointId node(dnode);
+      for (int i=0; i< node->inCount; i++) {
+	DedgeId edge = node->inArray[i];
+	TimepointId next = (TimepointId) edge->from;
+	Time newDistance = -(node->reftime) + edge->length;
+	if (newDistance < -(next->reftime)) {
+    check_error(!(newDistance > MAX_DISTANCE || newDistance < MIN_DISTANCE),
+                "Potential over(under)flow during lower bound propagation",
+                TempNetErr::TimeOutOfBoundsError());
+	  // Next check is a failsafe to prevent infinite propagation.
+    check_error(!((next->depth = node->depth + 1) > BFbound),
+                "Dijkstra propagation in inconsistent network",
+                TempNetErr::TempNetInternalError());
+	  next->reftime = -newDistance;
+	  // For backward prop correct key = (distance + potential).
 	  queue->insertInQueue (next, newDistance + next->potential);
 
 	  // Store in set of updated timepoints

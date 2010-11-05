@@ -84,6 +84,10 @@ namespace EUROPA {
       m_recomputeInterval = (new ProfileIterator(getId()))->getId();
     }
 
+    bool Profile::containsChange(const InstantId instant) {
+      return (instant->containsStartOrEnd());
+    }
+
     void Profile::removeTransaction(const TransactionId t) {
       if(m_transactions.find(t) == m_transactions.end())
         return;
@@ -100,7 +104,7 @@ namespace EUROPA {
         debugMsg("Profile:removeTransaction", "Removing transaction " << t << " from instant for time " << profIt.getInstant()->getTime());
         profIt.getInstant()->removeTransaction(t);
         //if the instant contains no transactions or doesn't represent the start or end of a transaction, it is empty and should be deleted.
-        if(profIt.getInstant()->getTransactions().empty() || !profIt.getInstant()->containsStartOrEnd()) {
+	if(profIt.getInstant()->getTransactions().empty() || !containsChange(profIt.getInstant())) {
           debugMsg("Profile:removeTransaction", "Instant for time " << profIt.getInstant()->getTime() << " is empty.");
           emptyInstants.push_back(profIt.getInstant()->getTime());
         }
@@ -145,7 +149,7 @@ namespace EUROPA {
         InstantId inst = instIt->second;
         debugMsg("Profile:removeTransaction", "Removing instant at time " << inst->getTime());
         condDebugMsg(inst->getTransactions().empty(), "Profile:removeTransaction", "because it has no transactions.");
-        condDebugMsg(!inst->containsStartOrEnd(), "Profile:removeTransaction", "because it does not mark a change.");
+        condDebugMsg(!containsChange(inst), "Profile:removeTransaction", "because it does not mark a change.");
         m_instants.erase(*it);
         m_detector->notifyDeleted(inst);
 	inst->discard();;
@@ -200,7 +204,7 @@ namespace EUROPA {
           if(!e->time()->lastDomain().isMember(inst->getTime())) {
             debugMsg("Profile:handleTimeChanged", "Removing transaction " << e << " from Instant at time " << inst->getTime());
             inst->removeTransaction(e);
-            if(inst->getTransactions().empty() || !inst->containsStartOrEnd())
+            if(inst->getTransactions().empty() || !containsChange(inst))
               emptyInstants.push_back(inst->getTime());
           }
           else
@@ -217,7 +221,7 @@ namespace EUROPA {
           InstantId inst = instIt->second;
           debugMsg("Profile:handleTimeChanged", "Removing instant at time " << inst->getTime());
           condDebugMsg(inst->getTransactions().empty(), "Profile:handleTimeChanged", "because it has no transactions.");
-          condDebugMsg(!inst->containsStartOrEnd(), "Profile:handleTimeChanged", "because it does not mark a change.");
+          condDebugMsg(!containsChange(inst), "Profile:handleTimeChanged", "because it does not mark a change.");
           m_instants.erase(*it);
           m_detector->notifyDeleted(inst);
           delete (Instant*) inst;
@@ -232,7 +236,7 @@ namespace EUROPA {
         std::vector<eint> emptyInstants;
         while(!it.done()) {
           InstantId inst = it.getInstant();
-          if(!inst->containsStartOrEnd())
+          if(!containsChange(inst))
             emptyInstants.push_back(inst->getTime());
           else if(inst->getTransactions().find(e) == inst->getTransactions().end())
             inst->addTransaction(e);
@@ -246,7 +250,7 @@ namespace EUROPA {
           InstantId inst = instIt->second;
           debugMsg("Profile:handleTimeChanged", "Removing instant at time " << inst->getTime());
           condDebugMsg(inst->getTransactions().empty(), "Profile:handleTimeChanged", "because it has no transactions.");
-          condDebugMsg(!inst->containsStartOrEnd(), "Profile:handleTimeChanged", "because it does not mark a change.");
+          condDebugMsg(!containsChange(inst), "Profile:handleTimeChanged", "because it does not mark a change.");
           m_instants.erase(*it);
           m_detector->notifyDeleted(inst);
           delete (Instant*) inst;
@@ -563,6 +567,20 @@ namespace EUROPA {
           debugMsg("Profile:addInstant", "Adding transaction " << trans << " spanning " << trans->time()->toString() << " to instant at time " << time);
           inst->addTransaction(trans);
         }
+      }
+    }
+
+    void Profile::removeInstant(const eint time) {
+      std::map<eint, InstantId>::iterator pit = m_instants.find(time);
+      check_error(pit != m_instants.end());
+      if (!containsChange(pit->second)) {
+	InstantId inst = pit->second;
+	debugMsg("Profile:removeInstant",
+		 "Removing instant at time " << inst->getTime()
+		 << " because it does not mark a change.");
+	m_instants.erase(pit);
+	m_detector->notifyDeleted(inst);
+	delete (Instant*) inst;
       }
     }
 
