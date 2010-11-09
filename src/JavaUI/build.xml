@@ -10,12 +10,6 @@
 	<property name="europa.dir" value="${env.PLASMA_HOME}" />
 	<echo message="PLASMA_HOME = ${europa.dir}" />
 
-	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
-		<classpath>
-			<pathelement location="${europa.dir}/ext/ant/lib/ant-contrib-1.0b3.jar" />
-		</classpath>
-	</taskdef>
-
 	<property file="${basedir}/build.properties" />
 	<property file="${basedir}/plugin.properties" />
 	<property name="srcdir" value="${basedir}/source" />

@@ -5,9 +5,10 @@
 
   <taskdef resource="net/sf/antcontrib/antcontrib.properties">
     <classpath>
-      <pathelement location="ext/ant/lib/ant-contrib-1.0b3.jar"/>
+      <pathelement location="ext/ant/ant-contrib-1.0b3.jar"/>
     </classpath>
   </taskdef>
+	
   <target name="init" depends="findSystem">
     <property environment="env"/>
 

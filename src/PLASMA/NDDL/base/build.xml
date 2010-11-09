@@ -4,14 +4,16 @@
   New Domain Definition Language
 	</description>
 
+	<property environment="env"/>
+	
 	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
-		<classpath>
-			<pathelement location="../../../../ext/ant/lib/ant-contrib-1.0b3.jar"/>
-		</classpath>
+	      <classpath>
+		      <pathelement location="${env.PLASMA_HOME}/ext/ant/ant-contrib-1.0b3.jar"/>
+		  </classpath>
 	</taskdef>
-
+		
+	
 	<target name="init">
-		<property environment="env"/>
 		<property name="local.env.vcInstallDir"  value="${env.VCINSTALLDIR}" />
 		<echo message="vcInstallDir: ${local.env.vcInstallDir}"/>
 		<if>

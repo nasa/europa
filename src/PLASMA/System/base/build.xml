@@ -3,13 +3,13 @@
 <project name="PSEngine" default="PSEngine" basedir=".">
   
   <property environment="env"/>
-    	
-  <taskdef resource="net/sf/antcontrib/antcontrib.properties">
-    <classpath>
-      <pathelement location="${env.PLASMA_HOME}/ext/ant/lib/ant-contrib-1.0b3.jar"/>
-    </classpath>
-  </taskdef>
 
+  <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+      <classpath>
+	      <pathelement location="${env.PLASMA_HOME}/ext/ant/ant-contrib-1.0b3.jar"/>
+	  </classpath>
+  </taskdef>
+	
   <target name="init">
     <tstamp/>
 
