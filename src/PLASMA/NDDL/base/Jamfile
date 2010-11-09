@@ -11,57 +11,10 @@ if ! $(PLASMA_READY) {
 	NddlToken.cc
 	NddlUtils.cc
 	NddlRules.cc
-        NDDL3Lexer.cpp
-        NDDL3Parser.cpp
-        NDDL3Tree.cpp
+	NDDL3Lexer.cpp
+	NDDL3Parser.cpp
+	NDDL3Tree.cpp
 	;
 
-  ApacheAnt nddl.jar :
-	[ FGristFiles build.xml ]
-	# ANTLR Grammars
-	antlr/nddl.g
-	antlr/nddl.tree.g
-
-	# Primary components (executables)
-	java/nddl/Nddl.java
-	java/nddl/Parse.java
-	java/nddl/NddlCompiler.java
-
-	# Parser support
-	java/nddl/ConstraintSignature.java
-	java/nddl/SignatureOperation.java
-	java/nddl/NddlASTFactory.java
-	java/nddl/NddlASTNode.java
-	java/nddl/NddlXmlStrings.java
-	java/nddl/NddlParserState.java
-	java/nddl/NddlName.java
-	java/nddl/NddlType.java
-	java/nddl/NddlVariable.java
-	java/nddl/EmptyDomainException.java
-
-	# Compiler support
-	java/nddl/ModelAccessor.java
-	java/nddl/HeaderGenerator.java
-	java/nddl/ImplementationGenerator.java
-	java/nddl/ClassWriter.java
-	java/nddl/ConstraintWriter.java
-	java/nddl/EnumerationWriter.java
-	java/nddl/IndentWriter.java
-	java/nddl/PredicateWriter.java
-	java/nddl/RuleWriter.java
-	java/nddl/SchemaWriter.java
-	java/nddl/SharedWriter.java
-
-	# Remaining utility classes
-	java/nddl/StreamMerge.java
-	java/nddl/DebugMsg.java
-	java/nddl/XMLUtil.java
-	java/nddl/NddlUtil.java
-	;
-
-LOCATE on nddl.jar = [ FDirName $(PLASMA_BUILD) lib ] ;
-
-Depends lib : nddl.jar ;
-Depends build-modules : nddl.jar ;
 
 } # PLASMA_READY
