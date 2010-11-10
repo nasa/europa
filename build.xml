@@ -303,7 +303,7 @@
   </target>
 
   <target name="build" depends="init">
-  <echo>${ver}</echo>
+  <echo message="${ver}"/>
   <if>		
 		<contains string="${ver}" substring="WindowsVS" casesensitive="false"/>
 		<then>		
@@ -329,22 +329,10 @@
 								
 			  </else>
 			</if>				
-				<ant dir="src\\PLASMA\\NDDL\\base" description="Build Nddl.jar" target="nddl">					
-				</ant>
 				<ant dir="src\\PLASMA\\System\\base" description="Build PSEngine.jar" target="PSEngine">
 					<property name="src.dir" value="swig" />
 				</ant>
 				<ant dir="src\\PLASMA\\System\\component\\PSUI" description="Build PSEngine.jar" target="dist"/>
-				<!--			
-				<delete file="src\\JavaUI\\lib\\PSEngine.jar"/>				
-				<exec executable="mklink" dir="src\\JavaUI\\lib" failonerror="true">
-					<arg line="PSEngine.jar ..\..\Europa\build\lib\PSEngine.jar"/>
-				</exec>				
-				<ant dir="src/JavaUI" description="Build Swing version of Java UI" target="build.swing">
-					<property name="europa.dir" value="${local.env.PLASMA_HOME}" />
-					<property name="psengine.jar.path" value="${local.env.PLASMA_HOME}/build/lib" />
-				</ant>
--->				
 		</then>
 		<else>
 				<echo message="jam ${jam.opts} -j${jam.num.cores} build"/>
