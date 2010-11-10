@@ -34,6 +34,7 @@ public class NddlAshInterpreter extends AshInterpreter
 
     public boolean eval(String toEval) 
     {
-        return interpreter_.eval(toEval);    
+    	return false;
+        //return interpreter_.eval(toEval);    
     }
 }
