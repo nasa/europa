@@ -247,30 +247,12 @@ namespace EUROPA {
     return retval;
   }
 
-  protected NddlInterpreter nddlInterpreter_=null;
-
-  public NddlInterpreter getNddlInterpreter()
-  {
-      if (nddlInterpreter_ == null)
-          nddlInterpreter_ = new NddlInterpreter(this);
-
-      return nddlInterpreter_;
-  }
-
   public String executeScript(String language, String script, boolean isFile) throws PSLanguageExceptionList
   {
       String retval = "";
       
       try {
-        if (language.equalsIgnoreCase("nddl2")) {
-            if (isFile)
-                getNddlInterpreter().source(script);
-            else
-                getNddlInterpreter().eval(script);
-        }
-        else {
-            retval = executeScript_internal(language,script,isFile);
-        }
+          retval = executeScript_internal(language,script,isFile);
       }
       catch (PSLanguageExceptionList e) {
         // This exception derives from RuntimeException and needs not be declared
