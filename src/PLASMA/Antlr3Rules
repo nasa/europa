@@ -54,7 +54,7 @@ rule RunAntlr3Tool
 #  Echo RunAntlr3Tool . $(files) . $(grammar) ;
 
   Depends $(files) : $(grammar) ;
-  LocalClean clean : $(files) ;
+#  LocalClean clean : $(files) ;
 }
 
 actions RunAntlr3Tool
@@ -86,7 +86,7 @@ rule RunAntlr3TreeTool
 #  Echo RunAntlr3TreeTool . $(files) . $(grammar) ;
 
   Depends $(files) : $(grammar) ;
-  LocalClean clean : $(files) ;
+#  LocalClean clean : $(files) ;
 }
 
 actions RunAntlr3TreeTool
