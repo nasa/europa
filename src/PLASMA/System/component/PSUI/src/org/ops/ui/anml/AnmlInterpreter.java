@@ -9,11 +9,6 @@ import java.io.PrintStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import nddl.ModelAccessor;
-import nddl.NddlParser;
-import nddl.NddlParserState;
-import nddl.NddlTreeParser;
-
 import net.n3.nanoxml.IXMLElement;
 import net.n3.nanoxml.XMLElement;
 import net.n3.nanoxml.XMLWriter;
