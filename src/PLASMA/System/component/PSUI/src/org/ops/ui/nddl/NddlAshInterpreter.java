@@ -13,23 +13,23 @@ import psengine.PSEngine;
 public class NddlAshInterpreter extends AshInterpreter 
 {
     PrintStream consoleErr_ = System.err;
-    NddlInterpreter interpreter_ = null;
+    //NddlInterpreter interpreter_ = null;
 
     public NddlAshInterpreter(PSEngine pse) 
     {
         super("Nddl");
-        interpreter_ = pse.getNddlInterpreter();
+        //interpreter_ = pse.getNddlInterpreter();
     }
 
     public void setConsole(AshConsole console) 
     {
         consoleErr_ = new PrintStream(new BufferedOutputStream(new DocumentOutputStream(console.getDocument(), "!!")), true);
-        interpreter_.setErrorStream(consoleErr_);
+        //interpreter_.setErrorStream(consoleErr_);
     }
 
     public void source(String filename) 
     {
-        interpreter_.source(filename);    
+        //interpreter_.source(filename);    
     }
 
     public boolean eval(String toEval) 
