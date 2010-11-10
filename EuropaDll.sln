@@ -35,8 +35,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "System", "src\PLASMA\System
 		{2F943FFF-8040-4D62-8958-5AF72F786C33} = {2F943FFF-8040-4D62-8958-5AF72F786C33}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DllTest", "examples\VS_Examples\DllTest.vcproj", "{4CC21857-4D58-4780-8CFD-8035A69D2EB8}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug CLR|Any CPU = Debug CLR|Any CPU
@@ -259,24 +257,6 @@ Global
 		{1DB2A409-8FEA-4786-9AB9-3917818FEE71}.Release|Win32.ActiveCfg = Release|Win32
 		{1DB2A409-8FEA-4786-9AB9-3917818FEE71}.Release|Win32.Build.0 = Release|Win32
 		{1DB2A409-8FEA-4786-9AB9-3917818FEE71}.Release|x64.ActiveCfg = Release|Win32
-		{4CC21857-4D58-4780-8CFD-8035A69D2EB8}.Debug CLR|Any CPU.ActiveCfg = Debug CLR|Win32
-		{4CC21857-4D58-4780-8CFD-8035A69D2EB8}.Debug CLR|Mixed Platforms.ActiveCfg = Debug CLR|Win32
-		{4CC21857-4D58-4780-8CFD-8035A69D2EB8}.Debug CLR|Mixed Platforms.Build.0 = Debug CLR|Win32
-		{4CC21857-4D58-4780-8CFD-8035A69D2EB8}.Debug CLR|Win32.ActiveCfg = Debug CLR|Win32
-		{4CC21857-4D58-4780-8CFD-8035A69D2EB8}.Debug CLR|Win32.Build.0 = Debug CLR|Win32
-		{4CC21857-4D58-4780-8CFD-8035A69D2EB8}.Debug CLR|x64.ActiveCfg = Debug CLR|Win32
-		{4CC21857-4D58-4780-8CFD-8035A69D2EB8}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{4CC21857-4D58-4780-8CFD-8035A69D2EB8}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-		{4CC21857-4D58-4780-8CFD-8035A69D2EB8}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-		{4CC21857-4D58-4780-8CFD-8035A69D2EB8}.Debug|Win32.ActiveCfg = Debug|Win32
-		{4CC21857-4D58-4780-8CFD-8035A69D2EB8}.Debug|Win32.Build.0 = Debug|Win32
-		{4CC21857-4D58-4780-8CFD-8035A69D2EB8}.Debug|x64.ActiveCfg = Debug|Win32
-		{4CC21857-4D58-4780-8CFD-8035A69D2EB8}.Release|Any CPU.ActiveCfg = Release|Win32
-		{4CC21857-4D58-4780-8CFD-8035A69D2EB8}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-		{4CC21857-4D58-4780-8CFD-8035A69D2EB8}.Release|Mixed Platforms.Build.0 = Release|Win32
-		{4CC21857-4D58-4780-8CFD-8035A69D2EB8}.Release|Win32.ActiveCfg = Release|Win32
-		{4CC21857-4D58-4780-8CFD-8035A69D2EB8}.Release|Win32.Build.0 = Release|Win32
-		{4CC21857-4D58-4780-8CFD-8035A69D2EB8}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
