@@ -7,7 +7,7 @@ import org.ops.ui.ash.AshConsole;
 import org.ops.ui.ash.AshInterpreter;
 import org.ops.ui.ash.DocumentOutputStream;
 
-import psengine.NddlInterpreter;
+//import psengine.NddlInterpreter;
 import psengine.PSEngine;
 
 public class NddlAshInterpreter extends AshInterpreter 
