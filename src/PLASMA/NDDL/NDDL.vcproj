@@ -523,10 +523,10 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="Generating NDDL3 grammer"
-						CommandLine="&quot;$(JAVA_HOME)&quot;\bin\java -cp $(PLASMA_HOME)\ext\lib\antlr-3.jar org.antlr.Tool -fo .\base -traceParser $(InputPath)&#x0D;&#x0A;move .\base\NDDL3Lexer.c .\base\\NDDL3Lexer.cpp&#x0D;&#x0A;move .\base\NDDL3Parser.c .\base\NDDL3Parser.cpp&#x0D;&#x0A;"
-						AdditionalDependencies=".\base\antlr\NDDL3.tokens"
-						Outputs=".\base\NDDL3Lexer.cpp;.\base\NDDL3Lexer.h;.\base\NDDL3Parser.cpp;.\base\NDDL3Parser.h;.\base\NDDL3.tokens"
+						Description=""
+						CommandLine=""
+						AdditionalDependencies=""
+						Outputs=""
 					/>
 				</FileConfiguration>
 			</File>
@@ -542,9 +542,10 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="&quot;$(JAVA_HOME)&quot;\bin\java -cp $(PLASMA_HOME)\ext\lib\antlr-3.jar org.antlr.Tool -fo .\base -traceParser $(InputPath)&#x0D;&#x0A;move .\base\NDDL3Tree.c .\base\\NDDL3Tree.cpp&#x0D;&#x0A;"
-						AdditionalDependencies=".\base\antlr\NDDL3Tree.tokens"
-						Outputs=".\base\NDDL3Tree.h;.\base\NDDL3Tree.cpp; .\base\NDDL3Tree.tokens"
+						Description=""
+						CommandLine=""
+						AdditionalDependencies=""
+						Outputs=""
 					/>
 				</FileConfiguration>
 			</File>
