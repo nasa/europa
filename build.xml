@@ -12,7 +12,7 @@
   <target name="init" depends="findSystem">
     <property environment="env"/>
 
-    <property name="europa.version" value="2.4"/> 	
+    <property name="europa.version" value="2.5b"/> 	
 
     <!-- load local overrides -->
     <property file="${user.home}/.ant.plasma.properties"/>
