@@ -283,23 +283,23 @@
   </target>
 
   <target name="clean" depends="init">
-	<delete dir="${dir.dist}"/>
-	<if>		
-		<contains string="${ver}" substring="Windows" casesensitive="false"/>
-		<then>
-			<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
-			  <arg line="/target:clean /p:Platform=Win32 /p:Configuration=Debug Europa.sln"/>
-			</exec>
-		</then>
-		<else>			  
-				<exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
-				  <arg line="clean-all"/>
-				  <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
-				</exec>				
-		</else>
-	</if>
-	<ant dir="src/JavaUI" description="Clean up Java part" target="clean.all" />
-		<delete dir="${dir.build}"/>
+    <delete dir="${dir.dist}"/>
+    <if>		
+      <contains string="${ver}" substring="Windows" casesensitive="false"/>
+      <then>
+	<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
+	  <arg line="/target:clean /p:Platform=Win32 /p:Configuration=Debug Europa.sln"/>
+	</exec>
+      </then>
+      <else>			  
+	<exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
+	  <arg line="clean-all"/>
+	  <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
+	</exec>				
+      </else>
+    </if>
+    <ant dir="src/JavaUI" description="Clean up Java part" target="clean.all" />
+    <delete dir="${dir.build}"/>
   </target>
 
   <target name="build" depends="init">
