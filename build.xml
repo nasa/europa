@@ -329,10 +329,10 @@
 			</if>	
 			
 			<ant dir="src\\PLASMA\\System\\base" description="Build PSEngine.jar" target="PSEngine">
-				<property name="plasma.dir" value="$basedir}"/>
+				<property name="plasma.dir" value="${basedir}"/>
 			</ant>
 			<ant dir="src\\PLASMA\\System\\component\\PSUI" description="Build PSEngine.jar" target="dist">
-				<property name="plasma.dir" value="$basedir}"/>
+				<property name="plasma.dir" value="${basedir}"/>
 			</ant>
 		</then>
 		<else>
