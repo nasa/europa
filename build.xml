@@ -119,8 +119,6 @@
 	    <property name="jam.log.type" value=""/>  <!-- choices are USE_EUROPA_LOGGER, ALL_LOGGING_DISABLED, "" -->
 	    <property name="jam.misc" value=""/>
 	    <property name="jam.args" value=""/>
-	    <property name="jam.platform-flags" value="${jam.antlr.include} ${jam.march}"/>
-	    <property name="jam.link-libs" value="${jam.antlr.lib}"/>
 	  	
 		<condition property="jam.antlr.include" value="-I${antlr.include}">
 			<isset property="antlr.include"/>
@@ -132,7 +130,7 @@
 		</condition>
 	    <property name="jam.antlr.lib" value=""/>
 	        	
-	    <condition property="jam.num.cores" value="${env.PLASMA_NUM_CORES}">
+		<condition property="jam.num.cores" value="${env.PLASMA_NUM_CORES}">
 	      <isset property="${env.PLASMA_NUM_CORES}"/>
 	    </condition>
 	    <property name="jam.num.cores" value="1"/>
@@ -147,6 +145,8 @@
 	    <property name="jam.64bit" value=""/>
 	    <property name="jam.march" value="-m32"/>
 	  	
+	    <property name="jam.platform-flags" value="${jam.antlr.include} ${jam.march}"/>
+	    <property name="jam.link-libs" value="${jam.antlr.lib}"/>
 	    <property name="jam.opts" value="${jam.args} ${jam.misc} ${jam.64bit} -sLOGGER_TYPE=${jam.log.type} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries} -sPLATFORM_FLAGS=&quot;${jam.platform-flags}&quot; -sLINKLIBS=&quot;${jam.link-libs}&quot;"/>
 
 	  	<if> 
