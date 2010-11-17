@@ -19,10 +19,6 @@
 	</path>
 
 	<target name="init">
-		<echo message="ANT_HOME: ${env.ANT_HOME}"/>
-		<echo message="JAVA_HOME: ${env.JAVA_HOME}"/>
-		<echo message="PLASMA_HOME: ${env.PLASMA_HOME}"/>
-
 		<mkdir dir="${build.dir}"/>
 		<mkdir dir="${cache.dir}"/>
 	</target>
