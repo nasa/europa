@@ -1,22 +1,91 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="PLASMA" default="build" basedir=".">
+<project name="EUROPA" default="build" basedir=".">
+	<description>EUROPA's Master build file</description>
 
-  <description>PLASMA</description>
-
-  <taskdef resource="net/sf/antcontrib/antcontrib.properties">
-    <classpath>
-      <pathelement location="ext/ant/ant-contrib-1.0b3.jar"/>
-    </classpath>
-  </taskdef>
+ 	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+		<classpath>
+			<pathelement location="ext/ant/ant-contrib-1.0b3.jar"/>
+		</classpath>
+	</taskdef>
 	
-  <target name="init" depends="findSystem">
     <property environment="env"/>
-
-    <property name="europa.version" value="2.5b"/> 	
 
     <!-- load local overrides -->
     <property file="${user.home}/.ant.plasma.properties"/>
+
+	<property name="europa.version" value="2.5b"/> 	
+	
+    <property name="dir.plasma" value="${basedir}"/>
+    <property name="dir.src" value="src/PLASMA"/>
+    <property name="dir.build" value="build"/>
+    <property name="dir.dist" value="dist"/>
+    <property name="dir.dist.base" location="${dir.dist}/europa"/>
+	
+	<target name="findPlatform">
+		<if>		
+		  <contains string="${os.name}" substring="Windows" casesensitive="false"/>  <!-- Cygwin isn't supported -->
+          <then>
+		    <property name="local.os" value="WindowsVS"/>
+			<property name="ver" value="WindowsVS"/>
+      	  </then>
+		<else>
+			<exec executable="uname" outputproperty="uname.s">
+			  <arg value="-s"/>
+			</exec>
+			<exec executable="uname" outputproperty="uname.a">
+			  <arg value="-a"/>
+			</exec>	
+			<exec executable="which" outputproperty="gcc.location">
+			  <arg value="gcc"/>
+			</exec>
+		</else>
+		</if>
 		
+	    <if>
+			<!-- Linux -->
+			<contains string="${uname.s}" substring="Linux" casesensitive="false"/>
+	    	<then>
+	    		<property name="local.os" value="linux"/>
+	    	</then>
+	    	<!-- Mac OS X -->
+	    	<elseif>
+				<contains string="${uname.s}" substring="Darwin" casesensitive="false"/>
+	    	<then>
+	          <property name="local.os" value="darwin"/>
+	          <property name="local.env.LD_LIBRARY_PATH.name" value="DYLD_LIBRARY_PATH"/>
+	        </then>
+			</elseif>	    	
+			<!-- Solaris -->
+	    	<elseif>
+	    		<contains string="${uname.s}" substring="SunOS" casesensitive="false"/>
+	    	<then>
+	    		<property name="local.os" value="solaris"/>
+	    	</then>
+			</elseif>
+	    </if>
+		
+	    <echo message="Running as a ${local.os} build."/>
+	  	
+		<!-- Find out if we're on a 64-bit platform -->
+	    <if>
+	    	<contains string="${uname.a}" substring="x86_64" casesensitive="false"/>
+		<then>
+			<property name="jam.64bit" value="-s64BIT=1"/>
+		</then>
+	    </if>
+
+	    <if>
+	      <equals arg1="${jam.64bit}" arg2="-s64BIT=1"/>
+	      <then>
+	        <property name="jam.march" value="-m64"/>
+	      </then>
+	      <else>
+	        <property name="jam.march" value="-m32"/>
+	      </else>
+	    </if>
+	</target>  
+  
+  <target name="init" depends="findPlatform">
     <if>
     	<equals arg1="${jam.variant}" arg2="OPTIMIZED"/>
     	<then>
@@ -29,112 +98,24 @@
     	</else>
     </if>	
   	
-	<if>
-	  <contains string="${ver}" substring="Windows" casesensitive="false"/>
-	    <then>
-			<property name="local.os" value="WindowsVS"/>
-		</then>
-	</if>
-
     <if>
-      <or>
-        <contains string="${uname.s}" substring="Linux" casesensitive="false"/>
-      </or>
+      <isset property="antlr.include"/>
       <then>
-      	<property name="local.os" value="linux"/>
+        <property name="jam.antlr.include" value="-I${antlr.include}"/>
       </then>
-      <!-- Mac OS X -->
-      <elseif>
-        <contains string="${uname.s}" substring="Darwin" casesensitive="false"/>
-        <then>
-          <property name="local.os" value="darwin"/>
-          <property name="local.env.LD_LIBRARY_PATH.name" value="DYLD_LIBRARY_PATH"/>
-        </then>
-      </elseif>
-
-      <elseif>
-        <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
-	<then>
-	<!-- Windows-MinGW running inside cygwin -->
-        <if>
-	  <contains string="${gcc.location}" substring="mingw" casesensitive="false"/>
-	  <then>
-	    <property name="local.os" value="MinGW"/>
-	    <exec executable="cygpath" outputproperty="local.env.PLASMA_HOME">
-	      <arg value="--mixed"/>
-              <!--<arg value="-absolute"/>-->
-              <arg value="${basedir}"/>
-            </exec>
-
-	    <exec executable="cygpath" outputproperty="local.env.EUROPA_HOME">
-	      <arg value="--mixed"/>
-	      <!--<arg value="-absolute"/>-->
-	      <arg value="${basedir}/dist/europa"/>
-	    </exec>
-	    <exec executable="cygpath" outputproperty="local.env.CYG_JAVA_HOME">
-              <arg value="--mixed"/>
-              <arg value="--absolute"/>
-              <arg value="${env.JAVA_HOME}"/>
-	    </exec>
-            <property name="jam.libraries" value="STATIC"/>
-	    <property name="jam.misc" value="-sOS=CYGWIN" />
-	  </then>
-	  <else>
-	    <!-- Windows-Cygwin -->
-	    <property name="local.os" value="windows"/>
-	    <exec executable="cygpath" outputproperty="local.env.PLASMA_HOME">
-              <arg value="--unix"/>
-              <!--<arg value="-absolute"/>-->
-              <arg value="${basedir}"/>
-            </exec>
-            <exec executable="cygpath" outputproperty="local.env.EUROPA_HOME">
-              <arg value="--unix"/>
-              <!--<arg value="-absolute"/>-->
-              <arg value="${basedir}/dist/europa"/>
-            </exec>
-            <exec executable="cygpath" outputproperty="local.env.CYG_JAVA_HOME">
-              <arg value="--unix"/>
-              <arg value="--absolute"/>
-              <arg value="${env.JAVA_HOME}"/>
-            </exec>
-            <property name="jam.libraries" value="STATIC"/>
-            <property name="jam.misc" value="-sOS=CYGWIN"/>
-	  </else>
-	</if>  
-        </then>
-      </elseif>
-    	
-      <!-- Solaris -->
-      <elseif>
-        <contains string="${uname.s}" substring="SunOS" casesensitive="false"/>
-        <then>
-          <property name="local.os" value="solaris"/>
-      	</then>
-      </elseif>
     </if>
-    <echo message="Running as a ${local.os} build."/>
-  	
     <if>
-      <contains string="${uname.a}" substring="x86_64" casesensitive="false"/>
+      <isset property="antlr.lib"/>
       <then>
-          <property name="jam.64bit" value="-s64BIT=1"/>
-     </then>
-    </if>
-
-    <if>
-      <equals arg1="${jam.64bit}" arg2="-s64BIT=1"/>
-      <then>
-        <property name="jam.march" value="-m64"/>
+        <property name="jam.antlr.lib" value="-Wl,-L${antlr.lib}"/>
       </then>
-      <else>
-        <property name="jam.march" value="-m32"/>
-      </else>
     </if>
-
-
+      
     <property name="local.env.PLASMA_HOME" value="${basedir}"/>
     <property name="local.env.EUROPA_HOME" value="${local.env.PLASMA_HOME}/dist/europa"/>
-    <if>
+  	
+    <property name="local.env.LD_LIBRARY_PATH.name" value="LD_LIBRARY_PATH"/>
+     <if>
       <contains string="${uname.s}" substring="SunOS" casesensitive="false"/>
       <then>
         <condition property="local.env.LD_LIBRARY_PATH.value"
@@ -152,34 +133,10 @@
       </else>
     </if>
 
-    <if>
-      <isset property="antlr.include"/>
-      <then>
-        <property name="jam.antlr.include" value="-I${antlr.include}"/>
-      </then>
-    </if>
-    <if>
-      <isset property="antlr.lib"/>
-      <then>
-        <property name="jam.antlr.lib" value="-Wl,-L${antlr.lib}"/>
-      </then>
-    </if>
-      
-    <property name="local.env.LD_LIBRARY_PATH.name" value="LD_LIBRARY_PATH"/>
-    <property name="dir.plasma" value="${basedir}"/>
-    <property name="dir.src" value="src/PLASMA"/>
-    <condition property="dir.planworks" value="${env.PLANWORKS_HOME}">
-      <isset property="${env.PLANWORKS_HOME}"/>
-    </condition>
-    <property name="dir.planworks" value="${basedir}/../PlanWorks"/>
-    <available property="planworks.present" file="${dir.planworks}"/>
     <condition property="jam.num.cores" value="${env.PLASMA_NUM_CORES}">
       <isset property="${env.PLASMA_NUM_CORES}"/>
     </condition>
     <property name="jam.num.cores" value="1"/>
-    <property name="dir.build" value="build"/>
-    <property name="dir.dist" value="dist"/>
-    <property name="dir.dist.base" location="${dir.dist}/europa"/>
     <property name="file.europa-dist" value="europa-${europa.version}-${local.os}.zip"/>
     <property name="file.europa-static-libs" value="europa-${europa.version}-${local.os}-static-libs.zip"/>	
 	<if>      
@@ -215,72 +172,6 @@
       </else>
     </if>
   </target> <!-- init -->
-
-	<target name="findSystem">
-		<if>		
-		  <contains string="${os.name}" substring="Windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
-          <then>
-		    <property name="local.os" value="WindowsVS"/>
-			<property name="ver" value="WindowsVS"/>
-      	  </then>
-		<else>
-			<exec executable="uname" outputproperty="uname.s">
-			  <arg value="-s"/>
-			</exec>
-			<exec executable="uname" outputproperty="uname.a">
-			  <arg value="-a"/>
-			</exec>	
-			<exec executable="which" outputproperty="gcc.location">
-			  <arg value="gcc"/>
-			</exec>
-		</else>
-		</if>
-	</target>  
-  
-  <target name="print-env" depends="init" 
-      description="Debug target: Prints the initialized environment" >
-	  <if>
-		<contains string="${ver}" substring="Windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
-		<then>
-			<exec executable="cmd"> 
-				<arg line="/c set"/>
-			</exec>
-		</then>
-		<else>
-		<exec executable="env"/> 
-		</else>
-		</if>
-  </target>
-
-  <target name="test-ant" depends="init,print-env" 
-      description="Debug target: Tests that this build file can call 'ant' as an executable.">
-    <echo message="testing ant exec"/>
-    <if>
-	  <or>
-      <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>	  
-	  <contains string="${ver}" substring="Windows" casesensitive="false"/>
-	  </or>
-      <then>
-        <exec executable="cmd" dir="c:\" failonerror="true">
-          <arg value="/c"/>
-          <arg value="${env.ANT_HOME}/bin/ant.bat"/>
-          <arg value="-Dproject.bsh.script=Batch.bsh"/>
-          <arg value="-Dproject.mode=${run-example-java.mode}"/>
-          <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
-          <env key="PATH" value=""/>
-          <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.EUROPA_HOME}/lib"/>
-        </exec>
-      </then>
-      <else>
-        <exec executable="ant" dir="\" failonerror="true">
-          <arg line="-Dproject.bsh.script=Batch.bsh -Dproject.mode=${run-example-java.mode}"/>
-          <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
-          <env key="PATH" value=""/>
-          <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.EUROPA_HOME}/lib"/>
-        </exec>
-      </else>
-    </if>
-  </target>
 
   <target name="clean" depends="init">
     <delete dir="${dir.dist}"/>
@@ -362,7 +253,7 @@
     </exec>
   </target>
 
-	<target name="test" depends="build, print-env">
+	<target name="test" depends="build">
 		<if>      
 			<contains string="${ver}" substring="Windows" casesensitive="false"/>
 		<then>
@@ -456,28 +347,6 @@
     <copy todir="${dir.dist.base}/config">
       <fileset dir="${dir.plasma}/config"/>
     </copy>
-
-    <!-- if PlanWorks is present, copy it into the distribution -->
-    <if>
-      <isset property="planworks.present"/>
-      <then>
-        <copy todir="${dir.dist.base}/bin">
-          <fileset file="${dir.planworks}/bin/PlanWorks.sh"/>
-        </copy>
-
-        <copy todir="${dir.dist.base}/lib">
-          <fileset dir="${dir.planworks}/build/lib"/>
-        </copy>
-
-        <copy todir="${dir.dist.base}/config">
-          <fileset dir="${dir.planworks}/config"/>
-        </copy>
-
-        <copy todir="${dir.dist.base}/res">
-          <fileset dir="${dir.planworks}/res"/>
-        </copy>
-      </then>
-    </if>
 
     <!-- ant doesn't preserve permissions -->
     <chmod perm="+x">
@@ -707,49 +576,6 @@
     <antcall target="zip-static-libs"/>
   </target>
 
-  <target name="tags" depends="init"
-          description="create tags and ebrowse files">
-    <delete file="${dir.src}/TAGS"/>
-    <delete file="${dir.src}/BROWSE"/>
-
-    <apply executable="etags" dir="${dir.src}" parallel="true" failonerror="true" >
-      <arg value="--declarations"/>
-      <arg value="-I"/>
-      <arg value="--members"/>
-      <fileset dir="${dir.src}">
-        <include name="*/*.hh"/>
-        <include name="*/*/*.hh"/>
-        <include name="*/*/*/*.hh"/>
-        <include name="*/*.h"/>
-        <include name="*/*/*.h"/>
-        <include name="*/*/*/*.h"/>
-        <include name="*/*.cc"/>
-        <include name="*/*/*.cc"/>
-        <include name="*/*/*/*.cc"/>
-        <include name="*/*.cpp"/>
-        <include name="*/*/*.cpp"/>
-        <include name="*/*/*/*.cpp"/>
-      </fileset>
-    </apply>
-
-    <apply executable="ebrowse" dir="${dir.src}" parallel="true" failonerror="true" >
-      <fileset dir="${dir.src}">
-        <include name="*/*.hh"/>
-        <include name="*/*/*.hh"/>
-        <include name="*/*/*/*.hh"/>
-        <include name="*/*.h"/>
-        <include name="*/*/*.h"/>
-        <include name="*/*/*/*.h"/>
-        <include name="*/*.cc"/>
-        <include name="*/*/*.cc"/>
-        <include name="*/*/*/*.cc"/>
-        <include name="*/*.cpp"/>
-        <include name="*/*/*.cpp"/>
-        <include name="*/*/*/*.cpp"/>
-      </fileset>
-    </apply>
-  </target>
-    
   <!-- This will run the DEV variant by default, 
        if you want other variant, you can do it specifying jam.variant on the command line,
        for instance:
@@ -772,4 +598,92 @@
       </if>    
   </target>  
 
+	<target name="tags" depends="init"
+	          description="create tags and ebrowse files">
+	    <delete file="${dir.src}/TAGS"/>
+	    <delete file="${dir.src}/BROWSE"/>
+
+	    <apply executable="etags" dir="${dir.src}" parallel="true" failonerror="true" >
+	      <arg value="--declarations"/>
+	      <arg value="-I"/>
+	      <arg value="--members"/>
+	      <fileset dir="${dir.src}">
+	        <include name="*/*.hh"/>
+	        <include name="*/*/*.hh"/>
+	        <include name="*/*/*/*.hh"/>
+	        <include name="*/*.h"/>
+	        <include name="*/*/*.h"/>
+	        <include name="*/*/*/*.h"/>
+	        <include name="*/*.cc"/>
+	        <include name="*/*/*.cc"/>
+	        <include name="*/*/*/*.cc"/>
+	        <include name="*/*.cpp"/>
+	        <include name="*/*/*.cpp"/>
+	        <include name="*/*/*/*.cpp"/>
+	      </fileset>
+	    </apply>
+
+	    <apply executable="ebrowse" dir="${dir.src}" parallel="true" failonerror="true" >
+	      <fileset dir="${dir.src}">
+	        <include name="*/*.hh"/>
+	        <include name="*/*/*.hh"/>
+	        <include name="*/*/*/*.hh"/>
+	        <include name="*/*.h"/>
+	        <include name="*/*/*.h"/>
+	        <include name="*/*/*/*.h"/>
+	        <include name="*/*.cc"/>
+	        <include name="*/*/*.cc"/>
+	        <include name="*/*/*/*.cc"/>
+	        <include name="*/*.cpp"/>
+	        <include name="*/*/*.cpp"/>
+	        <include name="*/*/*/*.cpp"/>
+	      </fileset>
+	    </apply>
+	  </target>
+	    
+	  <target name="print-env" depends="init" 
+	      description="Debug target: Prints the initialized environment" >
+		  <if>
+			<contains string="${ver}" substring="Windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
+			<then>
+				<exec executable="cmd"> 
+					<arg line="/c set"/>
+				</exec>
+			</then>
+			<else>
+			<exec executable="env"/> 
+			</else>
+			</if>
+	  </target>
+
+	  <target name="test-ant" depends="init,print-env" 
+	      description="Debug target: Tests that this build file can call 'ant' as an executable.">
+	    <echo message="testing ant exec"/>
+	    <if>
+		  <or>
+	      <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>	  
+		  <contains string="${ver}" substring="Windows" casesensitive="false"/>
+		  </or>
+	      <then>
+	        <exec executable="cmd" dir="c:\" failonerror="true">
+	          <arg value="/c"/>
+	          <arg value="${env.ANT_HOME}/bin/ant.bat"/>
+	          <arg value="-Dproject.bsh.script=Batch.bsh"/>
+	          <arg value="-Dproject.mode=${run-example-java.mode}"/>
+	          <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
+	          <env key="PATH" value=""/>
+	          <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.EUROPA_HOME}/lib"/>
+	        </exec>
+	      </then>
+	      <else>
+	        <exec executable="ant" dir="\" failonerror="true">
+	          <arg line="-Dproject.bsh.script=Batch.bsh -Dproject.mode=${run-example-java.mode}"/>
+	          <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
+	          <env key="PATH" value=""/>
+	          <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.EUROPA_HOME}/lib"/>
+	        </exec>
+	      </else>
+	    </if>
+	  </target>
+	
 </project>
