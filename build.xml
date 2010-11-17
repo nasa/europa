@@ -77,7 +77,7 @@
   		<property name="file.europa-dist" value="europa-${europa.version}-${local.os}.zip"/>
 		<property name="file.europa-static-libs" value="europa-${europa.version}-${local.os}-static-libs.zip"/>	
   	
-		<antcall target="init-${local.os.family}"/>
+		<runtarget target="init-${local.os.family}"/>
 		
 		<if>
 			<equals arg1="${jam.variant}" arg2="OPTIMIZED"/>
@@ -89,9 +89,8 @@
             <property name="run-example-cpp.mode" value=""/>      
             <property name="run-example-java.mode" value="g"/>     
     	</else>
-		</if>	
-  	
-  </target> <!-- init -->
+		</if>	 	
+	</target> 
 
 	<target name="init-unix">
 		<property name="local.env.LD_LIBRARY_PATH.name" value="LD_LIBRARY_PATH"/>
@@ -165,7 +164,7 @@
 	
 	<target name="clean" depends="init">
 		<ant dir="src/JavaUI" target="clean.all"/>
-		<antcall target="clean-${local.os.family}"/>
+		<runtarget target="clean-${local.os.family}"/>
  		<delete dir="${dir.build}"/>
 		<delete dir="${dir.dist}"/>
 	</target>
@@ -184,7 +183,7 @@
 	</target>
 	
 	<target name="build" depends="init">
-		<antcall target="build-${local.os.family}"/>
+		<runtarget target="build-${local.os.family}"/>
 	</target>
 
 	<target name="build-unix">
@@ -234,7 +233,7 @@
 	</target>
 		
 	<target name="test" depends="build">
-		<antcall target="test-${local.os.family}"/>
+		<runtarget target="test-${local.os.family}"/>
 	</target>
 	
 	<target name="test-unix">
@@ -391,7 +390,7 @@
 		<condition property="diff.allow">
 			<available file="${basedir}/dist/europa/examples/${example.name}/RUN_${example.name}-planner_g_rt.${example.name}-initial-state.nddl.PlannerConfig.xml.output"/>
 		</condition>
-		<antcall target="run-diff"></antcall>    
+		<runtarget target="run-diff"/>    
 	</target>
 	
 	<target name="run-example-java">
@@ -554,7 +553,7 @@
 	    
 	<target name="print-env" depends="init" 
 		description="Debug target: Prints the initialized environment" >
-		<antcall target="print-env-${local.os.family}"/>
+		<runtarget target="print-env-${local.os.family}"/>
 	</target>
 
 	<target name="print-env-unix">
@@ -569,7 +568,7 @@
 	
 	<target name="test-ant" depends="init,print-env" 
 		description="Debug target: Tests that this build file can call 'ant' as an executable.">
-		<antcall target="test-ant-${local.os.family}"/>
+		<runtarget target="test-ant-${local.os.family}"/>
 	</target>
 	
 	<target name="test-ant-unix">
