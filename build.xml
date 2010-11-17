@@ -302,83 +302,51 @@
     <delete dir="${dir.build}"/>
   </target>
 
-  <target name="build" depends="init">
-  <echo message="${ver}"/>
-  <if>		
-		<contains string="${ver}" substring="WindowsVS" casesensitive="false"/>
+	<target name="build" depends="init">
+		<if>		
+			<contains string="${ver}" substring="WindowsVS" casesensitive="false"/>
 		<then>		
-				<mkdir dir="src\\PLASMA\\System\\base\\swig"/>
-				<mkdir dir="src\\PLASMA\\System\\base\\swig\\psengine"/>
-				<if>											  
-					  <equals arg1="${build.libraries}" arg2="DYNAMIC"/>
-				  <then>				  
-				  <echo message="Building System dlls for Windows."/>	
-					<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
-						<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug EuropaDll.sln"/>
-						<env key="PLASMA_HOME" value="${basedir}"/>
-						<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>
-					</exec>					
-				  </then>
-			  <else>
+			<mkdir dir="src\\PLASMA\\System\\base\\swig"/>
+			<mkdir dir="src\\PLASMA\\System\\base\\swig\\psengine"/>
+			<if>											  
+				<equals arg1="${build.libraries}" arg2="DYNAMIC"/>
+			<then>				  
+				<echo message="Building System dlls for Windows."/>	
+				<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
+					<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug EuropaDll.sln"/>
+					<env key="PLASMA_HOME" value="${basedir}"/>
+					<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>
+				</exec>					
+			</then>
+			<else>
 				<echo message="Building Static libs for Windows."/>	
-			    <exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
-						<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug Europa.sln"/>
-						<env key="PLASMA_HOME" value="${basedir}"/>
-						<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>					
-					</exec>				
-								
-			  </else>
-			</if>				
-				<ant dir="src\\PLASMA\\System\\base" description="Build PSEngine.jar" target="PSEngine">
-					<property name="src.dir" value="swig" />
-				</ant>
-				<ant dir="src\\PLASMA\\System\\component\\PSUI" description="Build PSEngine.jar" target="dist"/>
+				<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
+					<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug Europa.sln"/>
+					<env key="PLASMA_HOME" value="${basedir}"/>
+					<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>					
+				</exec>									
+			</else>
+			</if>	
+			
+			<ant dir="src\\PLASMA\\System\\base" description="Build PSEngine.jar" target="PSEngine">
+				<property name="plasma.dir" value="$basedir}"/>
+			</ant>
+			<ant dir="src\\PLASMA\\System\\component\\PSUI" description="Build PSEngine.jar" target="dist">
+				<property name="plasma.dir" value="$basedir}"/>
+			</ant>
 		</then>
 		<else>
-				<echo message="jam ${jam.opts} -j${jam.num.cores} build"/>
-				<exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
-				  <arg line="${jam.opts} -j${jam.num.cores} build"/>
-				  <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
-				  <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
-				  <!-- This is set only for Windows, but other OSs don't care anyway -->
-				  <env key="CYG_JAVA_HOME" value="${local.env.CYG_JAVA_HOME}" />
-				</exec>
+			<echo message="jam ${jam.opts} -j${jam.num.cores} build"/>
+			<exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
+			<arg line="${jam.opts} -j${jam.num.cores} build"/>
+				<env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
+				<env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
+			</exec>
 				
-				<if>
-				  <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
-				  <then>
-					<echo message="Building System dlls for Windows."/>
-					<if>
-					  <equals arg1="${jam.variant}" arg2="OPTIMIZED"/>
-					  <then>
-						<property name="s" value="_o"/>
-					  </then>
-					</if>
-					<property name="s" value="_g"/>
-					<echo message="Suffix ${s}" />
-					
-					<!-- libANML_?.a disappeared? -mno-cygwin libAntlr3${s}.a -->
-					<property name="cmd" value="g++ -shared 
-						-Wl,-v
-					-oSystem${s}.dll 
-						-Wl,--add-stdcall-alias 
-					-Wl,--output-def=System${s}.dll.def
-					-Wl,--out-implib=System${s}.a
-					-Wl,--whole-archive libSystem${s}.a libSolvers${s}.a libResource${s}.a libNDDL${s}.a 
-										libRulesEngine${s}.a libTemporalNetwork${s}.a libPlanDatabase${s}.a 
-											libConstraintEngine${s}.a libUtils${s}.a libTinyXml${s}.a  -lws2_32
-						-Wl,--no-whole-archive -lpthread -lantlr3c
-					"/>
-					<exec executable="bash" dir="${dir.plasma}/build/lib">
-					  <arg value="-c" />
-					  <arg value="${cmd}" />
-					</exec>
-				  </then>
-				</if>
-				<ant dir="src/JavaUI" description="Build Swing version of Java UI" target="build.swing">
-					<property name="europa.dir" value="${local.env.PLASMA_HOME}" />
-					<property name="psengine.jar.path" value="${local.env.PLASMA_HOME}/build/lib" />
-				</ant>			
+			<ant dir="src/JavaUI" description="Build Swing version of Java UI" target="build.swing">
+				<property name="europa.dir" value="${local.env.PLASMA_HOME}" />
+				<property name="psengine.jar.path" value="${local.env.PLASMA_HOME}/build/lib" />
+			</ant>			
 		</else>
 	</if>									
   </target>
@@ -394,15 +362,23 @@
     </exec>
   </target>
 
-  <target name="test" depends="build, print-env">
-	<exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
-		<arg line="${jam.opts} run-all-tests"/>
-		<env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
-		<env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
-	</exec>
+	<target name="test" depends="build, print-env">
+		<if>      
+			<contains string="${ver}" substring="Windows" casesensitive="false"/>
+		<then>
+			<echo>Windows tests called here</echo>
+		</then>
+		<else>
+			<exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
+				<arg line="${jam.opts} run-all-tests"/>
+				<env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
+				<env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
+			</exec>
+		</else>
+		</if>			
   </target>
 
-  <!-- This target assumes that PLASMA and PlanWorks have already been built so that all the products are in place -->
+  <!-- This target assumes that all the products have already been built -->
   <target name="dist" depends="init" 
           description="Creates the binary distribution and packages it up into ${dir.dist}/${file.plasma_dist}">
    <!-- Create the distribution directory  -->
@@ -454,12 +430,6 @@
         <exclude name="**/test/**"/>
       </fileset>
     </copy>
-    <!-- <copy todir="${dir.dist.base}/include" flatten="false">
-      <fileset dir="${dir.src}/Log4cpp/log4cpp-1.0.patch1/include">
-        <include name="**/*.hh"/>
-        <include name="**/*.h"/>
-      </fileset>
-    </copy> -->
 
     <if>
       <isset property="antlr.include"/>
