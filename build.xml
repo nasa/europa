@@ -395,47 +395,11 @@
   </target>
 
   <target name="test" depends="build, print-env">
-	<if>
-		<contains string="${ver}" substring="Windows" casesensitive="false"/>
-		<then>
-			<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
-			  <arg line="/target:test /p:Platform=Win32 /p:Configuration=Debug examples\VS_Examples\Test.sln"/>
-			  <env key="PLASMA_HOME" value="${basedir}"/>
-				<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>
-			</exec>			
-			<condition property="test.exists">
-				<available file="Test.exe" filepath="${basedir}\\build\\lib\\Debug"/>
-			</condition>			
-			<condition property="pthreads.exists">
-				<available file="${env.PLASMA_THIRD_PARTY}\visualStudio\pthreads-w32-2-8-0-release\lib" filepath="${env.PLASMA_THIRD_PARTY}\visualStudio\pthreads-w32-2-8-0-release\lib"/>
-			</condition>	
-			<property name="local.env.PATH.name" value="Path"/>
-			<property name="local.env.PATH.value" value="${basedir}\build\lib\Debug;${basedir}\dist\europa\build\lib\Debug;${env.PLASMA_THIRD_PARTY}\visualStudio\pthreads-w32-2-8-0-release\lib;${basedir}\dist\europa\lib\Debug;"/>			
-			<!--
-			<echo>test found: ${test.exists}</echo>
-			<echo>pthreads found: ${pthreads.exists}</echo>
-			<echo>Path=${env.Path}</echo>
-			<echo>${local.env.PATH.name}=${local.env.PATH.value}</echo>
-			<echo>PLASMA_HOME=${local.env.PLASMA_HOME}</echo>
-			<echo>PLASMA_THIRD_PARTY=${env.PLASMA_THIRD_PARTY}</echo>			
-			<echo>Local.Path=${local.env.PATH.value}</echo>
-			-->
-			<property name="test.dir" value="${env.PLASMA_HOME}\\build\\lib\\Debug"/>								
-				<exec executable="${basedir}\\build\\lib\\Debug\\Test" dir="examples\\VS_Examples" failonerror="true" searchpath="true">					
-					<arg line="Light-initial-state.nddl PlannerConfig.xml"/>				
-					<env key="PLASMA_HOME" value="${basedir}"/>
-					<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>
-					<env key="PATH" path="${env.path}:${env.Path}:${local.env.PATH.value}"/>
-				</exec>
-		</then>
-		<else>
-			<exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
-			  <arg line="${jam.opts} run-all-tests"/>
-			  <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
-			  <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
-			</exec>
-		</else>
-	</if>
+	<exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
+		<arg line="${jam.opts} run-all-tests"/>
+		<env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
+		<env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
+	</exec>
   </target>
 
   <!-- This target assumes that PLASMA and PlanWorks have already been built so that all the products are in place -->
