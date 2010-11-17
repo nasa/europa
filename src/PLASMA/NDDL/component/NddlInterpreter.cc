@@ -98,7 +98,7 @@ std::vector<std::string> NddlInterpreter::getIncludePath()
         includePath.push_back(std::string(plasmaHome)+"/src/PLASMA/NDDL/base");
         includePath.push_back(std::string(plasmaHome)+"/src/PLASMA/Resource/component/NDDL");
     }
-
+		
     // TODO: dump includePath to log
     return includePath;
 }
@@ -112,7 +112,12 @@ std::string NddlInterpreter::getFilename(const std::string& f)
 
     for (unsigned int i=0; i<includePath.size();i++) {
         // TODO: this may not be portable to all OSs
-        std::string fullName = includePath[i]+"/"+fname;
+		#ifdef _MSC_VER
+		std::string fullName = includePath[i]+"\\"+fname;
+		#else
+		std::string fullName = includePath[i]+"/"+fname;
+		#endif
+        
         if (isFile(fullName)) {
             debugMsg("NddlInterpreter","Found:" << fullName);
             return fullName;
