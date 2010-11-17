@@ -41,7 +41,7 @@
 
 	<target name="clean" description="cleanup build byproducts">
 		<delete dir="${build.dir}"/>
-		<delete file="${plasma.dir}/build/lib/PSUI.jar"/>
+		<delete file="${dist.dir}/PSUI.jar"/>
 	</target>
 
 	<target name="compile" depends="init" description="compile 'src' tree into 'classes' tree">
@@ -55,7 +55,7 @@
 	</target>
 
 	<target name="check-jar-uptodate">
-		<uptodate property="uptodate.jar" targetfile="${plasma.dir}/build/lib/PSUI.jar" >
+		<uptodate property="uptodate.jar" targetfile="${dist.dir}/PSUI.jar" >
 			<srcfiles dir="${build.dir}"/>
 			<srcfiles refid="psui.libfiles"/>
 			<srcfiles refid="plasma.libfiles"/>
@@ -72,7 +72,7 @@
 
 	<target name="dist" depends="compile,unjar-libs">
 		<mkdir dir="${build.dir}"/>
-		<jar jarfile="${plasma.dir}/build/lib/PSUI.jar" basedir="${build.dir}"/>
+		<jar jarfile="${dist.dir}/PSUI.jar" basedir="${build.dir}"/>
 	</target>
 
 	
