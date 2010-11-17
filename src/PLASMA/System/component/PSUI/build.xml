@@ -1,58 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="PSUI" default="run" basedir=".">
-  <description>PSUI</description>
+	<description>PSUI</description>
 
-  <target name="init">
-    <tstamp/>
-    <property environment="env"/>
+	<!-- Load overrdides -->
+	<property file="${user.home}/.ant.psui.properties"/>
+	
+	<property environment="env"/>
+	<property name="plasma.dir" value="${env.PLASMA_HOME}"/>
 
-	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
-	    <classpath>
-	       <pathelement location="${env.PLASMA_HOME}/ext/ant/ant-contrib-1.0b3.jar"/>
-		</classpath>
-	</taskdef>
-		
-    <property name="local.env.vcInstallDir"  value="${env.VCINSTALLDIR}" />
-    <echo message="vcInstallDir: ${local.env.vcInstallDir}"/>
-    <condition property="os.isMSVC">
-      <contains string="${local.env.vcInstallDir}" substring="9.0" casesensitive="false"/>
-    </condition>
-
-    <if>
-      <equals arg1="${local.env.vcInstallDir}" arg2=""/>
-      <then>
-        <exec executable="uname" outputproperty="uname.o">
-	  <arg value="-o"/>
-	</exec>
-	<if>
-          <equals arg1="${uname.o}" arg2="Cygwin"/>
-          <then>
-            <exec executable="cygpath" outputproperty="plasma.dir">
-              <arg value="--windows"/>
-              <arg value="${env.PLASMA_HOME}"/>
-            </exec>
-          </then>
-        </if>
-      </then>
-    </if>
-    
-    <property name="plasma.dir" value="${env.PLASMA_HOME}"/>
-    <property file="${user.home}/.ant.psui.properties"/>
-
-    <property name="src.dir"     value="src"/>
-    <property name="build.dir"   value="${plasma.dir}/build/PSUI"/>
-    <property name="lib.dir"     value="lib"/>
-
-    <property name="project"        value="NDDLHelloWorld"/>
-    <property name="project.dir"    value="${user.home}/workspace/${project}"/>
-    <!-- project.mode = o for optimized, g for debug -->
-    <property name="project.mode" value="o"/>
-    <property name="project.bsh.script" value="${project}.bsh"/>
-
-    <property name="debug"  value="true"/>
-    <property name="deprecation"  value="true"/>
-
-    <mkdir dir="${build.dir}"/>
+	<property name="src.dir"   value="src"/>
+	<property name="build.dir" value="${plasma.dir}/build/PSUI"/>
+	<property name="lib.dir"   value="lib"/>
+	<property name="dist.dir"  value="${plasma.dir}/build/lib"/>
 
     <fileset dir="${lib.dir}" id="psui.libfiles">
       <include name="nanoxml/nanoxml.jar"/>
@@ -69,62 +28,73 @@
 
     <fileset dir="${plasma.dir}/build/lib" id="plasma.libfiles">
       <include name="PSEngine.jar"/>
-      <include name="nddl.jar"/>
     </fileset>
 
     <path id="psui.classpath">
       <fileset refid="psui.libfiles"/>
       <fileset refid="plasma.libfiles"/>
     </path>
+	
+	<target name="init">
+	    <mkdir dir="${build.dir}"/>
+	</target>
 
-  </target>
+	<target name="clean" description="cleanup build byproducts">
+		<delete dir="${build.dir}"/>
+		<delete file="${plasma.dir}/build/lib/PSUI.jar"/>
+	</target>
 
-  <target name="clean" description="delete the 'classes' directory tree">
-    <delete dir="${build.dir}"/>
-    <delete file="${plasma.dir}/build/lib/PSUI.jar"/>
-  </target>
+	<target name="compile" depends="init" description="compile 'src' tree into 'classes' tree">
+		<javac 
+			srcdir="${src.dir}"
+			destdir="${build.dir}"
+			debug="${debug}"
+			deprecation="${deprecation}">
+			<classpath refid="psui.classpath"/>
+		</javac>
+	</target>
 
-  <target name="compile" depends="init" description="compile 'src' tree into 'classes' tree">
-    <javac srcdir="${src.dir}"
-           destdir="${build.dir}"
-           debug="${debug}"
-           deprecation="${deprecation}">
-      <classpath refid="psui.classpath"/>
-    </javac>
-  </target>
+	<target name="check-jar-uptodate">
+		<uptodate property="uptodate.jar" targetfile="${plasma.dir}/build/lib/PSUI.jar" >
+			<srcfiles dir="${build.dir}"/>
+			<srcfiles refid="psui.libfiles"/>
+			<srcfiles refid="plasma.libfiles"/>
+		</uptodate>
+	</target>
+	
+	<target name="unjar-libs" depends="check-jar-uptodate" unless="uptodate.jar">
+		<unjar dest="${build.dir}" overwrite="false">
+    		<fileset refid="psui.libfiles"/>
+			<fileset refid="plasma.libfiles"/>
+		</unjar>
+		<delete dir="${build.dir}/META-INF"/>
+	</target>
 
-  <target name="check-jar-uptodate">
-    <uptodate property="uptodate.jar" targetfile="${plasma.dir}/build/lib/PSUI.jar" >
-      <srcfiles dir="${build.dir}"/>
-      <srcfiles refid="psui.libfiles"/>
-      <srcfiles refid="plasma.libfiles"/>
-   </uptodate>
-  </target>
+	<target name="dist" depends="compile,unjar-libs">
+		<mkdir dir="${build.dir}"/>
+		<jar jarfile="${plasma.dir}/build/lib/PSUI.jar" basedir="${build.dir}"/>
+	</target>
 
-  <target name="unjar-libs" depends="check-jar-uptodate" unless="uptodate.jar">
-    <unjar dest="${build.dir}" overwrite="false">
-      <fileset refid="psui.libfiles"/>
-      <fileset refid="plasma.libfiles"/>
-    </unjar>
-    <delete dir="${build.dir}/META-INF"/>
-  </target>
-
-  <target name="dist" depends="compile,unjar-libs">
-    <mkdir dir="${build.dir}"/>
-    <jar jarfile="${plasma.dir}/build/lib/PSUI.jar" basedir="${build.dir}"/>
-  </target>
-
-  <target name="run" depends="compile" description="build and run">
-    <echo message="Running ${project} project"/>
-    <java classname="org.ops.ui.PSDesktop" dir="${project.dir}" fork="yes">
-      <jvmarg value="-Xms256m"/>
-      <jvmarg value="-Xmx2048m"/>
-      <arg value="${project.mode}"/>
-      <arg value="${project.bsh.script}"/>
-      <classpath>
-        <path refid="psui.classpath"/>
-        <pathelement location="${build.dir}"/>
-      </classpath>
-    </java>
-  </target>
+	
+	<property name="project"        value="NDDLHelloWorld"/>
+	<property name="project.dir"    value="${user.home}/workspace/${project}"/>
+	<!-- project.mode = o for optimized, g for debug -->
+	<property name="project.mode" value="o"/>
+	<property name="project.bsh.script" value="${project}.bsh"/>
+	<property name="debug"  value="true"/>
+	<property name="deprecation"  value="true"/>
+	
+	<target name="run" depends="compile" description="build and run">
+		<echo message="Running ${project} project"/>
+		<java classname="org.ops.ui.PSDesktop" dir="${project.dir}" fork="yes">
+			<jvmarg value="-Xms256m"/>
+			<jvmarg value="-Xmx2048m"/>
+ 			<arg value="${project.mode}"/>
+			<arg value="${project.bsh.script}"/>
+			<classpath>
+				<path refid="psui.classpath"/>
+				<pathelement location="${build.dir}"/>
+			</classpath>
+		</java>
+	</target>
 </project>
