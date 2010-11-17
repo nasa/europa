@@ -20,73 +20,58 @@
     <property name="dir.build" value="build"/>
     <property name="dir.dist" value="dist"/>
     <property name="dir.dist.base" location="${dir.dist}/europa"/>
+
+    <property name="local.env.PLASMA_HOME" value="${basedir}"/>
+    <property name="local.env.EUROPA_HOME" value="${local.env.PLASMA_HOME}/dist/europa"/>
+
+    <property name="msbuild.dir" value="C:\\Windows\\Microsoft.NET\\Framework\\v3.5\\"/>
 	
 	<target name="findPlatform">
-		<echo message="Determining Platform : os.name='${os.name}' os.arch='os.arch'"/>
+		<echo message="os.name='${os.name}' os.arch='${os.arch}'"/>
 		
-		<if>		
-		  <contains string="${os.name}" substring="Windows" casesensitive="false"/>  
-          <then>
-		    <property name="local.os" value="WindowsVS"/>
-      	  </then>
-		<else>
-			<exec executable="uname" outputproperty="uname.s">
-			  <arg value="-s"/>
-			</exec>
-			<exec executable="uname" outputproperty="uname.a">
-			  <arg value="-a"/>
-			</exec>	
-			<exec executable="which" outputproperty="gcc.location">
-			  <arg value="gcc"/>
-			</exec>
-		</else>
-		</if>
-		
-	    <if>
-			<!-- Linux -->
-			<contains string="${uname.s}" substring="Linux" casesensitive="false"/>
-	    	<then>
-	    		<property name="local.os" value="linux"/>
-	    	</then>
-	    	<!-- Mac OS X -->
-	    	<elseif>
-				<contains string="${uname.s}" substring="Darwin" casesensitive="false"/>
-	    	<then>
-	          <property name="local.os" value="darwin"/>
-	          <property name="local.env.LD_LIBRARY_PATH.name" value="DYLD_LIBRARY_PATH"/>
-	        </then>
-			</elseif>	    	
-			<!-- Solaris -->
-	    	<elseif>
-	    		<contains string="${uname.s}" substring="SunOS" casesensitive="false"/>
-	    	<then>
-	    		<property name="local.os" value="solaris"/>
-	    	</then>
-			</elseif>
-	    </if>
-		
-	    <echo message="Running as a ${local.os} build."/>
-	  	
-		<!-- Find out if we're on a 64-bit platform -->
-	    <if>
-	    	<contains string="${uname.a}" substring="x86_64" casesensitive="false"/>
-		<then>
-			<property name="jam.64bit" value="-s64BIT=1"/>
+		<if> 
+			<contains string="${os.name}" substring="Windows" casesensitive="false"/>  
+		<then>   
+			<property name="local.os" value="windows"/> 
 		</then>
+	    <elseif> 
+	    	<contains string="${os.name}" substring="Linux" casesensitive="false"/>
+	    <then>   
+	    	<property name="local.os" value="linux"/> 
+	    </then>
+		</elseif>
+	    <elseif> <contains string="${os.name}" substring="Mac" casesensitive="false"/>
+	    <then>
+	    	<property name="local.os" value="mac"/>
+	    	<property name="local.env.LD_LIBRARY_PATH.name" value="DYLD_LIBRARY_PATH"/>
+		</then>
+		</elseif>
+	    <elseif>
+	    	<or>
+	    		<contains string="${uname.s}" substring="SunOS" casesensitive="false"/>
+	    		<contains string="${uname.s}" substring="Solaris" casesensitive="false"/>
+	    	</or>	
+	    <then>
+	    	<property name="local.os" value="solaris"/>
+	    </then>
+		</elseif>
+		<else>
+			<fail message="Unsupported OS : ${os.name}"/>
+		</else>
 	    </if>
-
-	    <if>
-	      <equals arg1="${jam.64bit}" arg2="-s64BIT=1"/>
-	      <then>
-	        <property name="jam.march" value="-m64"/>
-	      </then>
-	      <else>
-	        <property name="jam.march" value="-m32"/>
-	      </else>
-	    </if>
+		
+		<condition property="local.os.is64bit" value="true"> 
+	    	<contains string="${os.arch}" substring="x86_64" casesensitive="false"/>
+		</condition> 
+		<property name="local.os.is64bit" value="false"/>
+		
+	    <echo message="Running as a ${local.os} (64bit=${local.os.is64bit})  build."/>		
 	</target>  
   
   <target name="init" depends="findPlatform">
+    <property name="file.europa-dist" value="europa-${europa.version}-${local.os}.zip"/>
+    <property name="file.europa-static-libs" value="europa-${europa.version}-${local.os}-static-libs.zip"/>	
+  	
     <if>
     	<equals arg1="${jam.variant}" arg2="OPTIMIZED"/>
     	<then>
@@ -98,22 +83,6 @@
             <property name="run-example-java.mode" value="g"/>     
     	</else>
     </if>	
-  	
-    <if>
-      <isset property="antlr.include"/>
-      <then>
-        <property name="jam.antlr.include" value="-I${antlr.include}"/>
-      </then>
-    </if>
-    <if>
-      <isset property="antlr.lib"/>
-      <then>
-        <property name="jam.antlr.lib" value="-Wl,-L${antlr.lib}"/>
-      </then>
-    </if>
-      
-    <property name="local.env.PLASMA_HOME" value="${basedir}"/>
-    <property name="local.env.EUROPA_HOME" value="${local.env.PLASMA_HOME}/dist/europa"/>
   	
     <property name="local.env.LD_LIBRARY_PATH.name" value="LD_LIBRARY_PATH"/>
      <if>
@@ -134,43 +103,50 @@
       </else>
     </if>
 
-    <condition property="jam.num.cores" value="${env.PLASMA_NUM_CORES}">
-      <isset property="${env.PLASMA_NUM_CORES}"/>
-    </condition>
-    <property name="jam.num.cores" value="1"/>
-    <property name="file.europa-dist" value="europa-${europa.version}-${local.os}.zip"/>
-    <property name="file.europa-static-libs" value="europa-${europa.version}-${local.os}-static-libs.zip"/>	
-	<if>      
-      <contains string="${local.os}" substring="Windows" casesensitive="false"/>
-      <then>
-        <condition property="msbuild.dir"
-                   value="${msbuild.dir}"
-                   else="C:\\Windows\\Microsoft.NET\\Framework\\v3.5\\">
-          <isset property="msbuild.dir"/>
-        </condition>
-      </then>
-    </if>	
-    <property name="jam.exec" value="jam"/>
+  	<property name="jam.exec" value="jam"/>
     <property name="jam.libraries" value="SHARED"/>
     <property name="jam.variant" value="DEV"/>
     <property name="jam.log.type" value=""/>  <!-- choices are USE_EUROPA_LOGGER, ALL_LOGGING_DISABLED, "" -->
     <property name="jam.misc" value=""/>
     <property name="jam.args" value=""/>
-    <property name="jam.64bit" value=""/>
-    <property name="jam.antlr.include" value=""/>
-    <property name="jam.antlr.lib" value=""/>
     <property name="jam.platform-flags" value="${jam.antlr.include} ${jam.march}"/>
     <property name="jam.link-libs" value="${jam.antlr.lib}"/>
+  	
+	<condition property="jam.antlr.include" value="-I${antlr.include}">
+		<isset property="antlr.include"/>
+	</condition>
+    <property name="jam.antlr.include" value=""/>
 
+  	<condition property="jam.antlr.lib" value="-Wl,-L${antlr.lib}">
+      <isset property="antlr.lib"/>
+	</condition>
+    <property name="jam.antlr.lib" value=""/>
+        	
+    <condition property="jam.num.cores" value="${env.PLASMA_NUM_CORES}">
+      <isset property="${env.PLASMA_NUM_CORES}"/>
+    </condition>
+    <property name="jam.num.cores" value="1"/>
+  	
+	<if>
+		<equals arg1="${local.os.is64bit}" arg2="true"/>
+	<then>
+		<property name="jam.64bit" value="-s64BIT=1"/>
+		<property name="jam.march" value="-m64"/>
+	</then>
+    </if>  	
+    <property name="jam.64bit" value=""/>
+    <property name="jam.march" value="-m32"/>
+  	
     <property name="jam.opts" value="${jam.args} ${jam.misc} ${jam.64bit} -sLOGGER_TYPE=${jam.log.type} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries} -sPLATFORM_FLAGS=&quot;${jam.platform-flags}&quot; -sLINKLIBS=&quot;${jam.link-libs}&quot;"/>
-    <if>
-      <equals arg1="${jam.log.type}" arg2=""/>
-      <then>
-	<property name="make.log.type" value=""/> 
-      </then>
-      <else>
-	<property name="make.log.type" value="LOGGER_TYPE=-D${jam.log.type}"/> 
-      </else>
+
+  	<if> 
+  		<equals arg1="${jam.log.type}" arg2=""/>
+  	<then>
+  		<property name="make.log.type" value=""/> 
+  	</then>
+  	<else>
+  		<property name="make.log.type" value="LOGGER_TYPE=-D${jam.log.type}"/>
+  	</else>
     </if>
   </target> <!-- init -->
 
@@ -196,7 +172,7 @@
 
 	<target name="build" depends="init">
 		<if>		
-			<contains string="${local.os}" substring="WindowsVS" casesensitive="false"/>
+			<contains string="${local.os}" substring="windows" casesensitive="false"/>
 		<then>		
 			<mkdir dir="src\\PLASMA\\System\\base\\swig"/>
 			<mkdir dir="src\\PLASMA\\System\\base\\swig\\psengine"/>
@@ -256,7 +232,7 @@
 
 	<target name="test" depends="build">
 		<if>      
-			<contains string="${local.os}" substring="Windows" casesensitive="false"/>
+			<contains string="${local.os}" substring="windows" casesensitive="false"/>
 		<then>
 			<echo>Windows tests called here</echo>
 		</then>
@@ -286,7 +262,7 @@
     </copy>
 	
 	<if>		
-		<contains string="${local.os}" substring="Windows" casesensitive="false"/>
+		<contains string="${local.os}" substring="windows" casesensitive="false"/>
 		<then>
 		<copy todir="${dir.dist.base}/lib/Debug">
 			<fileset dir="${env.PLASMA_THIRD_PARTY}\visualStudio\pthreads-w32-2-8-0-release\lib"/>	  
@@ -359,7 +335,7 @@
         description="Puts distribution in a single zip file, excludes static libs">
     <delete file="${dir.dist}/${file.europa-dist}"/>
 	<if>      
-      <contains string="${local.os}" substring="Windows" casesensitive="false"/>
+      <contains string="${local.os}" substring="windows" casesensitive="false"/>
       <then>
 		<echo>Dynamic libraries called here</echo>
 	</then>
@@ -379,7 +355,7 @@
   	description="create a zip file for static libs only">
     <delete file="${dir.dist}/${file.europa-static-libs}"/>
 	<if>      
-		<contains string="${local.os}" substring="Windows" casesensitive="false"/>
+		<contains string="${local.os}" substring="windows" casesensitive="false"/>
 		<then>
 			<echo>${dir.dist.base}\lib</echo>
 			<zip destfile="${dir.dist}/${file.europa-static-libs}">
@@ -480,7 +456,7 @@
       </if>
       <property name="testdist.europa.home" value="${local.env.EUROPA_HOME}"/>
 	  <if>		
-		  <contains string="${os.name}" substring="Windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
+		  <contains string="${os.name}" substring="windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
           <then>
 			<echo>Test Distribution here</echo>
 		  </then>
@@ -520,7 +496,7 @@
   <target name="test-dist" depends="init,dist,test-makeproject" 
 	      description="Runs tests on release">
 	<if>		
-			<contains string="${os.name}" substring="Windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
+			<contains string="${os.name}" substring="windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
           <then>
 		  <echo>example goes here!</echo>
 		  </then>
@@ -562,7 +538,7 @@
       </then>
     </if>	
 	<if>		
-		  <contains string="${os.name}" substring="Windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
+		  <contains string="${os.name}" substring="windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
           <then>
 		  <!--<antcall target="build" inheritAll="false"><param name="build.libraries" value="DYNAMIC"/></antcall>-->
 		  <antcall target="build" inheritAll="false"></antcall>		  
@@ -645,7 +621,7 @@
 	  <target name="print-env" depends="init" 
 	      description="Debug target: Prints the initialized environment" >
 		  <if>
-			<contains string="${local.os}" substring="Windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
+			<contains string="${local.os}" substring="windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
 			<then>
 				<exec executable="cmd"> 
 					<arg line="/c set"/>
@@ -663,7 +639,7 @@
 	    <if>
 		  <or>
 	      <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>	  
-		  <contains string="${local.os}" substring="Windows" casesensitive="false"/>
+		  <contains string="${local.os}" substring="windows" casesensitive="false"/>
 		  </or>
 	      <then>
 	        <exec executable="cmd" dir="c:\" failonerror="true">
