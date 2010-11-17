@@ -2,51 +2,53 @@
 
 <project name="PSEngine" default="PSEngine" basedir=".">
   
-  <property environment="env"/>
-
-  <property name="plasma.dir" value="${env.PLASMA_HOME}"/>
-  <property name="build.dir"  value="${plasma.dir}/build/psengine/classes"/>
-  <property name="cache.dir"  value="${plasma.dir}/build/psengine/.cache"/>
-  <property name="dist.dir" value="${plasma.dir}/build/lib"/>
-  
-  <fileset dir="${plasma.dir}/ext/lib" id="plasma.extlibfiles">
-    <include name="util.jar"/>
-  </fileset>
-
-  <path id="psengine.classpath">
-    <fileset refid="plasma.extlibfiles"/>
-  </path>
-
-  <target name="init">
-    <echo message="ANT_HOME: ${env.ANT_HOME}"/>
-    <echo message="JAVA_HOME: ${env.JAVA_HOME}"/>
-    <echo message="PLASMA_HOME: ${env.PLASMA_HOME}"/>
-
-    <mkdir dir="${build.dir}"/>
-    <mkdir dir="${cache.dir}"/>
-  </target>
+	<property environment="env"/>
+	<property name="plasma.dir" value="${env.PLASMA_HOME}"/>
 	
-  <target name="compile" depends="init">
-    <depend srcdir="${src.dir}:java" destdir="${build.dir}" cache="${cache.dir}" closure="yes"/>
-    <javac classpathref="psengine.classpath" 
-           destdir="${build.dir}">
-        <src path="${src.dir}"/>
-        <src path="java"/>    	
-    </javac>	
-  </target>
+	<property name="src.dir"   value="swig"/>
+	<property name="build.dir"  value="${plasma.dir}/build/psengine/classes"/>
+ 	<property name="cache.dir"  value="${plasma.dir}/build/psengine/.cache"/>
+ 	<property name="dist.dir"   value="${plasma.dir}/build/lib"/>
+  
+ 	<fileset dir="${plasma.dir}/ext/lib" id="plasma.extlibfiles">
+		<include name="util.jar"/>
+ 	</fileset>
 
-  <target name="PSEngine" depends="compile">
-    <mkdir dir="${dist.dir}"/>
-    <jar jarfile="${dist.dir}/PSEngine.jar">
-      <fileset dir="${build.dir}"/>
-    </jar>
-    <touch file="${dist.dir}/PSEngine.jar"/>
-  </target>
+	<path id="psengine.classpath">
+ 		<fileset refid="plasma.extlibfiles"/>
+	</path>
 
-  <target name="clean">
-    <delete dir="${cache.dir}"/>
-    <delete dir="${build.dir}"/>
-    <delete file="${dist.dir}/PSEngine.jar"/>
-  </target>
+	<target name="init">
+		<echo message="ANT_HOME: ${env.ANT_HOME}"/>
+		<echo message="JAVA_HOME: ${env.JAVA_HOME}"/>
+		<echo message="PLASMA_HOME: ${env.PLASMA_HOME}"/>
+
+		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${cache.dir}"/>
+	</target>
+	
+	<target name="compile" depends="init">
+		<depend srcdir="${src.dir}:java" destdir="${build.dir}" cache="${cache.dir}" closure="yes"/>
+		<javac 
+			classpathref="psengine.classpath" 
+			destdir="${build.dir}">
+			<src path="${src.dir}"/>
+			<src path="java"/>    	
+		</javac>	
+	</target>
+
+	<target name="PSEngine" depends="compile">
+		<mkdir dir="${dist.dir}"/>
+		<jar jarfile="${dist.dir}/PSEngine.jar">
+			<fileset dir="${build.dir}"/>
+		</jar>
+		<touch file="${dist.dir}/PSEngine.jar"/>
+	</target>
+
+	<target name="clean">
+		<delete dir="${cache.dir}"/>
+		<delete dir="${build.dir}"/>
+		<delete file="${dist.dir}/PSEngine.jar"/>
+	</target>
 
 </project>
