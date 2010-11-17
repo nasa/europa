@@ -10,7 +10,7 @@
 #include "PSConstraintEngineListener.hh"
 
 #ifdef _MSC_VER
-	#if defined BUILD_DLL
+	#if defined USE_EUROPA_DLL
 		#if defined DLL_EXPORT
 			#define EUROPA_WINDOWS_DLL __declspec(dllexport)
 		#else
