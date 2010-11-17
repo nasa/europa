@@ -22,11 +22,12 @@
     <property name="dir.dist.base" location="${dir.dist}/europa"/>
 	
 	<target name="findPlatform">
+		<echo message="Determining Platform : os.name='${os.name}' os.arch='os.arch'"/>
+		
 		<if>		
-		  <contains string="${os.name}" substring="Windows" casesensitive="false"/>  <!-- Cygwin isn't supported -->
+		  <contains string="${os.name}" substring="Windows" casesensitive="false"/>  
           <then>
 		    <property name="local.os" value="WindowsVS"/>
-			<property name="ver" value="WindowsVS"/>
       	  </then>
 		<else>
 			<exec executable="uname" outputproperty="uname.s">
@@ -140,7 +141,7 @@
     <property name="file.europa-dist" value="europa-${europa.version}-${local.os}.zip"/>
     <property name="file.europa-static-libs" value="europa-${europa.version}-${local.os}-static-libs.zip"/>	
 	<if>      
-      <contains string="${ver}" substring="Windows" casesensitive="false"/>
+      <contains string="${local.os}" substring="Windows" casesensitive="false"/>
       <then>
         <condition property="msbuild.dir"
                    value="${msbuild.dir}"
@@ -176,7 +177,7 @@
   <target name="clean" depends="init">
     <delete dir="${dir.dist}"/>
     <if>		
-      <contains string="${ver}" substring="Windows" casesensitive="false"/>
+      <contains string="${local.os}" substring="Windows" casesensitive="false"/>
       <then>
 	<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
 	  <arg line="/target:clean /p:Platform=Win32 /p:Configuration=Debug Europa.sln"/>
@@ -195,7 +196,7 @@
 
 	<target name="build" depends="init">
 		<if>		
-			<contains string="${ver}" substring="WindowsVS" casesensitive="false"/>
+			<contains string="${local.os}" substring="WindowsVS" casesensitive="false"/>
 		<then>		
 			<mkdir dir="src\\PLASMA\\System\\base\\swig"/>
 			<mkdir dir="src\\PLASMA\\System\\base\\swig\\psengine"/>
@@ -255,7 +256,7 @@
 
 	<target name="test" depends="build">
 		<if>      
-			<contains string="${ver}" substring="Windows" casesensitive="false"/>
+			<contains string="${local.os}" substring="Windows" casesensitive="false"/>
 		<then>
 			<echo>Windows tests called here</echo>
 		</then>
@@ -285,7 +286,7 @@
     </copy>
 	
 	<if>		
-		<contains string="${ver}" substring="WindowsVS" casesensitive="false"/>
+		<contains string="${local.os}" substring="Windows" casesensitive="false"/>
 		<then>
 		<copy todir="${dir.dist.base}/lib/Debug">
 			<fileset dir="${env.PLASMA_THIRD_PARTY}\visualStudio\pthreads-w32-2-8-0-release\lib"/>	  
@@ -358,7 +359,7 @@
         description="Puts distribution in a single zip file, excludes static libs">
     <delete file="${dir.dist}/${file.europa-dist}"/>
 	<if>      
-      <contains string="${ver}" substring="Windows" casesensitive="false"/>
+      <contains string="${local.os}" substring="Windows" casesensitive="false"/>
       <then>
 		<echo>Dynamic libraries called here</echo>
 	</then>
@@ -378,7 +379,7 @@
   	description="create a zip file for static libs only">
     <delete file="${dir.dist}/${file.europa-static-libs}"/>
 	<if>      
-		<contains string="${ver}" substring="Windows" casesensitive="false"/>
+		<contains string="${local.os}" substring="Windows" casesensitive="false"/>
 		<then>
 			<echo>${dir.dist.base}\lib</echo>
 			<zip destfile="${dir.dist}/${file.europa-static-libs}">
@@ -644,7 +645,7 @@
 	  <target name="print-env" depends="init" 
 	      description="Debug target: Prints the initialized environment" >
 		  <if>
-			<contains string="${ver}" substring="Windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
+			<contains string="${local.os}" substring="Windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
 			<then>
 				<exec executable="cmd"> 
 					<arg line="/c set"/>
@@ -662,7 +663,7 @@
 	    <if>
 		  <or>
 	      <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>	  
-		  <contains string="${ver}" substring="Windows" casesensitive="false"/>
+		  <contains string="${local.os}" substring="Windows" casesensitive="false"/>
 		  </or>
 	      <then>
 	        <exec executable="cmd" dir="c:\" failonerror="true">
