@@ -48,8 +48,8 @@
 		</elseif>
 	    <elseif>
 	    	<or>
-	    		<contains string="${uname.s}" substring="SunOS" casesensitive="false"/>
-	    		<contains string="${uname.s}" substring="Solaris" casesensitive="false"/>
+	    		<contains string="${os.name}" substring="SunOS" casesensitive="false"/>
+	    		<contains string="${os.name}" substring="Solaris" casesensitive="false"/>
 	    	</or>	
 	    <then>
 	    	<property name="local.os" value="solaris"/>
@@ -60,20 +60,27 @@
 		</else>
 	    </if>
 		
+		<condition property="local.os.family" value="windows">
+	    	<contains string="${local.os}" substring="windows" casesensitive="false"/>
+		</condition>
+		<property name="local.os.family" value="unix"/>
+		
 		<condition property="local.os.is64bit" value="true"> 
 	    	<contains string="${os.arch}" substring="x86_64" casesensitive="false"/>
 		</condition> 
 		<property name="local.os.is64bit" value="false"/>
 		
-	    <echo message="Running as a ${local.os} (64bit=${local.os.is64bit})  build."/>		
+	    <echo message="Running build for : family=${local.os.family} os=${local.os} 64bit=${local.os.is64bit}"/>		
 	</target>  
   
-  <target name="init" depends="findPlatform">
-    <property name="file.europa-dist" value="europa-${europa.version}-${local.os}.zip"/>
-    <property name="file.europa-static-libs" value="europa-${europa.version}-${local.os}-static-libs.zip"/>	
+	<target name="init" depends="findPlatform">
+  		<property name="file.europa-dist" value="europa-${europa.version}-${local.os}.zip"/>
+		<property name="file.europa-static-libs" value="europa-${europa.version}-${local.os}-static-libs.zip"/>	
   	
-    <if>
-    	<equals arg1="${jam.variant}" arg2="OPTIMIZED"/>
+		<antcall target="init-${local.os.family}"/>
+		
+		<if>
+			<equals arg1="${jam.variant}" arg2="OPTIMIZED"/>
     	<then>
     	    <property name="run-example-cpp.mode" value="FAST=1"/>	
             <property name="run-example-java.mode" value="o"/>     
@@ -82,169 +89,165 @@
             <property name="run-example-cpp.mode" value=""/>      
             <property name="run-example-java.mode" value="g"/>     
     	</else>
-    </if>	
+		</if>	
   	
-    <property name="local.env.LD_LIBRARY_PATH.name" value="LD_LIBRARY_PATH"/>
-     <if>
-      <contains string="${uname.s}" substring="SunOS" casesensitive="false"/>
-      <then>
-        <condition property="local.env.LD_LIBRARY_PATH.value"
-                   value="${antlr.lib}:${local.env.PLASMA_HOME}/build/lib:${env.LD_LIBRARY_PATH}"
-                   else="${local.env.PLASMA_HOME}/build/lib:${env.LD_LIBRARY_PATH}">
-          <isset property="antlr.lib"/>
-        </condition>
-      </then>
-      <else>
-        <condition property="local.env.LD_LIBRARY_PATH.value"
-                   value="${antlr.lib}:${local.env.PLASMA_HOME}/build/lib"
-                   else="${local.env.PLASMA_HOME}/build/lib">
-          <isset property="antlr.lib"/>
-        </condition>
-      </else>
-    </if>
-
-  	<property name="jam.exec" value="jam"/>
-    <property name="jam.libraries" value="SHARED"/>
-    <property name="jam.variant" value="DEV"/>
-    <property name="jam.log.type" value=""/>  <!-- choices are USE_EUROPA_LOGGER, ALL_LOGGING_DISABLED, "" -->
-    <property name="jam.misc" value=""/>
-    <property name="jam.args" value=""/>
-    <property name="jam.platform-flags" value="${jam.antlr.include} ${jam.march}"/>
-    <property name="jam.link-libs" value="${jam.antlr.lib}"/>
-  	
-	<condition property="jam.antlr.include" value="-I${antlr.include}">
-		<isset property="antlr.include"/>
-	</condition>
-    <property name="jam.antlr.include" value=""/>
-
-  	<condition property="jam.antlr.lib" value="-Wl,-L${antlr.lib}">
-      <isset property="antlr.lib"/>
-	</condition>
-    <property name="jam.antlr.lib" value=""/>
-        	
-    <condition property="jam.num.cores" value="${env.PLASMA_NUM_CORES}">
-      <isset property="${env.PLASMA_NUM_CORES}"/>
-    </condition>
-    <property name="jam.num.cores" value="1"/>
-  	
-	<if>
-		<equals arg1="${local.os.is64bit}" arg2="true"/>
-	<then>
-		<property name="jam.64bit" value="-s64BIT=1"/>
-		<property name="jam.march" value="-m64"/>
-	</then>
-    </if>  	
-    <property name="jam.64bit" value=""/>
-    <property name="jam.march" value="-m32"/>
-  	
-    <property name="jam.opts" value="${jam.args} ${jam.misc} ${jam.64bit} -sLOGGER_TYPE=${jam.log.type} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries} -sPLATFORM_FLAGS=&quot;${jam.platform-flags}&quot; -sLINKLIBS=&quot;${jam.link-libs}&quot;"/>
-
-  	<if> 
-  		<equals arg1="${jam.log.type}" arg2=""/>
-  	<then>
-  		<property name="make.log.type" value=""/> 
-  	</then>
-  	<else>
-  		<property name="make.log.type" value="LOGGER_TYPE=-D${jam.log.type}"/>
-  	</else>
-    </if>
   </target> <!-- init -->
 
-  <target name="clean" depends="init">
-    <delete dir="${dir.dist}"/>
-    <if>		
-      <contains string="${local.os}" substring="Windows" casesensitive="false"/>
-      <then>
-	<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
-	  <arg line="/target:clean /p:Platform=Win32 /p:Configuration=Debug Europa.sln"/>
-	</exec>
-      </then>
-      <else>			  
-	<exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
-	  <arg line="clean-all"/>
-	  <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
-	</exec>				
-      </else>
-    </if>
-    <ant dir="src/JavaUI" description="Clean up Java part" target="clean.all" />
-    <delete dir="${dir.build}"/>
-  </target>
-
-	<target name="build" depends="init">
-		<if>		
-			<contains string="${local.os}" substring="windows" casesensitive="false"/>
-		<then>		
-			<mkdir dir="src\\PLASMA\\System\\base\\swig"/>
-			<mkdir dir="src\\PLASMA\\System\\base\\swig\\psengine"/>
-			<if>											  
-				<equals arg1="${build.libraries}" arg2="DYNAMIC"/>
-			<then>				  
-				<echo message="Building System dlls for Windows."/>	
-				<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
-					<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug EuropaDll.sln"/>
-					<env key="PLASMA_HOME" value="${basedir}"/>
-					<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>
-				</exec>					
-			</then>
-			<else>
-				<echo message="Building Static libs for Windows."/>	
-				<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
-					<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug Europa.sln"/>
-					<env key="PLASMA_HOME" value="${basedir}"/>
-					<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>					
-				</exec>									
-			</else>
-			</if>	
-			
-			<ant dir="src\\PLASMA\\System\\base" description="Build PSEngine.jar" target="PSEngine">
-				<property name="plasma.dir" value="${basedir}"/>
-			</ant>
-			<ant dir="src\\PLASMA\\System\\component\\PSUI" description="Build PSEngine.jar" target="dist">
-				<property name="plasma.dir" value="${basedir}"/>
-			</ant>
-		</then>
-		<else>
-			<echo message="jam ${jam.opts} -j${jam.num.cores} build"/>
-			<exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
-			<arg line="${jam.opts} -j${jam.num.cores} build"/>
-				<env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
-				<env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
-			</exec>
-				
-			<ant dir="src/JavaUI" description="Build Swing version of Java UI" target="build.swing">
-				<property name="europa.dir" value="${local.env.PLASMA_HOME}" />
-				<property name="psengine.jar.path" value="${local.env.PLASMA_HOME}/build/lib" />
-			</ant>			
-		</else>
-	</if>									
-  </target>
-
-  <target name="jam-target" depends="init">
-    <echo message="jam ${jam.opts} ${jam.target}"/>
-    <exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
-      <arg line="${jam.opts} ${jam.target}"/>
-      <env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
-      <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
-      <!-- This is set only for Windows, but other OS don't care anyway -->
-      <env key="CYG_JAVA_HOME" value="${local.env.CYG_JAVA_HOME}" />
-    </exec>
-  </target>
-
-	<target name="test" depends="build">
-		<if>      
-			<contains string="${local.os}" substring="windows" casesensitive="false"/>
+	<target name="init-unix">
+		<property name="local.env.LD_LIBRARY_PATH.name" value="LD_LIBRARY_PATH"/>
+		<if>
+			<contains string="${local.os}" substring="solaris" casesensitive="false"/>
 		<then>
-			<echo>Windows tests called here</echo>
+	        <condition property="local.env.LD_LIBRARY_PATH.value"
+	                   value="${antlr.lib}:${local.env.PLASMA_HOME}/build/lib:${env.LD_LIBRARY_PATH}"
+	                   else="${local.env.PLASMA_HOME}/build/lib:${env.LD_LIBRARY_PATH}">
+	          <isset property="antlr.lib"/>
+	        </condition>
+		</then>
+	    <else>
+	        <condition property="local.env.LD_LIBRARY_PATH.value"
+	                   value="${antlr.lib}:${local.env.PLASMA_HOME}/build/lib"
+	                   else="${local.env.PLASMA_HOME}/build/lib">
+	          <isset property="antlr.lib"/>
+	        </condition>
+	    </else>
+	    </if>
+
+	  	<property name="jam.exec" value="jam"/>
+	    <property name="jam.libraries" value="SHARED"/>
+	    <property name="jam.variant" value="DEV"/>
+	    <property name="jam.log.type" value=""/>  <!-- choices are USE_EUROPA_LOGGER, ALL_LOGGING_DISABLED, "" -->
+	    <property name="jam.misc" value=""/>
+	    <property name="jam.args" value=""/>
+	    <property name="jam.platform-flags" value="${jam.antlr.include} ${jam.march}"/>
+	    <property name="jam.link-libs" value="${jam.antlr.lib}"/>
+	  	
+		<condition property="jam.antlr.include" value="-I${antlr.include}">
+			<isset property="antlr.include"/>
+		</condition>
+	    <property name="jam.antlr.include" value=""/>
+
+	  	<condition property="jam.antlr.lib" value="-Wl,-L${antlr.lib}">
+	      <isset property="antlr.lib"/>
+		</condition>
+	    <property name="jam.antlr.lib" value=""/>
+	        	
+	    <condition property="jam.num.cores" value="${env.PLASMA_NUM_CORES}">
+	      <isset property="${env.PLASMA_NUM_CORES}"/>
+	    </condition>
+	    <property name="jam.num.cores" value="1"/>
+	  	
+		<if>
+			<equals arg1="${local.os.is64bit}" arg2="true"/>
+		<then>
+			<property name="jam.64bit" value="-s64BIT=1"/>
+			<property name="jam.march" value="-m64"/>
+		</then>
+	    </if>  	
+	    <property name="jam.64bit" value=""/>
+	    <property name="jam.march" value="-m32"/>
+	  	
+	    <property name="jam.opts" value="${jam.args} ${jam.misc} ${jam.64bit} -sLOGGER_TYPE=${jam.log.type} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries} -sPLATFORM_FLAGS=&quot;${jam.platform-flags}&quot; -sLINKLIBS=&quot;${jam.link-libs}&quot;"/>
+
+	  	<if> 
+	  		<equals arg1="${jam.log.type}" arg2=""/>
+	  	<then>
+	  		<property name="make.log.type" value=""/> 
+	  	</then>
+	  	<else>
+	  		<property name="make.log.type" value="LOGGER_TYPE=-D${jam.log.type}"/>
+	  	</else>
+	    </if>
+	</target>
+	
+	<target name="init-windows">
+	</target>
+	
+	<target name="clean" depends="init">
+		<ant dir="src/JavaUI" target="clean.all"/>
+		<antcall target="clean-${local.os.family}"/>
+ 		<delete dir="${dir.build}"/>
+		<delete dir="${dir.dist}"/>
+	</target>
+
+	<target name="clean-unix">
+		<exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
+			<arg line="clean-all"/>
+			<env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
+		</exec>				
+	</target>
+	
+	<target name="clean-windows">
+		<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
+		  <arg line="/target:clean /p:Platform=Win32 /p:Configuration=Debug Europa.sln"/>
+		</exec>
+	</target>
+	
+	<target name="build" depends="init">
+		<antcall target="build-${local.os.family}"/>
+	</target>
+
+	<target name="build-unix">
+		<echo message="jam ${jam.opts} -j${jam.num.cores} build"/>
+		<exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
+		<arg line="${jam.opts} -j${jam.num.cores} build"/>
+			<env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
+			<env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
+		</exec>
+			
+		<ant dir="src/JavaUI" description="Build Swing version of Java UI" target="build.swing">
+			<property name="europa.dir" value="${local.env.PLASMA_HOME}" />
+			<property name="psengine.jar.path" value="${local.env.PLASMA_HOME}/build/lib" />
+		</ant>			
+	</target>
+		
+	<target name="build-windows">
+		<mkdir dir="src\\PLASMA\\System\\base\\swig"/>
+		<mkdir dir="src\\PLASMA\\System\\base\\swig\\psengine"/>
+		
+		<if>											  
+			<equals arg1="${build.libraries}" arg2="DYNAMIC"/>
+		<then>				  
+			<echo message="Building System dlls for Windows."/>	
+			<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
+				<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug EuropaDll.sln"/>
+				<env key="PLASMA_HOME" value="${basedir}"/>
+				<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>
+			</exec>					
 		</then>
 		<else>
-			<exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
-				<arg line="${jam.opts} run-all-tests"/>
-				<env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
-				<env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
-			</exec>
+			<echo message="Building Static libs for Windows."/>	
+			<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
+				<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug Europa.sln"/>
+				<env key="PLASMA_HOME" value="${basedir}"/>
+				<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>					
+			</exec>									
 		</else>
-		</if>			
-  </target>
+		</if>	
+		
+		<ant dir="src\\PLASMA\\System\\base" description="Build PSEngine.jar" target="PSEngine">
+			<property name="plasma.dir" value="${basedir}"/>
+		</ant>
+		<ant dir="src\\PLASMA\\System\\component\\PSUI" description="Build PSEngine.jar" target="dist">
+			<property name="plasma.dir" value="${basedir}"/>
+		</ant>
+	</target>
+		
+	<target name="test" depends="build">
+		<antcall target="test-${local.os.family}"/>
+	</target>
+	
+	<target name="test-unix">
+		<exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
+			<arg line="${jam.opts} run-all-tests"/>
+			<env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
+			<env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
+		</exec>
+	</target>
+
+	<target name="test-windows">
+		<echo message="TODO : Run pre-release tests on Windows"/>
+	</target>
 
   <!-- This target assumes that all the products have already been built -->
   <target name="dist" depends="init" 
@@ -331,15 +334,10 @@
     </chmod>
   </target>
 
-  <target name="zip-dist" depends="dist"
-        description="Puts distribution in a single zip file, excludes static libs">
-    <delete file="${dir.dist}/${file.europa-dist}"/>
-	<if>      
-      <contains string="${local.os}" substring="windows" casesensitive="false"/>
-      <then>
-		<echo>Dynamic libraries called here</echo>
-	</then>
-	<else>
+	<target name="zip-dist" depends="dist"
+		description="Puts distribution in a single zip file, excludes static libs">
+		
+		<delete file="${dir.dist}/${file.europa-dist}"/>
 		<zip destfile="${dir.dist}/${file.europa-dist}">
 			<zipfileset dir="${dir.dist.base}/bin" prefix="bin" dirmode="775" filemode="775"/>
 			<zipfileset dir="${dir.dist.base}/config" prefix="config" dirmode="775" filemode="664"/>
@@ -347,9 +345,7 @@
 			<zipfileset dir="${dir.dist.base}/include" prefix="include" dirmode="775" filemode="664"/>
 			<zipfileset dir="${dir.dist.base}/lib"  excludes="*.a" prefix="lib" dirmode="775" filemode="664"/>
 		</zip>
-	</else>
-	</if>
-  </target>
+	</target>
 		
   <target name="zip-static-libs" depends="dist"
   	description="create a zip file for static libs only">
@@ -357,7 +353,6 @@
 	<if>      
 		<contains string="${local.os}" substring="windows" casesensitive="false"/>
 		<then>
-			<echo>${dir.dist.base}\lib</echo>
 			<zip destfile="${dir.dist}/${file.europa-static-libs}">
 				<zipfileset dir="${dir.dist.base}/lib" includes="*.lib" dirmode="775" filemode="664"/>
 				<zipfileset dir="${dir.dist.base}/lib/Debug" includes="*.lib" dirmode="775" filemode="664"/>
@@ -384,123 +379,75 @@
     </exec>
   </target>
 	                
-  <target name="run-example-cpp">
-    <echo> Running CPP example in ${basedir}/dist/europa/examples/${example.name}</echo>
-    <echo>   on ${uname.s} platform. </echo>
-    <if>
-      <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
-      <then>
-        <echo> Fixing platforms.mk linkage problem on windows </echo>
-        <exec executable="rm" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
-          <arg value="platforms.mk.lnk"/>
-        </exec>
-        <exec executable="ln" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
-          <arg value="-s"/>
-          <arg value="../../bin/.makeproject/platforms.mk"/>
-        </exec>
-      </then>
-    </if>
-    <exec executable="make" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
-      <arg line="${make.log.type}"/>
-      <arg line="${run-example-cpp.mode}"/>
-      <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
-      <env key="${local.env.LD_LIBRARY_PATH.name}" value="${basedir}/dist/europa/lib"/>
-    </exec>
-    <condition property="diff.allow">
-        <available file="${basedir}/dist/europa/examples/${example.name}/RUN_${example.name}-planner_g_rt.${example.name}-initial-state.nddl.PlannerConfig.xml.output"/>
-    </condition>
-    <antcall target="run-diff"></antcall>    
-  </target>
+	<target name="run-example-cpp">
+		<echo message="Running CPP example in ${basedir}/dist/europa/examples/${example.name}"/>
+		<echo message="on platform : ${local.os}"/>
+		<exec executable="make" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
+			<arg line="${make.log.type}"/>
+			<arg line="${run-example-cpp.mode}"/>
+			<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
+			<env key="${local.env.LD_LIBRARY_PATH.name}" value="${basedir}/dist/europa/lib"/>
+		</exec>
+		<condition property="diff.allow">
+			<available file="${basedir}/dist/europa/examples/${example.name}/RUN_${example.name}-planner_g_rt.${example.name}-initial-state.nddl.PlannerConfig.xml.output"/>
+		</condition>
+		<antcall target="run-diff"></antcall>    
+	</target>
 	
-  <target name="run-example-java">
-    <echo> Running Java example in ${basedir}/dist/europa/examples/${example.name}</echo>
-    <if>
-      <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
-      <then>
-        <exec executable="cmd" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
-          <arg value="/c"/>
-          <arg value="${env.ANT_HOME}/bin/ant.bat"/>
-          <arg value="-Dproject.bsh.script=Batch.bsh"/>
-          <arg value="-Dproject.mode=${run-example-java.mode}"/>
-          <!-- <arg value="-v"/> -->
-          <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
-          <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.EUROPA_HOME}/lib"/>
-        </exec>
-      </then>
-      <else>
-        <exec executable="ant" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
-          <arg value="-Dproject.bsh.script=Batch.bsh"/>
-          <arg value="-Dproject.mode=${run-example-java.mode}"/>
-          <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
-          <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.EUROPA_HOME}/lib"/>
-        </exec>
-      </else>
-    </if>
-  </target>
+	<target name="run-example-java">
+		<echo message="Running Java example in ${basedir}/dist/europa/examples/${example.name}"/>
+		<exec executable="ant" dir="${basedir}/dist/europa/examples/${example.name}" failonerror="true">
+			<arg value="-Dproject.bsh.script=Batch.bsh"/>
+			<arg value="-Dproject.mode=${run-example-java.mode}"/>
+			<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
+			<env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.EUROPA_HOME}/lib"/>
+		</exec>
+	</target>
 	
-  <target name="test-makeproject" depends="init"
-  	  description="Tests makeproject script">
-      <exec executable="python" dir="${basedir}/dist/europa/bin" failonerror="true">
-          <arg line="makeproject MakeProjectTest ${basedir}/dist/europa"/>
-      	  <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
-      </exec>	 		  
-      <if>
-          <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
-  	  <then>
-              <exec executable="cygpath" outputproperty="testdist.europa.home.tmp">
-	          <arg value="--windows"/>
-		  <arg value="${local.env.EUROPA_HOME}"/>
-	      </exec>
-  	      <propertyregex property="testdist.europa.home" input="${testdist.europa.home.tmp}" regexp="\\" replace="/" global="true" />
-          </then>
-      </if>
-      <property name="testdist.europa.home" value="${local.env.EUROPA_HOME}"/>
-	  <if>		
-		  <contains string="${os.name}" substring="windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
-          <then>
-			<echo>Test Distribution here</echo>
-		  </then>
-		  <else>
-			  <exec executable="make" dir="${basedir}/dist/europa/MakeProjectTest" failonerror="true">
-			  <arg line="${make.log.type}"/>
-				  <arg line="${run-example-cpp.mode}"/>
-				  <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
-				  <env key="EUROPA_JHOME" value="${testdist.europa.home}"/>
-				  <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
-			  </exec>
-			  <if>
-				<contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
-				<then>
-				  <exec executable="cmd" dir="${basedir}/dist/europa/MakeProjectTest" failonerror="true">
-					<arg value="/c"/>
-					<arg value="${env.ANT_HOME}/bin/ant.bat"/>
-					<arg value="-Dproject.bsh.script=Batch.bsh"/>
-					<arg value="-Dproject.mode=${run-example-java.mode}"/>
-					<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
-					<env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
-				  </exec>
-				</then>
-				<else>
-				  <exec executable="ant" dir="${basedir}/dist/europa/MakeProjectTest" failonerror="true">
-					<arg line="-Dproject.bsh.script=Batch.bsh -Dproject.mode=${run-example-java.mode}"/>
-					<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
-					<env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
-				  </exec>
-				</else>
-			  </if>
-		  </else>
+	<target name="test-makeproject" depends="init"
+		description="Tests makeproject script">
+		
+		<exec executable="python" dir="${basedir}/dist/europa/bin" failonerror="true">
+			<arg line="makeproject MakeProjectTest ${basedir}/dist/europa"/>
+			<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
+		</exec>
+		
+		<property name="testdist.europa.home" value="${local.env.EUROPA_HOME}"/>
+		
+		<if>		
+			<contains string="${local.os}" substring="windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
+		<then>
+			<echo message="TODO: Test makeproject on windows"/>
+		</then>
+		<else>
+			<exec executable="make" dir="${basedir}/dist/europa/MakeProjectTest" failonerror="true">
+				<arg line="${make.log.type}"/>
+				<arg line="${run-example-cpp.mode}"/>
+				<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
+				<env key="EUROPA_JHOME" value="${testdist.europa.home}"/>
+				<env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
+			</exec>
+			
+			<exec executable="ant" dir="${basedir}/dist/europa/MakeProjectTest" failonerror="true">
+				<arg line="-Dproject.bsh.script=Batch.bsh -Dproject.mode=${run-example-java.mode}"/>
+				<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
+				<env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
+			</exec>
+		</else>
 		</if>
-      <delete dir="${basedir}/dist/europa/MakeProjectTest"/>
-  </target>
+		
+		<delete dir="${basedir}/dist/europa/MakeProjectTest"/>
+	</target>
 	        
-  <target name="test-dist" depends="init,dist,test-makeproject" 
-	      description="Runs tests on release">
-	<if>		
-			<contains string="${os.name}" substring="windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
-          <then>
-		  <echo>example goes here!</echo>
-		  </then>
-		  <else>
+	<target name="test-dist" depends="init,dist,test-makeproject" 
+		description="Runs tests on release">
+		
+		<if>		
+			<contains string="${local.os}" substring="windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
+		<then>
+			<echo message="TODO: test-dist on windows"/>
+		</then>
+		<else>
 			<antcall target="run-example-cpp"><param name="example.name" value="BlocksWorld"/></antcall>	
 			<antcall target="run-example-cpp"><param name="example.name" value="Light"/></antcall>	
 			<antcall target="run-example-cpp"><param name="example.name" value="Rover"/></antcall>	
@@ -515,65 +462,52 @@
 			<antcall target="run-example-java"><param name="example.name" value="UBO"/></antcall>  
 			
 			<ant dir="src/JavaUI" description="Run model tests for Java UI" target="test">
-			<property name="europa.dir" value="${local.env.PLASMA_HOME}" />
-			<property name="europa.home" value="${local.env.EUROPA_HOME}" />
-			<property name="ld.path.key" value="${local.env.LD_LIBRARY_PATH.name}" />
-			<property name="ld.path.value" value="${local.env.LD_LIBRARY_PATH.value}"/>
-			<property name="psengine.jar.path" value="${local.env.PLASMA_HOME}/build/lib" />
+				<property name="europa.dir" value="${local.env.PLASMA_HOME}" />
+				<property name="europa.home" value="${local.env.EUROPA_HOME}" />
+				<property name="ld.path.key" value="${local.env.LD_LIBRARY_PATH.name}" />
+				<property name="ld.path.value" value="${local.env.LD_LIBRARY_PATH.value}"/>
+				<property name="psengine.jar.path" value="${local.env.PLASMA_HOME}/build/lib" />
 			</ant>	
-			</else>
-	</if>		
+		</else>
+		</if>		
 
-  </target>
+	</target>
   
-  <target name="release-dist" depends="init"
-  	description="Creates a binary distribution that includes all the variants">
-    <if>
-      <not>
-        <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>
-      </not>	   
-      <then>
+	<target name="release-dist" depends="init"
+		description="Creates a binary distribution that includes all the variants">
+		
       	<antcall target="build" inheritAll="false"><param name="jam.variant" value="DEV"/><param name="jam.libraries" value="SHARED"/></antcall>
       	<antcall target="build" inheritAll="false"><param name="jam.variant" value="OPTIMIZED"/><param name="jam.libraries" value="SHARED"/></antcall>
-      </then>
-    </if>	
-	<if>		
-		  <contains string="${os.name}" substring="windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
-          <then>
-		  <!--<antcall target="build" inheritAll="false"><param name="build.libraries" value="DYNAMIC"/></antcall>-->
-		  <antcall target="build" inheritAll="false"></antcall>		  
-		  </then>
-		  <else>
-			<antcall target="build" inheritAll="false"><param name="jam.variant" value="DEV"/><param name="jam.libraries" value="STATIC"/></antcall>
-			<antcall target="build" inheritAll="false"><param name="jam.variant" value="OPTIMIZED"/><param name="jam.libraries" value="STATIC"/></antcall>
-			<antcall target="build" inheritAll="false"><param name="jam.variant" value="PROFILE"/><param name="jam.libraries" value="STATIC"/></antcall>
-		  </else>
-	</if>	  
-    <antcall target="zip-dist"/>
-    <antcall target="zip-static-libs"/>
-  </target>
+		<antcall target="build" inheritAll="false"><param name="jam.variant" value="DEV"/><param name="jam.libraries" value="STATIC"/></antcall>
+		<antcall target="build" inheritAll="false"><param name="jam.variant" value="OPTIMIZED"/><param name="jam.libraries" value="STATIC"/></antcall>
+		<antcall target="build" inheritAll="false"><param name="jam.variant" value="PROFILE"/><param name="jam.libraries" value="STATIC"/></antcall>
+		<antcall target="zip-dist"/>
+		<antcall target="zip-static-libs"/>
+	</target>
 
-  <!-- This will run the DEV variant by default, 
-       if you want other variant, you can do it specifying jam.variant on the command line,
-       for instance:
-       ant -Djam.variant=OPTIMIZED autobuild
-       or
-       ant -Djam.variant=PROFILE -Djam.libraries=STATIC autobuild
-  -->   
-  <target name="autobuild"
-          description="This target replicates what autobuild does for local testing">
-      <antcall target="build"/>
-      <antcall target="test"/>
-      <if>
-          <not><equals arg1="${jam.variant}" arg2="PROFILE"/></not>
-          <then>      
-              <antcall target="build"><param name="jam.libraries" value="STATIC"/></antcall>
-              <antcall target="test"><param name="jam.libraries" value="STATIC"/></antcall>
-              <antcall target="dist"/>
-              <antcall target="test-dist"/>
-          </then>
-      </if>    
-  </target>  
+	<!-- This will run the DEV variant by default, 
+		if you want other variant, you can do it specifying jam.variant on the command line,
+		for instance:
+			ant -Djam.variant=OPTIMIZED autobuild
+		or
+			ant -Djam.variant=PROFILE -Djam.libraries=STATIC autobuild
+	-->   
+	<target name="autobuild"
+		description="This target replicates what autobuild does for local testing">
+		
+		<antcall target="build"/>
+		<antcall target="test"/>
+		
+		<if>
+			<not><equals arg1="${jam.variant}" arg2="PROFILE"/></not>
+		<then>      
+			<antcall target="build"><param name="jam.libraries" value="STATIC"/></antcall>
+			<antcall target="test"><param name="jam.libraries" value="STATIC"/></antcall>
+			<antcall target="dist"/>
+			<antcall target="test-dist"/>
+		</then>
+		</if>    
+	</target>  
 
 	<target name="tags" depends="init"
 	          description="create tags and ebrowse files">
@@ -618,49 +552,47 @@
 	    </apply>
 	  </target>
 	    
-	  <target name="print-env" depends="init" 
-	      description="Debug target: Prints the initialized environment" >
-		  <if>
-			<contains string="${local.os}" substring="windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
-			<then>
-				<exec executable="cmd"> 
-					<arg line="/c set"/>
-				</exec>
-			</then>
-			<else>
-			<exec executable="env"/> 
-			</else>
-			</if>
-	  </target>
+	<target name="print-env" depends="init" 
+		description="Debug target: Prints the initialized environment" >
+		<antcall target="print-env-${local.os.family}"/>
+	</target>
 
-	  <target name="test-ant" depends="init,print-env" 
-	      description="Debug target: Tests that this build file can call 'ant' as an executable.">
-	    <echo message="testing ant exec"/>
-	    <if>
-		  <or>
-	      <contains string="${uname.s}" substring="Cygwin" casesensitive="false"/>	  
-		  <contains string="${local.os}" substring="windows" casesensitive="false"/>
-		  </or>
-	      <then>
-	        <exec executable="cmd" dir="c:\" failonerror="true">
-	          <arg value="/c"/>
-	          <arg value="${env.ANT_HOME}/bin/ant.bat"/>
-	          <arg value="-Dproject.bsh.script=Batch.bsh"/>
-	          <arg value="-Dproject.mode=${run-example-java.mode}"/>
-	          <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
-	          <env key="PATH" value=""/>
-	          <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.EUROPA_HOME}/lib"/>
-	        </exec>
-	      </then>
-	      <else>
-	        <exec executable="ant" dir="\" failonerror="true">
-	          <arg line="-Dproject.bsh.script=Batch.bsh -Dproject.mode=${run-example-java.mode}"/>
-	          <env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
-	          <env key="PATH" value=""/>
-	          <env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.EUROPA_HOME}/lib"/>
-	        </exec>
-	      </else>
-	    </if>
-	  </target>
+	<target name="print-env-unix">
+		<exec executable="env"/> 
+	</target>
 	
+	<target name="print-env-windows">
+		<exec executable="cmd"> 
+			<arg line="/c set"/>
+		</exec>
+	</target>
+	
+	<target name="test-ant" depends="init,print-env" 
+		description="Debug target: Tests that this build file can call 'ant' as an executable.">
+		<antcall target="test-ant-${local.os.family}"/>
+	</target>
+	
+	<target name="test-ant-unix">
+        <exec executable="ant" dir="/" failonerror="true">
+          <arg line="-version"/>
+        </exec>
+	</target>
+	
+	<target name="test-ant-windows">
+        <exec executable="cmd" dir="c:\" failonerror="true">
+          <arg value="/c"/>
+          <arg value="${env.ANT_HOME}/bin/ant.bat"/>
+          <arg value="-version"/>
+        </exec>
+	</target>
+	
+	<target name="jam-target" depends="init">
+		<echo message="jam ${jam.opts} ${jam.target}"/>
+		<exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
+			<arg line="${jam.opts} ${jam.target}"/>
+			<env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
+			<env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.LD_LIBRARY_PATH.value}"/>
+		</exec>
+	</target>
+
 </project>
