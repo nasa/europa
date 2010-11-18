@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="Europa-dll"
+	Name="Europa"
 	ProjectGUID="{2DB15CF5-7261-4BF3-BB27-34480BE5A80C}"
-	RootNamespace="Europadll"
+	RootNamespace="Europa"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
