@@ -153,9 +153,9 @@
 	</target>
 	
 	<target name="init-windows">
-		<!-- TODO : need to support Dll on windows -->
-		<condition property="windows.libType" value="" else="">											  
-			<equals arg1="${build.libs}" arg2="static"/>
+		<!-- TODO : need to support static on windows -->
+		<condition property="windows.libType" value="static" else="dll">											  
+			<equals arg1="${build.libs}" arg2="dll"/>
 		</condition>
 			
 		<!-- TODO : need to support Release variant on windows -->
@@ -179,8 +179,8 @@
 	</target>
 	
 	<target name="clean-windows">
-		<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
-		  <arg line="/target:clean /p:Platform=Win32 /p:Configuration=Debug Europa.sln"/>
+		<exec dir="src/PLASMA" executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
+		  <arg line="/target:clean /p:Platform=Win32 /p:Configuration=${windows.variant}-${windows.libType} Europa.sln"/>
 		</exec>
 	</target>
 	
@@ -207,8 +207,8 @@
 		<mkdir dir="src/PLASMA/System/base/swig/psengine"/> 
 		
 		<echo message="Building EUROPA on Windows: libType=${windows.libType} variant=${windows.variant}"/>	
-		<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
-			<arg line="/target:build /p:Platform=Win32 /p:Configuration=${windows.variant} Europa${windows.libType}.sln"/>
+		<exec dir="src/PLASMA" executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
+			<arg line="/target:build /p:Platform=Win32 /p:Configuration=${windows.variant}-${windows.libType} Europa.sln"/>
 			<env key="PLASMA_HOME" value="${basedir}"/>
 			<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>
 		</exec>					
