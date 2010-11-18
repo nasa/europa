@@ -153,11 +153,13 @@
 	</target>
 	
 	<target name="init-windows">
-		<condition property="windows.libType" value="" else="Dll">											  
+		<!-- TODO : need to support Dll on windows -->
+		<condition property="windows.libType" value="" else="">											  
 			<equals arg1="${build.libs}" arg2="static"/>
 		</condition>
 			
-		<condition property="windows.variant" value="Release" else="Debug">											  
+		<!-- TODO : need to support Release variant on windows -->
+		<condition property="windows.variant" value="Debug" else="Debug">											  
 			<equals arg1="${build.variant}" arg2="release"/>
 		</condition>
 	</target>
