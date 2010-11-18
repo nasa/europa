@@ -43,7 +43,8 @@
 	    	<property name="local.os" value="linux"/> 
 	    </then>
 		</elseif>
-	    <elseif> <contains string="${os.name}" substring="Mac" casesensitive="false"/>
+	    <elseif> 
+	    	<contains string="${os.name}" substring="Mac" casesensitive="false"/>
 	    <then>
 	    	<property name="local.os" value="mac"/>
 		</then>
