@@ -60,15 +60,13 @@
 		</else>
 	    </if>
 		
-		<condition property="local.os.family" value="windows">
+		<condition property="local.os.family" value="windows" else="unix">
 	    	<contains string="${local.os}" substring="windows" casesensitive="false"/>
 		</condition>
-		<property name="local.os.family" value="unix"/>
 		
-		<condition property="local.os.is64bit" value="true"> 
+		<condition property="local.os.is64bit" value="true" else="false"> 
 	    	<contains string="${os.arch}" substring="x86_64" casesensitive="false"/>
 		</condition> 
-		<property name="local.os.is64bit" value="false"/>
 		
 	    <echo message="Running build for : family=${local.os.family} os=${local.os} 64bit=${local.os.is64bit}"/>		
 	</target>  
@@ -93,24 +91,21 @@
 	</target> 
 
 	<target name="init-unix">
-		<property name="local.env.LD_LIBRARY_PATH.name" value="LD_LIBRARY_PATH"/>
-		<if>
-			<contains string="${local.os}" substring="solaris" casesensitive="false"/>
-		<then>
-	        <condition property="local.env.LD_LIBRARY_PATH.value"
-	                   value="${antlr.lib}:${local.env.PLASMA_HOME}/build/lib:${env.LD_LIBRARY_PATH}"
-	                   else="${local.env.PLASMA_HOME}/build/lib:${env.LD_LIBRARY_PATH}">
-	          <isset property="antlr.lib"/>
-	        </condition>
-		</then>
-	    <else>
-	        <condition property="local.env.LD_LIBRARY_PATH.value"
-	                   value="${antlr.lib}:${local.env.PLASMA_HOME}/build/lib"
-	                   else="${local.env.PLASMA_HOME}/build/lib">
-	          <isset property="antlr.lib"/>
-	        </condition>
-	    </else>
-	    </if>
+		<condition property="local.env.LD_LIBRARY_PATH.name" 
+				value="DYLD_LIBRARY_PATH" else="LD_LIBRARY_PATH">
+	    	<contains string="${local.os}" substring="mac" casesensitive="false"/>
+		</condition>		
+
+		<!-- On Solaris it's important not to lose the incoming LD_LIBRARY _PATH -->
+		<condition property="local.old.ldlp" value=":${env.LD_LIBRARY_PATH}" else="">
+	    	<contains string="${local.os}" substring="solaris" casesensitive="false"/>
+		</condition>		
+		
+		<condition property="local.env.LD_LIBRARY_PATH.value"
+	                   value="${antlr.lib}:${local.env.PLASMA_HOME}/build/lib${local.old.ldlp}"
+	                   else="${local.env.PLASMA_HOME}/build/lib${local.old.ldlp}">
+			<isset property="antlr.lib"/>
+		</condition>
 
 	  	<property name="jam.exec" value="jam"/>
 	    <property name="jam.libraries" value="SHARED"/>
@@ -119,20 +114,17 @@
 	    <property name="jam.misc" value=""/>
 	    <property name="jam.args" value=""/>
 	  	
-		<condition property="jam.antlr.include" value="-I${antlr.include}">
+		<condition property="jam.antlr.include" value="-I${antlr.include}" else="">
 			<isset property="antlr.include"/>
 		</condition>
-	    <property name="jam.antlr.include" value=""/>
 
-	  	<condition property="jam.antlr.lib" value="-Wl,-L${antlr.lib}">
-	      <isset property="antlr.lib"/>
+	  	<condition property="jam.antlr.lib" value="-Wl,-L${antlr.lib}" else="">
+			<isset property="antlr.lib"/>
 		</condition>
-	    <property name="jam.antlr.lib" value=""/>
 	        	
-		<condition property="jam.num.cores" value="${env.PLASMA_NUM_CORES}">
-	      <isset property="${env.PLASMA_NUM_CORES}"/>
+		<condition property="jam.num.cores" value="${env.PLASMA_NUM_CORES}" else="1">
+			<isset property="${env.PLASMA_NUM_CORES}"/>
 	    </condition>
-	    <property name="jam.num.cores" value="1"/>
 	  	
 		<if>
 			<equals arg1="${local.os.is64bit}" arg2="true"/>
@@ -148,15 +140,9 @@
 	    <property name="jam.link-libs" value="${jam.antlr.lib}"/>
 	    <property name="jam.opts" value="${jam.args} ${jam.misc} ${jam.64bit} -sLOGGER_TYPE=${jam.log.type} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries} -sPLATFORM_FLAGS=&quot;${jam.platform-flags}&quot; -sLINKLIBS=&quot;${jam.link-libs}&quot;"/>
 
-	  	<if> 
+	  	<condition property="make.log.type" value="" else="LOGGER_TYPE=-D${jam.log.type}">
 	  		<equals arg1="${jam.log.type}" arg2=""/>
-	  	<then>
-	  		<property name="make.log.type" value=""/> 
-	  	</then>
-	  	<else>
-	  		<property name="make.log.type" value="LOGGER_TYPE=-D${jam.log.type}"/>
-	  	</else>
-	    </if>
+		</condition>
 	</target>
 	
 	<target name="init-windows">
@@ -201,9 +187,6 @@
 	</target>
 		
 	<target name="build-windows">
-		<mkdir dir="src\\PLASMA\\System\\base\\swig"/>
-		<mkdir dir="src\\PLASMA\\System\\base\\swig\\psengine"/>
-		
 		<if>											  
 			<equals arg1="${build.libraries}" arg2="DYNAMIC"/>
 		<then>				  
@@ -224,10 +207,10 @@
 		</else>
 		</if>	
 		
-		<ant dir="src\\PLASMA\\System\\base" description="Build PSEngine.jar" target="PSEngine">
+		<ant dir="src/PLASMA/System/base" description="Build PSEngine.jar" target="PSEngine">
 			<property name="plasma.dir" value="${basedir}"/>
 		</ant>
-		<ant dir="src\\PLASMA\\System\\component\\PSUI" description="Build PSEngine.jar" target="dist">
+		<ant dir="src/PLASMA/System/component/PSUI" description="Build PSUI.jar" target="dist">
 			<property name="plasma.dir" value="${basedir}"/>
 		</ant>
 	</target>
