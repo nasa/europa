@@ -1,3 +1,5 @@
+#  ifdef USE_EUROPA_LOGGER
+
 #include "EuropaLogger.hh"
 #include "LoggerMgr.hh"
 
@@ -162,4 +164,5 @@ std::ostream &EuropaLogger::operator<<( LoggerLevel level )
 }
 	
 } //namespace EUROPA
+#endif // USE_EUROPA_LOGGER
 
