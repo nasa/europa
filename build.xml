@@ -21,6 +21,9 @@
     <property name="dir.dist" value="dist"/>
     <property name="dir.dist.base" location="${dir.dist}/europa"/>
 
+    <property name="build.libs"    value="shared"/> <!-- shared | static -->
+    <property name="build.variant" value="debug"/> <!-- debug | release | profile -->
+	
     <property name="local.env.PLASMA_HOME" value="${basedir}"/>
     <property name="local.env.EUROPA_HOME" value="${local.env.PLASMA_HOME}/dist/europa"/>
 
