@@ -78,19 +78,15 @@
   		<property name="file.europa-dist" value="europa-${europa.version}-${local.os}.zip"/>
 		<property name="file.europa-static-libs" value="europa-${europa.version}-${local.os}-static-libs.zip"/>	
   	
-		<runtarget target="init-${local.os.family}"/>
+		<condition property="run-example-cpp.mode" value="FAST=1" else="">
+			<equals arg1="${build.variant}" arg2="release"/>
+		</condition>
+
+		<condition property="run-example-java.mode" value="o" else="g">
+			<equals arg1="${build.variant}" arg2="release"/>
+		</condition>
 		
-		<if>
-			<equals arg1="${jam.variant}" arg2="OPTIMIZED"/>
-    	<then>
-    	    <property name="run-example-cpp.mode" value="FAST=1"/>	
-            <property name="run-example-java.mode" value="o"/>     
-    	</then>
-    	<else>
-            <property name="run-example-cpp.mode" value=""/>      
-            <property name="run-example-java.mode" value="g"/>     
-    	</else>
-		</if>	 	
+		<runtarget target="init-${local.os.family}"/>		
 	</target> 
 
 	<target name="init-unix">
@@ -139,16 +135,14 @@
 			<isset property="${env.PLASMA_NUM_CORES}"/>
 	    </condition>
 	  	
-		<if>
+		<condition property="jam.64bit" value="-s64BIT=1" else="">
 			<equals arg1="${local.os.is64bit}" arg2="true"/>
-		<then>
-			<property name="jam.64bit" value="-s64BIT=1"/>
-			<property name="jam.march" value="-m64"/>
-		</then>
-	    </if>  	
-	    <property name="jam.64bit" value=""/>
-	    <property name="jam.march" value="-m32"/>
-	  	
+	    </condition>
+		
+		<condition property="jam.march" value="-m64" else="-m32">
+			<equals arg1="${local.os.is64bit}" arg2="true"/>
+	    </condition>
+		
 	    <property name="jam.platform-flags" value="${jam.antlr.include} ${jam.march}"/>
 	    <property name="jam.link-libs" value="${jam.antlr.lib}"/>
 	    <property name="jam.opts" value="${jam.args} ${jam.misc} ${jam.64bit} -sLOGGER_TYPE=${jam.log.type} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries} -sPLATFORM_FLAGS=&quot;${jam.platform-flags}&quot; -sLINKLIBS=&quot;${jam.link-libs}&quot;"/>
@@ -465,21 +459,21 @@
 	<target name="release-dist" depends="init"
 		description="Creates a binary distribution that includes all the variants">
 		
-      	<antcall target="build" inheritAll="false"><param name="jam.variant" value="DEV"/><param name="jam.libraries" value="SHARED"/></antcall>
-      	<antcall target="build" inheritAll="false"><param name="jam.variant" value="OPTIMIZED"/><param name="jam.libraries" value="SHARED"/></antcall>
-		<antcall target="build" inheritAll="false"><param name="jam.variant" value="DEV"/><param name="jam.libraries" value="STATIC"/></antcall>
-		<antcall target="build" inheritAll="false"><param name="jam.variant" value="OPTIMIZED"/><param name="jam.libraries" value="STATIC"/></antcall>
-		<antcall target="build" inheritAll="false"><param name="jam.variant" value="PROFILE"/><param name="jam.libraries" value="STATIC"/></antcall>
+      	<antcall target="build" inheritAll="false"><param name="build.variant" value="debug"/>  <param name="build.libs" value="shared"/></antcall>
+      	<antcall target="build" inheritAll="false"><param name="build.variant" value="release"/><param name="build.libs" value="shared"/></antcall>
+		<antcall target="build" inheritAll="false"><param name="build.variant" value="debug"/>  <param name="build.libs" value="static"/></antcall>
+		<antcall target="build" inheritAll="false"><param name="build.variant" value="release"/><param name="build.libs" value="static"/></antcall>
+		<antcall target="build" inheritAll="false"><param name="build.variant" value="profile"/><param name="build.libs" value="static"/></antcall>
 		<antcall target="zip-dist"/>
 		<antcall target="zip-static-libs"/>
 	</target>
 
-	<!-- This will run the DEV variant by default, 
-		if you want other variant, you can do it specifying jam.variant on the command line,
+	<!-- This will run the debug variant by default, 
+		if you want other variant, you can do it specifying build.variant on the command line,
 		for instance:
-			ant -Djam.variant=OPTIMIZED autobuild
+			ant -Dbuild.variant=release autobuild
 		or
-			ant -Djam.variant=PROFILE -Djam.libraries=STATIC autobuild
+			ant -Dbuild.variant=profile -Dbuild.libs=static autobuild
 	-->   
 	<target name="autobuild"
 		description="This target replicates what autobuild does for local testing">
@@ -488,10 +482,10 @@
 		<antcall target="test"/>
 		
 		<if>
-			<not><equals arg1="${jam.variant}" arg2="PROFILE"/></not>
+			<not><equals arg1="${build.variant}" arg2="profile"/></not>
 		<then>      
-			<antcall target="build"><param name="jam.libraries" value="STATIC"/></antcall>
-			<antcall target="test"><param name="jam.libraries" value="STATIC"/></antcall>
+			<antcall target="build"><param name="build.libraries" value="static"/></antcall>
+			<antcall target="test"><param name="build.libraries" value="static"/></antcall>
 			<antcall target="dist"/>
 			<antcall target="test-dist"/>
 		</then>
