@@ -107,9 +107,19 @@
 		</condition>
 
 	  	<property name="jam.exec" value="jam"/>
-	    <property name="jam.libraries" value="SHARED"/>
-	    <property name="jam.variant" value="DEV"/>
-	    <property name="jam.log.type" value=""/>  <!-- choices are USE_EUROPA_LOGGER, ALL_LOGGING_DISABLED, "" -->
+
+		<condition property="jam.libraries" value="STATIC" else="SHARED">											  
+			<equals arg1="${build.libs}" arg2="static"/>
+		</condition>
+			
+		<condition property="jam.variant" value="PROFILE">											  
+			<equals arg1="${build.variant}" arg2="profile"/>
+		</condition>
+		<condition property="jam.variant" value="OPTIMIZED" else="DEV">											  
+			<equals arg1="${build.variant}" arg2="release"/>
+		</condition>
+
+		<property name="jam.log.type" value=""/>  <!-- choices are USE_EUROPA_LOGGER, ALL_LOGGING_DISABLED, "" -->
 	    <property name="jam.misc" value=""/>
 	    <property name="jam.args" value=""/>
 	  	
@@ -145,6 +155,13 @@
 	</target>
 	
 	<target name="init-windows">
+		<condition property="windows.libType" value="" else="Dll">											  
+			<equals arg1="${build.libs}" arg2="static"/>
+		</condition>
+			
+		<condition property="windows.variant" value="Release" else="Debug">											  
+			<equals arg1="${build.variant}" arg2="release"/>
+		</condition>
 	</target>
 	
 	<target name="clean" depends="init">
@@ -186,25 +203,12 @@
 	</target>
 		
 	<target name="build-windows">
-		<if>											  
-			<equals arg1="${build.libraries}" arg2="DYNAMIC"/>
-		<then>				  
-			<echo message="Building System dlls for Windows."/>	
-			<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
-				<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug EuropaDll.sln"/>
-				<env key="PLASMA_HOME" value="${basedir}"/>
-				<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>
-			</exec>					
-		</then>
-		<else>
-			<echo message="Building Static libs for Windows."/>	
-			<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
-				<arg line="/target:build /p:Platform=Win32 /p:Configuration=Debug Europa.sln"/>
-				<env key="PLASMA_HOME" value="${basedir}"/>
-				<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>					
-			</exec>									
-		</else>
-		</if>	
+		<echo message="Building EUROPA on Windows: libType=${windows.libType} variant=${windows.variant}"/>	
+		<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
+			<arg line="/target:build /p:Platform=Win32 /p:Configuration=${windows.variant} Europa${windows.libType}.sln"/>
+			<env key="PLASMA_HOME" value="${basedir}"/>
+			<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>
+		</exec>					
 		
 		<ant dir="src/PLASMA/System/base" description="Build PSEngine.jar" target="PSEngine">
 			<property name="plasma.dir" value="${basedir}"/>
