@@ -203,6 +203,9 @@
 	</target>
 		
 	<target name="build-windows">
+		<mkdir dir="src/PLASMA/System/base/swig"/> 
+		<mkdir dir="src/PLASMA/System/base/swig/psengine"/> 
+		
 		<echo message="Building EUROPA on Windows: libType=${windows.libType} variant=${windows.variant}"/>	
 		<exec executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
 			<arg line="/target:build /p:Platform=Win32 /p:Configuration=${windows.variant} Europa${windows.libType}.sln"/>
