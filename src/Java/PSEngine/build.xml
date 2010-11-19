@@ -40,7 +40,6 @@
 		<jar jarfile="${dist.dir}/PSEngine.jar">
 			<fileset dir="${build.dir}"/>
 		</jar>
-		<touch file="${dist.dir}/PSEngine.jar"/>
 	</target>
 
 	<target name="clean">
