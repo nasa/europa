@@ -8,7 +8,9 @@
 	Europa's build.xml 
 	-->
 	<property name="europa.dir" value="${env.PLASMA_HOME}" />
-	<echo message="PLASMA_HOME = ${europa.dir}" />
+	<echo message="Building Java UI"/>
+	<echo message="europa.dir = ${europa.dir}"/>
+	<property name="psengine.jar.path" value="${europa.dir}/build/lib"/>
 
 	<property file="${basedir}/build.properties" />
 	<property file="${basedir}/plugin.properties" />
