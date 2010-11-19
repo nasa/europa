@@ -208,8 +208,8 @@
 	</target>
 		
 	<target name="build-cpp-windows">
-		<mkdir dir="src/PLASMA/System/base/swig"/> 
-		<mkdir dir="src/PLASMA/System/base/swig/psengine"/> 
+		<mkdir dir="src/Java/PSEngine/generated"/> 
+		<mkdir dir="src/Java/PSEngine/generated/psengine"/> 
 		
 		<echo message="Building EUROPA on Windows: libType=${windows.libType} variant=${windows.variant}"/>	
 		<exec dir="src/PLASMA" executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
