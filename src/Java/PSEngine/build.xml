@@ -6,7 +6,7 @@
 	<property name="plasma.dir" value="${env.PLASMA_HOME}"/>
 	
 	<property name="src.dir"   value="java"/>
-	<property name="generated.dir" value="swig"/>
+	<property name="generated.dir" value="${plasma.dir}/src/PLASMA/System/base/swig"/>
 	<property name="build.dir"  value="${plasma.dir}/build/psengine/classes"/>
  	<property name="cache.dir"  value="${plasma.dir}/build/psengine/.cache"/>
  	<property name="dist.dir"   value="${plasma.dir}/build/lib"/>

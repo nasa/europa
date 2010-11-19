@@ -187,8 +187,9 @@
 	</target>
 	
 	<target name="clean-java">
-		<ant dir="src/Java/JavaUI" target="clean.all"/>
+		<ant dir="src/Java/PSEngine" target="clean"/>
 		<ant dir="src/Java/PSUI" target="clean"/>
+		<ant dir="src/Java/JavaUI" target="clean.all"/>
 	</target>
 	
 	<target name="build" depends="build-cpp,build-java"/>
@@ -216,13 +217,12 @@
 			<env key="PLASMA_HOME" value="${basedir}"/>
 			<env key="EUROPA_HOME" value="${basedir}\dist\europa"/>
 		</exec>					
-		
-		<ant dir="src/PLASMA/System/base" description="Build PSEngine.jar" target="PSEngine">
-			<property name="plasma.dir" value="${basedir}"/>
-		</ant>
 	</target>
 		
-	<target name="build-java" depends="init">
+	<target name="build-java" depends="init">		
+		<ant dir="src/Java/PSEngine" description="Build PSEngine.jar" target="PSEngine">
+			<property name="plasma.dir" value="${basedir}"/>
+		</ant>
 		<ant dir="src/Java/PSUI" description="Build PSUI.jar" target="dist">
 			<property name="plasma.dir" value="${basedir}"/>
 		</ant>
@@ -460,7 +460,7 @@
 			<antcall target="run-example-java"><param name="example.name" value="Shopping"/></antcall>        
 			<antcall target="run-example-java"><param name="example.name" value="UBO"/></antcall>  
 			
-			<ant dir="src/JavaUI" description="Run model tests for Java UI" target="test">
+			<ant dir="src/Java/JavaUI" description="Run model tests for Java UI" target="test">
 				<property name="europa.dir" value="${local.env.PLASMA_HOME}" />
 				<property name="europa.home" value="${local.env.EUROPA_HOME}" />
 				<property name="ld.path.key" value="${local.env.LD_LIBRARY_PATH.name}" />

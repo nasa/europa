@@ -90,20 +90,6 @@ rule SwigJava {
      local wrapfile = [ FSwigWrapperName $(swigfile) : $(cpp) ] ;
 
      Swig [ FGristFiles $(wrapfile) ] : $(swigfile) : java "package $(package)" : $(outdir) : $(cpp) ;
-
-     local javadir ;
-     if $(outdir) {
-       #javadir = [ FDirName $(SUBDIR) $(outdir) ] ;
-       javadir = $(outdir) ;
-     }
-     else {
-       javadir = $(SUBDIR) ;
-     }
-     ApacheAnt $(target:S=.jar) : [ FGristFiles build.xml ] $(swigfile) : $(target) -Dsrc.dir=$(javadir) ;
-		 NotFile $(target) ;
-		 Depends $(target) : $(deps:G=module) ;
-		 Depends $(target) : [ FGristFiles $(wrapfile) ] ;
-     Depends $(target) : $(target:S=.jar) ;
 }
 
 rule FSwigWrapperName {
