@@ -5,7 +5,8 @@
 	<property environment="env"/>
 	<property name="plasma.dir" value="${env.PLASMA_HOME}"/>
 	
-	<property name="src.dir"   value="swig"/>
+	<property name="src.dir"   value="java"/>
+	<property name="generated.dir" value="swig"/>
 	<property name="build.dir"  value="${plasma.dir}/build/psengine/classes"/>
  	<property name="cache.dir"  value="${plasma.dir}/build/psengine/.cache"/>
  	<property name="dist.dir"   value="${plasma.dir}/build/lib"/>
@@ -24,12 +25,12 @@
 	</target>
 	
 	<target name="compile" depends="init">
-		<depend srcdir="${src.dir}:java" destdir="${build.dir}" cache="${cache.dir}" closure="yes"/>
+		<depend srcdir="${generated.dir}:java" destdir="${build.dir}" cache="${cache.dir}" closure="yes"/>
 		<javac 
 			classpathref="psengine.classpath" 
 			destdir="${build.dir}">
-			<src path="${src.dir}"/>
-			<src path="java"/>    	
+			<src path="${generated.dir}"/>
+			<src path="${src.dir}"/>    	
 		</javac>	
 	</target>
 
