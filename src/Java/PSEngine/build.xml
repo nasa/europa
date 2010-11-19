@@ -6,9 +6,9 @@
 	<property name="plasma.dir" value="${env.PLASMA_HOME}"/>
 	
 	<property name="src.dir"   value="src"/>
-	<property name="generated.dir" value="${plasma.dir}/src/PLASMA/System/base/swig"/>
-	<property name="build.dir"  value="${plasma.dir}/build/psengine/classes"/>
- 	<property name="cache.dir"  value="${plasma.dir}/build/psengine/.cache"/>
+	<property name="generated.dir" value="generated"/>
+	<property name="build.dir"  value="${plasma.dir}/build/PSEngine/classes"/>
+ 	<property name="cache.dir"  value="${plasma.dir}/build/PSEngine/.cache"/>
  	<property name="dist.dir"   value="${plasma.dir}/build/lib"/>
   
  	<fileset dir="${plasma.dir}/ext/lib" id="plasma.extlibfiles">
@@ -45,6 +45,7 @@
 	<target name="clean">
 		<delete dir="${cache.dir}"/>
 		<delete dir="${build.dir}"/>
+		<delete dir="${generated.dir}"/>
 		<delete file="${dist.dir}/PSEngine.jar"/>
 	</target>
 

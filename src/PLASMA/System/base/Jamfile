@@ -17,7 +17,7 @@ ModuleBase System
 	PSEngineImpl.cc
 	;
 
-SwigJava PSEngine.i : psengine : swig/psengine : cpp : TinyXml Utils ConstraintEngine PlanDatabase RulesEngine NDDL TemporalNetwork Solvers System : PSEngine ;
+SwigJava PSEngine.i : psengine : [ FDirName $(PLASMA_HOME) src Java PSEngine generated psengine ] : cpp : TinyXml Utils ConstraintEngine PlanDatabase RulesEngine NDDL TemporalNetwork Solvers System : PSEngine ;
 
 ModuleBaseSwig System : [ FSwigWrapperName PSEngine.i : cpp ] ;
 
