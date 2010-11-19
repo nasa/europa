@@ -164,24 +164,31 @@
 		</condition>
 	</target>
 	
-	<target name="clean" depends="init">
-		<ant dir="src/JavaUI" target="clean.all"/>
-		<runtarget target="clean-${local.os.family}"/>
+	<target name="clean" depends="init,clean-cpp,clean-java">
  		<delete dir="${dir.build}"/>
 		<delete dir="${dir.dist}"/>
 	</target>
 
-	<target name="clean-unix">
+	<target name="clean-cpp">
+		<runtarget target="clean-cpp-${local.os.family}"/>
+	</target>
+		
+	<target name="clean-cpp-unix">
 		<exec executable="${jam.exec}" dir="${dir.src}" failonerror="true">
 			<arg line="clean-all"/>
 			<env key="PLASMA_HOME" value="${local.env.PLASMA_HOME}"/>
 		</exec>				
 	</target>
 	
-	<target name="clean-windows">
+	<target name="clean-cpp-windows">
 		<exec dir="src/PLASMA" executable="${msbuild.dir}\\MSBuild.exe" failonerror="true">
 		  <arg line="/target:clean /p:Platform=Win32 /p:Configuration=${windows.variant}-${windows.libType} Europa.sln"/>
 		</exec>
+	</target>
+	
+	<target name="clean-java">
+		<ant dir="src/Java/JavaUI" target="clean.all"/>
+		<ant dir="src/Java/PSUI" target="clean"/>
 	</target>
 	
 	<target name="build" depends="build-cpp,build-java"/>
