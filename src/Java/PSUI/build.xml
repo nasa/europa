@@ -49,7 +49,8 @@
 			srcdir="${src.dir}"
 			destdir="${build.dir}"
 			debug="${debug}"
-			deprecation="${deprecation}">
+			deprecation="${deprecation}"
+			includeAntRuntime="no">
 			<classpath refid="psui.classpath"/>
 		</javac>
 	</target>

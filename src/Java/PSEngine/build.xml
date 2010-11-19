@@ -28,7 +28,8 @@
 		<depend srcdir="${generated.dir}:java" destdir="${build.dir}" cache="${cache.dir}" closure="yes"/>
 		<javac 
 			classpathref="psengine.classpath" 
-			destdir="${build.dir}">
+			destdir="${build.dir}"
+			includeAntRuntime="no">
 			<src path="${generated.dir}"/>
 			<src path="${src.dir}"/>    	
 		</javac>	
