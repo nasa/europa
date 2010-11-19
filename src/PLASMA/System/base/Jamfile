@@ -21,9 +21,4 @@ SwigJava PSEngine.i : psengine : swig/psengine : cpp : TinyXml Utils ConstraintE
 
 ModuleBaseSwig System : [ FSwigWrapperName PSEngine.i : cpp ] ;
 
-LOCATE on PSEngine.jar = [ FDirName $(PLASMA_BUILD) lib ] ;
-
-Depends lib : PSEngine.jar ;
-Depends build-modules : PSEngine.jar ;
-
 } # PLASMA_READY
