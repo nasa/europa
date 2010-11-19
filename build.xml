@@ -216,10 +216,10 @@
 	</target>
 		
 	<target name="build-java" depends="init">
-		<ant dir="src/PSUI" description="Build PSUI.jar" target="dist">
+		<ant dir="src/Java/PSUI" description="Build PSUI.jar" target="dist">
 			<property name="plasma.dir" value="${basedir}"/>
 		</ant>
-		<ant dir="src/JavaUI" description="Build Swing version of Java UI" target="build.swing">
+		<ant dir="src/Java/JavaUI" description="Build Swing version of Java UI" target="build.swing">
 			<property name="europa.dir" value="${local.env.PLASMA_HOME}" />
 			<property name="psengine.jar.path" value="${local.env.PLASMA_HOME}/build/lib" />
 		</ant>			
