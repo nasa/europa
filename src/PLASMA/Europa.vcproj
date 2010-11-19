@@ -1616,7 +1616,7 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Generating SWIG wrappers for PSEngine interface"
-							CommandLine="swig -java -package psengine -o $(ProjectDir)System\base\PSEngine_wrap.cc -Wall -c++ -outdir $(ProjectDir)System\base\swig\psengine $(ProjectDir)System\base\PSEngine.i&#x0D;&#x0A;"
+							CommandLine="swig -java -package psengine -o $(ProjectDir)System\base\PSEngine_wrap.cc -Wall -c++ -outdir $(ProjectDir)..\Java\PSEngine\generated\psengine $(ProjectDir)System\base\PSEngine.i&#x0D;&#x0A;"
 							Outputs="$(ProjectDir)System\base\PSEngine_wrap.cc;$(ProjectDir)System\base\PSEngine_wrap.h"
 						/>
 					</FileConfiguration>

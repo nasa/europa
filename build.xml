@@ -208,7 +208,7 @@
 	</target>
 		
 	<target name="build-cpp-windows">
-		<mkdir dir="src/Java/PSEngine/generated"/> 
+		<!-- swig needs this directory to be already in place for windows -->
 		<mkdir dir="src/Java/PSEngine/generated/psengine"/> 
 		
 		<echo message="Building EUROPA on Windows: libType=${windows.libType} variant=${windows.variant}"/>	
