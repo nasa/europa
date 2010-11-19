@@ -56,14 +56,14 @@
 	</target>
 
 	<target name="check-jar-uptodate">
-		<uptodate property="uptodate.jar" targetfile="${dist.dir}/PSUI.jar" >
+		<uptodate property="uptodateJar" targetfile="${dist.dir}/PSUI.jar" >
 			<srcfiles dir="${build.dir}"/>
 			<srcfiles refid="psui.libfiles"/>
 			<srcfiles refid="plasma.libfiles"/>
 		</uptodate>
 	</target>
 	
-	<target name="unjar-libs" depends="check-jar-uptodate" unless="uptodate.jar">
+	<target name="unjar-libs" depends="check-jar-uptodate" unless="uptodateJar">
 		<unjar dest="${build.dir}" overwrite="false">
     		<fileset refid="psui.libfiles"/>
 			<fileset refid="plasma.libfiles"/>
