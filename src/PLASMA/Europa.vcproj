@@ -233,6 +233,84 @@
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
+		<Configuration
+			Name="Release-dll|Win32"
+			OutputDirectory="$(PLASMA_HOME)\build\lib\"
+			IntermediateDirectory="$(PLASMA_HOME)\build\objects\$(ConfigurationName)"
+			ConfigurationType="2"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				UseUnicodeResponseFiles="false"
+				Optimization="3"
+				AdditionalIncludeDirectories="$(PLASMA_THIRD_PARTY)\visualStudio\dlfcn-win32-r11;$(PLASMA_THIRD_PARTY)\visualStudio\libantlr3c-3.1.3\include;$(PLASMA_THIRD_PARTY)\visualStudio\pthreads-w32-2-8-0-release;ConstraintEngine;ConstraintEngine\base;ConstraintEngine\component;NDDL;NDDL\base;NDDL\component;PlanDatabase;PlanDatabase\base;PlanDatabase\component;Resource;Resource\base;Resource\component;Resource\component\NDDL;Resource\component\Solvers;RulesEngine;RulesEngine\base;RulesEngine\component;Solvers;Solvers\base;Solvers\component;TemporalNetwork;TemporalNetwork\base;TemporalNetwork\component;TinyXml\base;Utils;Utils\base;Utils\component"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_USRDLL;_MBCS;_CRT_SECURE_NO_WARNINGS;_HAS_TRADITIONAL_STL;USE_EUROPA_DLL;DLL_EXPORT;TIXML_USE_STL;EUROPA_FAST"
+				MinimalRebuild="false"
+				BasicRuntimeChecks="0"
+				RuntimeLibrary="3"
+				TreatWChar_tAsBuiltInType="false"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				DebugInformationFormat="0"
+				DisableSpecificWarnings="4250;4355;4003;4002"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="antlr3cd.lib pthreadVC2d.lib"
+				OutputFile="$(OutDir)System_o.dll"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="&quot;$(PLASMA_THIRD_PARTY)\visualStudio\libantlr3c-3.1.3\Debug&quot;;&quot;$(PLASMA_THIRD_PARTY)\visualStudio\pthreads-w32-2-8-0-release\lib&quot;"
+				GenerateDebugInformation="false"
+				SubSystem="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -604,6 +682,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Static-Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							TreatWChar_tAsBuiltInType="true"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release-dll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1598,6 +1684,14 @@
 							AdditionalIncludeDirectories="&quot;$(JAVA_HOME)\include&quot;;&quot;$(JAVA_HOME)\include\win32&quot;;&quot;$(PLASMA_THIRD_PARTY)\visualStudio\libantlr3c-3.1.3\include&quot;"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="Release-dll|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories="&quot;$(JAVA_HOME)\include&quot;;&quot;$(JAVA_HOME)\include\win32&quot;;&quot;$(PLASMA_THIRD_PARTY)\visualStudio\libantlr3c-3.1.3\include&quot;"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\System\base\PSEngineImpl.cc"
@@ -1612,6 +1706,16 @@
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Generating SWIG wrappers for PSEngine interface"
+							CommandLine="swig -java -package psengine -o $(ProjectDir)System\base\PSEngine_wrap.cc -Wall -c++ -outdir $(ProjectDir)..\Java\PSEngine\generated\psengine $(ProjectDir)System\base\PSEngine.i&#x0D;&#x0A;"
+							Outputs="$(ProjectDir)System\base\PSEngine_wrap.cc;$(ProjectDir)System\base\PSEngine_wrap.h"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release-dll|Win32"
 						>
 						<Tool
 							Name="VCCustomBuildTool"

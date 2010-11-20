@@ -163,7 +163,7 @@
 		</condition>
 			
 		<!-- TODO : need to support Release variant on windows -->
-		<condition property="windows.variant" value="Debug" else="Debug">											  
+		<condition property="windows.variant" value="Release" else="Debug">											  
 			<equals arg1="${build.variant}" arg2="release"/>
 		</condition>
 	</target>
