@@ -157,12 +157,10 @@
 	    <property name="dir.msbuild" value="C:\\Windows\\Microsoft.NET\\Framework\\v3.5"/>
 	    <property name="msbuild.exe" value="${dir.msbuild}\\MSBuild.exe"/>
 		
-		<!-- TODO : need to support static libs on windows -->
-		<condition property="windows.libType" value="dll" else="dll">											  
+		<condition property="windows.libType" value="static" else="dll">											  
 			<equals arg1="${build.libs}" arg2="static"/>
 		</condition>
 			
-		<!-- TODO : need to support Release variant on windows -->
 		<condition property="windows.variant" value="Release" else="Debug">											  
 			<equals arg1="${build.variant}" arg2="release"/>
 		</condition>
