@@ -72,6 +72,7 @@ Bool Dqueue::isEmpty()
 
 /* BucketQueue functions */
 
+
 BucketQueue::BucketQueue (int n)
 {
   buckets = new DnodePriorityQueue();
@@ -94,34 +95,36 @@ void BucketQueue::reset()
 
 DnodeId BucketQueue::popMinFromQueue()
 {
+	DnodeId node;
+	
+	while (!buckets->empty()){
+		Bucket& b = buckets->top();
+		buckets->pop();
 
-  DnodeId node;
-  while (!buckets->empty()){
-    node = buckets->top();
-    buckets->pop();
-    if (node->isMarked()){
-      node->unmark();
-      return node;
-    }
-  }
-
-  return DnodeId::noId();
+		node = b.node;
+		if (node->isMarked()){
+			node->unmark();
+			return node;
+		}
+	}
+	
+	return DnodeId::noId();
 }
 
-  void BucketQueue::insertInQueue(DnodeId node, eint::basis_type key)
+void BucketQueue::insertInQueue(DnodeId node, eint::basis_type key)
 {
-  if(node.isNoId())
-    return;
+	if(node.isNoId())
+		return;
 
-  if(node->isMarked() && node->getKey() > -key ){
-    return;
-  }
+	if(node->isMarked() && node->getKey() > -key )
+		return;
 
-  node->setKey(-key); // Reverse since we want effective lowest priority first
-  node->mark();
-  this->buckets->push(node);
+	node->setKey(-key); // Reverse since we want effective lowest priority first
+	node->mark();
+	Bucket b(node,-key);
+	this->buckets->push(b);
 
-  //debugMsg("BucketQueue:insertInQueue", "Enqueueing " << node << " with key " << -key);
+	//debugMsg("BucketQueue:insertInQueue", "Enqueueing " << node << " with key " << -key);
 }
 
 void BucketQueue::insertInQueue(DnodeId node)

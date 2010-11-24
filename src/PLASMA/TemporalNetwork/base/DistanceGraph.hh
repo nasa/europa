@@ -419,19 +419,29 @@ public:
  * @brief  Utility class. Bucket elements are units stored by the BucketQueue
  * @ingroup TemporalNetwork
  */
-class Bucket {
-  friend class BucketQueue;
+class Bucket 
+{
 public:
-  Time key;
-private:
   DnodeId node;
-  /**
-   * @brief constructor
-   */
-  Bucket (Time distance) { key=distance; }
+  Time key;
+
+private:
+  Bucket (const DnodeId& n, Time distance) { node=n ; key=distance; }
+
+  friend class BucketQueue;
 };
 
-  typedef std::priority_queue<DnodeId, std::vector<DnodeId>, EntityComparator<DnodeId> > DnodePriorityQueue;
+class BucketComparator
+{
+public:
+	bool operator()(const Bucket& lhs,const Bucket& rhs) const
+	{
+		return lhs.key < rhs.key;
+	}
+};
+
+
+typedef std::priority_queue<Bucket,std::vector<Bucket>,BucketComparator> DnodePriorityQueue;
 
 /**
  * @class  BucketQueue
