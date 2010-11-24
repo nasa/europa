@@ -98,7 +98,7 @@ DnodeId BucketQueue::popMinFromQueue()
 	DnodeId node;
 	
 	while (!buckets->empty()){
-		Bucket& b = buckets->top();
+		const Bucket& b = buckets->top();
 		buckets->pop();
 
 		node = b.node;
