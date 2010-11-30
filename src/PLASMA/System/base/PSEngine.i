@@ -31,6 +31,27 @@
 %exception executeScript {
   try {
      $action
+  } catch (const Error &er) {
+		jclass excepClass = jenv->FindClass("psengine/PSLanguageExceptionList");
+		if (excepClass == NULL)
+			return $null;
+
+		jmethodID excepConstructor = jenv->GetMethodID(excepClass, "<init>", "(JZ)V");
+		if(excepConstructor == NULL)
+			return $null;
+			
+		EUROPA::PSLanguageException exc(er.getFile().c_str(), er.getLine(), 0, 0,
+			er.getMsg().c_str());
+		std::vector<EUROPA::PSLanguageException> list;
+		list.push_back(exc);
+		
+		jthrowable excep = static_cast<jthrowable> (jenv->NewObject(excepClass, excepConstructor, new EUROPA::PSLanguageExceptionList(list), true));
+		if(excep == NULL)
+			return $null;
+		else
+			jenv->Throw(excep);
+
+		return $null;
   } catch (const EUROPA::PSLanguageExceptionList &e) {
 		jclass excepClass = jenv->FindClass("psengine/PSLanguageExceptionList");
 		if (excepClass == NULL)

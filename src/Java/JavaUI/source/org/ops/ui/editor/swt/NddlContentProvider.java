@@ -62,7 +62,8 @@ public class NddlContentProvider implements IStructuredContentProvider,
 
 		// Update outline, if any
 		if (editor.getOutlinePage() != null)
-			editor.getOutlinePage().update(OutlineNode.makeTree(fm.getAST()));
+			editor.getOutlinePage().update(
+					OutlineNode.makeTree(fm == null ? null : fm.getAST()));
 
 		// Update error markers on the editor
 		IResource resource = (IResource) editor.getEditorInput().getAdapter(

@@ -470,12 +470,14 @@ INCLUDE :	'#include' WS+ file=STRING
                             CONSTRUCTEX();
                             FAILEDFLAG = ANTLR3_TRUE;
                             RECOGNIZER->state->errorCount++;
-                            std::string message = ("ERROR!: couldn't find file: " + std::string((const char*)$file.text->chars)
+                            std::string message = ("File not found: " + std::string((const char*)$file.text->chars)
                                                    + ", search path \"" + path + "\"");
-                            RECOGNIZER->state->exception->message = strdup(message.c_str());
-                            reportLexerError(RECOGNIZER, NULL); //Note: the second argument does not appear to be used for anything.
-                            check_runtime_error(false, std::string("ERROR!: couldn't find file: " + std::string((const char*)$file.text->chars)
-                                                                   + ", search path \"" + path + "\"").c_str());
+                            EXCEPTION->message      = (void*) strdup(message.c_str());
+                            EXCEPTION->token        = $file;
+                            return; // generated code has GOTO to the end
+                            // reportLexerError(RECOGNIZER, NULL); //Note: the second argument does not appear to be used for anything.
+                            //  check_runtime_error(false, std::string("ERROR!: couldn't find file: " + std::string((const char*)$file.text->chars)
+                            //                                       + ", search path \"" + path + "\"").c_str());
                         }
 
                         if (!CTX->parserObj->queryIncludeGuard(fullName)) {
