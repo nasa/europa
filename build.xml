@@ -67,7 +67,10 @@
 		</condition>
 		
 		<condition property="local.os.is64bit" value="true" else="false"> 
-	    	<contains string="${os.arch}" substring="x86_64" casesensitive="false"/>
+			<or>
+	    		<contains string="${os.arch}" substring="x86_64" casesensitive="false"/>
+		    	<contains string="${os.arch}" substring="amd64" casesensitive="false"/>
+			</or>
 		</condition> 
 		
 	    <echo message="Running build for : family=${local.os.family} os=${local.os} 64bit=${local.os.is64bit}"/>		
