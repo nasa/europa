@@ -464,7 +464,7 @@ INCLUDE :	'#include' WS+ file=STRING
                             std::string path = "";
                             std::vector<std::string> parserPath = CTX->parserObj->getIncludePath();
                             for (unsigned int i=0; i<parserPath.size();i++) {
-                                path += parserPath[i] + ":";
+                                path += parserPath[i] + PATH_SEPARATOR_STR;
                             }
                             //Error message here.
                             CONSTRUCTEX();

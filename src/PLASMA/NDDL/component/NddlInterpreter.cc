@@ -78,9 +78,9 @@ std::vector<std::string> NddlInterpreter::getIncludePath()
     const std::string& configPathStr = getEngine()->getConfig()->getProperty("nddl.includePath");
     if (configPathStr.size() > 0) {
         LabelStr configPath=configPathStr;
-        unsigned int cnt = configPath.countElements(":");
+        unsigned int cnt = configPath.countElements(PATH_SEPARATOR_STR.c_str());
         for (unsigned int i=0;i<cnt;i++)
-            includePath.push_back(configPath.getElement(i,":").c_str());
+            includePath.push_back(configPath.getElement(i,PATH_SEPARATOR_STR.c_str()).c_str());
     }
 
     // Look in current dir first
@@ -89,14 +89,14 @@ std::vector<std::string> NddlInterpreter::getIncludePath()
     // otherwise, look in include path, starting with $EUROPA_HOME, then $PLASMA_HOME
     const char* europaHome = std::getenv("EUROPA_HOME");
     if (europaHome != NULL)
-        includePath.push_back(std::string(europaHome)+"/include");
+        includePath.push_back(std::string(europaHome)+ PATH_STR + "include");
     else // TODO: this should be at least INFO, possibly WARNING
         debugMsg("NddlInterpreter","$EUROPA_HOME is not defined, therefore not added to NddlInterpreter include path");
 
     const char* plasmaHome = std::getenv("PLASMA_HOME");
     if (plasmaHome != NULL) {
-        includePath.push_back(std::string(plasmaHome)+"/src/PLASMA/NDDL/base");
-        includePath.push_back(std::string(plasmaHome)+"/src/PLASMA/Resource/component/NDDL");
+        includePath.push_back(std::string(plasmaHome)+ PATH_STR + "src" + PATH_STR + "PLASMA" + PATH_STR + "NDDL" + PATH_STR + "base");
+        includePath.push_back(std::string(plasmaHome)+ PATH_STR + "src" + PATH_STR + "PLASMA" + PATH_STR + "Resource" + PATH_STR + "component" + PATH_STR +"NDDL");
     }
 		
     // TODO: dump includePath to log
@@ -112,12 +112,7 @@ std::string NddlInterpreter::getFilename(const std::string& f)
 
     for (unsigned int i=0; i<includePath.size();i++) {
         // TODO: this may not be portable to all OSs
-		#ifdef _MSC_VER
-		std::string fullName = includePath[i]+"\\"+fname;
-		#else
-		std::string fullName = includePath[i]+"/"+fname;
-		#endif
-        
+        std::string fullName = includePath[i]+ PATH_STR +fname;
         if (isFile(fullName)) {
             debugMsg("NddlInterpreter","Found:" << fullName);
             return fullName;
@@ -178,7 +173,9 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
         throw PSLanguageExceptionList(all);
     }
     else {
-        debugMsg("NddlInterpreter:interpret","NDDL AST:\n" << result.tree->toStringTree(result.tree)->chars);
+		condDebugMsg(result.tree->toStringTree(result.tree) != NULL, "NddlInterpreter:interpret",
+					 "NDDL AST:\n" << result.tree->toStringTree(result.tree)->chars);
+		condDebugMsg(result.tree->toStringTree(result.tree) == NULL, "NddlInterpreter:interpret", "Empty NDDL AST.");
     }
 
     // Walk the AST to create nddl expr to evaluate
