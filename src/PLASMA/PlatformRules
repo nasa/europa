@@ -7,26 +7,14 @@ PlatformRules_INCLUDED = TRUE ;
 
 # POSITION_INDEPENDENT_CODE_FLAG = Flag to generate position-independent code
 
-if $(OS) = CYGWIN || $(OS) = MINGW || $(OS) = WinVS90 {
-  POSITION_INDEPENDENT_CODE_FLAG ?= ;
-} else {
-  POSITION_INDEPENDENT_CODE_FLAG ?= -fPIC ;
-}
+POSITION_INDEPENDENT_CODE_FLAG ?= -fPIC ;
 
 # LINKER_PASSTHROUGH_FLAG = Flag to pass an argument through to the linker
-
-if $(OS) = WinVS90 {
-  LINKER_PASSTHROUGH_FLAG ?= ;
-} else {
-  LINKER_PASSTHROUGH_FLAG ?= -Wl, ;
-}
+LINKER_PASSTHROUGH_FLAG ?= -Wl, ;
 
 # SHARED_FLAG = Flag to generate shared library
-
 if $(OS) = MACOSX {
   SHARED_FLAG ?= -fno-common -dynamiclib ;
-} else if $(OS) = WinVS90 {
-  SHARED_FLAG ?= /DLL ;
 } else {
   SHARED_FLAG ?= -shared ;
 }
@@ -96,13 +84,8 @@ if $(GCC_ROOTDIR) {
 PROFILE_FLAGS ?= -pg ;
 
 # OPTIMIZE_FLAGS = flags for optimization
-if $(OS) = WinVS90 {
-  OPTIMIZE_FLAGS ?= /Ot /Ox -DEUROPA_FAST -DNDEBUG ;
-  OPTIM = ; # suppress built-in optimization
-} else {
-  OPTIMIZE_FLAGS ?= -O3 -DEUROPA_FAST -DNDEBUG ;
-  OPTIM = ; # suppress built-in optimization
-}
+OPTIMIZE_FLAGS ?= -O3 -DEUROPA_FAST -DNDEBUG ;
+OPTIM = ; # suppress built-in optimization
 
 # COVERAGE_FLAGS = flags for code coverage (e.g., gcov)
 
@@ -112,26 +95,17 @@ COVERAGE_FLAGS ?= -fprofile-arcs -ftest-coverage ;
 
 if $(OS) = BEOS {
   WARNING_FLAGS ?= -Wall -Wno-unused -Wno-sign-promo -Wno-multichar ;
-} else if $(OS) = WinVS90 {
-#  WARNING_FLAGS ?= /Wall /wd 4820 ;
-  WARNING_FLAGS ?= /W0 ;
 } else {
   WARNING_FLAGS ?= -Wall ;
 }
 
 # DEBUG_FLAGS = flags to enable debugging
-if $(OS) = WinVS90 {
-  DEBUG_FLAGS ?= ;
-} else {
-  DEBUG_FLAGS ?= -g3 ;
-}
+DEBUG_FLAGS ?= -g3 ;
 
 # PTHREADS_LIBRARY = library with pthread related functions
 
 if $(OS) = BEOS {
   PTHREADS_LIBRARY = condvar ;
-} else if $(OS) = MINGW || $(OS) = WinVS90 {
-  PTHREADS_LIBRARY = pthreadGC2 ;
 } else if $(OS) = SOLARIS {
   PTHREADS_LIBRARY = pthread socket ;
 } else {
@@ -139,16 +113,12 @@ if $(OS) = BEOS {
 }
 
 # SUFSHARE = suffix for shared libraries
-if $(OS) = CYGWIN || $(OS) = MINGW || $(OS) = WinVS90 {
-  SUFSHARE ?= .lib ;
-} else {
-  if $(OS) = MACOSX {
-    SUFSHARE ?= .dylib ;
-  }
-  else 
-  {
-    SUFSHARE ?= .so ;
-  }
+if $(OS) = MACOSX {
+  SUFSHARE ?= .dylib ;
+}
+else 
+{
+  SUFSHARE ?= .so ;
 }
 
 # JAVA_HOME = java root directory
@@ -172,15 +142,6 @@ if $(JAVA_HOME) {
   JAR ?= jar ;
 }
 
-#if $(PLASMA_HOME) {
-#	ANT_HOME ?= [ FDirName $(PLASMA_HOME) ext ant ] ;
-#}
-#else if $(EUROPA_HOME) {
-#	ANT_HOME ?= [ FDirName $(EUROPA_HOME) ext ant ] ;
-#}
-#else {
-#	ANT_HOME ?= [ FDirName .. .. ext ant ] ;
-#}
 if $(ANT_HOME) {
   ANT ?= [ FDirName $(ANT_HOME) bin ant ] ;
 }
@@ -188,35 +149,20 @@ if $(ANT_HOME) {
 ANT ?= ant ;
 
 #SWIG_HOME ?= [ FDirName $(PLASMA) ext swig ] ;
-SWIG ?= [ FDirName $(SWIG_HOME) swig ] ;
+if $(SWIG_HOME) {
+  SWIG ?= [ FDirName $(SWIG_HOME) swig ] ;
+}
+
+SWIG ?= swig ;
 
 # CLASSPATH_SEPARATOR = separator for java class path
+CLASSPATH_SEPARATOR = ":" ;
 
-if $(OS) = CYGWIN {
-  CLASSPATH_SEPARATOR = '";"' ;
-  local colon = \: ;
-  CLASSPATH = \"$(CLASSPATH:J=$(colon))\" ;
-} else {
-  CLASSPATH_SEPARATOR = ":" ;
-}
-
-#
-
-if $(OS) = CYGWIN {
-  PATH_PREPROCESSOR = "cygpath --windows" ;
-} else {
-  PATH_PREPROCESSOR = "echo" ;
-}
+PATH_PREPROCESSOR = "echo" ;
 
 # DLOPEN_LIBRARY = library with open libraries functions
 
-if $(OS) = CYGWIN {
-  DLOPEN_LIBRARY = ;
-}
-else if $(OS) = OSF {
-  DLOPEN_LIBRARY = ;
-}
-else if $(OS) = MINGW {
+if $(OS) = OSF {
   DLOPEN_LIBRARY = ;
 }
 else {
@@ -226,40 +172,8 @@ else {
 #
 # Other miscellaneous platform tweaks
 #
-
-if $(OS) = CYGWIN {
-  MKDIR = mkdir -p ;
-  LINKFLAGS += -Wl,--add-stdcall-alias -I$(PLASMA_HOME)/build/lib -Wl,--enable-auto-import ;
-}
-
-if $(OS) = CYGWIN && $(NOCYGWIN) {
-  LINKFLAGS += $(LIBRARY_PATH_SEARCH_FLAG)/usr/local/mingw/lib -mno-cygwin ;
-  LINKFLAGS += -D_WIN32 ;  #to ensure Antlr3 compiles in win32 mode (see antlr3defs.h)
-  PLATFORM_FLAGS += -D_NO_W32_PSEUDO_MODIFIERS -D__MINGW32__ -D_WIN32 -I/usr/local/mingw/include -mno-cygwin ;
-  LINKLIBS += -lwsock32 ;  #winsock library is needed for Antlr3
-  #The compiler optimazations for MinGW are too slow for autobuild, but they do work
-  # -0 takes at least an hour, -01 >= 240 minutes,  -02 >= 230 minutes, -03 >= 350 minutes
-  #OPTIMIZE_FLAGS = -O3 -DEUROPA_FAST ;  
-  OPTIMIZE_FLAGS = -DEUROPA_FAST ;  
-}
-
-if $(OS) = MINGW {
-  PLATFORM_FLAGS += -D_NO_W32_PSEUDO_MODIFIERS -D_WIN32 ;
-}
-
 if $(OS) = MACOSX {
   PLATFORM_FLAGS += -I/opt/local/include ;
-}
-
-if $(OS) = WinVS90 {
-  PLATFORM_FLAGS += /EHsc ;
-  PLATFORM_FLAGS += /D _HAS_TRADITIONAL_STL ;
-  PLATFORM_FLAGS += /Iz:/files/ingenium.dev/workspace/ThirdParty/europa/plasma.ThirdParty/pthreads-w32-2-8-0-release ;
-  PLATFORM_FLAGS += /Iz:/files/ingenium.dev/workspace/ThirdParty/europa/plasma.ThirdParty/dlfcn-win32-r11 ;
-  PLATFORM_FLAGS += /Iz:/files/ingenium.dev/workspace/ThirdParty/europa/plasma.ThirdParty/cppunit-1.12.1/include ;
-  PLATFORM_FLAGS += /Iz:/files/ingenium.dev/workspace/ThirdParty/europa/plasma.ThirdParty/libantlr3c-3.1.3/include ;
-  PLATFORM_FLAGS += /I$(JAVA_HOME)/include ;
-  PLATFORM_FLAGS += /I$(JAVA_HOME)/include/win32 ;
 }
 
 if $(OS) = SOLARIS {
