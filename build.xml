@@ -307,7 +307,7 @@
 		<if>		
 			<contains string="${local.os}" substring="windows" casesensitive="false"/>
 		<then>
-			<copy todir="${dir.dist.base}/lib/Debug">
+			<copy todir="${dir.dist.base}/lib">
 				<fileset dir="${env.PLASMA_THIRD_PARTY}\visualStudio\pthreads-w32-2-8-0-release\lib"/>	  
 			</copy>
 		</then>
