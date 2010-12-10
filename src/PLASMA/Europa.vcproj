@@ -270,7 +270,7 @@
 				PreprocessorDefinitions="WIN32;_WINDOWS;_MBCS;_CRT_SECURE_NO_WARNINGS;_HAS_TRADITIONAL_STL;TIXML_USE_STL;EUROPA_FAST"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				TreatWChar_tAsBuiltInType="false"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
