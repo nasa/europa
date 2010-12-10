@@ -1690,6 +1690,14 @@
 					RelativePath=".\System\base\PSEngine_wrap.cc"
 					>
 					<FileConfiguration
+						Name="Debug-dll|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories="&quot;$(JAVA_HOME)\include&quot;;&quot;$(JAVA_HOME)\include\win32&quot;;&quot;$(PLASMA_THIRD_PARTY)\visualStudio\libantlr3c-3.1.3\include&quot;"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
 						Name="Debug-static|Win32"
 						>
 						<Tool
@@ -1734,12 +1742,22 @@
 					RelativePath=".\System\base\PSEngine.i"
 					>
 					<FileConfiguration
+						Name="Debug-dll|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							Description="Generating SWIG wrappers for PSEngine interface"
+							CommandLine="swig -java -package psengine -o $(ProjectDir)System\base\PSEngine_wrap.cc -Wall -c++ -outdir $(ProjectDir)..\Java\PSEngine\generated\psengine $(ProjectDir)System\base\PSEngine.i"
+							Outputs="$(ProjectDir)System\base\PSEngine_wrap.cc;$(ProjectDir)System\base\PSEngine_wrap.h"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
 						Name="Debug-static|Win32"
 						>
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Generating SWIG wrappers for PSEngine interface"
-							CommandLine="swig -java -package psengine -o $(ProjectDir)System\base\PSEngine_wrap.cc -Wall -c++ -outdir $(ProjectDir)..\Java\PSEngine\generated\psengine $(ProjectDir)System\base\PSEngine.i&#x0D;&#x0A;"
+							CommandLine="swig -java -package psengine -o $(ProjectDir)System\base\PSEngine_wrap.cc -Wall -c++ -outdir $(ProjectDir)..\Java\PSEngine\generated\psengine $(ProjectDir)System\base\PSEngine.i"
 							Outputs="$(ProjectDir)System\base\PSEngine_wrap.cc;$(ProjectDir)System\base\PSEngine_wrap.h"
 						/>
 					</FileConfiguration>
@@ -1749,7 +1767,7 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Generating SWIG wrappers for PSEngine interface"
-							CommandLine="swig -java -package psengine -o $(ProjectDir)System\base\PSEngine_wrap.cc -Wall -c++ -outdir $(ProjectDir)..\Java\PSEngine\generated\psengine $(ProjectDir)System\base\PSEngine.i&#x0D;&#x0A;"
+							CommandLine="swig -java -package psengine -o $(ProjectDir)System\base\PSEngine_wrap.cc -Wall -c++ -outdir $(ProjectDir)..\Java\PSEngine\generated\psengine $(ProjectDir)System\base\PSEngine.i"
 							Outputs="$(ProjectDir)System\base\PSEngine_wrap.cc;$(ProjectDir)System\base\PSEngine_wrap.h"
 						/>
 					</FileConfiguration>
@@ -1759,7 +1777,7 @@
 						<Tool
 							Name="VCCustomBuildTool"
 							Description="Generating SWIG wrappers for PSEngine interface"
-							CommandLine="swig -java -package psengine -o $(ProjectDir)System\base\PSEngine_wrap.cc -Wall -c++ -outdir $(ProjectDir)..\Java\PSEngine\generated\psengine $(ProjectDir)System\base\PSEngine.i&#x0D;&#x0A;"
+							CommandLine="swig -java -package psengine -o $(ProjectDir)System\base\PSEngine_wrap.cc -Wall -c++ -outdir $(ProjectDir)..\Java\PSEngine\generated\psengine $(ProjectDir)System\base\PSEngine.i"
 							Outputs="$(ProjectDir)System\base\PSEngine_wrap.cc;$(ProjectDir)System\base\PSEngine_wrap.h"
 						/>
 					</FileConfiguration>
