@@ -358,22 +358,9 @@
   		description="create a zip file for static libs only">
 		<delete file="${dir.dist}/${file.europa-static-libs}"/>
 		
-		<if>      
-			<contains string="${local.os}" substring="windows" casesensitive="false"/>
-		<then>
-			<zip destfile="${dir.dist}/${file.europa-static-libs}">
-				<zipfileset dir="${dir.dist.base}/lib" includes="*.lib" dirmode="775" filemode="664"/>
-				<zipfileset dir="${dir.dist.base}/lib" includes="*.a" dirmode="775" filemode="664"/>
-				<zipfileset dir="${dir.dist.base}/lib/Debug" includes="*.lib" dirmode="775" filemode="664"/>
-				<zipfileset dir="${dir.dist.base}/lib/Debug" includes="*.a" dirmode="775" filemode="664"/>
-			</zip>
-		</then>
-		<else>
-			<zip destfile="${dir.dist}/${file.europa-static-libs}">
-				<zipfileset dir="${dir.dist.base}/lib" includes="*.a" prefix="lib" dirmode="775" filemode="664"/>
-			</zip>
-		</else>
-		</if>
+		<zip destfile="${dir.dist}/${file.europa-static-libs}">
+			<zipfileset dir="${dir.dist.base}/lib" includes="*.a" prefix="lib" dirmode="775" filemode="664"/>
+		</zip>
 	</target>
   
 	<target name="run-diff" if="diff.allow">
