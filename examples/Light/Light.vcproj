@@ -43,12 +43,13 @@
 				Optimization="0"
 				AdditionalIncludeDirectories="$(EUROPA_HOME)\include;$(EUROPA_HOME)\include\PLASMA"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;USE_EUROPA_DLL"
-				MinimalRebuild="true"
+				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="1"
+				DisableSpecificWarnings="4250;4355;4003;4002;4101"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -118,11 +119,13 @@
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="$(EUROPA_HOME)\include;$(EUROPA_HOME)\include\PLASMA"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;USE_EUROPA_DLL"
+				MinimalRebuild="false"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="0"
+				DisableSpecificWarnings="4250;4355;4003;4002;4101"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -192,12 +195,13 @@
 				Optimization="0"
 				AdditionalIncludeDirectories="$(EUROPA_HOME)\include;$(EUROPA_HOME)\include\PLASMA"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
-				MinimalRebuild="true"
+				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="1"
+				DisableSpecificWarnings="4250;4355;4003;4002;4101"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -264,13 +268,14 @@
 				Name="VCCLCompilerTool"
 				Optimization="3"
 				AdditionalIncludeDirectories="$(EUROPA_HOME)\include;$(EUROPA_HOME)\include\PLASMA"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
-				MinimalRebuild="true"
+				PreprocessorDefinitions="WIN32;_CONSOLE"
+				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="0"
+				DisableSpecificWarnings="4250;4355;4003;4002;4101"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -284,8 +289,8 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="$(EUROPA_HOME)\lib\System_o.a"
-				LinkIncremental="2"
-				GenerateDebugInformation="true"
+				LinkIncremental="0"
+				GenerateDebugInformation="false"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -361,7 +366,7 @@
 			Name="Config Files"
 			>
 			<File
-				RelativePath="EuropaLogger.cfg"
+				RelativePath=".\Debug.cfg"
 				>
 			</File>
 			<File
