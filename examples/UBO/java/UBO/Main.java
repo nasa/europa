@@ -18,7 +18,7 @@ class Main
 	   
 	public static void main(String args[])
 	{
-		if ("".equals(args[2]))
+		if (args.length < 3)
 		{
 		    String debugMode = args[0];
 	        PSUtil.loadLibraries(debugMode);	   
