@@ -35,7 +35,7 @@ pANTLR3_INPUT_STREAM getInputStream(std::istream& input, const std::string& sour
         std::istringstream* is = dynamic_cast<std::istringstream*>(&input);
         strInput = is->str(); // This makes a copy of the original string that could be avoided
 
-		std::cout << "INPUT SCRIPT:" << std::endl << strInput << std::endl;
+		debugMsg("NddlInterpreter", "INPUT SCRIPT:" << std::endl << strInput);
         return antlr3NewAsciiStringInPlaceStream((pANTLR3_UINT8)strInput.c_str(),(ANTLR3_UINT32)strInput.size(),(pANTLR3_UINT8)source.c_str());
     }
     else {
