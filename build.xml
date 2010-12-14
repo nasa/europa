@@ -461,6 +461,7 @@
 
 		<antcall target="run-example-java"><param name="example.name" value="BlocksWorld"/></antcall>  
 		<antcall target="run-example-java"><param name="example.name" value="Light"/></antcall>        
+		<antcall target="run-example-java"><param name="example.name" value="NQueens"/></antcall>        
 		<antcall target="run-example-java"><param name="example.name" value="Rover"/></antcall> 
 		<antcall target="run-example-java"><param name="example.name" value="Shopping"/></antcall>        
 		<antcall target="run-example-java"><param name="example.name" value="UBO"/></antcall>  
@@ -468,9 +469,7 @@
 		<if>		
 			<contains string="${local.os.family}" substring="unix" casesensitive="false"/>  
 		<then>
-			<!-- TODO: these are failing on windows but should be run the same on windows and unix -->
-			<antcall target="run-example-java"><param name="example.name" value="NQueens"/></antcall>        
-			
+			<!-- TODO: these are failing on windows but should be run the same on windows and unix -->			
 			<ant dir="${dir.src.java}/JavaUI" description="Run model tests for Java UI" target="test">
 				<property name="europa.dir" value="${local.env.PLASMA_HOME}" />
 				<property name="europa.home" value="${local.env.EUROPA_HOME}" />
