@@ -28,13 +28,14 @@ NddlInterpreter::~NddlInterpreter()
 {
 }
 
-pANTLR3_INPUT_STREAM getInputStream(std::istream& input, const std::string& source)
+pANTLR3_INPUT_STREAM getInputStream(std::istream& input, const std::string& source, std::string& strInput)
 {
     if (source == "<eval>") {
         // TODO: this is kind of a hack, see if it can be made more robust & efficient
         std::istringstream* is = dynamic_cast<std::istringstream*>(&input);
-        std::string strInput = is->str(); // This makes a copy of the original string that could be avoided
+        strInput = is->str(); // This makes a copy of the original string that could be avoided
 
+		std::cout << "INPUT SCRIPT:" << std::endl << strInput << std::endl;
         return antlr3NewAsciiStringInPlaceStream((pANTLR3_UINT8)strInput.c_str(),(ANTLR3_UINT32)strInput.size(),(pANTLR3_UINT8)source.c_str());
     }
     else {
@@ -135,7 +136,8 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
     }
     addInclude(source);
 
-    pANTLR3_INPUT_STREAM input = getInputStream(ins,source);
+	std::string strInput;
+    pANTLR3_INPUT_STREAM input = getInputStream(ins,source,strInput);
 
     pNDDL3Lexer lexer = NDDL3LexerNew(input);
     lexer->parserObj = this;
@@ -739,7 +741,8 @@ pANTLR3_STRING toVerboseStringTree(pANTLR3_BASE_TREE tree);
 
 std::string NddlToASTInterpreter::interpret(std::istream& ins, const std::string& source)
 {
-    pANTLR3_INPUT_STREAM input = getInputStream(ins,source);
+	std::string strInput;
+    pANTLR3_INPUT_STREAM input = getInputStream(ins,source,strInput);
 
     pNDDL3Lexer lexer = NDDL3LexerNew(input);
     lexer->parserObj = this;
