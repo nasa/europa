@@ -421,14 +421,14 @@ namespace EUROPA {
     class ProfileArgs : public FactoryArgs
     {
     public:
-        ProfileArgs(const PlanDatabaseId db, const FVDetectorId detector,
+        ProfileArgs(const PlanDatabaseId& db, const FVDetectorId& detector,
                     const edouble initCapacityLb = 0, const edouble initCapacityUb = 0)
             : m_db(db), m_detector(detector), m_initCapacityLb(initCapacityLb), m_initCapacityUb(initCapacityUb)
         {
         }
 
-        const PlanDatabaseId& m_db;
-        const FVDetectorId& m_detector;
+        const PlanDatabaseId m_db;
+        const FVDetectorId m_detector;
         const edouble m_initCapacityLb;
         const edouble m_initCapacityUb;
     };

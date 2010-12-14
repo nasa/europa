@@ -661,10 +661,10 @@ namespace EUROPA {
       //m_profile->handleRecompute();
       debugMsg("ProfileIterator:ProfileIterator", "Creating iterator over interval [" << startTime << " " << endTime << "] with change count " <<
                m_changeCount);
-      m_start = m_profile->getLeastInstant(startTime);
-      m_startTime = m_start->first;
-      m_end = m_profile->getGreatestInstant(endTime);
       m_realEnd = m_profile->m_instants.end();
+      m_start = m_profile->getLeastInstant(startTime);
+      m_startTime = (m_start == m_realEnd ? MINUS_INFINITY : m_start->first);
+      m_end = m_profile->getGreatestInstant(endTime);
       m_endTime = (m_end == m_realEnd ? PLUS_INFINITY : m_end->first);
       if(m_end != m_realEnd)
         ++m_end;
