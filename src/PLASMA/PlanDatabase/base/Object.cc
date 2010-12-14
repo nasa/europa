@@ -424,7 +424,8 @@ namespace EUROPA {
     // If it is the only constraint, we should remove it - singleton constraint to this object
     ConstraintId candidateForRemoval = it->second;
     ++it;
-    if(it->first != token->getKey() && !hasExplicitConstraint(token)){ // Then there is only one, so clean it
+    if((it == m_constraintsByTokenKey.end()) ||
+		(it->first != token->getKey() && !hasExplicitConstraint(token))){ // Then there is only one, so clean it
       --it;
       m_constraintsByTokenKey.erase(it);
       candidateForRemoval->discard();
