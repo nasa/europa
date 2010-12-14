@@ -92,6 +92,8 @@
 	</target> 
 
 	<target name="init-unix">
+		<property name="ant.exe" value="ant"/>
+		
 		<condition property="local.env.LD_LIBRARY_PATH.name" 
 				value="DYLD_LIBRARY_PATH" else="LD_LIBRARY_PATH">
 	    	<contains string="${local.os}" substring="mac" casesensitive="false"/>
@@ -159,6 +161,7 @@
 	<target name="init-windows">
 	    <property name="dir.msbuild" value="C:\\Windows\\Microsoft.NET\\Framework\\v3.5"/>
 	    <property name="msbuild.exe" value="${dir.msbuild}\\MSBuild.exe"/>
+		<property name="ant.exe" value="${env.ANT_HOME}/bin/ant.bat"/>
 		
 		<condition property="windows.libType" value="static" else="dll">											  
 			<equals arg1="${build.libs}" arg2="static"/>
@@ -167,6 +170,10 @@
 		<condition property="windows.variant" value="Release" else="Debug">											  
 			<equals arg1="${build.variant}" arg2="release"/>
 		</condition>
+		
+		<property name="local.env.LD_LIBRARY_PATH.name" value="PATH"/>
+		<property name="release.LD_LIBRARY_PATH.value" value="${env.PATH};${local.env.EUROPA_HOME}/lib"/>
+		
 	</target>
 	
 	<target name="clean" depends="init,clean-cpp,clean-java">
@@ -379,21 +386,30 @@
 	<target name="run-example-cpp">
 		<echo message="Running CPP example in ${local.env.EUROPA_HOME}/examples/${example.name}"/>
 		<echo message="on platform : ${local.os}"/>
-		<exec executable="make" dir="${local.env.EUROPA_HOME}/examples/${example.name}" failonerror="true">
-			<arg line="${make.log.type}"/>
-			<arg line="${run-example-cpp.mode}"/>
-			<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
-			<env key="${local.env.LD_LIBRARY_PATH.name}" value="${release.LD_LIBRARY_PATH.value}"/>
-		</exec>
-		<condition property="diff.allow">
-			<available file="${local.env.EUROPA_HOME}/examples/${example.name}/RUN_${example.name}-planner_g_rt.${example.name}-initial-state.nddl.PlannerConfig.xml.output"/>
-		</condition>
-		<runtarget target="run-diff"/>    
+		
+		<if>		
+			<contains string="${local.os}" substring="windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
+		<then>
+			<echo message="TODO: run cpp examples on windows"/>
+		</then>
+		<else>
+			<exec executable="make" dir="${local.env.EUROPA_HOME}/examples/${example.name}" failonerror="true">
+				<arg line="${make.log.type}"/>
+				<arg line="${run-example-cpp.mode}"/>
+				<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
+				<env key="${local.env.LD_LIBRARY_PATH.name}" value="${release.LD_LIBRARY_PATH.value}"/>
+			</exec>
+			<condition property="diff.allow">
+				<available file="${local.env.EUROPA_HOME}/examples/${example.name}/RUN_${example.name}-planner_g_rt.${example.name}-initial-state.nddl.PlannerConfig.xml.output"/>
+			</condition>
+			<runtarget target="run-diff"/>    
+		</else>
+		</if>
 	</target>
 	
 	<target name="run-example-java">
 		<echo message="Running Java example in ${local.env.EUROPA_HOME}/examples/${example.name}"/>
-		<exec executable="ant" dir="${local.env.EUROPA_HOME}/examples/${example.name}" failonerror="true">
+		<exec executable="${ant.exe}" dir="${local.env.EUROPA_HOME}/examples/${example.name}" failonerror="true">
 			<arg value="-Dproject.bsh.script=Batch.bsh"/>
 			<arg value="-Dproject.mode=${run-example-java.mode}"/>
 			<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
@@ -422,7 +438,7 @@
 				<env key="${local.env.LD_LIBRARY_PATH.name}" value="${release.LD_LIBRARY_PATH.value}"/>
 			</exec>
 			
-			<exec executable="ant" dir="${local.env.EUROPA_HOME}/MakeProjectTest" failonerror="true">
+			<exec executable="${ant.exe}" dir="${local.env.EUROPA_HOME}/MakeProjectTest" failonerror="true">
 				<arg line="-Dproject.bsh.script=Batch.bsh -Dproject.mode=${run-example-java.mode}"/>
 				<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
 				<env key="${local.env.LD_LIBRARY_PATH.name}" value="${release.LD_LIBRARY_PATH.value}"/>
@@ -436,24 +452,23 @@
 	<target name="test-dist" depends="init,dist,test-makeproject" 
 		description="Runs tests on release">
 		
-		<if>		
-			<contains string="${local.os}" substring="windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
-		<then>
-			<echo message="TODO: test-dist on windows"/>
-		</then>
-		<else>
-			<antcall target="run-example-cpp"><param name="example.name" value="BlocksWorld"/></antcall>	
-			<antcall target="run-example-cpp"><param name="example.name" value="Light"/></antcall>	
-			<antcall target="run-example-cpp"><param name="example.name" value="Rover"/></antcall>	
-			<antcall target="run-example-cpp"><param name="example.name" value="Shopping"/></antcall>        
-			<antcall target="run-example-cpp"><param name="example.name" value="UBO"/></antcall>
+		<antcall target="run-example-cpp"><param name="example.name" value="BlocksWorld"/></antcall>	
+		<antcall target="run-example-cpp"><param name="example.name" value="Light"/></antcall>	
+		<antcall target="run-example-cpp"><param name="example.name" value="Rover"/></antcall>	
+		<antcall target="run-example-cpp"><param name="example.name" value="Shopping"/></antcall>        
+		<antcall target="run-example-cpp"><param name="example.name" value="UBO"/></antcall>
 
-			<antcall target="run-example-java"><param name="example.name" value="BlocksWorld"/></antcall>  
-			<antcall target="run-example-java"><param name="example.name" value="Light"/></antcall>        
+		<antcall target="run-example-java"><param name="example.name" value="BlocksWorld"/></antcall>  
+		<antcall target="run-example-java"><param name="example.name" value="Light"/></antcall>        
+		<antcall target="run-example-java"><param name="example.name" value="Rover"/></antcall> 
+		<antcall target="run-example-java"><param name="example.name" value="Shopping"/></antcall>        
+		<antcall target="run-example-java"><param name="example.name" value="UBO"/></antcall>  
+		
+		<if>		
+			<contains string="${local.os.family}" substring="unix" casesensitive="false"/>  
+		<then>
+			<!-- TODO: these are failing on windows but should be run the same on windows and unix -->
 			<antcall target="run-example-java"><param name="example.name" value="NQueens"/></antcall>        
-			<antcall target="run-example-java"><param name="example.name" value="Rover"/></antcall> 
-			<antcall target="run-example-java"><param name="example.name" value="Shopping"/></antcall>        
-			<antcall target="run-example-java"><param name="example.name" value="UBO"/></antcall>  
 			
 			<ant dir="${dir.src.java}/JavaUI" description="Run model tests for Java UI" target="test">
 				<property name="europa.dir" value="${local.env.PLASMA_HOME}" />
@@ -462,7 +477,7 @@
 				<property name="ld.path.value" value="${build.LD_LIBRARY_PATH.value}"/>
 				<property name="psengine.jar.path" value="${local.env.PLASMA_HOME}/build/lib" />
 			</ant>	
-		</else>
+			</then>
 		</if>		
 
 	</target>
