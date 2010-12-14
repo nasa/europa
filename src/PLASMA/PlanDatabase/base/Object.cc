@@ -598,7 +598,7 @@ namespace EUROPA {
       std::string varTypeName = "";
       Schema::NameValueVector members = m_planDatabase->getSchema()->getMembers(m_type);
       for (unsigned int i = 0; i < members.size(); i++) {
-          std::cout << "member [" << members[i].first.c_str() << ", " << members[i].second.c_str() << "]" << std::endl;
+          debugMsg("Object:typeForNewMember", "member [" << members[i].first.c_str() << ", " << members[i].second.c_str() << "]");
           if (strcmp( members[i].second.c_str(), name) == 0 ) {
               varTypeName = members[i].first.c_str();
           }
