@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C++ Express 2008
+Project("{%%RANDUID1%%}") = "%%Project%%", "%%Project%%.vcproj", "{%%GUID%%}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug-Static|Win32 = Debug-Static|Win32
+		Release|Win32 = Release|Win32
+		Release-Static|Win32 = Release-Static|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{%%GUID%%}.Debug|Win32.ActiveCfg = Debug|Win32
+		{%%GUID%%}.Debug|Win32.Build.0 = Debug|Win32
+		{%%GUID%%}.Debug-Static|Win32.ActiveCfg = Debug-Static|Win32
+		{%%GUID%%}.Debug-Static|Win32.Build.0 = Debug-Static|Win32
+		{%%GUID%%}.Release|Win32.ActiveCfg = Release|Win32
+		{%%GUID%%}.Release|Win32.Build.0 = Release|Win32
+		{%%GUID%%}.Release-Static|Win32.ActiveCfg = Release-Static|Win32
+		{%%GUID%%}.Release-Static|Win32.Build.0 = Release-Static|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

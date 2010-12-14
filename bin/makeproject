@@ -3,6 +3,7 @@ import re
 import sys
 import os
 import stat
+import uuid
 
 #
 # Author: Matthew E. Boyce
@@ -23,6 +24,11 @@ if len(sys.argv) < 2:
 projectName = sys.argv[1]
 projectSource = os.path.join(europaHome, "bin", ".makeproject")
 configDir = os.path.join(europaHome, "config")
+guid = str(uuid.uuid1())
+randId1 = str(uuid.uuid4())
+randId2 = str(uuid.uuid4())
+randId3 = str(uuid.uuid4())
+randId4 = str(uuid.uuid4())
 
 if len(sys.argv) > 2:
   projectDest = os.path.join(sys.argv[2], projectName)
@@ -43,6 +49,11 @@ def detemplate (string, isFilename):
     toret = re.sub("%%Project%%", projectName, toret)
     toret = re.sub("%%PROJECT%%", projectName.upper(), toret)
     toret = re.sub("%%project%%", projectName.lower(), toret)
+    toret = re.sub("%%GUID%%", guid, toret)
+    toret = re.sub("%%RANDUID1%%", randId1, toret)
+    toret = re.sub("%%RANDUID2%%", randId2, toret)
+    toret = re.sub("%%RANDUID3%%", randId3, toret)
+    toret = re.sub("%%RANDUID4%%", randId4, toret)
   return toret
 
 def copytemplate (source, dest, isDir):
