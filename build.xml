@@ -394,12 +394,15 @@
 			<echo message="TODO: run cpp examples on windows"/>
 		</then>
 		<else>
-			<exec executable="make" dir="${local.env.EUROPA_HOME}/examples/${example.name}" failonerror="true">
+			<exec executable="make" dir="${local.env.EUROPA_HOME}/examples/${example.name}" failonerror="true"
+				  outputproperty="exec.output" errorproperty="exec.error">
 				<arg line="${make.log.type}"/>
 				<arg line="${run-example-cpp.mode}"/>
 				<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
 				<env key="${local.env.LD_LIBRARY_PATH.name}" value="${release.LD_LIBRARY_PATH.value}"/>
 			</exec>
+			<!--echo message="exec output=${exec.output}"/-->
+			<echo message="exec error=${exec.error}"/>
 			<condition property="diff.allow">
 				<available file="${local.env.EUROPA_HOME}/examples/${example.name}/RUN_${example.name}-planner_g_rt.${example.name}-initial-state.nddl.PlannerConfig.xml.output"/>
 			</condition>
@@ -415,12 +418,22 @@
 	
 	<target name="run-example-java">
 		<echo message="Running Java example in ${local.env.EUROPA_HOME}/examples/${example.name}"/>
-		<exec executable="${ant.exe}" dir="${local.env.EUROPA_HOME}/examples/${example.name}" failonerror="true">
+		<exec executable="${ant.exe}" dir="${local.env.EUROPA_HOME}/examples/${example.name}" failonerror="true"
+			  outputproperty="exec.output" errorproperty="exec.error">
 			<arg value="-Dproject.bsh.script=Batch.bsh"/>
 			<arg value="-Dproject.mode=${run-example-java.mode}"/>
 			<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
 			<env key="${local.env.LD_LIBRARY_PATH.name}" value="${release.LD_LIBRARY_PATH.value}"/>
 		</exec>
+		<!--echo message="exec output=${exec.output}"/-->
+		<echo message="exec error=${exec.error}"/>
+		<!-- failonerror isn't working as expected -->
+		<if>
+			<contains string="${exec.output}" substring="BUILD FAILED"/>
+		<then>
+			<fail message="failed running java program"/>
+		</then>
+		</if>
 	</target>
 	
 	<target name="test-makeproject" depends="init"
