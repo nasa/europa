@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C++ Express 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlocksWorld", "BlocksWorld.vcproj", "{DAF2E254-AA1F-4821-897A-D6B9C7012E09}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug-Static|Win32 = Debug-Static|Win32
+		Release|Win32 = Release|Win32
+		Release-Static|Win32 = Release-Static|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DAF2E254-AA1F-4821-897A-D6B9C7012E09}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DAF2E254-AA1F-4821-897A-D6B9C7012E09}.Debug|Win32.Build.0 = Debug|Win32
+		{DAF2E254-AA1F-4821-897A-D6B9C7012E09}.Debug-Static|Win32.ActiveCfg = Debug-Static|Win32
+		{DAF2E254-AA1F-4821-897A-D6B9C7012E09}.Debug-Static|Win32.Build.0 = Debug-Static|Win32
+		{DAF2E254-AA1F-4821-897A-D6B9C7012E09}.Release|Win32.ActiveCfg = Release|Win32
+		{DAF2E254-AA1F-4821-897A-D6B9C7012E09}.Release|Win32.Build.0 = Release|Win32
+		{DAF2E254-AA1F-4821-897A-D6B9C7012E09}.Release-Static|Win32.ActiveCfg = Release-Static|Win32
+		{DAF2E254-AA1F-4821-897A-D6B9C7012E09}.Release-Static|Win32.Build.0 = Release-Static|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
