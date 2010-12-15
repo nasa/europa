@@ -172,8 +172,8 @@
 		</condition>
 		
 		<property name="local.env.LD_LIBRARY_PATH.name" value="PATH"/>
-		<property name="build.LD_LIBRARY_PATH.value" value="${env.PATH};${local.env.EUROPA_HOME}/lib"/>
-		<property name="release.LD_LIBRARY_PATH.value" value="${env.PATH};${dir.plasma.root}/build/lib"/>
+		<property name="build.LD_LIBRARY_PATH.value" value="${env.PATH};${dir.plasma.root}/build/lib"/>
+		<property name="release.LD_LIBRARY_PATH.value" value="${env.PATH};${local.env.EUROPA_HOME}/lib"/>
 		
 	</target>
 	
