@@ -371,7 +371,7 @@
 		</zip>
 	</target>
   
-	<target name="run-diff" if="diff.allow">
+	<target name="run-diff">
 		<echo message="Running Diff example in ${local.env.EUROPA_HOME}/examples/${example.name}"/>
 		<exec executable="make" dir="${local.env.EUROPA_HOME}/examples/${example.name}" failonerror="true">
 			<arg line="clean all"/>
@@ -403,7 +403,12 @@
 			<condition property="diff.allow">
 				<available file="${local.env.EUROPA_HOME}/examples/${example.name}/RUN_${example.name}-planner_g_rt.${example.name}-initial-state.nddl.PlannerConfig.xml.output"/>
 			</condition>
-			<runtarget target="run-diff"/>    
+			<if>
+				<equals arg1="${diff.allow}" arg2="true"/>
+		    <then>
+			    <runtarget target="run-diff"/>    
+			</then>
+			</if>
 		</else>
 		</if>
 	</target>
