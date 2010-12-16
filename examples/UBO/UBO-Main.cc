@@ -7,7 +7,6 @@
  */
 
 #include "PSEngine.hh"
-#include "Debug.hh"
 
 #include "ModuleUBO.hh"
 #include "UBOCustomCode.hh"
@@ -18,6 +17,7 @@ bool solve(const char* plannerConfig, const char* txSource, int startHorizon, in
 void runSolver(PSSolver* solver, int startHorizon, int endHorizon, int maxSteps);
 void checkSolver(PSSolver* solver, int i);
 void printFlaws(int it, PSList<std::string>& flaws);
+#define logMsg(category,msg) { /* std::cout << category << "::" << msg << std::endl; */ }
 
 int main(int argc, const char ** argv)
 {
@@ -67,10 +67,10 @@ bool solve(const char* plannerConfig,
 
 void printFlaws(int it, PSList<std::string>& flaws)
 {
-	debugMsg("Main","Iteration:" << it << " " << flaws.size() << " flaws");
+	logMsg("Main","Iteration:" << it << " " << flaws.size() << " flaws");
 
 	for (int i=0; i<flaws.size(); i++) {
-		debugMsg("Main", "    " << (i+1) << " - " << flaws.get(i));
+		logMsg("Main", "    " << (i+1) << " - " << flaws.get(i));
 	}
 }
 
@@ -88,12 +88,12 @@ void runSolver(PSSolver* solver, int startHorizon, int endHorizon, int maxSteps)
   	  PSList<std::string> flaws;
   	  if (solver->isConstraintConsistent()) {
   		  flaws = solver->getFlaws();
-  		  printFlaws(i,flaws);
+  		  //printFlaws(i,flaws);
   		  if (flaws.size() == 0)
   			  break;
   	  }
   	  else
-  		  debugMsg("Main","Iteration " << i << " Solver is not constraint consistent");
+  		  logMsg("Main","Iteration " << i << " Solver is not constraint consistent");
     }
 
     checkSolver(solver,i);
@@ -102,13 +102,13 @@ void runSolver(PSSolver* solver, int startHorizon, int endHorizon, int maxSteps)
 void checkSolver(PSSolver* solver, int i)
 {
     if (solver->isExhausted()) {
-  	  debugMsg("Main","Solver was exhausted after " << i << " steps");
+  	  logMsg("Main","Solver was exhausted after " << i << " steps");
     }
     else if (solver->isTimedOut()) {
-  	  debugMsg("Main","Solver timed out after " << i << " steps");
+  	  logMsg("Main","Solver timed out after " << i << " steps");
     }
     else {
-  	  debugMsg("Main","Solver finished after " << i << " steps");
+  	  logMsg("Main","Solver finished after " << i << " steps");
     }
 }
 

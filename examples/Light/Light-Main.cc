@@ -7,10 +7,9 @@
  */
 
 #include "PSEngine.hh"
-//#include "Debug.hh"
 
-//#include "ModuleLight.hh"
-//#include "LightCustomCode.hh"
+#include "ModuleLight.hh"
+#include "LightCustomCode.hh"
 
 using namespace EUROPA;
 
@@ -88,7 +87,7 @@ void runSolver(PSSolver* solver, int startHorizon, int endHorizon, int maxSteps)
   	  PSList<std::string> flaws;
   	  if (solver->isConstraintConsistent()) {
   		  flaws = solver->getFlaws();
-  		  printFlaws(i,flaws);
+  		  //printFlaws(i,flaws);
   		  if (flaws.size() == 0)
   			  break;
   	  }

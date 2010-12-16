@@ -391,7 +391,17 @@
 		<if>		
 			<contains string="${local.os}" substring="windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
 		<then>
-			<echo message="TODO: run cpp examples on windows"/>
+			<exec executable="${msbuild.exe}" dir="${local.env.EUROPA_HOME}/examples/${example.name}" failonerror="true">
+				<arg line="/target:build /p:Platform=Win32 /p:Configuration=${windows.variant} ${example.name}.sln"/>
+				<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
+				<!-- env key="${local.env.LD_LIBRARY_PATH.name}" value="${release.LD_LIBRARY_PATH.value}"/-->
+			</exec>					
+			<exec executable="${local.env.EUROPA_HOME}/examples/${example.name}/${windows.variant}/${example.name}" 
+				  dir="${local.env.EUROPA_HOME}/examples/${example.name}" failonerror="true">
+				<arg line="${example.name}-initial-state.nddl PlannerConfig.xml"/>
+				<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
+				<env key="${local.env.LD_LIBRARY_PATH.name}" value="${release.LD_LIBRARY_PATH.value}"/>
+			</exec>					
 		</then>
 		<else>
 			<exec executable="make" dir="${local.env.EUROPA_HOME}/examples/${example.name}" failonerror="true"
@@ -425,8 +435,8 @@
 			<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
 			<env key="${local.env.LD_LIBRARY_PATH.name}" value="${release.LD_LIBRARY_PATH.value}"/>
 		</exec>
-		<!--echo message="exec output=${exec.output}"/-->
-		<echo message="exec error=${exec.error}"/>
+		<echo message="${exec.output}"/>
+		<echo message="${exec.error}"/>
 		<!-- failonerror isn't working as expected -->
 		<if>
 			<contains string="${exec.output}" substring="BUILD FAILED"/>
@@ -450,7 +460,7 @@
 		<delete dir="${local.env.EUROPA_HOME}/examples/MakeProjectTest"/>
 	</target>
 	        
-	<target name="test-dist" depends="init,dist,test-makeproject" 
+	<target name="test-dist" depends="init,dist" 
 		description="Runs tests on release">
 		
 		<antcall target="run-example-cpp"><param name="example.name" value="BlocksWorld"/></antcall>	
