@@ -450,15 +450,7 @@
 			<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
 		</exec>
 		
-		<if>		
-			<contains string="${local.os}" substring="windows" casesensitive="false"/>  <!-- Assume nobody uses Cygwin -->
-		<then>
-			<echo message="TODO! : Makeproject still doesn't generate a working c++ project on windows"/>
-		</then>
-		<else>
-		    <antcall target="run-example-cpp"><param name="example.name" value="MakeProjectTest"/><param name="diff.allow" value="false"/></antcall>	
-		</else>	
-		</if>	
+	    <antcall target="run-example-cpp"><param name="example.name" value="MakeProjectTest"/><param name="diff.allow" value="false"/></antcall>	
 		<antcall target="run-example-java"><param name="example.name" value="MakeProjectTest"/></antcall>  
 		
 		<delete dir="${local.env.EUROPA_HOME}/examples/MakeProjectTest"/>
