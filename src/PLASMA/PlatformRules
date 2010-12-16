@@ -186,7 +186,10 @@ if $(OS) = BEOS {
 }
 
 if $(64BIT) = 1 {
-  PLATFORM_FLAGS += -DEUROPA_64_BIT_PLATFORM ;
+  PLATFORM_FLAGS += -m64 -DEUROPA_64_BIT_PLATFORM ;
+  if $(OS) = MACOSX {
+  	LINKFLAGS += $(LINKER_PASSTHROUGH_FLAG)-arch $(LINKER_PASSTHROUGH_FLAG)x86_64 ;
+  }
 }
 
 # Supress the message that ar usually prints (unifies build output further)

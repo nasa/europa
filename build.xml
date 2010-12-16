@@ -145,11 +145,7 @@
 			<equals arg1="${local.os.is64bit}" arg2="true"/>
 	    </condition>
 		
-		<condition property="jam.march" value="-m64" else="-m32">
-			<equals arg1="${local.os.is64bit}" arg2="true"/>
-	    </condition>
-		
-	    <property name="jam.platform-flags" value="${jam.antlr.include} ${jam.march}"/>
+	    <property name="jam.platform-flags" value="${jam.antlr.include}"/>
 	    <property name="jam.link-libs" value="${jam.antlr.lib}"/>
 	    <property name="jam.opts" value="${jam.args} ${jam.misc} ${jam.64bit} -sLOGGER_TYPE=${jam.log.type} -sVARIANTS=${jam.variant} -sLIBRARIES=${jam.libraries} -sPLATFORM_FLAGS=&quot;${jam.platform-flags}&quot; -sLINKLIBS=&quot;${jam.link-libs}&quot;"/>
 
