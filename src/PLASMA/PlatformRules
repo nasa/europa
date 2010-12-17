@@ -145,15 +145,17 @@ if $(JAVA_HOME) {
 if $(ANT_HOME) {
   ANT ?= [ FDirName $(ANT_HOME) bin ant ] ;
 }
-
 ANT ?= ant ;
 
-#SWIG_HOME ?= [ FDirName $(PLASMA) ext swig ] ;
 if $(SWIG_HOME) {
   SWIG ?= [ FDirName $(SWIG_HOME) swig ] ;
 }
-
 SWIG ?= swig ;
+
+if $(CPPUNIT_HOME) {
+   C++FLAGS += -I$(CPPUNIT_HOME)/include ; 
+   LINKFLAGS += -Wl,-rpath,$(CPPUNIT_HOME)/lib -L$(CPPUNIT_HOME)/lib ;
+}
 
 # CLASSPATH_SEPARATOR = separator for java class path
 CLASSPATH_SEPARATOR = ":" ;
