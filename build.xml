@@ -400,7 +400,7 @@
 				<equals arg1="${build.variant}" arg2="release"/>
 			</condition>
 
-			<condition property="run-example-cpp.64bit" value="EUROPA_64BIT=1" else="">
+			<condition property="run-example-cpp.64bit" value="EUROPA_64BIT=1" else="EUROPA_64BIT=0">
 				<equals arg1="${local.os.is64bit}" arg2="true"/>
 			</condition>
 

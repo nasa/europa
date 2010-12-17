@@ -17,6 +17,13 @@ else
   endif
 endif
 
+# Default to 64-bit on the mac
+ifneq (,$(findstring Darwin,$(UNAME)))
+	ifneq (0,$(EUROPA_64BIT))
+	  EUROPA_64BIT := 1
+	endif
+endif	
+
 ifeq (1,$(EUROPA_64BIT))
   CXXFLAGS += -m64
   LDFLAGS += -m64
