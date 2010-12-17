@@ -2,7 +2,7 @@ UNAME := $(shell uname)
 OPT_FLAGS = -O3 -DEUROPA_FAST  -fno-strict-aliasing
 LD_FLAGS = -O3  -fno-strict-aliasing
 
-ifeq (1,$(FAST))
+ifeq (1,$(EUROPA_FAST))
   BUILD_SUFFIX := _o
   CXXFLAGS += $(OPT_FLAGS)
   LDFLAGS += $(LD_FLAGS)
@@ -15,6 +15,11 @@ else
     BUILD_SUFFIX := _g
     CXXFLAGS += -ggdb3
   endif
+endif
+
+ifeq (1,$(EUROPA_64BIT))
+  CXXFLAGS += -m64
+  LDFLAGS += -m64
 endif
 
 ifdef ANT_HOME
@@ -59,8 +64,6 @@ ifneq (,$(findstring Darwin,$(UNAME)))
     CXXFLAGS += -I"$(JAVA_HOME)/include"
   endif  
   CXXFLAGS += -I"/System/Library/Frameworks/JavaVM.framework/Headers"
-  CXXFLAGS += -m64
-  LDFLAGS += -m64
 endif
 
 ifneq (,$(findstring Solaris,$(UNAME)))
