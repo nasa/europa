@@ -415,7 +415,7 @@
 			<if>
 				<equals arg1="${diff.allow}" arg2="true"/>
 		    <then>
-			    <runtarget target="run-diff"/>    
+			    <!--runtarget target="run-diff"/-->    
 			</then>
 			</if>
 		</else>
