@@ -26,14 +26,14 @@ projectSource = os.path.join(europaHome, "bin", ".makeproject")
 configDir = os.path.join(europaHome, "config")
 #guid = str(uuid.uuid1())
 guid = '0f03b300-07c4-11e0-b9aa-000bdb94b302'
-randId1 = str(uuid.uuid4())
-randId2 = str(uuid.uuid4())
-randId3 = str(uuid.uuid4())
-randId4 = str(uuid.uuid4())
-#randId1 = '3631d087-48f1-4412-ba99-8c206a6dcda2'
-#randId2 = '24b7adc7-6f30-4aea-b08b-c0957e21cfb2'
-#randId3 = 'd9af6b09-64bd-4173-84af-4269d9a021fd'
-#randId4 = '0e378145-e0a9-4c4f-b745-3df589c553e6'
+#randId1 = str(uuid.uuid4())
+#randId2 = str(uuid.uuid4())
+#randId3 = str(uuid.uuid4())
+#randId4 = str(uuid.uuid4())
+randId1 = '3631d087-48f1-4412-ba99-8c206a6dcda2'
+randId2 = '24b7adc7-6f30-4aea-b08b-c0957e21cfb2'
+randId3 = 'd9af6b09-64bd-4173-84af-4269d9a021fd'
+randId4 = '0e378145-e0a9-4c4f-b745-3df589c553e6'
 
 if len(sys.argv) > 2:
   projectDest = os.path.join(sys.argv[2], projectName)
