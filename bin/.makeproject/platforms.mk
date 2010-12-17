@@ -71,9 +71,10 @@ ifneq (,$(findstring Darwin,$(UNAME)))
   SHARED_LINK_FLAG := -dynamiclib
   ifdef $(JAVA_HOME)
     CXXFLAGS += -I"$(JAVA_HOME)/include"
-  else
-    CXXFLAGS += -I"/System/Library/Frameworks/JavaVM.framework/Headers"
-  endif
+  endif  
+  CXXFLAGS += -I"/System/Library/Frameworks/JavaVM.framework/Headers"
+  CXXFLAGS += -m64
+  CXXFLAGS += -m64
 endif
 
 ifneq (,$(findstring Solaris,$(UNAME)))
