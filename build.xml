@@ -360,16 +360,20 @@
 	</target>
   
 	<target name="run-diff">
-		<echo message="Running Diff example in ${local.env.EUROPA_HOME}/examples/${example.name}"/>
-		<exec executable="make" dir="${local.env.EUROPA_HOME}/examples/${example.name}" failonerror="true">
-			<arg line="clean all"/>
-			<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
-			<env key="${local.env.LD_LIBRARY_PATH.name}" value="${local.env.EUROPA_HOME}/lib"/>
-		</exec>
-		<exec executable="python" dir="${local.env.EUROPA_HOME}/bin" failonerror="true">
-      		<arg line="plancompare ${example.name}"/>
-      		<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
-		</exec>
+		<if>		
+			<equals arg1="${local.os.is64bit}" arg2="true"/>  
+		<then>
+			<!-- TODO! PlanDB dumps for 32-bit and 64-bit are currently different, let's see if we can make them the same -->
+			<echo message="Skipping output diff on 64bit-os for ${local.env.EUROPA_HOME}/examples/${example.name}"/>
+		</then>
+		<else>	
+			<echo message="Running output diff for ${local.env.EUROPA_HOME}/examples/${example.name}"/>
+			<exec executable="python" dir="${local.env.EUROPA_HOME}/bin" failonerror="true">
+      			<arg line="plancompare ${example.name}"/>
+      			<env key="EUROPA_HOME" value="${local.env.EUROPA_HOME}"/>
+			</exec>
+		</else>
+		</if>
 	</target>
 	                
 	<target name="run-example-cpp">
@@ -415,7 +419,7 @@
 			<if>
 				<equals arg1="${diff.allow}" arg2="true"/>
 		    <then>
-			    <!--runtarget target="run-diff"/-->    
+			    <runtarget target="run-diff"/>    
 			</then>
 			</if>
 		</else>
