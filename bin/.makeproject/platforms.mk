@@ -51,20 +51,6 @@ ifneq (,$(findstring Linux,$(UNAME)))
   endif
 endif
 
-ifneq (,$(findstring CYGWIN,$(UNAME)))
-  CYGWIN := 1
-  LIB_EXT := dll
-  RT_SUFFIX := _rt.exe
-  POSITION_INDEPENDENT_FLAG := 
-  ifdef JAVA_HOME
-    CXXFLAGS += -I"$(JAVA_HOME)/include"
-    CXXFLAGS += -I"$(JAVA_HOME)/include/win32"
-  endif
-  ## -ldl causes failure on mingw
-  DL_LIBRARY := 
-  PLATFORM_LIBS := -lpthread
-endif
-
 ifneq (,$(findstring Darwin,$(UNAME)))
   DARWIN := 1
   LIB_EXT := dylib
@@ -74,7 +60,7 @@ ifneq (,$(findstring Darwin,$(UNAME)))
   endif  
   CXXFLAGS += -I"/System/Library/Frameworks/JavaVM.framework/Headers"
   CXXFLAGS += -m64
-  CXXFLAGS += -m64
+  LDFLAGS += -m64
 endif
 
 ifneq (,$(findstring Solaris,$(UNAME)))
@@ -82,8 +68,6 @@ ifneq (,$(findstring Solaris,$(UNAME)))
   LIB_EXT := so
   ifdef $(JAVA_HOME)
     CXXFLAGS += -I"$(JAVA_HOME)/include"
-  else
-    CXXFLAGS += -I"/System/Library/Frameworks/JavaVM.framework/Headers"
   endif
 endif
 
