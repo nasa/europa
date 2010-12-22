@@ -6,7 +6,7 @@ import psengine.PSEngine;
 import org.ops.ui.PSDesktop;
 import psengine.util.SimpleTimer;
 import psengine.*;
-
+import bsh.Interpreter;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -18,7 +18,8 @@ class Main
 	   
 	public static void main(String args[])
 	{
-		if ((args.length < 3) || "".equals(args[2]))
+		if ((args.length < 4) || "".equals(args[2]) ||
+		args[2].equals("nogui"))
 		{
 		    String debugMode = args[0];
 	        PSUtil.loadLibraries(debugMode);	   
@@ -28,8 +29,22 @@ class Main
 			Runtime.getRuntime().addShutdownHook(new ShutdownHook());
 			loadCustomCode(debugMode);
 			
-			PSDesktop d = PSDesktop.makeInstance(psEngine_,args);
-			d.runUI();
+			if(args.length > 2 && args[2].equals("nogui"))
+			{
+			Interpreter bshInterpreter_ = new bsh.Interpreter();
+			try {
+				bshInterpreter_.set("psengine", psEngine_);
+			        bshInterpreter_.eval("source(\""+args[1]+"\");");
+				}
+				catch (Exception e) {
+				     throw new RuntimeException(e);
+				}            		
+			}
+			else
+			{
+				PSDesktop d = PSDesktop.makeInstance(psEngine_,args);
+				d.runUI();
+			}
 		}
 	    else
 	    {

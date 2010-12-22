@@ -61,11 +61,15 @@
   <!-- project,project.dir,project.mode and project.bsh.script are read from build.properties -->
   <target name="run" depends="compile" description="build and run">
     <echo message="Running ${project} project"/>
+    <condition property="gui.show" value="nogui" else="">
+	<equals arg1="${project.bsh.script}" arg2="Batch.bsh"/>
+    </condition>        
     <java classname="${project}.Main" dir="${project.dir}" fork="yes" failonerror="true">
       <jvmarg value="-Xms256m"/>
       <jvmarg value="-Xmx1024m"/>
       <arg value="${project.mode}"/>
       <arg value="${project.bsh.script}"/>
+      <arg value="${gui.show}"/>
       <arg value="${project.test}"/>      
       <arg value="${project.bound}"/>      
       <arg value="${project.timeout}"/>      
