@@ -20,8 +20,7 @@ class Main
 	Runtime.getRuntime().addShutdownHook(new ShutdownHook());
 	loadCustomCode(debugMode);
 		
-	if(args.length > 2 && args[1] != null && args[2] != null)
-	if(args[2].equals("nogui"))
+	if(args.length > 2 && args[2].equals("nogui"))
 		{
 			Interpreter bshInterpreter_ = new bsh.Interpreter();
 			try {
