@@ -3,7 +3,7 @@ import re
 import sys
 import os
 import stat
-import uuid
+#import uuid
 
 #
 # Author: Matthew E. Boyce
