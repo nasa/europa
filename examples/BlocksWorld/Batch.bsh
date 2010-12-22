@@ -5,7 +5,8 @@ try {
     errors = psengine.executeScript("nddl",bsh.cwd+"/BlocksWorld-initial-state.nddl",true/*isFile*/);
     if (!errors.equals(""))
         throw new RuntimeException("Failed loading model:"+errors);
-    solver = desktop.makeSolver("PlannerConfig.xml",0, 1000);
+    solver = psengine.createSolver("PlannerConfig.xml");
+    solver.configure(0,1000);
     solver.solve(200,200);
     System.out.println(psengine.planDatabaseToString());
     Runtime.getRuntime().exit(0);
