@@ -227,7 +227,7 @@
 			<property name="plasma.dir" value="${dir.plasma.root}"/>
 		</ant>
 		<ant dir="src/Java/JavaUI" description="Build Swing version of Java UI" target="build.swing">
-			<property name="europa.dir" value="${dir.plasma.root}" />
+			<property name="europa.dir" value="${dir.plasma.root}/build" />
 		</ant>			
 	</target>
 
@@ -485,7 +485,7 @@
 		<then>
 			<!-- TODO: these are failing on windows but should be run the same on windows and unix -->			
 			<ant dir="${dir.src.java}/JavaUI" description="Run model tests for Java UI" target="test">
-				<property name="europa.dir" value="${local.env.PLASMA_HOME}" />
+				<property name="europa.dir" value="${local.env.PLASMA_HOME}/dist/europa" />
 				<property name="europa.home" value="${local.env.EUROPA_HOME}" />
 				<property name="ld.path.key" value="${local.env.LD_LIBRARY_PATH.name}" />
 				<property name="ld.path.value" value="${build.LD_LIBRARY_PATH.value}"/>
