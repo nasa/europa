@@ -190,10 +190,8 @@ public class GanttView extends ViewPart implements SolverListener {
 		labelCanvas.getVerticalBar().setEnabled(false);
 		labelCanvas.getVerticalBar().setVisible(false);
 
-		// Show both horizontal bars - makes life easier in synchronizing
-		// label view with main view
-		// canvas.setScrollBarVisibility(SWT.H_SCROLL);
-		// labelCanvas.setScrollBarVisibility(SWT.H_SCROLL);
+		// Redraw the view
+		updateChart();
 	}
 
 	@Override

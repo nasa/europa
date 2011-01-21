@@ -147,6 +147,14 @@ public class DecisionsView extends ViewPart implements SolverListener {
 		data.right = new FormAttachment(100, -1);
 		restTable.setLayoutData(data);
 
+		// Load data, if any
+		if (model.isConfigured()) {
+			maxStep = model.getStepCount();
+			displayStepData(maxStep);
+			availableSteps.setText("of " + maxStep);
+		} else {
+			availableSteps.setText("no data");
+		}
 		setAllEnabled(model.isConfigured());
 	}
 
@@ -212,7 +220,7 @@ public class DecisionsView extends ViewPart implements SolverListener {
 		currentStep = step;
 
 		StepStatisticsRecord rec = model.getStepStatistics(step);
-		
+
 		// Some widget to do HTML?
 		String buffer = rec.getDecisionAsHtml(null).toString();
 		buffer = buffer.replaceAll("<br/>", "");
