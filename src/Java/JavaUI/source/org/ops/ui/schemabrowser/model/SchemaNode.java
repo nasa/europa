@@ -2,6 +2,8 @@ package org.ops.ui.schemabrowser.model;
 
 import java.util.ArrayList;
 
+import org.ops.ui.filemanager.model.AstNode;
+
 import psengine.PSDataType;
 
 /**
@@ -38,6 +40,9 @@ public class SchemaNode {
 
 	/** Child nodes */
 	private ArrayList<SchemaNode> children = new ArrayList<SchemaNode>();
+
+	/** Pointer to AST node, which in turn points to file and offset */
+	private AstNode ast;
 
 	public SchemaNode(Type type, String name) {
 		this.name = name;
@@ -116,5 +121,13 @@ public class SchemaNode {
 	/** Remove all children */
 	public void clear() {
 		children.clear();
+	}
+
+	public void setAst(AstNode ast) {
+		this.ast = ast;
+	}
+
+	public AstNode getAst() {
+		return ast;
 	}
 }

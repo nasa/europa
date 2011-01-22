@@ -1,9 +1,15 @@
 package org.ops.ui.schemabrowser.model;
 
+import java.io.File;
+import java.util.HashMap;
+
+import org.ops.ui.filemanager.model.AstNode;
+import org.ops.ui.filemanager.model.AstNodeTypes;
+import org.ops.ui.filemanager.model.FileModel;
 import org.ops.ui.schemabrowser.model.SchemaNode.Type;
+import org.ops.ui.solver.model.SolverModel;
 
 import psengine.PSDataType;
-import psengine.PSEngine;
 import psengine.PSObjectType;
 import psengine.PSObjectTypeList;
 import psengine.PSSchema;
@@ -18,24 +24,35 @@ import psengine.PSTokenTypeList;
  */
 public class SchemaSource {
 
-	/** PSEngine to do all the work */
-	private PSEngine engine;
+	/** Solver model pointing to loaded files and PSEngine to do all the work */
+	private SolverModel model;
 
-	public SchemaSource(PSEngine engine) {
-		this.engine = engine;
+	public SchemaSource(SolverModel model) {
+		this.model = model;
 	}
 
 	/** Make a node for object types */
 	public SchemaNode getObjectTypesNode() {
-		if (engine == null)
+		if (!model.isConfigured())
 			return null;
+
+		// Parse type definitions from loaded files
+		HashMap<String, AstNode> map = new HashMap<String, AstNode>();
+		for (File file : model.getLoadedFiles()) {
+			FileModel fm = FileModel.getModel(file.getAbsolutePath());
+			collectClasses(fm.getAST(), map);
+		}
+
 		SchemaNode node = new SchemaNode(Type.CATEGORY, "Object types");
-		PSSchema schema = engine.getPSSchema();
+		PSSchema schema = model.getEngine().getPSSchema();
 		PSObjectTypeList types = schema.getAllPSObjectTypes();
 		for (int i = 0; i < types.size(); i++) {
 			PSObjectType type = types.get(i);
 			SchemaNode typeNode = new SchemaNode(Type.OBJECT_TYPE, type
 					.getNameString(), type.getParentName());
+			AstNode ast = map.get(typeNode.getName());
+			if (ast != null)
+				typeNode.setAst(ast);
 			node.add(typeNode);
 
 			PSStringList members = type.getMemberNames();
@@ -64,11 +81,20 @@ public class SchemaSource {
 		return node;
 	}
 
-	public void setEngine(PSEngine engine) {
-		this.engine = engine;
+	private void collectClasses(AstNode ast, HashMap<String, AstNode> map) {
+		if (ast.getType() == AstNodeTypes.CLASS_DEF) {
+			map.put(ast.getChildren().get(0).getText(), ast);
+		} else
+			for (AstNode c : ast.getChildren()) {
+				collectClasses(c, map);
+			}
 	}
 
 	public boolean isInitialized() {
-		return engine != null;
+		return model.isConfigured();
+	}
+
+	public void setModel(SolverModel smodel) {
+		this.model = smodel;
 	}
 }

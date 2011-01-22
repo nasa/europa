@@ -18,6 +18,8 @@ public class SolverModel {
 	private ArrayList<SolverListener> listeners = new ArrayList<SolverListener>();
 
 	private ArrayList<StepStatisticsRecord> stepStatistics = new ArrayList<StepStatisticsRecord>();
+	
+	private ArrayList<File> loadedFiles = new ArrayList<File>();
 
 	public synchronized void configure(File file, File configFile,
 			int horizonStart, int horizonEnd) {
@@ -74,11 +76,17 @@ public class SolverModel {
 			this.engine.getConfig().setProperty(INCLUDE_PATH, newPath);
 			// Call plain nddl, not AST, so that it loads
 			this.engine.executeScript("nddl", file.getAbsolutePath(), true);
+			loadedFiles.add(file);
 		} catch (Exception e) {
 			System.err.println("Cannot load NDDL file? " + e);
 		} finally {
 			this.engine.getConfig().setProperty(INCLUDE_PATH, oldPath);
 		}
+	}
+	
+	/** Get all NDDL files loaded in this engine, includes are not followed */
+	public ArrayList<File> getLoadedFiles() {
+		return loadedFiles;
 	}
 
 	/** @return two numbers: horizon start and horizon end */

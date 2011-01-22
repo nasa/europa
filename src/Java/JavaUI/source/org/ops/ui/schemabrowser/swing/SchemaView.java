@@ -20,7 +20,7 @@ public class SchemaView extends EuropaInternalFrame {
 
 		// Data
 		this.treeModel = new SchemaTreeModel(
-				new SchemaSource(model.getEngine()));
+				new SchemaSource(model));
 		model.addSolverListener(new SolverAdapter() {
 			@Override
 			public void solverStarted() {
