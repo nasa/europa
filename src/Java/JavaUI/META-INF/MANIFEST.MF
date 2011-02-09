@@ -27,5 +27,7 @@ Bundle-ClassPath: .,
  lib/org.eclipse.nebula.widgets.ganttchart_1.0.0.jar
 Bundle-Localization: plugin
 Export-Package: .,
+ psengine,
+ org.ops.ui.solver.model,
  org.ops.ui.main.swt
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
