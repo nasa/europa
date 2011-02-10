@@ -264,6 +264,10 @@ public class SolverView extends ViewPart implements SolverListener {
 		widget.layout();
 	}
 
+	public File getModelFile() { 
+		return modelFile;
+	}
+	
 	/** Update state of labels and buttons */
 	private void updateState() {
 		// Do we have a file
