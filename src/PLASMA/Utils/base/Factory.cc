@@ -49,9 +49,7 @@ void FactoryMgr::registerFactory(FactoryId& factory)
     if(it != m_factoryMap.end()) {
         delete ((Factory*)it->second);
         m_factoryMap.erase(it);
-        std::cout << "FactoryMgr::registerFactory: Registered new factory for " << factory->getName().toString() << std::endl;
-        // TODO: log INFO message notifying of new registration
-        //debugMsg("FactoryMgr:registerFactory","Registered new factory for " << factory->getName().toString());
+        debugMsg("FactoryMgr:registerFactory","Registered new factory for " << factory->getName().toString());
     }
     m_factoryMap.insert(std::make_pair(factory->getName(), factory));
 }
