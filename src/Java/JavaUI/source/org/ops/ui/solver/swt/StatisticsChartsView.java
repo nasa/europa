@@ -9,7 +9,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import org.ops.ui.main.swt.EuropaPlugin;
 import org.ops.ui.solver.model.SolverListener;
 import org.ops.ui.solver.model.SolverModel;
 import org.ops.ui.solver.model.StepStatisticsRecord;
@@ -19,7 +18,8 @@ import org.ops.ui.solver.model.StepStatisticsRecord;
  * 
  * @author Tatiana Kichkaylo
  */
-public class StatisticsChartsView extends ViewPart implements SolverListener {
+public class StatisticsChartsView extends ViewPart implements SolverListener,
+		SolverModelView {
 	public static final String VIEW_ID = "org.ops.ui.solver.swt.StatisticsView";
 
 	/** Solver model, initialized in createPartControl */
@@ -40,11 +40,20 @@ public class StatisticsChartsView extends ViewPart implements SolverListener {
 	/** Total running time, seconds */
 	private double totalTimeSec = 0;
 
+	/** Switch this view to the given model, possibly NULL */
+	@Override
+	public void setModel() {
+		if (this.model != null)
+			this.model.removeSolverListener(this);
+		this.model = SolverModelSWT.getCurrent();
+		if (model != null)
+			model.addSolverListener(this);
+		if (model != null && !model.isTerminated())
+			updateChartData();
+	}
+
 	@Override
 	public void createPartControl(Composite parent) {
-		model = EuropaPlugin.getDefault().getSolverModel();
-		model.addSolverListener(this);
-
 		FillLayout layout = new FillLayout();
 		parent.setLayout(layout);
 
@@ -64,11 +73,16 @@ public class StatisticsChartsView extends ViewPart implements SolverListener {
 				lblStepNumber, lblDecsInPlan, data, false);
 
 		// If the solver is already running, update the chart data
-		if (model.isConfigured())
+		setModel();
+		if (model != null && !model.isTerminated())
 			updateChartData();
 	}
 
 	private void updateChartData() {
+		stepTimeSeries.clear();
+		stepAvgTimeSeries.clear();
+		decisionCntSeries.clear();
+
 		// Total step count
 		int stepCount = model.getStepCount();
 		for (int i = 1; i <= stepCount; i++) {
@@ -95,6 +109,7 @@ public class StatisticsChartsView extends ViewPart implements SolverListener {
 		// Nothing
 	}
 
+	@Override
 	public void afterOneStep(long time) {
 		int stepCnt = model.getStepCount();
 		double secs = time / 1000.0;
@@ -108,18 +123,22 @@ public class StatisticsChartsView extends ViewPart implements SolverListener {
 		decisionCntSeries.add(stepCnt, decs);
 	}
 
+	@Override
 	public void afterStepping() {
 		// Nothing
 	}
 
+	@Override
 	public void beforeStepping() {
 		// Nothing
 	}
 
+	@Override
 	public void solverStarted() {
 		totalTimeSec = 0;
 	}
 
+	@Override
 	public void solverStopped() {
 		clearSeries();
 	}

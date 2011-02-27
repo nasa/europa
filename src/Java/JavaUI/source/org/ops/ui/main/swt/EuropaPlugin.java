@@ -9,7 +9,6 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.ops.ui.solver.model.SolverModel;
 import org.osgi.framework.BundleContext;
 
 import psengine.PSUtil;
@@ -27,12 +26,7 @@ public class EuropaPlugin extends AbstractUIPlugin {
 	/** The shared instance */
 	private static EuropaPlugin plugin;
 
-	/**
-	 * Solver execution model. Should be one per plugin. Creates engine instance
-	 * inside
-	 */
-	private SolverModel solverModel;
-
+	/** Map of color resources */
 	private HashMap<RGB, Color> colorMap;
 
 	/**
@@ -54,7 +48,16 @@ public class EuropaPlugin extends AbstractUIPlugin {
 		plugin = this;
 
 		colorMap = new HashMap<RGB, Color>();
-		hookupEngine();
+
+		// Load the libraries or die
+		try {
+			PSUtil.loadLibraries();
+		} catch (UnsatisfiedLinkError e) {
+			logError("Cannot load Europa libraries. Please make the "
+					+ "dynamic libraries are included in LD_LIBRARY_PATH "
+					+ "(or PATH for Windows)\n" + e.getLocalizedMessage());
+			throw e;
+		}
 	}
 
 	/*
@@ -67,7 +70,6 @@ public class EuropaPlugin extends AbstractUIPlugin {
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
-		releaseEngine();
 		for (Color c : colorMap.values())
 			c.dispose();
 		colorMap = null;
@@ -95,18 +97,6 @@ public class EuropaPlugin extends AbstractUIPlugin {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
 
-	/** Create and connect PSEngine */
-	protected void hookupEngine() {
-		try {
-			PSUtil.loadLibraries();
-		} catch (UnsatisfiedLinkError e) {
-			logError("Cannot load Europa libraries. Please make the "
-					+ "dynamic libraries are included in LD_LIBRARY_PATH "
-					+ "(or PATH for Windows)\n" + e.getLocalizedMessage());
-			throw e;
-		}
-	}
-
 	public void logError(String message) {
 		this.getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, message));
 	}
@@ -125,19 +115,6 @@ public class EuropaPlugin extends AbstractUIPlugin {
 	public void logError(String message, Throwable exception) {
 		this.getLog().log(
 				new Status(IStatus.ERROR, PLUGIN_ID, message, exception));
-	}
-
-	/** Shutdown and release engine. Save any state if necessary */
-	protected void releaseEngine() {
-		if (solverModel != null)
-			solverModel.shutdown();
-		solverModel = null;
-	}
-
-	public SolverModel getSolverModel() {
-		if (solverModel == null)
-			solverModel = new SolverModel();
-		return solverModel;
 	}
 
 	public Color getColor(RGB rgb) {

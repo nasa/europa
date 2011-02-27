@@ -1,6 +1,5 @@
 package org.ops.ui.schemabrowser.model;
 
-import java.io.File;
 import java.util.HashMap;
 
 import org.ops.ui.filemanager.model.AstNode;
@@ -33,15 +32,16 @@ public class SchemaSource {
 
 	/** Make a node for object types */
 	public SchemaNode getObjectTypesNode() {
-		if (!model.isConfigured())
+		if (!isInitialized())
 			return null;
 
 		// Parse type definitions from loaded files
 		HashMap<String, AstNode> map = new HashMap<String, AstNode>();
-		for (File file : model.getLoadedFiles()) {
-			FileModel fm = FileModel.getModel(file.getAbsolutePath());
+		// for (File file : model.getLoadedFiles()) {
+		// FileModel fm = FileModel.getModel(file.getAbsolutePath());
+			FileModel fm = FileModel.getModel(model.getModelFile().getAbsolutePath());
 			collectClasses(fm.getAST(), map);
-		}
+		//}
 
 		SchemaNode node = new SchemaNode(Type.CATEGORY, "Object types");
 		PSSchema schema = model.getEngine().getPSSchema();
@@ -91,7 +91,7 @@ public class SchemaSource {
 	}
 
 	public boolean isInitialized() {
-		return model.isConfigured();
+		return model != null && !model.isTerminated();
 	}
 
 	public void setModel(SolverModel smodel) {

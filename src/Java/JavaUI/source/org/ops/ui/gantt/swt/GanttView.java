@@ -31,20 +31,22 @@ import org.ops.ui.gantt.model.GanttResource;
 import org.ops.ui.main.swt.EuropaPlugin;
 import org.ops.ui.solver.model.SolverListener;
 import org.ops.ui.solver.model.SolverModel;
+import org.ops.ui.solver.swt.SolverModelSWT;
+import org.ops.ui.solver.swt.SolverModelView;
 
 /**
  * Gantt chart view - SWT version for the Eclipse plugin
  * 
  * @author Tatiana Kichkaylo
  */
-public class GanttView extends ViewPart implements SolverListener {
+public class GanttView extends ViewPart implements SolverListener, SolverModelView {
 	public static final String VIEW_ID = "org.ops.ui.gantt.swt.GanttView";
 	/** Step size in pixels */
 	protected static int stepSizePx = 20;
 	protected static int headerHeight = 20;
 
 	/** Solver model, initialized in createPartControl */
-	private SolverModel solverModel;
+	private SolverModel solverModel = null;
 
 	private Canvas timeCanvas;
 	/** Canvas for tokens. There is a <code>contents</code> panel inside */
@@ -70,12 +72,21 @@ public class GanttView extends ViewPart implements SolverListener {
 		evenBg = pl.getColor(new RGB(250, 250, 150));
 		smallGrid = pl.getColor(new RGB(200, 200, 200));
 	}
+	
+	/** Switch this view to the given model, possibly NULL */
+	@Override
+	public void setModel() {
+		if (this.solverModel != null)
+			this.solverModel.removeSolverListener(this);
+		this.solverModel = SolverModelSWT.getCurrent();
+		if (this.solverModel!= null)
+			this.solverModel.addSolverListener(this);
+		updateChart();
+	}
+
 
 	@Override
 	public void createPartControl(final Composite parent) {
-		solverModel = EuropaPlugin.getDefault().getSolverModel();
-		solverModel.addSolverListener(this);
-
 		final Sash sash = new Sash(parent, SWT.VERTICAL);
 		labelCanvas = new FigureCanvas(parent, SWT.H_SCROLL);
 
@@ -99,6 +110,7 @@ public class GanttView extends ViewPart implements SolverListener {
 		sashData.bottom = new FormAttachment(100, 0);
 		sash.setLayoutData(sashData);
 		sash.addListener(SWT.Selection, new Listener() {
+			@Override
 			public void handleEvent(Event e) {
 				Rectangle sashRect = sash.getBounds();
 				Rectangle shellRect = parent.getClientArea();
@@ -126,16 +138,19 @@ public class GanttView extends ViewPart implements SolverListener {
 		canvas.setLayoutData(rightData);
 
 		timeCanvas.addPaintListener(new PaintListener() {
+			@Override
 			public void paintControl(PaintEvent event) {
 				paintTimeHeader(event);
 			}
 		});
 		canvas.getHorizontalBar().addListener(SWT.Selection, new Listener() {
+			@Override
 			public void handleEvent(Event e) {
 				timeCanvas.redraw();
 			}
 		});
 		canvas.getVerticalBar().addListener(SWT.Selection, new Listener() {
+			@Override
 			public void handleEvent(Event e) {
 				int x = labelCanvas.getViewport().getViewLocation().x;
 				int y = canvas.getViewport().getViewLocation().y;
@@ -191,6 +206,7 @@ public class GanttView extends ViewPart implements SolverListener {
 		labelCanvas.getVerticalBar().setVisible(false);
 
 		// Redraw the view
+		setModel();
 		updateChart();
 	}
 
@@ -204,20 +220,25 @@ public class GanttView extends ViewPart implements SolverListener {
 	public void setFocus() {
 	}
 
+	@Override
 	public void afterOneStep(long time) {
 	}
 
+	@Override
 	public void afterStepping() {
 		updateChart();
 	}
 
+	@Override
 	public void beforeStepping() {
 	}
 
+	@Override
 	public void solverStarted() {
 		updateChart();
 	}
 
+	@Override
 	public void solverStopped() {
 	}
 
@@ -266,6 +287,7 @@ public class GanttView extends ViewPart implements SolverListener {
 
 	private void updateChart() {
 		Display.getDefault().asyncExec(new Runnable() {
+			@Override
 			public void run() {
 				canvas.getViewport().setViewLocation(0, 0);
 				labelCanvas.getViewport().setViewLocation(0, 0);

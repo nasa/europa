@@ -1,27 +1,29 @@
 package org.ops.ui.solver.swt;
 
 import java.io.File;
+import java.util.ArrayList;
 
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.IMemento;
-import org.eclipse.ui.IViewSite;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ViewPart;
 import org.ops.ui.main.swt.CommonImages;
 import org.ops.ui.main.swt.EuropaPlugin;
-import org.ops.ui.main.swt.NddlConfigurationFields;
 import org.ops.ui.solver.model.SolverListener;
 import org.ops.ui.solver.model.SolverModel;
 import org.ops.ui.solver.model.TimeFormatHelper;
@@ -32,23 +34,24 @@ import org.ops.ui.solver.model.TimeFormatHelper;
  * @author Tatiana Kichkaylo
  */
 
-public class SolverView extends ViewPart implements SolverListener {
+public class SolverView extends ViewPart implements SolverListener,
+		SolverModelView {
 	public static final String VIEW_ID = "org.ops.ui.solver.swt.SolverView";
-	public static final String MEMENTO_TAG = "EuropaRunNddlView";
-	public static final String MEMENTO_FILE = "modelFile";
-	public static final String MEMENTO_CONFIG = "configFile";
-	public static final String MEMENTO_HOR_START = "horizonStart";
-	public static final String MEMENTO_HOR_END = "horizonEnd";
 
 	/** Message strings. Should probably move this into plugin resources */
 	private static final String TOOLTIP_START_ENGINE = "Start Europa engine";
 	private static final String TOOLTIP_STOP_ENGINE = "Stop Europa engine";
+	/** Attribute keys for storing time and step counts in models */
+	private static final String TIME_LABEL = "Time searching";
+	private static final String STEP_LABEL = "Step count";
 
 	/** Minimum width of text fields */
 	private static final int TEXT_WIDTH = 50;
 
-	private SolverModel model;
-
+	/** List of all NDDL launches */
+	private Combo launchList;
+	/** Models corresponding to strings to launchList */
+	private ArrayList<SolverModelSWT> launches = new ArrayList<SolverModelSWT>();
 	/** Display the name of the loaded model file */
 	private Label modelFileLabel;
 	/** Toggle button for running the engine */
@@ -64,15 +67,8 @@ public class SolverView extends ViewPart implements SolverListener {
 	/** Steps made and time spent display fields */
 	private Label stepCountLabel, timeSpentLabel;
 
-	/** File we are about to run, if any */
-	private File modelFile = null;
-	/** Configuration file */
-	private File configFile = null;
-	/** Used only during initialization to pass horizon from memento */
-	private String horizonStart = String
-			.valueOf(NddlConfigurationFields.DEF_HORIZON_START),
-			horizonEnd = String
-					.valueOf(NddlConfigurationFields.DEF_HORIZON_END);
+	/** Solver model we are currently displaying */
+	private SolverModelSWT model = null;
 
 	/** Start of N step run. Used to get statistics labels */
 	private long startOfRun;
@@ -80,59 +76,43 @@ public class SolverView extends ViewPart implements SolverListener {
 	/** Remember the parent widget so we can force layout when labels change */
 	private Composite widget;
 
-	/** Obtains the model from the Activator singleton */
-	@Override
-	public void init(IViewSite site, IMemento memento) throws PartInitException {
-		// Parent class ignores memento, but can set some defaults
-		super.init(site);
-		model = EuropaPlugin.getDefault().getSolverModel();
-		model.addSolverListener(this);
-		if (memento == null)
-			return;
-		IMemento m = memento.getChild(MEMENTO_TAG);
-		if (m == null)
-			return;
-		// Using for loops, 'cause I am lazy to check if the array size == 0
-		for (IMemento c : m.getChildren(MEMENTO_CONFIG))
-			configFile = new File(c.getTextData());
-		if (configFile == null || !configFile.exists())
-			return; // do not even read further
-		for (IMemento c : m.getChildren(MEMENTO_FILE)) {
-			modelFile = new File(c.getTextData());
-			// Paranoia
-			if (!modelFile.exists())
-				modelFile = null;
-		}
-		for (IMemento c : m.getChildren(MEMENTO_HOR_START))
-			horizonStart = c.getTextData();
-		for (IMemento c : m.getChildren(MEMENTO_HOR_END))
-			horizonEnd = c.getTextData();
-	}
-
-	@Override
-	public void saveState(IMemento memento) {
-		super.saveState(memento);
-		IMemento mem = memento.createChild(MEMENTO_TAG);
-		if (modelFile != null)
-			mem.createChild(MEMENTO_FILE).putTextData(
-					modelFile.getAbsolutePath());
-		if (configFile != null)
-			mem.createChild(MEMENTO_CONFIG).putTextData(
-					configFile.getAbsolutePath());
-		mem.createChild(MEMENTO_HOR_START).putTextData(
-				startHorizonText.getText());
-		mem.createChild(MEMENTO_HOR_END).putTextData(endHorizonText.getText());
-	}
-
 	/** Create and initialize the viewer */
 	@Override
 	public void createPartControl(Composite parent) {
 		widget = parent;
 		parent.setLayout(new GridLayout(4, false));
 
+		new Label(parent, SWT.NONE).setText("Launches");
+		launchList = new Combo(parent, SWT.READ_ONLY);
+		launchList.addSelectionListener(new SelectionListener() {
+			private void updateLaunchSelection() {
+				int idx = launchList.getSelectionIndex();
+				assert (idx < launches.size());
+				SolverModelSWT md = (idx < 0) ? null : launches.get(idx);
+				// Notify all relevant views, including this one
+				SolverModelSWT.makeActive(md);
+			}
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				updateLaunchSelection();
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				updateLaunchSelection();
+			}
+		});
+		GridData data = new GridData();
+		data.minimumWidth = 200;
+		data.horizontalSpan = 3;
+		data.grabExcessHorizontalSpace = true;
+		launchList.setLayoutData(data);
+		updateLaunchList();
+
 		new Label(parent, SWT.NONE).setText("File: ");
 		modelFileLabel = new Label(parent, SWT.BOLD);
-		GridData data = new GridData();
+		data = new GridData();
 		data.horizontalSpan = 2;
 		data.grabExcessHorizontalSpace = true;
 		modelFileLabel.setLayoutData(data);
@@ -145,6 +125,7 @@ public class SolverView extends ViewPart implements SolverListener {
 
 		modelFileLabel.setFont(boldFont);
 		modelFileLabel.setText("Fixme");
+
 		runEngineButton = new Button(parent, SWT.TOGGLE);
 		runEngineButton.setImage(EuropaPlugin.getDefault().getImageRegistry()
 				.get(CommonImages.IMAGE_EUROPA));
@@ -157,14 +138,12 @@ public class SolverView extends ViewPart implements SolverListener {
 
 		new Label(parent, SWT.NONE).setText("Horizon");
 		startHorizonText = new Text(parent, SWT.SINGLE | SWT.BORDER);
-		startHorizonText.setText(horizonStart);
 		data = new GridData();
 		data.minimumWidth = TEXT_WIDTH;
 		data.grabExcessHorizontalSpace = true;
 		data.horizontalAlignment = SWT.FILL;
 		startHorizonText.setLayoutData(data);
 		endHorizonText = new Text(parent, SWT.SINGLE | SWT.BORDER);
-		endHorizonText.setText(horizonEnd);
 		data = new GridData();
 		data.minimumWidth = TEXT_WIDTH;
 		data.grabExcessHorizontalSpace = true;
@@ -229,6 +208,34 @@ public class SolverView extends ViewPart implements SolverListener {
 		updateState();
 	}
 
+	/** Refresh the set of NDDL launches. Preserve selection, if possible */
+	public void updateLaunchList() {
+		// Remember selected launch
+		int idx = launchList.getSelectionIndex();
+		SolverModel old = (idx < 0) ? null : launches.get(idx);
+
+		// Reset the list, get all launches
+		this.launches.clear();
+		ArrayList<String> labels = new ArrayList<String>();
+		ILaunch[] all = DebugPlugin.getDefault().getLaunchManager()
+				.getLaunches();
+		for (int i = 0; i < all.length; i++) {
+			if (all[i].getProcesses().length < 1)
+				continue; // should not happen, but still
+			IProcess pr = all[i].getProcesses()[0];
+			if (pr instanceof SolverModelSWT) {
+				launches.add((SolverModelSWT) pr);
+				labels.add(all[i].getLaunchConfiguration().toString());
+			}
+		}
+		launchList.setItems(labels.toArray(new String[labels.size()]));
+
+		// Reapply the selection
+		idx = this.launches.indexOf(old);
+		if (idx >= 0)
+			launchList.select(idx);
+	}
+
 	@Override
 	public void setFocus() {
 	}
@@ -237,65 +244,91 @@ public class SolverView extends ViewPart implements SolverListener {
 		MessageDialog.openInformation(null, "Europa Solver", message);
 	}
 
+	@Override
 	public void afterOneStep(long time) {
-		timeSpentLabel.setText(TimeFormatHelper.formatTime(System
-				.currentTimeMillis()
-				- startOfRun));
+		String str = TimeFormatHelper.formatTime(System.currentTimeMillis()
+				- startOfRun);
+		model.setAttribute(TIME_LABEL, str);
+		timeSpentLabel.setText(str);
 		int stepCnt = model.getStepCount();
-		stepCountLabel.setText(Integer.toString(stepCnt));
+		str = Integer.toString(stepCnt);
+		model.setAttribute(STEP_LABEL, str);
+		stepCountLabel.setText(str);
 	}
 
+	@Override
 	public void afterStepping() {
 		runForStepsButton.setEnabled(true);
 		widget.layout();
 	}
 
+	@Override
 	public void beforeStepping() {
 		runForStepsButton.setEnabled(false);
 	}
 
+	@Override
 	public void solverStarted() {
 		updateState();
 		widget.layout();
 	}
 
+	@Override
 	public void solverStopped() {
 		updateState();
 		widget.layout();
 	}
 
-	public File getModelFile() { 
-		return modelFile;
+	public File getModelFile() {
+		if (model == null)
+			return null;
+		return model.getModelFile();
 	}
-	
+
 	/** Update state of labels and buttons */
 	private void updateState() {
 		// Do we have a file
-		boolean haveFile = (modelFile != null);
+		boolean haveFile = (model != null);
 
-		// File name label
-		if (haveFile)
-			modelFileLabel.setText(modelFile.getName());
-		else
+		if (haveFile) {
+			modelFileLabel.setText(model.getModelFile().getName());
+			startHorizonText.setText(String.valueOf(model.getHorizon()[0]));
+			endHorizonText.setText(String.valueOf(model.getHorizon()[1]));
+			String str = model.getAttribute(TIME_LABEL);
+			if (str != null)
+				timeSpentLabel.setText(str);
+			else
+				timeSpentLabel.setText("");
+			str = model.getAttribute(STEP_LABEL);
+			if (str != null)
+				stepCountLabel.setText(str);
+			else
+				stepCountLabel.setText("");
+		} else {
 			modelFileLabel.setText("No model selected. Use Run as NDDL");
+			startHorizonText.setText("");
+			endHorizonText.setText("");
+			timeSpentLabel.setText("");
+			stepCountLabel.setText("");
+		}
 
 		// Run engine button
 		if (haveFile) {
 			runEngineButton.setEnabled(true);
-			if (model.isConfigured()) {
+			if (!model.isTerminated()) {
 				setEnabledFields(true);
 			} else {
 				setEnabledFields(false);
 			}
+			if (!model.isTerminated())
+				runEngineButton.setToolTipText(TOOLTIP_STOP_ENGINE);
+			else
+				runEngineButton.setToolTipText(TOOLTIP_START_ENGINE);
 		} else {
 			runEngineButton.setEnabled(false);
 			// Cannot start without a model
 			setEnabledFields(false);
 		}
-		if (EuropaPlugin.getDefault().getSolverModel().isConfigured())
-			runEngineButton.setToolTipText(TOOLTIP_STOP_ENGINE);
-		else
-			runEngineButton.setToolTipText(TOOLTIP_START_ENGINE);
 	}
 
 	/**
@@ -320,12 +353,22 @@ public class SolverView extends ViewPart implements SolverListener {
 	}
 
 	/** Launch configuration tells us field values */
-	public void setFields(File nddl, File config, int horizonStart,
-			int horizonEnd) {
-		this.modelFile = nddl;
-		this.configFile = config;
-		this.startHorizonText.setText(String.valueOf(horizonStart));
-		this.endHorizonText.setText(String.valueOf(horizonEnd));
+	@Override
+	public void setModel() {
+		// Unsubscribe from the old model
+		if (this.model != null)
+			this.model.removeSolverListener(this);
+
+		// Remember the new one
+		this.model = SolverModelSWT.getCurrent();
+		if (model != null) {
+			model.addSolverListener(this);
+		}
+		updateState();
+
+		int idx = this.launches.indexOf(model);
+		if (idx >= 0)
+			launchList.select(idx);
 	}
 
 	/** Run for N steps button listener */
@@ -344,25 +387,17 @@ public class SolverView extends ViewPart implements SolverListener {
 
 	/** Button to start/stop the engine is hit */
 	protected void doEngineButtonPressed(SelectionEvent evt) {
+		// The button should be disabled when no model, so this method should
+		// not be called. Still, out of paranoia...
+		if (model == null)
+			return;
 		// The state of the button is changed, just read it
 		if (runEngineButton.getSelection()) {
 			// Need to run
-			if (model.isConfigured())
-				model.shutdown();
-			int horizonStart, horizonEnd;
-			try {
-				horizonStart = new Integer(startHorizonText.getText());
-			} catch (NumberFormatException e) {
-				horizonStart = NddlConfigurationFields.DEF_HORIZON_START;
-			}
-			try {
-				horizonEnd = new Integer(endHorizonText.getText());
-			} catch (NumberFormatException e) {
-				horizonEnd = NddlConfigurationFields.DEF_HORIZON_END;
-			}
-			model.configure(modelFile, configFile, horizonStart, horizonEnd);
+			assert (model.isTerminated());
+			model.start();
 		} else {
-			model.shutdown();
+			model.terminate();
 		}
 		updateState();
 	}

@@ -18,7 +18,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.part.ViewPart;
-import org.ops.ui.main.swt.EuropaPlugin;
 import org.ops.ui.solver.model.SolverListener;
 import org.ops.ui.solver.model.SolverModel;
 import org.ops.ui.solver.model.StepStatisticsRecord;
@@ -28,13 +27,14 @@ import org.ops.ui.solver.model.StepStatisticsRecord;
  * 
  * @author Tatiana Kichkaylo
  */
-public class DecisionsView extends ViewPart implements SolverListener {
+public class DecisionsView extends ViewPart implements SolverListener,
+		SolverModelView {
 	public static final String VIEW_ID = "org.ops.ui.solver.swt.DecisionsView";
 	/** Minimum width of text fields */
 	private static final int TEXT_WIDTH = 50;
 
 	/** Solver model, initialized in createPartControl */
-	private SolverModel model;
+	private SolverModel model = null;
 
 	private Button leftButton, rightButton, nstepButton;
 
@@ -54,10 +54,19 @@ public class DecisionsView extends ViewPart implements SolverListener {
 	/** Maximum possible step. Used to bound currentStep */
 	private int maxStep = 0;
 
+	/** Switch this view to the given model, possibly NULL */
+	@Override
+	public void setModel() {
+		if (this.model != null)
+			this.model.removeSolverListener(this);
+		this.model = SolverModelSWT.getCurrent();
+		if (model != null)
+			model.addSolverListener(this);
+		updateData();
+	}
+
 	@Override
 	public void createPartControl(Composite parent) {
-		model = EuropaPlugin.getDefault().getSolverModel();
-		model.addSolverListener(this);
 		parent.setLayout(new FormLayout());
 
 		leftButton = new Button(parent, SWT.PUSH);
@@ -91,8 +100,8 @@ public class DecisionsView extends ViewPart implements SolverListener {
 				try {
 					displayStepData(new Integer(stepField.getText()));
 				} catch (NumberFormatException e) {
-					MessageDialog.openError(null, "Not a number", e
-							.getMessage());
+					MessageDialog.openError(null, "Not a number",
+							e.getMessage());
 					displayStepData(currentStep);
 				}
 			}
@@ -147,15 +156,21 @@ public class DecisionsView extends ViewPart implements SolverListener {
 		data.right = new FormAttachment(100, -1);
 		restTable.setLayoutData(data);
 
+		setModel();
+		updateData();
+	}
+	
+	private void updateData() {		
 		// Load data, if any
-		if (model.isConfigured()) {
+		boolean haveData = model != null && !model.isTerminated();
+		if (haveData) {
 			maxStep = model.getStepCount();
 			displayStepData(maxStep);
 			availableSteps.setText("of " + maxStep);
 		} else {
 			availableSteps.setText("no data");
 		}
-		setAllEnabled(model.isConfigured());
+		setAllEnabled(haveData);
 	}
 
 	private FormData rightOf(Control control) {
@@ -177,10 +192,12 @@ public class DecisionsView extends ViewPart implements SolverListener {
 		rightButton.setFocus();
 	}
 
+	@Override
 	public void afterOneStep(long time) {
 		// Nothing
 	}
 
+	@Override
 	public void afterStepping() {
 		setAllEnabled(true);
 		assert (maxStep <= model.getStepCount());
@@ -189,10 +206,12 @@ public class DecisionsView extends ViewPart implements SolverListener {
 		availableSteps.setText("of " + maxStep);
 	}
 
+	@Override
 	public void beforeStepping() {
 		setAllEnabled(false);
 	}
 
+	@Override
 	public void solverStarted() {
 		setAllEnabled(true);
 		maxStep = model.getStepCount();
@@ -200,6 +219,7 @@ public class DecisionsView extends ViewPart implements SolverListener {
 		availableSteps.setText("of " + maxStep);
 	}
 
+	@Override
 	public void solverStopped() {
 		setAllEnabled(false);
 	}

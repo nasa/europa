@@ -11,63 +11,65 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.IMemento;
-import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.ops.ui.filemanager.model.AstNode;
-import org.ops.ui.main.swt.EuropaPlugin;
 import org.ops.ui.schemabrowser.model.SchemaNode;
 import org.ops.ui.schemabrowser.model.SchemaSource;
 import org.ops.ui.solver.model.SolverAdapter;
 import org.ops.ui.solver.model.SolverModel;
+import org.ops.ui.solver.swt.SolverModelSWT;
+import org.ops.ui.solver.swt.SolverModelView;
 
 /**
  * Europa schema browser - SWT version
  * 
  * @author Tatiana Kichkaylo
  */
-public class SchemaView extends ViewPart {
+public class SchemaView extends ViewPart implements SolverModelView {
 	public static final String VIEW_ID = "org.ops.ui.schemabrowser.swt.SchemaView";
 	private TreeViewer viewer;
-	private SchemaSource model;
+	private final SchemaSource source = new SchemaSource(null);
+	private SolverModel model;
 
+	// For now reload schema only on engine start/stop. If schema changes as
+	// a result of stepping, will also need to update then. Not doing it
+	// now, because too lazy to restore tree expansion
+	private SolverAdapter listener = new SolverAdapter() {
+		@Override
+		public void solverStarted() {
+			reloadView();
+		}
+
+		@Override
+		public void solverStopped() {
+			reloadView();
+		}
+	};
+
+	/** Switch this view to the given model, possibly NULL */
 	@Override
-	public void init(IViewSite site, IMemento memento) throws PartInitException {
-		// Parent class ignores memento, but can set some defaults
-		super.init(site);
-
-		SolverModel smodel = EuropaPlugin.getDefault().getSolverModel();
-		model = new SchemaSource(smodel);
-
-		// For now reload schema only on engine start/stop. If schema changes as
-		// a result of stepping, will also need to update then. Not doing it
-		// now, because too lazy to restore tree expansion
-		smodel.addSolverListener(new SolverAdapter() {
-			@Override
-			public void solverStarted() {
-				reloadView();
-			}
-
-			@Override
-			public void solverStopped() {
-				reloadView();
-			}
-		});
+	public void setModel() {
+		if (this.model != null)
+			this.model.removeSolverListener(listener);
+		this.model = SolverModelSWT.getCurrent();
+		if (model != null)
+			model.addSolverListener(listener);
+		reloadView();
 	}
 
 	@Override
 	public void createPartControl(Composite parent) {
 		viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		SchemaContentProvider cProvider = new SchemaContentProvider(model);
+		SchemaContentProvider cProvider = new SchemaContentProvider(source);
 		viewer.setContentProvider(cProvider);
 		viewer.setLabelProvider(new SchemaLabelProvider(parent.getFont()));
 		viewer.setInput(cProvider.getRootNode());
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				ISelection sel = event.getSelection();
 				if (!(sel instanceof ITreeSelection))
@@ -102,6 +104,7 @@ public class SchemaView extends ViewPart {
 				}
 			}
 		});
+		setModel();
 	}
 
 	@Override
@@ -110,8 +113,7 @@ public class SchemaView extends ViewPart {
 	}
 
 	private void reloadView() {
-		SolverModel smodel = EuropaPlugin.getDefault().getSolverModel();
-		model.setModel(smodel);
+		source.setModel(model);
 		SchemaContentProvider cProvider = (SchemaContentProvider) viewer
 				.getContentProvider();
 		cProvider.initialize();

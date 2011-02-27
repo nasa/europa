@@ -65,6 +65,7 @@ public class PSDesktop extends JFrame {
 
 		// Hook up engine
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+			@Override
 			public void run() {
 				releaseEngine();
 			}
@@ -113,6 +114,7 @@ public class PSDesktop extends JFrame {
 		JMenuItem item = new JMenuItem("Load BSH file");
 		menu.add(item);
 		item.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				File fl = askForFile(workingDir, "Bean Shell files", "bsh",
 						"Choose BSH file to interpret");
@@ -124,6 +126,7 @@ public class PSDesktop extends JFrame {
 		item = new JMenuItem("Exit");
 		menu.add(item);
 		item.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				askAndExit();
 			}
@@ -180,8 +183,10 @@ public class PSDesktop extends JFrame {
 		// loadFile(dataFile);
 
 		solverModel = new SolverModel();
-		if (data != null && solverConfig != null)
+		if (data != null && solverConfig != null) {
 			solverModel.configure(data, solverConfig, 0, 100);
+			solverModel.start();
+		}
 
 		log.log(Level.INFO, "Engine started");
 	}
@@ -189,7 +194,7 @@ public class PSDesktop extends JFrame {
 	/** Shutdown and release engine. Save any state if necessary */
 	protected synchronized void releaseEngine() {
 		if (solverModel != null) {
-			solverModel.shutdown();
+			solverModel.terminate();
 			solverModel = null;
 			log.log(Level.INFO, "Engine released");
 		}
