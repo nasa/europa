@@ -53,7 +53,11 @@ public class AstNode {
 		checkChar(astString, end + 1, ':');
 		offset = end + 2; // skip :
 		end = nextStop(astString, offset, ':', ' ', ')');
-		type = new Integer(astString.substring(offset, end));
+		if (end == astString.length() - 1) {
+			type = new Integer(astString.substring(offset));
+			return end + 1;
+		} else
+			type = new Integer(astString.substring(offset, end));
 
 		// If it was not :, we are done
 		if (astString.charAt(end) != ':')
