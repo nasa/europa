@@ -243,15 +243,21 @@ public class GanttView extends ViewPart implements SolverListener, SolverModelVi
 	}
 
 	private void doUpdate() {
+		contents.removeAll();
+		lines.clear();
+		labelContents.removeAll();
+		
+		if (solverModel == null) {
+			stepCount = 0;
+			largeSize = null;
+			return;
+		}
+
 		GanttModel model = new GanttModel(solverModel);
 		int start = model.getStart();
 		int end = model.getEnd();
 
 		stepCount = end - start + 1;
-
-		contents.removeAll();
-		lines.clear();
-		labelContents.removeAll();
 
 		int index = 0;
 		for (int i = 0; i < model.getResourceCount(); i++) {
