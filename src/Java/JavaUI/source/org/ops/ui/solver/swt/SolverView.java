@@ -3,8 +3,10 @@ package org.ops.ui.solver.swt;
 import java.io.File;
 import java.util.ArrayList;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
@@ -21,9 +23,13 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ViewPart;
 import org.ops.ui.main.swt.CommonImages;
 import org.ops.ui.main.swt.EuropaPlugin;
+import org.ops.ui.main.swt.NddlLauncher;
 import org.ops.ui.solver.model.SolverListener;
 import org.ops.ui.solver.model.SolverModel;
 import org.ops.ui.solver.model.TimeFormatHelper;
@@ -37,6 +43,7 @@ import org.ops.ui.solver.model.TimeFormatHelper;
 public class SolverView extends ViewPart implements SolverListener,
 		SolverModelView {
 	public static final String VIEW_ID = "org.ops.ui.solver.swt.SolverView";
+	public static final String MEMENTO_LAUNCH = "Europa.SolverView.LaunchName";
 
 	/** Message strings. Should probably move this into plugin resources */
 	private static final String TOOLTIP_START_ENGINE = "Start Europa engine";
@@ -75,6 +82,58 @@ public class SolverView extends ViewPart implements SolverListener,
 
 	/** Remember the parent widget so we can force layout when labels change */
 	private Composite widget;
+
+	@Override
+	public void init(IViewSite site, IMemento memento) throws PartInitException {
+		// Parent class ignores memento, but can set some defaults
+		super.init(site);
+		if (memento == null)
+			return;
+		IMemento m = memento.getChild(MEMENTO_LAUNCH);
+		if (m == null)
+			return;
+		String name = m.getTextData();
+		if (name == null)
+			return;
+		System.out.println("Will locate " + name);
+		try {
+			ILaunchConfiguration[] allcfg = DebugPlugin.getDefault()
+					.getLaunchManager().getLaunchConfigurations();
+			ILaunchConfiguration cfg = null;
+			for (int i = 0; i < allcfg.length; i++)
+				if (name.equals(allcfg[i].getName())) {
+					cfg = allcfg[i];
+					break;
+				}
+			if (cfg == null) {
+				EuropaPlugin.getDefault().logError(
+						"Cannot find old launch configuration " + name
+								+ " when restarting Solver view");
+				return;
+			}
+			// Temporary tell the launcher not to start the engine
+			NddlLauncher.startModel = false;
+			cfg.launch("run", null);
+		} catch (CoreException e) {
+			EuropaPlugin.getDefault().logError(
+					"Cannot reload launch "
+							+ "configuration when restarting Solver view", e);
+		}
+	}
+
+	@Override
+	public void saveState(IMemento memento) {
+		super.saveState(memento);
+		if (model == null)
+			return; // nothing to do
+		String name = model.getLaunch().getLaunchConfiguration().getName();
+		if (name == null) {
+			EuropaPlugin.getDefault().logError(
+					"Cannot get launch name out of "
+							+ "solver model on saving Solver view");
+		}
+		memento.createChild(MEMENTO_LAUNCH).putTextData(name);
+	}
 
 	/** Create and initialize the viewer */
 	@Override

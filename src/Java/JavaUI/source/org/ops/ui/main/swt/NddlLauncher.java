@@ -18,6 +18,14 @@ import org.ops.ui.solver.swt.SolverView;
 public class NddlLauncher implements ILaunchConfigurationDelegate,
 		NddlConfigurationFields {
 	private final static String ERROR_TITLE = "Problem launching";
+	/**
+	 * Ugly hack to enable loading of configuration without starting it when
+	 * restoring Solver view. Set in SolverView and then restored in launch of
+	 * this class. Restoring here, because the actual start happens in UI
+	 * thread, but which time SolverView restoration has long since exited. See
+	 * issue 115.
+	 */
+	public static boolean startModel = true;
 
 	@Override
 	public void launch(ILaunchConfiguration configuration, String mode,
@@ -59,7 +67,11 @@ public class NddlLauncher implements ILaunchConfigurationDelegate,
 					SolverModelSWT model = new SolverModelSWT(launch);
 					model.configure(nddl, config, horizonStart, horizonEnd);
 					launch.addProcess(model);
-					model.start();
+					// Start the model unless asked otherwise
+					if (startModel)
+						model.start();
+					else
+						startModel = true; // restore after used once
 
 					// Set new data
 					IWorkbenchPage page = workbench.getActiveWorkbenchWindow()
