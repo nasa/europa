@@ -328,6 +328,11 @@ public class SolverView extends ViewPart implements SolverListener,
 
 	@Override
 	public void solverStarted() {
+		// Clean up statistics that might linger from previous run
+		assert (model != null); // or it would not be started
+		model.setAttribute(TIME_LABEL, null);
+		model.setAttribute(STEP_LABEL, null);
+
 		updateState();
 		widget.layout();
 	}
