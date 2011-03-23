@@ -12,7 +12,7 @@ import org.eclipse.swt.SWT;
 public class NddlScanner extends BufferedRuleBasedScanner {
 
 	private final static String[] KEY_WORDS = { "include", "enum", "typedef",
-			"int", "float", "boolean", "bool", "string", "true", "false",
+			"int", "float", "bool", "string", "true", "false",
 			"inf", "inff", "constraint", "extends", "numeric", "class",
 			"predicate", "this", "rejectable", "goal", "super", "if", "else",
 			"foreach", "in", "new", "filter", "fact",
