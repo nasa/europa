@@ -62,6 +62,9 @@ public class GanttView extends ViewPart implements SolverListener, SolverModelVi
 	/** Odd and even background colors */
 	protected static final Color oddBg, evenBg, smallGrid,
 			boldGrid = ColorConstants.gray;
+	
+	/** Make this thing configurable? Issue 117 */
+	private boolean skipEmptyObjects = false;
 
 	private Dimension largeSize = null;
 
@@ -240,6 +243,7 @@ public class GanttView extends ViewPart implements SolverListener, SolverModelVi
 
 	@Override
 	public void solverStopped() {
+		updateChart();
 	}
 
 	private void doUpdate() {
@@ -247,7 +251,7 @@ public class GanttView extends ViewPart implements SolverListener, SolverModelVi
 		lines.clear();
 		labelContents.removeAll();
 		
-		if (solverModel == null) {
+		if (solverModel == null || solverModel.isTerminated()) {
 			stepCount = 0;
 			largeSize = null;
 			return;
@@ -271,7 +275,7 @@ public class GanttView extends ViewPart implements SolverListener, SolverModelVi
 						.getResourceName(i));
 				// Skip timeline (non-resource) lines with no tokens
 				List<GanttActivity> all = model.getActivities(i);
-				if (all.isEmpty())
+				if (skipEmptyObjects && all.isEmpty())
 					continue;
 				for (GanttActivity act : all) {
 					tline.addToken(new TokenWidget(act,

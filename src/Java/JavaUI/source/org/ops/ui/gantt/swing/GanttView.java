@@ -47,6 +47,9 @@ public class GanttView extends EuropaInternalFrame {
 	/** Main split pane for the whole thing */
 	protected JSplitPane splitPane;
 
+	/** Make this thing configurable? Issue 117 */
+	private boolean skipEmptyObjects = false;
+	
 	/** Odd and even background colors */
 	protected static final Color oddBg = new Color(250, 255, 250),
 			evenBg = new Color(250, 250, 150), boldGrid = Color.gray,
@@ -81,6 +84,7 @@ public class GanttView extends EuropaInternalFrame {
 		splitPane.setRightComponent(right);
 
 		AdjustmentListener adjListener = new AdjustmentListener() {
+			@Override
 			public void adjustmentValueChanged(AdjustmentEvent event) {
 				JViewport vp = tokenScrollPane.getViewport();
 				Point p = vp.getViewPosition();
@@ -100,6 +104,8 @@ public class GanttView extends EuropaInternalFrame {
 				tokenPanel.repaint();
 			}
 		});
+
+		updateView();
 	}
 
 	@Override
@@ -132,7 +138,7 @@ public class GanttView extends EuropaInternalFrame {
 				TimelinePanel tline = new TimelinePanel(model.getResourceName(i));
 				// Skip timeline (non-resource) lines with no tokens
 				List<GanttActivity> all = model.getActivities(i);
-				if (all.isEmpty())
+				if (skipEmptyObjects && all.isEmpty())
 					continue;
 				for (GanttActivity act : all) {
 					tline.addToken(new TokenWidget(act, TokenWidget.DEFAULT_COLOR));
