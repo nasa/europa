@@ -51,6 +51,7 @@ public class SolverView extends ViewPart implements SolverListener,
 	/** Attribute keys for storing time and step counts in models */
 	private static final String TIME_LABEL = "Time searching";
 	private static final String STEP_LABEL = "Step count";
+	private static final String VIOL_LABEL = "Allow violations";
 
 	/** Minimum width of text fields */
 	private static final int TEXT_WIDTH = 50;
@@ -73,6 +74,8 @@ public class SolverView extends ViewPart implements SolverListener,
 	private Button runForStepsButton;
 	/** Steps made and time spent display fields */
 	private Label stepCountLabel, timeSpentLabel;
+	/** Allow violations checkbox */
+	private Button allowViolButton;
 
 	/** Solver model we are currently displaying */
 	private SolverModelSWT model = null;
@@ -231,8 +234,18 @@ public class SolverView extends ViewPart implements SolverListener,
 		data = new GridData();
 		data.minimumWidth = TEXT_WIDTH;
 		data.grabExcessHorizontalSpace = true;
-		data.horizontalSpan = 2;
+		data.horizontalSpan = 1;
 		data.horizontalAlignment = SWT.FILL;
+
+		allowViolButton = new Button(parent, SWT.CHECK);
+		allowViolButton.setText("Allow violations");
+		allowViolButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent evt) {
+				allowViolationsClicked();
+			}
+		});
+
 		runForStepsText.setLayoutData(data);
 		runForStepsButton = new Button(parent, SWT.PUSH);
 		runForStepsButton.setImage(EuropaPlugin.getDefault().getImageRegistry()
@@ -265,6 +278,14 @@ public class SolverView extends ViewPart implements SolverListener,
 		row.setLayoutData(data);
 
 		updateState();
+	}
+
+	protected void allowViolationsClicked() {
+		boolean allow = allowViolButton.getSelection();
+		// Button should be disabled when there is no running model
+		assert (model != null);
+		model.getEngine().setAllowViolations(allow);
+		model.setAttribute(VIOL_LABEL, allow ? "true" : "false");
 	}
 
 	/** Refresh the set of NDDL launches. Preserve selection, if possible */
@@ -368,6 +389,9 @@ public class SolverView extends ViewPart implements SolverListener,
 				stepCountLabel.setText(str);
 			else
 				stepCountLabel.setText("");
+			str = model.getAttribute(VIOL_LABEL);
+			// string equals will take care of NULL - default is false
+			allowViolButton.setSelection("true".equals(str));
 		} else {
 			modelFileLabel.setText("No model selected. Use Run as NDDL");
 			startHorizonText.setText("");
@@ -409,6 +433,7 @@ public class SolverView extends ViewPart implements SolverListener,
 		resetHorizonButton.setEnabled(value);
 		runForStepsText.setEnabled(value);
 		runForStepsButton.setEnabled(value);
+		allowViolButton.setEnabled(value);
 
 		if (!value) {
 			stepCountLabel.setText("No info.");
