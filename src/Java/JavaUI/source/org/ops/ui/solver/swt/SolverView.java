@@ -1,6 +1,7 @@
 package org.ops.ui.solver.swt;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.eclipse.core.runtime.CoreException;
@@ -25,7 +26,16 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleConstants;
+import org.eclipse.ui.console.IConsoleManager;
+import org.eclipse.ui.console.IConsoleView;
+import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.part.ViewPart;
 import org.ops.ui.main.swt.CommonImages;
 import org.ops.ui.main.swt.EuropaPlugin;
@@ -44,6 +54,9 @@ public class SolverView extends ViewPart implements SolverListener,
 		SolverModelView {
 	public static final String VIEW_ID = "org.ops.ui.solver.swt.SolverView";
 	public static final String MEMENTO_LAUNCH = "Europa.SolverView.LaunchName";
+
+	/** Use one console for all NDDL engines. Will add model name to printout */
+	private static final String CONSOLE_NAME = "Nddl console";
 
 	/** Message strings. Should probably move this into plugin resources */
 	private static final String TOOLTIP_START_ENGINE = "Start Europa engine";
@@ -334,12 +347,16 @@ public class SolverView extends ViewPart implements SolverListener,
 		str = Integer.toString(stepCnt);
 		model.setAttribute(STEP_LABEL, str);
 		stepCountLabel.setText(str);
+
+		checkEngineOutput();
 	}
 
 	@Override
 	public void afterStepping() {
 		runForStepsButton.setEnabled(true);
 		widget.layout();
+
+		checkEngineOutput();
 	}
 
 	@Override
@@ -356,6 +373,8 @@ public class SolverView extends ViewPart implements SolverListener,
 
 		updateState();
 		widget.layout();
+
+		checkEngineOutput();
 	}
 
 	@Override
@@ -489,5 +508,55 @@ public class SolverView extends ViewPart implements SolverListener,
 			model.terminate();
 		}
 		updateState();
+	}
+
+	/**
+	 * Check if engine produced any error output. If so, print that output on a
+	 * console. If necessary, create the console and/or make it visible.
+	 */
+	protected void checkEngineOutput() {
+		String msg = model.retrieveEngineOutput();
+		if (msg == null || msg.isEmpty())
+			return; // nothing to do
+
+		// Get console's output stream
+		MessageConsole myConsole = findConsole(CONSOLE_NAME);
+		MessageConsoleStream out = myConsole.newMessageStream();
+		out.println("From " + model.getModelFile() + ":");
+		out.println(msg);
+		try {
+			out.close();
+		} catch (IOException e) {
+			EuropaPlugin.getDefault().logError("On adding to console", e);
+		}
+
+		// Now make it visible
+		IWorkbenchPage page = PlatformUI.getWorkbench()
+				.getActiveWorkbenchWindow().getActivePage();
+		String id = IConsoleConstants.ID_CONSOLE_VIEW;
+		try {
+			IConsoleView view = (IConsoleView) page.showView(id);
+			view.display(myConsole);
+		} catch (PartInitException e) {
+			EuropaPlugin.getDefault().logError("Cannot open NDDL console page",
+					e);
+		}
+	}
+
+	/**
+	 * Thanks to
+	 * http://wiki.eclipse.org/FAQ_How_do_I_write_to_the_console_from_a_plug-in
+	 */
+	private MessageConsole findConsole(String name) {
+		ConsolePlugin plugin = ConsolePlugin.getDefault();
+		IConsoleManager conMan = plugin.getConsoleManager();
+		IConsole[] existing = conMan.getConsoles();
+		for (int i = 0; i < existing.length; i++)
+			if (name.equals(existing[i].getName()))
+				return (MessageConsole) existing[i];
+		// no console found, so create a new one
+		MessageConsole myConsole = new MessageConsole(name, null);
+		conMan.addConsoles(new IConsole[] { myConsole });
+		return myConsole;
 	}
 }

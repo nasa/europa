@@ -24,6 +24,7 @@ import org.ops.ui.beanshell.swing.BeanShellView;
 import org.ops.ui.gantt.swing.GanttView;
 import org.ops.ui.schemabrowser.swing.SchemaView;
 import org.ops.ui.solver.model.SolverModel;
+import org.ops.ui.solver.swing.ConsoleView;
 import org.ops.ui.solver.swing.OpenDecisionsView;
 import org.ops.ui.solver.swing.PSSolverDialog;
 
@@ -42,9 +43,9 @@ public class PSDesktop extends JFrame {
 	private SchemaView schemaBrowser;
 	private PSSolverDialog solverDialog;
 	private OpenDecisionsView openDecisions;
-	// private EGanttView ganttView;
 	private GanttView ganttView;
 	private BeanShellView bshView;
+	private ConsoleView consoleView;
 
 	private JMenu userMenu = null;
 
@@ -76,10 +77,12 @@ public class PSDesktop extends JFrame {
 		// Build views
 		this.schemaBrowser = new SchemaView(this.solverModel);
 		this.desktop.add(this.schemaBrowser);
-
-		this.solverDialog = new PSSolverDialog(this.solverModel);
+		
+		this.consoleView = new ConsoleView();
+		this.solverDialog = new PSSolverDialog(this.solverModel, consoleView);
 		this.solverDialog.setVisible(true);
 		this.desktop.add(this.solverDialog);
+		this.desktop.add(this.consoleView);
 
 		this.openDecisions = new OpenDecisionsView(this.solverModel);
 		this.desktop.add(this.openDecisions);
@@ -136,6 +139,7 @@ public class PSDesktop extends JFrame {
 		bar.add(menu);
 		menu.add(this.schemaBrowser.getToggleMenuItem());
 		menu.add(this.solverDialog.getToggleMenuItem());
+		menu.add(this.consoleView.getToggleMenuItem());
 		menu.add(this.openDecisions.getToggleMenuItem());
 		menu.add(this.ganttView.getToggleMenuItem());
 		menu.add(this.bshView.getToggleMenuItem());

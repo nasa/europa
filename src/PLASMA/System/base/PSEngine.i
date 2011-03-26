@@ -6,6 +6,7 @@
 %{
 #include "PSEngine.hh"
 #include "Error.hh"
+#include "StringErrorStream.hh"
 #include "PSPlanDatabaseListener.hh"
 #include "PSConstraintEngineListener.hh"
 #include "NddlInterpreter.hh"
@@ -123,6 +124,12 @@ public:
   std::string getType();
 private:
   Error();
+};
+
+class StringErrorStream {
+public:
+  static void setErrorStreamToString();
+  static std::string retrieveString();
 };
 
 namespace EUROPA {

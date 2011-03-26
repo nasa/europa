@@ -55,9 +55,12 @@ public class PSSolverDialog extends EuropaInternalFrame implements
 
 	private SolverModel solver;
 
-	public PSSolverDialog(final SolverModel solver) {
+	private ConsoleView console;
+
+	public PSSolverDialog(final SolverModel solver, ConsoleView console) {
 		super("Solver");
 		this.solver = solver;
+		this.console = console;
 		createUI();
 		solver.addSolverListener(this);
 	}
@@ -75,6 +78,7 @@ public class PSSolverDialog extends EuropaInternalFrame implements
 		this.goButton = new JButton("Go");
 		this.goButton.setFont(this.goButton.getFont().deriveFont(Font.BOLD));
 		this.goButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 					int steps = new Integer(stepCountFld.getText());
@@ -118,6 +122,7 @@ public class PSSolverDialog extends EuropaInternalFrame implements
 		line.add(horEnd);
 		JButton setHor = new JButton("Set horizon");
 		setHor.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 					int start = new Integer(horStart.getText());
@@ -173,14 +178,18 @@ public class PSSolverDialog extends EuropaInternalFrame implements
 		this.add(bottom, c);
 	}
 
+	@Override
 	public void beforeStepping() {
 		goButton.setEnabled(false);
 	}
 
+	@Override
 	public void afterStepping() {
 		goButton.setEnabled(true);
+		checkEngineOutput();
 	}
 
+	@Override
 	public void afterOneStep(long time) {
 		timeLabel.setText(TimeFormatHelper.formatTime(System
 				.currentTimeMillis()
@@ -196,6 +205,7 @@ public class PSSolverDialog extends EuropaInternalFrame implements
 		stepTimeSeries.add(stepCnt, secs);
 		stepAvgTimeSeries.add(stepCnt, totalTimeSec / stepCnt);
 		decisionCntSeries.add(stepCnt, decs);
+		checkEngineOutput();
 	}
 
 	@Override
@@ -203,11 +213,25 @@ public class PSSolverDialog extends EuropaInternalFrame implements
 		return new Dimension(400, 300);
 	}
 
+	@Override
 	public void solverStarted() {
-		// Not important for Swing application
+		checkEngineOutput();
 	}
 
+	@Override
 	public void solverStopped() {
 		// Not important for Swing application
+	}
+	/**
+	 * Check if engine produced any error output. If so, print that output on a
+	 * console. If necessary, create the console and/or make it visible.
+	 */
+	protected void checkEngineOutput() {
+		String msg = solver.retrieveEngineOutput();
+		if (msg == null || msg.isEmpty())
+			return; // nothing to do
+		
+		console.addText(msg);
+		console.setVisible(true);
 	}
 }

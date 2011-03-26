@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import psengine.PSEngine;
 import psengine.PSSolver;
+import psengine.StringErrorStream;
 
 /**
  * Solver model corresponds to a single engine, or "run". Each launch of an NDDL
@@ -161,6 +162,7 @@ public class SolverModel {
 		if (engine != null)
 			throw new IllegalStateException("Restarting solver model without shutdown");
 
+		StringErrorStream.setErrorStreamToString();
 		this.engine = PSEngine.makeInstance();
 		this.engine.start();
 
@@ -191,5 +193,10 @@ public class SolverModel {
 		engine = null;
 		for (SolverListener lnr : listeners)
 			lnr.solverStopped();
+	}
+
+	/** Get contents of the engine output stream and clean the stream up */
+	public String retrieveEngineOutput() {
+		return StringErrorStream.retrieveString();
 	}
 }
