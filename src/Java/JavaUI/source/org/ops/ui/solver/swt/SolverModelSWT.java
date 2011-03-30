@@ -14,6 +14,7 @@ import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
+import org.ops.ui.gantt.swt.DetailsView;
 import org.ops.ui.solver.model.SolverModel;
 
 /**
@@ -124,6 +125,9 @@ public class SolverModelSWT extends SolverModel implements IProcess {
 			IViewPart v = vrefs[i].getView(false);
 			if (v != null && v instanceof SolverModelView) {
 				((SolverModelView) v).setModel();
+			}
+			if (v != null && v instanceof DetailsView) {
+				((DetailsView) v).setModel();
 			}
 		}
 	}

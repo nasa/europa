@@ -56,6 +56,14 @@
             name="%view.name.gantt"
             restorable="true">
       </view>
+      <view
+            category="org.ops.ui"
+            class="org.ops.ui.gantt.swt.DetailsView"
+            icon="icons/europa_empty.png"
+            id="org.ops.ui.gantt.swt.DetailsView"
+            name="%view.name.details"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.editors">

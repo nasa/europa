@@ -2,6 +2,8 @@ package org.ops.ui.gantt.swt;
 
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Label;
+import org.eclipse.draw2d.MouseEvent;
+import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
@@ -21,13 +23,19 @@ public class TokenWidget extends Figure {
 				140, 155)), pl.getColor(new RGB(0, 100, 0)));
 	}
 
-	private GanttActivity activity;
+	private final GanttActivity activity;
+	private final GanttView view; // our master, so we can send selection events
 	private TokenColor color;
-
-	public TokenWidget(GanttActivity activity, TokenColor color) {
+	
+	private void tokenSelected() {
+		view.setSelection(new TokenSelection(activity.getToken()));
+	}
+	
+	public TokenWidget(GanttActivity activity, TokenColor color, GanttView view) {
 		this.activity = activity;
 		this.color = color;
-
+		this.view = view;
+		
 		this.setLayoutManager(null);
 
 		StringBuffer b = new StringBuffer();
@@ -42,6 +50,27 @@ public class TokenWidget extends Figure {
 		this.setToolTip(new Label(b.toString()));
 		this.setBackgroundColor(color.body);
 		this.setOpaque(true);
+		
+		
+		this.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseDoubleClicked(MouseEvent arg0) {
+				System.out.println("Double click");
+			}
+
+			@Override
+			public void mousePressed(MouseEvent arg0) {
+				System.out.println("pressed");
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+				System.out.println("released");
+				tokenSelected();
+			}
+		});
 	}
 
 	private static String str(int num) {

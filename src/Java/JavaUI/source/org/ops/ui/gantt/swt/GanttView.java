@@ -1,7 +1,9 @@
 package org.ops.ui.gantt.swt;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.FigureCanvas;
@@ -9,6 +11,10 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.Panel;
 import org.eclipse.draw2d.geometry.Dimension;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
@@ -37,16 +43,16 @@ import org.ops.ui.solver.swt.SolverModelView;
 /**
  * Gantt chart view - SWT version for the Eclipse plugin
  * 
- * @author Tatiana Kichkaylo
+ * @author Tatiana Kichkaylo, Tristan Smith
  */
-public class GanttView extends ViewPart implements SolverListener, SolverModelView {
+public class GanttView extends ViewPart implements SolverListener, SolverModelView, ISelectionProvider {
 	public static final String VIEW_ID = "org.ops.ui.gantt.swt.GanttView";
 	/** Step size in pixels */
 	protected static int stepSizePx = 20;
 	protected static int headerHeight = 20;
 
 	/** Solver model, initialized in createPartControl */
-	private SolverModel solverModel = null;
+	protected SolverModel solverModel = null;
 
 	private Canvas timeCanvas;
 	/** Canvas for tokens. There is a <code>contents</code> panel inside */
@@ -211,6 +217,10 @@ public class GanttView extends ViewPart implements SolverListener, SolverModelVi
 		// Redraw the view
 		setModel();
 		updateChart();
+		
+		// Register so we can report when user selects tokens:
+		getSite().setSelectionProvider(this);
+
 	}
 
 	@Override
@@ -279,7 +289,7 @@ public class GanttView extends ViewPart implements SolverListener, SolverModelVi
 					continue;
 				for (GanttActivity act : all) {
 					tline.addToken(new TokenWidget(act,
-							TokenWidget.DEFAULT_COLOR));
+							TokenWidget.DEFAULT_COLOR, this));
 				}
 				line = tline;
 			}
@@ -295,7 +305,7 @@ public class GanttView extends ViewPart implements SolverListener, SolverModelVi
 		this.doLayout();
 	}
 
-	private void updateChart() {
+	protected void updateChart() {
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override
 			public void run() {
@@ -346,4 +356,37 @@ public class GanttView extends ViewPart implements SolverListener, SolverModelVi
 			gc.drawLine(x, 0, x, h);
 		}
 	}
+
+
+	// --------------------------------------------------------------------------
+	// REGISTERING AS A SELECTION PROVIDER
+	// --------------------------------------------------------------------------
+	private Set<ISelectionChangedListener> selectionChangedListeners = new HashSet<ISelectionChangedListener>();
+
+	@Override
+	public void addSelectionChangedListener(ISelectionChangedListener listener) {
+		selectionChangedListeners.add(listener);
+	}
+
+	@Override
+	public ISelection getSelection() {
+		// For now only selection when clicked
+		return null;
+	}
+
+
+	@Override
+	public void removeSelectionChangedListener(
+			ISelectionChangedListener listener) {
+		selectionChangedListeners.remove(listener);
+	}
+
+	@Override
+	public void setSelection(ISelection selection) {
+		for (ISelectionChangedListener listener : selectionChangedListeners ) {
+			listener.selectionChanged(new SelectionChangedEvent(
+					this, selection/*getSelection()*/));				
+		}
+	}
+	
 }

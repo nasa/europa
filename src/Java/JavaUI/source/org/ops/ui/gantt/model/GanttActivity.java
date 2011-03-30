@@ -30,6 +30,9 @@ public class GanttActivity {
 		durMax = (int) Math.floor(token.getDuration().getUpperBound());
 	}
 
+	// TBS: Is it inappropriate to return this?  We want access to more details in DetailsView
+	public PSToken getToken() { return token; }
+	
 	public boolean hasViolation() {
 		return token.getViolation() != 0;
 	}

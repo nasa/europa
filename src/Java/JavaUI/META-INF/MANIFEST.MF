@@ -27,6 +27,7 @@ Bundle-ClassPath: .,
  lib/org.eclipse.nebula.widgets.ganttchart_1.0.0.jar
 Bundle-Localization: plugin
 Export-Package: .,
+ org.ops.ui.gantt.swt,
  org.ops.ui.main.swt,
  org.ops.ui.solver.model,
  org.ops.ui.solver.swt,

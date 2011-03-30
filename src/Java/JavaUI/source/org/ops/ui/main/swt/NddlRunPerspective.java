@@ -4,6 +4,7 @@ import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.console.IConsoleConstants;
+import org.ops.ui.gantt.swt.DetailsView;
 import org.ops.ui.gantt.swt.GanttView;
 import org.ops.ui.schemabrowser.swt.SchemaView;
 import org.ops.ui.solver.swt.DecisionsView;
@@ -49,6 +50,12 @@ public class NddlRunPerspective implements IPerspectiveFactory {
 		topLeft.addView(SolverView.VIEW_ID);
 		topLeft.addView(IPageLayout.ID_RES_NAV);
 
+		// TBS:  This isn't quite where I want it.
+		IFolderLayout bottomRight = factory.createFolder("bottomRight", // NON-NLS-1
+				IPageLayout.RIGHT, 0.3f, factory.getEditorArea());
+		bottomRight.addView(DetailsView.VIEW_ID);
+		bottomRight.addView(IPageLayout.ID_RES_NAV);
+		
 		// Little buttons at the bottom. Left from the template
 		factory.addFastView("org.eclipse.team.ccvs.ui.RepositoriesView", 0.50f); // NON-NLS-1
 		factory.addFastView("org.eclipse.team.sync.views.SynchronizeView",
