@@ -313,10 +313,10 @@ Bool DistanceGraph::incBellmanFord()
 	DnodeId next = edge->to;
 	Time potential = nodePotential + edge->length;
 
-  check_error(!(potential > MAX_DISTANCE || potential < MIN_DISTANCE),
-              "Potential over(under)flow during distance propagation",
-              TempNetErr::TimeOutOfBoundsError());
 	if (potential < next->potential) {
+  check_error(!(potential < MIN_DISTANCE),
+              "Potential underflow during distance propagation",
+              TempNetErr::TimeOutOfBoundsError());
 
           // Cache the beginning potential in next->distance
           if (next->generation < this->dijkstraGeneration) {
@@ -392,10 +392,12 @@ Void DistanceGraph::dijkstra (DnodeId source, DnodeId destination)
       condDebugMsg(newDistance >= next->distance, 
 		     "DistanceGraph:dijkstra", newDistance << " >= " <<  next->distance << " for " << next);
 	*/
+	if (newDistance > MAX_DISTANCE)
+	  continue;
 	if (next->generation < generation || newDistance < next->distance) {
 	  next->generation = generation;
-    check_error(!(newDistance > MAX_DISTANCE || newDistance < MIN_DISTANCE),
-                "Potential over(under)flow during distance propagation",
+    check_error(!(newDistance < MIN_DISTANCE),
+                "Potential underflow during distance propagation",
                 TempNetErr::TimeOutOfBoundsError());
 	  // Next check is a failsafe to prevent infinite propagation.
     check_error(!((next->depth = node->depth + 1) > BFbound),
