@@ -46,7 +46,7 @@ public class SolverModel {
 		return engine;
 	}
 
-	private void loadNddlFile(File file) {
+	public void loadNddlFile(File file) {
 		String oldPath = this.engine.getConfig().getProperty(INCLUDE_PATH);
 		try {
 			String newPath = file.getParent();
