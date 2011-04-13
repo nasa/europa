@@ -1148,6 +1148,7 @@ class TestSingleton : public Constraint {
 private:
     Domain& m_test;
     Domain& m_arg1;
+  std::vector<ConstrainedVariableId> m_modifiedVariables;
     static const unsigned int ARG_COUNT = 2;
   };
 

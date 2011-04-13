@@ -34,3 +34,5 @@ src/PLASMA/TinyXml/test/test5.xml
 src/PLASMA/TinyXml/test/test6.xml
 src/PLASMA/TinyXml/test/textfile.txt
 src/PLASMA/Utils/test/writeTest.xml
+src/Java/PSEngine/generated/*
+\#*#

@@ -1943,7 +1943,8 @@ namespace EUROPA {
 			   const std::vector<ConstrainedVariableId>& variables)
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_test(getCurrentDomain(variables[0])),
-      m_arg1(getCurrentDomain(variables[1])){
+      m_arg1(getCurrentDomain(variables[1])),
+      m_modifiedVariables(makeScope(variables[0])) {
     check_error(variables.size() == ARG_COUNT);
   }
 
@@ -1959,7 +1960,7 @@ namespace EUROPA {
   }
 
   const std::vector<ConstrainedVariableId>& TestSingleton::getModifiedVariables() const {
-    return makeScope(getScope()[0]);
+    return m_modifiedVariables;
   }
 
   TestSpecified::TestSpecified(const LabelStr& name,

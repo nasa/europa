@@ -310,34 +310,34 @@ namespace EUROPA {
     bool m_isRedundant; /*!< True of the constraint is redundant */
   };
 
-  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1);
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1);
 
-  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1,
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
 						const ConstrainedVariableId& arg2);
 
-  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1,
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
 						const ConstrainedVariableId& arg2,
 						const ConstrainedVariableId& arg3);
 
-  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1,
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
 						const ConstrainedVariableId& arg2,
 						const ConstrainedVariableId& arg3,
 						const ConstrainedVariableId& arg4);
 
-  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1,
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
 						const ConstrainedVariableId& arg2,
 						const ConstrainedVariableId& arg3,
 						const ConstrainedVariableId& arg4,
 						const ConstrainedVariableId& arg5);
 
-  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1,
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
 						const ConstrainedVariableId& arg2,
 						const ConstrainedVariableId& arg3,
 						const ConstrainedVariableId& arg4,
 						const ConstrainedVariableId& arg5,
 						const ConstrainedVariableId& arg6);
 
-  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1,
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
 						const ConstrainedVariableId& arg2,
 						const ConstrainedVariableId& arg3,
 						const ConstrainedVariableId& arg4,
@@ -345,7 +345,7 @@ namespace EUROPA {
 						const ConstrainedVariableId& arg6,
 						const ConstrainedVariableId& arg7);
 
-  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1,
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
 						const ConstrainedVariableId& arg2,
 						const ConstrainedVariableId& arg3,
 						const ConstrainedVariableId& arg4,
@@ -354,7 +354,7 @@ namespace EUROPA {
 						const ConstrainedVariableId& arg7,
 						const ConstrainedVariableId& arg8);
 
-  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1,
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
 						const ConstrainedVariableId& arg2,
 						const ConstrainedVariableId& arg3,
 						const ConstrainedVariableId& arg4,

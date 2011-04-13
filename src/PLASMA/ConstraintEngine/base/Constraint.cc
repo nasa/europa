@@ -322,68 +322,68 @@ namespace EUROPA {
 	  m_propagator->getConstraintEngine()->getViolationMgr().removeViolatedConstraint(m_id);
   }
 
-  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1){
-    static std::vector<ConstrainedVariableId> sl_scope;
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1){
+    std::vector<ConstrainedVariableId> scope;
     check_error(arg1.isValid());
 
-    sl_scope.clear();
-    sl_scope.push_back(arg1);
-    return sl_scope;
+    scope.clear();
+    scope.push_back(arg1);
+    return scope;
   }
 
-  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1,
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
 						const ConstrainedVariableId& arg2){
     check_error(arg1.isValid());
     check_error(arg2.isValid());
 
-    std::vector<ConstrainedVariableId>& scope =  makeScope(arg1);
+    std::vector<ConstrainedVariableId> scope =  makeScope(arg1);
     scope.push_back(arg2);
     return scope;
   }
 
-  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1,
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
 					       const ConstrainedVariableId& arg2,
 					       const ConstrainedVariableId& arg3){
     check_error(arg3.isValid());
-    std::vector<ConstrainedVariableId>& scope =  makeScope(arg1, arg2);
+    std::vector<ConstrainedVariableId> scope =  makeScope(arg1, arg2);
     scope.push_back(arg3);
     return scope;
   }
 
-  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1,
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
 					       const ConstrainedVariableId& arg2,
 					       const ConstrainedVariableId& arg3,
 					       const ConstrainedVariableId& arg4){
     check_error(arg4.isValid());
-    std::vector<ConstrainedVariableId>& scope =  makeScope(arg1, arg2, arg3);
+    std::vector<ConstrainedVariableId> scope =  makeScope(arg1, arg2, arg3);
     scope.push_back(arg4);
     return scope;
   }
 
-  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1,
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
 					       const ConstrainedVariableId& arg2,
 					       const ConstrainedVariableId& arg3,
 					       const ConstrainedVariableId& arg4,
 					       const ConstrainedVariableId& arg5){
     check_error(arg5.isValid());
-    std::vector<ConstrainedVariableId>& scope =  makeScope(arg1, arg2, arg3, arg4);
+    std::vector<ConstrainedVariableId> scope =  makeScope(arg1, arg2, arg3, arg4);
     scope.push_back(arg5);
     return scope;
   }
 
-  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1,
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
 					       const ConstrainedVariableId& arg2,
 					       const ConstrainedVariableId& arg3,
 					       const ConstrainedVariableId& arg4,
 					       const ConstrainedVariableId& arg5,
 					       const ConstrainedVariableId& arg6){
     check_error(arg6.isValid());
-    std::vector<ConstrainedVariableId>& scope =  makeScope(arg1, arg2, arg3, arg4, arg5);
+    std::vector<ConstrainedVariableId> scope =  makeScope(arg1, arg2, arg3, arg4, arg5);
     scope.push_back(arg6);
     return scope;
   }
 
-  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1,
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
 					       const ConstrainedVariableId& arg2,
 					       const ConstrainedVariableId& arg3,
 					       const ConstrainedVariableId& arg4,
@@ -391,12 +391,12 @@ namespace EUROPA {
 					       const ConstrainedVariableId& arg6,
 					       const ConstrainedVariableId& arg7){
     check_error(arg7.isValid());
-    std::vector<ConstrainedVariableId>& scope =  makeScope(arg1, arg2, arg3, arg4, arg5, arg6);
+    std::vector<ConstrainedVariableId> scope =  makeScope(arg1, arg2, arg3, arg4, arg5, arg6);
     scope.push_back(arg7);
     return scope;
   }
 
-  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1,
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
 					       const ConstrainedVariableId& arg2,
 					       const ConstrainedVariableId& arg3,
 					       const ConstrainedVariableId& arg4,
@@ -405,12 +405,12 @@ namespace EUROPA {
 					       const ConstrainedVariableId& arg7,
 					       const ConstrainedVariableId& arg8){
     check_error(arg8.isValid());
-    std::vector<ConstrainedVariableId>& scope =  makeScope(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+    std::vector<ConstrainedVariableId> scope =  makeScope(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
     scope.push_back(arg8);
     return scope;
   }
 
-  std::vector<ConstrainedVariableId>& makeScope(const ConstrainedVariableId& arg1,
+  std::vector<ConstrainedVariableId> makeScope(const ConstrainedVariableId& arg1,
   					       const ConstrainedVariableId& arg2,
   					       const ConstrainedVariableId& arg3,
   					       const ConstrainedVariableId& arg4,
@@ -424,7 +424,7 @@ namespace EUROPA {
 					       const ConstrainedVariableId& arg12,
 					       const ConstrainedVariableId& arg13){
       check_error(arg13.isValid());
-      std::vector<ConstrainedVariableId>& scope =  makeScope(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+      std::vector<ConstrainedVariableId> scope =  makeScope(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
       scope.push_back(arg9);
       scope.push_back(arg10);
       scope.push_back(arg11);

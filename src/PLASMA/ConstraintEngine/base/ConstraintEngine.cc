@@ -269,6 +269,7 @@ namespace EUROPA
       return "OPENED";
     case DomainListener::EMPTIED:
       return "EMPTIED";
+    case DomainListener::REFTIME_CHANGED:
     case DomainListener::LAST_CHANGE_TYPE:
       break;
     }
