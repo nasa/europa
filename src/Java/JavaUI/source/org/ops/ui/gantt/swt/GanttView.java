@@ -225,7 +225,9 @@ public class GanttView extends ViewPart implements SolverListener, SolverModelVi
 
 	@Override
 	public void dispose() {
-		solverModel.removeSolverListener(this);
+		if(this.solverModel != null) {
+			solverModel.removeSolverListener(this);
+		}
 		super.dispose();
 	}
 
