@@ -133,5 +133,32 @@
             name="%perspective.name.run-nddl">
       </perspective>
    </extension>
-
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="org.ops.ui.europaplugin.commands.category"
+            name="%editor.command.category.name">
+      </category>
+      <command
+            categoryId="org.ops.ui.europaplugin.commands.category"
+            id="EuropaPlugin.commands.CommentToggleCommand"
+            name="%command.toggle-comment">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.ops.ui.editor.swt.NddlToggleCommentHandler"
+            commandId="EuropaPlugin.commands.CommentToggleCommand">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="EuropaPlugin.commands.CommentToggleCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="Ctrl+/">
+      </key>
+   </extension>
 </plugin>
