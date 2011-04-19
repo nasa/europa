@@ -285,7 +285,6 @@ public class DetailsView extends ViewPart implements SolverListener, SolverModel
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		if(selection instanceof TokenSelection) {
 			this.token = ((TokenSelection) selection).getToken();
-			System.out.println("Received token selection in view!");
 		}
 		else {
 			this.token = null;

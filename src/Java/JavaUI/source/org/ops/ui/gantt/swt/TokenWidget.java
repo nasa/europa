@@ -55,19 +55,13 @@ public class TokenWidget extends Figure {
 		this.addMouseListener(new MouseListener() {
 
 			@Override
-			public void mouseDoubleClicked(MouseEvent arg0) {
-				System.out.println("Double click");
-			}
+			public void mouseDoubleClicked(MouseEvent arg0) {}
 
 			@Override
-			public void mousePressed(MouseEvent arg0) {
-				System.out.println("pressed");
-				
-			}
+			public void mousePressed(MouseEvent arg0) {}
 
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
-				System.out.println("released");
 				tokenSelected();
 			}
 		});
