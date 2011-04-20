@@ -86,6 +86,8 @@ public class NddlToggleCommentHandler extends AbstractHandler {
 				int offset = doc.getLineOffset(l);
 				int length = getNextLineOffset(doc, l) - offset;
 				String text = doc.get(offset, length);
+				if (!text.trim().startsWith(COMMENT_TEXT))
+					continue;
 				int idx = text.indexOf(COMMENT_TEXT);
 				if (idx >= 0)
 					doc.replace(offset + idx, COMMENT_TEXT.length(), "");
