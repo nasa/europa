@@ -126,9 +126,6 @@ public class SolverModelSWT extends SolverModel implements IProcess {
 			if (v != null && v instanceof SolverModelView) {
 				((SolverModelView) v).setModel();
 			}
-			if (v != null && v instanceof DetailsView) {
-				((DetailsView) v).setModel();
-			}
 		}
 	}
 }
