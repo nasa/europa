@@ -17,9 +17,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.part.ViewPart;
-import org.ops.ui.solver.model.SolverListener;
-import org.ops.ui.solver.model.SolverModel;
 import org.ops.ui.solver.model.StepStatisticsRecord;
 
 /**
@@ -27,14 +24,10 @@ import org.ops.ui.solver.model.StepStatisticsRecord;
  * 
  * @author Tatiana Kichkaylo
  */
-public class DecisionsView extends ViewPart implements SolverListener,
-		SolverModelView {
+public class DecisionsView extends SolverModelViewImpl {
 	public static final String VIEW_ID = "org.ops.ui.solver.swt.DecisionsView";
 	/** Minimum width of text fields */
 	private static final int TEXT_WIDTH = 50;
-
-	/** Solver model, initialized in createPartControl */
-	private SolverModel model = null;
 
 	private Button leftButton, rightButton, nstepButton;
 
@@ -57,11 +50,7 @@ public class DecisionsView extends ViewPart implements SolverListener,
 	/** Switch this view to the given model, possibly NULL */
 	@Override
 	public void setModel() {
-		if (this.model != null)
-			this.model.removeSolverListener(this);
-		this.model = SolverModelSWT.getCurrent();
-		if (model != null)
-			model.addSolverListener(this);
+		super.setModel();
 		updateData();
 	}
 
@@ -157,7 +146,6 @@ public class DecisionsView extends ViewPart implements SolverListener,
 		restTable.setLayoutData(data);
 
 		setModel();
-		updateData();
 	}
 	
 	private void updateData() {		
@@ -182,19 +170,8 @@ public class DecisionsView extends ViewPart implements SolverListener,
 	}
 
 	@Override
-	public void dispose() {
-		model.removeSolverListener(this);
-		super.dispose();
-	}
-
-	@Override
 	public void setFocus() {
 		rightButton.setFocus();
-	}
-
-	@Override
-	public void afterOneStep(long time) {
-		// Nothing
 	}
 
 	@Override

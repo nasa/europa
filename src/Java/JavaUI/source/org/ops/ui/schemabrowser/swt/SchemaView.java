@@ -14,50 +14,39 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
-import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.ops.ui.filemanager.model.AstNode;
 import org.ops.ui.schemabrowser.model.SchemaNode;
 import org.ops.ui.schemabrowser.model.SchemaSource;
-import org.ops.ui.solver.model.SolverAdapter;
-import org.ops.ui.solver.model.SolverModel;
-import org.ops.ui.solver.swt.SolverModelSWT;
-import org.ops.ui.solver.swt.SolverModelView;
+import org.ops.ui.solver.swt.SolverModelViewImpl;
 
 /**
  * Europa schema browser - SWT version
  * 
  * @author Tatiana Kichkaylo
  */
-public class SchemaView extends ViewPart implements SolverModelView {
+public class SchemaView extends SolverModelViewImpl {
 	public static final String VIEW_ID = "org.ops.ui.schemabrowser.swt.SchemaView";
 	private TreeViewer viewer;
 	private final SchemaSource source = new SchemaSource(null);
-	private SolverModel model;
 
 	// For now reload schema only on engine start/stop. If schema changes as
 	// a result of stepping, will also need to update then. Not doing it
 	// now, because too lazy to restore tree expansion
-	private SolverAdapter listener = new SolverAdapter() {
-		@Override
-		public void solverStarted() {
-			reloadView();
-		}
+	@Override
+	public void solverStarted() {
+		reloadView();
+	}
 
-		@Override
-		public void solverStopped() {
-			reloadView();
-		}
-	};
+	@Override
+	public void solverStopped() {
+		reloadView();
+	}
 
 	/** Switch this view to the given model, possibly NULL */
 	@Override
 	public void setModel() {
-		if (this.model != null)
-			this.model.removeSolverListener(listener);
-		this.model = SolverModelSWT.getCurrent();
-		if (model != null)
-			model.addSolverListener(listener);
+		super.setModel();
 		reloadView();
 	}
 

@@ -15,11 +15,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.part.ViewPart;
-import org.ops.ui.solver.model.SolverListener;
-import org.ops.ui.solver.model.SolverModel;
-import org.ops.ui.solver.swt.SolverModelSWT;
-import org.ops.ui.solver.swt.SolverModelView;
+import org.ops.ui.solver.swt.SolverModelViewImpl;
 
 import psengine.PSToken;
 import psengine.PSTokenList;
@@ -33,12 +29,9 @@ import psengine.PSTokenList;
  * 
  */
 //public class DetailsView extends ViewPart implements ISelectionListener { 
-public class DetailsView extends ViewPart implements SolverListener, SolverModelView, ISelectionListener { 
+public class DetailsView extends SolverModelViewImpl implements ISelectionListener { 
 	public static final String VIEW_ID = "org.ops.ui.gantt.swt.DetailsView";
 
-	/** Solver model, initialized in createPartControl */
-	protected SolverModel solverModel = null;
-	
 	private PSToken token = null;
 	private Composite detailsComposite; // shown when there's a selected token
 	private Composite parent = null;
@@ -160,11 +153,6 @@ public class DetailsView extends ViewPart implements SolverListener, SolverModel
 		return retval;
 	}
 
-
-	@Override
-	public void setFocus() { // No-op 
-	}
-
 	public void refresh() {
 
 		if(token == null) {
@@ -270,11 +258,8 @@ public class DetailsView extends ViewPart implements SolverListener, SolverModel
 	//*********************************************************************
 	@Override
 	public void setModel() {
-		if (this.solverModel != null)
-			this.solverModel.removeSolverListener(this);
-		this.solverModel = SolverModelSWT.getCurrent();
-		if (this.solverModel!= null)
-			this.solverModel.addSolverListener(this);
+		super.setModel();
+		clear();
 	}
 	
 	//*********************************************************************

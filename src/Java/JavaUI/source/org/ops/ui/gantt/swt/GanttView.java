@@ -30,29 +30,22 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Sash;
-import org.eclipse.ui.part.ViewPart;
 import org.ops.ui.gantt.model.GanttActivity;
 import org.ops.ui.gantt.model.GanttModel;
 import org.ops.ui.gantt.model.GanttResource;
 import org.ops.ui.main.swt.EuropaPlugin;
-import org.ops.ui.solver.model.SolverListener;
-import org.ops.ui.solver.model.SolverModel;
-import org.ops.ui.solver.swt.SolverModelSWT;
-import org.ops.ui.solver.swt.SolverModelView;
+import org.ops.ui.solver.swt.SolverModelViewImpl;
 
 /**
  * Gantt chart view - SWT version for the Eclipse plugin
  * 
  * @author Tatiana Kichkaylo, Tristan Smith
  */
-public class GanttView extends ViewPart implements SolverListener, SolverModelView, ISelectionProvider {
+public class GanttView extends SolverModelViewImpl implements ISelectionProvider {
 	public static final String VIEW_ID = "org.ops.ui.gantt.swt.GanttView";
 	/** Step size in pixels */
 	protected static int stepSizePx = 20;
 	protected static int headerHeight = 20;
-
-	/** Solver model, initialized in createPartControl */
-	protected SolverModel solverModel = null;
 
 	private Canvas timeCanvas;
 	/** Canvas for tokens. There is a <code>contents</code> panel inside */
@@ -85,11 +78,7 @@ public class GanttView extends ViewPart implements SolverListener, SolverModelVi
 	/** Switch this view to the given model, possibly NULL */
 	@Override
 	public void setModel() {
-		if (this.solverModel != null)
-			this.solverModel.removeSolverListener(this);
-		this.solverModel = SolverModelSWT.getCurrent();
-		if (this.solverModel!= null)
-			this.solverModel.addSolverListener(this);
+		super.setModel();
 		updateChart();
 	}
 
@@ -224,28 +213,8 @@ public class GanttView extends ViewPart implements SolverListener, SolverModelVi
 	}
 
 	@Override
-	public void dispose() {
-		if(this.solverModel != null) {
-			solverModel.removeSolverListener(this);
-		}
-		super.dispose();
-	}
-
-	@Override
-	public void setFocus() {
-	}
-
-	@Override
-	public void afterOneStep(long time) {
-	}
-
-	@Override
 	public void afterStepping() {
 		updateChart();
-	}
-
-	@Override
-	public void beforeStepping() {
 	}
 
 	@Override
@@ -263,30 +232,30 @@ public class GanttView extends ViewPart implements SolverListener, SolverModelVi
 		lines.clear();
 		labelContents.removeAll();
 		
-		if (solverModel == null || solverModel.isTerminated()) {
+		if (model == null || model.isTerminated()) {
 			stepCount = 0;
 			largeSize = null;
 			return;
 		}
 
-		GanttModel model = new GanttModel(solverModel);
-		int start = model.getStart();
-		int end = model.getEnd();
+		GanttModel gmodel = new GanttModel(model);
+		int start = gmodel.getStart();
+		int end = gmodel.getEnd();
 
 		stepCount = end - start + 1;
 
 		int index = 0;
-		for (int i = 0; i < model.getResourceCount(); i++) {
-			GanttResource r = model.getResource(i);
+		for (int i = 0; i < gmodel.getResourceCount(); i++) {
+			GanttResource r = gmodel.getResource(i);
 			LinePanel line = null;
 			if (r != null) {
 				// Can resource timeline also have tokens?
 				line = new ResourcePanel(r);
 			} else {
-				TimelinePanel tline = new TimelinePanel(model
+				TimelinePanel tline = new TimelinePanel(gmodel
 						.getResourceName(i));
 				// Skip timeline (non-resource) lines with no tokens
-				List<GanttActivity> all = model.getActivities(i);
+				List<GanttActivity> all = gmodel.getActivities(i);
 				if (skipEmptyObjects && all.isEmpty())
 					continue;
 				for (GanttActivity act : all) {
@@ -322,7 +291,7 @@ public class GanttView extends ViewPart implements SolverListener, SolverModelVi
 
 	public void doLayout() {
 		int width = stepCount * stepSizePx;
-		int[] hor = solverModel.getHorizon();
+		int[] hor = model.getHorizon();
 		int y = 0;
 		for (LinePanel l : lines) {
 			l.setBounds(new org.eclipse.draw2d.geometry.Rectangle(0, y, width,

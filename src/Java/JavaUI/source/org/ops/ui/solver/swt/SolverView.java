@@ -36,11 +36,9 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
-import org.eclipse.ui.part.ViewPart;
 import org.ops.ui.main.swt.CommonImages;
 import org.ops.ui.main.swt.EuropaPlugin;
 import org.ops.ui.main.swt.NddlLauncher;
-import org.ops.ui.solver.model.SolverListener;
 import org.ops.ui.solver.model.SolverModel;
 import org.ops.ui.solver.model.TimeFormatHelper;
 
@@ -50,8 +48,7 @@ import org.ops.ui.solver.model.TimeFormatHelper;
  * @author Tatiana Kichkaylo
  */
 
-public class SolverView extends ViewPart implements SolverListener,
-		SolverModelView {
+public class SolverView extends SolverModelViewImpl {
 	public static final String VIEW_ID = "org.ops.ui.solver.swt.SolverView";
 	public static final String MEMENTO_LAUNCH = "Europa.SolverView.LaunchName";
 
@@ -89,9 +86,6 @@ public class SolverView extends ViewPart implements SolverListener,
 	private Label stepCountLabel, timeSpentLabel;
 	/** Allow violations checkbox */
 	private Button allowViolButton;
-
-	/** Solver model we are currently displaying */
-	private SolverModelSWT model = null;
 
 	/** Start of N step run. Used to get statistics labels */
 	private long startOfRun;
