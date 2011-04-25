@@ -60,6 +60,9 @@ namespace EUROPA {
 
     void TokenType::addArg(const DataTypeId& type, const LabelStr& name)
     {
+    	checkRuntimeError(m_args.find(name) == m_args.end(),
+    			m_objType->getName().toString() << "." << m_predicateName.toString()
+    			<< " already has a parameter called " << name.toString());
         m_args[name] = type;
     }
 
