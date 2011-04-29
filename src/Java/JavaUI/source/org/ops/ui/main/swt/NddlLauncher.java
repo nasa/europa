@@ -61,8 +61,6 @@ public class NddlLauncher implements ILaunchConfigurationDelegate,
 				try {
 					// Activate perspective
 					IWorkbench workbench = PlatformUI.getWorkbench();
-					workbench.showPerspective(NddlRunPerspective.PESPECTIVE_ID,
-							workbench.getActiveWorkbenchWindow());
 
 					// Create new model for the launch
 					SolverModelSWT model = new SolverModelSWT(launch);
@@ -95,6 +93,8 @@ public class NddlLauncher implements ILaunchConfigurationDelegate,
 
 					// If none exist, show first and then update launch:
 					if(!foundOne) {
+						workbench.showPerspective(NddlRunPerspective.PESPECTIVE_ID,
+								workbench.getActiveWorkbenchWindow());
 						SolverView view = (SolverView) page
 							.showView(SolverView.VIEW_ID);
 						view.updateLaunchList();
