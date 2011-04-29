@@ -9,6 +9,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.ILaunchConfigurationDelegate;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
@@ -76,9 +77,28 @@ public class NddlLauncher implements ILaunchConfigurationDelegate,
 					// Set new data
 					IWorkbenchPage page = workbench.getActiveWorkbenchWindow()
 							.getActivePage();
-					SolverView view = (SolverView) page
+
+					// In case the application has one (or more) versions of SolverView,
+					// don't assume it's the SolverView class itself we need to update:
+					// (TBS:  This seems messy to me, but without it, the Launches drop-down
+					// isn't populated for a class I have that extends SolverView)
+					// TODO:  Instead, we probably want to have listeners for launch updates
+					boolean foundOne = false;
+					IViewReference[] refs = page.getViewReferences();
+					for(IViewReference ref: refs) {
+						if(ref.getView(false) != null &&
+								ref.getView(false) instanceof SolverView) {
+								((SolverView) ref.getView(false)).updateLaunchList();
+								foundOne = true;
+						}
+					}
+
+					// If none exist, show first and then update launch:
+					if(!foundOne) {
+						SolverView view = (SolverView) page
 							.showView(SolverView.VIEW_ID);
-					view.updateLaunchList();
+						view.updateLaunchList();
+					}
 					SolverModelSWT.makeActive(model);
 				} catch (Throwable e) {
 					MessageDialog.openError(null, ERROR_TITLE, e.getMessage());
