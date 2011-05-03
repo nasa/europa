@@ -442,9 +442,10 @@ namespace EUROPA {
       std::map<eint, InstantId>::iterator retval = m_instants.lower_bound(time);
 
       //checkError(retval != m_instants.end(), "No instant with time not greater than " << time);
-      if(retval == m_instants.end() || retval->second->getTime() > time)
-        --retval;
-      checkError(retval != m_instants.end(), "No instant with time not greater than " << time);
+      if(retval == m_instants.end() ||
+         (retval != m_instants.begin() && retval->second->getTime() > time)) {
+    	  --retval;
+      }
 
       //if we're still greater than the given time, return end
       if(retval->second->getTime() > time)
