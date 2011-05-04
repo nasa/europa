@@ -14,6 +14,7 @@ namespace EUROPA
   {
     TiXmlDocument* doc = new TiXmlDocument(configurationFile.c_str());
     doc->LoadFile();
+    checkError(!doc->Error(), doc->ErrorDesc());
 
     SOLVERS::SolverId solver =
     	(new SOLVERS::Solver(m_pdb, *(doc->RootElement())))->getId();
