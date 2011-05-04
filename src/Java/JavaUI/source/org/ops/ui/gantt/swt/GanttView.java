@@ -191,6 +191,7 @@ public class GanttView extends SolverModelViewImpl implements ISelectionProvider
 					org.eclipse.draw2d.geometry.Rectangle b = lbl.getBounds();
 					b.width = rect.width;
 					lbl.setBounds(b);
+					lbl.invalidate();
 				}
 				// The v scroll bar keeps reappearing, so we keep hiding it
 				labelCanvas.getVerticalBar().setVisible(false);
