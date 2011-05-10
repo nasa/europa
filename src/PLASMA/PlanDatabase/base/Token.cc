@@ -561,7 +561,7 @@ namespace EUROPA{
 						true,
 						LabelStr("object")))->getId();
 
-    checkError(!m_planDatabase->getObjectsByType(m_baseObjectType).empty(),
+    checkError(m_planDatabase->hasObjectInstances(m_baseObjectType),
 	       "Allocated a token with no object instance available of type " << m_baseObjectType.toString());
 
     // Call the plan database to fill it in, and maintain synchronization for dynamic objects

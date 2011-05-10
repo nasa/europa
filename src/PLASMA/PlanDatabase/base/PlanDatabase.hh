@@ -240,9 +240,9 @@ namespace EUROPA {
     void getObjectsByType(const LabelStr& type, std::list<ID>& results);
 
     /**
-     * @brief Retrieves a collection of object instances of the given type.
+     * @brief Are there any object instances of the specified type?
      */
-    const std::set<ObjectId>& getObjectsByType(const LabelStr& objectType) const;
+    bool hasObjectInstances(const LabelStr& objectType) const;
 
     /**
      * @brief Lookup an object by name. It is an error if the object is not present.

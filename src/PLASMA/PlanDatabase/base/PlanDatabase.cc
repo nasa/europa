@@ -301,20 +301,12 @@ namespace EUROPA{
     return m_objects;
   }
 
-  const std::set<ObjectId>& PlanDatabase::getObjectsByType(const LabelStr& objectType) const {
-    static std::set<ObjectId> sl_results;
+  bool PlanDatabase::hasObjectInstances(const LabelStr& objectType) const {
     check_error(m_schema->isObjectType(objectType));
-    sl_results.clear();
 
-    for (std::multimap<edouble, ObjectId>::const_iterator it = m_objectsByType.find(objectType.getKey());
-         it != m_objectsByType.end() && it->first == objectType.getKey();
-         ++it) {
-      debugMsg("PlanDatabase:getObjectsByType", "Adding object '" << it->second->getName().toString() << "' of type '" <<
-	       it->second->getType().toString() << "' for type '" << objectType.toString() << "'");
-      sl_results.insert(it->second);
-    }
+    std::multimap<edouble, ObjectId>::const_iterator it = m_objectsByType.find(objectType.getKey());
 
-    return sl_results;
+    return (it != m_objectsByType.end() && it->first == objectType.getKey());
   }
 
   void PlanDatabase::registerGlobalVariable(const ConstrainedVariableId& var){
