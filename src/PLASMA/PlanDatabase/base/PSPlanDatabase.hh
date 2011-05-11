@@ -73,7 +73,7 @@ namespace EUROPA {
 
       virtual const std::string& getEntityType() const = 0;
       virtual std::string getTokenType() const = 0;
-    virtual std::string getFullTokenType() const = 0;
+      virtual std::string getFullTokenType() const = 0;
 
       virtual bool isFact() const = 0;
       virtual bool isIncomplete() const = 0;

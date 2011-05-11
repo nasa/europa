@@ -466,6 +466,7 @@ namespace EUROPA {
   {
   public:
     std::string getTokenType() const;
+    std::string getFullTokenType() const;
 
     bool isFact();
     bool isIncomplete();
