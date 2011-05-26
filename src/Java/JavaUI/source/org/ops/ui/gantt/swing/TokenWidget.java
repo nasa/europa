@@ -5,7 +5,7 @@ import java.awt.Graphics;
 
 import javax.swing.JPanel;
 
-import org.ops.ui.gantt.model.GanttActivity;
+import org.ops.ui.gantt.model.IGanttActivity;
 
 public class TokenWidget extends JPanel {
 	public static final int halfHeight = 5;
@@ -16,10 +16,10 @@ public class TokenWidget extends JPanel {
 	public static final TokenColor DEFAULT_COLOR = new TokenColor(startC, endC,
 			durC, new Color(0, 100, 0));
 
-	private GanttActivity activity;
+	private IGanttActivity activity;
 	private TokenColor color;
 
-	public TokenWidget(GanttActivity activity, TokenColor color) {
+	public TokenWidget(IGanttActivity activity, TokenColor color) {
 		this.activity = activity;
 		this.color = color;
 
@@ -88,7 +88,7 @@ public class TokenWidget extends JPanel {
 		setBounds(x * stepSize, y + halfHeight * 2, w * stepSize, h);
 	}
 
-	public GanttActivity getActivity() {
+	public IGanttActivity getActivity() {
 		return this.activity;
 	}
 

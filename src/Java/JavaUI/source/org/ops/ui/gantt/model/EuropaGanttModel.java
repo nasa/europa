@@ -11,16 +11,16 @@ import psengine.PSToken;
 import psengine.PSTokenList;
 
 /** Copied from the original PSUI and somewhat simplified */
-public class GanttModel {
+public class EuropaGanttModel implements IGanttModel {
 	/** Visible bounds on all activities */
 	private int start, end;
 	private PSObjectList resources;
 
-	public GanttModel(SolverModel solverModel) {
+	public EuropaGanttModel(SolverModel solverModel) {
 		this(solverModel, "Object");
 	}
 
-	public GanttModel(SolverModel solverModel, String objectsTypes) {
+	public EuropaGanttModel(SolverModel solverModel, String objectsTypes) {
 		this.resources = solverModel.getEngine().getObjectsByType(objectsTypes);
 		int[] hor = solverModel.getHorizon();
 
@@ -48,41 +48,65 @@ public class GanttModel {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.ops.ui.gantt.model.IGanttModel#getResourceCount()
+	 */
+	@Override
 	public int getResourceCount() {
 		return resources.size();
 	}
 
-	public List<GanttActivity> getActivities(int resource) {
+	/* (non-Javadoc)
+	 * @see org.ops.ui.gantt.model.IGanttModel#getActivities(int)
+	 */
+	@Override
+	public List<IGanttActivity> getActivities(int resource) {
 		assert (resource >= 0 && resource < getResourceCount());
 
 		// Original comment: cache activities?
-		ArrayList<GanttActivity> acts = new ArrayList<GanttActivity>();
+		ArrayList<IGanttActivity> acts = new ArrayList<IGanttActivity>();
 
 		PSTokenList tokens = resources.get(resource).getTokens();
 		for (int i = 0; i < tokens.size(); i++) {
 			PSToken token = tokens.get(i);
 
-			acts.add(new GanttActivity(token, start, end));
+			acts.add(new EuropaGanttActivity(token, start, end));
 		}
 
 		return acts;
 	}
 
-	public GanttResource getResource(int resource) {
+	/* (non-Javadoc)
+	 * @see org.ops.ui.gantt.model.IGanttModel#getResource(int)
+	 */
+	@Override
+	public IGanttResource getResource(int resource) {
 		PSResource r = PSResource.asPSResource(resources.get(resource));
 		if (r == null)
 			return null;
-		return new GanttResource(r);
+		return new EuropaGanttResource(r);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.ops.ui.gantt.model.IGanttModel#getStart()
+	 */
+	@Override
 	public int getStart() {
 		return start;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.ops.ui.gantt.model.IGanttModel#getEnd()
+	 */
+	@Override
 	public int getEnd() {
 		return end;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.ops.ui.gantt.model.IGanttModel#getResourceName(int)
+	 */
+	@Override
 	public String getResourceName(int index) {
 		return resources.get(index).getEntityName();
 	}

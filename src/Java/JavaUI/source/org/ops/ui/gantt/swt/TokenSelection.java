@@ -1,18 +1,17 @@
 package org.ops.ui.gantt.swt;
 
 import org.eclipse.jface.viewers.ISelection;
-
-import psengine.PSToken;
+import org.ops.ui.gantt.model.IGanttActivity;
 
 public class TokenSelection implements ISelection {
 
-	private PSToken token;
+	private IGanttActivity token;
 	
-	TokenSelection(PSToken token) {
-		this.token = token;
+	TokenSelection(IGanttActivity activity) {
+		this.token = activity;
 	}
 	
-	public PSToken getToken() { return token; }
+	public IGanttActivity getToken() { return token; }
 	
 	@Override
 	public boolean isEmpty() {

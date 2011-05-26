@@ -15,6 +15,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
+import org.ops.ui.gantt.model.EuropaGanttActivity;
 import org.ops.ui.solver.swt.SolverModelViewImpl;
 
 import psengine.PSToken;
@@ -268,15 +269,14 @@ public class DetailsView extends SolverModelViewImpl implements ISelectionListen
 
 	@Override
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-		if(selection instanceof TokenSelection) {
-			this.token = ((TokenSelection) selection).getToken();
-		}
-		else {
-			this.token = null;
+		this.token = null;
+		if ((selection instanceof TokenSelection)
+				&& (((TokenSelection) selection).getToken() instanceof EuropaGanttActivity)) {
+			this.token = ((EuropaGanttActivity) ((TokenSelection) selection)
+					.getToken()).getData();
 		}
 		refresh();
 	}
-
 
 
 

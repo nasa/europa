@@ -5,7 +5,7 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.MouseMotionListener;
-import org.ops.ui.gantt.model.GanttResource;
+import org.ops.ui.gantt.model.IGanttResource;
 
 /**
  * Single resource profile panel, includes upper and lower lines.
@@ -14,14 +14,14 @@ import org.ops.ui.gantt.model.GanttResource;
  */
 public class ResourcePanel extends LinePanel {
 
-	private GanttResource resource;
+	private IGanttResource resource;
 	private double pixelPerPoint = 1;
 	private int stepSize;
 	private int[] horizon;
 	private static final int margin = 2;
 	private Label toolTipFigure;
 
-	public ResourcePanel(GanttResource resource) {
+	public ResourcePanel(IGanttResource resource) {
 		super(resource.getName());
 		this.resource = resource;
 		this.toolTipFigure = new Label("TBD");

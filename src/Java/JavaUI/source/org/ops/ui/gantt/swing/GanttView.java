@@ -17,9 +17,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JViewport;
 
-import org.ops.ui.gantt.model.GanttActivity;
-import org.ops.ui.gantt.model.GanttModel;
-import org.ops.ui.gantt.model.GanttResource;
+import org.ops.ui.gantt.model.EuropaGanttModel;
+import org.ops.ui.gantt.model.IGanttActivity;
+import org.ops.ui.gantt.model.IGanttModel;
+import org.ops.ui.gantt.model.IGanttResource;
 import org.ops.ui.main.swing.EuropaInternalFrame;
 import org.ops.ui.solver.model.SolverAdapter;
 import org.ops.ui.solver.model.SolverModel;
@@ -116,7 +117,7 @@ public class GanttView extends EuropaInternalFrame {
 	protected void updateView() {
 		// System.out.println("Updating Gantt");
 
-		GanttModel model = new GanttModel(solverModel);
+		IGanttModel model = new EuropaGanttModel(solverModel);
 		int start = model.getStart();
 		int end = model.getEnd();
 
@@ -128,7 +129,7 @@ public class GanttView extends EuropaInternalFrame {
 
 		int index = 0;
 		for (int i = 0; i < model.getResourceCount(); i++) {
-			GanttResource r = model.getResource(i);
+			IGanttResource r = model.getResource(i);
 			LinePanel line;
 			if (r != null) {
 				// Can resource timeline also have tokens?
@@ -137,10 +138,10 @@ public class GanttView extends EuropaInternalFrame {
 			} else {
 				TimelinePanel tline = new TimelinePanel(model.getResourceName(i));
 				// Skip timeline (non-resource) lines with no tokens
-				List<GanttActivity> all = model.getActivities(i);
+				List<IGanttActivity> all = model.getActivities(i);
 				if (skipEmptyObjects && all.isEmpty())
 					continue;
-				for (GanttActivity act : all) {
+				for (IGanttActivity act : all) {
 					tline.addToken(new TokenWidget(act, TokenWidget.DEFAULT_COLOR));
 				}
 				line = tline;

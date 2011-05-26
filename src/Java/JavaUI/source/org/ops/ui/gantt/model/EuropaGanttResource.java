@@ -4,15 +4,20 @@ import psengine.PSResource;
 import psengine.PSResourceProfile;
 import psengine.PSTimePointList;
 
-public class GanttResource {
+/**
+ * Implementation of IGanttResource around Europa PSResource
+ * 
+ * @author tatiana
+ */
+public class EuropaGanttResource implements IGanttResource {
 	protected PSResource resource;
 	protected double tmin, tmax, amin, amax;
 
-	public GanttResource(PSResource resource) {
+	public EuropaGanttResource(PSResource resource) {
 		this.resource = resource;
 
-		//System.out.println("Limits " + resource.getLimits().getTimes().size()
-		//		+ ", actuals " + resource.getLevels().getTimes().size());
+		// System.out.println("Limits " + resource.getLimits().getTimes().size()
+		// + ", actuals " + resource.getLevels().getTimes().size());
 		// Limits
 		PSResourceProfile ls = resource.getLimits();
 		PSTimePointList ts = ls.getTimes();
@@ -22,7 +27,8 @@ public class GanttResource {
 			int t = ts.get(i);
 			tmin = Math.min(tmin, ls.getLowerBound(t));
 			tmax = Math.max(tmax, ls.getUpperBound(t));
-			// System.out.println(" l " + t + " " + ls.getLowerBound(t) + " " + ls.getUpperBound(t));
+			// System.out.println(" l " + t + " " + ls.getLowerBound(t) + " " +
+			// ls.getUpperBound(t));
 		}
 		// Actuals
 		ls = resource.getLevels();
@@ -33,7 +39,8 @@ public class GanttResource {
 			int t = ts.get(i);
 			amin = Math.min(amin, ls.getLowerBound(t));
 			amax = Math.max(amax, ls.getUpperBound(t));
-			// System.out.println(" a " + t + " " + ls.getLowerBound(t) + " " + ls.getUpperBound(t));
+			// System.out.println(" a " + t + " " + ls.getLowerBound(t) + " " +
+			// ls.getUpperBound(t));
 		}
 	}
 
@@ -42,23 +49,53 @@ public class GanttResource {
 		return resource.getEntityName() + "[" + tmin + ", " + tmax + "] ["
 				+ amin + ", " + amax + "]";
 	}
-	
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.ops.ui.gantt.model.IGanttResource#getName()
+	 */
+	@Override
 	public String getName() {
 		return resource.getEntityName();
 	}
-	
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.ops.ui.gantt.model.IGanttResource#getActualMin()
+	 */
+	@Override
 	public double getActualMin() {
 		return amin;
 	}
-	
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.ops.ui.gantt.model.IGanttResource#getActualMax()
+	 */
+	@Override
 	public double getActualMax() {
 		return amax;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.ops.ui.gantt.model.IGanttResource#getLow(int)
+	 */
+	@Override
 	public double getLow(int time) {
 		return resource.getLevels().getLowerBound(time);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.ops.ui.gantt.model.IGanttResource#getHigh(int)
+	 */
+	@Override
 	public double getHigh(int time) {
 		return resource.getLevels().getUpperBound(time);
 	}

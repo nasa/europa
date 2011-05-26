@@ -6,32 +6,27 @@ import org.eclipse.draw2d.MouseEvent;
 import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
-import org.ops.ui.gantt.model.GanttActivity;
-import org.ops.ui.main.swt.EuropaPlugin;
+import org.ops.ui.gantt.model.IGanttActivity;
 
-public class TokenWidget extends Figure {
+/**
+ * A graphic representation of an activity on Gantt chart
+ * 
+ * @author tatiana
+ */
+public class ActivityWidget extends Figure {
 	public static final int halfHeight = 5;
 
-	public static final TokenColor DEFAULT_COLOR;
+	public static TokenColor DEFAULT_COLOR;
 
-	// The plugin should be initialized before this class is ever loaded
-	static {
-		EuropaPlugin pl = EuropaPlugin.getDefault();
-		DEFAULT_COLOR = new TokenColor(pl.getColor(new RGB(100, 255, 120)), pl
-				.getColor(new RGB(100, 240, 255)), pl.getColor(new RGB(100,
-				140, 155)), pl.getColor(new RGB(0, 100, 0)));
-	}
-
-	private final GanttActivity activity;
-	private final GanttView view; // our master, so we can send selection events
+	private final IGanttActivity activity;
+	private final GenericGanttView view; // our master, so we can send selection events
 	private TokenColor color;
 	
 	private void tokenSelected() {
-		view.setSelection(new TokenSelection(activity.getToken()));
+		view.setSelection(new TokenSelection(activity));
 	}
 	
-	public TokenWidget(GanttActivity activity, TokenColor color, GanttView view) {
+	public ActivityWidget(IGanttActivity activity, TokenColor color, GenericGanttView view) {
 		this.activity = activity;
 		this.color = color;
 		this.view = view;
@@ -105,7 +100,7 @@ public class TokenWidget extends Figure {
 					activity.getEndMax(), width));
 	}
 
-	public GanttActivity getActivity() {
+	public IGanttActivity getActivity() {
 		return this.activity;
 	}
 
@@ -123,7 +118,7 @@ public class TokenWidget extends Figure {
 		Box(int xx, int yy, int y, Color color, int min, int max, int width) {
 			this.setLayoutManager(null);
 
-			int tickSize = GanttView.stepSizePx;
+			int tickSize = GenericGanttView.stepSizePx;
 			int x1 = (min - activity.getStartMin()) * tickSize;
 			int x2 = (max - activity.getStartMin()) * tickSize;
 
