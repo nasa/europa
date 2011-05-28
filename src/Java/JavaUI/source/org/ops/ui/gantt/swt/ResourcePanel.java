@@ -28,18 +28,23 @@ public class ResourcePanel extends LinePanel {
 		this.setToolTip(toolTipFigure);
 
 		this.addMouseMotionListener(new MouseMotionListener() {
+			@Override
 			public void mouseDragged(MouseEvent arg0) {
 			}
 
+			@Override
 			public void mouseEntered(MouseEvent arg0) {
 			}
 
+			@Override
 			public void mouseExited(MouseEvent arg0) {
 			}
 
+			@Override
 			public void mouseHover(MouseEvent arg0) {
 			}
 
+			@Override
 			public void mouseMoved(MouseEvent event) {
 				updateTooltip(event.x);
 			}
@@ -64,7 +69,8 @@ public class ResourcePanel extends LinePanel {
 	@Override
 	public int getHeight() {
 		double range = resource.getActualMax() - resource.getActualMin();
-		return (int) (range * pixelPerPoint) + margin * 2;
+		int px = (int) (range * pixelPerPoint) + margin * 2;
+		return Math.max(px, TimelinePanel.lineHeight);
 	}
 
 	@Override

@@ -21,7 +21,7 @@ public class TimelinePanel extends LinePanel {
 	 * One full line below, one above, half for start, half for end, and maybe
 	 * half for duration
 	 */
-	private static int lineHeight = ActivityWidget.halfHeight
+	public static int lineHeight = ActivityWidget.halfHeight
 			* (6 + (showDurationLine ? 1 : 0));
 
 	private ArrayList<ArrayList<ActivityWidget>> lines = new ArrayList<ArrayList<ActivityWidget>>();
