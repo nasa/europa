@@ -42,6 +42,7 @@ public class DetailsView extends SolverModelViewImpl implements ISelectionListen
 	GridData noData = null; 
 	GridData yesData = null;
 	
+	private Text idText;
 	private Text typeText;
 	private Text isFactText;
 	private Text masterText;
@@ -96,6 +97,7 @@ public class DetailsView extends SolverModelViewImpl implements ISelectionListen
 
 		detailsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
+		idText = createLabelAndText("Id", 2);
 		typeText = createLabelAndText("Type", 2);
 		isFactText = createLabelAndText("Fact", 2);
 		masterText = createLabelAndText("Master", 2);
@@ -163,6 +165,7 @@ public class DetailsView extends SolverModelViewImpl implements ISelectionListen
 		else {
 			showViewContents();
 			detailsComposite.setVisible(true);
+			idText.setText(new Integer(token.getEntityKey()).toString());
 			typeText.setText(token.getTokenType());
 			isFactText.setText(new Boolean(token.isFact()).toString());
 			
