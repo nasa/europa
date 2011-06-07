@@ -552,7 +552,10 @@ namespace EUROPA {
                   "Updated bounds [" << lb << " " << ub << "] from timepoint " << tp << " are outside of "
                   << dom.toString() << " for " << var->toString());
 
-          dom.intersect(mapToExternalInfinity(lb), mapToExternalInfinity(ub));
+	  if (lb == dom.getLowerBound() && ub == dom.getUpperBound())
+	    continue;  // PHM 06/06/11 This might often be the case
+
+	  dom.intersect(mapToExternalInfinity(lb), mapToExternalInfinity(ub));
 
 	  // PHM Support for reftime calculations
 	  if (m_tnet->getReferenceTimepoint().isId()) {
@@ -606,6 +609,9 @@ namespace EUROPA {
 
     edouble maxDuration = end.getUpperBound() - start.getLowerBound();
     edouble minDuration = end.getLowerBound() - start.getUpperBound();
+
+    if (minDuration <= duration.getLowerBound() && maxDuration >= duration.getUpperBound())
+      return;  // PHM 06/06/11 This will almost always be the case.for DE.
 
     // TODO JRB: this should never cause a new violation
     duration.intersect(minDuration, maxDuration);
