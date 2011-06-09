@@ -432,6 +432,7 @@ namespace EUROPA {
   class PSSolver
   {
   public:
+    void destroy();
     void step();
     void solve(int maxSteps,int maxDepth);
     bool backjump(unsigned int stepCount);

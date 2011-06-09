@@ -27,6 +27,7 @@ namespace EUROPA
 	  virtual bool backjump(unsigned int stepCount) = 0;
 	  virtual void reset() = 0;
 	  virtual void reset(unsigned int depth) = 0;
+	  virtual void destroy() = 0;
 	  
 	  virtual int getStepCount() = 0;
 	  virtual int getDepth() = 0;		
