@@ -29,6 +29,7 @@ Bundle-Localization: plugin
 Export-Package: .,
  org.ops.ui.gantt.swt,
  org.ops.ui.main.swt,
+ org.ops.ui.schemabrowser.model,
  org.ops.ui.solver.model,
  org.ops.ui.solver.swt,
  psengine,
