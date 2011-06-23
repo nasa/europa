@@ -110,6 +110,10 @@ public class EuropaPlugin extends AbstractUIPlugin {
 				getImageDescriptor(CommonImages.IMAGE_RUN));
 		reg.put(CommonImages.IMAGE_HORIZON,
 				getImageDescriptor(CommonImages.IMAGE_HORIZON));
+		reg.put(CommonImages.IMAGE_START,
+				getImageDescriptor(CommonImages.IMAGE_START));
+		reg.put(CommonImages.IMAGE_STOP,
+				getImageDescriptor(CommonImages.IMAGE_STOP));
 	}
 
 	public void logError(String message, Throwable exception) {

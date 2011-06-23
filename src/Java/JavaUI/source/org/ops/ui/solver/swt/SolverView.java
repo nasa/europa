@@ -197,7 +197,7 @@ public class SolverView extends SolverModelViewImpl {
 
 		runEngineButton = new Button(parent, SWT.TOGGLE);
 		runEngineButton.setImage(EuropaPlugin.getDefault().getImageRegistry()
-				.get(CommonImages.IMAGE_EUROPA));
+				.get(CommonImages.IMAGE_START));
 		runEngineButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent evt) {
@@ -496,9 +496,14 @@ public class SolverView extends SolverModelViewImpl {
 		// The state of the button is changed, just read it
 		if (runEngineButton.getSelection()) {
 			// Need to run
+			
+			runEngineButton.setImage(EuropaPlugin.getDefault().getImageRegistry()
+					.get(CommonImages.IMAGE_STOP));
 			assert (model.isTerminated());
 			model.start();
 		} else {
+			runEngineButton.setImage(EuropaPlugin.getDefault().getImageRegistry()
+					.get(CommonImages.IMAGE_START));
 			model.terminate();
 		}
 		updateState();

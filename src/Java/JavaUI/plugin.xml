@@ -21,21 +21,21 @@
       <view
             category="org.ops.ui"
             class="org.ops.ui.schemabrowser.swt.SchemaView"
-            icon="icons/europa_empty.png"
+            icon="icons/schemabrowser.png"
             id="org.ops.ui.schemabrowser.swt.SchemaView"
             name="%view.name.schema">
       </view>
       <view
             category="org.ops.ui"
             class="org.ops.ui.solver.swt.SolverView"
-            icon="icons/run_nddl.png"
+            icon="icons/calculator.png"
             id="org.ops.ui.solver.swt.SolverView"
             name="%view.name.solver">
       </view>
       <view
             category="org.ops.ui"
             class="org.ops.ui.solver.swt.StatisticsChartsView"
-            icon="icons/europa_empty.png"
+            icon="icons/statistics.png"
             id="org.ops.ui.solver.swt.StatisticsView"
             name="%view.name.statistics"
             restorable="true">
@@ -43,7 +43,7 @@
       <view
             category="org.ops.ui"
             class="org.ops.ui.solver.swt.DecisionsView"
-            icon="icons/europa_empty.png"
+            icon="icons/decide.png"
             id="org.ops.ui.solver.swt.DecisionsView"
             name="%view.name.open-decisions"
             restorable="true">
@@ -51,7 +51,7 @@
       <view
             category="org.ops.ui"
             class="org.ops.ui.gantt.swt.GanttView"
-            icon="icons/europa_empty.png"
+            icon="icons/gantt.png"
             id="org.ops.ui.gantt.swt.GanttView"
             name="%view.name.gantt"
             restorable="true">
@@ -59,7 +59,7 @@
       <view
             category="org.ops.ui"
             class="org.ops.ui.gantt.swt.DetailsView"
-            icon="icons/europa_empty.png"
+            icon="icons/graph_detail.png"
             id="org.ops.ui.gantt.swt.DetailsView"
             name="%view.name.details"
             restorable="true">

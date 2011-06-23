@@ -8,6 +8,10 @@ public interface CommonImages {
 	/** Plain Europa icons for things like the engine */
 	public static String IMAGE_EUROPA = "icons/europa_icon.png";
 	/** Run arrow with small E */
-	public static String IMAGE_RUN = "icons/europa_run.png";
-	public static String IMAGE_HORIZON = "icons/horizon.png";
+	public static String IMAGE_RUN = "icons/forward.png";
+	public static String IMAGE_HORIZON = "icons/reset.png";
+
+	public static String IMAGE_START = "icons/start.png";
+	public static String IMAGE_STOP = "icons/stop.png";
+
 }
