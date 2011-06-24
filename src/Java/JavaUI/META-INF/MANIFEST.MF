@@ -32,6 +32,7 @@ Export-Package: .,
  org.ops.ui.schemabrowser.model,
  org.ops.ui.solver.model,
  org.ops.ui.solver.swt,
+ org.ops.ui.utils,
  psengine,
  psengine.util
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
