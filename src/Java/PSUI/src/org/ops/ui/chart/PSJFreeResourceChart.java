@@ -101,7 +101,7 @@ public class PSJFreeResourceChart
         TimeSeries s1 = resourceProfileToTimeSeries("Capacity", model_.getCapacity(),true);
         TimeSeries s2 = resourceProfileToTimeSeries("Usage Upper Bound", model_.getUsage(),true);
         TimeSeries s3 = resourceProfileToTimeSeries("Usage Lower Bound", model_.getUsage(),false);
-        dataset.addSeries(s1);
+        //dataset.addSeries(s1);
         dataset.addSeries(s2);
         dataset.addSeries(s3);
         
@@ -132,10 +132,10 @@ public class PSJFreeResourceChart
    		    if ((lastTime >=0) && (lastValue != value) && (i-lastTime > 1)) {
    		    	time.add(Calendar.MINUTE, -1);
    		    	Minute t1 = new Minute(time.getTime());
-   	   		    ts.add(t1,lastValue);
+   	   		    ts.addOrUpdate(t1,lastValue);
    		    }
 
-   		    ts.add(t,value); 
+   		    ts.addOrUpdate(t,value); 
    		    lastTime = i;
    		    lastValue = value;
     	}
