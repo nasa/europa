@@ -77,8 +77,11 @@
 	</target>  
   
 	<target name="init" depends="findPlatform">
-  		<property name="file.europa-dist" value="europa-${europa.version}-${local.os}.zip"/>
-		<property name="file.europa-static-libs" value="europa-${europa.version}-${local.os}-static-libs.zip"/>	
+		<condition property="local.os.arch" value="64" else=""> 
+			<equals arg1="${local.os.is64bit}" arg2="true"/>
+		</condition> 
+  		<property name="file.europa-dist" value="europa-${europa.version}-${local.os}${local.os.arch}.zip"/>
+		<property name="file.europa-static-libs" value="europa-${europa.version}-${local.os}${local.os.arch}-static-libs.zip"/>	
   	
 		<runtarget target="init-${local.os.family}"/>		
 	</target> 
