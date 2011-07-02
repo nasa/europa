@@ -471,5 +471,13 @@ namespace EUROPA {
     return sl_const;
   }
 
+  CBReusableId Uses::getResource() const
+  {
+	  return m_resource;
+  }
 
+  const std::map<InstantId,Resource::ProblemType>& Uses::getViolationProblems() const
+  {
+	  return m_violationProblems;
+  }
 }

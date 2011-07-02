@@ -110,4 +110,13 @@ namespace EUROPA {
 
     return os.str();
   }
+
+  TokenId ResourceTokenRelation::getToken() const { return m_token; }
+
+  ResourceId ResourceTokenRelation::getResource() const { return m_resource; }
+
+  std::pair<eint,Resource::ProblemType> ResourceTokenRelation::getViolationInfo() const
+  {
+	  return std::pair<eint,Resource::ProblemType>(m_violationTime,m_violationProblem);
+  }
 }

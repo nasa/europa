@@ -101,6 +101,10 @@ namespace EUROPA {
 
       const TransactionId& getTransaction(int var) const;
 
+      CBReusableId getResource() const;
+
+      const std::map<InstantId,Resource::ProblemType>& getViolationProblems() const;
+
     protected:
       virtual void handleDiscard();
 

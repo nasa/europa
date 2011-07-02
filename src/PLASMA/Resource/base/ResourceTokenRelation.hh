@@ -34,6 +34,10 @@ namespace EUROPA {
 
       virtual std::string getViolationExpl() const;
 
+      TokenId getToken() const;
+      ResourceId getResource() const;
+      std::pair<eint,Resource::ProblemType> getViolationInfo() const;
+
     protected:
       virtual void notifyViolated(Resource::ProblemType problem, const InstantId inst);
       virtual void notifyNoLongerViolated();
