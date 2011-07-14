@@ -1558,7 +1558,7 @@ namespace EUROPA {
 								   const LabelStr& name)
   {
     ConstrainedVariableId localVariable = addVariable(baseDomain,canBeSpecified,name);
-    getPlanDatabase()->makeObjectVariableFromType(type,localVariable,canBeSpecified);
+    getPlanDatabase()->makeObjectVariableFromType(type,localVariable);
 
     return localVariable;
   }
