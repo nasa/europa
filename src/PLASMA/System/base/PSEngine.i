@@ -216,65 +216,7 @@ namespace EUROPA {
     PSVarValue get(int idx);
   };
 
-// If the output language is java, add a method to the PSEngine
-// that can get at the NDDL implementation.
 %typemap(javacode) PSEngine %{
-  protected Class getClassForName(String name)
-  {
-      try {
-          return Class.forName(name);
-      }
-      catch (Exception e) {
-          try {
-              return ClassLoader.getSystemClassLoader().loadClass(name);
-          }
-          catch (Exception ex) {
-              throw new RuntimeException("Failed to load class "+name,ex);
-          }
-      }
-  }
-
-  public String executeScript(String language, java.io.Reader reader) throws PSLanguageExceptionList {
-    String retval = "";
-    
-    String txns = null;
-    if(language.equalsIgnoreCase("nddl2")) {
-      try {
-        Class nddlClass = getClassForName("nddl.Nddl");
-        Class[] parameters = new Class[]{java.io.Reader.class, boolean.class};
-        Object[] arguments = new Object[]{reader, new Boolean(false)};
-        txns = (String) nddlClass.getMethod("nddlToXML", parameters).invoke(null, arguments);
-      }
-      catch(NoSuchMethodException ex) {
-        System.err.println("Cannot execute NDDL source: Unexpected NDDL implementation (nddlToXML not found).");
-        throw new RuntimeException(ex);
-      }
-      catch(IllegalAccessException ex) {
-        System.err.println("Cannot execute NDDL source: Unexpected NDDL implementation (access modifiers too restrictive on parse method).");
-        throw new RuntimeException(ex);
-      }
-      catch(java.lang.reflect.InvocationTargetException ex) {
-        System.err.println("Cannot execute NDDL source: exception during parsing: ");
-        System.err.println(ex.getCause().getClass().getName() + ": "+ ex.getCause().getMessage());
-        throw new RuntimeException(ex.getCause());
-      }
-      catch(RuntimeException ex) {
-        System.err.println("Cannot execute NDDL source: exception during parsing: ");
-        System.err.println(ex.getClass().getName() + ": "+ ex.getMessage());
-        throw ex;
-      }
-    }
-
-    if(txns != null) {
-      retval = executeScript_internal("nddl-xml",txns,false /*isFile*/);
-    }
-    else {
-      throw new RuntimeException("Failed to create transactions from "+language+" source.");
-    }
-    
-    return retval;
-  }
-
   public String executeScript(String language, String script, boolean isFile) throws PSLanguageExceptionList
   {
       String retval = "";
