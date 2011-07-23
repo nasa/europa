@@ -32,7 +32,7 @@ SubInclude PLASMA Solvers ;
 # extensions. 
 # TODO: dependencies need to be fixed so that NDDL and TemporalNetwork can be moved down here
 SubInclude PLASMA Resource ;
-#SubInclude PLASMA ANML ;
+SubInclude PLASMA ANML ;
 
 # engine-level modules
 SubInclude PLASMA System ;

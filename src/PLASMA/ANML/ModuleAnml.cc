@@ -1,7 +1,5 @@
 #include "ModuleAnml.hh"
-#include "ANMLTranslator.hh"
-#include "ANMLParser.hpp"
-#include "ANML2NDDL.hpp"
+#include "AnmlInterpreter.hh"
 
 namespace EUROPA {
 
@@ -33,31 +31,9 @@ namespace EUROPA {
 	      return;
   }
   
-  class AnmlInterpreter : public LanguageInterpreter 
-  {
-    public:
-      virtual ~AnmlInterpreter() {}	
-      virtual std::string interpret(std::istream& input, const std::string& source);
-      
-    protected:
-      ANML::ANMLTranslator m_anmlTranslator;
-  };
-
-  std::string AnmlInterpreter::interpret(std::istream& input, const std::string& source) {
-    antlr::RefAST ast;
-    // create and invoke parser
-    ast = ANMLParser::parse(input,source);
-    // create translator
-    ANML2NDDL treeParser(m_anmlTranslator);
-    // pass AST to translator
-    treeParser.anml(ast);
-    // return result.
-    return m_anmlTranslator.toString();
-  }
-
   void ModuleAnml::initialize(EngineId engine)
   {
-	  engine->addLanguageInterpreter("anml", new AnmlInterpreter());
+	  engine->addLanguageInterpreter("anml", new AnmlInterpreter(engine));
   }
   
   void ModuleAnml::uninitialize(EngineId engine)

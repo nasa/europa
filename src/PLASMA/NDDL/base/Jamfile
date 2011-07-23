@@ -16,5 +16,4 @@ if ! $(PLASMA_READY) {
 	NDDL3Tree.cpp
 	;
 
-
 } # PLASMA_READY

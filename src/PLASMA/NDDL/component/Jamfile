@@ -2,7 +2,7 @@ SubDir PLASMA NDDL component ;
 
 if ! $(PLASMA_READY) {
 
-ModuleComponent NDDL
+  ModuleComponent NDDL
 	:
 	Interpreter.cc
 	NddlInterpreter.cc

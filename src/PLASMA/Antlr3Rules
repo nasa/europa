@@ -5,9 +5,6 @@ include [ FDirName $(SUBDIR) JavaRules ] ;
 
 ANTLR3_JAR ?= [ FDirName $(SUBDIR) .. .. ext lib antlr-3.jar ] ;
 
-# This is necessary when building from external directories
-ANTLR3FLAGS ?= -o [ FDirName $(SUBDIR) NDDL base ] ;
-
 # Antlr3Grammar ParserPrefix : grammar.g grammar.tree.g ;
 rule Antlr3Grammar
 {
@@ -15,21 +12,17 @@ rule Antlr3Grammar
   local grammar = $(2[1]) ;
   local grammar.tree = $(2[2]) ;
 
-#  Echo Antlr3Tool . $(prefix) . $(grammar) . $(grammar.tree) ;
-
   local sources = [ FGristFiles $(prefix)Lexer.cpp $(prefix)Parser.cpp ] ;
   local headers = [ FGristFiles $(prefix)Lexer.h $(prefix)Parser.h $(prefix).tokens ] ;
 
   Antlr3Tool $(sources) $(headers) : $(grammar) ;
-
   Includes $(sources) : $(headers) ;
 
   local sources.tree = [ FGristFiles $(prefix)Tree.cpp ] ;
   local headers.tree = [ FGristFiles $(prefix)Tree.h $(prefix)Tree.tokens ] ;
 
   if $(grammar.tree) {
-      Antlr3TreeTool $(sources.tree) $(headers.tree) : $(grammar.tree) ;
-
+      Antlr3Tool $(sources.tree) $(headers.tree) : $(grammar.tree) ;
       Includes $(sources.tree) : $(headers.tree) ;
   }
 }
@@ -39,11 +32,15 @@ rule Antlr3Tool
   local files = $(1) ;
   local grammar = $(2) ;
 
-#  Echo Antlr3Tool . $(files) . $(grammar) ;
-
   LOCATE on $(files) = $(LOCATE_SOURCE) ;
   SEARCH on $(grammar) = $(SEARCH_SOURCE) ;
   RunAntlr3Tool $(files) : $(grammar) ;
+}
+
+actions RenameTarget.Action
+{
+	echo RenameTarget.Action : $(MV) $(1) $(2) ; 
+	$(MV) $(1) $(2) ; 
 }
 
 rule RunAntlr3Tool
@@ -51,8 +48,8 @@ rule RunAntlr3Tool
   local files = $(1) ;
   local grammar = $(2) ;
 
-#  Echo RunAntlr3Tool . $(files) . $(grammar) ;
-
+#  Echo RunAntlr3Tool $(files) . $(grammar) ;
+  
   Depends $(files) : $(grammar) ;
 #  LocalClean clean : $(files) ;
 }
@@ -60,42 +57,14 @@ rule RunAntlr3Tool
 actions RunAntlr3Tool
 {
   rm -f $(1)
-  echo "(Tool)Command to build the parser is: $(JAVA) -cp $(ANTLR3_JAR) $(JREFLAGS) org.antlr.Tool -fo $(1[0]:D) -traceParser $(ANTLR3FLAGS) $(2)"
-  "$(JAVA)" -cp $(ANTLR3_JAR) $(JREFLAGS) org.antlr.Tool -fo $(1[0]:D) -traceParser $(ANTLR3FLAGS) $(2) 
-  mv $(1[0]:D)/NDDL3Lexer.c $(1[0]:D)/NDDL3Lexer.cpp 
-  mv $(1[0]:D)/NDDL3Parser.c $(1[0]:D)/NDDL3Parser.cpp 
+  echo "(Tool)Command to build the parser is: $(JAVA) -cp $(ANTLR3_JAR) $(JREFLAGS) org.antlr.Tool -fo $(1[0]:D) $(2)"
+  "$(JAVA)" -cp $(ANTLR3_JAR) $(JREFLAGS) org.antlr.Tool -fo $(1[0]:D) $(2)   
+
+  mv $(1[1]:S=.c) $(1[1]) ; 
+  if [ -e $(1[2]:S=.c) ] 
+  	then
+	  mv $(1[2]:S=.c) $(1[2]) ; 
+  fi
 }
-
-rule Antlr3TreeTool
-{
-  local files = $(1) ;
-  local grammar = $(2) ;
-
-#  Echo Antlr3TreeTool . $(files) . $(grammar) ;
-
-  LOCATE on $(files) = $(LOCATE_SOURCE) ;
-  SEARCH on $(grammar) = $(SEARCH_SOURCE) ;
-  RunAntlr3TreeTool $(files) : $(grammar) ;
-}
-
-rule RunAntlr3TreeTool
-{
-  local files = $(1) ;
-  local grammar = $(2) ;
-
-#  Echo RunAntlr3TreeTool . $(files) . $(grammar) ;
-
-  Depends $(files) : $(grammar) ;
-#  LocalClean clean : $(files) ;
-}
-
-actions RunAntlr3TreeTool
-{
-  rm -f $(1)
-  echo "(TreeTool) Command to build the parser is: $(JAVA) -cp $(ANTLR3_JAR) $(JREFLAGS) org.antlr.Tool -fo $(1[0]:D) -traceParser $(ANTLR3FLAGS) $(2)"
-  "$(JAVA)" -cp $(ANTLR3_JAR) $(JREFLAGS) org.antlr.Tool -fo $(1[0]:D) -traceParser $(ANTLR3FLAGS) $(2) 
-  mv $(1[0]:D)/NDDL3Tree.c $(1[0]:D)/NDDL3Tree.cpp 
-}
-
 
 } # Antlr3Rules_INCLUDED

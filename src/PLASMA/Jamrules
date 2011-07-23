@@ -12,7 +12,6 @@ find . \( -name '*.[ao]' -o -name '*.so' -o -name '*_[gop]' -o -name '*_rt' -o -
   local SUBDIR = $(PLASMA) ;
   PLASMA_BUILD = $(PLASMA_HOME)/build ;
   include [ FDirName $(SUBDIR) CommonRules ] ;
-  include [ FDirName $(SUBDIR) AntlrRules ] ;
   include [ FDirName $(SUBDIR) Antlr3Rules ] ;
   include [ FDirName $(SUBDIR) ModuleRules ] ;
   include [ FDirName $(SUBDIR) NddlRules ] ;
