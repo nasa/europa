@@ -773,27 +773,27 @@ ref
 ;
 
 time_primitive
-	: (Bra LeftP ID RightP)=> Bra LeftP ID RightP
-    	-> ^(LabelRef ID Bra)
-	| (Start LeftP ID RightP)=> Start LeftP ID RightP
+	:	(Start LeftP ID RightP)=> Start LeftP ID RightP
     	-> ^(LabelRef ID Start)
-	| (End LeftP ID RightP)=> End LeftP ID RightP
-		-> ^(LabelRef ID End)
-	| (Duration LeftP ID RightP)=> Duration LeftP ID RightP
-		-> ^(LabelRef ID Duration)
-	| (Ket LeftP ID RightP)=> Ket LeftP ID RightP
-    	-> ^(LabelRef ID Ket)
-	| Start
+	| 	Start
     	-> ^(LabelRef This Start)
-	| End
+	|	(End LeftP ID RightP)=> End LeftP ID RightP
+		-> ^(LabelRef ID End)
+	| 	End
     	-> ^(LabelRef This End)
-	| Duration
+	|	(Duration LeftP ID RightP)=> Duration LeftP ID RightP
+		-> ^(LabelRef ID Duration)
+	| 	Duration
     	-> ^(LabelRef This Duration)
-	| Bra
-	   	-> ^(LabelRef This Bra)
-	| Ket
-    	-> ^(LabelRef This Ket)
-;
+//	|	(Bra LeftP ID RightP)=> Bra LeftP ID RightP
+//    	-> ^(LabelRef ID Bra)
+//	| 	Bra
+//	   	-> ^(LabelRef This Bra)
+//	| 	(Ket LeftP ID RightP)=> Ket LeftP ID RightP
+//    	-> ^(LabelRef ID Ket)
+//	| 	Ket
+//    	-> ^(LabelRef This Ket)
+	;
 	
 set: enumeration | range;
 
