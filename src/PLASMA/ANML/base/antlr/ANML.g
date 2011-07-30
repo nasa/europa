@@ -161,21 +161,18 @@ builtinType
 	
 // _constrained_ type references
 
-type_spec
-	: builtinType set?
+type_ref 
+	: (builtinType set?) => builtinType set
 	  -> ^(TypeRef builtinType set?)
-	| ID set?
+	| (ID set?) => ID set
 	  -> ^(TypeRef ID set?)
+;
+
+type_spec
+	: type_ref
 	| Vector param_list
 	  -> ^(Vector param_list)
 	| type_enumeration
-;
-
-type_ref 
-	: builtinType set?
-	  -> ^(TypeRef builtinType set?)
-	| ID set?
-	  -> ^(TypeRef ID set?)
 ;
 
 user_type_ref 
