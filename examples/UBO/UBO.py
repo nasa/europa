@@ -104,7 +104,7 @@ class Problem:
             print >>buf,'    ',a.toString()
         return buf.getvalue()
 
-    def toNddl(self,resProfile):
+    def toNddl(self,resProfile,resFVDetector):
         buf = StringIO.StringIO()
 
         print >>buf,'// Original file:'+self.filename
@@ -120,7 +120,7 @@ maxDuration.specify(1000);
 addEq(maxDuration,1,maxDurationPlusOne);
 '''
         for r in self.resources:
-            print >>buf,'CapacityResource resource%d = new CapacityResource( "%s" , 0.0 , %d.0 );' % (r.id,resProfile,r.capacity)
+            print >>buf,'CapacityResource resource%d = new CapacityResource( "%s" ,  "%s" , 0.0 , %d.0 );' % (r.id,resProfile,resFVDetector,r.capacity)
 
         i=0
         for act in self.activities:
@@ -190,21 +190,22 @@ class TestRunner:
                if (bound != 'inf'):
                    self.problems.append((test_file,bound))
 
-    def runTests(self,timeoutSecs,solvers,resProfiles):
+    def runTests(self,timeoutSecs,solvers,resProfiles,resFVDetectors):
         self.readProblems()
         data_dir = self.test_dir+'/testset'+self.benchmark_file.lstrip('benchmarks').rstrip('.txt')
         for p in self.problems:
             problem = Problem()
             problem.readFromFile(data_dir+'/'+p[0])
+            problemBound = int(p[1])        
             for solver in solvers:
-                nddl = problem.toNddl(resProfiles[solver])
+                nddl = problem.toNddl(resProfiles[solver],resFVDetectors[solver])
                 out = open('UBO-gen-initial-state.nddl','w')
                 print >>out,nddl
                 out.close()
                 cmd = 'ant'+\
                     ' -Dproject.mode=o'+\
                     ' -Dproject.test='+p[0]+\
-                    ' -Dproject.bound='+str(int(p[1])+1)+\
+                    ' -Dproject.bound='+str(problemBound+1)+\
                     ' -Dproject.timeout='+str(timeoutSecs)+\
                     ' -Dproject.solver='+solver
                 print cmd

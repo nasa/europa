@@ -10,7 +10,8 @@ import UBO
 timeoutSecs = 20 
 
 solvers = ['BuiltIn','IFIR','Hybrid']
-profiles = {'BuiltIn':'IncrementalFlowProfile', 'IFIR':'TimetableProfile', 'Hybrid':'TimetableProfile' }
+profiles = {'BuiltIn':'IncrementalFlowProfile', 'BuiltInG':'GroundedProfile', 'IFIR':'TimetableProfile', 'Hybrid':'TimetableProfile' }
+detectors = {'BuiltIn':'ClosedWorldFVDetector', 'BuiltInG':'GroundedFVDetector', 'IFIR':'ClosedWorldFVDetector', 'Hybrid':'ClosedWorldFVDetector' }
 
 opts, args = getopt.getopt(sys.argv[1:], 't:s:')
 for o, a in opts:
@@ -25,5 +26,5 @@ for o, a in opts:
 test_dir = args[0]
 for file in args[1:]:
     tr = UBO.TestRunner(test_dir,file)
-    tr.runTests(timeoutSecs,solvers,profiles)
+    tr.runTests(timeoutSecs,solvers,profiles,detectors)
 

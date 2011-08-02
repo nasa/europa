@@ -46,14 +46,15 @@
    <javac srcdir="${swig.src.dir}" 
            destdir="${class.dir}" 
     	   debug="${debug}" 
-    	   deprecation="${deprecation}">
+    	   deprecation="${deprecation}"
+   	       includeAntRuntime="no">
 	  <classpath refid="psui.class.path"/>
     </javac>
   <!-- Compile Main.java and any custom java code -->
     <javac srcdir="${java.src.dir}" 
            destdir="${class.dir}" 
-    	   debug="${debug}" 
-    	   deprecation="${deprecation}">
+ 	       deprecation="${deprecation}"
+	       includeAntRuntime="no">
 	  <classpath refid="psui.class.path"/>
     </javac>
   </target>

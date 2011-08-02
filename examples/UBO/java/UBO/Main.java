@@ -18,8 +18,7 @@ class Main
 	   
 	public static void main(String args[])
 	{
-		if ((args.length < 4) || "".equals(args[2]) ||
-		args[2].equals("nogui"))
+		if (args[3].equals(""))
 		{
 		    String debugMode = args[0];
 	        PSUtil.loadLibraries(debugMode);	   
@@ -29,7 +28,7 @@ class Main
 			Runtime.getRuntime().addShutdownHook(new ShutdownHook());
 			loadCustomCode(debugMode);
 			
-			if(args.length > 2 && args[2].equals("nogui"))
+			if(args[2].equals("nogui"))
 			{
 			Interpreter bshInterpreter_ = new bsh.Interpreter();
 			try {
@@ -87,10 +86,12 @@ class Main
 	{
 	    try {
 	        String debugMode = args[0];
-	        String test = args[2];
-	        Integer bound = new Integer(args[3]);
-	        long timeoutMsecs = (new Integer(args[4])).intValue() * 1000; 
-	        String solver = args[5];
+	        String test = args[3];
+	        Integer bound = new Integer(args[4]);
+	        long timeoutMsecs = (new Integer(args[5])).intValue() * 1000; 
+	        String solver = args[6];
+
+	    	System.out.println("Running batch test: "+debugMode+" "+test+" "+bound+" "+timeoutMsecs+" "+solver);
 
 	        LibraryLoader.loadLibrary("System_"+debugMode);        
 	        PSEngine engine = PSEngine.makeInstance();
@@ -98,8 +99,8 @@ class Main
 	        String nddlModel = "UBO-gen-initial-state.nddl";
 	        engine.executeScript("nddl",nddlModel,true/*isFile*/);
 
-	        if ("BuiltIn".equals(solver))
-	            runBuiltInSolver(engine,test,bound,timeoutMsecs);
+	        if (solver.startsWith("BuiltIn"))
+	            runBuiltInSolver(engine,solver,test,bound,timeoutMsecs);
 	        else if ("IFIR".equals(solver))
 	            runRCPSPSolver(engine,new IFlatIRelaxSolver(),test,bound,timeoutMsecs);
             else if ("Hybrid".equals(solver))
@@ -114,7 +115,7 @@ class Main
 	    }
 	}	
 	
-	public static void runBuiltInSolver(PSEngine engine,String test,Integer bound, long timeoutMsecs)
+	public static void runBuiltInSolver(PSEngine engine,String solverName, String test,Integer bound, long timeoutMsecs)
 	{
         PSVariable v = engine.getVariableByName("maxDuration");
         v.specifyValue(PSVarValue.getInstance(bound));
@@ -147,7 +148,7 @@ class Main
            .append(solver.getStepCount()).append(separator)
            .append("\n");
         
-        writeToFile("Solver-BuiltIn-"+timeoutMsecs+".txt",buf.toString());  
+        writeToFile("Solver-"+solverName+"-"+timeoutMsecs+".txt",buf.toString());  
 	}
 
     public static void runRCPSPSolver(PSEngine engine,RCPSPSolver s, String test,Integer bound, long timeoutMsecs)
