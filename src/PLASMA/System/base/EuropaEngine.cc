@@ -8,7 +8,7 @@
 #include "ModuleNddl.hh"
 #ifndef NO_RESOURCES
 #include "ModuleResource.hh"
-//#include "ModuleAnml.hh"
+#include "ModuleAnml.hh"
 #endif
 
 #include "ConstraintEngine.hh"
@@ -56,7 +56,7 @@ namespace EUROPA {
         addModule((new ModuleNddl())->getId());
 #ifndef NO_RESOURCES
         addModule((new ModuleResource())->getId());
-//        addModule((new ModuleAnml())->getId());
+        addModule((new ModuleAnml())->getId());
 #endif
     }
 

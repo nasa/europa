@@ -6,7 +6,7 @@ if ! $(PLASMA_READY) {
 local system_deps = NDDL Solvers ;
 
 if ! ( "Resources" in $(NO) ) {
-#  system_deps += Resource ANML ;
+  system_deps += Resource ANML ;
   system_deps += Resource ;
 }
 
