@@ -4,13 +4,17 @@ if ! $(PLASMA_READY) {
 
 # make model test parser.
 
-#ModuleMain ANMLParser : Main.cc : ANML ;
-ModuleMain ANML2NDDL : Main.cc : ANML ;
+ModuleMain ANMLParser : Main.cc : ANML ;
 
 local model ;
 
 for model in
 	empty.anml
+{
+	RunModuleMain run-anml-module-tests : ANMLParser : $(model) ;
+}
+
+for model in
 	vartype_decl.anml 
 	var_obj_declaration.anml 
 	objtype_decl.anml 
@@ -24,15 +28,14 @@ for model in
 	HelloWorld-problem-instance.anml 
 	Rover.anml
 {
-  #RunModuleMain run-anml-tests : ANMLParser : $(model) $(model:S=.dot) ;
-  RunModuleMain run-anml-tests : ANML2NDDL : $(model:S=) ;
+ 	RunModuleMain run-test : ANMLParser : $(model) ;
 }
 
 for model in
-	HelloWorld-problem-instance 
-	Rover-problem-instance
+	HelloWorld-problem-instance.anml 
+	Rover-problem-instance.anml
 {
-  RunModuleMain run-test : ANML2NDDL : $(model) ;
+ 	RunModuleMain run-test : ANMLParser : $(model) ;
 }
 
 

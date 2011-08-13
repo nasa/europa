@@ -172,6 +172,11 @@ protected:
 
 void reportParserError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 *tokenNames);
 void reportLexerError(pANTLR3_BASE_RECOGNIZER recognizer, pANTLR3_UINT8 * tokenNames);
+
+pANTLR3_STRING toVerboseStringTree(pANTLR3_BASE_TREE tree);
+pANTLR3_INPUT_STREAM getInputStream(std::istream& input, const std::string& source, std::string& strInput);
+
+
 }
 
 
