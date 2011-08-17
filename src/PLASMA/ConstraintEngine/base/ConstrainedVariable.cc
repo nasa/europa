@@ -67,11 +67,8 @@ namespace EUROPA {
 
     handleRestrictBaseDomain(dom);
 
-    if(dom.isSingleton() && !m_specifiedFlag && canBeSpecified())
-      specify(dom.getSingletonValue());
-
     // Trigger events for propagation of this variable restriction, even if no domain restriction has occured, since it does
-    // refelct a status change of a variable and further inference may be possible if we know the base domain
+    // reflect a status change of a variable and further inference may be possible if we know the base domain
     // has been restricted.
     m_constraintEngine->notify(m_id, DomainListener::BOUNDS_RESTRICTED);
 
@@ -225,17 +222,12 @@ namespace EUROPA {
   }
 
   bool ConstrainedVariable::isSpecified() const {
-    return m_specifiedFlag || (baseDomain().isSingleton() && baseDomain().isClosed());
+    return m_specifiedFlag;
   }
 
   edouble ConstrainedVariable::getSpecifiedValue() const {
     checkError(isSpecified(), toString());
-    if(m_specifiedFlag)
-    {
-    	return m_specifiedValue;
-    }
-    else
-      return baseDomain().getSingletonValue();
+   	return m_specifiedValue;
   }
 
   bool ConstrainedVariable::isValid() const {
@@ -333,7 +325,12 @@ namespace EUROPA {
   }
 
   void ConstrainedVariable::internalSpecify(edouble singletonValue) {
-    debugMsg("ConstrainedVariable:internalSpecify", "specifying value:" << toString());
+	if (m_specifiedFlag && (m_specifiedValue==singletonValue)) {
+	    debugMsg("ConstrainedVariable:internalSpecify", "tried to specify value to same, ignoring. " << toString());
+		return;
+	}
+
+     debugMsg("ConstrainedVariable:internalSpecify", "specifying value:" << toString());
     checkError(baseDomain().isMember(singletonValue), singletonValue << " not in " << baseDomain().toString());
     checkError(isActive(), toString());
 
@@ -368,11 +365,6 @@ namespace EUROPA {
   void ConstrainedVariable::reset(const Domain& domain){
     checkError(domain.isSubsetOf(internal_baseDomain()),
 				 domain.toString() << " not in " << internal_baseDomain().toString());
-
-    // If the base domain is a singleton, and it is closed, then we can consider the variable continues to be
-    // specified so we exit with no change
-    if(baseDomain().isSingleton() && baseDomain().isClosed())
-      return;
 
     m_specifiedFlag = false;
     getCurrentDomain().reset(domain);

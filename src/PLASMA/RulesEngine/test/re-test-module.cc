@@ -605,17 +605,22 @@ private:
   static bool testProxyVariableRelation(){
     RE_DEFAULT_SETUP(ce, db, false);
 
+    ConstrainedVariableId v;
+
     Object obj0(db, "Objects", "obj0", true);
     CPPUNIT_ASSERT(!obj0.isComplete());
-    obj0.addVariable(IntervalIntDomain(0, 0), "m_int");
+    v = obj0.addVariable(IntervalIntDomain(0, 0), "m_int");
+    v->specify(0);
     obj0.close();
     Object obj1(db, "Objects", "obj1", true);
     CPPUNIT_ASSERT(!obj1.isComplete());
-    obj1.addVariable(IntervalIntDomain(1, 1), "m_int");
+    v = obj1.addVariable(IntervalIntDomain(1, 1), "m_int");
+    v->specify(1);
     obj1.close();
     Object obj2(db, "Objects", "obj2", true);
     CPPUNIT_ASSERT(!obj2.isComplete());
-    obj2.addVariable(IntervalIntDomain(2, 2), "m_int");
+    v = obj2.addVariable(IntervalIntDomain(2, 2), "m_int");
+    v->specify(2);
     obj2.close();
 
     ObjectDomain emptyDomain(ce->getCESchema()->getDataType("Objects"));
@@ -637,7 +642,7 @@ private:
 
     // Allocate the constraint
     std::vector<unsigned int> path;
-    path.push_back(0);
+    path.push_back(0); // Proxy var will point to obj*.m_int
     ProxyVariableRelation c(objVar.getId(), proxyVar.getId(), path);
 
     CPPUNIT_ASSERT(ce->propagate());

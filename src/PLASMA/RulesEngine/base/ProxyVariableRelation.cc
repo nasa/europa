@@ -75,10 +75,11 @@ namespace EUROPA {
        !getScope()[1]->isSpecified()){
       ObjectId object = Entity::getTypedEntity<Object>(variable->getSpecifiedValue());
       ConstrainedVariableId fieldVar = object->getVariable(m_path);
-      checkError(fieldVar->isSpecified(), fieldVar->toString());
-      m_autoSpecified = true;
-      getScope()[1]->specify(fieldVar->getSpecifiedValue());
-      return true;
+      if (fieldVar->isSpecified()) {
+    	  m_autoSpecified = true;
+    	  getScope()[1]->specify(fieldVar->getSpecifiedValue());
+          return true;
+      }
     }
 
     // If the object variable is RESET and we had automatically set it, then we should reset it.
@@ -92,10 +93,11 @@ namespace EUROPA {
     if(argIndex == 1 && changeType == DomainListener::RESET && getScope()[0]->isSpecified()){
       ObjectId object = Entity::getTypedEntity<Object>(getScope()[0]->getSpecifiedValue());
       ConstrainedVariableId fieldVar = object->getVariable(m_path);
-      checkError(fieldVar->isSpecified(), fieldVar->toString());
-      m_autoSpecified = true;
-      getScope()[1]->specify(fieldVar->getSpecifiedValue());
-      return true;
+      if (fieldVar->isSpecified()) {
+    	  m_autoSpecified = true;
+    	  getScope()[1]->specify(fieldVar->getSpecifiedValue());
+          return true;
+      }
     }
 
     // Otherwise we cannot ignore

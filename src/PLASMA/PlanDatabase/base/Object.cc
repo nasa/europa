@@ -643,9 +643,6 @@ namespace EUROPA {
 
       m_variables.push_back(id);
 
-      if(id->baseDomain().isSingleton())
-          id->specify(id->baseDomain().getSingletonValue());
-
       return(id);
     }
 
