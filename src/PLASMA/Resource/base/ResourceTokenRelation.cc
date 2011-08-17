@@ -65,7 +65,8 @@ namespace EUROPA {
        variable->lastDomain().isSingleton()) {
       //if the object is singleton and the state has the singleton value ACTIVE
       if(object->lastDomain().isSingleton() &&
-         state->isSpecified() && state->getSpecifiedValue() == Token::ACTIVE) {
+         state->isSpecified() && state->getSpecifiedValue() == Token::ACTIVE &&
+         m_resource.isNoId()) {
         m_resource = Entity::getTypedEntity<Resource>(object->lastDomain().getSingletonValue());
         check_error(m_resource.isValid());
         debugMsg("ResourceTokenRelation:canIgnore", "Adding " << m_token->toString() << " to profile for resource " << m_resource->toString());
