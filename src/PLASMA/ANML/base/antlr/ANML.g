@@ -165,6 +165,16 @@ type_name:
 	| ID
 	;
 
+set: enumeration | range;
+
+enumeration: 
+	LeftC expr (Comma? expr)* RightC -> ^(Enum[$LeftC,"Enumeration"] expr+)
+;
+
+range: 
+	LeftB a=expr Comma? b=expr RightB -> ^(Range[$LeftB,"Range"] $a $b) 
+;
+
 type_spec: 
 	type_ref
 	| Vector param_list
@@ -172,15 +182,13 @@ type_spec:
 	| type_enumeration
 ;
 
-problem_stmt:	
-	fact_decl
-	| goal_decl
+type_enumeration: 
+	LeftC type_enumeration_element (Comma? type_enumeration_element)* RightC 
+	-> ^(Enum[$LeftC,"TypeElementEnumeration"] type_enumeration_element+)
 ;
-
-init: 
-	Assign! expr
-	| Assign! Undefined!
-	| Undefine!
+	  
+type_enumeration_element:
+	ID | literal
 ;
 
 param_list:	
@@ -194,6 +202,29 @@ param_list:
 param: 
 	type_ref ID
 	-> ^(Parameter type_ref ID) 
+;
+
+/* object definitions */
+// TODO JRB: what's this? is this supposed to be an object type?, if so, only fluents and actions should be allowed
+object_block: 
+	LeftC
+		( t+=type_decl 
+		| c+=const_decl 
+		| f+=fluent_decl 
+		| a+=action_decl
+		| s+=stmt
+		| ps+=problem_stmt
+		)+  
+	RightC
+		-> 
+		^(Block[$LeftC,"ObjectBlock"]
+			^(Types $t*)
+			^(Constants $c*)
+			^(Fluents $f*)
+			^(Actions $a*)
+			^(Stmts $s*)
+			^(ProblemStmts $ps*)
+		)
 ;
 
 /* Declarations */	
@@ -264,67 +295,17 @@ var_decl_helper:
 		-> ^(Fluent ID init?)
 ;
 
+init: 
+	Assign! expr
+	| Assign! Undefined!
+	| Undefine!
+;
+
 fun_decl_helper: 
 	ID param_list 
 	-> ^(FluentFunction ID param_list)
 ;
 
-fact_decl: 
-	Fact
-    	( LeftC fact_decl_helper* RightC
-      		-> fact_decl_helper*
-    	| fact_decl_helper
-      		-> fact_decl_helper
-    	)
-;
- 
-fact_decl_helper: 
-	(ref Semi)=> ref Semi
-	  -> ^(TimedStmt[$ref.tree] ^(DefinitePoint[$ref.tree] ^(TStart Start)) ^(Assign[$Semi] ref True))
-	| ((NotLog|NotBit) ref Semi)=> (n=NotLog|n=NotBit) ref Semi
-	  -> ^(TimedStmt[$n] ^(DefinitePoint[$n] ^(TStart Start)) ^(Assign[$Semi] ref False))
-	| ref (o=EqualLog|o=Equal) expr Semi
-	  -> ^(TimedStmt[$ref.tree] ^(DefinitePoint[$ref.tree] ^(TStart Start)) ^(Assign[$o] ref expr))
-	| Semi!
-;
-
-goal_decl : Goal 
-	( LeftC goal_decl_helper* RightC
-	  -> goal_decl_helper*
-	| goal_decl_helper
-	  -> goal_decl_helper 
-	)
-;
-
-goal_decl_helper: 
-	expr Semi
-	  -> ^(TimedStmt[$expr.tree] ^(DefinitePoint[$expr.tree] ^(TStart End)) expr)
-	| Semi!
-; 
-
-/* object definitions */
-
-object_block: 
-	LeftC
-		( t+=type_decl 
-		| c+=const_decl 
-		| f+=fluent_decl 
-		| a+=action_decl
-		| s+=stmt
-		| ps+=problem_stmt
-		)+  
-	RightC
-		-> 
-		^(Block[$LeftC,"ObjectBlock"]
-			^(Types $t*)
-			^(Constants $c*)
-			^(Fluents $f*)
-			^(Actions $a*)
-			^(Stmts $s*)
-			^(ProblemStmts $ps*)
-		)
-;
-		
 /* actions */
 
 // the declarations of actions nested within decompositions fails
@@ -405,6 +386,67 @@ decomp_block:
 		)
 ;
 
+/* problem stmts */
+
+problem_stmt:	
+	fact_decl
+	| goal_decl
+;
+
+fact_decl: 
+	Fact
+    	( LeftC fact_decl_helper* RightC
+      		-> fact_decl_helper*
+    	| fact_decl_helper
+      		-> fact_decl_helper
+    	)
+;
+ 
+fact_decl_helper: 
+	(ref Semi)=> ref Semi
+	  -> ^(TimedStmt[$ref.tree] ^(DefinitePoint[$ref.tree] ^(TStart Start)) ^(Assign[$Semi] ref True))
+	| ((NotLog|NotBit) ref Semi)=> (n=NotLog|n=NotBit) ref Semi
+	  -> ^(TimedStmt[$n] ^(DefinitePoint[$n] ^(TStart Start)) ^(Assign[$Semi] ref False))
+	| ref (o=EqualLog|o=Equal) expr Semi
+	  -> ^(TimedStmt[$ref.tree] ^(DefinitePoint[$ref.tree] ^(TStart Start)) ^(Assign[$o] ref expr))
+	| Semi!
+;
+
+goal_decl : Goal 
+	( LeftC goal_decl_helper* RightC
+	  -> goal_decl_helper*
+	| goal_decl_helper
+	  -> goal_decl_helper 
+	)
+;
+
+goal_decl_helper: 
+	expr Semi
+	  -> ^(TimedStmt[$expr.tree] ^(DefinitePoint[$expr.tree] ^(TStart End)) expr)
+	| Semi!
+; 
+
+/* stmts */
+			
+stmt: //options {memoize=true;}
+	(stmt_primitive)=> stmt_primitive
+	| (stmt_block)=> stmt_block
+	| (stmt_timed)=> stmt_timed
+	| stmt_contains
+	| stmt_when
+	| stmt_forall
+	| stmt_exists
+;
+
+stmt_primitive: 
+	(expr Semi)=> expr Semi!
+  	| (stmt_chain Semi)=> stmt_chain Semi!
+	| (stmt_delta_chain Semi)=> stmt_delta_chain Semi!
+  	| (stmt_timeless Semi)=> stmt_timeless Semi!
+  	| Semi -> Skip
+;
+
+// TODO JRB: what's this? same a object_block?
 stmt_block: 
 	LeftC
 		( t+=type_decl 
@@ -424,16 +466,6 @@ stmt_block:
 			^(Stmts $s*)
 			^(ProblemStmts $ps*)
 		)
-;
-			
-stmt: //options {memoize=true;}
-	(stmt_primitive)=> stmt_primitive
-	| (stmt_block)=> stmt_block
-	| (stmt_timed)=> stmt_timed
-	| stmt_contains
-	| stmt_when
-	| stmt_forall
-	| stmt_exists
 ;
 
 stmt_contains:
@@ -469,20 +501,13 @@ stmt_timed:
 		-> ^(TimedStmt interval stmt)
 ;
 	
-stmt_primitive: 
-	(expr Semi)=> expr Semi!
-  	| (stmt_chain Semi)=> stmt_chain Semi!
-	| (stmt_delta_chain Semi)=> stmt_delta_chain Semi!
-  	| (stmt_timeless Semi)=> stmt_timeless Semi!
-  	| Semi -> Skip
-;
-
 stmt_chain:
 	ref e+=stmt_chain_1+
   		-> ^(Chain ^(DefiniteInterval ^(TBra Bra) ^(TStart Start) ^(TDuration Duration) ^(TEnd End) ^(TKet Ket)) ref $e+) 
 	| (interval ref stmt_chain_1+)=> interval ref e+=stmt_chain_1+
 		-> ^(Chain interval ref $e+)
 ;
+
 stmt_chain_1:
     Comma!? Assign^ e_num
     | Comma? o=Change b=e_num
@@ -743,25 +768,6 @@ time_primitive:
 //    	-> ^(LabelRef This Ket)
 ;
 	
-set: enumeration | range;
-
-enumeration: 
-	LeftC expr (Comma? expr)* RightC -> ^(Enum[$LeftC,"Enumeration"] expr+)
-;
-
-range: 
-	LeftB a=expr Comma? b=expr RightB -> ^(Range[$LeftB,"Range"] $a $b) 
-;
-
-type_enumeration: 
-	LeftC type_enumeration_element (Comma? type_enumeration_element)* RightC 
-	-> ^(Enum[$LeftC,"TypeElementEnumeration"] type_enumeration_element+)
-;
-	  
-type_enumeration_element:
-	ID | literal
-;
-
 arg_list :
 	  LeftP (expr (Comma? expr)*)? RightP -> ^(Arguments[$LeftP,"Arguments"] expr*) 
 ;    
