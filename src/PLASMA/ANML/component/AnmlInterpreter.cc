@@ -9,6 +9,7 @@
 #include "ANMLParser.h"
 //#include "ANMLTree.h"
 #include "antlr3exception.h"
+#include "antlr3basetree.h"
 #include "NddlInterpreter.hh"
 
 namespace EUROPA {
@@ -51,7 +52,8 @@ std::string AnmlInterpreter::interpret(std::istream& ins, const std::string& sou
     // Warnings, if any, should go here
 
     // Calling static helper functions to get a verbose version of AST
-    const char* ast = (char*)(toVerboseStringTree(result.tree)->chars);
+    //const char* ast = (char*)(toVerboseStringTree(result.tree)->chars);
+    const char* ast = (char*)(result.tree->toStringTree(result.tree)->chars);
     os << "AST " << ast;
 
     debugMsg("AnmlToASTInterpreter:interpret",os.str());

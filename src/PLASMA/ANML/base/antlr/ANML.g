@@ -144,22 +144,30 @@ anml
 	)
 ;
 
-problem_stmt
-	:	fact_decl
-	|	goal_decl
+type_decl 
+	: Type l+=type_decl_helper (Comma l+=type_decl_helper)* Semi
+	  -> $l+
+	| type_refine
 	;
 
-/* Declaration Helpers */
-builtinType
-	: Boolean
-	| Integer
-	| Float
-	| Symbol
-	| String
-	| Object
-;
-	
-// _constrained_ type references
+type_decl_helper
+	: ID
+	  ( LessThan s+=type_reference
+	  | Assign d+=type_spec
+	  | With p+=object_block
+	  )*
+	-> ^(Type ID ^(Assign["Assign"] $d*) ^(LessThan["LessThan"] $s*) ^(With["With"] $p*))
+	;
+
+type_reference
+	: (type_name set?) 
+	  -> ^(TypeRef type_name set?)
+	;
+		 
+type_name
+	: builtinType
+	| ID
+	;
 
 type_ref 
 	: (builtinType set?) => builtinType set
@@ -175,6 +183,27 @@ type_spec
 	| type_enumeration
 ;
 
+// TODO JRB: Fact??? this looks incorrect
+type_refine
+	: Fact
+		( LeftC type_refine_helper+ RightC
+			-> type_refine_helper+
+		| type_refine_helper
+			-> type_refine_helper
+		)
+;
+		
+
+type_refine_helper
+	: user_type_ref LessThan type_ref Semi
+		-> ^(TypeRefine[$LessThan] user_type_ref ^(LessThan type_ref))
+	| user_type_ref Assign type_spec Semi
+		-> ^(TypeRefine[$Assign] user_type_ref ^(Assign type_spec))
+	| enumerated_type_ref i=ID (Comma ID)* Semi
+		-> ^(TypeRefine[$i] enumerated_type_ref ID+)
+;
+	
+// _constrained_ type references
 user_type_ref 
 	: ID -> ^(TypeRef ID)
 ;
@@ -210,24 +239,11 @@ const_fun_decl_helper : ID param_list
 	-> ^(ConstantFunction ID param_list)
 ;
 
-type_decl_helper
-	: ID
-	  ( LessThan s+=type_ref
-	  | Assign d+=type_spec
-	  | With p+=object_block
-	  )*
-	-> ^(Type ID ^(Assign["Assign"] $d*) ^(LessThan["LessThan"] $s*) ^(With["With"] $p*))
-;
+problem_stmt
+	:	fact_decl
+	|	goal_decl
+	;
 
-type_refine_helper
-	: user_type_ref LessThan type_ref Semi
-		-> ^(TypeRefine[$LessThan] user_type_ref ^(LessThan type_ref))
-	| user_type_ref Assign type_spec Semi
-		-> ^(TypeRefine[$Assign] user_type_ref ^(Assign type_spec))
-	| enumerated_type_ref i=ID (Comma ID)* Semi
-		-> ^(TypeRefine[$i] enumerated_type_ref ID+)
-;
-	
 init 
 	: Assign! expr
 	| Assign! Undefined!
@@ -246,12 +262,6 @@ param_list :
 param 
 	: type_ref param_helper (Comma param_helper)* 
 	  -> param_helper+
-;
-
-type_decl 
-	: Type l+=type_decl_helper (Comma l+=type_decl_helper)* Semi
-	  -> $l+
-	| type_refine
 ;
 
 const_decl 
@@ -302,15 +312,6 @@ decl_helper
 	;
 	
 
-type_refine
-	: Fact
-		( LeftC type_refine_helper+ RightC
-			-> type_refine_helper+
-		| type_refine_helper
-			-> type_refine_helper
-		)
-;
-		
 fact_decl_helper 
 	: (ref Semi)=> ref Semi
 	  -> ^(TimedStmt[$ref.tree] ^(DefinitePoint[$ref.tree] ^(TStart Start)) ^(Assign[$Semi] ref True))
@@ -816,6 +817,27 @@ arg_list :
 ;    
 
 /* primitives */	  
+builtinType
+	: Boolean
+	| Integer
+	| Float
+	| Symbol
+	| String
+	| Object
+;
+	
+Boolean 
+	: 'bool'
+	| 'boolean'
+;
+Integer : 'int' | 'integer';
+Float : 'float' ;
+Symbol : 'symbol' ;
+String : 'string' ;
+Object : 'object' ;
+
+Vector : 'vector';
+
 literal 
 	: INT
 	| FLOAT
@@ -907,18 +929,6 @@ Decomposition: ':decomposition';
 Ordered: 'ordered';
 Unordered: 'unordered';	  
 	  
-Boolean 
-	: 'bool'
-	| 'boolean'
-;
-Integer : 'int' | 'integer';
-Float : 'float' ;
-Symbol : 'symbol' ;
-String : 'string' ;
-Object : 'object' ;
-
-Vector : 'vector';
-
 Delta : '^';
 
 Undefined: 'undefined' 

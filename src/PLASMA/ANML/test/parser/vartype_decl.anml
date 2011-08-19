@@ -1,27 +1,30 @@
-// Test vartype_decl rule (and subrules)
+// Test type_decl rule (and subrules)
 
-vartype BoolAlias          : bool;
-vartype BoolAliasAlias     : BoolAlias;
+type BoolAlias          < bool ;
+type BoolAliasAlias     < BoolAlias;
 
-vartype IntAlias           : int;
-vartype IntAliasAlias      : IntAlias;
-vartype PositiveInt        : int [1 +inf];
-vartype PositiveIntAlias   : PositiveInt; 
-vartype NegativeInt        : int [-inf -1];
-vartype NegativeIntAlias   : NegativeInt; 
+type IntAlias           < int;
+type IntAliasAlias      < IntAlias;
+type PositiveInt        < int [1 infty];
 
-vartype HexDigit           : int [0x0 0xF];
+type PositiveIntAlias   < PositiveInt; 
+// TODO: can't say +infinity or -infinity in grammar
+//type NegativeInt        < int [-infty -1];
+type NegativeIntAlias   < NegativeInt; 
 
-vartype FloatAlias         : float;
-vartype FloatAliasAlias    : FloatAlias;
-vartype PositiveFloat      : float [0.0 +inf];
-vartype PositiveFloatAlias : PositiveFloat; 
+//type HexDigit           < int [0x0 0xF];
 
-vartype StringAlias        : string;
-vartype StringAliasAlias   : StringAlias;
+type FloatAlias         < float;
+type FloatAliasAlias    < FloatAlias;
+type PositiveFloat      < float [0.0 inff];
+type PositiveFloatAlias < PositiveFloat; 
 
-vartype EnumExample        : string { "string1", "string2", "string3" };
-vartype EnumExampleAlias   : EnumExample;
+type StringAlias        < string;
+type StringAliasAlias   < StringAlias;
 
-vartype VectorExample      : vector (int a, float b);
-vartype VectorExampleAlias : VectorExample;
+type EnumExample        < string { "string1", "string2", "string3" };
+type EnumExampleAlias   < EnumExample;
+
+// TODO: vectors are not supported in grammar
+//type VectorExample      < vector (int a, float b);
+//type VectorExampleAlias < VectorExample;
