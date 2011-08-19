@@ -28,8 +28,6 @@ tokens {
 	Bind;
 	Access;
 	
-	TypeRefine;
-
 	Type;
 	Fluent;
 	FluentFunction;
@@ -146,7 +144,6 @@ anml:
 type_decl: 
 	Type l+=type_decl_helper (Comma l+=type_decl_helper)* Semi
 		-> $l+
-	| type_refine
 ;
 
 type_decl_helper: 
@@ -173,66 +170,6 @@ type_spec:
 	| Vector param_list
 		-> ^(Vector param_list)
 	| type_enumeration
-;
-
-// TODO JRB: Fact??? this looks incorrect
-type_refine: 
-	Fact
-		( LeftC type_refine_helper+ RightC
-			-> type_refine_helper+
-		| type_refine_helper
-			-> type_refine_helper
-		)
-;
-		
-type_refine_helper: 
-	user_type_ref LessThan type_ref Semi
-		-> ^(TypeRefine[$LessThan] user_type_ref ^(LessThan type_ref))
-	| user_type_ref Assign type_spec Semi
-		-> ^(TypeRefine[$Assign] user_type_ref ^(Assign type_spec))
-	| enumerated_type_ref i=ID (Comma ID)* Semi
-		-> ^(TypeRefine[$i] enumerated_type_ref ID+)
-;
-	
-// _constrained_ type references
-user_type_ref: 
-	ID -> ^(TypeRef ID)
-;
-
-enumerated_type_ref: 
-	Symbol -> ^(TypeRef Symbol)
-	| Object -> ^(TypeRef Object)
-	| ID -> ^(TypeRef ID)
-;
-
-predicate_helper: 
-	Predicate
-		-> ^(TypeRef[$Predicate] Boolean[$Predicate])
-;
-
-param_helper: 
-	ID  
-	-> ^(Parameter ID)
-;
-
-var_decl_helper: 
-	ID init? 
-		-> ^(Fluent ID init?)
-;
-
-fun_decl_helper: 
-	ID param_list 
-	-> ^(FluentFunction ID param_list)
-;
-
-const_var_decl_helper: 
-	ID init? 
-		-> ^(Constant ID init?)
-;
-
-const_fun_decl_helper: 
-	ID param_list 
-		-> ^(ConstantFunction ID param_list)
 ;
 
 problem_stmt:	
@@ -271,6 +208,16 @@ const_decl_helper:
 	| const_fun_decl_helper
 ;
 
+const_var_decl_helper: 
+	ID init? 
+		-> ^(Constant ID init?)
+;
+
+const_fun_decl_helper: 
+	ID param_list 
+		-> ^(ConstantFunction ID param_list)
+;
+
 fluent_decl: 	
 	fluent_fluent_decl
 	| fluent_var_decl 
@@ -301,11 +248,26 @@ fluent_predicate_decl:
 		l+=fun_decl_helper (Comma l+=fun_decl_helper)* Semi	
 		) -> $l+
 ;
+
+predicate_helper: 
+	Predicate
+		-> ^(TypeRef[$Predicate] Boolean[$Predicate])
+;
 	
 decl_helper: 
 	var_decl_helper
 	| fun_decl_helper
 ;	
+
+var_decl_helper: 
+	ID init? 
+		-> ^(Fluent ID init?)
+;
+
+fun_decl_helper: 
+	ID param_list 
+	-> ^(FluentFunction ID param_list)
+;
 
 fact_decl: 
 	Fact
