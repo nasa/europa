@@ -260,16 +260,16 @@ param_list:
 	)
 ;
 
-/* Declarations */	
 param: 
 	type_reference ID
 	-> ^(Parameter type_reference ID) 
 ;
 
+/* Declarations */	
 const_decl: 	
 	Constant type_ref
-		//(l+=const_decl_helper (Comma l+=const_decl_helper)* Semi)
-	  	//-> $l+
+		(l+=const_decl_helper (Comma l+=const_decl_helper)* Semi)
+	  	-> $l+
 	;
 
 const_decl_helper: 	
