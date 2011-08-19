@@ -124,8 +124,7 @@ using namespace EUROPA;
 using namespace EUROPA;
 }
 
-anml	
-	: 
+anml: 
 	( t+=type_decl 
 	| c+=const_decl 
 	| f+=fluent_decl 
@@ -144,48 +143,47 @@ anml
 	)
 ;
 
-type_decl 
-	: Type l+=type_decl_helper (Comma l+=type_decl_helper)* Semi
-	  -> $l+
+type_decl: 
+	Type l+=type_decl_helper (Comma l+=type_decl_helper)* Semi
+		-> $l+
 	| type_refine
-	;
+;
 
-type_decl_helper
-	: ID
+type_decl_helper: 
+	ID
 	  ( LessThan s+=type_reference
 	  | Assign d+=type_spec
 	  | With p+=object_block
 	  )*
-	-> ^(Type ID ^(Assign["Assign"] $d*) ^(LessThan["LessThan"] $s*) ^(With["With"] $p*))
-	;
+		-> ^(Type ID ^(Assign["Assign"] $d*) ^(LessThan["LessThan"] $s*) ^(With["With"] $p*))
+;
 
-type_reference
-	: (type_name set?) 
-	  -> ^(TypeRef type_name set?)
+type_reference: 
+	(type_name set?) 
+		-> ^(TypeRef type_name set?)
 	;
 		 
-type_name
-	: builtinType
+type_name: 
+	builtinType
 	| ID
 	;
 
-type_ref 
-	: (builtinType set?) => builtinType set
-	  -> ^(TypeRef builtinType set?)
+type_ref: 
+	(builtinType set?) => builtinType set
+		-> ^(TypeRef builtinType set?)
 	| (ID set?) => ID set
-	  -> ^(TypeRef ID set?)
+		-> ^(TypeRef ID set?)
 ;
 
-type_spec
-	: type_ref
+type_spec: type_ref
 	| Vector param_list
-	  -> ^(Vector param_list)
+		-> ^(Vector param_list)
 	| type_enumeration
 ;
 
 // TODO JRB: Fact??? this looks incorrect
-type_refine
-	: Fact
+type_refine: 
+	Fact
 		( LeftC type_refine_helper+ RightC
 			-> type_refine_helper+
 		| type_refine_helper
@@ -193,9 +191,8 @@ type_refine
 		)
 ;
 		
-
-type_refine_helper
-	: user_type_ref LessThan type_ref Semi
+type_refine_helper: 
+	user_type_ref LessThan type_ref Semi
 		-> ^(TypeRefine[$LessThan] user_type_ref ^(LessThan type_ref))
 	| user_type_ref Assign type_spec Semi
 		-> ^(TypeRefine[$Assign] user_type_ref ^(Assign type_spec))
@@ -204,53 +201,58 @@ type_refine_helper
 ;
 	
 // _constrained_ type references
-user_type_ref 
-	: ID -> ^(TypeRef ID)
+user_type_ref: 
+	ID -> ^(TypeRef ID)
 ;
 
-enumerated_type_ref
-	: Symbol -> ^(TypeRef Symbol)
+enumerated_type_ref: 
+	Symbol -> ^(TypeRef Symbol)
 	| Object -> ^(TypeRef Object)
 	| ID -> ^(TypeRef ID)
 ;
 
-predicate_helper
-	: Predicate
-	  -> ^(TypeRef[$Predicate] Boolean[$Predicate])
+predicate_helper: 
+	Predicate
+		-> ^(TypeRef[$Predicate] Boolean[$Predicate])
 ;
 
-param_helper : ID  
+param_helper: 
+	ID  
 	-> ^(Parameter ID)
 ;
 
-var_decl_helper : ID init? 
-	-> ^(Fluent ID init?)
+var_decl_helper: 
+	ID init? 
+		-> ^(Fluent ID init?)
 ;
 
-fun_decl_helper : ID param_list 
+fun_decl_helper: 
+	ID param_list 
 	-> ^(FluentFunction ID param_list)
 ;
 
-const_var_decl_helper : ID init? 
-	-> ^(Constant ID init?)
+const_var_decl_helper: 
+	ID init? 
+		-> ^(Constant ID init?)
 ;
 
-const_fun_decl_helper : ID param_list 
-	-> ^(ConstantFunction ID param_list)
+const_fun_decl_helper: 
+	ID param_list 
+		-> ^(ConstantFunction ID param_list)
 ;
 
-problem_stmt
-	:	fact_decl
-	|	goal_decl
-	;
+problem_stmt:	
+	fact_decl
+	| goal_decl
+;
 
-init 
-	: Assign! expr
+init: 
+	Assign! expr
 	| Assign! Undefined!
 	| Undefine!
 ;
 
-param_list :	
+param_list:	
 	( LeftP p+=param (Comma p+=param)* RightP 
 		-> ^(Parameters $p+)
 	| LeftP RightP
@@ -259,8 +261,8 @@ param_list :
 ;
 
 /* Declarations */	
-param 
-	: type_reference ID
+param: 
+	type_reference ID
 	-> ^(Parameter type_reference ID) 
 ;
 
@@ -270,56 +272,64 @@ param
 	  -> param_helper+
 ;
 */
-const_decl 
-	: 	Constant type_ref
+const_decl: 	
+	Constant type_ref
 		//(l+=const_decl_helper (Comma l+=const_decl_helper)* Semi)
 	  	//-> $l+
 	;
 
-const_decl_helper
-	: 	const_var_decl_helper
-	|	const_fun_decl_helper
+const_decl_helper: 	
+	const_var_decl_helper
+	| const_fun_decl_helper
+;
+
+fluent_decl: 	
+	fluent_fluent_decl
+	| fluent_var_decl 
+	| fluent_fun_decl 
+	| fluent_predicate_decl
 	;
 
-fluent_decl 
-	: 	fluent_fluent_decl
-	|	fluent_var_decl 
-	|	fluent_fun_decl 
-	|	fluent_predicate_decl
-	;
-
-fluent_fluent_decl
-	: 	(Fluent type_ref
+fluent_fluent_decl: 	
+	(Fluent type_ref
 		l+=decl_helper (Comma l+=decl_helper)* Semi
 		) -> $l+
-	;
+;
 	
-fluent_var_decl
-	:	(Variable type_reference
+fluent_var_decl:	
+	(Variable type_reference
 		l+=var_decl_helper (Comma l+=var_decl_helper)* Semi
 		) -> $l+
-	;
+;
 	
-fluent_fun_decl
-	:	(Function type_ref 
+fluent_fun_decl:	
+	(Function type_ref 
 		l+=fun_decl_helper (Comma l+=fun_decl_helper)* Semi
 		) -> $l+
-	;
+;
 	
-fluent_predicate_decl
-	:	(predicate_helper 
+fluent_predicate_decl:	
+	(predicate_helper 
 		l+=fun_decl_helper (Comma l+=fun_decl_helper)* Semi	
 		) -> $l+
-	;
+;
 	
-decl_helper
-	: var_decl_helper
+decl_helper: 
+	var_decl_helper
 	| fun_decl_helper
-	;
-	
+;	
 
-fact_decl_helper 
-	: (ref Semi)=> ref Semi
+fact_decl: 
+	Fact
+    	( LeftC fact_decl_helper* RightC
+      		-> fact_decl_helper*
+    	| fact_decl_helper
+      		-> fact_decl_helper
+    	)
+;
+ 
+fact_decl_helper: 
+	(ref Semi)=> ref Semi
 	  -> ^(TimedStmt[$ref.tree] ^(DefinitePoint[$ref.tree] ^(TStart Start)) ^(Assign[$Semi] ref True))
 	| ((NotLog|NotBit) ref Semi)=> (n=NotLog|n=NotBit) ref Semi
 	  -> ^(TimedStmt[$n] ^(DefinitePoint[$n] ^(TStart Start)) ^(Assign[$Semi] ref False))
@@ -328,20 +338,6 @@ fact_decl_helper
 	| Semi!
 ;
 
-goal_decl_helper
-	: expr Semi
-	  -> ^(TimedStmt[$expr.tree] ^(DefinitePoint[$expr.tree] ^(TStart End)) expr)
-	| Semi!
-; 
-
-fact_decl : Fact
-    ( LeftC fact_decl_helper* RightC
-      -> fact_decl_helper*
-    | fact_decl_helper
-      -> fact_decl_helper
-    )
-;
- 
 goal_decl : Goal 
 	( LeftC goal_decl_helper* RightC
 	  -> goal_decl_helper*
@@ -350,9 +346,15 @@ goal_decl : Goal
 	)
 ;
 
+goal_decl_helper: 
+	expr Semi
+	  -> ^(TimedStmt[$expr.tree] ^(DefinitePoint[$expr.tree] ^(TStart End)) expr)
+	| Semi!
+; 
+
 /* object definitions */
 
-object_block : 
+object_block: 
 	LeftC
 		( t+=type_decl 
 		| c+=const_decl 
@@ -385,13 +387,9 @@ object_block :
 		
 // second argument is how you dispatch the action; give a start and an end time
 // or just a start time
-action_decl 
-:
-	Action ID 
-	param_list
-	(LeftB Duration RightB)? 
-	action_block
-	-> ^(Action ID param_list Duration? action_block)
+action_decl:
+	Action ID param_list (LeftB Duration RightB)? action_block
+		-> ^(Action ID param_list Duration? action_block)
 ;
 
 // this would be interesting:
@@ -406,19 +404,16 @@ action_decl
 //		[3] foo(...);
 //		[3,8] foo(...);
 //		[3,^5] foo(...);
-
-durative_action_block
-: 
-		LeftB! Duration RightB! action_block_h
+durative_action_block: 
+	LeftB! Duration RightB! action_block_h
 ;
 
-action_block
-:
-		action_block_h
+action_block:
+	action_block_h
 ;
 
-action_block_h
-  : LeftC
+action_block_h: 
+	LeftC
 		( t+=type_decl 
 		| c+=const_decl 
 		| f+=fluent_decl 
@@ -438,8 +433,8 @@ action_block_h
 			^(Decompositions $d*)
 ;
 					   
-decomp_block 
-	: Decomposition
+decomp_block: 
+	Decomposition
 	// ID param_list
 		( t+=type_decl 
 		| c+=const_decl 
@@ -460,8 +455,8 @@ decomp_block
 		)
 ;
 
-stmt_block 
-	: LeftC
+stmt_block: 
+	LeftC
 		( t+=type_decl 
 		| c+=const_decl 
 		| f+=fluent_decl 
@@ -481,8 +476,8 @@ stmt_block
 		)
 ;
 			
-stmt //options {memoize=true;}
-	: (stmt_primitive)=> stmt_primitive
+stmt: //options {memoize=true;}
+	(stmt_primitive)=> stmt_primitive
 	| (stmt_block)=> stmt_block
 	| (stmt_timed)=> stmt_timed
 	| stmt_contains
@@ -491,8 +486,8 @@ stmt //options {memoize=true;}
 	| stmt_exists
 ;
 
-stmt_contains
-	: Contains 
+stmt_contains:
+	Contains 
 		((exist_time stmt)=> exist_time stmt
 			-> ^(ContainsSomeStmt[$Contains] exist_time stmt)
 		| stmt
@@ -500,8 +495,8 @@ stmt_contains
 		)
 ;
 
-stmt_when 
-	: When guard stmt  
+stmt_when: 
+	When guard stmt  
 		( (Else)=> Else stmt
 			-> ^(WhenElse[$When] guard stmt stmt)
 		| 
@@ -509,37 +504,37 @@ stmt_when
 		)
 ;
 
-stmt_forall
-	: ForAll param_list stmt
+stmt_forall:
+	ForAll param_list stmt
 		-> ^(ForAllStmt[$ForAll] param_list stmt)
 ;
 
-stmt_exists
-	: Exists param_list stmt
+stmt_exists:
+	Exists param_list stmt
 		-> ^(ExistsStmt[$Exists] param_list stmt)
 ;
 
-stmt_timed
-	: interval stmt
+stmt_timed:
+	interval stmt
 		-> ^(TimedStmt interval stmt)
 ;
 	
-stmt_primitive 
-	: (expr Semi)=> expr Semi!
+stmt_primitive: 
+	(expr Semi)=> expr Semi!
   	| (stmt_chain Semi)=> stmt_chain Semi!
 	| (stmt_delta_chain Semi)=> stmt_delta_chain Semi!
   	| (stmt_timeless Semi)=> stmt_timeless Semi!
   	| Semi -> Skip
 ;
 
-stmt_chain
-	: ref e+=stmt_chain_1+
+stmt_chain:
+	ref e+=stmt_chain_1+
   		-> ^(Chain ^(DefiniteInterval ^(TBra Bra) ^(TStart Start) ^(TDuration Duration) ^(TEnd End) ^(TKet Ket)) ref $e+) 
 	| (interval ref stmt_chain_1+)=> interval ref e+=stmt_chain_1+
 		-> ^(Chain interval ref $e+)
 ;
-stmt_chain_1
-    : Comma!? Assign^ e_num
+stmt_chain_1:
+    Comma!? Assign^ e_num
     | Comma? o=Change b=e_num
     	->	Undefine 
     		^(Assign $b)
@@ -561,16 +556,16 @@ stmt_chain_1
     	-> Undefine
 ; 
 
-stmt_delta_chain
-	: Delta ref e+=stmt_delta_chain_1+ 
+stmt_delta_chain:
+	Delta ref e+=stmt_delta_chain_1+ 
   		-> ^(Chain ^(DefiniteInterval ^(TBra Bra) ^(TStart Start) ^(TDuration Duration) ^(TEnd End) ^(TKet Ket)) ^(Delta ref) $e+) 
 	| (interval ref stmt_delta_chain_1+)=> interval ref e+=stmt_delta_chain_1+
 		-> ^(Chain interval ^(Delta ref) $e+)
 ;
 
 // don't allow iterated deltas, in particular not implicitly through [start] ^f :produce 2;
-stmt_delta_chain_1
-    : Comma? Assign^ b=e_num
+stmt_delta_chain_1:
+    Comma? Assign^ b=e_num
     | Comma? o=Change b=e_num
     	->	Undefine
     		^(Assign $b)
@@ -581,18 +576,16 @@ stmt_delta_chain_1
     	-> Undefine
 ;
 
-stmt_timeless
-	: time_primitive Assign^ expr
+stmt_timeless:
+	time_primitive Assign^ expr
 ;
 	
-guard 
-//	: '('! expr ')'!
-	: expr
+guard: 
+	expr
 ;
 
-
-interval
-	: (univ_time)=>univ_time
+interval: 
+	(univ_time)=>univ_time
 	| (exist_time)=>exist_time
 ;
 
@@ -600,9 +593,9 @@ interval
 // no definition means no shadowing?
 // and indefinites explicitly map to undefined?
 // or no definition means must choose, and inheritance has to be explicit?
-univ_time 
+univ_time: 
  //options {memoize=true;}   //memoization breaks things for no good reason
-	: (bra All ket)=> bra All ket 
+	(bra All ket)=> bra All ket 
 	    -> ^(DefiniteInterval bra ^(TStart Start) ^(TDuration Duration) ^(TEnd End) ket)
 	| (LeftB expr RightB)=> LeftB e=expr RightB 
 	  -> ^(DefinitePoint ^(TStart $e))
@@ -618,9 +611,9 @@ univ_time
 	  )
 ;
 
-exist_time 
+exist_time: 
  //options {memoize=true;} // see above
-	: (LeftB Skip RightB)=> LeftB Skip RightB -> ^(IndefinitePoint)
+	(LeftB Skip RightB)=> LeftB Skip RightB -> ^(IndefinitePoint)
 	| (bra expr rLimit)=> bra e=expr rLimit -> ^(IndefiniteInterval bra ^(TStart $e) rLimit)
 	| (lLimit expr ket)=> lLimit e=expr ket -> ^(IndefiniteInterval lLimit ^(TEnd $e) ket)
 	| bra 
@@ -634,15 +627,16 @@ exist_time
 	  )
 ;
 
-delta_time : Delta! e_num_1 ;
+delta_time: 
+	Delta! e_num_1 ;
 
-bra 
-	: LeftB -> ^(TBra At[$LeftB,"At"]) 
+bra: 
+	LeftB -> ^(TBra At[$LeftB,"At"]) 
 	| LeftP -> ^(TBra After[$LeftP,"After"])
 //	| Dots -> ^(TBra Dots)
 ;
-ket 
-	: RightB -> ^(TKet At[$RightB,"At"]) 
+
+ket: RightB -> ^(TKet At[$RightB,"At"]) 
 	| RightP -> ^(TKet Before[$RightP,"Before"])
 //	| Dots -> ^(TKet Dots);
 ;
@@ -652,14 +646,14 @@ rLimit : Dots -> ^(TKet After[$Dots,"After"]);
 
 // parallel language; comparisons and assignments evaluate to left hand side.
 
-expr
-	: (e_prefix)=>e_prefix
+expr: 
+	(e_prefix)=>e_prefix
 	| e_log_1
 ;
 
-e_prefix 
+e_prefix: 
 //options {memoize=true;}
-	: ID Colon e=expr
+	ID Colon e=expr
 		-> ^(Label[$Colon] ID $e)
 	| (interval expr)=> interval e=expr
 		-> ^(TimedExpr interval $e)
@@ -683,16 +677,16 @@ e_prefix
     	
 // if...then..., and, either...or...
 // have low precedence, albeit, not as low as the chain-expr operators.
-e_log_1
-	: e_log_2 ((Implies)=>Implies^ ((e_prefix)=>e_prefix | e_log_1))?
+e_log_1: 
+	e_log_2 ((Implies)=>Implies^ ((e_prefix)=>e_prefix | e_log_1))?
 ;
 
-e_log_2
-	: e_log_3 ((EqualLog)=>EqualLog^ ((e_prefix)=>e_prefix | e_log_3))*
+e_log_2: 
+	e_log_3 ((EqualLog)=>EqualLog^ ((e_prefix)=>e_prefix | e_log_3))*
 ;
 
-e_log_3
-	: e_log_4 ((XorLog)=>XorLog^ ((e_prefix)=>e_prefix | e_log_4))*
+e_log_3: 
+	e_log_4 ((XorLog)=>XorLog^ ((e_prefix)=>e_prefix | e_log_4))*
 ;
 	
 // albeit switching and/or matches CNF precedence, which is a very normal
@@ -707,38 +701,38 @@ e_log_3
 //   (ptr != null && ptr->property1 == v1 || ptr->property1 == v2 && ptr->property2 == v3)
 // which is meant as (and (and (not null) (or v1 v2)) v3)
 // but actually means (or (and (not null) v1) (and v2 v3)) 
-e_log_4
-	: e_log_5 ((OrLog)=>OrLog^ ((e_prefix)=>e_prefix | e_log_5))*
+e_log_4: 
+	e_log_5 ((OrLog)=>OrLog^ ((e_prefix)=>e_prefix | e_log_5))*
 ;
 
-e_log_5 
-	: e_log_6 ((AndLog)=>AndLog^ ((e_prefix)=>e_prefix | e_log_6))*
+e_log_5: 
+	e_log_6 ((AndLog)=>AndLog^ ((e_prefix)=>e_prefix | e_log_6))*
 ;
 
-e_log_6
-	: (NotLog)=>NotLog^ ((e_prefix)=>e_prefix | e_log_6)
+e_log_6: 
+	(NotLog)=>NotLog^ ((e_prefix)=>e_prefix | e_log_6)
 	| e_log_7
 ;
 
-e_log_7
-	: e_num_1 ((num_relop)=>num_relop^ ((e_prefix)=>e_prefix | e_num_1))?
+e_log_7: 
+	e_num_1 ((num_relop)=>num_relop^ ((e_prefix)=>e_prefix | e_num_1))?
 ;
 
-e_num
-	: (e_prefix)=>e_prefix
+e_num: 
+	(e_prefix)=>e_prefix
 	| e_num_1
 ;
 
-e_num_1
-	: e_num_2 ((XorBit)=>XorBit^ ((e_prefix)=>e_prefix | e_num_2))*
+e_num_1: 
+	e_num_2 ((XorBit)=>XorBit^ ((e_prefix)=>e_prefix | e_num_2))*
 ;
 
-e_num_2
-	: e_num_3 ((Plus|Minus|OrBit)=>(Plus^|Minus^|OrBit^) ((e_prefix)=>e_prefix | e_num_3))*
+e_num_2: 
+	e_num_3 ((Plus|Minus|OrBit)=>(Plus^|Minus^|OrBit^) ((e_prefix)=>e_prefix | e_num_3))*
 ;
 
-e_num_3
-	: e_num_4 
+e_num_3: 
+	e_num_4 
 		((Times|Divide|AndBit)=>(Times^|Divide^|AndBit^) 
 			((e_prefix)=>e_prefix 
 			| e_num_4
@@ -746,28 +740,28 @@ e_num_3
 		)*
 ;
 
-e_num_4
-	: (Minus|NotBit)=>(Minus^|NotBit^) 
+e_num_4: 
+	(Minus|NotBit)=>(Minus^|NotBit^) 
 		((e_prefix)=>e_prefix 
 		| e_num_4
 		)
 	| e_atomic
 ;
 
-e_atomic
-	: '('! expr ')'!
+e_atomic: 
+	'('! expr ')'!
 	| time_primitive
 	| time_complex
 	| literal
 	| ref
 ;
 		
-time_complex :
+time_complex:
 	(Unordered^|Ordered^) '('! expr (Comma! expr)* ')'!
 ;
 
-ref
-	:	(i=ID -> ^(Ref[$i,"ReferenceID"] $i))
+ref:	
+	(i=ID -> ^(Ref[$i,"ReferenceID"] $i))
 	// TODO: enable this part of the rule
 	//	( Dot ID
 	//		-> ^(Access[$Dot,"AccessField"] $ref ^(Ref ID))
@@ -776,8 +770,8 @@ ref
 	//	)*
 ;
 
-time_primitive
-	:	(Start LeftP ID RightP)=> Start LeftP ID RightP
+time_primitive:	
+	(Start LeftP ID RightP)=> Start LeftP ID RightP
     	-> ^(LabelRef ID Start)
 	| 	Start
     	-> ^(LabelRef This Start)
@@ -797,7 +791,7 @@ time_primitive
 //    	-> ^(LabelRef ID Ket)
 //	| 	Ket
 //    	-> ^(LabelRef This Ket)
-	;
+;
 	
 set: enumeration | range;
 
@@ -806,7 +800,7 @@ enumeration:
 ;
 
 range: 
-	  LeftB a=expr Comma? b=expr RightB -> ^(Range[$LeftB,"Range"] $a $b) 
+	LeftB a=expr Comma? b=expr RightB -> ^(Range[$LeftB,"Range"] $a $b) 
 ;
 
 type_enumeration: 
@@ -823,8 +817,8 @@ arg_list :
 ;    
 
 /* primitives */	  
-builtinType
-	: Boolean
+builtinType: 
+	Boolean
 	| Integer
 	| Float
 	| Symbol
@@ -832,20 +826,20 @@ builtinType
 	| Object
 ;
 	
-Boolean 
-	: 'bool'
+Boolean: 
+	'bool'
 	| 'boolean'
 ;
-Integer : 'int' | 'integer';
-Float : 'float' ;
-Symbol : 'symbol' ;
-String : 'string' ;
-Object : 'object' ;
+Integer: 'int' | 'integer';
+Float: 'float' ;
+Symbol: 'symbol' ;
+String: 'string' ;
+Object: 'object' ;
 
-Vector : 'vector';
+Vector: 'vector';
 
-literal 
-	: INT
+literal: 
+	INT
 	| FLOAT
 	| STRING
 	| True
@@ -854,36 +848,28 @@ literal
 //	| boolean_literal 
 //	| vector_literal
 ;
+
 //vector_literal : '('! literal (',' literal)* ')'!;
 //vector_init : arg_list;
-
 	  
-num_relop : Equal | NotEqual | LessThan | GreaterThan | LessThanE | GreaterThanE;
+num_relop: Equal | NotEqual | LessThan | GreaterThan | LessThanE | GreaterThanE;
   
-	  
-NotLog: 'not' 
-	| 'Not' | 'NOT' 
-	;
-AndLog : 'and' 
-	| 'And' | 'AND'
-	;
-OrLog : 'or' 
-	| 'Or' | 'OR'
-	;
-XorLog : 'xor' 
-	| 'Xor' | 'XOR'
-	;
-EqualLog: 'equals' 
-	| 'iff' | 'Equals' | 'EQUALS'
-	;
-Implies: 'implies' 
-	| 'Implies' | 'IMPLIES'
-	;
+NotLog: 'not' | 'Not' | 'NOT';
+	
+AndLog: 'and' | 'And' | 'AND';
+
+OrLog : 'or' | 'Or' | 'OR';
+
+XorLog : 'xor' | 'Xor' | 'XOR';
+
+EqualLog: 'equals' | 'iff' | 'Equals' | 'EQUALS' ;
+
+Implies: 'implies' | 'Implies' | 'IMPLIES';
 
 NotBit: '!' | '~';
 AndBit: '&';
 OrBit: '|';				
-XorBit : '~&|';  
+XorBit: '~&|';  
   // 'a ~&| b' is supposed to suggest both '(a~&b)' and '(a|b)', i.e., '(~(a&b) and a|b)'
   // '^' is taken by Delta, so a^b could be confusing, albeit, ^ only means Delta if a unary operator applied
   // on the left, so perhaps it would be okay to use '^' for XorBit instead, in the same way that '-'
@@ -894,10 +880,10 @@ Divide: '/';
 Plus: '+';
 Minus: '-';
 
-Equal : '==';
-NotEqual : '!=' | '~=';
-LessThan : '<' ;
-LessThanE : '<=';
+Equal: '==';
+NotEqual: '!=' | '~=';
+LessThan: '<' ;
+LessThanE: '<=';
 GreaterThan: '>' ; 
 GreaterThanE: '>=';
 
@@ -935,11 +921,9 @@ Decomposition: ':decomposition';
 Ordered: 'ordered';
 Unordered: 'unordered';	  
 	  
-Delta : '^';
+Delta: '^';
 
-Undefined: 'undefined' 
-	| 'U' | 'UNDEFINED' | 'Undefined'
-	;
+Undefined: 'undefined' | 'U' | 'UNDEFINED' | 'Undefined';
 All: 'all';
 Start: 'start';
 End: 'end';
@@ -951,12 +935,12 @@ Infinity: 'infinity' | 'Infinity' | 'INFINITY' | 'infty' | 'INFTY' | 'inff' | 'I
 True:	('T' | 'TRUE' | 'true' | 'True');
 False:	('F' | 'FALSE' | 'false' | 'False');
 INT: DIGIT+;
-FLOAT
-	: DIGIT+ Dot DIGIT+
+FLOAT: 
+	DIGIT+ Dot DIGIT+
 	| DIGIT+ 'f'
 ;
-STRING:	 '"' ESC* '"';	
 
+STRING:	 '"' ESC* '"';	
 
 ID : LETTER (LETTER | DIGIT | '_')*;
 
