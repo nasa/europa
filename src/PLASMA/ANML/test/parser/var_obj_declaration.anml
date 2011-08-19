@@ -1,11 +1,18 @@
-bool a := true;
-bool b := flase, c := true;
-int [0 +inf] d;
-float [0.0 +inf] e := +inf, f := 54;
-string g := "foo";
+var bool a := true;
+var bool b := flase, c := true;
 
-enum {3, 6, 4, 2} aEnum := 3;
-vector (int i, float j, string k) aVector;
+// TODO: +/-infinity isn't supported in the grammar
+//var int [0 +inf] d;
+//var float [0.0 +inf] e := +inf, f := 54;
+var int [0 500] d;
+var float [0.0 100.0] e := 100, f := 54;
 
-type Foo : float [0 +inf];
-Foo m := 1.5;
+var string g := "foo";
+
+var int {3, 6, 4, 2} aEnum := 3;
+
+// TODO: vectors aren't supported in the grammar
+//vector (int i, float j, string k) aVector;
+
+type Foo < float [0.0 1000];
+var Foo m := 1.5;

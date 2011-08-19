@@ -11,7 +11,7 @@ local model ;
 for model in
 	empty.anml
 	vartype_decl.anml 
-#	var_obj_declaration.anml 
+	var_obj_declaration.anml 
 {
 	RunModuleMain run-anml-module-tests : ANMLParser : $(model) ;
 }

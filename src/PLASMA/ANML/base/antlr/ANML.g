@@ -289,7 +289,7 @@ fluent_fluent_decl
 	;
 	
 fluent_var_decl
-	:	(Variable type_ref 
+	:	(Variable type_reference
 		l+=var_decl_helper (Comma l+=var_decl_helper)* Semi
 		) -> $l+
 	;
