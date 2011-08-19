@@ -25,6 +25,5 @@ type StringAliasAlias   < StringAlias;
 type EnumExample        < string { "string1", "string2", "string3" };
 type EnumExampleAlias   < EnumExample;
 
-// TODO: vectors are not supported in grammar
-//type VectorExample      < vector (int a, float b);
-//type VectorExampleAlias < VectorExample;
+type VectorExample      := vector (int a, float b);
+type VectorExampleAlias < VectorExample;

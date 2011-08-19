@@ -11,8 +11,8 @@ var string g := "foo";
 
 var int {3, 6, 4, 2} aEnum := 3;
 
-// TODO: vectors aren't supported in the grammar
-//vector (int i, float j, string k) aVector;
+type VectorType := vector (int i, float j, string k);
+var  VectorType aVector;
 
 type Foo < float [0.0 1000];
 var Foo m := 1.5;
