@@ -151,14 +151,14 @@ type_decl:
 
 type_decl_helper: 
 	ID
-	  ( LessThan s+=type_reference
+	  ( LessThan s+=type_ref
 	  | Assign d+=type_spec
 	  | With p+=object_block
 	  )*
 		-> ^(Type ID ^(Assign["Assign"] $d*) ^(LessThan["LessThan"] $s*) ^(With["With"] $p*))
 ;
 
-type_reference: 
+type_ref: 
 	(type_name set?) 
 		-> ^(TypeRef type_name set?)
 	;
@@ -168,14 +168,8 @@ type_name:
 	| ID
 	;
 
-type_ref: 
-	(builtinType set?) => builtinType set
-		-> ^(TypeRef builtinType set?)
-	| (ID set?) => ID set
-		-> ^(TypeRef ID set?)
-;
-
-type_spec: type_ref
+type_spec: 
+	type_ref
 	| Vector param_list
 		-> ^(Vector param_list)
 	| type_enumeration
@@ -261,8 +255,8 @@ param_list:
 ;
 
 param: 
-	type_reference ID
-	-> ^(Parameter type_reference ID) 
+	type_ref ID
+	-> ^(Parameter type_ref ID) 
 ;
 
 /* Declarations */	
@@ -291,7 +285,7 @@ fluent_fluent_decl:
 ;
 	
 fluent_var_decl:	
-	(Variable type_reference
+	(Variable type_ref
 		l+=var_decl_helper (Comma l+=var_decl_helper)* Semi
 		) -> $l+
 ;
