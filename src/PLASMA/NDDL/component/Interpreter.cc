@@ -792,8 +792,17 @@ namespace EUROPA {
   PredicateInstanceRef::PredicateInstanceRef(const char* predInstance, const char* predName, const char* annotation)
       : m_predicateInstance(predInstance != NULL ? predInstance : "")
       , m_predicateName(predName != NULL ? predName : "")
-  	  , m_annotation(annotation != NULL ? annotation : "")
   {
+	  m_attributes=0;
+	  if (annotation != NULL) {
+		  std::string str = annotation;
+		  if (str=="condition")
+			  m_attributes |= TokenType::CONDITION;
+		  else if (str=="effect")
+			  m_attributes |= TokenType::EFFECT;
+		  else if (annotation != "")
+			  std::cerr << "PredicateInstanceref "<< m_predicateInstance << " " << m_predicateName << " unknown annotation:" << str << std::endl;
+	  }
   }
 
   PredicateInstanceRef::~PredicateInstanceRef()
@@ -812,7 +821,7 @@ namespace EUROPA {
     	  InterpretedRuleInstance* rule = (InterpretedRuleInstance*)(context.getElement("RuleInstance"));
     	  if (rule != NULL) {
     		  result = createSubgoal(context,rule,relationName);
-    		  // TODO: pass annotation to the newly created subgoal
+    		  result->addAttributes(m_attributes);
     	  }
     	  else
     		  result = createGlobalToken(context, isFact, isRejectable);
@@ -1231,12 +1240,15 @@ namespace EUROPA {
         : TokenType(ot,predicateName)
     {
     	// TODO: offer conversion methods in TokenType
+    	int attributes=0;
     	if (kind=="action")
-    		addAttributes(TokenType::ACTION);
+    		attributes |= TokenType::ACTION;
     	else if (kind=="predicate")
-    		addAttributes(TokenType::PREDICATE);
+    		attributes |= TokenType::PREDICATE;
     	else
     		std::cerr << "TokenType "<< predicateName.toString() << " unknown kind:" << kind << std::endl;
+
+    	addAttributes(attributes);
     }
 
     void InterpretedTokenType::addBodyExpr(Expr* e)
@@ -1260,7 +1272,6 @@ namespace EUROPA {
         return parentType;
     }
 
-    // TODO: set token attributes in InterpretedToken::commonInit
 	TokenId InterpretedTokenType::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
 	{
 	    TokenTypeId parentType = getParentType(planDb);
@@ -1274,6 +1285,8 @@ namespace EUROPA {
 	                rejectable,
 	                isFact,
 	                false))->getId();
+	        // TODO: this should be done for all tokens, not just InterpretedTokens
+	        token->setAttributes(getAttributes());
 	    }
 	    else {
 	        token = parentType->createInstance(planDb,name,rejectable,isFact);
@@ -1298,6 +1311,8 @@ namespace EUROPA {
                   relation,
                   m_body,
                   false))->getId();
+	        // TODO: this should be done for all tokens, not just InterpretedTokens
+	        token->setAttributes(getAttributes());
       }
       else {
           token = parentType->createInstance(master,name,relation);

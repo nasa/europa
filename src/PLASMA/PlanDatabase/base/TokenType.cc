@@ -66,7 +66,7 @@ namespace EUROPA {
         m_args[name] = type;
     }
 
-    int TokenType::getAttributes()
+    int TokenType::getAttributes() const
     {
     	return m_attributes;
     }
@@ -78,7 +78,7 @@ namespace EUROPA {
 
     void TokenType::addAttributes(int attrMask)
     {
-    	m_attributes &= attrMask;
+    	m_attributes |= attrMask;
     }
 
     PSList<std::string> TokenType::getParameterNames() const {

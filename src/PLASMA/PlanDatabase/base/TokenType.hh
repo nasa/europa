@@ -73,7 +73,8 @@ namespace EUROPA {
      */
     virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const = 0;
 
-    virtual int getAttributes();
+    // See TokenType::TokenAttribute
+    virtual int getAttributes() const;
     virtual void setAttributes(int attrs);
     virtual void addAttributes(int attrMask);
 

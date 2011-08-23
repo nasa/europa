@@ -641,6 +641,21 @@ namespace EUROPA{
 
   bool Token::isDeleted() const {return m_deleted;}
 
+  int Token::getAttributes() const
+  {
+  	return m_attributes;
+  }
+
+  void Token::setAttributes(int attrs)
+  {
+  	m_attributes=attrs;
+  }
+
+  void Token::addAttributes(int attrMask)
+  {
+  	m_attributes |= attrMask;
+  }
+
   void Token::makeFact() {
   	m_isFact = true;
   }

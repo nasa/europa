@@ -280,7 +280,7 @@ namespace EUROPA {
   protected:
       std::string m_predicateInstance;
       std::string m_predicateName;
-      std::string m_annotation;
+      int m_attributes;
 
       TokenId createSubgoal(EvalContext& ctx, InterpretedRuleInstance* rule, const char* relationName);
       TokenId createGlobalToken(EvalContext& context, bool isFact, bool isRejectable);

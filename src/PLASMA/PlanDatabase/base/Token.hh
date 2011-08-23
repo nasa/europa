@@ -352,6 +352,10 @@ namespace EUROPA {
      */
     bool isDeleted() const;
 
+    // See TokenType::TokenAttribute
+    virtual int getAttributes() const;
+    virtual void setAttributes(int attrs);
+    virtual void addAttributes(int attrMask);
 
     /**
      * @brief Test if the variable is a token state variable
@@ -502,6 +506,7 @@ namespace EUROPA {
     ObjectVarId m_object; /*!< object variable for token. The set of objects it may be assigned to. */
     TempVarId m_duration; /*!< The duration of the token. [0 +inf]. */
     bool m_isFact;
+    int m_attributes;
     std::vector<ConstrainedVariableId> m_parameters; /*!< The parameters of the token specification. May be empty */
     std::vector<ConstrainedVariableId> m_allVariables; /*!< The set of all variables of a token specification. Includes built in variables
 							 such as object, state, start, end, duration. Also includes all parameters (m_parameters). */
