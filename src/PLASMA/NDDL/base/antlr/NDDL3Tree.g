@@ -681,7 +681,7 @@ ruleStatement returns [Expr* result]
 	  |	child=variableDeclarations
 	  |	child=ifStatement
 	  |	child=loopStatement
-	  |     child=relation
+	  | child=relation
 	  )
 	  {
 	      result = child;
@@ -773,7 +773,7 @@ relation returns [Expr* result]
     std::vector<PredicateInstanceRef*> targets;    
 }
 	:	^(TOKEN_RELATION
-			(i=IDENT { source = new PredicateInstanceRef(NULL,c_str($i.text->chars)); })?
+			(i=IDENT { source = new PredicateInstanceRef(NULL,c_str($i.text->chars),""); })?
 			tr=temporalRelation { relationType = c_str($tr.text->chars); } 
 			predicateInstanceList[targets]
 		)
@@ -787,21 +787,30 @@ predicateInstanceList[std::vector<PredicateInstanceRef*>& instances]
 			(child=predicateInstance { instances.push_back(child); })*
 		)
 		|	i=IDENT 
-		        { instances.push_back(new PredicateInstanceRef(NULL,c_str($i.text->chars))); } 
+		        { instances.push_back(new PredicateInstanceRef(NULL,c_str($i.text->chars),"")); } 
 	;
 
 predicateInstance returns [PredicateInstanceRef* pi]
 @init {
     const char* name = NULL;
+    const char* annotation = NULL;
     std::string tokenStr;
     TokenTypeId tokenType;
 }
-	:	^(PREDICATE_INSTANCE qualifiedToken[tokenStr,tokenType] (i=IDENT { name = c_str($i.text->chars); })?)
+	:	^(PREDICATE_INSTANCE 
+				qualifiedToken[tokenStr,tokenType] 
+				(i=IDENT { name = c_str($i.text->chars); })?
+				(ann=tokenAnnotation { annotation = c_str($ann.text->chars); })?
+		)
 	        {
-	            pi = new PredicateInstanceRef(tokenStr.c_str(),name);
+	            pi = new PredicateInstanceRef(tokenStr.c_str(),name,annotation);
 	            if (name != NULL)
 	                CTX->SymbolTable->addLocalToken(name,tokenType);
 	        }
+	;
+
+tokenAnnotation
+	:	'condition' | 'effect'
 	;
 	
 qualifiedString[std::string& result]

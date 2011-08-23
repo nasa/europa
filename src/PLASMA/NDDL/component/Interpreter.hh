@@ -272,7 +272,7 @@ namespace EUROPA {
   class PredicateInstanceRef
   {
   public:
-      PredicateInstanceRef(const char* predInstance, const char* predName);
+      PredicateInstanceRef(const char* predInstance, const char* predName, const char* annotation);
       virtual ~PredicateInstanceRef();
 
       TokenId getToken(EvalContext& ctx, const char* relationName, bool isFact=false, bool isRejectable=false);
@@ -280,6 +280,7 @@ namespace EUROPA {
   protected:
       std::string m_predicateInstance;
       std::string m_predicateName;
+      std::string m_annotation;
 
       TokenId createSubgoal(EvalContext& ctx, InterpretedRuleInstance* rule, const char* relationName);
       TokenId createGlobalToken(EvalContext& context, bool isFact, bool isRejectable);

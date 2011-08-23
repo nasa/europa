@@ -789,9 +789,10 @@ namespace EUROPA {
       }
   }
 
-  PredicateInstanceRef::PredicateInstanceRef(const char* predInstance, const char* predName)
+  PredicateInstanceRef::PredicateInstanceRef(const char* predInstance, const char* predName, const char* annotation)
       : m_predicateInstance(predInstance != NULL ? predInstance : "")
       , m_predicateName(predName != NULL ? predName : "")
+  	  , m_annotation(annotation != NULL ? annotation : "")
   {
   }
 
@@ -804,17 +805,17 @@ namespace EUROPA {
   TokenId PredicateInstanceRef::getToken(EvalContext& context, const char* relationName, bool isFact, bool isRejectable)
   {
       TokenId result;
-      if (m_predicateInstance.length() == 0)
-      {
+      if (m_predicateInstance.length() == 0) {
           result = context.getToken(m_predicateName.c_str());
       }
-      else
-      {
-	  InterpretedRuleInstance* rule = (InterpretedRuleInstance*)(context.getElement("RuleInstance"));
-	  if (rule != NULL)
-	     result = createSubgoal(context,rule,relationName);
-	  else
-	     result = createGlobalToken(context, isFact, isRejectable);
+      else {
+    	  InterpretedRuleInstance* rule = (InterpretedRuleInstance*)(context.getElement("RuleInstance"));
+    	  if (rule != NULL) {
+    		  result = createSubgoal(context,rule,relationName);
+    		  // TODO: pass annotation to the newly created subgoal
+    	  }
+    	  else
+    		  result = createGlobalToken(context, isFact, isRejectable);
       }
 
       //TODO: In the future, this might be a hook into the NDDL error reporting system.
@@ -891,7 +892,7 @@ namespace EUROPA {
     , m_targets(targets)
   {
       if (m_origin == NULL) {
-          m_origin = new PredicateInstanceRef(NULL,"this");
+          m_origin = new PredicateInstanceRef(NULL,"this","");
       }
   }
 

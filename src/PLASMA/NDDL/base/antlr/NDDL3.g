@@ -269,26 +269,30 @@ type
 	;
 
 relation
-    :	(token=IDENT | token='this')? temporalRelation predicateArgumentList ';'
-			-> ^(TOKEN_RELATION $token temporalRelation predicateArgumentList)
+    :	(token=IDENT | token='this')? temporalRelation tokenInstanceList ';'
+			-> ^(TOKEN_RELATION $token? temporalRelation tokenInstanceList)
     ;
 
 problemStmt
-    :	('rejectable'^ | 'goal'^ | 'fact'^) predicateArgumentList ';'!
+    :	('rejectable'^ | 'goal'^ | 'fact'^) tokenInstanceList ';'!
 	;
         
-predicateArgumentList
+tokenInstanceList
 	:	IDENT
-	|	'('^ predicateArguments? ')'!
+	|	'('^ tokenInstances? ')'!
 	;
 
-predicateArguments
-	:	predicateArgument (','! predicateArgument)*
+tokenInstances
+	:	tokenInstance (','! tokenInstance)*
 	;
 
-predicateArgument
-	:	qualified IDENT?
-	        -> ^(PREDICATE_INSTANCE qualified IDENT?)
+tokenInstance
+	:	tokenAnnotation? qualified IDENT?
+	        -> ^(PREDICATE_INSTANCE qualified IDENT? tokenAnnotation?)
+	;
+
+tokenAnnotation
+	:	'condition' | 'effect'
 	;
 
 constraintInstantiation
