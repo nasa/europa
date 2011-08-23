@@ -30,6 +30,13 @@ namespace EUROPA {
    */
   class TokenType: public PSTokenType {
   public:
+	enum TokenAttribute {
+		ACTION=1,
+		PREDICATE=2,
+		CONDITION=4,
+		EFFECT=8
+	};
+
     TokenType(const ObjectTypeId& ot,const LabelStr& signature);
 
     virtual ~TokenType();
@@ -66,6 +73,9 @@ namespace EUROPA {
      */
     virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const = 0;
 
+    virtual int getAttributes();
+    virtual void setAttributes(int attrs);
+    virtual void addAttributes(int attrMask);
 
     // From PSTokenType
 	virtual PSList<std::string> getParameterNames() const;
@@ -77,6 +87,7 @@ namespace EUROPA {
     ObjectTypeId m_objType;
     LabelStr m_signature;
     LabelStr m_predicateName;
+    int m_attributes;
     std::map<LabelStr,DataTypeId> m_args;
   };
 }

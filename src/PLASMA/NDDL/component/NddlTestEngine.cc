@@ -5,6 +5,7 @@
 #include "ConstraintEngine.hh"
 #include "PlanDatabase.hh"
 #include "PlanDatabaseWriter.hh"
+#include "NddlInterpreter.hh"
 
 // Modules
 #include "ModuleConstraintEngine.hh"
@@ -55,19 +56,31 @@ int NddlTestEngine::run(int argc, const char** argv)
 
 int NddlTestEngine::run(const char* txSource, const char* language)
 {
-    PlanDatabase* planDatabase = (PlanDatabase*) getComponent("PlanDatabase");
-    planDatabase->getClient()->enableTransactionLogging();
+	try {
+		PlanDatabase* planDatabase = (PlanDatabase*) getComponent("PlanDatabase");
+		planDatabase->getClient()->enableTransactionLogging();
 
-    std::string result = executeScript(language,txSource,true /*isFile*/);
-    if (result.size()>0) {
-        std::cerr << result;
-        return -1;
-    }
+		std::string result = executeScript(language,txSource,true /*isFile*/);
+		if (result.size()>0) {
+			std::cerr << result;
+			return -1;
+		}
 
-    ConstraintEngine* ce EUROPA_ATTRIBUTE_UNUSED = (ConstraintEngine*)getComponent("ConstraintEngine");
-    assert(ce->constraintConsistent());
+		ConstraintEngine* ce EUROPA_ATTRIBUTE_UNUSED = (ConstraintEngine*)getComponent("ConstraintEngine");
+		assert(ce->constraintConsistent());
 
-    PlanDatabaseWriter::write(planDatabase->getId(), std::cout);
-    std::cout << "Finished\n";
-    return 0;
+		PlanDatabaseWriter::write(planDatabase->getId(), std::cout);
+		std::cout << "Finished\n";
+		return 0;
+	}
+	catch (PSLanguageExceptionList& errors) {
+		std::cerr << "Unexpected error(s) executing script" << std::endl;
+		for (int i=0;i<errors.getExceptionCount();i++)
+			std::cerr << errors.getException(i).asString() << std::endl;
+		return -1;
+	}
+	catch(...) {
+		std::cerr << "Unexpected unknown error executing script" << std::endl;
+		return -1;
+	}
 }

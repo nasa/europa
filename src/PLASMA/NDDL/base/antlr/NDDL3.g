@@ -196,7 +196,7 @@ classBlock
 classStatement
 	:	variableDeclarations
 	|	constructor
-	|	predicate
+	|	tokenType
 	|	noopstatement
 	;
 
@@ -228,16 +228,16 @@ constructorParameter
 			-> ^(VARIABLE IDENT type)
 	;
 
-predicate
-	:	'predicate'^ IDENT predicateBlock 
+tokenType
+	:	('predicate' | 'action')^ IDENT tokenBlock 
 	;
 
-predicateBlock
-	:	'{'^ predicateStatement* '}'!
+tokenBlock
+	:	'{'^ tokenStatement* '}'!
 	;
 
 // Note: Allocations are not legal here.
-predicateStatement
+tokenStatement
 	:	variableDeclarations
 	|	constraintInstantiation
 	|	assignment

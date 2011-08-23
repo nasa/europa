@@ -449,7 +449,7 @@ namespace EUROPA {
   class InterpretedTokenType: public TokenType
   {
     public:
-	  InterpretedTokenType(const ObjectTypeId& ot,const LabelStr& predicateName);
+	  InterpretedTokenType(const ObjectTypeId& ot,const LabelStr& predicateName, const std::string& kind);
           virtual ~InterpretedTokenType();
 
           void addBodyExpr(Expr* e);

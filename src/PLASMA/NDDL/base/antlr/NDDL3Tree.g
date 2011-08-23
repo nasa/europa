@@ -471,7 +471,7 @@ classBlock[ObjectType* objType]
 componentTypeEntry[ObjectType* objType]
 	:	classVariable[objType]
 	|	constructor[objType]
-	|	predicate[objType]
+	|	tokenType[objType]
 	;
 
 classVariable[ObjectType* objType]
@@ -561,19 +561,19 @@ assignment returns [ExprAssignment* result]
 		}
 	;
 
-predicate[ObjectType* objType]
+tokenType[ObjectType* objType]
 @init {
     InterpretedTokenType* tokenType;
-    std::string predName;
+    std::string tokenTypeName;
 }
-	:	^('predicate'
-			pred=IDENT 
+	:	^(kind=('predicate' | 'action')
+			ttName=IDENT 
 			{ 
-			    predName = objType->getName().toString() + "." + c_str($pred.text->chars);   
-			    tokenType = new InterpretedTokenType(objType->getId(),predName);
+			    tokenTypeName = objType->getName().toString() + "." + c_str($ttName.text->chars);   
+			    tokenType = new InterpretedTokenType(objType->getId(),tokenTypeName,c_str($kind.text->chars));
 			    pushContext(CTX,new NddlTokenSymbolTable(CTX->SymbolTable,tokenType->getId(),objType->getId())); 
 			}
-			predicateStatements[tokenType]
+			tokenStatements[tokenType]
 		)
 		{
             objType->addTokenType(tokenType->getId());
@@ -582,11 +582,11 @@ predicate[ObjectType* objType]
 	;
 
 // TODO: allow assignments to inherited parameters
-predicateStatements[InterpretedTokenType* tokenType]
+tokenStatements[InterpretedTokenType* tokenType]
 	:	^('{'
             (
-                ( child=predicateParameter[tokenType] 
-                | child=predicateParameterAssignment
+                ( child=tokenParameter[tokenType] 
+                | child=tokenParameterAssignment
                 | child=standardConstraint 
                 | child=enforceExpression
                 )
@@ -598,7 +598,7 @@ predicateStatements[InterpretedTokenType* tokenType]
 	;
 	
 // Note: Allocations are not legal here.        
-predicateParameter[InterpretedTokenType* tokenType] returns [Expr* result]
+tokenParameter[InterpretedTokenType* tokenType] returns [Expr* result]
         :
         child=variableDeclarations 
         { 
@@ -611,7 +611,7 @@ predicateParameter[InterpretedTokenType* tokenType] returns [Expr* result]
         }
         ;       
 
-predicateParameterAssignment returns [Expr* result]
+tokenParameterAssignment returns [Expr* result]
         :
         child=assignment 
         { 

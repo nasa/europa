@@ -66,6 +66,21 @@ namespace EUROPA {
         m_args[name] = type;
     }
 
+    int TokenType::getAttributes()
+    {
+    	return m_attributes;
+    }
+
+    void TokenType::setAttributes(int attrs)
+    {
+    	m_attributes=attrs;
+    }
+
+    void TokenType::addAttributes(int attrMask)
+    {
+    	m_attributes &= attrMask;
+    }
+
     PSList<std::string> TokenType::getParameterNames() const {
    	  PSList<std::string> retval;
    	  for (std::map<LabelStr,DataTypeId>::const_iterator it = m_args.begin(); it != m_args.end(); ++it) {

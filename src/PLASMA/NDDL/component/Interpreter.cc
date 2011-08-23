@@ -1225,9 +1225,17 @@ namespace EUROPA {
    */
     InterpretedTokenType::InterpretedTokenType(
             const ObjectTypeId& ot,
-            const LabelStr& predicateName)
+            const LabelStr& predicateName,
+            const std::string& kind)
         : TokenType(ot,predicateName)
     {
+    	// TODO: offer conversion methods in TokenType
+    	if (kind=="action")
+    		addAttributes(TokenType::ACTION);
+    	else if (kind=="predicate")
+    		addAttributes(TokenType::PREDICATE);
+    	else
+    		std::cerr << "TokenType "<< predicateName.toString() << " unknown kind:" << kind << std::endl;
     }
 
     void InterpretedTokenType::addBodyExpr(Expr* e)
@@ -1251,6 +1259,7 @@ namespace EUROPA {
         return parentType;
     }
 
+    // TODO: set token attributes in InterpretedToken::commonInit
 	TokenId InterpretedTokenType::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
 	{
 	    TokenTypeId parentType = getParentType(planDb);
