@@ -272,12 +272,13 @@ namespace EUROPA {
   class PredicateInstanceRef
   {
   public:
-      PredicateInstanceRef(const char* predInstance, const char* predName, const char* annotation);
+      PredicateInstanceRef(const TokenTypeId& tokenType, const char* predInstance, const char* predName, const char* annotation);
       virtual ~PredicateInstanceRef();
 
       TokenId getToken(EvalContext& ctx, const char* relationName, bool isFact=false, bool isRejectable=false);
 
   protected:
+      TokenTypeId m_tokenType;
       std::string m_predicateInstance;
       std::string m_predicateName;
       int m_attributes;

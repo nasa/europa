@@ -789,8 +789,9 @@ namespace EUROPA {
       }
   }
 
-  PredicateInstanceRef::PredicateInstanceRef(const char* predInstance, const char* predName, const char* annotation)
-      : m_predicateInstance(predInstance != NULL ? predInstance : "")
+  PredicateInstanceRef::PredicateInstanceRef(const TokenTypeId& tokenType, const char* predInstance, const char* predName, const char* annotation)
+      : m_tokenType(tokenType)
+  	  , m_predicateInstance(predInstance != NULL ? predInstance : "")
       , m_predicateName(predName != NULL ? predName : "")
   {
 	  m_attributes=0;
@@ -901,7 +902,8 @@ namespace EUROPA {
     , m_targets(targets)
   {
       if (m_origin == NULL) {
-          m_origin = new PredicateInstanceRef(NULL,"this","");
+    	  // TODO: may want to provide the actual token type at some point
+          m_origin = new PredicateInstanceRef(TokenTypeId::noId(),NULL,"this","");
       }
   }
 

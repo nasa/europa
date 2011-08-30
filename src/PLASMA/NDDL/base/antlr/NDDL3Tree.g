@@ -773,7 +773,7 @@ relation returns [Expr* result]
     std::vector<PredicateInstanceRef*> targets;    
 }
 	:	^(TOKEN_RELATION
-			(i=IDENT { source = new PredicateInstanceRef(NULL,c_str($i.text->chars),""); })?
+			(pvr=predicateVarRef { source = pvr; })?
 			tr=temporalRelation { relationType = c_str($tr.text->chars); } 
 			predicateInstanceList[targets]
 		)
@@ -786,8 +786,8 @@ predicateInstanceList[std::vector<PredicateInstanceRef*>& instances]
 	:	^('('
 			(child=predicateInstance { instances.push_back(child); })*
 		)
-		|	i=IDENT 
-		        { instances.push_back(new PredicateInstanceRef(NULL,c_str($i.text->chars),"")); } 
+		|	pvr=predicateVarRef 
+		        { instances.push_back(pvr); } 
 	;
 
 predicateInstance returns [PredicateInstanceRef* pi]
@@ -803,10 +803,26 @@ predicateInstance returns [PredicateInstanceRef* pi]
 				(ann=tokenAnnotation { annotation = c_str($ann.text->chars); })?
 		)
 	        {
-	            pi = new PredicateInstanceRef(tokenStr.c_str(),name,annotation);
+	            pi = new PredicateInstanceRef(tokenType,tokenStr.c_str(),name,annotation);
 	            if (name != NULL)
 	                CTX->SymbolTable->addLocalToken(name,tokenType);
 	        }
+	;
+
+predicateVarRef returns [PredicateInstanceRef* pi]
+@init {
+    const char* varName = NULL;
+    TokenTypeId tokenType;
+}
+	:	i=IDENT
+		{
+			varName = c_str($i.text->chars);
+            tokenType = CTX->SymbolTable->getTypeForToken(varName);  
+            if (tokenType.isNoId()) 
+               reportSemanticError(CTX,std::string(varName)+" is an undefined token");
+
+            pi = new PredicateInstanceRef(tokenType,NULL,varName,"");
+		}
 	;
 
 tokenAnnotation

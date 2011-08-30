@@ -76,6 +76,9 @@ namespace EUROPA {
       static bool isFile = true;
       std::string result = executeScript(language,txSource,isFile);
 
+      if (result.size()>0)
+    	  std::cerr << "ERROR!:" << result << std::endl;
+
       return (result.size()==0 && getConstraintEnginePtr()->constraintConsistent());
     }
 

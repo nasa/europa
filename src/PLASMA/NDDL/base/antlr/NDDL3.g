@@ -269,7 +269,7 @@ type
 	;
 
 relation
-    :	(token=IDENT | token='this')? temporalRelation tokenInstanceList ';'
+    :	token=tokenVarRef? temporalRelation tokenInstanceList ';'
 			-> ^(TOKEN_RELATION $token? temporalRelation tokenInstanceList)
     ;
 
@@ -278,10 +278,15 @@ problemStmt
 	;
         
 tokenInstanceList
-	:	IDENT
+	:	tokenVarRef
 	|	'('^ tokenInstances? ')'!
 	;
 
+tokenVarRef
+	: IDENT
+	| 'this'
+	;
+	
 tokenInstances
 	:	tokenInstance (','! tokenInstance)*
 	;
