@@ -631,6 +631,7 @@ rule returns [Expr* result]
 @init {
     std::vector<Expr*> ruleBody;
     std::string predName;
+    InterpretedTokenType* iTokenType=NULL;
 }
  	:	^('::'
 			className=IDENT
@@ -646,6 +647,8 @@ rule returns [Expr* result]
                 TokenTypeId tt = CTX->SymbolTable->getTokenType(predName.c_str());
                 if (tt.isNoId())
                     reportSemanticError(CTX,predName+" has not been declared");            
+                
+                iTokenType = dynamic_cast<InterpretedTokenType*>((TokenType*)tt);
                 
                 pushContext(CTX,new NddlTokenSymbolTable(CTX->SymbolTable,tt,ot));    
 			}
@@ -663,7 +666,11 @@ rule returns [Expr* result]
                 }
             }
 		    std::string source="\"" + filename + "," + std::string(buff) + "\"";
-		    result = new ExprRuleTypeDefinition((new InterpretedRuleFactory(predName,source,ruleBody))->getId());
+		    InterpretedRuleFactory* rf = new InterpretedRuleFactory(predName,source,ruleBody);
+		    if (iTokenType != NULL) 
+		        iTokenType->addRule(rf);
+		    
+		    result = new ExprRuleTypeDefinition(rf->getId());
 		    popContext(CTX);
 		}
 	;

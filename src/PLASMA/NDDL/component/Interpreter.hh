@@ -448,21 +448,26 @@ namespace EUROPA {
         friend class InterpretedTokenType;
   };
 
+  class InterpretedRuleFactory;
+
   class InterpretedTokenType: public TokenType
   {
     public:
 	  InterpretedTokenType(const ObjectTypeId& ot,const LabelStr& predicateName, const std::string& kind);
-          virtual ~InterpretedTokenType();
+	  virtual ~InterpretedTokenType();
 
-          void addBodyExpr(Expr* e);
+	  void addBodyExpr(Expr* e);
+	  void addRule(InterpretedRuleFactory* rf);
 
 	  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const;
 	  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
 
     protected:
       std::vector<Expr*> m_body;
+      std::vector<InterpretedRuleFactory*> m_rules;
 
       TokenTypeId getParentType(const PlanDatabaseId& planDb) const;
+      void processExpr(Expr* e);
   };
 
   class TokenEvalContext : public EvalContext
@@ -549,6 +554,8 @@ namespace EUROPA {
         virtual RuleInstanceId createInstance(const TokenId& token,
                                               const PlanDatabaseId& planDb,
                                               const RulesEngineId &rulesEngine) const;
+
+        const std::vector<Expr*>& getBody() const;
 
     protected:
         std::vector<Expr*> m_body;

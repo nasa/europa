@@ -18,6 +18,13 @@ namespace EUROPA {
   /** Version of TokenType for communication with other languages */
   class PSTokenType {
   public:
+	  enum TokenAttribute {
+		  ACTION=1,
+		  PREDICATE=2,
+		  CONDITION=4,
+		  EFFECT=8
+	  };
+
 	  virtual ~PSTokenType() {}
 	  virtual const std::string& getName() const = 0;
 	  virtual PSList<std::string> getParameterNames() const = 0;
@@ -30,13 +37,6 @@ namespace EUROPA {
    */
   class TokenType: public PSTokenType {
   public:
-	enum TokenAttribute {
-		ACTION=1,
-		PREDICATE=2,
-		CONDITION=4,
-		EFFECT=8
-	};
-
     TokenType(const ObjectTypeId& ot,const LabelStr& signature);
 
     virtual ~TokenType();
@@ -53,6 +53,8 @@ namespace EUROPA {
     const TokenTypeId& getId() const;
 
     const TokenTypeId& getParentType() const;
+
+    const ObjectTypeId& getObjectType() const;
 
     /**
      * @brief Return the type for which this type is registered.

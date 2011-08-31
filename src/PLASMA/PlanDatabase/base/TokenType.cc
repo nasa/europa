@@ -23,6 +23,8 @@ namespace EUROPA {
     // TODO: should probably cache this?, maybe in the constructor?
     const TokenTypeId& TokenType::getParentType() const { return m_objType->getParentType(getId()); }
 
+    const ObjectTypeId& TokenType::getObjectType() const { return m_objType; }
+
     const LabelStr& TokenType::getPredicateName() const { return m_predicateName; }
 
     const LabelStr& TokenType::getSignature() const {return m_signature;}

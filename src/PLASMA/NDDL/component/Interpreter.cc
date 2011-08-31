@@ -1256,6 +1256,15 @@ namespace EUROPA {
     void InterpretedTokenType::addBodyExpr(Expr* e)
     {
         m_body.push_back(e);
+        processExpr(e);
+    }
+
+    void InterpretedTokenType::addRule(InterpretedRuleFactory* rf)
+    {
+        m_rules.push_back(rf);
+        const std::vector<Expr*>& ruleBody=rf->getBody();
+        for (unsigned int i=0; i<ruleBody.size(); i++)
+        	processExpr(ruleBody[i]);
     }
 
     InterpretedTokenType::~InterpretedTokenType()
@@ -1264,6 +1273,11 @@ namespace EUROPA {
             delete m_body[i];
 
         m_body.clear();
+    }
+
+    void InterpretedTokenType::processExpr(Expr* e)
+    {
+    	// TODO: gather conditions/effects and any other info we may be interested in
     }
 
     TokenTypeId InterpretedTokenType::getParentType(const PlanDatabaseId& planDb) const
@@ -1681,6 +1695,11 @@ namespace EUROPA {
     InterpretedRuleInstance *foo = new InterpretedRuleInstance(m_id, token, planDb, m_body);
     foo->setRulesEngine(rulesEngine);
     return foo->getId();
+  }
+
+  const std::vector<Expr*>& InterpretedRuleFactory::getBody() const
+  {
+	  return m_body;
   }
 
   ExprTypedef::ExprTypedef(const DataTypeId& baseType, const char* name, Domain* baseDomain)
