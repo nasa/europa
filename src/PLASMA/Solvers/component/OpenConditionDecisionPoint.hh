@@ -60,10 +60,11 @@ namespace EUROPA {
 
     protected:
       virtual void handleInitialize();
-      void handleExecute();
-      void handleUndo();
-      bool hasNext() const;
-      bool canUndo() const;
+      virtual void handleExecute();
+      virtual void handleUndo();
+      virtual bool hasNext() const;
+      virtual bool canUndo() const;
+
       const TokenId m_flawedToken; /*!< The token to be resolved. */
       std::vector<LabelStr> m_choices; /*!< The sequences list of states to choose. */
       std::vector<TokenId> m_compatibleTokens; /*!< A possibly empty collection of tokens to merge with. */
@@ -72,6 +73,103 @@ namespace EUROPA {
       unsigned int m_mergeIndex; /*!< The position of the next choice in m_compatibleTokens. */
       unsigned int m_choiceIndex; /*!< The position of the next choice in m_choices. */
 
+    };
+
+
+    class OCDecision
+    {
+    public:
+    	virtual ~OCDecision() {}
+
+    	virtual void execute() = 0;
+    	virtual void undo() = 0;
+    	virtual bool hasNext() = 0;
+    };
+
+    /*
+     * @brief In addition to the standard Activate/Merge/Reject decisions, this decision point will
+     * generate choices for supporting actions if that applies to the flawed token
+     */
+    // TODO: reshape OpenConditionDecisionPoint so that this can inherit from it instead
+    class SupportedOCDecisionPoint : public DecisionPoint
+    {
+    public:
+        SupportedOCDecisionPoint(
+        	const DbClientId& client,
+        	const TokenId& flawedToken,
+        	const TiXmlElement& configData,
+        	const LabelStr& explanation = "unknown");
+
+        virtual ~SupportedOCDecisionPoint();
+
+        virtual std::string toString() const;
+        virtual std::string toShortString() const;
+
+    protected:
+        virtual void handleInitialize();
+        virtual void handleExecute();
+        virtual void handleUndo();
+        virtual bool hasNext() const;
+        virtual bool canUndo() const;
+
+        const TokenId m_flawedToken; /*!< The token to be resolved. */
+        std::vector<OCDecision*> m_choices;
+        unsigned int m_currentChoice;
+    };
+
+    class ChangeTokenState : public OCDecision
+    {
+    public:
+    	ChangeTokenState(const DbClientId& dbClient, const TokenId& token);
+    	virtual ~ChangeTokenState();
+
+    	virtual void undo();
+    	virtual bool hasNext();
+
+    protected:
+    	DbClientId m_dbClient;
+    	TokenId m_token;
+    	bool m_isExecuted;
+    };
+
+    class ActivateToken : public ChangeTokenState
+    {
+    public:
+    	ActivateToken(const DbClientId& dbClient, const TokenId& token);
+    	virtual ~ActivateToken();
+
+    	virtual void execute();
+    };
+
+    class MergeToken : public ChangeTokenState
+    {
+    public:
+    	MergeToken(const DbClientId& dbClient, const TokenId& token, const std::vector<TokenId>& compatibleTokens);
+    	virtual ~MergeToken();
+
+    	virtual void execute();
+
+    protected:
+    	std::vector<TokenId> m_compatibleTokens;
+    	unsigned int m_currentChoice;
+    };
+
+    class RejectToken : public ChangeTokenState
+    {
+    public:
+    	RejectToken(const DbClientId& dbClient, const TokenId& token);
+    	virtual ~RejectToken();
+
+    	virtual void execute();
+    };
+
+    class SupportToken : public ChangeTokenState
+    {
+    	SupportToken(const DbClientId& dbClient, const TokenId& token);
+    	virtual ~SupportToken();
+
+    	virtual void execute();
+    	virtual void undo();
     };
   }
 }

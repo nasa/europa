@@ -63,6 +63,7 @@ namespace EUROPA {
 
       REGISTER_FLAW_MANAGER(cfm,SOLVERS::OpenConditionManager, OpenConditionManager);
       REGISTER_FLAW_HANDLER(cfm,SOLVERS::OpenConditionDecisionPoint, StandardOpenConditionHandler);
+      REGISTER_FLAW_HANDLER(cfm,SOLVERS::SupportedOCDecisionPoint, SupportedOpenConditionHandler);
       REGISTER_FLAW_HANDLER(cfm,SOLVERS::HSTS::OpenConditionDecisionPoint, HSTSOpenConditionDecisionPoint);
 
       REGISTER_FLAW_MANAGER(cfm,SOLVERS::ThreatManager, ThreatManager);
