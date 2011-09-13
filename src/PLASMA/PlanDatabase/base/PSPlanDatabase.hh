@@ -23,6 +23,7 @@ namespace EUROPA {
       virtual bool hasMember(const std::string& parentType, const std::string& memberName) const = 0;
 
       virtual PSList<PSObjectType*> getAllPSObjectTypes() const = 0;
+      virtual PSList<PSTokenType*>  getPSTokenTypesByAttr( int attrMask ) const = 0;
   };
 
   class PSPlanDatabase : public EngineComponent

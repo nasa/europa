@@ -276,6 +276,8 @@ namespace EUROPA {
       virtual ~PredicateInstanceRef();
 
       TokenId getToken(EvalContext& ctx, const char* relationName, bool isFact=false, bool isRejectable=false);
+      int     getAttributes() const;
+      const TokenTypeId getTokenType();
 
   protected:
       TokenTypeId m_tokenType;
@@ -303,6 +305,7 @@ namespace EUROPA {
       DataRef eval(EvalContext& context, TokenId& tok, const std::vector<ConstrainedVariableId>& args) const;
   };
 
+  class InterpretedTokenType;
   class ExprRelation : public Expr
   {
     public:
@@ -313,10 +316,13 @@ namespace EUROPA {
 
         virtual DataRef eval(EvalContext& context) const;
 
+        void populateCausality( InterpretedTokenType* container );
+
     protected:
         LabelStr m_relation;
         PredicateInstanceRef* m_origin;
         std::vector<PredicateInstanceRef*> m_targets;
+
   };
 
   // Constraint Expressions
@@ -465,9 +471,10 @@ namespace EUROPA {
     protected:
       std::vector<Expr*> m_body;
       std::vector<InterpretedRuleFactory*> m_rules;
-
       TokenTypeId getParentType(const PlanDatabaseId& planDb) const;
       void processExpr(Expr* e);
+
+    friend class ExprRelation;
   };
 
   class TokenEvalContext : public EvalContext

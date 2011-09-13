@@ -361,10 +361,13 @@ namespace EUROPA {
     void registerTokenType(const TokenTypeId& tokenType);
     TokenTypeId getTokenType(const LabelStr& tokenType);
     TokenTypeId getParentTokenType( const LabelStr& tokenType, const LabelStr& parentObjType);
+
     bool hasTokenTypes() const;
 
     void registerMethod(const MethodId& m);
     MethodId getMethod(const LabelStr& methodName, const DataTypeId& targetType, const std::vector<DataTypeId>& argTypes);
+
+    std::vector<TokenTypeId> getTypeSupporters( TokenTypeId type );
 
     //PSSchema methods:
     PSList<std::string> getAllPredicates() const;
@@ -372,6 +375,7 @@ namespace EUROPA {
     bool hasMember(const std::string& parentType, const std::string& memberName) const;
 
     PSList<PSObjectType*> getAllPSObjectTypes() const;
+    PSList<PSTokenType*>  getPSTokenTypesByAttr( int attrMask ) const;
 
   protected:
     SchemaId m_id;

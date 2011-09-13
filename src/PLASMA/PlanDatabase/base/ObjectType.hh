@@ -35,7 +35,8 @@ public:
 	  virtual const std::string getParentName() const = 0;
 	  virtual PSList<std::string> getMemberNames() const = 0;
 	  virtual PSDataType* getMemberTypeRef(const std::string& name) const = 0;
-	  virtual PSList<PSTokenType*> getPredicates() const = 0;
+          virtual PSList<PSTokenType*> getPredicates() const = 0;
+          virtual PSList<PSTokenType*>  getPSTokenTypesByAttr( int attrMask ) const = 0;
 };
 
 class ObjectType: public PSObjectType
@@ -74,6 +75,8 @@ public:
 	virtual PSList<std::string> getMemberNames() const;
 	virtual PSDataType* getMemberTypeRef(const std::string& name) const;
 	virtual PSList<PSTokenType*> getPredicates() const;
+        virtual PSList<PSTokenType*>  getPSTokenTypesByAttr( int attrMask ) const;
+
 
 protected:
     ObjectTypeId m_id;

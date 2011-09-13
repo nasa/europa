@@ -15,7 +15,7 @@
     os = chars;
     Marshal::FreeHGlobal(IntPtr((void*)chars));
   }
-#endif 
+#endif
 
 
 namespace EUROPA {
@@ -204,7 +204,7 @@ namespace EUROPA {
     check_error(isType(parentType), parentType.toString() + " is not defined.");
 
     // First see if we get a hit for the parentType
-    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(parentType);
 
     // If no hit, then try for the parent. There must be one since it is a valid
@@ -236,7 +236,7 @@ namespace EUROPA {
   const Schema::NameValueVector& Schema::getMembers(const LabelStr& objectType) const
   {
     std::map<edouble, NameValueVector>::const_iterator it = membershipRelation.find(objectType);
-      
+
     check_error(it != membershipRelation.end(), "Unable to find members for object type:" + objectType.toString() );
     return it->second;
   }
@@ -264,7 +264,7 @@ namespace EUROPA {
     check_error(isType(parentType), parentType.toString() + " is undefined.");
 
     // First see if we get a hit for the parentType
-    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(parentType);
 
     // If no hit, then try for the parent. There must be one since it is a valid
@@ -404,7 +404,7 @@ namespace EUROPA {
 		memberName.toString() + " is not a member of " + parentType.toString());
 
     // First see if we get a hit for the parentType
-    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
@@ -428,7 +428,7 @@ namespace EUROPA {
 		memberName.toString() + " is not a member of " + parentType.toString());
 
     // First see if we get a hit for the parentType
-    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
@@ -452,7 +452,7 @@ namespace EUROPA {
 
   const LabelStr Schema::getNameFromIndex(const LabelStr& parentType, unsigned int index) const {
     // First see if we get a hit for the parentType
-    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(parentType);
 
     // At this point we know if we do not have a hit, then try a parent
@@ -494,7 +494,7 @@ namespace EUROPA {
   unsigned int Schema::getParameterCount(const LabelStr& predicate) const {
     check_error(isPredicate(predicate), predicate.toString() + " is not defined as a Predicate");
     // First see if we get a hit for the parentType
-    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(predicate);
 
     check_error(membershipRelation_it != membershipRelation.end(), predicate.toString() + " not found in the membership relation");
@@ -514,7 +514,7 @@ namespace EUROPA {
     check_error(paramIndex < getParameterCount(predicate), paramIndex + " is not a valid index");
 #endif
     // First see if we get a hit for the parentType
-    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it = 
+    std::map<edouble, NameValueVector>::const_iterator membershipRelation_it =
       membershipRelation.find(predicate);
 
     check_error(membershipRelation_it != membershipRelation.end());
@@ -776,6 +776,7 @@ namespace EUROPA {
       return m_tokenTypeMgr->getType(getId(),type);
   }
 
+
   TokenTypeId Schema::getParentTokenType(const LabelStr& tokenType, const LabelStr& parentObjType)
   {
       LabelStr objType = parentObjType;
@@ -814,6 +815,29 @@ namespace EUROPA {
       return (it != m_methods.end() ? it->second : MethodId::noId());
   }
 
+  std::vector<TokenTypeId> Schema::getTypeSupporters( TokenTypeId type )
+  {
+    edouble key = type->getSignature().getKey();
+    std::vector<TokenTypeId> retval;
+
+    PSList<PSTokenType*> actionTypes = getPSTokenTypesByAttr( PSTokenType::ACTION );
+
+    for( int i = 0; i < actionTypes.size(); i++){
+
+      TokenType* tt = (TokenType*)actionTypes.get( i );
+      PSList<PSTokenType*> effects = tt->getSubgoalsByAttr( PSTokenType::EFFECT);
+
+      for ( int i = 0; i < effects.size(); i++ ) {
+	TokenType* tt_effect = (TokenType*) effects.get(i);
+	if( tt_effect->getSignature().getKey() == key)
+	      retval.push_back( tt->getId() );
+      }
+    }
+
+    return retval;
+
+  }
+
   // PSSchema methods:
   PSList<std::string> Schema::getAllPredicates() const
    {
@@ -835,5 +859,23 @@ namespace EUROPA {
 
     return retval;
   }
+
+  /**
+   * @brief Retrieve TokenTypes by searching in all ObjectTypes@
+   */
+  PSList<PSTokenType*>  Schema::getPSTokenTypesByAttr( int attrMask ) const
+  {
+    PSList<PSTokenType*> retval;
+    std::vector<ObjectTypeId> ots = m_objectTypeMgr->getAllObjectTypes();
+    for( unsigned i = 0; i < ots.size(); i++ ){
+      PSList<PSTokenType*> tts = ots[i]->getPSTokenTypesByAttr( attrMask );
+      for( int j = 0; j < tts.size(); j++ )
+	retval.push_back( tts.get(j) );
+    }
+
+    return retval;
+
+  }
+
 
 } // namespace NDDL

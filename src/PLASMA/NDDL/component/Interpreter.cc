@@ -296,7 +296,7 @@ namespace EUROPA {
 
     // TODO: using ObjectEvalContext may be cleaner?
     ConstrainedVariableId thisVar = context.getVar("this");
-    ObjectId thisObject = 
+    ObjectId thisObject =
       (thisVar.isId() ? Entity::getTypedEntity<Object>(thisVar->derivedDomain().getSingletonValue()) : ObjectId::noId());
     std::string prefix = (thisObject.isId() ? thisObject->getName().toString() + "." : "");
 
@@ -894,6 +894,16 @@ namespace EUROPA {
       return slave;
   }
 
+  int PredicateInstanceRef::getAttributes(  ) const
+  {
+    return m_attributes;
+  }
+
+  const TokenTypeId PredicateInstanceRef::getTokenType()
+  {
+    return m_tokenType;
+  }
+
   ExprRelation::ExprRelation(const char* relation,
                              PredicateInstanceRef* origin,
                              const std::vector<PredicateInstanceRef*>& targets)
@@ -905,7 +915,9 @@ namespace EUROPA {
     	  // TODO: may want to provide the actual token type at some point
           m_origin = new PredicateInstanceRef(TokenTypeId::noId(),NULL,"this","");
       }
+
   }
+
 
   ExprRelation::~ExprRelation()
   {
@@ -913,6 +925,14 @@ namespace EUROPA {
       for (unsigned int i =0;i<m_targets.size();i++)
           delete m_targets[i];
       m_targets.clear();
+  }
+
+  void ExprRelation::populateCausality( InterpretedTokenType* container )
+  {
+    for( std::vector< PredicateInstanceRef* >::iterator it_target = m_targets.begin();
+	 it_target != m_targets.end(); it_target++ )
+      container->addSubgoalByAttr( (*it_target)->getTokenType(), (*it_target)->getAttributes() );
+
   }
 
 #define makeRelation(relationname, origin, originvar, target, targetvar) {  \
@@ -1244,9 +1264,9 @@ namespace EUROPA {
     	// TODO: offer conversion methods in TokenType
     	int attributes=0;
     	if (kind=="action")
-    		attributes |= TokenType::ACTION;
+    		attributes |= PSTokenType::ACTION;
     	else if (kind=="predicate")
-    		attributes |= TokenType::PREDICATE;
+    		attributes |= PSTokenType::PREDICATE;
     	else
     		std::cerr << "TokenType "<< predicateName.toString() << " unknown kind:" << kind << std::endl;
 
@@ -1278,6 +1298,10 @@ namespace EUROPA {
     void InterpretedTokenType::processExpr(Expr* e)
     {
     	// TODO: gather conditions/effects and any other info we may be interested in
+
+      ExprRelation* er = dynamic_cast<ExprRelation*>(e);
+      if (er!=NULL)
+	er->populateCausality( this );
     }
 
     TokenTypeId InterpretedTokenType::getParentType(const PlanDatabaseId& planDb) const
@@ -1677,6 +1701,7 @@ namespace EUROPA {
     for(std::vector<Expr*>::const_iterator it = body.begin(); it != body.end(); ++it) {
       debugMsg("InterpretedRuleFactory:InterpretedRuleFactory",
 	       (*it)->toString());
+
     }
   }
 

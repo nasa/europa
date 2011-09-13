@@ -162,6 +162,15 @@ PSList<PSTokenType*> ObjectType::getPredicates() const {
 	  return retval;
 }
 
+PSList<PSTokenType*> ObjectType::getPSTokenTypesByAttr( int attrMask ) const {
+	  PSList<PSTokenType*> retval;
+	  for (std::map<edouble,TokenTypeId>::const_iterator it = m_tokenTypes.begin(); it != m_tokenTypes.end(); ++it) {
+	    if( it->second->hasAttributes( attrMask ) )
+		  retval.push_back(it->second);
+	  }
+	  return retval;
+}
+
 const TokenTypeId& ObjectType::getParentType(const TokenTypeId& type) const
 {
     if (m_parent.isId()) {
