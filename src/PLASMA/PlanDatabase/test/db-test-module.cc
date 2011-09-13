@@ -286,6 +286,24 @@ PlanDatabaseId db;
     }
   };
 
+class DummyTokenType : public TokenType{
+
+public:
+  DummyTokenType(const ObjectTypeId& ot,const LabelStr& predicateName) : TokenType(ot, predicateName){}
+  virtual ~DummyTokenType(){}
+
+  virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const{
+    TokenId token;
+    return token;
+  }
+  virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const{
+    TokenId token;
+    return token;
+  }
+
+  friend class SchemaTest;
+
+};
 
 class SchemaTest {
 public:
@@ -295,6 +313,8 @@ public:
     EUROPA_runTest(testObjectTypeRelationships);
     EUROPA_runTest(testObjectPredicateRelationships);
     EUROPA_runTest(testPredicateParameterAccessors);
+    EUROPA_runTest(testTokenTypeAttributes);
+
     return(true);
   }
 
@@ -552,10 +572,67 @@ private:
     CPPUNIT_ASSERT(schema->getParameterType(LabelStr("Foo.Argle"), 0) == LabelStr("Bargle"));
     CPPUNIT_ASSERT(schema->getParameterType(LabelStr("Foo.Argle"), 1) == LabelStr("Targle"));
 
+    schema->reset();
     DEFAULT_TEARDOWN();
 
     return true;
   }
+
+  static bool testTokenTypeAttributes() {
+      DEFAULT_SETUP(ce, db, true);
+      ObjectTypeId timelineOT = schema->getObjectType("Timeline");
+      ObjectType* ot;
+      ot = new ObjectType( "Dummy", timelineOT, true );
+
+      DummyTokenType* ttOp = new DummyTokenType( ot->getId(), "Dummy.Action" );
+      ot->addTokenType( ttOp->getId() );
+
+      DummyTokenType* ttFl = new DummyTokenType( ot->getId(), "Dummy.Value" );
+      ot->addTokenType( ttFl->getId() );
+
+      schema->registerObjectType( ot->getId() );
+
+      CPPUNIT_ASSERT( schema->getPSTokenTypesByAttr( PSTokenType::PREDICATE ).size() == 0 );
+      CPPUNIT_ASSERT( schema->getPSTokenTypesByAttr( PSTokenType::ACTION ).size() == 0 );
+      CPPUNIT_ASSERT( schema->getPSTokenTypesByAttr( PSTokenType::CONDITION ).size() == 0 );
+      CPPUNIT_ASSERT( schema->getPSTokenTypesByAttr( PSTokenType::EFFECT ).size() == 0 );
+
+      CPPUNIT_ASSERT( ! ttOp->hasAttributes( PSTokenType::ACTION ) );
+      CPPUNIT_ASSERT( ot->getPSTokenTypesByAttr( PSTokenType::ACTION ).size() == 0 );
+      ttOp->setAttributes( PSTokenType::ACTION );
+      CPPUNIT_ASSERT( ttOp->hasAttributes( PSTokenType::ACTION ) );
+      CPPUNIT_ASSERT( ot->getPSTokenTypesByAttr( PSTokenType::ACTION ).size() == 1 );
+
+      CPPUNIT_ASSERT( ! ttFl->hasAttributes( PSTokenType::PREDICATE ) );
+      CPPUNIT_ASSERT( ot->getPSTokenTypesByAttr( PSTokenType::PREDICATE ).size() == 0 );
+      ttFl->setAttributes( PSTokenType::PREDICATE );
+      CPPUNIT_ASSERT( ttFl->hasAttributes( PSTokenType::PREDICATE ) );
+      CPPUNIT_ASSERT( ot->getPSTokenTypesByAttr( PSTokenType::PREDICATE ).size() == 1 );
+
+      CPPUNIT_ASSERT( ttOp->getSubgoalsByAttr( PSTokenType::CONDITION ).size() == 0 );
+      ttOp->addSubgoalByAttr( ttFl->getId(), PSTokenType::CONDITION );
+      CPPUNIT_ASSERT( ttFl->hasAttributes( PSTokenType::CONDITION ) );
+      CPPUNIT_ASSERT( ttOp->getSubgoalsByAttr( PSTokenType::CONDITION ).size() == 1 );
+
+      CPPUNIT_ASSERT( ttOp->getSubgoalsByAttr( PSTokenType::EFFECT ).size() == 0 );
+      CPPUNIT_ASSERT( schema->getTypeSupporters( ttFl->getId() ).size() == 0 );
+      ttOp->addSubgoalByAttr( ttFl->getId(), PSTokenType::EFFECT );
+      CPPUNIT_ASSERT( schema->getTypeSupporters( ttFl->getId() )[0] == ttOp->getId() );
+      CPPUNIT_ASSERT( schema->getTypeSupporters( ttFl->getId() ).size() == 1 );
+      CPPUNIT_ASSERT( ttOp->getSubgoalsByAttr( PSTokenType::EFFECT ).size() == 1 );
+
+      CPPUNIT_ASSERT( schema->getPSTokenTypesByAttr( PSTokenType::PREDICATE ).size() == 1 );
+      CPPUNIT_ASSERT( schema->getPSTokenTypesByAttr( PSTokenType::ACTION ).size() == 1 );
+      CPPUNIT_ASSERT( schema->getPSTokenTypesByAttr( PSTokenType::CONDITION ).size() == 1 );
+      CPPUNIT_ASSERT( schema->getPSTokenTypesByAttr( PSTokenType::EFFECT ).size() == 1 );
+
+
+
+      DEFAULT_TEARDOWN();
+
+    return true;
+  }
+
 };
 
 class ObjectTest {
