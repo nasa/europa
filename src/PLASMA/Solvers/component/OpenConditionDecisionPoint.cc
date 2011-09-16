@@ -243,15 +243,20 @@ namespace EUROPA {
             	m_choices.push_back(new MergeToken(m_client,m_flawedToken,compatibleTokens));
         }
 
-        if(stateDomain.isMember(Token::ACTIVE)) {
-        	// TODO: if token can be supported generate SupportToken decision instead
+		SchemaId schema = m_client->getSchema();
+		// TODO: PSToken::getTokenType() should return token type, not token type name
+		TokenTypeId tokenType = schema->getTokenType(m_flawedToken->getTokenType());
+		std::vector<TokenTypeId> supportActionTypes = schema->getTypeSupporters(tokenType);
+		if (supportActionTypes.size() > 0) {
+			checkError(stateDomain.isMember(Token::MERGED),"Fluent with possible supports must allow merging");
+			// TODO: probably should remove ACTIVE from stateDomain at some point, maybe here?
+			m_choices.push_back(new SupportToken(m_client,m_flawedToken,supportActionTypes));
+		}
+		else if(stateDomain.isMember(Token::ACTIVE))
         	m_choices.push_back(new ActivateToken(m_client,m_flawedToken));
-        }
 
-
-        if(stateDomain.isMember(Token::REJECTED)){
+        if(stateDomain.isMember(Token::REJECTED))
         	m_choices.push_back(new RejectToken(m_client,m_flawedToken));
-        }
     }
 
     void SupportedOCDecisionPoint::handleExecute()
@@ -330,7 +335,7 @@ namespace EUROPA {
 	{
 		TokenId activeToken = m_compatibleTokens[m_currentChoice++];
 		m_dbClient->merge(m_token,activeToken);
-		m_isExecuted=(m_currentChoice < m_compatibleTokens.size());
+		m_isExecuted=(m_currentChoice >= m_compatibleTokens.size());
 	}
 
 	RejectToken::RejectToken(const DbClientId& dbClient, const TokenId& token)
@@ -348,29 +353,106 @@ namespace EUROPA {
 		m_isExecuted=true;
 	}
 
-	SupportToken::SupportToken(const DbClientId& dbClient, const TokenId& token)
+	SupportToken::SupportToken(const DbClientId& dbClient, const TokenId& token, const std::vector<TokenTypeId>& supportActionTypes)
 		: ChangeTokenState(dbClient,token)
 	{
-		// TODO: generate all the choice points for support
+		for (unsigned int i = 0;i<supportActionTypes.size(); i++) {
+			TokenTypeId tt = supportActionTypes[i];
+			int mergeCnt = 0;
+			PSList<PSTokenType*> effectTypes = tt->getSubgoalsByAttr(PSTokenType::EFFECT);
+			for (int j=0;j<effectTypes.size();j++) {
+				// TODO: use ids for faster comparison instead
+				if (token->getTokenType() == effectTypes.get(i)->getName())
+					mergeCnt++;
+			}
+
+			checkError(mergeCnt > 0, "Expected to find at list one merge point for " << token->getTokenType() << " in " << tt->getName());
+			m_choices.push_back(std::pair<TokenTypeId,int>(tt,mergeCnt));
+		}
+
+		m_actionIndex = 0;
+		m_effectIndex = 0;
 	}
 
 	SupportToken::~SupportToken()
 	{
 	}
 
+	/* For each candidate action
+	 * 	For each possible effect that this token can be merged with
+	 *		1. Activate action
+	 * 		2. Add all of the action's effects into the plan (allow merges?)
+	 *		3. Merge this token with the target effect
+	 */
 	void SupportToken::execute()
 	{
-		// TODO: implement this
-		// For each candidate action
-		// 	For each possible effect that this token can be merge with
-		//		- Activate action
-		//		- Merge this token with the target effect
-		// 		- Activate all other effects (allow merges?)
+		TokenTypeId actionType = m_choices[m_actionIndex].first;
+
+		// 1. Activate Action
+		m_action = m_dbClient->createToken(
+				actionType->getPredicateName().c_str(),
+				actionType->getName().c_str(), // TODO: generate name?
+				false, //isRejectable
+				false //isFact
+		);
+		m_dbClient->activate(m_action);
+
+		// 2. Add all of the action's effects into the plan
+		TokenId targetEffect;
+		int effectCnt = 0;
+		PSList<PSToken*> slaves = m_action->getSlaves();
+		for (int i=0;i<slaves.size();i++) {
+			PSToken* slave = slaves.get(i);
+			if (slave->getAttributes() & PSTokenType::EFFECT) { // TODO: attribute should be evaluated by token
+				// TODO: allow merges?, but must make sure all the effects are activated/merged before anything else happens
+				// TODO: what happens if we fail to activate/merge all the effects of the supporting action?
+				// TODO: eliminate the need for the dynamic cast below
+				TokenId slaveId = dynamic_cast<Token*>(slave)->getId();
+				m_dbClient->activate(slaveId);
+				if (slave->getTokenType() == m_token->getTokenType()) { // TODO: use ids
+					if (effectCnt == m_effectIndex)
+						targetEffect = slaveId;
+					else
+						effectCnt++;
+				}
+			}
+		}
+
+		// 3. Merge the token that needs support with the target effect
+		checkError(targetEffect.isValid(),"Expected effect to support fluent");
+		// If target effect was merged into other token, merge with that one instead.
+		if (targetEffect->getActiveToken().isId())
+			targetEffect = targetEffect->getActiveToken();
+		m_dbClient->merge(m_token,targetEffect);
+
+		m_effectIndex++;
+		if (m_effectIndex >= m_choices[m_actionIndex].second) {
+			m_actionIndex++;
+			m_effectIndex=0;
+		}
+		m_isExecuted = ((unsigned int)m_actionIndex >= m_choices.size());
 	}
 
+	/*
+	 * Cancel the support provided by the candidate action
+	 * Remove candidate action and its effects from the plan
+	 */
 	void SupportToken::undo()
 	{
-		// TODO: implement this
+		m_dbClient->cancel(m_token);
+
+		// TODO: this will probably only work in the context of chronological backtracking,
+		// otherwise we may have to explicitly undo the entire slave tree for the supporting action
+		PSList<PSToken*> slaves = m_action->getSlaves();
+		for (int i=0;i<slaves.size();i++) {
+			TokenId slave = dynamic_cast<Token*>(slaves.get(i))->getId();
+			if (slave->getAttributes() & PSTokenType::EFFECT)
+				m_dbClient->cancel(slave);
+		}
+		m_dbClient->cancel(m_action);
+
+		delete (Token*)m_action;
+		m_action = TokenId::noId();
 	}
   }
 }

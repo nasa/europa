@@ -352,7 +352,7 @@ namespace EUROPA {
      */
     bool isDeleted() const;
 
-    // See TokenType::TokenAttribute
+    // See PSTokenType::TokenAttribute
     virtual int getAttributes() const;
     virtual void setAttributes(int attrs);
     virtual void addAttributes(int attrMask);

@@ -165,11 +165,18 @@ namespace EUROPA {
 
     class SupportToken : public ChangeTokenState
     {
-    	SupportToken(const DbClientId& dbClient, const TokenId& token);
+    public:
+    	SupportToken(const DbClientId& dbClient, const TokenId& token, const std::vector<TokenTypeId>& supportActionTypes);
     	virtual ~SupportToken();
 
     	virtual void execute();
     	virtual void undo();
+
+    protected:
+    	std::vector<std::pair<TokenTypeId,int> > m_choices;
+    	int m_actionIndex;
+    	int m_effectIndex;
+    	TokenId m_action;
     };
   }
 }

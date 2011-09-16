@@ -106,6 +106,10 @@ namespace EUROPA {
       // returns active tokens that this token can be merged to
       virtual PSList<PSToken*> getCompatibleTokens(unsigned int limit, bool useExactTest) = 0;
 
+      // See PSTokenType::TokenAttribute
+      virtual int getAttributes() const = 0;
+      virtual void setAttributes(int attrs) = 0;
+      virtual void addAttributes(int attrMask) = 0;
   };
 
   class PSPlanDatabaseClient
