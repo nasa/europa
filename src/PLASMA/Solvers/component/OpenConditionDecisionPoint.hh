@@ -177,6 +177,7 @@ namespace EUROPA {
     	int m_actionIndex;
     	int m_effectIndex;
     	TokenId m_action;
+    	TokenId m_targetEffect;
     };
   }
 }
