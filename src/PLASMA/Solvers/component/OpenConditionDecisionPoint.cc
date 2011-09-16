@@ -353,6 +353,7 @@ namespace EUROPA {
 		m_isExecuted=true;
 	}
 
+	// TODO: allow heuristic function to be passed as a parameter
 	SupportToken::SupportToken(const DbClientId& dbClient, const TokenId& token, const std::vector<TokenTypeId>& supportActionTypes)
 		: ChangeTokenState(dbClient,token)
 	{
@@ -367,6 +368,7 @@ namespace EUROPA {
 			}
 
 			checkError(mergeCnt > 0, "Expected to find at list one merge point for " << token->getTokenType() << " in " << tt->getName());
+			// TODO: use heuristic function to sort choices
 			m_choices.push_back(std::pair<TokenTypeId,int>(tt,mergeCnt));
 		}
 
