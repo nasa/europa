@@ -246,7 +246,7 @@ namespace EUROPA {
 		if(stateDomain.isMember(Token::ACTIVE)) {
 			SchemaId schema = m_client->getSchema();
 			// TODO: PSToken::getTokenType() should return token type, not token type name
-			TokenTypeId tokenType = schema->getTokenType(m_flawedToken->getTokenType());
+			TokenTypeId tokenType = schema->getTokenType(m_flawedToken->getFullTokenType());
 			std::vector<TokenTypeId> supportActionTypes = schema->getTypeSupporters(tokenType);
 			// TODO: allow heuristic function to be passed as a parameter to SupportToken
 			if (supportActionTypes.size() > 0)
