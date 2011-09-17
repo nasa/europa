@@ -239,6 +239,7 @@ namespace EUROPA {
             		EUROPA_UINT_MAX,
             		true);
 
+            // TODO: if flawed token is a fact, make sure we only look at other facts
             if (compatibleTokens.size() > 0)
             	m_choices.push_back(new MergeToken(m_client,m_flawedToken,compatibleTokens));
         }
@@ -249,7 +250,7 @@ namespace EUROPA {
 			TokenTypeId tokenType = schema->getTokenType(m_flawedToken->getFullTokenType());
 			std::vector<TokenTypeId> supportActionTypes = schema->getTypeSupporters(tokenType);
 			// TODO: allow heuristic function to be passed as a parameter to SupportToken
-			if (supportActionTypes.size() > 0)
+			if (!m_flawedToken->isFact() && (supportActionTypes.size() > 0))
 				m_choices.push_back(new SupportToken(m_client,m_flawedToken,supportActionTypes));
 			else
 				m_choices.push_back(new ActivateToken(m_client,m_flawedToken));
@@ -399,11 +400,11 @@ namespace EUROPA {
 		TokenTypeId actionType = m_choices[m_actionIndex].first;
 
 		// 1. Activate token that needs support
-		m_dbClient->activate(m_action);
+		m_dbClient->activate(m_token);
 
 		// 2. Activate candidate supporting action
 		m_action = m_dbClient->createToken(
-				actionType->getPredicateName().c_str(),
+				actionType->getSignature().c_str(), // TODO: getSignature() should be getQualifiedName(), or something like that
 				actionType->getName().c_str(), // TODO: generate name?
 				false, //isRejectable
 				false //isFact
