@@ -1119,6 +1119,8 @@ std::string attrsToString(int attrs)
 
 	if (attrs & PSTokenType::ACTION)
 		os << " ACTION";
+	if (attrs & PSTokenType::PREDICATE)
+		os << " PREDICATE";
 	if (attrs & PSTokenType::CONDITION)
 		os << " CONDITION";
 	if (attrs & PSTokenType::EFFECT)
