@@ -611,7 +611,6 @@ private:
 
       CPPUNIT_ASSERT( ttOp->getSubgoalsByAttr( PSTokenType::CONDITION ).size() == 0 );
       ttOp->addSubgoalByAttr( ttFl->getId(), PSTokenType::CONDITION );
-      CPPUNIT_ASSERT( ttFl->hasAttributes( PSTokenType::CONDITION ) );
       CPPUNIT_ASSERT( ttOp->getSubgoalsByAttr( PSTokenType::CONDITION ).size() == 1 );
 
       CPPUNIT_ASSERT( ttOp->getSubgoalsByAttr( PSTokenType::EFFECT ).size() == 0 );
@@ -623,10 +622,6 @@ private:
 
       CPPUNIT_ASSERT( schema->getPSTokenTypesByAttr( PSTokenType::PREDICATE ).size() == 1 );
       CPPUNIT_ASSERT( schema->getPSTokenTypesByAttr( PSTokenType::ACTION ).size() == 1 );
-      CPPUNIT_ASSERT( schema->getPSTokenTypesByAttr( PSTokenType::CONDITION ).size() == 1 );
-      CPPUNIT_ASSERT( schema->getPSTokenTypesByAttr( PSTokenType::EFFECT ).size() == 1 );
-
-
 
       DEFAULT_TEARDOWN();
 
