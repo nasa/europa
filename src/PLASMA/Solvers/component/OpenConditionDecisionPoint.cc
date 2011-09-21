@@ -361,10 +361,14 @@ namespace EUROPA {
 			TokenTypeId tt = supportActionTypes[i];
 			int mergeCnt = 0;
 			PSList<PSTokenType*> effectTypes = tt->getSubgoalsByAttr(PSTokenType::EFFECT);
+			debugMsg("SupportToken", "Support Type:" << tt->getName());
 			for (int j=0;j<effectTypes.size();j++) {
 				// TODO: use ids for faster comparison instead
-				if (token->getTokenType() == effectTypes.get(i)->getName())
+				debugMsg("SupportToken", "Comparing: " << token->getTokenType() << " and " << effectTypes.get(j)->getName());
+				if (token->getTokenType() == effectTypes.get(j)->getName()) {
 					mergeCnt++;
+					debugMsg("SupportToken", "Found match!");
+				}
 			}
 
 			checkError(mergeCnt > 0, "Expected to find at list one merge point for " << token->getTokenType() << " in " << tt->getName());
@@ -388,6 +392,16 @@ namespace EUROPA {
 	 * 2. Activate each action only once and only change which effect is merged into token
 	 */
 
+	std::string autoName(const std::string& prefix)
+	{
+	    static int i=0;
+	    std::stringstream os;
+
+	    os << prefix << "-" << (i++);
+
+	    return os.str();
+	}
+
 	/* For each candidate action
 	 * 	For each possible effect that this token can be merged with
 	 *		1. Activate token that needs support
@@ -399,24 +413,28 @@ namespace EUROPA {
 	{
 		TokenTypeId actionType = m_choices[m_actionIndex].first;
 
+		debugMsg("SupportToken", "Activating supporting action:" << actionType->getName() << " for \n" << m_token->toLongString());
+
 		// 1. Activate token that needs support
 		m_dbClient->activate(m_token);
 
 		// 2. Activate candidate supporting action
 		m_action = m_dbClient->createToken(
 				actionType->getSignature().c_str(), // TODO: getSignature() should be getQualifiedName(), or something like that
-				actionType->getName().c_str(), // TODO: generate name?
+				autoName(actionType->getName()).c_str(),
 				false, //isRejectable
 				false //isFact
 		);
 		m_dbClient->activate(m_action);
+
+		debugMsg("SupportToken", "Activated supporting action:\n" << m_action->toLongString());
 
 		// 3. Merge target effect from action into token that needs support
 		int effectCnt = 0;
 		PSList<PSToken*> slaves = m_action->getSlaves();
 		for (int i=0;i<slaves.size();i++) {
 			PSToken* slave = slaves.get(i);
-			if (slave->getAttributes() & PSTokenType::EFFECT) { // TODO: attribute should be evaluated by token
+			if (slave->getAttributes() & PSTokenType::EFFECT) { // TODO: attribute should be evaluated by token type
 				if (slave->getTokenType() == m_token->getTokenType()) { // TODO: use ids
 					if (effectCnt == m_effectIndex) {
 						// TODO: eliminate the need for the dynamic cast below
@@ -431,6 +449,10 @@ namespace EUROPA {
 			}
 		}
 		checkError(m_targetEffect.isId(),"Expected effect to support fluent");
+
+		debugMsg("SupportToken", "Merged with target effect:\n" << m_targetEffect->toLongString());
+		debugMsg("SupportToken", "Supported token:\n" << m_token->toLongString());
+		debugMsg("SupportToken", "Supporting action:\n" << m_action->toLongString());
 
 		// 4. Add all of the action's effects into the plan
 		// TODO: make sure that all of the activate/merge decisions for the action's effects are processed next

@@ -74,7 +74,7 @@ namespace EUROPA{
   }
 
   Token::Token(const PlanDatabaseId& planDatabase,
-	       const LabelStr& predicateName,
+	       const LabelStr& tokenTypeName,
 	       bool rejectable,
 	       bool isFact,
 	       const IntervalIntDomain& durationBaseDomain,
@@ -82,32 +82,32 @@ namespace EUROPA{
 	       bool closed)
       :Entity(),
        m_id(this),
-       m_name(predicateName), // TODO: fix this
+       m_name(tokenTypeName),
        m_relation("none"),
-       m_predicateName(predicateName),
+       m_predicateName(tokenTypeName),
        m_planDatabase(planDatabase) {
-    commonInit(predicateName, rejectable, isFact, durationBaseDomain, objectName, closed);
+    commonInit(tokenTypeName, rejectable, isFact, durationBaseDomain, objectName, closed);
   }
 
   // Slave tokens cannot be rejectable.
   Token::Token(const TokenId& master,
 	       const LabelStr& relation,
-	       const LabelStr& predicateName,
+	       const LabelStr& tokenTypeName,
 	       const IntervalIntDomain& durationBaseDomain,
 	       const LabelStr& objectName,
 	       bool closed)
      :Entity(),
       m_id(this),
-      m_name(predicateName), // TODO: fix this
+      m_name(tokenTypeName),
       m_master(master),
       m_relation(relation),
-      m_predicateName(predicateName),
+      m_predicateName(tokenTypeName),
       m_planDatabase((*master).m_planDatabase) {
 
        // Master must be active to add children
        check_error(m_master->isActive());
        m_master->add(m_id);
-       commonInit(predicateName, false, false, durationBaseDomain, objectName, closed);
+       commonInit(tokenTypeName, false, false, durationBaseDomain, objectName, closed);
   }
 
   Token::~Token(){
@@ -1111,6 +1111,24 @@ PSList<PSToken*> Token::getCompatibleTokens(unsigned int limit, bool useExactTes
     return retval;
 }
 
+std::string attrsToString(int attrs)
+{
+	std::ostringstream os;
+
+	os << "{";
+
+	if (attrs & PSTokenType::ACTION)
+		os << " ACTION";
+	if (attrs & PSTokenType::CONDITION)
+		os << " CONDITION";
+	if (attrs & PSTokenType::EFFECT)
+		os << " EFFECT";
+
+	os << " }";
+
+	return os.str();
+}
+
 std::string Token::toLongString() const
 {
 	std::ostringstream os;
@@ -1125,6 +1143,8 @@ std::string Token::toLongString() const
 	for (int i=0;i<vars.size();i++) {
 	    os << "    " << vars.get(i)->getEntityName() << " : " << vars.get(i)->toString() << std::endl;
 	}
+
+	os << "    Attributes: " << attrsToString(m_attributes) << std::endl;
 
 	os << "}" << std::endl;
 

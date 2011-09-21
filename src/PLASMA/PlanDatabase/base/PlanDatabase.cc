@@ -1093,7 +1093,7 @@ namespace EUROPA{
 
       TokenId token = factory->createInstance(
               getId(),
-              ttype,
+              ttype, // Hack!, this is supposed to be the instance name, InterpretedTokenFactory::createInstance relies on this hack
               rejectable,
               isFact);
 

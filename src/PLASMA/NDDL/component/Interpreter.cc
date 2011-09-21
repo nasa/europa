@@ -798,10 +798,10 @@ namespace EUROPA {
 	  if (annotation != NULL) {
 		  std::string str = annotation;
 		  if (str=="condition")
-			  m_attributes |= TokenType::CONDITION;
+			  m_attributes |= PSTokenType::CONDITION;
 		  else if (str=="effect")
-			  m_attributes |= TokenType::EFFECT;
-		  else if (annotation != "")
+			  m_attributes |= PSTokenType::EFFECT;
+		  else if (str != "")
 			  std::cerr << "PredicateInstanceref "<< m_predicateInstance << " " << m_predicateName << " unknown annotation:" << str << std::endl;
 	  }
   }
@@ -1312,7 +1312,12 @@ namespace EUROPA {
         return parentType;
     }
 
-	TokenId InterpretedTokenType::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
+    /*
+     * Hack! currently PlanDatabase::createToken passes TokenTypeName in the name parameter
+     * this method takes advantage of that hack to pass the original type up the class hierarchy
+     * a cleaner implementation that explicitly keeps track of the original token type is needed
+     */
+    TokenId InterpretedTokenType::createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable, bool isFact) const
 	{
 	    TokenTypeId parentType = getParentType(planDb);
 
@@ -1320,20 +1325,19 @@ namespace EUROPA {
 	    if (parentType.isNoId()) {
 	        token = (new InterpretedToken(
 	                planDb,
-	                name,
+	                name, // Hack! this should be original TokenType passed explicitly
 	                m_body,
 	                rejectable,
 	                isFact,
 	                false))->getId();
-	        // TODO: this should be done for all tokens, not just InterpretedTokens
+	        // TODO: this should be done for NativeTokens as well
 	        token->setAttributes(getAttributes());
 	    }
 	    else {
 	        token = parentType->createInstance(planDb,name,rejectable,isFact);
-	        // TODO: Hack! this makes it impossible to extend native tokens
-	        // class hierarchy needs to be fixed to avoid this cast
             InterpretedToken* it = dynamic_cast<InterpretedToken*>((Token*)token);
-            it->commonInit(m_body,false);
+            if (it != NULL)
+            	it->commonInit(m_body,false);
 	    }
 
 	    return token;
