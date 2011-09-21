@@ -146,7 +146,6 @@ namespace EUROPA {
   }
 
   void TokenType::addSubgoalByAttr( TokenTypeId type, int attr ){
-    type->addAttributes( attr );
     for( int attrMask = 1; attrMask <= attr; attrMask = attrMask << 1 ){
       if( ( attr & attrMask ) == attrMask ){
 	m_subgoalsByAttr[ attrMask ].push_back(  (PSTokenType*) type );
