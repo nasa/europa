@@ -58,6 +58,7 @@ namespace EUROPA {
     // Overrides the definition in DistanceGraph class.
     TimepointId node = (new Tnode(this))->getId();
     // PHM Support for reftime calculations
+    node->prev_reftime = TIME_MAX; // will never == reftime
     if (m_refpoint.isId()) {
       if (m_refpoint->inCount == 0)
 	node->reftime = POS_INFINITY;
