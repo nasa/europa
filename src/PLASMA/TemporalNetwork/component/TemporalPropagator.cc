@@ -552,11 +552,6 @@ namespace EUROPA {
                   "Updated bounds [" << lb << " " << ub << "] from timepoint " << tp << " are outside of "
                   << dom.toString() << " for " << var->toString());
 
-	  if (lb == dom.getLowerBound() && ub == dom.getUpperBound())
-	    continue;  // PHM 06/06/11 This might often be the case
-
-	  dom.intersect(mapToExternalInfinity(lb), mapToExternalInfinity(ub));
-
 	  // PHM Support for reftime calculations
 	  if (m_tnet->getReferenceTimepoint().isId()) {
 	    bool changed = tp->updatePrevReftime();
@@ -565,6 +560,11 @@ namespace EUROPA {
 	      listener->notifyChange(DomainListener::REFTIME_CHANGED);
 	    }
 	  }
+
+	  if (lb == dom.getLowerBound() && ub == dom.getUpperBound())
+	    continue;  // PHM 06/06/11 This might often be the case
+
+	  dom.intersect(mapToExternalInfinity(lb), mapToExternalInfinity(ub));
 
           if(TokenId::convertable(var->parent())){
               TokenId token = var->parent();
