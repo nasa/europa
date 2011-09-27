@@ -110,6 +110,7 @@ namespace EUROPA {
       virtual int getAttributes() const = 0;
       virtual void setAttributes(int attrs) = 0;
       virtual void addAttributes(int attrMask) = 0;
+      virtual bool hasAttributes( int attrMask ) const = 0;
   };
 
   class PSPlanDatabaseClient

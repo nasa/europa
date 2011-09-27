@@ -65,6 +65,24 @@ namespace EUROPA {
 	addFlaw(variable->parent());
     }
 
+    DecisionPointId OpenConditionManager::nextZeroCommitmentDecision()
+    {
+    	static LabelStr explanation("Processing action effects first");
+
+    	for(TokenSet::const_iterator it=m_flawCandidates.begin();it != m_flawCandidates.end();++it) {
+    		TokenId token = *it;
+    		// Deal with action effects right away
+    		if (token->hasAttributes(PSTokenType::EFFECT)) {
+    		      FlawHandlerId flawHandler = getFlawHandler(token);
+    		      checkError(flawHandler.isValid(), "No flawHandler for " << token->toString());
+    		      DecisionPointId dp =  flawHandler->create(m_db->getClient(), token, explanation);
+    		      return dp;
+    		}
+    	}
+
+    	return DecisionPointId::noId();
+    }
+
     std::string OpenConditionManager::toString(const EntityId& entity) const {
       checkError(TokenId::convertable(entity), entity->toString());
       TokenId token = entity;

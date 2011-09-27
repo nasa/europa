@@ -656,6 +656,11 @@ namespace EUROPA{
   	m_attributes |= attrMask;
   }
 
+  bool Token::hasAttributes( int attrMask ) const
+  {
+    return (m_attributes & attrMask) == attrMask;
+  }
+
   void Token::makeFact() {
   	m_isFact = true;
   }

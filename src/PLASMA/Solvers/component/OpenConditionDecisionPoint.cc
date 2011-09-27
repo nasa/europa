@@ -216,14 +216,19 @@ namespace EUROPA {
 
     std::string SupportedOCDecisionPoint::toString() const
     {
-    	// TODO: implement this
-    	return "SupportedOCDecisionPoint:" + m_flawedToken->toString();
+    	std::ostringstream os;
+    	os << "SupportedOCDecisionPoint:" + m_flawedToken->toString() << std::endl;
+    	for (unsigned int i=0;i<m_choices.size();i++)
+    		os << m_choices[i]->toString() << std::endl;
+
+    	return os.str();
     }
 
     std::string SupportedOCDecisionPoint::toShortString() const
     {
-    	// TODO: implement this
-    	return "SupportedOCDecisionPoint:" + m_flawedToken->toString();
+       	std::ostringstream os;
+        os << "SupportedOCDecisionPoint:" << m_flawedToken->toString() << "[" << m_currentChoice << " of " << m_choices.size() << "]";
+    	return os.str();
     }
 
     void SupportedOCDecisionPoint::handleInitialize()
@@ -250,7 +255,9 @@ namespace EUROPA {
 			TokenTypeId tokenType = schema->getTokenType(m_flawedToken->getFullTokenType());
 			std::vector<TokenTypeId> supportActionTypes = schema->getTypeSupporters(tokenType);
 			// TODO: allow heuristic function to be passed as a parameter to SupportToken
-			if (!m_flawedToken->isFact() && (supportActionTypes.size() > 0))
+			if (!m_flawedToken->isFact() &&
+				!m_flawedToken->hasAttributes(PSTokenType::EFFECT) &&
+				(supportActionTypes.size() > 0))
 				m_choices.push_back(new SupportToken(m_client,m_flawedToken,supportActionTypes));
 			else
 				m_choices.push_back(new ActivateToken(m_client,m_flawedToken));
@@ -321,6 +328,11 @@ namespace EUROPA {
 		m_isExecuted=true;
 	}
 
+	std::string ActivateToken::toString()
+	{
+		return "ACTIVATE";
+	}
+
 	MergeToken::MergeToken(const DbClientId& dbClient, const TokenId& token, const std::vector<TokenId>& compatibleTokens)
 		: ChangeTokenState(dbClient,token)
 		, m_compatibleTokens(compatibleTokens)
@@ -339,6 +351,21 @@ namespace EUROPA {
 		m_isExecuted=(m_currentChoice >= m_compatibleTokens.size());
 	}
 
+	std::string MergeToken::toString()
+	{
+		std::ostringstream os;
+
+		os << "MERGE[" << m_currentChoice << " of " << m_compatibleTokens.size() << "] = {";
+		for (unsigned int i=0;i<m_compatibleTokens.size();i++) {
+			if (i>0)
+				os << ",";
+			os << m_compatibleTokens[i]->getEntityKey();
+		}
+		os << "}";
+
+		return os.str();
+	}
+
 	RejectToken::RejectToken(const DbClientId& dbClient, const TokenId& token)
 		: ChangeTokenState(dbClient,token)
 	{
@@ -352,6 +379,11 @@ namespace EUROPA {
 	{
 		m_dbClient->reject(m_token);
 		m_isExecuted=true;
+	}
+
+	std::string RejectToken::toString()
+	{
+		return "REJECT";
 	}
 
 	SupportToken::SupportToken(const DbClientId& dbClient, const TokenId& token, const std::vector<TokenTypeId>& supportActionTypes)
@@ -434,7 +466,7 @@ namespace EUROPA {
 		PSList<PSToken*> slaves = m_action->getSlaves();
 		for (int i=0;i<slaves.size();i++) {
 			PSToken* slave = slaves.get(i);
-			if (slave->getAttributes() & PSTokenType::EFFECT) { // TODO: attribute should be evaluated by token type
+			if (slave->hasAttributes(PSTokenType::EFFECT)) {
 				if (slave->getTokenType() == m_token->getTokenType()) { // TODO: use ids
 					if (effectCnt == m_effectIndex) {
 						// TODO: eliminate the need for the dynamic cast below
@@ -490,6 +522,21 @@ namespace EUROPA {
 
 		// 4. Cancel the activation of the token that needed support
 		m_dbClient->cancel(m_token);
+	}
+
+	std::string SupportToken::toString()
+	{
+		std::ostringstream os;
+
+		os << "SUPPORT[" << m_actionIndex << " of " << m_choices.size() << "] = {";
+		for (unsigned int i=0;i<m_choices.size();i++) {
+			if (i>0)
+				os << ",";
+			os << m_choices[i].first->getName();
+		}
+		os << "}";
+
+		return os.str();
 	}
   }
 }

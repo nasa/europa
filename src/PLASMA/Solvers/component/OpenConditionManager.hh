@@ -18,11 +18,13 @@ namespace EUROPA {
     public:
       OpenConditionManager(const TiXmlElement& configData);
 
-      bool staticMatch(const EntityId& entity);
+      virtual bool staticMatch(const EntityId& entity);
 
-      IteratorId createIterator();
+      virtual IteratorId createIterator();
 
-      std::string toString(const EntityId& entity) const;
+      virtual DecisionPointId nextZeroCommitmentDecision();
+
+      virtual std::string toString(const EntityId& entity) const;
 
     protected:
       virtual void addFlaw(const TokenId& token);

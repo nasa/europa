@@ -84,6 +84,8 @@ namespace EUROPA {
     	virtual void execute() = 0;
     	virtual void undo() = 0;
     	virtual bool hasNext() = 0;
+
+    	virtual std::string toString() = 0;
     };
 
     /*
@@ -139,6 +141,8 @@ namespace EUROPA {
     	virtual ~ActivateToken();
 
     	virtual void execute();
+    	virtual std::string toString();
+
     };
 
     class MergeToken : public ChangeTokenState
@@ -148,6 +152,8 @@ namespace EUROPA {
     	virtual ~MergeToken();
 
     	virtual void execute();
+    	virtual std::string toString();
+
 
     protected:
     	std::vector<TokenId> m_compatibleTokens;
@@ -161,6 +167,8 @@ namespace EUROPA {
     	virtual ~RejectToken();
 
     	virtual void execute();
+    	virtual std::string toString();
+
     };
 
     class SupportToken : public ChangeTokenState
@@ -171,6 +179,7 @@ namespace EUROPA {
 
     	virtual void execute();
     	virtual void undo();
+    	virtual std::string toString();
 
     protected:
     	std::vector<std::pair<TokenTypeId,int> > m_choices;

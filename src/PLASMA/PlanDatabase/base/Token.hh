@@ -356,6 +356,7 @@ namespace EUROPA {
     virtual int getAttributes() const;
     virtual void setAttributes(int attrs);
     virtual void addAttributes(int attrMask);
+    virtual bool hasAttributes( int attrMask ) const;
 
     /**
      * @brief Test if the variable is a token state variable
