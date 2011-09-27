@@ -217,9 +217,10 @@ namespace EUROPA {
     std::string SupportedOCDecisionPoint::toString() const
     {
     	std::ostringstream os;
-    	os << "SupportedOCDecisionPoint:" + m_flawedToken->toString() << std::endl;
+    	os << "SupportedOCDecisionPoint:" + m_flawedToken->toString() << ":";
+    	os << (m_currentChoice+1) << " of " << m_choices.size() << ":";
     	for (unsigned int i=0;i<m_choices.size();i++)
-    		os << m_choices[i]->toString() << std::endl;
+    		os << (i+1) << "- " << m_choices[i]->toString() << ":";
 
     	return os.str();
     }
@@ -355,7 +356,7 @@ namespace EUROPA {
 	{
 		std::ostringstream os;
 
-		os << "MERGE[" << m_currentChoice << " of " << m_compatibleTokens.size() << "] = {";
+		os << "MERGE[" << (m_currentChoice+1) << " of " << m_compatibleTokens.size() << "] = {";
 		for (unsigned int i=0;i<m_compatibleTokens.size();i++) {
 			if (i>0)
 				os << ",";
@@ -528,7 +529,7 @@ namespace EUROPA {
 	{
 		std::ostringstream os;
 
-		os << "SUPPORT[" << m_actionIndex << " of " << m_choices.size() << "] = {";
+		os << "SUPPORT[" << (m_actionIndex+1) << " of " << m_choices.size() << "] = {";
 		for (unsigned int i=0;i<m_choices.size();i++) {
 			if (i>0)
 				os << ",";
