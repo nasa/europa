@@ -826,13 +826,16 @@ namespace EUROPA {
 
   TemporalConstraintId TemporalPropagator::updateConstraint(const ConstrainedVariableId& var,
                                                             const TemporalConstraintId& tnetConstraint,
-                                                            Time lb,
-                                                            Time ub)
+                                                            Time lbc,
+                                                            Time ubc)
   {
     debugMsg("TemporalPropagator:updateConstraint", "In updateConstraint for var " << var->getKey());
 
     static unsigned int sl_counter(0);
     sl_counter++;
+
+    Time lb = mapToInternalInfinity(lbc);
+    Time ub = mapToInternalInfinity(ubc);
 
     if(tnetConstraint.isNoId())
       return m_tnet->addTemporalConstraint(m_tnet->getOrigin(), getTimepoint(var), lb, ub);
@@ -850,7 +853,7 @@ namespace EUROPA {
 
     debugMsg("TemporalPropagator:updateConstraint", "Updating bounds for Variable " << var->getKey()
              << " tnet bounds : [" << lbt << "," << ubt << "]"
-             << " cnet bounds : [" << lb << "," << ub << "]");
+             << " cnet bounds : [" << lbc << "," << ubc << "]");
 
     if(lb < lbt || ub > ubt) { // Handle relaxation
       m_mostRecentRepropagation = getConstraintEngine()->mostRecentRepropagation();
@@ -885,13 +888,15 @@ namespace EUROPA {
                  << " [" << lb << "," << ub << "]");
       }
     }
-    else if (!tnetConstraint->isComplete() || lb > lbt || ub < ubt) { // Handle restriction. Retain most restricted values
+    //else if (!tnetConstraint->isComplete() || lb > lbt || ub < ubt) { // Handle restriction. Retain most restricted values
+    else if (lb > lbt || ub < ubt) { // Handle restriction. Retain most restricted values
       Time newLb = std::max(lb, lbt);
       Time newUb = std::min(ub, ubt);
       Time currentLb = 0;
       Time currentUb = 0;
       tnetConstraint->getBounds(currentLb, currentUb);
-      if(!tnetConstraint->isComplete() || currentUb > newUb || currentLb < newLb ){
+      //if(!tnetConstraint->isComplete() || currentUb > newUb || currentLb < newLb ){
+      if(currentUb > newUb || currentLb < newLb ){
           newLb = std::max(newLb, currentLb);
           newUb = std::min(newUb, currentUb);
           m_tnet->narrowTemporalConstraint(tnetConstraint, newLb, newUb);
@@ -1064,7 +1069,7 @@ namespace EUROPA {
       return tp->getReftime();
     }
     // Otherwise var is not (yet) ref timepoint, just return lb for now
-    return (Time) var->getLowerBound();
+    return (Time) cast_long(var->lastDomain().getLowerBound());
   }
 
   void TemporalPropagator::getMinPerturbTimes(const std::vector<ConstrainedVariableId>& timevars,
