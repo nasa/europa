@@ -5,9 +5,18 @@
 #include "Debug.hh"
 
 namespace EUROPA {
-    TimetableProfile::TimetableProfile(const PlanDatabaseId db, const FVDetectorId flawDetector, const edouble initCapacityLb, const edouble initCapacityUb)
-      : Profile(db, flawDetector, initCapacityLb, initCapacityUb), m_lowerLevelMin(0), m_lowerLevelMax(0), m_upperLevelMin(0), m_upperLevelMax(0),
-	m_minPrevConsumption(0), m_maxPrevConsumption(0), m_minPrevProduction(0), m_maxPrevProduction(0) {}
+    TimetableProfile::TimetableProfile(const PlanDatabaseId db, const FVDetectorId flawDetector, const LimitProfileId limitProfile)
+    	: Profile(db, flawDetector, limitProfile)
+    	, m_lowerLevelMin(0)
+    	, m_lowerLevelMax(0)
+    	, m_upperLevelMin(0)
+    	, m_upperLevelMax(0)
+    	, m_minPrevConsumption(0)
+    	, m_maxPrevConsumption(0)
+    	, m_minPrevProduction(0)
+    	, m_maxPrevProduction(0)
+    {
+    }
 
     void TimetableProfile::initRecompute(InstantId inst) {
       checkError(m_recomputeInterval.isValid(), "Attempted to initialize recomputation without a valid starting point!");
@@ -22,14 +31,14 @@ namespace EUROPA {
     }
 
     void TimetableProfile::initRecompute() {
-      m_lowerLevelMin = m_initLevelLb;
-      m_lowerLevelMax = m_initLevelLb;
-      m_upperLevelMin = m_initLevelUb;
-      m_upperLevelMax = m_initLevelUb;
-      m_minPrevConsumption = 0;
-      m_maxPrevConsumption = 0;
-      m_minPrevProduction = 0;
-      m_maxPrevProduction = 0;
+		m_lowerLevelMin = getInitCapacityLb();
+		m_lowerLevelMax = getInitCapacityLb();
+		m_upperLevelMin = getInitCapacityUb();
+		m_upperLevelMax = getInitCapacityUb();
+		m_minPrevConsumption = 0;
+		m_maxPrevConsumption = 0;
+		m_minPrevProduction = 0;
+		m_maxPrevProduction = 0;
     }
 
     void TimetableProfile::recomputeLevels( InstantId prev, InstantId inst) {

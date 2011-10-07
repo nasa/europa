@@ -246,8 +246,8 @@ namespace EUROPA
 
     //-------------------------------
 
-    FlowProfile::FlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const edouble initLevelLb, const edouble initLevelUb):
-      Profile( db, flawDetector, initLevelLb, initLevelUb),
+    FlowProfile::FlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const LimitProfileId limitProfile):
+      Profile( db, flawDetector, limitProfile),
       m_lowerLevelGraph( 0 ),
       m_upperLevelGraph( 0 ),
       m_recalculateLowerLevel( false ),
@@ -335,21 +335,19 @@ namespace EUROPA
 
     void FlowProfile::initRecompute()
     {
-      checkError(m_recomputeInterval.isValid(), "Attempted to initialize recomputation without a valid starting point!");
+    	checkError(m_recomputeInterval.isValid(), "Attempted to initialize recomputation without a valid starting point!");
 
-      debugMsg("FlowProfile:initRecompute","");
+    	debugMsg("FlowProfile:initRecompute","");
 
-      if( m_recalculateLowerLevel )
-	m_lowerLevelGraph->reset();
+    	if( m_recalculateLowerLevel )
+    		m_lowerLevelGraph->reset();
 
-      if( m_recalculateUpperLevel )
-	m_upperLevelGraph->reset();
+    	if( m_recalculateUpperLevel )
+    		m_upperLevelGraph->reset();
 
-      // initial level
-      m_lowerClosedLevel = m_initLevelLb;
-
-      // initial level
-      m_upperClosedLevel = m_initLevelUb;
+    	// initial level
+    	m_lowerClosedLevel = getInitCapacityLb();
+    	m_upperClosedLevel = getInitCapacityUb();
     }
 
     void FlowProfile::postHandleRecompute()

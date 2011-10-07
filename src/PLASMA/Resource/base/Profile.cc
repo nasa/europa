@@ -13,10 +13,15 @@
 
 namespace EUROPA {
 
-    Profile::Profile(const PlanDatabaseId db, const FVDetectorId flawDetector, const edouble initLevelLb, const edouble initLevelUb)
-      : m_id(this), m_changeCount(0), m_needsRecompute(false), m_initLevelLb(initLevelLb), m_initLevelUb(initLevelUb),
-        m_planDatabase(db), m_detector(flawDetector) {
-      m_removalListener = (new ConstraintRemovalListener(db->getConstraintEngine(), m_id))->getId();
+    Profile::Profile(const PlanDatabaseId db, const FVDetectorId flawDetector, const LimitProfileId limitProfile)
+    	: m_id(this)
+    	, m_changeCount(0)
+    	, m_needsRecompute(false)
+    	, m_limitProfile(limitProfile)
+        , m_planDatabase(db)
+        , m_detector(flawDetector)
+    {
+    	m_removalListener = (new ConstraintRemovalListener(db->getConstraintEngine(), m_id))->getId();
     }
 
     Profile::~Profile() {
@@ -289,23 +294,23 @@ namespace EUROPA {
       m_recomputeInterval = (new ProfileIterator(getId()))->getId();
     }
 
-  bool Profile::checkMessageConsistency() {
-    for(ConstraintSet::const_iterator it = m_temporalConstraints.begin(); it != m_temporalConstraints.end(); ++it) {
-      ConstraintId constr(*it);
-      checkError(constr.isValid(), "Id " << constr << " is invalid.");
-      checkError(constr->getScope().size() == 2 || constr->getScope().size() == 3,
-                 "Unexpected scope size in " << constr->toLongString());
-//       checkError(m_transactionsByTime.find(constr->getScope()[0]) != m_transactionsByTime.end(),
-//                  "First argument to temporal constraint isn't a known time-point: " << std::endl << constr->toLongString());
-//       checkError(constr->getScope().size() == 3 ||
-//                  m_transactionsByTime.find(constr->getScope()[1]) != m_transactionsByTime.end(),
-//                  "Second argument to temporal constraint isn't a known time-point: " << std::endl << constr->toLongString());
-//       checkError(constr->getScope().size() == 2 ||
-//                  m_transactionsByTime.find(constr->getScope()[2]) != m_transactionsByTime.end(),
-//                  "Third argument to temporal constraint isn't a known time-point: " << std::endl << constr->toLongString());
+    bool Profile::checkMessageConsistency() {
+    	for(ConstraintSet::const_iterator it = m_temporalConstraints.begin(); it != m_temporalConstraints.end(); ++it) {
+    		ConstraintId constr(*it);
+    		checkError(constr.isValid(), "Id " << constr << " is invalid.");
+    		checkError(constr->getScope().size() == 2 || constr->getScope().size() == 3,
+    				"Unexpected scope size in " << constr->toLongString());
+    		//       checkError(m_transactionsByTime.find(constr->getScope()[0]) != m_transactionsByTime.end(),
+    		//                  "First argument to temporal constraint isn't a known time-point: " << std::endl << constr->toLongString());
+    		//       checkError(constr->getScope().size() == 3 ||
+    		//                  m_transactionsByTime.find(constr->getScope()[1]) != m_transactionsByTime.end(),
+    		//                  "Second argument to temporal constraint isn't a known time-point: " << std::endl << constr->toLongString());
+    		//       checkError(constr->getScope().size() == 2 ||
+    		//                  m_transactionsByTime.find(constr->getScope()[2]) != m_transactionsByTime.end(),
+    		//                  "Third argument to temporal constraint isn't a known time-point: " << std::endl << constr->toLongString());
+    	}
+    	return true;
     }
-    return true;
-  }
 
     void Profile::handleConstraintMessage(const ConstraintId c, const ConstrainedVariableId var, int argIndex, bool addition) {
       check_error(c->getScope().size() == 2 || c->getScope().size() == 3);
@@ -418,41 +423,42 @@ namespace EUROPA {
      }
 
     void Profile::getLevel(const eint time, IntervalDomain& dest) {
-      if(needsRecompute())
-        handleRecompute();
-      std::map<eint, InstantId>::iterator it = getGreatestInstant(time);
-      IntervalDomain result;
+    	if(needsRecompute())
+    		handleRecompute();
+    	std::map<eint, InstantId>::iterator it = getGreatestInstant(time);
+    	IntervalDomain result;
 
-      if(it == m_instants.end())
-        result.intersect(m_initLevelLb, m_initLevelUb);
-      else {
-        InstantId inst = getGreatestInstant(time)->second;
-        result.intersect(inst->getLowerLevel(), inst->getUpperLevel());
-      }
-      dest = result;
+    	if(it == m_instants.end()) {
+    		result.intersect(getInitCapacityLb(),getInitCapacityUb());
+    	}
+    	else {
+    		InstantId inst = getGreatestInstant(time)->second;
+    		result.intersect(inst->getLowerLevel(), inst->getUpperLevel());
+    	}
+    	dest = result;
     }
 
     //i should really re-name these.
     std::map<eint, InstantId>::iterator Profile::getGreatestInstant(const eint time) {
-      debugMsg("Profile:getGreatestInstant", "Greatest Instant not greater than " << time);
+    	debugMsg("Profile:getGreatestInstant", "Greatest Instant not greater than " << time);
 
-      if(m_instants.empty())
-        return m_instants.end();
+    	if(m_instants.empty())
+    		return m_instants.end();
 
-      std::map<eint, InstantId>::iterator retval = m_instants.lower_bound(time);
+    	std::map<eint, InstantId>::iterator retval = m_instants.lower_bound(time);
 
-      //checkError(retval != m_instants.end(), "No instant with time not greater than " << time);
-      if(retval == m_instants.end() ||
-         (retval != m_instants.begin() && retval->second->getTime() > time)) {
-    	  --retval;
-      }
+    	//checkError(retval != m_instants.end(), "No instant with time not greater than " << time);
+    	if(retval == m_instants.end() ||
+    			(retval != m_instants.begin() && retval->second->getTime() > time)) {
+    		--retval;
+    	}
 
-      //if we're still greater than the given time, return end
-      if(retval->second->getTime() > time)
-        return m_instants.end();
+    	//if we're still greater than the given time, return end
+    	if(retval->second->getTime() > time)
+    		return m_instants.end();
 
-      debugMsg("Profile:getGreatestInstant", "Got instant at time " << retval->second->getTime());
-      return retval;
+    	debugMsg("Profile:getGreatestInstant", "Got instant at time " << retval->second->getTime());
+    	return retval;
     }
     
     std::map<eint, InstantId>::iterator Profile::getLeastInstant(const eint time) {
@@ -477,81 +483,81 @@ namespace EUROPA {
     }
 
     void Profile::handleRecompute() {
-      checkError(m_recomputeInterval.isValid(),
-                 "Attempted to recompute levels over an invalid interval.");
-      condDebugMsg(m_recomputeInterval->done(), "Profile:recompute", "No instants over which to recompute.");
-      debugMsg("Profile:handleRecompute","Invoked");
-      debugMsg("Profile:recompute:prePrint", std::endl << toString());
-      if(!m_recomputeInterval->done()) {
-        //bool consistant = m_constraintEngine->propagate();
-        //checkError(consistant, "Attempted to recompute a profile with an inconsistent constraint network.");
+    	checkError(m_recomputeInterval.isValid(),
+    			"Attempted to recompute levels over an invalid interval.");
+    	condDebugMsg(m_recomputeInterval->done(), "Profile:recompute", "No instants over which to recompute.");
+    	debugMsg("Profile:handleRecompute","Invoked");
+    	debugMsg("Profile:recompute:prePrint", std::endl << toString());
+    	if(!m_recomputeInterval->done()) {
+    		//bool consistant = m_constraintEngine->propagate();
+    		//checkError(consistant, "Attempted to recompute a profile with an inconsistent constraint network.");
 
-        InstantId prev = InstantId::noId();
+    		InstantId prev = InstantId::noId();
 
-	bool violation = false;
+    		bool violation = false;
 
-        //if there is no preceding instant, do a clean init
-        if(m_recomputeInterval->getInstant()->getTime() == m_instants.begin()->first) {
-          initRecompute();
-          m_detector->initialize();
-        }
-        else {
-          initRecompute(m_recomputeInterval->getInstant());
-          m_detector->initialize(m_recomputeInterval->getInstant());
+    		//if there is no preceding instant, do a clean init
+    		if(m_recomputeInterval->getInstant()->getTime() == m_instants.begin()->first) {
+    			initRecompute();
+    			m_detector->initialize();
+    		}
+    		else {
+    			initRecompute(m_recomputeInterval->getInstant());
+    			m_detector->initialize(m_recomputeInterval->getInstant());
 
-	  violation = m_detector->detect(m_recomputeInterval->getInstant());
+    			violation = m_detector->detect(m_recomputeInterval->getInstant());
 
-          prev = m_recomputeInterval->getInstant();
-          m_recomputeInterval->next();
-        }
+    			prev = m_recomputeInterval->getInstant();
+    			m_recomputeInterval->next();
+    		}
 
-        while(!m_recomputeInterval->done()
-	      &&
-	      !violation ) {
-          InstantId inst = m_recomputeInterval->getInstant();
-          debugMsg("Profile:recompute", "Recomputing levels at instant " << inst->getTime());
-          check_error(inst.isValid());
-          recomputeLevels( prev, inst);
-          prev = inst;
-          //stop detecting flaws and violations if the detector says so.
-          violation = m_detector->detect(inst);
-          m_recomputeInterval->next();
-        }
-      }
-      debugMsg("Profile:recompute:postPrint", std::endl << toString());
-      debugMsg("Profile:handleRecompute", "Deleting profile iterator " << m_recomputeInterval->getId() );
-      delete (ProfileIterator*) m_recomputeInterval;
-      m_recomputeInterval = ProfileIteratorId::noId();
-      m_needsRecompute = false;
-      postHandleRecompute();
+    		while(!m_recomputeInterval->done()
+    				&&
+    				!violation ) {
+    			InstantId inst = m_recomputeInterval->getInstant();
+    			debugMsg("Profile:recompute", "Recomputing levels at instant " << inst->getTime());
+    			check_error(inst.isValid());
+    			recomputeLevels( prev, inst);
+    			prev = inst;
+    			//stop detecting flaws and violations if the detector says so.
+    			violation = m_detector->detect(inst);
+    			m_recomputeInterval->next();
+    		}
+    	}
+    	debugMsg("Profile:recompute:postPrint", std::endl << toString());
+    	debugMsg("Profile:handleRecompute", "Deleting profile iterator " << m_recomputeInterval->getId() );
+    	delete (ProfileIterator*) m_recomputeInterval;
+    	m_recomputeInterval = ProfileIteratorId::noId();
+    	m_needsRecompute = false;
+    	postHandleRecompute();
     }
 
     void Profile::addInstantsForBounds(const TransactionId t) {
-      eint first = (eint) t->time()->lastDomain().getLowerBound();
-      eint last =  (eint) t->time()->lastDomain().getUpperBound();
+    	eint first = (eint) t->time()->lastDomain().getLowerBound();
+    	eint last =  (eint) t->time()->lastDomain().getUpperBound();
 
-      {
-        std::map<eint, InstantId>::iterator ite = m_instants.find( first );
-	
-        if( ite == m_instants.end() ) {
-          addInstant(first);
-        }
-        else {
-          InstantId& inst = (*ite).second;
-          inst->updateTransaction( t );
-        }
-      }
+    	{
+    		std::map<eint, InstantId>::iterator ite = m_instants.find( first );
 
-      {
-        std::map<eint, InstantId>::iterator ite = m_instants.find( last );
-        if( ite == m_instants.end() ) {
-          addInstant(last);
-        }
-        else {
-          InstantId& inst = (*ite).second;
-          inst->updateTransaction( t );
-        }
-      }
+    		if( ite == m_instants.end() ) {
+    			addInstant(first);
+    		}
+    		else {
+    			InstantId& inst = (*ite).second;
+    			inst->updateTransaction( t );
+    		}
+    	}
+
+    	{
+    		std::map<eint, InstantId>::iterator ite = m_instants.find( last );
+    		if( ite == m_instants.end() ) {
+    			addInstant(last);
+    		}
+    		else {
+    			InstantId& inst = (*ite).second;
+    			inst->updateTransaction( t );
+    		}
+    	}
     }
 
     void Profile::addInstant(const eint time) {
@@ -572,17 +578,17 @@ namespace EUROPA {
     }
 
     void Profile::removeInstant(const eint time) {
-      std::map<eint, InstantId>::iterator pit = m_instants.find(time);
-      check_error(pit != m_instants.end());
-      if (!containsChange(pit->second)) {
-	InstantId inst = pit->second;
-	debugMsg("Profile:removeInstant",
-		 "Removing instant at time " << inst->getTime()
-		 << " because it does not mark a change.");
-	m_instants.erase(pit);
-	m_detector->notifyDeleted(inst);
-	delete (Instant*) inst;
-      }
+    	std::map<eint, InstantId>::iterator pit = m_instants.find(time);
+    	check_error(pit != m_instants.end());
+    	if (!containsChange(pit->second)) {
+    		InstantId inst = pit->second;
+    		debugMsg("Profile:removeInstant",
+    				"Removing instant at time " << inst->getTime()
+    				<< " because it does not mark a change.");
+    		m_instants.erase(pit);
+    		m_detector->notifyDeleted(inst);
+    		delete (Instant*) inst;
+    	}
     }
 
     void Profile::getTransactionsToOrder(const InstantId& inst, std::vector<TransactionId>& results) {
@@ -654,6 +660,16 @@ namespace EUROPA {
       for(std::map<eint, InstantId>::const_iterator it = m_instants.begin(); it != m_instants.end(); ++it)
         sstr << it->second->toString() << std::endl;
       return sstr.str();
+    }
+
+    edouble Profile::getInitCapacityLb() const
+    {
+		return m_limitProfile->getEarliestLimit().first;
+    }
+
+    edouble Profile::getInitCapacityUb() const
+    {
+		return m_limitProfile->getEarliestLimit().second;
     }
 
     ProfileIterator::ProfileIterator(const ProfileId prof, const eint startTime, const eint endTime)
@@ -729,19 +745,67 @@ namespace EUROPA {
       return !done();
     }
 
-  bool Profile::hasConstraint(const ConstraintId& constr) const {
-    return m_temporalConstraints.find(constr) != m_temporalConstraints.end();
-  }
-
-  Profile::ConstraintRemovalListener::ConstraintRemovalListener(const ConstraintEngineId& ce, ProfileId profile)
-    : ConstraintEngineListener(ce), m_profile(profile) {}
-  
-  void Profile::ConstraintRemovalListener::notifyRemoved(const ConstraintId& constr) {
-    if(m_profile->hasConstraint(constr)) {
-      int index = 0;
-      for(std::vector<ConstrainedVariableId>::const_iterator it = constr->getScope().begin(); it != constr->getScope().end();
-          ++it, ++index)
-        m_profile->handleConstraintMessage(constr, *it, index, false);
+    bool Profile::hasConstraint(const ConstraintId& constr) const {
+    	return m_temporalConstraints.find(constr) != m_temporalConstraints.end();
     }
-  }
+
+    Profile::ConstraintRemovalListener::ConstraintRemovalListener(const ConstraintEngineId& ce, ProfileId profile)
+    : ConstraintEngineListener(ce), m_profile(profile) {}
+
+    void Profile::ConstraintRemovalListener::notifyRemoved(const ConstraintId& constr) {
+    	if(m_profile->hasConstraint(constr)) {
+    		int index = 0;
+    		for(std::vector<ConstrainedVariableId>::const_iterator it = constr->getScope().begin(); it != constr->getScope().end();
+    				++it, ++index)
+    			m_profile->handleConstraintMessage(constr, *it, index, false);
+    	}
+    }
+
+    LimitProfile::LimitProfile(edouble lb, edouble ub)
+    	: m_id(this)
+    {
+    	setLimit(std::numeric_limits<eint>::minus_infinity(),lb,ub);
+    }
+
+    LimitProfile::~LimitProfile()
+    {
+    	m_id.remove();
+    }
+
+	LimitProfileId& LimitProfile::getId()
+	{
+		return m_id;
+	}
+
+
+    void LimitProfile::setLimit(eint time, edouble lb, edouble ub)
+    {
+    	m_values[time] = std::pair<edouble,edouble>(lb,ub);
+    }
+
+    void LimitProfile::removeLimit(eint time)
+    {
+    	check_runtime_error(time != std::numeric_limits<eint>::minus_infinity(), "Can't remove entry for -infinity from LimitProfile");
+    	checkError(m_values.find(time) != m_values.end(),"Tried to remove unexisting entry from Limit Profile:" << time);
+    	m_values.erase(time);
+    }
+
+    const std::map< eint,std::pair<edouble,edouble> >& LimitProfile::getLimits() const
+    {
+    	return m_values;
+    }
+
+    const std::pair<edouble,edouble>& LimitProfile::getLimit(eint time) const
+    {
+    	std::map<eint,std::pair<edouble,edouble> >::const_iterator it = m_values.lower_bound(time);
+    	checkError(it != m_values.end(), "Couldn't find lower bound for a time in LimitProfile, which breaks invariant, time=" << time);
+
+    	return it->second;
+    }
+
+    const std::pair<edouble,edouble>& LimitProfile::getEarliestLimit() const
+    {
+    	checkError(!m_values.empty(),"Limit Profile can never be empty");
+    	return m_values.begin()->second;
+    }
 }

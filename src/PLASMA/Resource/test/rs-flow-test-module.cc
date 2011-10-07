@@ -43,6 +43,7 @@ class ResourceTestEngine  : public EngineBase
     void createModules();
 };
 
+LimitProfile RSF_DEFAULT_CAPACITY(0,0);
 
 #define RESOURCE_DEFAULT_SETUP(ce, db, autoClose) \
     ResourceTestEngine rte; \
@@ -966,7 +967,7 @@ private:
   static bool testNoTransactions() {
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(ResourceId::noId());
-    IncrementalFlowProfile profile(ce.getId(), detector.getId());
+    IncrementalFlowProfile profile(ce.getId(), detector.getId(), RSF_DEFAULT_CAPACITY.getId());
 
     profile.recompute();
     return true;
@@ -982,7 +983,7 @@ private:
   static bool testAddAndRemove(){
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(ResourceId::noId());
-    Profile profile(db.getId(), detector.getId());
+    Profile profile(db.getId(), detector.getId(), RSF_DEFAULT_CAPACITY.getId());
 
     Variable<IntervalIntDomain> t1( ce.getId(), IntervalIntDomain( 0, 10), true, "t1" );
     Variable<IntervalIntDomain> t2( ce.getId(), IntervalIntDomain(10, 15), true, "t2" );
@@ -1026,7 +1027,7 @@ private:
 
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(ResourceId::noId());
-    Profile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId(), RSF_DEFAULT_CAPACITY.getId());
 
     executeScenario0( profile, ce );
     return true;
@@ -1069,7 +1070,7 @@ private:
      *
      */
 
-    Profile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId(), RSF_DEFAULT_CAPACITY.getId());
 
     const int nrInstances = 4;
 
@@ -1100,7 +1101,7 @@ private:
      *
      */
 
-    Profile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId(), RSF_DEFAULT_CAPACITY.getId());
 
     const int nrInstances = 2;
 
@@ -1131,7 +1132,7 @@ private:
      *
      */
 
-    Profile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId() , RSF_DEFAULT_CAPACITY.getId());
 
     const int nrInstances = 3;
 
@@ -1162,7 +1163,7 @@ private:
      * Min level       0           1   -1              -1  -1             0
      *
      */
-    Profile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId(), RSF_DEFAULT_CAPACITY.getId());
 
     const int nrInstances = 6;
 
@@ -1191,7 +1192,7 @@ private:
      * Min level       0                   0
      *
      */
-    Profile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId(), RSF_DEFAULT_CAPACITY.getId());
 
     const int nrInstances = 2;
 
@@ -1208,7 +1209,7 @@ private:
     debugMsg("ResourceTest","  Scenario 6");
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(ResourceId::noId());
-    Profile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId(), RSF_DEFAULT_CAPACITY.getId());
 
     executeScenario6( profile, ce );
     return true;
@@ -1230,7 +1231,7 @@ private:
      * Min level       0                   0
      *
      */
-    Profile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId(), RSF_DEFAULT_CAPACITY.getId());
 
     const int nrInstances = 2;
 
@@ -1259,7 +1260,7 @@ private:
      * Min level      -1                  -1
      *
      */
-    Profile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId(), RSF_DEFAULT_CAPACITY.getId());
 
     const int nrInstances = 2;
 
@@ -1291,8 +1292,8 @@ private:
      * Max level(1)    0           -1   -2       -1    0     0
      *
      */
-
-    Profile profile( db.getId(), detector.getId(), initialLowerLevel, initialUpperLevel );
+    LimitProfile lp(initialLowerLevel, initialUpperLevel);
+    Profile profile( db.getId(), detector.getId(), lp.getId() );
 
     const int nrInstances = 6;
 
@@ -1311,7 +1312,8 @@ private:
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(ResourceId::noId());
 
-    Profile profile( db.getId(), detector.getId(), 5, 5);
+    LimitProfile lp(5,5);
+    Profile profile( db.getId(), detector.getId(), lp.getId());
 
     /*!
      * Transaction1 constrained to be at Transaction2
@@ -1346,7 +1348,7 @@ private:
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(ResourceId::noId());
 
-    Profile profile( db.getId(), detector.getId(), 0, 0);
+    Profile profile( db.getId(), detector.getId(), RSF_DEFAULT_CAPACITY.getId());
 
     /*!
      * Transaction1 constrained to be before or at Transaction2
@@ -1377,7 +1379,7 @@ private:
     debugMsg("ResourceTest","  Scenario 12");
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(ResourceId::noId());
-    Profile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId(), RSF_DEFAULT_CAPACITY.getId());
 
     executeScenario12( profile, ce );
     return true;
@@ -1388,7 +1390,7 @@ private:
     debugMsg("ResourceTest","  Scenario 13");
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(ResourceId::noId());
-    Profile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId(), RSF_DEFAULT_CAPACITY.getId());
     /*!
      * Transaction1 constrained to be [1,inf) before Transaction2
      *
@@ -1418,7 +1420,7 @@ private:
     debugMsg("ResourceTest","  Scenario 14");
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(ResourceId::noId());
-    Profile profile( db.getId(), detector.getId());
+    Profile profile( db.getId(), detector.getId(), RSF_DEFAULT_CAPACITY.getId());
 
     executeScenario14( profile, ce );
     return true;

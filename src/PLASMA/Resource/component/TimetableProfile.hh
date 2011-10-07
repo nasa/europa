@@ -9,8 +9,7 @@ namespace EUROPA {
 
     class TimetableProfile : public Profile {
     public:
-      TimetableProfile(const PlanDatabaseId db, const FVDetectorId flawDetector,
-		       const edouble initCapacityLb = 0, const edouble initCapacityUb = 0);
+      TimetableProfile(const PlanDatabaseId db, const FVDetectorId flawDetector,const LimitProfileId limitProfile);
 
       void getTransactionsToOrder(const InstantId& inst, std::vector<TransactionId>& results);
     protected:

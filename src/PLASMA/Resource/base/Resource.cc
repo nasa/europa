@@ -55,8 +55,9 @@ namespace EUROPA {
       if ((it->first->getOwner()).isNoId())
         delete (Transaction*) it->first;
     }
-    delete (FVDetector*) m_detector;
     delete (Profile*) m_profile;
+    delete (LimitProfile*) m_limitProfile;
+    delete (FVDetector*) m_detector;
   }
 
   void Resource::init(const edouble initCapacityLb, const edouble initCapacityUb,
@@ -66,6 +67,8 @@ namespace EUROPA {
                       const LabelStr& detectorName,
                       const LabelStr& profileName) {
     debugMsg("Resource:init", "In base init function.");
+
+    // TODO!! JRB: capacity and limits should be always the same, when are they not?
     m_initCapacityLb = initCapacityLb;
     m_initCapacityUb = initCapacityUb;
     m_lowerLimit = lowerLimit;
@@ -83,14 +86,15 @@ namespace EUROPA {
     FactoryMgr* fvdfm = (FactoryMgr*)engine->getComponent("FVDetectorFactoryMgr");
     m_detector = fvdfm->createInstance(detectorName, FVDetectorArgs(getId()));
 
+    m_limitProfile = (new LimitProfile(initCapacityLb,initCapacityUb))->getId();
+
     FactoryMgr* pfm = (FactoryMgr*)engine->getComponent("ProfileFactoryMgr");
     m_profile = pfm->createInstance(
                                     profileName,
                                     ProfileArgs(
                                                 getPlanDatabase(),
                                                 m_detector,
-                                                m_initCapacityLb,
-                                                m_initCapacityUb
+                                                m_limitProfile
                                                 )
                                     );
 

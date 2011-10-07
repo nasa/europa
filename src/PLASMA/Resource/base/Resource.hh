@@ -17,23 +17,23 @@
 
 namespace EUROPA {
 
-// Labels to associate with enum values:
-  const static char* problemLabels[] = { "ProductionRateExceeded",
-		  "ConsumptionRateExceeded",
-		  "ProductionSumExceeded",
-		  "ConsumptionSumExceeded",
-		  "LevelTooHigh",
-		  "LevelTooLow"
-  };
+	// Labels to associate with enum values:
+	const static char* problemLabels[] = {
+		"ProductionRateExceeded",
+		"ConsumptionRateExceeded",
+		"ProductionSumExceeded",
+		"ConsumptionSumExceeded",
+		"LevelTooHigh",
+		"LevelTooLow"
+	};
 
-
-  /**
-     * @class Resource
-     * @brief The base class for different Resource implementations.
-     *
-     * The Resource is provided as a base class from which a variety of implementations for similar resources or
-     * a variety of resources can be derived.
-     */
+	/**
+	 * @class Resource
+	 * @brief The base class for different Resource implementations.
+	 *
+	 * The Resource is provided as a base class from which a variety of implementations for similar resources or
+	 * a variety of resources can be derived.
+	 */
     class Resource : public Object, public virtual PSResource {
     public:
 
@@ -174,10 +174,6 @@ namespace EUROPA {
 
       virtual PSList<PSEntityKey> getOrderingChoices(TimePoint t);
 
-
-
-
-
     protected:
       friend class FVDetector;
       /**
@@ -244,13 +240,13 @@ namespace EUROPA {
       virtual bool transConstrainedToPrecede(const TransactionId& predecessor, const TransactionId& successor);
 
       bool noFlawedTokensForInst(const InstantId& inst) const;
-      //ResourceId m_id;
       edouble m_initCapacityLb, m_initCapacityUb; /*<! The bounds of the initial capacity*/
       edouble  m_lowerLimit, m_upperLimit; /*<! The bounds on the capacity*/
       edouble m_maxInstProduction, m_maxInstConsumption; /*<! The maximum production and consumption allowed at an instant */
       edouble m_maxProduction, m_maxConsumption; /*<! The maximum production and consumption allowed over the lifetime of the resource */
     protected:
       FVDetectorId m_detector; /*<! The flaw and violation detector for this resource. */
+      LimitProfileId m_limitProfile; /*<! The limit profile for this resource. */
       ProfileId m_profile; /*<! The profile calculator for this resource. */
       std::map<TransactionId, TokenId> m_transactionsToTokens;
       std::map<TokenId, std::set<InstantId> > m_flawedTokens;

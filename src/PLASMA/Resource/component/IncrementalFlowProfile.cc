@@ -28,10 +28,10 @@
 
 namespace EUROPA
 {
-    IncrementalFlowProfile::IncrementalFlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const edouble initLevelLb, const edouble initLevelUb ):
-      FlowProfile( db, flawDetector, initLevelLb, initLevelUb )
+    IncrementalFlowProfile::IncrementalFlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const LimitProfileId limitProfile ):
+      FlowProfile( db, flawDetector, limitProfile )
     {
-      debugMsg("IncrementalFlowProfile:IncrementalFlowProfile","Initial level [" << initLevelLb << "," << initLevelUb << "]");
+    	debugMsg("IncrementalFlowProfile:IncrementalFlowProfile","Initial level [" << getInitCapacityLb() << "," << getInitCapacityUb() << "]");
     }
 
     IncrementalFlowProfile::~IncrementalFlowProfile()
@@ -60,10 +60,8 @@ namespace EUROPA
       else
         {
           // initial level
-          m_lowerClosedLevel = m_initLevelLb;
-
-          // initial level
-          m_upperClosedLevel = m_initLevelUb;
+          m_lowerClosedLevel = getInitCapacityLb();
+          m_upperClosedLevel = getInitCapacityUb();
         }
 
       initializeGraphs();
@@ -208,21 +206,9 @@ namespace EUROPA
 
       initializeGraphs();
 
-//       if( m_recalculateLowerLevel )
-//         {
-//           m_lowerLevelContribution.clear();
-//         }
-
-//       if( m_recalculateUpperLevel )
-//         {
-//           m_upperLevelContribution.clear();
-//         }
-
       // initial level
-      m_lowerClosedLevel = m_initLevelLb;
-
-      // initial level
-      m_upperClosedLevel = m_initLevelUb;
+      m_lowerClosedLevel = getInitCapacityLb();
+      m_upperClosedLevel = getInitCapacityUb();
     }
 
     bool IncrementalFlowProfile::enableOrderings( const InstantId& inst  )

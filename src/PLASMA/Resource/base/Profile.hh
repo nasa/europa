@@ -45,7 +45,7 @@ namespace EUROPA {
        * @brief Constructor.
        * @param flawDetector The object responsible for detecting flaws and violations during level calculation.
        */
-      Profile(const PlanDatabaseId ce, const FVDetectorId flawDetector, const edouble initLevelLb = 0, const edouble initLevelUb = 0);
+      Profile(const PlanDatabaseId ce, const FVDetectorId flawDetector, const LimitProfileId limitProfile);
       virtual ~Profile();
       ProfileId& getId() {return m_id;}
 
@@ -64,6 +64,10 @@ namespace EUROPA {
        */
       virtual void removeTransaction(const TransactionId e);
 
+      /**
+       * @brief Get all the transactions in the profile.
+       */
+      const std::set<TransactionId>& getAllTransactions() const {return m_transactions;}
 
       /**
        * @brief Gets the bounds of the profile at a given point in time. Calling this method may cause recalculation.
@@ -89,7 +93,108 @@ namespace EUROPA {
 
       const ResourceId& getResource() const {return m_detector->getResource();}
 
+      /**
+       * @brief Gets the Instant with the greatest time that is not greater than the given time.
+       * @return An iterator pointing to the instant.
+       */
+      std::map<eint, InstantId>::iterator getGreatestInstant(const eint time);
+
+      /**
+       * @brief Gets the Instant with the least time not less than the given time.
+       * @return An iterator pointing to the instant.
+       */
+      std::map<eint, InstantId>::iterator getLeastInstant(const eint time);
+
+      const std::map<eint, InstantId>& getInstants() {return m_instants;}
+
+    private:
+      friend class ProfilePropagator;
+      friend class ProfileIterator;
+      friend class Instant;
+
+      /**
+       * @class VariableListener
+       * @brief Informs the profile of a change in either a quantity or time variable.
+       */
+      class VariableListener : public Constraint {
+      public:
+        VariableListener(const ConstraintEngineId& constraintEngine,
+                         const ProfileId profile,
+                         const TransactionId trans,
+                         const std::vector<ConstrainedVariableId>& scope, const bool isQuantity = false);
+        static const LabelStr& CONSTRAINT_NAME() {
+          static const LabelStr sl_const("ProfileVariableListener");
+          return sl_const;
+        }
+        static const LabelStr& PROPAGATOR_NAME() {
+          static const LabelStr sl_const("Resource");
+          return sl_const;
+        }
+        ProfileId getProfile() const {return m_profile;}
+      private:
+        bool canIgnore(const ConstrainedVariableId& variable,
+                       int argIndex,
+                       const DomainListener::ChangeType& changeType);
+        void handleExecute(){};
+        ProfileId m_profile;
+        TransactionId m_trans;
+        bool m_isQuantity;
+      };
+
+      class ConstraintAdditionListener : public ConstrainedVariableListener {
+      public:
+        ConstraintAdditionListener(const ConstrainedVariableId& var, TransactionId tid, ProfileId profile);
+        ~ConstraintAdditionListener();
+        void notifyDiscard();
+        void notifyConstraintAdded(const ConstraintId& constr, int argIndex);
+        void notifyConstraintRemoved(const ConstraintId& constr, int argIndex);
+      private:
+        ProfileId m_profile;
+        TransactionId m_tid;
+      };
+
+      struct ConstraintMessage {
+        ConstrainedVariableId var;
+        int index;
+        bool addition;
+        ConstraintMessage(ConstrainedVariableId _var, int _index, bool _addition)
+          : var(_var), index(_index), addition(_addition) {}
+      };
+
+      /**
+       * @class ConstraintRemovalListener
+       * @brief Listens for removal messages on constraints.
+       *
+       * Because it's possible for the ConstraintAdditionListener to get removed before a constraint it's listening for,
+       * this class has been added to catch any final messages about removal.
+       */
+
+      class ConstraintRemovalListener : public ConstraintEngineListener {
+      public:
+        ConstraintRemovalListener(const ConstraintEngineId& ce, ProfileId profile);
+        void notifyRemoved(const ConstraintId& constr);
+      private:
+        ProfileId m_profile;
+      };
+
+      bool hasConstraint(const ConstraintId& constr) const;
+
     protected:
+      ProfileId m_id;
+      unsigned int m_changeCount; /*<! The number of times that the profile has changed.  Used to detect stale iterators.*/
+      bool m_needsRecompute; /*<! A flag indicating the necessity of profile recomputation*/
+      unsigned int m_constraintKeyLb; /*<! The lower bound on the constraint key when searching for new constraints. */
+      LimitProfileId m_limitProfile;
+      PlanDatabaseId m_planDatabase; /*<! The plan database.  Used for creating the variable listeners. */
+      FVDetectorId m_detector; /*<! The flaw and violation detector. */
+      std::set<TransactionId> m_transactions; /*<! The set of Transactions that impact this profile. */
+      std::multimap<TransactionId, ConstraintId> m_variableListeners; /*<! The listeners on the Transactions. */
+      std::map<TransactionId, ConstrainedVariableListenerId> m_otherListeners;
+      std::map<ConstrainedVariableId, TransactionId> m_transactionsByTime;
+      ConstraintSet m_temporalConstraints;
+      ConstraintEngineListenerId m_removalListener;
+      std::map<eint, InstantId> m_instants; /*<! A map from times to Instants. */
+      ProfileIteratorId m_recomputeInterval; /*<! The stored interval of recomputation.*/
 
       bool hasTransactions() {return !m_transactions.empty();}
 
@@ -182,96 +287,9 @@ namespace EUROPA {
       bool needsRecompute() const {return m_needsRecompute;}
 
       std::string toString() const;
-    private:
-      friend class ProfilePropagator;
-      friend class ProfileIterator;
-      friend class Instant;
-
-      /**
-       * @class VariableListener
-       * @brief Informs the profile of a change in either a quantity or time variable.
-       */
-      class VariableListener : public Constraint {
-      public:
-        VariableListener(const ConstraintEngineId& constraintEngine,
-                         const ProfileId profile,
-                         const TransactionId trans,
-                         const std::vector<ConstrainedVariableId>& scope, const bool isQuantity = false);
-        static const LabelStr& CONSTRAINT_NAME() {
-          static const LabelStr sl_const("ProfileVariableListener");
-          return sl_const;
-        }
-        static const LabelStr& PROPAGATOR_NAME() {
-          static const LabelStr sl_const("Resource");
-          return sl_const;
-        }
-        ProfileId getProfile() const {return m_profile;}
-      private:
-        bool canIgnore(const ConstrainedVariableId& variable,
-                       int argIndex,
-                       const DomainListener::ChangeType& changeType);
-        void handleExecute(){};
-        ProfileId m_profile;
-        TransactionId m_trans;
-        bool m_isQuantity;
-      };
-
-      class ConstraintAdditionListener : public ConstrainedVariableListener {
-      public:
-        ConstraintAdditionListener(const ConstrainedVariableId& var, TransactionId tid, ProfileId profile);
-        ~ConstraintAdditionListener();
-        void notifyDiscard();
-        void notifyConstraintAdded(const ConstraintId& constr, int argIndex);
-        void notifyConstraintRemoved(const ConstraintId& constr, int argIndex);
-      private:
-        ProfileId m_profile;
-        TransactionId m_tid;
-      };
-
-      struct ConstraintMessage {
-        ConstrainedVariableId var;
-        int index;
-        bool addition;
-        ConstraintMessage(ConstrainedVariableId _var, int _index, bool _addition)
-          : var(_var), index(_index), addition(_addition) {}
-      };
-
-      /**
-       * @class ConstraintRemovalListener
-       * @brief Listens for removal messages on constraints.
-       * 
-       * Because it's possible for the ConstraintAdditionListener to get removed before a constraint it's listening for,
-       * this class has been added to catch any final messages about removal.
-       */
-
-      class ConstraintRemovalListener : public ConstraintEngineListener {
-      public:
-        ConstraintRemovalListener(const ConstraintEngineId& ce, ProfileId profile);
-        void notifyRemoved(const ConstraintId& constr);
-      private:
-        ProfileId m_profile;
-      };
-
-      bool hasConstraint(const ConstraintId& constr) const;
-
-    public:
-      /**
-       * @brief Gets the Instant with the greatest time that is not greater than the given time.
-       * @return An iterator pointing to the instant.
-       */
-      std::map<eint, InstantId>::iterator getGreatestInstant(const eint time);
-      
-      /**
-       * @brief Gets the Instant with the least time not less than the given time.
-       * @return An iterator pointing to the instant.
-       */
-      std::map<eint, InstantId>::iterator getLeastInstant(const eint time);
-
-      const std::map<eint, InstantId>& getInstants() {return m_instants;}
 
       // PHM Some refactoring needed so that customized subclass can
       // support reftimes.  Does not change this class functionality.
-    protected:
       /**
        * @brief Determines whether an instant contains a "significant"
        * transaction (i.e., at its upper/lower bound) that changes the
@@ -298,16 +316,12 @@ namespace EUROPA {
        * @param time The time
        */
       void removeInstant(const eint time);
-    public:
-      /**
-       * @brief Get all the transactions in the profile.
-       */
-      const std::set<TransactionId>& getAllTransactions() const {return m_transactions;}
 
+      edouble getInitCapacityLb() const;
+
+      edouble getInitCapacityUb() const;
 
     private:
-
-
       /** 
        * @brief Handle an addition or removal message on a temporal constraint.
        * Waits for two consecutive addition or removal messages in order to ensure that both variables in the scope of the 
@@ -322,30 +336,9 @@ namespace EUROPA {
 
       /** 
        * @brief Checks the m_constraintsForNotification map for internal consistency.
-       * 
-       * 
        * @return true if the map is consistent.  False otherwise.
        */
       bool checkMessageConsistency();
-
-      ProfileId m_id;
-      unsigned int m_changeCount; /*<! The number of times that the profile has changed.  Used to detect stale iterators.*/
-      bool m_needsRecompute; /*<! A flag indicating the necessity of profile recomputation*/
-      unsigned int m_constraintKeyLb; /*<! The lower bound on the constraint key when searching for new constraints. */
-    protected:
-      const edouble m_initLevelLb, m_initLevelUb;
-      PlanDatabaseId m_planDatabase; /*<! The plan database.  Used for creating the variable listeners. */
-    private:
-      FVDetectorId m_detector; /*<! The flaw and violation detector. */
-      std::set<TransactionId> m_transactions; /*<! The set of Transactions that impact this profile. */
-      std::multimap<TransactionId, ConstraintId> m_variableListeners; /*<! The listeners on the Transactions. */
-      std::map<TransactionId, ConstrainedVariableListenerId> m_otherListeners;
-      std::map<ConstrainedVariableId, TransactionId> m_transactionsByTime;
-      ConstraintSet m_temporalConstraints; 
-      ConstraintEngineListenerId m_removalListener;
-    protected:
-      std::map<eint, InstantId> m_instants; /*<! A map from times to Instants. */
-      ProfileIteratorId m_recomputeInterval; /*<! The stored interval of recomputation.*/
     };
 
     /**
@@ -409,8 +402,8 @@ namespace EUROPA {
 
       eint getStartTime() const;
       eint getEndTime() const;
+
     protected:
-    private:
       ProfileIteratorId m_id;
       ProfileId m_profile;
       unsigned int m_changeCount; /*<! A copy of the similar variable in Profile when this iterator was instantiated.  Used to detect staleness. */
@@ -421,16 +414,16 @@ namespace EUROPA {
     class ProfileArgs : public FactoryArgs
     {
     public:
-        ProfileArgs(const PlanDatabaseId& db, const FVDetectorId& detector,
-                    const edouble initCapacityLb = 0, const edouble initCapacityUb = 0)
-            : m_db(db), m_detector(detector), m_initCapacityLb(initCapacityLb), m_initCapacityUb(initCapacityUb)
+        ProfileArgs(const PlanDatabaseId& db, const FVDetectorId& detector,const LimitProfileId& limitProfile)
+            : m_db(db)
+        	, m_detector(detector)
+        	, m_limitProfile(limitProfile)
         {
         }
 
         const PlanDatabaseId m_db;
         const FVDetectorId m_detector;
-        const edouble m_initCapacityLb;
-        const edouble m_initCapacityUb;
+        const LimitProfileId m_limitProfile;
     };
 
     template<class ProfileType>
@@ -442,12 +435,36 @@ namespace EUROPA {
       {
           const ProfileArgs& args = (const ProfileArgs&)fa;
           return (EUROPA::FactoryObjId&)
-              (new ProfileType(args.m_db, args.m_detector, args.m_initCapacityLb, args.m_initCapacityUb))->getId();
+              (new ProfileType(args.m_db, args.m_detector, args.m_limitProfile))->getId();
       }
     };
 
     #define REGISTER_PROFILE(MGR, CLASS, NAME) (MGR->registerFactory((new EUROPA::ProfileFactory<CLASS>(#NAME))->getId()));
 
+    /*
+     * Limit profile keeps track of upper&lower bound of a resource's limit over time.
+     * For now only a piecewise constant LimitProfile is supported, we may consider supporting other types in the future
+     */
+    // TODO: Profile needs to be refactored into an interface that both the UsageProfile and the LimitProfile implement
+    class LimitProfile {
+    public:
+    	LimitProfile(edouble lb, edouble ub);
+    	virtual ~LimitProfile();
+
+    	LimitProfileId& getId();
+
+    	void setLimit(eint time, edouble lb, edouble ub);
+    	void removeLimit(eint time);
+    	// TODO: provide LimitProfileIterator instead?
+    	const std::map< eint,std::pair<edouble,edouble> >& getLimits() const;
+
+    	const std::pair<edouble,edouble>& getLimit(eint time) const;
+    	const std::pair<edouble,edouble>& getEarliestLimit() const;
+
+    protected:
+    	LimitProfileId m_id;
+    	std::map< eint,std::pair<edouble,edouble> > m_values;
+    };
 }
 
 #endif

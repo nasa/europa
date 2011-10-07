@@ -52,8 +52,7 @@ namespace EUROPA {
 
 class GroundedProfile : public TimetableProfile {
 public:
-	GroundedProfile(const PlanDatabaseId db, const FVDetectorId flawDetector,
-			const edouble initCapacityLb = 0, const edouble initCapacityUb = 0);
+	GroundedProfile(const PlanDatabaseId db, const FVDetectorId flawDetector,const LimitProfileId limitProfile);
 
 protected:
 

@@ -7,8 +7,8 @@
 
 
 namespace EUROPA {
-GroundedProfile::GroundedProfile(const PlanDatabaseId db, const FVDetectorId flawDetector, const edouble initCapacityLb, const edouble initCapacityUb)
-: TimetableProfile(db, flawDetector, initCapacityLb, initCapacityUb) {}
+GroundedProfile::GroundedProfile(const PlanDatabaseId db, const FVDetectorId flawDetector, const LimitProfileId limitProfile)
+: TimetableProfile(db, flawDetector, limitProfile) {}
 
 
 void GroundedProfile::handleTransactionStart(bool isConsumer, const edouble & lb, const edouble & ub)
