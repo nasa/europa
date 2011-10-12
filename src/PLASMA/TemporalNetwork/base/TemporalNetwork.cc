@@ -752,7 +752,7 @@ namespace EUROPA {
     DedgeId edge = findEdge(forwards ? head : foot,
                             forwards ? foot : head);
 
-    if (!edge.isNoId() && headDistance < g_infiniteTime()
+    if (!edge.isNoId() && headDistance < POS_INFINITY
         && headDistance + edge->length < footDistance) {
       // Propagate across edge
       footDistance = headDistance + edge->length;
@@ -765,7 +765,7 @@ namespace EUROPA {
     DedgeId revEdge = findEdge(forwards ? foot : head,
                                forwards ? head : foot);
 
-    if (!revEdge.isNoId() && footDistance < g_infiniteTime()
+    if (!revEdge.isNoId() && footDistance < POS_INFINITY
         && footDistance + revEdge->length < headDistance) {
       // Propagate across reverse edge
       headDistance = footDistance + revEdge->length;
