@@ -62,7 +62,8 @@ namespace EUROPA {
       REGISTER_FLAW_HANDLER(cfm,SOLVERS::HSTS::ValueEnum, ValEnum);
 
       REGISTER_FLAW_MANAGER(cfm,SOLVERS::OpenConditionManager, OpenConditionManager);
-      REGISTER_FLAW_HANDLER(cfm,SOLVERS::OpenConditionDecisionPoint, StandardOpenConditionHandler);
+      REGISTER_FLAW_HANDLER(cfm,SOLVERS::SupportedOCDecisionPoint, StandardOpenConditionHandler);
+      REGISTER_FLAW_HANDLER(cfm,SOLVERS::OpenConditionDecisionPoint, BasicOpenConditionHandler);
       REGISTER_FLAW_HANDLER(cfm,SOLVERS::SupportedOCDecisionPoint, SupportedOpenConditionHandler);
       REGISTER_FLAW_HANDLER(cfm,SOLVERS::HSTS::OpenConditionDecisionPoint, HSTSOpenConditionDecisionPoint);
 
