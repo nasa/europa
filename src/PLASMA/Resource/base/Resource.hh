@@ -93,14 +93,14 @@ namespace EUROPA {
       virtual ~Resource();
 
       /**
-       * @brief Accessor for the lower limit on capacity.
+       * @brief Accessor for the lower limit on level
        */
-      edouble getLowerLimit() const {return m_lowerLimit;}
+      edouble getLowerLimit() const;
 
       /**
-       * @brief Accessor for the upper limit on capacity.
+       * @brief Accessor for the upper limit on level
        */
-      edouble getUpperLimit() const {return m_upperLimit;}
+      edouble getUpperLimit() const;
 
       /**
        * @brief Accessor for the maximum consumption possible at an instant.
@@ -233,27 +233,26 @@ namespace EUROPA {
       virtual void createTransactions(const TokenId& tok) = 0;
       virtual void removeTransactions(const TokenId& tok) = 0;
 
-    private:
-      friend class ResourceTokenRelation;
-
-
-      virtual bool transConstrainedToPrecede(const TransactionId& predecessor, const TransactionId& successor);
-
-      bool noFlawedTokensForInst(const InstantId& inst) const;
-      edouble m_initCapacityLb, m_initCapacityUb; /*<! The bounds of the initial capacity*/
-      edouble  m_lowerLimit, m_upperLimit; /*<! The bounds on the capacity*/
-      edouble m_maxInstProduction, m_maxInstConsumption; /*<! The maximum production and consumption allowed at an instant */
-      edouble m_maxProduction, m_maxConsumption; /*<! The maximum production and consumption allowed over the lifetime of the resource */
     protected:
       FVDetectorId m_detector; /*<! The flaw and violation detector for this resource. */
       ExplicitProfileId m_capacityProfile; /*<! The capacity profile for this resource. */
+      ExplicitProfileId m_limitProfile; /*<! The capacity profile for this resource. */
       ProfileId m_profile; /*<! The availability profile for this resource. */
       std::map<TransactionId, TokenId> m_transactionsToTokens;
       std::map<TokenId, std::set<InstantId> > m_flawedTokens;
       std::map<eint, InstantId> m_flawedInstants;
+      edouble m_maxInstProduction, m_maxInstConsumption; /*<! The maximum production and consumption allowed at an instant */
+      edouble m_maxProduction, m_maxConsumption; /*<! The maximum production and consumption allowed over the lifetime of the resource */
 
       TokenId getTokenForTransaction(TransactionId t);
       ResourceTokenRelationId getRTRConstraint(TokenId tok);
+
+    private:
+      friend class ResourceTokenRelation;
+
+      virtual bool transConstrainedToPrecede(const TransactionId& predecessor, const TransactionId& successor);
+
+      bool noFlawedTokensForInst(const InstantId& inst) const;
     };
 }
 #endif

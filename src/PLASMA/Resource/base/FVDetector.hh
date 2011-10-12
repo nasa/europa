@@ -81,7 +81,7 @@ namespace EUROPA {
 
       bool allowViolations() const;
 
-    private:
+    protected:
       FVDetectorId m_id;
       ResourceId m_res;
     };

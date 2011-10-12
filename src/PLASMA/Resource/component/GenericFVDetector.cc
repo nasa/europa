@@ -5,17 +5,16 @@
 namespace EUROPA {
 
     GenericFVDetector::GenericFVDetector(const ResourceId res) : FVDetector(res) {
-      m_lowerLimit = res->getLowerLimit();
-      m_upperLimit = res->getUpperLimit();
       m_maxInstConsumption = res->getMaxInstConsumption();
       m_maxInstProduction = res->getMaxInstProduction();
       m_maxCumulativeConsumption = res->getMaxConsumption();
       m_maxCumulativeProduction = res->getMaxProduction();
       debugMsg("GenericFVDetector:GenericFVDetector", "Created FVDetector for " << res->toString());
-      debugMsg("GenericFVDetector:GenericFVDetector", "Got values: lower limit(" << m_lowerLimit << ") upper limit(" <<
-	       m_upperLimit << ") max instantaneous consumption(" << m_maxInstConsumption << ") max instantaneous production(" <<
-	       m_maxInstProduction << ") max consumption(" << m_maxCumulativeConsumption << ") max production(" <<
-	       m_maxCumulativeProduction << ")");
+      debugMsg("GenericFVDetector:GenericFVDetector", "Got values: "
+    		  << " max instantaneous consumption(" << m_maxInstConsumption << ")"
+    		  << " max instantaneous production(" << m_maxInstProduction << ")"
+    		  << " max consumption(" << m_maxCumulativeConsumption << ")"
+    		  << " max production(" << m_maxCumulativeProduction << ")");
     }
 
     Resource::ProblemType GenericFVDetector::getResourceViolation(const InstantId inst) const
@@ -140,5 +139,16 @@ namespace EUROPA {
 
     	// Return true if there was a violation and we're not allowing violations:
     	return(inst->isViolated() && !allowViolations());
+    }
+
+    // TODO: get real limits for instant
+    edouble GenericFVDetector::getLowerLimit(const InstantId& inst) const
+    {
+    	return m_res->getLowerLimit();
+    }
+
+    edouble GenericFVDetector::getUpperLimit(const InstantId& inst) const
+    {
+    	return m_res->getUpperLimit();
     }
 }

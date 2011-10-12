@@ -11,16 +11,16 @@ GroundedFVDetector::GroundedFVDetector(const ResourceId res) : GenericFVDetector
 // reorganization where the violation and flaw detection pieces can be configured separately
 Resource::ProblemType GroundedFVDetector::getResourceLevelViolation(const InstantId inst) const
 {
-	if (inst->getUpperLevel() < m_lowerLimit)
+	if (inst->getUpperLevel() < getLowerLimit(inst))
 	{
 		debugMsg("GroundedFVDetector:detect",
-				"Lower limit violation.  Limit: " << m_lowerLimit << " Upper level: " << inst->getUpperLevel());
+				"Lower limit violation.  Limit: " << getLowerLimit(inst) << " Upper level: " << inst->getUpperLevel());
 		return Resource::LevelTooLow;
 	}
-	if (inst->getLowerLevel() > m_upperLimit)
+	if (inst->getLowerLevel() > getUpperLimit(inst))
 	{
     	debugMsg("GroundedFVDetector:detect",
-    			"Upper limit violation.  Limit: " << m_upperLimit << " Lower level: " << inst->getLowerLevel());
+    			"Upper limit violation.  Limit: " << getUpperLimit(inst) << " Lower level: " << inst->getLowerLevel());
     	return Resource::LevelTooHigh;
 	}
 	return Resource::NoProblem;
@@ -31,20 +31,20 @@ Resource::ProblemType GroundedFVDetector::getResourceLevelViolation(const Instan
 void GroundedFVDetector::handleResourceLevelFlaws(const InstantId inst)
 {
 	// LowerLevelMax is really GroundedMin
-	if(inst->getLowerLevelMax() < m_lowerLimit)
+	if(inst->getLowerLevelMax() < getLowerLimit(inst))
 	{
 		inst->setFlawed(true);
 		inst->setLower(true);
-		inst->setLowerMagnitude(std::abs(m_lowerLimit - inst->getLowerLevelMax()));
+		inst->setLowerMagnitude(std::abs(getLowerLimit(inst) - inst->getLowerLevelMax()));
 		debugMsg("GroundedFVDetector:detect", "Lower limit flaw.");
 	}
 
 	// UpperLevelMin is really GroundedMax
-	if(inst->getUpperLevelMin() > m_upperLimit)
+	if(inst->getUpperLevelMin() > getUpperLimit(inst))
 	{
 		inst->setFlawed(true);
 		inst->setUpper(true);
-		inst->setUpperMagnitude(std::abs(m_upperLimit - inst->getUpperLevelMin()));
+		inst->setUpperMagnitude(std::abs(getUpperLimit(inst) - inst->getUpperLevelMin()));
 		debugMsg("GroundedFVDetector:detect", "Upper limit flaw.");
 	}
 }

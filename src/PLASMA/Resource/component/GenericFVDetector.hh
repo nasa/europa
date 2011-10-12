@@ -19,7 +19,7 @@ namespace EUROPA {
      *     For each, a violation occurs if current min > max allowed
      *     For each, a flaw occurs if current max > max allowed
      *
-     * This class checks all of the above cases, even though most situations only require a subset.  For example, resusable
+     * This class checks all of the above cases, even though most situations only require a subset.  For example, reusable
      * resources don't care about production (those tests will always pass and are therefore unnecessary).  If this becomes
      * a computational burden, we could split the above 6 cases into components and a user could select whatever subset is required.
      *
@@ -36,7 +36,10 @@ namespace EUROPA {
     public:
       GenericFVDetector(const ResourceId res);
       bool detect(const InstantId inst);
+
     protected:
+      edouble m_maxInstConsumption, m_maxInstProduction;
+      edouble m_maxCumulativeConsumption, m_maxCumulativeProduction;
 
       // Second version requires subclassing to handle open vs. closed world assumption
       Resource::ProblemType getResourceViolation(const InstantId inst) const;
@@ -47,9 +50,8 @@ namespace EUROPA {
       void handleResourceFlaws(const InstantId inst);
       virtual void handleResourceLevelFlaws(const InstantId inst) = 0;
 
-    protected:
-      edouble m_lowerLimit, m_upperLimit, m_maxInstConsumption, m_maxInstProduction;
-      edouble m_maxCumulativeConsumption, m_maxCumulativeProduction;
+      edouble getLowerLimit(const InstantId& inst) const;
+      edouble getUpperLimit(const InstantId& inst) const;
     };
 }
 

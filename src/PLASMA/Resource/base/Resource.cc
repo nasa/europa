@@ -56,6 +56,7 @@ namespace EUROPA {
         delete (Transaction*) it->first;
     }
     delete (Profile*) m_profile;
+    delete (ExplicitProfile*) m_limitProfile;
     delete (ExplicitProfile*) m_capacityProfile;
     delete (FVDetector*) m_detector;
   }
@@ -67,12 +68,6 @@ namespace EUROPA {
                       const LabelStr& detectorName,
                       const LabelStr& profileName) {
     debugMsg("Resource:init", "In base init function.");
-
-    // TODO!! JRB: capacity and limits should be always the same, when are they not?
-    m_initCapacityLb = initCapacityLb;
-    m_initCapacityUb = initCapacityUb;
-    m_lowerLimit = lowerLimit;
-    m_upperLimit = upperLimit;
 
     m_maxInstProduction = (maxInstProduction == PLUS_INFINITY ? maxProduction : maxInstProduction);
     m_maxProduction = maxProduction;
@@ -87,6 +82,7 @@ namespace EUROPA {
     m_detector = fvdfm->createInstance(detectorName, FVDetectorArgs(getId()));
 
     m_capacityProfile = (new ExplicitProfile(initCapacityLb,initCapacityUb))->getId();
+    m_limitProfile = (new ExplicitProfile(lowerLimit,upperLimit))->getId();
 
     FactoryMgr* pfm = (FactoryMgr*)engine->getComponent("ProfileFactoryMgr");
     m_profile = pfm->createInstance(
@@ -99,12 +95,22 @@ namespace EUROPA {
                                     );
 
     debugMsg("Resource:init", "Initialized Resource " << getName().toString() << "{"
-             << "initCapacity=[" << m_initCapacityLb << "," << m_initCapacityUb << "],"
-             << "usageLimits=[" << m_lowerLimit << "," << m_upperLimit << "],"
+             << "initCapacity=[" << initCapacityLb << "," << initCapacityUb << "],"
+             << "usageLimits=[" << lowerLimit << "," << upperLimit << "],"
              << "productionLimits=[max=" << m_maxProduction << ",maxInst=" << m_maxInstProduction << "],"
              << "consumptionLimits=[max=" << m_maxConsumption << ",maxInst=" << m_maxInstConsumption << "],"
              << "}"
              );
+  }
+
+  edouble Resource::getLowerLimit() const
+  {
+	  return m_limitProfile->getEarliestValue().first;
+  }
+
+  edouble Resource::getUpperLimit() const
+  {
+	  return m_limitProfile->getEarliestValue().second;
   }
 
   void Resource::add(const TokenId& token) {
