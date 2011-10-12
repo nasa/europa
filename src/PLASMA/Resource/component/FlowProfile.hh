@@ -299,7 +299,7 @@ namespace EUROPA
       /**
        * @brief Constructor
        */
-      FlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const LimitProfileId limitProfile );
+      FlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const ExplicitProfileId limitProfile );
       /**
        * @brief Destructor
        */

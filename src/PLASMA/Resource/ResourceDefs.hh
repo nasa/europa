@@ -16,8 +16,8 @@ namespace EUROPA {
     class ProfileIterator;
     typedef Id<ProfileIterator> ProfileIteratorId;
 
-	class LimitProfile;
-	typedef Id<LimitProfile> LimitProfileId;
+	class ExplicitProfile;
+	typedef Id<ExplicitProfile> ExplicitProfileId;
 
     class Instant;
     typedef Id<Instant> InstantId;

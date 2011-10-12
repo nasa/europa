@@ -7,7 +7,7 @@
 
 
 namespace EUROPA {
-GroundedProfile::GroundedProfile(const PlanDatabaseId db, const FVDetectorId flawDetector, const LimitProfileId limitProfile)
+GroundedProfile::GroundedProfile(const PlanDatabaseId db, const FVDetectorId flawDetector, const ExplicitProfileId limitProfile)
 : TimetableProfile(db, flawDetector, limitProfile) {}
 
 

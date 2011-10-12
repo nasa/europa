@@ -56,7 +56,7 @@ namespace EUROPA {
         delete (Transaction*) it->first;
     }
     delete (Profile*) m_profile;
-    delete (LimitProfile*) m_limitProfile;
+    delete (ExplicitProfile*) m_capacityProfile;
     delete (FVDetector*) m_detector;
   }
 
@@ -86,7 +86,7 @@ namespace EUROPA {
     FactoryMgr* fvdfm = (FactoryMgr*)engine->getComponent("FVDetectorFactoryMgr");
     m_detector = fvdfm->createInstance(detectorName, FVDetectorArgs(getId()));
 
-    m_limitProfile = (new LimitProfile(initCapacityLb,initCapacityUb))->getId();
+    m_capacityProfile = (new ExplicitProfile(initCapacityLb,initCapacityUb))->getId();
 
     FactoryMgr* pfm = (FactoryMgr*)engine->getComponent("ProfileFactoryMgr");
     m_profile = pfm->createInstance(
@@ -94,7 +94,7 @@ namespace EUROPA {
                                     ProfileArgs(
                                                 getPlanDatabase(),
                                                 m_detector,
-                                                m_limitProfile
+                                                m_capacityProfile
                                                 )
                                     );
 

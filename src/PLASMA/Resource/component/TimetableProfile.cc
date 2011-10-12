@@ -5,7 +5,7 @@
 #include "Debug.hh"
 
 namespace EUROPA {
-    TimetableProfile::TimetableProfile(const PlanDatabaseId db, const FVDetectorId flawDetector, const LimitProfileId limitProfile)
+    TimetableProfile::TimetableProfile(const PlanDatabaseId db, const FVDetectorId flawDetector, const ExplicitProfileId limitProfile)
     	: Profile(db, flawDetector, limitProfile)
     	, m_lowerLevelMin(0)
     	, m_lowerLevelMax(0)

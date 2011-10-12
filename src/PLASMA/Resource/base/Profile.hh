@@ -45,7 +45,7 @@ namespace EUROPA {
        * @brief Constructor.
        * @param flawDetector The object responsible for detecting flaws and violations during level calculation.
        */
-      Profile(const PlanDatabaseId ce, const FVDetectorId flawDetector, const LimitProfileId limitProfile);
+      Profile(const PlanDatabaseId ce, const FVDetectorId flawDetector, const ExplicitProfileId capacityProfile);
       virtual ~Profile();
       ProfileId& getId() {return m_id;}
 
@@ -184,7 +184,7 @@ namespace EUROPA {
       unsigned int m_changeCount; /*<! The number of times that the profile has changed.  Used to detect stale iterators.*/
       bool m_needsRecompute; /*<! A flag indicating the necessity of profile recomputation*/
       unsigned int m_constraintKeyLb; /*<! The lower bound on the constraint key when searching for new constraints. */
-      LimitProfileId m_limitProfile;
+      ExplicitProfileId m_capacityProfile;
       PlanDatabaseId m_planDatabase; /*<! The plan database.  Used for creating the variable listeners. */
       FVDetectorId m_detector; /*<! The flaw and violation detector. */
       std::set<TransactionId> m_transactions; /*<! The set of Transactions that impact this profile. */
@@ -414,7 +414,7 @@ namespace EUROPA {
     class ProfileArgs : public FactoryArgs
     {
     public:
-        ProfileArgs(const PlanDatabaseId& db, const FVDetectorId& detector,const LimitProfileId& limitProfile)
+        ProfileArgs(const PlanDatabaseId& db, const FVDetectorId& detector,const ExplicitProfileId& limitProfile)
             : m_db(db)
         	, m_detector(detector)
         	, m_limitProfile(limitProfile)
@@ -423,7 +423,7 @@ namespace EUROPA {
 
         const PlanDatabaseId m_db;
         const FVDetectorId m_detector;
-        const LimitProfileId m_limitProfile;
+        const ExplicitProfileId m_limitProfile;
     };
 
     template<class ProfileType>
@@ -442,27 +442,33 @@ namespace EUROPA {
     #define REGISTER_PROFILE(MGR, CLASS, NAME) (MGR->registerFactory((new EUROPA::ProfileFactory<CLASS>(#NAME))->getId()));
 
     /*
-     * Limit profile keeps track of upper&lower bound of a resource's limit over time.
-     * For now only a piecewise constant LimitProfile is supported, we may consider supporting other types in the future
+     * A Profile keeps track of upper&lower bounds of a resource's attribute over time.
+     * An ExplicitProfile is a profile whose values are explicitly specified (instead of being computed from usage or other information)
+     * An ExplicitProfile is a piecewise constant function, we may consider supporting other types in the future.
+     * For the time being a resource's capacity will be represented using an ExplicitProfile.
+     * Limits could also be represented by an ExplicitProfile if we see the need to move beyond a single {upperBound,lowerBound} pair.
+     *
+     * TODO: Profile needs to be refactored into an interface that both the ExplicitProfile and (a new) ComputedProfile class can implement.
+     * The current Profile class represents the Level (or availability) profile for a resource and would be better characterized
+     * as a ComputedProfile
      */
-    // TODO: Profile needs to be refactored into an interface that both the UsageProfile and the LimitProfile implement
-    class LimitProfile {
+    class ExplicitProfile {
     public:
-    	LimitProfile(edouble lb, edouble ub);
-    	virtual ~LimitProfile();
+    	ExplicitProfile(edouble lb, edouble ub);
+    	virtual ~ExplicitProfile();
 
-    	LimitProfileId& getId();
+    	ExplicitProfileId& getId();
 
-    	void setLimit(eint time, edouble lb, edouble ub);
-    	void removeLimit(eint time);
-    	// TODO: provide LimitProfileIterator instead?
-    	const std::map< eint,std::pair<edouble,edouble> >& getLimits() const;
+    	void setValue(eint time, edouble lb, edouble ub);
+    	void removeValue(eint time);
+    	// TODO: provide ExplicitProfileIterator instead?
+    	const std::map< eint,std::pair<edouble,edouble> >& getValues() const;
 
-    	const std::pair<edouble,edouble>& getLimit(eint time) const;
-    	const std::pair<edouble,edouble>& getEarliestLimit() const;
+    	const std::pair<edouble,edouble>& getValue(eint time) const;
+    	const std::pair<edouble,edouble>& getEarliestValue() const;
 
     protected:
-    	LimitProfileId m_id;
+    	ExplicitProfileId m_id;
     	std::map< eint,std::pair<edouble,edouble> > m_values;
     };
 }

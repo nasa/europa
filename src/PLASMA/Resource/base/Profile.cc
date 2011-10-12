@@ -13,11 +13,11 @@
 
 namespace EUROPA {
 
-    Profile::Profile(const PlanDatabaseId db, const FVDetectorId flawDetector, const LimitProfileId limitProfile)
+    Profile::Profile(const PlanDatabaseId db, const FVDetectorId flawDetector, const ExplicitProfileId capacityProfile)
     	: m_id(this)
     	, m_changeCount(0)
     	, m_needsRecompute(false)
-    	, m_limitProfile(limitProfile)
+    	, m_capacityProfile(capacityProfile)
         , m_planDatabase(db)
         , m_detector(flawDetector)
     {
@@ -664,12 +664,12 @@ namespace EUROPA {
 
     edouble Profile::getInitCapacityLb() const
     {
-		return m_limitProfile->getEarliestLimit().first;
+		return m_capacityProfile->getEarliestValue().first;
     }
 
     edouble Profile::getInitCapacityUb() const
     {
-		return m_limitProfile->getEarliestLimit().second;
+		return m_capacityProfile->getEarliestValue().second;
     }
 
     ProfileIterator::ProfileIterator(const ProfileId prof, const eint startTime, const eint endTime)
@@ -761,41 +761,41 @@ namespace EUROPA {
     	}
     }
 
-    LimitProfile::LimitProfile(edouble lb, edouble ub)
+    ExplicitProfile::ExplicitProfile(edouble lb, edouble ub)
     	: m_id(this)
     {
-    	setLimit(std::numeric_limits<eint>::minus_infinity(),lb,ub);
+    	setValue(std::numeric_limits<eint>::minus_infinity(),lb,ub);
     }
 
-    LimitProfile::~LimitProfile()
+    ExplicitProfile::~ExplicitProfile()
     {
     	m_id.remove();
     }
 
-	LimitProfileId& LimitProfile::getId()
+	ExplicitProfileId& ExplicitProfile::getId()
 	{
 		return m_id;
 	}
 
 
-    void LimitProfile::setLimit(eint time, edouble lb, edouble ub)
+    void ExplicitProfile::setValue(eint time, edouble lb, edouble ub)
     {
     	m_values[time] = std::pair<edouble,edouble>(lb,ub);
     }
 
-    void LimitProfile::removeLimit(eint time)
+    void ExplicitProfile::removeValue(eint time)
     {
     	check_runtime_error(time != std::numeric_limits<eint>::minus_infinity(), "Can't remove entry for -infinity from LimitProfile");
     	checkError(m_values.find(time) != m_values.end(),"Tried to remove unexisting entry from Limit Profile:" << time);
     	m_values.erase(time);
     }
 
-    const std::map< eint,std::pair<edouble,edouble> >& LimitProfile::getLimits() const
+    const std::map< eint,std::pair<edouble,edouble> >& ExplicitProfile::getValues() const
     {
     	return m_values;
     }
 
-    const std::pair<edouble,edouble>& LimitProfile::getLimit(eint time) const
+    const std::pair<edouble,edouble>& ExplicitProfile::getValue(eint time) const
     {
     	std::map<eint,std::pair<edouble,edouble> >::const_iterator it = m_values.lower_bound(time);
     	checkError(it != m_values.end(), "Couldn't find lower bound for a time in LimitProfile, which breaks invariant, time=" << time);
@@ -803,7 +803,7 @@ namespace EUROPA {
     	return it->second;
     }
 
-    const std::pair<edouble,edouble>& LimitProfile::getEarliestLimit() const
+    const std::pair<edouble,edouble>& ExplicitProfile::getEarliestValue() const
     {
     	checkError(!m_values.empty(),"Limit Profile can never be empty");
     	return m_values.begin()->second;

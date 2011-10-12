@@ -43,7 +43,7 @@ class ResourceTestEngine  : public EngineBase
     void createModules();
 };
 
-LimitProfile RSF_DEFAULT_CAPACITY(0,0);
+ExplicitProfile RSF_DEFAULT_CAPACITY(0,0);
 
 #define RESOURCE_DEFAULT_SETUP(ce, db, autoClose) \
     ResourceTestEngine rte; \
@@ -1292,7 +1292,7 @@ private:
      * Max level(1)    0           -1   -2       -1    0     0
      *
      */
-    LimitProfile lp(initialLowerLevel, initialUpperLevel);
+    ExplicitProfile lp(initialLowerLevel, initialUpperLevel);
     Profile profile( db.getId(), detector.getId(), lp.getId() );
 
     const int nrInstances = 6;
@@ -1312,7 +1312,7 @@ private:
     RESOURCE_DEFAULT_SETUP(ce, db, true);
     DummyDetector detector(ResourceId::noId());
 
-    LimitProfile lp(5,5);
+    ExplicitProfile lp(5,5);
     Profile profile( db.getId(), detector.getId(), lp.getId());
 
     /*!

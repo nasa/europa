@@ -127,7 +127,7 @@ private:
   }
 };
 
-LimitProfile DEFAULT_CAPACITY(0,0);
+ExplicitProfile DEFAULT_CAPACITY(0,0);
 
 class DummyProfile : public Profile {
 public:
