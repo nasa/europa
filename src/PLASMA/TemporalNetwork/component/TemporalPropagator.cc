@@ -834,8 +834,8 @@ namespace EUROPA {
     static unsigned int sl_counter(0);
     sl_counter++;
 
-    Time lb = lbc; //mapToInternalInfinity(lbc);
-    Time ub = ubc; //mapToInternalInfinity(ubc);
+    Time lb = mapToInternalInfinity(lbc);
+    Time ub = mapToInternalInfinity(ubc);
 
     if(tnetConstraint.isNoId())
       return m_tnet->addTemporalConstraint(m_tnet->getOrigin(), getTimepoint(var), lb, ub);
