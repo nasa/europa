@@ -7,6 +7,7 @@ import psengine.*;
 
 // Load the model and the problem :
 String nddlModel = bsh.cwd+"/Light-initial-state.nddl";
+//String nddlModel = bsh.cwd+"/Light-strips-initial-state.nddl";
 psengine.executeScript("nddl",nddlModel,true/*isFile*/);
 
 // Create a solver
@@ -23,12 +24,9 @@ desktop.makeSolverDialog(solver);
 void showPlan()
 {
 	PSObjectList l = psengine.getObjectsByType("Object");
-    for (int i=0;i<l.size();i++) 
-    {
-    	PSObject o = l.get(i);
-   	if(o.toLongString().startsWith("Light"))  // ie LightBulb or LightSwitch
-    	{
-    		desktop.showTokens(l.get(i));
-    	}
+	for (int i=0;i<l.size();i++) {
+		PSObject o = l.get(i);
+		if(o.toLongString().startsWith("Light"))  // ie LightBulb or LightSwitch
+			desktop.showTokens(l.get(i));
     }
 }

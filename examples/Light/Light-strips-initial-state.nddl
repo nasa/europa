@@ -1,0 +1,15 @@
+#include "Light-strips-model.nddl"
+
+// Problem instance : turning the light off
+LightBulb bulb1 = new LightBulb();
+LightSwitch switch1 = new LightSwitch(bulb1);
+
+// At time 0, the bulb is on
+fact(bulb1.On initialCondition);
+eq(initialCondition.start,0);
+
+// We want the bulb to be off by time 10
+goal(bulb1.Off goal1);
+lt(0,goal1.start);
+lt(goal1.start,10);
+
