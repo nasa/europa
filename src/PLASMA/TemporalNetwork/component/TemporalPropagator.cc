@@ -1069,7 +1069,7 @@ namespace EUROPA {
       return tp->getReftime();
     }
     // Otherwise var is not (yet) ref timepoint, just return lb for now
-    return (Time) cast_long(var->lastDomain().getLowerBound());
+    return (Time) cast_basis(var->lastDomain().getLowerBound());
   }
 
   void TemporalPropagator::getMinPerturbTimes(const std::vector<ConstrainedVariableId>& timevars,
