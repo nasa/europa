@@ -28,7 +28,7 @@ namespace EUROPA {
      *
      * HISTORICAL NOTE:
      * a) TimelineFVDetector used the open-world assumption and did not check any flaws
-     * b) ReuslabeFVDetector used the close-world assumption, ignored production violations and flaws, and reported consumption flaws
+     * b) ReusableFVDetector used the close-world assumption, ignored production violations and flaws, and reported consumption flaws
      *    as violations.
      */
 
@@ -41,17 +41,17 @@ namespace EUROPA {
       edouble m_maxInstConsumption, m_maxInstProduction;
       edouble m_maxCumulativeConsumption, m_maxCumulativeProduction;
 
-      // Second version requires subclassing to handle open vs. closed world assumption
       Resource::ProblemType getResourceViolation(const InstantId inst) const;
-      virtual Resource::ProblemType getResourceLevelViolation(const InstantId inst) const = 0;
+      virtual Resource::ProblemType getResourceLevelViolation(const InstantId inst) const;
 
-      // Handling flaws does more than just report there is one
-      // Second version requires subclassing to handle open vs. closed world assumption
       void handleResourceFlaws(const InstantId inst);
-      virtual void handleResourceLevelFlaws(const InstantId inst) = 0;
+      virtual void handleResourceLevelFlaws(const InstantId inst);
 
-      void getLimitBounds(const InstantId& inst, edouble& lb, edouble& ub) const;
-      void getLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const;
+      virtual void getLimitBounds(const InstantId& inst, edouble& lb, edouble& ub) const;
+      void getDefaultLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const;
+      // Requires sub-classing to handle open vs. closed world assumption
+      virtual void getFDLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const = 0; // Level Bounds for FlawDetection
+      virtual void getVDLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const = 0; // Level Bounds for ViolationDetection
     };
 }
 

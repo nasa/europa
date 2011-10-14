@@ -1,6 +1,7 @@
 #include "GenericFVDetector.hh"
 #include "Instant.hh"
 #include "FVDetector.hh"
+#include <cmath>
 
 namespace EUROPA {
 
@@ -141,14 +142,61 @@ namespace EUROPA {
     	return(inst->isViolated() && !allowViolations());
     }
 
-    // TODO: get real limits for instant
+    Resource::ProblemType GenericFVDetector::getResourceLevelViolation(const InstantId inst) const
+    {
+    	edouble limitLb, limitUb;
+    	getLimitBounds(inst,limitLb,limitUb);
+    	edouble levelLb, levelUb;
+    	getVDLevelBounds(inst,levelLb,levelUb);
+
+    	if (levelUb < limitLb)
+    	{
+    		debugMsg("GenericFVDetector:detect",
+    				"Lower limit violation.  Limit: " << limitLb << " Upper level: " << levelUb);
+    		return Resource::LevelTooLow;
+    	}
+    	if (levelLb > limitUb)
+    	{
+        	debugMsg("GenericFVDetector:detect",
+        			"Upper limit violation.  Limit: " << limitUb << " Lower level: " << levelLb);
+        	return Resource::LevelTooHigh;
+    	}
+    	return Resource::NoProblem;
+    }
+
+    void GenericFVDetector::handleResourceLevelFlaws(const InstantId inst)
+    {
+    	edouble limitLb, limitUb;
+    	getLimitBounds(inst,limitLb,limitUb);
+    	edouble levelLb, levelUb;
+    	getFDLevelBounds(inst,levelLb,levelUb);
+
+    	if(levelLb < limitLb)
+    	{
+    		inst->setFlawed(true);
+    		inst->setLower(true);
+    		inst->setLowerMagnitude(std::abs(limitLb - levelLb));
+    		debugMsg("GenericFVDetector:detect", "Lower limit flaw.");
+    	}
+
+    	if(levelUb > limitUb)
+    	{
+    		inst->setFlawed(true);
+    		inst->setUpper(true);
+    		inst->setUpperMagnitude(std::abs(limitUb - levelUb));
+    		debugMsg("GenericFVDetector:detect", "Upper limit flaw.");
+    	}
+    }
+
+    // TODO: get real limits from LimitProfile
     void GenericFVDetector::getLimitBounds(const InstantId& inst, edouble& lb, edouble& ub) const
     {
     	lb = m_res->getLowerLimit();
     	ub = m_res->getUpperLimit();
     }
 
-    void GenericFVDetector::getLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const
+    // TODO: Level(t) = Capacity(t) - Usage(t)
+    void GenericFVDetector::getDefaultLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const
     {
     	lb = inst->getLowerLevel();
     	ub = inst->getUpperLevel();

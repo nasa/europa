@@ -4,14 +4,14 @@
 #include "GenericFVDetector.hh"
 namespace EUROPA {
 
-    class ClosedWorldFVDetector : public GenericFVDetector {
-  public:
-   ClosedWorldFVDetector(const ResourceId res);
+	class ClosedWorldFVDetector : public GenericFVDetector {
+	public:
+		ClosedWorldFVDetector(const ResourceId res);
 
-  protected:
-   Resource::ProblemType getResourceLevelViolation(const InstantId inst) const;
-    void handleResourceLevelFlaws(const InstantId inst);
-    };
+	protected:
+		virtual void getFDLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const; // Level Bounds for FlawDetection
+		virtual void getVDLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const; // Level Bounds for ViolationDetection
+	};
 }
 
 #endif

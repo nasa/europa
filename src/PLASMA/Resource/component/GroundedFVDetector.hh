@@ -9,9 +9,8 @@ namespace EUROPA {
     	GroundedFVDetector(const ResourceId res);
 
     protected:
-    	Resource::ProblemType getResourceLevelViolation(const InstantId inst) const;
-    	void handleResourceLevelFlaws(const InstantId inst);
-    	void getGroundedLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const;
+		virtual void getFDLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const; // Level Bounds for FlawDetection
+		virtual void getVDLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const; // Level Bounds for ViolationDetection
     };
 }
 
