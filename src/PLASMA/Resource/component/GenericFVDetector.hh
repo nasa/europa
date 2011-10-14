@@ -50,8 +50,8 @@ namespace EUROPA {
       void handleResourceFlaws(const InstantId inst);
       virtual void handleResourceLevelFlaws(const InstantId inst) = 0;
 
-      edouble getLowerLimit(const InstantId& inst) const;
-      edouble getUpperLimit(const InstantId& inst) const;
+      void getLimitBounds(const InstantId& inst, edouble& lb, edouble& ub) const;
+      void getLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const;
     };
 }
 

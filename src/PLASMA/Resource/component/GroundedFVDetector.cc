@@ -11,16 +11,21 @@ GroundedFVDetector::GroundedFVDetector(const ResourceId res) : GenericFVDetector
 // reorganization where the violation and flaw detection pieces can be configured separately
 Resource::ProblemType GroundedFVDetector::getResourceLevelViolation(const InstantId inst) const
 {
-	if (inst->getUpperLevel() < getLowerLimit(inst))
+	edouble limitLb, limitUb;
+	getLimitBounds(inst,limitLb,limitUb);
+	edouble levelLb, levelUb;
+	getLevelBounds(inst,levelLb,levelUb);
+
+	if (levelUb < limitLb)
 	{
-		debugMsg("GroundedFVDetector:detect",
-				"Lower limit violation.  Limit: " << getLowerLimit(inst) << " Upper level: " << inst->getUpperLevel());
+		debugMsg("ClosedWorldFVDetector:detect",
+				"Lower limit violation.  Limit: " << limitLb << " Upper level: " << levelUb);
 		return Resource::LevelTooLow;
 	}
-	if (inst->getLowerLevel() > getUpperLimit(inst))
+	if (levelLb > limitUb)
 	{
-    	debugMsg("GroundedFVDetector:detect",
-    			"Upper limit violation.  Limit: " << getUpperLimit(inst) << " Lower level: " << inst->getLowerLevel());
+    	debugMsg("ClosedWorldFVDetector:detect",
+    			"Upper limit violation.  Limit: " << limitUb << " Lower level: " << levelLb);
     	return Resource::LevelTooHigh;
 	}
 	return Resource::NoProblem;
@@ -30,23 +35,34 @@ Resource::ProblemType GroundedFVDetector::getResourceLevelViolation(const Instan
 // the grounded min/max instead of the traditional meaning implied by their names.
 void GroundedFVDetector::handleResourceLevelFlaws(const InstantId inst)
 {
-	// LowerLevelMax is really GroundedMin
-	if(inst->getLowerLevelMax() < getLowerLimit(inst))
+	edouble limitLb, limitUb;
+	getLimitBounds(inst,limitLb,limitUb);
+	edouble levelLb, levelUb;
+	getGroundedLevelBounds(inst,levelLb,levelUb);
+
+	if(levelLb < limitLb)
 	{
 		inst->setFlawed(true);
 		inst->setLower(true);
-		inst->setLowerMagnitude(std::abs(getLowerLimit(inst) - inst->getLowerLevelMax()));
+		inst->setLowerMagnitude(std::abs(limitLb - levelLb));
 		debugMsg("GroundedFVDetector:detect", "Lower limit flaw.");
 	}
 
-	// UpperLevelMin is really GroundedMax
-	if(inst->getUpperLevelMin() > getUpperLimit(inst))
+	if(levelUb > limitUb)
 	{
 		inst->setFlawed(true);
 		inst->setUpper(true);
-		inst->setUpperMagnitude(std::abs(getUpperLimit(inst) - inst->getUpperLevelMin()));
+		inst->setUpperMagnitude(std::abs(limitUb - levelUb));
 		debugMsg("GroundedFVDetector:detect", "Upper limit flaw.");
 	}
+}
+
+void GroundedFVDetector::getGroundedLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const
+{
+	// LowerLevelMax is really GroundedMin
+	lb = inst->getLowerLevelMax();
+	// UpperLevelMin is really GroundedMax
+	ub = inst->getUpperLevelMin();
 }
 
 }

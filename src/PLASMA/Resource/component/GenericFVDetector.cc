@@ -142,13 +142,15 @@ namespace EUROPA {
     }
 
     // TODO: get real limits for instant
-    edouble GenericFVDetector::getLowerLimit(const InstantId& inst) const
+    void GenericFVDetector::getLimitBounds(const InstantId& inst, edouble& lb, edouble& ub) const
     {
-    	return m_res->getLowerLimit();
+    	lb = m_res->getLowerLimit();
+    	ub = m_res->getUpperLimit();
     }
 
-    edouble GenericFVDetector::getUpperLimit(const InstantId& inst) const
+    void GenericFVDetector::getLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const
     {
-    	return m_res->getUpperLimit();
+    	lb = inst->getLowerLevel();
+    	ub = inst->getUpperLevel();
     }
 }

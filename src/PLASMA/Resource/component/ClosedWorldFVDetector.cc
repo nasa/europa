@@ -9,16 +9,21 @@ ClosedWorldFVDetector::ClosedWorldFVDetector(const ResourceId res) : GenericFVDe
 
 Resource::ProblemType ClosedWorldFVDetector::getResourceLevelViolation(const InstantId inst) const
 {
-	if (inst->getUpperLevel() < getLowerLimit(inst))
+	edouble limitLb, limitUb;
+	getLimitBounds(inst,limitLb,limitUb);
+	edouble levelLb, levelUb;
+	getLevelBounds(inst,levelLb,levelUb);
+
+	if (levelUb < limitLb)
 	{
 		debugMsg("ClosedWorldFVDetector:detect",
-				"Lower limit violation.  Limit: " << getLowerLimit(inst) << " Upper level: " << inst->getUpperLevel());
+				"Lower limit violation.  Limit: " << limitLb << " Upper level: " << levelUb);
 		return Resource::LevelTooLow;
 	}
-	if (inst->getLowerLevel() > getUpperLimit(inst))
+	if (levelLb > limitUb)
 	{
     	debugMsg("ClosedWorldFVDetector:detect",
-    			"Upper limit violation.  Limit: " << getUpperLimit(inst) << " Lower level: " << inst->getLowerLevel());
+    			"Upper limit violation.  Limit: " << limitUb << " Lower level: " << levelLb);
     	return Resource::LevelTooHigh;
 	}
 	return Resource::NoProblem;
@@ -26,19 +31,24 @@ Resource::ProblemType ClosedWorldFVDetector::getResourceLevelViolation(const Ins
 
 void ClosedWorldFVDetector::handleResourceLevelFlaws(const InstantId inst)
 {
-	if(inst->getLowerLevel() < getLowerLimit(inst))
+	edouble limitLb, limitUb;
+	getLimitBounds(inst,limitLb,limitUb);
+	edouble levelLb, levelUb;
+	getLevelBounds(inst,levelLb,levelUb);
+
+	if(levelLb < limitLb)
 	{
 		inst->setFlawed(true);
 		inst->setLower(true);
-		inst->setLowerMagnitude(std::abs(getLowerLimit(inst) - inst->getLowerLevel()));
+		inst->setLowerMagnitude(std::abs(limitLb - levelLb));
 		debugMsg("ClosedWorldFVDetector:detect", "Lower limit flaw.");
 	}
 
-	if(inst->getUpperLevel() > getUpperLimit(inst))
+	if(levelUb > limitUb)
 	{
 		inst->setFlawed(true);
 		inst->setUpper(true);
-		inst->setUpperMagnitude(std::abs(getUpperLimit(inst) - inst->getUpperLevel()));
+		inst->setUpperMagnitude(std::abs(limitUb - levelUb));
 		debugMsg("ClosedWorldFVDetector:detect", "Upper limit flaw.");
 	}
 }

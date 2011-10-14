@@ -9,15 +9,20 @@ OpenWorldFVDetector::OpenWorldFVDetector(const ResourceId res) : GenericFVDetect
 
 Resource::ProblemType OpenWorldFVDetector::getResourceLevelViolation(const InstantId inst) const
 {
-	if (inst->getUpperLevel() + (m_maxCumulativeProduction - inst->getMinCumulativeProduction()) < getLowerLimit(inst))
+	edouble limitLb, limitUb;
+	getLimitBounds(inst,limitLb,limitUb);
+	edouble levelLb, levelUb;
+	getLevelBounds(inst,levelLb,levelUb);
+
+	if (levelUb + (m_maxCumulativeProduction - inst->getMinCumulativeProduction()) < limitLb)
 	{
-		debugMsg("OpenWorldFVDetector:detect", "Lower limit violation.  Limit: " << getLowerLimit(inst) << " Upper level: " << inst->getUpperLevel() <<
+		debugMsg("OpenWorldFVDetector:detect", "Lower limit violation.  Limit: " << limitLb << " Upper level: " << levelUb <<
 				" Maximum remaining production: " << (m_maxCumulativeProduction - inst->getMinCumulativeProduction()));
 		return Resource::LevelTooLow;
 	}
-	if (inst->getLowerLevel() - (m_maxCumulativeConsumption - inst->getMinCumulativeConsumption()) > getUpperLimit(inst))
+	if (levelLb - (m_maxCumulativeConsumption - inst->getMinCumulativeConsumption()) > limitUb)
 	{
-		debugMsg("OpenWorldFVDetector:detect", "Upper limit violation.  Limit: " << getUpperLimit(inst) << " Lower level: " << inst->getLowerLevel() <<
+		debugMsg("OpenWorldFVDetector:detect", "Upper limit violation.  Limit: " << limitUb << " Lower level: " << levelLb <<
 				" Maxumum remaining consumption: " << (m_maxCumulativeConsumption - inst->getMinCumulativeConsumption()));
     	return Resource::LevelTooHigh;
 	}
@@ -26,20 +31,31 @@ Resource::ProblemType OpenWorldFVDetector::getResourceLevelViolation(const Insta
 
 void OpenWorldFVDetector::handleResourceLevelFlaws(const InstantId inst)
 {
-	if(inst->getLowerLevelMax() < getLowerLimit(inst))
+	edouble limitLb, limitUb;
+	getLimitBounds(inst,limitLb,limitUb);
+	edouble levelLb, levelUb;
+	getOpenLevelBounds(inst,levelLb,levelUb);
+
+	if(levelLb < limitLb)
 	{
 		inst->setFlawed(true);
 		inst->setLower(true);
-		inst->setLowerMagnitude(std::abs(getLowerLimit(inst) - inst->getLowerLevelMax()));
+		inst->setLowerMagnitude(std::abs(limitLb - levelLb));
 		debugMsg("OpenWorldFVDetector:detect", "Lower limit flaw.");
 	}
-	if(inst->getUpperLevelMin() > getUpperLimit(inst))
+	if(levelUb > limitUb)
 	{
 		inst->setFlawed(true);
 		inst->setUpper(true);
-		inst->setUpperMagnitude(std::abs(getUpperLimit(inst) - inst->getUpperLevelMin()));
+		inst->setUpperMagnitude(std::abs(limitUb - levelUb));
 		debugMsg("OpenWorldFVDetector:detect", "Upper limit flaw.");	
 	}
+}
+
+void OpenWorldFVDetector::getOpenLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const
+{
+	lb = inst->getLowerLevelMax();
+	ub = inst->getUpperLevelMin();
 }
 
 }

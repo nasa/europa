@@ -4,13 +4,14 @@
 #include "GenericFVDetector.hh"
 namespace EUROPA {
 
-    class GroundedFVDetector : public GenericFVDetector {
-  public:
-   GroundedFVDetector(const ResourceId res);
+	class GroundedFVDetector : public GenericFVDetector {
+    public:
+    	GroundedFVDetector(const ResourceId res);
 
-  protected:
-   Resource::ProblemType getResourceLevelViolation(const InstantId inst) const;
-    void handleResourceLevelFlaws(const InstantId inst);
+    protected:
+    	Resource::ProblemType getResourceLevelViolation(const InstantId inst) const;
+    	void handleResourceLevelFlaws(const InstantId inst);
+    	void getGroundedLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const;
     };
 }
 
