@@ -103,14 +103,14 @@ namespace EUROPA {
              );
   }
 
-  edouble Resource::getLowerLimit() const
+  edouble Resource::getLowerLimit(const InstantId& inst) const
   {
-	  return m_limitProfile->getEarliestValue().first;
+	  return m_limitProfile->getValue(inst->getTime()).first;
   }
 
-  edouble Resource::getUpperLimit() const
+  edouble Resource::getUpperLimit(const InstantId& inst) const
   {
-	  return m_limitProfile->getEarliestValue().second;
+	  return m_limitProfile->getValue(inst->getTime()).second;
   }
 
   void Resource::add(const TokenId& token) {
@@ -639,11 +639,11 @@ namespace EUROPA {
 
   // PS Methods:
   PSResourceProfile* Resource::getLimits() {
-    return new PSResourceProfile(cast_double(getLowerLimit()), cast_double(getUpperLimit()));
+    return new PSGenericProfile(getLimitProfile());
   }
 
   PSResourceProfile* Resource::getLevels() {
-    return new PSResourceProfile(getProfile());
+    return new PSUsageProfile(getProfile());
   }
 
   PSList<PSEntityKey> Resource::getOrderingChoices(TimePoint t)

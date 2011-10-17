@@ -7,45 +7,70 @@
 namespace EUROPA
 {
 	// TODO:  Do we still need this?
-  PSResource* PSResource::asPSResource(PSObject* obj)
-  {
-	  return dynamic_cast<PSResource*>(obj);
-  }
+	PSResource* PSResource::asPSResource(PSObject* obj)
+	{
+		return dynamic_cast<PSResource*>(obj);
+	}
 
-  PSResourceProfile::PSResourceProfile(const double lb, const double ub)
-    : m_isConst(true), m_lb(lb), m_ub(ub) {
-    TimePoint inst = cast_basis((eint)MINUS_INFINITY); //being specific
-    m_times.push_back(inst);
-  }
+	PSGenericProfile::PSGenericProfile(const ExplicitProfileId& profile)
+		: m_profile(profile)
+	{
+	}
 
-  PSResourceProfile::PSResourceProfile(const ProfileId& profile)
-    : m_isConst(false), m_profile(profile) {
-    ProfileIterator it(m_profile);
-    while(!it.done()) {
-      TimePoint inst = cast_basis(it.getTime());
-      m_times.push_back(inst);
-      it.next();
-    }
-  }
+	PSList<TimePoint> PSGenericProfile::getTimes()
+	{
+		PSList<TimePoint> times;
+		const std::map< eint,std::pair<edouble,edouble> >& entries = m_profile->getValues();
 
-  double PSResourceProfile::getLowerBound(TimePoint time) {
-    if(m_isConst)
-      return m_lb;
+		std::map< eint,std::pair<edouble,edouble> >::const_iterator it = entries.begin();
+		for(; it != entries.end(); ++it) {
+			TimePoint inst = cast_basis(it->first);
+			times.push_back(inst);
+		}
 
-    IntervalDomain dom;
-    m_profile->getLevel((eint) time, dom);
-    return cast_double(dom.getLowerBound());
-  }
+		return times;
+	}
 
-  double PSResourceProfile::getUpperBound(TimePoint time) {
-    if(m_isConst)
-      return m_ub;
-    IntervalDomain dom;
-    m_profile->getLevel((eint) time, dom);
-    return cast_double(dom.getUpperBound());
-  }
+	double PSGenericProfile::getLowerBound(TimePoint time)
+	{
+		return cast_double(m_profile->getValue(time).first);
+	}
 
-  const PSList<TimePoint>& PSResourceProfile::getTimes() {return m_times;}
+	double PSGenericProfile::getUpperBound(TimePoint time)
+	{
+		return cast_double(m_profile->getValue(time).second);
+	}
 
+	PSUsageProfile::PSUsageProfile(const ProfileId& profile)
+	: m_profile(profile)
+	{
+	}
 
+	PSList<TimePoint> PSUsageProfile::getTimes()
+	{
+		PSList<TimePoint> times;
+
+		ProfileIterator it(m_profile);
+		while(!it.done()) {
+			TimePoint inst = cast_basis(it.getTime());
+			times.push_back(inst);
+			it.next();
+		}
+
+		return times;
+	}
+
+	double PSUsageProfile::getLowerBound(TimePoint time)
+	{
+		IntervalDomain dom;
+		m_profile->getLevel((eint) time, dom);
+		return cast_double(dom.getLowerBound());
+	}
+
+	double PSUsageProfile::getUpperBound(TimePoint time)
+	{
+		IntervalDomain dom;
+		m_profile->getLevel((eint) time, dom);
+		return cast_double(dom.getUpperBound());
+	}
 }

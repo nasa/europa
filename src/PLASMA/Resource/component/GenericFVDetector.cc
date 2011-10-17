@@ -191,13 +191,15 @@ namespace EUROPA {
     // TODO: get real limits from LimitProfile
     void GenericFVDetector::getLimitBounds(const InstantId& inst, edouble& lb, edouble& ub) const
     {
-    	lb = m_res->getLowerLimit();
-    	ub = m_res->getUpperLimit();
+    	// TODO: make 1 call instead of 2?
+    	lb = m_res->getLowerLimit(inst);
+    	ub = m_res->getUpperLimit(inst);
     }
 
     // TODO: Level(t) = Capacity(t) - Usage(t)
     void GenericFVDetector::getDefaultLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const
     {
+    	// TODO: make 1 call instead of 2?
     	lb = inst->getLowerLevel();
     	ub = inst->getUpperLevel();
     }

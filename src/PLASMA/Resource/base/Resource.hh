@@ -95,12 +95,12 @@ namespace EUROPA {
       /**
        * @brief Accessor for the lower limit on level
        */
-      edouble getLowerLimit() const;
+      edouble getLowerLimit(const InstantId& inst) const;
 
       /**
        * @brief Accessor for the upper limit on level
        */
-      edouble getUpperLimit() const;
+      edouble getUpperLimit(const InstantId& inst) const;
 
       /**
        * @brief Accessor for the maximum consumption possible at an instant.
@@ -123,6 +123,10 @@ namespace EUROPA {
       edouble getMaxProduction() const {return m_maxProduction;}
 
       const ProfileId getProfile() const {return m_profile;}
+
+      const ExplicitProfileId getCapacityProfile() const { return m_capacityProfile; }
+
+      const ExplicitProfileId getLimitProfile() const { return m_limitProfile; }
 
       virtual void add(const TokenId& token);
 

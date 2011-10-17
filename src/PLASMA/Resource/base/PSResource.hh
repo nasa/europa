@@ -6,43 +6,62 @@
 
 namespace EUROPA {
 
-  typedef eint::basis_type TimePoint;
+	typedef eint::basis_type TimePoint;
 
+	class PSResourceProfile;
 
-  class PSResourceProfile;
+	class PSResource : public virtual PSObject
+	{
+	public:
+		PSResource() {}
+		virtual ~PSResource() {}
 
-  class PSResource : public virtual PSObject
-  {
-    public:
-      PSResource() {}
-  	  virtual ~PSResource() {}
+		virtual PSResourceProfile* getLimits() = 0;
+		virtual PSResourceProfile* getLevels() = 0;
 
-      virtual PSResourceProfile* getLimits() = 0;
-      virtual PSResourceProfile* getLevels() = 0;
+		virtual PSList<PSEntityKey> getOrderingChoices(TimePoint t) = 0;
 
-      virtual PSList<PSEntityKey> getOrderingChoices(TimePoint t) = 0;
+		static PSResource* asPSResource(PSObject* obj);
+	};
 
-      static PSResource* asPSResource(PSObject* obj);
-  };
+	class PSResourceProfile
+	{
+	public:
+		PSResourceProfile() {}
+		virtual ~PSResourceProfile() {}
 
-  class PSResourceProfile
-  {
-    public:
-      virtual ~PSResourceProfile() {}
+		virtual PSList<TimePoint> getTimes() = 0;
+		virtual double getLowerBound(TimePoint time) = 0;
+		virtual double getUpperBound(TimePoint time) = 0;
+	};
 
-      virtual const PSList<TimePoint>& getTimes();
-      virtual double getLowerBound(TimePoint time);
-      virtual double getUpperBound(TimePoint time);
-    protected:
-       friend class Resource;
-       PSResourceProfile(const double lb, const double ub);
-       PSResourceProfile(const ProfileId& profile);
-     private:
-       bool m_isConst;
-       double m_lb, m_ub;
-       PSList<TimePoint> m_times;
-       ProfileId m_profile;
-  };
+	class PSGenericProfile : public PSResourceProfile
+	{
+	public:
+		PSGenericProfile(const ExplicitProfileId& profile);
+		virtual ~PSGenericProfile() {}
+
+		virtual PSList<TimePoint> getTimes();
+		virtual double getLowerBound(TimePoint time);
+		virtual double getUpperBound(TimePoint time);
+
+	protected:
+		ExplicitProfileId m_profile;
+	};
+
+	class PSUsageProfile : public PSResourceProfile
+	{
+	public:
+		PSUsageProfile(const ProfileId& profile);
+		virtual ~PSUsageProfile() {}
+
+		virtual PSList<TimePoint> getTimes();
+		virtual double getLowerBound(TimePoint time);
+		virtual double getUpperBound(TimePoint time);
+
+	protected:
+		ProfileId m_profile;
+	};
 }
 
 #endif

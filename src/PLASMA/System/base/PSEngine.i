@@ -541,7 +541,7 @@ namespace EUROPA {
   class PSResourceProfile
   {
   public:
-    const PSList<TimePoint>& getTimes();
+    PSList<TimePoint> getTimes();
     double getLowerBound(TimePoint time);
     double getUpperBound(TimePoint time);
   protected:

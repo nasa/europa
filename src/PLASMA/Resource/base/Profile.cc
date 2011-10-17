@@ -785,7 +785,7 @@ namespace EUROPA {
 
     void ExplicitProfile::removeValue(eint time)
     {
-    	check_runtime_error(time != std::numeric_limits<eint>::minus_infinity(), "Can't remove entry for -infinity from LimitProfile");
+    	check_runtime_error(time != MINUS_INFINITY, "Can't remove entry for -infinity from LimitProfile");
     	checkError(m_values.find(time) != m_values.end(),"Tried to remove unexisting entry from Limit Profile:" << time);
     	m_values.erase(time);
     }
@@ -797,8 +797,14 @@ namespace EUROPA {
 
     const std::pair<edouble,edouble>& ExplicitProfile::getValue(eint time) const
     {
-    	std::map<eint,std::pair<edouble,edouble> >::const_iterator it = m_values.lower_bound(time);
-    	checkError(it != m_values.end(), "Couldn't find lower bound for a time in LimitProfile, which breaks invariant, time=" << time);
+    	checkError(time >= MINUS_INFINITY, "Can't look up profile entries for times lower than MINUS_INFINITY");
+       	std::map<eint,std::pair<edouble,edouble> >::const_iterator it = m_values.upper_bound(time);
+
+    	// back up one entry since upper_bound gives us the successor
+    	checkError(it != m_values.begin(), "time upper bound in profile should never be MINUS_INFINITY");
+    	--it;
+
+    	checkError(it != m_values.end(), "Couldn't find lower bound for a time in LimitProfile, which breaks invariant. time=" << time);
 
     	return it->second;
     }
