@@ -126,7 +126,11 @@ namespace EUROPA {
 
       const ExplicitProfileId getCapacityProfile() const { return m_capacityProfile; }
 
+      void setCapacity(const eint& time, const edouble& lb, const edouble &ub);
+
       const ExplicitProfileId getLimitProfile() const { return m_limitProfile; }
+
+      void setLimit(const eint& time, const edouble& lb, const edouble &ub);
 
       virtual void add(const TokenId& token);
 

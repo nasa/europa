@@ -781,6 +781,7 @@ namespace EUROPA {
     void ExplicitProfile::setValue(eint time, edouble lb, edouble ub)
     {
     	m_values[time] = std::pair<edouble,edouble>(lb,ub);
+    	// TODO: remove redundant entries (contiguous entries with the same value)
     }
 
     void ExplicitProfile::removeValue(eint time)
@@ -788,6 +789,7 @@ namespace EUROPA {
     	check_runtime_error(time != MINUS_INFINITY, "Can't remove entry for -infinity from LimitProfile");
     	checkError(m_values.find(time) != m_values.end(),"Tried to remove unexisting entry from Limit Profile:" << time);
     	m_values.erase(time);
+    	// TODO: remove redundant entries (contiguous entries with the same value)
     }
 
     const std::map< eint,std::pair<edouble,edouble> >& ExplicitProfile::getValues() const

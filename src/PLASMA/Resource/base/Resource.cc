@@ -113,6 +113,16 @@ namespace EUROPA {
 	  return m_limitProfile->getValue(inst->getTime()).second;
   }
 
+  void Resource::setCapacity(const eint& time, const edouble& lb, const edouble &ub)
+  {
+	  m_capacityProfile->setValue(time,lb,ub);
+  }
+
+  void Resource::setLimit(const eint& time, const edouble& lb, const edouble &ub)
+  {
+	  m_limitProfile->setValue(time,lb,ub);
+  }
+
   void Resource::add(const TokenId& token) {
     if(tokens().find(token) != tokens().end())
       return;
