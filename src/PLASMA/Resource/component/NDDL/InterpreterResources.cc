@@ -235,4 +235,79 @@ namespace EUROPA {
     return (new NDDL::NddlUnary::use(master,name,relation,true))->getId();
   }
 
+  DataRef SetCapacity::eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const
+  {
+	  check_runtime_error(args.size()==4,"SetCapacity expects 4 parameters");
+
+	  ConstrainedVariableId resVar = args[0];
+	  check_runtime_error(resVar->isSingleton(),"SetCapacity: resource parameter must be singleton");
+	  Resource* res = dynamic_cast<Resource*>(resVar->getSingletonValue().asObject());
+	  check_runtime_error(res != NULL,"SetCapacity can only be applied to a Resource, not to:" + resVar->toLongString());
+
+	  ConstrainedVariableId timeVar = args[1];
+	  check_runtime_error(timeVar->isSingleton(),"SetCapacity: time parameter must be singleton");
+	  eint time = timeVar->getSingletonValue().asInt();
+
+	  ConstrainedVariableId lbVar = args[2];
+	  check_runtime_error(lbVar->isSingleton(),"SetCapacity: lowerBound parameter must be singleton");
+	  edouble lb = lbVar->getSingletonValue().asDouble();
+
+	  ConstrainedVariableId ubVar = args[3];
+	  check_runtime_error(ubVar->isSingleton(),"SetCapacity: upperBound parameter must be singleton");
+	  edouble ub = ubVar->getSingletonValue().asDouble();
+
+	  res->setCapacity(time,lb,ub);
+
+	  return DataRef::null;
+  }
+
+  const std::vector<DataTypeId>& SetCapacity::getSignature()
+  {
+	  // TODO : implement this
+	  static std::vector<DataTypeId> signature;
+	  return signature;
+  }
+
+  const DataTypeId& SetCapacity::getReturnType()
+  {
+	  return VoidDT::instance();
+  }
+
+  DataRef SetLimit::eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const
+  {
+	  check_runtime_error(args.size()==4,"SetLimit expects 4 parameters");
+
+	  ConstrainedVariableId resVar = args[0];
+	  check_runtime_error(resVar->isSingleton(),"SetLimit: resource parameter must be singleton");
+	  Resource* res = dynamic_cast<Resource*>(resVar->getSingletonValue().asObject());
+	  check_runtime_error(res != NULL,"SetLimit can only be applied to a Resource, not to:" + resVar->toLongString());
+
+	  ConstrainedVariableId timeVar = args[1];
+	  check_runtime_error(timeVar->isSingleton(),"SetLimit: time parameter must be singleton");
+	  eint time = timeVar->getSingletonValue().asInt();
+
+	  ConstrainedVariableId lbVar = args[2];
+	  check_runtime_error(lbVar->isSingleton(),"SetLimit: lowerBound parameter must be singleton");
+	  edouble lb = lbVar->getSingletonValue().asDouble();
+
+	  ConstrainedVariableId ubVar = args[3];
+	  check_runtime_error(ubVar->isSingleton(),"SetLimit: upperBound parameter must be singleton");
+	  edouble ub = ubVar->getSingletonValue().asDouble();
+
+	  res->setCapacity(time,lb,ub);
+
+	  return DataRef::null;
+  }
+
+  const std::vector<DataTypeId>& SetLimit::getSignature()
+  {
+	  // TODO : implement this
+	  static std::vector<DataTypeId> signature;
+	  return signature;
+  }
+
+  const DataTypeId& SetLimit::getReturnType()
+  {
+	  return VoidDT::instance();
+  }
 }

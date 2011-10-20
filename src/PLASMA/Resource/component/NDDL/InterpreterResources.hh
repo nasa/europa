@@ -100,6 +100,30 @@ namespace EUROPA {
       virtual TokenId createInstance(const PlanDatabaseId& planDb, const LabelStr& name, bool rejectable , bool isFact) const;
       virtual TokenId createInstance(const TokenId& master, const LabelStr& name, const LabelStr& relation) const;
   };
+
+  class SetCapacity : public Method
+  {
+  public:
+      SetCapacity() : Method("set_capacity") {}
+      virtual ~SetCapacity() {}
+
+      virtual DataRef eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const;
+
+      virtual const std::vector<DataTypeId>& getSignature();
+      virtual const DataTypeId& getReturnType();
+  };
+
+  class SetLimit : public Method
+  {
+  public:
+      SetLimit() : Method("set_limit") {}
+      virtual ~SetLimit() {}
+
+      virtual DataRef eval(EvalContext& context, const std::vector<ConstrainedVariableId>& args) const;
+
+      virtual const std::vector<DataTypeId>& getSignature();
+      virtual const DataTypeId& getReturnType();
+  };
 }
 
 #endif

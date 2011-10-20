@@ -764,7 +764,7 @@ namespace EUROPA {
     ExplicitProfile::ExplicitProfile(edouble lb, edouble ub)
     	: m_id(this)
     {
-    	setValue(std::numeric_limits<eint>::minus_infinity(),lb,ub);
+    	setValue(MINUS_INFINITY,lb,ub);
     }
 
     ExplicitProfile::~ExplicitProfile()

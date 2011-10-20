@@ -121,6 +121,9 @@ namespace EUROPA {
 
       SOLVERS::MatchFinderMgr* mfm = (EUROPA::SOLVERS::MatchFinderMgr*)engine->getComponent("MatchFinderMgr");
       REGISTER_MATCH_FINDER(mfm,EUROPA::SOLVERS::InstantMatchFinder,Instant::entityTypeName());
+
+      schema->registerMethod((new SetCapacity())->getId());
+      schema->registerMethod((new SetLimit())->getId());
   }
 
   void ModuleResource::uninitialize(EngineId engine)
