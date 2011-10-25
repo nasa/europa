@@ -8,7 +8,7 @@ namespace EUROPA {
 	public:
 		OpenWorldFVDetector(const ResourceId res);
 	protected:
-		Resource::ProblemType getResourceLevelViolation(const InstantId inst) const;
+		virtual Resource::ProblemType getResourceLevelViolation(const InstantId inst) const;
 		virtual void getFDLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const; // Level Bounds for FlawDetection
 		virtual void getVDLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const; // Level Bounds for ViolationDetection
 	};

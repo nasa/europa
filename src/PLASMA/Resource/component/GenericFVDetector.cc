@@ -1,7 +1,8 @@
+
 #include "GenericFVDetector.hh"
-#include "Instant.hh"
-#include "FVDetector.hh"
 #include <cmath>
+#include "Instant.hh"
+#include "Profile.hh"
 
 namespace EUROPA {
 
@@ -203,4 +204,49 @@ namespace EUROPA {
     	lb = inst->getLowerLevel();
     	ub = inst->getUpperLevel();
     }
+
+    FVProfile::FVProfile(GenericFVDetector* fvd, const ProfileId& profile, bool isFDProfile)
+    	: m_detector(fvd)
+    	, m_profile(profile)
+    	, m_isFDProfile(isFDProfile)
+    {
+    	update();
+    }
+
+    void FVProfile::update()
+    {
+    	m_times.clear();
+    	m_bounds.clear();
+
+		ProfileIterator it(m_profile);
+		while(!it.done()) {
+			TimePoint inst = cast_basis(it.getTime());
+			m_times.push_back(inst);
+			edouble lb,ub;
+			if (m_isFDProfile)
+				m_detector->getFDLevelBounds(it.getInstant(),lb,ub);
+			else
+				m_detector->getVDLevelBounds(it.getInstant(),lb,ub);
+
+			m_bounds[inst] = std::pair<edouble,edouble>(lb,ub);
+			it.next();
+		}
+    }
+
+	PSList<TimePoint> FVProfile::getTimes()
+	{
+		return m_times;
+	}
+
+	double FVProfile::getLowerBound(TimePoint time)
+	{
+		checkError(m_bounds.find(time) != m_bounds.end(),"Time " << time << " doesn't exist in FVProfile");
+		return cast_double(m_bounds[time].first);
+	}
+
+	double FVProfile::getUpperBound(TimePoint time)
+	{
+		checkError(m_bounds.find(time) != m_bounds.end(),"Time " << time << " doesn't exist in FVProfile");
+		return cast_double(m_bounds[time].first);
+	}
 }

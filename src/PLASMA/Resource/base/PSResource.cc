@@ -22,11 +22,16 @@ namespace EUROPA
 		PSList<TimePoint> times;
 		const std::map< eint,std::pair<edouble,edouble> >& entries = m_profile->getValues();
 
+		//std::cout << "PSGenericProfile {" << std::endl;
+
 		std::map< eint,std::pair<edouble,edouble> >::const_iterator it = entries.begin();
 		for(; it != entries.end(); ++it) {
 			TimePoint inst = cast_basis(it->first);
 			times.push_back(inst);
+			//std::cout << "    " << inst << " -> (" << it->second.first << "," << it->second.second << ")" << std::endl;
 		}
+
+		//std::cout << "}" << std::endl;
 
 		return times;
 	}

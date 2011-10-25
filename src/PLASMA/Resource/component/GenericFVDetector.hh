@@ -52,6 +52,28 @@ namespace EUROPA {
       // Requires sub-classing to handle open vs. closed world assumption
       virtual void getFDLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const = 0; // Level Bounds for FlawDetection
       virtual void getVDLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const = 0; // Level Bounds for ViolationDetection
+
+      friend class FVProfile;
+    };
+
+    class FVProfile : public PSResourceProfile
+    {
+    public:
+    	FVProfile(GenericFVDetector* fvd, const ProfileId& profile, bool isFDProfile);
+		virtual ~FVProfile() {}
+
+		virtual PSList<TimePoint> getTimes();
+		virtual double getLowerBound(TimePoint time);
+		virtual double getUpperBound(TimePoint time);
+
+	protected:
+		GenericFVDetector* m_detector;
+		ProfileId m_profile;
+		bool m_isFDProfile;
+		PSList<TimePoint> m_times;
+		std::map<TimePoint,std::pair<edouble,edouble> > m_bounds;
+
+		void update();
     };
 }
 
