@@ -57,6 +57,10 @@ namespace EUROPA {
       FVDetectorId& getId() {return m_id;}
 
       const ResourceId& getResource() const {return m_res;}
+
+      virtual PSResourceProfile* getFDLevelProfile() = 0;
+      virtual PSResourceProfile* getVDLevelProfile() = 0;
+
     protected:
       friend class Profile;
 

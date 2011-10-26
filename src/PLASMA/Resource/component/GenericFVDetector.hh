@@ -35,7 +35,10 @@ namespace EUROPA {
     class GenericFVDetector : public FVDetector {
     public:
       GenericFVDetector(const ResourceId res);
-      bool detect(const InstantId inst);
+      virtual bool detect(const InstantId inst);
+
+      virtual PSResourceProfile* getFDLevelProfile();
+      virtual PSResourceProfile* getVDLevelProfile();
 
     protected:
       edouble m_maxInstConsumption, m_maxInstProduction;
@@ -53,14 +56,14 @@ namespace EUROPA {
       virtual void getFDLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const = 0; // Level Bounds for FlawDetection
       virtual void getVDLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const = 0; // Level Bounds for ViolationDetection
 
-      friend class FVProfile;
+      friend class GenericFVProfile;
     };
 
-    class FVProfile : public PSResourceProfile
+    class GenericFVProfile : public PSResourceProfile
     {
     public:
-    	FVProfile(GenericFVDetector* fvd, const ProfileId& profile, bool isFDProfile);
-		virtual ~FVProfile() {}
+    	GenericFVProfile(GenericFVDetector* fvd, const ProfileId& profile, bool isFDProfile);
+		virtual ~GenericFVProfile() {}
 
 		virtual PSList<TimePoint> getTimes();
 		virtual double getLowerBound(TimePoint time);

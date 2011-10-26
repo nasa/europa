@@ -648,12 +648,19 @@ namespace EUROPA {
   }
 
   // PS Methods:
-  PSResourceProfile* Resource::getLimits() {
+  PSResourceProfile* Resource::getLimits()
+  {
     return new PSGenericProfile(getLimitProfile());
   }
 
-  PSResourceProfile* Resource::getLevels() {
-    return new PSUsageProfile(getProfile());
+  PSResourceProfile* Resource::getFDLevels()
+  {
+    return m_detector->getFDLevelProfile();
+  }
+
+  PSResourceProfile* Resource::getVDLevels()
+  {
+    return m_detector->getVDLevelProfile();
   }
 
   PSList<PSEntityKey> Resource::getOrderingChoices(TimePoint t)

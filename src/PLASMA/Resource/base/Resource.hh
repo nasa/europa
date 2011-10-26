@@ -178,7 +178,8 @@ namespace EUROPA {
 
       // PS Methods:
       virtual PSResourceProfile* getLimits();
-      virtual PSResourceProfile* getLevels();
+      virtual PSResourceProfile* getFDLevels();
+      virtual PSResourceProfile* getVDLevels();
 
       virtual PSList<PSEntityKey> getOrderingChoices(TimePoint t);
 

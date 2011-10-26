@@ -98,10 +98,10 @@ public class PSJFreeResourceChart
     {   	
         TimeSeriesCollection dataset = new TimeSeriesCollection();
 
-        TimeSeries s1 = resourceProfileToTimeSeries("Capacity", model_.getCapacity(),true);
-        TimeSeries s2 = resourceProfileToTimeSeries("Usage Upper Bound", model_.getUsage(),true);
-        TimeSeries s3 = resourceProfileToTimeSeries("Usage Lower Bound", model_.getUsage(),false);
-        //dataset.addSeries(s1);
+        TimeSeries s1 = resourceProfileToTimeSeries("Limit", model_.getLimit(),false);
+        TimeSeries s2 = resourceProfileToTimeSeries("FD Level Upper Bound", model_.getFDLevel(),true);
+        TimeSeries s3 = resourceProfileToTimeSeries("FD Level Lower Bound", model_.getFDLevel(),false);
+        dataset.addSeries(s1);
         dataset.addSeries(s2);
         dataset.addSeries(s3);
         
@@ -118,9 +118,9 @@ public class PSJFreeResourceChart
     	PSTimePointList times = rp.getTimes();
     	for (int j=0; j<times.size();j++) {
     		Integer i = times.get(j);
-    		// Ignore initial MINUS_INFINITY entry
+    		// push negative entries to right before 0
     		if (i < 0)
-    			continue;
+    			i = -1;
     		
     		Calendar time = (Calendar)start_.clone();
     		// TODO: can't assume time unit is minutes, should ask DSA

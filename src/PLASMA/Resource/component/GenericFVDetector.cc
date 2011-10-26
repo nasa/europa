@@ -143,6 +143,16 @@ namespace EUROPA {
     	return(inst->isViolated() && !allowViolations());
     }
 
+    PSResourceProfile* GenericFVDetector::getFDLevelProfile()
+    {
+    	return new GenericFVProfile(this,m_res->getProfile(),true);
+    }
+
+    PSResourceProfile* GenericFVDetector::getVDLevelProfile()
+    {
+    	return new GenericFVProfile(this,m_res->getProfile(),false);
+    }
+
     Resource::ProblemType GenericFVDetector::getResourceLevelViolation(const InstantId inst) const
     {
     	edouble limitLb, limitUb;
@@ -205,7 +215,7 @@ namespace EUROPA {
     	ub = inst->getUpperLevel();
     }
 
-    FVProfile::FVProfile(GenericFVDetector* fvd, const ProfileId& profile, bool isFDProfile)
+    GenericFVProfile::GenericFVProfile(GenericFVDetector* fvd, const ProfileId& profile, bool isFDProfile)
     	: m_detector(fvd)
     	, m_profile(profile)
     	, m_isFDProfile(isFDProfile)
@@ -213,7 +223,7 @@ namespace EUROPA {
     	update();
     }
 
-    void FVProfile::update()
+    void GenericFVProfile::update()
     {
     	m_times.clear();
     	m_bounds.clear();
@@ -233,20 +243,20 @@ namespace EUROPA {
 		}
     }
 
-	PSList<TimePoint> FVProfile::getTimes()
+	PSList<TimePoint> GenericFVProfile::getTimes()
 	{
 		return m_times;
 	}
 
-	double FVProfile::getLowerBound(TimePoint time)
+	double GenericFVProfile::getLowerBound(TimePoint time)
 	{
 		checkError(m_bounds.find(time) != m_bounds.end(),"Time " << time << " doesn't exist in FVProfile");
 		return cast_double(m_bounds[time].first);
 	}
 
-	double FVProfile::getUpperBound(TimePoint time)
+	double GenericFVProfile::getUpperBound(TimePoint time)
 	{
 		checkError(m_bounds.find(time) != m_bounds.end(),"Time " << time << " doesn't exist in FVProfile");
-		return cast_double(m_bounds[time].first);
+		return cast_double(m_bounds[time].second);
 	}
 }

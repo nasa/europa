@@ -13,13 +13,18 @@ public class PSResourceChartPSEModel
 	    resource_ = resource;
 	}
 
-	public PSResourceProfile getCapacity() 
+	public PSResourceProfile getLimit() 
 	{
 		return resource_.getLimits();
 	}
 
-	public PSResourceProfile getUsage() 
+	public PSResourceProfile getFDLevel() 
 	{
-		return resource_.getLevels();
+		return resource_.getFDLevels();
 	}
+	
+	public PSResourceProfile getVDLevel() 
+	{
+		return resource_.getVDLevels();
+	}	
 }

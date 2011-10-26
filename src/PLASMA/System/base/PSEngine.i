@@ -527,7 +527,8 @@ namespace EUROPA {
   {
   public:
     PSResourceProfile* getLimits();
-    PSResourceProfile* getLevels();
+    PSResourceProfile* getFDLevels();
+    PSResourceProfile* getVDLevels();
 
     PSList<PSEntityKey> getOrderingChoices(TimePoint t);
 

@@ -17,7 +17,8 @@ namespace EUROPA {
 		virtual ~PSResource() {}
 
 		virtual PSResourceProfile* getLimits() = 0;
-		virtual PSResourceProfile* getLevels() = 0;
+		virtual PSResourceProfile* getFDLevels() = 0;
+		virtual PSResourceProfile* getVDLevels() = 0;
 
 		virtual PSList<PSEntityKey> getOrderingChoices(TimePoint t) = 0;
 
