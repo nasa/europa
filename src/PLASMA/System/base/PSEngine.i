@@ -157,7 +157,7 @@ namespace EUROPA {
   };
 
 
-  typedef int TimePoint;
+  typedef long TimePoint;
   typedef int PSEntityKey;
 
   class PSConstraint;
@@ -202,13 +202,20 @@ namespace EUROPA {
     std::string get(int idx);
   };
 
-  %rename(PSTimePointList) PSList<int>;
-  class PSList<int> {
+  %rename(PSTimePointList) PSList<long>;
+  class PSList<long> {
   public:
     int size() const;
     int get(int idx);
   };
 
+  %rename(PSIntList) PSList<int>;
+  class PSList<int> {
+  public:
+    int size() const;
+    int get(int idx);
+  };
+  
   %rename(PSValueList) PSList<EUROPA::PSVarValue>;
   class PSList<EUROPA::PSVarValue> {
   public:

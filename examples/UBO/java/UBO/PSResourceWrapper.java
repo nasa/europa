@@ -19,7 +19,7 @@ public class PSResourceWrapper extends ResourceBase
     {
     	List<PSToken> retval = new Vector<PSToken>();
 
-    	PSTimePointList tokKeys = res_.getOrderingChoices(t);
+    	PSIntList tokKeys = res_.getOrderingChoices(t);
         for (int i=0;i<tokKeys.size();i++) {
         	PSToken tok = psengine_.getTokenByKey(tokKeys.get(i));
            	retval.add(tok);
@@ -33,7 +33,7 @@ public class PSResourceWrapper extends ResourceBase
     	int t = -1;
     	double lowestLevel = Double.MAX_VALUE;
     	
-		PSResourceProfile prof = res_.getLevels();
+		PSResourceProfile prof = res_.getVDLevels();
 		PSTimePointList times = prof.getTimes();
 		for (int i=0; i<times.size(); i++) {
 			double level = prof.getLowerBound(times.get(i));

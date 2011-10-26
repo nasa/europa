@@ -53,7 +53,7 @@ public class PSJFreeResourceChart
     {
     	XYDataset dataset = createDataset();
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
-            "Capacity and Usage Profiles for "+resourceName_,  // title
+            "Limit and Level Profiles for "+resourceName_,  // title
             "Date",             // x-axis label
             "Level",            // y-axis label
             dataset,            // data
