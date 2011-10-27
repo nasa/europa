@@ -99,13 +99,13 @@ public class PSJFreeResourceChart
     {   	
         TimeSeriesCollection dataset = new TimeSeriesCollection();
 
-        int seriesCnt = 3;
+        int seriesCnt = 4;
         TimeSeries ts[] = new TimeSeries[seriesCnt];
         
-        //ts[0] = resourceProfileToTimeSeries("Limit Upper Bound", model_.getLimit(),true);
-        ts[0] = resourceProfileToTimeSeries("Limit Lower Bound", model_.getLimit(),false);
+        ts[0] = resourceProfileToTimeSeries("FD Level Lower Bound", model_.getFDLevel(),false);
         ts[1] = resourceProfileToTimeSeries("FD Level Upper Bound", model_.getFDLevel(),true);
-        ts[2] = resourceProfileToTimeSeries("FD Level Lower Bound", model_.getFDLevel(),false);
+        ts[2] = resourceProfileToTimeSeries("Limit Lower Bound", model_.getLimit(),false);
+        ts[3] = resourceProfileToTimeSeries("Limit Upper Bound", model_.getLimit(),true);
         
         RegularTimePeriod maxX = new Minute(((Calendar)start_.clone()).getTime());
         for (int i=0;i<seriesCnt;i++) {
@@ -123,6 +123,7 @@ public class PSJFreeResourceChart
         dataset.addSeries(ts[0]);
         dataset.addSeries(ts[1]);
         dataset.addSeries(ts[2]);
+        dataset.addSeries(ts[3]);
         
         return dataset;
     } 
