@@ -199,7 +199,6 @@ namespace EUROPA {
     	}
     }
 
-    // TODO: get real limits from LimitProfile
     void GenericFVDetector::getLimitBounds(const InstantId& inst, edouble& lb, edouble& ub) const
     {
     	// TODO: make 1 call instead of 2?
@@ -210,9 +209,22 @@ namespace EUROPA {
     // TODO: Level(t) = Capacity(t) - Usage(t)
     void GenericFVDetector::getDefaultLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const
     {
+    	const std::pair<edouble,edouble>& capacityBounds = m_res->getCapacityProfile()->getValue(inst->getTime());
+
     	// TODO: make 1 call instead of 2?
-    	lb = inst->getLowerLevel();
-    	ub = inst->getUpperLevel();
+    	edouble usageLb = inst->getLowerLevel();
+    	edouble usageUb = inst->getUpperLevel();
+
+    	// Positive Usage is computed as a negative value by the profile, so add instead of subtract
+    	lb = capacityBounds.first + usageLb;
+    	ub = capacityBounds.second + usageUb;
+
+    	std::cout
+    		<< "GenericFVDetector::getDefaultLevelBounds - " << m_res->getName().toString() << " - time:" << inst->getTime() << " "
+    		<< "Capacity[" << capacityBounds.first << "," << capacityBounds.second << "] "
+    		<< "Usage[" << usageLb << "," << usageUb << "] "
+    		<< "Level[" << lb << "," << ub << "]"
+    		<< std::endl;
     }
 
     GenericFVProfile::GenericFVProfile(GenericFVDetector* fvd, const ProfileId& profile, bool isFDProfile)

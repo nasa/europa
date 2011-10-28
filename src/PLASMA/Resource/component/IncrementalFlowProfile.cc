@@ -28,8 +28,8 @@
 
 namespace EUROPA
 {
-    IncrementalFlowProfile::IncrementalFlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const ExplicitProfileId limitProfile ):
-      FlowProfile( db, flawDetector, limitProfile )
+    IncrementalFlowProfile::IncrementalFlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector):
+      FlowProfile(db, flawDetector)
     {
     	debugMsg("IncrementalFlowProfile:IncrementalFlowProfile","Initial level [" << getInitCapacityLb() << "," << getInitCapacityUb() << "]");
     }

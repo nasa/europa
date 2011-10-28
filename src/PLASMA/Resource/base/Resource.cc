@@ -86,13 +86,8 @@ namespace EUROPA {
 
     FactoryMgr* pfm = (FactoryMgr*)engine->getComponent("ProfileFactoryMgr");
     m_profile = pfm->createInstance(
-                                    profileName,
-                                    ProfileArgs(
-                                                getPlanDatabase(),
-                                                m_detector,
-                                                m_capacityProfile
-                                                )
-                                    );
+    				profileName,
+    				ProfileArgs(getPlanDatabase(),m_detector));
 
     debugMsg("Resource:init", "Initialized Resource " << getName().toString() << "{"
              << "initCapacity=[" << initCapacityLb << "," << initCapacityUb << "],"

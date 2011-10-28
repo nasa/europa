@@ -246,8 +246,8 @@ namespace EUROPA
 
     //-------------------------------
 
-    FlowProfile::FlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const ExplicitProfileId limitProfile):
-      Profile( db, flawDetector, limitProfile),
+    FlowProfile::FlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector):
+      Profile( db, flawDetector),
       m_lowerLevelGraph( 0 ),
       m_upperLevelGraph( 0 ),
       m_recalculateLowerLevel( false ),

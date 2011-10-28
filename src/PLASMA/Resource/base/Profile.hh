@@ -45,7 +45,7 @@ namespace EUROPA {
        * @brief Constructor.
        * @param flawDetector The object responsible for detecting flaws and violations during level calculation.
        */
-      Profile(const PlanDatabaseId ce, const FVDetectorId flawDetector, const ExplicitProfileId capacityProfile);
+      Profile(const PlanDatabaseId ce, const FVDetectorId flawDetector);
       virtual ~Profile();
       ProfileId& getId() {return m_id;}
 
@@ -184,7 +184,6 @@ namespace EUROPA {
       unsigned int m_changeCount; /*<! The number of times that the profile has changed.  Used to detect stale iterators.*/
       bool m_needsRecompute; /*<! A flag indicating the necessity of profile recomputation*/
       unsigned int m_constraintKeyLb; /*<! The lower bound on the constraint key when searching for new constraints. */
-      ExplicitProfileId m_capacityProfile;
       PlanDatabaseId m_planDatabase; /*<! The plan database.  Used for creating the variable listeners. */
       FVDetectorId m_detector; /*<! The flaw and violation detector. */
       std::set<TransactionId> m_transactions; /*<! The set of Transactions that impact this profile. */
@@ -414,16 +413,14 @@ namespace EUROPA {
     class ProfileArgs : public FactoryArgs
     {
     public:
-        ProfileArgs(const PlanDatabaseId& db, const FVDetectorId& detector,const ExplicitProfileId& limitProfile)
+        ProfileArgs(const PlanDatabaseId& db, const FVDetectorId& detector)
             : m_db(db)
         	, m_detector(detector)
-        	, m_limitProfile(limitProfile)
         {
         }
 
         const PlanDatabaseId m_db;
         const FVDetectorId m_detector;
-        const ExplicitProfileId m_limitProfile;
     };
 
     template<class ProfileType>
@@ -435,7 +432,7 @@ namespace EUROPA {
       {
           const ProfileArgs& args = (const ProfileArgs&)fa;
           return (EUROPA::FactoryObjId&)
-              (new ProfileType(args.m_db, args.m_detector, args.m_limitProfile))->getId();
+              (new ProfileType(args.m_db, args.m_detector))->getId();
       }
     };
 

@@ -13,11 +13,10 @@
 
 namespace EUROPA {
 
-    Profile::Profile(const PlanDatabaseId db, const FVDetectorId flawDetector, const ExplicitProfileId capacityProfile)
+    Profile::Profile(const PlanDatabaseId db, const FVDetectorId flawDetector)
     	: m_id(this)
     	, m_changeCount(0)
     	, m_needsRecompute(false)
-    	, m_capacityProfile(capacityProfile)
         , m_planDatabase(db)
         , m_detector(flawDetector)
     {
@@ -664,12 +663,12 @@ namespace EUROPA {
 
     edouble Profile::getInitCapacityLb() const
     {
-		return m_capacityProfile->getEarliestValue().first;
+		return 0.0;
     }
 
     edouble Profile::getInitCapacityUb() const
     {
-		return m_capacityProfile->getEarliestValue().second;
+		return 0.0;
     }
 
     ProfileIterator::ProfileIterator(const ProfileId prof, const eint startTime, const eint endTime)

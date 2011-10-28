@@ -1,6 +1,7 @@
 #include "OpenWorldFVDetector.hh"
 
 #include <cmath>
+#include "Profile.hh"
 
 namespace EUROPA {
 
@@ -29,8 +30,13 @@ Resource::ProblemType OpenWorldFVDetector::getResourceLevelViolation(const Insta
 
 void OpenWorldFVDetector::getFDLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const
 {
-	lb = inst->getLowerLevelMax();
-	ub = inst->getUpperLevelMin();
+	const std::pair<edouble,edouble>& capacityBounds = m_res->getCapacityProfile()->getValue(inst->getTime());
+
+	edouble usageLb = inst->getLowerLevelMax();
+	edouble usageUb = inst->getUpperLevelMin();
+
+	lb = capacityBounds.first + usageLb;
+	ub = capacityBounds.second + usageUb;
 }
 
 void OpenWorldFVDetector::getVDLevelBounds(const InstantId& inst, edouble& lb, edouble& ub) const

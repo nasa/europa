@@ -20,7 +20,7 @@ namespace EUROPA
       /**
        * @brief
        */
-      IncrementalFlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector, const ExplicitProfileId limitProfile );
+      IncrementalFlowProfile( const PlanDatabaseId db, const FVDetectorId flawDetector);
       /**
        * @brief
        */
