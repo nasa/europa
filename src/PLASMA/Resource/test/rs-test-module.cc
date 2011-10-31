@@ -127,12 +127,10 @@ private:
   }
 };
 
-ExplicitProfile DEFAULT_CAPACITY(0,0);
-
 class DummyProfile : public Profile {
 public:
   DummyProfile(PlanDatabaseId db, const FVDetectorId fv)
-    : Profile(db, fv, DEFAULT_CAPACITY.getId()), m_receivedNotification(0) {}
+    : Profile(db, fv), m_receivedNotification(0) {}
   InstantId getInstant(const int time) {
     return getGreatestInstant(time)->second;
   }
@@ -167,6 +165,9 @@ public:
   bool detect(const InstantId inst) {return false;}
   void initialize(const InstantId inst) {}
   void initialize() {}
+
+  virtual PSResourceProfile* getFDLevelProfile() { return NULL; }
+  virtual PSResourceProfile* getVDLevelProfile() { return NULL; }
 };
 
 
@@ -447,7 +448,7 @@ private:
     const int HORIZON_END = 1000;
 
     DummyDetector detector(ResourceId::noId());
-    TimetableProfile r(db.getId(), detector.getId(), DEFAULT_CAPACITY.getId());
+    TimetableProfile r(db.getId(), detector.getId());
 
 //     Variable<IntervalIntDomain> t0(ce.getId(), IntervalIntDomain(MINUS_INFINITY, MINUS_INFINITY));
 //     Variable<IntervalDomain> q0(ce.getId(), IntervalDomain(0, 0));
@@ -500,7 +501,7 @@ private:
     RESOURCE_DEFAULT_SETUP(ce,db,false);
 
     DummyDetector detector(ResourceId::noId());
-    TimetableProfile r(db.getId(), detector.getId(), DEFAULT_CAPACITY.getId());
+    TimetableProfile r(db.getId(), detector.getId());
 
     CPPUNIT_ASSERT(ce.propagate() && checkSum(r.getId()) == 0);
 
@@ -574,7 +575,7 @@ private:
     RESOURCE_DEFAULT_SETUP(ce,db,false);
 
     DummyDetector detector(ResourceId::noId());
-    TimetableProfile r(db.getId(), detector.getId(), DEFAULT_CAPACITY.getId());
+    TimetableProfile r(db.getId(), detector.getId());
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 1));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(1, 1));
@@ -641,7 +642,7 @@ private:
     RESOURCE_DEFAULT_SETUP(ce,db,false);
 
     DummyDetector detector(ResourceId::noId());
-    TimetableProfile r(db.getId(), detector.getId(), DEFAULT_CAPACITY.getId());
+    TimetableProfile r(db.getId(), detector.getId());
 
     Variable<IntervalIntDomain> t1(ce.getId(), IntervalIntDomain(0, 10));
     Variable<IntervalDomain> q1(ce.getId(), IntervalDomain(10, 10));
@@ -668,7 +669,7 @@ private:
     RESOURCE_DEFAULT_SETUP(ce,db,false);
 
     DummyDetector detector(ResourceId::noId());
-    TimetableProfile r(db.getId(), detector.getId(), DEFAULT_CAPACITY.getId());
+    TimetableProfile r(db.getId(), detector.getId());
 
 
     // Test producer
@@ -971,6 +972,17 @@ private:
     return(true);
   }
 
+  // TODO: Remove this is a Level profile is added to resource
+  static void getLevel(DummyResource& r, const eint& time, IntervalDomain& result)
+  {
+	  r.getProfile()->getLevel(time, result);
+	  edouble lb = (result.isSingleton() ? result.getSingletonValue() : result.getLowerBound());
+	  edouble ub = (result.isSingleton() ? result.getSingletonValue() : result.getUpperBound());
+
+	  IntervalDomain d(lb+initialCapacity,ub+initialCapacity);
+	  result = d;
+  }
+
   static bool testPointProfileQueries()
   {
     // Define input constrains for the resource spec
@@ -982,7 +994,7 @@ private:
 
     IntervalDomain result;
     // Verify correct behaviour for the case with no transactions
-    r.getProfile()->getLevel(10, result);
+    getLevel(r, 10, result);
     CPPUNIT_ASSERT(result.isSingleton() && result.getSingletonValue() == initialCapacity);
 
     // Test that a flaw is signalled when there is a possibility to violate limits
@@ -992,11 +1004,11 @@ private:
     r.addTransaction(trans1.getId());
 
     // Have a single transaction, test before, at and after.
-    r.getProfile()->getLevel(0, result);
+    getLevel(r, 0, result);
     CPPUNIT_ASSERT(result.isSingleton() && result.getSingletonValue() == initialCapacity);
-    r.getProfile()->getLevel(5, result);
+    getLevel(r, 5, result);
     CPPUNIT_ASSERT(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5));
-    r.getProfile()->getLevel(1000, result);
+    getLevel(r, 1000, result);
     CPPUNIT_ASSERT(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5));
 
     Variable<IntervalIntDomain> t2(ce.getId(), IntervalIntDomain(0, 7));
@@ -1010,11 +1022,11 @@ private:
     r.addTransaction(trans3.getId());
 
     // Confirm that we can query in the middle
-    r.getProfile()->getLevel(6, result);
+    getLevel(r, 6, result);
     CPPUNIT_ASSERT(result == IntervalDomain(initialCapacity+5-10, initialCapacity+5));
 
     // Confirm that we can query at the end
-    r.getProfile()->getLevel(1000, result);
+    getLevel(r, 1000, result);
     CPPUNIT_ASSERT(result.isSingleton() && result.getSingletonValue() == (initialCapacity + 5 - 10));
 
     // There should be no violations, only flaws

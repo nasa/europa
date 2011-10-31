@@ -219,12 +219,11 @@ namespace EUROPA {
     	lb = capacityBounds.first + usageLb;
     	ub = capacityBounds.second + usageUb;
 
-    	std::cout
-    		<< "GenericFVDetector::getDefaultLevelBounds - " << m_res->getName().toString() << " - time:" << inst->getTime() << " "
+    	debugMsg("GenericFVDetector:getDeafultLevelBounds",
+    		m_res->getName().toString() << " - time:" << inst->getTime() << " "
     		<< "Capacity[" << capacityBounds.first << "," << capacityBounds.second << "] "
     		<< "Usage[" << usageLb << "," << usageUb << "] "
-    		<< "Level[" << lb << "," << ub << "]"
-    		<< std::endl;
+    		<< "Level[" << lb << "," << ub << "]");
     }
 
     GenericFVProfile::GenericFVProfile(GenericFVDetector* fvd, const ProfileId& profile, bool isFDProfile)
