@@ -11,27 +11,34 @@
 
 namespace EUROPA {
 
-  Reusable::Reusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName, const LabelStr& profileName,
-                     edouble initCapacityLb, edouble initCapacityUb, edouble lowerLimit, edouble maxInstConsumption,
-                     edouble maxConsumption) :
-    Resource(planDatabase, type, name, detectorName, profileName, initCapacityLb, initCapacityUb, lowerLimit, initCapacityUb, maxInstConsumption,
-             maxInstConsumption, maxConsumption, maxConsumption)
-  {
-  }
+	Reusable::Reusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, const LabelStr& detectorName, const LabelStr& profileName,
+			edouble initCapacityLb, edouble initCapacityUb, edouble lowerLimit, edouble maxInstConsumption,
+			edouble maxConsumption)
+		:Resource(planDatabase,
+				type,
+				name,
+				detectorName,
+				profileName,
+				initCapacityLb, initCapacityUb,
+				lowerLimit, initCapacityUb,
+				maxInstConsumption, maxInstConsumption,
+				maxConsumption, maxConsumption)
+	{
+	}
 
-  Reusable::Reusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open) :
-    Resource(planDatabase, type, name, open)
-  {
-  }
+	Reusable::Reusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
+    	: Resource(planDatabase, type, name, open)
+	{
+	}
 
-  Reusable::Reusable(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open) :
-    Resource(parent, type, localName, open)
-  {
-  }
+	Reusable::Reusable(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open)
+    	: Resource(parent, type, localName, open)
+	{
+	}
 
-  Reusable::~Reusable()
-  {
-  }
+	Reusable::~Reusable()
+	{
+	}
 
   void Reusable::getOrderingChoices(const TokenId& token,
                                     std::vector<std::pair<TokenId, TokenId> >& results,
@@ -121,45 +128,45 @@ namespace EUROPA {
   {
   }
 
-  CBReusable::CBReusable(const PlanDatabaseId& planDatabase,
-                         const LabelStr& type,
-                         const LabelStr& name,
-                         const LabelStr& detectorName,
-                         const LabelStr& profileName,
-                         edouble initCapacityLb,
-                         edouble initCapacityUb,
-                         edouble lowerLimit,
-                         edouble maxInstConsumption,
-                         edouble maxConsumption)
-    : Resource(planDatabase,
-               type,
-               name,
-               detectorName,
-               profileName,
-               initCapacityLb,
-               initCapacityUb,
-               lowerLimit,
-               initCapacityUb,
-               maxInstConsumption,
-               maxInstConsumption,
-               maxConsumption,
-               maxConsumption)
-  {
-  }
+    CBReusable::CBReusable(const PlanDatabaseId& planDatabase,
+    		const LabelStr& type,
+    		const LabelStr& name,
+    		const LabelStr& detectorName,
+    		const LabelStr& profileName,
+    		edouble initCapacityLb,
+    		edouble initCapacityUb,
+    		edouble lowerLimit,
+    		edouble maxInstConsumption,
+    		edouble maxConsumption)
+    	: Resource(planDatabase,
+    		type,
+    		name,
+    		detectorName,
+    		profileName,
+    		initCapacityLb,
+    		initCapacityUb,
+    		lowerLimit,
+    		initCapacityUb,
+    		maxInstConsumption,
+    		maxInstConsumption,
+    		maxConsumption,
+    		maxConsumption)
+    {
+    }
 
-  CBReusable::CBReusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
-    : Resource(planDatabase, type, name, open)
-  {
-  }
+    CBReusable::CBReusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
+    	: Resource(planDatabase, type, name, open)
+    {
+    }
 
-  CBReusable::CBReusable(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open)
-    : Resource(parent, type, localName, open)
-  {
-  }
+    CBReusable::CBReusable(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open)
+    	: Resource(parent, type, localName, open)
+    {
+    }
 
-  CBReusable::~CBReusable()
-  {
-  }
+    CBReusable::~CBReusable()
+    {
+    }
 
   void CBReusable::addToProfile(const ConstraintId& gc)
   {

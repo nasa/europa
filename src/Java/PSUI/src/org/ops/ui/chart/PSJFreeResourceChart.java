@@ -163,6 +163,13 @@ public class PSJFreeResourceChart
     		Minute t = new Minute(time.getTime());
     		
     		double value = (useUB ? rp.getUpperBound(i) : rp.getLowerBound(i));
+    		
+    		// Don't try to display infinity values
+    		// Hack!: EUROPA should expose infinity constants through swig
+    		double einfinity = 1e8;
+    		if (value >= einfinity)
+    			continue;
+    		
    		    // Display a step function
    		    if ((lastTime >=0) && (lastValue != value) && (i-lastTime > 1)) {
    		    	time.add(Calendar.MINUTE, -1);

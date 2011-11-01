@@ -245,8 +245,8 @@ namespace EUROPA {
     protected:
       FVDetectorId m_detector; /*<! The flaw and violation detector for this resource. */
       ExplicitProfileId m_capacityProfile; /*<! The capacity profile for this resource. */
-      ExplicitProfileId m_limitProfile; /*<! The capacity profile for this resource. */
-      ProfileId m_profile; /*<! The availability profile for this resource. */
+      ExplicitProfileId m_limitProfile; /*<! The limit profile for this resource. */
+      ProfileId m_profile; /*<! The usage profile for this resource. */
       std::map<TransactionId, TokenId> m_transactionsToTokens;
       std::map<TokenId, std::set<InstantId> > m_flawedTokens;
       std::map<eint, InstantId> m_flawedInstants;

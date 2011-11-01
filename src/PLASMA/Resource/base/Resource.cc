@@ -23,80 +23,84 @@
 
 namespace EUROPA {
 
-  Resource::Resource(const PlanDatabaseId& planDatabase,
-                     const LabelStr& type, const LabelStr& name,
-                     const LabelStr& detectorName,
-                     const LabelStr& profileName,
-                     edouble initCapacityLb, edouble initCapacityUb,
-                     edouble lowerLimit, edouble upperLimit,
-                     edouble maxInstProduction, edouble maxInstConsumption,
-                     edouble maxProduction, edouble maxConsumption)
-    : Object(planDatabase, type, name, false)
-  {
-    init(initCapacityLb, initCapacityUb,
-         lowerLimit, upperLimit,
-         maxInstProduction, maxInstConsumption,
-         maxProduction, maxConsumption,
-         detectorName,
-         profileName
-         );
-  }
+	Resource::Resource(const PlanDatabaseId& planDatabase,
+			const LabelStr& type, const LabelStr& name,
+			const LabelStr& detectorName,
+			const LabelStr& profileName,
+			edouble initCapacityLb, edouble initCapacityUb,
+			edouble lowerLimit, edouble upperLimit,
+			edouble maxInstProduction, edouble maxInstConsumption,
+			edouble maxProduction, edouble maxConsumption)
+		: Object(planDatabase, type, name, false)
+	{
+			init(initCapacityLb, initCapacityUb,
+					lowerLimit, upperLimit,
+					maxInstProduction, maxInstConsumption,
+					maxProduction, maxConsumption,
+					detectorName,
+					profileName
+			);
+	}
 
-  Resource::Resource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
-    : Object(planDatabase, type, name, open) {}
+	Resource::Resource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name, bool open)
+		: Object(planDatabase, type, name, open)
+	{
+	}
 
-  Resource::Resource(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open)
-    : Object(parent, type, localName, open) {}
+	Resource::Resource(const ObjectId& parent, const LabelStr& type, const LabelStr& localName, bool open)
+		: Object(parent, type, localName, open)
+	{
+	}
 
-  Resource::~Resource()
-  {
-    for(std::map<TransactionId, TokenId>::const_iterator it = m_transactionsToTokens.begin(); it != m_transactionsToTokens.end();
-        ++it) {
-      if ((it->first->getOwner()).isNoId())
-        delete (Transaction*) it->first;
-    }
-    delete (Profile*) m_profile;
-    delete (ExplicitProfile*) m_limitProfile;
-    delete (ExplicitProfile*) m_capacityProfile;
-    delete (FVDetector*) m_detector;
-  }
+	Resource::~Resource()
+	{
+		for(std::map<TransactionId, TokenId>::const_iterator it = m_transactionsToTokens.begin(); it != m_transactionsToTokens.end();
+				++it) {
+			if ((it->first->getOwner()).isNoId())
+				delete (Transaction*) it->first;
+		}
 
-  void Resource::init(const edouble initCapacityLb, const edouble initCapacityUb,
-                      const edouble lowerLimit, const edouble upperLimit,
-                      const edouble maxInstProduction, const edouble maxInstConsumption,
-                      const edouble maxProduction, const edouble maxConsumption,
-                      const LabelStr& detectorName,
-                      const LabelStr& profileName) {
-    debugMsg("Resource:init", "In base init function.");
+		delete (Profile*) m_profile;
+		delete (ExplicitProfile*) m_limitProfile;
+		delete (ExplicitProfile*) m_capacityProfile;
+		delete (FVDetector*) m_detector;
+	}
 
-    m_maxInstProduction = (maxInstProduction == PLUS_INFINITY ? maxProduction : maxInstProduction);
-    m_maxProduction = maxProduction;
-    m_maxInstConsumption = (maxInstConsumption == PLUS_INFINITY ? maxConsumption : maxInstConsumption);
-    m_maxConsumption = maxConsumption;
+	void Resource::init(const edouble initCapacityLb, const edouble initCapacityUb,
+			const edouble lowerLimit, const edouble upperLimit,
+			const edouble maxInstProduction, const edouble maxInstConsumption,
+			const edouble maxProduction, const edouble maxConsumption,
+			const LabelStr& detectorName,
+			const LabelStr& profileName) {
+		debugMsg("Resource:init", "In base init function.");
 
+		m_maxInstProduction = (maxInstProduction == PLUS_INFINITY ? maxProduction : maxInstProduction);
+		m_maxProduction = maxProduction;
+		m_maxInstConsumption = (maxInstConsumption == PLUS_INFINITY ? maxConsumption : maxInstConsumption);
+		m_maxConsumption = maxConsumption;
 
-    // TODO: make profile this  more robust?
-    EngineId& engine = this->getPlanDatabase()->getEngine();
+		// TODO: make this more robust?
+		EngineId& engine = this->getPlanDatabase()->getEngine();
 
-    FactoryMgr* fvdfm = (FactoryMgr*)engine->getComponent("FVDetectorFactoryMgr");
-    m_detector = fvdfm->createInstance(detectorName, FVDetectorArgs(getId()));
+		FactoryMgr* fvdfm = (FactoryMgr*)engine->getComponent("FVDetectorFactoryMgr");
+		m_detector = fvdfm->createInstance(detectorName, FVDetectorArgs(getId()));
 
-    m_capacityProfile = (new ExplicitProfile(initCapacityLb,initCapacityUb))->getId();
-    m_limitProfile = (new ExplicitProfile(lowerLimit,upperLimit))->getId();
+		m_capacityProfile = (new ExplicitProfile(initCapacityLb,initCapacityUb))->getId();
+		m_limitProfile = (new ExplicitProfile(lowerLimit,upperLimit))->getId();
 
-    FactoryMgr* pfm = (FactoryMgr*)engine->getComponent("ProfileFactoryMgr");
-    m_profile = pfm->createInstance(
-    				profileName,
-    				ProfileArgs(getPlanDatabase(),m_detector));
+		FactoryMgr* pfm = (FactoryMgr*)engine->getComponent("ProfileFactoryMgr");
+		m_profile = pfm->createInstance(
+				profileName,
+				ProfileArgs(getPlanDatabase(),m_detector));
 
-    debugMsg("Resource:init", "Initialized Resource " << getName().toString() << "{"
-             << "initCapacity=[" << initCapacityLb << "," << initCapacityUb << "],"
-             << "usageLimits=[" << lowerLimit << "," << upperLimit << "],"
-             << "productionLimits=[max=" << m_maxProduction << ",maxInst=" << m_maxInstProduction << "],"
-             << "consumptionLimits=[max=" << m_maxConsumption << ",maxInst=" << m_maxInstConsumption << "],"
-             << "}"
-             );
-  }
+		debugMsg("Resource:init", "Initialized Resource " << getName().toString() << "{"
+				<< "initCapacity=[" << initCapacityLb << "," << initCapacityUb << "],"
+				<< "usageLimits=[" << lowerLimit << "," << upperLimit << "],"
+				<< "productionLimits=[max=" << m_maxProduction << ",maxInst=" << m_maxInstProduction << "],"
+				<< "consumptionLimits=[max=" << m_maxConsumption << ",maxInst=" << m_maxInstConsumption << "],"
+				<< "}"
+		);
+	}
 
   void Resource::setLimit(const eint& time, const edouble& lb, const edouble &ub)
   {

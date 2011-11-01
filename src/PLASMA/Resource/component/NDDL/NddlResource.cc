@@ -202,9 +202,13 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 
     std::pair <LabelStr, LabelStr> pd = getProfileAndDetectorNames(this, "IncrementalFlowProfile", "ClosedWorldFVDetector");
 
-    // For a reusable, typically UpperLevelLimit == Capacity, so we initialize it that way
+    // Since there is no production, upper level flaws will never occur in a Reusable.
+    // We set the Upper Limit to PLUS_INIFINITY to indicate that.
+    // Some profile types (like Timetable and its derivatives) may actually compute upper levels beyond capacity
+    // which will just be ignored because of the specified Upper Limit.
+    // TODO: The most efficient behavior would be for the FVDetector to not even compute or check upper levels.
     init(m_variables[C]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(),
-	 m_variables[LLMIN]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(),
+	 m_variables[LLMIN]->derivedDomain().getSingletonValue(), PLUS_INFINITY,
 	 m_variables[CRMAX]->derivedDomain().getSingletonValue(), m_variables[CRMAX]->derivedDomain().getSingletonValue(),
 	 m_variables[CMAX]->derivedDomain().getSingletonValue(), m_variables[CMAX]->derivedDomain().getSingletonValue(),
 	 pd.second, pd.first);
@@ -328,9 +332,11 @@ std::pair <LabelStr, LabelStr> getProfileAndDetectorNames(const Object* res, con
 
     std::pair <LabelStr, LabelStr> pd = getProfileAndDetectorNames(this, "IncrementalFlowProfile", "ClosedWorldFVDetector");
 
-    // TBS:  Use PLUS_INFINITY for upper limit, since TimetableProfile/GroundedProfile could compute
-    // upper bounds above capacity, even though we know those don't correspond to real flaws (because a reusable
-    // resource can't ever really exceed capacity)
+    // Since there is no production, upper level flaws will never occur in a Reusable.
+    // We set the Upper Limit to PLUS_INIFINITY to indicate that.
+    // Some profile types (like Timetable and its derivatives) may actually compute upper levels beyond capacity
+    // which will just be ignored because of the specified Upper Limit.
+    // TODO: The most efficient behavior would be for the FVDetector to not even compute or check upper levels.
     init(m_variables[C]->derivedDomain().getSingletonValue(), m_variables[C]->derivedDomain().getSingletonValue(),
      m_variables[LLMIN]->derivedDomain().getSingletonValue(), PLUS_INFINITY,
      m_variables[CRMAX]->derivedDomain().getSingletonValue(), m_variables[CRMAX]->derivedDomain().getSingletonValue(),
