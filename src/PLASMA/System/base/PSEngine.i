@@ -533,6 +533,8 @@ namespace EUROPA {
   class PSResource : public PSObject
   {
   public:
+    PSResourceProfile* getCapacity();
+    PSResourceProfile* getUsage();
     PSResourceProfile* getLimits();
     PSResourceProfile* getFDLevels();
     PSResourceProfile* getVDLevels();

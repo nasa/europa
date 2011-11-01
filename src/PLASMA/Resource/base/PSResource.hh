@@ -16,6 +16,8 @@ namespace EUROPA {
 		PSResource() {}
 		virtual ~PSResource() {}
 
+		virtual PSResourceProfile* getCapacity() = 0;
+		virtual PSResourceProfile* getUsage() = 0;
 		virtual PSResourceProfile* getLimits() = 0;
 		virtual PSResourceProfile* getFDLevels() = 0;
 		virtual PSResourceProfile* getVDLevels() = 0;

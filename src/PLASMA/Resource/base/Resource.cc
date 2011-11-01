@@ -102,9 +102,18 @@ namespace EUROPA {
 		);
 	}
 
+	void Resource::detectFV(const eint& time)
+	{
+		const std::map<eint, InstantId>& usages = m_profile->getInstants();
+		std::map<eint, InstantId>::iterator nextUsage = m_profile->getLeastInstant(time);
+		if (nextUsage != usages.end())
+			m_detector->detect(nextUsage->second);
+	}
+
   void Resource::setLimit(const eint& time, const edouble& lb, const edouble &ub)
   {
 	  m_limitProfile->setValue(time,lb,ub);
+	  detectFV(time);
   }
 
   edouble Resource::getLowerLimit(const InstantId& inst) const
@@ -120,6 +129,7 @@ namespace EUROPA {
   void Resource::setCapacity(const eint& time, const edouble& lb, const edouble &ub)
   {
 	  m_capacityProfile->setValue(time,lb,ub);
+	  detectFV(time);
   }
 
   void Resource::add(const TokenId& token) {
@@ -647,6 +657,16 @@ namespace EUROPA {
   }
 
   // PS Methods:
+  PSResourceProfile* Resource::getCapacity()
+  {
+    return new PSGenericProfile(getCapacityProfile());
+  }
+
+  PSResourceProfile* Resource::getUsage()
+  {
+    return new PSUsageProfile(getProfile());
+  }
+
   PSResourceProfile* Resource::getLimits()
   {
     return new PSGenericProfile(getLimitProfile());

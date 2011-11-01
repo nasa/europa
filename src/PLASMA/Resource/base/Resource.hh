@@ -177,6 +177,8 @@ namespace EUROPA {
       static const char* getProblemString(ProblemType t) { return problemLabels[t]; }
 
       // PS Methods:
+      virtual PSResourceProfile* getCapacity();
+      virtual PSResourceProfile* getUsage();
       virtual PSResourceProfile* getLimits();
       virtual PSResourceProfile* getFDLevels();
       virtual PSResourceProfile* getVDLevels();
@@ -255,6 +257,8 @@ namespace EUROPA {
 
       TokenId getTokenForTransaction(TransactionId t);
       ResourceTokenRelationId getRTRConstraint(TokenId tok);
+
+      void detectFV(const eint& time);
 
     private:
       friend class ResourceTokenRelation;
