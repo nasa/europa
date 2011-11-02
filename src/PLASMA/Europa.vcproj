@@ -1928,6 +1928,10 @@
 					RelativePath=".\ANML\component\AnmlTestEngine.cc"
 					>
 				</File>
+				<File
+					RelativePath=".\ANML\ModuleAnml.cc"
+					>
+				</File>
 			</Filter>
 		</Filter>
 	</Files>
