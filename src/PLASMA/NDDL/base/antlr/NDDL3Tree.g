@@ -648,7 +648,7 @@ rule returns [Expr* result]
                 if (tt.isNoId())
                     reportSemanticError(CTX,predName+" has not been declared");            
                 
-                iTokenType = dynamic_cast<InterpretedTokenType*>((TokenType*)tt);
+                iTokenType = dynamic_cast<InterpretedTokenType*>((EUROPA::TokenType*)tt);
                 
                 pushContext(CTX,new NddlTokenSymbolTable(CTX->SymbolTable,tt,ot));    
 			}
