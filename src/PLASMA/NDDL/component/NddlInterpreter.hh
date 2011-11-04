@@ -8,9 +8,9 @@
 #ifndef NDDLINTERPRETER_H_
 #define NDDLINTERPRETER_H_
 
-#include "Interpreter.hh"
 #include <antlr3.h>
 #include <antlr3interfaces.h>
+#include "Interpreter.hh"
 
 namespace EUROPA {
 

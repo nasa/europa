@@ -1885,6 +1885,10 @@
 				Name="Header Files"
 				>
 				<File
+					RelativePath=".\ANML\component\AnmlInterpreter.cc"
+					>
+				</File>
+				<File
 					RelativePath=".\ANML\component\AnmlInterpreter.hh"
 					>
 				</File>
@@ -1912,10 +1916,6 @@
 			<Filter
 				Name="Source Files"
 				>
-				<File
-					RelativePath=".\ANML\component\AnmlInterpreter.cc"
-					>
-				</File>
 				<File
 					RelativePath=".\ANML\base\ANMLLexer.cpp"
 					>
