@@ -2,10 +2,10 @@
 #include "NddlTestEngine.hh"
 
 #include "Error.hh"
+#include "NddlInterpreter.hh"
 #include "ConstraintEngine.hh"
 #include "PlanDatabase.hh"
 #include "PlanDatabaseWriter.hh"
-#include "NddlInterpreter.hh"
 
 // Modules
 #include "ModuleConstraintEngine.hh"
