@@ -51,15 +51,15 @@ Objects *************************
 		Tokens *************************
 				[13, 88]
 				Agent.Buy(product=Product:CLOSED{Milk(38)})
-				Key=101  Master=NONE
+				Key=99  Master=NONE
 				[23, 98]
 				[13, 88]
 				Agent.Buy(product=Product:CLOSED{Banana(31)})
-				Key=119  Master=NONE
+				Key=115  Master=NONE
 				[23, 98]
 				[2, 77]
 				Agent.Buy(product=Product:CLOSED{Drill(45)})
-				Key=137  Master=NONE
+				Key=131  Master=NONE
 				[12, 87]
 		End Tokens *********************
 		Variables *************************
@@ -71,40 +71,40 @@ Objects *************************
 				[0, 75]
 				AgentTimeline.At(loc=Location:CLOSED{Home(10)})
 				Key=83  Master=NONE
-					Merged Key=452 from AgentTimeline.Go(238)[1, 76] --> [2, 77]
+					Merged Key=379 from AgentTimeline.Go(199)[1, 76] --> [2, 77]
 				[1, 76]
 				[1, 76]
 				AgentTimeline.Go(from=Location:CLOSED{Home(10)}to=Location:CLOSED{HardwareStore(24)})
-				Key=238  Master=83 start(83)[0, 75] --> [1, 76]
-					Merged Key=595 from AgentTimeline.At(360)[2, 77] --> [12, 87]
+				Key=199  Master=83 start(83)[0, 75] --> [1, 76]
+					Merged Key=485 from AgentTimeline.At(300)[2, 77] --> [12, 87]
 				[2, 77]
 				[2, 77]
 				AgentTimeline.At(loc=Location:CLOSED{HardwareStore(24)})
-				Key=360  Master=137 buy3(137)[2, 77] --> [12, 87]
-					Merged Key=470 from AgentTimeline.Go(238)[1, 76] --> [2, 77]
-					Merged Key=759 from AgentTimeline.Go(512)[12, 87] --> [13, 88]
+				Key=300  Master=131 buy3(131)[2, 77] --> [12, 87]
+					Merged Key=397 from AgentTimeline.Go(199)[1, 76] --> [2, 77]
+					Merged Key=593 from AgentTimeline.Go(427)[12, 87] --> [13, 88]
 				[12, 87]
 				[12, 87]
 				AgentTimeline.Go(from=Location:CLOSED{HardwareStore(24)}to=Location:CLOSED{SuperMarket(17)})
-				Key=512  Master=277 AgentTimeline.At(277)[13, 88] --> [23, 98]
-					Merged Key=614 from AgentTimeline.At(360)[2, 77] --> [12, 87]
+				Key=427  Master=230 AgentTimeline.At(230)[13, 88] --> [23, 98]
+					Merged Key=504 from AgentTimeline.At(300)[2, 77] --> [12, 87]
 				[13, 88]
 				[13, 88]
 				AgentTimeline.At(loc=Location:CLOSED{SuperMarket(17)})
-				Key=277  Master=101 buy1(101)[13, 88] --> [23, 98]
-					Merged Key=320 from buy2(119)[13, 88] --> [23, 98]
-					Merged Key=674 from AgentTimeline.Go(396)[23, 98] --> [24, 99]
-					Merged Key=777 from AgentTimeline.Go(512)[12, 87] --> [13, 88]
+				Key=230  Master=99 buy1(99)[13, 88] --> [23, 98]
+					Merged Key=265 from buy2(115)[13, 88] --> [23, 98]
+					Merged Key=535 from AgentTimeline.Go(331)[23, 98] --> [24, 99]
+					Merged Key=611 from AgentTimeline.Go(427)[12, 87] --> [13, 88]
 				[23, 98]
 				[23, 98]
 				AgentTimeline.Go(from=Location:CLOSED{SuperMarket(17)}to=Location:CLOSED{Home(10)})
-				Key=396  Master=155 finish(155)[24, 99] --> [25, 100]
-					Merged Key=531 from AgentTimeline.At(277)[13, 88] --> [23, 98]
+				Key=331  Master=147 finish(147)[24, 99] --> [25, 100]
+					Merged Key=446 from AgentTimeline.At(230)[13, 88] --> [23, 98]
 				[24, 99]
 				[24, 99]
 				AgentTimeline.At(loc=Location:CLOSED{Home(10)})
-				Key=155  Master=NONE
-					Merged Key=692 from AgentTimeline.Go(396)[23, 98] --> [24, 99]
+				Key=147  Master=NONE
+					Merged Key=553 from AgentTimeline.Go(331)[23, 98] --> [24, 99]
 				[25, 100]
 		End Tokens *********************
 	End AgentTimeline:agent.timeline*************************
@@ -123,51 +123,51 @@ Global Variables*************************
 Merged Tokens: *************************
 		[-inf, 89]
 		AgentTimeline.At(loc=Location:CLOSED{SuperMarket(17)})
-		Key=320  Master=119 buy2(119)[13, 88] --> [23, 98]
+		Key=265  Master=115 buy2(115)[13, 88] --> [23, 98]
 		[11, +inf]
 		[-inf, 76]
 		AgentTimeline.At(loc=Location:CLOSED{Home(10)})
-		Key=452  Master=238 AgentTimeline.Go(238)[1, 76] --> [2, 77]
+		Key=379  Master=199 AgentTimeline.Go(199)[1, 76] --> [2, 77]
 		[1, 77]
 		[2, 78]
 		AgentTimeline.At(loc=Location:CLOSED{HardwareStore(24),Home(10),SuperMarket(17)})
-		Key=470  Master=238 AgentTimeline.Go(238)[1, 76] --> [2, 77]
+		Key=397  Master=199 AgentTimeline.Go(199)[1, 76] --> [2, 77]
 		[3, +inf]
 		[23, 98]
 		AgentTimeline.Go(from=Location:CLOSED{SuperMarket(17)}to=Location:CLOSED{HardwareStore(24),Home(10),SuperMarket(17)})
-		Key=531  Master=277 AgentTimeline.At(277)[13, 88] --> [23, 98]
+		Key=446  Master=230 AgentTimeline.At(230)[13, 88] --> [23, 98]
 		[24, +inf]
 		[-inf, 76]
 		AgentTimeline.Go(from=Location:CLOSED{HardwareStore(24),Home(10),SuperMarket(17)}to=Location:CLOSED{HardwareStore(24)})
-		Key=595  Master=360 AgentTimeline.At(360)[2, 77] --> [12, 87]
+		Key=485  Master=300 AgentTimeline.At(300)[2, 77] --> [12, 87]
 		[2, 77]
 		[12, 87]
 		AgentTimeline.Go(from=Location:CLOSED{HardwareStore(24)}to=Location:CLOSED{HardwareStore(24),Home(10),SuperMarket(17)})
-		Key=614  Master=360 AgentTimeline.At(360)[2, 77] --> [12, 87]
+		Key=504  Master=300 AgentTimeline.At(300)[2, 77] --> [12, 87]
 		[13, +inf]
 		[-inf, 97]
 		AgentTimeline.At(loc=Location:CLOSED{SuperMarket(17)})
-		Key=674  Master=396 AgentTimeline.Go(396)[23, 98] --> [24, 99]
+		Key=535  Master=331 AgentTimeline.Go(331)[23, 98] --> [24, 99]
 		[23, 98]
 		[24, 99]
 		AgentTimeline.At(loc=Location:CLOSED{Home(10)})
-		Key=692  Master=396 AgentTimeline.Go(396)[23, 98] --> [24, 99]
+		Key=553  Master=331 AgentTimeline.Go(331)[23, 98] --> [24, 99]
 		[25, +inf]
 		[-inf, 86]
 		AgentTimeline.At(loc=Location:CLOSED{HardwareStore(24)})
-		Key=759  Master=512 AgentTimeline.Go(512)[12, 87] --> [13, 88]
+		Key=593  Master=427 AgentTimeline.Go(427)[12, 87] --> [13, 88]
 		[12, 87]
 		[13, 88]
 		AgentTimeline.At(loc=Location:CLOSED{SuperMarket(17)})
-		Key=777  Master=512 AgentTimeline.Go(512)[12, 87] --> [13, 88]
+		Key=611  Master=427 AgentTimeline.Go(427)[12, 87] --> [13, 88]
 		[14, +inf]
 Inactive Tokens: *************************
 		[-inf, 74]
 		AgentTimeline.Go(from=Location:CLOSED{HardwareStore(24),Home(10),SuperMarket(17)}to=Location:CLOSED{Home(10)})
-		Key=219  Master=83 start(83)[0, 75] --> [1, 76]
+		Key=180  Master=83 start(83)[0, 75] --> [1, 76]
 		[0, 75]
 		[25, 100]
 		AgentTimeline.Go(from=Location:CLOSED{Home(10)}to=Location:CLOSED{HardwareStore(24),Home(10),SuperMarket(17)})
-		Key=415  Master=155 finish(155)[24, 99] --> [25, 100]
+		Key=350  Master=147 finish(147)[24, 99] --> [25, 100]
 		[26, +inf]
 
