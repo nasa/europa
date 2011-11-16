@@ -1,15 +1,15 @@
 package org.ops.ui.main.swing;
 
 import java.awt.BorderLayout;
-import java.util.Calendar;
+import java.util.ArrayList;
+//import java.util.Calendar;
 import java.util.List;
-import java.util.Vector;
 import java.util.Map;
 import java.util.HashMap;
 
 
 import javax.swing.JInternalFrame;
-import javax.swing.JTabbedPane;
+//import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
@@ -19,6 +19,9 @@ import javax.swing.JScrollPane;
 import bsh.Interpreter;
 import bsh.util.JConsole;
 
+import org.ops.ui.solver.swing.PSSolverDialog;
+import org.ops.ui.utils.swing.Util;
+
 /*
 import org.ops.ui.chart.PSJFreeResourceChart;
 import org.ops.ui.chart.PSResourceChart;
@@ -26,8 +29,6 @@ import org.ops.ui.chart.PSResourceChartPSEModel;
 import org.ops.ui.gantt.PSEGantt;
 import org.ops.ui.gantt.PSGantt;
 import org.ops.ui.gantt.PSGanttPSEModel;
-import org.ops.ui.solver.PSSolverDialog;
-import org.ops.ui.util.Util;
 import org.ops.ui.mouse.ActionViolationsPanel;
 import org.ops.ui.mouse.ActionDetailsPanel;
 import org.ops.ui.nddl.NddlAshInterpreter;
@@ -242,8 +243,32 @@ public class PSDesktop
 //        addBshVariable("nddlInterp", nddlInterpreter_);
     }
 
-/*    
-    public void makeTableFrame(String title,List l,String fields[])
+    public PSSolver makeSolver(String config,int horizonStart,int horizonEnd)
+    {
+    	PSSolver solver = getPSEngine().createSolver(config);
+    	solver.configure(horizonStart,horizonEnd);
+    	
+    	return solver;
+    }
+        
+    public PSSolverDialog makeSolverDialog(PSSolver solver)
+    {
+    	try {
+    		JInternalFrame frame = makeNewFrame("Solver");
+    		frame.getContentPane().setLayout(new BorderLayout());
+    		PSSolverDialog d = new PSSolverDialog(this,solver);
+    		frame.getContentPane().add(new JScrollPane(d));
+    		frame.setSize(675,375);
+    		
+    		return d;
+    	}
+    	catch (Exception e)
+    	{
+    		throw new RuntimeException(e);
+    	}
+    }
+
+    public void makeTableFrame(String title,List<Object> l,String fields[])
     {
     	JInternalFrame frame = this.makeNewFrame(title);
     	JTable table = Util.makeTable(l,fields);
@@ -252,6 +277,46 @@ public class PSDesktop
 		frame.setSize(frame.getSize()); // Force repaint
     }
 
+    public void showTokens(PSObject o)
+    {
+         PSTokenList l = o.getTokens();
+         showTokens("Activities for "+o.getEntityName(),l);
+    }
+
+    public void showTokens(String title,PSTokenList l)
+    {
+        List<Object> columnNames = new ArrayList<Object>();
+        List<Object> data = new ArrayList<Object>();
+        columnNames.add("Key");
+        columnNames.add("Name");
+        columnNames.add("Type");
+
+        for (int i=0; i<l.size();i++) {
+       	 List<Object> row = new ArrayList<Object>();
+       	 PSToken t = l.get(i);
+       	 row.add(t.getEntityKey());
+       	 row.add(t.getEntityName());
+       	 row.add(t.getEntityType());
+       	 PSVariableList vars = t.getParameters();
+       	 for (int j=0; j<vars.size();j++) {
+       		 PSVariable var = vars.get(j);
+       		 row.add(var.toString());
+
+       		 // Only add cols for the first row
+       		 if (i==0)
+       			 columnNames.add(var.getEntityName());
+       	 }
+       	 data.add(row);
+        }
+
+    	JInternalFrame frame = makeNewFrame(title);
+   	    JTable table = new JTable(new Util.MatrixTableModel(data,columnNames));
+   	    JScrollPane scrollpane = new JScrollPane(table);
+   	    frame.getContentPane().add(scrollpane);    	
+		frame.setSize(frame.getSize()); // Force repaint
+    }
+         
+/*    
     // Creates a table on the results of a JoSQL query
     public void makeTableFrame(String title,List l,String josqlQry)
     {
@@ -278,62 +343,6 @@ public class PSDesktop
     	catch (Exception e) {
     		throw new RuntimeException(e);
     	}
-    }
-    
-    public PSSolverDialog makeSolverDialog(PSSolver solver)
-    {
-    	try {
-    		JInternalFrame frame = makeNewFrame("Solver");
-    		frame.getContentPane().setLayout(new BorderLayout());
-    		PSSolverDialog d = new PSSolverDialog(this,solver);
-    		frame.getContentPane().add(new JScrollPane(d));
-    		frame.setSize(675,375);
-    		
-    		return d;
-    	}
-    	catch (Exception e)
-    	{
-    		throw new RuntimeException(e);
-    	}
-    }
-
-    public void showTokens(PSObject o)
-    {
-         PSTokenList l = o.getTokens();
-         showTokens("Activities for "+o.getEntityName(),l);
-    }
-
-    public void showTokens(String title,PSTokenList l)
-    {
-        List columnNames = new Vector();
-        List data = new Vector();
-        columnNames.add("Key");
-        columnNames.add("Name");
-        columnNames.add("Type");
-
-        for (int i=0; i<l.size();i++) {
-       	 List row = new Vector();
-       	 PSToken t = l.get(i);
-       	 row.add(t.getEntityKey());
-       	 row.add(t.getEntityName());
-       	 row.add(t.getEntityType());
-       	 PSVariableList vars = t.getParameters();
-       	 for (int j=0; j<vars.size();j++) {
-       		 PSVariable var = vars.get(j);
-       		 row.add(var.toString());
-
-       		 // Only add cols for the first row
-       		 if (i==0)
-       			 columnNames.add(var.getEntityName());
-       	 }
-       	 data.add(row);
-        }
-
-    	JInternalFrame frame = makeNewFrame(title);
-   	    JTable table = new JTable(new Util.MatrixTableModel(data,columnNames));
-   	    JScrollPane scrollpane = new JScrollPane(table);
-   	    frame.getContentPane().add(scrollpane);    	
-		frame.setSize(frame.getSize()); // Force repaint
     }
     
     public JInternalFrame makeResourceGanttFrame(
@@ -402,14 +411,6 @@ public class PSDesktop
 
         return frame;
     }    
-    
-    public PSSolver makeSolver(String config,int horizonStart,int horizonEnd)
-    {
-    	PSSolver solver = getPSEngine().createSolver(config);
-    	solver.configure(horizonStart,horizonEnd);
-    	
-    	return solver;
-    }
     
     public void makeNddlConsole()
     {

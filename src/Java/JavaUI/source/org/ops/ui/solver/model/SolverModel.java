@@ -15,6 +15,13 @@ import psengine.StringErrorStream;
  * 
  * @author tatiana
  */
+
+/*
+ * TODO JRB: this is too tightly coupled with the IDE usage pattern to serve as the model for a modular SolverView component.
+ * the behavior that restarts the PSEngine and creates a new solver in start() belongs somewhere else (possibly in a subclass).
+ * a generic model would just provide a way to interact with a PSSolver
+ */
+
 public class SolverModel {
 	/** Property name in the engine config: list of search paths for includes */
 	private final String INCLUDE_PATH = "nddl.includePath";
