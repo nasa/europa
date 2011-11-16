@@ -27,7 +27,7 @@
 	<!-- Output directory for the  update site -->
 	<property name="eclipse.out.dir" value="${europa.dir}/eclipse" />
 
-	<property name="swing.out.jar" value="${swing.out.dir}/${swingname}_${bundle.version}.jar"/>
+	<property name="swing.out.jar" value="${swing.out.dir}/PSUISwing.jar"/>
 
 	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
 		<classpath>

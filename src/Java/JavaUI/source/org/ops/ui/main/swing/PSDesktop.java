@@ -1,290 +1,434 @@
 package org.ops.ui.main.swing;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.awt.BorderLayout;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Vector;
+import java.util.Map;
+import java.util.HashMap;
 
+
+import javax.swing.JInternalFrame;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 import javax.swing.JDesktopPane;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.UIManager;
-import javax.swing.WindowConstants;
-import javax.swing.filechooser.FileFilter;
+import javax.swing.JTable;
+import javax.swing.JScrollPane;
 
-// Old version import org.ops.ui.gantt.swing.EGanttView;
-import org.ops.ui.beanshell.swing.BeanShellView;
-import org.ops.ui.gantt.swing.GanttView;
-import org.ops.ui.schemabrowser.swing.SchemaView;
-import org.ops.ui.solver.model.SolverModel;
-import org.ops.ui.solver.swing.ConsoleView;
-import org.ops.ui.solver.swing.OpenDecisionsView;
-import org.ops.ui.solver.swing.PSSolverDialog;
+import bsh.Interpreter;
+import bsh.util.JConsole;
 
-import psengine.PSUtil;
+/*
+import org.ops.ui.chart.PSJFreeResourceChart;
+import org.ops.ui.chart.PSResourceChart;
+import org.ops.ui.chart.PSResourceChartPSEModel;
+import org.ops.ui.gantt.PSEGantt;
+import org.ops.ui.gantt.PSGantt;
+import org.ops.ui.gantt.PSGanttPSEModel;
+import org.ops.ui.solver.PSSolverDialog;
+import org.ops.ui.util.Util;
+import org.ops.ui.mouse.ActionViolationsPanel;
+import org.ops.ui.mouse.ActionDetailsPanel;
+import org.ops.ui.nddl.NddlAshInterpreter;
+import org.ops.ui.nddl.NddlTokenMarker;
+import org.ops.ui.anml.AnmlInterpreter;
+import org.ops.ui.anml.AnmlTokenMarker;
+import org.ops.ui.ash.AshConsole;
 
-public class PSDesktop extends JFrame {
+import org.josql.contrib.JoSQLSwingTableModel;
+*/
 
-	protected File workingDir;
-	private JDesktopPane desktop;
-	private Logger log = Logger.getLogger(getClass().getName());
+import psengine.*;
 
-	// Solver model. It has engine inside
-	private SolverModel solverModel;
+public class PSDesktop
+{
+	public static PSDesktop instance_=null;
 
-	// Viewer
-	private SchemaView schemaBrowser;
-	private PSSolverDialog solverDialog;
-	private OpenDecisionsView openDecisions;
-	private GanttView ganttView;
-	private BeanShellView bshView;
-	private ConsoleView consoleView;
+	protected JDesktopPane desktop_;
+	protected int windowCnt_=0;
+	protected PSEngine psEngine_=null;
+//    protected NddlAshInterpreter nddlInterpreter_;
+	protected JConsole bshConsole_;
+    protected Interpreter bshInterpreter_;
+    
+	protected static String debugMode_="g";
+	protected static String bshFile_=null;
 
-	private JMenu userMenu = null;
+	public static void main(String[] args)
+	{	
+		try {
+			String debugMode = args[0];
+			PSUtil.loadLibraries(debugMode);	   
 
-	private PSDesktop(File dataFile, File solverConfig, File workingDir) {
-		assert (workingDir != null);
-		this.workingDir = workingDir;
-		this.desktop = new JDesktopPane();
-		this.add(this.desktop);
+			PSEngine engine = PSEngine.makeInstance();
+			engine.start();
+			Runtime.getRuntime().addShutdownHook(new ShutdownHook());
 
-		// Closing behavior. Add a question dialog?
-		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		this.addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				askAndExit();
-			}
-		});
+			PSDesktop d = PSDesktop.makeInstance(engine,args);
+			d.runUI();
+		}
+    	catch (Exception e) {
+    		e.printStackTrace();
+    		Runtime.getRuntime().exit(-1);    
+    	}
+	}
+	
+    static class ShutdownHook extends Thread 
+    {
+	    public ShutdownHook()
+	    {
+	        super("ShutdownHook");
+	    }
+	    
+	    public void run() 
+	    {
+	        PSDesktop.getInstance().getPSEngine().shutdown();
+	    }
+    }	  
 
-		// Hook up engine
-		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-			@Override
-			public void run() {
-				releaseEngine();
-			}
-		}));
-
-		hookupEngine(dataFile, solverConfig);
-
-		// Build views
-		this.schemaBrowser = new SchemaView(this.solverModel);
-		this.desktop.add(this.schemaBrowser);
+    public String getLibsMode() { return debugMode_; }
+	
+    public static PSDesktop getInstance()
+    {
+    	if (instance_ == null)
+    		instance_ = makeInstance(PSEngine.makeInstance(),new String[]{"g",null});
+    	
+    	return instance_;
+    }
+    
+	public static Map<String,String> parseArgs(String args[])
+	{
+		Map<String,String> retval = new HashMap<String,String>();
+		String debugMode = "g";
+		String bshFile = null; 
 		
-		this.consoleView = new ConsoleView();
-		this.solverDialog = new PSSolverDialog(this.solverModel, consoleView);
-		this.solverDialog.setVisible(true);
-		this.desktop.add(this.solverDialog);
-		this.desktop.add(this.consoleView);
+		if (args.length > 0)
+ 		    debugMode = args[0];
+		if ((args.length > 1) && (args[1].length()>0))
+			bshFile = args[1];
 
-		this.openDecisions = new OpenDecisionsView(this.solverModel);
-		this.desktop.add(this.openDecisions);
-
-		// this.ganttView = new EGanttView(this.solverModel);
-		this.ganttView = new GanttView(this.solverModel);
-		this.desktop.add(this.ganttView);
-
-		this.bshView = new BeanShellView(solverModel, this);
-		this.desktop.add(this.bshView);
-
-		// Finish up
-		buildMenu();
-		updateTitle(dataFile);
-		this.setSize(600, 700);
+		retval.put("debugMode", debugMode);
+		retval.put("bshFile",bshFile);
+		
+		return retval;
 	}
+	
+	public static PSDesktop makeInstance(PSEngine pse,String args[])
+	{
+		if (instance_ != null) 
+			throw new RuntimeException("PSDesktop is a singleton");
 
-	protected void askAndExit() {
-		if (JOptionPane.showConfirmDialog(this, "Close this application?",
-				"Exit", JOptionPane.YES_NO_OPTION) == JOptionPane.OK_OPTION) {
-			System.exit(0);
-		}
+		init(args);
+        instance_ = new PSDesktop(pse);
+        
+        return instance_;
+ 	}
+
+   public static void init(String[] args)
+    {   
+        init(parseArgs(args));    
+    }
+    
+	public static void init(Map<String,String> args)
+	{
+		debugMode_ = args.get("debugMode");
+		bshFile_ = args.get("bshFile");		
 	}
-
-	private void buildMenu() {
-		JMenuBar bar = new JMenuBar();
-		this.setJMenuBar(bar);
-		JMenu menu;
-
-		menu = new JMenu("File");
-		bar.add(menu);
-		JMenuItem item = new JMenuItem("Load BSH file");
-		menu.add(item);
-		item.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				File fl = askForFile(workingDir, "Bean Shell files", "bsh",
-						"Choose BSH file to interpret");
-				if (fl != null)
-					bshView.loadFile(fl);
-			}
-		});
-		menu.addSeparator();
-		item = new JMenuItem("Exit");
-		menu.add(item);
-		item.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				askAndExit();
-			}
-		});
-
-		menu = new JMenu("Windows");
-		bar.add(menu);
-		menu.add(this.schemaBrowser.getToggleMenuItem());
-		menu.add(this.solverDialog.getToggleMenuItem());
-		menu.add(this.consoleView.getToggleMenuItem());
-		menu.add(this.openDecisions.getToggleMenuItem());
-		menu.add(this.ganttView.getToggleMenuItem());
-		menu.add(this.bshView.getToggleMenuItem());
+	
+	protected PSDesktop(PSEngine pse)
+	{
+		assert (pse != null);
+	    psEngine_ = pse;
+//        nddlInterpreter_ = new NddlAshInterpreter(psEngine_);
+        bshConsole_ = new JConsole();
+        bshInterpreter_ = new Interpreter(bshConsole_);                	    
 	}
+		
+    public PSEngine getPSEngine() { return psEngine_; }
 
-	private void updateTitle(File dataFile) {
-		final String prefix = "Europa desktop";
-		this.setTitle(prefix + ": " + dataFile);
-	}
+    public void runUI()
+    {
+	    SwingUtilities.invokeLater(new UICreator());
+    }
 
-	/**
-	 * Pops up a file chooser dialog to open file. @return full path to the
-	 * chosen file, or null
-	 */
-	private static File askForFile(File baseDir, String typeTitle,
-			String typeExtension, String dialogTitle) {
-		JFileChooser chooser = new JFileChooser();
-		FileFilter filter = new FileNameExtensionFilter(typeTitle,
-				typeExtension);
-		chooser.setCurrentDirectory(baseDir);
-		chooser.addChoosableFileFilter(filter);
-		chooser.setFileFilter(filter);
-		chooser.setDialogTitle(dialogTitle);
-		int res = chooser.showOpenDialog(null);
-		if (res != JFileChooser.APPROVE_OPTION)
-			return null;
-		File file = chooser.getSelectedFile();
-		return file;
-	}
+    public JInternalFrame makeNewFrame(String name)
+    {
+        JInternalFrame frame = new JInternalFrame(name);
+        frame.getContentPane().setLayout(new BorderLayout());
+	    desktop_.add(frame);
+	    int offset=windowCnt_*15;
+	    windowCnt_++;
+	    frame.setLocation(offset,offset);
+	    frame.setSize(700,300);
+	    frame.setResizable(true);
+	    frame.setClosable(true);
+	    frame.setMaximizable(true);
+	    frame.setIconifiable(true);
+        frame.setVisible(true);
+        return frame;
+    }
 
-	/** Create and connect PSEngine */
-	protected void hookupEngine(File data, File solverConfig) {
-		try {
-			PSUtil.loadLibraries();
-		} catch (UnsatisfiedLinkError e) {
-			log
-					.log(
-							Level.SEVERE,
-							"Cannot load Europa libraries. Please make the "
-									+ "dynamic libraries are included in LD_LIBRARY_PATH "
-									+ "(or PATH for Windows)", e);
-			System.exit(1);
-		}
+    private class UICreator
+        implements Runnable
+    {
+	    public void run()
+	    {
+	    	createAndShowGUI();
+	    }
+    }
 
-		// loadFile(dataFile);
+    private void createAndShowGUI()
+    {
+    	try {
+    		//UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+    		JFrame.setDefaultLookAndFeelDecorated(true);
 
-		solverModel = new SolverModel();
-		if (data != null && solverConfig != null) {
-			solverModel.configure(data, solverConfig, 0, 100);
-			solverModel.start();
-		}
+    		//Create and set up the window.
+    		JFrame frame = new JFrame("Planning & Scheduling UI");
+    		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    		frame.getContentPane().setLayout(new BorderLayout());
+    		createDesktop();
+    		frame.getContentPane().add(desktop_,BorderLayout.CENTER);
 
-		log.log(Level.INFO, "Engine started");
-	}
+    		//Display the window.
+    		frame.pack();
+    		frame.setSize(1200,600);
+    		frame.setVisible(true);
+    	}
+    	catch (Exception e) {
+    		e.printStackTrace();
+    		Runtime.getRuntime().exit(-1);
+    	}
+    }
 
-	/** Shutdown and release engine. Save any state if necessary */
-	protected synchronized void releaseEngine() {
-		if (solverModel != null) {
-			solverModel.terminate();
-			solverModel = null;
-			log.log(Level.INFO, "Engine released");
-		}
-	}
+    private void createDesktop()
+    {
+    	desktop_ = new JDesktopPane();
 
-	private static File tryToSetFile(String kind, String name, File old) {
-		File f = new File(name);
-		if (f.exists())
-			return f;
-		System.err.println(kind + " file " + f + " is not found");
-		return old;
-	}
+        // BeanShell scripting
+        JInternalFrame consoleFrame = makeNewFrame("Console");
+        consoleFrame.getContentPane().add(bshConsole_);
 
-	public EuropaInternalFrame makeNewFrame(String title) {
-		EuropaInternalFrame res = new EuropaInternalFrame(title);
-		this.desktop.add(res);
-		// Hook up to menu
-		if (userMenu == null) {
-			userMenu = new JMenu("User");
-			this.getJMenuBar().add(userMenu);
-		}
-		userMenu.add(res.getToggleMenuItem());
-		return res;
-	}
+        registerBshVariables();
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception ex) {
-			System.out.println("Unable to load native look and feel");
-		}
+        if (bshFile_ != null) {
+            try {
+        	    bshInterpreter_.eval("source(\""+bshFile_+"\");");
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
 
-		// Parse command line parameters to get data file and configs
-		File dataFile = null, solverConfig = null, bshFile = null;
-		for (int i = 0; i < args.length; i++) {
-			if ("-config".equals(args[i])) {
-				solverConfig = tryToSetFile("Config", args[++i], solverConfig);
-			} else if ("-nddl".equals(args[i])) {
-				dataFile = tryToSetFile("NDDL", args[++i], dataFile);
-			} else if ("-bsh".equals(args[i])) {
-				bshFile = tryToSetFile("BSH", args[++i], bshFile);
-			} else {
-				if (dataFile == null)
-					dataFile = tryToSetFile("NDDL", args[i], dataFile);
-				else if (solverConfig == null)
-					solverConfig = tryToSetFile("Config", args[i], solverConfig);
-				else
-					bshFile = tryToSetFile("BSH", args[i], bshFile);
-			}
-		}
+        new Thread(bshInterpreter_).start();
+        //consoleFrame.setIcon(true);
+    }
 
-		// Pop up dialogs if needed
-		File baseDir;
-		if (dataFile != null)
-			baseDir = dataFile.getParentFile();
-		else if (solverConfig != null)
-			baseDir = solverConfig.getParentFile();
-		else
-			baseDir = new File(".");
-		if (dataFile == null && bshFile == null) {
-			dataFile = askForFile(baseDir, "NDDL files", "nddl",
-					"Choose NDDL initial state file");
-			if (dataFile == null) {
-				JOptionPane.showMessageDialog(null,
-						"No NDDL file chosen. Exiting");
-				return;
-			}
-			baseDir = dataFile.getParentFile();
-		}
-		if (solverConfig == null && bshFile == null) {
-			solverConfig = askForFile(baseDir, "XML files", "xml",
-					"Choose PlannerConfig.xml file");
-			if (solverConfig == null) {
-				JOptionPane.showMessageDialog(null,
-						"No solver config chosen. Exiting");
-				return;
-			}
-		}
+    public void addBshVariable(String name,Object obj)
+    {
+        try {
+            bshInterpreter_.set(name,obj);
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    protected void registerBshVariables()
+    {
+        addBshVariable("desktop",this);
+        addBshVariable("psengine",getPSEngine());
+//        addBshVariable("nddlInterp", nddlInterpreter_);
+    }
 
-		PSDesktop me = new PSDesktop(dataFile, solverConfig, baseDir);
-		if (bshFile != null)
-			me.bshView.loadFile(bshFile);
-		me.setVisible(true);
-	}
+/*    
+    public void makeTableFrame(String title,List l,String fields[])
+    {
+    	JInternalFrame frame = this.makeNewFrame(title);
+    	JTable table = Util.makeTable(l,fields);
+    	JScrollPane scrollpane = new JScrollPane(table);
+    	frame.getContentPane().add(scrollpane);
+		frame.setSize(frame.getSize()); // Force repaint
+    }
 
+    // Creates a table on the results of a JoSQL query
+    public void makeTableFrame(String title,List l,String josqlQry)
+    {
+    	try {
+    		JInternalFrame frame = this.makeNewFrame(title);
+
+    		// TODO: JoSQLSwingTableModel doesn't preserve column names, it should be easy to add
+    		JoSQLSwingTableModel model =  new JoSQLSwingTableModel();
+    		model.parse(josqlQry);
+    		model.execute(l);
+
+    		
+    		//Query qry = new Query();
+    		//qry.parse(josqlQry);
+    		//List data = qry.execute(l).getResults();
+    		//TableModel model = Util.makeTableModel(data, new String[]{"toString"});
+    		
+
+    		JTable table = new JTable(model);
+    		JScrollPane scrollpane = new JScrollPane(table);
+    		frame.getContentPane().add(scrollpane);
+    		frame.setSize(frame.getSize()); // Force repaint
+    	}
+    	catch (Exception e) {
+    		throw new RuntimeException(e);
+    	}
+    }
+    
+    public PSSolverDialog makeSolverDialog(PSSolver solver)
+    {
+    	try {
+    		JInternalFrame frame = makeNewFrame("Solver");
+    		frame.getContentPane().setLayout(new BorderLayout());
+    		PSSolverDialog d = new PSSolverDialog(this,solver);
+    		frame.getContentPane().add(new JScrollPane(d));
+    		frame.setSize(675,375);
+    		
+    		return d;
+    	}
+    	catch (Exception e)
+    	{
+    		throw new RuntimeException(e);
+    	}
+    }
+
+    public void showTokens(PSObject o)
+    {
+         PSTokenList l = o.getTokens();
+         showTokens("Activities for "+o.getEntityName(),l);
+    }
+
+    public void showTokens(String title,PSTokenList l)
+    {
+        List columnNames = new Vector();
+        List data = new Vector();
+        columnNames.add("Key");
+        columnNames.add("Name");
+        columnNames.add("Type");
+
+        for (int i=0; i<l.size();i++) {
+       	 List row = new Vector();
+       	 PSToken t = l.get(i);
+       	 row.add(t.getEntityKey());
+       	 row.add(t.getEntityName());
+       	 row.add(t.getEntityType());
+       	 PSVariableList vars = t.getParameters();
+       	 for (int j=0; j<vars.size();j++) {
+       		 PSVariable var = vars.get(j);
+       		 row.add(var.toString());
+
+       		 // Only add cols for the first row
+       		 if (i==0)
+       			 columnNames.add(var.getEntityName());
+       	 }
+       	 data.add(row);
+        }
+
+    	JInternalFrame frame = makeNewFrame(title);
+   	    JTable table = new JTable(new Util.MatrixTableModel(data,columnNames));
+   	    JScrollPane scrollpane = new JScrollPane(table);
+   	    frame.getContentPane().add(scrollpane);    	
+		frame.setSize(frame.getSize()); // Force repaint
+    }
+    
+    public JInternalFrame makeResourceGanttFrame(
+            String objectsType,
+            Calendar start,
+            Calendar end)
+    {
+        return makeResourceGanttFrame(objectsType,start,end,Calendar.MINUTE);
+    }
+    
+    public JInternalFrame makeResourceGanttFrame(
+    		String objectsType,
+	        Calendar start,
+	        Calendar end,
+	        int timeUnit)
+    {
+        PSGantt gantt = new PSEGantt(new PSGanttPSEModel(getPSEngine(),start,objectsType,timeUnit),start,end);
+
+        JInternalFrame frame = makeNewFrame("Resource Schedule");
+        frame.getContentPane().add(gantt);
+		frame.setSize(frame.getSize()); // Force repaint
+
+        return frame;
+    }
+
+    public PSResourceChart makeResourceChart(PSResource r,Calendar start)
+    {
+    	return new PSJFreeResourceChart(
+    			r.getEntityName(),
+    			new PSResourceChartPSEModel(r),
+    			start);
+    }
+
+    public JInternalFrame makeResourcesFrame(String type,Calendar start)
+    {
+        JTabbedPane resourceTabs = new JTabbedPane();
+        List<PSResource> resources = PSUtil.toResourceList(getPSEngine().getObjectsByType(type));
+        for (PSResource r : resources) 
+            resourceTabs.add(r.getEntityName(),makeResourceChart(r,start));
+
+        JInternalFrame frame = makeNewFrame("Resources");
+        frame.getContentPane().add(resourceTabs);
+		frame.setSize(frame.getSize()); // Force repaint
+
+        return frame;
+    }
+
+    public JInternalFrame makeViolationsFrame()
+    {
+        ActionViolationsPanel vp = new ActionViolationsPanel(getPSEngine());
+        JInternalFrame frame = makeNewFrame("Violations");
+        frame.getContentPane().add(vp);
+        frame.setLocation(500,180);
+        frame.setSize(300,300);
+
+        return frame;
+    }
+
+    public JInternalFrame makeDetailsFrame()
+    {
+        ActionDetailsPanel dp = new ActionDetailsPanel(getPSEngine());
+        JInternalFrame frame = makeNewFrame("Details");
+        frame.getContentPane().add(dp);
+        frame.setLocation(800,180);
+        frame.setSize(300,200);
+
+        return frame;
+    }    
+    
+    public PSSolver makeSolver(String config,int horizonStart,int horizonEnd)
+    {
+    	PSSolver solver = getPSEngine().createSolver(config);
+    	solver.configure(horizonStart,horizonEnd);
+    	
+    	return solver;
+    }
+    
+    public void makeNddlConsole()
+    {
+    	JInternalFrame nddlInterpFrame = makeNewFrame("Nddl Console");
+    	AshConsole console = new AshConsole(nddlInterpreter_);
+    	nddlInterpreter_.setConsole(console);
+    	console.setTokenMarker(new NddlTokenMarker());
+    	nddlInterpFrame.setContentPane(console);    
+    }
+
+    public void makeAnmlConsole()
+    {
+      AnmlInterpreter anmlInterpreter = new AnmlInterpreter();
+      JInternalFrame anmlInterpFrame = makeNewFrame("Anml Console");
+      AshConsole console = new AshConsole(anmlInterpreter);
+      anmlInterpreter.setConsole(console);
+      console.setTokenMarker(new AnmlTokenMarker());
+      anmlInterpFrame.setContentPane(console);
+    }    
+    */
 }
+
