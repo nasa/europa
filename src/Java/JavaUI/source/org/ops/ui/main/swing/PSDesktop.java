@@ -2,14 +2,14 @@ package org.ops.ui.main.swing;
 
 import java.awt.BorderLayout;
 import java.util.ArrayList;
-//import java.util.Calendar;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
 
 import javax.swing.JInternalFrame;
-//import javax.swing.JTabbedPane;
+import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
@@ -19,15 +19,15 @@ import javax.swing.JScrollPane;
 import bsh.Interpreter;
 import bsh.util.JConsole;
 
-import org.ops.ui.solver.swing.PSSolverDialog;
-import org.ops.ui.utils.swing.Util;
 import org.ops.ui.mouse.swing.ActionViolationsPanel;
 import org.ops.ui.mouse.swing.ActionDetailsPanel;
+import org.ops.ui.rchart.model.PSResourceChartPSEModel;
+import org.ops.ui.rchart.swing.PSJFreeResourceChart;
+import org.ops.ui.rchart.swing.PSResourceChart;
+import org.ops.ui.solver.swing.PSSolverDialog;
+import org.ops.ui.utils.swing.Util;
 
 /*
-import org.ops.ui.chart.PSJFreeResourceChart;
-import org.ops.ui.chart.PSResourceChart;
-import org.ops.ui.chart.PSResourceChartPSEModel;
 import org.ops.ui.gantt.PSEGantt;
 import org.ops.ui.gantt.PSGantt;
 import org.ops.ui.gantt.PSGanttPSEModel;
@@ -337,7 +337,29 @@ public class PSDesktop
 
         return frame;
     }    
-        
+
+    public PSResourceChart makeResourceChart(PSResource r,Calendar start)
+    {
+    	return new PSJFreeResourceChart(
+    			r.getEntityName(),
+    			new PSResourceChartPSEModel(r),
+    			start);
+    }
+
+    public JInternalFrame makeResourcesFrame(String type,Calendar start)
+    {
+        JTabbedPane resourceTabs = new JTabbedPane();
+        List<PSResource> resources = PSUtil.toResourceList(getPSEngine().getObjectsByType(type));
+        for (PSResource r : resources) 
+            resourceTabs.add(r.getEntityName(),makeResourceChart(r,start));
+
+        JInternalFrame frame = makeNewFrame("Resources");
+        frame.getContentPane().add(resourceTabs);
+		frame.setSize(frame.getSize()); // Force repaint
+
+        return frame;
+    }
+    
 /*    
     // Creates a table on the results of a JoSQL query
     public void makeTableFrame(String title,List l,String josqlQry)
@@ -385,28 +407,6 @@ public class PSDesktop
 
         JInternalFrame frame = makeNewFrame("Resource Schedule");
         frame.getContentPane().add(gantt);
-		frame.setSize(frame.getSize()); // Force repaint
-
-        return frame;
-    }
-
-    public PSResourceChart makeResourceChart(PSResource r,Calendar start)
-    {
-    	return new PSJFreeResourceChart(
-    			r.getEntityName(),
-    			new PSResourceChartPSEModel(r),
-    			start);
-    }
-
-    public JInternalFrame makeResourcesFrame(String type,Calendar start)
-    {
-        JTabbedPane resourceTabs = new JTabbedPane();
-        List<PSResource> resources = PSUtil.toResourceList(getPSEngine().getObjectsByType(type));
-        for (PSResource r : resources) 
-            resourceTabs.add(r.getEntityName(),makeResourceChart(r,start));
-
-        JInternalFrame frame = makeNewFrame("Resources");
-        frame.getContentPane().add(resourceTabs);
 		frame.setSize(frame.getSize()); // Force repaint
 
         return frame;

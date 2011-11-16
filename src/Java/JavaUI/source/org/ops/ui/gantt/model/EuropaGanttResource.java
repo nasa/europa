@@ -31,7 +31,7 @@ public class EuropaGanttResource implements IGanttResource {
 			// ls.getUpperBound(t));
 		}
 		// Actuals
-		ls = resource.getLevels();
+		ls = resource.getFDLevels();
 		ts = ls.getTimes();
 		amin = tmax;
 		amax = tmin;
@@ -87,7 +87,7 @@ public class EuropaGanttResource implements IGanttResource {
 	 */
 	@Override
 	public double getLow(int time) {
-		return resource.getLevels().getLowerBound(time);
+		return resource.getFDLevels().getLowerBound(time);
 	}
 
 	/*
@@ -97,6 +97,6 @@ public class EuropaGanttResource implements IGanttResource {
 	 */
 	@Override
 	public double getHigh(int time) {
-		return resource.getLevels().getUpperBound(time);
+		return resource.getFDLevels().getUpperBound(time);
 	}
 }

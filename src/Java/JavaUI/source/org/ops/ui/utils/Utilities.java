@@ -1,5 +1,9 @@
 package org.ops.ui.utils;
 
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Vector;
+
 import psengine.PSValueList;
 import psengine.PSVariable;
 
@@ -40,6 +44,31 @@ public class Utilities {
 		}
 		else {
 			return "TODO:  Provide labels for variable " + variable.getEntityName();
+		}
+	}
+
+	/*
+	 * Transform SWIG generated lists into Java lists
+	 * parameter list must support size() and get(int idx)
+	 */
+	public static List<Object> SWIGList(Object list)
+	{
+		try {
+		    List<Object> retval = new Vector<Object>();
+		
+		    Method m = list.getClass().getMethod("size", (Class[])null);
+		    int size = (Integer)m.invoke(list,(Object[])null);
+		    m = list.getClass().getMethod("get", new Class[]{int.class});
+		    Object args[] = new Object[1];
+		    for (int i=0; i<size;i++) {
+		    	args[0] = i;
+		    	retval.add(m.invoke(list, args));
+		    }
+		    	
+	    	return retval;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 }
