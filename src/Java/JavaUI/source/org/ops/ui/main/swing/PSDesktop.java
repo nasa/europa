@@ -21,6 +21,8 @@ import bsh.util.JConsole;
 
 import org.ops.ui.solver.swing.PSSolverDialog;
 import org.ops.ui.utils.swing.Util;
+import org.ops.ui.mouse.swing.ActionViolationsPanel;
+import org.ops.ui.mouse.swing.ActionDetailsPanel;
 
 /*
 import org.ops.ui.chart.PSJFreeResourceChart;
@@ -29,8 +31,6 @@ import org.ops.ui.chart.PSResourceChartPSEModel;
 import org.ops.ui.gantt.PSEGantt;
 import org.ops.ui.gantt.PSGantt;
 import org.ops.ui.gantt.PSGanttPSEModel;
-import org.ops.ui.mouse.ActionViolationsPanel;
-import org.ops.ui.mouse.ActionDetailsPanel;
 import org.ops.ui.nddl.NddlAshInterpreter;
 import org.ops.ui.nddl.NddlTokenMarker;
 import org.ops.ui.anml.AnmlInterpreter;
@@ -315,7 +315,29 @@ public class PSDesktop
    	    frame.getContentPane().add(scrollpane);    	
 		frame.setSize(frame.getSize()); // Force repaint
     }
-         
+
+    public JInternalFrame makeViolationsFrame()
+    {
+        ActionViolationsPanel vp = new ActionViolationsPanel(getPSEngine());
+        JInternalFrame frame = makeNewFrame("Violations");
+        frame.getContentPane().add(vp);
+        frame.setLocation(500,180);
+        frame.setSize(300,300);
+
+        return frame;
+    }
+
+    public JInternalFrame makeDetailsFrame()
+    {
+        ActionDetailsPanel dp = new ActionDetailsPanel(getPSEngine());
+        JInternalFrame frame = makeNewFrame("Details");
+        frame.getContentPane().add(dp);
+        frame.setLocation(800,180);
+        frame.setSize(300,200);
+
+        return frame;
+    }    
+        
 /*    
     // Creates a table on the results of a JoSQL query
     public void makeTableFrame(String title,List l,String josqlQry)
@@ -390,28 +412,6 @@ public class PSDesktop
         return frame;
     }
 
-    public JInternalFrame makeViolationsFrame()
-    {
-        ActionViolationsPanel vp = new ActionViolationsPanel(getPSEngine());
-        JInternalFrame frame = makeNewFrame("Violations");
-        frame.getContentPane().add(vp);
-        frame.setLocation(500,180);
-        frame.setSize(300,300);
-
-        return frame;
-    }
-
-    public JInternalFrame makeDetailsFrame()
-    {
-        ActionDetailsPanel dp = new ActionDetailsPanel(getPSEngine());
-        JInternalFrame frame = makeNewFrame("Details");
-        frame.getContentPane().add(dp);
-        frame.setLocation(800,180);
-        frame.setSize(300,200);
-
-        return frame;
-    }    
-    
     public void makeNddlConsole()
     {
     	JInternalFrame nddlInterpFrame = makeNewFrame("Nddl Console");
