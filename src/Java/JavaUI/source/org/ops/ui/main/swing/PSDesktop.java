@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
-
 import javax.swing.JInternalFrame;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
@@ -19,6 +18,9 @@ import javax.swing.JScrollPane;
 import bsh.Interpreter;
 import bsh.util.JConsole;
 
+import org.ops.ui.gantt.model.PSGanttPSEModel;
+import org.ops.ui.gantt.swing.PSEGantt;
+import org.ops.ui.gantt.swing.PSGantt;
 import org.ops.ui.mouse.swing.ActionViolationsPanel;
 import org.ops.ui.mouse.swing.ActionDetailsPanel;
 import org.ops.ui.rchart.model.PSResourceChartPSEModel;
@@ -28,9 +30,6 @@ import org.ops.ui.solver.swing.PSSolverDialog;
 import org.ops.ui.utils.swing.Util;
 
 /*
-import org.ops.ui.gantt.PSEGantt;
-import org.ops.ui.gantt.PSGantt;
-import org.ops.ui.gantt.PSGanttPSEModel;
 import org.ops.ui.nddl.NddlAshInterpreter;
 import org.ops.ui.nddl.NddlTokenMarker;
 import org.ops.ui.anml.AnmlInterpreter;
@@ -360,6 +359,29 @@ public class PSDesktop
         return frame;
     }
     
+    public JInternalFrame makeResourceGanttFrame(
+            String objectsType,
+            Calendar start,
+            Calendar end)
+    {
+        return makeResourceGanttFrame(objectsType,start,end,Calendar.MINUTE);
+    }
+    
+    public JInternalFrame makeResourceGanttFrame(
+    		String objectsType,
+	        Calendar start,
+	        Calendar end,
+	        int timeUnit)
+    {
+        PSGantt gantt = new PSEGantt(new PSGanttPSEModel(getPSEngine(),start,objectsType,timeUnit),start,end);
+
+        JInternalFrame frame = makeNewFrame("Resource Schedule");
+        frame.getContentPane().add(gantt);
+		frame.setSize(frame.getSize()); // Force repaint
+
+        return frame;
+    }
+    
 /*    
     // Creates a table on the results of a JoSQL query
     public void makeTableFrame(String title,List l,String josqlQry)
@@ -389,29 +411,6 @@ public class PSDesktop
     	}
     }
     
-    public JInternalFrame makeResourceGanttFrame(
-            String objectsType,
-            Calendar start,
-            Calendar end)
-    {
-        return makeResourceGanttFrame(objectsType,start,end,Calendar.MINUTE);
-    }
-    
-    public JInternalFrame makeResourceGanttFrame(
-    		String objectsType,
-	        Calendar start,
-	        Calendar end,
-	        int timeUnit)
-    {
-        PSGantt gantt = new PSEGantt(new PSGanttPSEModel(getPSEngine(),start,objectsType,timeUnit),start,end);
-
-        JInternalFrame frame = makeNewFrame("Resource Schedule");
-        frame.getContentPane().add(gantt);
-		frame.setSize(frame.getSize()); // Force repaint
-
-        return frame;
-    }
-
     public void makeNddlConsole()
     {
     	JInternalFrame nddlInterpFrame = makeNewFrame("Nddl Console");

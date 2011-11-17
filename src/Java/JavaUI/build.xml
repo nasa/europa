@@ -38,6 +38,7 @@
 	<!-- Local Jar files. Used for compilation and tests -->
 	<fileset id="local.jars" dir="lib">
 		<include name="*.jar" />
+		<include name="egantt/*.jar"/>
 	</fileset>
 
 	<target name="build.site" depends="clean.all, build.update.jar, build.swing, build.feature" description="Prepare exportable update site">
