@@ -2,14 +2,14 @@
 <project name="EuropaJavaUI" default="build.swing" basedir=".">
 
 	<property environment="env" />
-	<!-- 
-	Assume EUROPA_HOME points to PLASMA_HOME/dist/europa. Will get libs from 
-	there and place our output there.
+	<!--
+	This module requires relies on the C++ libs and PSEngine.jar 
+	It expects to find those under $PLASMA_HOME/build/lib
 	-->
-	<property name="europa.dir" value="${env.EUROPA_HOME}" />
+	<property name="plasma.dir" value="${env.PLASMA_HOME}" />
 	<echo message="Building Java UI"/>
-	<echo message="europa.dir = ${europa.dir}"/>
-	<property name="psengine.jar.path" value="${europa.dir}/lib"/>
+	<echo message="plasma.dir = ${plasma.dir}"/>
+	<property name="psengine.jar.path" value="${plasma.dir}/build/lib"/>
 
 	<property file="${basedir}/build.properties" />
 	<property file="${basedir}/plugin.properties" />
@@ -18,20 +18,20 @@
 	<property name="basename" value="org.ops.ui.europaplugin" />
 	<property name="swingname" value="org.ops.ui.europaswing" />
 
-	<property name="build.dir" value="${europa.dir}/JavaUI"/>
+	<property name="build.dir" value="${plasma.dir}/build/JavaUI"/>
 	<property name="tempdir" value="${build.dir}/build.temp" />
 	<property name="test.temp" value="${build.dir}/test.temp" />
 	<property name="test.report" value="${build.dir}/test.report" />
 	<!-- Build directory to place swing jars into -->
-	<property name="swing.out.dir" value="${europa.dir}/lib" />
+	<property name="swing.out.dir" value="${plasma.dir}/build/lib" />
 	<!-- Output directory for the  update site -->
-	<property name="eclipse.out.dir" value="${europa.dir}/eclipse" />
+	<property name="eclipse.out.dir" value="${plasma.dir}/build/eclipse" />
 
 	<property name="swing.out.jar" value="${swing.out.dir}/PSUISwing.jar"/>
 
 	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
 		<classpath>
-			<pathelement location="${europa.dir}/../../ext/ant/ant-contrib-1.0b3.jar"/>
+			<pathelement location="${plasma.dir}/ext/ant/ant-contrib-1.0b3.jar"/>
 		</classpath>
 	</taskdef>
 	
