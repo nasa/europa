@@ -8,14 +8,13 @@
   <property file="build.properties"/>
 
   <property name="europa.dir"   value="${env.EUROPA_HOME}"/>
-  <property name="psui.lib.dir" value="${europa.dir}/lib/PSUI"/>
 
   <property name="debug"  value="true"/>
   <property name="deprecation"  value="true"/>
   <property name="dist" value="build/lib"/>    
 
   <path id="psui.class.path">
-    <pathelement location="${europa.dir}/lib/PSUI.jar"/>
+    <pathelement location="${europa.dir}/lib/PSUISwing.jar"/>
   </path>
 
   <target name="init">
