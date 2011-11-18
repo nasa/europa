@@ -5,8 +5,8 @@ import java.util.StringTokenizer;
 import java.util.Comparator;
 import java.util.Collections;
 import psengine.*;
-import org.ops.ui.solver.*;
-import org.ops.ui.util.Util;
+import org.ops.ui.solver.swing.*;
+import org.ops.ui.utils.Utilities;
 
 public class BlockWorldSolverListener
     implements PSSolverDialogListener
@@ -48,7 +48,7 @@ public class BlockWorldSolverListener
     {
     	StringBuffer buf = new StringBuffer();
     	
-        List actions = Util.SWIGList(c.getTokens()); 
+        List actions = Utilities.SWIGList(c.getTokens()); 
         Collections.sort(actions,actionComparator_); 
     	for (Object o : actions) {
     		PSToken a = (PSToken)o;
@@ -81,7 +81,7 @@ public class BlockWorldSolverListener
     		if (c.getEntityName().endsWith("Bottom")) {
     			String blockName = getBlockName(c.getEntityName());
     			blockName = blockName.substring(0,blockName.length()-5);
-                List actions = Util.SWIGList(c.getTokens()); 
+                List actions = Utilities.SWIGList(c.getTokens()); 
                 Collections.sort(actions,actionComparator_); 
     			if (actions.size()==0)
     				continue;

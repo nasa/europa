@@ -1,5 +1,4 @@
 import psengine.*;
-import org.ops.ui.util.Util;
 
 try {
     errors = psengine.executeScript("nddl",bsh.cwd+"/BlocksWorld-initial-state.nddl",true/*isFile*/);

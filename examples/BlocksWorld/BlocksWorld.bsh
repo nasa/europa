@@ -1,15 +1,12 @@
-// CrewPlanning.bsh
+// BlocksWorld.bsh
+
+import psengine.*;
+import BlocksWorld.*;
 
 import java.awt.BorderLayout;
 import javax.swing.JInternalFrame;
-
-import org.ops.ui.util.Util;
-import org.ops.ui.PSDesktop;
-import org.ops.ui.mouse.*;
-import org.ops.ui.gantt.*;
-import org.ops.ui.chart.*;
-import psengine.*;
-import BlocksWorld.*;
+import org.ops.ui.mouse.swing.*;
+import org.ops.ui.gantt.swing.*;
 
 int month = GregorianCalendar.SEPTEMBER, day = 11; 
 GregorianCalendar start = new GregorianCalendar(2006,month,day,0,0);
@@ -23,17 +20,11 @@ void usingCodeGeneration()
     System.out.println("Used code generation");
 }
 
-void usingInterpreter()
+void initPSEngine()
 {
 	cwd = bsh.cwd;
     String nddlModel = cwd+"/BlocksWorld-initial-state.nddl";
     psengine.executeScript("nddl",nddlModel,true/*isFile*/);
-}
-
-void initPSEngine()
-{
-    //usingCodeGeneration();
-    usingInterpreter();
 }
 
 void setupDesktop()
