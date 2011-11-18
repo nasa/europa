@@ -117,7 +117,7 @@
 		<!-- compile the source code -->
 		<javac destdir="${tempdir}" srcdir="${srcdir}" includeAntRuntime="no">
 			<classpath refid="compile.classpath" />
-			<include name="**/swing/**" />
+			<exclude name="**/swt/**" />
 		</javac>
 		<!-- Copy necessary resources -->
 		<copy todir="${tempdir}" failonerror="true" overwrite="false">
@@ -202,11 +202,7 @@
 	<target name="build.swing" depends="compile.swing,unjar-libs" description="Create Swing JAR">
 		<mkdir dir="${swing.out.dir}" />
 		<jar destfile="${swing.out.jar}" basedir="${tempdir}" manifest="${basedir}/META-INF/MANIFEST.SWING">
-			<include name="bsh/**"/>
-			<include name="com/**"/>
-			<include name="org/jfree/**" />
-			<include name="**/model/*" />
-			<include name="**/swing/*" />
+			<exclude name="**/swt/*" />
 			<exclude name="**/unittesting/*" />
 		</jar>
 	</target>
