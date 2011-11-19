@@ -1,3 +1,3 @@
 Manifest-Version: 1.0
 Main-Class: org.ops.ui.main.swing.PSDesktop
-Class-Path: ../../europa/lib/PSEngine.jar ./PSEngine.jar
+Class-Path: ./PSEngine.jar
