@@ -1,11 +1,10 @@
 String project="Rover";
 
 import java.awt.BorderLayout;
-import org.ops.ui.util.Util;
-import org.ops.ui.PSDesktop;
-import org.ops.ui.mouse.*;
-import org.ops.ui.gantt.*;
-import org.ops.ui.chart.*;
+import org.ops.ui.main.swing.PSDesktop;
+import org.ops.ui.mouse.swing.*;
+import org.ops.ui.gantt.swing.*;
+import org.ops.ui.rchart.swing.*;
 import psengine.*;
 import Rover.*;
 
@@ -43,18 +42,17 @@ maxSteps = 200;
 config = "PlannerConfig.xml";
 
 try {
-    psengine.executeScript("nddl",bsh.cwd+"/"+project+"-initial-state.nddl",true/*isFile*/);
+    errors = psengine.executeScript("nddl",bsh.cwd+"/"+project+"-initial-state.nddl",true/*isFile*/);
+	if (!errors.equals(""))
+		throw new RuntimeException("Failed loading model:"+errors);
 
     PSSolver solver = psengine.createSolver(config);
     solver.configure(horizonStart,horizonEnd);
     solverDialog = desktop.makeSolverDialog(solver);
 }    
 catch (Exception e) {
-  	System.err.println("Failed Initializing : "+e.getMessage());
+    e.printStackTrace();
 }
-
-
    
 //setupDesktop();
-//showHistory();
 
