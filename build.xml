@@ -230,7 +230,7 @@
 			<property name="plasma.dir" value="${dir.plasma.root}"/>
 		</ant>
 		<ant dir="src/Java/JavaUI" description="Build Swing version of Java UI" target="build.swing">
-			<property name="europa.dir" value="${dir.plasma.root}/build" />
+			<property name="plasma.dir" value="${dir.plasma.root}"/>
 		</ant>			
 	</target>
 
