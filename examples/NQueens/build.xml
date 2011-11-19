@@ -1,79 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- This file is placed by the makeproject script in new projects -->
 <project name="NQueens" default="run" basedir=".">
-  <description>NQueens -- A EUROPA PSDesktop Project</description>
+	<description>NQueens -- A EUROPA PSDesktop Project</description>
 
-  <property environment="env"/>
-  <!-- load overrides from build.properties file -->
-  <property file="build.properties"/>
+	<property environment="env"/>
+	<!-- load overrides from build.properties file -->
+	<property file="build.properties"/>
 
-  <property name="europa.dir"   value="${env.EUROPA_HOME}"/>
-  <property name="psui.lib.dir" value="${europa.dir}/lib/PSUI"/>
+	<property name="europa.dir"   value="${env.EUROPA_HOME}"/>
 
-  <property name="debug"  value="true"/>
-  <property name="deprecation"  value="true"/>
-  <property name="dist" value="build/lib"/>    
+	<property name="debug"  value="true"/>
+	<property name="deprecation"  value="true"/>
+	<property name="dist" value="build/lib"/>
 
-  <path id="psui.class.path">
-    <pathelement location="${europa.dir}/lib/PSUI.jar"/>
-  </path>
+	<path id="psui.class.path">
+		<pathelement location="${europa.dir}/lib/PSEngine.jar"/>
+		<pathelement location="${europa.dir}/lib/PSUISwing.jar"/>
+	</path>
 
-  <target name="init">
-    <tstamp/>
-    <mkdir dir="${class.dir}"/>
-    <mkdir dir="${swig.src.dir}"/>
-  </target>
+	<target name="init">
+		<tstamp/>
+		<mkdir dir="${class.dir}"/>
+		<mkdir dir="${swig.src.dir}"/>
+	</target>
 
-  <property name="java.src.dir" value="java"/> 
-  <property name="swig.src.dir" value="build/swig/NQueens/"/>
-  <property name="class.dir"     value="build/classes"/> 
+	<property name="java.src.dir" value="java"/>
+	<property name="swig.src.dir" value="build/swig/NQueens/"/>
+	<property name="class.dir"     value="build/classes"/>
 
-  <!-- Create .jar to include any custom Java and swig-wrapped C++ -->
-  <target name="NQueens" depends="compile">
-     <mkdir dir="${dist}"/>  				<!-- if necessary -->
-     <jar jarfile="${dist}/NQueens.jar">
-       <fileset dir="${class.dir}"/>
-     </jar>
-     <touch file="${dist}/NQueens.jar"/>
-  </target>
+	<!-- Create .jar to include any custom Java and swig-wrapped C++ -->
+	<target name="NQueens" depends="compile">
+		<mkdir dir="${dist}"/>
+		<!-- if necessary -->
+		<jar jarfile="${dist}/NQueens.jar">
+			<fileset dir="${class.dir}"/>
+		</jar>
+		<touch file="${dist}/NQueens.jar"/>
+	</target>
 
-  <target name="clean" description="delete the 'classes' directory trees" >
-    <delete dir="${class.dir}"/>
-  </target>
+	<target name="clean" description="delete the 'classes' directory trees" >
+		<delete dir="${class.dir}"/>
+	</target>
 
-  <target name="compile" depends="init" description="compile 'src' tree into 'classes' tree" >
-  <!-- Compile any swig-wrapped custom C++ code -->
-   <javac srcdir="${swig.src.dir}" 
-           destdir="${class.dir}" 
-    	   debug="${debug}" 
-    	   deprecation="${deprecation}">
-	  <classpath refid="psui.class.path"/>
-    </javac>
-  <!-- Compile Main.java and any custom java code -->
-    <javac srcdir="${java.src.dir}" 
-           destdir="${class.dir}" 
-    	   debug="${debug}" 
-    	   deprecation="${deprecation}">
-	  <classpath refid="psui.class.path"/>
-    </javac>
-  </target>
-	
-  <!-- project,project.dir,project.mode and project.bsh.script are read from build.properties -->
-  <target name="run" depends="compile" description="build and run">
-    <echo message="Running ${project} project"/>
-    <condition property="gui.show" value="nogui" else="">
-	<equals arg1="${project.bsh.script}" arg2="Batch.bsh"/>
-    </condition>        
-    <java classname="${project}.Main" dir="${project.dir}" fork="yes" failonerror="true">
-      <jvmarg value="-Xms256m"/>
-      <jvmarg value="-Xmx1024m"/>
-      <arg value="${project.mode}"/>
-      <arg value="${project.bsh.script}"/>
-      <arg value="${gui.show}"/>
-      <classpath>
-      <path refid="psui.class.path"/>
-      <pathelement location="${class.dir}"/>
-       </classpath>
-    </java>
-  </target>
+	<target name="compile" depends="init" description="compile 'src' tree into 'classes' tree" >
+		<!-- Compile any swig-wrapped custom C++ code -->
+		<javac srcdir="${swig.src.dir}" destdir="${class.dir}" debug="${debug}" deprecation="${deprecation}" includeAntRuntime="no">
+			<classpath refid="psui.class.path" />
+		</javac>
+		<!-- Compile Main.java and any custom java code -->
+		<javac srcdir="${java.src.dir}" destdir="${class.dir}" debug="${debug}" deprecation="${deprecation}" includeAntRuntime="no">
+			<classpath refid="psui.class.path" />
+		</javac>
+	</target>
+
+	<!-- project,project.dir,project.mode and project.bsh.script are read from build.properties -->
+	<target name="run" depends="compile" description="build and run">
+		<echo message="Running ${project} project"/>
+		<condition property="gui.show" value="nogui" else="">
+			<equals arg1="${project.bsh.script}" arg2="Batch.bsh"/>
+		</condition>
+		<java classname="${project}.Main" dir="${project.dir}" fork="yes" failonerror="true">
+			<jvmarg value="-Xms256m"/>
+			<jvmarg value="-Xmx1024m"/>
+			<arg value="${project.mode}"/>
+			<arg value="${project.bsh.script}"/>
+			<arg value="${gui.show}"/>
+			<classpath>
+				<path refid="psui.class.path"/>
+				<pathelement location="${class.dir}"/>
+			</classpath>
+		</java>
+	</target>
 </project>
