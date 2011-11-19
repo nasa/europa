@@ -8,14 +8,14 @@
   <property file="build.properties"/>
 
   <property name="europa.dir"   value="${env.EUROPA_HOME}"/>
-  <property name="psui.lib.dir" value="${europa.dir}/lib/PSUI"/>
 
   <property name="debug"  value="true"/>
   <property name="deprecation"  value="true"/>
   <property name="dist" value="build/lib"/>    
 
   <path id="psui.class.path">
-    <pathelement location="${europa.dir}/lib/PSUI.jar"/>
+    <pathelement location="${europa.dir}/lib/PSEngine.jar"/>
+    <pathelement location="${europa.dir}/lib/PSUISwing.jar"/>
   </path>
 
   <target name="init">
@@ -42,20 +42,22 @@
   </target>
 
   <target name="compile" depends="init" description="compile 'src' tree into 'classes' tree" >
-  <!-- Compile any swig-wrapped custom C++ code -->
-   <javac srcdir="${swig.src.dir}" 
-           destdir="${class.dir}" 
-    	   debug="${debug}" 
-    	   deprecation="${deprecation}">
-	  <classpath refid="psui.class.path"/>
-    </javac>
-  <!-- Compile Main.java and any custom java code -->
-    <javac srcdir="${java.src.dir}" 
-           destdir="${class.dir}" 
-    	   debug="${debug}" 
-    	   deprecation="${deprecation}">
-	  <classpath refid="psui.class.path"/>
-    </javac>
+	  <!-- Compile any swig-wrapped custom C++ code -->
+	   <javac srcdir="${swig.src.dir}" 
+	           destdir="${class.dir}" 
+	    	   debug="${debug}" 
+	    	   deprecation="${deprecation}"
+	           includeAntRuntime="no">
+		  <classpath refid="psui.class.path"/>
+	    </javac>
+	  <!-- Compile Main.java and any custom java code -->
+	    <javac srcdir="${java.src.dir}" 
+	           destdir="${class.dir}" 
+	    	   debug="${debug}" 
+	    	   deprecation="${deprecation}"
+	           includeAntRuntime="no">
+		  <classpath refid="psui.class.path"/>
+	    </javac>
   </target>
 	
   <!-- project,project.dir,project.mode and project.bsh.script are read from build.properties -->

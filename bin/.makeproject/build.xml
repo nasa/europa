@@ -14,7 +14,8 @@
   <property name="dist" value="build/lib"/>    
 
   <path id="psui.class.path">
-    <pathelement location="${europa.dir}/lib/PSUISwing.jar"/>
+      <pathelement location="${europa.dir}/lib/PSEngine.jar"/>
+      <pathelement location="${europa.dir}/lib/PSUISwing.jar"/>
   </path>
 
   <target name="init">

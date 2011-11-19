@@ -5,20 +5,27 @@
 
 import psengine.*;
 
-// Load the model and the problem :
-String nddlModel = bsh.cwd+"/Light-initial-state.nddl";
-//String nddlModel = bsh.cwd+"/Light-strips-initial-state.nddl";
-psengine.executeScript("nddl",nddlModel,true/*isFile*/);
+try {
+	// Load the model and the problem :
+	String nddlModel = bsh.cwd+"/Light-initial-state.nddl";
+	//String nddlModel = bsh.cwd+"/Light-strips-initial-state.nddl";
+	errors = psengine.executeScript("nddl",nddlModel,true/*isFile*/);
+	if (!errors.equals(""))
+		throw new RuntimeException("Failed loading model:"+errors);
 
-// Create a solver
-solver = desktop.makeSolver(
-    "PlannerConfig.xml" // config
-	, 0                 // startHorizon
-	, 100               // endHorizon
-);
+	// Create a solver
+	solver = desktop.makeSolver(
+			"PlannerConfig.xml" // config
+			, 0                 // startHorizon
+			, 100               // endHorizon
+	);
 
-// This will display a dialog that allows the user to run the solver interactively
-desktop.makeSolverDialog(solver);
+	// This will display a dialog that allows the user to run the solver interactively
+	desktop.makeSolverDialog(solver);
+}
+catch (Exception e) {
+    e.printStackTrace();
+}
 
 // call showPlan() after you've run the solver to see the resulting plan
 void showPlan()

@@ -1,9 +1,9 @@
 package Light;
 
 import psengine.PSUtil;
-import psengine.util.LibraryLoader;
 import psengine.PSEngine;
-import org.ops.ui.PSDesktop;
+import psengine.util.LibraryLoader;
+import org.ops.ui.main.swing.PSDesktop;
 import bsh.Interpreter;
 
 class Main 
@@ -24,8 +24,8 @@ class Main
 		{
 			Interpreter bshInterpreter_ = new bsh.Interpreter();
 			try {
-			bshInterpreter_.set("psengine", psEngine_);
-		        bshInterpreter_.eval("source(\""+args[1]+"\");");
+				bshInterpreter_.set("psengine", psEngine_);
+				bshInterpreter_.eval("source(\""+args[1]+"\");");
 			}
 			catch (Exception e) {
 			     throw new RuntimeException(e);

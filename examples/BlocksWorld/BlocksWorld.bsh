@@ -24,7 +24,9 @@ void initPSEngine()
 {
 	cwd = bsh.cwd;
     String nddlModel = cwd+"/BlocksWorld-initial-state.nddl";
-    psengine.executeScript("nddl",nddlModel,true/*isFile*/);
+    errors = psengine.executeScript("nddl",nddlModel,true/*isFile*/);
+    if (!errors.equals(""))
+        throw new RuntimeException("Failed loading model:"+errors);
 }
 
 void setupDesktop()
