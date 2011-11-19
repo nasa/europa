@@ -1,11 +1,9 @@
 package UBO;
 
-import psengine.PSUtil;
-import psengine.util.LibraryLoader;
-import psengine.PSEngine;
-import org.ops.ui.PSDesktop;
-import psengine.util.SimpleTimer;
 import psengine.*;
+import psengine.util.LibraryLoader;
+import psengine.util.SimpleTimer;
+import org.ops.ui.main.swing.PSDesktop;
 import bsh.Interpreter;
 
 import java.io.BufferedWriter;
@@ -28,25 +26,22 @@ class Main
 			Runtime.getRuntime().addShutdownHook(new ShutdownHook());
 			loadCustomCode(debugMode);
 			
-			if(args[2].equals("nogui"))
-			{
-			Interpreter bshInterpreter_ = new bsh.Interpreter();
-			try {
-				bshInterpreter_.set("psengine", psEngine_);
-			        bshInterpreter_.eval("source(\""+args[1]+"\");");
+			if(args[2].equals("nogui")) {
+				Interpreter bshInterpreter_ = new bsh.Interpreter();
+				try {
+					bshInterpreter_.set("psengine", psEngine_);
+					bshInterpreter_.eval("source(\""+args[1]+"\");");
 				}
 				catch (Exception e) {
-				     throw new RuntimeException(e);
+					throw new RuntimeException(e);
 				}            		
 			}
-			else
-			{
+			else {
 				PSDesktop d = PSDesktop.makeInstance(psEngine_,args);
 				d.runUI();
 			}
 		}
-	    else
-	    {
+	    else {
 	        runBatchTest(args);
 	    }
 	}

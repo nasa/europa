@@ -2,8 +2,8 @@ package UBO;
 
 import java.util.Vector;
 import psengine.*;
-import org.ops.ui.PSDesktop;
-import org.ops.ui.solver.*;
+import org.ops.ui.main.swing.PSDesktop;
+import org.ops.ui.solver.swing.*;
 import java.util.regex.*;
 import psengine.util.SimpleTimer;
 
