@@ -219,7 +219,6 @@
 
 		<mkdir dir="${test.temp}" />
 		<junit failureproperty="testfailed" fork="true" maxmemory="500M" dir="${test.temp}">
-			<env key="EUROPA_HOME" value="${europa.home}" />
 			<env key="${ld.path.key}" value="${ld.path.value}" />
 			<jvmarg value="-ea" />
 			<classpath>
