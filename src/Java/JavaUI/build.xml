@@ -219,6 +219,7 @@
 
 		<mkdir dir="${test.temp}" />
 		<junit failureproperty="testfailed" fork="true" maxmemory="500M" dir="${test.temp}">
+			<env key="PLASMA_HOME" value="${plasma.dir}" />
 			<env key="${ld.path.key}" value="${ld.path.value}" />
 			<jvmarg value="-ea" />
 			<classpath>
