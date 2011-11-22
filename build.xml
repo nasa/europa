@@ -253,8 +253,11 @@
 	</target>
 
 	<target name="test-java">
-		<if>		
-			<contains string="${local.os.family}" substring="unix" casesensitive="false"/>  
+		<if>
+			<and>
+				<contains string="${local.os.family}" substring="unix" casesensitive="false"/>  
+		  		<equals arg1="${build.libs}" arg2="shared"/>
+			</and>
 		<then>
 			<!-- TODO: these are failing on windows but should be run the same on windows and unix -->			
 			<ant dir="${dir.src.java}/JavaUI" description="Run model tests for Java UI" target="test">
@@ -262,7 +265,7 @@
 				<property name="ld.path.key" value="${local.env.LD_LIBRARY_PATH.name}" />
 				<property name="ld.path.value" value="${build.LD_LIBRARY_PATH.value}"/>
 			</ant>	
-			</then>
+		</then>
 		</if>		
 
 	</target>
