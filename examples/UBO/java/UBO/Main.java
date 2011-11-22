@@ -16,8 +16,10 @@ class Main
 	   
 	public static void main(String args[])
 	{
-		if (args[3].equals(""))
-		{
+		if ((args.length >= 4) && !(args[3].equals(""))) {
+	        runBatchTest(args);
+		}
+	    else {
 		    String debugMode = args[0];
 	        PSUtil.loadLibraries(debugMode);	   
 
@@ -26,7 +28,7 @@ class Main
 			Runtime.getRuntime().addShutdownHook(new ShutdownHook());
 			loadCustomCode(debugMode);
 			
-			if(args[2].equals("nogui")) {
+			if((args.length >= 3) && args[2].equals("nogui")) {
 				Interpreter bshInterpreter_ = new bsh.Interpreter();
 				try {
 					bshInterpreter_.set("psengine", psEngine_);
@@ -40,9 +42,6 @@ class Main
 				PSDesktop d = PSDesktop.makeInstance(psEngine_,args);
 				d.runUI();
 			}
-		}
-	    else {
-	        runBatchTest(args);
 	    }
 	}
 	
