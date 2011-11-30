@@ -17,16 +17,13 @@ class Rover
 	Rover(Battery b)
 	{
     	navigator = new Navigator();
-    	instrument = new Instrument();
+    	instrument = new Instrument(this);
     	mainBattery = b;
   	}
   	
   	action Go { Location dest; }
   	
-	action TakeSample{
-		Location rock;
-     	eq(duration, [20, 25]); // Flexible durations for taking a sample
-   	}
+	action TakeSample { Location rock; }
    	
    	action PhoneHome{}    // Communicate material back to earth  
    	action PhoneLander{}  // Communicate material back to lander
@@ -73,9 +70,9 @@ class Navigator extends Timeline
 {
 	predicate At { Location location; }
 
-	// Rover maybe going between two locations.
+	// Rover may be going between two locations.
 	predicate Going{
-		Path p;
+		Path path;
 	  	Location from;
 	  	Location to;
 	  	neq(from, to); // prevents rover from going from a location straight back to that location.
@@ -83,19 +80,31 @@ class Navigator extends Timeline
 }
 
 // Management of the rover's instruments.
-class InstrumentState extends Timeline
+class InstrumentLocation extends Timeline
 {
 	predicate Stowed{}
+	predicate Stowing{}
 	predicate Unstowed{}
-	predicate On {Location rock;}	
+	predicate Unstowing{}
+}
+
+class InstrumentState extends Timeline
+{
+	predicate Placed {Location rock;}	
+	predicate Sampling {Location rock;}	
+	predicate Free {}	
 }
 
 class Instrument
 {
+    Rover rover;
+	InstrumentLocation location;
 	InstrumentState state;
 	
-	Instrument()
+	Instrument(Rover r)
 	{
+		rover = r;
+		location = new InstrumentLocation();
 	    state = new InstrumentState();
 	}
 	
@@ -120,23 +129,28 @@ class Instrument
 
 Rover::Go
 {
+	// Instrument must be stowed while driving
+	contained_by(condition object.instrument.location.Stowed);
+	 
 	met_by(condition object.navigator.At _from);
 	meets(effect object.navigator.At _to);
 	eq(_to.location, dest);
 
-	Path p;
-	 // The path used must be between the 2 points
-  	eq(p.from, _from.location);
-  	eq(p.to, dest);
+	// Find a path
+	Path path; 
+	
+	// The path used must be between the 2 points
+  	eq(path.from, _from.location);
+  	eq(path.to, dest);
   	
 	equals(effect object.navigator.Going going);
-	eq(going.p,p);
+	eq(going.path,path);
 	eq(going.from,_from.location);
 	eq(going.to,dest);
 
   	// Pull power from the battery equal to the path cost.
   	starts(effect Battery.consume tx);
-  	eq(tx.quantity, p.cost);
+  	eq(tx.quantity, path.cost);
 }
 
 Rover::TakeSample
@@ -145,12 +159,9 @@ Rover::TakeSample
 	contained_by(condition object.navigator.At at);
 	eq(at.location, rock);
 	
-	contains(object.instrument.TakeSample ts);
+	equals(object.instrument.TakeSample ts);
 	eq(ts.rock, rock);
-
-  	starts(effect object.mainBattery.consume tx);
-  	eq(tx.quantity, 120); // consume battery power
-	
+    
 	// Make contact with results. Prefer to phone home, but
 	// also allow contact to lander instead as a relay
 	bool OR;
@@ -163,32 +174,61 @@ Rover::TakeSample
   	}
 }
 
-// Take Sample = 
+Rover::PhoneHome
+{
+  starts(object.mainBattery.consume tx);
+  eq(tx.quantity, 300); // consume battery power
+}
+
+Rover::PhoneLander
+{
+  starts(object.mainBattery.consume tx);
+  eq(tx.quantity, 20); // consume battery power
+}
+
+// Take Sample = PositionOnRock + Sample
 Instrument::TakeSample
 {
-  	contained_by(condition object.state.On on);
+  	met_by(condition object.state.Placed on);
   	eq(on.rock, rock);
 
-  	meets(effect object.state.Stowed);
+    contained_by(condition object.location.Unstowed);
+    
+  	equals(effect object.state.Sampling sample);
+  	eq(sample.rock, rock);
+  	
+  	starts(effect object.rover.mainBattery.consume tx);
+  	eq(tx.quantity, 120); // consume battery power	
 }
 
 Instrument::Place
 {
-    contained_by(condition object.state.Unstowed);
+    contained_by(condition object.location.Unstowed);
     
-	meets(effect object.state.On on);
+	meets(effect object.state.Placed on);
 	eq(on.rock,rock);
+	
+  	starts(effect object.rover.mainBattery.consume tx);
+  	eq(tx.quantity, 20); // consume battery power		
 }
 
 Instrument::Stow
 {
-	met_by(condition object.state.Unstowed);
-	meets(effect object.state.Stowed);
+	met_by(condition object.location.Unstowed);
+	equals(effect object.location.Stowing);
+	meets(effect object.location.Stowed);
+	
+  	starts(effect object.rover.mainBattery.consume tx);
+  	eq(tx.quantity, 20); // consume battery power		
 }
 
 Instrument::Unstow
 {
-	met_by(condition object.state.Stowed);
-	meets(effect object.state.Unstowed);
+	met_by(condition object.location.Stowed);
+	equals(effect object.location.Unstowing);
+	meets(effect object.location.Unstowed);
+	
+  	starts(effect object.rover.mainBattery.consume tx);
+  	eq(tx.quantity, 20); // consume battery power		
 }
 

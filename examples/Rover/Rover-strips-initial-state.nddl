@@ -24,9 +24,11 @@ fact(spirit.navigator.At initialPosition);
 eq(initialPosition.start, 0);  // What time - the start of this planning horizon
 eq(initialPosition.location, lander); // What position - the lander
 
-// Establish the initial instrument state
-fact(spirit.instrument.state.Stowed stowed);
+// Establish the initial instrument state & location
+fact(spirit.instrument.location.Stowed stowed);
 eq(stowed.start, 0);
+fact(spirit.instrument.state.Free free);
+eq(free.start, 0);
 
 // Establish the goal - to take a sample at a position
 goal(spirit.TakeSample sample);
