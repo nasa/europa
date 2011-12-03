@@ -2,7 +2,6 @@ package org.ops.ui.schemabrowser.model;
 
 import java.util.ArrayList;
 
-import org.ops.ui.filemanager.model.AstNode;
 
 import psengine.PSDataType;
 
@@ -11,7 +10,8 @@ import psengine.PSDataType;
  * 
  * @author Tatiana Kichkaylo
  */
-public class SchemaNode {
+public class SchemaNode 
+{
 	/** Seed for conversion to array */
 	private final static SchemaNode[] seedArray = {};
 
@@ -41,8 +41,8 @@ public class SchemaNode {
 	/** Child nodes */
 	private ArrayList<SchemaNode> children = new ArrayList<SchemaNode>();
 
-	/** Pointer to AST node, which in turn points to file and offset */
-	private AstNode ast;
+	/** points to file and offset */
+	private FileLocation fileLocation = null;
 
 	public SchemaNode(Type type, String name) {
 		this.name = name;
@@ -123,11 +123,27 @@ public class SchemaNode {
 		children.clear();
 	}
 
-	public void setAst(AstNode ast) {
-		this.ast = ast;
+	public void setFileLocation(FileLocation fl) 
+	{
+		this.fileLocation = fl;
 	}
 
-	public AstNode getAst() {
-		return ast;
+	public FileLocation getFileLocation() 
+	{
+		return fileLocation;
+	}
+	
+	public static class FileLocation
+	{
+		public String filename;
+		public int startLine;
+		public int endLine;
+		
+		public FileLocation(String fn, int sl, int el)
+		{
+			filename = fn;
+			startLine = sl;
+			endLine = el;
+		}
 	}
 }

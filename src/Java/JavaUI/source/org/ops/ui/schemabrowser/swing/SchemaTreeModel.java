@@ -8,7 +8,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import org.ops.ui.schemabrowser.model.SchemaNode;
-import org.ops.ui.schemabrowser.model.SchemaSource;
+import org.ops.ui.schemabrowser.model.SchemaModel;
 
 /**
  * Convert schema nodes into Swing tree model
@@ -16,13 +16,13 @@ import org.ops.ui.schemabrowser.model.SchemaSource;
  * @author Tatiana Kichkaylo
  */
 public class SchemaTreeModel implements TreeModel {
-	private SchemaSource model;
+	private SchemaModel model;
 	private SchemaNode rootNode = new SchemaNode(SchemaNode.Type.CATEGORY,
 			"Root");
 	private ArrayList<TreeModelListener> listeners = new ArrayList<TreeModelListener>();
 
-	public SchemaTreeModel(SchemaSource model) {
-		this.model = model;
+	public SchemaTreeModel(SchemaModel m) {
+		this.model = m;
 		reloadFromSchema();
 	}
 

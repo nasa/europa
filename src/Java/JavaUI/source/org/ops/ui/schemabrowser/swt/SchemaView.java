@@ -15,9 +15,9 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.ops.ui.filemanager.model.AstNode;
+import org.ops.ui.schemabrowser.model.SchemaModel;
 import org.ops.ui.schemabrowser.model.SchemaNode;
-import org.ops.ui.schemabrowser.model.SchemaSource;
+import org.ops.ui.schemabrowser.model.SchemaSolverModel;
 import org.ops.ui.solver.swt.SolverModelViewImpl;
 
 /**
@@ -28,7 +28,7 @@ import org.ops.ui.solver.swt.SolverModelViewImpl;
 public class SchemaView extends SolverModelViewImpl {
 	public static final String VIEW_ID = "org.ops.ui.schemabrowser.swt.SchemaView";
 	private TreeViewer viewer;
-	private final SchemaSource source = new SchemaSource(null);
+	private SchemaModel source = new SchemaSolverModel(null);
 
 	// For now reload schema only on engine start/stop. If schema changes as
 	// a result of stepping, will also need to update then. Not doing it
@@ -66,11 +66,11 @@ public class SchemaView extends SolverModelViewImpl {
 				Object ob = ((ITreeSelection) sel).getFirstElement();
 				if (!(ob instanceof SchemaNode))
 					return;
-				AstNode ast = ((SchemaNode) ob).getAst();
-				if (ast == null)
+				SchemaNode.FileLocation location = ((SchemaNode) ob).getFileLocation();
+				if (location == null)
 					return;
 
-				String fileName = ast.getFileName();
+				String fileName = location.filename;
 				if (fileName == null)
 					return;
 
@@ -85,8 +85,8 @@ public class SchemaView extends SolverModelViewImpl {
 							.openEditorOnFileStore(page, store);
 					IDocument doc = editor.getDocumentProvider().getDocument(
 							editor.getEditorInput());
-					int offset = doc.getLineOffset(ast.getLine() - 1);
-					int end = doc.getLineOffset(ast.getEndLine());
+					int offset = doc.getLineOffset(location.startLine - 1);
+					int end = doc.getLineOffset(location.endLine);
 					editor.setHighlightRange(offset, end - offset + 1, true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -102,7 +102,7 @@ public class SchemaView extends SolverModelViewImpl {
 	}
 
 	private void reloadView() {
-		source.setModel(model);
+		source = new SchemaSolverModel(model);
 		SchemaContentProvider cProvider = (SchemaContentProvider) viewer
 				.getContentProvider();
 		cProvider.initialize();

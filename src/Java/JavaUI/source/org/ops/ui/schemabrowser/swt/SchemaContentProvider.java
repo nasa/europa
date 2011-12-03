@@ -2,8 +2,9 @@ package org.ops.ui.schemabrowser.swt;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.ops.ui.schemabrowser.model.SchemaModel;
 import org.ops.ui.schemabrowser.model.SchemaNode;
-import org.ops.ui.schemabrowser.model.SchemaSource;
+import org.ops.ui.schemabrowser.model.SchemaSolverModel;
 
 /**
  * Wrapping SchemaSource as a SWT content provider
@@ -13,12 +14,12 @@ import org.ops.ui.schemabrowser.model.SchemaSource;
 public class SchemaContentProvider implements ITreeContentProvider {
 
 	/** The actual source of data, common between SWT and Swing versions */
-	private SchemaSource model;
+	private SchemaModel model;
 
 	/** Root node to be fed as input to the viewer */
 	private SchemaNode rootNode;
 
-	public SchemaContentProvider(SchemaSource model) {
+	public SchemaContentProvider(SchemaModel model) {
 		this.model = model;
 		this.rootNode = new SchemaNode(SchemaNode.Type.CATEGORY, "Schema Root");
 	}

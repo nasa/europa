@@ -26,6 +26,8 @@ import org.ops.ui.mouse.swing.ActionDetailsPanel;
 import org.ops.ui.rchart.model.PSResourceChartPSEModel;
 import org.ops.ui.rchart.swing.PSJFreeResourceChart;
 import org.ops.ui.rchart.swing.PSResourceChart;
+import org.ops.ui.schemabrowser.model.SchemaModelImpl;
+import org.ops.ui.schemabrowser.swing.SchemaView;
 import org.ops.ui.solver.swing.PSSolverDialog;
 import org.ops.ui.utils.swing.Util;
 
@@ -239,7 +241,6 @@ public class PSDesktop
     {
         addBshVariable("desktop",this);
         addBshVariable("psengine",getPSEngine());
-//        addBshVariable("nddlInterp", nddlInterpreter_);
     }
 
     public PSSolver makeSolver(String config,int horizonStart,int horizonEnd)
@@ -315,6 +316,16 @@ public class PSDesktop
 		frame.setSize(frame.getSize()); // Force repaint
     }
 
+    public JInternalFrame makeSchemaBrowserFrame()
+    {
+    	// TODO: add a button to refresh info from engine on demand
+        JInternalFrame frame = makeNewFrame("Schema Browser");
+        frame.getContentPane().add(new SchemaView(new SchemaModelImpl(getPSEngine())));
+		frame.setSize(frame.getSize()); // Force repaint
+
+        return frame;
+    }
+    
     public JInternalFrame makeViolationsFrame()
     {
         ActionViolationsPanel vp = new ActionViolationsPanel(getPSEngine());
