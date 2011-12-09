@@ -503,13 +503,25 @@ namespace EUROPA {
     			m_detector->initialize();
     		}
     		else {
-    			initRecompute(m_recomputeInterval->getInstant());
-    			m_detector->initialize(m_recomputeInterval->getInstant());
+    			InstantId inst = m_recomputeInterval->getInstant();
 
-    			// initRecompute(instant) above also recomputes the levels for the 1st instant, so move forward:
-    			violation = m_detector->detect(m_recomputeInterval->getInstant());
+    			if (inst->getTime() == endTime) {
+    				endDiff.first = inst->getLowerLevel();
+    				endDiff.second = inst->getUpperLevel();
+    			}
 
-    			prev = m_recomputeInterval->getInstant();
+    			initRecompute(inst);
+    			m_detector->initialize(inst);
+
+    			if (inst->getTime() == endTime) {
+    				endDiff.first = inst->getLowerLevel() - endDiff.first;
+    				endDiff.second = inst->getUpperLevel() - endDiff.second;
+    			}
+
+    			// initRecompute(inst) above also recomputes the levels for the inst, so move forward:
+    			violation = m_detector->detect(inst);
+
+    			prev = inst;
     			m_recomputeInterval->next();
     		}
 
@@ -532,9 +544,9 @@ namespace EUROPA {
     				endDiff.second = inst->getUpperLevel() - endDiff.second;
     			}
 
-    			prev = inst;
-    			//stop detecting flaws and violations if the detector says so.
     			violation = m_detector->detect(inst);
+
+    			prev = inst;
     			m_recomputeInterval->next();
     		}
     	}
