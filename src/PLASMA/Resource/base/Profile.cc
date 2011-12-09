@@ -506,6 +506,7 @@ namespace EUROPA {
     			initRecompute(m_recomputeInterval->getInstant());
     			m_detector->initialize(m_recomputeInterval->getInstant());
 
+    			// initRecompute(instant) above also recomputes the levels for the 1st instant, so move forward:
     			violation = m_detector->detect(m_recomputeInterval->getInstant());
 
     			prev = m_recomputeInterval->getInstant();
@@ -555,12 +556,12 @@ namespace EUROPA {
     		return;
 
     	// Apply endDiff to (endTime,PLUS_INFINITY)
+    	bool violation = false;
     	std::map<eint, InstantId>::iterator it = m_instants.upper_bound(endTime);
-    	for (;it != m_instants.end();++it) {
+    	for (;(it != m_instants.end()) && !violation;++it) {
     		InstantId inst = it->second;
     		inst->applyBoundsDelta(endDiff.first,endDiff.second);
-    		// TODO: call m_detector->detect(inst);?
-    		// looks like we should
+    		violation = m_detector->detect(inst);
     	}
     }
 
