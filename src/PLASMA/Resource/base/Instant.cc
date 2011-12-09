@@ -112,6 +112,12 @@ namespace EUROPA {
       return retval;
     }
 
+    void Instant::applyBoundsDelta(const edouble& lbDelta, const edouble& ubDelta)
+    {
+    	m_lowerLevel += lbDelta;
+    	m_upperLevel += ubDelta;
+    }
+
     std::string Instant::toString() const {
       std::stringstream sstr;
       for(std::set<TransactionId>::const_iterator it = m_transactions.begin(); it != m_transactions.end(); ++it)

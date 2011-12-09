@@ -350,10 +350,11 @@ namespace EUROPA
     	m_upperClosedLevel = getInitCapacityUb();
     }
 
-    void FlowProfile::postHandleRecompute()
+    void FlowProfile::postHandleRecompute(const eint& endTime, const std::pair<edouble,edouble>& endDiff)
     {
-      m_recalculateLowerLevel = false;
-      m_recalculateUpperLevel = false;
+    	Profile::postHandleRecompute(endTime,endDiff);
+    	m_recalculateLowerLevel = false;
+    	m_recalculateUpperLevel = false;
     }
 
     void FlowProfile::recomputeLevels( InstantId prev, InstantId inst )

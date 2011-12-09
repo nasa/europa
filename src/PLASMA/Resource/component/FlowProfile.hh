@@ -336,7 +336,7 @@ namespace EUROPA
       /**
        * @brief
        */
-      void postHandleRecompute();
+      virtual void postHandleRecompute(const eint& endTime, const std::pair<edouble,edouble>& endDiff);
       /**
        * @brief Enables a transaction t. A transaction is enabled a time T to calculate the
        * envelopes for instant at time T if the lower bound of the time equals T (this is assuming

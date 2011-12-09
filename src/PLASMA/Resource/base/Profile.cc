@@ -481,19 +481,21 @@ namespace EUROPA {
         handleRecompute();
     }
 
-    void Profile::handleRecompute() {
+    void Profile::handleRecompute()
+    {
     	checkError(m_recomputeInterval.isValid(),
     			"Attempted to recompute levels over an invalid interval.");
     	condDebugMsg(m_recomputeInterval->done(), "Profile:recompute", "No instants over which to recompute.");
     	debugMsg("Profile:handleRecompute","Invoked");
     	debugMsg("Profile:recompute:prePrint", std::endl << toString());
+
+    	eint endTime = MINUS_INFINITY;
+    	std::pair<edouble,edouble> endDiff(0.0,0.0);
+
     	if(!m_recomputeInterval->done()) {
-    		//bool consistant = m_constraintEngine->propagate();
-    		//checkError(consistant, "Attempted to recompute a profile with an inconsistent constraint network.");
-
     		InstantId prev = InstantId::noId();
-
     		bool violation = false;
+    		endTime = m_recomputeInterval->getEndTime();
 
     		//if there is no preceding instant, do a clean init
     		if(m_recomputeInterval->getInstant()->getTime() == m_instants.begin()->first) {
@@ -514,21 +516,52 @@ namespace EUROPA {
     				&&
     				!violation ) {
     			InstantId inst = m_recomputeInterval->getInstant();
+
+    			if (inst->getTime() == endTime) {
+    				endDiff.first = inst->getLowerLevel();
+    				endDiff.second = inst->getUpperLevel();
+    			}
+
     			debugMsg("Profile:recompute", "Recomputing levels at instant " << inst->getTime());
     			check_error(inst.isValid());
     			recomputeLevels( prev, inst);
+
+    			if (inst->getTime() == endTime) {
+    				endDiff.first = inst->getLowerLevel() - endDiff.first;
+    				endDiff.second = inst->getUpperLevel() - endDiff.second;
+    			}
+
     			prev = inst;
     			//stop detecting flaws and violations if the detector says so.
     			violation = m_detector->detect(inst);
     			m_recomputeInterval->next();
     		}
     	}
+
     	debugMsg("Profile:recompute:postPrint", std::endl << toString());
     	debugMsg("Profile:handleRecompute", "Deleting profile iterator " << m_recomputeInterval->getId() );
     	delete (ProfileIterator*) m_recomputeInterval;
     	m_recomputeInterval = ProfileIteratorId::noId();
     	m_needsRecompute = false;
-    	postHandleRecompute();
+
+    	postHandleRecompute(endTime,endDiff);
+    }
+
+    void Profile::postHandleRecompute(const eint& endTime, const std::pair<edouble,edouble>& endDiff)
+    {
+    	debugMsg("Profile:postHandleRecompute", endTime << " [" << endDiff.first << "," << endDiff.second << "]");
+
+    	if ((endDiff.first==0) && (endDiff.second==0))
+    		return;
+
+    	// Apply endDiff to (endTime,PLUS_INFINITY)
+    	std::map<eint, InstantId>::iterator it = m_instants.upper_bound(endTime);
+    	for (;it != m_instants.end();++it) {
+    		InstantId inst = it->second;
+    		inst->applyBoundsDelta(endDiff.first,endDiff.second);
+    		// TODO: call m_detector->detect(inst);?
+    		// looks like we should
+    	}
     }
 
     void Profile::addInstantsForBounds(const TransactionId t) {

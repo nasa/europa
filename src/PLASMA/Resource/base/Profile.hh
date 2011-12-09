@@ -215,7 +215,7 @@ namespace EUROPA {
       /**
        * @brief Hanlde invoked at the end of handleRecompute
        */
-      virtual void postHandleRecompute() {}
+      virtual void postHandleRecompute(const eint& endTime, const std::pair<edouble,edouble>& endDiff);
       /**
        * @brief Initialize a recomputation with level data from the given Instant.
        */

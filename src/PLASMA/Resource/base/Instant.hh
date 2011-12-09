@@ -240,6 +240,11 @@ namespace EUROPA {
        */
       bool containsStartOrEnd();
 
+      /*
+       * @ brief applies delta to upper and lower bounds
+       */
+      void applyBoundsDelta(const edouble& lbDelta, const edouble& ubDelta);
+
       InstantId m_id;
       eint m_time; /*<! The time of the Instant */
       ProfileId m_profile; /*<! The Profile the Instant is on */
