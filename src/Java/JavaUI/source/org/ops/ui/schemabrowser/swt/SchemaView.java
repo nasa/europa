@@ -105,6 +105,7 @@ public class SchemaView extends SolverModelViewImpl {
 		source = new SchemaSolverModel(model);
 		SchemaContentProvider cProvider = (SchemaContentProvider) viewer
 				.getContentProvider();
+		cProvider.setModel(source);
 		cProvider.initialize();
 		viewer.refresh();
 	}

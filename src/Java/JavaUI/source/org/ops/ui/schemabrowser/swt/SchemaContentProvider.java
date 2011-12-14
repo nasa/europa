@@ -4,7 +4,6 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.ops.ui.schemabrowser.model.SchemaModel;
 import org.ops.ui.schemabrowser.model.SchemaNode;
-import org.ops.ui.schemabrowser.model.SchemaSolverModel;
 
 /**
  * Wrapping SchemaSource as a SWT content provider
@@ -24,6 +23,10 @@ public class SchemaContentProvider implements ITreeContentProvider {
 		this.rootNode = new SchemaNode(SchemaNode.Type.CATEGORY, "Schema Root");
 	}
 
+	public void setModel(SchemaModel model) {
+		this.model = model;
+	}
+	
 	public void dispose() {
 	}
 
