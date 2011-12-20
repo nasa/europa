@@ -8,7 +8,7 @@ import psengine.*;
 try {
 	// Load the model and the problem :
 	String nddlModel = bsh.cwd+"/Light-initial-state.nddl";
-	//String nddlModel = bsh.cwd+"/Light-strips-initial-state.nddl";
+	//String nddlModel = bsh.cwd+"/Light-nostrips-initial-state.nddl";
 	errors = psengine.executeScript("nddl",nddlModel,true/*isFile*/);
 	if (!errors.equals(""))
 		throw new RuntimeException("Failed loading model:"+errors);

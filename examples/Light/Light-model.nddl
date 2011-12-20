@@ -1,32 +1,32 @@
 
-class LightSwitch extends Timeline
-{
-    predicate turnOn  { duration=1; }
-    predicate turnOff { duration=1; }
-}
-
 class LightBulb extends Timeline
 {
-    LightSwitch mySwitch_;
-
-    LightBulb(LightSwitch b)
-    {
-        mySwitch_ = b;
-    }
-
     predicate On  {}
     predicate Off {}
 }
 
-LightBulb::On
+class LightSwitch extends Timeline
 {
-    met_by(object.Off);              // Bulb must be Off to be turned On
-    met_by(object.mySwitch_.turnOn); // Must be turned on through the switch
+    LightBulb myBulb_;
+
+    LightSwitch(LightBulb b)
+    {
+        myBulb_ = b;
+    }
+
+    action turnOn  { duration=1; }
+    action turnOff { duration=1; }
 }
 
-LightBulb::Off
+LightSwitch::turnOn
 {
-    met_by(object.On);                // Bulb must be On to be turned Off
-    met_by(object.mySwitch_.turnOff); // Must be turned off through the switch
+    met_by(condition object.myBulb_.Off);  // Bulb must be Off to be turned On
+    meets(effect object.myBulb_.On);   // Must be turned on through the switch
+}
+
+LightSwitch::turnOff
+{
+    met_by(condition object.myBulb_.On);   // Bulb must be On to be turned Off
+    meets(effect object.myBulb_.Off);      // Must be turned off through the switch
 }
 

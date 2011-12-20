@@ -1,13 +1,44 @@
-#include "Resources.nddl"
+// Rover-strips-model.nddl
 
-// Note that this example is described in detail in a Tutorial that can be
-// found on the project's documentation wiki.
+class Battery;
+class Instrument;
+class InstrumentState;
+class Location;
+class Navigator;
+class Path;
+class Rover;
 
-// --------------------------------------------------
-// CLASS DEFINITIONS
-// --------------------------------------------------
+class Rover 
+{
+	Navigator navigator;   // Keeps track of Rover's position
+	Instrument instrument; // Keeps track of Instrument's state
+	Battery mainBattery;   // Provides power 
 
+	Rover(Battery b)
+	{
+    	navigator = new Navigator();
+    	instrument = new Instrument(this);
+    	mainBattery = b;
+  	}
+  	
+  	action Go { Location dest; }
+  	
+	action TakeSample { Location rock; }
+   	
+   	action PhoneHome{}    // Communicate material back to earth  
+   	action PhoneLander{}  // Communicate material back to lander
+}
 
+class Battery extends Reservoir 
+{
+    string profileType;
+
+	Battery(float ic, float ll_min, float ll_max)
+	{
+		super(ic, ll_min, ll_max);
+		profileType="IncrementalFlowProfile";
+	}
+}
 
 // A point on the planet's surface. We assume a Euclidean Plane.
 class Location {
@@ -21,7 +52,6 @@ class Location {
      y = _y;
    }
 }
-
 
 // Paths between pairs of locations.
 // Includes cost in battery power for a rover to transverse the path.
@@ -39,199 +69,169 @@ class Path {
    }
 }
 
-class Battery extends Reservoir {
-  Battery(float ic, float ll_min, float ll_max){
-    super(ic, ll_min, ll_max);
-  }
-}
-
-
-// Navigation portion of a rover. Responsible for managing the location the
-// rover is at together with the state of navigating between locations.
 class Navigator extends Timeline
 {
-  // Rover maybe AT a location.
-  predicate At{
-    Location location;
-  }
+	predicate At { Location location; }
 
-  // Rover maybe going between two locations.
-  predicate Going{
-	  Path p;
-	  Location from;
-    Location to;
-    neq(from, to); // prevents rover from going from a location straight back to that location.
-  }
+	// Rover may be going between two locations.
+	predicate Going{
+		Path path;
+	  	Location from;
+	  	Location to;
+	  	neq(from, to); // prevents rover from going from a location straight back to that location.
+	}
 }
-
 
 // Management of the rover's instruments.
-class Instrument{
-  predicate TakeSample{
-    Location rock;
-    eq(10, duration); // duration of TakeSample is 10 time units
-  }
-
-  predicate Place{
-    Location rock;
-    eq(3, duration); // duration of Place is 3 time units
-  }
-
-  predicate Stow{
-    eq(2, duration); // duration of Stow is 2 time units
-  }
-
-  predicate Unstow{
-    eq(2, duration); // duration of Unstow is 2 time units
-  }
-
-  predicate Stowed{}
+class InstrumentLocation extends Timeline
+{
+	predicate Stowed{}
+	predicate Stowing{}
+	predicate Unstowed{}
+	predicate Unstowing{}
 }
 
-// Component of the rover for handling commands such as
-// taking samples or transmitting information back to the lander.
-class Commands extends Timeline {
-   predicate TakeSample{
-     Location rock;
-     eq(duration, [20, 25]); // Flexible durations for taking a sample
-   }
-
-   // Communicate material back to earth
-   predicate PhoneHome{}
-
-   // Communicate material back to lander
-   predicate PhoneLander{}
+class InstrumentState extends Timeline
+{
+	predicate Placed {Location rock;}	
+	predicate Sampling {Location rock;}	
+	predicate Free {}	
 }
 
+class Instrument
+{
+    Rover rover;
+	InstrumentLocation location;
+	InstrumentState state;
+	
+	Instrument(Rover r)
+	{
+		rover = r;
+		location = new InstrumentLocation();
+	    state = new InstrumentState();
+	}
+	
+	action TakeSample{
+    	Location rock;
+    	eq(10, duration); // duration of TakeSample is 10 time units
+	}
 
-// Rover itself is made up of command, navigator, instrument, and battery
-// componenents.
-class Rover {
-  Commands commands;  // High-level rover commands
-  Navigator navigator; // Handles position control and achievement
-  Instrument instrument; // Handles rock sampling
-  Battery mainBattery;  // Provides power for other timelines.
+	action Place{
+		Location rock;
+    	eq(3, duration); // duration of Place is 3 time units
+    }
 
-  Rover(Battery r){
-    commands = new Commands();
-    navigator = new Navigator();
-    instrument = new Instrument();
-    mainBattery = r;
-  }
+	action Stow{
+		eq(2, duration); // duration of Stow is 2 time units
+	}
+
+  	action Unstow{
+    	eq(2, duration); // duration of Unstow is 2 time units
+	}
 }
 
+Rover::Go
+{
+	// Instrument must be stowed while driving
+	contained_by(condition object.instrument.location.Stowed);
+	 
+	met_by(condition object.navigator.At _from);
+	meets(effect object.navigator.At _to);
+	eq(_to.location, dest);
 
-// --------------------------------------------------
-// PREDICATE DEFINITIONS
-// --------------------------------------------------
+	// Find a path
+	Path path; 
+	
+	// The path used must be between the 2 points
+  	eq(path.from, _from.location);
+  	eq(path.to, dest);
+  	
+	equals(effect object.navigator.Going going);
+	eq(going.path,path);
+	eq(going.from,_from.location);
+	eq(going.to,dest);
 
-Navigator::At{
-  met_by(object.Going from);
-  eq(from.to, location); // next Going token starts at this location
-  meets(object.Going to);
-  eq(to.from, location); // prevous Going token ends at this location
+  	// Pull power from the battery equal to the path cost.
+  	starts(effect Battery.consume tx);
+  	eq(tx.quantity, path.cost);
 }
 
-
-Navigator::Going{
-  met_by(object.At _from);
-  eq(_from.location, from);
-  meets(object.At _to);
-  eq(_to.location, to);
-
-  // The path used must be between the 2 points
-  eq(p.from, from);
-  eq(p.to, to);
-
-  // Pull power from the battery equal to the path cost.
-  starts(Battery.consume tx);
-  eq(tx.quantity, p.cost);
+Rover::TakeSample
+{
+	// Rover must be at the target rock throughout 
+	contained_by(condition object.navigator.At at);
+	eq(at.location, rock);
+	
+	equals(object.instrument.TakeSample ts);
+	eq(ts.rock, rock);
+    
+	// Make contact with results. Prefer to phone home, but
+	// also allow contact to lander instead as a relay
+	bool OR;
+	
+	if (OR == false) {
+		meets(object.PhoneHome t0);
+	}
+	if (OR == true) {
+    	meets(object.PhoneLander t1);
+  	}
 }
 
-
-
-Commands::TakeSample{
-  contains(Instrument.TakeSample a);
-  eq(a.rock, rock);
-  Rover rovers;
-
-  // Make contact with results. Prefer to phone home, but
-  // also allow contact to lander instead as a relay
-  bool OR;
-
-  if(OR == false){
-    meets(object.PhoneHome t0);
-  }
-  if(OR == true){
-    meets(object.PhoneLander t1);
-  }
-}
-
-Commands::PhoneHome{
-  starts(Battery.consume tx);
+Rover::PhoneHome
+{
+  starts(object.mainBattery.consume tx);
   eq(tx.quantity, 300); // consume battery power
 }
 
-Commands::PhoneLander{
-  starts(Battery.consume tx);
+Rover::PhoneLander
+{
+  starts(object.mainBattery.consume tx);
   eq(tx.quantity, 20); // consume battery power
 }
 
+// Take Sample = PositionOnRock + Sample
+Instrument::TakeSample
+{
+  	met_by(condition object.state.Placed on);
+  	eq(on.rock, rock);
 
-Instrument::TakeSample{
- // Same rover must be at the target rock throughout (Need a shared macro for this)
-  contained_by(Navigator.At at);
-  eq(at.location, rock);
-  Rover rovers;
-
- // Preceded by placing the instrument
-  met_by(Place b);
-  eq(b.rock, rock);
-
- // Succeded by stowing the instrument
-  meets(Stow c);
-
-  starts(Battery.consume tx);
-  eq(tx.quantity, 120); // consume battery power
+    contained_by(condition object.location.Unstowed);
+    
+  	equals(effect object.state.Sampling sample);
+  	eq(sample.rock, rock);
+  	
+  	starts(effect object.rover.mainBattery.consume tx);
+  	eq(tx.quantity, 120); // consume battery power	
 }
 
-Instrument::Place{
-  contained_by(Navigator.At at);
-  eq(at.location, rock);
-  Rover rovers;
-
-  meets(TakeSample a);
-  eq(a.rock, rock);
-  met_by(Unstow b);
-
-  starts(Battery.consume tx);
-  eq(tx.quantity, 20); // consume battery power
+Instrument::Place
+{
+    contained_by(condition object.location.Unstowed);
+    
+	meets(effect object.state.Placed on);
+	eq(on.rock,rock);
+	
+  	starts(effect object.rover.mainBattery.consume tx);
+  	eq(tx.quantity, 20); // consume battery power		
 }
 
-Instrument::Unstow{
-  contained_by(Navigator.At at);
-  Rover rovers;
-
-  meets(Place a);
-  met_by(Stowed b);
-
-  starts(Battery.consume tx);
-  eq(tx.quantity, 20); // consume battery power
+Instrument::Stow
+{
+	met_by(condition object.location.Unstowed);
+	equals(effect object.location.Stowing);
+	meets(effect object.location.Stowed);
+	
+  	starts(effect object.rover.mainBattery.consume tx);
+  	eq(tx.quantity, 20); // consume battery power		
 }
 
-
-Instrument::Stow{
-  contained_by(Navigator.At at);
-  Rover rovers;
-
-  meets(Stowed a);
-  met_by(TakeSample b);
-
-  starts(Battery.consume tx);
-  eq(tx.quantity, 20);  // consume batter power
+Instrument::Unstow
+{
+	met_by(condition object.location.Stowed);
+	equals(effect object.location.Unstowing);
+	meets(effect object.location.Unstowed);
+	
+  	starts(effect object.rover.mainBattery.consume tx);
+  	eq(tx.quantity, 20); // consume battery power		
 }
 
-Instrument::Stowed{
-  met_by(Stow a);
-  meets(Unstow b);
-}

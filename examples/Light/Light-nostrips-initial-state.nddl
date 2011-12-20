@@ -1,8 +1,8 @@
-#include "Light-strips-model.nddl"
+#include "Light-nostrips-model.nddl"
 
 // Problem instance : turning the light off
-LightBulb bulb1 = new LightBulb();
-LightSwitch switch1 = new LightSwitch(bulb1);
+LightSwitch switch1 = new LightSwitch();
+LightBulb bulb1 = new LightBulb(switch1);
 
 // At time 0, the bulb is on
 fact(bulb1.On initialCondition);

@@ -1,4 +1,4 @@
-#include "Rover-strips-model.nddl"
+#include "Rover-nostrips-model.nddl"
 
 // Create a planner configuration instance in PLASMA.
 Location lander = new Location("LANDER", 0, 0);
@@ -20,19 +20,17 @@ Rover spirit = new Rover(battery);
 close();
 
 // Establish the initial position for spirit
-fact(spirit.navigator.At initialPosition);
+fact(Navigator.At initialPosition);
 eq(initialPosition.start, 0);  // What time - the start of this planning horizon
 eq(initialPosition.location, lander); // What position - the lander
 
-// Establish the initial instrument state & location
-fact(spirit.instrument.location.Stowed stowed);
-eq(stowed.start, 0);
-fact(spirit.instrument.state.Free free);
-eq(free.start, 0);
-
 // Establish the goal - to take a sample at a position
-goal(spirit.TakeSample sample);
+goal(Commands.TakeSample sample);
 sample.start.specify(50);
 sample.rock.specify(rock4);  // Want to get to rock4
+
+// Establish the initial instrument state
+rejectable(Instrument.Stowed stowed);
+eq(stowed.start, 0);
 
 // The planner should take it form here!
