@@ -724,6 +724,7 @@ namespace EUROPA {
 	next = startNode(src, src->reftime, targ, targ->reftime);
 	if (!next.isNoId()) {
 	  queue1->insertInQueue(next);
+	  handleNodeUpdate(next);
 	  incDijkstraReftime();
 	}
       }
@@ -735,6 +736,7 @@ namespace EUROPA {
 	  src->reftime = -(headDistance);
 	  targ->reftime = -(footDistance);
 	  queue1->insertInQueue(next);
+	  handleNodeUpdate(next);
 	  incDijkstraRefBack(); // Backwards propagation
 	}
       }
