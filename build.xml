@@ -13,7 +13,7 @@
     <!-- load local overrides -->
     <property file="${user.home}/.ant.plasma.properties"/>
 
-	<property name="europa.version" value="2.6b"/> 	
+	<property name="europa.version" value="2.6"/> 	
 	
     <property name="dir.plasma.root" value="${basedir}"/>
     <property name="dir.src.cpp"     value="src/PLASMA"/>
