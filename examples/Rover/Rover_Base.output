@@ -60,30 +60,26 @@ Objects *************************
 	End Path:p1*************************
 	Battery:battery*************************
 		Tokens *************************
-				[50, 65]
+				[1, 43]
 				Battery.consume()
-				Key=419  Master=277 Instrument.TakeSample(277)[50, 65] --> [60, 75]
-				[50, 65]
-				[1, 59]
+				Key=434  Master=325 Go-0(325)[1, 43] --> [2, 44]
+				[1, 43]
+				{50}
 				Battery.consume()
-				Key=543  Master=248 Navigator.Going(248)[1, 59] --> [2, 60]
-				[1, 59]
-				[47, 62]
+				Key=544  Master=281 Instrument.TakeSample(281){50} --> {60}
+				{50}
+				[4, 46]
 				Battery.consume()
-				Key=635  Master=381 Instrument.Place(381)[47, 62] --> [50, 65]
-				[47, 62]
-				[60, 75]
+				Key=652  Master=594 Place-1(594)[4, 46] --> [7, 49]
+				[4, 46]
+				[2, 44]
 				Battery.consume()
-				Key=719  Master=401 Instrument.Stow(401)[60, 75] --> [62, 77]
-				[60, 75]
-				[45, 60]
+				Key=764  Master=691 Unstow-2(691)[2, 44] --> [4, 46]
+				[2, 44]
+				{60}
 				Battery.consume()
-				Key=831  Master=617 Instrument.Unstow(617)[45, 60] --> [47, 62]
-				[45, 60]
-				[70, 75]
-				Battery.consume()
-				Key=955  Master=935 Commands.PhoneHome(935)[70, 75] --> [71, +inf]
-				[70, 75]
+				Key=845  Master=825 Rover.PhoneHome(825){60} --> [61, +inf]
+				{60}
 		End Tokens *********************
 		Variables *************************
 			battery.initialCapacity=float:CLOSED[1000, 1000]
@@ -93,84 +89,106 @@ Objects *************************
 			battery.productionMax=float:CLOSED[+inf, +inf]
 			battery.consumptionRateMax=float:CLOSED[+inf, +inf]
 			battery.consumptionMax=float:CLOSED[+inf, +inf]
+			battery.profileType=string:CLOSED{IncrementalFlowProfile}
 		End Variables *********************
 	End Battery:battery*************************
 	Rover:spirit*************************
+		Tokens *************************
+				{50}
+				Rover.TakeSample(rock=Location:CLOSED{rock4(72)})
+				Key=231  Master=NONE
+				{60}
+				[1, 43]
+				Rover.Go(dest=Location:CLOSED{rock4(72)})
+				Key=325  Master=NONE
+				[2, 44]
+				{60}
+				Rover.PhoneHome()
+				Key=825  Master=231 sample(231){50} --> {60}
+				[61, +inf]
+		End Tokens *********************
 		Variables *************************
-			spirit.commands=Commands:CLOSED{spirit.commands(159)}
-			spirit.navigator=Navigator:CLOSED{spirit.navigator(162)}
+			spirit.navigator=Navigator:CLOSED{spirit.navigator(161)}
 			spirit.instrument=Instrument:CLOSED{spirit.instrument(165)}
 			spirit.mainBattery=Battery:CLOSED{battery(138)}
 		End Variables *********************
 	End Rover:spirit*************************
-	Commands:spirit.commands*************************
-		Tokens *************************
-				{50}
-				Commands.TakeSample(rock=Location:CLOSED{rock4(72)})
-				Key=189  Master=NONE
-				[70, 75]
-				[70, 75]
-				Commands.PhoneHome()
-				Key=935  Master=189 sample(189){50} --> [70, 75]
-				[71, +inf]
-		End Tokens *********************
-	End Commands:spirit.commands*************************
 	Navigator:spirit.navigator*************************
 		Tokens *************************
 				{0}
 				Navigator.At(location=Location:CLOSED{lander(12)})
-				Key=170  Master=NONE
-					Merged Key=501 from Navigator.Going(248)[1, 59] --> [2, 60]
-				[1, 59]
-				[1, 59]
-				Navigator.Going(p=Path:CLOSED{p1(121)}from=Location:CLOSED{lander(12)}to=Location:CLOSED{rock4(72)})
-				Key=248  Master=170 initialPosition(170){0} --> [1, 59]
-					Merged Key=449 from Navigator.At(361)[2, 60] --> [62, +inf]
-				[2, 60]
-				[2, 60]
+				Key=178  Master=NONE
+					Merged Key=361 from Go-0(325)[1, 43] --> [2, 44]
+				[1, 43]
+				[1, 43]
+				Navigator.Going(path=Path:CLOSED{p1(121)}from=Location:CLOSED{lander(12)}to=Location:CLOSED{rock4(72)})
+				Key=407  Master=325 Go-0(325)[1, 43] --> [2, 44]
+				[2, 44]
+				[2, 44]
 				Navigator.At(location=Location:CLOSED{rock4(72)})
-				Key=361  Master=277 Instrument.TakeSample(277)[50, 65] --> [60, 75]
-					Merged Key=519 from Navigator.Going(248)[1, 59] --> [2, 60]
-					Merged Key=577 from Instrument.Place(381)[47, 62] --> [50, 65]
-					Merged Key=665 from Instrument.Stow(401)[60, 75] --> [62, 77]
-					Merged Key=777 from Instrument.Unstow(617)[45, 60] --> [47, 62]
-				[62, +inf]
+				Key=259  Master=231 sample(231){50} --> {60}
+					Merged Key=380 from Go-0(325)[1, 43] --> [2, 44]
+				[60, +inf]
 		End Tokens *********************
 	End Navigator:spirit.navigator*************************
 	Instrument:spirit.instrument*************************
 		Tokens *************************
-				{0}
-				Instrument.Stowed()
-				Key=208  Master=NONE
-					Merged Key=815 from Instrument.Unstow(617)[45, 60] --> [47, 62]
-				[45, 60]
-				[50, 65]
+				{50}
 				Instrument.TakeSample(rock=Location:CLOSED{rock4(72)})
-				Key=277  Master=189 sample(189){50} --> [70, 75]
-					Merged Key=597 from Instrument.Place(381)[47, 62] --> [50, 65]
-					Merged Key=700 from Instrument.Stow(401)[60, 75] --> [62, 77]
-				[60, 75]
-				[47, 62]
+				Key=281  Master=231 sample(231){50} --> {60}
+				{60}
+				[4, 46]
 				Instrument.Place(rock=Location:CLOSED{rock4(72)})
-				Key=381  Master=277 Instrument.TakeSample(277)[50, 65] --> [60, 75]
-					Merged Key=796 from Instrument.Unstow(617)[45, 60] --> [47, 62]
-				[50, 65]
-				[60, 75]
-				Instrument.Stow()
-				Key=401  Master=277 Instrument.TakeSample(277)[50, 65] --> [60, 75]
-					Merged Key=866 from Instrument.Stowed(684)[62, 77] --> [63, +inf]
-				[62, 77]
-				[45, 60]
+				Key=594  Master=NONE
+				[7, 49]
+				[2, 44]
 				Instrument.Unstow()
-				Key=617  Master=381 Instrument.Place(381)[47, 62] --> [50, 65]
-					Merged Key=337 from stowed(208){0} --> [45, 60]
-				[47, 62]
-				[62, 77]
-				Instrument.Stowed()
-				Key=684  Master=401 Instrument.Stow(401)[60, 75] --> [62, 77]
-				[63, +inf]
+				Key=691  Master=NONE
+				[4, 46]
 		End Tokens *********************
+		Variables *************************
+			spirit.instrument.rover=Rover:CLOSED{spirit(158)}
+			spirit.instrument.location=InstrumentLocation:CLOSED{spirit.instrument.location(169)}
+			spirit.instrument.state=InstrumentState:CLOSED{spirit.instrument.state(172)}
+		End Variables *********************
 	End Instrument:spirit.instrument*************************
+	InstrumentLocation:spirit.instrument.location*************************
+		Tokens *************************
+				{0}
+				InstrumentLocation.Stowed()
+				Key=197  Master=NONE
+					Merged Key=341 from Go-0(325)[1, 43] --> [2, 44]
+					Merged Key=708 from Unstow-2(691)[2, 44] --> [4, 46]
+				[2, 44]
+				[2, 44]
+				InstrumentLocation.Unstowing()
+				Key=726  Master=691 Unstow-2(691)[2, 44] --> [4, 46]
+				[4, 46]
+				[4, 46]
+				InstrumentLocation.Unstowed()
+				Key=502  Master=281 Instrument.TakeSample(281){50} --> {60}
+					Merged Key=612 from Place-1(594)[4, 46] --> [7, 49]
+					Merged Key=746 from Unstow-2(691)[2, 44] --> [4, 46]
+				[60, +inf]
+		End Tokens *********************
+	End InstrumentLocation:spirit.instrument.location*************************
+	InstrumentState:spirit.instrument.state*************************
+		Tokens *************************
+				{0}
+				InstrumentState.Free()
+				Key=214  Master=NONE
+				[1, 49]
+				[7, 49]
+				InstrumentState.Placed(rock=Location:CLOSED{rock4(72)})
+				Key=482  Master=281 Instrument.TakeSample(281){50} --> {60}
+					Merged Key=632 from Place-1(594)[4, 46] --> [7, 49]
+				{50}
+				{50}
+				InstrumentState.Sampling(rock=Location:CLOSED{rock4(72)})
+				Key=522  Master=281 Instrument.TakeSample(281){50} --> {60}
+				{60}
+		End Tokens *********************
+	End InstrumentState:spirit.instrument.state*************************
 Global Variables*************************
 	lander=Location:CLOSED{lander(12)}
 	rock1=Location:CLOSED{rock1(27)}
@@ -181,71 +199,34 @@ Global Variables*************************
 	p3=Path:CLOSED{p3(104)}
 	p1=Path:CLOSED{p1(121)}
 	battery=Battery:CLOSED{battery(138)}
-	spirit=Rover:CLOSED{spirit(156)}
+	spirit=Rover:CLOSED{spirit(158)}
 Merged Tokens: *************************
-		[45, 60]
-		Instrument.Unstow()
-		Key=337  Master=208 stowed(208){0} --> [45, 60]
-		[47, 62]
-		[-inf, 64]
-		Navigator.Going(p=Path:CLOSED{p1(121),p2(87),p3(104)}from=Location:CLOSED{lander(12),rock1(27),rock2(42),rock3(57)}to=Location:CLOSED{rock4(72)})
-		Key=449  Master=361 Navigator.At(361)[2, 60] --> [62, +inf]
-		[2, 65]
-		[-inf, 63]
+		[-inf, 49]
+		InstrumentLocation.Stowed()
+		Key=341  Master=325 Go-0(325)[1, 43] --> [2, 44]
+		[2, +inf]
+		[-inf, 48]
 		Navigator.At(location=Location:CLOSED{lander(12)})
-		Key=501  Master=248 Navigator.Going(248)[1, 59] --> [2, 60]
-		[1, 64]
-		[2, 65]
-		Navigator.At(location=Location:CLOSED{rock4(72)})
-		Key=519  Master=248 Navigator.Going(248)[1, 59] --> [2, 60]
-		[3, +inf]
-		[-inf, 62]
-		Navigator.At(location=Location:CLOSED{rock4(72)})
-		Key=577  Master=381 Instrument.Place(381)[47, 62] --> [50, 65]
-		[50, +inf]
-		[50, 65]
-		Instrument.TakeSample(rock=Location:CLOSED{rock4(72)})
-		Key=597  Master=381 Instrument.Place(381)[47, 62] --> [50, 65]
-		[60, 75]
-		[-inf, 75]
+		Key=361  Master=325 Go-0(325)[1, 43] --> [2, 44]
+		[1, 49]
+		[-inf, +inf]
 		Navigator.At(location=Location:CLOSED{lander(12),rock1(27),rock2(42),rock3(57),rock4(72)})
-		Key=665  Master=401 Instrument.Stow(401)[60, 75] --> [62, 77]
-		[62, +inf]
-		[50, 65]
-		Instrument.TakeSample(rock=Location:CLOSED{lander(12),rock1(27),rock2(42),rock3(57),rock4(72)})
-		Key=700  Master=401 Instrument.Stow(401)[60, 75] --> [62, 77]
-		[60, 75]
-		[-inf, 60]
-		Navigator.At(location=Location:CLOSED{lander(12),rock1(27),rock2(42),rock3(57),rock4(72)})
-		Key=777  Master=617 Instrument.Unstow(617)[45, 60] --> [47, 62]
-		[47, +inf]
-		[47, 62]
-		Instrument.Place(rock=Location:CLOSED{lander(12),rock1(27),rock2(42),rock3(57),rock4(72)})
-		Key=796  Master=617 Instrument.Unstow(617)[45, 60] --> [47, 62]
-		[50, 65]
-		[-inf, 59]
-		Instrument.Stowed()
-		Key=815  Master=617 Instrument.Unstow(617)[45, 60] --> [47, 62]
-		[45, 60]
-		[60, 75]
-		Instrument.Stow()
-		Key=866  Master=684 Instrument.Stowed(684)[62, 77] --> [63, +inf]
-		[62, 77]
-Inactive Tokens: *************************
-		[-inf, -1]
-		Navigator.Going(p=Path:CLOSED{p1(121),p2(87),p3(104)}from=Location:CLOSED{rock1(27),rock2(42),rock3(57),rock4(72)}to=Location:CLOSED{lander(12)})
-		Key=227  Master=170 initialPosition(170){0} --> [1, 59]
-		{0}
-		{-2}
-		Instrument.Stow()
-		Key=319  Master=208 stowed(208){0} --> [45, 60]
-		{0}
-		[62, +inf]
-		Navigator.Going(p=Path:CLOSED{p1(121),p2(87),p3(104)}from=Location:CLOSED{rock4(72)}to=Location:CLOSED{lander(12),rock1(27),rock2(42),rock3(57)})
-		Key=470  Master=361 Navigator.At(361)[2, 60] --> [62, +inf]
-		[63, +inf]
-		[63, +inf]
-		Instrument.Unstow()
-		Key=884  Master=684 Instrument.Stowed(684)[62, 77] --> [63, +inf]
-		[65, +inf]
+		Key=380  Master=325 Go-0(325)[1, 43] --> [2, 44]
+		[-inf, +inf]
+		[-inf, 46]
+		InstrumentLocation.Unstowed()
+		Key=612  Master=594 Place-1(594)[4, 46] --> [7, 49]
+		[1, +inf]
+		[-inf, +inf]
+		InstrumentState.Placed(rock=Location:CLOSED{lander(12),rock1(27),rock2(42),rock3(57),rock4(72)})
+		Key=632  Master=594 Place-1(594)[4, 46] --> [7, 49]
+		[-inf, +inf]
+		[-inf, 43]
+		InstrumentLocation.Stowed()
+		Key=708  Master=691 Unstow-2(691)[2, 44] --> [4, 46]
+		[2, 44]
+		[-inf, +inf]
+		InstrumentLocation.Unstowed()
+		Key=746  Master=691 Unstow-2(691)[2, 44] --> [4, 46]
+		[-inf, +inf]
 
