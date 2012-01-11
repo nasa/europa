@@ -88,7 +88,7 @@ public class IFlatIRelaxSolver
         resources_ = new Vector<Resource>();
         
         for (PSResource r : res) {
-            PSResourceProfile prof = r.getLimits();
+            PSResourceProfile prof = r.getCapacity();
             int t = prof.getTimes().get(0);
             int capacity = (int) prof.getUpperBound(t);
         	resources_.add(makeResource(r,capacity));
