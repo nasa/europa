@@ -12,39 +12,21 @@ import org.ops.ui.mouse.swing.*;
 import org.ops.ui.gantt.swing.*;
 import org.ops.ui.rchart.swing.*;
 import org.ops.ui.solver.swing.*;
+import java.util.List;
+import java.util.regex.*;
 
 int month = GregorianCalendar.SEPTEMBER, day = 11; 
 GregorianCalendar start = new GregorianCalendar(2006,month,day,0,0);
 GregorianCalendar end = new GregorianCalendar(2006,month,day,1,30);
 
-void usingCodeGeneration()
-{
-	cwd = bsh.cwd;
-    psengine.loadModel(cwd+"/libUBO_o.so");
-    psengine.executeScript("nddl-xml-txn",cwd+"/UBO-initial-state.xml",true/*isFile*/);		
-}
 
-void usingXmlInterpreter()
-{
-	cwd = bsh.cwd;
-    String nddlModel = cwd+"/UBO-initial-state.xml";
-    psengine.executeScript("nddl-xml",nddlModel,true/*isFile*/);
-}
-
-void usingInterpreter()
+void initPSEngine()
 {
 	cwd = bsh.cwd;
     String nddlModel = cwd+"/UBO-initial-state.nddl";
     errors = psengine.executeScript("nddl",nddlModel,true/*isFile*/);
 	if (!errors.equals(""))
 		throw new RuntimeException("Failed loading model:"+errors);
-}
-
-void initPSEngine()
-{
-	//usingCodeGeneration();
-	//usingXmlInterpreter();
-	usingInterpreter();
 }
 
 void showResourceProfiles()
@@ -86,7 +68,9 @@ IFlatIRelaxSolver runIFIR(long timeout,int bound, boolean usePSResources)
 {
 	s = new IFlatIRelaxSolver();
 	s.solve(psengine,timeout,bound,usePSResources);
-	RCPSPUtil.ground(s.getActivities());
+	//RCPSPUtil.ground(s.getActivities());
+	v = psengine.getVariableByName("maxDuration");
+	v.specifyValue(PSVarValue.getInstance(bound));
 	
 	return s;
 }
@@ -143,8 +127,100 @@ catch (Exception e) {
   	System.err.println("Failed Initializing : "+e.getMessage());
 }
 
+String getViolations(psengine.PSToken activity)
+{
+	// TODO: get Violations only for the specified activity
+	if (psengine.getViolation() == 0)
+		return "OK";
+	
+	StringBuffer buf = new StringBuffer();
+	violations = psengine.getViolationExpl();
+	for (int i=0;i<violations.size();i++) {
+		System.out.println("Violations["+i+"]="+violations.get(i));
+		buf.append(violations.get(i).toString()).append("\n");
+	}
+	
+	return buf.toString();
+}
+
+// This will only work if temporal constraints are using the DefaultPropagator instead of the TemporalPropagator
+List wif(psengine.PSToken activity, int startTime, int endTime)
+{
+	List retval = new ArrayList();
+	
+	PSVariable s = activity.getStart();
+	PSVariable e = activity.getEnd();
+	PSVariable d = activity.getDuration();
+	int duration = d.getSingletonValue().asInt();
+		
+	for (int i=startTime; i<=endTime; i++) {
+		Object[] values = new Object[2];
+		
+		
+		int newEnd = i+duration;
+
+		psengine.setAutoPropagation(false);
+		s.specifyValue(PSVarValue.getInstance(i));
+		e.specifyValue(PSVarValue.getInstance(newEnd));
+		psengine.setAutoPropagation(true);
+		
+		values[0] = i;
+		values[1] = getViolations(activity);
+		print("time="+i+" violations="+values[1]);
+		
+		retval.add(values);
+	}
+	s.reset();
+	e.reset();
+	psengine.propagate();
+		
+	return retval;
+}
+
+
+String printWif(List wifInfo)
+{
+	StringBuffer buf = new StringBuffer();
+	
+	for (Object o : wifInfo) {
+		Object[] values = (Object[])o;
+		buf.append("time: ").append(values[0].toString())
+		   .append(" {")
+		   .append(values[1].toString())
+		   .append("}\n");
+	}
+		
+	return buf.toString();
+}
+
+// best makespan is 46 for solution {1<4}{2<5}{3<1}{3<4}{5<6}{5<9}{6<8}{7<5}{7<6}{7<8}{7<10}
+
+void loadSolution(String solution)
+{
+	Pattern p = Pattern.compile("\\d+<\\d+");
+	Matcher m = p.matcher(solution);
+	
+	while (m.find()) {
+		//System.out.println("Found:"+m.group());
+		StringTokenizer tok = new StringTokenizer(m.group(),"<");
+		String first = tok.nextToken();
+		String second = tok.nextToken();
+		//print("("+first+","+second+")\n");
+		nddl = "precedes(activity"+first+".end,activity"+second+".start);";
+		psengine.executeScript("nddl",nddl,false/*isFile*/);
+	}
+	
+	s = new IFlatIRelaxSolver();
+	s.solve(psengine,10,1000,false);
+	RCPSPUtil.ground(s.getActivities());
+}
+
 //ifirSolver = runIFIR(60000/*timeout*/,47/*bound*/,false/*usePSResources*/);
+
 /*
+loadSolution("{1<4}{2<5}{3<1}{3<4}{5<6}{5<9}{6<8}{7<5}{7<6}{7<8}{7<10}");
+tok = psengine.getTokens().get(3);
+wif(tok,1,5);
 setupDesktop();
 howHistory();
 undoIFIR(ifirSolver);
