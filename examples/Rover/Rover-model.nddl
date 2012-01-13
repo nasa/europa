@@ -152,7 +152,7 @@ Rover::Go
 	eq(going.to,dest);
 
   	// Pull power from the battery equal to the path cost.
-  	starts(effect Battery.consume tx);
+  	starts(effect object.mainBattery.consume tx);
   	eq(tx.quantity, path.cost);
 }
 
