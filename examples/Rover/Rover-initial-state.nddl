@@ -1,6 +1,5 @@
 #include "Rover-model.nddl"
 
-// Create a planner configuration instance in PLASMA.
 Location lander = new Location("LANDER", 0, 0);
 Location rock1 = new Location("ROCK1", 9, 9);
 Location rock2 = new Location("ROCK2", 1, 6);
