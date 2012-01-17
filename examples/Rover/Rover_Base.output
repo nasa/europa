@@ -66,19 +66,19 @@ Objects *************************
 				[1, 43]
 				{50}
 				Battery.consume()
-				Key=544  Master=281 Instrument.TakeSample(281){50} --> {60}
+				Key=547  Master=281 Instrument.TakeSample(281){50} --> {60}
 				{50}
 				[4, 46]
 				Battery.consume()
-				Key=652  Master=594 Place-1(594)[4, 46] --> [7, 49]
+				Key=655  Master=597 Place-1(597)[4, 46] --> [7, 49]
 				[4, 46]
 				[2, 44]
 				Battery.consume()
-				Key=764  Master=691 Unstow-2(691)[2, 44] --> [4, 46]
+				Key=767  Master=694 Unstow-2(694)[2, 44] --> [4, 46]
 				[2, 44]
 				{60}
 				Battery.consume()
-				Key=845  Master=825 Rover.PhoneHome(825){60} --> [61, +inf]
+				Key=848  Master=828 Rover.PhoneHome(828){60} --> [61, +inf]
 				{60}
 		End Tokens *********************
 		Variables *************************
@@ -104,7 +104,7 @@ Objects *************************
 				[2, 44]
 				{60}
 				Rover.PhoneHome()
-				Key=825  Master=231 sample(231){50} --> {60}
+				Key=828  Master=231 sample(231){50} --> {60}
 				[61, +inf]
 		End Tokens *********************
 		Variables *************************
@@ -139,11 +139,11 @@ Objects *************************
 				{60}
 				[4, 46]
 				Instrument.Place(rock=Location:CLOSED{rock4(72)})
-				Key=594  Master=NONE
+				Key=597  Master=NONE
 				[7, 49]
 				[2, 44]
 				Instrument.Unstow()
-				Key=691  Master=NONE
+				Key=694  Master=NONE
 				[4, 46]
 		End Tokens *********************
 		Variables *************************
@@ -158,17 +158,17 @@ Objects *************************
 				InstrumentLocation.Stowed()
 				Key=197  Master=NONE
 					Merged Key=341 from Go-0(325)[1, 43] --> [2, 44]
-					Merged Key=708 from Unstow-2(691)[2, 44] --> [4, 46]
+					Merged Key=711 from Unstow-2(694)[2, 44] --> [4, 46]
 				[2, 44]
 				[2, 44]
 				InstrumentLocation.Unstowing()
-				Key=726  Master=691 Unstow-2(691)[2, 44] --> [4, 46]
+				Key=729  Master=694 Unstow-2(694)[2, 44] --> [4, 46]
 				[4, 46]
 				[4, 46]
 				InstrumentLocation.Unstowed()
-				Key=502  Master=281 Instrument.TakeSample(281){50} --> {60}
-					Merged Key=612 from Place-1(594)[4, 46] --> [7, 49]
-					Merged Key=746 from Unstow-2(691)[2, 44] --> [4, 46]
+				Key=505  Master=281 Instrument.TakeSample(281){50} --> {60}
+					Merged Key=615 from Place-1(597)[4, 46] --> [7, 49]
+					Merged Key=749 from Unstow-2(694)[2, 44] --> [4, 46]
 				[60, +inf]
 		End Tokens *********************
 	End InstrumentLocation:spirit.instrument.location*************************
@@ -180,12 +180,12 @@ Objects *************************
 				[1, 49]
 				[7, 49]
 				InstrumentState.Placed(rock=Location:CLOSED{rock4(72)})
-				Key=482  Master=281 Instrument.TakeSample(281){50} --> {60}
-					Merged Key=632 from Place-1(594)[4, 46] --> [7, 49]
+				Key=485  Master=281 Instrument.TakeSample(281){50} --> {60}
+					Merged Key=635 from Place-1(597)[4, 46] --> [7, 49]
 				{50}
 				{50}
 				InstrumentState.Sampling(rock=Location:CLOSED{rock4(72)})
-				Key=522  Master=281 Instrument.TakeSample(281){50} --> {60}
+				Key=525  Master=281 Instrument.TakeSample(281){50} --> {60}
 				{60}
 		End Tokens *********************
 	End InstrumentState:spirit.instrument.state*************************
@@ -215,18 +215,18 @@ Merged Tokens: *************************
 		[-inf, +inf]
 		[-inf, 46]
 		InstrumentLocation.Unstowed()
-		Key=612  Master=594 Place-1(594)[4, 46] --> [7, 49]
+		Key=615  Master=597 Place-1(597)[4, 46] --> [7, 49]
 		[1, +inf]
 		[-inf, +inf]
 		InstrumentState.Placed(rock=Location:CLOSED{lander(12),rock1(27),rock2(42),rock3(57),rock4(72)})
-		Key=632  Master=594 Place-1(594)[4, 46] --> [7, 49]
+		Key=635  Master=597 Place-1(597)[4, 46] --> [7, 49]
 		[-inf, +inf]
 		[-inf, 43]
 		InstrumentLocation.Stowed()
-		Key=708  Master=691 Unstow-2(691)[2, 44] --> [4, 46]
+		Key=711  Master=694 Unstow-2(694)[2, 44] --> [4, 46]
 		[2, 44]
 		[-inf, +inf]
 		InstrumentLocation.Unstowed()
-		Key=746  Master=691 Unstow-2(691)[2, 44] --> [4, 46]
+		Key=749  Master=694 Unstow-2(694)[2, 44] --> [4, 46]
 		[-inf, +inf]
 
