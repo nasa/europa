@@ -1,9 +1,6 @@
 #include "nddl-test-module.hh"
 #include <stdlib.h>
-
-#include <cppunit/ui/text/TestRunner.h>
-#include <cppunit/extensions/TestFactoryRegistry.h>
-
+#include "CppUnitUtils.hh"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( NDDLModuleTests );
 
@@ -16,6 +13,10 @@ int main( int argc, char **argv)
   const char* baselineVar=getenv("SET_TEST_BASELINE");
   bool setBaseline = (baselineVar!=NULL && (std::string(baselineVar)=="1"));
   runner.addTest(new ErrorCheckingTests("ErrorCheckingTests.txt",setBaseline));
-  return !runner.run("", false);
+
+  // NOTE:  We can't use the standard RUN_CPP_UNIT_MODULE macro because of the above
+  //        'addTest' special case.  However, the rest of the functionality is still
+  //        available in this macro:
+  RUN_CPP_UNIT_RUNNER(runner, true);
 }
 

@@ -1,8 +1,6 @@
 #include "solvers-test-module.hh"
-
-#include <cppunit/ui/text/TestRunner.h>
-#include <cppunit/extensions/TestFactoryRegistry.h>
 #include "DataTypes.hh"
+#include "CppUnitUtils.hh"
 using namespace EUROPA;
 
 CPPUNIT_TEST_SUITE_REGISTRATION( SolversModuleTests );
@@ -17,9 +15,6 @@ int main( int argc, char **argv)
     StringDT::instance();
     SymbolDT::instance();
 
-    CppUnit::TextUi::TestRunner runner;
-    CppUnit::TestFactoryRegistry &registry = CppUnit::TestFactoryRegistry::getRegistry();
-    runner.addTest( registry.makeTest() );
-    return !runner.run("", false);
+    RUN_CPP_UNIT_MODULE(true);
 }
 
