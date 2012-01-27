@@ -62,6 +62,7 @@ int NddlTestEngine::run(const char* txSource, const char* language)
 
 		std::string result = executeScript(language,txSource,true /*isFile*/);
 		if (result.size()>0) {
+			std::cerr << "Unexpected error(s) executing script:" << txSource << std::endl;
 			std::cerr << result;
 			return -1;
 		}
@@ -74,13 +75,13 @@ int NddlTestEngine::run(const char* txSource, const char* language)
 		return 0;
 	}
 	catch (PSLanguageExceptionList& errors) {
-		std::cerr << "Unexpected error(s) executing script" << std::endl;
+		std::cerr << "Unexpected error(s) executing script:" << txSource << std::endl;
 		for (int i=0;i<errors.getExceptionCount();i++)
 			std::cerr << errors.getException(i).asString() << std::endl;
 		return -1;
 	}
 	catch(...) {
-		std::cerr << "Unexpected unknown error executing script" << std::endl;
+		std::cerr << "Unexpected unknown error executing script:" << txSource << std::endl;
 		return -1;
 	}
 }

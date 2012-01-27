@@ -63,9 +63,12 @@ Camera::Off {
 
 Camera::TakingPicture {
   met_by(On o);
+  o meets this;
+  
   contained_by(Rover.At a);
   eq(m_loc, a.m_location);
   meets(On n);
+  this meets n;
 }
 
 // Defines the initial state for the problem.

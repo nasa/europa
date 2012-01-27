@@ -189,6 +189,7 @@ std::string NddlInterpreter::interpret(std::istream& ins, const std::string& sou
 
     try {
         treeParser->nddl(treeParser);
+        // TODO: report treeParser antlr errors the same way we do it for tree builder lexer and parser
     }
     catch (const std::string& error) {
         debugMsg("NddlInterpreter:error","nddl parser halted on error:" << symbolTable.getErrors());

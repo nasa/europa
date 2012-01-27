@@ -821,7 +821,7 @@ predicateVarRef returns [PredicateInstanceRef* pi]
     const char* varName = NULL;
     TokenTypeId tokenType;
 }
-	:	i=IDENT
+	:	i=identifier
 		{
 			varName = c_str($i.text->chars);
             tokenType = CTX->SymbolTable->getTypeForToken(varName);  
