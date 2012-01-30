@@ -1,5 +1,7 @@
 #include "Shopping-model.nddl"
 
+// Planning Horizon
+int horizonStart = 0;
 int horizonEnd = 100;
 
 // Allocate instances
@@ -20,36 +22,33 @@ Agent agent = new Agent();
 // Indicate that the database is closed - no new objects can be created
 close();
 
+// We start the day at Home:
+fact(agent.location.At atHomeForBreakfast);
+atHomeForBreakfast.loc.specify(Home);
 
-// Goal token for starting at home at the beginning
-// (alternatively require it to precede all Buy tokens)
-goal(agent.timeline.At start);
-start.loc.specify(Home);
-//start.start.specify(0);
+// Goals for all of the agent's needs, buy if needed
+goal(agent.Own gotMilk);
+gotMilk.product.specify(Milk);
+goal(agent.Own gotBanana);
+gotBanana.product.specify(Banana);
+goal(agent.Own gotDrill);
+gotDrill.product.specify(Drill);
 
-// Goal tokens for all purhases
-goal(agent.Buy buy1);
-goal(agent.Buy buy2);
-goal(agent.Buy buy3);
+// Make sure agent is home for dinner
+goal(agent.location.At atHomeForDinner);
+atHomeForDinner.loc.specify(Home);
 
-buy1.product.specify(Milk);
-buy2.product.specify(Banana);
-buy3.product.specify(Drill);
+// Agent has all day to satisfy goals:
+gotMilk after atHomeForBreakfast;
+gotMilk before atHomeForDinner;
 
-// Goal token for ending at home after all purchases
-goal(agent.timeline.At finish);
-finish.loc.specify(Home);
+gotBanana after atHomeForBreakfast;
+gotBanana before atHomeForDinner;
 
-buy1 after start;
-buy2 after start;
-buy3 after start;
+gotDrill after atHomeForBreakfast;
+gotDrill before atHomeForDinner;
 
-buy1 before finish;
-buy2 before finish;
-buy3 before finish;
+// Force things to happen within our planning horizon:
+leq(horizonStart, atHomeForBreakfast.start);
+leq(atHomeForDinner.end, horizonEnd);
 
-// Force things to happen within our horizon:
-leq(0, start.start);
-leq(finish.end, horizonEnd);
-
-// The planner should take it form here!

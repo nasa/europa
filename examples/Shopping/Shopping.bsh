@@ -26,6 +26,10 @@ void addRows(Vector data, PSTokenList tl, Vector columnNames)
     	row = new Vector();
     	PSToken t = tl.get(i);
        	
+    	// Go actions and AgentLocation.Going tokens are redundant, so don't display Go actions
+    	if (t.getEntityName().startsWith("Go-"))
+    		continue;
+    	
 		// Fill each column as best we can:
        	for (int k=0; k < columnNames.size(); k++) {
 			String col = columnNames.get(k);
@@ -70,7 +74,7 @@ void showPlan()
 	PSObjectList ol = psengine.getObjectsByType("Agent");
 	PSTokenList tl = ol.get(0).getTokens();
 	
-	PSObjectList ol2 = psengine.getObjectsByType("AgentTimeline");	
+	PSObjectList ol2 = psengine.getObjectsByType("AgentLocation");	
 	PSTokenList tl2 = ol2.get(0).getTokens();
 
 	columnNames = new Vector();
@@ -84,8 +88,8 @@ void showPlan()
     columnNames.add("end");
     columnNames.add("product"); // Only for Buy token
     columnNames.add("loc");  // Only for At token
-    columnNames.add("from");  // Only for Go token
-    columnNames.add("to");  // Only for Go token
+    columnNames.add("from");  // Only for Going token
+    columnNames.add("to");  // Only for Going token
 	
 	addRows(data, tl, columnNames);
 	addRows(data, tl2, columnNames);
@@ -97,7 +101,7 @@ void showPlan()
 		int bestIdx = -1;
 		double lowestLB = 0;
 		for(int i=0; i < data.size(); i++) {
-			if (bestIdx == -1 || data.get(i).get(2) < lowestLB) {
+			if (bestIdx == -1 || data.get(i).get(2) <= lowestLB) {
 				bestIdx = i;
 				lowestLB = data.get(i).get(2);
 			}

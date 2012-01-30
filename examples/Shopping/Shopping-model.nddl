@@ -1,7 +1,6 @@
 #include "Plasma.nddl"
 
-// Classes for Locations (Home, SuperMarket, etc.), Products (Banana, etc.) and
-// ProductLocations (Banana can be found at SuperMarket, for example)
+// Locations (Home, SuperMarket, etc.)
 class Location {
   string name;
   Location(string _name){
@@ -9,6 +8,7 @@ class Location {
   }
 }
 
+// Products (Milk, Banana, etc.) and
 class Product {
   string name;
   Product(string _name) {
@@ -16,6 +16,7 @@ class Product {
   }
 }
 
+// ProductLocations (Banana can be found at SuperMarket, for example)
 class ProductLocation {
   Location location;
   Product product;
@@ -30,52 +31,58 @@ class ProductLocation {
 // a) Can't be at more than one place at a time.
 // b) Can't Go more than one place at a time.
 // c) Can't Go somewhere and be At somewhere at the same time.
-class AgentTimeline extends Timeline{
+class AgentLocation extends Timeline{
   predicate At {
     Location loc;
   }
 
-  predicate Go {
+  predicate Going {
     Location from;
     Location to;
   }
 }
 
-// In addition to a timeline, the agent can buy things.  Note that Buy can
-// (must, in fact) be simultaneous with an At token and the Buy predicate
-// therefore cannot be defined as part of the AgentTimeline.
+// In addition to having a location timeline, the agent can buy and own things.  
+// Note that the actions and the location predicates can be concurrent 
+// so they can't be on the same Timeline
 class Agent {
-  AgentTimeline timeline;
+  AgentLocation location;
 
   Agent() {
-    timeline = new AgentTimeline();
+    location = new AgentLocation();
   }
 
-  predicate Buy {
+  action Buy {
     Product product;
   }
+  
+  action Go {
+    Location from;
+    Location to;
+  }
+  
+  predicate Own {
+  	Product product;
+  }
 }
 
 
-// Define the rules for our three predicates:
-
-AgentTimeline::At {
-  met_by(Go prevGo);
-  eq(loc, prevGo.to);
-  meets(Go nextGo);
-  eq(loc, nextGo.from);
-
-}
-
-AgentTimeline::Go {
-  met_by(At originToken);
-  eq(from, originToken.loc);
-  meets(At destinationToken);
-  eq(to, destinationToken.loc);
-
+// Define the rules for our actions:
+Agent::Go {
+  met_by(condition object.location.At origin);
+  eq(from, origin.loc);
+ 
+  equals(effect object.location.Going going);
+  eq(going.from, from);
+  eq(going.to, to);
+   
+  meets(effect object.location.At destination);
+  eq(to, destination.loc);
 }
 
 Agent::Buy {
+  // A Buy takes 10 time units
+  eq(10, duration);
 
   // initialized to all locations
   ProductLocation possibleStores;
@@ -85,9 +92,9 @@ Agent::Buy {
 
   // We must be At a location during our Buy, and that location must have the
   // product we want available:
-  contained_by(object.timeline.At currLocation);
+  contained_by(condition object.location.At currLocation);
   eq(currLocation.loc, possibleStores.location);
-
-  // A Buy takes 10 time units
-  eq(10, duration);
+  
+  starts(effect Own purchase);
+  eq(purchase.product,product);
 }
