@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="europa-j" default="dist" basedir=".">
+  
+	<property environment="env"/>
+	<property name="plasma.dir" value="${env.PLASMA_HOME}"/>
+	
+	<property name="src.dir"   value="src"/>
+	<property name="lib.dir"   value="lib"/>
+	<property name="build.dir"  value="${plasma.dir}/build/Europa-J/classes"/>
+ 	<property name="dist.dir"   value="${plasma.dir}/build/lib"/>
+  
+	<target name="init">
+		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${cache.dir}"/>
+	</target>
+
+	<path id="europaj.libs">
+		<fileset dir="${lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+	
+	<target name="build" depends="init">
+		<javac 
+			classpathref="europaj.libs" 
+			destdir="${build.dir}"
+			includeAntRuntime="no">
+			<src path="${src.dir}"/>    	
+		</javac>	
+	</target>
+
+	<target name="dist" depends="build">
+		<mkdir dir="${dist.dir}"/>
+		<jar jarfile="${dist.dir}/Europa-J.jar">
+			<fileset dir="${build.dir}"/>
+		</jar>
+	</target>
+
+	<target name="clean">
+		<delete dir="${cache.dir}"/>
+		<delete dir="${build.dir}"/>
+		<delete dir="${generated.dir}"/>
+		<delete file="${dist.dir}/PSEngine.jar"/>
+	</target>
+
+</project>
