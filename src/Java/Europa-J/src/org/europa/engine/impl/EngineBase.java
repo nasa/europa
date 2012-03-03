@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.europa.engine.Engine;
 import org.europa.engine.EngineComponent;
 import org.europa.engine.EngineConfig;
@@ -16,6 +17,8 @@ import org.europa.engine.LanguageInterpreter;
 public class EngineBase 
 	implements Engine 
 {
+	private final static Logger LOG = Logger.getLogger(EngineBase.class);
+
 	protected boolean isStarted_;
 	protected EngineConfig config_;
 	protected List<EngineModule> modules_;
@@ -35,47 +38,74 @@ public class EngineBase
 	{
     	if(!isStarted_)
     	{
+    		LOG.info("Engine starting...");
             initializeModules();
     		initializeByModules();
     		isStarted_ = true;
+    		LOG.info("Engine started");
     	}
 	}
 	
 	protected void initializeModules()
 	{
 		for(EngineModule m : modules_)
-			m.initialize();
+			initializeModule(m);
+	}
+	
+	protected void initializeModule(EngineModule m)
+	{
+		m.initialize();
+		LOG.info("Initialized module: "+m.getName());
 	}
 	
 	protected void initializeByModules()
 	{
 		for(EngineModule m : modules_)
-			m.initialize(this);
+			initializeByModule(m);
 	}
-
+	
+	protected void initializeByModule(EngineModule m)
+	{
+		m.initialize(this);
+		LOG.info("Engine initialized by module: "+m.getName());
+	}
+	
 	@Override
 	public void shutdown() 
 	{
-    	if(isStarted_)
-    	{
+    	if(isStarted_) {
+    		LOG.info("Engine shutting down...");
     		uninitializeByModules();
             uninitializeModules();
     		isStarted_ = false;
+    		LOG.info("Engine shutdown finished");
     	}
 	}
 
 	protected void uninitializeModules()
 	{
 		for(EngineModule m : modules_)
-			m.uninitialize();
+			uninitializeModule(m);
+	}
+	
+	protected void uninitializeModule(EngineModule m)
+	{
+		m.uninitialize();
+		LOG.info("Uninitialized module: "+m.getName());
 	}
 	
 	protected void uninitializeByModules()
 	{
 		for(EngineModule m : modules_)
-			m.uninitialize(this);
+			uninitializeByModule(m);
 	}
 
+	protected void uninitializeByModule(EngineModule m)
+	{
+		m.uninitialize(this);
+		LOG.info("Engine uninitialized by module: "+m.getName());
+	}
+	
 	@Override
 	public boolean isStarted() 
 	{
@@ -108,19 +138,36 @@ public class EngineBase
 	@Override
 	public void addModule(EngineModule m) 
 	{
-		// TODO Auto-generated method stub
+		modules_.add(m);
+		
+		if (isStarted()) {
+			initializeModule(m);
+			initializeByModule(m);
+		}
 	}
 
 	@Override
-	public EngineModule removeModule(String name) {
-		// TODO Auto-generated method stub
-		return null;
+	public EngineModule removeModule(String name) 
+	{
+		EngineModule m = getModule(name);
+		if (m != null) {
+			modules_.remove(m);
+			if (isStarted()) {
+				uninitializeByModule(m);
+				uninitializeModule(m);
+			}
+		}
+		
+		return m;
 	}
 
 	@Override
 	public EngineModule getModule(String name) 
 	{
-		// TODO Auto-generated method stub
+		for (EngineModule m : modules_) 
+			if (m.getName().equals(name)) 
+				return m;
+			
 		return null;
 	}
 
@@ -131,21 +178,29 @@ public class EngineBase
 	}
 
 	@Override
-	public void addComponent(EngineComponent c) {
-		// TODO Auto-generated method stub
-
+	public void addComponent(EngineComponent c) 
+	{
+		EngineComponent old = components_.put(c.getName(), c);
+		c.setEngine(this);
+		
+		if (old != null)
+			LOG.info("Component "+c.getName()+" has been replaced by a new instance"); 	
 	}
 
 	@Override
-	public EngineComponent removeComponent(String name) {
-		// TODO Auto-generated method stub
-		return null;
+	public EngineComponent removeComponent(String name) 
+	{
+		EngineComponent old = components_.remove(name);
+		if (old != null)
+			old.setEngine(null);
+		
+		return old;
 	}
 
 	@Override
-	public EngineComponent getComponent(String name) {
-		// TODO Auto-generated method stub
-		return null;
+	public EngineComponent getComponent(String name) 
+	{
+		return components_.get(name);
 	}
 
 	@Override
@@ -155,22 +210,25 @@ public class EngineBase
 	}
 
 	@Override
-	public LanguageInterpreter addLanguageInterpreter(String language,
-			LanguageInterpreter interpreter) {
-		// TODO Auto-generated method stub
-		return null;
+	public void addLanguageInterpreter(String language,
+			LanguageInterpreter interpreter) 
+	{
+		LanguageInterpreter old = interpreters_.put(language, interpreter);	
+		
+		if (old != null)
+			LOG.info("Interpreter for language "+language+" has been replaced by a new one"); 	
 	}
 
 	@Override
-	public LanguageInterpreter removeLanguageInterpreter(String language) {
-		// TODO Auto-generated method stub
-		return null;
+	public LanguageInterpreter removeLanguageInterpreter(String language) 
+	{
+		return interpreters_.remove(language);
 	}
 
 	@Override
-	public LanguageInterpreter getLanguageInterpreter(String language) {
-		// TODO Auto-generated method stub
-		return null;
+	public LanguageInterpreter getLanguageInterpreter(String language) 
+	{
+		return interpreters_.get(language);
 	}
 
 	@Override

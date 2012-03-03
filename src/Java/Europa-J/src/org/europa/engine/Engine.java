@@ -25,7 +25,7 @@ public interface Engine
 	public EngineComponent getComponent(String name);
 	public Collection<EngineComponent> getAllComponents();
 
-	public LanguageInterpreter addLanguageInterpreter(String language, LanguageInterpreter interpreter);
+	public void addLanguageInterpreter(String language, LanguageInterpreter interpreter);
 	public LanguageInterpreter removeLanguageInterpreter(String language);
 	public LanguageInterpreter getLanguageInterpreter(String language);
 	public Collection<LanguageInterpreter> getAllInterpreters();
