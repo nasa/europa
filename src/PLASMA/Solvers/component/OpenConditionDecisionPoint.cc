@@ -390,11 +390,13 @@ namespace EUROPA {
 	SupportToken::SupportToken(const DbClientId& dbClient, const TokenId& token, const std::vector<TokenTypeId>& supportActionTypes)
 		: ChangeTokenState(dbClient,token)
 	{
+		debugMsg("SupportToken", "Flawed Token Type:" << token->getFullTokenType());
+				//tt->getObjectType()->getNameString() << ":" << tt->getName());
 		for (unsigned int i = 0;i<supportActionTypes.size(); i++) {
 			TokenTypeId tt = supportActionTypes[i];
 			int mergeCnt = 0;
 			PSList<PSTokenType*> effectTypes = tt->getSubgoalsByAttr(PSTokenType::EFFECT);
-			debugMsg("SupportToken", "Support Type:" << tt->getName());
+			debugMsg("SupportToken", "Support Type:" << tt->getObjectType()->getNameString() << ":" << tt->getName());
 			for (int j=0;j<effectTypes.size();j++) {
 				// TODO: use ids for faster comparison instead
 				debugMsg("SupportToken", "Comparing: " << token->getTokenType() << " and " << effectTypes.get(j)->getName());
@@ -468,7 +470,7 @@ namespace EUROPA {
 		for (int i=0;i<slaves.size();i++) {
 			PSToken* slave = slaves.get(i);
 			if (slave->hasAttributes(PSTokenType::EFFECT)) {
-				if (slave->getTokenType() == m_token->getTokenType()) { // TODO: use ids
+				if (slave->getFullTokenType() == m_token->getFullTokenType()) { // TODO: use ids
 					if (effectCnt == m_effectIndex) {
 						// TODO: eliminate the need for the dynamic cast below
 						TokenId slaveId = dynamic_cast<Token*>(slave)->getId();
