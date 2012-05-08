@@ -203,6 +203,7 @@ namespace EUROPA {
     	: DecisionPoint(client, flawedToken->getKey(), explanation)
     	, m_flawedToken(flawedToken)
     	, m_currentChoice(0)
+    	, m_heuristic(NULL)
     {
     }
 
@@ -212,6 +213,9 @@ namespace EUROPA {
     		delete m_choices[i];
 
     	m_choices.clear();
+
+    	if (m_heuristic != NULL)
+    		delete m_heuristic;
     }
 
     std::string SupportedOCDecisionPoint::toString() const
@@ -230,6 +234,16 @@ namespace EUROPA {
        	std::ostringstream os;
         os << "SupportedOCDecisionPoint:" << m_flawedToken->toString() << "[" << m_currentChoice << " of " << m_choices.size() << "]";
     	return os.str();
+    }
+
+    // TODO: move to Schema?
+    bool hasSupports(const TokenId& token)
+    {
+		SchemaId schema = token->getPlanDatabase()->getSchema();
+		// TODO: PSToken::getTokenType() should return token type, not token type name
+		TokenTypeId tokenType = schema->getTokenType(token->getFullTokenType());
+		std::vector<TokenTypeId> supportActionTypes = schema->getTypeSupporters(tokenType);
+		return (supportActionTypes.size() > 0);
     }
 
     void SupportedOCDecisionPoint::handleInitialize()
@@ -251,15 +265,10 @@ namespace EUROPA {
         }
 
 		if(stateDomain.isMember(Token::ACTIVE)) {
-			SchemaId schema = m_client->getSchema();
-			// TODO: PSToken::getTokenType() should return token type, not token type name
-			TokenTypeId tokenType = schema->getTokenType(m_flawedToken->getFullTokenType());
-			std::vector<TokenTypeId> supportActionTypes = schema->getTypeSupporters(tokenType);
-			// TODO: allow heuristic function to be passed as a parameter to SupportToken
 			if (!m_flawedToken->isFact() &&
 				!m_flawedToken->hasAttributes(PSTokenType::EFFECT) &&
-				(supportActionTypes.size() > 0))
-				m_choices.push_back(new SupportToken(m_client,m_flawedToken,supportActionTypes));
+				hasSupports(m_flawedToken))
+				m_choices.push_back(new SupportToken(m_client,m_flawedToken,getSupportHeuristic()));
 			else
 				m_choices.push_back(new ActivateToken(m_client,m_flawedToken));
 		}
@@ -387,34 +396,11 @@ namespace EUROPA {
 		return "REJECT";
 	}
 
-	SupportToken::SupportToken(const DbClientId& dbClient, const TokenId& token, const std::vector<TokenTypeId>& supportActionTypes)
+	SupportToken::SupportToken(const DbClientId& dbClient, const TokenId& token, ActionSupportHeuristic* heuristic)
 		: ChangeTokenState(dbClient,token)
+		, m_heuristic(heuristic)
 	{
-		debugMsg("SupportToken", "Flawed Token Type:" << token->getFullTokenType());
-				//tt->getObjectType()->getNameString() << ":" << tt->getName());
-		for (unsigned int i = 0;i<supportActionTypes.size(); i++) {
-			TokenTypeId tt = supportActionTypes[i];
-			int mergeCnt = 0;
-			PSList<PSTokenType*> effectTypes = tt->getSubgoalsByAttr(PSTokenType::EFFECT);
-			debugMsg("SupportToken", "Support Type:" << tt->getObjectType()->getNameString() << ":" << tt->getName());
-			for (int j=0;j<effectTypes.size();j++) {
-				// TODO: use ids for faster comparison instead
-				debugMsg("SupportToken", "Comparing: " << token->getTokenType() << " and " << effectTypes.get(j)->getName());
-				if (token->getTokenType() == effectTypes.get(j)->getName()) {
-					mergeCnt++;
-					debugMsg("SupportToken", "Found match!");
-				}
-			}
-
-			checkError(mergeCnt > 0, "Expected to find at list one merge point for " << token->getTokenType() << " in " << tt->getName());
-			// TODO: use heuristic function to sort choices
-			m_choices.push_back(std::pair<TokenTypeId,int>(tt,mergeCnt));
-		}
-
-		m_actionIndex = 0;
-		m_effectIndex = 0;
-		m_action = TokenId::noId();
-		m_targetEffect = TokenId::noId();
+		m_initialized = false;
 	}
 
 	SupportToken::~SupportToken()
@@ -437,6 +423,30 @@ namespace EUROPA {
 	    return os.str();
 	}
 
+	void SupportToken::init()
+	{
+		SchemaId schema = m_dbClient->getSchema();
+		// TODO: PSToken::getTokenType() should return token type, not token type name
+		TokenTypeId target = schema->getTokenType(m_token->getFullTokenType());
+
+		std::vector<SupportChoice> supports;
+		m_heuristic->getSupportCandidates(target,supports);
+
+		checkError(supports.size() > 0, "Expected to find at list one support for " << target->getName());
+		for (unsigned int i = 0; i<supports.size(); i++) {
+			SupportChoice& choice = supports[i];
+			// TODO: use action parameter values if available in the SupportChoice
+			m_choices.push_back(std::pair<TokenTypeId,int>(choice.m_actionType,choice.m_effectCount));
+		}
+
+		m_actionIndex = 0;
+		m_effectIndex = 0;
+		m_action = TokenId::noId();
+		m_targetEffect = TokenId::noId();
+
+		m_initialized = true;
+	}
+
 	/* For each candidate action
 	 * 	For each possible effect that this token can be merged with
 	 *		1. Activate token that needs support
@@ -446,6 +456,9 @@ namespace EUROPA {
 	 */
 	void SupportToken::execute()
 	{
+		if (!m_initialized)
+			init();
+
 		TokenTypeId actionType = m_choices[m_actionIndex].first;
 
 		debugMsg("SupportToken", "Activating supporting action:" << actionType->getName() << " for \n" << m_token->toLongString());
@@ -541,6 +554,84 @@ namespace EUROPA {
 
 		return os.str();
 	}
+
+	SupportChoice::SupportChoice(
+			const TokenTypeId& target,
+			const TokenTypeId& actionType,
+			int effectCount,
+			const std::vector< ParamValues >& paramValues)
+	: m_target(target)
+	, m_actionType(actionType)
+	, m_effectCount(effectCount)
+	, m_paramValues(paramValues)
+	{
+
+	}
+
+	SupportChoice::~SupportChoice()
+	{
+	}
+
+
+    class DefaultActionSupportHeuristic : public ActionSupportHeuristic
+    {
+    public:
+    	DefaultActionSupportHeuristic(const SchemaId& schema);
+    	virtual ~DefaultActionSupportHeuristic();
+
+    	void getSupportCandidates(
+    			const TokenTypeId& target,
+    			std::vector<SupportChoice>& supports);
+    protected:
+    	SchemaId m_schema;
+    };
+
+    DefaultActionSupportHeuristic::DefaultActionSupportHeuristic(const SchemaId& schema)
+    	: m_schema(schema)
+    {
+    }
+
+    DefaultActionSupportHeuristic::~DefaultActionSupportHeuristic()
+    {
+    }
+
+    void DefaultActionSupportHeuristic::getSupportCandidates(
+			const TokenTypeId& target,
+			std::vector<SupportChoice>& supports)
+    {
+		debugMsg("getSupportCandidates", "Flawed Token Type:" << target->getName());
+				//target->getObjectType()->getNameString() << ":" << target->getName());
+
+		std::vector<TokenTypeId> supportActionTypes = m_schema->getTypeSupporters(target);
+		for (unsigned int i = 0;i<supportActionTypes.size(); i++) {
+			TokenTypeId tt = supportActionTypes[i];
+			int mergeCnt = 0;
+			PSList<PSTokenType*> effectTypes = tt->getSubgoalsByAttr(PSTokenType::EFFECT);
+			debugMsg("getSupportCandidates", "Support Type:" << tt->getObjectType()->getNameString() << ":" << tt->getName());
+			for (int j=0;j<effectTypes.size();j++) {
+				// TODO: use ids for faster comparison instead
+				debugMsg("getSupportCandidates", "Comparing: " << target->getName() << " and " << effectTypes.get(j)->getName());
+				if (target->getName() == effectTypes.get(j)->getName()) {
+					mergeCnt++;
+					debugMsg("getSupportCandidates", "Found match!");
+				}
+			}
+
+			checkError(mergeCnt > 0, "Expected to find at list one merge point for " << target->getName() << " in " << tt->getName());
+			// TODO: cache this result
+			supports.push_back(SupportChoice(target,tt,mergeCnt));
+		}
+    }
+
+    ActionSupportHeuristic* SupportedOCDecisionPoint::getSupportHeuristic()
+    {
+    	// TODO: get heuristic from FlawManager, set through configuration
+    	if (m_heuristic == NULL)
+    		m_heuristic = new DefaultActionSupportHeuristic(m_client->getSchema());
+
+    	return m_heuristic;
+    }
+
   }
 }
 

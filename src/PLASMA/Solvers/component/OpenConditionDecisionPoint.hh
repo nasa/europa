@@ -93,6 +93,9 @@ namespace EUROPA {
      * generate choices for supporting actions if that applies to the flawed token
      */
     // TODO: reshape OpenConditionDecisionPoint so that this can inherit from it instead
+
+    class ActionSupportHeuristic;
+
     class SupportedOCDecisionPoint : public DecisionPoint
     {
     public:
@@ -114,9 +117,12 @@ namespace EUROPA {
         virtual bool hasNext() const;
         virtual bool canUndo() const;
 
+        ActionSupportHeuristic* getSupportHeuristic();
+
         const TokenId m_flawedToken; /*!< The token to be resolved. */
         std::vector<OCDecision*> m_choices;
         unsigned int m_currentChoice;
+        ActionSupportHeuristic* m_heuristic;
     };
 
     class ChangeTokenState : public OCDecision
@@ -174,7 +180,7 @@ namespace EUROPA {
     class SupportToken : public ChangeTokenState
     {
     public:
-    	SupportToken(const DbClientId& dbClient, const TokenId& token, const std::vector<TokenTypeId>& supportActionTypes);
+    	SupportToken(const DbClientId& dbClient, const TokenId& token, ActionSupportHeuristic* heuristic);
     	virtual ~SupportToken();
 
     	virtual void execute();
@@ -187,6 +193,40 @@ namespace EUROPA {
     	int m_effectIndex;
     	TokenId m_action;
     	TokenId m_targetEffect;
+    	ActionSupportHeuristic* m_heuristic;
+    	bool m_initialized;
+
+    	void init();
+    };
+
+    typedef std::vector< std::pair<std::string,double> > ParamValues;
+
+    class SupportChoice
+    {
+    public:
+    	SupportChoice(
+    			const TokenTypeId& target,
+    			const TokenTypeId& actionType,
+    			int effectCount,
+    			const std::vector< ParamValues >& paramValues = std::vector< ParamValues >());
+    	virtual ~SupportChoice();
+
+    	TokenTypeId m_target;     // Predicate type to be supported
+    	TokenTypeId m_actionType; // Action type that includes m_target in its effects
+    	int m_effectCount;        // How many effects of m_actionType match m_target
+    	std::vector< ParamValues > m_paramValues; // Optional parameter assignments for each one of the possible effects of m_action used to match m_target
+    };
+
+    class ActionSupportHeuristic
+    {
+    public:
+    	virtual ~ActionSupportHeuristic() {};
+
+    	virtual void getSupportCandidates(
+    			const TokenTypeId& target,
+    			std::vector<SupportChoice>& supports) = 0;
+    protected:
+    	ActionSupportHeuristic() {};
     };
   }
 }
