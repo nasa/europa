@@ -490,7 +490,7 @@ class CountZerosConstraint : public Constraint {
     bool equate(const ConstrainedVariableId& v1, const ConstrainedVariableId& v2, bool& isEmpty);
     const unsigned int m_argCount;
   };
-  CREATE_CONSTRAINT_TYPE(TwoSameArgumentsCT, EqualCT, EqualConstraint);
+  CREATE_CONSTRAINT_TYPE(AllSameArgumentsCT, EqualCT, EqualConstraint);
 
       class EqualMaximumConstraint : public Constraint {
   public:
