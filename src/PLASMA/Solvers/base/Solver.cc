@@ -314,6 +314,7 @@ namespace EUROPA {
           return;
         }
         else {
+          publish(notifyStepFailed,m_activeDecision);
           debugMsg("Solver:backtrack",
                    "Backtracking because of constraint inconsistency due to " << m_lastExecutedDecision);
         }
