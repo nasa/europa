@@ -19,7 +19,7 @@ namespace EUROPA {
     /**
      * @brief Factory for allocating DecisionPoint instances. Key extensions from a MatchingRule provide
      * behavior for allocation of a decision point from an entity and for storing initial configuration
-     * data so that it can be accessed durng actual decision point allocation.
+     * data so that it can be accessed during actual decision point allocation.
      * @see DecisionPoint
      */
     class FlawHandler: public MatchingRule {

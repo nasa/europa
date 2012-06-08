@@ -150,17 +150,18 @@ namespace EUROPA {
       virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) const;
   };
 
+
   class AddEqualConstraint : public Constraint {
   public:
     AddEqualConstraint(const LabelStr& name,
-		       const LabelStr& propagatorName,
-		       const ConstraintEngineId& constraintEngine,
-		       const std::vector<ConstrainedVariableId>& variables);
+           const LabelStr& propagatorName,
+           const ConstraintEngineId& constraintEngine,
+           const std::vector<ConstrainedVariableId>& variables);
 
     void handleExecute();
 
   private:
-
+    // X + Y = Z
     Domain& m_x;
     Domain& m_y;
     Domain& m_z;
@@ -190,6 +191,8 @@ namespace EUROPA {
       virtual void checkArgTypes(const std::vector<DataTypeId>& argTypes) const;
   };
 
+
+
   class MultEqualConstraint : public Constraint {
   public:
     MultEqualConstraint(const LabelStr& name,
@@ -199,13 +202,6 @@ namespace EUROPA {
 
     void handleExecute();
 
-    /**
-     * @brief Helper method to compute new bounds for both X and Y in X*Y == Z.
-     * @return True if the target domain was modified.
-     */
-    static bool updateMinAndMax(IntervalDomain& targetDomain,
-				edouble denomMin, edouble denomMax,
-				edouble numMin, edouble numMax);
   private:
     static const int X = 0;
     static const int Y = 1;
@@ -213,28 +209,47 @@ namespace EUROPA {
     static const int ARG_COUNT = 3;
   };
 
-class AddMultEqualConstraint : public Constraint {
+
+  class DivEqualConstraint : public Constraint {
   public:
-    AddMultEqualConstraint(const LabelStr& name,
-               const LabelStr& propagatorName,
-               const ConstraintEngineId& constraintEngine,
-               const std::vector<ConstrainedVariableId>& variables);
+    DivEqualConstraint(const LabelStr& name,
+      const LabelStr& propagatorName,
+      const ConstraintEngineId& constraintEngine,
+      const std::vector<ConstrainedVariableId>& variables);
 
-    ~AddMultEqualConstraint();
+    void handleExecute();
+
   private:
-    // All the work is done by the member constraints
-    inline void handleExecute() { }
-    void handleDiscard();
+    static const int X = 0;
+    static const int Y = 1;
+    static const int Z = 2;
+    static const int ARG_COUNT = 3;
+  };
 
-    static const int A = 0;
-    static const int B = 1;
-    static const int C = 2;
-    static const int D = 3;
-    static const int ARG_COUNT = 4;
 
-    Variable<IntervalDomain> m_interimVariable;
-    MultEqualConstraint m_multEqualConstraint;
-    AddEqualConstraint m_addEqualConstraint;
+  // A + (B * C) = D
+  class AddMultEqualConstraint : public Constraint {
+    public:
+      AddMultEqualConstraint(const LabelStr& name,
+                 const LabelStr& propagatorName,
+                 const ConstraintEngineId& constraintEngine,
+                 const std::vector<ConstrainedVariableId>& variables);
+
+      ~AddMultEqualConstraint();
+    private:
+      // All the work is done by the member constraints
+      inline void handleExecute() { }
+      void handleDiscard();
+
+      static const int A = 0;
+      static const int B = 1;
+      static const int C = 2;
+      static const int D = 3;
+      static const int ARG_COUNT = 4;
+
+      Variable<IntervalDomain> m_interimVariable;
+      MultEqualConstraint m_multEqualConstraint;
+      AddEqualConstraint m_addEqualConstraint;
   };
 
   class AllDiffConstraint : public Constraint {

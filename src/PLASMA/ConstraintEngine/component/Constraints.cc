@@ -183,7 +183,7 @@ namespace EUROPA {
     m_x = source->m_x->copy();
   }
 
-  /****************************************************************/
+  /*************** AddEqualConstraint **********************/
 
   void AddEqualCT::checkArgTypes(const std::vector<DataTypeId>& argTypes) const
   {
@@ -211,6 +211,7 @@ namespace EUROPA {
       }
   }
 
+
   AddEqualConstraint::AddEqualConstraint(const LabelStr& name,
 					 const LabelStr& propagatorName,
 					 const ConstraintEngineId& constraintEngine,
@@ -218,7 +219,8 @@ namespace EUROPA {
     : Constraint(name, propagatorName, constraintEngine, variables),
       m_x(getCurrentDomain(m_variables[X])),
       m_y(getCurrentDomain(m_variables[Y])),
-      m_z(getCurrentDomain(m_variables[Z])){
+      m_z(getCurrentDomain(m_variables[Z]))
+  {
     check_error(variables.size() == (unsigned int) ARG_COUNT);
   }
 
@@ -290,6 +292,301 @@ namespace EUROPA {
       m_z.empty();
   }
 
+  /*********** MultEqualConstraint: X*Y = Z *************/
+  MultEqualConstraint::MultEqualConstraint(const LabelStr& name,
+                                           const LabelStr& propagatorName,
+                                           const ConstraintEngineId& constraintEngine,
+                                           const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables) {
+    check_error(variables.size() == (unsigned int) ARG_COUNT);
+    for (int i = 0; i < ARG_COUNT; i++)
+      check_error(!getCurrentDomain(m_variables[i]).isEnumerated());
+  }
+/*
+  bool MultEqualConstraint::updateMinAndMax(IntervalDomain& targetDomain,
+              edouble denomMin, edouble denomMax,
+              edouble numMin, edouble numMax) {
+    edouble xMax = targetDomain.getUpperBound();
+    edouble xMin = targetDomain.getLowerBound();
+    edouble newMin = xMin;
+    edouble newMax = xMax;
+
+    // If the denominator could be zero, the result could be anything
+    //   except for some sign related restrictions.
+    if (denomMin <= 0.0 && denomMax >= 0.0) {
+      if ((numMin >= 0.0 && denomMin > 0.0) ||
+          (numMax <= 0.0 && denomMax < 0.0)) {
+        if (targetDomain.intersect(0.0, xMax))
+          return(true);
+      } else {
+        if ((numMax <= 0.0 && denomMin > 0.0) ||
+            (numMin >= 0.0 && denomMax < 0.0)) {
+          if (targetDomain.intersect(xMin, 0.0))
+            return(true);
+        }
+      }
+      return(false);
+    }
+    check_error(denomMin != 0.0 && denomMax != 0.0);
+
+    // Otherwise we must examine min and max of all pairings to deal with signs correctly.
+    newMax = std::max(std::max(numMax / denomMin, numMin / denomMin),
+                 std::max(numMax / denomMax, numMin/ denomMax));
+    newMin = std::min(std::min(numMax / denomMin, numMin / denomMin),
+                 std::min(numMax / denomMax, numMin/ denomMax));
+
+    if (xMax > newMax)
+      xMax = targetDomain.translateNumber(newMax, false);
+    if (xMin < newMin)
+      xMin = targetDomain.translateNumber(newMin, true);
+
+    // Update the bounds of targetDomain
+    return(targetDomain.intersect(xMin, xMax));
+  }
+
+  void MultEqualConstraint::handleExecute() {
+    IntervalDomain& domx = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
+    IntervalDomain& domy = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
+    IntervalDomain& domz = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Z]));
+
+    check_error(Domain::canBeCompared(domx, domy));
+    check_error(Domain::canBeCompared(domx, domz));
+    check_error(Domain::canBeCompared(domz, domy));
+
+    // Test preconditions for continued execution.
+    // Could support one open domain, but only very messily due to REAL_ENUMERATED case.
+    if (domx.isOpen() ||
+        domy.isOpen() ||
+        domz.isOpen())
+      return;
+
+    check_error(!domx.isEmpty() && !domy.isEmpty() && !domz.isEmpty());
+
+    edouble xMin, xMax, yMin, yMax, zMin, zMax;
+    for (bool done = false; !done; ) {
+      done = true;
+      domx.getBounds(xMin, xMax);
+      domy.getBounds(yMin, yMax);
+      domz.getBounds(zMin, zMax);
+
+      // Process Z = X * Y
+      edouble max_z = std::max(std::max(xMax * yMax, xMin * yMin), std::max(xMin * yMax, xMax * yMin));
+      if (zMax > max_z)
+        zMax = domz.translateNumber(max_z, false);
+
+      edouble min_z = std::min(std::min(xMax * yMax, xMin * yMin), std::min(xMin * yMax, xMax * yMin));
+      if (zMin < min_z)
+        zMin = domz.translateNumber(min_z, true);
+
+      // Minh: Why doesn't output error when dom(x or y or z) is empty (after update)?
+      if (domz.intersect(zMin, zMax) && domz.isEmpty())
+        return;
+
+      // Process X = Z / Y
+      if (updateMinAndMax(domx, yMin, yMax, zMin, zMax)) {
+        if (domx.isEmpty())
+          return;
+        else
+          done = false;
+      }
+
+      // Process Y = Z / X
+      if (updateMinAndMax(domy, xMin, xMax, zMin, zMax)) {
+        if (domy.isEmpty())
+          return;
+        else
+          done = false;
+      }
+    }
+  }
+*/
+
+  /*
+   * Some helper functions to help with the bound updates
+   */
+  // Update Z's domain bounds using domains of X and Y in: X * Y = Z.
+  // Return TRUE if we have new bounds for Z
+  bool updateMultBounds(IntervalDomain& domZ,
+                      const IntervalDomain& domX,
+                      const IntervalDomain& domY)
+  {
+    // Can not do any update if the domain of any variable is empty
+    if(domX.isEmpty() || domY.isEmpty() || domZ.isEmpty())
+      return false;
+
+    edouble xMin, yMin, xMax, yMax, zMin, zMax, a, b, c, d;
+    domX.getBounds(xMin, xMax);
+    domY.getBounds(yMin, yMax);
+
+    a = xMin * yMin;
+    b = xMin * yMax;
+    c = xMax * yMin;
+    d = xMax * yMax;
+
+    zMin = std::min(std::min(a,b),std::min(c,d));
+    zMax = std::max(std::max(a,b),std::max(c,d));
+
+    return domZ.intersect(zMin,zMax);
+  }
+
+  // Update Z's domain bounds using domains of X and Y in: X / Y = Z.
+  // Return TRUE if we have new bounds for Z
+  // NOTE: given the division-by-zero problem, there will be many different scenarios that need
+  // special treatments
+  bool updateDivBounds(IntervalDomain& domZ,
+      const IntervalDomain& domX,
+      const IntervalDomain& domY)
+  {
+    // Can not do any update if the domain of any variable is empty
+    if(domX.isEmpty() || domY.isEmpty() || domZ.isEmpty())
+      return false;
+
+    edouble xMin, yMin, xMax, yMax, zMin, zMax, a, b, c, d;
+    domX.getBounds(xMin, xMax);
+    domY.getBounds(yMin, yMax);
+
+
+    // if [Y] = {0} (singleton 0 value)
+    if(yMin == 0.0 && yMax == 0.0) {
+        // If [X] doesn't contain 0 then inconsistent -> empty Z domain
+        // NOTE: alternatively, [X] can be emptied instead of [Z] but it doesn't matter
+        // with the current mechanism in Europa
+        if((xMin > 0.0 || xMax < 0.0)) {
+          domZ.empty();
+          return true;
+        } else {
+          // If 0 \in [X] then no bound tightening (because 0/0 can be anything)
+          return false;
+        }
+    }
+
+    // If 0 \in [Y] but 0 is not one of the bounds then no tightening
+    // NOTE: regardless of the bounds of X because [Y] contains both positive & negative values
+    if(yMin < 0.0 && yMax > 0.0)
+      return false;
+
+    // If [Y] doesn't contain 0. Safely compute the two possible new bounds
+    if(yMin > 0.0 || yMax < 0.0) {
+      a = xMin / yMin;
+      b = xMin / yMax;
+      c = xMax / yMin;
+      d = xMax / yMax;
+
+      zMin = std::min(std::min(a,b),std::min(c,d));
+      zMax = std::max(std::max(a,b),std::max(c,d));
+      return domZ.intersect(zMin,zMax);
+    }
+
+    // if lb[Y] = 0 OR ub[Y] = 0 and ub[Y] > lb[Y] (i.e., 0 is one but not both bounds of [Y])
+    // and 0 \in [X] then there is no bound tightening (because 0/0 can be anything)
+    if((yMin == 0.0 || yMax == 0.0) && (xMin <= 0.0 && xMax >= 0.0))
+      return false;
+
+    /*
+     * if lb[Y] = 0 OR ub[Y] = 0 and [X] doesn't contain 0, then we can compute one of the bounds
+     */
+    // One of the bounds will be \infinity so we will initialize both of the potential
+    // new [Z]'s bounds with the existing bounds on [Z]
+    domZ.getBounds(zMin, zMax);
+
+    // Case 1 [+,+] / [0,+]: new bounds [xMin / yMax, +infinity]
+    if(yMin == 0.0 && xMin > 0.0)
+      zMin = xMin / yMax;
+
+    // Case 2 [-,-] / [0,+] : new bounds [-infinity, xMax / yMax]
+    if(yMin == 0.0 && xMax < 0.0)
+      zMax = xMax / yMax;
+
+    // Case 3 [+,+] / [-,0]: new bounds [-infinity, xMin /yMin]
+    if(yMax == 0.0 && xMin > 0.0)
+      zMax = xMin / yMin;
+
+    // Case 4 [-,-] / [-,0]: new bounds [xMax / yMin, +infinity ]
+    if(yMax == 0.0 && xMax < 0.0)
+      zMin = xMax / yMin;
+
+    // Set the new bounds
+    return domZ.intersect(zMin,zMax);
+  }
+
+  void MultEqualConstraint::handleExecute() {
+    IntervalDomain& domX = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
+    IntervalDomain& domY = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
+    IntervalDomain& domZ = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Z]));
+
+    check_error(Domain::canBeCompared(domX, domY));
+    check_error(Domain::canBeCompared(domX, domZ));
+    check_error(Domain::canBeCompared(domZ, domY));
+
+    // Do not handle cases where one of the domains is open
+    if (domX.isOpen() || domY.isOpen() || domZ.isOpen())
+      return;
+
+    // Domain should not be empty when this function is called
+    check_error(!domX.isEmpty() && !domY.isEmpty() && !domZ.isEmpty());
+
+    bool xChanged = true, yChanged = true, zChanged = true;
+
+    // Repeat the update process until none of the three variables changed their (bound) values
+    while(xChanged || yChanged || zChanged) {
+      // Process Z = X * Y
+      zChanged = updateMultBounds(domZ,domX,domY);
+
+      // Process X = Z / Y
+      xChanged = updateDivBounds(domX,domZ,domY);
+
+      // Process Y = Z / X
+      yChanged = updateDivBounds(domY,domZ,domX);
+    }
+  }
+
+
+  /*********** DivEqualConstraint: X/Y = Z *************/
+  DivEqualConstraint::DivEqualConstraint(const LabelStr& name,
+                                           const LabelStr& propagatorName,
+                                           const ConstraintEngineId& constraintEngine,
+                                           const std::vector<ConstrainedVariableId>& variables)
+    : Constraint(name, propagatorName, constraintEngine, variables)
+  {
+    check_error(variables.size() == (unsigned int) ARG_COUNT);
+    for (int i = 0; i < ARG_COUNT; i++)
+      check_error(!getCurrentDomain(m_variables[i]).isEnumerated());
+  }
+
+  void DivEqualConstraint::handleExecute()
+  {
+    IntervalDomain& domX = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
+    IntervalDomain& domY = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
+    IntervalDomain& domZ = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Z]));
+
+    check_error(Domain::canBeCompared(domX, domY));
+    check_error(Domain::canBeCompared(domX, domZ));
+    check_error(Domain::canBeCompared(domZ, domY));
+
+    // Test preconditions for continued execution.
+    // Could support one open domain, but only very messily due to REAL_ENUMERATED case.
+    if (domX.isOpen() ||  domY.isOpen() || domZ.isOpen())
+      return;
+
+    // Domain should not be empty when this function is called
+    check_error(!domX.isEmpty() && !domY.isEmpty() && !domZ.isEmpty());
+
+    bool xChanged = true, yChanged = true, zChanged = true;
+
+    // Repeat the update process until none of the three variables changed their (bound) values
+    while(xChanged || yChanged || zChanged) {
+      // Process Z = X / Y
+      zChanged = updateDivBounds(domZ,domX,domY);
+
+      // Process X = Y * Z
+      xChanged = updateMultBounds(domX,domY,domZ);
+
+      // Process Y = X / Z
+      yChanged = updateDivBounds(domY,domX,domZ);
+    }
+  }
+
+  /*********** EqualConstraint *************/
   EqualConstraint::EqualConstraint(const LabelStr& name,
 				   const LabelStr& propagatorName,
 				   const ConstraintEngineId& constraintEngine,
@@ -386,6 +683,7 @@ namespace EUROPA {
     return(Constraint::getCurrentDomain(var));
   }
 
+  /************ SubsetOfConstraint ******************/
   SubsetOfConstraint::SubsetOfConstraint(const LabelStr& name,
 					 const LabelStr& propagatorName,
 					 const ConstraintEngineId& constraintEngine,
@@ -415,6 +713,7 @@ namespace EUROPA {
       return true;
   }
 
+  /*********** LessThanEqualConstraint *************/
   LessThanEqualConstraint::LessThanEqualConstraint(const LabelStr& name,
 						   const LabelStr& propagatorName,
 						   const ConstraintEngineId& constraintEngine,
@@ -473,6 +772,8 @@ namespace EUROPA {
     return false;
   }
 
+
+  /*********** NotEqualConstraint *************/
   NotEqualConstraint::NotEqualConstraint(const LabelStr& name,
 					 const LabelStr& propagatorName,
 					 const ConstraintEngineId& constraintEngine,
@@ -547,7 +848,7 @@ namespace EUROPA {
     return true;
   }
 
-
+  /*********** LessThanConstraint *************/
   LessThanConstraint::LessThanConstraint(const LabelStr& name,
                                          const LabelStr& propagatorName,
                                          const ConstraintEngineId& constraintEngine,
@@ -602,110 +903,6 @@ namespace EUROPA {
 	    (changeType == DomainListener::LOWER_BOUND_INCREASED)));
   }
 
-  MultEqualConstraint::MultEqualConstraint(const LabelStr& name,
-                                           const LabelStr& propagatorName,
-                                           const ConstraintEngineId& constraintEngine,
-                                           const std::vector<ConstrainedVariableId>& variables)
-    : Constraint(name, propagatorName, constraintEngine, variables) {
-    check_error(variables.size() == (unsigned int) ARG_COUNT);
-    for (int i = 0; i < ARG_COUNT; i++)
-      check_error(!getCurrentDomain(m_variables[i]).isEnumerated());
-  }
-
-  bool MultEqualConstraint::updateMinAndMax(IntervalDomain& targetDomain,
-					    edouble denomMin, edouble denomMax,
-					    edouble numMin, edouble numMax) {
-    edouble xMax = targetDomain.getUpperBound();
-    edouble xMin = targetDomain.getLowerBound();
-    edouble newMin = xMin;
-    edouble newMax = xMax;
-
-    // If the denominator could be zero, the result could be anything
-    //   except for some sign related restrictions.
-    if (denomMin <= 0.0 && denomMax >= 0.0) {
-      if ((numMin >= 0.0 && denomMin > 0.0) ||
-          (numMax <= 0.0 && denomMax < 0.0)) {
-        if (targetDomain.intersect(0.0, xMax))
-          return(true);
-      } else {
-        if ((numMax <= 0.0 && denomMin > 0.0) ||
-            (numMin >= 0.0 && denomMax < 0.0)) {
-          if (targetDomain.intersect(xMin, 0.0))
-            return(true);
-        }
-      }
-      return(false);
-    }
-    check_error(denomMin != 0.0 && denomMax != 0.0);
-
-    // Otherwise we must examine min and max of all pairings to deal with signs correctly.
-    newMax = std::max(std::max(numMax / denomMin, numMin / denomMin),
-                 std::max(numMax / denomMax, numMin/ denomMax));
-    newMin = std::min(std::min(numMax / denomMin, numMin / denomMin),
-                 std::min(numMax / denomMax, numMin/ denomMax));
-
-    if (xMax > newMax)
-      xMax = targetDomain.translateNumber(newMax, false);
-    if (xMin < newMin)
-      xMin = targetDomain.translateNumber(newMin, true);
-
-    return(targetDomain.intersect(xMin, xMax));
-  }
-
-  void MultEqualConstraint::handleExecute() {
-    IntervalDomain& domx = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[X]));
-    IntervalDomain& domy = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Y]));
-    IntervalDomain& domz = static_cast<IntervalDomain&>(getCurrentDomain(m_variables[Z]));
-
-    check_error(Domain::canBeCompared(domx, domy));
-    check_error(Domain::canBeCompared(domx, domz));
-    check_error(Domain::canBeCompared(domz, domy));
-
-    /* Test preconditions for continued execution. */
-    /* Could support one open domain, but only very messily due to REAL_ENUMERATED case. */
-    if (domx.isOpen() ||
-        domy.isOpen() ||
-        domz.isOpen())
-      return;
-
-    check_error(!domx.isEmpty() && !domy.isEmpty() && !domz.isEmpty());
-
-    edouble xMin, xMax, yMin, yMax, zMin, zMax;
-    for (bool done = false; !done; ) {
-      done = true;
-      domx.getBounds(xMin, xMax);
-      domy.getBounds(yMin, yMax);
-      domz.getBounds(zMin, zMax);
-
-      // Process Z
-      edouble max_z = std::max(std::max(xMax * yMax, xMin * yMin), std::max(xMin * yMax, xMax * yMin));
-      if (zMax > max_z)
-        zMax = domz.translateNumber(max_z, false);
-
-      edouble min_z = std::min(std::min(xMax * yMax, xMin * yMin), std::min(xMin * yMax, xMax * yMin));
-      if (zMin < min_z)
-        zMin = domz.translateNumber(min_z, true);
-
-      if (domz.intersect(zMin, zMax) && domz.isEmpty())
-        return;
-
-      // Process X
-      if (updateMinAndMax(domx, yMin, yMax, zMin, zMax)) {
-        if (domx.isEmpty())
-          return;
-        else
-          done = false;
-      }
-
-      // Process Y
-      if (updateMinAndMax(domy, xMin, xMax, zMin, zMax)) {
-        if (domy.isEmpty())
-          return;
-        else
-          done = false;
-      }
-    }
-  }
 
   /**
    * @class AddMultEqualConstraint
@@ -733,6 +930,7 @@ namespace EUROPA {
     m_interimVariable.discard();
   }
 
+  /*********** EqualSumConstraint *************/
   EqualSumConstraint::EqualSumConstraint(const LabelStr& name,
                                          const LabelStr& propagatorName,
                                          const ConstraintEngineId& constraintEngine,
@@ -851,6 +1049,7 @@ namespace EUROPA {
     m_sum4.discard();
   }
 
+  /*********** EqualProductConstraint *************/
   EqualProductConstraint::EqualProductConstraint(const LabelStr& name,
                                                  const LabelStr& propagatorName,
                                                  const ConstraintEngineId& constraintEngine,
@@ -969,6 +1168,7 @@ namespace EUROPA {
     m_product4.discard();
   }
 
+  /*********** LessOrEqualThanSumConstraint *************/
   LessOrEqThanSumConstraint::LessOrEqThanSumConstraint(const LabelStr& name,
                                                        const LabelStr& propagatorName,
                                                        const ConstraintEngineId& constraintEngine,
@@ -996,6 +1196,8 @@ namespace EUROPA {
     m_interimVariable.discard();
   }
 
+
+  /*********** LessThanSumConstraint *************/
   LessThanSumConstraint::LessThanSumConstraint(const LabelStr& name,
                                                const LabelStr& propagatorName,
                                                const ConstraintEngineId& constraintEngine,
@@ -1011,6 +1213,7 @@ namespace EUROPA {
     check_error(m_eqSumConstraint.isValid());
   }
 
+  /*********** GreaterOrEqThanSumConstraint *************/
   GreaterOrEqThanSumConstraint::GreaterOrEqThanSumConstraint(const LabelStr& name,
                                                        const LabelStr& propagatorName,
                                                        const ConstraintEngineId& constraintEngine,
@@ -1025,6 +1228,7 @@ namespace EUROPA {
                                                 constraintEngine, eqSumScope))->getId();
   }
 
+  /*********** GreaterThanSumConstraint *************/
   GreaterThanSumConstraint::GreaterThanSumConstraint(const LabelStr& name,
                                                      const LabelStr& propagatorName,
                                                      const ConstraintEngineId& constraintEngine,
@@ -1042,6 +1246,7 @@ namespace EUROPA {
     check_error(m_eqSumConstraint.isValid());
   }
 
+  /*********** CondAllSameConstraint *************/
   CondAllSameConstraint::CondAllSameConstraint(const LabelStr& name,
                                                const LabelStr& propagatorName,
                                                const ConstraintEngineId& constraintEngine,
@@ -1190,6 +1395,8 @@ namespace EUROPA {
     } // else of if (boolDom.isSingleton())
   } // end of CondAllSameConstraint::handleExecute()
 
+
+  /*********** CondAllDiffConstraint *************/
   CondAllDiffConstraint::CondAllDiffConstraint(const LabelStr& name,
                                                const LabelStr& propagatorName,
                                                const ConstraintEngineId& constraintEngine,

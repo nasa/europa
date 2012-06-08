@@ -146,6 +146,9 @@ namespace EUROPA {
       REGISTER_CONSTRAINT(ces,MultEqualConstraint, "mulEq", "Default");
       REGISTER_CONSTRAINT(ces,MultEqualConstraint, "multEq", "Default");
       REGISTER_CONSTRAINT(ces,MultEqualConstraint, "MultEqual", "Default");
+      // Minh: Added (06/06/2012) new entries for DivEqualConstraint
+      REGISTER_CONSTRAINT(ces,DivEqualConstraint, "divEq", "Default");
+      // Minh: END
       REGISTER_CONSTRAINT(ces,NegateConstraint, "neg", "Default");
       REGISTER_CONSTRAINT(ces,NotEqualConstraint, "neq", "Default");
       REGISTER_CONSTRAINT(ces,NotEqualConstraint, "NotEqual", "Default");
