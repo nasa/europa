@@ -137,7 +137,14 @@ public class Util
 		@SuppressWarnings("unchecked")
 		public Object getValueAt(int rowIndex, int columnIndex) 
 		{
-			return ((List<Object>)data_.get(rowIndex)).get(columnIndex);
+			// MD: Need to check for INDEX-OUT-OF-BOUND error
+			if(rowIndex < data_.size()) {
+				if(columnIndex < ((List<Object>)data_.get(rowIndex)).size())
+					return  ((List<Object>)data_.get(rowIndex)).get(columnIndex);
+				else
+					return null;
+			} else
+				return null;
 		}    	
     }
 }

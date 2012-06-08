@@ -25,6 +25,15 @@
   public String getMessage() {
     return "Got " + getExceptionCount() + " errors";
   }
+  
+  public String getFullMessage() {
+    String s = "";
+    s += "Got " + getExceptionCount() + " errors";
+    for(int i = 0; i < getExceptionCount(); i++)
+      s += getException(i).toString() + "\n";
+    
+    return s;
+  }
 %}
 
 

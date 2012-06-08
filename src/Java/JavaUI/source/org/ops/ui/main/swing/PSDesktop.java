@@ -284,7 +284,7 @@ public class PSDesktop
     }
 
     public void showTokens(String title,PSTokenList l)
-    {
+    { 	
         List<Object> columnNames = new ArrayList<Object>();
         List<Object> data = new ArrayList<Object>();
         columnNames.add("Key");
@@ -308,6 +308,7 @@ public class PSDesktop
        	 }
        	 data.add(row);
         }
+        
 
     	JInternalFrame frame = makeNewFrame(title);
    	    JTable table = new JTable(new Util.MatrixTableModel(data,columnNames));
