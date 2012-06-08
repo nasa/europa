@@ -43839,6 +43839,7 @@
 			<IntervalDomain lb="-1" ub="-1"/>
 		</Outputs>
 	</Constraint>
+	<!--  
 	<Constraint name="MultEqual" test="3396">
 		<Inputs>
 			<IntervalDomain lb="6.216149" ub="6.216149"/>
@@ -43847,6 +43848,19 @@
 		</Inputs>
 		<Outputs>
 			<IntervalDomain lb="6.216149" ub="6.216149"/>
+			<IntervalDomain lb="2.09133" ub="2.09133"/>
+			<IntervalIntDomain lb="13" ub="13"/>
+		</Outputs>
+	</Constraint>
+	 -->
+	 <Constraint name="MultEqual" test="3396">
+		<Inputs>
+			<IntervalDomain lb="6.21615" ub="6.21615"/>
+			<IntervalDomain lb="2.09130" ub="2.41307"/>
+			<IntervalIntDomain lb="13" ub="13"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="6.21615" ub="6.21615"/>
 			<IntervalDomain lb="2.09133" ub="2.09133"/>
 			<IntervalIntDomain lb="13" ub="13"/>
 		</Outputs>
@@ -44278,7 +44292,7 @@
  			</NumericDomain>
 		</Outputs>
  	</Constraint>
- 	<Constraint name="ceil" test="3416">
+ 	<Constraint name="ceil" test="3417">
 		<Inputs>
 			<IntervalIntDomain lb="-inf" ub="+inf"/>
 			<NumericDomain>
@@ -44292,4 +44306,105 @@
  			</NumericDomain>
 		</Outputs>
  	</Constraint>
+ 	<!-- MD: Following divEq test cases are the reverse of the MultiEqual test cases with
+		the corresponding id pairs: [MultEqual,divEq] are:
+		(980,3418), (981,3419), (982,3420), (983,3421), (984,3422)
+		(1010,3423), (3395,3424), (3396,3425) -->
+	<Constraint name="divEq" test="3418">
+		<Inputs>
+			<IntervalIntDomain lb="-1" ub="+inf"/>
+			<IntervalIntDomain lb="-inf" ub="-1"/>
+			<IntervalIntDomain lb="-inf" ub="-1"/>
+		</Inputs>
+		<Outputs>
+			<IntervalIntDomain lb="1" ub="+inf"/>
+			<IntervalIntDomain lb="-inf" ub="-1"/>
+			<IntervalIntDomain lb="-inf" ub="-1"/>
+		</Outputs>
+	</Constraint>
+
+	<Constraint name="divEq" test="3419">
+		<Inputs>
+			<IntervalIntDomain lb="0" ub="+inf"/>
+			<IntervalIntDomain lb="-inf" ub="-1"/>
+			<IntervalIntDomain lb="-inf" ub="-1"/>
+		</Inputs>
+		<Outputs>
+			<IntervalIntDomain lb="1" ub="+inf"/>
+			<IntervalIntDomain lb="-inf" ub="-1"/>
+			<IntervalIntDomain lb="-inf" ub="-1"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="divEq" test="3420">
+		<Inputs>
+			<IntervalDomain lb="2.5" ub="+inf"/>
+			<IntervalDomain lb="-inf" ub="-1.0"/>
+			<IntervalDomain lb="-inf" ub="-1.0"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="2.5" ub="+inf"/>
+			<IntervalDomain lb="-inf" ub="-1.0"/>
+			<IntervalDomain lb="-inf" ub="-1.0"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="divEq" test="3421">
+		<Inputs>
+			<IntervalIntDomain lb="-inf" ub="-1"/>
+			<IntervalIntDomain lb="-inf" ub="0"/>
+			<IntervalIntDomain lb="-inf" ub="-1"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain/>
+			<IntervalDomain/>
+			<IntervalDomain/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="divEq" test="3422">
+		<Inputs>
+			<IntervalIntDomain lb="-inf" ub="-1"/>
+			<IntervalIntDomain lb="-inf" ub="-1"/>
+			<IntervalIntDomain lb="-inf" ub="-1"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain/>
+			<IntervalDomain/>
+			<IntervalDomain/>
+		</Outputs>
+	</Constraint>
+		<Constraint name="divEq" test="3423">
+		<Inputs>
+			<IntervalIntDomain lb="-1" ub="1"/>
+			<IntervalIntDomain lb="-1" ub="-1"/>
+			<IntervalIntDomain lb="-1" ub="0"/>
+		</Inputs>
+		<Outputs>
+			<IntervalIntDomain lb="0" ub="1"/>
+			<IntervalIntDomain lb="-1" ub="-1"/>
+			<IntervalIntDomain lb="-1" ub="0"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="divEq" test="3424">
+		<Inputs>
+			<IntervalDomain lb="-1" ub="-1"/>
+			<IntervalDomain lb="3.225" ub="3.225"/>
+			<IntervalDomain lb="-inf" ub="+inf"/>
+		</Inputs>
+		<Outputs>
+			<IntervalDomain lb="-1" ub="-1"/>
+			<IntervalDomain lb="3.225" ub="3.225"/>
+			<IntervalDomain lb="-0.310078" ub="-0.310078"/>
+		</Outputs>
+	</Constraint>
+	<Constraint name="divEq" test="3425">
+		<Inputs>
+			<IntervalIntDomain lb="13" ub="13"/>
+			<IntervalDomain lb="6.216149" ub="6.216149"/>
+			<IntervalDomain lb="2.091327" ub="2.413069"/>
+		</Inputs>
+		<Outputs>
+			<IntervalIntDomain lb="13" ub="13"/>
+			<IntervalDomain lb="6.216149" ub="6.216149"/>
+			<IntervalDomain lb="2.09133" ub="2.09133"/>
+		</Outputs>
+	</Constraint>	
 </ConstraintTests>
