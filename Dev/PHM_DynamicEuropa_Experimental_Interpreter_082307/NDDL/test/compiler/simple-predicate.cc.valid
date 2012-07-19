@@ -1,0 +1,409 @@
+// simple-predicate.nddl
+
+#include "simple-predicate.hh"
+#include "NddlUtils.hh"
+
+namespace NDDL {
+  
+  TokenStates TokenStatesBaseDomain(){
+    static TokenStates sl_enum("TokenStates");
+    if (sl_enum.isOpen()) {
+      // Insert values to initialize
+      sl_enum.insert(LabelStr("INACTIVE"));
+      sl_enum.insert(LabelStr("ACTIVE"));
+      sl_enum.insert(LabelStr("MERGED"));
+      sl_enum.insert(LabelStr("REJECTED"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
+  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Timeline
+  
+  
+  
+  // Plasma.nddl:15 StringData
+  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "StringData", name, true) {
+  }
+  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  StringData::StringData(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "StringData", name, true) {}
+  StringData::StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void StringData::handleDefaults(bool autoClose) {
+    if(data.isNoId()){
+      data = addVariable(StringDomain("string"), "data");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  // Plasma.nddl:15 StringData
+  void StringData::constructor(const LabelStr& _data) {
+    data = addVariable(StringDomain(_data, "string"), "data");
+  }
+  
+  // Plasma.nddl:15 StringData
+  class StringDataFactory0: public ConcreteObjectFactory {
+  public:
+    StringDataFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 1);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("string")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
+      check_error(arguments[0]->isSingleton());
+      LabelStr _data((LabelStr)arguments[0]->getSingletonValue());
+      
+      StringDataId instance = (new StringData(planDb, objectType, objectName))->getId();
+      instance->constructor(_data);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  Locations LocationsBaseDomain(){
+    static Locations sl_enum("Locations");
+    if (sl_enum.isOpen()) {
+      // Insert values to initialize
+      sl_enum.insert(LabelStr("Hill"));
+      sl_enum.insert(LabelStr("Rock"));
+      sl_enum.insert(LabelStr("Lander"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
+  
+  
+  // simple-predicate.nddl:8 Foo
+  Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Timeline(planDatabase, "Foo", name, true) {
+  }
+  Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Timeline(planDatabase, type, name, true) {
+  }
+  Foo::Foo(const ObjectId& parent, const LabelStr& name)
+   : Timeline(parent, "Foo", name, true) {}
+  Foo::Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Timeline(parent, type, name, true) {}
+  // default initialization of member variables
+  void Foo::handleDefaults(bool autoClose) {
+    if(m_0.isNoId()){
+      m_0 = addVariable(IntervalIntDomain(5,5, "int"), "m_0");
+    }
+    if(m_1.isNoId()){
+      m_1 = addVariable(StringDomain(LabelStr("Hello"), "string"), "m_1");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // simple-predicate.nddl:12 pred1
+  Foo::pred1::pred1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  Foo::pred1::pred1(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void Foo::pred1::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if(m_0.isNoId()){
+      m_0 = addParameter(SymbolDomain(LabelStr("Hill"), "Locations"), "m_0");
+    }
+    if(m_1.isNoId()){
+      m_1 = addParameter(IntervalIntDomain(1, 10, "int"), "m_1");
+    }
+    if(m_2.isNoId()){
+      m_2 = addParameter(IntervalDomain(1.267,1.267, "float"), "m_2");
+    }
+    if(m_3.isNoId()){
+      m_3 = addParameter(BoolDomain("bool"), "m_3");
+    }
+    if(m_4.isNoId()){
+      m_4 = addParameter(ObjectDomain("World"), "m_4");
+      completeObjectParam(World, m_4);
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  // simple-predicate.nddl:8 Foo
+  void Foo::constructor() {
+    m_0 = addVariable(IntervalIntDomain(8, 8, "int"), "m_0");
+  }
+  
+  // simple-predicate.nddl:8 Foo
+  class FooFactory1: public ConcreteObjectFactory {
+  public:
+    FooFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 0);
+      FooId instance = (new Foo(planDb, objectType, objectName))->getId();
+      instance->constructor();
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  // simple-predicate.nddl:8 Foo
+  void Foo::constructor(const LabelStr& s) {
+    m_1 = addVariable(StringDomain(s, "string"), "m_1");
+  }
+  
+  // simple-predicate.nddl:8 Foo
+  class FooFactory2: public ConcreteObjectFactory {
+  public:
+    FooFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 1);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("string")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
+      check_error(arguments[0]->isSingleton());
+      LabelStr s((LabelStr)arguments[0]->getSingletonValue());
+      
+      FooId instance = (new Foo(planDb, objectType, objectName))->getId();
+      instance->constructor(s);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  // simple-predicate.nddl:30 pred1
+  class Foo$pred1$0$0: public RuleInstance {
+  public:
+    Foo$pred1$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$Foo$pred1$0, Foo$pred1$0$0, Foo.pred1, "simple-predicate.nddl,30");
+  
+  void Foo$pred1$0$0::handleExecute() {
+    localSlave(pred1, p1, "meets");
+    sameObject(object, p1);
+    meets(this, p1);
+    localSlave(pred1, p2, "met_by");
+    sameObject(object, p2);
+    met_by(this, p2);
+  }
+  
+  
+  // simple-predicate.nddl:35 Bar
+  Bar::Bar(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Foo(planDatabase, "Bar", name) {
+  }
+  Bar::Bar(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Foo(planDatabase, type, name) {
+  }
+  Bar::Bar(const ObjectId& parent, const LabelStr& name)
+   : Foo(parent, "Bar", name) {}
+  Bar::Bar(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Foo(parent, type, name) {}
+  // default initialization of member variables
+  void Bar::handleDefaults(bool autoClose) {
+    Foo::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  // simple-predicate.nddl:35 Bar
+  DECLARE_DEFAULT_OBJECT_FACTORY(BarFactory3, Bar);
+  
+  
+  // simple-predicate.nddl:36 pred1
+  Bar::pred1::pred1(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : Foo::pred1(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+    getVariable("duration")->restrictBaseDomain(IntervalIntDomain(2, 100, "int"));
+    getVariable("m_3")->restrictBaseDomain(BoolDomain(true, "bool"));
+  }
+  
+  Bar::pred1::pred1(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : Foo::pred1(parent, name, relation, false) {
+    handleDefaults(close);
+    getVariable("duration")->restrictBaseDomain(IntervalIntDomain(2, 100, "int"));
+    getVariable("m_3")->restrictBaseDomain(BoolDomain(true, "bool"));
+  }
+  
+  // default initialization of member variables
+  void Bar::pred1::handleDefaults(bool autoClose) {
+    Foo::pred1::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // simple-predicate.nddl:45 World
+  World::World(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Timeline(planDatabase, "World", name, true) {
+  }
+  World::World(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Timeline(planDatabase, type, name, true) {
+  }
+  World::World(const ObjectId& parent, const LabelStr& name)
+   : Timeline(parent, "World", name, true) {}
+  World::World(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Timeline(parent, type, name, true) {}
+  // default initialization of member variables
+  void World::handleDefaults(bool autoClose) {
+    check_error(m_foo1.isValid(), "object variables must be initialized explicitly");
+    
+    check_error(m_bar1.isValid(), "object variables must be initialized explicitly");
+    
+    if (autoClose)
+      close();
+  }
+  
+  
+  
+  // simple-predicate.nddl:48 initialState
+  World::initialState::initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool isFact, bool close)
+   : NddlToken(planDatabase, name, rejectable, isFact, false) {
+    handleDefaults(close);
+  }
+  
+  World::initialState::initialState(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void World::initialState::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  // simple-predicate.nddl:45 World
+  void World::constructor() {
+    m_foo1 = addVariable(FooDomain((new Foo(m_id, "m_foo1"))->getId(), "Foo"), "m_foo1");
+    Id<Foo>(singleton(m_foo1))->constructor();
+    Id<Foo>(singleton(m_foo1))->handleDefaults();
+    m_bar1 = addVariable(BarDomain((new Bar(m_id, "m_bar1"))->getId(), "Bar"), "m_bar1");
+    Id<Bar>(singleton(m_bar1))->constructor();
+    Id<Bar>(singleton(m_bar1))->handleDefaults();
+  }
+  
+  // simple-predicate.nddl:45 World
+  class WorldFactory4: public ConcreteObjectFactory {
+  public:
+    WorldFactory4(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 0);
+      WorldId instance = (new World(planDb, objectType, objectName))->getId();
+      instance->constructor();
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  // simple-predicate.nddl:56 initialState
+  class World$initialState$1$0: public RuleInstance {
+  public:
+    World$initialState$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$World$initialState$1, World$initialState$1$0, World.initialState, "simple-predicate.nddl,56");
+  
+  void World$initialState$1$0::handleExecute() {
+    slave(Foo::pred1, Foo.pred1, a, LabelStr("any"));
+    slave(Bar::pred1, Bar.pred1, b, LabelStr("any"));
+  }
+  
+} // namespace NDDL
+
+
+namespace NDDL {
+  // Boot-strap code to initialize schema
+  extern "C" SchemaId loadSchema(){
+    Id<Schema> id = Schema::instance("simple-predicate");
+    id->reset(); // Reset prior data if present. 
+    
+    // Register Constraints
+    // Invoke commands to populate schema with type definitions
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("StringData", "Object");
+    id->addObjectType("Foo", "Timeline");
+    id->addObjectType("Bar", "Foo");
+    id->addObjectType("World", "Timeline");
+    id->addEnum("TokenStates");
+    id->addMember("StringData", "string", "data");
+    id->addEnum("Locations");
+    id->addMember("Foo", "int", "m_0");
+    id->addMember("Foo", "string", "m_1");
+    id->addPredicate("Foo.pred1");
+    id->addMember("Foo.pred1", "Locations", "m_0");
+    id->addMember("Foo.pred1", "int", "m_1");
+    id->addMember("Foo.pred1", "float", "m_2");
+    id->addMember("Foo.pred1", "bool", "m_3");
+    id->addMember("Foo.pred1", "World", "m_4");
+    id->addPredicate("Bar.pred1");
+    id->addMember("World", "Foo", "m_foo1");
+    id->addMember("World", "Bar", "m_bar1");
+    id->addPredicate("World.initialState");
+    id->addValue("TokenStates", LabelStr("INACTIVE"));
+    id->addValue("TokenStates", LabelStr("ACTIVE"));
+    id->addValue("TokenStates", LabelStr("MERGED"));
+    id->addValue("TokenStates", LabelStr("REJECTED"));
+    id->addValue("Locations", LabelStr("Hill"));
+    id->addValue("Locations", LabelStr("Rock"));
+    id->addValue("Locations", LabelStr("Lander"));
+    // Force allocation of model specific type factories
+    // Allocate factories
+    REGISTER_TOKEN_FACTORY(Foo::pred1::Factory);
+    REGISTER_TOKEN_FACTORY(Bar::pred1::Factory);
+    REGISTER_TOKEN_FACTORY(World::initialState::Factory);
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
+    REGISTER_TYPE_FACTORY(Timeline, ObjectDomain("Timeline"));
+    REGISTER_TYPE_FACTORY(StringData, ObjectDomain("StringData"));
+    REGISTER_OBJECT_FACTORY(StringDataFactory0, StringData:string);
+    REGISTER_TYPE_FACTORY(Locations, LocationsBaseDomain());
+    REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
+    REGISTER_OBJECT_FACTORY(FooFactory1, Foo);
+    REGISTER_OBJECT_FACTORY(FooFactory2, Foo:string);
+    REGISTER_TYPE_FACTORY(Bar, ObjectDomain("Bar"));
+    REGISTER_OBJECT_FACTORY(BarFactory3, Bar);
+    REGISTER_TYPE_FACTORY(World, ObjectDomain("World"));
+    REGISTER_OBJECT_FACTORY(WorldFactory4, World);
+    // Allocate rules
+    new Rule$Foo$pred1$0();
+    new Rule$World$initialState$1();
+    return id;
+  }
+  
+}
