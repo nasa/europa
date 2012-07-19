@@ -1,0 +1,6 @@
+#include "Model.nddl"
+
+BacktrackTest b = new BacktrackTest();
+close();
+
+goal(BacktrackTest.pred t);

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioPropertySheet
+	ProjectType="Visual C++"
+	Version="8.00"
+	Name="TemporalNetworkProperties"
+	>
+	<Tool
+		Name="VCCLCompilerTool"
+		AdditionalIncludeDirectories="$(PLASMA_HOME)\src\PLASMA\TemporalNetwork;$(PLASMA_HOME)\src\PLASMA\TemporalNetwork\base;$(PLASMA_HOME)\src\PLASMA\TemporalNetwork\component"
+	/>
+</VisualStudioPropertySheet>

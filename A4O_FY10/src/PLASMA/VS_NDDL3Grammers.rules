@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VisualStudioToolFile
+	Name="New Rule File"
+	Version="8.00"
+	>
+	<Rules>
+		<CustomBuildRule
+			Name="NDDL3Tree"
+			CommandLine="&quot;$(JAVA_HOME)&quot;\bin\java -cp $(PLASMA_HOME)\ext\lib\antlr-3.jar org.antlr.Tool -fo .\base -traceParser$(InputName)&#x0D;&#x0A;move .\base\NDDL3Tree.c .\base\NDDL3Tree.cpp"
+			Outputs="NDDL3Tree.cpp"
+			FileExtensions="*.g"
+			>
+			<Properties>
+			</Properties>
+		</CustomBuildRule>
+	</Rules>
+</VisualStudioToolFile>

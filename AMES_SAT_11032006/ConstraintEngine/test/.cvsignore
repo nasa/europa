@@ -1,0 +1,10 @@
+RUN*.gprof
+RUN*.output
+ce-module-tests_g
+ce-module-tests_g_no
+ce-module-tests_g_rt
+ce-module-tests_o
+ce-module-tests_o_no
+ce-module-tests_o_p
+ce-module-tests_o_p_no
+ce-module-tests_o_rt

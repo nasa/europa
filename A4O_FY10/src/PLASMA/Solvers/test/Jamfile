@@ -1,0 +1,11 @@
+SubDir PLASMA Solvers test ;
+
+if ! $(PLASMA_READY) {
+
+ ModuleLibraries solvers-module-tests : cppunit ;
+ 
+ ModuleMain solvers-module-tests : module-tests.cc solvers-test-module.cc : Solvers NDDL  : solvers-tests ;
+ RunModuleMain run-solvers-module-tests : solvers-module-tests ;
+ LocalDepends tests : run-solvers-module-tests ;
+ 
+} # PLASMA_READY

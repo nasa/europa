@@ -1,0 +1,3568 @@
+// missionExec.ddl
+#include "Plasma.nddl"
+
+enum ReturnStatus { OK, Failed } 
+
+enum InternalReturnStatus { OK, Failed } 
+
+enum LocalRecoveryReturnStatus { ClearedObstacle, UnableToClearObstacle } 
+
+enum RoverStationaryState { Standby, Charge, ReadRoverPosition, ViaPoint, ScienceAction, FluorMosaic } 
+
+enum MissionExecutiveConnectors { DriveAction, ChargeAction, Standby, ViaPointAction, ScienceAction, FluorMosaicAction } 
+
+enum RoverStateConnectors { DriveAction, ChargeAction, Standby, ReadRoverPosition, LocalRecovery, ViaPointAction, ScienceAction, FluorMosaicAction } 
+
+enum CompletionStatus { Nominal, Timeout, Failure, EarlyReturn, Fault } 
+
+enum TempestPlannerMode { NewPlan, RePlan } 
+
+enum HealthMonitorStatus { NoFault, NoArcFoundTriggered, NoArcFoundUntriggered, NotOnMapInNavTriggered, NotOnMapInNavUntriggered, VehicleControllerCrashTriggered, VehicleControllerCrashUntriggered, NavigatorCrashTriggered, NavigatorCrashUntriggered, PositionEstimatorCrashTriggered, PositionEstimatorCrashUntriggered, UserDefinedFaultTriggered, UserDefinedFaultUntriggered } 
+
+enum InterruptibleFaults { NoFault, NoArcFoundFault } 
+
+enum VehicleControllerState { VC_Nominal, VC_Restart, VC_CannotRecover, VC_ConfirmStart, VC_ConfirmStop, VC_OpenLoopStop, VC_AchieveSteadyState } 
+
+enum NavigatorState { NAV_Nominal, NAV_Restart, NAV_CannotRecover, NAV_ConfirmStart, NAV_ConfirmStop, NAV_AchieveSteadyState } 
+
+enum PositionEstimatorState { PE_Nominal, PE_Restart, PE_CannotRecover, PE_ResetRoverPosition, PE_ConfirmStopSet, PE_ConfirmStopClear } 
+
+enum FaultEnableStates { VC_Fault_Enable, VC_Fault_Disable } 
+
+enum HealthMode { NoFaultMode, FaultMode } 
+
+enum RoverStateData { RoverStateData_noId } 
+
+enum RecoveryDecisionMode { StayInactive, ActivateReplan, ActivateVC_Recovery, ActivateNAV_Recovery, ActivatePE_Recovery, ActivateNoArc_Recovery } 
+
+enum NotifyOperatorMessage { NoMessage, InvalidPlanFromTempest, PeCrashRecoveryFailed, NavCrashRecoveryFailed, VcCrashRecoveryFailed, IMAbortFailed } 
+
+enum RCLString { SampleScienceGoal } 
+
+enum SciencePredecessor { MET_BY_IDLE, MET_BY_SCIENCE, MET_BY_TIMEOUT } 
+
+enum ScienceSuccessor { MEETS_IDLE, MEETS_SCIENCE, MEETS_TIMEOUT } 
+
+enum ConfirmationMode { Simultaneous, Sequential } 
+
+
+class TEMPEST_Class___TEMPEST_SV;
+class TEMPEST_Class___MissionExecutive_SV;
+class TEMPEST_Class___RoverState_SV;
+class TEMPEST_Class___OperatorInterface_SV;
+class TEMPEST_Class___HealthMonitor_SV;
+class TEMPEST_Class___RoverOperationMode_SV;
+class TEMPEST_Class___VehicleController_SV;
+class TEMPEST_Class___VC_Health_SV;
+class TEMPEST_Class___Navigator_SV;
+class TEMPEST_Class___NAV_Health_SV;
+class TEMPEST_Class___PositionEstimator_SV;
+class TEMPEST_Class___PE_Health_SV;
+class TEMPEST_Class___NoArc_Health_SV;
+class TEMPEST_Class___MonitoredFaults_SV;
+class TEMPEST_Class___SStopSet_SV;
+class TEMPEST_Class___SStopSet_Internal_SV;
+class TEMPEST_Class___SStopConfirm_SV;
+class TEMPEST_Class___SStopClear_SV;
+class TEMPEST_Class___RecoveryManager_SV;
+class TEMPEST_Class___RecoveryDecision_SV;
+class TEMPEST_Class___OperatorNotification_SV;
+class TEMPEST_Class;
+class Local_Mode_Class___Local_Mode_SV;
+class Local_Mode_Class;
+class InstrumentManager_Class___InstrumentManager_SV;
+class InstrumentManager_Class;
+
+class TEMPEST_Class___TEMPEST_SV {
+  predicate TEMPEST_Idle {
+    TempestPlannerMode tempestPlannerMode;
+    bool metByActivateReplan;
+  }
+
+  predicate TEMPEST_PlanPrep {
+    TempestPlannerMode tempestPlannerMode;
+    bool during_IM_idle;
+  }
+
+  predicate TEMPEST_Planning {
+    TempestPlannerMode tempestPlannerMode;
+    ReturnStatus status;
+    bool statusFlag;
+    int tokenIndex;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___TEMPEST_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___MissionExecutive_SV {
+  predicate ME_Standby {
+    int tokenIndex;
+    MissionExecutiveConnectors pred;
+  }
+
+  predicate DriveAction {
+    float x;
+    float y;
+    float theta;
+    float length;
+    float width;
+    int endTime;
+    int startTime;
+    int currTokenIndex;
+    int nextTokenIndex;
+    MissionExecutiveConnectors pred;
+    MissionExecutiveConnectors succ;
+    int flexEndTimeCache;
+    CompletionStatus status;
+    bool statusFlag;
+    bool precisionFlag;
+  }
+
+  predicate ChargeAction {
+    int endTime;
+    int startTime;
+    int currTokenIndex;
+    int nextTokenIndex;
+    MissionExecutiveConnectors pred;
+    MissionExecutiveConnectors succ;
+    int __DDL__duration;
+  }
+
+  predicate ViaPointAction {
+    int currTokenIndex;
+    int nextTokenIndex;
+    MissionExecutiveConnectors pred;
+    int startTime;
+    int endTime;
+  }
+
+  predicate ScienceAction {
+    RCLString argument;
+    int endTime;
+    int startTime;
+    int currTokenIndex;
+    int nextTokenIndex;
+    MissionExecutiveConnectors pred;
+    int flexEndTimeCache;
+    CompletionStatus status;
+    bool statusFlag;
+  }
+
+  predicate FluorMosaicAction {
+    int currTokenIndex;
+    int nextTokenIndex;
+    MissionExecutiveConnectors pred;
+    int startTime;
+    int endTime;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___MissionExecutive_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___RoverState_SV {
+  predicate RoverStationary {
+    RoverStationaryState __DDL__state;
+    RoverStateConnectors pred;
+    int startTime;
+    int endTime;
+  }
+
+  predicate RoverMoving {
+    float x;
+    float y;
+    float theta;
+    float length;
+    float width;
+    int startTime;
+    int endTime;
+    ReturnStatus status;
+    bool statusFlag;
+    RoverStateConnectors pred;
+    int flexEndTimeCache;
+    bool earlyFlag;
+    HealthMonitorStatus hmStatus;
+    bool roverInSafeguardedMode;
+    bool precisionFlag;
+  }
+
+  predicate RoverPerformingLocalRecovery {
+    bool recoverySucceeded;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___RoverState_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___OperatorInterface_SV {
+  predicate OperatorInterfaceIdle {
+  }
+
+  predicate OperatorInterfaceActive {
+    ReturnStatus status;
+    bool statusFlag;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___OperatorInterface_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___HealthMonitor_SV {
+  predicate HealthMonitorIdle {
+  }
+
+  predicate HealthMonitorMessage {
+    HealthMonitorStatus hmStatus;
+    bool hmStatusFlag;
+    RoverStateConnectors actionType;
+    bool recoveryInProgress;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___HealthMonitor_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___RoverOperationMode_SV {
+  predicate GoToSafeguardedMode {
+  }
+
+  predicate GoToAutonomousMode {
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___RoverOperationMode_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___VehicleController_SV {
+  predicate VehicleController {
+    VehicleControllerState vcState;
+    bool vcRecovered;
+    bool afterRecovery;
+    bool timedOut;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___VehicleController_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___VC_Health_SV {
+  predicate VcHealth {
+    HealthMode vcHealthMode;
+    bool goToSafeguard;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___VC_Health_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___Navigator_SV {
+  predicate Navigator {
+    NavigatorState navState;
+    bool afterRecovery;
+    bool timedOut;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___Navigator_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___NAV_Health_SV {
+  predicate NavHealth {
+    HealthMode navHealthMode;
+    bool goToSafeguard;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___NAV_Health_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___PositionEstimator_SV {
+  predicate PositionEstimator {
+    PositionEstimatorState peState;
+    ReturnStatus status;
+    bool statusFlag;
+    bool afterRecovery;
+    bool timedOut;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___PositionEstimator_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___PE_Health_SV {
+  predicate PeHealth {
+    HealthMode peHealthMode;
+    bool goToSafeguard;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___PE_Health_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___NoArc_Health_SV {
+  predicate NoArcHealth {
+    HealthMode NoArcHealthMode;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___NoArc_Health_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___MonitoredFaults_SV {
+  predicate SetFaultIdle {
+  }
+
+  predicate SetFaultEnable {
+    FaultEnableStates faultEnableState;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___MonitoredFaults_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___SStopSet_SV {
+  predicate SStopSetMode {
+  }
+
+  predicate SStopSetAction {
+    InternalReturnStatus sStopSetStatus;
+    bool sStopSetStatusFlag;
+    bool closedLoop;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___SStopSet_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___SStopSet_Internal_SV {
+  predicate SStopSetMode_Internal {
+  }
+
+  predicate SStopSetAction_Internal {
+    InternalReturnStatus sStopSetStatus;
+    bool sStopSetStatusFlag;
+    bool closedLoop;
+    ConfirmationMode confirmMode;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___SStopSet_Internal_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___SStopConfirm_SV {
+  predicate Confirmation {
+    ReturnStatus status;
+    bool statusFlag;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___SStopConfirm_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___SStopClear_SV {
+  predicate SStopClearMode {
+  }
+
+  predicate SStopClearAction {
+    ReturnStatus sStopClearStatus;
+    bool sStopClearStatusFlag;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___SStopClear_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___RecoveryManager_SV {
+  predicate UpdateFaultCount {
+    int prevCount;
+    int deltaCount;
+    int nextCount;
+    bool decCount;
+    bool activeFaultUntriggered;
+    bool isFaultCountZero;
+    InterruptibleFaults interruptibleFault;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___RecoveryManager_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___RecoveryDecision_SV {
+  predicate RecoveryDecision {
+    RecoveryDecisionMode recMode;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___RecoveryDecision_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class___OperatorNotification_SV {
+  predicate NotifyOperator {
+    NotifyOperatorMessage opMsg;
+  }
+
+  TEMPEST_Class __DDL__object;
+  TEMPEST_Class___OperatorNotification_SV(TEMPEST_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class TEMPEST_Class {
+  TEMPEST_Class___TEMPEST_SV TEMPEST_SV;
+  TEMPEST_Class___MissionExecutive_SV MissionExecutive_SV;
+  TEMPEST_Class___RoverState_SV RoverState_SV;
+  TEMPEST_Class___OperatorInterface_SV OperatorInterface_SV;
+  TEMPEST_Class___HealthMonitor_SV HealthMonitor_SV;
+  TEMPEST_Class___RoverOperationMode_SV RoverOperationMode_SV;
+  TEMPEST_Class___VehicleController_SV VehicleController_SV;
+  TEMPEST_Class___VC_Health_SV VC_Health_SV;
+  TEMPEST_Class___Navigator_SV Navigator_SV;
+  TEMPEST_Class___NAV_Health_SV NAV_Health_SV;
+  TEMPEST_Class___PositionEstimator_SV PositionEstimator_SV;
+  TEMPEST_Class___PE_Health_SV PE_Health_SV;
+  TEMPEST_Class___NoArc_Health_SV NoArc_Health_SV;
+  TEMPEST_Class___MonitoredFaults_SV MonitoredFaults_SV;
+  TEMPEST_Class___SStopSet_SV SStopSet_SV;
+  TEMPEST_Class___SStopSet_Internal_SV SStopSet_Internal_SV;
+  TEMPEST_Class___SStopConfirm_SV SStopConfirm_SV;
+  TEMPEST_Class___SStopClear_SV SStopClear_SV;
+  TEMPEST_Class___RecoveryManager_SV RecoveryManager_SV;
+  TEMPEST_Class___RecoveryDecision_SV RecoveryDecision_SV;
+  TEMPEST_Class___OperatorNotification_SV OperatorNotification_SV;
+  TEMPEST_Class() {
+    TEMPEST_SV = new TEMPEST_Class___TEMPEST_SV(this);
+    MissionExecutive_SV = new TEMPEST_Class___MissionExecutive_SV(this);
+    RoverState_SV = new TEMPEST_Class___RoverState_SV(this);
+    OperatorInterface_SV = new TEMPEST_Class___OperatorInterface_SV(this);
+    HealthMonitor_SV = new TEMPEST_Class___HealthMonitor_SV(this);
+    RoverOperationMode_SV = new TEMPEST_Class___RoverOperationMode_SV(this);
+    VehicleController_SV = new TEMPEST_Class___VehicleController_SV(this);
+    VC_Health_SV = new TEMPEST_Class___VC_Health_SV(this);
+    Navigator_SV = new TEMPEST_Class___Navigator_SV(this);
+    NAV_Health_SV = new TEMPEST_Class___NAV_Health_SV(this);
+    PositionEstimator_SV = new TEMPEST_Class___PositionEstimator_SV(this);
+    PE_Health_SV = new TEMPEST_Class___PE_Health_SV(this);
+    NoArc_Health_SV = new TEMPEST_Class___NoArc_Health_SV(this);
+    MonitoredFaults_SV = new TEMPEST_Class___MonitoredFaults_SV(this);
+    SStopSet_SV = new TEMPEST_Class___SStopSet_SV(this);
+    SStopSet_Internal_SV = new TEMPEST_Class___SStopSet_Internal_SV(this);
+    SStopConfirm_SV = new TEMPEST_Class___SStopConfirm_SV(this);
+    SStopClear_SV = new TEMPEST_Class___SStopClear_SV(this);
+    RecoveryManager_SV = new TEMPEST_Class___RecoveryManager_SV(this);
+    RecoveryDecision_SV = new TEMPEST_Class___RecoveryDecision_SV(this);
+    OperatorNotification_SV = new TEMPEST_Class___OperatorNotification_SV(this);
+  }
+}
+
+class Local_Mode_Class___Local_Mode_SV {
+  predicate Local_Nominal {
+  }
+
+  predicate Local_Abort {
+  }
+
+  Local_Mode_Class __DDL__object;
+  Local_Mode_Class___Local_Mode_SV(Local_Mode_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class Local_Mode_Class {
+  Local_Mode_Class___Local_Mode_SV Local_Mode_SV;
+  Local_Mode_Class() {
+    Local_Mode_SV = new Local_Mode_Class___Local_Mode_SV(this);
+  }
+}
+
+class InstrumentManager_Class___InstrumentManager_SV {
+  predicate InstrumentManager_Idle {
+    int foo_0_anon_OR_tag_1;
+  }
+
+  predicate DoScience {
+    RCLString argument;
+    ReturnStatus status;
+    bool statusFlag;
+    int flexEndTimeCache;
+    bool earlyFlag;
+    HealthMonitorStatus hmStatus;
+    SciencePredecessor pred;
+    ScienceSuccessor succ;
+  }
+
+  predicate Abort {
+    ReturnStatus status;
+    bool statusFlag;
+    SciencePredecessor pred;
+    ScienceSuccessor succ;
+    HealthMonitorStatus hmStatus;
+  }
+
+  InstrumentManager_Class __DDL__object;
+  InstrumentManager_Class___InstrumentManager_SV(InstrumentManager_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class InstrumentManager_Class {
+  InstrumentManager_Class___InstrumentManager_SV InstrumentManager_SV;
+  InstrumentManager_Class() {
+    InstrumentManager_SV = new InstrumentManager_Class___InstrumentManager_SV(this);
+  }
+}
+
+TEMPEST_Class___TEMPEST_SV::TEMPEST_Idle {
+  eq(duration, [3 60000]);
+  if (metByActivateReplan==true) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___RecoveryDecision_SV.RecoveryDecision s0);
+      eq(s0.recMode, RecoveryDecisionMode.ActivateReplan);
+  }
+  if (tempestPlannerMode==TempestPlannerMode.NewPlan) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_Planning s0);
+  }
+  if (tempestPlannerMode==TempestPlannerMode.RePlan) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
+      eq(s0.tempestPlannerMode, tempestPlannerMode);
+  }
+}
+
+TEMPEST_Class___TEMPEST_SV::TEMPEST_PlanPrep {
+  if (during_IM_idle==false) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_Planning s0);
+      eq(s0.tempestPlannerMode, tempestPlannerMode);
+  }
+  if (during_IM_idle==true) {
+//output subgoal
+//outputSubgoalCreation
+    starts_during(InstrumentManager_Class___InstrumentManager_SV.InstrumentManager_Idle s0);
+    temporalDistance(s0.start, [0 +inf], this.start);
+    temporalDistance(this.start, [0 +inf], s0.end);
+  }
+  if (during_IM_idle==true) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_Planning s0);
+      eq(s0.tempestPlannerMode, tempestPlannerMode);
+  }
+  if (during_IM_idle==false) {
+    eq(duration, [24 30]);
+  }
+  if (during_IM_idle==true) {
+    eq(duration, 3);
+  }
+}
+
+TEMPEST_Class___TEMPEST_SV::TEMPEST_Planning {
+  eq(duration, [3 3600]);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_Idle s0);
+//output subgoal
+//outputSubgoalCreation
+  contained_by(TEMPEST_Class___MissionExecutive_SV.ME_Standby s1);
+    eq(s1.tokenIndex, tokenIndex);
+  if (status==ReturnStatus.Failed) {
+    if (statusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___OperatorNotification_SV.NotifyOperator s0);
+        eq(s0.opMsg, NotifyOperatorMessage.InvalidPlanFromTempest);
+    }
+  }
+  if (status==ReturnStatus.Failed) {
+    if (statusFlag==true) {
+    }
+  }
+}
+
+TEMPEST_Class___MissionExecutive_SV::ME_Standby {
+  eq(duration, [3 60000]);
+  if (pred==MissionExecutiveConnectors.ChargeAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ChargeAction s0);
+      eq(s0.currTokenIndex, tokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.DriveAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
+      eq(s0.currTokenIndex, tokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.FluorMosaicAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.FluorMosaicAction s0);
+      eq(s0.currTokenIndex, tokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.ScienceAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
+      eq(s0.currTokenIndex, tokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.Standby) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
+      eq(s0.tokenIndex, tokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.ViaPointAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ViaPointAction s0);
+      eq(s0.currTokenIndex, tokenIndex);
+  }
+}
+
+TEMPEST_Class___MissionExecutive_SV::DriveAction {
+  eq(duration, [3 60000]);
+  eq(start, startTime);
+  leq(end, endTime);
+  addEq(1, currTokenIndex, nextTokenIndex);
+  eq(currTokenIndex, [0 1000]);
+  eq(nextTokenIndex, [0 1000]);
+//output subgoal
+//outputSubgoalCreation
+  equals(TEMPEST_Class___RoverState_SV.RoverMoving s0);
+    eq(s0.x, x);
+    eq(s0.y, y);
+    eq(s0.theta, theta);
+    eq(s0.length, length);
+    eq(s0.width, width);
+    eq(s0.startTime, startTime);
+    eq(s0.endTime, endTime);
+    eq(s0.flexEndTimeCache, flexEndTimeCache);
+    eq(s0.precisionFlag, precisionFlag);
+  if (pred==MissionExecutiveConnectors.ChargeAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ChargeAction s0);
+      eq(s0.endTime, startTime);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.DriveAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
+      eq(s0.endTime, startTime);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.FluorMosaicAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.FluorMosaicAction s0);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.ScienceAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.Standby) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
+  }
+  if (pred==MissionExecutiveConnectors.ViaPointAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ViaPointAction s0);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (status==CompletionStatus.EarlyReturn) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
+      eq(s0.tokenIndex, currTokenIndex);
+      eq(s0.pred, MissionExecutiveConnectors.DriveAction);
+  }
+  if (status==CompletionStatus.EarlyReturn) {
+//output subgoal
+//outputSubgoalCreation
+    equals(TEMPEST_Class___RoverState_SV.RoverMoving s0);
+      eq(s0.x, x);
+      eq(s0.y, y);
+      eq(s0.theta, theta);
+      eq(s0.length, length);
+      eq(s0.width, width);
+      eq(s0.startTime, startTime);
+      eq(s0.endTime, endTime);
+      eq(s0.statusFlag, true);
+      eq(s0.flexEndTimeCache, flexEndTimeCache);
+  }
+  if (status==CompletionStatus.Failure) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
+      eq(s0.tokenIndex, currTokenIndex);
+      eq(s0.pred, MissionExecutiveConnectors.DriveAction);
+  }
+  if (status==CompletionStatus.Failure) {
+//output subgoal
+//outputSubgoalCreation
+    equals(TEMPEST_Class___RoverState_SV.RoverMoving s0);
+      eq(s0.x, x);
+      eq(s0.y, y);
+      eq(s0.theta, theta);
+      eq(s0.length, length);
+      eq(s0.width, width);
+      eq(s0.startTime, startTime);
+      eq(s0.endTime, endTime);
+      eq(s0.status, ReturnStatus.Failed);
+      eq(s0.statusFlag, true);
+      eq(s0.flexEndTimeCache, flexEndTimeCache);
+  }
+  if (status==CompletionStatus.Fault) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
+      eq(s0.tokenIndex, currTokenIndex);
+      eq(s0.pred, MissionExecutiveConnectors.DriveAction);
+  }
+  if (status==CompletionStatus.Fault) {
+//output subgoal
+//outputSubgoalCreation
+    equals(TEMPEST_Class___RoverState_SV.RoverMoving s0);
+      eq(s0.x, x);
+      eq(s0.y, y);
+      eq(s0.theta, theta);
+      eq(s0.length, length);
+      eq(s0.width, width);
+      eq(s0.startTime, startTime);
+      eq(s0.endTime, endTime);
+      eq(s0.flexEndTimeCache, flexEndTimeCache);
+  }
+  if (status==CompletionStatus.Timeout) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
+      eq(s0.tokenIndex, currTokenIndex);
+      eq(s0.pred, MissionExecutiveConnectors.DriveAction);
+  }
+  if (status==CompletionStatus.Timeout) {
+//output subgoal
+//outputSubgoalCreation
+    equals(TEMPEST_Class___RoverState_SV.RoverMoving s0);
+      eq(s0.x, x);
+      eq(s0.y, y);
+      eq(s0.theta, theta);
+      eq(s0.length, length);
+      eq(s0.width, width);
+      eq(s0.startTime, startTime);
+      eq(s0.endTime, endTime);
+      eq(s0.statusFlag, false);
+      eq(s0.flexEndTimeCache, flexEndTimeCache);
+  }
+//  if (status==CompletionStatus.EarlyReturn) {
+//    UpdateDurationOfTokens(end, endTime);
+//  }
+  if (status==CompletionStatus.Nominal) {
+    if (statusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      equals(TEMPEST_Class___RoverState_SV.RoverMoving s0);
+        eq(s0.x, x);
+        eq(s0.y, y);
+        eq(s0.theta, theta);
+        eq(s0.length, length);
+        eq(s0.width, width);
+        eq(s0.startTime, startTime);
+        eq(s0.endTime, endTime);
+        eq(s0.status, ReturnStatus.OK);
+        eq(s0.statusFlag, true);
+        eq(s0.flexEndTimeCache, flexEndTimeCache);
+        eq(s0.hmStatus, HealthMonitorStatus.NoFault);
+    }
+  }
+  if (status==CompletionStatus.Nominal) {
+    if (statusFlag==true) {
+    }
+  }
+  if (status==CompletionStatus.Nominal) {
+    if (statusFlag==true) {
+      eq(end, endTime);
+    }
+  }
+}
+
+TEMPEST_Class___MissionExecutive_SV::ChargeAction {
+  eq(start, startTime);
+  eq(end, endTime);
+  eq(duration, __DDL__duration);
+  addEq(1, currTokenIndex, nextTokenIndex);
+  eq(currTokenIndex, [0 1000]);
+  eq(nextTokenIndex, [0 1000]);
+//output subgoal
+//outputSubgoalCreation
+  equals(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+    eq(s0.__DDL__state, RoverStationaryState.Charge);
+    eq(s0.startTime, startTime);
+    eq(s0.endTime, endTime);
+  if (pred==MissionExecutiveConnectors.ChargeAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ChargeAction s0);
+      eq(s0.endTime, startTime);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.DriveAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
+      eq(s0.endTime, startTime);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.FluorMosaicAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.FluorMosaicAction s0);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.ScienceAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.Standby) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
+  }
+  if (pred==MissionExecutiveConnectors.ViaPointAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ViaPointAction s0);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+}
+
+TEMPEST_Class___MissionExecutive_SV::ViaPointAction {
+  eq(duration, 3);
+  eq(start, startTime);
+  eq(end, endTime);
+  addEq(1, currTokenIndex, nextTokenIndex);
+  eq(currTokenIndex, [0 1000]);
+  eq(nextTokenIndex, [0 1000]);
+//output subgoal
+//outputSubgoalCreation
+  equals(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+    eq(s0.__DDL__state, RoverStationaryState.ViaPoint);
+  if (pred==MissionExecutiveConnectors.ChargeAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ChargeAction s0);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.DriveAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.FluorMosaicAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.FluorMosaicAction s0);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.ScienceAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.Standby) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
+  }
+}
+
+TEMPEST_Class___MissionExecutive_SV::ScienceAction {
+  eq(duration, [3 60000]);
+  eq(start, startTime);
+  leq(end, endTime);
+  addEq(1, currTokenIndex, nextTokenIndex);
+  eq(currTokenIndex, [0 1000]);
+  eq(nextTokenIndex, [0 1000]);
+//output subgoal
+//outputSubgoalCreation
+  equals(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+    eq(s0.__DDL__state, RoverStationaryState.ScienceAction);
+    eq(s0.startTime, startTime);
+    eq(s0.endTime, endTime);
+//output subgoal
+//outputSubgoalCreation
+  equals(InstrumentManager_Class___InstrumentManager_SV.DoScience s1);
+    eq(s1.argument, argument);
+    eq(s1.flexEndTimeCache, flexEndTimeCache);
+  if (pred==MissionExecutiveConnectors.ChargeAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ChargeAction s0);
+      eq(s0.endTime, startTime);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.DriveAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
+      eq(s0.endTime, startTime);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.FluorMosaicAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.FluorMosaicAction s0);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.ScienceAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.Standby) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
+  }
+  if (pred==MissionExecutiveConnectors.ViaPointAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ViaPointAction s0);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (status==CompletionStatus.EarlyReturn) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
+      eq(s0.tokenIndex, currTokenIndex);
+      eq(s0.pred, MissionExecutiveConnectors.ScienceAction);
+  }
+  if (status==CompletionStatus.EarlyReturn) {
+//output subgoal
+//outputSubgoalCreation
+    equals(InstrumentManager_Class___InstrumentManager_SV.DoScience s0);
+      eq(s0.argument, argument);
+      eq(s0.statusFlag, true);
+      eq(s0.flexEndTimeCache, flexEndTimeCache);
+  }
+  if (status==CompletionStatus.Timeout) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
+      eq(s0.tokenIndex, currTokenIndex);
+      eq(s0.pred, MissionExecutiveConnectors.ScienceAction);
+  }
+  if (status==CompletionStatus.Timeout) {
+//output subgoal
+//outputSubgoalCreation
+    equals(InstrumentManager_Class___InstrumentManager_SV.DoScience s0);
+      eq(s0.argument, argument);
+      eq(s0.statusFlag, false);
+      eq(s0.flexEndTimeCache, flexEndTimeCache);
+  }
+//  if (status==CompletionStatus.EarlyReturn) {
+//    UpdateDurationOfTokens(end, endTime);
+//  }
+  if (status==CompletionStatus.Failure) {
+    if (statusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
+        eq(s0.tokenIndex, currTokenIndex);
+        eq(s0.pred, MissionExecutiveConnectors.ScienceAction);
+    }
+  }
+  if (status==CompletionStatus.Failure) {
+    if (statusFlag==true) {
+    }
+  }
+  if (status==CompletionStatus.Failure) {
+    if (statusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      equals(InstrumentManager_Class___InstrumentManager_SV.DoScience s0);
+        eq(s0.argument, argument);
+        eq(s0.status, ReturnStatus.Failed);
+        eq(s0.statusFlag, true);
+        eq(s0.flexEndTimeCache, flexEndTimeCache);
+    }
+  }
+  if (status==CompletionStatus.Failure) {
+    if (statusFlag==true) {
+    }
+  }
+  if (status==CompletionStatus.Fault) {
+    if (statusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
+        eq(s0.tokenIndex, currTokenIndex);
+        eq(s0.pred, MissionExecutiveConnectors.ScienceAction);
+    }
+  }
+  if (status==CompletionStatus.Fault) {
+    if (statusFlag==true) {
+    }
+  }
+  if (status==CompletionStatus.Fault) {
+    if (statusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      equals(InstrumentManager_Class___InstrumentManager_SV.DoScience s0);
+        eq(s0.argument, argument);
+        eq(s0.flexEndTimeCache, flexEndTimeCache);
+    }
+  }
+  if (status==CompletionStatus.Fault) {
+    if (statusFlag==true) {
+    }
+  }
+  if (status==CompletionStatus.Nominal) {
+    if (statusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      equals(InstrumentManager_Class___InstrumentManager_SV.DoScience s0);
+        eq(s0.argument, argument);
+        eq(s0.status, ReturnStatus.OK);
+        eq(s0.statusFlag, true);
+        eq(s0.flexEndTimeCache, flexEndTimeCache);
+    }
+  }
+  if (status==CompletionStatus.Nominal) {
+    if (statusFlag==true) {
+    }
+  }
+  if (status==CompletionStatus.Nominal) {
+    if (statusFlag==true) {
+      eq(end, endTime);
+    }
+  }
+}
+
+TEMPEST_Class___MissionExecutive_SV::FluorMosaicAction {
+  eq(duration, 3);
+  eq(start, startTime);
+  eq(end, endTime);
+  addEq(1, currTokenIndex, nextTokenIndex);
+  eq(currTokenIndex, [0 1000]);
+  eq(nextTokenIndex, [0 1000]);
+//output subgoal
+//outputSubgoalCreation
+  equals(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+    eq(s0.__DDL__state, RoverStationaryState.FluorMosaic);
+  if (pred==MissionExecutiveConnectors.ChargeAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ChargeAction s0);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.DriveAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.ScienceAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+  if (pred==MissionExecutiveConnectors.Standby) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ME_Standby s0);
+  }
+  if (pred==MissionExecutiveConnectors.ViaPointAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___MissionExecutive_SV.ViaPointAction s0);
+      eq(s0.nextTokenIndex, currTokenIndex);
+  }
+}
+
+TEMPEST_Class___RoverState_SV::RoverStationary {
+  eq(duration, [3 60000]);
+  if (pred==RoverStateConnectors.ChargeAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.Charge);
+      eq(s0.endTime, startTime);
+  }
+  if (pred==RoverStateConnectors.DriveAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___RoverState_SV.RoverMoving s0);
+      eq(s0.endTime, startTime);
+  }
+  if (pred==RoverStateConnectors.FluorMosaicAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.FluorMosaic);
+      eq(s0.endTime, startTime);
+  }
+  if (pred==RoverStateConnectors.LocalRecovery) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___RoverState_SV.RoverPerformingLocalRecovery s0);
+  }
+  if (pred==RoverStateConnectors.ReadRoverPosition) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.ReadRoverPosition);
+      eq(s0.endTime, startTime);
+  }
+  if (pred==RoverStateConnectors.ScienceAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.ScienceAction);
+      eq(s0.endTime, startTime);
+  }
+  if (pred==RoverStateConnectors.Standby) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.endTime, startTime);
+  }
+  if (pred==RoverStateConnectors.ViaPointAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.ViaPoint);
+      eq(s0.endTime, startTime);
+  }
+  if (__DDL__state==RoverStationaryState.Charge) {
+//output subgoal
+//outputSubgoalCreation
+    starts(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage s0);
+      eq(s0.actionType, RoverStateConnectors.ChargeAction);
+  }
+  if (__DDL__state==RoverStationaryState.FluorMosaic) {
+//output subgoal
+//outputSubgoalCreation
+    starts(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage s0);
+      eq(s0.actionType, RoverStateConnectors.FluorMosaicAction);
+  }
+  if (__DDL__state==RoverStationaryState.ReadRoverPosition) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.ReadRoverPosition);
+  }
+  if (__DDL__state==RoverStationaryState.ReadRoverPosition) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
+      eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
+  }
+  if (__DDL__state==RoverStationaryState.ReadRoverPosition) {
+//output subgoal
+//outputSubgoalCreation
+    starts(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage s0);
+      eq(s0.actionType, RoverStateConnectors.ReadRoverPosition);
+  }
+  if (__DDL__state==RoverStationaryState.Standby) {
+//output subgoal
+//outputSubgoalCreation
+    starts(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage s0);
+      eq(s0.actionType, RoverStateConnectors.Standby);
+  }
+  if (__DDL__state==RoverStationaryState.ViaPoint) {
+//output subgoal
+//outputSubgoalCreation
+    starts(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage s0);
+      eq(s0.actionType, RoverStateConnectors.ViaPointAction);
+  }
+  if (__DDL__state==RoverStationaryState.Charge) {
+    eq(duration, [3 60000]);
+    eq(start, startTime);
+    eq(end, endTime);
+  }
+  if (__DDL__state==RoverStationaryState.FluorMosaic) {
+    eq(duration, [3 60000]);
+  }
+  if (__DDL__state==RoverStationaryState.ReadRoverPosition) {
+    eq(duration, 3);
+  }
+  if (__DDL__state==RoverStationaryState.Standby) {
+    eq(duration, [3 60000]);
+  }
+  if (__DDL__state==RoverStationaryState.ViaPoint) {
+    eq(duration, [3 60000]);
+  }
+}
+
+TEMPEST_Class___RoverState_SV::RoverMoving {
+//output subgoal
+//outputSubgoalCreation
+  equals(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage s0);
+    eq(s0.hmStatus, hmStatus);
+    eq(s0.actionType, RoverStateConnectors.DriveAction);
+//output subgoal
+//outputSubgoalCreation
+  contained_by(TEMPEST_Class___VC_Health_SV.VcHealth s1);
+    eq(s1.vcHealthMode, HealthMode.NoFaultMode);
+//output subgoal
+//outputSubgoalCreation
+  contained_by(TEMPEST_Class___NAV_Health_SV.NavHealth s2);
+    eq(s2.navHealthMode, HealthMode.NoFaultMode);
+//output subgoal
+//outputSubgoalCreation
+  contained_by(TEMPEST_Class___PE_Health_SV.PeHealth s3);
+    eq(s3.peHealthMode, HealthMode.NoFaultMode);
+//output subgoal
+//outputSubgoalCreation
+  contained_by(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s4);
+    eq(s4.NoArcHealthMode, HealthMode.NoFaultMode);
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.DriveAction);
+  }
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
+      eq(s0.x, x);
+      eq(s0.y, y);
+      eq(s0.theta, theta);
+      eq(s0.length, length);
+      eq(s0.width, width);
+      eq(s0.endTime, endTime);
+      eq(s0.startTime, startTime);
+      eq(s0.flexEndTimeCache, flexEndTimeCache);
+      eq(s0.status, CompletionStatus.Fault);
+      eq(s0.statusFlag, true);
+  }
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___RoverState_SV.RoverPerformingLocalRecovery s0);
+  }
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
+      eq(s0.x, x);
+      eq(s0.y, y);
+      eq(s0.theta, theta);
+      eq(s0.length, length);
+      eq(s0.width, width);
+      eq(s0.endTime, endTime);
+      eq(s0.startTime, startTime);
+      eq(s0.flexEndTimeCache, flexEndTimeCache);
+      eq(s0.status, CompletionStatus.Fault);
+      eq(s0.statusFlag, true);
+  }
+  if (hmStatus==HealthMonitorStatus.NotOnMapInNavTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.DriveAction);
+  }
+  if (hmStatus==HealthMonitorStatus.NotOnMapInNavTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
+      eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
+  }
+  if (hmStatus==HealthMonitorStatus.NotOnMapInNavTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
+      eq(s0.x, x);
+      eq(s0.y, y);
+      eq(s0.theta, theta);
+      eq(s0.length, length);
+      eq(s0.width, width);
+      eq(s0.endTime, endTime);
+      eq(s0.startTime, startTime);
+      eq(s0.flexEndTimeCache, flexEndTimeCache);
+      eq(s0.status, CompletionStatus.Fault);
+      eq(s0.statusFlag, true);
+  }
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.DriveAction);
+  }
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
+      eq(s0.x, x);
+      eq(s0.y, y);
+      eq(s0.theta, theta);
+      eq(s0.length, length);
+      eq(s0.width, width);
+      eq(s0.endTime, endTime);
+      eq(s0.startTime, startTime);
+      eq(s0.flexEndTimeCache, flexEndTimeCache);
+      eq(s0.status, CompletionStatus.Fault);
+      eq(s0.statusFlag, true);
+  }
+  if (hmStatus==HealthMonitorStatus.UserDefinedFaultTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.DriveAction);
+  }
+  if (hmStatus==HealthMonitorStatus.UserDefinedFaultTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
+      eq(s0.x, x);
+      eq(s0.y, y);
+      eq(s0.theta, theta);
+      eq(s0.length, length);
+      eq(s0.width, width);
+      eq(s0.endTime, endTime);
+      eq(s0.startTime, startTime);
+      eq(s0.flexEndTimeCache, flexEndTimeCache);
+      eq(s0.status, CompletionStatus.Fault);
+      eq(s0.statusFlag, true);
+  }
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.DriveAction);
+  }
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
+      eq(s0.x, x);
+      eq(s0.y, y);
+      eq(s0.theta, theta);
+      eq(s0.length, length);
+      eq(s0.width, width);
+      eq(s0.endTime, endTime);
+      eq(s0.startTime, startTime);
+      eq(s0.flexEndTimeCache, flexEndTimeCache);
+      eq(s0.status, CompletionStatus.Fault);
+      eq(s0.statusFlag, true);
+  }
+  if (pred==RoverStateConnectors.ChargeAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.Charge);
+      eq(s0.endTime, startTime);
+  }
+  if (pred==RoverStateConnectors.DriveAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___RoverState_SV.RoverMoving s0);
+      eq(s0.endTime, startTime);
+  }
+  if (pred==RoverStateConnectors.FluorMosaicAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.FluorMosaic);
+  }
+  if (pred==RoverStateConnectors.ReadRoverPosition) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.ReadRoverPosition);
+  }
+  if (pred==RoverStateConnectors.ScienceAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.ScienceAction);
+  }
+  if (pred==RoverStateConnectors.Standby) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.endTime, startTime);
+  }
+  if (pred==RoverStateConnectors.ViaPointAction) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.ViaPoint);
+  }
+  if (roverInSafeguardedMode==true) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___RoverOperationMode_SV.GoToSafeguardedMode s0);
+  }
+  if (roverInSafeguardedMode==true) {
+//output subgoal
+//outputSubgoalCreation
+    starts(TEMPEST_Class___RoverOperationMode_SV.GoToAutonomousMode s0);
+  }
+  if (status==ReturnStatus.Failed) {
+    if (statusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+        eq(s0.__DDL__state, RoverStationaryState.Standby);
+        eq(s0.pred, RoverStateConnectors.DriveAction);
+    }
+  }
+  if (status==ReturnStatus.Failed) {
+    if (statusFlag==true) {
+    }
+  }
+  if (status==ReturnStatus.Failed) {
+    if (statusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
+        eq(s0.flexEndTimeCache, flexEndTimeCache);
+        eq(s0.status, CompletionStatus.Failure);
+        eq(s0.statusFlag, true);
+    }
+  }
+  if (status==ReturnStatus.Failed) {
+    if (statusFlag==true) {
+    }
+  }
+  if (status==ReturnStatus.Failed) {
+    if (statusFlag==true) {
+      if (precisionFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+        meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
+          eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
+      }
+    }
+  }
+  if (status==ReturnStatus.Failed) {
+    if (statusFlag==true) {
+      if (precisionFlag==true) {
+      }
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      if (earlyFlag==true) {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
+//output subgoal
+//outputSubgoalCreation
+          meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+            eq(s0.pred, RoverStateConnectors.DriveAction);
+        }
+      }
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      if (earlyFlag==true) {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
+        }
+      }
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      if (earlyFlag==true) {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
+//output subgoal
+//outputSubgoalCreation
+          meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
+            eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
+        }
+      }
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      if (earlyFlag==true) {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
+        }
+      }
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      if (earlyFlag==true) {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
+//output subgoal
+//outputSubgoalCreation
+          ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
+            eq(s0.x, x);
+            eq(s0.y, y);
+            eq(s0.theta, theta);
+            eq(s0.length, length);
+            eq(s0.width, width);
+            eq(s0.endTime, endTime);
+            eq(s0.startTime, startTime);
+            eq(s0.flexEndTimeCache, flexEndTimeCache);
+            eq(s0.status, CompletionStatus.EarlyReturn);
+            eq(s0.statusFlag, true);
+        }
+      }
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      if (earlyFlag==true) {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
+        }
+      }
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      if (earlyFlag==false) {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
+//output subgoal
+//outputSubgoalCreation
+          ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
+            eq(s0.x, x);
+            eq(s0.y, y);
+            eq(s0.theta, theta);
+            eq(s0.length, length);
+            eq(s0.width, width);
+            eq(s0.flexEndTimeCache, flexEndTimeCache);
+            eq(s0.status, CompletionStatus.Nominal);
+            eq(s0.statusFlag, true);
+        }
+      }
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      if (earlyFlag==false) {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
+        }
+      }
+    }
+  }
+//  if (status==ReturnStatus.OK) {
+//    if (statusFlag==true) {
+//      if (hmStatus==HealthMonitorStatus.NoFault) {
+//        CommandCompletedEarly(earlyFlag, end, flexEndTimeCache);
+//      }
+//    }
+//  }
+  if (statusFlag==false) {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+        eq(s0.__DDL__state, RoverStationaryState.ReadRoverPosition);
+        eq(s0.pred, RoverStateConnectors.DriveAction);
+    }
+  }
+  if (statusFlag==false) {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
+    }
+  }
+  if (statusFlag==false) {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
+//output subgoal
+//outputSubgoalCreation
+      ends(TEMPEST_Class___MissionExecutive_SV.DriveAction s0);
+        eq(s0.x, x);
+        eq(s0.y, y);
+        eq(s0.theta, theta);
+        eq(s0.length, length);
+        eq(s0.width, width);
+        eq(s0.endTime, endTime);
+        eq(s0.startTime, startTime);
+        eq(s0.flexEndTimeCache, flexEndTimeCache);
+        eq(s0.status, CompletionStatus.Timeout);
+        eq(s0.statusFlag, true);
+    }
+  }
+  if (statusFlag==false) {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
+    }
+  }
+}
+
+TEMPEST_Class___RoverState_SV::RoverPerformingLocalRecovery {
+  eq(duration, [3 60000]);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+    eq(s0.__DDL__state, RoverStationaryState.Standby);
+    eq(s0.pred, RoverStateConnectors.LocalRecovery);
+//output subgoal
+//outputSubgoalCreation
+  starts(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage s1);
+    eq(s1.actionType, RoverStateConnectors.LocalRecovery);
+  if (recoverySucceeded==true) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s0);
+      eq(s0.NoArcHealthMode, HealthMode.NoFaultMode);
+  }
+  if (recoverySucceeded==true) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___RecoveryManager_SV.UpdateFaultCount s0);
+      eq(s0.deltaCount, -1);
+      eq(s0.decCount, true);
+      eq(s0.activeFaultUntriggered, true);
+  }
+}
+
+TEMPEST_Class___OperatorInterface_SV::OperatorInterfaceIdle {
+  eq(duration, [3 60000]);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___OperatorInterface_SV.OperatorInterfaceActive s0);
+}
+
+TEMPEST_Class___OperatorInterface_SV::OperatorInterfaceActive {
+  eq(duration, [3 60000]);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___OperatorInterface_SV.OperatorInterfaceIdle s0);
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_Planning s0);
+        eq(s0.tempestPlannerMode, TempestPlannerMode.NewPlan);
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+    }
+  }
+}
+
+TEMPEST_Class___HealthMonitor_SV::HealthMonitorIdle {
+  eq(duration, [3 60000]);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage s0);
+}
+
+TEMPEST_Class___HealthMonitor_SV::HealthMonitorMessage {
+  eq(duration, [3 60000]);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage s0);
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
+    if (hmStatusFlag==true) {
+      if (actionType==RoverStateConnectors.LocalRecovery) {
+//output subgoal
+//outputSubgoalCreation
+        ends(TEMPEST_Class___RoverState_SV.RoverPerformingLocalRecovery s0);
+          eq(s0.recoverySucceeded, false);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
+    if (hmStatusFlag==true) {
+      if (actionType==RoverStateConnectors.LocalRecovery) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
+    if (hmStatusFlag==true) {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
+//output subgoal
+//outputSubgoalCreation
+        meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+          eq(s0.__DDL__state, RoverStationaryState.Standby);
+          eq(s0.pred, RoverStateConnectors.ViaPointAction);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
+    if (hmStatusFlag==true) {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
+    if (hmStatusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___NAV_Health_SV.NavHealth s0);
+        eq(s0.navHealthMode, HealthMode.FaultMode);
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
+    if (hmStatusFlag==true) {
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
+    if (hmStatusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___RecoveryManager_SV.UpdateFaultCount s0);
+        eq(s0.deltaCount, 1);
+        eq(s0.decCount, false);
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
+    if (hmStatusFlag==true) {
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==true) {
+//output subgoal
+//outputSubgoalCreation
+        ends(TEMPEST_Class___Navigator_SV.Navigator s0);
+          eq(s0.navState, NavigatorState.NAV_Restart);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==true) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==false) {
+//output subgoal
+//outputSubgoalCreation
+        meets(TEMPEST_Class___NAV_Health_SV.NavHealth s0);
+          eq(s0.navHealthMode, HealthMode.NoFaultMode);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==false) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==false) {
+//output subgoal
+//outputSubgoalCreation
+        meets(TEMPEST_Class___RecoveryManager_SV.UpdateFaultCount s0);
+          eq(s0.deltaCount, -1);
+          eq(s0.decCount, true);
+          eq(s0.activeFaultUntriggered, false);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==false) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
+    if (hmStatusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s0);
+        eq(s0.NoArcHealthMode, HealthMode.FaultMode);
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
+    if (hmStatusFlag==true) {
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
+    if (hmStatusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___RecoveryManager_SV.UpdateFaultCount s0);
+        eq(s0.deltaCount, 1);
+        eq(s0.decCount, false);
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
+    if (hmStatusFlag==true) {
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
+    if (hmStatusFlag==true) {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
+//output subgoal
+//outputSubgoalCreation
+        meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+          eq(s0.__DDL__state, RoverStationaryState.Standby);
+          eq(s0.pred, RoverStateConnectors.ViaPointAction);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
+    if (hmStatusFlag==true) {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NoArcFoundUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==true) {
+//output subgoal
+//outputSubgoalCreation
+        ends(TEMPEST_Class___RoverState_SV.RoverPerformingLocalRecovery s0);
+          eq(s0.recoverySucceeded, true);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NoArcFoundUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==true) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NoArcFoundUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==false) {
+//output subgoal
+//outputSubgoalCreation
+        meets(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s0);
+          eq(s0.NoArcHealthMode, HealthMode.NoFaultMode);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NoArcFoundUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==false) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NoArcFoundUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==false) {
+//output subgoal
+//outputSubgoalCreation
+        meets(TEMPEST_Class___RecoveryManager_SV.UpdateFaultCount s0);
+          eq(s0.deltaCount, -1);
+          eq(s0.decCount, true);
+          eq(s0.activeFaultUntriggered, false);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NoArcFoundUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==false) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NotOnMapInNavTriggered) {
+    if (hmStatusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___RoverOperationMode_SV.GoToSafeguardedMode s0);
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NotOnMapInNavTriggered) {
+    if (hmStatusFlag==true) {
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NotOnMapInNavTriggered) {
+    if (hmStatusFlag==true) {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
+//output subgoal
+//outputSubgoalCreation
+        meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+          eq(s0.__DDL__state, RoverStationaryState.Standby);
+          eq(s0.pred, RoverStateConnectors.ViaPointAction);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.NotOnMapInNavTriggered) {
+    if (hmStatusFlag==true) {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
+    if (hmStatusFlag==true) {
+      if (actionType==RoverStateConnectors.LocalRecovery) {
+//output subgoal
+//outputSubgoalCreation
+        ends(TEMPEST_Class___RoverState_SV.RoverPerformingLocalRecovery s0);
+          eq(s0.recoverySucceeded, false);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
+    if (hmStatusFlag==true) {
+      if (actionType==RoverStateConnectors.LocalRecovery) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
+    if (hmStatusFlag==true) {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
+//output subgoal
+//outputSubgoalCreation
+        meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+          eq(s0.__DDL__state, RoverStationaryState.Standby);
+          eq(s0.pred, RoverStateConnectors.ViaPointAction);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
+    if (hmStatusFlag==true) {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
+    if (hmStatusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___PE_Health_SV.PeHealth s0);
+        eq(s0.peHealthMode, HealthMode.FaultMode);
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
+    if (hmStatusFlag==true) {
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
+    if (hmStatusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___RecoveryManager_SV.UpdateFaultCount s0);
+        eq(s0.deltaCount, 1);
+        eq(s0.decCount, false);
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
+    if (hmStatusFlag==true) {
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==true) {
+//output subgoal
+//outputSubgoalCreation
+        ends(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
+          eq(s0.peState, PositionEstimatorState.PE_Restart);
+          eq(s0.status, ReturnStatus.OK);
+          eq(s0.statusFlag, false);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==true) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==false) {
+//output subgoal
+//outputSubgoalCreation
+        meets(TEMPEST_Class___PE_Health_SV.PeHealth s0);
+          eq(s0.peHealthMode, HealthMode.NoFaultMode);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==false) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==false) {
+//output subgoal
+//outputSubgoalCreation
+        meets(TEMPEST_Class___RecoveryManager_SV.UpdateFaultCount s0);
+          eq(s0.deltaCount, -1);
+          eq(s0.decCount, true);
+          eq(s0.activeFaultUntriggered, false);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==false) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.UserDefinedFaultTriggered) {
+    if (hmStatusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___RoverOperationMode_SV.GoToSafeguardedMode s0);
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.UserDefinedFaultTriggered) {
+    if (hmStatusFlag==true) {
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.UserDefinedFaultTriggered) {
+    if (hmStatusFlag==true) {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
+//output subgoal
+//outputSubgoalCreation
+        meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+          eq(s0.__DDL__state, RoverStationaryState.Standby);
+          eq(s0.pred, RoverStateConnectors.ViaPointAction);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.UserDefinedFaultTriggered) {
+    if (hmStatusFlag==true) {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.UserDefinedFaultUntriggered) {
+    if (hmStatusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
+        eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.UserDefinedFaultUntriggered) {
+    if (hmStatusFlag==true) {
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
+    if (hmStatusFlag==true) {
+      if (actionType==RoverStateConnectors.LocalRecovery) {
+//output subgoal
+//outputSubgoalCreation
+        ends(TEMPEST_Class___RoverState_SV.RoverPerformingLocalRecovery s0);
+          eq(s0.recoverySucceeded, false);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
+    if (hmStatusFlag==true) {
+      if (actionType==RoverStateConnectors.LocalRecovery) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
+    if (hmStatusFlag==true) {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
+//output subgoal
+//outputSubgoalCreation
+        meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+          eq(s0.__DDL__state, RoverStationaryState.Standby);
+          eq(s0.pred, RoverStateConnectors.ViaPointAction);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
+    if (hmStatusFlag==true) {
+      if (actionType==RoverStateConnectors.ViaPointAction) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
+    if (hmStatusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___VC_Health_SV.VcHealth s0);
+        eq(s0.vcHealthMode, HealthMode.FaultMode);
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
+    if (hmStatusFlag==true) {
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
+    if (hmStatusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___RecoveryManager_SV.UpdateFaultCount s0);
+        eq(s0.deltaCount, 1);
+        eq(s0.decCount, false);
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
+    if (hmStatusFlag==true) {
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==true) {
+//output subgoal
+//outputSubgoalCreation
+        ends(TEMPEST_Class___VehicleController_SV.VehicleController s0);
+          eq(s0.vcState, VehicleControllerState.VC_Restart);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==true) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==false) {
+//output subgoal
+//outputSubgoalCreation
+        meets(TEMPEST_Class___VC_Health_SV.VcHealth s0);
+          eq(s0.vcHealthMode, HealthMode.NoFaultMode);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==false) {
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==false) {
+//output subgoal
+//outputSubgoalCreation
+        meets(TEMPEST_Class___RecoveryManager_SV.UpdateFaultCount s0);
+          eq(s0.deltaCount, -1);
+          eq(s0.decCount, true);
+          eq(s0.activeFaultUntriggered, false);
+      }
+    }
+  }
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashUntriggered) {
+    if (hmStatusFlag==true) {
+      if (recoveryInProgress==false) {
+      }
+    }
+  }
+  if (hmStatusFlag==false) {
+    eq(duration, [3 60000]);
+    eq(hmStatus, HealthMonitorStatus.NoFault);
+  }
+}
+
+TEMPEST_Class___RoverOperationMode_SV::GoToSafeguardedMode {
+  eq(duration, [3 60000]);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___RoverOperationMode_SV.GoToAutonomousMode s0);
+//output subgoal
+//outputSubgoalCreation
+  contained_by(TEMPEST_Class___MissionExecutive_SV.ME_Standby s1);
+}
+
+TEMPEST_Class___RoverOperationMode_SV::GoToAutonomousMode {
+  eq(duration, [3 60000]);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___RoverOperationMode_SV.GoToSafeguardedMode s0);
+}
+
+TEMPEST_Class___VehicleController_SV::VehicleController {
+  if (vcState==VehicleControllerState.VC_AchieveSteadyState) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___VehicleController_SV.VehicleController s0);
+      eq(s0.vcState, VehicleControllerState.VC_ConfirmStop);
+      eq(s0.afterRecovery, afterRecovery);
+  }
+  if (vcState==VehicleControllerState.VC_CannotRecover) {
+//output subgoal
+//outputSubgoalCreation
+    starts(TEMPEST_Class___OperatorNotification_SV.NotifyOperator s0);
+      eq(s0.opMsg, NotifyOperatorMessage.VcCrashRecoveryFailed);
+  }
+  if (vcState==VehicleControllerState.VC_ConfirmStart) {
+//output subgoal
+//outputSubgoalCreation
+    contained_by(TEMPEST_Class___SStopClear_SV.SStopClearAction s0);
+  }
+  if (vcState==VehicleControllerState.VC_ConfirmStop) {
+//output subgoal
+//outputSubgoalCreation
+    contained_by(TEMPEST_Class___SStopSet_SV.SStopSetAction s0);
+      eq(s0.closedLoop, true);
+  }
+  if (vcState==VehicleControllerState.VC_Nominal) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___VehicleController_SV.VehicleController s0);
+      eq(s0.vcState, VehicleControllerState.VC_OpenLoopStop);
+  }
+  if (vcState==VehicleControllerState.VC_OpenLoopStop) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___VehicleController_SV.VehicleController s0);
+      eq(s0.vcState, VehicleControllerState.VC_Restart);
+      eq(s0.afterRecovery, afterRecovery);
+  }
+  if (vcState==VehicleControllerState.VC_OpenLoopStop) {
+//output subgoal
+//outputSubgoalCreation
+    contained_by(TEMPEST_Class___SStopSet_SV.SStopSetAction s0);
+      eq(s0.closedLoop, false);
+  }
+  if (vcState==VehicleControllerState.VC_AchieveSteadyState) {
+    eq(duration, [3 12]);
+  }
+  if (vcState==VehicleControllerState.VC_CannotRecover) {
+    eq(duration, [3 60000]);
+  }
+  if (vcState==VehicleControllerState.VC_ConfirmStart) {
+    if (timedOut==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___VehicleController_SV.VehicleController s0);
+        eq(s0.vcState, VehicleControllerState.VC_CannotRecover);
+    }
+  }
+  if (vcState==VehicleControllerState.VC_ConfirmStart) {
+    if (timedOut==true) {
+    }
+  }
+  if (vcState==VehicleControllerState.VC_ConfirmStart) {
+    if (timedOut==false) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___VehicleController_SV.VehicleController s0);
+        eq(s0.vcState, VehicleControllerState.VC_Nominal);
+        eq(s0.afterRecovery, afterRecovery);
+    }
+  }
+  if (vcState==VehicleControllerState.VC_ConfirmStart) {
+    if (timedOut==false) {
+    }
+  }
+  if (vcState==VehicleControllerState.VC_ConfirmStart) {
+    eq(duration, [3 6]);
+    condEq(timedOut, 6, duration);
+  }
+  if (vcState==VehicleControllerState.VC_ConfirmStop) {
+    if (timedOut==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___VehicleController_SV.VehicleController s0);
+        eq(s0.vcState, VehicleControllerState.VC_CannotRecover);
+    }
+  }
+  if (vcState==VehicleControllerState.VC_ConfirmStop) {
+    if (timedOut==true) {
+    }
+  }
+  if (vcState==VehicleControllerState.VC_ConfirmStop) {
+    if (timedOut==false) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___VehicleController_SV.VehicleController s0);
+        eq(s0.vcState, VehicleControllerState.VC_ConfirmStart);
+        eq(s0.afterRecovery, afterRecovery);
+    }
+  }
+  if (vcState==VehicleControllerState.VC_ConfirmStop) {
+    if (timedOut==false) {
+    }
+  }
+  if (vcState==VehicleControllerState.VC_ConfirmStop) {
+    eq(duration, [3 6]);
+    condEq(timedOut, 6, duration);
+  }
+  if (vcState==VehicleControllerState.VC_Nominal) {
+    if (afterRecovery==true) {
+//output subgoal
+//outputSubgoalCreation
+      starts(TEMPEST_Class___VC_Health_SV.VcHealth s0);
+        eq(s0.vcHealthMode, HealthMode.NoFaultMode);
+    }
+  }
+  if (vcState==VehicleControllerState.VC_Nominal) {
+    if (afterRecovery==true) {
+    }
+  }
+  if (vcState==VehicleControllerState.VC_Nominal) {
+    if (afterRecovery==true) {
+//output subgoal
+//outputSubgoalCreation
+      starts(TEMPEST_Class___RecoveryManager_SV.UpdateFaultCount s0);
+        eq(s0.deltaCount, -1);
+        eq(s0.decCount, true);
+        eq(s0.activeFaultUntriggered, true);
+    }
+  }
+  if (vcState==VehicleControllerState.VC_Nominal) {
+    if (afterRecovery==true) {
+    }
+  }
+  if (vcState==VehicleControllerState.VC_Nominal) {
+    eq(duration, [3 60000]);
+  }
+  if (vcState==VehicleControllerState.VC_OpenLoopStop) {
+    eq(duration, [3 60000]);
+  }
+  if (vcState==VehicleControllerState.VC_Restart) {
+    if (timedOut==false) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___VehicleController_SV.VehicleController s0);
+        eq(s0.vcState, VehicleControllerState.VC_ConfirmStop);
+        eq(s0.afterRecovery, afterRecovery);
+    }
+  }
+  if (vcState==VehicleControllerState.VC_Restart) {
+    if (timedOut==false) {
+    }
+  }
+  if (vcState==VehicleControllerState.VC_Restart) {
+    if (timedOut==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___VehicleController_SV.VehicleController s0);
+        eq(s0.vcState, VehicleControllerState.VC_CannotRecover);
+    }
+  }
+  if (vcState==VehicleControllerState.VC_Restart) {
+    if (timedOut==true) {
+    }
+  }
+  if (vcState==VehicleControllerState.VC_Restart) {
+    eq(duration, [3 120]);
+    condEq(timedOut, 120, duration);
+  }
+}
+
+TEMPEST_Class___VC_Health_SV::VcHealth {
+  eq(duration, [3 60000]);
+  if (vcHealthMode==HealthMode.FaultMode) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___VC_Health_SV.VcHealth s0);
+      eq(s0.vcHealthMode, HealthMode.NoFaultMode);
+  }
+  if (vcHealthMode==HealthMode.NoFaultMode) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___VC_Health_SV.VcHealth s0);
+      eq(s0.vcHealthMode, HealthMode.FaultMode);
+  }
+  if (vcHealthMode==HealthMode.FaultMode) {
+    if (goToSafeguard==true) {
+//output subgoal
+//outputSubgoalCreation
+      met_by(TEMPEST_Class___RoverOperationMode_SV.GoToAutonomousMode s0);
+    }
+  }
+  if (vcHealthMode==HealthMode.FaultMode) {
+    if (goToSafeguard==true) {
+    }
+  }
+  if (vcHealthMode==HealthMode.FaultMode) {
+    if (goToSafeguard==true) {
+//output subgoal
+//outputSubgoalCreation
+      starts(TEMPEST_Class___RoverOperationMode_SV.GoToSafeguardedMode s0);
+    }
+  }
+  if (vcHealthMode==HealthMode.FaultMode) {
+    if (goToSafeguard==true) {
+    }
+  }
+}
+
+TEMPEST_Class___Navigator_SV::Navigator {
+  if (navState==NavigatorState.NAV_AchieveSteadyState) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___Navigator_SV.Navigator s0);
+      eq(s0.navState, NavigatorState.NAV_ConfirmStart);
+      eq(s0.afterRecovery, afterRecovery);
+  }
+  if (navState==NavigatorState.NAV_CannotRecover) {
+//output subgoal
+//outputSubgoalCreation
+    starts(TEMPEST_Class___OperatorNotification_SV.NotifyOperator s0);
+      eq(s0.opMsg, NotifyOperatorMessage.NavCrashRecoveryFailed);
+  }
+  if (navState==NavigatorState.NAV_ConfirmStart) {
+//output subgoal
+//outputSubgoalCreation
+    contained_by(TEMPEST_Class___SStopClear_SV.SStopClearAction s0);
+  }
+  if (navState==NavigatorState.NAV_ConfirmStop) {
+//output subgoal
+//outputSubgoalCreation
+    contained_by(TEMPEST_Class___SStopSet_SV.SStopSetAction s0);
+      eq(s0.closedLoop, true);
+  }
+  if (navState==NavigatorState.NAV_Nominal) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___Navigator_SV.Navigator s0);
+      eq(s0.navState, NavigatorState.NAV_ConfirmStop);
+  }
+  if (navState==NavigatorState.NAV_AchieveSteadyState) {
+    eq(duration, [3 12]);
+  }
+  if (navState==NavigatorState.NAV_CannotRecover) {
+    eq(duration, [3 60000]);
+  }
+  if (navState==NavigatorState.NAV_ConfirmStart) {
+    if (timedOut==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___Navigator_SV.Navigator s0);
+        eq(s0.navState, NavigatorState.NAV_CannotRecover);
+    }
+  }
+  if (navState==NavigatorState.NAV_ConfirmStart) {
+    if (timedOut==true) {
+    }
+  }
+  if (navState==NavigatorState.NAV_ConfirmStart) {
+    if (timedOut==false) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___Navigator_SV.Navigator s0);
+        eq(s0.navState, NavigatorState.NAV_Nominal);
+        eq(s0.afterRecovery, afterRecovery);
+    }
+  }
+  if (navState==NavigatorState.NAV_ConfirmStart) {
+    if (timedOut==false) {
+    }
+  }
+  if (navState==NavigatorState.NAV_ConfirmStart) {
+    eq(duration, [3 6]);
+    condEq(timedOut, 6, duration);
+  }
+  if (navState==NavigatorState.NAV_ConfirmStop) {
+    if (timedOut==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___Navigator_SV.Navigator s0);
+        eq(s0.navState, NavigatorState.NAV_CannotRecover);
+    }
+  }
+  if (navState==NavigatorState.NAV_ConfirmStop) {
+    if (timedOut==true) {
+    }
+  }
+  if (navState==NavigatorState.NAV_ConfirmStop) {
+    if (timedOut==false) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___Navigator_SV.Navigator s0);
+        eq(s0.navState, NavigatorState.NAV_Restart);
+        eq(s0.afterRecovery, afterRecovery);
+    }
+  }
+  if (navState==NavigatorState.NAV_ConfirmStop) {
+    if (timedOut==false) {
+    }
+  }
+  if (navState==NavigatorState.NAV_ConfirmStop) {
+    eq(duration, [3 6]);
+    condEq(timedOut, 6, duration);
+  }
+  if (navState==NavigatorState.NAV_Nominal) {
+    if (afterRecovery==true) {
+//output subgoal
+//outputSubgoalCreation
+      starts(TEMPEST_Class___NAV_Health_SV.NavHealth s0);
+        eq(s0.navHealthMode, HealthMode.NoFaultMode);
+    }
+  }
+  if (navState==NavigatorState.NAV_Nominal) {
+    if (afterRecovery==true) {
+    }
+  }
+  if (navState==NavigatorState.NAV_Nominal) {
+    if (afterRecovery==true) {
+//output subgoal
+//outputSubgoalCreation
+      starts(TEMPEST_Class___RecoveryManager_SV.UpdateFaultCount s0);
+        eq(s0.deltaCount, -1);
+        eq(s0.decCount, true);
+        eq(s0.activeFaultUntriggered, true);
+    }
+  }
+  if (navState==NavigatorState.NAV_Nominal) {
+    if (afterRecovery==true) {
+    }
+  }
+  if (navState==NavigatorState.NAV_Nominal) {
+    eq(duration, [3 60000]);
+  }
+  if (navState==NavigatorState.NAV_Restart) {
+    eq(duration, [3 120]);
+  }
+  if (navState==NavigatorState.NAV_Restart) {
+    if (timedOut==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___Navigator_SV.Navigator s0);
+        eq(s0.navState, NavigatorState.NAV_CannotRecover);
+    }
+  }
+  if (navState==NavigatorState.NAV_Restart) {
+    if (timedOut==true) {
+    }
+  }
+  if (navState==NavigatorState.NAV_Restart) {
+    if (timedOut==false) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___Navigator_SV.Navigator s0);
+        eq(s0.navState, NavigatorState.NAV_ConfirmStart);
+        eq(s0.afterRecovery, afterRecovery);
+    }
+  }
+  if (navState==NavigatorState.NAV_Restart) {
+    if (timedOut==false) {
+    }
+  }
+  if (navState==NavigatorState.NAV_Restart) {
+    condEq(timedOut, 120, duration);
+  }
+}
+
+TEMPEST_Class___NAV_Health_SV::NavHealth {
+  eq(duration, [3 60000]);
+  if (navHealthMode==HealthMode.FaultMode) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___NAV_Health_SV.NavHealth s0);
+      eq(s0.navHealthMode, HealthMode.NoFaultMode);
+  }
+  if (navHealthMode==HealthMode.NoFaultMode) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___NAV_Health_SV.NavHealth s0);
+      eq(s0.navHealthMode, HealthMode.FaultMode);
+  }
+  if (navHealthMode==HealthMode.FaultMode) {
+    if (goToSafeguard==true) {
+//output subgoal
+//outputSubgoalCreation
+      met_by(TEMPEST_Class___RoverOperationMode_SV.GoToAutonomousMode s0);
+    }
+  }
+  if (navHealthMode==HealthMode.FaultMode) {
+    if (goToSafeguard==true) {
+    }
+  }
+  if (navHealthMode==HealthMode.FaultMode) {
+    if (goToSafeguard==true) {
+//output subgoal
+//outputSubgoalCreation
+      starts(TEMPEST_Class___RoverOperationMode_SV.GoToSafeguardedMode s0);
+    }
+  }
+  if (navHealthMode==HealthMode.FaultMode) {
+    if (goToSafeguard==true) {
+    }
+  }
+}
+
+TEMPEST_Class___PositionEstimator_SV::PositionEstimator {
+  if (peState==PositionEstimatorState.PE_CannotRecover) {
+//output subgoal
+//outputSubgoalCreation
+    starts(TEMPEST_Class___OperatorNotification_SV.NotifyOperator s0);
+      eq(s0.opMsg, NotifyOperatorMessage.PeCrashRecoveryFailed);
+  }
+  if (peState==PositionEstimatorState.PE_ConfirmStopClear) {
+//output subgoal
+//outputSubgoalCreation
+    contained_by(TEMPEST_Class___SStopClear_SV.SStopClearAction s0);
+  }
+  if (peState==PositionEstimatorState.PE_ConfirmStopSet) {
+//output subgoal
+//outputSubgoalCreation
+    contained_by(TEMPEST_Class___SStopSet_SV.SStopSetAction s0);
+      eq(s0.closedLoop, true);
+  }
+  if (peState==PositionEstimatorState.PE_Nominal) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
+      eq(s0.peState, PositionEstimatorState.PE_ConfirmStopSet);
+  }
+  if (peState==PositionEstimatorState.PE_CannotRecover) {
+    eq(duration, [3 60000]);
+  }
+  if (peState==PositionEstimatorState.PE_ConfirmStopClear) {
+    if (timedOut==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
+        eq(s0.peState, PositionEstimatorState.PE_CannotRecover);
+    }
+  }
+  if (peState==PositionEstimatorState.PE_ConfirmStopClear) {
+    if (timedOut==true) {
+    }
+  }
+  if (peState==PositionEstimatorState.PE_ConfirmStopClear) {
+    if (timedOut==false) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
+        eq(s0.peState, PositionEstimatorState.PE_Nominal);
+        eq(s0.afterRecovery, afterRecovery);
+    }
+  }
+  if (peState==PositionEstimatorState.PE_ConfirmStopClear) {
+    if (timedOut==false) {
+    }
+  }
+  if (peState==PositionEstimatorState.PE_ConfirmStopClear) {
+    eq(duration, [3 6]);
+    condEq(timedOut, 6, duration);
+  }
+  if (peState==PositionEstimatorState.PE_ConfirmStopSet) {
+    if (timedOut==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
+        eq(s0.peState, PositionEstimatorState.PE_CannotRecover);
+    }
+  }
+  if (peState==PositionEstimatorState.PE_ConfirmStopSet) {
+    if (timedOut==true) {
+    }
+  }
+  if (peState==PositionEstimatorState.PE_ConfirmStopSet) {
+    if (timedOut==false) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
+        eq(s0.peState, PositionEstimatorState.PE_Restart);
+        eq(s0.afterRecovery, afterRecovery);
+    }
+  }
+  if (peState==PositionEstimatorState.PE_ConfirmStopSet) {
+    if (timedOut==false) {
+    }
+  }
+  if (peState==PositionEstimatorState.PE_ConfirmStopSet) {
+    eq(duration, [3 6]);
+    condEq(timedOut, 6, duration);
+  }
+  if (peState==PositionEstimatorState.PE_Nominal) {
+    if (afterRecovery==true) {
+//output subgoal
+//outputSubgoalCreation
+      starts(TEMPEST_Class___PE_Health_SV.PeHealth s0);
+        eq(s0.peHealthMode, HealthMode.NoFaultMode);
+    }
+  }
+  if (peState==PositionEstimatorState.PE_Nominal) {
+    if (afterRecovery==true) {
+    }
+  }
+  if (peState==PositionEstimatorState.PE_Nominal) {
+    if (afterRecovery==true) {
+//output subgoal
+//outputSubgoalCreation
+      starts(TEMPEST_Class___RecoveryManager_SV.UpdateFaultCount s0);
+        eq(s0.deltaCount, -1);
+        eq(s0.decCount, true);
+        eq(s0.activeFaultUntriggered, true);
+    }
+  }
+  if (peState==PositionEstimatorState.PE_Nominal) {
+    if (afterRecovery==true) {
+    }
+  }
+  if (peState==PositionEstimatorState.PE_Nominal) {
+    eq(duration, [3 60000]);
+  }
+  if (peState==PositionEstimatorState.PE_ResetRoverPosition) {
+    eq(duration, [3 12]);
+  }
+  if (peState==PositionEstimatorState.PE_ResetRoverPosition) {
+    if (status==ReturnStatus.OK) {
+      if (statusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+        meets(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
+          eq(s0.peState, PositionEstimatorState.PE_ConfirmStopClear);
+          eq(s0.afterRecovery, afterRecovery);
+      }
+    }
+  }
+  if (peState==PositionEstimatorState.PE_ResetRoverPosition) {
+    if (status==ReturnStatus.OK) {
+      if (statusFlag==true) {
+      }
+    }
+  }
+  if (peState==PositionEstimatorState.PE_ResetRoverPosition) {
+    if (statusFlag==false) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
+        eq(s0.peState, PositionEstimatorState.PE_CannotRecover);
+    }
+  }
+  if (peState==PositionEstimatorState.PE_ResetRoverPosition) {
+    if (statusFlag==false) {
+    }
+  }
+  if (peState==PositionEstimatorState.PE_Restart) {
+    eq(duration, [3 120]);
+  }
+  if (peState==PositionEstimatorState.PE_Restart) {
+    if (statusFlag==false) {
+      if (timedOut==true) {
+//output subgoal
+//outputSubgoalCreation
+        meets(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
+          eq(s0.peState, PositionEstimatorState.PE_CannotRecover);
+      }
+    }
+  }
+  if (peState==PositionEstimatorState.PE_Restart) {
+    if (statusFlag==false) {
+      if (timedOut==true) {
+      }
+    }
+  }
+  if (peState==PositionEstimatorState.PE_Restart) {
+    if (statusFlag==false) {
+      if (timedOut==false) {
+//output subgoal
+//outputSubgoalCreation
+        meets(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
+          eq(s0.peState, PositionEstimatorState.PE_ResetRoverPosition);
+          eq(s0.afterRecovery, afterRecovery);
+      }
+    }
+  }
+  if (peState==PositionEstimatorState.PE_Restart) {
+    if (statusFlag==false) {
+      if (timedOut==false) {
+      }
+    }
+  }
+  if (peState==PositionEstimatorState.PE_Restart) {
+    if (statusFlag==false) {
+      condEq(timedOut, 120, duration);
+    }
+  }
+}
+
+TEMPEST_Class___PE_Health_SV::PeHealth {
+  eq(duration, [3 60000]);
+  if (peHealthMode==HealthMode.FaultMode) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___PE_Health_SV.PeHealth s0);
+      eq(s0.peHealthMode, HealthMode.NoFaultMode);
+  }
+  if (peHealthMode==HealthMode.NoFaultMode) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___PE_Health_SV.PeHealth s0);
+      eq(s0.peHealthMode, HealthMode.FaultMode);
+  }
+  if (peHealthMode==HealthMode.FaultMode) {
+    if (goToSafeguard==true) {
+//output subgoal
+//outputSubgoalCreation
+      met_by(TEMPEST_Class___RoverOperationMode_SV.GoToAutonomousMode s0);
+    }
+  }
+  if (peHealthMode==HealthMode.FaultMode) {
+    if (goToSafeguard==true) {
+    }
+  }
+  if (peHealthMode==HealthMode.FaultMode) {
+    if (goToSafeguard==true) {
+//output subgoal
+//outputSubgoalCreation
+      starts(TEMPEST_Class___RoverOperationMode_SV.GoToSafeguardedMode s0);
+    }
+  }
+  if (peHealthMode==HealthMode.FaultMode) {
+    if (goToSafeguard==true) {
+    }
+  }
+}
+
+TEMPEST_Class___NoArc_Health_SV::NoArcHealth {
+  eq(duration, [3 60000]);
+  if (NoArcHealthMode==HealthMode.FaultMode) {
+//output subgoal
+//outputSubgoalCreation
+    starts(TEMPEST_Class___RoverOperationMode_SV.GoToSafeguardedMode s0);
+  }
+  if (NoArcHealthMode==HealthMode.FaultMode) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s0);
+      eq(s0.NoArcHealthMode, HealthMode.NoFaultMode);
+  }
+  if (NoArcHealthMode==HealthMode.NoFaultMode) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s0);
+      eq(s0.NoArcHealthMode, HealthMode.FaultMode);
+  }
+}
+
+TEMPEST_Class___MonitoredFaults_SV::SetFaultIdle {
+  eq(duration, [3 60000]);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___MonitoredFaults_SV.SetFaultEnable s0);
+}
+
+TEMPEST_Class___MonitoredFaults_SV::SetFaultEnable {
+  eq(duration, 3);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___MonitoredFaults_SV.SetFaultIdle s0);
+}
+
+TEMPEST_Class___SStopSet_SV::SStopSetMode {
+  eq(duration, [3 60000]);
+//output subgoal
+//outputSubgoalCreation
+  contained_by(TEMPEST_Class___SStopSet_Internal_SV.SStopSetMode_Internal s0);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___SStopSet_SV.SStopSetAction s1);
+}
+
+TEMPEST_Class___SStopSet_SV::SStopSetAction {
+  eq(duration, [3 6]);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___SStopSet_SV.SStopSetMode s0);
+  if (closedLoop==true) {
+//output subgoal
+//outputSubgoalCreation
+    equals(TEMPEST_Class___SStopSet_Internal_SV.SStopSetAction_Internal s0);
+      eq(s0.sStopSetStatus, sStopSetStatus);
+      eq(s0.sStopSetStatusFlag, sStopSetStatusFlag);
+      eq(s0.closedLoop, true);
+  }
+  if (closedLoop==false) {
+    eq(duration, 3);
+  }
+}
+
+TEMPEST_Class___SStopSet_Internal_SV::SStopSetMode_Internal {
+  eq(duration, [3 +inf]);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___SStopSet_Internal_SV.SStopSetAction_Internal s0);
+}
+
+TEMPEST_Class___SStopSet_Internal_SV::SStopSetAction_Internal {
+  eq(duration, [3 6]);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___SStopSet_Internal_SV.SStopSetMode_Internal s0);
+  if (confirmMode==ConfirmationMode.Sequential) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(TEMPEST_Class___SStopConfirm_SV.Confirmation s0);
+      eq(s0.status, ReturnStatus.OK);
+      eq(s0.statusFlag, sStopSetStatusFlag);
+  }
+  if (confirmMode==ConfirmationMode.Simultaneous) {
+//output subgoal
+//outputSubgoalCreation
+    ends(TEMPEST_Class___SStopConfirm_SV.Confirmation s0);
+      eq(s0.status, ReturnStatus.OK);
+      eq(s0.statusFlag, sStopSetStatusFlag);
+  }
+  if (confirmMode==ConfirmationMode.Sequential) {
+    eq(duration, 3);
+    eq(sStopSetStatusFlag, true);
+  }
+  if (confirmMode==ConfirmationMode.Simultaneous) {
+    eq(duration, [3 6]);
+  }
+}
+
+TEMPEST_Class___SStopConfirm_SV::Confirmation {
+  eq(duration, [3 +inf]);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___SStopConfirm_SV.Confirmation s0);
+}
+
+TEMPEST_Class___SStopClear_SV::SStopClearMode {
+  eq(duration, [3 60000]);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___SStopClear_SV.SStopClearAction s0);
+}
+
+TEMPEST_Class___SStopClear_SV::SStopClearAction {
+  eq(duration, [3 6]);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___SStopClear_SV.SStopClearMode s0);
+}
+
+TEMPEST_Class___RecoveryManager_SV::UpdateFaultCount {
+  eq(duration, [3 60000]);
+  addEq(deltaCount, prevCount, nextCount);
+  eq(prevCount, [0 50]);
+  eq(deltaCount, [-1 1]);
+  eq(nextCount, [0 50]);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___RecoveryManager_SV.UpdateFaultCount s0);
+    eq(s0.prevCount, nextCount);
+  if (decCount==true) {
+    if (activeFaultUntriggered==true) {
+      if (isFaultCountZero==true) {
+//output subgoal
+//outputSubgoalCreation
+        starts(TEMPEST_Class___RecoveryDecision_SV.RecoveryDecision s0);
+          eq(s0.recMode, RecoveryDecisionMode.ActivateReplan);
+      }
+    }
+  }
+  if (decCount==true) {
+    if (activeFaultUntriggered==true) {
+      if (isFaultCountZero==false) {
+//output subgoal
+//outputSubgoalCreation
+        starts(TEMPEST_Class___RecoveryDecision_SV.RecoveryDecision s0);
+      }
+    }
+  }
+  if (decCount==true) {
+    if (activeFaultUntriggered==true) {
+      condEq(isFaultCountZero, 0, nextCount);
+    }
+  }
+  if (nextCount==1) {
+    if (decCount==false) {
+//output subgoal
+//outputSubgoalCreation
+      starts(TEMPEST_Class___RecoveryDecision_SV.RecoveryDecision s0);
+    }
+  }
+  if (nextCount==2) {
+    if (decCount==false) {
+      if (interruptibleFault==InterruptibleFaults.NoArcFoundFault) {
+//output subgoal
+//outputSubgoalCreation
+        starts_during(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s0);
+        temporalDistance(s0.start, [0 +inf], this.start);
+        temporalDistance(this.start, [0 +inf], s0.end);
+          eq(s0.NoArcHealthMode, HealthMode.FaultMode);
+      }
+    }
+  }
+  if (nextCount==2) {
+    if (decCount==false) {
+      if (interruptibleFault==InterruptibleFaults.NoArcFoundFault) {
+//output subgoal
+//outputSubgoalCreation
+        starts(TEMPEST_Class___RecoveryDecision_SV.RecoveryDecision s0);
+      }
+    }
+  }
+  if (decCount==false) {
+  }
+}
+
+TEMPEST_Class___RecoveryDecision_SV::RecoveryDecision {
+  eq(duration, [3 60000]);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___RecoveryDecision_SV.RecoveryDecision s0);
+  if (recMode==RecoveryDecisionMode.ActivateNAV_Recovery) {
+//output subgoal
+//outputSubgoalCreation
+    starts_during(TEMPEST_Class___NAV_Health_SV.NavHealth s0);
+    temporalDistance(s0.start, [0 +inf], this.start);
+    temporalDistance(this.start, [0 +inf], s0.end);
+      eq(s0.navHealthMode, HealthMode.FaultMode);
+  }
+  if (recMode==RecoveryDecisionMode.ActivateNAV_Recovery) {
+//output subgoal
+//outputSubgoalCreation
+    starts(TEMPEST_Class___Navigator_SV.Navigator s0);
+      eq(s0.navState, NavigatorState.NAV_ConfirmStop);
+      eq(s0.afterRecovery, true);
+  }
+  if (recMode==RecoveryDecisionMode.ActivateNoArc_Recovery) {
+//output subgoal
+//outputSubgoalCreation
+    starts_during(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s0);
+    temporalDistance(s0.start, [0 +inf], this.start);
+    temporalDistance(this.start, [0 +inf], s0.end);
+      eq(s0.NoArcHealthMode, HealthMode.FaultMode);
+  }
+  if (recMode==RecoveryDecisionMode.ActivateNoArc_Recovery) {
+//output subgoal
+//outputSubgoalCreation
+    starts(TEMPEST_Class___RoverState_SV.RoverPerformingLocalRecovery s0);
+  }
+  if (recMode==RecoveryDecisionMode.ActivatePE_Recovery) {
+//output subgoal
+//outputSubgoalCreation
+    starts_during(TEMPEST_Class___PE_Health_SV.PeHealth s0);
+    temporalDistance(s0.start, [0 +inf], this.start);
+    temporalDistance(this.start, [0 +inf], s0.end);
+      eq(s0.peHealthMode, HealthMode.FaultMode);
+  }
+  if (recMode==RecoveryDecisionMode.ActivatePE_Recovery) {
+//output subgoal
+//outputSubgoalCreation
+    starts(TEMPEST_Class___PositionEstimator_SV.PositionEstimator s0);
+      eq(s0.peState, PositionEstimatorState.PE_ConfirmStopSet);
+      eq(s0.afterRecovery, true);
+  }
+  if (recMode==RecoveryDecisionMode.ActivateReplan) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___RecoveryDecision_SV.RecoveryDecision s0);
+      eq(s0.recMode, RecoveryDecisionMode.StayInactive);
+  }
+  if (recMode==RecoveryDecisionMode.ActivateReplan) {
+//output subgoal
+//outputSubgoalCreation
+    starts(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
+      eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
+  }
+  if (recMode==RecoveryDecisionMode.ActivateReplan) {
+//output subgoal
+//outputSubgoalCreation
+    ends(TEMPEST_Class___TEMPEST_SV.TEMPEST_Planning s0);
+      eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
+  }
+  if (recMode==RecoveryDecisionMode.ActivateVC_Recovery) {
+//output subgoal
+//outputSubgoalCreation
+    starts_during(TEMPEST_Class___VC_Health_SV.VcHealth s0);
+    temporalDistance(s0.start, [0 +inf], this.start);
+    temporalDistance(this.start, [0 +inf], s0.end);
+      eq(s0.vcHealthMode, HealthMode.FaultMode);
+  }
+  if (recMode==RecoveryDecisionMode.ActivateVC_Recovery) {
+//output subgoal
+//outputSubgoalCreation
+    starts(TEMPEST_Class___VehicleController_SV.VehicleController s0);
+      eq(s0.vcState, VehicleControllerState.VC_OpenLoopStop);
+      eq(s0.afterRecovery, true);
+  }
+}
+
+TEMPEST_Class___OperatorNotification_SV::NotifyOperator {
+  eq(duration, [3 60000]);
+//output subgoal
+//outputSubgoalCreation
+  meets(TEMPEST_Class___OperatorNotification_SV.NotifyOperator s0);
+}
+
+Local_Mode_Class___Local_Mode_SV::Local_Nominal {
+  eq(duration, [3 +inf]);
+//output subgoal
+//outputSubgoalCreation
+  meets(Local_Mode_Class___Local_Mode_SV.Local_Abort s0);
+}
+
+Local_Mode_Class___Local_Mode_SV::Local_Abort {
+  eq(duration, [3 +inf]);
+//output subgoal
+//outputSubgoalCreation
+  met_by(Local_Mode_Class___Local_Mode_SV.Local_Nominal s0);
+}
+
+InstrumentManager_Class___InstrumentManager_SV::InstrumentManager_Idle {
+  eq(duration, [3 60000]);
+  eq(foo_0_anon_OR_tag_1, [0 1]);
+  if (foo_0_anon_OR_tag_1==1) {
+//output subgoal
+//outputSubgoalCreation
+    meets(InstrumentManager_Class___InstrumentManager_SV.DoScience s0);
+      eq(s0.pred, SciencePredecessor.MET_BY_IDLE);
+  }
+}
+
+InstrumentManager_Class___InstrumentManager_SV::DoScience {
+//output subgoal
+//outputSubgoalCreation
+  equals(TEMPEST_Class___HealthMonitor_SV.HealthMonitorMessage s0);
+    eq(s0.hmStatus, hmStatus);
+    eq(s0.actionType, RoverStateConnectors.ScienceAction);
+//output subgoal
+//outputSubgoalCreation
+  contained_by(TEMPEST_Class___VC_Health_SV.VcHealth s1);
+    eq(s1.vcHealthMode, HealthMode.NoFaultMode);
+//output subgoal
+//outputSubgoalCreation
+  contained_by(TEMPEST_Class___NAV_Health_SV.NavHealth s2);
+    eq(s2.navHealthMode, HealthMode.NoFaultMode);
+//output subgoal
+//outputSubgoalCreation
+  contained_by(TEMPEST_Class___PE_Health_SV.PeHealth s3);
+    eq(s3.peHealthMode, HealthMode.NoFaultMode);
+//output subgoal
+//outputSubgoalCreation
+  contained_by(TEMPEST_Class___NoArc_Health_SV.NoArcHealth s4);
+    eq(s4.NoArcHealthMode, HealthMode.NoFaultMode);
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.ScienceAction);
+  }
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    meets(InstrumentManager_Class___InstrumentManager_SV.Abort s0);
+      eq(s0.pred, SciencePredecessor.MET_BY_SCIENCE);
+      eq(s0.hmStatus, HealthMonitorStatus.NavigatorCrashTriggered);
+  }
+  if (hmStatus==HealthMonitorStatus.NavigatorCrashTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    ends(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
+      eq(s0.argument, argument);
+      eq(s0.flexEndTimeCache, flexEndTimeCache);
+      eq(s0.status, CompletionStatus.Fault);
+      eq(s0.statusFlag, true);
+  }
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.ScienceAction);
+  }
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    meets(InstrumentManager_Class___InstrumentManager_SV.Abort s0);
+      eq(s0.pred, SciencePredecessor.MET_BY_SCIENCE);
+      eq(s0.hmStatus, HealthMonitorStatus.NoArcFoundTriggered);
+  }
+  if (hmStatus==HealthMonitorStatus.NoArcFoundTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    ends(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
+      eq(s0.argument, argument);
+      eq(s0.flexEndTimeCache, flexEndTimeCache);
+      eq(s0.status, CompletionStatus.Fault);
+      eq(s0.statusFlag, true);
+  }
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.ScienceAction);
+  }
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    meets(InstrumentManager_Class___InstrumentManager_SV.Abort s0);
+      eq(s0.pred, SciencePredecessor.MET_BY_SCIENCE);
+      eq(s0.hmStatus, HealthMonitorStatus.PositionEstimatorCrashTriggered);
+  }
+  if (hmStatus==HealthMonitorStatus.PositionEstimatorCrashTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    ends(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
+      eq(s0.argument, argument);
+      eq(s0.flexEndTimeCache, flexEndTimeCache);
+      eq(s0.status, CompletionStatus.Fault);
+      eq(s0.statusFlag, true);
+  }
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+      eq(s0.__DDL__state, RoverStationaryState.Standby);
+      eq(s0.pred, RoverStateConnectors.ScienceAction);
+  }
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    meets(InstrumentManager_Class___InstrumentManager_SV.Abort s0);
+      eq(s0.pred, SciencePredecessor.MET_BY_SCIENCE);
+      eq(s0.hmStatus, HealthMonitorStatus.VehicleControllerCrashTriggered);
+  }
+  if (hmStatus==HealthMonitorStatus.VehicleControllerCrashTriggered) {
+//output subgoal
+//outputSubgoalCreation
+    ends(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
+      eq(s0.argument, argument);
+      eq(s0.flexEndTimeCache, flexEndTimeCache);
+      eq(s0.status, CompletionStatus.Fault);
+      eq(s0.statusFlag, true);
+  }
+  if (pred==SciencePredecessor.MET_BY_IDLE) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(InstrumentManager_Class___InstrumentManager_SV.InstrumentManager_Idle s0);
+  }
+  if (pred==SciencePredecessor.MET_BY_SCIENCE) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(InstrumentManager_Class___InstrumentManager_SV.DoScience s0);
+      eq(s0.succ, ScienceSuccessor.MEETS_SCIENCE);
+  }
+  if (pred==SciencePredecessor.MET_BY_TIMEOUT) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(InstrumentManager_Class___InstrumentManager_SV.Abort s0);
+      eq(s0.succ, ScienceSuccessor.MEETS_SCIENCE);
+  }
+  if (succ==ScienceSuccessor.MEETS_IDLE) {
+//output subgoal
+//outputSubgoalCreation
+    meets(InstrumentManager_Class___InstrumentManager_SV.InstrumentManager_Idle s0);
+  }
+  if (succ==ScienceSuccessor.MEETS_SCIENCE) {
+//output subgoal
+//outputSubgoalCreation
+    meets(InstrumentManager_Class___InstrumentManager_SV.DoScience s0);
+      eq(s0.pred, SciencePredecessor.MET_BY_SCIENCE);
+  }
+  if (succ==ScienceSuccessor.MEETS_TIMEOUT) {
+//output subgoal
+//outputSubgoalCreation
+    meets(InstrumentManager_Class___InstrumentManager_SV.Abort s0);
+      eq(s0.pred, SciencePredecessor.MET_BY_SCIENCE);
+  }
+  if (status==ReturnStatus.Failed) {
+    if (statusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+        eq(s0.__DDL__state, RoverStationaryState.Standby);
+        eq(s0.pred, RoverStateConnectors.ScienceAction);
+    }
+  }
+  if (status==ReturnStatus.Failed) {
+    if (statusFlag==true) {
+    }
+  }
+  if (status==ReturnStatus.Failed) {
+    if (statusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
+        eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
+    }
+  }
+  if (status==ReturnStatus.Failed) {
+    if (statusFlag==true) {
+    }
+  }
+  if (status==ReturnStatus.Failed) {
+    if (statusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      ends(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
+        eq(s0.argument, argument);
+        eq(s0.flexEndTimeCache, flexEndTimeCache);
+        eq(s0.status, CompletionStatus.Failure);
+        eq(s0.statusFlag, true);
+    }
+  }
+  if (status==ReturnStatus.Failed) {
+    if (statusFlag==true) {
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      if (earlyFlag==true) {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
+//output subgoal
+//outputSubgoalCreation
+          meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+            eq(s0.pred, RoverStateConnectors.ScienceAction);
+        }
+      }
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      if (earlyFlag==true) {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
+        }
+      }
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      if (earlyFlag==true) {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
+//output subgoal
+//outputSubgoalCreation
+          meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
+            eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
+        }
+      }
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      if (earlyFlag==true) {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
+        }
+      }
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      if (earlyFlag==true) {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
+//output subgoal
+//outputSubgoalCreation
+          ends(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
+            eq(s0.argument, argument);
+            eq(s0.flexEndTimeCache, flexEndTimeCache);
+            eq(s0.status, CompletionStatus.EarlyReturn);
+            eq(s0.statusFlag, true);
+        }
+      }
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      if (earlyFlag==true) {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
+        }
+      }
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      if (earlyFlag==false) {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
+//output subgoal
+//outputSubgoalCreation
+          ends(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
+            eq(s0.argument, argument);
+            eq(s0.flexEndTimeCache, flexEndTimeCache);
+            eq(s0.status, CompletionStatus.Nominal);
+            eq(s0.statusFlag, true);
+        }
+      }
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      if (earlyFlag==false) {
+        if (hmStatus==HealthMonitorStatus.NoFault) {
+        }
+      }
+    }
+  }
+//  if (status==ReturnStatus.OK) {
+//    if (statusFlag==true) {
+//      if (hmStatus==HealthMonitorStatus.NoFault) {
+//        CommandCompletedEarly(earlyFlag, end, flexEndTimeCache);
+//      }
+//    }
+//  }
+  if (statusFlag==false) {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
+//output subgoal
+//outputSubgoalCreation
+      ends(TEMPEST_Class___MissionExecutive_SV.ScienceAction s0);
+        eq(s0.argument, argument);
+        eq(s0.flexEndTimeCache, flexEndTimeCache);
+        eq(s0.status, CompletionStatus.Timeout);
+    }
+  }
+  if (statusFlag==false) {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
+    }
+  }
+  if (statusFlag==false) {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
+//output subgoal
+//outputSubgoalCreation
+      meets(InstrumentManager_Class___InstrumentManager_SV.Abort s0);
+        eq(s0.pred, SciencePredecessor.MET_BY_SCIENCE);
+        eq(s0.hmStatus, HealthMonitorStatus.NoFault);
+    }
+  }
+  if (statusFlag==false) {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
+    }
+  }
+  if (statusFlag==false) {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___RoverState_SV.RoverStationary s0);
+        eq(s0.__DDL__state, RoverStationaryState.Standby);
+        eq(s0.pred, RoverStateConnectors.ScienceAction);
+    }
+  }
+  if (statusFlag==false) {
+    if (hmStatus==HealthMonitorStatus.NoFault) {
+    }
+  }
+}
+
+InstrumentManager_Class___InstrumentManager_SV::Abort {
+  eq(duration, [3 36]);
+  if (pred==SciencePredecessor.MET_BY_SCIENCE) {
+//output subgoal
+//outputSubgoalCreation
+    met_by(InstrumentManager_Class___InstrumentManager_SV.DoScience s0);
+      eq(s0.succ, ScienceSuccessor.MEETS_TIMEOUT);
+  }
+  if (statusFlag==false) {
+//output subgoal
+//outputSubgoalCreation
+    meets(TEMPEST_Class___OperatorNotification_SV.NotifyOperator s0);
+      eq(s0.opMsg, NotifyOperatorMessage.IMAbortFailed);
+  }
+  if (statusFlag==false) {
+//output subgoal
+//outputSubgoalCreation
+    meets(Local_Mode_Class___Local_Mode_SV.Local_Abort s0);
+  }
+  if (succ==ScienceSuccessor.MEETS_IDLE) {
+//output subgoal
+//outputSubgoalCreation
+    meets(InstrumentManager_Class___InstrumentManager_SV.InstrumentManager_Idle s0);
+  }
+  if (succ==ScienceSuccessor.MEETS_SCIENCE) {
+//output subgoal
+//outputSubgoalCreation
+    meets(InstrumentManager_Class___InstrumentManager_SV.DoScience s0);
+      eq(s0.pred, SciencePredecessor.MET_BY_TIMEOUT);
+  }
+  if (status==ReturnStatus.Failed) {
+    if (statusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(TEMPEST_Class___OperatorNotification_SV.NotifyOperator s0);
+        eq(s0.opMsg, NotifyOperatorMessage.IMAbortFailed);
+    }
+  }
+  if (status==ReturnStatus.Failed) {
+    if (statusFlag==true) {
+    }
+  }
+  if (status==ReturnStatus.Failed) {
+    if (statusFlag==true) {
+//output subgoal
+//outputSubgoalCreation
+      meets(Local_Mode_Class___Local_Mode_SV.Local_Abort s0);
+    }
+  }
+  if (status==ReturnStatus.Failed) {
+    if (statusFlag==true) {
+    }
+  }
+  if (status==ReturnStatus.Failed) {
+    if (statusFlag==true) {
+      eq(duration, [3 36]);
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      eq(duration, [3 36]);
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      if (hmStatus==HealthMonitorStatus.NoFault) {
+//output subgoal
+//outputSubgoalCreation
+        meets(TEMPEST_Class___TEMPEST_SV.TEMPEST_PlanPrep s0);
+          eq(s0.tempestPlannerMode, TempestPlannerMode.RePlan);
+      }
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      if (hmStatus==HealthMonitorStatus.NoFault) {
+      }
+    }
+  }
+  if (status==ReturnStatus.OK) {
+    if (statusFlag==true) {
+      if (hmStatus==HealthMonitorStatus.NoFault) {
+        eq(duration, [3 36]);
+      }
+    }
+  }
+  if (statusFlag==false) {
+    eq(duration, [3 36]);
+  }
+}
+

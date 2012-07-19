@@ -1,0 +1,186 @@
+#include "Plasma.nddl"
+constraint lessThan(a, b) extends eq(a, b);
+
+enum Letters {X, Y, Z};
+
+class A extends Timeline {
+ predicate predicateA{
+  int arg1 = [0 1000];
+  float arg2 = [0.0 1000.0];
+ }
+
+ predicate predicateB{
+  bool arg3;
+  bool arg4;
+ }
+}
+
+class B extends A {
+ predicate predicateC{
+  Letters arg5;
+ }
+}
+
+class C extends B {
+ predicate predicateA{}
+ predicate predicateC{}
+}
+
+class D extends A {
+ predicate predicateA{}
+
+ predicate predicateC{
+  int arg6;
+  int arg7;
+  int arg8;
+ }
+
+ predicate predicateF{}
+
+ predicate predicateG{}
+}
+
+class E extends D{
+ predicate predicateC{}
+}
+
+
+class NoPredicates {
+}
+
+class PredicateRoot extends Timeline {
+ predicate predicateD{}
+ predicate predicateE{}
+}
+
+class PredicateDerived extends PredicateRoot {}
+
+B::predicateC{
+ any(E.predicateC);
+}
+
+D::predicateF{
+ any(E.predicateC);
+ any(D.predicateC);
+ any(B.predicateB);
+}
+
+D::predicateG{
+ meets(E.predicateC);
+}
+
+class Container extends Timeline {
+ int objectVar1 = 10;
+ int objectVar2 = 20;
+ predicate pred1 {
+  int arg1;
+  int arg2;
+ }
+
+ predicate pred2 {
+  int arg3;
+ }
+}
+
+class DerivedContainer extends Container {
+ int objectVar3;
+ int objectVar4;
+ predicate pred3{
+  int arg4;
+ }
+}
+
+Container::pred2 {
+ int localArg1;
+}
+
+class HorizonFiltered extends Timeline {
+ predicate predicate1{}
+ predicate predicate2{}
+ predicate predicate3{}
+ predicate predicate4{}
+ predicate predicate5{}
+ predicate predicate6{bool filterVar;}
+ predicate predicate7{bool keepVar;}
+
+ predicate uberPredicate{
+  bool forceRejection;
+  eq(duration, 10);
+  eq(forceRejection, true);
+ }
+}
+
+/**
+ * Subgoal lots of predicates within the temporal extent
+ * of this uber predicate. Also subgoal recursively before and
+ * after.
+ */
+HorizonFiltered::uberPredicate{
+ meets(uberPredicate g0);
+ eq(g0.forceRejection, forceRejection);
+ met_by(uberPredicate g1);
+ eq(g1.forceRejection, forceRejection);
+
+ if(end == 10){
+  if(forceRejection == true){
+   eq(1, 0); // Force failure
+  }
+ }
+}
+
+class BacktrackTest extends Object {
+ predicate pred{}
+}
+
+/**
+ * When we select b as false, we are forced to take c next. Then we get a failure which
+ * will backtrack out. Should be OK if we then pick b true.
+ */
+BacktrackTest::pred{
+ bool b;
+ if(b == false){
+  bool c;
+  eq(c, true);
+  if(c == true){
+   neq(c, true);
+  }
+ }
+}
+
+class Foo {
+ predicate p{}
+}
+
+Foo::p{
+ eq(1, 0); // Always fails
+}
+
+class GuardTest extends Object {
+  predicate pred {
+    bool a;
+    int b;
+  }
+}
+
+GuardTest::pred {
+  if(a == false) {
+    eq(b, [0 10]);
+  }
+}
+
+class CommitTest extends Timeline {
+	predicate chaina {int a;}
+	predicate chainb {int b;}
+}
+
+CommitTest::chaina {
+	eq(a, [0 10]);
+	eq(duration, 10);
+	meets(chainb);
+}
+
+CommitTest::chainb {
+	eq(b, [0 10]);
+	eq(duration, 10);
+	meets(chaina);
+}

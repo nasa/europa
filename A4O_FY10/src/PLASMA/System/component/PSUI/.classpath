@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="lib/beanshell/bsh-2.0b4.jar"/>
+    <!--classpathentry combineaccessrules="false" kind="src" path="/egantt"/-->
+	<classpathentry kind="lib" path="lib/egantt/egantt-core.jar"/>
+	<classpathentry kind="lib" path="lib/egantt/egantt-ext.jar"/>
+	<classpathentry kind="lib" path="lib/egantt/egantt-resources.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart/jfreechart-1.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart/jcommon-1.0.5.jar"/>
+	<classpathentry kind="lib" path="lib/nanoxml/nanoxml.jar"/>
+	<classpathentry kind="lib" path="lib/josql/JoSQL-1.9.jar"/>
+	<classpathentry kind="lib" path="lib/josql/gentlyWEB-utils-1.1.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/PLASMA/build/lib/nddl.jar"/>
+	<classpathentry kind="lib" path="/PLASMA/build/lib/PSEngine.jar"/>
+	<classpathentry kind="output" path="build_eclipse"/>
+</classpath>

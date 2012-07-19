@@ -1,0 +1,7 @@
+SubDir PLASMA Antlr base ;
+
+if ! $(PLASMA_READY) {
+
+SubInclude PLASMA Antlr base antlr ;
+
+} # PLASMA_READY

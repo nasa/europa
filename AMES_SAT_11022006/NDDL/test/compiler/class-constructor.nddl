@@ -1,0 +1,133 @@
+// Declares a class, a consructor with arguments, and member variables initialized
+// via constructor as well as in the class declaration. Illustrates multiple constructors
+// for a wide variety of argument types.
+
+enum Locations {Hill, Rock, Lander};
+
+class World;
+
+class Foo { //class World predefined for line 15
+ int m_0;
+ int m_1;
+ bool m_2;
+ bool m_3;
+ string m_4;
+ Locations m_5;
+ float m_6;
+ World m_7;
+
+ Foo(World w){
+  m_0 = 100;
+  m_1 = 200;
+  m_2 = false;
+  m_4 = "This is a very long string";
+  m_5 = Hill;
+  m_7 = w;
+  // COMMENT IN NEXT LINE TO FORCE GNATS 2637
+  //m_11 = 18;
+ }
+
+ Foo(World w, int a, bool b, string c, Locations loc){
+  m_0 = a;
+  m_2 = b;
+  m_4 = c;
+  m_5 = loc;
+  m_6 = 198.65;
+  m_7 = w;
+ }
+
+ Foo(World w, int a, bool b){
+  m_0 = a;
+  m_2 = b;
+  m_4 = "Default String Value";
+  m_5 = Rock;
+  m_6 = 198.65;
+  m_7 = w;
+ }
+}
+
+class Bar extends Foo {
+ float m_8;
+ Bar(float m8, World w){
+  super(w, 10, true);
+  m_8 = m8;
+ } 
+}
+
+class Baz {
+ Foo m_foo;
+
+ Baz(Foo _foo){
+  m_foo = _foo;
+ }
+
+// This test is negative - it will cause the NddlCompiler to detecte a collision. When we allow negative tests causing failure
+// then reintroduce this as a test
+// Baz(Bar _foo){
+//  m_foo = _foo;
+// }
+}
+
+class Bat {
+ Baz m_baz;
+
+ Bat(Foo _foo){
+  m_baz = new Baz(_foo);
+ }
+}
+
+// Implicit constructors for base and derived
+class Bing {}
+class Bang extends Bing {}
+
+class Baluga{
+ Locations location;
+ Baluga(Locations loc){
+  location = loc;
+ }
+}
+
+class World {
+ string m_str1;
+ Foo m_foo1;
+ Foo m_foo2;
+ Foo m_foo3;
+ Foo m_foo4;
+ Baz m_baz1;
+ Bat m_bat1;
+ int m_int1;
+
+ World(){
+  m_str1 = "This is also a long string";
+  m_foo1 = new Foo(this, 1, true, m_str1, Lander);
+  m_foo2 = new Foo(this);
+  m_foo3 = m_foo2;
+  m_int1 = 100;
+  m_foo4 = new Foo(this, m_int1, false);
+  m_baz1 = new Baz(m_foo1);
+  m_bat1 = new Bat(m_foo1);
+ } 
+}
+
+// Transactions
+World world = new World();
+Foo f0 = new Foo(world);
+Foo f1 = new Foo(world, 1, true, "hello", Hill);
+Foo f2 = new Foo(world, 100, false);
+Bar bar = new Bar(123.45, world);
+Baz baz = new Baz(f0);
+Foo f = new Baz(f0);
+
+Bar bar1 = new Bar(123.0, world);
+
+// Call to constructor of Bat is passed a derived type. Should still match according
+// to rules of inheritance.
+Bat bat = new Bat(bar1);
+
+Bing bing = new Bing();
+
+Bang bang = new Bang();
+
+Baluga baluga = new Baluga(Rock);
+
+close();

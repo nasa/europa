@@ -1,0 +1,8 @@
+import psengine.*;
+import org.ops.ui.util.Util;
+
+psengine.executeScript("nddl",bsh.cwd+"/Shopping-initial-state.nddl",true/*isFile*/);
+solver = desktop.makeSolver("PlannerConfig.xml",0, 100);
+solver.solve(100,100);
+System.out.println(psengine.planDatabaseToString());
+Runtime.getRuntime().exit(0);

@@ -1,0 +1,191 @@
+#include "Db.hh"
+#include "NddlUtils.hh"
+/** Custom Include Files **/
+
+namespace NDDL {
+
+// simple-rules.nddl
+
+  class StringData;
+  typedef Id<StringData> StringDataId;
+  typedef ObjectDomain StringDataDomain;
+  
+  class Foo;
+  typedef Id<Foo> FooId;
+  typedef ObjectDomain FooDomain;
+  
+  class Rover;
+  typedef Id<Rover> RoverId;
+  typedef ObjectDomain RoverDomain;
+  
+  class SuperRover;
+  typedef Id<SuperRover> SuperRoverId;
+  typedef ObjectDomain SuperRoverDomain;
+  
+  class World;
+  typedef Id<World> WorldId;
+  typedef ObjectDomain WorldDomain;
+  
+  
+  
+  // Core.nddl:8 TokenStates
+  typedef SymbolDomain TokenStates;
+  TokenStates TokenStatesBaseDomain();
+  // SKIPPING DECLARATION FOR BUILT-IN CLASS Timeline
+  
+  
+  // StringData.nddl:5 StringData
+  class StringData : public Object {
+  public:
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId data; // SchemaWriter::declareVariable
+    
+    // StringData.nddl:5 StringData
+    virtual void constructor(const LabelStr& _data);
+  };
+  
+  
+  // simple-rules.nddl:3 Locations
+  typedef SymbolDomain Locations;
+  Locations LocationsBaseDomain();
+  
+  
+  // simple-rules.nddl:4 StringEnum
+  typedef StringDomain StringEnum;
+  StringEnum StringEnumBaseDomain();
+  
+  
+  // simple-rules.nddl:5 NumericEnum
+  typedef NumericDomain NumericEnum;
+  NumericEnum NumericEnumBaseDomain();
+  
+  // simple-rules.nddl:7 Foo
+  class Foo : public Timeline {
+  public:
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    virtual void constructor(); // default constructoror
+    
+    class Bar;
+    typedef Id<Bar> BarId;
+    
+    // simple-rules.nddl:8 Bar
+    class Bar : public NddlToken {
+    public:
+      Bar(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      Bar(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Foo::Bar, Foo.Bar);
+      
+    };
+  };
+  
+  // simple-rules.nddl:11 Rover
+  class Rover : public Timeline {
+  public:
+    Rover(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Rover(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Rover(const ObjectId& parent, const LabelStr& name);
+    Rover(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    class At;
+    typedef Id<At> AtId;
+    class Going;
+    typedef Id<Going> GoingId;
+    class AnyPredicate;
+    typedef Id<AnyPredicate> AnyPredicateId;
+    ConstrainedVariableId foo; // SchemaWriter::declareVariable
+    
+    // simple-rules.nddl:13 At
+    class At : public NddlToken {
+    public:
+      At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      At(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Rover::At, Rover.At);
+      
+      ConstrainedVariableId _location; // SchemaWriter::declareVariable
+      ConstrainedVariableId _foo; // SchemaWriter::declareVariable
+    };
+    
+    // simple-rules.nddl:18 Going
+    class Going : public NddlToken {
+    public:
+      Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      Going(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Rover::Going, Rover.Going);
+      
+      ConstrainedVariableId _from; // SchemaWriter::declareVariable
+      ConstrainedVariableId _to; // SchemaWriter::declareVariable
+    };
+    
+    // simple-rules.nddl:22 AnyPredicate
+    class AnyPredicate : public NddlToken {
+    public:
+      AnyPredicate(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      AnyPredicate(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Rover::AnyPredicate, Rover.AnyPredicate);
+      
+      ConstrainedVariableId v0; // SchemaWriter::declareVariable
+      ConstrainedVariableId v1; // SchemaWriter::declareVariable
+      ConstrainedVariableId v2; // SchemaWriter::declareVariable
+      ConstrainedVariableId v3; // SchemaWriter::declareVariable
+      ConstrainedVariableId v4; // SchemaWriter::declareVariable
+    };
+    
+    // simple-rules.nddl:11 Rover
+    virtual void constructor();
+  };
+  
+  // simple-rules.nddl:67 SuperRover
+  class SuperRover : public Rover {
+  public:
+    SuperRover(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    SuperRover(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    SuperRover(const ObjectId& parent, const LabelStr& name);
+    SuperRover(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    
+    // simple-rules.nddl:67 SuperRover
+    virtual void constructor();
+  };
+  
+  // simple-rules.nddl:74 World
+  class World : public Timeline {
+  public:
+    World(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    World(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    World(const ObjectId& parent, const LabelStr& name);
+    World(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    class initialState;
+    typedef Id<initialState> initialStateId;
+    ConstrainedVariableId rover; // SchemaWriter::declareVariable
+    
+    // simple-rules.nddl:77 initialState
+    class initialState : public NddlToken {
+    public:
+      initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      initialState(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(World::initialState, World.initialState);
+      
+    };
+    
+    // simple-rules.nddl:74 World
+    virtual void constructor();
+  };
+} // End NDDL namespace

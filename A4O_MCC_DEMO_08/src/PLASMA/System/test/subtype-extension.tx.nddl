@@ -1,0 +1,30 @@
+#include "Plasma.nddl"
+#include "PlannerConfig.nddl"
+
+/**
+ * Test that we can sub-class a timeline and correctly inherit the rule so that it 
+ * will allocate a token of the sub-type instead of the base type.
+ */
+
+
+class Base extends Timeline {
+ predicate P{}
+}
+
+Base::P{
+ met_by(P);
+ meets(P);
+ eq(duration, 10);
+}
+
+class Derived extends Base {
+ predicate P{int i;}
+}
+
+// Allocate objects of the problem
+PlannerConfig world = new PlannerConfig(0, 100, 100);
+Derived d = new Derived();
+close();
+
+goal(Derived.P g0);
+g0.start = 0;

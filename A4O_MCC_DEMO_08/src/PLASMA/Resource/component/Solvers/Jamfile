@@ -1,0 +1,13 @@
+SubDir PLASMA Resource component Solvers ;
+
+if ! $(PLASMA_READY) {
+  Module Resource : Solvers RulesEngine ;
+  ModuleComponent Resource
+  		  :
+		  ResourceThreatDecisionPoint.cc
+		  SAVH_ThreatManager.cc
+		  SAVH_ThreatDecisionPoint.cc
+		  ResourceMatching.cc
+		  ;
+
+} #PLASMA_READY
