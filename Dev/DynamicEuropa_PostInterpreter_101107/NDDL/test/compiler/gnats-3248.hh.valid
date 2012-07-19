@@ -1,0 +1,103 @@
+#include "Db.hh"
+#include "NddlUtils.hh"
+/** Custom Include Files **/
+
+namespace NDDL {
+
+// gnats-3248.nddl
+
+  class PlannerConfig;
+  typedef Id<PlannerConfig> PlannerConfigId;
+  typedef ObjectDomain PlannerConfigDomain;
+  
+  class StringData;
+  typedef Id<StringData> StringDataId;
+  typedef ObjectDomain StringDataDomain;
+  
+  class Foo;
+  typedef Id<Foo> FooId;
+  typedef ObjectDomain FooDomain;
+  
+  
+  // PlannerConfig.nddl:7 PlannerConfig
+  class PlannerConfig : public Object {
+  public:
+    PlannerConfig(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    PlannerConfig(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    PlannerConfig(const ObjectId& parent, const LabelStr& name);
+    PlannerConfig(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId m_horizonStart; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_horizonEnd; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_maxPlannerSteps; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_maxPlannerDepth; // SchemaWriter::declareVariable
+    
+    // PlannerConfig.nddl:7 PlannerConfig
+    virtual void constructor(int start, int end, int maxPlannerSteps, int maxPlannerDepth);
+    
+    // PlannerConfig.nddl:7 PlannerConfig
+    virtual void constructor(int start, int end, int maxPlannerSteps);
+    
+    // PlannerConfig.nddl:7 PlannerConfig
+    virtual void constructor();
+  };
+  
+  
+  // Core.nddl:8 TokenStates
+  typedef SymbolDomain TokenStates;
+  TokenStates TokenStatesBaseDomain();
+  // SKIPPING DECLARATION FOR BUILT-IN CLASS Timeline
+  
+  
+  // Plasma.nddl:15 StringData
+  class StringData : public Object {
+  public:
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId data; // SchemaWriter::declareVariable
+    
+    // Plasma.nddl:15 StringData
+    virtual void constructor(const LabelStr& _data);
+  };
+  
+  // gnats-3248.nddl:4 Foo
+  class Foo : public Timeline {
+  public:
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    virtual void constructor(); // default constructoror
+    
+    class guard;
+    typedef Id<guard> guardId;
+    class boring;
+    typedef Id<boring> boringId;
+    
+    // gnats-3248.nddl:5 guard
+    class guard : public NddlToken {
+    public:
+      guard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      guard(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Foo::guard, Foo.guard);
+      
+    };
+    
+    // gnats-3248.nddl:6 boring
+    class boring : public NddlToken {
+    public:
+      boring(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      boring(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Foo::boring, Foo.boring);
+      
+    };
+  };
+} // End NDDL namespace
