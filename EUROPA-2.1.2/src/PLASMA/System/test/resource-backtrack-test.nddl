@@ -1,0 +1,75 @@
+#include "PlannerConfig.nddl"
+#include "Resources.nddl"
+
+class Battery extends Resource {
+ Battery(float ic, float ll_min, float ll_max) {
+  super(ic, ll_min, ll_max, 0.0, 0.0, -inff, -inff);
+ }
+}
+
+class Disk extends Resource {
+ Disk(){
+  super();
+ }
+}
+
+class DriveSubsystem extends Timeline {
+ predicate Drive{
+  eq(duration, 50);
+ }
+
+ predicate Stroll{
+  eq(duration, 100);
+ }
+}
+
+DriveSubsystem::Drive{
+ any(Battery.change tx);
+ eq(start, tx.time);
+ eq(tx.quantity, -50);
+}
+
+DriveSubsystem::Stroll{
+ any(Battery.change tx);
+ eq(start, tx.time);
+ eq(tx.quantity, -25);
+}
+
+class Rover extends Timeline {
+ DriveSubsystem dss;
+ Battery battery;
+ Disk disk;
+
+ predicate Move{}
+
+ Rover(Battery b){
+  dss = new DriveSubsystem();
+  battery = b;
+  disk = new Disk();
+ }
+}
+
+Rover::Move{
+ bool switch_value;
+
+ if(switch_value==false){
+  any(DriveSubsystem.Drive drive);
+  eq(drive.start, start);
+  eq(drive.duration, duration);
+ }
+
+ if(switch_value==true){
+  any(DriveSubsystem.Stroll stroll);
+  eq(stroll.start, start);
+  eq(stroll.duration, duration);
+ }
+}
+
+// Allocation of objects
+PlannerConfig world = new PlannerConfig(0, 100, 350);
+Battery mainBattery = new Battery(30.0, 0.0, 50.0);
+Rover rover = new Rover(mainBattery);
+close();
+
+rejectable(Rover.Move goal1);
+goal1.start.specify(0);

@@ -1,0 +1,62 @@
+#include "BlocksWorld-model.nddl"
+
+// Allocate objects of the problem
+PlannerConfig world = new PlannerConfig(0, 150, 600);
+ 
+Goal goalTower = new Goal();
+
+close();
+
+//Initial State
+
+fact(Top.Clear top1InitiallyClear);
+eq(top1InitiallyClear.theBlock, goalTower.firstBlock);
+eq(top1InitiallyClear.start, world.m_horizonStart);
+precedes(top1InitiallyClear.end, world.m_horizonEnd);
+
+fact(Bottom.OnTable bottom1InitiallyOnTable);
+eq(bottom1InitiallyOnTable.theBlock, goalTower.firstBlock);
+eq(bottom1InitiallyOnTable.start, world.m_horizonStart);
+precedes(bottom1InitiallyOnTable.end, world.m_horizonEnd);
+
+fact(Top.Clear top2InitiallyClear);
+eq(top2InitiallyClear.theBlock, goalTower.secondBlock);
+eq(top2InitiallyClear.start, world.m_horizonStart);
+precedes(top2InitiallyClear.end, world.m_horizonEnd);
+
+fact(Bottom.OnTable bottom2InitiallyOnTable);
+eq(bottom2InitiallyOnTable.theBlock, goalTower.secondBlock);
+eq(bottom2InitiallyOnTable.start, world.m_horizonStart);
+precedes(bottom2InitiallyOnTable.end, world.m_horizonEnd);
+
+fact(Top.Clear top3InitiallyClear);
+eq(top3InitiallyClear.theBlock, goalTower.thirdBlock);
+eq(top3InitiallyClear.start, world.m_horizonStart);
+precedes(top3InitiallyClear.end, world.m_horizonEnd);
+
+fact(Bottom.OnTable bottom3InitiallyOnTable);
+eq(bottom3InitiallyOnTable.theBlock, goalTower.thirdBlock);
+eq(bottom3InitiallyOnTable.start, world.m_horizonStart);
+//precedes(bottom3InitiallyOnTable.end, world.m_horizonEnd);
+
+fact(Arm.ArmEmpty armInitiallyEmpty);
+eq(armInitiallyEmpty.start, world.m_horizonStart);
+precedes(armInitiallyEmpty.end, world.m_horizonEnd);
+
+// We know there is no overlap between the initial facts, so help the solver a little
+top1InitiallyClear.activate();
+bottom1InitiallyOnTable.activate();
+top2InitiallyClear.activate();
+bottom2InitiallyOnTable.activate();
+top3InitiallyClear.activate();
+bottom3InitiallyOnTable.activate();
+armInitiallyEmpty.activate();
+
+//Goal State
+
+goal(goalTower.GoalAchieved towerFinallyDone);
+precedes(world.m_horizonStart, towerFinallyDone.start);
+precedes(towerFinallyDone.end, world.m_horizonEnd);
+
+
+

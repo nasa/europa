@@ -1,0 +1,684 @@
+#include "Resources.nddl"
+
+enum Types {ACTION, FLUENT};
+enum Data {CHAMPIMAGE, MOSSBAUER, OPPSCI};
+
+class Rover;
+
+class Energy extends Reservoir {
+  Energy(float ic, float ll_min, float ll_max) {
+    super(ic, ll_min, ll_max);
+  } 
+}
+
+class Location {
+}
+
+class Target extends Timeline {
+
+  predicate NotTracked {
+    Target target;
+    Types TYPE;
+    eq(TYPE, FLUENT);
+    eq(object, target);
+  }
+
+  predicate trackstart {
+    Target target;
+    Types TYPE;
+    eq(TYPE, ACTION);
+    float m_duration_mean;
+    float m_duration_std;
+    float m_energy_mean;
+    float m_energy_std;
+    eq( m_duration_mean, 1);
+    eq( m_duration_std, 0);
+    eq( m_energy_mean, 1);
+    eq( m_energy_std, 0);
+    eq(object, target);
+  }
+
+  predicate Tracked {
+    Target target;
+    Types TYPE;
+    eq(TYPE, FLUENT);
+    eq(object, target);
+  }
+
+  predicate trackstop {
+    Target target;
+    Types TYPE;
+    eq(TYPE, ACTION);
+    float m_duration_mean;
+    float m_duration_std;
+    float m_energy_mean;
+    float m_energy_std;
+    eq( m_duration_mean, 1);
+    eq( m_duration_std, 0);
+    eq( m_energy_mean, 1);
+    eq( m_energy_std, 0);
+    eq(object, target);
+  }
+}
+
+class Path {
+  Location m_from, m_to;
+
+  Path(Location from, Location to) {
+    m_from = from;
+    m_to = to;
+  }  
+}
+
+class CHAMP_Accessable {
+  Location m_from;
+  Target m_to;
+
+  CHAMP_Accessable(Location from, Target to) {
+    m_from = from;
+    m_to = to;
+  }  
+}
+
+class OppSci_Accessable {
+  Location m_from;
+  Target  m_to;
+
+  OppSci_Accessable(Location from, Target to) {
+    m_from = from;
+    m_to = to;
+  }  
+}
+
+class Position extends Timeline {  
+  Rover m_rover;
+
+  Position(Rover rover) {
+    m_rover = rover;
+  }
+
+  predicate At {
+    Location location;
+    Types TYPE;
+    eq(TYPE, FLUENT);
+  }
+  
+  predicate navigate {
+    Location from;
+    Location to;
+    Types TYPE;
+    eq(TYPE, ACTION);
+    float m_duration_mean_multiplier;
+    float m_duration_std_multiplier;
+    float m_energy_mean_multiplier;
+    float m_energy_std_multiplier;
+    eq( m_duration_mean_multiplier, 1);
+    eq( m_duration_std_multiplier, 1);
+    eq( m_energy_mean_multiplier, 1);
+    eq( m_energy_std_multiplier, 1);
+    neq(from, to);
+  }  
+}
+
+class Tracker extends Timeline {
+  Rover m_rover;
+
+  Tracker(Rover rover) {
+    m_rover = rover;
+  }
+
+  predicate TrackingOff {
+    Types TYPE;
+    eq(TYPE, FLUENT);
+  }
+
+  predicate trackloadgroup {
+    Types TYPE;
+    eq(TYPE, ACTION);
+    float m_duration_mean;
+    float m_duration_std;
+    float m_energy_mean;
+    float m_energy_std;
+    eq( m_duration_mean, 1);
+    eq( m_duration_std, 0);
+    eq( m_energy_mean, 1);
+    eq( m_energy_std, 0);
+  }
+
+  predicate LandmarksDefined {
+    Types TYPE;
+    eq(TYPE, FLUENT);
+  }
+
+  predicate StartTracking {    
+    Types TYPE;
+    eq(TYPE, ACTION);
+    float m_duration_mean;
+    float m_duration_std;
+    float m_energy_mean;
+    float m_energy_std;
+    eq( m_duration_mean, 1);
+    eq( m_duration_std, 0);
+    eq( m_energy_mean, 1);
+    eq( m_energy_std, 0);
+  }
+
+  predicate TrackingOn {
+    Types TYPE;
+    eq(TYPE, FLUENT);
+  }
+
+  predicate trackfreeze {
+    Types TYPE;
+    eq(TYPE, ACTION);
+    float m_duration_mean;
+    float m_duration_std;
+    float m_energy_mean;
+    float m_energy_std;
+    eq( m_duration_mean, 1);
+    eq( m_duration_std, 0);
+    eq( m_energy_mean, 1);
+    eq( m_energy_std, 0);
+  }
+
+  predicate TrackingFrozen {
+    Types TYPE;
+    eq(TYPE, FLUENT);
+  }
+
+  predicate trackunfreeze {
+    Types TYPE;
+    eq(TYPE, ACTION);
+    float m_duration_mean;
+    float m_duration_std;
+    float m_energy_mean;
+    float m_energy_std;
+    eq( m_duration_mean, 1);
+    eq( m_duration_std, 0);
+    eq( m_energy_mean, 1);
+    eq( m_energy_std, 0);
+  }
+
+}
+
+class OpportunisticScience extends Timeline {
+  Rover m_rover;
+
+  OpportunisticScience(Rover rover) {
+    m_rover = rover;
+  }
+
+  predicate OppSciIdle {   
+    Types TYPE;
+    eq(TYPE, FLUENT);
+  }
+
+  predicate oppscidefineproc {
+    Types TYPE;
+    eq(TYPE, ACTION);
+    float m_duration_mean;
+    float m_duration_std;
+    float m_energy_mean;
+    float m_energy_std;
+    eq( m_duration_mean, 1);
+    eq( m_duration_std, 0);
+    eq( m_energy_mean, 1);
+    eq( m_energy_std, 0);
+  }
+
+  predicate OppSciProcDefined {
+    Types TYPE;
+    eq(TYPE, FLUENT);
+  }
+
+  predicate oppscisetparams {
+    Types TYPE;
+    eq(TYPE, ACTION);
+    float m_duration_mean;
+    float m_duration_std;
+    float m_energy_mean;
+    float m_energy_std;
+    eq( m_duration_mean, 1);
+    eq( m_duration_std, 0);
+    eq( m_energy_mean, 1);
+    eq( m_energy_std, 0);
+  }
+
+  predicate OppSciParamsSet {
+    Types TYPE;
+    eq(TYPE, FLUENT);
+  }
+
+  predicate oppscilooknow {
+    Target target;
+    Location at_loc;
+    Types TYPE;
+    eq(TYPE, ACTION);
+    float m_duration_mean;
+    float m_duration_std;
+    float m_energy_mean;
+    float m_energy_std;
+    eq( m_duration_mean, 1);
+    eq( m_duration_std, 0);
+    eq( m_energy_mean, 1);
+    eq( m_energy_std, 0);
+  }
+
+  predicate OppSciDoneLookNow {
+    Target  target;
+    Location at_loc;
+    Types TYPE;
+    eq(TYPE, FLUENT);
+  }
+
+  predicate oppscigetstatus {
+    Target  target;
+    Location at_loc;
+    Types TYPE;
+    eq(TYPE, ACTION);
+    float m_duration_mean;
+    float m_duration_std;
+    float m_energy_mean;
+    float m_energy_std;
+    eq( m_duration_mean, 1);
+    eq( m_duration_std, 0);
+    eq( m_energy_mean, 1);
+    eq( m_energy_std, 0);
+  }
+}
+
+class CHAMP extends Timeline {
+  Rover m_rover;
+
+  CHAMP(Rover rover) {
+    m_rover = rover;
+  }
+
+  predicate IPIdle {
+    Types TYPE;
+    eq(TYPE, FLUENT);
+  }
+  
+  predicate ipgetname {
+    Target target;
+    Location at_loc;
+    Types TYPE;
+    eq(TYPE, ACTION);
+    float m_duration_mean;
+    float m_duration_std;
+    float m_energy_mean;
+    float m_energy_std;
+    eq( m_duration_mean, 1);
+    eq( m_duration_std, 0);
+    eq( m_energy_mean, 1);
+    eq( m_energy_std, 0);
+    ////eq(duration,[1 +inf]);
+  }
+
+  predicate IPHaveName {
+    Target target;
+    Location at_loc;
+    Types TYPE;
+    eq(TYPE, FLUENT);
+  }
+
+  predicate ipsettarget {
+    Target target;
+    Location at_loc;
+    Types TYPE;
+    eq(TYPE, ACTION);
+    float m_duration_mean;
+    float m_duration_std;
+    float m_energy_mean;
+    float m_energy_std;
+    eq( m_duration_mean, 1);
+    eq( m_duration_std, 0);
+    eq( m_energy_mean, 1);
+    eq( m_energy_std, 0);
+    //eq(duration,[1 +inf]);
+  }
+  
+  predicate IPTargetSet {
+    Target target;
+    Location at_loc;
+    Types TYPE;
+    eq(TYPE, FLUENT);
+  }
+
+  predicate ipplaceinstrument {
+    Target target;
+    Location at_loc;
+    Types TYPE;
+    eq(TYPE, ACTION);
+    float m_duration_mean;
+    float m_duration_std;
+    float m_energy_mean;
+    float m_energy_std;
+    eq( m_duration_mean, 1);
+    eq( m_duration_std, 0);
+    eq( m_energy_mean, 1);
+    eq( m_energy_std, 0);
+    //eq(duration,[1 +inf]);
+  }
+
+  predicate IPDonePlaceInstrument {
+    Target target;
+    Location at_loc;
+    Types TYPE;
+    eq(TYPE, FLUENT);
+  }
+
+  predicate ipgetstatus {
+    Target target;
+    Location at_loc;
+    Types TYPE;
+    eq(TYPE, ACTION);
+    float m_duration_mean;
+    float m_duration_std;
+    float m_energy_mean;
+    float m_energy_std;
+    eq( m_duration_mean, 1);
+    eq( m_duration_std, 0);
+    eq( m_energy_mean, 1);
+    eq( m_energy_std, 0);
+    //eq(duration,[1 +inf]);
+  }
+}
+
+
+Target::NotTracked {
+  meets(object.trackstart tstart);
+  met_by(object.trackstop tstop);
+}
+
+Target::trackstart {
+  meets(object.Tracked t);
+  met_by(object.NotTracked nt);
+  contained_by(Tracker.LandmarksDefined l);
+}
+
+
+Target::Tracked {
+  meets(object.trackstop tstop);
+  met_by(object.trackstart tstart);
+}
+
+Target::trackstop {
+  meets(object.NotTracked nt);
+  met_by(object.Tracked t);
+}
+
+Position::At{
+  meets(object.navigate a);
+  eq(location , a.from);
+  
+  met_by(object.navigate b);
+  eq(location, b.to);
+}
+
+Position::navigate{
+
+  Path path;
+  eq(path.m_from, from);
+  eq(path.m_to, to);
+
+  meets(object.At a);
+  eq(to , a.location);
+  
+  met_by(object.At b);
+  eq(b.location, from);
+
+  //not able to reference parents objects more than one level.
+  Rover rovers;
+  contained_by(Tracker.TrackingOn tOn);
+  commonAncestor(tOn.object, object, rovers); 
+
+  contained_by(OpportunisticScience.OppSciIdle oppsci);
+  commonAncestor(oppsci.object, object, rovers); 
+
+  contained_by(CHAMP.IPIdle ipidle);
+  commonAncestor(ipidle.object, object, rovers); 
+
+}
+
+Tracker::TrackingOff{
+  meets(object.trackloadgroup tlgp);
+}
+
+Tracker::trackloadgroup{
+  meets(object.LandmarksDefined tld);
+  met_by(object.TrackingOff toff);
+}
+
+Tracker::LandmarksDefined{
+  met_by(object.trackloadgroup tlgp);
+  meets(object.StartTracking tst);
+}
+
+Tracker::StartTracking{
+  met_by(object.LandmarksDefined tld);
+  meets(object.TrackingOn tto);
+}
+
+Tracker::TrackingOn{
+  meets(object.trackfreeze tfz);
+  bool OR;
+  if(OR == true){
+    met_by(object.StartTracking s0);
+  }
+  if(OR == false){
+    met_by(object.trackunfreeze s0);
+  }
+}
+
+Tracker::trackfreeze{
+  met_by(object.TrackingOn tld);
+  meets(object.TrackingFrozen tto);
+}
+
+Tracker::TrackingFrozen{
+  met_by(object.trackfreeze tld);
+  meets(object.trackunfreeze tto);
+}
+
+Tracker::trackunfreeze{
+  met_by(object.TrackingFrozen tld);
+  meets(object.TrackingOn tto);
+}
+
+OpportunisticScience::oppscidefineproc {
+  met_by(object.OppSciIdle s0);
+  meets(object.OppSciProcDefined s1);
+}
+
+OpportunisticScience::OppSciProcDefined {
+  met_by(object.oppscidefineproc s0);
+  meets(object.oppscisetparams s1);
+}
+
+OpportunisticScience::oppscisetparams {
+  met_by(object.OppSciProcDefined s0);
+  meets(object.OppSciParamsSet s1);
+}
+
+OpportunisticScience::OppSciParamsSet {
+  met_by(object.oppscisetparams s0);
+  meets(object.oppscilooknow s1);
+}
+
+OpportunisticScience::oppscilooknow {
+  met_by(object.OppSciParamsSet s0);
+  meets(object.OppSciDoneLookNow s1);
+  contained_by(Target.Tracked tr);
+  eq(tr.object, target);
+
+  OppSci_Accessable oppsci;
+  eq(oppsci.m_from, at_loc);
+  eq(oppsci.m_to, target);
+
+  Rover rovers;
+  contained_by(Tracker.TrackingFrozen tfo);
+  commonAncestor(tfo.object, object, rovers); 
+
+  contained_by(Position.At at);
+  commonAncestor(at.object, object, rovers); 
+
+  contained_by(CHAMP.IPIdle ipidle);
+  commonAncestor(ipidle.object, object, rovers); 
+    
+}
+OpportunisticScience::OppSciDoneLookNow {
+  met_by(object.oppscilooknow s0);
+  meets(object.oppscigetstatus s1);
+}
+
+OpportunisticScience::oppscigetstatus {
+  met_by(object.OppSciDoneLookNow s0);
+  meets(object.OppSciIdle s1);
+  contained_by(Target.Tracked tr);
+  eq(tr.object, target);
+
+  OppSci_Accessable oppsci;
+  eq(oppsci.m_from, at_loc);
+  eq(oppsci.m_to, target);
+
+  Rover rovers;
+  contained_by(Tracker.TrackingFrozen tfo);
+  commonAncestor(tfo.object, object, rovers); 
+
+  contained_by(Position.At at);
+  commonAncestor(at.object, object, rovers); 
+
+  contained_by(CHAMP.IPIdle ipidle);
+  commonAncestor(ipidle.object, object, rovers); 
+}
+
+CHAMP::ipgetname {
+  met_by(object.IPIdle s0);
+  meets(object.IPHaveName s1);
+
+  contained_by(Target.Tracked tr);
+  eq(tr.object, target);
+
+  CHAMP_Accessable champ;
+  eq(champ.m_from, at_loc);
+  eq(champ.m_to, target);
+
+  Rover rovers;
+  contained_by(Tracker.TrackingOn tfo);
+  commonAncestor(tfo.object, object, rovers); 
+
+  contained_by(Position.At at);
+  commonAncestor(at.object, object, rovers); 
+
+  contained_by(OpportunisticScience.OppSciIdle oppsciidle);
+  commonAncestor(oppsciidle.object, object, rovers); 
+
+}
+
+CHAMP::IPHaveName {
+  met_by(object.ipgetname s0);
+  meets(object.ipsettarget s1);
+}
+
+CHAMP::ipsettarget {
+  met_by(object.IPHaveName s0);
+  meets(object.IPTargetSet s1);
+
+  contained_by(Target.Tracked tr);
+  eq(tr.object, target);
+
+  CHAMP_Accessable champ;
+  eq(champ.m_from, at_loc);
+  eq(champ.m_to, target);
+
+  Rover rovers;
+  contained_by(Tracker.TrackingOn tfo);
+  commonAncestor(tfo.object, object, rovers); 
+
+  contained_by(Position.At at);
+  commonAncestor(at.object, object, rovers); 
+
+  contained_by(OpportunisticScience.OppSciIdle oppsciidle);
+  commonAncestor(oppsciidle.object, object, rovers); 
+}
+
+CHAMP::IPTargetSet {
+  met_by(object.ipsettarget s0);
+  meets(object.ipplaceinstrument s1);
+
+}
+
+CHAMP::ipplaceinstrument {
+  met_by(object.IPTargetSet s0);
+  meets(object.IPDonePlaceInstrument s1);
+
+  contained_by(Target.Tracked tr);
+  eq(tr.object, target);
+
+  CHAMP_Accessable champ;
+  eq(champ.m_from, at_loc);
+  eq(champ.m_to, target);
+
+  Rover rovers;
+  contained_by(Tracker.TrackingOn tfo);
+  commonAncestor(tfo.object, object, rovers); 
+
+  contained_by(Position.At at);
+  commonAncestor(at.object, object, rovers); 
+
+  contained_by(OpportunisticScience.OppSciIdle oppsciidle);
+  commonAncestor(oppsciidle.object, object, rovers); 
+}
+
+
+CHAMP::IPDonePlaceInstrument {
+  met_by(object.ipplaceinstrument s0);
+  meets(object.ipgetstatus s1);
+
+}
+
+CHAMP::ipgetstatus {
+  met_by(object.IPDonePlaceInstrument s0);
+
+  contained_by(Target.Tracked tr);
+  eq(tr.object, target);
+
+  CHAMP_Accessable champ;
+  eq(champ.m_from, at_loc);
+  eq(champ.m_to, target);
+
+  Rover rovers;
+  contained_by(Tracker.TrackingOn tfo);
+  commonAncestor(tfo.object, object, rovers); 
+
+  contained_by(Position.At at);
+  commonAncestor(at.object, object, rovers); 
+
+  contained_by(OpportunisticScience.OppSciIdle oppsciidle);
+  commonAncestor(oppsciidle.object, object, rovers); 
+}
+
+class Rover {
+
+  Position m_position;
+  Tracker m_tracker;
+  OpportunisticScience m_oppsci;
+  CHAMP m_champ;
+  Energy m_energy;
+
+  float BATTERY_MIN;
+  float BATTERY_MAX;
+
+  Rover(float ic) {    
+    BATTERY_MIN = 0.0;
+    BATTERY_MAX = 518400.0;
+    m_position = new Position(this);
+    m_tracker = new Tracker(this);
+    m_oppsci = new OpportunisticScience (this);
+    m_champ = new CHAMP (this);
+    m_energy = new Energy(ic, 0.0, 518400.0);
+  }
+
+}
+

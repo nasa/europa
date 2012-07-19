@@ -1,0 +1,69 @@
+
+#include "PlannerConfig.nddl"
+#include "Resources.nddl"
+
+class CapacityResource extends Reusable 
+{
+    string profileType;
+     
+    CapacityResource( string pt, float mincapacity, float maxcapacity ) 
+    {    
+        super( maxcapacity, mincapacity );
+        profileType = pt;
+    } 
+}
+
+class Allocation 
+{
+    int m_identifier;
+    float m_quantity;
+    CapacityResource m_resource;
+
+    Allocation( CapacityResource resource, int activityId, float quantity ) 
+    {
+        m_identifier = activityId;
+        m_resource = resource;
+        m_quantity = quantity;
+    }
+}
+
+class ActivityTimeline extends Timeline
+{
+   int id_;
+   
+   ActivityTimeline(int i)
+   {
+       id_ = i;
+   }
+   
+   predicate act {};
+}
+
+ActivityTimeline::act
+{
+}
+
+class ProblemInstance extends Object 
+{
+    predicate Activity {
+	int m_identifier;
+	ActivityTimeline timeline;
+    }
+}
+
+ProblemInstance::Activity
+{
+    //eq(start, [ 0 +inf ]);
+    equals(timeline.act act);
+    eq(act.state,ACTIVE);
+  
+    Allocation allocations;
+    eq( allocations.m_identifier, m_identifier );
+
+    foreach( a in allocations ) {
+        equals( a.m_resource.uses u );
+        eq( duration, u.duration); // Duration is known, so force propagation
+        eq( u.quantity, a.m_quantity );
+    }
+}
+

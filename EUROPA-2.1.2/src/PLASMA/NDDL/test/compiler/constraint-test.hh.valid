@@ -1,0 +1,108 @@
+#include "Db.hh"
+#include "NddlUtils.hh"
+/** Custom Include Files **/
+
+namespace NDDL {
+
+// constraint-test.nddl
+
+  class StringData;
+  typedef Id<StringData> StringDataId;
+  typedef ObjectDomain StringDataDomain;
+  
+  class Sample;
+  typedef Id<Sample> SampleId;
+  typedef ObjectDomain SampleDomain;
+  
+  class World;
+  typedef Id<World> WorldId;
+  typedef ObjectDomain WorldDomain;
+  
+  
+  
+  // Core.nddl:8 TokenStates
+  typedef SymbolDomain TokenStates;
+  TokenStates TokenStatesBaseDomain();
+  // SKIPPING DECLARATION FOR BUILT-IN CLASS Timeline
+  
+  
+  // StringData.nddl:5 StringData
+  class StringData : public Object {
+  public:
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId data; // SchemaWriter::declareVariable
+    
+    // StringData.nddl:5 StringData
+    virtual void constructor(const LabelStr& _data);
+  };
+  
+  
+  // constraint-test.nddl:6 ENUM
+  typedef SymbolDomain ENUM;
+  ENUM ENUMBaseDomain();
+  
+  
+  // constraint-test.nddl:7 Fruits
+  typedef SymbolDomain Fruits;
+  Fruits FruitsBaseDomain();
+  
+  // constraint-test.nddl:10 Sample
+  class Sample : public Timeline {
+  public:
+    Sample(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Sample(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Sample(const ObjectId& parent, const LabelStr& name);
+    Sample(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    virtual void constructor(); // default constructoror
+    
+    class sample;
+    typedef Id<sample> sampleId;
+    
+    // constraint-test.nddl:11 sample
+    class sample : public NddlToken {
+    public:
+      sample(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      sample(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Sample::sample, Sample.sample);
+      
+      ConstrainedVariableId p1; // SchemaWriter::declareVariable
+      ConstrainedVariableId p2; // SchemaWriter::declareVariable
+      ConstrainedVariableId p3; // SchemaWriter::declareVariable
+      ConstrainedVariableId p4; // SchemaWriter::declareVariable
+    };
+  };
+  
+  // constraint-test.nddl:43 World
+  class World : public Timeline {
+  public:
+    World(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    World(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    World(const ObjectId& parent, const LabelStr& name);
+    World(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    class initialState;
+    typedef Id<initialState> initialStateId;
+    ConstrainedVariableId sample; // SchemaWriter::declareVariable
+    
+    // constraint-test.nddl:45 initialState
+    class initialState : public NddlToken {
+    public:
+      initialState(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      initialState(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(World::initialState, World.initialState);
+      
+    };
+    
+    // constraint-test.nddl:43 World
+    virtual void constructor();
+  };
+} // End NDDL namespace

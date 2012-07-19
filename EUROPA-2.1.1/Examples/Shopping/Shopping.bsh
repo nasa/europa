@@ -1,0 +1,117 @@
+String project="Shopping";
+
+import psengine.*;
+import org.ops.ui.util.Util;
+
+psengine.executeScript("nddl",bsh.cwd+"/"+project+"-initial-state.nddl",true/*isFile*/);
+
+desktop.makeNddlConsole();
+
+solver = desktop.makeSolver(
+    "PlannerConfig.xml" // config
+	, 0                 // startHorizon
+	, 100               // endHorizon
+);
+
+// Instead of showing stepping tool, skip right to the end:
+//desktop.makeSolverDialog(solver);
+solver.solve(100, 100);
+
+
+// Helper method that, for each token, creates a row of values for each
+// column in columnNames, and adds the row to data.
+void addRows(Vector data, PSTokenList tl, Vector columnNames)
+{ 
+	for (int i=0; i < tl.size() ; i++) {
+    	row = new Vector();
+    	PSToken t = tl.get(i);
+       	
+		// Fill each column as best we can:
+       	for (int k=0; k < columnNames.size(); k++) {
+			String col = columnNames.get(k);
+			
+			// Three special cases before we get to generic case:
+			if(col == "Key") {
+				row.add(t.getKey());
+			}
+			else if(col == "Name") {
+				row.add(t.getName());
+			}
+			else if(col == "ES") {
+				row.add(t.getStart().getLowerBound());
+			}
+		
+			else {
+				String entry = "--";
+ 		     	PSVariableList vars = t.getParameters();
+        			for (int j=0; j<vars.size();j++) 
+       			{	
+       				PSVariable var = vars.get(j);
+        			if (var.getName().equals(col)) 
+       				{
+       					entry = var.toString();
+       				}
+       			}
+       			row.add(entry);
+       		}
+		}
+		data.add(row);    
+	}
+}
+
+
+// We want to:
+// a) Gather the tokens in the agent and timeline objects.
+// b) Gather the tokens associated with them.
+// c) Store the token vars we want to show for each token.
+// d) Sort them in chronological order
+void showPlan()
+{	   
+	PSObjectList ol = psengine.getObjectsByType("Agent");
+	PSTokenList tl = ol.get(0).getTokens();
+	
+	PSObjectList ol2 = psengine.getObjectsByType("AgentTimeline");	
+	PSTokenList tl2 = ol2.get(0).getTokens();
+
+	columnNames = new Vector();
+	data = new Vector();
+ 
+    columnNames.add("Key");
+    columnNames.add("Name");
+	columnNames.add("ES");  // We use this column for chronological sorting later
+    columnNames.add("start");
+    columnNames.add("duration");
+    columnNames.add("end");
+    columnNames.add("product"); // Only for Buy token
+    columnNames.add("loc");  // Only for At token
+    columnNames.add("from");  // Only for Go token
+    columnNames.add("to");  // Only for Go token
+	
+	addRows(data, tl, columnNames);
+	addRows(data, tl2, columnNames);
+
+	// Sort the rows based on the 3rd column (start) 
+	sortedData = new Vector();
+	
+	while(data.size() > 0) {
+		int bestIdx = -1;
+		double lowestLB = 0;
+		for(int i=0; i < data.size(); i++) {
+			if (bestIdx == -1 || data.get(i).get(2) < lowestLB) {
+				bestIdx = i;
+				lowestLB = data.get(i).get(2);
+			}
+		}
+		sortedData.add(data.get(bestIdx));
+		data.remove(bestIdx);
+	}
+
+	frame = desktop.makeNewFrame("Shopping timeline");
+	table = new JTable(new Util.MatrixTableModel(sortedData,columnNames));
+	scrollpane = new JScrollPane(table);
+    frame.getContentPane().add(scrollpane);    	
+ 	frame.setSize(frame.getSize()); // Force repaint
+}
+
+// Show results right away:
+showPlan();

@@ -1,0 +1,21 @@
+import psengine.*;
+import UBO.*;
+
+
+IFlatIRelaxSolver runIFIR(long timeout,int bound, boolean usePSResources)
+{
+    s = new IFlatIRelaxSolver();
+    s.solve(psengine,timeout,bound,usePSResources);
+    RCPSPUtil.ground(s.getActivities());
+    
+    return s;
+}
+
+psengine.executeScript("nddl",bsh.cwd+"/UBO-initial-state.nddl",true/*isFile*/);
+solver = psengine.createSolver("PlannerConfig.xml");
+solver.configure(0,1000);
+// Only works for problem with 11 activities
+for (int i=0;i<24;i++)
+    solver.step();
+runIFIR(5000/*timeout*/,47/*bound*/,false/*usePSResources*/);
+Runtime.getRuntime().exit(0);

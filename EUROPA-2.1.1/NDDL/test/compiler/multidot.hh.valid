@@ -1,0 +1,148 @@
+#include "Db.hh"
+#include "NddlUtils.hh"
+/** Custom Include Files **/
+
+namespace NDDL {
+
+// multidot.nddl
+
+  class StringData;
+  typedef Id<StringData> StringDataId;
+  typedef ObjectDomain StringDataDomain;
+  
+  class Foo;
+  typedef Id<Foo> FooId;
+  typedef ObjectDomain FooDomain;
+  
+  class Bar;
+  typedef Id<Bar> BarId;
+  typedef ObjectDomain BarDomain;
+  
+  class Baz;
+  typedef Id<Baz> BazId;
+  typedef ObjectDomain BazDomain;
+  
+  class Mumble;
+  typedef Id<Mumble> MumbleId;
+  typedef ObjectDomain MumbleDomain;
+  
+  
+  
+  // Core.nddl:8 TokenStates
+  typedef SymbolDomain TokenStates;
+  TokenStates TokenStatesBaseDomain();
+  // SKIPPING DECLARATION FOR BUILT-IN CLASS Timeline
+  
+  
+  // StringData.nddl:5 StringData
+  class StringData : public Object {
+  public:
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId data; // SchemaWriter::declareVariable
+    
+    // StringData.nddl:5 StringData
+    virtual void constructor(const LabelStr& _data);
+  };
+  
+  // multidot.nddl:3 Foo
+  class Foo : public Object {
+  public:
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    virtual void constructor(); // default constructoror
+    
+  };
+  
+  // multidot.nddl:6 Bar
+  class Bar : public Object {
+  public:
+    Bar(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Bar(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Bar(const ObjectId& parent, const LabelStr& name);
+    Bar(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId m_foo; // SchemaWriter::declareVariable
+    
+    // multidot.nddl:6 Bar
+    virtual void constructor(const FooId& foo);
+  };
+  
+  // multidot.nddl:15 Baz
+  class Baz : public Timeline {
+  public:
+    Baz(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Baz(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Baz(const ObjectId& parent, const LabelStr& name);
+    Baz(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    class apred;
+    typedef Id<apred> apredId;
+    class bpred;
+    typedef Id<bpred> bpredId;
+    ConstrainedVariableId myfoo; // SchemaWriter::declareVariable
+    ConstrainedVariableId myBar; // SchemaWriter::declareVariable
+    
+    // multidot.nddl:15 Baz
+    virtual void constructor(const BarId& bar, const FooId& foo);
+    
+    // multidot.nddl:24 apred
+    class apred : public NddlToken {
+    public:
+      apred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      apred(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Baz::apred, Baz.apred);
+      
+      ConstrainedVariableId predFoo; // SchemaWriter::declareVariable
+    };
+    
+    // multidot.nddl:28 bpred
+    class bpred : public NddlToken {
+    public:
+      bpred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      bpred(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Baz::bpred, Baz.bpred);
+      
+      ConstrainedVariableId predBar; // SchemaWriter::declareVariable
+    };
+  };
+  
+  // multidot.nddl:40 Mumble
+  class Mumble : public Timeline {
+  public:
+    Mumble(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Mumble(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Mumble(const ObjectId& parent, const LabelStr& name);
+    Mumble(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    class mumbPred;
+    typedef Id<mumbPred> mumbPredId;
+    ConstrainedVariableId myBaz; // SchemaWriter::declareVariable
+    
+    // multidot.nddl:40 Mumble
+    virtual void constructor(const BazId& baz);
+    
+    // multidot.nddl:47 mumbPred
+    class mumbPred : public NddlToken {
+    public:
+      mumbPred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      mumbPred(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Mumble::mumbPred, Mumble.mumbPred);
+      
+      ConstrainedVariableId m_foo; // SchemaWriter::declareVariable
+    };
+  };
+} // End NDDL namespace

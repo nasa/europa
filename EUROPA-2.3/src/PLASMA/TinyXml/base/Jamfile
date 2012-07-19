@@ -1,0 +1,13 @@
+SubDir PLASMA TinyXml base ;
+
+if ! $(PLASMA_READY) {
+
+ModuleBase TinyXml
+	:
+	tinystr.cpp
+	tinyxml.cpp
+	tinyxmlerror.cpp
+	tinyxmlparser.cpp
+	;
+
+} # PLASMA_READY

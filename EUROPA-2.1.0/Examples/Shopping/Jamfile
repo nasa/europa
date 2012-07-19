@@ -1,0 +1,20 @@
+SubDir Shopping ;
+
+if ! $(Shopping_READY) {
+ # Declare a library for PlanWorks Control
+
+ ModuleSharedLibrary ShoppingController 
+     : $(PLASMA_HOME)/ControllerStub.cc $(PLASMA_HOME)/MasterController.cc $(PLASMA_HOME)/SingleSolverController.cc 
+     : System : ShoppingController ;
+
+ # Create a build target to run a problem
+ RunNDDLProblem Shopping : Shopping-initial-state.nddl : Shopping-planner : PlannerConfig.xml ;
+
+ # Create a build target for the planner executable with the given model.
+ NddlMain Shopping-planner : Shopping-Main.cc : Shopping-model.nddl : System : Shopping-planner ;
+
+ # Create a build target for the planner shared library with model.
+ ModuleSharedLibrary Shopping : Shopping-model.o : System : Shopping ;
+
+ Depends all : Shopping ShoppingController ;
+} # Shopping_READY

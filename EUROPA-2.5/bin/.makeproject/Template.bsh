@@ -1,0 +1,13 @@
+import psengine.*;
+import org.ops.ui.util.Util;
+import %%Project%%.*;
+
+psengine.executeScript("nddl",bsh.cwd+"/%%Project%%-initial-state.nddl",true/*isFile*/);
+desktop.makeNddlConsole();
+solver = desktop.makeSolver(
+                            "PlannerConfig.xml" // config
+                            , 0                 // startHorizon
+                            , 100               // endHorizon
+                           );
+
+desktop.makeSolverDialog(solver);

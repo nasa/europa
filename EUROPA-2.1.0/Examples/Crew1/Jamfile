@@ -1,0 +1,20 @@
+SubDir Crew1 ;
+
+if ! $(Crew1_READY) {
+ # Declare a library for PlanWorks Control
+
+ ModuleSharedLibrary Crew1Controller 
+     : $(PLASMA_HOME)/ControllerStub.cc $(PLASMA_HOME)/MasterController.cc $(PLASMA_HOME)/SingleSolverController.cc 
+     : System : Crew1Controller ;
+
+ # Create a build target to run a problem
+ RunNDDLProblem Crew1 : Crew1-initial-state.nddl : Crew1-planner : PlannerConfig.xml ;
+
+ # Create a build target for the planner executable with the given model.
+ NddlMain Crew1-planner : Crew1-Main.cc : Crew1-model.nddl : System : Crew1-planner ;
+
+ # Create a build target for the planner shared library with model.
+ ModuleSharedLibrary Crew1 : Crew1-model.o : System : Crew1 ;
+
+ Depends all : Crew1 Crew1Controller ;
+} # Crew1_READY

@@ -1,0 +1,21 @@
+SubDir PLASMA ConstraintEngine test ;
+
+if ! $(PLASMA_READY) {
+
+SubDirC++Flags -Wno-unknown-pragmas -Wno-format ;
+
+CET_Files = [ FGristFiles ConstraintTesting ] ; #<ConstraintEngine!test>ConstraintTesting ;
+
+ModuleMain ce-module-tests
+	:
+	module-tests.cc
+	domain-tests.cc
+	ConstraintTesting.cc
+        ce-test-module.cc
+	:
+	ConstraintEngine
+	;
+RunModuleMain run-ce-module-tests : ce-module-tests ;
+LocalDepends tests : run-ce-module-tests ;
+
+} # PLASMA_READY

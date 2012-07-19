@@ -1,0 +1,34 @@
+#include "Plasma.nddl"
+#include "PlannerConfig.nddl"
+
+class LightSwitch extends Timeline
+{
+    predicate turnOn  { duration=1; } 
+    predicate turnOff { duration=1; }    
+}
+
+class LightBulb extends Timeline 
+{
+    LightSwitch mySwitch_;
+    
+    LightBulb(LightSwitch b)
+    {
+        mySwitch_ = b;
+    }
+
+    predicate On  {} 
+    predicate Off {}
+}
+
+LightBulb::On
+{
+    met_by(object.Off);              // Bulb must be Off to be turned On
+    met_by(object.mySwitch_.turnOn); // Must be turned on through the switch
+}
+
+LightBulb::Off
+{
+    met_by(object.On);                // Bulb must be On to be turned Off
+    met_by(object.mySwitch_.turnOff); // Must be turned off through the switch
+}
+

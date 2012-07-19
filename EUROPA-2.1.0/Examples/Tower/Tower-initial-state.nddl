@@ -1,0 +1,53 @@
+#include "Tower-model.nddl"
+
+// Allocate objects of the problem
+PlannerConfig world = new PlannerConfig(0, 100, 600);
+ 
+Goal goalTower = new Goal();
+
+close();
+
+//Initial State
+
+goal(Top.Clear top1InitiallyClear);
+eq(top1InitiallyClear.theBlock, goalTower.firstBlock);
+eq(top1InitiallyClear.start, world.m_horizonStart);
+precedes(top1InitiallyClear.end, world.m_horizonEnd);
+
+goal(Bottom.OnTable bottom1InitiallyOnTable);
+eq(bottom1InitiallyOnTable.theBlock, goalTower.firstBlock);
+eq(bottom1InitiallyOnTable.start, world.m_horizonStart);
+precedes(bottom1InitiallyOnTable.end, world.m_horizonEnd);
+
+goal(Top.Clear top2InitiallyClear);
+eq(top2InitiallyClear.theBlock, goalTower.secondBlock);
+eq(top2InitiallyClear.start, world.m_horizonStart);
+precedes(top2InitiallyClear.end, world.m_horizonEnd);
+
+goal(Bottom.OnTable bottom2InitiallyOnTable);
+eq(bottom2InitiallyOnTable.theBlock, goalTower.secondBlock);
+eq(bottom2InitiallyOnTable.start, world.m_horizonStart);
+precedes(bottom2InitiallyOnTable.end, world.m_horizonEnd);
+
+goal(Top.Clear top3InitiallyClear);
+eq(top3InitiallyClear.theBlock, goalTower.thirdBlock);
+eq(top3InitiallyClear.start, world.m_horizonStart);
+precedes(top3InitiallyClear.end, world.m_horizonEnd);
+
+goal(Bottom.OnTable bottom3InitiallyOnTable);
+eq(bottom3InitiallyOnTable.theBlock, goalTower.thirdBlock);
+eq(bottom3InitiallyOnTable.start, world.m_horizonStart);
+//precedes(bottom3InitiallyOnTable.end, world.m_horizonEnd);
+
+goal(Arm.ArmEmpty armInitiallyEmpty);
+eq(armInitiallyEmpty.start, world.m_horizonStart);
+precedes(armInitiallyEmpty.end, world.m_horizonEnd);
+
+//Goal State
+
+goal(goalTower.GoalAchieved towerFinallyDone);
+precedes(world.m_horizonStart, towerFinallyDone.start);
+precedes(towerFinallyDone.end, world.m_horizonEnd);
+
+
+

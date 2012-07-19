@@ -1,0 +1,21 @@
+
+rule RemoveBinaries {
+  local target = $(1) ;
+}
+
+actions RemoveBinaries {
+# '*.output' & '*.gprof' should probably have separate rules and actions, but ...
+find . \( -name '*.[ao]' -o -name '*.so' -o -name '*_[gop]' -o -name '*_rt' -o -name '*_no' -o -name '*.output' -o -name '*.gprof' \) -exec rm {} \;
+}
+
+{
+  local SUBDIR = $(PLASMA) ;
+  PLASMA_BUILD = $(PLASMA_HOME)/build ;
+  include [ FDirName $(SUBDIR) CommonRules ] ;
+  include [ FDirName $(SUBDIR) AntlrRules ] ;
+  include [ FDirName $(SUBDIR) ModuleRules ] ;
+  include [ FDirName $(SUBDIR) NddlRules ] ;
+  include [ FDirName $(SUBDIR) SWIGRules ] ;
+  include [ FDirName $(SUBDIR) Jamfile ] ;
+  PLASMA_READY = TRUE ;
+}

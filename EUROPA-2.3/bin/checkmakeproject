@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+# checkmakeproject: sh script for checking makeproject is working 
+# (builds and then removes a project in the local directory)
+#
+
+TEST_PROJECT_NAME="CheckMakeProjectTestProject"
+
+echo "Testing makeproject."
+
+# Ensure test project directory does not already exist.
+if [ -d $TEST_PROJECT_NAME ]  
+then
+  # Directory exists. Print warning and exit.
+  echo "**** [WARNING] Terminating makeproject test - directory ../$TEST_PROJECT_NAME already exists." 
+  exit -1
+fi
+
+echo "Creating test project - $TEST_PROJECT_NAME"
+
+# Run makeproject.
+$PLASMA_HOME/bin/makeproject "$TEST_PROJECT_NAME" ./
+cd "$TEST_PROJECT_NAME"
+
+# Execute project.
+ make
+
+# Remove project.
+echo "Cleaning up - removing directory $TEST_PROJECT_NAME"
+cd ..
+rm -r "$TEST_PROJECT_NAME"
+echo "Finished testing makeproject."
+exit 0

@@ -1,0 +1,197 @@
+// NQueens.bsh
+
+import psengine.*;
+import NQueens.*;
+
+String model = "NQueens";
+int N = 8;
+
+String generateModelWithAllDiff(int n)
+{
+    StringBuffer buf = new StringBuffer();
+    buf.append("typedef int [0 ").append(n-1).append("] Row;\n\n");
+    
+    buf.append("Row ");
+    for (int i=0; i<n;i++) {
+    	if (i>0)
+    		buf.append(",");
+    	buf.append("v").append(i);
+    }
+    buf.append(";\n\n");
+    
+    // check for same row
+    for (int i=0; i<n;i++) {
+    	for (int j=i+1; j<n; j++) {
+            buf.append("neq(")
+        	   .append("v").append(i)
+        	   .append(",")
+        	   .append("v").append(j)
+        	   .append(");").append("\n");
+    	}
+    }
+    
+    // check for diagonals
+    for (int i=0; i<n;i++) {
+    	for (int j=i+1; j<n; j++) {
+    		String varName = "v"+i+"_down_v"+j;
+            buf.append("int ").append(varName).append(";\n")
+               .append("addEq(v").append(i).append(",").append(j-i).append(",").append(varName).append(");\n")
+               .append("AllDiff(")
+               .append("v").append(i)
+        	   .append(",")
+               .append("v").append(j)
+        	   .append(",")
+        	   .append(varName)
+        	   .append(");").append("\n");
+            
+    		varName = "v"+i+"_up_v"+j;
+            buf.append("int ").append(varName).append(";\n")
+               .append("addEq(v").append(i).append(",").append(i-j).append(",").append(varName).append(");\n") 
+               .append("AllDiff(")
+               .append("v").append(i)
+        	   .append(",")
+               .append("v").append(j)
+        	   .append(",")
+        	   .append(varName)
+        	   .append(");").append("\n");            
+    	}
+    }
+
+    return buf.toString();
+}
+
+String generateModel(int n)
+{
+    StringBuffer buf = new StringBuffer();
+
+    buf.append("typedef int [0 ").append(n-1).append("] Row;\n\n");
+    buf.append("Row ");
+    for (int i=0; i<n;i++) {
+    	if (i>0)
+    		buf.append(",");
+    	buf.append("v").append(i);
+    }
+    buf.append(";\n\n");
+    
+    // check for same row
+    for (int i=0; i<n;i++) {
+    	for (int j=i+1; j<n; j++) {
+            buf.append("neq(")
+        	   .append("v").append(i)
+        	   .append(",")
+        	   .append("v").append(j)
+        	   .append(");").append("\n");
+    	}
+    }
+    
+    // check for diagonals
+    for (int i=0; i<n;i++) {
+    	for (int j=i+1; j<n; j++) {
+    		String varName;
+    		
+    		varName = "v"+j+"_up_v"+i;
+            buf.append("int ").append(varName).append(";\n")
+               .append("addEq(v").append(i).append(",").append(j-i).append(",").append(varName).append(");\n")
+               .append("neq(")
+               .append("v").append(j)
+        	   .append(",")
+        	   .append(varName)
+        	   .append(");").append("\n");
+
+            varName = "v"+i+"_down_v"+j;
+            buf.append("int ").append(varName).append(";\n")
+               .append("addEq(v").append(j).append(",").append(i-j).append(",").append(varName).append(");\n")
+               .append("neq(")
+               .append("v").append(i)
+        	   .append(",")
+        	   .append(varName)
+        	   .append(");").append("\n");
+            
+    		varName = "v"+j+"_down_v"+i;
+            buf.append("int ").append(varName).append(";\n")
+               .append("addEq(v").append(i).append(",").append(i-j).append(",").append(varName).append(");\n") 
+               .append("neq(")
+               .append("v").append(j)
+        	   .append(",")
+        	   .append(varName)
+        	   .append(");").append("\n");
+
+    		varName = "v"+i+"_up_v"+j;
+            buf.append("int ").append(varName).append(";\n")
+               .append("addEq(v").append(j).append(",").append(j-i).append(",").append(varName).append(");\n") 
+               .append("neq(")
+               .append("v").append(i)
+        	   .append(",")
+        	   .append(varName)
+        	   .append(");").append("\n");            
+    	}
+    }
+   return buf.toString();
+}
+
+void loadModel()
+{
+	String nddlModel = generateModel(N); //generateModelWithAllDiff(N);
+	//System.out.println(nddlModel);
+	psengine.setAllowViolations(true);
+	psengine.executeScript("nddl",nddlModel,false/*isFile*/);
+}
+
+
+String queensToString()
+{
+    StringBuffer buf = new StringBuffer();
+    
+    buf.append("{");
+    for (int i=0; i<N;i++) {
+    	if (i>0)
+    		buf.append(",");
+    	buf.append(psengine.getGlobalVariables().get(i).toString());
+    }
+    buf.append("}");
+    buf.append(" violation:").append(psengine.getViolation());
+    
+    return buf.toString();
+}
+
+void printQueens()
+{
+    print(queensToString());	
+}
+
+void initQueens()
+{	
+	PSVariableList l = psengine.getGlobalVariables();	
+	PSVarValue value = PSVarValue.getInstance(0);
+	
+	for (int i=0;i<N;i++) {
+		v = l.get(i);
+		v.specifyValue(value);
+	}    		
+}
+
+void showQueens()
+{
+	JTextArea mouseInfo = new JTextArea("");
+    f = desktop.makeNewFrame("NQueens");
+    NQueensPanel p = new NQueensPanel(psengine,N,mouseInfo);
+    f.getContentPane().add(p.getUIPanel());
+    f.setSize(450,550);
+
+    f = desktop.makeNewFrame("Mouse Info");
+    f.getContentPane().add(mouseInfo);
+    f.setSize(200,400); 
+    f.setLocation(470,20);
+}
+
+void solve(int maxIter)
+{
+    TSNQueensSolver s = new TSNQueensSolver(N,psengine);
+    s.solve(maxIter);
+}
+
+/*
+solve(100);
+print(generateModel(N));
+desktop.makeNddlConsole();
+*/

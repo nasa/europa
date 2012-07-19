@@ -1,0 +1,20 @@
+SubDir Rover ;
+
+if ! $(Rover_READY) {
+ # Declare a library for PlanWorks Control
+
+ ModuleSharedLibrary RoverController 
+     : $(PLASMA_HOME)/ControllerStub.cc $(PLASMA_HOME)/MasterController.cc $(PLASMA_HOME)/SingleSolverController.cc 
+     : System : RoverController ;
+
+ # Create a build target to run a problem
+ RunNDDLProblem Rover : Rover-initial-state.nddl : Rover-planner : PlannerConfig.xml ;
+
+ # Create a build target for the planner executable with the given model.
+ NddlMain Rover-planner : Rover-Main.cc : Rover-model.nddl : System : Rover-planner ;
+
+ # Create a build target for the planner shared library with model.
+ ModuleSharedLibrary Rover : Rover-model.o : System : Rover ;
+
+ Depends all : Rover RoverController ;
+} # Rover_READY

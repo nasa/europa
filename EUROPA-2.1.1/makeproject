@@ -1,0 +1,208 @@
+#!/bin/bash
+#
+# the makeproject script creates a directory (either in the specified location, or adjacent
+# to PLASMA by default)  with the name NAME.  it populates this directory with basic
+# project files that use PLASMA.
+#
+# See ./NDDL/test/project/* for source material
+#
+
+PLASMA=`dirname "$0"`
+
+# Special case of a test project - invoked from checkmakeproject.
+# Include file paths will be omitted in this case to test the NDDL.cfg path feature
+TEST_PROJECT_NAME="CheckMakeProjectTestProject"
+
+if [ "$1" == "" ]
+then
+  echo "makeproject version 1.0"
+  echo "Usage: makeproject NAME (LOCATION)"
+  echo ""
+  echo "Example: makeproject IDEA ~/PLASMA/example" 
+  exit -1
+fi
+
+NAME="$1"
+
+DIRECTORY="$PLASMA/../$NAME"
+if [ "$2" != "" ]
+then
+  DIRECTORY="$2/$NAME"
+fi
+
+if [ -e $DIRECTORY ]
+then
+  echo "error: "$DIRECTORY" already exists"
+  exit -1
+fi
+echo "Creating directory: $DIRECTORY"
+mkdir $DIRECTORY
+
+if [ -e $DIRECTORY/Jamrules ]
+then
+  echo "error: "$DIRECTORY"/Jamrules already exists"
+  exit -1
+fi
+echo "Adding Jamrules"
+
+touch $DIRECTORY/Jamrules
+echo "{"                                                     >> $DIRECTORY/Jamrules
+echo "  local SUBDIR = \$("$NAME") ;"                        >> $DIRECTORY/Jamrules
+echo "  local PLASMA = \$(PLASMA_HOME) ;"                    >> $DIRECTORY/Jamrules
+echo "  include [ FDirName \$(PLASMA_HOME) Jamrules ] ;"     >> $DIRECTORY/Jamrules
+echo "  include [ FDirName \$(SUBDIR) Jamfile ] ;"           >> $DIRECTORY/Jamrules
+echo "  "$NAME"_READY = TRUE ;"                              >> $DIRECTORY/Jamrules
+echo "}"                                                     >> $DIRECTORY/Jamrules
+
+if [ -e $DIRECTORY/Jamfile ]
+then
+  echo "error: "$DIRECTORY"/Jamfile already exists"
+  exit -1
+fi
+
+echo "Adding Jamfile"
+echo "SubDir "$NAME" ;" >> $DIRECTORY/Jamfile
+echo "" >> $DIRECTORY/Jamfile
+echo "if ! \$("$NAME"_READY) {" >> $DIRECTORY/Jamfile
+echo " # Declare a library for PlanWorks Control" >> $DIRECTORY/Jamfile
+echo "" >> $DIRECTORY/Jamfile
+echo " ModuleSharedLibrary "$NAME"Controller " >> $DIRECTORY/Jamfile
+echo "     : \$(PLASMA_HOME)/ControllerStub.cc \$(PLASMA_HOME)/MasterController.cc \$(PLASMA_HOME)/SingleSolverController.cc " >> $DIRECTORY/Jamfile
+echo "     : System : "$NAME"Controller ;" >> $DIRECTORY/Jamfile
+echo "" >> $DIRECTORY/Jamfile
+echo " # Create a build target to run a problem" >> $DIRECTORY/Jamfile
+echo " RunNDDLProblem "$NAME" : "$NAME"-initial-state.nddl : "$NAME"-planner : PlannerConfig.xml ;" >> $DIRECTORY/Jamfile
+echo "" >> $DIRECTORY/Jamfile
+echo " # Create a build target for the planner executable with the given model." >> $DIRECTORY/Jamfile
+echo " NddlMain "$NAME"-planner : "$NAME"-Main.cc : "$NAME"-model.nddl : System : "$NAME"-planner ;" >> $DIRECTORY/Jamfile
+echo "" >> $DIRECTORY/Jamfile
+echo " # Create a build target for the planner shared library with model." >> $DIRECTORY/Jamfile
+echo " ModuleSharedLibrary "$NAME" : "$NAME"-model.o : System : "$NAME" ;" >> $DIRECTORY/Jamfile
+echo "" >> $DIRECTORY/Jamfile
+echo " NOTFILE "$NAME" "$NAME"Controller ; " >> $DIRECTORY/Jamfile
+echo "" >> $DIRECTORY/Jamfile
+echo " # Only let all run project if we're in this directory:" >> $DIRECTORY/Jamfile
+echo " if \$(SUBDIR) = "." { " >> $DIRECTORY/Jamfile
+echo "    Depends all : "$NAME" "$NAME"Controller ;" >> $DIRECTORY/Jamfile
+echo " } " >> $DIRECTORY/Jamfile
+echo " Depends run-"$NAME"-tests : "$NAME" "$NAME"Controller ;" >> $DIRECTORY/Jamfile
+echo "} # "$NAME"_READY" >> $DIRECTORY/Jamfile
+
+
+if [ -e $DIRECTORY/$NAME-model.nddl ]
+then
+  echo "error: "$DIRECTORY"/"$NAME"-model.nddl already exists"
+  exit -1
+fi
+
+echo "Adding "$NAME"-model.nddl"
+echo "#include \"Plasma.nddl\"" >> $DIRECTORY/$NAME-model.nddl
+echo "#include \"PlannerConfig.nddl\"" >> $DIRECTORY/$NAME-model.nddl
+echo "" >> $DIRECTORY/$NAME-model.nddl
+echo "/**" >> $DIRECTORY/$NAME-model.nddl
+echo " * @brief Place holder class with a single predicate" >> $DIRECTORY/$NAME-model.nddl
+echo " */" >> $DIRECTORY/$NAME-model.nddl
+echo "class YourObject {" >> $DIRECTORY/$NAME-model.nddl
+echo " predicate helloWorld{} /*!< Predicate with no arguments */" >> $DIRECTORY/$NAME-model.nddl
+echo "}" >> $DIRECTORY/$NAME-model.nddl
+echo "" >> $DIRECTORY/$NAME-model.nddl
+echo "/**" >> $DIRECTORY/$NAME-model.nddl
+echo " * @brief A simple rule to force a repeated cycle" >> $DIRECTORY/$NAME-model.nddl
+echo " */" >> $DIRECTORY/$NAME-model.nddl
+echo "YourObject::helloWorld{" >> $DIRECTORY/$NAME-model.nddl
+echo " eq(duration, 10);" >> $DIRECTORY/$NAME-model.nddl
+echo " meets (object.helloWorld);" >> $DIRECTORY/$NAME-model.nddl
+echo " met_by(object.helloWorld);" >> $DIRECTORY/$NAME-model.nddl
+echo "}" >> $DIRECTORY/$NAME-model.nddl
+
+
+if [ -e $DIRECTORY/$NAME-initial-state.nddl ]
+then
+  echo "error: "$DIRECTORY"/"$NAME"-initial-state.nddl already exists"
+  exit -1
+fi
+echo "Adding "$NAME"-initial-state.nddl"
+echo "#include \""$NAME"-model.nddl\"" >> $DIRECTORY/$NAME-initial-state.nddl
+echo "" >> $DIRECTORY/$NAME-initial-state.nddl
+echo "// Create a planner configuration instance in PLASMA." >> $DIRECTORY/$NAME-initial-state.nddl
+echo "// Horizon Start, Horizon End, MaxPlannerSteps, MaxPlannerDepth" >> $DIRECTORY/$NAME-initial-state.nddl
+echo "PlannerConfig plannerConfiguration = new PlannerConfig(0, 100, 500, +inf);" >> $DIRECTORY/$NAME-initial-state.nddl
+echo "" >> $DIRECTORY/$NAME-initial-state.nddl
+echo "// Sample object" >> $DIRECTORY/$NAME-initial-state.nddl
+echo "YourObject object = new YourObject();" >> $DIRECTORY/$NAME-initial-state.nddl
+echo "" >> $DIRECTORY/$NAME-initial-state.nddl
+echo "// Close the the PLASMA Database - no more objects can be created." >> $DIRECTORY/$NAME-initial-state.nddl
+echo "close();" >> $DIRECTORY/$NAME-initial-state.nddl
+echo "" >> $DIRECTORY/$NAME-initial-state.nddl
+echo "// Now place your goals here." >> $DIRECTORY/$NAME-initial-state.nddl
+echo "goal(YourObject.helloWorld initialToken);" >> $DIRECTORY/$NAME-initial-state.nddl
+echo "initialToken.start.specify(0); // Starts at beginning of the horizon" >> $DIRECTORY/$NAME-initial-state.nddl
+echo "" >> $DIRECTORY/$NAME-initial-state.nddl
+echo "// The planner should take it form here!" >> $DIRECTORY/$NAME-initial-state.nddl
+
+if [ -e $DIRECTORY/"$NAME"-Main.cc ]
+then
+  echo "error: "$DIRECTORY"/"$NAME"-Main.cc already exists"
+  exit -1
+fi
+echo "Adding "$NAME"-Main.cc"
+cp ./System/component/Main.cc $DIRECTORY/$NAME-Main.cc
+
+if [ -e $DIRECTORY/PlanWorks.cfg ]
+then
+  echo "error: "$DIRECTORY"/PlanWorks.cfg already exists"
+  exit -1
+fi
+echo "Adding PlanWorks.cfg"
+cp ./Solvers/component/PlanWorks.cfg $DIRECTORY/PlanWorks.cfg
+
+if [ -e $DIRECTORY/Debug.cfg ]
+then
+  echo "error: "$DIRECTORY"/Debug.cfg already exists"
+  exit -1
+fi
+echo "Adding Debug.cfg"
+cp ./NDDL/test/project/Debug.cfg $DIRECTORY/Debug.cfg
+
+if [ -e $DIRECTORY/PlannerConfig.xml ]
+then
+  echo "error: "$DIRECTORY"/PlannerConfig.xml already exists"
+  exit -1
+fi
+echo "Adding PlannerConfig.xml"
+cp ./System/test/DefaultPlannerConfig.xml $DIRECTORY/PlannerConfig.xml
+
+if [ -e $DIRECTORY/NDDL.cfg ]
+then
+  echo "error: "$DIRECTORY"/NDDL.cfg already exists"
+  exit -1
+fi
+echo "Adding NDDL.cfg"
+
+touch $DIRECTORY/NDDL.cfg
+echo "<configuration>"                                                                                 >> $DIRECTORY/NDDL.cfg
+echo " <binding nddl=\"Object\" cpp=\"Object\"/>"                                                      >> $DIRECTORY/NDDL.cfg
+echo " <binding nddl=\"Timeline\" cpp=\"Timeline\"/>"                                                  >> $DIRECTORY/NDDL.cfg
+echo " <binding nddl=\"Resource\" cpp=\"NddlResource\" include=\"NddlResource.hh\"/>"                  >> $DIRECTORY/NDDL.cfg
+echo " <binding nddl=\"Resource.change\" cpp=\"NddlResource::change\" include=\"NddlResource.hh\"/>"   >> $DIRECTORY/NDDL.cfg
+echo " <include path=\"$PLASMA_HOME/NDDL/base;$PLASMA_HOME/NDDL/component/Resource\"/>"                >> $DIRECTORY/NDDL.cfg
+echo "</configuration>"                                                                                >> $DIRECTORY/NDDL.cfg
+echo ""                                                                                                >> $DIRECTORY/NDDL.cfg
+
+echo "Adding build.xml"
+cp makeproject.java.build.xml $DIRECTORY/build.xml
+
+echo "Adding build.properties"
+echo "project=$NAME" >> $DIRECTORY/build.properties
+cat makeproject.java.build.properties >> $DIRECTORY/build.properties
+
+echo "Adding "$NAME".bsh"
+echo "String project=\"$NAME\";" >> $DIRECTORY/$NAME.bsh
+cat makeproject.java.project.bsh >> $DIRECTORY/$NAME.bsh
+
+echo "Adding Main.java"
+mkdir $DIRECTORY/java
+mkdir $DIRECTORY/java/$NAME
+echo "package $NAME;" >> $DIRECTORY/java/$NAME/Main.java
+cat makeproject.java.project.java >> $DIRECTORY/java/$NAME/Main.java
+

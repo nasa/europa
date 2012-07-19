@@ -1,0 +1,187 @@
+// gnats-2537.nddl
+
+#include "gnats-2537.hh"
+#include "NddlUtils.hh"
+
+namespace NDDL {
+  
+  Location LocationBaseDomain(){
+    static Location sl_enum("Location");
+    if (sl_enum.isOpen()) {
+      // Insert values to initialize
+      sl_enum.insert(LabelStr("Hill"));
+      sl_enum.insert(LabelStr("Rock"));
+      sl_enum.insert(LabelStr("Lander"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
+  
+  
+  // gnats-2537.nddl:7 Foo
+  Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "Foo", name, true) {
+  }
+  Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  Foo::Foo(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "Foo", name, true) {}
+  Foo::Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void Foo::handleDefaults(bool autoClose) {
+    if (autoClose)
+      close();
+  }
+  
+  // implicit constructor
+  void Foo::constructor() {
+  }
+  
+  
+  // gnats-2537.nddl:7 Foo
+  DECLARE_DEFAULT_OBJECT_FACTORY(FooFactory0, Foo);
+  
+  
+  // gnats-2537.nddl:9 Region
+  Region::Region(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "Region", name, true) {
+  }
+  Region::Region(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  Region::Region(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "Region", name, true) {}
+  Region::Region(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void Region::handleDefaults(bool autoClose) {
+    if(location.isNoId()){
+      location = addVariable(LocationBaseDomain(), "location");
+    }
+    check_error(foo.isValid(), "object variables must be initialized explicitly");
+    
+    if (autoClose)
+      close();
+  }
+  
+  
+  // gnats-2537.nddl:9 Region
+  void Region::constructor() {
+    location = addVariable(Location(LabelStr("Hill"), "Location"), "location");
+    foo = addVariable(FooDomain((new Foo(m_id, "foo"))->getId(), "Foo"), "foo");
+    Id<Foo>(singleton(foo))->constructor();
+    Id<Foo>(singleton(foo))->handleDefaults();
+  }
+  
+  // gnats-2537.nddl:9 Region
+  class RegionFactory1: public ConcreteObjectFactory {
+  public:
+    RegionFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 0);
+      RegionId instance = (new Region(planDb, objectType, objectName))->getId();
+      instance->constructor();
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  // gnats-2537.nddl:9 Region
+  void Region::constructor(const FooId& _foo) {
+    foo = addVariable(FooDomain(_foo, "Foo"), "foo");
+  }
+  
+  // gnats-2537.nddl:9 Region
+  class RegionFactory2: public ConcreteObjectFactory {
+  public:
+    RegionFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 1);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("Foo")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to Foo");
+      check_error(arguments[0]->isSingleton());
+      FooId _foo((FooId)arguments[0]->getSingletonValue());
+      
+      RegionId instance = (new Region(planDb, objectType, objectName))->getId();
+      instance->constructor(_foo);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  // gnats-2537.nddl:9 Region
+  void Region::constructor(const LabelStr& loc) {
+    location = addVariable(Location(loc, "Location"), "location");
+    foo = addVariable(FooDomain((new Foo(m_id, "foo"))->getId(), "Foo"), "foo");
+    Id<Foo>(singleton(foo))->constructor();
+    Id<Foo>(singleton(foo))->handleDefaults();
+  }
+  
+  // gnats-2537.nddl:9 Region
+  class RegionFactory3: public ConcreteObjectFactory {
+  public:
+    RegionFactory3(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 1);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("Location")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to Location");
+      check_error(arguments[0]->isSingleton());
+      LabelStr loc((LabelStr)arguments[0]->getSingletonValue());
+      
+      RegionId instance = (new Region(planDb, objectType, objectName))->getId();
+      instance->constructor(loc);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+} // namespace NDDL
+
+
+namespace NDDL {
+  // Boot-strap code to initialize schema
+  extern "C" SchemaId loadSchema(){
+    Id<Schema> id = Schema::instance("gnats-2537");
+    // Register Constraints
+    // Invoke commands to populate schema with type definitions
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("Foo", "Object");
+    id->addObjectType("Region", "Object");
+    id->addEnum("Location");
+    id->addMember("Region", "Location", "location");
+    id->addMember("Region", "Foo", "foo");
+    id->addValue("Location", LabelStr("Hill"));
+    id->addValue("Location", LabelStr("Rock"));
+    id->addValue("Location", LabelStr("Lander"));
+    // Force allocation of model specific type factories
+    // Allocate factories
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(Location, LocationBaseDomain());
+    REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
+    REGISTER_OBJECT_FACTORY(FooFactory0, Foo);
+    REGISTER_TYPE_FACTORY(Region, ObjectDomain("Region"));
+    REGISTER_OBJECT_FACTORY(RegionFactory1, Region);
+    REGISTER_OBJECT_FACTORY(RegionFactory2, Region:Foo);
+    REGISTER_OBJECT_FACTORY(RegionFactory2, Region:Object);
+    REGISTER_OBJECT_FACTORY(RegionFactory3, Region:Location);
+    // Allocate rules
+    return id;
+  }
+  
+}

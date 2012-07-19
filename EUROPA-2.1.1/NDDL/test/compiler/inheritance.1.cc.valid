@@ -1,0 +1,291 @@
+// inheritance.1.nddl
+
+#include "inheritance.1.hh"
+#include "NddlUtils.hh"
+
+namespace NDDL {
+  
+  
+  // inheritance.1.nddl:2 Foo
+  Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "Foo", name, true) {
+  }
+  Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  Foo::Foo(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "Foo", name, true) {}
+  Foo::Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void Foo::handleDefaults(bool autoClose) {
+    if(arg1.isNoId()){
+      arg1 = addVariable(IntervalIntDomain("int"), "arg1");
+    }
+    if(arg2.isNoId()){
+      arg2 = addVariable(IntervalDomain("float"), "arg2");
+    }
+    if(arg3.isNoId()){
+      arg3 = addVariable(BoolDomain("bool"), "arg3");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  // inheritance.1.nddl:2 Foo
+  void Foo::constructor() {
+    arg1 = addVariable(IntervalIntDomain(0, 0, "int"), "arg1");
+    arg2 = addVariable(IntervalDomain(0.0, 0.0, "float"), "arg2");
+    arg3 = addVariable(BoolDomain(false, "bool"), "arg3");
+  }
+  
+  // inheritance.1.nddl:2 Foo
+  class FooFactory0: public ConcreteObjectFactory {
+  public:
+    FooFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 0);
+      FooId instance = (new Foo(planDb, objectType, objectName))->getId();
+      instance->constructor();
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  // inheritance.1.nddl:2 Foo
+  void Foo::constructor(int _arg1, float _arg2) {
+    arg1 = addVariable(IntervalIntDomain(_arg1, _arg1, "int"), "arg1");
+    arg2 = addVariable(IntervalDomain(_arg2, _arg2, "float"), "arg2");
+    arg3 = addVariable(BoolDomain(false, "bool"), "arg3");
+  }
+  
+  // inheritance.1.nddl:2 Foo
+  class FooFactory1: public ConcreteObjectFactory {
+  public:
+    FooFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 2);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("int")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to int");
+      check_error(arguments[0]->isSingleton());
+      int _arg1((int)arguments[0]->getSingletonValue());
+      
+      check_error(AbstractDomain::canBeCompared(*arguments[1], 
+                                                TypeFactory::baseDomain("float")), 
+                  "Cannot convert " + arguments[1]->getTypeName().toString() + " to float");
+      check_error(arguments[1]->isSingleton());
+      float _arg2((float)arguments[1]->getSingletonValue());
+      
+      FooId instance = (new Foo(planDb, objectType, objectName))->getId();
+      instance->constructor(_arg1, _arg2);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  // inheritance.1.nddl:2 Foo
+  void Foo::constructor(int _arg1, float _arg2, bool _arg3) {
+    arg1 = addVariable(IntervalIntDomain(_arg1, _arg1, "int"), "arg1");
+    arg2 = addVariable(IntervalDomain(_arg2, _arg2, "float"), "arg2");
+    arg3 = addVariable(BoolDomain(_arg3, "bool"), "arg3");
+  }
+  
+  // inheritance.1.nddl:2 Foo
+  class FooFactory2: public ConcreteObjectFactory {
+  public:
+    FooFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 3);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("int")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to int");
+      check_error(arguments[0]->isSingleton());
+      int _arg1((int)arguments[0]->getSingletonValue());
+      
+      check_error(AbstractDomain::canBeCompared(*arguments[1], 
+                                                TypeFactory::baseDomain("float")), 
+                  "Cannot convert " + arguments[1]->getTypeName().toString() + " to float");
+      check_error(arguments[1]->isSingleton());
+      float _arg2((float)arguments[1]->getSingletonValue());
+      
+      check_error(AbstractDomain::canBeCompared(*arguments[2], 
+                                                TypeFactory::baseDomain("bool")), 
+                  "Cannot convert " + arguments[2]->getTypeName().toString() + " to bool");
+      check_error(arguments[2]->isSingleton());
+      bool _arg3((bool)arguments[2]->getSingletonValue());
+      
+      FooId instance = (new Foo(planDb, objectType, objectName))->getId();
+      instance->constructor(_arg1, _arg2, _arg3);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  
+  // inheritance.1.nddl:31 Bar
+  Bar::Bar(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Foo(planDatabase, "Bar", name) {
+  }
+  Bar::Bar(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Foo(planDatabase, type, name) {
+  }
+  Bar::Bar(const ObjectId& parent, const LabelStr& name)
+   : Foo(parent, "Bar", name) {}
+  Bar::Bar(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Foo(parent, type, name) {}
+  // default initialization of member variables
+  void Bar::handleDefaults(bool autoClose) {
+    Foo::handleDefaults(false);
+    if(arg4.isNoId()){
+      arg4 = addVariable(StringDomain("string"), "arg4");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  // inheritance.1.nddl:31 Bar
+  void Bar::constructor() {
+    Foo::constructor();
+    arg4 = addVariable(StringDomain(LabelStr("empty string"), "string"), "arg4");
+  }
+  
+  // inheritance.1.nddl:31 Bar
+  class BarFactory3: public ConcreteObjectFactory {
+  public:
+    BarFactory3(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 0);
+      BarId instance = (new Bar(planDb, objectType, objectName))->getId();
+      instance->constructor();
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  // inheritance.1.nddl:31 Bar
+  void Bar::constructor(const LabelStr& _arg4) {
+    Foo::constructor();
+    arg4 = addVariable(StringDomain(_arg4, "string"), "arg4");
+  }
+  
+  // inheritance.1.nddl:31 Bar
+  class BarFactory4: public ConcreteObjectFactory {
+  public:
+    BarFactory4(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 1);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("string")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
+      check_error(arguments[0]->isSingleton());
+      LabelStr _arg4((LabelStr)arguments[0]->getSingletonValue());
+      
+      BarId instance = (new Bar(planDb, objectType, objectName))->getId();
+      instance->constructor(_arg4);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  // inheritance.1.nddl:31 Bar
+  void Bar::constructor(const LabelStr& _arg4, int _arg1, float _arg2, bool _arg3) {
+    Foo::constructor(_arg1, _arg2, _arg3);
+    arg4 = addVariable(StringDomain(_arg4, "string"), "arg4");
+  }
+  
+  // inheritance.1.nddl:31 Bar
+  class BarFactory5: public ConcreteObjectFactory {
+  public:
+    BarFactory5(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 4);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("string")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
+      check_error(arguments[0]->isSingleton());
+      LabelStr _arg4((LabelStr)arguments[0]->getSingletonValue());
+      
+      check_error(AbstractDomain::canBeCompared(*arguments[1], 
+                                                TypeFactory::baseDomain("int")), 
+                  "Cannot convert " + arguments[1]->getTypeName().toString() + " to int");
+      check_error(arguments[1]->isSingleton());
+      int _arg1((int)arguments[1]->getSingletonValue());
+      
+      check_error(AbstractDomain::canBeCompared(*arguments[2], 
+                                                TypeFactory::baseDomain("float")), 
+                  "Cannot convert " + arguments[2]->getTypeName().toString() + " to float");
+      check_error(arguments[2]->isSingleton());
+      float _arg2((float)arguments[2]->getSingletonValue());
+      
+      check_error(AbstractDomain::canBeCompared(*arguments[3], 
+                                                TypeFactory::baseDomain("bool")), 
+                  "Cannot convert " + arguments[3]->getTypeName().toString() + " to bool");
+      check_error(arguments[3]->isSingleton());
+      bool _arg3((bool)arguments[3]->getSingletonValue());
+      
+      BarId instance = (new Bar(planDb, objectType, objectName))->getId();
+      instance->constructor(_arg4, _arg1, _arg2, _arg3);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+} // namespace NDDL
+
+
+namespace NDDL {
+  // Boot-strap code to initialize schema
+  extern "C" SchemaId loadSchema(){
+    Id<Schema> id = Schema::instance("inheritance.1");
+    // Register Constraints
+    // Invoke commands to populate schema with type definitions
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("Foo", "Object");
+    id->addObjectType("Bar", "Foo");
+    id->addMember("Foo", "int", "arg1");
+    id->addMember("Foo", "float", "arg2");
+    id->addMember("Foo", "bool", "arg3");
+    id->addMember("Bar", "string", "arg4");
+    // Force allocation of model specific type factories
+    // Allocate factories
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
+    REGISTER_OBJECT_FACTORY(FooFactory0, Foo);
+    REGISTER_OBJECT_FACTORY(FooFactory1, Foo:int:float);
+    REGISTER_OBJECT_FACTORY(FooFactory2, Foo:int:float:bool);
+    REGISTER_TYPE_FACTORY(Bar, ObjectDomain("Bar"));
+    REGISTER_OBJECT_FACTORY(BarFactory3, Bar);
+    REGISTER_OBJECT_FACTORY(BarFactory4, Bar:string);
+    REGISTER_OBJECT_FACTORY(BarFactory5, Bar:string:int:float:bool);
+    // Allocate rules
+    return id;
+  }
+  
+}

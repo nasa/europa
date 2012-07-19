@@ -1,0 +1,131 @@
+#!/bin/sh -f
+# -*- Mode: sh -*-
+#
+# Author: David Rijsman
+
+PARSER_DIR=../PLASMA/NDDL/core/
+MODEL="RCPSProgen.nddl"
+MAKESPAN=-1
+
+GENERATOR_LOC=./generator
+
+if [ -z $1 ]
+then
+  echo " "
+  echo "Usage:"
+  echo " "
+  echo " sch2xml <problem.sch> [output-base-name] [makespan-limit] [generator] [parser-directory]"
+  echo " "
+  echo "This script will parse a ProGen/max problem and translate it into nddl"
+  echo "initial state format and in XML format for the EUROPA transaction player."
+  echo " "
+  echo " <problem.sch>       Input file containing problem"
+  echo " [output-base-name]  Base name for the output file, default value equal to <problem.sch>"
+  echo " [makespan-limit]    Limit on the makespan, integer, default value is INFINITE."
+  echo " [generator]         Location of the (sch to nddl) generator, optional, default value '"$GENERATOR_LOC"'"
+  echo " [parser-directory]  Location of the NDDL EUROPA directory, optional, default value '"$PARSER_DIR"'"
+  echo " "
+  echo "Output of this script is <problem.sch>.<makespan-limit>.xml"
+  echo " "
+  echo "This script assumes 'Plasma. "
+  echo "Uses 'nddl2xml'"
+
+  exit -1
+fi
+
+if [ ! -e $1 ]
+then
+  echo " "
+  echo "Expected '"$1"' to exist as a ProGen/max problem, it does not or not the right permissions."
+  exit -1
+fi
+
+OUTPUT_BASE_NAME=$1
+
+if [ ! -z $2 ]
+then
+  OUTPUT_BASE_NAME=$2
+fi
+
+if [ ! -z $3 ]
+then
+ if [ $3 != "INFINITE" ]
+ then
+   MAKESPAN=$3
+ fi
+fi
+
+if [ ! -z $4 ]
+then
+  GENERATOR_LOC=$4
+fi
+
+if [ -e $GENERATOR_LOC ]; then
+  GENERATOR=$GENERATOR_LOC
+else
+  echo " "
+  echo "Expected '"$GENERATOR_LOC"' to exist as a location of the generator, it does not or not the right permissions."
+  echo "Finished with an error."
+  exit -1
+fi
+
+if [ ! -z $4 ]
+then
+  PARSER_DIR=$4
+fi
+
+PLASMA_NDDL=Plasma.nddl
+PLANNER_CONFIG_NDDL=PlannerConfig.nddl
+CONSTRAINTS_NDDL=Constraints.nddl
+
+PARSER_LOC=$PARSER_DIR/jars/nddl.jar
+PLASMA_NDDL_LOC=$PARSER_DIR/$PLASMA_NDDL
+PLANNER_CONFIG_NDDL_LOC=$PARSER_DIR/$PLANNER_CONFIG_NDDL
+CONSTRAINTS_NDDL_LOC=$PARSER_DIR/$CONSTRAINTS_NDDL
+
+if [ $MAKESPAN -ne -1 ]
+then
+ gen_cmd=$GENERATOR" --problem "$1" "$OUTPUT_BASE_NAME" "$MAKESPAN
+else
+ gen_cmd=$GENERATOR" --problem "$1" "$OUTPUT_BASE_NAME
+fi
+
+$gen_cmd
+
+if [ -e $OUTPUT_BASE_NAME.nddl ] || [ -e $OUTPUT_BASE_NAME.$MAKESPAN.nddl ]
+then
+    if [ ! -e $MODEL ]
+    then
+      if [ ! -e $PLASMA_NDDL ]
+      then
+	cp $PLASMA_NDDL_LOC .
+      fi
+
+      if [ ! -e $CONSTRAINTS_NDDL ]
+      then
+	cp $CONSTRAINTS_NDDL_LOC .
+      fi
+
+      if [ ! -e $PLANNER_CONFIG_NDDL ]
+      then
+        cp $PLANNER_CONFIG_NDDL_LOC .
+      fi
+
+      $GENERATOR --model
+    fi
+
+    if [ $MAKESPAN -ne -1 ]
+    then
+      nddl2xml $OUTPUT_BASE_NAME"."$MAKESPAN.nddl $PARSER_LOC
+    else
+      nddl2xml $OUTPUT_BASE_NAME.nddl $PARSER_LOC
+    fi
+else
+ echo " "
+ echo "Expected "$OUTPUT_BASE_NAME".nddl to be created, it has not."
+ exit -1
+fi
+
+
+
+

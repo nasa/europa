@@ -1,0 +1,196 @@
+#include "Db.hh"
+#include "NddlUtils.hh"
+/** Custom Include Files **/
+
+namespace NDDL {
+
+// guards.nddl
+
+  class StringData;
+  typedef Id<StringData> StringDataId;
+  typedef ObjectDomain StringDataDomain;
+  
+  class Bar;
+  typedef Id<Bar> BarId;
+  typedef ObjectDomain BarDomain;
+  
+  class Foo;
+  typedef Id<Foo> FooId;
+  typedef ObjectDomain FooDomain;
+  
+  
+  
+  // Core.nddl:8 TokenStates
+  typedef SymbolDomain TokenStates;
+  TokenStates TokenStatesBaseDomain();
+  // SKIPPING DECLARATION FOR BUILT-IN CLASS Timeline
+  
+  
+  // StringData.nddl:5 StringData
+  class StringData : public Object {
+  public:
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId data; // SchemaWriter::declareVariable
+    
+    // StringData.nddl:5 StringData
+    virtual void constructor(const LabelStr& _data);
+  };
+  
+  
+  // guards.nddl:3 Locations
+  typedef SymbolDomain Locations;
+  Locations LocationsBaseDomain();
+  
+  
+  // guards.nddl:4 StringEnum
+  typedef SymbolDomain StringEnum;
+  StringEnum StringEnumBaseDomain();
+  
+  // guards.nddl:6 Bar
+  class Bar : public Timeline {
+  public:
+    Bar(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Bar(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Bar(const ObjectId& parent, const LabelStr& name);
+    Bar(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    virtual void constructor(); // default constructoror
+    
+    class pred;
+    typedef Id<pred> predId;
+    ConstrainedVariableId loc; // SchemaWriter::declareVariable
+    
+    // guards.nddl:8 pred
+    class pred : public NddlToken {
+    public:
+      pred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      pred(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Bar::pred, Bar.pred);
+      
+    };
+  };
+  
+  // guards.nddl:11 Foo
+  class Foo : public Timeline {
+  public:
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    class basicToken;
+    typedef Id<basicToken> basicTokenId;
+    class tokenWithParameters;
+    typedef Id<tokenWithParameters> tokenWithParametersId;
+    class impliedObjectGuard;
+    typedef Id<impliedObjectGuard> impliedObjectGuardId;
+    class impliedLocalVariableGuard;
+    typedef Id<impliedLocalVariableGuard> impliedLocalVariableGuardId;
+    class singletonGuard;
+    typedef Id<singletonGuard> singletonGuardId;
+    class mixGuardedWithUnguarded;
+    typedef Id<mixGuardedWithUnguarded> mixGuardedWithUnguardedId;
+    class localVariableGuard;
+    typedef Id<localVariableGuard> localVariableGuardId;
+    class multipleNestedGuards;
+    typedef Id<multipleNestedGuards> multipleNestedGuardsId;
+    ConstrainedVariableId arg1; // SchemaWriter::declareVariable
+    ConstrainedVariableId arg2; // SchemaWriter::declareVariable
+    
+    // guards.nddl:11 Foo
+    virtual void constructor();
+    
+    // guards.nddl:19 basicToken
+    class basicToken : public NddlToken {
+    public:
+      basicToken(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      basicToken(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Foo::basicToken, Foo.basicToken);
+      
+    };
+    
+    // guards.nddl:20 tokenWithParameters
+    class tokenWithParameters : public NddlToken {
+    public:
+      tokenWithParameters(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      tokenWithParameters(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Foo::tokenWithParameters, Foo.tokenWithParameters);
+      
+      ConstrainedVariableId int_arg; // SchemaWriter::declareVariable
+      ConstrainedVariableId bool_arg; // SchemaWriter::declareVariable
+      ConstrainedVariableId float_arg; // SchemaWriter::declareVariable
+      ConstrainedVariableId location_arg; // SchemaWriter::declareVariable
+      ConstrainedVariableId strEnum_arg; // SchemaWriter::declareVariable
+    };
+    
+    // guards.nddl:28 impliedObjectGuard
+    class impliedObjectGuard : public NddlToken {
+    public:
+      impliedObjectGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      impliedObjectGuard(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Foo::impliedObjectGuard, Foo.impliedObjectGuard);
+      
+      ConstrainedVariableId allFoo; // SchemaWriter::declareVariable
+    };
+    
+    // guards.nddl:32 impliedLocalVariableGuard
+    class impliedLocalVariableGuard : public NddlToken {
+    public:
+      impliedLocalVariableGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      impliedLocalVariableGuard(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Foo::impliedLocalVariableGuard, Foo.impliedLocalVariableGuard);
+      
+    };
+    
+    // guards.nddl:34 singletonGuard
+    class singletonGuard : public NddlToken {
+    public:
+      singletonGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      singletonGuard(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Foo::singletonGuard, Foo.singletonGuard);
+      
+    };
+    
+    // guards.nddl:35 mixGuardedWithUnguarded
+    class mixGuardedWithUnguarded : public NddlToken {
+    public:
+      mixGuardedWithUnguarded(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      mixGuardedWithUnguarded(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Foo::mixGuardedWithUnguarded, Foo.mixGuardedWithUnguarded);
+      
+    };
+    
+    // guards.nddl:36 localVariableGuard
+    class localVariableGuard : public NddlToken {
+    public:
+      localVariableGuard(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      localVariableGuard(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Foo::localVariableGuard, Foo.localVariableGuard);
+      
+    };
+    
+    // guards.nddl:37 multipleNestedGuards
+    class multipleNestedGuards : public NddlToken {
+    public:
+      multipleNestedGuards(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      multipleNestedGuards(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Foo::multipleNestedGuards, Foo.multipleNestedGuards);
+      
+    };
+  };
+} // End NDDL namespace

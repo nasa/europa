@@ -1,0 +1,47 @@
+<UnboundVariableManager>
+  <!-- Exclude all temporal variables -->
+  <FlawFilter var-match="start"/>
+  <FlawFilter var-match="end"/>
+  <FlawFilter var-match="duration"/>
+
+  <!-- Exlude all arg1 parameters of predicateA on A and all its subclasses -->
+  <FlawFilter var-match="arg1" predicate-match="predicateA" class-match="A"/>
+
+  <!-- Exclude all variables of predicateB -->
+  <FlawFilter class-match="A" predicate-match="predicateB"/>
+
+  <!-- Exclude all tokens and variables of class D -->
+  <FlawFilter class-match="D"/>
+
+  <!-- Impose a dynamic filter based on a singleton -->
+  <FlawFilter var-match="globalVariable1" component="Singleton"/>
+
+  <!-- Impose a dynamic filter based on finiteness and dynamicity -->
+  <FlawFilter var-match="globalVariable3" component="InfiniteDynamicFilter"/>
+
+  <!-- Impose a horizon filter based on predicates -->
+  <FlawFilter class-match="HorizonFiltered" component="HorizonVariableFilter"/>
+
+</UnboundVariableManager>
+
+<OpenConditionManager>
+  <FlawFilter class-match="D"/>
+
+  <!-- Exclude all token flaws in predicate E.PredicateC -->
+  <FlawFilter class-match="E" predicate-match="PredicateC"/>
+
+  <!-- Exclude all token flaws on the HorizonFiltered class based on horizon values and policy -->
+  <FlawFilter class-match="HorizonFiltered" predicate-match="predicate5" component="HorizonFilter" policy="TotallyContained"/> 
+  <FlawFilter class-match="HorizonFiltered" component="HorizonFilter"/> 
+</OpenConditionManager>
+
+<ThreatManager>
+  <FlawFilter class-match="D"/>
+
+  <!-- Exclude all token flaws in predicate E.PredicateC -->
+  <FlawFilter class-match="E" predicate-match="PredicateC"/>
+
+  <!-- Exclude all token flaws on the HorizonFiltered class based on horizon values and policy -->
+  <FlawFilter class-match="HorizonFiltered" predicate-match="predicate5" component="HorizonFilter" policy="TotallyContained"/> 
+  <FlawFilter class-match="HorizonFiltered" component="HorizonFilter"/> 
+</ThreatManager>

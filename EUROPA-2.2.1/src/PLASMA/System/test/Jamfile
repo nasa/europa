@@ -1,0 +1,216 @@
+SubDir PLASMA System test ;
+
+# MJI's idea on fixing paths [ FDirName $(PLASMA) PlanDatabase test db-test-module.cc ]
+                             
+if ! $(PLASMA_READY) {
+
+PLANNER ?= SOLVER ;
+
+SubDirHdrs $(PLASMA) PlanDatabase test ;
+SubDirHdrs $(log4cpp.includeDir) ;
+#SubDirC++Flags -lcppunit -Wno-unknown-pragmas -Wno-format ;
+#SubDirC++Flags -I/usr/include ; #-lcppunit -Wno-unknown-pragmas -Wno-format ;
+ModuleLibraries system-module-tests : cppunit ;
+
+if ( "Resources" in $(NO) ) {
+  SubDirC++Flags -DNO_RESOURCES ;
+}
+
+ModuleMain system-module-tests : module-tests.cc ;
+
+RunModuleMain run-system-module-tests : system-module-tests ;
+
+LocalDepends tests : run-system-module-tests ;
+
+#
+# NDDL TESTS
+#
+EXTRA_DEFS = -D$(PLANNER) ;
+ModuleNamedObjects runProblem_$(PLANNER) : runProblem.cc : System ;
+ModuleMain runProblem_$(PLANNER) : runProblem_$(PLANNER).o : System ;
+
+local DEFAULT_PCONFIG = "DefaultPlannerConfig.xml" ;
+
+# To run one of these individulally: jam run-<target> i.e. jam run-basic-types
+
+local checkin-tests ;
+checkin-tests = 
+	basic-types
+    constrain-transaction
+	HTX.1
+	HTX.2
+	HTX.3
+    foreach-transaction
+    force-object-distribution
+	gnats_3161
+    rejection
+;
+
+if ! ( "Resources" in $(NO) ) {
+checkin-tests += 
+    better-res
+    better-res-reservoir #need to re-write the constraints so that they produce positive consumption values
+    k9.backtrack.moderate-transaction
+	k9.backtrack.moderate-transaction-reservoir
+    resource-backtrack-test
+    resource-backtrack-test-reservoir
+	reusable-test-transaction
+    Rover-transaction
+    Rover-transaction-reservoir
+	unary-resource-test-transaction 
+;
+}
+
+#RunPlannerProblem <model> : <configurationFile> : <heuristicsFile> : <target that depends> ;
+rule RunPlannerProblem {
+  local model = $(1) ;
+  local configurationFile = $(2) ;
+  local deptarget = $(3) ;
+  local exe = $(model:S=_$(PLANNER)) ;
+  local executable = $(model:S=) ;
+  local xml = $(model:S=.xml) ;
+  local nddl = $(model) ;
+
+  # create .xml for a .nddl
+  NddlParser $(xml) : $(nddl) ;
+
+  #run with interpreted model
+  RunModuleMain run-xml-interp-$(exe) : runProblem_$(PLANNER) : $(xml) $(configurationFile) nddl-xml ;
+  Depends $(deptarget) : $(xml) run-xml-interp-$(exe) ;
+  Depends run-system-tests : $(deptarget) ;
+  Clean clean-generated-xml : $(xml) ;
+
+  #run with fully interpreted model
+  RunModuleMain run-nddl-interp-$(exe) : runProblem_$(PLANNER) : $(nddl) $(configurationFile) nddl ;
+  Depends $(deptarget) : [ FGristFiles $(nddl) ] run-nddl-interp-$(exe) ;
+  Depends run-system-tests : run-nddl-interp-$(exe) ;
+
+  if $(executable) in $(checkin-tests) {
+    LocalDepends run-$(deptarget)-checkin-tests : run-xml-interp-$(exe) ;
+    LocalDepends run-$(deptarget)-checkin-tests : run-nddl-interp-$(exe) ;
+  }
+}
+
+#
+# PLANNER SYSTEM TESTS
+#
+local testmodels = 
+      basic-model-transaction.nddl 
+      basic-types.nddl 
+      constrain-transaction.nddl
+      DynamicObjTest.nddl
+      foreach-transaction.nddl
+      force-object-distribution.nddl  
+      gnats_2572_interval-tx.nddl 
+      gnats_2837-tx.nddl 
+      gnats_3161.nddl 
+      k9-initial.nddl 
+      k9-transaction.nddl 
+      monkey1monkey-transaction.nddl
+      path-filter-transaction.nddl 
+      rejection.nddl 
+      rules.0.tx.nddl 
+      subtype-extension.tx.nddl 
+      ;
+
+if ! ( "Resources" in $(NO) ) {
+  testmodels += 
+      backtr.nddl
+      better-res.nddl 
+      better-res-reservoir.nddl
+      CAPER.nddl 
+      EOS-backtrack-test-reservoir.nddl
+      EOS-backtrack-test.nddl  
+      parent-predicate.nddl 
+      parent-predicate-reservoir.nddl
+      resource-backtrack-test.nddl 
+      resource-backtrack-test-reservoir.nddl
+      ;
+}
+
+for model in $(testmodels) {
+    RunPlannerProblem $(model) : $(DEFAULT_PCONFIG) : common-tests ;
+}
+
+if ! ( "Resources" in $(NO) ) {
+    RunPlannerProblem reusable-test-transaction.nddl : ReusableTestConfig.xml :  solver-tests ;
+    RunPlannerProblem unary-resource-test-transaction.nddl : ReusableTestConfig.xml : solver-tests ;
+}
+
+if $(PLANNER) = SOLVER {
+  RunPlannerProblem HTX.1.solver.nddl : HTX.1.solverConfig.xml : solver-tests ;
+  RunPlannerProblem HTX.3.solver.nddl : HTX.3.solverConfig.xml : solver-tests ;
+
+  Depends solver-tests : common-tests ;
+  Depends run-nddl-planner-tests : solver-tests ;
+  
+  if $(LIBRARIES) = SHARED) {
+    Depends run-model-tests : run-solver-tests-model-tests ;
+    Depends run-all-tests : run-model-tests ;
+  }  
+}
+
+Depends run-all-tests : run-nddl-planner-tests ;
+
+#
+# PERFORMANCE TESTS
+#
+
+Main stackGenerator : stackGenerator.cc ;
+ObjectHdrs stackGenerator.cc : [ FDirName $(PLASMA) Utils base ] ;
+MakeLocate [ FAppendSuffix stackGenerator : $(SUFEXE) ] : $(SUBDIR) ;
+
+rule FSatelliteModel {
+  local arguments = $(1) ;
+  return satellites-$(arguments:J=-).nddl ;
+}
+
+rule GenerateStack {
+  local output = $(1) ;
+  local generator = $(2) ;
+  local arguments = $(3) ;
+  Depends $(output) : $(generator) ;
+  ARGUMENTS on $(output) = $(arguments) ;
+  MakeLocate $(output) : $(SUBDIR) ;
+}
+
+actions GenerateStack {
+  ./$(2) $(ARGUMENTS) $(1:S=) 
+}
+
+local numSatellites ;
+for numSatellites in 1 {
+  local numTargets ;
+# numTargets == 1 has no plan, so do not add it here.
+#  --wedgingt@email.arc.nasa.gov 2004 Dec 10
+   for numTargets in 10 50 100 {
+    local numParams ;
+     for numParams in 0 {
+      local numParamChoices ;
+       for numParamChoices in 0 {
+        if $(numParamChoices) <= $(numParams) {
+          local model = [ FSatelliteModel $(numSatellites) $(numTargets) $(numParams) $(numParamChoices) ] ;
+          local exe = $(model:S=_$(PLANNER)) ;
+          local xml = $(model:S=.xml) ;
+          GenerateStack [ FGristFiles $(model) ] : [ FAppendSuffix stackGenerator : $(SUFEXE) ] : $(numSatellites) $(numTargets) $(numParams) $(numParamChoices) ;
+	  local plannerModule ;
+	  if $(PLANNER) = SOLVER {
+	    plannerModule = Solvers ;
+	  }
+          NddlMain $(exe) : runProblem_link_$(PLANNER).o : $(model) : System $(plannerModule) : performance-tests ;
+          RunModuleMain run-$(exe) : $(exe) : $(xml) $(DEFAULT_PCONFIG) : time ;
+          LocalDepends run-performance-tests : run-$(exe) ;
+        }
+      }
+    }
+  }
+}
+
+#
+# PLANNER CONTROL TESTS
+#
+ModuleMain runPlannerControlTest : runPlannerControlTest.cc : : planner-control-tests ;
+LinkSharedLibrariesNoDeps runPlannerControlTest_g_rt : $(DLOPEN_LIBRARY) ;
+
+
+} # PLASMA_READY

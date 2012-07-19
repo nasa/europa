@@ -1,0 +1,20 @@
+SubDir UBO ;
+
+if ! $(UBO_READY) {
+ # Declare a library for PlanWorks Control
+
+ ModuleSharedLibrary UBOController 
+     : $(PLASMA_HOME)/ControllerStub.cc $(PLASMA_HOME)/MasterController.cc $(PLASMA_HOME)/SingleSolverController.cc 
+     : System : UBOController ;
+
+ # Create a build target to run a problem
+ RunNDDLProblem UBO : UBO-initial-state.nddl : UBO-planner : PlannerConfig.xml ;
+
+ # Create a build target for the planner executable with the given model.
+ NddlMain UBO-planner : UBO-Main.cc : UBO-model.nddl : System : UBO-planner ;
+
+ # Create a build target for the planner shared library with model.
+ ModuleSharedLibrary UBO : UBO-model.o : System : UBO ;
+
+ Depends all : UBO UBOController ;
+} # UBO_READY

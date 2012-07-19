@@ -1,0 +1,19 @@
+EUROPA documentation is now kept on the project wiki pages at:
+
+https://babelfish.arc.nasa.gov/trac/europa/wiki
+
+
+To generate doxygen documentation, run:
+
+jam documentation
+
+This directory remains simply for Doxygen related files.  Doxygen is used to
+document the code itself.  To use these docs requires two steps:
+
+1.  Run 'jam documentation' in this directory.
+2.  Use a web browser to view docs by opening:
+
+PLASMA/documentation/html/index.html
+
+NOTE: Please ignored documentation in the deprecated directory - it is years
+out of date.

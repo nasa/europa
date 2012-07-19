@@ -1,0 +1,14 @@
+SubDir PLASMA ConstraintEngine component ;
+
+if ! $(PLASMA_READY) {
+
+ModuleComponent ConstraintEngine
+	:
+	Constraints.cc
+	DataTypes.cc
+	Domains.cc
+	EquivalenceClassCollection.cc
+	Propagators.cc
+	;
+
+} # PLASMA_READY

@@ -1,0 +1,20 @@
+enum Tool {gripper, drill, solderIron};
+
+class Parent
+{
+  int x;
+  string n;
+}
+
+class Child
+extends Parent
+{
+  float y;
+  Tool leftArm;
+}
+
+class Instantiator
+{
+  Parent p1;
+  Child c1,c2;
+}

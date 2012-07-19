@@ -1,0 +1,49 @@
+#include "Resources.nddl"
+
+/*
+This model is designed to test the following case:
+-a master token which can be on multiple objects is activated
+-a slave resource token is created and assigned to a single object.  the slave object variable is connected to the master via a proxy relation
+-a second slave is created and assigned to a single object.  again, there is the proxy connection
+-a handle is gotten on a transaction for the slave token.
+-the object variable for the second slave is relaxed and re-restricted
+-the bug: the transaction handle is invalidated
+
+This comes up in the solver, which will hold a handle to a transaction in the decision stack.
+*/
+
+
+class Battery extends Reservoir {
+  Battery(float ic, float ll_min, float ll_max){
+    super(ic, ll_min, ll_max);
+  }
+}
+
+class Foo extends Timeline {
+  predicate foo {}
+}
+
+class Main extends Timeline {
+  Foo m_foo;
+  Battery m_battery;
+  Main() {
+    m_foo = new Foo();
+    m_battery = new Battery(50.0, 0.0, 100.0);
+  }
+  predicate Master {}
+}
+
+Main::Master {
+  contains(object.m_battery.consume tx);
+  eq(tx.quantity, 5);
+  
+  contains(object.m_foo.foo f);
+}
+
+
+Main m1 = new Main();
+Main m2 = new Main();
+
+close();
+
+goal(Main.Master master);
