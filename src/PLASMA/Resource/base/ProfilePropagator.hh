@@ -11,6 +11,14 @@ namespace EUROPA {
     public:
       ProfilePropagator(const LabelStr& name,
 			const ConstraintEngineId& constraintEngine);
+
+      virtual ~ProfilePropagator();
+
+      // Batch mode delays all propagation until Batch mode is exited
+      virtual void enterBatchMode();
+      virtual void exitBatchMode();
+      virtual bool inBatchMode() const { return m_inBatchMode; }
+
     protected:
       friend class Profile;
       void setUpdateRequired(const bool update) {m_updateRequired = update;}
@@ -24,6 +32,8 @@ namespace EUROPA {
       std::set<ProfileId> m_profiles;
       std::set<ConstraintId> m_newConstraints;
       bool m_updateRequired;
+      bool m_inBatchMode;
+      ConstraintEngineListener* m_batchListener;
     };
 }
 

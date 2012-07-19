@@ -42,6 +42,17 @@ namespace EUROPA {
       virtual void notifyViolated(Resource::ProblemType problem, const InstantId inst);
       virtual void notifyNoLongerViolated();
 
+      // TODO: these should be handleDeactivate and handleActivate, but need to fix ViolationManager first
+      friend class ProfilePropagator;
+      friend class BatchModeListener;
+      virtual void disable();
+      virtual void enable();
+
+      void connect();
+      void disconnect();
+      void safeConnect();
+      void safeDisconnect();
+
     private:
       void handleDiscard();
       bool canIgnore(const ConstrainedVariableId& variable,
