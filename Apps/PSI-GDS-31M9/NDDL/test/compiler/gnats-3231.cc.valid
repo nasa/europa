@@ -1,0 +1,116 @@
+// gnats-3231.nddl
+
+#include "gnats-3231.hh"
+#include "NddlUtils.hh"
+
+namespace NDDL {
+  
+  
+  // gnats-3231.nddl:1 GnatsClass
+  GnatsClass::GnatsClass(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "GnatsClass", name, true) {
+  }
+  GnatsClass::GnatsClass(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  GnatsClass::GnatsClass(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "GnatsClass", name, true) {}
+  GnatsClass::GnatsClass(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void GnatsClass::handleDefaults(bool autoClose) {
+    if (autoClose)
+      close();
+  }
+  
+  // implicit constructor
+  void GnatsClass::constructor() {
+  }
+  
+  
+  // gnats-3231.nddl:1 GnatsClass
+  DECLARE_DEFAULT_OBJECT_FACTORY(GnatsClassFactory0, GnatsClass);
+  
+  
+  // gnats-3231.nddl:1 p
+  GnatsClass::p::p(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable, bool close)
+   : NddlToken(planDatabase, name, rejectable, false) {
+    handleDefaults(close);
+  }
+  
+  GnatsClass::p::p(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close)
+   : NddlToken(parent, name, relation, false) {
+    handleDefaults(close);
+  }
+  
+  // default initialization of member variables
+  void GnatsClass::p::handleDefaults(bool autoClose) {
+    NddlToken::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  // gnats-3231.nddl:2 p
+  class GnatsClass$p$0$0: public RuleInstance {
+  public:
+    GnatsClass$p$0$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$GnatsClass$p$0, GnatsClass$p$0$0, GnatsClass.p, "gnats-3231.nddl,2");
+  
+  void GnatsClass$p$0$0::handleExecute() {
+    slave(GnatsClass::p, GnatsClass.p, a, LabelStr("meets"));
+    sameObject(object, a);
+    meets(this, a);
+  }
+  
+  // gnats-3231.nddl:5 p
+  class GnatsClass$p$1$0: public RuleInstance {
+  public:
+    GnatsClass$p$1$0(const RuleId& rule, const TokenId& token, const PlanDatabaseId& planDb)
+    : RuleInstance(rule, token, planDb){}
+    void handleExecute();
+  };
+  
+  DECLARE_AND_DEFINE_RULE(Rule$GnatsClass$p$1, GnatsClass$p$1$0, GnatsClass.p, "gnats-3231.nddl,5");
+  
+  void GnatsClass$p$1$0::handleExecute() {
+    slave(GnatsClass::p, GnatsClass.p, a, LabelStr("met_by"));
+    sameObject(object, a);
+    met_by(this, a);
+  }
+  
+} // namespace NDDL
+
+
+namespace NDDL {
+  // Boot-strap code to initialize schema
+  extern "C" SchemaId loadSchema(){
+    Id<Schema> id = Schema::instance("gnats-3231");
+    id->reset(); // Reset prior data if present. 
+    
+    // Register Constraints
+    // Invoke commands to populate schema with type definitions
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("GnatsClass", "Object");
+    id->addPrimitive("int");
+    id->addPrimitive("float");
+    id->addPrimitive("bool");
+    id->addPrimitive("string");
+    id->addPredicate("GnatsClass.p");
+    // Force allocation of model specific type factories
+    // Allocate factories
+    REGISTER_TOKEN_FACTORY(GnatsClass::p::Factory);
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(GnatsClass, ObjectDomain("GnatsClass"));
+    REGISTER_OBJECT_FACTORY(GnatsClassFactory0, GnatsClass);
+    // Allocate rules
+    new Rule$GnatsClass$p$1();
+    new Rule$GnatsClass$p$0();
+    return id;
+  }
+  
+}

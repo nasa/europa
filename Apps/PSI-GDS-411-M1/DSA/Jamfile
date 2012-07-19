@@ -1,0 +1,10 @@
+SubDir PLASMA DSA ;
+
+if ! $(PLASMA_READY) {
+
+Module DSA : System ;
+
+SubInclude PLASMA DSA base ;
+SubInclude PLASMA DSA test ;
+
+} # PLASMA_READY

@@ -1,0 +1,6 @@
+ANMLLexer.*
+ANMLParser.*
+ANMLTokenTypes.*
+ANML2NDDL.cpp
+ANML2NDDL.hpp
+ANML2NDDLTokenTypes.*

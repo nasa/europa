@@ -1,0 +1,20 @@
+SubDir PLASMA Aver test converter ;
+
+if ! $(PLASMA_READY) {
+TL_PARSER_TESTS = tokenstest objectstest transtest steptest booltest depthtest 
+                  rangetest enumtest proptest ;
+
+local parser_test ;
+for parser_test in $(TL_PARSER_TESTS) {
+  local xml = $(parser_test:S=.xml) ;
+
+  AverToXml $(xml) : $(parser_test) ;
+
+  LocalClean clean : $(xml) ;
+  LocalDepends aver-build-$(parser_test) : $(xml) ;
+  LocalDepends aver-parser-tests : $(xml) ;
+  LocalDepends aver-module-tests : aver-build-$(parser_test) ;
+  LocalDepends run-aver-module-tests : aver-build-$(parser_test) ;
+  LocalDepends tests : run-aver-module-tests ;
+}
+}

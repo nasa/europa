@@ -1,0 +1,7 @@
+#include "location.nddl"
+
+enum Place { LANDER, ROCK, SAND, MARTIAN_CITY }
+
+class Rover {
+  Location loc;
+}

@@ -1,0 +1,225 @@
+<Heuristics-HSTS
+xmlns="HSTS"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="Heuristics-HSTS.xsd">
+
+<Defaults>
+ <DefaultCreationPref>older</DefaultCreationPref>
+ <DefaultPriorityPref>low</DefaultPriorityPref>
+ <DefaultCompatibility>
+   <Priority>1024.5</Priority>
+   <PredicateSpec>
+     <PredicateName>Navigator.At</PredicateName>
+     <PredicateParameters/>
+   </PredicateSpec>
+   <Priority>100.25</Priority>
+   <PredicateSpec>
+     <PredicateName>Navigator.Going</PredicateName>
+     <PredicateParameters/>
+   </PredicateSpec>
+ </DefaultCompatibility>
+ <DefaultToken>
+   <Priority>10.0</Priority>
+   <DecisionPreference>
+     <StateOrder>
+        <State>merge</State>
+        <Order>early</Order>
+     </StateOrder>
+     <StateOrder>
+        <State>activate</State>
+        <Order>early</Order>
+     </StateOrder>
+     <State>reject</State>
+   </DecisionPreference>
+ </DefaultToken>
+ <DefaultConstrainedVariable>
+   <Priority>5000.0</Priority>
+   <ValueOrder>descending</ValueOrder>
+ </DefaultConstrainedVariable> 
+</Defaults>
+
+<VariableSpecification>
+<ConstrainedVariable>
+  <Priority>6000.25</Priority>
+  <VariableSpec>
+    <Name>to</Name>
+  </VariableSpec>
+  <PredicateSpec>
+  <PredicateName>Navigator.Going</PredicateName>
+  <PredicateParameters>
+   <Parameter>
+     <Index>0</Index>
+     <Value>Loc1</Value>
+   </Parameter>
+  </PredicateParameters>
+  </PredicateSpec>
+</ConstrainedVariable>
+
+<ConstrainedVariable>
+  <Priority>6000.5</Priority>
+  <Preference>
+  <ValueOrder>descending</ValueOrder>
+  </Preference>
+  <VariableSpec>
+    <Index>0</Index>
+  </VariableSpec>
+  <PredicateSpec>
+  <PredicateName>Commands.TakeSample</PredicateName>
+  <PredicateParameters/>
+  </PredicateSpec>
+</ConstrainedVariable>
+
+<ConstrainedVariable>
+  <Priority>6000.25</Priority>
+  <Preference>
+  <DomainOrder>
+    <Value>Loc3</Value>
+    <Value>Loc4</Value>
+    <Value>Loc5</Value>
+  </DomainOrder>
+  </Preference>
+  <VariableSpec>
+    <Index>0</Index>
+  </VariableSpec>
+  <PredicateSpec>
+  <PredicateName>Instrument.TakeSample</PredicateName>
+  <PredicateParameters/>
+  </PredicateSpec>
+</ConstrainedVariable>
+
+<ConstrainedVariable>
+  <Priority>9000</Priority>
+  <Preference>
+  <ValueOrder>ascending</ValueOrder>
+  </Preference>
+  <VariableSpec>
+    <Name>minutes</Name>
+  </VariableSpec>
+  <PredicateSpec>
+  <PredicateName>Telemetry.Communicate</PredicateName>
+  <PredicateParameters/>
+  </PredicateSpec>
+</ConstrainedVariable>
+
+<ConstrainedVariable>
+  <Priority>9000</Priority>
+  <Preference>
+  <DomainOrder>
+    <Value>low</Value>
+    <Value>medium</Value>
+    <Value>high</Value>
+    <Value>medium-high</Value>
+    <Value>medium-low</Value>
+  </DomainOrder>
+  </Preference>
+  <VariableSpec>
+    <Name>mode</Name>
+  </VariableSpec>
+  <PredicateSpec>
+  <PredicateName>Telemetry.Communicate</PredicateName>
+  <PredicateParameters/>
+  </PredicateSpec>
+</ConstrainedVariable>
+</VariableSpecification>
+
+<TokenSpecification>
+
+<Token>
+  <Priority>7.23</Priority>
+  <PredicateSpec>
+   <PredicateName>Navigator.At</PredicateName>
+    <PredicateParameters>
+     <Parameter>
+      <Index>0</Index>
+      <Value>Loc5</Value>
+     </Parameter>
+    </PredicateParameters>
+  </PredicateSpec>
+</Token>
+
+<Token>
+  <Priority>443.7</Priority>
+  <PredicateSpec>
+  <PredicateName>Navigator.At</PredicateName>
+  <PredicateParameters/>
+  </PredicateSpec>
+  <Master/>
+  <DecisionPreference>
+    <StateOrder>
+       <State>activate</State>
+       <Order>late</Order>
+    </StateOrder>
+    <State>reject</State>
+  </DecisionPreference>
+</Token>
+
+<Token>
+  <Priority>200.4</Priority>
+  <PredicateSpec>
+  <PredicateName>Commands.TakeSample</PredicateName>
+  <PredicateParameters>
+   <Parameter>
+     <Index>0</Index>
+     <Value>Loc3</Value>
+   </Parameter>
+  </PredicateParameters>
+  </PredicateSpec>
+  <Master/>
+  <DecisionPreference/>
+</Token>
+<Token>
+  <Priority>10000.0</Priority>
+  <PredicateSpec>
+  <PredicateName>Navigator.Going</PredicateName>
+  <PredicateParameters>
+    <Parameter>
+     <Index>0</Index>
+     <Value>Loc1</Value>
+    </Parameter>
+    <Parameter>
+     <Index>1</Index>
+     <Value>Loc3</Value>
+    </Parameter>
+  </PredicateParameters>
+  </PredicateSpec>
+  <Master>
+    <Relation>after</Relation>
+    <PredicateSpec>
+      <PredicateName>Commands.TakeSample</PredicateName>
+      <PredicateParameters/>
+    </PredicateSpec>
+  </Master>
+  <DecisionPreference>
+    <StateOrder>
+       <State>merge</State>
+       <Order>early</Order>
+    </StateOrder>
+    <StateOrder>
+       <State>activate</State>
+       <Order>late</Order>
+    </StateOrder>
+    <State>reject</State>
+  </DecisionPreference>
+</Token>
+<Token>
+  <Priority>3.14159</Priority>
+  <PredicateSpec>
+    <PredicateName>Navigator.Going</PredicateName>
+    <PredicateParameters/>
+  </PredicateSpec>
+  <Master>
+    <Relation>before</Relation>
+    <PredicateSpec>
+      <PredicateName>Commands.TakeSample</PredicateName>
+      <PredicateParameters/>
+    </PredicateSpec>
+  </Master>
+  <DecisionPreference>
+    <StateOrder>
+      <State>merge</State>
+    </StateOrder>
+  </DecisionPreference>
+</Token>
+</TokenSpecification>
+
+</Heuristics-HSTS>

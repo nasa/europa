@@ -1,0 +1,7 @@
+enum Place { Martian_City, Lander, BigRock, Valley }
+
+class Location {
+  predicate At { Place x; }
+  predicate Going { Place from, to; }
+  predicate AtCityDefault { Place x = Martian_City; }
+}

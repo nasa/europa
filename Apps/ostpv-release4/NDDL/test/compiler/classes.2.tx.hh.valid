@@ -1,0 +1,231 @@
+// classes.2.tx.nddl
+
+#include "Db.hh"
+#include "NddlUtils.hh"
+/** Custom Include Files **/
+
+namespace NDDL {
+
+  class Reusable;
+  typedef Id<Reusable> ReusableId;
+  typedef ObjectDomain ReusableDomain;
+  
+  class Unary;
+  typedef Id<Unary> UnaryId;
+  typedef ObjectDomain UnaryDomain;
+  
+  class UnaryResource;
+  typedef Id<UnaryResource> UnaryResourceId;
+  typedef ObjectDomain UnaryResourceDomain;
+  
+  class StringData;
+  typedef Id<StringData> StringDataId;
+  typedef ObjectDomain StringDataDomain;
+  
+  class Location;
+  typedef Id<Location> LocationId;
+  typedef ObjectDomain LocationDomain;
+  
+  class Path;
+  typedef Id<Path> PathId;
+  typedef ObjectDomain PathDomain;
+  
+  class Navigator;
+  typedef Id<Navigator> NavigatorId;
+  typedef ObjectDomain NavigatorDomain;
+  
+  
+  
+  // Plasma.nddl:10 TokenStates
+  typedef SymbolDomain TokenStates;
+  TokenStates TokenStatesBaseDomain();
+  // SKIPPING DECLARATION FOR BUILT-IN CLASS Timeline
+  
+  // SKIPPING DECLARATION FOR BUILT-IN CLASS Resource
+  
+  // SKIPPING DECLARATION FOR BUILT-IN CLASS Reservoir
+  
+  
+  // Plasma.nddl:137 Reusable
+  class Reusable : public Object {
+  public:
+    Reusable(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Reusable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Reusable(const ObjectId& parent, const LabelStr& name);
+    Reusable(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    class uses;
+    typedef Id<uses> usesId;
+    ConstrainedVariableId capacity; // SchemaWriter::declareVariable
+    ConstrainedVariableId levelLimitMin; // SchemaWriter::declareVariable
+    ConstrainedVariableId consumptionMax; // SchemaWriter::declareVariable
+    ConstrainedVariableId consumptionRateMax; // SchemaWriter::declareVariable
+    
+    // Plasma.nddl:143 uses
+    class uses : public NddlToken {
+    public:
+      uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      uses(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Reusable::uses, Reusable.uses);
+      
+      ConstrainedVariableId quantity; // SchemaWriter::declareVariable
+    };
+    
+    // Plasma.nddl:137 Reusable
+    virtual void constructor(float c, float ll_min);
+    
+    // Plasma.nddl:137 Reusable
+    virtual void constructor(float c, float ll_min, float cr_max);
+    
+    // Plasma.nddl:137 Reusable
+    virtual void constructor(float c, float ll_min, float c_max, float cr_max);
+  };
+  
+  // Plasma.nddl:169 Unary
+  class Unary : public Object {
+  public:
+    Unary(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Unary(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Unary(const ObjectId& parent, const LabelStr& name);
+    Unary(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    class use;
+    typedef Id<use> useId;
+    ConstrainedVariableId consumptionMax; // SchemaWriter::declareVariable
+    
+    // Plasma.nddl:169 Unary
+    virtual void constructor();
+    
+    // Plasma.nddl:169 Unary
+    virtual void constructor(float c_max);
+    
+    // Plasma.nddl:179 use
+    class use : public NddlToken {
+    public:
+      use(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      use(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Unary::use, Unary.use);
+      
+    };
+  };
+  
+  // Plasma.nddl:187 UnaryResource
+  class UnaryResource : public Timeline {
+  public:
+    UnaryResource(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    UnaryResource(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    UnaryResource(const ObjectId& parent, const LabelStr& name);
+    UnaryResource(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    virtual void constructor(); // default constructoror
+    
+    class uses;
+    typedef Id<uses> usesId;
+    
+    // Plasma.nddl:188 uses
+    class uses : public NddlToken {
+    public:
+      uses(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      uses(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(UnaryResource::uses, UnaryResource.uses);
+      
+    };
+  };
+  
+  // Plasma.nddl:197 StringData
+  class StringData : public Object {
+  public:
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId data; // SchemaWriter::declareVariable
+    
+    // Plasma.nddl:197 StringData
+    virtual void constructor(const LabelStr& _data);
+  };
+  
+  // classes.0.nddl:5 Location
+  class Location : public Object {
+  public:
+    Location(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Location(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Location(const ObjectId& parent, const LabelStr& name);
+    Location(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId name; // SchemaWriter::declareVariable
+    
+    // classes.0.nddl:5 Location
+    virtual void constructor(const LabelStr& _name);
+  };
+  
+  // classes.0.nddl:13 Path
+  class Path : public Object {
+  public:
+    Path(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Path(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Path(const ObjectId& parent, const LabelStr& name);
+    Path(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId from; // SchemaWriter::declareVariable
+    ConstrainedVariableId to; // SchemaWriter::declareVariable
+    ConstrainedVariableId cost; // SchemaWriter::declareVariable
+    
+    // classes.0.nddl:13 Path
+    virtual void constructor(const LocationId& _from, const LocationId& _to);
+    
+    // classes.0.nddl:13 Path
+    virtual void constructor(const LocationId& loc);
+    
+    // classes.0.nddl:13 Path
+    virtual void constructor(const LocationId& _from, const LocationId& _to, float _cost);
+  };
+  
+  // classes.2.nddl:5 Navigator
+  class Navigator : public Timeline {
+  public:
+    Navigator(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Navigator(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Navigator(const ObjectId& parent, const LabelStr& name);
+    Navigator(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    virtual void constructor(); // default constructoror
+    
+    class At;
+    typedef Id<At> AtId;
+    class Going;
+    typedef Id<Going> GoingId;
+    
+    // classes.2.nddl:7 At
+    class At : public NddlToken {
+    public:
+      At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      At(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Navigator::At, Navigator.At);
+      
+      ConstrainedVariableId location; // SchemaWriter::declareVariable
+    };
+    
+    // classes.2.nddl:12 Going
+    class Going : public NddlToken {
+    public:
+      Going(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool close = false);
+      Going(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Navigator::Going, Navigator.Going);
+      
+      ConstrainedVariableId from; // SchemaWriter::declareVariable
+      ConstrainedVariableId to; // SchemaWriter::declareVariable
+    };
+  };
+} // End NDDL namespace

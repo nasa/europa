@@ -1,0 +1,52 @@
+
+/**
+ * As of this patch, all uses of constraints without camelcase have been removed.
+ * this also addresses the request for a uniform method for constraint registration.
+ */
+constraint unary(a);
+
+constraint addEq(a, b, c) { a <: numeric && b <: numeric && c <: numeric }
+
+constraint eq(a, b) { a <: b || b <: a || (a <: numeric && b <: numeric) }
+constraint eq(a, b, c) extends eq(a, b) { ((a <: c || c <: a) && (b <: c || c <: b)) || (c <: numeric && b <: numeric)}
+constraint eq(a, b, c, d) extends eq(a, b, c) { ((a <: d || d <: a) && (b <: d || d <: b) && (c <: d || d <: c)) || (d <: numeric && c <: numeric)}
+constraint eq(a, b, c, d, e) extends eq(a, b, c, d) { ((a <: e || e <: a) && (b <: e || e <: b) && (c <: e || e <: c) && (d <: e || e <: d)) || (e <: numeric && d <: numeric)}
+
+constraint subsetOf(a, b);
+
+constraint lock(a, b) extends eq(a, b);
+
+constraint leq(a, b) extends eq(a, b);
+
+constraint neq(a, b) extends eq(a, b);
+
+constraint mulEq(a, b, c) { a <: numeric && b <: numeric && c <: numeric }
+
+constraint addMulEq(a, b, c, d) { a <: numeric && b <: numeric && c <: numeric && d <: numeric}
+
+constraint sum(a, b, c) { a <: numeric && b <: numeric && c <: numeric }
+constraint sum(a, b, c, d) extends sum(a, b, c) { d <: numeric }
+
+constraint product(a, b, c) { a <: numeric && b <: numeric && c <: numeric }
+
+constraint condEq(a, b, c) extends eq(b, c) {a <: bool}
+
+constraint allDiff(a, b) extends eq(a, b);
+
+constraint condAllDiff(a, b, c) extends allDiff(b, c) {a <: bool}
+
+constraint memberImply(a, b, c, d) { (a <: b || b <: a || (a <: numeric && b <: numeric)) && (c <: d || d <: c || (c <: numeric && d <: numeric))}
+
+constraint exists(a);
+
+constraint temporalDistance(a, b, c);
+
+constraint testEQ(a, b, c);
+
+constraint precedes(a, b);
+
+constraint concurrent(a, b);
+
+constraint commonAncestor(a, b, c);
+
+constraint hasAncestor(a, b);

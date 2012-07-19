@@ -1,0 +1,13 @@
+SubDir PLASMA Examples ;
+
+if ! $(PLASMA_READY) {
+
+Module Examples : System ;
+
+SubInclude PLASMA Examples pddl2nddl ;
+if ! ( "Resources" in $(NO) ) {
+  SubInclude PLASMA Examples SimpleRover ;
+}
+
+
+} # PLASMA_READY

@@ -1,0 +1,32 @@
+// ../ModuleTests/Parser/gnats/NoBranchBug.ddl
+
+#include "Plasma.nddl"
+#include "PlannerConfig.nddl"
+#include "NoBranchBug.nddl"
+
+PlannerConfig world = new PlannerConfig(0, 20, 1000);
+
+Test T = new Test();
+
+Test.close();
+Test___R.close();
+close();
+
+goal(Test___R.V g10);
+  g10.start.specify(0);
+  g10.end.specify([1 19]);
+  g10.duration.specify([1 19]);
+T.R.constrain(g10);
+  g10.Value.specify(-5.00000);
+  g10.MeetsSubgoal.specify(true);
+
+goal(Test___R.V g32);
+  g32.start.specify([1 19]);
+  g32.end.specify(20);
+  g32.duration.specify([1 19]);
+T.R.constrain(g10, g32);
+  g32.Value.specify(2.00000);
+  g32.MeetsSubgoal.specify(false);
+
+g10 before g32; // key=42
+g10 before g32; // key=52

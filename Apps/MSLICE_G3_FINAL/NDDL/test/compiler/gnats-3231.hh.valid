@@ -1,0 +1,37 @@
+#include "Db.hh"
+#include "NddlUtils.hh"
+/** Custom Include Files **/
+
+namespace NDDL {
+
+// gnats-3231.nddl
+
+  class GnatsClass;
+  typedef Id<GnatsClass> GnatsClassId;
+  typedef ObjectDomain GnatsClassDomain;
+  
+  
+  // gnats-3231.nddl:1 GnatsClass
+  class GnatsClass : public Object {
+  public:
+    GnatsClass(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    GnatsClass(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    GnatsClass(const ObjectId& parent, const LabelStr& name);
+    GnatsClass(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    virtual void constructor(); // default constructoror
+    
+    class p;
+    typedef Id<p> pId;
+    
+    // gnats-3231.nddl:1 p
+    class p : public NddlToken {
+    public:
+      p(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      p(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(GnatsClass::p, GnatsClass.p);
+      
+    };
+  };
+} // End NDDL namespace

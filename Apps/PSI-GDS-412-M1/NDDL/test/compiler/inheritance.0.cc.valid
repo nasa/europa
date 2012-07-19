@@ -1,0 +1,210 @@
+// inheritance.0.nddl
+
+#include "inheritance.0.hh"
+#include "NddlUtils.hh"
+
+namespace NDDL {
+  
+  TokenStates TokenStatesBaseDomain(){
+    static TokenStates sl_enum("TokenStates");
+    if (sl_enum.isOpen()) {
+      // Insert values to initialize
+      sl_enum.insert(LabelStr("INACTIVE"));
+      sl_enum.insert(LabelStr("ACTIVE"));
+      sl_enum.insert(LabelStr("MERGED"));
+      sl_enum.insert(LabelStr("REJECTED"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
+  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Timeline
+  
+  
+  
+  // Plasma.nddl:15 StringData
+  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "StringData", name, true) {
+  }
+  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  StringData::StringData(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "StringData", name, true) {}
+  StringData::StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void StringData::handleDefaults(bool autoClose) {
+    if(data.isNoId()){
+      data = addVariable(StringDomain("string"), "data");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  // Plasma.nddl:15 StringData
+  void StringData::constructor(const LabelStr& _data) {
+    data = addVariable(StringDomain(_data, "string"), "data");
+  }
+  
+  // Plasma.nddl:15 StringData
+  class StringDataFactory0: public ConcreteObjectFactory {
+  public:
+    StringDataFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 1);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("string")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
+      check_error(arguments[0]->isSingleton());
+      LabelStr _data((LabelStr)arguments[0]->getSingletonValue());
+      
+      StringDataId instance = (new StringData(planDb, objectType, objectName))->getId();
+      instance->constructor(_data);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  
+  // inheritance.0.nddl:5 Foo
+  Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "Foo", name, true) {
+  }
+  Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  Foo::Foo(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "Foo", name, true) {}
+  Foo::Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void Foo::handleDefaults(bool autoClose) {
+    if (autoClose)
+      close();
+  }
+  
+  // implicit constructor
+  void Foo::constructor() {
+  }
+  
+  
+  // inheritance.0.nddl:5 Foo
+  DECLARE_DEFAULT_OBJECT_FACTORY(FooFactory1, Foo);
+  
+  
+  // inheritance.0.nddl:7 Bar
+  Bar::Bar(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Foo(planDatabase, "Bar", name) {
+  }
+  Bar::Bar(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Foo(planDatabase, type, name) {
+  }
+  Bar::Bar(const ObjectId& parent, const LabelStr& name)
+   : Foo(parent, "Bar", name) {}
+  Bar::Bar(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Foo(parent, type, name) {}
+  // default initialization of member variables
+  void Bar::handleDefaults(bool autoClose) {
+    Foo::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  // inheritance.0.nddl:7 Bar
+  DECLARE_DEFAULT_OBJECT_FACTORY(BarFactory2, Bar);
+  
+  
+  // inheritance.0.nddl:9 Baz
+  Baz::Baz(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Foo(planDatabase, "Baz", name) {
+  }
+  Baz::Baz(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Foo(planDatabase, type, name) {
+  }
+  Baz::Baz(const ObjectId& parent, const LabelStr& name)
+   : Foo(parent, "Baz", name) {}
+  Baz::Baz(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Foo(parent, type, name) {}
+  // default initialization of member variables
+  void Baz::handleDefaults(bool autoClose) {
+    Foo::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  // inheritance.0.nddl:9 Baz
+  DECLARE_DEFAULT_OBJECT_FACTORY(BazFactory3, Baz);
+  
+  
+  // inheritance.0.nddl:11 Bing
+  Bing::Bing(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Baz(planDatabase, "Bing", name) {
+  }
+  Bing::Bing(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Baz(planDatabase, type, name) {
+  }
+  Bing::Bing(const ObjectId& parent, const LabelStr& name)
+   : Baz(parent, "Bing", name) {}
+  Bing::Bing(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Baz(parent, type, name) {}
+  // default initialization of member variables
+  void Bing::handleDefaults(bool autoClose) {
+    Baz::handleDefaults(false);
+    if (autoClose)
+      close();
+  }
+  
+  
+  // inheritance.0.nddl:11 Bing
+  DECLARE_DEFAULT_OBJECT_FACTORY(BingFactory4, Bing);
+  
+} // namespace NDDL
+
+
+namespace NDDL {
+  // Boot-strap code to initialize schema
+  extern "C" SchemaId loadSchema(){
+    Id<Schema> id = Schema::instance("inheritance.0");
+    id->reset(); // Reset prior data if present. 
+    
+    // Register Constraints
+    // Invoke commands to populate schema with type definitions
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("StringData", "Object");
+    id->addObjectType("Foo", "Object");
+    id->addObjectType("Bar", "Foo");
+    id->addObjectType("Baz", "Foo");
+    id->addObjectType("Bing", "Baz");
+    id->addEnum("TokenStates");
+    id->addMember("StringData", "string", "data");
+    id->addValue("TokenStates", LabelStr("INACTIVE"));
+    id->addValue("TokenStates", LabelStr("ACTIVE"));
+    id->addValue("TokenStates", LabelStr("MERGED"));
+    id->addValue("TokenStates", LabelStr("REJECTED"));
+    // Force allocation of model specific type factories
+    // Allocate factories
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
+    REGISTER_TYPE_FACTORY(Timeline, ObjectDomain("Timeline"));
+    REGISTER_TYPE_FACTORY(StringData, ObjectDomain("StringData"));
+    REGISTER_OBJECT_FACTORY(StringDataFactory0, StringData:string);
+    REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
+    REGISTER_OBJECT_FACTORY(FooFactory1, Foo);
+    REGISTER_TYPE_FACTORY(Bar, ObjectDomain("Bar"));
+    REGISTER_OBJECT_FACTORY(BarFactory2, Bar);
+    REGISTER_TYPE_FACTORY(Baz, ObjectDomain("Baz"));
+    REGISTER_OBJECT_FACTORY(BazFactory3, Baz);
+    REGISTER_TYPE_FACTORY(Bing, ObjectDomain("Bing"));
+    REGISTER_OBJECT_FACTORY(BingFactory4, Bing);
+    // Allocate rules
+    return id;
+  }
+  
+}

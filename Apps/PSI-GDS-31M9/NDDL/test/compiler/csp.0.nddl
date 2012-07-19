@@ -1,0 +1,20 @@
+#include "Constraints.nddl"
+
+// Declare variables of type int.
+int a; // Declare a variable of type int. It's base domain = [-inf +inf]
+int b = [-inf +inf]; // Equivalent declaration but making the base domain explicit.
+int c = 15; // In place initialization to a singleton value. Base domain = 40.
+int d = [1 20]; // In place initialization to a finite interval. Base domain = [1 20].
+
+// Post constraints on variables
+eq(a, b); // a == b
+leq(b, c); // b <= c 
+addEq(b, c, d); // b + c == d
+eq(b, [4 8]); // b == [4 8]
+eq(a, 5); // a == 5
+
+// Now we show use of a library constraint to verify expected solutions to the CSP.
+testEQ(true, a, 5); // Asserts that a == 5
+testEQ(true, b, 5); // Asserts that b == 5 
+testEQ(true, c, 15);// Asserts that c == 15
+testEQ(true, d, 20);// Asserts that d == 20

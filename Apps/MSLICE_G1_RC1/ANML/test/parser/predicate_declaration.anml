@@ -1,0 +1,2 @@
+predicate y(int x);
+predicate a(int b), c(int d);

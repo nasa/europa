@@ -1,0 +1,77 @@
+#include "PlannerTestConfig.nddl"
+
+class Foo extends Timeline {
+ int fieldValue;
+
+ predicate pred{int arg;}
+
+ Foo(int _fieldValue){
+  fieldValue = _fieldValue;
+ }
+}
+
+class Bar {
+ Foo foo1;
+ Foo foo2;
+ Foo foo3;
+
+ Bar(){
+  foo1 = new Foo(1);
+  foo2 = new Foo(2);
+  foo3 = new Foo(3);
+ }
+}
+
+class Baz {
+ Bar bar1;
+ Bar bar2;
+ Bar bar3;
+ Baz(){
+  bar1 = new Bar();
+  bar2 = new Bar();
+  bar3 = new Bar();
+ }
+}
+
+Foo::pred{
+ // Allocate a slave, and set it up to be stacked on this. Careful for merging
+ any(object.pred p); // Force merge
+ eq(arg, p.arg);
+ int _start;
+ int _end;
+ eq(_start, start);
+ eq(_end, end);
+ concurrent(_start, p.start);
+ concurrent(_end, p.end);
+
+
+ // Allocate a var of objects and constrain it based on a slave variable
+ Baz baz1;
+ eq(baz1.bar1.foo1.fieldValue, p.arg);
+
+/*
+ // There should be exactly
+ bool b;
+ if(b){
+  foreach (baz in baz1) {
+   contains(pred);
+  }
+ }
+*/
+}
+
+PlannerTestConfig world = new PlannerTestConfig(0, 10, 4, 3);
+Baz b0 = new Baz();
+Baz b1 = new Baz();
+Baz b2 = new Baz();
+
+close();
+rejectable(Foo.pred g0);
+g0.start.specify(0);
+g0.end.specify(10);
+g0.arg.specify(100);
+
+goal(Foo.pred g1);
+g1.start.specify(0);
+g1.end.specify(10);
+g1.arg.specify(1);

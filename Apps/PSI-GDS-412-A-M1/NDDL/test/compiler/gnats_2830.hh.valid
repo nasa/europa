@@ -1,0 +1,181 @@
+#include "Db.hh"
+#include "NddlUtils.hh"
+/** Custom Include Files **/
+
+namespace NDDL {
+
+// gnats_2830.nddl
+
+  class PlannerConfig;
+  typedef Id<PlannerConfig> PlannerConfigId;
+  typedef ObjectDomain PlannerConfigDomain;
+  
+  class StringData;
+  typedef Id<StringData> StringDataId;
+  typedef ObjectDomain StringDataDomain;
+  
+  class Path;
+  typedef Id<Path> PathId;
+  typedef ObjectDomain PathDomain;
+  
+  class Enable;
+  typedef Id<Enable> EnableId;
+  typedef ObjectDomain EnableDomain;
+  
+  class Position;
+  typedef Id<Position> PositionId;
+  typedef ObjectDomain PositionDomain;
+  
+  class Foo;
+  typedef Id<Foo> FooId;
+  typedef ObjectDomain FooDomain;
+  
+  
+  // PlannerConfig.nddl:7 PlannerConfig
+  class PlannerConfig : public Object {
+  public:
+    PlannerConfig(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    PlannerConfig(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    PlannerConfig(const ObjectId& parent, const LabelStr& name);
+    PlannerConfig(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId m_horizonStart; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_horizonEnd; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_maxPlannerSteps; // SchemaWriter::declareVariable
+    ConstrainedVariableId m_maxPlannerDepth; // SchemaWriter::declareVariable
+    
+    // PlannerConfig.nddl:7 PlannerConfig
+    virtual void constructor(int start, int end, int maxPlannerSteps, int maxPlannerDepth);
+    
+    // PlannerConfig.nddl:7 PlannerConfig
+    virtual void constructor(int start, int end, int maxPlannerSteps);
+    
+    // PlannerConfig.nddl:7 PlannerConfig
+    virtual void constructor();
+  };
+  
+  
+  // Core.nddl:8 TokenStates
+  typedef SymbolDomain TokenStates;
+  TokenStates TokenStatesBaseDomain();
+  // SKIPPING DECLARATION FOR BUILT-IN CLASS Timeline
+  
+  
+  // Plasma.nddl:15 StringData
+  class StringData : public Object {
+  public:
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& name);
+    StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId data; // SchemaWriter::declareVariable
+    
+    // Plasma.nddl:15 StringData
+    virtual void constructor(const LabelStr& _data);
+  };
+  
+  
+  // gnats_2830.nddl:4 Location
+  typedef SymbolDomain Location;
+  Location LocationBaseDomain();
+  
+  // gnats_2830.nddl:6 Path
+  class Path : public Object {
+  public:
+    Path(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Path(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Path(const ObjectId& parent, const LabelStr& name);
+    Path(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId _from; // SchemaWriter::declareVariable
+    ConstrainedVariableId _to; // SchemaWriter::declareVariable
+    
+    // gnats_2830.nddl:6 Path
+    virtual void constructor(const LabelStr& f, const LabelStr& t);
+  };
+  
+  // gnats_2830.nddl:16 Enable
+  class Enable : public Object {
+  public:
+    Enable(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Enable(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Enable(const ObjectId& parent, const LabelStr& name);
+    Enable(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    
+    ConstrainedVariableId _t; // SchemaWriter::declareVariable
+    ConstrainedVariableId _p; // SchemaWriter::declareVariable
+    
+    // gnats_2830.nddl:16 Enable
+    virtual void constructor(const LabelStr& l, const PathId& p);
+  };
+  
+  // gnats_2830.nddl:26 Position
+  class Position : public Timeline {
+  public:
+    Position(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Position(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Position(const ObjectId& parent, const LabelStr& name);
+    Position(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    virtual void constructor(); // default constructoror
+    
+    class At;
+    typedef Id<At> AtId;
+    class Navigate;
+    typedef Id<Navigate> NavigateId;
+    
+    // gnats_2830.nddl:28 At
+    class At : public NddlToken {
+    public:
+      At(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      At(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Position::At, Position.At);
+      
+      ConstrainedVariableId _l; // SchemaWriter::declareVariable
+    };
+    
+    // gnats_2830.nddl:32 Navigate
+    class Navigate : public NddlToken {
+    public:
+      Navigate(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      Navigate(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Position::Navigate, Position.Navigate);
+      
+      ConstrainedVariableId _from; // SchemaWriter::declareVariable
+      ConstrainedVariableId _to; // SchemaWriter::declareVariable
+      ConstrainedVariableId _p; // SchemaWriter::declareVariable
+    };
+  };
+  
+  // gnats_2830.nddl:39 Foo
+  class Foo : public Timeline {
+  public:
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& name);
+    Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& name);
+    Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name);
+    void handleDefaults(bool autoClose = true); // default variable initialization
+    virtual void constructor(); // default constructoror
+    
+    class FooPred;
+    typedef Id<FooPred> FooPredId;
+    
+    // gnats_2830.nddl:41 FooPred
+    class FooPred : public NddlToken {
+    public:
+      FooPred(const PlanDatabaseId& planDatabase, const LabelStr& name, bool rejectable = false, bool isFact = false, bool close = false);
+      FooPred(const TokenId& parent, const LabelStr& name, const LabelStr& relation, bool close = false);
+      void handleDefaults(bool autoClose = true); // default variable initialization
+      DECLARE_TOKEN_FACTORY(Foo::FooPred, Foo.FooPred);
+      
+      ConstrainedVariableId loc; // SchemaWriter::declareVariable
+    };
+  };
+} // End NDDL namespace

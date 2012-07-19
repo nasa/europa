@@ -1,0 +1,234 @@
+M_27
+1. Solver has been created (a replacement for CBPlanner)
+2. The NDDL parser has been completely rewritten.
+3. Documentation restructured and enhanced.
+4. Various and sundry minor features and bug fixes.
+
+M_26
+1. Important changes in the way we handle dynamic domains. We now force object variables of
+dynamic object types to be closed on construction, though the type may be open. We also allow
+direct operations in variables to close and open them and consider opening a variable a relaxation
+in the network.
+2. A good first cut at the new solvers module is in place.
+3. Caching has been introduced into the plan database for more efficiently obtaining compatible tokens
+and ordering choices.
+
+EUROPA2_20050404_0
+1. fixes to HSTS heuristics that cause some problems but fix others
+2. fixes to the converter to convert initial states properly and to
+eliminate singleton specifications of heuristics if they correspond to the
+full domain.
+3. fixes to infinite domain treatment
+4. fixes to propagate temporal changes to non-temporal variables
+5. eliminated choices in CBPlanner and optimized to handle large domain sizes
+6. fixed parser to parse strings with "." in them (like filenames)
+7. Bool types are now symbolic and not numeric.
+8. Dynamic linking works on Mac OSX now.
+
+EUROPA2_20050228_0
+1. fixed HSTS heuristics so all HSTS models either succeed or timeout
+2. added stream version of check_error
+3. added support for queries with cutoffs
+
+TUTORIAL_20050210
+1. Improvements to documentation
+2. Improved support for multiple guards
+3. Numerous bug fixes
+	
+EUROPA2_20050114_0
+1. Aver test language and interpreter added to the modules
+2. HSTS planner, constraint semantics, and heuristics and plan id support
+for migrating users added to the modules
+3. Numerous Europa system tests have been added to HSTS/test, though not
+all run successfully.
+4. Object constrain has been changed to constrain(object,pred,succ) to
+ensure uniformity when using any type of object.  Free has been
+changed to match.  Makes it easier to keep track of relationships when
+doing non-chronological backtracking.
+5. Id locking has been added to allow multiple users to lock the plan
+database while imposing transactions on it on a thread by thread basis.
+6. DebugMsg has replaced logging to std::cout and we added configuration
+files in each module.
+7. API documentation templates in doxygen have been added.
+8. User guide has improved.
+9. We include more comprehensive README and BUILDING files as well as a HELLOWORLD
+10. Numerous bug fixes and better build support
+	
+M_25
+1. A fairly solid milestone using the new build structure with numerous small fixes.
+2. First incorporation of the project creation utilities to make a useful project.
+
+DEV_20041026_0
+1. build support for shared libraries for modules & models
+
+DEV_20040906_0
+1. patches for types, resolution, usage, and maintenance
+	
+DEV_20040819_0
+1. Cleaned up destructors in planner and decision managers.
+
+DEV_20040817_0
+1. Changed logic for handling retracted decisions, we now ensure that
+decisions are deleted when there are no more choices left and new ones are
+created eagerly.
+2. Fixed several bugs in decision handling and managing discarded decisions.
+3. We now evaluate tokens every time a temporal variable changes.	
+	
+M_24:
+1. Revised implementation for GNATS-2489. Existential Quantification will now enforce constraints on input variables. Filtering will not
+enforce such constraints.
+2. Fixed problem with epsilon safe comparisons discovered in Enumerated domains.
+3. Enhanced integration of Error and Debug support.
+
+
+M_23:
+1. Fixed bug in Planner where it was retracting all the way out of the first decision failed. See System/tests/rejection.nddl.
+2. Reimplemented existential and universal quantification, driven by GNATS-2489.
+3. Implemented support for constraints of any arity and streamlined factory mechanism for constraints. Unary and Non-uanry construction is all the same now. Removed all special support for unary constraints, except for the provision for testing if a constraint is unary.
+
+
+M_22:
+1. Added NegationConstraint.
+2. Added support for a PlannerConfig class in NDDL, rather than using NddlWorld.
+3. Completed support for object dynamicity, addressing GNATS 2342.
+4. Decision manager cleans up decisions even if other agents closed
+them, addressing GNATS 2493.
+
+M_21:
+1. Changed object decision model to avoid incompleness in search.
+2. GNATS addressed in this milestone: 2469, 2485
+
+M_20:
+1. Main focus has been a re0implementation of internals of resources to simplify it.
+2. GNATS addressed in this milestone: 2477, 2472, 2471, 2470, 2460, 2458, 2457, 2431, 2409, 2480
+	
+M_19:
+1. Fixed some bugs in the planner in order to get new test case working. See
+System/test/resource-backtrack.nddl
+2. Include foreach example in system tests. Still have to get it working with file based copy.
+
+M_18:
+1. Agent Database has been added. New module for multi-threaded access. Baseline version.
+2. A number of synchronization problems with Id's in Resources and in the Planner discovered and fixed.
+3. A plethora of gnats fixes.
+4. Support for 'foreach' semantics in NDDL and in the rules engine.
+5. Incorporated temporary fix for accessing active tokens in slaves. This will only work for a chronological backtrack.
+6. Added some code for getting more precise distance relationships from the temporal advisor.
+
+M_17:
+1. First tag in new PLASMA cvs directory.
+2. Minor build patches.
+
+MIGRATED:
+1. Migrated to PLASMA build structure and cvs directory.
+
+M_16:
+?
+
+M_15:
+1. Changed CBPlanner so that responsibilities for maintaining open
+decisions in sorted order relies on the OpenDecisionManager rather than the
+DecisionManager.  The DecisionManager manages events and processes them in
+the order they should be processed.   This shouldn't have to change as long
+as the planner is a backtracking planner.
+2. Measured performance and there has been no degradation and no
+perceptible improvement.
+
+M_14:
+**** Major Performance Milestone
+1. Introduced CBPlanner which responds to PlanDatabase and ConstraintEngine
+events to manage decisions directly without Flaws.
+2. Moved java nddl parser.
+3. Introduced support for Dynamic Objects
+
+M_12:
+**** Fixed problems creating Object Decision Points from flaws.
+1. Introduced new test cases in Planner module to test backtracking due to
+subgoaling.
+2. ObjectFlaws now maintain the list of tokens involved in the flaw to ease
+decision management.
+3. Introduced a flaw decision map to manage map between flaws and
+decisions, specifically in the case of multiple object decisions per object
+flaw.
+4. Cleaned up planner module tests
+5. Removed redirection to file logging on SamplePlanDatabase.hh
+
+M_11:
+**** Fixed problems integrating the Temporal Network.
+1. Lazy propagation of constraints added is not safe as it is required to obtain the context for returning no-goods.
+2. Was allowing paths through incremental propagation even when the TNET was inconsistent.
+3. Was allowing immediate execution of StartEndDuration relations in the propagator's execute method since consequences
+of propagation could cause new constraints to be inserted on the agenda of constraints to execute, while we were executingthem. This meant they would execute before the tnet had a change to be updated and propagated. Consequently, we would see
+side-effects from executing the constraint. It turns out we do not need to update the duration variable anyway, so we knowskip this constraint execution altogether.
+4. Have greatly simplified the buffering model in the TemporalPropagator.
+5. Added k9.backtrack.moderate to the system tests. This was breaking and is now fixed.
+6. k9.huge also runs.
+7. We appear to now have good memory performance. k9.huge completes in 18M.
+
+M_10:
+**** Performance improvement: beat betaPlanner by 66% up to 2 orders of magnitude on satellite problems.
+1. Miscellaneous inlining
+2. Added a cache from flaws to decisions to expedite decision processing in
+synchronize flaws.
+3. Added purging of entities, constraint engine, plan database, etc.
+4. Hooked up FlawSynchConnector
+
+M_9:
+**** Performance milestone: beat betaPlanner by 30% up to 2 orders of magnitude on satellite problems.
+1. Buffered addition of constraints to temporal network.
+2. Optimized heuristic ordering.
+3. Optimized apply flaw changes in decision handling.
+4. Inlined a few heavily used methods.
+
+M_8:
+1. Updated Entity to allow linkage with an external entity. This allows efficient integration with
+shadowed objects. In particular, we use this for Timepoints and TemporalConstraints in the
+TempralNetwork
+2. Removed TokenTemporalVariable
+3. Made significant changes to the TemporalPropagator to avoid looking up links between entities, and
+also to be more selective about restricting updates to active variables only.
+
+M_7:
+**** Removed FlawQuery, FlawQueryListener, FlawQueryLogger files 
+1. Fixed bugs and cleaned up code in EUROPAHeuristicStrategy and Decision
+handling.
+2. Implemented Incremental flaw change synchronization.  Moved FlawQuery
+functionality into FlawSource, removed FlawQuery and associated files.
+Imposed correspondance between conditions, filters, and FlawSource.
+Changed implementation of FlawSource to listen to messages to decide when
+to evaluate flaws for possible change.
+3. Tweaked TemporalPropagator to avoid adding and removing constraints
+unnecessarily.
+4. Added performance test framework to SystemTests
+
+M_6:
+1. Fixed bug in temporal network propagator execute method. It was masking side-effects which required further
+propagation. Note that executing StartEndDuration may impact and of the start, end or duration variables.
+2. Still have open bug where the Rover model backtracks when it shouldn't, at the direction of the TemporalNetwork,
+and arising out of Merging and Activation decisions.
+3. Still have open bug where transaction logging and replay leads to spurious behavior if done repeatedly. The general
+symptom is that we get the CE in an inconsistent state when trying to constrain token(s) on an object.
+4. Have implemented a write mechanism on the DbClient which gives us a pretty good checksum as a string for comparing
+the copied plan.
+
+M_5:
+1. Principal Transaction Logging and replay infrastructure completed.
+
+M_4:
+1. Working version of DecisionPlay and Replay
+2. Some minor fixes to the NddlCompiler
+3. A bunch of new Constraints ported from EUROPA
+4. Introduction of Constraint test harness
+5. Other minor bug fixes
+
+M_3:
+1. Nddl Compiler Cleanup
+2. Added Factories to NddlCompiler generation.
+3. Added DbClient for playing logged transactions.
+
+M_2:
+1. Working integration of the Temporal Network
+2. Support for nested guards.
+
+M_1:
+1. Baseline TAG.

@@ -1,0 +1,12 @@
+SubDir PLASMA Solvers ;
+
+if ! $(PLASMA_READY) {
+
+	Module Solvers : NDDL ;
+
+	SubInclude PLASMA Solvers base ;
+	SubInclude PLASMA Solvers component ;
+	SubInclude PLASMA Solvers documentation ;
+	SubInclude PLASMA Solvers test ;
+
+} # PLASMA_READY

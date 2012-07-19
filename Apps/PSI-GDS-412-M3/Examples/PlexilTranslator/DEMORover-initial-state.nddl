@@ -1,0 +1,39 @@
+#include "DEMORover-model.nddl"
+
+// Create a planner configuration instance in PLASMA.
+// Horizon Start, Horizon End, MaxPlannerSteps, MaxPlannerDepth
+
+//Note horizon time scale is in seconds
+
+PlannerConfig plannerConfiguration = new PlannerConfig(0,500 ,500, +inf);
+
+Rover b = new Rover();
+
+Location hill = new Location("hill",1.0,1.0);
+Location rock1 = new Location("rock1",1.0,2.0);
+Location rock2 = new Location("rock2",2.0,1.0);
+
+//Note position scale in meters, but distance scale is in centimeters
+
+Path p1 = new Path("hill-rock1",hill,rock1,100.0,90.0);
+Path p3 = new Path("rock1-hill",rock1,hill,100.0,270.0);
+Path p2 = new Path("hill-rock2",hill,rock2,100.0,0.0);
+Path p4 = new Path("rock2-hill",rock2,hill,100.0,180.0);
+Path p5 = new Path("rock2-rock1",rock2,rock1,142.0,315.0);
+Path p6 = new Path("rock1-rock2",rock1,rock2,142.0,135.0);
+
+close();
+
+goal(Navigator.at init);
+eq(init.location, hill);
+init.start.specify(0);
+init.end.specify(60);
+init.heading.specify(30.0);
+
+goal(Navigator.at final);
+eq(final.location, rock2);
+final.end.specify(500);
+
+
+//goal(Navigator.turn_in_place final);
+//final.end.specify(15);

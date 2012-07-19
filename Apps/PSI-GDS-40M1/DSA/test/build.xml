@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="PLASMA" default="execute" basedir=".">
+  <description>  DSA Test targets  </description>
+
+  <!-- set global properties for this build -->
+
+  <property name="src" value="."/>
+  <property name="build" value="classes"/>
+  <property name="dist"  value="../../lib"/>
+  <property name="jars"  value="../../ext"/>
+  <!-- show line numbers in stack trace -->
+  <property name="debug"  value="true"/>
+  <!-- property name="deprecation"  value="off"/ -->
+  <property name="deprecation"  value="true"/>
+  <property environment="env"/>
+
+  
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+    <!-- echo message="init completed"/ -->
+  </target>
+
+  <target name="execute" depends="compile" description="build and run test harness" >
+    <!-- Compile the java code from ${src} into ${build} -->
+    <java classname="Main">
+       <arg value="${env.PLASMA_HOME}/DSA/test/"/>
+       <classpath>
+	  <pathelement location="${dist}/DSA.jar"/>
+	  <pathelement location="${jars}/junit/junit-4.1.jar"/>
+	  <pathelement location="../../NDDL/base/jars/nddl.jar"/>
+	  <pathelement location="./classes"/>
+       </classpath>
+    </java>
+    <echo message="compile completed"/>
+  </target>
+
+  <target name="runSocketListener" depends="compile" description="build and run socket server" >
+    <!-- Compile the java code from ${src} into ${build} -->
+    <java classname="dsa.SocketListener">
+       <classpath>
+	  <pathelement location="${dist}/DSA.jar"/>
+	  <pathelement location="./classes"/>
+       </classpath>
+    </java>
+    <echo message="compile completed"/>
+  </target>
+
+  <target name="compile" depends="init"
+        description="compile 'src' tree into 'classes' tree" >
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}" debug="${debug}" deprecation="${deprecation}">
+       <classpath>
+	  <pathelement location="${dist}/DSA.jar"/>
+	  <pathelement location="${jars}/junit/junit-4.1.jar"/>
+       </classpath>
+    </javac>
+    <echo message="compile completed"/>
+  </target>
+
+  <target name="clean"
+        description="delete the 'classes' directory tree" >
+    <!-- Delete the ${build} directory trees -->
+    <delete dir="${build}"/>
+    <echo message="clean class files completed"/>
+  </target>
+
+</project>

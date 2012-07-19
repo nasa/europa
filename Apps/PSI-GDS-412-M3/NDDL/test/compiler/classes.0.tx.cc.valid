@@ -1,0 +1,304 @@
+// classes.0.tx.nddl
+
+#include "classes.0.tx.hh"
+#include "NddlUtils.hh"
+
+namespace NDDL {
+  
+  TokenStates TokenStatesBaseDomain(){
+    static TokenStates sl_enum("TokenStates");
+    if (sl_enum.isOpen()) {
+      // Insert values to initialize
+      sl_enum.insert(LabelStr("INACTIVE"));
+      sl_enum.insert(LabelStr("ACTIVE"));
+      sl_enum.insert(LabelStr("MERGED"));
+      sl_enum.insert(LabelStr("REJECTED"));
+      sl_enum.close();
+    }
+    return(sl_enum);
+  }
+  // SKIPPING IMPLEMENTATION FOR BUILT-IN CLASS Timeline
+  
+  
+  
+  // Plasma.nddl:15 StringData
+  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "StringData", name, true) {
+  }
+  StringData::StringData(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  StringData::StringData(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "StringData", name, true) {}
+  StringData::StringData(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void StringData::handleDefaults(bool autoClose) {
+    if(data.isNoId()){
+      data = addVariable(StringDomain("string"), "data");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  // Plasma.nddl:15 StringData
+  void StringData::constructor(const LabelStr& _data) {
+    data = addVariable(StringDomain(_data, "string"), "data");
+  }
+  
+  // Plasma.nddl:15 StringData
+  class StringDataFactory0: public ConcreteObjectFactory {
+  public:
+    StringDataFactory0(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 1);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("string")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
+      check_error(arguments[0]->isSingleton());
+      LabelStr _data((LabelStr)arguments[0]->getSingletonValue());
+      
+      StringDataId instance = (new StringData(planDb, objectType, objectName))->getId();
+      instance->constructor(_data);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  
+  // classes.0.nddl:5 Location
+  Location::Location(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "Location", name, true) {
+  }
+  Location::Location(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  Location::Location(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "Location", name, true) {}
+  Location::Location(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void Location::handleDefaults(bool autoClose) {
+    if(name.isNoId()){
+      name = addVariable(StringDomain("string"), "name");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  // classes.0.nddl:5 Location
+  void Location::constructor(const LabelStr& _name) {
+    name = addVariable(StringDomain(_name, "string"), "name");
+  }
+  
+  // classes.0.nddl:5 Location
+  class LocationFactory1: public ConcreteObjectFactory {
+  public:
+    LocationFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 1);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("string")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to string");
+      check_error(arguments[0]->isSingleton());
+      LabelStr _name((LabelStr)arguments[0]->getSingletonValue());
+      
+      LocationId instance = (new Location(planDb, objectType, objectName))->getId();
+      instance->constructor(_name);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  
+  // classes.0.nddl:13 Path
+  Path::Path(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "Path", name, true) {
+  }
+  Path::Path(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  Path::Path(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "Path", name, true) {}
+  Path::Path(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void Path::handleDefaults(bool autoClose) {
+    check_error(from.isValid(), "object variables must be initialized explicitly");
+    
+    check_error(to.isValid(), "object variables must be initialized explicitly");
+    
+    if(cost.isNoId()){
+      cost = addVariable(IntervalDomain(0.0,0.0, "float"), "cost");
+    }
+    if (autoClose)
+      close();
+  }
+  
+  
+  // classes.0.nddl:13 Path
+  void Path::constructor(const LocationId& _from, const LocationId& _to) {
+    from = addVariable(LocationDomain(_from, "Location"), "from");
+    to = addVariable(LocationDomain(_to, "Location"), "to");
+  }
+  
+  // classes.0.nddl:13 Path
+  class PathFactory2: public ConcreteObjectFactory {
+  public:
+    PathFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 2);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("Location")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to Location");
+      check_error(arguments[0]->isSingleton());
+      LocationId _from((LocationId)arguments[0]->getSingletonValue());
+      
+      check_error(AbstractDomain::canBeCompared(*arguments[1], 
+                                                TypeFactory::baseDomain("Location")), 
+                  "Cannot convert " + arguments[1]->getTypeName().toString() + " to Location");
+      check_error(arguments[1]->isSingleton());
+      LocationId _to((LocationId)arguments[1]->getSingletonValue());
+      
+      PathId instance = (new Path(planDb, objectType, objectName))->getId();
+      instance->constructor(_from, _to);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  // classes.0.nddl:13 Path
+  void Path::constructor(const LocationId& loc) {
+    from = addVariable(LocationDomain(loc, "Location"), "from");
+    to = addVariable(LocationDomain(loc, "Location"), "to");
+  }
+  
+  // classes.0.nddl:13 Path
+  class PathFactory3: public ConcreteObjectFactory {
+  public:
+    PathFactory3(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 1);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("Location")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to Location");
+      check_error(arguments[0]->isSingleton());
+      LocationId loc((LocationId)arguments[0]->getSingletonValue());
+      
+      PathId instance = (new Path(planDb, objectType, objectName))->getId();
+      instance->constructor(loc);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  // classes.0.nddl:13 Path
+  void Path::constructor(const LocationId& _from, const LocationId& _to, float _cost) {
+    from = addVariable(LocationDomain(_from, "Location"), "from");
+    to = addVariable(LocationDomain(_to, "Location"), "to");
+    cost = addVariable(IntervalDomain(_cost, _cost, "float"), "cost");
+  }
+  
+  // classes.0.nddl:13 Path
+  class PathFactory4: public ConcreteObjectFactory {
+  public:
+    PathFactory4(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<const AbstractDomain*>& arguments) const {
+      check_error(arguments.size() == 3);
+      check_error(AbstractDomain::canBeCompared(*arguments[0], 
+                                                TypeFactory::baseDomain("Location")), 
+                  "Cannot convert " + arguments[0]->getTypeName().toString() + " to Location");
+      check_error(arguments[0]->isSingleton());
+      LocationId _from((LocationId)arguments[0]->getSingletonValue());
+      
+      check_error(AbstractDomain::canBeCompared(*arguments[1], 
+                                                TypeFactory::baseDomain("Location")), 
+                  "Cannot convert " + arguments[1]->getTypeName().toString() + " to Location");
+      check_error(arguments[1]->isSingleton());
+      LocationId _to((LocationId)arguments[1]->getSingletonValue());
+      
+      check_error(AbstractDomain::canBeCompared(*arguments[2], 
+                                                TypeFactory::baseDomain("float")), 
+                  "Cannot convert " + arguments[2]->getTypeName().toString() + " to float");
+      check_error(arguments[2]->isSingleton());
+      float _cost((float)arguments[2]->getSingletonValue());
+      
+      PathId instance = (new Path(planDb, objectType, objectName))->getId();
+      instance->constructor(_from, _to, _cost);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+} // namespace NDDL
+
+
+namespace NDDL {
+  // Boot-strap code to initialize schema
+  extern "C" SchemaId loadSchema(){
+    Id<Schema> id = Schema::instance("classes.0.tx");
+    id->reset(); // Reset prior data if present. 
+    
+    // Register Constraints
+    // Invoke commands to populate schema with type definitions
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("StringData", "Object");
+    id->addObjectType("Location", "Object");
+    id->addObjectType("Path", "Object");
+    id->addEnum("TokenStates");
+    id->addMember("StringData", "string", "data");
+    id->addMember("Location", "string", "name");
+    id->addMember("Path", "Location", "from");
+    id->addMember("Path", "Location", "to");
+    id->addMember("Path", "float", "cost");
+    id->addValue("TokenStates", LabelStr("INACTIVE"));
+    id->addValue("TokenStates", LabelStr("ACTIVE"));
+    id->addValue("TokenStates", LabelStr("MERGED"));
+    id->addValue("TokenStates", LabelStr("REJECTED"));
+    // Force allocation of model specific type factories
+    // Allocate factories
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(TokenStates, TokenStatesBaseDomain());
+    REGISTER_TYPE_FACTORY(Timeline, ObjectDomain("Timeline"));
+    REGISTER_TYPE_FACTORY(StringData, ObjectDomain("StringData"));
+    REGISTER_OBJECT_FACTORY(StringDataFactory0, StringData:string);
+    REGISTER_TYPE_FACTORY(Location, ObjectDomain("Location"));
+    REGISTER_OBJECT_FACTORY(LocationFactory1, Location:string);
+    REGISTER_TYPE_FACTORY(Path, ObjectDomain("Path"));
+    REGISTER_OBJECT_FACTORY(PathFactory2, Path:Location:Location);
+    REGISTER_OBJECT_FACTORY(PathFactory2, Path:Location:Object);
+    REGISTER_OBJECT_FACTORY(PathFactory2, Path:Object:Location);
+    REGISTER_OBJECT_FACTORY(PathFactory2, Path:Object:Object);
+    REGISTER_OBJECT_FACTORY(PathFactory3, Path:Location);
+    REGISTER_OBJECT_FACTORY(PathFactory3, Path:Object);
+    REGISTER_OBJECT_FACTORY(PathFactory4, Path:Location:Location:float);
+    REGISTER_OBJECT_FACTORY(PathFactory4, Path:Location:Object:float);
+    REGISTER_OBJECT_FACTORY(PathFactory4, Path:Object:Location:float);
+    REGISTER_OBJECT_FACTORY(PathFactory4, Path:Object:Object:float);
+    // Allocate rules
+    return id;
+  }
+  
+}

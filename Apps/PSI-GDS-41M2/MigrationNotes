@@ -1,0 +1,154 @@
+Brief Migration Notes
+
+$Id: MigrationNotes,v 1.11 2005-03-31 01:36:54 tania Exp $
+
+This file is intended to help users of the prior Europa (in the
+NewPlan CVS tree) planning system migrate their projects to this
+version, Europa2 (informally known as PLASMA during its initial
+development, which is still in progress at this time).
+
+This is a draft document likely to be modified fairly often as issues
+are noticed.  New issues are likely to be simply appended to the end
+without regard to importance or any other criteria, at least until the
+first official release of Europa2.
+
+There are several references to GNATS below; see the README file for
+the URL of the GNATS database.
+
+1. Explicit bounds on timepoints of tokens (whether between two tokens
+or to absolute time values) are not supported by Europa2 in XML
+transaction files.  This may be an issue when translating NewPlan
+style initial state files to NDDL or to XML transaction files.  See
+also GNATS 2708.
+
+2. In NewPlan, there is only one (C++) class Domain.  In Europa2, there
+are many: EnumeratedDomain, StringDomain, SymbolDomain, ObjectDomain,
+IntervalDomain, IntervalIntDomain, etc.  Also, each enumeration (label
+set, in NewPlan terms) will have its own C++ class for its domains.
+
+3. For several reasons, re-using (C++) domain variables is not as
+simple as in NewPlan.  First, assigning or specifying a domain will
+error out if it is not a subset of the previously specified domain;
+the domain must be reset (member function "reset()") in between such
+specifications.  Second, open domains can be closed but cannot be
+re-opened.  That, in turn, implies that propagation does not restrict
+variables with open domains, because backtracking the closures is not
+supported.  Third, changing the type of a C++ domain variable is, of
+course, not possible during run time but could be "simulated" in
+NewPlan because all C++ domain variables were of the single C++ class
+Domain.
+
+4. In Europa2, when the domain of the object variable of a token is
+closed but not singleton, then asking any of the objects in that
+domain for the list of associated tokens will include the token.  This
+is very different from the behavior of NewPlan, for which such queries
+only return the tokens that have already been inserted onto a timeline
+of the object.  (see also GNATS 2704).
+
+5. In NewPlan, label sets imply a "default ordering" heuristic based
+on the order they are given when the label set is declared.  This
+behavior is not duplicated in Europa2, for which the "default ordering"
+heuristic would be lexicographic (based on ASCII code) due to
+internals of how the C++ classes EnumeratedDomain and LabelStr are
+implemented.
+
+6. The number of plan steps for otherwise identical problems will
+almost certainly be larger with Europa2 (PLASMA) than with Europa
+(NewPlan) whenever tokens are involved due to changes in how tokens
+are supported and change from creation to insertion, merge, or
+rejection.
+
+7. NewPlan/ModelLoader/converter/convert2 can be used to read a DDL
+file (including any DDL files that it includes) and produce a single
+NDDL file for use with Europa2.
+
+8. NewPlan's ConstraintTokens are not supported by Europa2, though the
+convert2 program will not complain about them (the NDDL compiler will,
+at least whenever there is a choice between two or more predicates
+because it is a ConstraintToken rather than a ValueToken).
+
+9. The NewPlan makefiles are designed to notice when the compiler
+version and other build options are changed and, when appropriate,
+modify an include file that, due to the dependencies in the makefiles
+(including many generated automatically via the compiler), will cause
+most everything to be recompiled.  There is nothing similar in the
+PLASMA jam files, so 'jam clean' (with appropriate -s options) needs
+to be run after changing any of the compilers being used (including,
+usually, the version of the compilers).  PLASMA's independent naming
+of files resulting from the different compilation variants mitigates
+but does not preclude this problem.
+
+10. The constraint 'condasame' (conditional all same) in Europa1
+(NewPlan) has the boolean controlling the condition last; in Europa2
+(PLASMA), it is first to match the name of the constraint.  This is
+now dealt with by the DDL to NDDL converter program, convert2 (see #7
+above).
+
+11. In DDL (Europa1, NewPlan), 0 and 1 can be used for false and
+true in certain contexts, notably as arguments to constraint functions.
+In NDDL (Europa2), they cannot be; use false and true.
+
+12. In the DDL language used with Europa (CVS module name NewPlan),
+temporal constraints can only be made between master tokens and their
+slave (or subgoal) tokens, but they can also have explicit intervals.
+They are otherwise the same as in Europa2 (which will support
+intervals, but already has other, more explicit, ways of specifying
+temporal - and other - constraints).
+
+Note that these temporal relation names are the same in Europa1
+(NewPlan) and Europa2 (PLASMA); thus, this is not a "translation
+table" from DDL to NDDL, but rather a description of what the relation
+names mean in terms of actual constraints when explicit intervals are
+involved.
+
+Europa Name         Implied Constraints
+-----------         -------------------
+after               slave.end + interval = master.start
+before              master.end + interval = slave.start
+contained_by        slave.start + interval1 = master.start, master.end + interval2 = slave.end
+contains            master.start + interval1 = slave.start, slave.end + interval2 = master.end
+contains_end        master.start + interval1 = slave.end, slave.end + interval2 = master.end
+contains_start      master.start + interval1 = slave.start, slave.start + interval2 = master.end
+ends_after          slave.end + interval = master.end
+ends_after_start    slave.start + interval = master.end
+ends_before         master.end + interval = slave.end
+ends_during         slave.start + interval1 = master.end, master.end + interval2 = slave.end
+paralleled_by       slave.start + interval1 = master.start, slave.end + interval2 = master.end
+parallels           master.start + interval1 = slave.start, master.end + interval2 = slave.end
+starts_after        slave.start + interval = master.start
+starts_before       master.start + interval = slave.start
+starts_before_end   master.start + interval = slave.end
+starts_during       slave.start + interval1 = master.start, master.start + interval2 = slave.end
+
+All the intervals default to [0 +Inf] in DDL models (and presumably in
+NDDL, once it supports explicit intervals).  Thus, if no explicit
+interval is given in a DDL model, the "translation" to NDDL is simply
+to use the same temporal relation name between the token names.
+
+The names are intended to make sense when read as "Master <name> slave"
+(or "Goal <name> subgoal") or, with an explicit interval, "Master <name>
+slave by between 5 and 10 inclusive" (e.g.).
+
+Also, there are several abbreviations of commonly used temporal
+relations that would otherwise require explicit intervals.  As before,
+these have the same meaning in Europa1 and Europa2.
+
+Europa Abbreviation             Expands to
+-------------------             ----------
+any                             parallels [-Inf +Inf] [-Inf +Inf]
+ends                            ends_before [0 0]
+equal                           contains [0 0] [0 0]
+meets                           before [0 0]
+met_by                          after [0 0]
+starts                          starts_before [0 0]
+
+Finally, as an example of a temporal relation with an explicit interval,
+presently only supported in Europa1 (NewPlan):
+
+Europa1 DDL			NDDL Constraints
+-----------			----------------
+after [5 10]			EqualSum(Master.start, [5 10], Slave.end);
+
+13. In EUROPA Boolean variables are comparable with numeric variables, in
+PLASMA, Boolean variables are symbolic and no longer comparable with
+numeric variables.

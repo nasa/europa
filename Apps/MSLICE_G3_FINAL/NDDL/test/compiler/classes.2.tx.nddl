@@ -1,0 +1,42 @@
+// Include the model
+#include "classes.2.nddl"
+
+// Allocate instances for this plan database
+Location Hill = new Location("Hill");
+Location Rock = new Location("Rock");
+Location Lander = new Location("Lander");
+
+// Allocate a navigator using the default constructor.
+Navigator nav1 = new Navigator();
+
+// Indicate that the database is closed - no new objects can be created
+close();
+
+// Now allocate instances of predicates i.e. tokens
+
+// First token
+goal(nav1.At t0);
+t0.activate();
+
+// Specify that it is located at the Rock
+t0.location.specify(Rock);
+
+// Specify that it is at the rock from timepoint 0. No end time is indicated.
+t0.start.specify(0);
+
+// Second token
+goal(nav1.At t1);
+t1.activate();
+
+// Specify that it is at the Lander
+t1.location.specify(Lander);
+
+// Specify that it is at the Lander from timepoint 1000. 
+t1.start.specify(1000);
+
+// Impose a temporal distance of between 20 and 100 time units between the end of the first token
+// and the start of the second.
+temporalDistance(t0.end, [20 100], t1.start);
+
+// Explicitly constrain the tokens in the navigator object
+nav1.constrain(t0, t1);

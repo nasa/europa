@@ -1,0 +1,437 @@
+#!/usr/bin/perl
+
+use File::Path;
+use Net::SMTP;
+use Fcntl ':flock';
+use strict;
+
+######################################################################
+#                         Autobuild behavior                         #
+######################################################################
+#  Autobuilding is a complicated operation, which should be simple   #
+#   to execute.  This could be complicated by any misunderstanding   #
+#   about what exactly autobuild does, so this descripton is more    #
+#                       than just a formality.                       #
+#                                                                    #
+#  1) Create/Move to the sandbox directory.                          #
+#  2) Find executables required for all builds.                      #
+#  3) Setup the environment required for all builds.                 #
+#  4) Checkout a clean copy of EUROPA for all builds.                #
+#  ----------------------------------------------------------------  #
+#  5) Copy clean checkout into directory for current build.          #
+#  6) Call jam with the arguments for the current build type,        #
+#     leaving a log of the build output in the sandbox.              #
+#  7) Delete EUROPA directory for build type.                        #
+#  8) Repeat steps (5-7) for each remaining build type.              #
+#  ----------------------------------------------------------------  #
+#  9) Email single Success/Failure report for all builds. Attach     #
+#     build output log in the case of failure.                       #
+######################################################################
+
+######################################################################
+#                          Script Constants                          #
+######################################################################
+
+my $cvsname = "PLASMA";
+my $cvscanon = "${cvsname}_cvscanon";
+my $cvshost = "copernicus.arc.nasa.gov";
+my $cvsrepository = "/home/cvs/ISG-Repository";
+my $smtphost = "gate.arc.nasa.gov";
+my $resultaddress = "europa-night-build-results\@nx.arc.nasa.gov";
+my $version = "2.2b pl";
+
+# Keys should be a collection of the following:
+#       NAME, TARGET, LIBRARIES, VARIANTS
+my @buildtypes =
+(
+	{NAME => "Shared-Dev",       TARGET => "run-all-tests",
+	   LIBRARIES => "SHARED",      VARIANTS => "DEV"},
+ 	{NAME => "Shared-Optimized", TARGET => "run-all-tests",
+ 	   LIBRARIES => "SHARED",      VARIANTS => "OPTIMIZED"},
+
+ 	{NAME => "Static-Dev",       TARGET => "run-all-tests",
+ 	   LIBRARIES => "STATIC",      VARIANTS => "DEV"},
+ 	{NAME => "Static-Optimized", TARGET => "run-all-tests",
+ 	   LIBRARIES => "STATIC",      VARIANTS => "OPTIMIZED"},
+ 	{NAME => "Static-Profile",   TARGET => "run-all-tests",
+ 	   LIBRARIES => "STATIC",      VARIANTS => "PROFILE"}
+
+# 	{NAME => "Nolibs-Dev",       TARGET => "run-all-tests",
+# 	   LIBRARIES => "NONE",        VARIANTS => "DEV"},
+# 	{NAME => "Nolibs-Optimized", TARGET => "run-all-tests",
+# 	   LIBRARIES => "NONE",        VARIANTS => "OPTIMIZED"},
+# 	{NAME => "Nolibs-Profile",   TARGET => "run-all-tests",
+# 	   LIBRARIES => "NONE",        VARIANTS => "PROFILE"}
+);
+
+######################################################################
+#                            Subroutines                             #
+######################################################################
+
+# takes seconds and returns an Hours:Minutes:Seconds String
+sub readableDuration {
+	my $seconds = shift;
+	my $hours = int ($seconds / 3600); $seconds -= $hours * 3600;
+	my $minutes = int ($seconds / 60); $seconds -= $minutes * 60;
+	return sprintf "%d:%02d:%02d", $hours, $minutes, $seconds if($hours);
+	return sprintf "%02d:%02d", $minutes, $seconds;
+}
+
+# returns a string of $ENVVAR = value
+sub envString {
+	my $prefix = shift;
+	my $varname = shift;
+	my $suffix = shift;
+	return $prefix . "$varname = $ENV{$varname}" . $suffix if(defined $ENV{$varname});
+}
+
+sub checkJava {
+	my $JAVA = shift;
+	return 0 if(!(-x $JAVA));
+	my ($i, $j, $k) = `bash -c '$JAVA -version 2>&1'` =~ m/version \"(\d+)\.(\d+)\.(\d+)/m;
+	if($i < 1 || ($i == 1 && $j < 5) || ($i == 1 && $j == 5 && $k < 0)) {
+		return 0;
+	}
+	return 1;
+}
+
+sub checkJam {
+	my $JAM = shift;
+	return 0 if(!(-x $JAM));
+	my ($i, $j) = `bash -c '$JAM -v 2>&1'` =~ m/^Jam (\d+)\.(\d+)/m;
+	return 0 if($i < 2 || ($i == 2 && $j < 4));
+	return 1;
+}
+
+sub checkGcc {
+	my $GCC = shift;
+	return 0 if(!(-x $GCC));
+	my ($i, $j) = `bash -c '$GCC -v 2>&1'` =~ m/^gcc version (\d+)\.(\d+)/m;
+	if($i < 3 || ($i == 3 && $j < 3)) {
+		return 0;
+	}
+	return 1;
+}
+
+# initialize environment variables used across all builds
+sub init {
+	print "Initializing environment...\n";
+	$ENV{MALLOC_CHECK_} = "2";
+	chomp($ENV{USER} = `whoami`) if(!defined $ENV{USER});
+	chomp($ENV{OSTYPE} = lc `uname -s`) if(!defined $ENV{OSTYPE});
+	chomp($ENV{HOST} = `uname -n`);
+
+	if(-r "$cvsrepository/PLASMA") {
+		$ENV{CVSROOT} = $cvsrepository;
+	}
+	else {
+		$ENV{CVSROOT} = "$cvshost:$cvsrepository";
+		$ENV{CVS_RSH} = "ssh" if(!defined $ENV{CVS_RSH});
+	}
+
+	$ENV{AUTOBUILD_HOME} = "$ENV{HOME}/${cvsname}_autobuilds" if(!defined($ENV{AUTOBUILD_HOME}));
+	mkdir($ENV{AUTOBUILD_HOME});
+
+	$ENV{PLASMA_HOME} = "$ENV{AUTOBUILD_HOME}/$cvsname";
+
+	# build path from common directories, if they exist.
+	# the directories containing version checked execs (to follow) will take precidence.
+	$ENV{PATH} = "";
+	my @commondirs = ("/bin","/sbin","/usr/bin","/usr/sbin","/usr/local/bin","/usr/local/sbin",
+		                "/opt/bin","/opt/sbin","/opt/local/bin","/opt/local/sbin","/opt/ssh/bin");
+
+	foreach my $dir (@commondirs) {
+		$ENV{PATH} = "$ENV{PATH}:$dir" if(-x $dir);
+	}
+
+	my @javapaths = (</usr/java/jdk*>, </usr/local/jdk*>, "/System/Library/Frameworks/JavaVM.framework/Home", @commondirs);
+	foreach my $path (@javapaths) {
+		$ENV{JAVA_HOME} = $path;
+		last if(checkJava("$ENV{JAVA_HOME}/bin/java"));
+		$ENV{JAVA_HOME} = undef;
+	}
+
+	my @jampaths = (</usr/local/jam*>, "/usr/local/beta/bin", @commondirs, "$ENV{HOME}/bin");
+	foreach my $path (@jampaths) {
+		$ENV{JAM_HOME} = $path;
+		last if(checkJam("$ENV{JAM_HOME}/jam"));
+		$ENV{JAM_HOME} = undef;
+	}
+
+	#gcc *must* be in the normal location on darwin
+	if($ENV{OSTYPE} eq "darwin") {
+		$ENV{DYLD_LIBRARY_PATH} = "$ENV{PLASMA_HOME}/lib";
+		$ENV{DYLD_BIND_AT_LAUNCH} = "YES";
+		$ENV{PATH} = "$ENV{JAVA_HOME}/bin:$ENV{JAM_HOME}$ENV{PATH}";
+	}
+	else {
+		my @gxxpaths = (</usr/local/gcc*>, </usr/local/beta/gcc*>, $ENV{HOME});
+		foreach my $path (@gxxpaths) {
+			$ENV{GCC_ROOTDIR} = $path;
+			last if(checkGcc("$ENV{GCC_ROOTDIR}/bin/g++"));
+			$ENV{GCC_ROOTDIR} = undef;
+		}
+		$ENV{LD_LIBRARY_PATH} = "$ENV{PLASMA_HOME}/lib";
+		$ENV{LD_LIBRARY_PATH} = "$ENV{GCC_ROOTDIR}/lib:$ENV{LD_LIBRARY_PATH}" if(-x "$ENV{GCC_ROOTDIR}/lib");
+		$ENV{LD_LIBRARY_PATH} = "/usr/local/beta/lib:$ENV{LD_LIBRARY_PATH}" if(-x "/usr/local/beta/lib");
+
+		$ENV{PATH} = "$ENV{JAVA_HOME}/bin:$ENV{JAM_HOME}:$ENV{GCC_ROOTDIR}/bin$ENV{PATH}";
+	}
+	print "  Environment Initialized.\n";
+}
+
+# ensure that all variables we are expecting to be set are set in a way we are pleased with, or die.
+sub sanityCheck {
+	my $errors = "";
+	
+	# all the simple existance checks.
+	my @reqs = ("AUTOBUILD_HOME", "JAVA_HOME", "JAM_HOME", "PATH", "CVSROOT");
+	foreach my $req (@reqs) {
+		defined($ENV{$req}) or $errors .= "\$$req must be defined.\n";
+	}
+	
+	if($ENV{CVSROOT} =~ /:/) {
+		defined($ENV{CVS_RSH}) or $errors .= "\$CVS_RSH must be defined.\n";
+	}
+
+	!defined($ENV{INVALID}) or $errors .= "\$INVALID must be undefined.\n";
+
+	if($ENV{OSTYPE} eq "darwin") {
+		!defined($ENV{GCC_ROOTDIR}) or $errors .= "\$GCC_ROOTDIR must be undefined on darwin.\n";
+		defined($ENV{DYLD_LIBRARY_PATH}) or $errors .= "\$DYLD_LIBRARY_PATH must be defined on darwin.\n";
+		if(defined($ENV{DYLD_BIND_AT_LAUNCH})) {
+			$ENV{DYLD_BIND_AT_LAUNCH} eq "YES" or $errors .= "\$DYLD_BIND_AT_LAUNCH must be set to \"YES\" on darwin.\n";
+		}
+		else {
+			$errors .= "\$DYLD_BIND_AT_LAUNCH must be defined on OS X.\n";
+			$errors++;
+		}
+		checkGcc("/usr/bin/g++") or $errors .= "G++ not found or not high enough version.\n";
+	}
+	else {
+		defined($ENV{GCC_ROOTDIR}) or $errors .= "\$GCC_ROOTDIR must be defined.\n";
+		defined($ENV{LD_LIBRARY_PATH}) or $errors .= "\$LD_LIBRARY_PATH must be defined.\n";
+		checkGcc("$ENV{GCC_ROOTDIR}/bin/g++") or $errors .= "G++ not found or not high enough version.\n";
+	}
+
+	(-w $ENV{AUTOBUILD_HOME}) or $errors .= "Sandbox \"$ENV{AUTOBUILD_HOME}\" not found or not writable.\n";
+	checkJava("$ENV{JAVA_HOME}/bin/java") or $errors .= "Java not found or not high enough version.\n";
+	checkJam("$ENV{JAM_HOME}/jam") or $errors .= "Jam not found or not high enough version.\n";
+
+	foreach my $build (@buildtypes) {
+		defined $build->{NAME} or $errors .= "All buildtypes must have a NAME key.\n";
+	}
+
+	softdie("Errors while checking build sanity:\n$errors") if($errors ne "");
+}
+
+sub jam {
+	my $build = shift;
+	$build->{COMMAND}  = "$ENV{JAM_HOME}/jam ";
+	$build->{COMMAND} .= "-sLIBRARIES=$build->{LIBRARIES} " if(defined $build->{LIBRARIES});
+	$build->{COMMAND} .= "-sVARIANTS=$build->{VARIANTS} " if(defined $build->{VARIANTS});
+	$build->{COMMAND} .= "$build->{TARGET} " if(defined $build->{TARGET});
+	$build->{LOG} = "$ENV{AUTOBUILD_HOME}/jam-$build->{NAME}.log";
+	chdir($ENV{PLASMA_HOME});
+	print "$build->{COMMAND}> $build->{LOG} 2>&1\n";
+	my $timer = time();
+	# add limits later if appropriate.
+	# Apply limits; some planner runs want lots of RAM (>2GB).
+	#ulimit -c 400000
+	#ulimit -d 1300000 
+	#ulimit -s 1300000 
+	#ulimit -t 3600 
+	#ulimit -v 1300000 
+
+	# Print the limits so it is obvious what they are when something goes wrong.
+	#ulimit -a
+	$build->{STATUS} = system("bash -c '$build->{COMMAND}> $build->{LOG} 2>&1'");
+	$build->{DURATION} = readableDuration(time() - $timer);
+	print "  build exited (\$status = $build->{STATUS}) Duration: [$build->{DURATION}]\n";
+	chdir($ENV{AUTOBUILD_HOME});
+}
+
+# To avoid having to deal with modules, mime message will be written
+# completely by hand.
+sub mailresults {
+	my @builds = @_;
+	my $allsucceeded = 1;
+	foreach my $build (@builds) {
+		if(!defined $build->{STATUS} || $build->{STATUS}) {
+			$allsucceeded = 0;
+			last;
+		}
+	}
+
+	my $mime_boundary = "==============|SALT|2a86cee3cbedde3236d535391254d5f8|"; #mmmm, salty.
+	my $mailserver = Net::SMTP->new($smtphost);
+	$mailserver->mail($ENV{USER});
+	$mailserver->to($resultaddress);
+	$mailserver->data();
+	$mailserver->datasend("From: $cvsname Autobuild <europa-dev\@nx.arc.nasa.gov>\n");
+	$mailserver->datasend("To: $resultaddress\n");
+	$mailserver->datasend("Reply-To: europa-dev\@nx.arc.nasa.gov\n");
+	$mailserver->datasend("Subject: PLASMA Autobuild on $ENV{HOST} ", ($allsucceeded? "passed" : "failed"), "\n");
+	$mailserver->datasend("X-Mailer: $cvsname Autobuild script $version\n");
+	$mailserver->datasend("MIME-Version: 1.0\n");
+	$mailserver->datasend("Content-type: multipart/mixed; boundary=\"$mime_boundary\"\n");
+	$mailserver->datasend("\n");
+	$mailserver->datasend("This is a multi-part message in MIME format.\n\n");
+	$mailserver->datasend("--$mime_boundary\n");
+	$mailserver->datasend("Content-type: text/plain; name=\"$cvsname Autobuild Summary\"\n");
+	$mailserver->datasend("Content-disposition: inline; filename=\"$cvsname Autobuild Summary\"\n");
+	$mailserver->datasend("\n");
+	$mailserver->datasend("Environment for all tests:\n");
+	$mailserver->datasend(envString("  ","OSTYPE","\n"));
+	$mailserver->datasend(envString("  ","USER","\n"));
+	$mailserver->datasend(envString("  ","HOST","\n"));
+	$mailserver->datasend(envString("  ","JAVA_HOME","\n"));
+	$mailserver->datasend(envString("  ","GCC_ROOTDIR","\n"));
+	$mailserver->datasend(envString("  ","JAM_HOME","\n"));
+	$mailserver->datasend(envString("  ","PATH","\n"));
+	$mailserver->datasend(envString("  ","CVSROOT","\n"));
+	$mailserver->datasend(envString("  ","PLASMA_HOME","\n"));
+	$mailserver->datasend(envString("  ","LD_LIBRARY_PATH","\n"));
+	$mailserver->datasend(envString("  ","DYLD_LIBRARY_PATH","\n"));
+
+	$mailserver->datasend(" +------------------------------------------------------------\n");
+	foreach my $build (@builds) {
+		next unless(defined $build->{STATUS});
+		$mailserver->datasend(" | $build->{NAME} ( $build->{COMMAND})    [", (!$build->{STATUS}? "PASSED" : "FAILED"), "]\n");
+		$mailserver->datasend(" |    Build Duration:  $build->{DURATION}\n");
+		$mailserver->datasend(" |    Exit Status:  $build->{STATUS}\n") if($build->{STATUS});
+		$mailserver->datasend(" +------------------------------------------------------------\n");
+		if($build->{STATUS}) {
+			open(my $logfile,"<$build->{LOG}");
+			my @loglines = <$logfile>;
+			# The following code may be a bit confusing... here's what it does:
+			# search through the log file line by line for "...failed <action>..."
+			# search backwards from that line for "<action>"
+			# send everything from "<action>" up until "...failed <action>..."
+			for(my $i = 0; $i <= $#loglines-2 ; $i++) {
+				if($loglines[$i] =~ /don't know how to make (.*)/) {
+					$mailserver->datasend("Missing target: \"$1\"\n");
+				}
+				elsif($loglines[$i] =~ /\.{3}failed (.*?)\.{3}/) {
+					my $action = $1 . "\n";
+					for(my $j = $i-1; $j > -1; $j--) {
+						if($loglines[$j] eq $action) {
+							$mailserver->datasend("Failed ");
+							for(;$j < $i; $j++) {
+								$mailserver->datasend($loglines[$j]);
+							}
+							last;
+						}
+					}
+				}
+			}
+			close($logfile);
+			$mailserver->datasend(" +------------------------------------------------------------\n");
+		}
+	}
+
+	foreach my $build (@builds) {
+		# attach file
+		next unless(-r $build->{LOG});
+		$mailserver->datasend("\n--$mime_boundary\n");
+		$mailserver->datasend("Content-type: text/plain; name=\"jam-$build->{NAME}.log\"\n");
+		$mailserver->datasend("Content-disposition: attachment; filename=\"jam-$build->{NAME}.log\"\n");
+		$mailserver->datasend("\n");
+		open(my $attachment,"<$build->{LOG}");
+		while(<$attachment>) {
+			$mailserver->datasend($_);
+		}
+		close $attachment;
+	}
+	$mailserver->datasend("--$mime_boundary--\n");
+	my $mailstatus = $mailserver->dataend();
+	$mailserver->quit();
+	if($mailstatus) {
+		print stderr "message sent!\n";
+	}
+	else {
+		print stderr "message failed to send.\n";
+	}
+}
+
+# this will send off an error message and die.
+sub softdie {
+	print stderr "$cvsname autobuild sending message for die..";
+	my $mailserver = Net::SMTP->new($smtphost);
+	die "Kaboom!: $_\nOriginal Error: ", join("", @_) if(!$mailserver);
+	$mailserver->mail($ENV{USER});
+	$mailserver->to($resultaddress);
+	$mailserver->data();
+	$mailserver->datasend("From: $cvsname Autobuild <europa-dev\@nx.arc.nasa.gov>\n");
+	$mailserver->datasend("To: $resultaddress\n");
+	$mailserver->datasend("Reply-To: europa-dev\@nx.arc.nasa.gov\n");
+	$mailserver->datasend("Subject: PLASMA Autobuild on $ENV{HOST} Died\n");
+	$mailserver->datasend("X-Mailer: $cvsname Autobuild script $version\n");
+	$mailserver->datasend("MIME-Version: 1.0\n");
+	$mailserver->datasend("Content-type: text/plain\n");
+	$mailserver->datasend("\n");
+	$mailserver->datasend("Environment:\n");
+	$mailserver->datasend(envString("  ","OSTYPE","\n"));
+	$mailserver->datasend(envString("  ","USER","\n"));
+	$mailserver->datasend(envString("  ","HOST","\n"));
+	$mailserver->datasend(envString("  ","JAVA_HOME","\n"));
+	$mailserver->datasend(envString("  ","GCC_ROOTDIR","\n"));
+	$mailserver->datasend(envString("  ","JAM_HOME","\n"));
+	$mailserver->datasend(envString("  ","PATH","\n"));
+	$mailserver->datasend(envString("  ","CVSROOT","\n"));
+	$mailserver->datasend(envString("  ","PLASMA_HOME","\n"));
+	$mailserver->datasend(envString("  ","LD_LIBRARY_PATH","\n"));
+	$mailserver->datasend(envString("  ","DYLD_LIBRARY_PATH","\n"));
+	$mailserver->datasend("--------------------------------------------------------------\n");
+	$mailserver->datasend("Died with message:\n");
+	$mailserver->datasend(join "", @_);
+	my $mailstatus = $mailserver->dataend();
+	$mailserver->quit();
+	if($mailstatus) {
+		print stderr ". message sent!\n";
+	}
+	else {
+		print stderr ". message failed to send.\n";
+	}
+	die @_;
+}
+
+######################################################################
+#                            Entry Point                             #
+######################################################################
+
+sub main {
+	init();
+	print "locking $0 for process uniqueness...\n";
+	open(my $source,">>$0") or softdie "Error opening file for process uniqueness: $!";
+	flock $source, LOCK_EX | LOCK_NB or softdie "Autobuild already running: $!";
+	close($source);
+	print "  file locked!\n";
+
+	chdir($ENV{AUTOBUILD_HOME}) or softdie "Error moving to AUTOBUILD_HOME: $!";
+	print "checking out $cvsname...\n";
+	print "  cvs checkout $cvsname\n";
+	system("bash -c 'cvs checkout -d $cvscanon $cvsname > /dev/null 2>&1'") and softdie("Error during checkout");
+	print "Checkout complete.\n";
+	for(my $i = 0; $i <= $#buildtypes; $i++) {
+		my $build = $buildtypes[$i];
+		print " +------------------------------------------------------------\n";
+		print " | Build $build->{NAME} (",$i+1,"/",$#buildtypes+1,")\n";
+		print " |   TARGET => $build->{TARGET}\n" if(defined($build->{TARGET}));
+		print " |   LIBRARIES => $build->{LIBRARIES}\n" if(defined($build->{LIBRARIES}));
+		print " |   VARIANTS => $build->{VARIANTS}\n" if(defined($build->{VARIANTS}));
+		print " +------------------------------------------------------------\n";
+		if(-d $cvsname) {
+			system("bash -c 'chmod -fR u+w $cvsname'") and softdie("Error moving canon checkout: $!");
+			system("rm -rf $cvsname") and softdie("Error deleting directory in preparation for build $build->{NAME}: $!\n");
+		}
+		system("bash -c 'cp -pR $cvscanon $cvsname'") and softdie("Error moving canon checkout: $!");
+		sanityCheck();
+		jam($build);
+		system("bash -c 'chmod -fR u+w $cvsname'") and softdie("Error moving canon checkout: $!");
+		system("rm -rf $cvsname") and softdie("Error deleting directory for build $build->{NAME}: $!\n");
+	}
+	mailresults(@buildtypes);
+	return 0;
+}
+exit(main());

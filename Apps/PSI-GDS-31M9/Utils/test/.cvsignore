@@ -1,0 +1,17 @@
+*.bb
+*.bbg
+*.da
+*.gprof
+*.output
+gmon.out
+utils-module-tests
+utils-module-tests_g
+utils-module-tests_g_no
+utils-module-tests_g_rt
+utils-module-tests_o
+utils-module-tests_o_no
+utils-module-tests_o_p
+utils-module-tests_o_p_no
+utils-module-tests_o_rt
+utils-module-tests_p
+utils-module-tests_p_no

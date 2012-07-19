@@ -1,0 +1,31 @@
+SubDir PLASMA Solvers test ;
+
+if ! $(PLASMA_READY) {
+
+ # All input file names used for the tests
+local solverInputFiles = 	UnboundVariableFiltering.nddl	
+				OpenConditionFiltering.nddl
+				ThreatFiltering.nddl
+				StaticCSP.nddl 
+				SuccessfulSearch.nddl 
+				ExhaustiveSearch.nddl 
+				SimpleActivation.nddl 
+				SimpleRejection.nddl 
+				BacktrackFirstDecision.nddl 
+				GNATS_3196.nddl ;
+ 
+ # Create dependency for initial state files to be parsed
+ local solversInputFile ;
+ for solversInputFile in $(solverInputFiles) {
+  local fullPathName = [ FDirName $(PLASMA_HOME) Solvers test $(solversInputFile) ] ; 
+  NddlParser $(fullPathName:S=.xml) : $(fullPathName) ;
+  LocalDepends run-solvers-module-tests : $(fullPathName:S=.xml) ;
+ }
+
+ if "Resources" in $(NO) {
+    SubDirC++Flags -DNO_RESOURCES ;
+ }
+ NddlMain solvers-module-tests : module-tests.cc solvers-test-module.cc : Model.nddl : Solvers NDDL ;
+ RunModuleMain run-solvers-module-tests : solvers-module-tests ;
+ LocalDepends tests : run-solvers-module-tests ;
+} # PLASMA_READY

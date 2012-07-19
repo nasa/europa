@@ -1,0 +1,11 @@
+SubDir PLASMA ANML test ;
+
+if ! $(PLASMA_READY) {
+
+ ModuleMain anml-module-tests : module-tests.cc anml-test-module.cc : ANML ;
+ RunModuleMain run-anml-module-tests : anml-module-tests ;
+ LocalDepends tests : run-anml-module-tests ;
+
+ SubInclude PLASMA ANML test parser ;
+
+} # PLASMA_READY
