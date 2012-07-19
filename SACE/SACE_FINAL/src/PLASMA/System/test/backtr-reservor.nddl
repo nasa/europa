@@ -1,0 +1,241 @@
+#include "PlannerConfig.nddl"
+#include "Resources.nddl"
+
+/*
+	Rover:   Standby, Drive, Sample. Drive and Sample consume at max rate.
+	Antenna: Transmit (cons at max rate), Idle.
+
+	Idea: rate limit should force Transmit to be during Idle.
+    The idea does not work, because there is too much flexibility.
+    Can we detect some sort of rate-based flaw?
+*/
+
+
+//*****************************************************************
+class Battery extends Resource {
+   Battery( float ic, float ll_min, float ll_max,
+			float prod_max, float prod_Rmax, float cons_max, float cons_Rmax) {
+      super(ic, ll_min, ll_max, prod_max, prod_Rmax, cons_max, cons_Rmax );
+   } 
+}
+//*****************************************************************
+
+class Antenna extends Timeline {
+  predicate Transmit{}
+  predicate Idle{}
+}
+
+class Memory extends Timeline {
+  predicate Full{}
+  predicate Empty{}
+  predicate Busy{}
+}
+
+class Rover extends Timeline {
+ Battery m_battery;
+ Antenna m_antenna;
+ Memory m_memory;
+
+
+
+ Rover( float bat_start, float bat_low, float bat_high,
+	    float prod_max, float prod_Rmax, float cons_max, float cons_Rmax ) {
+   m_battery = new Battery( bat_start, bat_low, bat_high, 
+	 		     prod_Rmax, prod_max, cons_Rmax, cons_max);
+   m_antenna = new Antenna();
+   m_memory = new Memory();
+ }
+
+ // Do the work
+ predicate Sample{
+  int m_x, m_y;
+ }
+
+ predicate Drive {
+  int m_from_x, m_from_y, m_to_x, m_to_y;
+ }
+
+ // Doing nothing, waiting for external forces to charge 
+ // our battery
+ predicate Standby{
+  int m_x, m_y;
+  eq(duration, [1 +inf]);
+ }
+
+}
+
+Rover::Sample{
+  // we care that it consumes the battery
+  any(Battery.change bc);
+  eq(bc.time, start);
+  eq(bc.quantity, -8.0);
+
+  eq(duration, 2); // this gives us consumption rate of 4
+
+  // Should also transmit at some later point
+  meets(Memory.Full fullMem);
+  met_by(Memory.Empty emptyMem);
+  any(Memory.Busy busy);
+  eq(busy.start, start);
+  eq(busy.end, end);
+
+  // battery consumption and duration depend on work
+  // should we pass coordinates here?
+  // sampleBattery( bc.quantity, m_x, m_y );
+  //sampleDuration( duration, m_x, m_y );
+
+  // What do we do after
+  bool sw_after;
+  if (sw_after==false) {
+     meets(Drive dr);
+     eq(dr.m_from_x, m_x);
+     eq(dr.m_from_y, m_y);
+  }
+  if (sw_after==true) {
+     meets(Standby sb);
+     eq(sb.m_x, m_x);
+     eq(sb.m_y, m_y);
+  }
+}
+
+Rover::Drive{
+  // we care that it consumes the battery
+  any(Battery.change bc);
+  eq(bc.time, start);
+
+  // to begin with, the charge is always negative
+  // it is also never more than the battery's level (TBD as an argument)
+  eq(bc.quantity, [-50 0]);
+
+  // Ensure that the end points are different
+  float x_sq, y_sq, dist;
+  diffSquare( m_from_x, m_to_x, x_sq );
+  diffSquare( m_from_y, m_to_y, y_sq );
+  distanceSquares( x_sq, y_sq, dist );
+  neq( dist, 0 );
+
+  // Battery consumption and driving duration are functions of distance
+  // These two constraints enforce consumption rate of [2,4]
+  //driveBattery( bc.quantity, dist );
+  float intermediateQuantity;
+  multEq(dist, 4, intermediateQuantity);
+  neg(intermediateQuantity, bc.quantity);
+
+  //driveDuration( duration, dist );
+  multEq(dist, [1 2], duration);
+
+  // What do we do after
+  bool sw_after;
+  if (sw_after==false) {
+     meets(Sample sm);
+     eq(m_to_x, sm.m_x);
+     eq(m_to_y, sm.m_y);
+  }
+  if (sw_after==true) {
+     meets(Standby sb);
+     eq(sb.m_x, m_to_x);
+     eq(sb.m_y, m_to_y);
+  }
+}
+
+Rover::Standby{
+  // What do we do after
+  bool sw_after;
+  if (sw_after==false) {
+     meets(Drive dr);
+     eq(dr.m_from_x, m_x);
+     eq(dr.m_from_y, m_y);
+  }
+  if (sw_after==true) {
+     meets(Sample sm);
+     eq(sm.m_x, m_x);
+     eq(sm.m_y, m_y);
+  }
+}
+
+
+Antenna::Transmit {
+  eq(duration, 4);
+  any(Battery.change bc);
+  eq(bc.time, start);
+  eq(bc.quantity, -16.0);
+
+  meets(Idle idle1);
+  met_by(Idle idle2);
+
+  met_by(Memory.Full fullMem);
+  meets(Memory.Empty emptyMem);
+  any(Memory.Busy busy);
+  eq(busy.start, start);
+  eq(busy.end, end);
+}
+
+Antenna::Idle {
+  meets(Transmit t1);
+  met_by(Transmit t2);
+}
+
+Memory::Full{
+  meets(Antenna.Transmit tr);
+  // met_by(Rover.Sample sm);
+}
+Memory::Empty{
+  met_by(Antenna.Transmit tr);
+  // meets(Rover.Sample sm);
+}
+
+PlannerConfig world = new PlannerConfig(10, 101, 3000);
+
+// Limits are essentially infinity
+// float ic, float ll_min, float ll_max,
+// float prod_max, float prod_Rmax, float cons_max, float cons_Rmax
+Rover rover = new Rover(100.0, 0.0, 100.0, 76.0, 16.0, -76.0, -16.0);
+
+close();
+
+// Initially Rover stays at the source and does nothing
+goal(Rover.Standby roverInit);
+roverInit.m_x.specify(0);
+roverInit.m_y.specify(0);
+roverInit.start.specify(10);
+roverInit.activate();
+
+// Mission goals
+goal(Rover.Sample goal1);
+goal1.m_x.specify(3);
+goal1.m_y.specify(0);
+goal1.start.specify([10 100]);
+goal1.end.specify([11 30]);
+goal1.activate();
+
+goal(Rover.Sample goal2);
+goal2.m_x.specify(3);
+goal2.m_y.specify(4);
+goal2.start.specify([10 30]);
+goal2.end.specify([11 30]);
+goal2.activate();
+
+leq( goal1.end, goal2.start );
+
+// At the start and at the end Antenna is idle
+goal(Antenna.Idle sIdle);
+sIdle.start.specify(10);
+sIdle.activate();
+
+goal(Antenna.Idle eIdle);
+// Bad way
+// eIdle.end.specify(100);
+// Good way
+leq(30,eIdle.end);
+eIdle.activate();
+
+// The memory at the start at the end is empty
+goal(Memory.Empty sMem);
+sMem.start.specify(10);
+sMem.activate();
+
+goal(Memory.Empty eMem);
+eMem.end.specify(30);
+eMem.activate(); 
+
+

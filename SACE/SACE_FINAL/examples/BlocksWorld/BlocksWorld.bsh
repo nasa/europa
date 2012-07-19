@@ -1,0 +1,86 @@
+// CrewPlanning.bsh
+
+import java.awt.BorderLayout;
+import javax.swing.JInternalFrame;
+
+import org.ops.ui.util.Util;
+import org.ops.ui.PSDesktop;
+import org.ops.ui.mouse.*;
+import org.ops.ui.gantt.*;
+import org.ops.ui.chart.*;
+import psengine.*;
+import BlocksWorld.*;
+
+int month = GregorianCalendar.SEPTEMBER, day = 11; 
+GregorianCalendar start = new GregorianCalendar(2006,month,day,0,0);
+GregorianCalendar end = new GregorianCalendar(2006,month,day,0,10);
+
+void usingCodeGeneration()
+{
+	cwd = bsh.cwd;
+    psengine.loadModel(cwd+"/libBlocksWorld_o.so");
+    psengine.executeScript("nddl-xml-txn",cwd+"/BlocksWorld-initial-state.xml",true/*isFile*/);	
+    System.out.println("Used code generation");
+}
+
+void usingInterpreter()
+{
+	cwd = bsh.cwd;
+    String nddlModel = cwd+"/BlocksWorld-initial-state.nddl";
+    psengine.executeScript("nddl",nddlModel,true/*isFile*/);
+}
+
+void initPSEngine()
+{
+    //usingCodeGeneration();
+    usingInterpreter();
+}
+
+void setupDesktop()
+    throws Exception
+{
+    ActionDetailsPanel dp = (ActionDetailsPanel)desktop.makeDetailsFrame().getContentPane().getComponent(0);
+
+    JInternalFrame ganttFrame = desktop.makeResourceGanttFrame("Object",start,end);
+    ganttFrame.setLocation(0,0);
+    ganttFrame.setSize(700,300);
+    PSGantt gantt = (PSGantt)ganttFrame.getContentPane().getComponent(0);
+    gantt.addMouseListener(dp);    
+}
+
+
+void showHistory()
+{
+    String[] fields1 = {"Index","StepNumber","Towers","OperatorHistory"};
+    desktop.makeTableFrame("Execution History",bwhp.getHistory(),fields1);
+}
+
+
+horizonStart = 0;
+horizonEnd = 1000;
+maxSteps = 200;
+config = "PlannerConfig.xml";
+
+BlockWorldHistoryPanel bwhp;
+
+try {
+    initPSEngine();
+    PSSolver solver = psengine.createSolver(config);
+    solver.configure(horizonStart,horizonEnd);
+    solverDialog = desktop.makeSolverDialog(solver);
+
+    bwhp = new BlockWorldHistoryPanel();
+    JInternalFrame hf = desktop.makeNewFrame("Block World History");
+    hf.getContentPane().setLayout(new BorderLayout());
+    hf.getContentPane().add(bwhp);
+  
+    BlockWorldSolverListener listener = new BlockWorldSolverListener(psengine,bwhp);
+    solverDialog.addListener(listener);
+}    
+catch (Exception e) {
+  	System.err.println("Failed Initializing : "+e.getMessage());
+}
+   
+//setupDesktop();
+//showHistory();
+

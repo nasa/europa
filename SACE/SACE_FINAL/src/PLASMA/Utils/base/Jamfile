@@ -1,0 +1,21 @@
+SubDir PLASMA Utils base ;
+
+if ! $(PLASMA_READY) {
+
+ModuleBase Utils
+	:
+	Debug.cc
+	Factory.cc
+	Engine.cc
+	Entity.cc
+	Error.cc
+	IdTable.cc
+  	LabelStr.cc
+	Mutex.cc
+  	Pdlfcn.cc
+  	TestData.cc
+  	Utils.cc
+	XMLUtils.cc
+	;
+
+} # PLASMA_READY

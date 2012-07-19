@@ -1,0 +1,28 @@
+//////////////////////////////////////////////////////////////
+// Want to test explict use of base classes to allow predicates to be placed on
+// objects without imposing the default of a Timeline implementation
+//////////////////////////////////////////////////////////////
+
+#include "Plasma.nddl"
+
+class BaseTimeline extends Timeline {
+ predicate p0{};
+}
+
+class World {
+ BaseTimeline _o1;
+
+ World(){
+ 	_o1 = new BaseTimeline();
+ }
+
+}
+
+World world = new World();
+BaseTimeline timeline = new BaseTimeline();
+close();
+
+goal(BaseTimeline.p0 g0);
+g0.activate();
+timeline.constrain(g0);
+timeline.free(g0);

@@ -1,0 +1,13 @@
+SubDir PLASMA NDDL component ;
+
+if ! $(PLASMA_READY) {
+
+ModuleComponent NDDL
+	:
+        Interpreter.cc
+	NddlXml.cc
+        NddlInterpreter.cc
+        NddlTestEngine.cc
+	;
+
+} # PLASMA_READY

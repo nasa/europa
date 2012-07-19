@@ -1,0 +1,161 @@
+// ../ModuleTests/Parser/robot/robot.ddl
+#include "Plasma.nddl"
+
+enum Location { A, B, In_Between } 
+
+class TestSet extends StringData {}
+TestSet TestSet0 = new TestSet("Foo");
+
+class Robot;
+class Robot___At;
+class Robot___Task;
+class Robot___Charge;
+class Hole;
+class Hole___HAt;
+class Hole___HStatus;
+
+class Robot___At extends Timeline {
+  predicate Robot_Loc {
+    Location Loc;
+  }
+
+  Robot __DDL__object;
+  Robot___At(Robot object) {
+    __DDL__object = object;
+  }
+}
+
+class Robot___Task extends Timeline {
+  predicate Fixing_Hole {
+    Hole Hole_To_Fix;
+  }
+
+  predicate Recharging {
+    Location At;
+  }
+
+  predicate Robot_Moving {
+    Location From;
+    Location To;
+  }
+
+  predicate Doing_Nothing {
+  }
+
+  Robot __DDL__object;
+  Robot___Task(Robot object) {
+    __DDL__object = object;
+  }
+}
+
+class Robot___Charge extends Timeline {
+  predicate Charge_Full {
+  }
+
+  predicate Charge_Empty {
+  }
+
+  predicate Charge_In_Between {
+  }
+
+  Robot __DDL__object;
+  Robot___Charge(Robot object) {
+    __DDL__object = object;
+  }
+}
+
+class Robot {
+  Robot___At At;
+  Robot___Task Task;
+  Robot___Charge Charge;
+  Robot() {
+    At = new Robot___At(this);
+    Task = new Robot___Task(this);
+    Charge = new Robot___Charge(this);
+  }
+}
+
+class Hole___HAt extends Timeline {
+  predicate Hole_Loc {
+    Location Loc;
+  }
+
+  Hole __DDL__object;
+  Hole___HAt(Hole object) {
+    __DDL__object = object;
+  }
+}
+
+class Hole___HStatus extends Timeline {
+  predicate Hole_Exists {
+  }
+
+  predicate Hole_Being_Fixed {
+  }
+
+  predicate Hole_Fixed {
+  }
+
+  Hole __DDL__object;
+  Hole___HStatus(Hole object) {
+    __DDL__object = object;
+  }
+}
+
+class Hole {
+  Hole___HAt HAt;
+  Hole___HStatus HStatus;
+  Hole() {
+    HAt = new Hole___HAt(this);
+    HStatus = new Hole___HStatus(this);
+  }
+}
+
+Robot___At::Robot_Loc {
+  if (Loc==Location.A) {
+  }
+  if (Loc==Location.B) {
+  }
+  if (Loc==Location.In_Between) {
+  }
+}
+
+Robot___Task::Fixing_Hole {
+}
+
+Robot___Task::Recharging {
+}
+
+Robot___Task::Robot_Moving {
+  eq(duration, [5 +inf]);
+  neq(From, To);
+  met_by(Robot___At.Robot_Loc s0);
+    eq(s0.Loc, From);
+  met_by(Robot___Task.Doing_Nothing s1);
+  meets(Robot___Task.Doing_Nothing s2);
+}
+
+Robot___Task::Doing_Nothing {
+}
+
+Robot___Charge::Charge_Full {
+}
+
+Robot___Charge::Charge_Empty {
+}
+
+Robot___Charge::Charge_In_Between {
+}
+
+Hole___HAt::Hole_Loc {
+}
+
+Hole___HStatus::Hole_Exists {
+}
+
+Hole___HStatus::Hole_Being_Fixed {
+}
+
+Hole___HStatus::Hole_Fixed {
+}
+

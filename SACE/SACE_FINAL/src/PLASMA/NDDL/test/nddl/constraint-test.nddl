@@ -1,0 +1,59 @@
+#include "Plasma.nddl"
+
+// a constraint which exists only for the purpose of this test:
+constraint veryLongConstraint(a, b, c, d) {a <: numeric && b <: numeric && c <: numeric && d <: numeric}
+
+enum ENUM {foo, bar};
+enum Fruits {X, Y, Z};
+
+// Goal is to test generation of constraint code
+class Sample extends Timeline {
+ predicate sample{
+  int p1;
+  int p2;
+  int p3;
+  float p4;
+  eq(p1, p2);
+  subsetOf(p2, p3); // A binary constraint using 2 variables
+  subsetOf(p2, [10 20]); // A binary constraint, but one is locked - meaning a constant
+  eq(p4, [1.0 2.0]);
+  eq(p2, [11.0 18.0]);
+ }
+}
+
+Sample::sample{
+ Sample s;
+ exists(s); // A Unary constraint.
+ eq(p1, p2); // A Binary constraint
+ subsetOf(p2, p3); // A binary constraint using 2 variables
+ subsetOf(p2, [10 20]); // A binary constraint, but one is locked - meaning a constant
+ veryLongConstraint(p1, p2, p3, p4);
+ int lv1;
+ int lv2;
+ eq(lv1, lv2);
+ eq(lv1, p1);
+ any(Sample.sample sample);
+ eq(start, sample.start);
+ eq(object, sample.object);
+
+ Fruits f;
+ subsetOf(f, {X, Z});
+}
+
+class World extends Timeline {
+ Sample sample;
+ predicate initialState{}
+ World(){
+  sample = new Sample();
+ }
+}
+
+World::initialState{
+ any (Sample.sample s);
+ eq(foo, foo);
+ neq("bing", "baz");
+}
+
+World world = new World();
+close();
+goal(World.initialState g0);
