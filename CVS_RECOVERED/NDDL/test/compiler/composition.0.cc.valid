@@ -1,0 +1,139 @@
+// composition.0.nddl
+
+#include "composition.0.hh"
+#include "NddlUtils.hh"
+
+namespace NDDL {
+  
+  
+  // composition.0.nddl:2 Foo
+  Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "Foo", name, true) {
+  }
+  Foo::Foo(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  Foo::Foo(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "Foo", name, true) {}
+  Foo::Foo(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void Foo::handleDefaults(bool autoClose) {
+    if (autoClose)
+      close();
+  }
+  
+  // implicit constructor
+  void Foo::constructor() {
+  }
+  
+  
+  // composition.0.nddl:2 Foo
+  DECLARE_DEFAULT_OBJECT_FACTORY(FooFactory0, Foo);
+  
+  
+  // composition.0.nddl:5 Bar
+  Bar::Bar(const PlanDatabaseId& planDatabase, const LabelStr& name)
+   : Object(planDatabase, "Bar", name, true) {
+  }
+  Bar::Bar(const PlanDatabaseId& planDatabase, const LabelStr& type, const LabelStr& name)
+   : Object(planDatabase, type, name, true) {
+  }
+  Bar::Bar(const ObjectId& parent, const LabelStr& name)
+   : Object(parent, "Bar", name, true) {}
+  Bar::Bar(const ObjectId& parent, const LabelStr& type, const LabelStr& name)
+   : Object(parent, type, name, true) {}
+  // default initialization of member variables
+  void Bar::handleDefaults(bool autoClose) {
+    check_error(foo.isValid(), "object variables must be initialized explicitly");
+    
+    if (autoClose)
+      close();
+  }
+  
+  
+  // composition.0.nddl:5 Bar
+  void Bar::constructor() {
+    foo = addVariable(FooDomain((new Foo(m_id, "foo"))->getId(), "Foo"), "foo");
+    Id<Foo>(singleton(foo))->constructor();
+    Id<Foo>(singleton(foo))->handleDefaults();
+  }
+  
+  // composition.0.nddl:5 Bar
+  class BarFactory1: public ConcreteObjectFactory {
+  public:
+    BarFactory1(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<ConstructorArgument>& arguments) const {
+      check_error(arguments.size() == 0);
+      BarId instance = (new Bar(planDb, objectType, objectName))->getId();
+      instance->constructor();
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+  // composition.0.nddl:5 Bar
+  void Bar::constructor(const FooId& _foo) {
+    foo = addVariable(FooDomain(_foo, "Foo"), "foo");
+  }
+  
+  // composition.0.nddl:5 Bar
+  class BarFactory2: public ConcreteObjectFactory {
+  public:
+    BarFactory2(const LabelStr& name): ConcreteObjectFactory(name){}
+  private:
+    ObjectId createInstance(const PlanDatabaseId& planDb,
+                            const LabelStr& objectType, 
+                            const LabelStr& objectName,
+                            const std::vector<ConstructorArgument>& arguments) const {
+      check_error(arguments.size() == 1);
+      check_error(AbstractDomain::canBeCompared(*arguments[0].second, 
+                                                TypeFactory::baseDomain("Foo")), 
+                  "Cannot convert " + arguments[0].first.toString() + " to Foo");
+      check_error(arguments[0].second->isSingleton());
+      FooId _foo((FooId)arguments[0].second->getSingletonValue());
+      
+      BarId instance = (new Bar(planDb, objectType, objectName))->getId();
+      instance->constructor(_foo);
+      instance->handleDefaults();
+      return instance;
+    }
+  };
+  
+} // namespace NDDL
+
+
+namespace NDDL {
+  // Boot-strap code to initialize schema
+  extern "C" SchemaId loadSchema(){
+    Id<Schema> id = Schema::instance("composition.0");
+    id->reset(); // Reset prior data if present. 
+    
+    // Register Constraints
+    // Invoke commands to populate schema with type definitions
+    id->addObjectType("Timeline","Object");
+    id->addObjectType("Foo", "Object");
+    id->addObjectType("Bar", "Object");
+    id->addPrimitive("int");
+    id->addPrimitive("float");
+    id->addPrimitive("bool");
+    id->addPrimitive("string");
+    id->addMember("Bar", "Foo", "foo");
+    // Force allocation of model specific type factories
+    // Allocate factories
+    REGISTER_TYPE_FACTORY(Object, ObjectDomain("Object"));
+    REGISTER_TYPE_FACTORY(Foo, ObjectDomain("Foo"));
+    REGISTER_OBJECT_FACTORY(FooFactory0, Foo);
+    REGISTER_TYPE_FACTORY(Bar, ObjectDomain("Bar"));
+    REGISTER_OBJECT_FACTORY(BarFactory1, Bar);
+    REGISTER_OBJECT_FACTORY(BarFactory2, Bar:Foo);
+    REGISTER_OBJECT_FACTORY(BarFactory2, Bar:Object);
+    // Allocate rules
+    return id;
+  }
+  
+}

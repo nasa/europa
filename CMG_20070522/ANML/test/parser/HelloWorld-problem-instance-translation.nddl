@@ -1,0 +1,12 @@
+
+PlannerConfig plannerConfiguration = new PlannerConfig(0, 100, 500, +inf);
+
+YourObject object = new YourObject();
+close(); // Close the the PLASMA Database - no more objects can be created.
+
+goal(YourObject.busy_eq_true goal1);
+leq(goal1.start,100);   
+leq(100,goal1.end);   
+
+// TODO: must generate this to prevent the goal from being clipped?
+leq(0,goal1.start);   

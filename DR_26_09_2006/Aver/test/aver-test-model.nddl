@@ -1,0 +1,102 @@
+#include "../../NDDL/base/Plasma.nddl"
+#include "../../NDDL/base/PlannerConfig.nddl"
+
+class PhysicalStatus extends Timeline {
+  predicate Sleeping {}
+  predicate AtSchool {}
+  predicate Working {}
+}
+
+class EmotionalStatus extends Timeline {
+  predicate Relaxed {}
+  predicate Bored {}
+  predicate Focused {}
+}
+
+class CaffeineLevel extends Resource {
+  CaffeineLevel(float ic, float ll_min, float ll_max) {
+    super(ic, ll_min, ll_max);
+  }
+}
+
+class Geek extends Object {
+  PhysicalStatus where;
+  EmotionalStatus what;
+  CaffeineLevel how;
+
+  Geek() {
+    where = new PhysicalStatus();
+    what = new EmotionalStatus();
+    how = new CaffeineLevel(50.0, 0.0, 100.0);
+  }
+}
+
+
+PhysicalStatus::Sleeping {
+  met_by(object.Working w);
+  meets(object.AtSchool s);
+  
+  Geek g;
+  eq(8, duration);
+  contains(EmotionalStatus.Relaxed r);
+  commonAncestor(r.object, object, g);
+}
+
+PhysicalStatus::AtSchool {
+  met_by(object.Sleeping s);
+  meets(object.Working w);
+  
+  Geek g;
+  eq(8, duration); //too long
+  contains(EmotionalStatus.Bored b);
+  commonAncestor(b.object, object, g);
+}
+
+PhysicalStatus::Working {
+  met_by(object.AtSchool a);
+  meets(object.Sleeping s);
+  
+  Geek g;
+  eq(8, duration);
+  contains(EmotionalStatus.Focused b);
+  commonAncestor(b.object, object, g);
+}
+
+EmotionalStatus::Relaxed {
+  eq(8, duration);
+
+  Geek g;
+  contains(CaffeineLevel.change c);
+  eq(-1.0, c.quantity);
+  commonAncestor(c.object, object, g);
+}
+
+EmotionalStatus::Bored {
+  eq(8, duration);
+
+  Geek g;
+  contains(CaffeineLevel.change c);
+  eq(-3.0, c.quantity);
+  commonAncestor(c.object, object, g);
+}
+
+EmotionalStatus::Focused {
+  eq(8, duration);
+  
+  Geek g;
+  contains(CaffeineLevel.change c);
+  eq(5.0, c.quantity);
+  commonAncestor(c.object, object, g);
+}
+
+PlannerConfig world = new PlannerConfig(0, 64, 100000);
+Geek geek = new Geek();
+close();
+
+goal(PhysicalStatus.Working w1);
+w1.start.specify(0);
+w1.activate();
+
+goal(PhysicalStatus.Sleeping w2);
+w2.end.specify(96);
+w2.activate();

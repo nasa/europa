@@ -1,0 +1,40 @@
+#include "Rover.nddl"
+#include "PlannerConfig.nddl"
+
+// Allocate objects of the problem
+PlannerConfig world = new PlannerConfig(0, 100, 100);
+
+Location lander = new Location("LANDER", 0, 0);
+Location rock1 = new Location("ROCK1", 9, 9);
+Location rock2 = new Location("ROCK2", 1, 6);
+Location rock3 = new Location("ROCK3", 4, 8);
+Location rock4 = new Location("ROCK4", 3, 9);
+
+// Allocate paths. Different paths use different resource levels. We want to force it to
+// use the short cut.
+Path p1 = new Path("Very Long Way", lander, rock4, -2000.0);
+Path p2 = new Path("Moderately Long Way", lander, rock4, -1500.0);
+Path p3 = new Path("Short Cut", lander, rock4, -400.0);
+
+// Allocate Rover. Only has enough energy to take the short cut.
+Battery battery = new Battery(1000.0, 0.0, 1000.0);
+Rover spirit = new Rover(battery);
+
+Resource.close();
+close();
+
+// Establish the initial position for spirit
+goal(Navigator.At initialPosition);
+eq(initialPosition.start, world.m_horizonStart); // What time - the start of this planmning horizon
+
+eq(initialPosition.location, lander); // What position - the lander
+
+// Establish the goal - to take a sample at a position. This will consume 120 units
+// of battery resource
+goal(Commands.TakeSample sample);
+sample.start.specify(50);
+sample.rock.specify(rock4); // Want to get to rock4
+
+// Establish the initial instrument state
+rejectable(Instrument.Stowed stowed);
+eq(stowed.start, world.m_horizonStart);

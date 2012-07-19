@@ -1,0 +1,9 @@
+predicate Stow{
+  eq([2 6], duration); // duration of Stow is between 2 and 6 time units
+}
+
+predicate Unstow{
+   eq([2 6], duration); // duration of Unstow is between 2 and 6 time units
+}
+
+predicate Stowed{}

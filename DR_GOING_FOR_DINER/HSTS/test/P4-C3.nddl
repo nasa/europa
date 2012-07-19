@@ -1,0 +1,297 @@
+// ../ModuleTests/Parser/gnats/P4-C3.ddl
+
+class P4C3;
+class P4C3___A;
+class P4C3___Ap;
+class P4C3___B;
+class P4C3___Bp;
+class P4C3___R;
+
+class P4C3___A extends Timeline {
+  predicate P {
+    float d;
+  }
+
+  predicate Ia {
+  }
+
+  P4C3 __DDL__object;
+  P4C3___A(P4C3 object) {
+    __DDL__object = object;
+  }
+}
+
+class P4C3___Ap extends Timeline {
+  predicate Wa {
+    float dx;
+    float dy;
+    bool Idle;
+  }
+
+  predicate Na {
+    float dx;
+    float dy;
+    bool Idle;
+  }
+
+  P4C3 __DDL__object;
+  P4C3___Ap(P4C3 object) {
+    __DDL__object = object;
+  }
+}
+
+class P4C3___B extends Timeline {
+  predicate C {
+    float d;
+  }
+
+  predicate Ib {
+  }
+
+  P4C3 __DDL__object;
+  P4C3___B(P4C3 object) {
+    __DDL__object = object;
+  }
+}
+
+class P4C3___Bp extends Timeline {
+  predicate Wb {
+    float dx;
+    float dy;
+    bool Idle;
+  }
+
+  predicate Nb {
+    float dx;
+    float dy;
+    bool Idle;
+  }
+
+  P4C3 __DDL__object;
+  P4C3___Bp(P4C3 object) {
+    __DDL__object = object;
+  }
+}
+
+class P4C3___R extends Timeline {
+  predicate S {
+    float x;
+    float y;
+    float ox;
+    float oy;
+    float adx;
+    float ady;
+    float bdx;
+    float bdy;
+  }
+
+  predicate E {
+    float x;
+    float y;
+    float nx;
+    float ny;
+    float adx;
+    float ady;
+    float bdx;
+    float bdy;
+  }
+
+  P4C3 __DDL__object;
+  P4C3___R(P4C3 object) {
+    __DDL__object = object;
+  }
+}
+
+class P4C3 {
+  P4C3___A A;
+  P4C3___Ap Ap;
+  P4C3___B B;
+  P4C3___Bp Bp;
+  P4C3___R R;
+  P4C3() {
+    A = new P4C3___A(this);
+    Ap = new P4C3___Ap(this);
+    B = new P4C3___B(this);
+    Bp = new P4C3___Bp(this);
+    R = new P4C3___R(this);
+  }
+}
+
+P4C3___A::P {
+  eq(duration, [2 +inf]);
+  eq(d, [0.00000 +inff]);
+  starts(P4C3___Ap.Wa s0);
+    eq(s0.dx, d);
+    eq(s0.dy, 0.00000);
+    eq(s0.Idle, false);
+  ends(P4C3___Ap.Na s1);
+    eq(s1.dx, 0.00000);
+    eq(s1.dy, d);
+    eq(s1.Idle, false);
+  met_by(P4C3___A.Ia s2);
+  meets(P4C3___A.Ia s3);
+}
+
+P4C3___A::Ia {
+  eq(duration, [2 +inf]);
+  starts(P4C3___Ap.Wa s0);
+    eq(s0.dx, 0.00000);
+    eq(s0.dy, 0.00000);
+    eq(s0.Idle, true);
+  ends(P4C3___Ap.Na s1);
+    eq(s1.dx, 0.00000);
+    eq(s1.dy, 0.00000);
+    eq(s1.Idle, true);
+  met_by(P4C3___A.P s2);
+  meets(P4C3___A.P s3);
+}
+
+P4C3___Ap::Wa {
+  eq(duration, [1 +inf]);
+  condEq(Idle, dx, dy);
+  eq(dx, [0.00000 +inff]);
+  eq(dy, [-inff 0.00000]);
+  meets(P4C3___Ap.Na s0);
+  met_by(P4C3___Ap.Na s1);
+  equals(P4C3___R.S s2);
+    eq(s2.adx, dx);
+    eq(s2.ady, dy);
+  if (Idle==false) {
+    starts(P4C3___A.P s0);
+      eq(s0.d, dx);
+  }
+}
+
+P4C3___Ap::Na {
+  eq(duration, [1 +inf]);
+  condEq(Idle, dx, dy);
+  eq(dx, [-inff 0.00000]);
+  eq(dy, [0.00000 +inff]);
+  meets(P4C3___Ap.Wa s0);
+  met_by(P4C3___Ap.Wa s1);
+  equals(P4C3___R.E s2);
+    eq(s2.adx, dx);
+    eq(s2.ady, dy);
+  if (Idle==false) {
+    ends(P4C3___A.P s0);
+      eq(s0.d, dy);
+  }
+}
+
+P4C3___B::C {
+  eq(duration, [2 +inf]);
+  eq(d, [-inff 0.00000]);
+  starts(P4C3___Bp.Wb s0);
+    eq(s0.dx, 0.00000);
+    eq(s0.dy, d);
+    eq(s0.Idle, false);
+  ends(P4C3___Bp.Nb s1);
+    eq(s1.dx, d);
+    eq(s1.dy, 0.00000);
+    eq(s1.Idle, false);
+  met_by(P4C3___B.Ib s2);
+  meets(P4C3___B.Ib s3);
+}
+
+P4C3___B::Ib {
+  eq(duration, [2 +inf]);
+  starts(P4C3___Bp.Wb s0);
+    eq(s0.dx, 0.00000);
+    eq(s0.dy, 0.00000);
+    eq(s0.Idle, true);
+  ends(P4C3___Bp.Nb s1);
+    eq(s1.dx, 0.00000);
+    eq(s1.dy, 0.00000);
+    eq(s1.Idle, true);
+  met_by(P4C3___B.C s2);
+  meets(P4C3___B.C s3);
+}
+
+P4C3___Bp::Wb {
+  eq(duration, [1 +inf]);
+  condEq(Idle, dx, dy);
+  eq(dx, [0.00000 +inff]);
+  eq(dy, [-inff 0.00000]);
+  meets(P4C3___Bp.Nb s0);
+  met_by(P4C3___Bp.Nb s1);
+  equals(P4C3___R.S s2);
+    eq(s2.bdx, dx);
+    eq(s2.bdy, dy);
+  if (Idle==false) {
+    starts(P4C3___B.C s0);
+      eq(s0.d, dy);
+  }
+}
+
+P4C3___Bp::Nb {
+  eq(duration, [1 +inf]);
+  condEq(Idle, dx, dy);
+  eq(dx, [-inff 0.00000]);
+  eq(dy, [0.00000 +inff]);
+  meets(P4C3___Bp.Wb s0);
+  met_by(P4C3___Bp.Wb s1);
+  equals(P4C3___R.E s2);
+    eq(s2.bdx, dx);
+    eq(s2.bdy, dy);
+  if (Idle==false) {
+    ends(P4C3___B.C s0);
+      eq(s0.d, dx);
+  }
+}
+
+P4C3___R::S {
+  eq(duration, [1 +inf]);
+  sum(x, ox, adx, bdx);
+  leq(y, x);
+  sum(y, oy, ady, bdy);
+  leq(oy, ox);
+  eq(x, [0.00000 +inff]);
+  eq(y, [0.00000 +inff]);
+  eq(ox, [0.00000 +inff]);
+  eq(oy, [0.00000 +inff]);
+  eq(adx, [0.00000 +inff]);
+  eq(ady, [-inff 0.00000]);
+  eq(bdx, [0.00000 +inff]);
+  eq(bdy, [-inff 0.00000]);
+  equals(P4C3___Ap.Wa s0);
+    eq(s0.dx, adx);
+    eq(s0.dy, ady);
+  equals(P4C3___Bp.Wb s1);
+    eq(s1.dx, bdx);
+    eq(s1.dy, bdy);
+  met_by(P4C3___R.E s2);
+    eq(s2.nx, ox);
+    eq(s2.ny, oy);
+  meets(P4C3___R.E s3);
+    eq(s3.x, x);
+    eq(s3.y, y);
+}
+
+P4C3___R::E {
+  eq(duration, [1 +inf]);
+  sum(nx, x, adx, bdx);
+  leq(y, x);
+  sum(ny, y, ady, bdy);
+  leq(ny, nx);
+  eq(x, [0.00000 +inff]);
+  eq(y, [0.00000 +inff]);
+  eq(nx, [0.00000 +inff]);
+  eq(ny, [0.00000 +inff]);
+  eq(adx, [-inff 0.00000]);
+  eq(ady, [0.00000 +inff]);
+  eq(bdx, [-inff 0.00000]);
+  eq(bdy, [0.00000 +inff]);
+  equals(P4C3___Ap.Na s0);
+    eq(s0.dx, adx);
+    eq(s0.dy, ady);
+  equals(P4C3___Bp.Nb s1);
+    eq(s1.dx, bdx);
+    eq(s1.dy, bdy);
+  met_by(P4C3___R.S s2);
+    eq(s2.x, x);
+    eq(s2.y, y);
+  meets(P4C3___R.S s3);
+    eq(s3.ox, nx);
+    eq(s3.oy, ny);
+}
+

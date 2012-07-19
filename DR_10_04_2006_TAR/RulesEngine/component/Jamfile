@@ -1,0 +1,7 @@
+SubDir PLASMA RulesEngine component ;
+
+if ! $(PLASMA_READY) {
+
+ModuleComponent RulesEngine ;
+
+} # PLASMA_READY

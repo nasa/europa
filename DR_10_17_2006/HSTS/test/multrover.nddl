@@ -1,0 +1,136 @@
+// ../ModuleTests/Parser/rover/multrover.ddl
+
+enum Location_Label { lander, rock, hill, sand, martian_city } 
+
+class Rover_Class;
+class Rover_Class___location;
+class Rover_Class___charge;
+
+class Rover_Class___location extends Timeline {
+  predicate At {
+    Location_Label Loc_Label;
+  }
+
+  predicate Going {
+    Location_Label From_Loc;
+    Location_Label To_Loc;
+  }
+
+  Rover_Class __DDL__object;
+  Rover_Class___location(Rover_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class Rover_Class___charge extends Timeline {
+  predicate Maintain {
+    int Charge_Value;
+    int _0_anon_OR_tag_1;
+  }
+
+  predicate Charge {
+    int Start_Val;
+    int Rate_Val;
+    int End_Val;
+    int _0_anon_OR_tag_1;
+  }
+
+  predicate Use {
+    int Start_Val;
+    int Rate_Val;
+    int End_Val;
+    int _0_anon_OR_tag_1;
+    int _0_anon_OR_tag_2;
+  }
+
+  Rover_Class __DDL__object;
+  Rover_Class___charge(Rover_Class object) {
+    __DDL__object = object;
+  }
+}
+
+class Rover_Class {
+  Rover_Class___location location;
+  Rover_Class___charge charge;
+  Rover_Class() {
+    location = new Rover_Class___location(this);
+    charge = new Rover_Class___charge(this);
+  }
+}
+
+Rover_Class___location::At {
+  eq(duration, [1 +inf]);
+  met_by(Rover_Class___location.Going s0);
+    eq(s0.To_Loc, Loc_Label);
+  meets(Rover_Class___location.Going s1);
+    eq(s1.From_Loc, Loc_Label);
+}
+
+Rover_Class___location::Going {
+  neq(From_Loc, To_Loc);
+  met_by(Rover_Class___location.At s0);
+    eq(s0.Loc_Label, From_Loc);
+  equals(Rover_Class___charge.Use s1);
+  meets(Rover_Class___location.At s2);
+    eq(s2.Loc_Label, To_Loc);
+}
+
+Rover_Class___charge::Maintain {
+  eq(Charge_Value, [0 200]);
+  eq(_0_anon_OR_tag_1, [1 2]);
+  meets(Rover_Class___charge.Use s0);
+    eq(s0.Start_Val, Charge_Value);
+  if (_0_anon_OR_tag_1==1) {
+    met_by(Rover_Class___charge.Charge s0);
+      eq(s0.End_Val, Charge_Value);
+  }
+  if (_0_anon_OR_tag_1==2) {
+    met_by(Rover_Class___charge.Use s0);
+      eq(s0.End_Val, Charge_Value);
+  }
+}
+
+Rover_Class___charge::Charge {
+  addMulEq(Start_Val, duration, Rate_Val, End_Val);
+  eq(Start_Val, [10 100]);
+  eq(Start_Val, [0 200]);
+  eq(Rate_Val, 20);
+  eq(End_Val, [0 200]);
+  eq(_0_anon_OR_tag_1, [1 2]);
+  met_by(Rover_Class___charge.Use s0);
+    eq(s0.End_Val, Start_Val);
+  if (_0_anon_OR_tag_1==1) {
+    meets(Rover_Class___charge.Maintain s0);
+      eq(s0.Charge_Value, End_Val);
+  }
+  if (_0_anon_OR_tag_1==2) {
+    meets(Rover_Class___charge.Use s0);
+      eq(s0.Start_Val, End_Val);
+  }
+}
+
+Rover_Class___charge::Use {
+  addMulEq(End_Val, duration, Rate_Val, Start_Val);
+  eq(Start_Val, [0 200]);
+  eq(Rate_Val, 20);
+  eq(End_Val, [0 200]);
+  eq(_0_anon_OR_tag_1, [1 2]);
+  eq(_0_anon_OR_tag_2, [1 2]);
+  if (_0_anon_OR_tag_1==1) {
+    met_by(Rover_Class___charge.Maintain s0);
+      eq(s0.Charge_Value, Start_Val);
+  }
+  if (_0_anon_OR_tag_1==2) {
+    met_by(Rover_Class___charge.Charge s0);
+      eq(s0.End_Val, Start_Val);
+  }
+  if (_0_anon_OR_tag_2==1) {
+    meets(Rover_Class___charge.Maintain s0);
+      eq(s0.Charge_Value, End_Val);
+  }
+  if (_0_anon_OR_tag_2==2) {
+    meets(Rover_Class___charge.Charge s0);
+      eq(s0.Start_Val, End_Val);
+  }
+}
+

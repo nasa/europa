@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!DOCTYPE test SYSTEM "XMLUtil-test.dtd">
+<!-- This self referential comment exists to test comments.  Its second sentence serves only as a bad joke. -->
+<test>
+	<Foo>
+		<Bar>
+			<Bing attr="baz"/>
+		</Bar>
+	</Foo>
+</test>

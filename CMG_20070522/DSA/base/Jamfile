@@ -1,0 +1,51 @@
+SubDir PLASMA DSA base ;
+
+if ! $(PLASMA_READY) {
+
+if $(JAVA_HOME) {
+	if $(OS) = SOLARIS {
+		SubDirC++Flags -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/solaris ;
+	}
+	else if $(OS) = LINUX {
+		SubDirC++Flags -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux ;
+	}
+	else {
+		SubDirC++Flags -I$(JAVA_HOME)/include ;
+	}
+}
+
+ModuleBase DSA : DSA.cc ;
+
+ApacheAnt JNI.h : [ FGristFiles build.xml ] dsa/impl/JNI.java : createJNI ;
+
+ApacheAnt DSA.jar : 
+	[ FGristFiles build.xml ]
+	dsa/DSA.java
+	dsa/Entity.java
+	dsa/Component.java
+	dsa/Attribute.java
+	dsa/Slot.java
+	dsa/Token.java
+	dsa/Action.java
+	dsa/Proposition.java
+	dsa/Parameter.java
+	dsa/Violation.java
+	dsa/LibraryLoader.java
+	dsa/InvalidSourceException.java
+	dsa/InvalidSinkException.java
+	dsa/PlanNotSavedException.java
+	dsa/NoActivePlanException.java
+	dsa/InvalidKeyException.java
+	dsa/impl/JNI.java
+	dsa/impl/TokenImpl.java
+	dsa/impl/ActionImpl.java
+	:
+	DSA
+;
+
+LOCATE on DSA.jar = [ FDirName $(SUBDIR) .. .. lib ] ;
+
+Depends DSA.jar : nddl.jar ;
+
+	
+} # PLASMA_READY

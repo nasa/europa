@@ -1,0 +1,407 @@
+// ../ModuleTests/Parser/dnp/DNP.compats.ddl
+
+enum Observation_Level { ObsNo, ObsLo, ObsHi } 
+
+enum Done_Flag { Done, Undone } 
+
+enum End_Flag { End, Noend } 
+
+enum DSS_Id { DSS_15, DSS_45, DSS_14, DSS_65 } 
+
+class DNP_Science;
+class DNP_Science___Scan_Platform;
+class DNP_Science___Fields_and_Particles;
+class DNP_Data;
+class DNP_Data___SSR_Storage_Use;
+class DNP_Comm;
+class DNP_Comm___Comm_Activity;
+class DSS_Any;
+class DSS_Any___DSS_Availability;
+
+class DNP_Science___Scan_Platform extends Timeline {
+  predicate Mosaic_LO {
+    int ID;
+    Observation_Level Data_Rate;
+    int Length;
+  }
+
+  predicate Mosaic_HI {
+    int ID;
+    Observation_Level Data_Rate;
+    int Length;
+  }
+
+  predicate Scan_Idle {
+    int _0_anon_OR_tag_1;
+    int _0_anon_OR_tag_2;
+  }
+
+  DNP_Science __DDL__object;
+  DNP_Science___Scan_Platform(DNP_Science object) {
+    __DDL__object = object;
+  }
+}
+
+class DNP_Science___Fields_and_Particles extends Timeline {
+  predicate F_and_P_Observation_LO {
+    int ID;
+    Observation_Level Data_Rate;
+    int Length;
+  }
+
+  predicate F_and_P_Observation_HI {
+    int ID;
+    Observation_Level Data_Rate;
+    int Length;
+  }
+
+  predicate F_and_P_Idle {
+    int _0_anon_OR_tag_1;
+    int _0_anon_OR_tag_2;
+  }
+
+  DNP_Science __DDL__object;
+  DNP_Science___Fields_and_Particles(DNP_Science object) {
+    __DDL__object = object;
+  }
+}
+
+class DNP_Science {
+  DNP_Science___Scan_Platform Scan_Platform;
+  DNP_Science___Fields_and_Particles Fields_and_Particles;
+  DNP_Science() {
+    Scan_Platform = new DNP_Science___Scan_Platform(this);
+    Fields_and_Particles = new DNP_Science___Fields_and_Particles(this);
+  }
+}
+
+class DNP_Data___SSR_Storage_Use extends Timeline {
+  predicate Record {
+    int Start_Storage;
+    int End_Storage;
+    int Length;
+    Observation_Level ReqFPRate;
+    Observation_Level ReqMosRate;
+    int _0_anon_OR_tag_1;
+    int _0_anon_OR_tag_2;
+    int _0_anon_OR_tag_3;
+  }
+
+  predicate Playback {
+    int Start_Storage;
+    int End_Storage;
+    int Playback_Rate;
+    DSS_Id Location;
+    int DSS_Opp_Num;
+    int Allowed_Earlier_Opps;
+    End_Flag Flagged_End;
+    int _0_anon_OR_tag_1;
+  }
+
+  predicate Constant_Storage {
+    int SSR_Storage;
+    int DSS_Opp_Num;
+    End_Flag Flagged_End;
+    int _0_anon_OR_tag_1;
+    int _0_anon_OR_tag_2;
+  }
+
+  DNP_Data __DDL__object;
+  DNP_Data___SSR_Storage_Use(DNP_Data object) {
+    __DDL__object = object;
+  }
+}
+
+class DNP_Data {
+  DNP_Data___SSR_Storage_Use SSR_Storage_Use;
+  DNP_Data() {
+    SSR_Storage_Use = new DNP_Data___SSR_Storage_Use(this);
+  }
+}
+
+class DNP_Comm___Comm_Activity extends Timeline {
+  predicate Pre_Cal {
+    int Duration;
+  }
+
+  predicate Post_Cal {
+    int Duration;
+  }
+
+  predicate Communicate {
+    int Pre_Cal_Duration;
+    int Post_Cal_Duration;
+    DSS_Id Location;
+    int Playback_Rate;
+  }
+
+  predicate Comm_Idle {
+  }
+
+  DNP_Comm __DDL__object;
+  DNP_Comm___Comm_Activity(DNP_Comm object) {
+    __DDL__object = object;
+  }
+}
+
+class DNP_Comm {
+  DNP_Comm___Comm_Activity Comm_Activity;
+  DNP_Comm() {
+    Comm_Activity = new DNP_Comm___Comm_Activity(this);
+  }
+}
+
+class DSS_Any___DSS_Availability extends Timeline {
+  predicate Downlink_Window {
+    int Downlink_Rate;
+    int Pre_Cal_Time;
+    int Post_Cal_Time;
+    DSS_Id loc;
+    int Opp_Number;
+  }
+
+  predicate No_Window {
+  }
+
+  DSS_Any __DDL__object;
+  DSS_Any___DSS_Availability(DSS_Any object) {
+    __DDL__object = object;
+  }
+}
+
+class DSS_Any {
+  DSS_Any___DSS_Availability DSS_Availability;
+  DSS_Any() {
+    DSS_Availability = new DSS_Any___DSS_Availability(this);
+  }
+}
+
+DNP_Science___Scan_Platform::Mosaic_LO {
+  eq(ID, [0 +inf]);
+  eq(Length, [0 +inf]);
+  met_by(DNP_Science___Scan_Platform.Scan_Idle s0);
+  meets(DNP_Science___Scan_Platform.Scan_Idle s1);
+  starts(DNP_Data___SSR_Storage_Use.Record s2);
+    eq(s2.Length, Length);
+    eq(s2.ReqFPRate, Observation_Level.ObsNo);
+    eq(s2.ReqMosRate, Data_Rate);
+}
+
+DNP_Science___Scan_Platform::Mosaic_HI {
+  eq(ID, [0 +inf]);
+  eq(Length, [0 +inf]);
+  met_by(DNP_Science___Scan_Platform.Scan_Idle s0);
+  meets(DNP_Science___Scan_Platform.Scan_Idle s1);
+  starts(DNP_Data___SSR_Storage_Use.Record s2);
+    eq(s2.Length, Length);
+    eq(s2.ReqFPRate, Observation_Level.ObsNo);
+    eq(s2.ReqMosRate, Data_Rate);
+}
+
+DNP_Science___Scan_Platform::Scan_Idle {
+  eq(duration, [1 +inf]);
+  eq(_0_anon_OR_tag_1, [1 2]);
+  eq(_0_anon_OR_tag_2, [1 2]);
+  if (_0_anon_OR_tag_1==1) {
+    met_by(DNP_Science___Scan_Platform.Mosaic_HI s0);
+  }
+  if (_0_anon_OR_tag_1==2) {
+    met_by(DNP_Science___Scan_Platform.Mosaic_LO s0);
+  }
+  if (_0_anon_OR_tag_2==1) {
+    meets(DNP_Science___Scan_Platform.Mosaic_HI s0);
+  }
+  if (_0_anon_OR_tag_2==2) {
+    meets(DNP_Science___Scan_Platform.Mosaic_LO s0);
+  }
+}
+
+DNP_Science___Fields_and_Particles::F_and_P_Observation_LO {
+  eq(ID, [0 +inf]);
+  eq(Length, [0 +inf]);
+  met_by(DNP_Science___Fields_and_Particles.F_and_P_Idle s0);
+  meets(DNP_Science___Fields_and_Particles.F_and_P_Idle s1);
+  starts(DNP_Data___SSR_Storage_Use.Record s2);
+    eq(s2.Length, Length);
+    eq(s2.ReqFPRate, Data_Rate);
+    eq(s2.ReqMosRate, Observation_Level.ObsNo);
+}
+
+DNP_Science___Fields_and_Particles::F_and_P_Observation_HI {
+  eq(ID, [0 +inf]);
+  eq(Length, [0 +inf]);
+  met_by(DNP_Science___Fields_and_Particles.F_and_P_Idle s0);
+  meets(DNP_Science___Fields_and_Particles.F_and_P_Idle s1);
+  starts(DNP_Data___SSR_Storage_Use.Record s2);
+    eq(s2.Length, Length);
+    eq(s2.ReqFPRate, Data_Rate);
+    eq(s2.ReqMosRate, Observation_Level.ObsNo);
+}
+
+DNP_Science___Fields_and_Particles::F_and_P_Idle {
+  eq(duration, [1 +inf]);
+  eq(_0_anon_OR_tag_1, [1 2]);
+  eq(_0_anon_OR_tag_2, [1 2]);
+  if (_0_anon_OR_tag_1==1) {
+    met_by(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO s0);
+  }
+  if (_0_anon_OR_tag_1==2) {
+    met_by(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI s0);
+  }
+  if (_0_anon_OR_tag_2==1) {
+    meets(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO s0);
+  }
+  if (_0_anon_OR_tag_2==2) {
+    meets(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI s0);
+  }
+}
+
+DNP_Data___SSR_Storage_Use::Record {
+  eq(duration, [1 +inf]);
+  BOUNDS_RECORD_END_STORAGE(End_Storage, Start_Storage, ReqFPRate, ReqMosRate, Length);
+  BOUNDS_RECORD_START_STORAGE(Start_Storage, End_Storage, ReqFPRate, ReqMosRate, Length);
+  eq(Start_Storage, [0 90000000]);
+  eq(End_Storage, [0 90000000]);
+  eq(Length, [0 +inf]);
+  eq(_0_anon_OR_tag_1, [1 4]);
+  eq(_0_anon_OR_tag_2, [1 2]);
+  eq(_0_anon_OR_tag_3, [1 3]);
+  if (_0_anon_OR_tag_1==1) {
+    starts(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI s0);
+  }
+  if (_0_anon_OR_tag_1==2) {
+    starts(DNP_Science___Fields_and_Particles.F_and_P_Observation_LO s0);
+  }
+  if (_0_anon_OR_tag_1==3) {
+    starts(DNP_Science___Scan_Platform.Mosaic_HI s0);
+  }
+  if (_0_anon_OR_tag_1==4) {
+    starts(DNP_Science___Scan_Platform.Mosaic_LO s0);
+  }
+  if (_0_anon_OR_tag_2==1) {
+    met_by(DNP_Data___SSR_Storage_Use.Constant_Storage s0);
+      eq(s0.SSR_Storage, Start_Storage);
+  }
+  if (_0_anon_OR_tag_2==2) {
+    met_by(DNP_Data___SSR_Storage_Use.Record s0);
+      eq(s0.End_Storage, Start_Storage);
+  }
+  if (_0_anon_OR_tag_3==1) {
+    meets(DNP_Data___SSR_Storage_Use.Record s0);
+      eq(s0.Start_Storage, End_Storage);
+  }
+  if (_0_anon_OR_tag_3==2) {
+    meets(DNP_Data___SSR_Storage_Use.Playback s0);
+      eq(s0.Start_Storage, End_Storage);
+  }
+  if (_0_anon_OR_tag_3==3) {
+    meets(DNP_Data___SSR_Storage_Use.Constant_Storage s0);
+      eq(s0.SSR_Storage, End_Storage);
+  }
+}
+
+DNP_Data___SSR_Storage_Use::Playback {
+  eq(duration, [100 +inf]);
+  COMPUTE_PLAYBACK_DURATION(duration, Start_Storage, End_Storage, Playback_Rate, start, end);
+  BOUNDS_PLAYBACK_START_STORAGE(Start_Storage, End_Storage, Playback_Rate, duration);
+  BOUNDS_PLAYBACK_END_STORAGE(End_Storage, Start_Storage, Playback_Rate, duration);
+  FIGURE_EARLIER_OP_IDS(Allowed_Earlier_Opps, DSS_Opp_Num);
+  eq(Start_Storage, [0 90000000]);
+  eq(End_Storage, [0 90000000]);
+  eq(Playback_Rate, [0 +inf]);
+  eq(DSS_Opp_Num, [0 +inf]);
+  eq(Allowed_Earlier_Opps, [0 +inf]);
+  eq(_0_anon_OR_tag_1, [1 2]);
+  meets(DNP_Data___SSR_Storage_Use.Constant_Storage s0);
+    eq(s0.SSR_Storage, End_Storage);
+  equals(DNP_Comm___Comm_Activity.Communicate s1);
+    eq(s1.Location, Location);
+    eq(s1.Playback_Rate, Playback_Rate);
+  contained_by(DNP_Science___Scan_Platform.Scan_Idle s2);
+  contained_by(DNP_Science___Fields_and_Particles.F_and_P_Idle s3);
+  contained_by(DSS_Any___DSS_Availability.Downlink_Window s4);
+    eq(s4.Downlink_Rate, Playback_Rate);
+    eq(s4.loc, Location);
+    eq(s4.Opp_Number, DSS_Opp_Num);
+  if (_0_anon_OR_tag_1==1) {
+    met_by(DNP_Data___SSR_Storage_Use.Constant_Storage s0);
+      eq(s0.SSR_Storage, Start_Storage);
+      eq(s0.DSS_Opp_Num, Allowed_Earlier_Opps);
+      eq(s0.Flagged_End, Flagged_End);
+  }
+  if (_0_anon_OR_tag_1==2) {
+    met_by(DNP_Data___SSR_Storage_Use.Record s0);
+      eq(s0.End_Storage, Start_Storage);
+  }
+}
+
+DNP_Data___SSR_Storage_Use::Constant_Storage {
+  eq(duration, [1 +inf]);
+  eq(SSR_Storage, [0 90000000]);
+  eq(DSS_Opp_Num, [0 +inf]);
+  eq(_0_anon_OR_tag_1, [1 2]);
+  eq(_0_anon_OR_tag_2, [1 2]);
+  if (_0_anon_OR_tag_1==1) {
+    met_by(DNP_Data___SSR_Storage_Use.Playback s0);
+      eq(s0.End_Storage, SSR_Storage);
+      eq(s0.DSS_Opp_Num, DSS_Opp_Num);
+      eq(s0.Flagged_End, Flagged_End);
+  }
+  if (_0_anon_OR_tag_1==2) {
+    met_by(DNP_Data___SSR_Storage_Use.Record s0);
+      eq(s0.End_Storage, SSR_Storage);
+  }
+  if (_0_anon_OR_tag_2==1) {
+    meets(DNP_Data___SSR_Storage_Use.Record s0);
+      eq(s0.Start_Storage, SSR_Storage);
+  }
+  if (_0_anon_OR_tag_2==2) {
+    meets(DNP_Data___SSR_Storage_Use.Playback s0);
+      eq(s0.Start_Storage, SSR_Storage);
+  }
+}
+
+DNP_Comm___Comm_Activity::Pre_Cal {
+  eq(duration, Duration);
+  met_by(DNP_Comm___Comm_Activity.Comm_Idle s0);
+  meets(DNP_Comm___Comm_Activity.Communicate s1);
+    eq(s1.Pre_Cal_Duration, Duration);
+}
+
+DNP_Comm___Comm_Activity::Post_Cal {
+  eq(duration, Duration);
+  meets(DNP_Comm___Comm_Activity.Comm_Idle s0);
+  met_by(DNP_Comm___Comm_Activity.Communicate s1);
+    eq(s1.Post_Cal_Duration, Duration);
+}
+
+DNP_Comm___Comm_Activity::Communicate {
+  eq(Playback_Rate, [0 +inf]);
+  contained_by(DSS_Any___DSS_Availability.Downlink_Window s0);
+    eq(s0.Downlink_Rate, Playback_Rate);
+    eq(s0.Pre_Cal_Time, Pre_Cal_Duration);
+    eq(s0.Post_Cal_Time, Post_Cal_Duration);
+    eq(s0.loc, Location);
+  met_by(DNP_Comm___Comm_Activity.Pre_Cal s1);
+    eq(s1.Duration, Pre_Cal_Duration);
+  meets(DNP_Comm___Comm_Activity.Post_Cal s2);
+    eq(s2.Duration, Post_Cal_Duration);
+}
+
+DNP_Comm___Comm_Activity::Comm_Idle {
+  met_by(DNP_Comm___Comm_Activity.Post_Cal s0);
+  meets(DNP_Comm___Comm_Activity.Pre_Cal s1);
+}
+
+DSS_Any___DSS_Availability::Downlink_Window {
+  eq(Downlink_Rate, [0 +inf]);
+  eq(Opp_Number, [0 +inf]);
+  meets(DSS_Any___DSS_Availability.No_Window s0);
+  met_by(DSS_Any___DSS_Availability.No_Window s1);
+}
+
+DSS_Any___DSS_Availability::No_Window {
+  meets(DSS_Any___DSS_Availability.Downlink_Window s0);
+  met_by(DSS_Any___DSS_Availability.Downlink_Window s1);
+}
+

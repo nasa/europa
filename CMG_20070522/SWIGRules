@@ -1,0 +1,96 @@
+if ! $(SWIGRules_INCLUDED) {
+SWIGRules_INCLUDED = TRUE ;
+
+include [ FDirName $(SUBDIR) PlatformRules ] ;
+
+# Swig <c/c++ file> : <swig file> : <language> : <destination directory for language files> : <true if wrapping c++> ;
+rule Swig {
+  local cfile = $(1) ;
+  local swigfile = $(2) ;
+  local language = $(3) ;
+  local destdir = $(4) ;
+  local cpp = $(5) ;
+
+  SEARCH on $(swigfile) = $(SUBDIR) ;
+  LOCATE on $(cfile) = $(SUBDIR) ;
+
+  local arguments = -$(language) -o [ FDirName $(SUBDIR) $(cfile:G=) ] -Wall ;
+
+  if $(cpp) {
+    arguments += "-c++" ;
+  }
+
+  local actualdestdir = $(SUBDIR) ;
+  if $(destdir) {
+    actualdestdir = [ FDirName $(SUBDIR) $(destdir) ] ;
+    if ! ( $(destdir) in [ GLOB $(SUBDIR) ] ) {
+      MkDir $(actualdestdir) ;
+      Depends $(cfile) : $(actualdestdir) ;
+    }
+  }
+  arguments += -outdir $(actualdestdir) ;
+
+  NOCARE $(swigfile) ;
+  Depends $(cfile) : $(swigfile) ;
+  ARGUMENTS on $(cfile) = $(arguments) ;
+  Clean clean : $(cfile) ;
+
+}
+
+actions Swig {
+  echo $(SWIG) $(ARGUMENTS) $(2) ;
+  $(SWIG) $(ARGUMENTS) $(2)
+}
+
+rule SwigJava {
+     local swigfile = $(1) ;
+     local package = $(2) ;
+     local outdir = $(3) ;
+     local cpp = $(4) ;
+     local deps = $(5) ;
+     local target = $(6) ;
+     local language = java "package $(package)" ;
+
+     if $(JAVA_HOME) {
+	if $(OS) = SOLARIS {
+		SubDirC++Flags -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/solaris ;
+	}
+	else if $(OS) = LINUX {
+		SubDirC++Flags -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux ;
+	}
+	else {
+		SubDirC++Flags -I$(JAVA_HOME)/include ;
+	}
+     }
+
+     local wrapfile = [ FSwigWrapperName $(swigfile) : $(cpp) ] ;
+
+     Swig [ FGristFiles $(wrapfile) ] : $(swigfile) : java "package $(package)" : $(outdir) : $(cpp) ;
+
+     local javadir ;
+     if $(outdir) {
+       #javadir = [ FDirName $(SUBDIR) $(outdir) ] ;
+       javadir = $(outdir) ;
+     }
+     else {
+       javadir = $(SUBDIR) ;
+     }
+     ApacheAnt $(target:S=.jar) : [ FGristFiles build.xml ] : $(target) -Dsrc.dir=$(javadir) ;
+		 NotFile $(target) ;
+		 Depends $(target) : $(deps:G=module) ;
+		 Depends $(target) : [ FGristFiles $(wrapfile) ] ;
+     Depends $(target) : $(target:S=.jar) ;
+}
+
+rule FSwigWrapperName {
+	local swigfile = $(1) ;
+	local cpp = $(2) ;
+
+	local wrapsuffix = c ;
+	if $(cpp) {
+		wrapsuffix = cc ;
+	}
+	return $(swigfile:S=)_wrap.$(wrapsuffix) ;
+}
+
+}

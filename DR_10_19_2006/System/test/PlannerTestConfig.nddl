@@ -1,0 +1,16 @@
+///////////////////////////////////////////////////////////
+// Declare a simple class to initialize planner data and
+// provide expected test results for verification
+// Author: Conor McGann
+// Date: September, 2005
+///////////////////////////////////////////////////////////
+
+#include "PlannerConfig.nddl"
+
+class PlannerTestConfig extends PlannerConfig {
+ PlannerTestConfig(int start, int end, 
+                   int maxPlannerSteps, 
+                   int maxPlannerDepth){
+  super(start, end, maxPlannerSteps, maxPlannerDepth);
+ }
+}

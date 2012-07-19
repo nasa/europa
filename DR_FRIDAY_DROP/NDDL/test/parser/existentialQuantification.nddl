@@ -1,0 +1,49 @@
+enum Location { Hill, Rock, Lander, MartianCity }
+
+class Path {
+    Location from;
+    Location to;
+    Path(Location _from, Location _to) {
+        from = _from; to = _to;
+    }
+}
+
+class Rover {
+    predicate Going {
+        Location from, to;
+        neq(from,to);
+    }
+    predicate At {
+        Location location;
+    }
+}
+
+Rover::Going {
+    meets(At a);
+    eq(a.location,to);
+    Path p : { eq(p.from,from); eq(p.to,to); };
+}
+
+Rover::Going {
+    met_by(At a);
+    eq(a.location,from);
+}
+
+Rover::At {
+    meets(Going g);
+    eq(location,g.from);
+}
+
+Rover::At {
+    met_by(Going g);
+    eq(location,g.to);
+}
+
+class World {
+    Path p1;
+    Path p2;
+    World() {
+        p1 = new Path(Hill,Rock);
+        p2 = new Path(Rock,Lander);
+    }
+}

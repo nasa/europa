@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<project name="CheckAnt" default="check" basedir=".">
+	<description>
+  Check Apache Ant requirements for PLASMA
+	</description>
+
+	<target name="check"
+	  description="Check Apache Ant requirements for PLASMA">
+		<echo message="Testing your ant installation."/>
+		<condition property="hasclass.project"><available classname="org.apache.tools.ant.Project"/></condition>
+		<condition property="hasclass.target"><available classname="org.apache.tools.ant.Target"/></condition>
+		<condition property="hasclass.description"><available classname="org.apache.tools.ant.types.Description"/></condition>
+		<condition property="hasclass.path"><available classname="org.apache.tools.ant.types.Path"/></condition>
+		<condition property="hasclass.property"><available classname="org.apache.tools.ant.taskdefs.Property"/></condition>
+		<condition property="hasclass.fileset"><or>
+			<available classname="org.apache.tools.ant.types.Fileset"/>
+			<available classname="org.apache.tools.ant.types.FileSet"/>
+		</or></condition>
+		<condition property="hasclass.manifest"><available classname="org.apache.tools.ant.taskdefs.Manifest"/></condition>
+		<condition property="hasclass.delete"><available classname="org.apache.tools.ant.taskdefs.Delete"/></condition>
+		<condition property="hasclass.jar"><available classname="org.apache.tools.ant.taskdefs.Jar"/></condition>
+		<condition property="hasclass.unjar"><available classname="org.apache.tools.ant.taskdefs.Untar"/></condition>
+		<condition property="hasclass.tstamp"><available classname="org.apache.tools.ant.taskdefs.Tstamp"/></condition>
+		<condition property="hasclass.mkdir"><available classname="org.apache.tools.ant.taskdefs.Mkdir"/></condition>
+		<condition property="hasclass.javac"><available classname="org.apache.tools.ant.taskdefs.Javac"/></condition>
+		<condition property="hasclass.antlr"><available classname="org.apache.tools.ant.taskdefs.optional.ANTLR"/></condition>
+		<condition property="hasclass.depend"><available classname="org.apache.tools.ant.taskdefs.optional.depend.Depend"/></condition>
+		<condition property="hasclass.echoproperties"><or>
+			<available classname="org.apache.tools.ant.taskdefs.optional.Echoproperties"/>
+			<available classname="org.apache.tools.ant.taskdefs.optional.EchoProperties"/>
+		</or></condition>
+
+		<condition property="build.severe.ok">
+			<and>
+				<istrue value="${hasclass.project}"/>
+				<istrue value="${hasclass.target}"/>
+				<istrue value="${hasclass.description}"/>
+				<istrue value="${hasclass.path}"/>
+				<istrue value="${hasclass.property}"/>
+				<istrue value="${hasclass.fileset}"/>
+			</and>
+		</condition>
+
+		<condition property="build.ok">
+			<and>
+				<istrue value="${build.severe.ok}"/>
+				<istrue value="${hasclass.manifest}"/>
+				<istrue value="${hasclass.delete}"/>
+				<istrue value="${hasclass.jar}"/>
+				<istrue value="${hasclass.unjar}"/>
+				<istrue value="${hasclass.tstamp}"/>
+				<istrue value="${hasclass.mkdir}"/>
+				<istrue value="${hasclass.javac}"/>
+				<istrue value="${hasclass.antlr}"/>
+				<istrue value="${hasclass.depend}"/>
+				<istrue value="${hasclass.echoproperties}"/>
+			</and>
+		</condition>
+		<antcall target="echoHasclass"/>
+		<fail message="  Your ant is severely broken." unless="build.severe.ok"/>
+		<fail message="  Your ant is insufficent." unless="build.ok"/>
+		<echo message="  All tests pass, your ant should do just fine."/>
+	</target>
+
+	<target name="echoHasclass" unless="build.ok">
+		<echoproperties prefix="hasclass."/>
+	</target>
+
+</project>

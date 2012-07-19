@@ -1,0 +1,117 @@
+#include "Plasma.nddl"
+
+enum Locations {Hill, Rock, Lander};
+
+class Camera;
+
+class Rover extends Timeline {
+ Camera m_camera;
+ predicate At{
+  Locations m_location;
+  eq(duration, 1);
+ }
+
+ predicate Going{
+  Locations m_from, m_to;
+  eq(duration, 4);
+  neq(m_from, m_to);
+ }
+
+ Rover() {
+  m_camera = new Camera();
+ }
+}
+
+Rover::At{
+ meets(Going to);
+ eq(to.m_from, m_location);
+
+ met_by(Going from);
+ eq(from.m_to, m_location);
+}
+
+Rover::Going{
+  neq(m_from, m_to);
+  met_by(At from);
+  eq(m_from, from.m_location);
+  meets(At to);
+  eq(m_to, to.m_location);
+}
+
+class Camera extends Timeline{
+  predicate On {
+    eq(duration, [1 2]);
+  }
+  predicate Off {
+    eq(duration, [1 +inf]);
+  }
+  predicate TakingPicture {
+    Locations m_loc;
+    eq(duration, 1);
+  }
+}
+
+Camera::On {
+  meets(TakingPicture t);
+  meets(Off n);
+  met_by(Off o);
+}
+
+Camera::Off {
+  meets(On o);
+}
+
+Camera::TakingPicture {
+  met_by(On o);
+  contained_by(Rover.At a);
+  eq(m_loc, a.m_location);
+  meets(On n);
+}
+
+// Defines the initial state for the problem.
+class World extends Timeline {
+ // Horizon information
+ int m_horizonStart;
+ int m_horizonEnd;
+ Rover m_rover;
+
+ predicate initialState{}
+ World(){
+  // Set up the planning horizon
+  m_horizonStart = 10;
+  m_horizonEnd = 100;
+  m_rover = new Rover();
+ }
+}
+
+World::initialState{
+ // Enforce horizon bounds on initialState
+ leq(object.m_horizonStart, start);
+ leq(end, object.m_horizonEnd);
+ 
+ contains(Rover.At a);
+ eq(a.m_location, Lander);
+ eq(a.start, 10);
+
+ contains(Rover.At b);
+ eq(b.m_location, Rock);
+ eq(b.end, 100);
+
+ leq(a.end, b.start);
+
+ contains(Camera.Off o);
+ eq(o.start, 10);
+ contains(Camera.Off f);
+ eq(f.end, 100);
+ leq(o.end, f.start);
+ contains(Camera.On g);
+}
+
+World world = new World();
+close();
+goal(World.initialState g0);
+goal(Camera.Off g1);
+goal(Camera.On g2);
+goal(Camera.TakingPicture g3);
+goal(Rover.Going g4);
+goal(Rover.At g5);

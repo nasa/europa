@@ -1,0 +1,30 @@
+SubDir PLASMA Aver base ;
+
+if ! $(PLASMA_READY) {
+
+SubDirC++Flags -DTIXML_USE_STL ;
+
+ModuleBase Aver
+  :
+  AggregateListener.cc
+  EventAggregator.cc
+  Assertion.cc
+  AssertionExecutor.cc
+  AverHelper.cc
+  AverInterp.cc
+  Test.cc
+  ;
+
+ApacheAnt aver.jar :
+	[ FGristFiles build.xml ]
+	antlr/Aver.g
+  java/aver/LineNumberAST.java
+  java/aver/AverParseException.java
+  java/aver/AverRuntimeException.java
+  java/aver/AverHelper.java
+  java/aver/AverToXML.java
+  ;
+
+AVER_JAR = $(SUBDIR)/jars/aver.jar ;
+
+}

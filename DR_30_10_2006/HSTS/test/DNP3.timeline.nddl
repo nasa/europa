@@ -1,0 +1,105 @@
+// ../ModuleTests/Parser/dnp3/DNP.compats.ddl
+
+#include "Plasma.nddl"
+#include "PlannerConfig.nddl"
+#include "DNP3.nddl"
+
+PlannerConfig world = new PlannerConfig(0, 31536000, 1000);
+
+DNP_Science DNP_Sci = new DNP_Science();
+
+DNP_Data DNP_Dat_Stor = new DNP_Data();
+
+DNP_Comm DNP_Comm_Sys = new DNP_Comm();
+
+DSS_Any DNP_DSS = new DSS_Any();
+
+DNP_Comm.close();
+DNP_Comm___Comm_Activity.close();
+DNP_Data.close();
+DNP_Data___SSR_Storage_Use.close();
+DNP_Science.close();
+DNP_Science___Fields_and_Particles.close();
+DNP_Science___Scan_Platform.close();
+DSS_Any.close();
+DSS_Any___DSS_Availability.close();
+close();
+
+goal(DNP_Science___Scan_Platform.Scan_Idle g46);
+  g46.start.specify(0);
+  g46.end.specify(31536000);
+  g46.duration.specify(31536000);
+DNP_Sci.Scan_Platform.constrain(g46);
+
+goal(DNP_Science___Fields_and_Particles.F_and_P_Idle g69);
+  g69.start.specify(0);
+  g69.end.specify([1 31535998]);
+  g69.duration.specify([1 31535998]);
+DNP_Sci.Fields_and_Particles.constrain(g69);
+
+goal(DNP_Science___Fields_and_Particles.F_and_P_Observation_HI g90);
+  g90.start.specify([1 31535998]);
+  g90.end.specify([2 31535999]);
+  g90.duration.specify([1 31535998]);
+DNP_Sci.Fields_and_Particles.constrain(g69, g90);
+  g90.ID.specify(10);
+  g90.Data_Rate.specify(Observation_Level.ObsHi);
+  g90.Length.specify(3600);
+
+goal(DNP_Science___Fields_and_Particles.F_and_P_Idle g116);
+  g116.start.specify([2 31535999]);
+  g116.end.specify(31536000);
+  g116.duration.specify([1 31535998]);
+DNP_Sci.Fields_and_Particles.constrain(g90, g116);
+
+goal(DNP_Data___SSR_Storage_Use.Constant_Storage g140);
+  g140.start.specify(0);
+  g140.end.specify([1 31535999]);
+  g140.duration.specify([1 31535999]);
+DNP_Dat_Stor.SSR_Storage_Use.constrain(g140);
+  g140.SSR_Storage.specify(0);
+  g140.DSS_Opp_Num.specify([0 +inf]);
+
+goal(DNP_Data___SSR_Storage_Use.Constant_Storage g168);
+  g168.start.specify([1 31535999]);
+  g168.end.specify(31536000);
+  g168.duration.specify([1 31535999]);
+DNP_Dat_Stor.SSR_Storage_Use.constrain(g140, g168);
+  g168.SSR_Storage.specify(0);
+  g168.DSS_Opp_Num.specify([0 +inf]);
+
+goal(DNP_Comm___Comm_Activity.Comm_Idle g199);
+  g199.start.specify(0);
+  g199.end.specify([1 31536000]);
+  g199.duration.specify([1 31536000]);
+DNP_Comm_Sys.Comm_Activity.constrain(g199);
+
+goal(DSS_Any___DSS_Availability.No_Window g222);
+  g222.start.specify(0);
+  g222.end.specify(2225700);
+  g222.duration.specify(2225700);
+DNP_DSS.DSS_Availability.constrain(g222);
+
+goal(DSS_Any___DSS_Availability.Downlink_Window g242);
+  g242.start.specify(2225700);
+  g242.end.specify(2248500);
+  g242.duration.specify(22800);
+DNP_DSS.DSS_Availability.constrain(g222, g242);
+  g242.Downlink_Rate.specify(20);
+  g242.Pre_Cal_Time.specify(4500);
+  g242.Post_Cal_Time.specify(900);
+  g242.loc.specify(DSS_Id.DSS_65);
+  g242.Opp_Number.specify(13);
+
+goal(DSS_Any___DSS_Availability.No_Window g270);
+  g270.start.specify(2248500);
+  g270.end.specify(31536000);
+  g270.duration.specify(29287500);
+DNP_DSS.DSS_Availability.constrain(g242, g270);
+
+g69 meets g90; // key=103
+g90 meets g116; // key=125
+g140 before g168; // key=184
+g140 before g168; // key=194
+g222 meets g242; // key=257
+g242 meets g270; // key=278

@@ -1,0 +1,135 @@
+if ! $(NddlRules_INCLUDED) {
+NddlRules_INCLUDED = TRUE ;
+
+include [ FDirName $(SUBDIR) JavaRules ] ;
+
+# TRACE_NDDL ?= TRUE ;
+
+# Runs a planner problem: RunNDDLProblem test-01 : initial-state.nddl : planner : planner-config.xml : model : path ;
+# Will ensure initial state is parsed into xml first
+rule RunNDDLProblem {
+ local problem = $(1) ;
+ local initialState = $(2) ;
+ local executable = $(3) ;
+ local config = $(4) ;
+ local model = [ FVariantName $(5) : $(VARIANTS) ] ;
+ local path = $(6) ;
+ local prefix = $(7) ;
+ model = lib$(model)$(SUFSHARE) ;
+ local txSource = $(initialState:S=.xml) ;
+ Nddl $(txSource) : $(initialState) ;
+ Depends $(problem) : $(txSource) ;
+ RunModuleMain $(problem) : $(executable) : $(model) $(txSource) $(config) $(path) : $(prefix) ; 
+}
+
+# NddlMain run : code.cc : model.nddl : System ;
+rule NddlMain {
+  local exe = $(1) ;
+  local code = $(2) ;
+  local model = $(3) ;
+  local module = $(4) ;
+  local build_target = $(5) ;
+
+  if $(TRACE_NDDL) = TRUE {
+    Echo NddlMain $(exe) . $(code) . $(model) . $(module) . $(build_target) ;
+  }
+
+  local hh = $(model:S=.hh) ;
+  local cc = [ FGristFiles $(model:S=.cc) ] ;
+  local xml = $(model:S=.xml) ;
+  Includes $(cc) : $(hh) $(xml) ;
+  Nddl $(xml) $(hh) $(cc) : $(model) ;
+  ModuleMain $(exe) : $(cc) $(code) : $(module) : $(build_target) ;
+}
+
+# NddlModel model.nddl : System ;
+rule NddlModel {
+  local model = $(1) ;
+  local modules = $(2) ;
+  local build_target = $(3) ;
+
+  if $(TRACE_NDDL) = TRUE {
+    Echo NddlModel $(model) . $(module) . $(build_target) ;
+  }
+
+  local hh = $(model:S=.hh) ;
+  local cc = [ FGristFiles $(model:S=.cc) ] ;
+  local lib = $(model:S=) ;
+  Includes $(cc) : $(hh) ;
+  Nddl $(hh) $(cc) : $(model) ;
+  ModuleSharedLibrary $(lib) : $(cc) : $(modules) : $(build_target) ;
+}
+
+rule NddlSystemTest {
+  local target = $(1) ;
+  local code = $(2) ;
+  local model = $(3) ;
+  local module = $(4) ;
+
+  local exe = $(model:S=) ;
+  NddlMain $(exe) : $(code) : $(model) : $(module) ;
+  RunModuleMain $(target) : $(exe) : $(model:S=.xml) ;
+}
+
+# Nddl <model.xml> <model.hh model.cc> : model.nddl : directory
+rule Nddl {
+	local code = $(1) ;
+	local model = $(2) ;
+
+	if $(TRACE_NDDL) = TRUE {
+		Echo Nddl $(code) . $(model) ;
+	}
+
+	SEARCH on $(model) = $(SEARCH_SOURCE) ;
+	LOCATE on $(code) = $(LOCATE_TARGET) ;
+	Depends $(code) : nddl.jar ;
+	Depends $(code) : $(model) ;
+	LocalClean clean : $(code) ;
+
+  HDRS on $(<) = $(SEARCH_SOURCE) $(SUBDIRHDRS) $(HDRS) ;
+  HDRRULE on $(>) = HdrRule ;
+  HDRSCAN on $(>) = $(HDRPATTERN) ;
+  HDRSEARCH on $(>) = $(SEARCH_SOURCE:E) $(SUBDIRHDRS) $(HDRS) $(STDHDRS) ;
+  HDRGRIST on $(>) = $(HDRGRIST) ;
+}
+
+# send the flag -Wall to Nddl to enable warning messages
+actions Nddl {
+$(JAVA) $(JREFLAGS) -jar "$(NDDL_JAR)" -C "$(2:D)" $(NDDL_FLAGS) $(2)
+}
+
+# NddlParser model.xml : model.nddl ;
+rule NddlParser {
+  local xml = $(1) ;
+  local nddl = $(2) ;
+
+  if $(TRACE_NDDL) = TRUE {
+    Echo NddParser $(xml) . $(nddl) ;
+  }
+
+  NddlParser1 $(xml) : [ FGristSourceFiles $(nddl) ] ;
+}
+
+rule NddlParser1 {
+  local xml = $(1) ;
+  local nddl = $(2) ;
+
+  LocalClean clean-nddl-xml : $(xml) ;
+  MakeLocate $(xml) : $(LOCATE_TARGET) ;
+  SEARCH on $(nddl) = $(SEARCH_SOURCE) ;
+
+  Depends $(xml) : nddl.jar ;
+  Depends $(xml) : $(nddl) ;
+
+  HDRS on $(<) = $(SEARCH_SOURCE) $(SUBDIRHDRS) $(HDRS) ;
+  HDRRULE on $(>) = HdrRule ;
+  HDRSCAN on $(>) = $(HDRPATTERN) ;
+  HDRSEARCH on $(>) = $(SEARCH_SOURCE:E) $(SUBDIRHDRS) $(HDRS) $(STDHDRS) ;
+  HDRGRIST on $(>) = $(HDRGRIST) ;
+}
+
+actions NddlParser1 {
+$(JAVA) $(JREFLAGS) -jar "$(NDDL_JAR)" --NddlParser -C "$(2:D)" -q $(2) 
+}
+
+} # NddlRules_INCLUDED

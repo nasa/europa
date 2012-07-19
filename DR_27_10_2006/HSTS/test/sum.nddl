@@ -1,0 +1,29 @@
+// ../ModuleTests/Parser/gnats/sum.ddl
+
+class Sum;
+class Sum___A;
+
+class Sum___A extends Timeline {
+  predicate V {
+    int sum;
+    int x;
+    int y;
+  }
+
+  Sum __DDL__object;
+  Sum___A(Sum object) {
+    __DDL__object = object;
+  }
+}
+
+class Sum {
+  Sum___A A;
+  Sum() {
+    A = new Sum___A(this);
+  }
+}
+
+Sum___A::V {
+  sum(sum, x, y);
+}
+

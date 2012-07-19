@@ -1,0 +1,58 @@
+#include "PlannerConfig.nddl"
+
+enum Locations {Hill, Rock, Lander};
+
+class Rover extends Timeline {
+
+ predicate At{
+  Locations m_location;
+  eq(duration, 1);
+ }
+
+ predicate Going{
+  Locations m_from, m_to;
+  eq(duration, 1);
+  neq(m_from, m_to);
+ }
+}
+
+Rover::At{
+ meets(Going to);
+ eq(to.m_from, m_location);
+
+ if (object) {
+  if (to.object) {
+    neq(object,to.object);
+  }
+ }
+
+ met_by(Going from);
+ eq(from.m_to, m_location);
+}
+
+Rover::Going{
+  met_by(At from);
+  eq(m_from, from.m_location);
+
+  meets(At to);
+  eq(m_to, to.m_location);
+}
+
+PlannerConfig world = new PlannerConfig(10, 13, 800);
+
+Rover spirit = new Rover();
+Rover opportunity = new Rover();
+
+rejectable(Rover.At a);
+a.m_location.specify(Lander);
+a.start.specify(10);
+a.object.specify(spirit);
+
+rejectable(Rover.At b);
+b.m_location.specify(Rock);
+b.start.specify(13);
+
+a before b;
+
+close();
+

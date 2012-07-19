@@ -1,0 +1,99 @@
+///////////////////////////////////////////////////////////
+// Defines a framework in Nddl for integration with EUROPA
+// Resources. Requires Core.nddl
+// Author: Conor McGann
+// Date: January, 2005
+///////////////////////////////////////////////////////////
+#include "Core.nddl"
+#include "Constraints.nddl"
+
+//An enumeration representing the possible values for the profile calculation algorithm.
+enum ProfileAlgorithm {Simple, MaxFlow, IncMaxFlow};
+
+// Base class for adding multi-capacity, numeric resources to the NDDL language.
+class Resource {
+  // Specified resource properties
+  float initialCapacity;
+  float levelLimitMin;
+  float levelLimitMax;
+  float productionRateMax;
+  float productionMax;
+  float consumptionRateMax;
+  float consumptionMax;
+  ProfileAlgorithm algo;
+
+  // The only predicate we allow
+  predicate change{
+    float quantity;
+  }
+
+  Resource(float ic, float ll_min, float ll_max){
+    initialCapacity = ic;
+    levelLimitMin = ll_min;
+    levelLimitMax = ll_max;
+    productionRateMax = +inff;
+    productionMax = +inff;
+    consumptionRateMax = -inff;
+    consumptionMax = -inff;
+    algo = Simple;
+  }
+
+  Resource(float ic, float ll_min, float ll_max, 
+	   float p_max, float c_max){
+    initialCapacity = ic;
+    levelLimitMin = ll_min;
+    levelLimitMax = ll_max;
+    productionRateMax = p_max; 
+    productionMax = p_max; 
+    consumptionRateMax = -inff;
+    consumptionMax = c_max; // -inff;
+    algo = Simple;
+  }
+
+  Resource(float ic, float ll_min, float ll_max, 
+	   float pr_max, float p_max, float cr_max, float c_max){
+    initialCapacity = ic;
+    levelLimitMin = ll_min;
+    levelLimitMax = ll_max;
+    productionRateMax = pr_max; 
+    productionMax = p_max; 
+    consumptionRateMax = cr_max; 
+    consumptionMax = c_max; 
+    algo = Simple;
+  }
+
+  Resource(float ic, float ll_min, float ll_max,
+	   float pr_max, float p_max, float cr_max, float c_max,
+	   ProfileAlgorithm algorithm) {
+    initialCapacity = ic;
+    levelLimitMin = ll_min;
+    levelLimitMax = ll_max;
+    productionRateMax = pr_max;
+    productionMax = p_max;
+    consumptionRateMax = cr_max;
+    consumptionMax = c_max;
+    algo = algorithm;
+  }
+	
+  Resource() {
+    initialCapacity = 0.0;
+    levelLimitMin = -inff;
+    levelLimitMax = +inff;
+    productionRateMax = +inff;
+    productionMax = +inff;
+    consumptionRateMax = -inff;
+    consumptionMax = -inff;
+    algo = Simple;
+  }
+}
+
+/**
+ * A UnaryResource is a reusable, discrete, single-capacity resource
+ * and is efficiently supported using a timeline rather than
+ * independent consume and produce transactions.
+ */
+class UnaryResource extends Timeline {
+  predicate uses{
+    eq(state, ACTIVE); 
+  }
+}

@@ -1,0 +1,7 @@
+SubDir PLASMA ConstraintEngine documentation ;
+
+if ! $(PLASMA_READY) {
+
+ModuleDocumentation ConstraintEngine ;
+
+} # PLASMA_READY

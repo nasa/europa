@@ -1,0 +1,48 @@
+#include "Plasma.nddl"
+
+// Declare a basic class with a set of simple predicates
+class Foo extends Timeline { 
+ predicate pred0{}
+ predicate pred1{}
+ predicate pred2{}
+ predicate pred3{}
+ predicate pred4{}
+}
+
+// Allocate 2 objects
+Foo foo1 = new Foo();
+Foo foo2 = new Foo();
+close();
+
+// Allocate active tokens. Initially the object variable of each will contain
+// 2 values - foo1 and foo2
+goal(Foo.pred0 t0); // Initially active
+goal(Foo.pred1 t1); // Initially active
+goal(Foo.pred2 t2); // Initially active
+goal(Foo.pred3 t3); // Initially active
+goal(Foo.pred4 t4); // Initially active
+
+// Set a time time bound overall extent
+t0.start.specify(0);
+t4.end.specify(5);
+
+// Pass the same token for both arguments as a degenerate case to assign the token to the object.
+// This will probably be deprecated.
+foo1.constrain(t1,t1);
+
+// Constrain t2 and t3 such that t2 before t3 and both assigned to foo2,
+foo2.constrain(t2, t3);
+
+// Constrain t1 and t4 to foo1.
+foo1.constrain(t1, t4);
+
+// Constraint t0 before t1 on foo1
+foo1.constrain(t0, t1);
+
+// Now free it to illustrate the reversal. Should see that it is unassigned.
+foo1.free(t0, t1);
+
+// Add some additional temporal relations to create a total order
+t0 before t1;
+t0 before t2;
+t3 before t4;
