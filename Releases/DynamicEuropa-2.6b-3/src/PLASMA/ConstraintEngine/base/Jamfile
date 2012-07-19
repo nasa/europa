@@ -1,0 +1,23 @@
+SubDir PLASMA ConstraintEngine base ;
+
+if ! $(PLASMA_READY) {
+
+ModuleBase ConstraintEngine
+	:
+	CESchema.cc
+	CFunction.cc
+	Constraint.cc
+	ConstraintEngine.cc
+	ConstraintEngineListener.cc
+	ConstrainedVariable.cc
+	ConstraintType.cc
+	DataType.cc
+	Domain.cc
+	DomainListener.cc
+	Propagator.cc
+	PSConstraintEngineListener.cc
+	PSVarValue.cc
+	VariableChangeListener.cc
+	;
+
+} # PLASMA_READY

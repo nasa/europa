@@ -1,0 +1,16 @@
+SubDir PLASMA ANML base ;
+
+if ! $(PLASMA_READY) {
+
+  SubDirC++Flags -D_NO_W32_PSEUDO_MODIFIERS ;
+  
+  Antlr3Grammar ANML : antlr/ANML.g ;
+
+  ModuleBase ANML
+	:
+	ANMLLexer.cpp
+	ANMLParser.cpp
+	#ANMLTreeParser.cpp
+	;
+
+} # PLASMA_READY

@@ -1,0 +1,62 @@
+enum Symbols { HELLO, FIVE }
+
+class D {
+  int l;
+}
+
+D y;
+
+class Contained {
+  int x;
+  Contained(int _x) {
+   x = _x;
+   x = 4.4;
+   x = 3;
+   x = "hello";
+   x = 'HELLO';
+   x = HELLO;
+   x = y.l;
+  }
+}
+
+class Container {
+  Contained c, d;
+  Contained c2 = new Contained(), d2 = new Contained(3);
+  Container() {
+    c = new Contained(4);
+    c = new Contained([4 5]);
+    c2 = new Contained({4,3,2});
+    d = new Contained(5);
+    d = new Contained(5.5);
+    d = new Contained("FIVE");
+    d2 = new Contained('FIVE');
+    d = new Contained(FIVE);
+    d = new Contained(c);
+    d2 = new Contained(y.l);
+  }
+}
+
+class A {
+    int c, d;
+    A() {
+    }
+}
+
+class B extends A {
+    int e;
+    B(int x, int y, int z) {
+        super();
+        c = x;
+        d = y;
+        e = z;
+    }
+}
+
+class C extends A {
+    B(int c, int d, int e) {
+        super(c,d,e);
+        c = 2;
+        d = 5;
+        e = 6;
+    }
+}

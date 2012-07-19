@@ -1,0 +1,21 @@
+#include "Plasma.nddl"
+
+/**
+ * Test that we can sub-class a timeline and correctly inherit the rule so that it 
+ * will allocate a token of the sub-type instead of the base type.
+ */
+
+
+class Base extends Timeline {
+ predicate P{}
+}
+
+Base::P{
+ met_by(P);
+ meets(P);
+ eq(duration, 10);
+}
+
+class Derived extends Base {
+ predicate P{int i;}
+}

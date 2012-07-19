@@ -1,0 +1,13 @@
+EUROPA documentation, including doxygen docs for the current code and past
+releases, is now kept on the project wiki pages at:
+
+https://babelfish.arc.nasa.gov/trac/europa/wiki
+
+To generate a local copy of doxygen documentation, run:
+
+doxygen doxygen.cfg
+
+View the documention by using a web browser to open:
+
+PLASMA/documentation/html/index.html
+

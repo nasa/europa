@@ -1,0 +1,173 @@
+Objects *************************
+	Location:Home*************************
+		Variables *************************
+			Home.name=string:CLOSED{Home}
+		End Variables *********************
+	End Location:Home*************************
+	Location:SuperMarket*************************
+		Variables *************************
+			SuperMarket.name=string:CLOSED{SuperMarket}
+		End Variables *********************
+	End Location:SuperMarket*************************
+	Location:HardwareStore*************************
+		Variables *************************
+			HardwareStore.name=string:CLOSED{HardwareStore}
+		End Variables *********************
+	End Location:HardwareStore*************************
+	Product:Banana*************************
+		Variables *************************
+			Banana.name=string:CLOSED{Banana}
+		End Variables *********************
+	End Product:Banana*************************
+	Product:Milk*************************
+		Variables *************************
+			Milk.name=string:CLOSED{Milk}
+		End Variables *********************
+	End Product:Milk*************************
+	Product:Drill*************************
+		Variables *************************
+			Drill.name=string:CLOSED{Drill}
+		End Variables *********************
+	End Product:Drill*************************
+	ProductLocation:bananaLocation*************************
+		Variables *************************
+			bananaLocation.location=Location:CLOSED{SuperMarket(17)}
+			bananaLocation.product=Product:CLOSED{Banana(31)}
+		End Variables *********************
+	End ProductLocation:bananaLocation*************************
+	ProductLocation:milkLocation*************************
+		Variables *************************
+			milkLocation.location=Location:CLOSED{SuperMarket(17)}
+			milkLocation.product=Product:CLOSED{Milk(38)}
+		End Variables *********************
+	End ProductLocation:milkLocation*************************
+	ProductLocation:drillLocation*************************
+		Variables *************************
+			drillLocation.location=Location:CLOSED{HardwareStore(24)}
+			drillLocation.product=Product:CLOSED{Drill(45)}
+		End Variables *********************
+	End ProductLocation:drillLocation*************************
+	Agent:agent*************************
+		Tokens *************************
+				[13, 88]
+				Agent.Buy(product=Product:CLOSED{Milk(38)})
+				Key=101  Master=NONE
+				[23, 98]
+				[13, 88]
+				Agent.Buy(product=Product:CLOSED{Banana(31)})
+				Key=119  Master=NONE
+				[23, 98]
+				[2, 77]
+				Agent.Buy(product=Product:CLOSED{Drill(45)})
+				Key=137  Master=NONE
+				[12, 87]
+		End Tokens *********************
+		Variables *************************
+			agent.timeline=AgentTimeline:CLOSED{agent.timeline(79)}
+		End Variables *********************
+	End Agent:agent*************************
+	AgentTimeline:agent.timeline*************************
+		Tokens *************************
+				[0, 75]
+				AgentTimeline.At(loc=Location:CLOSED{Home(10)})
+				Key=83  Master=NONE
+					Merged Key=452 from AgentTimeline.Go(238)[1, 76] --> [2, 77]
+				[1, 76]
+				[1, 76]
+				AgentTimeline.Go(from=Location:CLOSED{Home(10)}to=Location:CLOSED{HardwareStore(24)})
+				Key=238  Master=83 start(83)[0, 75] --> [1, 76]
+					Merged Key=595 from AgentTimeline.At(360)[2, 77] --> [12, 87]
+				[2, 77]
+				[2, 77]
+				AgentTimeline.At(loc=Location:CLOSED{HardwareStore(24)})
+				Key=360  Master=137 buy3(137)[2, 77] --> [12, 87]
+					Merged Key=470 from AgentTimeline.Go(238)[1, 76] --> [2, 77]
+					Merged Key=759 from AgentTimeline.Go(512)[12, 87] --> [13, 88]
+				[12, 87]
+				[12, 87]
+				AgentTimeline.Go(from=Location:CLOSED{HardwareStore(24)}to=Location:CLOSED{SuperMarket(17)})
+				Key=512  Master=277 AgentTimeline.At(277)[13, 88] --> [23, 98]
+					Merged Key=614 from AgentTimeline.At(360)[2, 77] --> [12, 87]
+				[13, 88]
+				[13, 88]
+				AgentTimeline.At(loc=Location:CLOSED{SuperMarket(17)})
+				Key=277  Master=101 buy1(101)[13, 88] --> [23, 98]
+					Merged Key=320 from buy2(119)[13, 88] --> [23, 98]
+					Merged Key=674 from AgentTimeline.Go(396)[23, 98] --> [24, 99]
+					Merged Key=777 from AgentTimeline.Go(512)[12, 87] --> [13, 88]
+				[23, 98]
+				[23, 98]
+				AgentTimeline.Go(from=Location:CLOSED{SuperMarket(17)}to=Location:CLOSED{Home(10)})
+				Key=396  Master=155 finish(155)[24, 99] --> [25, 100]
+					Merged Key=531 from AgentTimeline.At(277)[13, 88] --> [23, 98]
+				[24, 99]
+				[24, 99]
+				AgentTimeline.At(loc=Location:CLOSED{Home(10)})
+				Key=155  Master=NONE
+					Merged Key=692 from AgentTimeline.Go(396)[23, 98] --> [24, 99]
+				[25, 100]
+		End Tokens *********************
+	End AgentTimeline:agent.timeline*************************
+Global Variables*************************
+	horizonEnd=int:CLOSED[100, 100]
+	Home=Location:CLOSED{Home(10)}
+	SuperMarket=Location:CLOSED{SuperMarket(17)}
+	HardwareStore=Location:CLOSED{HardwareStore(24)}
+	Banana=Product:CLOSED{Banana(31)}
+	Milk=Product:CLOSED{Milk(38)}
+	Drill=Product:CLOSED{Drill(45)}
+	bananaLocation=ProductLocation:CLOSED{bananaLocation(52)}
+	milkLocation=ProductLocation:CLOSED{milkLocation(61)}
+	drillLocation=ProductLocation:CLOSED{drillLocation(70)}
+	agent=Agent:CLOSED{agent(77)}
+Merged Tokens: *************************
+		[-inf, 89]
+		AgentTimeline.At(loc=Location:CLOSED{SuperMarket(17)})
+		Key=320  Master=119 buy2(119)[13, 88] --> [23, 98]
+		[11, +inf]
+		[-inf, 76]
+		AgentTimeline.At(loc=Location:CLOSED{Home(10)})
+		Key=452  Master=238 AgentTimeline.Go(238)[1, 76] --> [2, 77]
+		[1, 77]
+		[2, 78]
+		AgentTimeline.At(loc=Location:CLOSED{HardwareStore(24),Home(10),SuperMarket(17)})
+		Key=470  Master=238 AgentTimeline.Go(238)[1, 76] --> [2, 77]
+		[3, +inf]
+		[23, 98]
+		AgentTimeline.Go(from=Location:CLOSED{SuperMarket(17)}to=Location:CLOSED{HardwareStore(24),Home(10),SuperMarket(17)})
+		Key=531  Master=277 AgentTimeline.At(277)[13, 88] --> [23, 98]
+		[24, +inf]
+		[-inf, 76]
+		AgentTimeline.Go(from=Location:CLOSED{HardwareStore(24),Home(10),SuperMarket(17)}to=Location:CLOSED{HardwareStore(24)})
+		Key=595  Master=360 AgentTimeline.At(360)[2, 77] --> [12, 87]
+		[2, 77]
+		[12, 87]
+		AgentTimeline.Go(from=Location:CLOSED{HardwareStore(24)}to=Location:CLOSED{HardwareStore(24),Home(10),SuperMarket(17)})
+		Key=614  Master=360 AgentTimeline.At(360)[2, 77] --> [12, 87]
+		[13, +inf]
+		[-inf, 97]
+		AgentTimeline.At(loc=Location:CLOSED{SuperMarket(17)})
+		Key=674  Master=396 AgentTimeline.Go(396)[23, 98] --> [24, 99]
+		[23, 98]
+		[24, 99]
+		AgentTimeline.At(loc=Location:CLOSED{Home(10)})
+		Key=692  Master=396 AgentTimeline.Go(396)[23, 98] --> [24, 99]
+		[25, +inf]
+		[-inf, 86]
+		AgentTimeline.At(loc=Location:CLOSED{HardwareStore(24)})
+		Key=759  Master=512 AgentTimeline.Go(512)[12, 87] --> [13, 88]
+		[12, 87]
+		[13, 88]
+		AgentTimeline.At(loc=Location:CLOSED{SuperMarket(17)})
+		Key=777  Master=512 AgentTimeline.Go(512)[12, 87] --> [13, 88]
+		[14, +inf]
+Inactive Tokens: *************************
+		[-inf, 74]
+		AgentTimeline.Go(from=Location:CLOSED{HardwareStore(24),Home(10),SuperMarket(17)}to=Location:CLOSED{Home(10)})
+		Key=219  Master=83 start(83)[0, 75] --> [1, 76]
+		[0, 75]
+		[25, 100]
+		AgentTimeline.Go(from=Location:CLOSED{Home(10)}to=Location:CLOSED{HardwareStore(24),Home(10),SuperMarket(17)})
+		Key=415  Master=155 finish(155)[24, 99] --> [25, 100]
+		[26, +inf]
+

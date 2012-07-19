@@ -1,0 +1,14 @@
+SubDir PLASMA PlanDatabase ;
+
+if ! $(PLASMA_READY) {
+
+Module PlanDatabase : ConstraintEngine ;
+
+SubInclude PLASMA PlanDatabase base ;
+SubInclude PLASMA PlanDatabase component ;
+
+ModuleFiles PlanDatabase : ModulePlanDatabase.cc ;
+
+SubInclude PLASMA PlanDatabase test ;
+
+} # PLASMA_READY

@@ -1,0 +1,40 @@
+Unknown type for Typedef
+nddl/error/UnknownTypeForTypedef.nddl
+{{{
+nddl/error/UnknownTypeForTypedef.nddl(line:2), at offset 12, near ([ 1 2)
+Unknown data type:Foo
+
+}}}
+
+Incompatible Typedef Value
+nddl/error/IncompatibleTypedefValue.nddl
+{{{
+-unknown source-(line:0), at offset 0, near UP
+Incompatible types in value set: foo(string) 1(int)
+
+}}}
+
+Undefined Variable
+nddl/error/UndefinedVariable.nddl
+{{{
+-unknown source-(line:0), at offset 0, near UP
+z is not defined
+
+}}}
+
+Undefined Class Member
+nddl/error/UndefinedClassMember.nddl
+{{{
+nddl/error/UndefinedClassMember.nddl(line:9), at offset 12, near 8
+y is not defined
+
+}}}
+
+Undefined Predicate Argument
+nddl/error/UndefinedPredicateArgument.nddl
+{{{
+nddl/error/UndefinedPredicateArgument.nddl(line:10), at offset 9, near 6
+y is not defined
+
+}}}
+

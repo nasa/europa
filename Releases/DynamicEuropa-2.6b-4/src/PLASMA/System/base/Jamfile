@@ -1,0 +1,24 @@
+SubDir PLASMA System base ;
+
+if ! $(PLASMA_READY) {
+
+if $(OS) != WinVS90 {
+  SubDirC++Flags -Wno-unknown-pragmas ;
+}
+
+if "Resources" in $(NO) {
+  SubDirC++Flags -DNO_RESOURCES ;
+}
+
+
+ModuleBase System 
+	: 
+	EuropaEngine.cc
+	PSEngineImpl.cc
+	;
+
+SwigJava PSEngine.i : psengine : [ FDirName $(PLASMA_HOME) src Java PSEngine generated psengine ] : cpp : TinyXml Utils ConstraintEngine PlanDatabase RulesEngine NDDL TemporalNetwork Solvers System : PSEngine ;
+
+ModuleBaseSwig System : [ FSwigWrapperName PSEngine.i : cpp ] ;
+
+} # PLASMA_READY

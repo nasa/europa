@@ -1,0 +1,749 @@
+Objects *************************
+	ProblemInstance:problem*************************
+		Tokens *************************
+				[0, 10]
+				ProblemInstance.Activity(m_identifier=int:CLOSED[0, 0]timeline=ActivityTimeline:CLOSED{at0(675)})
+				Key=757  Master=NONE
+				[1, 11]
+				[0, 10]
+				ProblemInstance.Activity(m_identifier=int:CLOSED[1, 1]timeline=ActivityTimeline:CLOSED{at1(682)})
+				Key=783  Master=NONE
+				[4, 14]
+				[4, 14]
+				ProblemInstance.Activity(m_identifier=int:CLOSED[2, 2]timeline=ActivityTimeline:CLOSED{at2(689)})
+				Key=809  Master=NONE
+				[8, 18]
+				[8, 18]
+				ProblemInstance.Activity(m_identifier=int:CLOSED[3, 3]timeline=ActivityTimeline:CLOSED{at3(696)})
+				Key=835  Master=NONE
+				[18, 28]
+				[18, 28]
+				ProblemInstance.Activity(m_identifier=int:CLOSED[4, 4]timeline=ActivityTimeline:CLOSED{at4(703)})
+				Key=861  Master=NONE
+				[28, 38]
+				[28, 38]
+				ProblemInstance.Activity(m_identifier=int:CLOSED[5, 5]timeline=ActivityTimeline:CLOSED{at5(710)})
+				Key=887  Master=NONE
+				[31, 41]
+				[31, 41]
+				ProblemInstance.Activity(m_identifier=int:CLOSED[6, 6]timeline=ActivityTimeline:CLOSED{at6(717)})
+				Key=913  Master=NONE
+				[32, 42]
+				[32, 42]
+				ProblemInstance.Activity(m_identifier=int:CLOSED[7, 7]timeline=ActivityTimeline:CLOSED{at7(724)})
+				Key=939  Master=NONE
+				[40, 50]
+				[40, 50]
+				ProblemInstance.Activity(m_identifier=int:CLOSED[8, 8]timeline=ActivityTimeline:CLOSED{at8(731)})
+				Key=965  Master=NONE
+				[50, 60]
+				[40, 51]
+				ProblemInstance.Activity(m_identifier=int:CLOSED[9, 9]timeline=ActivityTimeline:CLOSED{at9(738)})
+				Key=991  Master=NONE
+				[49, 60]
+				[40, 55]
+				ProblemInstance.Activity(m_identifier=int:CLOSED[10, 10]timeline=ActivityTimeline:CLOSED{at10(745)})
+				Key=1017  Master=NONE
+				[45, 60]
+				[50, 60]
+				ProblemInstance.Activity(m_identifier=int:CLOSED[11, 11]timeline=ActivityTimeline:CLOSED{at11(752)})
+				Key=1043  Master=NONE
+				[51, 61]
+		End Tokens *********************
+	End ProblemInstance:problem*************************
+	CapacityResource:resource0*************************
+		Tokens *************************
+				[0, 10]
+				CapacityResource.uses()
+				Key=1378  Master=757 activity0(757)[0, 10] --> [1, 11]
+				[1, 11]
+				[0, 10]
+				CapacityResource.uses()
+				Key=1461  Master=783 activity1(783)[0, 10] --> [4, 14]
+				[4, 14]
+				[4, 14]
+				CapacityResource.uses()
+				Key=1731  Master=809 activity2(809)[4, 14] --> [8, 18]
+				[8, 18]
+				[8, 18]
+				CapacityResource.uses()
+				Key=1992  Master=835 activity3(835)[8, 18] --> [18, 28]
+				[18, 28]
+				[28, 38]
+				CapacityResource.uses()
+				Key=2384  Master=887 activity5(887)[28, 38] --> [31, 41]
+				[31, 41]
+				[31, 41]
+				CapacityResource.uses()
+				Key=2651  Master=913 activity6(913)[31, 41] --> [32, 42]
+				[32, 42]
+				[32, 42]
+				CapacityResource.uses()
+				Key=2913  Master=939 activity7(939)[32, 42] --> [40, 50]
+				[40, 50]
+				[40, 50]
+				CapacityResource.uses()
+				Key=3134  Master=965 activity8(965)[40, 50] --> [50, 60]
+				[50, 60]
+				[40, 55]
+				CapacityResource.uses()
+				Key=3301  Master=1017 activity10(1017)[40, 55] --> [45, 60]
+				[45, 60]
+				[50, 60]
+				CapacityResource.uses()
+				Key=3566  Master=1043 activity11(1043)[50, 60] --> [51, 61]
+				[51, 61]
+		End Tokens *********************
+		Variables *************************
+			resource0.capacity=float:CLOSED[10, 10]
+			resource0.levelLimitMin=float:CLOSED[0, 0]
+			resource0.consumptionRateMax=float:CLOSED[+inf, +inf]
+			resource0.consumptionMax=float:CLOSED[+inf, +inf]
+			resource0.profileType=string:CLOSED{GroundedProfile}
+			resource0.detectorType=string:CLOSED{GroundedFVDetector}
+		End Variables *********************
+	End CapacityResource:resource0*************************
+	CapacityResource:resource1*************************
+		Tokens *************************
+				[0, 10]
+				CapacityResource.uses()
+				Key=1506  Master=783 activity1(783)[0, 10] --> [4, 14]
+				[4, 14]
+				[4, 14]
+				CapacityResource.uses()
+				Key=1775  Master=809 activity2(809)[4, 14] --> [8, 18]
+				[8, 18]
+				[18, 28]
+				CapacityResource.uses()
+				Key=2165  Master=861 activity4(861)[18, 28] --> [28, 38]
+				[28, 38]
+				[28, 38]
+				CapacityResource.uses()
+				Key=2430  Master=887 activity5(887)[28, 38] --> [31, 41]
+				[31, 41]
+				[31, 41]
+				CapacityResource.uses()
+				Key=2696  Master=913 activity6(913)[31, 41] --> [32, 42]
+				[32, 42]
+				[40, 51]
+				CapacityResource.uses()
+				Key=3217  Master=991 activity9(991)[40, 51] --> [49, 60]
+				[49, 60]
+				[40, 55]
+				CapacityResource.uses()
+				Key=3346  Master=1017 activity10(1017)[40, 55] --> [45, 60]
+				[45, 60]
+		End Tokens *********************
+		Variables *************************
+			resource1.capacity=float:CLOSED[10, 10]
+			resource1.levelLimitMin=float:CLOSED[0, 0]
+			resource1.consumptionRateMax=float:CLOSED[+inf, +inf]
+			resource1.consumptionMax=float:CLOSED[+inf, +inf]
+			resource1.profileType=string:CLOSED{GroundedProfile}
+			resource1.detectorType=string:CLOSED{GroundedFVDetector}
+		End Variables *********************
+	End CapacityResource:resource1*************************
+	CapacityResource:resource2*************************
+		Tokens *************************
+				[0, 10]
+				CapacityResource.uses()
+				Key=1553  Master=783 activity1(783)[0, 10] --> [4, 14]
+				[4, 14]
+				[4, 14]
+				CapacityResource.uses()
+				Key=1820  Master=809 activity2(809)[4, 14] --> [8, 18]
+				[8, 18]
+				[18, 28]
+				CapacityResource.uses()
+				Key=2211  Master=861 activity4(861)[18, 28] --> [28, 38]
+				[28, 38]
+				[28, 38]
+				CapacityResource.uses()
+				Key=2476  Master=887 activity5(887)[28, 38] --> [31, 41]
+				[31, 41]
+				[31, 41]
+				CapacityResource.uses()
+				Key=2741  Master=913 activity6(913)[31, 41] --> [32, 42]
+				[32, 42]
+				[32, 42]
+				CapacityResource.uses()
+				Key=2959  Master=939 activity7(939)[32, 42] --> [40, 50]
+				[40, 50]
+				[40, 55]
+				CapacityResource.uses()
+				Key=3391  Master=1017 activity10(1017)[40, 55] --> [45, 60]
+				[45, 60]
+		End Tokens *********************
+		Variables *************************
+			resource2.capacity=float:CLOSED[10, 10]
+			resource2.levelLimitMin=float:CLOSED[0, 0]
+			resource2.consumptionRateMax=float:CLOSED[+inf, +inf]
+			resource2.consumptionMax=float:CLOSED[+inf, +inf]
+			resource2.profileType=string:CLOSED{GroundedProfile}
+			resource2.detectorType=string:CLOSED{GroundedFVDetector}
+		End Variables *********************
+	End CapacityResource:resource2*************************
+	CapacityResource:resource3*************************
+		Tokens *************************
+				[0, 10]
+				CapacityResource.uses()
+				Key=1600  Master=783 activity1(783)[0, 10] --> [4, 14]
+				[4, 14]
+				[4, 14]
+				CapacityResource.uses()
+				Key=1865  Master=809 activity2(809)[4, 14] --> [8, 18]
+				[8, 18]
+				[8, 18]
+				CapacityResource.uses()
+				Key=2036  Master=835 activity3(835)[8, 18] --> [18, 28]
+				[18, 28]
+				[18, 28]
+				CapacityResource.uses()
+				Key=2257  Master=861 activity4(861)[18, 28] --> [28, 38]
+				[28, 38]
+				[28, 38]
+				CapacityResource.uses()
+				Key=2522  Master=887 activity5(887)[28, 38] --> [31, 41]
+				[31, 41]
+				[31, 41]
+				CapacityResource.uses()
+				Key=2786  Master=913 activity6(913)[31, 41] --> [32, 42]
+				[32, 42]
+				[32, 42]
+				CapacityResource.uses()
+				Key=3005  Master=939 activity7(939)[32, 42] --> [40, 50]
+				[40, 50]
+				[40, 55]
+				CapacityResource.uses()
+				Key=3437  Master=1017 activity10(1017)[40, 55] --> [45, 60]
+				[45, 60]
+		End Tokens *********************
+		Variables *************************
+			resource3.capacity=float:CLOSED[10, 10]
+			resource3.levelLimitMin=float:CLOSED[0, 0]
+			resource3.consumptionRateMax=float:CLOSED[+inf, +inf]
+			resource3.consumptionMax=float:CLOSED[+inf, +inf]
+			resource3.profileType=string:CLOSED{GroundedProfile}
+			resource3.detectorType=string:CLOSED{GroundedFVDetector}
+		End Variables *********************
+	End CapacityResource:resource3*************************
+	CapacityResource:resource4*************************
+		Tokens *************************
+				[0, 10]
+				CapacityResource.uses()
+				Key=1647  Master=783 activity1(783)[0, 10] --> [4, 14]
+				[4, 14]
+				[4, 14]
+				CapacityResource.uses()
+				Key=1910  Master=809 activity2(809)[4, 14] --> [8, 18]
+				[8, 18]
+				[8, 18]
+				CapacityResource.uses()
+				Key=2082  Master=835 activity3(835)[8, 18] --> [18, 28]
+				[18, 28]
+				[18, 28]
+				CapacityResource.uses()
+				Key=2302  Master=861 activity4(861)[18, 28] --> [28, 38]
+				[28, 38]
+				[28, 38]
+				CapacityResource.uses()
+				Key=2568  Master=887 activity5(887)[28, 38] --> [31, 41]
+				[31, 41]
+				[31, 41]
+				CapacityResource.uses()
+				Key=2831  Master=913 activity6(913)[31, 41] --> [32, 42]
+				[32, 42]
+				[32, 42]
+				CapacityResource.uses()
+				Key=3051  Master=939 activity7(939)[32, 42] --> [40, 50]
+				[40, 50]
+				[40, 55]
+				CapacityResource.uses()
+				Key=3483  Master=1017 activity10(1017)[40, 55] --> [45, 60]
+				[45, 60]
+		End Tokens *********************
+		Variables *************************
+			resource4.capacity=float:CLOSED[10, 10]
+			resource4.levelLimitMin=float:CLOSED[0, 0]
+			resource4.consumptionRateMax=float:CLOSED[+inf, +inf]
+			resource4.consumptionMax=float:CLOSED[+inf, +inf]
+			resource4.profileType=string:CLOSED{GroundedProfile}
+			resource4.detectorType=string:CLOSED{GroundedFVDetector}
+		End Variables *********************
+	End CapacityResource:resource4*************************
+	Allocation:a0*************************
+		Variables *************************
+			a0.m_identifier=int:CLOSED[0, 0]
+			a0.m_resource=CapacityResource:CLOSED{resource0(24)}
+			a0.m_quantity=float:CLOSED[0, 0]
+		End Variables *********************
+	End Allocation:a0*************************
+	Allocation:a1*************************
+		Variables *************************
+			a1.m_identifier=int:CLOSED[1, 1]
+			a1.m_resource=CapacityResource:CLOSED{resource0(24)}
+			a1.m_quantity=float:CLOSED[4, 4]
+		End Variables *********************
+	End Allocation:a1*************************
+	Allocation:a2*************************
+		Variables *************************
+			a2.m_identifier=int:CLOSED[1, 1]
+			a2.m_resource=CapacityResource:CLOSED{resource1(43)}
+			a2.m_quantity=float:CLOSED[3, 3]
+		End Variables *********************
+	End Allocation:a2*************************
+	Allocation:a3*************************
+		Variables *************************
+			a3.m_identifier=int:CLOSED[1, 1]
+			a3.m_resource=CapacityResource:CLOSED{resource2(62)}
+			a3.m_quantity=float:CLOSED[7, 7]
+		End Variables *********************
+	End Allocation:a3*************************
+	Allocation:a4*************************
+		Variables *************************
+			a4.m_identifier=int:CLOSED[1, 1]
+			a4.m_resource=CapacityResource:CLOSED{resource3(81)}
+			a4.m_quantity=float:CLOSED[7, 7]
+		End Variables *********************
+	End Allocation:a4*************************
+	Allocation:a5*************************
+		Variables *************************
+			a5.m_identifier=int:CLOSED[1, 1]
+			a5.m_resource=CapacityResource:CLOSED{resource4(100)}
+			a5.m_quantity=float:CLOSED[2, 2]
+		End Variables *********************
+	End Allocation:a5*************************
+	Allocation:a6*************************
+		Variables *************************
+			a6.m_identifier=int:CLOSED[2, 2]
+			a6.m_resource=CapacityResource:CLOSED{resource0(24)}
+			a6.m_quantity=float:CLOSED[1, 1]
+		End Variables *********************
+	End Allocation:a6*************************
+	Allocation:a7*************************
+		Variables *************************
+			a7.m_identifier=int:CLOSED[2, 2]
+			a7.m_resource=CapacityResource:CLOSED{resource1(43)}
+			a7.m_quantity=float:CLOSED[9, 9]
+		End Variables *********************
+	End Allocation:a7*************************
+	Allocation:a8*************************
+		Variables *************************
+			a8.m_identifier=int:CLOSED[2, 2]
+			a8.m_resource=CapacityResource:CLOSED{resource2(62)}
+			a8.m_quantity=float:CLOSED[6, 6]
+		End Variables *********************
+	End Allocation:a8*************************
+	Allocation:a9*************************
+		Variables *************************
+			a9.m_identifier=int:CLOSED[2, 2]
+			a9.m_resource=CapacityResource:CLOSED{resource3(81)}
+			a9.m_quantity=float:CLOSED[4, 4]
+		End Variables *********************
+	End Allocation:a9*************************
+	Allocation:a10*************************
+		Variables *************************
+			a10.m_identifier=int:CLOSED[2, 2]
+			a10.m_resource=CapacityResource:CLOSED{resource4(100)}
+			a10.m_quantity=float:CLOSED[1, 1]
+		End Variables *********************
+	End Allocation:a10*************************
+	Allocation:a11*************************
+		Variables *************************
+			a11.m_identifier=int:CLOSED[3, 3]
+			a11.m_resource=CapacityResource:CLOSED{resource0(24)}
+			a11.m_quantity=float:CLOSED[2, 2]
+		End Variables *********************
+	End Allocation:a11*************************
+	Allocation:a12*************************
+		Variables *************************
+			a12.m_identifier=int:CLOSED[3, 3]
+			a12.m_resource=CapacityResource:CLOSED{resource3(81)}
+			a12.m_quantity=float:CLOSED[4, 4]
+		End Variables *********************
+	End Allocation:a12*************************
+	Allocation:a13*************************
+		Variables *************************
+			a13.m_identifier=int:CLOSED[3, 3]
+			a13.m_resource=CapacityResource:CLOSED{resource4(100)}
+			a13.m_quantity=float:CLOSED[2, 2]
+		End Variables *********************
+	End Allocation:a13*************************
+	Allocation:a14*************************
+		Variables *************************
+			a14.m_identifier=int:CLOSED[4, 4]
+			a14.m_resource=CapacityResource:CLOSED{resource1(43)}
+			a14.m_quantity=float:CLOSED[7, 7]
+		End Variables *********************
+	End Allocation:a14*************************
+	Allocation:a15*************************
+		Variables *************************
+			a15.m_identifier=int:CLOSED[4, 4]
+			a15.m_resource=CapacityResource:CLOSED{resource2(62)}
+			a15.m_quantity=float:CLOSED[4, 4]
+		End Variables *********************
+	End Allocation:a15*************************
+	Allocation:a16*************************
+		Variables *************************
+			a16.m_identifier=int:CLOSED[4, 4]
+			a16.m_resource=CapacityResource:CLOSED{resource3(81)}
+			a16.m_quantity=float:CLOSED[7, 7]
+		End Variables *********************
+	End Allocation:a16*************************
+	Allocation:a17*************************
+		Variables *************************
+			a17.m_identifier=int:CLOSED[4, 4]
+			a17.m_resource=CapacityResource:CLOSED{resource4(100)}
+			a17.m_quantity=float:CLOSED[10, 10]
+		End Variables *********************
+	End Allocation:a17*************************
+	Allocation:a18*************************
+		Variables *************************
+			a18.m_identifier=int:CLOSED[5, 5]
+			a18.m_resource=CapacityResource:CLOSED{resource0(24)}
+			a18.m_quantity=float:CLOSED[6, 6]
+		End Variables *********************
+	End Allocation:a18*************************
+	Allocation:a19*************************
+		Variables *************************
+			a19.m_identifier=int:CLOSED[5, 5]
+			a19.m_resource=CapacityResource:CLOSED{resource1(43)}
+			a19.m_quantity=float:CLOSED[6, 6]
+		End Variables *********************
+	End Allocation:a19*************************
+	Allocation:a20*************************
+		Variables *************************
+			a20.m_identifier=int:CLOSED[5, 5]
+			a20.m_resource=CapacityResource:CLOSED{resource2(62)}
+			a20.m_quantity=float:CLOSED[3, 3]
+		End Variables *********************
+	End Allocation:a20*************************
+	Allocation:a21*************************
+		Variables *************************
+			a21.m_identifier=int:CLOSED[5, 5]
+			a21.m_resource=CapacityResource:CLOSED{resource3(81)}
+			a21.m_quantity=float:CLOSED[6, 6]
+		End Variables *********************
+	End Allocation:a21*************************
+	Allocation:a22*************************
+		Variables *************************
+			a22.m_identifier=int:CLOSED[5, 5]
+			a22.m_resource=CapacityResource:CLOSED{resource4(100)}
+			a22.m_quantity=float:CLOSED[6, 6]
+		End Variables *********************
+	End Allocation:a22*************************
+	Allocation:a23*************************
+		Variables *************************
+			a23.m_identifier=int:CLOSED[6, 6]
+			a23.m_resource=CapacityResource:CLOSED{resource0(24)}
+			a23.m_quantity=float:CLOSED[10, 10]
+		End Variables *********************
+	End Allocation:a23*************************
+	Allocation:a24*************************
+		Variables *************************
+			a24.m_identifier=int:CLOSED[6, 6]
+			a24.m_resource=CapacityResource:CLOSED{resource1(43)}
+			a24.m_quantity=float:CLOSED[1, 1]
+		End Variables *********************
+	End Allocation:a24*************************
+	Allocation:a25*************************
+		Variables *************************
+			a25.m_identifier=int:CLOSED[6, 6]
+			a25.m_resource=CapacityResource:CLOSED{resource2(62)}
+			a25.m_quantity=float:CLOSED[4, 4]
+		End Variables *********************
+	End Allocation:a25*************************
+	Allocation:a26*************************
+		Variables *************************
+			a26.m_identifier=int:CLOSED[6, 6]
+			a26.m_resource=CapacityResource:CLOSED{resource3(81)}
+			a26.m_quantity=float:CLOSED[7, 7]
+		End Variables *********************
+	End Allocation:a26*************************
+	Allocation:a27*************************
+		Variables *************************
+			a27.m_identifier=int:CLOSED[6, 6]
+			a27.m_resource=CapacityResource:CLOSED{resource4(100)}
+			a27.m_quantity=float:CLOSED[10, 10]
+		End Variables *********************
+	End Allocation:a27*************************
+	Allocation:a28*************************
+		Variables *************************
+			a28.m_identifier=int:CLOSED[7, 7]
+			a28.m_resource=CapacityResource:CLOSED{resource0(24)}
+			a28.m_quantity=float:CLOSED[9, 9]
+		End Variables *********************
+	End Allocation:a28*************************
+	Allocation:a29*************************
+		Variables *************************
+			a29.m_identifier=int:CLOSED[7, 7]
+			a29.m_resource=CapacityResource:CLOSED{resource2(62)}
+			a29.m_quantity=float:CLOSED[10, 10]
+		End Variables *********************
+	End Allocation:a29*************************
+	Allocation:a30*************************
+		Variables *************************
+			a30.m_identifier=int:CLOSED[7, 7]
+			a30.m_resource=CapacityResource:CLOSED{resource3(81)}
+			a30.m_quantity=float:CLOSED[4, 4]
+		End Variables *********************
+	End Allocation:a30*************************
+	Allocation:a31*************************
+		Variables *************************
+			a31.m_identifier=int:CLOSED[7, 7]
+			a31.m_resource=CapacityResource:CLOSED{resource4(100)}
+			a31.m_quantity=float:CLOSED[6, 6]
+		End Variables *********************
+	End Allocation:a31*************************
+	Allocation:a32*************************
+		Variables *************************
+			a32.m_identifier=int:CLOSED[8, 8]
+			a32.m_resource=CapacityResource:CLOSED{resource0(24)}
+			a32.m_quantity=float:CLOSED[4, 4]
+		End Variables *********************
+	End Allocation:a32*************************
+	Allocation:a33*************************
+		Variables *************************
+			a33.m_identifier=int:CLOSED[9, 9]
+			a33.m_resource=CapacityResource:CLOSED{resource1(43)}
+			a33.m_quantity=float:CLOSED[8, 8]
+		End Variables *********************
+	End Allocation:a33*************************
+	Allocation:a34*************************
+		Variables *************************
+			a34.m_identifier=int:CLOSED[10, 10]
+			a34.m_resource=CapacityResource:CLOSED{resource0(24)}
+			a34.m_quantity=float:CLOSED[4, 4]
+		End Variables *********************
+	End Allocation:a34*************************
+	Allocation:a35*************************
+		Variables *************************
+			a35.m_identifier=int:CLOSED[10, 10]
+			a35.m_resource=CapacityResource:CLOSED{resource1(43)}
+			a35.m_quantity=float:CLOSED[1, 1]
+		End Variables *********************
+	End Allocation:a35*************************
+	Allocation:a36*************************
+		Variables *************************
+			a36.m_identifier=int:CLOSED[10, 10]
+			a36.m_resource=CapacityResource:CLOSED{resource2(62)}
+			a36.m_quantity=float:CLOSED[6, 6]
+		End Variables *********************
+	End Allocation:a36*************************
+	Allocation:a37*************************
+		Variables *************************
+			a37.m_identifier=int:CLOSED[10, 10]
+			a37.m_resource=CapacityResource:CLOSED{resource3(81)}
+			a37.m_quantity=float:CLOSED[9, 9]
+		End Variables *********************
+	End Allocation:a37*************************
+	Allocation:a38*************************
+		Variables *************************
+			a38.m_identifier=int:CLOSED[10, 10]
+			a38.m_resource=CapacityResource:CLOSED{resource4(100)}
+			a38.m_quantity=float:CLOSED[6, 6]
+		End Variables *********************
+	End Allocation:a38*************************
+	Allocation:a39*************************
+		Variables *************************
+			a39.m_identifier=int:CLOSED[11, 11]
+			a39.m_resource=CapacityResource:CLOSED{resource0(24)}
+			a39.m_quantity=float:CLOSED[0, 0]
+		End Variables *********************
+	End Allocation:a39*************************
+	ActivityTimeline:at0*************************
+		Tokens *************************
+				[0, 10]
+				ActivityTimeline.act()
+				Key=1341  Master=757 activity0(757)[0, 10] --> [1, 11]
+				[1, 11]
+		End Tokens *********************
+		Variables *************************
+			at0.id_=int:CLOSED[0, 0]
+		End Variables *********************
+	End ActivityTimeline:at0*************************
+	ActivityTimeline:at1*************************
+		Tokens *************************
+				[0, 10]
+				ActivityTimeline.act()
+				Key=1424  Master=783 activity1(783)[0, 10] --> [4, 14]
+				[4, 14]
+		End Tokens *********************
+		Variables *************************
+			at1.id_=int:CLOSED[1, 1]
+		End Variables *********************
+	End ActivityTimeline:at1*************************
+	ActivityTimeline:at2*************************
+		Tokens *************************
+				[4, 14]
+				ActivityTimeline.act()
+				Key=1694  Master=809 activity2(809)[4, 14] --> [8, 18]
+				[8, 18]
+		End Tokens *********************
+		Variables *************************
+			at2.id_=int:CLOSED[2, 2]
+		End Variables *********************
+	End ActivityTimeline:at2*************************
+	ActivityTimeline:at3*************************
+		Tokens *************************
+				[8, 18]
+				ActivityTimeline.act()
+				Key=1955  Master=835 activity3(835)[8, 18] --> [18, 28]
+				[18, 28]
+		End Tokens *********************
+		Variables *************************
+			at3.id_=int:CLOSED[3, 3]
+		End Variables *********************
+	End ActivityTimeline:at3*************************
+	ActivityTimeline:at4*************************
+		Tokens *************************
+				[18, 28]
+				ActivityTimeline.act()
+				Key=2128  Master=861 activity4(861)[18, 28] --> [28, 38]
+				[28, 38]
+		End Tokens *********************
+		Variables *************************
+			at4.id_=int:CLOSED[4, 4]
+		End Variables *********************
+	End ActivityTimeline:at4*************************
+	ActivityTimeline:at5*************************
+		Tokens *************************
+				[28, 38]
+				ActivityTimeline.act()
+				Key=2347  Master=887 activity5(887)[28, 38] --> [31, 41]
+				[31, 41]
+		End Tokens *********************
+		Variables *************************
+			at5.id_=int:CLOSED[5, 5]
+		End Variables *********************
+	End ActivityTimeline:at5*************************
+	ActivityTimeline:at6*************************
+		Tokens *************************
+				[31, 41]
+				ActivityTimeline.act()
+				Key=2614  Master=913 activity6(913)[31, 41] --> [32, 42]
+				[32, 42]
+		End Tokens *********************
+		Variables *************************
+			at6.id_=int:CLOSED[6, 6]
+		End Variables *********************
+	End ActivityTimeline:at6*************************
+	ActivityTimeline:at7*************************
+		Tokens *************************
+				[32, 42]
+				ActivityTimeline.act()
+				Key=2876  Master=939 activity7(939)[32, 42] --> [40, 50]
+				[40, 50]
+		End Tokens *********************
+		Variables *************************
+			at7.id_=int:CLOSED[7, 7]
+		End Variables *********************
+	End ActivityTimeline:at7*************************
+	ActivityTimeline:at8*************************
+		Tokens *************************
+				[40, 50]
+				ActivityTimeline.act()
+				Key=3097  Master=965 activity8(965)[40, 50] --> [50, 60]
+				[50, 60]
+		End Tokens *********************
+		Variables *************************
+			at8.id_=int:CLOSED[8, 8]
+		End Variables *********************
+	End ActivityTimeline:at8*************************
+	ActivityTimeline:at9*************************
+		Tokens *************************
+				[40, 51]
+				ActivityTimeline.act()
+				Key=3180  Master=991 activity9(991)[40, 51] --> [49, 60]
+				[49, 60]
+		End Tokens *********************
+		Variables *************************
+			at9.id_=int:CLOSED[9, 9]
+		End Variables *********************
+	End ActivityTimeline:at9*************************
+	ActivityTimeline:at10*************************
+		Tokens *************************
+				[40, 55]
+				ActivityTimeline.act()
+				Key=3264  Master=1017 activity10(1017)[40, 55] --> [45, 60]
+				[45, 60]
+		End Tokens *********************
+		Variables *************************
+			at10.id_=int:CLOSED[10, 10]
+		End Variables *********************
+	End ActivityTimeline:at10*************************
+	ActivityTimeline:at11*************************
+		Tokens *************************
+				[50, 60]
+				ActivityTimeline.act()
+				Key=3529  Master=1043 activity11(1043)[50, 60] --> [51, 61]
+				[51, 61]
+		End Tokens *********************
+		Variables *************************
+			at11.id_=int:CLOSED[11, 11]
+		End Variables *********************
+	End ActivityTimeline:at11*************************
+Global Variables*************************
+	problem=ProblemInstance:CLOSED{problem(6)}
+	maxDuration=int:CLOSED[60, 60]
+	maxDurationPlusOne=int:CLOSED[61, 61]
+	profileType=string:CLOSED{GroundedProfile}
+	detectorType=string:CLOSED{GroundedFVDetector}
+	resource0=CapacityResource:CLOSED{resource0(24)}
+	resource1=CapacityResource:CLOSED{resource1(43)}
+	resource2=CapacityResource:CLOSED{resource2(62)}
+	resource3=CapacityResource:CLOSED{resource3(81)}
+	resource4=CapacityResource:CLOSED{resource4(100)}
+	a0=Allocation:CLOSED{a0(118)}
+	a1=Allocation:CLOSED{a1(132)}
+	a2=Allocation:CLOSED{a2(146)}
+	a3=Allocation:CLOSED{a3(160)}
+	a4=Allocation:CLOSED{a4(174)}
+	a5=Allocation:CLOSED{a5(188)}
+	a6=Allocation:CLOSED{a6(202)}
+	a7=Allocation:CLOSED{a7(216)}
+	a8=Allocation:CLOSED{a8(230)}
+	a9=Allocation:CLOSED{a9(244)}
+	a10=Allocation:CLOSED{a10(258)}
+	a11=Allocation:CLOSED{a11(272)}
+	a12=Allocation:CLOSED{a12(286)}
+	a13=Allocation:CLOSED{a13(300)}
+	a14=Allocation:CLOSED{a14(314)}
+	a15=Allocation:CLOSED{a15(328)}
+	a16=Allocation:CLOSED{a16(342)}
+	a17=Allocation:CLOSED{a17(356)}
+	a18=Allocation:CLOSED{a18(370)}
+	a19=Allocation:CLOSED{a19(384)}
+	a20=Allocation:CLOSED{a20(398)}
+	a21=Allocation:CLOSED{a21(412)}
+	a22=Allocation:CLOSED{a22(426)}
+	a23=Allocation:CLOSED{a23(440)}
+	a24=Allocation:CLOSED{a24(454)}
+	a25=Allocation:CLOSED{a25(468)}
+	a26=Allocation:CLOSED{a26(482)}
+	a27=Allocation:CLOSED{a27(496)}
+	a28=Allocation:CLOSED{a28(510)}
+	a29=Allocation:CLOSED{a29(524)}
+	a30=Allocation:CLOSED{a30(538)}
+	a31=Allocation:CLOSED{a31(552)}
+	a32=Allocation:CLOSED{a32(566)}
+	a33=Allocation:CLOSED{a33(580)}
+	a34=Allocation:CLOSED{a34(594)}
+	a35=Allocation:CLOSED{a35(608)}
+	a36=Allocation:CLOSED{a36(622)}
+	a37=Allocation:CLOSED{a37(636)}
+	a38=Allocation:CLOSED{a38(650)}
+	a39=Allocation:CLOSED{a39(664)}
+	at0=ActivityTimeline:CLOSED{at0(675)}
+	at1=ActivityTimeline:CLOSED{at1(682)}
+	at2=ActivityTimeline:CLOSED{at2(689)}
+	at3=ActivityTimeline:CLOSED{at3(696)}
+	at4=ActivityTimeline:CLOSED{at4(703)}
+	at5=ActivityTimeline:CLOSED{at5(710)}
+	at6=ActivityTimeline:CLOSED{at6(717)}
+	at7=ActivityTimeline:CLOSED{at7(724)}
+	at8=ActivityTimeline:CLOSED{at8(731)}
+	at9=ActivityTimeline:CLOSED{at9(738)}
+	at10=ActivityTimeline:CLOSED{at10(745)}
+	at11=ActivityTimeline:CLOSED{at11(752)}
+
